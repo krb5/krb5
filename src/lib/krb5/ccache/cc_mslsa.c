@@ -63,10 +63,12 @@
 #include <security.h>
 #include <ntsecapi.h>
 
+#define MAX_MSG_SIZE 256
+#define MAX_MSPRINC_SIZE 1024
+
 static VOID
 ShowWinError(LPSTR szAPI, DWORD dwError)
 {
-#define MAX_MSG_SIZE 256
 
     // TODO - Write errors to event log so that scripts that don't
     // check for errors will still get something in the event log
@@ -149,6 +151,18 @@ ANSIToUnicode(LPSTR  lpInputString, LPTSTR lpszOutputString, int nOutStringLen)
         lstrcpy(lpszOutputString, (LPTSTR) lpInputString);
 }  // ANSIToUnicode
 
+
+static void
+MITPrincToMSPrinc(krb5_context context, krb5_principal principal, UNICODE_STRING * msprinc)
+{
+    char *aname = NULL;
+
+    if (!krb5_unparse_name(context, principal, &aname)) {
+        msprinc->Length = strlen(aname) * sizeof(WCHAR);
+        ANSIToUnicode(aname, msprinc->Buffer, msprinc->MaximumLength);
+        krb5_free_unparsed_name(context,aname);
+    }
+}
 
 static void
 MSPrincToMITPrinc(KERB_EXTERNAL_NAME *msprinc, WCHAR *realm, krb5_context context, krb5_principal *principal)
@@ -304,9 +318,11 @@ ConcatenateUnicodeStrings(UNICODE_STRING *pTarget, UNICODE_STRING Source1, UNICO
     if (TotalSize > pTarget->MaximumLength)
         return ERROR_INSUFFICIENT_BUFFER;
 
-    pTarget->Length = TotalSize;
-    memcpy(buffer, Source1.Buffer, Source1.Length);
+    if ( pTarget->Buffer != Source1.Buffer )
+        memcpy(buffer, Source1.Buffer, Source1.Length);
     memcpy(buffer + Source1.Length, Source2.Buffer, Source2.Length);
+
+    pTarget->Length = TotalSize;
     return ERROR_SUCCESS;
 }
 
@@ -828,8 +844,59 @@ FreeQueryResponse(PKERB_QUERY_TKT_CACHE_RESPONSE  pResponse)
     LsaFreeReturnBuffer(pResponse);
 }
 
+
 static BOOL
-GetMSCacheTicket( HANDLE LogonHandle, ULONG PackageId,
+GetMSCacheTicketFromMITCred( HANDLE LogonHandle, ULONG PackageId,
+                  krb5_context context, krb5_creds *creds, PKERB_EXTERNAL_TICKET *ticket)
+{
+    NTSTATUS Status = 0;
+    NTSTATUS SubStatus = 0;
+    ULONG RequestSize;
+    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest = NULL;
+    PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
+    ULONG ResponseSize;
+
+    RequestSize = sizeof(*pTicketRequest) + MAX_MSPRINC_SIZE;
+
+    pTicketRequest = (PKERB_RETRIEVE_TKT_REQUEST) LocalAlloc(LMEM_ZEROINIT, RequestSize);
+    if (!pTicketRequest)
+        return FALSE;
+
+    pTicketRequest->MessageType = KerbRetrieveEncodedTicketMessage;
+    pTicketRequest->LogonId.LowPart = 0;
+    pTicketRequest->LogonId.HighPart = 0;
+
+    pTicketRequest->TargetName.Length = 0;
+    pTicketRequest->TargetName.MaximumLength = MAX_MSPRINC_SIZE;
+    pTicketRequest->TargetName.Buffer = (PWSTR) (pTicketRequest + 1);
+    MITPrincToMSPrinc(context, creds->server, &pTicketRequest->TargetName);
+    pTicketRequest->CacheOptions = 0;
+    pTicketRequest->TicketFlags = creds->ticket_flags;
+    pTicketRequest->EncryptionType = creds->keyblock.enctype;
+
+    Status = LsaCallAuthenticationPackage(
+        LogonHandle,
+        PackageId,
+        pTicketRequest,
+        RequestSize,
+        &pTicketResponse,
+        &ResponseSize,
+        &SubStatus
+        );
+
+    LocalFree(pTicketRequest);
+
+    if (FAILED(Status) || FAILED(SubStatus))
+        return(FALSE);
+    
+    /* otherwise return ticket */
+    *ticket = &(pTicketResponse->Ticket);
+    return(TRUE);
+
+}
+
+static BOOL
+GetMSCacheTicketFromCacheInfo( HANDLE LogonHandle, ULONG PackageId,
                   PKERB_TICKET_CACHE_INFO tktinfo, PKERB_EXTERNAL_TICKET *ticket)
 {
     NTSTATUS Status = 0;
@@ -866,7 +933,7 @@ GetMSCacheTicket( HANDLE LogonHandle, ULONG PackageId,
         &SubStatus
         );
 
-    LsaFreeReturnBuffer(pTicketRequest);
+    LocalFree(pTicketRequest);
 
     if (FAILED(Status) || FAILED(SubStatus))
         return(FALSE);
@@ -921,6 +988,9 @@ static krb5_error_code KRB5_CALLCONV krb5_lcc_set_flags
 extern const krb5_cc_ops krb5_lcc_ops;
 
 krb5_error_code krb5_change_cache (void);
+
+krb5_boolean
+krb5int_cc_creds_match_request(krb5_context, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds);
 
 #define KRB5_OK 0
 
@@ -1140,7 +1210,7 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
     if ( lcursor->index >= lcursor->response->CountOfTickets )
         return KRB5_CC_END;
 
-    if (!GetMSCacheTicket(data->LogonHandle, data->PackageId,
+    if (!GetMSCacheTicketFromCacheInfo(data->LogonHandle, data->PackageId,
                           &lcursor->response->Tickets[lcursor->index++],&msticket))
         return KRB5_FCC_INTERNAL;
 
@@ -1209,7 +1279,7 @@ krb5_lcc_get_name (krb5_context context, krb5_ccache id)
  *
  * Errors:
  * system errors
- * KRB5_CC_NOMEM
+ * KRB5_CC_NOT_KTYPE
  */
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
@@ -1225,18 +1295,92 @@ static krb5_error_code KRB5_CALLCONV
 krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields, 
                   krb5_creds *mcreds, krb5_creds *creds)
 {
-    return krb5_cc_retrieve_cred_default (context, id, whichfields,
-					  mcreds, creds);
+    krb5_error_code kret = KRB5_OK;
+    krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+    KERB_EXTERNAL_TICKET *msticket = 0;
+    krb5_creds * mcreds_noflags;
+    krb5_creds * fetchcreds;
+
+    /* first try to find out if we have an existing ticket which meets the requirements */
+    kret = krb5_cc_retrieve_cred_default (context, id, whichfields, mcreds, creds);
+    if ( !kret )
+        return KRB5_OK;
+    
+    /* if not, we must try to get a ticket without specifying any flags or etypes */
+    krb5_copy_creds(context, mcreds, &mcreds_noflags);
+    mcreds_noflags->ticket_flags = 0;
+    mcreds_noflags->keyblock.enctype = 0;
+
+    if (!GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, mcreds_noflags, &msticket)) {
+        kret = KRB5_CC_NOTFOUND;
+        goto cleanup;
+    }
+
+    /* try again to find out if we have an existing ticket which meets the requirements */
+    kret = krb5_cc_retrieve_cred_default (context, id, whichfields, mcreds, creds);
+    if ( !kret )
+        goto cleanup;
+
+    /* if not, obtain a ticket using the request flags and enctype even though it will not
+     * be stored in the LSA cache for future use.
+     */
+    if ( msticket ) {
+        LsaFreeReturnBuffer(msticket);
+        msticket = 0;
+    }
+
+    if (!GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, mcreds, &msticket)) {
+        kret = KRB5_CC_NOTFOUND;
+        goto cleanup;
+    }
+
+    /* convert the ticket */
+    MSCredToMITCred(msticket, context, fetchcreds);
+
+    /* check to see if this ticket matches the request using logic from
+     * krb5_cc_retrieve_cred_default()
+     */
+    if ( krb5int_cc_creds_match_request(context, whichfields, mcreds, fetchcreds) ) {
+        creds = fetchcreds;
+    } else {
+        krb5_free_creds(context, fetchcreds);
+        kret = KRB5_CC_NOTFOUND;
+    }
+
+  cleanup:
+    if ( msticket )
+        LsaFreeReturnBuffer(msticket);
+    if ( mcreds_noflags )
+        krb5_free_creds(context, mcreds_noflags);
+    return kret;
 }
 
 
 /*
+ * We can't write to the MS LSA cache.  So we request the cache to obtain a ticket for the same
+ * principal in the hope that next time the application requires a ticket for the service it
+ * is attempt to store, the retrieved ticket will be good enough.
+ *
  * Errors:
  * KRB5_CC_READONLY - not supported
  */
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
+    krb5_error_code kret = KRB5_OK;
+    krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+    KERB_EXTERNAL_TICKET *msticket = 0;
+    krb5_creds * creds_noflags;
+
+    /* if not, we must try to get a ticket without specifying any flags or etypes */
+    krb5_copy_creds(context, creds, &creds_noflags);
+    creds_noflags->ticket_flags = 0;
+    creds_noflags->keyblock.enctype = 0;
+
+    if (GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds_noflags, &msticket)) {
+        LsaFreeReturnBuffer(msticket);
+        return KRB5_OK;
+    }
     return KRB5_CC_READONLY;
 }
 
