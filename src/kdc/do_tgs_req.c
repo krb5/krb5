@@ -50,7 +50,8 @@ static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
 				krb5_boolean *, int *);
 
 static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
-					  int, const char *, krb5_data **);
+					  int, const char *, krb5_data **,
+					  const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -661,12 +662,14 @@ cleanup:
     }
     
     if (errcode) {
+	if (status == 0)
+	    status = error_message (errcode);
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
 	retval = prepare_error_tgs(request, header_ticket, errcode,
-				   fromstring, response);
+				   fromstring, response, status);
     }
     
     if (header_ticket)
@@ -688,12 +691,8 @@ cleanup:
 }
 
 static krb5_error_code
-prepare_error_tgs (request, ticket, error, ident, response)
-register krb5_kdc_req *request;
-krb5_ticket *ticket;
-int error;
-const char *ident;
-krb5_data **response;
+prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
+		   const char *ident, krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -711,10 +710,10 @@ krb5_data **response;
 	errpkt.client = ticket->enc_part2->client;
     else
 	errpkt.client = 0;
-    errpkt.text.length = strlen(error_message(error+KRB5KDC_ERR_NONE))+1;
+    errpkt.text.length = strlen(status) + 1;
     if (!(errpkt.text.data = malloc(errpkt.text.length)))
 	return ENOMEM;
-    (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
+    (void) strcpy(errpkt.text.data, status);
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);
@@ -735,11 +734,8 @@ krb5_data **response;
  * some intermediate realm.
  */
 static void
-find_alternate_tgs(request, server, more, nprincs)
-krb5_kdc_req *request;
-krb5_db_entry *server;
-krb5_boolean *more;
-int *nprincs;
+find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
+		   krb5_boolean *more, int *nprincs)
 {
     krb5_error_code retval;
     krb5_principal *plist, *pl2;
@@ -817,4 +813,3 @@ int *nprincs;
     krb5_free_realm_tree(kdc_context, plist);
     return;
 }
-

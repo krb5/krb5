@@ -47,7 +47,7 @@
 #include "extern.h"
 
 static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
-					 krb5_data **);
+					 krb5_data **, const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -439,11 +439,14 @@ errout:
 	       errcode ? ", " : "",
 	       errcode ? error_message(errcode) : "");
     if (errcode) {
+	if (status == 0)
+	    status = error_message (errcode);
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
-	errcode = prepare_error_as(request, errcode, &e_data, response);
+	errcode = prepare_error_as(request, errcode, &e_data, response,
+				   status);
     }
 
     krb5_free_keyblock_contents(kdc_context, &encrypting_key);
@@ -486,11 +489,8 @@ errout:
 }
 
 static krb5_error_code
-prepare_error_as (request, error, e_data, response)
-register krb5_kdc_req *request;
-int error;
-krb5_data *e_data;
-krb5_data **response;
+prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
+		  krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
@@ -505,10 +505,10 @@ krb5_data **response;
     errpkt.error = error;
     errpkt.server = request->server;
     errpkt.client = request->client;
-    errpkt.text.length = strlen(error_message(error+KRB5KDC_ERR_NONE))+1;
+    errpkt.text.length = strlen(status)+1;
     if (!(errpkt.text.data = malloc(errpkt.text.length)))
 	return ENOMEM;
-    (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
+    (void) strcpy(errpkt.text.data, status);
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);

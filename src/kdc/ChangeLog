@@ -1,5 +1,16 @@
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* do_as_req.c (prepare_error_as): New argument, the error message
+	text as determined *before* possibly replacing the error code with
+	"generic error".
+	(process_as_req): Fill it in based on 'status', or the error
+	message corresponding to the error code to be returned.
+	* do_tgs_req.c (prepare_error_tgs): New argument, the error
+	message text as determined *before* possibly replacing the error
+	code with "generic error".
+	(process_tgs_req): Fill it in based on 'status', or the error
+	message corresponding to the error code to be returned.
+
 	* network.c (process_packet): Call inet_ntop directly.
 	* sock2p.c: Deleted.
 	* Makefile.in (SRCS, OBJS): Drop it.
