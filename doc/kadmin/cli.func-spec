@@ -2,26 +2,29 @@ kadmin [-r _realm_] [[-p _principal_] [-k _keytab_]] [-q _query_]
 
        	If given the -p option, kadmin will use the specified
 	principal to authenticate.  If the -p option is not given,
-	kadmin will default to $USER/admin (if the environment
-	variable USER is set).  If $USER is not set, then the first
-	component of the principal will be the username as obtained
-	from getuid(). If given -k, kadmin will not prompt for a
+	kadmin will default appending "/admin" to the first component
+	of the default principal of the default credentials cache.  If
+	the default credentials cache does not exist, then kadmin will
+	default to $USER/admin (if the environment variable USER is
+	set).  If $USER is not set, then the first component of the
+	principal will be the username as obtained from
+	getpwnam(getuid()). If given -k, kadmin will not prompt for a
 	password, but rather use the specified keytab.  Also, if the
 	-k option is given, the default principal will be the
 	host/hostname.  If -r is present, then kadmin will use the
 	specified realm as the default database realm rather than the
-	default realm for the local machine.
-
-	Upon starting up, kadmin will prompt for a password (unless
-	the -k option has been given).  The program will then obtain
-	tickets for ovsec_admin/admin in the default realm (unless -r
-	has been specified, in which case it will use the specified
-	realm).  The ticket is stored in a separate ccache, unless -c
-	is specified.  The lifetime for these tickets is 5 minutes.
+	default realm for the local machine. Upon starting up, kadmin
+	will prompt for a password (unless the -k option has been
+	given).  The program will then obtain tickets for
+	ovsec_admin/admin in the default realm (unless -r has been
+	specified, in which case it will use the specified realm).
+	The ticket is stored in a separate ccache.  The lifetime for
+	these tickets is 5 minutes.
 
 	The -q option allows the passing of a request directly to
 	kadmin, which will then exit.  This can be useful for writing
-	scripts.
+	scripts.  The query provided must be quoted as a single
+	argument to the program if there is more than one word in it.
 
 DATE FORMAT
 	Various commands in kadmin can take a variety of date formats,
@@ -43,7 +46,10 @@ DATE FORMAT
 	absolute dates, unless they appear in a field where a duration
 	is expected.  In that case the time specifier will be
 	interpreted as relative.  Specifying "ago" on a duration may
-	result in unexpected behaviour.
+	result in unexpected behaviour.  The format follows that of
+	the public-domain "getdate" package.  All date parameters must
+	be provided as a single word, which means that they must be
+	double-quoted if there are any spaces.
 
 COMMAND DESCRIPTIONS
 
@@ -53,15 +59,6 @@ add_principal [options] _newprinc_
 	command has the aliases "addprinc", "ank".
 
 	OPTIONS
-	-salt _salttype_
-		uses the specified salt instead of the default V5 salt
-		for generating the key.  Valid values for _salttype_
-		are:
-			full_name (aliases "v5_salt", "normal")
-			name_only
-			realm_only
-			no_salt (alias "v4_salt")
-
 	-expire _expdate_
 		expiration date of the principal
 
@@ -114,7 +111,7 @@ add_principal [options] _newprinc_
 		KRB5_KDB_PWCHANGE_SERVICE flag on the principal in the
 		database.
 
-	-randpass
+	-randkey
 		sets the key of the principal to a random value
 
 	-pw _password_
@@ -133,7 +130,6 @@ add_principal [options] _newprinc_
 
 	ERRORS
 	OVSEC_KADM_AUTH_ADD (requires "add" privilege)
-	OVSEC_KADM_BAD_MASK (shouldn't happen)
 	OVSEC_KADM_DUP (principal exists already)
 	OVSEC_KADM_UNK_POLICY (policy does not exist)
 	OVSEC_KADM_PASS_Q_* (password quality violations)
@@ -145,10 +141,10 @@ delete_principal [-force] _principal_
 	to "delprinc".
 
 	EXAMPLE
-	kadmin: delprinc mwm_user
+	kadmin: delprinc testuser
 	Are you sure you want to delete the principal
-	"mwm_user@ATHENA.MIT.EDU"? (yes/no): yes
-	Principal "mwm_user@ATHENA.MIT.EDU" deleted.
+	"testuser@ATHENA.MIT.EDU"? (yes/no): yes
+	Principal "testuser@ATHENA.MIT.EDU" deleted.
 	Make sure that you have removed this principal from
 	all ACLs before reusing.
 	kadmin:
@@ -202,12 +198,7 @@ change_password [options] _principal_
 	"cpw".
 
 	OPTIONS
-	-salt _salttype_
-		uses the specified salt instead of the default V5 salt
-		for generating the key.  Options are the same as for
-		add_principal.
-
-	-randpass
+	-randkey
 		sets the key of the principal to a random value
 
 	-pw _password_
@@ -234,8 +225,8 @@ get_principal [-terse] _principal_
 	gets the attributes of _principal_.  Requires the "get"
 	privilege, or that the principal that is running the the
 	program to be the same as the one being listed.  With the
-	"-terse" option, outputs fields as a quoted tab-separated
-	strings.  Alias "getprinc".
+	"-terse" option, outputs fields as tab-separated strings.  Any
+	string fields get double-quoted.  Alias "getprinc".
 
 	EXAMPLES
 	kadmin: getprinc tlyu/deity
@@ -252,11 +243,10 @@ get_principal [-terse] _principal_
 	Attributes: DISALLOW_FORWARDABLE, DISALLOW_PROXIABLE,
 		REQUIRES_HW_AUTH
 	Salt type: DEFAULT
-	kadmin: getprinc systest
-	systest@ATHENA.MIT.EDU	3	86400	604800	1
-	785926535	753241234	785900000
-	tlyu/admin@ATHENA.MIT.EDU	786100034	0
-	0
+	kadmin: getprinc -terse systest
+	"systest@ATHENA.MIT.EDU"	3	86400	604800
+	1	785926535	753241234	785900000
+	"tlyu/admin@ATHENA.MIT.EDU"	786100034	0	0
 	kadmin:
 
 	ERRORS
@@ -318,7 +308,8 @@ modify_policy [options] _policy_
 get_policy [-terse] _policy_
 	displays the values of the named policy.  Requires the "get"
 	privilege.  With the "-terse" flag, outputs the fields as
-	quoted strings separated by tabs.  Alias "getpol".
+	strings separated by tabs.  All string fields get
+	double-quoted.  Alias "getpol".
 
 	EXAMPLES
 	kadmin: get_policy admin
@@ -330,7 +321,7 @@ get_policy [-terse] _policy_
 	Number of old keys kept: 5
 	Reference count: 17
 	kadmin: get_policy -terse admin
-	admin	15552000	0	6	2	5	17
+	"admin"	15552000	0	6	2	5	17
 	kadmin:
 
 	ERRORS
