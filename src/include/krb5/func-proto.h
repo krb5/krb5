@@ -153,6 +153,8 @@ krb5_error_code krb5_generate_subkey
     PROTOTYPE((const krb5_keyblock *, krb5_keyblock **));
 krb5_error_code krb5_generate_seq_number
     PROTOTYPE((const krb5_keyblock *, krb5_int32 *));
+krb5_error_code krb5_get_server_rcache
+    PROTOTYPE((const char *, krb5_rcache *));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
