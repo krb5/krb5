@@ -1,3 +1,7 @@
+2000-08-08  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* v4standalone.exp: New set of tests for basic V4 functionality.
+
 2000-07-04  Tom Yu  <tlyu@mit.edu>
 
 	* rsh.exp: Drain buffers on klist test to avoid wedging rsh on
