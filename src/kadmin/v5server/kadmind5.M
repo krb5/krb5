@@ -128,7 +128,8 @@ Specifies that the daemon is not to operate in the background.
 .SH ACL FILE
 .PP
 The ACL file controls which principals can or cannot perform which
-administrative functions.  This file can contain comment lines, null
+administrative functions on which principals.
+This file can contain comment lines, null
 lines or lines which contain ACL entries.  Comment lines start with
 the sharp sign (
 .B \#
@@ -136,14 +137,25 @@ the sharp sign (
 entries have the format of
 .B principal
 .I whitespace
-.B operation-mask.
+.B operation-mask
+[
+.I whitespace
+.B operation-target
+]
+
 Ordering is important.  The first matching entry is the one which will
-control access for a particular principal.
+control access for a particular principal on a particular principal.
 .PP
 .IP principal
 may specify a partially or fully qualified Kerberos version 5
 principal name.  Each component of the name may be wildcarded using
 the asterisk (
+.B *
+) character.
+.IP operation-target
+[Optional] may specify a partially or fully qualified Kerberos version 5
+principal name.  Each component of the name may be wildcarded using the
+asterisk (
 .B *
 ) character.
 .IP operation-mask
@@ -196,12 +208,27 @@ only applies to this principal and specifies that [s]he may add,
 delete or modify principals and change his/her own password, but not
 anybody elses.
 .TP 2i
+.I user/instance@realm ceim service/instance@realm
+A standard fully qualified name and a standard fully qualified target.  The
+.B operation-mask
+only applies to this principal operating on this target and specifies that
+[s]he may change the target's password, extract its service key, request
+information about the target and modify it.
+.TP 2i
 .I user/*@realm aw
 A wildcarded name.  The
 .B operation-mask
 applies to all principals in realm "realm" whose first component is
 "user" and specifies that [s]he may add principals and change anybody
 else's password or change his/her own.
+.TP 2i
+.I user/*@realm ei */instance@realm
+A wildcarded name and target.  The
+.B operation-mask
+applies to all principals in realm "realm" whose first component is
+"user" and specifies that [s]he may extract service keys for or perform
+inquiries on principals whose second component is "instance" and realm
+is "realm".
 .TP 2i
 .I * o
 The catchall entry.  The
