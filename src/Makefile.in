@@ -1,15 +1,5 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-prefix = /usr/local
-exec_prefix = $(prefix)
-binprefix =
-manprefix =
-
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-mandir = $(prefix)/man/man1
-manext = 1
-
 SRCS =  
 HDRS = 
 
