@@ -1,3 +1,7 @@
+2003-03-02  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* aclocal.m4 : Substitute in DEPLIBEXT into krb5_build_library_with_deps
+
 2003-02-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (ETOUT): Replace $(S) with "/".
