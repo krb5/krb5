@@ -1,3 +1,11 @@
+2001-01-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_afss2k.c: New file.
+	* Makefile.in (t_afss2k): New target.
+	(TAFSS2KOBJS): New variable.
+	(check-unix): Run t_afss2k.
+	(clean): Get rid of t_afss2k binaries.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* des_int.h: Change prototypes for mit_des_cbc_encrypt(),
