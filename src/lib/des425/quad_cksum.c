@@ -166,8 +166,10 @@ des_quad_cksum(in,out,length,out_count,c_seed)
 	    x2 = z2;
 	    z  = ((x * x) + (x2 * x2)) % 0x7fffffff;
 	    z2 = (x * (x2+83653421))   % 0x7fffffff; /* modulo */
+#ifdef DEBUG
 	    if (des_debug & 8)
 		printf("%d %d\n",z,z2);
+#endif
 	}
 
 	if (out != NULL) {
