@@ -104,6 +104,7 @@ free(scratch.data);}
     /*  now decode the decrypted stuff */
     retval = decode_krb5_ap_rep_enc_part(&scratch, repl);
     clean_scratch();
-    (*repl)->subkey->etype = reply->enc_part.etype;
+    if ((*repl)->subkey)
+	(*repl)->subkey->etype = reply->enc_part.etype;
     return retval;
 }
