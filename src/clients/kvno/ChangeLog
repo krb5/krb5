@@ -1,3 +1,8 @@
+2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kvno.c (main): Use krb5_decode_ticket() instead of
+	decode_krb5_ticket(), which is not part of API.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kvno.c (main): Use krb5_free_unparsed_name() isntead of free().

@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* we need a native ticket */
-	if (ret = decode_krb5_ticket(&out_creds->ticket, &ticket)) {
+	if (ret = krb5_decode_ticket(&out_creds->ticket, &ticket)) {
 	    fprintf(stderr, "%s: %s while decoding ticket\n",
 		    princ, error_message(ret));
 
