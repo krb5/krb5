@@ -92,7 +92,9 @@ error_message(long code)
 	offset = l_offset;
 	table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
 	if (table_num == 0) {
+#ifdef __sgi
 	system_error_code:
+#endif
 		if (code == 0)
 			goto oops;
 
