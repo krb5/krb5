@@ -34,13 +34,29 @@ K4LIB =
 DEFINES = $(APPL_BSD_DEF) -DKERBEROS 
 
 #ifdef CrayArchitecture
-LOCAL_LIBRARIES = $(KLIB) -lshare  -lm -lrsc
+LOCAL_LIBRARIES = -lshare  -lm -lrsc
+#endif
+
+#ifdef AIXArchitecture
+LOCAL_LIBRARIES = -ls -lcfg
+#endif
+
+
+LIBRARIES= $(KLIB) $(LOCAL_LIBRARIES)
+
+# XXX This should be something like HasSetenv instead....
+#if defined(NeXTArchitecture)
+SETENVSRC=
+SETENVOBJ=
 #else
-LOCAL_LIBRARIES = $(KLIB)
+SETENVSRC= setenv.c
+SETENVOBJ= setenv.o
 #endif
         
-CLIENTSRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c setenv.c login.c
-CLIENTOBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o setenv.o login.o
+CLIENTSRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
+	login.c
+CLIENTOBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
+	login.o
 
 #ifdef CrayArchitecture
 SERVERSRCS= krshd.c
@@ -58,23 +74,23 @@ all::	rsh rcp rlogin krshd
 all::	rsh rcp rlogin krshd krlogind login.krb5
 #endif
 
-NormalProgramTarget(rsh,krsh.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rsh,krsh.o kcmd.o forward.o,$(DEPLIBS),$(LIBRARIES),)
 Krb5InstallClientProgram(rsh)
 
-NormalProgramTarget(rcp,krcp.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rcp,krcp.o kcmd.o forward.o,$(DEPLIBS),$(LIBRARIES),)
 Krb5InstallClientProgram(rcp)
 
-NormalProgramTarget(rlogin,krlogin.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(rlogin,krlogin.o kcmd.o forward.o,$(DEPLIBS),$(LIBRARIES),)
 Krb5InstallClientProgram(rlogin)
 
-NormalProgramTarget(krshd,krshd.o kcmd.o logutil.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),$(K4LIB))
+NormalProgramTarget(krshd,krshd.o kcmd.o logutil.o forward.o,$(DEPLIBS),$(LIBRARIES),$(K4LIB))
 Krb5InstallServerProgram(krshd)
 
 #ifndef CrayArchitecture
-NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),$(K4LIB))
+NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o forward.o,$(DEPLIBS),$(LIBRARIES),$(K4LIB))
 Krb5InstallServerProgram(krlogind)
 
-NormalProgramTarget(login.krb5,login.o logutil.o setenv.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(login.krb5,login.o logutil.o $(SETENVOBJ),$(DEPLIBS),$(LIBRARIES),)
 InstallProgram(login.krb5,$(SERVER_BINDIR))
 #endif
 
