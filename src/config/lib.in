@@ -78,7 +78,7 @@ lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
 	@dirs=`echo $(STOBJLISTS) | \
 		sed -e 's%/OBJS.ST%%g' -e 's%OBJS.ST%.%'`; \
 		$(AR) cq $@ `for d in $$dirs; do \
-			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
 				$$d/OBJS.ST; done`
 	$(RANLIB) $@
 
@@ -88,7 +88,7 @@ lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS)
 	@dirs=`echo $(SHOBJLISTS) | \
 		sed -e 's%/OBJS.SH%%g' -e 's%OBJS.SH%.%'`; \
 		$(LDCOMBINE) -o $@ `for d in $$dirs; do \
-			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
 				$$d/OBJS.SH; done` \
 			$(SHLIB_EXPFLAGS) \
 			$(LDCOMBINE_TAIL)
@@ -105,7 +105,7 @@ lib$(LIB)$(PFLIBEXT): $(PFOBJLISTS)
 	@dirs=`echo $(PFOBJLISTS) | \
 		sed -e 's%/OBJS.PF%%g' -e 's%OBJS.PF%.%'`; \
 		$(AR) cq $@ `for d in $$dirs; do \
-			sed -e "s%^%$$d/%" -e "s% % $$d/%g" \
+			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
 				$$d/OBJS.PF; done`
 	$(RANLIB) $@
 

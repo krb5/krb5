@@ -1,3 +1,8 @@
+2000-07-01  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Fix up lib build rules to deal properly (hopefuly) with
+	empty objlist files.
+
 2000-06-30  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Fix up DNS build flags to correspond to new DNS
