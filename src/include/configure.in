@@ -5,10 +5,12 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
-AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton gethostbyname_r gethostbyaddr_r getservbyname_r getservbyport_r seteuid setresuid setreuid setegid setresgid setregid)
+AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid)
 dnl
 dnl Check what the return types for gethostbyname_r and getservbyname_r are.
 dnl
+AC_CHECK_FUNC(gethostbyname_r,[
+ac_cv_func_gethostbyname_r=yes
 if test "$ac_cv_func_gethostbyname_r" = yes; then
   AC_MSG_CHECKING([if gethostbyname_r returns an int])
   AC_CACHE_VAL(krb5_cv_gethostbyname_r_returns_int,
@@ -34,7 +36,14 @@ if test "$ac_cv_func_gethostbyname_r" = yes; then
     AC_DEFINE(GETHOSTBYNAME_R_RETURNS_INT, 1, [Define if gethostbyname_r returns int rather than struct hostent * ])
   fi
 fi
+if test "$ac_cv_func_gethostbyname_r" = yes; then
+  AC_DEFINE(HAVE_GETHOSTBYNAME_R, 1, [Define if gethostbyname_r exists and its return type is known])
+  AC_CHECK_FUNC(gethostbyaddr_r)
+fi
+])
 dnl
+AC_CHECK_FUNC(getservbyname_r,[
+ac_cv_func_getservbyname_r=yes
 if test "$ac_cv_func_getservbyname_r" = yes; then
   AC_MSG_CHECKING([if getservbyname_r returns an int])
   AC_CACHE_VAL(krb5_cv_getservbyname_r_returns_int,
@@ -60,6 +69,11 @@ if test "$ac_cv_func_getservbyname_r" = yes; then
     AC_DEFINE(GETSERVBYNAME_R_RETURNS_INT, 1, [Define if getservbyname_r returns int rather than struct servent * ])
   fi
 fi
+if test "$ac_cv_func_getservbyname_r" = yes; then
+  AC_DEFINE(HAVE_GETSERVBYNAME_R, 1, [Define if getservbyname_r exists and its return type is known])
+  AC_CHECK_FUNC(getservbyport_r)
+fi
+])
 dnl
 HAVE_YYLINENO
 CHECK_DIRENT

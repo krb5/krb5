@@ -1,3 +1,8 @@
+2002-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (SOCKET_WRITEV) [!_WIN32]: Use TMP after setting
+	it, to silence compiler warnings.
+
 2002-06-26  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Modify test for in6addr_any definition in C

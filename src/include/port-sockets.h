@@ -119,7 +119,7 @@ typedef struct iovec sg_buf;
 /* Use TMP to avoid compiler warnings and keep things consistent with
    Windoze version.  */
 #define SOCKET_WRITEV(FD, SG, LEN, TMP) \
-	((TMP) = writev((FD), (SG), (LEN)))
+	((TMP) = writev((FD), (SG), (LEN)), (TMP))
 
 #define SHUTDOWN_READ	0
 #define SHUTDOWN_WRITE	1

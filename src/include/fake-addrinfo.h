@@ -128,8 +128,8 @@ gai_strerror (int code) /*@*/;
 #endif
 
 #ifdef _WIN32
-#define HAVE_GETADDRINFO
-#define HAVE_GETNAMEINFO
+#define HAVE_GETADDRINFO 1
+#define HAVE_GETNAMEINFO 1
 #endif
 
 
@@ -379,7 +379,7 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 #define HAVE_FAKE_GETADDRINFO /* was not originally HAVE_GETADDRINFO */
 #define HAVE_GETADDRINFO
 #undef  HAVE_GETNAMEINFO
-#define HAVE_GETNAMEINFO
+#define HAVE_GETNAMEINFO 1
 
 static
 char *gai_strerror (int code);
@@ -417,6 +417,7 @@ char *gai_strerror (int code);
 #endif
 
 #ifdef NEED_FAKE_GETADDRINFO
+#include <string.h> /* for strspn */
 
 static inline int translate_h_errno (int h);
 
@@ -623,7 +624,8 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 #endif
 	} else {
 	    int herr;
-	    GET_HOST_BY_ADDR(&sinp->sin_addr, sizeof (struct in_addr),
+	    GET_HOST_BY_ADDR((const char *) &sinp->sin_addr,
+			     sizeof (struct in_addr),
 			     sa->sa_family, hp, herr);
 	    if (hp == 0) {
 		if (herr == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */
