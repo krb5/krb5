@@ -1,3 +1,4 @@
+1999-10-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* trval.c (print_tag_type): Use fputs when there's no formatting
 	to do.
