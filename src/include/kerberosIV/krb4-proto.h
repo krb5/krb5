@@ -123,7 +123,7 @@ int in_tkt P_TYPE_((char *, char *));
 int k_gethostname P_TYPE_((char *, int ));
 
 /* klog.c */
-char *klog P_TYPE_((int , char *, int , int , int , int , int , int , int , int , int , int ));
+char *klog P_TYPE_((int , char *, char * , char * , char * , char * , char * , char * , char * , char * , char * , char * ));
 int kset_logfile P_TYPE_((char *));
 
 /* kname_parse.c */

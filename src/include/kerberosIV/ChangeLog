@@ -1,3 +1,7 @@
+Tue May 23 22:08:05 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb4-proto.h: klog prototype did not match source.
+
 Sun May  7 08:26:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kparse.h: Remove ErrorMsg definition. It is declared static in
