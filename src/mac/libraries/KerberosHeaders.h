@@ -30,7 +30,7 @@ typedef unsigned int size_t;
 
 #define PROVIDE_RSA_MD4
 #define PROVIDE_RSA_MD5
-#define PROVIDE_SNEFRU
+#define PROVIDE_CRC32
 #define PROVIDE_DES_CBC_CKSUM
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_DES_CBC_MD5
