@@ -72,6 +72,6 @@ extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,
 
 
 krb5_checksum_entry des_cbc_cksumtable_entry = {
-    des_cbc_checksum,
+    mit_des_cbc_checksum,
     sizeof(des_cblock)
     };
