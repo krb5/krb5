@@ -273,16 +273,16 @@ principal_found(nvalid, pname)
  * Add a principal to the database.
  */
 static krb5_error_code
-add_principal(kcontext, principal, eblock, key, rseed)
+add_principal(kcontext, principal, mkey, key, rseed)
     krb5_context	  kcontext;
     krb5_principal	  principal;
-    krb5_encrypt_block	* eblock;
+    krb5_keyblock	* mkey;
     krb5_keyblock	* key;
     krb5_pointer	  rseed;
 {
     krb5_error_code	  kret;
     krb5_db_entry	  dbent;
-    krb5_keyblock	* rkey = NULL;
+    krb5_keyblock	* rkey = NULL, lkey;
     krb5_timestamp	  timenow;
     int			  nentries = 1;
 
@@ -304,14 +304,16 @@ add_principal(kcontext, principal, eblock, key, rseed)
 	    goto out;
 
     if (!key) {
-	if ((kret = krb5_random_key(kcontext, eblock, rseed, &rkey)))
+	kret = krb5_c_make_random_key (kcontext, mkey->enctype, &lkey);
+	if (kret)
 	    goto out;
+	rkey = &lkey;
     } else
 	rkey = key;
 
     if ((kret = krb5_dbe_create_key_data(kcontext, &dbent)))
 	goto out;
-    if ((kret = krb5_dbekd_encrypt_key_data(kcontext, eblock, rkey, NULL, 1,
+    if ((kret = krb5_dbekd_encrypt_key_data(kcontext, mkey, rkey, NULL, 1,
 					    &dbent.key_data[0])))
 	goto out;
 
@@ -564,7 +566,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     op = "adding master principal";
     if ((kret = add_principal(kcontext,
 			      master_princ,
-			      &master_encblock,
+			      &master_keyblock,
 			      &master_keyblock,
 			      rseed)))
 	goto goodbye;
@@ -628,7 +630,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		swatch_on();
 	    }
 	    if ((kret = add_principal(kcontext, playback_principal(passno),
-				      &master_encblock, kbp, rseed))) {
+				      &master_keyblock, kbp, rseed))) {
 		linkage = "initially ";
 		oparg = playback_name(passno);
 		goto cya;
@@ -659,7 +661,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		}
 		if ((kret = add_principal(kcontext,
 					  playback_principal(nvalid),
-					  &master_encblock,
+					  &master_keyblock,
 					  kbp, rseed))) {
 		    oparg = playback_name(nvalid);
 		    goto cya;
@@ -789,7 +791,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	for (passno=0; passno<passes; passno++) {
 	    op = "adding principal";
 	    if ((kret = add_principal(kcontext, playback_principal(passno),
-				     &master_encblock, &stat_kb, rseed)))
+				     &master_keyblock, &stat_kb, rseed)))
 		goto goodbye;
 	    if (verbose > 4)
 		fprintf(stderr, "*A(%s)\n", playback_name(passno));
@@ -885,7 +887,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		for (j=0; j<nper; j++) {
 		    if ((kret = add_principal(ccontext,
 					      playback_principal(base+j),
-					      &master_encblock,
+					      &master_keyblock,
 					      &stat_kb,
 					      rseed))) {
 			fprintf(stderr,
