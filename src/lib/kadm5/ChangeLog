@@ -1,3 +1,7 @@
+Fri Sep 20 16:52:07 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* configure.in: add unit-test directory
+
 Wed Sep 18 12:35:16 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): set max_life default to 10
