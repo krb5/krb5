@@ -1,0 +1,35 @@
+CFLAGS = $(CCOPTS) $(DEFS)
+
+##DOSBUILDTOP = ..\..\..\..
+##DOSLIBNAME=..\..\krb5.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+OBJS    = mcc_close.$(OBJEXT) mcc_destry.$(OBJEXT) mcc_eseq.$(OBJEXT) \
+	mcc_gennew.$(OBJEXT) mcc_getnam.$(OBJEXT) mcc_gprin.$(OBJEXT) \
+	mcc_init.$(OBJEXT) mcc_nseq.$(OBJEXT) \
+	mcc_reslv.$(OBJEXT) mcc_retrv.$(OBJEXT) mcc_sseq.$(OBJEXT) \
+	mcc_store.$(OBJEXT) mcc_ops.$(OBJEXT) \
+	mcc_sflags.$(OBJEXT)
+
+SRCS    = $(srcdir)/mcc_close.c $(srcdir)/mcc_destry.c $(srcdir)/mcc_eseq.c \
+	$(srcdir)/mcc_gennew.c $(srcdir)/mcc_getnam.c $(srcdir)/mcc_gprin.c \
+	$(srcdir)/mcc_init.c $(srcdir)/mcc_nseq.c \
+	$(srcdir)/mcc_reslv.c $(srcdir)/mcc_retrv.c $(srcdir)/mcc_sseq.c    \
+	$(srcdir)/mcc_store.c $(srcdir)/mcc_ops.c \
+	$(srcdir)/mcc_sflags.c
+
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared: 
+	mkdir shared
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
