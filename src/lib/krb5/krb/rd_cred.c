@@ -63,14 +63,14 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock,
     krb5_replay_data    * replaydata;
     krb5_creds        *** pppcreds;
 {
-  krb5_error_code       retval;
-  krb5_cred 		* pcred;
+    krb5_error_code       retval;
+    krb5_cred 		* pcred;
     krb5_int32 		  ncreds;
     krb5_int32 		  i = 0;
     krb5_cred_enc_part 	  encpart;
 
     /* decode cred message */
-        if ((retval = decode_krb5_cred(pcreddata, &pcred)))
+    if ((retval = decode_krb5_cred(pcreddata, &pcred)))
     	return retval;
 
     memset(&encpart, 0, sizeof(encpart));
