@@ -1,3 +1,8 @@
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5int_set_prompt_types): Set to actual value
+	intead of 0.
+
 2000-04-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
