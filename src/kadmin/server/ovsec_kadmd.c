@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 #ifdef PURIFY
      purify_start_batch();
 #endif /* PURIFY */
-     whoami = argv[0];
+     whoami = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
      nofork = 0;
 
