@@ -24,7 +24,7 @@
  *
  */
 
-#include NEED_SOCKETS
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 krb5_error_code
