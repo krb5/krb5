@@ -50,7 +50,7 @@ char *argv[];
   int retval;
   struct sockaddr_in l_inaddr, f_inaddr;	/* local, foreign address */
   krb5_address laddr, faddr;
-  krb5_creds creds;
+  krb5_creds creds, *new_creds;
   krb5_ccache cc;
   krb5_data msgtext, msg;
   krb5_int32 seqno;
@@ -134,7 +134,8 @@ char *argv[];
   printf ("uu-server: client ticket is %d bytes.\n",
 	  creds.second_ticket.length);
 
-  if (retval = krb5_get_credentials(context, KRB5_GC_USER_USER, cc, &creds))
+  if (retval = krb5_get_credentials(context, KRB5_GC_USER_USER, cc, 
+				    &creds, &new_creds))
     {
       com_err("uu-server", retval, "getting user-user ticket");
       return 5;
@@ -166,17 +167,15 @@ char *argv[];
   /* send a ticket/authenticator to the other side, so it can get the key
      we're using for the krb_safe below. */
 
-  if (retval = krb5_generate_seq_number(context, &creds.keyblock, &seqno)) {
+  if (retval = krb5_generate_seq_number(context, &new_creds->keyblock, &seqno)){
       com_err("uu-server", retval, "generating sequence number");
       return 8;
   }
 #if 1
   if (retval = krb5_mk_req_extended(context, AP_OPTS_USE_SESSION_KEY,
 			       0,	/* no application checksum here */
-			       krb5_kdc_default_options,
 			       seqno,
 			       0,	/* no need for subkey */
-			       cc,
 			       &creds,
 			       0,	/* don't need authenticator copy */
 			       &msg)) {
@@ -201,7 +200,7 @@ char *argv[];
   msgtext.data = "Hello, other end of connection.";
 
   if (retval = krb5_mk_safe(context, &msgtext, CKSUMTYPE_RSA_MD4_DES, 
-			    &creds.keyblock, &laddr, &faddr, seqno,
+			    &new_creds->keyblock, &laddr, &faddr, seqno,
 			    KRB5_SAFE_NOTIME|KRB5_SAFE_DOSEQUENCE, 0, &msg))
     {
       com_err("uu-server", retval, "encoding message to client");

@@ -65,7 +65,7 @@ char *argv[];
   struct sockaddr_in serv_net_addr, cli_net_addr;
   krb5_address serv_addr, cli_addr;
   krb5_ccache cc;
-  krb5_creds creds;
+  krb5_creds creds, *new_creds;
   krb5_data reply, msg, princ_data;
   krb5_tkt_authent *authdat;
   krb5_context context;
@@ -188,7 +188,8 @@ char *argv[];
     }
 
   /* Get TGT from credentials cache */
-  if (retval = krb5_get_credentials(context, KRB5_GC_CACHED, cc, &creds))
+  if (retval = krb5_get_credentials(context, KRB5_GC_CACHED, cc, 
+				    &creds, &new_creds))
     {
       com_err("uu-client", retval, "getting TGT");
       return 6;
@@ -196,7 +197,7 @@ char *argv[];
 
   i = strlen(princ) + 1;
 
-  fprintf(stderr, "uu-client: sending %d bytes\n", creds.ticket.length + i);
+  fprintf(stderr, "uu-client: sending %d bytes\n",new_creds->ticket.length + i);
   princ_data.data = princ;
   princ_data.length = i;		/* include null terminator for
 					   server's convenience */
@@ -207,7 +208,7 @@ char *argv[];
       return 8;
     }
   free(princ);
-  retval = krb5_write_message(context, (krb5_pointer) &s, &creds.ticket);
+  retval = krb5_write_message(context, (krb5_pointer) &s, &new_creds->ticket);
   if (retval)
     {
       com_err("uu-client", retval, "sending ticket to server");
@@ -235,7 +236,7 @@ char *argv[];
 		       &serv_addr,
 		       0,		/* no fetchfrom */
 		       tgt_keyproc,
-		       (krb5_pointer)&creds, /* credentials as arg to
+		       (krb5_pointer)new_creds, /* credentials as arg to
 						keyproc */
 		       0,		/* no rcache for the moment XXX */
 		       &authdat);
@@ -243,7 +244,7 @@ char *argv[];
 #else
   retval = krb5_recvauth(context, (krb5_pointer)&s, "???",
 			 0, /* server */
-			 &serv_addr, 0, tgt_keyproc, (krb5_pointer)&creds,
+			 &serv_addr, 0, tgt_keyproc, (krb5_pointer)new_creds,
 			 0, 0,
 			 0, 0, 0, 0);
 #endif
