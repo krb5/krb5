@@ -1,3 +1,8 @@
+Wed Mar 27 18:51:43 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kconfig.c, getpasswd.c: Use universal procedure pointers (UPP)
+		which are necessary for the Mac Power PC.
+
 Tue Nov 7 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* kconfig.c, kconfig.h: Cleaned out dead code and improved 

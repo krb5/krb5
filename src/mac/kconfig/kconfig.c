@@ -87,6 +87,18 @@
 #define KFAILURE 255
 #define KSUCCESS 0
 
+
+	//  IH 05.03.96: PPC Port, must use UPPs instead of Procedure Ptrs
+static DeviceLoopDrawingUPP	gpictdrawprocUPP = NULL;
+static ModalFilterUPP 		gklistFilterUPP = NULL;
+static ModalFilterUPP		gokFilterUPP = NULL;
+static ModalFilterUPP		ginternalBufferFilterUPP = NULL;
+static UserItemUPP			gdooutlineUPP = NULL;
+static UserItemUPP			gdopictUPP = NULL;
+static UserItemUPP			gdrawRealmUPP = NULL;
+static UserItemUPP			gdolistUPP = NULL;
+
+
 /*
  * Globals
  */
@@ -192,6 +204,32 @@ int main (void)
 	strcpy(gUserName, kUNKNOWNUSERNAME);
 #endif
 	
+		//  IH 05.03.95: Create the UPPs for ToolBox callback routines
+	gpictdrawprocUPP = NewDeviceLoopDrawingProc(pictdrawproc);
+	if (gpictdrawprocUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gklistFilterUPP = NewModalFilterProc(klistFilter);
+	if (gklistFilterUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gokFilterUPP = NewModalFilterProc(okFilter);
+	if (gokFilterUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	ginternalBufferFilterUPP = NewModalFilterProc(internalBufferFilter);
+	if (ginternalBufferFilterUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gdooutlineUPP = NewUserItemProc(dooutline);	
+	if (gdooutlineUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gdopictUPP = NewUserItemProc(dopict);	
+	if (gdopictUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gdrawRealmUPP = NewUserItemProc(drawRealm);	
+	if (gdrawRealmUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+	gdolistUPP = NewUserItemProc(dolist);	
+	if (gdolistUPP == NULL)
+		doalert("Error creating a Universal Proc Pointer");
+
 	readprefs();
 	
 	/*
@@ -242,6 +280,7 @@ int main (void)
 	getServerMaps();	/* Get Servers first */
 	getRealmMaps();		/* Need servers to get realms */
 #endif
+
 	buildmain();
 
 	/*
@@ -658,9 +697,11 @@ void about ()
 	 * Set the draw procedure for the user items.
 	 */
 	GetDItem(dialog, ABOUT_OUT, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, ABOUT_OUT, itemType, (Handle)dooutline, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, ABOUT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
 	GetDItem(dialog, ABOUT_PICT, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, ABOUT_PICT, itemType, (Handle)dopict, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, ABOUT_PICT, itemType, (Handle)gdopictUPP, &itemRect);
 
 	ok = 0;
 	do {
@@ -730,7 +771,8 @@ pascal void dopict (DialogPtr dialog, short itemNo)
 	if (!trapAvailable(_DeviceLoop) || Gestalt('qd  ', &qdv) || ((qdv&0xff) == 0)) { /* if old mac */
 		drawpict(dialog, PICT_ABOUT_BW);
 	} else {
-		DeviceLoop(dialog->visRgn, (DeviceLoopDrawingProcPtr)pictdrawproc, 
+			//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+		DeviceLoop(dialog->visRgn, gpictdrawprocUPP, 
 				   (long)dialog, 0);
 	}
 }
@@ -926,17 +968,20 @@ void buildmain ()
      * Also, set the correct list heights.
 	 */
 	GetDItem(dialog, MAIN_REALM, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, MAIN_REALM, itemType, (Handle)drawRealm, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, MAIN_REALM, itemType, (Handle)gdrawRealmUPP, &itemRect);
 	
 	GetDItem(dialog, MAIN_DMAP, &itemType, &itemHandle, &dRect);
 	h = (((dRect.bottom - dRect.top) / CELLH) * CELLH);
 	dRect.bottom = dRect.top + h;
-	SetDItem(dialog, MAIN_DMAP, itemType, (Handle) dolist, &dRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, MAIN_DMAP, itemType, (Handle) gdolistUPP, &dRect);
 
 	GetDItem(dialog, MAIN_SERVERS, &itemType, &itemHandle, &sRect);
 	h = (((sRect.bottom - sRect.top) / CELLH) * CELLH);
 	sRect.bottom = sRect.top + h;
-	SetDItem(dialog, MAIN_SERVERS, itemType, (Handle) dolist, &sRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, MAIN_SERVERS, itemType, (Handle) gdolistUPP, &sRect);
 
 	GetDItem(dialog, MAIN_DDELETE, &itemType, &ddeleteHandle, &itemRect);
 	GetDItem(dialog, MAIN_SDELETE, &itemType, &sdeleteHandle, &itemRect);
@@ -1567,10 +1612,12 @@ void klist_dialog ()
 	 * to be drawn by the Dialog Manger.
 	 */
 	GetDItem(dialog, KLIST_OUT, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, KLIST_OUT, itemType, (Handle) dooutline, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, KLIST_OUT, itemType, (Handle) gdooutlineUPP, &itemRect);
 		
 	GetDItem(dialog, KLIST_LIST, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, KLIST_LIST, itemType, (Handle) dolist, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, KLIST_LIST, itemType, (Handle) gdolistUPP, &itemRect);
 	/* note item rect used later */
 
 	ShowWindow(dialog);
@@ -1637,7 +1684,8 @@ void klist_dialog ()
 		/* 
 		 * process hits in the dialog.
 		 */
-		ModalDialog(klistFilter, &itemNo);
+			//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+		ModalDialog(gklistFilterUPP, &itemNo);
 				
 		switch(itemNo) {
 			/* 
@@ -1812,7 +1860,8 @@ Boolean editlist (int dlog, char *e1, char *e2, int *admin)
 	 * Set the draw procedure for the user items.
 	 */
 	GetDItem(dialog, EDIT_OUT, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, EDIT_OUT, itemType, (Handle)dooutline, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, EDIT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
 
 	GetDItem(dialog, EDIT_E1, &itemType, &itemHandle, &itemRect);
 	c2pstr(e1);
@@ -1837,7 +1886,8 @@ Boolean editlist (int dlog, char *e1, char *e2, int *admin)
 		/* 
 		 * process hits in the dialog.
 		 */
-		ModalDialog(okFilter, &item);
+			//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+		ModalDialog(gokFilterUPP, &item);
 		switch (item) {
 		case EDIT_OK:							/* ok button */
 			ok = 1;
@@ -2963,7 +3013,8 @@ void kpass_dialog ()
 	 * Set the draw procedure for the user items.
 	 */
 	GetDItem(dialog, KPASS_OUT, &itemType, &itemHandle, &itemRect);
-	SetDItem(dialog, KPASS_OUT, itemType, (Handle)dooutline, &itemRect);
+		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+	SetDItem(dialog, KPASS_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
 
 	/* preset dialog ... */
 	SetWRefCon(dialog, (long)&valcruft);	/* Stash the cruft's address */
@@ -3004,12 +3055,14 @@ char *ptr;
 #endif
 	
 	retry:
+	
 	ok = 0;
 	do {
 		/* 
 		 * process hits in the dialog.
 		 */
-		ModalDialog(internalBufferFilter, &item);
+			//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
+		ModalDialog(ginternalBufferFilterUPP, &item);
 		switch (item) {
 		case KPASS_OK:					/* ok button */
 			ok = 1;

@@ -33,6 +33,11 @@ typedef union {								// used to convert ProcPtr to Handle
 } Proc2Hand;
 
 
+	//  IH 05.03.96: PPC port, we have to use UPP instead of Procedure Ptrs
+static ModalFilterUPP 	gTwoItemFilterUPP = NULL;
+static UserItemUPP		gFrameOKbtnUPP = NULL;
+
+
 static pascal void FrameOKbtn( WindowPtr myWindow, short itemNo )
 {
 	short		tempType;
@@ -179,17 +184,25 @@ OSErr GetUserInfo( char *UserName, char *password )
 	}
 	else SelIText( myDLOG, kLoginNameItem,0,0 );
 	
+		//  IH 05.03.96: Create the Universal Proc Pointers here
+	if (gTwoItemFilterUPP == NULL)
+		gTwoItemFilterUPP = NewModalFilterProc(TwoItemFilter);
+	if (gFrameOKbtnUPP == NULL)
+		gFrameOKbtnUPP = NewUserItemProc(FrameOKbtn);
+			
 	// Establish a user item around the OK button to draw the default button frame in
 	GetDItem( myDLOG, kLoginOKItem, &itemType, &itemHandle, &itemRect );
 	InsetRect( &itemRect, -4, -4 );				// position user item around OK button
 	procConv.P = (ProcPtr) FrameOKbtn;			// convert ProcPtr to a Handle
-	SetDItem( myDLOG, kLoginFrameItem, userItem, procConv.H, &itemRect );
+		//  IH 05.03.96: PPC Port - Use UPP instead of Procedure Ptrs
+	SetDItem( myDLOG, kLoginFrameItem, userItem, (Handle) gFrameOKbtnUPP, &itemRect );
 	
 	InitCursor();
 	do {
 		do {										// display the dialog & handle events
 			SetOKEnable(myDLOG);
-			ModalDialog( (ModalFilterProcPtr) TwoItemFilter, (short *) &itemHit );
+				//  IH 05.03.96: PPC Port - Use UPP instead of Procedure Ptrs
+			ModalDialog(gTwoItemFilterUPP, (short *) &itemHit );
 		} while( itemHit != kLoginOKItem && itemHit != kLoginCnclItem );
 		
 		if( itemHit == kLoginOKItem ) {				// OK button pressed?			
