@@ -42,5 +42,5 @@ clean::
 
 depend::
 
-Krb5InstallHeaders($(KRB5_HEADERS),$(KRB5_INCDIR)/krb5)
+Krb5InstallHeaders($(KRB5_HEADERS) config.h osconf.h,$(KRB5_INCDIR)/krb5)
 
