@@ -1,3 +1,8 @@
+2003-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Kill echo before printing
+	prompt to avoid possible race conditions in test suite.
+
 2003-02-06  Tom Yu  <tlyu@mit.edu>
 
 	* prompter.c (krb5_prompter_posix, setup_tty, restore_tty): Fix to

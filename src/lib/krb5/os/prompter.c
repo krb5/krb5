@@ -69,18 +69,17 @@ krb5_prompter_posix(
 	/* fgets() takes int, but krb5_data.length is unsigned. */
 	if (prompts[i].reply->length > INT_MAX)
 	    goto cleanup;
+
+	errcode = setup_tty(fp, prompts[i].hidden);
+	if (errcode)
+	    break;
+
 	/* put out the prompt */
 	(void)fputs(prompts[i].prompt, stdout);
 	(void)fputs(": ", stdout);
 	(void)fflush(stdout);
 	(void)memset(prompts[i].reply->data, 0, prompts[i].reply->length);
 
-	errcode = setup_tty(fp, prompts[i].hidden);
-	if (errcode) {
-	    if (prompts[i].hidden)
-		putchar('\n');
-	    break;
-	}
 	got_int = 0;
 	retp = fgets(prompts[i].reply->data, (int)prompts[i].reply->length,
 		     fp);
