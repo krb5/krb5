@@ -1043,6 +1043,17 @@ login(passwd)
 			goto bad;
 		}
 	}
+#ifdef HAVE_SETLUID
+  	/*
+  	 * If we're on a system which keeps track of login uids, then
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
+	 */
+	if (setluid((uid_t)pw->pw_uid) < 0) {
+	        reply(550, "Can't set luid.");
+		goto bad;
+	}
+#endif
 	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
 	        reply(550, "Can't set uid.");
 		goto bad;
