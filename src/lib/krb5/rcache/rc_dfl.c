@@ -538,13 +538,16 @@ krb5_rcache id;
   
 #else
     struct authlist *q;
-    char *name = t->name;
+    char *name;
     krb5_error_code retval;
     krb5_rcache tmp;
     krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
 
+    name = t->name;
+    t->name = 0;		/* Clear name so it isn't freed */
     (void) krb5_rc_dfl_close_no_free(id);
     retval = krb5_rc_dfl_resolve(id, name);
+    free(name);
     if (retval)
 	return retval;
     retval = krb5_rc_dfl_recover(id);
