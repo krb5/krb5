@@ -57,6 +57,7 @@
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/adb.h>
+#include <krb5/adm_proto.h>
 #include "kdb5_util.h"
 
 enum ap_op {
@@ -410,8 +411,8 @@ add_principal(context, princ, op, pblock)
 						  &master_keyblock, NULL, 
 						  1, entry.key_data)))
 	    return retval;
-        if ((retval = krb5_dbe_update_generation_number_general(util_context,
-                                                                &entry, 1)))
+        if ((retval = krb5_dbe_set_generation_number_general(util_context,
+                                                             &entry, 1)))
             return retval;
 	break;
     case TGT_KEY:

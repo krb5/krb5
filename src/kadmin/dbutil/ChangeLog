@@ -1,3 +1,9 @@
+2001-06-21  Mitchell Berger  <mitchb@mit.edu>
+
+	* kdb5_create.c (add_principal): Changed from using
+	krb5_dbe_update_generation_number_general to using
+	krb5_dbe_set_generation_number_general on creation of master principal.
+	
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* dump.c: Changed to include server_internal.h instead of adb.h.
@@ -14,6 +20,11 @@
 	osa_adb_open_policy calling sequence.
 
 	* loadv4.c: Unimportant whitespace change in a comment.
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_create.c: Include <krb5/adm_proto.h> for
+	krb5_keysalt_iterate() prototype.
 
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
