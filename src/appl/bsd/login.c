@@ -210,6 +210,10 @@ int pagflag = 0;			/* true if setpag() has been called */
 char *getenv();
 void dofork();
 
+#ifndef HAVE_STRSAVE
+char * strsave();
+#endif
+
 #ifdef POSIX
 typedef void sigtype;
 #else
