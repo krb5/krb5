@@ -25,7 +25,6 @@ extern krb5_timestamp infinity;		/* greater than all other timestamps */
 extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
 extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */
 extern krb5_encrypt_block master_encblock;
-extern krb5_cryptosystem_entry krb5_des_cs_entry;
 
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;

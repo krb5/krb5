@@ -29,6 +29,7 @@ krb5_timestamp infinity = KRB5_INT32_MAX; /* XXX */
 
 krb5_deltat max_life_for_realm;		/* XXX parameter per-realm? */
 krb5_deltat max_renewable_life_for_realm; /* XXX param per-realm? */
+krb5_encrypt_block master_encblock;
 
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
