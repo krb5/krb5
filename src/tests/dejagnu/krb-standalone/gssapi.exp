@@ -1,0 +1,415 @@
+# Test for the GSS-API.
+# This is a DejaGnu test script.
+# This script tests that the GSS-API tester functions correctly.
+
+# This mostly just calls procedures in test/dejagnu/config/default.exp.
+
+if ![info exists KDESTROY] {
+    set KDESTROY [findfile $objdir/../../clients/kdestroy/kdestroy]
+}
+
+if ![info exists GSSCLIENT] {
+    set GSSCLIENT [findfile $objdir/../../appl/gss-sample/gss-client]
+}
+
+if ![info exists GSSSERVER] {
+    set GSSSERVER [findfile $objdir/../../appl/gss-sample/gss-server]
+}
+
+# Set up the Kerberos files and environment.
+if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
+    return
+}
+
+# Initialize the Kerberos database.  The argument tells
+# setup_kerberos_db that it is being called from here.
+if ![setup_kerberos_db 0] {
+    return
+}
+
+#
+# Like kinit in default.exp, but allows us to specify a different ccache.
+#
+proc our_kinit { name pass ccache } {
+    global KINIT
+    global spawn_id
+
+    # Use kinit to get a ticket.
+    spawn $KINIT -c $ccache $name@KRBTEST.COM
+    expect {
+	"Password for $name@KRBTEST.COM:" {
+	    verbose "kinit started"
+	}
+	timeout {
+	    fail "kinit"
+	    return 0
+	}
+	eof {
+	    fail "kinit"
+	    return 0
+	}
+    }
+    send "$pass\r"
+    # This last expect seems useless, but without it the test hangs on
+    # AIX.
+    expect {
+        "\r" { }
+    }
+    if ![check_exit_status kinit] {
+	return 0
+    }
+
+    return 1
+}
+
+#
+# Destroys a particular ccache.
+#
+proc our_kdestroy { ccache } {
+    global KDESTROY
+    global spawn_id
+
+    spawn $KDESTROY -c $ccache
+    if ![check_exit_status "kdestroy"] {
+	return 0
+    }
+    return 1
+}
+
+#
+# Stops the gss-server.
+#
+proc stop_gss_server { } {
+    global gss_server_pid
+    global gss_server_spawn_id
+
+    if [info exists gss_server_pid] {
+	catch "close -i $gss_server_spawn_id"
+	catch "exec kill $gss_server_pid"
+	wait -i $gss_server_spawn_id
+	unset gss_server_pid
+    }
+}
+
+#
+# Restore environment variables possibly set.
+#
+proc gss_restore_env { } {
+    global env
+    global gss_save_ccname
+    global gss_save_ktname
+
+    catch "unset env(KRB5CCNAME)"
+    if [info exists gss_save_ccname] {
+	set env(KRB5CCNAME) $gss_save_ccname
+	unset gss_save_ccname
+    }
+    catch "unset env(KRB5_KTNAME)"
+    if [info exists gss_save_ktname] {
+	set env(KRB5_KTNAME) $gss_save_ktname
+	unset gss_save_ktname
+    }
+}
+
+proc doit { } {
+    global env
+    global KLIST
+    global KDESTROY
+    global KEY
+    global GSSTEST
+    global GSSSERVER
+    global GSSCLIENT
+    global hostname
+    global tmppwd
+    global spawn_id
+    global timeout
+    global gss_server_pid
+    global gss_server_spawn_id
+    global gss_save_ccname
+    global gss_save_ktname
+
+    # Start up the kerberos and kadmind daemons.
+    if ![start_kerberos_daemons 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kadmin to add a key for us.
+    if ![add_kerberos_key gsstest0 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kadmin to add a key for us.
+    if ![add_kerberos_key gsstest1 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kadmin to add a key for us.
+    if ![add_kerberos_key gsstest2 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kadmin to add a key for us.
+    if ![add_kerberos_key gsstest3 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kadmin to add a service key for us.
+    if ![add_random_key gssservice/$hostname 0] {
+	fail gsstest
+	return
+    }
+
+    # Use kdb5_edit to create a srvtab entry for gssservice
+    if ![setup_srvtab 0 gssservice] {
+	fail gsstest
+	return
+    }
+
+    catch "exec rm -f $tmppwd/gss_tk_0 $tmppwd/gss_tk_1 $tmppwd/gss_tk_2 $tmppwd/gss_tk_3"
+
+    # Use kinit to get a ticket.
+    if ![our_kinit gsstest0 gsstest0$KEY $tmppwd/gss_tk_0] {
+	fail gsstest
+	return
+    }
+
+    # Use kinit to get a ticket.
+    if ![our_kinit gsstest1 gsstest1$KEY $tmppwd/gss_tk_1] {
+	fail gsstest
+	return
+    }
+
+    # Use kinit to get a ticket.
+    if ![our_kinit gsstest2 gsstest2$KEY $tmppwd/gss_tk_2] {
+	fail gsstest
+	return
+    }
+
+    # Use kinit to get a ticket.
+    if ![our_kinit gsstest3 gsstest3$KEY $tmppwd/gss_tk_3] {
+	fail gsstest
+	return
+    }
+
+    #
+    # Save settings of KRB5CCNAME and KRB5_KTNAME
+    #
+    if [info exists env(KRB5CCNAME)] {
+	set gss_save_ccname $env(KRB5CCNAME)
+    }
+    if [info exists env(KRB5_KTNAME)] {
+	set gss_save_ktname $env(KRB5_KTNAME)
+    }
+
+    #
+    # set KRB5CCNAME and KRB5_KTNAME
+    #
+    set env(KRB5_KTNAME) FILE:$tmppwd/srvtab
+    verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
+
+    # Now start the gss-server.
+    spawn $GSSSERVER -port 5556 gssservice@$hostname
+    set gss_server_pid [exp_pid]
+    set gss_server_spawn_id $spawn_id
+    catch "exec sleep 4"
+
+    # Start the client with client identity 0
+    set env(KRB5CCNAME) $tmppwd/gss_tk_0
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest0"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest0\""
+    catch "expect_after"
+    if ![check_exit_status gssclient0] {
+	fail gssclient0
+	return
+    }
+    pass gssclient0
+
+    # Start the client with client identity 1
+    set env(KRB5CCNAME) $tmppwd/gss_tk_1
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest1"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest1\""
+    catch "expect_after"
+    if ![check_exit_status gssclient1] {
+	fail gssclient1
+	return
+    }
+    pass gssclient1
+
+    # Start the client with client identity 2
+    set env(KRB5CCNAME) $tmppwd/gss_tk_2
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest2"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest2\""
+    catch "expect_after"
+    if ![check_exit_status gssclient2] {
+	fail gssclient2
+	return
+    }
+    pass gssclient2
+
+    # Start the client with client identity 3
+    set env(KRB5CCNAME) $tmppwd/gss_tk_3
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest3"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
+    catch "expect_after"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    if ![check_exit_status gssclient3] {
+	fail gssclient3
+	return
+    }
+    pass gssclient3
+
+    stop_gss_server
+    gss_restore_env
+
+    if ![our_kdestroy $tmppwd/gss_tk_0] {
+	fail gsstest
+	return
+    }
+
+    if ![our_kdestroy $tmppwd/gss_tk_1] {
+	fail gsstest
+	return
+    }
+
+    if ![our_kdestroy $tmppwd/gss_tk_2] {
+	fail gsstest
+	return
+    }
+
+    if ![our_kdestroy $tmppwd/gss_tk_3] {
+	fail gsstest
+	return
+    }
+
+    catch "exec rm -f $tmppwd/gss_tk_0 $tmppwd/gss_tk_1 $tmppwd/gss_tk_2 $tmppwd/gss_tk_3"
+
+    return
+}
+
+set status [catch doit msg]
+
+stop_gss_server
+gss_restore_env
+stop_kerberos_daemons
+
+if { $status != 0 } {
+    send_error "ERROR: error in gssapi.exp\n"
+    send_error "$msg\n"
+    exit 1
+}

@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+gssapi.exp
 kadmin.exp
 rcp.exp
 rsh.exp
