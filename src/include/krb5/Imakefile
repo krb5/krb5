@@ -13,3 +13,6 @@ ProcessStockHeader(stock/config.h,config.h)
 ProcessStockHeader(stock/osconf.h,osconf.h)
 
 all::
+
+clean::
+	$(RM) config.h osconf.h
