@@ -1,0 +1,5 @@
+Tue Oct  4 14:54:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* md4crypto.c:
+	* md4glue.c: Added placeholder for magic number.
+

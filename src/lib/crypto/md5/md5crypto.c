@@ -53,6 +53,7 @@ krb5_checksum *outcksum;
 
 
 krb5_checksum_entry rsa_md5_des_cksumtable_entry = {
+    0,
     md5_crypto_sum_func,
     RSA_MD5_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
