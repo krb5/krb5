@@ -172,3 +172,4 @@ check-windows::
 
 clean::
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
+	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
