@@ -65,7 +65,7 @@ krb5_error_code KRB5_CALLCONV krb5_mcc_next_cred
 
 /* mcc_reslv.c */
 krb5_error_code KRB5_CALLCONV krb5_mcc_resolve 
-	PROTOTYPE((krb5_context, krb5_ccache *id , char *residual ));
+	PROTOTYPE((krb5_context, krb5_ccache *id , const char *residual ));
 
 /* mcc_retrv.c */
 krb5_error_code KRB5_CALLCONV krb5_mcc_retrieve 

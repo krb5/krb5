@@ -53,7 +53,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_resolve (context, id, residual)
    krb5_context context;
    krb5_ccache *id;
-   char *residual;
+   const char *residual;
 {
      krb5_ccache lid;
      krb5_mcc_data *ptr;

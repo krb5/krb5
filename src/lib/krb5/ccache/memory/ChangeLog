@@ -1,3 +1,8 @@
+Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* mcc-proto.h, mcc_reslv.c (krb5_mcc_resolve): Incoming name
+	        is const char *
+
 Thu Jan  2 17:02:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
