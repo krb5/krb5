@@ -181,7 +181,7 @@ n_found = 0;
 		    }
 		} else mem_err++;
 	    }
-#ifdef AF_INET6
+#ifdef KRB5_USE_INET6
 	case AF_INET6:
 	    {
 		struct sockaddr_in6 *in =
@@ -209,7 +209,7 @@ n_found = 0;
 		    }
 		} else mem_err++;
 	    }
-#endif /* AF_INET6 */
+#endif /* KRB5_USE_INET6 */
 #endif /* netinet/in.h */
 
 #ifdef KRB5_USE_NS

@@ -1,3 +1,8 @@
+1999-11-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Conditionalize INET6 support on
+	new KRB5_USE_INET6 macro.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
