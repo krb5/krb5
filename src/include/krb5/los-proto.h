@@ -106,7 +106,7 @@ krb5_error_code krb5_write_message PROTOTYPE((krb5_pointer, krb5_data *));
 krb5_error_code krb5_sname_to_principal
     PROTOTYPE((const char *,
 	       const char *,
-	       krb5_boolean,
+	       krb5_int32,
 	       krb5_principal *));
 #include <krb5/narrow.h>
 
