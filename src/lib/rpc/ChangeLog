@@ -1,3 +1,25 @@
+2000-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gssapi.c (auth_gssapi_create): Free call_res because
+	xdr_authgssapi_init_res can potentially allocate memory.  Perhaps
+	clnt_call should really deal with this, though.  It is not at all
+	clear whether clnt_call or svc_getargs should actually end up
+	freeing allocated memory themselves.
+
+2000-02-15  Tom Yu  <tlyu@mit.edu>
+
+	* svc_auth_gssapi.c (_svcauth_gssapi): Call gssrpc_xdr_free() if
+	xdr_authgssapi_creds() or xdr_authgssapi_init_arg() fails.
+
+	* auth_gssapi_misc.c (xdr_authgssapi_creds):
+	(xdr_authgssapi_init_arg):
+	(xdr_authgssapi_init_res): Revert prior change.  The caller should
+	be the one dealing.  Additionally, it was probably wrong to
+	unconditionally free the object regardless of whether the mode is
+	XDR_DECODE.
+	(auth_gssapi_unwrap_data): Use temp_xdrs rather than in_xdrs to
+	force XDR_FREE operation.
+
 2000-02-14  Tom Yu  <tlyu@mit.edu>
 
 	* svc.c (xprt_register): Zero out xports after allocating.

@@ -162,6 +162,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
 	  PRINTF(("svcauth_gssapi: failed decoding creds\n"));
 	  LOG_MISCERR("protocol error in client credentials");
+	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
 	  XDR_DESTROY(&xdrs);
 	  ret = AUTH_BADCRED;
 	  goto error;
@@ -270,6 +271,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 			    &call_arg)) {
 	       PRINTF(("svcauth_gssapi: cannot decode args\n"));
 	       LOG_MISCERR("protocol error in procedure arguments");
+	       xdr_free(xdr_authgssapi_init_arg, &call_arg);
 	       ret = AUTH_BADCRED;
 	       goto error;
 	  }
@@ -550,6 +552,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 				      &call_arg)) {
 			 PRINTF(("svcauth_gssapi: cannot decode args\n"));
 			 LOG_MISCERR("protocol error in call arguments");
+			 xdr_free(xdr_authgssapi_init_arg, &call_arg);
 			 ret = AUTH_BADCRED;
 			 goto error;
 		    }

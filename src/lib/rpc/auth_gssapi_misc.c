@@ -49,13 +49,9 @@ bool_t xdr_authgssapi_creds(xdrs, creds)
    auth_gssapi_creds *creds;
 {
      if (! xdr_u_int32(xdrs, &creds->version) ||
-	 ! xdr_bool(xdrs, &creds->auth_msg))
-	     return FALSE;
-     if (! xdr_gss_buf(xdrs, &creds->client_handle)) {
-	     xdrs->x_op = XDR_FREE;
-	     (void)xdr_gss_buf(xdrs, &creds->client_handle);
-	     return FALSE;
-     }
+	 ! xdr_bool(xdrs, &creds->auth_msg) ||
+	 ! xdr_gss_buf(xdrs, &creds->client_handle))
+       return FALSE;
      return TRUE;
 }
 
@@ -63,13 +59,9 @@ bool_t xdr_authgssapi_init_arg(xdrs, init_arg)
    XDR *xdrs;
    auth_gssapi_init_arg *init_arg;
 {
-     if (! xdr_u_int32(xdrs, &init_arg->version))
-	     return FALSE;
-     if (! xdr_gss_buf(xdrs, &init_arg->token)) {
-	     xdrs->x_op = XDR_FREE;
-	     (void)xdr_gss_buf(xdrs, &init_arg->token);
-	     return FALSE;
-     }
+     if (! xdr_u_int32(xdrs, &init_arg->version) ||
+	 ! xdr_gss_buf(xdrs, &init_arg->token))
+	  return FALSE;
      return TRUE;
 }
 
@@ -77,26 +69,13 @@ bool_t xdr_authgssapi_init_res(xdrs, init_res)
    XDR *xdrs;
    auth_gssapi_init_res *init_res;
 {
-     if (! xdr_u_int32(xdrs, &init_res->version))
-	     return FALSE;
-     if (! xdr_gss_buf(xdrs, &init_res->client_handle)) {
-	     xdrs->x_op = XDR_FREE;
-	     (void)xdr_gss_buf(xdrs, &init_res->client_handle);
-	     return FALSE;
-     }
-     if (! xdr_u_int32(xdrs, &init_res->gss_major) ||
-	 ! xdr_u_int32(xdrs, &init_res->gss_minor))
-	     return FALSE;
-     if (! xdr_gss_buf(xdrs, &init_res->token)) {
-	     xdrs->x_op =  XDR_FREE;
-	     (void)xdr_gss_buf(xdrs, &init_res->token);
-	     return FALSE;
-     }
-     if (! xdr_gss_buf(xdrs, &init_res->signed_isn)) {
-	     xdrs->x_op = XDR_FREE;
-	     (void)xdr_gss_buf(xdrs, &init_res->signed_isn);
-	     return FALSE;
-     }
+     if (! xdr_u_int32(xdrs, &init_res->version) ||
+	 ! xdr_gss_buf(xdrs, &init_res->client_handle) ||
+	 ! xdr_u_int32(xdrs, &init_res->gss_major) ||
+	 ! xdr_u_int32(xdrs, &init_res->gss_minor) ||
+	 ! xdr_gss_buf(xdrs, &init_res->token) ||
+	 ! xdr_gss_buf(xdrs, &init_res->signed_isn))
+	  return FALSE;
      return TRUE;
 }
 
@@ -288,8 +267,8 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
      if (! xdr_bytes(in_xdrs, (char **) &in_buf.value, 
 		     (unsigned int *) &in_buf.length, (unsigned int) -1)) {
 	 PRINTF(("gssapi_unwrap_data: deserializing encrypted data failed\n"));
-	 in_xdrs->x_op = XDR_FREE;
-	 (void)xdr_bytes(in_xdrs, (char **) &in_buf.value,
+	 temp_xdrs.x_op = XDR_FREE;
+	 (void)xdr_bytes(&temp_xdrs, (char **) &in_buf.value,
 			 (unsigned int *) &in_buf.length,
 			 (unsigned int) -1);
 	 return FALSE;
@@ -326,6 +305,7 @@ bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
      if (! (*xdr_func)(&temp_xdrs, xdr_ptr)) {
 	  PRINTF(("gssapi_unwrap_data: deserializing arguments failed\n"));
 	  gss_release_buffer(minor, &out_buf);
+	  gssrpc_xdr_free(xdr_func, xdr_ptr);
 	  XDR_DESTROY(&temp_xdrs);
 	  return FALSE;
      }
