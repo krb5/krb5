@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.4
+		  Kerberos Version 5, Release 1.2.5
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.4.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.5.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.4.tar.gz
+	gtar zxpf krb5-1.2.5.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.4.tar.gz | tar xpf -
+	gzcat krb5-1.2.5.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.4/src
-and the documentation into DIST/krb5-1.2.4/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.5/src
+and the documentation into DIST/krb5-1.2.5/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,40 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.5
+----------------------------------------------
+
+Major Changes:
+
+* On MacOS X, we have reviewed the list of exported symbol names.  As
+  in earlier MacOS releases, and the Windows releases, but unlike the
+  UNIX releases, the list of exported names accessible to applications
+  is reduced to a predefined set of symbols.  We are attempting to
+  define a "stable" subset of the API we feel confident about
+  providing, as opposed to giving applications access to half of the
+  packet-manipulation functions we have.
+
+  In future releases, we may investigate applying a similar export
+  list under some UNIX shared library implementations.
+
+  If a function you use is not exported, we probably figured it was
+  functionality that should be internal to the library, or something
+  that should be done with a different interface, or something we
+  didn't know anyone was using at the moment and thought we'd like to
+  clean up the interface later on.  If you need it, and there isn't a
+  cleaner way, contact us about getting it added back in to the export
+  list.
+
+  A few things are marked "deprecated" in the header file, but will
+  continue to be provided under "#if KRB5_DEPRECATED" because even
+  though they're ugly, we also know they're in use and we can't phase
+  them out fast enough.  We may replace the implementation later on
+  with a shim on top of some cleaner mechanism.
+
+Minor changes:
+
+* A null pointer dereference in the krb5 library has been fixed.
 
 Notes, Major Changes, and Known Bugs for 1.2.4
 ----------------------------------------------
