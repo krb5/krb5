@@ -1,3 +1,7 @@
+1999-06-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* texinfo.tex: Get rid of control characters in text file.
+
 Wed May 19 11:44:31 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add windows build rules for putting header files in
