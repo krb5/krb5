@@ -195,12 +195,15 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (delegated_cred_handle)
       *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
 
-   /* context handle must be unspecified */
-
+   /*
+    * Context handle must be unspecified.  Actually, it must be
+    * non-established, but currently, accept_sec_context never returns
+    * a non-established context handle.
+    */
    /*SUPPRESS 29*/
    if (*context_handle != GSS_C_NO_CONTEXT) {
       *minor_status = 0;
-      return(GSS_S_NO_CONTEXT);
+      return(GSS_S_FAILURE);
    }
 
    /* validate the cred handle - no default */

@@ -1,3 +1,8 @@
+Sat Nov 15 20:14:05 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Return
+		GSS_S_FAILURE if an context handle is passed to it.
+
 Thu Sep 18 17:55:09 1997  Tom Yu  <tlyu@mit.edu>
 
 	* acquire_cred.c: Replace USE_STRING_H with something more sane.
