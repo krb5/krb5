@@ -57,6 +57,8 @@
 #define krb5_dbm_db_lock krb5_db_lock
 #define krb5_dbm_db_unlock krb5_db_unlock
 #define krb5_dbm_db_set_lockmode krb5_db_set_lockmode
+#define krb5_dbm_db_close_database krb5_db_close_database
+#define krb5_dbm_db_open_database krb5_db_open_database
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name PROTOTYPE((char * ));
@@ -91,5 +93,8 @@ krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((int, /* krb5_boolean */
 krb5_boolean krb5_dbm_db_set_lockmode
 	PROTOTYPE((int /* krb5_boolean */ ));
 #endif /* NARROW_PROTOTYPES */
+
+krb5_error_code krb5_dbm_db_open_database PROTOTYPE ((void));
+krb5_error_code krb5_dbm_db_close_database PROTOTYPE ((void));
 
 #endif /* KRB5_KDB5_DBM__ */
