@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989, 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * These routines check and fix parity of encryption keys for the DES
  * algorithm.

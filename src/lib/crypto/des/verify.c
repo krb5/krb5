@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988, 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Program to test the correctness of the DES library
  * implementation.

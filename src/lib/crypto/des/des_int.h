@@ -3,10 +3,10 @@
  * $Author$
  * $Id$ 
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988, 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Private include file for the Data Encryption Standard library.
  */

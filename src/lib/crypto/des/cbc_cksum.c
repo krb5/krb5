@@ -2,9 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
  *
  * Under U.S. law, this software may not be exported outside the US
@@ -13,7 +11,7 @@
  * These routines form the library interface to the DES facilities.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  */
 

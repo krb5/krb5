@@ -2,11 +2,11 @@
  * $Source$
  * $Author$
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This routine computes the DES key schedule given a key.  The
  * permutations and shifts have been done at compile time, resulting

@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1985, 1988,1990 by the Massachusetts Institute of Technology.
+ * Copyright 1985, 1988, 1990 by the Massachusetts Institute of Technology.
  *
- * For copying and distribution information, please
- * see the file <krb5/copyright.h>.
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
  *
  */
 

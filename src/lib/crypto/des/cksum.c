@@ -2,11 +2,11 @@
  * $Source$
  * $Author$
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * These routines perform encryption and decryption using the DES
  * private key algorithm, or else a subset of it-- fewer inner loops.

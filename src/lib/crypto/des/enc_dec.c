@@ -2,9 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
  *
  * These routines perform encryption and decryption using the DES
@@ -19,7 +17,7 @@
  * Originally written 8/85 by Steve Miller, MIT Project Athena.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  */
 

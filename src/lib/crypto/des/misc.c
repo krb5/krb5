@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988,1990 by the Massachusetts Institute of Technology.
+ * Copyright 1988, 1990 by the Massachusetts Institute of Technology.
  *
- * For copying and distribution information,
- * please seethe file <krb5/copyright.h>.
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
  *
  * This file contains most of the routines needed by the various
  * make_foo programs, to account for bit- and byte-ordering on
