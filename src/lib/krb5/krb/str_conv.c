@@ -104,11 +104,13 @@ static const char stype_v4_in[]		= "v4";
 static const char stype_norealm_in[]	= "norealm";
 static const char stype_olrealm_in[]	= "onlyrealm";
 static const char stype_special_in[]	= "special";
+static const char stype_afs3_in[]	= "afs3";
 static const char stype_v5_out[]	= "Version 5";
 static const char stype_v4_out[]	= "Version 4";
 static const char stype_norealm_out[]	= "Version 5 - No Realm";
 static const char stype_olrealm_out[]	= "Version 5 - Realm Only";
 static const char stype_special_out[]	= "Special";
+static const char stype_afs3_out[]	= "AFS version 3";
 
 /* Checksum type strings */
 static const char cstype_crc32_in[]	= "crc32";
@@ -195,7 +197,8 @@ static const struct salttype_lookup_entry salttype_table[] = {
 { KRB5_KDB_SALTTYPE_V4,		stype_v4_in,		stype_v4_out	  },
 { KRB5_KDB_SALTTYPE_NOREALM,	stype_norealm_in,	stype_norealm_out },
 { KRB5_KDB_SALTTYPE_ONLYREALM,	stype_olrealm_in,	stype_olrealm_out },
-{ KRB5_KDB_SALTTYPE_SPECIAL,	stype_special_in,	stype_special_out }
+{ KRB5_KDB_SALTTYPE_SPECIAL,	stype_special_in,	stype_special_out },
+{ KRB5_KDB_SALTTYPE_AFS3,	stype_afs3_in,		stype_afs3_out    }
 };
 static const int salttype_table_nents = sizeof(salttype_table)/
 					sizeof(salttype_table[0]);

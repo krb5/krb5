@@ -26,7 +26,6 @@
  * kerberos kdc request, with various hardware/software verification devices.
  */
 
-
 #include "k5-int.h"
 #include <stdio.h>
 #include <time.h>
@@ -71,6 +70,21 @@ KRB5_NPROTOTYPE((krb5_context,
 		 krb5_int32 *,
 		 krb5_int32 *));
 
+static krb5_error_code obtain_sam_padata
+KRB5_NPROTOTYPE((krb5_context,
+		 krb5_pa_data *,
+		 krb5_etype_info,
+		 krb5_keyblock *, 
+		 krb5_error_code ( * )(krb5_context,
+				       krb5_const krb5_enctype,
+				       krb5_data *,
+				       krb5_const_pointer,
+				       krb5_keyblock **),
+		 krb5_const_pointer,
+		 krb5_creds *,
+		 krb5_kdc_req *,
+		 krb5_pa_data **));
+
 static krb5_preauth_ops preauth_systems[] = {
     {
 	KV5M_PREAUTH_OPS,
@@ -85,6 +99,20 @@ static krb5_preauth_ops preauth_systems[] = {
         0,
         0,
         process_pw_salt,
+    },
+    {
+	KV5M_PREAUTH_OPS,
+	KRB5_PADATA_AFS3_SALT,
+        0,
+        0,
+        process_pw_salt,
+    },
+    {
+	KV5M_PREAUTH_OPS,
+	KRB5_PADATA_SAM_CHALLENGE,
+        0,
+        obtain_sam_padata,
+        0,
     },
     { KV5M_PREAUTH_OPS, -1 }
 };
@@ -335,7 +363,8 @@ process_pw_salt(context, padata, request, as_reply,
 	return 0;
 
     salt.data = (char *) padata->contents;
-    salt.length = padata->length;
+    salt.length = 
+      (padata->pa_type == KRB5_PADATA_AFS3_SALT)?(-1):(padata->length);
     
     if ((retval = (*key_proc)(context, as_reply->enc_part.enctype,
 			      &salt, keyseed, decrypt_key))) {
@@ -361,3 +390,222 @@ find_pa_system(type, preauth)
     return 0;
 } 
 
+
+extern char *krb5_default_pwd_prompt1;
+
+static krb5_error_code
+sam_get_pass_from_user(context, etype_info, key_proc, key_seed, request,
+		       new_enc_key, prompt)
+    krb5_context		context;
+    krb5_etype_info		etype_info;
+    git_key_proc 		key_proc;
+    krb5_const_pointer		key_seed;
+    krb5_kdc_req *		request;
+    krb5_keyblock **		new_enc_key;
+    const char *		prompt;
+{
+    krb5_enctype 		enctype;
+    krb5_error_code		retval;
+    char *oldprompt;
+
+    /* enctype = request->ktype[0]; */
+    enctype = ENCTYPE_DES_CBC_MD5;
+/* hack with this first! */
+    oldprompt = krb5_default_pwd_prompt1;
+    krb5_default_pwd_prompt1 = prompt;
+    {
+      krb5_data newpw;
+      newpw.data = 0; newpw.length = 0;
+      /* we don't keep the new password, just the key... */
+      retval = (*key_proc)(context, enctype, 0, 
+			   (krb5_const_pointer)&newpw, new_enc_key);
+      krb5_xfree(newpw.data);
+    }
+    krb5_default_pwd_prompt1 = oldprompt;
+    return retval;
+}
+static 
+char *handle_sam_labels(sc)
+     krb5_sam_challenge *sc;
+{
+    char *label = sc->sam_challenge_label.data;
+    int label_len = sc->sam_challenge_label.length;
+    char *prompt = sc->sam_response_prompt.data;
+    int prompt_len = sc->sam_response_prompt.length;
+    char *challenge = sc->sam_challenge.data;
+    int challenge_len = sc->sam_challenge.length;
+    char *prompt1, *p;
+    char *sep1 = ": [";
+    char *sep2 = "]\n";
+    char *sep3 = ": ";
+
+    if (sc->sam_cksum.length == 0) {
+      /* or invalid -- but lets just handle presence now XXX */
+      switch (sc->sam_type) {
+      case PA_SAM_TYPE_ENIGMA:	/* Enigma Logic */
+	label = "Challenge for Enigma Logic mechanism";
+	break;
+      case PA_SAM_TYPE_DIGI_PATH: /*  Digital Pathways */
+	label = "Challenge for Digital Pathways mechanism";
+	break;
+      case PA_SAM_TYPE_SKEY_K0:	/*  S/key where  KDC has key 0 */
+	label = "Challenge for Enhanced S/Key mechanism";
+	break;
+      case PA_SAM_TYPE_SKEY:	/*  Traditional S/Key */
+	label = "Challenge for Traditional S/Key mechanism";
+	break;
+      case PA_SAM_TYPE_SECURID:	/*  Security Dynamics */
+	label = "Challenge for Security Dynamics mechanism";
+	break;
+      }
+      prompt = "Passcode";
+      label_len = strlen(label);
+      prompt_len = strlen(prompt);
+    }
+
+    /* example:
+       Challenge for Digital Pathways mechanism: [134591]
+       Passcode: 
+     */
+    p = prompt1 = malloc(label_len + strlen(sep1) +
+			 challenge_len + strlen(sep2) +
+			 prompt_len+ strlen(sep3) + 1);
+    strncpy(p, label, label_len); p += label_len;
+    strcpy(p, sep1); p += strlen(sep1);
+    strncpy(p, challenge, challenge_len); p += challenge_len;
+    strcpy(p, sep2); p += strlen(sep2);
+    strncpy(p, prompt, prompt_len); p += prompt_len;
+    strcpy(p, sep3); /* p += strlen(sep3); */
+    return prompt1;
+}
+
+/*
+ * This routine is the "obtain" function for the SAM_CHALLENGE
+ * preauthentication type.  It presents the challenge...
+ */
+static krb5_error_code
+obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
+		  key_proc, key_seed, creds, request, out_padata)
+    krb5_context		context;
+    krb5_pa_data *		in_padata;
+    krb5_etype_info		etype_info;
+    krb5_keyblock *		def_enc_key;
+    git_key_proc 		key_proc;
+    krb5_const_pointer		key_seed;
+    krb5_creds *		creds;
+    krb5_kdc_req *		request;
+    krb5_pa_data **		out_padata;
+{
+    krb5_pa_enc_ts		pa_enc;
+    krb5_error_code		retval;
+    krb5_data *			scratch;
+    krb5_data			tmpsam;
+    krb5_pa_data *		pa;
+    krb5_sam_challenge		*sam_challenge = 0;
+    krb5_sam_response		sam_response;
+    /* these two get encrypted and stuffed in to sam_response */
+    krb5_enc_sam_response_enc	enc_sam_response_enc;
+    krb5_keyblock *		sam_use_key = 0;
+    char * prompt;
+
+    tmpsam.length = in_padata->length;
+    tmpsam.data = in_padata->contents;
+    retval = decode_krb5_sam_challenge(&tmpsam, &sam_challenge);
+    if (retval)
+      return retval;
+
+    if (sam_challenge->sam_flags & KRB5_SAM_MUST_PK_ENCRYPT_SAD) {
+      return KRB5_SAM_UNSUPPORTED;
+    }
+
+    enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
+    if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
+      /* encrypt passcode in key by stuffing it here */
+      int pcsize = 256;
+      char *passcode = malloc(pcsize+1);
+      prompt = handle_sam_labels(sam_challenge);
+      retval = krb5_read_password(context, prompt, 0, passcode, &pcsize);
+      free(prompt);
+
+      if (retval) {
+	free(passcode);
+	return retval;
+      }
+      enc_sam_response_enc.sam_passcode.data = passcode;
+      enc_sam_response_enc.sam_passcode.length = pcsize;
+    } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
+      if (sam_challenge->sam_nonce) {
+	/* use nonce in the next AS request? */
+      } else {
+	retval = krb5_us_timeofday(context, 
+				   &enc_sam_response_enc.sam_timestamp,
+				   &enc_sam_response_enc.sam_usec);
+	sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
+      }
+      if (retval)
+	return retval;      
+      prompt = handle_sam_labels(sam_challenge);
+      retval = sam_get_pass_from_user(context, etype_info, key_proc, 
+				      key_seed, request, &sam_use_key,
+				      prompt);
+      free(prompt);
+      if (retval)
+	return retval;      
+      enc_sam_response_enc.sam_passcode.length = 0;
+    } else {
+      /* what *was* it? */
+      return KRB5_SAM_UNSUPPORTED;
+    }
+
+    /* so at this point, either sam_use_key is generated from the passcode
+     * or enc_sam_response_enc.sam_passcode is set to it, and we use 
+     * def_enc_key instead. */
+    /* encode the encoded part of the response */
+    if ((retval = encode_krb5_enc_sam_response_enc(&enc_sam_response_enc,
+						   &scratch)) != 0)
+      return retval;
+
+    if ((retval = krb5_encrypt_data(context, 
+				    sam_use_key?sam_use_key:def_enc_key, 
+				    0, scratch,
+				    &sam_response.sam_enc_nonce_or_ts)))
+      goto cleanup;
+
+    krb5_free_data(context, scratch);
+    scratch = 0;
+
+    /* sam_enc_key is reserved for future use */
+    sam_response.sam_enc_key.ciphertext.length = 0;
+
+    /* copy things from the challenge */
+    sam_response.sam_nonce = sam_challenge->sam_nonce;
+    sam_response.sam_flags = sam_challenge->sam_flags;
+    sam_response.sam_track_id = sam_challenge->sam_track_id;
+    sam_response.sam_type = sam_challenge->sam_type;
+    sam_response.magic = KV5M_SAM_RESPONSE;
+
+    if ((retval = encode_krb5_sam_response(&sam_response, &scratch)) != 0)
+	return retval;
+    
+    if ((pa = malloc(sizeof(krb5_pa_data))) == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
+
+    pa->magic = KV5M_PA_DATA;
+    pa->pa_type = KRB5_PADATA_SAM_RESPONSE;
+    pa->length = scratch->length;
+    pa->contents = scratch->data;
+    scratch = 0;		/* so we don't free it! */
+
+    *out_padata = pa;
+
+    retval = 0;
+    
+cleanup:
+    if (scratch)
+	krb5_free_data(context, scratch);
+    if (sam_challenge)
+        krb5_xfree(sam_challenge);
+    return retval;
+}

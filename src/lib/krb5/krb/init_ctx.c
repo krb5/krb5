@@ -136,16 +136,8 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
 	    return ENOMEM;
 
     } else {
-	i = 3;
-
-	/* Should reset the list to the runtime defaults */
-	if ((new_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))) {
-	    new_ktypes[0] = ENCTYPE_DES3_CBC_MD5;
-	    new_ktypes[1] = ENCTYPE_DES_CBC_MD5;
-	    new_ktypes[2] = ENCTYPE_DES_CBC_CRC;
-	} else {
-	    return ENOMEM;
-	}
+	i = 0;
+	new_ktypes = 0;
     }
 
     if (context->in_tkt_ktypes) 
@@ -162,13 +154,75 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 {
     krb5_enctype * old_ktypes;
 
-    if ((old_ktypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
-					     (context->in_tkt_ktype_count + 1)))) {
+    if (context->in_tkt_ktype_count) {
+      /* application-set defaults */
+      if ((old_ktypes = 
+	   (krb5_enctype *)malloc(sizeof(krb5_enctype) *
+				  (context->in_tkt_ktype_count + 1)))) {
 	memcpy(old_ktypes, context->in_tkt_ktypes, sizeof(krb5_enctype) * 
-		  		context->in_tkt_ktype_count);
+	       context->in_tkt_ktype_count);
 	old_ktypes[context->in_tkt_ktype_count] = 0;
-    } else {
+      } else {
 	return ENOMEM;
+      }
+    } else {
+	/* taken directly from krb5_get_tgs_ktypes... */
+        /*
+	   XXX - For now, we only support libdefaults
+	   Perhaps this should be extended to allow for per-host / per-realm
+	   session key types.
+	 */
+
+	char *retval;
+	char *sp, *ep;
+	int i, j, count;
+	krb5_error_code code;
+
+	code = profile_get_string(context->profile,
+				  "libdefaults", "default_tkt_enctypes", NULL,
+				  "des3-cbc-md5 des-cbc-md5 des-cbc-crc",
+				  &retval);
+	if (code)
+	    return code;
+
+	count = 0;
+	sp = retval;
+	while (sp) {
+	    for (ep = sp; *ep && (*ep != ',') && !isspace(*ep); ep++)
+		;
+	    if (*ep) {
+		*ep++ = '\0';
+		while (isspace(*ep))
+		    ep++;
+	    } else
+		ep = (char *) NULL;
+
+	    count++;
+	    sp = ep;
+	}
+	
+	if ((old_ktypes =
+	     (krb5_enctype *)malloc(sizeof(krb5_enctype) * (count + 1))) ==
+	    (krb5_enctype *) NULL)
+	    return ENOMEM;
+	
+	sp = retval;
+	j = 0;
+	i = 1;
+	while (1) {
+	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
+		j++;
+
+	    if (i++ >= count)
+		break;
+
+	    /* skip to next token */
+	    while (*sp) sp++;
+	    while (! *sp) sp++;
+	}
+
+	old_ktypes[j] = (krb5_enctype) 0;
+	free(retval);
     }
 
     *ktypes = old_ktypes;
