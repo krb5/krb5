@@ -8,6 +8,10 @@ DEFINES=-I$(srcdir)/../../include/kerberosIV
 
 EHDRDIR=$(BUILDTOP)$(S)include
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS	= \
 	cr_auth_repl.$(OBJEXT) \
 	cr_ciph.$(OBJEXT) \
@@ -80,6 +84,9 @@ SRCS = \
 	$(CACHESRCS) $(SETENVSRCS) $(STRCASESRCS) $(SHMSRCS) \
 	$(LIB_KRB_HOSTSRCS) $(SERVER_KRB_SRCS) $(NETIO_OBJS) $(REALMDBSRCS)
 
+
+LIB_SUBDIRS= .
+LIBDONE= ./DONE
 
 #
 # These objects implement ticket cacheing for Unix.  They are
@@ -156,11 +163,18 @@ install:: install-$(WHAT)
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
 
-all-unix:: $(LIBNAME) krb_err.h includes
+all-unix:: shared $(LIBNAME) krb_err.h includes
+
+shared:
+	mkdir shared
 
 # comp_et_depend(krb_err)
 krb_err.h:: krb_err.et
 krb_err.c: krb_err.et
+
+krb_err.o: krb_err.c
+	$(CC) $(CFLAGS) -c krb_err.c
+@SHARED_RULE_LOCAL@
 
 depend:: krb_err.h
 #
@@ -233,6 +247,7 @@ clean-unix::
 	-$(RM) krb_err.c
 	-$(RM) krb_err.h
 	-$(RM) ../../include/krb_err.h
+	-$(RM) shared/*
 
 clean-windows::
 	-$(RM) kerberos.lib

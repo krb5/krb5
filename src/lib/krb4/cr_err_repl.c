@@ -13,8 +13,14 @@
 #include "prot.h"
 #include <string.h>
 
+/*
+ * This is only needed for backwards compatibility for Kerberos V3 (!)
+ * and it causes problems for shared libraries.  So I've yanked it.
+ */
+#if 0
 extern int req_act_vno;		/* this is defined in the kerberos
 				 * server code */
+#endif
 
 /*
  * This routine is used by the Kerberos authentication server to
@@ -64,7 +70,11 @@ cr_err_reply(pkt,pname,pinst,prealm,time_ws,e,e_string)
     u_char *t = (u_char *)(pkt->dat+1); /* Prot message type */
 
     /* Create fixed part of packet */
+#if 0
     *v = (unsigned char) req_act_vno; /* KRB_PROT_VERSION; */
+#else
+    *v = (unsigned char) KRB_PROT_VERSION;
+#endif
     *t = (unsigned char) AUTH_MSG_ERR_REPLY;
     *t |= HOST_BYTE_ORDER;
 

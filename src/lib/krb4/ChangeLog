@@ -1,3 +1,10 @@
+Fri May 26 21:11:38 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* cr_err_repl.c (cr_err_reply): Remove backward compatibility code
+		for Kerberos V3 (!) which was causing problems for shared
+		libraries.  Library code shouldn't try to reference global
+		variables defined by the calling application!
+
 Sun May 21 16:06:20 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* dest_tkt.c: If O_SYNC is not defined, define as 0.
