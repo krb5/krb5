@@ -202,7 +202,7 @@ os_get_default_config_files(pfiles, secure)
 #ifdef macintosh
     files = malloc(3 * sizeof(FSSpec));
     if (files != 0) {
-		OSErr err = GetMacProfileFileSpec(&(files [0]), "\pkrb Configuration");
+		OSErr err = GetMacProfileFileSpec(&(files [0]), "\pKerberos5 Configuration");
 		if (err == noErr) {
 			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini");
 		}
@@ -390,6 +390,35 @@ krb5_os_init_context(ctx)
 
 	return retval;
 }
+
+krb5_error_code
+krb5_get_profile (ctx, profile)
+	krb5_context ctx;
+	profile_t* profile;
+{
+    krb5_error_code	retval = 0;
+    profile_filespec_t *files = 0;
+
+    retval = os_get_default_config_files(&files, ctx->profile_secure);
+
+    if (!retval)
+        retval = profile_init(files, profile);
+
+    if (files)
+        free_filespecs(files);
+
+    if (retval == ENOENT)
+        return KRB5_CONFIG_CANTOPEN;
+
+    if ((retval == PROF_SECTION_NOTOP) ||
+        (retval == PROF_SECTION_SYNTAX) ||
+        (retval == PROF_RELATION_SYNTAX) ||
+        (retval == PROF_EXTRA_CBRACE) ||
+        (retval == PROF_MISSING_OBRACE))
+        return KRB5_CONFIG_BADFORMAT;
+
+    return retval;
+}	
 
 #ifndef macintosh
 
