@@ -158,15 +158,17 @@ void ofb64_session P((Session_Key *, int));
 int ofb64_keyid P((int, unsigned char *, int *));
 void ofb64_printsub P((unsigned char *, int, unsigned char *, int));
 
-__declspec(dllimport) int __stdcall
-des_new_random_key P((Block));
-__declspec(dllimport) void __stdcall
-des_set_random_generator_seed P((Block));
-__declspec(dllimport) void __stdcall
-des_key_sched P((Block, Schedule));
-__declspec(dllimport) void __stdcall
-des_ecb_encrypt P((Block, Block, Schedule, int));
-int  des_string_to_key P((char *, Block));
+KRB5_DLLIMP int KRB5_CALLCONV
+	des_new_random_key P((Block));
+KRB5_DLLIMP void KRB5_CALLCONV
+	des_set_random_generator_seed P((Block));
+KRB5_DLLIMP void KRB5_CALLCONV
+	des_key_sched P((Block, Schedule));
+KRB5_DLLIMP void KRB5_CALLCONV
+	des_ecb_encrypt P((Block, Block, Schedule, int));
+
+/* int	des_string_to_key P((char *, Block)); */
+
 
 #ifdef DEBUG
 extern int encrypt_debug_mode;

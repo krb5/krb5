@@ -93,7 +93,7 @@ int encrypt_verbose = 1;
 int encrypt_verbose = 0;
 #endif
 
-char dbgbuf [10240];
+static char dbgbuf [10240];
 
 static int decrypt_mode = 0;
 static int encrypt_mode = 0;
@@ -575,8 +575,10 @@ encrypt_start(data, cnt)
      * decryption scheme.  Send a REQUEST-END to
      * attempt to clear the channel...
      */
-    printf("Warning, Cannot decrypt input stream!!!\n");
+    /* printf("Warning, Cannot decrypt input stream!!!\n"); */
     encrypt_send_request_end();
+    MessageBox(NULL, "Warning, Cannot decrypt input stream!!!", NULL,
+	       MB_OK | MB_ICONEXCLAMATION);
     return;
   }
 
@@ -600,11 +602,12 @@ encrypt_start(data, cnt)
     }
 #endif
   } else {
-    printf("Warning, Cannot decrypt type %s (%d)!!!\n",
-	   ENCTYPE_NAME_OK(decrypt_mode)
-	   ? ENCTYPE_NAME(decrypt_mode)
-	   : "(unknown)",
-	   decrypt_mode);
+    char buf[1024];
+    wsprintf(buf, "Warning, Cannot decrypt type %s (%d)!!!",
+	    ENCTYPE_NAME_OK(decrypt_mode)
+	    ? ENCTYPE_NAME(decrypt_mode) : "(unknown)",
+	    decrypt_mode);
+    MessageBox(NULL, buf, NULL, MB_OK | MB_ICONEXCLAMATION);
     encrypt_send_request_end();
   }
 }
@@ -645,8 +648,10 @@ encrypt_end()
     OutputDebugString(dbgbuf);
   }
 #endif
-  if (encrypt_verbose)
-    printf("[ Input is now clear text ]\n");
+  if (encrypt_verbose) {
+      sprintf(dbgbuf, "[ Input is now clear text ]\n");
+      OutputDebugString(dbgbuf);
+  }
 }
 
 /*
@@ -884,8 +889,10 @@ encrypt_send_end()
     OutputDebugString(dbgbuf);
   }
 #endif
-  if (encrypt_verbose)
-    printf("[ Output is now clear text ]\n");
+  if (encrypt_verbose) {
+      sprintf(dbgbuf, "[ Output is now clear text ]\n");
+      OutputDebugString(dbgbuf);
+  }
 }
 
 void

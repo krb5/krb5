@@ -87,8 +87,10 @@ WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
   
   if (!InitInstance(hInstance, nCmdShow))
     return(FALSE);
-  
+
+#ifdef _WIN32
   SetDebugErrorLevel(SLE_WARNING);
+#endif
 
   /*
    * Acquire and dispatch messages until a WM_QUIT message is received.
