@@ -1,3 +1,8 @@
+Thu Jun 13 23:03:03 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* aclocal.m4: break some stuff out into pre.in and post.in in
+		preparation for doing away with PUSH_MAKEFILE cruft
+
 Wed Jun 12 15:27:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (AC_CHECK_DBM_PROTO): Correct to use correct cache

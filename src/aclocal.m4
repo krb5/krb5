@@ -1,20 +1,4 @@
 dnl
-dnl
-dnl arrange to stuff file in substitution
-dnl
-dnl AC_STUFF_FILE_PRE()
-define(AC_STUFF_FILE_PRE,
-[AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
-1r $1
-AC_DIVERT_POP()dnl
-])dnl
-dnl AC_STUFF_FILE_POST()
-define(AC_STUFF_FILE_POST,
-[AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
-[$]r $1
-AC_DIVERT_POP()dnl
-])dnl
-dnl
 dnl Figure out the top of the source and build trees.  We depend on localdir
 dnl being a relative pathname; we could make it general later, but for now 
 dnl this is good enough.
@@ -76,67 +60,12 @@ case "$ac_cv_path_install" in
 esac
 ])dnl
 dnl
-dnl append subdir rule -- MAKE_SUBDIRS("making",all)
-dnl
-define(MAKE_SUBDIRS,[dnl
-AC_PUSH_MAKEFILE()dnl
-changequote(<<<,>>>)dnl
-
-$2::
-dnl These don't work well with some versions of GNU make.
-dnl	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-dnl		*[ik]*) e=:;; *) e="exit 1";; esac; \
-<<<	@e="exit 1";\
-	for i in $(SUBDIRS) ; do \
-		if test -d $$i ; then \
-			echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			    CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
-			else $$e; fi; \
-		else \
-			echo "Skipping missing directory $(CURRENT_DIR)$$i" ; \
-		fi \
-	done>>>
-changequote([,])dnl
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl take saved makefile stuff and put it in the Makefile
-dnl
-define(EXTRA_RULES,[
->>append.out
-cat - append.out>> Makefile <<"SUBDIREOF"
-# append.out contents
-SUBDIREOF
-])dnl
-dnl
-dnl take saved makefile stuff and put it in the argument
-dnl
-define(EXTRA_RULES_IN,[
->>append.out
-cat - append.out >> $1 <<"SUBDIREOF"
-# append.out contents
-SUBDIREOF
-])dnl
-dnl
-dnl take saved makefile stuff and put it in the argument
-dnl
-define(EXTRA_RULES_OUT,[
->>append.out
-cat - append.out> $1 <<"SUBDIREOF"
-# append.out contents
-SUBDIREOF
-])dnl
-dnl
-dnl drop in standard subdirectory rules
-dnl
-define(DO_SUBDIRS,[dnl
-MAKE_SUBDIRS("making",all-unix, all)
-MAKE_SUBDIRS("cleaning",clean-unix, clean)
-MAKE_SUBDIRS("installing",install-unix, install)
-MAKE_SUBDIRS("checking",check-unix, check)
-MAKE_SUBDIRS("making Makefiles",Makefiles, Makefiles)
-])dnl
+dnl DO_SUBDIRS
+dnl recurse into subdirs by specifying the recursion targets
+dnl the rules are in post.in but the target needs substitution
+AC_DEFUN([DO_SUBDIRS],
+[RECURSE_TARGETS="all-unix clean-unix install-unix check-unix Makefiles"
+AC_SUBST(RECURSE_TARGETS)])
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
@@ -153,25 +82,6 @@ AC_CONST dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
-AC_PUSH_MAKEFILE()dnl
-[
-SHELL=/bin/sh
-
-Makefiles:: Makefile
-
-Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
-		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
-	cd $(thisconfigdir) && $(SHELL) config.status
-$(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
-	cd $(thisconfigdir) && $(SHELL) config.status --recheck
-$(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
-		$(SRCTOP)/aclocal.m4
-	cd $(srcdir)/$(thisconfigdir) && \
-		$(SHELL) $(SRCTOP)/util/autoconf/autoconf \
-			--localdir=$(BUILDTOP) \
-			--macrodir=$(BUILDTOP)/util/autoconf
-]
-AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
@@ -207,50 +117,6 @@ fi
 dnl
 define(AC_PROG_ARCHIVE, [AC_PROGRAM_CHECK(ARCHIVE, ar, ar cqv, false)])dnl
 define(AC_PROG_ARCHIVE_ADD, [AC_PROGRAM_CHECK(ARADD, ar, ar cruv, false)])dnl
-dnl
-dnl drop in rules for building error tables -- ET_RULES
-dnl
-define(ET_RULES,[
-AC_PROG_AWK dnl
-AC_PUSH_MAKEFILE()dnl
-[
-
-### /* these are invoked as $(...) foo.et, which works, but could be better */
-COMPILE_ET_H= $(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$@
-COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
-.SUFFIXES:  .h .c .et .ct
-
-.et.h:
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$][*.h $<
-
-.et.c:
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$][*.c $<
-
-]
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl drop in rules for building command tables -- SS_RULES
-dnl
-define(SS_RULES,[dnl
-AC_PUSH_MAKEFILE()dnl
-changequote({,})dnl
-{
-
-MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
-.SUFFIXES:  .h .c .et .ct
-
-.ct.c:
-	@if [ $< != "$}{*.ct" ]; then \
-		(set -x; cp $< "$}{*.ct" && $(MAKE_COMMANDS) "$}{*.ct" && $(RM) "$}{*.ct") || exit 1; \
-	else \
-		(set -x; $(MAKE_COMMANDS) "$}{*.ct") || exit 1; \
-	fi
-
-}
-changequote([,])dnl
-AC_POP_MAKEFILE()dnl
-])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
 dnl (may need to be more complex later)
