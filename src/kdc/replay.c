@@ -29,6 +29,8 @@
 #include "kdc_util.h"
 #include "extern.h"
 
+#ifndef NOCACHE
+
 typedef struct _krb5_kdc_replay_ent {
     struct _krb5_kdc_replay_ent *next;
     int num_hits;
@@ -166,3 +168,5 @@ kdc_insert_lookaside(inpkt, from, outpkt)
     num_entries++;
     return;
 }
+
+#endif /* NOCACHE */
