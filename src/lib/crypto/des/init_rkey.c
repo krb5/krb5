@@ -41,6 +41,7 @@ mit_des_init_random_key (seedblock, seed)
     if ((seedblock->enctype != ENCTYPE_DES_CBC_CRC) &&
 	(seedblock->enctype != ENCTYPE_DES_CBC_MD4) && 
 	(seedblock->enctype != ENCTYPE_DES_CBC_MD5) && 
+	(seedblock->enctype != ENCTYPE_DES3_CBC_MD5) && 
 	(seedblock->enctype != ENCTYPE_DES_CBC_RAW))
 	return KRB5_BAD_ENCTYPE;
     if ( !(p_seed = (mit_des_random_key_seed *) 
