@@ -21,7 +21,7 @@
 #define NEED_SOCKETS
 #define NEED_LOWLEVEL_IO         
 
-#include <krb5.h>
+#include "krb5.h"
 #include <stdio.h> /* for P_tmpdir */
 #include "rc_base.h"
 #include "rc_dfl.h"

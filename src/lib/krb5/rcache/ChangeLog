@@ -1,3 +1,7 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* rc_io.c, rc_dfl.c: use "" includes for krb5.h and k5-int.h
+
 2001-01-23  Tom Yu  <tlyu@mit.edu>
 
 	* rc_io.c (getdir, krb5_rc_io_creat): Undo prior fudge; dirlen
