@@ -56,9 +56,9 @@ krb5_decrypt_tkt_part(context, srv_key, ticket)
 	return(ENOMEM);
 
     /* call the encryption routine */
-    if (retval = krb5_c_decrypt(context, srv_key,
+    if ((retval = krb5_c_decrypt(context, srv_key,
 				KRB5_KEYUSAGE_KDC_REP_TICKET, 0,
-				&ticket->enc_part, &scratch)) {
+				&ticket->enc_part, &scratch))) {
 	free(scratch.data);
 	return retval;
     }

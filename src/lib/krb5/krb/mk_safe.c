@@ -109,7 +109,6 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
 cleanup_checksum:
     krb5_xfree(safe_checksum.contents);
 
-cleanup_scratch:
     memset((char *)scratch1->data, 0, scratch1->length); 
     krb5_free_data(context, scratch1);
     return retval;

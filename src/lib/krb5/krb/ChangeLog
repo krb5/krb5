@@ -1,3 +1,24 @@
+2000-06-29  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* t_walk_rtree.c (main): Declare as returning int.
+
+	* get_in_tkt.c (_krb5_conf_boolean): Declare as taking a const char *
+
+	* str_conv.c (krb5_timestamp_to_string): Work around gcc's warning
+	that %c format in strftime might return only two digits for the
+	year.
+
+	* mk_safe.c, rd_rep.c, send_tgs.c: Remove unused goto label.
+
+	* kdc_rep_dc.c (krb5_kdc_rep_decrypt_proc): Remove code with no
+	effect.
+
+	* init_ctx.c: Make krb5_brand[] look used.
+
+	* chpw.c, decode_kdc.c, decrypt_tk.c, enc_helper.c, get_creds.c,
+	get_in_tkt.c, gic_keytab.c, gic_pwd.c, preauth2.c, vfy_increds.c:
+	Add parentheses around assignment used as truth value
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* conv_princ.c, get_creds.c, get_in_tkt.c, mk_rep.c, parse.c,

@@ -199,8 +199,10 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
 {
     int ret;
     time_t timestamp2 = timestamp;
+    const char *fmt = "%c"; /* This is to get around gcc -Wall warning that 
+			       the year returned might be two digits */
 
-    ret = strftime(buffer, buflen, "%c", localtime(&timestamp2));
+    ret = strftime(buffer, buflen, fmt, localtime(&timestamp2));
     if (ret == 0 || ret == buflen)
 	return(ENOMEM);
     return(0);

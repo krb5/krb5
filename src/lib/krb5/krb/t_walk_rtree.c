@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "com_err.h"
 
+int
 main(argc, argv)
 	int	argc;
 	char	**argv;
@@ -37,14 +38,14 @@ main(argc, argv)
 	retval = krb5_walk_realm_tree(context, &client, &server, &tree,
 				      realm_branch_char);
 	if (retval) {
-		com_err("krb5_walk_realm_tree", retval, "");
+		com_err("krb5_walk_realm_tree", retval, " ");
 		exit(1);
 	}
 
 	for (p = tree; *p; p++) {
 		retval = krb5_unparse_name(context, *p, &name);
 		if (retval) {
-			com_err("krb5_unprase_name", retval, "");
+			com_err("krb5_unprase_name", retval, " ");
 			exit(2);
 		}
 		printf("%s\n", name);

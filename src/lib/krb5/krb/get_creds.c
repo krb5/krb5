@@ -265,7 +265,7 @@ krb5_validate_or_renew_creds(context, creds, client, ccache, in_tkt_service,
 	   in the library, so I'm going to manipulate the data structures
 	   directly, otherwise, it will be worse. */
 
-	if (ret = krb5_parse_name(context, in_tkt_service, &in_creds.server))
+        if ((ret = krb5_parse_name(context, in_tkt_service, &in_creds.server)))
 	    goto cleanup;
 
 	/* stuff the client realm into the server principal.
@@ -282,14 +282,14 @@ krb5_validate_or_renew_creds(context, creds, client, ccache, in_tkt_service,
 	memcpy(in_creds.server->realm.data, in_creds.client->realm.data,
 	       in_creds.client->realm.length);
     } else {
-	if (ret = krb5_build_principal_ext(context, &in_creds.server,
+	if ((ret = krb5_build_principal_ext(context, &in_creds.server,
 					   in_creds.client->realm.length,
 					   in_creds.client->realm.data,
 					   KRB5_TGS_NAME_SIZE,
 					   KRB5_TGS_NAME,
 					   in_creds.client->realm.length,
 					   in_creds.client->realm.data,
-					   0))
+					    0)))
 	    goto cleanup;
     }
 

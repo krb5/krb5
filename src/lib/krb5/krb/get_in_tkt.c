@@ -292,12 +292,12 @@ stash_as_reply(context, time_now, request, as_reply, creds, ccache)
     server = NULL;
 
     if (!creds->client)
-	if (retval = krb5_copy_principal(context, as_reply->client, &client))
+        if ((retval = krb5_copy_principal(context, as_reply->client, &client)))
 	    goto cleanup;
 
     if (!creds->server)
-	if (retval = krb5_copy_principal(context, as_reply->enc_part2->server,
-					 &server))
+	if ((retval = krb5_copy_principal(context, as_reply->enc_part2->server,
+					  &server)))
 	    goto cleanup;
 
     /* fill in the credentials */
@@ -598,7 +598,7 @@ static char *conf_no[] = {
 
 int
 _krb5_conf_boolean(s)
-     char *s;
+     const char *s;
 {
     char **p;
 
@@ -799,7 +799,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     } else if ((ret = krb5_libdefault_string(context, &client->realm,
 					     "renew_lifetime", &tempstr))
 	       == 0) {
-	if (ret = krb5_string_to_deltat(tempstr, &renew_life)) {
+	if ((ret = krb5_string_to_deltat(tempstr, &renew_life))) {
 	    free(tempstr);
 	    goto cleanup;
 	}
@@ -823,7 +823,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 	   in the library, so I'm going to manipulate the data structures
 	   directly, otherwise, it will be worse. */
 
-	if (ret = krb5_parse_name(context, in_tkt_service, &request.server))
+        if ((ret = krb5_parse_name(context, in_tkt_service, &request.server)))
 	    goto cleanup;
 
 	/* stuff the client realm into the server principal.
@@ -840,18 +840,18 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 	memcpy(request.server->realm.data, request.client->realm.data,
 	       request.client->realm.length);
     } else {
-	if (ret = krb5_build_principal_ext(context, &request.server,
+	if ((ret = krb5_build_principal_ext(context, &request.server,
 					   request.client->realm.length,
 					   request.client->realm.data,
 					   KRB5_TGS_NAME_SIZE,
 					   KRB5_TGS_NAME,
 					   request.client->realm.length,
 					   request.client->realm.data,
-					   0))
+					   0)))
 	    goto cleanup;
     }
 
-    if (ret = krb5_timeofday(context, &request.from))
+    if ((ret = krb5_timeofday(context, &request.from)))
 	goto cleanup;
     request.from += start_time;
 
@@ -906,9 +906,9 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     /* set up the other state.  */
 
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST)) {
-	if (ret = make_preauth_list(context, options->preauth_list,
+	if ((ret = make_preauth_list(context, options->preauth_list,
 				    options->preauth_list_length, 
-				    &padata))
+				     &padata)))
 	    goto cleanup;
     }
 
@@ -930,10 +930,10 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 	    request.padata = NULL;
 	}
 
-	if (ret = krb5_do_preauth(context, &request,
+	if ((ret = krb5_do_preauth(context, &request,
 				  padata, &request.padata,
 				  &salt, &etype, &as_key, prompter,
-				  prompter_data, gak_fct, gak_data))
+				   prompter_data, gak_fct, gak_data)))
 	    goto cleanup;
 
 	if (padata) {
@@ -975,10 +975,10 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
     /* process any preauth data in the as_reply */
 
-    if (ret = krb5_do_preauth(context, &request,
-			      local_as_reply->padata, &padata,
-			      &salt, &etype, &as_key, prompter,
-			      prompter_data, gak_fct, gak_data))
+    if ((ret = krb5_do_preauth(context, &request,
+			       local_as_reply->padata, &padata,
+			       &salt, &etype, &as_key, prompter,
+			       prompter_data, gak_fct, gak_data)))
 	goto cleanup;
 
     /* XXX if there's padata on output, something is wrong, but it's
@@ -1007,19 +1007,19 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     if (ret) {
 	/* if we haven't get gotten a key, get it now */
 
-	if (ret = ((*gak_fct)(context, request.client,
-			      local_as_reply->enc_part.enctype,
-			      prompter, prompter_data, &salt,
-			      &as_key, gak_data)))
+	if ((ret = ((*gak_fct)(context, request.client,
+			       local_as_reply->enc_part.enctype,
+			       prompter, prompter_data, &salt,
+			       &as_key, gak_data))))
 	    goto cleanup;
 
-	if (ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
-				   NULL, &as_key, krb5_kdc_rep_decrypt_proc,
-				   NULL))
+	if ((ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
+				    NULL, &as_key, krb5_kdc_rep_decrypt_proc,
+				    NULL)))
 	    goto cleanup;
     }
 
-    if (ret = verify_as_reply(context, time_now, &request, local_as_reply))
+    if ((ret = verify_as_reply(context, time_now, &request, local_as_reply)))
 	goto cleanup;
 
     /* XXX this should be inside stash_as_reply, but as long as
@@ -1027,8 +1027,8 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
        do that */
     memset(creds, 0, sizeof(*creds));
 
-    if (ret = stash_as_reply(context, time_now, &request, local_as_reply,
-			     creds, NULL))
+    if ((ret = stash_as_reply(context, time_now, &request, local_as_reply,
+			      creds, NULL)))
 	goto cleanup;
 
     /* success */

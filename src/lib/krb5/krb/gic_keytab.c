@@ -65,8 +65,8 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
    krb5_keytab keytab;
 
    if (arg_keytab == NULL) {
-       if (ret = krb5_kt_default(context, &keytab))
-	   return ret;
+       if ((ret = krb5_kt_default(context, &keytab)))
+	    return ret;
    } else {
        keytab = arg_keytab;
    }

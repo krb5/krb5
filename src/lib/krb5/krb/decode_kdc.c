@@ -71,8 +71,8 @@ krb5_decode_kdc_rep(context, enc_rep, key, dec_rep)
     if (retval)
 	return retval;
 
-    if (retval = krb5_kdc_rep_decrypt_proc(context, key, &usage,
-					   local_dec_rep)) 
+    if ((retval = krb5_kdc_rep_decrypt_proc(context, key, &usage,
+					    local_dec_rep))) 
 	krb5_free_kdc_rep(context, local_dec_rep);
     else
     	*dec_rep = local_dec_rep;

@@ -109,7 +109,7 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     *outbuf = *toutbuf;
     krb5_xfree(toutbuf);
 
-cleanup:
+
     memset(request.authenticator.ciphertext.data, 0,
            request.authenticator.ciphertext.length);
     free(request.authenticator.ciphertext.data);
@@ -121,7 +121,6 @@ cleanup_data:
     memset(scratch->data, 0, scratch->length);
     free(scratch->data);
 
-cleanup_scratch:
     free(scratch);
 
     return retval;
@@ -273,7 +272,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     /* now send request & get response from KDC */
     retval = krb5_sendto_kdc(context, scratch, 
 			     krb5_princ_realm(context, sname),
-			     &rep->response, NULL);
+			     &rep->response, 0);
     krb5_free_data(context, scratch);
 
     if (retval == 0) {

@@ -61,7 +61,7 @@ krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
 	return(ENOMEM);
     }
 
-    dec_rep->enc_part.enctype;
+    /*dec_rep->enc_part.enctype;*/
 
     if ((retval = krb5_c_decrypt(context, key, usage, 0, &dec_rep->enc_part,
 				 &scratch))) {

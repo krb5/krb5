@@ -67,6 +67,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)
 	krb5_context *context;
 {
+
 	return init_common (context, FALSE);
 }
 
@@ -74,6 +75,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(context)
 	krb5_context *context;
 {
+
+        /* This is to make gcc -Wall happy */
+        if(0) krb5_brand[0] = krb5_brand[0];
 	return init_common (context, TRUE);
 }
 

@@ -58,8 +58,8 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 
 	/* PROMPTER_INVOCATION */
 	krb5int_set_prompt_types(context, &prompt_type);
-	if (ret = (((*prompter)(context, prompter_data, NULL, NULL,
-				1, &prompt)))) {
+	if ((ret = (((*prompter)(context, prompter_data, NULL, NULL,
+				1, &prompt))))) {
 	    krb5int_set_prompt_types(context, 0);
 	    return(ret);
 	}
@@ -223,8 +223,8 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 
       /* PROMPTER_INVOCATION */
       krb5int_set_prompt_types(context, prompt_types);
-      if (ret = ((*prompter)(context, data, 0, banner,
-			     sizeof(prompt)/sizeof(prompt[0]), prompt)))
+      if ((ret = ((*prompter)(context, data, 0, banner,
+			      sizeof(prompt)/sizeof(prompt[0]), prompt))))
 	 goto cleanup;
       krb5int_set_prompt_types(context, 0);
 

@@ -94,7 +94,7 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
 clean_scratch:
     memset(scratch.data, 0, scratch.length); 
-errout:
+
     krb5_free_ap_rep(context, reply);
     free(scratch.data);
     return retval;

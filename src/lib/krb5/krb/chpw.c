@@ -20,15 +20,15 @@ krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
 
     cipherpw.data = NULL;
 
-    if (ret = krb5_auth_con_setflags(context, auth_context,
-				     KRB5_AUTH_CONTEXT_DO_SEQUENCE))
+    if ((ret = krb5_auth_con_setflags(context, auth_context,
+				      KRB5_AUTH_CONTEXT_DO_SEQUENCE)))
 	  goto cleanup;
 
     clearpw.length = strlen(passwd);
     clearpw.data = passwd;
 
-    if (ret = krb5_mk_priv(context, auth_context,
-			   &clearpw, &cipherpw, &replay))
+    if ((ret = krb5_mk_priv(context, auth_context,
+			    &clearpw, &cipherpw, &replay)))
       goto cleanup;
 
     packet->length = 6 + ap_req->length + cipherpw.length;
@@ -126,7 +126,7 @@ krb5_rd_chpw_rep(context, auth_context, packet, result_code, result_data)
 	ap_rep.data = ptr;
 	ptr += ap_rep.length;
 
-	if (ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc))
+	if ((ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc)))
 	    return(ret);
 
 	krb5_free_ap_rep_enc_part(context, ap_rep_enc);
@@ -154,7 +154,7 @@ krb5_rd_chpw_rep(context, auth_context, packet, result_code, result_data)
 	cipherresult.data = ptr;
 	cipherresult.length = (packet->data + packet->length) - ptr;
 
-	if (ret = krb5_rd_error(context, &cipherresult, &krberror))
+	if ((ret = krb5_rd_error(context, &cipherresult, &krberror)))
 	    return(ret);
 
 	clearresult = krberror->e_data;

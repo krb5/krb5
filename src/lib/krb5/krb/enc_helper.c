@@ -37,8 +37,8 @@ krb5_encrypt_helper(context, key, usage, plain, cipher)
     krb5_error_code ret;
     size_t enclen;
 
-    if (ret = krb5_c_encrypt_length(context, key->enctype, plain->length,
-				    &enclen))
+    if ((ret = krb5_c_encrypt_length(context, key->enctype, plain->length,
+				     &enclen)))
 	return(ret);
 
     cipher->ciphertext.length = enclen;
