@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpasswd.c (main): Argument to krb5_read_password takes an
+	unsigned int as argument.
+
 2000-07-29  Ezra Peisach  <epeisach@mit.edu>
 
 	* kpasswd.c (main): Warnings cleanup.

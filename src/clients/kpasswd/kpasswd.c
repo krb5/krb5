@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
    krb5_creds creds;
 
    char pw[1024];
-   int pwlen;
+   unsigned int pwlen;
    int result_code;
    krb5_data result_code_string, result_string;
 
@@ -133,9 +133,9 @@ int main(int argc, char *argv[])
 
    if (result_code) {
       printf("%.*s%s%.*s\n",
-	     result_code_string.length, result_code_string.data,
+	     (int) result_code_string.length, result_code_string.data,
 	     result_string.length?": ":"",
-	     result_string.length, result_string.data);
+	     (int) result_string.length, result_string.data);
       exit(2);
    }
 
