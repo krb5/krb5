@@ -1,4 +1,9 @@
-1999-10-17  Ken Raeburn  <raeburn@raeburn.org>
+1999-10-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Don't bother trying to create
+	inet6 socket; any socket type will do.
+
+1999-10-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Raise buffer size to 10K.
 	Handle INET6 addresses.  If INET6 support is built in but the

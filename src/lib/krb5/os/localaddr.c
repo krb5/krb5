@@ -54,12 +54,7 @@
 #include <netinet/in.h>
 
 #ifndef USE_AF
-#ifdef AF_INET6
-#define USE_AF  AF_INET6
-#define USE_AF2 AF_INET
-#else
 #define USE_AF AF_INET
-#endif
 #define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
 #endif
@@ -130,10 +125,6 @@ krb5_os_localaddr(context, addr)
     ifc.ifc_buf = buf;
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
-#if defined (USE_AF2) && defined (EPROTONOSUPPORT)
-    if (s < 0 && SOCKET_ERRNO == EPROTONOSUPPORT)
-	s = socket (USE_AF2, USE_TYPE, USE_PROTO);
-#endif
     if (s < 0)
 	return SOCKET_ERRNO;
 
