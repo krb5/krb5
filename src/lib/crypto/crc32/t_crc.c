@@ -146,6 +146,7 @@ timetest(unsigned int nblk, unsigned int blksiz)
 	   (long)(after.tms_cutime - before.tms_cutime),
 	   (long)(after.tms_cstime - before.tms_cstime));
 #endif
+    free(block);
 }
 
 static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
@@ -187,7 +188,7 @@ verify(void)
 	    break;
 	case HEX:
 	    typestr = "HEX";
-	    gethexstr(trial.data, &len, &buf, 4);
+	    gethexstr(trial.data, &len, buf, 4);
 	    mit_crc32(buf, len, &cksum);
 	    break;
 	default:
