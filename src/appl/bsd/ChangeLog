@@ -4,15 +4,19 @@
 	(kcmd_connect): Use getaddrinfo instead of gethostbyname, but only
 	get AF_INET addresses for now.  Add new argument, pointer to where
 	to store local socket address used; call getsockname to fill it
-	in.
+	in.  Always call getport with the address family from the current
+	address.  Retry connection to the same remote address if the error
+	returned was EADDRINUSE; that applies to the local address.
 	(setup_socket): New function.
 	(getport): Use setup_socket.  When selecting an address family to
 	use, fall through in the last case instead of calling getport
 	recursively.
 	(kcmd, k4cmd): Don't call getsockname, let kcmd_connect do it.
-	Delete unused variables.
+	Delete unused variables.  Don't set *fd2p before calling
+	setup_secondary_channel.
 	(setup_secondary_channel): No cleanup is needed, just return error
-	indications rather than branching to end of function.
+	indications rather than branching to end of function.  If fd2p is
+	non-null, initialize the pointed-to value to -1.
 
 	* rcp.M: Document -f and -t options as internal use only.
 

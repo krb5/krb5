@@ -205,7 +205,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
     memset(&aihints, 0, sizeof(aihints));
     aihints.ai_socktype = SOCK_STREAM;
     aihints.ai_flags = AI_CANONNAME;
-    aihints.ai_family = AF_INET;
+    aihints.ai_family = *addrfamilyp;
     aierr = getaddrinfo(hname, rport_buf, &aihints, &ap);
     if (aierr) {
 	const char *msg;
@@ -238,22 +238,24 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
     for (ap2 = ap; ap; ap = ap->ai_next) {
 	char hostbuf[NI_MAXHOST];
 	int oerrno;
+	int af = ap->ai_family;
 
-        s = getport(lportp, addrfamilyp);
-    	if (s < 0) {
-	    if (errno == EAGAIN)
-		fprintf(stderr, "socket: All ports in use\n");
-	    else
-		perror("kcmd: socket");
-	    return -1;
-    	}
-	if (connect(s, ap->ai_addr, ap->ai_addrlen) >= 0)
-	    break;
-    	(void) close(s);
-    	if (errno == EADDRINUSE) {
+	for (;;) {
+	    s = getport(lportp, &af);
+	    if (s < 0) {
+		if (errno == EAGAIN)
+		    fprintf(stderr, "socket: All ports in use\n");
+		else
+		    perror("kcmd: socket");
+		return -1;
+	    }
+	    if (connect(s, ap->ai_addr, ap->ai_addrlen) >= 0)
+		goto connected;
+	    (void) close(s);
+	    if (errno != EADDRINUSE)
+		break;
 	    if (lportp)
 		(*lportp)--;
-	    continue;
 	}
 
 	aierr = getnameinfo(ap->ai_addr, ap->ai_addrlen,
@@ -269,9 +271,9 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	if (ap->ai_next)
 	    fprintf(stderr, "Trying next address...\n");
     }
-    if (ap == 0)
-	return -1;
+    return -1;
 
+connected:
     sin_len = sizeof(struct sockaddr_in);
     if (getsockname(s, (struct sockaddr *)laddrp, &sin_len) < 0) {
 	perror("getsockname");
@@ -297,6 +299,7 @@ setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
 	size_t slen;
     	int s2 = getport(lportp, addrfamilyp), s3;
 
+	*fd2p = -1;
 	if (s2 < 0)
 	    return -1;
 	listen(s2, 1);
@@ -413,8 +416,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	  return(-1);
 	}
     }
-    if (fd2p)
-	*fd2p = -1;
     status = setup_secondary_channel(s, fd2p, &lport, &addrfamily, &from,
 				     anyport);
     if (status)
@@ -624,8 +625,6 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 	realm = krb_realmofhost(host_save);
     }
     lport--;
-    if (fd2p)
-	*fd2p = -1;
     status = setup_secondary_channel(s, fd2p, &lport, &addrfamily, &from,
 				     anyport);
     if (status)
