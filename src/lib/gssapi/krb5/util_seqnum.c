@@ -26,9 +26,12 @@
  * $Id$
  */
 
-krb5_error_code kg_make_seq_num(krb5_gss_enc_desc *ed, int direction,
-				int seqnum, unsigned char *cksum,
-				unsigned char *buf)
+krb5_error_code kg_make_seq_num(ed, direction, seqnum, cksum, buf)
+     krb5_gss_enc_desc *ed;
+     int direction;
+     int seqnum;
+     unsigned char *cksum;
+     unsigned char *buf;
 {
    unsigned char plain[8];
 

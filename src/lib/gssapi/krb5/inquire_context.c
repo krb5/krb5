@@ -27,14 +27,17 @@
  */
 
 OM_uint32
-krb5_gss_inquire_context(OM_uint32 *minor_status,
-			 gss_ctx_id_t context_handle,
-			 gss_name_t *initiator_name,
-			 gss_name_t *acceptor_name,
-			 OM_uint32 *lifetime_rec,
-			 gss_OID *mech_type,
-			 int *ret_flags,
-			 int *locally_initiated)
+krb5_gss_inquire_context(minor_status, context_handle, initiator_name, 
+			 acceptor_name, lifetime_rec, mech_type, ret_flags,
+			 locally_initiated)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t context_handle;
+     gss_name_t *initiator_name;
+     gss_name_t *acceptor_name;
+     OM_uint32 *lifetime_rec;
+     gss_OID *mech_type;
+     int *ret_flags;
+     int *locally_initiated;
 {
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;

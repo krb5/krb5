@@ -24,10 +24,14 @@
  * $Id$
  */
 
-#include <string.h>
-#include <pwd.h>
 
 #include "gssapiP_krb5.h"
+#include <pwd.h>
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 /*
  * errors:
@@ -37,10 +41,12 @@
  */
 
 OM_uint32
-krb5_gss_import_name(OM_uint32 *minor_status,
-		     gss_buffer_t input_name_buffer,
-		     const_gss_OID input_name_type,
-		     gss_name_t *output_name)
+krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
+		     output_name)
+     OM_uint32 *minor_status;
+     gss_buffer_t input_name_buffer;
+     const_gss_OID input_name_type;
+     gss_name_t *output_name;
 {
    krb5_principal princ;
    krb5_error_code code;

@@ -28,15 +28,11 @@
  * $Id$
  */
 
-/* XXXX This widen/narrow stuff is bletcherous, but it seems to be
-   necessary.  Perhaps there is a "better" way, but I don't know what it
-   is */
-
-#include <krb5/widen.h>
-static krb5_error_code
-rd_req_keyproc(krb5_pointer keyprocarg, krb5_principal server,
-	       krb5_kvno kvno, krb5_keyblock **keyblock)
-#include <krb5/narrow.h>
+static krb5_error_code rd_req_keyproc(keyprocarg, server, kvno, keyblock)
+     krb5_pointer keyprocarg;
+     krb5_principal server;
+     krb5_kvno kvno;
+     krb5_keyblock **keyblock;
 {
    krb5_error_code code;
    krb5_keytab_entry ktentry;
@@ -52,11 +48,11 @@ rd_req_keyproc(krb5_pointer keyprocarg, krb5_principal server,
    return(code);
 }
 
-static krb5_error_code
-make_ap_rep(krb5_tkt_authent *authdat,
-	    krb5_keyblock *subkey,
-	    krb5_int32 *seq_send,
-	    gss_buffer_t token)
+static krb5_error_code make_ap_rep(authdat, subkey, seq_send, token)
+     krb5_tkt_authent *authdat;
+     krb5_keyblock *subkey;
+     krb5_int32 *seq_send;
+     gss_buffer_t token;
 {
    krb5_error_code code;
    krb5_ap_rep_enc_part ap_rep_data;
@@ -110,18 +106,22 @@ make_ap_rep(krb5_tkt_authent *authdat,
    return(0);
 }
 
-OM_uint32
-krb5_gss_accept_sec_context(OM_uint32 *minor_status,
-			    gss_ctx_id_t *context_handle,
-			    gss_cred_id_t verifier_cred_handle,
-			    gss_buffer_t input_token,
-			    gss_channel_bindings_t input_chan_bindings,
-			    gss_name_t *src_name,
-			    gss_OID *mech_type,
-			    gss_buffer_t output_token,
-			    int *ret_flags,
-			    OM_uint32 *time_rec,
-			    gss_cred_id_t *delegated_cred_handle)
+OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle, 
+				      verifier_cred_handle, input_token,
+				      input_chan_bindings, src_name, mech_type,
+				      output_token, ret_flags, time_rec,
+				      delegated_cred_handle)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t *context_handle;
+     gss_cred_id_t verifier_cred_handle;
+     gss_buffer_t input_token;
+     gss_channel_bindings_t input_chan_bindings;
+     gss_name_t *src_name;
+     gss_OID *mech_type;
+     gss_buffer_t output_token;
+     int *ret_flags;
+     OM_uint32 *time_rec;
+     gss_cred_id_t *delegated_cred_handle;
 {
    unsigned char *ptr, *ptr2;
    long tmp;
@@ -193,7 +193,7 @@ krb5_gss_accept_sec_context(OM_uint32 *minor_status,
       return(GSS_S_DEFECTIVE_TOKEN);
    }
 
-   TREAD_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
+   TREAD_STR(ptr, ap_req.data, ap_req.length);
 
    /* construct the sender_addr */
 

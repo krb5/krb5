@@ -34,13 +34,15 @@
    */
 
 OM_uint32
-kg_unseal(OM_uint32 *minor_status,
-	  gss_ctx_id_t context_handle,
-	  gss_buffer_t input_token_buffer,
-	  gss_buffer_t message_buffer,
-	  int *conf_state,
-	  int *qop_state,
-	  int toktype)
+kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
+	  conf_state, qop_state, toktype)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t context_handle;
+     gss_buffer_t input_token_buffer;
+     gss_buffer_t message_buffer;
+     int *conf_state;
+     int *qop_state;
+     int toktype;
 {
    krb5_gss_ctx_id_rec *ctx;
    krb5_error_code code;

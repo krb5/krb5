@@ -27,12 +27,14 @@
  */
 
 OM_uint32
-krb5_gss_inquire_cred(OM_uint32 *minor_status,
-		      gss_cred_id_t cred_handle,
-		      gss_name_t *name,
-		      OM_uint32 *lifetime_ret,
-		      int *cred_usage,
-		      gss_OID_set *mechanisms)
+krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
+		      cred_usage, mechanisms)
+     OM_uint32 *minor_status;
+     gss_cred_id_t cred_handle;
+     gss_name_t *name;
+     OM_uint32 *lifetime_ret;
+     int *cred_usage;
+     gss_OID_set *mechanisms;
 {
    krb5_gss_cred_id_t cred;
    krb5_error_code code;

@@ -27,9 +27,10 @@
  */
 
 OM_uint32
-krb5_gss_delete_sec_context(OM_uint32 *minor_status,
-			    gss_ctx_id_t *context_handle,
-			    gss_buffer_t output_token)
+krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t *context_handle;
+     gss_buffer_t output_token;
 {
    krb5_gss_ctx_id_rec *ctx;
 
@@ -55,7 +56,8 @@ krb5_gss_delete_sec_context(OM_uint32 *minor_status,
 
    if (output_token) {
       OM_uint32 major;
-      gss_buffer_desc empty = {0, NULL};
+      gss_buffer_desc empty;
+      empty.length = 0; empty.value = NULL;
 
       if (major = kg_seal(minor_status, *context_handle, 0, GSS_C_QOP_DEFAULT,
 			  &empty, NULL, output_token, KG_TOK_DEL_CTX))

@@ -29,7 +29,8 @@
 
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
-int kg_confounder_size(krb5_gss_enc_desc *ed)
+int kg_confounder_size(ed)
+     krb5_gss_enc_desc *ed;
 {
    /* XXX Is this an abstraction violation? */
 
@@ -37,19 +38,27 @@ int kg_confounder_size(krb5_gss_enc_desc *ed)
 }
 
 krb5_error_code
-kg_make_confounder(krb5_gss_enc_desc *ed, unsigned char *buf)
+kg_make_confounder(ed, buf)
+     krb5_gss_enc_desc *ed;
+     unsigned char *buf;
 {
    return(krb5_random_confounder(ed->eblock.crypto_entry->block_length, buf));
 }
 
-int kg_encrypt_size(krb5_gss_enc_desc *ed, int n)
+int kg_encrypt_size(ed, n)
+     krb5_gss_enc_desc *ed;
+     int n;
 {
    return(krb5_encrypt_size(n, ed->eblock.crypto_entry));
 }
 
 krb5_error_code
-kg_encrypt(krb5_gss_enc_desc *ed, krb5_pointer iv,
-	   krb5_pointer in, krb5_pointer out, int length)
+kg_encrypt(ed, iv, in, out, length)
+     krb5_gss_enc_desc *ed;
+     krb5_pointer iv;
+     krb5_pointer in;
+     krb5_pointer out;
+     int length;
 {
    krb5_error_code code;
 
@@ -59,7 +68,7 @@ kg_encrypt(krb5_gss_enc_desc *ed, krb5_pointer iv,
       ed->processed = 1;
    }
 
-   if (code = krb5_encrypt(in, out, length, &ed->eblock, iv?iv:zeros))
+   if (code = krb5_encrypt(in, out, length, &ed->eblock, iv?iv:(krb5_pointer)zeros))
       return(code);
 
    return(0);
@@ -68,8 +77,12 @@ kg_encrypt(krb5_gss_enc_desc *ed, krb5_pointer iv,
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt(krb5_gss_enc_desc *ed, krb5_pointer iv,
-	   krb5_pointer in, krb5_pointer out, int length)
+kg_decrypt(ed, iv, in, out, length)
+     krb5_gss_enc_desc *ed;
+     krb5_pointer iv;
+     krb5_pointer in;
+     krb5_pointer out;
+     int length;
 {
    krb5_error_code code;
    int elen;
@@ -85,7 +98,7 @@ kg_decrypt(krb5_gss_enc_desc *ed, krb5_pointer iv,
    if ((buf = (char *) xmalloc(elen)) == NULL)
       return(ENOMEM);
 
-   if (code = krb5_decrypt(in, buf, elen, &ed->eblock, iv?iv:zeros)) {
+   if (code = krb5_decrypt(in, buf, elen, &ed->eblock, iv?iv:(krb5_pointer)zeros)) {
       xfree(buf);
       return(code);
    }

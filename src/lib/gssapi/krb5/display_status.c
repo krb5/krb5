@@ -36,12 +36,14 @@ static int init_et = 0;
 /**/
 
 OM_uint32
-krb5_gss_display_status(OM_uint32 *minor_status,
-			OM_uint32 status_value,
-			int status_type,
-			const_gss_OID mech_type,
-			int *message_context,
-			gss_buffer_t status_string)
+krb5_gss_display_status(minor_status, status_value, status_type,
+			mech_type, message_context, status_string)
+     OM_uint32 *minor_status;
+     OM_uint32 status_value;
+     int status_type;
+     const_gss_OID mech_type;
+     int *message_context;
+     gss_buffer_t status_string;
 {
    status_string->length = 0;
    status_string->value = NULL;

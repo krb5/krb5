@@ -76,7 +76,9 @@ static gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
 /* XXX what happens when the default credentials expire or are invalidated? */
 
 OM_uint32
-kg_get_defcred(OM_uint32 *minor_status, gss_cred_id_t *cred)
+kg_get_defcred(minor_status, cred)
+     OM_uint32 *minor_status;
+     gss_cred_id_t *cred;
 {
    if (defcred == GSS_C_NO_CREDENTIAL) {
       OM_uint32 major;
@@ -97,7 +99,8 @@ kg_get_defcred(OM_uint32 *minor_status, gss_cred_id_t *cred)
 }
 
 OM_uint32
-kg_release_defcred(OM_uint32 *minor_status)
+kg_release_defcred(minor_status)
+     OM_uint32 *minor_status;
 {
    if (defcred == GSS_C_NO_CREDENTIAL) {
       *minor_status = 0;

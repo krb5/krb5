@@ -28,15 +28,17 @@
  */
 
 static krb5_error_code
-make_ap_req(krb5_gss_cred_id_t cred,
-	    krb5_principal server,
-	    krb5_timestamp *endtime,
-	    gss_channel_bindings_t chan_bindings,
-	    int do_mutual,
-	    krb5_keyblock **subkey,
-	    krb5_flags *flags,
-	    krb5_int32 *seqnum,
-	    gss_buffer_t token)
+make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
+	    seqnum, token)
+     krb5_gss_cred_id_t cred;
+     krb5_principal server;
+     krb5_timestamp *endtime;
+     gss_channel_bindings_t chan_bindings;
+     int do_mutual;
+     krb5_keyblock **subkey;
+     krb5_flags *flags;
+     krb5_int32 *seqnum;
+     gss_buffer_t token;
 {
    krb5_error_code code;
    krb5_checksum md5, checksum;
@@ -131,19 +133,24 @@ make_ap_req(krb5_gss_cred_id_t cred,
 }
 
 OM_uint32
-krb5_gss_init_sec_context(OM_uint32 *minor_status,
-			  gss_cred_id_t claimant_cred_handle,
-			  gss_ctx_id_t *context_handle,
-			  gss_name_t target_name,
-			  const_gss_OID mech_type,
-			  int req_flags,
-			  OM_uint32 time_req,
-			  gss_channel_bindings_t input_chan_bindings,
-			  gss_buffer_t input_token,
-			  gss_OID *actual_mech_type,
-			  gss_buffer_t output_token,
-			  int *ret_flags,
-			  OM_uint32 *time_rec)
+krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
+			context_handle, target_name, mech_type,
+			req_flags, time_req, input_chan_bindings,
+			input_token, actual_mech_type, output_token,
+			ret_flags, time_rec)
+     OM_uint32 *minor_status;
+     gss_cred_id_t claimant_cred_handle;
+     gss_ctx_id_t *context_handle;
+     gss_name_t target_name;
+     const_gss_OID mech_type;
+     int req_flags;
+     OM_uint32 time_req;
+     gss_channel_bindings_t input_chan_bindings;
+     gss_buffer_t input_token;
+     gss_OID *actual_mech_type;
+     gss_buffer_t output_token;
+     int *ret_flags;
+     OM_uint32 *time_rec;
 {
    krb5_gss_cred_id_t cred;
    krb5_error_code code; 
@@ -377,7 +384,7 @@ krb5_gss_init_sec_context(OM_uint32 *minor_status,
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
 
-      TREAD_STR(ptr, (unsigned char *) ap_rep.data, ap_rep.length);
+      TREAD_STR(ptr, ap_rep.data, ap_rep.length);
 
       /* decode the ap_rep */
       if (code = krb5_rd_rep(&ap_rep, ctx->subkey, &ap_rep_data)) {

@@ -29,15 +29,17 @@
  */
 
 static krb5_error_code
-make_seal_token(krb5_gss_enc_desc *enc_ed,
-		krb5_gss_enc_desc *seq_ed,
-		krb5_int32 *seqnum,
-		int direction,
-		gss_buffer_t text,
-		gss_buffer_t token,
-		int encrypt,
-		int toktype,
-		int bigend)
+make_seal_token(enc_ed, seq_ed, seqnum, direction, text, token,
+		encrypt, toktype, bigend)
+     krb5_gss_enc_desc *enc_ed;
+     krb5_gss_enc_desc *seq_ed;
+     krb5_int32 *seqnum;
+     int direction;
+     gss_buffer_t text;
+     gss_buffer_t token;
+     int encrypt;
+     int toktype;
+     int bigend;
 {
    krb5_error_code code;
    MD5_CTX md5;
@@ -182,14 +184,16 @@ make_seal_token(krb5_gss_enc_desc *enc_ed,
    and do not encode the ENC_TYPE, MSG_LENGTH, or MSG_TEXT fields */
 
 OM_uint32
-kg_seal(OM_uint32 *minor_status,
-	gss_ctx_id_t context_handle,
-	int conf_req_flag,
-	int qop_req,
-	gss_buffer_t input_message_buffer,
-	int *conf_state,
-	gss_buffer_t output_message_buffer,
-	int toktype)
+kg_seal(minor_status, context_handle, conf_req_flag, qop_req, 
+	input_message_buffer, conf_state, output_message_buffer, toktype)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t context_handle;
+     int conf_req_flag;
+     int qop_req;
+     gss_buffer_t input_message_buffer;
+     int *conf_state;
+     gss_buffer_t output_message_buffer;
+     int toktype;
 {
    krb5_gss_ctx_id_rec *ctx;
    krb5_error_code code;

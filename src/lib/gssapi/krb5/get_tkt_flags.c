@@ -27,9 +27,10 @@
  */
 
 OM_uint32
-gss_krb5_get_tkt_flags(OM_uint32 *minor_status,
-		       gss_ctx_id_t context_handle,
-		       krb5_flags *ticket_flags)
+gss_krb5_get_tkt_flags(minor_status, context_handle, ticket_flags)
+     OM_uint32 *minor_status;
+     gss_ctx_id_t context_handle;
+     krb5_flags *ticket_flags;
 {
    krb5_gss_ctx_id_rec *ctx;
 

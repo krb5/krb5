@@ -27,10 +27,11 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_compare_name(OM_uint32 *minor_status,
-		      gss_name_t name1,
-		      gss_name_t name2,
-		      int *name_equal)
+krb5_gss_compare_name(minor_status, name1, name2, name_equal)
+     OM_uint32 *minor_status;
+     gss_name_t name1;
+     gss_name_t name2;
+     int *name_equal;
 { 
    if (! kg_validate_name(name1)) {
       *minor_status = G_VALIDATE_FAILED;

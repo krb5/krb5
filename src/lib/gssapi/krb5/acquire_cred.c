@@ -33,11 +33,12 @@
    If successful, set the keytab-specific fields in cred
    */
 
-static OM_uint32
-acquire_accept_cred(OM_uint32 *minor_status,
-		    gss_name_t desired_name,
-		    krb5_principal *output_princ,
-		    krb5_gss_cred_id_rec *cred)
+static OM_uint32 acquire_accept_cred(minor_status, desired_name, output_princ,
+				     cred)
+     OM_uint32 *minor_status;
+     gss_name_t desired_name;
+     krb5_principal *output_princ;
+     krb5_gss_cred_id_rec *cred;
 {
    krb5_error_code code;
    krb5_principal princ;
@@ -116,11 +117,12 @@ acquire_accept_cred(OM_uint32 *minor_status,
    If successful, set the ccache-specific fields in cred.
    */
 
-static OM_uint32
-acquire_init_cred(OM_uint32 *minor_status,
-		  gss_name_t desired_name,
-		  krb5_principal *output_princ,
-		  krb5_gss_cred_id_rec *cred)
+static OM_uint32 acquire_init_cred(minor_status, desired_name, output_princ,
+				   cred)
+     OM_uint32 *minor_status;
+     gss_name_t desired_name;
+     krb5_principal *output_princ;
+     krb5_gss_cred_id_rec *cred;
 {
    krb5_error_code code;
    krb5_ccache ccache;
@@ -232,15 +234,17 @@ acquire_init_cred(OM_uint32 *minor_status,
 }
    
 /*ARGSUSED*/
-OM_uint32
-krb5_gss_acquire_cred(OM_uint32 *minor_status,
-		      gss_name_t desired_name,
-		      OM_uint32 time_req,
-		      gss_OID_set desired_mechs,
-		      int cred_usage,
-		      gss_cred_id_t *output_cred_handle,
-		      gss_OID_set *actual_mechs,
-		      OM_uint32 *time_rec)
+OM_uint32 krb5_gss_acquire_cred(minor_status, desired_name, time_req,
+				desired_mechs, cred_usage, output_cred_handle,
+				actual_mechs, time_rec)
+     OM_uint32 *minor_status;
+     gss_name_t desired_name;
+     OM_uint32 time_req;
+     gss_OID_set desired_mechs;
+     int cred_usage;
+     gss_cred_id_t *output_cred_handle;
+     gss_OID_set *actual_mechs;
+     OM_uint32 *time_rec;
 {
    int i;
    krb5_gss_cred_id_t cred;
@@ -323,7 +327,7 @@ krb5_gss_acquire_cred(OM_uint32 *minor_status,
        (cred_usage == GSS_C_BOTH))
       if ((ret =
 	   acquire_init_cred(minor_status,
-			     cred->princ?cred->princ:desired_name,
+			     cred->princ?(gss_name_t)cred->princ:desired_name,
 			     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {
 	 if (cred->keytab)

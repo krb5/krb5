@@ -27,8 +27,9 @@
  */
 
 OM_uint32
-krb5_gss_release_cred(OM_uint32 *minor_status,
-		      gss_cred_id_t *cred_handle)
+krb5_gss_release_cred(minor_status, cred_handle)
+     OM_uint32 *minor_status;
+     gss_cred_id_t *cred_handle;
 {
    krb5_gss_cred_id_t cred;
    krb5_error_code code1, code2;
