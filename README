@@ -69,7 +69,7 @@ Building and Installing Kerberos 5
 ----------------------------------
 The first file you should look at is doc/install.ps; it contains the
 notes for building and installing Kerberos 5.  The info file
-krb5-install.info has the same information in info file format.  You
+install.info has the same information in info file format.  You
 can view this using the GNU emacs info-mode, or by using the
 standalone info file viewer from the Free Software Foundation.
 
@@ -92,22 +92,33 @@ Notes and Major Changes
 
 * Windows DLL names have changed. XXX need more info here
 
-* The directory structure used for installations has changed.  Please
-see the install document for more details.
+* The directory structure used for installations has changed.  In
+ particular, files previously located in $prefix/lib/krb5kdc are now
+ normally located in $sysconfdir/krb5kdc.  With the normal configure
+ options, this means the KDC database goes in /usr/local/var/krb5kdc
+by default.  If you wish to have the old behavior, then you would use
+a configure line like the following:
 
-* krshd has been modified to accept krb4 rcp connections.
 
-* For as yet unknown reasons, make check fails for NetBSD and OSF/1
-under some circumstances.  XXX should this be here?
+      Configure --prefix=/usr/local --sysconfdir=/usr/local/lib
 
-* Under NetBSD, "make install" doesn't work.  Please see the build
-instructions for more details.  XXX should this be here?
+
+* kshd has been modified to accept krb4 encrypted rcp connections; for
+ this to work, the v4rcp program must be in the sbin directory..
+
 
 * The gssrpc library has symbol collisions with the rpc library in
-some of the libcs in certain operating systems, notably NetBSD.  For
-those platforms which have rpc in libc and also contain NIS in libc,
+some of the libcs in certain operating systems without shared
+libraries, notably some ports of NetBSD and MkLinux.  For those
+platforms which have rpc in libc and also contain NIS in libc,
 compiling with static libraries will not work because of this
-conflict.  XXX should this be here?
+conflict.  NetBSD users can either upgrade to the current tree, which
+includes shared libraries for more ports, choose not to build kadmind
+or kadmin, or recompile NetBSD without NIS support.  MkLinux users
+must either recompile without NIS or not build the administration
+system.
+
+
 
 Acknowledgements
 ----------------
