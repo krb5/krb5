@@ -422,6 +422,7 @@ readtcp(ctptr, buf, len)
 	register int len;
 {
   register struct ct_data *ct = (struct ct_data *)(void *)ctptr;
+  struct timeval tout;
 #ifdef FD_SETSIZE
 	fd_set mask;
 	fd_set readfds;
@@ -440,8 +441,9 @@ readtcp(ctptr, buf, len)
 #endif /* def FD_SETSIZE */
 	while (TRUE) {
 		readfds = mask;
+		tout = ct->ct_wait;
 		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set*)NULL, (fd_set*)NULL,
-			       &(ct->ct_wait))) {
+			       &tout)) {
 		case 0:
 			ct->ct_error.re_status = RPC_TIMEDOUT;
 			return (-1);

@@ -1,3 +1,15 @@
+2001-08-10    <epeisach@mit.edu>
+
+	* clnt_udp.c (clntudp_call): Do not assume that select will not
+	change the timeout struct timeval. Under Linux, this reflects the
+	time left available - which might result in 0 in the case of a
+	timeout. When attempting to resend a request, this may results in
+	a timeout of zero - flooding the server with replay requests.
+	
+	* clnt_tcp.c (readtcp): Same.
+	* pmap_rmt.c (clnt_broadcast): Same
+	* svc_tcp.c (readtcp): Same
+
 2001-07-26  Ezra Peisach  <epeisach@home>
 
 	* xdr_reference.c (xdr_reference): Remove cast in argument to memset.

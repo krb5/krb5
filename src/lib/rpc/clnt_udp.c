@@ -242,7 +242,7 @@ clntudp_call(cl, proc, xargs, argsp, xresults, resultsp, utimeout)
 	struct sockaddr_in from;
 	struct rpc_msg reply_msg;
 	XDR reply_xdrs;
-	struct timeval time_waited;
+	struct timeval time_waited, seltimeout;
 	bool_t ok;
 	int nrefreshes = 2;	/* number of times to refresh cred */
 	struct timeval timeout;
@@ -298,8 +298,9 @@ send_again:
 #endif /* def FD_SETSIZE */
 	for (;;) {
 		readfds = mask;
+		seltimeout = cu->cu_wait;
 		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
-			       (fd_set *)NULL, &(cu->cu_wait))) {
+			       (fd_set *)NULL, &seltimeout)) {
 
 		case 0:
 			time_waited.tv_sec += cu->cu_wait.tv_sec;

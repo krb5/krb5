@@ -315,6 +315,7 @@ readtcp(xprtptr, buf, len)
 {
 	register SVCXPRT *xprt = (SVCXPRT *)(void *)xprtptr;
 	register int sock = xprt->xp_sock;
+	struct timeval tout;
 #ifdef FD_SETSIZE
 	fd_set mask;
 	fd_set readfds;
@@ -327,8 +328,9 @@ readtcp(xprtptr, buf, len)
 #endif /* def FD_SETSIZE */
 	do {
 		readfds = mask;
+		tout = wait_per_try;
 		if (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set*)NULL,
-			   (fd_set*)NULL, &wait_per_try) <= 0) {
+			   (fd_set*)NULL, &tout) <= 0) {
 			if (errno == EINTR) {
 				continue;
 			}

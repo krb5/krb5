@@ -257,7 +257,7 @@ clnt_broadcast(prog, vers, proc, xargs, argsp, xresults, resultsp, eachresult)
 	struct rmtcallargs a;
 	struct rmtcallres r;
 	struct rpc_msg msg;
-	struct timeval t; 
+	struct timeval t, t2; 
 	char outbuf[MAX_BROADCAST_SIZE];
 #ifndef MAX
 #define MAX(A,B) ((A)<(B)?(B):(A))
@@ -342,8 +342,9 @@ clnt_broadcast(prog, vers, proc, xargs, argsp, xresults, resultsp, eachresult)
 		msg.acpted_rply.ar_results.where = (caddr_t)&r;
                 msg.acpted_rply.ar_results.proc = xdr_rmtcallres;
 		readfds = mask;
+		t2 = t;
 		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
-			       (fd_set *)NULL, &t)) {
+			       (fd_set *)NULL, &t2)) {
 
 		case 0:  /* timed out */
 			stat = RPC_TIMEDOUT;
