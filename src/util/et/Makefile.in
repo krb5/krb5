@@ -68,7 +68,7 @@ et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
 
 clean:: clean-$(WHAT)
-	
+
 clean-unix::
 	$(RM) compile_et compile_et.o error_table.o 
 clean-mac:: clean-unix

@@ -1,3 +1,7 @@
+Tue May  2 21:35:09 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: remove spurious whitespace from blank line
+
 Fri Apr 14 08:48:00 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* com_err.h: If FAR is not defined, define it away.

@@ -1,3 +1,7 @@
+Tue May  2 21:32:23 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: remove spurious whitespace from blank line
+
 Fri Apr 28 15:30:03 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* lndir (ls): use ls -a to get dotfiles too.

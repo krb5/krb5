@@ -16,6 +16,6 @@ libupdate: $(srcdir)/libupdate.sh
 
 clean::
 	$(RM) libupdate
-	
+
 install::
 	@echo nothing to install in util
