@@ -166,7 +166,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	/* make a copy */
 	krb5_gss_cred_id_t new_cred;
 	char *kttype, ktboth[1024];
-	char *cctype, *ccname, ccboth[1024];
+	const char *cctype, *ccname;
+	char ccboth[1024];
 
 	if ((new_cred =
 	     (krb5_gss_cred_id_t) xmalloc(sizeof(krb5_gss_cred_id_rec)))

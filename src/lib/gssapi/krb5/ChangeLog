@@ -1,3 +1,8 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* add_cred.c (krb5_gss_add_cred): krb5_cc_get_type() and
+	krb5_cc_get_name() return const char *.
+
 Fri Sep 22 12:05:31 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): When
