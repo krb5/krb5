@@ -1,3 +1,8 @@
+Thu Aug  8 20:26:47 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (shared): Always mkdir shared; test -d shared ||
+		mkdir shared breaks under Ultrix sh (grrr...).
+
 Fri Aug  2 14:08:03 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in(LIBS): AIX wants to link against -ldb when building the shared lib.

@@ -47,7 +47,7 @@ LIBDONE = DONE
 
 all-unix:: shared
 shared::
-	test -d shared || mkdir shared
+	mkdir shared
 
 clean-unix::
 	$(RM) shared/*
