@@ -1,3 +1,7 @@
+2001-04-02  Alexandra Ellwood <lxs@mit.edu>
+	* gssapi.hin, gssapi_generic.h, gssapi_generic.c: 
+	added oids from rfc 2744.  Kept old oids for compatibility.
+
 2001-03-20  Alexandra Ellwood <lxs@mit.edu>
 	* gssapi.hin: Changed KerberosConditionalMacros.h to
 	KerberosSupport.h.
