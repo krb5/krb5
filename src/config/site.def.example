@@ -35,6 +35,11 @@
  */
 
 /*
+ * Krb5Root --- where the root of the Kerberos 5 tree should be
+ */
+#define Krb5Root	/krb5
+
+/*
  * 1.  HasLargeTmp - if your /tmp space is less than a 1meg, you should
  * probably set this to NO
  */
