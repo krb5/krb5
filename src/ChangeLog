@@ -8,6 +8,12 @@ Thu Jul  2 20:41:02 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Update commands to build the Macintosh MPW Makefile
 
+1998-07-05    <hartmans@fundsxpress.com>
+
+	* aclocal.m4 (enable_shared): If we aren't building shared, then
+	make sure that SHLIBEXT and friends are not set so that we don't
+	break on AIX and anything else where STLIBEXT == SHLIBEXT
+
 1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Don't depend on $(RM) macro being defined when

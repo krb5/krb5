@@ -915,6 +915,9 @@ AC_ARG_ENABLE([shared],
 else
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
+	SHLIBEXT=.so-nobuild
+	SHLIBVEXT=.so.v-nobuild
+	SHLIBSEXT=.so.s-nobuild
 fi],
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
