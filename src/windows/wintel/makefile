@@ -1,12 +1,12 @@
 # makefile: Constructs the kerborized telnet client
 # Works for both k4 and k5 releases.
 #
-NAME = telnet
-OBJS = telnet.obj negotiat.obj auth.obj edit.obj emul.obj \
-	font.obj intern.obj screen.obj
+NAME 	 = telnet
+OBJS 	 = $(NAME).obj negotiat.obj auth.obj edit.obj emul.obj \
+		font.obj intern.obj screen.obj
 
 ##### Options
-DEBUG = 1
+DEBUG 	 = 1
 !IF ! defined(KVERSION)
 KVERSION = 5
 !endif
@@ -32,36 +32,36 @@ XOBJS    = k5stream.obj
 !endif
 
 ##### C Compiler
-CC = cl
-CFLAGS_RELEASE = /nologo /W3 /AL /GAs /Gx /O1 /DNDEBUG
-CFLAGS_DEBUG = /nologo /W3 /AL /GAs /Gx /G2 /Zi /Od /D_DEBUG /Fd"TELNET.PDB"
+CC 	 = cl
+CFLAGS_RELEASE = /nologo /W3 /AL /GAs /G2 /Zp /O2 /DNDEBUG=1
+CFLAGS_DEBUG   = /nologo /W3 /AL /GAs /G2 /Zp /O2 /Od /Zi
 !if $(DEBUG)
-CFLAGS = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
+CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
 !else
-CFLAGS = $(CFLAGS_RELEASE) $(INCLUDES) /D$(KRB)=1
+CFLAGS 	 = $(CFLAGS_RELEASE) $(INCLUDES) /D$(KRB)=1
 !endif
 
 ##### RC Compiler
-RC = rc
-RFLAGS_RELEASE = /nologo
-RFLAGS_DEBUG = /nologo /D_DEBUG
+RC 	 = rc
+RFLAGS_RELEASE = /nologo /DNDEBUG
+RFLAGS_DEBUG   = /nologo
 !if $(DEBUG)
-RFLAGS = $(RFLAGS_DEBUG) $(INCLUDES)
+RFLAGS 	 = $(RFLAGS_DEBUG) $(INCLUDES)
 !else
-RFLAGS = $(RFLAGS_RELEASE) $(INCLUDES)
+RFLAGS   = $(RFLAGS_RELEASE) $(INCLUDES)
 !endif
 
 ##### Linker
-LINK = link	 
-LIBS = $(KLIB) $(WLIB)
-SYSLIBS = libw llibcew commdlg
+LINK 	 = link	 
+LIBS 	 = $(KLIB) $(WLIB)
+SYSLIBS  = libw llibcew commdlg
 !if $(DEBUG)
-LFLAGS = /co /nol /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+LFLAGS   = /co /nologo /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
 !else
-LFLAGS = /nol /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
+LFLAGS   = /nologo /nod /packc:61440 /stack:32768 /align:16 /onerror:noexe
 !endif
 
-all: makefile $(NAME).exe
+all:: makefile $(NAME).exe
 
 $(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
@@ -69,16 +69,16 @@ $(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
 	$(RC) $(RFLAGS) /k $*.res $@
 
 install:
-	copy telnet.exe ..\floppy
+	copy $(NAME).exe ..\floppy
 
-clean:
+clean::
 	if exist *.obj del *.obj
 	if exist *.exe del *.exe
 	if exist *.res del *.res
         if exist *.map del *.map
 	if exist *.pdb del *.pdb
 	if exist *.err del *.err
-	if exist ..\floppy\telnet.exe del ..\floppy\telnet.exe
+	if exist ..\floppy\$(NAME).exe del ..\floppy\$(NAME).exe
 
 telnet.obj: telnet.h dialog.h screen.h struct.h wt-proto.h ini.h
 

@@ -20,7 +20,7 @@ BEGIN
 	BEGIN
 		MENUITEM "&Copy     Cltr+Ins",IDM_COPY
 		MENUITEM "&Paste    Shift+Ins", IDM_PASTE
-		#ifdef _DEBUG
+		#if ! defined(NDEBUG)
 			MENUITEM "&Debug", IDM_DEBUG
 		#endif
 	END                            

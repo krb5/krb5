@@ -505,7 +505,7 @@ void ScreenEm(
 				break;
 
 			case 'h':               	/* set mode (SM) */
-//                  ScreenSetOption(pScr,1);
+				ScreenSetOption(pScr,1);
 				escflg = 0;
 				break;
 
@@ -520,7 +520,7 @@ void ScreenEm(
 				break;
 
 			case 'l':					/* reset mode (RM) */
-//                    ScreenSetOption(pScr,0);
+				ScreenSetOption(pScr,0);
 				escflg = 0;
 				break;
 

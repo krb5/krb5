@@ -2,7 +2,7 @@
 # Works for both k4 and k5 releases.
 #
 NAME 	 = cns
-OBJS 	 = cns.obj tktlist.obj kpasswd.obj
+OBJS 	 = $(NAME).obj tktlist.obj
 
 ##### Options
 DEBUG 	 = 1
@@ -17,6 +17,7 @@ LIBDIR 	 = $(BUILDTOP)\lib\krb
 KLIB 	 = $(LIBDIR)\kerberos.lib 
 WLIB 	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include
+XOBJS    = 
 !endif
 
 !if $(KVERSION) == 5
@@ -25,12 +26,13 @@ LIBDIR	 = $(BUILDTOP)\lib
 KLIB	 = $(LIBDIR)\libkrb5.lib
 WLIB	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+XOBJS    = kpasswd.obj
 !endif
 
 ##### C Compiler
 CC 	 = cl
-CFLAGS_RELEASE = /f- /nologo /W3 /AL /GAs /G2 /Zp /O2 /DNDEBUG=1
-CFLAGS_DEBUG   = /f  /nologo /W3 /AL /GAs /G2 /Zp /O2 /Od /Zi
+CFLAGS_RELEASE = /nologo /W3 /AL /GAs /G2 /Zp /O2 /DNDEBUG=1
+CFLAGS_DEBUG   = /nologo /W3 /AL /GAs /G2 /Zp /O2 /Od /Zi
 !if $(DEBUG)
 CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
 !else
@@ -53,21 +55,26 @@ LFLAGS 	 = /nologo /nod /nopackcode
 
 all:: makefile $(NAME).exe
 
-$(NAME).exe: $*.def $*.res $(OBJS) $(LIBS)
-	$(LINK) $(LFLAGS) $(OBJS), $@, $*.map, $(LIBS) $(SYSLIBS), $*.def
+$(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
+	  $(LIBS) $(SYSLIBS), $*.def
 	$(RC) $(RFLAGS) /k $*.res $@
 
-$(OBJS) cns.res: cns.h tktlist.h
-
 install:
-	copy cns.exe ..\floppy
+	copy $(NAME).exe ..\floppy
 
 clean:: 
-	if exist *.exe del *.exe
-	if exist ..\floppy\cns.exe del ..\floppy\cns.exe
 	if exist *.obj del *.obj
+	if exist *.exe del *.exe
 	if exist *.res del *.res
 	if exist *.map del *.map
 	if exist *.pdb del *.pdb
 	if exist *.err del *.err
+	if exist ..\floppy\$(NAME).exe del ..\floppy\$(NAME).exe
 
+$(OBJS) $(NAME).res: $(NAME).h tktlist.h
+
+$(NAME).res: clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
+	     clock25.ico clock30.ico clock35.ico clock40.ico clock45.ico \
+	     clock50.ico clock55.ico clock60.ico clockexp.ico clocktkt.ico \
+	     cns.ico

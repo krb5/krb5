@@ -295,8 +295,17 @@ long FAR PASCAL MainWndProc(
 	        wParam = con->backspace;
 		else if (wParam == 0x7f)
 			wParam = con->ctrl_backspace;
+		else if (wParam == VK_SPACE && GetKeyState(VK_CONTROL) < 0)
+			wParam = 0;
 	    TelnetSend(con->ks, (char *) &wParam, 1, NULL);
 	    break;
+
+	case WM_MYCURSORKEY:
+		/* Acts as a send through: buffer is lParam and length in wParam */
+		if (!con)
+			break;
+		TelnetSend (con->ks, (char *) lParam, wParam, NULL);
+		break;
 
 	case WM_MYSYSCHAR:
 	    if (!con)
@@ -732,6 +741,7 @@ BOOL FAR PASCAL OpenTelnetDlg(
 	case WM_COMMAND:
 		switch (wParam) {
 		case TEL_CANCEL:
+		case IDCANCEL:							// From the menu
 			EndDialog(hDlg, FALSE);
 			break;
 				

@@ -16,6 +16,10 @@ static SCREEN *ScreenList;
 static HINSTANCE hInst;
 static char szScreenClass[] = "ScreenWClass";
 static char szScreenMenu[] = "ScreenMenu";
+static char cursor_key[8][4] = {				// Send for cursor keys
+	"\x1B[D", "\x1B[A", "\x1B[C", "\x1B[B", 	// Normal mode
+	"\x1BOD", "\x1BOA", "\x1BOC", "\x1BOB",		// Numpad on mode
+};
 
 void ScreenInit(
 	HINSTANCE hInstance)
@@ -703,7 +707,7 @@ long FAR PASCAL ScreenWndProc(
 			MessageBox(NULL, strTmp, "Kerberos", MB_OK);
 			break;
 
-		#ifdef _DEBUG
+		#if ! defined(NDEBUG)
 			case IDM_DEBUG:
 				CheckScreen(pScr);
 				break;
@@ -843,29 +847,42 @@ long FAR PASCAL ScreenWndProc(
 			else if (GetKeyState(VK_CONTROL) < 0)
 				PostMessage(hWnd, WM_COMMAND, IDM_COPY, NULL);
 			break;
-		}        
-		if (wParam < VK_PRIOR || wParam > VK_DOWN)
-			break;
-
-		switch (wParam) {
-
-		case VK_PRIOR:	/* Page up   */
-			SendMessage(hWnd, WM_VSCROLL, SB_PAGEUP, NULL);
-			break;
-
-		case VK_NEXT:	/* Page down */
-			SendMessage(hWnd, WM_VSCROLL, SB_PAGEDOWN, NULL);
-			break;
-
-		case VK_UP:		/* Line up   */
-			SendMessage(hWnd, WM_VSCROLL, SB_LINEUP, NULL);
-			break;
-
-		case VK_DOWN:	/* Line down */
-			SendMessage(hWnd, WM_VSCROLL, SB_LINEDOWN, NULL);
-			break;
 		}
+		/*
+		** Check for cursor keys. With control pressed, we treat as
+		** keyboard equivalents to scrolling. Otherwise, we send
+		** a WM_MYCURSORKEY message with the appropriate string
+		** to be sent. Sending the actual string allows the upper
+		** level to be ignorant of keyboard modes, etc.
+		*/
+		if (wParam < VK_PRIOR || wParam > VK_DOWN) // Is it a cursor key?
+			break;
 
+		if (GetKeyState (VK_CONTROL) >= 0) {	// No control key
+			if (wParam >= VK_LEFT && wParam <= VK_DOWN) {
+				pScr = (SCREEN *) GetWindowLong(hWnd, SCREEN_HANDLE);
+				assert (pScr != NULL);
+				wParam = wParam - VK_LEFT + (pScr->DECCKM ? 4 : 0);
+				SendMessage (pScr->hwndTel, WM_MYCURSORKEY,
+					strlen(cursor_key[wParam]),
+					(LPARAM) (char FAR *) cursor_key[wParam]);
+			}
+		} else {								// Control is down
+			switch (wParam) {
+			case VK_PRIOR:						/* Page up   */
+				SendMessage(hWnd, WM_VSCROLL, SB_PAGEUP, NULL);
+				break;
+			case VK_NEXT:						/* Page down */
+				SendMessage(hWnd, WM_VSCROLL, SB_PAGEDOWN, NULL);
+				break;
+			case VK_UP:							/* Line up   */
+				SendMessage(hWnd, WM_VSCROLL, SB_LINEUP, NULL);
+				break;
+			case VK_DOWN:						/* Line down */
+				SendMessage(hWnd, WM_VSCROLL, SB_LINEDOWN, NULL);
+				break;
+			}
+		}
 		UpdateWindow(hWnd);
 		break;
 		

@@ -1,3 +1,15 @@
+Fri Jun 2 10:51:31 1995 Keith Vetter (keithv@fusion.com)
+	
+	Added cursor keys (in two modes) and ctrl-space:
+	* emul.c: enabled calls to ScreenSetOption to change keyboard modes.
+	* intern.c: enabled ScreenSetOption but in a limited fashion.
+	* screen.c: cursor keys now get sent to the host machine.
+	* screen.h: Added prototype for ScreenSetOption and a new message
+	   type WM_MYCURSORKEY for handling the cursor keys.
+	* telnet.c: handles WM_MYCURSORKEY and ctrl-space, plus a bug
+	   fix on cancelling from the menu on the opening dialog.
+	* makefile: cleaned up and made consistent with the cns makefile.
+
 Thu May 25 12:52:50 1995 Keith Vetter (keithv@fusion.com)
 
 	* auth.c, intern.c, negotiat.c, screen.c, screen.h, telnet.c,

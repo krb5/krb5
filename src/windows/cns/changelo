@@ -1,3 +1,7 @@
+Fri Jun 2 11:45:23 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: cleaned up and made consistent with telnet's makefile.
+
 Tue May 30 17:28:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* kpasswd.c: new file for k5 password changing.

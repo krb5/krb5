@@ -33,6 +33,7 @@ extern long FAR PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 #define WM_MYSCREENSIZE			(WM_USER+6)
 #define WM_NETWORKEVENT			(WM_USER+7)
 #define WM_HOSTNAMEFOUND		(WM_USER+8)
+#define WM_MYCURSORKEY			(WM_USER+9)
 
 #define FRAME_HEIGHT ((2* GetSystemMetrics(SM_CYFRAME))+GetSystemMetrics(SM_CYCAPTION)+GetSystemMetrics(SM_CYMENU)+3)
 #define FRAME_WIDTH  (2*GetSystemMetrics(SM_CXFRAME)+GetSystemMetrics(SM_CXVSCROLL))
@@ -234,6 +235,10 @@ intern.c
 	void ScreenApClear(
 		SCREEN *pScr);
 
+	void ScreenSetOption(
+		SCREEN *pScr,
+		int toggle);
+	
 	int ScreenInsChar(
 		SCREEN *pScr,
 		int x);
@@ -275,7 +280,7 @@ intern.c
 		int n,
 		int s);
 
-	#ifdef _DEBUG
+	#if ! defined(NDEBUG)
 		BOOL CheckScreen(
 			SCREEN *pScr);
 	#endif

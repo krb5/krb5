@@ -628,65 +628,69 @@ void ScreenSetOption(
 	SCREEN *pScr,
 	int toggle)
 {
+	if (pScr->parms[0] == -2 && pScr->parms[1] == 1)
+		pScr->DECCKM = toggle;
 
-	switch(pScr->parms[0]) {
+	#if 0
+		switch(pScr->parms[0]) {
 
-	case -2:
-		switch(pScr->parms[1]) {
+		case -2:								// Set on the '?' char
+			switch(pScr->parms[1]) {
 
-		case 1:     /* set/reset cursor key mode */
-			pScr->DECCKM = toggle;
-			break;
-
-		#ifdef NOT_SUPPORTED
-			case 2:     /* set/reset ANSI/vt52 mode */
+			case 1: /* set/reset cursor key mode */
+				pScr->DECCKM = toggle;
 				break;
-		#endif
 
-		case 3:     /* set/reset column mode */
-			pScr->x = pScr->y = 0;      /* Clear the screen, mama! */
-			ScreenEraseScreen(pScr);
-			#if 0	/* removed for variable screen size */
-				if (toggle)      /* 132 column mode */
-					pScr->width = pScr->allwidth;
-	            else
-		            pScr->width = 79;
+			#ifdef NOT_SUPPORTED
+				case 2: /* set/reset ANSI/vt52 mode */
+					break;
 			#endif
+
+			case 3: /* set/reset column mode */
+				pScr->x = pScr->y = 0;  /* Clear the screen, mama! */
+				ScreenEraseScreen(pScr);
+				#if 0	/* removed for variable screen size */
+					if (toggle)  /* 132 column mode */
+						pScr->width = pScr->allwidth;
+		            else
+			            pScr->width = 79;
+				#endif
+				break;
+
+			#ifdef NOT_SUPPORTED
+				case 4: /* set/reset scrolling mode */
+				case 5: /* set/reset screen mode */
+				case 6: /* set/rest origin mode */
+					pScr->DECORG = toggle;
+					break;
+			#endif
+
+			case 7:	/* set/reset wrap mode */
+				pScr->DECAWM = toggle;
+//          	set_vtwrap(pScrn, fpScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
+				break;
+
+			#ifdef NOT_SUPPORTED
+				case 8: /* set/reset autorepeat mode */
+				case 9: /* set/reset interlace mode */
+					break;
+			#endif
+
+			default:
+				break;
+			} /* end switch */
 			break;
 
-		#ifdef NOT_SUPPORTED
-			case 4:     /* set/reset scrolling mode */
-			case 5:     /* set/reset screen mode */
-			case 6:     /* set/rest origin mode */
-				pScr->DECORG = toggle;
-				break;
-		#endif
-
-		case 7:		/* set/reset wrap mode */
-			pScr->DECAWM = toggle;
-//          set_vtwrap(pScrn, fpScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
+		case 4:
+			pScr->IRM=toggle;
 			break;
-
-		#ifdef NOT_SUPPORTED
-			case 8:     /* set/reset autorepeat mode */
-			case 9:     /* set/reset interlace mode */
-				break;
-		#endif
 
 		default:
 			break;
+
 		} /* end switch */
-		break;
 
-	case 4:
-		pScr->IRM=toggle;
-		break;
-
-	default:
-		break;
-
-	} /* end switch */
-
+	#endif
 } /* ScreenSetOption */
 
 
@@ -782,7 +786,7 @@ void ScreenDraw(
 } /* ScreenDraw */
 
 
-#ifdef _DEBUG
+#if ! defined(NDEBUG)
 
 	BOOL CheckScreen(
 		SCREEN *pScr)
