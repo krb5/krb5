@@ -1,3 +1,7 @@
+2000-07-03  Tom Yu  <tlyu@mit.edu>
+
+	* cr_tkt.c: Frob prototypes so they don't involve narrow types.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* cr_tkt.c: Provide prototype for static krb_cr_tkt_int function

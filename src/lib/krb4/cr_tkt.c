@@ -16,9 +16,9 @@
 #include <krb5.h>
 
 static int
-krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned char flags, char *pname, 
+krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags, char *pname, 
 			  char *pinstance, char *prealm, long paddress,
-			  char *session, short life, long time_sec, 
+			  char *session, int life, long time_sec, 
 			  char *sname, char *sinstance, C_Block key, 
 			  krb5_keyblock *k5key));
 
@@ -82,13 +82,13 @@ int
 krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
 		  session, life, time_sec, sname, sinstance, key, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;        /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
@@ -103,13 +103,13 @@ int
 krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
 		  session, life, time_sec, sname, sinstance, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;        /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
@@ -126,13 +126,13 @@ static int
 krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
 	       session, life, time_sec, sname, sinstance, key, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;        /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
