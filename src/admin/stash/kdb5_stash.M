@@ -43,6 +43,9 @@ kdb5_stash \- store a principal database master key on disk
 ] [
 .B \-f
 .I keyfile
+] [
+.B \-o
+.I v4-stash-file
 ]
 .br
 .SH DESCRIPTION
@@ -91,6 +94,11 @@ The
 .B \-f
 option specifies the file in which the master key should be stored; the
 default is DEFAULT_KEYFILE_STUB ("/.k5." concatenated with the realm name).
+.PP
+The
+.B \-o
+option specifies the file in which an old V4 master key was stored; this is
+usually the file "/.k".
 .SH SEE ALSO
 krb5(3), krb5kdc(8), kdb5_create(8)
 .SH BUGS

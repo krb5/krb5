@@ -47,7 +47,7 @@ char *who;
 int status;
 {
     fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
-\t[-e etype] [-M mkeyname] [-f keyfile]\n",
+\t[-e etype] [-M mkeyname] [-f keyfile] [-o v4-stash-file]\n",
 	    who);
     exit(status);
 }
@@ -67,6 +67,7 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char *keyfile = 0;
+    char *v4_stashfile = 0;
 
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
@@ -76,7 +77,7 @@ char *argv[];
 
     krb5_init_ets();
 
-    while ((optchar = getopt(argc, argv, "d:r:k:M:e:f:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:r:k:M:e:f:o:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
@@ -96,6 +97,9 @@ char *argv[];
 	    break;
 	case 'f':
 	    keyfile = optarg;
+	    break;
+	case 'o':
+	    v4_stashfile = optarg;
 	    break;
 	case '?':
 	default:
@@ -151,11 +155,44 @@ char *argv[];
     }
 
     /* TRUE here means read the keyboard, but only once */
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE,
-				    FALSE, 0, &master_keyblock)) {
-	com_err(argv[0], retval, "while reading master key");
-	(void) krb5_db_fini();
-	exit(1);
+    if (v4_stashfile) {
+	FILE *kf;
+	krb5_keyblock *key = &master_keyblock;
+
+	key->length = 8;
+
+#ifdef ANSI_STDIO
+#define STDIO_RB "rb"
+#else
+#define STDIO_RB "r"
+#endif
+	if (!(kf = fopen(v4_stashfile, STDIO_RB))) {
+	    retval = errno;
+	} else if (!(key->contents = (krb5_octet *)malloc(key->length))) {
+	    retval = ENOMEM;
+	} else if (fread((krb5_pointer) key->contents,
+			 sizeof(key->contents[0]), key->length, kf) != key->length) {
+	    memset(key->contents, 0, key->length);
+	    free(key->contents);
+	    key->contents = 0;
+	    retval = KRB5_KDB_CANTREAD_STORED;
+	}
+	
+	fclose(kf);
+
+	if (retval)
+	{
+	    (void) krb5_db_fini();
+	    com_err(argv[0], retval, "trying to open old kstash file");
+	    exit(1);
+	}
+    } else {
+	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE,
+					FALSE, 0, &master_keyblock)) {
+	    com_err(argv[0], retval, "while reading master key");
+	    (void) krb5_db_fini();
+	    exit(1);
+	}
     }
     if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
 					   &master_encblock)) {
