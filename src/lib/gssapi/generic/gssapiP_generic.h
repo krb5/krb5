@@ -40,6 +40,9 @@
 #include "gssapi_err_generic.h"
 #include <errno.h>
 
+#include "k5-platform.h"
+typedef UINT64_TYPE gssint_uint64;
+
 /** helper macros **/
 
 #define g_OID_equal(o1,o2) \
@@ -171,10 +174,10 @@ OM_uint32 g_display_com_err_status (OM_uint32 *minor_status,
 				   OM_uint32 status_value,
 				   gss_buffer_t status_string);
 
-gss_int32 g_order_init (void **queue, OM_uint32 seqnum,
-				  int do_replay, int do_sequence);
+gss_int32 g_order_init (void **queue, gssint_uint64 seqnum,
+				  int do_replay, int do_sequence, int wide);
 
-gss_int32 g_order_check (void **queue, OM_uint32 seqnum);
+gss_int32 g_order_check (void **queue, gssint_uint64 seqnum);
 
 void g_order_free (void **queue);
 
