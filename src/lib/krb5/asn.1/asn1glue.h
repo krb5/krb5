@@ -16,6 +16,9 @@
 #ifndef __KRB5_GLUE_H__
 #define __KRB5_GLUE_H__
 
-#define krb5_string2qbuf(val) str2qb(val->string, val->length, 1)
+#define krb5_string2qbuf(val) str2qb((val)->string, (val)->length, 1)
+
+#define kdcoptions2KRB5_KDCOptions(val) (struct type_KRB5_KDCOptions *)flags2KRB5_TicketFlags(val)
+#define KRB5_KDCOptions2kdcoptions(val) KRB5_TicketFlags2flags((struct type_KRB5_TicketFlags *) val)
 
 #endif /* __KRB5_GLUE_H__ */
