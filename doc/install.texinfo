@@ -1275,7 +1275,6 @@ Here is an example of a generic @code{krb5.conf} file:
         kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}:88
         admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}:749
         default_domain = @value{PRIMARYDOMAIN}
-        @}
     @}
 
 [domain_realm]
