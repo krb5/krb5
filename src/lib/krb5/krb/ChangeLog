@@ -1,3 +1,8 @@
+Mon Mar 16 19:50:55 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Check lengths when
+	appending to next and prev.
+
 Wed Jan 14 20:58:52 1998  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c (handle_sam_labels): Check return value of
