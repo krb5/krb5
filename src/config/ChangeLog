@@ -1,3 +1,9 @@
+Thu Jun  8 17:44:12 1995    <tytso@rsx-11.mit.edu>
+
+	* pre.in: Define ${prefix} since exec_prefix is sometimes to that.
+		Don't create the directories include/krb5 and
+		include/kerberosIV when installing.  (They're not needed).
+
 Wed Jun  7 16:08:35 1995    <tytso@rsx-11.mit.edu>
 
 	* pre.in: Use the GNU/configure standard method of prefix and

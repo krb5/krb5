@@ -24,7 +24,10 @@ INSTALL=@INSTALL@
 INSTALL_PROGRAM=@INSTALL_PROGRAM@ -s
 INSTALL_DATA=@INSTALL_DATA@
 INSTALL_SETUID=$(INSTALL) -s -m 4755
-INSTALL_PREFIX=@prefix@
+## This is needed because autoconf will sometimes define @exec_prefix@ to be
+## ${prefix}.
+prefix=@prefix@
+INSTALL_PREFIX=$(prefix)
 INSTALL_EXEC_PREFIX=@exec_prefix@
 
 KRB5MANROOT = $(INSTALL_PREFIX)/man
@@ -38,9 +41,7 @@ FILE_MANDIR = $(KRB5MANROOT)/man5
 KRB5_LIBDIR = $(INSTALL_PREFIX)/lib
 KRB5_INCDIR = $(INSTALL_PREFIX)/include
 KRB5_INCSUBDIRS = \
-	$(KRB5_INCDIR)/krb5 \
 	$(KRB5_INCDIR)/asn.1 \
-	$(KRB5_INCDIR)/kerberosIV \
 	$(KRB5_INCDIR)/gssapi
 
 
