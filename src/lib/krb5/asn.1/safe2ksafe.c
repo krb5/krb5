@@ -66,7 +66,7 @@ register int *error;
     if (!retval->r_address) {
 	goto errout;
     }
-    retval->checksum = KRB5_Checksum2krb5_checksum(val->checksum, error);
+    retval->checksum = KRB5_Checksum2krb5_checksum(val->cksum, error);
     if (!retval->checksum) {
 	goto errout;
     }
