@@ -93,7 +93,7 @@ static const char* yarrow_str_error[] = {
 
 /* calculate limits after initialization */
 
-static void Yarrow_Init_Limits(Yarrow_CTX* y)
+static void krb5int_yarrow_init_Limits(Yarrow_CTX* y)
 {
     double tmp1, tmp2, limit;
     /* max number of gates between reseeds -> exceed this, do forced reseed */
@@ -127,7 +127,7 @@ static int Yarrow_detect_fork(Yarrow_CTX *y)
      * pids */
     if ( y->pid != getpid() )
     {
-	TRY( Yarrow_Init( y, y->entropyfile ) );
+	TRY( krb5int_yarrow_init( y, y->entropyfile ) );
     }
 
  CATCH:
@@ -153,7 +153,7 @@ static void Yarrow_Make_Seeded( Yarrow_CTX* y )
 }
 
 YARROW_DLL
-int Yarrow_Init(Yarrow_CTX* y, const char *filename)
+int krb5int_yarrow_init(Yarrow_CTX* y, const char *filename)
 {
     EXCEP_DECL;
     int locked = 0;
@@ -192,7 +192,7 @@ int Yarrow_Init(Yarrow_CTX* y, const char *filename)
     y->fast_thresh = YARROW_FAST_INIT_THRESH;
     y->slow_k_of_n_thresh = YARROW_K_OF_N_INIT_THRESH;
 
-    Yarrow_Init_Limits(y);
+    krb5int_yarrow_init_Limits(y);
 
 #if defined( YARROW_SAVE_STATE )
     if ( y->entropyfile != NULL )
@@ -228,7 +228,7 @@ int Yarrow_Init(Yarrow_CTX* y, const char *filename)
 }
 
 YARROW_DLL
-int Yarrow_Input( Yarrow_CTX* y, unsigned source_id, 
+int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id, 
 		  const void* sample, 
 		  size_t size, size_t entropy_bits )
 {
@@ -281,7 +281,7 @@ int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
 	{
 	    if (source->entropy[YARROW_FAST_POOL] >= y->fast_thresh)
 	    {
-		ret = Yarrow_Reseed(y, YARROW_FAST_POOL);
+		ret = krb5int_yarrow_reseed(y, YARROW_FAST_POOL);
 		if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
 		{
 		    THROW( ret );
@@ -298,7 +298,7 @@ int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
 		if (y->slow_k_of_n >= y->slow_k_of_n_thresh)
 		{
 		    y->slow_k_of_n = 0;
-		    ret = Yarrow_Reseed(y, YARROW_SLOW_POOL);
+		    ret = krb5int_yarrow_reseed(y, YARROW_SLOW_POOL);
 		    if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
 		    {
 			THROW( ret );
@@ -318,7 +318,7 @@ int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
 }
 
 YARROW_DLL
-int Yarrow_New_Source(Yarrow_CTX* y, unsigned* source_id)
+int krb5int_yarrow_new_source(Yarrow_CTX* y, unsigned* source_id)
 {
     EXCEP_DECL;
     int locked = 0;
@@ -350,7 +350,7 @@ CATCH:
     EXCEP_RET;
 }
 
-int Yarrow_Register_Source_Estimator(Yarrow_CTX* y, unsigned source_id, 
+int krb5int_yarrow_register_source_estimator(Yarrow_CTX* y, unsigned source_id, 
                                      estimator_fn* fptr)
 {
     EXCEP_DECL;
@@ -367,7 +367,7 @@ int Yarrow_Register_Source_Estimator(Yarrow_CTX* y, unsigned source_id,
     EXCEP_RET;
 }
 
-static int Yarrow_Output_Block( Yarrow_CTX* y, void* out )
+static int krb5int_yarrow_output_Block( Yarrow_CTX* y, void* out )
 {
     EXCEP_DECL;
 
@@ -381,7 +381,7 @@ static int Yarrow_Output_Block( Yarrow_CTX* y, void* out )
     if (y->out_count >= y->Pg)
     {
 	y->out_count = 0;
-	TRY( Yarrow_Gate( y ) );
+	TRY( krb5int_yarrow_gate( y ) );
 
 	/* require new seed after reaching gates_limit */
 
@@ -394,7 +394,7 @@ static int Yarrow_Output_Block( Yarrow_CTX* y, void* out )
 	    
 	    TRACE( printf( "OUTPUT LIMIT REACHED," ); );
 
-	    TRY( Yarrow_Reseed( y, YARROW_SLOW_POOL ) );
+	    TRY( krb5int_yarrow_reseed( y, YARROW_SLOW_POOL ) );
 	}
     }
   
@@ -417,7 +417,7 @@ static int Yarrow_Output_Block( Yarrow_CTX* y, void* out )
 }
 
 YARROW_DLL
-int Yarrow_Status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
+int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
 		   size_t *entropy_bits, size_t *entropy_max )
 {
     EXCEP_DECL;
@@ -465,7 +465,7 @@ int Yarrow_Status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
 }
 
 YARROW_DLL
-int Yarrow_Output( Yarrow_CTX* y, void* out, size_t size )
+int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size )
 {
     EXCEP_DECL;
     int locked = 0;
@@ -496,12 +496,12 @@ int Yarrow_Output( Yarrow_CTX* y, void* out, size_t size )
 	  left >= CIPHER_BLOCK_SIZE;
 	  left -= CIPHER_BLOCK_SIZE, outp += CIPHER_BLOCK_SIZE)
     {
-	TRY( Yarrow_Output_Block(y, outp) );
+	TRY( krb5int_yarrow_output_Block(y, outp) );
     }
 
     if (left > 0)
     {
-	TRY( Yarrow_Output_Block(y, y->out) );
+	TRY( krb5int_yarrow_output_Block(y, y->out) );
 	mem_copy(outp, y->out, left);
 	y->out_left = CIPHER_BLOCK_SIZE - left;
     }
@@ -512,7 +512,7 @@ int Yarrow_Output( Yarrow_CTX* y, void* out, size_t size )
     EXCEP_RET;
 }
 
-int Yarrow_Gate(Yarrow_CTX* y)
+int krb5int_yarrow_gate(Yarrow_CTX* y)
 {
     EXCEP_DECL;
     byte new_K[CIPHER_KEY_SIZE];
@@ -523,7 +523,7 @@ int Yarrow_Gate(Yarrow_CTX* y)
 
     /* K <- Next k bits of PRNG output */
 
-    TRY( Yarrow_Output(y, new_K, CIPHER_KEY_SIZE) );
+    TRY( krb5int_yarrow_output(y, new_K, CIPHER_KEY_SIZE) );
     mem_copy(y->K, new_K, CIPHER_KEY_SIZE);
 
     /* need to resetup the key schedule as the key has changed */
@@ -561,7 +561,7 @@ static int Yarrow_Load_State( Yarrow_CTX *y )
 
 	Yarrow_Make_Seeded( y );
 
-	TRY( Yarrow_Reseed(y, YARROW_FAST_POOL) );
+	TRY( krb5int_yarrow_reseed(y, YARROW_FAST_POOL) );
     }
  CATCH:
     mem_zero(state.seed, sizeof(state.seed));
@@ -578,7 +578,7 @@ static int Yarrow_Save_State( Yarrow_CTX *y )
     if ( y->entropyfile && y->seeded ) 
     {
 	TRACE( printf( "SAVE STATE[" ); );
-	TRY( Yarrow_Output( y, state.seed, sizeof(state.seed) ) );
+	TRY( krb5int_yarrow_output( y, state.seed, sizeof(state.seed) ) );
 	TRY( STATE_Save(y->entropyfile, &state) );
     }
     y->saved = 1;
@@ -594,7 +594,7 @@ static int Yarrow_Save_State( Yarrow_CTX *y )
 
 #endif
 
-int Yarrow_Reseed(Yarrow_CTX* y, int pool)
+int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
 {
     EXCEP_DECL;
     HASH_CTX* fast_pool = &y->pool[YARROW_FAST_POOL];
@@ -677,7 +677,7 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
 #endif
     /* K <- h'(t) */
 
-    TRY( Yarrow_Stretch(v_i, HASH_DIGEST_SIZE, y->K, CIPHER_KEY_SIZE) );
+    TRY( krb5int_yarrow_stretch(v_i, HASH_DIGEST_SIZE, y->K, CIPHER_KEY_SIZE) );
 
     /* need to resetup the key schedule as the key has changed */
 
@@ -742,7 +742,7 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
     EXCEP_RET;
 }
 
-int Yarrow_Stretch(const byte* m, size_t size, byte* out, size_t out_size)
+int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_size)
 {
     EXCEP_DECL;
     const byte* s_i;
@@ -816,7 +816,7 @@ static void block_increment(void* block, const int sz)
 }
 
 YARROW_DLL
-int Yarrow_Final(Yarrow_CTX* y)
+int krb5int_yarrow_final(Yarrow_CTX* y)
 {
     EXCEP_DECL;
     int locked = 0;
@@ -840,7 +840,7 @@ int Yarrow_Final(Yarrow_CTX* y)
 }
 
 YARROW_DLL
-const char* Yarrow_Str_Error( int err )
+const char* krb5int_yarrow_str_error( int err )
 {
     err = 1-err;
     if ( err < 0 || err >= sizeof( yarrow_str_error ) / sizeof( char* ) )

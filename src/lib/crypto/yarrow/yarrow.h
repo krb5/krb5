@@ -130,42 +130,42 @@ typedef struct
 
 
 YARROW_DLL
-int Yarrow_Init( Yarrow_CTX* y, const char *filename );
+int krb5int_yarrow_init( Yarrow_CTX* y, const char *filename );
 
 
 YARROW_DLL
-int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
+int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
 		  const void* sample, 
 		  size_t size, size_t entropy_bits );
 
 YARROW_DLL
-int Yarrow_Status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
+int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
 		   size_t *entropy_bits, size_t *entropy_max );
 
 YARROW_DLL
-int Yarrow_Output( Yarrow_CTX* y, void* out, size_t size );
+int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size );
 
 YARROW_DLL
-int Yarrow_New_Source( Yarrow_CTX* y, unsigned* source_id );
+int krb5int_yarrow_new_source( Yarrow_CTX* y, unsigned* source_id );
 
 YARROW_DLL
-int Yarrow_Register_Source_Estimator( Yarrow_CTX* y, unsigned source_id, 
+int krb5int_yarrow_register_source_estimator( Yarrow_CTX* y, unsigned source_id, 
 				      estimator_fn* fptr );
 
 YARROW_DLL
-int Yarrow_Stretch( const byte* m, size_t size, byte* out, size_t out_size );
+int krb5int_yarrow_stretch( const byte* m, size_t size, byte* out, size_t out_size );
 
 YARROW_DLL
-int Yarrow_Reseed( Yarrow_CTX* y, int pool );
+int krb5int_yarrow_reseed( Yarrow_CTX* y, int pool );
 
 YARROW_DLL
-int Yarrow_Gate( Yarrow_CTX* y );
+int krb5int_yarrow_gate( Yarrow_CTX* y );
 
 YARROW_DLL
-int Yarrow_Final( Yarrow_CTX* y );
+int krb5int_yarrow_final( Yarrow_CTX* y );
 
 YARROW_DLL
-const char* Yarrow_Str_Error( int );
+const char* krb5int_yarrow_str_error( int );
 
 
 #   define mem_zero(p, n)       memset((p), 0, (n))
