@@ -29,18 +29,21 @@
 #define KRB5_ENCRYPTION__
 
 typedef struct _krb5_keyblock {
+    krb5_magic magic;
     krb5_keytype keytype;
     int length;
     krb5_octet *contents;
 } krb5_keyblock;
 
 typedef struct _krb5_checksum {
+    krb5_magic magic;
     krb5_cksumtype checksum_type;	/* checksum type */
     int length;
     krb5_octet *contents;
 } krb5_checksum;
 
 typedef struct _krb5_encrypt_block {
+    krb5_magic magic;
     struct _krb5_cryptosystem_entry *crypto_entry;
     krb5_keyblock *key;
     krb5_pointer priv;			/* for private use, e.g. DES
@@ -48,6 +51,7 @@ typedef struct _krb5_encrypt_block {
 } krb5_encrypt_block;
 
 typedef struct _krb5_enc_data {
+    krb5_magic magic;
     krb5_enctype etype;
     krb5_kvno kvno;
     krb5_data ciphertext;
@@ -57,6 +61,7 @@ typedef struct _krb5_enc_data {
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
+    krb5_magic magic;
     krb5_error_code (*encrypt_func) NPROTOTYPE((krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
@@ -93,12 +98,14 @@ typedef struct _krb5_cryptosystem_entry {
 #include <krb5/narrow.h>
 
 typedef struct _krb5_cs_table_entry {
+    krb5_magic magic;
     krb5_cryptosystem_entry *system;
     krb5_pointer random_sequence;	/* from init_random_key() */
 } krb5_cs_table_entry;
 
 /* could be used in a table to find a sumtype */
 typedef struct _krb5_checksum_entry {
+    krb5_magic magic;
     krb5_error_code  (*sum_func) NPROTOTYPE ((krb5_pointer /* in */,
 					     size_t /* in_length */,
 					     krb5_pointer /* key/seed */,

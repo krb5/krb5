@@ -54,6 +54,7 @@ krb5_checksum *outcksum;
 }
 
 krb5_checksum_entry rsa_md4_cksumtable_entry = {
+    0,
     md4_sum_func,
     RSA_MD4_CKSUM_LENGTH,
     1,					/* is collision proof */

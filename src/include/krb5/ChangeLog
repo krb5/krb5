@@ -1,3 +1,7 @@
+Tue Oct  4 14:51:32 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+* encryption.h: Add magic number to encryption structures.
+
 Mon Oct  3 18:45:55 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb.h: Add magic number to _krb5_db_entry.  (This among other
