@@ -62,7 +62,4 @@ clean::
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 
-includes::
-	@-mkdir $(EHDRDIR)
-
 depend:: $(ETSRCS)

@@ -1,3 +1,7 @@
+Thu Jul 14 03:29:25 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: remove spurious mkdir
+
 Tue Jun 21 01:17:35 1994  Mark W. Eichin  (eichin at mit.edu)
 
 	* configure.in: add AC_SIZE_T.
