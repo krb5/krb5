@@ -1,3 +1,7 @@
+Sat Apr 15 06:40:28 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* configure.in: Add profile directory
+
 Tue Mar 28 18:50:04 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (all):  Split into all-$(WHAT).
