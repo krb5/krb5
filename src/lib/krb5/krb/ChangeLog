@@ -1,3 +1,11 @@
+2000-02-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (pa_sam): In send-encrypted-sad mode, check for magic
+	salt length and generate a salt from the principal name if found;
+	use the password and salt to generate a key.  Provide timestamp if
+	nonce is zero, regardless of preauth mode.  (Patch from Chas
+	Williams.)
+
 2000-02-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* gic_pwd.c (krb5_get_as_key_password): If the as_key enctype is

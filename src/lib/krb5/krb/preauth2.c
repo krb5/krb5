@@ -271,20 +271,56 @@ krb5_error_code pa_sam(krb5_context context,
     }
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
+    if (sam_challenge->sam_nonce == 0) {
+	if (ret = krb5_us_timeofday(context, 
+				&enc_sam_response_enc.sam_timestamp,
+				&enc_sam_response_enc.sam_usec)) {
+		krb5_xfree(sam_challenge);
+		return(ret);
+	}
+
+	sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
+    }
+
     /* XXX What if more than one flag is set?  */
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
-	enc_sam_response_enc.sam_sad = response_data;
-    } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
-	if (sam_challenge->sam_nonce == 0) {
-	    if (ret = krb5_us_timeofday(context, 
-					&enc_sam_response_enc.sam_timestamp,
-					&enc_sam_response_enc.sam_usec)) {
+
+	if (as_key->length) {
+	    krb5_free_keyblock_contents(context, as_key);
+	    as_key->length = 0;
+	}
+
+	/* generate a salt using the requested principal */
+
+	if ((salt->length == -1) && (salt->data == NULL)) {
+	    if (ret = krb5_principal2salt(context, request->client,
+					  &defsalt)) {
 		krb5_xfree(sam_challenge);
 		return(ret);
 	    }
 
-	    sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
+	    salt = &defsalt;
+	} else {
+	    defsalt.length = 0;
 	}
+
+	/* generate a key using the supplied password */
+
+	ret = krb5_c_string_to_key(context, ENCTYPE_DES_CBC_MD5,
+				   (krb5_data *)gak_data, salt, as_key);
+
+	if (defsalt.length)
+	    krb5_xfree(defsalt.data);
+
+	if (ret) {
+	    krb5_xfree(sam_challenge);
+	    return(ret);
+	}
+
+	/* encrypt the passcode with the key from above */
+
+	enc_sam_response_enc.sam_sad = response_data;
+    } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
 
 	/* process the key as password */
 
