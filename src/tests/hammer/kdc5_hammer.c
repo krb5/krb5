@@ -78,7 +78,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype]\n");
     fprintf(stderr, "\t [-P preauth type] [-R repeat_count]\n");
 
     exit(status);
@@ -123,7 +123,7 @@ main(argc, argv)
     errors = 0;
     keytypedone = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bv")) != EOF) {
+    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:")) != EOF) {
 	switch (option) {
 	case 'b':
 	    brief = 1;
@@ -254,6 +254,12 @@ main(argc, argv)
       }
     }
     fprintf (stderr, "\nTried %d.  Got %d errors.\n", n_tried, errors);
+
+    (void) krb5_cc_close(test_context, ccache);
+
+    krb5_free_context(test_context);
+
+    exit(errors);
   }
 
 
@@ -319,7 +325,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	      p_num, c_depth, s_depth);
     else
       fprintf(stderr, "\tclient %s for server %s\n", p_client_str, 
-	      hostname);
+	      service);
 
     /* Initialize variables */
     memset((char *)&creds, 0, sizeof(creds));
@@ -404,6 +410,8 @@ cleanup_keyblock:
 
 cleanup_rdata:
     krb5_xfree(request_data.data);
+
+    krb5_free_cred_contents(context, credsp);
 
     return retval;
 }

@@ -1,3 +1,9 @@
+Thu Apr 20 13:06:53 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_hammer.c (usage()): Removed -M as not used.
+	               (main()): Add missing option to getopt call. 
+		       On exit, close the ccache, free context, and exit
+		       with status set to number of errors encountered.
 
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
