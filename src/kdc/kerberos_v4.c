@@ -33,11 +33,7 @@
 #include "kdc_util.h"
 #include "adm_proto.h"
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -78,11 +74,7 @@ static int kerb_get_principal (char *, char *, Principal *, int,
 static int check_princ (char *, char *, int, Principal *,
 				  krb5_keyblock *, int, krb5_deltat *);
 
-#ifdef HAVE_STDARG_H
 char * v4_klog (int, const char *, ...);
-#else
-char * v4_klog (int, char *, va_dcl);
-#endif
 #define klog v4_klog
 
 /* take this out when we don't need it anymore */
@@ -262,22 +254,11 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
     return(retval);
 }
 
-#ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
-#else
-char * v4_klog( type, format, va_alist)
-    int type;
-    char *format;
-    va_dcl
-#endif
 {
     int logpri = LOG_INFO;
     va_list pvar;
-#ifdef HAVE_STDARG_H
     va_start(pvar, format);
-#else
-    va_start(pvar);
-#endif
 
     switch (type) {
     case L_ERR_SEXP:
@@ -1006,29 +987,6 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
 
 }
 
-/*
- * Given a pointer to a long containing the number of seconds
- * since the beginning of time (midnight 1 Jan 1970 GMT), return
- * a string containing the local time in the form:
- *
- * "25-Jan-88 10:17:56"
- */
-
-static char *krb4_stime(long int *t)
-{
-    static char st[40];
-    static time_t adjusted_time;
-    struct tm *tm;
-    extern char *month_sname(int);
-
-    adjusted_time = *t /* - CONVERT_TIME_EPOCH */;
-    tm = localtime(&adjusted_time);
-    (void) sprintf(st,"%4d-%s-%02d %02d:%02d:%02d",tm->tm_mday+1900,
-                   month_sname(tm->tm_mon + 1),tm->tm_year,
-                   tm->tm_hour, tm->tm_min, tm->tm_sec);
-    return st;
-}
-
 static int
 check_princ(char *p_name, char *instance, int lifetime, Principal *p,
 	    krb5_keyblock *k5key, int issrv, krb5_deltat *k5life)
@@ -1122,9 +1080,14 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
     if (((u_long) p->exp_date != 0)&&
 	((u_long) p->exp_date <(u_long) kerb_time.tv_sec)) {
 	/* service did expire, log it */
+	char timestr[40];
+	struct tm *tm;
+	time_t t = p->exp_date;
+
+	tm = localtime(&t);
+	strftime(timestr, "%Y-%m-%d %H:%M:%S", tm);
 	lt = klog(L_ERR_SEXP,
-	    "EXPIRED \"%s\" \"%s\"  %s", p->name, p->instance,
-	     krb4_stime(&(p->exp_date)), 0);
+		  "EXPIRED \"%s\" \"%s\"  %s", p->name, p->instance, timestr);
 	return KERB_ERR_NAME_EXP;
     }
     /* ok is zero */
