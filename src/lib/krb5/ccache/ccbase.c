@@ -38,13 +38,19 @@ struct krb5_cc_typelist
  };
 extern const krb5_cc_ops krb5_mcc_ops;
 
+#ifdef _WIN32
+extern const krb5_cc_ops krb5_lcc_ops;
+static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NULL };
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_lcc_entry };
+#else
 static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
+#endif
 
 static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
 
-
 static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
+
 
 /*
  * Register a new credentials cache type

@@ -1,3 +1,7 @@
+2003-12-12  Jeffrey Altman <jaltman@mit.edu>
+
+    * krb5_err.et (KRB5_CC_READONLY) new ccache error code
+
 2003-07-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* init_ets.c (krb5_init_ets): Only initialize error tables once -

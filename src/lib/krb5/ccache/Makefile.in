@@ -17,6 +17,9 @@ LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
+##WIN32##MSLSA_OBJ = $(OUTPRE)cc_mslsa.$(OBJEXT)
+##WIN32##MSLSA_SRC = $(srcdir)/cc_mslsa.c
+
 MAC_SUBDIRS = ccapi
 
 STLIBOBJS= \
@@ -37,7 +40,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
 	$(OUTPRE)cc_memory.$(OBJEXT) \
 	$(OUTPRE)ccfns.$(OBJEXT) \
-	$(OUTPRE)ser_cc.$(OBJEXT)
+	$(OUTPRE)ser_cc.$(OBJEXT) $(MSLSA_OBJ)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
@@ -47,7 +50,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cc_file.c \
 	$(srcdir)/cc_memory.c \
 	$(srcdir)/ccfns.c \
-	$(srcdir)/ser_cc.c
+	$(srcdir)/ser_cc.c $(MSLSA_SRC)
 
 ##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
 
@@ -97,7 +100,7 @@ check-unix:: t_cc
 clean-unix::
 	$(RM) t_cc t_cc.o
 
-
+##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
 # @libobj_frag@
 

@@ -1,3 +1,49 @@
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_msla.c:   Enable purging of the MS Kerberos LSA cache when the TGT
+     has expired.  This will force the LSA to get a new TGT instead of 
+     returning the expired version.
+
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c:  Perform a GetMSTGT() call as part of krb5_lcc_start_seq_get
+     to ensure that the tgt is refreshed
+
+2003-12-13  Jeffrey Altman <jaltman@mit.edu>
+
+   * Makefile.in: Remove extranenous spaces in ##WIN32## constructs
+     defining MSLSA_SRC MSLSA_OBJ
+
+2003-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Move ##WIN32## constructs from inside
+	backslash-continued lists, as it was breaking them.  Move explicit
+	dependency information from under automatic dependencies.
+
+2003-12-11  Jeffrey Altman <jaltman@mit.edu>
+
+    * Makefile.in, ccbase.c, cc_mslsa.c (new)
+
+    Remove all of the code which was duplicated between ms2mit.c
+    and the KfW Leash libraries (and who knows how many applications
+    shipped by third parties) and use it as the basis for a new
+    krb5_ccache type, "MSLSA:".  The "MSLSA:" ccache type is a
+    read-only ccache which can be used either as a monitor of the
+    contents of the Microsoft LSA cache or as a source for copying
+    the contents to another ccache type.  The purpose of migrating
+    this code to the krb5_32.dll is to avoid the need for applications
+    to be consistently updated each time Microsoft makes a change
+    to the behavior of the LSA cache.  Changes have occurred with
+    the release of 2000, XP, and 2003 so far.  Also, the code for
+    working with the MS LSA cache is not well documented and many
+    mistakes were made in the original versions of the ms2mit.c
+    code base.  Unfortunately, the ms2mit.c code has been copied
+    into many other applications.  
+
+    With access to this new ccache type, the ms2mit.c source file
+    is reduced from 890 lines to 80 lines including the copyright
+    banner.
+
 2003-11-26  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_default.c: Add support for Leash Kinit Dialog on Windows to
