@@ -1936,32 +1936,40 @@ kwin_command (
 		#endif
 
 		#ifdef KRB5
-            code = krb5_parse_name(k5_context, name, &principal);
-			code = krb5_cc_initialize(k5_context, k5_ccache, principal);
-			memset(&creds, 0, sizeof(creds));
-			creds.client = principal;
+            do {
+                principal = server = NULL;
+	    		memset(&creds, 0, sizeof(creds));
 
-			code = krb5_build_principal_ext(k5_context, &server,
-				krb5_princ_realm(k5_context, principal)->length,
-				krb5_princ_realm(k5_context, principal)->data,
-                KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-				krb5_princ_realm(k5_context, principal)->length,
-				krb5_princ_realm(k5_context, principal)->data, 0);
+                code = krb5_parse_name(k5_context, name, &principal);
+                if (code) break;
+	    		code = krb5_cc_initialize(k5_context, k5_ccache, principal);
+                if (code) break;
 
-			creds.server = server;
+    			code = krb5_build_principal_ext(k5_context, &server,
+	    			krb5_princ_realm(k5_context, principal)->length,
+		    		krb5_princ_realm(k5_context, principal)->data,
+                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+				    krb5_princ_realm(k5_context, principal)->length,
+    				krb5_princ_realm(k5_context, principal)->data, 0);
+                if (code) break;
 
-			//code = krb5_os_localaddr(&address);
-			code = krb5_timeofday(k5_context, &now);
+		    	creds.client = principal;
+	    		creds.server = server;
 
-			creds.times.starttime = 0;
-			creds.times.endtime = now + 60L * lifetime;
-			creds.times.renew_till = 0;
+                code = krb5_timeofday(k5_context, &now);
+                if (code) break;
+                creds.times.starttime = 0;
+    			creds.times.endtime = now + 60L * lifetime;
+	    		creds.times.renew_till = 0;
 
-			code = krb5_get_in_tkt_with_password(k5_context, 0, NULL, NULL, 
-				NULL, password, k5_ccache, &creds, 0);
+		    	code = krb5_get_in_tkt_with_password(k5_context, 0, NULL,
+                    NULL, NULL, password, k5_ccache, &creds, 0);
+            } while (0);
 
-			krb5_free_principal(k5_context, server);
-			//krb5_free_addresses(k5_context, address);
+            if (principal)
+                krb5_free_principal(k5_context, principal);
+            if (server) 
+    			krb5_free_principal(k5_context, server);
 
 		#endif
 
@@ -1983,8 +1991,6 @@ kwin_command (
 				com_err (NULL, code, "while logging in");
 				return TRUE;
 			}
-            // ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
-
 		#endif
 
 		SetDlgItemText(hwnd, IDD_LOGIN_PASSWORD, "");
@@ -2016,7 +2022,6 @@ kwin_command (
 
 		#ifdef KRB5
             code = k5_dest_tkt ();
-    		// ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
 		#endif
 
 		kwin_set_default_focus(hwnd);
@@ -2053,7 +2058,12 @@ kwin_command (
 		if (isblocking)
 			return TRUE;
 
-		strcpy(copyright, "        Kerberos for Windows\n");
+        #ifdef KRB4
+    		strcpy(copyright, "        Kerberos 4 for Windows\n");
+        #endif
+        #ifdef KRB5
+    		strcpy(copyright, "        Kerberos 5 for Windows\n");
+        #endif
 		strcat(copyright, "\n                Version 1.00\n\n");
 		strcat(copyright, "          For support, contact:\n");
 		strcat(copyright, ORGANIZATION);
