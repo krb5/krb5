@@ -72,9 +72,6 @@ register int *error;
 	    *error = ENOMEM;
 	    return(0);
 	}
-    }
-    
-    if (val->usec) {
 	retval->usec = val->usec;
 	retval->optionals |= opt_KRB5_EncKrbCredPart_usec;
     }
