@@ -98,7 +98,7 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply)
      * XXX we know they are the same size... and we should do
      * something better than just the current time
      */
-    request->nonce = (krb5_int32) time_now;
+    request->nonce = (krb5_int32) *time_now;
 
     /* encode & send to KDC */
     if ((retval = encode_krb5_as_req(request, &packet)) != 0)
@@ -452,13 +452,14 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	    retval = KRB5_GET_IN_TKT_LOOP;
 	    goto cleanup;
 	}
-#if 0
-	if ((retval = krb5_obtain_padata(context, preauth_to_use, key_proc,
+
+	if ((retval = krb5_obtain_padata(context, preauth_to_use, 0, key_proc,
 					 keyseed, creds, &request)) != 0)
 	    goto cleanup;
-	krb5_free_pa_data(context, preauth_to_use);
+	if (preauth_to_use)
+	    krb5_free_pa_data(context, preauth_to_use);
 	preauth_to_use = 0;
-#endif
+	
 	err_reply = 0;
 	as_reply = 0;
 	if ((retval = send_as_request(context, &request, &time_now, &err_reply,
@@ -483,13 +484,11 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
 	    goto cleanup;
 	}
-#if 0
 	if ((retval = krb5_process_padata(context, &request, as_reply,
 					  key_proc, keyseed, creds,
 					  &do_more)) != 0)
 	    goto cleanup;
-	
-#endif
+
 	if (!do_more)
 	    break;
     }
@@ -510,6 +509,8 @@ cleanup:
 	free(request.ktype);
     if (!addrs && request.addresses)
 	krb5_free_addresses(context, request.addresses);
+    if (request.padata)
+	krb5_free_pa_data(context, request.padata);
     if (padata)
 	krb5_free_pa_data(context, padata);
     if (preauth_to_use)

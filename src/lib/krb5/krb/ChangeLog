@@ -1,3 +1,16 @@
+Wed Nov  8 02:50:59 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* encrypt_tk.c (cleanup_scratch): Changed interface to no longer
+		require an eblock; we can use our own and figure out the
+		enctype from the passed-in key.
+
+	* get_in_tkt.c (krb5_get_in_tkt): Added calls to
+		krb5_obtain_padata(). 
+
+	* preauth.c: Completely restructured file to support
+		preauthentication. 
+		
+
 Fri Oct 27 22:15:33 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* get_in_tkt.c (krb5_get_in_tkt): Extensive reworking of the
