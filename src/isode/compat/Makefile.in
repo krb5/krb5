@@ -17,8 +17,8 @@ INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
 PEPSYDIR=	$(PEPSYDIRM)/
-LIBISODE=	$(TOPDIR)libisode.a
-LIBDSAP	=	$(TOPDIR)libdsap.a
+LIBISODE=	$(TOPDIR)lib/libisode.a
+LIBDSAP	=	$(TOPDIR)lib/libdsap.a
 
 LIBES	=	libcompat.a
 LLIBS   =
@@ -95,9 +95,9 @@ libcompat.a:	compatvrsn.o
 		-rm -f $@
 		$(UTILDIR)make-lib.sh $(SYSTEM) $@ $(OFILES) \
 			compatvrsn.o
-		-@rm -f $(TOPDIR)libcompat.a $(TOPDIR)llib-lcompat
-		-@$(LN) libcompat.a $(TOPDIR)libcompat.a || cp libcompat.a $(TOPDIR)libcompat.a
-		-@$(LN) llib-lcompat $(TOPDIR)llib-lcompat
+		-@rm -f $(TOPDIR)lib/libcompat.a $(TOPDIR)lib/llib-lcompat
+		-@$(LN) libcompat.a $(TOPDIR)lib/libcompat.a || cp libcompat.a $(TOPDIR)lib/libcompat.a
+		-@$(LN) llib-lcompat $(TOPDIR)lib/llib-lcompat
 		-@ls -l $@
 		-@echo "COMPAT library built normally"
 

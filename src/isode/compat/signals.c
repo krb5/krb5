@@ -9,7 +9,12 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
- * Revision 1.1  1994/06/10 03:28:14  eichin
+ * Revision 1.2  1994/06/12 23:52:02  tytso
+ * Take out old linux specific hack which doesn't work anymore.
+ *
+ * Move isode libraries to lib subdirectory and out of the top level directory.
+ *
+ * Revision 1.1  1994/06/10  03:28:14  eichin
  * autoconfed isode for kerberos work
  *
  * Revision 1.1  94/06/10  03:16:43  eichin
@@ -112,11 +117,7 @@ int	mask;
     return omask;
 }
 
-#ifdef linux
-sigset_t	sigsetmask (mask)
-#else
 int	sigsetmask (mask)
-#endif
 int	mask;
 {
     register int    sig,
