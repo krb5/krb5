@@ -368,7 +368,7 @@ cleanup:
 
    return(ret);
 }
-krb5_error_code krb5int_populate_gic_opt (
+void krb5int_populate_gic_opt (
     krb5_context context, krb5_get_init_creds_opt *opt,
     krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
     krb5_preauthtype *pre_auth_types)
