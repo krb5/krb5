@@ -27,9 +27,9 @@ build : {KH68K} {KHPPC}
 
 link :
 	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
-	MWLinkPPC -library -model far -o libkrb5.PPC {K5OBJSPPC}
+	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
 	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
-	MWLinkPPC -library -model far -o libgss.PPC {GSSOBJSPPC}
+	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
 
 clean :
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC}

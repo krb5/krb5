@@ -1,3 +1,8 @@
+Wed Mar 27 18:53:04 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.tmpl (link): Don't use "-model far" when linking on the
+		Power PC.  It has no meaning.
+
 Wed Mar 20 00:16:45 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* macfiles.sh: Improved matching of the SRCS declaration.  It must
