@@ -161,10 +161,10 @@ clean-unix:: clean-libs clean-libobjs
 conv_creds.so conv_creds.po $(OUTPRE)conv_creds.$(OBJEXT): conv_creds.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h krb524.h $(BUILDTOP)/include/krb524_err.h
+  $(SRCTOP)/include/kerberosIV/des.h krb524.h krb524_err.h
 conv_princ.so conv_princ.po $(OUTPRE)conv_princ.$(OBJEXT): conv_princ.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h krb524.h $(BUILDTOP)/include/krb524_err.h \
+  $(SRCTOP)/include/kerberosIV/des.h krb524.h krb524_err.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h
 cnv_tkt_skey.so cnv_tkt_skey.po $(OUTPRE)cnv_tkt_skey.$(OBJEXT): cnv_tkt_skey.c $(SRCTOP)/include/k5-int.h \
@@ -172,15 +172,15 @@ cnv_tkt_skey.so cnv_tkt_skey.po $(OUTPRE)cnv_tkt_skey.$(OBJEXT): cnv_tkt_skey.c 
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h krb524.h $(BUILDTOP)/include/krb524_err.h
+  $(SRCTOP)/include/kerberosIV/des.h krb524.h krb524_err.h
 encode.so encode.po $(OUTPRE)encode.$(OBJEXT): encode.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h krb524.h $(BUILDTOP)/include/krb524_err.h \
+  $(SRCTOP)/include/kerberosIV/des.h krb524.h krb524_err.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h
 misc.so misc.po $(OUTPRE)misc.$(OBJEXT): misc.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h krb524.h $(BUILDTOP)/include/krb524_err.h \
+  $(SRCTOP)/include/kerberosIV/des.h krb524.h krb524_err.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h
 globals.so globals.po $(OUTPRE)globals.$(OBJEXT): globals.c
@@ -190,6 +190,6 @@ sendmsg.so sendmsg.po $(OUTPRE)sendmsg.$(OBJEXT): sendmsg.c $(SRCTOP)/include/fa
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  krb524.h $(BUILDTOP)/include/krb524_err.h
+  krb524.h krb524_err.h
 libinit.so libinit.po $(OUTPRE)libinit.$(OBJEXT): libinit.c
 
