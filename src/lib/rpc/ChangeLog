@@ -1,3 +1,8 @@
+2002-08-02  Tom Yu  <tlyu@mit.edu>
+
+	* xdr_array.c (xdr_array): Account for elsize when checking
+	encoded array count.
+
 2002-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* dyn.c: New file, combining contents of old util/dyn library,
