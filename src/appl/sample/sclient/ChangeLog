@@ -1,7 +1,12 @@
+2001-01-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* sclient.c (main): Do not free auth_context unless
+	set. (krb5-appl/895 from tim.mann@compaq.com)
+
 2000-07-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* sclient.c:  Include unistd.h if present (for close prototype). 
-	Change variable named sin (shadows maht library).
+	Change variable named sin (shadows math library).
 
 2000-02-25  Ezra Peisach  <epeisach@mit.edu>
 

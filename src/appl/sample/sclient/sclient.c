@@ -182,7 +182,7 @@ char *argv[];
     krb5_free_principal(context, server);	/* finished using it */
     krb5_free_principal(context, client);      
     krb5_cc_close(context, ccdef);
-    krb5_auth_con_free(context, auth_context);
+    if (auth_context) krb5_auth_con_free(context, auth_context);
 
     if (retval && retval != KRB5_SENDAUTH_REJECTED) {
 	com_err(argv[0], retval, "while using sendauth");
