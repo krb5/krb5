@@ -124,6 +124,348 @@
 			settings = {
 			};
 		};
+		00F189640074D4357F000001 = {
+			children = (
+				00F1896B0074D48F7F000001,
+				00F189850074D7B97F000001,
+				00F189860074D7B97F000001,
+				00F189870074D7B97F000001,
+				00F1896E0074D52F7F000001,
+			);
+			isa = PBXGroup;
+			name = clients;
+			path = "";
+			refType = 2;
+		};
+		00F189650074D4357F000001 = {
+			isa = PBXExecutableFileReference;
+			path = kinit;
+			refType = 3;
+		};
+		00F189660074D4357F000001 = {
+			buildPhases = (
+				00F189670074D4357F000001,
+				00F189680074D4357F000001,
+				00F189690074D4357F000001,
+				00F1896A0074D4357F000001,
+			);
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "";
+				INSTALL_PATH = /usr/bin;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT -DKINIT_DEFAULT_BOTH";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = kinit;
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+			);
+			isa = PBXToolTarget;
+			name = kinit;
+			productInstallPath = /usr/bin;
+			productName = kinit;
+			productReference = 00F189650074D4357F000001;
+			shouldUseHeadermap = 0;
+		};
+		00F189670074D4357F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F189680074D4357F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1896C0074D4907F000001,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F189690074D4357F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1896F0074D52F7F000001,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F1896A0074D4357F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F1896B0074D48F7F000001 = {
+			isa = PBXFileReference;
+			path = kinit.c;
+			refType = 2;
+		};
+		00F1896C0074D4907F000001 = {
+			fileRef = 00F1896B0074D48F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F1896E0074D52F7F000001 = {
+			isa = PBXFrameworkReference;
+			path = Kerberos.framework;
+			refType = 3;
+		};
+		00F1896F0074D52F7F000001 = {
+			fileRef = 00F1896E0074D52F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F189700074D6497F000001 = {
+			isa = PBXExecutableFileReference;
+			path = klist;
+			refType = 3;
+		};
+		00F189710074D6497F000001 = {
+			isa = PBXExecutableFileReference;
+			path = kpasswd;
+			refType = 3;
+		};
+		00F189720074D6497F000001 = {
+			isa = PBXExecutableFileReference;
+			path = kdestroy;
+			refType = 3;
+		};
+		00F189730074D6497F000001 = {
+			buildPhases = (
+				00F189740074D6497F000001,
+				00F189750074D6497F000001,
+				00F189760074D6497F000001,
+				00F189770074D6497F000001,
+			);
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT -DUSE_CCAPI";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = klist;
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+			);
+			isa = PBXToolTarget;
+			name = klist;
+			productInstallPath = /usr/local/bin;
+			productName = klist;
+			productReference = 00F189700074D6497F000001;
+			shouldUseHeadermap = 0;
+		};
+		00F189740074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F189750074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F189880074D7B97F000001,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F189760074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F189890074D7B97F000001,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F189770074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F189780074D6497F000001 = {
+			buildPhases = (
+				00F189790074D6497F000001,
+				00F1897A0074D6497F000001,
+				00F1897B0074D6497F000001,
+				00F1897C0074D6497F000001,
+			);
+			buildSettings = {
+				HEADER_SEARCH_PATHS = "";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = kpasswd;
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+			);
+			isa = PBXToolTarget;
+			name = kpasswd;
+			productInstallPath = /usr/local/bin;
+			productName = kpasswd;
+			productReference = 00F189710074D6497F000001;
+			shouldUseHeadermap = 0;
+		};
+		00F189790074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F1897A0074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1898A0074D7B97F000001,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F1897B0074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1898B0074D7B97F000001,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F1897C0074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F1897D0074D6497F000001 = {
+			buildPhases = (
+				00F1897E0074D6497F000001,
+				00F1897F0074D6497F000001,
+				00F189800074D6497F000001,
+				00F189810074D6497F000001,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = kdestroy;
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+			);
+			isa = PBXToolTarget;
+			name = kdestroy;
+			productInstallPath = /usr/local/bin;
+			productName = kdestroy;
+			productReference = 00F189720074D6497F000001;
+			shouldUseHeadermap = 0;
+		};
+		00F1897E0074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F1897F0074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1898C0074D7B97F000001,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F189800074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F1898D0074D7B97F000001,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F189810074D6497F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F189850074D7B97F000001 = {
+			isa = PBXFileReference;
+			path = klist.c;
+			refType = 4;
+		};
+		00F189860074D7B97F000001 = {
+			isa = PBXFileReference;
+			path = kpasswd.c;
+			refType = 4;
+		};
+		00F189870074D7B97F000001 = {
+			isa = PBXFileReference;
+			path = kdestroy.c;
+			refType = 4;
+		};
+		00F189880074D7B97F000001 = {
+			fileRef = 00F189850074D7B97F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F189890074D7B97F000001 = {
+			fileRef = 00F1896E0074D52F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F1898A0074D7B97F000001 = {
+			fileRef = 00F189860074D7B97F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F1898B0074D7B97F000001 = {
+			fileRef = 00F1896E0074D52F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F1898C0074D7B97F000001 = {
+			fileRef = 00F189870074D7B97F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		00F1898D0074D7B97F000001 = {
+			fileRef = 00F1896E0074D52F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		00F24292FFB75B2612120156 = {
 			isa = PBXLibraryReference;
 			path = libkrb5.dylib;
@@ -6069,6 +6411,10 @@
 				00F242A5FFB75FA712120156,
 				00F24293FFB75B2612120156,
 				00F242ADFFB760BC12120156,
+				00F189660074D4357F000001,
+				00F189730074D6497F000001,
+				00F189780074D6497F000001,
+				00F1897D0074D6497F000001,
 			);
 		};
 		25C77493FF52D03A12120111 = {
@@ -6081,6 +6427,11 @@
 				1744760AFF5FF8DB12120111,
 				5C1372E8FF6546C412120111,
 				00F24299FFB75CD112120156,
+				00F189640074D4357F000001,
+				00F189650074D4357F000001,
+				00F189700074D6497F000001,
+				00F189710074D6497F000001,
+				00F189720074D6497F000001,
 			);
 			isa = PBXGroup;
 			refType = 4;
