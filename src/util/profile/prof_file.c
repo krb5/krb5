@@ -28,13 +28,18 @@
 #define stat _stat
 #endif
 
+#ifdef SHARE_TREE_DATA
+struct global_shared_profile_data krb5int_profile_shared_data = {
+    0
+};
+#endif
+
 #ifndef PROFILE_USES_PATHS
 #include <FSp_fopen.h>
 
 static OSErr GetMacOSTempFilespec (
 	const	FSSpec*	inFilespec,
 			FSSpec*	outFilespec);
-
 #endif
 
 static int rw_access(filespec)
@@ -80,7 +85,36 @@ errcode_t profile_open_file(filespec, ret_prof)
 	if (!prf)
 		return ENOMEM;
 	memset(prf, 0, sizeof(struct _prf_file_t));
+	prf->magic = PROF_MAGIC_FILE;
+
+#ifdef SHARE_TREE_DATA
+	for (data = g_shared_trees; data; data = data->next) {
+	    if (!strcmp(data->filespec, filespec)
+		/* Check that current uid has read access.  */
+		&& access(data->filespec, R_OK) == 0)
+		break;
+	}
+	if (data) {
+	    retval = profile_update_file_data(data);
+	    data->refcount++;
+	    prf->data = data;
+	    *ret_prof = prf;
+	    return retval;
+	}
+	data = malloc(sizeof(struct _prf_data_t));
+	if (data == NULL) {
+	    free(prf);
+	    return ENOMEM;
+	}
+	memset(data, 0, sizeof(*data));
+	prf->data = data;
+#else
 	data = prf->data;
+#endif
+
+	data->magic = PROF_MAGIC_FILE_DATA;
+	data->refcount = 1;
+	data->comment = 0;
 
 	len = strlen(filespec)+1;
 	if (filespec[0] == '~' && filespec[1] == '/') {
@@ -98,15 +132,18 @@ errcode_t profile_open_file(filespec, ret_prof)
 		strcat(data->filespec, filespec+1);
 	} else
 		strcpy(data->filespec, filespec);
-	prf->magic = PROF_MAGIC_FILE;
-	data->magic = PROF_MAGIC_FILE_DATA;
-	data->refcount = 1;
 
 	retval = profile_update_file(prf);
 	if (retval) {
 		profile_close_file(prf);
 		return retval;
 	}
+
+#ifdef SHARE_TREE_DATA
+	data->next = g_shared_trees;
+	data->flags |= PROFILE_FILE_SHARED;
+	g_shared_trees = data;
+#endif
 
 	*ret_prof = prf;
 	return 0;
@@ -276,16 +313,47 @@ errout:
 }
 
 
+void profile_dereference_data(prf_data_t data)
+{
+#ifdef SHARE_TREE_DATA
+    data->refcount--;
+    if (data->refcount == 0)
+	profile_free_file_data(data);
+#else
+    profile_free_file_data(data);
+#endif
+}
+
 void profile_free_file(prf)
 	prf_file_t prf;
 {
-	profile_free_file_data(prf->data);
-	free(prf);
+    profile_dereference_data(prf->data);
+    free(prf);
 }
 
 void profile_free_file_data(data)
 	prf_data_t data;
 {
+#ifdef SHARE_TREE_DATA
+    if (data->flags & PROFILE_FILE_SHARED) {
+	/* Remove from linked list.  */
+	if (g_shared_trees == data)
+	    g_shared_trees = data->next;
+	else {
+	    prf_data_t prev, next;
+	    prev = g_shared_trees;
+	    next = prev->next;
+	    while (next) {
+		if (next == data) {
+		    prev->next = next->next;
+		    break;
+		}
+		prev = next;
+		next = next->next;
+	    }
+	}
+    }
+#endif
 #ifdef PROFILE_USES_PATHS
 	if (data->filespec)
 		free(data->filespec);
@@ -295,6 +363,9 @@ void profile_free_file_data(data)
 	if (data->comment)
 		free(data->comment);
 	data->magic = 0;
+#ifdef SHARE_TREE_DATA
+	free(data);
+#endif
 }
 
 errcode_t profile_close_file(prf)
@@ -308,4 +379,3 @@ errcode_t profile_close_file(prf)
 	profile_free_file(prf);
 	return 0;
 }
-

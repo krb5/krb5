@@ -1,3 +1,28 @@
+2002-12-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (SHARE_TREE_DATA): Define.
+	(struct _prf_file_t) [SHARE_TREE_DATA]: Make data field a pointer
+	rather than an array.
+	(struct global_shared_profile_data): New type, for profile library
+	global data.
+	(krb5int_profile_shared_data): Declare new variable.
+	(g_shared_trees): New macro, refers to a field in the global data.
+	(PROFILE_FILE_SHARED): New flag macro.
+	* prof_file.c (krb5int_profile_shared_data): Initialize here.
+	(profile_open_file) [SHARE_TREE_DATA]: Scan g_shared_trees for an
+	entry with the same filename.  If found, increment its reference
+	count, update it, and return it; otherwise, allocate a new one,
+	and add it to the list after filling it in.
+	(profile_dereference_data): New function.  Decrement reference
+	count if SHARE_TREE_DATA, and free the data if appropriate.
+	(profile_free_file): Call profile_dereference_data.
+	(profile_free_file_data) [SHARE_TREE_DATA]: If the SHARED flag is
+	set, remove it from the g_shared_trees list before freeing.  Free
+	up the allocated space.
+	* prof_set.c (rw_setup) [SHARE_TREE_DATA]: If the object's data is
+	shared, copy it into a new data structure not in the global shared
+	list, and dereference the old one.
+
 2002-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h: Include Mac OS X versions of header files if

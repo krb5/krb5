@@ -24,7 +24,7 @@ static errcode_t rw_setup(profile)
 	profile_t	profile;
 {
    	prf_file_t	file;
-	errcode_t	retval;
+	errcode_t	retval = 0;
 
 	if (!profile)
 		return PROF_NO_PROFILE;
@@ -39,7 +39,39 @@ static errcode_t rw_setup(profile)
 	/* Don't update the file if we've already made modifications */
 	if (file->data->flags & PROFILE_FILE_DIRTY)
 		return 0;
-			
+
+#ifdef SHARE_TREE_DATA
+	if ((file->data->flags & PROFILE_FILE_SHARED) != 0) {
+	    prf_data_t new_data;
+	    new_data = malloc(sizeof(struct _prf_data_t));
+	    if (new_data == NULL) {
+		retval = ENOMEM;
+	    } else {
+		*new_data = *file->data;
+		/* We can blow away the information because update
+		   will be called further down */
+		new_data->comment = NULL;
+		new_data->root = NULL;
+		new_data->flags &= ~PROFILE_FILE_SHARED;
+		new_data->timestamp = 0;
+		/* copy the file spec */
+		new_data->filespec = malloc(strlen(file->data->filespec) + 1);
+		if (new_data->filespec == NULL) {
+		    retval = ENOMEM;
+		} else {
+		    strcpy (new_data->filespec, file->data->filespec);
+		}
+	    }
+
+	    if (retval != 0) {
+		free(new_data);
+		return retval;
+	    }
+	    profile_dereference_data(file->data);
+	    file->data = new_data;
+	}
+#endif /* SHARE_TREE_DATA */
+
 	retval = profile_update_file(file);
 	
 	return retval;

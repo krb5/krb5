@@ -30,6 +30,8 @@
 
 typedef long prf_magic_t;
 
+#define SHARE_TREE_DATA
+
 /*
  * This is the structure which stores the profile information for a
  * particular configuration file.
@@ -50,17 +52,31 @@ typedef struct _prf_data_t *prf_data_t;
 
 struct _prf_file_t {
 	prf_magic_t	magic;
+#ifdef SHARE_TREE_DATA
+	struct _prf_data_t	*data;
+#else
 	struct _prf_data_t	data[1];
+#endif
 	struct _prf_file_t *next;
 };
 
 typedef struct _prf_file_t *prf_file_t;
+
+#ifdef SHARE_TREE_DATA
+struct global_shared_profile_data {
+	/* This is the head of the global list of shared trees */
+	prf_data_t trees;
+};
+extern struct global_shared_profile_data krb5int_profile_shared_data;
+#define g_shared_trees		(krb5int_profile_shared_data.trees)
+#endif /* SHARE_TREE_DATA */
 
 /*
  * The profile flags
  */
 #define PROFILE_FILE_RW		0x0001
 #define PROFILE_FILE_DIRTY	0x0002
+#define PROFILE_FILE_SHARED	0x0004
 
 /*
  * This structure defines the high-level, user visible profile_t
