@@ -1,3 +1,12 @@
+1999-07-22  Jeffrey Altman <jaltman@columbia.edu>
+
+        * krb5_32.def
+          add additional exports:
+
+          krb5_address_search
+ 	  krb5_auth_con_getrcache
+ 	  krb5_c_enctype_compare
+
 1999-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fix jaltman's changes so they don't break the unix
