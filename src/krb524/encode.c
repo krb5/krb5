@@ -47,7 +47,7 @@ int encode_bytes(char **out, int *outlen, char *in, int len)
 {
      if (len > *outlen)
 	  return KRB524_ENCFULL;
-     bcopy(in, *out, len);
+     memcpy(*out, in, len);
      *out += len;
      *outlen -= len;
      return 0;
@@ -85,7 +85,7 @@ int decode_bytes(char **out, int *outlen, char *in, int len)
 {
      if (len > *outlen)
 	  return KRB524_DECEMPTY;
-     bcopy(*out, in, len);
+     memcpy(in, *out, len);
      *out += len;
      *outlen -= len;
      return 0;

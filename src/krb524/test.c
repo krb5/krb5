@@ -278,8 +278,8 @@ void do_remote(krb5_creds *v5creds, char *server, krb5_keyblock *key)
 	  }
 	  memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
 	  saddr.sin_family = AF_INET;
-	  bcopy(hp->h_addr, (char *) &saddr.sin_addr.s_addr,
-		sizeof(struct in_addr));
+	  memcpy((char *) &saddr.sin_addr.s_addr, hp->h_addr,
+		 sizeof(struct in_addr));
 	  
 	  if (ret = krb524_convert_creds_addr(v5creds, &v4creds, &saddr)) {
 	       com_err("test", ret, "converting credentials on %s",

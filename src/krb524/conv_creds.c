@@ -86,8 +86,8 @@ int krb524_convert_creds_plain(krb5_creds *v5creds, CREDENTIALS *v4creds)
 		       sizeof(C_Block));
 	  return KRB524_BADKEY;
      } else
-	  bcopy((char *) v5creds->keyblock.contents, v4creds->session,
-		sizeof(C_Block));
+	  memcpy(v4creds->session, (char *) v5creds->keyblock.contents,
+		 sizeof(C_Block));
 
      /* V4 has no concept of authtime or renew_till, so ignore them */
      /* V4 lifetime is 1 byte, in 5 minute increments */
@@ -105,8 +105,8 @@ int krb524_convert_creds_plain(krb5_creds *v5creds, CREDENTIALS *v4creds)
 	       fprintf(stderr, "Invalid v5creds address information.\n");
 	  return KRB524_BADADDR;
      } else
-	  bcopy(v5creds->addresses[0]->contents, (char *) &addr,
-		sizeof(addr));
+	  memcpy((char *) &addr, v5creds->addresses[0]->contents,
+		 sizeof(addr));
 
      return 0;
 }

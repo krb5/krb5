@@ -327,7 +327,7 @@ krb5_error_code lookup_service_key(krb5_principal p, krb5_keyblock *key)
      if (use_keytab) {
 	  if (ret = krb5_kt_get_entry(kt, p, 0, &entry))
 	       return ret;
-	  bcopy((char *) &entry.key, key, sizeof(krb5_keyblock));
+	  memcpy(key, (char *) &entry.key, sizeof(krb5_keyblock));
 	  return 0;
      } else if (use_master) {
 	  if (ret = krb5_dbm_db_init())
