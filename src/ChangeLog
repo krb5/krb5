@@ -1,3 +1,8 @@
+Thu Nov  7 14:26:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (Macfile): Correctly build the file lists for the
+		Macintosh 68K and PPC object file lists.
+
 Tue Nov  5 17:27:30 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-recurse): Add dependency of install-recurse
