@@ -5,6 +5,11 @@
 	(krb5_mcc_store): Rewrite.
 	(NEED_WINDOWS): Don't define.
 	(krb5_mcc_*): All functions now static.
+	(struct _krb5_mcc_data): Delete 'next' pointer.  Add a mutex.
+	(krb5_mcc_*): Lock and unlock the mutex as appropriate.
+	(struct krb5_mcc_list_node): New type, separates the linked-list
+	container from the data for individual nodes.
+	(mcc_head): Now points to krb5_mcc_list_node.
 	* cc-int.h (krb5int_mcc_mutex): Declare.
 	* ccbase.c (krb5int_cc_initialize): Initialize it.
 
