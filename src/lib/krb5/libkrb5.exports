@@ -669,6 +669,7 @@ krb5int_cc_default
 krb5int_cleanup_library
 krb5int_cm_call_select
 krb5int_copy_data_contents
+krb5int_foreach_localaddr
 krb5int_free_addrlist
 krb5int_free_srv_dns_data
 krb5int_generate_and_save_subkey
