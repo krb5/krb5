@@ -402,6 +402,20 @@ krb_rd_req_with_key(authent, service, instance, from_addr, ad, ks, k5key)
 	    goto cleanup;
     } else if (krb_life_to_time((KRB4_32)ad->time_sec, ad->life)
 	     < t_local + CLOCK_SKEW) {
+        /*
+	 * This calculation is different than the same expiration
+	 * calculation in  krb5.  In krb5  the ticket lasts for
+	 * clock_skew seconds longer than its expiration; in krb4 it
+	 * lasts clock_skew seconds less.  This difference is
+	 * necessary to avoid using an almost expired tgt to get a new
+	 * tgt that will last for another 5 minutes.  This code
+	 * interacts with the login in src/kdc/kerberos_v4.c to
+	 * back-date tickets to avoid them expiring late.  The
+	 * combination may be overly conservative, but I'm fairly sure
+	 * either  removing the kerberos_v4 backdating or replacing
+	 * this check with the krb5 check is sufficient to create a
+	 * security problem.
+	 */
 	ret = RD_AP_EXP;
 	goto cleanup;
     }
