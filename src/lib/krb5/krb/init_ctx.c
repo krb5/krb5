@@ -388,8 +388,8 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 				  context->in_tkt_ktypes));
 }
 
-krb5_error_code
-krb5_set_default_tgs_ktypes(context, ktypes)
+krb5_error_code KRB5_CALLCONV
+krb5_set_default_tgs_enctypes (context, ktypes)
 	krb5_context context;
 	const krb5_enctype *ktypes;
 {
@@ -419,6 +419,13 @@ krb5_set_default_tgs_ktypes(context, ktypes)
     context->tgs_ktype_count = i;
     return 0;
 }
+
+krb5_error_code krb5_set_default_tgs_ktypes
+(krb5_context context, const krb5_enctype *etypes)
+{
+  return (krb5_set_default_tgs_enctypes (context, etypes));
+}
+
 
 void
 KRB5_CALLCONV

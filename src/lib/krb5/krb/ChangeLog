@@ -1,3 +1,8 @@
+2001-11-16  Sam Hartman  <hartmans@mit.edu>
+
+	* init_ctx.c (krb5_set_default_tgs_enctypes):  rename from
+	set_default_ktypes; old function provided as APIA 
+
 2001-11-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): Ensure space present after

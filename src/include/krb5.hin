@@ -1327,6 +1327,10 @@ krb5_error_code krb5_get_default_in_tkt_ktypes
 krb5_error_code krb5_set_default_tgs_ktypes
 	(krb5_context,
 		krb5_const krb5_enctype *);
+krb5_error_code KRB5_CALLCONV 
+krb5_set_default_tgs_enctypes
+	(krb5_context,
+		krb5_const krb5_enctype *);
 krb5_error_code KRB5_CALLCONV krb5_get_tgs_ktypes
 	(krb5_context,
 		krb5_const_principal,
