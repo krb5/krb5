@@ -1,3 +1,7 @@
+2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Include aes128-cts
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* mk_req_ext.c (krb5int_generate_and_save_subkey): New function,
