@@ -248,7 +248,7 @@ void do_keytab(name)
 	       printf(")");
 	  }
 	  printf("\n");
-	  free(pname);
+          krb5_free_unparsed_name(kcontext, pname);
      }
      if (code && code != KRB5_KT_END) {
 	  com_err(progname, code, "while scanning keytab");
@@ -447,7 +447,7 @@ show_credential(progname, kcontext, cred)
     retval = krb5_unparse_name(kcontext, cred->server, &sname);
     if (retval) {
 	com_err(progname, retval, "while unparsing server name");
-	free(name);
+        krb5_free_unparsed_name(kcontext, name);
 	return;
     }
     if (!cred->times.starttime)
@@ -534,8 +534,8 @@ show_credential(progname, kcontext, cred)
 	}
     }
 
-    free(name);
-    free(sname);
+    krb5_free_unparsed_name(kcontext, name);
+    krb5_free_unparsed_name(kcontext, sname);
 }
 
 void one_addr(a)
