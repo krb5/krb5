@@ -239,7 +239,7 @@ extern int mit_des3_string_to_key
 extern krb5_error_code mit_des_n_fold
 	PROTOTYPE((const krb5_octet * input,
 		   const size_t in_len,
-		   const krb5_octet * output,
+		   krb5_octet * output,
 		   const size_t out_len));
 
 #endif	/*DES_INTERNAL_DEFS*/
