@@ -1,4 +1,4 @@
-#ident  "@(#)mechglue.h 1.13     95/08/07 SMI"
+/* #ident  "@(#)mechglue.h 1.13     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -29,8 +29,11 @@
 #ifndef _GSS_MECHGLUE_H
 #define _GSS_MECHGLUE_H
 
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#include <gssapi.h>
+#else
 #include <gssapi/gssapi.h>
-#include <sys/types.h>
+#endif
 
 /********************************************************/
 /* GSSAPI Extension functions -- these functions aren't */

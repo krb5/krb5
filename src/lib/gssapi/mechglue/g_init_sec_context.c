@@ -1,4 +1,4 @@
-#ident  "@(#)gss_init_sec_context.c 1.20     95/08/07 SMI"
+/* #ident  "@(#)gss_init_sec_context.c 1.20     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

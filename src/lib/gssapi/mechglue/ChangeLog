@@ -1,3 +1,19 @@
+Wed Mar 20 20:20:38 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mechglue.h: Don't include <sys/types.h>; it's included if
+		necessary in gssapi/gssapi.h.  On a Macintosh, #include
+		gssapi.h instead of gssapi/gssapi.h.
+
+	* g_accept_sec_context.c, g_acquire_cred.c, g_compare_name.c,
+	g_context_time.c, g_delete_sec_context.c, g_dsp_name.c,
+	g_dsp_status.c, g_exp_sec_context.c, g_glue.c, g_imp_name.c,
+	g_imp_sec_context.c, g_indicate_mechs.c, g_init_sec_context.c,
+	g_initialize.c, g_inq_context.c, g_inq_cred.c, g_inq_names.c,
+	g_process_context.c, g_rel_buffer.c, g_rel_cred.c, g_rel_name.c,
+	g_rel_oid_set.c, g_seal.c, g_sign.c, g_unseal.c, g_verify.c,
+	gssd_pname_to_uid.c, mechglue.h, mglueP.h: Comment out #ident
+		line.  This causes the Macintosh C compiler indigestion.
+
 Tue Mar 12 23:28:57 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mechglue.h (gssd_pname_to_uid, gss_initialize): Use PROTOTYPE

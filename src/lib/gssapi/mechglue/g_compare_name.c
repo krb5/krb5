@@ -1,4 +1,4 @@
-#ident  "@(#)gss_compare_name.c 1.13     95/08/02 SMI"
+/* #ident  "@(#)gss_compare_name.c 1.13     95/08/02 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

@@ -1,4 +1,4 @@
-#ident  "@(#)gss_indicate_mechs.c 1.13     95/08/04 SMI"
+/* #ident  "@(#)gss_indicate_mechs.c 1.13     95/08/04 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

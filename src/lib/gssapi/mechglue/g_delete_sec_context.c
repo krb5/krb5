@@ -1,4 +1,4 @@
-#ident  "@(#)gss_delete_sec_context.c 1.10     95/08/07 SMI"
+/* #ident  "@(#)gss_delete_sec_context.c 1.10     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

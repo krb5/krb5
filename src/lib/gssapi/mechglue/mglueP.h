@@ -1,4 +1,5 @@
-#ident  "@(#)mglueP.h 1.2     96/01/18 SMI"
+/* #ident  "@(#)mglueP.h 1.2     96/01/18 SMI" */
+
 /*
  * This header contains the private mechglue definitions.
  *

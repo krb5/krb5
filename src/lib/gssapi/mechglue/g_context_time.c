@@ -1,4 +1,4 @@
-#ident  "@(#)gss_context_time.c 1.8     95/08/07 SMI"
+/* #ident  "@(#)gss_context_time.c 1.8     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

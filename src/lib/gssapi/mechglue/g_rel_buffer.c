@@ -1,4 +1,4 @@
-#ident  "@(#)g_rel_buffer.c 1.2     96/02/06 SMI"
+/* #ident  "@(#)g_rel_buffer.c 1.2     96/02/06 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

@@ -1,4 +1,4 @@
-#ident  "@(#)g_imp_name.c 1.2     96/02/06 SMI"
+/* #ident  "@(#)g_imp_name.c 1.2     96/02/06 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

@@ -1,4 +1,4 @@
-#ident  "@(#)gss_seal.c 1.10     95/08/07 SMI"
+/* #ident  "@(#)gss_seal.c 1.10     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

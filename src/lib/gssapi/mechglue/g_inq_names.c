@@ -1,5 +1,4 @@
-
-#ident	"@(#)g_inquire_names.c 1.1     95/12/19 SMI"
+/* #ident	"@(#)g_inquire_names.c 1.1     95/12/19 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

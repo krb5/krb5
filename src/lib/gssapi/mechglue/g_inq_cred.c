@@ -1,4 +1,4 @@
-#ident  "@(#)gss_inquire_cred.c 1.9     95/08/02 SMI"
+/* #ident  "@(#)gss_inquire_cred.c 1.9     95/08/02 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

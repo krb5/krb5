@@ -1,4 +1,4 @@
-#ident  "@(#)gss_process_context.c 1.9     95/08/07 SMI"
+/* #ident  "@(#)gss_process_context.c 1.9     95/08/07 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

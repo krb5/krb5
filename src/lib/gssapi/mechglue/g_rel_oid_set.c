@@ -1,4 +1,4 @@
-#ident  "@(#)gss_release_oid_set.c 1.12     95/08/23 SMI"
+/* #ident  "@(#)gss_release_oid_set.c 1.12     95/08/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

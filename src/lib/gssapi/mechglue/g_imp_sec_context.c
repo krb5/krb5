@@ -1,5 +1,4 @@
-
-#ident  "@(#)g_imp_sec_context.c 1.2     96/01/18 SMI"
+/* #ident  "@(#)g_imp_sec_context.c 1.2     96/01/18 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

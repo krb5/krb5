@@ -1,5 +1,4 @@
-
-#ident	"@(#)g_glue.c 1.1     96/02/06 SMI"
+/* #ident	"@(#)g_glue.c 1.1     96/02/06 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.

@@ -1,4 +1,4 @@
-#ident  "@(#)gssd_pname_to_uid.c 1.5     95/08/02 SMI"
+/* #ident  "@(#)gssd_pname_to_uid.c 1.5     95/08/02 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
