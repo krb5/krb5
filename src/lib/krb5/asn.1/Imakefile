@@ -20,3 +20,5 @@ KRB5-types.c: KRB5-types.py
 KRB5-types.py:	KRB5-asn.py
 	$(POSY) $(POFLAGS) -o $@ KRB5-asn.py
 
+clean::
+	$(RM) KRB5-types.c KRB5.ph KRB5-types.py KRB5-types.h
