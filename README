@@ -1,4 +1,4 @@
-		   Kerberos Version 5, Release 1.3
+		  Kerberos Version 5, Release 1.3.1
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.3.tar.gz.  Instructions on how to extract the entire
+krb5-1.3.1.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.3.tar.gz
+	gtar zxpf krb5-1.3.1.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.3.tar.gz | tar xpf -
+	gzcat krb5-1.3.1.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.3/src and
-the documentation into krb5-1.3/doc.
+Both of these methods will extract the sources into krb5-1.3.1/src and
+the documentation into krb5-1.3.1/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,56 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+Notes, Major Changes, and Known Bugs for 1.3.1
+----------------------------------------------
+
+* [1681] The incorrect encoding of ETYPE-INFO2 preauthentication hint
+  is no longer emitted, and the both the incorrect and the correct
+  encodings of ETYPE-INFO2 are now accepted.  We STRONGLY encourage
+  deploying krb5-1.3.1 in preference to 1.3, especially on client
+  installations, as the 1.3 release did not conform to the
+  internet-draft for the revised Kerberos protocol in its encoding of
+  ETYPE-INFO2.
+
+* [1683] The non-caching getaddrinfo() API on Mac OS X, which was
+  causing significant slowdowns under some circumstances, has been
+  worked around.
+
+Minor changes in 1.3.1
+----------------------
+
+* [1015] gss_accept_sec_context() now passes correct arguments to
+  TREAD_STR() when reading options beyond the forwarded credential
+  option.  Thanks to Emily Ratliff.
+
+* [1365] The GSSAPI initiator credentials are no longer cached inside
+  the GSSAPI library.
+
+* [1651] A buffer overflow in krb_get_admhst() has been fixed.
+
+* [1655] krb5_get_permitted_enctypes() and krb5_set_real_time() are
+  now exported for use by Samba.
+
+* [1656] gss_init_sec_context() no longer leaks credentials under some
+  error conditions.
+
+* [1657] krb_get_lrealm() no longer returns "ATHENA.MIT.EDU"
+  inappropriately.
+
+* [1666] The GSS_C_NT_* symbols are now exported from gssapi32.dll on
+  Windows.
+
+* [1667] ms2mit now imports any tickets with supported enctypes, and
+  does not import invalid tickets.
+
+* [1677] krb5_gss_register_acceptor_identity() no longer has an
+  off-by-one in its memory allocation.
+
+* [1679] krb5_principal2salt is now exported on all platforms.
+
+* [1684] The file credentials cache is now supported if USE_CCAPI is
+  defined, i.e., for KfM and KfW.
+
 Notes, Major Changes, and Known Bugs for 1.3
 --------------------------------------------
 
@@ -78,7 +128,7 @@ Notes, Major Changes, and Known Bugs for 1.3
   support IPv6.  The support for Kerberos 4 may work with IPv6 in very
   limited ways, if the address checking is turned off.  The FTP client
   and server do not have support for the new protocol messages needed
-  for IPv6 support (RFC 2429).
+  for IPv6 support (RFC 2428).
 
 * We have upgraded to autoconf 2.52 (or later), and the syntax for
   specifying certain configuration options have changed.  For example,
