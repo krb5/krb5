@@ -24,8 +24,8 @@ typedef krb5_pointer krb5_kt_cursor;	/* XXX */
 
 typedef struct krb5_keytab_entry_st {
     krb5_principal principal;	/* principal of this key */
-    krb5_keyblock *key;		/* the secret key */
     krb5_kvno vno;		/* key version number */
+    krb5_keyblock key;		/* the secret key */
 } krb5_keytab_entry;
 
 
