@@ -179,7 +179,7 @@ t_mktime: gmt_mktime.c
 	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
 
 t_localaddr: localaddr.c
-	$(CC) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c $(LIBS)
+	$(CC_LINK) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c $(KRB5_BASE_LIBS) $(LIBS)
 
 t_locate_kdc: t_locate_kdc.o
 	$(CC_LINK) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \
@@ -276,9 +276,9 @@ ccdefname.so ccdefname.po $(OUTPRE)ccdefname.$(OBJEXT): ccdefname.c $(SRCTOP)/in
   $(SRCTOP)/include/krb5/kdb.h
 changepw.so changepw.po $(OUTPRE)changepw.$(OBJEXT): changepw.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
 dnsglue.so dnsglue.po $(OUTPRE)dnsglue.$(OBJEXT): dnsglue.c dnsglue.h $(SRCTOP)/include/k5-int.h \
@@ -392,9 +392,9 @@ localaddr.so localaddr.po $(OUTPRE)localaddr.$(OBJEXT): localaddr.c $(SRCTOP)/in
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/foreachaddr.h
 locate_kdc.so locate_kdc.po $(OUTPRE)locate_kdc.$(OBJEXT): locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
 lock_file.so lock_file.po $(OUTPRE)lock_file.$(OBJEXT): lock_file.c $(SRCTOP)/include/k5-int.h \
@@ -459,16 +459,16 @@ port2ip.so port2ip.po $(OUTPRE)port2ip.$(OBJEXT): port2ip.c $(SRCTOP)/include/k5
   $(SRCTOP)/include/krb5/kdb.h os-proto.h
 send524.so send524.po $(OUTPRE)send524.$(OBJEXT): send524.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
 sendto_kdc.so sendto_kdc.po $(OUTPRE)sendto_kdc.$(OBJEXT): sendto_kdc.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h $(SRCTOP)/include/cm.h
 sn2princ.so sn2princ.po $(OUTPRE)sn2princ.$(OBJEXT): sn2princ.c $(SRCTOP)/include/k5-int.h \
@@ -513,17 +513,17 @@ t_gifconf.so t_gifconf.po $(OUTPRE)t_gifconf.$(OBJEXT): t_gifconf.c
 t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): t_locate_kdc.c $(COM_ERR_DEPS) \
   locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/krb5/kdb.h os-proto.h
 t_realm_iter.so t_realm_iter.po $(OUTPRE)t_realm_iter.$(OBJEXT): t_realm_iter.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS)
 t_std_conf.so t_std_conf.po $(OUTPRE)t_std_conf.$(OBJEXT): t_std_conf.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
 
