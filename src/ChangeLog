@@ -3,6 +3,7 @@
 	* acconfig.h (KRB5_NO_PROTOTYPES, KRB5_PROVIDE_PROTOTYPES,
 	KRB5_NO_NESTED_PROTOTYPES): Deleted.
 	* aclocal.m4 (HAS_ANSI_VOLATILE, KRB5_CHECK_PROTOS): Deleted.
+	(KRB5_AC_INET6): Don't look for getipnodebyname, getipnodebyaddr.
 
 2001-04-25  Ken Raeburn  <raeburn@mit.edu>
 

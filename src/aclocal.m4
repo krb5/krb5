@@ -214,7 +214,7 @@ dnl Check for IPv6 compile-time support.
 dnl
 AC_DEFUN(KRB5_AC_INET6,[
 AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h netdb.h)
-AC_CHECK_FUNCS(inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo)
+AC_CHECK_FUNCS(inet_ntop inet_pton getaddrinfo getnameinfo)
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])
 AC_ARG_ENABLE([ipv6],
 [  --enable-ipv6           enable IPv6 support
