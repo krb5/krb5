@@ -15,12 +15,22 @@
 \end{description}
 
 }
-%\setlength{\parskip}{\baselineskip}
+
+\newcommand{\numtest}[2]{\begin{description}
+\setlength{\itemsep}{0pt}
+\Number{#1}
+#2
+\end{description}
+
+}
+
+\newcommand{\Number}[1]{\item[Number:] #1}
 \newcommand{\Reason}[1]{\item[Reason:] #1}
 %\newcommand{\Call}[1]{\item[Call:] #1}
 %\newcommand{\Expected}[1]{\item[Expected:] #1}
 \newcommand{\Conditions}[1]{\item[Conditions:] #1}
 
+%\newcommand{\Number}[1]{}
 %\newcommand{\Reason}[1]{}
 \newcommand{\Call}[1]{}
 \newcommand{\Expected}[1]{}
@@ -86,19 +96,19 @@ tested.
 XXX needs to be updated to take into account new server behavior with
 respect to reading master key vs. getting it from stash.
 
-\test{
+\numtest{1}{
 \Reason{An empty string realm is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, "")}
 \Expected{returns XXX.}
 }
 
-\test{
+\numtest{2}{
 \Reason{A bad realm is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, B.R)}
 \Expected{returns XXX}
 }
 
-\test{
+\numtest{3}{
 \Reason{A bad service name representing an existing principal
 		is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, b, null)}
@@ -106,7 +116,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{4}{
 \Reason{A bad service name representing a non-existent
 		principal is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, n, null)}
@@ -114,7 +124,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{5}{
 \Reason{A bad service name identical to the (existing) client
 		name is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, a, null)}
@@ -122,21 +132,21 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{6}{
 \Reason{A null password is rejected.}
 \Call{ovsec_kadm_init(a, null, A_S, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
 }
 
-\test{
+\numtest{7}{
 \Reason{An empty-string password is rejected.}
 \Call{ovsec_kadm_init(a, "", A_S, null)}
 \Expected{returns XXX}
 \Conditions{RPC}
 }
 
-\test{
+\numtest{8}{
 \Reason{An incorrect password which is the password of another
 		user is rejected.}
 \Call{ovsec_kadm_init(a, b's-p, A_S, null)}
@@ -144,7 +154,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{9}{
 \Reason{An incorrect password which isn't the password of any
 		user is rejected.}
 \Call{ovsec_kadm_init(a, no-p, A_S, null)}
@@ -152,19 +162,19 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{10}{
 \Reason{A null client_name is rejected.}
 \Call{ovsec_kadm_init(null, no-p, A_S, null)}
 \Expected{returns XXX}
 }
 
-\test{
+\numtest{11}{
 \Reason{An empty-string client_name is rejected.}
 \Call{ovsec_kadm_init("", no-p, A_S, null)}
 \Expected{returns XXX}
 }
 
-\test{
+\numtest{12}{
 \Reason{A client_name referring to a non-existent principal in
 		the default realm is rejected.}
 \Call{ovsec_kadm_init(n, no-p, A_S, null)}
@@ -172,7 +182,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{13}{
 \Reason{A client_name referring to a non-existent principal
 		with the local realm specified explicitly is rejected.}
 \Call{ovsec_kadm_init(n@L.R, no-p, A_S, null)}
@@ -180,7 +190,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{14}{
 \Reason{A client_name referring to a non-existent principal in
 		a bad realm is rejected.}
 \Call{ovsec_kadm_init(n@B.R, no-p, A_S, null)}
@@ -188,7 +198,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{15}{
 \Reason{A client_name referring to an existing principal in a
 		bad realm is rejected.}
 \Call{ovsec_kadm_init(a@B.R, a's-p, A_S, null)}
@@ -196,35 +206,35 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{16}{
 \Reason{Valid invocation.}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 }
 
-\test{
+\numtest{17}{
 \Reason{Valid invocation (explicit client realm).}
 \Call{ovsec_kadm_init(a@L.R, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 }
 
-\test{
+\numtest{18}{
 \Reason{Valid invocation (CHANGEPW_SERVICE).}
 \Call{ovsec_kadm_init(a, a-s'p, C_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 }
 
-\test{
+\numtest{19}{
 \Reason{Valid invocation (explicit service realm).}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, L.R);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 }
 
-\test{
+\numtest{20}{
 \Reason{Valid invocation (database access allowed after init).}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_get_principal(a, buffer);
@@ -232,7 +242,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns OK}
 }
 
-\test{
+\numtest{21}{
 \Reason{Init fails when called twice in a row.}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_init(a, a-s'p, A_S, null);
@@ -240,7 +250,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns OK the first time, XXX the second time}
 }
 
-\test{
+\numtest{22}{
 \Reason{Null password is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, null, A_S, null);
 		ovsec_kadm_destroy()}
@@ -248,7 +258,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{local}
 }
 
-\test{
+\numtest{23}{
 \Reason{Non-null password is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, no-p, A_S, null);
 		ovsec_kadm_destroy()}
@@ -256,7 +266,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{local}
 }
 
-\test{
+\numtest{24}{
 \Reason{Null service name is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, null, null, null);
 		ovsec_kadm_destroy()}
@@ -264,7 +274,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{local}
 }
 
-\test{
+\numtest{25}{
 \Reason{Non-null service name is ignored in local invocation.}
 \Call{ovsec_kadm_init(a, null, n, null);
 		ovsec_kadm_destroy()}
@@ -274,36 +284,36 @@ respect to reading master key vs. getting it from stash.
 
 \section{ovsec_kadm_destroy}
 
-\test{
+\numtest{1}{
 \Reason{Valid invocation.}
 \Call{ovsec_kadm_init(a, a-s'p, A_S, null);
 		ovsec_kadm_destroy()}
 \Expected{returns OK}
 }
 
-\test{
+\numtest{2}{
 \Reason{Valid invocation (``get'' not allowed after destroy).}
 }
 
-\test{
+\numtest{3}{
 \Reason{Valid invocation (``add'' not allowed after destroy).}
 }
 
-\test{
+\numtest{4}{
 \Reason{Valid invocation (``modify'' not allowed after destroy).}
 }
 
-\test{
+\numtest{5}{
 \Reason{Valid invocation (``delete'' not allowed after destroy).}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails if database not initialized.}
 \Call{ovsec_kadm_destroy()}
 \Expected{returns NOT_INIT}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails if invoked twice in a row.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, null);
 		ovsec_kadm_destroy();
@@ -311,7 +321,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns OK the first time, NOT_INIT the second}
 }
 
-\test{
+\numtest{8}{
 \Reason{Database can be reinitialized after destroy.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, null);
 		ovsec_kadm_destroy();
@@ -353,11 +363,11 @@ respect to reading master key vs. getting it from stash.
 %this structure may be changed by the tests, but they should clean up
 %after themselves.
 
-\test{
+\numtest{1}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails on null princ argument.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(null, PRINCIPAL, "foobar",
@@ -366,7 +376,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns EINVAL}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails on null password argument.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL, null,
@@ -375,7 +385,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns EINVAL}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails on empty-string password argument. XXX Assumes
 		that an empty string is not a legal password.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
@@ -385,7 +395,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns XXX}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails when mask contains undefined bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL | 0x002000,
@@ -395,7 +405,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails when mask contains LAST_PWD_CHANGE bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, 
@@ -406,7 +416,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails when mask contains MOD_TIME bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MOD_TIME,
@@ -416,7 +426,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails when mask contains MOD_NAME bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MOD_NAME,
@@ -426,7 +436,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails when mask contains MKVNO bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MKVNO,
@@ -436,7 +446,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{10}{
 \Reason{Fails when mask contains AUX_ATTRIBUTES bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ,
@@ -447,7 +457,7 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{11}{
 \Reason{Fails when mask contains POLICY_CLR bit.}
 \Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL | POLICY_CLR,
@@ -457,11 +467,11 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns BAD_MASK}
 }
 
-\test{
+\numtest{12}{
 \Reason{Fails for caller with no access bits.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Fails when caller has ``get'' access and not ``add''.}
 \Call{ovsec_kadm_init(getu, getu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
@@ -472,7 +482,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{14}{
 \Reason{Fails when caller has ``modify'' access and not ``add''.}
 \Call{ovsec_kadm_init(modifyu, modifyu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
@@ -483,7 +493,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{15}{
 \Reason{Fails when caller has ``delete'' access and not ``add''.}
 \Call{ovsec_kadm_init(deleteu, deleteu's-p, A_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
@@ -494,7 +504,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{16}{
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
 \Call{ovsec_kadm_init(addu, addu's-p, C_S, null);
 		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
@@ -505,7 +515,7 @@ respect to reading master key vs. getting it from stash.
 \Conditions{RPC}
 }
 
-\test{
+\numtest{17}{
 \Reason{Fails on attempt to create existing principal.}
 \Call{ovsec_kadm_init(getu, getu's-p, A_S, null);
 		ovsec_kadm_get_principal("usera", buffer);
@@ -529,107 +539,107 @@ respect to reading master key vs. getting it from stash.
 \Expected{returns DUP}
 }
 
-\test{
+\numtest{18}{
 \Reason{Fails when password is too short.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Fails when password has too few classes.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Fails when password is in dictionary.}
 }
 
-\test{
+\numtest{21}{
 \Reason{Nonexistent policy is rejected.}
 }
 
-\test{
+\numtest{22}{
 \Reason{Fails on invalid principal name.}
 }
 
-\test{
+\numtest{23}{
 \Reason{Valid invocation.}
 }
 
-\test{
+\numtest{24}{
 \Reason{Succeeds when caller has ``add'' access and another one.}
 }
 
-\test{
+\numtest{25}{
 \Reason{Allows too-short password when override_qual is true.}
 }
 
-\test{
+\numtest{26}{
 \Reason{Allows password with too few classes when
 		override_qual is true.}
 }
 
-\test{
+\numtest{27}{
 \Reason{Allows password in dictionary when override_qual is
 		true.}
 }
 
-\test{
+\numtest{28}{
 \Reason{Succeeds when assigning policy.}
 }
 
-\test{
+\numtest{29}{
 \Reason{Allows 0 (never) for princ_expire_time.}
 }
 
-\test{
+\numtest{30}{
 \Reason{Allows 0 (never) for pw_expiration when there's no policy.}
 }
 
-\test{
+\numtest{31}{
 \Reason{Allows 0 (never) for pw_expiration when there's a policy with
 	0 for pw_max_life.}
 }
 
-\test{
+\numtest{32}{
 \Reason{Accepts 0 (never) for pw_expiration when there's a policy with
 	non-zero pw_max_life, but actually sets pw_expiration to now +
 	pw_max_life.}
 }
 
-\test{
+\numtest{33}{
 \Reason{Accepts and sets non-zero pw_expiration when no policy.}
 }
 
-\test{
+\numtest{34}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with zero pw_max_life.}
 }
 
-\test{
+\numtest{35}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with pw_max_life later than the specified pw_expiration.}
 }
 
-\test{
+\numtest{36}{
 \Reason{Accepts non-zero pw_expiration and limits it to now +
 	pw_max_life when it's later than now + non-zero pw_max_life in
 	policy.}
 }
 
-\test{
+\numtest{37}{
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
 }
 
-\test{
+\numtest{38}{
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
 }
 
-\test{
+\numtest{39}{
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
 }
 
-\test{
+\numtest{40}{
 \Reason{Allows 0 (forever) for max_life.}
 }
 
@@ -637,52 +647,52 @@ respect to reading master key vs. getting it from stash.
 
 \section{ovsec_kadm_delete_principal}
 
-\test{
+\numtest{1}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails on null principal.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails on empty-string principal.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails on invalid principal name.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails on nonexistent principal.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails if caller has ``add'' access and not ``delete''.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails if caller has ``modify'' access and not ``delete''.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails if caller has ``get'' access and not ``delete''.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Fails if caller has no access bits.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Valid invocation.}
 \Expected{Principal is removed from database.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Valid invocation (on principal with policy).}
 \Expected{Principal is removed from database.  Reference count
 		of its policy is decremented.}
@@ -692,171 +702,171 @@ respect to reading master key vs. getting it from stash.
 
 \section{ovsec_kadm_modify_principal}
 
-\test{
+\numtest{1}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails on mask with undefined bit set.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails on mask with PRINCIPAL set.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails on mask with LAST_PWD_CHANGE set.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails on mask with MOD_TIME set.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails on mask with MOD_NAME set.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails on mask with MKVNO set.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails on mask with AUX_ATTRIBUTES set.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Fails on nonexistent principal.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Fails for user with no access bits.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Fails for user with ``get'' access.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Fails for user with ``add'' access.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Fails for user with ``delete'' access.}
 }
 
-\test{
+\numtest{15}{
 \Reason{Succeeds for user with ``modify'' access.}
 }
 
-\test{
+\numtest{16}{
 \Reason{Succeeds for user with ``modify'' and another access.}
 }
 
-\test{
+\numtest{17}{
 \Reason{Fails when nonexistent policy is specified.}
 }
 
-\test{
+\numtest{18}{
 \Reason{Succeeds when existent policy is specified.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Updates policy count when setting policy from none.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Updates policy count when clearing policy from set.}
 }
 
-\test{
+\numtest{21}{
 \Reason{Updates policy count when setting policy from other policy.}
 }
 
-\test{
+\numtest{22}{
 \Reason{Allows 0 (never) for pw_expiration when there's no policy.}
 }
 
-\test{
+\numtest{23}{
 \Reason{Allows 0 (never) for pw_expiration when there's a policy with
 	0 for pw_max_life.}
 }
 
-\test{
+\numtest{24}{
 \Reason{Accepts 0 (never) for pw_expiration when there's a policy with
 	non-zero pw_max_life, but actually sets pw_expiration to
 	last_pwd_change + pw_max_life.}
 }
 
-\test{
+\numtest{25}{
 \Reason{Accepts and sets non-zero pw_expiration when no policy.}
 }
 
-\test{
+\numtest{26}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with zero pw_max_life.}
 }
 
-\test{
+\numtest{27}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with pw_max_life later than the specified pw_expiration.}
 }
 
-\test{
+\numtest{28}{
 \Reason{Accepts non-zero pw_expiration and limits it to last_pwd_change +
 	pw_max_life when it's later than last_pwd_change + non-zero
 	pw_max_life in policy.}
 }
 
-\test{
+\numtest{29}{
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
 }
 
-\test{
+\numtest{30}{
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
 }
 
-\test{
+\numtest{31}{
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
 }
 
-\test{
+\numtest{32}{
 \Reason{Accepts princ_expire_time change.}
 }
 
-\test{
+\numtest{33}{
 \Reason{Accepts attributes change.}
 }
 
-\test{
+\numtest{34}{
 \Reason{Accepts max_life change.}
 }
 
-\test{
+\numtest{35}{
 \Reason{Accepts kvno change.}
 }
 
-\test{
+\numtest{36}{
 \Reason{Behaves correctly when policy is set to the same as it was
 	before.}
 }
 
-\test{
+\numtest{37}{
 \Reason{Behaves properly when POLICY_CLR is specified and there was no
 	policy before.}
 }
 
-\test{
+\numtest{38}{
 \Reason{Accepts 0 (never) for princ_expire_time.}
 }
 
-\test{
+\numtest{39}{
 \Reason{Accepts 0 for max_life.}
 }
 
@@ -864,67 +874,67 @@ respect to reading master key vs. getting it from stash.
 
 \section{ovsec_kadm_rename_principal}
 
-\test{
+\numtest{1}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for user with no access bits.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for user with ``modify'' access and not ``add'' or
 ``delete''.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails for user with ``get'' access and not ``add'' or
 ``delete''.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for user with ``modify'' and ``add'' but not ``delete''.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for user with ``modify'' and ``delete'' but not ``add''.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for user with ``get'' and ``add'' but not ``delete''.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails for user with ``get'' and ``delete'' but not ``add.''}
 }
 
-\test{
+\numtest{10}{
 \Reason{Fails for user with ``modify'', ``get'' and ``add'', but not
 	``delete''.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Fails for user with ``modify'', ``get'' and ``delete'', but
 	not ``add''.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Fails for user with ``add'' but not ``delete''.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Fails for user with ``delete'' but not ``add''.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Succeeds for user with ``add'' and ``delete''.}
 }
 
-\test{
+\numtest{15}{
 \Reason{Fails if target principal name exists.}
 }
 
@@ -946,172 +956,175 @@ succeed or fail, will be given.
 
 \subsubsection{List of tests}
 
-\test{
+The test number of each of these tests is an offset from the base
+given in the table below.
+
+\numtest{1}{
 \Reason{With history setting of 1, change password to itself.}
 }
 
-\test{
+\numtest{2}{
 \Reason{With history setting of 2 but no password changes since
 	principal creation, change password to itself.}
 }
 
-\test{
+\numtest{3}{
 \Reason{With history setting of 2 and one password change since
 	principal creation, change password to itself
 	and directly previous password.}
 }
 
-\test{
+\numtest{4}{
 \Reason{With a history setting of 3 and no password changes,
 	change password to itself.}
 }
 
-\test{
+\numtest{5}{
 \Reason{With a history setting of 3 and 1 password change,
 	change password itself or previous password.}
 }
 
-\test{
+\numtest{6}{
 \Reason{With a history setting of 3 and 2 password changes,
 	change password to itself and the two previous passwords.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Change to previously unused password when now -
 	last_pwd_change $<$ pw_min_life.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Change to previously unused password that doesn't contain enough
 	character classes.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Change to previously unused password that's too short.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Change to previously unused password that's in the dictionary.}
 }
 
 \subsubsection{List of parameter settings}
 
-\begin{tabular}{lllll}
-Modify access? & Own password? & Service & override_qual & Pass/Fail \\ \hline
-no & yes & ADMIN & false & fail \\
-no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
-no & yes & CHANGEPW & false & fail \\
-no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-no & no & ADMIN & false & fail \\
-no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
-no & no & CHANGEPW & false & fail \\
-no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-yes & yes & ADMIN & false & fail \\
-yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
-yes & yes & CHANGEPW & false & fail \\
-yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-yes & no & ADMIN & false & fail \\
-yes & no & ADMIN & true & {\em pass} \\
-yes & no & CHANGEPW & false & fail \\
-yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
+\begin{tabular}{llllll}
+Base & Modify access? & Own password? & Service & override_qual & Pass/Fail \\ \hline
+0 & no & yes & ADMIN & false & fail \\
+10 & no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
+20 & no & yes & CHANGEPW & false & fail \\
+30 & no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+40 & no & no & ADMIN & false & fail \\
+50 & no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
+60 & no & no & CHANGEPW & false & fail \\
+70 & no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+80 & yes & yes & ADMIN & false & fail \\
+90 & yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
+100 & yes & yes & CHANGEPW & false & fail \\
+110 & yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+120 & yes & no & ADMIN & false & fail \\
+130 & yes & no & ADMIN & true & {\em pass} \\
+140 & yes & no & CHANGEPW & false & fail \\
+150 & yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 \end{tabular}
 
 \subsection{Other quality/history tests}
 
 These tests should be run with override_qual false.
 
-\test{
+\numtest{161}{
 \Reason{With history of 1, can change password to anything other than
 	itself that doesn't conflict with other quality
 	rules.}
 }
 
-\test{
+\numtest{162}{
 \Reason{With history of 2 and 2 password changes, can change password
 	to original password.}
 }
 
-\test{
+\numtest{163}{
 \Reason{With history of 3 and 3 password changes, can change password
 	to original password.}
 }
 
-\test{
+\numtest{164}{
 \Reason{Can change password when now - last_pwd_change $>$ pw_min_life.}
 }
 
-\test{
+\numtest{165}{
 \Reason{Can change password when it contains exactly the number of
 	classes required by the policy.}
 }
 
-\test{
+\numtest{166}{
 \Reason{Can change password when it is exactly the length required by
 	the policy.}
 }
 
-\test{
+\numtest{167}{
 \Reason{Can change password to a word that isn't in the dictionary.}
 }
 
 
 \subsection{Other tests}
 
-\test{
+\numtest{168}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{169}{
 \Reason{Fails for non-existent principal.}
 }
 
-\test{
+\numtest{170}{
 \Reason{Fails for null password.}
 }
 
-\test{
+\numtest{171}{
 \Reason{Fails for empty-string password.}
 }
 
-\test{
+\numtest{172}{
 \Reason{Pw_expiration is set to now + max_pw_life if policy exists and
 	has non-zero max_pw_life.}
 }
 
-\test{
+\numtest{173}{
 \Reason{Pw_expiration is set to 0 if policy exists and has zero
 	max_pw_life.}
 }
 
-\test{
+\numtest{174}{
 \Reason{Pw_expiration is set to 0 if no policy.}
 }
 
-\test{
+\numtest{175}{
 \Reason{KRB5_KDC_REQUIRES_PWCHANGE bit is cleared when password is
 	successfully changed.}
 }
 
-\test{
+\numtest{176}{
 \Reason{Fails for user with no access bits, on other's password.}
 }
 
-\test{
+\numtest{177}{
 \Reason{Fails for user with ``get'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{178}{
 \Reason{Fails for user with ``delete'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{179}{
 \Reason{Fails for user with ``add'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{180}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
 	other's password.}
 }
@@ -1144,84 +1157,84 @@ run of the test.
 
 \subsubsection{List of parameter settings}
 
-\begin{tabular}{lllll}
-Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hline
-no & yes & ADMIN & false & fail \\
-no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
-no & yes & CHANGEPW & false & fail \\
-no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-no & no & ADMIN & false & fail \\
-no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
-no & no & CHANGEPW & false & fail \\
-no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-yes & yes & ADMIN & false & fail \\
-yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
-yes & yes & CHANGEPW & false & fail \\
-yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
-yes & no & ADMIN & false & fail \\
-yes & no & ADMIN & true & {\em pass} \\
-yes & no & CHANGEPW & false & fail \\
-yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
+\begin{tabular}{llllll}
+Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hline
+1 & no & yes & ADMIN & false & fail \\
+2 & no & yes & ADMIN & true & RPC: fail; local: {\em pass} \\
+3 & no & yes & CHANGEPW & false & fail \\
+4 & no & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+5 & no & no & ADMIN & false & fail \\
+6 & no & no & ADMIN & true & RPC: fail; local: {\em pass} \\
+7 & no & no & CHANGEPW & false & fail \\
+8 & no & no & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+9 & yes & yes & ADMIN & false & fail \\
+10 & yes & yes & ADMIN & true & RPC: fail; local {\em pass} \\
+11 & yes & yes & CHANGEPW & false & fail \\
+12 & yes & yes & CHANGEPW & true & RPC: fail; local: {\em pass} \\
+13 & yes & no & ADMIN & false & fail \\
+14 & yes & no & ADMIN & true & {\em pass} \\
+15 & yes & no & CHANGEPW & false & fail \\
+16 & yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 \end{tabular}
 
 \subsection{Other tests}
 
-\test{
+\numtest{17}{
 \Reason{Fails if database not initialized.}
 }
 
-\test{
+\numtest{18}{
 \Reason{Fails for non-existent principal.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Fails for null keyblock pointer.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Pw_expiration is set to now + max_pw_life if policy exists and
 	has non-zero max_pw_life.}
 }
 
-\test{
+\numtest{21}{
 \Reason{Pw_expiration is set to 0 if policy exists and has zero
 	max_pw_life.}
 }
 
-\test{
+\numtest{22}{
 \Reason{Pw_expiration is set to 0 if no policy.}
 }
 
-\test{
+\numtest{23}{
 \Reason{KRB5_KDC_REQUIRES_PWCHANGE bit is cleared when key is
 	successfully changed.}
 }
 
-\test{
+\numtest{24}{
 \Reason{Fails for user with no access bits, on other's password.}
 }
 
-\test{
+\numtest{25}{
 \Reason{Fails for user with ``get'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{26}{
 \Reason{Fails for user with ``delete'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{27}{
 \Reason{Fails for user with ``add'' but not ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{28}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
 	other's password.}
 }
 
-\test{
+\numtest{29}{
 \Reason{The new key that's assigned is truly random. XXX not sure how
 	to test this.}
 }
@@ -1230,69 +1243,69 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 \section{ovsec_kadm_get_principal}
 
-\test{
+\numtest{1}{
 \Reason{Fails for null ent.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails for non-existent principal.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for user with no access bits, retrieving other principal.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for user with ``add'' but not ``get'', getting principal
 	other than his own, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails for user with ``modify'' but not ``get'', getting
 	principal other than his own, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for user with ``delete'' but not ``get'', getting
 	principal other than his own, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for user with ``delete'' but not ``get'', getting
 	principal other than his own, using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for user with ``get'', getting principal other than his
 	own, using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Succeeds for user without ``get'', retrieving self, using
 	ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Succeeds for user without ``get'', retrieving self, using
 	CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Succeeds for user with ``get'', retrieving self, using
 	ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Succeeds for user with ``get'', retrieving self, using
 	CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Succeeds for user with ``get'', retrieving other user, using
 	ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Succeeds for user with ``get'' and ``modify'', retrieving
 	other principal, using ADMIN_SERVICE.}
 }
@@ -1301,111 +1314,111 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 \section{ovsec_kadm_create_policy}
 
-\test{
+\numtest{1}{
 \Reason{Fails for mask with undefined bit set.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for mask without POLICY bit set.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for mask with REF_COUNT bit set.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails for invalid policy name.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for existing policy name.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for null policy name.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for empty-string policy name.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Accepts 0 for pw_min_life.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Accepts non-zero for pw_min_life.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Accepts 0 for pw_max_life.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Accepts non-zero for pw_max_life.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Accepts 0 for pw_min_length.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Accepts non-zero for pw_min_length.}
 }
 
-\test{
+\numtest{15}{
 \Reason{Rejects 0 for pw_min_classes.}
 }
 
-\test{
+\numtest{16}{
 \Reason{Accepts 1 for pw_min_classes.}
 }
 
-\test{
+\numtest{17}{
 \Reason{Accepts 4 for pw_min_classes.}
 }
 
-\test{
+\numtest{18}{
 \Reason{Rejects 5 for pw_min_classes.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Rejects 0 for pw_history_num.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Accepts 1 for pw_history_num.}
 }
 
-\test{
+\numtest{21}{
 \Reason{Accepts 10 for pw_history_num.}
 }
 
-\test{
+\numtest{22}{
 \Reason{Fails for user with no access bits.}
 }
 
-\test{
+\numtest{23}{
 \Reason{Fails for user with ``get'' but not ``add''.}
 }
 
-\test{
+\numtest{24}{
 \Reason{Fails for user with ``modify'' but not ``add.''}
 }
 
-\test{
+\numtest{25}{
 \Reason{Fails for user with ``delete'' but not ``add.''}
 }
 
-\test{
+\numtest{26}{
 \Reason{Succeeds for user with ``add.''}
 }
 
-\test{
+\numtest{27}{
 \Reason{Succeeds for user with ``get'' and ``add.''}
 }
 
@@ -1413,51 +1426,51 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 \section{ovsec_kadm_delete_policy}
 
-\test{
+\numtest{1}{
 \Reason{Fails for null policy name.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails for empty-string policy name.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for non-existent policy name.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for bad policy name.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for user with no access bits.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for user with ``add'' but not ``delete''.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for user with ``modify'' but not ``delete''.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails for user with ``get'' but not ``delete.''}
 }
 
-\test{
+\numtest{10}{
 \Reason{Succeeds for user with only ``delete''.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Succeeds for user with ``delete'' and ``add''.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Fails for policy with non-zero reference count.}
 }
 
@@ -1465,111 +1478,111 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 \section{ovsec_kadm_modify_policy}
 
-\test{
+\numtest{1}{
 \Reason{Fails for mask with undefined bit set.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for mask with POLICY bit set.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for mask with REF_COUNT bit set.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails for invalid policy name.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for non-existent policy name.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for null policy name.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for empty-string policy name.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Accepts 0 for pw_min_life.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Accepts non-zero for pw_min_life.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Accepts 0 for pw_max_life.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Accepts non-zero for pw_max_life.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Accepts 0 for pw_min_length.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Accepts non-zero for pw_min_length.}
 }
 
-\test{
+\numtest{15}{
 \Reason{Rejects 0 for pw_min_classes.}
 }
 
-\test{
+\numtest{16}{
 \Reason{Accepts 1 for pw_min_classes.}
 }
 
-\test{
+\numtest{17}{
 \Reason{Accepts 4 for pw_min_classes.}
 }
 
-\test{
+\numtest{18}{
 \Reason{Rejects 5 for pw_min_classes.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Rejects 0 for pw_history_num.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Accepts 1 for pw_history_num.}
 }
 
-\test{
+\numtest{21}{
 \Reason{Accepts 10 for pw_history_num.}
 }
 
-\test{
+\numtest{22}{
 \Reason{Fails for user with no access bits.}
 }
 
-\test{
+\numtest{23}{
 \Reason{Fails for user with ``get'' but not ``modify''.}
 }
 
-\test{
+\numtest{24}{
 \Reason{Fails for user with ``add'' but not ``modify.''}
 }
 
-\test{
+\numtest{25}{
 \Reason{Fails for user with ``delete'' but not ``modify.''}
 }
 
-\test{
+\numtest{26}{
 \Reason{Succeeds for user with ``modify.''}
 }
 
-\test{
+\numtest{27}{
 \Reason{Succeeds for user with ``get'' and ``modify.''}
 }
 
@@ -1577,97 +1590,97 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 \section{ovsec_kadm_get_policy}
 
-\test{
+\numtest{1}{
 \Reason{Fails for null policy.}
 }
 
-\test{
+\numtest{2}{
 \Reason{Fails for invalid policy name.}
 }
 
-\test{
+\numtest{3}{
 \Reason{Fails for empty-string policy name.}
 }
 
-\test{
+\numtest{4}{
 \Reason{Fails for non-existent policy name.}
 }
 
-\test{
+\numtest{5}{
 \Reason{Fails for null ent.}
 }
 
-\test{
+\numtest{6}{
 \Reason{Fails for user with no access bits trying to get other's
 	policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{7}{
 \Reason{Fails for user with ``add'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{8}{
 \Reason{Fails for user with ``modify'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{9}{
 \Reason{Fails for user with ``delete'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{10}{
 \Reason{Fails for user with ``delete'' but not ``get'' trying to get
 	other's policy, using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{11}{
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{12}{
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{13}{
 \Reason{Succeeds for user with ``add'' and ``get'', trying to get own
 	policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{14}{
 \Reason{Succeeds for user with ``add'' and ``get'', trying to get own
 	policy, using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{15}{
 \Reason{Succeeds for user without ``get'', trying to get own policy,
 	using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{16}{
 \Reason{Succeeds for user without ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{17}{
 \Reason{Succeeds for user with ``get'', trying to get other's policy,
 	using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{18}{
 \Reason{Fails for user with ``get'', trying to get other's policy,
 	using CHANGEPW_SERVICE.}
 }
 
-\test{
+\numtest{19}{
 \Reason{Succeeds for user with ``modify'' and ``get'', trying to get
 	other's policy, using ADMIN_SERVICE.}
 }
 
-\test{
+\numtest{20}{
 \Reason{Fails for user with ``modify'' and ``get'', trying to get
 	other's policy, using CHANGEPW_SERVICE.}
 }
@@ -1690,7 +1703,7 @@ XXX This isn't sufficient.
 
 \section{ovsec_kadm_get_privs}
 
-\test{
+\numtest{1}{
 \Reason{Fails for null pointer argument.}
 }
 
@@ -1698,14 +1711,14 @@ This test should be run with the 16 possible combinations of access
 bits (since there are 4 access bits, there are $2^4 = 16$ popsible
 combinations of them):
 
-\test{
+\numtest{2}{
 \Reason{Returns correct bit mask for access bits of user.}
 \Conditions{RPC}
 }
 
 This test should be run locally:
 
-\test{
+\numtest{3}{
 \Reason{Returns 0x0f.}
 \Conditions{local}
 }
