@@ -1,3 +1,8 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* cleanup.c, init.c, init_slave.c, vhangup.c: Use ANSI style
+	function definitions.
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Delete unused ADD_DEF, probably left over from

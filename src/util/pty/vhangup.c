@@ -24,7 +24,7 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-void ptyint_vhangup()
+void ptyint_vhangup(void)
 {
 #ifdef HAVE_VHANGUP
 #ifdef POSIX_SIGNALS

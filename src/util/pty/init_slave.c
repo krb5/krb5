@@ -43,8 +43,7 @@ static char *push_list[] = {
 
  
 
-long pty_initialize_slave (fd)
-    int fd;
+long pty_initialize_slave (int fd)
 {
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
     struct termios new_termio;

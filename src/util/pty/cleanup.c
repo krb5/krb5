@@ -27,10 +27,10 @@
 #include <sys/wait.h>
 #endif
 
-long pty_cleanup (slave, pid, update_utmp)
-    char *slave;
-    int pid; /* May be zero for unknown.*/
-    int update_utmp;
+long pty_cleanup (char *slave,
+		  /* May be zero for unknown.  */
+		  int pid,
+		  int update_utmp)
 {
 #ifdef VHANG_LAST
     int retval, fd;

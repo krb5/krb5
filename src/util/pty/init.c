@@ -26,7 +26,7 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-long pty_init()
+long pty_init(void)
 {
     initialize_pty_error_table();
     return 0;
