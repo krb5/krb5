@@ -166,6 +166,10 @@ if test "$enable_thread_support" = yes; then
       CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
       ;;
   esac
+else
+  PTHREAD_CC="$CC"
+  PTHREAD_CFLAGS=""
+  PTHREAD_LIBS=""
 fi
 dnl We want to know where these routines live, so on systems with weak
 dnl reference support we can figure out whether or not the pthread library
