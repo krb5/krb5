@@ -449,9 +449,6 @@ char *kadmin_startup(argc, argv)
 
 int quit()
 {
-     krb5_ccache cc;
-     int retval;
-
      kadm5_destroy(handle);
      if (ccache_name != NULL) {
 	  fprintf(stderr,
@@ -1251,7 +1248,6 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
     int i;
     time_t now;
     time_t date;
-    krb5_error_code retval;
 
     time(&now);
     *mask = 0;
@@ -1430,15 +1426,15 @@ void kadmin_getpol(argc, argv)
     }
     if (argc == 2) {
 	printf("Policy: %s\n", policy.policy);
-	printf("Maximum password life: %d\n", policy.pw_max_life);
-	printf("Minimum password life: %d\n", policy.pw_min_life);
-	printf("Minimum password length: %d\n", policy.pw_min_length);
-	printf("Minimum number of password character classes: %d\n",
+	printf("Maximum password life: %ld\n", policy.pw_max_life);
+	printf("Minimum password life: %ld\n", policy.pw_min_life);
+	printf("Minimum password length: %ld\n", policy.pw_min_length);
+	printf("Minimum number of password character classes: %ld\n",
 	       policy.pw_min_classes);
-	printf("Number of old keys kept: %d\n", policy.pw_history_num);
-	printf("Reference count: %d\n", policy.policy_refcnt);
+	printf("Number of old keys kept: %ld\n", policy.pw_history_num);
+	printf("Reference count: %ld\n", policy.policy_refcnt);
     } else {
-	printf("\"%s\"\t%d\t%d\t%d\t%d\t%d\t%d\n",
+	printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n",
 	       policy.policy, policy.pw_max_life, policy.pw_min_life,
 	       policy.pw_min_length, policy.pw_min_classes,
 	       policy.pw_history_num, policy.policy_refcnt);

@@ -55,6 +55,10 @@ void *alloca ();
 #include <stdio.h>
 #include <ctype.h>
 
+#if defined(HAVE_STDLIB_H)
+#include <stdlib.h>
+#endif
+
 /* The code at the top of get_date which figures out the offset of the
    current time zone checks various CPP symbols to see if special
    tricks are need, but defaults to using the gettimeofday system call.
@@ -118,7 +122,7 @@ extern struct tm	*localtime();
 static int yylex ();
 static int yyerror ();
 
-#if	!defined(lint) && !defined(SABER)
+#if	!defined(lint) && !defined(SABER) && !defined(_LINT)
 static char RCS[] =
 	"$Header$";
 #endif	/* !defined(lint) && !defined(SABER) */

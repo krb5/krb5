@@ -1,3 +1,10 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadmin.c (kadmin_getpol): Change format strings from %d to %ld
+	to match the policy types which are longs.
+
+	* getdate.y: Include stdlib.h if present on system.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* ss_wrapper.c (main): ss_listen() takes only one argument
