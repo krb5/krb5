@@ -930,7 +930,7 @@ krb5_do_preauth(krb5_context context,
 		scratch.data = (char *) etype_info[l]->salt;
 		scratch.length = etype_info[l]->length;
 		krb5_free_data_contents(context, salt);
-		if (scratch.length = KRB5_ETYPE_NO_SALT) 
+		if (scratch.length == KRB5_ETYPE_NO_SALT) 
 		  salt->data = NULL;
 		else
 		    if ((ret = krb5int_copy_data_contents( context, &scratch, salt)) != 0)
