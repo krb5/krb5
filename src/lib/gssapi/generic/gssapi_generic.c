@@ -29,24 +29,24 @@
 
 /*
  * The OID of user_name is:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
- * 	generic(1) user_name(1) = 1.2.840.113554.2.1.1.1
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ * 	generic(1) user_name(1) = 1.2.840.113554.1.2.1.1
  * machine_uid_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
- * 	generic(1) machine_uid_name(2) = 1.2.840.113554.2.1.1.2
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ * 	generic(1) machine_uid_name(2) = 1.2.840.113554.1.2.1.2
  * string_uid_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
- * 	generic(1) string_uid_name(3) = 1.2.840.113554.2.1.1.3
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ * 	generic(1) string_uid_name(3) = 1.2.840.113554.1.2.1.3
  * service_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(2) gssapi(1)
- * 	generic(1) service_name(4) = 1.2.840.113554.2.1.1.4
+ * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
+ * 	generic(1) service_name(4) = 1.2.840.113554.1.2.1.4
  */
 
 static const gss_OID_desc oids[] = {
-   {10, "\052\206\110\206\367\022\002\001\001\001"},
-   {10, "\052\206\110\206\367\022\002\001\001\002"},
-   {10, "\052\206\110\206\367\022\002\001\001\003"},
-   {10, "\052\206\110\206\367\022\002\001\001\004"},
+   {10, "\052\206\110\206\367\022\001\002\001\001"},
+   {10, "\052\206\110\206\367\022\001\002\001\002"},
+   {10, "\052\206\110\206\367\022\001\002\001\003"},
+   {10, "\052\206\110\206\367\022\001\002\001\004"},
 };
 
 const_gss_OID gss_nt_user_name = oids+0;

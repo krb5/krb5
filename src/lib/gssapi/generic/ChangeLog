@@ -1,3 +1,7 @@
+Sat Aug 20 01:34:46 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* gss_generic.c (gss_OID_desc): Fix OID's!
+
 Thu Jul 14 03:29:25 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* Makefile.in: remove spurious mkdir
