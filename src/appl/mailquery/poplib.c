@@ -85,7 +85,7 @@ int reserved;
 #endif
 
     if (sfi && sfo) {
-	return;
+	return OK;		/* guessing at this -- eichin -- XXX */
     }
 
     hp = gethostbyname(host);
@@ -113,7 +113,7 @@ int reserved;
     }
 
     sin.sin_family = hp->h_addrtype;
-    bcopy(hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
+    memcpy((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
     sin.sin_port = sp->s_port;
 #ifdef KPOP
     s = socket(AF_INET, SOCK_STREAM, 0);
@@ -232,9 +232,9 @@ int reserved;
 
 pop_command(fmt, a, b, c, d)
 char *fmt;
+char *a, *b, *c, *d;
 {
     char buf[1024];
-    char errmsg[64];
 
     sprintf(buf, fmt, a, b, c, d);
 
@@ -309,7 +309,9 @@ int *nmsgs, *nbytes;
 }
 
 pop_retr(msgno, action, arg)
+int msgno;
 int (*action)();
+char *arg;			/* is this always FILE*??? -- XXX */
 {
     char buf[1024];
     int nbytes = 0;

@@ -27,6 +27,9 @@
 #include <fcntl.h>
 #include <sys/file.h>  
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HESIOD
 #include <hesiod.h>
 #endif
@@ -53,7 +56,6 @@ main(argc, argv)
 #ifdef HESIOD
     struct hes_postoffice *p;
 #endif /* HESIOD */
-    char *index();
 
     while ((c = getopt(argc, argv, "dve:")) != EOF) {
 	switch (c) {
@@ -80,7 +82,7 @@ main(argc, argv)
 
     if (argc > 0) {
 	user = argv[0];
-	if ((mhost = index(argv[0], '@')) != NULL) {
+	if ((mhost = strchr(argv[0], '@')) != NULL) {
 	    *mhost = '\0';
 	    mhost++;
 	}
@@ -166,7 +168,7 @@ mailquery(mhost, user)
     return nbytes;
 }
     
-usage()
+void usage()
 {
     fprintf(stderr, "usage: mailquery [-d] [-v] [-e cmd] [user[@host]]\n");
 } 
