@@ -65,9 +65,13 @@
    them.  This'll be fixed, but for better compatibility, let's prefer
    des-crc for now.  */
 #define DEFAULT_ETYPE_LIST	\
+	"aes256-cts-hmac-sha1-96 " \
 	"des3-cbc-sha1 arcfour-hmac-md5 " \
-	"aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 " \
 	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
+
+/* Not included:
+	"aes128-cts-hmac-sha1-96 " \
+ */
 
 #if (defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
