@@ -1376,7 +1376,7 @@ AC_DEFUN([KRB5_GETPEERNAME_ARGS],[
 peer_set=no
 for peer_arg1 in "struct sockaddr *" "void *"
 do
-  for peer_arg2 in "size_t *" "int *"
+  for peer_arg2 in "size_t *" "int *" "socklen_t *"
   do
 	if test $peer_set = no; then
 	  TRY_PEER_INT($peer_arg1, $peer_arg2)
@@ -1417,7 +1417,7 @@ AC_DEFUN([KRB5_GETSOCKNAME_ARGS],[
 sock_set=no
 for sock_arg1 in "struct sockaddr *" "void *"
 do
-  for sock_arg2 in "size_t *" "int *"
+  for sock_arg2 in "size_t *" "int *" "socklen_t *"
   do
 	if test $sock_set = no; then
 	  TRY_GETSOCK_INT($sock_arg1, $sock_arg2)
