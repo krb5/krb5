@@ -75,6 +75,6 @@ kv5m_err.so kv5m_err.po $(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c $(BUILDTOP)/incl
 adm_err.so adm_err.po $(OUTPRE)adm_err.$(OBJEXT): adm_err.c $(BUILDTOP)/include/com_err.h
 init_ets.so init_ets.po $(OUTPRE)init_ets.$(OBJEXT): init_ets.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h
 
