@@ -1,3 +1,13 @@
+Wed Nov  8 20:00:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): If the optional
+		salt element is not present, set etype.length to -1.
+
+	* asn1_k_encode.c (asn1_encode_etype_info_entry): When encoding
+		the etype_info_entry structure, use length == -1 to mean
+		that the optional salt structure should not be sent.  (It
+		used to be if length == -1.)
+
 Tue Oct 31 20:06:49 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_decode.c (decode_krb5_pa_enc_ts, decode_krb5_enc_data):

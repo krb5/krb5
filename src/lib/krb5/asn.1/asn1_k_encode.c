@@ -774,10 +774,10 @@ asn1_error_code asn1_encode_etype_info_entry(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || (val->length != 0 && val->salt == NULL))
+  if(val == NULL || (val->length >= 0 && val->salt == NULL))
      return ASN1_MISSING_FIELD;
 
-  if (val->length)
+  if (val->length >= 0)
 	  asn1_addlenfield((int) val->length,val->salt,1,
 			   asn1_encode_octetstring);
   asn1_addfield(val->etype,0,asn1_encode_integer);

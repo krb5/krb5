@@ -665,7 +665,7 @@ asn1_error_code asn1_decode_etype_info_entry(buf, val)
     if (tagnum == 1) {
 	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
     } else {
-	    val->length = 0;
+	    val->length = -1;
 	    val->salt = 0;
     }
     end_structure();
