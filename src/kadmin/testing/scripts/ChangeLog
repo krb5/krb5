@@ -1,3 +1,8 @@
+2004-09-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: If one of the servers failed to start, log
+	info about which start file was not found.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* env-setup.shin: Substitute FAKEDEST.  Substitue "$" for "$$".

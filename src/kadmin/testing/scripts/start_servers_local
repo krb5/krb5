@@ -201,6 +201,12 @@ EOF
 	else
 		echo "Admin server or KDC failed to start after $sofar_s" \
 			"seconds." 1>&2
+		if [ ! -f $adm_start_file ]; then
+		    echo "  No admin server start file $adm_start_file." 1>&2
+		fi
+		if [ ! -f $kdc_start_file ]; then
+		    echo "  No KDC start file $adm_start_file." 1>&2
+		fi
 		exit 1
 	fi
 done
