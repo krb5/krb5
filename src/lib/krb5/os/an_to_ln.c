@@ -45,6 +45,9 @@ static char rcsid_an_to_ln_c[] =
 #define min(a,b) ((a) > (b) ? (b) : (a))
 #endif /* min */
 
+static krb5_error_code dbm_an_to_ln();
+static krb5_error_code username_an_to_ln();
+
 /*
  Converts an authentication name to a local name suitable for use by
  programs wishing a translation to an environment-specific name (e.g.
