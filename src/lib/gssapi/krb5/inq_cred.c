@@ -56,10 +56,11 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 	 return(major);
       }
    } else {
-      if (! kg_validate_cred_id(cred_handle)) {
-	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-	 return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
-      }
+      OM_uint32 major;
+	   
+      major = krb5_gss_validate_cred(minor_status, cred_handle);
+      if (GSS_ERROR(major))
+	  return(major);
    }
 
    cred = (krb5_gss_cred_id_t) cred_handle;

@@ -517,5 +517,10 @@ PROTOTYPE( (OM_uint32  *,		/* minor_status */
 	    const gss_name_t,		/* input_name */
 	    gss_name_t *		/* dest_name */
 	 ));
+
+OM_uint32 krb5_gss_validate_cred
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_cred_id_t		/* cred */
+         ));
 	
 #endif /* _GSSAPIP_KRB5_H_ */

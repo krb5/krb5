@@ -261,10 +261,11 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	 return(major);
       }
    } else {
-      if (! kg_validate_cred_id(claimant_cred_handle)) {
-	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-	 return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
-      }
+      OM_uint32 major;
+	   
+      major = krb5_gss_validate_cred(minor_status, claimant_cred_handle);
+      if (GSS_ERROR(major))
+	  return(major);
    }
 
    cred = (krb5_gss_cred_id_t) claimant_cred_handle;

@@ -1,0 +1,66 @@
+/*
+ * Copyright 1997 by Massachusetts Institute of Technology
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+
+#include "gssapiP_krb5.h"
+
+/*
+ * Check to see whether or not a GSSAPI krb5 credential is valid.  If
+ * it is not, return an error.
+ */
+
+OM_uint32
+krb5_gss_validate_cred(minor_status, cred_handle)
+     OM_uint32 *minor_status;
+     gss_cred_id_t cred_handle;
+{
+    krb5_context context;
+    krb5_gss_cred_id_t cred;
+    krb5_error_code code;
+    krb5_principal princ;
+	
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+	return(GSS_S_FAILURE);
+
+    if (!kg_validate_cred_id(cred_handle)) {
+	*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+	return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
+    }
+
+    cred = (krb5_gss_cred_id_t) cred_handle;
+	
+    if (cred->ccache) {
+	if ((code = krb5_cc_get_principal(context, cred->ccache, &princ))) {
+	    *minor_status = code;
+	    return(GSS_S_DEFECTIVE_CREDENTIAL);
+	}
+	if (!krb5_principal_compare(context, princ, cred->princ)) {
+	    *minor_status = KG_CCACHE_NOMATCH;
+	    return(GSS_S_DEFECTIVE_CREDENTIAL);
+	}
+    }
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
+
+		
+
+

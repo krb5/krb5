@@ -49,6 +49,7 @@ SRCS = \
 	$(srcdir)/util_crypt.c \
 	$(srcdir)/util_seed.c \
 	$(srcdir)/util_seqnum.c \
+	$(srcdir)/val_cred.c \
 	$(srcdir)/verify.c \
 	$(srcdir)/wrap_size_limit.c \
 	gssapi_err_krb5.c
@@ -92,6 +93,7 @@ OBJS = \
 	util_crypt.$(OBJEXT) \
 	util_seed.$(OBJEXT) \
 	util_seqnum.$(OBJEXT) \
+	val_cred.$(OBJECT) \
 	verify.$(OBJEXT) \
 	wrap_size_limit.$(OBJEXT) \
 	gssapi_err_krb5.$(OBJEXT)
@@ -135,6 +137,7 @@ STLIBOBJS = \
 	util_crypt.o \
 	util_seed.o \
 	util_seqnum.o \
+	val_cred.o \
 	verify.o \
 	wrap_size_limit.o \
 	gssapi_err_krb5.o

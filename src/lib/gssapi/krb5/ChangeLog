@@ -1,5 +1,15 @@
 Sat Nov 15 20:14:05 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* accept_sec_context.c (krb5_gss_accept_sec_context), 
+	  init_sec_context.c (krb5_gss_init_sec_context),
+	  inq_cred.c (krb5_gss_inquire_cred): Call krb5_gss_validate_cred
+	  	to make sure the credential handle is still valid.
+
+	* val_cred.c (krb5_gss_validate_cred): New file which validates
+		the credential to make sure it is valid, including
+		checking to make sure the credentials cache still points
+		at the same krb5 principal as it did before.
+
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Return
  		GSS_S_FAILURE if a non-NULL context handle is passed to
  		it.
