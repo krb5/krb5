@@ -46,12 +46,17 @@ The first file you should look at is doc/install.ps; it contains the
 notes for building and installing Kerberos 5.  The info file
 krb5-install.info has the same information in info file format.  You
 can view this using the GNU emacs info-mode, or by using the
-standalone info file viewer from the Free Software Foundation.
+standalone info file viewer from the Free Software Foundation.  This
+is also available as an HTML file, install.html.
 
 Other good files to look at are admin-guide.ps and user-guide.ps,
 which contain the system administrator's guide, and the user's guide,
 respectively.  They are also available as info files
-kerberos-admin.info and krb5-user.info, respectively.
+kerberos-admin.info and krb5-user.info, respectively.  These files are
+also available as HTML files.
+
+If you are attempting to build under Windows, please see the
+src/windows/README file.
 
 Reporting Bugs
 --------------
@@ -72,7 +77,11 @@ Notes, Major Changes, and Known Bugs
   service keys at the moment, due to a large number of compatibility
   issues.  For example, the GSSAPI library has some (buggy) support
   for a triple DES session key, but it is intentionally disabled.
-  More here later.
+  ** Do not use triple-DES in your config files except as described in
+  ** the documentation.
+
+* The principal database now uses the btree backend of Berkeley DB.
+  This should result in improved KDC performance.
 
 * The lib/rpc tests do not appear to work under NetBSD-1.4, for
   reasons that are not completely clear at the moment, but probably
@@ -80,14 +89,20 @@ Notes, Major Changes, and Known Bugs
   affect other operations, such as kadmind operation.
 
 * Shared library builds are under a new framework; at this point only
-  Solaris, Irix, NetBSD, and possibly Linux are known to work.  All
-  other working shared library builds may be figments of your
-  imagination.
+  Solaris (2.x), Irix (6.5), NetBSD (1.4 i386), and possibly Linux are
+  known to work.  All other working shared library builds may be
+  figments of your imagination.
 
 * Many existing databases, especially those converted from krb4
   original databases, may contain expiration dates in 1999.  You
   should make sure to update these expiration dates, and also change
   any config file entries that have two-digit years.
+
+* Hardware preauthentication is known to be broken; this will be fixed
+  in an upcoming release.
+
+* krb524d now defaults to forking into the background; use
+  "krb524d -nofork" to avoid forking.
 
 * Not all reported bugs have been fixed in this release, due to time
   constraints.  We are planning to make another release in the near
@@ -110,7 +125,11 @@ a specific license from the United States Government.  It is the
 responsibility of any person or organization contemplating export to
 obtain such a license before exporting.
 
-WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+If you make modifications to this software and distribute the modified
+software you MUST LABEL IT AS BEING A MODIFIED VERSION AND NOT
+ORIGINAL MIT KERBEROS CODE.
+
+WITHIN THESE CONSTRAINTS, permission to use, copy, modify, and
 distribute this software and its documentation for any purpose and
 without fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright notice and
@@ -209,8 +228,8 @@ their many suggestions and bug fixes.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danillo Almeida, Jay Berkenbilt, Richard Basch, John
-Carr, Don Davis, Alexis Ellwood, Nancy Gilman, Matt Hancher, Sam
+Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt Hancher, Sam
 Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Barry Jaspan, Geoffrey
 King, John Kohl, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul
 Park, Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
-Schiller, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
+Schiller, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
