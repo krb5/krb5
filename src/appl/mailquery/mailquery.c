@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/file.h>  
 #include <stdio.h>
+#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -39,6 +40,11 @@
 extern int pop_debug;
 int verbose = 0;
 char *exec_cmd;
+
+void usage()
+{
+    fprintf(stderr, "usage: mailquery [-d] [-v] [-e cmd] [user[@host]]\n");
+} 
 
 main(argc, argv)
      int argc;
@@ -168,9 +174,3 @@ mailquery(mhost, user)
     return nbytes;
 }
     
-void usage()
-{
-    fprintf(stderr, "usage: mailquery [-d] [-v] [-e cmd] [user[@host]]\n");
-} 
-
-
