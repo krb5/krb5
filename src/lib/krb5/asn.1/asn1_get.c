@@ -37,6 +37,12 @@ asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
       *tagnum = ASN1_TAGNUM_CEILING;
       return 0;
   }
+  /* Allow for the indefinite encoding */
+  if ( !*(buf->next) && !*(buf->next + 1)) {
+    buf->next += 2;
+    *tagnum = ASN1_TAGNUM_CEILING;
+    return 0;
+  }
   retval = asn1_get_id(buf,class,construction,tagnum);
   if(retval) return retval;
   retval = asn1_get_length(buf,retlen);
