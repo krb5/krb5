@@ -1,3 +1,11 @@
+Tue Feb 14 17:55:47 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdb5_edit.c: add modent
+	* getdate.y: import get_date
+	* kdbt_ed_ct.ct: add modent
+	* configure.in:
+	* Makefile.in: support for getdate.y
+
 Wed Feb  8 20:08:36 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* kdb5_edit.c (show_principal): make sane and print all useful

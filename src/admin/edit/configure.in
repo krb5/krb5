@@ -3,6 +3,10 @@ WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
 AC_PROG_INSTALL
+AC_PROG_YACC
+AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
+AC_HAVE_FUNCS(ftime timezone)
+AC_CONST
 AC_CHECK_LIB(socket,main)
 AC_CHECK_LIB(nsl,main)
 AC_CHECK_LIB(ndbm,main)

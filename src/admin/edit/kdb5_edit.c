@@ -36,8 +36,18 @@
 #include <com_err.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/timeb.h>
 
 #include "kdb5_edit.h"
+
+/* special struct to convert flag names for principals
+   to actual krb5_flags for a principal */
+struct pflag {
+    char *flagname;		/* name of flag as typed to CLI */
+    int flaglen;		/* length of string (not counting -,+) */
+    krb5_flags theflag;		/* actual principal flag to set/clear */
+    int set;			/* 0 means clear, 1 means set (on '-') */
+};
 
 struct mblock mblock = {				/* XXX */
     KRB5_KDB_MAX_LIFE,
@@ -1429,7 +1439,8 @@ void show_principal(argc, argv)
 	NULL,			/* 0x00000400 */
 	NULL,			/* 0x00000800 */
 	"DISALLOW_SVR",		/* 0x00001000 */
-	"PWCHANGE_SERVICE"	/* 0x00002000 */
+	"PWCHANGE_SERVICE",	/* 0x00002000 */
+	/* yes abuse detail that rest are initialized to NULL */
 	};
 
     if (argc < 2) {
@@ -1521,6 +1532,208 @@ errout:
 	krb5_db_free_principal(edit_context, &entry, nprincs);
 }
 
+int parse_princ_args(argc, argv, entry, pass, randkey, caller)
+    int argc;
+    char *argv[];
+    krb5_db_entry *entry;
+    char **pass;
+    int *randkey;
+    char *caller;
+{
+    int i, j, attrib_set;
+    time_t date;
+    struct timeb now;
+    krb5_error_code retval;
+    
+    static struct pflag flags[] = {
+    {"allow_postdated",	15,	KRB5_KDB_DISALLOW_POSTDATED,	1},
+    {"allow_forwardable",17,	KRB5_KDB_DISALLOW_FORWARDABLE,	1},
+    {"allow_tgs_req",	13,	KRB5_KDB_DISALLOW_TGT_BASED,	1},
+    {"allow_renewable",	15,	KRB5_KDB_DISALLOW_RENEWABLE,	1},
+    {"allow_proxiable",	15,	KRB5_KDB_DISALLOW_PROXIABLE,	1},
+    {"allow_dup_skey",	14,	KRB5_KDB_DISALLOW_DUP_SKEY,	1},
+    {"allow_tix",	9,	KRB5_KDB_DISALLOW_ALL_TIX,	1},
+    {"requires_preauth",16,	KRB5_KDB_REQUIRES_PRE_AUTH,	0},
+    {"requires_hwauth",	15,	KRB5_KDB_REQUIRES_HW_AUTH,	0},
+    {"needchange",	10,	KRB5_KDB_REQUIRES_PWCHANGE,	0},
+    {"allow_svr",	9,	KRB5_KDB_DISALLOW_SVR,		1},
+    {"password_changing_service",25,KRB5_KDB_PWCHANGE_SERVICE,	0}
+    };
+    
+    *pass = NULL;
+    ftime(&now);
+    *randkey = 0;
+    for (i = 1; i < argc - 1; i++) {
+	attrib_set = 0;
+	if (strlen(argv[i]) == 5 &&
+	    !strcmp("-kvno", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		entry->kvno = atoi(argv[i]);
+		continue;
+	    }
+	}
+	if (strlen(argv[i]) == 8 &&
+	    !strcmp("-maxlife", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		entry->max_life = get_date(argv[i], now) - now.time;
+		continue;
+	    }
+	}
+	if (strlen(argv[i]) == 7 &&
+	    !strcmp("-expire", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		date = get_date(argv[i], now);
+		entry->expiration = date == (time_t) -1 ? 0 : date;
+		continue;
+	    }
+	}
+	if (strlen(argv[i]) == 9 &&
+	    !strcmp("-pwexpire", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		date = get_date(argv[i], now);
+		entry->pw_expiration = date == (time_t) -1 ? 0 : date;
+		continue;
+	    }
+	}
+	if (strlen(argv[i]) == 3 &&
+	    !strcmp("-pw", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		*pass = argv[i];
+		continue;
+	    }
+	}
+	if (strlen(argv[i]) == 8 &&
+	    !strcmp("-randkey", argv[i])) {
+	    ++*randkey;
+	    continue;
+	}
+	for (j = 0; j < sizeof (flags) / sizeof (struct pflag); j++) {
+	    if (strlen(argv[i]) == flags[j].flaglen + 1 &&
+		!strcmp(flags[j].flagname,
+			&argv[i][1] /* strip off leading + or - */)) {
+		if (flags[j].set && argv[i][0] == '-' ||
+		    !flags[j].set && argv[i][0] == '+') {
+		    entry->attributes |= flags[j].theflag;
+		    attrib_set++;
+		    break;
+		} else if (flags[j].set && argv[i][0] == '+' ||
+			   !flags[j].set && argv[i][0] == '-') {
+		    entry->attributes &= ~flags[j].theflag;
+		    attrib_set++;
+		    break;
+		} else {
+		    return -1;
+		}
+	    }
+	}
+	if (!attrib_set)
+	    return -1;		/* nothing was parsed */
+    }
+    if (i != argc - 1) {
+	fprintf(stderr, "%s: parser lost count!\n", caller);
+	return -1;
+    }
+    retval = krb5_parse_name(edit_context, argv[i], &entry->principal);
+    if (retval) {
+	com_err(caller, retval, "while parsing principal");
+	return -1;
+    }
+    return 0;
+}
+
+void modent(argc, argv)
+    int argc;
+    char *argv[];
+{
+    krb5_db_entry entry, oldentry;
+    krb5_principal kprinc;
+    krb5_error_code retval;
+    krb5_boolean more;
+    char *pass, *canon;
+    int one = 1, nprincs = 1, randkey = 0;
+    
+    retval = krb5_parse_name(edit_context, argv[argc - 1], &kprinc);
+    if (retval) {
+	com_err("modify_principal", retval, "while parsing principal");
+	return;
+    }
+    retval = krb5_unparse_name(edit_context, kprinc, &canon);
+    if (retval) {
+	com_err("modify_principal", retval,
+		"while canonicalizing principal");
+	krb5_free_principal(edit_context, kprinc);
+	return;
+    }
+    retval = krb5_db_get_principal(edit_context, kprinc, &oldentry,
+				   &nprincs, &more);
+    krb5_free_principal(edit_context, kprinc);
+    if (retval) {
+	com_err("modify_entry", retval, "while getting \"%s\".",
+		canon);
+	free(canon);
+	return;
+    }
+    if (!nprincs) {
+	com_err(argv[0], 0, "No principal \"%s\" exists", canon);
+	exit_status++;
+	free(canon);
+	return;
+    }
+    memcpy((krb5_pointer) &entry, (krb5_pointer) &oldentry,
+	   sizeof (krb5_db_entry));
+    retval = parse_princ_args(argc, argv,
+			      &entry, &pass, &randkey,
+			      "modify_principal");
+    if (retval) {
+	fprintf(stderr, "modify_principal: bad arguments\n");
+	krb5_free_principal(edit_context, entry.principal);
+	free(canon);
+	return;
+    }
+    if (randkey) {
+	fprintf(stderr, "modify_principal: -randkey not allowed\n");
+	krb5_free_principal(edit_context, entry.principal);
+	free(canon);
+	return;
+    }
+    entry.mod_name = master_princ;
+    if (retval = krb5_timeofday(edit_context, &entry.mod_date)) {
+	com_err(argv[0], retval, "while fetching date");
+	krb5_free_principal(edit_context, entry.principal);
+	exit_status++;
+	free(canon);
+	return;
+    }
+    retval = krb5_db_put_principal(edit_context, &entry, &one);
+    krb5_free_principal(edit_context, entry.principal);
+    if (retval) {
+	com_err("modify_principal", retval,
+		"while modifying \"%s\".", canon);
+	free(canon);
+	return;
+    }
+    if (one != 1) {
+	com_err(argv[0], 0, "entry not stored in database (unknown failure)");
+	exit_status++;
+    }
+    printf("Principal \"%s\" modified.\n", canon);
+    free(canon);
+}
+
+#ifdef HAVE_GETCWD
+#define getwd(x) getcwd(x,MAXPATHLEN)
+#endif
+
 void change_working_dir(argc, argv)
 	int	argc;
 	char	**argv;
@@ -1536,10 +1749,6 @@ void change_working_dir(argc, argv)
 		exit_status++;
 	}
 }
-
-#ifdef HAVE_GETCWD
-#define getwd(x) getcwd(x,MAXPATHLEN)
-#endif
 
 void print_working_dir(argc, argv)
 	int	argc;

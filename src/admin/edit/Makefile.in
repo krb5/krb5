@@ -21,13 +21,32 @@ DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(K4LIB)
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
-OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o dumpv4.o ss_wrapper.o
-SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c $(srcdir)/ss_wrapper.c $(srcdir)/dumpv4.c
+OBJS= kdb5_edit.o \
+	kdb5_ed_ct.o \
+	util.o \
+	dump.o \
+	dumpv4.o \
+	ss_wrapper.o \
+	getdate.o \
+	$(LIBOBJS)
+SRCS= $(srcdir)/kdb5_edit.c \
+	$(srcdir)/kdb5_ed_ct.c \
+	$(srcdir)/util.c \
+	$(srcdir)/dump.c \
+	$(srcdir)/ss_wrapper.c \
+	$(srcdir)/dumpv4.c \
+	$(srcdir)/getdate.o
 
 all:: kdb5_edit
 
 kdb5_edit: kdb5_edit.o $(DEPLIBS) $(OBJS)
 	$(CC) $(CFLAGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
+
+getdate.c getdate.h: getdate.y
+	$(RM) getdate.c getdate.h y.tab.*
+	$(YACC) -d $(srcdir)/getdate.y
+	$(MV) y.tab.c getdate.c
+	$(MV) y.tab.h getdate.h
 
 install::
 	$(INSTALL_PROGRAM) kdb5_edit ${DESTDIR}$(ADMIN_BINDIR)/kdb5_edit
@@ -44,6 +63,8 @@ clean::
 depend:: kdb5_ed_ct.c
 
 clean::
-	$(RM) kdb5_edit
+	$(RM) kdb5_edit getdate getdate.c getdate.h y.tab.c y.tab.h
 
-
+# testing rule for building getdate
+getdate: getdate.c
+	$(CC) -o getdate $(CFLAGS) -DTEST getdate.c

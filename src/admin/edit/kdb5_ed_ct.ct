@@ -57,6 +57,9 @@ request extract_srvtab, "Extract service key table",
 request extract_v4_srvtab, "Extract service key table",
 	extract_v4_srvtab, xst4;
 
+request modent, "Modify entry",
+	modify_entry, modent;
+
 request list_db, "List database entries",
 	list_db, ldb;
 
