@@ -19,7 +19,7 @@
 static const char copyright[] =
     "Copyright 1987 by MIT Student Information Processing Board";
 
-extern pointer malloc PROTOTYPE((unsigned));
+extern pointer malloc (unsigned);
 extern char *last_token;
 extern FILE *output_file;
 

@@ -105,147 +105,147 @@ asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
 	     Returns ENOMEM if memory runs out.
 */
 
-asn1_error_code asn1_encode_ui_4 PROTOTYPE((asn1buf *buf,
+asn1_error_code asn1_encode_ui_4 (asn1buf *buf,
 					    const krb5_ui_4 val,
-					    unsigned int *retlen));
+					    unsigned int *retlen);
 
-asn1_error_code asn1_encode_msgtype PROTOTYPE((asn1buf *buf,
+asn1_error_code asn1_encode_msgtype (asn1buf *buf,
 					       const /*krb5_msgtype*/int val,
-					       unsigned int *retlen));
+					       unsigned int *retlen);
 
 asn1_error_code asn1_encode_realm
-	PROTOTYPE((asn1buf *buf, const krb5_principal val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_principal val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_principal_name
-	PROTOTYPE((asn1buf *buf, const krb5_principal val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_principal val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_encrypted_data
-	PROTOTYPE((asn1buf *buf, const krb5_enc_data *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_enc_data *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_krb5_flags
-	PROTOTYPE((asn1buf *buf, const krb5_flags val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_flags val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_ap_options
-	PROTOTYPE((asn1buf *buf, const krb5_flags val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_flags val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_ticket_flags
-	PROTOTYPE((asn1buf *buf, const krb5_flags val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_flags val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_kdc_options
-	PROTOTYPE((asn1buf *buf, const krb5_flags val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_flags val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_authorization_data
-	PROTOTYPE((asn1buf *buf, const krb5_authdata **val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_authdata **val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_krb5_authdata_elt
-	PROTOTYPE((asn1buf *buf, const krb5_authdata *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_authdata *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_kdc_rep
-	PROTOTYPE((int msg_type, asn1buf *buf, const krb5_kdc_rep *val,
-		   unsigned int *retlen));
+	(int msg_type, asn1buf *buf, const krb5_kdc_rep *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_enc_kdc_rep_part
-	PROTOTYPE((asn1buf *buf, const krb5_enc_kdc_rep_part *val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_enc_kdc_rep_part *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_ticket
-	PROTOTYPE((asn1buf *buf, const krb5_ticket *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_ticket *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_encryption_key
-	PROTOTYPE((asn1buf *buf, const krb5_keyblock *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_keyblock *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_kerberos_time
-	PROTOTYPE((asn1buf *buf, const krb5_timestamp val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_timestamp val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_checksum
-	PROTOTYPE((asn1buf *buf, const krb5_checksum *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_checksum *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_host_address
-	PROTOTYPE((asn1buf *buf, const krb5_address *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_address *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_host_addresses
-	PROTOTYPE((asn1buf *buf, const krb5_address **val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_address **val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_transited_encoding
-	PROTOTYPE((asn1buf *buf, const krb5_transited *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_transited *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_last_req
-	PROTOTYPE((asn1buf *buf, const krb5_last_req_entry **val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_last_req_entry **val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_sequence_of_pa_data
-	PROTOTYPE((asn1buf *buf, const krb5_pa_data **val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_pa_data **val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sequence_of_ticket
-	PROTOTYPE((asn1buf *buf, const krb5_ticket **val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_ticket **val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sequence_of_enctype
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const int len, const krb5_enctype *val,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_kdc_req
-	PROTOTYPE((int msg_type,
+	(int msg_type,
 		   asn1buf *buf,
 		   const krb5_kdc_req *val,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_kdc_req_body
-	PROTOTYPE((asn1buf *buf, const krb5_kdc_req *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_kdc_req *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_krb_safe_body
-	PROTOTYPE((asn1buf *buf, const krb5_safe *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_safe *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sequence_of_krb_cred_info
-	PROTOTYPE((asn1buf *buf, const krb5_cred_info **val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_cred_info **val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_krb_cred_info
-	PROTOTYPE((asn1buf *buf, const krb5_cred_info *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_cred_info *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_last_req_entry
-	PROTOTYPE((asn1buf *buf, const krb5_last_req_entry *val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_last_req_entry *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_pa_data
-	PROTOTYPE((asn1buf *buf, const krb5_pa_data *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_pa_data *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_alt_method
-	PROTOTYPE((asn1buf *buf, const krb5_alt_method *val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_alt_method *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_etype_info_entry
-	PROTOTYPE((asn1buf *buf, const krb5_etype_info_entry *val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_etype_info_entry *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_etype_info
-	PROTOTYPE((asn1buf *buf, const krb5_etype_info_entry **val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_etype_info_entry **val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_passwdsequence
-	PROTOTYPE((asn1buf *buf, const passwd_phrase_element *val, unsigned int *retlen));
+	(asn1buf *buf, const passwd_phrase_element *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sequence_of_passwdsequence
-	PROTOTYPE((asn1buf *buf, const passwd_phrase_element **val,
-	unsigned int *retlen));
+	(asn1buf *buf, const passwd_phrase_element **val,
+	unsigned int *retlen);
 
 asn1_error_code asn1_encode_sam_flags
-	PROTOTYPE((asn1buf * buf, const krb5_flags val, unsigned int *retlen));
+	(asn1buf * buf, const krb5_flags val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sam_challenge
-	PROTOTYPE((asn1buf *buf, const krb5_sam_challenge * val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_sam_challenge * val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_sam_key
-	PROTOTYPE((asn1buf *buf, const krb5_sam_key *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_sam_key *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_enc_sam_response_enc
-	PROTOTYPE((asn1buf *buf, const krb5_enc_sam_response_enc *val,
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_enc_sam_response_enc *val,
+		   unsigned int *retlen);
 
 asn1_error_code asn1_encode_sam_response
-	PROTOTYPE((asn1buf *buf, const krb5_sam_response *val, unsigned int *retlen));
+	(asn1buf *buf, const krb5_sam_response *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_predicted_sam_response
-	PROTOTYPE((asn1buf *buf, const krb5_predicted_sam_response *val, 
-		   unsigned int *retlen));
+	(asn1buf *buf, const krb5_predicted_sam_response *val, 
+		   unsigned int *retlen);
 
 #endif

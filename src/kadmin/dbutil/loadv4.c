@@ -107,19 +107,19 @@ static int verbose = 0;
 static int shortlife = 0;
 
 static krb5_error_code add_principal 
-	PROTOTYPE((krb5_context,
+		  (krb5_context,
 		   krb5_principal, 
 		   enum ap_op,
-		   struct realm_info *));
+		   struct realm_info *);
 
-static int v4init PROTOTYPE((char *, int, char *));
-static krb5_error_code enter_in_v5_db PROTOTYPE((krb5_context,
-						 char *, Principal *));
-static krb5_error_code process_v4_dump PROTOTYPE((krb5_context, char *,
-						  char *, long));
-static krb5_error_code v4_dump_find_default PROTOTYPE((krb5_context, char *,
-						       char *, long *));
-static krb5_error_code fixup_database PROTOTYPE((krb5_context, char *));
+static int v4init (char *, int, char *);
+static krb5_error_code enter_in_v5_db (krb5_context,
+				       char *, Principal *);
+static krb5_error_code process_v4_dump (krb5_context, char *,
+					char *, long);
+static krb5_error_code v4_dump_find_default (krb5_context, char *,
+					     char *, long *);
+static krb5_error_code fixup_database (krb5_context, char *);
 	
 static int create_local_tgt = 0;
 

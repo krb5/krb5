@@ -35,53 +35,53 @@
 #include <errno.h>
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_close
-	PROTOTYPE((krb5_context, krb5_ccache id ));
+	(krb5_context, krb5_ccache id );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_destroy 
-	PROTOTYPE((krb5_context, krb5_ccache id ));
+	(krb5_context, krb5_ccache id );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_end_seq_get 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
+	(krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_generate_new 
-	PROTOTYPE((krb5_context, krb5_ccache *id ));
+	(krb5_context, krb5_ccache *id );
 
 const char * KRB5_CALLCONV krb5_mcc_get_name 
-	PROTOTYPE((krb5_context, krb5_ccache id ));
+	(krb5_context, krb5_ccache id );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_get_principal 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
+	(krb5_context, krb5_ccache id , krb5_principal *princ );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_initialize 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
+	(krb5_context, krb5_ccache id , krb5_principal princ );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_next_cred 
-	PROTOTYPE((krb5_context, 
+	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
-		   krb5_creds *creds ));
+		   krb5_creds *creds );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_resolve 
-	PROTOTYPE((krb5_context, krb5_ccache *id , const char *residual ));
+	(krb5_context, krb5_ccache *id , const char *residual );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_retrieve 
-	PROTOTYPE((krb5_context, 
+	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
 		   krb5_creds *mcreds , 
-		   krb5_creds *creds ));
+		   krb5_creds *creds );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_start_seq_get 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
+	(krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_store 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
+	(krb5_context, krb5_ccache id , krb5_creds *creds );
 
 krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
-	PROTOTYPE((krb5_context, krb5_ccache id , krb5_flags flags ));
+	(krb5_context, krb5_ccache id , krb5_flags flags );
 
 extern krb5_cc_ops krb5_mcc_ops;
-krb5_error_code krb5_change_cache PROTOTYPE(());
+krb5_error_code krb5_change_cache ();
 
 #define KRB5_OK 0
 
@@ -111,7 +111,7 @@ static krb5_mcc_data *mcc_head = 0;
  * system errors
  * permission errors
  */
-void krb5_mcc_free KRB5_PROTOTYPE((krb5_context context, krb5_ccache id));
+void krb5_mcc_free (krb5_context context, krb5_ccache id);
 
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(context, id, princ)

@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktest.h, ktest_equal.h, utility.c, utility.h: Make prototypes
+	unconditional.
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* trval.c: Include string.h for strcmp prototype.

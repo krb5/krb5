@@ -37,8 +37,8 @@ get_all_princ_from_file - retrieves all principal names
 			from file pointed to by fp.
 
 *******************************************************************/
-static void close_time PROTOTYPE((int, FILE *, int, FILE *));
-static krb5_boolean find_str_in_list PROTOTYPE((char **, char *));
+static void close_time (int, FILE *, int, FILE *);
+static krb5_boolean find_str_in_list (char **, char *);
 
 krb5_error_code get_all_princ_from_file (fp, plist)
     FILE *fp;

@@ -41,11 +41,11 @@ struct keytab_keyproc_arg {
  * from system area.
  */
 static krb5_error_code keytab_keyproc
-    PROTOTYPE((krb5_context,
+    (krb5_context,
                const krb5_enctype,
                krb5_data *,
                krb5_const_pointer,
-               krb5_keyblock **));
+               krb5_keyblock **);
 
 static krb5_error_code
 keytab_keyproc(context, type, salt, keyseed, key)

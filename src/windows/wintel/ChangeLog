@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* enc_des.c, enc_des.h, encrypt.c, encrypt.h: Make prototypes
+	unconditional.  Don't define P().
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* font.c, k5stream.c, k5stream.h, screen.c, screen.h, telnet.c,

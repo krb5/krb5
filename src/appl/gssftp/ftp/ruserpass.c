@@ -57,7 +57,7 @@ static char sccsid[] = "@(#)ruserpass.c	5.3 (Berkeley) 3/1/91";
 #define MAXHOSTNAMELEN 64
 #endif
 
-static int token PROTOTYPE((void));
+static int token (void);
 static	FILE *cfile;
 
 #define	DEFAULT	1

@@ -70,13 +70,13 @@
 #include "kdb_db2.h"
 
 static char *gen_dbsuffix 
-	PROTOTYPE((char *, char * ));
+	(char *, char * );
 static krb5_error_code krb5_db2_db_start_update 
-	PROTOTYPE((krb5_context));
+	(krb5_context);
 static krb5_error_code krb5_db2_db_end_update 
-	PROTOTYPE((krb5_context));
+	(krb5_context);
 static krb5_error_code krb5_db2_db_set_hashfirst
-	PROTOTYPE((krb5_context, int));
+	(krb5_context, int);
 
 static char default_db_name[] = DEFAULT_KDB_FILE;
 
@@ -1121,7 +1121,7 @@ cleanup:
 krb5_error_code
 krb5_db2_db_iterate (context, func, func_arg)
     krb5_context context;
-    krb5_error_code (*func) PROTOTYPE((krb5_pointer, krb5_db_entry *));
+    krb5_error_code (*func) (krb5_pointer, krb5_db_entry *);
     krb5_pointer func_arg;
 {
     krb5_db2_context *db_ctx;

@@ -5,15 +5,11 @@
 #define myaddr		data_addr
 #define hisaddr		hisdataaddr
 
-#ifndef PROTOTYPE
-#define PROTOTYPE(x) x
-#endif
-
-int secure_flush PROTOTYPE((int));
-int secure_putc PROTOTYPE((int, FILE *));
-int secure_getc PROTOTYPE((FILE *));
-int secure_write PROTOTYPE((int, unsigned char *, unsigned int));
-int secure_read PROTOTYPE((int, char *, unsigned int));
-void secure_gss_error PROTOTYPE((OM_uint32 maj_stat, OM_uint32 min_stat, char *s));
+int secure_flush (int);
+int secure_putc (int, FILE *);
+int secure_getc (FILE *);
+int secure_write (int, unsigned char *, unsigned int);
+int secure_read (int, char *, unsigned int);
+void secure_gss_error (OM_uint32 maj_stat, OM_uint32 min_stat, char *s);
 
 void secure_error(char *, ...);

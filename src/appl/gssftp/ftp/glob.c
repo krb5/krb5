@@ -81,22 +81,22 @@ static	short gflag;
 char	**ftpglob();
 char	*globerr;
 char	*home;
-static	char *strspl PROTOTYPE((char *, char *)), *strend PROTOTYPE((char *));
-char	**copyblk PROTOTYPE((char **));
+static	char *strspl (char *, char *), *strend (char *);
+char	**copyblk (char **);
 
-static void acollect PROTOTYPE((char *)), addpath PROTOTYPE((int)), 
-  collect PROTOTYPE((char *)), expand PROTOTYPE((char *)), 
-  Gcat PROTOTYPE((char *, char *));
-static void ginit PROTOTYPE((char **)), matchdir PROTOTYPE((char *)),
-  rscan PROTOTYPE((char **, int (*f)())), sort PROTOTYPE((void));
-static int amatch PROTOTYPE((char *, char *)), 
-  execbrc PROTOTYPE((char *, char *)), match PROTOTYPE((char *, char *));
-static int digit PROTOTYPE((int)), letter PROTOTYPE((int)),
-  any PROTOTYPE((int, char *));
+static void acollect (char *), addpath (int), 
+  collect (char *), expand (char *), 
+  Gcat (char *, char *);
+static void ginit (char **), matchdir (char *),
+  rscan (char **, int (*f)()), sort (void);
+static int amatch (char *, char *), 
+  execbrc (char *, char *), match (char *, char *);
+static int digit (int), letter (int),
+  any (int, char *);
 #ifndef _WIN32
-static int gethdir PROTOTYPE((char *));
+static int gethdir (char *);
 #endif
-static int tglob PROTOTYPE((int ));
+static int tglob (int );
 
 static	int globcnt;
 

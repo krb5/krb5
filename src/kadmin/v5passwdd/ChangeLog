@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_conn.c, adm_rw.c, kadm5_defs.h: Make prototypes
+	unconditional.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_conn.c: Drop _MSDOS support.

@@ -173,114 +173,110 @@ extern	char *mktemp();
 
 extern int command(char *, ...);
 
-#ifndef PROTOTYPE
-#define PROTOTYPE(x) x
-#endif
-
-char *remglob PROTOTYPE((char **, int));
-int another PROTOTYPE((int *, char ***, char *));
-void makeargv PROTOTYPE((void));
-void setpeer PROTOTYPE((int, char **));
-void setclevel PROTOTYPE((int, char **));
-void setdlevel PROTOTYPE((int, char **));
-void ccc PROTOTYPE((void));
-void setclear PROTOTYPE((void));
-void setsafe PROTOTYPE((void));
-void setprivate PROTOTYPE((void));
-void settype PROTOTYPE((int, char **));
-void changetype PROTOTYPE((int, int));
-void setbinary PROTOTYPE((void));
-void setascii PROTOTYPE((void));
-void settenex PROTOTYPE((void));
-void set_mode  PROTOTYPE((int, char **));
-void setform  PROTOTYPE((int, char **));
-void setstruct  PROTOTYPE((int, char **));
-void siteidle  PROTOTYPE((int, char **));
-void put  PROTOTYPE((int, char **));
-void mput  PROTOTYPE((int, char **));
-void reget  PROTOTYPE((int, char **));
-void get  PROTOTYPE((int, char **));
-void mget  PROTOTYPE((int, char **));
-void status  PROTOTYPE((int, char **));
-void setbell PROTOTYPE((void));
-void settrace PROTOTYPE((void));
-void sethash PROTOTYPE((void));
-void setverbose PROTOTYPE((void));
-void setport PROTOTYPE((void));
-void setprompt PROTOTYPE((void));
-void setglob PROTOTYPE((void));
-void setdebug PROTOTYPE((int, char **));
-void cd PROTOTYPE((int, char **));
-void lcd PROTOTYPE((int, char **));
-void delete_file PROTOTYPE((int, char **));
-void mdelete PROTOTYPE((int, char **));
-void renamefile PROTOTYPE((int, char **));
-void ls PROTOTYPE((int, char **));
-void mls PROTOTYPE((int, char **));
-void shell PROTOTYPE((int, char **));
-void user PROTOTYPE((int, char **));
-void pwd PROTOTYPE((void));
-void makedir PROTOTYPE((int, char **));
-void removedir PROTOTYPE((int, char **));
-void quote PROTOTYPE((int, char **));
-void site PROTOTYPE((int, char **));
-void do_chmod PROTOTYPE((int, char **));
-void do_umask PROTOTYPE((int, char **));
-void setidle PROTOTYPE((int, char **));
-void rmthelp PROTOTYPE((int, char **));
-void quit PROTOTYPE((void));
-void disconnect PROTOTYPE((void));
-void fatal PROTOTYPE((char *));
-void account PROTOTYPE((int, char **));
-void doproxy PROTOTYPE((int, char **));
-void setcase PROTOTYPE((void));
-void setcr PROTOTYPE((void));
-void setntrans PROTOTYPE((int, char **));
-void setnmap PROTOTYPE((int, char **));
-void setsunique PROTOTYPE((void));
-void setrunique PROTOTYPE((void));
-void cdup PROTOTYPE((void));
-void restart PROTOTYPE((int, char **));
-void syst PROTOTYPE((void));
-void macdef PROTOTYPE((int, char **));
-void sizecmd PROTOTYPE((int, char **));
-void modtime PROTOTYPE((int, char **));
-void rmtstatus PROTOTYPE((int, char **));
-void newer PROTOTYPE((int, char **));
-void setpassive PROTOTYPE((void));
+char *remglob (char **, int);
+int another (int *, char ***, char *);
+void makeargv (void);
+void setpeer (int, char **);
+void setclevel (int, char **);
+void setdlevel (int, char **);
+void ccc (void);
+void setclear (void);
+void setsafe (void);
+void setprivate (void);
+void settype (int, char **);
+void changetype (int, int);
+void setbinary (void);
+void setascii (void);
+void settenex (void);
+void set_mode  (int, char **);
+void setform  (int, char **);
+void setstruct  (int, char **);
+void siteidle  (int, char **);
+void put  (int, char **);
+void mput  (int, char **);
+void reget  (int, char **);
+void get  (int, char **);
+void mget  (int, char **);
+void status  (int, char **);
+void setbell (void);
+void settrace (void);
+void sethash (void);
+void setverbose (void);
+void setport (void);
+void setprompt (void);
+void setglob (void);
+void setdebug (int, char **);
+void cd (int, char **);
+void lcd (int, char **);
+void delete_file (int, char **);
+void mdelete (int, char **);
+void renamefile (int, char **);
+void ls (int, char **);
+void mls (int, char **);
+void shell (int, char **);
+void user (int, char **);
+void pwd (void);
+void makedir (int, char **);
+void removedir (int, char **);
+void quote (int, char **);
+void site (int, char **);
+void do_chmod (int, char **);
+void do_umask (int, char **);
+void setidle (int, char **);
+void rmthelp (int, char **);
+void quit (void);
+void disconnect (void);
+void fatal (char *);
+void account (int, char **);
+void doproxy (int, char **);
+void setcase (void);
+void setcr (void);
+void setntrans (int, char **);
+void setnmap (int, char **);
+void setsunique (void);
+void setrunique (void);
+void cdup (void);
+void restart (int, char **);
+void syst (void);
+void macdef (int, char **);
+void sizecmd (int, char **);
+void modtime (int, char **);
+void rmtstatus (int, char **);
+void newer (int, char **);
+void setpassive (void);
 
 /* ftp.c */
-void sendrequest PROTOTYPE((char *, char *, char *, int));
-void recvrequest PROTOTYPE((char *, char *volatile, char *, char *, int));
-int login PROTOTYPE((char *));
-void setpbsz PROTOTYPE((unsigned int));
-void pswitch PROTOTYPE((int));
-int getreply PROTOTYPE((int));
-void reset PROTOTYPE((void));
-char *hookup PROTOTYPE((char *, int));
-int do_auth PROTOTYPE((void));
+void sendrequest (char *, char *, char *, int);
+void recvrequest (char *, char *volatile, char *, char *, int);
+int login (char *);
+void setpbsz (unsigned int);
+void pswitch (int);
+int getreply (int);
+void reset (void);
+char *hookup (char *, int);
+int do_auth (void);
 
 /* glob.c */
-void blkfree PROTOTYPE((char **));
+void blkfree (char **);
 
 /* domacro.c */
-void domacro PROTOTYPE((int, char **));
+void domacro (int, char **);
 
 
 /* main.c */
-void help PROTOTYPE((int, char **));
-struct cmd *getcmd PROTOTYPE((char *));
+void help (int, char **);
+struct cmd *getcmd (char *);
 
 
 /* ruserpass.c */
-int ruserpass PROTOTYPE((char *, char **, char **, char **));
+int ruserpass (char *, char **, char **, char **);
 
 /* radix.h */
-int radix_encode PROTOTYPE((unsigned char *, unsigned char *, int *, int));
-char *radix_error PROTOTYPE((int));
+int radix_encode (unsigned char *, unsigned char *, int *, int);
+char *radix_error (int);
 
 /* getpass.c */
-char *mygetpass PROTOTYPE((char *));
+char *mygetpass (char *);
 
 /* glob.c */
-char **ftpglob PROTOTYPE((char *));
+char **ftpglob (char *);

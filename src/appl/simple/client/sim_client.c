@@ -57,7 +57,7 @@ extern char *malloc();
 
 #define MSG "hi there!"			/* message text */
 
-void usage KRB5_PROTOTYPE((char *));
+void usage (char *);
 
 void
 usage(name)

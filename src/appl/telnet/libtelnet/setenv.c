@@ -44,7 +44,7 @@
 
 #include "misc-proto.h"
 
-static char *__findenv P((const char *, int *)); 
+static char *__findenv (const char *, int *); 
 
 /*
  * setenv --

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-char hexchar PROTOTYPE((const unsigned int digit));
+char hexchar (const unsigned int digit);
 
 asn1_error_code asn1_krb5_data_unparse(code, s)
      const krb5_data * code;

@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfile.h, ser_ktf.c: Make prototypes unconditional.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_ktf.c: Drop _MSDOS support.

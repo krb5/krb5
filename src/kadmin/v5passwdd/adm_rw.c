@@ -35,8 +35,8 @@
 /*
  * Local prototypes (needed or else the PC will pass fail).
  */
-static void kadm_copyin_int32 PROTOTYPE((char *, krb5_int32 *));
-static void kadm_copyout_int32 PROTOTYPE((krb5_int32, char *));
+static void kadm_copyin_int32 (char *, krb5_int32 *);
+static void kadm_copyout_int32 (krb5_int32, char *);
 
 /*
  * Routines to [de]serialize integers.

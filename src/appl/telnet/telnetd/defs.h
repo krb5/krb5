@@ -317,15 +317,7 @@ typedef struct {
 
 extern char	*line;
 
-#ifndef	P
-# ifdef	__STDC__
-#  define P(x)	x
-# else
-#  define P(x)	()
-# endif
-#endif
-
 #ifdef	ENCRYPTION
-extern void	(*encrypt_output) P((unsigned char *, int));
-extern int	(*decrypt_input) P((int));
+extern void	(*encrypt_output) (unsigned char *, int);
+extern int	(*decrypt_input) (int);
 #endif	/* ENCRYPTION */

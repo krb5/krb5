@@ -92,13 +92,13 @@ jmp_buf jabort;
 extern	char *auth_type;
 extern int do_auth();
 
-static int globulize PROTOTYPE((char **));
-static int confirm PROTOTYPE((char *, char *));
-static int getit PROTOTYPE((int, char **, int, char *));
-static sigtype mabort PROTOTYPE((int));
-static void quote1 PROTOTYPE((char *, int, char **));
-static char *dotrans PROTOTYPE((char *));
-static char *domap PROTOTYPE((char *));
+static int globulize (char **);
+static int confirm (char *, char *);
+static int getit (int, char **, int, char *);
+static sigtype mabort (int);
+static void quote1 (char *, int, char **);
+static char *dotrans (char *);
+static char *domap (char *);
 
 /*
  * `Another' gets another argument, and stores the new argc and argv.

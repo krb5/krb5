@@ -58,7 +58,7 @@ typedef unsigned long ftp_uint32;
 typedef long ftp_int32;
 #endif
 
-static int secure_putbuf PROTOTYPE((int, unsigned char *, unsigned int));
+static int secure_putbuf (int, unsigned char *, unsigned int);
 
 extern struct	sockaddr_in hisaddr;
 extern struct	sockaddr_in myaddr;

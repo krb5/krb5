@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_hammer.c: Make prototypes unconditional.
+
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdc5_hammer.c (main): Initialize enctype at entry; eliminate

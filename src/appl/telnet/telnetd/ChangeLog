@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* defs.h, state.c, sys_term.c, telnetd-ktd.c, telnetd.c: Make
+	prototypes unconditional.
+
 Sat Sep  8 08:24:51 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* telnetd.c: Move include of fake-addrinfo.c to after stdlib.h so

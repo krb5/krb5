@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-misc.c, gss-misc.h: Make prototypes unconditional.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use srcdir.

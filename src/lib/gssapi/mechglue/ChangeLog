@@ -1,5 +1,6 @@
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* mechglue.h: Make prototypes unconditional.
 	* mglueP.h: Make all prototypes unconditional.
 	(NPROTOTYPE): Macro deleted.
 

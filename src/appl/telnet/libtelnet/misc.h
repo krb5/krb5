@@ -39,16 +39,8 @@ extern char *RemoteHostName;
 extern int ConnectedCount;
 extern int ReservedPort;
 
-#if	!defined(P)
-#ifdef	__STDC__
-#define P(x)	x
-#else
-#define P(x)	()
-#endif
-#endif
-
-int isprefix P((char *, char *));
-char **genget P((char *, char **, int));
-int Ambiguous P((void *));
+int isprefix (char *, char *);
+char **genget (char *, char **, int);
+int Ambiguous (void *);
 
 #include "misc-proto.h"

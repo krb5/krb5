@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* macsock.h (PROTOTYPE): Don't define.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_defs.h, kdb.h, kdb_dbc.h, kdb_dbm.h, kdb_kt.h, kwinsock.h:

@@ -107,7 +107,7 @@ int debug = 0;
 int keepalive = 1;
 char *progname;
 
-extern void usage P((void));
+extern void usage (void);
 
 main(argc, argv)
 	char *argv[];
@@ -682,9 +682,9 @@ char host_name[MAXHOSTNAMELEN];
 char remote_host_name[MAXHOSTNAMELEN];
 
 #ifndef	convex
-extern void telnet P((int, int));
+extern void telnet (int, int);
 #else
-extern void telnet P((int, int, char *));
+extern void telnet (int, int, char *);
 #endif
 
 /*

@@ -30,72 +30,46 @@ typedef struct _krb5_kt_list {
     krb5_keytab_entry *entry;
 } *krb5_kt_list;
 
-krb5_error_code ktutil_free_kt_list
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_kt_list));
+krb5_error_code ktutil_free_kt_list (krb5_context, krb5_kt_list);
 
-krb5_error_code ktutil_delete
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_kt_list *,
-			int));
+krb5_error_code ktutil_delete (krb5_context, krb5_kt_list *, int);
 
-krb5_error_code ktutil_add
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_kt_list *,
-			char *,
-			krb5_kvno,
-			char *,
-			int));
+krb5_error_code ktutil_add (krb5_context,
+			    krb5_kt_list *,
+			    char *,
+			    krb5_kvno,
+			    char *,
+			    int);
 
-krb5_error_code ktutil_read_keytab
-	KRB5_PROTOTYPE((krb5_context,
-			char *,
-			krb5_kt_list *));
+krb5_error_code ktutil_read_keytab (krb5_context,
+				    char *,
+				    krb5_kt_list *);
 
-krb5_error_code ktutil_write_keytab
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_kt_list,
-			char *));
+krb5_error_code ktutil_write_keytab (krb5_context,
+				     krb5_kt_list,
+				     char *);
 
 #ifdef KRB5_KRB4_COMPAT
-krb5_error_code ktutil_read_srvtab
-	KRB5_PROTOTYPE((krb5_context,
-			char *,
-			krb5_kt_list *));
-krb5_error_code ktutil_write_srvtab
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_kt_list,
-			char *));
+krb5_error_code ktutil_read_srvtab (krb5_context,
+				    char *,
+				    krb5_kt_list *);
+krb5_error_code ktutil_write_srvtab (krb5_context,
+				     krb5_kt_list,
+				     char *);
 #endif
 
-void ktutil_add_entry
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_add_entry (int, char *[]);
 
-void ktutil_clear_list
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_clear_list (int, char *[]);
 
-void ktutil_read_v5
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_read_v5 (int, char *[]);
 
-void ktutil_read_v4
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_read_v4 (int, char *[]);
 
-void ktutil_write_v5
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_write_v5 (int, char *[]);
 
-void ktutil_write_v4
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_write_v4 (int, char *[]);
 
-void ktutil_delete_entry
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_delete_entry (int, char *[]);
 
-void ktutil_list
-	KRB5_PROTOTYPE((int,
-			char *[]));
+void ktutil_list (int, char *[]);

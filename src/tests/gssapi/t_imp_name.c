@@ -34,10 +34,10 @@
 #include <gssapi/gssapi_generic.h>
 
 #define GSSAPI_V2
-void display_status PROTOTYPE((char *, OM_uint32, OM_uint32));
-static void display_status_1 PROTOTYPE((char *, OM_uint32, int));
-static void display_buffer PROTOTYPE((gss_buffer_desc));
-static int test_import_name PROTOTYPE((char *));
+void display_status (char *, OM_uint32, OM_uint32);
+static void display_status_1 (char *, OM_uint32, int);
+static void display_buffer (gss_buffer_desc);
+static int test_import_name (char *);
 
 FILE *display_file;
 

@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* crc.c: Make prototypes unconditional.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* crc.c: Don't declare pointers FAR any more.

@@ -38,11 +38,11 @@
  *	krb5_principal_internalize();
  */
 static krb5_error_code krb5_principal_size
-	KRB5_PROTOTYPE((krb5_context, krb5_pointer, size_t *));
+	(krb5_context, krb5_pointer, size_t *);
 static krb5_error_code krb5_principal_externalize
-	KRB5_PROTOTYPE((krb5_context, krb5_pointer, krb5_octet **, size_t *));
+	(krb5_context, krb5_pointer, krb5_octet **, size_t *);
 static krb5_error_code krb5_principal_internalize
-	KRB5_PROTOTYPE((krb5_context,krb5_pointer *, krb5_octet **, size_t *));
+	(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
 
 /* Local data */
 static const krb5_ser_entry krb5_principal_ser_entry = {

@@ -111,38 +111,38 @@ krb5_address	receiver_addr;
 short 		port = 0;
 
 void	PRS
-	PROTOTYPE((char**));
+	(char**);
 void	do_standalone
-	PROTOTYPE((void));
+	(void);
 void	doit
-	PROTOTYPE((int));
+	(int);
 void	kerberos_authenticate
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		   int,
 		   krb5_principal *,
 		   krb5_enctype *,
-		   struct sockaddr_in));
+		   struct sockaddr_in);
 krb5_boolean authorized_principal
-	PROTOTYPE((krb5_context,
+	(krb5_context,
     		   krb5_principal,
-		   krb5_enctype));
+		   krb5_enctype);
 void	recv_database
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		   int,
 		   int,
-		   krb5_data *));
+		   krb5_data *);
 void	load_database
-	PROTOTYPE((krb5_context,
+	(krb5_context,
     		   char *,
-    		   char *));
+    		   char *);
 void	send_error
-	PROTOTYPE((krb5_context,
+	(krb5_context,
     		   int,
 		   krb5_error_code,
-    		   char	*));
+    		   char	*);
 void	recv_error
-	PROTOTYPE((krb5_context,
-    		   krb5_data *));
+	(krb5_context,
+    		   krb5_data *);
 
 static void usage()
 {

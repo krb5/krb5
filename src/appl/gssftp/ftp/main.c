@@ -82,7 +82,7 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 uid_t	getuid();
 #endif
 
-sigtype	intr PROTOTYPE((int)), lostpeer PROTOTYPE((int));
+sigtype	intr (int), lostpeer (int);
 extern	char *home;
 char	*getlogin();
 #ifdef KRB5_KRB4_COMPAT
@@ -91,8 +91,8 @@ struct servent staticsp;
 extern char realm[];
 #endif /* KRB5_KRB4_COMPAT */
 
-static void cmdscanner PROTOTYPE((int));
-static char *slurpstring PROTOTYPE((void));
+static void cmdscanner (int);
+static char *slurpstring (void);
 
 
 int 

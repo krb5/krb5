@@ -53,7 +53,7 @@ if(class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-time_t gmt_mktime PROTOTYPE((struct tm *));
+time_t gmt_mktime (struct tm *);
 
 asn1_error_code asn1_decode_integer(buf, val)
      asn1buf * buf;

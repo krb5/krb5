@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* cr_tkt.c, decomp_tkt.c, g_in_tkt.c, tf_util.c: Make prototypes
+	unconditional.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* dest_tkt.c, err_txt.c, g_admhst.c, g_cred.c, g_krbhst.c,

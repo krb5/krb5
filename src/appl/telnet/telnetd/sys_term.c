@@ -1096,7 +1096,7 @@ startslave(host, autologin, autoname)
 	if (i) {
 		char c;
 
-		void sigjob P((int));
+		void sigjob (int);
 		slavepid = i; /* So we can clean it up later */
 #ifdef	CRAY
 		(void) signal(WJSIGNAL, sigjob);

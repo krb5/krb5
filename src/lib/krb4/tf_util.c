@@ -112,7 +112,7 @@ static int  curpos;			/* Position in tfbfr */
 static int  lastpos;			/* End of tfbfr */
 static char tfbfr[BUFSIZ];		/* Buffer for ticket data */
 
-static int tf_gets PROTOTYPE((char *, int)), tf_read PROTOTYPE((char *, int));
+static int tf_gets (char *, int), tf_read (char *, int);
 
 /*
  * This file contains routines for manipulating the ticket cache file.

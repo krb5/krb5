@@ -135,8 +135,8 @@ char	ptyibuf2[BUFSIZ];
 
 #endif /* ! STREAMPTY */
 
-static void doit P((struct sockaddr *));
-int terminaltypeok P((char *));
+static void doit (struct sockaddr *);
+int terminaltypeok (char *);
 static void _gettermname(void);
 
 int	hostinfo = 1;			/* do we print login banner? */
@@ -154,7 +154,7 @@ int maxhostlen = 0;
 int always_ip = 0;
 int stripdomain = 1;
 
-extern void usage P((void));
+extern void usage (void);
 
 /*
  * The string to pass to getopt().  We do it this way so
@@ -917,9 +917,9 @@ char remote_host_name[MAXDNAME];
 char *rhost_sane;
 
 #ifndef	convex
-extern void telnet P((int, int));
+extern void telnet (int, int);
 #else
-extern void telnet P((int, int, char *));
+extern void telnet (int, int, char *);
 #endif
 
 /*

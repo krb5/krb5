@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktsrvtab.h: Make prototypes unconditional.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* kts_g_name.c, ktsrvtab.h (krb5_ktsrvtab_get_name): Uses unsigned

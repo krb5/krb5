@@ -78,8 +78,8 @@
  * These functions pointers point to the current routines
  * for encrypting and decrypting data.
  */
-void	(*encrypt_output) P((unsigned char *, int));
-int	(*decrypt_input) P((int));
+void	(*encrypt_output) (unsigned char *, int);
+int	(*decrypt_input) (int);
 
 int encrypt_debug_mode = 0;
 static int decrypt_mode = 0;
@@ -730,7 +730,7 @@ encrypt_request_start(data, cnt)
 
 static unsigned char str_keyid[(MAXKEYLEN*2)+5] = { IAC, SB, TELOPT_ENCRYPT };
 
-static void encrypt_keyid P((struct key_info *kp, unsigned char *, int));
+static void encrypt_keyid (struct key_info *kp, unsigned char *, int);
 		
 void encrypt_enc_keyid(keyid, len)
 	unsigned char *keyid;

@@ -26,7 +26,7 @@ int misc_debug_gssapi = DEBUG_GSSAPI;
 #endif
    
 static void auth_gssapi_display_status_1
-	PROTOTYPE((char *, OM_uint32, int, int));
+	(char *, OM_uint32, int, int);
    
 bool_t xdr_gss_buf(xdrs, buf)
    XDR *xdrs;

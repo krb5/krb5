@@ -109,7 +109,7 @@
 extern int auth_debug_mode;
 extern krb5_context telnet_context;
 
-int kerberos4_cksum P((unsigned char *, int));
+int kerberos4_cksum (unsigned char *, int);
 
 static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V4, };

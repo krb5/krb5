@@ -78,14 +78,6 @@ typedef	struct {
   unsigned char	*data;
 } Session_Key;
 
-#if !defined(P)
-#ifdef __STDC__
-#define P(x)	x
-#else
-#define P(x)	()
-#endif
-#endif
-
 #ifdef DEBUG
 int printsub(char, unsigned char *, size_t);
 #endif
@@ -95,90 +87,90 @@ void encrypt_parse(kstream, unsigned char *, int);
 typedef struct {
   char	*name;
   int	type;
-  void	(*output) P((unsigned char *, int));
-  int	(*input) P((int));
-  void	(*init) P((int));
-  int	(*start) P((int, int));
-  int	(*is) P((unsigned char *, int));
-  int	(*reply) P((unsigned char *, int));
-  void	(*session) P((Session_Key *, int));
-  int	(*keyid) P((int, unsigned char *, int *));
-  void	(*printsub) P((unsigned char *, int, unsigned char *, int));
+  void	(*output) (unsigned char *, int);
+  int	(*input) (int);
+  void	(*init) (int);
+  int	(*start) (int, int);
+  int	(*is) (unsigned char *, int);
+  int	(*reply) (unsigned char *, int);
+  void	(*session) (Session_Key *, int);
+  int	(*keyid) (int, unsigned char *, int *);
+  void	(*printsub) (unsigned char *, int, unsigned char *, int);
 } Encryptions;
 
 #define	SK_DES		1	/* Matched Kerberos v5 ENCTYPE_DES */
 
-void encrypt_init P((kstream, char *, int));
-Encryptions *findencryption P((int));
-void encrypt_send_supprt P((void));
-void encrypt_auto P((int));
-void decrypt_auto P((int));
-void encrypt_is P((unsigned char *, int));
-void encrypt_reply P((unsigned char *, int));
-void encrypt_start_input P((int));
-void encrypt_session_key P((Session_Key *, int));
-void encrypt_end_input P((void));
-void encrypt_start_output P((int));
-void encrypt_end_output P((void));
-void encrypt_send_request_start P((void));
-void encrypt_send_request_end P((void));
-void encrypt_send_end P((void));
-void encrypt_wait P((void));
-int encrypt_is_encrypting P((void));
-void encrypt_send_support P((void));
-void encrypt_send_keyid P((int, unsigned char *, int, int));
-int net_write P((unsigned char *, int));
+void encrypt_init (kstream, char *, int);
+Encryptions *findencryption (int);
+void encrypt_send_supprt (void);
+void encrypt_auto (int);
+void decrypt_auto (int);
+void encrypt_is (unsigned char *, int);
+void encrypt_reply (unsigned char *, int);
+void encrypt_start_input (int);
+void encrypt_session_key (Session_Key *, int);
+void encrypt_end_input (void);
+void encrypt_start_output (int);
+void encrypt_end_output (void);
+void encrypt_send_request_start (void);
+void encrypt_send_request_end (void);
+void encrypt_send_end (void);
+void encrypt_wait (void);
+int encrypt_is_encrypting (void);
+void encrypt_send_support (void);
+void encrypt_send_keyid (int, unsigned char *, int, int);
+int net_write (unsigned char *, int);
 
-int encrypt_cmd P((int, char **));
-void encrypt_display P((void));
+int encrypt_cmd (int, char **);
+void encrypt_display (void);
 
-void krbdes_encrypt P((unsigned char *, int));
-int krbdes_decrypt P((int));
-int krbdes_is P((unsigned char *, int));
-int krbdes_reply P((unsigned char *, int));
-void krbdes_init P((int));
-int krbdes_start P((int, int));
-void krbdes_session P((Session_Key *, int));
-void krbdes_printsub P((unsigned char *, int, unsigned char *, int));
+void krbdes_encrypt (unsigned char *, int);
+int krbdes_decrypt (int);
+int krbdes_is (unsigned char *, int);
+int krbdes_reply (unsigned char *, int);
+void krbdes_init (int);
+int krbdes_start (int, int);
+void krbdes_session (Session_Key *, int);
+void krbdes_printsub (unsigned char *, int, unsigned char *, int);
 
-void cfb64_encrypt P((unsigned char *, int));
-int cfb64_decrypt P((int));
-void cfb64_init P((int));
-int cfb64_start P((int, int));
-int cfb64_is P((unsigned char *, int));
-int cfb64_reply P((unsigned char *, int));
-void cfb64_session P((Session_Key *, int));
-int cfb64_keyid P((int, unsigned char *, int *));
-void cfb64_printsub P((unsigned char *, int, unsigned char *, int));
+void cfb64_encrypt (unsigned char *, int);
+int cfb64_decrypt (int);
+void cfb64_init (int);
+int cfb64_start (int, int);
+int cfb64_is (unsigned char *, int);
+int cfb64_reply (unsigned char *, int);
+void cfb64_session (Session_Key *, int);
+int cfb64_keyid (int, unsigned char *, int *);
+void cfb64_printsub (unsigned char *, int, unsigned char *, int);
 
-void ofb64_encrypt P((unsigned char *, int));
-int ofb64_decrypt P((int));
-void ofb64_init P((int));
-int ofb64_start P((int, int));
-int ofb64_is P((unsigned char *, int));
-int ofb64_reply P((unsigned char *, int));
-void ofb64_session P((Session_Key *, int));
-int ofb64_keyid P((int, unsigned char *, int *));
-void ofb64_printsub P((unsigned char *, int, unsigned char *, int));
+void ofb64_encrypt (unsigned char *, int);
+int ofb64_decrypt (int);
+void ofb64_init (int);
+int ofb64_start (int, int);
+int ofb64_is (unsigned char *, int);
+int ofb64_reply (unsigned char *, int);
+void ofb64_session (Session_Key *, int);
+int ofb64_keyid (int, unsigned char *, int *);
+void ofb64_printsub (unsigned char *, int, unsigned char *, int);
 
 int KRB5_CALLCONV
-	des_new_random_key P((Block));
+	des_new_random_key (Block);
 void KRB5_CALLCONV
-	des_set_random_generator_seed P((Block));
+	des_set_random_generator_seed (Block);
 void KRB5_CALLCONV
-	des_key_sched P((Block, Schedule));
+	des_key_sched (Block, Schedule);
 void KRB5_CALLCONV
-	des_ecb_encrypt P((Block, Block, Schedule, int));
+	des_ecb_encrypt (Block, Block, Schedule, int);
 
-/* int	des_string_to_key P((char *, Block)); */
+/* int	des_string_to_key (char *, Block); */
 
 
 #ifdef DEBUG
 extern int encrypt_debug_mode;
 #endif
 
-extern int (*decrypt_input) P((int));
-extern void (*encrypt_output) P((unsigned char *, int));
+extern int (*decrypt_input) (int);
+extern void (*encrypt_output) (unsigned char *, int);
 
 int decrypt_ks_hack(unsigned char *, int);
 

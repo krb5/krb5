@@ -93,10 +93,10 @@ struct iterate_args {
 };
 
 static krb5_error_code add_principal 
-	PROTOTYPE((krb5_context,
-		   krb5_principal, 
-		   enum ap_op,
-		   struct realm_info *));
+	(krb5_context,
+	 krb5_principal,
+	 enum ap_op,
+	 struct realm_info *);
 
 /*
  * Steps in creating a database:

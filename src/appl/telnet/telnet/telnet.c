@@ -79,7 +79,7 @@
 #include <libtelnet/misc-proto.h>
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
 
-static int is_unique P((char *, char **, char **));
+static int is_unique (char *, char **, char **);
 
 
 #define	strip(x)	((x)&0x7f)

@@ -50,7 +50,7 @@ struct mblock {
     1
 };
 
-int set_dbname_help PROTOTYPE((char *, char *));
+int set_dbname_help (char *, char *);
 
 static void
 usage(who, status)
@@ -77,7 +77,7 @@ static char *mkey_name = 0;
 static char *mkey_password = 0;
 static krb5_boolean manual_mkey = FALSE;
 
-void add_princ PROTOTYPE((krb5_context, char *));
+void add_princ (krb5_context, char *);
 
 int
 main(argc, argv)

@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* dump.c, kdb5_create.c, kdb5_util.h, loadv4.c, tcl_wrapper.c:
+	Make prototypes unconditional.
+
 2001-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* string_table.c (str_INITING_KCONTEXT): Variable deleted.

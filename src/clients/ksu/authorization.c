@@ -27,7 +27,7 @@
 
 #include "ksu.h"
 
-static void auth_cleanup PROTOTYPE((FILE *, FILE *, char *));
+static void auth_cleanup (FILE *, FILE *, char *);
 
 krb5_boolean fowner(fp, uid)
     FILE *fp;

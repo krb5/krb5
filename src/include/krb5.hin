@@ -206,8 +206,6 @@ typedef struct _krb5_data {
 typedef	void * krb5_pointer;
 typedef void krb5_const * krb5_const_pointer;
 
-#define KRB5_PROTOTYPE(x) x
-
 typedef struct krb5_principal_data {
     krb5_magic magic;
     krb5_data realm;

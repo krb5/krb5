@@ -86,8 +86,8 @@
  * These function pointers point to the current routines
  * for encrypting and decrypting data.
  */
-void	(*encrypt_output) P((unsigned char *, int));
-int	(*decrypt_input) P((int));
+void	(*encrypt_output) (unsigned char *, int);
+int	(*decrypt_input) (int);
 
 #ifdef DEBUG
 int encrypt_debug_mode = 1;

@@ -6,7 +6,7 @@
 #include "asn1buf.h"
 
 asn1_error_code asn1_krb5_data_unparse
-	PROTOTYPE((const krb5_data *code, char **s));
+	(const krb5_data *code, char **s);
 /* modifies  *s;
    effects   Instantiates *s with a string representation of the series
 	      of hex octets in *code.  (e.g. "02 02 00 7F")  If code==NULL,
@@ -17,16 +17,16 @@ asn1_error_code asn1_krb5_data_unparse
 	     Returns ENOMEM or the string rep cannot be created. */
 
 krb5_error_code krb5_data_parse
-	PROTOTYPE((krb5_data *d, const char *s));
+	(krb5_data *d, const char *s);
 /* effects  Parses character string *s into krb5_data *d. */
 
 krb5_error_code krb5_data_hex_parse
-	PROTOTYPE((krb5_data *d, const char *s));
+	(krb5_data *d, const char *s);
 /* requires  *s is the string representation of a sequence of
               hexadecimal octets.  (e.g. "02 01 00")
    effects  Parses *s into krb5_data *d. */
 
 void asn1buf_print
-	PROTOTYPE((const asn1buf *buf));
+	(const asn1buf *buf);
 
 #endif

@@ -37,12 +37,12 @@ documentation and/or software.
 #define TEST_BLOCK_LEN 1000
 #define TEST_BLOCK_COUNT 1000
 
-static void MDString PROTOTYPE ((char *));
-static void MDTimeTrial PROTOTYPE ((void));
-static void MDTestSuite PROTOTYPE ((void));
-static void MDFile PROTOTYPE ((char *));
-static void MDFilter PROTOTYPE ((void));
-static void MDPrint PROTOTYPE ((unsigned char [16]));
+static void MDString (char *);
+static void MDTimeTrial (void);
+static void MDTestSuite (void);
+static void MDFile (char *);
+static void MDFilter (void);
+static void MDPrint (unsigned char [16]);
 
 struct md_test_entry {
     char *string;

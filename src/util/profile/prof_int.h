@@ -7,12 +7,6 @@
 #include "prof_err.h"
 #include "profile.h"
 
-#if defined(__STDC__) || defined(_WIN32)
-#define PROTOTYPE(x) x
-#else
-#define PROTOTYPE(x) ()
-#endif
-
 #if defined(_WIN32)
 #define SIZEOF_INT      4
 #define SIZEOF_SHORT    2
@@ -81,120 +75,120 @@ struct _profile_t {
 /* profile_parse.c */
 
 errcode_t profile_parse_file
-	PROTOTYPE((FILE *f, struct profile_node **root));
+	(FILE *f, struct profile_node **root);
 
 errcode_t profile_write_tree_file
-	PROTOTYPE((struct profile_node *root, FILE *dstfile));
+	(struct profile_node *root, FILE *dstfile);
 
 
 /* prof_tree.c */
 
 void profile_free_node
-	PROTOTYPE((struct profile_node *relation));
+	(struct profile_node *relation);
 
 errcode_t profile_create_node
-	PROTOTYPE((const char *name, const char *value,
-		   struct profile_node **ret_node));
+	(const char *name, const char *value,
+		   struct profile_node **ret_node);
 
 errcode_t profile_verify_node
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 
 errcode_t profile_add_node
-	PROTOTYPE ((struct profile_node *section,
+	(struct profile_node *section,
 		    const char *name, const char *value,
-		    struct profile_node **ret_node));
+		    struct profile_node **ret_node);
 
 errcode_t profile_make_node_final
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 	
 int profile_is_node_final
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 
 const char *profile_get_node_name
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 
 const char *profile_get_node_value
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 
 errcode_t profile_find_node
-	PROTOTYPE ((struct profile_node *section,
+	(struct profile_node *section,
 		    const char *name, const char *value,
 		    int section_flag, void **state,
-		    struct profile_node **node));
+		    struct profile_node **node);
 
 errcode_t profile_find_node_relation
-	PROTOTYPE ((struct profile_node *section,
+	(struct profile_node *section,
 		    const char *name, void **state,
-		    char **ret_name, char **value));
+		    char **ret_name, char **value);
 
 errcode_t profile_find_node_subsection
-	PROTOTYPE ((struct profile_node *section,
+	(struct profile_node *section,
 		    const char *name, void **state,
-		    char **ret_name, struct profile_node **subsection));
+		    char **ret_name, struct profile_node **subsection);
 		   
 errcode_t profile_get_node_parent
-	PROTOTYPE ((struct profile_node *section,
-		   struct profile_node **parent));
+	(struct profile_node *section,
+		   struct profile_node **parent);
 		   
 errcode_t profile_delete_node_relation
-	PROTOTYPE ((struct profile_node *section, const char *name));
+	(struct profile_node *section, const char *name);
 
 errcode_t profile_find_node_name
-	PROTOTYPE ((struct profile_node *section, void **state,
-		    char **ret_name));
+	(struct profile_node *section, void **state,
+		    char **ret_name);
 
 errcode_t profile_node_iterator_create
-	PROTOTYPE((profile_t profile, const char *const *names,
-		   int flags, void **ret_iter));
+	(profile_t profile, const char *const *names,
+		   int flags, void **ret_iter);
 
 void profile_node_iterator_free
-	PROTOTYPE((void	**iter_p));
+	(void	**iter_p);
 
 errcode_t profile_node_iterator
-	PROTOTYPE((void	**iter_p, struct profile_node **ret_node,
-		   char **ret_name, char **ret_value));
+	(void	**iter_p, struct profile_node **ret_node,
+		   char **ret_name, char **ret_value);
 
 errcode_t profile_remove_node
-	PROTOTYPE((struct profile_node *node));
+	(struct profile_node *node);
 
 errcode_t profile_set_relation_value
-	PROTOTYPE((struct profile_node *node, const char *new_value));
+	(struct profile_node *node, const char *new_value);
 
 errcode_t profile_rename_node
-	PROTOTYPE((struct profile_node *node, const char *new_name));
+	(struct profile_node *node, const char *new_name);
 
 /* prof_file.c */
 
 errcode_t profile_open_file
-	PROTOTYPE ((const_profile_filespec_t file, prf_file_t *ret_prof));
+	(const_profile_filespec_t file, prf_file_t *ret_prof);
 
 errcode_t profile_update_file
-	PROTOTYPE ((prf_file_t profile));
+	(prf_file_t profile);
 
 errcode_t profile_flush_file
-	PROTOTYPE ((prf_file_t profile));
+	(prf_file_t profile);
 
 void profile_free_file
-	PROTOTYPE ((prf_file_t profile));
+	(prf_file_t profile);
 
 errcode_t profile_close_file
-	PROTOTYPE ((prf_file_t profile));
+	(prf_file_t profile);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size
-        PROTOTYPE ((const char *, profile_t, size_t *));
+        (const char *, profile_t, size_t *);
 
 errcode_t profile_ser_externalize
-        PROTOTYPE ((const char *, profile_t, unsigned char **, size_t *));
+        (const char *, profile_t, unsigned char **, size_t *);
 
 errcode_t profile_ser_internalize
-        PROTOTYPE ((const char *, profile_t *, unsigned char **, size_t *));
+        (const char *, profile_t *, unsigned char **, size_t *);
 
 /* prof_get.c */
 
 errcode_t profile_get_value
-	PROTOTYPE ((profile_t profile, const char **names,
-		    const char	**ret_value));
+	(profile_t profile, const char **names,
+		    const char	**ret_value);
 /* Others included from profile.h */
 	
 /* prof_set.c -- included from profile.h */

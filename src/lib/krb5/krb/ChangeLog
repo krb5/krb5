@@ -1,3 +1,11 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c, in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c,
+	int-proto.h, mk_req_ext.c, pr_to_salt.c, rd_req_dec.c, ser_actx.c,
+	ser_adata.c, ser_addr.c, ser_auth.c, ser_cksum.c, ser_ctx.c,
+	ser_eblk.c, ser_key.c, ser_princ.c, t_kerb.c: Make prototypes
+	unconditional.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c, preauth.c: Drop _MSDOS support.

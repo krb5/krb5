@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin, gssapiP_generic.h: Make prototypes unconditional.
+	* gssapi.hin (PROTOTYPE): Don't define.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	Windows still requires DLL specs for variables.

@@ -50,7 +50,7 @@
 */
 
 asn1_error_code asn1_encode_integer
-	PROTOTYPE((asn1buf *buf, const long val, unsigned int *retlen));
+	(asn1buf *buf, const long val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -59,8 +59,8 @@ asn1_error_code asn1_encode_integer
               to expand the buffer. */
 
 asn1_error_code asn1_encode_unsigned_integer
-	PROTOTYPE((asn1buf *buf, const unsigned long val, 
-		   unsigned int *retlen));
+	(asn1buf *buf, const unsigned long val, 
+		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -69,9 +69,9 @@ asn1_error_code asn1_encode_unsigned_integer
               to expand the buffer. */
 
 asn1_error_code asn1_encode_octetstring
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const asn1_octet *val,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -80,9 +80,9 @@ asn1_error_code asn1_encode_octetstring
               to expand the buffer. */
 
 asn1_error_code asn1_encode_charstring
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const char *val,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -91,7 +91,7 @@ asn1_error_code asn1_encode_charstring
               to expand the buffer. */
 
 asn1_error_code asn1_encode_null
-	PROTOTYPE((asn1buf *buf, int *retlen));
+	(asn1buf *buf, int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of NULL into *buf and returns 
@@ -100,9 +100,9 @@ asn1_error_code asn1_encode_null
               to expand the buffer. */
 
 asn1_error_code asn1_encode_printablestring
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const char *val,
-		   int *retlen));
+		   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -111,9 +111,9 @@ asn1_error_code asn1_encode_printablestring
               to expand the buffer. */
 
 asn1_error_code asn1_encode_ia5string
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const char *val,
-		   int *retlen));
+		   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -122,7 +122,7 @@ asn1_error_code asn1_encode_ia5string
               to expand the buffer. */
 
 asn1_error_code asn1_encode_generaltime
-	PROTOTYPE((asn1buf *buf, const time_t val, unsigned int *retlen));
+	(asn1buf *buf, const time_t val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -132,9 +132,9 @@ asn1_error_code asn1_encode_generaltime
    Note: The encoding of GeneralizedTime is YYYYMMDDhhmmZ */
 
 asn1_error_code asn1_encode_generalstring
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const char *val,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated,  val has a length of len characters
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 

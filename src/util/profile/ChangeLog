@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h, profile.hin, test_parse.c: Make prototypes
+	unconditional.  Don't define PROTOTYPE.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* profile.hin (KRB5_EXPORTVAR): Don't define.

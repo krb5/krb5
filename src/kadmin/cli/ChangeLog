@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* dump.c: Make prototypes unconditional.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* getdate.y: Provide full prototype for getdate_yylex() and

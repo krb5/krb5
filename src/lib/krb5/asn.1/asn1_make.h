@@ -47,11 +47,11 @@
 */
 
 asn1_error_code asn1_make_etag
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const asn1_class class,
 		   const asn1_tagnum tagnum,
 		   const unsigned int in_len,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
    modifies  *buf, *retlen
@@ -61,11 +61,11 @@ asn1_error_code asn1_make_etag
 	     Returns ENOMEM if memory runs out. */
 
 asn1_error_code asn1_make_tag
-	PROTOTYPE((asn1buf *buf, const asn1_class class,
+	(asn1buf *buf, const asn1_class class,
 		   const asn1_construction construction,
 		   const asn1_tagnum tagnum,
 		   const unsigned int in_len,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
    modifies  *buf, *retlen
@@ -78,7 +78,7 @@ asn1_error_code asn1_make_tag
 	      the implementation. */
 
 asn1_error_code asn1_make_sequence
-	PROTOTYPE((asn1buf *buf, const unsigned int seq_len, unsigned int *len));
+	(asn1buf *buf, const unsigned int seq_len, unsigned int *len);
 /* requires  *buf is allocated, seq_len is the length of a series of
              sequence components which have just been inserted in *buf
    modifies  *buf, *retlen
@@ -87,8 +87,8 @@ asn1_error_code asn1_make_sequence
              Returns ENOMEM if memory runs out. */
 
 asn1_error_code asn1_make_set
-	PROTOTYPE((asn1buf *buf, const unsigned int set_len, 
-		   unsigned int *retlen));
+	(asn1buf *buf, const unsigned int set_len, 
+		   unsigned int *retlen);
 /* requires  *buf is allocated, seq_len is the length of a series of
              sequence components which have just been inserted in *buf
    modifies  *buf, *retlen
@@ -97,12 +97,11 @@ asn1_error_code asn1_make_set
              Returns ENOMEM if memory runs out. */
 
 asn1_error_code asn1_make_string
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const unsigned int len, const char *string,
-		   int *retlen));
+		   int *retlen);
 /* requires  *buf is allocated, len is the length of *string
-   effects   Inserts the encoding of *string 
-	PROTOTYPE((a series of octets) in *buf.
+   effects   Inserts the encoding of *string (a series of octets) in *buf.
              Returns the length of this encoding in *retlen.
              Returns ENOMEM if memory runs out. */
 
@@ -112,26 +111,24 @@ asn1_error_code asn1_make_string
 
 /* "helper" procedure for asn1_make_tag */
 asn1_error_code asn1_make_length
-	PROTOTYPE((asn1buf *buf, const unsigned int in_len, 
-		   unsigned int *retlen));
+	(asn1buf *buf, const unsigned int in_len, 
+		   unsigned int *retlen);
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
    modifies  *buf, *retlen
-   effects   inserts length octet
-	PROTOTYPE((s) for in_len into *buf */
+   effects   inserts length octet(s) for in_len into *buf */
 
 /* "helper" procedure for asn1_make_tag */
 asn1_error_code asn1_make_id
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   const asn1_class class,
 		   const asn1_construction construction,
 		   const asn1_tagnum tagnum,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated, class and tagnum are appropriate for
              the ASN.1 encoding which has just been inserted in *buf
    modifies  *buf, *retlen
-   effects   Inserts id octet
-	PROTOTYPE((s) of class class and tag number tagnum
+   effects   Inserts id octet(s) of class class and tag number tagnum
              into *buf */
 
 #endif

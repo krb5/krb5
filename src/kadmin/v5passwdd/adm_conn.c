@@ -49,30 +49,30 @@
  * Prototypes for local functions
  */
 static krb5_error_code kadm_get_ccache
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		   char *,
 		   char *,
 		   krb5_ccache *,
-		   krb5_principal *));
+		   krb5_principal *);
 static krb5_error_code kadm_get_creds
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		krb5_ccache ,
 		krb5_principal,
 		krb5_creds  *,
 		const char *,
 		char *,
-		krb5_timestamp));
+		krb5_timestamp);
 static krb5_error_code kadm_contact_server
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		krb5_data *,
 		int *,
 		krb5_address **,
-		krb5_address **));
+		krb5_address **);
 static krb5_error_code kadm_get_auth
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		krb5_auth_context *,
 		krb5_address *,
-		krb5_address *));
+		krb5_address *);
 
 /*
  * kadm_get_ccache()	- Initialze a credentials cache.

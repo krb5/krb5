@@ -34,17 +34,17 @@
 #include "asn1buf.h"
 
 asn1_error_code asn1_get_tag_indef
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   asn1_class *class,
 		   asn1_construction *construction,
 		   asn1_tagnum *tagnum,
-		   unsigned int *retlen, int *indef));
+		   unsigned int *retlen, int *indef);
 asn1_error_code asn1_get_tag
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   asn1_class *class,
 		   asn1_construction *construction,
 		   asn1_tagnum *tagnum,
-		   unsigned int *retlen));
+		   unsigned int *retlen);
 /* requires  *buf is allocated
    effects   Decodes the tag in *buf.  If class != NULL, returns
               the class in *class.  Similarly, the construction,
@@ -55,7 +55,7 @@ asn1_error_code asn1_get_tag
 	     Returns ASN1_OVERRUN if *buf is exhausted during the parse. */
 
 asn1_error_code asn1_get_sequence
-	PROTOTYPE((asn1buf *buf, unsigned int *retlen, int *indef));
+	(asn1buf *buf, unsigned int *retlen, int *indef);
 /* requires  *buf is allocated
    effects   Decodes a tag from *buf and returns ASN1_BAD_ID if it
               doesn't have a sequence ID.  If retlen != NULL, the
@@ -65,10 +65,10 @@ asn1_error_code asn1_get_sequence
 /* Private Procedures */
 
 asn1_error_code asn1_get_id
-	PROTOTYPE((asn1buf *buf,
+	(asn1buf *buf,
 		   asn1_class *class,
 		   asn1_construction *construction,
-		   asn1_tagnum *tagnum));
+		   asn1_tagnum *tagnum);
 /* requires  *buf is allocated
    effects   Decodes the group of identifier octets at *buf's
               current position.  If class != NULL, returns the class
@@ -77,7 +77,7 @@ asn1_error_code asn1_get_id
 	     Returns ASN1_OVERRUN if *buf is exhausted. */
 
 asn1_error_code asn1_get_length
-	PROTOTYPE((asn1buf *buf, unsigned int *retlen, int *indef));
+	(asn1buf *buf, unsigned int *retlen, int *indef);
 /* requires  *buf is allocated
    effects   Decodes the group of length octets at *buf's
               current position.  If retlen != NULL, the

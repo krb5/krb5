@@ -23,22 +23,22 @@
 /* ident  "@(#)krb5_gssd_extern_srvr.conf 1.10     95/08/01 SMI" */
 
 OM_uint32 krb5_gss_internal_release_oid
-      PROTOTYPE((void *,                /* context */
+      (void *,                /* context */
        OM_uint32 *,           /* minor_status */
        gss_OID *              /* OID */
-      ));
+      );
 
 extern OM_uint32 krb5_gss_get_context
-	   PROTOTYPE((void**
-	   ));
+	   (void**
+	   );
 
 extern int krb5_pname_to_uid
-             PROTOTYPE((void *,           /* context */
+             (void *,           /* context */
               char *,		/* principal name */
               gss_OID,		/* name_type */
 	      gss_OID,		/* mech_type */
               uid_t *		/* uid (OUT) */
-             ));
+             );
 
 /*
  * This is the declaration of the mechs_array table for Kerberos V5.

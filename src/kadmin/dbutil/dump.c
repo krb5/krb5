@@ -66,37 +66,37 @@ struct dump_args {
     int			verbose;
 };
 
-static krb5_error_code dump_k5beta_iterator PROTOTYPE((krb5_pointer,
-						       krb5_db_entry *));
-static krb5_error_code dump_k5beta6_iterator PROTOTYPE((krb5_pointer,
-							krb5_db_entry *));
-static krb5_error_code dump_k5beta6_iterator_ext PROTOTYPE((krb5_pointer,
-							    krb5_db_entry *,
-							    int));
-static krb5_error_code dump_k5beta7_princ PROTOTYPE((krb5_pointer,
-						     krb5_db_entry *));
-static krb5_error_code dump_k5beta7_princ_ext PROTOTYPE((krb5_pointer,
-							 krb5_db_entry *,
-							 int));
+static krb5_error_code dump_k5beta_iterator (krb5_pointer,
+					     krb5_db_entry *);
+static krb5_error_code dump_k5beta6_iterator (krb5_pointer,
+					      krb5_db_entry *);
+static krb5_error_code dump_k5beta6_iterator_ext (krb5_pointer,
+						  krb5_db_entry *,
+						  int);
+static krb5_error_code dump_k5beta7_princ (krb5_pointer,
+					   krb5_db_entry *);
+static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
+					       krb5_db_entry *,
+					       int);
 static krb5_error_code dump_k5beta7_princ_withpolicy
-			PROTOTYPE((krb5_pointer, krb5_db_entry *));
-static krb5_error_code dump_ov_princ PROTOTYPE((krb5_pointer,
-						krb5_db_entry *));
-static void dump_k5beta7_policy PROTOTYPE((void *, osa_policy_ent_t));
+			(krb5_pointer, krb5_db_entry *);
+static krb5_error_code dump_ov_princ (krb5_pointer,
+				      krb5_db_entry *);
+static void dump_k5beta7_policy (void *, osa_policy_ent_t);
 
-typedef krb5_error_code (*dump_func)PROTOTYPE((krb5_pointer,
-					       krb5_db_entry *));
+typedef krb5_error_code (*dump_func)(krb5_pointer,
+				     krb5_db_entry *);
 
-static int process_k5beta_record PROTOTYPE((char *, krb5_context,
-					    FILE *, int, int *, void *));
-static int process_k5beta6_record PROTOTYPE((char *, krb5_context,
-					     FILE *, int, int *, void *));
-static int process_k5beta7_record PROTOTYPE((char *, krb5_context,
-					     FILE *, int, int *, void *));
-static int process_ov_record PROTOTYPE((char *, krb5_context,
-					FILE *, int, int *, void *));
-typedef krb5_error_code (*load_func)PROTOTYPE((char *, krb5_context,
-					       FILE *, int, int *, void *));
+static int process_k5beta_record (char *, krb5_context,
+				  FILE *, int, int *, void *);
+static int process_k5beta6_record (char *, krb5_context,
+				   FILE *, int, int *, void *);
+static int process_k5beta7_record (char *, krb5_context,
+				   FILE *, int, int *, void *);
+static int process_ov_record (char *, krb5_context,
+			      FILE *, int, int *, void *);
+typedef krb5_error_code (*load_func)(char *, krb5_context,
+				     FILE *, int, int *, void *);
 
 typedef struct _dump_version {
      char *name;

@@ -42,17 +42,6 @@
 #include <stdio.h>
 
 /*
- * Make sure we have a definition for PROTOTYPE.
- */
-#if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_WIN32) || defined(__ultrix)
-#define PROTOTYPE(x) x
-#else
-#define PROTOTYPE(x) ()
-#endif
-#endif
-
-/*
  * XDR provides a conventional way for converting between C data
  * types and an external bit-string representation.  Library supplied
  * routines provide for the conversion on built-in C data types.  These
@@ -277,47 +266,47 @@ struct xdr_discrim {
 
 extern bool_t	xdr_void(XDR *, void *);
 extern bool_t	xdr_int
-PROTOTYPE((XDR *, int *));
+(XDR *, int *);
 extern bool_t	xdr_u_int
-PROTOTYPE((XDR *, unsigned int *));
+(XDR *, unsigned int *);
 extern bool_t	xdr_long
-PROTOTYPE((XDR *, long *));
+(XDR *, long *);
 extern bool_t	xdr_u_long
-PROTOTYPE((XDR *, unsigned long *));
+(XDR *, unsigned long *);
 extern bool_t	xdr_short
-PROTOTYPE((XDR *, short *));
+(XDR *, short *);
 extern bool_t	xdr_u_short
-PROTOTYPE((XDR *, unsigned short *));
+(XDR *, unsigned short *);
 extern bool_t	xdr_bool
-PROTOTYPE((XDR *, bool_t *));
+(XDR *, bool_t *);
 extern bool_t	xdr_enum
-PROTOTYPE((XDR *, enum_t *));
+(XDR *, enum_t *);
 extern bool_t	xdr_array
-PROTOTYPE((XDR *, caddr_t *, unsigned int*, unsigned int, unsigned int, xdrproc_t));
+(XDR *, caddr_t *, unsigned int*, unsigned int, unsigned int, xdrproc_t);
 extern bool_t	xdr_bytes
-PROTOTYPE((XDR *, char **, unsigned int *, unsigned int));
+(XDR *, char **, unsigned int *, unsigned int);
 extern bool_t	xdr_opaque
-PROTOTYPE((XDR *, caddr_t, unsigned int));
+(XDR *, caddr_t, unsigned int);
 extern bool_t	xdr_string
-PROTOTYPE((XDR *, char **, unsigned int));
+(XDR *, char **, unsigned int);
 extern bool_t	xdr_union
-PROTOTYPE((XDR *, enum_t *, char *, struct xdr_discrim *, xdrproc_t));
+(XDR *, enum_t *, char *, struct xdr_discrim *, xdrproc_t);
 extern bool_t	xdr_char
-PROTOTYPE((XDR *, char *));
+(XDR *, char *);
 extern bool_t	xdr_u_char
-PROTOTYPE((XDR *, unsigned char *));
+(XDR *, unsigned char *);
 extern bool_t	xdr_vector
-PROTOTYPE((XDR *, char *, unsigned int, unsigned int, xdrproc_t));
+(XDR *, char *, unsigned int, unsigned int, xdrproc_t);
 extern bool_t	xdr_float
-PROTOTYPE((XDR *, float *));
+(XDR *, float *);
 extern bool_t	xdr_double
-PROTOTYPE((XDR *, double *));
+(XDR *, double *);
 extern bool_t	xdr_reference
-PROTOTYPE((XDR *, caddr_t *, unsigned int, xdrproc_t));
+(XDR *, caddr_t *, unsigned int, xdrproc_t);
 extern bool_t	xdr_pointer
-PROTOTYPE((XDR *, char **, unsigned int, xdrproc_t));
+(XDR *, char **, unsigned int, xdrproc_t);
 extern bool_t	xdr_wrapstring
-PROTOTYPE((XDR *, char **));
+(XDR *, char **);
 
 /*
  * Common opaque bytes objects used by many rpc protocols;
@@ -334,12 +323,12 @@ struct netobj {
 };
 typedef struct netobj netobj;
 extern bool_t   xdr_netobj
-PROTOTYPE((XDR *, struct netobj *));
+(XDR *, struct netobj *);
 
 extern bool_t	xdr_int32
-PROTOTYPE((XDR *, rpc_int32 *));
+(XDR *, rpc_int32 *);
 extern bool_t	xdr_u_int32
-PROTOTYPE((XDR *, rpc_u_int32 *));
+(XDR *, rpc_u_int32 *);
 
 /*
  * These are the public routines for the various implementations of
@@ -356,37 +345,37 @@ PROTOTYPE((XDR *, rpc_u_int32 *));
 #define xdralloc_getdata	gssrpc_xdralloc_getdata
 
 /* XDR allocating memory buffer */
-extern void   xdralloc_create PROTOTYPE((XDR *xdrs, enum xdr_op op));	
+extern void   xdralloc_create (XDR *xdrs, enum xdr_op op);	
 
 /* destroy xdralloc, save buf */
-extern void   xdralloc_release PROTOTYPE((XDR *xdrs));	
+extern void   xdralloc_release (XDR *xdrs);	
 
 /* get buffer from xdralloc */
-extern caddr_t xdralloc_getdata PROTOTYPE((XDR *xdrs));	
+extern caddr_t xdralloc_getdata (XDR *xdrs);	
 
 /* XDR using memory buffers */
-extern void xdrmem_create PROTOTYPE((XDR *xdrs, caddr_t addr,
-				     unsigned int size, enum xdr_op xop));
+extern void xdrmem_create (XDR *xdrs, caddr_t addr,
+				     unsigned int size, enum xdr_op xop);
 
 /* XDR using stdio library */
-extern void xdrstdio_create PROTOTYPE((XDR *xdrs, FILE *file,
-					enum xdr_op op));
+extern void xdrstdio_create (XDR *xdrs, FILE *file,
+					enum xdr_op op);
 
 /* XDR pseudo records for tcp */
-extern void xdrrec_create PROTOTYPE((XDR *xdrs, unsigned int sendsize,
+extern void xdrrec_create (XDR *xdrs, unsigned int sendsize,
 				     unsigned int recvsize, caddr_t tcp_handle,
 				     int (*readit) (caddr_t, caddr_t, int),
-				     int (*writeit) (caddr_t, caddr_t, int)));
+				     int (*writeit) (caddr_t, caddr_t, int));
 
 /* make end of xdr record */
-extern bool_t xdrrec_endofrecord PROTOTYPE((XDR *xdrs, bool_t sendnow));
+extern bool_t xdrrec_endofrecord (XDR *xdrs, bool_t sendnow);
 
 /* move to beginning of next record */
-extern bool_t xdrrec_skiprecord PROTOTYPE((XDR *xdrs));
+extern bool_t xdrrec_skiprecord (XDR *xdrs);
 
 /* true if no more input */
-extern bool_t xdrrec_eof PROTOTYPE((XDR *xdrs));
+extern bool_t xdrrec_eof (XDR *xdrs);
 
 /* free memory buffers for xdr */
-extern void gssrpc_xdr_free PROTOTYPE((xdrproc_t proc, void *__objp));
+extern void gssrpc_xdr_free (xdrproc_t proc, void *__objp);
 #endif /* !__XDR_HEADER__ */

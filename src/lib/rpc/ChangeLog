@@ -1,3 +1,9 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* auth_gssapi.h, auth_gssapi_misc.c, getrpcent.c,
+	svc_auth_gssapi.c, xdr.h: Make prototypes unconditional.  Don't
+	define PROTOTYPE.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* auth_gssapi.h, getrpcent.c, xdr.h: Drop _MSDOS support.

@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* autoconf.h (NO_NESTED_PROTOTYPES): Don't define.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* autoconf.h (KRB5_PROVIDE_PROTOTYPES): Don't define.

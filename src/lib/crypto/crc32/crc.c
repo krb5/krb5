@@ -149,20 +149,20 @@ static u_long const crc_table[256] = {
 /* Windows needs to these prototypes for crc32_cksumtable_entry below */
 
 static krb5_error_code
-crc32_sum_func PROTOTYPE((
+crc32_sum_func (
 	const krb5_pointer in,
 	const size_t in_length,
 	const krb5_pointer seed,
 	const size_t seed_length,
-	krb5_checksum *outcksum));
+	krb5_checksum *outcksum);
 
 static krb5_error_code
-crc32_verify_func PROTOTYPE((
+crc32_verify_func (
 	const krb5_checksum *cksum,
 	const krb5_pointer in,
 	const size_t in_length,
 	const krb5_pointer seed,
-	const size_t seed_length));
+	const size_t seed_length);
 
 static krb5_error_code
 crc32_sum_func(in, in_length, seed, seed_length, outcksum)

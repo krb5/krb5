@@ -59,16 +59,8 @@
 #ifndef	__KEY_PROTO__
 #define	__KEY_PROTO__
 
-#if	!defined(P)
-#ifdef	__STDC__
-#define	P(x)	x
-#else
-#define	P(x)	()
-#endif
-#endif
-
-int key_file_exists P((void));
-void key_lookup P((unsigned char *, Block));
-void key_stream_init P((Block, Block, int));
-unsigned char key_stream P((int, int));
+int key_file_exists (void);
+void key_lookup (unsigned char *, Block);
+void key_stream_init (Block, Block, int);
+unsigned char key_stream (int, int);
 #endif

@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_mddriver.c: Make prototypes unconditional.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* md5.c, rsa-md5.h: Don't explicitly declare pointers FAR any

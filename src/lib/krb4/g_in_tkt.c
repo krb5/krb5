@@ -36,12 +36,12 @@
    in <krb-sed.h>, but the code below is too opaque if you can't also
    see them here.  */
 #ifndef	KEY_PROC_TYPE_DEFINED
-typedef int (*key_proc_type) PROTOTYPE ((char *, char *, char *,
-					     char *, C_Block));
+typedef int (*key_proc_type) (char *, char *, char *,
+					     char *, C_Block);
 #endif
 #ifndef	DECRYPT_TKT_TYPE_DEFINED
-typedef int (*decrypt_tkt_type) PROTOTYPE ((char *, char *, char *, char *,
-				     key_proc_type, KTEXT *));
+typedef int (*decrypt_tkt_type) (char *, char *, char *, char *,
+				     key_proc_type, KTEXT *);
 #endif
 
 static int

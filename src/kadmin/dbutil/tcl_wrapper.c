@@ -40,8 +40,7 @@
     Tcl_Interp * interp;\
     int argc;\
     char ** argv;
-#define CMDPROTO(x) int x PROTOTYPE((ClientData, Tcl_Interp,\
-				     int, char **))
+#define CMDPROTO(x) int x (ClientData, Tcl_Interp, int, char **)
 #define MKCMD(name,cmd) Tcl_CreateCommand(interp, name, cmd,\
 					 (ClientData)NULL,\
 					 (Tcl_CmdDeleteProc *)NULL)
@@ -53,19 +52,19 @@ extern Tcl_Interp *interp;	/* XXX yes, this is gross,
 				   but we do need it for some things */
 extern int exit_status;
 
-void show_principal PROTOTYPE((int, char **));
-void add_new_key PROTOTYPE((int, char **));
-void change_pwd_key PROTOTYPE((int, char **));
-void add_rnd_key PROTOTYPE((int, char **));
-void change_rnd_key PROTOTYPE((int, char **));
-void delete_entry PROTOTYPE((int, char **));
-void extract_srvtab PROTOTYPE((krb5_context, int, char **));
-void extract_v4_srvtab PROTOTYPE((int, char **));
-void list_db PROTOTYPE((int, char **));
-void dump_db PROTOTYPE((int, char **));
-void load_db PROTOTYPE((int, char **));
-void set_dbname PROTOTYPE((krb5_context, int, char **));
-void enter_master_key PROTOTYPE((krb5_context, int, char **));
+void show_principal (int, char **);
+void add_new_key (int, char **);
+void change_pwd_key (int, char **);
+void add_rnd_key (int, char **);
+void change_rnd_key (int, char **);
+void delete_entry (int, char **);
+void extract_srvtab (krb5_context, int, char **);
+void extract_v4_srvtab (int, char **);
+void list_db (int, char **);
+void dump_db (int, char **);
+void load_db (int, char **);
+void set_dbname (krb5_context, int, char **);
+void enter_master_key (krb5_context, int, char **);
 
 /*
  * this is mostly stolen from tcl_ExitCmd()

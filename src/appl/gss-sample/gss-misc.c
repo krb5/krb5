@@ -54,7 +54,7 @@ gss_buffer_desc empty_token_buf = { 0, (void *) "" };
 gss_buffer_t empty_token = &empty_token_buf;
 
 static void display_status_1
-	PROTOTYPE( (char *m, OM_uint32 code, int type) );
+	(char *m, OM_uint32 code, int type);
 
 static int write_all(int fildes, char *buf, unsigned int nbyte)
 {

@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kprop.c, kpropd.c: Make prototypes unconditional.
+
 2001-09-24  Mitchell Berger  <mitchb@mit.edu>
 
 	* kpropd.M: Correct typo (synopsis line should say kpropd, not kprop).

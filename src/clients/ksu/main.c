@@ -42,9 +42,9 @@ int quiet = 0;
 /***********/
 
 #define _DEF_CSH "/bin/csh" 
-static int set_env_var PROTOTYPE((char *, char *));
-static void sweep_up PROTOTYPE((krb5_context, krb5_ccache));
-static char * ontty PROTOTYPE((void));
+static int set_env_var (char *, char *);
+static void sweep_up (krb5_context, krb5_ccache);
+static char * ontty (void);
 #ifdef HAVE_STDARG_H
 static void print_status( const char *fmt, ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)

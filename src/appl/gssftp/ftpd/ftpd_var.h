@@ -38,8 +38,8 @@
 #endif
 
 /* radix.c */
-char *radix_error PROTOTYPE((int));
-int radix_encode PROTOTYPE((unsigned char *, unsigned char *, int *, int));
+char *radix_error (int);
+int radix_encode (unsigned char *, unsigned char *, int *, int);
 
 /* ftpd.c */
 void ack(char *);

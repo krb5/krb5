@@ -54,11 +54,11 @@ extern char *progname;
 static char default_db_name[] = DEFAULT_KDB_FILE;
 
 static char *gen_dbsuffix 
-	PROTOTYPE((char *, char * ));
+	(char *, char * );
 static krb5_error_code krb5_dbm_db_start_update 
-	PROTOTYPE((krb5_context));
+	(krb5_context);
 static krb5_error_code krb5_dbm_db_end_update 
-	PROTOTYPE((krb5_context));
+	(krb5_context);
 
 /*
  * This module contains all of the code which directly interfaces to
@@ -1132,7 +1132,7 @@ cleanup:
 krb5_error_code
 krb5_dbm_db_iterate (context, func, func_arg)
     krb5_context context;
-    krb5_error_code (*func) PROTOTYPE((krb5_pointer, krb5_db_entry *));
+    krb5_error_code (*func) (krb5_pointer, krb5_db_entry *);
     krb5_pointer func_arg;
 {
     datum key, contents;

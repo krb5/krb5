@@ -433,10 +433,10 @@ void dump_db(argc, argv)
     char		*programname;
     char		*ofile;
     krb5_error_code	kret;
-    krb5_error_code	(*dump_iterator) PROTOTYPE((krb5_pointer,
-						    char *,
-						    kadm5_principal_ent_rec *));
-    krb5_error_code	(*dump_header) PROTOTYPE((struct dump_args *));
+    krb5_error_code	(*dump_iterator) (krb5_pointer,
+					  char *,
+					  kadm5_principal_ent_rec *);
+    krb5_error_code	(*dump_header) (struct dump_args *);
     const char		* dump_name;
     int			aindex, num, i;
     krb5_boolean	locked;
@@ -1329,11 +1329,11 @@ load_db(argc, argv)
     const char		*dumpfile;
     char		*dbname;
     char		*dbname_tmp;
-    int			(*restore_function) PROTOTYPE((const char *,
+    int			(*restore_function) (const char *,
 						       krb5_context,
 						       const char *,
 						       FILE *,
-						       int));
+						       int);
     const char		* restore_name;
     int			update, verbose;
     krb5_int32		crflags;

@@ -8,7 +8,7 @@
 
 #include "prof_int.h"
 
-void dump_profile PROTOTYPE((struct profile_node *root, int level));
+void dump_profile (struct profile_node *root, int level);
 
 int main(argc, argv)
 	int	argc;

@@ -10,12 +10,12 @@
 	    Returns false (zero) if ref and var differ. */
 
 #define generic(funcname,type)\
-int funcname KRB5_PROTOTYPE((type *ref, type *var))
+int funcname (type *ref, type *var)
 
 #define len_array(funcname,type)\
-int funcname KRB5_PROTOTYPE((const int length, type *ref, type *var))
+int funcname (const int length, type *ref, type *var)
 #define len_unsigned_array(funcname,type)\
-int funcname KRB5_PROTOTYPE((const unsigned int length, type *ref, type *var))
+int funcname (const unsigned int length, type *ref, type *var)
 
 generic(ktest_equal_authenticator,krb5_authenticator);
 generic(ktest_equal_principal_data,krb5_principal_data);
@@ -61,33 +61,33 @@ generic(ktest_equal_sam_challenge,krb5_sam_challenge);
 generic(ktest_equal_sam_response,krb5_sam_response);
 
 int ktest_equal_last_req
-	KRB5_PROTOTYPE((krb5_last_req_entry **ref, krb5_last_req_entry **var));
+	(krb5_last_req_entry **ref, krb5_last_req_entry **var);
 int ktest_equal_sequence_of_ticket
-	KRB5_PROTOTYPE((krb5_ticket **ref, krb5_ticket **var));
+	(krb5_ticket **ref, krb5_ticket **var);
 int ktest_equal_sequence_of_pa_data
-	KRB5_PROTOTYPE((krb5_pa_data **ref, krb5_pa_data **var));
+	(krb5_pa_data **ref, krb5_pa_data **var);
 int ktest_equal_sequence_of_cred_info
-	KRB5_PROTOTYPE((krb5_cred_info **ref, krb5_cred_info **var));
+	(krb5_cred_info **ref, krb5_cred_info **var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
 len_unsigned_array(ktest_equal_array_of_octet,krb5_octet);
 
 int ktest_equal_array_of_passwd_phrase_element
-	KRB5_PROTOTYPE((passwd_phrase_element **ref, passwd_phrase_element **var));
+	(passwd_phrase_element **ref, passwd_phrase_element **var);
 int ktest_equal_authorization_data
-	KRB5_PROTOTYPE((krb5_authdata **ref, krb5_authdata **var));
+	(krb5_authdata **ref, krb5_authdata **var);
 int ktest_equal_addresses
-	KRB5_PROTOTYPE((krb5_address **ref, krb5_address **var));
+	(krb5_address **ref, krb5_address **var);
 int ktest_equal_array_of_char
-	KRB5_PROTOTYPE((const unsigned int length, char *ref, char *var));
+	(const unsigned int length, char *ref, char *var);
 
 int ktest_equal_etype_info
-    KRB5_PROTOTYPE((krb5_etype_info_entry ** ref,
-		    krb5_etype_info_entry ** var));
+    (krb5_etype_info_entry ** ref,
+		    krb5_etype_info_entry ** var);
 
 int ktest_equal_krb5_etype_info_entry
-    KRB5_PROTOTYPE((krb5_etype_info_entry * ref,
-		    krb5_etype_info_entry * var));
+    (krb5_etype_info_entry * ref,
+		    krb5_etype_info_entry * var);
 
 #endif

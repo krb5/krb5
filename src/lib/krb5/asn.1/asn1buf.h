@@ -13,17 +13,17 @@ typedef struct code_buffer_rep {
 /**************** Private Procedures ****************/
 
 int asn1buf_size
-	PROTOTYPE((const asn1buf *buf));
+	(const asn1buf *buf);
 /* requires  *buf has been created and not destroyed
    effects   Returns the total size 
-	PROTOTYPE((in octets) of buf's octet buffer. */
+	(in octets) of buf's octet buffer. */
 #define asn1buf_size(buf) \
   (((buf) == NULL || (buf)->base == NULL) \
    ? 0 \
    : ((buf)->bound - (buf)->base + 1))
 
 int asn1buf_free
-	PROTOTYPE((const asn1buf *buf));
+	(const asn1buf *buf);
 /* requires  *buf is allocated
    effects   Returns the number of unused, allocated octets in *buf. */
 #define asn1buf_free(buf) \
@@ -33,7 +33,7 @@ int asn1buf_free
 
 
 asn1_error_code asn1buf_ensure_space
-	PROTOTYPE((asn1buf *buf, const unsigned int amount));
+	(asn1buf *buf, const unsigned int amount);
 /* requires  *buf is allocated
    modifies  *buf
    effects  If buf has less than amount octets of free space, then it is
@@ -46,14 +46,14 @@ asn1_error_code asn1buf_ensure_space
 
 
 asn1_error_code asn1buf_expand
-	PROTOTYPE((asn1buf *buf, unsigned int inc));
+	(asn1buf *buf, unsigned int inc);
 /* requires  *buf is allocated
    modifies  *buf
    effects   Expands *buf by allocating space for inc more octets.
              Returns ENOMEM if memory is exhausted. */
 
 int asn1buf_len
-	PROTOTYPE((const asn1buf *buf));
+	(const asn1buf *buf);
 /* requires  *buf is allocated
    effects   Returns the length of the encoding in *buf. */
 #define asn1buf_len(buf)	((buf)->next - (buf)->base)
@@ -98,12 +98,12 @@ int asn1buf_len
 */
 
 asn1_error_code asn1buf_create
-	PROTOTYPE((asn1buf **buf));
+	(asn1buf **buf);
 /* effects   Creates a new encoding buffer pointed to by *buf.
              Returns ENOMEM if the buffer can't be created. */
 
 asn1_error_code asn1buf_wrap_data
-	PROTOTYPE((asn1buf *buf, const krb5_data *code));
+	(asn1buf *buf, const krb5_data *code);
 /* requires  *buf has already been allocated
    effects   Turns *buf into a "wrapper" for *code.  i.e. *buf is set up
               such that its bottom is the beginning of *code, and its top
@@ -111,9 +111,9 @@ asn1_error_code asn1buf_wrap_data
 	     Returns ASN1_MISSING_FIELD if code is empty. */
 
 asn1_error_code asn1buf_imbed
-	PROTOTYPE((asn1buf *subbuf, const asn1buf *buf, 
+	(asn1buf *subbuf, const asn1buf *buf, 
 		   const unsigned int length,
-		   const int indef));
+		   const int indef);
 /* requires  *subbuf and *buf are allocated
    effects   *subbuf becomes a sub-buffer of *buf.  *subbuf begins
               at *buf's current position and is length octets long.
@@ -122,27 +122,27 @@ asn1_error_code asn1buf_imbed
 	      position starts at the beginning of *subbuf. */
 
 asn1_error_code asn1buf_sync
-	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, const asn1_class class, 
+	(asn1buf *buf, asn1buf *subbuf, const asn1_class class, 
 		   const asn1_tagnum lasttag,
 		   const unsigned int length, const int indef,
-		   const int seqindef));
+		   const int seqindef);
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
              lasttag is the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */
 
 asn1_error_code asn1buf_skiptail
-	PROTOTYPE((asn1buf *buf, const unsigned int length,
-		   const int indef));
+	(asn1buf *buf, const unsigned int length,
+		   const int indef);
 /* requires  *buf is a subbuffer used in a decoding of a
              constructed indefinite sequence.
    effects   skips trailing fields. */
 
 asn1_error_code asn1buf_destroy
-	PROTOTYPE((asn1buf **buf));
+	(asn1buf **buf);
 /* effects   Deallocates **buf, sets *buf to NULL. */
 
 asn1_error_code asn1buf_insert_octet
-	PROTOTYPE((asn1buf *buf, const int o));
+	(asn1buf *buf, const int o);
 /* requires  *buf is allocated
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */
@@ -162,7 +162,7 @@ extern __inline__ asn1_error_code asn1buf_insert_octet(buf, o)
 #endif
 
 asn1_error_code asn1buf_insert_octetstring
-	PROTOTYPE((asn1buf *buf, const unsigned int len, const asn1_octet *s));
+	(asn1buf *buf, const unsigned int len, const asn1_octet *s);
 /* requires  *buf is allocated
    modifies  *buf
    effects   Inserts the contents of s (an octet array of length len)
@@ -170,7 +170,7 @@ asn1_error_code asn1buf_insert_octetstring
 	     Returns ENOMEM if memory is exhausted. */
 
 asn1_error_code asn1buf_insert_charstring
-	PROTOTYPE((asn1buf *buf, const unsigned int len, const char *s));
+	(asn1buf *buf, const unsigned int len, const char *s);
 /* requires  *buf is allocated
    modifies  *buf
    effects   Inserts the contents of s (a character array of length len)
@@ -178,7 +178,7 @@ asn1_error_code asn1buf_insert_charstring
 	     Returns ENOMEM if memory is exhausted. */
 
 asn1_error_code asn1buf_remove_octet
-	PROTOTYPE((asn1buf *buf, asn1_octet *o));
+	(asn1buf *buf, asn1_octet *o);
 /* requires  *buf is allocated
    effects   Returns *buf's current octet in *o and advances to
               the next octet.
@@ -189,7 +189,7 @@ asn1_error_code asn1buf_remove_octet
    : ((*(o) = (asn1_octet)(*(((buf)->next)++))),0))
 
 asn1_error_code asn1buf_remove_octetstring
-	PROTOTYPE((asn1buf *buf, const unsigned int len, asn1_octet **s));
+	(asn1buf *buf, const unsigned int len, asn1_octet **s);
 /* requires  *buf is allocated
    effects   Removes the next len octets of *buf and returns them in **s.
 	     Returns ASN1_OVERRUN if there are fewer than len unread octets
@@ -197,8 +197,8 @@ asn1_error_code asn1buf_remove_octetstring
 	     Returns ENOMEM if *s could not be allocated. */
 
 asn1_error_code asn1buf_remove_charstring
-	PROTOTYPE((asn1buf *buf, const unsigned int len,
-					  char **s));
+	(asn1buf *buf, const unsigned int len,
+					  char **s);
 /* requires  *buf is allocated
    effects   Removes the next len octets of *buf and returns them in **s.
 	     Returns ASN1_OVERRUN if there are fewer than len unread octets
@@ -206,26 +206,26 @@ asn1_error_code asn1buf_remove_charstring
 	     Returns ENOMEM if *s could not be allocated. */
 
 asn1_error_code asn1buf_unparse
-	PROTOTYPE((const asn1buf *buf, char **s));
+	(const asn1buf *buf, char **s);
 /* modifies  *s
    effects   Returns a human-readable representation of *buf in *s,
              where each octet in *buf is represented by a character in *s. */
 
 asn1_error_code asn1buf_hex_unparse
-	PROTOTYPE((const asn1buf *buf, char **s));
+	(const asn1buf *buf, char **s);
 /* modifies  *s
    effects   Returns a human-readable representation of *buf in *s,
              where each octet in *buf is represented by a 2-digit
 	     hexadecimal number in *s. */
 
 asn1_error_code asn12krb5_buf
-	PROTOTYPE((const asn1buf *buf, krb5_data **code));
+	(const asn1buf *buf, krb5_data **code);
 /* modifies  *code
    effects   Instantiates **code with the krb5_data representation of **buf. */
 
 
 int asn1buf_remains
-	PROTOTYPE((asn1buf *buf, int indef));
+	(asn1buf *buf, int indef);
 /* requires  *buf is a buffer containing an asn.1 structure or array
    modifies  *buf
    effects   Returns the number of unprocessed octets remaining in *buf. */

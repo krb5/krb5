@@ -33,15 +33,15 @@
 extern FILE *display_file;
 
 int send_token
-	PROTOTYPE( (int s, int flags, gss_buffer_t tok) );
+	(int s, int flags, gss_buffer_t tok);
 int recv_token
-	PROTOTYPE( (int s, int *flags, gss_buffer_t tok) );
+	(int s, int *flags, gss_buffer_t tok);
 void display_status
-	PROTOTYPE( (char *msg, OM_uint32 maj_stat, OM_uint32 min_stat) );
+	(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
 void display_ctx_flags
-	PROTOTYPE( (OM_uint32 flags) );
+	(OM_uint32 flags);
 void print_token
-	PROTOTYPE( (gss_buffer_t tok) );
+	(gss_buffer_t tok);
 
 /* Token types */
 #define TOKEN_NOOP		(1<<0)

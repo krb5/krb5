@@ -79,164 +79,164 @@ typedef struct opt_info{
 
 /* krb_auth_su.c */
 extern krb5_boolean krb5_auth_check
-        PROTOTYPE((krb5_context, krb5_principal, char *, opt_info *,
-		   char *, krb5_ccache, int *, uid_t));
+        (krb5_context, krb5_principal, char *, opt_info *,
+		   char *, krb5_ccache, int *, uid_t);
 
 extern krb5_boolean krb5_fast_auth
-        PROTOTYPE((krb5_context, krb5_principal, krb5_principal, char *,
-		   krb5_ccache));
+        (krb5_context, krb5_principal, krb5_principal, char *,
+		   krb5_ccache);
 
 extern krb5_boolean krb5_get_tkt_via_passwd 
-	PROTOTYPE((krb5_context, krb5_ccache *, krb5_principal,
-		   krb5_principal, opt_info *, krb5_boolean *));
+	(krb5_context, krb5_ccache *, krb5_principal,
+		   krb5_principal, opt_info *, krb5_boolean *);
 
 extern void dump_principal 
-	PROTOTYPE((krb5_context, char *, krb5_principal));
+	(krb5_context, char *, krb5_principal);
 
 extern void plain_dump_principal 
-	PROTOTYPE((krb5_context, krb5_principal));
+	(krb5_context, krb5_principal);
 
 
 extern krb5_error_code krb5_parse_lifetime
-	PROTOTYPE((char *, long *));
+	(char *, long *);
 
 extern krb5_error_code get_best_principal
-	PROTOTYPE((krb5_context, char **, krb5_principal *));
+	(krb5_context, char **, krb5_principal *);
 
 /* ccache.c */
 extern krb5_error_code krb5_ccache_copy
-	PROTOTYPE((krb5_context, krb5_ccache, char *, krb5_principal, 
-		   krb5_ccache *, krb5_boolean *, uid_t));
+	(krb5_context, krb5_ccache, char *, krb5_principal, 
+		   krb5_ccache *, krb5_boolean *, uid_t);
 
 extern krb5_error_code krb5_store_all_creds
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_creds **, krb5_creds **));
+	(krb5_context, krb5_ccache, krb5_creds **, krb5_creds **);
 
 extern krb5_error_code krb5_store_all_creds
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_creds **, krb5_creds **));
+	(krb5_context, krb5_ccache, krb5_creds **, krb5_creds **);
 
 extern krb5_boolean compare_creds
-	PROTOTYPE((krb5_context, krb5_creds *, krb5_creds *));
+	(krb5_context, krb5_creds *, krb5_creds *);
 
 extern krb5_error_code krb5_get_nonexp_tkts
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_creds ***));
+	(krb5_context, krb5_ccache, krb5_creds ***);
 
 extern krb5_error_code krb5_check_exp
-	PROTOTYPE((krb5_context, krb5_ticket_times));
+	(krb5_context, krb5_ticket_times);
 
-extern char *flags_string PROTOTYPE((krb5_creds *));
+extern char *flags_string (krb5_creds *);
 
 extern krb5_error_code krb5_get_login_princ
-	PROTOTYPE((const char *, char ***));
+	(const char *, char ***);
 
 extern void show_credential
-	PROTOTYPE((krb5_context, krb5_creds *, krb5_ccache));
+	(krb5_context, krb5_creds *, krb5_ccache);
 
-extern int gen_sym PROTOTYPE((void));
+extern int gen_sym (void);
 
 extern krb5_error_code krb5_ccache_overwrite
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_ccache, krb5_principal));
+	(krb5_context, krb5_ccache, krb5_ccache, krb5_principal);
 
 extern krb5_error_code krb5_store_some_creds
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_creds **, krb5_creds **,
-		   krb5_principal, krb5_boolean *));
+	(krb5_context, krb5_ccache, krb5_creds **, krb5_creds **,
+		   krb5_principal, krb5_boolean *);
 
 extern krb5_error_code krb5_ccache_copy_restricted
-	PROTOTYPE((krb5_context, krb5_ccache, char *, krb5_principal, 
-		   krb5_ccache *, krb5_boolean *, uid_t));
+	(krb5_context, krb5_ccache, char *, krb5_principal, 
+		   krb5_ccache *, krb5_boolean *, uid_t);
 
 extern krb5_error_code krb5_ccache_refresh
-	PROTOTYPE((krb5_context, krb5_ccache));
+	(krb5_context, krb5_ccache);
 
 extern krb5_error_code krb5_ccache_filter
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_principal));
+	(krb5_context, krb5_ccache, krb5_principal);
 
 extern krb5_boolean krb5_find_princ_in_cred_list
-	PROTOTYPE((krb5_context, krb5_creds **, krb5_principal));
+	(krb5_context, krb5_creds **, krb5_principal);
 
 extern krb5_error_code krb5_find_princ_in_cache
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_principal, krb5_boolean *));
+	(krb5_context, krb5_ccache, krb5_principal, krb5_boolean *);
 
-extern void printtime PROTOTYPE((time_t));
+extern void printtime (time_t);
 
 /* authorization.c */
-extern krb5_boolean fowner PROTOTYPE((FILE *, int));
+extern krb5_boolean fowner (FILE *, int);
 
 extern krb5_error_code krb5_authorization
-	PROTOTYPE((krb5_context, krb5_principal, const char *, char *, 
-		   krb5_boolean *, char **));
+	(krb5_context, krb5_principal, const char *, char *, 
+		   krb5_boolean *, char **);
 
-extern krb5_error_code k5login_lookup PROTOTYPE((FILE *, char *,
-						 krb5_boolean *));
+extern krb5_error_code k5login_lookup (FILE *, char *,
+						 krb5_boolean *);
 
 extern krb5_error_code k5users_lookup 
-	PROTOTYPE((FILE *, char *, char *, krb5_boolean *, char **));
+	(FILE *, char *, char *, krb5_boolean *, char **);
 
 extern krb5_boolean fcmd_resolve
-	PROTOTYPE((char *, char ***, char **));
+	(char *, char ***, char **);
 
-extern krb5_boolean cmd_single PROTOTYPE((char *));
+extern krb5_boolean cmd_single (char *);
 
-extern int cmd_arr_cmp_postfix PROTOTYPE((char **, char *));
+extern int cmd_arr_cmp_postfix (char **, char *);
 
-extern int cmd_arr_cmp PROTOTYPE((char **, char *));
+extern int cmd_arr_cmp (char **, char *);
 
 extern krb5_boolean find_first_cmd_that_exists 
-	PROTOTYPE((char **, char **, char **));
+	(char **, char **, char **);
 
 extern int match_commands 
-	PROTOTYPE((char *, char *, krb5_boolean *, char **, char **));
+	(char *, char *, krb5_boolean *, char **, char **);
 
-extern krb5_error_code get_line PROTOTYPE((FILE *, char **));
+extern krb5_error_code get_line (FILE *, char **);
 
-extern char *  get_first_token PROTOTYPE((char *, char **));
+extern char *  get_first_token (char *, char **);
 
-extern char *  get_next_token PROTOTYPE((char **));
+extern char *  get_next_token (char **);
 
-extern krb5_boolean fowner PROTOTYPE((FILE *, int));
+extern krb5_boolean fowner (FILE *, int);
 
-extern void init_auth_names PROTOTYPE((char *));
+extern void init_auth_names (char *);
 
 /* main.c */
-extern void usage PROTOTYPE((void));
+extern void usage (void);
 
-extern int standard_shell PROTOTYPE((char *));
+extern int standard_shell (char *);
 
-extern krb5_error_code get_params PROTOTYPE((int *, int, char **, char ***));
+extern krb5_error_code get_params (int *, int, char **, char ***);
 
-extern char *get_dir_of_file PROTOTYPE((const char *));
+extern char *get_dir_of_file (const char *);
 
 /* heuristic.c */
-extern krb5_error_code get_all_princ_from_file PROTOTYPE((FILE *, char ***));
+extern krb5_error_code get_all_princ_from_file (FILE *, char ***);
 
-extern krb5_error_code list_union PROTOTYPE((char **, char **, char ***));
+extern krb5_error_code list_union (char **, char **, char ***);
 
-extern krb5_error_code filter PROTOTYPE((FILE *, char *, char **, char ***));
+extern krb5_error_code filter (FILE *, char *, char **, char ***);
 
 extern krb5_error_code get_authorized_princ_names
-	PROTOTYPE((const char *, char *, char ***));
+	(const char *, char *, char ***);
 
 extern krb5_error_code get_closest_principal 
-	PROTOTYPE((krb5_context, char **, krb5_principal *, krb5_boolean *));
+	(krb5_context, char **, krb5_principal *, krb5_boolean *);
 
 extern krb5_error_code find_either_ticket 
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_principal,
-		krb5_principal, krb5_boolean *));
+	(krb5_context, krb5_ccache, krb5_principal,
+		krb5_principal, krb5_boolean *);
 
 extern krb5_error_code find_ticket 
-	PROTOTYPE((krb5_context, krb5_ccache, krb5_principal,
-		krb5_principal, krb5_boolean *));
+	(krb5_context, krb5_ccache, krb5_principal,
+		krb5_principal, krb5_boolean *);
 
 
 extern krb5_error_code find_princ_in_list
-	PROTOTYPE((krb5_context, krb5_principal, char **, krb5_boolean *));
+	(krb5_context, krb5_principal, char **, krb5_boolean *);
 
 extern krb5_error_code get_best_princ_for_target
-	PROTOTYPE((krb5_context, int, int, char *, char *, krb5_ccache, 
-		opt_info *, char *, char *, krb5_principal *, int *));
+	(krb5_context, int, int, char *, char *, krb5_ccache, 
+		opt_info *, char *, char *, krb5_principal *, int *);
 
-extern krb5_error_code ksu_tgtname PROTOTYPE((krb5_context, const krb5_data *,
+extern krb5_error_code ksu_tgtname (krb5_context, const krb5_data *,
 					      const krb5_data *, 
-					      krb5_principal *tgtprinc));
+					      krb5_principal *tgtprinc);
 
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))
@@ -246,11 +246,11 @@ extern krb5_error_code ksu_tgtname PROTOTYPE((krb5_context, const krb5_data *,
 extern char *krb5_lname_file;  /* Note: print this out just be sure
 				  that it gets set */   	    
 
-extern void *xmalloc PROTOTYPE((size_t)), 
-    *xrealloc PROTOTYPE((void *, size_t)), 
-    *xcalloc PROTOTYPE((size_t, size_t));
-extern char *xstrdup PROTOTYPE((const char *));
+extern void *xmalloc (size_t), 
+    *xrealloc (void *, size_t), 
+    *xcalloc (size_t, size_t);
+extern char *xstrdup (const char *);
 
 #ifndef HAVE_UNSETENV
-void unsetenv PROTOTYPE((char *));
+void unsetenv (char *);
 #endif

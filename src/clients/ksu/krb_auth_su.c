@@ -28,12 +28,12 @@
 #include "ksu.h"
     
 static krb5_error_code krb5_verify_tkt_def
-	PROTOTYPE((krb5_context,
+		  (krb5_context,
     		   krb5_principal,
     		   krb5_principal,
     		   krb5_keyblock *,
     		   krb5_data *,
-    		   krb5_ticket **));
+    		   krb5_ticket **);
 
 void plain_dump_principal ();
 

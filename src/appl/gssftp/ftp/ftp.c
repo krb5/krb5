@@ -154,15 +154,15 @@ unsigned char *ucbuf;
 #include "secure.h"
 
 #ifdef GSSAPI
-void user_gss_error PROTOTYPE((OM_uint32, OM_uint32, char *));
+void user_gss_error (OM_uint32, OM_uint32, char *);
 #endif
 
-static void proxtrans PROTOTYPE((char *, char *, char *));
-static int initconn PROTOTYPE((void));
-static void ptransfer PROTOTYPE((char *, long, struct timeval *, struct timeval *));
-static void abort_remote PROTOTYPE((FILE *));
-static void tvsub PROTOTYPE((struct timeval *, struct timeval *, struct timeval *));
-static char *gunique PROTOTYPE((char *));
+static void proxtrans (char *, char *, char *);
+static int initconn (void);
+static void ptransfer (char *, long, struct timeval *, struct timeval *);
+static void abort_remote (FILE *);
+static void tvsub (struct timeval *, struct timeval *, struct timeval *);
+static char *gunique (char *);
 
 struct	sockaddr_in hisctladdr;
 struct	sockaddr_in hisdataaddr;
@@ -190,7 +190,7 @@ extern int connected;
 #define herror()	printf("unknown host\n")
 
 FILE	*cin, *cout;
-FILE	*dataconn PROTOTYPE((char *));
+FILE	*dataconn (char *);
 
 char *
 hookup(host, port)

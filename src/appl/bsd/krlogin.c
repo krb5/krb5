@@ -257,11 +257,11 @@ struct	winsize winsize;
 char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
-krb5_sigtype	sigwinch KRB5_PROTOTYPE((int));
-int server_message KRB5_PROTOTYPE((int));
-void oob KRB5_PROTOTYPE((void));
-krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
-void setsignal KRB5_PROTOTYPE((int sig, krb5_sigtype (*act)()));
+krb5_sigtype	sigwinch (int);
+int server_message (int);
+void oob (void);
+krb5_sigtype	lostpeer (int);
+void setsignal (int sig, krb5_sigtype (*act)());
 static int read_wrapper(int fd, char *buf, int size, int *got_esc);
 static void prf(char *f);
 void try_normal(char **);
@@ -784,8 +784,8 @@ static int confirm_death ()
 #define CRLF "\r\n"
 
 int	child;
-krb5_sigtype	catchild KRB5_PROTOTYPE((int));
-krb5_sigtype	writeroob KRB5_PROTOTYPE((int));
+krb5_sigtype	catchild (int);
+krb5_sigtype	writeroob (int);
 
 int	defflags, tabflag;
 int	deflflags;

@@ -4,7 +4,6 @@
 #define HAS_ANSI_CONST 1
 #define HAVE_STDLIB_H 1
 #define HAS_VOID_TYPE 1
-#define NO_NESTED_PROTOTYPES 1
 #define NO_YYLINENO 1
 #define USE_DIRENT_H 1
 #define HAVE_STRING_H 1

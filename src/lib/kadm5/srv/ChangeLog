@@ -1,3 +1,7 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* server_acl.h: Make prototypes unconditional.
+
 2001-07-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* svr_principal.c (check_pw_reuse): Change argument for

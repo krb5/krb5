@@ -59,19 +59,19 @@ krb5_data tgtname = {
 };
 
 int verify_cs_pair 
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		   char *,
 		   krb5_principal,
 		   char *,
 		   char *,
 		   int, int, int,
-		   krb5_ccache));
+		   krb5_ccache);
 
 int get_tgt 
-	PROTOTYPE((krb5_context,
+	(krb5_context,
 		   char *,
 		   krb5_principal *,
-		   krb5_ccache));
+		   krb5_ccache);
 
 static void
 usage(who, status)

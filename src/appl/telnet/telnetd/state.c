@@ -47,7 +47,7 @@ unsigned char	will[] = { IAC, WILL, '%', 'c', 0 };
 unsigned char	wont[] = { IAC, WONT, '%', 'c', 0 };
 int	not42 = 1;
 
-static int envvarok P((char *));
+static int envvarok (char *);
 
 /*
  * Buffer for sub-options, and macros

@@ -77,14 +77,13 @@ static bool_t	svc_auth_gssapi_wrap(SVCAUTH *, XDR *, xdrproc_t, caddr_t);
 static bool_t	svc_auth_gssapi_unwrap(SVCAUTH *, XDR *, xdrproc_t, caddr_t);
 static svc_auth_gssapi_data *create_client(void);
 static svc_auth_gssapi_data *get_client
-       PROTOTYPE((gss_buffer_t client_handle));
+       (gss_buffer_t client_handle);
 static void destroy_client
-       PROTOTYPE((svc_auth_gssapi_data *client_data));
+       (svc_auth_gssapi_data *client_data);
 static void clean_client(void), cleanup(void);
 static void client_expire
-       PROTOTYPE((svc_auth_gssapi_data *client_data, rpc_u_int32 exp));
-static void dump_db
-PROTOTYPE((char *msg));
+       (svc_auth_gssapi_data *client_data, rpc_u_int32 exp);
+static void dump_db (char *msg);
 
 struct svc_auth_ops svc_auth_gssapi_ops = {
      svc_auth_gssapi_wrap,

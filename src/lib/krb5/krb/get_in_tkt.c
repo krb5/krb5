@@ -64,20 +64,20 @@
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
-typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
+typedef krb5_error_code (*git_key_proc) (krb5_context,
 						   const krb5_enctype,
 						   krb5_data *,
 						   krb5_const_pointer,
-						   krb5_keyblock **));
+						   krb5_keyblock **);
 
-typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
+typedef krb5_error_code (*git_decrypt_proc) (krb5_context,
 						       const krb5_keyblock *,
 						       krb5_const_pointer,
-						       krb5_kdc_rep * ));
+						       krb5_kdc_rep * );
 
-static krb5_error_code make_preauth_list PROTOTYPE((krb5_context, 
+static krb5_error_code make_preauth_list (krb5_context, 
 						    krb5_preauthtype *,
-						    int, krb5_pa_data ***));
+						    int, krb5_pa_data ***);
 /*
  * This function sends a request to the KDC, and gets back a response;
  * the response is parsed into ret_err_reply or ret_as_reply if the

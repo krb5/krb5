@@ -65,27 +65,27 @@ krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
 void	PRS
-	PROTOTYPE((int, char **));
+	(int, char **);
 void	get_tickets
-	PROTOTYPE((krb5_context));
+	(krb5_context);
 static void usage 
-	PROTOTYPE((void));
+	(void);
 krb5_error_code open_connection 
-	PROTOTYPE((char *, int *, char *, unsigned int));
+	(char *, int *, char *, unsigned int);
 void	kerberos_authenticate 
-	PROTOTYPE((krb5_context, krb5_auth_context *, 
-		   int, krb5_principal, krb5_creds **));
+	(krb5_context, krb5_auth_context *, 
+		   int, krb5_principal, krb5_creds **);
 int	open_database 
-	PROTOTYPE((krb5_context, char *, int *));
+	(krb5_context, char *, int *);
 void	close_database 
-	PROTOTYPE((krb5_context, int));
+	(krb5_context, int);
 void	xmit_database 
-	PROTOTYPE((krb5_context, krb5_auth_context, krb5_creds *, 
-		   int, int, int));
+	(krb5_context, krb5_auth_context, krb5_creds *, 
+		   int, int, int);
 void	send_error 
-	PROTOTYPE((krb5_context, krb5_creds *, int, char *, krb5_error_code));
+	(krb5_context, krb5_creds *, int, char *, krb5_error_code);
 void	update_last_prop_file 
-	PROTOTYPE((char *, char *));
+	(char *, char *);
 
 static void usage()
 {

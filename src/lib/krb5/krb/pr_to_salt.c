@@ -30,7 +30,7 @@
 #include "k5-int.h"
 
 static krb5_error_code krb5_principal2salt_internal
-    PROTOTYPE((krb5_context, krb5_const_principal, krb5_data *ret, int));
+    (krb5_context, krb5_const_principal, krb5_data *ret, int);
 
 /*
  * Convert a krb5_principal into the default salt for that principal.
