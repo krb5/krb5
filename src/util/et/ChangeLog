@@ -1,13 +1,16 @@
-Sat Feb 22 02:22:01 1997  Sam Hartman  <hartmans@mit.edu>
+Sat Feb 22 12:18:47 1997  Richard Basch  <basch@lehman.com>
 
-	* error_message.c: Remove #ifdef unix
+	* et_c.awk et_h.awk error_message.c com_err.c:
+		Put back #ifdef unix, and also based it on AIX.
+		We do NOT want the compatibility interface on any new
+		architectures.  Since we have distributed Kerberos on
+		AIX before, we need it there.  If newer Unix systems
+		lack the #define, so be it... it doesn't matter.
 
 Sat Feb 22 02:18:47 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* et_h.awk (char_shift): Avoid #ifdef unix
-
-Sat Feb 22 02:04:20 1997  Sam Hartman  <hartmans@mit.edu>
-
+	* error_message.c: Remove #ifdef unix
 	* com_err.c: Remove #ifdef unix
 
 Sat Feb 22 00:34:05 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
