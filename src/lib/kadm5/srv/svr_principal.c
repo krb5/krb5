@@ -37,15 +37,6 @@ static int decrypt_key_data(krb5_context context,
 /*
  * XXX Functions that ought to be in libkrb5.a, but aren't.
  */
-int krb5_free_keyblock_contents(context, key)
-     krb5_context context;
-     krb5_keyblock *key;
-{
-     memset(key->contents, 0, key->length);
-     krb5_xfree(key->contents);
-     return 0;
-}
-
 kadm5_ret_t krb5_copy_key_data_contents(context, from, to)
    krb5_context context;
    krb5_key_data *from, *to;

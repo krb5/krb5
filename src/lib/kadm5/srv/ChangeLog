@@ -1,3 +1,8 @@
+Fri Aug  2 14:07:31 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* svr_principal.c: remove krb5_free_keyblock_contents (moved to
+        libkrb5.a)
+
 Fri Jul 26 17:48:14 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* svr_principal.c (krb5_copy_key_data_contents): If
