@@ -13,8 +13,6 @@
 #define krb5_sigtype void
 #define HAVE_NETINET_IN_H 1
 #define ODBM 1
-/* Define to empty if the keyword does not work.  */
-#define const 
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1

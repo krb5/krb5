@@ -291,22 +291,32 @@ login(host)
 			user = tmp;
 	}
 	n = command("USER %s", user);
-	if (n == COMPLETE)
-		n = command("PASS dummy");
+	if (n == COMPLETE) {
+	        /* determine if we need to send a dummy password */
+		int oldverbose = verbose;
+
+		verbose = 0;
+		if (command("PWD") != COMPLETE) {
+			verbose = oldverbose;
+			command("PASS dummy");
+		} else {
+			verbose = oldverbose;
+		}
+	}
 	else if (n == CONTINUE) {
 #ifndef NOENCRYPTION
-		int oldlevel;
+		int oldclevel;
 #endif
 		if (pass == NULL)
 			pass = mygetpass("Password:");
 #ifndef NOENCRYPTION
-		oldlevel = level;
-		level = PROT_P;
+		oldclevel = clevel;
+		clevel = PROT_P;
 #endif
 		n = command("PASS %s", pass);
 #ifndef NOENCRYPTION
 		/* level may have changed */
-		if (level == PROT_P) level = oldlevel;
+		if (clevel == PROT_P) clevel = oldclevel;
 #endif
 	}
 	if (n == CONTINUE) {
@@ -352,14 +362,10 @@ secure_command(cmd)
 	char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
 	int length;
 
-	if (auth_type) {
-		/*
-		 * File protection level also determines whether
-		 * commands are MIC or ENC.  Should be independent ...
-		 */
+	if (auth_type && clevel != PROT_C) {
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0)
-		    if ((length = level == PROT_P ?
+		    if ((length = clevel == PROT_P ?
 			krb_mk_priv((unsigned char *)cmd, (unsigned char *)out,
 				strlen(cmd), schedule,
 				&cred.session, &myctladdr, &hisctladdr)
@@ -367,7 +373,7 @@ secure_command(cmd)
 				strlen(cmd), &cred.session,
 				&myctladdr, &hisctladdr)) == -1) {
 			fprintf(stderr, "krb_mk_%s failed for KERBEROS_V4\n",
-					level == PROT_P ? "priv" : "safe");
+					clevel == PROT_P ? "priv" : "safe");
 			return(0);
 		    }
 #endif /* KRB5_KRB4_COMPAT */
@@ -377,27 +383,27 @@ secure_command(cmd)
 			gss_buffer_desc in_buf, out_buf;
 			OM_uint32 maj_stat, min_stat;
 			int conf_state;
-/* level = PROT_P; */
+/* clevel = PROT_P; */
 			in_buf.value = cmd;
 			in_buf.length = strlen(cmd) + 1;
 			maj_stat = gss_seal(&min_stat, gcontext,
-					    (level==PROT_P), /* confidential */
+					    (clevel==PROT_P), /* private */
 					    GSS_C_QOP_DEFAULT,
 					    &in_buf, &conf_state,
 					    &out_buf);
 			if (maj_stat != GSS_S_COMPLETE) {
 				/* generally need to deal */
 				user_gss_error(maj_stat, min_stat,
-					       (level==PROT_P)?
+					       (clevel==PROT_P)?
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
-			} else if ((level == PROT_P) && !conf_state) {
+			} else if ((clevel == PROT_P) && !conf_state) {
 				fprintf(stderr, 
 					"GSSAPI didn't encrypt message");
 			} else {
 				if (debug)
 				  fprintf(stderr, "sealed (%s) %d bytes\n",
-					  level==PROT_P?"ENC":"MIC", 
+					  clevel==PROT_P?"ENC":"MIC", 
 					  out_buf.length);
 				memcpy(out, out_buf.value, 
 				       length=out_buf.length);
@@ -411,10 +417,10 @@ secure_command(cmd)
 					radix_error(kerror));
 			return(0);
 		}
-		fprintf(cout, "%s %s", level == PROT_P ? "ENC" : "MIC", in);
+		fprintf(cout, "%s %s", clevel == PROT_P ? "ENC" : "MIC", in);
 		if(debug) 
 		  fprintf(stderr, "secure_command(%s)\nencoding %d bytes %s %s\n",
-			  cmd, length, level==PROT_P ? "ENC" : "MIC", in);
+			  cmd, length, clevel==PROT_P ? "ENC" : "MIC", in);
 	} else	fputs(cmd, cout);
 	fprintf(cout, "\r\n");
 	(void) fflush(cout);
@@ -475,10 +481,10 @@ again:	if (secure_command(in) == 0)
 	cpend = 1;
 	r = getreply(!strcmp(fmt, "QUIT"));
 #ifndef NOENCRYPTION
-	if (r == 533 && level == PROT_P) {
+	if (r == 533 && clevel == PROT_P) {
 		fprintf(stderr,
 			"ENC command not supported at server; retrying under MIC...\n");
-		level = PROT_S;
+		clevel = PROT_S;
 		goto again;
 	}
 #endif
@@ -600,7 +606,7 @@ getreply(expecteof)
 		    if (code != 631 && code != 632 && code != 633) {
 			printf("Unknown reply: %d %s\n", code, obuf);
 			n = '5';
-		    } else safe = code;
+		    } else safe = (code == 631);
 		if (obuf[0])	/* if there is a string to decode */
 		    if (!auth_type) {
 			printf("Cannot decode reply:\n%d %s\n", code, obuf);
@@ -641,7 +647,7 @@ getreply(expecteof)
 					krb_get_err_text(kerror));
 				  n = '5';
 				} else {
-				  if (verbose) printf("%c:", safe ? 'S' : 'P');
+				  if (debug) printf("%c:", safe ? 'S' : 'P');
 				  memcpy(ibuf, msg_data.app_data,
 					msg_data.app_length);
 				  strcpy(&ibuf[msg_data.app_length], "\r\n");
@@ -1544,7 +1550,8 @@ pswitch(flag)
 		char mi[MAXPATHLEN];
 		char mo[MAXPATHLEN];
 		char *authtype;
-		int lvl;
+		int clvl;
+	        int dlvl;
 #ifdef KRB5_KRB4_COMPAT
 		C_Block session;
 		Key_schedule schedule;
@@ -1613,10 +1620,14 @@ pswitch(flag)
 	(void) strcpy(mapout, op->mo);
 	ip->authtype = auth_type;
 	auth_type = op->authtype;
-	ip->lvl = level;
-	level = op->lvl;
-	if (!level)
-		level = 1;
+	ip->clvl = clevel;
+	clevel = op->clvl;
+	ip->dlvl = dlevel;
+	dlevel = op->dlvl;
+	if (!clevel)
+	     clevel = PROT_C;
+	if (!dlevel)
+	     dlevel = PROT_C;
 #ifdef KRB5_KRB4_COMPAT
 	memcpy(ip->session, cred.session, sizeof(cred.session));
 	memcpy(cred.session, op->session, sizeof(cred.session));
@@ -1850,7 +1861,7 @@ int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 do_auth()
 {
 	extern int setsafe();
-	int oldverbose;
+	int oldverbose = verbose;
 #ifdef KRB5_KRB4_COMPAT
 	char *service, inst[INST_SZ];
 	u_long cksum, checksum = (u_long) getpid();

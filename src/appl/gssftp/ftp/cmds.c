@@ -160,7 +160,7 @@ setpeer(argc, argv)
 		/*
 		 * Set up defaults for FTP.
 		 */
-		level = PROT_C;
+		clevel = dlevel = PROT_C;
 		type = TYPE_A;
 		curtype = TYPE_A;
 		form = FORM_N;
@@ -169,15 +169,17 @@ setpeer(argc, argv)
 		(void) strcpy(bytename, "8"), bytesize = 8;
 		if (autoauth) {
 			if (do_auth() && autoencrypt) {
+ 				clevel = PROT_P;
 				setpbsz(1<<20);
 				if (command("PROT P") == COMPLETE)
-					level = PROT_P;
+					dlevel = PROT_P;
 				else
 					fprintf(stderr, "ftp: couldn't enable encryption\n");
 			}
-
+			if(auth_type && clevel == PROT_C)
+				clevel = PROT_S;
 			if(autologin)
-			  (void) login(argv[1]);
+				(void) login(argv[1]);
 		}
 
 #ifndef unix
@@ -259,18 +261,85 @@ struct	levels {
 };
 
 char *
-getlevel()
+getclevel()
 {
 	register struct levels *p;
 
-	for (p = levels; p->p_level != level; p++);
+	for (p = levels; p->p_level != clevel; p++);
 	return(p->p_name);
 }
 
+char *
+getdlevel()
+{
+	register struct levels *p;
+
+	for (p = levels; p->p_level != dlevel; p++);
+	return(p->p_name);
+}
+
+char *plevel[] = {
+	"protect",
+	"",
+	0
+};
+
 /*
- * Set protection level.
+ * Set control channel protection level.
  */
-setlevel(argc, argv)
+setclevel(argc, argv)
+	char *argv[];
+{
+	register struct levels *p;
+	int comret;
+
+	if (argc > 2) {
+		char *sep;
+
+		printf("usage: %s [", argv[0]);
+		sep = " ";
+		for (p = levels; p->p_name; p++) {
+			printf("%s%s", sep, p->p_name);
+			if (*sep == ' ')
+				sep = " | ";
+		}
+		printf(" ]\n");
+		code = -1;
+		return;
+	}
+	if (argc < 2) {
+		printf("Using %s protection level for commands.\n",
+			getclevel());
+		code = 0;
+		return;
+	}
+	for (p = levels; p->p_name; p++)
+		if (strcmp(argv[1], p->p_name) == 0)
+			break;
+	if (p->p_name == 0) {
+		printf("%s: unknown protection level\n", argv[1]);
+		code = -1;
+		return;
+	}
+	if (!auth_type) {
+		if (strcmp(p->p_name, "clear"))
+			printf("Cannot set protection level to %s\n", argv[1]);
+		return;
+	}
+	if (!strcmp(p->p_name, "clear")) {
+		comret = command("CCC");
+		if (comret == COMPLETE)
+			clevel = PROT_C; 
+		return;
+	}
+	clevel = p->p_level;
+	printf("Control channel protection level set to %s.\n", p->p_name);
+}
+
+/*
+ * Set data channel protection level.
+ */
+setdlevel(argc, argv)
 	char *argv[];
 {
 	register struct levels *p;
@@ -292,7 +361,7 @@ setlevel(argc, argv)
 	}
 	if (argc < 2) {
 		printf("Using %s protection level to transfer files.\n",
-			getlevel());
+			getdlevel());
 		code = 0;
 		return;
 	}
@@ -313,44 +382,49 @@ setlevel(argc, argv)
 	if (p->p_level != PROT_C) setpbsz(1<<20);
 	comret = command("PROT %s", p->p_mode);
 	if (comret == COMPLETE)
-		level = p->p_level;
+		dlevel = p->p_level;
 }
 
-char *plevel[] = {
-	"protect",
-	"",
-	0
-};
 
 /*
- * Set clear protection level.
+ * Set clear command protection level.
+ */
+/*VARARGS*/
+ccc()
+{
+	plevel[1] = "clear";
+	setclevel(2, plevel);
+}
+
+/*
+ * Set clear data protection level.
  */
 /*VARARGS*/
 setclear()
 {
 	plevel[1] = "clear";
-	setlevel(2, plevel);
+	setdlevel(2, plevel);
 }
 
 /*
- * Set safe protection level.
+ * Set safe data protection level.
  */
 /*VARARGS*/
 setsafe()
 {
 	plevel[1] = "safe";
-	setlevel(2, plevel);
+	setdlevel(2, plevel);
 }
 
 #ifndef NOENCRYPTION
 /*
- * Set private protection level.
+ * Set private data protection level.
  */
 /*VARARGS*/
 setprivate()
 {
 	plevel[1] = "private";
-	setlevel(2, plevel);
+	setdlevel(2, plevel);
 }
 #endif
 
@@ -1021,7 +1095,8 @@ cstatus()
 	printf("Connected %sto %s.\n",
 		proxy ? "for proxy commands " : "", hostname);
 	if (auth_type) printf("Authentication type: %s\n", auth_type);
-	printf("Protection Level: %s\n", getlevel());
+	printf("Control Channel Protection Level: %s\n", getclevel());
+	printf("Data Channel Protection Level: %s\n", getdlevel());
 	printf("Passive mode %s\n", onoff(passivemode));
 	printf("Mode: %s; Type: %s; Form: %s; Structure: %s\n",
 		getmode(), gettype(), getform(), getstruct());
@@ -1489,17 +1564,17 @@ user(argc, argv)
 		n = command("PASS dummy");
 	else if (n == CONTINUE) {
 #ifndef NOENCRYPTION
-		int oldlevel;
+		int oldclevel;
 #endif
-		if (argc < 3 )
+		if (argc < 3)
 			argv[2] = mygetpass("Password: "), argc++;
 #ifndef NOENCRYPTION
-		if ((oldlevel = level) == PROT_S) level = PROT_P;
+		if ((oldclevel = clevel) == PROT_S) clevel = PROT_P;
 #endif
 		n = command("PASS %s", argv[2]);
 #ifndef NOENCRYPTION
 		/* level may have changed */
-		if (level == PROT_P) level = oldlevel;
+		if (clevel == PROT_P) clevel = oldclevel;
 #endif
 	}
 	if (n == CONTINUE) {
@@ -1730,7 +1805,7 @@ disconnect()
 		macnum = 0;
 	}
 	auth_type = NULL;
-	level = PROT_C;
+	dlevel = PROT_C;
 }
 
 confirm(cmd, file)

@@ -190,6 +190,8 @@ int tf_init(tf_name, rw)
     int shmid;
 #endif
 
+    me = getuid();
+
     switch (rw) {
     case R_TKT_FIL:
 	wflag = 0;

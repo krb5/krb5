@@ -8,6 +8,10 @@ Fri Jul 31 18:17:16 1998  Tom Yu  <tlyu@mit.edu>
 	* admin_server.c (clear_secrets): Remove references to
 	master_encblock, due to new crypto API.
 
+Mon Jul 20 11:20:32 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* acl_files.c: Include stdlib.h if present.
+
 Thu Jul  9 21:52:41 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_server.c (kadm_ser_cpw): Re-enable "old-style" password

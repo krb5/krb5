@@ -575,7 +575,7 @@ main(argc, argv)
       authopts |= OPTS_FORWARDABLE_CREDS;
 
     status = kcmd(&sock, &host, debug_port,
-		  null_local_username ? NULL : pwd->pw_name,
+		  null_local_username ? "" : pwd->pw_name,
 		  name ? name : pwd->pw_name, term,
 		  0, "host", krb_realm,
 		  &cred,
@@ -589,7 +589,7 @@ main(argc, argv)
 #ifdef KRB5_KRB4_COMPAT
 	fprintf(stderr, "Trying krb4 rlogin...\n");
 	status = k4cmd(&sock, &host, debug_port,
-		       null_local_username ? NULL : pwd->pw_name,
+		       null_local_username ? "" : pwd->pw_name,
 		       name ? name : pwd->pw_name, term,
 		       0, &v4_ticket, "rcmd", krb_realm,
 		       &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
@@ -620,10 +620,10 @@ main(argc, argv)
     
 #else
     rem = rcmd(&host, debug_port,
-	       null_local_username ? NULL : pwd->pw_name,
+	       null_local_username ? "" : pwd->pw_name,
 	       name ? name : pwd->pw_name, term, 0);
 #endif /* KERBEROS */
-    
+
     if (rem < 0)
       exit(1);
     

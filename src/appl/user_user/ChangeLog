@@ -1,3 +1,10 @@
+Tue Sep 29 18:58:46 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* client.c (main): Don't use h_errno at all; it doesn't work on
+ 		all platforms (for example HPUX), and it's just not worth
+ 		the effort to disambiguate between the different reasons
+		why gethostbyname() might have failed.
+
 1998-07-05    <hartmans@fundsxpress.com>
 
 	* client.c (main): do not declare h_errno

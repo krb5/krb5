@@ -1134,12 +1134,6 @@ struct buffer *allocbuf(bp, fd, blksize)
     return (bp);
 }
 
-
-
-/* This function is mostly vestigial, since under normal operation
- * the -x flag doesn't get set for the server process for encrypted
- * rcp.  It only gets called by beta clients attempting user-to-user
- * authentication. */
 void
 #ifdef HAVE_STDARG_H
 error(char *fmt, ...)
@@ -1164,8 +1158,9 @@ error(fmt, va_alist)
     (void) vsprintf(cp, fmt, ap);
     va_end(ap);
 
-    (void) rcmd_stream_write(rem, buf, strlen(buf));
-    if (iamremote == 0)
+    if (iamremote)
+      (void) rcmd_stream_write(rem, buf, strlen(buf));
+    else
       (void) write(2, buf+1, strlen(buf+1));
 }
 
@@ -1253,8 +1248,6 @@ char **save_argv(argc, argv)
 #else
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
-
-
 
 
 /* This function is mostly vestigial, since under normal operation

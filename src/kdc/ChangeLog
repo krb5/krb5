@@ -46,6 +46,21 @@ Wed Aug 12 18:40:08 1998  Tom Yu  <tlyu@mit.edu>
 	it's a single-des key.
 	(set_tgtkey): Call krb_set_key_krb5 if appropriate.
 
+Tue Jul 21 20:29:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* replay.c (kdc_check_lookaside):
+	(kdc_insert_lookaside): Add code to originating address of packet,
+ 	as krb4 initial ticket requests don't contain an address.  This
+ 	would cause a subtle problem wherein two simultaneous krb4 initial
+ 	ticket requests for the same principal originating from different
+ 	addresses would result in both replies containing the same
+	address.
+
+	* kdc_util.h: Modify prototype for lookaside functions.
+
+	* dispatch.c (dispatch): Update to new calling conventions of the
+	lookaside functions.
+
 Wed Jul 15 18:32:07 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add CHECK_SIGNALS so that POSIX_SIGNALS gets

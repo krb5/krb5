@@ -1,3 +1,81 @@
+Fri Oct 21 18:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* ReadMe: updated instructions to say we require CW Pro4
+	* version.r: upped to 1.1a4
+
+Fri Oct 21 17:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* Makefile.initial: added auto-detection of CodeWarrior version
+	* Makefile.tmpl: added CodeWarrior Pro4 files and fixed -map on krb5 68k lib
+
+Fri Sep 8 15:50:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* CFMGlue.c: Added check for Code Fragment Manager
+
+Fri Aug 28 16:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl, ReadMe, Makefile.initial, RunAppleScript.pl: Added stuff to
+	automagically run AppleScriprs to build CW projects.
+
+Fri Aug 28 12:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Removed static library targets, renamed other
+	targets, added debugging targets
+	* ReadMe: removed mentions of static libraries and kconfig
+	* macfile_gen.pl: renamed output variables
+	* version.r: upped to 1.1a3
+
+Fri Aug 21 17:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Added CCache API dependencies
+
+Wed Aug 19 18:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* version.r: Upped to 1.1a1 library, 1.5a1 package
+
+Tue Aug 18 14:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* ReadMe: added information about warnings that should be ignored
+
+Fri Aug 14 14:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Change -sym fullpath to -sym on -- now
+	MPW doesn't crash during link stage
+	* version.r: Upped to 1.0.5b8
+
+Wed Aug 12 13:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* version.r: Upped to 1.0.5b7
+
+Wed Aug 12 13:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Change glue targets' output folders
+
+Mon Aug 10 17:20:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Fixed glue targets' dependencies
+
+Mon Aug 10 13:15:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* version.r: Upped to 1.0.5b6
+
+Mon Aug 10 13:15:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Added glue files to snapshot list
+
+Mon Aug 10 13:05:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Changed location of glue generation output
+
+Mon Aug 10 13:05:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* ReadMe: Changed instructions to refer to 68K glue
+
+Mon Aug 10 12:58:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Added glue files to clean targets
+
+Mon Aug 10 12:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Added sources for classic 68K glue for GSSAPI and krb5 libraries
+
 Tue Jul  7 17:00:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile: separated krb5 and GSS libraries; also commented out MIT-specific targets,

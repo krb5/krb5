@@ -1,3 +1,20 @@
+Fri Sep 25 22:32:16 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ccdefname.c: We shouldn't try to use the CCache API on Unix
+		systems.  (The maze of #ifdef's was confusing.)
+
+Tue Sep  1 15:44:11 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ccdefname.c (krb5_cc_default_name): Changed the PC version to
+ 		use the CCache API by default.  Removed the old Macintosh
+ 		code that had been commented out.  (If we need to
+ 		ressurect it, we'll get it from CVS.)
+
+Fri Aug 21 17:37:00 1998  Miro Jurisic  <meeroh@mit.edu>
+
+	* ccdefname.c.c (krb5_cc_default_name): Changed the Mac
+			version to use CCache API by default.
+
 Thu Jul 16 09:59:34 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* changepw.c (krb5_change_password): Changes casts from char * to

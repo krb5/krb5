@@ -92,19 +92,9 @@ krb5_cc_default_name(context)
     
     if (name == 0) {
 
-#ifdef HAVE_MACSOCK_H
+#ifdef macintosh
 {
-short	vRefnum;
-long	parID;
-OSErr	theErr;
-FSSpec	krbccSpec;
-char	pathbuf[255];
-
-	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
-	FSMakeFSSpec(vRefnum, parID, "\pkrb5cc", &krbccSpec);
-	GetPathname(&krbccSpec, &pathbuf);
-	sprintf(name_buf, "STDIO:%s", pathbuf);
-//	strcpy (name_buf, "STDIO:krb5cc");
+	strcpy (name_buf, "API:default_cache_name");
 }
 #else
 #if defined(_MSDOS) || defined(_WIN32)
@@ -151,16 +141,18 @@ char	pathbuf[255];
 	    if(!(found)) {
 #endif
 		
-		GetWindowsDirectory (defname, sizeof(defname)-7);
-		strcat (defname, "\\krb5cc");
-		strcpy (name_buf, "FILE:");
+		//GetWindowsDirectory (defname, sizeof(defname)-7);
+		strcpy (defname, "default_cache_name");
+		strcpy (name_buf, "API:");
 		GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-					name_buf+5, sizeof(name_buf)-5, KERBEROS_INI);
+					name_buf+4, sizeof(name_buf)-4,
+					KERBEROS_INI);
 #if defined(_WIN32)
 	    }
 #endif
 	}
 #else
+	/* Default for Unix systems */
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 #endif
 #endif

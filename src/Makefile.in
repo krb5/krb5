@@ -141,6 +141,7 @@ config-windows:: makefile-windows
 ##DOS##		lib\krb5\ccache\file\makefile \
 ##DOS##		lib\krb5\ccache\stdio\makefile \
 ##DOS##		lib\krb5\ccache\memory\makefile \
+##DOS##		lib\krb5\ccache\ccapi\makefile \
 ##DOS##		lib\krb5\error_tables\makefile \
 ##DOS##		lib\krb5\keytab\makefile \
 ##DOS##		lib\krb5\keytab\file\makefile lib\krb5\krb\makefile \
@@ -206,6 +207,8 @@ config-windows:: makefile-windows
 ##DOS##lib\krb5\ccache\stdio\makefile: lib\krb5\ccache\stdio\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\ccache\memory\makefile: lib\krb5\ccache\memory\makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\krb5\ccache\ccapi\makefile: lib\krb5\ccache\ccapi\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\error_tables\makefile: lib\krb5\error_tables\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -285,7 +288,8 @@ FILES= ./* \
 	lib/gssapi/mechglue/* lib/krb4/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* lib/krb5/ccache/memory/* \
-	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
+	lib/krb5/ccache/stdio/* lib/krb5/ccache/ccapi/* \
+	lib/krb5/error_tables/* \
 	lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
 	util/et/* util/profile/*
@@ -293,8 +297,7 @@ FILES= ./* \
 WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/*
 
-MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
-	mac/gss-sample/* mac/SAP/* config/* include/* \
+MACFILES= mac/* mac/kconfig/* mac/libraries/* config/* include/* \
 	include/krb5/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 

@@ -4,6 +4,12 @@ Wed Sep 23 15:24:44 1998  Tom Yu  <tlyu@mit.edu>
 	moving the explicit resetting of DEPLIB=$SHLIBEXT and forcing
 	SHLIBEXT=.so-nobuild to avoid duplicate rules on AIX and such.
 
+1998-08-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add support to build the lib/krb5/ccache api
+		directory and include it in the Windows kerbsrc-nt.zip
+		file.
+
 Wed Aug 19 20:14:31 1998  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_AUX): Back out Sam's change to reorder the

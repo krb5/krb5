@@ -1,6 +1,27 @@
+1998-10-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krshd.c (doit): Apply ghudson's patch so that rshd passes the
+		port numbers for the local and foreign addresses so that
+		the V4 encrypted RCP will work correctly.  [krb5-appl/638]
+	* v4rcp.c (answer_auth): Apply ghudson's patch so that if
+		KRB5LOCALPORT and KRB5REMOTEPORT are set, use them to set
+		the foreign and local ports so that encrypted rcp for the
+		same machine.  [krb5-appl/638]
+
 Tue Aug 18 16:48:02 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krlogin.c: Add <sys/filio.h> for FIONREAD.
+
+Sat Aug 15 00:01:15 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krcp.c (error): Don't call rcmd_stream_write if iamremote is not
+ 	set, because it expects a valid file descriptor [krb5-appl/359].
+  	Also, remove mistakenly duplicated comment above the function.
+
+Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
+	no longer dumps core. [krb5-appl/612]
 
 Sun Jul 26 23:46:36 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 

@@ -175,7 +175,7 @@ main(argc, argv)
 	cpend = 0;	/* no pending replies */
 	proxy = 0;	/* proxy not active */
 #ifndef NO_PASSIVE_MODE
-	passivemode = 1; /* passive mode active */
+	passivemode = 0; /* passive mode not active */
 #endif
 	crflag = 1;	/* strip c.r. on ascii gets */
 	sendport = -1;	/* not using ports */
@@ -225,7 +225,8 @@ lostpeer(sig)
 	extern FILE *cout;
 	extern int data;
 	extern char *auth_type;
-	extern int level;
+	extern int clevel;
+	extern int dlevel;
 
 	if (connected) {
 		if (cout != NULL) {
@@ -240,7 +241,7 @@ lostpeer(sig)
 		}
 		connected = 0;
 		auth_type = NULL;
-		level = PROT_C;
+		clevel = dlevel = PROT_C;
 	}
 	pswitch(1);
 	if (connected) {
@@ -251,7 +252,7 @@ lostpeer(sig)
 		}
 		connected = 0;
 		auth_type = NULL;
-		level = PROT_C;
+		clevel = dlevel = PROT_C;
 	}
 	proxflag = 0;
 	pswitch(0);

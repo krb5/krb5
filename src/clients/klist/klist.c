@@ -287,7 +287,7 @@ void do_ccache(name)
  
     flags = 0;				/* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-	if (code == ENOENT) {
+	if (code == KRB5_FCC_NOFILE) {
 	    if (!status_only)
 		com_err(progname, code, "(ticket cache %s)",
 			krb5_cc_get_name(kcontext, cache));

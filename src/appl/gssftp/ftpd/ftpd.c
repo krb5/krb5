@@ -172,13 +172,17 @@ sigjmp_buf urgcatch;
 int	logged_in;
 struct	passwd *pw;
 int	debug;
+int	allow_ccc = 0;    /* whether or not the CCC command is allowed */
+int	ccc_ok = 0;       /* whether or not to accept cleartext commands */
 int	timeout = 900;    /* timeout after 15 minutes of inactivity */
 int	maxtimeout = 7200;/* don't allow idle time to be set beyond 2 hours */
 int	logging;
 int	authenticate;
 int	guest;
+int	restricted;
 int	type;
-int	level;
+int	clevel;			/* control protection level */
+int	dlevel;			/* data protection level */
 int	form;
 int	stru;			/* avoid C keyword */
 int	mode;
@@ -193,6 +197,7 @@ off_t	byte_count;
 #endif
 int	defumask = CMASK;		/* default umask value */
 char	tmpline[FTP_BUFSIZ];
+char    pathbuf[MAXPATHLEN + 1];
 char	hostname[MAXHOSTNAMELEN];
 char	remotehost[MAXHOSTNAMELEN];
 
@@ -274,11 +279,15 @@ main(argc, argv, envp)
 			break;
 
 		case 'l':
-			logging = 1;
+			logging ++;
 			break;
 
 		case 'a':
 			authenticate = 1;
+			break;
+
+		case 'c':
+			allow_ccc = 1;
 			break;
 
 		case 'p':
@@ -399,6 +408,7 @@ nextopt:
 #define LOG_DAEMON 0
 #endif
 	openlog("ftpd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+
 	addrlen = sizeof (his_addr);
 	if (getpeername(0, (struct sockaddr *)&his_addr, &addrlen) < 0) {
 		syslog(LOG_ERR, "getpeername (%s): %m",argv[0]);
@@ -454,7 +464,7 @@ nextopt:
 	 * Set up default state
 	 */
 	data = -1;
-	level = PROT_C;
+	clevel = dlevel = PROT_C;
 	type = TYPE_A;
 	form = FORM_N;
 	stru = STRU_F;
@@ -537,7 +547,36 @@ sgetpwnam(name)
 	return (&save);
 }
 
-setlevel(prot_level)
+/*
+ * Expand the given pathname relative to the current working directory.
+ */
+char *
+path_expand(path)
+       char *path;
+{
+	pathbuf[0] = '\x0';
+	if (!path) return pathbuf;
+	/* Don't bother with getcwd() if the path is absolute */
+	if (path[0] != '/') {
+	        if (!getcwd(pathbuf, sizeof pathbuf)) {
+		        pathbuf[0] = '\x0';
+			syslog(LOG_ERR, "getcwd() failed");
+		}
+		else {
+		        int len = strlen(pathbuf);
+			if (pathbuf[len-1] != '/') {
+			        pathbuf[len++] = '/';
+				pathbuf[len] = '\x0';
+			}
+		}
+	}
+	return strcat(pathbuf, path);
+}
+
+/*
+ * Set data channel protection level
+ */
+setdlevel(prot_level)
 int prot_level;
 {
 	switch (prot_level) {
@@ -547,10 +586,10 @@ int prot_level;
 #endif
 			if (auth_type)
 		case PROT_C:
-				reply(200, "Protection level set to %s.",
-					(level = prot_level) == PROT_S ?
-						"Safe" : level == PROT_P ?
-						"Private" : "Clear");
+				reply(200, "Data channel protection level set to %s.",
+					(dlevel = prot_level) == PROT_S ?
+						"safe" : dlevel == PROT_P ?
+						"private" : "clear");
 			else
 		default:	reply(536, "%s protection level not supported.",
 					levelnames[prot_level]);
@@ -569,7 +608,10 @@ int askpasswd;			/* had user command, ask for passwd */
  * If account doesn't exist, ask for passwd anyway.  Otherwise, check user
  * requesting login privileges.  Disallow anyone who does not have a standard
  * shell as returned by getusershell().  Disallow anyone mentioned in the file
- * _PATH_FTPUSERS to allow people such as root and uucp to be avoided.
+ * _PATH_FTPUSERS to allow people such as root and uucp to be avoided, except
+ * for users whose names are followed by whitespace and then the keyword
+ * "restrict."  Restricted users are allowed to login, but a chroot() is
+ * done to their home directory.
  */
 user(name)
 	char *name;
@@ -580,14 +622,16 @@ user(name)
 	char *getusershell();
 #endif
 
-	/* Some paranoid sites may want the client to authenticate
-	 * before accepting the USER command.  If so, uncomment this:
-
+#ifdef PARANOID
+	/*
+	 * Some paranoid sites may want the client to authenticate
+	 * before accepting the USER command.
+	 */
 	if (!auth_type) {
 		reply(530,
 			"Must perform authentication before identifying USER.");
 		return;
-	 */
+#endif
 	if (logged_in) {
 		if (guest) {
 			reply(530, "Can't change user from guest login.");
@@ -598,7 +642,7 @@ user(name)
 
 	guest = 0;
 	if (strcmp(name, "ftp") == 0 || strcmp(name, "anonymous") == 0) {
-		if (checkuser("ftp") || checkuser("anonymous"))
+		if (disallowed_user("ftp") || disallowed_user("anonymous"))
 			reply(530, "User %s access denied.", name);
 		else if ((pw = sgetpwnam("ftp")) != NULL) {
 			guest = 1;
@@ -612,14 +656,15 @@ user(name)
 		if ((shell = pw->pw_shell) == NULL || *shell == 0)
 			shell = "/bin/sh";
 #ifdef HAVE_GETUSERSHELL
+		setusershell();
 		while ((cp = getusershell()) != NULL)
 			if (strcmp(cp, shell) == 0)
 				break;
-		/* endusershell(); */ /* this breaks on solaris 2.4 */
+		endusershell();
 #else
 		cp = shell;
 #endif
-		if (cp == NULL || checkuser(name)) {
+		if (cp == NULL || disallowed_user(name)) {
 			reply(530, "User %s access denied.", name);
 			if (logging)
 				syslog(LOG_NOTICE,
@@ -628,6 +673,7 @@ user(name)
 			pw = (struct passwd *) NULL;
 			return;
 		}
+		restricted = restricted_user(name);
 	}
 #ifdef GSSAPI
 	if (auth_type && strcmp(auth_type, "GSSAPI") == 0) {
@@ -649,6 +695,10 @@ user(name)
 		/* 232 is per draft-8, but why 331 not 53z? */
 		reply(gss_ok ? 232 : 331, "%s", buf);
 		syslog(gss_ok ? LOG_INFO : LOG_ERR, "%s", buf);
+		if (gss_ok) {
+			login((char *) NULL);
+			return;
+		}
 	} else
 #endif /* GSSAPI */
 #ifdef KRB5_KRB4_COMPAT
@@ -671,6 +721,10 @@ user(name)
 			name, kerb_ok ? "" : "; Password required.");
 		reply(kerb_ok ? 232 : 331, "%s", buf);
 		syslog(kerb_ok ? LOG_INFO : LOG_ERR, "%s", buf);
+		if (kerb_ok) {
+			login((char *) NULL);
+			return;
+		}		
 	} else
 #endif /* KRB5_KRB4_COMPAT */
 	/* Other auth types go here ... */
@@ -685,7 +739,9 @@ user(name)
 		return;
 	} else
 		reply(331, "Password required for %s.", name);
+
 	askpasswd = 1;
+
 	/*
 	 * Delay before reading passwd after first failed
 	 * attempt to slow down passwd-guessing programs.
@@ -695,7 +751,9 @@ user(name)
 }
 
 /*
- * Check if a user is in the file _PATH_FTPUSERS
+ * Check if a user is in the file _PATH_FTPUSERS.
+ * Return 1 if they are (a disallowed user), -1 if their username
+ * is followed by "restrict." (a restricted user).  Otherwise return 0.
  */
 checkuser(name)
 	char *name;
@@ -705,17 +763,45 @@ checkuser(name)
 	char line[FTP_BUFSIZ];
 
 	if ((fd = fopen(_PATH_FTPUSERS, "r")) != NULL) {
-		while (fgets(line, sizeof(line), fd) != NULL)
-			if ((p = strchr(line, '\n')) != NULL) {
-				*p = '\0';
-				if (line[0] == '#')
-					continue;
-				if (strcmp(line, name) == 0)
-					return (1);
+	     while (fgets(line, sizeof(line), fd) != NULL) {
+	          if ((p = strchr(line, '\n')) != NULL) {
+			*p = '\0';
+			if (line[0] == '#')
+			     continue;
+			if (strcmp(line, name) == 0)
+			     return (1);
+			if (strncmp(line, name, strlen(name)) == 0) {
+			     int i = strlen(name) + 1;
+			     
+			     /* Make sure foo doesn't match foobar */
+			     if (line[i] == '\0' || !isspace(line[i]))
+			          continue;
+			     /* Ignore whitespace */
+			     while (isspace(line[++i]));
+
+			     if (strcmp(&line[i], "restrict") == 0)
+			          return (-1);
+			     else
+			          return (1);
 			}
-		(void) fclose(fd);
+		  }
+	     }
 	}
+	(void) fclose(fd);
+
 	return (0);
+}
+
+disallowed_user(name)
+        char *name;
+{
+        return(checkuser(name) == 1);
+}
+
+restricted_user(name)
+        char *name;
+{
+        return(checkuser(name) == -1);
 }
 
 /*
@@ -790,19 +876,18 @@ pass(passwd)
 {
 	char *xpasswd, *salt;
 
-	if (logged_in || askpasswd == 0) {
-		reply(503, "Login with USER first.");
+	if (auth_ok()) {
+		reply(202, "PASS command superfluous.");
 		return;
 	}
-	askpasswd = 0;
-	if (
-#ifdef KRB5_KRB4_COMPAT
-	    !kerb_ok &&
-#endif /* KRB5_KRB4_COMPAT */
-#ifdef GSSAPI
-	    !gss_ok &&
-#endif /* GSSAPI */
-	    !guest) {		/* "ftp" is only account allowed no password */
+
+	if (logged_in || askpasswd == 0) {
+	  	reply(503, "Login with USER first.");
+		return;
+	} 
+
+	if (!auth_ok() && !guest) {
+	    	/* "ftp" is only account allowed no password */
 		if (pw == NULL)
 			salt = "xx";
 		else
@@ -818,12 +903,13 @@ pass(passwd)
 		if (pw == NULL ||
 		    (*pw->pw_passwd && strcmp(xpasswd, pw->pw_passwd) &&
 			!kpass(pw->pw_name, passwd)) ||
-		    (!*pw->pw_passwd && !kpass(pw->pw_name, passwd))) {
+		    (!*pw->pw_passwd && !kpass(pw->pw_name, passwd)))
 #else
 		/* The strcmp does not catch null passwords! */
 		if (pw == NULL || *pw->pw_passwd == '\0' ||
-		    strcmp(xpasswd, pw->pw_passwd)) {
+		    strcmp(xpasswd, pw->pw_passwd))
 #endif /* KRB5_KRB4_COMPAT */
+		                                                      {
 			reply(530, "Login incorrect.");
 			pw = NULL;
 			if (login_attempts++ >= 5) {
@@ -833,38 +919,54 @@ pass(passwd)
 				exit(0);
 			}
 			return;
-		}
+	        }
 	}
 	login_attempts = 0;		/* this time successful */
+
+	login(passwd);
+	return;
+}
+
+login(passwd)
+	char *passwd;
+{
 	(void) krb5_setegid((gid_t)pw->pw_gid);
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
-	(void)sprintf(ttyline, "ftp%d", getpid());
+	(void) sprintf(ttyline, "ftp%d", getpid());
 	ftp_logwtmp(ttyline, pw->pw_name, remotehost);
 	logged_in = 1;
 
+	if (guest || restricted) {
+		if (chroot(pw->pw_dir) < 0) {
+			reply(550, "Can't set privileges.");
+			goto bad;
+		}
+	}
+	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
+	        reply(550, "Can't set uid.");
+		goto bad;
+	}
 	if (guest) {
 		/*
 		 * We MUST do a chdir() after the chroot. Otherwise
 		 * the old current directory will be accessible as "."
 		 * outside the new root!
 		 */
-		if (chroot(pw->pw_dir) < 0 || chdir("/") < 0) {
+		if (chdir("/") < 0) {
 			reply(550, "Can't set guest privileges.");
 			goto bad;
 		}
-	} else if (chdir(pw->pw_dir) < 0) {
-		if (chdir("/") < 0) {
-			reply(530, "User %s: can't change directory to %s.",
-			    pw->pw_name, pw->pw_dir);
-			goto bad;
-		} else
-			lreply(230, "No directory! Logging in with home=/");
-	}
-	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
-		reply(550, "Can't set uid.");
-		goto bad;
+	} else {
+	        if (chdir(restricted ? "/" : pw->pw_dir) < 0) {
+		        if (chdir("/") < 0) {
+			        reply(530, "User %s: can't change directory to %s.",
+				      pw->pw_name, pw->pw_dir);
+				goto bad;
+			} else
+			        lreply(230, "No directory! Logging in with home=/");
+		}
 	}
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
@@ -878,7 +980,10 @@ pass(passwd)
 			syslog(LOG_INFO, "ANONYMOUS FTP LOGIN FROM %s, %s",
 			    remotehost, passwd);
 	} else {
-		reply(230, "User %s logged in.", pw->pw_name);
+		if (askpasswd) {
+			askpasswd = 0;
+			reply(230, "User %s logged in.", pw->pw_name);
+		}
 #ifdef SETPROCTITLE
 		sprintf(proctitle, "%s: %s", remotehost, pw->pw_name);
 		setproctitle(proctitle);
@@ -902,6 +1007,8 @@ retrieve(cmd, name)
 	struct stat st;
 	int (*closefunc)();
 
+	if (logging > 1 && !cmd)
+	        syslog(LOG_NOTICE, "get %s", path_expand(name));
 	if (cmd == 0) {
 		fin = fopen(name, "r"), closefunc = fclose;
 		st.st_size = 0;
@@ -957,6 +1064,8 @@ retrieve(cmd, name)
 	pdata = -1;
 done:
 	(*closefunc)(fin);
+	if (logging > 2 && !cmd)
+	        syslog(LOG_NOTICE, "get: %i bytes transferred", byte_count);
 }
 
 store_file(name, mode, unique)
@@ -967,6 +1076,8 @@ store_file(name, mode, unique)
 	struct stat st;
 	int (*closefunc)();
 	char *gunique();
+
+	if (logging > 1) syslog(LOG_NOTICE, "put %s", path_expand(name));
 
 	if (unique && stat(name, &st) == 0 &&
 	    (name = gunique(name)) == NULL)
@@ -1023,6 +1134,8 @@ store_file(name, mode, unique)
 	pdata = -1;
 done:
 	(*closefunc)(fout);
+	if (logging > 2)
+	        syslog(LOG_NOTICE, "put: %i bytes transferred", byte_count);
 }
 
 FILE *
@@ -1396,7 +1509,7 @@ statcmd()
 		reply(0, "     Waiting for authentication data");
 	else
 		reply(0, "     Waiting for user name");
-	reply(0, "     PROTection level: %s", levelnames[level]);
+	reply(0, "     Protection level: %s", levelnames[dlevel]);
 	sprintf(str, "     TYPE: %s", typenames[type]);
 	if (type == TYPE_A || type == TYPE_E)
 		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
@@ -1470,16 +1583,12 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 	if (auth_type) {
 		char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
 		int length, kerror;
-		/*
-		 * File protection level also determines whether
-		 * replies are 631 or 632.  Should be independent ...
-		 */
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
 		strcat(in, buf);
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-			if ((length = level == PROT_P ?
+			if ((length = clevel == PROT_P ?
 			     krb_mk_priv((unsigned char *)in,
 					 (unsigned char *)out,
 					 strlen(in), schedule, &kdata.session,
@@ -1490,7 +1599,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					   &ctrl_addr, &his_addr)) == -1) {
 				syslog(LOG_ERR,
 				       "krb_mk_%s failed for KERBEROS_V4",
-				       level == PROT_P ? "priv" : "safe");
+				       clevel == PROT_P ? "priv" : "safe");
 				fputs(in,stdout);
 			}
 		} else
@@ -1505,17 +1614,17 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 			in_buf.value = in;
 			in_buf.length = strlen(in) + 1;
 			maj_stat = gss_seal(&min_stat, gcontext,
-					    level == PROT_P, /* confidential */
+					    clevel == PROT_P, /* private */
 					    GSS_C_QOP_DEFAULT,
 					    &in_buf, &conf_state,
 					    &out_buf);
 			if (maj_stat != GSS_S_COMPLETE) {
 				/* generally need to deal */
 				secure_gss_error(maj_stat, min_stat,
-					       (level==PROT_P)?
+					       (clevel==PROT_P)?
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
-			} else if ((level == PROT_P) && !conf_state) {
+			} else if ((clevel == PROT_P) && !conf_state) {
 				secure_error("GSSAPI didn't encrypt message");
 			} else {
 				memcpy(out, out_buf.value, 
@@ -1530,7 +1639,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					radix_error(kerror));
 			fputs(in,stdout);
 		} else
-		printf("%s%c%s", level == PROT_P ? "632" : "631",
+		printf("%s%c%s", clevel == PROT_P ? "632" : "631",
 				 n ? cont_char : '-', in);
 	} else {
 		if (n) printf("%d%c", n, cont_char);
@@ -1596,6 +1705,8 @@ delete_file(name)
 {
 	struct stat st;
 
+	if (logging > 1) syslog(LOG_NOTICE, "del %s", path_expand(name));
+
 	if (stat(name, &st) < 0) {
 		perror_reply(550, name);
 		return;
@@ -1627,6 +1738,8 @@ cwd(path)
 makedir(name)
 	char *name;
 {
+        if (logging > 1) syslog(LOG_NOTICE, "mkdir %s", path_expand(name));
+
 	if (mkdir(name, 0777) < 0)
 		perror_reply(550, name);
 	else
@@ -1636,6 +1749,8 @@ makedir(name)
 removedir(name)
 	char *name;
 {
+        if (logging > 1) syslog(LOG_NOTICE, "rmdir %s", path_expand(name));
+
 	if (rmdir(name) < 0)
 		perror_reply(550, name);
 	else
@@ -1644,16 +1759,14 @@ removedir(name)
 
 pwd()
 {
-	char path[MAXPATHLEN + 1];
-
-	if (getcwd(path, sizeof path) == (char *)NULL)
+	if (getcwd(pathbuf, sizeof pathbuf) == (char *)NULL)
 #ifdef POSIX
-		perror_reply(550, path);
+		perror_reply(550, pathbuf);
 #else
-		reply(550, "%s.", path);
+		reply(550, "%s.", pathbuf);
 #endif
 	else
-		reply(257, "\"%s\" is current directory.", path);
+		reply(257, "\"%s\" is current directory.", pathbuf);
 }
 
 char *
@@ -1673,6 +1786,9 @@ renamefrom(name)
 renamecmd(from, to)
 	char *from, *to;
 {
+        if(logging > 1)
+                syslog(LOG_NOTICE, "rename %s %s", path_expand(from), to);
+
 	if (rename(from, to) < 0)
 		perror_reply(550, "rename");
 	else
@@ -1978,8 +2094,8 @@ char *data;
 			return 0;
 		}
 		if (!(hp = gethostbyname(localname))) {
-			reply(501, "couldn't canonicalize local hostname (%d)\n", h_errno);
-			syslog(LOG_ERR, "Couldn't canonicalize local hostname (%d)", h_errno);
+			reply(501, "couldn't canonicalize local hostname\n");
+			syslog(LOG_ERR, "Couldn't canonicalize local hostname");
 			return 0;
 		}
 		strcpy(localname, hp->h_name);
@@ -2040,8 +2156,14 @@ char *data;
 				return 0;
 			}
 		} else {
-			reply_gss_error(501, stat_maj, stat_min,
-					"acquiring credentials");
+			/* Kludge to make sure the right error gets reported, so we don't *
+			 * get those nasty "error: no error" messages.			  */
+			if(stat_maj != GSS_S_COMPLETE)
+			        reply_gss_error(501, stat_maj, stat_min,
+						"acquiring credentials");
+			else
+			        reply_gss_error(501, acquire_maj, acquire_min,
+						"acquiring credentials");
 			syslog(LOG_ERR, "gssapi error acquiring credentials");
 			return 0;
 		}
@@ -2153,7 +2275,7 @@ char *fmt;
         va_list ap;
 
         va_start(ap, fmt);
-        if (level == PROT_C) rval = vfprintf(stream, fmt, ap);
+        if (dlevel == PROT_C) rval = vfprintf(stream, fmt, ap);
         else {
                 vsprintf(s, fmt, ap);
                 rval = secure_write(fileno(stream), s, strlen(s));
@@ -2162,7 +2284,7 @@ char *fmt;
 
         return(rval);
 #else
-        if (level == PROT_C)
+        if (dlevel == PROT_C)
                 return(fprintf(stream, fmt, p1, p2, p3, p4, p5));
         sprintf(s, fmt, p1, p2, p3, p4, p5);
         return(secure_write(fileno(stream), s, strlen(s)));
@@ -2303,6 +2425,18 @@ data_err:
 	pdata = -1;
 }
 
+int auth_ok(void)
+{
+	return(0
+#ifdef KRB5_KRB4_COMPAT
+	       || kerb_ok
+#endif /* KRB5_KRB4_COMPAT */
+#ifdef GSSAPI
+	       || gss_ok
+#endif /* GSSAPI */
+	       );
+}
+
 #ifdef SETPROCTITLE
 /*
  * clobber argv so ps will show what we're doing.
@@ -2415,3 +2549,4 @@ ftpd_userok(client_name, name)
 	return retval;
 }
 #endif /* GSSAPI */
+

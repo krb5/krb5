@@ -1,3 +1,9 @@
+Wed Aug 12 00:17:09 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* Makefile.in (AUTH_DEF): Undefine LOGIN_CAP_F so that telnetd
+	runs login with -f rather than -F for preauthenticated login, 
+	following the changes in appl/bsd/.
+
 1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sys_term.c: #include utmp.h if present, and use _PATH_WTMP and

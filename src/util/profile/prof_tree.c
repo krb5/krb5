@@ -145,9 +145,14 @@ errcode_t profile_add_node(section, name, value, ret_node)
 	if (section->value)
 		return PROF_ADD_NOT_SECTION;
 
+	/*
+	 * Find the place to insert the new node.  We look for the
+	 * place *after* the last match of the node name, since 
+	 * order matters.
+	 */
 	for (p=section->first_child, last = 0; p; last = p, p = p->next) {
 		cmp = strcmp(p->name, name);
-		if (cmp >= 0)
+		if (cmp > 0)
 			break;
 	}
 	retval = profile_create_node(name, value, &new);
@@ -155,19 +160,14 @@ errcode_t profile_add_node(section, name, value, ret_node)
 		return retval;
 	new->group_level = section->group_level+1;
 	new->parent = section;
-	if (cmp == 0) {
-		do {
-			last = p;
-			p = p->next;
-		} while (p && strcmp(p->name, name) == 0);
-	}
 	new->prev = last;
+	new->next = p;
+	if (p)
+		p->prev = new;
 	if (last)
 		last->next = new;
 	else
 		section->first_child = new;
-	if (p)
-		new->next = p;
 	if (ret_node)
 		*ret_node = new;
 	return 0;
@@ -317,7 +317,7 @@ errcode_t profile_delete_node_relation(section, name)
 			section->first_child = p->next;
 		next = p->next;
 		if (p->next)
-			p->next->prev = p;
+			p->next->prev = p->prev;
 		profile_free_node(p);
 		p = next;
 	}
