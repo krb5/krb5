@@ -29,4 +29,3 @@ LOCAL_LIBRARIES = $(KLIB)
 Krb5ServerProgramTarget(sserver)
 
 DependTarget()
-LintTarget()
