@@ -54,10 +54,12 @@ krb5_encrypt_block *eblock;
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(eblock, mkey)) {
+	krb5_db_free_principal(&master_entry, nprinc);
 	return(retval);
     }
     if (retval = krb5_kdb_decrypt_key(eblock, &master_entry.key, &tempkey)) {
 	(void) krb5_finish_key(eblock);
+	krb5_db_free_principal(&master_entry, nprinc);
 	return retval;
     }
     if (memcmp((char *)mkey->contents, (char *)tempkey.contents,
@@ -66,6 +68,8 @@ krb5_encrypt_block *eblock;
 	(void) krb5_finish_key(eblock);
     } else
 	retval = krb5_finish_key(eblock);
+
+    krb5_db_free_principal(&master_entry, nprinc);
     
     return retval;
 }
