@@ -1,3 +1,9 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* acconfig.h (KRB5_NO_PROTOTYPES, KRB5_PROVIDE_PROTOTYPES,
+	KRB5_NO_NESTED_PROTOTYPES): Deleted.
+	* aclocal.m4 (HAS_ANSI_VOLATILE, KRB5_CHECK_PROTOS): Deleted.
+
 2001-04-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* acconfig.h (HAVE_SOCKLEN_T): Add.

@@ -105,22 +105,15 @@ int print_krb5_types = 0;
 
 int current_appl_type = -1;
 
-#if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
-#define PROTOTYPE(x) x
-#else
-#define PROTOTYPE(x) ()
-#endif
-
-
-int decode_len PROTOTYPE((FILE *, unsigned char *, int));
-int do_prim PROTOTYPE((FILE *, int, unsigned char *, int, int));
-int do_cons PROTOTYPE((FILE *, unsigned char *, int, int, int *));
-int do_prim_bitstring PROTOTYPE((FILE *, int, unsigned char *, int, int));
-int do_prim_int PROTOTYPE((FILE *, int, unsigned char *, int, int));
-int do_prim_string PROTOTYPE((FILE *, int, unsigned char *, int, int));
-void print_tag_type PROTOTYPE((FILE *, int, int));
-int trval PROTOTYPE((FILE *, FILE *));
-int trval2 PROTOTYPE((FILE *, unsigned char *, int, int, int *));
+int decode_len (FILE *, unsigned char *, int);
+int do_prim (FILE *, int, unsigned char *, int, int);
+int do_cons (FILE *, unsigned char *, int, int, int *);
+int do_prim_bitstring (FILE *, int, unsigned char *, int, int);
+int do_prim_int (FILE *, int, unsigned char *, int, int);
+int do_prim_string (FILE *, int, unsigned char *, int, int);
+void print_tag_type (FILE *, int, int);
+int trval (FILE *, FILE *);
+int trval2 (FILE *, unsigned char *, int, int, int *);
 
 
 /****************************************************************************/

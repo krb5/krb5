@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't use KRB5_CHECK_PROTOS.
+
 2001-04-02  Tom Yu  <tlyu@mit.edu>
 
 	* login.M: Don't include "= 0" as part of the "accept_passwd"

@@ -1,3 +1,8 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftp_var.h (PROTOTYPE): Always define to use supplied prototype.
+	* secure.h (PROTOTYPE): Likewise.
+
 2001-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (strerror): Only define if not HAVE_STRERROR.

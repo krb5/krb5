@@ -7,9 +7,6 @@
    handle it on some systems.  */
 
 #undef ANSI_STDIO
-#undef KRB5_NO_PROTOTYPES
-#undef KRB5_PROVIDE_PROTOTYPES
-#undef KRB5_NO_NESTED_PROTOTYPES
 
 #undef NO_YYLINENO
 #undef POSIX_FILE_LOCKS

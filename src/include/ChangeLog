@@ -1,3 +1,15 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-mac.h (HAS_ANSI_VOLATILE, KRB5_PROVIDE_PROTOTYPES): Don't
+	define.
+
+	* configure.in: Don't use KRB5_CHECK_PROTOS.  Don't check for use
+	of prototypes inside structures.
+
+	* syslog.h (syslog, vsyslog, openlog, closelog, setlogmask):
+	Always use prototype versions of declarations; delete
+	non-prototype declarations.
+
 2001-04-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (socklen_t) [NEED_SOCKETS] [!HAVE_SOCKLEN_T]: Define as

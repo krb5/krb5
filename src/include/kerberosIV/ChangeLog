@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb.h: Make struct sockaddr_in declaration unconditional.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.h (des_pcbc_encrypt, des_quad_cksum, des_cbc_cksum,

@@ -1,3 +1,9 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* syslog.h (syslog, vsyslog, openlog, closelog, setlogmask):
+	Always use prototype versions of declarations; delete
+	non-prototype declarations.
+
 Wed Jun 12 00:44:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* syslog.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS

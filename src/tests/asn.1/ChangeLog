@@ -1,3 +1,9 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* trval.c (decode_len, do_prim, do_cons, do_prim_bitstring,
+	do_prim_int, do_prim_string, print_tag_type, trval, trval2):
+	Always use prototype declarations.
+
 Sun Feb 18 15:33:50 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* trval.c: Add prototypes for trval() and trval2().

@@ -141,11 +141,7 @@ extern	char *mktemp();
 extern int command(char *, ...);
 #endif
 
-#if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
 #define PROTOTYPE(x) x
-#else
-#define PROTOTYPE(x) ()
-#endif /* STDC or PROTOTYPES */
 
 char *remglob PROTOTYPE((char **, int));
 int another PROTOTYPE((int *, char ***, char *));

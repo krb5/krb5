@@ -152,9 +152,7 @@ typedef unsigned char	u_char;
 #define INI_RECENT_LOGINS "Recent Logins"    
 #define INI_LOGIN       "Login"
 
-#define HAS_ANSI_VOLATILE
 #define HAS_VOID_TYPE
-#define KRB5_PROVIDE_PROTOTYPES
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
 #define HAVE_STDLIB_H

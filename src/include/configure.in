@@ -38,19 +38,6 @@ if test $krb5_cv_has_ansi_stdio = yes; then
 AC_DEFINE(ANSI_STDIO)
 fi
 dnl
-KRB5_CHECK_PROTOS
-dnl
-AC_MSG_CHECKING([prototypes in structs])
-AC_CACHE_VAL(krb5_cv_struct_prototypes,
-[AC_TRY_COMPILE(
-[typedef int i_t; typedef struct foo { int (*foofn)(i_t, i_t); } *footype;],
-[],
-krb5_cv_struct_prototypes=yes, krb5_cv_struct_prototypes=no)])
-AC_MSG_RESULT($krb5_cv_struct_prototypes)
-if test $krb5_cv_struct_prototypes = no; then
-AC_DEFINE(KRB5_NO_NESTED_PROTOTYPES)
-fi
-dnl
 dnl Word sizes...
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)

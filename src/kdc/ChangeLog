@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't use HAS_ANSI_VOLATILE.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* do_as_req.c, do_tgs_req.c, kdc_preauth.c, kdc_util.h,

@@ -90,7 +90,6 @@
 #define LOG_NOWAIT	0x10	/* if forking to log on console, don't wait() */
 
 #ifndef KERNEL
-#if (defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)) && !defined(KRB5_NO_PROTOTYPES)
 extern void syslog  (int , const char *, ... );
 #ifdef va_start				
 /* XXX depending on #define of va_start in <stdarg.h> */
@@ -99,12 +98,5 @@ extern void vsyslog  (int , const char *, va_list );
 extern void openlog  (const char *, int , int );
 extern void closelog  (void );
 extern int setlogmask  (int );
-#else /* STDC */
-extern void syslog  ();
-extern void vsyslog  ();
-extern void openlog  ();
-extern void closelog  ();
-extern int setlogmask  ();
-#endif /* STDC */
 
 #endif

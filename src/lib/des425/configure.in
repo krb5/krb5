@@ -5,7 +5,6 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 dnl
-HAS_ANSI_VOLATILE
 AC_MSG_CHECKING([if pragma weak supported])
 AC_CACHE_VAL(krb5_cv_pragma_weak,
 [AC_TRY_LINK(

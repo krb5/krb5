@@ -600,38 +600,6 @@ AC_ARG_WITH([netlib],
 [AC_LIBRARY_NET]
 )])dnl
 dnl
-dnl HAS_ANSI_VOLATILE
-dnl
-define(HAS_ANSI_VOLATILE,[
-AC_MSG_CHECKING([volatile])
-AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
-[AC_TRY_COMPILE(
-[volatile int x();], [],
-krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
-AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
-if test $krb5_cv_has_ansi_volatile = no; then
-ADD_DEF(-Dvolatile=)
-fi
-])dnl
-dnl
-dnl
-dnl Check for prototype support - used by application not including k5-int.h
-dnl
-define(KRB5_CHECK_PROTOS,[
-AC_MSG_CHECKING([prototype support])
-AC_CACHE_VAL(krb5_cv_has_prototypes,
-[AC_TRY_COMPILE(
-[int x(double y, int z);], [],
-krb5_cv_has_prototypes=yes, krb5_cv_has_prototypes=no)])
-AC_MSG_RESULT($krb5_cv_has_prototypes)
-if test $krb5_cv_has_prototypes = no; then
-AC_DEFINE(KRB5_NO_PROTOTYPES)
-else
-AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
-fi
-dnl *never* set NARROW_PROTOTYPES
-])dnl
-dnl
 dnl Check if stdarg or varargs is available *and compiles*; prefer stdarg.
 dnl (This was sent to djm for incorporation into autoconf 3/12/1996.  KR)
 dnl

@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* autoconf.h (KRB5_PROVIDE_PROTOTYPES): Don't define.
+
 Wed Oct  21 17:40:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Metrowerks: Added CodeWarrior Pro4 projects and docs
