@@ -1,3 +1,12 @@
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* util_ordering.c (g_order_free): 
+	* rel_oid_set.c (generic_gss_release_oid_set): 
+	* disp_major_status.c: General lint cleanup.
+
+	* util_oid.c (g_copy_OID_set): Copy the OID set with entirely
+		dynamic memory (don't alias the contents of the OID set).
+
 Wed Apr  1 16:33:27 1998  Tom Yu  <tlyu@mit.edu>
 
 	* disp_major_status.c (g_display_major_status): Fix a typo in

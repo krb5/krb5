@@ -40,7 +40,6 @@ generic_gss_release_oid_set (minor_status,
      gss_OID_set *		set;
 {
     size_t i;
-    gss_OID oid;
     if (minor_status)
 	*minor_status = 0;
 

@@ -168,7 +168,6 @@ void
 g_order_free(void **vqueue)
 {
    queue *q;
-   int i;
    
    q = (queue *) (*vqueue);
 
