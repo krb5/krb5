@@ -676,7 +676,7 @@ is added, ignoring multiple keys with the same encryption type but
 different salt types.  If the
 .B \-k
 argument is not specified, the default keytab
-.I /etc/v5srvtab
+.I /etc/krb5.keytab
 is used.  If the
 .B \-q
 option is specified, less verbose status information is displayed.
@@ -716,7 +716,7 @@ parsed as an integer, and all entries whose kvno match that integer are
 removed.  If the
 .B \-k
 argument is not specifeid, the default keytab
-.I /etc/v5srvtab
+.I /etc/krb5.keytab
 is used.  If the
 .B \-q
 option is specified, less verbose status information is displayed.
