@@ -25,7 +25,7 @@ static char rcsid_decode_kdc_c[] =
 /*
  Takes a KDC_REP message and decrypts encrypted part using etype and
  *key, putting result in *rep.
- dec_rep->client,ticket,session.last_req,server,caddrs
+ dec_rep->client,ticket,session,last_req,server,caddrs
  are all set to allocated storage which should be freed by the caller
  when finished with the response.
 
@@ -50,25 +50,17 @@ OLDDECLARG(krb5_kdc_rep **, dec_rep)
 
 
     /* XXX maybe caller should specify type expected? */
-    if (!krb5_is_kdc_rep(enc_rep))
-	return KRB5KRB_AP_ERR_MSG_TYPE;
-    retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
-    switch (retval) {
-    case ISODE_50_LOCAL_ERR_BADMSGTYPE:
+    if (krb5_is_as_rep(enc_rep))
+	retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
+    else if (krb5_is_tgs_rep(enc_rep))
 	retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
-	switch (retval) {
-	case 0:
-	    break;
-	default:
-	    return(retval);
-	}
-    case 0:
-	break;
-    default:
-	return (retval);
-    }
+    else
+	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    if (local_dec_rep->etype != etype) {
+    if (retval)
+	return retval;
+
+    if (local_dec_rep->enc_part.etype != etype) {
 	krb5_free_kdc_rep(local_dec_rep);
 	return KRB5_WRONG_ETYPE;
     }
