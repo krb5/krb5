@@ -109,7 +109,7 @@ ar cq $library $FILES || exit $?
 	then
 	if test "$HAVE_GCC" = "yes" ; then
 		$CC -o shr.o.$VERSION $library -nostartfiles -Xlinker -bgcbypass:1 -Xlinker -bfilelist -Xlinker -bM:SRE -Xlinker -bE:${library}.syms $ldflags $liblist $libdirfl
-		else ld -o shr.o.$VERSION $library -H512 -T512 -bM:SRE -lc $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist
+		else ld -o shr.o.$VERSION $library -H512 -T512 -bM:SRE  $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist -lc
             fi
  stat=$?
 	if [ $stat -eq 0 ]

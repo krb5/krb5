@@ -1,3 +1,8 @@
+Sun Jul 28 00:43:16 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* makeshlib.sh (aix Allow symbols for the shared library to
+        overide symbols from libc.
+
 Wed Jul 10 00:52:28 1996  Marc Horowitz  <marc@mit.edu>
 
 	* Makefile.in (all-unix): "install" the db2 headers and libs with
