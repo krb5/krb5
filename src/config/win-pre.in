@@ -38,6 +38,11 @@ CPU=i386
 # End of figuring out CPU
 #
 
+!if "$(OS)" == "Windows_NT"
+NULL=
+!else 
+NULL=nul
+!endif
 
 # NOTE: ^ is an escape char for NMAKE.
 !ifdef NODEBUG
@@ -111,13 +116,24 @@ LOPTS=-debug
 LINKOPTS=-incremental:no $(LOPTS) -nologo -dll -entry:DllMain
 LINKOPTS2=-incremental:no $(LOPTS) -nologo
 
-!if defined(KRB5_USE_DNS) 
-DNSFLAGS= -DKRB5_DNS_LOOKUP -DWSHELPER
+
+!if defined(KRB5_USE_DNS)
+!if !defined(DNS_INC)
+!message Must define DNS_INC to point to version server include dir!
+!error
+!endif
+!if !defined(DNS_LIB)
+!message Must define DNS_LIB to point to version server library!
+!error
+!endif
+DNSLIBS=$(DNS_LIB)
+DNSFLAGS=-I$(DNS_INC) -DKRB5_DNS_LOOKUP -DWSHELPER
 !else
+DNSLIBS=
 DNSFLAGS=
 !endif
 
-CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 -I$(SRCTOP)\mit\windows\include $(DNSFLAGS)
+CPPFLAGS = -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS)
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
 

@@ -1,3 +1,9 @@
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix DNS flags it does not try to depend on mit dir.
+	Define NULL so we can do directory existence checks via the shell
+	under both NT and 9x.
+
 1999-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* config.guess: Recognize Rhapsody OS.
