@@ -152,6 +152,7 @@ WITH_KRB4 dnl
 AC_CONST dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
+AC_ARG_PROGRAM dnl
 AC_PUSH_MAKEFILE()dnl
 [
 SHELL=/bin/sh
@@ -749,14 +750,41 @@ define(USE_KRB5UTIL_LIBRARY,[
 kutil_deplib="\[$](TOPLIBD)/libkrb5util.a"
 kutil_lib=-lkrb5util])
 dnl
-dnl This rule tells KRB5_LIBRARIES to include the kdb5 library.
+dnl This rule tells KRB5_LIBRARIES to include the aname dbm library.
+dnl
+kaname_deplib=''
+kaname_libs=''
+define(USE_ANAME,[
+WITH_ANAME_DB
+kaname_libs="$dblibs"
+if test "$dbval" = "db"; then
+  if test -n "$krb5_cv_shlib_version_libdb"; then
+    kaname_deplib="\$(TOPLIBD)/libdb.$krb5_cv_shlibs_ext.$krb5_cv_shlib_version_libdb"
+  else
+    kaname_deplib="\$(TOPLIBD)/libdb.$krb5_cv_noshlibs_ext"
+  fi
+fi
+])dnl
+dnl
+dnl This rule tells KRB5_LIBRARIES to include the kdb5 and dbm libraries.
 dnl
 kdb5_deplib=''
 kdb5_lib=''
+kdbm_deplib=''
+kdbm_libs=''
 define(USE_KDB5_LIBRARY,[
-WITH_KDB_DB
 kdb5_deplib="\[$](TOPLIBD)/libkdb5.a"
-kdb5_lib=-lkdb5])
+kdb5_lib=-lkdb5
+WITH_KDB_DB
+kdbm_libs="$dblibs"
+if test "$dbval" = "db"; then
+  if test -n "$krb5_cv_shlib_version_libdb"; then
+    kdbm_deplib="\$(TOPLIBD)/libdb.$krb5_cv_shlibs_ext.$krb5_cv_shlib_version_libdb"
+  else
+    kdbm_deplib="\$(TOPLIBD)/libdb.$krb5_cv_noshlibs_ext"
+  fi
+fi
+])
 dnl
 dnl This rule tells KRB5_LIBRARIES to include the kdb4 library.
 dnl
@@ -786,8 +814,8 @@ dnl
 dnl This rule generates library lists for programs.
 dnl
 define(KRB5_LIBRARIES,[
-DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
-LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kdb4_lib $kutil_lib $krb4_lib -lkrb5 -lcrypto $ss_lib -lcom_err $LIBS"
+DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib $kdbm_deplib $kaname_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
+LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kdb4_lib $kutil_lib $krb4_lib -lkrb5 $kdbm_libs $kaname_libs -lcrypto $ss_lib -lcom_err $LIBS"
 LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
 AC_SUBST(LDFLAGS)
 AC_SUBST(LDARGS)
@@ -994,8 +1022,6 @@ dnl --with-kdb-db=[dbm type]
 dnl --with-kdb-dbopts=[compile flags]
 dnl
 dnl
-define(USE_ANAME,[WITH_ANAME_DB])dnl
-dnl
 define(WITH_ANAME_DB,[
 AC_ARG_WITH([aname-db],
 [  --with-aname-db=DBM     name conversion database type],
@@ -1031,26 +1057,35 @@ dnl
 dnl
 define(CHECK_DB,[
 if test "$dbval" = "" -o "$dbval" = ndbm; then
+	OLIBS="$LIBS"
 	AC_HEADER_CHECK(ndbm.h,[dbval=ndbm
+	  AC_CHECK_FUNC(dbm_nextkey,,
+	    AC_CHECK_LIB(ndbm,dbm_nextkey,[dblibs=-lndbm],
+	      AC_CHECK_LIB(dbm,dbm_nextkey,[dblibs=-ldbm],
+		AC_CHECK_LIB(gdbm,dbm_nextkey,[dblibs=-lgdbm]))))
 	  AC_DEFINE(NDBM)
-	  AC_CHECK_LIB(ndbm,main,,AC_CHECK_LIB(gdbm,main))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
 		AC_DEFINE(MISSING_ERROR_PROTO))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
 		AC_DEFINE(MISSING_CLEARERR_PROTO))])
+	LIBS="$OLIBS"
 fi
 if test "$dbval" = "" -o "$dbval" = dbm; then
+	OLIBS="$LIBS"
 	AC_HEADER_CHECK(dbm.h,[dbval=dbm
+	  AC_CHECK_FUNC(nextkey,,
+	    AC_CHECK_LIB(dbm,dbm_nextkey,[dblibs=-ldbm]))
 	  AC_DEFINE(ODBM)
-	  AC_CHECK_LIB(dbm,main)
 	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
 		AC_DEFINE(MISSING_ERROR_PROTO))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
 		AC_DEFINE(MISSING_CLEARERR_PROTO))])
+	LIBS="$OLIBS"
 fi
 if test "$dbval" = "" -o "$dbval" = db; then
-	  dbval=db
-	  AC_DEFINE(BERK_DB_DBM)
+	dbval=db
+	dblibs=-ldb
+	AC_DEFINE(BERK_DB_DBM)
 fi
 ])dnl
 dnl
