@@ -296,7 +296,11 @@ osa_adb_ret_t
 osa_adb_close_T(osa_adb_T_t db);
 \end{verbatim}
 %
-Close an open database.
+Release all shared or exclusive locks (on BOTH databases, since they
+use the same lock file) and close the database.
+
+It is an error to exit while a permanent lock is held;
+OSA_ADB_NOLOCKFILE is returned in this case.
 
 \begin{verbatim}
 osa_adb_ret_t osa_adb_get_lock(osa_adb_T_t db, int mode)
