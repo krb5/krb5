@@ -6,6 +6,7 @@ Thu Jul 25 12:04:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 	* misc_free.c (kadm5_free_name_list, krb5_free_key_data_contents: 
 		Add KADM5_OK return value upon success.
 
+
 Wed Jul 24 18:18:39 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in, configure.in: fix shared lib lossage by
