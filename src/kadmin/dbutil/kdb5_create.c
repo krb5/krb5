@@ -57,6 +57,7 @@
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/adb.h>
+#include "kdb5_util.h"
 
 enum ap_op {
     NULL_KEY,				/* setup null keys */

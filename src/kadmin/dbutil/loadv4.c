@@ -56,6 +56,9 @@
 
 #ifdef KRB5_KRB4_COMPAT
 
+#include "k5-int.h"
+#include "com_err.h"
+
 #include <des.h>
 #include <krb.h>
 #include <krb_db.h>
@@ -67,8 +70,6 @@ static Key_schedule master_key_schedule;
 
 static char *v4_mkeyfile = "/.k";
 
-#include "k5-int.h"
-#include "com_err.h"
 #include <kadm5/admin.h>
 #include <stdio.h>
 /* Define to make certain blocks private */
@@ -463,7 +464,7 @@ char *dumpfile;
 	}
     }
     if (!ok) {
-	des_read_password(master_key, "V4 Kerberos master key: ", 0);
+	des_read_password(&master_key, "V4 Kerberos master key: ", 0);
 	printf("\n");
     }
     key_sched(master_key, master_key_schedule);

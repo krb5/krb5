@@ -57,6 +57,7 @@
 #include "com_err.h"
 #include <kadm5/admin.h>
 #include <stdio.h>
+#include "kdb5_util.h"
 
 extern int errno;
 

@@ -81,3 +81,6 @@ extern void kdb5_stash PROTOTYPE((int argc, char **argv));
 extern void update_ok_file PROTOTYPE((char *file_name));
 
 extern int kadm5_create PROTOTYPE((kadm5_config_params *params));
+
+void usage PROTOTYPE((void));
+

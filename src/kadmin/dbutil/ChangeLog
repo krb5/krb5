@@ -1,3 +1,15 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* dumpv4.c: Pass C_Block * to des_read_password() as per prototype.
+
+	* loadv4.c: Include k5-int.h before des.h for des_read_password
+	prototype. Pass C_Block * to des_read_password() as per prototype.
+
+	* kdb5_util.h: Add prototype for usage.
+
+	* kdb5_create.c, kdb5_destroy.c, kdb5_stash.c: Include kdb5_util.h
+	for usage() prototype.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm5_create.c: Add prototype for static

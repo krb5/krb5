@@ -34,6 +34,7 @@
 #include "com_err.h"
 #include <kadm5/admin.h>
 #include <kadm5/adb.h>
+#include "kdb5_util.h"
 
 extern int errno;
 extern int exit_status;
