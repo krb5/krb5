@@ -747,11 +747,11 @@ proc kadmin_test { } {
 	return
     }
     # now test modify changes.
-    if {![kadmin_add testuser testpw] \
-            || ![kinit testuser testpw 0] \
+    if {![kadmin_add testuser longtestpw] \
+            || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
 	    || ![kadmin_modify testuser maxlife=2500] \
-	    || ![kinit testuser testpw 0] \
+	    || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
 	    || ![kadmin_delete testuser]} {
 	return
