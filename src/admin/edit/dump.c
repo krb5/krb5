@@ -1549,6 +1549,28 @@ restore_dump(programname, kcontext, dumpfile, f, verbose)
 	if (f != stdin)
 	    fclose(f);
     }
+    else if (!strcmp (buf, k5beta_dump_header)) {
+	lineno = 1;
+	/*
+	 * Process the records.
+	 */
+	while (!(error = process_k5beta_record(dumpfile,
+					       kcontext, 
+					       f,
+					       verbose,
+					       &lineno)))
+	    ;
+	if (error != -1)
+	    fprintf(stderr, err_line_fmt, programname, lineno, dumpfile);
+	else
+	    error = 0;
+
+	/*
+	 * Close the input file.
+	 */
+	if (f != stdin)
+	    fclose(f);
+    }
     else {
 	fprintf(stderr, head_bad_fmt, programname, dumpfile);
 	error++;

@@ -1,3 +1,11 @@
+Thu May  2 22:16:01 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* ss_wrapper.c (main): Make sci_idx a global.  This makes certain
+	Cygnus customizations simpler.
+
+	* dump.c (restore_dump): If header indicates a beta-5 dump,
+	process it.
+
 Thu Apr 11 19:32:36 1996  Richard Basch  <basch@lehman.com>
 
 	* kdb5_edit.c (extract_v4_srvtab): Use the matching key_data's kvno;

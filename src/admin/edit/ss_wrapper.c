@@ -33,13 +33,15 @@ extern ss_request_table kdb5_edit_cmds;
 extern int exit_status;
 extern FILE *scriptfile;
 
+int sci_idx;
+
 int main(argc, argv)
     int argc;
     char *argv[];
 {
     char *request;
     krb5_error_code retval;
-    int sci_idx, code = 0;
+    int code = 0;
 
     request = kdb5_edit_Init(argc, argv);
     sci_idx = ss_create_invocation("kdb5_edit", "5.0", (char *) NULL,
