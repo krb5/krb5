@@ -12,7 +12,7 @@ DONE	* narrow types (done)
 DONE	* get_in_tkt for salt support, multi encryption
 DONE	* keytab lookup (for multi-encryption)
 DONE	* oracle forwarding support
-	* Remove krb5_enctype argument from string_to_key().  (HIGH)
+DONE	* Remove krb5_enctype argument from string_to_key().  (HIGH)
 	* Functionalize krb5.h (HIGH)
 
 3.  Multi-encryption support

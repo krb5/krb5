@@ -1,3 +1,7 @@
+Thu Nov 09 17:04:02 1995  Chris Provenzano (proven@mit.edu)
+
+	* TODO : Remove krb5_enctype argument from string_to_key() is done.
+
 Thu Nov  2 16:57:45 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Added support for Linux shared libraries.
