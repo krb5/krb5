@@ -1,3 +1,11 @@
+Thu Dec  5 21:15:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kprop.M: Update outdated references to kdb5_edit and /krb5 [PR
+	279]
+
+	* kpropd.M: Update outdated references to kdb5_edit and /krb5 [PR
+	279]
+
 Fri Nov 22 15:52:07 1996  unknown  <bjaspan@mit.edu>
 
 	* kprop.c (open_connection): use sizeof instead of h_length to
