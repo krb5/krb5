@@ -6,6 +6,38 @@
 MakeSubdirs($(SUBDIRS))
 NormalLibraryObjectRule()
 
-/* OBJS=read_servi.o */
+OBJS=	\
+	ktadd.o		\
+	ktclose.o	\
+	ktdefault.o	\
+	ktdefname.o	\
+	ktdir.o		\
+	ktendseq.o	\
+	ktfr_entry.o	\
+	ktget_name.o	\
+	ktgetentry.o	\
+	ktnext.o	\
+	ktregister.o	\
+	ktremove.o	\
+	ktresolve.o	\
+	ktssget.o	\
+	read_servi.o
 
-/* NormalLibraryTarget(keytab,$(OBJS)) */
+SRCS=	\
+	ktadd.c		\
+	ktclose.c	\
+	ktdir.c		\
+	ktdefault.c	\
+	ktdefname.c	\
+	ktendseq.c	\
+	ktfr_entry.c	\
+	ktget_name.c	\
+	ktgetentry.c	\
+	ktnext.c	\
+	ktregister.c	\
+	ktremove.c	\
+	ktresolve.c	\
+	ktssget.c	\
+	read_servi.c
+
+NormalLibraryTarget(kt,$(OBJS))
