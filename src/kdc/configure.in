@@ -5,6 +5,34 @@ AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 AC_CHECK_HEADERS(sys/select.h)
 ET_RULES
 HAS_ANSI_VOLATILE
+dnl
+dnl --with-vague-errors disables useful error messages.
+dnl
+AC_ARG_WITH([vague-errors],
+[  --with-vague-errors		Do not supply helpful error messages to clients
+  --without-vague-errors	Supply helpful error messages to clients (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Supplying vague error messages to KDC clients)
+	AC_DEFINE(KRBCONF_VAGUE_ERRORS)
+fi
+dnl
+dnl --with-kdc-kdb-update makes the KDC update the database with last request
+dnl information and failure information.
+dnl
+AC_ARG_WITH([kdc-kdb-update],
+[  --with-kdc-kdb-update	Update the database
+  --without-kdc-kdb-update1	Do not update the database (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Updating KDC database with each request)
+	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB)
+fi
+dnl
+dnl --with-dbm uses native DBM for the KDC database.
+dnl
 AC_ARG_WITH([dbm],
 [  --with-dbm		use native dbm for kdc database
   --without-dbm		use included version of Berkeley db (default)],
