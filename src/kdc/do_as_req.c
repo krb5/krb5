@@ -130,17 +130,17 @@ krb5_data **response;			/* filled in with a response packet */
 	return(prepare_error_as(request, KDC_ERR_BADOPTION, response));
     }
 
-    if (isset(request->kdc_options, KDC_OPT_FORWARDABLE))
-	set(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 
-    if (isset(request->kdc_options, KDC_OPT_PROXIABLE))
-	set(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
+    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
 
-    if (isset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
-	set(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
+    if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
-    if (isset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY))
-	set(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
+    if (isflagset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY))
+	setflag(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
 
 
     enc_tkt_reply.session = session_key;
@@ -148,12 +148,12 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.transited = empty_string; /* equivalent of "" */
     enc_tkt_reply.times.authtime = kdc_time;
 
-    if (isset(request->kdc_options, KDC_OPT_POSTDATED)) {
+    if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
 	if (against_postdate_policy(request->from)) {
 	    cleanup();
 	    return(prepare_error_as(request, KDC_ERR_POLICY, response));
 	}
-	set(enc_tkt_reply.flags, TKT_FLG_INVALID);
+	setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
 	enc_tkt_reply.times.starttime = request->from;
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
@@ -168,18 +168,18 @@ krb5_data **response;			/* filled in with a response packet */
 		    enc_tkt_reply.times.starttime + max_life_for_realm)));
 
     /* XXX why && request->till ? */
-    if (isset(request->kdc_options, KDC_OPT_RENEWABLE_OK) && 
+    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) && 
 	request->till && (enc_tkt_reply.times.endtime < request->till)) {
 
 	/* we set the RENEWABLE option for later processing */
 
-	set(request->kdc_options, KDC_OPT_RENEWABLE);
+	setflag(request->kdc_options, KDC_OPT_RENEWABLE);
 	request->rtime = request->till;
     }
     rtime = (request->rtime == 0) ? infinity : request->rtime;
 
-    if (isset(request->kdc_options, KDC_OPT_RENEWABLE)) {
-	set(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
+    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
+	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
 	enc_tkt_reply.times.renew_till =
 	    min(rtime, min(enc_tkt_reply.times.starttime +
 			   client.max_renewable_life,
