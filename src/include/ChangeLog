@@ -1,3 +1,7 @@
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Prototype krb5int_populate_gic_opt
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add krb5int_copy_data_contents

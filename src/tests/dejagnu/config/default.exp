@@ -1539,7 +1539,7 @@ proc add_kerberos_key { kkey standalone } {
 		break
 	    }
 	}
-	expect "Enter password:"
+	expect -re "assword\[^\r\n\]*: *"
 	send "adminpass$KEY\r"
 	expect "Enter password for principal \"$kkey@$REALMNAME\":"
 	send "$kkey"
@@ -1601,7 +1601,7 @@ proc add_random_key { kkey standalone } {
 		break
 	    }
 	}
-	expect "Enter password:"
+	expect -re "assword\[^\r\n\]*: *"
 	send "adminpass$KEY\r"
 	expect {
 	    "Principal \"$kkey@$REALMNAME\" created" { }

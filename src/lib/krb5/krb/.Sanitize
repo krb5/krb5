@@ -60,8 +60,6 @@ gen_seqnum.c
 gen_subkey.c
 get_creds.c
 get_in_tkt.c
-in_tkt_ktb.c
-in_tkt_pwd.c
 in_tkt_sky.c
 init_ctx.c
 int-proto.h

@@ -409,6 +409,15 @@ make_preauth_list(krb5_context	context,
 }
 
 #define MAX_IN_TKT_LOOPS 16
+static krb5_enctype get_in_tkt_enctypes[] = {
+    ENCTYPE_DES3_CBC_SHA1,
+    ENCTYPE_ARCFOUR_HMAC,
+    ENCTYPE_DES_CBC_MD5,
+    ENCTYPE_DES_CBC_MD4,
+    ENCTYPE_DES_CBC_CRC,
+    0
+};
+
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(krb5_context context,
@@ -460,8 +469,13 @@ krb5_get_in_tkt(krb5_context context,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if ((retval = krb5_get_default_in_tkt_ktypes(context, &request.ktype)))
+
+    request.ktype = malloc (sizeof(get_in_tkt_enctypes));
+    if (request.ktype == NULL) {
+	retval = ENOMEM;
 	goto cleanup;
+    }
+    memcpy(request.ktype, get_in_tkt_enctypes, sizeof(get_in_tkt_enctypes));
     for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
     if (ktypes) {
 	int i, req, next = 0;
