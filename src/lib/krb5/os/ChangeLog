@@ -1,3 +1,9 @@
+Sun Nov 12 05:31:21 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* def_realm.c (krb5_get_default_realm): check for PROF_NO_PROFILE
+	and return KRB5_CONFIG_CANTOPEN instead of BADFORMAT so that the
+	user in the end knows what is going on.
+
 Mon Oct  9 19:05:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ktdefname.c (krb5_kt_default_name): If profile_secure flag is

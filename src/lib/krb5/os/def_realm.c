@@ -51,6 +51,7 @@ krb5_get_default_realm(context, lrealm)
 {
     char *realm;
     char *cp;
+    krb5_error_code retval;
 
     if (!context || (context->magic != KV5M_CONTEXT)) 
 	    return KV5M_CONTEXT;
@@ -61,9 +62,11 @@ krb5_get_default_realm(context, lrealm)
 	     * on the host's DNS domain.
 	     */
 	    context->default_realm = 0;
-	    profile_get_string(context->profile, "libdefaults",
+	    retval = profile_get_string(context->profile, "libdefaults",
 			       "default_realm", 0, 0,
 			       &context->default_realm);
+	    if (retval == PROF_NO_PROFILE)
+	        return KRB5_CONFIG_CANTOPEN;
 	    if (context->default_realm == 0)
 		return(KRB5_CONFIG_BADFORMAT);
     }
