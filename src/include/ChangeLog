@@ -1,3 +1,10 @@
+2001-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c: New file, split off from fake-addrinfo.h.
+	* fake-addrinfo.h: Don't define implementation functions.
+	(FAI_DEFINED): New macro, used to protect against multiple
+	inclusions.
+
 2001-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (ss2sin6): New gcc-specific function and alternative
