@@ -306,9 +306,6 @@ closedown_db()
  exit
  */
 
-/* This void is a bit bogus, but it's necessary to prevent some compilers from
-   complaining about a no-value return path from a non-void function. */
-void
 main(argc, argv)
 int argc;
 char *argv[];
@@ -330,12 +327,12 @@ char *argv[];
     if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
 	com_err(argv[0], retval, "while initializing database");
 	finish_args(argv[0]);
-	exit(1);
+	return 1;
     }
     if (retval = setup_network(argv[0])) {
 	com_err(argv[0], retval, "while initializing network");
 	finish_args(argv[0]);
-	exit(1);
+	return 1;
     }
     syslog(LOG_INFO, "commencing operation");
     if (retval = listen_and_process(argv[0])){
@@ -352,6 +349,6 @@ char *argv[];
     }
     syslog(LOG_INFO, "shutting down");
     finish_args(argv[0]);
-    exit(errout);
+    return errout;
 }
 
