@@ -1,3 +1,7 @@
+2000-09-19  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: Put #include <fcntl.h> back in
+
 2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
