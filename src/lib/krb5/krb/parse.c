@@ -62,7 +62,7 @@ static char rcsid_parse_c [] =
 #define	COMPONENT_SEP	'/'
 #define QUOTECHAR	'\\'
 
-#define FCOMPNUM	2
+#define FCOMPNUM	10
 
 
 /*
@@ -82,6 +82,7 @@ krb5_parse_name(name, nprincipal)
 	int		fcompsize[FCOMPNUM];
 	int		realmsize = 0;
 	static char	*default_realm = NULL;
+	static int	default_realm_size = 0;
 	char		*tmpdata;
 	krb5_principal	principal;
 	krb5_error_code retval;
@@ -148,14 +149,20 @@ krb5_parse_name(name, nprincipal)
 	}
 	principal->length = components;
 	/*
-	 * If a realm was not found, then we need to find the defualt
-	 * realm....
+	 * If a realm was not found, then use the defualt realm....
 	 */
 	if (!parsed_realm) {
-		if (!default_realm &&
-		    (retval = krb5_get_default_realm(&default_realm)))
-			return(retval);
-		krb5_princ_realm(principal)->length = realmsize = strlen(default_realm);
+	    if (!default_realm) {
+		retval = krb5_get_default_realm(&default_realm);
+		if (retval) {
+		    krb5_xfree(principal->data);
+		    krb5_xfree((char *)principal);
+		    return(retval);
+		}
+		default_realm_size = strlen(default_realm);
+	    }
+	    krb5_princ_realm(principal)->length = default_realm_size;
+	    realmsize = default_realm_size;
 	}
 	/*
 	 * Pass 2.  Happens only if there were more than FCOMPNUM
