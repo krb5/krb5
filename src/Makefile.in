@@ -17,14 +17,31 @@ SRCS =
 
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
+all:: all-$(WHAT)
 
-all::
+all-unix::
+
+all-: all-windows
+all-windows:: makefile-windows
+	@echo Making in include
+	cd include
+	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making in util\et
+	cd ..\util\et
+	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making in lib
+	cd ..\..\lib
+	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making in windows\cns
+	cd ..\windows\cns
+	-$(MAKE) -$(MAKEFLAGS)
+	cd ..\..
 
 world::
 	date
-	make ${MFLAGS} mastermakefiles
-	make ${MFLAGS} depend
-	make ${MFLAGS} all
+	make $(MFLAGS) mastermakefiles
+	make $(MFLAGS) depend
+	make $(MFLAGS) all
 	date
 
 INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
@@ -58,7 +75,10 @@ mastermakefiles::
 TAGS: $(SRCS)
 	etags $(SRCS)
 
-clean::
+clean:: clean-$(WHAT)
+
+clean-:: clean-unix
+clean-unix::
 	rm -f  *.o core
 
 mostlyclean: clean
@@ -80,3 +100,72 @@ dist: $(DISTFILES)
 	done
 	tar chzf `cat .fname`.tar.gz `cat .fname`
 	rm -rf `cat .fname` .fname
+
+makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
+		include\makefile.in include\krb5\makefile.in \
+		lib\makefile.in lib\crypto\makefile.in \
+		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
+		lib\crypto\md4\makefile.in lib\crypto\md5\makefile.in \
+		lib\crypto\os\makefile.in lib\des425\makefile.in \
+		lib\gssapi\makefile.in lib\gssapi\generic\makefile.in \
+		lib\gssapi\krb5\makefile.in lib\krb5\makefile.in \
+		lib\krb5\asn.1\makefile.in lib\krb5\ccache\makefile.in \
+		lib\krb5\ccache\file\makefile.in \
+		lib\krb5\ccache\stdio\makefile.in \
+		lib\krb5\error_ta\makefile.in \
+		lib\krb5\free\makefile.in lib\krb5\keytab\makefile.in \
+		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
+		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
+		lib\krb5\rcache\makefile.in lib\krb425\makefile.in \
+		util\et\makefile.in
+	SET CL=/nologo
+	$(CC) /AL wconfig.c
+	copy Makefile Makefile.bak
+	.\wconfig config <makefile.in >makefile
+	.\wconfig config <include\makefile.in >include\makefile
+	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
+	.\wconfig config <lib\makefile.in >lib\makefile
+	.\wconfig config <lib\crypto\makefile.in >lib\crypto\makefile
+	.\wconfig config <lib\crypto\crc32\makefile.in >lib\crypto\crc32\makefile
+	.\wconfig config <lib\crypto\des\makefile.in >lib\crypto\des\makefile
+	.\wconfig config <lib\crypto\md4\makefile.in >lib\crypto\md4\makefile
+	.\wconfig config <lib\crypto\md5\makefile.in >lib\crypto\md5\makefile
+	.\wconfig config <lib\crypto\os\makefile.in >lib\crypto\os\makefile
+	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
+	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
+	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
+	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
+	.\wconfig config <lib\krb5\makefile.in >lib\krb5\makefile
+	.\wconfig config <lib\krb5\asn.1\makefile.in >lib\krb5\asn.1\makefile
+	.\wconfig config <lib\krb5\ccache\makefile.in >lib\krb5\ccache\makefile
+	.\wconfig config <lib\krb5\ccache\file\makefile.in >lib\krb5\ccache\file\makefile
+	.\wconfig config <lib\krb5\ccache\stdio\makefile.in >lib\krb5\ccache\stdio\makefile
+	.\wconfig config <lib\krb5\error_ta\makefile.in >lib\krb5\error_ta\makefile
+	.\wconfig config <lib\krb5\free\makefile.in >lib\krb5\free\makefile
+	.\wconfig config <lib\krb5\keytab\makefile.in >lib\krb5\keytab\makefile
+	.\wconfig config <lib\krb5\keytab\file\makefile.in >lib\krb5\keytab\file\makefile
+	.\wconfig config <lib\krb5\krb\makefile.in >lib\krb5\krb\makefile
+	.\wconfig config <lib\krb5\os\makefile.in >lib\krb5\os\makefile
+	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
+	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
+	.\wconfig config <lib\krb425\makefile.in >lib\krb425\makefile
+	.\wconfig config <util\et\makefile.in >util\et\makefile
+	config\rm.bat wconfig.obj wconfig.exe
+
+clean-windows::
+	@echo Making clean in include
+	cd include
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in util\et
+	cd ..\util\et
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in lib
+	cd ..\..\lib
+	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in windows\cns
+	cd ..\windows\cns
+	-$(MAKE) -$(MAKEFLAGS) clean
+	cd ..\..
+	@echo Making clean locally
+	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
+

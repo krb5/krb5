@@ -1,3 +1,9 @@
+Thu Mar 16 15:15:00 1995 Keith Vetter <keithv@fusion.com>
+
+	* Makefile.in: added PC stuff so it builds the whole world.
+	* wconfig.h: program to configure makefiles on the PC.
+	* CHANGELOG -> CHANGES: renamed to avoid PC name conflict.
+
 Tue Mar  7 19:49:07 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (UsePepsy, PepsyTarget): removed, not referenced
