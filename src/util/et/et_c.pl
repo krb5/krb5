@@ -230,7 +230,7 @@ line: while (<>) {
     $skipone = 0;
 }
 
-if ($table_item_count > 255) {
+if ($table_item_count > 256) {
     &Pick('|', 'cat 1>&2') &&
 	(print $fh 'Error table too large!');
     exit 1;

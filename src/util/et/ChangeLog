@@ -1,3 +1,8 @@
+2004-10-07  Tom Yu  <tlyu@mit.edu>
+
+	* et_c.awk, et_h.awk: Fix off-by-one error.
+	* et_c.pl, et_h.pl: Regenerated.
+
 2004-10-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* et_c.awk, et_h.awk: Complain if the error table is too large.

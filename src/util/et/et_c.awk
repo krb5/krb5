@@ -184,7 +184,7 @@ c2n["_"]=63
 	skipone=0
 }
 END {
-	if (table_item_count > 255) {
+	if (table_item_count > 256) {
 	    print "Error table too large!" | "cat 1>&2"
 	    exit 1
 	}

@@ -140,6 +140,7 @@ line: while (<>) {
 	    (print $fh '#include <com_err.h>');
 	&Pick('>', $outfile) &&
 	    (print $fh '');
+	$table_item_count = 0;
     }
 
     if (/^[ \t]*(error_code|ec)[ \t]+[A-Z_0-9]+,/) {
@@ -168,7 +169,7 @@ line: while (<>) {
     }
 }
 
-if ($table_item_count > 255) {
+if ($table_item_count > 256) {
     &Pick('|', 'cat 1>&2') &&
 	(print $fh 'Error table too large!');
     exit 1;

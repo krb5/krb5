@@ -113,6 +113,7 @@ c2n["_"]=63
 	print "" > outfile
 	print "#include <com_err.h>" > outfile
 	print "" > outfile
+	table_item_count = 0
 }
 
 /^[ \t]*(error_code|ec)[ \t]+[A-Z_0-9]+,/ {
@@ -136,7 +137,7 @@ c2n["_"]=63
 }
 
 END {
-	if (table_item_count > 255) {
+	if (table_item_count > 256) {
 	    print "Error table too large!" | "cat 1>&2"
 	    exit 1
 	}
