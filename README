@@ -69,7 +69,15 @@ Notes:
   requests have not been incorporated.  We have focussed mainly on
   important security fixes and usability fixes.
 
+* The lists following are known to be INCOMPLETE; they will be updated
+  prior to final release.
+
 Major Changes:
+
+* Various bugs in single-DES enctype similarity have been fixed; the
+  1.0.x behavior of treating all single-DES enctype as equivalent has
+  been restored for now.  This may go away in a future release.  Note
+  that SUPPORT_DESMD5 will be treated as always false for now.
 
 * Triple-DES should work on Windows now.  The SHA-1 implementation had
   a Windows-specific bug preventing it from working in most cases.
@@ -107,6 +115,23 @@ Major Changes:
   have been using.  This should not affect the use of any existing
   databases, only newly created ones, and even that should be a
   transparent change.
+
+Known Bugs:
+
+* ETYPE_INFO preauthentication data returned from the KDC are not
+  sorted in the order requested by the client.  This may result in
+  preauthentication failure when encrypted timestamp preauthentication
+  is required but the client doesn't understand some of the enctypes
+  of the keys stored for it in the database.
+
+* The gssftp daemon and client, when running in krb4 mode, are
+  inconsistent with respect to port numbers passed to the
+  {mk,rd}_{priv,safe} functinos.  As a result, there is a small but
+  nonzero probability that krb4 ftp with client and server on the same
+  IP address will fail with a "Time is out of bounds" error.  This
+  includes the tests/dejagnu test suite, which tests the krb4 ftp
+  functionality.  The probability of this occuring seems to be less
+  than 50%.
 
 Notes, Major Changes, and Known Bugs for 1.2.2
 ----------------------------------------------
