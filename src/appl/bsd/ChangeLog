@@ -1,3 +1,8 @@
+Thu Feb 27 10:58:07 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* krshd.c: Allow user to login with / as home directory if homedir
+ 	not found. [167]
+
 Fri Dec  6 00:53:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* v4rcp.c: Extend the platform-specific braindamage so that
