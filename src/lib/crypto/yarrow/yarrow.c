@@ -850,6 +850,7 @@ int krb5int_yarrow_final(Yarrow_CTX* y)
 
  CATCH:
     if ( locked ) { TRY( UNLOCK() ); }
+    krb5int_yarrow_cipher_final(&y->cipher);
     mem_zero( y, sizeof(Yarrow_CTX) );
     EXCEP_RET;
 }

@@ -1,3 +1,12 @@
+2004-05-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* yarrow.c (krb5int_yarrow_final): Call
+	krb5int_yarrow_cipher_final before zeroing out reference to
+	memory.
+
+	* ycipher.[ch] (krb5int_yarrow_cipher_final): Free CIPHER_CTX memory
+	allocated by krb5int_yarrpw_cipher_init().
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* ycipher.c (krb5int_yarrow_cipher_init): Use keybytes and

@@ -32,6 +32,7 @@ typedef struct
 int krb5int_yarrow_cipher_init (CIPHER_CTX *ctx, unsigned const char *key);
 int krb5int_yarrow_cipher_encrypt_block
 (CIPHER_CTX *ctx,  const unsigned char *in, unsigned char *out);
+void krb5int_yarrow_cipher_final (CIPHER_CTX *ctx);
 
 #if !defined( YARROW_NO_MATHLIB )
 #define POW_CIPHER_KEY_SIZE pow(2.0, CIPHER_KEY_SIZE * 8 / 3.0)

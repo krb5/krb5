@@ -82,3 +82,15 @@ int krb5int_yarrow_cipher_encrypt_block
   return YARROW_OK;
 }
 
+void
+krb5int_yarrow_cipher_final
+(CIPHER_CTX *ctx)
+
+{
+ if (ctx->key.contents) {
+    memset (ctx->key.contents, 0, ctx->key.length);
+    free (ctx->key.contents);
+  }
+  ctx->key.contents = 0;
+  ctx->key.length = 0;
+}
