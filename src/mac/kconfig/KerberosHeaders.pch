@@ -1,0 +1,90 @@
+/*
+ *	KerberosHeaders.pch
+ *
+ *	Script to generate the 'MacHeaders<xxx>' precompiled header for Metrowerks C/C++.
+ *  Copyright © 1993 metrowerks inc.  All rights reserved.
+ * Modified for Kerberos5 Mac port to include compile options
+ */
+
+/*
+ * Add the compile flag switches for kerberos compile
+ */
+#define _MWERKS
+#define _MACINTOSH
+#define SIZEOF_INT 4
+#define SIZEOF_SHORT 2
+#define HAVE_SRAND
+#define NO_PASSWORD
+#define HAS_LABS
+#define ENOMEM -1
+#define ANSI_STDIO
+typedef unsigned int size_t;
+#define _SIZET
+#include <unix.h>
+#include <ctype.h>
+#define KRB5 1
+
+#define PROVIDE_RSA_MD4
+#define PROVIDE_RSA_MD5
+#define PROVIDE_SNEFRU
+#define PROVIDE_DES_CBC_CKSUM
+#define PROVIDE_DES_CBC_CRC
+#define PROVIDE_DES_CBC_MD5
+#define PROVIDE_RAW_DES_CBC
+
+typedef int datum;
+
+//jfm need to reimplement
+#define mktemp(a)
+
+enum {
+ENOENT = -43,
+EPERM,
+EACCES,
+EISDIR,
+ENOTDIR,
+ELOOP,
+ETXTBSY,
+EBUSY,
+EROFS,
+EINVAL,
+EEXIST,
+EFAULT,
+EBADF,
+ENAMETOOLONG,
+EWOULDBLOCK,
+EDQUOT,
+ENOSPC,
+EIO,
+ENFILE,
+EMFILE,
+ENXIO
+};
+#define HAVE_STRFTIME 1
+#define MAXPATHLEN 255
+#define HAVE_SYSLOG_H 1
+
+/*
+ *	Support for automatically naming the precompiled header file ...
+ */
+
+#ifdef __cplusplus
+ #ifdef powerc
+  #pragma precompile_target "MacKrbPPC++"
+ #else
+  #pragma precompile_target "MacKrb68K++"
+ #endif
+#else
+ #ifdef powerc
+  #pragma precompile_target "MacKrbPPC"
+ #else
+  #pragma precompile_target "MacKrb68K"
+ #endif
+#endif
+
+/*
+ *	Now just include the "MacHeaders.c" source file ...
+ */
+
+#include "MacHeaders.c"
+

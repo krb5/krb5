@@ -1,0 +1,50 @@
+Mon Feb  6 16:47:17 1995  John Gilmore  (gnu at toad.com)
+
+	* kconfig.c (kerror):  Call krb_get_err_text instead of having a
+	private copy of the error message texts.
+	(main):  When can't talk to Kerb driver, can't interpret an error
+	code either; just complain directly.
+	* krb_err_txt.c:  Removed.
+
+	* kconfig.c (main):  Call krb_start_session (from mac_stubs) to find
+	driver.  This enables us to make ordinary Kerberos subroutine 
+	calls rather than being stuck with driver calls.
+	* MakeFile (OBJS):  Add mac_stubs.c.o.
+	(mac_stubs.c):  Add rule to copy this file from src/lib/krb.
+
+Sun Feb  5 12:43:43 1995  John Gilmore  (gnu at toad.com)
+
+	* kconfig.c (openprefres):  Change Preferences file name to 'CNS
+	Config Preferences'
+	(doupdate):  Move more useless code inside #ifdef notdef.
+	* MakeFile: Output map file is now 'CNS Config.MAP'.
+	* %kconfig.rsrc (About DITL):  Add text about CNS Config and Cygnus.
+	(About DLOG):  Increase size of the about box to hold the above.
+
+Sun Feb  5 10:49:03 1995  John Gilmore  (gnu at toad.com)
+
+	* %kconfig.rsrc (Apple menu):  "About KConfig" -> "About CNS Config".
+	(File menu):  Add "Close Window (apple-W) item.
+	(main DITL):  Window title "Kerberos Configuration" -> "CNS Kerberos
+	Configuration".
+	* MakeFile:  Remove obj subdir and all references to it.  Remove
+	references to include files that were moved to src/include.
+	(all):  Build 'CNS Config' by default.
+	(KRBFOLDER):  Remove all references.
+	(INCFOLDER):  Add, pointing to src/include.
+	(KConfig):  Rename to 'CNS Config'.
+	* obj:  Remove subdir for building object files; they're now
+	built in the main directory.
+	* kadm.c, kconfig.c: Fix include file names to have correct
+	upper/lower case.  (This doesn't matter in Mac native file
+	systems, but matters over NFS.)
+	* kconfig.c, kconfig.h:  Add case for "Close Window" in the File
+	menu, to make apple-W work.
+	* kconfig.r:  Remove "obj" reference.  Change Kconfig to CNS Config.
+
+Sat Feb  4 19:44:35 1995  John Gilmore  (gnu at toad.com)
+
+	* AddressXlation.h, mactcpcommontypes.h, Krb_driver.h, udppb.h,
+	tcppb.h, getmyipaddr.h:  Remove; use the versions in src/include.
+	* des_cornell.c, desproto.h:  Moved these here from ../Krb.
+
