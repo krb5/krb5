@@ -403,7 +403,7 @@ bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): bld_princ.c $(SRCTOP)/in
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h
-brand.so brand.po $(OUTPRE)brand.$(OBJEXT): brand.c
+brand.so brand.po $(OUTPRE)brand.$(OBJEXT): brand.c $(SRCTOP)/patchlevel.h
 chk_trans.so chk_trans.po $(OUTPRE)chk_trans.$(OBJEXT): chk_trans.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -603,7 +603,8 @@ init_ctx.so init_ctx.po $(OUTPRE)init_ctx.$(OBJEXT): init_ctx.c $(SRCTOP)/includ
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h brand.c $(srcdir)/../krb5_libinit.h
+  $(SRCTOP)/include/krb5/kdb.h brand.c $(SRCTOP)/patchlevel.h \
+  $(srcdir)/../krb5_libinit.h
 init_keyblock.so init_keyblock.po $(OUTPRE)init_keyblock.$(OBJEXT): init_keyblock.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
