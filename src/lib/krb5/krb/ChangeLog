@@ -1,3 +1,9 @@
+Tue Oct 25 23:34:57 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* srv_rcache.c (krb5_get_server_rcache): Added missing continue so
+	 	that we don't copy both the unprintable character as well
+		as the quoted version of it.
+
 Mon Oct 24 15:50:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: If KRB4 is defined, define KRB5_KRB4_COMPAT for

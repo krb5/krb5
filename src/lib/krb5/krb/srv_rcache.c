@@ -75,6 +75,7 @@ krb5_rcache *rcptr;
 	    cachename[p++] = tmp[0];
 	    cachename[p++] = tmp[1];
 	    cachename[p++] = tmp[2];
+	    continue;
 	}
 	cachename[p++] = piece->data[i];
     }
