@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/get_in_tkt.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -734,6 +734,7 @@ krb5_get_init_creds(krb5_context context,
     krb5_deltat renew_life;
     int loopcount;
     krb5_data salt;
+    krb5_data s2kparams;
     krb5_keyblock as_key;
     krb5_error *err_reply;
     krb5_kdc_rep *local_as_reply;
@@ -742,6 +743,8 @@ krb5_get_init_creds(krb5_context context,
 
     /* initialize everything which will be freed at cleanup */
 
+    s2kparams.data = NULL;
+    s2kparams.length = 0;
     request.server = NULL;
     request.ktype = NULL;
     request.addresses = NULL;
@@ -927,7 +930,7 @@ krb5_get_init_creds(krb5_context context,
 
 	if ((ret = krb5_do_preauth(context, &request,
 				  padata, &request.padata,
-				  &salt, &etype, &as_key, prompter,
+				  &salt, &s2kparams, &etype, &as_key, prompter,
 				   prompter_data, gak_fct, gak_data)))
 	    goto cleanup;
 
@@ -973,7 +976,7 @@ krb5_get_init_creds(krb5_context context,
 
     if ((ret = krb5_do_preauth(context, &request,
 			       local_as_reply->padata, &padata,
-			       &salt, &etype, &as_key, prompter,
+			       &salt, &s2kparams, &etype, &as_key, prompter,
 			       prompter_data, gak_fct, gak_data)))
 	goto cleanup;
 
@@ -1005,7 +1008,7 @@ krb5_get_init_creds(krb5_context context,
 
 	if ((ret = ((*gak_fct)(context, request.client,
 			       local_as_reply->enc_part.enctype,
-			       prompter, prompter_data, &salt,
+			       prompter, prompter_data, &salt, &s2kparams,
 			       &as_key, gak_data))))
 	    goto cleanup;
 

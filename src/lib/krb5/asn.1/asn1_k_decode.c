@@ -796,7 +796,7 @@ asn1_error_code asn1_decode_sequence_of_checksum(asn1buf *buf, krb5_checksum ***
   decode_array_body(krb5_checksum, asn1_decode_checksum);
 }
 
-asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry *val)
+asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry *val )
 {
   setup();
   { begin_structure();
@@ -807,13 +807,21 @@ asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry
 	    val->length = KRB5_ETYPE_NO_SALT;
 	    val->salt = 0;
     }
+    if ( tagnum ==2) {
+      krb5_octet *params = (krb5_octet *) val->s2kparams.data;
+      get_lenfield( val->s2kparams.length, params,
+		      2, asn1_decode_octetstring);
+    } else {
+	val->s2kparams.data = NULL;
+	val->s2kparams.length = 0;
+    }
     end_structure();
     val->magic = KV5M_ETYPE_INFO_ENTRY;
   }
   cleanup();
 }
 
-asn1_error_code asn1_decode_etype_info(asn1buf *buf, krb5_etype_info_entry ***val)
+asn1_error_code asn1_decode_etype_info(asn1buf *buf, krb5_etype_info_entry ***val )
 {
   decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info_entry);
 }

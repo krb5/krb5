@@ -282,12 +282,15 @@ typedef struct _krb5_alt_method {
  * A null-terminated array of this structure is returned by the KDC as
  * the data part of the ETYPE_INFO preauth type.  It informs the
  * client which encryption types are supported.
+ * The  same data structure is used by both etype-info and etype-info2
+ * but s2kparams must be null when encoding etype-info.
  */
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
 	krb5_enctype	etype;
 	unsigned int	length;
 	krb5_octet	*salt;
+    krb5_data s2kparams;
 } krb5_etype_info_entry;
 
 /* 
@@ -911,6 +914,7 @@ typedef krb5_error_code (*krb5_gic_get_as_key_fct)
 		     krb5_prompter_fct,
 		     void *prompter_data,
 		     krb5_data *salt,
+     krb5_data *s2kparams,
 		     krb5_keyblock *as_key,
 		     void *gak_data);
 
@@ -933,7 +937,8 @@ krb5_get_init_creds
 krb5_error_code krb5_do_preauth
 (krb5_context, krb5_kdc_req *,
 		krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *, krb5_enctype *,
+		krb5_data *salt, krb5_data *s2kparams,
+ krb5_enctype *,
 		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);
@@ -1221,6 +1226,8 @@ krb5_error_code encode_krb5_alt_method
 
 krb5_error_code encode_krb5_etype_info
 	(const krb5_etype_info_entry **, krb5_data **code);
+krb5_error_code encode_krb5_etype_info2
+	(const krb5_etype_info_entry **, krb5_data **code);
 
 krb5_error_code encode_krb5_enc_data
     	(const krb5_enc_data *, krb5_data **);
@@ -1397,6 +1404,9 @@ krb5_error_code decode_krb5_alt_method
 	(const krb5_data *output, krb5_alt_method **rep);
 
 krb5_error_code decode_krb5_etype_info
+	(const krb5_data *output, krb5_etype_info_entry ***rep);
+
+krb5_error_code decode_krb5_etype_info2
 	(const krb5_data *output, krb5_etype_info_entry ***rep);
 
 krb5_error_code decode_krb5_enc_data

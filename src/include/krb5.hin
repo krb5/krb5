@@ -491,6 +491,13 @@ krb5_error_code KRB5_CALLCONV
     (krb5_context context, krb5_enctype enctype,
 		    const krb5_data *string, const krb5_data *salt,
 		    krb5_keyblock *key);
+krb5_error_code KRB5_CALLCONV
+krb5_c_string_to_key_with_params(krb5_context context,
+				 krb5_enctype enctype,
+				 const krb5_data *string,
+				 const krb5_data *salt,
+				 const krb5_data *params,
+				 krb5_keyblock *key);
 
 krb5_error_code KRB5_CALLCONV
     krb5_c_enctype_compare
@@ -874,7 +881,7 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_PADATA_SAM_RESPONSE	13 /* draft challenge system response */
 #define KRB5_PADATA_PK_AS_REQ		14 /* PKINIT */
 #define KRB5_PADATA_PK_AS_REP		15 /* PKINIT */
-
+#define KRB5_PADATA_ETYPE_INFO2 19
 #define KRB5_PADATA_SAM_CHALLENGE_2	30 /* draft challenge system, updated */
 #define KRB5_PADATA_SAM_RESPONSE_2	31 /* draft challenge system, updated */
     

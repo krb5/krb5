@@ -531,6 +531,32 @@ main(argc, argv)
 
     free(info);
   }
+  /* encode_etype_info 2*/
+  {
+    krb5_etype_info_entry **info;
+    
+    setup(info,krb5_etype_info_entry **,"etype_info2",
+	  ktest_make_sample_etype_info2);
+    retval = encode_krb5_etype_info2((const krb5_etype_info_entry **)info,&(code));
+    if(retval) {
+	com_err("encoding etype_info",retval,"");
+	exit(1);
+    }
+    encoder_print_results(code, "etype_info2", "");
+    ktest_destroy_etype_info_entry(info[2]);      info[2] = 0;
+    ktest_destroy_etype_info_entry(info[1]);      info[1] = 0;
+
+    retval = encode_krb5_etype_info2((const krb5_etype_info_entry **)info,&(code));
+    if(retval) {
+	com_err("encoding etype_info (only 1)",retval,"");
+	exit(1);
+    }
+    encoder_print_results(code, "etype_info2 (only 1)", "");
+
+    ktest_destroy_etype_info_entry(info[0]);      info[0] = 0;
+    
+    free(info);
+  }
 
   /****************************************************************/
   /* encode_pa_enc_ts */

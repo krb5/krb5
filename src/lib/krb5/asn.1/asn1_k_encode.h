@@ -219,11 +219,11 @@ asn1_error_code asn1_encode_alt_method
 
 asn1_error_code asn1_encode_etype_info_entry
 	(asn1buf *buf, const krb5_etype_info_entry *val,
-		   unsigned int *retlen);
+		   unsigned int *retlen, int etype_info2);
 
 asn1_error_code asn1_encode_etype_info
 	(asn1buf *buf, const krb5_etype_info_entry **val,
-		   unsigned int *retlen);
+		   unsigned int *retlen, int etype_info2);
 
 asn1_error_code asn1_encode_passwdsequence
 	(asn1buf *buf, const passwd_phrase_element *val, unsigned int *retlen);

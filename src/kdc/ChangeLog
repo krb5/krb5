@@ -1,7 +1,26 @@
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (return_pw_salt): Don't return pw-salt if the
+	client's enctype list  mandates it supports enctype-info2
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (kdc_process_tgs_req): Rename getremotesubkey ->
 	getrecvsubkey.
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Patch from Sun to reorganize
+	code and make sure that even for md5 the database order is
+	preserved. 
+	(enctype_requires_etype_info_2): new function; determines wether a
+	particular enctype in a client request means that the client  is
+	required to support etype_info2 by Kerberos clarifications.
+	(etype_info_helper): Renamed from get_etype_info  to abstract out
+	code in common between etype_info and etype_info2
+	(get_enctype_info): Return etype info only if request contains no
+	enctypes that  require etype_info2
+	(return_etype_info2): New function.
 
 2003-04-02  Sam Hartman  <hartmans@mit.edu>
 

@@ -1,9 +1,25 @@
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add prototype for krb5_c_string_to_key_with_params
+
+	* k5-int.h: Add s2kparams to krb5_gic_get_as_key_fct
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add KRB5_PADATA_ETYPE_INFO2
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add krb5_auth_con_getsendsubkey,
 	krb5_auth_con_getrecvsubkey, krb5_auth_con_setsendsubkey,
 	krb5_auth_con_setrecvsubkey.  Mark krb5_auth_con_getlocalsubkey
 	and krb5_auth_con_getremotesubkey as deprecated.
+
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add s2kparams to 
+	krb5_etype_info_entry
+	Add encode_etype_info2 and decode_etype_info2
 
 2003-05-02  Ken Raeburn  <raeburn@mit.edu>
 

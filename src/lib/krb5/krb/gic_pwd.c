@@ -9,6 +9,7 @@ krb5_get_as_key_password(
     krb5_prompter_fct prompter,
     void *prompter_data,
     krb5_data *salt,
+    krb5_data *params,
     krb5_keyblock *as_key,
     void *gak_data)
 {
@@ -74,7 +75,8 @@ krb5_get_as_key_password(
 	defsalt.length = 0;
     }
 
-    ret = krb5_c_string_to_key(context, etype, password, salt, as_key);
+    ret = krb5_c_string_to_key_with_params(context, etype, password, salt,
+					   params->data?params:NULL, as_key);
 
     if (defsalt.length)
 	krb5_xfree(defsalt.data);

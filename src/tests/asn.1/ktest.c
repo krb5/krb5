@@ -656,6 +656,8 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	if (info[i]->salt == 0)
 	    goto memfail;
 	strcpy((char *) info[i]->salt, buf);
+	info[i]->s2kparams.data = NULL;
+	info[i]->s2kparams.length = 0;
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
     }
     free(info[1]->salt);
@@ -667,6 +669,49 @@ memfail:
     ktest_destroy_etype_info(info);
     return ENOMEM;
 }
+
+
+krb5_error_code ktest_make_sample_etype_info2(p)
+     krb5_etype_info_entry *** p;
+{
+    krb5_etype_info_entry **info;
+    int	i;
+    char buf[80];
+
+    info = malloc(sizeof(krb5_etype_info_entry *) * 4);
+    if (!info)
+	return ENOMEM;
+    memset(info, 0, sizeof(krb5_etype_info_entry *) * 4);
+
+    for (i=0; i < 3; i++) {
+	info[i] = malloc(sizeof(krb5_etype_info_entry));
+	if (info[i] == 0)
+	    goto memfail;
+	info[i]->etype = i;
+	sprintf(buf, "Morton's #%d", i);
+	info[i]->length = strlen(buf);
+	info[i]->salt = malloc((size_t) (info[i]->length+1));
+	if (info[i]->salt == 0)
+	    goto memfail;
+	strcpy((char *) info[i]->salt, buf);
+	sprintf(buf, "s2k: %d", i);
+	info[i]->s2kparams.data = malloc(strlen(buf)+1);
+	if (info[i]->s2kparams.data == NULL)
+	    goto memfail;
+	strcpy( info[i]->s2kparams.data, buf);
+	info[i]->s2kparams.length = strlen(buf);
+	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
+    }
+    free(info[1]->salt);
+    info[1]->length = KRB5_ETYPE_NO_SALT;
+    info[1]->salt = 0;
+    *p = info;
+    return 0;
+memfail:
+    ktest_destroy_etype_info(info);
+    return ENOMEM;
+}
+
 
 krb5_error_code ktest_make_sample_pa_enc_ts(pa_enc)
      krb5_pa_enc_ts * pa_enc;
