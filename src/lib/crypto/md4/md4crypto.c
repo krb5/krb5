@@ -18,6 +18,7 @@ static char rcsid_md4crypto_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 #include <krb5/rsa-md4.h>
 
 #include "../des/des_int.h"	/* we cheat a bit and call it directly... */
@@ -30,37 +31,24 @@ krb5_pointer seed;
 size_t seed_length;
 krb5_checksum *outcksum;
 {
-    krb5_octet *output, outtmp[RSA_MD4_DES_CKSUM_LENGTH];
+    krb5_octet outtmp[RSA_MD4_DES_CKSUM_LENGTH];
     krb5_octet *input = (krb5_octet *)in;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
 
-    register int i, j;
-    MDstruct working;
+    MD4_CTX working;
 
-    MDbegin(&working);
-
-    for (i = in_length; i >= 64; i -= 64, input += 64)
-	/* MD4 works in 512 bit chunks (64 bytes) */
-	MDupdate(&working, input, 512);
-    /* now close out remaining stuff.  Even if i == 0, we want to
-       "close out" the MD4 algorithm */
-    MDupdate(&working, input, i*8);
+    MD4Init(&working);
+    MD4Update(&working, input, in_length*8);
+    MD4Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4_DES;
     outcksum->length = RSA_MD4_DES_CKSUM_LENGTH;
 
-    /* the output code here is adapted from MDprint;
-       it needs to assemble it into proper byte order. */
+    memcpy((char *)outtmp, (char *)&working.digest[0], 16);
 
-    output = &outtmp[0];
-    for (i = 0; i < 4; i++)
-	for (j = 0; j < 32; j += 8)
-	    *output++ = (working.buffer[i] >> j) & 0xFF;
-
-    for (i = 0; i < 8; i++)
-	*output++ = working.count[i];
+    memset((char *)&working, 0, sizeof(working));
 
     keyblock.length = seed_length;
     keyblock.contents = (krb5_octet *)seed;
