@@ -115,6 +115,8 @@ krb5_error_code dispatch PROTOTYPE((krb5_data *,
 /* main.c */
 krb5_error_code kdc_initialize_rcache PROTOTYPE((krb5_context, char *));
 
+krb5_error_code setup_server_realm PROTOTYPE((krb5_principal));
+
 /* network.c */
 krb5_error_code listen_and_process PROTOTYPE((const char *));
 krb5_error_code setup_network PROTOTYPE((const char *));

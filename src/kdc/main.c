@@ -43,8 +43,6 @@
 
 kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
 
-krb5_error_code setup_server_realm PROTOTYPE((krb5_principal));
-
 void usage PROTOTYPE((char *));
 
 krb5_sigtype request_exit PROTOTYPE((int));
@@ -60,116 +58,6 @@ static char *kdc_current_rcname = (char *) NULL;
 static int rkey_init_done = 0;
 
 #define	KRB5_KDC_MAX_REALMS	32
-
-/*
- * Get port information for a realm.  The precedence is:
- *	[realms]-><realm>-><name> in profile (if our hostname and has a port)
- *	defport
- *	/etc/services entry matching <service>
- */
-static krb5_int32
-get_realm_port(ctx, realm, name, defport, service)
-    krb5_context	ctx;
-    char		*realm;
-    char		*name;
-    krb5_int32		defport;
-    char		*service;
-{
-    krb5_error_code	kret;
-    char		our_host_name[MAXHOSTNAMELEN];
-    struct hostent	*our_hostent;
-    struct servent	*our_servent;
-    krb5_int32		retval;
-    krb5_boolean	found;
-
-    /*
-     * Some preliminaries here.  Get our hostname and our host entry.
-     */
-    found = 0;
-    retval = -1;
-    if (!gethostname(our_host_name, sizeof(our_host_name)) &&
-	(our_hostent = gethostbyname(our_host_name))) {
-	const char	*hierarchy[4];
-	char		**hostlist;
-
-	hostlist = (char **) NULL;
-	hierarchy[0] = "realms";
-	hierarchy[1] = realm;
-	hierarchy[2] = name;
-	hierarchy[3] = (char *) NULL;
-	if (!(kret = profile_get_values(ctx->profile, hierarchy, &hostlist))) {
-	    int		hi;
-	    char	*cport;
-	    char	*cp;
-	    int		ai;
-	    krb5_int32	pport;
-
-	    cport = (char *) NULL;
-	    for (hi=0; hostlist[hi]; hi++) {
-		/*
-		 * This knows a little too much about the format of profile
-		 * entries.  Shouldn't it just be some sort of tuple?
-		 *
-		 * The form is assumed to be:
-		 *	<name> = <hostname>[:<portname>[<whitespace>]]
-		 */
-		pport = -1;
-		cp = strchr(hostlist[hi], ' ');
-		if (cp)
-		    *cp = '\0';
-		cp = strchr(hostlist[hi], '\t');
-		if (cp)
-		    *cp = '\0';
-		cport = strchr(hostlist[hi], ':');
-		if (cport) {
-		    *cport = '\0';
-		    cport++;
-		    if (sscanf(cport, "%d", &pport) == 1) {
-			pport = -1;
-		    }
-		}
-		/*
-		 * We've stripped away the crud.  Now check to see if the
-		 * profile entry matches our hostname.  If so, then this
-		 * is the one to use.  Additionally, check the host alias
-		 * list.
-		 */
-		if (!strcmp(hostlist[hi], our_hostent->h_name)) {
-		    if (pport != -1) {
-			retval = pport;
-			found = 1;
-		    }
-		}
-		else {
-		    for (ai=0; our_hostent->h_aliases[ai]; ai++) {
-			if (!strcmp(hostlist[hi],
-				    our_hostent->h_aliases[ai])) {
-			    if (pport != -1) {
-				retval = pport;
-				found = 1;
-			    }
-			    break;
-			}
-		    }
-		}
-	    }
-	    free(hostlist);
-	}
-    }
-    /*
-     * If we didn't find an entry in the profile, then use the default.
-     * If it's no good, then attempt to find it in /etc/services.
-     */
-    if (!found) {
-	retval = defport;
-	/* Get the service entry out of /etc/services */
-	if (retval <= 0) {
-	    if ((our_servent = getservbyname(service, "udp")))
-		retval = ntohs(our_servent->s_port);
-	}
-    }
-    return(retval);
-}
 
 /*
  * initialize the replay cache.
