@@ -179,6 +179,7 @@ kerberos5_send(ap)
 	krb5_error_code r;
 	krb5_ccache ccache;
 	krb5_creds creds;		/* telnet gets session key from here */
+	krb5_creds * new_creds;
 	extern krb5_flags krb5_kdc_default_options;
 	int ap_opts;
 
@@ -218,7 +219,7 @@ kerberos5_send(ap)
 	}
 
 	if (r = krb5_get_credentials(telnet_context, krb5_kdc_default_options,
-				     ccache, &creds)) {
+				     ccache, &creds, &new_creds)) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on credentials(%s)\r\n",
 			       error_message(r));
@@ -233,14 +234,13 @@ kerberos5_send(ap)
 	    ap_opts = 0;
 	    
 	r = krb5_mk_req_extended(telnet_context, ap_opts,
-				 (krb5_checksum *) NULL,
-				 krb5_kdc_default_options, 0,
+				 (krb5_checksum *) NULL, 0,
 #ifdef	ENCRYPTION
 				 &newkey,
 #else	/* ENCRYPTION */
 				 0,
 #endif	/* ENCRYPTION */
-				 ccache, &creds, &authenticator, &auth);
+				 &creds, &authenticator, &auth);
 	/* don't let the key get freed if we clean up the authenticator */
 	authenticator.subkey = 0;
 
@@ -251,9 +251,9 @@ kerberos5_send(ap)
 	    /* keep the key in our private storage, but don't use it
 	       yet---see kerberos5_reply() below */
 	    if (newkey->keytype != KEYTYPE_DES) {
-		if (creds.keyblock.keytype == KEYTYPE_DES)
+		if (new_creds->keyblock.keytype == KEYTYPE_DES)
 		    /* use the session key in credentials instead */
-		    krb5_copy_keyblock_contents(telnet_context, &creds,
+		    krb5_copy_keyblock_contents(telnet_context, new_creds,
 						&session_key);
 		else
 		    /* XXX ? */;
@@ -264,6 +264,7 @@ kerberos5_send(ap)
 	}
 #endif	/* ENCRYPTION */
 	krb5_free_cred_contents(telnet_context, &creds);
+	krb5_free_creds(telnet_context, new_creds);
 	if (r) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: mk_req failed (%s)\r\n",
@@ -607,7 +608,7 @@ kerberos5_printsub(data, cnt, buf, buflen)
 kerberos5_forward(ap)
      Authenticator *ap;
 {
-    krb5_creds *local_creds;
+    krb5_creds *local_creds, * new_creds;
     krb5_error_code r;
     krb5_data forw_creds;
     extern krb5_cksumtype krb5_kdc_req_sumtype;
@@ -647,25 +648,27 @@ kerberos5_forward(ap)
 
     /* Get ticket from credentials cache */
     if (r = krb5_get_credentials(telnet_context, KRB5_GC_CACHED, 
-			         ccache, local_creds)) {
+			         ccache, local_creds, &new_creds)) {
 	if (auth_debug_mode) 
 	  printf("Kerberos V5: could not obtain credentials - %s\r\n",
 		 error_message(r));
 	krb5_free_creds(telnet_context, local_creds);
+	krb5_free_creds(telnet_context, new_creds);
 	return;
     }
 
     if (r = krb5_get_for_creds(telnet_context,
 			       krb5_kdc_req_sumtype,
 			       RemoteHostName,
-			       local_creds->client,
-			       &local_creds->keyblock,
+			       new_creds->client,
+			       &new_creds->keyblock,
 			       forward_flags & OPTS_FORWARDABLE_CREDS,
 			       &forw_creds)) {
 	if (auth_debug_mode) 
 	  printf("Kerberos V5: error getting forwarded creds - %s\r\n",
 		 error_message(r));
 	krb5_free_creds(telnet_context, local_creds);
+        krb5_free_creds(telnet_context, new_creds);
 	return;
     }
     
@@ -680,6 +683,7 @@ kerberos5_forward(ap)
     }
 
     krb5_free_creds(telnet_context, local_creds);
+    krb5_free_creds(telnet_context, new_creds);
 }
 #endif	/* FORWARD */
 

@@ -1,3 +1,9 @@
+Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
+
+        * kerberos5.c (kerberos5_send(), kerberos5_forward()) 
+		Call krb5_get_credentials() and krb5_mk_req_extended() 
+		with new calling convention.
+
 Thu Feb  2 02:56:50 1995  John Gilmore  <gnu@cygnus.com>
 
 	* forward.c:  Remove unused #include <krb5/crc-32.h>.
