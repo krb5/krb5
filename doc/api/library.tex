@@ -1,4 +1,4 @@
-\documentstyle[newcen,fixunder,functions,changebar,twoside]{article}
+\documentstyle[newcen,fixunder,functions,changebar,twoside,fancyheadings,backslash]{article}
 \setlength{\oddsidemargin}{0.25in}
 \setlength{\evensidemargin}{-0.25in}
 \setlength{\topmargin}{-.5in}
@@ -7,11 +7,17 @@
 \setlength{\parindent}{2em}
 \setlength{\textwidth}{6.25in}
 \makeindex
-\pagestyle{headings}
 \newif\ifdraft
 \drafttrue
-\typein{Draft flag? (type /draftfalse<CR> if not draft...)}
+\typein{Draft flag? (type \backslash draftfalse<CR> if not draft...)}
+\ifdraft
+\pagestyle{fancy}
+\lhead[\fancyplain{}\thepage]{\fancyplain{}{\sl \leftmark}}
+\rhead[\fancyplain{}{\sl \leftmark}]{\fancyplain{}\thepage}
+\cfoot{{\bf DRAFT---DO NOT REDISTRIBUTE}}
+\else\pagestyle{headings}\fi
 \begin{document}
+\thispagestyle{empty}
 \begin{center}
 {\Huge Kerberos V5 application programming library}
 \ifdraft \\ {\Large DRAFT---\today}\fi
