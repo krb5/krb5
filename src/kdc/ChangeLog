@@ -1,3 +1,10 @@
+Fri Feb 20 15:58:21 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_preauth.c (get_preauth_hint_list): Don't add the pseudo
+		preauth type KRB5_PADATA_PW_SALT to the hint list of
+		supported preauthentication systems, since it doesn't help
+		to send it.  (And it may screw up Cygnus KerbNet clients.)
+
 Wed Feb 18 16:04:22 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (thisconfigdir): Remove trailing slash.

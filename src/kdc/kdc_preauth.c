@@ -87,6 +87,8 @@ static krb5_error_code get_sam_edata
 #define PA_HARDWARE	0x00000001
 #define PA_REQUIRED	0x00000002
 #define PA_SUFFICIENT	0x00000004
+	/* Not really a padata, so don't include it in the etype list*/
+#define PA_PSEUDO	0x00000008 
 
 static krb5_preauth_systems preauth_systems[] = {
     {
@@ -105,7 +107,7 @@ static krb5_preauth_systems preauth_systems[] = {
     },
     {
 	KRB5_PADATA_PW_SALT,
-	0,
+	PA_PSEUDO,		/* Don't include this in the error list */
 	0, 
 	0,
 	return_pw_salt
@@ -196,6 +198,8 @@ void get_preauth_hint_list(request, client, server, e_data)
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
 	if (hw_only && !(ap->flags & PA_HARDWARE))
+	    continue;
+	if (ap->flags & PA_PSEUDO)
 	    continue;
 	*pa = malloc(sizeof(krb5_pa_data));
 	if (*pa == 0)
