@@ -94,10 +94,17 @@ install-mac::
 check-mac::
 
 # Directory syntax:
-R=
-C=:
+#
+# begin absolute path
+ABS=
+# begin relative path
+REL=:
+# up-directory
+U=
+# path separator
 S=:
-U=:
+# this is magic... should only be used for preceding a program invocation
+C=:
 
 BUILDTOP = @BUILDTOP@
 srcdir = $(C)

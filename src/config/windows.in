@@ -14,10 +14,17 @@ check-windows::
 all-windows:: Makefile
 
 # Directory syntax:
-R=\		# root
-C=.\		# current
-S=\		# seperator
-U=..\		# up one level
+#
+# begin absolute path
+ABS=\
+# begin relative path
+REL=
+# up-directory
+U=..
+# path separator
+S=\
+# this is magic... should only be used for preceding a program invocation
+C=.\
 
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)

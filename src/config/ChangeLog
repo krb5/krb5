@@ -1,3 +1,11 @@
+Wed Feb 18 17:31:52 1998  Tom Yu  <tlyu@mit.edu>
+
+	* windows.in: Rewrite some of the directory syntax.
+
+	* pre.in: Rewrite some of the directory syntax.
+
+	* mac-pre.in: Rewrite some of the directory syntax.
+
 Fri Feb 13 22:16:51 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* config.guess, config.sub: Applied lxs's changes to add support
