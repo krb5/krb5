@@ -155,6 +155,10 @@ typedef int krb5_sigtype;
 #define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */
 #define	KRB5_KDB_EXPIRATION	2145830400 /* Thu Jan  1 00:00:00 2038 UTC */
 
+#ifdef Krb4Compat
+#define KRB5_KRB4_COMPAT
+#endif
+
 /*
  * For paranoid DOE types that don't want to give helpful error
  * messages to the client....er, attacker
