@@ -1,3 +1,8 @@
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfile_get_entry): Check principal name prior to
+	checking enctype.  Suggested by Wyllys Ingersoll.
+
 2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kt_file.c (krb5_ktfileint_internal_read_entry): Use

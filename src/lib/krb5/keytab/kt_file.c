@@ -258,6 +258,14 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id, krb5_const_principal
 	   and copy new_entry there, or free new_entry.  Otherwise, it
 	   leaks. */
 
+	/* if the principal isn't the one requested, free new_entry
+	   and continue to the next. */
+
+	if (!krb5_principal_compare(context, principal, new_entry.principal)) {
+	    krb5_kt_free_entry(context, &new_entry);
+	    continue;
+	}
+
 	/* if the enctype is not ignored and doesn't match, free new_entry
 	   and continue to the next */
 
@@ -279,14 +287,6 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id, krb5_const_principal
 	     */
 	    new_entry.key.enctype = enctype;
 
-	}
-
-	/* if the principal isn't the one requested, free new_entry
-	   and continue to the next. */
-
-	if (!krb5_principal_compare(context, principal, new_entry.principal)) {
-	    krb5_kt_free_entry(context, &new_entry);
-	    continue;
 	}
 
 	if (kvno == IGNORE_VNO) {
