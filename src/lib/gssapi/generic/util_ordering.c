@@ -245,12 +245,7 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
-#if defined( __linux__)
-/*# define LOGPATH "/dev/pts/7"*/
 #define LOGPATH "/tmp/gsslog"
-#elif defined(__MACH__)
-# define LOGPATH "/dev/ttyp6" /* laptop */
-#endif
 void _log(const char *fmt, ...) {
 #if 1
     static FILE *logf;
