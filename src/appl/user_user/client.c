@@ -38,12 +38,13 @@
 #include <com_err.h>
 
 krb5_error_code
-tgt_keyproc(context, keyprocarg, principal, vno, key)
+tgt_keyproc(context, keyprocarg, principal, vno, keytype, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal principal;
     krb5_kvno vno;
-    krb5_keyblock ** key;
+    krb5_keytype keytype;
+   krb5_keyblock ** key;
 {
     krb5_creds *creds = (krb5_creds *)keyprocarg;
     

@@ -1,3 +1,7 @@
+Fri Feb  3 11:58:18 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* client.c: (tgt_keyproc): Add keytype argument to rd_req_proc.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
