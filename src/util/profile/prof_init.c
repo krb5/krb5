@@ -98,6 +98,7 @@ profile_init_path(filepath, ret_profile)
 		if (filenames[i] == 0) {
 			/* if malloc fails, free the ones that worked */
 			while(--i >= 0) free(filenames[i]);
+                        free(filenames);
 			return ENOMEM;
 		}
 		strncpy(filenames[i], s, ent_len);

@@ -1,3 +1,7 @@
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prof_init.c (profile_init_path): Fix memory leak.
+
 1999-06-09 Miro Jurisic   <meeroh@mit.edu>
 
 	* prof_file.c (profile_update_file): if fopen fails and errno is 0, set
