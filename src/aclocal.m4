@@ -88,10 +88,14 @@ $2::<<<
 	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
 		*[ik]*) e=:;; *) e="exit 1";; esac; \
 	for i in $(SUBDIRS) ; do \
-		if (cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
-			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
-		else $$e; fi; \
+		if test -d $$i ; then \
+			echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
+			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
+			    CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
+			else $$e; fi; \
+		else \
+			echo "Skipping missing directory $(CURRENT_DIR)$$i" ; \
+		fi \
 	done>>>
 changequote([,])dnl
 AC_POP_MAKEFILE()dnl
