@@ -1,3 +1,8 @@
+Mon Oct  2 15:08:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* logger.c (krb5_klog_init): If the log file can't be opened,
+		print an intelligent error message.
+
 Thu Oct  5 12:06:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* alt_prof.c (krb5_read_realm_params): If secure flag is set in

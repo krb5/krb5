@@ -357,6 +357,7 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
     char	savec;
     int		error;
     int		do_openlog, log_facility;
+    FILE	*f;
 
     /* Initialize */
     do_openlog = 0;
@@ -417,18 +418,16 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 		    /*
 		     * Check for append/overwrite, then open the file.
 		     */
-		    if (cp[4] == ':') {
-			if (log_control.log_entries[i].lfu_filep =
-			    fopen(&cp[5], "a+")) {
+		    if (cp[4] == ':' || cp[4] == '=') {
+			f = fopen(&cp[5], (cp[4] == ':') ? "a+" : "w");
+			if (f) {
+			    log_control.log_entries[i].lfu_filep = f;
 			    log_control.log_entries[i].log_type = K_LOG_FILE;
 			    log_control.log_entries[i].lfu_fname = &cp[5];
-			}
-		    }
-		    else if (cp[4] == '=') {
-			if (log_control.log_entries[i].lfu_filep =
-			    fopen(&cp[5], "w")) {
-			    log_control.log_entries[i].log_type = K_LOG_FILE;
-			    log_control.log_entries[i].lfu_fname = &cp[5];
+			} else {
+			    fprintf(stderr,"Couldn't open log file %s: %s\n",
+				    &cp[5], error_message(errno));
+			    continue;
 			}
 		    }
 		}
