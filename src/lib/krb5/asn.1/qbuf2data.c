@@ -56,7 +56,13 @@ register int *error;
     if (!retval) {
 	goto nomem;
     }
-    retval->length = val->qb_forw->qb_len;
+    /* If there is no data, don't call malloc.  This saves space on systems
+       which allocate data in response to malloc(0), and saves error checking
+       on systems which return NULL.  */
+    if ((retval->length = val->qb_forw->qb_len) == 0) {
+	retval->data = 0;
+	return retval;
+    }
     retval->data = (char *)xmalloc(val->qb_forw->qb_len);
     if (!retval->data) {
 	xfree(retval);
