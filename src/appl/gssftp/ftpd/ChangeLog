@@ -1,3 +1,10 @@
+Tue Feb 24 21:34:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Add production "nonguest" to catch things that
+	anonymous users aren't supposed to do.  Replace "check_login" with
+	"nonguest" in a few places to prevent w4r3z d00dz from being
+	lame with world-writable incoming directories.
+
 Sun Feb 22 19:37:07 1998  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c: Use krb5_seteuid() and krb5_setegid(). [krb5-libs/505]

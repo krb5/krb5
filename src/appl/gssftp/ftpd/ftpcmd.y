@@ -182,7 +182,7 @@ struct tab sitetab[];
 
 %type <num> NUMBER
 %type <num> form_code prot_code struct_code mode_code octal_number
-%type <num> check_login byte_size
+%type <num> check_login byte_size nonguest
 
 %type <str> STRING
 %type <str> password pathname username pathstring
@@ -441,14 +441,14 @@ cmd:		USER SP username CRLF
 		= {
 			reply(200, "NOOP command successful.");
 		}
-	|	MKD check_login SP pathname CRLF
+	|	MKD nonguest SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
 				makedir((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
-	|	RMD check_login SP pathname CRLF
+	|	RMD nonguest SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
 				removedir((char *) $4);
@@ -483,7 +483,7 @@ cmd:		USER SP username CRLF
 				reply(200, "Current UMASK is %03o", oldmask);
 			}
 		}
-	|	SITE SP UMASK check_login SP octal_number CRLF
+	|	SITE SP UMASK nonguest SP octal_number CRLF
 		= {
 			int oldmask;
 
@@ -498,7 +498,7 @@ cmd:		USER SP username CRLF
 				}
 			}
 		}
-	|	SITE SP CHMOD check_login SP octal_number SP pathname CRLF
+	|	SITE SP CHMOD nonguest SP octal_number SP pathname CRLF
 		= {
 			if ($4 && ($8 != NULL)) {
 				if ($6 > 0777)
@@ -828,6 +828,16 @@ check_login:	/* empty */
 	}
 	;
 
+nonguest: check_login
+	= {
+		if (guest) {
+			reply(550, "Operation prohibited for anonymous users.");
+			$$ = 0;
+		}
+		else
+			$$ = 1;
+	}
+	;
 %%
 
 struct tab cmdtab[] = {		/* In order defined in RFC 765 */
