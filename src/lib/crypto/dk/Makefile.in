@@ -14,23 +14,23 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS=\
 	checksum.o	\
-	decrypt.o	\
+	dk_decrypt.o	\
+	dk_encrypt.o	\
 	derive.o	\
-	encrypt.o	\
 	stringtokey.o
 
 OBJS=\
 	checksum.$(OBJEXT)	\
-	decrypt.$(OBJEXT)	\
+	dk_decrypt.$(OBJEXT)	\
+	dk_encrypt.$(OBJEXT)	\
 	derive.$(OBJEXT)	\
-	encrypt.$(OBJEXT)	\
 	stringtokey.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/checksum.c	\
-	$(srcdir)/decrypt.c	\
+	$(srcdir)/dk_decrypt.c	\
+	$(srcdir)/dk_encrypt.c	\
 	$(srcdir)/derive.c	\
-	$(srcdir)/encrypt.c	\
 	$(srcdir)/stringtokey.c
 
 ##DOS##LIBOBJS = $(OBJS)

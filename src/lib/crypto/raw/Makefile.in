@@ -12,11 +12,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= decrypt.o encrypt.o
+STLIBOBJS= raw_decrypt.o raw_encrypt.o
 
-OBJS= decrypt.$(OBJEXT) encrypt.$(OBJEXT)
+OBJS= raw_decrypt.$(OBJEXT) raw_encrypt.$(OBJEXT)
 
-SRCS= $(srcdir)/decrypt.c $(srcdir)/encrypt.c
+SRCS= $(srcdir)/raw_decrypt.c $(srcdir)/raw_encrypt.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
