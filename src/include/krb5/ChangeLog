@@ -1,4 +1,7 @@
+Mon Jan 22 17:36:00 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* configure.in: Use KRB5_CHECK_PROTOS instead of inlining
+		prototype checking.
 
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
 

@@ -55,19 +55,9 @@ if test $krb5_cv_has_ansi_stdio = yes; then
 AC_DEFINE(ANSI_STDIO)
 fi
 dnl
-AC_MSG_CHECKING([prototype support])
-AC_CACHE_VAL(krb5_cv_has_prototypes,
-[AC_TRY_COMPILE(
-[int x(double y, int z);], [],
-krb5_cv_has_prototypes=yes, krb5_cv_has_prototypes=no)])
-AC_MSG_RESULT($krb5_cv_has_prototypes)
-if test $krb5_cv_has_prototypes = no; then
-AC_DEFINE(KRB5_NO_PROTOTYPES)
-else
-AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
-fi
-dnl *never* set NARROW_PROTOTYPES
-
+KRB5_CHECK_PROTOS
+dnl
+dnl
 AC_MSG_CHECKING([prototypes in structs])
 AC_CACHE_VAL(krb5_cv_struct_prototypes,
 [AC_TRY_COMPILE(
