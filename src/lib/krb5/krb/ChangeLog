@@ -1,3 +1,8 @@
+
+Fri Apr 28 09:54:51 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Move adm_rw.c from libkrb5 to libkadm.
+
 Fri Apr 28 08:36:03 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* init_ctx.c (krb5_free_context): Extra semicolon meant the etypes

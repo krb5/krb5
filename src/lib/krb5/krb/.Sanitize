@@ -26,7 +26,6 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
-adm_rw.c
 addr_comp.c
 addr_order.c
 addr_srch.c
