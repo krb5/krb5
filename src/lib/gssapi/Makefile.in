@@ -12,11 +12,13 @@ RM = rm -f
 CP = cp
 RANLIB = @RANLIB@
 
+TST=if test -n "`cat DONE`" ; then
+
 all::
 
 libgssapi_krb5.a: generic/DONE krb5/DONE
-	(cd generic; $(ARADD) ../$@ `cat DONE`)
-	(cd krb5; $(ARADD) ../$@ `cat DONE`)
+	(cd generic; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
+	(cd krb5; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
 	$(RANLIB) $@
 
 install:: libgssapi_krb5.a
