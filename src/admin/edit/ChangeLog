@@ -1,3 +1,8 @@
+Wed Feb  8 20:08:36 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdb5_edit.c (show_principal): make sane and print all useful
+	fields
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h

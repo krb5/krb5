@@ -1381,6 +1381,24 @@ enter_pwd_key(cmdname, newprinc, princ, string_princ, vno, salttype)
     return;
 }
 
+char *strdur(duration)
+    time_t duration;
+{
+    static char out[50];
+    int days, hours, minutes, seconds;
+    
+    days = duration / (24 * 3600);
+    duration %= 24 * 3600;
+    hours = duration / 3600;
+    duration %= 3600;
+    minutes = duration / 60;
+    duration %= 60;
+    seconds = duration;
+    sprintf(out, "%d %s %02d:%02d:%02d", days, days == 1 ? "day" : "days",
+	    hours, minutes, seconds);
+    return out;
+}
+
 /*
  * XXX Still under construction....
  */
@@ -1395,8 +1413,25 @@ void show_principal(argc, argv)
     krb5_error_code retval;
     char *pr_name = 0;
     char *pr_mod = 0;
-    time_t mod_date;
-    
+    time_t tmp_date;
+    int i;
+    static char *prflags[32] = {
+	"DISALLOW_POSTDATED",	/* 0x00000001 */
+	"DISALLOW_FORWARDABLE",	/* 0x00000002 */
+	"DISALLOW_TGT_BASED",	/* 0x00000004 */
+	"DISALLOW_RENEWABLE",	/* 0x00000008 */
+	"DISALLOW_PROXIABLE",	/* 0x00000010 */
+	"DISALLOW_DUP_SKEY",	/* 0x00000020 */
+	"DISALLOW_ALL_TIX",	/* 0x00000040 */
+	"REQUIRES_PRE_AUTH",	/* 0x00000080 */
+	"REQUIRES_HW_AUTH",	/* 0x00000100 */
+	"REQUIRES_PWCHANGE",	/* 0x00000200 */
+	NULL,			/* 0x00000400 */
+	NULL,			/* 0x00000800 */
+	"DISALLOW_SVR",		/* 0x00001000 */
+	"PWCHANGE_SERVICE"	/* 0x00002000 */
+	};
+
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
@@ -1445,10 +1480,34 @@ void show_principal(argc, argv)
     }
 
     printf("Name: %s\n", pr_name);
+    printf("Key version: %d\n", entry.kvno);
+    printf("Maximum life: %s\n", strdur(entry.max_life));
+    printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
+    printf("Master key version: %d\n", entry.mkvno);
+    tmp_date = (time_t) entry.expiration;
+    printf("Expiration: %s", ctime(&tmp_date));
+    tmp_date = (time_t) entry.pw_expiration;
+    printf("Password expiration: %s", ctime(&tmp_date));
+    tmp_date = (time_t) entry.last_pwd_change;
+    printf("Last password change: %s", ctime(&tmp_date));
+    tmp_date = (time_t) entry.last_success;
+    printf("Last successful password: %s", ctime(&tmp_date));
+    tmp_date = (time_t) entry.last_failed;
+    printf("Last failed password attempt: %s", ctime(&tmp_date));
+    printf("Failed password attempts: %d\n", entry.fail_auth_count);
+    tmp_date = (time_t) entry.mod_date;
+    printf("Last modified by %s on %s", pr_mod, ctime(&tmp_date));
+    printf("Attributes:");
+    for (i = 0; i < 32; i++) {
+	if (entry.attributes & (krb5_flags) 1 << i)
+	    if (prflags[i])
+		printf(" %s", prflags[i]);
+	    else
+		printf("UNKNOWN_0x%08X", (krb5_flags) 1 << i);
+    }
+    printf("\n");
     printf("Salt: %d\n", entry.salt_type);
     printf("Alt salt: %d\n", entry.salt_type);
-    mod_date = (time_t) entry.mod_date;
-    printf("Last modified by %s on %s\n", pr_mod, ctime(&mod_date));
     
     if (!nprincs) {
 	com_err(argv[0], 0, "Principal '%s' does not exist", argv[1]);
