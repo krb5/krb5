@@ -1,3 +1,8 @@
+Wed Jun  5 15:59:12 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5_decode_test.c (main): For asn1_decode_enc_kdc_rep_part,
+		starttime will equal authtime if not sent OTW.
+
 Tue Apr  2 20:57:12 1996  Chris Provenzano  <proven@mit.edu>
 
 	* utility.c (krb5_data_hex_parse()) : Do a strdup() of string before
