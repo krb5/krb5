@@ -14,6 +14,10 @@
 /*
  * Kconfig
  */
+
+
+/* #define SAPTIMEBOMB 1 */
+
 #include <stdio.h>
 #ifndef __MWERKS__
 #include <Controls.h>
@@ -63,6 +67,8 @@
 #	include "krb_driver.h"
 #	include "kconfig.vers"
 #	include "glue.h"
+#	include "bsd-mac-compat.h"
+#	include "testtrack.h"
 #endif
 
 #ifdef KRB5
@@ -73,6 +79,8 @@
 #	include "kconfig.vers"
 #	include "prof_int.h"
 #	include "adm_proto.h"
+//#	include "bsd-mac-compat.h"
+#	include "testtrack.h"
 #endif
 
 #include "WindowUtil.h"
@@ -86,6 +94,10 @@
 //#define dangerousPattern 1
 #define KFAILURE 255
 #define KSUCCESS 0
+
+// Timebomb info
+#define TBALERTID	135
+#define TB30ALERTID	136
 
 
 	//  IH 05.03.96: PPC Port, must use UPPs instead of Procedure Ptrs
@@ -125,8 +137,9 @@ queuetype credentialsQ = 0;
 ListHandle dlist;						/* domain list */
 ListHandle slist;						/* server list */
 struct listfilter lf;					/* lf for maind */
-Handle ddeleteHandle, deditHandle;
-Handle sdeleteHandle, seditHandle;
+/* Add the 'new' handle so we can disable the control for the SAP release */
+Handle dnewHandle, ddeleteHandle, deditHandle;
+Handle snewHandle, sdeleteHandle, seditHandle;
 preferences prefs;						/* preferences */
 
 #ifdef KRB4
@@ -155,6 +168,8 @@ k5_init_ccache (krb5_ccache *ccache) {
     krb5_principal princ;
     FILE *fp;
 
+	strcpy(gUserName, kUNKNOWNUSERNAME);
+
     code = krb5_cc_default (kcontext, ccache); // Initialize the ccache
     if (code)
         return code;
@@ -165,7 +180,10 @@ k5_init_ccache (krb5_ccache *ccache) {
         if (fp == NULL)                         // Can't open it
             return KRB5_FCC_PERM;
         fclose (fp);
-    }
+    } else if ( code == noErr ) {
+    	strcpy(gUserName, princ->data->data);
+		strcpy(gRealmName, princ->realm.data);
+	} 
 
     if (code) {                                 // Bad, delete and try again
         remove (krb5_cc_get_name(kcontext, *ccache));
@@ -183,7 +201,12 @@ k5_init_ccache (krb5_ccache *ccache) {
 int main (void)
 {
 	int i, s;
-	MenuHandle menuhandle;
+	MenuHandle 		menuhandle;
+	
+#ifdef SAPTIMEBOMB
+	DateTimeRec		goalTimeBomb;
+	long			currentTime, goalTimeBombInSecs;
+#endif
 
 	/*	
 	 * Setup
@@ -196,12 +219,33 @@ int main (void)
 	InitDialogs(0);
 	InitCursor();
 	FlushEvents(everyEvent, 0);
+
+#ifdef SAPTIMEBOMB
+	goalTimeBomb.year = 1997;
+	goalTimeBomb.month = 6;
+	goalTimeBomb.day = 1;
+	goalTimeBomb.hour = 0; /* Let's use midnight for simplicity */
+	goalTimeBomb.minute = 0;
+	goalTimeBomb.second = 0;
+	
+	DateToSeconds( &goalTimeBomb, &goalTimeBombInSecs );
+	
+	GetDateTime(&currentTime);
+	
+	if ( (goalTimeBombInSecs - currentTime) <= 0 ) {
+		StopAlert(TBALERTID, NULL);
+		ExitToShell();
+    } else if ( (goalTimeBombInSecs - currentTime) < 1209600 ) { /* num seconds in 14 days */
+		NoteAlert(TB30ALERTID, NULL);
+	}
+#endif
+
 #ifdef KRB4
 	init_cornell_des();
 #endif
 #ifdef KRB5
 	k5_init_ccache (&k5_ccache);
-	strcpy(gUserName, kUNKNOWNUSERNAME);
+	/*strcpy(gUserName, kUNKNOWNUSERNAME);*/
 #endif
 	
 		//  IH 05.03.95: Create the UPPs for ToolBox callback routines
@@ -319,18 +363,22 @@ void mainEvent ()
 		 * cells are selected or not.
 		 */
 		SetPt(&cell, 0, 0);
-		if (LGetSelect(true, &cell, dlist))
+		/* disabled for SAP release */
+	/*	if (LGetSelect(true, &cell, dlist))
 			state = 0;
-		else
+		else*/
 			state = 255;					/* disable */
+		HiliteControl((ControlHandle) dnewHandle, state);
 		HiliteControl((ControlHandle) ddeleteHandle, state);
 		HiliteControl((ControlHandle) deditHandle, state);
 
 		SetPt(&cell, 0, 0);
-		if (LGetSelect(true, &cell, slist))
+		/* disabled for SAP release */
+	/*	if (LGetSelect(true, &cell, slist))
 			state = 0;
-		else
+		else*/
 			state = 255;					/* disable */
+		HiliteControl((ControlHandle) snewHandle, state);
 		HiliteControl((ControlHandle) sdeleteHandle, state);
 		HiliteControl((ControlHandle) seditHandle, state);
 
@@ -820,7 +868,9 @@ void updatedisplay ()
 	Handle itemHandle;
 	Rect itemRect;
 	Point pt;
-		
+    krb5_principal princ;
+    int	anErr;
+
 	if (!maind)
 		return;
 		
@@ -874,6 +924,19 @@ char *ptr;
 		strcpy(scratch, "None");
 #endif
 #ifdef KRB5
+/*	anErr = krb5_cc_get_principal(kcontext, k5_ccache, &princ);
+	
+	if ( anErr == noErr )
+	{
+		strcpy(scratch, princ->data->data);
+		strcat(scratch, "@");
+		strcat(scratch, princ->realm.data);
+	}
+	else
+		strcpy(scratch, kUNKNOWNUSERNAME);*/
+		
+	
+	/* old cruft */
 	if (strcmp(gUserName, kUNKNOWNUSERNAME))
 	{
 		strcpy(scratch, gUserName);
@@ -983,6 +1046,9 @@ void buildmain ()
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
 	SetDItem(dialog, MAIN_SERVERS, itemType, (Handle) gdolistUPP, &sRect);
 
+	/* Add for 'new' SAP release */
+	GetDItem(dialog, MAIN_DNEW, &itemType, &dnewHandle, &itemRect);
+	GetDItem(dialog, MAIN_SNEW, &itemType, &snewHandle, &itemRect);
 	GetDItem(dialog, MAIN_DDELETE, &itemType, &ddeleteHandle, &itemRect);
 	GetDItem(dialog, MAIN_SDELETE, &itemType, &sdeleteHandle, &itemRect);
 	GetDItem(dialog, MAIN_DEDIT, &itemType, &deditHandle, &itemRect);
@@ -1327,13 +1393,15 @@ void mainhit (EventRecord *event, DialogPtr dlg, int item)
 		 * cell selection dragging, scrolling and double clicks by the 
 		 * user.
 		 */
-		if (LClick(where, event->modifiers, dlist)) {
+		 
+		 /* disabled for SAP purposes */
+		if (LClick(where, event->modifiers, dlist)) { 
 			/* 
 			 * a double click in a cell has occured. find out in which 
 			 * one of the cells the user has double clicked in.
 			 */
-			cell = LLastClick(dlist);
-			goto dedit;
+		/*	cell = LLastClick(dlist);
+			goto dedit;*/
 		}
 
 		break;
@@ -1358,8 +1426,8 @@ void mainhit (EventRecord *event, DialogPtr dlg, int item)
 			 * a double click in a cell has occured. find out in which 
 			 * one of the cells the user has double clicked in.
 			 */
-			cell = LLastClick(slist);
-			goto sedit;
+		/*	cell = LLastClick(slist);
+			goto sedit;*/
 		}
 		break;
 		
@@ -1674,10 +1742,11 @@ void klist_dialog ()
 		 * Set the state of the edit and delete buttons depending on if any
 		 * cells are selected or not.
 		 */
-		SetPt(&cell, 0, 0);
+		 /* disabled for SAP release */
+		/*SetPt(&cell, 0, 0);
 		if (LGetSelect(true, &cell, list))
 			state = 0;
-		else
+		else*/
 			state = 255;					/* disable */
 		HiliteControl((ControlHandle) deleteHandle, state);
 
@@ -2236,7 +2305,7 @@ void doLogin ()
 #endif
 
 #ifdef KRB5
-    long lifetime = 8*60;	// 8 hours
+    long lifetime = 8*60;	// 8 hours 
     krb5_error_code code;
     krb5_principal principal;
     krb5_creds creds;
@@ -2340,7 +2409,19 @@ k5_dest_tkt (void) {
     }
 
     krb5_free_principal (kcontext, princ);
+   
+   /* quick nasty hack to remove the ticket cache for better
+      user understanding of what the hell is going on. */ 
+    code = krb5_cc_destroy( kcontext, k5_ccache );
+    k5_init_ccache (&k5_ccache);
+
+    if ( code != 0 ) {
+    	kerror("when removing cache", code);
+    	return code;
+    }
+    
     return code;
+
 }
 #endif
 
@@ -3338,7 +3419,7 @@ pascal Boolean internalBufferFilter (DialogPtr dlog, EventRecord *event, short *
 			return true;					/* eat event */
 		}
 		InsertChar(buffer,start,key);		// Insert the real key into the buffer
-		event->message = '¥';			// Character to use in field
+		event->message = '€';			// Character to use in field
 	}
 	
 	return false; 							// Let ModalDialog insert the fake char

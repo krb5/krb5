@@ -1,3 +1,13 @@
+Fri Dec 20 12:01:10 1996 Marshall Vale <mjv@mit.edu>
+
+	* kconfig.c: Adjusted time-bomb date to June 1, 1997
+	* kconfig.rsrc: Bumped up version number, moved timebomb resources out
+
+Mon Aug 5 12:00:00 1996 Marshall Vale <mjv@mit.edu>
+    
+    * kconfig.c: Added time-bomb code.
+    * kconfig.rsrc: Added alert resources for time bomb display.
+
 Thu Mar 28 17:59:43 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kadm.c: Use new MacTCP Header files.
