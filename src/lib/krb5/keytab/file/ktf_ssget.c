@@ -37,7 +37,7 @@ krb5_kt_cursor *cursorp;
 	return ENOMEM;
     }
     *fileoff = ftell(KTFILEP(id));
-    cursorp = (krb5_kt_cursor *)fileoff;
+    *cursorp = (krb5_kt_cursor)fileoff;
 
     return 0;
 }
