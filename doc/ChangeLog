@@ -1,3 +1,10 @@
+2002-09-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo, dnssrv.texinfo: Documented config file variables
+	and SRV records to use for Kerberos TCP service, if it's enabled,
+	which it isn't by default.  Removed UDP port 750 from the DNS SRV
+	recommendations.
+
 2002-09-20  Jen Selby  <jenselby@mit.edu>
 
 	* Makefile: made the list of manpages a variable

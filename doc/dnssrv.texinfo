@@ -21,9 +21,19 @@ well.)  Several different Kerberos-related service names are used:
 
 @table @code 
 @item _kerberos._udp 
-This is for contacting any KDC.  This entry will be used the most
-often.  Normally you should list ports @value{DefaultKdcPorts} on each
-of your KDCs.
+This is for contacting any KDC by UDP.  This entry will be used the most
+often.  Normally you should list port 88 on each of your KDCs.
+@c Don't encourage continued use of port 750 for krb5.
+@c It should be only for backwards compatibility with krb4.
+@c Do the Mac/Windows krb4 libraries use this DNS entry?
+@c The UNIX code does not.
+
+@item _kerberos._tcp
+This is for contacting any KDC by TCP.  The MIT KDC by default will not
+listen on any TCP ports, so unless you've changed the configuration or
+you're running another KDC implementation, you should leave this
+unspecified.  If you do enable TCP support, normally you should use
+port 88.
 
 @item _kerberos-master._udp
 This entry should refer to those KDCs, if any, that will immediately see
