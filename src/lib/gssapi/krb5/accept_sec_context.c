@@ -515,18 +515,20 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        reqcksum.contents = 0;
 
        TREAD_INT(ptr, gss_flags, bigend);
+#if 0
        gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if
 					  there's a delegation, we'll set
 					  it below */
+#endif
        decode_req_message = 0;
 
        /* if the checksum length > 24, there are options to process */
 
-       if(authdat->checksum->length > 24) {
+       if(authdat->checksum->length > 24 && (gss_flags & GSS_C_DELEG_FLAG)) {
 
 	   i = authdat->checksum->length - 24;
 
-	   while (i >= 4) {
+	   if (i >= 4) {
 
 	       TREAD_INT16(ptr, option_id, bigend);
 
@@ -548,9 +550,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 	       i -= option.length;
 
-	       switch(option_id) {
-
-	       case KRB5_GSS_FOR_CREDS_OPTION:
+	       if (option_id != KRB5_GSS_FOR_CREDS_OPTION) {
+		   major_status = GSS_S_FAILURE;
+		   goto fail;
+	       }
 
 		   /* store the delegated credential */
 
@@ -562,15 +565,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 		       goto fail;
 		   }
 
-		   gss_flags |= GSS_C_DELEG_FLAG; /* got a delegation */
-
-		   break;
-
-		   /* default: */
-		   /* unknown options aren't an error */
-
-	       } /* switch */
-	   } /* while */
+	   } /* if i >= 4 */
+	   /* ignore any additional trailing data, for now */
        } /* if */
    }
 

@@ -1,3 +1,17 @@
+2004-01-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_sec_context.c: Include auth_con.h if CFX_EXERCISE is
+	defined.
+	(make_gss_checksum) [CFX_EXERCISE]: If the key enctype is aes256,
+	insert some stuff after the delegation slot.
+	(new_connection) [CFX_EXERCISE]: Don't send messages with bogus
+	token ids.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't
+	discard the delegation flag; only look for a delegation if the
+	flag is set, and only look for delegation, not other options.
+	Ignore any other data there.
+
 2003-12-19  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c: Include k5-int.h for accessor.
