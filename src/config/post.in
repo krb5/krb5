@@ -16,9 +16,9 @@ check-windows::
 		done ; \
 		$(CC) -M $(ALL_CFLAGS) $(SRCS) | \
 			sed -e 's; \./; ;g' \
-				-e "s; $$r/"'; $$(SRCTOP)/;g' \
 				-e 's; $(SRCTOP)/; $$(SRCTOP)/;g' \
 				-e 's; $(srcdir)/; $$(srcdir)/;g' \
+				-e "s; $$r/"'; $$(SRCTOP)/;g' \
 				-e 's; $(BUILDTOP)/; $$(BUILDTOP)/;g' | \
 			sed -f $(SRCTOP)/util/depfix.sed \
 			> .depend; \
