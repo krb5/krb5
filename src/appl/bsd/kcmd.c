@@ -451,9 +451,9 @@ getport(alport)
 
 #ifndef convex
 ruserok(rhost, superuser, ruser, luser)
-     char *rhost;
+     const char *rhost;
      int superuser;
-     char *ruser, *luser;
+     const char *ruser, *luser;
 {
     FILE *hostf;
     char fhost[MAXHOSTNAMELEN];
