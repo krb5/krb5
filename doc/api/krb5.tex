@@ -499,6 +499,36 @@ Returns system errors, encryption errors, replay errors.
 Essentially the same as \funcname{krb5_rd_req}, but uses a decoded AP_REQ
 as the input rather than an encoded input.
 
+\begin{funcdecl}{krb5_mk_rep}{krb5_error_code}{\funcin}
+\funcarg{const krb5_ap_rep_enc_part *}{repl}
+\funcarg{const krb5_keyblock *}{kblock}
+\funcout
+\funcarg{krb5_data *}{outbuf}
+\end{funcdecl}
+
+Formats and encrypts an AP_REP message, using \funcparam{*repl} for the
+encrypted part of the message.  The message is encrypted under the key
+in \funcparam{*kblock}, then encoded and left in outbuf.
+
+The output buffer storage is allocated, and should be freed by the
+caller when finished.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_rd_rep}{krb5_error_code}{\funcin}
+\funcarg{const krb5_data *}{inbuf}
+\funcarg{const krb5_keyblock *}{kblock}
+\funcout
+\funcarg{krb5_ap_rep_enc_part *}{repl}
+\end{funcdecl}
+
+Parses and decrypts an AP_REP message from \funcparam{*inbuf}, filling in
+the values in \funcparam{*repl} with the values from the message.
+
+The key in \funcparam{*kblock} is used to decrypt the message.
+
+Returns system errors.
+
 \begin{funcdecl}{krb5_mk_error}{krb5_error_code}{\funcin}
 \funcarg{krb5_error *}{dec_err}
 \funcout
