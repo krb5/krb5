@@ -16,7 +16,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 1.0
+@set EDITION 1.1
 
 @finalout                               @c don't print black warning boxes
 
@@ -1050,17 +1050,17 @@ counterparts
 @c @code{from}
 @code{su}, @code{passwd}, and @code{rdist}.
 
-@node Client Machine Configuration Files,  , Client Programs, Installing and Configuring UNIX Client Machines
+@node Client Machine Configuration Files, MacOS X Configuration, Client Programs, Installing and Configuring UNIX Client Machines
 @subsection Client Machine Configuration Files
 
 Each machine running Kerberos must have a @code{/etc/krb5.conf} file.
 (@xref{krb5.conf})
 
 @need 4000
-Also, you must add the appropriate Kerberos services to each client
-machine's @code{/etc/services} file.  If you are using the default
-configuration for @value{PRODUCT}, you should be able to just insert the
-following code:
+Also, for most UNIX systems, you must add the appropriate Kerberos
+services to each client machine's @code{/etc/services} file.  If you are
+using the default configuration for @value{PRODUCT}, you should be able
+to just insert the following code:
 
 @smallexample
 @group
@@ -1094,6 +1094,76 @@ authenticating to any Kerberos V4 KDCs in another realm) you will need
 to switch the port number for @code{kerberos} to 750 and create a
 @code{kerberos-sec} service (tcp and udp) on port 88, so the Kerberos
 V4 KDC(s) will continue to work properly.
+
+@menu
+* MacOS X Configuration::
+@end menu
+
+@node MacOS X Configuration,  , Client Machine Configuration Files, Client Machine Configuration Files
+@subsubsection MacOS X Configuration
+
+To install Kerberos V on MacOS X, follow the directions for generic
+Unix-based OS's, except for the @code{/etc/services} updates described
+above.  Then, you must reconfigure your name resolver to return fully
+qualified domain names (FQDNs).  To see if your system is already
+correctly configured, compile the Kerberos code, and run:
+
+@smallexample
+@group
+$ cd .../src/tests/resolve
+$ ./resolve
+@end group
+@end smallexample
+
+This will tell you whether or not your machine returns FQDNs on name
+lookups.  If the test fails, run the following commands to fix things:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder CacheAgent DNSAgent
+ NIAgent NILAgent
+@end group
+@end smallexample
+
+Unfortunately, as of release time, the machine must be rebooted for the
+changes to take effect.  When the machine comes back up, run the test
+again to make sure things are fixed.
+
+Now, service entries must be created for the Kerberos-based servers.
+@code{/etc/services} is meaningless on MacOS X, so the following
+commands must be run instead:
+
+@smallexample
+@group
+$ niutil -create . /services/kerberos
+$ niutil -createprop . /services/kerberos name kerberos kdc
+$ niutil -createprop . /services/kerberos port 750
+$ niutil -createprop . /services/kerberos protocol tcp udp
+$ niutil -create . /services/krbupdate
+$ niutil -createprop . /services/krbupdate name krbupdate kreg
+$ niutil -createprop . /services/krbupdate port 760
+$ niutil -createprop . /services/krbupdate protocol tcp
+$ niutil -create . /services/kpasswd
+$ niutil -createprop . /services/kpasswd name kpasswd kpwd
+$ niutil -createprop . /services/kpasswd port 761
+$ niutil -createprop . /services/kpasswd protocol tcp
+$ niutil -create . /services/klogin
+$ niutil -createprop . /services/klogin port 543
+$ niutil -createprop . /services/klogin protocol tcp
+$ niutil -create . /services/eklogin
+$ niutil -createprop . /services/eklogin port 2105
+$ niutil -createprop . /services/eklogin protocol tcp
+$ niutil -create . /services/kshell
+$ niutil -createprop . /services/kshell name kshell krcmd
+$ niutil -createprop . /services/kshell port 544
+$ niutil -createprop . /services/kshell protocol tcp
+@end group
+@end smallexample
+
+The remainder of the setup of a MacOS X client machine or application
+server should be the same as for other UNIX-based systems.
+
 
 @node UNIX Application Servers,  , Installing and Configuring UNIX Client Machines, Installing Kerberos V5
 @section UNIX Application Servers
@@ -1471,10 +1541,12 @@ To add Kerberos V4 support, change the @code{supported_enctypes} line to:
 @node Encryption Types and Salt Types,  , kdc.conf, kdc.conf
 @appendixsubsec Encryption Types and Salt Types
 
-Currently, @value{PRODUCT} supports only DES encryption.  The encoding
-type is @code{des-cbc-crc}.  The @dfn{salt} is additional information
-encoded within the key that tells what kind of key it is.  The only
-salts that you will be likely to encounter are:
+Currently, @value{PRODUCT} supports only DES and triple-DES encryption;
+however, triple-DES is currently supported only for service keys, not
+for user keys or session keys.  The encoding types include
+@code{des-cbc-crc} and @code{des3-cbc-sha1}.  The @dfn{salt} is
+additional information encoded within the key that tells what kind of
+key it is.  The only salts that you will be likely to encounter are:
 
 @itemize @bullet
 @item @dfn{normal}, which @value{COMPANY} recommends using for all of
