@@ -1,3 +1,8 @@
+Wed Jan 21 15:15:58 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* rtest.c (main): returns int, not void. ANSI X3.159-1989
+	2.1.2.2.1 says so, and gcc now warns about it.
+
 Fri Jan 16 03:33:50 1998  Tom Yu  <tlyu@mit.edu>
 
 	* do_tgs_req.c: Add some explicit settings of errcode so that the

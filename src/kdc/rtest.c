@@ -55,7 +55,7 @@ make_princ(ctx, str, prog)
     return ret;
 }
 
-void
+int
 main(argc,argv)
     int	argc;
     char *argv[];
