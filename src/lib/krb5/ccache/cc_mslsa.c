@@ -489,15 +489,14 @@ PurgeMSTGT(HANDLE LogonHandle, ULONG  PackageId)
     return TRUE;
 }
 
-//
-// #define ENABLE_PURGING
+#define ENABLE_PURGING 1
 // to allow the purging of expired tickets from LSA cache.  This is necessary
 // to force the retrieval of new TGTs.  Microsoft does not appear to retrieve
 // new tickets when they expire.  Instead they continue to accept the expired
-// tickets.  I do not want to enable purging of the LSA cache without testing
-// the side effects in a Windows domain with a machine which has been suspended,
-// removed from the network, and resumed after ticket expiration.
-//
+// tickets.  This is safe to do because the LSA purges its cache when it 
+// retrieves a new TGT (ms calls this renew) but not when it renews the TGT
+// (ms calls this refresh).
+
 static BOOL
 GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
 {

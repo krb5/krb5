@@ -1,5 +1,11 @@
 2003-12-15  Jeffrey Altman <jaltman@mit.edu>
 
+   * cc_msla.c:   Enable purging of the MS Kerberos LSA cache when the TGT
+     has expired.  This will force the LSA to get a new TGT instead of 
+     returning the expired version.
+
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
    * cc_mslsa.c:  Perform a GetMSTGT() call as part of krb5_lcc_start_seq_get
      to ensure that the tgt is refreshed
 
