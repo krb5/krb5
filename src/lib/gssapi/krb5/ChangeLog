@@ -1,3 +1,10 @@
+2000-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix up
+	wrap_size_limit() to deal with integrity wrap tokens properly.
+	The rfc1964 mech always pads and confounds regardless of whether
+	confidentiality is requested.
+
 2000-03-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* accept_sec_context.c, init_sec_context.c: Disable krb5-mech2
