@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * appl/sample/sclient/sclient.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -26,11 +25,6 @@
  *
  * Usage: sample_client hostname
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_sclient_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

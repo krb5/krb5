@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)state.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)state.c	8.1 (Berkeley) 6/4/93 */
 
 #include "telnetd.h"
 #if	defined(AUTHENTICATION)

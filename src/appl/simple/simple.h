@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * appl/simple/simple.h
  *
  * Copyright 1988,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

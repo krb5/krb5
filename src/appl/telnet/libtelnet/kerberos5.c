@@ -1,16 +1,6 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ *	appl/telnet/libtelnet/kerberos5.c
  */
-
-#if !defined(lint) && !defined(SABER)
-static
-#ifdef __STDC__
-const
-#endif
-char rcsid_kerberos5_c[] = "$Id$";
-#endif /* lint */
 
 /*-
  * Copyright (c) 1991, 1993
@@ -45,9 +35,7 @@ char rcsid_kerberos5_c[] = "$Id$";
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)kerberos5.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)kerberos5.c	8.1 (Berkeley) 6/4/93 */
 
 /*
  * Copyright (C) 1990 by the Massachusetts Institute of Technology

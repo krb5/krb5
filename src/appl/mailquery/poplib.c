@@ -13,9 +13,7 @@
  * Packard Company makes no representations about the 
  * suitability of this software for any purpose.
  */
-#if !defined(lint) && !defined(_NOIDENT)
-static char rcsid[] = "@(#)$Header$";
-#endif
+
 /*
  * Poplib - library routines for speaking POP
  */

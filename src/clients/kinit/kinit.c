@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * clients/kinit/kinit.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Initialize a credentials cache.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kinit_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 #include <com_err.h>

@@ -31,10 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)rsaencpwd.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
-
+/* based on @(#)rsaencpwd.c	8.1 (Berkeley) 6/4/93 */
 
 #ifdef	RSA_ENCPWD
 /*

@@ -37,9 +37,7 @@ char copyright[] =
  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
-static char sccsid[] = "@(#)telnetd.c	5.51 (Berkeley) 1/21/93";
-#endif /* not lint */
+/* based on @(#)telnetd.c	5.51 (Berkeley) 1/21/93 */
 
 #include "telnetd.h"
 #include "pathnames.h"

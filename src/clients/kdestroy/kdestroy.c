@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * clients/kdestroy/kdestroy.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Destroy the contents of your credential cache.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_klist_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 

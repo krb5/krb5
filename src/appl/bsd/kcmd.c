@@ -1,13 +1,6 @@
 /*
- *    $Source$
- *    $Id$
+ * appl/bsd/kcmd.c
  */
-
-#ifndef lint
-static char *rcsid_kcmd_c =
-  "$Id$";
-#endif /* lint */
-#define LIBC_SCCS
 
 /*
  * Copyright (c) 1983 Regents of the University of California.
@@ -26,9 +19,7 @@ static char *rcsid_kcmd_c =
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88";
-#endif /* LIBC_SCCS and not lint */
+/* derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88 */
      
 #include <stdio.h>
 #include <ctype.h>

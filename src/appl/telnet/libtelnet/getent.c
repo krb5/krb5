@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)getent.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)getent.c	8.1 (Berkeley) 6/4/93 */
 
 static char *area;
 

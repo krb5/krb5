@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * appl/sample/sample.h
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *

@@ -4,9 +4,7 @@
  * specifies the terms and conditions for redistribution.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)gettytab.c	5.1 (Berkeley) 4/29/85";
-#endif not lint
+/* based on @(#)gettytab.c	5.1 (Berkeley) 4/29/85 */
 
 #include <ctype.h>
 

@@ -42,9 +42,7 @@
 #include <string.h>
 #endif
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)strcasecmp.c	8.1 (Berkeley) 6/4/93";
-#endif /* LIBC_SCCS and not lint */
+/* based on @(#)strcasecmp.c	8.1 (Berkeley) 6/4/93 */
 
 typedef unsigned char u_char;
 

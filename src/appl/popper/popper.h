@@ -4,7 +4,7 @@
  * specifies the terms and conditions for redistribution.
  *
  * static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
- * static char SccsId[] = "@(#)popper.h	2.2  4/2/91";
+ * based on @(#)popper.h	2.2  4/2/91
  *
  */
 

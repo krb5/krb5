@@ -25,9 +25,7 @@ char copyright[] =
  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
-static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
-#endif /* not lint */
+/* based on @(#)rcp.c	5.10 (Berkeley) 9/20/88 */
 
      /*
       * rcp

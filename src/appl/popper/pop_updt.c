@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_updt.c	2.3  3/20/91";
+/* based on @(#)pop_updt.c	2.3  3/20/91 */
 #endif
 
 #include <errno.h>

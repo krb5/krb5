@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)enc_des.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)enc_des.c	8.1 (Berkeley) 6/4/93 */
 
 #ifdef	ENCRYPTION
 # ifdef	AUTHENTICATION

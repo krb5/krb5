@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)sys_term.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* baesd on @(#)sys_term.c	8.1 (Berkeley) 6/4/93 */
 
 #include "telnetd.h"
 #include "pathnames.h"

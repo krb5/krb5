@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * clients/klist/klist.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * List out the contents of your credential cache.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_klist_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 

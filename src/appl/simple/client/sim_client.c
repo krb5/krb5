@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * appl/simple/client/sim_client.c
  *
  * Copyright 1989,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,12 +24,6 @@
  * Simple UDP-based sample client program.  For demonstration.
  * This program performs no useful function.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_sim_client_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
-
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_stat.c	2.2  3/18/91";
+/* based on @(#)pop_stat.c	2.2  3/18/91 */
 #endif
 
 #include <stdio.h>

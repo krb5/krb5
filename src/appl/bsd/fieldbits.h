@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * appl/bsd/fieldbits.h
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

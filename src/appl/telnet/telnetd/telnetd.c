@@ -37,9 +37,7 @@ static char copyright[] =
 	The Regents of the University of California.  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
-static char sccsid[] = "@(#)telnetd.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)telnetd.c	8.1 (Berkeley) 6/4/93 */
 
 #include "telnetd.h"
 #include "pathnames.h"

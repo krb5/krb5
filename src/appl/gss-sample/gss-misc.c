@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <netinet/in.h>

@@ -1,13 +1,6 @@
 /*
- *    $Source$
- *    $Id$
+ * appl/telnet/libtelnet/forward.c
  */
-
-#ifndef lint
-static char *rcsid_forward_c =
-  "$Id$";
-#endif /* lint */
-#define LIBC_SCCS
 
 /*
  * Copyright (c) 1983 Regents of the University of California.

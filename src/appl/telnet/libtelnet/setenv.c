@@ -31,10 +31,8 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid1[] = "@(#)setenv.c	8.1 (Berkeley) 6/4/93";
-static char sccsid2[] = "@(#)getenv.c	8.1 (Berkeley) 6/4/93";
-#endif /* LIBC_SCCS and not lint */
+/* based on @(#)setenv.c	8.1 (Berkeley) 6/4/93 */
+/* based on @(#)getenv.c	8.1 (Berkeley) 6/4/93 */
 
 #ifndef __STDC__
 #define const

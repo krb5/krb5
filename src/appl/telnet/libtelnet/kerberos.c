@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)kerberos.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)kerberos.c	8.1 (Berkeley) 6/4/93 */
 
 /*
  * Copyright (C) 1990 by the Massachusetts Institute of Technology

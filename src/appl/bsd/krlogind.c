@@ -25,9 +25,7 @@ char copyright[] =
  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
-static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
-#endif /* not lint */
+/* based on @(#)rlogind.c	5.17 (Berkeley) 8/31/88 */
      
      /*
       * remote login server:

@@ -31,9 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)global.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)global.c	8.1 (Berkeley) 6/4/93 */
 
 /*
  * Allocate global variables.  We do this

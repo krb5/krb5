@@ -31,13 +31,10 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
-static char sccsid[] = "@(#)read_password.c	8.1 (Berkeley) 6/4/93";
-#endif /* not lint */
+/* based on @(#)read_password.c	8.1 (Berkeley) 6/4/93 */
 
 /*
- * $Source$
- * $Author$
+ * appl/telnet/libtelnet/read_password.c
  *
  * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
  * of Technology.

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * appl/user_user/client.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
