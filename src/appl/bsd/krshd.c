@@ -1682,8 +1682,9 @@ recvauth(netf, peersin, valid_checksum)
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
-krb5_authenticator *authenticator;
+    krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
+    krb5_rcache		rcache;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1705,6 +1706,26 @@ krb5_authenticator *authenticator;
     if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
 			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
 	return status;
+
+    status = krb5_auth_con_getrcache(bsd_context, auth_context, &rcache);
+    if (status) return status;
+
+    if (! rcache) {
+	krb5_principal server;
+
+	status = krb5_sname_to_principal(bsd_context, 0, 0,
+					 KRB5_NT_SRV_HST, &server);
+	if (status) return status;
+
+	status = krb5_get_server_rcache(bsd_context,
+				krb5_princ_component(bsd_context, server, 0),
+				&rcache);
+	krb5_free_principal(bsd_context, server);
+	if (status) return status;
+
+	status = krb5_auth_con_setrcache(bsd_context, auth_context, rcache);
+	if (status) return status;
+    }
 
     status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",

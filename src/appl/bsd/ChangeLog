@@ -1,3 +1,14 @@
+Thu May  9 00:09:14 1996  Richard Basch  <basch@lehman.com>
+
+	* krlogind.c krshd.c:
+	Use the replay cache associated with the default server name
+	(rc_host*), like telnetd does.
+
+Mon May  6 14:06:21 1996  Richard Basch  <basch@lehman.com>
+
+	* login.c: SVR4 logins do not do motd or mailcheck normally; that
+	is a function of /etc/profile.  login.krb should act the same...
+
 Mon Apr 29 17:02:44 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge with Cygnus sources, changes from Mark Eichin, Marc

@@ -260,6 +260,11 @@ extern int errno;
 					   passsword */
 #endif /* KRB4_GET_TICKETS */
 
+#ifdef __SVR4
+#define NO_MOTD
+#define NO_MAILCHECK
+#endif
+
 char *getenv();
 void dofork();
 
@@ -1994,6 +1999,7 @@ void motd()
 void motd () { }
 #endif
 
+#ifndef NO_MAILCHECK
 void check_mail ()
 {
     char tbuf[MAXPATHLEN+2];
@@ -2003,6 +2009,9 @@ void check_mail ()
 	printf("You have %smail.\n",
 	       (st.st_mtime > st.st_atime) ? "new " : "");
 }
+#else
+void check_mail () { }
+#endif
 
 void checknologin()
 {
