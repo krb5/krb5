@@ -1,3 +1,8 @@
+Mon Oct 21 13:44:53 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kcmd.c: don't retry (and waste 7 seconds) on ECONNREFUSED, just
+ 	fail immediately [krb5-appl/120]
+
 Fri Oct 18 17:26:51 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krsh.c, krlogin.c: don't print our own error message if kcmd

@@ -189,14 +189,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    lport--;
 	    continue;
     	}
-	/*
-	 * don't wait very long for Kerberos kcmd.
-	 */
-    	if (errno == ECONNREFUSED && timo <= 4) {
-	    sleep(timo);
-	    timo *= 2;
-	    continue;
-    	}
+
 #if !(defined(tek) || defined(ultrix) || defined(sun) || defined(SYSV))
     	if (hp->h_addr_list[1] != NULL) {
 	    int oerrno = errno;
