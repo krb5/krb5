@@ -80,15 +80,17 @@ register int *error;
     if (!retval->sname) {
 	goto errout;
     }
-    retval->from = unix2gentime(val->from, error);
-    if (!retval->from) {
-	goto errout;
+    if (val->from) {
+	retval->from = unix2gentime(val->from, error);
+	if (!retval->from) {
+	    goto errout;
+	}
     }
     retval->till = unix2gentime(val->till, error);
     if (!retval->till) {
 	goto errout;
     }
-    if (val->kdc_options & KDC_OPT_RENEWABLE) {
+    if (val->rtime) {
 	retval->rtime = unix2gentime(val->rtime, error);
 	if (!retval->rtime) {
 	    goto errout;
