@@ -123,10 +123,11 @@ libdir/lib/**/libname.a:						@@\
            CRCLIB = $(TOP)/lib/crc-32/libcrc32.a
          ISODELIB = $(ISODE)/@sys/lib/libisode.a
 
+           DBMLIB = DbmLib
           DEPKLIB = $(KRB5LIB) $(OSLIB) $(DESLIB) $(CRCLIB)
-             KLIB = $(DEPKLIB) $(ISODELIB) $(COMERRLIB)
+             KLIB = $(DEPKLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
-           KDBLIB = $(DEPKDBLIB) DbmLib
+           KDBLIB = $(DEPKDBLIB)
 
 #ifdef UseInstalled
             IMAKE = imake		/* assume BINDIR in path */
