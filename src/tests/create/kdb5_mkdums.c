@@ -76,7 +76,6 @@ static char *cur_realm = 0;
 static char *mkey_name = 0;
 static char *mkey_password = 0;
 static krb5_boolean manual_mkey = FALSE;
-static krb5_boolean dbactive = FALSE;
 
 void
 quit()
@@ -408,7 +407,6 @@ char *dbname;
     mblock.mkvno = master_entry.key_data[0].key_data_kvno;
 
     krb5_db_free_principal(test_context, &master_entry, nentries);
-    dbactive = TRUE;
     return 0;
 }
 
