@@ -729,8 +729,25 @@ initialize_realms(kcontext, argc, argv)
     krb5_pointer	aprof;
     const char		*hierarchy[3];
     extern char *optarg;
+    char		*db_prof;
 
-    if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
+    {
+      /* handle kdc file config */
+      const char* conf_names[3];
+      char **conf_val = 0;
+      conf_names[0] = "kdc";
+      conf_names[1] = "profile";
+      conf_names[2] = 0;
+
+      retval = profile_get_values(kcontext->profile, conf_names, &conf_val);
+      if(!retval && conf_val) {
+	db_prof = strdup(conf_val);
+      } else {
+	db_prof = strdup(DEFAULT_KDC_PROFILE);
+      }
+    }
+
+    if (!krb5_aprof_init(db_prof, KDC_PROFILE_ENV, &aprof)) {
 	hierarchy[0] = "kdcdefaults";
 	hierarchy[1] = "kdc_ports";
 	hierarchy[2] = (char *) NULL;
@@ -830,6 +847,8 @@ initialize_realms(kcontext, argc, argv)
     kdc_active_realm = kdc_realmlist[0];
     if (default_ports)
 	free(default_ports);
+
+    free(db_prof);
     return;
 }
 
