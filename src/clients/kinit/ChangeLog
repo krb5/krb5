@@ -1,3 +1,7 @@
+Sat Jan 28 14:45:55 1995  Chris Provenzano (proven@mit.edu)
+
+        * kinit.c (main()) use new API for krb5_kt_get_entry.
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
     * Added krb5_context to all krb5_routines

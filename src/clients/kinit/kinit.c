@@ -294,8 +294,14 @@ main(argc, argv)
 	 }
 	 memset(password, 0, sizeof(password));
     } else {
-	 if (keytab != NULL) {
+	/*
+	 * krb5_get_in_tkt_with_skey is getting a face lift so for now
+	 * I just put 0 as the default keytype for krb5_kt_get_entry()
+	 * --- proven
+	 */
+	if (keytab != NULL) {
 	      code = krb5_kt_get_entry(kcontext, keytab, my_creds.client, 0,
+				       0, /* keytype arg, default for now */
 				       &kt_ent);
 	      if (code) {
 		   com_err(argv[0], code, "reading keytab entry %s",
