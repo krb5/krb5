@@ -1,3 +1,8 @@
+2004-01-04 Jeffrey Altman <jaltman@mit.edu>
+
+    * win-mac.h: conditionally define strcasecmp/strncasecmp macros 
+      only if they do not already exist.
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
     * k5-int.h: add new functions to krb5int_access for use by gssapi
