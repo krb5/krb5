@@ -1,3 +1,7 @@
+Sat Aug  6 18:05:42 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* commands.c: in_systm.h is *not* broken on linux with 4.5 libc.
+
 Thu Aug  4 03:36:59 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in:
