@@ -65,7 +65,7 @@ krb5_checksum *outcksum;
     if (retval = mit_des_process_key(&eblock, &keyblock))
 	return retval;
     /* now encrypt it */
-    retval = mit_des_cbc_encrypt(output,
+    retval = mit_des_cbc_encrypt(&outtmp[0],
 				 outcksum->contents,
 				 RSA_MD4_DES_CKSUM_LENGTH,
 				 (struct mit_des_ks_struct *)eblock.priv,
