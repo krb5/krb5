@@ -32,6 +32,7 @@ extern AUTH_DAT kdata;
 #ifdef KRB5
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
 #include <com_err.h>
 extern krb5_principal ext_client;
 extern char *client_name;
@@ -54,6 +55,7 @@ POP     *   p;
 #endif /* KRB4 */
 #ifdef KRB5
     char *lrealm;
+    krb5_data *tmpdata;
     krb5_error_code retval;
 #endif /* KRB5 */
 #else
@@ -95,17 +97,17 @@ POP     *   p;
             "Kerberos error:  \"%s\".", error_message(retval)));
     }
 
-    if (strncmp(ext_client[0]->data, lrealm, ext_client[0]->length))  {
+    tmpdata = krb5_princ_realm(ext_client);
+    if (strncmp(tmpdata->data, lrealm, tmpdata->length))  {
          pop_log(p, POP_WARNING, "%s: (%s) realm not accepted.", 
 		 p->client, client_name);
 	 return(pop_msg(p,POP_FAILURE,
 		     "Kerberos realm \"%*s\" not accepted.",
-			ext_client[0]->length, ext_client[0]->data));
+			tmpdata->length, tmpdata->data));
     }
 
-
     /* only accept one-component names, i.e. realm and name only */
-    if (ext_client[2]) {
+    if (krb5_princ_size(ext_client) > 1) {
         pop_log(p, POP_WARNING, "%s: (%s) instance not accepted.", 
 		 p->client, client_name);
         return(pop_msg(p,POP_FAILURE,
@@ -119,13 +121,14 @@ POP     *   p;
      * but this causes too much confusion and assumes p->user will never
      * change. This makes me feel more comfortable.
      */
-    if(strncmp(p->user, ext_client[1]->data, ext_client[1]->length))
+    tmpdata = krb5_princ_component(ext_client, 0);
+    if(strncmp(p->user, tmpdata->data, tmpdata->length))
       {
 	pop_log(p, POP_WARNING, "%s: auth failed: %s vs %s", 
 		 p->client, client_name, p->user);
         return(pop_msg(p,POP_FAILURE,
-	      "Wrong username supplied (%*s vs. %s).\n", ext_client[1]->length,
-		       ext_client[1]->data,
+	      "Wrong username supplied (%*s vs. %s).\n", tmpdata->length,
+		       tmpdata->data,
 		       p->user));
       }
 #endif /* KRB5 */
