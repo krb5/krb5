@@ -141,10 +141,10 @@ register krb5_int32 *seconds, *microseconds;
 
     _ftime(&timeptr);                           /* Get the current time */
     sec  = timeptr.time;
-    usec = timeptr.millitm;
+    usec = timeptr.millitm * 1000;
 
-    if (sec == last_sec) {                      /* Same as last time??? */
-        usec = ++last_usec;                     /* Yep, so do microseconds */
+    if ((sec == last_sec) && (usec <= last_usec)) { /* Same as last time??? */
+        usec = ++last_usec;
         if (usec >= 1000000) {
             ++sec;
             usec = 0;

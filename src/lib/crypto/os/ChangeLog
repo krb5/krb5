@@ -1,3 +1,7 @@
+Mon Feb 17 17:24:41 1997  Richard Basch  <basch@lehman.com>
+
+	* c_ustime.c: Fixed microsecond adjustment code (win32)
+
 Thu Nov 21 00:58:04 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in: Win32 build
