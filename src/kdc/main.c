@@ -570,7 +570,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		 */
 		kdata = (krb5_key_data *) NULL;
 		for (i=0; i<nkslist; i++) {
-		    if ((kret = krb5_dbe_find_enctype(rdp->realm_context,
+		    if (!(kret = krb5_dbe_find_enctype(rdp->realm_context,
 						      &db_entry,
 						      kslist[i].ks_enctype,
 						      -1,
