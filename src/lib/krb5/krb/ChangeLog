@@ -1,3 +1,8 @@
+2004-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Free the as reply in
+	the !use_master case  (Thanks to Lijian Liu)
+
 2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): Include aes128-cts
