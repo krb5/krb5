@@ -1,3 +1,30 @@
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Link krshd with KRSHDLIBS instead of LOGINLIBS.
+
+	* configure.in: Creare a new variable KRSHDLIBS which differs from
+	LOGINLIBS by not including libkrb524.a. Test for getenv.
+
+	* krcp.c: Prototype lostconn().
+
+	* krlogind.c: Provide prototype for signal handler cleanup. Implied
+	need to add extra argument to function - ensure consistant
+	calling.
+
+	* krsh.c: Provide prototype for signal handler sendsig.
+
+	* krshd.c: Rewrite error() to use stdargs/varargs.
+	(doit): When creating a tty name using getpid. Ensure that does
+	not overflow tty string buffer.
+
+	* login.c: Provide prototype for signal handler timedout.
+
+	* setenv.c: Do not define getenv() unless needed.
+
+	* v4rcp.c: Rewrite error() to use stdargs/varargs. Add signal
+	number argument to lostconn(), include prototype, and ensure
+	called consistantly.
+
 2001-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* v4rcp.c, login.c: Fill in prototypes, declare many functions static. 

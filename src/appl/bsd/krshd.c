@@ -119,6 +119,11 @@ char copyright[] =
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
      
 #include <signal.h>
 #if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
@@ -252,8 +257,11 @@ int     secflag;
 extern
 #endif /* CRAY */
 
-/*VARARGS1*/
-void	error();
+void 	error (char *fmt, ...)
+#if !defined (__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+       __attribute__ ((__format__ (__printf__, 1, 2)))
+#endif
+     ;
 
 void usage(void), getstr(int, char *, int, char *), 
     doit(int, struct sockaddr_in *);
@@ -563,7 +571,7 @@ int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 #define KRB5_RECVAUTH_V4	4
 #define KRB5_RECVAUTH_V5	5
 
-krb5_sigtype
+static krb5_sigtype
 cleanup(signumber)
      int signumber;
 {
@@ -935,7 +943,7 @@ void doit(f, fromp)
        privileges. */
     if (port) {
 	/* Place entry into wtmp */
-	sprintf(ttyn,"krsh%1d",getpid());
+	sprintf(ttyn,"krsh%ld",(long) (getpid() % 9999999));
 	pty_logwtmp(ttyn,locuser,sane_host);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
@@ -1531,16 +1539,29 @@ if(port)
     
 
 
+void
+#ifdef HAVE_STDARG_H
+error(char *fmt, ...)
+#else
 /*VARARGS1*/
-void error(fmt, a1, a2, a3)
+error(fmt, va_alist)
      char *fmt;
-     char *a1, *a2, *a3;
+     va_dcl
+#endif
 {
-    char buf[RCMD_BUFSIZ];
+    va_list ap;
+    char buf[RCMD_BUFSIZ],  *cp = buf;
     
-    buf[0] = 1;
-    (void) sprintf(buf+1, "%s: ", progname);
-    (void) sprintf(buf+strlen(buf), fmt, a1, a2, a3);
+#ifdef HAVE_STDARG_H
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+
+    *cp++ = 1;
+    (void) sprintf(cp, "%s: ", progname);
+    (void) vsprintf(buf+strlen(buf), fmt, ap);
+    va_end(ap);
     (void) write(2, buf, strlen(buf));
     syslog(LOG_ERR ,"%s",buf+1);
 }

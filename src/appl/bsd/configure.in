@@ -44,6 +44,10 @@ alpha*-dec-osf*)
 	ac_cv_header_termios_h=no
 	;;
 esac
+dnl
+dnl krshd does not use krb524...
+dnl
+KRSHDLIBS="$LOGINLIBS"
 dnl 
 dnl After beta6 this functionality will be integrated with aclocal.m4
 AC_ARG_WITH([krb4],
@@ -65,13 +69,14 @@ else
 fi
 dnl
 dnl
+AC_SUBST(KRSHDLIBS)
 AC_SUBST(LOGINLIBS)
 AC_SUBST(V4RCP)
 AC_SUBST(V4RCPO)
 dnl
 AC_FUNC_VFORK
 AC_TYPE_MODE_T
-AC_CHECK_FUNCS(isatty inet_aton gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes rmufile)
+AC_CHECK_FUNCS(isatty inet_aton getenv gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes rmufile)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h sys/ioctl_compat.h paths.h arpa/nameser.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)

@@ -85,7 +85,7 @@ int	error();
 int	options;
 int	rfd2;
 int	nflag;
-krb5_sigtype  sendsig();
+krb5_sigtype  sendsig(int);
 
 #ifdef KERBEROS
 

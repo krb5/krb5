@@ -117,7 +117,7 @@ int	encryptflag = 0;
 int	rem;
 char	*colon(char *);
 int	errs;
-krb5_sigtype	lostconn();
+krb5_sigtype	lostconn(int);
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
@@ -918,7 +918,7 @@ int response()
 {
     char resp, c, rbuf[RCP_BUFSIZ], *cp = rbuf;
     if (rcmd_stream_read(rem, &resp, 1, 0) != 1)
-      lostconn();
+      lostconn(0);
     switch (resp) {
 	
       case 0:				/* ok */
@@ -931,7 +931,7 @@ int response()
       case 2:				/* fatal error, "" */
 	do {
 	    if (rcmd_stream_read(rem, &c, 1, 0) != 1)
-	      lostconn();
+	      lostconn(0);
 	    *cp++ = c;
 	} while (cp < &rbuf[RCP_BUFSIZ] && c != '\n');
 	if (iamremote == 0)
@@ -947,7 +947,8 @@ int response()
 
 
 krb5_sigtype
-  lostconn()
+  lostconn(signumber)
+    int signumber;
 {
     if (iamremote == 0)
       fprintf(stderr, "rcp: lost connection\n");

@@ -20,6 +20,12 @@
 #include <sys/types.h>
 #include <stdio.h>
 
+#ifdef NEED_SETENV
+extern int setenv(char *, char *, int);
+extern void unsetenv(char *);
+#endif
+
+static char *_findenv(char *, int*);
 /*
  * setenv --
  *	Set the value of the environmental variable "name" to be
@@ -34,7 +40,7 @@ setenv(name, value, rewrite)
 	static int alloced;			/* if allocated space before */
 	register char *C;
 	int l_value, offset;
-	char *malloc(), *realloc(), *_findenv();
+	char *malloc(), *realloc();
 
 	if (*value == '=')			/* no `=' in value */
 		++value;
@@ -90,7 +96,6 @@ unsetenv(name)
 	extern	char	**environ;
 	register char	**P;
 	int	offset;
-	char    *_findenv();
 
 	while (_findenv(name, &offset))		/* if set multiple times */
 		for (P = &environ[offset];; ++P)
@@ -116,6 +121,7 @@ unsetenv(name)
 
 /* based on @(#)getenv.c	5.5 (Berkeley) 6/27/88 */
 
+#ifndef HAVE_GETENV
 /*
  * getenv --
  *	Returns ptr to value associated with name, if any, else NULL.
@@ -125,10 +131,10 @@ getenv(name)
 	char *name;
 {
 	int offset;
-	char *_findenv();
 
 	return(_findenv(name, &offset));
 }
+#endif
 
 /*
  * _findenv --
@@ -139,7 +145,7 @@ getenv(name)
  *
  *	This routine *should* be a static; don't use it.
  */
-char *
+static char *
 _findenv(name, offset)
 	register char *name;
 	int *offset;

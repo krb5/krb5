@@ -9,10 +9,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 
-LOGINLIBS =@LOGINLIBS@
+LOGINLIBS=@LOGINLIBS@
 LIBOBJS=@LIBOBJS@
 V4RCP=@V4RCP@
 V4RCPO=@V4RCPO@
+KRSHDLIBS=@KRSHDLIBS@
 
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c  $(SETENVSRC) \
 	login.c krshd.c krlogind.c v4rcp.c
@@ -64,7 +65,7 @@ install::
 	fi
 
 kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
 klogind: krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)

@@ -340,6 +340,8 @@ char * strsave(char *);
 
 typedef krb5_sigtype sigtype;
 
+sigtype timedout(int);
+
 
 #ifndef HAVE_INITGROUPS
 static int initgroups(char* name, gid_t basegid) {
@@ -1044,7 +1046,6 @@ int main(argc, argv)
     int fflag, hflag, pflag, rflag, cnt;
     int kflag, Kflag, eflag;
     int quietlog, passwd_req, ioctlval;
-    sigtype timedout();
     char *domain, **envinit, *ttyn, *tty;
     char tbuf[MAXPATHLEN + 2];
     char *ttyname(), *crypt(), *getpass();
@@ -2051,7 +2052,8 @@ void getloginname()
 }
 
 sigtype
-timedout()
+timedout(signumber)
+    int signumber;
 {
     fprintf(stderr, "Login timed out after %d seconds\n", timeout);
     exit(0);

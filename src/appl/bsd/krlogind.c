@@ -325,7 +325,7 @@ extern int daemon(int, int);
 void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr_in *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
 void	protocol(int, int);
 int	princ_maps_to_lname(krb5_principal, char *), default_realm(krb5_principal);
-krb5_sigtype	cleanup();
+krb5_sigtype	cleanup(int);
 krb5_error_code recvauth(int *);
 
 /* There are two authentication related masks:
@@ -897,7 +897,7 @@ void doit(f, fromp)
 #endif
     protocol(f, p);
     signal(SIGCHLD, SIG_IGN);
-    cleanup();
+    cleanup(0);
 }
 
 unsigned char	magic[2] = { 0377, 0377 };
@@ -1146,7 +1146,8 @@ void protocol(f, p)
 
 
 
-krb5_sigtype cleanup()
+krb5_sigtype cleanup(signumber)
+    int signumber;
 {
     pty_cleanup (line, pid, 1);
     shutdown(netf, 2);
@@ -1188,7 +1189,7 @@ void fatal(f, msg)
 #else
 	(void) ioctl(f, TCFLSH, out);
 #endif
-	cleanup();
+	cleanup(0);
     }
     exit(1);
 }

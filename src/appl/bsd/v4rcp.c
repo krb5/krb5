@@ -73,6 +73,12 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <netdb.h>
 #endif
 #include <errno.h>
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 #ifdef KERBEROS
 #include <krb.h>
 #include <krbports.h>
@@ -81,7 +87,11 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 void sink(int, char **), source(int, char **), 
     rsource(char *, struct stat *), usage(void);
 /*VARARGS*/
-void	error();
+void 	error (char *fmt, ...)
+#if !defined (__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+       __attribute__ ((__format__ (__printf__, 1, 2)))
+#endif
+     ;
 int	response(void);
 #if !defined(HAVE_UTIMES)
 int	utimes();
@@ -321,7 +331,7 @@ int	encryptflag = 0;
 
 kstream krem;
 int	errs;
-krb5_sigtype lostconn();
+krb5_sigtype lostconn(int);
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
@@ -621,7 +631,7 @@ int response()
 	char resp, c, rbuf[BUFSIZ], *cp = rbuf;
 
 	if (kstream_read (krem, &resp, 1) != 1)
-		lostconn();
+		lostconn(0);
 	switch (resp) {
 
 	case 0:				/* ok */
@@ -634,7 +644,7 @@ int response()
 	case 2:				/* fatal error, "" */
 		do {
 			if (kstream_read (krem, &c, 1) != 1)
-				lostconn();
+				lostconn(0);
 			*cp++ = c;
 		} while (cp < &rbuf[BUFSIZ] && c != '\n');
 		if (iamremote == 0)
@@ -648,7 +658,8 @@ int response()
 	return -1;
 }
 
-krb5_sigtype lostconn()
+krb5_sigtype lostconn(signum)
+    int signum;
 {
 
 	if (iamremote == 0)
@@ -921,20 +932,34 @@ allocbuf(bp, fd, blksize)
 	return (bp);
 }
 
+void
+#ifdef HAVE_STDARG_H
+error(char *fmt, ...)
+#else
 /*VARARGS1*/
-void error(fmt, a1, a2, a3, a4, a5)
-	char *fmt;
-	int a1, a2, a3, a4, a5;
+error(fmt, va_alist)
+     char *fmt;
+     va_dcl
+#endif
 {
-	char buf[BUFSIZ], *cp = buf;
+    va_list ap;
+    char buf[BUFSIZ], *cp = buf;
+    
+#ifdef HAVE_STDARG_H
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
 
-	errs++;
-	*cp++ = 1;
-	(void) sprintf(cp, fmt, a1, a2, a3, a4, a5);
-	if (krem)
-	  (void) kstream_write(krem, buf, strlen(buf));
-	if (iamremote == 0)
-		(void) write(2, buf+1, strlen(buf+1));
+    errs++;
+    *cp++ = 1;
+    (void) vsprintf(cp, fmt, ap);
+    va_end(ap);
+
+    if (krem)
+	(void) kstream_write(krem, buf, strlen(buf));
+    if (iamremote == 0)
+	(void) write(2, buf+1, strlen(buf+1));
 }
 
 void usage()
