@@ -61,6 +61,7 @@ read_msg.c
 read_pwd.c
 realm_dom.c
 ref_std_conf.out
+send524.c
 sendto_kdc.c
 sn2princ.c
 timeofday.c

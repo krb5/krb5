@@ -7,9 +7,8 @@
 #ifndef _ss_h
 #define _ss_h __FILE__
 
+#include <errno.h>
 #include <ss/ss_err.h>
-
-extern int errno;
 
 #ifdef __STDC__
 #define __SS_CONST const

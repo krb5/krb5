@@ -168,12 +168,15 @@ void g_make_token_header(mech, body_size, buf, tok_type)
  * mechanism in the token does not match the mech argument.  buf and
  * *body_size are left unmodified on error.
  */
-gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
+
+gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in,
+				wrapper_required)
      gss_OID mech;
      unsigned int *body_size;
      unsigned char **buf_in;
      int tok_type;
      unsigned int toksize_in;
+     int wrapper_required;
 {
    unsigned char *buf = *buf_in;
    int seqsize;
@@ -182,8 +185,13 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
 
    if ((toksize-=1) < 0)
       return(G_BAD_TOK_HEADER);
-   if (*buf++ != 0x60)
-      return(G_BAD_TOK_HEADER);
+   if (*buf++ != 0x60) {
+       if (wrapper_required)
+	   return(G_BAD_TOK_HEADER);
+       buf--;
+       toksize++;
+       goto skip_wrapper;
+   }
 
    if ((seqsize = der_read_length(&buf, &toksize)) < 0)
       return(G_BAD_TOK_HEADER);
@@ -207,16 +215,17 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
 
    if (! g_OID_equal(&toid, mech)) 
        return  G_WRONG_MECH;
+skip_wrapper:
    if (tok_type != -1) {
        if ((toksize-=2) < 0)
 	   return(G_BAD_TOK_HEADER);
 
        if ((*buf++ != ((tok_type>>8)&0xff)) ||
-	   (*buf++ != (tok_type&0xff))) 
+	   (*buf++ != (tok_type&0xff)))
 	   return(G_WRONG_TOKID);
    }
-	*buf_in = buf;
-	*body_size = toksize;
+   *buf_in = buf;
+   *body_size = toksize;
 
-	return 0;
-	}
+   return 0;
+}

@@ -1,3 +1,25 @@
+2004-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize):
+	Check for sufficient buffer space.
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h: Include k5-platform.h.
+	(gssint_uint64): New typedef.
+	(g_order_init, g_order_check): Update decls.
+	* util_ordering.c (struct _queue): Change sequence number fields
+	to gssint_uint64.  Add mask field.
+	(queue_insert): Change sequence number to gssint_uint64.
+	(g_order_init): Change sequence numbers to gssint_uint64.  Add
+	"wide_nums" argument; initialize the queue mask field based on
+	it; all callers changed.  Store a -1 as the first element.
+	(g_order_check): Store and check elements as offsets from
+	firstnum.  Mask to 32 bits if desired.
+	* util_token.c (g_verify_token_header): Add new argument
+	indicating whether the pseudo-ASN.1 wrapper is required; all
+	callers changed.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * disp_com_err_status.c, gssapi_generic.h:  

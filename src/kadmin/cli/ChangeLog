@@ -1,3 +1,12 @@
+2003-06-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (strdate): Increase size of buffer to 40.  Use sizeof
+	for length passed to strftime.
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* kadmin.c (kadmin_startup): Don't register writable keytabs as this is always done by the library now.
+
 2003-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install): Fix typo in k5srvutil.M install rule.

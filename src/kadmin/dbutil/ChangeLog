@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_destroy.c, kdb5_stash.c: Don't declare errno.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.
