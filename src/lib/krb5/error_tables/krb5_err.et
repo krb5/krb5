@@ -254,7 +254,7 @@ error_code KRB5_FCC_NOFILE,		"No credentials cache file found"
 error_code KRB5_FCC_INTERNAL,		"Internal file credentials cache error"
 error_code KRB5_CC_WRITE,		"Error writing to credentials cache file"
 error_code KRB5_CC_NOMEM,		"No more memory to allocate (in credentials cache code)"
-error_code KRB5_CC_FORMAT		"Bad format in credentials cache"
+error_code KRB5_CC_FORMAT,		"Bad format in credentials cache"
 
 # errors for dual tgt library calls
 error_code KRB5_INVALID_FLAGS,		"Invalid KDC option combination (library internal error)"
