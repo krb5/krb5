@@ -1,3 +1,9 @@
+
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+	*  k5-int.h (krb5_lock_file(), krb5_unlock_file()):
+		Use fds instead of FILE *s and don't pass the filename.
+
 Fri Aug  4 23:04:06 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* k5-int.h: Add prototypes for krb5_crypto_os_localaddr and

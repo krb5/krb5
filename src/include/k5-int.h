@@ -852,19 +852,17 @@ extern char *strdup KRB5_PROTOTYPE((const char *));
 /* libos.spec */
 krb5_error_code krb5_read_password
 	KRB5_PROTOTYPE((krb5_context,
-		   const char *,
-		   const char *,
-		   char *,
-		   int * ));
+			const char *,
+		   	const char *,
+		   	char *,
+		   	int * ));
 krb5_error_code krb5_lock_file
 	KRB5_PROTOTYPE((krb5_context,
-		   FILE *,
-		   char *,
-		   int  ));
+		        int,
+		        int));
 krb5_error_code krb5_unlock_file
 	KRB5_PROTOTYPE((krb5_context,
-		   FILE *,
-		   char * ));
+			int));
 int krb5_net_read
 	KRB5_PROTOTYPE((krb5_context,
 		   int ,
