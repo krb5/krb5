@@ -94,7 +94,7 @@ char *argv[];
 	syslog(LOG_ERR, "listen: %m");
 	exit(3);
     }
-    if ((acc = accept(sock, &peername, &namelen)) == -1) {
+    if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1) {
 	syslog(LOG_ERR, "accept: %m");
 	exit(3);
     }
