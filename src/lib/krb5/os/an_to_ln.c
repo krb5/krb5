@@ -38,6 +38,7 @@
 #if	HAVE_REGEX_H
 #include <regex.h>
 #endif	/* HAVE_REGEX_H */
+#include <string.h>
 /*
  * Use compile(3) if no regcomp present.
  */

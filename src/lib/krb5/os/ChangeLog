@@ -1,3 +1,7 @@
+2004-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* an_to_ln.c: Include string.h.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* an_to_ln.c (db_an_to_ln): Don't test macintosh.
