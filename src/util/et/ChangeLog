@@ -1,3 +1,7 @@
+Sat Mar  1 11:54:02 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* com_err.c: Make com_err_hook global instead of static to work around either NetBSD or Gcc bug.[383]
+
 Sat Feb 22 12:18:47 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Move list file construction to win-post.in
