@@ -41,8 +41,9 @@ krb5_fcc_skip_header(context, id)
      if (data->version == KRB5_FCC_FVNO_4) {
 	 kret = krb5_fcc_read_ui_2(context, id, &fcc_flen);
 	 if (kret) return kret;
+	 if(lseek(data->fd, fcc_flen, SEEK_CUR) < 0)
+		 return errno;
      }
-     lseek(data->fd, fcc_flen, SEEK_CUR);
      return KRB5_OK;
 }
 

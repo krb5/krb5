@@ -1,7 +1,13 @@
+Thu Feb 15 14:55:56 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* fcc_skip.c (krb5_fcc_skip_header): If version is not FVNO_4, do not
+		seek forward a random stack value.
+
 Thu Feb  1 15:45:23 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* fcc_retrv.c (ktype_reasonable): removed.
-	(krb5_fcc_retrieve): Accept any enctype unless specific enctype is being matched.
+	(krb5_fcc_retrieve): Accept any enctype unless specific enctype is
+		being matched. 
 
 Wed Jan 24 21:36:34 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
