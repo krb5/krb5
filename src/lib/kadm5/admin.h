@@ -39,13 +39,6 @@ typedef long		kadm5_ret_t;
 #define KADM5_OK	0
 
 /*
- * XXX This should be in kdb.h; it is here so that I do not have to
- * change that file yet, but this should be *very* temporary.
- *   --- bjaspan, 5/23/96
- */
-#define KRB5_TL_KADM5_E_DATA	0x0004
- 
-/*
  * Field masks
  */
 
