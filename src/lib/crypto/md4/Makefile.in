@@ -1,10 +1,25 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+all:: $(OBJS) t_mddriver
 
 
 
 OBJS=	md4.o md4glue.o md4crypto.o
 
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
+
+t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
+	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
+
+t_mddriver.o: t_mddriver.c
+	$(CC) -DMD=4 $(CFLAGS) -c  t_mddriver.c
+
+t_mddriver: t_mddriver.o md4.o
+	$(CC) $(CFLAGS) -o t_mddriver t_mddriver.o md4.o
+
+check:: t_mddriver
+	./t_mddriver -x
+
+clean::
+	$(RM) t_mddriver t_mddriver.o t_mddriver.c
