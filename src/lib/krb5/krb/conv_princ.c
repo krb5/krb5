@@ -45,54 +45,74 @@
 #define		INST_SZ		40
 
 struct krb_convert {
-	char	*v4_str;
-	char	*v5_str;
-	int	flags;
+    char		*v4_str;
+    char		*v5_str;
+    unsigned int	flags : 8;
+    unsigned int	len : 8;
 };
 
 #define DO_REALM_CONVERSION 0x00000001
 
 /*
  * Kadmin doesn't do realm conversion because it's currently
- * kadmin/REALM.NAME.  It should be kadmin/kerberos.master.host, but
- * we'll fix that in the next release.
+ * kadmin/REALM.NAME.  Zephyr doesn't because it's just zephyr/zephyr.
+ *
+ * "Realm conversion" is a bit of a misnomer; really, the v5 name is
+ * using a FQDN or something that looks like it, where the v4 name is
+ * just using the first label.  Sometimes that second principal name
+ * component is a hostname, sometimes the realm name, sometimes it's
+ * neither.
+ *
+ * This list should probably be more configurable, and more than
+ * likely on a per-realm basis, so locally-defined services can be
+ * added, or not.
  */
 static const struct krb_convert sconv_list[] = {
-    {"kadmin",	"kadmin",	0},
-    {"rcmd",	"host",		DO_REALM_CONVERSION},
-    {"discuss",	"discuss",	DO_REALM_CONVERSION},
-    {"rvdsrv",	"rvdsrv",	DO_REALM_CONVERSION},
-    {"sample",	"sample",	DO_REALM_CONVERSION},
-    {"olc",	"olc",		DO_REALM_CONVERSION},
-    {"pop",	"pop",		DO_REALM_CONVERSION},
-    {"sis",	"sis",		DO_REALM_CONVERSION},
-    {"rfs",	"rfs",		DO_REALM_CONVERSION},
-    {"imap",	"imap",		DO_REALM_CONVERSION},
-    {"ftp",	"ftp",		DO_REALM_CONVERSION},
-    {"ecat",	"ecat",		DO_REALM_CONVERSION},
-    {"daemon",        "daemon",       DO_REALM_CONVERSION},
-    {"gnats", "gnats",        DO_REALM_CONVERSION},
-    {"moira", "moira",        DO_REALM_CONVERSION},
-    {"prms",  "prms",         DO_REALM_CONVERSION},
-    {"mandarin",      "mandarin",     DO_REALM_CONVERSION},
-    {"register",      "register",     DO_REALM_CONVERSION},
-    {"changepw",      "changepw",     DO_REALM_CONVERSION},
-    {"sms",   "sms",          DO_REALM_CONVERSION},
-    {"afpserver",     "afpserver",    DO_REALM_CONVERSION},
-    {"gdss",  "gdss",         DO_REALM_CONVERSION},
-    {"news",  "news",         DO_REALM_CONVERSION},
-    {"abs",   "abs",          DO_REALM_CONVERSION},
-    {"nfs",   "nfs",          DO_REALM_CONVERSION},
-    {"tftp",  "tftp",         DO_REALM_CONVERSION},
-    {"zephyr",        "zephyr",       0},
-    {"http",  "http",         DO_REALM_CONVERSION},
-    {"khttp", "khttp",        DO_REALM_CONVERSION},
-    {"pgpsigner", "pgpsigner",        DO_REALM_CONVERSION},
-    {"irc",   "irc",          DO_REALM_CONVERSION},
-    {"mandarin-agent",        "mandarin-agent",       DO_REALM_CONVERSION},
-    {"write", "write",        DO_REALM_CONVERSION},
-    {"palladium", "palladium",        DO_REALM_CONVERSION},
-    {0,		0,		0},
+    /* Realm conversion, Change service name */
+#define RC(V5NAME,V4NAME) { V5NAME, V4NAME, DO_REALM_CONVERSION, sizeof(V5NAME)-1 }
+    /* Realm conversion */
+#define R(NAME)		{ NAME, NAME, DO_REALM_CONVERSION, sizeof(NAME)-1 }
+    /* No Realm conversion */
+#define NR(NAME)	{ NAME, NAME, 0, sizeof(NAME)-1 }
+
+    NR("kadmin"),
+    RC("rcmd", "host"),
+    R("discuss"),
+    R("rvdsrv"),
+    R("sample"),
+    R("olc"),
+    R("pop"),
+    R("sis"),
+    R("rfs"),
+    R("imap"),
+    R("ftp"),
+    R("ecat"),
+    R("daemon"),
+    R("gnats"),
+    R("moira"),
+    R("prms"),
+    R("mandarin"),
+    R("register"),
+    R("changepw"),
+    R("sms"),
+    R("afpserver"),
+    R("gdss"),
+    R("news"),
+    R("abs"),
+    R("nfs"),
+    R("tftp"),
+    NR("zephyr"),
+    R("http"),
+    R("khttp"),
+    R("pgpsigner"),
+    R("irc"),
+    R("mandarin-agent"),
+    R("write"),
+    R("palladium"),
+    {0, 0, 0, 0},
+#undef R
+#undef RC
+#undef NR
 };
 
 /*
@@ -148,7 +168,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	  compo = krb5_princ_component(context, princ, 0);
 	  p = sconv_list;
 	  while (p->v4_str) {
-	       if (strncmp(p->v5_str, compo->data, compo->length) == 0) {
+	       if (p->len == compo->length
+		   && memcmp(p->v5_str, compo->data, compo->length) == 0) {
 		   /*
 		    * It is, so set the new name now, and chop off
 		    * instance's domain name if requested.

@@ -1,3 +1,10 @@
+2002-04-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_princ.c (struct krb_convert): Add new field 'len'.
+	(RC, R, NR): New macros.
+	(sconv_list): Use them.
+	(krb5_524_conv_principal): Compare lengths and then use memcmp.
+
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* decrypt_tk.c (krb5_decrypt_tkt_part): Call krb5_c_valid_enctype
