@@ -68,7 +68,7 @@ static krb5_error_code
 krb5_generate_authenticator (krb5_context,
 				       krb5_authenticator *, krb5_principal,
 				       krb5_checksum *, krb5_keyblock *,
-				       krb5_int32, krb5_authdata ** );
+				       krb5_ui_4, krb5_authdata ** );
 
 krb5_error_code KRB5_CALLCONV
 krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
@@ -239,7 +239,7 @@ cleanup:
 }
 
 static krb5_error_code
-krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent, krb5_principal client, krb5_checksum *cksum, krb5_keyblock *key, krb5_int32 seq_number, krb5_authdata **authorization)
+krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent, krb5_principal client, krb5_checksum *cksum, krb5_keyblock *key, krb5_ui_4 seq_number, krb5_authdata **authorization)
 {
     krb5_error_code retval;
     
