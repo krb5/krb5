@@ -27,7 +27,7 @@ extern int errno;
 krb5_error_code
 krb5_ms_timeofday(seconds, milliseconds)
 register krb5_int32 *seconds;
-register krb5_int16 *milliseconds;
+register krb5_ui_2 *milliseconds;
 {
     struct timeval tv;
 
