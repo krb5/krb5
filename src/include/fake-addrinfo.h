@@ -80,6 +80,8 @@
      supporting IPv6 at all, they really should be doing getaddrinfo
      by now.
 
+   + inet_ntop, inet_pton
+
    + Upgrade host requirements to include working implementations of
      these functions, and throw all this away.  Pleeease?  :-)  */
 
@@ -99,15 +101,74 @@
 #define HAVE_GETNAMEINFO
 #endif
 
+
+/* Do we actually have *any* systems we care about that don't provide
+   either getaddrinfo or one of these two flavors of
+   gethostbyname_r?  */
+#ifndef HAVE_GETHOSTBYNAME_R
+#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+    { (HP) = gethostbyname (NAME); (ERR) = h_errno; }
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+    { (HP) = gethostbyaddr ((ADDR), (ADDRLEN), (FAMILY)); (ERR) = h_errno; }
+#else
+#ifdef GETHOSTBYNAME_R_RETURNS_INT
+#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+    {									\
+	struct hostent my_h_ent, *my_hp;				\
+	int my_h_err;							\
+	char my_h_buf[8192];						\
+	(HP) = (gethostbyname_r((NAME), &my_h_ent,			\
+				my_h_buf, sizeof (my_h_buf), &my_hp,	\
+				&my_h_err)				\
+		? &my_h_ent						\
+		: 0);							\
+	(ERR) = my_h_err;						\
+    }
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+    {									\
+	struct hostent my_h_ent;					\
+	int my_h_err;							\
+	char my_h_buf[8192];						\
+	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
+				my_h_buf, sizeof (my_h_buf), &my_hp,	\
+				&my_h_err)				\
+		? &my_h_ent						\
+		: 0);							\
+	(ERR) = my_h_err;						\
+    }
+#else
+#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+    {									\
+	struct hostent my_h_ent;					\
+	int my_h_err;							\
+	char my_h_buf[8192];						\
+	(HP) = gethostbyname_r((NAME), &my_h_ent,			\
+			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
+	(ERR) = my_h_err;						\
+    }
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+    {									\
+	struct hostent my_h_ent;					\
+	int my_h_err;							\
+	char my_h_buf[8192];						\
+	(HP) = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
+			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
+	(ERR) = my_h_err;						\
+    }
+#endif
+#endif
+
 #ifdef WRAP_GETADDRINFO
-static int (*gaiptr) (const char *, const char *, const struct addrinfo *,
-		      struct addrinfo **) = &getaddrinfo;
-static void (*faiptr) (struct addrinfo *) = &freeaddrinfo;
+static int (*const gaiptr) (const char *, const char *,
+			    const struct addrinfo *,
+			    struct addrinfo **) = &getaddrinfo;
+static void (*const faiptr) (struct addrinfo *) = &freeaddrinfo;
 #endif
 
 #ifdef WRAP_GETNAMEINFO
-static int (*gniptr) (const struct sockaddr *, socklen_t,
-		      char *, size_t, char *, size_t, int) = &getnameinfo;
+static int (*const gniptr) (const struct sockaddr *, socklen_t,
+			    char *, size_t, char *, size_t,
+			    int) = &getnameinfo;
 #endif
 
 #if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETADDRINFO)
@@ -299,13 +360,14 @@ static inline int fai_add_hosts_by_name (const char *name, int af,
 {
     struct hostent *hp;
     int i, r;
+    int herr;
 
     if (af != AF_INET)
 	/* For now, real ipv6 support needs real getaddrinfo.  */
 	return EAI_FAMILY;
-    hp = gethostbyname (name);
+    GET_HOST_BY_NAME (name, hp, herr);
     if (hp == 0)
-	return translate_h_errno (h_errno);
+	return translate_h_errno (herr);
     for (i = 0; hp->h_addr_list[i]; i++) {
 	r = fai_add_entry (result, hp->h_addr_list[i], portnum, template);
 	if (r)
@@ -367,7 +429,17 @@ fake_getaddrinfo (const char *name, const char *serv,
 		socktype = SOCK_STREAM;
 	    }
 	try_service_lookup:
+#ifdef HAVE_GETSERVBYNAME_R
+	    {
+		char my_s_buf[1024];
+		struct servent my_s_ent;
+		sp = getservbyname_r(serv,
+				     socktype == SOCK_STREAM ? "tcp" : "udp",
+				     &my_s_ent, my_s_buf, sizeof(my_s_buf));
+	    }
+#else
 	    sp = getservbyname (serv, socktype == SOCK_STREAM ? "tcp" : "udp");
+#endif
 	    if (sp == 0) {
 		if (try_dgram_too) {
 		    socktype = SOCK_DGRAM;
@@ -440,14 +512,15 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 
     if (host) {
 	if (flags & NI_NUMERICHOST) {
-#if defined(__GNUC__) && defined(__mips__)
-	    /* The inet_ntoa call, passing a struct, fails on Irix 6.5
+#if (defined(__GNUC__) && defined(__mips__)) || 1 /* thread-safe version */
+	    /* The inet_ntoa call, passing a struct, fails on IRIX 6.5
 	       using gcc 2.95; we get back "0.0.0.0".  Since this in a
 	       configuration still important at Athena, here's the
 	       workaround....  */
-	    const unsigned char *uc = (const unsigned char *) &sinp->sin_addr;
+	    const unsigned char *uc;
 	    char tmpbuf[20];
 	numeric_host:
+	    uc = (const unsigned char *) &sinp->sin_addr;
 	    sprintf(tmpbuf, "%d.%d.%d.%d", uc[0], uc[1], uc[2], uc[3]);
 	    strncpy(host, tmpbuf, hostlen);
 #else
@@ -457,13 +530,13 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    strncpy (host, p, hostlen);
 #endif
 	} else {
-	    hp = gethostbyaddr ((const char *) &sinp->sin_addr,
-				sizeof (struct in_addr),
-				sa->sa_family);
+	    int herr;
+	    GET_HOST_BY_ADDR(&sinp->sin_addr, sizeof (struct in_addr),
+			     sa->sa_family, hp, herr);
 	    if (hp == 0) {
-		if (h_errno == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */
+		if (herr == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */
 		    goto numeric_host;
-		return translate_h_errno (h_errno);
+		return translate_h_errno (herr);
 	    }
 	    /* According to the Open Group spec, getnameinfo can
 	       silently truncate, but must still return a
@@ -484,8 +557,16 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    sprintf (numbuf, "%d", port);
 	    strncpy (service, numbuf, servicelen);
 	} else {
+#ifdef HAVE_GETSERVBYPORT_R
+	    char my_s_buf[1024];
+	    struct servent my_s_ent;
+	    sp = getservbyport_r(sinp->sin_port,
+				 (flags & NI_DGRAM) ? "udp" : "tcp",
+				 &my_s_ent, my_s_buf, sizeof(my_s_buf));
+#else
 	    sp = getservbyport (sinp->sin_port,
 				(flags & NI_DGRAM) ? "udp" : "tcp");
+#endif
 	    if (sp == 0)
 		goto numeric_service;
 	    strncpy (service, sp->s_name, servicelen);
@@ -576,12 +657,13 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
    have to be initialized at the end, because the way we initialize
    them (for UNIX) is #undef and a reference to the C library symbol
    name.  */
-static int (*gaiptr) (const char *, const char *, const struct addrinfo *,
-		      struct addrinfo **);
-static void (*faiptr) (struct addrinfo *);
+static int (*const gaiptr) (const char *, const char *,
+			    const struct addrinfo *,
+			    struct addrinfo **);
+static void (*const faiptr) (struct addrinfo *);
 #ifdef WRAP_GETNAMEINFO
-static int (*gniptr) (const struct sockaddr *, socklen_t,
-		      char *, size_t, char *, size_t, int);
+static int (*const gniptr) (const struct sockaddr *, socklen_t,
+			    char *, size_t, char *, size_t, int);
 #endif
 
 #ifdef WRAP_GETADDRINFO
@@ -633,9 +715,9 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
     if (name && hint && (hint->ai_flags & AI_CANONNAME)) {
 	struct hostent *hp;
 	const char *name2 = 0;
-	int i;
+	int i, herr;
 
-	hp = gethostbyname(name);
+	GET_HOST_BY_NAME (name, hp, herr);
 	if (hp == 0) {
 	    if ((*result)->ai_canonname != 0)
 		/* XXX Indicate success with the existing name?  */
