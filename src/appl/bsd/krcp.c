@@ -34,8 +34,6 @@ char copyright[] =
 static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #endif /* not lint */
 
-#define KERBEROS
-     
      /*
       * rcp
       */
