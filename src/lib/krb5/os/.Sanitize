@@ -63,6 +63,7 @@ sendto_kdc.c
 sn2princ.c
 timeofday.c
 t_std_conf.c
+t_an_to_ln.c
 td_krb5.conf
 unlck_file.c
 ustime.c

@@ -1,3 +1,6 @@
+Thu Aug 24 18:53:32 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Mon Aug 21 17:07:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* str_conv.c - Add krb5_timestamp_to_sfstring().  This converts time

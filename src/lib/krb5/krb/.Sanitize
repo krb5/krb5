@@ -53,7 +53,6 @@ decode_kdc.c
 decrypt_tk.c
 encode_kdc.c
 encrypt_tk.c
-faddr_ordr.c
 free_rtree.c
 gc_frm_kdc.c
 gc_via_tkt.c

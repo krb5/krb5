@@ -32,9 +32,11 @@ adm_kw_enc.c
 adm_kt_dec.c
 adm_kt_enc.c
 adm_rw.c
+alt_prof.c
 configure.in
 configure
 keysalt.c
+logger.c
 str_conv.c
 t_dbentry.c
 t_ktentry.c

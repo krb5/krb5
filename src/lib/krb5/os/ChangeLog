@@ -1,3 +1,7 @@
+Thu Aug 24 18:56:35 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list.
+
 Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
 
         * lock_file.c (krb5_lock_file()), unlck_file.c (krb5_unlock_file()):

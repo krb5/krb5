@@ -28,7 +28,9 @@ ChangeLog
 Makefile.in
 configure
 configure.in
+localaddr.c
 rnd_confoun.c
+ustime.c
 
 Things-to-lose:
 

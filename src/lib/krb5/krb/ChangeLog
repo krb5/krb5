@@ -1,3 +1,7 @@
+Thu Aug 24 18:55:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list.
+
 Mon Aug  7 18:54:35 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* in_tkt_ktb.c (keytab_keyproc): If there is an error looking up

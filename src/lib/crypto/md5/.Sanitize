@@ -32,6 +32,7 @@ md5.c
 md5crypto.c
 md5glue.c
 rsa-md5.h
+t_cksum.c
 t_mddriver.c
 
 Things-to-lose:

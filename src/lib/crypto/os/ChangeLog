@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Sat Jul 29 03:17:21 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* localaddr.c (krb5_crypto_os_localaddr): Don't bash the return

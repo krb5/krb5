@@ -1,3 +1,6 @@
+Thu Aug 24 18:51:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Thu Jul 27 15:23:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Check for the sizes of short, int and long.

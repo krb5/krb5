@@ -32,9 +32,12 @@ decrypt_key.c
 encrypt_key.c
 fetch_mkey.c
 kdb_compat.h
+kdb_cpw.c
 kdb_dbm.c
+kdb_xdr.c
 setup_mkey.c
 store_mkey.c
+t_kdb.c
 verify_mky.c
 
 Things-to-lose:

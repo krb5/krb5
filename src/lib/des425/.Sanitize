@@ -32,6 +32,7 @@ configure.in
 des.c
 des.h
 enc_dec.c
+k4_glue.c
 key_parity.c
 key_sched.c
 new_rnd_key.c
@@ -42,6 +43,7 @@ read_passwd.c
 str_to_key.c
 string2key.c
 unix_time.c
+util.c
 verify.c
 weak_key.c
 

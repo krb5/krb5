@@ -1,3 +1,6 @@
+Thu Aug 24 18:54:51 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Fri Aug 18 17:27:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Bump timestamp to the future if we can't discriminate
