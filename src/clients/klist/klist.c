@@ -132,8 +132,10 @@ main(argc, argv)
     }
     fputs("  Valid starting       Expires          Service principal\n",
 	  stdout);
-    while (!(code = krb5_cc_next_cred(cache, &cur, &creds)))
+    while (!(code = krb5_cc_next_cred(cache, &cur, &creds))) {
 	show_credential(&creds);
+	krb5_free_cred_contents(&creds);
+    }
     if (code == KRB5_CC_END) {
 	if (code = krb5_cc_end_seq_get(cache, &cur)) {
 	    com_err(progname, code, "while finishing ticket retrieval");

@@ -1,0 +1,5 @@
+Thu Sep 22 22:41:42 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* klist.c (main): Fix memory leak in klist --- the returned
+		credentials should be freed before you fetch the next set.
+
