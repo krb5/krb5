@@ -1,3 +1,9 @@
+Thu Apr 11 19:32:36 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): Use the matching key_data's kvno;
+	don't assume that key_data[0]'s kvno is necessarily the matching
+	key_data's kvno.
+
 Wed Apr 10 19:17:58 1996  Richard Basch  <basch@lehman.com>
 
 	* kdb5_edit.c (extract_v4_srvtab): Translate the principal name to

@@ -904,7 +904,7 @@ void extract_v4_srvtab(argc, argv)
 	fwrite(v4_inst, strlen(v4_inst) + 1, 1, fout);	/* p.instance */
 	fwrite(v4_realm, strlen(v4_realm) + 1, 1, fout); /* p.realm */
 
-        kvno = (unsigned char) dbentry.key_data[0].key_data_kvno;
+        kvno = (unsigned char) pkey->key_data_kvno;
         fwrite((char *)&kvno, sizeof(kvno), 1, fout);
 	fwrite((char *)key.contents, 8, 1, fout);
 	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
