@@ -89,13 +89,13 @@ static const char enctype_null_in[]		= "null";
 static const char enctype_descbccrc_in[]	= "des-cbc-crc";
 static const char enctype_descbcmd4_in[]	= "des-cbc-md4";
 static const char enctype_descbcmd5_in[]	= "des-cbc-md5";
-static const char enctype_des3cbcmd5_in[]	= "des3-cbc-md5";
+static const char enctype_des3cbcsha_in[]	= "des3-cbc-sha";
 static const char enctype_descbcraw_in[]	= "des-cbc-raw";
 static const char enctype_null_out[]		= "Null";
 static const char enctype_descbccrc_out[]	= "DES cbc mode with CRC-32";
 static const char enctype_descbcmd4_out[]	= "DES cbc mode with RSA-MD4";
 static const char enctype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
-static const char enctype_des3cbcmd5_out[]	= "Triple DES cbc mode with RSA-MD5";
+static const char enctype_des3cbcsha_out[]	= "DES-3 cbc mode with NIST-SHA";
 static const char enctype_descbcraw_out[]	= "DES cbc mode raw";
 
 /* Salttype strings */
@@ -119,12 +119,16 @@ static const char cstype_md4des_in[]	= "md4-des";
 static const char cstype_descbc_in[]	= "des-cbc";
 static const char cstype_md5_in[]	= "md5";
 static const char cstype_md5des_in[]	= "md5-des";
+static const char cstype_sha_in[]	= "sha";
+static const char cstype_shades3_in[]	= "sha-des3";
 static const char cstype_crc32_out[]	= "CRC-32";
 static const char cstype_md4_out[]	= "RSA-MD4";
 static const char cstype_md4des_out[]	= "RSA-MD4 with DES cbc mode";
 static const char cstype_descbc_out[]	= "DES cbc mode";
 static const char cstype_md5_out[]	= "RSA-MD5";
 static const char cstype_md5des_out[]	= "RSA-MD5 with DES cbc mode";
+static const char cstype_sha_out[]	= "NIST-SHA";
+static const char cstype_shades3_out[]	= "NIST-SHA with DES-3 cbc mode";
 
 /* Absolute time strings */
 static const char atime_full_digits[]	= "%y%m%d%H%M%S";
@@ -184,7 +188,7 @@ static const struct enctype_lookup_entry enctype_table[] = {
 { ENCTYPE_DES_CBC_CRC,	enctype_descbccrc_in,	enctype_descbccrc_out	},
 { ENCTYPE_DES_CBC_MD4,	enctype_descbcmd4_in,	enctype_descbcmd4_out	},
 { ENCTYPE_DES_CBC_MD5,	enctype_descbcmd5_in,	enctype_descbcmd5_out	},
-{ ENCTYPE_DES3_CBC_MD5,	enctype_des3cbcmd5_in,	enctype_des3cbcmd5_out	},
+{ ENCTYPE_DES3_CBC_SHA,	enctype_des3cbcsha_in,	enctype_des3cbcsha_out	},
 { ENCTYPE_DES_CBC_RAW,	enctype_descbcraw_in,	enctype_descbcraw_out	}
 };
 static const int enctype_table_nents = sizeof(enctype_table)/
@@ -211,7 +215,9 @@ static const struct cksumtype_lookup_entry cksumtype_table[] = {
 { CKSUMTYPE_RSA_MD4_DES,  cstype_md4des_in,	cstype_md4des_out	},
 { CKSUMTYPE_DESCBC,       cstype_descbc_in,	cstype_descbc_out	},
 { CKSUMTYPE_RSA_MD5,      cstype_md5_in,	cstype_md5_out		},
-{ CKSUMTYPE_RSA_MD5_DES,  cstype_md5des_in,	cstype_md5des_out	}
+{ CKSUMTYPE_RSA_MD5_DES,  cstype_md5des_in,	cstype_md5des_out	},
+{ CKSUMTYPE_NIST_SHA,     cstype_sha_in,	cstype_sha_out		},
+{ CKSUMTYPE_NIST_SHA_DES3,cstype_shades3_in,	cstype_shades3_out	}
 };
 static const int cksumtype_table_nents = sizeof(cksumtype_table)/
 					 sizeof(cksumtype_table[0]);

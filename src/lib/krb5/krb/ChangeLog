@@ -1,3 +1,7 @@
+Fri May 10 02:51:17 1996  Richard Basch  <basch@lehman.com>
+
+	* str_conv.c: changes des3-md5 to des3-sha & added sha cksum types
+
 Sun May  5 09:46:18 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* preauth.c: Add casts and const keywords as needed.
