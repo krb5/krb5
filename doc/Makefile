@@ -93,6 +93,9 @@ user-guide.ps: $(USER_GUIDE_DEPS)
 	$(MANPS) $(MANPAGES)
 	$(DVIPS) user-guide
 
+user-guide.pdf: user-guide.ps
+	$(PSPDF) user-guide.ps user-guide.pdf
+
 .PHONY: user-guide-info
 user-guide-info:: krb5-user.info
 
