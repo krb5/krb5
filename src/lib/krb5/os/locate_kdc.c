@@ -75,9 +75,9 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	return code;
 
 #ifdef KRB5_USE_INET
-    if (sp = getservbyname(KDC_PORTNAME, "udp"))
+    if ((sp = getservbyname(KDC_PORTNAME, "udp")))
 	udpport = sp->s_port;
-    if (sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp"))
+    if ((sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp")))
 	sec_udpport = sp->s_port;
 #endif
     if (sec_udpport == udpport)

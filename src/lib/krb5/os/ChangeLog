@@ -1,3 +1,13 @@
+Fri Jan  5 09:00:47 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Add parrentheses for assignment
+		in conditional. (gcc -Wall)
+
+	* init_os_ctx.c (krb5_os_init_context): Remove unused variables
+
+	* an_to_ln.c (aname_do_match): Initialize local variable before
+		referenced. 
+
 Thu Jan  4 22:23:04 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* hostaddr.c (krb5_os_hostaddr): New function which takes a

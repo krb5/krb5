@@ -105,7 +105,10 @@ os_init_paths(ctx, secure)
 {
 	krb5_error_code	retval = 0;
 	char *name = 0;
+
+#if defined(_MACINTOSH) || defined(_WINDOWS)
 	const char *filenames[2];
+#endif
 
 	ctx->profile_secure = secure;
 
@@ -156,9 +159,7 @@ krb5_os_init_context(ctx)
 {
 	krb5_os_context os_ctx;
 	krb5_error_code	retval = 0;
-	char *name;
-	const char *filenames[2];
-	
+
 	if (ctx->os_context)
 		return 0;
 

@@ -207,7 +207,7 @@ aname_do_match(string, contextp)
     char	**contextp;
 {
     krb5_error_code	kret;
-    char		*regexp, *startp, *endp;
+    char		*regexp, *startp, *endp = 0;
     size_t		regexlen;
 #if	HAVE_REGCOMP
     regex_t		match_exp;
@@ -479,7 +479,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
     krb5_error_code	kret;
     char		*current;
     char		*fprincname;
-    char		*selstring;
+    char		*selstring = 0;
     int			num_comps, compind;
     char		*cout;
     krb5_data		*datap;
