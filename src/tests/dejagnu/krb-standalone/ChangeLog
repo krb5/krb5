@@ -1,3 +1,8 @@
+Wed Aug 14 20:27:36 1996  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Do case insensitive match in case hostname doesn't
+		get downcased.
+
 Mon Aug 12 22:58:09 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadmin.exp: Rewrite using kadmin.local instead of kdb5_edit.
