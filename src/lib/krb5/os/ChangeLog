@@ -1,6 +1,12 @@
+2002-10-10  Sam Hartman  <hartmans@mit.edu>
+
+	* read_pwd.c (krb5_read_password): Reimplement in terms of krb5_prompter_posix for unix
+
+
 2002-09-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (krb5int_cm_call_select): Fix last change.
+
 
 2002-09-19  Ken Raeburn  <raeburn@mit.edu>
 
