@@ -38,6 +38,7 @@ OBJS=	addr_comp.o	\
 	krbconfig.o	\
 	mk_error.o	\
 	mk_priv.o	\
+	mk_rep.o	\
 	mk_req.o	\
 	mk_req_ext.o	\
 	mk_safe.o	\
@@ -45,6 +46,7 @@ OBJS=	addr_comp.o	\
 	princ_comp.o	\
 	rd_error.o	\
 	rd_priv.o	\
+	rd_rep.o	\
 	rd_req.o	\
 	rd_req_sim.o	\
 	rd_req_dec.o	\
@@ -83,6 +85,7 @@ SRCS=	addr_comp.c	\
 	krbconfig.c	\
 	mk_error.c	\
 	mk_priv.c	\
+	mk_rep.c	\
 	mk_req.c	\
 	mk_req_ext.c	\
 	mk_safe.c	\
@@ -90,6 +93,7 @@ SRCS=	addr_comp.c	\
 	princ_comp.c	\
 	rd_error.c	\
 	rd_priv.c	\
+	rd_rep.c	\
 	rd_req.c	\
 	rd_req_sim.c	\
 	rd_req_dec.c	\
