@@ -49,6 +49,10 @@ static char sccsid[] = "@(#)ftpcmd.y	5.24 (Berkeley) 2/25/91";
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/ftp.h>
@@ -942,6 +946,26 @@ lookup(p, cmd)
 	return (0);
 }
 
+/*
+ * urgsafe_getc - hacked up getc to ignore EOF if SIOCATMARK returns TRUE
+ */
+int
+urgsafe_getc(f)
+	FILE *f;
+{
+	register int c;
+	int atmark;
+
+	c = getc(f);
+	if (c == EOF) {
+		if (ioctl(fileno(f), SIOCATMARK, &atmark) != -1) {
+			c = getc(f);
+			syslog(LOG_DEBUG, "atmark: c=%d", c);
+		}
+	}
+	return c;
+}
+
 #include <arpa/telnet.h>
 
 /*
@@ -954,6 +978,7 @@ getline(s, n, iop)
 {
 	register c;
 	register char *cs;
+	int atmark;
 
 	cs = s;
 /* tmpline may contain saved command from urgent mode interruption */
@@ -969,21 +994,23 @@ getline(s, n, iop)
 		if (c == 0)
 			tmpline[0] = '\0';
 	}
-	while ((c = getc(iop)) != EOF) {
+	while ((c = urgsafe_getc(iop)) != EOF) {
 		c &= 0377;
 		if (c == IAC) {
-		    if ((c = getc(iop)) != EOF) {
+			if (debug) syslog(LOG_DEBUG, "got IAC");
+		    if ((c = urgsafe_getc(iop)) != EOF) {
 			c &= 0377;
+			if (debug) syslog(LOG_DEBUG, "got IAC %d", c);
 			switch (c) {
 			case WILL:
 			case WONT:
-				c = getc(iop);
+				c = urgsafe_getc(iop);
 				printf("%c%c%c", IAC, DONT, 0377&c);
 				(void) fflush(stdout);
 				continue;
 			case DO:
 			case DONT:
-				c = getc(iop);
+				c = urgsafe_getc(iop);
 				printf("%c%c%c", IAC, WONT, 0377&c);
 				(void) fflush(stdout);
 				continue;

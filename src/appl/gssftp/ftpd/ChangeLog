@@ -1,3 +1,11 @@
+Wed Mar 24 17:11:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y (urgsafe_getc): New function; like getc() except it
+	retries once if SIOCATMARK returns TRUE.
+	(getline): Use urgsafe_getc() rather than getc() to avoid problems
+	with certain Mac clients that cause the urgent pointer to end up
+	in a location that results in EOF from getc().
+
 Fri Mar 12 07:35:01 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (user): Remove extra "%s" in call to sprintf() to avoid
