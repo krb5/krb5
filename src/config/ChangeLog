@@ -1,3 +1,8 @@
+Sun Mar  2 19:54:26 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in (KRB4COMPAT_DEPLIBS): Depends on KRB5_BASE_DEPLIBS (not
+	        KRB5_BASE_DEPLBS)
+
 Sat Mar  1 14:33:21 1997  Tom Yu  <tlyu@mit.edu>
 
 	* libobj.in: Change .c.so and .c.po rules to work better with
