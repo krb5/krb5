@@ -1,5 +1,8 @@
 Thu Feb 11 22:24:03 1999  Tom Yu  <tlyu@mit.edu>
 
+	* sane_hostname.c: Force maxlen to be 16 if it's less than 16,
+	since otherwise a numeric IP address won't fit.
+
 	* Makefile.in: Add sane_hostname.{o,c}; bump minor version.
 
 	* libpty.h: Add prototype for make_sane_hostname.
