@@ -290,7 +290,7 @@ SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 AC_SUBST(SHLIB_TAIL_COMP)
 dnl
 dnl
-AC_CONFIG_SUBDIRS(util/et util/ss util/profile util/pty util/db2 include lib/libcrypto lib/krb5 lib/des425 $libkrb4 lib/krb5util lib/kdb lib/gssapi lib/rpc lib/kadm5 $krb524 kdc kadmin slave clients appl tests)
+AC_CONFIG_SUBDIRS(util/et util/ss util/profile util/pty util/db2 include lib/crypto lib/krb5 lib/des425 $libkrb4 lib/krb5util lib/kdb lib/gssapi lib/rpc lib/kadm5 $krb524 kdc kadmin slave clients appl tests)
 K5_GEN_MAKEFILE(.)
 K5_GEN_MAKEFILE(util)
 K5_GEN_MAKEFILE(util/send-pr)

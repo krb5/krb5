@@ -1,3 +1,8 @@
+Wed Jan 27 17:10:18 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix typo so that lib/crypto actually gets
+ 	configured.
+
 1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in, configure.in: Move the responsibility for
