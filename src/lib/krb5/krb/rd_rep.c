@@ -104,7 +104,8 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
     /* Set auth subkey */
     if ((*repl)->subkey) {
 	(*repl)->subkey->etype = reply->enc_part.etype;
-	auth_context->remote_subkey = (*repl)->subkey;
+	retval = krb5_copy_keyblock(context, (*repl)->subkey,
+				    &auth_context->remote_subkey);
     }
 
     /* Get remote sequence number */
