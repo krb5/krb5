@@ -1,3 +1,10 @@
+Tue Apr 16 13:43:43 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in :  Don't use streams on HPUX.
+
+	* getpty.c (pty_getpty): Check /dev/ptym/clone for HPUX10, only
+ 	try /dev/ptmx if HAVE_STREAMS defined so we can bipass for HPUX9.
+
 Sun Apr 14 00:36:33 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* pty-int.h: Don't include sys/wait.h here.

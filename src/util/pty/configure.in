@@ -43,8 +43,7 @@ alpha-dec-osf*)
      AC_DEFINE(PUSH_TTCOMPAT)
      ;;
 *-*-hpux*)
-    AC_DEFINE(PUSH_PTEM)
-     AC_DEFINE(PUSH_LDTERM)
+     krb5_cv_has_streams=no
      ;;
 esac
 dnl

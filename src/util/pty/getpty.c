@@ -63,13 +63,16 @@ close(slavefd);
     return 0;
 #else /*HAVE__GETPTY*/
     
-    *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris*/
+    *fd = open(" /dev/ptym/clone", O_RDWR|O_NDELAY);	/* HPUX*/
+#ifdef HAVE_STREAMS
+    if (*fd < 0) *fd = open("/dev/ptmx",O_RDWR|O_NDELAY); /*Solaris*/
+#endif
     if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
     if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
 
     if (*fd >= 0) {
 
-#ifdef HAVE_GRANTPT
+#if defined(HAVE_GRANTPT)&&defined(HAVE_STREAMS)
 	if (grantpt(*fd) || unlockpt(*fd)) return PTY_GETPTY_STREAMS;
 #endif
     
