@@ -51,8 +51,6 @@ void add_new_key PROTOTYPE((int, char **));
 void change_pwd_key PROTOTYPE((int, char **));
 void add_rnd_key PROTOTYPE((int, char **));
 void change_rnd_key PROTOTYPE((int, char **));
-void add_v4_key PROTOTYPE((int, char **));
-void change_v4_key PROTOTYPE((int, char **));
 void delete_entry PROTOTYPE((int, char **));
 void extract_srvtab PROTOTYPE((krb5_context, int, char **));
 void extract_v4_srvtab PROTOTYPE((int, char **));
@@ -97,7 +95,7 @@ int list_requests(clientData, interp, argc, argv)
     int argc;
     char *argv[];
 {
-    Tcl_SetResult(interp, "show_principal, show: Show the Kerberos database entry for a principal\nadd_new_key, ank: Add new entry to the Kerberos database (prompting for password\nchange_pwd_key, cpw: Change key of an entry in the Kerberos database (prompting for password)\nadd_rnd_key, ark: Add new entry to Kerberos database, using a random key\nchange_rnd_key, crk: Change key of an entry in the Kerberos database (select a random key)\nadd_v4_key, av4k: Add new entry to Kerberos database (using V4 string-to-key)\nchange_v4_key, cv4k: Change key of an entry in the Kerberos database (using V4 string-to-key)\ndelete_entry, delent: Delete an entry from the database\nextract_srvtab, xst, ex_st: Extract service key table\nextract_v4_srvtab, xst4: Extract service key table\nlist_db, ldb: List database entries\nset_dbname, sdbn: Change database name\nenter_master_key, emk: Enter the master key for a database\nchange_working_directory, cwd, cd: Change working directory\nprint_working_directory, pwd: Print working directory\nlist_requests, lr: List available requests\nquit, exit: Exit program", TCL_STATIC);
+    Tcl_SetResult(interp, "show_principal, show: Show the Kerberos database entry for a principal\nadd_new_key, ank: Add new entry to the Kerberos database (prompting for password\nchange_pwd_key, cpw: Change key of an entry in the Kerberos database (prompting for password)\nadd_rnd_key, ark: Add new entry to Kerberos database, using a random key\nchange_rnd_key, crk: Change key of an entry in the Kerberos database (select a random key)\ndelete_entry, delent: Delete an entry from the database\nextract_srvtab, xst, ex_st: Extract service key table\nextract_v4_srvtab, xst4: Extract service key table\nlist_db, ldb: List database entries\nset_dbname, sdbn: Change database name\nenter_master_key, emk: Enter the master key for a database\nchange_working_directory, cwd, cd: Change working directory\nprint_working_directory, pwd: Print working directory\nlist_requests, lr: List available requests\nquit, exit: Exit program", TCL_STATIC);
     return TCL_OK;
 }
 
@@ -196,14 +194,6 @@ int Tcl_AppInit(interp)
     Tcl_CreateCommand(interp, "change_rnd_key", wrapper, change_rnd_key,
 		      (Tcl_CmdDeleteProc *)0);
     Tcl_CreateCommand(interp, "crk", wrapper, change_rnd_key,
-		      (Tcl_CmdDeleteProc *)0);
-    Tcl_CreateCommand(interp, "add_v4_key", wrapper, add_v4_key,
-		      (Tcl_CmdDeleteProc *)0);
-    Tcl_CreateCommand(interp, "av4k", wrapper, add_v4_key,
-		      (Tcl_CmdDeleteProc *)0);
-    Tcl_CreateCommand(interp, "change_v4_key", wrapper, change_v4_key,
-		      (Tcl_CmdDeleteProc *)0);
-    Tcl_CreateCommand(interp, "cv4k", wrapper, change_v4_key,
 		      (Tcl_CmdDeleteProc *)0);
     Tcl_CreateCommand(interp, "delete_entry", wrapper, delete_entry,
 		      (Tcl_CmdDeleteProc *)0);

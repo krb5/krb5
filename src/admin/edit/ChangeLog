@@ -1,4 +1,14 @@
 
+Mon Aug 07 11:16:03 1995  Chris Provenzano   (proven@mit.edu)
+
+	* cpw.c : Uses new kdb change password routines for ank, ark, cpw,
+		and crk. Also remove v4 variants of ank and cpw.
+	* krb5_edit.c : Deleted old variants of rotuines now in cpw.c
+	* kdb5_ed_ct.ct, kdb5_edit.M, tcl_wrapper.c: 
+		Removed references to v4 variants of ank and cpw.
+	* kdb5_edit.h (enter_pwd_key()) : Removed proto, it's nolonger 
+		necessary as it's a static routine in cpw.c
+
 Thu Aug 03 12:13:50 1995  Chris Provenzano   (proven@mit.edu)
 
 	* cpw.c : New change password code for kdb5_edit.

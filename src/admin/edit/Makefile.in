@@ -6,6 +6,7 @@ LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
 OBJS= kdb5_edit.o \
 	kdb5_ed_ct.o \
+	cpw.o \
 	util.o \
 	dump.o \
 	dumpv4.o \
@@ -14,6 +15,7 @@ OBJS= kdb5_edit.o \
 
 SRCS= $(srcdir)/kdb5_edit.c \
 	$(srcdir)/kdb5_ed_ct.c \
+	$(srcdir)/cpw.c \
 	$(srcdir)/util.c \
 	$(srcdir)/dump.c \
 	$(srcdir)/ss_wrapper.c \

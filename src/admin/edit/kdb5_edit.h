@@ -40,9 +40,6 @@ void add_key
 	PROTOTYPE((char const *, char const *, 
 		   krb5_const_principal, const krb5_keyblock *, 
 		   krb5_kvno, krb5_keysalt *));
-void enter_pwd_key
-	PROTOTYPE((char *, char *, krb5_const_principal,
-		   krb5_const_principal, krb5_kvno, int));
 int set_dbname_help
 	PROTOTYPE((char *, char *));
 

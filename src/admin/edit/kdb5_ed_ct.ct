@@ -42,12 +42,6 @@ request add_rnd_key, "Add new entry to Kerberos database, using a random key",
 request change_rnd_key, "Change key of an entry in the Kerberos database (select a new random key)",
 	change_rnd_key, crk;
 
-request add_v4_key, "Add new entry to Kerberos database (using V4 string-to-key)",
-	add_v4_key, av4k;
-
-request change_v4_key, "Change key of an entry in the Kerberos database (using V4 string-to-key)",
-	change_v4_key, cv4k;
-
 request delete_entry, "Delete an entry from the database",
 	delete_entry, delent, del;
 

@@ -107,12 +107,6 @@ Add new entry to Kerberos database, using a random key
 .IP change_rnd_key,crk      
 Change key of an entry in the Kerberos database (select a new random key)
 
-.IP add_v4_key,av4k         
-Add new entry to Kerberos database (using V4 string-to-key)
-
-.IP change_v4_key,cv4k     
-Change key of an entry in the Kerberos database (using V4 string-to-key)
-
 .IP delete_entry,delent,del
 Delete an entry from the database
 
