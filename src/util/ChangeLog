@@ -1,3 +1,8 @@
+Sat May 11 17:38:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* libupdate.sh: When using --force, do not use variable before
+		being set. 
+
 Tue Apr 16 22:26:36 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Wed Mar  6 05:02:36 1996  Mark Eichin  <eichin@cygnus.com>

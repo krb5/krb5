@@ -15,7 +15,7 @@ if test "$1" = "--force"
 then
 	force=yes
 	arcmd="$ARCHIVE"
-	rmcmd="rm -f $library"
+	rmcmd="rm -f $2"
 	shift
 fi
 
