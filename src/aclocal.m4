@@ -142,7 +142,7 @@ if test "$enable_thread_support" = yes ; then
 fi
 dnl Maybe this should be inside the conditional above?  Doesn't cache....
 if test "$enable_thread_support" = yes; then
-  ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support])])
+  ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support; try --disable-thread-support])])
   AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
   AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
   AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
@@ -163,14 +163,17 @@ if test "$enable_thread_support" = yes; then
       # These are the flags that "gcc -pthread" adds.  But we don't
       # want "-pthread" because that has link-time effects, and we
       # don't exclude CFLAGS when linking.  *sigh*
-      CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
+      PTHREAD_CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
       ;;
   esac
+  THREAD_SUPPORT=1
 else
   PTHREAD_CC="$CC"
   PTHREAD_CFLAGS=""
   PTHREAD_LIBS=""
+  THREAD_SUPPORT=0
 fi
+AC_SUBST(THREAD_SUPPORT)
 dnl We want to know where these routines live, so on systems with weak
 dnl reference support we can figure out whether or not the pthread library
 dnl has been linked in.

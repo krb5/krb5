@@ -1,3 +1,9 @@
+2005-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Expand on error message if
+	failing.  Substitute THREAD_SUPPORT -> 0 or 1 in makefiles.  For
+	HP-UX, set PTHREAD_CFLAGS, not CFLAGS.
+
 2005-02-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (config.status): Depend on shlib.conf.
