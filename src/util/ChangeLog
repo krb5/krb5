@@ -1,3 +1,7 @@
+Thu Oct 31 12:51:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kbuild: Add an option SHARED for configuring --enable-shared. 
+
 Tue Oct 29 15:39:12 1996  Tom Yu  <tlyu@mit.edu>
 
 	* makeshlib.sh: Allow stuffing of SONAME field in shared lib if

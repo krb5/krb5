@@ -101,6 +101,11 @@ then
 	CONFIG_OPTS="$CONFIG_OPTS --with-krb4=${KRB4}"
 fi
 
+if test "x${SHARED}" != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --enable-shared"
+fi
+
 /bin/rm -rf $BUILD_PATH
 mkdir $BUILD_PATH
 cd $BUILD_PATH
