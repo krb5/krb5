@@ -318,15 +318,15 @@ krb5_error_code
 krb5_check_transited_list (krb5_context ctx, const krb5_data *trans_in,
 			   const krb5_data *crealm, const krb5_data *srealm)
 {
-  krb5_data trans;
+    krb5_data trans;
     struct check_data cdata;
     krb5_error_code r;
 
     trans.length = trans_in->length;
     trans.data = (char *) trans_in->data;
-    if (trans.length&&( trans.data[trans.length-1] == NULL))
+    if (trans.length && (trans.data[trans.length-1] == '\0'))
 	trans.length--;
-	
+
     Tprintf (("krb5_check_transited_list(trans=\"%.*s\", crealm=\"%.*s\", srealm=\"%.*s\")\n",
 	      (int) translength, trans.data,
 	      (int) crealm->length, crealm->data,

@@ -1,3 +1,8 @@
+2002-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Style nit: check
+	character against '\0' not NULL.
+
 2002-10-30  Sam Hartman  <hartmans@mit.edu>
 
 	* chk_trans.c: Ignore trailing null in transited  encoding; older
