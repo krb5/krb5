@@ -33,8 +33,8 @@ OBJS=	cksum.o		\
 	pcbc_encrypt.o	\
 	quad_cksum.o	\
 	random_key.o	\
-	read_password.o \
-	string_to_key.o	\
+	read_passwd.o \
+	str_to_key.o	\
 	weak_key.o	
 
 SRCS=	$(SRCDIR)cksum.c	\
@@ -46,8 +46,8 @@ SRCS=	$(SRCDIR)cksum.c	\
 	$(SRCDIR)pcbc_encrypt.c	\
 	$(SRCDIR)quad_cksum.c	\
 	$(SRCDIR)random_key.c	\
-	$(SRCDIR)read_password.c \
-	$(SRCDIR)string_to_key.c \
+	$(SRCDIR)read_passwd.c \
+	$(SRCDIR)str_to_key.c \
 	$(SRCDIR)weak_key.c	
 
 DEFINES = $(DESDEFINES)
