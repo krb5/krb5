@@ -1,3 +1,7 @@
+Sat Sep  7 02:13:32 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
+
+	* Makefile.in (install): Fix BINDIR to be CLIENT_BINDIR
+
 Fri Aug 23 14:17:42 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install): Install in bin not sbin.
