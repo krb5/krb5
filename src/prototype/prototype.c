@@ -15,4 +15,4 @@ static char <<< rcsid_module_c >>>[] =
 "$Id$";
 #endif	lint
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>

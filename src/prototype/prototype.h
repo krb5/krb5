@@ -11,7 +11,7 @@
  * <<< Description >>>
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
 #ifndef __<<< include blocker>>>__
 #define __<<< include blocker>>>__
