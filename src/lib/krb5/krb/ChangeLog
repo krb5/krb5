@@ -1,3 +1,9 @@
+2001-06-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Zero out multiple separator
+	characters between tokens, so the second can be recognized
+	properly.
+
 2001-04-04  Tom Yu  <tlyu@mit.edu>
 
 	* mk_safe.c (krb5_mk_safe): Only use safe_cksumtype from the

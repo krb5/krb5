@@ -333,8 +333,8 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 		;
 	    if (*ep) {
 		*ep++ = '\0';
-		while (isspace(*ep))
-		    ep++;
+		while (isspace(*ep) || *ep == ',')
+		    *ep++ = '\0';
 	    } else
 		ep = (char *) NULL;
 
