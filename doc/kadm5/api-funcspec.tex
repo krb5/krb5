@@ -991,11 +991,19 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
                                  unsigned long struct_version,
                                  unsigned long api_version,
                                  void **server_handle)
+
+kadm5_ret_t kadm5_init_with_creds(char *client_name,
+				  krb5_ccache ccache,
+				  char *service_name,
+				  kadm5_config_params *params,
+				  krb5_ui_4 struct_version,
+				  krb5_ui_4 api_version,
+				  void **server_handle)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: none
 
-NOTE: kadm5_init is an obsolete provided for backwards
+NOTE: kadm5_init is an obsolete function provided for backwards
 compatibility.  It is identical to kadm5_init_with_password.
 
 These three functions open a connection to the kadm5 library and
@@ -1037,13 +1045,20 @@ be one of the constants KADM5_ADMIN_SERVICE or
 KADM5_CHANGEPW_SERVICE.
 \item If realm is NULL, client_name's realm is used.
 
-\item For init_with_password, the ticket is decoded with the password
-pass, which must be client_name's password.  If pass is NULL or an
-empty string, the user is prompted (via the tty) for a password.
+\item For init_with_password, an initial ticket is acquired and
+decoded with the password pass, which must be client_name's password.
+If pass is NULL or an empty string, the user is prompted (via the tty)
+for a password.
 
-\item For init_with_skey, the ticket is decoded with client_name's key
-obtained from the keytab keytab.  If keytab is NULL or an empty string
-the default keytab is used.
+\item For init_with_skey, an initial ticket is acquired and decoded
+with client_name's key obtained from the specified keytab.  If keytab
+is NULL or an empty string the default keytab is used.
+
+\item For init_with_creds, ccache must be an open credential cache
+that already has a ticket for the specified client and server.
+Alternatively, if a site chooses to disable the DISALLOW_TGT_BASED
+flag on the admin and changepw principals, the ccache can contain a
+ticket-granting ticket for client_name.
 \end{enumerate}
 
 \item Creates a GSS-API authenticated connection to the Admin server,
@@ -1060,14 +1075,11 @@ for this connection, to be used in all subsequent API calls.
 
 The caller should always specify KADM5_STRUCT_VERSION for the
 struct_version argument, a valid and supported API version constant
-for the api_version argument (currently, theonly valid API version
-constant is KADM5_API_VERSION_1), and a valid pointer in which
-the server handle will be stored.
+for the api_version argument (currently, KADM5_API_VERSION_1 or
+KADM5_API_VERSION_2), and a valid pointer in which the server handle
+will be stored.
 
-Local clients, running on the KDC, may be useful. For now this is will
-most likely be used for testing, but could in the future be the basis
-for a command-line system that works both remotely and on the KDC
-machine.  If any kadm5_init_* is invoked locally its semantics are:
+If any kadm5_init_* is invoked locally its semantics are:
 
 \begin{enumerate}
 \item Initializes all the com_err error tables used by the Admin
@@ -1084,9 +1096,11 @@ KADM5_API_VERISON_1, if pass (or keytab) is NULL or an empty string,
 reads the master password from the stash file; otherwise, the non-NULL
 password is ignored and the user is prompted for it via the tty.  In
 KADM5_API_VERSION_2, if the MKEY_FROM_KEYBOARD parameter mask is set
-and the value is non-zero, reads the master keyboard from the user via
-the tty; otherwise, the master key is read from the stash file.  It is
-illegal to call kadm5_init_with_skey with this parameter mask set.
+and the value is non-zero, reads the master password from the user via
+the tty; otherwise, the master key is read from the stash file.
+Calling init_with_skey or init_with_creds with the MKEY_FROM_KEYBOARD
+mask set with a non-zero field is illegal, and calling them without
+the mask set is exactly like calling init_with_password.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
