@@ -144,6 +144,7 @@ LOPTS=-nologo -incremental:no
 !ifdef NODEBUG
 !ifdef DEBUG_SYMBOL
 CCOPTS=/ZI $(CCOPTS)
+LOPTS=$(LOPTS) -debug
 !endif
 CCOPTS=/Os /MD $(CCOPTS)
 LOPTS=$(LOPTS)
