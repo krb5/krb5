@@ -21,7 +21,13 @@
 #include <sys/types.h>			/* needed for much of the reset */
 #endif /* KRB5_SYSTYPES__ */
 
+#include <krb5/osconf.h>		/* USE*TIME_H macros */
+#ifdef USE_TIME_H
+#include <time.h>
+#endif
+#ifdef USE_SYS_TIME_H
 #include <sys/time.h>			/* struct timeval, utimes() */
+#endif
 #include <sys/stat.h>			/* struct stat, stat() */
 #include <sys/param.h>			/* MAXPATHLEN */
 #if defined(unix) || defined(__unix__)
