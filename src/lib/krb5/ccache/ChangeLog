@@ -1,22 +1,27 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* ccdefault.c: Add newline at end of file (compiler warning)
+
 2000-5-31	Alexandra Ellwood <lxs@mit.edu>
 
-	* ccdefault.c: Changed kerberosPrincipal_V5 to kerberosVersion_V5 to reflect 
-	the new constant name.
+	* ccdefault.c: Changed kerberosPrincipal_V5 to kerberosVersion_V5
+	to reflect the new constant name.
 
 2000-4-26	Alexandra Ellwood <lxs@mit.edu>
 
-	* ccdefault.c: Added version number to internal Kerberos Login Library 
-	routine.
+	* ccdefault.c: Added version number to internal Kerberos Login
+	Library routine.
 
 2000-4-13	Alexandra Ellwood <lxs@mit.edu>
 
-	* ccdefault.c: Added Kerberos Login library support (with ifdefs to control 
-	whether or not it is on.  Also added support to store a krb5_principal in the
-	os_context along with the default ccache name (if known, this principal is 
-	the same as the last time we looked at the ccache.
-	* ccdefname.c: Added support to store a krb5_principal in the os_context 
-	along with the default ccache name (if known, this principal is the same 
-	as the last time we looked at the ccache.
+	* ccdefault.c: Added Kerberos Login library support (with ifdefs
+	to control whether or not it is on.  Also added support to store a
+	krb5_principal in the os_context along with the default ccache
+	name (if known, this principal is the same as the last time we
+	looked at the ccache.  * ccdefname.c: Added support to store a
+	krb5_principal in the os_context along with the default ccache
+	name (if known, this principal is the same as the last time we
+	looked at the ccache.
 
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
