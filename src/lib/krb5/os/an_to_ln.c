@@ -60,7 +60,8 @@ int krb5_lname_username_fallback = 1;
 extern char *krb5_lname_file;
 
 krb5_error_code
-krb5_aname_to_localname(aname, lnsize, lname)
+krb5_aname_to_localname(context, aname, lnsize, lname)
+    krb5_context context;
 	krb5_const_principal aname;
 	const int lnsize;
 	char *lname;
@@ -68,9 +69,9 @@ krb5_aname_to_localname(aname, lnsize, lname)
 	struct stat statbuf;
 
 	if (!stat(krb5_lname_file,&statbuf))
-		return dbm_an_to_ln(aname, lnsize, lname);
+		return dbm_an_to_ln(context, aname, lnsize, lname);
 	if (krb5_lname_username_fallback)
-		return username_an_to_ln(aname, lnsize, lname);
+		return username_an_to_ln(context, aname, lnsize, lname);
 	return KRB5_LNAME_CANTOPEN;
 }
 
@@ -82,17 +83,18 @@ krb5_aname_to_localname(aname, lnsize, lname)
  * null in the DBM datum.size.
  */
 static krb5_error_code
-dbm_an_to_ln(aname, lnsize, lname)
-krb5_const_principal aname;
-const int lnsize;
-char *lname;
+dbm_an_to_ln(context, aname, lnsize, lname)
+    krb5_context context;
+    krb5_const_principal aname;
+    const int lnsize;
+    char *lname;
 {
     DBM *db;
     krb5_error_code retval;
     datum key, contents;
     char *princ_name;
 
-    if (retval = krb5_unparse_name(aname, &princ_name))
+    if (retval = krb5_unparse_name(context, aname, &princ_name))
 	return(retval);
     key.dptr = princ_name;
     key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
@@ -130,32 +132,33 @@ char *lname;
  * that name is returned as the lname.
  */
 static krb5_error_code
-username_an_to_ln(aname, lnsize, lname)
-krb5_const_principal aname;
-const int lnsize;
-char *lname;
+username_an_to_ln(context, aname, lnsize, lname)
+    krb5_context context;
+    krb5_const_principal aname;
+    const int lnsize;
+    char *lname;
 {
     krb5_error_code retval;
     char *def_realm;
     int realm_length;
 
-    realm_length = krb5_princ_realm(aname)->length;
+    realm_length = krb5_princ_realm(context, aname)->length;
     
-    if (retval = krb5_get_default_realm(&def_realm)) {
+    if (retval = krb5_get_default_realm(context, &def_realm)) {
 	return(retval);
     }
     if ((realm_length != strlen(def_realm)) ||
-        (memcmp(def_realm, krb5_princ_realm(aname)->data, realm_length))) {
+        (memcmp(def_realm, krb5_princ_realm(context, aname)->data, realm_length))) {
         free(def_realm);
         return KRB5_LNAME_NOTRANS;
     }
 
-    if (krb5_princ_size(aname) != 1) {
-        if (krb5_princ_size(aname) == 2 ) {
+    if (krb5_princ_size(context, aname) != 1) {
+        if (krb5_princ_size(context, aname) == 2 ) {
            /* Check to see if 2nd component is the local realm. */
-           if ( strncmp(krb5_princ_component(aname,1)->data,def_realm,
+           if ( strncmp(krb5_princ_component(context, aname,1)->data,def_realm,
                         realm_length) ||
-                realm_length != krb5_princ_component(aname,1)->length)
+                realm_length != krb5_princ_component(context, aname,1)->length)
                 return KRB5_LNAME_NOTRANS;
         }
         else
@@ -165,12 +168,12 @@ char *lname;
     }
 
     free(def_realm);
-    strncpy(lname, krb5_princ_component(aname,0)->data, 
-	    min(krb5_princ_component(aname,0)->length,lnsize));
-    if (lnsize < krb5_princ_component(aname,0)->length ) {
+    strncpy(lname, krb5_princ_component(context, aname,0)->data, 
+	    min(krb5_princ_component(context, aname,0)->length,lnsize));
+    if (lnsize < krb5_princ_component(context, aname,0)->length ) {
 	retval = KRB5_CONFIG_NOTENUFSPACE;
     } else {
-	lname[krb5_princ_component(aname,0)->length] = '\0';
+	lname[krb5_princ_component(context, aname,0)->length] = '\0';
 	retval = 0;
     }
     return retval;

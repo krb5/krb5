@@ -35,8 +35,9 @@ extern int errno;
 static struct timeval last_tv = {0, 0};
 
 krb5_error_code
-krb5_us_timeofday(seconds, microseconds)
-register krb5_int32 *seconds, *microseconds;
+krb5_us_timeofday(context, seconds, microseconds)
+    krb5_context context;
+    register krb5_int32 *seconds, *microseconds;
 {
     struct timeval tv;
 

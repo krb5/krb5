@@ -64,12 +64,11 @@ extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
 krb5_error_code
-krb5_sendto_kdc (DECLARG(const krb5_data *, message),
-		 DECLARG(const krb5_data *, realm),
-		 DECLARG(krb5_data *, reply))
-OLDDECLARG(const krb5_data *, message)
-OLDDECLARG(const krb5_data *, realm)
-OLDDECLARG(krb5_data *, reply)
+krb5_sendto_kdc (context, message, realm, reply)
+    krb5_context context;
+    const krb5_data * message;
+    const krb5_data * realm;
+    krb5_data * reply;
 {
     register int timeout, host, i;
     struct sockaddr *addr;
@@ -85,7 +84,7 @@ OLDDECLARG(krb5_data *, reply)
      * find KDC location(s) for realm
      */
 
-    if (retval = krb5_locate_kdc (realm, &addr, &naddr))
+    if (retval = krb5_locate_kdc (context, realm, &addr, &naddr))
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;

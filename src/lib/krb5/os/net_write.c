@@ -36,10 +36,11 @@
  */
 
 int
-krb5_net_write(fd, buf, len)
-int fd;
-register const char *buf;
-int len;
+krb5_net_write(context, fd, buf, len)
+    krb5_context context;
+    int fd;
+    register const char *buf;
+    int len;
 {
     int cc;
     register int wrlen = len;

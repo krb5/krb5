@@ -81,9 +81,10 @@
 extern char *krb5_trans_file;
 
 krb5_error_code
-krb5_get_host_realm(host, realmsp)
-const char *host;
-char ***realmsp;
+krb5_get_host_realm(context, host, realmsp)
+    krb5_context context;
+    const char *host;
+    char ***realmsp;
 {
     char **retrealms;
     char *domain;
@@ -120,7 +121,7 @@ char ***realmsp;
 	    if (islower(*cp))
 		*cp = toupper(*cp);
     } else {
-	if (retval = krb5_get_default_realm(&retrealms[0])) {
+	if (retval = krb5_get_default_realm(context, &retrealms[0])) {
 	    krb5_xfree(retrealms);
 	    return retval;
 	}

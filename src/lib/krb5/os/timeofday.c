@@ -41,8 +41,9 @@
 extern int errno;
 
 krb5_error_code
-krb5_timeofday(timeret)
-register krb5_int32 *timeret;
+krb5_timeofday(context, timeret)
+    krb5_context context;
+    register krb5_int32 *timeret;
 {
     timetype tval;
 

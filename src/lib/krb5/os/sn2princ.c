@@ -34,14 +34,12 @@
 #include <sys/param.h>
 
 krb5_error_code
-krb5_sname_to_principal(DECLARG(const char *,hostname),
-			DECLARG(const char *,sname),
-			DECLARG(krb5_int32,type),
-			DECLARG(krb5_principal *,ret_princ))
-OLDDECLARG(const char *,hostname)
-OLDDECLARG(const char *,sname)
-OLDDECLARG(krb5_int32,type)
-OLDDECLARG(krb5_principal *,ret_princ)
+krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
+    krb5_context context;
+    const char * hostname;
+    const char * sname;
+    krb5_int32 type;
+    krb5_principal * ret_princ;
 {
     struct hostent *hp;
     char **hrealms, *realm, *remote_host;
@@ -106,12 +104,12 @@ OLDDECLARG(krb5_principal *,ret_princ)
 		    *cp = tolower(*cp);
 
 	if (use_local_realm) {
-	    if (retval = krb5_get_default_realm(&realm)) {
+	    if (retval = krb5_get_default_realm(context, &realm)) {
 		free(remote_host);
 		return retval;
 	    }
 	} else {
-	    if (retval = krb5_get_host_realm(remote_host, &hrealms)) {
+	    if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
 		free(remote_host);
 		return retval;
 	    }
@@ -123,15 +121,15 @@ OLDDECLARG(krb5_principal *,ret_princ)
 	    realm = hrealms[0];
 	}
 
-	retval = krb5_build_principal(ret_princ, strlen(realm),
+	retval = krb5_build_principal(context, ret_princ, strlen(realm),
 				      realm, sname, remote_host,
 				      (char *)0);
 
-	krb5_princ_type(*ret_princ) = type;
+	krb5_princ_type(context, *ret_princ) = type;
 
 	free(remote_host);
 	if (!use_local_realm)
-	    krb5_free_host_realm(hrealms);
+	    krb5_free_host_realm(context, hrealms);
 	return retval;
     } else {
 	return KRB5_SNAME_UNSUPP_NAMETYPE;

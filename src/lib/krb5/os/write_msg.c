@@ -35,7 +35,8 @@
 #include <netinet/in.h>
 
 krb5_error_code
-krb5_write_message(fdp, outbuf)
+krb5_write_message(context, fdp, outbuf)
+    krb5_context context;
 	krb5_pointer	fdp;
 	krb5_data	*outbuf;
 {
@@ -43,10 +44,10 @@ krb5_write_message(fdp, outbuf)
 	int		fd = *( (int *) fdp);
 
 	len = htonl(outbuf->length);
-	if (krb5_net_write(fd, (char *)&len, 4) < 0) {
+	if (krb5_net_write(context, fd, (char *)&len, 4) < 0) {
 		return(errno);
 	}
-	if (len && (krb5_net_write(fd, outbuf->data, outbuf->length) < 0)) {
+	if (len && (krb5_net_write(context, fd, outbuf->data, outbuf->length) < 0)) {
 		return(errno);
 	}
 	return(0);

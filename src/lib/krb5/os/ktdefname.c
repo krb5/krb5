@@ -33,9 +33,10 @@
 extern char *krb5_defkeyname;
 
 krb5_error_code
-krb5_kt_default_name(name, namesize)
-char *name;
-int namesize;
+krb5_kt_default_name(context, name, namesize)
+    krb5_context context;
+    char *name;
+    int namesize;
 {
     strncpy(name, krb5_defkeyname, namesize);
     if (namesize < strlen(krb5_defkeyname))

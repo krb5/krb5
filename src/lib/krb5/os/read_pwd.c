@@ -70,11 +70,12 @@ intr_routine()
 }
 
 krb5_error_code
-krb5_read_password(prompt, prompt2, return_pwd, size_return)
-char *prompt;
-char *prompt2;
-char *return_pwd;
-int *size_return;
+krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
+    krb5_context context;
+    char *prompt;
+    char *prompt2;
+    char *return_pwd;
+    int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
 #if defined(__STDC__) || defined(mips)

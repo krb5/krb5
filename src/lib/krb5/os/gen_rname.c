@@ -39,10 +39,11 @@
 #endif
 
 krb5_error_code
-krb5_gen_replay_name(address, uniq, string)
-const krb5_address *address;
-const char *uniq;
-char **string;
+krb5_gen_replay_name(context, address, uniq, string)
+    krb5_context context;
+    const krb5_address *address;
+    const char *uniq;
+    char **string;
 {
 #ifdef KRB5_USE_INET
     krb5_int16 port;
@@ -51,7 +52,7 @@ char **string;
     register char *tmp, *tmp2;
     struct in_addr inaddr;
 
-    if (retval = krb5_unpack_full_ipaddr(address, &addr, &port))
+    if (retval = krb5_unpack_full_ipaddr(context, address, &addr, &port))
 	return retval;
     inaddr.s_addr = addr;
 

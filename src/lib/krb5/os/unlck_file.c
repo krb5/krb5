@@ -32,9 +32,10 @@
 #include <krb5/los-proto.h>
 
 krb5_error_code
-krb5_unlock_file(filep, pathname)
-FILE *filep;
-char *pathname;
+krb5_unlock_file(context, filep, pathname)
+    krb5_context context;
+    FILE *filep;
+    char *pathname;
 {
-    return krb5_lock_file(filep, pathname, KRB5_LOCKMODE_UNLOCK);
+    return krb5_lock_file(context, filep, pathname, KRB5_LOCKMODE_UNLOCK);
 }

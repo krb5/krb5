@@ -32,10 +32,11 @@
 #include "os-proto.h"
 
 krb5_error_code
-krb5_gen_portaddr(addr, ptr, outaddr)
-const krb5_address *addr;
-krb5_const_pointer ptr;
-krb5_address **outaddr;
+krb5_gen_portaddr(context, addr, ptr, outaddr)
+    krb5_context context;
+    const krb5_address *addr;
+    krb5_const_pointer ptr;
+    krb5_address **outaddr;
 {
 #ifdef KRB5_USE_INET
     krb5_int32 adr;
@@ -46,7 +47,7 @@ krb5_address **outaddr;
     port = *(krb5_int16 *)ptr;
     
     memcpy((char *)&adr, (char *)addr->contents, sizeof(adr));
-    return krb5_make_full_ipaddr(adr, port, outaddr);
+    return krb5_make_full_ipaddr(context, adr, port, outaddr);
 #else
     return KRB5_PROG_ATYPE_NOSUPP;
 #endif

@@ -56,7 +56,8 @@
 extern char *krb5_trans_file;
 
 krb5_error_code
-krb5_get_realm_domain(realm, domain)
+krb5_get_realm_domain(context, realm, domain)
+    krb5_context context;
     const char *realm;
     char **domain;
 {
@@ -71,7 +72,7 @@ krb5_get_realm_domain(realm, domain)
 					   conversion */
 
     if (realm == NULL) {
-	if (retval = krb5_get_host_realm(NULL, &realmlist))
+	if (retval = krb5_get_host_realm(context, NULL, &realmlist))
 	    return retval;
 	realm = realmlist[0];
     }

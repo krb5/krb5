@@ -36,7 +36,8 @@
 #include <netinet/in.h>
 
 krb5_error_code
-krb5_read_message(fdp, inbuf)
+krb5_read_message(context, fdp, inbuf)
+    krb5_context context;
 	krb5_pointer fdp;
 	krb5_data	*inbuf;
 {
@@ -44,7 +45,7 @@ krb5_read_message(fdp, inbuf)
 	char		*buf = NULL;
 	int		fd = *( (int *) fdp);
 	
-	if ((len2 = krb5_net_read(fd, (char *)&len, 4)) != 4)
+	if ((len2 = krb5_net_read(context, fd, (char *)&len, 4)) != 4)
 		return((len2 < 0) ? errno : ECONNABORTED);
 	inbuf->length = len = ntohl(len);
 	if (len) {
@@ -54,7 +55,7 @@ krb5_read_message(fdp, inbuf)
 		if (!(buf = malloc(len))) {
 			return(ENOMEM);
 		}
-		if ((len2 = krb5_net_read(fd, buf, len)) != len) {
+		if ((len2 = krb5_net_read(context, fd, buf, len)) != len) {
 			krb5_xfree(buf);
 			return((len2 < 0) ? errno : ECONNABORTED);
 		}

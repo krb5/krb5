@@ -1,3 +1,10 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+	* Moved init_ctx.c to init_os_ctx.c because a library cannot
+		have more than on file with the same name. See krb/init_ctx.c
+
 Mon Dec 19 15:20:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* init_ctx.c: New file.  Initializes and frees the krb5_os_context

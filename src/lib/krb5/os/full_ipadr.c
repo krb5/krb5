@@ -36,12 +36,11 @@
 #include <netinet/in.h>
 
 krb5_error_code
-krb5_make_full_ipaddr(DECLARG(krb5_int32, adr),
-		      DECLARG(krb5_int16, port),
-		      DECLARG(krb5_address **,outaddr))
-OLDDECLARG(krb5_int32, adr)
-OLDDECLARG(krb5_int16, port)
-OLDDECLARG(krb5_address **,outaddr)
+krb5_make_full_ipaddr(context, adr, port, outaddr)
+    krb5_context context;
+    krb5_int32 adr;
+    krb5_int16 port;
+    krb5_address ** outaddr;
 {
     unsigned long smushaddr = (unsigned long) adr; /* already in net order */
     unsigned short smushport = (unsigned short) port; /* ditto */

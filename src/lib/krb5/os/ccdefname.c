@@ -31,7 +31,8 @@
 #include <krb5/ext-proto.h>
 #include <krb5/osconf.h>
 
-char *krb5_cc_default_name()
+char *krb5_cc_default_name(context)
+    krb5_context context;
 {
     char *name = getenv(KRB5_ENV_CCNAME);
     static char *name_buf;

@@ -54,10 +54,11 @@ extern int errno;
 
 /*ARGSUSED*/
 krb5_error_code
-krb5_lock_file(filep, pathname, mode)
-FILE *filep;
-char *pathname;
-int mode;
+krb5_lock_file(context, filep, pathname, mode)
+    krb5_context context;
+    FILE *filep;
+    char *pathname;
+    int mode;
 {
 #ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;

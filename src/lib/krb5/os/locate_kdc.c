@@ -50,7 +50,8 @@ extern char *krb5_kdc_sec_udp_portname;
  */
 
 krb5_error_code
-krb5_locate_kdc(realm, addr_pp, naddrs)
+krb5_locate_kdc(context, realm, addr_pp, naddrs)
+    krb5_context context;
     const krb5_data *realm;
     struct sockaddr **addr_pp;
     int *naddrs;
@@ -69,7 +70,7 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
 
     hostlist = 0;
     
-    if (code = krb5_get_krbhst (realm, &hostlist))
+    if (code = krb5_get_krbhst (context, realm, &hostlist))
 	return(code);
 
 #ifdef KRB5_USE_INET

@@ -62,9 +62,10 @@
  */
 
 krb5_boolean
-krb5_kuserok(principal, luser)
-krb5_principal principal;
-const char *luser;
+krb5_kuserok(context, principal, luser)
+    krb5_context context;
+    krb5_principal principal;
+    const char *luser;
 {
     struct stat sbuf;
     struct passwd *pwd;
@@ -91,13 +92,13 @@ const char *luser;
 	 * krb5_aname_to_localname to convert the principal to a name
 	 * which we can string compare. 
 	 */
-	if (!(krb5_aname_to_localname(principal,
+	if (!(krb5_aname_to_localname(context, principal,
 				      sizeof(kuser), kuser))
 	    && (strcmp(kuser, luser) == 0)) {
 	    return(TRUE);
 	}
     }
-    if (krb5_unparse_name(principal, &princname))
+    if (krb5_unparse_name(context, principal, &princname))
 	return(FALSE);			/* no hope of matching */
 
     /* open ~/.k5login */

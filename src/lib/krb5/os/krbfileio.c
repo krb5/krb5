@@ -50,7 +50,8 @@ static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #endif
 
 krb5_error_code
-krb5_create_secure_file(pathname)
+krb5_create_secure_file(context, pathname)
+    krb5_context context;
     const char * pathname;
 {
     int fd;
@@ -88,7 +89,8 @@ krb5_create_secure_file(pathname)
 }
 
 krb5_error_code
-krb5_sync_disk_file(fp)
+krb5_sync_disk_file(context, fp)
+    krb5_context context;
     FILE *fp;
 {
     fflush(fp);

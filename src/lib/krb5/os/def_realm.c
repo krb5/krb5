@@ -55,8 +55,9 @@ extern char *krb5_override_default_realm;
 char *krb5_override_default_realm = 0;
 
 krb5_error_code
-krb5_get_default_realm(lrealm)
-char **lrealm;
+krb5_get_default_realm(context, lrealm)
+    krb5_context context;
+    char **lrealm;
 {
     FILE *config_file;
     char realmbuf[BUFSIZ];
