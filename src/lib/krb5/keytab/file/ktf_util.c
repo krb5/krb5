@@ -205,16 +205,22 @@ krb5_int32 delete_point;
     if (!xfread(&size, sizeof(size), 1, KTFILEP(id))) {
         return KRB5_KT_END;
     }
+    if (KTVERSION(id) != KRB5_KT_VNO_1)
+	size = ntohl(size);
+
     if (size > 0) {
-        size = -size;
+        krb5_int32 minus_size = -size;
+	if (KTVERSION(id) != KRB5_KT_VNO_1)
+	    minus_size = htonl(minus_size);
+
         if (fseek(KTFILEP(id), delete_point, SEEK_SET)) {
             return errno;
         }
-        if (!xfwrite(&size, sizeof(size), 1, KTFILEP(id))) {
+
+        if (!xfwrite(&minus_size, sizeof(minus_size), 1, KTFILEP(id))) {
             return KRB5_KT_IOERR;
         }
 
-        size = -size;
         if (size < BUFSIZ) {
             len = size;
         } else {

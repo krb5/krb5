@@ -1,0 +1,6 @@
+Wed Sep 14 21:56:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktf_util.c (krb5_ktfileint_delete_entry):  Fixed bug reported by
+		Bill Sommerfeld where a missing byte-swap on a
+		little-endian machine causes the delete operation fail.
+
