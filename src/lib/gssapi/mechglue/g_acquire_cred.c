@@ -71,7 +71,7 @@ create_actual_mechs(creds)
 }
 
 
-KRB5_DLLIMP OM_uint32 KRB5_CALLCONV
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV
 gss_acquire_cred(minor_status,
                  desired_name,
                  time_req,
@@ -379,7 +379,7 @@ error_out:
 }
 
 /* V2 KRB5_CALLCONV */
-KRB5_DLLIMP OM_uint32 KRB5_CALLCONV
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV
 gss_add_cred(minor_status, input_cred_handle,
 		  desired_name, desired_mech, cred_usage,
 		  initiator_time_req, acceptor_time_req,

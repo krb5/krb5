@@ -7,6 +7,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
 
+##DOS##DLL_EXP_TYPE=GSS
+
 LIBDONE=DONE
 LIB_SUBDIRS=.
 DEPLIBS=
