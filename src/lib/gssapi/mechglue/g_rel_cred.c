@@ -49,8 +49,9 @@ gss_cred_id_t *		cred_handle;
 
 	mech = get_mechanism (&union_cred->mechs_array[j]);
 
+	if (union_cred->mechs_array[j].elements)
+		free(union_cred->mechs_array[j].elements);
 	if (mech) {
-
 	    if (mech->gss_release_cred) {
 		temp_status = mech->gss_release_cred
 		    (mech->context,
@@ -66,6 +67,7 @@ gss_cred_id_t *		cred_handle;
 	    status = GSS_S_NO_CRED;
     }
 
+    gss_release_buffer(minor_status, &union_cred->auxinfo.name);
     free(union_cred->cred_array);
     free(union_cred->mechs_array);
     free(union_cred);

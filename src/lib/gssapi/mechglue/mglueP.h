@@ -1,4 +1,4 @@
-#ident  "%Z%%M% %I%     %E% SMI"
+#ident  "@(#)mglueP.h 1.2     96/01/18 SMI"
 /*
  * This header contains the private mechglue definitions.
  *
@@ -9,7 +9,7 @@
 #ifndef _GSS_MECHGLUEP_H
 #define _GSS_MECHGLUEP_H
 
-#include <gssapi/mechglue.h>
+#include "mechglue.h"
 #include <sys/types.h>
 
 /*
@@ -252,12 +252,28 @@ typedef struct gss_config {
 	 OM_uint32 *,		/* acceptor_lifetime */
 	 gss_cred_usage_t *	/* cred_usage */
 	 );
-
     OM_uint32	    (*gss_inquire_names_for_mech)
 	(void *,		/* context */
 	 OM_uint32 *,		/* minor_status */
 	 gss_OID,		/* mechanism */
 	 gss_OID_set *		/* name_types */
+	 );
+    OM_uint32	(*gss_inquire_context)
+	(void *,		/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_ctx_id_t,		/* context_handle */
+	 gss_name_t *,		/* src_name */
+	 gss_name_t *,		/* targ_name */
+	 OM_uint32 *,		/* lifetime_rec */
+	 gss_OID *,		/* mech_type */
+	 OM_uint32 *,		/* ctx_flags */
+	 int *,           	/* locally_initiated */
+	 int *			/* open */
+	);
+    OM_uint32	    (*gss_internal_release_oid)
+	(void *,		/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_OID *		/* OID */
 	 );
     int		     (*pname_to_uid)
 	(char *,		/* pname */
@@ -265,6 +281,7 @@ typedef struct gss_config {
 	 gss_OID,		/* mech type */
 	 uid_t *		/* uid */
 	 );
+
 } *gss_mechanism;
 
 /********************************************************/
@@ -278,5 +295,42 @@ OM_uint32 import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,
 OM_uint32 display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
 				 gss_buffer_t, gss_OID *);
 OM_uint32 release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
+
+OM_uint32 generic_gss_release_oid
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID *		/* oid */
+	   ));
+
+OM_uint32 generic_gss_create_empty_oid_set
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID_set *	/* oid_set */
+	   ));
+
+OM_uint32 generic_gss_add_oid_set_member
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* member_oid */
+	    gss_OID_set *	/* oid_set */
+	   ));
+
+OM_uint32 generic_gss_test_oid_set_member
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* member */
+	    gss_OID_set,	/* set */
+	    int *		/* present */
+	   ));
+
+OM_uint32 generic_gss_oid_to_str
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* oid */
+	    gss_buffer_t	/* oid_str */
+	   ));
+
+OM_uint32 generic_gss_str_to_oid
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_buffer_t,	/* oid_str */
+	    gss_OID *		/* oid */
+	   ));
+
+
 
 #endif /* _GSS_MECHGLUEP_H */

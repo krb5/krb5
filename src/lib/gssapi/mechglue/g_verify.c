@@ -58,7 +58,7 @@ int *			qop_state;
 }
 
 OM_uint32
-gss_verify_misc (minor_status,
+gss_verify_mic (minor_status,
             context_handle,
             message_buffer,
             token_buffer,

@@ -214,15 +214,15 @@ OM_uint32 *		time_rec;
 		   desired_mechs->elements[i].elements,
 		   desired_mechs->elements[i].length);
 	    creds->cred_array[j] = creds_returned[i].cred;
-
-	    (*actual_mechs)->elements[j].length =
-		desired_mechs->elements[i].length;
-	    (*actual_mechs)->elements[j].elements = (void *)
-		malloc(desired_mechs->elements[i].length);
-	    memcpy((*actual_mechs)->elements[j].elements,
-		   desired_mechs->elements[i].elements,
-		   desired_mechs->elements[i].length);
-
+	    if (actual_mechs) {
+		    (*actual_mechs)->elements[j].length =
+			desired_mechs->elements[i].length;
+		    (*actual_mechs)->elements[j].elements = (void *)
+			malloc(desired_mechs->elements[i].length);
+		    memcpy((*actual_mechs)->elements[j].elements,
+			   desired_mechs->elements[i].elements,
+			   desired_mechs->elements[i].length);
+	    }
 	    j++;
 	}
     }
@@ -253,12 +253,14 @@ OM_uint32 *		time_rec;
 
 	for(i=0; i < creds->count; i++) {
 	    free(creds->mechs_array[i].elements);
-	    free((*actual_mechs)->elements[i].elements);
+	    if (actual_mechs) free((*actual_mechs)->elements[i].elements);
 	}
 	
-	free((*actual_mechs)->elements);
-	free(*actual_mechs);
-	*actual_mechs = GSS_C_NULL_OID_SET;
+	if (actual_mechs) {
+		free((*actual_mechs)->elements);
+		free(*actual_mechs);
+		*actual_mechs = GSS_C_NULL_OID_SET;
+	}
 	free(creds->cred_array);
 	free(creds->mechs_array);
 	free(creds);
