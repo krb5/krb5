@@ -1000,9 +1000,8 @@ installation of the KDCs.
 
 The Kerberized client programs are @code{login.krb5}, @code{rlogin},
 @code{telnet}, @code{ftp}, @code{rcp}, @code{rsh}, @code{kinit},
-@code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu},
-@c @code{krb524init}, 
-and @code{krdist}.  All of these programs are in the directory
+@code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu}, and
+@code{krb524init}.  All of these programs are in the directory
 @code{@value{ROOTDIR}/bin}, except for @code{login.krb5} which is in
 @code{@value{ROOTDIR}/sbin}.
 
@@ -1021,8 +1020,8 @@ programs @code{kinit},
 @c @code{krb524init}, 
 @code{klist}, @code{kdestroy}, and to use the Kerberos programs
 @c @code{pfrom},
-@code{ksu}, @code{kpasswd}, and @code{krdist}, in place of their
-non-Kerberos counterparts
+@code{ksu}, and @code{kpasswd} in place of their non-Kerberos
+counterparts
 @c @code{from}
 @code{su}, @code{passwd}, and @code{rdist}.
 

@@ -774,14 +774,13 @@ programs with the Kerberos features added.
 The @value{PRODUCT} @dfn{network programs} are those programs that
 connect to another host somewhere on the internet.  These programs
 include @code{rlogin}, @code{telnet}, @code{ftp}, @code{rsh},
-@code{rcp}, @code{krdist}, and @code{ksu}.  These programs have all of
-the original features of the corresponding non-Kerberos @code{rlogin},
-@code{telnet}, @code{ftp}, @code{rsh}, @code{rcp}, @code{rdist}, and
-@code{su} programs, plus additional features that transparently use your
-Kerberos tickets for negotiating authentication and optional encryption
-with the remote host.  In most cases, all you'll notice is that you no
-longer have to type your password, because Kerberos has already proven
-your identity.
+@code{rcp}, and @code{ksu}.  These programs have all of the original
+features of the corresponding non-Kerberos @code{rlogin}, @code{telnet},
+@code{ftp}, @code{rsh}, @code{rcp}, and @code{su} programs, plus
+additional features that transparently use your Kerberos tickets for
+negotiating authentication and optional encryption with the remote host.
+In most cases, all you'll notice is that you no longer have to type your
+password, because Kerberos has already proven your identity.
 
 The @value{PRODUCT} network programs allow you the options of forwarding
 your tickets to the remote host (if you obtained forwardable tickets
@@ -1406,7 +1405,6 @@ M-x manual-entry @emph{command}
 * rsh Reference::               
 * rcp Reference::               
 * ksu Reference::               
-* krdist Reference::            
 @end menu
 
 @node kinit Reference, klist Reference, Kerberos V5 Reference, Kerberos V5 Reference
@@ -1597,7 +1595,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end ifinfo
 
-@node ksu Reference, krdist Reference, rcp Reference, Kerberos V5 Reference
+@node ksu Reference,  , rcp Reference, Kerberos V5 Reference
 @section ksu Reference
 
 @iftex
@@ -1623,42 +1621,6 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end iftex
 @ifinfo
 Type @kbd{M-x manual-entry ksu} to read this manual page.
-@end ifinfo
-
-@node krdist Reference,  , ksu Reference, Kerberos V5 Reference
-@section krdist Reference
-
-@iftex
-@special{psfile=krdist1.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist2.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist3.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist4.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist5.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist6.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-
-@special{psfile=krdist7.ps voffset=-1115 hoffset=-40}
-@centerline{Reference Manual for @code{krdist}}
-@page
-@end iftex
-@ifinfo
-Type @kbd{M-x manual-entry krdist} to read this manual page.
 @end ifinfo
 
 @node Kerberos Glossary,  , Kerberos V5 Reference, Top

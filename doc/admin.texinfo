@@ -1612,13 +1612,12 @@ firewall, the server they connect to must be able to send outgoing
 packets to arbitrary port numbers.  Similarly, if your users need to run
 @code{rsh} from inside your firewall to hosts outside your firewall, the
 outside server needs to be able to connect to an arbitrary port on the
-machine inside your firewall.  Because @value{PRODUCT} @code{rcp} and
-@code{krdist} use @code{rsh}, the same issues apply to these programs.
-If you need to use @code{rsh} (or @code{rcp} or @code{krdist}) through
-your firewall and are concerned with the security implications of
-allowing connections to arbitrary ports, @value{COMPANY} suggests that
-you have rules that specifically name these applications and, if
-possible, list the allowed hosts.
+machine inside your firewall.  Because @value{PRODUCT} @code{rcp} uses
+@code{rsh}, the same issues apply.  If you need to use @code{rsh} (or
+@code{rcp}) through your firewall and are concerned with the security
+implications of allowing connections to arbitrary ports, @value{COMPANY}
+suggests that you have rules that specifically name these applications
+and, if possible, list the allowed hosts.
 
 A reasonably good cookbook for configuring firewalls is available by FTP
 from @code{ftp.livingston.com}, in the location:
