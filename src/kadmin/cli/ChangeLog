@@ -1,3 +1,9 @@
+2001-10-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (kadmin_parse_name): Properly advance pointer in
+	certain error cases involving '@'.  Patch from Emily Ratliff,
+	<ratliff@austin.ibm.com>.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* dump.c: Make prototypes unconditional.
