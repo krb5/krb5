@@ -90,7 +90,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:fpl:s:c:kt:v")) != EOF) {
+    while ((option = getopt(argc, argv, "r:Rfpl:s:c:kt:v")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
@@ -99,6 +99,10 @@ main(argc, argv)
 		fprintf(stderr, "Bad lifetime value %s\n", optarg);
 		errflg++;
 	    }
+	    break;
+	case 'R':
+	    /* renew the ticket */
+	    options |= KDC_OPT_RENEW;
 	    break;
 	case 'v':
 	    /* validate the ticket */
@@ -182,7 +186,7 @@ main(argc, argv)
     }
 
     if (errflg) {
-	fprintf(stderr, "Usage: %s [-r time] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [principal]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-r time] [-R] [-s time] [-v] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [principal]\n", argv[0]);
 	exit(2);
     }
 
@@ -284,6 +288,19 @@ main(argc, argv)
 	/* should be done... */
 	exit(0);
     }
+
+    if (options & KDC_OPT_RENEW) {
+        /* don't use get_in_tkt, just use mk_req... */
+        krb5_data outbuf;
+
+        code = krb5_renew_tgt(kcontext, ccache, server, &outbuf);
+	if (code) {
+	  com_err (argv[0], code, "renewing tgt");
+	  exit(1);
+	}
+	/* should be done... */
+	exit(0);
+    }
 #ifndef NO_KEYTAB
     if (!use_keytab)
 #endif
@@ -341,12 +358,37 @@ main(argc, argv)
     exit(0);
 }
 
+#define VALIDATE 0
+#define RENEW 1
+
 /* stripped down version of krb5_mk_req */
 krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
      krb5_context context;
      krb5_ccache ccache;
      krb5_principal	  server; /* tgtname */
      krb5_data *outbuf;
+{
+	return krb5_tgt_gen(context, ccache, server, outbuf, VALIDATE);
+}
+
+/* stripped down version of krb5_mk_req */
+krb5_error_code krb5_renew_tgt(context, ccache, server, outbuf)
+     krb5_context context;
+     krb5_ccache ccache;
+     krb5_principal	  server; /* tgtname */
+     krb5_data *outbuf;
+{
+	return krb5_tgt_gen(context, ccache, server, outbuf, RENEW);
+}
+
+
+/* stripped down version of krb5_mk_req */
+krb5_error_code krb5_tgt_gen(context, ccache, server, outbuf, opt)
+     krb5_context context;
+     krb5_ccache ccache;
+     krb5_principal	  server; /* tgtname */
+     krb5_data *outbuf;
+     int opt;
 {
     krb5_auth_context   * auth_context = 0;
     const krb5_flags      ap_req_options;
@@ -364,9 +406,15 @@ krb5_error_code krb5_validate_tgt(context, ccache, server, outbuf)
     if ((retval = krb5_cc_get_principal(context, ccache, &creds.client)))
 	goto cleanup_creds;
 
-    if ((retval = krb5_get_credentials_validate(context, 0,
-						ccache, &creds, &credsp)))
-	goto cleanup_creds;
+    if(opt == VALIDATE) {
+	    if ((retval = krb5_get_credentials_validate(context, 0,
+							ccache, &creds, &credsp)))
+		    goto cleanup_creds;
+    } else {
+	    if ((retval = krb5_get_credentials_renew(context, 0,
+							ccache, &creds, &credsp)))
+		    goto cleanup_creds;
+    }
 
     /* we don't actually need to do the mk_req, just get the creds. */
 cleanup_creds:

@@ -31,12 +31,16 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .B \-s
 .I starttime
 ] [
+.B \-v
+] [
 .B \-p
 ] [
 .B \-f
 ] [
 .B \-r
 .I rlife
+] [
+.B \-R
 ] [
 .B \-c
 .I cachename
@@ -58,7 +62,11 @@ The
 option specifies the start time, and causes you to get a postdated ticket. 
 Postdated tickets are issued with the 
 .I invalid
-flag set, and needs to be fed back to the kdc before use.
+flag set, and needs to be fed back to the kdc before use. This may be
+accomplished by using the 
+.B \-v
+option. 
+.PP
 The
 .B \-p
 option specifies that the PROXIABLE option should be requested for the
@@ -73,7 +81,11 @@ The
 .B \-r
 .I rlife
 option specifies that the RENEWABLE option should be requested for the
-ticket, and specifies the desired total lifetime of the ticket.
+ticket, and specifies the desired total lifetime of the ticket. To renew
+the ticket, the 
+.B \-R
+option is used. Note that you must renew the ticket before it has
+expired. 
 .PP
 The
 .B \-c

@@ -1,3 +1,14 @@
+Sun Jul  7 15:21:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kinit.M: Document -R option.
+
+	* kinit.c (krb5_tgt_gen): Code from krb5_validate_tgt() modified
+	to handle both renewal and validation of postdated tickets. 
+	(krb5_renew_tgt): Takes a credential cache with a tgt with the
+	"renewable flag" set and asks ths kdc to renew it. Cache is wiped
+	and only new tgt is stored.
+	(main): New option -R to renew tickets.
+
 Fri May  3 00:28:10 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kinit.c (krb5_validate_tgt): new function, takes a credential
