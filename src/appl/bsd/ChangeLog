@@ -1,3 +1,12 @@
+Wed Jan 20 21:42:41 1999  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (main): Call setluid().
+
+	* krshd.c (doit): Call setluid().
+
+	* configure.in: Check for setluid() rather than main() in
+	libsecurity.
+
 1998-11-28  Sam Hartman  <hartmans@mesas.com>
 
 	* krshd.c krsh.c:  Use RCMD_BUFSIZ not RSH_BUFSIZE [krb5-appl/678]

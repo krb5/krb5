@@ -30,7 +30,7 @@ case $krb5_cv_host in
 krb5_cv_has_streams=no
 ;;
 alpha-dec-osf*)
-	AC_CHECK_LIB(security,main,
+	AC_CHECK_LIB(security,setluid,
 		AC_DEFINE(HAVE_SETLUID)
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)

@@ -1604,14 +1604,15 @@ int main(argc, argv)
 #endif
 
 #ifdef	HAVE_SETLUID
-    /*
-     * If we're on a system which keeps track of login uids, then
-     * attempt to set the login uid, but don't get too unhappy when/if
-     * it doesn't succeed.
-     */
-    if ((uid_t) getluid() < (uid_t) 0) {
-	setluid((uid_t) pwd->pw_uid);
-    }
+  	/*
+  	 * If we're on a system which keeps track of login uids, then
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
+	 */
+ 	if (setluid((uid_t) pwd->pw_uid) < 0) {
+	    perror("setuid");
+	    sleepexit(1);
+	}
 #endif	/* HAVE_SETLUID */
 #ifdef _IBMR2
     setuidx(ID_LOGIN, pwd->pw_uid);

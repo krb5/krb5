@@ -1311,6 +1311,13 @@ if(port)
         initgroups(pwd->pw_name, pwd->pw_gid);
     }
 #endif
+#ifdef	HAVE_SETLUID
+    /*
+     * If we're on a system which keeps track of login uids, then
+     * set the login uid. 
+     */
+    setluid((uid_t) pwd->pw_uid);
+#endif	/* HAVE_SETLUID */
     (void) setuid((uid_t)pwd->pw_uid);
     /* if TZ is set in the parent, drag it in */
     {
