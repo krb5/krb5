@@ -114,6 +114,9 @@ Major changes listed by ticket ID
 * [880] krb5_gss_register_acceptor_identity() implemented (is called
   gsskrb5_register_acceptor_identity() by Heimdal).
 
+* [1087] ftpd no longer requires channel bindings, allowing easier use
+  of ftp from behind a NAT.
+
 * [1156, 1209] It is now possible to use the system com_err to build
   this release.
 
@@ -142,12 +145,16 @@ Major changes listed by ticket ID
 * [1281] The "fakeka" program, which emulates the AFS kaserver, has
   been integrated.  Thanks to Ken Hornstein.
 
-* [1377, 1442, 1443] The Microsoft set-password protocol has been
-  implemented.  Thanks to Paul Nelson.
+* [1343] The KDC now defaults to not answering krb4 requests.
+
+* [1344] Addressless tickets are requested by default now.
 
 * [1372] There is no longer a need to create a special keytab for
   kadmind.  The legacy administration daemons "kadmind4" and
   "v5passwdd" will still require a keytab, though.
+
+* [1377, 1442, 1443] The Microsoft set-password protocol has been
+  implemented.  Thanks to Paul Nelson.
 
 * [1385, 1395, 1410] The krb4 protocol vulnerabilities
   [MITKRB5-SA-2003-004] have been worked around.  Note that this will
@@ -188,6 +195,9 @@ Minor changes listed by ticket ID
 * [299] kadmin no longer complains about missing kdc.conf parameters
   when it really means krb5.conf parameters.
 
+* [318] Run-time load path for tcl is set now when linking test
+  programs.
+
 * [443] --includedir honored now.
 
 * [479] unused argument in try_krb4() in login.c deleted.
@@ -200,6 +210,8 @@ Minor changes listed by ticket ID
 
 * [620] krb4 encrypted rcp should work a little better now.  Thanks to
   Greg Hudson.
+
+* [647] libtelnet/kerberos5.c no longer uses internal include files.
 
 * [673] Weird echoing of admin password in kadmin client worked around
   by not using buffered stdio calls to read passwords.
@@ -243,6 +255,9 @@ Minor changes listed by ticket ID
 * [953] des3 no longer failing on Windows due to SHA1 implementation
   problems.
 
+* [964] kdb_init_hist() no longer fails if master_key_enctype is not
+  in supported_enctypes.
+
 * [970] A minor inconsistency in ccache.tex has been fixed.
 
 * [971] option parsing bugs rendered irrelevant by removal of unused
@@ -255,7 +270,8 @@ Minor changes listed by ticket ID
 * [992] Related to [677], quirks with --with-cc no longer relevant as
   AC_PROG_CC is used instead now.
 
-* [999] kdc_default_options now honored in gss context initialization.
+* [999] The kdc_default_options configuration variable is now honored.
+  Thanks to Emily Ratliff.
 
 * [1006] Client library, as well as KDC, now perform reasonable
   sorting of ETYPE-INFO preauthentication data.
@@ -274,9 +290,6 @@ Minor changes listed by ticket ID
   password expiration.
 
 * [1066] printf() argument mismatches in rpc unit tests fixed.
-
-* [1087] ftpd no longer requires channel bindings, allowing easier use
-  of ftp from behind a NAT.
 
 * [1102] gssapi_generic.h should now work with C++.
 
@@ -375,11 +388,19 @@ Minor changes listed by ticket ID
 * [1324] The KDC no longer logs an inappropriate "no matching key"
   error when an encrypted timestamp preauth password is incorrect.
 
+* [1334] The KDC now returns a clockskew error when the timestamp in
+  the encrypted timestamp preauth is out of bounds, rather than just
+  returning a preauthentcation failure.
+
 * [1342] gawk is no longer required for building kerbsrc.zip for the
   Windows build.
 
 * [1346] gss_krb5_ccache_name() no longer attempts to return a pointer
   to freed memory.
+
+* [1351] The filename globbing vulnerability [CERT VU#258721] in the
+  ftp client's handling of filenames beginning with "|" or "-"
+  returned from the "mget" command has been fixed.
 
 * [1352] GSS_C_PROT_READY_FLAG is no longer asserted inappropriately
   during GSSAPI context establishment.
@@ -497,6 +518,23 @@ Minor changes listed by ticket ID
 * [1576, 1575] The client library no longer requests RENEWABLE_OK if
   the renew lifetime is greater than the ticket lifetime.
 
+* [1587] A more standard autoconf test to locate the C compiler allows
+  for gcc to be found by default without additional configuration
+  arguments.
+
+* [1593] Replay cache filenames are now escaped with hyphens, not
+  backslashes.
+
+* [1598] MacOS 9 support removed from in-tree com_err.
+
+* [1602] Fixed a memory leak in make_ap_req_v1().  Thanks to Kent Wu.
+
+* [1604] Fixed a memory leak in krb5_gss_init_sec_context(), and an
+  uninitialized memory reference in kg_unseal_v1().  Thanks to Kent
+  Wu.
+
+* [1610] Fixed AES credential delegation under GSSAPI.
+
 --[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
 
 * [1054] KRB-CRED messages for RC4 are encrypted now.
@@ -512,6 +550,9 @@ Minor changes listed by ticket ID
 * [1248] RC4 is explicitly excluded from combine_keys.
 
 * [1276] Generated dependencies handle --without-krb4 properly now.
+
+* [1339] An inadvertent change to the krb4 get_adm_hst API (strcpy vs
+  strncpy etc.) has been fixed.
 
 * [1384, 1413] Use of autoconf-2.52 in util/reconf will now cause a
   warning.
@@ -554,6 +595,14 @@ Minor changes listed by ticket ID
   free()d upon a subsequent call.
 
 * [1569] A debug statement has been removed from krb524init.
+
+* [1594] Darwin gets an explicit dependency of err_txt.o on
+  krb_err.c.
+
+* [1596] Calling conventions, etc. tweaked for KfW build of
+  krb524.dll.
+
+* [1605] Fixed a leak of subkeys in krb5_rd_rep().
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
