@@ -47,7 +47,15 @@ typedef struct _krb5_db_entry {
     krb5_deltat	max_life;
     krb5_deltat	max_renewable_life;
     krb5_kvno mkvno;			/* master encryption key vno */
-    krb5_timestamp expiration;
+    
+    krb5_timestamp expiration;		/* This is when the client expires */
+    krb5_timestamp pw_expiration; 	/* This is when its password does */
+    krb5_timestamp last_pwd_change; 	/* Last time of password change  */
+    krb5_timestamp last_success;	/* Last successful password */
+    
+    krb5_timestamp last_failed;		/* Last failed password attempt */
+    krb5_kvno fail_auth_count; 		/* # of failed password attempts */
+    
     krb5_principal mod_name;
     krb5_timestamp mod_date;
     krb5_flags attributes;
@@ -58,12 +66,8 @@ typedef struct _krb5_db_entry {
     krb5_int32 alt_salt_type:8,
  	       alt_salt_length:24;
     krb5_octet *alt_salt;
-
-    /* SANDIA Enhancement (Pre-Auth/Blacklist) */
-    krb5_timestamp last_pwd_change;	
-    krb5_timestamp last_success;
-    krb5_kvno fail_auth_count;
-    int lastreqid;
+    
+    krb5_int32 expansion[8];
 } krb5_db_entry;
   
 #ifdef SANDIA	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
