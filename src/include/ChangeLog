@@ -1,3 +1,8 @@
+2001-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h: Always include stdlib.h and string.h; don't bother
+	testing the HAVE_ macros.
+
 2001-03-08 Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Add prototypes for krb5_auth_con_setpermetypes() and

@@ -416,22 +416,8 @@ typedef struct _krb5_sam_response {
 #ifndef KRB5_EXT_PROTO__
 #define KRB5_EXT_PROTO__
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#else
-#if defined(__STDC__) || defined(_MSDOS)
-#include <fake-stdlib.h>
-#else
-extern char *malloc(), *realloc(), *calloc();
-extern char *getenv();
-#endif /* ! __STDC__ */
-#endif /* HAVE_STDLIB_H */
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #ifndef HAVE_STRDUP
 extern char *strdup (const char *);
