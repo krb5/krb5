@@ -1,3 +1,7 @@
+Mon Sep 11 22:06:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Update macintosh/dos file lists
+
 Thu Aug 24 19:27:04 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
