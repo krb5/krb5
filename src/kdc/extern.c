@@ -35,6 +35,8 @@ static char rcsid_extern_c[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+#include "extern.h"
+
 /* real declarations of KDC's externs */
 krb5_rcache kdc_rcache;
 
@@ -55,5 +57,5 @@ char *dbm_db_name = DEFAULT_DBM_FILE;
 krb5_keyblock tgs_key;
 krb5_kvno tgs_kvno;
 
-static krb5_data tgs_name = {sizeof(TGTNAME)-1, TGTNAME};
-krb5_data *tgs_server[4] = {0, &tgs_name, 0, 0};
+static krb5_data tgs_data[3] = { {sizeof(TGTNAME)-1, TGTNAME}, {0, 0}};
+krb5_principal_data tgs_server_struct = { { 0, 0}, tgs_data, 2, 0};
