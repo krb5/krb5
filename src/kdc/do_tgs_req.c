@@ -90,6 +90,8 @@ process_tgs_req(pkt, from, portnum, response)
     register int i;
     int firstpass = 1;
     const char	*status = 0;
+    char ktypestr[128];
+    char rep_etypestr[128];
 
     session_key.contents = 0;
     
@@ -97,6 +99,8 @@ process_tgs_req(pkt, from, portnum, response)
     if (retval)
 	return retval;
 
+    ktypes2str(ktypestr, sizeof(ktypestr),
+	       request->nktypes, request->ktype);
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
      */
@@ -648,13 +652,22 @@ tgt_again:
     free(reply.enc_part.ciphertext.data);
     
 cleanup:
-    if (status)
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): %s: authtime %d, %s for %s%s%s",
-	       fromstring, portnum, status, authtime, 
-	       cname ? cname : "<unknown client>",
-	       sname ? sname : "<unknown server>",
-	       errcode ? ", " : "",
-	       errcode ? error_message(errcode) : "");
+    if (status) {
+	if (!errcode)
+	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
+        krb5_klog_syslog(LOG_INFO,
+			 "TGS_REQ (%s) %s(%d): %s: authtime %d, "
+			 "%s%s %s for %s%s%s",
+			 ktypestr,
+			 fromstring, portnum, status, authtime,
+			 !errcode ? rep_etypestr : "",
+			 !errcode ? "," : "",
+			 cname ? cname : "<unknown client>",
+			 sname ? sname : "<unknown server>",
+			 errcode ? ", " : "",
+			 errcode ? error_message(errcode) : "");
+    }
+    
     if (errcode) {
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)

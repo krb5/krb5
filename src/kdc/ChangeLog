@@ -1,3 +1,24 @@
+2001-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str): New function; construct a string
+	containing a list of enctypes, given a number and list of
+	enctypes.
+	(rep_etypes2str): New function; construct a string indicating all
+	three enctypes associated with a KDC reply.
+	[pullup 5.99->5.101 from trunk]
+
+	* kdc_util.h: Add prototypes for ktypes2str() and
+	rep_etypes2str().
+	[pullup 5.46->5.47 from trunk]
+
+	* do_as_req.c (process_as_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+	[pullup 5.80->5.81 from trunk]
+
+	* do_tgs_req.c (process_tgs_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+	[pullup 5.77->5.78 from trunk]
+
 2001-10-11  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code

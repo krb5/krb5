@@ -31,9 +31,11 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
+#include <ctype.h>
 #include <syslog.h>
 #include "adm.h"
 #include "adm_proto.h"
+#include <limits.h>
 
 #ifdef USE_RCACHE
 static char *kdc_current_rcname = (char *) NULL;
@@ -1536,4 +1538,83 @@ void limit_string(char *name)
 	name[i++] = '.';
 	name[i] = '\0';
 	return;
+}
+
+/*
+ * L10_2 = log10(2**x), rounded up; log10(2) ~= 0.301.
+ */
+#define L10_2(x) ((int)(((x * 301) + 999) / 1000))
+
+/*
+ * Max length of sprintf("%ld") for an int of type T; includes leading
+ * minus sign and terminating NUL.
+ */
+#define D_LEN(t) (L10_2(sizeof(t) * CHAR_BIT) + 2)
+
+void
+ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
+{
+    int i;
+    char stmp[D_LEN(krb5_enctype) + 1];
+    char *p;
+
+    if (nktypes < 0
+	|| len < (sizeof(" etypes {...}") + D_LEN(int))) {
+	*s = '\0';
+	return;
+    }
+
+    sprintf(s, "%d etypes {", nktypes);
+    for (i = 0; i < nktypes; i++) {
+	sprintf(stmp, "%s%ld", i ? " " : "", (long)ktype[i]);
+	if (strlen(s) + strlen(stmp) + sizeof("}") > len)
+	    break;
+	strcat(s, stmp);
+    }
+    if (i < nktypes) {
+	/*
+	 * We broke out of the loop. Try to truncate the list.
+	 */
+	p = s + strlen(s);
+	while (p - s + sizeof("...}") > len) {
+	    while (p > s && *p != ' ' && *p != '{')
+		*p-- = '\0';
+	    if (p > s && *p == ' ') {
+		*p-- = '\0';
+		continue;
+	    }
+	}
+	strcat(s, "...");
+    }
+    strcat(s, "}");
+    return;
+}
+
+void
+rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
+{
+    char stmp[sizeof("ses=") + D_LEN(krb5_enctype)];
+
+    if (len < (3 * D_LEN(krb5_enctype)
+	       + sizeof("etypes {rep= tkt= ses=}"))) {
+	*s = '\0';
+	return;
+    }
+
+    sprintf(s, "etypes {rep=%ld", (long)rep->enc_part.enctype);
+
+    if (rep->ticket != NULL) {
+	sprintf(stmp, " tkt=%ld", (long)rep->ticket->enc_part.enctype);
+	strcat(s, stmp);
+    }
+
+    if (rep->ticket != NULL
+	&& rep->ticket->enc_part2 != NULL
+	&& rep->ticket->enc_part2->session != NULL) {
+	sprintf(stmp, " ses=%ld",
+		(long)rep->ticket->enc_part2->session->enctype);
+	strcat(s, stmp);
+    }
+    strcat(s, "}");
+    return;
 }

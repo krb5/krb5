@@ -80,11 +80,16 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0, *fromstring = 0;
+    char ktypestr[128];
+    char rep_etypestr[128];
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
     encrypting_key.contents = 0;
     session_key.contents = 0;
+
+    ktypes2str(ktypestr, sizeof(ktypestr),
+	       request->nktypes, request->ktype);
 
 #ifdef HAVE_NETINET_IN_H
     if (from->address->addrtype == ADDRTYPE_INET)
@@ -411,8 +416,14 @@ krb5_data **response;			/* filled in with a response packet */
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    krb5_klog_syslog(LOG_INFO, "AS_REQ %s(%d): ISSUE: authtime %d, %s for %s",
-	             fromstring, portnum, authtime, cname, sname);
+    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
+    krb5_klog_syslog(LOG_INFO,
+		     "AS_REQ (%s) %s(%d): ISSUE: authtime %d, "
+		     "%s, %s for %s",
+		     ktypestr,
+	             fromstring, portnum, authtime,
+		     rep_etypestr,
+		     cname, sname);
 
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     /*
@@ -425,7 +436,8 @@ krb5_data **response;			/* filled in with a response packet */
 
 errout:
     if (status)
-        krb5_klog_syslog(LOG_INFO, "AS_REQ %s(%d): %s: %s for %s%s%s",
+        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s(%d): %s: %s for %s%s%s",
+			 ktypestr,
 	       fromstring, portnum, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
