@@ -41,6 +41,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include "pos-obsolete.h"
 
 #ifndef	__P
 #define __P(x)	()

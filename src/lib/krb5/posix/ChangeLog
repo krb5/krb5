@@ -1,3 +1,10 @@
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* setenv.c: Include pos-obsolete.h
+
+	* pos-obsolete.h: Add for obsolete functions until they can be
+	removed from the library. Contains setenv functions.
+
 2000-06-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* setenv.c: Do not provide prototype for static function unless
