@@ -1,3 +1,8 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Drop references to
+	libdyn.
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
