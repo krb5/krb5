@@ -237,6 +237,10 @@ extern int KRB5_CALLCONV krb4prot_encode_err_reply(
     char *, char *, char *,
     unsigned long, unsigned long, char *,
     int, int, KTEXT);
+extern int KRB5_CALLCONV krb4prot_decode_kdc_request(
+    KTEXT,
+    int *, char *, char *, char *,
+    long *, int *, char *sname, char *sinst);
 
 /* Message types , always leave lsb for byte order */
 
@@ -266,5 +270,14 @@ extern int KRB5_CALLCONV krb4prot_encode_err_reply(
 /* Cygnus extensions for Preauthentication */
 #define         KERB_ERR_PREAUTH_SHORT			11
 #define		KERB_ERR_PREAUTH_MISMATCH		12
+
+/* Return codes from krb4prot_ encoders/decoders */
+
+#define		KRB4PROT_OK				0
+#define		KRB4PROT_ERR_UNDERRUN			1
+#define		KRB4PROT_ERR_OVERRUN			2
+#define		KRB4PROT_ERR_PROT_VERS			3
+#define		KRB4PROT_ERR_MSG_TYPE			4
+#define		KRB4PROT_ERR_GENERIC			255
 
 #endif /* PROT_DEFS */
