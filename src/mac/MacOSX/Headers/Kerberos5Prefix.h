@@ -1,5 +1,5 @@
 #ifndef __ASSEMBLER__
-#include <KerberosSupport/KerberosConditionalMacros.h>
+#include <TargetConditionals.h>
 
 #define SIZEOF_LONG		4
 #define SIZEOF_INT		4
@@ -13,6 +13,7 @@
 
 #define	krb5_sigtype		void
 
+/* Note: code only checks #ifdef <foo> */
 #define USE_CCAPI			1
 #define USE_LOGIN_LIBRARY	1
 #define NO_PASSWORD			1
