@@ -1,3 +1,16 @@
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add support for setting SUPPORT_DESMD5 flag on the
+	TGT principal.  Add test pass des.md5-tgt for exercising enctype
+	similarity inconsistency.  Add test pass des.no-kdc-md5 for
+	exercising failure to constrain session key issuance to
+	permitted_enctypes.  Pepper the code with null calls to
+	expect_after to prevent misfiring of expect_after clauses.
+	(setup_srvtab): Look for some possible error cases to avoid timing
+	out.
+	(setup_root_shell): Restore timeout so we don't wait 5 minutes in
+	other places.
+
 2001-08-06    <epeisach@mit.edu>
 
 	* default.exp (setup_root_shell): Also recognize "nection reset by

@@ -16,6 +16,7 @@ set stty_init {erase \^h kill \^u}
 set env(TERM) dumb
 
 set des3_krbtgt 0
+set tgt_support_desmd5 0
 set supported_enctypes "des-cbc-crc:normal"
 set kdc_supported_enctypes "des-cbc-crc:normal"
 
@@ -23,16 +24,27 @@ set kdc_supported_enctypes "des-cbc-crc:normal"
 # depend on it.  The PASSES variable may not contain comments; only
 # small pieces get evaluated, so comments will do strange things.
 
-# The des.no-kdc-md5 pass will fail due to the SUPPORTS_MD5 flag not
-# being set.
+# Most of the purpose of using multiple passes is to exercise the
+# dependency of various bugs on configuration file settings,
+# particularly with regards to encryption types.
 
-# The des.no-kdc-md5.client-md4-skey will fail on TGS requests due to
-# the KDC issuing session keys that it won't accept.  It will also
-# fail for a kadmin client, but for different reasons, since the kadm5
-# library does some curious filtering of enctypes, and also uses
-# get_in_tkt() rather than get_init_creds(); the former does an
-# intersection of the enctypes provided by the caller and those listed
-# in the config file!
+# The des.md5-tgt pass will fail if enctype similarity is inconsisent;
+# between 1.0.x and 1.1, the decrypt functions became more strict
+# about matching enctypes, while the KDB retrieval functions didn't
+# coerce the enctype to match what was requested.  It works by setting
+# SUPPORT_DESMD5 on the TGT principal, forcing an enctype of
+# des-cbc-md5 on the TGT key.  Since the database only contains a
+# des-cbc-crc key, the decrypt will fail if enctypes are not coerced.
+
+# The des.no-kdc-md5 pass will fail if the KDC does not constrain
+# session key enctypes to those in its permitted_enctypes list.  It
+# works by assuming enctype similarity, thus allowing the client to
+# request a des-cbc-md4 session key.  Since only des-cbc-crc is in the
+# KDC's permitted_enctypes list, the TGT will be unusable.
+
+# XXX -- master_key_type is fragile w.r.t. permitted_enctypes; it is
+# possible to configure things such that you have a master_key_type
+# that is not permitted, and the error message is cryptic.
 
 set passes {
     {
@@ -67,19 +79,65 @@ set passes {
 		des-cbc-md4:normal}
 	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
     }
-}
-set unused_passes {
+    {
+	des.md5-tgt
+	des3_krbtgt=0
+	tgt_support_desmd5=1
+	supported_enctypes=des-cbc-crc:normal
+	kdc_supported_enctypes=des-cbc-crc:normal
+	{permitted_enctypes(kdc)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
+	{permitted_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
+	{dummy=[verbose -log "DES TGT, SUPPORTS_DESMD5"]}
+    }
     {
 	des.no-kdc-md5
 	des3_krbtgt=0
+	tgt_support_desmd5=0
 	{permitted_enctypes(kdc)=des-cbc-crc}
-	{default_tgs_enctypes(client)=des-cbc-md5}
-	{default_tkt_enctypes(client)=des-cbc-md5}
+	{default_tgs_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
+	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
 	{supported_enctypes=des-cbc-crc:normal}
 	{kdc_supported_enctypes=des-cbc-crc:normal}
+	{master_key_type=des-cbc-crc}
 	{dummy=[verbose -log \
-		"DES TGT, DES enctype, KDC permitting only des-cbc-crc"]}
+		"DES TGT, KDC permitting only des-cbc-crc"]}
     }
+    {
+	des.md5-tgt.no-kdc-md5
+	des3_krbtgt=0
+	tgt_support_desmd5=1
+	{permitted_enctypes(kdc)=des-cbc-crc}
+	{default_tgs_enctypes(client)=des-cbc-crc}
+	{default_tkt_enctypes(client)=des-cbc-crc}
+	{supported_enctypes=des-cbc-crc:normal}
+	{kdc_supported_enctypes=des-cbc-crc:normal}
+	{master_key_type=des-cbc-crc}
+	{dummy=[verbose -log \
+		"DES TGT, SUPPORTS_DESMD5, KDC permitting only des-cbc-crc"]}
+    }
+    {
+	des.des3-tgt.no-kdc-des3
+	tgt_support_desmd5=0
+	{permitted_enctypes(kdc)=des-cbc-crc}
+	{default_tgs_enctypes(client)=des-cbc-crc}
+	{default_tkt_enctypes(client)=des-cbc-crc}
+	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
+	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
+	{master_key_type=des-cbc-crc}
+	{dummy=[verbose -log \
+		"DES3 TGT, KDC permitting only des-cbc-crc"]}
+    }
+}
+
+# The des.no-kdc-md5.client-md4-skey will fail on TGS requests due to
+# the KDC issuing session keys that it won't accept.  It will also
+# fail for a kadmin client, but for different reasons, since the kadm5
+# library does some curious filtering of enctypes, and also uses
+# get_in_tkt() rather than get_init_creds(); the former does an
+# intersection of the enctypes provided by the caller and those listed
+# in the config file!
+
+set unused_passes {
     {
 	des.no-kdc-md5.client-md4-skey
 	des3_krbtgt=0
@@ -520,6 +578,7 @@ proc setup_kerberos_files { } {
     global kdc_supported_enctypes
     global last_passname_conf
     global multipass_name
+    global master_key_type
 
     if ![get_hostname] { 
 	return 0
@@ -532,6 +591,9 @@ proc setup_kerberos_files { } {
     # Create a kdc.conf file.
     if { ![file exists $tmppwd/kdc.conf] \
 	    || $last_passname_conf != $multipass_name } {
+	if ![info exists master_key_type] {
+	    set master_key_type des-cbc-md5
+	}
 	set conffile [open $tmppwd/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_ports = 3085,3086,3087,3088,3089"
@@ -548,7 +610,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		kpasswd_port = 3751"
 	puts $conffile "		max_life = 1:00:00"
 	puts $conffile "		max_renewable_life = 3:00:00"
-	puts $conffile "		master_key_type = des-cbc-md5"
+	puts $conffile "		master_key_type = $master_key_type"
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = $supported_enctypes"
 	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
@@ -802,6 +864,7 @@ proc setup_kadmind_srvtab {  } {
     setup_kerberos_env kdc
     spawn $KADMIN_LOCAL -r $REALMNAME
     envstack_pop
+    catch expect_after
     expect_after {
 	timeout {
 	    fail "kadmin.local admin-keytab (timeout)"
@@ -866,6 +929,7 @@ proc setup_kerberos_db { standalone } {
     global tmppwd
     global spawn_id
     global des3_krbtgt
+    global tgt_support_desmd5
     global multipass_name
     global last_passname_db
 
@@ -924,6 +988,7 @@ proc setup_kerberos_db { standalone } {
 	    "Warning: proceeding without master key" exp_continue
 	    eof { }
 	}
+	catch expect_after
 	if ![check_exit_status kdb5_util] {
 	    break
 	}
@@ -952,6 +1017,7 @@ proc setup_kerberos_db { standalone } {
 	expect "Enter KDC database master key:"
 	send "masterkey$KEY\r"
 	expect eof
+	catch expect_after
 	if ![check_exit_status kdb5_util] {
 	    break
 	}
@@ -996,6 +1062,7 @@ proc setup_kerberos_db { standalone } {
 	expect "kadmin.local: "
 	send "quit\r"
 	expect eof
+	catch expect_after
 	if ![check_exit_status kadmin_local] {
 	    break
 	}
@@ -1034,6 +1101,46 @@ proc setup_kerberos_db { standalone } {
 	    expect "kadmin.local: "
 	    send "quit\r"
 	    expect eof
+	    catch expect_after
+	    if ![check_exit_status kadmin_local] {
+		break
+	    }
+	}
+	if [catch $body] {
+	    set failall 1
+	    if $standalone {
+		fail $test
+	    } else {
+		catch "exec rm -f $tmppwd/db.ok $tmppwd/adb.db"
+	    }
+	} else {
+	    if $standalone {
+		pass $test
+	    }
+	}
+    }
+    if $tgt_support_desmd5 {
+	# Make TGT support des-cbc-md5
+	set test "kadmin.local TGT to SUPPORT_DESMD5"
+	set body {
+	    if $failall {
+		break
+	    }
+	    spawn $KADMIN_LOCAL -r $REALMNAME
+	    verbose "starting $test"
+	    expect_after $def_exp_after
+
+	    expect "kadmin.local: "
+	    send "modprinc +support_desmd5 krbtgt/$REALMNAME@$REALMNAME\r"
+	    # It echos...
+	    expect "modprinc +support_desmd5 krbtgt/$REALMNAME@$REALMNAME\r"
+	    expect {
+		"Principal \"krbtgt/$REALMNAME@$REALMNAME\" modified.\r\n" { }
+	    }
+	    expect "kadmin.local: "
+	    send "quit\r"
+	    expect eof
+	    catch expect_after
 	    if ![check_exit_status kadmin_local] {
 		break
 	    }
@@ -1336,13 +1443,13 @@ proc add_kerberos_key { kkey standalone } {
 	    "Principal \"$kkey@$REALMNAME\" created" { }
 	    "Principal or policy already exists while creating*" { }
 	}
-	expect eof
-	catch expect_after
 	if ![check_exit_status kadmin] {
 	    break
 	}
     }
     set ret [catch $body]
+    catch "expect eof"
+    catch expect_after
     if $ret {
 	if $standalone {
 	    fail $test
@@ -1392,6 +1499,7 @@ proc add_random_key { kkey standalone } {
 	    "Principal or policy already exists while creating*" { }
 	}
 	expect eof
+	catch expect_after
 	if ![check_exit_status kadmin] {
 	    break
 	}
@@ -1460,7 +1568,19 @@ proc setup_srvtab { standalone {id host} } {
     }
     expect "kadmin.local:  "
     send "xst -k $hostname-new-srvtab $id/$hostname\r"
-    expect -re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-srvtab."
+    expect "xst -k $hostname-new-srvtab $id/$hostname\r\n"
+    expect {
+	-re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-srvtab." { }
+	-re "\r\nkadmin.local:  " {
+	    if {$standalone} {
+		fail "kadmin.local srvtab"
+	    } else {
+		catch "exec rm -f $tmppwd/srvtab"
+	    }
+	    catch expect_after
+	    return 0
+	}
+    }
     expect "kadmin.local:  "
     send "quit\r"
     expect "\r"
@@ -1619,7 +1739,6 @@ proc setup_root_shell { testname } {
     global krb5_init_vars
 
     global timeout
-    set timeout 300
 
     # Make sure we are using the original values of the environment
     # variables.  This means that the caller must call
@@ -1653,10 +1772,14 @@ proc setup_root_shell { testname } {
     eval spawn $RLOGIN $hostname -l root $RLOGIN_FLAGS
     set rlogin_spawn_id $spawn_id
     set rlogin_pid [exp_pid]
+    set old_timeout $timeout
+    set timeout 300
+
     expect {
 	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
 	    note "$testname test requires ability to rlogin as root"
 	    unsupported "$testname"
+	    set timeout $old_timeout
 	    stop_root_shell
 	    return 0
 	}
@@ -1665,12 +1788,14 @@ proc setup_root_shell { testname } {
 	    perror "timeout from rlogin $hostname -l root"
 	    perror "If you have an unusual root prompt,"
 	    perror "try running with ROOT_PROMPT=\"regexp\""
+	    set timeout $old_timeout
 	    stop_root_shell
 	    return 0
 	}
 	eof {
 	    perror "eof from rlogin $hostname -l root"
 	    stop_root_shell
+	    set timeout $old_timeout
 	    catch "expect_after"
 	    return 0
 	}
@@ -1680,12 +1805,14 @@ proc setup_root_shell { testname } {
 	timeout {
 	    perror "timeout from rlogin $hostname -l root"
 	    stop_root_shell
+	    set timeout $old_timeout
 	    catch "expect_after"
 	    return 0
 	}
 	eof {
 	    perror "eof from rlogin $hostname -l root"
 	    stop_root_shell
+	    set timeout $old_timeout
 	    catch "expect_after"
 	    return 0
 	}
@@ -1737,12 +1864,14 @@ proc setup_root_shell { testname } {
 	-re "$ROOT_PROMPT" { }
 	"$dir:" {
 	    perror "root shell can not cd to $dir"
+	    set timeout $old_timeout
 	    stop_root_shell
 	    return 0
 	}
     }
 
     expect_after
+    set timeout $old_timeout
 
     return 1
 }
