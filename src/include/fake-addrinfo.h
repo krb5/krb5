@@ -324,6 +324,11 @@ system_freeaddrinfo (struct addrinfo *ai)
     freeaddrinfo(ai);
 }
 
+/* Note: Implementations written to RFC 2133 use size_t, while RFC
+   2553 implementations use socklen_t, for the second parameter.
+
+   Mac OS X (10.2) and AIX 4.3.3 appear to be in the RFC 2133 camp,
+   but we don't have an autoconf test for that right now.  */
 static inline int
 system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
 		    char *host, size_t hostlen, char *serv, size_t servlen,
@@ -339,8 +344,6 @@ system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
 #define getaddrinfo	my_fake_getaddrinfo
 #undef  freeaddrinfo
 #define freeaddrinfo	my_fake_freeaddrinfo
-#undef  getnameinfo
-#define getnameinfo	my_fake_getnameinfo
 
 #endif
 
@@ -539,14 +542,6 @@ void freeaddrinfo (struct addrinfo *ai);
 #endif
 
 #if !defined (HAVE_GETADDRINFO)
-static
-int getnameinfo (const struct sockaddr *addr, socklen_t len,
-		 char *host, socklen_t hostlen,
-		 char *service, socklen_t servicelen,
-		 int flags);
-#endif
-
-#if !defined (HAVE_GETADDRINFO)
 
 #define HAVE_FAKE_GETADDRINFO /* was not originally HAVE_GETADDRINFO */
 #define HAVE_GETADDRINFO
@@ -554,9 +549,20 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 #undef  HAVE_GETNAMEINFO
 #define HAVE_GETNAMEINFO 1
 
+#undef  getnameinfo
+#define getnameinfo	my_fake_getnameinfo
+
 static
 char *gai_strerror (int code);
 
+#endif
+
+#if !defined (HAVE_GETADDRINFO)
+static
+int getnameinfo (const struct sockaddr *addr, socklen_t len,
+		 char *host, socklen_t hostlen,
+		 char *service, socklen_t servicelen,
+		 int flags);
 #endif
 
 /* Fudge things on older gai implementations.  */
