@@ -98,6 +98,8 @@
 
 #define Krb4ApplCompat /* turn this on if you want selected applications to
 			  work with both v4 & v5 code */
+#define Krb4KDCCompat /* turn this on if you want the KDC to provide v4
+			 tickets from a v5 database */
 /* #define Krb4Includes <empty>	-- If you don't want to use our copy of the
    				   Kerberos V4 include files, set this to
 				   an empty name, by using the /**/
