@@ -1,0 +1,30 @@
+thisconfigdir=./..
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)/../md4 \
+	-I$(srcdir)/../md5
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=hashkey_provider
+##DOS##OBJFILE=..\hk_pro.lst
+##WIN16##LIBNAME=..\crypto.lib
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o
+
+OBJS= descbc.$(OBJEXT) k5_md4des.$(OBJEXT) k5_md5des.$(OBJEXT)
+
+SRCS= $(srcdir)/descbc.c $(srcdir)/k6_md4des.c $(srcdir)/k5_md5des.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
