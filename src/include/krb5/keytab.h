@@ -70,4 +70,7 @@ typedef struct _krb5_kt_ops {
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 
+
+extern krb5_kt_ops krb5_kt_dfl_ops;
+
 #endif /* KRB5_KEYTAB__ */
