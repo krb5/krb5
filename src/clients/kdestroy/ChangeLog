@@ -1,3 +1,8 @@
+2000-03-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdestroy.c: Do not define variables if v4 compatilibilty is not
+	defined.
+
 2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kdestroy.M: Make up-to-date.

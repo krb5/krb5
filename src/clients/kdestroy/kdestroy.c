@@ -92,10 +92,12 @@ main(argc, argv)
     krb5_ccache cache = NULL;
     char *cache_name = NULL;
     int code = 0;
+#ifdef KRB5_KRB4_COMPAT
     int v4code = 0;
+    int v4 = 1;
+#endif
     int errflg = 0;
     int quiet = 0;
-    int v4 = 1;
 
     int use_k5 = 0;
     int use_k4 = 0;
@@ -173,7 +175,9 @@ main(argc, argv)
 	}
 
 	if (cache_name) {
+#ifdef KRB5_KRB4_COMPAT
 	    v4 = 0;	/* Don't do v4 if doing v5 and cache name given. */
+#endif
 	    code = krb5_cc_resolve (kcontext, cache_name, &cache);
 	    if (code != 0) {
 		com_err (progname, code, "while resolving %s", cache_name);
