@@ -1,3 +1,6 @@
+Sun Jul  9 01:31:25 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in: remove bogus definitions of prefix, etc.
 
 Fri Jul 7 15:29:43 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* aclocal.m4 - Add ability to set LDFLAGS from --with-ldopts (I know,
