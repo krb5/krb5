@@ -1,3 +1,8 @@
+Tue Mar  3 10:40:09 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Enable v4 kadmin tests only if athena
+        compatibility is enabled.
+
 Sun Mar  1 21:12:08 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Define S_TOP to contain an absolute pathname

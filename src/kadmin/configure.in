@@ -23,6 +23,13 @@ if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; t
  	DO_TEST=ok
 fi
 AC_SUBST(DO_TEST) 
+dnl
+DO_V4_TEST=
+if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != "" -a "$ath_compat" != ""; then
+ 	DO_V4_TEST=ok
+fi
+AC_SUBST(DO_V4_TEST)
+dnl
 dnl The following are substituted into testing/scripts/env-setup.sh
 RBUILD=`pwd`/..
 AC_SUBST(RBUILD)
