@@ -316,12 +316,6 @@ errout:
       goto errout;
     }
 
-    if (kdbe.mkvno != mblock.mkvno) {
-      fprintf(stderr, "\tmaster keyvno did not match stored value for %s.\n", 
-	      princ_name);
-      goto errout;
-    }
-
     if (kdbe.expiration != mblock.expiration) {
       fprintf(stderr, "\texpiration time did not match stored value for %s.\n",
 	      princ_name);
