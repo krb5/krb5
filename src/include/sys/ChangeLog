@@ -1,3 +1,7 @@
+Thu Jun 22 16:12:23 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
+
 Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
 
 	* syslog.h:  __STDC__ conditionals also check for the _WINDOWS define.
