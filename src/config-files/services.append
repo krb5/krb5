@@ -1,8 +1,8 @@
 klogin		543/tcp				# Kerberos authenticated rlogin
-kerberos	88/udp 		kdc		# Kerberos authentication--udp
-kerberos	88/tcp 		kdc		# Kerberos authentication--tcp
-kerberos-sec	750/udp 			# Kerberos authentication--udp
-kerberos-sec	750/tcp 			# Kerberos authentication--tcp
+kerberos5	88/udp 		kdc		# Kerberos authentication--udp
+kerberos5	88/tcp 		kdc		# Kerberos authentication--tcp
+kerberos4	750/udp 			# Kerberos authentication--udp
+kerberos4	750/tcp 			# Kerberos authentication--tcp
 kerberos_master	751/udp 			# Kerberos authentication
 kerberos_master	751/tcp 			# Kerberos authentication
 kerberos-adm	749/tcp				# Kerberos 5 admin/changepw
