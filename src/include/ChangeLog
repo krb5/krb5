@@ -1,3 +1,7 @@
+Wed Feb 19 14:25:32 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.hin: Added function prototype for krb5_set_principal_realm().
+
 Tue Feb 18 17:43:55 1997  Richard Basch  <basch@lehman.com>
 
 	* krb5.hin:
