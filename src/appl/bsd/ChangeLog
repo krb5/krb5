@@ -1,5 +1,8 @@
 Mon Oct 24 14:46:07 1994    (tytso@rsx-11)
 
+	* Makefile.in: The Kerberos V4 libraries must be linked in after
+		the V5 libraries; compat_recvauth pulls in the V4 routines.
+
 	* kcmd.c (kcmd): Don't free host_save; it's supposed to be
 		returned by kcmd to the caller!
 
