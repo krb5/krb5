@@ -161,7 +161,8 @@ WINMAKEFILES=Makefile \
 	util\windows\Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
-	windows\gss\Makefile windows\wintel\Makefile
+	windows\gss\Makefile windows\ms2mit\Makefile \
+	windows\wintel\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -271,6 +272,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gss\Makefile: windows\gss\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
@@ -327,7 +330,7 @@ FILES= ./* \
 	util/* util/et/* util/profile/*
 
 WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
-	windows/wintel/* windows/gss/* windows/gina/*
+	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/*
 
 MACFILES= mac/* mac/libraries/* config/* include/* \
 	include/krb5/* include/krb5/stock/* include/sys/* \

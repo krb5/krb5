@@ -1,3 +1,7 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add ms2mit.
+
 2000-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Moved bulk of the work into
