@@ -1,3 +1,8 @@
+1999-10-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* changepw.c (krb5_change_password): Wait only two minutes, not
+	indefinitely, for a response from the kpasswd server.
+
 1999-09-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* changepw.c: Changes from Jeffrey Altman to look up kpasswd
