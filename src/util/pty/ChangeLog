@@ -1,3 +1,8 @@
+Wed Mar 31 17:12:14 1999  Tom Yu  <tlyu@mit.edu>
+
+	* cleanup.c (pty_cleanup): Temporary hack to not call revoke()
+	under AIX.
+
 Sun Mar 28 17:50:57 1999  Tom Yu  <tlyu@mit.edu>
 
 	* update_wtmp.c: Define WTMPX_FILE to be _PATH_WTMPX in case we're
