@@ -1,3 +1,11 @@
+Mon Sep  9 13:25:06 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+
+	* user-guide.texinfo (Reference): changed offset to -700 for
+	PostScript man pages for full page printing.
+
+	* man2ps: changed scale from 0.7 to 0.85 for full page printing.
+	Piped csplit output to /dev/null, to make it a bit neater.
+
 Fri Sep  6 19:59:12 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* copyright.texinfo: Updated copyright dates and modify copyright
