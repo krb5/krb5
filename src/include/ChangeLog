@@ -1,3 +1,14 @@
+1999-03-11  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* win-mac.h: Define GSS_DLLIMP to be __declspec(dllimport) or
+		__declspec(dllexport)  depending on whether GSS_DLL_FILE
+		is defined.
+
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* win-mac.h: Add definition for GSS_DLLIMP which is set ala
+		KRB5_DLLIMP, but controlled by the #define GSS_DLL_FILE.
+
 Mon Feb  8 21:51:10 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin (krb5_get_realm_domain): Add appropriate modifiers so

@@ -68,18 +68,23 @@
 #define HAVE_LABS
 
 #ifndef KRB5_CALLCONV
-#ifdef _MSC_VER
-# ifdef KRB5_DLL_FILE
-# define KRB5_DLLIMP __declspec(dllexport)
-# else
-# define KRB5_DLLIMP __declspec(dllimport)
-# endif
-#else /* !_MSC_VER */
-# define KRB5_DLLIMP
-#endif
-#define KRB5_CALLCONV __stdcall
-#define KRB5_CALLCONV_C __cdecl
-#define KRB5_EXPORTVAR
+#  ifdef _MSC_VER
+#    ifdef KRB5_DLL_FILE
+#      define KRB5_DLLIMP __declspec(dllexport)
+#    else
+#      define KRB5_DLLIMP __declspec(dllimport)
+#    endif
+#    ifdef GSS_DLL_FILE
+#      define GSS_DLLIMP __declspec(dllexport)
+#    else
+#      define GSS_DLLIMP __declspec(dllimport)
+#    endif
+#  else /* !_MSC_VER */
+#    define KRB5_DLLIMP
+#  endif
+#  define KRB5_CALLCONV __stdcall
+#  define KRB5_CALLCONV_C __cdecl
+#  define KRB5_EXPORTVAR
 #endif /* !KRB5_CALLCONV */
 
 #endif /* _MSDOS */
