@@ -28,14 +28,17 @@
 /* default target... */
 all::
 
+WORLDOPTS = -k
+
 world::
 	@date
 	cd $(IMAKESRC); $(MAKE) $(MFLAGS) -f Makefile.ini clean; $(MAKE) $(MFLAGS) -f Makefile.ini BOOSTRAPCFLAGS="$(BOOTSTAPCFLAGS)"
 	-$(RM) Makefile.bak; $(MV) Makefile Makefile.bak
 	$(MAKE) $(MFLAGS) -f Makefile.bak Makefile
-	$(MAKE) ${MFLAGS} mastermakefiles
-	$(MAKE) ${MFLAGS} depend
-	$(MAKE) ${MFLAGS} all
+	$(MAKE) $(MFLAGS) Makefiles
+	$(MAKE) $(MFLAGS) includes
+	$(MAKE) $(MFLAGS) depend
+	$(MAKE) $(MFLAGS) $(WORLDOPTS)
 	@date
 
 SUBDIRS = util include lib kdc admin kadmin slave clients appl tests \
@@ -50,17 +53,15 @@ install:: install-mkdirs
 
 MakeSubdirs($(SUBDIRS))
 
-depend:: includes
-
-
 install-mkdirs:
 	-mkdir $(INSTALLMKDIRS)
 
 install::
 	$(MAKE) $(MFLAGS) install.man
-
+#ifdef notdef
 /**/# rebuild the Makefiles in the master source tree
 mastermakefiles::
 	-$(MV) Makefile Makefile.bak
 	$(MAKE) -f Makefile.bak Makefile
 	$(MAKE) Makefiles
+#endif
