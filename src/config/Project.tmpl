@@ -116,10 +116,10 @@ libdir/lib/**/libname.a:						@@\
          SSCMDSRC = $(TOP)/lib/ss/mk_cmds
           DEPKLIB = $(TOP)/lib/libkrb5.a \
                     $(TOP)/lib/os-4.3/libos.a \
-                    $(TOP)/lib/des/libdes.a \
+                    $(TOP)/lib/des_new/libdes.a \
                     $(TOP)/lib/crc-32/libcrc32.a
 
-             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err
+             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -lcom_err
         DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
            KDBLIB = $(TOP)/lib/kdb/libkdb.a DbmLib
 
