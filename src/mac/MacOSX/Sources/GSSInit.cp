@@ -16,43 +16,12 @@
  * without express or implied warranty.
  */
  
+#include <CoreFoundation/CoreFoundation.h>
 #include "gss_libinit.h"
 
-#if TARGET_RT_MAC_CFM
-#include <CodeFragments.h>
+extern "C" void GSSInit (CFStringRef inBundleID);
 
-OSErr __initializeGSS(CFragInitBlockPtr ibp);
-void __terminateGSS(void);
-
-OSErr __initializeGSS(CFragInitBlockPtr ibp)
+void GSSInit (void)
 {
-	OSErr	err = noErr;
-        
-	/* Do normal init of the shared library */
-	err = __initialize();
-#else
-#define noErr	0
-void __initializeGSS(void);
-void __initializeGSS(void)
-{
-        int	err = noErr;
-#endif
-
-	/* Initialize the error tables */
-	if (err == noErr) {
-		err = gssint_initialize_library ();
-	}
-
-#if TARGET_RT_MAC_CFM
-	return err;
-#endif
+	gssint_initialize_library ();
 }
-
-#if TARGET_RT_MAC_CFM
-void __terminateGSS(void)
-{
-	gssint_cleanup_library ();
-
-	__terminate();
-}
-#endif

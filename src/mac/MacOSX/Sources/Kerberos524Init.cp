@@ -16,18 +16,13 @@
  * without express or implied warranty.
  */
  
-extern "C" {
-
-#include <CoreServices/CoreServices.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <Kerberos/com_err.h>
-
 #include "krb524_err.h"
 
-void Kerberos5Init (CFStringRef inBundleID);
+extern "C" void Kerberos5Init (CFStringRef inBundleID);
 
 void Kerberos5Init (CFStringRef inBundleID)
 {
     add_error_table (&et_k524_error_table);
 }
-
-};

@@ -15,16 +15,14 @@
  * this software for any purpose.  It is provided "as is"
  * without express or implied warranty.
  */
- 
-extern "C" {
 
-#include <CoreServices/CoreServices.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <Kerberos/com_err.h>
 
 #include "krb5_libinit.h"
 #include "crypto_libinit.h"
 
-void Kerberos5Init (CFStringRef inBundleID);
+extern "C" void Kerberos5Init (CFStringRef inBundleID);
 
 void Kerberos5Init (CFStringRef inBundleID)
 {
@@ -32,4 +30,3 @@ void Kerberos5Init (CFStringRef inBundleID)
     cryptoint_initialize_library ();
 }
 
-};

@@ -16,14 +16,12 @@
  * without express or implied warranty.
  */
  
-#include <CoreServices/CoreServices.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <Kerberos/com_err.h>
 #include "profile.h"
 #include "prof_err.h"
 
-extern "C" {
-void KerberosProfileInit (CFStringRef inBundleID);
-};
+extern "C" void KerberosProfileInit (CFStringRef inBundleID);
 
 void KerberosProfileInit (CFStringRef inBundleID)
 {
