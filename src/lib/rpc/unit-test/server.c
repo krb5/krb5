@@ -38,8 +38,15 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
 #define SERVICE_NAME "server"
 #endif
 
+void usage()
+{
+     fprintf(stderr, "Usage: server {-t|-u} [svc-debug] [misc-debug]\n");
+     exit(1);
+}
+
 main(int argc, char **argv)
 {
+     int c, prot;
      auth_gssapi_name names[2];
      register SVCXPRT *transp;
 
@@ -47,30 +54,54 @@ main(int argc, char **argv)
      names[0].type = (gss_OID) gss_nt_service_name;
      names[1].name = 0;
      names[1].type = 0;
-     
+
+     prot = 0;
+     while ((c = getopt(argc, argv, "tu")) != -1) {
+	  switch (c) {
+	  case 't':
+	       prot = IPPROTO_TCP;
+	       break;
+	  case 'u':
+	       prot = IPPROTO_UDP;
+	       break;
+	  case '?':
+	       usage();
+	       break;
+	  }
+     }
+     if (prot == 0)
+	  usage();
+
+     argv += optind;
+     argc -= optind;
+
      switch (argc) {
-     case 3:
-	  misc_debug_gssapi = atoi(argv[2]);
      case 2:
-	  svc_debug_gssapi = atoi(argv[1]);
+	  misc_debug_gssapi = atoi(argv[1]);
      case 1:
+	  svc_debug_gssapi = atoi(argv[0]);
+     case 0:
 	  break;
      default:
-	  fprintf(stderr, "Usage: server [svc-debug] [misc-debug]\n");
+	  usage();
 	  exit(1);
      }
 
      (void) pmap_unset(RPC_TEST_PROG, RPC_TEST_VERS_1);
 
-     transp = svctcp_create(RPC_ANYSOCK, 0, 0);
+     if (prot == IPPROTO_TCP)
+	  transp = svctcp_create(RPC_ANYSOCK, 0, 0);
+     else
+	  transp = svcudp_create(RPC_ANYSOCK);
      if (transp == NULL) {
 	  fprintf(stderr, "cannot create tcp service.");
 	  exit(1);
      }
      if (!svc_register(transp, RPC_TEST_PROG, RPC_TEST_VERS_1,
-		       rpc_test_prog_1,  IPPROTO_TCP)) { 
+		       rpc_test_prog_1, prot)) { 
 	  fprintf(stderr,
-		  "unable to register (RPC_TEST_PROG, RPC_TEST_VERS_1, tcp).");
+		  "unable to register (RPC_TEST_PROG, RPC_TEST_VERS_1, %s).",
+		  prot == IPPROTO_TCP ? "tcp" : "udp");
 	  exit(1);
      }
      

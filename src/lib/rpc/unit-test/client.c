@@ -5,6 +5,11 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.14  1996/11/12 21:29:54  bjaspan
+ * 	* lib/helpers.exp, client.c, server.c, config/unix.exp,
+ *  	Makefile.in: test GSS-RPC with both TCP and UDP transport layers
+ *  	[krb5-libs/180]
+ *
  * Revision 1.13  1996/07/22 20:41:40  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -108,6 +113,7 @@ main(argc, argv)
    char **argv;
 {
      char        *host, *target, *echo_arg, **echo_resp, buf[BIG_BUF];
+     char	 *prot;
      CLIENT      *clnt;
      AUTH	 *tmp_auth;
      struct rpc_err e;
@@ -120,8 +126,9 @@ main(argc, argv)
      whoami = argv[0];
      count = 1026;
      auth_once = 0;
+     prot = NULL;
      
-     while ((c = getopt(argc, argv, "a:m:os:")) != -1) {
+     while ((c = getopt(argc, argv, "a:m:os:tu")) != -1) {
 	  switch (c) {
 	  case 'a':
 	       auth_debug_gssapi = atoi(optarg);
@@ -135,11 +142,19 @@ main(argc, argv)
 	  case 's':
 	       svc_debug_gssapi = atoi(optarg);
 	       break;
+	  case 't':
+	       prot = "tcp";
+	       break;
+	  case 'u':
+	       prot = "udp";
+	       break;
 	  case '?':
 	       usage();
 	       break;
 	  }
      }
+     if (prot == NULL)
+	  usage();
 
      argv += optind;
      argc -= optind;
@@ -160,7 +175,7 @@ main(argc, argv)
      }
      
      /* client handle to rstat */
-     clnt = clnt_create(host, RPC_TEST_PROG, RPC_TEST_VERS_1, "tcp");
+     clnt = clnt_create(host, RPC_TEST_PROG, RPC_TEST_VERS_1, prot);
      if (clnt == NULL) {
 	  clnt_pcreateerror(whoami);
 	  exit(1);
@@ -314,7 +329,7 @@ main(argc, argv)
 
 usage()
 {
-     fprintf(stderr, "usage: %s [-a] [-s num] [-m num] host service [count]\n",
+     fprintf(stderr, "usage: %s {-t|-u} [-a] [-s num] [-m num] host service [count]\n",
 	     whoami);
      exit(1);
 }

@@ -46,7 +46,7 @@ proc rpc_test_exit {} {
 # rpc_test_start -- start the rpc_test server running
 #
 proc rpc_test_start { } {
- 	global SERVER
+ 	global SERVER PROT
 	global server_id
 	global server_pid
 	global server_started
@@ -55,7 +55,7 @@ proc rpc_test_start { } {
 	set env(KRB5_KTNAME) FILE:$env(RPC_TEST_SRVTAB)
 
  	verbose "% $SERVER" 1
-	set server_pid [spawn $SERVER]
+	set server_pid [spawn $SERVER $PROT]
 	set server_id $spawn_id
 
 	unset env(KRB5_KTNAME)

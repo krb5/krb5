@@ -61,11 +61,7 @@ proc flush_server {} {
 
 proc start_client {testname ccname user password lifetime count
 		  {target ""}} {
-	global env
-	global CLIENT
-	global hostname
-	global spawn_id
-	global verbose
+	global env CLIENT PROT hostname spawn_id verbose
 
 	if {$target == ""} {
 		set target "server@$hostname"
@@ -75,9 +71,9 @@ proc start_client {testname ccname user password lifetime count
 	kinit $user $password $lifetime
 
 	if {$verbose > 0} {
-		spawn $CLIENT -a 1 -s 1 -m 1 $hostname $target $count
+		spawn $CLIENT -a 1 -s 1 -m 1 $PROT $hostname $target $count
 	} else {
-		spawn $CLIENT $hostname $target $count
+		spawn $CLIENT $PROT $hostname $target $count
 	}
 
 	verbose "$testname: client $ccname started"
