@@ -1,3 +1,27 @@
+Fri Apr 21 17:13:48 1995  Mark Eichin  <eichin@cygnus.com>
+
+	More changes from ian@cygnus.com to support testing.
+
+> Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* krcp.c (forcenet): New global vraiable.
+	(main): Accept -D and -N arguments.  Pass Kerberos realm to remote
+	rcp execution.
+	(hosteq): If -N specified, always return 0.
+	* rcp.M: Document -D and -N.
+	* krshd.c (ARGSTR): Add "P:" to KERBEROS version.
+	(kprogdir): New global variable.
+	(main): Handle -P.
+	(path): Remove global variable.
+	(path_rest): Remove explicit size.
+	(envinit): Use 0 instead of path.
+	(PATHENV): define.
+	(doit): Use kprogdir variable instead of KPROGDIR macro when
+	setting path.  Build path in allocated memory rather than using a
+	fixed size array.  If the command starts with "rcp ", force use of
+	kprogdir/rcp if it exists.
+	* krshd.M: Document -P.
+
 Fri Apr 21 14:07:15 1995  Mark Eichin  <eichin@cygnus.com>
 
 	Added Ian's changes with minor tweaks. These are used by the testsuite.

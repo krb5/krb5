@@ -158,7 +158,7 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"rRxXeEkKD:S:M:A?"
+#define ARGSTR	"rRxXeEkKD:S:M:AP:?"
 
 #define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
 
@@ -186,6 +186,7 @@ int (*des_write)() = v5_des_write;
 
 int do_encrypt = 0;
 int anyport = 0;
+char *kprogdir = KPROGDIR;
 int netf;
 
 #else /* !KERBEROS */
@@ -327,6 +328,10 @@ main(argc, argv)
 	case 'A':
 	  anyport = 1;
 	  break;
+
+	case 'P':
+	  kprogdir = optarg;
+	  break;
 #endif
 	case 'D':
 	  debug_port = atoi(optarg);
@@ -416,24 +421,25 @@ char	username[20] = "USER=";
 char	homedir[64] = "HOME=";
 char	shell[64] = "SHELL=";
 char    term[64] = "TERM=network";
-char	path[128] = "PATH=";
-char	path_rest[64] = RPATH;
+char	path_rest[] = RPATH;
 
 #ifdef CRAY
 char    *envinit[] =
-{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
+{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0};
 #define TZENV   4
 #define TMPDIRENV 5
 char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
 char    *envinit[] =
-{homedir, shell, path, username, term, 0};
+{homedir, shell, 0, username, term, 0};
 #else /* KERBEROS */
 char	*envinit[] =
-{homedir, shell, path, username, term, 0};
+{homedir, shell, 0, username, term, 0};
 #endif /* KERBEROS */
 #endif /* CRAY */
+
+#define PATHENV 2
 
 extern char	**environ;
 char ttyn[12];		/* Line string for wtmp entries */
@@ -487,6 +493,7 @@ doit(f, fromp)
     register char *p;
     char *crypt();
     struct passwd *pwd;
+    char *path;
     
 #ifdef CRAY
 #ifndef NO_UDB
@@ -1219,14 +1226,49 @@ doit(f, fromp)
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
-    strcat(path, KPROGDIR);
-    strcat(path, ":");
-    strcat(path, path_rest);
+    path = (char *) malloc(strlen(kprogdir) + strlen(path_rest) + 7);
+    if (path == NULL) {
+        perror("malloc");
+	_exit(1);
+    }
+    sprintf(path, "PATH=%s:%s", kprogdir, path_rest);
+    envinit[PATHENV] = path;
     cp = strrchr(pwd->pw_shell, '/');
     if (cp)
       cp++;
     else
       cp = pwd->pw_shell;
+
+#ifdef KERBEROS
+    /* To make Kerberos rcp work correctly, we must ensure that we
+       invoke Kerberos rcp on this end, not normal rcp, even if the
+       shell startup files change PATH.  */
+    if (!strncmp(cmdbuf, "rcp ", 4) ||
+	(do_encrypt && !strncmp(cmdbuf, "-x rcp ", 7))) {
+        char *copy;
+	struct stat s;
+
+	copy = malloc(strlen(cmdbuf) + 1);
+	if (copy == NULL) {
+	    perror("malloc");
+	    _exit(1);
+	}
+	strcpy(copy, cmdbuf);
+	if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
+	    strcpy(cmdbuf + 3, kprogdir);
+	    cp = copy + 6;
+	} else {
+	    strcpy(cmdbuf, kprogdir);
+	    cp = copy + 3;
+	}
+	strcat(cmdbuf, "/rcp");
+	if (stat(cmdbuf, &s) >= 0)
+	  strcat(cmdbuf, cp);
+	else
+	  strcpy(cmdbuf, copy);
+	free(copy);
+    }
+#endif
 
     if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
 	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, 0);

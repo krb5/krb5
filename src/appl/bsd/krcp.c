@@ -109,6 +109,7 @@ extern char	*sys_errlist[];
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
+int	forcenet;
 struct	passwd *pwd;
 int	userid;
 int	port;
@@ -133,7 +134,8 @@ main(argc, argv)
     char *targ, *host, *src;
     char *suser, *tuser, *thost;
     int i;
-    char buf[BUFSIZ], cmd[16];
+    char buf[BUFSIZ], cmdbuf[16];
+    char *cmd = cmdbuf;
     struct servent *sp;
     static char curhost[256];
 #ifdef POSIX_SIGNALS
@@ -181,6 +183,17 @@ main(argc, argv)
 	    pflag++;
 	    break;
 	    
+	  case 'D':
+	    argc--, argv++;
+	    if (argc == 0)
+	      usage();
+	    port = atoi(*argv);
+	    goto next_arg;
+
+	  case 'N':
+	    forcenet++;
+	    break;
+
 #ifdef KERBEROS
 	  case 'x':
 	    encryptflag++;
@@ -223,9 +236,7 @@ main(argc, argv)
 	  default:
 	    usage();
 	}
-#ifdef KERBEROS
       next_arg: ;
-#endif /* KERBEROS */
     }
     
     if (argc < 2)
@@ -234,10 +245,19 @@ main(argc, argv)
       targetshouldbedirectory = 1;
     rem = -1;
 #ifdef KERBEROS
-    (void) sprintf(cmd, "rcp%s%s%s%s",
+    if (krb_realm != NULL) {
+        cmd = (char *) malloc(strlen(krb_realm) + 20);
+	if (cmd == NULL) {
+	    fprintf(stderr, "rcp: Cannot malloc.\n");
+	    exit(1);
+	}
+    }
+    (void) sprintf(cmd, "rcp%s%s%s%s%s%s",
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
 		   encryptflag ? " -x" : "",
-		   targetshouldbedirectory ? " -d" : "");
+		   targetshouldbedirectory ? " -d" : "",
+		   krb_realm != NULL ? " -k " : "",
+		   krb_realm != NULL ? krb_realm : "");
 #else /* !KERBEROS */
     (void) sprintf(cmd, "rcp%s%s%s",
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
@@ -1083,6 +1103,9 @@ hosteq(h1, h2)
     struct hostent *h_ptr;
     char hname1[256];
     
+    if (forcenet)
+      return(0);
+
     /* get the official names for the two hosts */
     
     if ((h_ptr = gethostbyname(h1)) == NULL)

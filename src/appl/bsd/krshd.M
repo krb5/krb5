@@ -68,7 +68,7 @@ behaviour of the program exactly as with the command-line arguments.
 If the \fB\-r\fP or \fB\-R\fP options are used, the client must
 connect from a privileged port.
 .PP
-\fIKrshd\fP supports three options which may be used for testing:
+\fIKrshd\fP supports four options which may be used for testing:
 
 .IP \fB\-S\ srvtab\fP 10
 Set the \fIsrvtab\fP file to use.
@@ -78,6 +78,10 @@ Set the Kerberos realm to use.
 
 .IP \fB\-A\fP
 Don't allocate a reserved port for the stderr connection.
+
+.IP \fB\-P\ path\fP
+Use the argument to find the Kerberos binaries.  Normally a compiled
+in argument is used.
 .SH DIAGNOSTICS
 Except for the last one listed below,
 all diagnostic messages

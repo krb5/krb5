@@ -30,7 +30,11 @@ rcp \- remote file copy
 .B \-x
 ] [
 .B \-k
-realm ] file1 file2
+realm ] [
+.B \-D
+port ] [
+.B \-N
+] file1 file2
 .br
 .B rcp
 [
@@ -41,6 +45,10 @@ realm ] file1 file2
 .B \-k
 realm ] [
 .B \-r
+] [
+.B \-D
+port ] [
+.B \-N
 ] file ... directory
 .SH DESCRIPTION
 .I Rcp
@@ -112,6 +120,13 @@ to obtain tickets for the remote host in
 .I realm
 instead of the remote host's realm as determined by
 .IR krb_realmofhost (3).
+.PP
+The
+.B \-D
+option specifies the port to connect to on the remote machine.  The
+.B \-N
+option tells rcp to use a network connection even when copying files
+on the local machine.  These options are used for testing purposes.
 .PP
 .I Rcp
 handles third party copies, where neither source nor target files
