@@ -9,6 +9,8 @@
 
 #define OSName            4.3bsd
 #define	OS_BSD            1
+#define OS_TelnetName     4.3bsd /* see appl/telnet/Config.generic
+				    to select the name for this */
 /* #define OS_BSD_TAHOE */
 /* #define OS_BSD_RENO */
 #define OSMajorVersion    4
@@ -45,6 +47,9 @@
 
 #undef HasNdbm
 #define HasNdbm		YES
+
+#undef AwkCmd
+#define AwkCmd gawk
 
 #if HasGcc
 #define MakeDependDefine '-DGCCINCPATH="/mit/gnu/vaxlib/gcc-include"'
