@@ -1173,7 +1173,7 @@
 			neededFileNames = (
 			);
 			shellPath = /bin/sh;
-			shellScript = "ln -s \"Versions/Current/Headers\" \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}\"";
+			shellScript = "ln -sf \"Versions/Current/Headers\" \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}\"";
 		};
 //0A0
 //0A1
@@ -6447,6 +6447,7 @@
 				5C1372F1FF6546C412120111,
 				5C1372F3FF6546C412120111,
 				F529E97B019AEB1D01120112,
+				F579576501C027FC01120112,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -9084,7 +9085,7 @@
 		};
 		F529E9F2019B2C4801120112 = {
 			buildActionMask = 2147483647;
-			dstPath = ../Headers;
+			dstPath = ../PrivateHeaders;
 			dstSubfolderSpec = 7;
 			files = (
 				F529E9E9019B2B6A01120112,
@@ -9104,7 +9105,7 @@
 			neededFileNames = (
 			);
 			shellPath = /bin/sh;
-			shellScript = "ln -sf Versions/Current/Headers \"${SYMROOT}/Kerberos5Private.${WRAPPER_EXTENSION}/Headers\"";
+			shellScript = "ln -sf Versions/Current/PrivateHeaders \"${SYMROOT}/Kerberos5Private.${WRAPPER_EXTENSION}/PrivateHeaders\"";
 		};
 		F529E9F4019B2C9001120112 = {
 			isa = PBXFrameworkReference;
@@ -9350,6 +9351,19 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F579576501C027FC01120112 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			name = "Shell Script";
+			neededFileNames = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "ln -sf Versions/Current/Headers \"${SYMROOT}/GSS.${WRAPPER_EXTENSION}/Headers\"";
 		};
 	};
 	rootObject = 25C77492FF52D03A12120111;
