@@ -15,6 +15,11 @@ AC_COMPILE_CHECK([ut_type in struct utmp],
 [struct utmp ut; ut.ut_type;],
 ,
 AC_DEFINE(NO_UT_TYPE))
+AC_COMPILE_CHECK([ut_host in struct utmp],
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_host;],
+,
+AC_DEFINE(NO_UT_HOST))
 AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
 ET_RULES
 KRB_INCLUDE
