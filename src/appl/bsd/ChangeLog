@@ -1,3 +1,8 @@
+Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
+	no longer dumps core. [krb5-appl/612]
+
 1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* login.c (dolastlog): BSD 4.4 systems don't have lastlog.h, but
