@@ -1,3 +1,6 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * gssapi_krb5.h: Updated Mac OS X headers to new framework layout
+
 2002-02-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Remove unsused
