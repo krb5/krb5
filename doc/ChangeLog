@@ -1,3 +1,9 @@
+Mon Nov 25 23:39:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* copyright.texinfo: Change lib/kadm to lib/kadm5, and add the
+ 		kadmin/passwd to the list of directories containing OV
+ 		code.
+
 Sun Nov 24 23:55:52 1996  Ezra Peisach  (epeisach@mit.edu)
 
 	* build.texinfo: Remove --with-kdb-db section as it does not
