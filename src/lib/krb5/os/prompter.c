@@ -117,6 +117,18 @@ krb5_prompter_posix(krb5_context context,
 
 cleanup:
     (void) signal(SIGINT, ointrfunc);
+#ifndef ECHO_PASSWORD
+    if (i < num_prompts) {
+	if (prompts[i].hidden) {
+	    (void)putchar('\n');
+	    if (isatty(fd) == 1) {
+		if ((tcsetattr(fd, TCSANOW, &save_control) == -1
+		     && errcode == 0))
+		    return errno;
+	    }
+	}
+    }
+#endif
     return(errcode);
 }
 #else /* MSDOS */
