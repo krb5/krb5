@@ -1,3 +1,11 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* pmap_rmt.c (GIFCONF_BUFSIZE): New macro.
+	(getbroadcastnets): Use it for buffer size.
+	(clnt_broadcast): Make buffer at least that big.
+
+	* get_myaddress.c (get_myaddress): Increase buffer size.
+
 2000-05-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Don't pass a
