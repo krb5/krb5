@@ -1494,11 +1494,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		A1253780040BF748003D8244 = {
-			isa = PBXTargetDependency;
-			target = F5E59BD503FD803201120114;
-			targetProxy = A181DA4705CEFC0400E4C246;
-		};
 		A1253783040BF7E6003D8244 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1752,6 +1747,14 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A1474D05066D13E700CA2AA8 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.jam;
+			path = Kerberos5BuildSystem.jam;
+			refType = 4;
+			sourceTree = "<group>";
+		};
 		A166BCC3040D36F8004AA618 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1847,13 +1850,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = F5CFD5E6022D8A9901120112;
 			remoteInfo = "Error Table Generation";
-		};
-		A181DA4705CEFC0400E4C246 = {
-			containerPortal = F5CFD36E022D854401120112;
-			isa = PBXContainerItemProxy;
-			proxyType = 1;
-			remoteGlobalIDString = F5E59BD503FD803201120114;
-			remoteInfo = ServerBuild;
 		};
 		A181DA4805CEFC0400E4C246 = {
 			containerPortal = F5CFD36E022D854401120112;
@@ -13129,6 +13125,7 @@
 				F5E59BD403FD7D5301120114,
 				F5CFD5E5022D891701120112,
 				F5CFD60D022D8BD601120112,
+				A1474D05066D13E700CA2AA8,
 			);
 			isa = PBXGroup;
 			name = Scripts;
@@ -13209,7 +13206,6 @@
 			buildToolPath = /Developer/Private/jam;
 			dependencies = (
 				F5CFD62A022D922C01120112,
-				A1253780040BF748003D8244,
 			);
 			isa = PBXLegacyTarget;
 			name = "Header Generation";
@@ -13341,7 +13337,7 @@
 			dependencies = (
 			);
 			isa = PBXLegacyTarget;
-			name = ServerBuild;
+			name = Servers;
 			passBuildSettingsInEnvironment = 1;
 			productName = ServerBuild;
 		};
