@@ -8,7 +8,7 @@
 #include <string.h>
 #include "mit-sipb-copyright.h"
 
-#ifdef HAVE_STDARG_H
+#if defined(HAVE_STDARG_H) || defined(_WINDOWS)
 #include <stdarg.h>
 #else
 #include <varargs.h>

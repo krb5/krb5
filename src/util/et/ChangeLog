@@ -1,3 +1,9 @@
+Wed Mar 22 11:34:09 1995 Keith Vetter (keithv@fusion.com)
+
+	* com_err.c: added _WINDOWS equivalent condition to HAVE_STDARG_H
+ 	   since windows fakes autoconf by defining such constants in
+	   k5-config.h which isn't included for this file.
+
 Thu Mar 16 19:57:20 1995 Keith Vetter (keithv@fusion.com)
 
 	* com_err.c: added missing INTERFACE on a prototype.
