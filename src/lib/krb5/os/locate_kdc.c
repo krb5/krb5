@@ -27,10 +27,11 @@ static char rcsid_locate_kdc_c[] =
 #include <sys/socket.h>
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
-#define KRB5_UDP_PORT	htons(8973)	/* XXX */
 #endif
 #include <netdb.h>
 #include "os-proto.h"
+
+extern char *krb5_kdc_udp_portname;
 
 /*
  * returns count of number of addresses found
@@ -38,7 +39,7 @@ static char rcsid_locate_kdc_c[] =
 
 krb5_error_code
 krb5_locate_kdc(realm, addr_pp, naddrs)
-    krb5_data *realm;
+    const krb5_data *realm;
     struct sockaddr **addr_pp;
     int *naddrs;
 {
@@ -48,11 +49,20 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
     struct sockaddr *addr_p;
     struct sockaddr_in *sin_p;
     struct hostent *hp;
-    
+    struct servent *sp;
+#ifdef KRB5_USE_INET
+    u_short udpport = 0;		/* 0 is an invalid UDP port #. */
+#endif
+
     hostlist = 0;
     
     if (code = krb5_get_krbhst (realm, &hostlist))
 	return(code);
+
+#ifdef KRB5_USE_INET
+    if (sp = getservbyname(krb5_kdc_udp_portname, "udp"))
+	udpport = sp->s_port;
+#endif
 
     for (i=0; hostlist[i]; i++)
 	;
@@ -71,11 +81,12 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
 	    switch (hp->h_addrtype) {
 #ifdef KRB5_USE_INET
 	    case AF_INET:
+		if (udpport)		/* must have gotten a port # */
 		for (j=0; hp->h_addr_list[j]; j++) {
 		    sin_p = (struct sockaddr_in *) &addr_p[out++];
 		    memset ((char *)sin_p, sizeof(struct sockaddr), 0);
 		    sin_p->sin_family = hp->h_addrtype;
-		    sin_p->sin_port = KRB5_UDP_PORT;
+		    sin_p->sin_port = udpport;
 		    memcpy((char *)&sin_p->sin_addr,
 			   (char *)hp->h_addr_list[j],
 			   sizeof(struct in_addr));
