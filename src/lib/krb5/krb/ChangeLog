@@ -1,3 +1,13 @@
+2001-11-26  Sam Hartman  <hartmans@mit.edu>
+
+	* gen_seqnum.c (krb5_generate_seq_number):  add entropy source id
+
+	* sendauth.c (krb5_sendauth): Add entropy source ID
+
+	* mk_req_ext.c (krb5_mk_req_extended):  Add entropy source ID to random seed call
+
+	* init_ctx.c (init_common): Specify entropy source for random seed
+
 2001-11-16  Sam Hartman  <hartmans@mit.edu>
 
 	* init_ctx.c (krb5_set_default_tgs_enctypes):  rename from

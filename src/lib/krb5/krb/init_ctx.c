@@ -155,7 +155,7 @@ init_common (context, secure)
 	seed_data.pid = getpid ();
 	seed.length = sizeof(seed_data);
 	seed.data = (char *) &seed_data;
-	if ((retval = krb5_c_random_seed(ctx, &seed)))
+	if ((retval = krb5_c_random_add_entropy(ctx, KRB5_C_RANDSOURCE_TIMING, &seed)))
 		goto cleanup;
 
 	ctx->default_realm = 0;

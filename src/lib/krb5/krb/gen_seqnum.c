@@ -46,7 +46,7 @@ krb5_generate_seq_number(context, key, seqno)
 
     seed.length = key->length;
     seed.data = key->contents;
-    if ((retval = krb5_c_random_seed(context, &seed)))
+    if ((retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
 	return(retval);
 
     seed.length = sizeof(*seqno);

@@ -179,13 +179,13 @@ krb5_sendauth(context, auth_context,
 	    if (getpeername (*(int*)fd, (GETPEERNAME_ARG2_TYPE *) rnd_data, 
 			     &len2) == 0) {
 		d.length = len2;
-		(void) krb5_c_random_seed (context, &d);
+		(void) krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL, &d);
 	    }
 	    len2 = sizeof (rnd_data);
 	    if (getsockname (*(int*)fd, (GETSOCKNAME_ARG2_TYPE *) rnd_data, 
 			     &len2) == 0) {
 		d.length = len2;
-		(void) krb5_c_random_seed (context, &d);
+		(void) krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL, &d);
 	    }
 	}
 

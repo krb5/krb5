@@ -138,7 +138,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	krb5_crypto_us_timeofday (&rnd_data.sec, &rnd_data.usec);
 	d.length = sizeof (rnd_data);
 	d.data = (char *) &rnd_data;
-	(void) krb5_c_random_seed (context, &d);
+	(void) krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_TIMING, &d);
 
 	if ((retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
 					   &(*auth_context)->local_subkey)))
