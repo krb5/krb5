@@ -60,20 +60,6 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     memset((char *)&creds, 0, sizeof(creds));
     memset((char *)&tgt, 0, sizeof(creds));
 
-    if (rhost == NULL) {
-	if (krb5_princ_type(context, server) != KRB5_NT_SRV_HST)
-	    return(KRB5_FWD_BAD_PRINCIPAL);
-
-	if (krb5_princ_size(context, server) < 2)
-	    return (KRB5_CC_BADNAME);
-	
-	rhost = malloc(server->data[1].length+1);
-	if (!rhost)
-	    return ENOMEM;
-	free_rhost = 1;
-	memcpy(rhost, server->data[1].data, server->data[1].length);
-	rhost[server->data[1].length] = '\0';
-    }
     if (cc == 0) {
       if ((retval = krb5int_cc_default(context, &cc)))
 	goto errout;
@@ -140,6 +126,27 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     }
     
     if (tgt.addresses && *tgt.addresses) {
+      if (rhost == NULL) {
+	if (krb5_princ_type(context, server) != KRB5_NT_SRV_HST) {
+retval = KRB5_FWD_BAD_PRINCIPAL;
+ goto errout;
+	}
+
+	if (krb5_princ_size(context, server) < 2){
+	  retval = KRB5_CC_BADNAME;
+	  goto errout;
+	}
+	
+	rhost = malloc(server->data[1].length+1);
+	if (!rhost) {
+	  retval = ENOMEM;
+	  goto errout;
+	}
+	free_rhost = 1;
+	memcpy(rhost, server->data[1].data, server->data[1].length);
+	rhost[server->data[1].length] = '\0';
+      }
+
 	retval = krb5_os_hostaddr(context, rhost, &addrs);
 	if (retval)
 	    goto errout;
