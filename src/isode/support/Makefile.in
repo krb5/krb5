@@ -1,0 +1,119 @@
+###############################################################################
+#   Instructions to Make, for compilation of ISODE support processes
+###############################################################################
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+BUILDTOP = ../../
+TOPDIR = $(BUILDTOP)
+
+OPTIONS	=	-I. -I$(HDIR) $(PEPYPATH) $(KRBOPT)
+CFLAGS  =       $(OPTIONS) $(LOPTIONS) 
+
+HDIR	=	$(TOPDIR)isode/h/
+UTILDIR	=	$(TOPDIR)isode/util/
+INCDIRM	=	$(HDIR)
+INCDIR	=	$(INCDIRM)/
+PEPSYDIRM=	$(INCDIR)pepsy
+PEPSYDIR=	$(PEPSYDIRM)/
+LIBISODE=	$(TOPDIR)libisode.a
+LIBDSAP	=	$(TOPDIR)libdsap.a
+
+LIBES	=	libcompat.a
+LLIBS   =
+HFILES	=	$(HDIR)manifest.h $(HDIR)general.h $(HDIR)config.h
+LN	=	ln
+
+###############################################################################
+#
+#				 NOTICE
+#
+#    Acquisition, use, and distribution of this module and related
+#    materials are subject to the restrictions of a license agreement.
+#    Consult the Preface in the User's Manual for the full terms of
+#    this agreement.
+#
+###############################################################################
+
+
+LIBES   =       $(TOPDIR)libpepsy.a $(TOPDIR)libpsap.a $(TOPDIR)libcompat.a
+
+
+LLIBS   =       $(TOPDIR)llib-lpsap $(TOPDIR)llib-lcompat
+
+
+##################################################################
+# Here it is...
+##################################################################
+
+all:		libisode
+inst-all:	inst-libisode
+install:	inst-all clean
+
+inst-:;
+man-:;
+l-:;
+
+
+################################################################
+# libisode
+################################################################
+
+inst-libisode:	$(LIBDIR)libisode.a
+
+libisode:	libisode.a libisode-$(SHAREDLIB)
+
+libisode.a:	isodevrsn.o
+		-rm -f $@ $(TOPDIR)libisode.a
+		-rm -rf tmp
+		-mkdir tmp
+		ln isodevrsn.o tmp || cp isodevrsn.o tmp 
+		for i in $(LIBES); do (cd tmp; ar x ../$$i; \
+		    ../$(UTILDIR)make-lib.sh -quick $(SYSTEM) ../$@ *.o; \
+		    rm -f *); done
+		$(UTILDIR)make-lib.sh $(SYSTEM) $@ -ranlib
+		-rm -rf tmp
+		-@rm -f $(TOPDIR)libisode.a
+		-@$(LN) $@ $(TOPDIR)lib/libisode.a || cp $@ $(TOPDIR)lib/libisode.a
+		-@ls -l $@
+		-@echo "ISODE library built normally"
+
+libisode-:;
+
+libisode-shared: isodevrsn.o
+		@rm -f libisode.so.* $(TOPDIR)libisode.so.*
+		@$(UTILDIR)make-lib.sh $(SYSTEM) -shared \
+			-major `cat version.major``cat version.minor` \
+			-minor `cat version.local` \
+			libisode.a 
+		@for i in libisode.s[ao].* ;\
+		do \
+			rm -f $(TOPDIR)$$i; \
+			$(LN) $$i $(TOPDIR)$$i; \
+			ls -l $$i; \
+		done
+		@echo "shared ISODE library built normally"
+		@touch $@
+		
+
+llib-lisode:	$(LLIBS)
+		-@echo '/* llib-lisode - lint library for -lisode */' > $@
+		-@echo '' >> $@
+		cat $(LLIBS) >> $@
+		-@rm -f $(TOPDIR)llib-lisode
+		-@$(LN) llib-lisode $(TOPDIR)llib-lisode
+
+isodevrsn.c:	$(LIBES)
+		@$(UTILDIR)version.sh isode > $@
+
+
+################################################################
+# clean
+################################################################
+
+clean:;		rm -f *.o *.a *.so.* x* z* _* core isodevrsn.c llib-lisode \
+		    libisode-shared
+
+true:;
+

@@ -1,0 +1,45 @@
+###############################################################################
+#
+# isoservices - ISODE Services Database
+#
+#	Mappings between services, selectors, and programs
+#
+#
+# $Header$
+#
+#
+# $Log$
+# Revision 1.1  1994/06/10 03:35:51  eichin
+# autoconfed isode for kerberos work
+#
+# Revision 1.1  1994/05/31 20:43:27  eichin
+# reduced-isode release from /mit/isode/isode-subset/src
+#
+# Revision 8.0  91/07/17  12:20:32  isode
+# Release 7.0
+# 
+# 
+###############################################################################
+
+
+###############################################################################
+#
+# Syntax:
+#
+#	<provider>/<entity> <selector> <arg0> <arg1> ... <argn>
+#
+#	Each token is separated by LWSP, though double-quotes may be
+#	used to prevent separation
+#
+###############################################################################
+
+
+###############################################################################
+# locally defined services
+#	(this section is usually empty...)
+###############################################################################
+
+
+
+# local additions end here (do not remove this line)
+

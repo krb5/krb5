@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+#
+echo "Configuring for $1..."
+
+if [ ! -f config/$1.make -o ! -f config/$1.h ]; then
+	echo "ISODE configuration for $1 is not available!"
+	exit 1
+fi
+
+rm -f h/config.h config/CONFIG.make
+ln -s $1.make config/CONFIG.make
+ln -s ../config/$1.h h/config.h

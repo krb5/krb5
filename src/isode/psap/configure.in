@@ -1,0 +1,4 @@
+AC_INIT(configure.in)
+AC_HAVE_LIBRARY(nsl)
+AC_HAVE_LIBRARY(socket)
+AC_OUTPUT(Makefile)
