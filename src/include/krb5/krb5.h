@@ -167,7 +167,7 @@ typedef struct _krb5_ap_rep_enc_part {
 
 typedef struct _krb5_response {
     krb5_octet message_type;
-    krb5_data *response;
+    krb5_data response;
 } krb5_response;
 
 typedef struct _krb5_tgs_req_enc_part {
