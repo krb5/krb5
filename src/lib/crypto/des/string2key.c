@@ -99,6 +99,9 @@ mit_des_string_to_key_int (keyblock, data, salt)
     if (salt) {
 	if (salt->length == SALT_TYPE_AFS_LENGTH || salt->length == (unsigned) -1) {
 	    krb5_data salt2;
+	    char *c;
+	    c = strchr(salt->data, '@');
+	    if (c != NULL) *c = '\0'; /* workaround from krb5-clients/1146 */
 	    salt2.data = salt->data;
 	    salt2.length = strlen (salt2.data);
 	    /* cheat and do AFS string2key instead */
