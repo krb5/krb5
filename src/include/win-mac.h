@@ -31,8 +31,6 @@
 
 #include <windows.h>
 
-#define HAVE_LABS
-
 #ifndef KRB5_CALLCONV
 #  define KRB5_CALLCONV __stdcall
 #  define KRB5_CALLCONV_C __cdecl

@@ -1,5 +1,9 @@
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Don't test for labs, memmove or bcopy.
+	* k5-int.h (labs, HAVE_LABS): Never define.
+	* win-mac.h (HAVE_LABS): Don't define.
+
 	* configure.in: Check for some C99 headers and types.
 
 	* fake-addrinfo.h (inline): Supported by Sun Forte Developer 7

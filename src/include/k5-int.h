@@ -97,7 +97,6 @@
 #define INI_FILES	"Files"
 #define INI_KRB_CCACHE	"krb5cc"	/* Location of the ccache */
 #define INI_KRB5_CONF	"krb5.ini"	/* Location of krb5.conf file */
-#define HAVE_LABS
 #define ANSI_STDIO
 #endif
 
@@ -111,7 +110,6 @@
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
 #define NO_PASSWORD
-#define HAVE_LABS
 /*#define ENOMEM -1*/
 #define ANSI_STDIO
 #include <size_t.h>
@@ -155,10 +153,6 @@ typedef unsigned char	u_char;
 #endif
 #ifndef O_BINARY
 #define O_BINARY 0
-#endif
-
-#ifndef HAVE_LABS
-#define labs(x) abs(x)
 #endif
 
 /* #define KRB5_OLD_CRYPTO is done in krb5.h */
