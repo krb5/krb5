@@ -1,3 +1,7 @@
+Sun Aug 27 15:35:04 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rlogin.M: Document -f and -F options.
+
 Mon Aug  7 17:32:29 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogind.c: Close the write side of the syncpipe in the parent

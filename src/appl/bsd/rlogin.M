@@ -33,6 +33,10 @@ rhost [
 ] [
 .B \-a
 ] [
+.B \-f
+] [
+.B \-F
+] [
 .B \-t
 termtype ] [
 .B \-n
@@ -51,6 +55,7 @@ realm ] [
 ] [
 .B \-l
 username ]
+.PP
 .br
 rhost [
 \fB\-e\fR\fIc\fR
@@ -60,6 +65,10 @@ rhost [
 .B \-c
 ] [
 .B \-a
+] [
+.B \-f
+] [
+.B \-F
 ] [
 .B \-t
 termtype ] [
@@ -156,6 +165,16 @@ The
 option forces the remote machine to ask for a password by sending a null local
 username.  This option has no effect unless the standard UCB rlogin is
 executed in place of the Kerberos rlogin (see above).
+.PP
+The
+.B \-f
+option forwards the local credentials to the remote system
+but marks the remote credentials as Non-forwardable.
+.PP
+The
+.B \-F
+option forwards the local credentials to the remote system
+and marks the remote credentials as Forwardable.
 .PP
 The
 .B \-t
