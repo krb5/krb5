@@ -1,3 +1,18 @@
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kuserok.c (krb5_kuserok): Fix improper negation in
+	non-Unix localname check.  Also fix calling convention
+	before this function is exported by the Windows DLL.
+
+	* localaddr.c (krb5_os_localaddr): Fix memset to clear
+	right address list.  (Thanks to jaltman@columbia.edu).
+
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_krbhst.c (krb5_get_krbhst): Fix double-indirection
+	confusion.  Do actually copy string contents to newly allocated
+	storage.
+
 1999-08-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Use multiple addresses, if
