@@ -15,9 +15,10 @@
 #ifndef __KRB5_RSA_MD4_H__
 #define __KRB5_RSA_MD4_H__
 
-/* 4 words of buffer, plus 8 bytes of count */
-#define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
-#define RSA_MD4_DES_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
+/* 16 u_char's in the digest */
+#define RSA_MD4_CKSUM_LENGTH	16
+/* des blocksize is 8, so this works nicely... */
+#define RSA_MD4_DES_CKSUM_LENGTH	16
 
 extern krb5_checksum_entry
     rsa_md4_cksumtable_entry,
