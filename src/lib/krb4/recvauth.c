@@ -150,11 +150,11 @@ krb_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 
     int i, cc, old_vers = 0;
     char krb_vers[KRB_SENDAUTH_VLEN + 1]; /* + 1 for the null terminator */
-    char *cp;
+    char *cp = NULL;
     int rem;
     KRB4_32 tkt_len, priv_len;
     unsigned KRB4_32 cksum;
-    u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)];
+    u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)] = { 0 };
 
     /* read the protocol version number */
     if (krb_net_read(fd, krb_vers, KRB_SENDAUTH_VLEN) !=
@@ -196,11 +196,14 @@ krb_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 		}
 	    }
 
+	if (i==20)
+	    return(KFAILURE);
+
 	tkt_len = (KRB4_32) atoi((char *) tmp_buf);
 
 	/* sanity check the length */
 	/* These conditions make sure that cp got initialized */
-	if ((i==20)||(tkt_len<=0)||(tkt_len>MAX_KTXT_LEN))
+	if ((tkt_len<=0)||(tkt_len>MAX_KTXT_LEN))
 	    return(KFAILURE);
 
 	if (i < KRB_SENDAUTH_VLEN) {
