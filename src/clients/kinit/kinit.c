@@ -770,7 +770,6 @@ k5_kinit(opts, k5)
 	    goto cleanup;
 	}
 	krb5_get_init_creds_opt_set_address_list(&options, addresses);
-	krb5_free_addresses(k5->ctx, addresses);
     }
     if (opts->no_addresses)
 	krb5_get_init_creds_opt_set_address_list(&options, NULL);

@@ -1,3 +1,8 @@
+2004-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c (k5_kinit): Don't free addresses after calling
+	krb5_get_init_creds_opt_set_address_list; it doesn't make a copy.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac): Target deleted.
