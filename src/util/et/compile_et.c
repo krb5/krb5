@@ -15,10 +15,6 @@
 #include "mit-sipb-copyright.h"
 #include "compiler.h"
 
-#ifndef __STDC__
-#define const
-#endif
-
 #ifndef lint
 static const char copyright[] =
     "Copyright 1987,1988 by MIT Student Information Processing Board";

@@ -27,6 +27,18 @@
 #undef com_err
 #endif
 
+/* We have problems with varargs definitions if we include com_err.h */
+
+/*
+ * XXX for now, we define error_message by hand.  Ultimately, we
+ * should fix up com_err.h so that it's safe to #include here 
+ * directly.
+ */
+#ifdef __STDC__
+extern char const *error_message (long);
+#else
+extern char *error_message ();
+#endif
 
 static void
 #ifdef __STDC__

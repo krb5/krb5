@@ -1,3 +1,16 @@
+Fri Sep 30 17:12:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* compile_et.c: Add declaration of error_message() manually.
+
+	* internal.h: Use autoconf to determine whether or not to declare
+		perror().
+
+	* configure.in:
+	  compiler.h:
+	  internal.h:
+	  compilet_et.c:
+	  init_et.c: Let configure take care of removing const with AC_CONST.
+
 Thu Sep  8 22:33:07 1994  Theodore Y. Ts'o  (tytso@pinata)
 
 	* com_err.c (default_com_err_proc): Reversed order of \n\r to make

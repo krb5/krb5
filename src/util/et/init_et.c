@@ -11,11 +11,6 @@
 #include "error_table.h"
 #include "mit-sipb-copyright.h"
 
-#ifndef __STDC__
-#define const
-#endif
-
-
 extern char *malloc(), *realloc();
 
 struct foobar {
