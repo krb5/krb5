@@ -1,6 +1,6 @@
 #ifndef _SHS_DEFINED
 
-#include <k5-int.h>
+#include "k5-int.h"
 
 #define _SHS_DEFINED
 

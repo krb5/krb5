@@ -1,3 +1,7 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* shs.c: use "" include for k5-int.h
+	
 2001-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_shs3.c: New test file from Marcus Watts.
