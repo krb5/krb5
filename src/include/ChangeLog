@@ -1,4 +1,7 @@
 1997-07-26 Miro Jurisic <meeroh@mit.edu>
+	* win-mac.h (size_t): Fixed size_t redefinition on MacOS
+	
+1997-07-26 Miro Jurisic <meeroh@mit.edu>
 
         * k5-int.h (krb5_get_profile): added krb5_get_profile. It returns
         a profile handle you can use with the profile layer. It is guaranteed

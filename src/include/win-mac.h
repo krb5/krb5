@@ -241,11 +241,6 @@ HINSTANCE get_lib_instance(void);
 #define NO_PASSWORD
 #define HAVE_LABS
 /*#define ENOMEM 12*/
-#define ANSI_STDIO
-#ifndef _SIZET
-typedef unsigned long size_t;
-#define _SIZET
-#endif
 #include <unix.h>
 #include <ctype.h>
 
@@ -260,6 +255,7 @@ typedef unsigned long size_t;
 
 /* there is no <stat.h> for mpw */
 #ifndef __MWERKS__
+typedef unsigned long size_t;
 typedef unsigned long	mode_t;
 typedef unsigned long	ino_t;
 typedef unsigned long	dev_t;
