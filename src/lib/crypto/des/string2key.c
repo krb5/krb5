@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char des_st2_key_c[] =
+static char rcsid_string2key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
