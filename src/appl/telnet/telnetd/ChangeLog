@@ -1,3 +1,7 @@
+2001-01-25  Tom Yu  <tlyu@mit.edu>
+
+	* state.c (envvarok): Disallow LC_* and NLSPATH.
+
 2000-06-19  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.c (doit): Change test for "no authentication" as per
