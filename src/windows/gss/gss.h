@@ -23,7 +23,7 @@ void OkMsgBox (char *format, ...);
 void my_perror (char *msg);
 
 // gss-client.c
-int gss (char *host, char *name, char *msg, int port);
-int call_server(char *host, u_short port, char *service_name, char *msg);
+int gss (char *host, char *name, char *msg, char *oid, int port);
+int call_server(char *host, u_short port, char *service_name, char *oid, char *msg);
 int connect_to_server(char *host, u_short port);
-int client_establish_context(int s, char *service_name, gss_ctx_id_t *gss_context);
+int client_establish_context(int s, char *service_name, char *oid, gss_ctx_id_t *gss_context);

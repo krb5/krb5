@@ -1,3 +1,13 @@
+Thu Jul 25 02:16:56 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gss.c (parse_name): Add code to parse an optional fourth
+	 	parameter which is the mechanism OID to actually use.  If
+	 	it is ommited, the default mechanism is used.
+
+	* gss-client.c (client_establish_context): Added parameter
+		oid_name, which allows the user to specify the OID that
+		he/she actually wants to use to as the mechanism.
+
 Wed Jun 12 00:16:46 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* gss-clie.c: Renamed to gss-client.c, for VFAT/NTFS filesystems

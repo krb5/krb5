@@ -21,9 +21,10 @@
 
 #define MAX_HOSTS 9
 char hosts[MAX_HOSTS][256];
-char szHost[256];								// GSSAPI Host to connect to
-char szServiceName[256];						// Service to do
-int port = 0;									// Which port to use
+char szHost[256];			// GSSAPI Host to connect to
+char szServiceName[256];		// Service to do
+char szOID[256];			// OID to use	
+int port = 0;				// Which port to use
 
 static void do_gssapi_test (char *name);
 static void parse_name (char *name);
@@ -68,7 +69,7 @@ do_gssapi_test (char *name) {
 	parse_name(name);							// Get host, service and port
 
 	hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
-	n = gss (szHost, szServiceName, "Test Gssapi Message", port);
+	n = gss (szHost, szServiceName, szOID, "Test Gssapi Message", port);
 	SetCursor(hcursor);
 
 	if (n)
@@ -184,6 +185,18 @@ parse_name (char *name) {
 	}else{
 	    wsprintf (szServiceName, "sample@%s", szHost); // Make the service name
 	}
+	if( ptr ){
+	    ptr = strtok( NULL, seps);
+	}
+	if( ptr ){
+	    wsprintf (szOID, "{ %s }", ptr); // Put in the OID
+	    for (ptr = szOID; *ptr; ptr++)
+		    if (*ptr == '.')
+			    *ptr = ' ';
+    } else {
+	   szOID[0] = 0;
+	}
+
 }
 /*+*************************************************************************
 **

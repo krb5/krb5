@@ -35,12 +35,12 @@ const gss_OID_desc * gss_nt_string_uid_name = oids+2;
 const gss_OID_desc * gss_nt_service_name = oids+3;
 
 int
-gss (char *host, char *name, char *msg, int port)
+gss (char *host, char *name, char *oid, char *msg, int port)
 {
 	if (port == 0 || port == -1)
         port = 4444;
 
-    if (call_server(host, port, name, msg) < 0)
+    if (call_server(host, port, name, oid, msg) < 0)
         return 1;
 
     return 0;
@@ -70,7 +70,7 @@ gss (char *host, char *name, char *msg, int port)
  * otherwise 0 is returned.
  */
 int
-call_server (char *host, u_short port, char *service_name, char *msg)
+call_server (char *host, u_short port, char *service_name, char *oid, char *msg)
 {
     gss_ctx_id_t context;
     gss_buffer_desc in_buf, out_buf;
@@ -82,7 +82,7 @@ call_server (char *host, u_short port, char *service_name, char *msg)
         return -1;
 
     /* Establish context */
-    if (client_establish_context(s, service_name, &context) < 0)
+    if (client_establish_context(s, service_name, oid, &context) < 0)
         return -1;
 
     /* Seal the message */
@@ -201,16 +201,28 @@ connect_to_server (char *host, u_short port)
  * and -1 is returned.
  */
 int
-client_establish_context (int s, char *sname, gss_ctx_id_t *gss_context)
+client_establish_context (int s, char *sname, char *oid_name,
+			  gss_ctx_id_t *gss_context)
 {
     gss_buffer_desc send_tok, recv_tok, *token_ptr;
     gss_name_t target_name;
     OM_uint32 maj_stat, min_stat;
+    gss_OID oid = GSS_C_NULL_OID;
+
+    if (oid_name && oid_name[0]) {
+	    send_tok.value = oid_name;
+	    send_tok.length = strlen(oid_name);
+	    maj_stat = gss_str_to_oid(&min_stat, &send_tok, &oid);
+	    if (maj_stat != GSS_S_COMPLETE) {
+		    display_status("str_to_oid", maj_stat, min_stat);
+		    return -1;
+	    }
+    }
 
     /*
-	 * Import the name into target_name.  Use send_tok to save
-	 * local variable space.
-	 */
+     * Import the name into target_name.  Use send_tok to save
+     * local variable space.
+     */
     send_tok.value = sname;
     send_tok.length = strlen(sname) + 1;
     maj_stat = gss_import_name(&min_stat, &send_tok,
@@ -245,7 +257,7 @@ client_establish_context (int s, char *sname, gss_ctx_id_t *gss_context)
 			                     GSS_C_NO_CREDENTIAL,
 								 gss_context,
 								 target_name,
-								 GSS_C_NULL_OID,
+								 oid,
 								 GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
 								 0,
 								 NULL,		/* no channel bindings */
