@@ -22,11 +22,17 @@ static char rcsid_decrypt_key_c [] =
 #include <errno.h>
 
 
+/*
+ * Decrypt a key from storage in the database.  "eblock" is used
+ * to decrypt the key in "in" into "out"; the storage pointed to by "out"
+ * is allocated before use.
+ */
+
 krb5_error_code
-krb5_kdb_decrypt_key(in, out, eblock)
+krb5_kdb_decrypt_key(eblock, in, out)
+krb5_encrypt_block *eblock;
 krb5_keyblock *in;
 krb5_keyblock *out;
-krb5_encrypt_block *eblock;
 {
     krb5_error_code retval;
 

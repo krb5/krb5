@@ -21,6 +21,12 @@ static char rcsid_encrypt_key_c [] =
 #include <krb5/ext-proto.h>
 #include <errno.h>
 
+/*
+ * Encrypt a key for storage in the database.  "eblock" is used
+ * to encrypt the key in "in" into "out"; the storage pointed to by "out"
+ * is allocated before use.
+ */
+
 krb5_error_code
 krb5_kdb_encrypt_key(in, out, eblock)
 krb5_keyblock *in;
