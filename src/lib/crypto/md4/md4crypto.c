@@ -39,7 +39,7 @@ krb5_checksum *outcksum;
     MD4_CTX working;
 
     MD4Init(&working);
-    MD4Update(&working, input, in_length*8);
+    MD4Update(&working, input, in_length);
     MD4Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4_DES;
