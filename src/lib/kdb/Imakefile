@@ -42,4 +42,4 @@ OBJS= \
 	setup_mkey.o \
 	store_mkey.o
 
-Krb5LibraryTarget(kdb,$(OBJS))
+Krb5LibraryTarget(kdb5,$(OBJS))
