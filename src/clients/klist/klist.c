@@ -44,7 +44,7 @@ main(argc, argv)
     krb5_creds creds;
     char *cache_name;
     krb5_principal princ;
-    char *name, *sname;
+    char *name;
     krb5_flags flags;
 
     krb5_init_ets();
@@ -206,7 +206,7 @@ register krb5_creds *cred;
 
     if (!cred->times.starttime)
 	cred->times.starttime = cred->times.authtime;
-    stime = localtime(&cred->times.starttime);
+    stime = localtime((time_t *)&cred->times.starttime);
     printf("valid %02d/%02d/%02d:%02d:%02d:%02d to ",
 	   stime->tm_year,
 	   stime->tm_mon + 1,
@@ -214,7 +214,7 @@ register krb5_creds *cred;
 	   stime->tm_hour,
 	   stime->tm_min,
 	   stime->tm_sec);
-    stime = localtime(&cred->times.endtime);
+    stime = localtime((time_t *)&cred->times.endtime);
     printf("%02d/%02d/%02d:%02d:%02d:%02d",
 	   stime->tm_year,
 	   stime->tm_mon + 1,
@@ -223,7 +223,7 @@ register krb5_creds *cred;
 	   stime->tm_min,
 	   stime->tm_sec);
     if (cred->times.renew_till) {
-	stime = localtime(&cred->times.renew_till);
+	stime = localtime((time_t *)&cred->times.renew_till);
 	printf("\n\trenew until %02d/%02d/%02d:%02d:%02d:%02d",
 	       stime->tm_year,
 	       stime->tm_mon + 1,
