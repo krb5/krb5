@@ -11,3 +11,5 @@ includes:: config.h osconf.h
 
 ProcessStockHeader(stock/config.h,config.h)
 ProcessStockHeader(stock/osconf.h,osconf.h)
+
+all::
