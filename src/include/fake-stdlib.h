@@ -193,7 +193,11 @@ char *initstate P((unsigned , char *, int ));
 int isatty P((int ));
 double ldexp P((double , int ));
 int longjmperror P((void ));
+#ifdef __STDC__
+void *malloc P((size_t ));
+#else
 char *malloc P((unsigned ));
+#endif
 char *memccpy P((char *, char *, int , int ));
 char *memchr P((char *, int , int ));
 int memcmp P((char *, char *, int ));
@@ -450,7 +454,11 @@ struct ttyent *getttyent P((void ));
 struct ttyent *getttynam P((const char * ));
 unsigned long inet_network P((const char * ));
 int initgroups P((char * , int  ));
+#ifdef __STDC__
+void *malloc P((unsigned ));
+#else
 char *malloc P((unsigned ));
+#endif
 char *calloc P((unsigned , unsigned  ));
 char *realloc P((char * , unsigned  ));
 void free P((char * ));
