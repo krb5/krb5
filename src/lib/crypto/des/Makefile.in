@@ -5,10 +5,9 @@ LDFLAGS = -g
 ##DOSLIBNAME=..\libcrypto.$(LIBEXT)
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
 
-KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(ISODELIB) $(COMERRLIB)
+KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 
 OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
