@@ -27,6 +27,30 @@
 #ifndef	KRB_DEFS
 #define KRB_DEFS
 
+#if defined(_WIN32) && !defined(_WINDOWS)
+#define _WINDOWS
+#endif
+
+#if defined(_WINDOWS)
+#include <win-mac.h>
+#endif
+
+/* Windows declarations */
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
+#endif
+#ifndef FAR
+#define FAR
+#define NEAR
+#endif
+
+#ifndef INTERFACE
+#define INTERFACE KRB5_CALLCONV
+#endif
+
+
 /* Need some defs from des.h	 */
 #include <kerberosIV/des.h>
 
@@ -394,8 +418,6 @@ char *tkt_string();
 #endif /* ATHENA_COMPAT */
 
 /* until we do V4 compat under DOS, just turn this off */
-#define INTERFACE
-#define FAR
 #define	_fmemcpy	memcpy
 #define	_fstrncpy	strncpy
 #define	far_fputs	fputs
@@ -415,7 +437,9 @@ char *tkt_string();
 
 /* If this source file requires it, define struct sockaddr_in
    (and possibly other things related to network I/O).  FIXME.  */
-#ifdef DEFINE_SOCKADDR
+#if defined(DEFINE_SOCKADDR)
+
+#if !defined(_WINDOWS)
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */
 #include <netdb.h>		/* For struct hostent, gethostbyname, etc */
@@ -425,12 +449,19 @@ char *tkt_string();
 #ifdef NEED_TIME_H
 #include <time.h>		/* For localtime, etc */
 #endif
+#endif /* !_WINDOWS */
+
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET (-1)
 #endif
+
+#endif /* DEFINE_SOCKADDR */
+
+
 /*
  * Compatability with WinSock calls on MS-Windows...
  */
 #define	SOCKET		unsigned int
-#define	INVALID_SOCKET	((SOCKET)~0)
 #define	closesocket	close
 #define	ioctlsocket	ioctl
 #define	SOCKET_ERROR	(-1)
