@@ -37,13 +37,13 @@ static char rcsid_pr_to_salt_c[] =
 /*
  * Convert a krb5_principal into the default salt for that principal.
  */
-
 krb5_error_code
-krb5_principal2salt(pr, ret)
+krb5_principal2salt_internal(pr, ret, use_realm)
 register krb5_const_principal pr;
 krb5_data *ret;
+int use_realm;
 {
-    int size, offset;
+    int size = 0, offset = 0;
     int nelem;
     register int i;
 
@@ -55,7 +55,8 @@ krb5_data *ret;
 
     nelem = krb5_princ_size(pr);
 
-    size = krb5_princ_realm(pr)->length;
+    if (use_realm)
+	    size += krb5_princ_realm(pr)->length;
 
     for (i = 0; i < nelem; i++)
 	size += krb5_princ_component(pr, i)->length;
@@ -64,8 +65,10 @@ krb5_data *ret;
     if (!(ret->data = malloc (size)))
 	return ENOMEM;
 
-    offset = krb5_princ_realm(pr)->length;
-    memcpy(ret->data, krb5_princ_realm(pr)->data, offset);
+    if (use_realm) {
+	    offset = krb5_princ_realm(pr)->length;
+	    memcpy(ret->data, krb5_princ_realm(pr)->data, offset);
+    }
 
     for (i = 0; i < nelem; i++) {
 	memcpy(&ret->data[offset], krb5_princ_component(pr, i)->data,
@@ -73,4 +76,22 @@ krb5_data *ret;
 	offset += krb5_princ_component(pr, i)->length;
     }
     return 0;
+}
+
+krb5_error_code
+krb5_principal2salt(pr, ret)
+register krb5_const_principal pr;
+krb5_data *ret;
+int use_realm;
+{
+	return krb5_principal2salt_internal(pr, ret, 1);
+}
+
+krb5_error_code
+krb5_principal2salt_norealm(pr, ret)
+register krb5_const_principal pr;
+krb5_data *ret;
+int use_realm;
+{
+	return krb5_principal2salt_internal(pr, ret, 0);
 }
