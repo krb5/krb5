@@ -1,3 +1,11 @@
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5.hin
+          Added prototypes for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
 2000-4-13	Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5-int.h: Added support to store a krb5_principal in the os_context 
