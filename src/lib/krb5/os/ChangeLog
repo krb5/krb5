@@ -1,3 +1,8 @@
+Wed Mar 22 18:59:47 1995 Keith Vetter (keithv@fusion.com)
+
+        * hst_realm.c, realm_dom.c: windows DLL can't use fscanf so had
+           to write a couple of routines to read what we need from the file.
+
 Wed Mar 22 13:30:35 1995 Keith Vetter (keithv@fusion.com)
 
 	* an_to_ln.c, kuserok.c: last two os routines ported to the PC.

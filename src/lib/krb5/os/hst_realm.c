@@ -81,6 +81,56 @@
 
 extern char *krb5_trans_file;
 
+#ifdef _WINDOWS
+/*
+ * Windows DLL can't use the fscanf routine. We need fscanf to read
+ * in the host and realm. Read_2str with read_1str duplicate the needed
+ * functionality. See also realm_dom.c.
+ */
+static int
+read_1str (FILE *fp, char *buf, int buflen) {
+    int c;
+
+    while (1) {
+        c = fgetc (fp);                         /* Past leading whitespace */
+        if (c == EOF)
+            return 0;
+        if (! isspace (c))
+            break;
+    }
+
+    while (1) {
+        if (buflen > 0) {                       /* Store the character */
+            *buf++ = (char) c;
+            --buflen;
+        }
+        if (buflen <= 0)                        /* Fscanf stops scanning... */
+            break;                              /* ...when buffer is full */
+
+        c = fgetc (fp);                         /* Get next character */
+        if (c == EOF || isspace (c))
+            break;
+    }
+
+    if (buflen)                                 /* Make ASCIIZ if room */
+        *buf = '\0';
+
+    return 1;
+}
+
+static int 
+read_2str (FILE *fp, char *b1, int l1, char *b2, int l2) {
+    int n;
+
+    n = read_1str (fp, b1, l1);                 /* Read first string */
+    if (!n) return EOF;
+    n = read_1str (fp, b2, l2);                 /* Read second string */
+    if (!n) return 1;
+    return 2;
+}
+
+#endif /* _WINDOWS */
+
 krb5_error_code INTERFACE
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
@@ -136,8 +186,13 @@ krb5_get_host_realm(context, host, realmsp)
     (void) sprintf(scanstring, "%%%ds %%%ds",
 		   sizeof(trans_host)-1,sizeof(trans_realm)-1);
     while (1) {
-	if ((scanval = fscanf(trans_file, scanstring,
-			      trans_host, trans_realm)) != 2) {
+        #ifdef _WINDOWS
+            scanval = read_2str (trans_file, trans_host, sizeof(trans_host)-1,
+                trans_realm, sizeof(trans_realm)-1);
+        #else
+            scanval = fscanf(trans_file, scanstring, trans_host, trans_realm));
+        #endif
+	if (scanval != 2) {
 	    if (scanval == EOF) {
 		fclose(trans_file);
 		goto out;
@@ -175,3 +230,6 @@ krb5_get_host_realm(context, host, realmsp)
     *realmsp = retrealms;
     return 0;
 }
+
+
+
