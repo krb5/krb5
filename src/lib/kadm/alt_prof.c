@@ -267,6 +267,9 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 
     filename = (kdcprofile) ? kdcprofile : DEFAULT_KDC_PROFILE;
     envname = (kdcenv) ? kdcenv : KDC_PROFILE_ENV;
+
+    if (kcontext->profile_secure == TRUE) envname = 0;
+
     rparams = (krb5_realm_params *) NULL;
     if (realm)
 	lrealm = strdup(realm);

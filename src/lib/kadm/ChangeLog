@@ -1,3 +1,9 @@
+Thu Oct  5 12:06:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): If secure flag is set in
+		context, do not allow for environment variables to specify
+		configuration files.
+
 Tue Sep 26 02:31:38 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* adm_conn.c (kadm_get_creds): zero out creds->server after
