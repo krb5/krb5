@@ -77,7 +77,7 @@ krb5_address	receiver_addr;
 
 void	PRS();
 void	get_tickets();
-void	usage();
+static void usage();
 krb5_error_code open_connection();
 void	kerberos_authenticate();
 int	open_database();
