@@ -46,6 +46,8 @@ static const char *proto_wr_rep_msg = "\004%d: cannot write AP_REP message";
 static const char *proto_conn_abort_msg = "\007%d: connection destroyed by client";
 static const char *proto_seq_err_msg = "\004%d: protocol sequence violation";
 static const char *proto_rd_cmd_msg = "\004%d: cannot read administrative protocol command";
+static const char *proto_db_open_msg = "\004%d: cannot open database";
+static const char *proto_db_close_msg = "\004%d: cannot close database";
 static const char *proto_wr_reply_msg = "\004%d: cannot write administrative protocol reply";
 static const char *proto_fmt_reply_msg = "\004%d: cannot format administrative protocol reply";
 extern char *programname;
@@ -127,6 +129,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     krb5_int32		num_args;
     krb5_data		*arglist;
 
+    krb5_boolean	db_opened;
+
     cl_addr = (struct sockaddr_in *) cl_p;
     sv_addr = (struct sockaddr_in *) sv_p;
     DPRINT(DEBUG_CALLS, proto_debug_level,
@@ -147,6 +151,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     (void) sigemptyset(&s_action.sa_mask);
     s_action.sa_flags = 0;
 #endif	/* POSIX_SIGNALS */
+    db_opened = 0;
 
     /* Get memory for addresses */
     local = (krb5_address *) malloc(sizeof(krb5_address));
@@ -321,6 +326,20 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 
 	    cmd_error = KRB5_ADM_SUCCESS;
 	    do_quit = 0;
+
+	    /*
+	     * First open the database.  We only have it open for the
+	     * lifetime of a command so that we are sure to close it after
+	     * performing an update.  This also reduces the likelihood
+	     * that somebody'll have stale data lying around since we're
+	     * most likely going to change something here.
+	     */
+	    if ((kret = key_open_db(kcontext))) {
+		com_err(programname, kret, proto_db_open_msg, my_id);
+		goto cleanup;
+	    }
+	    else
+		db_opened = 1;
 
 	    /*
 	     * Now check our arguments.
@@ -716,6 +735,16 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	    }
 
 	    /*
+	     * Close the database.
+	     */
+	    if ((kret = key_close_db(kcontext))) {
+		com_err(programname, kret, proto_db_close_msg, my_id);
+		goto cleanup;
+	    }
+	    else
+		db_opened = 0;
+
+	    /*
 	     * Now make the reply.
 	     */
 	    DPRINT(DEBUG_PROTO, proto_debug_level,
@@ -827,6 +856,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	free(local);
     if (remote)
 	free(remote);
+    if (db_opened)
+	key_close_db(kcontext);
     close(cl_sock);
 
  done:
