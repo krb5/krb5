@@ -210,7 +210,7 @@ proc kadmin_show { pname } {
     }
     expect "Enter password for krbtest/admin@KRBTEST.COM:"
     send "adminpass$KEY\r"
-    expect -re "\r.*-*Principal: $pname.*Flags: .*Last modified by: .*-*"
+    expect -re "\r.*-*Principal: $pname.*Flags: .*Key: .*-*"
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]
