@@ -161,7 +161,7 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
     for (pa = preauth_to_use, size=0; *pa; pa++, size++) {
 	if ((*pa)->pa_type == KRB5_PADATA_ETYPE_INFO) {
 	    scratch.length = (*pa)->length;
-	    scratch.data = (*pa)->contents;
+	    scratch.data = (char *) (*pa)->contents;
 	    retval = decode_krb5_etype_info(&scratch, &etype_info);
 	    if (retval)
 		return retval;
@@ -179,7 +179,7 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
     salt.length = -1;
     if (etype_info) {
 	enctype = etype_info[0]->etype;
-	salt.data = etype_info[0]->salt;
+	salt.data = (char *) etype_info[0]->salt;
 	salt.length = etype_info[0]->length;
     }
     if (salt.length == -1) {
@@ -323,7 +323,7 @@ obtain_enc_ts_padata(context, in_padata, etype_info, def_enc_key,
     pa->magic = KV5M_PA_DATA;
     pa->pa_type = KRB5_PADATA_ENC_TIMESTAMP;
     pa->length = scratch->length;
-    pa->contents = scratch->data;
+    pa->contents = (krb5_octet *) scratch->data;
 
     *out_padata = pa;
 
@@ -391,7 +391,7 @@ find_pa_system(type, preauth)
 } 
 
 
-extern char *krb5_default_pwd_prompt1;
+extern const char *krb5_default_pwd_prompt1;
 
 static krb5_error_code
 sam_get_pass_from_user(context, etype_info, key_proc, key_seed, request,
@@ -406,7 +406,7 @@ sam_get_pass_from_user(context, etype_info, key_proc, key_seed, request,
 {
     krb5_enctype 		enctype;
     krb5_error_code		retval;
-    char *oldprompt;
+    const char *oldprompt;
 
     /* enctype = request->ktype[0]; */
     enctype = ENCTYPE_DES_CBC_MD5;
@@ -509,7 +509,7 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
     char * prompt;
 
     tmpsam.length = in_padata->length;
-    tmpsam.data = in_padata->contents;
+    tmpsam.data = (char *) in_padata->contents;
     retval = decode_krb5_sam_challenge(&tmpsam, &sam_challenge);
     if (retval)
       return retval;
@@ -595,7 +595,7 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
     pa->magic = KV5M_PA_DATA;
     pa->pa_type = KRB5_PADATA_SAM_RESPONSE;
     pa->length = scratch->length;
-    pa->contents = scratch->data;
+    pa->contents = (krb5_octet *) scratch->data;
     scratch = 0;		/* so we don't free it! */
 
     *out_padata = pa;

@@ -1,3 +1,7 @@
+Sun May  5 09:46:18 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* preauth.c: Add casts and const keywords as needed.
+
 Fri May  3 00:15:18 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* get_creds.c (krb5_get_credentials_core): new function. Common
