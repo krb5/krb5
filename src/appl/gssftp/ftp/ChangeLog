@@ -1,3 +1,15 @@
+Thu Jan 29 19:39:27 1998  Dan Winship  <danw@mit.edu>
+
+	* ftp.h:
+	* ftp.M:
+	* main.c (main): add options -f (forward credentials) and -x
+	(automatically negotiate encryption)
+
+	* ftp.c (do_auth): implement -f. Also, don't complain that
+	ftp/hostname doesn't exist if host/hostname does.
+
+	* cmds.c (setpeer): implement -x
+
 Thu Dec 11 23:26:58 1997  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.c:

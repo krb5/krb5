@@ -101,6 +101,8 @@ main(argc, argv)
 	doglob = 1;
 	interactive = 1;
 	autologin = 1;
+	forward = 0;
+	autoencrypt = 0;
 	argc--, argv++;
 	while (argc > 0 && **argv == '-') {
 		for (cp = *argv + 1; *cp; cp++)
@@ -142,6 +144,14 @@ main(argc, argv)
 
 			case 'g':
 				doglob = 0;
+				break;
+
+			case 'f':
+				forward = 1;
+				break;
+
+			case 'x':
+				autoencrypt = 1;
 				break;
 
 			default:

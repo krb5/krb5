@@ -37,7 +37,7 @@ ftp \- ARPANET file transfer program
 .SH SYNOPSIS
 .B ftp
 [\fB\-v\fP] [\fB\-d\fP] [\fB\-i\fP] [\fB\-n\fP] [\fB\-g\fP] [\fB\-k\fP
-\fIrealm\fP] [\fIhost\fP] [\fB\-forward\fP]
+\fIrealm\fP] [\fB\-f\fP] [\fB\-x\fP] [\fIhost\fP]
 .SH DESCRIPTION
 .B FTP
 is the user interface to the
@@ -89,11 +89,15 @@ Enables debugging.
 Disables file name globbing.
 .TP
 \fB\-k\fP \fIrealm\fP
-When using Kerberos authentication, get tickets in
+When using Kerberos v4 authentication, gets tickets in
 .IR realm .
 .TP
-.B \-forward
-Cause tickets to be forwarded to the remote host.
+.B \-f
+Causes credentials to be forwarded to the remote host.
+.TP
+.B \-x
+Causes the client to attempt to negotiate encryption (protection level
+`private') immediately after successfully authenticating.
 .SH COMMANDS
 The client host with which
 .B ftp
