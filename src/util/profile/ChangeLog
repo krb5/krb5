@@ -1,3 +1,8 @@
+2003-07-03 Alexandra Ellwood <lxs@mit.edu>
+
+    * profile.hin: Remove leading spaces in #define and #include 
+    in public headers to support K&R C compilers
+    
 2003-04-28  Ezra Peisach  <epeisach@bu.edu>
 
 	* prof_file.c (r_access): Static function. Only include if
