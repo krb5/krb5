@@ -40,10 +40,6 @@
 /*
  * Needed for master key conversion.
  */
-extern krb5_keyblock master_keyblock;
-extern krb5_principal master_princ;
-extern int valid_master_key;
-extern void usage();
 static int			mkey_convert;
 static krb5_keyblock		new_master_keyblock;
 
@@ -246,7 +242,7 @@ static const char dump_tmptrail[] = "~";
 /*
  * Re-encrypt the key_data with the new master key...
  */
-krb5_error_code master_key_convert(context, db_entry)
+static krb5_error_code master_key_convert(context, db_entry)
     krb5_context	  context;
     krb5_db_entry	* db_entry;
 {
@@ -458,6 +454,7 @@ find_enctype(dbentp, enctype, salttype, kentp)
     return(ENOENT);    
 }
 
+#if 0
 /*
  * dump_k5beta_header()	- Make a dump header that is recognizable by Kerberos
  *			  Version 5 Beta 5 and previous releases.
@@ -470,6 +467,7 @@ dump_k5beta_header(arglist)
     fprintf(arglist->ofile, k5beta_dump_header);
     return(0);
 }
+#endif
 
 /*
  * dump_k5beta_iterator()	- Dump an entry in a format that is usable
@@ -891,7 +889,7 @@ void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
 	     entry->policy_refcnt);
 }
 
-void print_key_data(FILE *f, krb5_key_data *key_data)
+static void print_key_data(FILE *f, krb5_key_data *key_data)
 {
      int c;
      
@@ -1901,7 +1899,8 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop, pol_db)
     return(retval);
 }
 
-int process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
+static int 
+process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;

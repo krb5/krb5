@@ -56,6 +56,7 @@
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
+#include <krb5/adm_proto.h>
 #include <kadm5/adb.h>
 #include <time.h>
 #include "kdb5_util.h"
@@ -78,7 +79,7 @@ krb5_context util_context;
 osa_adb_policy_t policy_db;
 kadm5_config_params global_params;
 
-usage()
+void usage()
 {
      fprintf(stderr, "Usage: "
 	   "kdb5_util cmd [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
@@ -104,35 +105,29 @@ char *progname;
 krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
-int kdb5_create(int, char **);
-int kdb5_destroy(int, char **);
-int kdb5_stash(int, char **);
-int dump_db(int, char **);
-int load_db(int, char **);
-int dump_v4db(int, char **);
-int load_v4db(int, char **);
-int open_db_and_mkey();
-int add_random_key(int, char **);
+static int open_db_and_mkey(void);
+
+static void add_random_key(int, char **);
    
-typedef int (*cmd_func)(int, char **);
+typedef void (*cmd_func)(int, char **);
 
 struct _cmd_table {
      char *name;
      cmd_func func;
      int opendb;
 } cmd_table[] = {
-     "create", kdb5_create, 0,
-     "destroy", kdb5_destroy, 1,
-     "stash", kdb5_stash, 1,
-     "dump", dump_db, 1,
-     "load", load_db, 0,
-     "dump_v4", dump_v4db, 1,
-     "load_v4", load_v4db, 0,
-     "ark", add_random_key, 1,
-     NULL, NULL, 0,
+     {"create", kdb5_create, 0},
+     {"destroy", kdb5_destroy, 1},
+     {"stash", kdb5_stash, 1},
+     {"dump", dump_db, 1},
+     {"load", load_db, 0},
+     {"dump_v4", dump_v4db, 1},
+     {"load_v4", load_v4db, 0},
+     {"ark", add_random_key, 1},
+     {NULL, NULL, 0},
 };
 
-struct _cmd_table *cmd_lookup(name)
+static struct _cmd_table *cmd_lookup(name)
    char *name;
 {
      struct _cmd_table *cmd = cmd_table;
@@ -220,8 +215,9 @@ int main(argc, argv)
     if (cmd_argv[0] == NULL)
 	 usage();
     
-    if (retval = kadm5_get_config_params(util_context, NULL, NULL,
-					 &global_params, &global_params)) {
+    retval = kadm5_get_config_params(util_context, NULL, NULL,
+				     &global_params, &global_params);
+    if (retval) {
 	 com_err(argv[0], retval, "while retreiving configuration parameters");
 	 exit(1);
     }
@@ -299,7 +295,7 @@ void set_dbname(argc, argv)
  * cannot be fetched (the master key stash file may not exist when the
  * program is run).
  */
-int open_db_and_mkey()
+static int open_db_and_mkey()
 {
     krb5_error_code retval;
     int nentries;
@@ -320,10 +316,10 @@ int open_db_and_mkey()
 	exit_status++;
 	return(1);
     }
-    if (retval = osa_adb_open_policy(&policy_db, &global_params)) {
-	 com_err(progname, retval, "opening policy database");
-	 exit_status++;
-	 return (1);
+    if ((retval = osa_adb_open_policy(&policy_db, &global_params))) {
+	com_err(progname, retval, "opening policy database");
+	exit_status++;
+	return (1);
     }
 
    /* assemble & parse the master key name */
@@ -445,7 +441,7 @@ quit()
     return 0;
 }
 
-int
+static void
 add_random_key(argc, argv)
     int argc;
     char **argv;
@@ -453,7 +449,7 @@ add_random_key(argc, argv)
     krb5_error_code ret;
     krb5_principal princ;
     krb5_db_entry dbent;
-    int n, i;
+    int n;
     krb5_boolean more;
     krb5_timestamp now;
 
@@ -481,23 +477,27 @@ add_random_key(argc, argv)
     ret = krb5_parse_name(util_context, pr_str, &princ);
     if (ret) {
 	com_err(me, ret, "while parsing principal name %s", pr_str);
-	return 1;
+	exit_status++;
+	return;
     }
     n = 1;
     ret = krb5_db_get_principal(util_context, princ, &dbent,
 				&n, &more);
     if (ret) {
 	com_err(me, ret, "while fetching principal %s", pr_str);
-	return 1;
+	exit_status++;
+	return;
     }
     if (n != 1) {
 	fprintf(stderr, "principal %s not found\n", pr_str);
-	return 1;
+	exit_status++;
+	return;
     }
     if (more) {
 	fprintf(stderr, "principal %s not unique\n", pr_str);
 	krb5_dbe_free_contents(util_context, &dbent);
-	return 1;
+	exit_status++;
+	return;
     }
     ret = krb5_string_to_keysalts(ks_str,
 				  ", \t", ":.-", 0,
@@ -505,7 +505,8 @@ add_random_key(argc, argv)
 				  &num_keysalts);
     if (ret) {
 	com_err(me, ret, "while parsing keysalts %s", ks_str);
-	return 1;
+	exit_status++;
+	return;
     }
     if (!num_keysalts || keysalts == NULL) {
 	num_keysalts = global_params.num_keysalts;
@@ -521,27 +522,30 @@ add_random_key(argc, argv)
     if (ret) {
 	com_err(me, ret, "while randomizing principal %s", pr_str);
 	krb5_dbe_free_contents(util_context, &dbent);
-	return 1;
+	exit_status++;
+	return;
     }
     dbent.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
     ret = krb5_timeofday(util_context, &now);
     if (ret) {
 	com_err(me, ret, "while getting time");
 	krb5_dbe_free_contents(util_context, &dbent);
-	return 1;
+	exit_status++;
+	return;
     }
     ret = krb5_dbe_update_last_pwd_change(util_context, &dbent, now);
     if (ret) {
 	com_err(me, ret, "while setting changetime");
 	krb5_dbe_free_contents(util_context, &dbent);
-	return 1;
+	exit_status++;
+	return;
     }
     ret = krb5_db_put_principal(util_context, &dbent, &n);
     krb5_dbe_free_contents(util_context, &dbent);
     if (ret) {
 	com_err(me, ret, "while saving principal %s", pr_str);
-	return 1;
+	exit_status++;
+	return;
     }
     printf("%s changed\n", pr_str);
-    return 0;
 }

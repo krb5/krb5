@@ -1,3 +1,10 @@
+Mon Feb 26 15:01:27 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* loadv4.c, ovload.c, kdb5_util.h, kdb5_util.c, kadm5_create.c,
+ 	dumpv4.c, dump.c: Compiler warning cleanup including prototypes,
+ 	assignments in conditionals, unused variables, varaibles shadowing
+ 	one-another.
+
 2001-02-08  Tom Yu  <tlyu@mit.edu>
 
 	* loadv4.c: Remove references to KRB_NEVERDATE.

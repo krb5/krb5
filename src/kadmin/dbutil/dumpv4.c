@@ -81,12 +81,6 @@ struct dump_record {
 	char	*realm;
 };
 
-extern krb5_keyblock master_keyblock;
-extern krb5_principal master_princ;
-extern krb5_boolean dbactive;
-extern int exit_status;
-extern krb5_context util_context;
-extern kadm5_config_params global_params;
 
 void update_ok_file();
 
@@ -95,6 +89,11 @@ void update_ok_file();
 
 static char *v4_mkeyfile = "/.k";
 static int shortlife;
+static krb5_error_code handle_one_key(struct dump_record *arg, 
+				      krb5_keyblock *v5mkey, 
+				      krb5_key_data *v5key, 
+				      des_cblock v4key);
+static int handle_keys(struct dump_record *arg);
 
 static int
 v4init(arg, manual)
@@ -122,6 +121,7 @@ v4init(arg, manual)
     return 0;
 }
 
+static void
 v4_print_time(file, timeval)
     FILE   *file;
     unsigned long timeval;
@@ -139,7 +139,7 @@ v4_print_time(file, timeval)
 
 
 
-krb5_error_code
+static krb5_error_code
 dump_v4_iterator(ptr, entry)
     krb5_pointer ptr;
     krb5_db_entry *entry;
@@ -186,8 +186,8 @@ dump_v4_iterator(ptr, entry)
 	strcpy(principal->instance, "*");
 
     /* Now move to mod princ */
-    if (retval = krb5_dbe_lookup_mod_princ_data(util_context,entry,
-						&mod_time, &mod_princ)){
+    if ((retval = krb5_dbe_lookup_mod_princ_data(util_context,entry,
+						 &mod_time, &mod_princ))){
 	com_err(arg->comerr_name, retval, "while unparsing db entry");
 	exit_status++;
 	return retval;
@@ -342,7 +342,7 @@ void dump_v4db(argc, argv)
 	/* special handling for K.M since it isn't preserved */
 	{
 	  des_cblock v4key;
-	  int i;
+	  int i2;
 
 	  /* assume:
 	     max lifetime (255)
@@ -369,9 +369,9 @@ void dump_v4db(argc, argv)
 		       ENCRYPT);
 #endif	/* KDB4_DISABLE */
 
-	  for (i=0; i<8; i++) {
-	    fprintf(f, "%02x", ((unsigned char*)v4key)[i]);
-	    if (i == 3) fputc(' ', f);
+	  for (i2=0; i2<8; i2++) {
+	    fprintf(f, "%02x", ((unsigned char*)v4key)[i2]);
+	    if (i2 == 3) fputc(' ', f);
 	  }
 	  fprintf(f," 200001010459 197001020000 db_creation *\n");
 	}
@@ -384,16 +384,16 @@ void dump_v4db(argc, argv)
 		update_ok_file(outname);
 }
 
-int handle_keys(arg)
+static int handle_keys(arg)
     struct dump_record *arg;
 {
     krb5_error_code retval;
     char *defrealm;
     char *mkey_name = 0;
     char *mkey_fullname;
-    krb5_principal master_princ;
+    krb5_principal l_master_princ;
 
-    if (retval = krb5_get_default_realm(util_context, &defrealm)) {
+    if ((retval = krb5_get_default_realm(util_context, &defrealm))) {
       com_err(arg->comerr_name, retval, 
 	      "while retrieving default realm name");
       exit(1);
@@ -402,16 +402,16 @@ int handle_keys(arg)
 
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(util_context, mkey_name, arg->realm, 
-					 &mkey_fullname, &master_princ)) {
+    if ((retval = krb5_db_setup_mkey_name(util_context, mkey_name, arg->realm, 
+					  &mkey_fullname, &l_master_princ))) {
 	com_err(arg->comerr_name, retval, "while setting up master key name");
 	exit(1);
     }
 
-    if (retval = krb5_db_fetch_mkey(util_context, master_princ, 
-				    master_keyblock.enctype, 0,
-				    0, global_params.stash_file, 0,
-				    &master_keyblock)) { 
+    if ((retval = krb5_db_fetch_mkey(util_context, l_master_princ, 
+				     master_keyblock.enctype, 0,
+				     0, global_params.stash_file, 0,
+				     &master_keyblock))) { 
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }
@@ -419,6 +419,7 @@ int handle_keys(arg)
     return(0);
 }
 
+static krb5_error_code
 handle_one_key(arg, v5mkey, v5key, v4key)
     struct dump_record *arg;
     krb5_keyblock *v5mkey;
@@ -427,17 +428,13 @@ handle_one_key(arg, v5mkey, v5key, v4key)
 {
     krb5_error_code retval;
 
-    krb5_keyblock v4v5key;
     krb5_keyblock v5plainkey;
     /* v4key is the actual v4 key from the file. */
 
-    if (retval = krb5_dbekd_decrypt_key_data(util_context, v5mkey, v5key, 
-				             &v5plainkey, NULL)) 
+    retval = krb5_dbekd_decrypt_key_data(util_context, v5mkey, v5key, 
+					 &v5plainkey, NULL);
+    if (retval) 
 	return retval;
-
-    /* v4v5key.contents = (krb5_octet *)v4key; */
-    /* v4v5key.enctype = ENCTYPE_DES; */
-    /* v4v5key.length = sizeof(v4key); */
 
     memcpy(v4key, v5plainkey.contents, sizeof(des_cblock));
 #ifndef	KDB4_DISABLE
