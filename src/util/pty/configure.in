@@ -1,0 +1,142 @@
+AC_INIT(getpty.c)
+CONFIG_RULES
+ET_RULES
+CopySrcHeader(libpty.h,[$](BUILDTOP)/include)
+LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
+AC_PROG_INSTALL
+AC_PROG_ARCHIVE
+AC_PROG_RANLIB
+AC_CHECK_FUNCS(fchmod fchown revoke)
+dnl dbm libs for use of an_to_ln
+LOGINLIBS=
+dnl
+dnl Make our operating system-specific security checks and definitions for
+dnl login.
+dnl
+case $krb5_cv_host in
+*-*-aix3*) # AIX has streams include files but not streams TTY
+# Moreover, strops.h trashes sys/ioctl.h
+krb5_cv_has_streams=no
+;;
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,main,
+		AC_DEFINE(HAVE_SETLUID)
+		LOGINLIBS="$LOGINLIBS -lsecurity"
+	)
+	;;
+esac
+dnl
+AC_SUBST(LOGINLIBS)
+dnl
+AC_TYPE_MODE_T
+AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
+AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
+AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
+AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAVE_GETTOSBYNAME))
+AC_FUNC_CHECK(setsid,AC_DEFINE(HAVE_SETSID))
+AC_FUNC_CHECK(ttyname,AC_DEFINE(HAVE_TTYNAME))
+AC_FUNC_CHECK(line_push,AC_DEFINE(HAVE_LINE_PUSH))
+AC_FUNC_CHECK(ptsname,AC_DEFINE(HAVE_PTSNAME))
+AC_FUNC_CHECK(grantpt,AC_DEFINE(HAVE_GRANTPT))
+AC_FUNC_CHECK(openpty,AC_DEFINE(HAVE_OPENPTY))
+AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
+AC_REPLACE_FUNCS(getdtablesize)
+DECLARE_SYS_ERRLIST
+KRB5_SIGTYPE
+CHECK_SIGNALS
+CHECK_SETJMP
+CHECK_DIRENT
+CHECK_WAIT_TYPE
+AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+CHECK_UTMP
+dnl
+dnl
+AC_MSG_CHECKING([streams interface])
+AC_CACHE_VAL(krb5_cv_has_streams,
+[AC_TRY_COMPILE(
+[#include <sys/stream.h>
+#include <sys/stropts.h>], [],
+krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
+AC_MSG_RESULT($krb5_cv_has_streams)
+if test $krb5_cv_has_streams = yes; then
+AC_DEFINE(HAVE_STREAMS)
+fi
+dnl
+dnl
+AC_MSG_CHECKING([F_SETOWN])
+AC_CACHE_VAL(krb5_cv_f_setown,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <fcntl.h>], [1+F_SETOWN;],
+krb5_cv_f_setown=yes,krb5_cv_f_setown=no)])
+AC_MSG_RESULT($krb5_cv_f_setown)
+if test $krb5_cv_f_setown = yes; then
+AC_DEFINE(HAVE_SETOWN)
+fi
+dnl
+dnl
+AC_MSG_CHECKING([setenv])
+AC_CACHE_VAL(krb5_cv_setenv,
+[AC_TRY_LINK(
+[],[setenv("PATH","/bin",0);],
+krb5_cv_setenv=yes,krb5_cv_setenv=no)])
+AC_MSG_RESULT($krb5_cv_setenv)
+if test $krb5_cv_setenv = no; then
+SETENVSRC=setenv.c
+SETENVOBJ=setenv.o
+AC_SUBST([SETENVSRC])
+AC_SUBST([SETENVOBJ])
+fi
+dnl
+dnl
+AC_MSG_CHECKING([arguments to getpgrp])
+AC_CACHE_VAL(krb5_cv_getpgrp_args,
+[AC_TRY_COMPILE(
+[#ifndef __STDC__
+#define __STDC__ 1
+#endif
+#include <unistd.h>
+#include <sys/types.h>], [pid_t pid = getpgrp(getpid())],
+krb5_cv_getpgrp_args=pid, krb5_cv_getpgrp_args=void)])
+AC_MSG_RESULT($krb5_cv_getpgrp_args)
+if test $krb5_cv_getpgrp_args = pid; then
+AC_DEFINE(GETPGRP_ONEARG)
+fi
+dnl
+dnl
+AC_MSG_CHECKING([number of arguments to setpgrp])
+AC_CACHE_VAL(krb5_cv_setpgrp_args,
+[AC_TRY_COMPILE(
+[#ifndef __STDC__
+#define __STDC__ 1
+#endif
+#include <unistd.h>],[setpgrp(0,0)],
+krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
+AC_MSG_RESULT($krb5_cv_setpgrp_args)
+if test $krb5_cv_setpgrp_args = two; then
+AC_DEFINE(SETPGRP_TWOARG)
+fi
+dnl
+dnl
+AC_MSG_CHECKING([shadow password support])
+AC_CACHE_VAL(krb5_cv_shadow_pwd,
+[AC_TRY_LINK(
+[#include <sys/types.h>
+#include <pwd.h>
+#include <shadow.h>],
+[struct spwd *sp = getspnam("root")],
+krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
+AC_MSG_RESULT($krb5_cv_shadow_pwd)
+if test $krb5_cv_shadow_pwd = yes; then
+AC_DEFINE(HAVE_SHADOW)
+fi
+dnl
+dnl
+ADD_DEF(-DKERBEROS)
+AC_CONST
+USE_KADM_LIBRARY
+USE_KRB4_LIBRARY
+KRB5_LIBRARIES
+V5_USE_SHARED_LIB
+V5_AC_OUTPUT_MAKEFILE

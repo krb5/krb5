@@ -1,0 +1,91 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+SED = sed
+
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+
+
+LIBOBJS= cleanup.o getpty.o initialize_slave.o open_ctty.o open_slave.o update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o
+
+LIBDONE=DONE
+LIB_SUBDIRS=.
+INSTALLFILE = cp
+
+# for pty-int.h
+LOCALINCLUDE=-I. -I$(srcdir)
+
+FILES= Makefile cleanup.c getpty.c initialize_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
+logwtmp.c
+
+CFILES=cleanup.c getpty.c initialize_slave.c open_ctty.c open_slave.c\
+update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.c logwtmp.c
+
+
+SRCS=pty_err.h $(CFILES)
+
+DEPLIBS=
+
+all:: all-$(WHAT)
+
+#
+all-unix:: includes pty_err.h libpty.a $(TOPLIBD)/libpty.a
+
+
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
+
+
+depend:: 
+
+install:: libpty.h
+	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
+
+
+
+libpty.a: $(LIBOBJS)
+	$(ARCHIVE) $@ $(LIBOBJS)
+	$(RANLIB) $@
+
+DONE:: $(LIBOBJS)
+	 $(RM) DONE
+	 echo $(LIBOBJS) >DONE
+
+clean-unix::
+	$(RM) $(LIBOBJS)
+
+clean-mac::
+	$(RM) libpty.a
+	$(RM) $(LIBOBJS)
+
+install::
+	$(INSTALL_DATA) libpty.a $(DESTDIR)$(KRB5_LIBDIR)/libpty.a
+	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/libpty.a
+## 
+
+clean-unix:: clean-files
+
+clean-mac:: clean-files
+
+clean-files::
+	rm -f *~ \#* *.bak \
+		*.otl *.aux *.toc *.PS *.dvi *.x9700 *.ps \
+		*.cp *.fn *.ky *.log *.pg *.tp *.vr \
+		*.o profiled/?*.o libcom_err.a libcom_err_p.a \
+		com_err.o compile_et \
+		et.ar TAGS y.tab.c lex.yy.c error_table.c \
+		et_lex.lex.c \
+		test1.h test1.c test2.h test2.c test_et \
+		eddep makedep *.ln
+
+pty_err.o: pty_err.c
+	$(CC) $(CFLAGS) -c $*.c
+
+pty_err.h:: pty_err.et
+pty_err.c:: pty_err.et
+
+depend::  et_lex.lex.c
+
