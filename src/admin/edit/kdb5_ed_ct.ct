@@ -27,6 +27,9 @@
 
 command_table kdb5_edit_cmds;
 
+request show_principal, "Show the Kerberos database entry for a principal",
+	show_principal, show;
+
 request add_new_key, "Add new entry to Kerberos database (prompting for password)",
 	add_new_key, ank;
 
