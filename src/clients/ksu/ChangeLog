@@ -1,3 +1,8 @@
+Fri Jun  9 18:37:43 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Tue May  9 15:52:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb_auth_su.c (krb5_auth_check): Add missing context

@@ -1,14 +1,16 @@
 AC_INIT(auth.c)
-WITH_CCOPTS
 CONFIG_RULES
-AC_SET_BUILDTOP
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_REPLACE_FUNCS([strcasecmp strdup setenv setsid strerror strftime getopt herror])
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 LIBOBJS="$LIBOBJS getent.o"
-KRB_INCLUDE
-WITH_KRB4
 AC_CONST
+if test "$KRB4_LIB" = ''; then
+	AC_MSG_RESULT(No Kerberos 4 authentication)
+else
+	AC_MSG_RESULT(Kerberos 4 authentication enabled)
+	AC_DEFINE(KRB4)
+fi
 V5_AC_OUTPUT_MAKEFILE

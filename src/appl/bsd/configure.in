@@ -1,9 +1,6 @@
 AC_INIT(krlogind.c)
-WITH_CCOPTS
 CONFIG_RULES
-AC_SET_BUILDTOP
 AC_PROG_INSTALL
-WITH_NETLIB
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
@@ -48,10 +45,7 @@ CHECK_SETJMP
 CHECK_DIRENT
 CHECK_WAIT_TYPE
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
-KRB_INCLUDE
 CHECK_UTMP
-WITH_KRB5ROOT
-WITH_KRB4
 dnl
 dnl Check for where the BSD rlogin, rcp, and rsh programs live.
 dnl

@@ -1,3 +1,8 @@
+Fri Jun  9 18:42:30 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Thu Jun 8 14:41:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Add prototypes for logging routines.  Also, if
 		kdb.h has not been included, add null structure for entry

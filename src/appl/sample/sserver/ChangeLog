@@ -1,3 +1,8 @@
+Fri Jun  9 18:28:33 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Sat Jun  3 17:20:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sserver.c (main): If using inetd, set file descriptor to 0.
