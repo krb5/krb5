@@ -379,7 +379,7 @@ main(argc, argv)
 #endif
     int port, debug_port = 0;
     enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
-   
+
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1;
@@ -1054,13 +1054,15 @@ int signo;
  */
 writer()
 {
-    unsigned char c;
-    register n;
-    register bol = 1;               /* beginning of line */
-    register local = 0;
-    
+    int n_read;
+    char buf[1024];
+    int got_esc; /* set to true by read_wrapper if an escape char
+		    was encountered */
+    char c;
+
 #ifdef ultrix             
     fd_set waitread;
+    register n;
     
     /* we need to wait until the reader() has set up the terminal, else
        the read() below may block and not unblock when the terminal
@@ -1081,89 +1083,172 @@ writer()
 	  }
     }
 #endif /* ultrix */
-    for (;;) {
-	n = read(0, &c, 1);
-	if (n <= 0) {
-	    if (n < 0 && errno == EINTR)
-	      continue;
-	    break;
-	}
-	/*
-	 * If we're at the beginning of the line
-	 * and recognize a command character, then
-	 * we echo locally.  Otherwise, characters
-	 * are echo'd remotely.  If the command
-	 * character is doubled, this acts as a 
-	 * force and local echo is suppressed.
-	 */
-	if (bol) {
-	    bol = 0;
-	    if (c == cmdchar) {
-		bol = 0;
-		local = 1;
-		continue;
-	    }
-	} else if (local) {
-	    local = 0;
-#ifdef POSIX_TERMIOS
-	    if (c == '.' || c == deftty.c_cc[VEOF]) {
-#else
-	    if (c == '.' || c == deftc.t_eofc) {
-#endif
-		if (confirm_death()) {
-		    echo(c);
-		    break;
-		}
-	    }
-#ifdef TIOCGLTC
-	    if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
-		&& !no_local_escape) {
-		bol = 1;
-		echo(c);
-		stop(c);
-		continue;
-	    }
-#else
-#ifdef POSIX_TERMIOS
-	    if ( (
-		  (c == deftty.c_cc[VSUSP]) 
-#ifdef VDSUSP
-		  || (c == deftty.c_cc[VDSUSP]) 
-#endif
-		  )
-		&& !no_local_escape) {
-	      bol = 1;
-	      echo(c);
-	      stop(c);
-	      continue;
-	    }
-#endif
-#endif
 
-	    if (c != cmdchar)
-	      (void) rcmd_stream_write(rem, &cmdchar, 1, 0);
+    /* This loop works as follows.  Call read_wrapper to get data until
+       we would block or until we read a cmdchar at the beginning of a line.
+       If got_esc is false, we just send everything we got back.  If got_esc 
+       is true, we send everything except the cmdchar at the end and look at 
+       the next char.  If its a "." we break out of the loop and terminate.
+       If its ^Z or ^Y we call stop with the value of the char and continue.
+       If its none of those, we send the cmdchar and then send the char we 
+       just read, unless that char is also the cmdchar (in which case we are
+       only supposed to send one of them).  When this loop ends, so does the
+       program.
+    */
+
+    for (;;) {
+
+      /* read until we would block or we get a cmdchar */
+      n_read = read_wrapper(0,buf,sizeof(buf),&got_esc);
+  
+      /* if read returns an error or 0 bytes, just quit */
+      if (n_read <= 0) {
+	break;
+      }
+      
+      if (!got_esc) {
+	if (rcmd_stream_write(rem, buf, n_read, 0) == 0) {
+	  prf("line gone");
+	  break;
 	}
-	if (rcmd_stream_write(rem, &c, 1, 0) == 0) {
+	continue;
+      }
+      else {
+	/* This next test is necessary to avoid sending 0 bytes of data
+	   in the event that we got just a cmdchar */
+	if (n_read > 1) {
+	  if (rcmd_stream_write(rem, buf, n_read-1, 0) == 0) {
 	    prf("line gone");
 	    break;
+	  }
 	}
+	if (read_wrapper(0,&c,1,&got_esc) <= 0) {
+	  break;
+	}
+
 #ifdef POSIX_TERMIOS
-	bol = (c == deftty.c_cc[VKILL] ||
-	       c == deftty.c_cc[VINTR] ||
-	       c == '\r' || c == '\n');
+	if (c == '.' || c == deftty.c_cc[VEOF]) 
+#else
+	  if (c == '.' || c == deftc.t_eofc) 
+#endif
+	    {
+	      if (confirm_death()) {
+		echo(c);
+		break; 
+	      }
+	    }
+
 #ifdef TIOCGLTC
-	if (!bol)
-	  bol = (c == defltc.t_suspc);
+	if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
+	    && !no_local_escape) {
+	  echo(c);
+	  stop(c);
+	  continue;
+	}
+#else
+#ifdef POSIX_TERMIOS
+	if ( (
+	      (c == deftty.c_cc[VSUSP]) 
+#ifdef VDSUSP
+	      || (c == deftty.c_cc[VDSUSP]) 
 #endif
-#else /* !POSIX_TERMIOS */
-	bol = c == defkill || c == deftc.t_eofc ||
-	  c == deftc.t_intrc || c == defltc.t_suspc ||
-	    c == '\r' || c == '\n';
+	      )
+	     && !no_local_escape) {
+	  echo(c);
+	  stop(c);
+	  continue;
+	}
 #endif
+#endif
+      
+	if (c != cmdchar) {
+	  rcmd_stream_write(rem, &cmdchar, 1, 0);
+	}
+
+	if (rcmd_stream_write(rem,&c,1,0) == 0) {
+	  prf("line gone");
+	  break;
+	}
+      }
     }
 }
 
+/* This function reads up to size bytes from file desciptor fd into buf.
+   It will copy as much data as it can without blocking, but will never
+   copy more than size bytes.  In addition, if it encounters a cmdchar
+   at the beginning of a line, it will copy everything up to and including
+   the cmdchar, but nothing after that.  In this instance *esc_char is set
+   to true and any remaining data is buffered and copied on a subsequent 
+   call.  Otherwise, *esc_char will be set to false and the minimum of size,
+   1024, and the number of bytes that can be read without blocking will
+   be copied.  In all cases, a non-negative return value indicates the number 
+   of bytes actually copied and a return value of -1 indicates that there
+   was a read error (other than EINTR) and errno is set appropriately. 
+*/
 
+int read_wrapper(fd,buf,size,got_esc) 
+     int fd;
+     char *buf;
+     int size;
+     int *got_esc;
+{
+  static char tbuf[1024];
+  static char *data_start = tbuf;
+  static char *data_end = tbuf;
+  static int bol = 1;
+  int return_length = 0;
+  char c;
+
+  /* if we have no data buffered, get more */
+  if (data_start == data_end) {
+    int n_read;
+    while ((n_read = read(fd, tbuf, sizeof(tbuf))) <= 0) {
+      if (n_read < 0 && errno == EINTR)
+	continue;
+      return n_read;
+    }
+    data_start = tbuf;
+    data_end = tbuf+n_read;
+  }
+
+  *got_esc = 0;
+
+  /* We stop when we've fully checked the buffer or have checked size
+     bytes.  We break out and set *got_esc if we encounter a cmdchar
+     at the beginning of a line.
+  */
+
+  while (data_start+return_length < data_end && return_length < size) {
+    
+    c = *(data_start+return_length);
+    return_length++;
+
+    if (bol == 1 && c == cmdchar) {
+      bol = 0;
+      *got_esc = 1;
+      break;
+    }
+
+#ifdef POSIX_TERMIOS
+    bol = (c == deftty.c_cc[VKILL] ||
+	   c == deftty.c_cc[VINTR] ||
+	   c == '\r' || c == '\n');
+#ifdef TIOCGLTC
+    if (!bol)
+      bol = (c == defltc.t_suspc);
+#endif
+	
+#else / * !POSIX_TERMIOS * /
+    bol = c == defkill || c == deftc.t_eofc ||
+      c == deftc.t_intrc || c == defltc.t_suspc ||
+      c == '\r' || c == '\n';
+#endif
+  }
+   
+  memcpy(buf,tbuf, return_length);
+  data_start = data_start + return_length;
+  return return_length;
+}
 
 echo(c)
      register char c;

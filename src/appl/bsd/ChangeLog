@@ -1,3 +1,12 @@
+2000-07-21  Peter S Litwack  <plitwack@mit.edu>
+
+	* krlogin.c (writer): Improved bandwith efficiency by reading 
+        and sending more than one character at a time if multiple 
+        characters are available to be read from the terminal.
+        * krlogin.c (read_wrapper): Added this function as a helper
+        to writer.  It facilitates checking for escape sequences 
+        (~^Z etc.) when reading mulitple characters at a time.
+
 2000-07-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* krcp.c: Provide format attribute for error() for versions of gcc
