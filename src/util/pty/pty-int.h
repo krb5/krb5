@@ -99,7 +99,6 @@ void ptyint_vhangup(void);
 
 long ptyint_void_association();
 void ptyint_vhangup();
-void initialize_pty_error_table();
 long ptyint_update_wtmp();
 #endif /* __STDC__*/
 

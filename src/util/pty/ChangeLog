@@ -1,3 +1,7 @@
+Fri Feb 21 18:25:47 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* pty-int.h: No longer prototype error table init function.
+
 Thu Jan 16 18:47:12 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Cause "clean" to dtrt.
