@@ -36,32 +36,20 @@ PROFFLAGS=@PROFFLAGS@
 	$(CC) $(PROFFLAGS) $(CFLAGS) -c $< -o $*.po
 
 # rules to generate object file lists
-#
-# The "STAMP.*" files are there in case the object list happens to be
-# empty.
-OBJS.ST: STAMP.ST
-	touch $@
-STAMP.ST: $(STLIBOBJS)
-	@echo $(STLIBOBJS) > OBJS.ST
-	touch $@
 
-OBJS.SH: STAMP.SH
-	touch $@
-STAMP.SH: $(SHLIBOBJS)
-	@echo $(SHLIBOBJS) > OBJS.SH
-	touch $@
+OBJS.ST: $(STLIBOBJS)
+	@echo $(STLIBOBJS) > $@
 
-OBJS.PF: STAMP.PF
-	touch $@
-STAMP.PF: $(PFLIBOBJS)
-	@echo $(PFLIBOBJS) > OBJS.PF
-	touch $@
+OBJS.SH: $(SHLIBOBJS)
+	@echo $(SHLIBOBJS) > $@
+
+OBJS.PF: $(PFLIBOBJS)
+	@echo $(PFLIBOBJS) > $@
 
 all-libobjs: $(OBJLISTS)
 
 clean-libobjs:
 	$(RM) OBJS.ST OBJS.SH OBJS.PF
-	$(RM) STAMP.ST STAMP.SH STAMP.PF
 	$(RM) $(STLIBOBJS)
 	$(RM) $(SHLIBOBJS)
 	$(RM) $(PFLIBOBJS)
