@@ -36,6 +36,19 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef GETPEERNAME_ARG2_TYPE
+#define GETPEERNAME_ARG2_TYPE struct sockaddr
+#endif
+#ifndef GETPEERNAME_ARG3_TYPE
+#define GETPEERNAME_ARG3_TYPE size_t
+#endif
+#ifndef GETSOCKNAME_ARG2_TYPE
+#define GETSOCKNAME_ARG2_TYPE struct sockaddr
+#endif
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE size_t
+#endif
+
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
@@ -158,18 +171,18 @@ krb5_sendauth(context, auth_context,
 	       not to guarantee randomness, but to make it less likely
 	       that multiple sessions could pick the same subkey.  */
 	    char rnd_data[1024];
-	    size_t len2;
+	    GETPEERNAME_ARG3_TYPE len2;
 	    krb5_data d;
 	    d.length = sizeof (rnd_data);
 	    d.data = rnd_data;
 	    len2 = sizeof (rnd_data);
-	    if (getpeername (*(int*)fd, (struct sockaddr *) rnd_data, 
+	    if (getpeername (*(int*)fd, (GETPEERNAME_ARG2_TYPE *) rnd_data, 
 			     &len2) == 0) {
 		d.length = len2;
 		(void) krb5_c_random_seed (context, &d);
 	    }
 	    len2 = sizeof (rnd_data);
-	    if (getsockname (*(int*)fd, (struct sockaddr *) rnd_data, 
+	    if (getsockname (*(int*)fd, (GETSOCKNAME_ARG2_TYPE *) rnd_data, 
 			     &len2) == 0) {
 		d.length = len2;
 		(void) krb5_c_random_seed (context, &d);
