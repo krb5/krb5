@@ -25,18 +25,19 @@
 #include <memory.h>
 
 static krb5_error_code 
-rd_req_keyproc(context, keyprocarg, server, kvno, keyblock)
+rd_req_keyproc(context, keyprocarg, server, kvno, keytype, keyblock)
      krb5_context context;
      krb5_pointer keyprocarg;
      krb5_principal server;
      krb5_kvno kvno;
+     krb5_keytype keytype;
      krb5_keyblock **keyblock;
 {
    krb5_error_code code;
    krb5_keytab_entry ktentry;
 
    if (code = krb5_kt_get_entry(context, (krb5_keytab) keyprocarg, server, 
-				kvno, &ktentry))
+				kvno, keytype, &ktentry))
       return(code);
 
    code = krb5_copy_keyblock(context, &ktentry.key, keyblock);

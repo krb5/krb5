@@ -1,3 +1,7 @@
+Fri Jan 27 14:41:12 1995  Chris Provenzano (proven@mit.edu)
+
+        * accept_sec_context.c (rd_req_keyproc() added krb5_keytype arg.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
