@@ -39,7 +39,7 @@ int win_socket_initialize();
 /*
  * Compatability with WinSock calls on MS-Windows...
  */
-#define	SOCKET		unsigned int
+#define	SOCKET		int
 #define	INVALID_SOCKET	((SOCKET)~0)
 #define	closesocket	close
 #define	ioctlsocket	ioctl

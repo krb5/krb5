@@ -193,9 +193,18 @@ typedef krb5_error_code	krb5_magic;
 
 typedef struct _krb5_data {
 	krb5_magic magic;
-	int length;
+	unsigned int length;
 	char FAR *data;
 } krb5_data;
+
+/* 
+ * Hack length for crypto library to use the afs_string_to_key It is
+ * equivalent to -1 without possible sign extension 
+ * We also overload for an unset salt type length - which is also -1, but
+ * hey, why not....
+*/
+#define SALT_TYPE_AFS_LENGTH VALID_UINT_BITS
+#define SALT_TYPE_NO_LENGTH VALID_UINT_BITS
 
 /* Define krb5_const as necessary */
 
@@ -292,7 +301,7 @@ typedef krb5_const krb5_principal_data FAR *krb5_const_principal;
 typedef struct _krb5_address {
     krb5_magic magic;
     krb5_addrtype addrtype;
-    int length;
+    unsigned int length;
     krb5_octet FAR *contents;
 } krb5_address;
 
@@ -330,7 +339,7 @@ struct _krb5_cryptosystem_entry;
 typedef struct _krb5_keyblock {
     krb5_magic magic;
     krb5_enctype enctype;
-    int length;
+    unsigned int length;
     krb5_octet FAR *contents;
 } krb5_keyblock;
 
@@ -347,7 +356,7 @@ typedef struct _krb5_encrypt_block {
 typedef struct _krb5_checksum {
     krb5_magic magic;
     krb5_cksumtype checksum_type;	/* checksum type */
-    int length;
+    unsigned int length;
     krb5_octet FAR *contents;
 } krb5_checksum;
 
@@ -844,7 +853,7 @@ typedef struct _krb5_ticket_times {
 typedef struct _krb5_authdata {
     krb5_magic magic;
     krb5_authdatatype ad_type;
-    int length;
+    unsigned int length;
     krb5_octet FAR *contents;
 } krb5_authdata;
 
@@ -925,7 +934,7 @@ typedef struct _krb5_last_req_entry {
 typedef struct _krb5_pa_data {
     krb5_magic magic;
     krb5_preauthtype  pa_type;
-    int length;
+    unsigned int length;
     krb5_octet FAR *contents;
 } krb5_pa_data;
 
@@ -1321,7 +1330,7 @@ typedef struct _krb5_kt_ops {
 	KRB5_NPROTOTYPE((krb5_context,
 		 krb5_keytab,
 		 char FAR *,
-		 int));
+		 unsigned int));
     krb5_error_code (KRB5_CALLCONV *close) 
 	KRB5_NPROTOTYPE((krb5_context,
 		 krb5_keytab));
@@ -1530,7 +1539,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_unparse_name_ext
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		char FAR * FAR *,
-		int FAR *));
+		unsigned int FAR *));
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_set_principal_realm
 	KRB5_PROTOTYPE((krb5_context, krb5_principal, const char FAR *));
@@ -1613,14 +1622,14 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_server_rcache
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_data *, krb5_rcache *));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C krb5_build_principal_ext
-	KRB5_STDARG_P((krb5_context, krb5_principal FAR *, int, krb5_const char FAR *, ...));
+	KRB5_STDARG_P((krb5_context, krb5_principal FAR *, unsigned int, krb5_const char FAR *, ...));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C krb5_build_principal
-	KRB5_STDARG_P((krb5_context, krb5_principal FAR *, int, krb5_const char FAR *, ...));
+	KRB5_STDARG_P((krb5_context, krb5_principal FAR *, unsigned int, krb5_const char FAR *, ...));
 #ifdef va_start
 /* XXX depending on varargs include file defining va_start... */
 krb5_error_code krb5_build_principal_va
 	KRB5_PROTOTYPE((krb5_context,
-		krb5_principal, int, krb5_const char *, va_list));
+		krb5_principal, unsigned int, krb5_const char *, va_list));
 #endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_425_conv_principal
@@ -2157,7 +2166,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_read_password
 		const char FAR *,
 		const char FAR *,
 		char FAR *,
-		int FAR * ));
+		unsigned int FAR * ));
 krb5_error_code krb5_aname_to_localname
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,

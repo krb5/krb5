@@ -295,7 +295,7 @@ struct sockaddr;
 typedef struct _krb5_alt_method {
 	krb5_magic	magic;
 	krb5_int32	method;
-	int		length;
+	unsigned int	length;
 	krb5_octet	*data;
 } krb5_alt_method;
 
@@ -307,9 +307,17 @@ typedef struct _krb5_alt_method {
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
 	krb5_enctype	etype;
-	int		length;
+	unsigned int	length;
 	krb5_octet	*salt;
 } krb5_etype_info_entry;
+
+/* 
+ *  This is essentially -1 without sign extension which can screw up
+ *  comparisons on 64 bit machines. If the length is this value, then
+ *  the salt data is not present. This is to distinguish between not
+ *  being set and being of 0 length. 
+ */
+#define KRB5_ETYPE_NO_SALT VALID_UINT_BITS
 
 typedef krb5_etype_info_entry ** krb5_etype_info;
 
@@ -668,8 +676,8 @@ struct krb5_cksumtypes {
  */
 
 void krb5_nfold
-KRB5_PROTOTYPE((int inbits, krb5_const unsigned char *in,
-		int outbits, unsigned char *out));
+KRB5_PROTOTYPE((unsigned int inbits, krb5_const unsigned char *in,
+		unsigned int outbits, unsigned char *out));
 
 krb5_error_code krb5_hmac
 KRB5_PROTOTYPE((krb5_const struct krb5_hash_provider *hash,
@@ -1241,7 +1249,7 @@ krb5_error_code encode_krb5_predicted_sam_response
 krb5_error_code decode_krb5_sam_challenge
        KRB5_PROTOTYPE((const krb5_data *, krb5_sam_challenge **));
 
-krb5_error_code decode_krb5_sam_key
+krb5_error_code decode_krb5_enc_sam_key
        KRB5_PROTOTYPE((const krb5_data *, krb5_sam_key **));
 
 krb5_error_code decode_krb5_enc_sam_response_enc
@@ -1538,10 +1546,10 @@ typedef struct _krb5int_access {
 		   struct sockaddr **,
 		   int *,
 		   int));
-    int krb5_max_skdc_timeout;
-    int krb5_skdc_timeout_shift;
-    int krb5_skdc_timeout_1;
-    int krb5_max_dgram_size;
+    unsigned int krb5_max_skdc_timeout;
+    unsigned int krb5_skdc_timeout_shift;
+    unsigned int krb5_skdc_timeout_1;
+    unsigned int krb5_max_dgram_size;
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

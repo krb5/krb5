@@ -1,3 +1,20 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-int.h: krb5_alt_method, krb5_etype_info_entry length fields
+	changed to unsigned int. KRB5_ETYPE_NO_LENGTH defined.  Change
+	prototype decode_krb5_sam_key to decode_krb5_enc_sam_key which is
+	what the code says.
+	krb5int_access - change timeouts, shifts, etc to unsigned ints. 
+
+	* krb5.hin: krb5_data, krb5_address, krb5_keyblock, krb5_checksum,
+	krb5_authdata, and krb5_pa_data length fields changed to unsigned
+	int. krb5_kt_get_name(), krb5_unparse_name_ext(),
+	krb5_build_principal(), krb5_build_principal_ext(),
+	krb5_build_principal_va() and krb5_read_password() all take or
+	return unsigned int lengths.
+
+	* port-sockets.h (SOCKET): Under unix, a socket is of type int.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin, k5-int.h: krb5_cc_get_name now returns const char *.
