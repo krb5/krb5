@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989-1998 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989-1998,2002 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -44,9 +44,48 @@
  * They live in libkrb5util.
  */
 
-int krb5_seteuid(int);
-int krb5_setedid(int);
-int krb5_setegid(int);
+#include "krb5/autoconf.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#include <errno.h>
+
+#ifndef krb5_seteuid
+
+#if defined(HAVE_SETEUID)
+#  define krb5_seteuid(EUID)	(seteuid((uid_t)(EUID)))
+#elif defined(HAVE_SETRESUID)
+#  define krb5_seteuid(EUID)	setresuid(getuid(), (uid_t)(EUID), geteuid())
+#elif defined(HAVE_SETREUID)
+#  define krb5_seteuid(EUID)	setreuid(geteuid(), (uid_t)(EUID))
+#else
+   /* You need to add a case to deal with this operating system.*/
+#  define krb5_seteuid(EUID)	(errno = EPERM, -1)
+#endif
+
+#ifdef HAVE_SETEGID
+#  define krb5_setegid(EGID)	(setegid((gid_t)(EGID)))
+#elif defined(HAVE_SETRESGID)
+#  define krb5_setegid(EGID)	(setresgid(getgid(), (gid_t)(EGID), getegid()))
+#elif defined(HAVE_SETREGID)
+#  define krb5_setegid(EGID)	(setregid(getegid(), (gid_t)(EGID)))
+#else
+   /* You need to add a case to deal with this operating system.*/
+#  define krb5_setegid(EGID)	(errno = EPERM, -1)
+#endif
+
+#endif
+
 
 #if defined(KRB_DEFS) && defined(SOCK_DGRAM)
 krb5_error_code krb5_compat_recvauth(krb5_context, krb5_auth_context *,

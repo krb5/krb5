@@ -6,11 +6,11 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5util.lib
 
-OBJS=	compat_recv.$(OBJEXT)	 seteuid.$(OBJEXT)
+OBJS=	compat_recv.$(OBJEXT)
 
-STLIBOBJS=compat_recv.o seteuid.o
+STLIBOBJS=compat_recv.o
 
-SRCS=	$(srcdir)/compat_recv.c $(srcdir)/seteuid.c	
+SRCS=	$(srcdir)/compat_recv.c
 
 LIB=krb5util
 LIBMAJOR=1
@@ -40,5 +40,4 @@ compat_recv.so compat_recv.po $(OUTPRE)compat_recv.$(OBJEXT): compat_recv.c $(SR
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/k5-util.h
-seteuid.so seteuid.po $(OUTPRE)seteuid.$(OBJEXT): seteuid.c $(SRCTOP)/include/k5-util.h
 

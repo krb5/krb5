@@ -5,7 +5,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
-AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton gethostbyname_r gethostbyaddr_r getservbyname_r getservbyport_r)
+AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntoa inet_aton gethostbyname_r gethostbyaddr_r getservbyname_r getservbyport_r seteuid setresuid setreuid setegid setresgid setregid)
 dnl
 dnl Check what the return types for gethostbyname_r and getservbyname_r are.
 dnl

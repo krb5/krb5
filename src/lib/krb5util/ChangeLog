@@ -1,3 +1,8 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* seteuid.c: Deleted.
+	* Makefile.in (OBJS, STLIBOBJS, SRCS): Remove references.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* compat_recv.c: Drop _MSDOS support.
