@@ -19,7 +19,6 @@
 				A1253718040BEC06003D8244,
 				A1253725040BEC06003D8244,
 				A125374E040BEC06003D8244,
-				A125376D040BEC06003D8244,
 			);
 			isa = PBXGroup;
 			path = kadmin;
@@ -1492,113 +1491,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.exports;
 			path = usage.exp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A125376D040BEC06003D8244 = {
-			children = (
-				A125376E040BEC06003D8244,
-				A125376F040BEC06003D8244,
-				A1253770040BEC06003D8244,
-				A1253771040BEC06003D8244,
-				A1253772040BEC06003D8244,
-				A1253773040BEC06003D8244,
-				A1253774040BEC06003D8244,
-				A1253775040BEC07003D8244,
-				A1253776040BEC07003D8244,
-				A1253777040BEC07003D8244,
-				A1253778040BEC07003D8244,
-			);
-			isa = PBXGroup;
-			path = v5passwdd;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A125376E040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text;
-			path = .cvsignore;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A125376F040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = adm_conn.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253770040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = adm_rw.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253771040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text;
-			path = ChangeLog;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253772040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = kadm5_defs.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253773040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = kpasswd.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253774040BEC06003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = main.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253775040BEC07003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text;
-			path = Makefile.in;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253776040BEC07003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = proto_serv.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253777040BEC07003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = srv_net.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		A1253778040BEC07003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.objcpp;
-			path = v5passwd.M;
 			refType = 4;
 			sourceTree = "<group>";
 		};
