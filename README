@@ -62,9 +62,9 @@ and logging in as "guest" with password "guest".
 Major changes in 1.3.2
 ----------------------
 
-* [2040, 1471, 2067, 2077, 2079, 2166, 2167, 2220] Support for AES in
-  GSSAPI has been implemented.  This corresponds to the in-progress
-  work in the IETF (CFX).
+* [2040, 1471, 2067, 2077, 2079, 2166, 2167, 2220, 2266] Support for
+  AES in GSSAPI has been implemented.  This corresponds to the
+  in-progress work in the IETF (CFX).
 
 * [2049, 2139, 2148, 2153, 2182, 2183, 2184, 2190, 2202] Added a new
   ccache type "MSLSA:" for read-only access to the MS Windows LSA
@@ -227,6 +227,9 @@ Minor changes in 1.3.2
   affecting the test suite, has been worked around by hacking
   scheduler priorities.  See the installation notes for details.
   Thanks to Bill Sommerfeld for some useful hints.
+
+* [2258] An incorrect memcpy() statment in fakeka has been fixed.
+  Reported by David Thompson.
 
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
