@@ -148,7 +148,7 @@ extern void mit_des_generate_random_block
 
 /* process_ky.c */
 extern krb5_error_code mit_des_process_key
-    PROTOTYPE(( krb5_encrypt_block *,  krb5_keyblock *));
+    PROTOTYPE(( krb5_encrypt_block *,  const krb5_keyblock *));
 
 /* random_key.c */
 extern krb5_error_code mit_des_random_key
