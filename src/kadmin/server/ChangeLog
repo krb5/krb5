@@ -1,3 +1,17 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_svc.c (check_rpcsec_auth, gss_to_krb5_name): New
+	functions to check service name for RPCSEC_GSS.
+	(kadm_1): Add service name check for RPCSEC_GSS.
+
+	* ovsec_kadmd.c (main): Setup logging calllbacks for RPCSEC_GSS.
+	Use GSS_C_N_NAME for acceptor name for RPCSEC_GSS.
+	(log_badverf): Handle null client and server names.
+
+	* server_stubs.c (rqst2name): New function to return appropriate
+	gss_name_t for a given auth flavor (RPCSEC_GSS and AUTH_GSSAPI use
+	different field names).
+
 2004-05-27  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_svc.c (kadm_1): Allow RPCSEC_GSS; remove

@@ -41,7 +41,6 @@
 #include    <unistd.h>
 #include    <netinet/in.h>
 #include    <arpa/inet.h>  /* inet_ntoa */
-#include    <netdb.h>
 #include    <gssrpc/rpc.h>
 #include    <gssapi/gssapi.h>
 #include    "gssapiP_krb5.h" /* for kg_get_context */
@@ -208,13 +207,12 @@ int main(int argc, char *argv[])
      struct sockaddr_in addr;
      int s;
      auth_gssapi_name names[4];
-     char service_name[MAXHOSTNAMELEN + 8];
-     char localname[MAXHOSTNAMELEN];
-     struct hostent *hp;
      gss_buffer_desc gssbuf;
      gss_OID nt_krb5_name_oid;
      kadm5_config_params params;
-     
+
+     setvbuf(stderr, NULL, _IONBF, 0);
+
      /* This is OID value the Krb5_Name NameType */
      gssbuf.value = "{1 2 840 113554 1 2 2 1}";
      gssbuf.length = strlen(gssbuf.value);
@@ -228,17 +226,6 @@ int main(int argc, char *argv[])
      names[0].name = names[1].name = names[2].name = names[3].name = NULL;
      names[0].type = names[1].type = names[2].type = names[3].type =
 	     nt_krb5_name_oid;
-
-     if (gethostname(localname, MAXHOSTNAMELEN)) {
-	 perror("gethostname");
-	 exit(1);
-     }
-     hp = gethostbyname(localname);
-     if (hp == NULL) {
-	 perror("gethostbyname");
-	 exit(1);
-     }
-     sprintf(service_name, "kadmin@%s", hp->h_name);
 
 #ifdef PURIFY
      purify_start_batch();
@@ -583,10 +570,11 @@ kterr:
      svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);
      svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
      
-     in_buf.value = service_name;
-     in_buf.length = strlen(in_buf.value);
-     gss_import_name(&OMret, &in_buf, gss_nt_service_name, &gss_kadmin_name);
-     if (svcauth_gss_set_svc_name(gss_kadmin_name) != TRUE) {
+     svcauth_gss_set_log_badauth_func(log_badauth, NULL);
+     svcauth_gss_set_log_badverf_func(log_badverf, NULL);
+     svcauth_gss_set_log_miscerr_func(log_miscerr, NULL);
+     
+     if (svcauth_gss_set_svc_name(GSS_C_NO_NAME) != TRUE) {
 	 fprintf(stderr, "%s: Cannot initialize RPCSEC_GSS service name.\n",
 		 whoami);
 	 exit(1);
@@ -966,6 +954,10 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 
      (void) gss_display_name(&minor, client_name, &client, &gss_type);
      (void) gss_display_name(&minor, server_name, &server, &gss_type);
+     if (client.value == NULL)
+	 client.value = "(null)";
+     if (server.value == NULL)
+	 server.value = "(null)";
      a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
 
      proc = msg->rm_call.cb_proc;
