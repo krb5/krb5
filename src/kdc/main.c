@@ -435,6 +435,8 @@ char *argv[];
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
+    krb5_init_context(&kdc_context);
+
     setup_com_err();
 
     openlog(argv[0], LOG_CONS|LOG_NDELAY|LOG_PID, LOG_LOCAL6); /* XXX */

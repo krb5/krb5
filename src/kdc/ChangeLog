@@ -1,3 +1,7 @@
+Fri Mar 31 16:50:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* main.c (main): Make sure the context is initialized before it is
+	  	used.
 
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
