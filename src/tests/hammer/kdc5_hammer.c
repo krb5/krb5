@@ -51,8 +51,14 @@ krb5_data tgtname = {
     TGTNAME
 };
 
-int verify_cs_pair(char *, krb5_principal, char *, int, int, int, krb5_ccache);
-int get_tgt (char *, krb5_principal *, krb5_ccache);
+int verify_cs_pair PROTOTYPE((char *,
+			      krb5_principal,
+			      char *,
+			      int, int, int,
+			      krb5_ccache));
+int get_tgt PROTOTYPE((char *,
+		       krb5_principal *,
+		       krb5_ccache));
 
 static void
 usage(who, status)
@@ -234,8 +240,9 @@ OLDDECLARG(krb5_keyblock **,key)
   krb5_data pwd, salt;
   char *princ_str, *at;
   krb5_error_code code;
-  /* Does this belong here or in libos or something? */
-  
+  /* Jon Rochlis asks: Does this belong here or in libos or something? */
+  /* John Kohl replies: not really; it's not a generally useful function */
+
   code = krb5_unparse_name(princ, &princ_str);
   if (code) {
     com_err (prog, code, "while unparsing server name");
