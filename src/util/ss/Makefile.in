@@ -65,7 +65,7 @@ FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
 
 all:: all-$(WHAT)
 
-all-unix::	mk_cmds libss.a includes # libss_p.a lint
+all-unix::	mk_cmds ct_c.awk ct_c.sed libss.a includes # libss_p.a lint
 all-mac::
 all-windows::  all-unix
 
@@ -82,7 +82,7 @@ install::
 #	@mkdir ${DESTDIR}$(INCLDIR)/ss
 
 
-includes:: mk_cmds ss_err.h
+includes:: mk_cmds ct_c.sed ct_c.awk ss_err.h
 
 #install:: $(HFILES) copyright.h
 #	for i in $(HFILES) copyright.h; do \
@@ -125,7 +125,7 @@ libss.o:	$(OBJS)
 	$(CHMOD) -x $@
 
 # program(mk_cmds,$(MKCMDSOBJS), , LEXLIB BSDLIB,$(PROGDIR)) 
-all:: mk_cmds ct_c.awk ct_c.sed
+# all:: mk_cmds 
 
 #mk_cmds: $(MKCMDSOBJS)
 #	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
@@ -139,14 +139,14 @@ mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script
 	$(srcdir)/config_script $(srcdir)/mk_cmds.sh . $(AWK) $(SED) > mk_cmds
 	chmod 755 mk_cmds	
 
-ct_c.awk: $(srcdir)/ct_c.awk.in
-	$(CP) $(srcdir)/ct_c.awk.in ct_c.awk
+ct_c.awk: $(srcdir)/ct_c_awk.in
+	$(CP) $(srcdir)/ct_c_awk.in ct_c.awk
 
-ct_c.sed: $(srcdir)/ct_c.sed.in
-	$(SED) -e '/^#/d' $(srcdir)/ct_c.sed.in > ct_c.sed
+ct_c.sed: $(srcdir)/ct_c_sed.in
+	$(SED) -e '/^#/d' $(srcdir)/ct_c_sed.in > ct_c.sed
 
 clean::
-	$(RM) mk_cmds $(MKCMDSOBJS)
+	$(RM) mk_cmds ct_c.awk ct_c.sed $(MKCMDSOBJS)
 
 # 
 
