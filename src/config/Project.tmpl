@@ -140,14 +140,15 @@ libdir/lib/**/libname.a:						@@\
         DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
            KDBLIB = $(DEPKDBLIB)
 
-#ifdef UseInstalled
+#ifdef UseImakeInstalled
             IMAKE = imake		/* assume BINDIR in path */
-           DEPEND = makedepend		/* assume BINDIR in path */
-        MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
 #else
             IMAKE = $(IMAKESRC)/imake
+#endif
+#ifdef UseMakedependInstalled
+           DEPEND = makedepend		/* assume BINDIR in path */
+#else
            DEPEND = DependCmd
-        MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
 #endif
 #ifdef UseSSInstalled
             SSLIB = -lss
