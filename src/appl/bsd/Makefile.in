@@ -63,7 +63,7 @@ install::
 		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	fi
 
-kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
 klogind: krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)

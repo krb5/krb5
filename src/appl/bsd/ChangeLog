@@ -1,3 +1,7 @@
+Fri Mar 12 19:01:35 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kshd): Add $(LOGINLIBS).
+
 Mon Mar  8 19:21:23 1999  Tom Yu  <tlyu@mit.edu>
 
 	* kshd.M: Resync manpage.
