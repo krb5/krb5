@@ -200,7 +200,7 @@ krb5_deltat lifespan;
     return 0;
 }
 
-krb5_error_code krb5_rc_dfl_close(id)
+krb5_error_code krb5_rc_dfl_close_no_free(id)
 krb5_rcache id;
 {
  struct dfl_data *t = (struct dfl_data *)id->data;
@@ -220,6 +220,14 @@ krb5_rcache id;
 #endif
  FREE(t);
  return 0;
+}
+
+krb5_error_code krb5_rc_dfl_close(id)
+krb5_rcache id;
+{
+    krb5_rc_dfl_close_no_free(id);
+    free(id);
+    return 0;
 }
 
 krb5_error_code krb5_rc_dfl_destroy(id)
@@ -501,7 +509,7 @@ krb5_rcache id;
     krb5_rcache tmp;
     krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
 
-    (void) krb5_rc_dfl_close(id);
+    (void) krb5_rc_dfl_close_no_free(id);
     retval = krb5_rc_dfl_resolve(id, name);
     if (retval)
 	return retval;
