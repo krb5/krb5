@@ -162,8 +162,7 @@ char *argv[];
 
     /* TRUE here means read the keyboard, but only once */
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE,
-				    FALSE,
-				    &master_keyblock)) {
+				    FALSE, 0, &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
 	(void) krb5_db_fini();
 	exit(1);
