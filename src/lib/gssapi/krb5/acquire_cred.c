@@ -267,7 +267,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    krb5_context context;
    size_t i;
    krb5_gss_cred_id_t cred;
-   gss_OID_set valid_mechs, ret_mechs;
+   gss_OID_set ret_mechs;
+   const gss_OID_set_desc FAR * valid_mechs;
    int req_old, req_new;
    OM_uint32 ret;
    krb5_error_code code;

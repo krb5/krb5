@@ -1,3 +1,8 @@
+Fri Aug  2 13:40:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Add const to local
+		variable which is pointing to const data.
+
 Fri Jul 26 16:58:31 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (OBJS): Remove trailing backslash on a comment; it
