@@ -1,3 +1,9 @@
+Tue Jun 27 20:50:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: *int*_t are likely to collide with native types,
+	and the int8_t and *int64_t are never used anyway, so push them
+	off to hash/configure.in AC_CHECK_TYPE calls. pgno_t also.
+
 
 Tue Jun 27 15:47:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* hash.c - Cast 2nd argument to memmove to (char *).

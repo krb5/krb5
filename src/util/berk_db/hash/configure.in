@@ -6,7 +6,14 @@ AC_PROG_RANLIB
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
-
+dnl berzerkely types, to avoid collisions.
+AC_CHECK_TYPE(u_int8_t, unsigned char)
+AC_CHECK_TYPE(int16_t, short)
+AC_CHECK_TYPE(u_int16_t, unsigned short)
+AC_CHECK_TYPE(int32_t, int)
+AC_CHECK_TYPE(u_int32_t, unsigned int)
+AC_CHECK_TYPE(pgno_t, u_int32_t)
+dnl
 dnl Determine the size of datum and DBT size fields. If they are not the same
 dnl then the elements need to be copied.
 AC_MSG_CHECKING(size of datum.dsize)
