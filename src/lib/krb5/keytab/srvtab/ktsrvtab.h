@@ -71,7 +71,7 @@ krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_get_name
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   char *,
-		   int));
+		   unsigned int));
 
 krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_close
 	PROTOTYPE((krb5_context,

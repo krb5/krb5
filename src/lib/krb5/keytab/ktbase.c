@@ -88,16 +88,17 @@ krb5_kt_resolve (context, name, ktid)
     krb5_keytab FAR *ktid;
 {
     struct krb5_kt_typelist *tlist;
-    char *pfx, *resid, *cp;
-    int pfxlen;
+    char *pfx;
+    unsigned int pfxlen;
+    const char *cp, *resid;
     
     cp = strchr (name, ':');
     if (!cp) {
 	    return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
     }
 
-    pfxlen = cp - (char *)name;
-    resid = (char *)name + pfxlen + 1;
+    pfxlen = cp - name;
+    resid = name + pfxlen + 1;
 	
     pfx = malloc (pfxlen+1);
     if (!pfx)

@@ -35,7 +35,7 @@ krb5_ktfile_get_name(context, id, name, len)
     krb5_context context;
   krb5_keytab id;
   char *name;
-  int len;
+  unsigned int len;
   /* 
    * This routine returns the name of the name of the file associated with
    * this file-based keytab.  name is zeroed and the filename is truncated

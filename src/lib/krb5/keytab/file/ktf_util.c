@@ -255,6 +255,7 @@ krb5_int32 *delete_point;
 {
     krb5_octet vno;
     krb5_int16 count;
+    unsigned int u_count, u_princ_size;
     krb5_int16 enctype;
     krb5_int16 princ_size;
     register int i;
@@ -311,9 +312,11 @@ krb5_int32 *delete_point;
     if (!ret_entry->principal)
         return ENOMEM;
     
+    u_count = count;
     ret_entry->principal->magic = KV5M_PRINCIPAL;
-    ret_entry->principal->length = count;
-    ret_entry->principal->data = (krb5_data *)calloc(count, sizeof(krb5_data));
+    ret_entry->principal->length = u_count;
+    ret_entry->principal->data = (krb5_data *) 
+                                 calloc(u_count, sizeof(krb5_data));
     if (!ret_entry->principal->data) {
 	free(ret_entry->principal);
 	ret_entry->principal = 0;
@@ -331,13 +334,15 @@ krb5_int32 *delete_point;
 	    error = KRB5_KT_END;
 	    goto fail;
     }
-    krb5_princ_set_realm_length(context, ret_entry->principal, princ_size);
-    tmpdata = malloc(princ_size+1);
+    u_princ_size = princ_size;
+
+    krb5_princ_set_realm_length(context, ret_entry->principal, u_princ_size);
+    tmpdata = malloc(u_princ_size+1);
     if (!tmpdata) {
 	    error = ENOMEM;
 	    goto fail;
     }
-    if (fread(tmpdata, 1, princ_size, KTFILEP(id)) != (size_t) princ_size) {
+    if (fread(tmpdata, 1, u_princ_size, KTFILEP(id)) != (size_t) princ_size) {
 	    free(tmpdata);
 	    error = KRB5_KT_END;
 	    goto fail;
@@ -360,13 +365,14 @@ krb5_int32 *delete_point;
 	    goto fail;
         }
 
-	princ->length = princ_size;
-	princ->data = malloc(princ_size+1);
+	u_princ_size = princ_size; 
+	princ->length = u_princ_size;
+	princ->data = malloc(u_princ_size+1);
 	if (!princ->data) {
 	    error = ENOMEM;
 	    goto fail;
         }
-	if (!xfread(princ->data, sizeof(char), princ_size, KTFILEP(id))) {
+	if (!xfread(princ->data, sizeof(char), u_princ_size, KTFILEP(id))) {
 	    error = KRB5_KT_END;
 	    goto fail;
         }
@@ -421,9 +427,11 @@ krb5_int32 *delete_point;
 	error = KRB5_KT_END;
 	goto fail;
     }
-    ret_entry->key.length = count;
+
+    u_count = count;
+    ret_entry->key.length = u_count;
     
-    ret_entry->key.contents = (krb5_octet *)malloc(count);
+    ret_entry->key.contents = (krb5_octet *)malloc(u_count);
     if (!ret_entry->key.contents) {
 	error = ENOMEM;
 	goto fail;

@@ -35,7 +35,7 @@ krb5_ktsrvtab_get_name(context, id, name, len)
     krb5_context context;
     krb5_keytab id;
     char *name;
-    int len;
+    unsigned int len;
   /* 
    * This routine returns the name of the name of the file associated with
    * this srvtab-based keytab.  The name is prefixed with PREFIX:, so that

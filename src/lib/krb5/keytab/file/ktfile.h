@@ -79,7 +79,7 @@ krb5_error_code KRB5_CALLCONV krb5_ktfile_get_name
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   char *,
-		   int));
+		   unsigned int));
 
 krb5_error_code KRB5_CALLCONV krb5_ktfile_close 
 	PROTOTYPE((krb5_context,

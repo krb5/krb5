@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Signed/unsigned int
+	cleanups. Maintain const char * attribute of incomming name.
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktbase.c (krb5_kt_resolve): Change prototype from const to

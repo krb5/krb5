@@ -1,3 +1,10 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktf_util.c: Unsigned/signed int cleanups.
+
+	* ktf_g_name.c, ktfile.h (krb5_ktfile_get_name): Length field now
+	unsigned int.
+
 2000-09-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* ser_ktf.c (krb5_ktf_keytab_externalize): Do not violate const char * 
