@@ -38,6 +38,8 @@ all::
 
 MakeSubdirs($(SUBDIRS))
 
+depend:: includes
+
 /**/# rebuild the Makefiles in the master source tree
 mastermakefiles::
 	cd $(IMAKESRC); $(MAKE) -f Makefile.ini clean; $(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"

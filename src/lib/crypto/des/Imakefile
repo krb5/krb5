@@ -108,3 +108,5 @@ s_table.h: make_st
 depend:: des.c
 
 NormalLintTarget($(SRCS))
+
+DependTarget()
