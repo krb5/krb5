@@ -37,13 +37,13 @@
  */
 
 int
-mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
+mit_des_cbc_encrypt(in, out, length, schedule, ivec, enc)
 	const mit_des_cblock FAR *in;
 	mit_des_cblock FAR *out;
 	unsigned long length;
 	const mit_des_key_schedule schedule;
 	const mit_des_cblock ivec;
-	int encrypt;
+	int enc;
 {
 	register unsigned DES_INT32 left, right;
 	register unsigned DES_INT32 temp;
@@ -59,7 +59,7 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	/*
 	 * Deal with encryption and decryption separately.
 	 */
-	if (encrypt) {
+	if (enc) {
 		/*
 		 * Initialize left and right with the contents of the initial
 		 * vector.
