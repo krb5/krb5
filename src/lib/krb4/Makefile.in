@@ -32,6 +32,10 @@ EHDRDIR=$(BUILDTOP)$(S)include$(S)kerberosIV
 KRB_ERR=@KRB_ERR@
 ##DOS##KRB_ERR=$(OUTPRE)krb_err.$(OBJEXT)
 
+# Name of generated krb_err.c, needed for err_txt.* dependency on Darwin.
+KRB_ERR_C=@KRB_ERR_C@
+##DOS##KRB_ERR_C=
+
 OBJS	= \
 	$(OUTPRE)change_password.$(OBJEXT) \
 	$(OUTPRE)cr_auth_repl.$(OBJEXT) \
@@ -219,7 +223,7 @@ krb_err_txt.c: krb_err.et $(srcdir)$(S)et_errtxt.awk
 # Will be empty on Darwin, krb_err_txt.c elsewhere.
 KRB_ERR_TXT=@KRB_ERR_TXT@
 ##DOS##KRB_ERR_TXT=krb_err_txt.c
-err_txt.so err_txt.po $(OUTPRE)err_txt.$(OBJEXT): err_txt.c $(KRB_ERR_TXT)
+err_txt.so err_txt.po $(OUTPRE)err_txt.$(OBJEXT): err_txt.c $(KRB_ERR_C) $(KRB_ERR_TXT)
 
 depend-dependencies: krb_err.h $(EHDRDIR)$(S)krb_err.h \
 	kadm_err.h $(EHDRDIR)$(S)kadm_err.h \
