@@ -32,6 +32,7 @@
 #define __KRB5_FILE_CCACHE__
 
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
 #include <krb5/ext-proto.h>
 #include "fcc-proto.h"
 #include <krb5/sysincl.h>

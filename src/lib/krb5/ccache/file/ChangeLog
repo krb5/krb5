@@ -1,0 +1,5 @@
+Mon Jun 20 19:36:19 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* fcc.h: #include <krb5/osconf.h> so that build works using imake.
+
+

@@ -1,0 +1,4 @@
+Mon Jun 20 19:37:13 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* rc_base.h: #include <krb5/osconf.h> so that build works using	imake. 
+

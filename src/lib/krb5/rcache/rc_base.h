@@ -11,6 +11,7 @@
 #ifndef KRB5_RC_H
 #define KRB5_RC_H
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
 #include <krb5/ext-proto.h>
 
 /* all the stuff that was here is now in rcache.h, included by krb5/krb5.h */
