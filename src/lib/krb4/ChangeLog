@@ -1,3 +1,7 @@
+2002-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* decomp_tkt.c (decomp_ticket): Add KRB5_CALLCONV.
+
 2002-12-04  Tom Yu  <tlyu@mit.edu>
 
 	* krb4int.h: Remove now conflicting prototype for

@@ -70,7 +70,7 @@ static int dcmp_tkt_int (KTEXT tkt, unsigned char *flags,
  * See create_ticket.c for the format of the ticket packet.
  */
 
-int
+int KRB5_CALLCONV		/* XXX should this be exported on win32? */
 decomp_ticket(tkt, flags, pname, pinstance, prealm, paddress, session,
               life, time_sec, sname, sinstance, key, key_s)
     KTEXT tkt;			/* The ticket to be decoded */
