@@ -62,6 +62,7 @@
 #define SECURITY_WIN32
 #include <security.h>
 #include <ntsecapi.h>
+#include <ntstatus.h>
 
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
@@ -1265,18 +1266,25 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket;
+    krb5_error_code  retval = KRB5_OK;
 
   next_cred:
-    if ( lcursor->index >= lcursor->response->CountOfTickets )
-        return KRB5_CC_END;
+    if ( lcursor->index >= lcursor->response->CountOfTickets ) {
+        if (retval == KRB5_OK)
+            return KRB5_CC_END;
+        else {
+            LsaFreeReturnBuffer(lcursor->mstgt);
+            LsaFreeReturnBuffer(lcursor->response);
+            free(*cursor);
+            *cursor = 0;
+            return retval;
+        }
+    }
 
     if (!GetMSCacheTicketFromCacheInfo(data->LogonHandle, data->PackageId,
                                         &lcursor->response->Tickets[lcursor->index++],&msticket)) {
-        LsaFreeReturnBuffer(lcursor->mstgt);
-        LsaFreeReturnBuffer(lcursor->response);
-        free(*cursor);
-        *cursor = 0;
-        return KRB5_FCC_INTERNAL;
+        retval = KRB5_FCC_INTERNAL;
+        goto next_cred;
     }
 
     /* Don't return tickets with NULL Session Keys */
@@ -1309,10 +1317,13 @@ krb5_lcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
 
-    LsaFreeReturnBuffer(lcursor->mstgt);
-    LsaFreeReturnBuffer(lcursor->response);
-    free(*cursor);
+    if ( lcursor ) {
+        LsaFreeReturnBuffer(lcursor->mstgt);
+        LsaFreeReturnBuffer(lcursor->response);
+        free(*cursor);
+    }
     *cursor = 0;
+
     return KRB5_OK;
 }
 

@@ -1,3 +1,18 @@
+2004-02-02  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c: the MSLSA code was crashing on Pismere machines when 
+     logging on with cross realm credentials.  On these machines there are
+     8 tickets within the LSA cache from two different realms.  One of the
+     krbtgt/CLIENT-REALM@CLIENT-REALM tickets (not the Initial ticket but
+     a Forwarded ticket) is inaccessible to the ms2mit.exe and leash32.exe
+     processes.  The attempt to access the ticket returns a SubStatus code
+     of STATUS_LOGON_FAILURE (0xC000006DL) which is supposed to mean that
+     the logon attempt was invalid due to bad authentication information.
+     kerbtray has no problem listing this ticket.  The other seven tickets
+     in the cache including the Initial Ticket are accessible.  Modified 
+     krb5_lcc_next_cred() to skip to the next ticket if an attempt to read
+     a single ticket fails.
+
 2004-01-31  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_mslsa.c: Optimize the get next logic by storing a handle to
