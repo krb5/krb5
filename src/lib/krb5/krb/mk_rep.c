@@ -27,7 +27,7 @@ static char rcsid_mk_rep_c[] =
 /*
  Formats a KRB_AP_REP message into outbuf.
 
- The reply in repl is encrypted under the key in creds, and the resulting
+ The reply in repl is encrypted under the key in kblock, and the resulting
  message encoded and left in outbuf.
 
  The outbuf buffer storage is allocated, and should be freed by the
@@ -37,9 +37,9 @@ static char rcsid_mk_rep_c[] =
 */
 
 krb5_error_code
-krb5_mk_rep(repl, creds, outbuf)
+krb5_mk_rep(repl, kblock, outbuf)
 const krb5_ap_rep_enc_part *repl;
-const krb5_creds *creds;
+const krb5_keyblock *kblock;
 krb5_data *outbuf;
 {
     krb5_error_code retval;
@@ -50,10 +50,10 @@ krb5_data *outbuf;
     krb5_data *toutbuf;
 
     /* verify a valid etype is available */
-    if (!valid_keytype(creds->keyblock.keytype))
+    if (!valid_keytype(kblock->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    etype = krb5_keytype_array[creds->keyblock.keytype]->system->proto_enctype;
+    etype = krb5_keytype_array[kblock->keytype]->system->proto_enctype;
 
     if (!valid_etype(etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
@@ -85,7 +85,7 @@ krb5_data *outbuf;
 #define cleanup_encpart() {(void) bzero(reply.enc_part.data, reply.enc_part.length); free(reply.enc_part.data); reply.enc_part.length = 0; reply.enc_part.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, &creds->keyblock)) {
+    if (retval = krb5_process_key(&eblock, kblock)) {
 	goto clean_encpart;
     }
 

@@ -26,15 +26,15 @@ static char rcsid_rd_req_dec_c[] =
 
  repl is filled in with the fields from the encrypted response.
 
- creds supplies the encryption key used to decrypt the message.
+ the key in kblock is used to decrypt the message.
 
  returns system errors, encryption errors, replay errors
  */
 
 krb5_error_code
-krb5_rd_rep(inbuf, creds, repl)
+krb5_rd_rep(inbuf, kblock, repl)
 const krb5_data *inbuf;
-const krb5_creds *creds;
+const krb5_keyblock *kblock;
 krb5_ap_rep_enc_part *repl;
 {
     krb5_error_code retval;
@@ -46,7 +46,7 @@ krb5_ap_rep_enc_part *repl;
     if (!krb5_is_ap_rep(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    if (!valid_keytype(creds->keyblock.keytype))
+    if (!valid_keytype(kblock->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
     
     /* decode it */
@@ -56,7 +56,7 @@ krb5_ap_rep_enc_part *repl;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_keytype_array[creds->keyblock.keytype]->system;
+    eblock.crypto_entry = krb5_keytype_array[kblock->keytype]->system;
 
     scratch.length = reply->enc_part.length;
     if (!(scratch.data = malloc(scratch.length))) {
@@ -65,7 +65,7 @@ krb5_ap_rep_enc_part *repl;
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, &creds->keyblock)) {
+    if (retval = krb5_process_key(&eblock, kblock)) {
     errout:
 	free(scratch.data);
 	krb5_free_ap_rep(reply);
