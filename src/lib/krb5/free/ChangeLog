@@ -1,3 +1,7 @@
+Fri Mar 17 19:45:01 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Elim duplicate.
+
 Wed Mar 15 12:21:24 1995 Keith Vetter (keithv@fusion.com)
 
 	* f_cksum.c renamed to f_chksum.c because of module name conflicts
