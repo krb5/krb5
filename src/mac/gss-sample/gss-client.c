@@ -336,7 +336,7 @@ SOCKET connect_to_server(char *host, u_short port)
      }
      
      saddr.sin_family = hp->h_addrtype;
-     memcpy((char *)&saddr.sin_addr, hp->h_addr, hp->h_length);
+     memcpy((char *)&saddr.sin_addr, hp->h_addr, sizeof(saddr.sin_addr));
      saddr.sin_port = htons(port);
 
      if ((s = socket(AF_INET, SOCK_STREAM, 0)) == (SOCKET) -1) {

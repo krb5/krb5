@@ -180,7 +180,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    return (-1);
     	}
     	sin.sin_family = hp->h_addrtype;
-    	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, hp->h_length);
+    	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, sizeof(sin.sin_addr));
     	sin.sin_port = rport;
     	if (connect(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0)
 	  break;
@@ -200,7 +200,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    perror(0);
 	    hp->h_addr_list++;
 	    memcpy((caddr_t)&sin.sin_addr,hp->h_addr_list[0],
-		   hp->h_length);
+		   sizeof(sin.sin_addr));
 	    fprintf(stderr, "Trying %s...\n",
 		    inet_ntoa(sin.sin_addr));
 	    continue;

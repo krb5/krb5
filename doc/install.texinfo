@@ -123,10 +123,17 @@ installation procedure is somewhat involved, and requires forethought
 and planning.  @value{COMPANY} has attempted to make this
 @value{PRODUCT} Installation Guide as concise as possible, rather than
 making it an exhaustive description of the details of Kerberos.
+@ifset cygnus
 Consequently, everything in this guide appears because @value{COMPANY}
 believes that it is important.  Please read and follow these
 instructions carefully, and if there is anything you do not understand
 or are not sure of, please don't hesitate to call us.
+@end ifset
+@ifclear cygnus
+Consequently, everything in this guide appears because @value{COMPANY}
+believes that it is important.  Please read and follow these
+instructions carefully.
+@end ifclear
 
 @node Overview of This Guide,  , Please Read the Documentation, Introduction
 @section Overview of This Guide
@@ -271,9 +278,10 @@ Have at least one slave KDC as a backup, for when the master KDC is
 down, is being upgraded, or is otherwise unavailable.
 
 @item
-If your network is split such that a network outage is likely to cause
-some segment or segments of the network to become cut off or isolated,
-have a slave KDC accessible to each segment.
+If your network is split such that a network outage is likely to cause a
+network partition (some segment or segments of the network to become cut
+off or isolated from other segments), have a slave KDC accessible to
+each segment.
 
 @item
 If possible, have at least one slave KDC in a different building from
@@ -304,7 +312,7 @@ effect.
 
 If the propagation time is longer than this maximum reasonable time
 (@i{e.g.,} you have a particularly large database, you have a lot of
-slaves, and/or you experience frequent network delays), you may wish to
+slaves, or you experience frequent network delays), you may wish to
 cut down on your propagation delay by performing the propagation in
 parallel.  To do this, have the master KDC propagate the database to one
 set of slaves, and then have each of these slaves propagate the database
@@ -359,12 +367,12 @@ regular intervals.  All database changes (such as password changes) are
 made on the master KDC.
 
 Slave KDCs provide Kerberos ticket-granting services, but not database
-access.  This allows clients to continue to obtain tickets when the
-master KDC is unavailable.
+administration.  This allows clients to continue to obtain tickets when
+the master KDC is unavailable.
 
-@value{COMPANY}'s recommends that you install all of your KDCs to be
-able to function as either the master or one of the slaves.  This will
-enable you to easily switch your master KDC with one of the slaves if
+@value{COMPANY} recommends that you install all of your KDCs to be able
+to function as either the master or one of the slaves.  This will enable
+you to easily switch your master KDC with one of the slaves if
 necessary.  (@xref{Switching Master and Slave KDCs}.)  This installation
 procedure is based on that recommendation.
 
@@ -401,9 +409,7 @@ Modify the configuration files, @code{/etc/krb5.conf}
 (@pxref{krb5.conf}) and @code{@value{ROOTDIR}/var/krb5kdc/kdc.conf}
 (@pxref{kdc.conf}) to reflect the correct information (such as the
 hostnames and realm name) for your realm.  @value{COMPANY} recommends
-that you keep @code{krb5.conf} in @code{/etc}.  The @code{krb5.conf}
-file may contain a pointer to @code{kdc.conf}, which you need to change
-if you want to move @code{kdc.conf} to another location.
+that you keep @code{krb5.conf} in @code{/etc}.
 
 @node Create the Database, Add Administrators to the Acl File, Edit the Configuration Files, Install the Master KDC
 @subsubsection Create the Database
@@ -430,11 +436,10 @@ words that can be found in a dictionary, any common or popular name,
 especially a famous person (or cartoon character), your username in any
 form (@i{e.g.}, forward, backward, repeated twice, @i{etc.}), and any of
 the sample keys that appear in this manual.  One example of a key which
-would be good if it did not appear in this manual is ``MITiys4K5!'',
-which represents the sentence ``@value{COMPANY} is your source for
-Kerberos 5!''  (It's the first letter of each word, substituting the
-numeral ``4'' for the word ``for'', and includes the punctuation mark at
-the end.)
+might be good if it did not appear in this manual is ``MITiys4K5!'',
+which represents the sentence ``MIT is your source for Kerberos 5!''
+(It's the first letter of each word, substituting the numeral ``4'' for
+the word ``for'', and includes the punctuation mark at the end.)
 
 The following is an example of how to create a Kerberos database and
 stash file on the master KDC, using the @code{kdb5_util} command.  (The
@@ -758,8 +763,8 @@ KDC:
 kerberos        88/udp      kdc       # Kerberos authentication (udp)
 kerberos        88/tcp      kdc       # Kerberos authentication (tcp)
 krb5_prop       754/tcp               # Kerberos slave propagation
-kerberos-adm    749/tcp              # Kerberos 5 admin/changepw (tcp)
-kerberos-adm    749/udp              # Kerberos 5 admin/changepw (udp)
+kerberos-adm    749/tcp               # Kerberos 5 admin/changepw (tcp)
+kerberos-adm    749/udp               # Kerberos 5 admin/changepw (udp)
 eklogin         2105/tcp              # Kerberos encrypted rlogin
 @end group
 @end smallexample

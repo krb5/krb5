@@ -53,8 +53,10 @@
 
 #ifdef PROVIDE_NIST_SHA
 #include "shs.h"
-#define SHA_CKENTRY &nist_sha_cksumtable_entry
-#define HMAC_SHA_CKENTRY &hmac_sha_cksumtable_entry
+/* #define SHA_CKENTRY &nist_sha_cksumtable_entry */
+/* #define HMAC_SHA_CKENTRY &hmac_sha_cksumtable_entry */
+#define SHA_CKENTRY 0
+#define HMAC_SHA_CKENTRY 0
 #else
 #define SHA_CKENTRY 0
 #define HMAC_SHA_CKENTRY 0
@@ -109,7 +111,11 @@
 #include "des_int.h"
 #define _DES_DONE__
 #endif
-#define DES3_CBC_SHA_CSENTRY &krb5_des3_sha_cst_entry
+/* Don't try to enable triple DES unless you know what you are doing; */
+/* the current implementation of triple DES is NOT the final and */
+/* correct implementation.!!!  */
+/* #define DES3_CBC_SHA_CSENTRY &krb5_des3_sha_cst_entry */
+#define DES3_CBC_SHA_CSENTRY 0
 #else
 #define DES3_CBC_SHA_CSENTRY 0
 #endif
@@ -119,7 +125,8 @@
 #include "des_int.h"
 #define _DES_DONE__
 #endif
-#define DES3_CBC_RAW_CSENTRY &krb5_des3_raw_cst_entry
+/* #define DES3_CBC_RAW_CSENTRY &krb5_des3_raw_cst_entry */
+#define DES3_CBC_RAW_CSENTRY 0
 #else
 #define DES3_CBC_RAW_CSENTRY 0
 #endif

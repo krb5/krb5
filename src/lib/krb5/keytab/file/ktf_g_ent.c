@@ -40,6 +40,7 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 {
     krb5_keytab_entry cur_entry, new_entry;
     krb5_error_code kerror = 0;
+    int found_wrong_kvno = 0;
 
     /* Open the keyfile for reading */
     if ((kerror = krb5_ktfileint_openr(context, id)))
@@ -92,14 +93,21 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 			    krb5_kt_free_entry(context, &cur_entry);
 			    cur_entry = new_entry;
 			    break;
-			}
+			} else
+			     found_wrong_kvno++;
 		}
 	} else {
 		krb5_kt_free_entry(context, &new_entry);
 	}
     }
-    if (kerror == KRB5_KT_END)
-	    kerror = cur_entry.principal ? 0 : KRB5_KT_NOTFOUND;
+    if (kerror == KRB5_KT_END) {
+	 if (cur_entry.principal)
+	      kerror = 0;
+	 else if (found_wrong_kvno)
+	      kerror = KRB5_KT_KVNONOTFOUND;
+	 else
+	      kerror = KRB5_KT_NOTFOUND;
+    }
     if (kerror) {
 	(void) krb5_ktfileint_close(context, id);
 	krb5_kt_free_entry(context, &cur_entry);
