@@ -4,6 +4,7 @@
  * $Id$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,7 +15,6 @@
 #ifndef KRB5_KRB_ERR_H__
 #define KRB5_KRB_ERR_H__
 
-#include <krb5/copyright.h>
 #define KRBET_KSUCCESS                           ((int)39525376)
 #define KRBET_KDC_NAME_EXP                       ((int)39525377)
 #define KRBET_KDC_SERVICE_EXP                    ((int)39525378)

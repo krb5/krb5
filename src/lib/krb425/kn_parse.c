@@ -2,13 +2,18 @@
  * $Source$
  * $Author$
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987,1988,1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
  */
 
-#include <mit-copyright.h>
+#if !defined(lint) && !defined(SABER)
+static char rcsid_kn_parse_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
 
 #include <stdio.h>
 #include <krb.h>

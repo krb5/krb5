@@ -16,7 +16,6 @@
 #ifndef KRB5_krb425__
 #define KRB5_krb425__
 
-#include <krb5/copyright.h>
 #include <ctype.h>
 #include <netdb.h>
 #include <krb.h>

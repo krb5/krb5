@@ -2,14 +2,19 @@
  * $Source$
  * $Author$
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987,1988,1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
  *
  */
 
-#include <mit-copyright.h>
+#if !defined(lint) && !defined(SABER)
+static char rcsid_sendauth_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
 #include "krb425.h"
 
 #include <sys/types.h>
