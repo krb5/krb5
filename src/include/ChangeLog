@@ -1,5 +1,9 @@
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
 
+        * krb5.hin: add prototype for krb5_is_thread_safe
+
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
         * win-mac.h: define NEED_INSIXADDR_ANY for ipv6 symbol
 
 2005-01-04  Ken Raeburn  <raeburn@mit.edu>
