@@ -1,3 +1,9 @@
+2001-04-03  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add checks for unsetenv and getenv.  Compile
+	setenv.o if any of setenv, unsetenv, or getenv are
+	missing. [pullup from krb5-1-2-2-branch]
+
 2000-03-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for alpha*-dec-osf* instead of
