@@ -1,3 +1,10 @@
+2004-09-13  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
+
+  Detect the Wix MSI, the SWRT MSI, and the Pismere MSI
+  If found, uninstall the MSI before installing NSIS
+
 2004-09-07  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi:

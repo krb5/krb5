@@ -624,17 +624,17 @@ checkprevious:
   ReadRegStr $R0 HKLM \
   "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
   "DisplayVersion"
-  IfErrors contInstall
+  IfErrors testWIX
   StrCmp $R0 "${KFW_VERSION}" contInstall
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
   "${PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
   previous version or `Cancel` to cancel this upgrade or downgrade." \
-  IDOK uninst
+  IDOK uninstNSIS
   Abort
   
 ;Run the uninstaller
-uninst:
+uninstNSIS:
   ReadRegStr $R0 HKLM \
   "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
   "UninstallString"
@@ -651,6 +651,95 @@ uninst:
   Call RestartRequired
   Pop $R1
   StrCmp $R1 "1" Restart DoNotRestart
+
+testWIX:
+  ClearErrors
+  ReadRegStr $R0 HKLM \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\{FD5B1F41-81BB-4BBC-9F7E-4B971660AE1A}" \
+  "DisplayVersion"
+  IfErrors testSWRT
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
+  previous version or `Cancel` to cancel this installation." \
+  IDOK uninstMSI1
+  Abort
+  
+;Run the uninstaller
+uninstMSI1:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{FD5B1F41-81BB-4BBC-9F7E-4B971660AE1A} /passive /promptrestart'
+
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
+
+testSWRT:
+  ClearErrors
+  ReadRegStr $R0 HKLM \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\{61211594-AAA1-4A98-A299-757326763CC7}" \
+  "DisplayVersion"
+  IfErrors testPismere
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
+  previous version or `Cancel` to cancel this installation." \
+  IDOK uninstMSI2
+  Abort
+  
+;Run the uninstaller
+uninstMSI2:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{61211594-AAA1-4A98-A299-757326763CC7} /passive /promptrestart'
+
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
+
+testPismere:
+  ClearErrors
+  ReadRegStr $R0 HKLM \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\{83977767-388D-4DF8-BB08-3BF2401635BD}" \
+  "DisplayVersion"
+  IfErrors contInstall
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PROGRAM_NAME} is already installed. $\n$\nClick `OK` to remove the \
+  previous version or `Cancel` to cancel this installation." \
+  IDOK uninstPismere
+  Abort
+  
+;Run the uninstaller
+uninstPismere:
+  ClearErrors
+  ExecWait 'MSIEXEC /x{83977767-388D-4DF8-BB08-3BF2401635BD} /passive /promptrestart'
+
+  IfErrors no_remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+
+  Push $R1
+  Call RestartRequired
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
+
+
 
 Restart:
    MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Please reboot and then restart the installer."
