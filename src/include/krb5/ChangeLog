@@ -1,3 +1,8 @@
+Wed Jan 25 19:26:57 1995  John Gilmore  (gnu at toad.com)
+
+	* crc-32.h:  Move to lib/crypto/crc32; only gets local use.
+	* rsa-md4.h:  Move to lib/crypto/md4; only gets local use.
+
 Wed Jan 25 20:01:36 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: rewrote remaining tests to use AC_TRY_COMPILE and
