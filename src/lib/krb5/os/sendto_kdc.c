@@ -79,8 +79,7 @@ OLDDECLARG(krb5_data *, reply)
     int socklist[AF_MAX];		/* one for each, if necessary! */
     fd_set readable;
     struct timeval waitlen;
-    struct sockaddr fromaddr;
-    int fromlen, cc;
+    int cc;
 
     /*
      * find KDC location(s) for realm
