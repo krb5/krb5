@@ -159,7 +159,7 @@
 		00CFB47BFF6EA3C312120111 = {
 			isa = PBXFrameworkReference;
 			name = CCache.framework;
-			path = /System/Library/Frameworks/CCache.framework;
+			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework;
 			refType = 0;
 		};
 		00CFB47CFF6EA3C312120111 = {
@@ -297,7 +297,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = ComErr;
-			productInstallPath = /System/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 			productName = ComErr;
 			productReference = 012574A5FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -490,7 +490,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = Profile;
-			productInstallPath = /System/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 			productName = Profile;
 			productReference = 012574A6FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -880,9 +880,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "\"/System/Library/Frameworks/Kerberos.framework/Frameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SRCROOT)/../../CCacheLib/Headers\"";
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"/System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -904,7 +904,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = Kerberos5;
-			productInstallPath = /System/Library/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 			productName = Kerberos5;
 			productReference = 012574A7FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -3261,15 +3261,13 @@
 		};
 		174476CCFF60088512120111 = {
 			isa = PBXFrameworkReference;
-			name = ComErr.framework;
-			path = build/ComErr.framework;
-			refType = 4;
+			path = ComErr.framework;
+			refType = 3;
 		};
 		174476CDFF60088512120111 = {
 			isa = PBXFrameworkReference;
-			name = Profile.framework;
-			path = build/Profile.framework;
-			refType = 4;
+			path = Profile.framework;
+			refType = 3;
 		};
 		174476CEFF60088512120111 = {
 			isa = PBXFileReference;
@@ -7327,6 +7325,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = GSS;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 			productName = GSS;
 			productReference = 012574A8FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
