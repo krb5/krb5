@@ -1,7 +1,6 @@
-1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+1999-12-01  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile.in (LIBMAJOR, LIBMINOR): Jump to 4.0; 3.0 will be used
-	for 1.0.6, patch 1.
+	* Makefile.in (LIBMINOR): Update to 2.
 
 1999-06-13  Geoffrey King  <gjking@mit.edu>
 
