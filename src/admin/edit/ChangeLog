@@ -1,0 +1,6 @@
+Thu Sep 15 11:00:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* dump.c (load_db): Fix error string on failed fopen. ("for
+		writing" -> "for reading")
+
+

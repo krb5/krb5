@@ -236,7 +236,7 @@ void load_db(argc, argv)
 		}
 	if (!(f = fopen(argv[1], "r"))) {
 		com_err(argv[0], errno,
-			"While opening file %s for writing", argv[1]);
+			"While opening file %s for reading", argv[1]);
 		return;
 	}
 	fgets(buf, sizeof(buf), f);
