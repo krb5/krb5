@@ -63,10 +63,6 @@
 #define INI_KRB_CCACHE  "krb5cc"       /* Location of the ccache */
 #define INI_KRB5_CONF   "krb5.ini"		/* Location of krb5.conf file */
 
-#define KRB5_DBM_COMPAT__                       /* Don't load dbm.h */
-#define KRB5_KDB5__                             /* Don't load kdb.h */
-#define KRB5_KDB5_DBM__                         /* Don't load kdb_dbm.h */
-
 #define BITS16
 #define SIZEOF_INT      2
 #define SIZEOF_SHORT    2
@@ -482,8 +478,7 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 /*
  * Begin "dbm.h"
  */
-#if !defined(KRB5_DBM_COMPAT__) && !defined(_MACINTOSH)
-#define KRB5_DBM_COMPAT__
+#if !defined(_MACINTOSH) && !defined(_MSDOS)
 
 #include "osconf.h"
 
@@ -518,7 +513,7 @@ typedef char DBM;
 #define dbm_close(db) dbmclose()
 #endif /* OLD DBM */
 
-#endif /* KRB5_DBM_COMPAT__ */
+#endif /* !MSDOS && !MACINTOSH */
 /*
  * End "dbm.h"
  */
@@ -620,12 +615,6 @@ extern char *strdup KRB5_PROTOTYPE((const char *));
 #include <stdio.h>
 
 /* libos.spec */
-krb5_error_code krb5_read_password
-	KRB5_PROTOTYPE((krb5_context,
-			const char *,
-		   	const char *,
-		   	char *,
-		   	int * ));
 krb5_error_code krb5_lock_file
 	KRB5_PROTOTYPE((krb5_context,
 		        int,
@@ -655,25 +644,6 @@ krb5_error_code krb5_get_krbhst
 krb5_error_code krb5_free_krbhst
 	KRB5_PROTOTYPE((krb5_context,
 		   char * const * ));
-krb5_error_code krb5_aname_to_localname
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const_principal,
-		   const int,
-		   char * ));
-krb5_error_code krb5_get_host_realm
-	KRB5_PROTOTYPE((krb5_context,
-		   const char *,
-		   char *** ));
-krb5_error_code krb5_free_host_realm
-	KRB5_PROTOTYPE((krb5_context,
-		   char * const * ));
-krb5_error_code krb5_get_realm_domain
-	KRB5_PROTOTYPE((krb5_context,
-		   const char *,
-		   char ** ));
-krb5_boolean krb5_kuserok
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal, const char *));
 krb5_error_code krb5_random_confounder
 	KRB5_PROTOTYPE((int,
 		   krb5_pointer ));
@@ -682,15 +652,6 @@ krb5_error_code krb5_gen_replay_name
 		   const krb5_address *,
 	       const char *,
 	       char **));
-krb5_error_code INTERFACE krb5_auth_con_genaddrs
-    KRB5_PROTOTYPE((krb5_context,
-		   krb5_auth_context,
-	       int, int));
-krb5_error_code krb5_gen_portaddr
-    KRB5_PROTOTYPE((krb5_context,
-		   const krb5_address *,
-	       krb5_const_pointer,
-	       krb5_address **));
 krb5_error_code krb5_create_secure_file
 	KRB5_PROTOTYPE((krb5_context,
 		   const char * pathname));
@@ -717,22 +678,6 @@ void krb5_os_free_context
 krb5_error_code krb5_find_config_files
         KRB5_PROTOTYPE(());
 
-krb5_error_code krb5_make_fulladdr
-    KRB5_PROTOTYPE((krb5_context,
-	       krb5_address *,
-	       krb5_address *,
-	       krb5_address *));
-
-krb5_error_code krb5_set_real_time
-    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
-krb5_error_code krb5_set_debugging_time
-    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
-krb5_error_code krb5_use_natural_time
-    KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_get_time_offsets
-    KRB5_PROTOTYPE((krb5_context, krb5_int32 *, krb5_int32 *));
-krb5_error_code krb5_set_time_offsets
-    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
 
 /* in here to deal with stuff from lib/crypto/os */
 

@@ -1,3 +1,11 @@
+Tue Sep 26 15:18:26 1995    <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Don't predefine symbols to stop kdb.h and kdb_dbm.h
+		for _MSDOS.
+
+	* krb5.hin, k5-int.h: Move some src/lib/krb5/os prototypes to
+		krb5.hin.
+
 Mon Sep 25 16:39:21 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
