@@ -1,5 +1,8 @@
 2001-05-04  Tom Yu  <tlyu@mit.edu>
 
+	* dump-utmp.c: Fix some off-by-one errors.  Handle cases where we
+	have utmpname() but not utmpname().
+
 	* pty-int.h: Fix typo; VHANG_first -> VHANG_FIRST.
 
 	* open_slave.c (pty_open_slave): Add workaround for Tru64 v5.0,

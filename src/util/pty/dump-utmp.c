@@ -231,13 +231,8 @@ main(int argc, char **argv)
 	    perror(fn);
 	    exit(1);
 	}
-	do {
-	    nread = read(f, &u, recsize);
-	    if (nread == -1) {
-		perror("read");
-		exit(1);
-	    }
-	    if (nread && nread < recsize) {
+	while ((nread = read(f, &u, recsize)) > 0) {
+	    if (nread < recsize) {
 		fprintf(stderr, "short read");
 		close(f);
 		exit(1);
@@ -251,15 +246,24 @@ main(int argc, char **argv)
 	    } else {
 		print_ut(all, &u.ut);
 	    }
-	} while (nread);
+	}
+	if (nread == -1) {
+	    perror("read");
+	    exit(1);
+	}
 	close(f);
     } else {
 	if (is_utmpx) {
-#if defined(UTMPX) && defined(UTN)
+#ifdef UTMPX
+#ifdef HAVE_UTMPXNAME
 	    utmpxname(fn);
 	    setutxent();
 	    while ((utxp = getutxent()) != NULL)
 		print_utx(all, utxp);
+#else
+	    fprintf(stderr, "no utmpxname(); can't use getutxent()\n");
+	    exit(1);
+#endif
 #else
 	    abort();
 #endif
@@ -270,7 +274,8 @@ main(int argc, char **argv)
 	    while ((utp = getutent()) != NULL)
 		print_ut(all, utp);
 #else
-	    abort();
+	    fprintf(stderr, "no utmpname(); can't use getutent()\n");
+	    exit(1);
 #endif
 	}
     }
