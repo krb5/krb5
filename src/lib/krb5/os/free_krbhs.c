@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char free_krbhs_c[] =
+static char rcsid_free_krbhs_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
