@@ -65,8 +65,14 @@
 #include <ntsecapi.h>
 #include <ntstatus.h>
 
+#ifdef COMMENT
+/* The following two features can only be built using a version of the
+ * Microsoft Windows Platform SDK which is not currently public.  These
+ * features will be disabled until the SDK is made publicly available.
+ */
 #define KERB_SUBMIT_TICKET 1
 #define HAVE_CACHE_INFO_EX2 1
+#endif
 
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
