@@ -352,12 +352,11 @@ coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): col
   $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
   cksumtypes.h
-combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): combine_keys.c \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
-  etypes.h $(srcdir)/dk/dk.h
+combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): combine_keys.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h etypes.h $(srcdir)/dk/dk.h
 crypto_libinit.so crypto_libinit.po $(OUTPRE)crypto_libinit.$(OBJEXT): crypto_libinit.c \
   crypto_libinit.h
 default_state.so default_state.po $(OUTPRE)default_state.$(OBJEXT): default_state.c $(SRCTOP)/include/k5-int.h \
@@ -516,9 +515,5 @@ t_pkcs5.so t_pkcs5.po $(OUTPRE)t_pkcs5.$(OBJEXT): t_pkcs5.c $(BUILDTOP)/include/
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h
 vectors.so vectors.po $(OUTPRE)vectors.$(OBJEXT): vectors.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(srcdir)/hash_provider/hash_provider.h \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h
+  $(COM_ERR_DEPS)
 
