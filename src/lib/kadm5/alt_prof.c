@@ -38,7 +38,6 @@ krb5_int32 len;
     int i;
     krb5_key_salt_tuple *knew;    
 
-    if(len == 0) return 0;
     if((knew = (krb5_key_salt_tuple *)
 		malloc((len ) * sizeof(krb5_key_salt_tuple)))) {
          memcpy(knew, ksalt, len * sizeof(krb5_key_salt_tuple));
