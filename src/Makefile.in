@@ -274,8 +274,7 @@ ZIP=zip
 FILES= ./* \
 	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	config/* include/* include/kerberosIV/* \
-	include/krb5/* include/krb5/asn.1/* include/krb5/stock/* \
-	include/sys/* lib/* \
+	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
 	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* \
 	lib/crypto/sha/* lib/crypto/md4/* lib/crypto/md5/* lib/crypto/os/* \
 	lib/des425/* lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
@@ -292,7 +291,7 @@ WINFILES= util/windows/* \
 
 MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 	mac/gss-sample/* mac/SAP/* config/* include/* include/krb5/* \
-	include/krb5/asn.1/* include/krb5/stock/* include/sys/* \
+	include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp windows/*/*.hpj
