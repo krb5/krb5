@@ -22,6 +22,9 @@
  * 
  */
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <krb5/krb5.h>
 #include <krb5/dbm.h>
@@ -33,6 +36,12 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <utime.h>
+
+#ifdef _POSIX_VERSION
+ /* Is there a better way to decide whether or not we should use flock */
+ /* vs. fcntl.  Example: broken SunOS tmpfs.... */
+#define POSIX_FILE_LOCKS
+#endif
 
 #if defined (POSIX_FILE_LOCKS) && !defined(unicos61)
 #include <fcntl.h>
