@@ -54,6 +54,9 @@ krb5_init_context(context)
 	memset(ctx, 0, sizeof(struct _krb5_context));
 	ctx->magic = KV5M_CONTEXT;
 
+	/* Initialize error tables */
+	krb5_init_ets(ctx);
+
 	/* Set the default encryption types, possible defined in krb5/conf */
 	if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))
 		goto cleanup;
