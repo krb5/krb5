@@ -191,7 +191,7 @@ EXPORTS
 ;	krb5_free_adm_data
 ;	krb5_read_adm_reply
 ;	krb5_send_adm_cmd
-;
+
 	krb5_change_password
 ;Temporary exports (DO NOT USE)
 	decode_krb5_ticket
@@ -203,7 +203,6 @@ EXPORTS
 	des_string_to_key
 ;	des_set_random_generator_seed
 	des_init_random_number_generator
-	profile_get_values
 	krb5_random_confounder
 	krb5_size_opaque
 	krb5_internalize_opaque

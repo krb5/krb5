@@ -30,6 +30,7 @@ clean-windows::
 # Windows stuff to make krb5 and gssapi DLLs.
 
 CLIBS = $(BUILDTOP)\util\et\comerr.lib
+PLIBS = $(BUILDTOP)\util\profile\profile.lib
 KLIBS = krb5\krb5.lib crypto\crypto.lib \
 	$(BUILDTOP)\util\profile\profile.lib des425\des425.lib
 GLIBS = gssapi\gssapi.lib
@@ -45,6 +46,8 @@ K4LIBS = krb4\krb4.lib
 
 ##WIN16##CDEF = comerr16.def
 ##WIN32##CDEF = comerr32.def
+##WIN16##PDEF = xpprof16.def
+##WIN32##PDEF = xpprof32.def
 ##WIN16##KDEF = krb5_16.def
 ##WIN32##KDEF = krb5_32.def
 ##WIN16##KRB5RC = krb5.rc
@@ -75,10 +78,20 @@ $(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
 ##WIN32##	   no_glue.obj version.res $(CLIBS) $(WINLIBS)
 
-$(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE_LIB)
+$(PLIB): $(PLIBS) $(WLIB) $(PDEF) no_glue.obj
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   no_glue, $*.dll, $*.map, $(PLIBS) $(WINLIBS), $(PDEF)
+##WIN16##	copy $(VERSIONRC) version.rc
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DPROF_LIB -D_MSDOS_ -DRES_ONLY version.rc $*.dll
+##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc  $(CPPFLAGS) -DPROF_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo version.res $(VERSIONRC)
+##WIN32##	link $(WINDLLFLAGS) /def:$(PDEF) /out:$*.dll \
+##WIN32##	   no_glue.obj version.res $(PLIBS) $(WINLIBS)
+
+$(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE_LIB)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
-##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
+##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(PLIB) $(WINLIBS), $(KDEF)
 ##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DKRB5_LIB -D_MSDOS -DRES_ONLY \
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
@@ -86,7 +99,7 @@ $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE_LIB)
 ##WIN32##	   -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
 ##WIN32##	   k5_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) \
-##WIN32##          $(CCACHE_LIB) $(CLIB) \
+##WIN32##          $(CCACHE_LIB) $(CLIB) $(PLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
@@ -176,6 +189,7 @@ comerr.lib: $(CLIB)
 krb4.lib:   $(K4LIB)
 krb5.lib:   $(KLIB)
 gssapi.lib: $(GLIB)
+profile.lib: $(PLIB)
 
 all-windows:: 
 	@echo Making in lib\crypto
@@ -197,7 +211,7 @@ all-windows::
 	cd ..
 
 all-windows:: lib-windows
-lib-windows:: krb5.lib gssapi.lib krb4.lib
+lib-windows:: krb5.lib gssapi.lib krb4.lib 
 
 clean-windows::
 	@echo Making clean in lib\crypto
