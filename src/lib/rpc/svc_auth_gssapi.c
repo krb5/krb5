@@ -887,7 +887,7 @@ done:
 }
 
 /*
- * Function: _svcauth_gssapi_set_name
+ * Function: _svcauth_gssapi_set_names
  *
  * Purpose: Sets the list of service names for which incoming
  * authentication requests should be honored.
@@ -917,6 +917,13 @@ bool_t _svcauth_gssapi_set_names(names, num)
 	  goto fail;
      
      for (i = 0; i < num; i++) {
+	  server_name_list[i] = 0;
+	  server_creds_list[i] = 0;
+     }
+
+     server_creds_count = num;
+     
+     for (i = 0; i < num; i++) {
 	  in_buf.value = names[i].name;
 	  in_buf.length = strlen(in_buf.value) + 1;
      
@@ -939,18 +946,40 @@ bool_t _svcauth_gssapi_set_names(names, num)
 	  }
      }
 
-     server_creds_count = num;
-     
      return TRUE;
 
 fail:
-     /* memory leak: not releasing names/creds already acquired */
-     if (server_creds_list)
-	  free(server_creds_list);
-     if (server_name_list)
-	  free(server_name_list);
+     _svcauth_gssapi_unset_names();
+
      return FALSE;
 }
+
+/* Function: _svcauth_gssapi_unset_names
+ *
+ * Purpose: releases the names and credentials allocated by
+ * _svcauth_gssapi_set_names
+ */
+
+void _svcauth_gssapi_unset_names()
+{
+     int i;
+     OM_uint32 minor_stat;
+
+     if (server_creds_list) {
+	  for (i = 0; i < server_creds_count; i++)
+	       if (server_creds_list[i])
+		    gss_release_cred(&minor_stat, &server_creds_list[i]);
+	  free(server_creds_list);
+     }
+
+     if (server_name_list) {
+	  for (i = 0; i < server_creds_count; i++)
+	       if (server_name_list[i])
+		    gss_release_name(&minor_stat, &server_name_list[i]);
+	  free(server_name_list);
+     }
+}
+
 
 /*
  * Function: _svcauth_gssapi_set_log_badauth_func
