@@ -20,7 +20,7 @@
 /* If you have a STDC compiler cobbled together from High C, use these
    two lines: */
 #undef CcCmd
-#define CcCmd c89 -Dunix
+#define CcCmd c89 -Dunix -H+w
 
 #define	Bitsize32
 
@@ -46,27 +46,42 @@
 
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
 
-#else	/* AIX on Risc 6000 */
+#else	/* AIX on Risc 6000 or PS/2 */
 
+#ifdef PS2Architecture
+#define	OSName			AIX 1.2.1
+#define	OSMajorVersion		1
+#define	OSMinorVersion		2
+#else
 #define	OSName			AIX 3.1
 #define	OSMajorVersion		3
 #define	OSMinorVersion		1
+#endif
 
-#define	BitSize32
+#define	Bitsize32
 
 #define	HasNdbm			YES
 #define	HasVoidSignalReturn	YES
 #define	HasSaberC		NO
-#define	HasStdlibH		YES
+#define	HasStdlibH		2		/* Always use <stdlib.h> */
 #define	HasStringH		YES
 #define	HasPosixTermios		YES
 #define	HasPosixFileLocks	YES
 #define	HasPosixTypes		YES
 
 #define	HasInet			YES
+#ifdef PS2Architecture
+#define	WantPrototypes		YES
+#else
 #define	NeedNarrowPrototypes	YES
+#endif
+#ifdef PS2Architecture
+#define DesDefines -DBIG -DLSBFIRST
+#else
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
+#endif
 
 #endif /* RT */
 
 #define DefaultCDebugFlags OptimizedCDebugFlags
+
