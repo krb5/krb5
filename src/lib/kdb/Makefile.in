@@ -67,8 +67,8 @@ libkdb5.$(STEXT): $(OBJS)
 clean::
 	$(RM) libkdb5.a DONE
 
-t_kdb:	t_kdb.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(LIBS)
+t_kdb:	t_kdb.o $(DEPLIBS) $(OBJS) $(TOPLIBD)/libdb.a
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(LIBS) $(OBJS) -ldb
 
 check::	t_kdb
 	$(KRB5_RUN_ENV) ./t_kdb -tcv

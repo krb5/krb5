@@ -1,3 +1,8 @@
+Fri Aug 23 16:34:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (t_kdb): Fix Makefile so that t_kdb is linked
+	 	correctly with the appropriate libraries.
+
 Thu Aug 22 16:22:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdb_dbm.c: Remove vestigal code which was using BERK_DB_DBM
