@@ -89,8 +89,12 @@ krb5_error_code krb5_cc_resolve (name, cache)
     int pfxlen;
     
     cp = strchr (name, ':');
-    if (!cp)
-	return KRB5_CC_BADNAME;
+    if (!cp) {
+	if (krb5_cc_dfl_ops)
+	    return (*krb5_cc_dfl_ops->resolve)(cache, name);
+	else
+	    return KRB5_CC_BADNAME;
+    }
 
     pfxlen = cp - name;
     resid = name + pfxlen + 1;
