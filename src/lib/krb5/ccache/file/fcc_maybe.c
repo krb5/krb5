@@ -287,7 +287,7 @@ krb5_fcc_open_file (context, id, mode)
 	    }
 	    /* Skip past the header info for now */
 	    if (fcc_flen = htons(fcc_flen)) {
-	        if (read(fd, buf, fcc_flen) != fcc_flen) {
+	        if ((krb5_ui_2) read(fd, buf, fcc_flen) != fcc_flen) {
 		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 		     (void) close(fd);
 		     return KRB5_CCACHE_BADVNO;

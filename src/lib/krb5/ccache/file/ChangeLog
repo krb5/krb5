@@ -1,3 +1,7 @@
+Wed Sep 13 10:56:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc_maybe.c: signed/unsigned mismatch.
+
 Mon Sep 11 21:05:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* fcc_maybe.c (krb5_fcc_open_file): use THREEPARAMOPEN instead of
