@@ -14,7 +14,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#ifdef HAS_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
 char *getenv();

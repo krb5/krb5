@@ -7,18 +7,15 @@
    handle it on some systems.  */
 
 #undef ANSI_STDIO
-#undef HAS_STDLIB_H
 #undef HAS_VOID_TYPE
 #undef KRB5_NO_PROTOTYPES
 #undef KRB5_PROVIDE_PROTOTYPES
 #undef KRB5_NO_NESTED_PROTOTYPES
-#undef NO_STDLIB_H
 
 #undef NO_YYLINENO
 #undef POSIX_FILE_LOCKS
 #undef POSIX_SIGTYPE
 #undef POSIX_TERMIOS
-#undef POSIX_TYPES
 #undef USE_DIRENT_H
 #undef WAIT_USES_INT
 #undef krb5_sigtype
@@ -31,6 +28,9 @@
 
 /* Define if Kerberos V4 backwards compatibility should be supported */
 #undef KRB5_KRB4_COMPAT
+
+/* Define to `long' if <sys/types.h> doesn't define. */
+#undef time_t
 
 /*
  * The stuff following here is taken from util/db2/acconfig.h

@@ -13,16 +13,13 @@ AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 
 KRB5_POSIX_LOCKS
 
-dnl time_t, only used in lib/krb5/os/timeofday.c
-AC_EGREP_HEADER(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
-
 KRB5_SIGTYPE
 
 dnl
 dnl
-AC_CHECK_HEADERS(string.h unistd.h)
-AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H),AC_DEFINE(NO_STDLIB_H))
-AC_CHECK_HEADERS(sys/types.h sys/file.h sys/param.h sys/stat.h macsock.h stddef.h xom.h dbm.h ndbm.h)
+AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h)
+AC_CHECK_HEADERS(sys/types.h sys/file.h sys/param.h sys/stat.h)
+AC_CHECK_HEADERS(macsock.h xom.h)
 AC_HEADER_STDARG
 
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
@@ -82,13 +79,11 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 
 dnl then from osconf.h, we have
-AC_TIME_WITH_SYS_TIME
+AC_HEADER_TIME
 AC_CHECK_HEADERS(sys/time.h)
+AC_CHECK_TYPE(time_t, long)
 
 AC_CHECK_HEADERS(netinet/in.h)
-
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
 
 dnl
 dnl Determine where to put the replay cache.

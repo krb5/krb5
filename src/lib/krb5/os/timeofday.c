@@ -29,12 +29,6 @@
 
 #include <time.h>
 
-#ifdef POSIX_TYPES
-#define timetype time_t
-#else
-#define timetype long
-#endif
-
 #ifndef HAVE_ERRNO
 extern int errno;
 #endif
@@ -45,7 +39,7 @@ krb5_timeofday(context, timeret)
     register krb5_int32 FAR *timeret;
 {
     krb5_os_context os_ctx = context->os_context;
-    timetype tval;
+    time_t tval;
 
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {
 	    *timeret = os_ctx->time_offset;
@@ -62,7 +56,7 @@ krb5_timeofday(context, timeret)
 #else
     tval = time(0);
 #endif
-    if (tval == (timetype) -1)
+    if (tval == (time_t) -1)
 	return (krb5_error_code) errno;
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
 	    tval += os_ctx->time_offset;

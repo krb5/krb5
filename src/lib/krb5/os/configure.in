@@ -1,9 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-dnl time checks are for timeofday.c (which gets them from osconf.h)
-dnl and gmt_mktime.c (which only gets them from here...)
-AC_TIME_WITH_SYS_TIME
-AC_HAVE_HEADERS(unistd.h sys/time.h regex.h regexp.h regexpr.h)
+AC_HAVE_HEADERS(regex.h regexp.h regexpr.h)
 
 dnl regcomp is present but non-functional on Solaris 2.4
 AC_C_CROSS
@@ -24,7 +21,6 @@ dnl no -lgen.  This is fine.
 AC_CHECK_FUNCS(compile step)
 LIBS="$save_LIBS"
 AC_HAVE_FUNCS(re_comp)
-AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 HAS_ANSI_VOLATILE
 AC_DEFINE(AN_TO_LN_RULES)
 KRB5_BUILD_PROGRAM

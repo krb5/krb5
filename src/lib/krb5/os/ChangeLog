@@ -1,3 +1,16 @@
+Wed Oct  1 04:58:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Punt some things that are otherwise gotten from
+	include/krb5/configure.in.
+
+	* gmt_mktime.c: Get k5-int.h to get some autoconf symbols.
+
+Tue Sep 30 19:57:27 1997  Tom Yu  <tlyu@mit.edu>
+
+	* timeofday.c: Replaace erroneously named POSIX_TYPES and timetype
+	with plain old time_t, since we're using AC_CHECK_TYPE now to
+	handle it.
+
 Thu Sep 25 21:24:54 1997  Tom Yu  <tlyu@mit.edu>
 
 	* mk_faddr.c: Replace KRB5_USE_INET with something more sane.

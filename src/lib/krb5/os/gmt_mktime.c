@@ -1,6 +1,7 @@
 /* This code placed in the public domain by Mark W. Eichin */
 
 #include <stdio.h>
+#include "k5-int.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

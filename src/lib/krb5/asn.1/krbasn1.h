@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <limits.h>		/* For INT_MAX */
-#ifdef HAS_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 /*

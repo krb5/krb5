@@ -1,3 +1,8 @@
+Tue Sep 30 19:04:20 1997  Tom Yu  <tlyu@mit.edu>
+
+	* autoconf.h: Replace HAS_STDLIB_H with something more sane.  Punt
+	POSIX_TYPES.
+
 Thu Sep 25 21:05:23 1997  Tom Yu  <tlyu@mit.edu>
 
 	* autoconf.h: Change HAS_SETVBUF, KRB5_USE_INET to something more

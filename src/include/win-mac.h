@@ -149,7 +149,7 @@ typedef unsigned char	u_char;
 #define KRB5_PROVIDE_PROTOTYPES
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
-#define HAS_STDLIB_H
+#define HAVE_STDLIB_H
 
 /* This controls which encryption routines libcrypto will provide */
 #define PROVIDE_DES_CBC_MD5

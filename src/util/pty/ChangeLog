@@ -1,3 +1,8 @@
+Wed Oct  1 04:53:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Default to a long rather than an int for a time_t
+	for paranoia reasons.
+
 Tue Jun  3 23:05:07 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* getpty.c (pty_getpty): Remove erroneous space from the HPUX open().

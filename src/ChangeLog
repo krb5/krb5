@@ -1,3 +1,7 @@
+Tue Sep 30 18:56:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acconfig.h: Punt HAS_STDLIB_H, NO_STDLIB_H, POSIX_TYPES.
+
 Thu Sep 25 21:06:40 1997  Tom Yu  <tlyu@mit.edu>
 
 	* acconfig.h: Punt HAS_SETVBUF, HAS_UNISTD_H, KRB5_USE_INET.

@@ -54,7 +54,7 @@ static char *strutol();
 #ifndef HAVE_STRSAVE
 static char *strsave();
 #endif
-#ifndef HAS_STDLIB_H
+#ifndef HAVE_STDLIB_H
 extern char *malloc();
 #endif
 

@@ -2,12 +2,11 @@
 
 #define HAVE_SETVBUF 1
 #define HAS_ANSI_CONST 1
-#define HAS_STDLIB_H 1
+#define HAVE_STDLIB_H 1
 #define HAS_VOID_TYPE 1
 #define KRB5_PROVIDE_PROTOTYPES 1
 #define NO_NESTED_PROTOTYPES 1
 #define NO_YYLINENO 1
-#define POSIX_TYPES 1
 #define USE_DIRENT_H 1
 #define HAVE_STRING_H 1
 #define WAIT_USES_INT 1

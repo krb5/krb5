@@ -1,3 +1,10 @@
+Tue Sep 30 18:56:05 1997  Tom Yu  <tlyu@mit.edu>
+
+	* win-mac.h: Replace HAS_STDLIB_H with something more sane.
+
+	* k5-int.h: Replace HAS_STDLIB_H, NO_STDLIB_H with something more
+ 	sane.
+
 Thu Sep 25 21:10:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* win-mac.h: Replace KRB5_USE_INET with something more sane.

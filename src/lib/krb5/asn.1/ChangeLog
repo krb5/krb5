@@ -1,3 +1,7 @@
+Tue Sep 30 19:03:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krbasn1.h: Replace HAS_STDLIB_H with something more sane.
+
 Thu Jul 31 15:38:10 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
         * asn1buf.h (asn1buf_remove_octet, asn1buf_size, asn1buf_free,

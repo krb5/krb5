@@ -9,7 +9,7 @@ KRB5_POSIX_LOCKS
 AC_CHECK_HEADERS(sys/select.h time.h unistd.h)
 dnl Could check for full stdc environment, but will only test
 dnl for stdlib.h
-AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H))
+AC_CHECK_HEADERS(stdlib.h)
 
 AC_C_CROSS dnl pretty up output, eval this before AC_TRY_RUN
 dnl need MSBFIRST, LSBFIRST, BITS16, BITS32

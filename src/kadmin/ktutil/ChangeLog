@@ -1,3 +1,7 @@
+Tue Sep 30 18:58:09 1997  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil.c: Replace HAS_STDLIB_H with something more sane.
+
 Tue Feb  4 21:11:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
