@@ -1,3 +1,8 @@
+Thu Oct 31 11:20:22 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c (main): Add -T keyfile and -D debug_level
+		options. [krb5-admin/42] 
+
 Tue Sep 10 14:37:23 1996  Tom Yu  <tlyu@mit.edu>
 
 	* v5passwd.M: remove extra args to .TH

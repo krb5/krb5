@@ -40,13 +40,14 @@ unhandled_signal(signo)
 void usage()
 {
      fprintf(stderr, "Usage: kadmind [-r realm] [-m] [-nofork] "
-	     "[-port port-number]\n");
+	     "[-D debuglevel] [-T keytable] [-port port-number]\n");
      exit(1);
 }
 
 int main(int argc, char *argv[])
 {
      int ret, rlen, nofork, oldnames = 0;
+     int timeout = -1;
      krb5_error_code code;
      int debug_level = 0;
 #if	POSIX_SIGNALS
@@ -81,6 +82,19 @@ int main(int argc, char *argv[])
 	      usage();
 	    params.kadmind_port = atoi(*argv);
 	    params.mask |= KADM5_CONFIG_KADMIND_PORT;
+	  } else if (strcmp(*argv, "-T") == 0) {
+	       argc--; argv++;
+	       if (!argc)
+		    usage();
+	       params.admin_keytab = *argv;
+	       params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
+	       argc--; argv++;
+	       continue;
+	  } else if (strcmp(*argv, "-D") == 0) {
+	       if (!argc)
+		    usage();
+	       argc--; argv++;
+	       debug_level = atoi(*argv);
 	  } else
 	       break;
 	  argc--; argv++;
@@ -167,6 +181,12 @@ int main(int argc, char *argv[])
 		programname, error_message(code));
 
 	exit(1);
+     }
+     if (code = proto_init(context, debug_level, timeout)) {
+	     krb5_klog_syslog(LOG_ERR, "%s: %s while initializing proto",
+			      programname, error_message(code));
+	     fprintf(stderr, "%s: %s while initializing  proto\n",
+		     programname, error_message(code));
      }
 
      if (
