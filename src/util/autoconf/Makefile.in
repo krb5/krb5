@@ -77,7 +77,8 @@ autoconf.dvi: autoconf.texi
 standards.dvi: standards.texi make-stds.texi
 	$(TEXI2DVI) $(srcdir)/standards.texi
 
-check:
+check::
+
 installcheck:
 
 installdirs:

@@ -1,3 +1,7 @@
+Fri Oct  7 14:30:28 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use check:: instead of check:
+
 Thu May 12 15:55:40 1994  David J. MacKenzie  (djm@nutrimat.gnu.ai.mit.edu)
 
 	* Version 1.11.
