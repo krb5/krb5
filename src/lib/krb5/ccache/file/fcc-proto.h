@@ -1,3 +1,21 @@
+/*
+ * $Source$
+ * $Author$
+ * $Id$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * Prototypes for File-based credentials cache
+ */
+
+#include <krb5/copyright.h>
+
+#ifndef KRB5_FCC_PROTO__
+#define KRB5_FCC_PROTO__
+
 /* fcc_close.c */
 krb5_error_code krb5_fcc_close PROTOTYPE((krb5_ccache id ));
 
@@ -68,3 +86,4 @@ krb5_error_code krb5_fcc_store_times PROTOTYPE((krb5_ccache id , krb5_ticket_tim
 void init_test_cred PROTOTYPE((void ));
 
 
+#endif /* KRB5_FCC_PROTO__ */
