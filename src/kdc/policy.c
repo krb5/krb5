@@ -40,6 +40,14 @@ krb5_db_entry server;
 krb5_timestamp kdc_time;
 char	**status;
 {
+#if 0
+     /* An AS request must include the addresses field */
+    if (request->addresses == 0) {
+	*status = "NO ADDRESS";
+	return KRB5KDC_ERR_POLICY;
+    }
+#endif
+    
     return 0;			/* not against policy */
 }
 

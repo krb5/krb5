@@ -732,12 +732,6 @@ char	**status;
 	return KDC_ERR_BADOPTION;
     }
 
-     /* An AS request must include the addresses field */
-    if (request->addresses == 0) {
-	*status = "NO ADDRESS";
-	return KRB_AP_ERR_BADADDR;
-    }
-    
     /* The client's password must not be expired */
     if (client.pw_expiration && client.pw_expiration < kdc_time) {
 	*status = "CLIENT KEY EXPIRED";

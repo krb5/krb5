@@ -102,7 +102,7 @@ void
 setup_com_err()
 {
     krb5_init_ets();
-    initialize_kdb5_error_table();
+    initialize_kdc5_error_table();
     (void) set_com_err_hook(kdc_com_err_proc);
     return;
 }

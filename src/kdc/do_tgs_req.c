@@ -534,6 +534,9 @@ tgt_again:
 	}
 	    
 	ticket_reply.enc_part.kvno = 0;
+	ticket_reply.enc_part.etype =
+		request->second_ticket[st_idx]->enc_part2->session->etype;
+	krb5_use_cstype(&eblock, ticket_reply.enc_part.etype);
 	if (retval = krb5_encrypt_tkt_part(&eblock,
 					   request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
@@ -550,6 +553,8 @@ tgt_again:
 	}
 
 	ticket_reply.enc_part.kvno = server.kvno;
+	ticket_reply.enc_part.etype = useetype;
+	krb5_use_cstype(&eblock, ticket_reply.enc_part.etype);
 	retval = krb5_encrypt_tkt_part(&eblock, &encrypting_key, &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
@@ -592,6 +597,11 @@ tgt_again:
     
     /* use the session key in the ticket, unless there's a subsession key
        in the AP_REQ */
+
+    reply.enc_part.etype = req_authdat->authenticator->subkey ?
+	    req_authdat->authenticator->subkey->etype :
+		    header_ticket->enc_part2->session->etype;
+    krb5_use_cstype(&eblock, reply.enc_part.etype);
 
     retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart, &eblock,
 				 req_authdat->authenticator->subkey ?
@@ -663,11 +673,8 @@ krb5_data **response;
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 
-    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec)) {
-	if (ticket)
-	    krb5_free_ticket(ticket);
+    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec))
 	return(retval);
-    }
     errpkt.error = error;
     errpkt.server = request->server;
     if (ticket && ticket->enc_part2)
@@ -675,17 +682,12 @@ krb5_data **response;
     else
 	errpkt.client = 0;
     errpkt.text.length = strlen(error_message(error+KRB5KDC_ERR_NONE))+1;
-    if (!(errpkt.text.data = malloc(errpkt.text.length))) {
-	if (ticket)
-	    krb5_free_ticket(ticket);
+    if (!(errpkt.text.data = malloc(errpkt.text.length)))
 	return ENOMEM;
-    }
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);
-	if (ticket)
-	    krb5_free_ticket(ticket);
 	return ENOMEM;
     }
     errpkt.e_data.length = 0;
@@ -694,8 +696,6 @@ krb5_data **response;
     retval = krb5_mk_error(&errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
-    if (ticket)
-	krb5_free_ticket(ticket);
     return retval;
 }
 

@@ -489,7 +489,7 @@ krb5_data **response;			/* filled in with a response packet */
        in the database) */
     if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key))
 	goto errout;
-
+    reply.enc_part.etype = useetype;
     reply.enc_part.kvno = client.kvno;
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart, &eblock,
 				 &encrypting_key,  &reply, response);

@@ -1,3 +1,24 @@
+Thu Dec  8 00:33:05 1994    <tytso@rsx-11.mit.edu>
+
+	* do_tgs_req.c (prepare_error_tgs): Don't free the passed in
+		ticket; it will be freed as part of other structures.
+
+	* do_tgs_req.c (process_tgs_req): Set the encryption type in the
+		reply structure, and set the eblock type accordingly.
+
+Wed Dec  7 13:36:34 1994    <tytso@rsx-11.mit.edu>
+
+	* do_as_req.c (process_as_req): Set the encryption type in the
+		reply_encpart structure.
+
+	* kdc_util.c (validate_as_request): 
+	* policy.c (against_local_policy_as): Move requirement that an AS
+		request must include the addresses field to the local
+		policy routine.  (Not required by RFC).
+
+	* main.c (setup_com_err): Initialize the kdc5 error table (the
+		kdb5 error table is already initialized)
+
 Wed Nov 30 16:37:26 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* confiugre.in: Add appropriate help text for --with-krb4
