@@ -283,7 +283,6 @@ krb5_principal  client;
 
 extern	int errno;
 int	reapchild();
-struct	passwd *getpwnam();
 #if (!defined(__STDC__) && !defined(ultrix))
 char	*malloc();
 #endif

@@ -38,6 +38,9 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <errno.h>
 #include <signal.h>
 #include <pwd.h>
@@ -54,6 +57,7 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 #include <krb5/crc-32.h>
 #include <krb5/mit-des.h>
 #include <krb5/osconf.h>
+#include <com_err.h>
 #include "defines.h"
 #endif /* KERBEROS */
      
@@ -93,7 +97,6 @@ main(argc, argv0)
     int rem, pid;
     char *host=0, *cp, **ap, buf[BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
-    int asrsh = 0;
     struct passwd *pwd;
     int readfrom, ready;
     int one = 1;

@@ -1041,7 +1041,7 @@ dolastlog(quiet, tty)
 	int fd;
 
 	if ((fd = open(LASTLOG, O_RDWR, 0)) >= 0) {
-		(void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), L_SET);
+		(void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 		if (!quiet) {
 			if (read(fd, (char *)&ll, sizeof(ll)) == sizeof(ll) &&
 			    ll.ll_time != 0) {
@@ -1054,7 +1054,7 @@ dolastlog(quiet, tty)
 					printf("on %.*s\n",
 					    sizeof(ll.ll_line), ll.ll_line);
 			}
-			(void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), L_SET);
+			(void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 		}
 		(void)time(&ll.ll_time);
 		(void) strncpy(ll.ll_line, tty, sizeof(ll.ll_line));

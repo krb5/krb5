@@ -177,9 +177,6 @@ struct sockaddr_in local, foreign;
 # endif /* TIOCPKT_WINDOW */
 
 char	*getenv();
-#ifndef convex
-struct	passwd *getpwuid();
-#endif
 char	*name;
 int 	rem = -1;		/* Remote socket fd */
 char	cmdchar = '~';
@@ -571,7 +568,7 @@ main(argc, argv)
     if ( status = krb5_process_key(&eblock,&cred->keyblock)) {
 	fprintf(stderr,
 		"%s: Cannot process session key : %s.\n",
-		orig_argv, error_message(status));
+		orig_argv[0], error_message(status));
 	exit(1);
     }
 #else
@@ -1488,6 +1485,7 @@ mode(f)
 /*VARARGS*/
 prf(f, a1, a2, a3, a4, a5)
      char *f;
+     char *a1, *a2, *a3, *a4, *a5;
 {
     fprintf(stderr, f, a1, a2, a3, a4, a5);
     fprintf(stderr, CRLF);

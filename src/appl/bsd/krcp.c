@@ -119,9 +119,6 @@ int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
 struct	passwd *pwd;
-#ifndef convex
-struct	passwd *getpwuid();
-#endif
 int	userid;
 int	port;
 
@@ -1136,7 +1133,7 @@ void send_auth()
     char *princ;          /* principal in credentials cache */
     krb5_ccache cc;
     krb5_creds creds;
-    krb5_data reply, msg, princ_data;
+    krb5_data reply, princ_data;
     krb5_tkt_authent *authdat;
     krb5_error_code status;
     krb5_address faddr;

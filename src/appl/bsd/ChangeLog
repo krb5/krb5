@@ -1,3 +1,7 @@
+Sat Aug 13 02:04:37 1994  Mark Eichin  (eichin@perdiem)
+
+	* Makefile.in (DEFINES): set LOGIN_PROGRAM correctly.
+
 Thu Aug 11 23:16:31 1994  Mark Eichin  (eichin@perdiem)
 
 	* krsh.c: Don't (mis)declare getpwuid ever.

@@ -16,7 +16,7 @@ OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
 RSH=	-DKRB_RLOGIN=\"$(PROGDIR)/rlogin\"
 
 DEFINES= $(RSH) $(RPROGS) \
- 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
+ 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin krshd krlogind login.krb5
 
