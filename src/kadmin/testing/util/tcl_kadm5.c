@@ -570,7 +570,7 @@ static int parse_flags(Tcl_Interp *interp, Tcl_HashTable *table,
 	  *flags |= *(krb5_flags *) Tcl_GetHashValue(entry);
      }
   
-     free(argv);
+     Tcl_Free(argv);
      return(retcode);
 }
 
@@ -832,14 +832,15 @@ static int parse_keysalts(Tcl_Interp *interp, char *list,
 	  }
 	  (*keysalts)[i].ks_salttype = tmp;
 
-	  free(argv1);
+	  Tcl_Free(argv1);
 	  argv1 = NULL;
      }
 
 finished:
-     if (argv1)
-	  free(argv1);
-     free(argv);
+     if (argv1) {
+	  Tcl_Free(argv1);
+     }
+     Tcl_Free(argv);
      return retcode;
 }
 
@@ -878,7 +879,7 @@ static int parse_key_data(Tcl_Interp *interp, char *list,
      }
 
 finished:
-     free(argv);
+     Tcl_Free(argv);
      return retcode;
 }
 
@@ -955,7 +956,7 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
 	  tl->tl_data_contents = (krb5_octet *) malloc(tmp+1);
 	  strcpy((char *) tl->tl_data_contents, argv1[2]);
 
-	  free(argv1);
+	  Tcl_Free(argv1);
 	  argv1 = NULL;
 	  tl = tl->tl_data_next;
      }
@@ -967,9 +968,10 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
      *tlp = tl2;
 
 finished:
-     if (argv1)
-	  free(argv1);
-     free(argv);
+     if (argv1) {
+	  Tcl_Free(argv1);
+     }
+     Tcl_Free(argv);
      return retcode;
 }
 
@@ -1326,7 +1328,7 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
      }
 
 finished:
-     free(argv);
+     Tcl_Free(argv);
      *out_princ = princ;
      return retcode;
 }
@@ -1475,7 +1477,7 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
      policy->policy_refcnt = tmp;
 
 finished:
-     free(argv);
+     Tcl_Free(argv);
      *out_policy = policy;
      return retcode;
 }
