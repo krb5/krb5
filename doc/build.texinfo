@@ -152,10 +152,10 @@ building Kerberos; see @ref{Doing the Build}.):
 
 @menu
 * The DejaGnu Tests::           
-* The KADM5 Tests::     
+* The KADM5 Tests::             
 @end menu
 
-@node The DejaGnu Tests,  The KADM5 Tests, Testing the Build, Testing the Build
+@node The DejaGnu Tests, The KADM5 Tests, Testing the Build, Testing the Build
 @subsection The DejaGnu Tests 
 
 Some of the built-in regression tests are setup to use the DejaGnu
@@ -450,6 +450,7 @@ Thanks!
 * AIX::                         
 * Alpha OSF/1 V1.3::            
 * Alpha OSF/1 (Digital Unix) V2.0++::  
+* Alpha Tru64 4.0::             
 * BSDI::                        
 * HPUX::                        
 * Solaris versions 2.0 through 2.3::  
@@ -474,7 +475,7 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 (Digital Unix) V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
+@node Alpha OSF/1 (Digital Unix) V2.0++, Alpha Tru64 4.0, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0++
 
 There used to be a bug when using the native compiler in compiling
@@ -485,13 +486,21 @@ problem would exist there. (We welcome feedback on this issue). There
 was never a problem in using GCC version 2.6.3.
 
 In version 3.2 and beyond of the operating system, we have not seen any
-problems with the native compiler. 
+optimizer problems with the native compiler. 
 
-@c @node Alpha Tru64 UNIX 5.0
+@node Alpha Tru64 4.0, BSDI, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@subsection Alpha Tru64 4.0
+
+Alpha Tru64 4.0 will have some trouble compiling the some stdarg
+prototypes, since it defaults to K&R C.  Use the @samp{-std} or
+@samp{-std1} flags to force ANSI behavior (e.g. @samp{./configure
+--with-cc='cc -std1'}).
+
+@comment  node-name,  next,  previous,  up@c @node Alpha Tru64 UNIX 5.0
 @c @subsection Alpha Tru64 UNIX 5.0
 @c ... login.krb5 problems
 
-@node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@node BSDI, HPUX, Alpha Tru64 4.0, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes

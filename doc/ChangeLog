@@ -1,3 +1,8 @@
+2002-02-27  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo: Update build quirks for Tru64 4.0 defaulting to
+	K&R mode.
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (realms (kdc.conf)): Add description of
