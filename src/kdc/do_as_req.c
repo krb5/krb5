@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_do_as_req_c >>>[] =
+static char rcsid_do_as_req_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -20,13 +20,14 @@ static char rcsid_do_as_req_c >>>[] =
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
 #include <krb5/kdb.h>
-#include <krb5/asn.1/KRB5-types.h>
-#include <krb5/asn.1/krb5_free.h>
-#include <krb5/asn.1/asn1defs.h>
-#include <krb5/asn.1/KRB5-types-aux.h>
-#include <krb5/asn.1/encode.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
+#include <krb5/asn1.h>
 #include <errno.h>
 #include <com_err.h>
+
+#include <sys/types.h>
+#include <krb5/ext-proto.h>
 
 extern krb5_cs_table_entry *csarray[];
 extern int max_cryptosystem;		/* max entry in array */
@@ -35,8 +36,11 @@ extern krb5_timestamp infinity;		/* greater than every valid timestamp */
 extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
 extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */
 
-static krb5_error_code prepare_error PROTOTYPE((int,
-						krb5_data *));
+static krb5_error_code prepare_error PROTOTYPE((krb5_as_req *,
+						int,
+						krb5_data **));
+extern int against_postdate_policy PROTOTYPE((krb5_timestamp));
+
 /*
  * Do all the processing required for a AS_REQ
  */
@@ -67,8 +71,6 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_boolean more;
     krb5_timestamp kdc_time;
     krb5_keyblock *session_key;
-    krb5_encrypt_block eblock;
-    krb5_data *scratch;
 
     krb5_timestamp until, rtime;
 
@@ -118,7 +120,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key, sizeof(*session_key)+session_key->length-1); }
+#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key, krb5_keyblock_size(session_key)); }
 
 
     ticket_reply.server = request->server;
@@ -131,6 +133,7 @@ krb5_data **response;			/* filled in with a response packet */
         /* processing of any of these flags.  For example, some */
         /* realms may refuse to issue renewable tickets         */
 
+    /* XXX procedurize */
     if (isset(request->kdc_options, KDC_OPT_FORWARDED) ||
 	isset(request->kdc_options, KDC_OPT_PROXY) ||
 	isset(request->kdc_options, KDC_OPT_RENEW) ||
@@ -204,51 +207,18 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.caddrs = request->addresses;
     enc_tkt_reply.authorization_data = 0; /* XXX? */
 
-    /* encrypt the encrypted part */
-    /*  Encode the to-be-encrypted part. */
-    if (retval = encode_krb5_enc_tkt_part(&enc_tkt_reply, &scratch)) {
+    /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
+
+    if (retval = krb5_encrypt_tkt_part(&enc_tkt_reply,
+				       server.key, &ticket_reply)) {
 	cleanup();
 	return retval;
     }
 
-#undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); bzero((char *)session_key, sizeof(*session_key)+session_key->length-1); bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
-
-    /* put together an eblock for this encryption */
-
-    eblock.crypto_entry = csarray[request->etype]->system;
-    ticket_reply.enc_part.length = krb5_encrypt_size(scratch->length,
-						     eblock.crypto_entry);
-    if (!(ticket_reply.enc_part.data = malloc(ticket_reply.enc_part.length))) {
-	cleanup();
-	return ENOMEM;
-    }
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, server.key)) {
-	free(ticket_reply.enc_part.data);
-	cleanup();
-	return retval;
-    }
-    if (retval = (*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data, (krb5_pointer) ticket_reply.enc_part.data, scratch->length, &eblock)) {
-	free(ticket_reply.enc_part.data);
-	(void) (*eblock.crypto_entry->finish_key)(&eblock);
-	cleanup();
-	return retval;
-    }
-
-    /* ticket is now complete-- do some cleanup */
-    bzero(scratch->data, scratch->length);
-    krb5_free_data(scratch);
     krb5_db_free_principal(&server, 1);
 
 #undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1);bzero((char *)session_key, sizeof(*session_key)+session_key->length-1); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
-
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
-	cleanup();
-	return retval;
-    }
-
-    /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
+#define cleanup() {krb5_db_free_principal(&client, 1);bzero((char *)session_key, krb5_keyblock_size(session_key)); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
 
 
     /* Start assembling the response */
@@ -256,7 +226,6 @@ krb5_data **response;			/* filled in with a response packet */
     reply.etype = request->etype;
     reply.ckvno = client.kvno;
     reply.ticket = &ticket_reply;
-
 
     reply_encpart.session = session_key;
     reply_encpart.last_req = 0;		/* XXX */
@@ -273,60 +242,17 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
 
     /* finished with session key */
-    bzero((char *)session_key, sizeof(*session_key)+session_key->length-1);
+    bzero((char *)session_key, krb5_keyblock_size(session_key));
 
 #undef cleanup
 #define cleanup() { krb5_db_free_principal(&client, 1); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data);}
 
     /* now encode/encrypt the response */
 
-    if (retval = encode_krb5_enc_kdc_rep_part(&reply_encpart, &scratch)) {
-	cleanup();
-	return retval;
-    }
-#undef cleanup
-#define cleanup() { krb5_db_free_principal(&client, 1); bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data); bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
-
-    /* put together an eblock for this encryption */
-
-    eblock.crypto_entry = csarray[request->etype]->system;
-    reply.enc_part.length = krb5_encrypt_size(scratch->length,
-					      eblock.crypto_entry);
-    if (!(reply.enc_part.data = malloc(reply.enc_part.length))) {
-	cleanup();
-	return ENOMEM;
-    }
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, client.key)) {
-	free(reply.enc_part.data);
-	cleanup();
-	return retval;
-    }
-    if (retval = (*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data, (krb5_pointer) reply.enc_part.data, scratch->length, &eblock)) {
-	free(reply.enc_part.data);
-	(void) (*eblock.crypto_entry->finish_key)(&eblock);
-	cleanup();
-	return retval;
-    }
-
-    /* some more cleanup */
-    bzero(scratch->data, scratch->length);
-    krb5_free_data(scratch);
-    krb5_db_free_principal(&client, 1);
-
-#undef cleanup
-#define cleanup() { bzero(ticket_reply.enc_part.data, ticket_reply.enc_part.length); free(ticket_reply.enc_part.data); bzero(reply.enc_part.data,reply.enc_part.length); free(reply.enc_part.data); }
-
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
-	cleanup();
-	return retval;
-    }
-
-    /* now it's ready to be encoded for the wire! */
-
-    retval = encode_krb5_kdc_rep(&reply, response);
+    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply, &reply_encpart,
+				 client.key, response);
     cleanup();
     return retval;
-
 }
 
 static krb5_error_code
@@ -342,7 +268,7 @@ krb5_data **response;
     errpkt.ctime = request->ctime;
     errpkt.cmsec = 0;
 
-    if (retval = krb5_mstimeofday(&errpkt.stime, &errpkt.smsec))
+    if (retval = krb5_ms_timeofday(&errpkt.stime, &errpkt.smsec))
 	return(retval);
     errpkt.error = error;
     errpkt.server = request->server;
