@@ -61,7 +61,6 @@ awk-windows:
 # dependencies for traditional makes
 #
 $(OUTPRE)asn1_err.$(OBJEXT): asn1_err.c
-$(OUTPRE)isode_err.$(OBJEXT): isode_err.c
 $(OUTPRE)kdb5_err.$(OBJEXT): kdb5_err.c
 $(OUTPRE)krb5_err.$(OBJEXT): krb5_err.c
 $(OUTPRE)adm_err.$(OBJEXT): adm_err.c
