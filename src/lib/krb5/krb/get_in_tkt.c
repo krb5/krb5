@@ -556,7 +556,7 @@ cleanup:
     return (retval);
 }
 
-/* begin libdefaults parsing code.  This should almost certainly move
+/* begin appdefaults parsing code.  This should almost certainly move
    somewhere else, but I don't know where the correct somewhere else
    is yet. */
 
@@ -571,7 +571,7 @@ static char *conf_no[] = {
     0,
 };
 
-static int conf_boolean(s)
+int krb5_conf_boolean(s)
      char *s;
 {
     char **p;
@@ -666,6 +666,7 @@ goodbye:
 }
 
 /* not static so verify_init_creds() can call it */
+/* as well as the DNS code */
 
 krb5_error_code
 krb5_appdefault_boolean(context, realm, option, ret_value)
@@ -682,7 +683,7 @@ krb5_appdefault_boolean(context, realm, option, ret_value)
     if (retval)
 	return(retval);
 
-    *ret_value = conf_boolean(string);
+    *ret_value = krb5_conf_boolean(string);
     free(string);
 
     return(0);
