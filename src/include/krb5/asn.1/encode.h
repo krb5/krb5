@@ -71,12 +71,12 @@ krb5_error_code krb5_decode_generic
 #define encode_krb5_as_req(req, output) \
     krb5_encode_generic((krb5_pointer)req, output, \
 		   (encoder_func) encode_KRB5_AS__REQ, \
-		   (translator_func) krb5_as_req2KRB5_AS__REQ, \
+		   (translator_func) krb5_kdc_req2KRB5_TGS__REQ, \
 		   (free_func) free_KRB5_AS__REQ)
 #define decode_krb5_as_req(req, output) \
     krb5_decode_generic(req, (krb5_pointer *) output, \
 		   (decoder_func) decode_KRB5_AS__REQ, \
-		   (translator_func) KRB5_AS__REQ2krb5_as_req, \
+		   (translator_func) KRB5_TGS__REQ2krb5_kdc_req, \
 		   (free_func) free_KRB5_AS__REQ)
 
 #define encode_krb5_as_rep(req, output) \
@@ -111,17 +111,6 @@ krb5_error_code krb5_decode_generic
 		   (decoder_func) decode_KRB5_KDC__REP, \
 		   (translator_func) KRB5_KDC__REP2krb5_tgs_rep, \
 		   (free_func) free_KRB5_KDC__REP)
-
-#define encode_krb5_tgs_req_enc_part(req, output) \
-    krb5_encode_generic((krb5_pointer)req, output, \
-		   (encoder_func) encode_KRB5_KDC__REP, \
-		   (translator_func) krb5_tgs_req_enc_part2KRB5_EncTgsReqPart, \
-		   (free_func) free_KRB5_EncTgsReqPart)
-#define decode_krb5_tgs_req_enc_part(req, output) \
-    krb5_decode_generic(req, (krb5_pointer *) output, \
-		   (decoder_func) decode_KRB5_EncTgsReqPart, \
-		   (translator_func) KRB5_EncTgsReqPart2krb5_tgs_req_enc_part, \
-		   (free_func) free_KRB5_EncTgsReqPart)
 
 #define encode_krb5_ap_req(req, output) \
     krb5_encode_generic((krb5_pointer)req,  output, \
@@ -159,24 +148,13 @@ krb5_error_code krb5_decode_generic
 #define encode_krb5_tgs_req(req, output) \
     krb5_encode_generic((krb5_pointer)req, output, \
 		   (encoder_func) encode_KRB5_TGS__REQ, \
-		   (translator_func) krb5_tgs_req2KRB5_TGS__REQ, \
+		   (translator_func) krb5_kdc_req2KRB5_TGS__REQ, \
 		   (free_func) free_KRB5_TGS__REQ)
 #define decode_krb5_tgs_req(req, output) \
     krb5_decode_generic(req, (krb5_pointer *) output, \
 		   (decoder_func) decode_KRB5_TGS__REQ, \
-		   (translator_func) KRB5_TGS__REQ2krb5_tgs_req, \
+		   (translator_func) KRB5_TGS__REQ2krb5_kdc_req, \
 		   (free_func) free_KRB5_TGS__REQ)
-
-#define encode_krb5_real_tgs_req(req, output) \
-    krb5_encode_generic((krb5_pointer)req, output, \
-		   (encoder_func) encode_KRB5_RealTGS__REQ, \
-		   (translator_func) krb5_real_tgs_req2KRB5_RealTGS__REQ, \
-		   (free_func) free_KRB5_RealTGS__REQ)
-#define decode_krb5_real_tgs_req(req, output) \
-    krb5_decode_generic(req, (krb5_pointer *) output, \
-		   (decoder_func) decode_KRB5_RealTGS__REQ, \
-		   (translator_func) KRB5_RealTGS__REQ2krb5_real_tgs_req, \
-		   (free_func) free_KRB5_RealTGS__REQ)
 
 #define encode_krb5_safe(req, output) \
     krb5_encode_generic((krb5_pointer)req, output, \
