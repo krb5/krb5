@@ -41,6 +41,9 @@
 #define	DEFAULT_LNAME_FILENAME	"/krb5/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/krb5/v5srvtab"
 
+#define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
+#define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
+
 #define KDC_PORTNAME	"kerberos5"	/* for /etc/services or equiv. */
 
 #define MAX_DGRAM_SIZE	4096
@@ -49,6 +52,5 @@
 #define SKDC_TIMEOUT_1 1		/* seconds for first timeout */
 
 #define RCTMPDIR	"/usr/tmp"	/* directory to store replay caches */
-#define KDCRCACHE	"dfl:krb5kdc_rcache"
 
 #endif /* KRB5_OSCONF__ */
