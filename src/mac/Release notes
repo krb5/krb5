@@ -141,3 +141,8 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_2_5
  added documentation and fixed makefile so that documentation,
  headers, and cfrm glue are always built correctly
+
+2.5.1
+ from tag Mac_GSSKerberos5_2_5_1
+ fixed pre-PCI strong-link against DriverServicesLib
+ added krb5_change_password 2 minute timeout (changepw.c)
