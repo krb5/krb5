@@ -1,5 +1,8 @@
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (PTHREAD_CFLAGS): New variable.
+	(ALL_CFLAGS): Include it.
+
 	* win-pre.in (SLIB): New variable.
 
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>

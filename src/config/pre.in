@@ -150,10 +150,13 @@ FAKELIBDIR=$(FAKEPREFIX)/lib
 # LOCALINCLUDES	set by local Makefile.in
 # CPPFLAGS	user override
 # CFLAGS	user override but starts off set by configure
+# PTHREAD_CFLAGS set by configure, not included in CFLAGS so that we
+#		don't pull the pthreads library into shared libraries
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
-	$(CPPFLAGS) $(CFLAGS)
+	$(CPPFLAGS) $(CFLAGS) $(PTHREAD_CFLAGS)
 
 CFLAGS = @CFLAGS@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
 CC = @CC@
