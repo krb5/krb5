@@ -2,3 +2,4 @@ thisconfigdir=.
 myfulldir=appl/telnet
 mydir=.
 BUILDTOP=$(REL)..$(S)..
+LOCAL_SUBDIRS=libtelnet telnet telnetd

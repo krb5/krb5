@@ -1,3 +1,10 @@
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Merged in code from subdir configure.in files.
+	Create the subdir Makefiles here.  Substitute TELNET_LIBS and
+	TELNETD_LIBS with the appropriate sets of libraries.
+	* Makefile.in (LOCAL_SUBDIRS): Set to list the subdirs.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.orig: Deleted.

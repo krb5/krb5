@@ -1,3 +1,8 @@
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Deleted; configure this dir from parent now.
+	* Makefile.in (thisconfigdir, mydir): Updated.
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos5.c (kerberos5_send): Rename getlocalsubkey ->

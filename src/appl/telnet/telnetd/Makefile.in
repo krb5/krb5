@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=appl/telnet/telnetd
-mydir=.
+mydir=telnetd
 BUILDTOP=$(REL)..$(S)..$(S)..
 # derived from the original Makefile.generic
 #
@@ -32,6 +32,8 @@ ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBS=	@TELNETD_LIBS@
 
 SRCS=	$(srcdir)/telnetd.c \
 	$(srcdir)/termio-tn.c \

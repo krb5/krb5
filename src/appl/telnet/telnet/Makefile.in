@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=appl/telnet/telnet
-mydir=.
+mydir=telnet
 BUILDTOP=$(REL)..$(S)..$(S)..
 # derived from the original Makefile.generic
 #
@@ -32,6 +32,8 @@ ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBS=	@TELNET_LIBS@
 
 SRCS=	$(srcdir)/authenc.c $(srcdir)/commands.c $(srcdir)/main.c $(srcdir)/network.c $(srcdir)/ring.c \
 	$(srcdir)/sys_bsd.c $(srcdir)/telnet.c $(srcdir)/terminal.c \

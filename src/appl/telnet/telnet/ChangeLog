@@ -1,3 +1,9 @@
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Deleted; configure this dir from parent now.
+	* Makefile.in (thisconfigdir, mydir): Updated.
+	(LIBS): Define from @TELNET_LIBS@.
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* externs.h: Don't declare errno.
