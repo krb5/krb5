@@ -17,131 +17,144 @@
 .\"
 .\"	@(#)rcp.1	6.6 (Berkeley) 9/20/88
 .\"
-.TH RCP 1 "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH RCP 1 \*h
 .SH NAME
 rcp \- remote file copy
 .SH SYNOPSIS
 .B rcp
-[
-.B \-p
-] [
-.B \-x
-] [
-.B \-k
-realm ] [
-.B \-D
-port ] [
-.B \-N
-] file1 file2
-.br
+[\fB\-p\fP] [\fB\-x\fP | \fB\-\-encrypt\fP] [\fB\-k\fP \fIrealm\fP ]
+[\fB\-D\fP \fIport\fP] [\fB\-N\fP]
+.I file1 file2
+.sp
 .B rcp
-[
-.B \-p
-] [
-.B \-x
-] [
-.B \-k
-realm ] [
-.B \-r
-] [
-.B \-D
-port ] [
-.B \-N
-] file ... directory
+[\fB\-p\fB] [\fB\-x\fP | \fB\-\-encrypt\fP] [\fP\-k\fP \fIrealm\fP]
+[\fB\-r\fP] [\fB\-D\fP \fIport\fP] [\fB\-N\fP]
+.I file ... directory
 .SH DESCRIPTION
-.I Rcp
+.B Rcp
 copies files between machines.  Each
 .I file
 or
 .I directory
-argument is either a remote file name of the
-form ``rhost:path'', or a local file name (containing no `:' characters,
-or a `/' before any `:'s).
-.PP
-If the
-.B \-r
-option
-is specified and any of the source files are directories,
-.I rcp
-copies each subtree rooted at that name; in this case
-the destination must be a directory.
+argument is either a remote file name of the form ``rhost:path'', or a
+local file name (containing no `:' characters, or a `/' before any
+`:'s).
 .PP
 By default, the mode and owner of
 .I file2
-are preserved if it already existed; otherwise the mode of the source file
-modified by the
+are preserved if it already existed; otherwise the mode of the source
+file modified by the
 .IR umask (2)
 on the destination host is used.
-The
-.B \-p
-option causes
-.I rcp
-to attempt to preserve (duplicate) in its copies the modification
-times and modes of the source files, ignoring the
-.IR umask .
 .PP
 If
 .I path
-is not a full path name, it is interpreted relative to
-your login directory on 
+is not a full path name, it is interpreted relative to your login
+directory on
 .IR rhost .
 A 
 .I path
-on a remote host may be quoted (using \e, ", or \(aa)
-so that the metacharacters are interpreted remotely.
+on a remote host may be quoted (using \e, ", or \(aa) so that the
+metacharacters are interpreted remotely.
 .PP
-.I Rcp
+.B Rcp
 does not prompt for passwords; it uses Kerberos authentication when
 connecting to
 .IR rhost .
-Each user may have a private authorization list in a file \&.k5login
-in his login directory.  Each line in this file should contain a
-Kerberos principal name of the form 
+Each user may have a private authorization list in a file \&.k5login in
+his login directory.  Each line in this file should contain a Kerberos
+principal name of the form
 .IR principal/instance@realm .
 If there is a ~/.k5login file, then access is granted to the account if
 and only if the originater user is authenticated to one of the
 principals named in the ~/.k5login file.  Otherwise, the originating
 user will be granted access to the account if and only if the
 authenticated principal name of the user can be mapped to the local
-account name using the aname -> lname mapping rules (see \fIkrb5_anadd(8)\fP
+account name using the aname -> lname mapping rules (see
+.IR krb5_anadd (8)
 for more details).
-.PP
-The
-.B \-x
-option selects encryption of all information transferring between hosts.
-The
-.B \-k
-.I realm
-option causes 
-.I rcp
-to obtain tickets for the remote host in
+.SH OPTIONS
+.TP
+.B \-p
+attempt to preserve (duplicate) the modification times and modes of the
+source files in the copies, ignoring the
+.IR umask .
+.TP
+\fB\-x\fP | \fB\-\-encrypt\fP
+encrypt all information transferring between hosts.
+.TP
+\fB\-k\fP \fIrealm\fP
+obtain tickets for the remote host in
 .I realm
 instead of the remote host's realm as determined by
 .IR krb_realmofhost (3).
-.PP
-The
-.B \-D
-option specifies the port to connect to on the remote machine.  The
+.TP
+.B \-r
+if any of the source files are directories, copy each subtree rooted at
+that name; in this case the destination must be a directory.
+.TP
+\fB\-D\fP \fIport\fP
+connect to port
+.I port
+on the remote machine.  
+.TP
 .B \-N
-option tells rcp to use a network connection even when copying files
-on the local machine.  These options are used for testing purposes.
+use a network connection, even when copying files on the local machine
+(used for testing purposes).
 .PP
-.I Rcp
-handles third party copies, where neither source nor target files
-are on the current machine.
-Hostnames may also take the form ``rname@rhost'' to use
+.B Rcp
+handles third party copies, where neither source nor target files are on
+the current machine.  Hostnames may also take the form ``rname@rhost''
+to use
 .I rname
 rather than the current user name on the remote host.
+.SH CONFIGURATION
+The following defaults may be specified in the [appdefaults] or [realms]
+section of the
+.IR krb5.conf (5)
+file:
+.TP "\w'.B encrypt\ \ 'u"
+.B encrypt
+Whether or not to encrypt the data stream.  Takes a boolean argument.
+.PP
+For example:
+.sp
+.nf
+.in +1i
+[appdefaults]
+    rcp = {
+        encrypt = true
+    }
+[realms]
+    FUBAR.ORG = {
+        rcp = {
+            encrypt = false
+        }
+    }
+.in -1i
+.fi
+.sp
+.SH FILES
+.TP "\w'/etc/krb5.conf\ \ 'u"
+/etc/krb5.conf
+file containing local host's Kerberos V5 configuration information
+.sp -1v
+.TP
+~/.k5login
+(on remote host) - file containing Kerberos principals that are allowed
+access.
 .SH SEE ALSO
 cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3),
-rcp(1) [UCB version]
+krb5.conf(5), rcp(1) [UCB version]
 .SH BUGS
-Doesn't detect all cases where the target of a copy might
-be a file in cases where only a directory should be legal.
+.B Rcp
+doesn't detect all cases where the target of a copy might be a file in
+cases where only a directory should be legal.
 .PP
-Is confused by any output generated by commands in a
-\&.login, \&.profile, or \&.cshrc file on the remote host.
+.B Rcp
+is confused by any output generated by commands in a \&.login,
+\&.profile, or \&.cshrc file on the remote host.
 .PP
 Kerberos is only used for the first connection of a third-party copy;
 the second connection uses the standard Berkeley rcp protocol.
-

@@ -4,7 +4,8 @@
 .\"
 .\"	@(#)rshd.8c	6.3 (Berkeley) 5/24/86
 .\"
-.TH KRSHD 8C "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH KRSHD 8C \*h
 .SH NAME
 kshd \- kerberized remote shell server
 .SH SYNOPSIS
@@ -107,8 +108,8 @@ connect from a privileged port.
 .PP
 \fIKrshd\fP supports four options which may be used for testing:
 
-.IP \fB\-S\ srvtab\fP 10
-Set the \fIsrvtab\fP file to use.
+.IP \fB\-S\ keytab\fP 10
+Set the \fIkeytab\fP file to use.
 
 .IP \fB\-M\ realm\fP
 Set the Kerberos realm to use.

@@ -1,26 +1,28 @@
 .\"	login.1
 .\"
-.TH LOGIN 8C "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH LOGIN 8C \*h
 .SH NAME
-login \- kerberos enhanced login program
+login.krb5 \- kerberos enhanced login program
 .SH SYNOPSIS
-.B /sbin/login.krb5
+.B login.krb5
 [
 .B \-fF [username]
 ]
 .SH DESCRIPTION
-.I login
-is a modification of the BSD login program which is used for two functions.
-It is the sub-process used by krlogind and telnetd to initiate a user session
-and it is a replacement for the command-line login program which, when 
-invoked with a password, acquires Kerberos tickets for the user.
+.I login.krb5
+is a modification of the BSD login program which is used for two
+functions.  It is the sub-process used by krlogind and telnetd to
+initiate a user session and it is a replacement for the command-line
+login program which, when invoked with a password, acquires Kerberos
+tickets for the user.
 .PP
-.I login 
+.I login.krb5 
 will prompt for a username, or take one on the command line, as
-.I login username
-and will then prompt for a password. This password will be used to acquire
-Kerberos Version 5 tickets and Kerberos Version 4 tickets (if
-possible.) It will also attempt to run 
+.I login.krb5 username
+and will then prompt for a password. This password will be used to
+acquire Kerberos Version 5 tickets and Kerberos Version 4 tickets (if
+possible.) It will also attempt to run
 .I aklog
 to get \fIAFS\fP tokens for the user. The version 5 tickets will be
 tested against a local 
@@ -29,12 +31,30 @@ if it is available, in order to verify the tickets, before letting the
 user in. However, if the password matches the entry in
 \fI/etc/passwd\fP the user will be unconditionally allowed (permitting
 use of the machine in case of network failure.)
-.PP
-.I login
+.SH OPTIONS
+.TP
+\fB\-r\fP \fIhostname\fP
+pass hostname to rlogind.
+.TP
+\fB\-h\fP \fIhostname\fP
+pass hostname to telnetd, etc.
+.TP
+\fB\-f\fP \fIname\fP
+Perform pre-authenticated login, e.g., datakit, xterm, etc.; does not
+allow preauthenticated login as root.
+.TP
+\fB\-F\fP \fIname\fP
+Perform pre-authenticated login, e.g.,for datakit, xterm, etc.; allows
+preauthenticated login as root.
+.TP
+\fB\-e\fP \fIname\fP
+Perform pre-authenticated, encrypted login.  Must do term negotiation.
+.SH CONFIGURATION
+.I login.krb5
 is also configured via 
 .I krb5.conf
 using the
-.I \[login\]
+.I login
 stanza. A collection of options dealing with initial authentication are
 provided:
 .IP krb5_get_tickets

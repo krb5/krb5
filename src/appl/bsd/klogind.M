@@ -4,28 +4,29 @@
 .\"
 .\"	@(#)rlogind.8c	6.3 (Berkeley) 5/24/86
 .\"
-.TH KRLOGIND 8C "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH KLOGIND 8C \*h
 .SH NAME
-krlogind \- remote login server
+klogind \- remote login server
 .SH SYNOPSIS
-.B /etc/rlogind
+.B klogind
 [
 .B \-kr54cpPe
 ]
 .SH DESCRIPTION
-.I Krlogind
+.I Klogind
 is the server for the 
 .IR rlogin (1C)
 program.  The server is 
-based on rlogind(8C) but uses kerberos authentication.
+based on rlogind(8C) but uses Kerberos authentication.
 .PP
 The 
-.I krlogind
-server is invoked by \fIinetd(8c)\fP when it receives a
-connection on the port indicated in /etc/inetd.conf.  A typical
-/etc/inetd.conf configuration line for \fIkrlogind\fP might be:
+.I klogind
+server is invoked by \fIinetd(8c)\fP when it receives a connection on
+the port indicated in /etc/inetd.conf.  A typical /etc/inetd.conf
+configuration line for \fIklogind\fP might be:
 
-klogin	stream	tcp	nowait	root	/krb5/sbin/krlogind krlogind -e5c
+klogin stream tcp nowait root /usr/cygnus/sbin/klogind klogind -e5c
 
 When a service request is received, the following protocol is initiated:
 
@@ -41,20 +42,22 @@ If the authentication succeeds, login the user by calling the accompanying
 login.krb5 or /bin/login, according to the definition of 
 DO_NOT_USE_K_LOGIN.  
 .PP 
-The configuration of \fIkrlogind\fP is done
+The configuration of \fIklogind\fP is done
 by command line arguments passed by inetd.  The options are:
 .IP \fB\-5\fP 10
-Allow Kerberos5 authentication with the \fI.k5login\fP access control file
-to be trusted.  If this authentication system is used by the client and the
-authorization check is passed, then the user is allowed to log in.
+Allow Kerberos V5 authentication with the \fI.k5login\fP access control
+file to be trusted.  If this authentication system is used by the client
+and the authorization check is passed, then the user is allowed to log
+in.
 
 .IP \fB\-4\fP 
-Allow Kerberos4 authentication with the \fI.klogin\fP access control file
-to be trusted.  If this authentication system is used by the client and the
-authorization check is passed, then the user is allowed to log in.
+Allow Kerberos V4 authentication with the \fI.klogin\fP access control
+file to be trusted.  If this authentication system is used by the client
+and the authorization check is passed, then the user is allowed to log
+in.
 
 .IP \fB\-k\fP 
-Allow Kerberos5 and Kerberos4 as acceptable authentication
+Allow Kerberos V5 and Kerberos V4 as acceptable authentication
 mechanisms.  This is the same as including \fB\-4\fP and \fB\-5\fP.
 
 .IP \fB\-r\fP 
@@ -77,16 +80,16 @@ to all other checks.
 Create an encrypted session. 
 
 .IP \fB\-c\fP 
-Require Kerberos5 clients to present a cryptographic
-checksum of initial connection information like the name of the user
-that the client is trying to access in the initial authenticator.
-This checksum provides additionl security by preventing an attacker
-from changing the initial connection information.  To benefit from
-this security, only Kerberos5 should be trusted; Kerberos4 and rhosts
-authentication do not include this checksum.  If this option is
-specified, older Kerberos5 clients that do not send a checksum in the
-authenticator will not be able to authenticate to this server.  This
-option is mutually exclusive with the \fB-i\fP option.
+Require Kerberos V5 clients to present a cryptographic checksum of
+initial connection information like the name of the user that the client
+is trying to access in the initial authenticator.  This checksum
+provides additionl security by preventing an attacker from changing the
+initial connection information.  To benefit from this security, only
+Kerberos V5 should be trusted; Kerberos V4 and rhosts authentication do
+not include this checksum.  If this option is specified, older Kerberos
+V5 clients that do not send a checksum in the authenticator will not be
+able to authenticate to this server.  This option is mutually exclusive
+with the \fB-i\fP option.
 
 	If neither the \fB-c\fP or \fB-i\fP options are specified,then
 checksums are validated if presented.  Since it is difficult to remove
@@ -124,11 +127,13 @@ environment variable, ``TERM''; see .IR environ (7).  The screen or
 window size of the terminal is requested from the client, and window
 size changes from the client are propagated to the pseudo terminal.
 
-.PP .I Krlogind supports three options which are used for testing
+.PP
+.I Klogind
+supports three options which are used for testing
 purposes:
 
-.IP \fB\-S\ srvtab\fP 10
-Set the \fIsrvtab\fP file to use.
+.IP \fB\-S\ keytab\fP 10
+Set the \fIkeytab\fP file to use.
 
 .IP \fB\-M\ realm\fP
 Set the Kerberos realm to use.
@@ -136,7 +141,7 @@ Set the Kerberos realm to use.
 .IP \fB\-L\ login\fP
 Set the login program to use.  This option only has an effect if
 DO_NOT_USE_K_LOGIN was not defined when
-.I krlogind
+.I klogind
 was compiled.
 .SH DIAGNOSTICS
 All diagnostic messages are returned on the connection
