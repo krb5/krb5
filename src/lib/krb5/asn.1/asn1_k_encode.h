@@ -65,7 +65,7 @@
     asn1_encode_last_req
     asn1_encode_sequence_of_pa_data
     asn1_encode_sequence_of_ticket
-    asn1_encode_sequence_of_enctype
+    asn1_encode_sequence_of_keytype
     asn1_encode_sequence_of_krb_cred_info
 */
 
@@ -176,9 +176,9 @@ asn1_error_code asn1_encode_sequence_of_pa_data
 asn1_error_code asn1_encode_sequence_of_ticket
 	PROTOTYPE((asn1buf *buf, const krb5_ticket **val, int *retlen));
 
-asn1_error_code asn1_encode_sequence_of_enctype
+asn1_error_code asn1_encode_sequence_of_keytype
 	PROTOTYPE((asn1buf *buf,
-		   const int len, const krb5_enctype *val,
+		   const int len, const krb5_keytype *val,
 		   int *retlen));
 
 asn1_error_code asn1_encode_kdc_req

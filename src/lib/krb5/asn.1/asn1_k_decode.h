@@ -76,8 +76,6 @@ asn1_error_code asn1_decode_msgtype
 	PROTOTYPE((asn1buf *buf, krb5_msgtype *val));
 asn1_error_code asn1_decode_cksumtype
 	PROTOTYPE((asn1buf *buf, krb5_cksumtype *val));
-asn1_error_code asn1_decode_enctype
-	PROTOTYPE((asn1buf *buf, krb5_enctype *val));
 asn1_error_code asn1_decode_octet
 	PROTOTYPE((asn1buf *buf, krb5_octet *val));
 asn1_error_code asn1_decode_addrtype
@@ -155,8 +153,8 @@ asn1_error_code asn1_decode_sequence_of_pa_data
 asn1_error_code asn1_decode_last_req
 	PROTOTYPE((asn1buf *buf, krb5_last_req_entry ***val));
 
-asn1_error_code asn1_decode_sequence_of_enctype
-	PROTOTYPE((asn1buf *buf, int *num, krb5_enctype **val));
+asn1_error_code asn1_decode_sequence_of_keytype
+	PROTOTYPE((asn1buf *buf, int *num, krb5_keytype **val));
 
 asn1_error_code asn1_decode_sequence_of_passwdsequence
 	PROTOTYPE((asn1buf *buf, passwd_phrase_element ***val));

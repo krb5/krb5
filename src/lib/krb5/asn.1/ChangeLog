@@ -1,3 +1,10 @@
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * asn1_k_decode.c, asn1_k_decode.h, asn1_k_encode.c, asn1_k_encode.h
+	* krb5_decode.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
+
 Mon Aug 28 12:54:05 1995    <tytso@rsts-11.mit.edu>
 
 	* krb5_decode.c (decode_krb5_alt_method,
