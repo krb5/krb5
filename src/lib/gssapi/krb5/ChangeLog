@@ -1,3 +1,8 @@
+2000-06-04  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): Reverse sense of test;
+	break out of enctype loop if one succeeds.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* util_crypt.c (kg_encrypt): Copy ivec, since c_encrypt() now

@@ -117,7 +117,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 				    &in_creds, out_creds);
 	if (code == KRB5_CC_NOT_KTYPE)
 	    continue;
-	if (code != 0)
+	if (code == 0)
 	    break;
     }
     if (enctypes[i] == 0) {
@@ -129,7 +129,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * boundaries) because accept_sec_context code is also similarly
      * non-forgiving.
      */
-    if (!krb5_gss_dbg_client_expcreds && (*out_creds)->times.endtime < now) {
+    if (!krb5_gss_dbg_client_expcreds && *out_creds != NULL &&
+	(*out_creds)->times.endtime < now) {
 	code = KRB5KRB_AP_ERR_TKT_EXPIRED;
 	goto cleanup;
     }
