@@ -1,3 +1,8 @@
+Mon Mar 17 15:03:36 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.tmpl (GSSRTLCFMPPC): Add double quotes to prevent Mac
+		filenames with spaces from losing.
+
 Fri Nov 22 07:54:57 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.tmpl: Use '%' in Makefiles where you really want a '/'

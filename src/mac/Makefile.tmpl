@@ -4,14 +4,14 @@ KHCFM-68K = {KH}KerberosHeadersCFM-68K
 KHPPC = {KH}KerberosHeadersPPC
 
 GSSRTLCFM68K = "{MW68KLibraries}ANSI (4i%8d) C.CFM68K.Lib" \
-	{MW68KLibraries}SIOUX.CFM68K.Lib \
-	{MW68KLibraries}InterfaceLib \
-	{MW68KLibraries}MWCFM68KRuntime.Lib \
+	"{MW68KLibraries}SIOUX.CFM68K.Lib" \
+	"{MW68KLibraries}InterfaceLib" \
+	"{MW68KLibraries}MWCFM68KRuntime.Lib" \
 	"{MW68KLibraries}MathLibCFM68K (4i%8d).Lib"
 
 GSSRTLCFMPPC = "{MWPPCLibraries}ANSI C.PPC.Lib" \
-	{MWPPCLibraries}SIOUX.PPC.Lib {MWPPCLibraries}MWCRuntime.Lib \
-	{SharedLibraries}InterfaceLib {SharedLibraries}MathLib
+	"{MWPPCLibraries}SIOUX.PPC.Lib" "{MWPPCLibraries}MWCRuntime.Lib" \
+	"{SharedLibraries}InterfaceLib" "{SharedLibraries}MathLib"
 
 OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
         -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
@@ -39,15 +39,15 @@ build-PPC : {KHPPC}
 .c.PPC.o : .c
 	MWCPPC {DepDir}{Default}.c {OPTIONS} -prefix {KHPPC}
 
-{KH68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
-	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
+{KH68K} : "{KH}KerberosHeaders.pch" "{KH}KerberosHeaders.h"
+	MWC68K "{KH}KerberosHeaders.pch" -precompile {KH68K} {OPTIONS} -i {KH}
 
-{KHCFM-68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
-	MWC68K {KH}KerberosHeaders.pch -precompile {KHCFM-68K} {OPTIONS} \
+{KHCFM-68K} : "{KH}KerberosHeaders.pch" "{KH}KerberosHeaders.h"
+	MWC68K "{KH}KerberosHeaders.pch" -precompile {KHCFM-68K} {OPTIONS} \
 		-i {KH} -model cfmflat
 
-{KHPPC} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
-	MWCPPC {KH}KerberosHeaders.pch -precompile {KHPPC} {OPTIONS} -i {KH}
+{KHPPC} : "{KH}KerberosHeaders.pch" "{KH}KerberosHeaders.h"
+	MWCPPC "{KH}KerberosHeaders.pch" -precompile {KHPPC} {OPTIONS} -i {KH}
 
 link : link-68K link-68KCFM link-PPC link-CFMFAT
 
