@@ -156,8 +156,7 @@ int main(argc, argv)
 
     retval = krb5_init_context(&util_context);
     if (retval) {
-	    fprintf(stderr, "krb5_init_context failed with error #%ld\n",
-		    (long) retval);
+	    com_err (progname, retval, "while initializing Kerberos code");
 	    exit(1);
     }
     initialize_adb_error_table();
