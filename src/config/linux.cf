@@ -33,7 +33,15 @@
 /* makedepend won't understand -YPOSIX also implies -DPOSIX... */
 /* #define MakeDependFlags -DPOSIX */
 
-/* #define DefaultCDebugFlags OptimizedCDebugFlags */
+#define DependFlags -I/usr/lib/gcc-lib/i486-linux/`gcc -v 2>&1 | sed -ne "s/gcc version //p"`/include
+
+#undef HasGcc
+#define HasGcc YES
+
+#undef CcCmd
+#define CcCmd gcc -pedantic -pipe -Wall -fpcc-struct-return
+#define	OptimizedCDebugFlags -O3
+#define DefaultCDebugFlags OptimizedCDebugFlags
 
 /* #undef HasNdbm */
 #define HasNdbm YES
