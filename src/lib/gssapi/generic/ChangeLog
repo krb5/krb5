@@ -1,4 +1,7 @@
 2001-02-28  Miro Jurisic <meeroh@mit.edu>
+	* gssapi.hin: Fixed Mac OS preprocessor test
+	
+2001-02-28  Miro Jurisic <meeroh@mit.edu>
 	* gssapi_generic.h: corrected Mac OS include to <GSS/gssapi.h>
 	* gssapiP_generic.h: use "" include for krb5.h
 	
