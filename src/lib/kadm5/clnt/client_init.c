@@ -168,7 +168,6 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      handle->lhandle->lhandle = handle->lhandle;
 
      krb5_init_context(&handle->context);
-     krb5_init_ets(handle->context);	
 
      if(service_name == NULL || client_name == NULL) {
 	free(handle);

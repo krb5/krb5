@@ -116,11 +116,10 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 	 free(handle);
 	 return(ret);
     }
-     
+
     initialize_ovk_error_table();
     initialize_adb_error_table();
     initialize_ovku_error_table();
-    krb5_init_ets(handle->context);
 
     handle->magic_number = KADM5_SERVER_HANDLE_MAGIC;
     handle->struct_version = struct_version;

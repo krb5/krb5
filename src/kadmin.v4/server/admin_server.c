@@ -91,7 +91,6 @@ char *argv[];
     extern int fascist_cpw;
 
     krb5_init_context(&kadm_context);
-    krb5_init_ets(kadm_context);
     initialize_kadm_error_table();
     prog[sizeof(prog)-1]='\0';		/* Terminate... */
     (void) strncpy(prog, argv[0], sizeof(prog)-1);

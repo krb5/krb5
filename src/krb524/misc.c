@@ -34,6 +34,5 @@
 void krb524_init_ets(context)
      krb5_context context;
 {
-     krb5_init_ets(context);
      initialize_k524_error_table();
 }

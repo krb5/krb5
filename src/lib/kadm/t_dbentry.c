@@ -736,7 +736,6 @@ do_test(pname, verbose, isrand, is_a_set, title, passno)
 
     kret = 0;
     krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
     in_dbent = (krb5_db_entry *) malloc(sizeof(krb5_db_entry));
     out_dbent = (krb5_db_entry *) malloc(sizeof(krb5_db_entry));
     if (in_dbent && out_dbent) {

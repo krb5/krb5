@@ -80,7 +80,6 @@ main(argc,argv)
 
     /* do some initialisation */
     krb5_init_context(&context);
-    krb5_init_ets(context);
 
     krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_CRC);
     keyblock.enctype = ENCTYPE_DES_CBC_CRC;

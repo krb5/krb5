@@ -240,7 +240,6 @@ do_test(pname, verbose, isrand, title, passno)
 
     kret = 0;
     krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
     in_ktent = (krb5_keytab_entry *) malloc(sizeof(krb5_keytab_entry));
     out_ktent = (krb5_keytab_entry *) malloc(sizeof(krb5_keytab_entry));
     if (in_ktent && out_ktent) {

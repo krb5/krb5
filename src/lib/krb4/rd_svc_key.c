@@ -143,7 +143,6 @@ read_service_key(service,instance,realm,kvno,file,key)
 	return KSUCCESS;
 
     krb5_init_context(&context);
-    krb5_init_ets(context);
 
     if (!strcmp(instance, "*")) {
 	retval = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
