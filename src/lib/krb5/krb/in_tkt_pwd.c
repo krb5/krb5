@@ -34,13 +34,13 @@ extern char *krb5_default_pwd_prompt1;
 static krb5_error_code
 pwd_keyproc(DECLARG(const krb5_keytype, type),
 	    DECLARG(krb5_keyblock **, key),
-	    DECLARG(krb5_pointer, keyseed))
+	    DECLARG(krb5_const_pointer, keyseed))
 OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
-OLDDECLARG(krb5_pointer, keyseed)
+OLDDECLARG(krb5_const_pointer, keyseed)
 {
     krb5_error_code retval;
-    struct pwd_keyproc_arg *arg;
+    struct pwd_keyproc_arg *arg, arg2;
     char pwdbuf[BUFSIZ];
     int pwsize = sizeof(pwdbuf);
 
@@ -53,6 +53,8 @@ OLDDECLARG(krb5_pointer, keyseed)
 					0,
 					pwdbuf, &pwsize))
 	    return retval;
+	arg2 = *arg;
+	arg = &arg2;
 	arg->password.length = pwsize;
 	arg->password.data = pwdbuf;
     }

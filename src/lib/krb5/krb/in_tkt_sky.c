@@ -34,18 +34,18 @@ struct skey_keyproc_arg {
 static krb5_error_code
 skey_keyproc(DECLARG(const krb5_keytype, type),
 	     DECLARG(krb5_keyblock **, key),
-	     DECLARG(krb5_pointer, keyseed))
+	     DECLARG(krb5_const_pointer, keyseed))
 OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
-OLDDECLARG(krb5_pointer, keyseed)
+OLDDECLARG(krb5_const_pointer, keyseed)
 {
     krb5_keyblock *realkey;
-    struct skey_keyproc_arg *arg;
+    const struct skey_keyproc_arg *arg;
     krb5_error_code retval;
     krb5_keytab kt_id;
     krb5_keytab_entry kt_ent;
 
-    arg = (struct skey_keyproc_arg *)keyseed;
+    arg = (const struct skey_keyproc_arg *)keyseed;
 
     if (!valid_keytype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
