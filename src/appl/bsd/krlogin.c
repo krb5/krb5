@@ -650,23 +650,23 @@ main(argc, argv)
 		  0,
 		  &kcmd_proto);
     if (status) {
-	if (kcmd_proto != KCMD_NEW_PROTOCOL) {
+	if (kcmd_proto == KCMD_NEW_PROTOCOL && encrypt_flag)
+	    /* Don't fall back to something less secure.  */
+	    exit (1);
 #ifdef KRB5_KRB4_COMPAT
-	    fprintf(stderr, "Trying krb4 rlogin...\n");
-	    status = k4cmd(&sock, &host, port,
-			   null_local_username ? "" : pwd->pw_name,
-			   name ? name : pwd->pw_name, term,
-			   0, &v4_ticket, "rcmd", krb_realm,
-			   &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
-			   (encrypt_flag) ? KOPT_DO_MUTUAL : 0L, 0);
-	    if (status)
-		try_normal(orig_argv);
-	    rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 1, 1);
-#else
+	fprintf(stderr, "Trying krb4 rlogin...\n");
+	status = k4cmd(&sock, &host, port,
+		       null_local_username ? "" : pwd->pw_name,
+		       name ? name : pwd->pw_name, term,
+		       0, &v4_ticket, "rcmd", krb_realm,
+		       &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
+		       (encrypt_flag) ? KOPT_DO_MUTUAL : 0L, 0);
+	if (status)
 	    try_normal(orig_argv);
+	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 1, 1);
+#else
+	try_normal(orig_argv);
 #endif
-	}
-	exit (1);
     } else {
 	krb5_keyblock *key = 0;
 

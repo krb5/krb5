@@ -417,7 +417,7 @@ int main(argc, argv)
 				   cmd, targ);
 		    host = thost;
 #ifdef KERBEROS
-		    authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
+		    authopts = AP_OPTS_MUTUAL_REQUIRED;
 		    status = kcmd(&sock, &host,
 				  port,
 				  pwd->pw_name,
@@ -437,6 +437,9 @@ int main(argc, argv)
 				  0,
 				  &kcmd_proto);
 		    if (status) {
+			if (kcmd_proto == KCMD_NEW_PROTOCOL)
+			    /* Don't fall back to less safe methods.  */
+			    exit (1);
 #ifdef KRB5_KRB4_COMPAT
 			fprintf(stderr, "Trying krb4 rcp...\n");
 			if (strncmp(buf, "-x rcp", 6) == 0)
@@ -544,7 +547,7 @@ int main(argc, argv)
 		}
 		(void) sprintf(buf, "%s -f %s", cmd, src);
 #ifdef KERBEROS
-		authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
+		authopts = AP_OPTS_MUTUAL_REQUIRED;
 		status = kcmd(&sock, &host,
 			      port,
 			      pwd->pw_name,  suser,
@@ -562,6 +565,9 @@ int main(argc, argv)
 			      0,
 			      &kcmd_proto);
 		if (status) {
+			if (kcmd_proto == KCMD_NEW_PROTOCOL)
+			    /* Don't fall back to less safe methods.  */
+			    exit (1);
 #ifdef KRB5_KRB4_COMPAT
 			fprintf(stderr, "Trying krb4 rcp...\n");
 			if (strncmp(buf, "-x rcp", 6) == 0)

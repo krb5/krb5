@@ -382,31 +382,30 @@ main(argc, argv0)
 		  suppress,
 		  &kcmd_proto);
     if (status) {
-	if (kcmd_proto != KCMD_NEW_PROTOCOL) {
-#ifdef KRB5_KRB4_COMPAT
-	    /* No encrypted Kerberos 4 rsh. */
-	    if (encrypt_flag)
-		exit(1);
-#ifdef HAVE_ISATTY
-	    if (isatty(fileno(stderr)))
-		fprintf(stderr, "Trying krb4 rsh...\n");
-#endif
-	    status = k4cmd(&rem, &host, debug_port,
-			   pwd->pw_name,
-			   user ? user : pwd->pw_name, args,
-			   &rfd2, &v4_ticket, "rcmd", krb_realm,
-			   &v4_cred, v4_schedule, &v4_msg_data,
-			   &local, &foreign, 0L, 0);
-	    if (status)
-		try_normal(argv0);
-	    rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 0, 1);
-#else
-	    try_normal(argv0);
-#endif
-	}
 	/* If new protocol requested, don't fall back to less secure
 	   ones.  */
-	exit (1);
+	if (kcmd_proto == KCMD_NEW_PROTOCOL)
+	    exit (1);
+#ifdef KRB5_KRB4_COMPAT
+	/* No encrypted Kerberos 4 rsh. */
+	if (encrypt_flag)
+	    exit(1);
+#ifdef HAVE_ISATTY
+	if (isatty(fileno(stderr)))
+	    fprintf(stderr, "Trying krb4 rsh...\n");
+#endif
+	status = k4cmd(&rem, &host, debug_port,
+		       pwd->pw_name,
+		       user ? user : pwd->pw_name, args,
+		       &rfd2, &v4_ticket, "rcmd", krb_realm,
+		       &v4_cred, v4_schedule, &v4_msg_data,
+		       &local, &foreign, 0L, 0);
+	if (status)
+	    try_normal(argv0);
+	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 0, 1);
+#else
+	try_normal(argv0);
+#endif
     } else {
 	krb5_boolean similar;
 	krb5_keyblock *key = &cred->keyblock;
