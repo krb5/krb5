@@ -1,3 +1,7 @@
+2003-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* admin_server.c (kadm_listen): Zero sa_flags to avoid wonkiness.
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin_server.c (kadm_listen): Use socklen_t when passing address

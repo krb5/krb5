@@ -295,6 +295,7 @@ kadm_listen()
     struct sigaction new_act;
 
     new_act.sa_handler = doexit;
+    new_act.sa_flags = 0;
     sigemptyset(&new_act.sa_mask);
     sigaction(SIGINT, &new_act, 0);
     sigaction(SIGTERM, &new_act, 0);
