@@ -31,7 +31,7 @@
 #include <stdio.h>
 
 /*
- Frees the storage taken by a realm list returned by krb5_get_local_realm.
+ Frees the storage taken by a realm list returned by krb5_get_host_realm.
  */
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
