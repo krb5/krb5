@@ -360,15 +360,15 @@ struct sockaddr_in *who;
     /* ugh... clean this up later */
     if (status == KRB5_KDB_DB_INUSE) {
 	/* db locked */
-	u_long retcode = KADM_DB_INUSE;
+	krb5_ui_4 retcode = KADM_DB_INUSE;
 	char *pdat;
 	
-	dat_len = KADM_VERSIZE + sizeof(u_long);
+	dat_len = KADM_VERSIZE + sizeof(krb5_ui_4);
 	dat = (u_char *) malloc((unsigned)dat_len);
 	pdat = (char *) dat;
-	retcode = htonl((u_long) KADM_DB_INUSE);
+	retcode = htonl((krb5_ui_4) KADM_DB_INUSE);
 	(void) strncpy(pdat, KADM_ULOSE, KADM_VERSIZE);
-	memcpy(&pdat[KADM_VERSIZE], (char *)&retcode, sizeof(u_long));
+	memcpy(&pdat[KADM_VERSIZE], (char *)&retcode, sizeof(krb5_ui_4));
 	goto out;
     } else if (!nentries) {
 	syslog(LOG_ERR, "no service %s.%s", server_parm.sname, server_parm.sinst);

@@ -1,3 +1,15 @@
+Fri Jun  9 06:49:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadm_stream.c (vts_long, stv_long): Change u_long to krb5_ui_4
+
+	* kadm_server.c (kadm_ser_ckpw): Change u_long to krb5_ui_4
+
+	* kadm_ser_wrap.c (errpkt, kadm_ser_in):  Change u_long to krb5_ui_4
+
+	* kadm_funcs.c (kadm_add_entry):  Change u_long to krb5_ui_4
+
+	* admin_server.c (process_client): Change u_long to krb5_ui_4
+
 Sat May 20 22:33:58 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadm_stream.c: Based on presence of stdlib.h, include or declare

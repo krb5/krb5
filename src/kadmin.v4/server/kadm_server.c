@@ -352,7 +352,7 @@ AUTH_DAT *ad;
 u_char **datout;
 int *outlen;
 {
-    unsigned long keylow, keyhigh;
+    krb5_ui_4 keylow, keyhigh;
     char pword[MAX_KPW_LEN];
     int no_pword = 0;
     des_cblock newkey;

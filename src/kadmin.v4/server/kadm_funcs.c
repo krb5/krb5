@@ -197,7 +197,7 @@ Kadm_vals *valsout;
   data_i.key_low = ntohl(data_i.key_low);
   data_i.key_high = ntohl(data_i.key_high);
   memcpy(newpw.contents, &data_i.key_low, 4);
-  memcpy((char *)(((long *) newpw.contents) + 1), &data_i.key_high, 4);
+  memcpy((char *)(((krb5_int32 *) newpw.contents) + 1), &data_i.key_high, 4);
   newpw.length = 8;
   newpw.keytype = KEYTYPE_DES;
   /* encrypt new key in master key */

@@ -122,20 +122,20 @@ u_char **dat;
 int *dat_len;
 int code;
 {
-    u_long retcode;
+    krb5_ui_4 retcode;
     char *pdat;
 
     free((char *)*dat);			/* free up req */
-    *dat_len = KADM_VERSIZE + sizeof(u_long);
+    *dat_len = KADM_VERSIZE + sizeof(krb5_ui_4);
     *dat = (u_char *) malloc((unsigned)*dat_len);
     if (!(*dat)) {
 	syslog(LOG_ERR, "malloc(%d) returned null while in errpkt!", *dat_len);
 	abort();
     }
     pdat = (char *) *dat;
-    retcode = htonl((u_long) code);
+    retcode = htonl((krb5_ui_4) code);
     (void) strncpy(pdat, KADM_ULOSE, KADM_VERSIZE);
-    memcpy(&pdat[KADM_VERSIZE], (char *)&retcode, sizeof(u_long));
+    memcpy(&pdat[KADM_VERSIZE], (char *)&retcode, sizeof(krb5_ui_4));
     return;
 }
 
@@ -150,10 +150,10 @@ int *dat_len;
     u_char *in_st;			/* pointer into the sent packet */
     int in_len,retc;			/* where in packet we are, for
 					   returns */
-    u_long r_len;			/* length of the actual packet */
+    krb5_ui_4 r_len;			/* length of the actual packet */
     KTEXT_ST authent;			/* the authenticator */
     AUTH_DAT ad;			/* who is this, klink */
-    u_long ncksum;			/* checksum of encrypted data */
+    krb5_ui_4 ncksum;			/* checksum of encrypted data */
     des_key_schedule sess_sched;	/* our schedule */
     MSG_DAT msg_st;
     u_char *retdat, *tmpdat;
@@ -168,7 +168,7 @@ int *dat_len;
     if ((retc = stv_long(*dat, &r_len, in_len, *dat_len)) < 0)
 	return KADM_LENGTH_ERROR;
     in_len += retc;
-    authent.length = *dat_len - r_len - KADM_VERSIZE - sizeof(u_long);
+    authent.length = *dat_len - r_len - KADM_VERSIZE - sizeof(krb5_ui_4);
     memcpy((char *)authent.dat, (char *)(*dat) + in_len, authent.length);
     authent.mbz = 0;
     /* service key should be set before here */
@@ -185,7 +185,7 @@ int *dat_len;
 #ifdef NOENCRYPTION
     ncksum = 0;
 #else
-    ncksum = quad_cksum(in_st, (u_long *)0, (long) r_len, 0, ad.session);
+    ncksum = quad_cksum(in_st, (krb5_ui_4 *)0, (long) r_len, 0, ad.session);
 #endif
     if (ncksum!=ad.checksum) {		/* yow, are we correct yet */
 	clr_cli_secrets();
@@ -241,28 +241,28 @@ int *dat_len;
     /* Now seal the response back into a priv msg */
     free((char *)*dat);
     tmpdat = (u_char *) malloc((unsigned)(retlen + KADM_VERSIZE +
-					  sizeof(u_long)));
+					  sizeof(krb5_ui_4)));
     if (!tmpdat) {
 	clr_cli_secrets();
 	syslog(LOG_ERR, "malloc(%d) returned null while in kadm_ser_in!",
-	    retlen + KADM_VERSIZE + sizeof(u_long));
+	    retlen + KADM_VERSIZE + sizeof(krb5_ui_4));
 	errpkt(dat, dat_len, KADM_NOMEM);
 	return KADM_NOMEM;
     }
     (void) strncpy((char *)tmpdat, KADM_VERSTR, KADM_VERSIZE);
-    retval = htonl((u_long)retval);
-    memcpy((char *)tmpdat + KADM_VERSIZE, (char *)&retval, sizeof(u_long));
+    retval = htonl((krb5_ui_4)retval);
+    memcpy((char *)tmpdat + KADM_VERSIZE, (char *)&retval, sizeof(krb5_ui_4));
     if (retlen) {
-	memcpy((char *)tmpdat + KADM_VERSIZE + sizeof(u_long), (char *)retdat,
+	memcpy((char *)tmpdat + KADM_VERSIZE + sizeof(krb5_ui_4), (char *)retdat,
 	       retlen);
 	free((char *)retdat);
     }
     /* slop for mk_priv stuff */
     *dat = (u_char *) malloc((unsigned) (retlen + KADM_VERSIZE +
-					 sizeof(u_long) + 200));
+					 sizeof(krb5_ui_4) + 200));
     if ((*dat_len = krb_mk_priv(tmpdat, *dat,
 				(u_long) (retlen + KADM_VERSIZE +
-					  sizeof(u_long)),
+					  sizeof(krb5_ui_4)),
 				sess_sched,
 				ad.session, &server_parm.admin_addr,
 				&server_parm.recv_addr)) < 0) {

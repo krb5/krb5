@@ -12,6 +12,7 @@
 
 #include <mit-copyright.h>
 #include <string.h>
+#include "k5-int.h"
 
 #ifdef HAS_STDLIB_H
 #include <stdlib.h>
@@ -111,16 +112,16 @@ int loc;			/* offset into the stream for current data */
 }
 
 vts_long(dat, st, loc)
-u_long dat;			/* the attributes field */
+krb5_ui_4 dat;			/* the attributes field */
 u_char **st;			/* a base pointer to the stream */
 int loc;			/* offset into the stream for current data */
 {
-  u_long temp;			/* to hold the net order short */
+  krb5_ui_4 temp;			/* to hold the net order short */
 
   temp = htonl(dat);		/* convert to network order */
-  *st = (u_char *) realloc ((char *)*st, (unsigned)(loc + sizeof(u_long)));
-  memcpy((char *)(*st + loc), (char *) &temp, sizeof(u_long));
-  return sizeof(u_long);
+  *st = (u_char *) realloc ((char *)*st, (unsigned)(loc + sizeof(krb5_ui_4)));
+  memcpy((char *)(*st + loc), (char *) &temp, sizeof(krb5_ui_4));
+  return sizeof(krb5_ui_4);
 }
 
     
@@ -242,24 +243,24 @@ int maxlen;
 
   if (loc + sizeof(u_short) > maxlen)
       return(-1);
-  memcpy((char *) &temp, (char *)((u_long)st+(u_long)loc), sizeof(u_short));
+  memcpy((char *) &temp, (char *) st+ loc, sizeof(u_short));
   *dat = ntohs(temp);		/* convert to network order */
   return sizeof(u_short);
 }
 
 stv_long(st, dat, loc, maxlen)
 u_char *st;			/* a base pointer to the stream */
-u_long *dat;			/* the attributes field */
+krb5_ui_4 *dat;			/* the attributes field */
 int loc;			/* offset into the stream for current data */
 int maxlen;			/* maximum length of st */
 {
-  u_long temp;			/* to hold the net order short */
+  krb5_ui_4 temp;			/* to hold the net order short */
 
-  if (loc + sizeof(u_long) > maxlen)
+  if (loc + sizeof(krb5_ui_4) > maxlen)
       return(-1);
-  memcpy((char *) &temp, (char *)((u_long)st+(u_long)loc), sizeof(u_long));
+  memcpy((char *) &temp, (char *) st + loc, sizeof(krb5_ui_4));
   *dat = ntohl(temp);		/* convert to network order */
-  return sizeof(u_long);
+  return sizeof(krb5_ui_4);
 }
     
 stv_char(st, dat, loc, maxlen)
