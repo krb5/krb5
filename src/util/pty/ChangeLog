@@ -1,3 +1,8 @@
+2001-05-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* open_slave.c (pty_open_slave): If revoke() present on system but
+	VHANG_FIRST is not defined, declare local variable.
+
 2001-05-04  Tom Yu  <tlyu@mit.edu>
 
 	* dump-utmp.c: Fix some off-by-one errors.  Handle cases where we

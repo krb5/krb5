@@ -29,7 +29,7 @@ long pty_open_slave ( slave, fd)
     const char *slave;
     int *fd;
 {
-#ifdef VHANG_FIRST
+#if defined(VHANG_FIRST) || defined(HAVE_REVOKE)
     int vfd;
 #endif
 
