@@ -434,16 +434,17 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
           If either test succeeds we continue without error.
        */
 
+       if ((code = kg_checksum_channel_bindings(context, 
+						input_chan_bindings,
+						&reqcksum, bigend))) {
+	 major_status = GSS_S_BAD_BINDINGS;
+	 goto fail;
+       }
+
+       /* Always read the clients bindings - eventhough we might ignore them */
+       TREAD_STR(ptr, ptr2, reqcksum.length);
+
        if (input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS ) {
-           if ((code = kg_checksum_channel_bindings(context, 
-                                                    input_chan_bindings,
-           					    &reqcksum, bigend))) {
-           	   major_status = GSS_S_BAD_BINDINGS;
-           	   goto fail;
-           }
-           
-           
-           TREAD_STR(ptr, ptr2, reqcksum.length);
            if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
                xfree(reqcksum.contents);
                reqcksum.contents = 0;
@@ -460,9 +461,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                }
            }
            
-           xfree(reqcksum.contents);
-           reqcksum.contents = 0;
        }
+
+       xfree(reqcksum.contents);
+       reqcksum.contents = 0;
 
        TREAD_INT(ptr, gss_flags, bigend);
        gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if

@@ -1,3 +1,11 @@
+Fri Sep 22 12:05:31 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): When
+ 	GCC_S_NO_CHANNEL_BINDINGS is set by the server, skip over the
+ 	bindings sent from the client. RFC-1964 indicates that the
+ 	client's channel bindings are always sent in checksum field and
+ 	need to be accounted for, evn if the server does not care.
+
 2000-09-01  Jeffrey Altman <jaltman@columbia.edu>
 
         * accept_sec_context.c: krb5_gss_accept_sec_context()
