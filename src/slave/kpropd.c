@@ -803,7 +803,17 @@ load_database(kdb5_edit, database_file_name)
 {
 	static char	*edit_av[4];
 	int	error_ret, save_stderr;
+
+	/* <sys/param.h> has been included, so BSD will be defined on
+	   BSD systems */
+#if BSD > 0 && BSD <= 43
+#ifndef WEXITSTATUS
+#define	WEXITSTATUS(w) (w).w_retcode
+#endif
 	union wait	waitb;
+#else
+	int	waitb;
+#endif
 	char	request[1024];
 	krb5_error_code	retval;
 
@@ -816,6 +826,10 @@ load_database(kdb5_edit, database_file_name)
 	edit_av[1] = "-R";	
 	edit_av[2] = request;
 	edit_av[3] = NULL;
+
+#ifndef BSD
+#define	vfork fork
+#endif
 	switch(vfork()) {
 	case -1:
 		com_err(progname, errno, "while trying to fork %s",
@@ -848,7 +862,7 @@ load_database(kdb5_edit, database_file_name)
 		}
 	}
 	
-	if (error_ret = waitb.w_retcode) {
+	if (error_ret = WEXITSTATUS(waitb)) {
 		com_err(progname, 0, "%s returned a bad exit status (%d)",
 			kdb5_edit, error_ret);
 		exit(1);
