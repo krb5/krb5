@@ -27,14 +27,25 @@
 #include "k5-int.h"
 
 void
+krb5_free_keyblock_contents(context, key)
+     krb5_context context;
+     register krb5_keyblock *key;
+{
+     if (key->contents) {
+	  memset(key->contents, 0, key->length);
+	  krb5_xfree(key->contents);
+     }
+     return;
+}
+
+void
 krb5_free_keyblock(context, val)
     krb5_context context;
     register krb5_keyblock *val;
 {
-    if (val->contents) {
-	memset((char *)val->contents, 0, val->length);
-	krb5_xfree(val->contents);
-    }
+    krb5_free_keyblock_contents(context, val);
     krb5_xfree(val);
     return;
 }
+
+

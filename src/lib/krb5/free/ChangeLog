@@ -1,3 +1,8 @@
+Fri Aug  2 14:03:44 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* f_keyblock.c (krb5_free_keyblock_contents): added
+        krb5_free_keyblock_contents
+
 Wed Nov  8 17:51:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* f_einfo.c (krb5_free_etype_info): Added new function to free a
