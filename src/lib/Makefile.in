@@ -79,11 +79,11 @@ $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
-##WIN16##	   $(MITLIBS) $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
+##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj $(MITLIBS) $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   gss_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
@@ -94,12 +94,51 @@ $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
 ##WIN32##	   k4_glue.obj $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
+#
+# The following kludge is for MIT's SAP/Version server hack
+#
+
+##WIN16##SGDEF = sapgss16.def
+##WIN16##SKDEF = sapkrb16.def
+##WIN32##SGDEF = gssapi.def
+##WIN32##SKDEF = krb5_32.def
+##WIN16##SGLIB = sapgss16.lib
+##WIN16##SKLIB = sapkrb16.lib
+##WIN32##SGLIB = sapgss32.lib
+##WIN32##SKLIB = sapkrb32.lib
+
+sap_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) $(MITFLAGS) /DSAP_VERSERV=1 /DKRB5=1 /c \
+		/Fo$@ win_glue.c
+
+$(SKLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) sap_glue.obj $(KRB5RC)
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   sap_glue, $*.dll, $*.map, \
+##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(SKDEF)
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -D_MSDOS -DRES_ONLY \
+##WIN16##	   $(KRB5RC) $*.dll
+##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	link $(WINDLLFLAGS) /def:$(SKDEF) /out:$*.dll \
+##WIN32##	   sap_glue.obj $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
+##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
+
+$(SGLIB): $(GLIBS) $(SKLIB) $(CLIB) $(GDEF) gss_glue.obj
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   gss_glue, $*.dll, $*.map, \
+##WIN16##	   $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS), $(SGDEF)
+##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	link $(WINDLLFLAGS) /def:$(SGDEF) /out:$*.dll \
+##WIN32##	   gss_glue.obj $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS)
+
+##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
+
 k5_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
 k4_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
 gss_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) $(MITFLAGS) /c /DGSSAPI=1 /Fo$@ $**
+	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 no_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /Fo$@ $**
 
@@ -116,21 +155,6 @@ comerr.lib: $(CLIB)
 krb4.lib:   $(K4LIB)
 krb5.lib:   $(KLIB)
 gssapi.lib: $(GLIB)
-
-sap_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -DGSSAPI=1 /c /Fo$@ win_glue.c
-
-##WIN16##krbsap16.dll: $(GLIBS) $(KLIB) $(CLIB) $(GDEF) $(GDEF) sap_glue.obj
-##WIN16##	link /co /seg:400 /noe /nod /nol \
-##WIN16##	   sap_glue, $*.dll, $*.map, \
-##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
-##WIN16##	rc /nologo /p /k $*.dll
-##WIN16##	implib /nologo $*.lib $*.dll
-
-##WIN32##krbsap32.dll: $(GLIBS) $(KLIB) $(CLIB) $(GDEF) $(GDEF) sap_glue.obj
-##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   sap_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
-
 
 all-windows:: 
 	@echo Making in lib\crypto
@@ -155,7 +179,7 @@ all-windows::
 	cd ..
 
 all-windows:: lib-windows
-lib-windows: krb5.lib gssapi.lib krb4.lib
+lib-windows:: krb5.lib gssapi.lib krb4.lib
 
 clean-windows::
 	@echo Making clean in lib\crypto

@@ -70,9 +70,8 @@
  * #defines for using MIT's version server DLL
  */
 #ifdef SAP_VERSERV
-#define VERSERV
 #define APP_TITLE "KRB5-SAP"
-#define APP_VER "3.0c"
+#define APP_VER "3.0f"
 #define APP_INI "krb5sap.ini"
 #define VERSERV_ERROR 	KRB5_APPL_EXPIRED
 #endif
@@ -307,6 +306,10 @@ krb5_error_code krb5_vercheck()
 		return KRB5_LIB_EXPIRED;
 #endif
 	{
+#ifdef APP_TITLE
+		if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
+			return VERSERV_ERROR;
+#else
 		char AppTitle[256];
 		char AppVer[256];
 		char AppIni[256];
@@ -318,6 +321,8 @@ krb5_error_code krb5_vercheck()
 			if (CallVersionServer(AppTitle, AppVer, AppIni, NULL))
 				return KRB5_APPL_EXPIRED;
 		}
+#endif
+		
 	}
 #endif
 	return 0;

@@ -1,3 +1,10 @@
+Thu May  1 22:56:04 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, win_glue.c, sapkrb16.def, sapkrb32.def: Write
+		special case hack for the SAP kerberos libraries since we
+		can't make the version server code correctly read out the
+		version resource from SAPGUI.EXE for some reason....
+
 Tue Apr 29 06:22:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* win_glue.c (CallVersionServer): Add code to get the version
