@@ -1,3 +1,8 @@
+Fri Feb 21 18:38:06 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* crypto_glue.c: Move into libcrypto as krb5_glue.c; I need to
+        avoid libcrypto depending on libkrb5
+
 Wed Feb 19 14:21:12 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* t_kerb.c (test_set_realm): New function used to test

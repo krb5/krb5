@@ -27,7 +27,6 @@ STLIBOBJS= \
 	copy_princ.o	\
 	copy_tick.o	\
 	cp_key_cnt.o	\
-	crypto_glue.o	\
 	decode_kdc.o	\
 	decrypt_tk.o	\
 	encode_kdc.o	\
