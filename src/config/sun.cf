@@ -48,5 +48,6 @@
 
 #define DesDefines		-DBIG -DMUSTALIGN -DMSBFIRST
 
+#define LnCmd /usr/5bin/ln -sf
 
 #define	UseSedHack
