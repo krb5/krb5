@@ -1,3 +1,8 @@
+Tue Nov 12 14:58:20 1996  Tom Yu  <tlyu@mit.edu>
+
+	* rpc_test_setup.sh: Fix test of $VERBOSE_TEST so that $VERBOSE
+	only gets set if $VERBOSE_TEST is not empty.
+
 Mon Nov 11 20:52:27 1996  Tom Yu  <tlyu@mit.edu>
 
 	* rpc_test_setup.sh: Use a temp file rather than a here document
