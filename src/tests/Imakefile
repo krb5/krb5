@@ -12,10 +12,10 @@
 #define PassCDebugFlags
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
-        SUBDIRS = jon
+        SUBDIRS = create verify hammer
 
            OBJS = test1.o dump.o 
 
            SRCS = test1.c dump.c 
 
-#ComplexProgramTarget(test)
+MakeSubdirs($(SUBDIRS))
