@@ -1,3 +1,7 @@
+2003-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install): Fix typo in k5srvutil.M install rule.
+
 2003-02-06  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (install): Install k5srvutil
