@@ -1,3 +1,8 @@
+Tue Jan 23 04:06:36 1996    <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add support for building the gssapi library as a
+		shared library.
+
 Tue Jan 23 03:32:25 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Add the mechglue directory as a subdir

@@ -6,6 +6,13 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 DO_SUBDIRS
+V5_MAKE_SHARED_LIB(libgssapi_krb5,0.1,.., ./krb5)
+CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
+AC_SUBST(CRYPTO_SH_VERS)
+COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
+AC_SUBST(COMERR_SH_VERS)
+KRB5_SH_VERS=$krb5_cv_shlib_version_libkrb5
+AC_SUBST(KRB5_SH_VERS)
 AppendRule([all:: libgssapi_krb5.a])
 LinkFileDir(../libgssapi_krb5.a, libgssapi_krb5.a, ./gssapi)
 AppendRule([all-unix:: ../libgssapi_krb5.a])
