@@ -50,14 +50,18 @@ main(argc, argv)
     char *cache_name = NULL;
     int code;
     int errflg=0;
+    int quiet = 0;	
     
     krb5_init_ets();
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((c = getopt(argc, argv, "c:")) != EOF) {
+    while ((c = getopt(argc, argv, "qc:")) != EOF) {
 	switch (c) {
+	case 'q':
+	    quiet = 1;
+	    break;	
 	case 'c':
 	    if (cache == NULL) {
 		cache_name = optarg;
@@ -83,7 +87,7 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -c cache-name ]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-q] [ -c cache-name ]\n", argv[0]);
 	exit(2);
     }
 
@@ -97,11 +101,15 @@ main(argc, argv)
     code = krb5_cc_destroy (cache);
     if (code != 0) {
 	com_err (argv[0], code, "while destroying cache");
+	if (quiet)
+	    fprintf(stderr, "Ticket cache NOT destroyed!\n");
+	else {
 #ifdef __STDC__
-	fprintf(stderr, "Ticket cache \aNOT\a destroyed!\n");
+	    fprintf(stderr, "Ticket cache \aNOT\a destroyed!\n");
 #else
-	fprintf(stderr, "Ticket cache \007NOT\007 destroyed!\n");
+	    fprintf(stderr, "Ticket cache \007NOT\007 destroyed!\n");
 #endif
+	}
 	exit (1);
     }
     exit (0);
