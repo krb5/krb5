@@ -59,6 +59,11 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+Major changes in 1.3.6
+
+* [2841] Fix heap buffer overflow in password history
+  mechanism. [MITKRB5-SA-2004-004]
+
 Major changes in 1.3.5
 ----------------------
 
