@@ -5,9 +5,9 @@
 @c guide
 @setfilename kerberos-admin.info
 @settitle Kerberos V5 System Administrator's Guide
-@c @setchapternewpage odd                  @c chapter begins on next odd page
-@setchapternewpage on                   @c chapter begins on next page
-@smallbook                              @c Format for 7" X 9.25" paper
+@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
 @c %**end of header
 @paragraphindent 0
 @iftex

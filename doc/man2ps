@@ -35,14 +35,14 @@ do
     echo $filename': '$pages' pages'
 
     if [ "$CSPLIT"x != x ]; then
-        $CSPLIT -k $filename.ps /Page:/ \{$pp\}
+        $CSPLIT -k $filename.ps /Page:/ \{$pp\} > /dev/null
 
         counter=0
 
         for number in `ls xx*`
         do
             cat xx00 > $filename$counter.ps
-            echo '.7 dup scale' >> $filename$counter.ps
+            echo '0.85 dup scale' >> $filename$counter.ps
             cat $number >> $filename$counter.ps
             if [ $counter != $pages ];
                 then
