@@ -54,6 +54,11 @@ register int *error;
     register krb5_address * const *temp;
     register int i;
 
+    if (!val) {
+	    *error = EINVAL;
+	    return 0;
+    }
+
     /* count elements */
     for (i = 0, temp = val; *temp; temp++,i++);
 
@@ -89,7 +94,12 @@ register int *error;
     register struct type_KRB5_HostAddresses *retval = 0, *rv1 = 0, *rv2;
     register krb5_address * const *temp;
     register int i;
-
+ 
+    if (!val) {
+	    *error = EINVAL;
+	    return 0;
+    }
+   
     for (i = 0, temp = val; *temp; temp++,i++, rv1 = rv2) {
 
 	rv2 = (struct type_KRB5_HostAddresses *) xmalloc(sizeof(*rv2));
