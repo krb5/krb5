@@ -1,3 +1,8 @@
+Mon Oct 13 10:55:02 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_init.c (kadm5_destroy): Free handle->lhandle field, call
+        kadm5_free_config_params and krb5_free_context.
+
 Tue Jul  1 02:34:46 1997  Tom Yu  <tlyu@mit.edu>
 
 	* client_principal.c, client_rpc.c: Add support for setv4key.

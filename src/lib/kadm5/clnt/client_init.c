@@ -220,11 +220,11 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  return KADM5_BAD_CLIENT_PARAMS;
      }
 			
-     if (code = kadm5_get_config_params(handle->context,
+     if ((code = kadm5_get_config_params(handle->context,
 					DEFAULT_PROFILE_PATH,
 					"KRB5_CONFIG",
 					params_in,
-					&handle->params)) {
+					&handle->params))) {
 	  krb5_free_context(handle->context);
 	  free(handle);
 	  return(code);
@@ -530,6 +530,11 @@ kadm5_destroy(void *server_handle)
 	  AUTH_DESTROY(handle->clnt->cl_auth);
      if (handle->clnt)
 	  clnt_destroy(handle->clnt);
+     if (handle->lhandle)
+          free (handle->lhandle);
+
+     kadm5_free_config_params(handle->context, &handle->params);
+     krb5_free_context(handle->context);
 
      handle->magic_number = 0;
      free(handle);
