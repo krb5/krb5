@@ -191,7 +191,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
    code = 0;
     
 cleanup:
-    if (checksum_data.data && checksum_data.data != ckbuf)
+    if (checksum_data.data && checksum_data.data != (char *) ckbuf)
 	free(checksum_data.data);
     krb5_free_cred_contents(context, &in_creds);
     if (out_creds)

@@ -6,6 +6,10 @@
  */
 
 #include <gssapi/gssapi.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <string.h>
 #include <pwd.h>
 #include <sys/types.h>
 

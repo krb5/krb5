@@ -1,3 +1,11 @@
+Tue Jan 23 13:01:42 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Check for stdlib.h
+
+	* pname_to_uid.c: Include string.h and stdlib.h.
+
+	* init_sec_context.c (make_ap_req): Handle gcc warning.
+
 Tue Jan 23 04:05:23 1996    <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Add support for building GSSAPI as a shared
