@@ -39,12 +39,13 @@ des.so des.po $(OUTPRE)des.$(OBJEXT): des.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h $(srcdir)/../des/des_int.h \
-  enc_provider.h
+  $(SRCTOP)/include/kerberosIV/des.h enc_provider.h
 des3.so des3.po $(OUTPRE)des3.$(OBJEXT): des3.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(srcdir)/../des/des_int.h
+  $(BUILDTOP)/include/profile.h $(srcdir)/../des/des_int.h \
+  $(SRCTOP)/include/kerberosIV/des.h
 arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): arcfour.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
