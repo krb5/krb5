@@ -289,7 +289,7 @@ kadm_listen()
     int peer_fd;
     fd_set mask, readfds;
     struct sockaddr_in peer;
-    int addrlen;
+    socklen_t addrlen;
     int pid;
 #ifdef POSIX_SIGNALS
     struct sigaction new_act;

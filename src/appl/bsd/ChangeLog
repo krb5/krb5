@@ -1,3 +1,8 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogind.c (main, recvauth): Use socklen_t when passing
+	addresses to socket functions.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c: Remove declaration of errno

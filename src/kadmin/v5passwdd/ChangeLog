@@ -1,3 +1,8 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_conn.c (kadm_contact_server): Use socklen_t when passing
+	address to socket functions.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* kpasswd.c (kpwd_change_prompt_1, kpwd_change_prompt_2)

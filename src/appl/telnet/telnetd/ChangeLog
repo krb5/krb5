@@ -1,3 +1,8 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c (main): Use socklen_t when passing address to socket
+	functions.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.orig: Deleted.

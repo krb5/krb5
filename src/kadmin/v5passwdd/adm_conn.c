@@ -326,7 +326,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 
     struct sockaddr_in	in_local;
     struct sockaddr_in	in_remote;
-    int			addr_len;
+    socklen_t		addr_len;
 
     const char		*realm_admin_names[4];
     char		*realm_name;

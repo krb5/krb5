@@ -196,7 +196,8 @@ char *
 hookup(char* host, int port)
 {
 	register struct hostent *hp = 0;
-	int s, len;
+	int s;
+	socklen_t len;
 #ifdef IP_TOS
 #ifdef IPTOS_LOWDELAY
 	int tos;
@@ -1440,7 +1441,8 @@ die:
 static int initconn()
 {
 	register char *p, *a;
-	int result, len, tmpno = 0;
+	int result, tmpno = 0;
+	socklen_t len;
 	int on = 1;
 #ifndef NO_PASSIVE_MODE
 	int a1,a2,a3,a4,p1,p2;
@@ -1560,7 +1562,8 @@ bad:
 FILE *
 dataconn(char *lmode)
 {
-	int s, fromlen = sizeof (hisdataaddr);
+	int s;
+	socklen_t fromlen = sizeof (hisdataaddr);
 #ifdef IP_TOS
 #ifdef IPTOS_LOWDELAY
         int tos;

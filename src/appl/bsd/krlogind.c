@@ -354,7 +354,8 @@ int main(argc, argv)
 {
     extern int opterr, optind;
     extern char * optarg;
-    int on = 1, fromlen, ch;
+    int on = 1, ch;
+    socklen_t fromlen;
     struct sockaddr_storage from;
     int debug_port = 0;
     int fd;
@@ -1354,7 +1355,7 @@ recvauth(valid_checksum)
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_storage peersin, laddr;
-    int len;
+    socklen_t len;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     krb5_data version;
@@ -1461,7 +1462,7 @@ recvauth(valid_checksum)
     
       if (authenticator->checksum) {
 	struct sockaddr_in adr;
-	int adr_length = sizeof(adr);
+	socklen_t adr_length = sizeof(adr);
 	char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
 	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;

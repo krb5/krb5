@@ -47,7 +47,8 @@ int argc;
 char *argv[];
 {
   krb5_data pname_data, tkt_data;
-  int l, sock = 0;
+  int sock = 0;
+  socklen_t l;
   int retval;
   struct sockaddr_in l_inaddr, f_inaddr;	/* local, foreign address */
   krb5_creds creds, *new_creds;
@@ -71,7 +72,7 @@ char *argv[];
       int one = 1;
       int acc;
       struct servent *sp;
-      int namelen = sizeof(f_inaddr);
+      socklen_t namelen = sizeof(f_inaddr);
       
       if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 	  com_err("uu-server", errno, "creating socket");

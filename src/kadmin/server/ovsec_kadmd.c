@@ -1027,7 +1027,7 @@ void do_schpw(int s1, kadm5_config_params *params)
     char req[1500];
     int len;
     struct sockaddr_in from;
-    int fromlen;
+    socklen_t fromlen;
     krb5_keytab kt;
     krb5_data reqdata, repdata;
     int s2;

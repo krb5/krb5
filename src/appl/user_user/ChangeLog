@@ -1,3 +1,8 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* server.c (main): Use socklen_t when passing address to socket
+	functions.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

@@ -1,3 +1,8 @@
+2003-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftp.c (hookup, initconn, dataconn): Use socklen_t when passing
+	address to socket functions.
+
 2002-11-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* main.c (makeargv): Report an error if parsed arguments won't fit

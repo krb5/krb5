@@ -221,7 +221,8 @@ main(argc, argv)
 	char *argv[];
 {
 	struct sockaddr_storage from;
-	int on = 1, fromlen;
+	int on = 1;
+	socklen_t fromlen;
 	register int ch;
 	extern char *optarg;
 	extern int optind;
@@ -488,7 +489,8 @@ main(argc, argv)
 
 	/* XXX Convert this to support getaddrinfo, ipv6, etc.  */
 	if (debug) {
-	    int s, ns, foo;
+	    int s, ns;
+	    socklen_t foo;
 	    struct servent *sp;
 	    static struct sockaddr_in sin4 = { AF_INET };
 
