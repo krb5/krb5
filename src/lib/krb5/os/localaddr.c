@@ -35,9 +35,7 @@
 /* needed for solaris, harmless elsewhere... */
 #define BSD_COMP
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <sys/time.h>
-#include <net/if.h>
 #include <errno.h>
 
 /*

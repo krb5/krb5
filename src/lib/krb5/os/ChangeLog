@@ -1,3 +1,8 @@
+Fri Mar 17 19:56:39 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.
+	* localaddr.c:  Remove socket include files now handled in k5-int.h.
+
 Wed Mar 15 12:19:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* sendto_kdc.c: made to work on the PC.
