@@ -85,11 +85,10 @@ if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
 asn1buf subbuf;\
-retval = asn1_get_tag(&buf,&class,&construction,&tagnum,&length);\
+int indef;\
+retval = asn1_get_sequence(&buf,&length,&indef);\
 if(retval) clean_return(retval);\
-if(class != UNIVERSAL || construction != CONSTRUCTED ||\
-   tagnum != ASN1_SEQUENCE) clean_return(ASN1_BAD_ID);\
-retval = asn1buf_imbed(&subbuf,&buf,length);\
+retval = asn1buf_imbed(&subbuf,&buf,length,indef);\
 if(retval) clean_return(retval);\
 next_tag()
 
