@@ -1,3 +1,7 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Invoke AC_CANONICAL_HOST.
+
 2000-11-08  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Change KRB4_DEJAGNU_TEST variable to KRBIV from
