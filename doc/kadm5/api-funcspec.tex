@@ -58,7 +58,36 @@ in the dictionary will not be accepted.
 The behavior of any function when called with a principal name that is
 not in the host's local realm is currently undefined.
 
-\section{Admin API}
+\section{Admin API requirements}
+
+\subsection{Versioning}
+
+The API will include a versioning system aimed at meeting the
+following requirements:
+\begin{description}
+\item[R1] Admin API client applications will be source-code
+	compatible, whenever possible, with newer versions of the
+	Admin API. {\bf [high]}
+\item[R2] Admin API client applications will be object-code and
+	shared-library compatible, whenever possible, with newer
+	versions of the Admin API. {\bf [low]}
+\item[R3] Admin API client applications will be protocol compatible,
+	whenever possible, with newer versions of the Admin server.
+	I.e., a statically linked Admin API client application will be
+	able to talk to an Admin server from a later version of
+	Secure. {\bf [medium]}
+\item[R4] Admin API client applications will be protocol compatible,
+	whenever possible, with older versions of the Admin server.
+	{\bf [lower than low]}
+\item[R5] Changes to the Admin API structures or protocol will,
+	whenever possible, require only localized changes to the Admin
+	server source code and Admin API library implementation. {\bf
+	[medium]}
+\end{description}
+The present implementation meets requirements R1, R2, and R3, and
+partially meets requirement R5.  Requirement R4 is not addressed.
+
+\section{Admin API functional specification}
 
 This section describes the Admin API that can be used to maintain
 principals and policies.  It describes the data structures used for
