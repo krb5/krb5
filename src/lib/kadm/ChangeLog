@@ -1,3 +1,8 @@
+
+Fri Jul 7 16:23:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, it's set by configure.  Find com_err
+		library in TOPLIBD now.
+
 Thu Jul  6 17:34:22 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* adm_conn.c (kadm_get_creds): Pass kcontext to os_localaddr.

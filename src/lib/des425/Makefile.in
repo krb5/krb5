@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
-LDFLAGS = 
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libdes425.lib

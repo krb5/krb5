@@ -1,6 +1,5 @@
 DBFLAGS=@DBFLAGS@
 CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS)
-LDFLAGS = -g
 
 all:: $(OBJS) all-$(WHAT)
 
@@ -35,8 +34,8 @@ install:: libkdb5.a
 clean::
 	$(RM) libkdb5.a
 
-COMERRLIB =	$(BUILDTOP)/util/et/libcom_err.a
 KDB5LIB =	libkdb5.a
+COMERRLIB =	$(TOPLIBD)/libcom_err.a
 KRB5LIB =	$(TOPLIBD)/libkrb5.a
 CRYPTOLIB =	$(TOPLIBD)/libcrypto.a
 KLIBS =		$(KDB5LIB) $(KRB5LIB) $(CRYPTOLIB) $(COMERRLIB)

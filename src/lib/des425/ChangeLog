@@ -1,3 +1,7 @@
+
+Fri Jul 7 16:22:13 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, it's set by configure.
+
 Wed Jun 28 17:09:34 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* read_passwd.c, configure.in: use HAS_ANSI_VOLATILE instead.

@@ -1,4 +1,8 @@
 
+Fri Jul 7 16:35:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS.
+
+
 Thu Jun 15 18:10:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Set LD_LIBRARY_PATH to be the library directory in
 		case we've built with shared libraries.

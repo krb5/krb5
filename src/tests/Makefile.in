@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS)
-LDFLAGS = -g
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM

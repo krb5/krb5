@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=kadm.lib
@@ -56,7 +55,7 @@ clean-windows::
 #
 T_DBENTRY_OBJS =  t_dbentry.$(OBJEXT) \
 		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
-		$(TOPLIBD)/libcrypto.a $(BUILDTOP)/util/et/libcom_err.a
+		$(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a
 
 t_dbentry:	$(T_DBENTRY_OBJS)
 	$(LD) -o t_dbentry $(T_DBENTRY_OBJS) $(LIBS)
@@ -66,7 +65,7 @@ t_dbentry:	$(T_DBENTRY_OBJS)
 #
 T_KTENTRY_OBJS =  t_ktentry.$(OBJEXT) \
 		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
-		$(TOPLIBD)/libcrypto.a $(BUILDTOP)/util/et/libcom_err.a
+		$(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a
 
 t_ktentry:	$(T_KTENTRY_OBJS)
 	$(LD) -o t_ktentry $(T_KTENTRY_OBJS) $(LIBS)

@@ -1,4 +1,8 @@
 
+Fri Jul 7 16:29:22 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, find com_err in TOPLIBD.
+
+
 Fri Jun 30 14:39:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Add function dispatch table to context and use it to
 		perform database accesses.  Add kdb5_db_set_dbops() to set

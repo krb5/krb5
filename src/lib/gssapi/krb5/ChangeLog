@@ -1,3 +1,7 @@
+
+Fri Jul 7 16:23:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, it's set by configure.
+
 Sat Jun 10 23:04:52 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* accept_sec_context.c, gssapiP_krb5.h, init_sec_context.c:

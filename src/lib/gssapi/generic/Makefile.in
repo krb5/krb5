@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)

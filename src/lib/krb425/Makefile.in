@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(SRCTOP)/include/kerberosIV
-LDFLAGS = -g
 
 EHDRDIR = $(BUILDTOP)/include/kerberosIV
 
