@@ -1,3 +1,10 @@
+2002-04-25  Ezra Peisach  <epeisach@bu.edu>
+
+	* configure.in (AC_CONFIG_SUBDIRS): Always run configure in
+	lib/krb4 and krb524 - but do not build in those directories if
+	krb4 support disabled. Autoconf 2.53 and up cannot handle
+	variables in AC_CONFIG_SUBDIRS directive.
+
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (TRY_PEER_INT): Strip trailing spaces from defined
