@@ -9,7 +9,7 @@
 # 
 NormalLibraryObjectRule()
 
-INCLUDES=-I./include -I$(TOP)
+INCLUDES=-I$(TOP)/include/kerberosIV
 
 OBJS=	425data.o \
 	425error.o \
