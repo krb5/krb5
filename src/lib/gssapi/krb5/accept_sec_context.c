@@ -98,25 +98,27 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	krb5_auth_con_setflags(context, auth_context,
 			       KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
-	/* By the time krb5_rd_cred is called here (after krb5_rd_req has been */
-	/* called in krb5_gss_accept_sec_context), the "keyblock" field of */
-	/* auth_context contains a pointer to the session key, and the */
-	/* "remote_subkey" field might contain a session subkey.  Either of */
-	/* these (the "remote_subkey" if it isn't NULL, otherwise the */
-	/* "keyblock") might have been used to encrypt the encrypted part of */
-	/* the KRB_CRED message that contains the forwarded credentials.  (The */
-	/* Java Crypto and Security Implementation from the DSTC in Australia */
-	/* always uses the session key.  But apparently it never negotiates a */
-	/* subkey, so this code works fine against a JCSI client.)  Up to the */
-	/* present, though, GSSAPI clients linked against the MIT code (which */
-	/* is almost all GSSAPI clients) don't encrypt the KRB_CRED message at */
-	/* all -- at this level.  So if the first call to krb5_rd_cred fails, */
-	/* we should call it a second time with another auth context freshly */
-	/* created by krb5_auth_con_init.  All of its keyblock fields will be */
-	/* NULL, so krb5_rd_cred will assume that the KRB_CRED message is */
-	/* unencrypted.  (The MIT code doesn't actually send the KRB_CRED */
-	/* message in the clear -- the "authenticator" whose "checksum" ends up */
-	/* containing the KRB_CRED message does get encrypted.) */
+	/*
+	 * By the time krb5_rd_cred is called here (after krb5_rd_req has been
+	 * called in krb5_gss_accept_sec_context), the "keyblock" field of
+	 * auth_context contains a pointer to the session key, and the
+	 * "remote_subkey" field might contain a session subkey.  Either of
+	 * these (the "remote_subkey" if it isn't NULL, otherwise the
+	 * "keyblock") might have been used to encrypt the encrypted part of
+	 * the KRB_CRED message that contains the forwarded credentials.  (The
+	 * Java Crypto and Security Implementation from the DSTC in Australia
+	 * always uses the session key.  But apparently it never negotiates a
+	 * subkey, so this code works fine against a JCSI client.)  Up to the
+	 * present, though, GSSAPI clients linked against the MIT code (which
+	 * is almost all GSSAPI clients) don't encrypt the KRB_CRED message at
+	 * all -- at this level.  So if the first call to krb5_rd_cred fails,
+	 * we should call it a second time with another auth context freshly
+	 * created by krb5_auth_con_init.  All of its keyblock fields will be
+	 * NULL, so krb5_rd_cred will assume that the KRB_CRED message is
+	 * unencrypted.  (The MIT code doesn't actually send the KRB_CRED
+	 * message in the clear -- the "authenticator" whose "checksum" ends up
+	 * containing the KRB_CRED message does get encrypted.)
+	 */
 	if (krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) {
 		if (retval = krb5_auth_con_init(context, &new_auth_ctx))
 			goto cleanup;
