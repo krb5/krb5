@@ -1359,7 +1359,6 @@
 		};
 		A12537EA040C0795003D8244 = {
 			children = (
-				A1253802040C0D3E003D8244,
 				A12537FA040C080B003D8244,
 				A12537FE040C080B003D8244,
 				A1253803040C0D3E003D8244,
@@ -1529,12 +1528,6 @@
 			path = krb_err.h;
 			refType = 4;
 		};
-		A1253802040C0D3E003D8244 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = Kerberos5Prefix.h;
-			refType = 4;
-		};
 		A1253803040C0D3E003D8244 = {
 			children = (
 				A1253804040C0D3E003D8244,
@@ -1674,6 +1667,30 @@
 		};
 		A198BC2B0406DA8F00120114 = {
 			fileRef = A198BC2A0406DA8F00120114;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1B21F170417D6BC00120114 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = aes_s2k.c;
+			refType = 4;
+		};
+		A1B21F180417D6BC00120114 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = aes_s2k.h;
+			refType = 4;
+		};
+		A1B21F190417D6BC00120114 = {
+			fileRef = A1B21F170417D6BC00120114;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1B21F1A0417D6BC00120114 = {
+			fileRef = A1B21F180417D6BC00120114;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -2926,6 +2943,8 @@
 		F517322903F1B65901120114 = {
 			children = (
 				F517322A03F1B65901120114,
+				A1B21F170417D6BC00120114,
+				A1B21F180417D6BC00120114,
 				F517322B03F1B65901120114,
 				F517322C03F1B65901120114,
 				F517322D03F1B65901120114,
@@ -10480,6 +10499,7 @@
 				A1CA60A3040F25DC0013F915,
 				A1CA60A4040F25DD0013F915,
 				A1CA60A5040F25DE0013F915,
+				A1B21F1A0417D6BC00120114,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -10740,6 +10760,7 @@
 				A1CA609B040F25C70013F915,
 				A1CA609D040F25D40013F915,
 				A1CA609F040F25D70013F915,
+				A1B21F190417D6BC00120114,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
