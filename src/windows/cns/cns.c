@@ -41,7 +41,9 @@ HFONT hfontdialog = NULL;	       /* Font in which the dialog is drawn. */
 static HFONT hfonticon = NULL;	       /* Font for icon label */
 HINSTANCE hinstance;
 static int dlgncmdshow;		       /* ncmdshow from WinMain */
+#if 0
 static UINT wm_kerberos_changed;       /* message for cache changing */
+#endif
 static int action;		       /* After login actions */
 static UINT kwin_timer_id;	       /* Timer being used for update */
 BOOL alert;		       	       /* Actions on ticket expiration */
@@ -1491,12 +1493,14 @@ kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   int n;
 
+#if 0
   if (message == wm_kerberos_changed) {       /* Message from the ccache */
     n = ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
     EnableWindow(GetDlgItem(hwnd, IDD_TICKET_DELETE), n > 0);
 
     return 0;
   }
+#endif
 
   switch (message) {
     HANDLE_MSG(hwnd, WM_GETMINMAXINFO, kwin_getminmaxinfo);
@@ -1601,12 +1605,14 @@ init_application(HINSTANCE hinstance)
 {
   BOOL rc;
 
+#if 0
 #ifdef KRB4
   wm_kerberos_changed = krb_get_notification_message();
 #endif
 
 #ifdef KRB5
   wm_kerberos_changed = krb5_get_notification_message();
+#endif
 #endif
 
   rc = kwin_init(hinstance);

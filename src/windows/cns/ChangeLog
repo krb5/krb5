@@ -1,3 +1,8 @@
+2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cns.c: Do not use krb_get_notification_message() or
+	krb5_get_notification_message().
+
 2000-05-08  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 	
