@@ -1,3 +1,9 @@
+Mon Apr 29 17:02:44 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (install): Install correct set of man pages, and
+	check for failures.
+	* kshd.M, klogind.M: Renamed from kr*.M versions.
+
 Sun Apr 21 12:52:35 1996  Richard Basch  <basch@lehman.com>
 
 	* krshd.c: If checksumming is required & ALWAYS_V5_KUSEROK is
