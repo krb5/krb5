@@ -179,9 +179,21 @@ krb5_dbm_db_init()
 	char *filename = gen_dbsuffix (current_db_name, ".ok");
 	if (!filename)
 	    return ENOMEM;
-	if ((dblfd = open(filename, 0, 0)) < 0) {
+#ifdef POSIX_FILE_LOCKS
+	/* needs be open read/write so that write locking can work with
+	   POSIX systems */
+	if ((dblfd = open(filename, O_RDWR, 0)) == -1) {
+	    if (errno == EACCES) {
+		if ((dblfd = open(filename, O_RDONLY, 0)) == -1)
+		    return errno;
+	    } else
+		return errno;
+	}
+#else
+	if ((dblfd = open(filename, 0, 0)) == -1) {
 	    return errno;
 	}
+#endif
 	free(filename);
 	inited++;
     }
@@ -601,8 +613,14 @@ int mode;
     fl.l_whence = 0;
     fl.l_start = 0;
     fl.l_len = 0;
-    if (fcntl(dblfd, non_blocking ? F_SETLK : F_SETLKW, &fl) == -1)
+    if (fcntl(dblfd, non_blocking ? F_SETLK : F_SETLKW, &fl) == -1) {
+	if (errno == EBADF && mode == KRB5_DBM_EXCLUSIVE) {
+	    /* tried to exclusive-lock something we don't have write access
+	       to. */
+	    return KRB5_KDB_CANTLOCK_DB;
+	}
 	return errno;
+    }
 #else
     switch (mode) {
     case KRB5_DBM_EXCLUSIVE:
