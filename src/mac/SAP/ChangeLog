@@ -1,0 +1,5 @@
+Fri Dec 13 14:58:20 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* macSAPglue.c (__initializeSAPglue): Change the timebomb date to
+		be June 1, 1997.
+

@@ -21,8 +21,8 @@ OSErr __initializeSAPglue(InitBlockPtr ibp)
 	}
 	
 	goalTimeBomb.year = 1997;
-	goalTimeBomb.month = 1;
-	goalTimeBomb.day = 15;
+	goalTimeBomb.month = 6;
+	goalTimeBomb.day = 1;
 	goalTimeBomb.hour = 0; /* Let's use midnight for simplicity */
 	goalTimeBomb.minute = 0;
 	goalTimeBomb.second = 0;
