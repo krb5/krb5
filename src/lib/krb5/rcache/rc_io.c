@@ -13,7 +13,7 @@
 
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
-#define NEED_WINSOCK_H
+#define NEED_SOCKETS
 
 #include <stdio.h> /* for P_tmpdir */
 #include <krb5.h>

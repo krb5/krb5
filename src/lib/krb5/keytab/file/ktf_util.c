@@ -67,7 +67,7 @@
  * sizeof(krb5_int32) bytes for the key length, followed by the key
  */
 
-#define NEED_WINSOCK_H
+#define NEED_SOCKETS
 #include "krb5.h"
 #include "k5-int.h"
 #include <stdio.h>
