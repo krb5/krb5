@@ -1,3 +1,19 @@
+
+Tue Aug  1 08:20:06 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* cleanup.c (pty_cleanup): Allow pid to be zero (unknown).
+
+	* pty-int.h: Define VHANG_FIRST and VHANG_LAST based on presence
+        of vhangup.
+
+	* pty_err.et: Define PTY_GETPTY_SLAVE_TOOLONG
+
+	* getpty.c (pty_getpty): Close slave side if we call openpty.
+
+	(pty_getpty): Take length parameter; return error if it isn't big enough.
+
+
+
 Tue Aug  1 12:06:14 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* open_ctty.c (pty_open_ctty): Fixed typo TIOCSTTY to TIOCSCTTY.

@@ -25,7 +25,7 @@
 
 long pty_cleanup (slave, pid, update_utmp)
     char *slave;
-    pid_t pid;
+    pid_t pid; /* May be zero for unknown.*/
     int update_utmp;
 {
     struct utmp ut;

@@ -24,7 +24,7 @@
 
 #ifdef __STDC__ /* use prototypes */
 
-long pty_getpty ( int *fd, char *slave);
+long pty_getpty ( int *fd, char *slave, int slavelength);
 
 long pty_open_slave (const char *slave, int *fd);
 long pty_open_ctty (const char *slave, int *fd);

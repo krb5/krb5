@@ -76,6 +76,11 @@
 #endif
 #endif
 
+#if defined(HAVE_VHANGUP)
+#define VHANG_first /* may not work under Ultrix*/
+#define VHANG_LAST
+#endif
+
 /* Internal functions */
 #ifdef __STDC__
 long ptyint_void_association(void);

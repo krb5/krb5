@@ -28,6 +28,8 @@ error_code PTY_GETPTY_FSTAT, "fstat of master pty failed"
 
 error_code PTY_GETPTY_NOPTY, "All terminal ports in use"
 
+error_code PTY_GETPTY_SLAVE_TOOLONG, "buffer to hold slave pty name is too short"
+
 error_code PTY_OPEN_SLAVE_OPENFAIL, "Failed to open slave side of pty"
 error_code PTY_OPEN_SLAVE_CHMODFAIL, "Failed to chmod slave side of pty"
 

@@ -23,19 +23,23 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-long pty_getpty (fd, slave)
-int *fd; char *slave;
+long pty_getpty (fd, slave, slavelength)
+    int slavelength;
+    int *fd; char *slave;
 {
     char c;
     char *p;
     int i,ptynum;
     struct stat stb;
+char slavebuf[1024];
+
 
 #ifdef HAVE_OPENPTY
     int slavefd;
 
     if(openpty(fd, &slavefd, slave, (struct termios *) 0,
          (struct winsize *) 0)) return 1;
+close(slavefd);
     return 0;
 #else
 
@@ -59,6 +63,13 @@ int *fd; char *slave;
 #endif
 #endif
 	if (p) {
+	    if ( strlen(p) < slavelength)
+		{
+		    close (*fd);
+		    *fd = -1;
+		    return PTY_GETPTY_SLAVE_TOOLONG;
+		}
+	    
 	    strcpy(slave, p);
 	    return 0;
 	}
@@ -68,24 +79,37 @@ int *fd; char *slave;
 	    return PTY_GETPTY_FSTAT;
 	}
 	ptynum = (int)(stb.st_rdev&0xFF);
-	sprintf(slave, "/dev/ttyp%x", ptynum);
+    sprintf(slavebuf, "/dev/ttyp%x", ptynum);
+    if ( strlen(slavebuf) < slavelength) {
+	close(*fd);
+	*fd = -1;
+	return PTY_GETPTY_SLAVE_TOOLONG;
+    }
+    strncpy ( slave, slavebuf, slavelength);
 	return 0;
 
     } else {
     
 	for (c = 'p'; c <= 's'; c++) {
-	    sprintf(slave,"/dev/ptyXX");
-	    slave[strlen("/dev/pty")] = c;
-	    slave[strlen("/dev/ptyp")] = '0';
-	    if (stat(slave, &stb) < 0)
+	    sprintf(slavebuf,"/dev/ptyXX");
+	    slavebuf[strlen("/dev/pty")] = c;
+	    slavebuf[strlen("/dev/ptyp")] = '0';
+	    if (stat(slavebuf, &stb) < 0)
 		break;
 	    for (i = 0; i < 16; i++) {
-		slave[sizeof("/dev/ptyp") - 1] = "0123456789abcdef"[i];
-		*fd = open(slave, O_RDWR);
+		slavebuf[sizeof("/dev/ptyp") - 1] = "0123456789abcdef"[i];
+		*fd = open(slavebuf, O_RDWR);
 		if (*fd < 0) continue;
 
 		/* got pty */
-		slave[strlen("/dev/")] = 't';
+		slavebuf[strlen("/dev/")] = 't';
+		if ( strlen(slavebuf) < slavelength ) {
+		    close ( *fd);
+		    *fd = -1;
+return PTY_GETPTY_SLAVE_TOOLONG;
+		}
+		strncpy ( slave, slavebuf, slavelength);
+		
 		return 0;
 	    }
 	}
