@@ -32,7 +32,7 @@ typedef	unsigned char	octet;
 
 #ifndef __OK
  Error:  must define word size!
-#endif __OK
+#endif /* __OK */
 
 #undef __OK
 
