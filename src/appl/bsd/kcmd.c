@@ -196,7 +196,6 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	      struct sockaddr_in *laddrp)
 {
     int s, aierr;
-    struct sockaddr_in sockin;
     struct addrinfo *ap, *ap2, aihints;
     char rport_buf[10];
     GETSOCKNAME_ARG3_TYPE  sin_len;
@@ -282,7 +281,7 @@ connected:
     }
 
     *sp = s;
-    *sockinp = sockin;
+    *sockinp = *(struct sockaddr_in *) ap->ai_addr;
     return 0;
 }
 

@@ -216,7 +216,7 @@ int maxhostlen = 0;
 int stripdomain = 1;
 int always_ip = 0;
 
-static krb5_error_code recvauth(int netfd, struct sockaddr_in peersin,
+static krb5_error_code recvauth(int netfd, struct sockaddr *peersin,
 				int *valid_checksum);
 
 #else /* !KERBEROS */
@@ -264,7 +264,7 @@ void 	error (char *fmt, ...)
      ;
 
 void usage(void), getstr(int, char *, int, char *), 
-    doit(int, struct sockaddr_in *);
+    doit(int, struct sockaddr *);
 
 #ifndef HAVE_INITGROUPS
 int initgroups(char* name, gid_t basegid) {
@@ -286,7 +286,7 @@ int main(argc, argv)
     struct linger linger;
 #endif
     int on = 1, fromlen;
-    struct sockaddr_in from;
+    struct sockaddr_storage from;
     extern int opterr, optind;
     extern char *optarg;
     int ch;
@@ -492,7 +492,7 @@ int main(argc, argv)
 	fatal(fd, "Configuration error: mutually exclusive options specified");
     }
 
-    doit(dup(fd), &from);
+    doit(dup(fd), (struct sockaddr *) &from);
     return 0;
 }
 
@@ -609,7 +609,7 @@ cleanup(signumber)
 
 void doit(f, fromp)
      int f;
-     struct sockaddr_in *fromp;
+     struct sockaddr *fromp;
 {
     char *cp;
 #ifdef KERBEROS
@@ -817,7 +817,7 @@ void doit(f, fromp)
 	exit(1);
     }
 
-    if ((status = recvauth(f, fromaddr,&valid_checksum))) {
+    if ((status = recvauth(f, fromaddr, &valid_checksum))) {
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
     }
@@ -945,14 +945,11 @@ void doit(f, fromp)
     if (port) {
 	/* Place entry into wtmp */
 	sprintf(ttyn,"krsh%ld",(long) (getpid() % 9999999));
-	pty_logwtmp(ttyn,locuser,sane_host);
     }
-    /*      We are simply execing a program over rshd : log entry into wtmp,
-	    as kexe(pid), then finish out the session right after that.
-	    Syslog should have the information as to what was exec'd */
-    else {
-	pty_logwtmp(ttyn,locuser,sane_host);
-    }
+    /* else: We are simply execing a program over rshd : log entry into wtmp,
+	     as kexe(pid), then finish out the session right after that.
+	     Syslog should have the information as to what was exec'd */
+    pty_logwtmp(ttyn,locuser,sane_host);
     
 #ifdef CRAY
     

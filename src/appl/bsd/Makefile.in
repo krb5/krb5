@@ -60,8 +60,8 @@ install::
 	  ) || exit 1; \
 	done
 	f=$(V4RCP); \
-	if test -n "$$f" ; then	$(INSTALL_SETUID) $$f \
-		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	if test -n "$$f" ; then	$(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`.real; \
 	$(INSTALL_DATA) $(srcdir)/$$f.M \
 		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	fi

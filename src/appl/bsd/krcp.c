@@ -47,6 +47,8 @@ char copyright[] =
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
+
+#include <syslog.h>
      
 #include <netinet/in.h>
      
@@ -93,6 +95,7 @@ Key_schedule v4_schedule;
 CREDENTIALS v4_cred;
 KTEXT_ST v4_ticket;
 MSG_DAT v4_msg_data;
+int v4_only;
 #endif
 
 void	v4_send_auth(char *, char *), try_normal(char **);
@@ -125,6 +128,7 @@ int	forcenet;
 struct	passwd *pwd;
 int	userid;
 int	port = 0;
+static const char *me;
 
 struct buffer {
     unsigned int cnt;
@@ -172,6 +176,12 @@ int main(argc, argv)
 	    exit(1);
     }
 #endif
+
+    me = strrchr (argv[0], '/');
+    if (me)
+	me++;
+    else
+	me = argv[0];
 
     pwd = getpwuid(userid = getuid());
     if (pwd == 0) {
@@ -244,6 +254,11 @@ int main(argc, argv)
 	    else
 		usage ();
 	    goto next_arg;
+#ifdef KRB5_KRB4_COMPAT
+	case '4':
+	    v4_only = 1;
+	    break;
+#endif
 #endif /* KERBEROS */
 	    /* The rest of these are not for users. */
 	  case 'd':
@@ -252,6 +267,7 @@ int main(argc, argv)
 	    
 	  case 'f':		/* "from" */
 	    iamremote = 1;
+	    openlog (me, LOG_PID, LOG_DAEMON);
 	    rcmd_stream_init_normal();
 #if defined(KERBEROS)
 	    if (encryptflag)
@@ -264,6 +280,7 @@ int main(argc, argv)
 	    
 	  case 't':		/* "to" */
 	    iamremote = 1;
+	    openlog (me, LOG_PID, LOG_DAEMON);
 	    rcmd_stream_init_normal();
 #if defined(KERBEROS)
 	    if (encryptflag)
@@ -425,6 +442,10 @@ int main(argc, argv)
 				   cmd, targ);
 		    host = thost;
 #ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
+		    if (v4_only)
+			goto try_krb4;
+#endif
 		    authopts = AP_OPTS_MUTUAL_REQUIRED;
 		    status = kcmd(&sock, &host,
 				  port,
@@ -449,6 +470,7 @@ int main(argc, argv)
 			    /* Don't fall back to less safe methods.  */
 			    exit (1);
 #ifdef KRB5_KRB4_COMPAT
+		    try_krb4:
 			fprintf(stderr, "Trying krb4 rcp...\n");
 			if (strncmp(buf, "-x rcp", 6) == 0)
 			    memcpy(buf, "rcp -x", 6);
@@ -951,8 +973,11 @@ krb5_sigtype
   lostconn(signumber)
     int signumber;
 {
+    char *reason = signumber ? "signal" : "eof";
     if (iamremote == 0)
-      fprintf(stderr, "rcp: lost connection\n");
+	fprintf(stderr, "rcp: lost connection (%s)\n", reason);
+    else
+	syslog(LOG_ERR, "lost connection (%s)", reason);
     exit(1);
 }
 
@@ -1251,8 +1276,14 @@ error(fmt, va_alist)
 void usage()
 {
 #ifdef KERBEROS
+# ifdef KRB5_KRB4_COMPAT
+#  define POPT "[-PN | -PO | -4]"
+# else
+#  define POPT "[-PN | -PO]"
+# endif
     fprintf(stderr,
-	    "Usage: \trcp [-PN | -PO] [-p] [-x] [-k realm] f1 f2; or:\n\trcp [-PN | -PO] [-r] [-p] [-x] [-k realm] f1 ... fn d2\n");
+	    "Usage:\trcp " POPT " [-p] [-x] [-k realm] f1 f2\n"
+	    "   or:\trcp " POPT " [-r] [-p] [-x] [-k realm] f1 ... fn d2\n");
 #else
     fputs("usage: rcp [-p] f1 f2; or: rcp [-rp] f1 ... fn d2\n", stderr);
 #endif

@@ -300,8 +300,8 @@ char		lusername[UT_NAMESIZE+1];
 char		rusername[UT_NAMESIZE+1];
 char            *krusername = 0;
 char		term[64];
-char            rhost_name[MAXDNAME];
-char		rhost_addra[16];
+char            rhost_name[NI_MAXHOST];
+char		rhost_addra[NI_MAXHOST];
 krb5_principal  client;
 int		do_inband = 0;
 
@@ -322,7 +322,7 @@ extern int daemon(int, int);
 #define VHANG_LAST		/* vhangup must occur on close, not open */
 #endif
 
-void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr_in *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
+void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
 void	protocol(int, int);
 int	princ_maps_to_lname(krb5_principal, char *), default_realm(krb5_principal);
 krb5_sigtype	cleanup(int);
@@ -353,7 +353,7 @@ int main(argc, argv)
     extern int opterr, optind;
     extern char * optarg;
     int on = 1, fromlen, ch;
-    struct sockaddr_in from;
+    struct sockaddr_storage from;
     int debug_port = 0;
     int fd;
     int do_fork = 0;
@@ -542,7 +542,7 @@ int main(argc, argv)
 		    syslog(LOG_ERR, "fork: %s", error_message(errno));
 		case 0:
 		    (void) close(s);
-		    doit(fd, &from);
+		    doit(fd, (struct sockaddr *) &from);
 		    close(fd);
 		    exit(0);
 		default:
@@ -570,7 +570,7 @@ int main(argc, argv)
 	fd = 0;
     }
 
-    doit(fd, &from);
+    doit(fd, (struct sockaddr *) &from);
     return 0;
 }
 
@@ -593,7 +593,7 @@ int pid; /* child process id */
 
 void doit(f, fromp)
   int f;
-  struct sockaddr_in *fromp;
+  struct sockaddr *fromp;
 {
     int p, t, on = 1;
     register struct hostent *hp;
@@ -640,24 +640,28 @@ void doit(f, fromp)
     sa.sa_flags = 0;
 #endif
 
-    fromp->sin_port = ntohs((u_short)fromp->sin_port);
+    if (fromp->sa_family == AF_INET)
+	portnum = ntohs(((struct sockaddr_in *)fromp)->sin_port);
+#ifdef KRB5_USE_INET6
+    else if (fromp->sa_family == AF_INET6)
+	portnum = ntohs(((struct sockaddr_in6 *)fromp)->sin6_port);
+#endif
+    else
+	fatal(f, "Permission denied - Malformed from address\n");
+
+    if (getnameinfo (fromp, socklen(fromp), rhost_name, sizeof(rhost_name),
+		     0, 0, 0))
+	rhost_name[0] = 0;
+    if (getnameinfo (fromp, socklen(fromp), rhost_addra, sizeof(rhost_addra),
+		     0, 0, NI_NUMERICHOST))
+	strcpy(rhost_addra, "??");
+
     hp = gethostbyaddr((char *) &fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
     strncpy(rhost_addra, inet_ntoa(fromp->sin_addr), sizeof (rhost_addra));
-    rhost_addra[sizeof (rhost_addra) -1] = '\0';
-    if (hp != NULL) {
-	/* Save hostent information.... */
-	strncpy(rhost_name,hp->h_name,sizeof (rhost_name));
-	rhost_name[sizeof (rhost_name) - 1] = '\0';
-    } else
-	rhost_name[0] = '\0';
-    
-    if (fromp->sin_family != AF_INET)
-      fatal(f, "Permission denied - Malformed from address\n");
     
 #ifndef KERBEROS
-    if (fromp->sin_port >= IPPORT_RESERVED ||
-	fromp->sin_port < IPPORT_RESERVED/2)
+    if (portnum >= IPPORT_RESERVED || portnum < IPPORT_RESERVED/2)
       fatal(f, "Permission denied - Connection from bad port");
 #endif /* KERBEROS */
     
@@ -816,7 +820,7 @@ void doit(f, fromp)
         setenv("TERM",term, 1);
     }
 
-    retval = pty_make_sane_hostname((struct sockaddr *) fromp, maxhostlen,
+    retval = pty_make_sane_hostname(fromp, maxhostlen,
 				    stripdomain, always_ip,
 				    &rhost_sane);
     if (retval)
@@ -843,7 +847,7 @@ void doit(f, fromp)
      **      The master blocks here until it reads a byte.
      */
     
-(void) close(syncpipe[1]);
+    (void) close(syncpipe[1]);
     if (read(syncpipe[0], &c, 1) != 1) {
 	/*
 	 * Problems read failed ...
@@ -867,7 +871,7 @@ void doit(f, fromp)
        * will fail to work properly
        */
 #endif /* KERBEROS */
-      ioctl(f, FIONBIO, &on);
+	ioctl(f, FIONBIO, &on);
     ioctl(p, FIONBIO, &on);
 
     /* FIONBIO doesn't always work on ptys, use fcntl to set O_NDELAY? */
@@ -1382,7 +1386,10 @@ recvauth(valid_checksum)
 {
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
+    struct sockaddr_storage peer_addr, local_addr;
+#if 0
     struct sockaddr_in peersin, laddr;
+#endif
     int len;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
@@ -1394,12 +1401,12 @@ recvauth(valid_checksum)
 
     *valid_checksum = 0;
     len = sizeof(laddr);
-    if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
+    if (getsockname(netf, (struct sockaddr *)&local_addr, &len)) {
 	    exit(1);
     }
-	
-    len = sizeof(peersin);
-    if (getpeername(netf, (struct sockaddr *)&peersin, &len)) {
+
+    len = sizeof(peer_addr);
+    if (getpeername(netf, (struct sockaddr *)&peer_addr, &len)) {
 	syslog(LOG_ERR, "get peer name failed %d", netf);
 	exit(1);
     }
