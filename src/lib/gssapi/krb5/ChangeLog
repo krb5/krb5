@@ -1,3 +1,8 @@
+Fri Jul 26 00:40:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Add AC_PROG_INSTALL, since it's needed for a "make
+		install"
+
 Thu Jul 25 20:21:33 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in: remove trailing backslash from comment under SRCS
