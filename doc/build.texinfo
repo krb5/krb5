@@ -166,9 +166,9 @@ client/server activities.
 DejaGnu may be found wherever GNU software is archived.  
 
 Most of the tests are setup to run as a non-privledged user.  For some
-of these to work properly, either (a) the user running the tests must
-either not have a .k5login file in the home directory or (b) the
-.k5login must contain an entry for @code{<username>@@KRBTEST.COM}.
+of the krb-root tests to work properly, either (a) the user running the
+tests must not have a .k5login file in the home directory or (b) the
+.k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
 There are two series of tests (@samp{rlogind} and @samp{telnetd}) which
 require the ability to @samp{rlogin} as root to the local
 machine. Admittedly, this does require the use of a @file{.rhosts} file

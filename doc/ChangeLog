@@ -1,5 +1,8 @@
 Mon Dec  2 13:00:26 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* build.texinfo (The DejaGnu Tests): info about .k5login for
+ 	krb-root tests [krb5-doc/261]
+
 	* install.texinfo (Add Administrators to the Kerberos Database):
  	note relationship between acl file and admin principals
  	[krb5-doc/251]
