@@ -30,7 +30,7 @@ static char rcsid_kdcr2kkdcr_c[] =
 
 krb5_kdc_rep *
 KRB5_KDC__REP2krb5_kdc_rep(val, type, error)
-const register struct type_KRB5_KDC__REP *val;
+const register struct type_KRB5_TGS__REP *val;
 krb5_msgtype *type;
 register int *error;
 {
