@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.3.3
+		  Kerberos Version 5, Release 1.3.4
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.3.3.tar.gz.  Instructions on how to extract the entire
+krb5-1.3.4.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.3.3.tar.gz
+	gtar zxpf krb5-1.3.4.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.3.3.tar.gz | tar xpf -
+	gzcat krb5-1.3.4.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.3.3/src and
-the documentation into krb5-1.3.3/doc.
+Both of these methods will extract the sources into krb5-1.3.4/src and
+the documentation into krb5-1.3.4/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
