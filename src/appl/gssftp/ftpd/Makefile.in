@@ -105,5 +105,4 @@ $(OUTPRE)secure.$(OBJEXT): $(srcdir)/../ftp/secure.c \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(srcdir)/../arpa/ftp.h
 $(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c
-$(OUTPRE)setenv.$(OBJEXT): $(srcdir)/../../bsd/setenv.c
 

@@ -253,7 +253,8 @@ acquire_cred.so acquire_cred.po $(OUTPRE)acquire_cred.$(OBJEXT): acquire_cred.c 
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/../gss_libinit.h \
+  ../generic/gssapi.h gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
 add_cred.so add_cred.po $(OUTPRE)add_cred.$(OBJEXT): add_cred.c gssapiP_krb5.h \
@@ -303,7 +304,8 @@ disp_status.so disp_status.po $(OUTPRE)disp_status.$(OBJEXT): disp_status.c gssa
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h $(SRCTOP)/include/k5-platform.h \
-  gssapi_krb5.h gssapi_err_krb5.h
+  gssapi_krb5.h gssapi_err_krb5.h $(srcdir)/../gss_libinit.h \
+  ../generic/gssapi.h
 duplicate_name.so duplicate_name.po $(OUTPRE)duplicate_name.$(OBJEXT): duplicate_name.c \
   gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
   $(srcdir)/../generic/gssapiP_generic.h $(SRCTOP)/include/k5-thread.h \
