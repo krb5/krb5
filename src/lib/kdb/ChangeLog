@@ -1,3 +1,7 @@
+Thu Jul 20 23:59:18 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kdb_dbm.c (krb5_dbm_db_create): move dirname, pagname
+	declarations to the top of function, so it compiles...
 
 Mon Jul 17 15:17:53 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* fetch_mkey.c - Remove inclusion of kdbint.h and add handling of

@@ -1158,7 +1158,11 @@ krb5_dbm_db_create(context, db_name)
     register krb5_error_code retval = 0;
 #ifndef ODBM
     DBM *db;
+#else
+    char *dirname;
+    char *pagname;
 #endif
+
 
     if ((retval = k5dbm_init_context(context)))
 	return(retval);
@@ -1170,9 +1174,6 @@ krb5_dbm_db_create(context, db_name)
     else
 	KDBM_CLOSE(context->db_context, db);
 #else /* OLD DBM */
-    char *dirname;
-    char *pagname;
-
     dirname = gen_dbsuffix(db_name, ".dir");
     if (!dirname)
 	return ENOMEM;
