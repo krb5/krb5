@@ -167,26 +167,10 @@ krb5_error_code krb5_free_realm_params KRB5_PROTOTYPE((krb5_context,
 
 /* str_conv.c */
 krb5_error_code
-krb5_string_to_enctype KRB5_PROTOTYPE((char *, krb5_enctype *));
-krb5_error_code
-krb5_string_to_salttype KRB5_PROTOTYPE((char *, krb5_int32 *));
-krb5_error_code
-krb5_string_to_cksumtype KRB5_PROTOTYPE((char *, krb5_cksumtype *));
-krb5_error_code
 krb5_string_to_flags KRB5_PROTOTYPE((char *,
 				     const char *,
 				     const char *,
 				     krb5_flags *));
-krb5_error_code
-krb5_string_to_timestamp KRB5_PROTOTYPE((char *, krb5_timestamp *));
-krb5_error_code
-krb5_string_to_deltat KRB5_PROTOTYPE((char *, krb5_deltat *));
-krb5_error_code
-krb5_enctype_to_string KRB5_PROTOTYPE((krb5_enctype, char *, size_t));
-krb5_error_code
-krb5_salttype_to_string KRB5_PROTOTYPE((krb5_int32, char *, size_t));
-krb5_error_code
-krb5_cksumtype_to_string KRB5_PROTOTYPE((krb5_cksumtype, char *, size_t));
 krb5_error_code
 krb5_flags_to_string KRB5_PROTOTYPE((krb5_flags,
 				     const char *,
@@ -196,15 +180,6 @@ krb5_error_code
 krb5_input_flag_to_string KRB5_PROTOTYPE((int, 
 					char *,
 					size_t));
-krb5_error_code
-krb5_timestamp_to_string KRB5_PROTOTYPE((krb5_timestamp, char *, size_t));
-krb5_error_code
-krb5_timestamp_to_sfstring KRB5_PROTOTYPE((krb5_timestamp,
-					   char *,
-					   size_t,
-					   char *));
-krb5_error_code
-krb5_deltat_to_string KRB5_PROTOTYPE((krb5_deltat, char *, size_t));
 
 /* keysalt.c */
 krb5_boolean
