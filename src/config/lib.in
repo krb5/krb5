@@ -39,16 +39,16 @@ lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
 				$$d/OBJS.ST; done`
 	$(RANLIB) $@
 
-lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS)
+lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
 	@echo "building shared $(LIB) library ($(LIBMAJOR).$(LIBMINOR))"
 	@dirs=`echo $(SHOBJLISTS) | \
 		sed -e 's%/OBJS.SH%%g' -e 's%OBJS.SH%.%'`; \
-		$(LDCOMBINE) -o $@ `for d in $$dirs; do \
+		objlist=`for d in $$dirs; do \
 			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
-				$$d/OBJS.SH; done` \
-			$(SHLIB_EXPFLAGS) \
-			$(LDCOMBINE_TAIL)
+				$$d/OBJS.SH; done` ; \
+		set -x ; $(MAKE_SHLIB_COMMAND)
+
 lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBVEXT)
 	$(RM) $@
 	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@

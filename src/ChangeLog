@@ -1,3 +1,8 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Substitute
+	MAKE_SHLIB_COMMAND, not LDCOMBINE and LDCOMBINE_TAIL.
+
 2004-03-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_MAINTAINER_MODE, KRB5_AC_ENABLE_THREADS,

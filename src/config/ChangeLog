@@ -1,3 +1,18 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (DO_MAKE_SHLIB, SHLIB_STATIC_TARGET, LDCOMBINE,
+	LDCOMBINE_TAIL): Delete unused variables.
+	(SHLIB_EXPORT_FILE, SHLIB_EXPORT_FILE_DEP, MAKE_SHLIB_COMMAND):
+	New variables.
+	* lib.in (lib$(LIB)$(SHLIBVEXT)): Depend on
+	SHLIB_EXPORT_FILE_DEP.  Set objlist to the list of object files
+	before invoking MAKE_SHLIB_COMMAND, instead of wrapping the list
+	with LDCOMBINE and LDCOMBINE_TAIL.
+	* shlib.conf: Set MAKE_SHLIB_COMMAND, using LDCOMBINE and
+	LDCOMBINE_TAIL in the common case.
+	(case *-*-aix*): Specify new commands, taken from makeshlib.sh,
+	but assume the export list is provided externally.
+
 2004-03-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (default_static, default_shared): New variables to
