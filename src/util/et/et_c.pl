@@ -241,7 +241,11 @@ line: while (<>) {
 &Pick('>', $outfile) &&
     (print $fh
 
-      '#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))');
+      '#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))');
+&Pick('>', $outfile) &&
+    (print $fh '#include <KerberosComErr/KerberosComErr.h>');
+&Pick('>', $outfile) &&
+    (print $fh '#else');
 &Pick('>', $outfile) &&
     (print $fh '#include <com_err.h>');
 &Pick('>', $outfile) &&
