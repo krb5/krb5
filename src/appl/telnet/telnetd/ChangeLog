@@ -1,3 +1,7 @@
+2001-01-25  Tom Yu  <tlyu@mit.edu>
+
+	* state.c (envvarok): Disallow LC_* and NLSPATH.
+
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnetd.c (doit): Cast pty_make_sane_hostname first argument to
