@@ -29,6 +29,8 @@ krb5_kdc_req *val;
 	krb5_free_principal(val->client);
     if (val->server)
 	krb5_free_principal(val->server);
+    if (val->etype)
+	xfree(val->etype);
     if (val->addresses)
 	krb5_free_address(val->addresses);
     if (val->authorization_data.ciphertext.data)
