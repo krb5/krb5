@@ -257,7 +257,9 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 		    goto cleanup_auth_context;
 	    }
 	} else
-	    goto cleanup_auth_context;
+	    goto cleanup_auth_context; 
+#else
+	goto cleanup_auth_context; 
 #endif
     }
 

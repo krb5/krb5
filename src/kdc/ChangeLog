@@ -51,6 +51,12 @@ Mon Nov 24 19:57:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 	* kdc_util.c (limit_string): Check to make sure the input string
 		is non-NULL before operating on it.
 
+Mon Nov 10 20:03:14 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): If not using the reply cache,
+		properly handle a failure return from
+		krb5_rd_req_decode_anyflag().
+
 Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc_util.c (add_to_transited): Fix up memory leaks, clean out
