@@ -284,12 +284,14 @@ int direction;
 
 /* This probably wants to be updated if you support last_req stuff */
 
+static krb5_last_req_entry *nolrarray[] = { 0 };
+
 krb5_error_code
 fetch_last_req_info(dbentry, lrentry)
 krb5_db_entry *dbentry;
 krb5_last_req_entry ***lrentry;
 {
-    *lrentry = 0;
+    *lrentry = nolrarray;
     return 0;
 }
 
