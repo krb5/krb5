@@ -27,6 +27,9 @@
 
 #include "ksu.h"
 #include "adm_proto.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 /* globals */
 char * prog_name;
@@ -102,7 +105,7 @@ struct passwd *pwd=NULL,  *target_pwd ;
 char * shell;
 char ** params;
 int keep_target_cache = 0;
-int child_pid, ret_pid;
+int child_pid, child_pgrp, ret_pid;
 extern char * getpass(), *crypt();
 int pargc;
 char ** pargv;
@@ -384,27 +387,6 @@ char * dir_of_cc_source;
 		exit(1);
 	}
 
-	
-	if (! stat(cc_source_tag_tmp, &st_temp)){ 
-
-
-		if (access(cc_source_tag_tmp, R_OK | W_OK )){
-		    fprintf(stderr,
-			"%s does not have correct permissions for %s\n", 
-						   source_user, cc_source_tag); 
-		    exit(1); 	
-		}
-
-
-		if ((retval= krb5_ccache_refresh(ksu_context, cc_source))){
-			   com_err(prog_name, retval, 
-				"while refreshing %s (source cache)", cc_source_tag); 
-			   exit(1);	
-		}
-
-	}
-
-
 	if ((retval = get_best_princ_for_target(ksu_context, source_uid,
 			target_uid, source_user, target_user, cc_source, 
 			&options, cmd, localhostname, &client, &hp))){
@@ -508,7 +490,7 @@ char * dir_of_cc_source;
 				exit(1);
 			}
 
-                } else{
+        } else{
 			if ((retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
 					     client,&cc_target, &stored))){
 	    			com_err (prog_name, retval, 
@@ -817,32 +799,43 @@ char * dir_of_cc_source;
 		 	 params[0]);
 		 sweep_up(ksu_context, use_source_cache, cc_target);
 		 exit(1);
-	}else{
-		if ((child_pid = fork())){	
-			if (auth_debug){
-			 	printf(" The childs pid is %d \n", child_pid);
-        			printf(" The parents pid is %d \n", getpid());
-			}
-        		ret_pid = waitpid(child_pid, &statusp, 0);
-        		if (ret_pid == -1){
-				com_err(prog_name, errno, "while calling waitpid");
-		 		exit(1);
-        		}
-		 	sweep_up(ksu_context, use_source_cache, cc_target);
-
-			if (auth_debug){
-				printf("The exit status of the child is %d\n",
-					 statusp); 
-			}
-
-			exit (statusp);
-		}else{
-		 	execv(params[0], params);
-			com_err(prog_name, errno, "while trying to execv %s",
-				params[0]);
-			exit (1);
+    }else{
+	statusp = 1;
+	switch ((child_pid = fork())) {
+	default:
+	    if (auth_debug){
+	 	printf(" The childs pid is %d \n", child_pid);
+        	printf(" The parents pid is %d \n", getpid());
+	    }
+            while ((ret_pid = waitpid(child_pid, &statusp, WUNTRACED)) != -1) {
+		if (WIFSTOPPED(statusp)) {
+		    child_pgrp = tcgetpgrp(1);
+		    kill(getpid(), SIGSTOP);
+		    tcsetpgrp(1, child_pgrp);
+		    kill(child_pid, SIGCONT); 
+		    statusp = 1;
+		    continue;
 		}
+		break;
+            }
+	    if (auth_debug){
+		printf("The exit status of the child is %d\n", statusp); 
+	    }
+	    if (ret_pid == -1) {
+	    	com_err(prog_name, errno, "while calling waitpid");
+	    }
+	    sweep_up(ksu_context, use_source_cache, cc_target);
+	    exit (statusp);
+	case -1:
+	    com_err(prog_name, errno, "while trying to fork.");
+	    sweep_up(ksu_context, use_source_cache, cc_target);
+	    exit (1);
+	case 0:
+	    execv(params[0], params);
+	    com_err(prog_name, errno, "while trying to execv %s", params[0]);
+	    exit (1);
 	}
+    }
 }
 
 #ifdef HAVE_GETUSERSHELL

@@ -687,59 +687,6 @@ struct stat st_temp;
     return retval;	
 }
 
-/************************************************************
-krb5_ccache_refresh - gets rid of all the expired tickets in
-a cache.  The alg. may look a bit funny, --> cc_remove was
-not available with beta3 release.                           
-
-************************************************************/
-
-krb5_error_code krb5_ccache_refresh (context, cc)
-    krb5_context context;
-    krb5_ccache cc;
-{
-
-int i=0; 
-krb5_error_code retval=0;
-krb5_principal temp_principal;
-krb5_creds ** cc_creds_arr = NULL;
-char * cc_name;
-struct stat st_temp;
-
-    cc_name = krb5_cc_get_name(context, cc);    
-
-    if ( ! stat(cc_name, &st_temp)){
-
-	if (auth_debug) {  
-		fprintf(stderr,"Refreshing cache %s\n", cc_name);
-	}
-
-	if ((retval = krb5_get_nonexp_tkts(context,  cc, &cc_creds_arr))){
-		return retval;
-	}
-
-	if ((retval = krb5_cc_get_principal(context, cc, &temp_principal))){ 
-		return retval;
-	}
-
-    	if ((retval = krb5_cc_initialize(context, cc, temp_principal))) {
-		return retval; 
-    	}
-
-	if ((retval = krb5_store_all_creds(context, cc, cc_creds_arr, NULL))){ 
-		return retval; 
-    	}
-
-   	if (cc_creds_arr){ 	
- 	  	 while (cc_creds_arr[i]){
-    			krb5_free_creds(context, cc_creds_arr[i]);	
-			i++;
-    	   	}
-    	}	
-    }
-    return 0;	
-}
-
 krb5_error_code krb5_ccache_filter (context, cc, prst)
     krb5_context context;
     krb5_ccache cc;
