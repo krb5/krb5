@@ -68,7 +68,7 @@ lang_error_message(lang, kval)
     krb5_error_code	kval;
 {
     char	*ret;
-    char	*ermsg;
+    const char	*ermsg;
 
     ermsg = (char *) error_message(kval);
     if (lang && output_lang_supported(lang)) {

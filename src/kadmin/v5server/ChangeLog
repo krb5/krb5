@@ -1,3 +1,12 @@
+Sat May 9 17:46:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* srv_output.c (lang_error_message): Local variable is assigned
+		from error_message() which returns a const char *. Should
+		be assigned to same.
+
+	* srv_acl.c: Added const to acl_acl_file
+		definition. default_acl_file is a const char * and gets
+		assigned to it.
 
 Tue May 9 15:29:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Add new administrative protocol support functions and fix bugs.

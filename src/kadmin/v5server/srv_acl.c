@@ -64,7 +64,7 @@ static aent_t	*acl_list_head = (aent_t *) NULL;
 static aent_t	*acl_list_tail = (aent_t *) NULL;
 
 static const char *acl_default_file = "/etc/krb5_adm.acl";
-static char *acl_acl_file = (char *) NULL;
+static const char *acl_acl_file = (char *) NULL;
 static int acl_inited = 0;
 static int acl_debug_level = 0;
 /*
