@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see
- * the file <mit-copyright.h>.
+ * the file <krb5/copyright.h>.
  *
  * This routine generates an odd-parity table for use in key generation.
  */

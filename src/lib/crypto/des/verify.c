@@ -19,14 +19,11 @@ static char rcsid_verify_c[] =
 "$Id$";
 #endif	/*lint*/
 
-#include <mit-copyright.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/mit-des.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
+#include <krb5/mit-des.h>
+#include <stdio.h>
 #include <com_err.h>
 
 extern int errno;

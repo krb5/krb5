@@ -25,11 +25,10 @@ static char rcsid_cksum_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <mit-copyright.h>
-#include <stdio.h>
-#include <strings.h>
-
+#include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+
 #include "des_int.h"
 
 extern int mit_des_debug;

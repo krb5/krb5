@@ -18,15 +18,11 @@ static char rcsid_fetch_mkey_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <krb5/kdb5_err.h>
 #include <krb5/kdb.h>
-#include <errno.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
+#include <krb5/sysincl.h>		/* for MAXPATHLEN */
 #include "kdbint.h"
-#include <sys/param.h>			/* XXX for MAXPATHLEN */
 
 /* these are available to other funcs, and the pointers may be reassigned */
 

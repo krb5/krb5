@@ -2,18 +2,18 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information,
- * please see the file <mit-copyright.h>.
+ * please see the file <krb5/copyright.h>.
  *
  * This file contains a generation routine for source code
  * implementing the final permutation of the DES.
  */
 
 #include <krb5/copyright.h>
-#include <stdio.h>
 #include <krb5/krb5.h>
+#include <stdio.h>
 #include <krb5/ext-proto.h>
 #include "des_int.h"
 #include "tables.h"

@@ -19,15 +19,10 @@ static char rcsid_store_mkey_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
-#include <errno.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
 #include "kdbint.h"
-#include <sys/param.h>			/* XXX for MAXPATHLEN */
-#ifdef unix
-#include <sys/file.h>			/* XX for umask prototype */
-#endif
+#include <krb5/sysincl.h>		/* for MAXPATHLEN */
 
 /*
  * Put the KDC database master key into a file.  If keyfile is NULL,

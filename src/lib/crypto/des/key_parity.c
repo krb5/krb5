@@ -19,10 +19,10 @@
 
 #if !defined(lint) && !defined(SABER)
 static char key_parity_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
-#include <mit-copyright.h>
+#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include "des_int.h"
 

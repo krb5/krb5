@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * New pseudo-random key generator, using DES encryption to make the
  * pseudo-random cycle as hard to break as DES.
@@ -18,10 +18,10 @@
 
 #if !defined(lint) && !defined(SABER)
 static char new_rnd_key_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
-#include <mit-copyright.h>
+#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include "des_int.h"

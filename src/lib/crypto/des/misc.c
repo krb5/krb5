@@ -2,10 +2,10 @@
  * $Source$
  * $Author$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information,
- * please seethe file <mit-copyright.h>.
+ * please seethe file <krb5/copyright.h>.
  *
  * This file contains most of the routines needed by the various
  * make_foo programs, to account for bit- and byte-ordering on
@@ -14,10 +14,9 @@
  */
 
 #include <krb5/copyright.h>
-#include <stdio.h>
-#include <sys/errno.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <stdio.h>
 
 #include "des_int.h"
 

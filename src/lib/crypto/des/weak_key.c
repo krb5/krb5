@@ -5,7 +5,7 @@
  * Copyright 1989 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Under U.S. law, this software may not be exported outside the US
  * without license from the U.S. Commerce department.
@@ -17,9 +17,10 @@
 
 #if !defined(lint) && !defined(SABER)
 static char weak_key_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
+#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include "des_int.h"

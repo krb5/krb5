@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Wrapper for the V4 libdes for use with kerberos V5.
  */
@@ -17,10 +17,7 @@ static char des_st2_key_c[] =
 
 #include <krb5/copyright.h>
 
-#include <sys/errno.h>
-
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 
 #include "des_int.h"

@@ -32,10 +32,10 @@
 
 #if !defined(lint) && !defined(SABER)
 static char key_sched_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
-#include <mit-copyright.h>
+#include <krb5/copyright.h>
 #include <stdio.h>
 
 #include <krb5/krb5.h>

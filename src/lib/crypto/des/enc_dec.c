@@ -30,9 +30,6 @@ static char rcsid_enc_dec_c[] =
 
 #include <krb5/copyright.h>
 
-#include <sys/errno.h>
-#include <krb5/krb5_err.h>
-
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/crc-32.h>

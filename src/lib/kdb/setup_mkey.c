@@ -19,7 +19,6 @@ static char rcsid_setup_mkey_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/ext-proto.h>
-#include <errno.h>
 
 /*
  * Given a key name and a realm name, construct a principal which can be used

@@ -2,17 +2,18 @@
  * $Source$
  * $Author$
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information,
- * please see the file <mit-copyright.h>.
+ * please see the file <krb5/copyright.h>.
  *
  * This routine generates source code that implements the "E"
  * operations of the DES.
  */
 
-#include <stdio.h>
+#include <krb5/mit-copyright.h>
 #include <krb5/krb5.h>
+#include <stdio.h>
 #include "des_int.h"
 #include "tables.h"
 

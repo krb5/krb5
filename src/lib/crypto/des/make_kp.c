@@ -3,10 +3,10 @@
  * $Author$
  * $Locker$
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This routine calculates an effective Key schedule set of
  * permutations for des.  Beginning with the pre-defined key schedule
@@ -16,15 +16,14 @@
  * subscripts starting at 0.
  */
 
-#include <mit-copyright.h>
-#include <stdio.h>
-#include <errno.h>
+#include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <stdio.h>
 #include "des_int.h"
 
 #ifndef lint
 static char rcsid[]=
-    "$Header$";
+    "$Id$";
 #endif /* lint */
 
 char *progname;
