@@ -1403,12 +1403,11 @@ shell(argc, argv)
 	     * Fire up the shell in the child.
 	     */
 	    register char *shellp, *shellname;
-	    extern char *rindex();
 
 	    shellp = getenv("SHELL");
 	    if (shellp == NULL)
 		shellp = "/bin/sh";
-	    if ((shellname = rindex(shellp, '/')) == 0)
+	    if ((shellname = strrchr(shellp, '/')) == 0)
 		shellname = shellp;
 	    else
 		shellname++;
