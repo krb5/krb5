@@ -50,13 +50,6 @@ int krb524_convert_princs
 	 char *pname, char *pinst, char *prealm,
 	 char *sname, char *sinst, char *srealm);
 
-#if TARGET_OS_MAC
-#    if defined(__MWERKS__)
-#	pragma import reset
-#    endif
-#	pragma options align=reset
-#endif
-
 KRB524INT_END_DECLS
 
 #endif /* KRB524INT_H */
