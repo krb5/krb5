@@ -1,3 +1,8 @@
+Fri Sep  6 20:23:13 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* patchlevel.h (KRB5_MAJOR_RELEASE): Update patch level file for
+		Beta 7 release.
+
 Fri Sep  6 15:48:05 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: remove admin subdir
