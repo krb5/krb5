@@ -1,3 +1,7 @@
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * pop_init.c: (krb5_recvauth()): No longer needs the rc_type arg.
+
 Mon Mar 27 16:52:48 1995    <tytso@rsx-11.mit.edu>
 
 	* pop_init.c (pop_init): Put in a type cast to shut up the

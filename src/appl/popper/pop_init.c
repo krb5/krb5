@@ -307,7 +307,6 @@ authenticate(p, addr)
 
     if (retval = krb5_recvauth(pop_context, &auth_context, (krb5_pointer)&sock,
 			       "KPOPV1.0", server,
-			       NULL,	/* default rc type */
 			       0, 	/* no flags */
 			       NULL,	/* default keytab */
 			       NULL	/* don't care about ticket */
