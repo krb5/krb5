@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <ver.h>
+#include <winver.h>
 
 /*
  * BEGIN COMMON VERSION INFO for GSS and Kerberos version resources

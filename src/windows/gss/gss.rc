@@ -7,7 +7,7 @@
 ***************************************************************************/
 
 #include <windows.h>
-#include <ver.h>
+#include <winver.h>
 
 #define GSS_CONNECT_NAME            102
 #define GSS_OK                      100
