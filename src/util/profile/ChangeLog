@@ -1,8 +1,10 @@
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
+	* test_profile.c: Include <string.h> for strcmp() prototype.
+
 	* argv_parse.c (argv_parse): Cast argument to isspace() as int.
 	* prof_parse.c (skip_over_blanks, parse_std_line, need_double_quotes): 
-	Likewise
+	Likewise.
 
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
