@@ -125,7 +125,7 @@ int
 krb_net_rd_sendauth (fd, reply, raw_len)
      int fd;			/* file descriptor to write onto */
      KTEXT reply;		/* Where we put the reply message */
-     char *raw_len;		/* Where to read the length field info */
+     KRB4_32 *raw_len;		/* Where to read the length field info */
 {
     KRB4_32 tkt_len;
     int got;
@@ -145,8 +145,7 @@ krb_net_rd_sendauth (fd, reply, raw_len)
        when it starts up.  We just ignore any such message and keep
        going.  This doesn't affect security: we just require the
        ticket to follow the warning message.  */
-    if ((*(unsigned long *)raw_len
-	 == (('l' << 24) | ('d' << 16) | ('.' << 8) | 's'))) {
+    if (!memcmp("ld.s", raw_len, 4)) {
     	char c;
 
 	while (krb_net_read(fd, &c, 1) == 1 && c != '\n')
@@ -154,7 +153,7 @@ krb_net_rd_sendauth (fd, reply, raw_len)
 	goto reread;
     }
 
-    tkt_len = ntohl(*(unsigned long *)raw_len);
+    tkt_len = ntohl(*raw_len);
 
     /* if the length is negative, the server failed to recognize us. */
     if ((tkt_len < 0) || (tkt_len > sizeof(reply->dat)))

@@ -1,3 +1,10 @@
+2003-01-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendauth.c (krb_net_rd_sendauth): Arg raw_len now points to
+	KRB4_32; don't cast it to pointer to unsigned long.  Change ld.so
+	warning message check to be byte-order independent.
+	* krb4int.h (krb_net_rd_sendauth): Decl updated.
+
 2003-01-15  Tom Yu  <tlyu@mit.edu>
 
 	* CCache-glue.c: New file from KfM.

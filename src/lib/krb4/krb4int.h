@@ -73,7 +73,7 @@ int krb_rd_preauth(KTEXT, char *, int, Principal *, des_cblock);
 #endif
 
 /* sendauth.c */
-int krb_net_rd_sendauth(int, KTEXT, char *);
+int krb_net_rd_sendauth(int, KTEXT, KRB4_32 *);
 
 /* stime.c */
 char *krb_stime(long *);
