@@ -25,10 +25,10 @@
 #define ImakeCmd imake
 #endif
 #ifndef SSLib
-#define SSLib -L$(TOPLIBD) -lss
+#define SSLib $(TOPLIBD)/libss.a
 #endif
 #ifndef ComErrLib
-#define ComErrLib -L$(TOPLIBD) -lcom_err
+#define ComErrLib $(TOPLIBD)/libcom_err.a
 #endif
 #ifndef PepsyFlags
 #ifdef ISODE7
@@ -48,7 +48,7 @@
 #define ArAddCmd ar cruv
 #endif
 #ifndef Krb4LibList
-#define Krb4LibList -lkrb $(KLIBLOC) -l$(DES425LIB)
+#define Krb4LibList -lkrb $(TOPLIBD)/libdes425.a
 #endif
 #ifndef Krb4KdbList
 #define Krb4KdbList -lkdb
@@ -599,9 +599,9 @@ P_KRB4_COMPAT=-UKrb4Compat
            DBMLIB = DbmLib
           DEPKLIB = $(KRB5DEPLIB) $(DESDEPLIB)
           KLIBLOC = -L$(TOPLIBD)
-             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(DESLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+             KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         KDBDEPLIB = $(TOPLIBD)/libkdb5.a
-           KDBLIB = $(KLIBLOC) -lkdb5
+           KDBLIB = $(TOPLIBD)/libkdb5.a
      KRB425DEPLIB = $(TOPLIBD)/libkrb425.a
         KRB425LIB = krb425
      DES425DEPLIB = $(TOPLIBD)/libdes425.a
