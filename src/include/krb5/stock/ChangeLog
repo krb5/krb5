@@ -1,3 +1,8 @@
+Mon Feb 20 12:30:42 1995  John Gilmore  (gnu at toad.com)
+
+	* config.h, config.win:  Remove; merge them both into ../config.h.
+	Now that we aren't using imake, this isn't a generated header file.
+
 Mon Feb 20 15:25:26 1995 Keith Vetter (keithv@fusion.com)
 
 	* config.h: changed API to INTERFACE.
