@@ -53,6 +53,7 @@ clean::
 ################ Dependencies ################
 krb5_decode_test.o: ktest.h utility.h ktest_equal.h debug.h
 krb5_encode_test.o: utility.h ktest.h debug.h
+trval.o: trval.c
 ktest.o: ktest.h utility.h
 ktest_equal.o: ktest_equal.h
 #utility.o: utility.h

@@ -93,7 +93,7 @@ int print_id_and_len = 1;
 int print_constructed_length = 1;	
 int print_primitive_length = 1;
 int print_skip_context = 0;
-int print_skip_tagnum = 0;
+int print_skip_tagnum = 1;
 int print_context_shortcut = 0;
 int do_hex = 0;
 #ifdef KRB5
@@ -111,7 +111,7 @@ int trval(), trval2(), decode_len(), do_cons(), do_prim();
 
 void usage()
 {
-	fprintf(stderr, "Usage: trval [--types] [--krb5] [--hex] [file]\n");
+	fprintf(stderr, "Usage: trval [--types] [--krb5] [--krb5decode] [--hex] [-notypebytes] [file]\n");
 	exit(1);
 }
 
@@ -151,8 +151,14 @@ int main(argc, argv)
 				print_types = 0;
 			else if (check_option(*argv, "krb5"))
 				print_krb5_types = 1;
-			else if (check_option(*argv, "hex")) {
+			else if (check_option(*argv, "hex"))
 				do_hex = 1;
+			else if (check_option(*argv, "notypebytes"))
+				print_id_and_len = 0;
+			else if (check_option(*argv, "krb5decode")) {
+				print_id_and_len = 0;
+				print_krb5_types = 1;
+				print_types = 1;
 			} else {
 				fprintf(stderr,"trval: unknown option: %s\n", *argv);
 				usage();
@@ -283,8 +289,6 @@ context_restart:
 
 	switch(eid & ID_FORM) {
 	case FORM_PRIM:
-		if (print_primitive_length)
-			fprintf(fp, "<%d>", elen);
 		r = do_prim(fp, eid & ID_TAG, enc+2+xlen, elen, lev+1);
 		*rlen = 2 + xlen + elen + rlen_ext;
 		break;
@@ -320,7 +324,87 @@ int decode_len(fp, enc, len)
 	return(rlen);
 }
 
-#define WIDTH 8
+/*
+ * This is the printing function for bit strings
+ */
+int do_prim_bitstring(fp, tag, enc, len, lev)
+	FILE *fp;
+	int tag;
+	unsigned char *enc;
+	int len;
+	int lev;
+{
+	int	i;
+	long	num = 0;
+
+	if (tag != PRIM_BITS || len > 5)
+		return 0;
+
+	for (i=1; i < len; i++) {
+		num = num << 8;
+		num += enc[i];
+	}
+
+	fprintf(fp, "0x%lx", num);
+	if (enc[0])
+		fprintf(fp, " (%d unused bits)", enc[0]);
+	return 1;
+}
+
+/*
+ * This is the printing function for integers
+ */
+int do_prim_int(fp, tag, enc, len, lev)
+	FILE *fp;
+	int tag;
+	unsigned char *enc;
+	int len;
+	int lev;
+{
+	int	i;
+	long	num = 0;
+
+	if (tag != PRIM_INT || len > 4)
+		return 0;
+
+	if (enc[0] & 0x80)
+		num = -1;
+
+	for (i=0; i < len; i++) {
+		num = num << 8;
+		num += enc[i];
+	}
+
+	fprintf(fp, "%ld", num);
+	return 1;
+}
+
+
+/*
+ * This is the printing function which we use if it's a string or
+ * other other type which is best printed as a string
+ */
+int do_prim_string(fp, tag, enc, len, lev)
+	FILE *fp;
+	int tag;
+	unsigned char *enc;
+	int len;
+	int lev;
+{
+	int	i;
+
+	/*
+	 * Only try this printing function with "reasonable" types
+	 */
+	if ((tag < DEFN_NUMS) && (tag != PRIM_OCTS))
+		return 0;
+
+	for (i=0; i < len; i++)
+		if (!isprint(enc[i]))
+			return 0;
+	fprintf(fp, "\"%.*s\"", len, enc);
+	return 1;
+}
 
 int do_prim(fp, tag, enc, len, lev)
 	FILE *fp;
@@ -332,28 +416,41 @@ int do_prim(fp, tag, enc, len, lev)
 	int n;
 	int i;
 	int j;
+	int width;
+
+	if (do_prim_string(fp, tag, enc, len, lev))
+		return OK;
+	if (do_prim_int(fp, tag, enc, len, lev))
+		return OK;
+	if (do_prim_bitstring(fp, tag, enc, len, lev))
+		return OK;
+
+	if (print_primitive_length)
+		fprintf(fp, "<%d>", len);
+	
+	width = (80 - (lev * 3) - 8) / 4;
 	
 	for (n = 0; n < len; n++) {
-		if ((n % WIDTH) == 0) {
+		if ((n % width) == 0) {
 			fprintf(fp, "\n");
-	    for (i=0; i<lev; i++) fprintf(fp, "   ");
+			for (i=0; i<lev; i++) fprintf(fp, "   ");
+		}
+		fprintf(fp, "%02x ", enc[n]);
+		if ((n % width) == (width-1)) {
+			fprintf(fp, "    ");
+			for (i=n-(width-1); i<=n; i++)
+				if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
+				else fprintf(fp, ".");
+		}
 	}
-	fprintf(fp, "%02x ", enc[n]);
-	if ((n % WIDTH) == (WIDTH-1)) {
-	    fprintf(fp, "    ");
-	    for (i=n-(WIDTH-1); i<=n; i++)
-		if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
-		else fprintf(fp, ".");
+	if ((j = (n % width)) != 0) {
+		fprintf(fp, "    ");
+		for (i=0; i<width-j; i++) fprintf(fp, "   ");
+		for (i=n-j; i<n; i++)
+			if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
+			else fprintf(fp, ".");
 	}
-    }
-    if ((j = (n % WIDTH)) != 0) {
-	fprintf(fp, "    ");
-	for (i=0; i<WIDTH-j; i++) fprintf(fp, "   ");
-	for (i=n-j; i<n; i++)
-	    if (isprint(enc[i])) fprintf(fp, "%c", enc[i]);
-	    else fprintf(fp, ".");
-    }
-    return(OK);
+	return(OK);
 }
 
 int do_cons(fp, enc, len, lev, rlen)
@@ -451,8 +548,8 @@ struct typestring_table krb5_types[] = {
 	{ 21, -1, "Krb5 PRIV packet"},
 	{ 22, -1, "Krb5 CRED packet"},
 	{ 30, -1, "Krb5 ERROR packet"},
-	{ 25, -1, "Krb5 Encrypted AS-REQ part"},
-	{ 26, -1, "Krb5 Encrypted TGS-REQ part"},
+	{ 25, -1, "Krb5 Encrypted AS-REP part"},
+	{ 26, -1, "Krb5 Encrypted TGS-REP part"},
 	{ 27, -1, "Krb5 Encrypted AP-REP part"},
 	{ 28, -1, "Krb5 Encrypted PRIV part"},
 	{ 29, -1, "Krb5 Encrypted CRED part"},
@@ -492,7 +589,7 @@ struct typestring_table krb5_fields[] = {
 	{ 1007, 7, "nonce"},
 	{ 1007, 8, "etype"},
 	{ 1007, 9, "addresses", 1003},
-	{ 1007, 10, "enc-authorization-data", 1004},
+	{ 1007, 10, "enc-authorization-data", 1001},
 	{ 1007, 11, "additional-tickets"},
 
 	{ 1008, 1, "padata-type"},	/* PA-DATA */
@@ -503,7 +600,22 @@ struct typestring_table krb5_fields[] = {
 	{ 1009, 2, "usec"},
 	{ 1009, 3, "seq-number"},	
 	{ 1009, 4, "s-address", 1002},
-	{ 1009, 5, "r-address", 1002},	
+	{ 1009, 5, "r-address", 1002},
+
+	{ 1010, 0, "lr-type"},	/* LastReq */
+	{ 1010, 1, "lr-value"},
+
+	{ 1011, 0, "key", 1005},	/* KRB-CRED-INFO */
+	{ 1011, 1, "prealm"},	
+	{ 1011, 2, "pname", 1000},
+	{ 1011, 3, "flags"},	
+	{ 1011, 4, "authtime"},
+	{ 1011, 5, "startime"},	
+	{ 1011, 6, "endtime"},
+	{ 1011, 7, "renew-till"},
+	{ 1011, 8, "srealm"},
+	{ 1011, 9, "sname", 1000},
+	{ 1011, 10, "caddr", 1002},
 
 	{ 1, 0, "tkt-vno"},	/* Ticket */
 	{ 1, 1, "realm"},
@@ -513,12 +625,24 @@ struct typestring_table krb5_fields[] = {
 	{ 2, 0, "authenticator-vno"}, /* Authenticator */
 	{ 2, 1, "crealm"},
 	{ 2, 2, "cname", 1000},
-	{ 2, 3, "cksum"},
+	{ 2, 3, "cksum", 1006},
 	{ 2, 4, "cusec"},
 	{ 2, 5, "ctime"},
-	{ 2, 6, "subkey"},
+	{ 2, 6, "subkey", 1005},
 	{ 2, 7, "seq-number"},
 	{ 2, 8, "authorization-data", 1004},
+
+	{ 3, 0, "flags"}, /* EncTicketPart */
+	{ 3, 1, "key", 1005},
+	{ 3, 2, "crealm"},
+	{ 3, 3, "cname", 1000},
+	{ 3, 4, "transited"},
+	{ 3, 5, "authtime"},
+	{ 3, 6, "starttime"},
+	{ 3, 7, "endtime"},
+	{ 3, 8, "renew-till"},
+	{ 3, 9, "caddr", 1003},
+	{ 3, 10, "authorization-data", 1004},
 
 	{ 10, 1, "pvno"},	/* AS-REQ */
 	{ 10, 2, "msg-type"},
@@ -569,6 +693,51 @@ struct typestring_table krb5_fields[] = {
 	{ 22, 1, "msg-type"},
 	{ 22, 2, "tickets"},
 	{ 22, 3, "enc-part", 1001},
+
+	{ 25, 0, "key", 1005},	/* EncASRepPart */
+	{ 25, 1, "last-req", 1010},
+	{ 25, 2, "nonce"},
+	{ 25, 3, "key-expiration"},
+	{ 25, 4, "flags"},
+	{ 25, 5, "authtime"},
+	{ 25, 6, "starttime"},
+	{ 25, 7, "enddtime"},
+	{ 25, 8, "renew-till"},
+	{ 25, 9, "srealm"},
+	{ 25, 10, "sname", 1000},
+	{ 25, 11, "caddr", 1003},
+	
+	{ 26, 0, "key", 1005},	/* EncTGSRepPart */
+	{ 26, 1, "last-req", 1010},
+	{ 26, 2, "nonce"},
+	{ 26, 3, "key-expiration"},
+	{ 26, 4, "flags"},
+	{ 26, 5, "authtime"},
+	{ 26, 6, "starttime"},
+	{ 26, 7, "enddtime"},
+	{ 26, 8, "renew-till"},
+	{ 26, 9, "srealm"},
+	{ 26, 10, "sname", 1000},
+	{ 26, 11, "caddr", 1003},
+	
+	{ 27, 0, "ctime"},	/* EncApRepPart */
+	{ 27, 1, "cusec"},
+	{ 27, 2, "subkey", 1005},
+	{ 27, 3, "seq-number"},
+
+	{ 28, 0, "user-data"},	/* EncKrbPrivPart */
+	{ 28, 1, "timestamp"},
+	{ 28, 2, "usec"},
+	{ 28, 3, "seq-number"},
+	{ 28, 4, "s-address", 1002},
+	{ 28, 5, "r-address", 1002},
+
+	{ 29, 0, "ticket-info", 1011},	/* EncKrbCredPart */
+	{ 29, 1, "nonce"},
+	{ 29, 2, "timestamp"},
+	{ 29, 3, "usec"},
+	{ 29, 4, "s-address", 1002},
+	{ 29, 5, "r-address", 1002},
 
 	{ 30, 0, "pvno"},	/* KRB-ERROR */
 	{ 30, 1, "msg-type"},
