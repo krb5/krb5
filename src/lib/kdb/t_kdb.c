@@ -318,7 +318,7 @@ add_principal(kcontext, principal, mkey, key, rseed)
 	goto out;
 
     if (!key)
-	krb5_free_keyblock(kcontext, rkey);
+	krb5_free_keyblock_contents(kcontext, rkey);
 
     kret = krb5_db_put_principal(kcontext, &dbent, &nentries);
     if ((!kret) && (nentries != 1))
