@@ -33,13 +33,14 @@ k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
 static krb5_error_code
 k5_arcfour_make_key(const krb5_data *, krb5_keyblock *);
 
-static unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
-static unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
-static krb5_data arcfour_weakkeys[] = { {KV5M_DATA, sizeof (arcfour_weakkey1),
-					 (char * ) arcfour_weakkey1},
-					{KV5M_DATA, sizeof (arcfour_weakkey2),
-					 (char * ) arcfour_weakkey2},
-					{KV5M_DATA, 0, 0}
+static const unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
+static const unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
+static const krb5_data arcfour_weakkeys[] = {
+    {KV5M_DATA, sizeof (arcfour_weakkey1),
+     (char * ) arcfour_weakkey1},
+    {KV5M_DATA, sizeof (arcfour_weakkey2),
+     (char * ) arcfour_weakkey2},
+    {KV5M_DATA, 0, 0}
 };
 
 /*xxx we really should check for c9x here and use inline on 

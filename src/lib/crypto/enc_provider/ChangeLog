@@ -1,5 +1,8 @@
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* arcfour.c (arcfour_weakkey1, arcfour_weakkey2,
+	arcfour_weakkeys): Now const.
+
 	* des.c (mit_des_zeroblock): Don't define here.
 	* des3.c (mit_des_zeroblock): Don't define here.
 
