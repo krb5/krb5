@@ -1297,6 +1297,7 @@ profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:Ke
 
 gss-headers-output = ¶
 	"{gss-headers-output-folder}gssapi.h" ¶
+	"{gss-headers-output-folder}GSS.h" ¶
 	"{gss-headers-output-folder}gssapi_krb5.h"
 
 krb5-headers-output = ¶
@@ -1313,6 +1314,14 @@ headers-output = {gss-headers-output} {krb5-headers-output} ¶
 	{comerr-headers-output} {profile-headers-output} 
 
 headers Ä unset-echo {headers-output}
+
+"{gss-headers-output-folder}GSS.h" Ä {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Catenate "{root-folder}mac:GSS.h" > "{Targ}"
+	SetFile -a l "{Targ}"
 
 "{gss-headers-output-folder}gssapi.h" Ä "{root-folder}lib:gssapi:generic:gssapi.h" {makefile-dependency}
 	"{create-folder}" "{TargDir}"
