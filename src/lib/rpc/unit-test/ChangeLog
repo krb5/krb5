@@ -1,3 +1,11 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib/helpers.exp (set_from_env, expect_tcl_prompt,
+	send_tcl_cmd_await_echo, expect_kadm_ok, setup_database): New
+	procs.
+	(top level): Do database setup here...
+	* Makefile.in (unit-test-setup): ...not here.
+
 2001-07-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* client.c: Change local variable count from int to unsigned int.

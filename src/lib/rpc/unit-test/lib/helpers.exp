@@ -16,6 +16,106 @@ if {$exp_version_4} {
 	set wait_status_index 3
 }
 				
+proc set_from_env {varname default_value} {
+    global env
+    upvar $varname v
+
+    if [info exists env($varname)] {
+	set v $env($varname)
+    } else {
+	set v $default_value
+    }
+}
+proc expect_tcl_prompt {} {
+    global kadmin_tcl_spawn_id
+    expect {
+	-i $kadmin_tcl_spawn_id
+	"^% " { }
+	-re . { error "unexpected output {$expect_out(buffer)} from subprocess, expecting tcl prompt" }
+	timeout { perror "timeout waiting for tcl prompt" }
+	eof { perror "eof from subprocess when expecting tcl prompt" }
+    }
+}
+proc send_tcl_cmd_await_echo {cmd} {
+    global kadmin_tcl_spawn_id
+    send -i $kadmin_tcl_spawn_id "$cmd\n"
+    expect {
+	-i $kadmin_tcl_spawn_id
+	-ex "$cmd\r\n" { }
+	timeout { perror "timeout waiting for tcl subprocess to echo input" }
+	eof { perror "eof waiting for tcl subprocess to echo input" }
+    }
+}
+proc expect_kadm_ok {} {
+    global kadmin_tcl_spawn_id
+    expect {
+	-i $kadmin_tcl_spawn_id
+	-re "^OK OVSEC_KADM_OK \[^\n\]*\n" {}
+	default { error "didn't get ok back" }
+    }
+}
+# trying to translate rpc_test_setup.sh into inline tcl...
+proc setup_database {} {
+    global env spawn_id kadmin_tcl_spawn_id TESTDIR MAKE_KEYTAB CANON_HOST
+
+    # XXXXX
+    set_from_env TOP {/x/x/x/x/x}
+    send_user "TOP=$TOP\n"
+
+    set_from_env TESTDIR $env(TOP)/testing
+    set_from_env CLNTTCL $TESTDIR/util/ovsec_kadm_clnt_tcl
+    set_from_env TCLUTIL $TESTDIR/tcl/util.t
+    set env(TCLUTIL) $TCLUTIL
+    set_from_env MAKE_KEYTAB $TESTDIR/scripts/make-host-keytab.pl
+    set env(PATH) "$TOP/install/admin:$env(PATH)"
+
+    # $VERBOSE ?
+
+    if [info exists spawn_id] { set x $spawn_id }
+    spawn $CLNTTCL
+    set kadmin_tcl_spawn_id $spawn_id
+    if [info exists x] { set spawn_id $x }
+
+    expect_tcl_prompt
+    send_tcl_cmd_await_echo "source {$TCLUTIL}"
+    expect_tcl_prompt
+    send_tcl_cmd_await_echo "set h {$CANON_HOST}"
+    expect {
+	-ex "$CANON_HOST\r\n" { }
+	timeout { perror "timeout waiting for subprocess" }
+	eof { perror "eof from subprocess" }
+    }
+    expect_tcl_prompt
+
+    send_tcl_cmd_await_echo {ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle}
+    expect_kadm_ok
+    expect "^% "
+    send_tcl_cmd_await_echo {ovsec_kadm_create_principal $server_handle [simple_principal server/$h] {OVSEC_KADM_PRINCIPAL} admin}
+    expect_kadm_ok
+    expect "^% "
+    send_tcl_cmd_await_echo {ovsec_kadm_randkey_principal $server_handle server/$h key}
+    expect_kadm_ok
+    expect "^% "
+    send_tcl_cmd_await_echo {ovsec_kadm_create_principal $server_handle [simple_principal notserver/$h] {OVSEC_KADM_PRINCIPAL} admin}
+    expect_kadm_ok
+    expect "^% "
+    send_tcl_cmd_await_echo {ovsec_kadm_randkey_principal $server_handle notserver/$h key}
+    expect_kadm_ok
+    expect "^% "
+    send_tcl_cmd_await_echo {ovsec_kadm_destroy $server_handle}
+    expect_kadm_ok
+    expect "^% "
+    wait -nowait -i $spawn_id
+    close -i $spawn_id
+}
+
+if ![info exists CANON_HOST] {
+    set CANON_HOST [exec $env(QUALNAME)]
+    setup_database
+    file delete $env(RPC_TEST_SRVTAB)
+    exec $env(MAKE_KEYTAB) -princ "server/$CANON_HOST" $env(RPC_TEST_SRVTAB)
+}
+
 
 proc kinit {princ pass lifetime} {
 	global kinit

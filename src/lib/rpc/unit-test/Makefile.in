@@ -54,7 +54,7 @@ unit-test-body:
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS)
-	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) $(srcdir)/rpc_test_setup.sh
+#	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) $(srcdir)/rpc_test_setup.sh
 
 unit-test-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS)
