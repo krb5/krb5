@@ -21,6 +21,9 @@
 
 #include <stdio.h>
 
+#ifdef HAVE_PTY_H
+#include <pty.h>
+#endif
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>

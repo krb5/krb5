@@ -28,7 +28,7 @@ long pty_getpty (fd, slave, slavelength)
     int slavelength;
     int *fd; char *slave;
 {
-#if !defined(HAVE__GETPTY)
+#if !defined(HAVE__GETPTY) && !defined(HAVE_OPENPTY)
     char *cp;
     char *p;
     int i,ptynum;

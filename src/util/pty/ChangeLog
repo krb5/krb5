@@ -1,3 +1,16 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* getpty.c (pty_getpty): More conditionalizing variable defintion
+	based on OS features.
+
+	* cleanup.c (pty_cleanup): Add parenthesis about assignment in
+	conditional (gcc suggestion).
+
+	* pty-int.h: Include pty.h if it exists (for openpty prototype
+	under Linux).
+
+	* configure.in: Check for pty.h
+
 2000-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* libpty.h: If SOCK_DGRAM is not defined, provide a definition for

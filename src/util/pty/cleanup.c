@@ -79,7 +79,7 @@ long pty_cleanup (slave, pid, update_utmp)
 	return errno;
       case 0:
 	ptyint_void_association();
-	if ( retval = ( pty_open_ctty( slave, &fd ))) 
+	if ((retval = pty_open_ctty(slave, &fd)))
 	  exit(retval);
 	ptyint_vhangup();
 	exit(0);
