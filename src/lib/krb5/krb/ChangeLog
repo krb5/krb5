@@ -1,3 +1,17 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Check principal name
+	length before examining components.
+
+	* parse.c (krb5_parse_name): Double-check principal name length
+	before filling in components.
+
+	* srv_rcache.c (krb5_get_server_rcache): Check for null pointer
+	supplied in place of name.
+
+	* unparse.c (krb5_unparse_name_ext): Don't move buffer pointer
+	backwards if nothing has been put into the buffer yet.
+
 2002-10-30  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c (krb5_check_transited_list): Style nit: check

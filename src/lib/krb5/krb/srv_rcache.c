@@ -48,6 +48,9 @@ krb5_get_server_rcache(context, piece, rcptr)
     unsigned long uid = geteuid();
 #endif
     
+    if (piece == NULL)
+	return ENOMEM;
+    
     rcache = (krb5_rcache) malloc(sizeof(*rcache));
     if (!rcache)
 	return ENOMEM;

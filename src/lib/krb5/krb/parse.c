@@ -173,11 +173,13 @@ krb5_parse_name(context, name, nprincipal)
 				cp++;
 				size++;
 			} else if (c == COMPONENT_SEP) {
-				krb5_princ_component(context, principal, i)->length = size;
+				if (krb5_princ_size(context, principal) > i)
+					krb5_princ_component(context, principal, i)->length = size;
 				size = 0;
 				i++;
 			} else if (c == REALM_SEP) {
-				krb5_princ_component(context, principal, i)->length = size;
+				if (krb5_princ_size(context, principal) > i)
+					krb5_princ_component(context, principal, i)->length = size;
 				size = 0;
 				parsed_realm = cp+1;
 			} else
@@ -186,7 +188,8 @@ krb5_parse_name(context, name, nprincipal)
 		if (parsed_realm)
 			krb5_princ_realm(context, principal)->length = size;
 		else
-			krb5_princ_component(context, principal, i)->length = size;
+			if (krb5_princ_size(context, principal) > i)
+				krb5_princ_component(context, principal, i)->length = size;
 		if (i + 1 != components) {
 #if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 			fprintf(stderr,

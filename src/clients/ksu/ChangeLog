@@ -1,3 +1,10 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* heuristic.c (get_closest_principal): Don't try to examine
+	principal name components after the last.
+	* krb_auth_su.c (get_best_principal): Check principal name length
+	before examining components.
+
 2001-10-18  Ken Raeburn  <raeburn@mit.edu>
 
 	Don't crash if .k[5]login file ownership is wrong.  Patch from

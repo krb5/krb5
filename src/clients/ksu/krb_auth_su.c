@@ -620,7 +620,9 @@ int i = 0, nelem;
                   	      krb5_princ_realm(context, temp_client)->length))){
 
 
-			if(nelem){ 
+	    if (nelem &&
+		krb5_princ_size(context, *client) > 0 &&
+		krb5_princ_size(context, temp_client) > 0) {
 				krb5_data *p1 =
 				 krb5_princ_component(context, *client, 0);
         			krb5_data *p2 = 
