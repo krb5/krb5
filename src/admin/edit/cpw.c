@@ -49,8 +49,9 @@ extern krb5_encrypt_block master_encblock;
 extern int	valid_master_key;
 extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 extern krb5_boolean dbactive;
+extern FILE *scriptfile;
 
-static krb5_key_salt_tuple ks_tuple_rnd_def[] = { KEYTYPE_DES, 0 };
+static krb5_key_salt_tuple ks_tuple_rnd_def[] = {{ KEYTYPE_DES, 0 }};
 static int ks_tuple_rnd_def_count = 1;
 
 static void
@@ -62,15 +63,16 @@ enter_rnd_key(argc, argv, entry)
     krb5_error_code 	  retval;
     int 		  nprincs = 1;
     
-    if (retval = krb5_dbe_crk(edit_context, &master_encblock, ks_tuple_rnd_def,
-			      ks_tuple_rnd_def_count, entry)) {
+    if ((retval = krb5_dbe_crk(edit_context, &master_encblock,
+			       ks_tuple_rnd_def,
+			       ks_tuple_rnd_def_count, entry))) {
 	com_err(argv[0], retval, "while generating random key");
         krb5_db_free_principal(edit_context, entry, nprincs);
 	exit_status++;
 	return;
     }
 
-    if (retval = krb5_db_put_principal(edit_context, entry, &nprincs)) {
+    if ((retval = krb5_db_put_principal(edit_context, entry, &nprincs))) {
 	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
         krb5_db_free_principal(edit_context, entry, nprincs);
 	exit_status++;
@@ -101,10 +103,12 @@ pre_key(argc, argv, newprinc, entry)
 	com_err(argv[0], 0, Err_no_database);
     } else if (!valid_master_key) {
 	com_err(argv[0], 0, Err_no_master_msg);
-    } else if (retval = krb5_parse_name(edit_context, argv[argc-1], newprinc)) {
+    } else if ((retval = krb5_parse_name(edit_context,
+					 argv[argc-1],
+					 newprinc))) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[argc-1]);
-    } else if (retval = krb5_db_get_principal(edit_context, *newprinc, entry, 
-				              &nprincs, &more)) {
+    } else if ((retval = krb5_db_get_principal(edit_context, *newprinc, entry, 
+					       &nprincs, &more))) {
         com_err(argv[0],retval,"while trying to get principal's db entry");
     } else if ((nprincs > 1) || (more)) {
 	krb5_db_free_principal(edit_context, entry, nprincs);
@@ -132,7 +136,7 @@ void add_rnd_key(argc, argv)
     }
     switch (pre_key(argc, argv, &newprinc, &entry)) {
     case 0:
-	if (retval = create_db_entry(newprinc, &entry)) {
+	if ((retval = create_db_entry(newprinc, &entry))) {
 	    com_err(argv[0], retval, "While creating new db entry.");
 	    exit_status++;
 	    return;
@@ -154,7 +158,6 @@ void change_rnd_key(argc, argv)
     int argc;
     char *argv[];
 {
-    krb5_error_code 	  retval;
     krb5_principal 	  newprinc;
     krb5_db_entry 	  entry;
 
@@ -177,7 +180,7 @@ void change_rnd_key(argc, argv)
     }
 }
 
-static krb5_key_salt_tuple ks_tuple_default[] = { KEYTYPE_DES, 0 };
+static krb5_key_salt_tuple ks_tuple_default[] = {{ KEYTYPE_DES, 0 }};
 static int ks_tuple_count_default = 1;
 
 void 
@@ -193,19 +196,37 @@ enter_pwd_key(cmdname, princ, ks_tuple, ks_tuple_count, entry)
     krb5_error_code 	  retval;
     int			  one = 1;
   
-    if (retval = krb5_read_password(edit_context, krb5_default_pwd_prompt1,
-				    krb5_default_pwd_prompt2,
-				    password, &pwsize)) {
-        com_err(cmdname, retval, "while reading password for '%s'", princ);
-	goto errout;
+    /* Prompt for password only if interactive */
+    if (!scriptfile) {
+	if ((retval = krb5_read_password(edit_context,
+					 krb5_default_pwd_prompt1,
+					 krb5_default_pwd_prompt2,
+					 password, &pwsize))) {
+	    com_err(cmdname, retval, "while reading password for '%s'", princ);
+	    goto errout;
+	}
+    }
+    else {
+	if (!fgets(password, pwsize, scriptfile)) {
+	    com_err(cmdname, errno, "while reading password for '%s'", princ);
+	    retval = errno;
+	    goto errout;
+	}
+	else {
+	    pwsize = strlen(password);
+	    if (password[pwsize-1] == '\n') {
+		password[pwsize-1] = '\0';
+		pwsize--;
+	    }
+	}
     }
     
     if (ks_tuple_count == 0) {
 	ks_tuple_count = ks_tuple_count_default;
 	ks_tuple = ks_tuple_default;
     }
-    if (retval = krb5_dbe_cpw(edit_context, &master_encblock, ks_tuple,
-			      ks_tuple_count, password, entry)) {
+    if ((retval = krb5_dbe_cpw(edit_context, &master_encblock, ks_tuple,
+			       ks_tuple_count, password, entry))) {
 	com_err(cmdname, retval, "while storing entry for '%s'\n", princ);
         memset(password, 0, sizeof(password)); /* erase it */
 	krb5_dbe_free_contents(edit_context, entry);
@@ -214,7 +235,7 @@ enter_pwd_key(cmdname, princ, ks_tuple, ks_tuple_count, entry)
     memset(password, 0, sizeof(password)); /* erase it */
 
     /* Write the entry back out and we're done */
-    if (retval = krb5_db_put_principal(edit_context, entry, &one)) {
+    if ((retval = krb5_db_put_principal(edit_context, entry, &one))) {
 	com_err(cmdname, retval, "while storing entry for '%s'\n", princ);
     }
 
@@ -236,12 +257,9 @@ void change_pwd_key(argc, argv)
 {
     krb5_key_salt_tuple	* ks_tuple = NULL;
     krb5_int32		  n_ks_tuple = 0;
-    krb5_error_code 	  retval;
     krb5_principal 	  newprinc;
     krb5_db_entry	  entry;
 
-    krb5_kvno 		  vno;
-    int			  one;
     int			  i;
 
     if (argc < 2) {
@@ -278,7 +296,6 @@ void change_pwd_key(argc, argv)
 	break;
     }
 
-change_pwd_key_error:;
     if (ks_tuple) {
 	free(ks_tuple);
     }
@@ -301,7 +318,7 @@ void add_new_key(argc, argv)
     }
     switch (pre_key(argc, argv, &newprinc, &entry)) {
     case 0:
-	if (retval = create_db_entry(newprinc, &entry)) {
+	if ((retval = create_db_entry(newprinc, &entry))) {
 	    com_err(argv[0], retval, "While creating new db entry.");
 	    exit_status++;
 	    return;

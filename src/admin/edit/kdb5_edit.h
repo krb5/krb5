@@ -44,3 +44,14 @@ int set_dbname_help
 	PROTOTYPE((char *, char *));
 
 char *kdb5_edit_Init PROTOTYPE((int, char **));
+
+int quit();
+
+int check_for_match
+	PROTOTYPE((char *, int, krb5_db_entry *, int, int));
+
+void parse_token
+	PROTOTYPE((char *, int *, int *, char *));
+
+int create_db_entry
+	PROTOTYPE((krb5_principal, krb5_db_entry *));

@@ -1,4 +1,9 @@
 
+Tue Aug 15 14:22:50 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_edit.c, ss_wrapper.c, cpw.c, kdb5_edit.h - Add support for
+		-s scriptfile and fix up assorted gcc -Wall complaints.
+
+
 Mon Aug 7 17:32:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* cpw.c - Use krb5_string_to_keysalts() to generate a list of unique
 		key/salt pairs supplied in argv.

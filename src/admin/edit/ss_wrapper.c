@@ -31,6 +31,7 @@
 
 extern ss_request_table kdb5_edit_cmds;
 extern int exit_status;
+extern FILE *scriptfile;
 
 int main(argc, argv)
     int argc;
@@ -47,12 +48,37 @@ int main(argc, argv)
 	ss_perror(sci_idx, retval, "creating invocation");
 	exit(1);
     }
+
     if (request) {
 	    code = ss_execute_line(sci_idx, request, &code);
 	    if (code != 0) {
 		    ss_perror(sci_idx, code, request);
 		    exit_status++;
 	    }
+    } else if (scriptfile) {
+	char *command;
+	int nread;
+
+	/* Get a buffer */
+	if ((command = (char *) malloc(BUFSIZ))) {
+	    /* Process commands from the script until end-of-file or error */
+	    while (!feof(scriptfile) &&
+		   !(fgets(command, BUFSIZ, scriptfile))) {
+
+		/* Strip trailing newline */
+		if (command[strlen(command)-1] == '\n')
+		    command[strlen(command)-1] = '\0';
+
+		/* Execute the command */
+		code = ss_execute_line(sci_idx, command, &code);
+		if (code != 0) {
+		    ss_perror(sci_idx, code, command);
+		    exit_status++;
+		    break;
+		}
+	    }
+	    free(command);
+	}
     } else
 	    ss_listen(sci_idx, &retval);
     return quit() ? 1 : exit_status;
