@@ -43,6 +43,7 @@ void INTERFACE krb5_adm_disconnect
 		   krb5_auth_context *,
 		   krb5_ccache));
 
+#if ! defined(_WINDOWS)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
 	PROTOTYPE((krb5_context,
@@ -60,6 +61,7 @@ krb5_error_code krb5_adm_dbent_to_proto
 		   char *,
 		   krb5_int32 *,
 		   krb5_data **));
+#endif /* _WINDOWS */
 
 /* adm_kt_dec.c */
 krb5_error_code krb5_adm_proto_to_ktent

@@ -5,21 +5,28 @@ LDFLAGS = -g
 ##DOSLIBNAME=kadm.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-OBJS=	adm_conn.$(OBJEXT)	\
-	adm_kw_dec.$(OBJEXT)	\
-	adm_kw_enc.$(OBJEXT)	\
+BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)
 
+DBOBJS= adm_kw_dec.$(OBJEXT)	\
+	adm_kw_enc.$(OBJEXT)
+
+OBJS=	$(BASE_OBJS) $(DB_OBJS)
+
 SRCS=	$(srcdir)/adm_conn.c	\
-	$(srcdir)/adm_kw_dec.c	\
-	$(srcdir)/adm_kw_enc.c	\
 	$(srcdir)/adm_kt_dec.c	\
 	$(srcdir)/adm_kt_enc.c	\
-	$(srcdir)/adm_rw.c
+	$(srcdir)/adm_rw.c	\
+	$(srcdir)/adm_kw_dec.c	\
+	$(srcdir)/adm_kw_enc.c
 
-all:: $(OBJS)
+all:: all-$(WHAT) $(BASE_OBJS)
+
+all-unix:: $(DB_OBJS)
+all-mac:: $(DB_OBJS)
+all-windows::
 
 libkadm.a: $(OBJS)
 	$(RM) $@
@@ -33,8 +40,13 @@ install:: libkadm.a
 	$(INSTALL_DATA) libkadm.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 
-clean::
+clean::	clean-$(WHAT)
+clean-unix::
 	$(RM) libkadm.$(LIBEXT)
+clean-mac::
+	$(RM) libkadm.$(LIBEXT)
+clean-windows::
+	$(RM) kadm.lib kadm.bak
 
 #
 # t_dbentry
@@ -68,7 +80,10 @@ check-mac::
 
 check-windows::
 
-clean::
+clean-unix::
+	$(RM) t_dbentry$(EXEEXT) t_dbentry.$(OBJEXT)
+	$(RM) t_ktentry$(EXEEXT) t_ktentry.$(OBJEXT)
+clean-mac::
 	$(RM) t_dbentry$(EXEEXT) t_dbentry.$(OBJEXT)
 	$(RM) t_ktentry$(EXEEXT) t_ktentry.$(OBJEXT)
 

@@ -1,3 +1,9 @@
+Tue May 30 10:22:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_proto.h: conditionally removed for Windows two prototypes
+	   that use the database.
+	* k5-config.h: bumped MAXPATHLEN and removed need for the kdb.h file.		
+
 Fri May 26 10:17:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_proto.h: added more missing INTERFACE.

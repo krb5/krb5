@@ -41,6 +41,7 @@
 #define INI_KRB5_CONF   "krb5.ini"		/* Location of krb5.conf file */
 
 #define KRB5_DBM_COMPAT__                       /* Don't load dbm.h */
+#define KRB5_KDB5__                             /* Don't load kdb.h */
 #define KRB5_KDB5_DBM__                         /* Don't load kdb_dbm.h */
 
 #define BITS16
@@ -48,7 +49,7 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 #define MAXHOSTNAMELEN  512
-#define MAXPATHLEN	128
+#define MAXPATHLEN      256            /* Also for Windows temp files */
 
 #define KRB5_USE_INET
 #define MSDOS_FILESYSTEM

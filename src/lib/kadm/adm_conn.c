@@ -91,7 +91,13 @@ kadm_get_ccache(kcontext, user, ccache, client)
     if (kret = krb5_parse_name(kcontext, name, client))
 	goto cleanup;
 
+#ifdef _WINDOWS
+    strcpy (new_cache, "FILE:");
+    GetTempFileName (0, "tkt", 0, new_cache+5);
+#else
     (void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
+#endif /* _WINDOWS */
+
     if (kret = krb5_cc_resolve(kcontext, new_cache, ccache))
 	goto cleanup;
 

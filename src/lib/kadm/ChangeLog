@@ -1,3 +1,8 @@
+Tue May 30 10:35:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_conn.c: used Windows specific way of creating a temp file.
+	* Makefile.in: PC doesn't need to compile adm_kw_*.c files.
+
 Thu May 25 17:49:06 1995 Keith Vetter (keithv@fusion.com)
 
 	First pass to make the code compile cleanly on the PC.
