@@ -26,18 +26,9 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
-asn.1
 configure
 configure.in
-create
-dejagnu
-dump.c
-gssapi
-hammer
-misc
-resolve
-test1.c
-verify
+t_imp_name.c
 
 Things-to-lose:
 
