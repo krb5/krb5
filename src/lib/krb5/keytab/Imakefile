@@ -1,0 +1,11 @@
+#define IHaveSubdirs
+#define PassCDebugFlags
+
+         SUBDIRS = file
+
+MakeSubdirs($(SUBDIRS))
+NormalLibraryObjectRule()
+
+/* OBJS=read_servi.o */
+
+/* NormalLibraryTarget(keytab,$(OBJS)) */

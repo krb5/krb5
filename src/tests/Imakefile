@@ -1,0 +1,8 @@
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+
+           OBJS = test1.o dump.o 
+
+           SRCS = test1.c dump.c 
+
+ComplexProgramTarget(test)

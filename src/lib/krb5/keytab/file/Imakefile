@@ -1,0 +1,7 @@
+NormalLibraryObjectRule()
+
+OBJS = ktf_close.o	\
+	ktf_get_na.o	\
+	ktf_util.o	
+
+NormalLibraryTarget(ktfile,$(OBJS))

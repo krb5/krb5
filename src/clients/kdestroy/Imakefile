@@ -1,0 +1,4 @@
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+
+SimpleProgramTarget(kdestroy)
