@@ -1,3 +1,16 @@
+2001-03-10  Ezra Peisach  <epeisach@mit.edu>
+
+	* def_realm.c: Move prototype for krb5_try_realm_txt_rr() to
+	os-proto.h.
+
+	* init_os_ctx.c: Include os-proto.h
+
+	* changepw.c, locate_kdc.c: Do not shadow sin() with local
+	variable name.
+
+	* os-proto.h: Add prototypes for krb5_try_realm_txt_rr() and the
+	obsolete krb5_secure_config_files().
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Don't look for -1 return value

@@ -52,7 +52,6 @@
 
 #define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
 
-extern int krb5_try_realm_txt_rr(char *,char *, char **);
 #endif /* KRB5_DNS_LOOKUP */
 
 /*

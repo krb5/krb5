@@ -55,6 +55,12 @@ krb5_error_code krb5_make_full_ipaddr
 
 #endif /* HAVE_NETINET_IN_H */
 
+krb5_error_code krb5_try_realm_txt_rr(const char *, const char *, 
+				      char **realm);
+
+/* Obsolete interface - leave prototype here until code removed */
+krb5_error_code krb5_secure_config_files(krb5_context ctx);
+
 int _krb5_use_dns_realm KRB5_PROTOTYPE((krb5_context));
 int _krb5_use_dns_kdc KRB5_PROTOTYPE((krb5_context));
 int _krb5_conf_boolean KRB5_PROTOTYPE((const char *));

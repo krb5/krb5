@@ -348,7 +348,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     unsigned char *p=NULL;
     char host[MAX_DNS_NAMELEN], *h;
     struct sockaddr *addr = NULL;
-    struct sockaddr_in *sin = NULL;
+    struct sockaddr_in *sin_p = NULL;
     struct hostent *hp = NULL;
     int type, class;
     int priority, weight, size, len, numanswers, numqueries, rdlen;
@@ -553,11 +553,11 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
 #ifdef HAVE_NETINET_IN_H
             case AF_INET:
 		for (j=0; hp->h_addr_list[j]; j++) {
-		    sin = (struct sockaddr_in *) &addr[out++];
-		    memset ((char *) sin, 0, sizeof (struct sockaddr));
-		    sin->sin_family = hp->h_addrtype;
-		    sin->sin_port = htons(entry->port);
-		    memcpy((char *) &sin->sin_addr,
+		    sin_p = (struct sockaddr_in *) &addr[out++];
+		    memset ((char *) sin_p, 0, sizeof (struct sockaddr));
+		    sin_p->sin_family = hp->h_addrtype;
+		    sin_p->sin_port = htons(entry->port);
+		    memcpy((char *) &sin_p->sin_addr,
 			   (char *) hp->h_addr_list[j],
 			   sizeof(struct in_addr));
 		    if (out + 1 >= count) {

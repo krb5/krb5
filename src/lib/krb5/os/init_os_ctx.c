@@ -28,6 +28,7 @@
 
 #define NEED_WINDOWS
 #include "k5-int.h"
+#include "os-proto.h"
 
 #ifdef macintosh
 #include <PreferencesLib.h>

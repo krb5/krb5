@@ -76,8 +76,8 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
             /* success with admin_server but now we need to change the port */
             /* number to use DEFAULT_KPASSWD_PORT.                          */
             for ( i=0;i<*naddrs;i++ ) {
-                struct sockaddr_in *sin = (struct sockaddr_in *) addr_pp[i];
-                sin->sin_port = htons(DEFAULT_KPASSWD_PORT);
+                struct sockaddr_in *sockin = (struct sockaddr_in *) addr_pp[i];
+                sockin->sin_port = htons(DEFAULT_KPASSWD_PORT);
             }
         }
     }
@@ -97,8 +97,8 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
                     /* success with admin_server but now we need to change the port */
                     /* number to use DEFAULT_KPASSWD_PORT.                          */
                     for ( i=0;i<*naddrs;i++ ) {
-                        struct sockaddr_in *sin = (struct sockaddr_in *) addr_pp[i];
-                        sin->sin_port = htons(DEFAULT_KPASSWD_PORT);
+                        struct sockaddr_in *sockin = (struct sockaddr_in *) addr_pp[i];
+                        sockin->sin_port = htons(DEFAULT_KPASSWD_PORT);
                     }
                 }
             }
