@@ -1,3 +1,9 @@
+2002-06-07  Alexandra Ellwood <lxs@mit.edu>
+	
+	* crypto_libinit.h: Changed macros so you can include
+	crypto_libinit.h and krb5_libinit.h at the same time.
+	[pullup from 1-2-2-branch]
+
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* coll_proof_cksum.c (krb5_c_is_coll_proof_cksum): Rename function
