@@ -1,4 +1,10 @@
-2003-04-04  Alexandra Ellwood  <lxs@mit.edu>
+2003-04-15  Alexandra Ellwood  <lxs@mit.edu>
+   
+    * g_ad_tkt.c: accidentally checked a non-space character into
+    the USE_LOGIN_LIBRARY part of get_ad_tkt so it doesn't build
+    on the Mac.  Oops.
+    
+2003-04-14  Alexandra Ellwood  <lxs@mit.edu>
    
     * g_ad_tkt.c: Added support for login library to get_ad_tkt.
     Support is copied from Mac Kerberos4 library and conditionalized

@@ -257,10 +257,10 @@ get_ad_tkt(service, sinstance, realm, lifetime)
 
     kerror = krb_get_tf_realm(TKT_FILE, lrealm);
 #if USE_LOGIN_LIBRARY
-       if (kerror == GC_NOTKT) {
-               /* No tickets... call krb_get_cred (KLL will prompt) and try again. */
-               if ((kerror = krb_get_cred ("krbtgt", realm, realm, &cr)) == KSUCCESS) {
-                       /* Now get the realm again. */
+    if (kerror == GC_NOTKT) {
+        /* No tickets... call krb_get_cred (KLL will prompt) and try again. */
+        if ((kerror = krb_get_cred ("krbtgt", realm, realm, &cr)) == KSUCCESS) {
+            /* Now get the realm again. */
             kerror = krb_get_tf_realm (TKT_FILE, lrealm);
         }
     }
