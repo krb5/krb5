@@ -546,21 +546,46 @@ void one_addr(a)
 {
     struct hostent *h;
 
-    if ((a->addrtype == ADDRTYPE_INET) &&
-	(a->length == 4)) {
+    if ((a->addrtype == ADDRTYPE_INET && a->length == 4)
+#ifdef AF_INET6
+	|| (a->addrtype == ADDRTYPE_INET6 && a->length == 16)
+#endif
+	) {
 	if (!no_resolve) {
+#ifdef HAVE_GETIPNODEBYADDR
+	    int err;
+	    h = getipnodebyaddr(a->contents, 16, AF_INET6, &err);
+	    if (h) {
+		printf("%s", h->h_name);
+		freehostent(h);
+	    }
+#else
 	    h = gethostbyaddr(a->contents, 4, AF_INET);
 	    if (h) {
 		printf("%s", h->h_name);
 	    }
+#endif
+	    if (h)
+		return;
 	}
 	if (no_resolve || !h) {
-	    printf("%d.%d.%d.%d", a->contents[0], a->contents[1],
-		   a->contents[2], a->contents[3]);
+	    char buf[46];
+#ifdef HAVE_INET_NTOP
+	    char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
+	    if (name) {
+		printf ("%s", name);
+		return;
+	    }
+#else
+	    if (a->addrtype == ADDRTYPE_INET) {
+		printf("%d.%d.%d.%d", a->contents[0], a->contents[1],
+		       a->contents[2], a->contents[3]);
+		return;
+	    }
+#endif
 	}
-    } else {
-	printf("unknown addr type %d", a->addrtype);
     }
+    printf("unknown addr type %d", a->addrtype);
 }
 
 void

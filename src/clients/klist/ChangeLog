@@ -1,3 +1,9 @@
+1999-10-17  Ken Raeburn  <raeburn@raeburn.org>
+
+	* klist.c (one_addr): Use getipnodebyaddr and inet_ntop if
+	available.  Display ADDRTYPE_INET6 addresses if AF_INET6 is
+	defined.
+
 1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
 
 	* klist.c (do_ccache, show_credential): Use krb5_free_unparsed_name
