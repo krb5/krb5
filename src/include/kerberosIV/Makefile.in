@@ -7,4 +7,7 @@ clean::
 depend::
 
 install::
+	@set -x; for f in $(KRB4_HEADERS) ; \
+	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/$$f ; \
+	done
 

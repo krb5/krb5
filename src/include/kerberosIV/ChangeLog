@@ -1,3 +1,7 @@
+Thu Oct 31 17:27:08 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (install): Start installing headers again [36]
+
 Sun Jul  7 18:18:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb4-proto.h: Change prototype for decomp_ticket to match source

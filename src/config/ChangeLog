@@ -1,3 +1,7 @@
+Thu Oct 31 17:45:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* pre.in (FILE_MANDIR): Create $prefix/include/kerberosIV [36]
+
 Mon Oct 21 21:21:43 1996  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Substitute for *_RECURSE variables.

@@ -77,7 +77,8 @@ KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = $(INSTALL_EXEC_PREFIX)/include
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/asn.1 \
-	$(KRB5_INCDIR)/gssapi
+	$(KRB5_INCDIR)/gssapi \
+	$(KRB5_INCDIR)/kerberosIV
 
 #
 # Macros used by the KADM5 (OV-based) unit test system.
