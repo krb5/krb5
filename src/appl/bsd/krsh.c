@@ -127,7 +127,7 @@ main(argc, argv0)
      int argc;
      char **argv0;
 {
-    int rem, pid;
+    int rem, pid = 0;
     char *host=0, *cp, **ap, buf[RCMD_BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     struct passwd *pwd;
@@ -533,6 +533,9 @@ main(argc, argv0)
 	goto rewrite;
       done:
 	(void) shutdown(rem, 1);
+#ifdef KERBEROS 
+	krb5_free_context(bsd_context);
+#endif
 	exit(0);
     }
 #ifdef POSIX_SIGNALS
@@ -575,6 +578,9 @@ main(argc, argv0)
     } while (FD_ISSET(rem, &readfrom) || FD_ISSET(rfd2, &readfrom));
     if (nflag == 0)
       (void) kill(pid, SIGKILL);
+#ifdef KERBEROS 
+    krb5_free_context(bsd_context);
+#endif
     exit(0);
   usage:
     fprintf(stderr,

@@ -1,3 +1,7 @@
+2004-05-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* krsh.c (main): Invoke krb5_free_context at exit.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (kshd, klogind): Link against apputils lib.
