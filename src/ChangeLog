@@ -1,3 +1,8 @@
+2002-10-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL): If --with-tcl is given, failure to
+	find a library we can use is now an error.
+
 2002-10-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4: Use dnl after all AC_REQUIRE invocations.

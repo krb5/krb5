@@ -928,10 +928,15 @@ if test "$with_tcl" != no ; then
   if test $tcl_lib = no ; then
     if test "$with_tcl" != try ; then
       AC_KRB5_TCL_TRYOLD
-dnl      AC_MSG_ERROR(Could not find Tcl)
     else
       AC_MSG_WARN(Could not find Tcl which is needed for some tests)
     fi
+  fi
+fi
+# If "yes" or pathname, error out if not found.
+if test "$with_tcl" != no -a "$with_tcl" != try ; then
+  if test "$tcl_header $tcl_lib" != "yes yes" ; then
+    AC_MSG_ERROR(Could not find Tcl)
   fi
 fi
 ])dnl
