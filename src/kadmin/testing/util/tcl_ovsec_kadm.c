@@ -166,10 +166,10 @@ static int remove_server_handle(Tcl_Interp *interp, char *name)
 	return TCL_ERROR; \
     } \
     { \
-	int tcl_ret; \
-	if ((tcl_ret = get_server_handle(interp, argv[0], &server_handle)) \
+	int htcl_ret; \
+	if ((htcl_ret = get_server_handle(interp, argv[0], &server_handle)) \
 	    != TCL_OK) { \
-	    return tcl_ret; \
+	    return htcl_ret; \
 	} \
     } \
     argv++, argc--;
@@ -251,7 +251,8 @@ static void set_ok(Tcl_Interp *interp, char *string)
 
 static Tcl_DString *unparse_err(ovsec_kadm_ret_t code)
 {
-     char *code_string, *error_string;
+     char *code_string;
+     const char *error_string;
      Tcl_DString *dstring;
 
      switch (code) {
@@ -372,10 +373,10 @@ static Tcl_DString *unparse_err(ovsec_kadm_ret_t code)
      case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN: code_string = "KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN"; break;
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
-     default: fprintf(stderr, "**** CODE %d ***\n", code); code_string = "UNKNOWN"; break;
+     default: fprintf(stderr, "**** CODE %ld ***\n", (long) code); code_string = "UNKNOWN"; break;
      }
 
-     error_string = (char *) error_message(code);
+     error_string = error_message(code);
 
      if (! (dstring = (Tcl_DString *) malloc(sizeof(Tcl_DString)))) {
 	  fprintf(stderr, "Out of memory!\n");
@@ -576,7 +577,8 @@ static Tcl_DString *unparse_principal_ent(ovsec_kadm_principal_ent_t princ)
 	      /* code for krb5_parse_name that the pointer passed into */
 	      /* it should be initialized to 0 if I want it do be */
 	      /* allocated automatically. */
-     if (krb5_ret = krb5_unparse_name(context, princ->principal, &tmp)) {
+     krb5_ret = krb5_unparse_name(context, princ->principal, &tmp);
+     if (krb5_ret) {
 	  /* XXX Do we want to return an error?  Not sure. */
 	  Tcl_DStringAppendElement(str, "[unparseable principal]");
      }
@@ -598,7 +600,8 @@ static Tcl_DString *unparse_principal_ent(ovsec_kadm_principal_ent_t princ)
      Tcl_DStringAppendElement(str, buf);
 
      tmp = 0;
-     if (krb5_ret = krb5_unparse_name(context, princ->mod_name, &tmp)) {
+     krb5_ret = krb5_unparse_name(context, princ->mod_name, &tmp);
+     if (krb5_ret) {
 	  /* XXX */
 	  Tcl_DStringAppendElement(str, "[unparseable principal]");
      }
@@ -804,22 +807,22 @@ static Tcl_DString *unparse_policy_ent(ovsec_kadm_policy_ent_t policy)
      Tcl_DStringFree(tmp_dstring);
      free(tmp_dstring);
      
-     sprintf(buf, "%d", policy->pw_min_life);
+     sprintf(buf, "%ld", policy->pw_min_life);
      Tcl_DStringAppendElement(str, buf);
 
-     sprintf(buf, "%d", policy->pw_max_life);
+     sprintf(buf, "%ld", policy->pw_max_life);
      Tcl_DStringAppendElement(str, buf);
 
-     sprintf(buf, "%d", policy->pw_min_length);
+     sprintf(buf, "%ld", policy->pw_min_length);
      Tcl_DStringAppendElement(str, buf);
 
-     sprintf(buf, "%d", policy->pw_min_classes);
+     sprintf(buf, "%ld", policy->pw_min_classes);
      Tcl_DStringAppendElement(str, buf);
 
-     sprintf(buf, "%d", policy->pw_history_num);
+     sprintf(buf, "%ld", policy->pw_history_num);
      Tcl_DStringAppendElement(str, buf);
 
-     sprintf(buf, "%d", policy->policy_refcnt);
+     sprintf(buf, "%ld", policy->policy_refcnt);
      Tcl_DStringAppendElement(str, buf);
 
      return str;
@@ -995,8 +998,8 @@ static Tcl_DString *unparse_keyblock(krb5_keyblock *keyblock)
 
 
 
-int tcl_ovsec_kadm_init(ClientData clientData, Tcl_Interp *interp,
-			int argc, char *argv[])
+static int tcl_ovsec_kadm_init(ClientData clientData, Tcl_Interp *interp,
+			       int argc, char *argv[])
 {
      ovsec_kadm_ret_t ret;
      char *client_name, *pass, *service_name, *realm;
@@ -1058,8 +1061,8 @@ int tcl_ovsec_kadm_init(ClientData clientData, Tcl_Interp *interp,
 
 
 
-int tcl_ovsec_kadm_destroy(ClientData clientData, Tcl_Interp *interp,
-			   int argc, char *argv[])
+static int tcl_ovsec_kadm_destroy(ClientData clientData, Tcl_Interp *interp,
+				  int argc, char *argv[])
 {
      ovsec_kadm_ret_t ret;
      int tcl_ret;
@@ -1081,8 +1084,9 @@ int tcl_ovsec_kadm_destroy(ClientData clientData, Tcl_Interp *interp,
      return TCL_OK;
 }	  
 
-int tcl_ovsec_kadm_create_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_ovsec_kadm_create_principal(ClientData clientData, 
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      int tcl_ret;
      ovsec_kadm_ret_t ret;
@@ -1150,8 +1154,9 @@ finished:
 
 
 
-int tcl_ovsec_kadm_delete_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_ovsec_kadm_delete_principal(ClientData clientData, 
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      krb5_principal princ;
      krb5_error_code krb5_ret;
@@ -1164,7 +1169,8 @@ int tcl_ovsec_kadm_delete_principal(ClientData clientData, Tcl_Interp *interp,
      if((tcl_ret = parse_str(interp, argv[0], &name)) != TCL_OK)
 	return tcl_ret;
      if(name != NULL) {
-	if (krb5_ret = krb5_parse_name(context, name, &princ)) {
+        krb5_ret = krb5_parse_name(context, name, &princ);
+	if (krb5_ret) {
 	    stash_error(interp, krb5_ret);
 	    Tcl_AppendElement(interp, "while parsing principal");
 	    return TCL_ERROR;
@@ -1187,8 +1193,9 @@ int tcl_ovsec_kadm_delete_principal(ClientData clientData, Tcl_Interp *interp,
 
 
 
-int tcl_ovsec_kadm_modify_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_ovsec_kadm_modify_principal(ClientData clientData, 
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      char *princ_string;
      ovsec_kadm_principal_ent_t princ = 0;
@@ -1233,8 +1240,9 @@ finished:
 }
 
 
-int tcl_ovsec_kadm_rename_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_ovsec_kadm_rename_principal(ClientData clientData,
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      krb5_principal source, target;
      krb5_error_code krb5_ret;
@@ -1243,13 +1251,15 @@ int tcl_ovsec_kadm_rename_principal(ClientData clientData, Tcl_Interp *interp,
 
      GET_HANDLE(2, 0);
 
-     if (krb5_ret = krb5_parse_name(context, argv[0], &source)) {
+     krb5_ret = krb5_parse_name(context, argv[0], &source);
+     if (krb5_ret) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing source");
 	  return TCL_ERROR;
      }
 
-     if (krb5_ret = krb5_parse_name(context, argv[1], &target)) {
+     krb5_ret = krb5_parse_name(context, argv[1], &target);
+     if (krb5_ret) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing target");
 	  krb5_free_principal(context, source);
@@ -1273,8 +1283,9 @@ int tcl_ovsec_kadm_rename_principal(ClientData clientData, Tcl_Interp *interp,
 
 
 	  
-int tcl_ovsec_kadm_chpass_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_ovsec_kadm_chpass_principal(ClientData clientData, 
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      krb5_principal princ;
      char *pw;
@@ -1288,7 +1299,8 @@ int tcl_ovsec_kadm_chpass_principal(ClientData clientData, Tcl_Interp *interp,
 
      GET_HANDLE(2, 0);
 
-     if (krb5_ret = krb5_parse_name(context, argv[0], &princ)) {
+     krb5_ret = krb5_parse_name(context, argv[0], &princ);
+     if (krb5_ret) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing principal name");
 	  return TCL_ERROR;
@@ -1330,9 +1342,9 @@ finished:
 
 
 
-int tcl_ovsec_kadm_chpass_principal_util(ClientData clientData,
-					 Tcl_Interp *interp,
-					 int argc, char *argv[])
+static int tcl_ovsec_kadm_chpass_principal_util(ClientData clientData,
+						Tcl_Interp *interp,
+						int argc, char *argv[])
 {
      krb5_principal princ;
      char *new_pw;
@@ -1348,7 +1360,7 @@ int tcl_ovsec_kadm_chpass_principal_util(ClientData clientData,
 
      GET_HANDLE(4, 0);
 
-     if (krb5_ret = krb5_parse_name(context, argv[0], &princ)) {
+     if ((krb5_ret = krb5_parse_name(context, argv[0], &princ))) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing principal name");
 	  return TCL_ERROR;
@@ -1416,8 +1428,9 @@ finished:
 
 
 
-int tcl_ovsec_kadm_randkey_principal(ClientData clientData, Tcl_Interp *interp,
-				     int argc, char *argv[])
+static int tcl_ovsec_kadm_randkey_principal(ClientData clientData,
+					    Tcl_Interp *interp,
+					    int argc, char *argv[])
 {
      krb5_principal princ;
      krb5_keyblock *keyblock;
@@ -1433,7 +1446,7 @@ int tcl_ovsec_kadm_randkey_principal(ClientData clientData, Tcl_Interp *interp,
 
      GET_HANDLE(2, 0);
 
-     if (krb5_ret = krb5_parse_name(context, argv[0], &princ)) {
+     if ((krb5_ret = krb5_parse_name(context, argv[0], &princ))) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing principal name");
 	  return TCL_ERROR;
@@ -1491,8 +1504,9 @@ finished:
 
 
 
-int tcl_ovsec_kadm_get_principal(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_ovsec_kadm_get_principal(ClientData clientData,
+					Tcl_Interp *interp,
+					int argc, char *argv[])
 {
      krb5_principal princ;
      ovsec_kadm_principal_ent_t ent;
@@ -1509,7 +1523,7 @@ int tcl_ovsec_kadm_get_principal(ClientData clientData, Tcl_Interp *interp,
      if((tcl_ret = parse_str(interp, argv[0], &name)) != TCL_OK)
 	return tcl_ret;
      if(name != NULL) {
-	if (krb5_ret = krb5_parse_name(context, name, &princ)) {
+	if ((krb5_ret = krb5_parse_name(context, name, &princ))) {
 	    stash_error(interp, ret);
 	    Tcl_AppendElement(interp, "while parsing principal name");
 	    return TCL_ERROR;
@@ -1594,8 +1608,9 @@ finished:
      return retcode;
 }
      
-int tcl_ovsec_kadm_create_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_ovsec_kadm_create_policy(ClientData clientData,
+					Tcl_Interp *interp,
+					int argc, char *argv[])
 {
      int tcl_ret;
      ovsec_kadm_ret_t ret;
@@ -1642,11 +1657,10 @@ finished:
 
 
 
-int tcl_ovsec_kadm_delete_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_ovsec_kadm_delete_policy(ClientData clientData,
+					Tcl_Interp *interp,
+					int argc, char *argv[])
 {
-     krb5_principal princ;
-     krb5_error_code krb5_ret;
      ovsec_kadm_ret_t ret;
      char *policy;
      int tcl_ret;
@@ -1672,8 +1686,9 @@ int tcl_ovsec_kadm_delete_policy(ClientData clientData, Tcl_Interp *interp,
 
 
 
-int tcl_ovsec_kadm_modify_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_ovsec_kadm_modify_policy(ClientData clientData,
+					Tcl_Interp *interp,
+					int argc, char *argv[])
 {
      char *policy_string;
      ovsec_kadm_policy_ent_t policy = 0;
@@ -1718,8 +1733,9 @@ finished:
 }
 
 
-int tcl_ovsec_kadm_get_policy(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char *argv[])
+static int tcl_ovsec_kadm_get_policy(ClientData clientData,
+				     Tcl_Interp *interp,
+				     int argc, char *argv[])
 {
      ovsec_kadm_policy_ent_t ent;
      Tcl_DString *ent_dstring = 0;
@@ -1813,9 +1829,9 @@ finished:
 
      
      
-int tcl_ovsec_kadm_free_principal_ent(ClientData clientData,
-				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+static int tcl_ovsec_kadm_free_principal_ent(ClientData clientData,
+					     Tcl_Interp *interp,
+					     int argc, char *argv[])
 {
      char *ent_name;
      ovsec_kadm_principal_ent_t ent;
@@ -1858,7 +1874,7 @@ int tcl_ovsec_kadm_free_principal_ent(ClientData clientData,
 
 	  ent = (ovsec_kadm_principal_ent_t) Tcl_GetHashValue(entry);
 
-	  if (ret = ovsec_kadm_free_principal_ent(server_handle, ent)) {
+	  if ((ret = ovsec_kadm_free_principal_ent(server_handle, ent))) {
 	      stash_error(interp, ret);
 	      return TCL_ERROR;
 	  }
@@ -1869,9 +1885,9 @@ int tcl_ovsec_kadm_free_principal_ent(ClientData clientData,
 }
 	  
 		    
-int tcl_ovsec_kadm_free_policy_ent(ClientData clientData,
-				   Tcl_Interp *interp,
-				   int argc, char *argv[])
+static int tcl_ovsec_kadm_free_policy_ent(ClientData clientData,
+					  Tcl_Interp *interp,
+					  int argc, char *argv[])
 {
      char *ent_name;
      ovsec_kadm_policy_ent_t ent;
@@ -1914,7 +1930,7 @@ int tcl_ovsec_kadm_free_policy_ent(ClientData clientData,
 
 	  ent = (ovsec_kadm_policy_ent_t) Tcl_GetHashValue(entry);
 
-	  if (ret = ovsec_kadm_free_policy_ent(server_handle, ent)) {
+	  if ((ret = ovsec_kadm_free_policy_ent(server_handle, ent))) {
 	      stash_error(interp, ret);
 	      return TCL_ERROR;
 	  }
@@ -1925,8 +1941,8 @@ int tcl_ovsec_kadm_free_policy_ent(ClientData clientData,
 }
 	  
 		    
-int tcl_ovsec_kadm_get_privs(ClientData clientData, Tcl_Interp *interp,
-			     int argc, char *argv[])
+static int tcl_ovsec_kadm_get_privs(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char *argv[])
 {
      int tcl_ret;
      char *set_ret;

@@ -1,3 +1,8 @@
+2001-04-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_kadm5.c, tcl_ovsec_kadm.c: Cleanup of assignments in
+	conditionals, missing prototypes, etc.
+
 2000-05-23  Tom Yu  <tlyu@mit.edu>
 
 	* tcl_kadm5.c (tcl_kadm5_chpass_principal_util): Add new argument
