@@ -139,6 +139,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
   ciphertext.data=output->data+hashsize;
   confounder.length=CONFOUNDERLENGTH;
   confounder.data=plaintext.data;
+  output->length = plaintext.length+hashsize;
   
   /* begin the encryption, computer K1 */
   ms_usage=krb5int_arcfour_translate_usage(usage);
