@@ -1,3 +1,8 @@
+2002-12-04  Tom Yu  <tlyu@mit.edu>
+
+	* kadm.h: Include port-sockets.h, not netinet/in.h, for Windows
+	portability.
+
 2002-12-02  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (kadm_err.h): Build here.

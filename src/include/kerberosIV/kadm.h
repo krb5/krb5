@@ -43,7 +43,7 @@
 #endif
 
 #include <sys/types.h>
-#include <netinet/in.h>
+#include "port-sockets.h"
 #include <kerberosIV/krb.h>
 #include <kerberosIV/des.h>
 
