@@ -28,10 +28,6 @@
 
 #include <krb5/base-defs.h>
 #include <krb5/hostaddr.h>
-
-typedef	krb5_data **	krb5_principal;	/* array of strings */
-					/* CONVENTION: realm is first elem. */
-
 #include <krb5/encryption.h>
 #include <krb5/fieldbits.h>
 #include <krb5/errors.h>
@@ -51,7 +47,7 @@ typedef struct _krb5_ticket_times {
 typedef struct _krb5_authdata {
     krb5_authdatatype ad_type;
     int length;
-    octet contents[1];			/* actually can be more, depending
+    krb5_octet contents[1];			/* actually can be more, depending
 					   on length */
 } krb5_authdata;
 
@@ -107,7 +103,7 @@ typedef struct _krb5_credentials {
 /* Last request fields */
 typedef struct _krb5_last_req_entry {
     krb5_ui_4 value;
-    octet lr_type;
+    krb5_octet lr_type;
 } krb5_last_req_entry;
 
 typedef struct _krb5_as_req {
@@ -173,7 +169,7 @@ typedef struct _krb5_ap_rep_enc_part {
 } krb5_ap_rep_enc_part;
 
 typedef struct _krb5_response {
-    octet message_type;
+    krb5_octet message_type;
     krb5_data *response;
 } krb5_response;
 
