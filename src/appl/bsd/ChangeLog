@@ -1,3 +1,15 @@
+Wed Dec 28 13:12:02 1994  Richard Basch  (probe@tardis)
+
+	* configure.in
+	  	Don't bother checking for sys/stream.h; done elsewhere
+		Look for the function ptsname.
+
+	* logutil.c
+	  	Search to the proper position in the utmp/utmpx files.
+
+	* krlogind.c
+	  	Revamped the tty setup routines.
+
 Tue Dec 27 14:42:15 1994  Richard Basch  (probe@tardis)
 
 	* krlogin.c
