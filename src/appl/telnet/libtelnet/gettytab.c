@@ -98,9 +98,10 @@ nchktc()
 	/* p now points to beginning of last field */
 	if (p[0] != 't' || p[1] != 'c')
 		return(1);
-	strcpy(tcname,p+3);
+	strncpy(tcname, p + 3, sizeof(tcname) - 1);
+	tcname[sizeof(tcname) - 1] = '\0';
 	q = tcname;
-	while (q && *q != ':')
+	while (*q && *q != ':')
 		q++;
 	*q = 0;
 	if (++hopcount > MAXHOP) {

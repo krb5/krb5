@@ -138,7 +138,9 @@ makeargv()
     margc = 0;
     cp = line;
     if (*cp == '!') {		/* Special case shell escape */
-	strcpy(saveline, line);	/* save for shell command */
+	strncpy(saveline, line, sizeof(saveline) - 1);
+				/* save for shell command */
+	saveline[sizeof(saveline)  - 1] = '\0';
 	*argp++ = "!";		/* No room in string to get this */
 	margc++;
 	cp++;
@@ -2450,7 +2452,8 @@ tn(argc, argv)
 	if (temp & 0xffffffff != INADDR_NONE) {
 	    sin.sin_addr.s_addr = temp;
 	    sin.sin_family = AF_INET;
-	    (void) strcpy(_hostname, hostp);  
+	    (void) strncpy(_hostname, hostp, sizeof(_hostname) - 1);  
+	    _hostname[sizeof(_hostname) - 1] = '\0';
 	    hostname = _hostname;
 	} else {
 	    host = gethostbyname(hostp);
@@ -2855,7 +2858,8 @@ cmdrc(m1, m2)
     if (skiprc)
 	return;
 
-    strcpy(m1save, m1);
+    strncpy(m1save, m1, sizeof(m1save) - 1);
+    m1save[sizeof(m1save) - 1] = '\0';
     m1 = m1save;
 
     if (rcname == 0) {

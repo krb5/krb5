@@ -1,3 +1,13 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* commands.c (makeargv): Don't overflow buffer "saveline".
+	(tn): Don't overflow buffer "_hostname".
+	(cmdrc): Don't overflow buffer "m1save".
+	* externs.h: Include the size of "tline", so that we can check for
+	overflows elsewhere.
+	* main.c(main, tn370): Don't overflow buffer "tline".
+	* utilities.c (SetNetTrace): Don't overflow buffer "NetTraceFile".
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* commands.c (cmdrc): Don't overflow buffer "rcbuf".

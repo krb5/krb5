@@ -602,7 +602,9 @@ kerberos4_status(ap, name, level)
 		return(level);
 
 	if (UserNameRequested && !kuserok(&adat, UserNameRequested)) {
-		strcpy(name, UserNameRequested);
+		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
+		strncpy(name, UserNameRequested, 255);
+		name[255] = '\0';
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);

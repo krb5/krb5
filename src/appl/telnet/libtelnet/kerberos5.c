@@ -441,8 +441,12 @@ kerberos5_is(ap, data, cnt)
 		    princ[krb5_princ_component(telnet_context, 
 					       ticket->server,0)->length] = '\0';
 		    if (strcmp("host", princ)) {
-			(void) sprintf(errbuf, "incorrect service name: \"%s\" != \"%s\"",
-				       princ, "host");
+                        if(strlen(princ) < sizeof(errbuf) - 39) {
+                            (void) sprintf(errbuf, "incorrect service name: \"%s\" != \"host\"",
+                                           princ);
+                        } else {
+                            (void) sprintf(errbuf, "incorrect service name: principal != \"host\"");
+                        }
 			goto errout;
 		    }
 		} else {
@@ -713,7 +717,9 @@ kerberos5_status(ap, name, level)
 	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
 			 UserNameRequested))
 	{
-		strcpy(name, UserNameRequested);
+		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
+		strncpy(name, UserNameRequested, 255);
+		name[255] = '\0';
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);

@@ -274,7 +274,8 @@ main(argc, argv)
 		case 't':
 #if defined(TN3270) && defined(unix)
 			transcom = tline;
-			(void)strcpy(transcom, optarg);
+			(void)strncpy(transcom, optarg, sizeof(tline) - 1);
+			tline[sizeof(tline) - 1] = '\0';
 #else
 			fprintf(stderr,
 			   "%s: Warning: -t ignored, no TN3270 support.\n",

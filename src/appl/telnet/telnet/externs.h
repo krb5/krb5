@@ -486,7 +486,7 @@ extern char
     *Ibackp,		/* Oldest byte of 3270 data */
     Ibuf[],		/* 3270 buffer */
     *Ifrontp,		/* Where next 3270 byte goes */
-    tline[],
+    tline[200],
     *transcom;		/* Transparent command */
 
 extern int

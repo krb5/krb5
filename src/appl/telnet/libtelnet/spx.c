@@ -515,7 +515,9 @@ spx_status(ap, name, level)
                                       &acl_file_buffer);
 
         if (major_status == GSS_S_COMPLETE) {
-	  strcpy(name, UserNameRequested);
+          /* the name buffer comes from telnetd/telnetd{-ktd}.c */
+	  strncpy(name, UserNameRequested, 255);
+	  name[255] = '\0';
 	  return(AUTH_VALID);
         } else {
            return(AUTH_USER);

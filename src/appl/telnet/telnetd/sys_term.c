@@ -1257,6 +1257,7 @@ start_login(host, autologin, name)
 		} else {
 			strcpy(termbuf, "TERM=");
 			strncat(termbuf, term, sizeof(termbuf) - 6);
+			termbuf[sizeof(termbuf) - 1] = '\0';
 			term = termbuf;
 		}
 		argv = addarg(argv, term);

@@ -360,7 +360,7 @@ main(argc, argv)
 	    }
 	    (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 				(char *)&on, sizeof(on));
-	    if (bind(s, (struct sockaddr *)&sin, sizeof sin) < 0) {
+	    if (bind(s, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
 		perror("bind");
 		exit(1);
 	    }
@@ -368,7 +368,7 @@ main(argc, argv)
 		perror("listen");
 		exit(1);
 	    }
-	    foo = sizeof sin;
+	    foo = sizeof(sin);
 	    ns = accept(s, (struct sockaddr *)&sin, &foo);
 	    if (ns < 0) {
 		perror("accept");
@@ -548,25 +548,33 @@ getterminaltype(name)
     if (his_state_is_will(TELOPT_TSPEED)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_TSPEED, TELQUAL_SEND, IAC, SE };
 
-	memcpy(nfrontp, sbbuf, sizeof sbbuf);
-	nfrontp += sizeof sbbuf;
+	if(nfrontp - netobuf + sizeof(sbbuf) < sizeof(netobuf)) {
+		memcpy(nfrontp, sbbuf, sizeof(sbbuf));
+		nfrontp += sizeof(sbbuf);
+	}
     }
     if (his_state_is_will(TELOPT_XDISPLOC)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_XDISPLOC, TELQUAL_SEND, IAC, SE };
 
-	memcpy(nfrontp, sbbuf, sizeof sbbuf);
-	nfrontp += sizeof sbbuf;
+	if(nfrontp - netobuf + sizeof(sbbuf) < sizeof(netobuf)) {
+		memcpy(nfrontp, sbbuf, sizeof(sbbuf));
+		nfrontp += sizeof(sbbuf);
+	}
     }
     if (his_state_is_will(TELOPT_ENVIRON)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_ENVIRON, TELQUAL_SEND, IAC, SE };
 
-	memcpy(nfrontp, sbbuf, sizeof sbbuf);
-	nfrontp += sizeof sbbuf;
+	if(nfrontp - netobuf + sizeof(sbbuf) < sizeof(netobuf)) {
+		memcpy(nfrontp, sbbuf, sizeof(sbbuf));
+		nfrontp += sizeof(sbbuf);
+	}
     }
     if (his_state_is_will(TELOPT_TTYPE)) {
 
-	memcpy(nfrontp, ttytype_sbbuf, sizeof ttytype_sbbuf);
-	nfrontp += sizeof ttytype_sbbuf;
+	if(nfrontp - netobuf + sizeof(ttytype_sbbuf) < sizeof(netobuf)) {
+		memcpy(nfrontp, ttytype_sbbuf, sizeof(ttytype_sbbuf));
+		nfrontp += sizeof(ttytype_sbbuf);
+	}
     }
     if (his_state_is_will(TELOPT_TSPEED)) {
 	while (sequenceIs(tspeedsubopt, baseline))
@@ -591,12 +599,14 @@ getterminaltype(name)
 	 * we have to just go with what we (might) have already gotten.
 	 */
 	if (his_state_is_will(TELOPT_TTYPE) && !terminaltypeok(terminaltype)) {
-	    (void) strncpy(first, terminaltype, sizeof(first));
+	    (void) strncpy(first, terminaltype, sizeof(first) - 1);
+	    first[sizeof(first) - 1] = '\0';
 	    for(;;) {
 		/*
 		 * Save the unknown name, and request the next name.
 		 */
-		(void) strncpy(last, terminaltype, sizeof(last));
+		(void) strncpy(last, terminaltype, sizeof(last) - 1);
+	    	last[sizeof(last) - 1] = '\0';
 		_gettermname();
 		if (terminaltypeok(terminaltype))
 		    break;
@@ -615,7 +625,8 @@ getterminaltype(name)
 		     */
 		     _gettermname();
 		    if (strncmp(first, terminaltype, sizeof(first)) != 0)
-			(void) strncpy(terminaltype, first, sizeof(first));
+			(void) strncpy(terminaltype, first, sizeof(terminaltype) - 1);
+		    terminaltype[sizeof(terminaltype) - 1] = '\0';
 		    break;
 		}
 	    }
@@ -635,8 +646,8 @@ _gettermname()
     if (his_state_is_wont(TELOPT_TTYPE))
 	return;
     settimer(baseline);
-    memcpy(nfrontp, ttytype_sbbuf, sizeof ttytype_sbbuf);
-    nfrontp += sizeof ttytype_sbbuf;
+    memcpy(nfrontp, ttytype_sbbuf, sizeof(ttytype_sbbuf));
+    nfrontp += sizeof(ttytype_sbbuf);
     while (sequenceIs(ttypesubopt, baseline))
 	ttloop();
 }
@@ -922,7 +933,7 @@ telnet(f, p, host)
 
 #if	defined(SO_OOBINLINE)
 	(void) setsockopt(net, SOL_SOCKET, SO_OOBINLINE,
-				(char *)&on, sizeof on);
+				(char *)&on, sizeof(on));
 #endif	/* defined(SO_OOBINLINE) */
 
 #ifdef	SIGTSTP
@@ -989,8 +1000,10 @@ telnet(f, p, host)
 		HE = getstr("he", &cp);
 		HN = getstr("hn", &cp);
 		IM = getstr("im", &cp);
-		if (HN && *HN)
-			(void) strcpy(host_name, HN);
+		if (HN && *HN) {
+			(void) strncpy(host_name, HN, sizeof(host_name) - 1);
+			host_name[sizeof(host_name) - 1] = '\0';
+		}
 		if (IM == 0)
 			IM = "";
 	} else {
@@ -1426,8 +1439,10 @@ recv_ayt()
 		return;
 	}
 #endif
-	(void) strcpy(nfrontp, "\r\n[Yes]\r\n");
+	(void) strncpy(nfrontp, "\r\n[Yes]\r\n",
+		       sizeof(netobuf) - 1 - (nfrontp - netobuf));
 	nfrontp += 9;
+	*nfrontp = '\0';
 }
 
 	void

@@ -1,3 +1,15 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* gettytab.c (nchktc): Don't overflow tcname if tty type name is too
+	long
+	* kerberos.c (kerberos4_status): Make sure "UserNameRequested" is
+	always properly terminated.
+	* kerberos5.c (kerberos5_is): If bad principal name is too long to fit
+	in "errbuf", don't print it.
+	(kerberos5_status): Make sure "UserNameRequested" is always properly
+	terminated.
+	* spx.c (spx_status): Ditto.
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kerberos5.c (kerberos5_is): Don't overflow buffer "errbuf".
