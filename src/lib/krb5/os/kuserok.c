@@ -60,10 +60,7 @@
  */
 
 krb5_boolean KRB5_CALLCONV
-krb5_kuserok(context, principal, luser)
-    krb5_context context;
-    krb5_principal principal;
-    const char *luser;
+krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
 {
     struct stat sbuf;
     struct passwd *pwd;

@@ -30,9 +30,7 @@
 #include "os-proto.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5int_accessor(internals, version)
-     krb5int_access* internals;
-     krb5_int32 version;
+krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 {
   if (version == KRB5INT_ACCESS_VERSION)
   {

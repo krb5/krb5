@@ -105,9 +105,7 @@
  */
 
 krb5_error_code
-krb5_try_realm_txt_rr(prefix, name, realm)
-    const char *prefix, *name;
-    char **realm;
+krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
 {
     union {
         unsigned char bytes[2048];
@@ -116,7 +114,7 @@ krb5_try_realm_txt_rr(prefix, name, realm)
     unsigned char *p;
     char host[MAX_DNS_NAMELEN], *h;
     int size;
-    int type, class, numanswers, numqueries, rdlen, len;
+    int type, rrclass, numanswers, numqueries, rdlen, len;
 
     /*
      * Form our query, and send it via DNS
@@ -197,7 +195,7 @@ krb5_try_realm_txt_rr(prefix, name, realm)
 
 	/* Next is the query class; also skip over 4 byte TTL */
         CHECK(p,6);
-	class = NTOHSP(p,6);
+	rrclass = NTOHSP(p,6);
 
 	/* Record data length - make sure we aren't truncated */
 
@@ -213,7 +211,7 @@ krb5_try_realm_txt_rr(prefix, name, realm)
 	 */
 	/* XXX What about flagging multiple TXT records as an error?  */
 
-	if (class == C_IN && type == T_TXT) {
+	if (rrclass == C_IN && type == T_TXT) {
 	    len = *p++;
 	    if (p + len > answer.bytes + size)
 		return KRB5_ERR_HOST_REALM_UNKNOWN;
@@ -268,10 +266,7 @@ krb5int_get_fq_local_hostname (char *buf, size_t bufsiz)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_host_realm(context, host, realmsp)
-    krb5_context context;
-    const char *host;
-    char ***realmsp;
+krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 {
     char **retrealms;
     char *default_realm, *realm, *cp, *temp_realm;

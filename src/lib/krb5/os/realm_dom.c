@@ -46,10 +46,7 @@
 #include <stdio.h>
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_realm_domain(context, realm, domain)
-    krb5_context context;
-    const char *realm;
-    char **domain;
+krb5_get_realm_domain(krb5_context context, const char *realm, char **domain)
 {
     krb5_error_code retval;
     char *temp_domain = 0;

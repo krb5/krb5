@@ -31,11 +31,7 @@
 #include "os-proto.h"
 
 krb5_error_code
-krb5_gen_portaddr(context, addr, ptr, outaddr)
-    krb5_context context;
-    const krb5_address *addr;
-    krb5_const_pointer ptr;
-    krb5_address **outaddr;
+krb5_gen_portaddr(krb5_context context, const krb5_address *addr, krb5_const_pointer ptr, krb5_address **outaddr)
 {
 #ifdef HAVE_NETINET_IN_H
     krb5_int32 adr;

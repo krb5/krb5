@@ -15,8 +15,7 @@
 static jmp_buf pwd_jump;
 
 static krb5_sigtype
-intr_routine(signo)
-    int signo;
+intr_routine(int signo)
 {
     longjmp(pwd_jump, 1);
     /*NOTREACHED*/
@@ -243,17 +242,14 @@ krb5_prompter_posix(krb5_context context,
 #endif /* Windows or Mac */
 
 void
-krb5int_set_prompt_types(context, types)
-    krb5_context context;
-    krb5_prompt_type *types;
+krb5int_set_prompt_types(krb5_context context, krb5_prompt_type *types)
 {
     context->prompt_types = types;
 }
 
 krb5_prompt_type*
 KRB5_CALLCONV
-krb5_get_prompt_types(context)
-    krb5_context context;
+krb5_get_prompt_types(krb5_context context)
 {
     return context->prompt_types;
 }

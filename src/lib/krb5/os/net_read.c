@@ -40,11 +40,7 @@
  */
 
 int
-krb5_net_read(context, fd, buf, len)
-    krb5_context context;
-    int fd;
-    register char *buf;
-    register int len;
+krb5_net_read(krb5_context context, int fd, register char *buf, register int len)
 {
     int cc, len2 = 0;
 

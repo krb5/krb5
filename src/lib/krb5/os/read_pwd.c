@@ -43,20 +43,14 @@
 static jmp_buf pwd_jump;
 
 static krb5_sigtype
-intr_routine(signo)
-    int signo;
+intr_routine(int signo)
 {
     longjmp(pwd_jump, 1);
     /*NOTREACHED*/
 }
 
 krb5_error_code
-krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
-    krb5_context context;
-    const char *prompt;
-    const char *prompt2;
-    char *return_pwd;
-    unsigned int *size_return;
+krb5_read_password(krb5_context context, const char *prompt, const char *prompt2, char *return_pwd, unsigned int *size_return)
 {
     /* adapted from Kerberos v4 des/read_password.c */
     /* readin_string is used after a longjmp, so must be volatile */

@@ -29,17 +29,14 @@ typedef struct _krb5_uio {
 static jmp_buf pwd_jump;
 
 static krb5_sigtype
-intr_routine(signo)
-    int signo;
+intr_routine(int signo)
 {
     longjmp(pwd_jump, 1);
     /*NOTREACHED*/
 }
 
 krb5_error_code
-krb5_os_get_tty_uio(context, uio)
-    krb5_context	context;
-    krb5_uio		uio;
+krb5_os_get_tty_uio(krb5_context context, krb5_uio uio)
 {
     volatile krb5_error_code 	retval;
     krb5_sigtype	(*volatile ointrfunc)();
@@ -126,9 +123,7 @@ krb5_os_get_tty_uio(context, uio)
 }
 
 void
-krb5_free_uio(context, uio)
-    krb5_context	context;
-    krb5_uio		uio;
+krb5_free_uio(krb5_context context, krb5_uio uio)
 {
     krb5_uio		p, next;
 

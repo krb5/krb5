@@ -1,3 +1,23 @@
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c, an_to_ln.c, c_ustime.c, ccdefname.c, changepw.c,
+	def_realm.c, free_hstrl.c, free_krbhs.c, full_ipadr.c, gen_port.c,
+	gen_rname.c, genaddrs.c, get_krbhst.c, gmt_mktime.c, hostaddr.c,
+	hst_realm.c, init_os_ctx.c, krbfileio.c, ktdefname.c, kuserok.c,
+	localaddr.c, locate_kdc.c, lock_file.c, mk_faddr.c, net_read.c,
+	net_write.c, port2ip.c, prompter.c, promptusr.c, read_msg.c,
+	read_pwd.c, realm_dom.c, realm_iter.c, sendto_kdc.c, sn2princ.c,
+	t_an_to_ln.c, t_gifconf.c, t_locate_kdc.c, t_realm_iter.c,
+	t_std_conf.c, timeofday.c, toffset.c, unlck_file.c, ustime.c,
+	write_msg.c: Use prototype-style function definitions.
+
+	* c_ustime.c, timeofday.c: Don't declare errno.
+	* hst_realm.c (krb5_try_realm_txt_rr), locate_kdc.c
+	(krb5_locate_srv_dns_1): Avoid variable name "class".
+	* lock_file.c (krb5_lock_file): Initialize flock_zero.
+	* sendto_kdc.c (enum conn_states): Define separately from
+	conn_state 'state' field declaration.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

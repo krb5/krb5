@@ -43,7 +43,7 @@ const char *stypename (int stype)
     }
 }
 
-void print_addrs ()
+void print_addrs (void)
 {
     int i;
 

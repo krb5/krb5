@@ -165,8 +165,7 @@ get_from_registry(
 #endif /* _WIN32 */
 
 static void
-free_filespecs(files)
-	profile_filespec_t *files;
+free_filespecs(profile_filespec_t *files)
 {
 #if !TARGET_OS_MAC
     char **cp;
@@ -181,9 +180,7 @@ free_filespecs(files)
 }
 
 static krb5_error_code
-os_get_default_config_files(pfiles, secure)
-	profile_filespec_t ** pfiles;
-	krb5_boolean secure;
+os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
 {
     profile_filespec_t* files;
 #if defined(_WIN32)
@@ -281,8 +278,7 @@ os_get_default_config_files(pfiles, secure)
    do not include user paths (from environment variables, etc.)
 */
 static krb5_error_code
-os_init_paths(ctx)
-	krb5_context ctx;
+os_init_paths(krb5_context ctx)
 {
     krb5_error_code	retval = 0;
     profile_filespec_t *files = 0;
@@ -328,8 +324,7 @@ os_init_paths(ctx)
 }
 
 krb5_error_code
-krb5_os_init_context(ctx)
-	krb5_context ctx;
+krb5_os_init_context(krb5_context ctx)
 {
 	krb5_os_context os_ctx;
 	krb5_error_code	retval = 0;
@@ -364,9 +359,7 @@ krb5_os_init_context(ctx)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_profile (ctx, profile)
-	krb5_context ctx;
-	profile_t* profile;
+krb5_get_profile (krb5_context ctx, profile_t *profile)
 {
     krb5_error_code	retval = 0;
     profile_filespec_t *files = 0;
@@ -396,9 +389,7 @@ krb5_get_profile (ctx, profile)
 
 
 krb5_error_code
-krb5_set_config_files(ctx, filenames)
-	krb5_context ctx;
-	const char **filenames;
+krb5_set_config_files(krb5_context ctx, const char **filenames)
 {
 	krb5_error_code retval;
 	profile_t	profile;
@@ -415,8 +406,7 @@ krb5_set_config_files(ctx, filenames)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_default_config_files(pfilenames)
-	char ***pfilenames;
+krb5_get_default_config_files(char ***pfilenames)
 {
     if (!pfilenames)
         return EINVAL;
@@ -424,16 +414,14 @@ krb5_get_default_config_files(pfilenames)
 }
 
 void KRB5_CALLCONV
-krb5_free_config_files(filenames)
-	char **filenames;
+krb5_free_config_files(char **filenames)
 {
     free_filespecs(filenames);
 }
 
 
 krb5_error_code
-krb5_secure_config_files(ctx)
-	krb5_context ctx;
+krb5_secure_config_files(krb5_context ctx)
 {
 	/* Obsolete interface; always return an error.
 
@@ -455,8 +443,7 @@ krb5_secure_config_files(ctx)
 }
 
 void
-krb5_os_free_context(ctx)
-	krb5_context	ctx;
+krb5_os_free_context(krb5_context ctx)
 {
 	krb5_os_context os_ctx;
 

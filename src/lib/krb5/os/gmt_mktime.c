@@ -36,8 +36,7 @@ static const int days_in_month[12] = {
 
 #define hasleapday(year) (year%400?(year%100?(year%4?0:1):0):1)
 
-time_t gmt_mktime(t)
-     struct tm* t;
+time_t gmt_mktime(struct tm *t)
 {
   time_t accum;
 

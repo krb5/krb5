@@ -64,10 +64,7 @@
 #endif
 
 static int
-maybe_use_dns (context, name, defalt)
-     krb5_context context;
-     const char *name;
-     int defalt;
+maybe_use_dns (krb5_context context, const char *name, int defalt)
 {
     krb5_error_code code;
     char * value = NULL;
@@ -90,15 +87,13 @@ maybe_use_dns (context, name, defalt)
 }
 
 int
-_krb5_use_dns_kdc(context)
-    krb5_context context;
+_krb5_use_dns_kdc(krb5_context context)
 {
     return maybe_use_dns (context, "dns_lookup_kdc", DEFAULT_LOOKUP_KDC);
 }
 
 int
-_krb5_use_dns_realm(context)
-    krb5_context context;
+_krb5_use_dns_realm(krb5_context context)
 {
     return maybe_use_dns (context, "dns_lookup_realm", DEFAULT_LOOKUP_REALM);
 }
@@ -464,14 +459,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
 #ifdef TEST
 static krb5_error_code
-krb5_locate_srv_conf(context, realm, name, al, get_masters,
-		     udpport, sec_udpport)
-    krb5_context context;
-    const krb5_data *realm;
-    const char * name;
-    struct addrlist *al;
-    int get_masters;
-    int udpport, sec_udpport;
+krb5_locate_srv_conf(krb5_context context, const krb5_data *realm, const char *name, struct addrlist *al, int get_masters, int udpport, int sec_udpport)
 {
     krb5_error_code ret;
 
@@ -503,7 +491,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     } answer;
     unsigned char *p=NULL;
     char host[MAX_DNS_NAMELEN], *h;
-    int type, class;
+    int type, rrclass;
     int priority, weight, size, len, numanswers, numqueries, rdlen;
     unsigned short port;
     const int hdrsize = sizeof(HEADER);
@@ -620,7 +608,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 
 	/* Next is the query class; also skip over 4 byte TTL */
         CHECK(p, 6);
-	class = NTOHSP(p,6);
+	rrclass = NTOHSP(p,6);
 
 	/* Record data length */
 
@@ -636,7 +624,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 	 * Server name
 	 */
 
-	if (class == C_IN && type == T_SRV) {
+	if (rrclass == C_IN && type == T_SRV) {
             CHECK(p,2);
 	    priority = NTOHSP(p,2);
 	    CHECK(p, 2);

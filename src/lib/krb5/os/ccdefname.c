@@ -231,9 +231,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 #endif
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_set_default_name(context, name)
-	krb5_context context;
-	const char *name;
+krb5_cc_set_default_name(krb5_context context, const char *name)
 {
 	char name_buf[1024];
 	char *new_name;
@@ -277,8 +275,7 @@ krb5_cc_set_default_name(context, name)
 
 	
 const char * KRB5_CALLCONV
-krb5_cc_default_name(context)
-    krb5_context context;
+krb5_cc_default_name(krb5_context context)
 {
 	krb5_os_context os_ctx;
 

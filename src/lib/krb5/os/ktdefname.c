@@ -37,10 +37,7 @@ extern char *krb5_defkeyname;
 char *krb5_overridekeyname = NULL;
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_default_name(context, name, namesize)
-    krb5_context context;
-    char *name;
-    int namesize;
+krb5_kt_default_name(krb5_context context, char *name, int namesize)
 {
     char *cp = 0;
     char *retval;

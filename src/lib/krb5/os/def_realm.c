@@ -69,9 +69,7 @@
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_default_realm(context, lrealm)
-    krb5_context context;
-    char **lrealm;
+krb5_get_default_realm(krb5_context context, char **lrealm)
 {
     char *realm = 0;
     char *cp;
@@ -164,9 +162,7 @@ krb5_get_default_realm(context, lrealm)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_set_default_realm(context, lrealm)
-    krb5_context context;
-    const char *lrealm;
+krb5_set_default_realm(krb5_context context, const char *lrealm)
 {
     if (!context || (context->magic != KV5M_CONTEXT)) 
 	    return KV5M_CONTEXT;
@@ -191,9 +187,7 @@ krb5_set_default_realm(context, lrealm)
 }
 
 void KRB5_CALLCONV
-krb5_free_default_realm(context, lrealm)
-	krb5_context context;
-	char *lrealm;
+krb5_free_default_realm(krb5_context context, char *lrealm)
 {
 	free (lrealm);
 }

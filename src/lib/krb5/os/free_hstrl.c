@@ -35,9 +35,7 @@
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_free_host_realm(context, realmlist)
-    krb5_context context;
-    char * const *realmlist;
+krb5_free_host_realm(krb5_context context, char *const *realmlist)
 {
     /* same format, so why duplicate code? */
     return krb5_free_krbhst(context, realmlist);

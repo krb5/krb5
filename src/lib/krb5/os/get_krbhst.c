@@ -58,10 +58,7 @@
  */
 
 krb5_error_code
-krb5_get_krbhst(context, realm, hostlist)
-    krb5_context context;
-    const krb5_data *realm;
-    char ***hostlist;
+krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
 {
     char	**values, **cpp, *cp;
     const char	*realm_kdc_names[4];

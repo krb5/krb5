@@ -34,9 +34,7 @@
  */
 
 krb5_error_code
-krb5_free_krbhst(context, hostlist)
-    krb5_context context;
-    char * const *hostlist;
+krb5_free_krbhst(krb5_context context, char *const *hostlist)
 {
     register char * const *cp;
 

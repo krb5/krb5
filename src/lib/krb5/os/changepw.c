@@ -71,14 +71,7 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 
 
 krb5_error_code KRB5_CALLCONV
-krb5_change_password(context, creds, newpw, result_code,
-		     result_code_string, result_string)
-    krb5_context context;
-    krb5_creds *creds;
-    char *newpw;
-    int *result_code;
-    krb5_data *result_code_string;
-    krb5_data *result_string;
+krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *result_code, krb5_data *result_code_string, krb5_data *result_string)
 {
     krb5_auth_context auth_context;
     krb5_data ap_req, chpw_req, chpw_rep;

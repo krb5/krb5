@@ -244,7 +244,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 	return 0;
 
     for (iter = values; *iter; iter++) {
-	char *cp = *iter, *next, *this;
+	char *cp = *iter, *next, *current;
 	int i, count;
 
 #ifdef DEBUG
@@ -260,7 +260,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 #ifdef DEBUG
 	    fprintf (stderr, "    addr found in '%s'\n", cp);
 #endif
-	    this = cp;
+	    current = cp;
 	    while (*cp != 0 && !isspace((int) *cp) && *cp != ',')
 		cp++;
 	    if (*cp != 0) {
@@ -270,10 +270,10 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 		next = cp;
 	    /* Got a single address, process it.  */
 #ifdef DEBUG
-	    fprintf (stderr, "    processing '%s'\n", this);
+	    fprintf (stderr, "    processing '%s'\n", current);
 #endif
 	    newaddrs = 0;
-	    err = krb5_os_hostaddr (context, this, &newaddrs);
+	    err = krb5_os_hostaddr (context, current, &newaddrs);
 	    if (err)
 		continue;
 	    for (i = 0; newaddrs[i]; i++) {
@@ -309,9 +309,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_os_localaddr(context, addr)
-    krb5_context context;
-    krb5_address ***addr;
+krb5_os_localaddr(krb5_context context, krb5_address ***addr)
 {
     return get_localaddrs(context, addr, 1);
 }

@@ -175,13 +175,10 @@ register krb5_int32 *seconds, *microseconds;
 
 /* We're a Unix machine -- do Unix time things.  */
 
-extern int errno;
-
 static struct timeval last_tv = {0, 0};
 
 krb5_error_code
-krb5_crypto_us_timeofday(seconds, microseconds)
-    register krb5_int32 *seconds, *microseconds;
+krb5_crypto_us_timeofday(register krb5_int32 *seconds, register krb5_int32 *microseconds)
 {
     struct timeval tv;
 
