@@ -23,7 +23,7 @@ Changes the locking mode of the database functions, returning the previous
 mode in \funcparam{*oldmode}.
 
 If \funcparam{newmode} is TRUE, then the database is put into
-non-blocking mode, which may result in "database busy" error codes from
+non-blocking mode, which may result in ``database busy'' error codes from
 the get, put, and iterate routines.
 
 If \funcparam{newmode} is FALSE, then the database is put into blocking mode,
@@ -147,7 +147,8 @@ Returns error code if not all entries were stored.
 
 Iterates over the database, fetching every entry in an unspecified order
 and calling \funcparam{(*func)}(\funcparam{iterate_arg},
-{\sl principal}) where {\sl principal} points to a record from the database.
+{\sl principal\/}) where {\sl principal\/} points to a record from the
+database.
 
 If \funcparam{(*func)}() ever returns an error code, the iteration is
 aborted and that error code is returned by this function.
