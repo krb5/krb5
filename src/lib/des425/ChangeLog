@@ -1,3 +1,8 @@
+Sat May 11 17:36:26 EDT 1996  Richard Basch  <basch@lehman.com>
+
+	* new_rnd_key.c: Use sizeof(mit_des_cblock) instead of sizeof(key)
+	so that we copy the full DES key instead of only 4 bytes.
+
 Thu May  2 18:44:02 1996  Richard Basch  <basch@lehman.com>
 
 	* random_key.c new_rnd_key.c:

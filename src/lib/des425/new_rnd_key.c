@@ -48,7 +48,7 @@ des_new_random_key(key)
     kret = mit_des_random_key(NULL, des425_random_state, &keyblock);
     if (kret) return kret;
     
-    memcpy(key, keyblock->contents, sizeof(key));
+    memcpy(key, keyblock->contents, sizeof(mit_des_cblock));
     krb5_free_keyblock(NULL, keyblock);
     return 0;
 }
