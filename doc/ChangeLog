@@ -1,3 +1,7 @@
+2000-07-10  Tom Yu  <tlyu@mit.edu>
+
+	* coding-style: First pass draft of coding standards.
+
 2000-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (Kerberos V5 Database Library Error Codes):

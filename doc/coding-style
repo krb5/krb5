@@ -1,0 +1,310 @@
+WRITING C CODE
+==============
+
+The code in the krb5 source tree largely follows BSD KNF
+(/usr/share/misc/style on NetBSD) except that it uses a four column
+basic offset.  The style described here is a synthesis of BSD KNF and
+the GNU coding standards for the C language.  The formatting described
+in the "Formatting Your Source Code" section of the GNU coding
+standards is mostly what we want, except we use BSD brace style and
+BSD-ish conventions for the spacing around operators.
+
+Formatting style for C code
+---------------------------
+
+In general, use a four column basic offset, tab stops at eight
+columns.  Indents should be tabified, i.e. continuous tabs followed by
+spaces if necessary if the indent isn't a multiple of eight columns.
+The "bsd" style in emacs cc-mode mostly does the right thing.  You can
+use "M-x c-set-style" "bsd" to get this.  Alternatively, you can use
+the "krb5" style that is included here.
+
+Labels, including case labels, are outdented by four columns.
+Continuations of statements are indented by an additional four
+columns.  Continuations of argument lists or parenthesized expressions
+should line up with the column after the opening parenthesis.
+
+The maximum width should be 79 columns.  If you need more than this,
+consider rewriting the code so that it fits in 79 columns, since
+control flow that is nested deeply enough to require excessive width
+is also likely to be difficult to understand if not broken up.
+Exceptions may be made for long strings, though ANSI C string
+concatenation should work around that as well.
+
+Function names for definitions should start on column zero, on the
+line following their return type name, e.g.
+
+	char *
+	foo(int a)
+	{
+	    /* ... */
+	}
+
+[just pretend that's really at column zero]
+
+The opening brace of a function definition should also be on column
+zero.
+
+Braces that open substatements, such as those following "if", "else",
+"while", "for", "do", and "switch", should be on the same line as the
+begining of the statement.  This is sometimes called "hanging" braces.
+The corresponding closing brace should be at the same indentation
+level as the beginning of the statement.
+
+The "while" keyword in a do-while construct should sit on the same
+line as the closing brace of the substatement following "do":
+
+	do {
+	    foo();
+	} while (0);
+
+If there is an "if" statement immediately following an "else" keyword,
+it should go on the same line immediately after the "else":
+
+	if (x) {
+	    foo();
+	} else if (y) {
+	    bar();
+	}
+
+Comments to the right of code start in column 32.  Comments not to the
+right of code are indented at the prevailing indent for the
+surrounding code.  Make the comments complete sentences.  If you need
+more than one line, make them into block comments, like this:
+
+	/*
+	 * This is a block comment.  It should consist of complete
+	 * sentences.
+	 *
+	 * Paragraphs should be separated by blank lines so that emacs
+	 * fill commands will work properly.
+	 */
+
+Really important single-line comments should also be done in block
+form:
+
+	/*
+	 * This is a really important one-line comment.
+	 */
+
+In order to get the start and end delimiters for block comments to
+stay when you use emacs to fill paragraphs in the comments, set both
+the c-hanging-comment-starter-p and the c-hanging-comment-ender-p
+variables to nil.  This will be done by the tentative "krb5" style for
+the emacs cc-mode.
+
+Spaces go after keywords, but not after function names.  Do not,
+however, put a space after sizeof if its argument is
+parenthesized. [XXX from BSD KNF but do we want to do this?]  Don't
+put a space after a cast operator, either.  Spaces also do not go
+before parentheses that are argument lists for function calls if there
+is a function pointer being dereferenced somewhere.  Spaces go after
+commas in argument lists, as well as commas that are comma operators.
+Spaces also go between parts in a for loop, except for "forever" type
+loops.  Use for statements rather than while statements to create
+forever loops.
+
+	if (x) {
+	    p = calloc(1024, sizeof(int));
+	}
+	cp = (elem->fp)(1024);
+	for (i = 0; i < 10; i++);
+	for (;;) {
+	    /* ... */
+	}
+
+Binary operators get spaces, unary ones do not.  Prefix and postfix
+operators also do not get spaces.
+
+	x = --a + b / c - d++;
+	y = p->z.v[x];
+
+In general, do not parenthesize the argument of "return".  
+
+Coding practices for C
+----------------------
+
+Do not use assignments as truth values.  Rather than this:
+
+	/* bad style */
+	if ((retval = krb5_foo()))
+	    /* ... */;
+
+do this:
+
+	retval = krb5_foo();
+	if (retval)
+	    /* ... */;
+
+This makes the code easier to read, and also makes it easier to use
+debuggers.  It may be excusable to put assignments into the
+conditional espression of a "while" statement, though, like:
+
+	while ((ch = getopt(argc, argv, "abn")) != -1)
+	    /* ... */;
+
+Using assignments as truth values in conditional expressions may make
+code particularly impenetrable.
+
+There are at least three types of "zero" known to C.  These are the
+integer zero (0), the null pointer constant (NULL), and the character
+constant zero ('\0').  Use them in their correct contexts.  (Purists
+will point out that 0 is a valid null pointer constant; still, do not
+use 0 to specify a null pointer constant.  For further unconfusion,
+read the section on null pointer constants in the C FAQ.)  Do not use
+a lone variable as a truth value unless it's of integer type.  Thus:
+
+	int i;
+	char *cp;
+	/* ... */
+	if (i)
+	    /* ... */;
+	if (cp != NULL) {
+	    while (*cp != '\0')
+		/* ... */;
+	}
+
+Do not cast uses of NULL unless you're calling a function with a
+variable number of arguments, in which case you should cast it to to
+the appropriate pointer type.  Likewise, do not cast the return value
+from malloc() and friends; the prototype should declare them properly
+as returning a void * and thus shouldn't require an explicit cast.
+
+Control flow statements that have a single statement as their body
+should nevertheless have braces around ther bodies if the body is more
+than one line long, especially in the case of stacked multiple if-else
+clauses; use:
+
+	/* bad style */
+	if (x) {
+	    if (y)
+		foo();
+	    else
+		bar();
+	}
+
+instead of:
+
+	if (x)
+	    if (y)
+		foo();
+	    else
+		bar();
+
+which, while legible to the compiler, may confuse human readers and
+make the code less maintainable.  Also, you should almost never
+intersperse conditional compilation directives with control flow
+statements, as some combination of #define'd symbols may result in
+statements getting eaten by dangling bits of control flow statements.
+When it is not possible to avoid this questionable practice (you
+really should rewrite the relevant code section), make use of
+redundant braces to ensure that a compiler error will result in
+preference to incorrect runtime behavior (such as inadvertantly
+providing someone with a root shell).  Also, do not intersperse
+conditional compilation directives with control flow statements in
+such a way that confuses emacs cc-mode.  Not only does emacs get
+confused, but the code becomes more difficult to read and
+maintain.  Therefore, avoid code like this:
+
+	    /* bad style */
+	    if (x) {
+		f();
+	    }
+	#ifdef FOO
+	    else if (y) {
+	#else
+	    else {
+	#endif
+		g();
+	    }
+
+If a function is declared to return a value, do not call "return"
+without an argument or allow the flow of control to fall off the end
+of the function.
+
+Do not declare variables in an inner scope, e.g. inside a compound
+substatement of an if statement, unless the complexity of the code
+really demands that the variables be declared that way.  In such
+situations, the function could probably stand to be broken up into
+smaller chunks anyway.  Do not declare variables in an inner scope
+that shadow ones in an outer scope, since this leads to confusion.
+Also, some debugging environments, such as gdb under Solaris, can't
+see variables declared in an inner scope, so declaring such variables
+will make maintenance more difficult as well.
+
+Parenthesize expressions that may be confusing, particularly where C's
+precedences are broken.  For example, the shift operators have lower
+precedence than the +, -, *, /, and % operators.  Perhaps the most
+familiar C precedence quirk is that equality and relational operators
+are of higher precedence than assignment operators.  Less well known
+is that the bitwise operators are of a lower precedence than equality
+and relational operators.
+
+Strive to make your code capable of compiling using "gcc -Wall
+-Wmissing-prototypes -Wtraditional -Wcast-qual -Wcast-align
+-Wconversion -Waggregate-return -pedantic" [XXX need to rethink this
+somewhat] without generating any errors or warnings.  Do not, however,
+compile using the "-ansi" flag to gcc, since that can result in odd
+behavior with header files on some systems, causing some necessary
+symbols to not be defined.
+
+Emacs cc-mode style
+-------------------
+
+Putting the following code in your .emacs file will result in mostly
+the right thing happening with respect to formatting style.  Note that
+you may want to turn on auto-newline feature of cc-mode, though that
+seems to have some bugs with brace-elseif-brace handling at least in
+the version of cc-mode that comes with emacs 20.3.
+
+	(defconst krb5-c-style
+	  '("bsd" 
+	    (c-cleanup-list
+	     brace-elseif-brace brace-else-brace defun-close-semi)
+	    (c-comment-continuation-stars . "* ")
+	    (c-electric-pound-behavior alignleft)
+	    (c-hanging-braces-alist
+	     (brace-list-open)
+	     (class-open after)
+	     (substatement-open after)
+	     (block-close . c-snug-do-while)
+	     (extern-lang-open after))
+	    (c-hanging-colons-alist
+	     (case-label after)
+	     (label after))
+	    (c-hanging-comment-starter-p)
+	    (c-hanging-comment-ender-p)
+	    (c-indent-comments-syntactically-p . t)
+	    (c-label-minimum-indentation . 0)
+	    (c-special-indent-hook)))
+	(defun krb5-c-hook ()
+	  (c-add-style "krb5" krb5-c-style t))
+	(add-hook 'c-mode-common-hook 'krb5-c-hook)
+
+indent.pro settings
+-------------------
+
+The following settings for the indent program should produce a
+reasonable approximation to the C coding style described here, though
+some manual cleanup may be necessary.  Note that the gindent installed
+in the gnu locker does not currently handle -psl correctly though.
+
+-bap
+-br
+-ce
+-ci4
+-cli0
+-d0
+-di8
+-i4
+-ip
+-l79
+-nbc
+-ncdb
+-ndj
+-nfc1
+-lp
+-npcs
+-psl
+-sc
+-sob
