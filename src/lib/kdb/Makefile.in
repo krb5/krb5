@@ -66,6 +66,10 @@ check::	t_kdb
 clean::
 	$(RM) t_kdb t_kdb.o
 
+
+# @lib_frag@
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

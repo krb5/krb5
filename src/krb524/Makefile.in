@@ -158,6 +158,10 @@ clean-unix:: clean-libs clean-libobjs
 	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o
 	$(RM) $(BUILDTOP)/include/krb524.h $(BUILDTOP)/include/krb524_err.h
 
+
+# @libobj_frag@
+# @lib_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

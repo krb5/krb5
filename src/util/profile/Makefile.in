@@ -122,6 +122,10 @@ check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj
 	$(OUTPRE)test_parse test.ini
 
+
+# @lib_frag@
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

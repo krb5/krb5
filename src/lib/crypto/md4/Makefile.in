@@ -53,6 +53,9 @@ clean::
 	$(RM) $(OUTPRE)t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) t_mddriver.c
 
 clean-unix:: clean-libobjs
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

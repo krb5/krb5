@@ -23,51 +23,6 @@
 #			form dir1:dir2 ...
 # RELDIR	path to this directory relative to $(TOPLIBD)
 
-## Parameters to be set by configure:
-##
-
-LN_S=@LN_S@
-AR=@AR@
-
-# Set to "lib$(LIB)$(STEXT) lib$(LIB)$(SHEXT) lib$(LIB)$(PFEXT)" or
-# some subset thereof by configure; determines which types of libs get
-# built.
-LIBLIST=@LIBLIST@
-
-# Set by configure; list of library symlinks to make to $(TOPLIBD)
-LIBLINKS=@LIBLINKS@
-
-# Set by configure; list of install targets
-LIBINSTLIST=@LIBINSTLIST@
-
-# Some of these should really move to pre.in, since programs will need
-# it too. (e.g. stuff that has dependencies on the libraries)
-
-# usually .a
-STLIBEXT=@STLIBEXT@
-
-# usually .so.$(LIBMAJOR).$(LIBMINOR)
-SHLIBVEXT=@SHLIBVEXT@
-
-# usually .so.$(LIBMAJOR) (to allow for major-version compat)
-SHLIBSEXT=@SHLIBSEXT@
-
-# usually .so
-SHLIBEXT=@SHLIBEXT@
-
-# usually _p.a
-PFLIBEXT=@PFLIBEXT@
-
-# "cc -G", "ld -Bshareable", etc.
-LDCOMBINE=@LDCOMBINE@
-
-# Misc args to tack on the tail of LDCOMBINE
-LDCOMBINE_TAIL=@LDCOMBINE_TAIL@
-
-# flags for explicit libraries depending on this one,
-# e.g. "-R$(SHLIB_RPATH) $(SHLIB_SHLIB_DIRFLAGS) $(SHLIB_EXPLIBS)"
-SHLIB_EXPFLAGS=@SHLIB_EXPFLAGS@
-
 # STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
 SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
 PFOBJLISTS=$(STOBJLISTS:.ST=.PF)

@@ -8,3 +8,4 @@ LOCALINCLUDES=-I../include
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
+# @libobj_frag@

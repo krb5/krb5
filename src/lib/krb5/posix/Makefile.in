@@ -18,3 +18,4 @@ clean-unix:: clean-libobjs
 
 ##WIN16##LIBOBJS = syslog.obj sscanf.obj
 ##WIN32##LIBOBJS = $(OUTPRE)syslog.obj
+# @libobj_frag@

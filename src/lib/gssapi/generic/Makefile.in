@@ -131,6 +131,9 @@ install-headers-unix install:: gssapi.h
 	done
 
 depend:: $(ETSRCS)
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

@@ -192,7 +192,4 @@ else
 	AC_DEFINE(KRB5_KRB4_COMPAT,1,[Define if Kerberos V4 backwards compatibility should be supported])
 fi
 dnl
-K5_GEN_MAKEFILE(.)
-K5_GEN_MAKEFILE(krb5)
-K5_GEN_MAKEFILE(kerberosIV)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. krb5 kerberosIV)

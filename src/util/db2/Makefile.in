@@ -30,3 +30,4 @@ $(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
 
 clean-includes::
 	$(RM) $(HDRS)
+# @lib_frag@

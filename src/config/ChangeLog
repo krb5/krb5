@@ -1,3 +1,13 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (LN_S, AR, LIBLIST, LIBLINKS, LIBINSTLIST, STLIBEXT,
+	SHLIBVEXT, SHLIBSEXT, SHLIBEXT, PFLIBEXT, LDCOMBINE,
+	LDCOMBINE_TAIL, SHLIB_EXPFLAGS): Move these autoconf-substituted
+	variables...
+	* libobj.in (OBJLISTS, SHLIBOBJS, PFLIBOBJS, LDCOMBINE, SONAME,
+	PICFLAGS, PROFFLAGS): ...and these...
+	* pre.in: ...to here.
+
 2002-12-23  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Add variables for krb524 and krb4 generated headers for

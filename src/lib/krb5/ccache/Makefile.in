@@ -98,6 +98,9 @@ clean-unix::
 	$(RM) t_cc t_cc.o
 
 
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

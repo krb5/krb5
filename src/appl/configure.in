@@ -15,13 +15,4 @@ KRB5_GETSOCKNAME_ARGS
 KRB5_GETPEERNAME_ARGS
 KRB5_BUILD_PROGRAM
 AC_CONFIG_SUBDIRS(bsd gssftp telnet)
-K5_GEN_MAKEFILE(.)
-K5_GEN_MAKEFILE(sample)
-K5_GEN_MAKEFILE(sample/sclient)
-K5_GEN_MAKEFILE(sample/sserver)
-K5_GEN_MAKEFILE(simple)
-K5_GEN_MAKEFILE(simple/client)
-K5_GEN_MAKEFILE(simple/server)
-K5_GEN_MAKEFILE(gss-sample)
-K5_GEN_MAKEFILE(user_user)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. sample sample/sclient sample/sserver simple simple/client simple/server gss-sample user_user)

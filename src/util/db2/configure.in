@@ -89,12 +89,4 @@ KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM
 KRB5_RUN_FLAGS
-K5_GEN_MAKEFILE(., lib)
-K5_GEN_MAKEFILE(hash, libobj)
-K5_GEN_MAKEFILE(btree, libobj)
-K5_GEN_MAKEFILE(db, libobj)
-K5_GEN_MAKEFILE(mpool, libobj)
-K5_GEN_MAKEFILE(recno, libobj)
-K5_GEN_MAKEFILE(clib, libobj)
-K5_GEN_MAKEFILE(test)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. hash btree db mpool recno clib test)

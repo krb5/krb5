@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -35,7 +35,6 @@ ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 krb5_pre_in=$ac_config_fragdir/pre.in
 krb5_post_in=$ac_config_fragdir/post.in
-define([krb5_append_frags],[$krb5_post_in])
 echo "Looking for $srcdir/$ac_config_fragdir"
 if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR($ac_config_fragdir)
@@ -97,6 +96,10 @@ dnl
 CONFIG_RELTOPDIR=$ac_reltopdir
 AC_SUBST(CONFIG_RELTOPDIR)
 AC_SUBST(subdirs)
+lib_frag=$srcdir/$ac_config_fragdir/lib.in
+AC_SUBST_FILE(lib_frag)
+libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
+AC_SUBST_FILE(libobj_frag)
 ])dnl
 
 dnl This is somewhat gross and should go away when the build system
@@ -559,7 +562,7 @@ dnl  Note: Be careful in quoting.
 dnl        The ac_foreach generates the list of fragments to include
 dnl        or "" if $2 is empty
 AC_DEFUN(_K5_GEN_MAKEFILE,[dnl
-AC_CONFIG_FILES([$1/Makefile:$krb5_pre_in:$1/Makefile.in]AC_FOREACH([FRAG], [$2], :$ac_config_fragdir/[FRAG].in)[:$krb5_post_in])
+AC_CONFIG_FILES([$1/Makefile:$krb5_pre_in:$1/Makefile.in:$krb5_post_in])
 ])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
@@ -584,7 +587,7 @@ dnl
 define(_V5_AC_OUTPUT_MAKEFILE,
 [ifelse($2, , ,AC_CONFIG_FILES($2))
 AC_FOREACH([DIR], [$1],dnl
- [AC_CONFIG_FILES(DIR[/Makefile:$krb5_pre_in:]DIR[/Makefile.in:]krb5_append_frags)])
+ [AC_CONFIG_FILES(DIR[/Makefile:$krb5_pre_in:]DIR[/Makefile.in:$krb5_post_in])])
 K5_AC_OUTPUT])dnl
 dnl
 dnl
@@ -998,8 +1001,6 @@ AC_DEFUN(KRB5_BUILD_LIBRARY,
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
-# add frag for building libraries
-define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
 # null out SHLIB_EXPFLAGS because we lack any dependencies
 SHLIB_EXPFLAGS=
 AC_SUBST(LIBLIST)
@@ -1042,8 +1043,6 @@ AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 AC_CHECK_PROG(AR, ar, ar, false)
-# add frag for building libraries
-define([krb5_append_frags],[$ac_config_fragdir/lib.in:]krb5_append_frags)
 AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(LDCOMBINE)
@@ -1064,8 +1063,6 @@ dnl Pull in the necessary stuff to build library objects.
 
 AC_DEFUN(KRB5_BUILD_LIBOBJS,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
-# add frag for building library objects
-define([krb5_append_frags],[$ac_config_fragdir/libobj.in:]krb5_append_frags)
 AC_SUBST(OBJLISTS)
 AC_SUBST(STOBJEXT)
 AC_SUBST(SHOBJEXT)

@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* tf_util.c: Remove declaration of errno

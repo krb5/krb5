@@ -72,19 +72,5 @@ AC_SUBST(V4SERVER)
 dnl
 KRB5_BUILD_PROGRAM
 dnl
-K5_GEN_MAKEFILE(.)
-K5_GEN_MAKEFILE(cli)
-K5_GEN_MAKEFILE(dbutil)
-K5_GEN_MAKEFILE(passwd)
-K5_GEN_MAKEFILE(passwd/unit-test)
-K5_GEN_MAKEFILE(ktutil)
-K5_GEN_MAKEFILE(server)
-K5_GEN_MAKEFILE(v4server)
-K5_GEN_MAKEFILE(v4server/unit-test)
-K5_GEN_MAKEFILE(v5passwdd)
-K5_GEN_MAKEFILE(testing)
-K5_GEN_MAKEFILE(testing/scripts)
 K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
-K5_GEN_MAKEFILE(testing/util)
-K5_AC_OUTPUT
-
+V5_AC_OUTPUT_MAKEFILE(. cli dbutil passwd passwd/unit-test ktutil server v4server v4server/unit-test v5passwdd testing testing/scripts testing/util)

@@ -59,6 +59,9 @@ $(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c
 
 clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

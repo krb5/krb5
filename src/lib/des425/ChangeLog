@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
 2002-10-10  Sam Hartman  <hartmans@mit.edu>
 
 	* read_passwd.c : Implement in terms of krb5_prompter_posix

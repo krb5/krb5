@@ -21,11 +21,4 @@ alpha*-dec-osf*)
 	;;
 esac
 AC_SUBST(KSU_LIBS)
-K5_GEN_MAKEFILE(.)
-K5_GEN_MAKEFILE(klist)
-K5_GEN_MAKEFILE(kinit)
-K5_GEN_MAKEFILE(kvno)
-K5_GEN_MAKEFILE(kdestroy)
-K5_GEN_MAKEFILE(kpasswd)
-K5_GEN_MAKEFILE(ksu)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. klist kinit kvno kdestroy kpasswd ksu)

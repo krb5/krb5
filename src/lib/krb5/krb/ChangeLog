@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
 2003-01-09  Sam Hartman  <hartmans@mit.edu>
 
 	* get_creds.c (krb5_get_credentials_core): Patch from Ben Cox

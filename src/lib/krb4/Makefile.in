@@ -249,6 +249,10 @@ check-windows::
 
 
 install-unix:: install-libs
+
+# @lib_frag@
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

@@ -54,6 +54,9 @@ clean-windows::
 	@echo Making clean in krb5\keytab
 	$(RM) $(OBJFILE)
 
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

@@ -48,6 +48,9 @@ clean-unix:: clean-libobjs
 
 t_shs3: t_shs3.o shs.o
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_shs3 t_shs3.o shs.o
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

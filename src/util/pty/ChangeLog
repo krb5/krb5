@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
 2002-12-06  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Quote the argument to AC_CHECK_HEADER. Autoconf

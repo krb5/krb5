@@ -36,6 +36,9 @@ check-unix:: t_crc
 t_crc: t_crc.o crc32.o
 	$(CC_LINK) -o $@ t_crc.o crc32.o
 
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

@@ -80,10 +80,4 @@ if test -n "$KRB4_LIB"; then
 fi
 AC_CONFIG_SUBDIRS(kdc kadmin slave clients appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
-K5_GEN_MAKEFILE(.)
-K5_GEN_MAKEFILE(util)
-K5_GEN_MAKEFILE(util/send-pr)
-K5_GEN_MAKEFILE(lib)
-K5_GEN_MAKEFILE(config-files)
-K5_GEN_MAKEFILE(gen-manpages)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. util util/send-pr lib config-files gen-manpages)

@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
 2002-12-06  Tom Yu  <tlyu@mit.edu>
 
 	* sendmsg.c (krb524_sendto_kdc): Update calls to locate_server()

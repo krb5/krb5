@@ -357,6 +357,9 @@ clean::
 		$(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)	\
 		$(OUTPRE)t_deltat$(EXEEXT) $(OUTPRE)t_deltat.$(OBJEXT) \
 		$(OUTPRE)t_expand$(EXEEXT) $(OUTPRE)t_expand.$(OBJEXT)
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

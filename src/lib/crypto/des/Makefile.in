@@ -90,6 +90,9 @@ clean::
 	t_verify.$(OBJEXT) t_afss2k.$(OBJEXT) t_afss2k$(EXEEXT)
 
 clean-unix:: clean-libobjs
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

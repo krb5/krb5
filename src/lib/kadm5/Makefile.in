@@ -103,6 +103,9 @@ clean-unix:: clean-libobjs
 
 clean-mac::
 clean-windows::
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

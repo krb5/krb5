@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
 2002-12-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* t_crc.c: Declare local functions static. 

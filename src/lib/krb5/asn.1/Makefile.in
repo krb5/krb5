@@ -51,6 +51,9 @@ OBJS= \
 all-unix:: all-libobjs
 
 clean-unix:: clean-libobjs
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

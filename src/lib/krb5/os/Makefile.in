@@ -225,6 +225,9 @@ check-unix::
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
+
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

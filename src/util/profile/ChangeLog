@@ -1,3 +1,10 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
+	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
 2003-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (make_hard_link): New function.

@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (krb5_cc_file_ops, krb5_fcc_ops): Now const.

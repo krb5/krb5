@@ -23,13 +23,4 @@ KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM
 KRB5_RUN_FLAGS
 dnl
-K5_GEN_MAKEFILE(., lib libobj)
-K5_GEN_MAKEFILE(error_tables, libobj)
-K5_GEN_MAKEFILE(asn.1, libobj)
-K5_GEN_MAKEFILE(ccache, libobj)
-K5_GEN_MAKEFILE(keytab, libobj)
-K5_GEN_MAKEFILE(krb, libobj)
-K5_GEN_MAKEFILE(rcache, libobj)
-K5_GEN_MAKEFILE(os, libobj)
-K5_GEN_MAKEFILE(posix, libobj)
-K5_AC_OUTPUT
+V5_AC_OUTPUT_MAKEFILE(. error_tables asn.1 ccache keytab krb rcache os posix)

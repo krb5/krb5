@@ -1,3 +1,7 @@
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
 2002-12-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* asn1_k_decode.c (asn1_decode_sam_challenge_2_body): Add
