@@ -74,8 +74,8 @@ Krb5InstallServerProgram(krshd)
 NormalProgramTarget(krlogind,krlogind.o logutil.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),$(K4LIB))
 Krb5InstallServerProgram(krlogind)
 
-NormalProgramTarget(login.krb,login.o logutil.o setenv.o,,,)
-InstallProgram(login.krb,$(SERVER_BINDIR))
+NormalProgramTarget(login.krb5,login.o logutil.o setenv.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
+InstallProgram(login.krb5,$(SERVER_BINDIR))
 #endif
 
 DependTarget()

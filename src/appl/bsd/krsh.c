@@ -77,10 +77,15 @@ krb5_sigtype  sendsig();
 char	*krb_realm = (char *)0;
 void	try_normal();
 #define UCB_RSH "/usr/ucb/rsh"
+#endif
+
+#ifndef RLOGIN_PROGRAM
+#ifdef KERBEROS
 #define RLOGIN_PROGRAM KRB5_PATH_RLOGIN
 #else /* KERBEROS */
 #define RLOGIN_PROGRAM "/usr/ucb/rlogin"
 #endif  /* KERBEROS */
+#endif /* !RLOGIN_PROGRAM */
      
 #define	mask(s)	(1 << ((s) - 1))
      

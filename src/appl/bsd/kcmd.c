@@ -100,7 +100,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_ap_rep_enc_part *rep_ret;
     krb5_checksum send_cksum;
     char *tmpstr = 0;
-    krb5_error	*error;
+    krb5_error	*error = 0;
     int sin_len;
     krb5_ccache cc;
     krb5_data outbuf;
@@ -139,14 +139,19 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    if ((realm == NULL) || (realm[0] == '\0')) {
-	krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
-				&ret_cred->server);
-    }
-    else {
-        sprintf(tmpstr,"%s/%s@%s",service,host_save,realm);
-        krb5_parse_name(tmpstr,&ret_cred->server);
-    }
+    krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
+			    &ret_cred->server);
+    if (realm && *realm) {
+       char *copyrealm;
+       krb5_data rdata;
+
+       rdata.length = strlen(realm);
+       rdata.data = (char *) malloc(rdata.length+1);
+       strcpy(rdata.data, realm);
+       
+       /* XXX we should free the old realm first */
+       krb5_princ_set_realm(ret_cred->server, &rdata);
+   }
 #ifdef sgi
     oldmask = sigignore(sigmask(SIGURG));
 #else
@@ -312,11 +317,17 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
                            &error,		/* No error return */
                            &rep_ret);
     if (status) {
-	printf("We have a sendauth error %d\n", error->error);
-	if (error->text.length) {
-	    fprintf(stderr, "Text: %s\n", error->text.data);
+	printf("Couldn't authenticate to server: %s\n", error_message(status));
+	if (error) {
+	    printf("Server returned error code %d (%s)\n", error->error,
+		   error_message(ERROR_TABLE_BASE_krb5 + error->error));
+	    if (error->text.length) {
+		fprintf(stderr, "Error text sent from server: %s\n",
+			error->text.data);
+	    }
+	    krb5_free_error(error);
+	    error = 0;
 	}
-	krb5_free_error(error);
     }	
     if (status) goto bad3;
     if (rep_ret && server_seqno) {

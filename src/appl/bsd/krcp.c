@@ -58,6 +58,7 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <ctype.h>
 #include <netdb.h>
 #include <errno.h>
+#include <string.h>
      
 #ifdef KERBEROS
 #include <krb5/krb5.h>
@@ -102,7 +103,7 @@ int	encryptflag = 0;
 #endif /* KERBEROS */
 
 int	rem;
-char	*colon(), *index(), *rindex(), *strcpy();
+char	*colon();
 int	errs;
 krb5_sigtype	lostconn();
 int	errno;
@@ -273,7 +274,7 @@ main(argc, argv)
 	/* Target machine is some remote machine */
 	if (*targ == 0)
 	  targ = ".";
-	thost = index(argv[argc - 1], '@');
+	thost = strchr(argv[argc - 1], '@');
 	if (thost) {
 	    *thost++ = 0;
 	    tuser = argv[argc - 1];
@@ -291,7 +292,7 @@ main(argc, argv)
 		*src++ = 0;
 		if (*src == 0)
 		  src = ".";
-		host = index(argv[i], '@');
+		host = strchr(argv[i], '@');
 		if (host) {
 		    *host++ = 0;
 		    suser = argv[i];
@@ -401,7 +402,7 @@ main(argc, argv)
 		*src++ = 0;
 		if (*src == 0)
 		  src = ".";
-		host = index(argv[i], '@');
+		host = strchr(argv[i], '@');
 		if (host) {
 		    *host++ = 0;
 		    suser = argv[i];
@@ -576,7 +577,7 @@ source(argc, argv)
 	    error("rcp: %s: not a plain file\n", name);
 	    continue;
 	}
-	last = rindex(name, '/');
+	last = strrchr(name, '/');
 	if (last == 0)
 	  last = name;
 	else
@@ -653,7 +654,7 @@ rsource(name, statp)
 	error("rcp: %s: %s\n", name, sys_errlist[errno]);
 	return;
     }
-    last = rindex(name, '/');
+    last = strrchr(name, '/');
     if (last == 0)
       last = name;
     else
@@ -1086,7 +1087,6 @@ void send_auth()
     char *princ;          /* principal in credentials cache */
     krb5_ccache cc;
     krb5_creds creds;
-    krb5_principal sprinc;                /* principal of server */
     krb5_data reply, msg, princ_data;
     krb5_tkt_authent *authdat;
     krb5_error_code status;
@@ -1116,7 +1116,7 @@ void send_auth()
 	krb5_cc_close(cc);
 	exit(1);
     }
-    if (status = krb5_build_principal_ext(&sprinc,
+    if (status = krb5_build_principal_ext(&creds.server,
 					  krb5_princ_realm(creds.client)->length,
 					  krb5_princ_realm(creds.client)->data,
 					  6, "krbtgt",
@@ -1130,8 +1130,6 @@ void send_auth()
 	exit(1);
     }
     
-    creds.server = sprinc;
-    
     /* Get TGT from credentials cache */
     if (status = krb5_get_credentials(KRB5_GC_CACHED, cc, &creds)){
 	fprintf(stderr,
@@ -1141,10 +1139,6 @@ void send_auth()
 	exit(1);
     }
     krb5_cc_close(cc);
-    
-    krb5_free_principal(sprinc);          /* creds.server is replaced
-					     upon retrieval */
-    
     
     princ_data.data = princ;
     princ_data.length = strlen(princ_data.data) + 1; /* include null 

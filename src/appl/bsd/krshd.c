@@ -75,9 +75,6 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
  *   SERVE_V4 - Define this if v4 rlogin clients are also to be served.
  *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
  *              checked even for v4 clients (instead of .klogin).
- *   SERVE_NON_KRB - Define this is non-kerberized rlogin clients are 
- *              to be served. NOTE HOWEVER THAT THIS IS A SERIOUS
- *              SECURITY FLAW!
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
  *   LOG_OTHER_USERS - Define this if you want to log all principals that do
  *              not map onto the local user.
@@ -123,6 +120,7 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #include <errno.h>
 #include <pwd.h>
 #include <ctype.h>
+#include <string.h>
      
 #ifdef sun
 #include <sys/label.h>
@@ -179,7 +177,6 @@ extern
 #endif /* CRAY */
 int     errno;
 
-char	*index(), *rindex(), *strncat();
 /*VARARGS1*/
 int	error();
 
@@ -199,7 +196,7 @@ main(argc, argv)
     char *options, ch;
     int i;
     int fd;
-    int debug_port;
+    int debug_port = 0;
 
 #ifdef CRAY
     secflag = sysconf(_SC_CRAY_SECURE_SYS);
@@ -385,7 +382,6 @@ char cmdbuf[NCARGS+1];
 char *kremuser;
 krb5_principal client;
 krb5_authenticator *kdata;
-krb5_ticket        *ticket = 0;
 
 #ifdef SERVE_V4
 #include <kerberosIV/krb.h>
@@ -393,7 +389,10 @@ AUTH_DAT	*v4_kdata;
 KTEXT		v4_ticket;
 #endif
 
-int V4 = 0;    /* Set when connection is seen to be from a V4 client */
+int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
+
+#define KRB5_RECVAUTH_V4	4
+#define KRB5_RECVAUTH_V5	5
 
 doit(f, fromp)
      int f;
@@ -479,6 +478,7 @@ doit(f, fromp)
 	exit(1);
     }
 #ifdef KERBEROS
+    krb5_init_ets();
     if ((must_pass_rhosts || must_pass_one)
 	&& (fromp->sin_port >= IPPORT_RESERVED ||
 	    fromp->sin_port < IPPORT_RESERVED/2))
@@ -882,7 +882,7 @@ doit(f, fromp)
 	    failed_k5 = 1;
 	}
 #else
-	if (V4) {
+	if (auth_sys == KRB5_RECVAUTH_V4) {
 	    /* kuserok returns 0 if OK */
 	    if (kuserok(v4_kdata, locuser)){
 		syslog(LOG_ERR ,
@@ -1066,7 +1066,7 @@ doit(f, fromp)
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
-    cp = rindex(pwd->pw_shell, '/');
+    cp = strrchr(pwd->pw_shell, '/');
     if (cp)
       cp++;
     else
@@ -1374,557 +1374,116 @@ recvauth(netf, peersin, peeraddr)
      struct sockaddr_in peersin;
      krb5_address peeraddr;
 {
-    char hostname[100];
-    krb5_principal server;
     krb5_error_code status;
+    struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
+    krb5_principal server;
+    krb5_data inbuf;
+    char v4_instance[INST_SZ];	/* V4 Instance */
+    char v4_version[9];
+    krb5_ticket        *ticket;
 
-    len = sizeof(int);
-    if ((status = krb5_net_read(netf, krb_vers, len)) != len)
-      return((status < 0) ? errno : ECONNABORTED);
-
-    krb_vers[len] = '\0';
-
-    if (!strncmp(krb_vers, KRB_SENDAUTH_VERS, len)) {
-	/* Must be V4 rlogin client */
-#ifdef SERVE_V4
-	char version[9];
-	struct sockaddr_in faddr;
-	char instance[INST_SZ];
-	long authoptions;
-	int len;
-	
-	V4 = 1;
-
-	authoptions = 0L;
-	
-	len = sizeof(faddr);
-	if (getsockname(0, (struct sockaddr *)&faddr, &len)) {
+    len = sizeof(laddr);
+    if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
-	}
-
-	v4_kdata = (AUTH_DAT *)malloc( sizeof(AUTH_DAT) );
-	v4_ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
-
-	strcpy(instance, "*");
-
-	if (status = v4_recvauth(krb_vers, authoptions, netf,
-				 v4_ticket, "rcmd",
-				 instance, &peersin, &faddr,
-				 v4_kdata, "", (bit_64 *)0, version)) {
-	    return(status);
-	}
-
-	getstr(netf, locuser, sizeof (locuser), "locuser");
-	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
-	/* We do not really know the remote user's login name.
-         * Assume it to be the same as the first component of the
-	 * principal's name. 
-         */
-	strcpy(remuser, v4_kdata->pname);
-	kremuser = (char *) malloc(strlen(v4_kdata->pname) + 1 +
-				     strlen(v4_kdata->pinst) + 1 +
-				     strlen(v4_kdata->prealm) + 1);
-	sprintf(kremuser, "%s/%s@%s", v4_kdata->pname,
-		v4_kdata->pinst, v4_kdata->prealm);
-
-	if (status = krb5_parse_name(kremuser, &client))
-	  return(status);
-#else
-	syslog(LOG_ERR, "Kerberos V4 authentication: rejected!");
-	error("Permission denied");
-#endif
     }
-    else if (isprint(krb_vers[0])) { 
-	/* Un-kerberized rlogin client */
-#ifdef SERVE_NON_KRB
-	strncpy(remuser, krb_vers, sizeof(int));
-	getstr(netf, remuser+4, sizeof(remuser)-sizeof(int), "remuser");
-	getstr(netf, locuser, sizeof(locuser), "locuser");
-	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");	
-#else
-	syslog(LOG_ERR, "Un-kerberized client: authentication rejected!");
-	error( "Permission denied");
-#endif
-    }
-    else {
-	/* Must be V5 rlogin client */
-	krb5_principal server;
-	krb5_data inbuf;
-	int len;
-
-	/*
-	 * First read the sendauth version string and check it.
-	 */
-	inbuf.length = ntohl(*((int *) krb_vers));
-
-	if (inbuf.length < 0 || inbuf.length > 25)
-	  return 255;
 	
-	if (!(inbuf.data = malloc(inbuf.length))) {
-	    return(ENOMEM);
-	}
-	
-	if ((len = krb5_net_read(netf, inbuf.data, inbuf.length)) !=
-	    inbuf.length) {
-	    krb5_xfree(inbuf.data);
-	    return((len < 0) ? errno : ECONNABORTED);
-	}
-
-	if (strcmp(inbuf.data, "KRB5_SENDAUTH_V1.0")) {
-	    krb5_xfree(inbuf.data);
-	    status = KRB5_SENDAUTH_BADAUTHVERS;
-	    return status;
-	}
-	krb5_xfree(inbuf.data);
-
 #ifdef unicos61
 #define SIZEOF_INADDR  SIZEOF_in_addr
 #else
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-	gethostname(hostname, 100);
-	if (status = krb5_sname_to_principal(hostname,"host", KRB5_NT_SRV_HST,
-					     &server)) {
+    if (status = krb5_sname_to_principal(NULL, "host", KRB5_NT_SRV_HST,
+					 &server)) {
 	    syslog(LOG_ERR, "parse server name %s: %s", "host",
 		   error_message(status));
 	    exit(1);
-	}
-	krb5_princ_type(server) = KRB5_NT_SRV_HST;
+    }
 
-	krb5_init_ets();
+    strcpy(v4_instance, "*");
+
+    status = krb5_compat_recvauth(&netf,
+				  "KCMDV0.1",
+				  server, /* Specify daemon principal */
+				  &peeraddr, /* We do want to match */
+					     /* this against caddrs in */
+					     /* the ticket */
+				  0, /* use v5srvtab */
+				  0, /* no keyproc */
+				  0, /* no keyprocarg */
+				  0, /* default rc_type */
+				  0, /* no flags */
+
+				  0, /*v4_opts*/
+				  "rcmd", /* v4_service */
+				  v4_instance, /* v4_instance */
+				  &peersin, /* foriegn address */
+				  &laddr, /* our local address */
+				  "", /* use default srvtab */
+
+				  &auth_sys, /* which authentication system */
+				  0, /* no seq number */
+				  &client, /* return client */
+				  &ticket, /* return ticket */
+				  &kdata, /* return authenticator */
+				  
+				  &v4_kdata, 0, v4_version);
+
+    if (status) {
+	if (auth_sys == KRB5_RECVAUTH_V5) {
+	    /*
+	     * clean up before exiting
+	     */
+	    getstr(netf, locuser, sizeof(locuser), "locuser");
+	    getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
+	    getstr(netf, remuser, sizeof(locuser), "remuser");
+	}
+	return status;
+    }
+
+    getstr(netf, locuser, sizeof(locuser), "locuser");
+    getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
+
+    if (auth_sys == KRB5_RECVAUTH_V4) {
+	/* We do not really know the remote user's login name.
+         * Assume it to be the same as the first component of the
+	 * principal's name. 
+         */
+	strcpy(remuser, v4_kdata->pname);
+	kremuser = (char *) malloc(strlen(v4_kdata->pname) + 1 +
+				   strlen(v4_kdata->pinst) + 1 +
+				   strlen(v4_kdata->prealm) + 1);
+	sprintf(kremuser, "%s/%s@%s", v4_kdata->pname,
+		v4_kdata->pinst, v4_kdata->prealm);
 	
-	if (status = v5_recvauth(&netf,
-				 "KCMDV0.1",
-				 server,    /* Specify daemon principal */
-				 &peeraddr, /* We do want to match this
-					       against caddrs in the
-					       ticket. */
-				 0,         /* use srv5tab */
-				 0,         /* no keyproc */
-				 0,         /* no keyproc arg */
-				 0,         /* no rc_type */
-				 0,         /* no seq number */
-				 &client,   /* return client */
-				 &ticket,   /* return ticket */
-				 &kdata     /* return authenticator */
-				 )) {
-	    error("Kerberos rsh or rcp failed: %s\n",
+	if (status = krb5_parse_name(kremuser, &client))
+	  return(status);
+	return 0;
+    }
+
+    /* Must be V5  */
+	
+    getstr(netf, remuser, sizeof(locuser), "remuser");
+
+    if (status = krb5_unparse_name(client, &kremuser))
+	return status;
+    
+    if (status = krb5_read_message((krb5_pointer)&netf, &inbuf)) {
+	error("Error reading message: %s\n",
+	      error_message(status));
+	exit(1);
+    }
+
+    if (inbuf.length) { /* Forwarding being done, read creds */
+	if (status = rd_and_store_for_creds(&inbuf, ticket, locuser)) {
+	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
 	    exit(1);
 	}
-	krb5_unparse_name(kdata->client,&kremuser);
-	    
-	getstr(netf, locuser, sizeof(locuser), "locuser");
-	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
-	getstr(netf, remuser, sizeof(locuser), "remuser");
-
-	if (status = krb5_read_message((krb5_pointer)&netf, &inbuf)) {
-	    error("Error reading message: %s\n",
-		  error_message(status));
-	    exit(1);
-	}
-
-	if (inbuf.length) {
-	    if (status = rd_and_store_for_creds(&inbuf, ticket, locuser)) {
-		error("Can't get forwarded credentials: %s\n",
-		      error_message(status));
-		exit(1);
-	    }
-	}
     }
-    return 0;
-}
-
-#ifdef SERVE_V4
-
-#ifndef max
-#define	max(a,b) (((a) > (b)) ? (a) : (b))
-#endif /* max */
-
-krb5_error_code
-v4_recvauth(krb_vers, options, fd, ticket, service, instance, faddr,
-	    laddr, kdata, filename, schedule, version)
-     char *krb_vers;
-     long options;			 /* bit-pattern of options */
-     int fd;				 /* file descr. to read from */
-     KTEXT ticket;			 /* storage for client's ticket */
-     char *service;			 /* service expected */
-     char *instance;			 /* inst expected (may be filled in) */
-     struct sockaddr_in *faddr;	 /* address of foreign host on fd */
-     struct sockaddr_in *laddr;	 /* local address */
-     AUTH_DAT *kdata;		 /* kerberos data (returned) */
-     char *filename;			 /* name of file with service keys */
-     Key_schedule schedule;		 /* key schedule (return) */
-     char *version;			 /* version string (filled in) */
-{
-    
-    int i, cc, old_vers = 0;
-    char *cp;
-    int rem;
-    long tkt_len, priv_len;
-    u_long cksum;
-    u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)];
-    
-    /* read the protocol version number */
-    if (krb_net_read(fd, krb_vers+sizeof(int), 
-		     KRB_SENDAUTH_VLEN-sizeof(int)) !=
-	KRB_SENDAUTH_VLEN-sizeof(int))
-      return(errno);
-    krb_vers[KRB_SENDAUTH_VLEN] = '\0';
-    
-    /* check version string */
-    if (strcmp(krb_vers,KRB_SENDAUTH_VERS)) {
-	return(KFAILURE);
-    } else {
-	/* read the application version string */
-	if (krb_net_read(fd, version, KRB_SENDAUTH_VLEN) !=
-	    KRB_SENDAUTH_VLEN)
-	  return(errno);
-	version[KRB_SENDAUTH_VLEN] = '\0';
-	
-	/* get the length of the ticket */
-	if (krb_net_read(fd, (char *)&tkt_len, sizeof(tkt_len)) !=
-	    sizeof(tkt_len))
-	  return(errno);
-	
-	/* sanity check */
-	ticket->length = ntohl((unsigned long)tkt_len);
-	if ((ticket->length <= 0) || (ticket->length > MAX_KTXT_LEN)) {
-	    if (options & KOPT_DO_MUTUAL) {
-		rem = KFAILURE;
-		goto mutual_fail;
-	    } else
-	      return(KFAILURE); /* XXX there may still be junk on the fd? */
-	}
-	
-	/* read the ticket */
-	if (krb_net_read(fd, (char *) ticket->dat, ticket->length)
-	    != ticket->length)
-	  return(errno);
-    }
-    /*
-     * now have the ticket.  decrypt it to get the authenticated
-     * data.
-     */
-    rem = krb_rd_req(ticket,service,instance,faddr->sin_addr.s_addr,
-		     kdata,filename);
-    
-    if (old_vers) return(rem);	 /* XXX can't do mutual with old client */
-    
-    /* if we are doing mutual auth (used by erlogin), compose a response */
-    if (options & KOPT_DO_MUTUAL) {
-	if (rem != KSUCCESS)
-	  /* the krb_rd_req failed */
-	  goto mutual_fail;
-	
-	/* add one to the (formerly) sealed checksum, and re-seal it
-	   for return to the client */
-	cksum = kdata->checksum + 1;
-	cksum = htonl(cksum);
-#ifdef CRYPT
-	key_sched(kdata->session,schedule);
-#endif
-	priv_len = krb_mk_priv((unsigned char *)&cksum,
-			       tmp_buf,
-			       (unsigned long) sizeof(cksum),
-			       schedule,
-			       kdata->session,
-			       laddr,
-			       faddr);
-	if (priv_len < 0) {
-	    /* re-sealing failed; notify the client */
-	    rem = KFAILURE;	 /* XXX */
-	  mutual_fail:
-	    priv_len = -1;
-	    tkt_len = htonl((unsigned long) priv_len);
-	    /* a length of -1 is interpreted as an authentication
-	       failure by the client */
-	    if ((cc = krb_net_write(fd, (char *)&tkt_len, sizeof(tkt_len)))
-		!= sizeof(tkt_len))
-	      return(cc);
-	    return(rem);
-	} else {
-	    /* re-sealing succeeded, send the private message */
-	    tkt_len = htonl((unsigned long)priv_len);
-	    if ((cc = krb_net_write(fd, (char *)&tkt_len, sizeof(tkt_len)))
-		!= sizeof(tkt_len))
-	      return(cc);
-	    if ((cc = krb_net_write(fd, (char *)tmp_buf, (int) priv_len))
-		!= (int) priv_len)
-	      return(cc);
-	}
-    }
-    return(0);
-}
-
-#endif /* SERVE_V4 */
-
-extern krb5_flags	krb5_kdc_default_options;
-
-krb5_error_code
-v5_recvauth(/* IN */
-	    fd, appl_version, server, sender_addr, fetch_from,
-	    keyproc, keyprocarg, rc_type, 
-	    /* OUT */
-	    seq_number, client, ticket, authent)
-     krb5_pointer	fd;
-     char	*appl_version;
-     krb5_principal	server;
-     krb5_address	*sender_addr;
-     krb5_pointer	fetch_from;
-     krb5_int32	*seq_number;
-     char		*rc_type;
-     krb5_rdreq_key_proc keyproc;
-     krb5_pointer keyprocarg;
-     krb5_principal	*client;
-     krb5_ticket	**ticket;
-     krb5_authenticator	**authent;
-{
-    krb5_error_code	retval, problem;
-    krb5_data	inbuf;
-    krb5_tkt_authent	*authdat;
-    krb5_data		outbuf;
-    krb5_rcache rcache;
-    krb5_octet		response;
-    krb5_data	*server_name;
-    char *cachename;
-    extern krb5_deltat krb5_clockskew;
-    static char		*rc_base = "rc_";
-    
-    /*
-     * Zero out problem variable.  If problem is set at the end of
-     * the intial version negotiation section, it means that we
-     * need to send an error code back to the client application
-     * and exit.
-     */
-    problem = 0;
-  
-    /*
-     * Read and check the application version string.
-     */
-    if (retval = krb5_read_message(fd, &inbuf))
-      return(retval);
-    if (strcmp(inbuf.data, appl_version)) {
-	krb5_xfree(inbuf.data);
-	if (!problem)
-	  problem = KRB5_SENDAUTH_BADAPPLVERS;
-    }
-    krb5_xfree(inbuf.data);
-    /*
-     * OK, now check the problem variable.  If it's zero, we're
-     * fine and we can continue.  Otherwise, we have to signal an
-     * error to the client side and bail out.
-     */
-    switch (problem) {
-      case 0:
-	response = 0;
-	break;
-      case KRB5_SENDAUTH_BADAUTHVERS:
-	response = 1;
-	break;
-      case KRB5_SENDAUTH_BADAPPLVERS:
-	response = 2;
-	break;
-      default:
-	/*
-	 * Should never happen!
-	 */
-	response = 255;
-#ifdef SENDAUTH_DEBUG
-	fprintf(stderr, "Programming botch in recvauth!  problem = %d",
-		problem);
-	abort();
-#endif
-	break;
-    }
-
-    /*
-     * Now we actually write the response.  If the response is non-zero,
-     * exit with a return value of problem
-     */
-    if ((krb5_net_write(*((int *) fd), (char *)&response, 1)) < 0) {
-	return(problem); /* We'll return the top-level problem */
-    }
-    if (problem)
-      return(problem);
-    rcache = NULL;
-#ifdef WORKING_RCACHE
-    /*
-     * Setup the replay cache.
-     */
-    if (!(rcache = (krb5_rcache) malloc(sizeof(*rcache)))) 
-      problem = ENOMEM;
-    if (!problem) 
-      problem = krb5_rc_resolve_type(&rcache,
-				     rc_type ? rc_type : "dfl");
-    cachename = NULL;
-    server_name = krb5_princ_component(server, 0);
-    if (!problem && !(cachename = malloc(server_name->length+1+strlen(rc_base))))
-      problem = ENOMEM;
-    if (!problem) {
-	strcpy(cachename, rc_base ? rc_base : "rc_");
-	strncat(cachename, server_name->data, server_name->length);
-	cachename[server_name->length+strlen(rc_base)] = '\0';
-	problem = krb5_rc_resolve(rcache, cachename);
-    }
-    if (!problem) {
-	if (krb5_rc_recover(rcache))
-	  /*
-	   * If the rc_recover didn't work, then try
-	   * initializing the replay cache.
-	   */
-	  problem = krb5_rc_initialize(rcache, krb5_clockskew);
-	if (problem) {
-	    krb5_rc_close(rcache);
-	    rcache = NULL;
-	}
-    }
-#endif
-
-    /*
-     * Now, let's read the AP_REQ message and decode it
-     */
-    if (retval = krb5_read_message(fd, &inbuf)) {
-#ifdef WORKING_RCACHE		
-	(void) krb5_rc_close(rcache);
-	if (cachename)
-	  free(cachename);
-#endif
-	return(retval);
-    }
-    authdat = 0;			/* so we can tell if we need to
-					   free it later... */
-    if (!problem)
-      problem = krb5_rd_req(&inbuf, server, sender_addr, fetch_from,
-			    keyproc, keyprocarg, rcache, &authdat);
-    krb5_xfree(inbuf.data);
-#ifdef WORKING_RCACHE
-    if (rcache)
-      retval = krb5_rc_close(rcache);
-#endif
-    if (!problem && retval)
-      problem = retval;
-#ifdef WORKING_RCACHE
-    if (cachename)
-      free(cachename);
-#endif
-    
-    /*
-     * If there was a problem, send back a krb5_error message,
-     * preceeded by the length of the krb5_error message.  If
-     * everything's ok, send back 0 for the length.
-     */
-    if (problem) {
-	krb5_error	error;
-	const	char *message;
-	
-	memset((char *)&error, 0, sizeof(error));
-	krb5_us_timeofday(&error.stime, &error.susec);
-	error.server = server;
-	error.error = problem - ERROR_TABLE_BASE_krb5;
-	if (error.error > 127)
-	  error.error = KRB_ERR_GENERIC;
-	message = error_message(problem);
-	error.text.length  = strlen(message) + 1;
-	if (!(error.text.data = malloc(error.text.length)))
-	  return(ENOMEM);
-	strcpy(error.text.data, message);
-	if (retval = krb5_mk_error(&error, &outbuf)) {
-	    free(error.text.data);
-	    return(retval);
-	}
-	free(error.text.data);
-    } else {
-	outbuf.length = 0;
-	outbuf.data = 0;
-    }
-    if (retval = krb5_write_message(fd, &outbuf)) {
-	if (outbuf.data)
-	  krb5_xfree(outbuf.data);
-	if (!problem)
-	  krb5_free_tkt_authent(authdat);
-	return(retval);
-    }
-    if (problem) {
-	/*
-	 * We sent back an error, we need to return
-	 */
-	if (authdat) krb5_free_tkt_authent(authdat);
-	return(problem);
-    }
-
-    /*
-     * Here lies the mutual authentication stuff...
-     *
-     * We're going to compose and send a AP_REP message.
-     */
-    if ((authdat->ap_options & AP_OPTS_MUTUAL_REQUIRED)) {
-	krb5_ap_rep_enc_part	repl;
-	
-	/*
-	 * Generate a random sequence number
-	 */
-	if (seq_number &&
-	    (retval = krb5_generate_seq_number(authdat->ticket->enc_part2->session,
-					       seq_number))) {
-	    krb5_free_tkt_authent(authdat);
-	    return(retval);
-	}
-	
-	repl.ctime = authdat->authenticator->ctime;
-	repl.cusec = authdat->authenticator->cusec;
-	repl.subkey = authdat->authenticator->subkey;
-	if (seq_number)
-	  repl.seq_number = *seq_number;
-	else
-	  repl.seq_number = 0;
-	
-	if (retval = krb5_mk_rep(&repl,
-				 authdat->ticket->enc_part2->session,
-				 &outbuf)) {
-	    krb5_free_tkt_authent(authdat);
-	    return(retval);
-	}
-	if (retval = krb5_write_message(fd, &outbuf)) {
-	    krb5_xfree(outbuf.data);
-	    krb5_free_tkt_authent(authdat);
-	    return(retval);
-	}
-	krb5_xfree(outbuf.data);
-    }
-    
-    /*
-     * At this point, we've won.  We just need to copy whatever
-     * parts of the authdat structure which the user wants, clean
-     * up, and exit.
-     */
-    if (client)
-      if (retval =
-	  krb5_copy_principal(authdat->ticket->enc_part2->client,
-			      client))
-	return(retval);
-    /*
-     * The following efficiency hack assumes knowledge about the
-     * structure of krb5_tkt_authent.  If we later add additional
-     * allocated substructures to krb5_tkt_authent, they will have
-     * to be reflected here; otherwise, we will probably have a
-     * memory leak.
-     *
-     * If the user wants that part of the authdat structure,
-     * return it; otherwise free it.
-     */
-    if (ticket)
-      *ticket = authdat->ticket;
-    else
-      krb5_free_ticket(authdat->ticket);
-    if (authent)
-      *authent = authdat->authenticator;
-    else
-      krb5_free_authenticator(authdat->authenticator);
-    krb5_xfree(authdat);
+    krb5_free_ticket(ticket);
     return 0;
 }
 
