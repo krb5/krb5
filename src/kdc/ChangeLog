@@ -1,3 +1,8 @@
+1999-09-13  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Don't try to take the 2nd
+	component of a principal that doesn't have 2 components.
+
 1999-08-18  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (compat_decrypt_key): Align DES3 enctypes with
