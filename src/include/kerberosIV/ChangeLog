@@ -1,3 +1,8 @@
+2003-09-23  Jeffrey Altman  <jaltman@mit.edu>
+
+	* krb.h: Modify the declaration of the CREDENTIALS structure to
+	support the additional address field used on Windows.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     * des.h, krb.h: Removed deprecated KfM functions.  They will be 
     exported but not in the headers to discourage new callers. Removed 
