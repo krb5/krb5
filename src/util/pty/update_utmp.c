@@ -138,5 +138,5 @@ if (host)
 
 #endif /* HAVE_SETUTENT */
 
-    return ptyint_update_wtmp(&ent, host);
+    return ptyint_update_wtmp(&ent, host, username);
 }
