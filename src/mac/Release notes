@@ -5,4 +5,19 @@ Changes in 1.1a3:
  fragment aliases
  debugging and non-debugging versions of shared libraries
  
-Yes, the release notes will be better written in next revision.
+1.1b1
+ building with 3des and realms iterator code
+ config file changes to turn off 3des
+
+1.1b2
+ upped cfm version numbers to prevent new apps from working with old libs
+
+1.1b3
+ renamed prebuild "all" target to prebuild
+ fixed resource chain mangling in Mac networking layer
+
+1.1b4
+ realms iterator fixes
+ additional tweaks to config file (reordering realms)
+ fix debug targets to link against debug C and runtime libs
+ 
