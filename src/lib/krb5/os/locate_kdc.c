@@ -284,19 +284,7 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 	    a->ai_addr->sa_family = a->ai_family;
 #ifdef HAVE_SA_LEN
 	if (a->ai_addr->sa_len == 0)
-	    switch (a->ai_addr->sa_family) {
-	    case AF_INET:
-		a->ai_addr->sa_len = sizeof (struct sockaddr_in);
-		break;
-#ifdef KRB5_USE_INET6
-	    case AF_INET6:
-		a->ai_addr->sa_len = sizeof (struct sockaddr_in6);
-		break;
-#endif
-	    default:
-		/* oh well, we lose */
-		break;
-	    }
+	    a->ai_addr->sa_len = a->ai_addrlen;
 #endif
 
 	set_port_num (a->ai_addr, port);
