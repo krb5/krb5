@@ -1,3 +1,6 @@
+Thu Jul 25 02:29:19 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Don't build the create, destroy, and stash directories.
 
 Thu Aug 03 12:04:59 1995  Chris Provenzano (proven@mit.edu)
 
