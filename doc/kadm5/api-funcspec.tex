@@ -446,52 +446,52 @@ order presented here. As mentioned above, the error table include file
 will be $<$ovsec_admin/kadm_err.h$>$.
 
 \begin{description}
-\item[* OVSEC_KADM_FAILURE] Operation failed for unspecified reason.
-\item[* OVSEC_KADM_AUTH_GET] Operation requires ``get'' privilege.
-\item[* OVSEC_KADM_AUTH_ADD] Operation requires ``add'' privilege.
-\item[* OVSEC_KADM_AUTH_MODIFY] Operation requires ``modify'' privilege.
-\item[* OVSEC_KADM_AUTH_DELETE] Operation requires ``delete'' privilege.
+\item[* OVSEC_KADM_FAILURE] Operation failed for unspecified reason
+\item[* OVSEC_KADM_AUTH_GET] Operation requires ``get'' privilege
+\item[* OVSEC_KADM_AUTH_ADD] Operation requires ``add'' privilege
+\item[* OVSEC_KADM_AUTH_MODIFY] Operation requires ``modify'' privilege
+\item[* OVSEC_KADM_AUTH_DELETE] Operation requires ``delete'' privilege
 \item[* OVSEC_KADM_AUTH_INSUFFICIENT] Insufficient authorization for
-operation.
-\item[* OVSEC_KADM_BAD_DB] Database inconsistency detected.
-\item[OVSEC_KADM_DUP] Principal or policy already exists.
-\item[OVSEC_KADM_RPC_ERROR] Communication failure with server.
-\item[OVSEC_KADM_NO_SRV] No administration server found for realm.
+operation
+\item[* OVSEC_KADM_BAD_DB] Database inconsistency detected
+\item[OVSEC_KADM_DUP] Principal or policy already exists
+\item[OVSEC_KADM_RPC_ERROR] Communication failure with server
+\item[OVSEC_KADM_NO_SRV] No administration server found for realm
 \item[OVSEC_KADM_BAD_HIST_KEY] Password history principal key version
-mismatch.
-\item[OVSEC_KADM_NOT_INIT] Connection to server not initialized.
-\item[OVSEC_KADM_UNK_PRINC]  Principal does not exist.
-\item[OVSEC_KADM_UNK_POLICY] Policy does not exist.
-\item[OVSEC_KADM_BAD_MASK] Invalid field mask for operation.
-\item[OVSEC_KADM_BAD_CLASS] Invalid number of character classes.
-\item[OVSEC_KADM_BAD_LENGTH] Invalid password length.
-\item[OVSEC_KADM_BAD_POLICY] Illegal policy name.
-\item[OVSEC_KADM_BAD_PRINCIPAL] Illegal principal name. XXX use krb5
-error code?
-\item[OVSEC_KADM_BAD_AUX_ATTR] Invalid auxillary attributes.
-\item[OVSEC_KADM_BAD_HISTORY] Invalid password history count.
+mismatch
+\item[OVSEC_KADM_NOT_INIT] Connection to server not initialized
+\item[OVSEC_KADM_UNK_PRINC]  Principal does not exist
+\item[OVSEC_KADM_UNK_POLICY] Policy does not exist
+\item[OVSEC_KADM_BAD_MASK] Invalid field mask for operation
+\item[OVSEC_KADM_BAD_CLASS] Invalid number of character classes
+\item[OVSEC_KADM_BAD_LENGTH] Invalid password length
+\item[OVSEC_KADM_BAD_POLICY] Illegal policy name
+\item[OVSEC_KADM_BAD_PRINCIPAL] Illegal principal name (XXX use krb5
+error code?)
+\item[OVSEC_KADM_BAD_AUX_ATTR] Invalid auxillary attributes
+\item[OVSEC_KADM_BAD_HISTORY] Invalid password history count
 \item[OVSEC_KADM_BAD_MIN_PASS_LIFE] Password minimum life is greater
-then password maximum life.
-\item[OVSEC_KADM_PASS_Q_TOOSHORT] Password is too short.
+then password maximum life
+\item[OVSEC_KADM_PASS_Q_TOOSHORT] Password is too short
 \item[OVSEC_KADM_PASS_Q_CLASS] Password does not contain enough
-character classes.
-\item[OVSEC_KADM_PASS_Q_DICT] Password is in the password dictionary.
-\item[OVSEC_KADM_PASS_REUSE] Cannot resuse password.
+character classes
+\item[OVSEC_KADM_PASS_Q_DICT] Password is in the password dictionary
+\item[OVSEC_KADM_PASS_REUSE] Cannot resuse password
 \item[OVSEC_KADM_PASS_TOOSOON] Current password's minimum life has not
-expired.
-\item[OVSEC_KADM_POLICY_REF] Policy reference count is not zero.
-\item[OVSEC_KADM_INIT] Connection to server already initialized.
-\item[OVSEC_KADM_BAD_PASSWORD] Incorrect password.
-\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change protected principal."
-\item[* OVSEC_KADM_BAD_SERVER_HANDLE] Programmer error!  Bad Admin server handle.
-\item[* OVSEC_KADM_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version.
-\item[* OVSEC_KADM_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported; recompile application against current OpenV*Secure Admin API header files and libraries.
-\item[* OVSEC_KADM_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries; obtain current OpenV*Secure Admin API header files and libraries and recompile application.
-\item[* OVSEC_KADM_BAD_API_VERSION] Programmer error!  Bad API version.
-\item[* OVSEC_KADM_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries; update application to adhere to current API version and recompile.
-\item[* OVSEC_KADM_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server; update application to adhere to current API version and recompile.
-\item[* OVSEC_KADM_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries; obrain current OpenV*Secure Admin API header files and libraries and recompile application.
-\item[* OVSEC_KADM_NEW_SERVER_API_VERSION] API version specified by application is unknown to server; obtain and install newest OpenV*Secure Admin Server.
+expired
+\item[OVSEC_KADM_POLICY_REF] Policy is in use
+\item[OVSEC_KADM_INIT] Connection to server already initialized
+\item[OVSEC_KADM_BAD_PASSWORD] Incorrect password
+\item[OVSEC_KADM_PROTECT_PRINCIPAL] Cannot change protected principal
+\item[* OVSEC_KADM_BAD_SERVER_HANDLE] Programmer error!  Bad Admin server handle
+\item[* OVSEC_KADM_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version
+\item[* OVSEC_KADM_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported (to fix, recompile application against current OpenV*Secure Admin API header files and libraries)
+\item[* OVSEC_KADM_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries (to fix, obtain current OpenV*Secure Admin API header files and libraries and recompile application)
+\item[* OVSEC_KADM_BAD_API_VERSION] Programmer error!  Bad API version
+\item[* OVSEC_KADM_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
+\item[* OVSEC_KADM_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
+\item[* OVSEC_KADM_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current OpenV*Secure Admin API header files and libraries and recompile application)
+\item[* OVSEC_KADM_NEW_SERVER_API_VERSION] API version specified by application is unknown to server (to fix, obtain and install newest OpenV*Secure Admin Server)
 \end{description}
 
 \subsection{Authentication and Authorization}
