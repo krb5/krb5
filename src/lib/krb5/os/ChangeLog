@@ -1,3 +1,10 @@
+Tue May  2 20:51:14 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* get_krbhst.c (krb5_get_krbhst): look in KRB5_ENV_KDC
+	(KERBEROS_SERVER) for a REALM:SERVER string. This overrides
+	anything else for that realm and is intended for un-installed
+	client use, testsuite use, and diagnostic use.
+
 Mon May  1 17:05:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* init_os_ctx.c (krb5_set_config_files): Added required const to
