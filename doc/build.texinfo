@@ -831,6 +831,18 @@ compiler should work as long as you give it the @samp{-Ae} flag
 @samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
 recommendation.  This has only been tested recently for HPUX 10.20.
 
+You will need to configure with @samp{--disable-shared
+--enable-static}, because as of 1.4 we don't have support for HPUX
+shared library finalization routines, nor the option (yet) to ignore
+that lack of support (which means repeated
+@code{dlopen}/@code{dlclose} cycles on the Kerberos libraries may not
+be safe) and build the shared libraries anyways.
+
+You will also need to configure the build tree with
+@samp{--disable-thread-support} if you are on HPUX 10 and do not have
+the DCE development package installed, because that's where the
+@code{pthread.h} header file is found.
+
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
 

@@ -1,5 +1,8 @@
 2005-03-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* build.texinfo (HPUX): Update with current state of shared
+	library and thread support.
+
 	* Makefile (PSPDF): New variable.
 	(admin-guide.pdf, install-guide.pdf, user-guide.pdf): New
 	targets.
