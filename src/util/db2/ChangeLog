@@ -1,3 +1,8 @@
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-unix): Delete install-libs.  We don't want
+	to install our in-tree libdb.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_INSTALL.

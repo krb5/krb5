@@ -9,6 +9,7 @@ required in porting Kerberos V5 to a new platform.
                                            build Kerberos.
 * Unpacking the Sources::       Preparing the source tree.
 * Doing the Build::             Compiling Kerberos.
+* Installing the Binaries::     Installing the compiled binaries.
 * Testing the Build::           Making sure Kerberos built correctly.
 * Options to Configure::        Command-line options to Configure
 * osconf.h::                    Header file-specific configurations
@@ -57,15 +58,15 @@ source code for building @value{PRODUCT} on Windows (see windows/README)
 
 @menu
 * The appl Directory::          
-* The clients Directory::
-* The gen-manpages Directory::
-* The include Directory::
+* The clients Directory::       
+* The gen-manpages Directory::  
+* The include Directory::       
 * The kadmin Directory::        
 * The kdc Directory::           
 * The krb524 Directory::        
-* The lib Directory::
-* The prototype Directory::
-* The slave Directory::
+* The lib Directory::           
+* The prototype Directory::     
+* The slave Directory::         
 * The util Directory::          
 @end menu
 
@@ -248,7 +249,7 @@ your current directory is @file{/u1} when you unpack the tarfiles, you
 will get @file{/u1/krb5-@value{RELEASE}/src}, etc.)
 
 
-@node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
+@node Doing the Build, Installing the Binaries, Unpacking the Sources, Building Kerberos V5
 @section Doing the Build
 
 You have a number of different options in how to build Kerberos.  If you
@@ -335,7 +336,33 @@ makes it fail for relative pathnames. Note that this version differs
 from the latest version as distributed and installed by the XConsortium
 with X11R6. Either version should be acceptable.
 
-@node Testing the Build, Options to Configure, Doing the Build, Building Kerberos V5
+@node Installing the Binaries, Testing the Build, Doing the Build, Building Kerberos V5
+@section Installing the Binaries
+
+Once you have built Kerberos, you should install the binaries.  You
+can do this by running:
+
+@example
+% make install
+@end example
+
+If you want to install the binaries into a destination directory that
+is not their final destination, which may be convenient if you want to
+build a binary distribution to be deployed on multiple hosts, you may
+use:
+
+@example
+% make install DESTDIR=/path/to/destdir
+@end example
+
+This will install the binaries under @code{DESTDIR/PREFIX}, e.g., the
+user programs will install into @code{DESTDIR/PREFIX/bin}, the
+libraries into @code{DESTDIR/PREFIX/lib}, etc.
+
+Note that if you want to test the build (see @ref{Testing the Build}),
+you usually do not need to do a @code{make install} first.
+
+@node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
 @section Testing the Build
 
 The Kerberos V5 distribution comes with built-in regression tests.  To
@@ -569,7 +596,10 @@ This option is ignored if @samp{--with-system-ss} is not specified.
 @item --with-system-db
 
 Use an installed version of the Berkeley DB package, which must
-provide an API compatible with version 1.85.
+provide an API compatible with version 1.85.  This option is
+@emph{unsupported} and untested.  In particular, we do not know if the
+database-rename code used in the dumpfile load operation will behave
+properly.
 
 If this option is not given, a version supplied with the Kerberos
 sources will be built and installed.  (We are not updating this
@@ -769,11 +799,12 @@ NetBSD and FreeBSD.)
 @node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
 @subsection HPUX
 
-The native (bundled) compiler for HPUX currently will not work, because
-it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{-D_HPUX_SOURCE} flag
-(i.e. @samp{./configure --with-cc='c89 -D_HPUX_SOURCE'}).  This has only
-been tested recently for HPUX 10.20.
+The native (bundled) compiler for HPUX currently will not work,
+because it is not a full ANSI C compiler.  The optional ANSI C
+compiler should work as long as you give it the @samp{-Ae} flag
+(i.e. @samp{./configure CC='cc -Ae'}).  This is equivalent to
+@samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
+recommendation.  This has only been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
@@ -823,7 +854,12 @@ You @b{must} compile Kerberos V5 without the UCB compatibility
 libraries.  This means that @file{/usr/ucblib} must not be in the
 LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
-@code{--with-ccopts=-i} option to @samp{configure}.
+@code{CFLAGS=-i} option to @samp{configure}.
+
+If you are compiling for a 64-bit execution environment, you may need
+to configure with the option @code{CFLAGS="-D_XOPEN_SOURCE=500
+-D__EXTENSIONS__"}.  This is not well tested; at MIT we work primarily
+with the 32-bit execution environment.
 
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
 @subsection SGI Irix 5.X
@@ -852,8 +888,8 @@ GCC instead.
 
 On the DEC MIPS platform, using the native compiler, @file{md4.c} and
 @file{md5.c} can not be compiled with the optimizer set at level 1.
-That is, you must specify either @samp{--with-ccopts=-O} and
-@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
+That is, you must specify either @samp{CFLAGS=-O} and
+@samp{CFLAGS=-g} to configure.  If you don't specify either, the
 compile will never complete.
 
 The optimizer isn't hung; it just takes an exponentially long time.

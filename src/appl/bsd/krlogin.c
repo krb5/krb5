@@ -702,8 +702,8 @@ main(argc, argv)
 	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
 	    do_inband = 1;
 
-	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
-						   &key);
+	    status = krb5_auth_con_getsendsubkey (bsd_context, auth_context,
+						  &key);
 	    if ((status || !key) && encrypt_flag)
 		try_normal(orig_argv);
 	}

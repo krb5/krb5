@@ -58,6 +58,7 @@ char confname[FILENAME_MAX];           /* krb5.conf (or krb.conf for krb4) */
 #ifdef KRB5
 char ccname[FILENAME_MAX];             /* ccache file location */
 BOOL forwardable;                      /* TRUE to get forwardable tickets */
+BOOL noaddresses;
 krb5_context k5_context;
 krb5_ccache k5_ccache;
 #endif
@@ -1224,7 +1225,10 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     krb5_get_init_creds_opt_init(&opts);
     krb5_get_init_creds_opt_set_forwardable(&opts, forwardable);
     krb5_get_init_creds_opt_set_tkt_life(&opts, lifetime * 60);
-    
+    if (noaddresses) {
+		krb5_get_init_creds_opt_set_address_list(&opts, NULL);
+ 	}    
+
     /*
      * get the initial creds using the password and the options we set above
      */
@@ -1491,7 +1495,6 @@ kwin_paint(HWND hwnd)
 LRESULT CALLBACK
 kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  int n;
 
 #if 0
   if (message == wm_kerberos_changed) {       /* Message from the ccache */
@@ -1704,6 +1707,7 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
    * ticket options
    */
   forwardable = cns_res.forwardable;
+  noaddresses = cns_res.noaddresses;
 
   /*
    * Load clock icons
