@@ -6,6 +6,8 @@ DONE	* convert syslog -> log (to real file)
 DONE	* save versus deletion of rcache file (HIGH PRIORITY)
 DONE	* Use dbm as the default database. (HIGH PRIORITY)
 DONE	* KDC does not notice new databases after new db loads (HIGH PRIORITY)
+	* KDC returns wrong starttime if queried too quickly with a TGS req.
+		after a TGT request.
 
 2.  API changes
 DONE	* context changes (mostly done)
@@ -48,7 +50,7 @@ DONE	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
 		unnecessarily; this is because init_ctx references
 		krb5_csarray (via valid_etype) and
 		krb5_max_crypto_system, which drags in cryptoconf.c
-	* Make kinit not delete the credcache before tickets are
+DONE	* Make kinit not delete the credcache before tickets are
 		successfully obtained.
 	* Telnet/rlogin bug --- must do
 		gethostbyname()/gethostbyaddr() to get a real DNS name
@@ -65,7 +67,7 @@ DONE	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
 		principal in the database.  Doing this will also allow
 		us to remove the mkvno field saving 2 bytes per entry.
 	* Fix preauthentication code
-	* Save the time offset between the kerberos server and the
+DONE	* Save the time offset between the kerberos server and the
 		current host in the credential cache. (Just need to
 		actually get and save the time.)
 	* Make a keysalt to salt function that takes keysalt info and
@@ -86,7 +88,7 @@ DONE	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
 	* discuss (POST 1.0)
 	* FTP (POST 1.0?)
 	* Zephyr (POST 1.0)
-	* Encrypted telnet (POST 1.0?)
+	* Encrypted telnet (HIGH)
 
 9.  Kadmin
 DONE	* Password changing protocol.
@@ -107,7 +109,7 @@ DONE	* We shouldn't be installing into /krb5.  Should use the Gnu
 		the need.)
 
 11.  Testing
-	* A test for the new kdb locking code (HIGH)
+	* Test the new kdb locking code (HIGH)
 	* test cross realm authentication (HIGH)
 	* Test that db key_data crunching of enctypes actually works.  (HIGH)
 		Routines in kdb_cpw.c: add_key_pwd(), add_key_rnd()
