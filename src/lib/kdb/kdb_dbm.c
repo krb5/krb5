@@ -36,8 +36,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <utime.h>
+#include <krb5/config.h>
 
-#if defined (POSIX_FILE_LOCKS) && !defined(unicos61)
+#ifdef POSIX_FILE_LOCKS
 #include <fcntl.h>
 #endif
 
