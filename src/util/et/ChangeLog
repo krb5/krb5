@@ -1,3 +1,15 @@
+Fri Feb  7 22:10:23 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* compile_et.c: Change the emitted name of the struct error_table
+ 		to be et_XXX_error_table, instead of it being a static
+ 		variable named "et".  (This change has already been made
+		in the awk versions of compile_et.)
+
+	* com_err.h, com_err.c: Remove the void *priv argument from
+ 		com_err_va() and et_com_err() experimental API's.  (That
+ 		was a braino; the private data pointer should come from
+ 		the hook_func_data field.)
+
 Fri Feb  7 19:03:07 1997  Richard Basch  <basch@lehman.com>
 
 	* com_err.c com_err.h: Added old interface function com_err_va

@@ -247,15 +247,15 @@ int main (argc, argv) int argc; char **argv; {
     for (cpp = struct_def; *cpp; cpp++)
 	fputs (*cpp, cfile);
     fprintf(cfile,
-	    "static const struct error_table et = { text, %ldL, %d };\n\n",
-	    table_number, current);
+	    "const struct error_table et_%s_error_table = { text, %ldL, %d };\n\n",
+	    table_name, table_number, current);
     fputs("static struct et_list link = { 0, 0 };\n\n",
 	  cfile);
     fprintf(cfile, "void initialize_%s_error_table (%s) {\n",
 	    table_name, (language == lang_C) ? "void" : "NOARGS");
     fputs("    if (!link.table) {\n", cfile);
     fputs("        link.next = _et_list;\n", cfile);
-    fputs("        link.table = &et;\n", cfile);
+    fprintf(cfile, "        link.table = &et_%s_error_table;\n", table_name);
     fputs("        _et_list = &link;\n", cfile);
     fputs("    }\n", cfile);
     fputs("}\n", cfile);

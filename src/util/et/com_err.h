@@ -72,9 +72,12 @@ KRB5_DLLIMP extern et_old_error_hook_func KRB5_CALLCONV set_com_err_hook
 	ET_P((et_old_error_hook_func));
 KRB5_DLLIMP extern et_old_error_hook_func KRB5_CALLCONV reset_com_err_hook
 	ET_P((void));
+KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
+	ET_P((const char FAR *whoami, errcode_t code, const char FAR *fmt,
+	      va_list ap));
 
 /*
- * The the new com_err API...
+ * The experimental com_err API...
  */
 typedef struct et_context FAR *et_ctx;
 typedef void (KRB5_CALLCONV *et_error_hook_func)
@@ -102,11 +105,11 @@ KRB5_DLLIMP extern const char FAR * KRB5_CALLCONV et_error_message
 	ET_P((et_ctx, errcode_t));
 
 KRB5_DLLIMP extern void KRB5_CALLCONV_C et_com_err
-	ET_STDARG_P((et_ctx, void FAR *, const char FAR *, errcode_t,
+	ET_STDARG_P((et_ctx, const char FAR *, errcode_t,
 		     const char FAR *, ...));
 
 KRB5_DLLIMP extern void KRB5_CALLCONV_C et_com_err_va
-	ET_STDARG_P((et_ctx, void FAR *, const char FAR *, errcode_t,
+	ET_STDARG_P((et_ctx, const char FAR *, errcode_t,
 		     const char FAR *, va_list ap));
 
 KRB5_DLLIMP errcode_t KRB5_CALLCONV et_set_hook

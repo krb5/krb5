@@ -103,9 +103,8 @@ void KRB5_CALLCONV default_com_err_proc(ectx, priv, whoami, code, fmt, ap)
 
 et_old_error_hook_func com_err_hook = 0;
 
-void et_com_err_va(ectx, priv, whoami, code, fmt, ap)
+void et_com_err_va(ectx, whoami, code, fmt, ap)
 	et_ctx ectx;
-	void FAR *priv;
 	const char FAR *whoami;
 	errcode_t code;
 	const char FAR *fmt;
@@ -114,7 +113,8 @@ void et_com_err_va(ectx, priv, whoami, code, fmt, ap)
 	if (ectx) {
 		if (ectx->hook_func == 0)
 			ectx->hook_func = default_com_err_proc;
-		(*ectx->hook_func)(ectx, priv, whoami, code, fmt, ap);
+		(*ectx->hook_func)(ectx, ectx->hook_func_data, whoami,
+				   code, fmt, ap);
 	} else {
 		if (!com_err_hook)
 			default_com_err_proc(0, 0, whoami,
@@ -126,15 +126,13 @@ void et_com_err_va(ectx, priv, whoami, code, fmt, ap)
 
 #ifndef ET_VARARGS
 KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(et_ctx ectx,
-					    void FAR *priv,
 					    const char FAR *whoami,
 					    errcode_t code,
 					    const char FAR *fmt, ...)
 #else
-KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(ectx, priv, whoami,
+KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(ectx, whoami,
 					    code, fmt, va_alist)
 	et_ctx ectx;
-	void FAR *priv;
 	const char FAR *whoami;
 	errcode_t code;
 	const char FAR *fmt;
@@ -148,7 +146,7 @@ KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(ectx, priv, whoami,
 #else
 	va_start(ap, fmt);
 #endif
-	et_com_err_va(ectx, priv, whoami, code, fmt, ap);
+	et_com_err_va(ectx, whoami, code, fmt, ap);
 	va_end(ap);
 }
 
@@ -162,7 +160,7 @@ KRB5_DLLIMP void KRB5_CALLCONV_C com_err_va(whoami, code, fmt, args)
     const char FAR * fmt;
     va_list args;
 {
-    et_com_err_va(0, 0, whoami, code, fmt, args);
+    et_com_err_va(0, whoami, code, fmt, args);
 }
 
 #ifndef ET_VARARGS
@@ -170,7 +168,7 @@ KRB5_DLLIMP void KRB5_CALLCONV_C com_err(const char FAR *whoami,
 					 errcode_t code,
 					 const char FAR *fmt, ...)
 #else
-KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(whoami, code, fmt, va_alist)
+KRB5_DLLIMP void KRB5_CALLCONV_C com_err(whoami, code, fmt, va_alist)
 	const char FAR *whoami;
 	errcode_t code;
 	const char FAR *fmt;
