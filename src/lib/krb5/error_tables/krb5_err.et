@@ -204,4 +204,7 @@ error_code KRB5_RC_IO_IO,		"I/O error in replay cache i/o code"
 error_code KRB5_RC_IO_UNKNOWN,		"Generic unknown RC/IO error"
 error_code KRB5_RC_IO_SPACE,		"Insufficient system space to store replay information"
 
+error_code KRB5_TRANS_CANTOPEN,		"Can't find realm translation file"
+error_code KRB5_TRANS_BADFORMAT,	"Improper format of realm translation file"
+
 end
