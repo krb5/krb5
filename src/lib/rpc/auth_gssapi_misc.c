@@ -4,6 +4,24 @@
  * $Header$
  * 
  * $Log$
+ * Revision 1.15  1996/08/14 00:01:37  tlyu
+ * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
+ *
+ * 	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
+ *  		function definitions.
+ *
+ * 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
+ * 		string concatenation, de-ANSI-fy function definitions.
+ *
+ * 	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
+ * 		concatenation, de-ANSI-fy function definitions.
+ *
  * Revision 1.14  1996/07/22 20:39:44  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -109,7 +127,8 @@ int misc_debug_gssapi = DEBUG_GSSAPI;
 #define AUTH_GSSAPI_DISPLAY_STATUS(args)
 #endif
    
-static void auth_gssapi_display_status_1(char *, OM_uint32, int, int);
+static void auth_gssapi_display_status_1
+	PROTOTYPE((char *, OM_uint32, int, int));
    
 bool_t xdr_gss_buf(xdrs, buf)
    XDR *xdrs;
@@ -216,14 +235,20 @@ bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
      return TRUE;
 }
 
-void auth_gssapi_display_status(char *msg, OM_uint32 major, OM_uint32 minor)
+void auth_gssapi_display_status(msg, major, minor)
+     char *msg;
+     OM_uint32 major;
+     OM_uint32 minor;
 {
      auth_gssapi_display_status_1(msg, major, GSS_C_GSS_CODE, 0);
      auth_gssapi_display_status_1(msg, minor, GSS_C_MECH_CODE, 0);
 }
 
-static void auth_gssapi_display_status_1(char *m, OM_uint32 code, int type,
-					 int rec)
+static void auth_gssapi_display_status_1(m, code, type, rec)
+     char *m;
+     OM_uint32 code;
+     int type;
+     int rec;
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc msg;
@@ -240,8 +265,9 @@ static void auth_gssapi_display_status_1(char *m, OM_uint32 code, int type,
 		    auth_gssapi_display_status_1(m, minor_stat,
 						 GSS_C_MECH_CODE, 1);
 	       } else
-		    fprintf(stderr,"GSS-API authentication error %s: "
-			    "recursive failure!\n", msg);
+		    fprintf(stderr,
+			    "GSS-API authentication error %s: recursive failure!\n",
+			    msg);
 	       return;
 	  }
 	  

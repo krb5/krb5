@@ -4,6 +4,24 @@
  * $Header$
  * 
  * $Log$
+ * Revision 1.24  1996/08/14 00:01:30  tlyu
+ * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
+ *
+ * 	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
+ *  		function definitions.
+ *
+ * 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
+ * 		string concatenation, de-ANSI-fy function definitions.
+ *
+ * 	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
+ * 		concatenation, de-ANSI-fy function definitions.
+ *
  * Revision 1.23  1996/07/22 20:39:39  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -183,7 +201,9 @@ extern struct rpc_createerr rpc_createerr;
  *
  * Effects: See design document, section XXX.
  */
-AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
+AUTH *auth_gssapi_create_default(clnt, service_name)
+     CLIENT *clnt;
+     char *service_name;
 {
      AUTH *auth;
      OM_uint32 gssstat, minor_stat;
@@ -227,17 +247,26 @@ AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
  *
  * Effects: See design document, section XXX.
  */
-AUTH *auth_gssapi_create(CLIENT *clnt,
-			 OM_uint32 *gssstat,
-			 OM_uint32 *minor_stat,
-			 gss_cred_id_t claimant_cred_handle,
-			 gss_name_t target_name,
-			 gss_OID mech_type,
-			 int req_flags,
-			 OM_uint32 time_req,
-			 gss_OID *actual_mech_type,
-			 int *ret_flags,
-			 OM_uint32 *time_rec)
+AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
+			 claimant_cred_handle,
+			 target_name,
+			 mech_type,
+			 req_flags,
+			 time_req,
+			 actual_mech_type,
+			 ret_flags,
+			 time_rec)
+     CLIENT *clnt;
+     OM_uint32 *gssstat;
+     OM_uint32 *minor_stat;
+     gss_cred_id_t claimant_cred_handle;
+     gss_name_t target_name;
+     gss_OID mech_type;
+     int req_flags;
+     OM_uint32 time_req;
+     gss_OID *actual_mech_type;
+     int *ret_flags;
+     OM_uint32 *time_rec;
 {
      AUTH *auth, *save_auth;
      struct auth_gssapi_data *pdata;
@@ -376,8 +405,8 @@ next_token:
 	       if (callstat == RPC_AUTHERROR &&
 		   (err.re_why == AUTH_BADCRED || err.re_why == AUTH_FAILED)
 		   && call_arg.version >= 1) {
-		    L_PRINTF(1, ("call_arg protocol "
-			    "version %d rejected, trying %d.\n",
+		    L_PRINTF(1,
+			     ("call_arg protocol version %d rejected, trying %d.\n",
 			    call_arg.version, call_arg.version-1));
 		    call_arg.version--;
 		    goto try_new_version;
@@ -396,8 +425,8 @@ next_token:
 		* understand
 		*/
 	       if (call_arg.version > 2 && call_res.version == 1) {
-		    L_PRINTF(1, ("Talking to Secure 1.1 server, "
-				 "using version 1.\n"));
+		    L_PRINTF(1,
+			     ("Talking to Secure 1.1 server, using version 1.\n"));
 		    call_arg.version = 1;
 		    goto try_new_version;
 	       }

@@ -39,6 +39,17 @@
 #define __XDR_HEADER__
 
 /*
+ * Make sure we have a definition for PROTOTYPE.
+ */
+#if !defined(PROTOTYPE)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+#endif
+
+/*
  * XDR provides a conventional way for converting between C data
  * types and an external bit-string representation.  Library supplied
  * routines provide for the conversion on built-in C data types.  These
@@ -222,27 +233,48 @@ struct xdr_discrim {
  * These are the "generic" xdr routines.
  */
 extern bool_t	xdr_void();
-extern bool_t	xdr_int(XDR *, int *);
-extern bool_t	xdr_u_int(XDR *, unsigned int *);
-extern bool_t	xdr_long(XDR *, long *);
-extern bool_t	xdr_u_long(XDR *, unsigned long *);
-extern bool_t	xdr_short(XDR *, short *);
-extern bool_t	xdr_u_short(XDR *, unsigned short *);
-extern bool_t	xdr_bool(XDR *, bool_t *);
-extern bool_t	xdr_enum(XDR *, enum_t *);
-extern bool_t	xdr_array(XDR *, caddr_t *, unsigned int*, unsigned int, unsigned int, xdrproc_t);
-extern bool_t	xdr_bytes(XDR *, char **, unsigned int *, unsigned int);
-extern bool_t	xdr_opaque(XDR *, caddr_t, unsigned int);
-extern bool_t	xdr_string(XDR *, char **, unsigned int);
-extern bool_t	xdr_union(XDR *, enum_t *, char *, struct xdr_discrim *, xdrproc_t);
-extern bool_t	xdr_char(XDR *, char *);
-extern bool_t	xdr_u_char(XDR *, char *);
-extern bool_t	xdr_vector(XDR *, char *, unsigned int, unsigned int, xdrproc_t);
-extern bool_t	xdr_float(XDR *, float *);
-extern bool_t	xdr_double(XDR *, double *);
-extern bool_t	xdr_reference(XDR *, caddr_t *, unsigned int, xdrproc_t);
-extern bool_t	xdr_pointer(XDR *, char **, unsigned int, xdrproc_t);
-extern bool_t	xdr_wrapstring(XDR *, char **);
+extern bool_t	xdr_int
+PROTOTYPE((XDR *, int *));
+extern bool_t	xdr_u_int
+PROTOTYPE((XDR *, unsigned int *));
+extern bool_t	xdr_long
+PROTOTYPE((XDR *, long *));
+extern bool_t	xdr_u_long
+PROTOTYPE((XDR *, unsigned long *));
+extern bool_t	xdr_short
+PROTOTYPE((XDR *, short *));
+extern bool_t	xdr_u_short
+PROTOTYPE((XDR *, unsigned short *));
+extern bool_t	xdr_bool
+PROTOTYPE((XDR *, bool_t *));
+extern bool_t	xdr_enum
+PROTOTYPE((XDR *, enum_t *));
+extern bool_t	xdr_array
+PROTOTYPE((XDR *, caddr_t *, unsigned int*, unsigned int, unsigned int, xdrproc_t));
+extern bool_t	xdr_bytes
+PROTOTYPE((XDR *, char **, unsigned int *, unsigned int));
+extern bool_t	xdr_opaque
+PROTOTYPE((XDR *, caddr_t, unsigned int));
+extern bool_t	xdr_string
+PROTOTYPE((XDR *, char **, unsigned int));
+extern bool_t	xdr_union
+PROTOTYPE((XDR *, enum_t *, char *, struct xdr_discrim *, xdrproc_t));
+extern bool_t	xdr_char
+PROTOTYPE((XDR *, char *));
+extern bool_t	xdr_u_char
+PROTOTYPE((XDR *, char *));
+extern bool_t	xdr_vector
+PROTOTYPE((XDR *, char *, unsigned int, unsigned int, xdrproc_t));
+extern bool_t	xdr_float
+PROTOTYPE((XDR *, float *));
+extern bool_t	xdr_double
+PROTOTYPE((XDR *, double *));
+extern bool_t	xdr_reference
+PROTOTYPE((XDR *, caddr_t *, unsigned int, xdrproc_t));
+extern bool_t	xdr_pointer
+PROTOTYPE((XDR *, char **, unsigned int, xdrproc_t));
+extern bool_t	xdr_wrapstring
+PROTOTYPE((XDR *, char **));
 
 /*
  * Common opaque bytes objects used by many rpc protocols;
@@ -254,10 +286,13 @@ struct netobj {
 	char	*n_bytes;
 };
 typedef struct netobj netobj;
-extern bool_t   xdr_netobj(XDR *, struct netobj *);
+extern bool_t   xdr_netobj
+PROTOTYPE((XDR *, struct netobj *));
 
-extern bool_t	xdr_int32(XDR *, rpc_int32 *);
-extern bool_t	xdr_u_int32(XDR *, rpc_u_int32 *);
+extern bool_t	xdr_int32
+PROTOTYPE((XDR *, rpc_int32 *));
+extern bool_t	xdr_u_int32
+PROTOTYPE((XDR *, rpc_u_int32 *));
 
 /*
  * These are the public routines for the various implementations of

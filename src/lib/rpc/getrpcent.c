@@ -58,8 +58,21 @@ static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
 #define ENDRPCENT_TYPE int
 #endif
 
-SETRPCENT_TYPE setrpcent(int);
-ENDRPCENT_TYPE endrpcent(void);
+/*
+ * Make sure we have a definition for PROTOTYPE.
+ */
+#if !defined(PROTOTYPE)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+#endif
+
+SETRPCENT_TYPE setrpcent
+PROTOTYPE((int));
+ENDRPCENT_TYPE endrpcent
+PROTOTYPE((void));
 
 /*
  * Internet version.

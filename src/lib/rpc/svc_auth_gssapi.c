@@ -5,6 +5,24 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.39  1996/08/14 00:01:48  tlyu
+ * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
+ *
+ * 	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
+ *  		function definitions.
+ *
+ * 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
+ * 		string concatenation, de-ANSI-fy function definitions.
+ *
+ * 	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
+ * 		prototypes.
+ *
+ * 	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
+ * 		concatenation, de-ANSI-fy function definitions.
+ *
  * Revision 1.38  1996/07/30 23:25:37  tlyu
  * 	* svc_auth_gssapi.c: #include <rpc/rpc.h> before <sys/stat.h> (to
  * 		get sys/types.h.
@@ -231,11 +249,15 @@ typedef struct _svc_auth_gssapi_data {
 static bool_t	svc_auth_gssapi_wrap();
 static bool_t	svc_auth_gssapi_unwrap();
 static svc_auth_gssapi_data *create_client();
-static svc_auth_gssapi_data *get_client(gss_buffer_t client_handle);
-static void destroy_client(svc_auth_gssapi_data *client_data);
+static svc_auth_gssapi_data *get_client
+PROTOTYPE((gss_buffer_t client_handle));
+static void destroy_client
+PROTOTYPE((svc_auth_gssapi_data *client_data));
 static void clean_client(), cleanup();
-static void client_expire(svc_auth_gssapi_data *client_data, rpc_u_int32 exp);
-static void dump_db(char *msg);
+static void client_expire
+PROTOTYPE((svc_auth_gssapi_data *client_data, rpc_u_int32 exp));
+static void dump_db
+PROTOTYPE((char *msg));
 
 struct svc_auth_ops svc_auth_gssapi_ops = {
      svc_auth_gssapi_wrap,
@@ -320,9 +342,8 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
      }
      XDR_DESTROY(&xdrs);
 
-     PRINTF(("svcauth_gssapi: got credentials, version %d, "
-	     "client_handle len %d\n", creds.version,
-	     creds.client_handle.length));
+     PRINTF(("svcauth_gssapi: got credentials, version %d, client_handle len %d\n",
+	     creds.version, creds.client_handle.length));
 
      if (creds.version != 2) {
  	  PRINTF(("svcauth_gssapi: bad credential version\n"));
@@ -861,7 +882,9 @@ static svc_auth_gssapi_data *create_client()
  * would break the rep invariant.  Now the database is an unsorted
  * linked list, so it doesn't matter.
  */
-static void client_expire(svc_auth_gssapi_data *client_data, rpc_u_int32 exp)
+static void client_expire(client_data, exp)
+     svc_auth_gssapi_data *client_data;
+     rpc_u_int32 exp;
 {
      client_data->expiration = exp;
 }
@@ -882,7 +905,8 @@ static void client_expire(svc_auth_gssapi_data *client_data, rpc_u_int32 exp)
  * matches the contents of client_handle, or returns NULL if none was
  * found.
  */
-static svc_auth_gssapi_data *get_client(gss_buffer_t client_handle)
+static svc_auth_gssapi_data *get_client(client_handle)
+     gss_buffer_t client_handle;
 {
      client_list *c;
      rpc_u_int32 handle;
@@ -917,7 +941,8 @@ static svc_auth_gssapi_data *get_client(gss_buffer_t client_handle)
  * client_data's entry in the database is destroyed.  client_data is
  * freed.
  */
-static void destroy_client(svc_auth_gssapi_data *client_data)
+static void destroy_client(client_data)
+     svc_auth_gssapi_data *client_data;
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc out_buf;
@@ -978,7 +1003,8 @@ done:
 #endif
 }
 
-static void dump_db(char *msg)
+static void dump_db(msg)
+     char *msg;
 {
      svc_auth_gssapi_data *client_data;
      client_list *c;
@@ -1032,7 +1058,9 @@ done:
  *
  * See functional specifications.
  */
-bool_t _svcauth_gssapi_set_names(auth_gssapi_name *names, int num)
+bool_t _svcauth_gssapi_set_names(names, num)
+     auth_gssapi_name *names;
+     int num;
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc in_buf;
@@ -1097,7 +1125,9 @@ fail:
  * See functional specifications.
  */
 void _svcauth_gssapi_set_log_badauth_func
-     (auth_gssapi_log_badauth_func func, caddr_t data)
+     (func, data)
+     auth_gssapi_log_badauth_func func;
+     caddr_t data;
 {
      log_badauth = func;
      log_badauth_data = data;
@@ -1112,7 +1142,9 @@ void _svcauth_gssapi_set_log_badauth_func
  * See functional specifications.
  */
 void _svcauth_gssapi_set_log_badverf_func
-     (auth_gssapi_log_badverf_func func, caddr_t data)
+     (func, data)
+     auth_gssapi_log_badverf_func func;
+     caddr_t data;
 {
      log_badverf = func;
      log_badverf_data = data;
@@ -1127,7 +1159,9 @@ void _svcauth_gssapi_set_log_badverf_func
  * See functional specifications.
  */
 void _svcauth_gssapi_set_log_miscerr_func
-     (auth_gssapi_log_miscerr_func func, caddr_t data)
+     (func, data)
+     auth_gssapi_log_miscerr_func func;
+     caddr_t data;
 {
      log_miscerr = func;
      log_miscerr_data = data;

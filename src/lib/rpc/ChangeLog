@@ -1,3 +1,22 @@
+Tue Aug 13 15:18:16 1996  Tom Yu  <tlyu@mit.edu>
+
+	* getrpcent.c: Add PROTOTYPE and conditionalize function
+		prototypes.
+
+	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
+
+	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
+ 		function definitions.
+
+	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
+		string concatenation, de-ANSI-fy function definitions.
+
+	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
+		prototypes.
+
+	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
+		concatenation, de-ANSI-fy function definitions.
+
 Thu Aug  8 15:30:01 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in, types.hin: Change search for struct rpcent yet
