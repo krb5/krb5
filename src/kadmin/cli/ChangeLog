@@ -1,3 +1,11 @@
+Wed Oct  9 15:23:51 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.c (kadmin_addprinc): add "default" policy behavior;
+ 	delete kadmin_renprinc entirely, since it is no longer supported
+ 	by the api and there is no ss command for it anyway
+
+	* kadmin.M: document "default" policy behavior.  [krb5-admin/84]
+
 Fri Oct  4 16:37:30 1996  Kevin L Mitchell  <klmitch@mit.edu>
 
 	* kadmin.c (kadmin_renprinc): Changed newcanon to oldcanon in the

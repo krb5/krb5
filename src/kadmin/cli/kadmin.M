@@ -151,7 +151,13 @@ Specifying "ago" in a duration may result in unexpected behavior.
 \fBadd_principal\fP [\fIoptions\fP] \fInewprinc\fP
 creates the principal
 .IR newprinc ,
-prompting twice for a password.  This command requires the
+prompting twice for a password.  If no policy is specified with the
+-policy option, and the policy named "default" exists, then that
+policy is assigned to the principal; note that the assignment of the
+policy "default" only occurs automatically when a principal is first
+created, so the policy "default" must already exist for the assignment
+to occur.  This assignment of "default" can be suppressed with the
+-clearpolicy option.  This command requires the 
 .I add
 privilege.  This command has the aliases
 .B addprinc
@@ -176,8 +182,17 @@ maximum renewable life of tickets for the principal
 explicity set the key version number.
 .TP
 \fB\-policy\fP \fIpolicy\fP
-policy used by this principal.  If no policy is supplied, the principal
-will default to having no policy, and a warning message will be printed.
+policy used by this principal.  If no policy is supplied, then if the
+policy "default" exists and the -clearpolicy is not also specified,
+then the policy "default" is used; otherwise, the principal 
+will have no policy, and a warning message will be printed.
+.TP
+\fB\-clearpolicy\fP 
+.B -clearpolicy
+prevents the policy "default" from being assigned when 
+.B -policy
+is not specified.  This option has no effect if the policy "default"
+does not exist.
 .TP
 {\fB\-\fP|\fB+\fP}\fBallow_postdated\fP
 .B -allow_postdated
