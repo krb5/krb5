@@ -1,0 +1,22 @@
+; To build a symlink tree, do:
+;
+; /mit/synctree/synctree -s /mit/krb5/src -d /mit/krb5/@sys
+
+map * $
+
+copy *;d
+link *;r
+link include/stdc-incl
+link include/isode-6.0
+link config
+copy include/isode
+copy *Makefile
+ignore *~
+ignore *RCS
+ignore *Makefile.bak
+ignore *,v
+ignore *.o
+ignore *.a
+ignore include/isode-5.0
+ignore prototype
+ignore lib/des.v4
