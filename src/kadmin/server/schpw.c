@@ -7,6 +7,10 @@
 
 #include "misc.h"
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
+
 krb5_error_code
 process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
 		     req, rep)
@@ -30,7 +34,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     krb5_ticket *ticket;
     krb5_data cipher, clear;
     struct sockaddr local_addr, remote_addr;
-    int addrlen;
+    GETSOCKNAME_ARG3_TYPE addrlen;
     krb5_replay_data replay;
     krb5_error krberror;
     int numresult;

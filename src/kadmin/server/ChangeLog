@@ -1,3 +1,8 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* schpw.c (process_chpw_request): Use GETSOCKNAME_ARG3_TYPE
+	instead of int as argument to getsockname().
+
 2001-06-29  Ezra Peisach  <epeisach@mit.edu>
 
 	* misc.c, server_stubs.c: Nuke rcsid.
