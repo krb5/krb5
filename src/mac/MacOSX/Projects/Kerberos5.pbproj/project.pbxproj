@@ -4632,6 +4632,11 @@
 				A1D256F206A713A600A9EC13,
 				A1A6783206C3D47F00EC826E,
 				A1A6784406C3D82500EC826E,
+				A1CA43BD06E3D0D400F35E9C,
+				A1CA43BE06E3D0D400F35E9C,
+				A1CA43BF06E3D0D400F35E9C,
+				A1CA43C006E3D0D400F35E9C,
+				A1CA43C106E3D0D400F35E9C,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -7617,6 +7622,116 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A1CA438506E3D01200F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = pkinit_apple_utils.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA438606E3D01200F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = pkinit_asn1.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA438706E3D01200F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = pkinit_cert_store.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA438806E3D01200F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = pkinit_client.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA438906E3D01200F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = pkinit_cms.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43B806E3D0D400F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = pkinit_apple_asn1.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43B906E3D0D400F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = pkinit_apple_cert_store.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43BA06E3D0D400F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = pkinit_apple_client.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43BB06E3D0D400F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = pkinit_apple_cms.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43BC06E3D0D400F35E9C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = pkinit_apple_utils.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1CA43BD06E3D0D400F35E9C = {
+			fileRef = A1CA43B806E3D0D400F35E9C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1CA43BE06E3D0D400F35E9C = {
+			fileRef = A1CA43B906E3D0D400F35E9C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1CA43BF06E3D0D400F35E9C = {
+			fileRef = A1CA43BA06E3D0D400F35E9C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1CA43C006E3D0D400F35E9C = {
+			fileRef = A1CA43BB06E3D0D400F35E9C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1CA43C106E3D0D400F35E9C = {
+			fileRef = A1CA43BC06E3D0D400F35E9C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		A1CA623604168DFE0013F915 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -7735,6 +7850,11 @@
 				F517310E03F1B65801120114,
 				F517310F03F1B65801120114,
 				F517311003F1B65801120114,
+				A1CA438506E3D01200F35E9C,
+				A1CA438606E3D01200F35E9C,
+				A1CA438706E3D01200F35E9C,
+				A1CA438806E3D01200F35E9C,
+				A1CA438906E3D01200F35E9C,
 				F517311103F1B65801120114,
 				F517311203F1B65801120114,
 				F517311303F1B65901120114,
@@ -13164,6 +13284,11 @@
 				F517352303F1B65A01120114,
 				F517352403F1B65A01120114,
 				F517352503F1B65A01120114,
+				A1CA43B806E3D0D400F35E9C,
+				A1CA43B906E3D0D400F35E9C,
+				A1CA43BA06E3D0D400F35E9C,
+				A1CA43BB06E3D0D400F35E9C,
+				A1CA43BC06E3D0D400F35E9C,
 				F517352603F1B65A01120114,
 				F517352703F1B65A01120114,
 				F517352803F1B65A01120114,
