@@ -104,7 +104,7 @@ krb_realmofhost(host)
 		ret_realm[REALM_SZ] = '\0';
 		/* Upper-case realm */
 		for (cp = ret_realm; *cp; cp++)
-			if (islower(*cp))
+			if (islower((int) (*cp)))
 				*cp = toupper(*cp);
 	} else {
 		krb_get_lrealm(ret_realm, 1);

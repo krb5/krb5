@@ -1,5 +1,9 @@
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
+	* kparse.c (strutol): Cast argument to isupper()/tolower() to int.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
 	* g_pw_in_tkt.c: Include krb5.h so that des_read_password()
 	prototype is present in des.h. Cast argument to des_read_password.
 
