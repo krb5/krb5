@@ -1,3 +1,21 @@
+2001-05-08  Tom Yu  <tlyu@mit.edu>
+
+	* cleanup.c: Call update_utmp() with the correct pid to assist in
+	finding the old utmp entry.
+
+	* open_ctty.c: Reformat somewhat and revise comment.
+
+	* open_slave.c: Rework significantly.  Primarily, keep a fd open
+	to the slave if we need to reopen the slave device following
+	vhangup() or revoke(), to accommodate various OS quirks.
+
+	* update_utmp.c: Revise history section somewhat to document more
+	HP-UX brokenness.  Search via ut_pid before searching via
+	ut_line.  Copy stuff around because entuxent() will clobber some
+	things.
+
+	* void_assoc.c: Revise comment and reformat somewhat.
+
 2001-05-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* open_slave.c (pty_open_slave): If revoke() present on system but

@@ -30,16 +30,17 @@
  * BSD:
  * ----
  *
- * The simplest (and earliest?) case is 4.x BSD utmp/wtmp.  There are
- * no auxiliary files.  There is only a struct utmp, declared in
- * utmp.h.  Its contents usually include:
+ * The simplest (and earliest? possibly dating back to Version 7...)
+ * case is 4.x BSD utmp/wtmp.  There are no auxiliary files.  There is
+ * only a struct utmp, declared in utmp.h.  Its contents usually
+ * include:
  *
  *	char ut_line[]
  *	char ut_name[]
  *	char ut_host[]
  *	long ut_time
  *
- * The meanings of these fields follows their names reasonbly well.
+ * The meanings of these fields follow their names reasonbly well.
  * The ut_line field usually is the pathname of the tty device
  * associated with the login, with the leading "/dev/" stripped off.
  *
@@ -53,10 +54,10 @@
  * determine this if a utmp entry is made by the window system on at
  * least SunOS 4.x.
  *
- * It is not know whether the login program or init is responsible for
- * clearing the utmp entry, or for entering a logout record in wtmp.
- * It is likely the case that init cleans up for processes that it is
- * itself responsible for starting.
+ * The native login never clears its own utmp entry or writes its own
+ * logout record; its parent (one of init, rlogind, telnetd, etc.)
+ * should handle that.  In theory, getty could do that, but getty
+ * usually doesn't fork to exec login.
  *
  * Old (c. 1984) System V:
  * -----------------------
@@ -217,11 +218,30 @@
  *
  * HP-UX 10.x:
  *
- * When init cleans up after processes it doesn't start, if the
- * process being cleaned up after allocated a pty, ut_line gets a
- * prefix of "pty/" for no readily apparent reason.  This causes
- * ut_line of logout entries in wtmp to not match that of their login
- * entries, confusing various utilities.
+ * There is a curious interaction between how we allocate pty masters
+ * and how ttyname() works.  It seems that if /dev/ptmx/clone is
+ * opened, a call to ptsname() on the master fd gets a filename of the
+ * form /dev/pty/tty[pqrs][0-9a-f], while ttyname() called on a fd
+ * opened with that filename returns a filename of the form
+ * /dev/tty[pqrs][0-9a-f] instead.  These two filenames are actually
+ * hardlinks to the same special device node, so it shouldn't be a
+ * security problem.
+ *
+ * We can't call ttyname() in the parent because it would involve
+ * possibly acquiring a controlling terminal (which would be
+ * potentially problematic), so we have to resort to some trickery in
+ * order to ensure that the ut_line in the wtmp logout and login
+ * records match.  If they don't match, various utilities such as last
+ * will get confused.  Of course it's likely an OS bug that ttyname()
+ * and ptsname() are inconsistent in this way, but it's one that isn't
+ * too painful to work around.
+ *
+ * It seems that the HP-UX native telnetd has problems similar to ours
+ * in this area, though it manages to write the correct logout record
+ * to wtmp somehow.  It probably does basically what we do here:
+ * search for a record with a matching ut_pid and grab its ut_line for
+ * writing into the logout record.  Interestingly enough, its
+ * LOGIN_PROCESS record is of the form pty/tty[pqrs][0-9][a-f].
  *
  * Uses four-character unique IDs for /etc/inittab, which means that
  * programs not running out of init should use two-character ut_id
@@ -305,12 +325,14 @@
 #ifdef HAVE_SETUTXENT
 #define PTY_STRUCT_UTMPX struct utmpx
 #define PTY_SETUTXENT setutxent
+#define PTY_GETUTXENT getutxent
 #define PTY_GETUTXLINE getutxline
 #define PTY_PUTUTXLINE pututxline
 #define PTY_ENDUTXENT endutxent
 #else
 #define PTY_STRUCT_UTMPX struct utmp
 #define PTY_SETUTXENT setutent
+#define PTY_GETUTXENT gettutent
 #define PTY_GETUTXLINE getutline
 #define PTY_PUTUTXLINE pututline
 #define PTY_ENDUTXENT endutent
@@ -318,35 +340,42 @@
 
 static int better(const PTY_STRUCT_UTMPX *, const PTY_STRUCT_UTMPX *,
 		  const PTY_STRUCT_UTMPX *);
-static PTY_STRUCT_UTMPX *best_utxline(const PTY_STRUCT_UTMPX *);
+static int match_pid(const PTY_STRUCT_UTMPX *,
+		     const PTY_STRUCT_UTMPX *);
+static PTY_STRUCT_UTMPX *best_utxent(const PTY_STRUCT_UTMPX *);
 
 /*
  * Utility function to determine whether A is a better match for
- * SEARCH than B.  Should only be called by best_utxline().
+ * SEARCH than B.  Should only be called by best_utxent().
  */
 static int
 better(const PTY_STRUCT_UTMPX *search,
        const PTY_STRUCT_UTMPX *a, const PTY_STRUCT_UTMPX *b)
 {
+    if (strncmp(search->ut_id, b->ut_id, sizeof(b->ut_id))) {
+	if (!strncmp(search->ut_id, a->ut_id, sizeof(a->ut_id))) {
+	    return 1;
+	}
+    }
+
     if (strncmp(a->ut_id, b->ut_id, sizeof(b->ut_id))) {
-	/* different UT_IDs; find the right one */
-	if (a->ut_type == LOGIN_PROCESS) {
-	    if (b->ut_type != LOGIN_PROCESS) {
-		/* prefer LOGIN_PROCESS */
-		return 1;
-	    } else if (search->ut_pid == a->ut_pid
-		       && a->ut_pid != b->ut_pid) {
-		/*
-		 * Prefer entry whose ut_pid matches that of SEARCH,
-		 * if all else is the same.  Note that this will fail
-		 * in the case of login.krb5 called from krlogind,
-		 * etc., since the login.krb5 will have a different
-		 * pid from its parent.  Consequently, we save this
-		 * test for last, in order to catch the case of
-		 * login.krb5 being called from getty.
-		 */
-		return 1;
-	    }
+	/* Got different UT_IDs; find the right one. */
+	if (!strncmp(search->ut_id, b->ut_id, sizeof(b->ut_id))) {
+	    /* Old entry already matches; use it. */
+	    return 0;
+	}
+	if (a->ut_type == LOGIN_PROCESS
+	    && b->ut_type != LOGIN_PROCESS) {
+	    /* Prefer LOGIN_PROCESS */
+	    return 1;
+	}
+	if (search->ut_type == DEAD_PROCESS
+	    && a->ut_type == USER_PROCESS
+	    && b->ut_type != USER_PROCESS) {
+	    /*
+	     * Try USER_PROCESS if we're entering a DEAD_PROCESS.
+	     */
+	    return 1;
 	}
 	return 0;
     } else {
@@ -362,54 +391,96 @@ better(const PTY_STRUCT_UTMPX *search,
     }
 }
 
+static int
+match_pid(const PTY_STRUCT_UTMPX *search, const PTY_STRUCT_UTMPX *u)
+{
+    if (u->ut_type != LOGIN_PROCESS && u->ut_type != USER_PROCESS)
+	return 0;
+    if (u->ut_pid == search->ut_pid) {
+	/*
+	 * One of ut_line or ut_id should match, else some nastiness
+	 * may result.  We can fall back to searching by ut_line if
+	 * need be.  This should only really break if we're login.krb5
+	 * running out of getty, or we're cleaning up after the vendor
+	 * login, and either the vendor login or the getty has
+	 * different ideas than we do of what both ut_id and ut_line
+	 * should be.  It should be rare, though.  We may want to
+	 * remove this restriction later.
+	 */
+	if (!strncmp(u->ut_line, search->ut_line, sizeof(u->ut_line)))
+	    return 1;
+	if (!strncmp(u->ut_id, search->ut_id, sizeof(u->ut_id)))
+	    return 1;
+    }
+    return 0;
+}
+
 /*
  * This expects to be called with SEARCH pointing to a struct utmpx
  * with its ut_type equal to USER_PROCESS or DEAD_PROCESS, since if
  * we're making a LOGIN_PROCESS entry, we presumably don't care about
  * preserving existing state.  At the very least, the ut_pid, ut_line,
- * and ut_type fields must be filled in by the caller.
+ * ut_id, and ut_type fields must be filled in by the caller.
  */
 static PTY_STRUCT_UTMPX *
-best_utxline(const PTY_STRUCT_UTMPX *search)
+best_utxent(const PTY_STRUCT_UTMPX *search)
 {
     PTY_STRUCT_UTMPX utxtmp, *utxp;
     int i, best;
 
-    i = best = 0;
     memset(&utxtmp, 0, sizeof(utxtmp));
 
+    /*
+     * First, search based on pid, but only if non-zero.
+     */
+    if (search->ut_pid) {
+	i = 0;
+	PTY_SETUTXENT();
+	while ((utxp = PTY_GETUTXENT()) != NULL) {
+	    if (match_pid(search, utxp)) {
+		return utxp;
+	    }
+	    i++;
+	}
+    }
+    /*
+     * Uh-oh, someone didn't enter our pid.  Try valiantly to search
+     * by terminal line.
+     */
+    i = 0;
+    best = -1;
     PTY_SETUTXENT();
-    utxp = PTY_GETUTXLINE(search);
-    if (utxp == NULL)
-	return NULL;
-    utxtmp = *utxp;
-
-    for (;;) {
-	memset(utxp, 0, sizeof(*utxp));
-	utxp = PTY_GETUTXLINE(search);
-	if (utxp == NULL)
-	    break;
-	i++;
+    while ((utxp = PTY_GETUTXLINE(search)) != NULL) {
 	if (better(search, utxp, &utxtmp)) {
 	    utxtmp = *utxp;
 	    best = i;
 	}
+	memset(utxp, 0, sizeof(*utxp));
+	i++;
     }
+    if (best == -1)
+	return NULL;
     PTY_SETUTXENT();
     for (i = 0; i <= best; i++) {
 	if (utxp != NULL)
 	    memset(utxp, 0, sizeof(*utxp));
 	utxp = PTY_GETUTXLINE(search);
     }
-    PTY_ENDUTXENT();
     return utxp;
 }
 
+/*
+ * All calls to this function for a given login session must have the
+ * pids be equal; various things will break if this is not the case,
+ * since we do some searching based on the pid.  Note that if a parent
+ * process calls this via pty_cleanup(), it should still pass the
+ * child's pid rather than its own.
+ */
 long
 pty_update_utmp(int process_type, int pid, const char *username,
 		    const char *line, const char *host, int flags)
 {
-    PTY_STRUCT_UTMPX utx, *utxtmp;
+    PTY_STRUCT_UTMPX utx, *utxtmp, utx2;
     const char *cp;
     size_t len;
     char utmp_id[5];
@@ -421,13 +492,6 @@ pty_update_utmp(int process_type, int pid, const char *username,
     memset(&utx, 0, sizeof(utx));
     utxtmp = NULL;
     cp = line;
-    /*
-     * XXX For some reason HP-UX init uses a prefix of "pty/" when
-     * writing the process termination record to utmp and wtmp if the
-     * line is a pty.  Not sure why.  Native HP-UX telnetd appears to
-     * write its own process termination record without the "pty/"
-     * prefix, and init or whatever doesn't clean up after it.
-     */
     if (strncmp(cp, "/dev/", sizeof("/dev/") - 1) == 0)
 	cp += sizeof("/dev/") - 1;
     strncpy(utx.ut_line, cp, sizeof(utx.ut_line));
@@ -445,25 +509,45 @@ pty_update_utmp(int process_type, int pid, const char *username,
     default:
 	return PTY_UPDATE_UTMP_PROCTYPE_INVALID;
     }
+    len = strlen(line);
+    if (len >= 2) {
+	cp = line + len - 1;
+	if (*(cp - 1) != '/')
+	    cp--;		/* last two characters, unless it's a / */
+    } else
+	cp = line;
     /*
-     * Get existing utmpx entry for LINE, if any, so we can copy some
-     * stuff from it.  This is particularly important if we're running
-     * out of getty, since getty will have written the entry for the
-     * line with ut_type == LOGIN_PROCESS, and what it has recorded in
-     * ut_id may not be what we come up with, since that's up to the
-     * whim of the sysadmin who writes the inittab entry.
+     * HP-UX has mostly 4-character inittab ids, while most other sysV
+     * variants use only 2-charcter inittab ids, so to avoid
+     * conflicts, we pick 2-character ut_ids for our own use.  We may
+     * want to feature-test for this, but it would be somewhat of a
+     * pain, and would eit cross-compiling.
+     */
+#ifdef __hpux
+    strcpy(utmp_id, cp);
+#else
+    sprintf(utmp_id, "kl%s", cp);
+#endif
+    strncpy(utx.ut_id, utmp_id, sizeof(utx.ut_id));
+    /*
+     * Get existing utmpx entry for PID or LINE, if any, so we can
+     * copy some stuff from it.  This is particularly important if we
+     * are login.krb5 and are running out of getty, since getty will
+     * have written the entry for the line with ut_type ==
+     * LOGIN_PROCESS, and what it has recorded in ut_id may not be
+     * what we come up with, since that's up to the whim of the
+     * sysadmin who writes the inittab entry.
      *
-     * We make the assumption that getty constructs ut_line the same
-     * way that we do, which may be unwarranted.
-     *
-     * It seems that getty will find its ut_id by means of searching
-     * for a utmpx entry of type INIT_PROCESS containing getty's pid
-     * in ut_pid, though that is largely conjecture at the moment.
-     * This should be irrelevant for this library, since none of its
-     * callers should attempt to be a replacement for getty.
+     * Note that we may be screwed if we try to write a logout record
+     * for a vendor's login program, since it may construct ut_line
+     * and ut_id differently from us; even though we search on ut_pid,
+     * we validate against ut_id or ut_line to sanity-check.  We may
+     * want to rethink whether to actually include this check, since
+     * it should be highly unlikely that there will be a bogus entry
+     * in utmpx matching our pid.
      */
     if (process_type != PTY_LOGIN_PROCESS)
-	utxtmp = best_utxline(&utx);
+	utxtmp = best_utxent(&utx);
 
 #ifdef HAVE_SETUTXENT
     if (gettimeofday(&utx.ut_tv, NULL))
@@ -480,7 +564,7 @@ pty_update_utmp(int process_type, int pid, const char *username,
      */
 #if (defined(HAVE_SETUTXENT) && defined(HAVE_STRUCT_UTMPX_UT_HOST))	\
 	|| (!defined(HAVE_SETUTXENT) && defined(HAVE_STRUCT_UTMP_UT_HOST))
-    if (host) {
+    if (host != NULL) {
 	strncpy(utx.ut_host, host, sizeof(utx.ut_host));
 	/* Unlike other things in utmpx, ut_host is nul-terminated? */
 	utx.ut_host[sizeof(utx.ut_host) - 1] = '\0';
@@ -497,8 +581,6 @@ pty_update_utmp(int process_type, int pid, const char *username,
 
     /* XXX deal with ut_addr? */
 
-    utx.ut_id[0] = '\0';
-
     if (utxtmp != NULL) {
 	/*
 	 * For entries not of type LOGIN_PROCESS, override some stuff
@@ -508,29 +590,30 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	utx.ut_pid = utxtmp->ut_pid;
     }
 
-    if (utx.ut_id[0] == '\0') {
-	len = strlen(line);
-	if (len >= 2) {
-	    cp = line + len - 1;
-	    if (*(cp - 1) != '/')
-		cp--;		/* last two characters, unless it's a / */
-	} else
-	    cp = line;
-	/*
-	 * HP-UX has mostly 4-character inittab ids, while most other
-	 * sysV variants use only 2-charcter inittab ids, so to avoid
-	 * conflicts, we pick 2-character ut_ids for our own use.  We
-	 * may want to feature-test for this, but it would be somewhat
-	 * of a pain, and would eit cross-compiling.
-	 */
-#ifdef __hpux
-	strcpy(utmp_id, cp);
-#else
-	sprintf(utmp_id, "kl%s", cp);
-#endif
-	strncpy(utx.ut_id, utmp_id, sizeof(utx.ut_id));
-    }
     strncpy(utx.ut_user, username, sizeof(utx.ut_user));
+
+    /*
+     * Make a copy now and deal with copying relevant things out of
+     * utxtmp in case setutxline() or pututxline() clobbers utxtmp.
+     * (After all, the returned pointer from the getutx*() functions
+     * is allowed to point to static storage that may get overwritten
+     * by subsequent calls to related functions.)
+     */
+    utx2 = utx;
+    if (process_type == PTY_DEAD_PROCESS && utxtmp != NULL) {
+	/*
+	 * Use ut_line from old entry to avoid confusing last on
+	 * HP-UX.
+	 */
+	strncpy(utx2.ut_line, utxtmp->ut_line, sizeof(utx2.ut_line));
+    }
+
+    if (username[0] == '\0'
+	&& (flags & PTY_UTMP_USERNAME_VALID) && utxtmp != NULL) {
+	/* Use the ut_user from the entry we looked up, if any. */
+	/* XXX Is this really necessary? */
+	strncpy(utx2.ut_user, utxtmp->ut_user, sizeof(utx2.ut_user));
+    }
 
     PTY_SETUTXENT();
     PTY_PUTUTXLINE(&utx);
@@ -540,16 +623,10 @@ pty_update_utmp(int process_type, int pid, const char *username,
     if (process_type == PTY_LOGIN_PROCESS)
 	return 0;
 
-    if (username[0] == '\0'
-	&& (flags & PTY_UTMP_USERNAME_VALID) && utxtmp != NULL)
-	/* Use the ut_user from the entry we looked up, if any. */
-	/* XXX Is this really necessary? */
-	strncpy(utx.ut_user, utxtmp->ut_user, sizeof(utx.ut_user));
-
 #ifdef HAVE_SETUTXENT
-    return ptyint_update_wtmpx(&utx);
+    return ptyint_update_wtmpx(&utx2);
 #else
-    return ptyint_update_wtmp(&utx);
+    return ptyint_update_wtmp(&utx2);
 #endif
 }
 

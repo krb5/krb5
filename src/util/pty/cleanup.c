@@ -37,7 +37,7 @@ long pty_cleanup (slave, pid, update_utmp)
 #endif
     
     if (update_utmp)
-	pty_update_utmp(PTY_DEAD_PROCESS,0,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
+	pty_update_utmp(PTY_DEAD_PROCESS, pid,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
     
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);
