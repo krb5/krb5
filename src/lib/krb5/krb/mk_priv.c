@@ -68,9 +68,8 @@ OLDDECLARG(krb5_data *, outbuf)
     privmsg_enc_part.s_address = sender_addr->address;
     privmsg_enc_part.r_address = recv_addr->address;
 
-    /* ms_timeofday returns signed msec, hence the cast */
     if (retval = krb5_ms_timeofday(&privmsg_enc_part.timestamp,
-				   (krb5_int16 *)&privmsg_enc_part.msec))
+				   &privmsg_enc_part.msec))
 	return retval;
 
     if (krb5_fulladdr_order(sender_addr, recv_addr) > 0)
