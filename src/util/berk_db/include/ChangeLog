@@ -1,0 +1,6 @@
+Tue Jun 27 20:49:50 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* db.h: *int*_t are likely to collide with native types,
+	and the int8_t and *int64_t are never used anyway, so push them
+	off to hash/configure.in AC_CHECK_TYPE calls.
+

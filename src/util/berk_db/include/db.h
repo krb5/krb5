@@ -49,22 +49,8 @@
 #define	RET_SUCCESS	 0
 #define	RET_SPECIAL	 1
 
-#ifndef	__BIT_TYPES_DEFINED__
-#define	__BIT_TYPES_DEFINED__
-typedef	__signed char		   int8_t;
-typedef	unsigned char		 u_int8_t;
-typedef	short			  int16_t;
-typedef	unsigned short		u_int16_t;
-typedef	int			  int32_t;
-typedef	unsigned int		u_int32_t;
-#ifdef WE_DONT_NEED_QUADS
-typedef	long long		  int64_t;
-typedef	unsigned long long	u_int64_t;
-#endif
-#endif
-
 #define	MAX_PAGE_NUMBER	0xffffffff	/* >= # of pages in a file */
-typedef u_int32_t	pgno_t;
+/* typedef u_int32_t	pgno_t; */
 #define	MAX_PAGE_OFFSET	65535		/* >= # of bytes in a page */
 typedef u_int16_t	indx_t;
 #define	MAX_REC_NUMBER	0xffffffff	/* >= # of records in a tree */
