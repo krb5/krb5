@@ -1,3 +1,19 @@
+Mon Jul 10 17:01:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Add prototypes for compat_decrypt_key,
+		kerb_get_principal, check_princ, v4_klog
+
+	* network.c (process_packet): Make prog a const char *. 
+
+	* main.c: Add prototypes for find_realm_data, setup_server_realm,
+		usage, request_exit, setup_signal_handlers, initialize_realms,
+			finish_realms. 
+
+	* kdc_util.h: Add prototypes for against_local_policy_as,
+		against_local_policy_tgs, validate_as_request,
+		validate_tgs_request, fetch_asn1_field,
+		kdc_initialize_rcache, process_packet.
+
 Sat Jul  8 17:40:10 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kerberos_v4.c (v4_klog): Also log L_KRB_PERR error messages, so

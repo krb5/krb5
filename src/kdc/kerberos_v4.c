@@ -72,6 +72,17 @@
 
 extern int errno;
 
+int compat_decrypt_key PROTOTYPE((krb5_encrypted_keyblock *, C_Block));
+int kerb_get_principal PROTOTYPE((char *, char *, Principal *, unsigned int,
+				  int *));
+int check_princ PROTOTYPE((char *, char *, unsigned, Principal *));
+
+#ifdef HAVE_STDARG_H
+char * v4_klog PROTOTYPE((int, const char *, ...));
+#else
+char * v4_klog PROTOTYPE((int, char *, va_dcl));
+#endif
+
 /* take this out when we don't need it anymore */
 int krbONE = 1;
 
@@ -140,7 +151,8 @@ static void hang();
 static krb5_error_code retval; 
 static krb5_data *response;
 
-void kerberos_v4(), kerb_err_reply();
+void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
+void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
  
 krb5_error_code
 process_v4( pkt, client_fulladdr, is_secondary, resp)

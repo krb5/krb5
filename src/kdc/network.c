@@ -137,7 +137,7 @@ const char *prog;
 
 void process_packet(port_fd, prog, is_secondary)
     int	port_fd;
-    char	*prog;
+    const char	*prog;
     int		is_secondary;
 {
     int cc, saddr_len;

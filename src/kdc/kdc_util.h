@@ -61,6 +61,18 @@ krb5_error_code kdc_process_tgs_req
 krb5_error_code kdc_get_server_key PROTOTYPE((krb5_ticket *,
 					      krb5_keyblock **,
 					      krb5_kvno *));
+
+int validate_as_request PROTOTYPE((krb5_kdc_req *, krb5_db_entry, 
+					  krb5_db_entry, krb5_timestamp,
+					  char **));
+
+int validate_tgs_request PROTOTYPE((krb5_kdc_req *, krb5_db_entry, 
+					  krb5_ticket *, krb5_timestamp,
+					  char **));
+
+int fetch_asn1_field PROTOTYPE((unsigned char *, unsigned int, unsigned int,
+				 krb5_data *));
+
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
@@ -78,10 +90,22 @@ krb5_error_code dispatch PROTOTYPE((krb5_data *,
 				    int,
 				    krb5_data **));
 
+/* main.c */
+krb5_error_code kdc_initialize_rcache PROTOTYPE((krb5_context, char *));
+
 /* network.c */
 krb5_error_code listen_and_process PROTOTYPE((const char *));
 krb5_error_code setup_network PROTOTYPE((const char *));
 krb5_error_code closedown_network PROTOTYPE((const char *));
+void process_packet PROTOTYPE((int, const char *, int));
+
+/* policy.c */
+int against_local_policy_as PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
+					krb5_db_entry, krb5_timestamp,
+					char **));
+
+int against_local_policy_tgs PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
+					krb5_ticket *, char **));
 
 
 /* replay.c */

@@ -35,6 +35,20 @@
 #include "kdc5_err.h"
 #include "adm_proto.h"
 
+kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
+
+krb5_error_code setup_server_realm PROTOTYPE((krb5_principal));
+
+void usage PROTOTYPE((char *));
+
+krb5_sigtype request_exit PROTOTYPE((int));
+
+void setup_signal_handlers PROTOTYPE((void));
+
+void initialize_realms PROTOTYPE((krb5_context, krb5_pointer, int, char **));
+
+void finish_realms PROTOTYPE((char *));
+
 static int nofork = 0;
 static char *kdc_current_rcname = (char *) NULL;
 static int rkey_init_done = 0;
