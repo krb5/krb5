@@ -1,3 +1,61 @@
+2000-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo: Update descriptions to indicate full support for
+	des3.  Describe new DNS-related libdefaults tags for krb5.conf.
+
+	* build.texinfo (Options to Configure): Fix @item labels.
+
+	* install.texinfo: Update descriptions to indicate full support
+	for des3, and describe "v4" salt as being useful only with
+	des-cbc-crc.
+
+2000-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo: Note in multiple places that the current default
+	dump format doesn't include the per-principal policy information,
+	and some means of working around this problem.
+
+	* install.texinfo (Switching Master and Slave KDCs): Note that
+	in the process of swapping KDCs, it is necessary to do a ov format
+	dump in order to preserve per-principal policy information.
+
+2000-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo (Upgrading Existing Kerberos V5 Installations):
+	Add info describing how to preserve policy information while
+	upgrading.  Also needs to go into other sections, possibly.
+
+2000-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo: Enter correct xref info for DNS data
+	descriptions.  Fix up text around some xrefs.
+	* install.texinfo: Describe SRV and TXT DNS records.  Fix up text
+	around some xrefs.
+
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo: Add descriptions of the kadmin {ank,cpw,ktadd} -e
+	flag.
+
+2000-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* install.texinfo: Describe new DNS support, and 3DES upgrade
+	path.  Update "enctypes" config file sample lines.
+
+	* build.texinfo: No kpasswd directory.  Describe new configure
+	options.
+
+	* send-pr.texinfo: Suggest caution regarding tab expansion for
+	patches.
+
+2000-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Update for 1.2 release.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb425.texinfo (libdefaults): Add description of v4_realm.
+
 1999-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* copyright.texinfo: Update copyright again.
