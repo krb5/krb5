@@ -83,7 +83,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
 	    cachename[p++] = '\\';
 	    continue;
 	}
-	if (!isinvalidrcname((int) piece->data[i])) {
+	if (!isvalidrcname((int) piece->data[i])) {
 	    sprintf(tmp, "%03o", piece->data[i]);
 	    cachename[p++] = '\\';
 	    cachename[p++] = tmp[0];

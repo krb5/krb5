@@ -1,3 +1,8 @@
+2003-03-04  Tom Yu  <tlyu@mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): Fix missed
+	isinvalidrcname -> isvalidrcname.
+
 2003-03-02  Sam Hartman  <hartmans@mit.edu>
 
 	* srv_rcache.c (krb5_get_server_rcache): If punctuation or graphic characters in replay ccache name then use  escaping
