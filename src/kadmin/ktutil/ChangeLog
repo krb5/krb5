@@ -1,3 +1,9 @@
+2002-03-02  Sam Hartman  <hartmans@mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Set umask to 077 to avoid
+	public srvtabs.
+	
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktutil.h: Make prototypes unconditional.

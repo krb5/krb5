@@ -508,6 +508,9 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 	    /* Check if lp->entry is newer kvno; if so, update */
 	    lp1->entry = lp->entry;
     }
+    umask(0077); /*Changing umask for all of ktutil is OK
+		  * We don't ever write out anything that should use
+		  * default umask.*/
     fp = fopen(name, "w");
     if (!fp) {
 	retval = EIO;
