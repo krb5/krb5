@@ -1,5 +1,7 @@
 2001-11-19  Sam Hartman  <hartmans@mit.edu>
 
+	* t_prng.c (main): Fix seeding bug in t_prng
+
 	* t_prng.reseedtest: New test; description in t_prng.reseedtest-comments
 
 	* t_prng.c (main): If we request 0 bytes of output don't try to

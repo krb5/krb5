@@ -57,7 +57,7 @@ int main () {
       assert ((input.data = malloc(seed_length)) != NULL);
       for (lc = seed_length; lc > 0; lc--) {
 	scanf ("%2x",  &i);
-	input.data[lc] = (unsigned) (i&0xff);
+	input.data[seed_length-lc] = (unsigned) (i&0xff);
       }
       input.length = seed_length;
       assert (krb5_c_random_add_entropy (0, source_id, &input) == 0);
