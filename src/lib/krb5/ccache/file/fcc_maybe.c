@@ -241,7 +241,7 @@ krb5_fcc_open_file (context, id, mode)
      if (fd == -1)
 	  return krb5_fcc_interpret (context, errno);
 
-     if (retval = fcc_lock_file(data, fd, LOCK_IT)) {
+     if ((retval = fcc_lock_file(data, fd, LOCK_IT))) {
 	 (void) close(fd);
 	 return retval;
      }
