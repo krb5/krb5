@@ -1,3 +1,8 @@
+2003-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (SIZE_MAX): Provide default definition if stdint.h
+	doesn't define it.
+
 2003-12-15  Jeffrey Altman <jaltman@mit.edu>
 
   * win-mac.h: source code written to the C99 standard assumes there

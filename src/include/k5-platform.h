@@ -1,5 +1,35 @@
-/* Copyright 2003 Massachusetts Institute of Technology.  All rights reserved.  */
-/* Platform-dependent junk.  */
+/*
+ * k5-platform.h
+ *
+ * Copyright 2003  by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.	Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ *
+ * Some platform-dependent definitions to sync up the C support level.
+ * Some to a C99-ish level, some related utility code.
+ *
+ * Currently: make "static inline" work; 64-bit types and load/store
+ * code; SIZE_MAX.
+ */
 
 #ifndef K5_PLATFORM_H
 #define K5_PLATFORM_H
@@ -41,6 +71,10 @@
 #else /* not Windows, and neither stdint.h nor inttypes.h */
 # define INT64_TYPE signed long long
 # define UINT64_TYPE unsigned long long
+#endif
+
+#ifndef SIZE_MAX
+# define SIZE_MAX ((size_t)((size_t)0 - 1))
 #endif
 
 /* Read and write integer values as (unaligned) octet strings in
