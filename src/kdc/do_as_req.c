@@ -23,6 +23,7 @@ static char rcsid_do_as_req_c[] =
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
+#include <krb5/osconf.h>
 #include <errno.h>
 #include <com_err.h>
 
@@ -30,6 +31,9 @@ static char rcsid_do_as_req_c[] =
 #include <krb5/ext-proto.h>
 
 #include <syslog.h>
+#ifdef KRB5_USE_INET
+#include <arpa/inet.h>
+#endif
 
 #include "kdc_util.h"
 #include "policy.h"
@@ -66,7 +70,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_keyblock encrypting_key;
 
     krb5_timestamp until, rtime;
-    char *cname = 0, *sname = 0;
+    char *cname = 0, *sname = 0, *fromstring = 0;
 
     if (retval = krb5_unparse_name(request->client, &cname))
 	return(retval);
@@ -74,7 +78,14 @@ krb5_data **response;			/* filled in with a response packet */
 	free(cname);
 	return(retval);
     }
-    syslog(LOG_INFO, "AS_REQ: %s for %s", cname, sname);
+#ifdef KRB5_USE_INET
+    if (from->address->addrtype == ADDRTYPE_INET)
+	fromstring = inet_ntoa(*(struct in_addr *)from->address->contents);
+#endif
+    if (!fromstring)
+	fromstring = "<unknown>";
+
+    syslog(LOG_INFO, "AS_REQ: host %s, %s for %s", fromstring, cname, sname);
     free(cname);
     free(sname);
 
