@@ -1,3 +1,9 @@
+Fri Jul 25 15:38:35 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove test-randkey since it was breaking the
+	server-side tests; api.2/getprinc-v2.exp wants *two* keys, while
+	randkey results in only one.
+
 Mon May  5 17:11:44 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* setkey-test.c, configure.in: add rules to test for correct
