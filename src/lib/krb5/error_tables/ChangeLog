@@ -1,3 +1,8 @@
+2002-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5KRB_AP_PATH_NOT_ACCEPTED,
+	KRB5KRB_ERR_RESPONSE_TOO_BIG): New error codes.
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et: Change several "credentials cache file" messages to
