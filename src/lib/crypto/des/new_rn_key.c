@@ -88,14 +88,13 @@ mit_des_init_random_number_generator(key,p_seed)
     mit_des_cblock new_key;
 
     krb5_address **addrs = 0;
-    krb5_context context;
 
     /*
      * use a host id in generating the seed to ensure
      * that different servers have different streams:
      */
     memset((char *)seed, 0, sizeof(seed));
-    if (!krb5_os_localaddr(&addrs) && addrs && *addrs) {
+    if (!krb5_crypto_os_localaddr(&addrs) && addrs && *addrs) {
 	memcpy((char *)seed, (char *)addrs[0]->contents,
 	      min(sizeof(seed), addrs[0]->length));
 	/* XXX may not do all of the seed. */
@@ -127,8 +126,9 @@ mit_des_init_random_number_generator(key,p_seed)
      * use a time stamp to ensure that a server started later does not reuse
      * an old stream:
      */
-    (void) krb5_us_timeofday(context, &timenow.seconds,
-			     &timenow.microseconds); /* XXX return value */
+    /* XXX return value */
+    (void) krb5_crypto_us_timeofday(&timenow.seconds,
+				    &timenow.microseconds);
     mit_des_set_sequence_number((unsigned char *)&timenow, p_seed);
 
     /*

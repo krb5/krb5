@@ -1,3 +1,9 @@
+Thu Jul  6 17:16:17 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* new_rn_key.c (mit_des_init_random_number_generator): don't call
+		us_timeofday with context arg; also update for new
+		function names (krb5_crypto_*).
+
 Fri Jun  9 19:18:29 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
