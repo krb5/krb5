@@ -52,6 +52,7 @@ static char *__findenv __P((const char *, int *));
  *	Set the value of the environmental variable "name" to be
  *	"value".  If rewrite is set, replace any current value.
  */
+#ifndef HAVE_SETENV
 setenv(name, value, rewrite)
 	register const char *name;
 	register const char *value;
@@ -102,11 +103,13 @@ setenv(name, value, rewrite)
 	for (*c++ = '='; *c++ = *value++;);
 	return (0);
 }
+#endif
 
 /*
  * unsetenv(name) --
  *	Delete environmental variable "name".
  */
+#ifndef HAVE_UNSETENV
 void
 unsetenv(name)
 	const char *name;
@@ -120,11 +123,13 @@ unsetenv(name)
 			if (!(*p = *(p + 1)))
 				break;
 }
+#endif
 
 /*
  * getenv --
  *	Returns ptr to value associated with name, if any, else NULL.
  */
+#ifndef HAVE_GETENV
 char *
 getenv(name)
 	const char *name;
@@ -133,6 +138,7 @@ getenv(name)
 
 	return (__findenv(name, &offset));
 }
+#endif
 
 /*
  * __findenv --

@@ -1,3 +1,17 @@
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode_test.c (main): Add new test cases for indefinite
+	length ticket and as_rep.  Fix up calls to decode_run() to have
+	the modifier be in the description parameter.
+	(decode_run): If the ASN1 decoder returns an error, add one to the
+	error count so there will be a non-zero exit. Sometimes, the
+	decoded structure is complete enoght to pass the test, even with
+	an ASN.1 error - which can easilly get missed in the output run.
+	[pullup from trunk]
+
+	* utility.c (asn1_krb5_data_unparse): signed char
+	paranoia. [pullup from trunk]
+
 1999-11-01  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_decode_test.c (main): Add test case for zero-length

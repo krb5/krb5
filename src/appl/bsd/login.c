@@ -517,6 +517,7 @@ void k_init (ttyn)
     if (!getenv(KRB5_ENV_CCNAME)) {
 	sprintf(ccfile, "FILE:/tmp/krb5cc_p%d", getpid());
 	setenv(KRB5_ENV_CCNAME, ccfile, 1);
+	krb5_cc_set_default_name(kcontext, ccfile);
 	unlink(ccfile+strlen("FILE:"));
     } else {
 	/* note it correctly */
@@ -619,9 +620,10 @@ int have_v5_tickets (me)
 #endif /* KRB5_GET_TICKETS */
 
 #ifdef KRB4_CONVERT
-try_convert524 (kcontext, me)
-     krb5_context kcontext;
-     krb5_principal me;
+try_convert524(kcontext, me, use_ccache)
+    krb5_context kcontext;
+    krb5_principal me;
+    int use_ccache;
 {
     krb5_principal kpcserver;
     krb5_error_code kpccode;
@@ -632,38 +634,45 @@ try_convert524 (kcontext, me)
 
     /* or do this directly with krb524_convert_creds_kdc */
     krb524_init_ets(kcontext);
-    /* cc->ccache, already set up */
-    /* client->me, already set up */
-    if ((kpccode = krb5_build_principal(kcontext,
-				        &kpcserver, 
-				        krb5_princ_realm(kcontext, me)->length,
-				        krb5_princ_realm(kcontext, me)->data,
-				        "krbtgt",
-				        krb5_princ_realm(kcontext, me)->data,
-					NULL))) {
-      com_err("login/v4", kpccode,
-	      "while creating service principal name");
-      return 0;
-    }
 
-    memset((char *) &increds, 0, sizeof(increds));
-    increds.client = me;
-    increds.server = kpcserver;
-    increds.times.endtime = 0;
-    increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-    if ((kpccode = krb5_get_credentials(kcontext, 0, 
-					ccache,
-					&increds, 
-					&v5creds))) {
-	com_err("login/v4", kpccode,
-		"getting V5 credentials");
-	return 0;
-    }
-    if ((kpccode = krb524_convert_creds_kdc(kcontext, 
-					    v5creds,
-					    &v4creds))) {
-	com_err("login/v4", kpccode, 
-		"converting to V4 credentials");
+    /* If we have forwarded v5 tickets, retrieve the credentials from
+     * the cache; otherwise, the v5 credentials are in my_creds.
+     */
+    if (use_ccache) {
+	/* cc->ccache, already set up */
+	/* client->me, already set up */
+	kpccode = krb5_build_principal(kcontext, &kpcserver, 
+				       krb5_princ_realm(kcontext, me)->length,
+				       krb5_princ_realm(kcontext, me)->data,
+				       "krbtgt",
+				       krb5_princ_realm(kcontext, me)->data,
+				       NULL);
+	if (kpccode) {
+	    com_err("login/v4", kpccode,
+		    "while creating service principal name");
+	    return 0;
+	}
+
+	memset((char *) &increds, 0, sizeof(increds));
+	increds.client = me;
+	increds.server = kpcserver;
+	increds.times.endtime = 0;
+	increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+	kpccode = krb5_get_credentials(kcontext, 0, ccache,
+				       &increds, &v5creds);
+	krb5_free_principal(kcontext, kpcserver);
+	increds.server = NULL;
+	if (kpccode) {
+	    com_err("login/v4", kpccode, "getting V5 credentials");
+	    return 0;
+	}
+
+	kpccode = krb524_convert_creds_kdc(kcontext, v5creds, &v4creds);
+	krb5_free_creds(kcontext, v5creds);
+    } else
+	kpccode = krb524_convert_creds_kdc(kcontext, &my_creds, &v4creds);
+    if (kpccode) {
+	com_err("login/v4", kpccode, "converting to V4 credentials");
 	return 0;
     }
     /* this is stolen from the v4 kinit */
@@ -913,8 +922,9 @@ afs_login ()
 	struct stat st;
 	/* construct the name */
 	/* get this from profile later */
-	strcpy (aklog_path, KPROGDIR);
-	strcat (aklog_path, "/aklog");
+	aklog_path[sizeof(aklog_path) - 1] = '\0';
+	strncpy (aklog_path, KPROGDIR, sizeof(aklog_path) - 1);
+	strncat (aklog_path, "/aklog", sizeof(aklog_path) - 1 - strlen(aklog_path));
 	/* only run it if we can find it */
 	if (stat (aklog_path, &st) == 0) {
 	    system(aklog_path);
@@ -1145,8 +1155,13 @@ int main(argc, argv)
 	}
     argc -= optind;
     argv += optind;
-    if (*argv)
-	username = *argv;
+    /* Throw away too-long names, they can't be usernames.  */
+    if (*argv) {
+	if (strlen (*argv) < UT_NAMESIZE)
+	    username = *argv;
+	else
+	    fprintf (stderr, "login name '%s' too long\n", *argv);
+    }
 
 #if !defined(POSIX_TERMIOS) && defined(TIOCLSET)
     ioctlval = 0;
@@ -1448,7 +1463,7 @@ int main(argc, argv)
 #if defined(KRB5_GET_TICKETS) && defined(KRB4_CONVERT)
     if (login_krb4_convert && !got_v4_tickets) {
 	if (got_v5_tickets||forwarded_v5_tickets)
-	    try_convert524 (kcontext, me);
+	    try_convert524(kcontext, me, forwarded_v5_tickets);
     }
 #endif
 
@@ -1746,8 +1761,10 @@ int main(argc, argv)
 
 #ifdef KRB5_GET_TICKETS
     /* ccfile[0] is only set if we got tickets above */
-    if (login_krb5_get_tickets && ccfile[0])
+    if (login_krb5_get_tickets && ccfile[0]) {
 	(void) setenv(KRB5_ENV_CCNAME, ccfile, 1);
+	krb5_cc_set_default_name(kcontext, ccfile);
+    }
 #endif /* KRB5_GET_TICKETS */
 
     if (tty[sizeof("tty")-1] == 'd')
@@ -2086,6 +2103,7 @@ void dolastlog(quiet, tty)
 {
 #if defined(HAVE_LASTLOG_H) || (defined(BSD) && (BSD >= 199103))
     struct lastlog ll;
+    time_t lltime;
     int fd;
 
     if ((fd = open(LASTLOG, O_RDWR, 0)) >= 0) {
@@ -2094,7 +2112,9 @@ void dolastlog(quiet, tty)
 	    if ((read(fd, (char *)&ll, sizeof(ll)) == sizeof(ll)) &&
 		(ll.ll_time != 0)) {
 
-		printf("Last login: %.*s ", 24-5, (char *)ctime(&ll.ll_time));
+		/* .ll_time may not be a time_t.  */
+		lltime = ll.ll_time;
+		printf("Last login: %.*s ", 24-5, (char *)ctime(&lltime));
 
 		if (*ll.ll_host != '\0')
 		    printf("from %.*s\n", sizeof(ll.ll_host), ll.ll_host);
@@ -2103,7 +2123,8 @@ void dolastlog(quiet, tty)
 	    }
 	    (void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 	}
-	(void) time(&ll.ll_time);
+	(void) time(&lltime);
+	ll.ll_time = lltime;
 
 	(void) strncpy(ll.ll_line, tty, sizeof(ll.ll_line));
 	ll.ll_line[sizeof(ll.ll_line) - 1] = '\0';

@@ -162,4 +162,4 @@ main(int argc, char **argv)
 
 #endif
 	
-#endif /* !_MSODS || _!MACINTOSH */
+#endif /* !_MSDOS || _!MACINTOSH */

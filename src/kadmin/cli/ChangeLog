@@ -1,3 +1,28 @@
+2001-10-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (kadmin_parse_name): Properly advance pointer in
+	certain error cases involving '@'.  Patch from Emily Ratliff,
+	<ratliff@austin.ibm.com>.
+	[pulled up 1.54->1.55 from trunk]
+
+2001-02-22  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.M: Remove references to "rename_principal".
+
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.M: Update to reflect new -e and -keepold flags.
+
+2000-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (kadmin_startup): Don't pass keytab_name to printf if
+	it's NULL.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* strftime.c: Replace with a copy of the one from libkrb5, which
+	isn't under GPL.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.c (kadmin_cpw): Initialize ks_tuple to NULL.

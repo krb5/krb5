@@ -90,16 +90,28 @@ const gss_OID_desc krb5_gss_oid_array[] = {
    /* this is the v2 assigned OID */
    {9, "\052\206\110\206\367\022\001\002\003"},
    /* these two are name type OID's */
+
+    /* 2.1.1. Kerberos Principal Name Form:  (rfc 1964)
+     * This name form shall be represented by the Object Identifier {iso(1)
+     * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+     * krb5(2) krb5_name(1)}.  The recommended symbolic name for this type
+     * is "GSS_KRB5_NT_PRINCIPAL_NAME". */
    {10, "\052\206\110\206\367\022\001\002\002\001"},
+
+   /* gss_nt_krb5_principal.  Object identifier for a krb5_principal. Do not use. */
    {10, "\052\206\110\206\367\022\001\002\002\002"},
    { 0, 0 }
 };
 
-const gss_OID_desc * const gss_mech_krb5 = krb5_gss_oid_array+0;
-const gss_OID_desc * const gss_mech_krb5_old = krb5_gss_oid_array+1;
-const gss_OID_desc * const gss_mech_krb5_v2 = krb5_gss_oid_array+2;
-const gss_OID_desc * const gss_nt_krb5_name = krb5_gss_oid_array+3;
-const gss_OID_desc * const gss_nt_krb5_principal = krb5_gss_oid_array+4;
+const gss_OID_desc * const gss_mech_krb5              = krb5_gss_oid_array+0;
+const gss_OID_desc * const gss_mech_krb5_old          = krb5_gss_oid_array+1;
+const gss_OID_desc * const gss_mech_krb5_v2           = krb5_gss_oid_array+2;
+const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+3;
+const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+4;
+#if GSS_RFC_COMPLIANT_OIDS
+const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+3;
+#endif /* GSS_RFC_COMPLIANT_OIDS */
+
 
 static const gss_OID_set_desc oidsets[] = {
    {1, (gss_OID) krb5_gss_oid_array+0},
