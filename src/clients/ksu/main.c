@@ -648,12 +648,13 @@ int temp_debug;
     	}
 
       /* insist that the target login uses a standard shell (root is omited) */ 
-
+#ifdef HAS_GETUSERSHELL
        if (!standard_shell(target_pwd->pw_shell) && source_uid) {
 	       fprintf(stderr, "ksu: permission denied (shell).\n");
 	       sweep_up(use_source_cache, cc_target);
 	       exit(1);
 	}
+#endif /* HAS_GETUSERSHELL */
 
       /*  want to check the scoop with USER for the real ksu , MOD */          	
 	
@@ -680,9 +681,9 @@ int temp_debug;
 
       /* set the cc env name to target */         	
 
-      if(set_env_var( KRB5_CC_NAME, cc_target_tag)){
+      if(set_env_var(KRB5_ENV_CCNAME, cc_target_tag)){
 		fprintf(stderr,"ksu: couldn't set environment variable %s \n",
-			KRB5_CC_NAME);
+			KRB5_ENV_CCNAME);
 	        sweep_up(use_source_cache, cc_target);
 	        exit(1);
       } 			
@@ -783,6 +784,7 @@ int temp_debug;
 }
 
 
+#ifdef HAS_GETUSERSHELL
 int standard_shell(sh)
 char *sh;
 {
@@ -794,6 +796,7 @@ char *getusershell();
 			 return (1);
 	 return (0);    
 }
+#endif
 						  
 
 /* Modify this later , (clean it up) , MOD */     
