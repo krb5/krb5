@@ -45,7 +45,7 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 			    key_string, &string_size);
     
     if (ok == 0)
-	mit_des_string_to_key(key_string, k);
+	des_string_to_key(key_string, k);
 
     bzero(key_string, sizeof (key_string));
     return ok;
