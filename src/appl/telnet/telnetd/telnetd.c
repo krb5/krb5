@@ -173,7 +173,7 @@ char valid_opts[] = {
 	'D', ':',
 #endif
 #ifdef	ENCRYPTION
-	'e', ':',
+	'e',
 #endif
 #if	defined(CRAY) && defined(NEWINIT)
 	'I', ':',
@@ -308,6 +308,9 @@ main(argc, argv)
 				diagnostic |= TD_PTYDATA;
 			} else if (!strcmp(optarg, "options")) {
 				diagnostic |= TD_OPTIONS;
+			} else if (!strcmp(optarg, "encrypt")) {
+				extern int encrypt_debug_mode;
+				encrypt_debug_mode = 1;
 			} else {
 				usage();
 				/* NOT REACHED */
@@ -317,13 +320,7 @@ main(argc, argv)
 
 #ifdef	ENCRYPTION
 		case 'e':
-			if (strcmp(optarg, "debug") == 0) {
-				extern int encrypt_debug_mode;
-				encrypt_debug_mode = 1;
-				break;
-			}
-			usage();
-			/* NOTREACHED */
+			must_encrypt = 1;
 			break;
 #endif	/* ENCRYPTION */
 
@@ -694,8 +691,12 @@ usage()
 
 static void encrypt_failure()
 {
-    char *lerror_message =
-	"Encryption was not successfully negotiated.  Goodbye.\r\n\r\n";
+    char *lerror_message;
+
+    if (auth_must_encrypt())
+	lerror_message = "Encryption was not successfully negotiated.  Goodbye.\r\n\r\n";
+    else
+	lerror_message = "Unencrypted connection refused. Goodbye.\r\n\r\n";
 
     netputs(lerror_message);
     netflush();
@@ -720,6 +721,7 @@ getterminaltype(name)
 
     settimer(baseline);
 #if	defined(AUTHENTICATION)
+    ttsuck();
     /*
      * Handle the Authentication option before we do anything else.
      */
@@ -727,7 +729,7 @@ getterminaltype(name)
     while (his_will_wont_is_changing(TELOPT_AUTHENTICATION))
 	ttloop();
     if (his_state_is_will(TELOPT_AUTHENTICATION)) {
-	retval = auth_wait(name);
+	auth_wait(name);
     }
 #endif
 
@@ -760,15 +762,25 @@ getterminaltype(name)
     if (his_state_is_will(TELOPT_ENCRYPT)) {
 	encrypt_wait();
     }
-    if (auth_must_encrypt()) {
+    if (must_encrypt || auth_must_encrypt()) {
 	time_t timeout = time(0) + 60;
 	
 	if (my_state_is_dont(TELOPT_ENCRYPT) ||
-	    my_state_is_wont(TELOPT_ENCRYPT))
+	    my_state_is_wont(TELOPT_ENCRYPT) ||
+	    his_state_is_wont(TELOPT_AUTHENTICATION))
 	    encrypt_failure();
 
-	if (!EncryptStartInput() || !EncryptStartOutput())
-	    encrypt_failure();
+	while (!EncryptStartInput()) {
+	    if (time (0) > timeout)
+		encrypt_failure();
+	    ttloop();
+	}
+
+	while (!EncryptStartOutput()) {
+	    if (time (0) > timeout)
+		encrypt_failure();
+	    ttloop();
+	}
 
 	while (!encrypt_is_encrypting()) {
 	    if (time(0) > timeout)
@@ -865,7 +877,11 @@ getterminaltype(name)
 	    }
 	}
     }
-    return(retval);
+#ifdef AUTHENTICATION
+    return(auth_check(name));
+#else
+    return(-1);
+#endif
 }  /* end of getterminaltype */
 
 static void

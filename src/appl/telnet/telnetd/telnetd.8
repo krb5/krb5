@@ -39,7 +39,7 @@ protocol server
 .SH SYNOPSIS
 .B /usr/libexec/telnetd
 [\fB\-a\fP \fIauthmode\fP] [\fB\-B\fP] [\fB\-D\fP] [\fIdebugmode\fP]
-[\fB\-edebug\fP] [\fB\-h\fP] [\fB\-I\fP\fIinitid\fP] [\fB\-l\fP]
+[\fB\-e\fP] [\fB\-h\fP] [\fB\-I\fP\fIinitid\fP] [\fB\-l\fP]
 [\fB\-k\fP] [\fB\-n\fP] [\fB\-r\fP\fIlowpty-highpty\fP] [\fB\-s\fP]
 [\fB\-S\fP \fItos\fP] [\fB\-U\fP] [\fB\-X\fP \fIauthtype\fP]
 [\fB\-w\fP [\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
@@ -163,6 +163,9 @@ Displays the data stream received by
 .B ptydata
 Displays data written to the pty.
 .TP
+.B encrypt
+Enables	encryption debugging code.
+.TP
 .B exercise
 Has not been implemented yet.
 .RE
@@ -175,12 +178,10 @@ Enables debugging on each socket created by
 in
 .IR socket (2)).
 .TP
-.B \-edebug
-If
+.B \-e
+This option causes
 .B telnetd
-has been compiled with support for data encryption, then the
-.B edebug
-option may be used to enable encryption debugging code.
+to refuse unencrypted connections.
 .TP
 .B \-h
 Disables the printing of host-specific information before login has been
