@@ -85,7 +85,7 @@
  *
  * NOTE WELL:
  *
- * This section must be kept in sync with lib/crypto/des/des_int.h,
+ * This section must be kept in sync with include/kerberosIV/des.h,
  * until we get around to actually combining them at the source level.
  * We can't right now, because both the Mac and Windows platforms are
  * using their own versions of krb4 des.h, and that's the one that
