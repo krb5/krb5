@@ -79,7 +79,7 @@ static krb5_error_code add_principal
 		   enum ap_op,
 		   struct realm_info *));
 
-static int v4init PROTOTYPE((char *, char *, int, char *));
+static int v4init PROTOTYPE((char *, int, char *));
 static krb5_error_code enter_in_v5_db PROTOTYPE((krb5_context,
 						 char *, Principal *));
 static krb5_error_code process_v4_dump PROTOTYPE((krb5_context, char *,
@@ -128,7 +128,6 @@ char *argv[];
        make it explicit (error reporting and temporary filename generation
        use it).  */
     char *dbname = DEFAULT_KDB_FILE;
-    char *v4dbname = 0;
     char *v4dumpfile = 0;
     char *realm = 0;
     char *mkey_name = 0;
@@ -169,16 +168,12 @@ char *argv[];
 	else if (!strcmp(argv[op_ind], "-n")) {
 	    v4manual++;
 	}
-	else if (!strcmp(argv[op_ind], "-f") && ((argc - op_ind) >= 2)) {
-	    if (v4dbname) {
-		usage();
-		return;
-	    }
-	    v4dumpfile = argv[op_ind+1];
+	else if ((argc - op_ind) >= 1) {
+	    v4dumpfile = argv[op_ind];
 	    op_ind++;
 	}
 	else
-	    persist = 0;
+	    usage();
 	op_ind++;
     }
 
@@ -296,7 +291,7 @@ master key name '%s'\n",
                 tempdbname);
         return;
     }
-    if (v4init(PROGNAME, v4dbname, v4manual, v4dumpfile)) {
+    if (v4init(PROGNAME, v4manual, v4dumpfile)) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	(void) krb5_dbm_db_destroy(context, tempdbname);
@@ -373,7 +368,7 @@ master key name '%s'\n",
      * Always create the policy db, even if we are not loading a dump
      * file with policy info.
      */
-    if (retval = osa_adb_create_policy_db(&newparams)) {
+    if (!tempdb && (retval = osa_adb_create_policy_db(&newparams))) {
 	 com_err(PROGNAME, retval, "while creating policy database");
 	 kadm5_free_config_params(context, &newparams);
 	 return;
@@ -391,8 +386,8 @@ master key name '%s'\n",
 }
 
 static int
-v4init(pname, name, manual, dumpfile)
-char *pname, *name;
+v4init(pname, manual, dumpfile)
+char *pname;
 int manual;
 char *dumpfile;
 {
@@ -836,6 +831,6 @@ load_v4db(argc, argv)
 	int argc;
 	char *argv[];
 {
-	printf("This version of krb5_edit does not support the V4 load command.\n");
+	printf("This version of kdb5_util does not support the V4 load command.\n");
 }
 #endif /* KRB5_KRB4_COMPAT */

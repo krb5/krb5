@@ -1,3 +1,13 @@
+Wed Sep  4 17:34:58 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* loadv4.c (load_v4db): Fix argument parsing so that it actually works!
+		Eliminated the -f option, as it is superfluous.  Don't
+		create the policy database if using the -t option, since
+		it'll already exist.
+
+	* kdb5_util.c (usage): Fix usage message so that it's correct for
+	 	load_v4.
+
 Tue Sep  3 22:12:54 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (install): Fixed typo: ($PROG) -> $(PROG)
