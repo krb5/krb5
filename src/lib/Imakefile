@@ -34,3 +34,5 @@ all:: libkrb5.a libcrypto.a
 LinkFile(libkrb5.a, krb5/libkrb5.a)
 LinkFile(libcrypto.a, crypto/libcrypto.a)
 
+Krb5InstallLibrary(krb425,$(KRB5_LIBDIR))
+Krb5InstallLibrary(des425,$(KRB5_LIBDIR))
