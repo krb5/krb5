@@ -10,5 +10,6 @@ AC_PROG_RANLIB
 AC_PROG_INSTALL
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("checking",check)
 AppendRule([all:: libkrb5.a libkrb5_ranlib])
 V5_AC_OUTPUT_MAKEFILE
