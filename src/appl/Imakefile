@@ -25,5 +25,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=sample simple popper movemail user_user
+SUBDIRS=sample simple bsd popper movemail user_user
 MakeSubdirs($(SUBDIRS))
