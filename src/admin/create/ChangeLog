@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+	* kdb5_create.c : Remove krb5_enctype references, and replace with 
+		krb5_keytype where appropriate.
+
 Wed Aug 9 18:05:44 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_create.c - Use default key/salt tuple list or one generated from
 		reading KDC profile to determine which key types to make for

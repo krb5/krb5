@@ -36,7 +36,7 @@ enum ap_op {
     TGT_KEY				/* special handling for tgt key */
 };
 
-krb5_key_salt_tuple def_kslist = { KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL };
+krb5_key_salt_tuple def_kslist = { KEYTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_NORMAL };
 
 struct realm_info {
     krb5_deltat max_life;
@@ -90,7 +90,7 @@ char *who;
 int status;
 {
     fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
-\t[-e etype] [-M mkeyname]\n",
+\t[-M mkeyname]\n",
 	    who);
     exit(status);
 }
@@ -140,7 +140,6 @@ char *argv[];
     char *defrealm;
     char *mkey_password = 0;
     int keytypedone = 0;
-    krb5_enctype etype = 0xffff;
     krb5_data scratch, pwd;
     krb5_context context;
     krb5_realm_params *rparams;
@@ -171,11 +170,6 @@ char *argv[];
         case 'P':		/* Only used for testing!!! */
 	    mkey_password = optarg;
 	    break;
-	case 'e':
-	    if (krb5_string_to_enctype(optarg, &etype))
-		com_err(argv[0], 0, "%s is an invalid encryption type",
-			optarg);
-	    break;
 	case '?':
 	default:
 	    usage(argv[0], 1);
@@ -205,10 +199,6 @@ char *argv[];
 	    master_keyblock.keytype = rparams->realm_keytype;
 	    keytypedone++;
 	}
-
-	/* Get the value for the encryption type */
-	if (rparams->realm_enctype_valid && (etype == 0xffff))
-	    etype = rparams->realm_enctype;
 
 	/* Get the value for maximum ticket lifetime. */
 	if (rparams->realm_max_life_valid)
@@ -253,19 +243,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == 0xffff)
-	etype = DEFAULT_KDC_ETYPE;
-
-    if (!valid_etype(etype)) {
-	char tmp[32];
-	if (krb5_enctype_to_string(etype, tmp, sizeof(tmp)))
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
-		    "while setting up etype %d", etype);
-	else
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP, tmp);
-	exit(1);
-    }
-    krb5_use_cstype(context, &master_encblock, etype);
+    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
 
     retval = krb5_db_set_name(context, dbname);
     if (!retval) retval = EEXIST;
