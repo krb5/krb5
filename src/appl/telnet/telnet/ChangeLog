@@ -1,3 +1,8 @@
+Tue May 26 15:27:55 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Re-order check for setupterm to avoid lossage if
+	setupterm is defined in libtermcap or libcurses.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* main.c (main): POSIX states that getopt returns -1 when it
