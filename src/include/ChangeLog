@@ -1,3 +1,9 @@
+2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
+
+    * configure.in: Use KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
+    and higher.  When bind 9 is present, BIND_8_COMPAT needs to be 
+    defined to get bind 8 types.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     
     * krb5.h: Removed enumsalwaysint because there are no typed
