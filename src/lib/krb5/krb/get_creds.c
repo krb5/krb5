@@ -56,7 +56,7 @@ krb5_creds *creds;
 {
     krb5_error_code retval, rv2;
     krb5_creds **tgts;
-    krb5_creds mcreds;
+    krb5_creds mcreds, ncreds;
     krb5_flags fields;
 
     if (!creds || !creds->server || !creds->client)
@@ -82,7 +82,11 @@ krb5_creds *creds;
 	    return KRB5_NO_2ND_TKT;
     }
 
-    retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, creds);
+    retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, &ncreds);
+    if (retval == 0) {
+	    krb5_free_cred_contents(creds);
+	    *creds = ncreds;
+    }
     if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
 	return retval;
 
