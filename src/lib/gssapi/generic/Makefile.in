@@ -20,9 +20,12 @@ EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 HDRS=	$(EHDRDIR)$(S)gssapi.h \
 	$(EHDRDIR)$(S)gssapi_generic.h
 
-$(EHDRDIR)$(S)gssapi.h: gssapi.h $(EHDRDIR)$(S)stamp
+EHDRDIRSTAMP=$(EHDRDIR)/stamp
+##DOS##EHDRDIRSTAMP=
+
+$(EHDRDIR)$(S)gssapi.h: gssapi.h $(EHDRDIRSTAMP)
 	$(CP) gssapi.h $@
-$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h $(EHDRDIR)$(S)stamp
+$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h $(EHDRDIRSTAMP)
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
 $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
@@ -104,14 +107,12 @@ all-unix:: all-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: $(EHDRDIR)$(S)stamp $(HDRS)
+all-windows:: win-create-ehdrdir
+all-windows:: $(HDRS)
 
-# windows
-$(EHDRDIR)\stamp:
+win-create-ehdrdir:
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-	echo. > $@
 
-# unix
 $(EHDRDIR)/stamp:
 	@if test -d $(EHDRDIR); then :; \
 		else (set -x; mkdir $(EHDRDIR)) fi; touch $@
@@ -123,7 +124,6 @@ clean-unix:: clean-libobjs
 
 clean-windows::
 	$(RM) $(HDRS)
-	-if exist $(EHDRDIR)\stamp $(RM) $(EHDRDIR)\stamp
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)

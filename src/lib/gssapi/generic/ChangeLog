@@ -1,3 +1,10 @@
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Another attempt... turns our that the "copy"
+	command on Windows preserves modtimes, so spurious rebuilds were
+	happening even with the stamp file, since the target in $(EHDRDIR)
+	is always out of date with respect to the stamp file.
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fix $(EHDRDIR) creation to avoid spurious
