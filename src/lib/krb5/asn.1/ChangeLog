@@ -1,3 +1,7 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* asn1_encode.c: Updated Utilities.h #include
+
 2001-01-31  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c (asn1buf_sync): Add new arguments to include the full
