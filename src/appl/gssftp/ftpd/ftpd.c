@@ -596,7 +596,8 @@ path_expand(path)
 			}
 		}
 	}
-	return strcat(pathbuf, path);
+	return strncat(pathbuf, path,
+		       sizeof (pathbuf) - strlen(pathbuf) - 1);
 }
 
 /*
@@ -728,11 +729,13 @@ user(name)
 #endif /* KRB5_KRB4_COMPAT */
 
 		if (!authorized && authlevel == AUTHLEVEL_AUTHORIZE) {
-			strcat(buf, "; Access denied.");
+			strncat(buf, "; Access denied.",
+				sizeof(buf) - strlen(buf) - 1);
 			result = 530;
 			pw = NULL;
 		} else if (!authorized || (want_creds && !have_creds)) {
-			strcat(buf, "; Password required.");
+			strncat(buf, "; Password required.",
+				sizeof(buf) - strlen(buf) - 1);
 			askpasswd = 1;
 			result = 331;
 		} else
@@ -1611,7 +1614,7 @@ statcmd()
 		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
 	if (type == TYPE_L)
 #if 1
-		strcat(str, " 8");
+		strncat(str, " 8", sizeof (str) - strlen(str) - 1);
 #else
 /* this is silly. -- eichin@cygnus.com */
 #if NBBY == 8
@@ -1681,7 +1684,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		int length, kerror;
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
-		strcat(in, buf);
+		strncat(in, buf, sizeof (in) - strlen(in) - 1);
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
 			if ((length = clevel == PROT_P ?
