@@ -31,7 +31,7 @@ static int init_et = 0;
 
 /**/
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_display_status(context, minor_status, status_value, status_type,
 			mech_type, message_context, status_string)
      krb5_context context;

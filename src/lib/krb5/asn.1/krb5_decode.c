@@ -147,7 +147,7 @@ if(tagnum == (tagexpect)){\
 #define cleanup()\
 return 0
 
-krb5_error_code INTERFACE decode_krb5_authenticator(code, rep)
+krb5_error_code decode_krb5_authenticator(code, rep)
      const krb5_data * code;
      krb5_authenticator ** rep;
 {
@@ -176,7 +176,7 @@ krb5_error_code INTERFACE decode_krb5_authenticator(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_ticket(code, rep)
+krb5_error_code decode_krb5_ticket(code, rep)
      const krb5_data * code;
      krb5_ticket ** rep;
 {
@@ -198,7 +198,7 @@ krb5_error_code INTERFACE decode_krb5_ticket(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_encryption_key(code, rep)
+krb5_error_code decode_krb5_encryption_key(code, rep)
      const krb5_data * code;
      krb5_keyblock ** rep;
 {
@@ -215,7 +215,7 @@ krb5_error_code INTERFACE decode_krb5_encryption_key(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_enc_tkt_part(code, rep)
+krb5_error_code decode_krb5_enc_tkt_part(code, rep)
      const krb5_data * code;
      krb5_enc_tkt_part ** rep;
 {
@@ -242,7 +242,7 @@ krb5_error_code INTERFACE decode_krb5_enc_tkt_part(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_enc_kdc_rep_part(code, rep)
+krb5_error_code decode_krb5_enc_kdc_rep_part(code, rep)
      const krb5_data * code;
      krb5_enc_kdc_rep_part ** rep;
 {
@@ -262,7 +262,7 @@ krb5_error_code INTERFACE decode_krb5_enc_kdc_rep_part(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_as_rep(code, rep)
+krb5_error_code decode_krb5_as_rep(code, rep)
      const krb5_data * code;
      krb5_kdc_rep ** rep;
 {
@@ -280,7 +280,7 @@ krb5_error_code INTERFACE decode_krb5_as_rep(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_tgs_rep(code, rep)
+krb5_error_code decode_krb5_tgs_rep(code, rep)
      const krb5_data * code;
      krb5_kdc_rep ** rep;
 {
@@ -297,7 +297,7 @@ krb5_error_code INTERFACE decode_krb5_tgs_rep(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_ap_req(code, rep)
+krb5_error_code decode_krb5_ap_req(code, rep)
      const krb5_data * code;
      krb5_ap_req ** rep;
 {
@@ -324,7 +324,7 @@ krb5_error_code INTERFACE decode_krb5_ap_req(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_ap_rep(code, rep)
+krb5_error_code decode_krb5_ap_rep(code, rep)
      const krb5_data * code;
      krb5_ap_rep ** rep;
 {
@@ -348,7 +348,7 @@ krb5_error_code INTERFACE decode_krb5_ap_rep(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_ap_rep_enc_part(code, rep)
+krb5_error_code decode_krb5_ap_rep_enc_part(code, rep)
      const krb5_data * code;
      krb5_ap_rep_enc_part ** rep;
 {
@@ -367,7 +367,7 @@ krb5_error_code INTERFACE decode_krb5_ap_rep_enc_part(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_as_req(code, rep)
+krb5_error_code decode_krb5_as_req(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
@@ -384,7 +384,7 @@ krb5_error_code INTERFACE decode_krb5_as_req(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_tgs_req(code, rep)
+krb5_error_code decode_krb5_tgs_req(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
@@ -401,7 +401,7 @@ krb5_error_code INTERFACE decode_krb5_tgs_req(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_kdc_req_body(code, rep)
+krb5_error_code decode_krb5_kdc_req_body(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
@@ -414,7 +414,7 @@ krb5_error_code INTERFACE decode_krb5_kdc_req_body(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_safe(code, rep)
+krb5_error_code decode_krb5_safe(code, rep)
      const krb5_data * code;
      krb5_safe ** rep;
 {
@@ -440,7 +440,7 @@ krb5_error_code INTERFACE decode_krb5_safe(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_priv(code, rep)
+krb5_error_code decode_krb5_priv(code, rep)
      const krb5_data * code;
      krb5_priv ** rep;
 {
@@ -464,7 +464,7 @@ krb5_error_code INTERFACE decode_krb5_priv(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_enc_priv_part(code, rep)
+krb5_error_code decode_krb5_enc_priv_part(code, rep)
      const krb5_data * code;
      krb5_priv_enc_part ** rep;
 {
@@ -486,7 +486,7 @@ krb5_error_code INTERFACE decode_krb5_enc_priv_part(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_cred(code, rep)
+krb5_error_code decode_krb5_cred(code, rep)
      const krb5_data * code;
      krb5_cred ** rep;
 {
@@ -511,7 +511,7 @@ krb5_error_code INTERFACE decode_krb5_cred(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_enc_cred_part(code, rep)
+krb5_error_code decode_krb5_enc_cred_part(code, rep)
      const krb5_data * code;
      krb5_cred_enc_part ** rep;
 {
@@ -533,7 +533,7 @@ krb5_error_code INTERFACE decode_krb5_enc_cred_part(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_error(code, rep)
+krb5_error_code decode_krb5_error(code, rep)
      const krb5_data * code;
      krb5_error ** rep;
 {
@@ -569,7 +569,7 @@ krb5_error_code INTERFACE decode_krb5_error(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_authdata(code, rep)
+krb5_error_code decode_krb5_authdata(code, rep)
      const krb5_data * code;
      krb5_authdata *** rep;
 {
@@ -580,7 +580,7 @@ krb5_error_code INTERFACE decode_krb5_authdata(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_pwd_sequence(code, rep)
+krb5_error_code decode_krb5_pwd_sequence(code, rep)
      const krb5_data * code;
      passwd_phrase_element ** rep;
 {
@@ -591,7 +591,7 @@ krb5_error_code INTERFACE decode_krb5_pwd_sequence(code, rep)
   cleanup();
 }
 
-krb5_error_code INTERFACE decode_krb5_pwd_data(code, rep)
+krb5_error_code decode_krb5_pwd_data(code, rep)
      const krb5_data * code;
      krb5_pwd_data ** rep;
 {

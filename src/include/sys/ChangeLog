@@ -1,0 +1,3 @@
+Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
+
+	* syslog.h:  __STDC__ conditionals also check for the _WINDOWS define.

@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_release_name(context, minor_status, input_name)
      krb5_context context;
      OM_uint32 *minor_status;

@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+void
 krb5_free_tkt_authent(context, val)
     krb5_context context;
     krb5_tkt_authent *val;

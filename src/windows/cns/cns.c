@@ -1940,7 +1940,6 @@ kwin_command (
         krb5_principal principal;
 		krb5_creds creds;
 		krb5_principal server;
-		krb5_timestamp now;
         krb5_int32 sec, usec;
 	#endif
 
@@ -2063,12 +2062,6 @@ kwin_command (
 
                 code = krb5_us_timeofday(k5_context, &sec, &usec);
                 if (code) break;
- code = krb5_timeofday(k5_context, &now);
- if (code) break;
- if (labs(now-sec) > 60*60) {            // Off by more than an hour
-     MessageBox (NULL, "DEBUG: timeofday != us_timeofday", NULL, 0);
-     now = sec;
- }
                 creds.times.starttime = 0;
     			creds.times.endtime = sec + 60L * lifetime;
 	    		creds.times.renew_till = 0;
@@ -2099,7 +2092,11 @@ kwin_command (
 
 		#ifdef KRB5
 			if (code) {
-				com_err (NULL, code, "while logging in");
+            	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+                    MessageBox (hwnd, "Password incorrect", NULL, 
+    					MB_OK | MB_ICONEXCLAMATION);
+                else 
+    				com_err (NULL, code, "while logging in");
 				return TRUE;
 			}
 		#endif

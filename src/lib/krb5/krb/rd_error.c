@@ -36,7 +36,7 @@
  *  returns system errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_rd_error(context,  enc_errbuf, dec_error)
     krb5_context context;
     const krb5_data *enc_errbuf;

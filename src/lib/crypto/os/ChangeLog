@@ -1,3 +1,7 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+
 Sat Mar 25 15:38:23 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (memmove.c): memmove.c is in krb5/posix, not krb5/os.

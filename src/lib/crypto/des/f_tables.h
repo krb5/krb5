@@ -15,7 +15,7 @@
 #define	__DES_TABLES_H__	/* nothing */
 
 #ifndef const
-#ifndef __STDC__
+#if !defined(__STDC__) && !defined(_WINDOWS)
 #define const /* nothing */
 #endif
 #endif

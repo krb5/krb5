@@ -42,7 +42,7 @@
 
 	returns: errors
 */
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
     krb5_pointer in;
     size_t in_length;

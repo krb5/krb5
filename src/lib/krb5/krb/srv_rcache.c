@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_server_rcache(context, piece, rcptr)
     krb5_context context;
     const krb5_data *piece;

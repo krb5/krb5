@@ -27,7 +27,7 @@
    make sure that buffer is consistent (release'able) when this
    function exits, no matter what the exit value */
 
-int INTERFACE g_make_string_buffer(str, buffer)
+int g_make_string_buffer(str, buffer)
      const char *str;
      gss_buffer_t buffer;
 {

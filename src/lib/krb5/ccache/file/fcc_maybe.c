@@ -183,7 +183,7 @@ int lockunlock;
 #endif
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_close_file (context, id)
    krb5_context context;
     krb5_ccache id;
@@ -204,7 +204,7 @@ krb5_fcc_close_file (context, id)
      return (ret == -1) ? krb5_fcc_interpret (context, errno) : 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_open_file (context, id, mode)
    krb5_context context;
     krb5_ccache id;

@@ -38,7 +38,7 @@
  * GSS_S_FAILURE	if memory allocation fails
  */
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_import_name(context, minor_status, input_name_buffer, 
 		     input_name_type, output_name)
      krb5_context context;

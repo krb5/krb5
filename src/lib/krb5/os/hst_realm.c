@@ -131,7 +131,7 @@ read_2str (FILE *fp, char *b1, int l1, char *b2, int l2) {
 
 #endif /* _WINDOWS */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
     const char *host;

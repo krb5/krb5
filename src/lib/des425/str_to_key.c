@@ -48,7 +48,7 @@ extern int mit_des_debug;
 /*
  * convert an arbitrary length string to a DES key
  */
-int INTERFACE
+int
 des_string_to_key(str,key)
     char *str;
     register mit_des_cblock *key;
@@ -62,7 +62,7 @@ des_string_to_key(str,key)
     register char *p_char;
     static char k_char[64];
     static mit_des_key_schedule key_sked;
-    extern void INTERFACE des_cbc_cksum();
+    extern void des_cbc_cksum();
 
     in_str = str;
     forward = 1;

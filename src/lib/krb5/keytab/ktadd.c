@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_kt_add_entry (context, id, entry)
     krb5_context context;
     krb5_keytab id;

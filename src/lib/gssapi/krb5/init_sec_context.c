@@ -147,7 +147,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
    return(0);
 }
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 			context_handle, target_name, mech_type,
 			req_flags, time_req, input_chan_bindings,
@@ -175,7 +175,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
     gss_buffer_desc token;
     int i;
 /* Remove this when server is fixed and this function goes away */
-krb5_error_code INTERFACE krb5_auth_con_setkey (); 
+krb5_error_code krb5_auth_con_setkey (); 
 
    /* set up return values so they can be "freed" successfully */
 

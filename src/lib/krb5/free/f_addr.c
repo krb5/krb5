@@ -25,7 +25,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+void
 krb5_free_address(context, val)
     krb5_context context;
     krb5_address *val;

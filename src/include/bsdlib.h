@@ -4,7 +4,7 @@
  */
 #ifndef __BSDLIB__
 #define __BSDLIB__
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 /* compat-4.3 */
 extern char *ecvt  (double , int , int *, int *);
 extern char *fcvt  (double , int , int *, int *);

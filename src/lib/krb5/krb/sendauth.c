@@ -39,7 +39,7 @@ extern krb5_flags	krb5_kdc_default_options;
 
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_sendauth(context, auth_context,
 	      /* IN */
 	      fd, appl_version, client, server, ap_req_options, in_data,

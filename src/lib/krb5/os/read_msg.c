@@ -28,7 +28,7 @@
 #include "k5-int.h"
 #include <errno.h>
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_read_message(context, fdp, inbuf)
     krb5_context context;
 	krb5_pointer fdp;

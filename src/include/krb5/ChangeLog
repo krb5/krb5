@@ -1,3 +1,14 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+        * asn1.h, ccache.h, encryption.h, func-pro.h, hostaddr.h, keytab.h,
+          los-prot.h, preauth.h, rcache.h: 
+            removed unneeded INTERFACE from non-api functions.
+        * adm_defs.h, ccache.h, encryption.h, hostaddr.h, k5-free.h, keytab.h,
+          macros.h, rcache.h:
+           Added FAR to pointers visible to the world.
+        * base-def.h, ext-prot.h, rsa-md5.h: __STDC__ condition also 
+           checks for the _WINDOWS define.
+
 Wed Apr 5 16:41:41 1995 Keith Vetter (keithv@fusion.com)
 
 	* los-proto.h, func-proto.h: moved krb5_us_timeofday and 

@@ -39,7 +39,7 @@
  returns errors from encryption routines, system errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_decode_kdc_rep(context, enc_rep, key, etype, dec_rep)
     krb5_context context;
     krb5_data * enc_rep;

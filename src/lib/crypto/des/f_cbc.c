@@ -36,7 +36,7 @@
  * cleartext.
  */
 
-int INTERFACE
+int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	const des_cblock *in;
 	des_cblock *out;

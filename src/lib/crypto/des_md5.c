@@ -25,11 +25,11 @@
 #include "rsa-md5.h"
 #include "des_int.h"
 
-krb5_error_code INTERFACE mit_des_md5_encrypt_func
+krb5_error_code mit_des_md5_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
-krb5_error_code INTERFACE mit_des_md5_decrypt_func
+krb5_error_code mit_des_md5_decrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
@@ -59,7 +59,7 @@ krb5_cs_table_entry krb5_des_md5_cst_entry = {
     };
 
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_md5_encrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
@@ -124,7 +124,7 @@ mit_des_md5_encrypt_func(in, out, size, key, ivec)
     
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_md5_decrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;

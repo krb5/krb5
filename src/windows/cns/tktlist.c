@@ -445,6 +445,7 @@ flags_string(krb5_creds *cred) {
     int i = 0;
 
     buf[i++] = ' ';    
+    buf[i++] = '(';    
     if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
         buf[i++] = 'F';
     if (cred->ticket_flags & TKT_FLG_FORWARDED)
@@ -468,7 +469,10 @@ flags_string(krb5_creds *cred) {
     if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
         buf[i++] = 'A';
 
+    buf[i++] = ')';    
     buf[i] = '\0';
+    if (i <= 3)
+        buf[0] = '\0';
     return(buf);
 }
 

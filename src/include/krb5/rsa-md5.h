@@ -48,14 +48,14 @@ typedef struct {
   unsigned char digest[16];		/* actual digest after MD5Final call */
 } MD5_CTX;
 
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
-extern void INTERFACE MD5Init(MD5_CTX FAR *);
-extern void INTERFACE MD5Update (MD5_CTX FAR *, unsigned char FAR *, unsigned int);
-extern void INTERFACE MD5Final (MD5_CTX FAR *);
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
+extern void MD5Init(MD5_CTX FAR *);
+extern void MD5Update (MD5_CTX FAR *, unsigned char FAR *, unsigned int);
+extern void MD5Final (MD5_CTX FAR *);
 #else
-extern void INTERFACE MD5Init();
-extern void INTERFACE MD5Update ();
-extern void INTERFACE MD5Final ();
+extern void MD5Init();
+extern void MD5Update ();
+extern void MD5Final ();
 #endif
 
 #define	RSA_MD5_CKSUM_LENGTH		16

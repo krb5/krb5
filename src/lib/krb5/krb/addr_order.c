@@ -34,7 +34,7 @@
  * Return an ordering on two addresses:  0 if the same,
  * < 0 if first is less than 2nd, > 0 if first is greater than 2nd.
  */
-int INTERFACE
+int
 krb5_address_order(context, addr1, addr2)
     krb5_context context;
     register const krb5_address *addr1;

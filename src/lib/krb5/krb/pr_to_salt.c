@@ -29,7 +29,7 @@
 /*
  * Convert a krb5_principal into the default salt for that principal.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_principal2salt_internal(context, pr, ret, use_realm)
     krb5_context context;
     register krb5_const_principal pr;
@@ -71,7 +71,7 @@ krb5_principal2salt_internal(context, pr, ret, use_realm)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_principal2salt(context, pr, ret)
     krb5_context context;
     register krb5_const_principal pr;
@@ -80,7 +80,7 @@ krb5_principal2salt(context, pr, ret)
 	return krb5_principal2salt_internal(context, pr, ret, 1);
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_principal2salt_norealm(context, pr, ret)
     krb5_context context;
     register krb5_const_principal pr;

@@ -23,7 +23,7 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
-krb5_error_code INTERFACE
+krb5_error_code
 kg_checksum_channel_bindings(cb, cksum, bigend)
      gss_channel_bindings_t cb;
      krb5_checksum *cksum;

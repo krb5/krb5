@@ -90,7 +90,7 @@
 #define LOG_NOWAIT	0x10	/* if forking to log on console, don't wait() */
 
 #ifndef KERNEL
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
 extern void syslog  (int , const char *, ... );
 #ifdef va_start				
 /* XXX depending on #define of va_start in <stdarg.h> */

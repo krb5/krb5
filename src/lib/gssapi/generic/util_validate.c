@@ -105,45 +105,45 @@ static int g_delete(DB **vdb, int type, void *ptr)
 
 /* save */
 
-int INTERFACE g_save_name(void **vdb, gss_name_t *name)
+int g_save_name(void **vdb, gss_name_t *name)
 {
    return(g_save((DB **) vdb, V_NAME, (void *) name));
 }
-int INTERFACE g_save_cred_id(void **vdb, gss_cred_id_t *cred)
+int g_save_cred_id(void **vdb, gss_cred_id_t *cred)
 {
    return(g_save((DB **) vdb, V_CRED_ID, (void *) cred));
 }
-int INTERFACE g_save_ctx_id(void **vdb, gss_ctx_id_t *ctx)
+int g_save_ctx_id(void **vdb, gss_ctx_id_t *ctx)
 {
    return(g_save((DB **) vdb, V_CTX_ID, (void *) ctx));
 }
 
 /* validate */
 
-int INTERFACE g_validate_name(void **vdb, gss_name_t *name)
+int g_validate_name(void **vdb, gss_name_t *name)
 {
    return(g_validate((DB **) vdb, V_NAME, (void *) name));
 }
-int INTERFACE g_validate_cred_id(void **vdb, gss_cred_id_t *cred)
+int g_validate_cred_id(void **vdb, gss_cred_id_t *cred)
 {
    return(g_validate((DB **) vdb, V_CRED_ID, (void *) cred));
 }
-int INTERFACE g_validate_ctx_id(void **vdb, gss_ctx_id_t *ctx)
+int g_validate_ctx_id(void **vdb, gss_ctx_id_t *ctx)
 {
    return(g_validate((DB **) vdb, V_CTX_ID, (void *) ctx));
 }
 
 /* delete */
 
-int INTERFACE g_delete_name(void **vdb, gss_name_t *name)
+int g_delete_name(void **vdb, gss_name_t *name)
 {
    return(g_delete((DB **) vdb, V_NAME, (void *) name));
 }
-int INTERFACE g_delete_cred_id(void **vdb, gss_cred_id_t *cred)
+int g_delete_cred_id(void **vdb, gss_cred_id_t *cred)
 {
    return(g_delete((DB **) vdb, V_CRED_ID, (void *) cred));
 }
-int INTERFACE g_delete_ctx_id(void **vdb, gss_ctx_id_t *ctx)
+int g_delete_ctx_id(void **vdb, gss_ctx_id_t *ctx)
 {
    return(g_delete((DB **) vdb, V_CTX_ID, (void *) ctx));
 }

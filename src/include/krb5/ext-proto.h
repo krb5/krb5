@@ -31,7 +31,7 @@
 #ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #else
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 #ifdef NO_STDLIB_H
 #include <fake-stdlib.h>
 #else

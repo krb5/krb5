@@ -30,7 +30,7 @@
  * if addr is listed in addrlist, or addrlist is null, return TRUE.
  * if not listed, return FALSE
  */
-krb5_boolean INTERFACE
+krb5_boolean
 krb5_address_search(context, addr, addrlist)
     krb5_context context;
     const krb5_address *addr;

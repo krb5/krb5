@@ -35,7 +35,7 @@
 
 */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_context context;
     const krb5_keyblock *srv_key;

@@ -32,7 +32,7 @@ typedef struct _krb5_address {
     krb5_magic magic;
     krb5_addrtype addrtype;
     int length;
-    krb5_octet *contents;
+    krb5_octet FAR *contents;
 } krb5_address;
 
 /* per Kerberos v5 protocol spec */
@@ -50,7 +50,7 @@ typedef struct _krb5_address {
 
 /* implementation-specific stuff: */
 typedef struct _krb5_fulladdr {
-    krb5_address *address;
+    krb5_address FAR *address;
     unsigned long port;			/* port, for some address types.
 					   large enough for most protos? */
 } krb5_fulladdr;

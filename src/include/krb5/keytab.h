@@ -45,56 +45,56 @@ typedef struct krb5_keytab_entry_st {
 
 typedef struct _krb5_kt {
     krb5_magic magic;
-    struct _krb5_kt_ops *ops;
+    struct _krb5_kt_ops FAR *ops;
     krb5_pointer data;
-} *krb5_keytab;
+} FAR *krb5_keytab;
 
 
 typedef struct _krb5_kt_ops {
     krb5_magic magic;
-    char *prefix;
+    char FAR *prefix;
     /* routines always present */
-    krb5_error_code (INTERFACE *resolve) 
+    krb5_error_code (*resolve) 
 	NPROTOTYPE((krb5_context,
-		    const char *,
-		    krb5_keytab *));
-    krb5_error_code (INTERFACE *get_name) 
+		    const char FAR *,
+		    krb5_keytab FAR *));
+    krb5_error_code (*get_name) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		    char *,
+		    char FAR *,
 		    int));
-    krb5_error_code (INTERFACE *close) 
+    krb5_error_code (*close) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab));
-    krb5_error_code (INTERFACE *get) 
+    krb5_error_code (*get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_principal,
 		    krb5_kvno,
 		    krb5_keytype,
-		    krb5_keytab_entry *));
-    krb5_error_code (INTERFACE *start_seq_get) 
+		    krb5_keytab_entry FAR *));
+    krb5_error_code (*start_seq_get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		    krb5_kt_cursor *));	
-    krb5_error_code (INTERFACE *get_next) 
+		    krb5_kt_cursor FAR *));	
+    krb5_error_code (*get_next) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		    krb5_keytab_entry *,
-		    krb5_kt_cursor *));
-    krb5_error_code (INTERFACE *end_get) 
+		    krb5_keytab_entry FAR *,
+		    krb5_kt_cursor FAR *));
+    krb5_error_code (*end_get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		    krb5_kt_cursor *));
+		    krb5_kt_cursor FAR *));
     /* routines to be included on extended version (write routines) */
-    krb5_error_code (INTERFACE *add) 
+    krb5_error_code (*add) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		    krb5_keytab_entry *));
-    krb5_error_code (INTERFACE *remove) 
+		    krb5_keytab_entry FAR *));
+    krb5_error_code (*remove) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
-		  krb5_keytab_entry *));
+		  krb5_keytab_entry FAR *));
 } krb5_kt_ops;
 
 #define krb5_kt_get_name(context, keytab, name, namelen) (*(keytab)->ops->get_name)(context, keytab,name,namelen)

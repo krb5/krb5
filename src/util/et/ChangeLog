@@ -1,3 +1,8 @@
+Thu Apr 13 16:02:24 1995 Keith Vetter (keithv@fusion.com)
+
+        * com_err.c, compile_et.c, error_ta.h, et_c.awk, internal.h:
+           __STDC__ conditionals also checks for the _WINDOWS define.
+
 Wed Apr 5 16:25:35 1995 Keith Vetter (keithv@fusion.com)
 
 	* com_err.h: added FAR to pointers in prototypes.

@@ -23,7 +23,7 @@
 
 #include "asn1_make.h"
 
-asn1_error_code INTERFACE asn1_make_etag(buf, class, tagnum, in_len, retlen)
+asn1_error_code asn1_make_etag(buf, class, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_tagnum tagnum;
@@ -33,7 +33,7 @@ asn1_error_code INTERFACE asn1_make_etag(buf, class, tagnum, in_len, retlen)
   return asn1_make_tag(buf,class,CONSTRUCTED,tagnum,in_len,retlen);
 }
 
-asn1_error_code INTERFACE asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
+asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_construction construction;
@@ -57,7 +57,7 @@ asn1_error_code INTERFACE asn1_make_tag(buf, class, construction, tagnum, in_len
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_make_length(buf, in_len, retlen)
+asn1_error_code asn1_make_length(buf, in_len, retlen)
      asn1buf * buf;
      const int in_len;
      int * retlen;
@@ -86,7 +86,7 @@ asn1_error_code INTERFACE asn1_make_length(buf, in_len, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_make_id(buf, class, construction, tagnum, retlen)
+asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_construction construction;
@@ -124,7 +124,7 @@ asn1_error_code INTERFACE asn1_make_id(buf, class, construction, tagnum, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_make_sequence(buf, seq_len, retlen)
+asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
      asn1buf * buf;
      const int seq_len;
      int * retlen;
@@ -143,7 +143,7 @@ asn1_error_code INTERFACE asn1_make_sequence(buf, seq_len, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_make_set(buf, set_len, retlen)
+asn1_error_code asn1_make_set(buf, set_len, retlen)
      asn1buf * buf;
      const int set_len;
      int * retlen;
@@ -162,7 +162,7 @@ asn1_error_code INTERFACE asn1_make_set(buf, set_len, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_make_string(buf, length, string, retlen)
+asn1_error_code asn1_make_string(buf, length, string, retlen)
      asn1buf * buf;
      const int length;
      const char * string;

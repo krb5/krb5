@@ -42,7 +42,7 @@
 #include "k5-int.h"
 #include "des_int.h"
 
-int INTERFACE
+int
 mit_des_key_sched(k,schedule)
     mit_des_cblock k;
     mit_des_key_schedule schedule;

@@ -28,7 +28,7 @@
 
 extern char *krb5_defkeyname;
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
     char *name;

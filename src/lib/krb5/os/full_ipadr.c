@@ -31,7 +31,7 @@
 
 #include "os-proto.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_make_full_ipaddr(context, adr, port, outaddr)
     krb5_context context;
     krb5_int32 adr;

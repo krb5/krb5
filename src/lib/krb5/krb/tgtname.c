@@ -28,7 +28,7 @@
 
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_tgtname(context, server, client, tgtprinc)
     krb5_context context;
     const krb5_data *server, *client;

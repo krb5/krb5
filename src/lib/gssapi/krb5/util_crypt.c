@@ -25,7 +25,7 @@
 
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
-int INTERFACE
+int
 kg_confounder_size(ed)
      krb5_gss_enc_desc *ed;
 {
@@ -34,7 +34,7 @@ kg_confounder_size(ed)
    return(ed->eblock.crypto_entry->block_length);
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
@@ -42,7 +42,7 @@ kg_make_confounder(ed, buf)
    return(krb5_random_confounder( ed->eblock.crypto_entry->block_length, buf));
 }
 
-int INTERFACE
+int
 kg_encrypt_size(ed, n)
      krb5_gss_enc_desc *ed;
      int n;
@@ -50,7 +50,7 @@ kg_encrypt_size(ed, n)
    return(krb5_encrypt_size(n, ed->eblock.crypto_entry));
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 kg_encrypt(ed, iv, in, out, length)
      krb5_gss_enc_desc *ed;
      krb5_pointer iv;
@@ -78,7 +78,7 @@ kg_encrypt(ed, iv, in, out, length)
 
 /* length is the length of the cleartext. */
 
-krb5_error_code INTERFACE
+krb5_error_code
 kg_decrypt(ed, iv, in, out, length)
      krb5_gss_enc_desc *ed;
      krb5_pointer iv;

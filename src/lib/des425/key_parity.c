@@ -39,7 +39,7 @@
  *                       8,16,...64 in des order, implies 0, 8, 16, ...
  *                       vax order.
  */
-void INTERFACE
+void
 des_fixup_key_parity(key)
      register mit_des_cblock key;
 {
@@ -51,7 +51,7 @@ des_fixup_key_parity(key)
  *                       See des_fix_key_parity for the definition of
  *                       correct des parity.
  */
-int INTERFACE
+int
 des_check_key_parity(key)
      register mit_des_cblock key;
 {

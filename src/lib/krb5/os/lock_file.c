@@ -108,7 +108,7 @@ krb5_lock_file(context, filep, pathname, mode)
 }
 #else   /* MSDOS or Macintosh */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_lock_file(context, filep, pathname, mode)
     krb5_context context;
     FILE *filep;

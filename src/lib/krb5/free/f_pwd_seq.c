@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+void
 krb5_free_pwd_sequences(context, val)
     krb5_context context;
     passwd_phrase_element **val;

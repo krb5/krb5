@@ -28,7 +28,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-char * INTERFACE
+char *
 krb5_cc_default_name(context)
     krb5_context context;
 {

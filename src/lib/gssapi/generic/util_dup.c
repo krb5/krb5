@@ -23,7 +23,7 @@
 #include "gssapiP_generic.h"
 #include <string.h>
 
-char * INTERFACE g_strdup(str)
+char * g_strdup(str)
      char *str;
 {
    char *ret;

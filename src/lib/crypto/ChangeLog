@@ -1,3 +1,8 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+        * *.h added FAR to pointers visible at to the world.
+
 Tue Mar 28 20:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: more of nmake's strange behavior. Problem goes

@@ -37,7 +37,7 @@ extern char *krb5_kdc_sec_udp_portname;
  * returns count of number of addresses found
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_locate_kdc(context, realm, addr_pp, naddrs)
     krb5_context context;
     const krb5_data *realm;

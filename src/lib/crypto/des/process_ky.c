@@ -38,7 +38,7 @@
         returns: errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_process_key (eblock, keyblock)
     krb5_encrypt_block * eblock;
     const krb5_keyblock * keyblock;

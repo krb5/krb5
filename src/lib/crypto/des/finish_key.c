@@ -32,7 +32,7 @@
 	returns: errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_finish_key (eblock)
     krb5_encrypt_block FAR * eblock;
 {

@@ -41,7 +41,7 @@
  * Errors:
  * system errors
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_write(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
@@ -72,7 +72,7 @@ krb5_fcc_write(context, id, buf, len)
  * system errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -111,7 +111,7 @@ krb5_fcc_store_principal(context, id, princ)
     return KRB5_OK;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_addrs(context, id, addrs)
    krb5_context context;
    krb5_ccache id;
@@ -138,7 +138,7 @@ krb5_fcc_store_addrs(context, id, addrs)
      return KRB5_OK;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_keyblock(context, id, keyblock)
    krb5_context context;
    krb5_ccache id;
@@ -159,7 +159,7 @@ krb5_fcc_store_keyblock(context, id, keyblock)
      return krb5_fcc_write(context, id, (char *) keyblock->contents, keyblock->length);
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_addr(context, id, addr)
    krb5_context context;
    krb5_ccache id;
@@ -175,7 +175,7 @@ krb5_fcc_store_addr(context, id, addr)
 }
 
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_data(context, id, data)
    krb5_context context;
    krb5_ccache id;
@@ -188,7 +188,7 @@ krb5_fcc_store_data(context, id, data)
      return krb5_fcc_write(context, id, data->data, data->length);
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -213,7 +213,7 @@ krb5_fcc_store_int32(context, id, i)
     }
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_ui_2(context, id, i)
    krb5_context context;
     krb5_ccache id;
@@ -236,7 +236,7 @@ krb5_fcc_store_ui_2(context, id, i)
     }
 }
    
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_octet(context, id, i)
    krb5_context context;
     krb5_ccache id;
@@ -248,7 +248,7 @@ krb5_fcc_store_octet(context, id, i)
     return krb5_fcc_write(context, id, (char *) &ibuf, 1);
 }
    
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_times(context, id, t)
    krb5_context context;
    krb5_ccache id;
@@ -273,7 +273,7 @@ krb5_fcc_store_times(context, id, t)
     }
 }
    
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_authdata(context, id, a)
    krb5_context context;
     krb5_ccache id;
@@ -297,7 +297,7 @@ krb5_fcc_store_authdata(context, id, a)
     return KRB5_OK;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_store_authdatum (context, id, a)
    krb5_context context;
     krb5_ccache id;

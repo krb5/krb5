@@ -22,7 +22,7 @@
 
 #include "gssapiP_generic.h"
 
-int INTERFACE
+int
 g_copy_OID_set(in, out)
      const gss_OID_set_desc * const in;
      gss_OID_set *out;

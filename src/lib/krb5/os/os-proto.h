@@ -28,7 +28,7 @@
 #define KRB5_LIBOS_INT_PROTO__
 
 #ifdef SOCK_DGRAM			/* XXX hack... */
-krb5_error_code INTERFACE krb5_locate_kdc
+krb5_error_code krb5_locate_kdc
     PROTOTYPE((krb5_context,
 	       const krb5_data *,
 	       struct sockaddr **,
@@ -36,20 +36,20 @@ krb5_error_code INTERFACE krb5_locate_kdc
 #endif
 
 #ifdef KRB5_USE_INET
-krb5_error_code INTERFACE krb5_unpack_full_ipaddr
+krb5_error_code krb5_unpack_full_ipaddr
     PROTOTYPE((krb5_context,
 	       const krb5_address *,
 	       krb5_int32 *,
 	       krb5_int16 *));
 
 #ifdef NARROW_PROTOTYPES
-krb5_error_code INTERFACE krb5_make_full_ipaddr
+krb5_error_code krb5_make_full_ipaddr
     PROTOTYPE((krb5_context,
 	       krb5_int32,
 	       krb5_int16,
 	       krb5_address **));
 #else
-krb5_error_code INTERFACE krb5_make_full_ipaddr
+krb5_error_code krb5_make_full_ipaddr
     PROTOTYPE((krb5_context,
 	       krb5_int32,
 	       int,			/* unsigned short promotes to signed

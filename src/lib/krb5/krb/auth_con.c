@@ -2,7 +2,7 @@
 #include "k5-int.h"
 #include "auth_con.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_init(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context  ** auth_context;
@@ -21,7 +21,7 @@ krb5_auth_con_init(context, auth_context)
     return ENOMEM;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_free(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -38,7 +38,7 @@ krb5_auth_con_free(context, auth_context)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -51,7 +51,7 @@ krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
 }
 
 /* XXX this call is a hack. Fixed when I do the servers. */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -69,7 +69,7 @@ krb5_auth_con_setkey(context, auth_context, keyblock)
  * Once decrypted this key is no longer necessary and is then overwritten
  * with the session key sent by the client.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -80,7 +80,7 @@ krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
     return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -92,7 +92,7 @@ krb5_auth_con_getkey(context, auth_context, keyblock)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -104,7 +104,7 @@ krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -116,7 +116,7 @@ krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setcksumtype(context, auth_context, cksumtype)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -126,7 +126,7 @@ krb5_auth_con_setcksumtype(context, auth_context, cksumtype)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getlocalseqnumber(context, auth_context, seqnumber)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -136,7 +136,7 @@ krb5_auth_con_getlocalseqnumber(context, auth_context, seqnumber)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getauthenticator(context, auth_context, authenticator)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -146,7 +146,7 @@ krb5_auth_con_getauthenticator(context, auth_context, authenticator)
 				    authenticator));
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -156,7 +156,7 @@ krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_initivector(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -174,7 +174,7 @@ krb5_auth_con_initivector(context, auth_context)
     return EINVAL; /* XXX need an error for no keyblock */
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setivector(context, auth_context, ivector)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -184,7 +184,7 @@ krb5_auth_con_setivector(context, auth_context, ivector)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_getivector(context, auth_context, ivector)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -194,7 +194,7 @@ krb5_auth_con_getivector(context, auth_context, ivector)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setflags(context, auth_context, flags)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -204,7 +204,7 @@ krb5_auth_con_setflags(context, auth_context, flags)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_auth_con_setrcache(context, auth_context, rcache)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;

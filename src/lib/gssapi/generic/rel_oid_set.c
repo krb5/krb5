@@ -22,7 +22,7 @@
 
 #include "gssapiP_generic.h"
 
-OM_uint32 INTERFACE generic_gss_release_oid_set(minor_status, set)
+OM_uint32 generic_gss_release_oid_set(minor_status, set)
      OM_uint32 *minor_status;
      gss_OID_set *set;
 {

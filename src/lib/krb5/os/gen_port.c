@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_gen_portaddr(context, addr, ptr, outaddr)
     krb5_context context;
     const krb5_address *addr;

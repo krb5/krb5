@@ -84,14 +84,14 @@ typedef struct {
   unsigned char digest[16];		/* actual digest after MD4Final call */
 } MD4_CTX;
 
-#ifdef __STDC__
-extern void INTERFACE MD4Init(MD4_CTX FAR *);
-extern void INTERFACE MD4Update(MD4_CTX FAR *, unsigned char FAR *, unsigned int);
-extern void INTERFACE MD4Final(MD4_CTX FAR *);
+#if defined(__STDC__) || defined(_WINDOWS)
+extern void MD4Init(MD4_CTX FAR *);
+extern void MD4Update(MD4_CTX FAR *, unsigned char FAR *, unsigned int);
+extern void MD4Final(MD4_CTX FAR *);
 #else
-void INTERFACE MD4Init ();
-void INTERFACE MD4Update ();
-void INTERFACE MD4Final ();
+void MD4Init ();
+void MD4Update ();
+void MD4Final ();
 #endif
 
 /*

@@ -1,3 +1,9 @@
+Thu Apr 13 16:56:50 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in, libkrb5.def, gssapi.def (new): 
+           Spec says we need a gssapi.dll & gssapi.lib.
+        * Makefile.in: re-inserted make-$(ALL) rule.
+
 Wed Apr 5 16:27:53 1995 Keith Vetter (keithv@fusion.com)
 
 	* libkrb5.def: added krb5_us_timeofday to export list

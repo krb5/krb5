@@ -51,7 +51,7 @@
 
 #include "des.h"
 
-int INTERFACE
+int
 des_ecb_encrypt(clear, cipher, schedule, encrypt)
     unsigned long *clear;
     unsigned long *cipher;

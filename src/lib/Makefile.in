@@ -3,7 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-all:: 
+all:: all-$(WHAT)
 
 all-unix::
 
@@ -22,6 +22,7 @@ clean-mac::
 
 clean-windows::
 	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak libkrb5.map winsock.lib
+	$(RM) gssapi.dll gssapi.lib gssapi.bak gssapi.map
 #
 # Windows stuff to make libkrb5.dll and libkrb5.lib. Currently it
 # combines crypto, krb5 and the util/et directories.
@@ -33,29 +34,16 @@ ETLIB = $(BUILDTOP)\util\et\comerr.lib
 WLIB  = .\winsock.lib
 LIBS  = $(CLIB) $(KLIB) $(GLIB) $(ETLIB) $(WLIB)
 
-#
-# Fast: is a faster way to make things on the PC. Unfortunately it requires
-# the unix utility sed so it can't be part of the final production release.
-#
-fast: win_glue.obj winsock.lib
-	$(RM) libkrb5.lib libkrb5.dll
-	cd crypto
-	$(MAKE) -$(MFLAGS) LIBCMD=rem
-	libdir crypto.lib
-	cd ..\krb5
-	$(MAKE) -$(MFLAGS) LIBCMD=rem
-	libdir krb5.lib
-	cd ..
-	cd $(BUILDTOP)\util\et
-	$(MAKE) -$(MFLAGS)
-	cd ..\..\lib\gssapi
-	$(MAKE) -$(MFLAGS)
-	cd ..
-	link /co /seg:400 /noe /nologo win_glue, libkrb5.dll, libkrb5.map, \
-	   $(LIBS) ldllcew libw, libkrb5.def
-	rc /nologo /p /k libkrb5.dll
-	implib /nologo libkrb5.lib libkrb5.dll
-		
+lib-windows: winsock.lib libkrb5.lib gssapi.lib 
+
+gssapi.lib:: gssapi.dll
+	implib /nologo gssapi.lib gssapi.dll
+
+gssapi.dll:: $(GLIB) $(LIBS) gssapi.def
+	link /co /seg:400 /noe /nol win_glue, gssapi.dll, gssapi.map, \
+	   $(LIBS) ldllcew libw, gssapi.def
+	rc /nologo /p /k gssapi.dll
+
 libkrb5.lib:: libkrb5.dll
 	implib /nologo libkrb5.lib libkrb5.dll
 	

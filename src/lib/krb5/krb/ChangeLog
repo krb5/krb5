@@ -1,3 +1,7 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+
 Fri Mar 31 16:45:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* krb5_get_in_tkt: changed error return value for when clocks

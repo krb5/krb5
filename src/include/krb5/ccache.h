@@ -32,36 +32,36 @@ typedef	krb5_pointer	krb5_cc_cursor;	/* cursor for sequential lookup */
 
 typedef struct _krb5_ccache {
     krb5_magic magic;
-    struct _krb5_cc_ops *ops;
+    struct _krb5_cc_ops FAR *ops;
     krb5_pointer data;
-} *krb5_ccache;
+} FAR *krb5_ccache;
 
 typedef struct _krb5_cc_ops {
     krb5_magic magic;
-    char *prefix;
-    char *(INTERFACE *get_name) NPROTOTYPE((krb5_context, krb5_ccache));
-    krb5_error_code (INTERFACE *resolve) NPROTOTYPE((krb5_context, krb5_ccache *, 
-					    char *));
-    krb5_error_code (INTERFACE *gen_new) NPROTOTYPE((krb5_context, krb5_ccache *));
+    char FAR *prefix;
+    char FAR * (INTERFACE *get_name) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (INTERFACE *resolve) NPROTOTYPE((krb5_context, krb5_ccache FAR *,
+					    char FAR *));
+    krb5_error_code (INTERFACE *gen_new) NPROTOTYPE((krb5_context, krb5_ccache FAR *));
     krb5_error_code (INTERFACE *init) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_principal));
     krb5_error_code (INTERFACE *destroy) NPROTOTYPE((krb5_context, krb5_ccache));
     krb5_error_code (INTERFACE *close) NPROTOTYPE((krb5_context, krb5_ccache));
     krb5_error_code (INTERFACE *store) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_creds *));
+					    krb5_creds FAR *));
     krb5_error_code (INTERFACE *retrieve) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_flags, krb5_creds *,
-					    krb5_creds *));
+					    krb5_flags, krb5_creds FAR *,
+					    krb5_creds FAR *));
     krb5_error_code (INTERFACE *get_princ) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_principal *));
+					    krb5_principal FAR *));
     krb5_error_code (INTERFACE *get_first) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_cc_cursor *));
+					    krb5_cc_cursor FAR *));
     krb5_error_code (INTERFACE *get_next) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_cc_cursor *, krb5_creds *));
+					    krb5_cc_cursor FAR *, krb5_creds FAR *));
     krb5_error_code (INTERFACE *end_get) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_cc_cursor *));
+					    krb5_cc_cursor FAR *));
     krb5_error_code (INTERFACE *remove_cred) NPROTOTYPE((krb5_context, krb5_ccache,
-					    krb5_flags, krb5_creds *));
+					    krb5_flags, krb5_creds FAR *));
     krb5_error_code (INTERFACE *set_flags) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_flags));
 } krb5_cc_ops;
@@ -93,6 +93,6 @@ typedef struct _krb5_cc_ops {
 #define krb5_cc_set_flags(context, cache, flags) (*(cache)->ops->set_flags)(context, cache, flags)
 #define krb5_cc_get_name(context, cache) (*(cache)->ops->get_name)(context, cache)
 
-extern krb5_cc_ops *krb5_cc_dfl_ops;
+extern krb5_cc_ops FAR *krb5_cc_dfl_ops;
 
 #endif /* KRB5_CCACHE__ */

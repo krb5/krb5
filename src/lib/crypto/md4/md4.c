@@ -38,14 +38,14 @@
 #include "k5-int.h"
 #include "rsa-md4.h"
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 #define UL(x) x##UL
 #else
 #define UL(x) ((krb5_ui_4) x)
 #endif    
 
 /* forward declaration */
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
 static void Transform (krb5_ui_4 FAR *, krb5_ui_4 FAR *);
 #else
 static void Transform ();
@@ -82,7 +82,7 @@ static unsigned char PADDING[64] = {
   {(a) += H ((b), (c), (d)) + (x) + UL(015666365641); \
    (a) = ROTATE_LEFT ((a), (s));}
 
-void INTERFACE
+void
 MD4Init (mdContext)
 MD4_CTX FAR *mdContext;
 {
@@ -96,7 +96,7 @@ MD4_CTX FAR *mdContext;
   mdContext->buf[3] = UL(0x10325476);
 }
 
-void INTERFACE
+void
 MD4Update (mdContext, inBuf, inLen)
 MD4_CTX FAR *mdContext;
 unsigned char FAR *inBuf;
@@ -132,7 +132,7 @@ unsigned int inLen;
   }
 }
 
-void INTERFACE
+void
 MD4Final (mdContext)
 MD4_CTX FAR *mdContext;
 {

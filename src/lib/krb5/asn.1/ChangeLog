@@ -1,3 +1,7 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+
 Wed Mar 22 09:39:55 1995    <tytso@rsx-11.mit.edu>
 
 	* asn1_k_decode.c (setup, next_tag, apptag, get_field_body,

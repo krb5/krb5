@@ -33,7 +33,7 @@
  */
 
 /*ARGSUSED*/
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
     krb5_context context;
     const krb5_keyblock * key;

@@ -161,7 +161,7 @@ cleanup:
     return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
     krb5_context 	context;
     krb5_auth_context * auth_context;

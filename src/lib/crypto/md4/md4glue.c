@@ -26,11 +26,11 @@
 #include "k5-int.h"
 #include "rsa-md4.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 md4_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
-krb5_error_code INTERFACE
+krb5_error_code
 md4_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;

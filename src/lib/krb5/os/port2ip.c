@@ -30,7 +30,7 @@
 #ifdef KRB5_USE_INET
 #include "os-proto.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_unpack_full_ipaddr(context, inaddr, adr, port)
     krb5_context context;
     const krb5_address *inaddr;

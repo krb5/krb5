@@ -14,8 +14,8 @@ srcdir = .
 # /* The name of the C compiler for the target */
 CC=cl /nologo
 CL=
-CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W3 $(XTRA)
-CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
+CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 $(XTRA)
+CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
 CPPFLAGS =  -I$(SRCTOP)/include -I$(SRCTOP)/include/krb5
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)

@@ -29,7 +29,7 @@
 /*
  * Copy a data structure, with fresh allocation.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_copy_data(context, indata, outdata)
     krb5_context context;
     const krb5_data *indata;

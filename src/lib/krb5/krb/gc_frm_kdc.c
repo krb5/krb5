@@ -63,7 +63,7 @@ extern krb5_cksumtype krb5_kdc_req_sumtype;
 #define TGT_ETYPE \
       krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_cred_from_kdc(context, ccache, in_cred, out_cred, tgts)
     krb5_context context;
     krb5_ccache ccache;

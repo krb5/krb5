@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+void
 krb5_free_last_req(context, val)
     krb5_context context;
     krb5_last_req_entry **val;

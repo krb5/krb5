@@ -25,7 +25,7 @@
 
 #include "k5-int.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_os_init_context(ctx)
 	krb5_context ctx;
 {
@@ -45,7 +45,7 @@ krb5_os_init_context(ctx)
 	return 0;
 }
 
-void INTERFACE
+void
 krb5_os_free_context(ctx)
 	krb5_context	ctx;
 {

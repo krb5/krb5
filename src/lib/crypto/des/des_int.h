@@ -31,85 +31,86 @@
 #include "mit-des.h"		/* From include/krb5 */
 
 /* cbc_cksum.c */
-extern krb5_error_code INTERFACE mit_des_cbc_checksum
+extern krb5_error_code mit_des_cbc_checksum
     PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum FAR * ));
 
 /* cksum.c */
-extern long INTERFACE mit_des_cbc_cksum
-    PROTOTYPE((krb5_octet *, krb5_octet *, long , mit_des_key_schedule ,
-	       krb5_octet *));
+extern long mit_des_cbc_cksum
+    PROTOTYPE((krb5_octet FAR *, krb5_octet FAR *, long , mit_des_key_schedule ,
+	       krb5_octet FAR *));
 /* des.c */
-extern int INTERFACE mit_des_ecb_encrypt
-    PROTOTYPE((unsigned long *, unsigned long *, mit_des_key_schedule , int ));
+extern int mit_des_ecb_encrypt
+    PROTOTYPE((unsigned long FAR *, unsigned long FAR *, mit_des_key_schedule , int ));
 
 /* f_cbc.c */
-extern int INTERFACE mit_des_cbc_encrypt
-    PROTOTYPE((const mit_des_cblock *in, mit_des_cblock *out, long length,
+extern int mit_des_cbc_encrypt
+    PROTOTYPE((const mit_des_cblock FAR *in, mit_des_cblock FAR *out, long length,
 	       mit_des_key_schedule schedule, mit_des_cblock ivec,
 	       int encrypt));
     
 /* fin_rndkey.c */
-extern krb5_error_code INTERFACE mit_des_finish_random_key
-    PROTOTYPE(( krb5_pointer *));
+extern krb5_error_code mit_des_finish_random_key
+    PROTOTYPE(( krb5_pointer FAR *));
 
 /* finish_key.c */
-extern krb5_error_code INTERFACE mit_des_finish_key
+extern krb5_error_code mit_des_finish_key
     PROTOTYPE(( krb5_encrypt_block FAR *));
 
 /* init_rkey.c */
-extern krb5_error_code INTERFACE mit_des_init_random_key
-    PROTOTYPE(( const krb5_keyblock *,  krb5_pointer *));
+extern krb5_error_code mit_des_init_random_key
+    PROTOTYPE(( const krb5_keyblock FAR *,  krb5_pointer FAR *));
 
 /* key_parity.c */
-extern void INTERFACE mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
-extern int INTERFACE mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
+extern void mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
+extern int mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
 
 /* key_sched.c */
-extern int INTERFACE mit_des_key_sched
+extern int mit_des_key_sched
     PROTOTYPE((mit_des_cblock , mit_des_key_schedule ));
 
 /* new_rnd_key.c */
-extern int INTERFACE mit_des_new_random_key
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-extern void INTERFACE mit_des_init_random_number_generator
-    PROTOTYPE((mit_des_cblock, mit_des_random_key_seed *));
-extern void INTERFACE mit_des_set_random_generator_seed
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-extern void INTERFACE mit_des_set_sequence_number
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-extern void INTERFACE mit_des_generate_random_block
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
+extern int mit_des_new_random_key
+    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
+extern void mit_des_init_random_number_generator
+    PROTOTYPE((mit_des_cblock, mit_des_random_key_seed FAR *));
+extern void mit_des_set_random_generator_seed
+    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
+extern void mit_des_set_sequence_number
+    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
+extern void mit_des_generate_random_block
+    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
 
 /* process_ky.c */
-extern krb5_error_code INTERFACE mit_des_process_key
-    PROTOTYPE(( krb5_encrypt_block *,  const krb5_keyblock *));
+extern krb5_error_code mit_des_process_key
+    PROTOTYPE(( krb5_encrypt_block FAR *,  const krb5_keyblock FAR *));
 
 /* random_key.c */
-extern krb5_error_code INTERFACE mit_des_random_key
-    PROTOTYPE(( const krb5_encrypt_block *, krb5_pointer ,  krb5_keyblock **));
+extern krb5_error_code mit_des_random_key
+    PROTOTYPE(( const krb5_encrypt_block FAR *, krb5_pointer ,
+                krb5_keyblock FAR * FAR *));
 
 /* string2key.c */
-extern krb5_error_code INTERFACE mit_des_string_to_key
-    PROTOTYPE(( const krb5_encrypt_block *, const krb5_keytype,
-	       krb5_keyblock *, const krb5_data *, const krb5_data *));
+extern krb5_error_code mit_des_string_to_key
+    PROTOTYPE(( const krb5_encrypt_block FAR *, const krb5_keytype,
+	       krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *));
 
 /* weak_key.c */
-extern int INTERFACE mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));
+extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));
 
 /* cmb_keys.c */
 krb5_error_code mit_des_combine_subkeys
-    PROTOTYPE((const krb5_keyblock *, const krb5_keyblock *,
-	       krb5_keyblock **));
+    PROTOTYPE((const krb5_keyblock FAR *, const krb5_keyblock FAR *,
+	       krb5_keyblock FAR * FAR *));
 
 /* f_pcbc.c */
-int INTERFACE mit_des_pcbc_encrypt ();
+int mit_des_pcbc_encrypt ();
 
 /* f_sched.c */
-int INTERFACE make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
+int make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
 
 
 /* misc.c */
-extern void swap_bits PROTOTYPE((char *));
+extern void swap_bits PROTOTYPE((char FAR *));
 extern unsigned long long_swap_bits PROTOTYPE((unsigned long ));
 extern unsigned long swap_six_bits_to_ansi PROTOTYPE((unsigned long ));
 extern unsigned long swap_four_bits_to_ansi PROTOTYPE((unsigned long ));

@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include <string.h>
 
-char * INTERFACE
+char *
 g_canonicalize_host(hostname)
      char *hostname;
 {

@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_seal(context, minor_status, context_handle, conf_req_flag,
 	      qop_req, input_message_buffer, conf_state,
 	      output_message_buffer)

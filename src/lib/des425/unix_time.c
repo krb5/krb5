@@ -15,7 +15,7 @@
 #ifndef _MSDOS
 #include <sys/time.h>
 
-krb5_ui_4 INTERFACE
+krb5_ui_4
 unix_time_gmt_unixsec (usecptr)
      krb5_ui_4	*usecptr;
 {
@@ -45,7 +45,7 @@ unix_time_gmt_unixsec (usecptr)
  */
 static long win_time_get_epoch(void);
 
-krb5_ui_4 INTERFACE
+krb5_ui_4
 unix_time_gmt_unixsec (usecptr)
      krb5_ui_4	*usecptr;
 {

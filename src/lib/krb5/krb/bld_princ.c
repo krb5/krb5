@@ -33,7 +33,7 @@
 #include <varargs.h>
 #endif
 
-krb5_error_code INTERFACE_C
+krb5_error_code
 krb5_build_principal_va(context, princ, rlen, realm, ap)
     krb5_context context;
     krb5_principal princ;
@@ -96,7 +96,7 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
     return 0;
 }
 
-krb5_error_code INTERFACE_C
+krb5_error_code
 #ifdef HAVE_STDARG_H
 krb5_build_principal(krb5_context context,  krb5_principal * princ, int rlen,
     const char * realm, ...)

@@ -67,7 +67,7 @@ static mit_des_cblock weak[16] = {
  *
  * Requires: key has correct odd parity.
  */
-int INTERFACE
+int
 mit_des_is_weak_key(key)
      mit_des_cblock key;
 {

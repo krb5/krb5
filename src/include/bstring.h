@@ -4,7 +4,7 @@
  */
 #ifndef __BSTRING__
 #define __BSTRING__
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 /* compat-sys5 */
 /* these are in <string.h> */
 extern int bcmp  (const char *, const char *, int );

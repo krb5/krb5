@@ -27,44 +27,44 @@ krb5_rc_iostuff;
 
 /* first argument is always iostuff for result file */
 
-krb5_error_code INTERFACE krb5_rc_io_creat 
+krb5_error_code krb5_rc_io_creat 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   char **));
-krb5_error_code INTERFACE krb5_rc_io_open 
+krb5_error_code krb5_rc_io_open 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   char *));
-krb5_error_code INTERFACE krb5_rc_io_move 
+krb5_error_code krb5_rc_io_move 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   krb5_rc_iostuff *));
-krb5_error_code INTERFACE krb5_rc_io_write 
-	PROTOTYPE((krb5_context,
-		   krb5_rc_iostuff *,
-		   krb5_pointer,
-		   int));
-krb5_error_code INTERFACE krb5_rc_io_read 
+krb5_error_code krb5_rc_io_write 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   krb5_pointer,
 		   int));
-krb5_error_code INTERFACE krb5_rc_io_close 
+krb5_error_code krb5_rc_io_read 
+	PROTOTYPE((krb5_context,
+		   krb5_rc_iostuff *,
+		   krb5_pointer,
+		   int));
+krb5_error_code krb5_rc_io_close 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
-krb5_error_code INTERFACE krb5_rc_io_destroy 
+krb5_error_code krb5_rc_io_destroy 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
-krb5_error_code INTERFACE krb5_rc_io_mark 
+krb5_error_code krb5_rc_io_mark 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
-krb5_error_code INTERFACE krb5_rc_io_unmark 
+krb5_error_code krb5_rc_io_unmark 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
-krb5_error_code INTERFACE krb5_rc_io_sync
+krb5_error_code krb5_rc_io_sync
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
-long INTERFACE krb5_rc_io_size
+long krb5_rc_io_size
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));
 #endif

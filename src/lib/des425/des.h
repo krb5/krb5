@@ -66,22 +66,22 @@ typedef struct des_ks_struct bit_64;
 /*
  * Windows needs everything prototyped because we're exporting all the fuctions.
  */
-void INTERFACE des_cbc_cksum();
-int INTERFACE des_ecb_encrypt();
-int INTERFACE des_cbc_encrypt();
-void INTERFACE des_fixup_key_parity();
-int INTERFACE des_check_key_parity();
-int INTERFACE des_key_sched();
-int INTERFACE des_new_random_key();
-void INTERFACE des_init_random_number_generator();
-void INTERFACE des_set_random_generator_seed();
-void INTERFACE des_set_sequence_number();
-void INTERFACE des_generate_random_block();
-int INTERFACE des_pcbc_encrypt();
-unsigned long INTERFACE des_quad_cksum();
-int INTERFACE des_random_key();
-krb5_error_code INTERFACE des_read_password();
-int INTERFACE des_string_to_key();
-int INTERFACE des_is_weak_key();
+void des_cbc_cksum();
+int des_ecb_encrypt();
+int des_cbc_encrypt();
+void des_fixup_key_parity();
+int des_check_key_parity();
+int des_key_sched();
+int des_new_random_key();
+void des_init_random_number_generator();
+void des_set_random_generator_seed();
+void des_set_sequence_number();
+void des_generate_random_block();
+int des_pcbc_encrypt();
+unsigned long des_quad_cksum();
+int des_random_key();
+krb5_error_code des_read_password();
+int des_string_to_key();
+int des_is_weak_key();
 
 #endif	/* DES_DEFS */

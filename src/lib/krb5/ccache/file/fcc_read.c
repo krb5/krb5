@@ -40,7 +40,7 @@
  * KRB5_CC_END - there were not len bytes available
  * system errors (read)
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
@@ -75,7 +75,7 @@ krb5_fcc_read(context, id, buf, len)
  * KRB5_CC_NOMEM
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_principal(context, id, princ)
    krb5_context context;
    krb5_ccache id;
@@ -146,7 +146,7 @@ krb5_fcc_read_principal(context, id, princ)
     return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_addrs(context, id, addrs)
    krb5_context context;
    krb5_ccache id;
@@ -189,7 +189,7 @@ krb5_fcc_read_addrs(context, id, addrs)
      return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_keyblock(context, id, keyblock)
    krb5_context context;
    krb5_ccache id;
@@ -238,7 +238,7 @@ krb5_fcc_read_keyblock(context, id, keyblock)
      return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_data(context, id, data)
    krb5_context context;
    krb5_ccache id;
@@ -276,7 +276,7 @@ krb5_fcc_read_data(context, id, data)
      return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_addr(context, id, addr)
    krb5_context context;
    krb5_ccache id;
@@ -316,7 +316,7 @@ krb5_fcc_read_addr(context, id, addr)
      return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_int32(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -343,7 +343,7 @@ krb5_fcc_read_int32(context, id, i)
     }
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_ui_2(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -365,7 +365,7 @@ krb5_fcc_read_ui_2(context, id, i)
     }
 }    
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_octet(context, id, i)
    krb5_context context;
    krb5_ccache id;
@@ -375,7 +375,7 @@ krb5_fcc_read_octet(context, id, i)
 }    
 
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_times(context, id, t)
    krb5_context context;
    krb5_ccache id;
@@ -410,7 +410,7 @@ errout:
     return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_authdata(context, id, a)
    krb5_context context;
     krb5_ccache id;
@@ -456,7 +456,7 @@ krb5_fcc_read_authdata(context, id, a)
      return kret;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_fcc_read_authdatum(context, id, a)
    krb5_context context;
     krb5_ccache id;

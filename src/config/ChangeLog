@@ -1,3 +1,8 @@
+Thu Apr 13 16:20:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: compile with stdc extensions enabled versus
+           strict stdc adherence.
+
 Tue Mar 28 17:58:55 1995  John Gilmore  (gnu at toad.com)
 
 	* mac-config.cache:  Correct some entries.

@@ -91,7 +91,7 @@ krb5_copy_enc_tkt_part(context, partfrom, partto)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_copy_ticket(context, from, pto)
     krb5_context context;
     const krb5_ticket *from;

@@ -43,7 +43,7 @@
       asn1_make_string
 */
 
-asn1_error_code INTERFACE asn1_make_etag
+asn1_error_code asn1_make_etag
 	PROTOTYPE((asn1buf *buf,
 		   const asn1_class class,
 		   const asn1_tagnum tagnum,
@@ -57,7 +57,7 @@ asn1_error_code INTERFACE asn1_make_etag
 	     Returns the length of this encoding in *retlen.
 	     Returns ENOMEM if memory runs out. */
 
-asn1_error_code INTERFACE asn1_make_tag
+asn1_error_code asn1_make_tag
 	PROTOTYPE((asn1buf *buf, const asn1_class class,
 		   const asn1_construction construction,
 		   const asn1_tagnum tagnum,
@@ -74,7 +74,7 @@ asn1_error_code INTERFACE asn1_make_tag
 	     Returns ASN1_OVERFLOW if tagnum exceeds the limits of
 	      the implementation. */
 
-asn1_error_code INTERFACE asn1_make_sequence
+asn1_error_code asn1_make_sequence
 	PROTOTYPE((asn1buf *buf, const int seq_len, int *len));
 /* requires  *buf is allocated, seq_len is the length of a series of
              sequence components which have just been inserted in *buf
@@ -83,7 +83,7 @@ asn1_error_code INTERFACE asn1_make_sequence
               in *buf.  Returns the length of this encoding in *retlen.
              Returns ENOMEM if memory runs out. */
 
-asn1_error_code INTERFACE asn1_make_set
+asn1_error_code asn1_make_set
 	PROTOTYPE((asn1buf *buf, const int set_len, int *retlen));
 /* requires  *buf is allocated, seq_len is the length of a series of
              sequence components which have just been inserted in *buf
@@ -92,7 +92,7 @@ asn1_error_code INTERFACE asn1_make_set
              Returns the length of this encoding in *retlen.
              Returns ENOMEM if memory runs out. */
 
-asn1_error_code INTERFACE asn1_make_string
+asn1_error_code asn1_make_string
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const char *string,
 		   int *retlen));
@@ -107,7 +107,7 @@ asn1_error_code INTERFACE asn1_make_string
 /* Private procedures */
 
 /* "helper" procedure for asn1_make_tag */
-asn1_error_code INTERFACE asn1_make_length
+asn1_error_code asn1_make_length
 	PROTOTYPE((asn1buf *buf, const int in_len, int *retlen));
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
@@ -116,7 +116,7 @@ asn1_error_code INTERFACE asn1_make_length
 	PROTOTYPE((s) for in_len into *buf */
 
 /* "helper" procedure for asn1_make_tag */
-asn1_error_code INTERFACE asn1_make_id
+asn1_error_code asn1_make_id
 	PROTOTYPE((asn1buf *buf,
 		   const asn1_class class,
 		   const asn1_construction construction,

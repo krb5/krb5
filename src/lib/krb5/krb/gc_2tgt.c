@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_cred_via_2tgt (context, tgt, kdcoptions, sumtype, in_cred, out_cred)
     krb5_context context;
     krb5_creds *tgt;

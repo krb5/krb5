@@ -1,3 +1,8 @@
+Thu Apr 13 16:19:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.c: Added better error message for incorrect password.
+        * tktlist.c: flag string gets displayed within parentheses.
+
 Fri Apr 7 15:03:10 1995 Keith Vetter (keithv@fusion.com)
 
         * cns.c, cns.h, cns.rc: added option dialog widget allowing user

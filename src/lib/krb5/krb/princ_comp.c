@@ -27,7 +27,7 @@
 
 #include "k5-int.h"
 
-krb5_boolean INTERFACE
+krb5_boolean
 krb5_realm_compare(context, princ1, princ2)
     krb5_context context;
     krb5_const_principal princ1;
@@ -43,7 +43,7 @@ krb5_realm_compare(context, princ1, princ2)
     return TRUE;
 }
 
-krb5_boolean INTERFACE
+krb5_boolean
 krb5_principal_compare(context, princ1, princ2)
     krb5_context context;
     krb5_const_principal princ1;

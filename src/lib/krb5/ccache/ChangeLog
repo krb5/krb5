@@ -1,3 +1,7 @@
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* ccbase.c: removed unneeded INTERFACE from non-api functions.
+
 Wed Mar 22 11:47:49 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in (CFLAGS): Make -I options work when the build and

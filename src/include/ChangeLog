@@ -1,3 +1,9 @@
+Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
+
+	* bsdlib.h, bstring.h, fake-std.h, syslog.h:  __STDC__ conditionals
+           also check for the _WINDOWS define.
+        * krb5.h: added FAR to pointers visible to the world.
+
 Tue Mar 28 18:12:32 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (KRB5_HEADERS, install):  `Make install' now works.

@@ -40,7 +40,7 @@
 	returns: errors
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_string_to_key (eblock, keytype, keyblock, data, salt)
 const krb5_encrypt_block FAR * eblock;
 const krb5_keytype keytype;
@@ -61,7 +61,9 @@ const krb5_data FAR * salt;
     char k_char[64];
     mit_des_key_schedule key_sked;
 
+#ifndef min
 #define min(A, B) ((A) < (B) ? (A): (B))
+#endif
 
     if ( keytype != KEYTYPE_DES )
 	return (KRB5_PROG_KEYTYPE_NOSUPP);

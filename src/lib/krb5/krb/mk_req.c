@@ -48,7 +48,7 @@
 
 extern krb5_flags krb5_kdc_default_options;
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
 	      ccache, outbuf)
     krb5_context          context;

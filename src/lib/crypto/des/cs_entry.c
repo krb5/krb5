@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "des_int.h"
 
-extern krb5_error_code INTERFACE mit_des_cbc_checksum PROTOTYPE ((
+extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((
                                                         krb5_pointer ,
 							size_t ,
 							krb5_pointer ,

@@ -202,7 +202,7 @@ static OM_uint32 display_bit(minor_status, code, status_string)
      message_context > 2  : print supplementary info bit (message_context-2)
      */
 
-OM_uint32 INTERFACE g_display_major_status(minor_status, status_value, 
+OM_uint32 g_display_major_status(minor_status, status_value, 
 				 message_context, status_string)
      OM_uint32 *minor_status;
      OM_uint32 status_value;

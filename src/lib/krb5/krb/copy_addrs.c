@@ -49,7 +49,7 @@ krb5_address **outad;
 /*
  * Copy an address array, with fresh allocation.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_copy_addresses(context, inaddr, outaddr)
     krb5_context context;
     krb5_address * const * inaddr;
@@ -87,7 +87,7 @@ krb5_copy_addresses(context, inaddr, outaddr)
  * Note that this function may change the value of *outaddr even if it
  * returns failure, but it will not change the contents of the list.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_append_addresses(context, inaddr, outaddr)
     krb5_context context;
 	krb5_address * const * inaddr;

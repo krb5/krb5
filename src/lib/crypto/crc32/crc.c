@@ -143,11 +143,11 @@ static u_long const crc_table[256] = {
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
     };
 
-krb5_error_code INTERFACE
+krb5_error_code
 crc32_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
-krb5_error_code INTERFACE
+krb5_error_code
 crc32_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;

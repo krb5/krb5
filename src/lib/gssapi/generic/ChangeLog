@@ -1,3 +1,9 @@
+Thu Apr 13 16:27:56 1995 Keith Vetter (keithv@fusion.com)
+
+	* gssapi_e.c: __STDC__ conditional also checks the _WINDOWS define.
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+        * *.h added FAR to pointers visible at to the world.
+
 Tue Mar 28 18:28:03 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (unixmac):  Add to build header files.

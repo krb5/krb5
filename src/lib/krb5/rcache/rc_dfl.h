@@ -15,41 +15,41 @@
 
 extern krb5_rc_ops krb5_rc_dfl_ops; /* initialized to the following */
 
-krb5_error_code INTERFACE krb5_rc_dfl_init 
+krb5_error_code krb5_rc_dfl_init 
     	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_deltat));
-krb5_error_code INTERFACE krb5_rc_dfl_recover 
+krb5_error_code krb5_rc_dfl_recover 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache)); 
-krb5_error_code INTERFACE krb5_rc_dfl_destroy 
+krb5_error_code krb5_rc_dfl_destroy 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code INTERFACE krb5_rc_dfl_close 
+krb5_error_code krb5_rc_dfl_close 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code INTERFACE krb5_rc_dfl_store 
+krb5_error_code krb5_rc_dfl_store 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_donot_replay *));
-krb5_error_code INTERFACE krb5_rc_dfl_expunge 
+krb5_error_code krb5_rc_dfl_expunge 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code INTERFACE krb5_rc_dfl_get_span 
+krb5_error_code krb5_rc_dfl_get_span 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   krb5_deltat *));
-char * INTERFACE krb5_rc_dfl_get_name 
+char * krb5_rc_dfl_get_name 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-krb5_error_code INTERFACE krb5_rc_dfl_resolve 
+krb5_error_code krb5_rc_dfl_resolve 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache,
 		   char *));
-krb5_error_code INTERFACE krb5_rc_dfl_close_no_free
+krb5_error_code krb5_rc_dfl_close_no_free
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-void INTERFACE krb5_rc_free_entry 
+void krb5_rc_free_entry 
 	PROTOTYPE((krb5_context,
 		   krb5_donot_replay **));
 #endif

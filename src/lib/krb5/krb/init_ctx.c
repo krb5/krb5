@@ -55,7 +55,7 @@ cleanup:
 	return retval;
 }
 
-void INTERFACE
+void
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {
@@ -71,7 +71,7 @@ krb5_free_context(ctx)
 /*
  * Set the desired default etypes, making sure they are valid.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_set_default_in_tkt_etypes(context, etypes)
 	krb5_context context;
 	const krb5_enctype *etypes;
@@ -110,7 +110,7 @@ krb5_set_default_in_tkt_etypes(context, etypes)
     return 0;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_get_default_in_tkt_etypes(context, etypes)
     krb5_context context;
     krb5_enctype **etypes;

@@ -33,8 +33,9 @@
  * Modified to use UNIX domain IPC by Ralph Campbell
  */
 
-#ifndef _MSDOS
-#ifdef __STDC__
+#ifndef _WINDOWS
+
+#if defined(__STDC__) || defined(_WINDOWS)
 #include <stdarg.h>
 #else
 #define const
@@ -62,7 +63,7 @@ static int	LogFacility = LOG_USER;	/* default facility code */
 
 
 void
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 syslog(int pri, const char *fmt, ...)
 #else
 syslog(pri, fmt, va_alist)
@@ -73,7 +74,7 @@ syslog(pri, fmt, va_alist)
 {
     va_list pvar;
     void vsyslog();
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
     va_start(pvar, fmt);
 #else
     va_start(pvar);

@@ -24,7 +24,7 @@
 #include <krb5/rsa-md5.h>
 #include <memory.h>
 
-OM_uint32 INTERFACE
+OM_uint32
 krb5_gss_accept_sec_context(context, minor_status, context_handle, 
 			    verifier_cred_handle, input_token,
 			    input_chan_bindings, src_name, mech_type,

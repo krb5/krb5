@@ -32,7 +32,7 @@
         sequence information.
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_init_random_key (seedblock, seed)
     const krb5_keyblock * seedblock;
     krb5_pointer * seed;

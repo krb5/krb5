@@ -62,14 +62,14 @@ typedef struct _krb5_data {
 
 /* make const & volatile available without effect */
 
-#if !defined(__STDC__) && !defined(HAS_ANSI_CONST)
+#if !defined(__STDC__) && !defined(HAS_ANSI_CONST) && !defined(_WINDOWS)
 #define const
 #endif
-#if !defined(__STDC__) && !defined(HAS_ANSI_VOLATILE)
+#if !defined(__STDC__) && !defined(HAS_ANSI_VOLATILE) && !defined(_WINDOWS)
 #define volatile
 #endif
 
-#if defined(__STDC__) || defined(HAS_VOID_TYPE)
+#if defined(__STDC__) || defined(HAS_VOID_TYPE) || defined(_WINDOWS)
 typedef	void FAR * krb5_pointer;
 typedef void const FAR * krb5_const_pointer;
 #else
@@ -77,9 +77,9 @@ typedef char FAR * krb5_pointer;
 typedef char const FAR * krb5_const_pointer;
 #endif
 
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
 #define PROTOTYPE(x) x
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
+#if defined(__STDC__) || defined(HAVE_STDARG_H) || defined(_WINDOWS)
 #define	STDARG_P(x) x
 #else
 #define STDARG_P(x) ()

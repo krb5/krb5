@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-void INTERFACE
+void
 krb5_free_kdc_rep(context, val)
     krb5_context context;
 krb5_kdc_rep *val;

@@ -1,3 +1,7 @@
+Thu Apr 13 16:36:10 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: clean target was cleaning too much for the PC.
+
 Wed Apr 5 16:29:25 1995 Keith Vetter (keithv@fusion.com)
 
 	* krb5_err.et: added KRB5_REALM_CANT_RESOLVE for more precise 

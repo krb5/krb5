@@ -32,7 +32,7 @@
 static krb5_context krb4_global_context = 0;
 
 /*** Routines ****************************************************** */
-krb5_error_code INTERFACE
+krb5_error_code
 des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     mit_des_cblock *k;
     char *prompt;

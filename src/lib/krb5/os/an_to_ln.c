@@ -173,7 +173,7 @@ username_an_to_ln(context, aname, lnsize, lname)
 
 #ifdef _MSDOS
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_aname_to_localname(context, aname, lnsize, lname)
     krb5_context context;
 	krb5_const_principal aname;

@@ -33,7 +33,7 @@ krb5_error_code INTERFACE krb5_fcc_close
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 
 /* fcc_defnam.c */
-char * INTERFACE krb5_fcc_default_name 
+char * krb5_fcc_default_name 
 	PROTOTYPE((krb5_context));
 
 /* fcc_destry.c */
@@ -68,27 +68,27 @@ krb5_error_code INTERFACE krb5_fcc_next_cred
 		   krb5_creds *creds ));
 
 /* fcc_read.c */
-krb5_error_code INTERFACE krb5_fcc_read_principal 
+krb5_error_code krb5_fcc_read_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
-krb5_error_code INTERFACE krb5_fcc_read_keyblock 
+krb5_error_code krb5_fcc_read_keyblock 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_keyblock *keyblock ));
-krb5_error_code INTERFACE krb5_fcc_read_data 
+krb5_error_code krb5_fcc_read_data 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_data *data ));
-krb5_error_code INTERFACE krb5_fcc_read_int32 
+krb5_error_code krb5_fcc_read_int32 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 *i ));
-krb5_error_code INTERFACE krb5_fcc_read_ui_2 
+krb5_error_code krb5_fcc_read_ui_2 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_ui_2 *i ));
-krb5_error_code INTERFACE krb5_fcc_read_octet 
+krb5_error_code krb5_fcc_read_octet 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_octet *i ));
-krb5_error_code INTERFACE krb5_fcc_read_times 
+krb5_error_code krb5_fcc_read_times 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_ticket_times *t ));
-krb5_error_code INTERFACE krb5_fcc_read_addrs 
+krb5_error_code krb5_fcc_read_addrs 
 	PROTOTYPE((krb5_context, krb5_ccache, krb5_address ***));
-krb5_error_code INTERFACE krb5_fcc_read_addr 
+krb5_error_code krb5_fcc_read_addr 
 	PROTOTYPE((krb5_context, krb5_ccache, krb5_address *));
-krb5_error_code INTERFACE krb5_fcc_read_authdata 
+krb5_error_code krb5_fcc_read_authdata 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata ***));
-krb5_error_code INTERFACE krb5_fcc_read_authdatum 
+krb5_error_code krb5_fcc_read_authdatum 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata *));
 
 /* fcc_reslv.c */
@@ -112,7 +112,7 @@ krb5_error_code INTERFACE krb5_fcc_store
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
 
 /* fcc_skip.c */
-krb5_error_code INTERFACE krb5_fcc_skip_principal 
+krb5_error_code krb5_fcc_skip_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 
 /* fcc_sflags.c */
@@ -126,39 +126,39 @@ krb5_error_code krb5_change_cache
 
 
 /* fcc_write.c */
-krb5_error_code INTERFACE krb5_fcc_write 
+krb5_error_code krb5_fcc_write 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_pointer buf , int len ));
-krb5_error_code INTERFACE krb5_fcc_store_principal 
+krb5_error_code krb5_fcc_store_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
-krb5_error_code INTERFACE krb5_fcc_store_keyblock 
+krb5_error_code krb5_fcc_store_keyblock 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_keyblock *keyblock ));
-krb5_error_code INTERFACE krb5_fcc_store_data 
+krb5_error_code krb5_fcc_store_data 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_data *data ));
-krb5_error_code INTERFACE krb5_fcc_store_int32 
+krb5_error_code krb5_fcc_store_int32 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 i ));
-krb5_error_code INTERFACE krb5_fcc_store_ui_2 
+krb5_error_code krb5_fcc_store_ui_2 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 i ));
-krb5_error_code INTERFACE krb5_fcc_store_octet 
+krb5_error_code krb5_fcc_store_octet 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_int32 i ));
-krb5_error_code INTERFACE krb5_fcc_store_times 
+krb5_error_code krb5_fcc_store_times 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_ticket_times *t ));
-krb5_error_code INTERFACE krb5_fcc_store_addrs 
+krb5_error_code krb5_fcc_store_addrs 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_address ** ));
-krb5_error_code INTERFACE krb5_fcc_store_addr 
+krb5_error_code krb5_fcc_store_addr 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_address * ));
-krb5_error_code INTERFACE krb5_fcc_store_authdata 
+krb5_error_code krb5_fcc_store_authdata 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata **));
-krb5_error_code INTERFACE krb5_fcc_store_authdatum 
+krb5_error_code krb5_fcc_store_authdatum 
 	PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata *));
 
 /* fcc_errs.c */
-krb5_error_code INTERFACE krb5_fcc_interpret 
+krb5_error_code krb5_fcc_interpret 
 	PROTOTYPE((krb5_context, int ));
 
 /* fcc_maybe.c */
-krb5_error_code INTERFACE krb5_fcc_close_file 
+krb5_error_code krb5_fcc_close_file 
 	PROTOTYPE((krb5_context, krb5_ccache));
-krb5_error_code INTERFACE krb5_fcc_open_file 
+krb5_error_code krb5_fcc_open_file 
 	PROTOTYPE((krb5_context, krb5_ccache, int));
 
 #endif /* KRB5_FCC_PROTO__ */

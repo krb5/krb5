@@ -38,7 +38,7 @@
 #include "k5-int.h"
 #include "rsa-md5.h"
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 #define UL(x) x##UL
 #else
 #define UL(x) ((krb5_ui_4) x)
@@ -104,7 +104,7 @@ static unsigned char PADDING[64] = {
 /* The routine MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
-void INTERFACE 
+void 
 MD5Init (mdContext)
 MD5_CTX FAR *mdContext;
 {
@@ -122,7 +122,7 @@ MD5_CTX FAR *mdContext;
    account for the presence of each of the characters inBuf[0..inLen-1]
    in the message whose digest is being computed.
  */
-void INTERFACE
+void
 MD5Update (mdContext, inBuf, inLen)
 MD5_CTX FAR *mdContext;
 unsigned char FAR *inBuf;
@@ -161,7 +161,7 @@ unsigned int inLen;
 /* The routine MD5Final terminates the message-digest computation and
    ends with the desired message digest in mdContext->digest[0...15].
  */
-void INTERFACE
+void
 MD5Final (mdContext)
 MD5_CTX FAR *mdContext;
 {

@@ -51,7 +51,7 @@ static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #   define OPEN_MODE_NOT_TRUSTWORTHY
 #endif
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_create_secure_file(context, pathname)
     krb5_context context;
     const char * pathname;
@@ -90,7 +90,7 @@ krb5_create_secure_file(context, pathname)
     }
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_sync_disk_file(context, fp)
     krb5_context context;
     FILE *fp;

@@ -33,20 +33,20 @@ typedef struct _krb5_keyblock {
     krb5_keytype keytype;
     krb5_enctype etype;	/* hint of what encryption type to use */
     int length;
-    krb5_octet *contents;
+    krb5_octet FAR *contents;
 } krb5_keyblock;
 
 typedef struct _krb5_checksum {
     krb5_magic magic;
     krb5_cksumtype checksum_type;	/* checksum type */
     int length;
-    krb5_octet *contents;
+    krb5_octet FAR *contents;
 } krb5_checksum;
 
 typedef struct _krb5_encrypt_block {
     krb5_magic magic;
-    struct _krb5_cryptosystem_entry *crypto_entry;
-    krb5_keyblock *key;
+    struct _krb5_cryptosystem_entry FAR *crypto_entry;
+    krb5_keyblock FAR *key;
     krb5_pointer priv;			/* for private use, e.g. DES
 					   key schedules */
 } krb5_encrypt_block;
@@ -61,30 +61,30 @@ typedef struct _krb5_enc_data {
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     krb5_magic magic;
-    krb5_error_code (INTERFACE *encrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
+    krb5_error_code (*encrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
-					       krb5_encrypt_block *,
+					       krb5_encrypt_block FAR *,
 					       krb5_pointer));
-    krb5_error_code (INTERFACE *decrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
+    krb5_error_code (*decrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
-					       krb5_encrypt_block *,
+					       krb5_encrypt_block FAR *,
 					       krb5_pointer));
-    krb5_error_code (INTERFACE *process_key) NPROTOTYPE(( krb5_encrypt_block *,
-					      const krb5_keyblock *));
-    krb5_error_code (INTERFACE *finish_key) NPROTOTYPE(( krb5_encrypt_block *));
-    krb5_error_code (INTERFACE *string_to_key) NPROTOTYPE(( const krb5_encrypt_block *,
+    krb5_error_code (*process_key) NPROTOTYPE(( krb5_encrypt_block FAR *,
+					      const krb5_keyblock FAR *));
+    krb5_error_code (*finish_key) NPROTOTYPE(( krb5_encrypt_block FAR *));
+    krb5_error_code (*string_to_key) NPROTOTYPE((const krb5_encrypt_block FAR *,
 						 const krb5_keytype,
-						krb5_keyblock *,
-						const krb5_data *,
- 	                                        const krb5_data *));
-    krb5_error_code  (INTERFACE *init_random_key) NPROTOTYPE(( const krb5_keyblock *,
-						   krb5_pointer *));
-    krb5_error_code  (INTERFACE *finish_random_key) NPROTOTYPE(( krb5_pointer *));
-    krb5_error_code (INTERFACE *random_key) NPROTOTYPE(( const krb5_encrypt_block *,
+						krb5_keyblock FAR *,
+						const krb5_data FAR *,
+ 	                                        const krb5_data FAR *));
+    krb5_error_code  (*init_random_key) NPROTOTYPE((const krb5_keyblock FAR *,
+						   krb5_pointer FAR *));
+    krb5_error_code  (*finish_random_key) NPROTOTYPE(( krb5_pointer FAR *));
+    krb5_error_code (*random_key) NPROTOTYPE(( const krb5_encrypt_block FAR *,
 					      krb5_pointer,
-					      krb5_keyblock **));
+					      krb5_keyblock FAR * FAR *));
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
@@ -98,12 +98,12 @@ typedef struct _krb5_cryptosystem_entry {
 
 typedef struct _krb5_cs_table_entry {
     krb5_magic magic;
-    krb5_cryptosystem_entry *system;
+    krb5_cryptosystem_entry FAR *system;
     krb5_pointer random_sequence;	/* from init_random_key() */
 } krb5_cs_table_entry;
 
 /* could be used in a table to find a sumtype */
-typedef krb5_error_code  (INTERFACE *SUM_FUNC) NPROTOTYPE (
+typedef krb5_error_code  (*SUM_FUNC) NPROTOTYPE (
 			(krb5_pointer /* in */,
 			size_t /* in_length */,
 			krb5_pointer /* key/seed */,

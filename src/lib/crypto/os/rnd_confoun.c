@@ -60,7 +60,7 @@ You need a random number generator!
 /*
  * Generate a random confounder
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_random_confounder(size, fillin)
 int size;
 krb5_pointer fillin;

@@ -28,7 +28,7 @@
    conf_state is only valid if SEAL.
    */
 
-OM_uint32 INTERFACE
+OM_uint32
 kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 	  conf_state, qop_state, toktype)
      OM_uint32 *minor_status;

@@ -163,7 +163,7 @@ cleanup_scratch:
     return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	      authorization_data, padata, second_ticket, in_cred, rep)
     krb5_context context;

@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 INTERFACE 
+OM_uint32 
 krb5_gss_release_cred(context, minor_status, cred_handle)
      krb5_context context;
      OM_uint32 *minor_status;

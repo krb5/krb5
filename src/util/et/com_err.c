@@ -35,14 +35,14 @@
  * should fix up com_err.h so that it's safe to #include here 
  * directly.
  */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 extern char const * INTERFACE error_message (long);
 #else
 extern char * INTERFACE error_message ();
 #endif
 
 static void
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
     default_com_err_proc (const char *whoami, long code, const char *fmt, va_list args)
 #else
     default_com_err_proc (whoami, code, fmt, args)
@@ -77,7 +77,7 @@ static void
 #endif
 }
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 typedef void (*errf) (const char *, long, const char *, va_list);
 #else
 typedef void (*errf) ();

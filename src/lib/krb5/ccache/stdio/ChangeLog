@@ -1,3 +1,7 @@
+Thu Apr 13 16:32:12 1995 Keith Vetter (keithv@fusion.com)
+
+	* scc_genn.c: __STDC__ conditional also checks the _WINDOWS define.
+
 Sat Mar 25 14:42:37 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* scc_maybe.c (krb5_scc_open_file): fixed typo (extra & in

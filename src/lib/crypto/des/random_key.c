@@ -29,7 +29,7 @@
         filling in the keyblock address in *keyblock
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 mit_des_random_key (eblock, seed, keyblock)
     const krb5_encrypt_block * eblock;
     krb5_pointer seed;

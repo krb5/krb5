@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_generate_subkey(context, key, subkey)
     krb5_context context;
     const krb5_keyblock *key;

@@ -1,5 +1,4 @@
-#ifdef __STDC__
-# define	P(s) s
+#if defined(__STDC__) || defined(_WINDOWS)
 #else
 # define P(s) ()
 #endif
@@ -201,7 +200,7 @@ char *initstate P((unsigned , char *, int ));
 int isatty P((int ));
 double ldexp P((double , int ));
 int longjmperror P((void ));
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 void *malloc P((size_t ));
 #else
 char *malloc P((unsigned ));
@@ -466,7 +465,7 @@ struct ttyent *getttyent P((void ));
 struct ttyent *getttynam P((const char * ));
 unsigned long inet_network P((const char * ));
 int initgroups P((char * , int  ));
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 void *malloc P((unsigned ));
 #else
 char *malloc P((unsigned ));

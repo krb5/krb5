@@ -56,7 +56,7 @@ extern int krb5_max_skdc_timeout;
 extern int krb5_skdc_timeout_shift;
 extern int krb5_skdc_timeout_1;
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_sendto_kdc (context, message, realm, reply)
     krb5_context context;
     const krb5_data * message;

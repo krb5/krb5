@@ -28,6 +28,6 @@
 #ifndef KRB5_MACROS__
 #define KRB5_MACROS__
 
-#define krb5_princ_aref(princ, n, plen) (char *)(*plen = princ[n]->length, princ[n]->data)
+#define krb5_princ_aref(princ, n, plen) (char FAR *)(*plen = princ[n]->length, princ[n]->data)
 
 #endif /* KRB5_MACROS__ */

@@ -90,7 +90,7 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
     return retval;
 }
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_rd_req_decoded(context, auth_context, req, server, keytab, 
 		    ap_req_options, ticket)
     krb5_context 	  context;

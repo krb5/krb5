@@ -35,7 +35,7 @@
  * XXX must not use non-blocking I/O
  */
 
-int INTERFACE
+int
 krb5_net_read(context, fd, buf, len)
     krb5_context context;
     int fd;

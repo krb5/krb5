@@ -26,7 +26,7 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-asn1_error_code INTERFACE asn1_encode_integer(buf, val, retlen)
+asn1_error_code asn1_encode_integer(buf, val, retlen)
      asn1buf * buf;
      const long val;
      int * retlen;
@@ -63,7 +63,7 @@ asn1_error_code INTERFACE asn1_encode_integer(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_unsigned_integer(buf, val, retlen)
+asn1_error_code asn1_encode_unsigned_integer(buf, val, retlen)
      asn1buf * buf;
      const unsigned long val;
      int * retlen;
@@ -96,7 +96,7 @@ asn1_error_code INTERFACE asn1_encode_unsigned_integer(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_octetstring(buf, len, val, retlen)
+asn1_error_code asn1_encode_octetstring(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
      const asn1_octet * val;
@@ -114,7 +114,7 @@ asn1_error_code INTERFACE asn1_encode_octetstring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_charstring(buf, len, val, retlen)
+asn1_error_code asn1_encode_charstring(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
      const char * val;
@@ -132,7 +132,7 @@ asn1_error_code INTERFACE asn1_encode_charstring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_null(buf, retlen)
+asn1_error_code asn1_encode_null(buf, retlen)
      asn1buf * buf;
      int * retlen;
 {
@@ -147,7 +147,7 @@ asn1_error_code INTERFACE asn1_encode_null(buf, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_printablestring(buf, len, val, retlen)
+asn1_error_code asn1_encode_printablestring(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
      const char * val;
@@ -165,7 +165,7 @@ asn1_error_code INTERFACE asn1_encode_printablestring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_ia5string(buf, len, val, retlen)
+asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
      const char * val;
@@ -183,7 +183,7 @@ asn1_error_code INTERFACE asn1_encode_ia5string(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_generaltime(buf, val, retlen)
+asn1_error_code asn1_encode_generaltime(buf, val, retlen)
      asn1buf * buf;
      const time_t val;
      int * retlen;
@@ -210,7 +210,7 @@ asn1_error_code INTERFACE asn1_encode_generaltime(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code INTERFACE asn1_encode_generalstring(buf, len, val, retlen)
+asn1_error_code asn1_encode_generalstring(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
      const char * val;

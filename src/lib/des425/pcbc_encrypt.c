@@ -71,7 +71,7 @@ typedef struct des_ks_struct bit_64;
 /*
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
  */
-int INTERFACE
+int
 des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock *in;
 	des_cblock *out;

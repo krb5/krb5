@@ -65,7 +65,7 @@ static void getdir()
   }
 }
 
-krb5_error_code INTERFACE krb5_rc_io_creat (context, d, fn)
+krb5_error_code krb5_rc_io_creat (context, d, fn)
     krb5_context context;
     krb5_rc_iostuff *d;
     char **fn;
@@ -149,7 +149,7 @@ krb5_error_code INTERFACE krb5_rc_io_creat (context, d, fn)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_open (context, d, fn)
+krb5_error_code krb5_rc_io_open (context, d, fn)
     krb5_context context;
     krb5_rc_iostuff *d;
     char *fn;
@@ -227,7 +227,7 @@ krb5_error_code INTERFACE krb5_rc_io_open (context, d, fn)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_move (context, new, old)
+krb5_error_code krb5_rc_io_move (context, new, old)
     krb5_context context;
     krb5_rc_iostuff *new;
     krb5_rc_iostuff *old;
@@ -243,7 +243,7 @@ krb5_error_code INTERFACE krb5_rc_io_move (context, new, old)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_write (context, d, buf, num)
+krb5_error_code krb5_rc_io_write (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
@@ -264,7 +264,7 @@ krb5_error_code INTERFACE krb5_rc_io_write (context, d, buf, num)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_sync (context, d)
+krb5_error_code krb5_rc_io_sync (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -281,7 +281,7 @@ krb5_error_code INTERFACE krb5_rc_io_sync (context, d)
     return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_read (context, d, buf, num)
+krb5_error_code krb5_rc_io_read (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
@@ -300,7 +300,7 @@ krb5_error_code INTERFACE krb5_rc_io_read (context, d, buf, num)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_close (context, d)
+krb5_error_code krb5_rc_io_close (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -311,7 +311,7 @@ krb5_error_code INTERFACE krb5_rc_io_close (context, d)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_destroy (context, d)
+krb5_error_code krb5_rc_io_destroy (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -328,7 +328,7 @@ krb5_error_code INTERFACE krb5_rc_io_destroy (context, d)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_mark (context, d)
+krb5_error_code krb5_rc_io_mark (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -336,7 +336,7 @@ krb5_error_code INTERFACE krb5_rc_io_mark (context, d)
  return 0;
 }
 
-krb5_error_code INTERFACE krb5_rc_io_unmark (context, d)
+krb5_error_code krb5_rc_io_unmark (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -344,7 +344,7 @@ krb5_error_code INTERFACE krb5_rc_io_unmark (context, d)
  return 0;
 }
 
-long INTERFACE
+long
 krb5_rc_io_size (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;

@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "k5-int.h"
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_unlock_file(context, filep, pathname)
     krb5_context context;
     FILE *filep;
