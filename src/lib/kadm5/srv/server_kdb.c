@@ -107,6 +107,7 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     int	    ret = 0;
     char    *realm, *hist_name;
     krb5_key_data *key_data;
+    krb5_key_salt_tuple ks[1];
 
     if (r == NULL)  {
 	if ((ret = krb5_get_default_realm(handle->context, &realm)))
@@ -144,11 +145,13 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 	   history principal, anyway. */
 
 	hist_kvno = 2;
-
-	ret = kadm5_create_principal(handle, &ent,
-				     (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
-				      KADM5_ATTRIBUTES),
-				     "to-be-random");
+	ks[0].ks_enctype = handle->params.enctype;
+	ks[0].ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
+	ret = kadm5_create_principal_3(handle, &ent,
+				       (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
+					KADM5_ATTRIBUTES),
+				       1, ks,
+				       "to-be-random");
 	if (ret)
 	    goto done;
 
@@ -156,7 +159,8 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 
 	hist_princ = NULL;
 
-	ret = kadm5_randkey_principal(handle, ent.principal, NULL, NULL);
+	ret = kadm5_randkey_principal_3(handle, ent.principal, 0, 1, ks,
+					NULL, NULL);
 
 	hist_princ = ent.principal;
 

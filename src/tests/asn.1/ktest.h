@@ -89,6 +89,8 @@ krb5_error_code ktest_make_sample_alt_method
 
 krb5_error_code ktest_make_sample_etype_info
     (krb5_etype_info_entry *** p);
+krb5_error_code ktest_make_sample_etype_info2
+    (krb5_etype_info_entry *** p);
 krb5_error_code ktest_make_sample_pa_enc_ts
 	(krb5_pa_enc_ts *am);
 krb5_error_code ktest_make_sample_sam_challenge
@@ -125,6 +127,8 @@ void ktest_destroy_principal
 	(krb5_principal *p);
 void ktest_destroy_checksum
 	(krb5_checksum **cs);
+void ktest_empty_keyblock
+	(krb5_keyblock *kb);
 void ktest_destroy_keyblock
 	(krb5_keyblock **kb);
 void ktest_destroy_authdata
@@ -135,13 +139,64 @@ void ktest_destroy_sequence_of_ticket
 	(krb5_ticket ***sot);
   void ktest_destroy_ticket
 	(krb5_ticket **tkt);
+void ktest_empty_ticket
+	(krb5_ticket *tkt);
 void ktest_destroy_enc_data
 	(krb5_enc_data *ed);
-
+void ktest_empty_error
+        (krb5_error * kerr);
 void ktest_destroy_etype_info_entry
 	(krb5_etype_info_entry *i);
 void ktest_destroy_etype_info
 	(krb5_etype_info_entry **info);
+
+void ktest_empty_kdc_req
+        (krb5_kdc_req *kr);
+void ktest_empty_kdc_rep
+        (krb5_kdc_rep *kr);
+
+void ktest_empty_authenticator
+        (krb5_authenticator *a);
+void ktest_empty_enc_tkt_part
+        (krb5_enc_tkt_part * etp);
+void ktest_destroy_enc_tkt_part
+        (krb5_enc_tkt_part ** etp);
+void ktest_empty_enc_kdc_rep_part
+        (krb5_enc_kdc_rep_part * ekr);
+void ktest_destroy_transited
+        (krb5_transited * t);
+void ktest_empty_ap_rep
+        (krb5_ap_rep * ar);
+void ktest_empty_ap_req
+        (krb5_ap_req * ar);
+void ktest_empty_cred_enc_part
+        (krb5_cred_enc_part * cep);
+void ktest_destroy_cred_info
+        (krb5_cred_info ** ci);
+void ktest_destroy_sequence_of_cred_info
+        (krb5_cred_info *** soci);
+void ktest_empty_safe
+        (krb5_safe * s);
+void ktest_empty_priv
+        (krb5_priv * p);
+void ktest_empty_priv_enc_part
+        (krb5_priv_enc_part * pep);
+void ktest_empty_cred
+        (krb5_cred * c);
+void ktest_destroy_last_req
+        (krb5_last_req_entry *** lr);
+void ktest_empty_ap_rep_enc_part
+        (krb5_ap_rep_enc_part * arep);
+void ktest_empty_passwd_phrase_element
+        (passwd_phrase_element * ppe);
+void ktest_empty_pwd_data
+        (krb5_pwd_data * pd);
+void ktest_empty_alt_method
+	(krb5_alt_method *am);
+void ktest_empty_sam_challenge
+	(krb5_sam_challenge * p);
+void ktest_empty_sam_response
+	(krb5_sam_response * p);
 
 extern krb5_context test_context;
 extern char *sample_principal_name;

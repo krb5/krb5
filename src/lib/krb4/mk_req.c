@@ -114,7 +114,6 @@ krb_mk_req_creds_prealm(authent, creds, checksum, myrealm)
 				+ 1 + 1 + ticket->length)
 	|| ticket->length < 0 || ticket->length > 255) {
 	authent->length = 0;
-	memset(creds->session, 0, sizeof(creds->session));
 	return KFAILURE;
     }
 
@@ -150,7 +149,6 @@ krb_mk_req_creds_prealm(authent, creds, checksum, myrealm)
     myrealmlen = strlen(myrealm) + 1;
     if (sizeof(req_id->dat) / 8 < (pnamelen + pinstlen + myrealmlen
 				   + 4 + 1 + 4 + 7) / 8) {
-	memset(creds->session, 0, sizeof(creds->session));
 	return KFAILURE;
     }
 
@@ -185,7 +183,6 @@ krb_mk_req_creds_prealm(authent, creds, checksum, myrealm)
                  (long)req_id->length, key_s, &creds->session, 1);
     /* clean up */
     memset(key_s, 0, sizeof(key_s));
-    memset(creds->session, 0, sizeof(creds->session));
 #endif /* NOENCRYPTION */
 
     /* Copy it into the authenticator */
@@ -252,7 +249,9 @@ krb_mk_req(authent, service, instance, realm, checksum)
     if (retval != KSUCCESS)
 	return retval;
 
-    return krb_mk_req_creds_prealm(authent, &creds, checksum, myrealm);
+    retval = krb_mk_req_creds_prealm(authent, &creds, checksum, myrealm);
+    memset(&creds.session, 0, sizeof(creds.session));
+    return retval;
 }
 
 int KRB5_CALLCONV

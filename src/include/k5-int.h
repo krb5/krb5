@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -137,6 +137,13 @@ typedef unsigned short	u_short;
 typedef unsigned char	u_char;
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* KRB5_SYSTYPES__ */
+
+
+#include "k5-platform.h"
+/* not used in krb5.h (yet) */
+typedef UINT64_TYPE krb5_ui_8;
+typedef INT64_TYPE krb5_int64;
+
 
 #define DEFAULT_PWD_STRING1 "Enter password"
 #define DEFAULT_PWD_STRING2 "Re-enter password for verification"
@@ -282,12 +289,15 @@ typedef struct _krb5_alt_method {
  * A null-terminated array of this structure is returned by the KDC as
  * the data part of the ETYPE_INFO preauth type.  It informs the
  * client which encryption types are supported.
+ * The  same data structure is used by both etype-info and etype-info2
+ * but s2kparams must be null when encoding etype-info.
  */
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
 	krb5_enctype	etype;
 	unsigned int	length;
 	krb5_octet	*salt;
+    krb5_data s2kparams;
 } krb5_etype_info_entry;
 
 /* 
@@ -638,6 +648,7 @@ struct krb5_keytypes {
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
     krb5_str2key_func str2key;
+    krb5_cksumtype required_ctype;
 };
 
 struct krb5_cksumtypes {
@@ -657,6 +668,12 @@ struct krb5_cksumtypes {
        kind of messy, but so is the krb5 api. */
     const struct krb5_keyhash_provider *keyhash;
     const struct krb5_hash_provider *hash;
+    /* This just gets uglier and uglier.  In the key derivation case,
+       we produce an hmac.  To make the hmac code work, we can't hack
+       the output size indicated by the hash provider, but we may want
+       a truncated hmac.  If we want truncation, this is the number of
+       bytes we truncate to; it should be 0 otherwise.  */
+    unsigned int trunc_size;
 };
 
 #define KRB5_CKSUMFLAG_DERIVE		0x0001
@@ -678,6 +695,10 @@ krb5_error_code krb5_hmac
 krb5_error_code krb5int_pbkdf2_hmac_sha1 (const krb5_data *, unsigned long,
 					  const krb5_data *,
 					  const krb5_data *);
+
+/* Make this a function eventually?  */
+#define krb5int_zap_data(ptr, len) memset((volatile void *)ptr, 0, len)
+#define zap(p,l) krb5int_zap_data(p,l)
 
 /* A definition of init_state for DES based encryption systems.
  * sets up an 8-byte IV of all zeros
@@ -753,7 +774,6 @@ typedef struct _krb5_os_context {
 	krb5_int32		usec_offset;
 	krb5_int32		os_flags;
 	char *			default_ccname;
-	krb5_principal	default_ccprincipal;
 } *krb5_os_context;
 
 /*
@@ -903,6 +923,8 @@ void krb5_free_etype_info
 /*
  * End "preauth.h"
  */
+krb5_error_code
+krb5int_copy_data_contents (krb5_context, const krb5_data *, krb5_data *);
 
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     (krb5_context,
@@ -911,6 +933,7 @@ typedef krb5_error_code (*krb5_gic_get_as_key_fct)
 		     krb5_prompter_fct,
 		     void *prompter_data,
 		     krb5_data *salt,
+     krb5_data *s2kparams,
 		     krb5_keyblock *as_key,
 		     void *gak_data);
 
@@ -929,11 +952,17 @@ krb5_get_init_creds
 		int master,
 		krb5_kdc_rep **as_reply);
 
+void krb5int_populate_gic_opt (
+    krb5_context, krb5_get_init_creds_opt *,
+    krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
+    krb5_preauthtype *pre_auth_types);
+
 
 krb5_error_code krb5_do_preauth
 (krb5_context, krb5_kdc_req *,
 		krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *, krb5_enctype *,
+		krb5_data *salt, krb5_data *s2kparams,
+ krb5_enctype *,
 		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);
@@ -1005,6 +1034,17 @@ struct _krb5_context {
 	   absolute limit on the UDP packet size.  */
 	int		udp_pref_limit;
 
+	/* This is the tgs_ktypes list as read from the profile, or
+	   set to compiled-in defaults.  The application code cannot
+	   override it.  This is used for session keys for
+	   intermediate ticket-granting tickets used to acquire the
+	   requested ticket (the session key of which may be
+	   constrained by tgs_ktypes above).  */
+	krb5_enctype	*conf_tgs_ktypes;
+	int		conf_tgs_ktypes_count;
+	/* Use the _configured version?  */
+	krb5_boolean	use_conf_ktypes;
+
 #ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
 #endif /* KRB5_DNS_LOOKUP */
@@ -1023,7 +1063,7 @@ typedef struct _krb5_safe {
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time,
 					   optional */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
     krb5_address *s_address;	/* sender address */
     krb5_address *r_address;	/* recipient address, optional */
     krb5_checksum *checksum;	/* data integrity checksum */
@@ -1039,7 +1079,7 @@ typedef struct _krb5_priv_enc_part {
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time, opt. */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
     krb5_address *s_address;	/* sender address */
     krb5_address *r_address;	/* recipient address, optional */
 } krb5_priv_enc_part;
@@ -1189,6 +1229,9 @@ krb5_error_code encode_krb5_kdc_req_body
 krb5_error_code encode_krb5_safe
 	(const krb5_safe *rep, krb5_data **code);
 
+krb5_error_code encode_krb5_safe_with_body
+	(const krb5_safe *rep, const krb5_data *body, krb5_data **code);
+
 krb5_error_code encode_krb5_priv
 	(const krb5_priv *rep, krb5_data **code);
 
@@ -1220,6 +1263,8 @@ krb5_error_code encode_krb5_alt_method
 	(const krb5_alt_method *, krb5_data **code);
 
 krb5_error_code encode_krb5_etype_info
+	(const krb5_etype_info_entry **, krb5_data **code);
+krb5_error_code encode_krb5_etype_info2
 	(const krb5_etype_info_entry **, krb5_data **code);
 
 krb5_error_code encode_krb5_enc_data
@@ -1269,6 +1314,9 @@ krb5_error_code encode_krb5_sam_response
 
 krb5_error_code encode_krb5_predicted_sam_response
        (const krb5_predicted_sam_response * , krb5_data **);
+
+krb5_error_code encode_krb5_setpw_req
+(const krb5_principal target, char *password, krb5_data **code);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c
@@ -1363,6 +1411,9 @@ krb5_error_code decode_krb5_kdc_req_body
 krb5_error_code decode_krb5_safe
 	(const krb5_data *output, krb5_safe **rep);
 
+krb5_error_code decode_krb5_safe_with_body
+	(const krb5_data *output, krb5_safe **rep, krb5_data *body);
+
 krb5_error_code decode_krb5_priv
 	(const krb5_data *output, krb5_priv **rep);
 
@@ -1394,6 +1445,9 @@ krb5_error_code decode_krb5_alt_method
 	(const krb5_data *output, krb5_alt_method **rep);
 
 krb5_error_code decode_krb5_etype_info
+	(const krb5_data *output, krb5_etype_info_entry ***rep);
+
+krb5_error_code decode_krb5_etype_info2
 	(const krb5_data *output, krb5_etype_info_entry ***rep);
 
 krb5_error_code decode_krb5_enc_data
@@ -1448,6 +1502,8 @@ krb5_error_code krb5_encode_kdc_rep
 krb5_error_code krb5_validate_times
 	(krb5_context, 
 		krb5_ticket_times *);
+krb5_boolean krb5int_auth_con_chkseqnum
+	(krb5_context ctx, krb5_auth_context ac, krb5_ui_4 in_seq);
 /*
  * [De]Serialization Handle and operations.
  */
@@ -1537,6 +1593,11 @@ krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
 	(krb5_int32 *,
 		krb5_octet **,
 		size_t *);
+/* [De]serialize 8-byte integer */
+krb5_error_code KRB5_CALLCONV krb5_ser_pack_int64
+	(krb5_int64, krb5_octet **, size_t *);
+krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int64
+	(krb5_int64 *, krb5_octet **, size_t *);
 /* [De]serialize byte string */
 krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
 	(krb5_octet *,
@@ -1559,7 +1620,46 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 void krb5int_set_prompt_types
 	(krb5_context, krb5_prompt_type *);
 
+krb5_error_code
+krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
+				  krb5_keyblock * /* Old keyblock, not new!  */);
 
+/* set and change password helpers */
+
+krb5_error_code krb5int_mk_chpw_req
+	(krb5_context context, krb5_auth_context auth_context,
+ 			krb5_data *ap_req, char *passwd, krb5_data *packet);
+krb5_error_code krb5int_rd_chpw_rep
+	(krb5_context context, krb5_auth_context auth_context,
+		       krb5_data *packet, int *result_code,
+		       krb5_data *result_data);
+krb5_error_code KRB5_CALLCONV krb5_chpw_result_code_string
+	(krb5_context context, int result_code,
+			char **result_codestr);
+krb5_error_code  krb5int_mk_setpw_req
+	(krb5_context context, krb5_auth_context auth_context,
+ 			krb5_data *ap_req, krb5_principal targetprinc, char *passwd, krb5_data *packet);
+krb5_error_code krb5int_rd_setpw_rep
+	(krb5_context context, krb5_auth_context auth_context,
+		       krb5_data *packet, int *result_code,
+		       krb5_data *result_data);
+krb5_error_code krb5int_setpw_result_code_string
+	(krb5_context context, int result_code,
+			const char **result_codestr);
+
+struct srv_dns_entry {
+    struct srv_dns_entry *next;
+    int priority;
+    int weight;
+    unsigned short port;
+    char *host;
+};
+krb5_error_code
+krb5int_make_srv_query_realm(const krb5_data *realm,
+			     const char *service,
+			     const char *protocol,
+			     struct srv_dns_entry **answers);
+void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
@@ -1577,26 +1677,24 @@ void krb5int_set_prompt_types
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 6
+#define KRB5INT_ACCESS_STRUCT_VERSION 8
 
+#ifndef ANAME_SZ
+struct ktext;			/* from krb.h, for krb524 support */
+#endif
 typedef struct _krb5int_access {
-    krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
-					struct addrlist *, int, int, int);
-    krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
-					   struct addrlist *, int,
-					   const char *, const char *,
-					   int, int, int, int);
-    void (*free_addrlist) (struct addrlist *);
-    unsigned int krb5_max_skdc_timeout;
-    unsigned int krb5_skdc_timeout_shift;
-    unsigned int krb5_skdc_timeout_1;
-    unsigned int krb5_max_dgram_size;
+    /* crypto stuff */
     const struct krb5_hash_provider *md5_hash_provider;
     const struct krb5_enc_provider *arcfour_enc_provider;
     krb5_error_code (* krb5_hmac) (const struct krb5_hash_provider *hash,
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
+    /* service location and communication */
+    krb5_error_code (*locate_server) (krb5_context, const krb5_data *,
+				      struct addrlist *, int,
+				      const char *, const char *,
+				      int, int, int, int);
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, krb5_data *reply,
 				   struct sockaddr *, socklen_t *);
@@ -1604,6 +1702,24 @@ typedef struct _krb5int_access {
 					const char *hostname,
 					int port, int secport,
 					int socktype, int family);
+    void (*free_addrlist) (struct addrlist *);
+
+    krb5_error_code (*make_srv_query_realm)(const krb5_data *realm,
+					    const char *service,
+					    const char *protocol,
+					    struct srv_dns_entry **answers);
+    void (*free_srv_dns_data)(struct srv_dns_entry *);
+
+    /* krb4 compatibility stuff -- may be null if not enabled */
+    krb5_int32 (*krb_life_to_time)(krb5_int32, int);
+    int (*krb_time_to_life)(krb5_int32, krb5_int32);
+    int (*krb524_encode_v4tkt)(struct ktext *, char *, unsigned int *);
+    krb5_error_code (*krb5int_c_mandatory_cksumtype)
+        (krb5_context, krb5_enctype, krb5_cksumtype *);
+    krb5_error_code (KRB5_CALLCONV *krb5_ser_pack_int64)
+        (krb5_int64, krb5_octet **, size_t *);
+    krb5_error_code (KRB5_CALLCONV *krb5_ser_unpack_int64)
+        (krb5_int64 *, krb5_octet **, size_t *);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
@@ -1612,6 +1728,29 @@ typedef struct _krb5int_access {
 
 krb5_error_code KRB5_CALLCONV krb5int_accessor
 	(krb5int_access*, krb5_int32);
+
+/* Ick -- some krb524 and krb4 support placed in the krb5 library,
+   because AFS (and potentially other applications?) use the krb4
+   object as an opaque token, which (in some implementations) is not
+   in fact a krb4 ticket, so we don't want to drag in the krb4 support
+   just to enable this.  */
+
+#define KRB524_SERVICE "krb524"
+#define KRB524_PORT 4444
+
+/* v4lifetime.c */
+extern krb5_int32 krb5int_krb_life_to_time(krb5_int32, int);
+extern int krb5int_krb_time_to_life(krb5_int32, krb5_int32);
+
+/* conv_creds.c */
+int krb5int_encode_v4tkt
+	(struct ktext *v4tkt, char *buf, unsigned int *encoded_len);
+
+/* send524.c */
+int krb5int_524_sendto_kdc
+        (krb5_context context, const krb5_data * message, 
+	 const krb5_data * realm, krb5_data * reply,
+	 struct sockaddr *, socklen_t *);
 
 /* temporary -- this should be under lib/krb5/ccache somewhere */
 
@@ -1743,5 +1882,9 @@ typedef struct _krb5_kt_ops {
 extern const krb5_kt_ops krb5_kt_dfl_ops;
 
 extern krb5_error_code krb5int_translate_gai_error (int);
+
+/* Not sure it's ready for exposure just yet.  */
+extern krb5_error_code
+krb5int_c_mandatory_cksumtype (krb5_context, krb5_enctype, krb5_cksumtype *);
 
 #endif /* _KRB5_INT_H */

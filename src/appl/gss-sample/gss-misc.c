@@ -19,6 +19,29 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+/*
+ * Copyright (C) 2003, 2004 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
 
 #if !defined(lint) && !defined(__CODECENTER__)
 static char *rcsid = "$Header$";
@@ -38,6 +61,13 @@ static char *rcsid = "$Header$";
 #include <unistd.h>
 #endif
 #include <string.h>
+
+/* need struct timeval */
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
 
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"
@@ -77,21 +107,31 @@ static int write_all(int fildes, char *buf, unsigned int nbyte)
 
 static int read_all(int fildes, char *buf, unsigned int nbyte)
 {
-     int ret;
-     char *ptr;
+    int ret;
+    char *ptr;
+    fd_set rfds;
+    struct timeval tv;
 
-     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	  ret = recv(fildes, ptr, nbyte, 0);
-	  if (ret < 0) {
-	       if (errno == EINTR)
-		    continue;
-	       return(ret);
-	  } else if (ret == 0) {
-	       return(ptr-buf);
-	  }
-     }
+    FD_ZERO(&rfds);
+    FD_SET(fildes, &rfds);
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
 
-     return(ptr-buf);
+    for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
+	if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0
+	    || !FD_ISSET(fildes, &rfds))
+	    return(ptr-buf);
+	ret = recv(fildes, ptr, nbyte, 0);
+	if (ret < 0) {
+	    if (errno == EINTR)
+		continue;
+	    return(ret);
+	} else if (ret == 0) {
+	    return(ptr-buf);
+	}
+    }
+
+    return(ptr-buf);
 }
 
 /*

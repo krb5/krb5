@@ -27,6 +27,7 @@
  */
 
 #include "k5-int.h"
+#include "cc-int.h"
 
 #define KRB5_OK 0
 
@@ -157,6 +158,40 @@ pref (krb5_enctype my_ktype, int nktypes, krb5_enctype *ktypes)
  * KRB5_CC_NOT_KTYPE
  */
 
+krb5_boolean
+krb5int_cc_creds_match_request(krb5_context context, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds)
+{
+    if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
+		   srvname_match(context, mcreds, creds)) ||
+	       standard_fields_match(context, mcreds, creds))
+	      &&
+	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
+	       mcreds->is_skey == creds->is_skey)
+	      &&
+	      (! set(KRB5_TC_MATCH_FLAGS_EXACT) ||
+	       mcreds->ticket_flags == creds->ticket_flags)
+	      &&
+	      (! set(KRB5_TC_MATCH_FLAGS) ||
+	       flags_match(mcreds->ticket_flags, creds->ticket_flags))
+	      &&
+	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
+	       times_match_exact(&mcreds->times, &creds->times))
+	      &&
+	      (! set(KRB5_TC_MATCH_TIMES) ||
+	       times_match(&mcreds->times, &creds->times))
+	      &&
+	      ( ! set(KRB5_TC_MATCH_AUTHDATA) ||
+	       authdata_match(mcreds->authdata, creds->authdata))
+	      &&
+	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
+	       data_match (&mcreds->second_ticket, &creds->second_ticket))
+	      &&
+	     ((! set(KRB5_TC_MATCH_KTYPE))||
+		(mcreds->keyblock.enctype == creds->keyblock.enctype)))
+        return TRUE;
+    return FALSE;
+}
+
 static krb5_error_code
 krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds, int nktypes, krb5_enctype *ktypes)
 {
@@ -178,34 +213,8 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id, krb5_flags whic
 	  return kret;
 
      while ((kret = krb5_cc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
-	 if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
-		   srvname_match(context, mcreds, &fetchcreds)) ||
-	       standard_fields_match(context, mcreds, &fetchcreds))
-	      &&
-	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
-	       mcreds->is_skey == fetchcreds.is_skey)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS_EXACT) ||
-	       mcreds->ticket_flags == fetchcreds.ticket_flags)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS) ||
-	       flags_match(mcreds->ticket_flags, fetchcreds.ticket_flags))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
-	       times_match_exact(&mcreds->times, &fetchcreds.times))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(&mcreds->times, &fetchcreds.times))
-	      &&
-	      ( ! set(KRB5_TC_MATCH_AUTHDATA) ||
-	       authdata_match(mcreds->authdata, fetchcreds.authdata))
-	      &&
-	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
-	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
-	      &&
-	     ((! set(KRB5_TC_MATCH_KTYPE))||
-		(mcreds->keyblock.enctype == fetchcreds.keyblock.enctype)))
-	  {
+      if (krb5int_cc_creds_match_request(context, whichfields, mcreds, &fetchcreds))
+      {
 	      if (ktypes) {
 		  fetched.pref = pref (fetchcreds.keyblock.enctype,
 				       nktypes, ktypes);

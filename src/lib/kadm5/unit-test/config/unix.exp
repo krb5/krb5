@@ -14,6 +14,44 @@ if {[info exists exp_version_4]} {
 	set wait_status_index 3
 }
 
+# Hack around Solaris 9 kernel race condition that causes last output
+# from a pty to get dropped.
+if { $PRIOCNTL_HACK } {
+    catch {exec priocntl -s -c FX -m 30 -p 30 -i pid [getpid]}
+    rename spawn oldspawn
+    proc spawn { args } {
+	upvar 1 spawn_id spawn_id
+	set newargs {}
+	set inflags 1
+	set eatnext 0
+	foreach arg $args {
+	    if { $arg == "-ignore" \
+		     || $arg == "-open" \
+		     || $arg == "-leaveopen" } {
+		lappend newargs $arg
+		set eatnext 1
+		continue
+	    }
+	    if [string match "-*" $arg] {
+		lappend newargs $arg
+		continue
+	    }
+	    if { $eatnext } {
+		set eatnext 0
+		lappend newargs $arg
+		continue
+	    }
+	    if { $inflags } {
+		set inflags 0
+		set newargs [concat $newargs {priocntl -e -c FX -p 0}]
+	    }
+	    lappend newargs $arg
+	}
+	set pid [eval oldspawn $newargs]
+	return $pid
+    }
+}
+
 # Variables for keeping track of api process state
 set api_pid "0"
 

@@ -9,6 +9,7 @@ required in porting Kerberos V5 to a new platform.
                                            build Kerberos.
 * Unpacking the Sources::       Preparing the source tree.
 * Doing the Build::             Compiling Kerberos.
+* Installing the Binaries::     Installing the compiled binaries.
 * Testing the Build::           Making sure Kerberos built correctly.
 * Options to Configure::        Command-line options to Configure
 * osconf.h::                    Header file-specific configurations
@@ -19,7 +20,7 @@ required in porting Kerberos V5 to a new platform.
 @end menu
 
 @node Organization of the Source Directory, Build Requirements, Building Kerberos V5, Building Kerberos V5
-@section Build Requirements
+@section Organization of the Source Directory
 
 Below is a brief overview of the organization of the complete source
 directory.  More detailed descriptions follow.
@@ -57,15 +58,15 @@ source code for building @value{PRODUCT} on Windows (see windows/README)
 
 @menu
 * The appl Directory::          
-* The clients Directory::
-* The gen-manpages Directory::
-* The include Directory::
+* The clients Directory::       
+* The gen-manpages Directory::  
+* The include Directory::       
 * The kadmin Directory::        
 * The kdc Directory::           
 * The krb524 Directory::        
-* The lib Directory::
-* The prototype Directory::
-* The slave Directory::
+* The lib Directory::           
+* The prototype Directory::     
+* The slave Directory::         
 * The util Directory::          
 @end menu
 
@@ -104,7 +105,7 @@ a credentials cache, or the keys held in a keytab file.
 This program changes a user's Kerberos password.
 
 @itemx ksu
-This program is a Kerberized verions of the @code{su} program that is
+This program is a Kerberized version of the @code{su} program that is
 meant to securely change the real and effective user ID to that of the
 target user and to create a new security context.
 
@@ -214,12 +215,17 @@ library and utilities (@i{et}), the Sub-system library and utilities
 (@i{pty}), and bug-reporting program @code{send-pr}.
 
 @node Build Requirements, Unpacking the Sources, Organization of the Source Directory, Building Kerberos V5
-@section Organization of the Source Directory
+@section Build Requirements
 
 In order to build Kerberos V5, you will need approximately 60-70
 megabytes of disk space.  The exact amount will vary depending on the
 platform and whether the distribution is compiled with debugging symbol
 tables or not.
+
+Your C compiler must conform to ANSI C (ISO/IEC 9899:1990, ``c89'').
+Some operating systems do not have an ANSI C compiler, or their
+default compiler requires extra command-line options to enable ANSI C
+conformance.
 
 If you wish to keep a separate @dfn{build tree}, which contains the compiled
 @file{*.o} file and executables, separate from your source tree, you
@@ -248,7 +254,7 @@ your current directory is @file{/u1} when you unpack the tarfiles, you
 will get @file{/u1/krb5-@value{RELEASE}/src}, etc.)
 
 
-@node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
+@node Doing the Build, Installing the Binaries, Unpacking the Sources, Building Kerberos V5
 @section Doing the Build
 
 You have a number of different options in how to build Kerberos.  If you
@@ -335,7 +341,33 @@ makes it fail for relative pathnames. Note that this version differs
 from the latest version as distributed and installed by the XConsortium
 with X11R6. Either version should be acceptable.
 
-@node Testing the Build, Options to Configure, Doing the Build, Building Kerberos V5
+@node Installing the Binaries, Testing the Build, Doing the Build, Building Kerberos V5
+@section Installing the Binaries
+
+Once you have built Kerberos, you should install the binaries.  You
+can do this by running:
+
+@example
+% make install
+@end example
+
+If you want to install the binaries into a destination directory that
+is not their final destination, which may be convenient if you want to
+build a binary distribution to be deployed on multiple hosts, you may
+use:
+
+@example
+% make install DESTDIR=/path/to/destdir
+@end example
+
+This will install the binaries under @code{DESTDIR/PREFIX}, e.g., the
+user programs will install into @code{DESTDIR/PREFIX/bin}, the
+libraries into @code{DESTDIR/PREFIX/lib}, etc.
+
+Note that if you want to test the build (see @ref{Testing the Build}),
+you usually do not need to do a @code{make install} first.
+
+@node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
 @section Testing the Build
 
 The Kerberos V5 distribution comes with built-in regression tests.  To
@@ -362,7 +394,7 @@ client/server activities.
 
 DejaGnu may be found wherever GNU software is archived.  
 
-Most of the tests are setup to run as a non-privledged user.  For some
+Most of the tests are setup to run as a non-privileged user.  For some
 of the krb-root tests to work properly, either (a) the user running the
 tests must not have a .k5login file in the home directory or (b) the
 .k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
@@ -569,7 +601,10 @@ This option is ignored if @samp{--with-system-ss} is not specified.
 @item --with-system-db
 
 Use an installed version of the Berkeley DB package, which must
-provide an API compatible with version 1.85.
+provide an API compatible with version 1.85.  This option is
+@emph{unsupported} and untested.  In particular, we do not know if the
+database-rename code used in the dumpfile load operation will behave
+properly.
 
 If this option is not given, a version supplied with the Kerberos
 sources will be built and installed.  (We are not updating this
@@ -708,18 +743,20 @@ one in the tree or you will be missing references.
 
 This section details operating system incompatibilities with Kerberos V5
 which have been reported to the developers at MIT.  If you find
-additional incompatibilities, and/or discover work arounds to such
+additional incompatibilities, and/or discover workarounds to such
 problems, please send a report via the @code{krb5-send-pr} program.
 Thanks!
 
 @menu
 * AIX::                         
 * Alpha OSF/1 V1.3::            
-* Alpha OSF/1 (Digital Unix) V2.0++::  
+* Alpha OSF/1 V2.0::            
+* Alpha OSF/1 V4.0::            
 * BSDI::                        
 * HPUX::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
+* Solaris 9::                   
 * SGI Irix 5.X::                
 * Ultrix 4.2/3::                
 @end menu
@@ -731,7 +768,7 @@ The AIX 3.2.5 linker dumps core trying to build a shared
 @samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
 compiler works fine.  This problem is fixed using the AIX 4.1 linker.
 
-@node Alpha OSF/1 V1.3, Alpha OSF/1 (Digital Unix) V2.0++, AIX, OS Incompatibilities
+@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, AIX, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
 
 Using the native compiler, compiling with the @samp{-O} compiler flag
@@ -740,8 +777,8 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 (Digital Unix) V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
-@subsection Alpha OSF/1 V2.0++
+@node Alpha OSF/1 V2.0, Alpha OSF/1 V4.0, Alpha OSF/1 V1.3, OS Incompatibilities
+@subsection Alpha OSF/1 V2.0
 
 There used to be a bug when using the native compiler in compiling
 @file{md4.c} when compiled without either the @samp{-O} or @samp{-g}
@@ -750,14 +787,24 @@ under V2.1, but we do not have access to V2.0 to test and see if the
 problem would exist there. (We welcome feedback on this issue). There
 was never a problem in using GCC version 2.6.3.
 
-In version 3.2 and beyond of the operating system, we have not seen any
-problems with the native compiler. 
+In version 3.2 and beyond of the operating system, we have not seen
+this sort of problem with the native compiler.
+
+@node Alpha OSF/1 V4.0, BSDI, Alpha OSF/1 V2.0, OS Incompatibilities
+@subsection Alpha OSF/1 (Digital UNIX) V4.0
+
+The C compiler provided with Alpha OSF/1 V4.0 (a.k.a. Digital UNIX)
+defaults to an extended K&R C mode, not ANSI C.  You need to provide
+the @samp{-std} argument to the compiler (i.e., @samp{./configure
+CC='cc -std'}) to enable extended ANSI C mode.  More recent versions
+of the operating system, such as 5.0, seem to have C compilers which
+default to @samp{-std}.
 
 @c @node Alpha Tru64 UNIX 5.0
 @c @subsection Alpha Tru64 UNIX 5.0
 @c ... login.krb5 problems
 
-@node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@node BSDI, HPUX, Alpha OSF/1 V4.0, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
@@ -769,11 +816,12 @@ NetBSD and FreeBSD.)
 @node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
 @subsection HPUX
 
-The native (bundled) compiler for HPUX currently will not work, because
-it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{-D_HPUX_SOURCE} flag
-(i.e. @samp{./configure --with-cc='c89 -D_HPUX_SOURCE'}).  This has only
-been tested recently for HPUX 10.20.
+The native (bundled) compiler for HPUX currently will not work,
+because it is not a full ANSI C compiler.  The optional ANSI C
+compiler should work as long as you give it the @samp{-Ae} flag
+(i.e. @samp{./configure CC='cc -Ae'}).  This is equivalent to
+@samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
+recommendation.  This has only been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
@@ -816,16 +864,38 @@ environment to break or behave differently.
 
 @end enumerate
 
-@node Solaris 2.X, SGI Irix 5.X, Solaris versions 2.0 through 2.3, OS Incompatibilities
+@node Solaris 2.X, Solaris 9, Solaris versions 2.0 through 2.3, OS Incompatibilities
 @subsection Solaris 2.X
 
 You @b{must} compile Kerberos V5 without the UCB compatibility
 libraries.  This means that @file{/usr/ucblib} must not be in the
 LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
-@code{--with-ccopts=-i} option to @samp{configure}.
+@code{CFLAGS=-i} option to @samp{configure}.
 
-@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
+If you are compiling for a 64-bit execution environment, you may need
+to configure with the option @code{CFLAGS="-D_XOPEN_SOURCE=500
+-D__EXTENSIONS__"}.  This is not well tested; at MIT we work primarily
+with the 32-bit execution environment.
+
+@node Solaris 9, SGI Irix 5.X, Solaris 2.X, OS Incompatibilities
+@subsection Solaris 9
+
+Solaris 9 has a kernel race condition which causes the final output
+written to the slave side of a pty to be lost upon the final close()
+of the slave device.  This causes the dejagnu-based tests to fail
+intermittently.  A workaround exists, but requires some help from the
+scheduler, and the ``make check'' must be executed from a shell with
+elevated priority limits.
+
+Run something like
+
+@code{priocntl -s -c FX -m 30 -p 30 -i pid nnnn}
+
+as root, where @code{nnnn} is the pid of the shell whose priority
+limit you wish to raise.
+
+@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 9, OS Incompatibilities
 @subsection SGI Irix 5.X
 
 If you are building in a tree separate from the source tree, the vendors
@@ -852,8 +922,8 @@ GCC instead.
 
 On the DEC MIPS platform, using the native compiler, @file{md4.c} and
 @file{md5.c} can not be compiled with the optimizer set at level 1.
-That is, you must specify either @samp{--with-ccopts=-O} and
-@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
+That is, you must specify either @samp{CFLAGS=-O} and
+@samp{CFLAGS=-g} to configure.  If you don't specify either, the
 compile will never complete.
 
 The optimizer isn't hung; it just takes an exponentially long time.

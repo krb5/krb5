@@ -100,6 +100,7 @@ krb_change_password(char *principal, char *instance, char *realm,
     p = key;
     KRB4_GET32BE(tempKey, p);
     sendSize += vts_long(tempKey, &sendStream, (int)sendSize);
+    tempKey = 0;
 
     if (newPassword) {
 	sendSize += vts_string(newPassword, &sendStream, (int)sendSize);
@@ -120,5 +121,7 @@ disconnect:
     kadm_cli_disconn(&client_parm);
 
 cleanup:
+    memset(&client_parm.creds.session, 0, sizeof(client_parm.creds.session));
+    memset(&key, 0, sizeof(key));
     return err;
 }

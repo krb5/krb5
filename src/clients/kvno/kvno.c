@@ -39,9 +39,12 @@ static char *prog;
 static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
-    fprintf(stderr, "xusage: %s [-4 | -e etype] service1 service2 ...\n", prog);
+    fprintf(stderr, 
+            "usage: %s [-4 | [-c ccache] [-e etype]] service1 service2 ...\n", 
+            prog);
 #else
-    fprintf(stderr, "xusage: %s [-e etype] service1 service2 ...\n", prog);
+    fprintf(stderr, "usage: %s [-c ccache] [-e etype] service1 service2 ...\n",
+            prog);
 #endif
     exit(1);
 }
@@ -49,19 +52,23 @@ static void xusage()
 int quiet = 0;
 
 static void do_v4_kvno (int argc, char *argv[]);
-static void do_v5_kvno (int argc, char *argv[], char *etypestr);
+static void do_v5_kvno (int argc, char *argv[], 
+                        char *ccachestr, char *etypestr);
 
 int main(int argc, char *argv[])
 {
     int option;
-    char *etypestr = 0;
+    char *etypestr = 0, *ccachestr = 0;
     int v4 = 0;
 
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "e:hq4")) != -1) {
+    while ((option = getopt(argc, argv, "c:e:hq4")) != -1) {
 	switch (option) {
+	case 'c':
+	    ccachestr = optarg;
+	    break;
 	case 'e':
 	    etypestr = optarg;
 	    break;
@@ -83,13 +90,13 @@ int main(int argc, char *argv[])
     if ((argc - optind) < 1)
 	xusage();
 
-    if (etypestr != 0 && v4)
+    if ((ccachestr != 0 || etypestr != 0) && v4)
 	xusage();
 
     if (v4)
 	do_v4_kvno(argc - optind, argv + optind);
     else
-	do_v5_kvno(argc - optind, argv + optind, etypestr);
+	do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr);
     return 0;
 }
 
@@ -142,7 +149,8 @@ static void do_v4_kvno (int count, char *names[])
 }
 
 #include <krb5.h>
-static void do_v5_kvno (int count, char *names[], char *etypestr)
+static void do_v5_kvno (int count, char *names[], 
+                        char * ccachestr, char *etypestr)
 {
     krb5_context context;
     krb5_error_code ret;
@@ -170,7 +178,10 @@ static void do_v5_kvno (int count, char *names[], char *etypestr)
 	etype = 0;
     }
 
-    ret = krb5_cc_default(context, &ccache);
+    if (ccachestr)
+        ret = krb5_cc_resolve(context, ccachestr, &ccache);
+    else
+        ret = krb5_cc_default(context, &ccache);
     if (ret) {
 	com_err(prog, ret, "while opening ccache");
 	exit(1);
@@ -216,7 +227,7 @@ static void do_v5_kvno (int count, char *names[], char *etypestr)
 	    fprintf(stderr, "%s: %s while getting credentials\n",
 		    princ, error_message(ret));
 
-	    free(princ);
+	    krb5_free_unparsed_name(context, princ);
 
 	    errors++;
 	    continue;
@@ -229,7 +240,7 @@ static void do_v5_kvno (int count, char *names[], char *etypestr)
 		    princ, error_message(ret));
 
 	    krb5_free_creds(context, out_creds);
-	    free(princ);
+	    krb5_free_unparsed_name(context, princ);
 
 	    errors++;
 	    continue;

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+  Copyright (C) 2004 by the Massachusetts Institute of Technology.
+  All rights reserved.
+ 
+  Export of this software from the United States of America may
+    require a specific license from the United States Government.
+    It is the responsibility of any person or organization contemplating
+    export to obtain such a license before exporting.
+ 
+  WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+  distribute this software and its documentation for any purpose and
+  without fee is hereby granted, provided that the above copyright
+  notice appear in all copies and that both that copyright notice and
+  this permission notice appear in supporting documentation, and that
+  the name of M.I.T. not be used in advertising or publicity pertaining
+  to distribution of the software without specific, written prior
+  permission.  Furthermore if you modify this software you must label
+  your software as modified software and not distribute it in such a
+  fashion that it might be confused with the original M.I.T. software.
+  M.I.T. makes no representations about the suitability of
+  this software for any purpose.  It is provided "as is" without express
+  or implied warranty.
+  
+  -->
+<Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
+    <Feature 
+        Id="feaKfw"
+        AllowAdvertise="no"
+        Description="$(loc.KerberosDesc)"
+        InstallDefault="local"
+        Title="$(loc.KerberosTitle)"
+        ConfigurableDirectory="KERBEROSDIR"
+        Level="30">
+        <Feature
+            Id="feaKfwClient"
+            AllowAdvertise="no"
+            Description="$(loc.KerberosClientDesc)"
+            InstallDefault="local"
+            Title="$(loc.KerberosClientTitle)"
+            FollowParent="yes"
+            Level="30">
+            
+            <ComponentRef Id="cmf_aklog_exe" />
+            <ComponentRef Id="cmf_comerr32_dll" />
+            <ComponentRef Id="cmf_gss_exe" />
+            <ComponentRef Id="cmf_gss_client_exe" />
+            <ComponentRef Id="cmf_gss_server_exe" />
+            <ComponentRef Id="cmf_gssapi32_dll" />
+            <ComponentRef Id="cmf_k524init_exe" />
+            <ComponentRef Id="cmf_kclnt32_dll" />
+            <ComponentRef Id="cmf_kdestroy_exe" />
+            <ComponentRef Id="cmf_kinit_exe" />
+            <ComponentRef Id="cmf_klist_exe" />
+            <ComponentRef Id="cmf_kpasswd_exe" />
+            <ComponentRef Id="cmf_kvno_exe" />
+            <ComponentRef Id="cmf_krb5_32_dll" />
+            <ComponentRef Id="cmf_krb524_dll" />
+            <ComponentRef Id="cmf_krbcc32_dll" />
+            <ComponentRef Id="cmf_krbcc32s_exe" />
+            <ComponentRef Id="cmf_krbv4w32_dll" />
+            <ComponentRef Id="cmf_leash32_exe" />
+            
+            <!-- Leash config options -->
+            <ComponentRef Id="rcm_leash_1" />
+            <ComponentRef Id="rcm_leash_2" />
+            <ComponentRef Id="rcm_leash_3" />
+            <ComponentRef Id="rcm_leash_5" />
+            <ComponentRef Id="rcm_leash_6" />
+            
+            <!-- Kerberos IV options -->
+            <ComponentRef Id="rcm_krb4_1" />
+            <ComponentRef Id="rcm_krb4_2" />
+            <ComponentRef Id="rcm_krb4_3" />
+            <ComponentRef Id="rcm_krb4_4" />
+            
+            <!-- Kerberos V options -->
+            <ComponentRef Id="rcm_krb5_1" />
+            <ComponentRef Id="rcm_krb5_2" />
+            <ComponentRef Id="rcm_krb5_3" />
+            
+        <?ifdef OldHelp?>
+            <ComponentRef Id="cmf_leash32_hlp" />
+        <?else?>
+            <ComponentRef Id="cmf_leash32_chm" />
+        <?endif?>
+            <ComponentRef Id="cmf_leashw32_dll" />
+            
+            <!-- Leash dll options -->
+            <ComponentRef Id="rcm_leashdll_1" />
+            <ComponentRef Id="rcm_leashdll_2" />
+            <ComponentRef Id="rcm_leashdll_3" />
+            <ComponentRef Id="rcm_leashdll_4" />
+            <ComponentRef Id="rcm_leashdll_5" />
+            <ComponentRef Id="rcm_leashdll_6" />
+            <ComponentRef Id="rcm_leashdll_7" />
+            <ComponentRef Id="rcm_leashdll_8" />
+            <ComponentRef Id="rcm_leashdll_9" />
+            <ComponentRef Id="rcm_leashdll_10" />
+            <ComponentRef Id="rcm_leashdll_11" />
+            <ComponentRef Id="rcm_leashdll_12" />
+            <ComponentRef Id="rcm_leashdll_13" />
+            <ComponentRef Id="rcm_leashdll_15" />
+            <ComponentRef Id="rcm_leashdll_16" />
+            <ComponentRef Id="rcm_leashdll_17" />
+            
+            <ComponentRef Id="cmf_ms2mit_exe" />
+            <ComponentRef Id="cmf_wshelp32_dll" />
+            <ComponentRef Id="cmf_xpprof32_dll" />
+
+        <?ifdef Debug?>            
+            <ComponentRef Id="cmf_bin_debug"/>
+        <?endif?>
+        
+            <ComponentRef Id="cmf_psapi_dll" />
+            
+        <?ifndef Debug?>
+            <?ifdef CL1200?>
+                <ComponentRef Id="cmf_mfc42_dll" />
+                <ComponentRef Id="cmf_msvcp60_dll" />
+                <ComponentRef Id="cmf_msvcrt_dll" />
+            <?else?>
+                <?ifdef CL1300?>
+                    <ComponentRef Id="cmf_mfc70_dll" />
+                    <ComponentRef Id="cmf_msvcr70_dll" />
+                    <ComponentRef Id="cmf_msvcp70_dll" />
+                    <ComponentRef Id="cmf_mfc70chs_dll" />
+                    <ComponentRef Id="cmf_mfc70cht_dll" />
+                    <ComponentRef Id="cmf_mfc70deu_dll" />
+                    <ComponentRef Id="cmf_mfc70enu_dll" />
+                    <ComponentRef Id="cmf_mfc70esp_dll" />
+                    <ComponentRef Id="cmf_mfc70fra_dll" />
+                    <ComponentRef Id="cmf_mfc70ita_dll" />
+                    <ComponentRef Id="cmf_mfc70jpn_dll" />
+                    <ComponentRef Id="cmf_mfc70kor_dll" />
+                <?else?> <!-- 1310 -->
+                    <ComponentRef Id="cmf_mfc71_dll" />
+                    <ComponentRef Id="cmf_msvcr71_dll" />
+                    <ComponentRef Id="cmf_msvcp71_dll" />
+                    <ComponentRef Id="cmf_mfc71chs_dll" />
+                    <ComponentRef Id="cmf_mfc71cht_dll" />
+                    <ComponentRef Id="cmf_mfc71deu_dll" />
+                    <ComponentRef Id="cmf_mfc71enu_dll" />
+                    <ComponentRef Id="cmf_mfc71esp_dll" />
+                    <ComponentRef Id="cmf_mfc71fra_dll" />
+                    <ComponentRef Id="cmf_mfc71ita_dll" />
+                    <ComponentRef Id="cmf_mfc71jpn_dll" />
+                    <ComponentRef Id="cmf_mfc71kor_dll" />
+                <?endif?>
+            <?endif?>
+        <?else?>
+            <?ifdef CL1200?>
+                <ComponentRef Id="cmf_mfc42d_dll" />
+                <ComponentRef Id="cmf_msvcp60d_dll" />
+                <ComponentRef Id="cmf_msvcrtd_dll" />
+                <ComponentRef Id="cmf_runtime_debug1200" />
+            <?else?>
+                <?ifdef CL1300?>
+                    <ComponentRef Id="cmf_mfc70d_dll" />
+                    <ComponentRef Id="cmf_msvcr70d_dll" />
+                    <ComponentRef Id="cmf_msvcp70d_dll" />
+                    <ComponentRef Id="cmf_mfc70chs_dll" />
+                    <ComponentRef Id="cmf_mfc70cht_dll" />
+                    <ComponentRef Id="cmf_mfc70deu_dll" />
+                    <ComponentRef Id="cmf_mfc70enu_dll" />
+                    <ComponentRef Id="cmf_mfc70esp_dll" />
+                    <ComponentRef Id="cmf_mfc70fra_dll" />
+                    <ComponentRef Id="cmf_mfc70ita_dll" />
+                    <ComponentRef Id="cmf_mfc70jpn_dll" />
+                    <ComponentRef Id="cmf_mfc70kor_dll" />
+                    <ComponentRef Id="cmf_runtime_debug1300" />
+                <?else?> <!-- 1310 -->
+                    <ComponentRef Id="cmf_mfc71d_dll" />
+                    <ComponentRef Id="cmf_msvcr71d_dll" />
+                    <ComponentRef Id="cmf_msvcp71d_dll" />
+                    <ComponentRef Id="cmf_mfc71chs_dll" />
+                    <ComponentRef Id="cmf_mfc71cht_dll" />
+                    <ComponentRef Id="cmf_mfc71deu_dll" />
+                    <ComponentRef Id="cmf_mfc71enu_dll" />
+                    <ComponentRef Id="cmf_mfc71esp_dll" />
+                    <ComponentRef Id="cmf_mfc71fra_dll" />
+                    <ComponentRef Id="cmf_mfc71ita_dll" />
+                    <ComponentRef Id="cmf_mfc71jpn_dll" />
+                    <ComponentRef Id="cmf_mfc71kor_dll" />
+                    <ComponentRef Id="cmf_runtime_debug1310" />
+                <?endif?>
+            <?endif?>
+        <?endif?>
+            <ComponentRef Id="cmf_krb5_ini" />
+            <ComponentRef Id="cmf_krb_con" />
+            <ComponentRef Id="cmf_krbrealm_con" />
+            
+            <ComponentRef Id="rcm_common" />
+            <ComponentRef Id="rcm_client" />
+            
+            <Feature Id="feaKfwLeashStartup" AllowAdvertise="no" Display="hidden" Level="130">
+                <Condition Level="30">LEASHAUTOSTART = 1</Condition>
+                <ComponentRef Id="csc_leashStartup"/>
+            </Feature>
+
+        </Feature> <!-- /feaKfwClient -->
+        
+        <Feature
+            Id="feaKfwSDK" 
+            AllowAdvertise="no" 
+            Description="$(loc.KerberosSDKDesc)" 
+            InstallDefault="local" 
+            Level="130" 
+            Title="$(loc.KerberosSDKTitle)">
+            
+            <ComponentRef Id="cmp_dirinc_kclient" />
+            <ComponentRef Id="cmp_dirinc_krb4" />
+            <ComponentRef Id="cmp_dirinc_krb5_gssapi" />
+            <ComponentRef Id="cmp_dirinc_krb5_KerberosIV" />
+            <ComponentRef Id="cmp_dirinc_krb5" />
+            <ComponentRef Id="cmp_dirinc_krbcc" />
+            <ComponentRef Id="cmp_dirinc_leash" />
+            <ComponentRef Id="cmp_dirinc_loadfuncs" />
+            <ComponentRef Id="cmp_dirinc_wshelper" />
+            <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
+            <ComponentRef Id="cmp_dirlib_i386" />
+            <ComponentRef Id="cmp_dirinstall_nsis" />
+            <ComponentRef Id="cmp_dirinstall_wix" />
+            <ComponentRef Id="cmp_dirinstall_wix_lang" />
+            <ComponentRef Id="cmp_dirinstall_wix_Binary" />
+            <ComponentRef Id="cmp_dirinstall_wix_custom" />
+            <ComponentRef Id="rcm_common" />
+            <ComponentRef Id="rcm_sdk" />
+        </Feature> <!-- /feaKfwSDK -->
+        
+        <Feature
+            Id="feaKfwDocs" 
+            AllowAdvertise="no" 
+            Description="$(loc.KerberosDocDesc)" 
+            InstallDefault="local" 
+            Level="130" 
+            Title="$(loc.KerberosDocTitle)">
+
+            <ComponentRef Id="efl_leash_userdoc_pdf" />
+            <ComponentRef Id="efl_relnotes_html" />
+            
+            <ComponentRef Id="rcm_common" />
+            <ComponentRef Id="rcm_docs" />
+        </Feature>
+        
+    </Feature>
+</Include>
