@@ -103,10 +103,10 @@ profile-library-implementation-version				= 0
 ###			Generation of file lists
 ##############################################################################################################
 
+list-generation-script-working-folder = "{root-folder}mac:"
 list-generation-script-folder = "{root-folder}mac:"
 list-generation-script = "{list-generation-script-folder}macfile_gen.pl"
 list-generation-script-root = ".."
-list-generation-script-prefix = "{root-folder}"
 
 all-files-list									= {root-folder}"All files.list"
 all-sources-list								= {root-folder}"All sources.list"
@@ -159,75 +159,75 @@ file-lists Ä {all-lists}
 # path to root Makefile.in. This is why we run it with -x to specify the root.
 
 {all-files-list} Ä {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-files {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-files {list-generation-script-root} ¶
  > {Targ}
 
 {all-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {all-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-folders {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {include-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} include-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} include-folders {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 ##############################################################################################################
@@ -589,15 +589,23 @@ profile-library-linker-options-68k-debug = {common-linker-options-debug} {profil
 profile-library-linker-options-ppc-final = {common-linker-options-final} {profile-library-common-linker-options}
 profile-library-linker-options-68k-final = {common-linker-options-final} {profile-library-common-linker-options}
 
-gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
-gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-68k-debug}
-gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-final}
-gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list}` {root-folder}mac:GSS.CFM{object-suffix-68k-final}
+gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
+gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-68k-debug}
+gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-ppc-final}
+gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-68k-final}
 
-krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-debug}
-krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list}` {root-folder}mac:K5.CFM{object-suffix-68k-debug}
-krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-final}
-krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list}` {root-folder}mac:K5.CFM{object-suffix-68k-final}
+krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:K5.CFM{object-suffix-ppc-debug}
+krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:K5.CFM{object-suffix-68k-debug}
+krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:K5.CFM{object-suffix-ppc-final}
+krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:K5.CFM{object-suffix-68k-final}
 
 krb5-globals-library-objects-ppc-debug = ¶
 	{krb5-globals-root-folder}Krb5Globals{object-suffix-ppc-debug} ¶
@@ -615,10 +623,14 @@ krb5-globals-library-objects-68k-final = ¶
 krb5-globals-data-library-objects-ppc = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-ppc-data}
 krb5-globals-data-library-objects-68k = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-68k-data}
 
-profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
-profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
-profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
-profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
+profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
+profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
+profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
+profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
 
 library-linker-ppc						= MWLinkPPC
 library-linker-68K						= MWLink68K
@@ -632,7 +644,7 @@ common-compiler-options = ¶
 		-model farData
 
 # Don't put the prefix file in these options because they are used to precompile the prefix file
-ppc-compiler-options = 
+ppc-compiler-options = -tb on
 68k-compiler-options = -model cfmflat 
 debug-compiler-options = -sym on
 final-compiler-options = -sym off
@@ -642,7 +654,7 @@ mitsupportlib-include-paths = ¶
 	-i {mitsupportlib-root-folder}ErrorLib:Headers: ¶
 	-i {mitsupportlib-root-folder}UtilitiesLib:Headers:
 
-include-paths = `catenate {include-folders-list}` ¶
+include-paths = `catenate {include-folders-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/-i (Å)¨1/ Print '-i 'prefix¨1"` ¶
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {krb5-globals-root-folder} ¶
 	{mitsupportlib-include-paths}

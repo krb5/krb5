@@ -26,7 +26,7 @@
 #	output on stdout
 
 # Check number of arguments
-if (scalar @ARGV != 3) {
+if (scalar @ARGV != 2) {
 	print (STDERR "Got " . scalar @ARGV . " arguments, expected 2");
 	&usage;
 	exit;
@@ -35,7 +35,7 @@ if (scalar @ARGV != 3) {
 # Parse arguments
 $action = $ARGV [0];
 $ROOT = $ARGV [1];
-$prefix = $ARGV [2];
+#$prefix = $ARGV [2];
 
 # Read source list
 if ($action ne "all-files") {
@@ -46,9 +46,9 @@ if ($action ne "all-files") {
 } else {
 
 	@sourceList = &make_macfile_maclist (&make_macfile_list ());
-	foreach (@sourceList) {
-	        $_ =~ s/^:/$prefix/;
-	}
+#	foreach (@sourceList) {
+#	        $_ =~ s/^:/$prefix/;
+#	}
 #	@sourceList = map { $prefix . $_;} @sourceList;
 	
 }
