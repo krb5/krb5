@@ -1,3 +1,8 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* ad_print.c (ad_print): Cast arguments to printf() to longs to
+	match format string.
+
 2001-06-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* g_krbrlm.c: Remove unused static variable krb_conf. 

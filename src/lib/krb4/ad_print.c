@@ -34,7 +34,7 @@ ad_print(x)
     printf("\n%s %s %s ", x->pname, x->pinst, x->prealm);
     far_fputs (inet_ntoa(ina), stdout);
     printf(" flags %u cksum 0x%lX\n\ttkt_tm 0x%lX sess_key",
-           x->k_flags, x->checksum, x->time_sec);
+            x->k_flags, (long) x->checksum, (long) x->time_sec);
     printf("[8] =");
 #ifdef NOENCRYPTION
     placebo_cblock_print(x->session);

@@ -15,6 +15,7 @@
 
 #include "k5-int.h"
 #include <krb54proto.h>
+#include "prot.h"
 
 extern char *krb__get_srvtabname();
 
