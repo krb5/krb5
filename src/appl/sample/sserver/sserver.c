@@ -117,7 +117,7 @@ char *argv[];
 	syslog(LOG_ERR, "no memory allocating addr");
 	exit(1);
     }
-    bcopy((char *)&peername.sin_addr, (char *)peeraddr.contents,
+    memcpy((char *)peeraddr.contents, (char *)&peername.sin_addr,
 	  peeraddr.length);
 
     if ((retval = krb5_net_read(0, (char *)&xmitlen, sizeof(xmitlen))) <= 0) {
