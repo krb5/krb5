@@ -47,20 +47,20 @@ krb5_send_tgs(DECLARG(const krb5_flags, kdcoptions),
 	      DECLARG(const krb5_enctype, etype),
 	      DECLARG(const krb5_cksumtype, sumtype),
 	      DECLARG(const krb5_principal, sname),
-	      DECLARG(const krb5_address **, addrs),
-	      DECLARG(const krb5_authdata **,authorization_data),
+	      DECLARG(krb5_address * const *, addrs),
+	      DECLARG(krb5_authdata * const *,authorization_data),
 	      DECLARG(const krb5_data *,second_ticket),
-	      DECLARG(const krb5_creds *,usecred),
+	      DECLARG(krb5_creds *,usecred),
 	      DECLARG(krb5_response *,rep))
 OLDDECLARG(const krb5_flags, kdcoptions)
 OLDDECLARG(const krb5_ticket_times *,timestruct)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_cksumtype, sumtype)
 OLDDECLARG(const krb5_principal, sname)
-OLDDECLARG(const krb5_address **, addrs)
-OLDDECLARG(const krb5_authdata **,authorization_data)
+OLDDECLARG(krb5_address * const *, addrs)
+OLDDECLARG(krb5_authdata * const *,authorization_data)
 OLDDECLARG(const krb5_data *,second_ticket)
-OLDDECLARG(const krb5_creds *,usecred)
+OLDDECLARG(krb5_creds *,usecred)
 OLDDECLARG(krb5_response *,rep)
 {
     krb5_error_code retval;
@@ -82,9 +82,9 @@ OLDDECLARG(krb5_response *,rep)
 	return(retval);
     realreq.etype = etype;
     realreq.server = sname;
-    realreq.addresses = addrs;
+    realreq.addresses = (krb5_address **) addrs;
 
-    encpart.authorization_data = authorization_data;
+    encpart.authorization_data = (krb5_authdata **)authorization_data;
     if (second_ticket) {
 	if (retval = krb5_decode_ticket(second_ticket, &sec_ticket))
 	    return retval;
