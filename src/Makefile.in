@@ -55,10 +55,6 @@ mastermakefiles::
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(DEFS) -I$(srcdir) $(CFLAGS) $<
 
-check:
-	@echo No tests are supplied.
-
-
 TAGS: $(SRCS)
 	etags $(SRCS)
 
