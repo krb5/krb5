@@ -1,3 +1,8 @@
+Fri Jul 26 16:58:31 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (OBJS): Remove trailing backslash on a comment; it
+		was keeping HDRS from getting set.
+
 Fri Jul 26 00:40:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in: Add AC_PROG_INSTALL, since it's needed for a "make

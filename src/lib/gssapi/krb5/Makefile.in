@@ -108,7 +108,7 @@ OBJS = \
 	gssapi_err_krb5.$(OBJEXT)
 
 #	k5mech.$(OBJEXT) \
-#	pname_to_uid.$(OBJEXT) \
+#	pname_to_uid.$(OBJEXT)
 
 HDRS= $(ETHDRS)
 
