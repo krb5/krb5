@@ -1,3 +1,7 @@
+2002-02-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): Disable previous change.
+
 2002-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadm_rpc_xdr.c (xdr_krb5_kvno): Return an error if the key
