@@ -1,3 +1,16 @@
+2003-09-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* ovsec_kadmd.c: Added Apple password server support.
+
+2003-05-27  Tom Yu  <tlyu@mit.edu>
+
+	* schpw.c (process_chpw_request): Log chpw requests.
+
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* schpw.c (process_chpw_request): Return KRB5_KPASSWD_BAD_VERSION
+	if the version number isn't 1.
+
 2003-03-07  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (REQUIRED_PARAMS): Remove

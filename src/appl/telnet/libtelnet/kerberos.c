@@ -612,10 +612,17 @@ kerberos4_status(ap, kname, level)
 	if (level < AUTH_USER)
 		return(level);
 
-	if (UserNameRequested && !kuserok(&adat, UserNameRequested)) {
+	/*
+	 * Always copy in UserNameRequested if the authentication
+	 * is valid, because the higher level routines need it.
+	 */
+	if (UserNameRequested) {
 		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
 		strncpy(kname, UserNameRequested, 255);
 		name[255] = '\0';
+	}
+
+	if (UserNameRequested && !kuserok(&adat, UserNameRequested)) {
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);

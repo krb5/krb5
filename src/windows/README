@@ -1,10 +1,10 @@
 	       Building & Running Kerberos 5 on Windows
 	       ----------------------------------------
 
-Kerberos 5 builds on Windows with MSVC++ 6.0.  You will need the
-November 2001 platform SDK or later; this SDK is required to define
-getaddrinfo.  It may or may not build with other compilers or make
-utilities.
+Kerberos 5 builds on Windows with MSVC++ 6.0, MSVS.NET, and 
+MSVS.NET 2003.  You will need the November 2001 platform SDK or 
+later; this SDK is required to define getaddrinfo.  It may or 
+may not build with other compilers or make utilities.
 
 These build instructions assume that you have the standalone source
 distribution of Kerberos 5 rather than the MIT Kerberos for Windows
@@ -22,19 +22,28 @@ Runtime library, which is not found on most Windows systems unless
 they have development tools.  To build a release version, you need to
 define NODEBUG either in the environment or the nmake command-line.
 
-DNS Support: To support DNS lookups, you will need to define
-KRB5_DNS_LOOKUP, KRB5_DNS_LOOKUP_KDC, or KRB5_DNS_LOOKUP_REALMS.  The
-DNS code will default to trying to use the wshelper library.  If you
-would rather use a resolver library whose include files more closely
-match the Unix resolver library, define KRB5_NO_WSHELPER.  You will
-also need to define DNS_INC to point to the include directory for the
-library and DNS_LIB to library itself.  The default is not to support
-DNS because the build cannot know whether there is a DNS resolver
-library around for it to use.
+To configuring the build environment execute first the compiler
+batch file, vcvars32.bat or vsvars32.bat, followed by the SDK
+batch file, setenv.bat.  For example, 
 
-Building ms2mit requires that you have a reasonably recent Microsoft
-Platform SDK installed.  Anything starting at the Windows 2000 edition
-should be fine.
+  "c:\program files\microsoft visual studio .net 2003\common7\tools\vsvars32.bat"
+  "c:\program files\microsoft sdk\setenv.bat" /2000 /RETAIL
+
+or 
+
+  "c:\program files\microsoft visual studio\vc98\bin\vcvars32.bat"
+  "c:\program files\microsoft sdk\setenv.bat" /2000 /DEBUG
+  
+DNS Support: To support DNS lookups, you will need to define
+KRB5_DNS_LOOKUP, KRB5_DNS_LOOKUP_KDC, or KRB5_DNS_LOOKUP_REALMS.  When 
+any of the KRB5_DNS_LOOKUP definitions are used, the default build will use
+the WSHelper library which is part of the Kerberos for Windows (Kfw) 
+distribution.  If you are building outside of KfW and wish to build Krb5 
+with DNS support, you must provide a resolver library whose include files 
+match the Unix resolver library.  You will need to define KRB5_NO_WSHELPER,
+define DNS_INC to point to the include directory for the library and DNS_LIB 
+to library itself.  The default is not to support DNS because the build 
+cannot know whether there is a DNS resolver library around for it to use.
 
 
 Traditional Build Method:
@@ -54,7 +63,7 @@ On the PC side
         - or -
    pkunzip -d kerbsrc.zip
 4) nmake [NODEBUG=1] [DNS-options]     # Build the sources
-5) nmake install [NODEBUG=1]           # Copy headers, libs, executables
+5) nmake install [NODEBUG=1] [options] # Copy headers, libs, executables
 
 
 All-Windows Build Method:
@@ -64,8 +73,8 @@ First, make sure you have sed, gawk, cat, and cp.
 
 1) cd xxx/src                          # Go to where the source lives
 2) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
-3) nmake [NODEBUG=1] [DNS-options      # Build the sources
-4) nmake install [NODEBUG=1]           # Copy headers, libs, executables
+3) nmake [NODEBUG=1] [DNS-options]     # Build the sources
+4) nmake install [NODEBUG=1] [options] # Copy headers, libs, executables
 
 
 Notes on the install Target:
@@ -132,11 +141,160 @@ In addition to standard FILE: (disk file) and MEMORY: (in-process
 non-shared memory) Windows supports the API: cache type, which is a
 shared memory cache.  This is implemented by krbcc32.dll, which is not
 included the the krb5-only distribution.  Rather, it is part of MIT's
-Kerberos for Win32 suite.
+Kerberos for Win32 suite.  
 
+As of the 1.3.2 release, a new cache type, MSLSA:, has been added for
+use in accessing the Microsoft Kerberos Logon Session credentials 
+cache.  The MSLSA: cache is available when the user logon is performed
+using Kerberos either to an Active Directory Domain or a non-Microsoft
+KDC.
 
-Othes Issues:
-------------
+A user is able to logon to Windows using the Kerberos LSA if the machine
+is part of a Windows 2000 or Windows 2003 Active Directory domain or
+if the machine has been configured to authenticate to a non-Microsoft KDC
+such as MIT.  The instructions for configuring a Windows 2000 XP
+workstation to authenticate to a non-Microsoft KDC are documented
+in TechNet somewhere.  In brief:
+
+  1. Install the Windows 2000 or XP support tools in order to obtain
+     the tools: KSETUP.EXE and KTPASS.EXE.
+  2. Install the Windows 2000 or XP Resource Kit to obtain the tools
+     KERBTRAY.EXE and KLIST.EXE
+  3. Add Realms and associated KDCs with: *KSETUP /AddKdc <realm>
+     [<kdcname>]*.  If you leave off the <kdcname> DNS SRV records will
+     be used.
+  4. Specify the password change service host for the realm with:
+     *KSETUP /AddKpasswd <realm> <Kpwdhost>*
+  5. Assign the realm of the local machine with: *KSETUP /SetRealm
+     <realm>* where realm must be all upper case.   
+  6. Assign the local machine's password with: *KSETUP
+     /SetComputerPassword <Password>
+     *
+  7. Specify the capabilities of the Realm KDC with: *KSETUP
+     /SetRealmFlags <realm> <flag> [<flag> ...]* where flags may be
+     *None, SendAddress, TcpSupported, Delegate, *and *NcSupported*,
+  8. Map principal names to local accounts with: *KSETUP /MapUser
+     <principal> <account>*
+
+On the MIT KDC, you must then create service principals using the "Password" 
+assigned to the machine.  So far the minimum list of principals required appear 
+to be for a machine named "mymachine" in the realm "EXAMPLE.COM" with a 
+domain name of "example.com":
+
+   * host/mymachine@EXAMPLE.COM
+   * host/mymachine.example.com@EXAMPLE.COM
+   * cifs/mymachine@EXAMPLE.COM
+   * cifs/mymachine.example.com@EXAMPLE.COM
+
+There may very well be other serivces for which principals must be created depending 
+on what services are being executed on the machine.
+
+It is very important to note that while you can successfully log into a Windows 
+workstation by authenticating to the KDC without creating a host key; the logon 
+session you receive will not be a Kerberos Logon Session.  There will be no Kerberos 
+principal and no LSA cache to access.
+
+The result of a real KSETUP configuration looks like this:
+
+   [C:\4\4NT]ksetup
+   default realm = KRB5.COLUMBIA.EDU (external)
+   ATHENA.MIT.EDU:
+           kdc = kerberos.mit.edu
+           kdc = kerberos-1.mit.edu
+           kdc = kerberos-2.mit.edu
+           kdc = kerberos-3.mit.edu
+           Realm Flags = 0x0 none
+   CC.COLUMBIA.EDU:
+           kdc = kerberos.cc.columbia.edu
+           Realm Flags = 0x0 none
+   GRAND.CENTRAL.ORG:
+           kdc = penn.central.org
+           kdc = grand-opening.mit.edu
+           Realm Flags = 0x0 none
+   KRB5.COLUMBIA.EDU:
+           kdc = yclept.kermit.columbia.edu
+           Realm Flags = 0x0 none
+   OPENAFS.ORG:
+           kdc = virtue.openafs.org
+           Realm Flags = 0x0 none
+   Mapping jaltman@KRB5.COLUMBIA.EDU to jaltman.
+   Mapping jaltman@CC.COLUMBIA.EDU to jaltman.
+   Mapping jaltman@ATHENA.MIT.EDU to jaltman.
+   Mapping all users (*) to a local account by the same name (*).
+
+The MSLSA: credential cache relies on the ability to extract the entire
+Kerberos ticket including the session key from the Kerberos LSA.  In an
+attempt to increase security Microsoft has begun to implement a feature
+by which they no longer export the session keys for Ticket Getting Tickets.
+This has the side effect of making them useless to the MIT krb5 library
+when attempting to request additional service tickets.
+
+This new feature has been seen in Windows 2003 Server, Windows 2000 Server SP4,
+and Windows XP SP2 Beta.  We assume that it will be implemented in all future
+Microsoft operating systems supporting the Kerberos SSPI.  Microsoft does work
+closely with MIT and has provided a registry key to disable this new feature.
+
+  HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters
+    AllowTGTSessionKey = 0x01 (DWORD)
+
+On Windows XP SP2 Beta 1 the key was specified as 
+
+  HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos
+    AllowTGTSessionKey = 0x01 (DWORD)
+
+However, we anticipate that this will be changed to match the Server platforms 
+in time for SP2 RC1.
+
+It has been noted that the Microsoft Kerberos LSA does not provide enough 
+information within its KERB_EXTERNAL_TICKET structure to properly construct
+the Client Principal simply by examining a single ticket. From the MSDN
+Library:
+
+  ClientName 
+    KERB_EXTERNAL_NAME structure that contains the client name in the ticket. 
+    This name is relative to the current domain. 
+
+  DomainName 
+    UNICODE_STRING that contains the name of the domain that corresponds to 
+    the ServiceName member. This is the domain that issued the ticket. 
+
+  TargetDomainName 
+    UNICODE_STRING that contains the name of the domain in which the ticket is
+    valid. For an interdomain ticket, this is the destination domain. 
+
+  AltTargetDomainName 
+    UNICODE_STRING that contains a synonym for the destination domain. Every 
+    domain has two names: a DNS name and a NetBIOS name. If the name returned 
+    in the ticket is different from the name used to request the ticket (the 
+    Kerberos Key Distribution Center (KDC) may do name mapping), this string 
+    contains the original name. 
+
+Unfortunately, there is no field here which contains the domain of the client.
+In order for the krb5_ccache to properly report the client principal name, the 
+client principal name is constructed by utilizing the ClientName and DomainName
+fields of the Initial TGT associated with the Kerberos LSA credential cache.
+To disable the use of the TGT info and instead simply use the "DomainName" field
+of the current ticket define one of the following registry keys depending on
+whether the change should be system global or just for the current user.
+
+   HKLM\Software\MIT\Kerberos5\
+      PreserveInitialTicketIdentity = 0x0 (DWORD)
+
+   HKCU\Software\MIT\Kerberos5\
+      PreserveInitialTicketIdentity = 0x0 (DWORD)
+
+GSSAPI Sample Client:
+---------------------
+
+The GSS API Sample Client provided in this distribution is compatible with the
+gss-server application built on Unix/Linux systems.  This client is not compatible
+with the Platform SDK/Samples/Security/SSPI/GSS/ samples which Microsoft has been
+shipping as of January 2004.  Revised versions of these samples are available upon 
+request to krbdev@mit.edu.  Microsoft is committed to distribute revised samples
+which are compatible with the MIT distributed tools in a future SDK and via MSDN.
+
+Kerberos 4 Library Support:
+---------------------------
 
 The krb4_32.dll that is built (but not installed) is not supported.
 If you need Kerberos 4, you can use the krbv4w32.dll that MIT

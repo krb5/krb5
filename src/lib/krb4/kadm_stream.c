@@ -129,8 +129,11 @@ vts_short(KRB_UINT32 dat, u_char **st, int loc)
     if (p == NULL)
 	return -1;
 
+    *st = p; /* KRB4_PUT32BE will modify p */
+
+    p += loc; /* place bytes at the end */
     KRB4_PUT16BE(p, dat);
-    *st = p;
+
     return 2;
 }
 
@@ -145,8 +148,11 @@ vts_long(KRB_UINT32 dat, u_char **st, int loc)
     if (p == NULL)
 	return -1;
 
+    *st = p; /* KRB4_PUT32BE will modify p */
+
+    p += loc; /* place bytes at the end */
     KRB4_PUT32BE(p, dat);
-    *st = p;
+
     return 4;
 }
 

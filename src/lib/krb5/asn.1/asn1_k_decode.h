@@ -89,6 +89,8 @@ asn1_error_code asn1_decode_ui_2
 	(asn1buf *buf, krb5_ui_2 *val);
 asn1_error_code asn1_decode_ui_4
 	(asn1buf *buf, krb5_ui_4 *val);
+asn1_error_code asn1_decode_seqnum
+	(asn1buf *buf, krb5_ui_4 *val);
 asn1_error_code asn1_decode_kerberos_time
 	(asn1buf *buf, krb5_timestamp *val);
 asn1_error_code asn1_decode_sam_flags
@@ -185,6 +187,8 @@ asn1_error_code asn1_decode_sequence_of_passwdsequence
 
 asn1_error_code asn1_decode_etype_info
 	(asn1buf *buf, krb5_etype_info_entry ***val);
+asn1_error_code asn1_decode_etype_info2
+	(asn1buf *buf, krb5_etype_info_entry ***val, krb5_boolean v1_3_behavior);
 
 
 #endif

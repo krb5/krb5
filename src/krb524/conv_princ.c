@@ -22,7 +22,6 @@
 
 #include "krb5.h"
 #include <krb.h>
-#include "krb524.h"
 
 int krb524_convert_princs(context, client, server, pname, pinst, prealm, 
 			  sname, sinst, srealm)

@@ -15,7 +15,8 @@ unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 unit-test-body::	
 	$(ENV_SETUP) $(RUNTEST) --tool kpasswd KPASSWD=../kpasswd \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
-		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy
+		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
+		PRIOCNTL_HACK=@PRIOCNTL_HACK@
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS)

@@ -1,3 +1,19 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (krb5int_aes_encrypt, krb5int_aes_decrypt): Copy out value
+	for new IV.
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (enc): Replaced function with a macro.
+	(dec): New macro.
+	(krb5int_aes_encrypt): Use enc and dec.  Delete unused variable
+	OFFSET.
+	(krb5int_aes_decrypt): Renamed from k5_aes_dencrypt, implemented
+	decryption, made non-static.
+	(krb5int_enc_aes128, krb5int_enc_aes256): Use new name for
+	krb5int_aes_decrypt.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes.c (krb5int_aes_init_state): Implement.
