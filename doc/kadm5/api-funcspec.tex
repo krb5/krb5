@@ -885,7 +885,7 @@ life.
 \begin{verbatim}
 ovsec_kadm_ret_t
 ovsec_kadm_chpass_principal_util(krb5_principal princ, char *new_pw, 
-                int override_qual, char *msg_ret);
+                int override_qual, char **pw_ret, char *msg_ret);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -896,7 +896,8 @@ This function is a wrapper around ovsec_kadm_chpass_principal. It can
 read a new password from a user, change a principal's password, and
 return detailed error messages.  msg_ret should point to a char buffer
 in the caller's space of sufficient length for the error messages
-described below. 1024 bytes is recommended.
+described below. 1024 bytes is recommended.  It will also return the
+new password to the caller if pw_ret is non-NULL.
 
 \begin{enumerate}
 \item If new_pw is NULL, this routine will prompt the user for
@@ -911,6 +912,10 @@ password, copy the string ``<com_err message$>$ occurred while trying
 to read new password.''  followed by a blank line and ``Password not
 changed.'' into msg_ret and return the error code returned by
 krb5_read_password.
+
+\item If pw_ret is non-NULL, and the password was prompted, set *pw_ret to
+point to a static buffer containing the password.  If pw_ret is non-NULL
+and the password was supplied, set *pw_ret to the supplied password.
 
 \item Call ovsec_kadm_chpass_principal with princ, new_pw, and override_qual.
 
