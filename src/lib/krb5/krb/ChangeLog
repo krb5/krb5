@@ -1,3 +1,7 @@
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_pwd.c (krb5int_populate_gic_opt): returns void
+
 2003-05-21  Tom Yu  <tlyu@mit.edu>
 
 	* gic_pwd.c (krb5_get_in_tkt_with_password): Set pw0.length
