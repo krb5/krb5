@@ -46,13 +46,10 @@
 #include "k5-int.h"
 
 static krb5_error_code
-krb5_get_credentials_core(context, options, ccache, in_creds, out_creds,
-			  mcreds, fields)
+krb5_get_credentials_core(context, options, in_creds, mcreds, fields)
     krb5_context context;
     const krb5_flags options;
-    krb5_ccache ccache;
     krb5_creds *in_creds;
-    krb5_creds **out_creds;
     krb5_creds *mcreds;
     krb5_flags *fields;
 {
@@ -74,8 +71,22 @@ krb5_get_credentials_core(context, options, ccache, in_creds, out_creds,
     *fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
 	| KRB5_TC_MATCH_AUTHDATA
 	| KRB5_TC_SUPPORTED_KTYPES;
-    if (mcreds->keyblock.enctype)
+    if (mcreds->keyblock.enctype) {
+	krb5_enctype *ktypes;
+	krb5_error_code ret;
+	int i;
+
 	*fields |= KRB5_TC_MATCH_KTYPE;
+	ret = krb5_get_tgs_ktypes (context, mcreds->server, &ktypes);
+	for (i = 0; ktypes[i]; i++)
+	    if (ktypes[i] == mcreds->keyblock.enctype)
+		break;
+	if (ktypes[i] == 0)
+	    ret = KRB5_CC_NOT_KTYPE;
+	free (ktypes);
+	if (ret)
+	    return ret;
+    }
     if (options & KRB5_GC_USER_USER) {
 	/* also match on identical 2nd tkt and tkt encrypted in a
 	   session key */
@@ -104,8 +115,8 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_flags fields;
     int not_ktype;
 
-    retval = krb5_get_credentials_core(context, options, ccache, 
-				       in_creds, out_creds,
+    retval = krb5_get_credentials_core(context, options,
+				       in_creds,
 				       &mcreds, &fields);
 
     if (retval) return retval;

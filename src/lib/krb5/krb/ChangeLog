@@ -1,3 +1,10 @@
+2000-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_creds.c (krb5_get_credentials_core): If the supplied enctype
+	is not supported, return an error; can't satisfy both
+	TC_SUPPORTED_KTYPES and TC_MATCH_KTYPE that way.  Delete unused
+	arguments CCACHE and OUT_CREDS; fix callers.
+
 2000-07-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* vfy_increds.c: include int-proto.h for krb5_libdefault_boolean
