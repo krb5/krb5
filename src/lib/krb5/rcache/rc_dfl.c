@@ -499,6 +499,7 @@ krb5_rcache id;
     char *name = t->name;
     krb5_error_code retval;
     krb5_rcache tmp;
+    krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
 
     (void) krb5_rc_dfl_close(id);
     retval = krb5_rc_dfl_resolve(id, name);
@@ -507,6 +508,7 @@ krb5_rcache id;
     retval = krb5_rc_dfl_recover(id);
     if (retval)
 	return retval;
+    t = (struct dfl_data *)id->data; /* point to recovered cache */
     tmp = (krb5_rcache) malloc(sizeof(*tmp));
     if (!tmp)
 	return ENOMEM;
@@ -516,7 +518,7 @@ krb5_rcache id;
     retval = krb5_rc_resolve(tmp, 0);
     if (retval)
 	return retval;
-    retval = krb5_rc_initialize(tmp, t->lifespan);
+    retval = krb5_rc_initialize(tmp, lifespan);
     if (retval)
 	return retval;
     for (q = t->a;q;q = q->na) {
