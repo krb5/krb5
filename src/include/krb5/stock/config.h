@@ -64,6 +64,10 @@ typedef int krb5_sigtype;
 #define	HAS_STDLIB_H
 #endif
 
+#ifdef HasAnsiStdio
+#define	ANSI_STDIO
+#endif
+
 #ifdef ProvidePrototypes
 #define KRB5_PROVIDE_PROTOTYPES
 #endif
@@ -74,6 +78,18 @@ typedef int krb5_sigtype;
 
 #ifdef UseStdarg
 #define	STDARG_PROTOTYPES
+#endif
+
+#ifdef UseVoid
+#define HAS_VOID_TYPE
+#endif
+
+#ifdef UseConst
+#define HAS_ANSI_CONST
+#endif
+
+#ifdef UseVolatile
+#define HAS_ANSI_VOLATILE
 #endif
 
 #ifdef Bitsize32
