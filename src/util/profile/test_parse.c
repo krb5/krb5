@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "profile.h"
+#include "prof_int.h"
 
 #ifndef _MSDOS
 #include "com_err.h"

@@ -1,3 +1,8 @@
+Sat May  6 17:21:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* test_parse.c: Include prof_int.h - this program relies on
+		internal functions.
+
 Fri May  5 00:02:41 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* prof_init.c (profile_get_values): Return PROF_NO_PROFILE if the
