@@ -1,3 +1,8 @@
+Sat Oct 21 15:03:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in (CONFIG_DIRS): Add config-files to list of
+	directories. 
+
 Wed Oct 11 17:23:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: For all platforms, set krb5_cv_shlibs_versioned_filenames; no for AIX, yes for all others

@@ -160,7 +160,7 @@ else
 kadminv4=kadmin.v4
 krb524=krb524
 fi
-CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old $krb524 slave clients appl tests)
+CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old $krb524 slave clients appl tests config-files)
 DO_SUBDIRS
 dnl dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
 V5_AC_OUTPUT_MAKEFILE
