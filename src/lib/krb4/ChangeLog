@@ -1,3 +1,8 @@
+Thu Feb 20 23:27:39 1997  Richard Basch  <basch@lehman.com>
+
+	* memcache.c: Just use malloc/free, since _nmalloc isn't on
+		all versions of Windows.
+
 Sun Feb 16 21:11:51 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Win16/Win32 cleanup

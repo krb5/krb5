@@ -21,10 +21,6 @@ typedef DWORD OSErr;
 #define noErr 0
 #define cKrbCredsDontExist 12001
 #define cKrbSessDoesntExist 12002
-#define OFFSETOF(x) x
-#define _nmalloc malloc
-#define _nrealloc realloc
-#define _nfree free
 #define memFullErr ENOMEM
 #endif
 
@@ -44,12 +40,6 @@ typedef DWORD OSErr;
 #else
 extern char *malloc (), *realloc ();
 #endif
-
-#define _nmalloc malloc
-#define _nfree free
-#define _nrealloc realloc
-#define NPSTR char *
-#define OFFSETOF(x) x
 
 typedef int OSErr;
 #define noErr 0
@@ -89,7 +79,7 @@ NewHandleSys(s)
 {
 	Handle h;
 
-	h = (char **) _nmalloc(sizeof(char *));
+	h = (char **) malloc(sizeof(char *));
 
 	if (h == NULL) {
 		memerror = memFullErr;
@@ -97,10 +87,10 @@ NewHandleSys(s)
 	}
 
 	if (s > 0) {
-		*h = _nmalloc(s);
+		*h = malloc(s);
 
 		if (*h == NULL) {
-			_nfree((NPSTR) OFFSETOF(h));
+			free(h);
 			memerror = memFullErr;
 			return (NULL);
 		}
@@ -123,9 +113,8 @@ DisposHandle(h)
 	Handle h;
 {
 	if (*h != NULL)
-		_nfree((NPSTR) OFFSETOF(*h));
-
-	_nfree((NPSTR) OFFSETOF(h));
+		free(*h);
+	free(h);
 }
 
 /*
@@ -142,23 +131,21 @@ SetHandleSize(h, s)
 {
 	if (*h != NULL) {
 		if (s > 0) {
-			*h = _nrealloc((NPSTR) OFFSETOF(*h), s);
-
+			*h = realloc(*h, s);
 			if (*h == NULL) {
 				memerror = memFullErr;
 				return;
 			}
 		}
 		else {
-			_nfree((NPSTR) OFFSETOF(*h));
+			free(*h);
 			*h = NULL;
 		}
 	}
 
 	else {
 		if (s > 0) {
-			*h = _nmalloc(s);
-
+			*h = malloc(s);
 			if (*h == NULL) {
 				memerror = memFullErr;
 				return;
