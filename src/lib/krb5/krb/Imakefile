@@ -9,7 +9,6 @@ OBJS=	addr_comp.o	\
 	decode_kdc.o	\
 	decode_tkt.o	\
 	decrypt_tk.o	\
-	def_realm.o	\
 	encode_kdc.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
@@ -44,7 +43,6 @@ SRCS=	addr_comp.c	\
 	decode_kdc.c	\
 	decode_tkt.c	\
 	decrypt_tk.c	\
-	def_realm.c	\
 	encode_kdc.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
