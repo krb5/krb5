@@ -1,3 +1,14 @@
+2002-02-27  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred_basic): Don't check IP addresses; if
+	someone knows the key and wants to give us credentials, that's OK.
+	No reflection attack is possible in most protocols since  krb_cred
+	is almost always client->server.  Address checking created
+	significant problems for NATs.    We also ran into problems
+	getting our code to work with Heimdal  and removing checking was
+	easier than a staged upgrade to fix the problems.
+	(krb5_rd_cred): Don't pass in addresses
+
 2002-02-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* addr_comp.c, addr_order.c, addr_srch.c, bld_pr_ext.c,
