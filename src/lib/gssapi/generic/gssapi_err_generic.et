@@ -40,4 +40,7 @@ error_code G_BAD_HOSTNAME, "Hostname in SERVICE-NAME string could not be canonic
 error_code G_WRONG_MECH, "Mechanism is incorrect"
 error_code G_BAD_TOK_HEADER, "Token header is malformed or corrupt"
 error_code G_BAD_DIRECTION, "Packet was replayed in wrong direction"
+error_code G_TOK_TRUNC, "Token is missing data"
+error_code G_REFLECT, "Token was reflected"
+error_code G_WRONG_TOKID, "Received token ID does not match expected token ID"
 end
