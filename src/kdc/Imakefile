@@ -7,7 +7,14 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
-DEFINES = -DBACKWARD_COMPAT
+
+#ifdef Krb4KDCCompat
+KRB4DEF = -DKRB4
+#else
+KRB4DEF =
+#endif
+DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
+
 INCLUDES = $(KRB4INCLUDES)
 SRCS= \
 	kdc5_err.c \

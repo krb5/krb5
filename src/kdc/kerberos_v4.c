@@ -9,10 +9,12 @@
  * <mit-copyright.h>.
  */
 
+#ifdef KRB4
 #ifndef lint
-static char *rcsid_kerberos_c =
-"$Header$";
+static char rcsid_kerberos_c[] =
+"$Id$";
 #endif  /* lint */
+
 
 #ifdef __STDC__
 #include <stdarg.h>
@@ -1150,3 +1152,4 @@ hang()
     }
 }
 #endif /* BACKWARD_COMPAT */
+#endif /* KRB4 */
