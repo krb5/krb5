@@ -1,3 +1,9 @@
+2000-06-07  Tom Yu  <tlyu@mit.edu>
+
+	* get_creds.c (krb5_get_credentials): Translate KRB5_CC_NOTFOUND
+	returned from krb5_get_cred_from_kdc() if a prior call to
+	krb5_cc_retrieve_cred() returned KRB5_CC_NOT_KTYPE.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* rd_priv.c (krb5_rd_priv_basic): Delete code that was incorrectly
