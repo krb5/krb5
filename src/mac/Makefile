@@ -42,37 +42,44 @@ unset-echo Ä
 ##############################################################################################################
 
 gss-library-output-folder							= {root-folder}:GSSLib:Binaries:
+privatekrb5-library-output-folder					= {root-folder}:Kerberos5Lib:Binaries:
 krb5-library-output-folder							= {root-folder}:Kerberos5Lib:Binaries:
 profile-library-output-folder						= {root-folder}:KerberosProfileLib:Binaries:
 comerr-library-output-folder						= {root-folder}:ComErrLib:Binaries:
 
 gss-library-name									= GSSLib
+privatekrb5-library-name							= PrivateKrb5Lib
 krb5-library-name									= Kerberos5Lib
 profile-library-name								= KrbProfileLib
 comerr-library-name									= ComErrLib
 
 gss-library-export									= {root-folder}mac:GSSLibrary.exp
-krb5-library-export									= {root-folder}mac:K5Library.exp
+privatekrb5-library-export							= {root-folder}mac:PrivateKerberos5Lib.exp
+krb5-library-export									= {root-folder}mac:Kerberos5Lib.exp
 profile-library-export								= {root-folder}util:profile:profile.exp
 comerr-library-export								= {root-folder}util:et:et.exp
 
 gss-library-fragment-name							= "GSSLibrary"
+privatekrb5-library-fragment-name					= "MIT Kerberos¥PrivateKerberos5Lib"
 krb5-library-fragment-name							= "MIT Kerberos¥Kerberos5Lib"
 profile-library-fragment-name						= "MIT Kerberos¥KerberosProfileLib"
 comerr-library-fragment-name						= "MIT Kerberos¥ComErrLib"
 
 gss-library-main									= ¶"¶"
+privatekrb5-library-main							= ¶"¶"
 krb5-library-main									= ¶"¶"
 profile-library-main								= ¶"¶"
 comerr-library-main									= ¶"¶"
 
 gss-library-init									= __initializeGSS
-krb5-library-init									= __initializeK5
+privatekrb5-library-init							= __initializeK5
+krb5-library-init									= ¶"¶"
 profile-library-init								= InitializeProfileLib
 comerr-library-init									= __initialize
 	
 gss-library-term 									= __terminateGSS
-krb5-library-term									= __terminateK5
+privatekrb5-library-term							= __terminateK5
+krb5-library-term									= ¶"¶"
 profile-library-term								= TerminateProfileLib
 comerr-library-term									= __terminate
 
@@ -80,9 +87,13 @@ gss-library-current-version							= 1
 gss-library-definition-version						= 0
 gss-library-implementation-version					= 1
 
-krb5-library-current-version						= 4
-krb5-library-definition-version						= 4
-krb5-library-implementation-version					= 4
+privatekrb5-library-current-version					= 5
+privatekrb5-library-definition-version				= 5
+privatekrb5-library-implementation-version			= 5
+
+krb5-library-current-version						= 5
+krb5-library-definition-version						= 5
+krb5-library-implementation-version					= 5
 
 profile-library-current-version						= 0
 profile-library-definition-version					= 0
@@ -411,16 +422,21 @@ object-suffix-ppc-data					= .ppc.o
 
 gss-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-debug} ¶
+	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug}
 gss-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-final} ¶
+	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform-ppc}{library-kind-final} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-final}
 
 krb5-library-libraries-ppc-debug = ¶
+	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform-ppc}{library-kind-debug}
+krb5-library-libraries-ppc-final = ¶
+	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform-ppc}{library-kind-final}
+
+privatekrb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
 	{ccachelib-ppc-debug} ¶
 	{loginlib-ppc-debug} ¶
@@ -430,7 +446,7 @@ krb5-library-libraries-ppc-debug = ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
-krb5-library-libraries-ppc-final = ¶
+privatekrb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccachelib-ppc-final} ¶
 	{loginlib-ppc-final} ¶
@@ -474,8 +490,16 @@ krb5-library-common-linker-options = ¶
 	-dv {krb5-library-definition-version} ¶
 	-uv {krb5-library-implementation-version}
 
-krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
-krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
+krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options}
+krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options}
+
+privatekrb5-library-common-linker-options = ¶
+	-cv {privatekrb5-library-current-version} ¶
+	-dv {privatekrb5-library-definition-version} ¶
+	-uv {privatekrb5-library-implementation-version}
+
+privatekrb5-library-linker-options-ppc-debug = {common-linker-options-debug} {privatekrb5-library-common-linker-options} -weaklib "DriverServicesLib"
+privatekrb5-library-linker-options-ppc-final = {common-linker-options-final} {privatekrb5-library-common-linker-options} -weaklib "DriverServicesLib"
 
 profile-library-common-linker-options = ¶
 	-cv {profile-library-current-version} ¶
@@ -498,9 +522,9 @@ gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list} | StreamE
 gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:GSS.CFM{object-suffix-ppc-final}
 
-krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+privatekrb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-ppc-debug}
-krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+privatekrb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-ppc-final}
 
 profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
@@ -573,6 +597,13 @@ make-options-common = ¶
 	-d krb5-library-main="{krb5-library-main}" ¶
 	-d krb5-library-init="{krb5-library-init}" ¶
 	-d krb5-library-term="{krb5-library-term}" ¶
+	-d privatekrb5-library-output-folder="{privatekrb5-library-output-folder}" ¶
+	-d privatekrb5-library-name="{privatekrb5-library-name}" ¶
+	-d privatekrb5-library-export="{privatekrb5-library-export}" ¶
+	-d privatekrb5-library-fragment-name={privatekrb5-library-fragment-name} ¶
+	-d privatekrb5-library-main="{privatekrb5-library-main}" ¶
+	-d privatekrb5-library-init="{privatekrb5-library-init}" ¶
+	-d privatekrb5-library-term="{privatekrb5-library-term}" ¶
 	-d profile-library-output-folder="{profile-library-output-folder}" ¶
 	-d profile-library-name="{profile-library-name}" ¶
 	-d profile-library-export="{profile-library-export}" ¶
@@ -598,6 +629,9 @@ make-options-ppc-debug = ¶
 	-d krb5-library-libraries="{krb5-library-libraries-ppc-debug}" ¶
 	-d krb5-library-objects="{krb5-library-objects-ppc-debug}" ¶
 	-d krb5-library-linker-options="{krb5-library-linker-options-ppc-debug}" ¶
+	-d privatekrb5-library-libraries="{privatekrb5-library-libraries-ppc-debug}" ¶
+	-d privatekrb5-library-objects="{privatekrb5-library-objects-ppc-debug}" ¶
+	-d privatekrb5-library-linker-options="{privatekrb5-library-linker-options-ppc-debug}" ¶
 	-d profile-library-libraries="{profile-library-libraries-ppc-debug}" ¶
 	-d profile-library-objects="{profile-library-objects-ppc-debug}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-ppc-debug}" ¶
@@ -620,6 +654,9 @@ make-options-ppc-final = ¶
 	-d krb5-library-libraries="{krb5-library-libraries-ppc-final}" ¶
 	-d krb5-library-objects="{krb5-library-objects-ppc-final}" ¶
 	-d krb5-library-linker-options="{krb5-library-linker-options-ppc-final}" ¶
+	-d privatekrb5-library-libraries="{privatekrb5-library-libraries-ppc-final}" ¶
+	-d privatekrb5-library-objects="{privatekrb5-library-objects-ppc-final}" ¶
+	-d privatekrb5-library-linker-options="{privatekrb5-library-linker-options-ppc-final}" ¶
 	-d profile-library-libraries="{profile-library-libraries-ppc-final}" ¶
 	-d profile-library-objects="{profile-library-objects-ppc-final}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-ppc-final}" ¶
@@ -633,17 +670,23 @@ make-options-ppc-final = ¶
 	-d precompiled-headers="{precompiled-headers-ppc}"
 	
 make-output = "{TempFolder}GSS/Kerberos Makefile script"
-submakefile-target = gss-library
+submakefile-gss-target = gss-library
+submakefile-krb5-target = krb5-library
 
 ppc-debug Ä glue headers documentation {makefile-name} {gss-objects-ppc-debug-list} {krb5-objects-ppc-debug-list} ¶
 	{profile-objects-ppc-debug-list} {comerr-objects-ppc-debug-list} {include-folders-list}
-	Make {make-options-common} {make-options-ppc-debug} {submakefile-target} > {make-output}
+	Make {make-options-common} {make-options-ppc-debug} {submakefile-gss-target} > {make-output}
+	{make-output}
+	Make {make-options-common} {make-options-ppc-debug} {submakefile-krb5-target} > {make-output}
 	{make-output}
 	
 ppc-final Ä glue headers documentation  {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final-list} ¶
 	{profile-objects-ppc-final-list} {comerr-objects-ppc-final-list} {include-folders-list}
-	Make {make-options-common} {make-options-ppc-final} {submakefile-target} > {make-output}
+	Make {make-options-common} {make-options-ppc-final} {submakefile-gss-target} > {make-output}
 	{make-output}
+	Make {make-options-common} {make-options-ppc-final} {submakefile-krb5-target} > {make-output}
+	{make-output}
+	
 	
 ##############################################################################################################
 ###			Variable targets -- these depend on which target we select in the above make invocations
@@ -671,6 +714,17 @@ ppc-final Ä glue headers documentation  {makefile-name} {gss-objects-ppc-final-l
 ###			krb5-library-init								-- name of Krb5 library initialization routine
 ###			krb5-library-term								-- name of Krb5 library termination routine
 ###			krb5-library-linker-options						-- all other Krb5 library linker options
+###		For PrivateKrb5 library
+###			privatekrb5-library-output-folder				-- destination of PrivateKrb5 library output
+###			privatekrb5-library-name						-- name of the PrivateKrb5 library
+###			privatekrb5-library-export						-- name of PrivateKrb5 library export file
+###			privatekrb5-library-libraries					-- list of libraries PrivateKrb5 library links against
+###			privatekrb5-library-objects						-- list of object files PrivateKrb5 library links
+###			privatekrb5-library-fragment-name				-- name of PrivateKrb5 library fragment
+###			privatekrb5-library-main						-- name of PrivateKrb5 library main entry point
+###			privatekrb5-library-init						-- name of PrivateKrb5 library initialization routine
+###			privatekrb5-library-term						-- name of PrivateKrb5 library termination routine
+###			privatekrb5-library-linker-options				-- all other PrivateKrb5 library linker options
 ###		For profile library
 ###			profile-library-output-folder					-- destination of profile library output
 ###			profile-library-name							-- name of the profile library
@@ -714,6 +768,9 @@ gss-library-linker-options =
 krb5-library-libraries =
 krb5-library-objects =
 krb5-library-linker-options =
+privatekrb5-library-libraries =
+privatekrb5-library-objects =
+privatekrb5-library-linker-options =
 precompiled-headers =
 object-suffix = .ignore.me
 object-suffix-data = .ignore.me.too
@@ -757,6 +814,23 @@ krb5-library-build-command = ¶
 	{krb5-library-linker-options} ¶
 	{krb5-library-objects} {krb5-library-libraries}
 
+privatekrb5-library-output-files = ¶
+	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform}{library-kind}
+privatekrb5-library-dependencies = ¶
+	{autogenerated-files} {privatekrb5-library-export} {privatekrb5-library-libraries} {privatekrb5-library-objects}
+privatekrb5-library-build-command = ¶
+	{library-linker} ¶
+	-name "{privatekrb5-library-fragment-name}{library-kind}" ¶
+	-main {privatekrb5-library-main} ¶
+	-init {privatekrb5-library-init} ¶
+	-term {privatekrb5-library-term} ¶
+	-@export {privatekrb5-library-export} ¶
+	-@export {krb5-library-export} ¶
+	-map {privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform}{library-kind}.MAP ¶
+	-o {privatekrb5-library-output-folder}{privatekrb5-library-name}{library-platform}{library-kind} ¶
+	{privatekrb5-library-linker-options} ¶
+	{privatekrb5-library-objects} {privatekrb5-library-libraries}
+
 profile-library-output-files = ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform}{library-kind}
 profile-library-dependencies = ¶
@@ -793,6 +867,7 @@ comerr-library-build-command = ¶
 
 gss-library Ä {gss-library-output-files}
 krb5-library Ä {krb5-library-output-files}
+privatekrb5-library Ä {privatekrb5-library-output-files}
 profile-library Ä {profile-library-output-files}
 comerr-library Ä {comerr-library-output-files}
 
@@ -803,6 +878,10 @@ comerr-library Ä {comerr-library-output-files}
 {krb5-library-output-files} ÄÄ {krb5-library-dependencies} {makefile-name}
 	{create-folder} {krb5-library-output-folder}
 	{krb5-library-build-command}
+
+{privatekrb5-library-output-files} ÄÄ {privatekrb5-library-dependencies} {makefile-name}
+	{create-folder} {privatekrb5-library-output-folder}
+	{privatekrb5-library-build-command}
 
 {profile-library-output-files} ÄÄ {profile-library-dependencies} {makefile-name}
 	{create-folder} {profile-library-output-folder}
