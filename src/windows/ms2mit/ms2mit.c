@@ -40,19 +40,20 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <krb5.h>
 #include <com_err.h>
-
-#define SEC_SUCCESS(Status) ((Status) >= 0)
-
+#include <assert.h>
 
 VOID
-ShowLastError(
+ShowWinError(
     LPSTR szAPI,
     DWORD dwError
     )
 {
 #define MAX_MSG_SIZE 256
 
-    static WCHAR szMsgBuf[MAX_MSG_SIZE];
+    // TODO - Write errors to event log so that scripts that don't
+    // check for errors will still get something in the event log
+
+    WCHAR szMsgBuf[MAX_MSG_SIZE];
     DWORD dwRes;
 
     printf("Error calling function %s: %lu\n", szAPI, dwError);
@@ -74,15 +75,15 @@ ShowLastError(
 }
 
 VOID
-ShowNTError(
+ShowLsaError(
     LPSTR szAPI,
     NTSTATUS Status
     )
 {
     //
-    // Convert the NTSTATUS to Winerror. Then call ShowLastError().
+    // Convert the NTSTATUS to Winerror. Then call ShowWinError().
     //
-    ShowLastError(szAPI, LsaNtStatusToWinError(Status));
+    ShowWinError(szAPI, LsaNtStatusToWinError(Status));
 }
 
 
@@ -285,9 +286,9 @@ PackageConnectLookup(
         pLogonHandle
         );
 
-    if (!SEC_SUCCESS(Status))
+    if (FAILED(Status))
     {
-        ShowNTError("LsaConnectUntrusted", Status);
+        ShowLsaError("LsaConnectUntrusted", Status);
         return FALSE;
     }
 
@@ -301,9 +302,9 @@ PackageConnectLookup(
         pPackageId
         );
 
-    if (!SEC_SUCCESS(Status))
+    if (FAILED(Status))
     {
-        ShowNTError("LsaLookupAuthenticationPackage", Status);
+        ShowLsaError("LsaLookupAuthenticationPackage", Status);
         return FALSE;
     }
 
@@ -312,42 +313,213 @@ PackageConnectLookup(
 }
 
 
-BOOL GetMSTGT(HANDLE LogonHandle,
-              ULONG PackageId,
-              KERB_EXTERNAL_TICKET **ticket)
+DWORD
+ConcatenateUnicodeStrings(
+    UNICODE_STRING *pTarget,
+    UNICODE_STRING Source1,
+    UNICODE_STRING Source2
+    )
 {
-    NTSTATUS Status;
-    ULONG ResponseSize;
-    NTSTATUS SubStatus;
-    KERB_EXTERNAL_TICKET *tmptkt;
+    //
+    // The buffers for Source1 and Source2 cannot overlap pTarget's
+    // buffer.  Source1.Length + Source2.Length must be <= 0xFFFF,
+    // otherwise we overflow...
+    //
+
+    USHORT TotalSize = Source1.Length + Source2.Length;
+    PBYTE buffer = (PBYTE) pTarget->Buffer;
+
+    if (TotalSize > pTarget->MaximumLength)
+        return ERROR_INSUFFICIENT_BUFFER;
+
+    pTarget->Length = TotalSize;
+    memcpy(buffer, Source1.Buffer, Source1.Length);
+    memcpy(buffer + Source1.Length, Source2.Buffer, Source2.Length);
+    return ERROR_SUCCESS;
+}
+
+BOOL
+GetMSTGT(
+    HANDLE LogonHandle,
+    ULONG PackageId,
+    KERB_EXTERNAL_TICKET **ticket
+    )
+{
+    //
+    // INVARIANTS:
+    //
+    //   (FAILED(Status) || FAILED(SubStatus)) ==> error
+    //   bIsLsaError ==> LsaCallAuthenticationPackage() error
+    //
+
+    //
+    // NOTE:
+    //
+    // The updated code leaks memory, but so does the old code.  The
+    // whole program is full of leaks.  Since it's short-lived
+    // process, it is ok.
+    //
+
+    BOOL bIsLsaError = FALSE;
+    NTSTATUS Status = 0;
+    NTSTATUS SubStatus = 0;
+
+    UNICODE_STRING TargetPrefix;
+
     KERB_QUERY_TKT_CACHE_REQUEST CacheRequest;
-    static PKERB_RETRIEVE_TKT_RESPONSE TicketEntry = NULL;
+    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest;
+    PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
+    ULONG RequestSize;
+    ULONG ResponseSize;
+    USHORT TargetSize;
+
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
     CacheRequest.LogonId.LowPart = 0;
     CacheRequest.LogonId.HighPart = 0;
+
+    pTicketResponse = NULL;
 
     Status = LsaCallAuthenticationPackage(
         LogonHandle,
         PackageId,
         &CacheRequest,
         sizeof(CacheRequest),
-        (PVOID *) &TicketEntry,
+        &pTicketResponse,
         &ResponseSize,
         &SubStatus
         );
 
-    if (!SEC_SUCCESS(Status) || !SEC_SUCCESS(SubStatus))
+    if (FAILED(Status) || FAILED(SubStatus))
     {
-        ShowNTError("LsaCallAuthenticationPackage", Status);
-        printf("Substatus: 0x%x\n", SubStatus);
+        bIsLsaError = TRUE;
+        goto cleanup;
+    }
+
+    if (pTicketResponse->Ticket.SessionKey.KeyType == KERB_ETYPE_DES_CBC_CRC)
+    {
+        // all done!
+        goto cleanup;
+    }
+
+    //
+    // Set up the "krbtgt/" target prefix into a UNICODE_STRING so we
+    // can easily concatenate it later.
+    //
+
+    TargetPrefix.Buffer = L"krbtgt/";
+    TargetPrefix.Length = wcslen(TargetPrefix.Buffer) * sizeof(WCHAR);
+    TargetPrefix.MaximumLength = TargetPrefix.Length;
+
+    //
+    // We will need to concatenate the "krbtgt/" prefix and the previous
+    // response's target domain into our request's target name.
+    //
+    // Therefore, first compute the necessary buffer size for that.
+    //
+    // Note that we might theoretically have integer overflow.
+    //
+
+    TargetSize = TargetPrefix.Length +
+        pTicketResponse->Ticket.TargetDomainName.Length;
+
+    //
+    // The ticket request buffer needs to be a single buffer.  That buffer
+    // needs to include the buffer for the target name.
+    //
+
+    RequestSize = sizeof(*pTicketRequest) + TargetSize;
+
+    //
+    // Allocate the request buffer and make sure it's zero-filled.
+    //
+
+    pTicketRequest = (PKERB_RETRIEVE_TKT_REQUEST)
+        LocalAlloc(LMEM_ZEROINIT, RequestSize);
+    if (!pTicketRequest)
+    {
+        Status = GetLastError();
+        goto cleanup;
+    }
+
+    //
+    // Concatenate the target prefix with the previous reponse's
+    // target domain.
+    //
+
+    pTicketRequest->TargetName.Length = 0;
+    pTicketRequest->TargetName.MaximumLength = TargetSize;
+    pTicketRequest->TargetName.Buffer = (PWSTR) (pTicketRequest + 1);
+    Status = ConcatenateUnicodeStrings(&(pTicketRequest->TargetName),
+                                       TargetPrefix,
+                                       pTicketResponse->Ticket.TargetDomainName);
+    assert(SUCCEEDED(Status));
+
+    //
+    // Intialize the requst of the request.
+    //
+
+    pTicketRequest->MessageType = KerbRetrieveEncodedTicketMessage;
+    pTicketRequest->LogonId.LowPart = 0;
+    pTicketRequest->LogonId.HighPart = 0;
+    // Note: pTicketRequest->TargetName set up above
+    pTicketRequest->CacheOptions = KERB_RETRIEVE_TICKET_DONT_USE_CACHE;
+    pTicketRequest->TicketFlags = 0L;
+    pTicketRequest->EncryptionType = ENCTYPE_DES_CBC_CRC;
+
+    //
+    // Free the previous response buffer so we can get the new response.
+    //
+
+    LsaFreeReturnBuffer(pTicketResponse);
+    pTicketResponse = NULL;
+
+    Status = LsaCallAuthenticationPackage(
+        LogonHandle,
+        PackageId,
+        pTicketRequest,
+        RequestSize,
+        &pTicketResponse,
+        &ResponseSize,
+        &SubStatus
+        );
+
+    if (FAILED(Status) || FAILED(SubStatus))
+    {
+        bIsLsaError = TRUE;
+        goto cleanup;
+    }
+
+ cleanup:
+    if (FAILED(Status) || FAILED(SubStatus))
+    {
+        if (bIsLsaError)
+        {
+            // XXX - Will be fixed later
+            if (FAILED(Status))
+                ShowLsaError("LsaCallAuthenticationPackage", Status);
+            if (FAILED(SubStatus))
+                ShowLsaError("LsaCallAuthenticationPackage", SubStatus);
+        }
+        else
+        {
+            ShowWinError("GetMSTGT", Status);
+        }
+
+        if (pTicketResponse)
+            LsaFreeReturnBuffer(pTicketResponse);
+
         return(FALSE);
     }
-    tmptkt=&(TicketEntry->Ticket);
-    *ticket=&(TicketEntry->Ticket);
+
+    *ticket = &(pTicketResponse->Ticket);
     return(TRUE);
 }
 
-main (int argc, char **argv)
+void
+main(
+    int argc,
+    char *argv[]
+    )
 {
     krb5_context kcontext;
     krb5_error_code code;
