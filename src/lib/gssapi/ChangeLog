@@ -1,3 +1,6 @@
+Wed Sep 13 11:11:38 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: Put back in all:: all-$(WHAT) rule--PC needs it.
 
 Thu Jun 15 18:02:16 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit "all" rule at head of file, it causes
