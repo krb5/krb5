@@ -23,12 +23,12 @@
 #include "ss_internal.h"
 
 #if (defined(_STDARG_H_) || defined(_STDARG_H))
-#define STDARG
+#define STDARG_PROTOTYPES
 #endif
 
 #ifndef __STDC__
 /* we didn't get it in com_err.h if it wasn't STDC. */
-#ifndef STDARG
+#ifndef STDARG_PROTOTYPES
 /* and we don't need it, either, if we're using stdarg.h... */
 #include <varargs.h>
 #endif
@@ -74,7 +74,7 @@ char * ss_name(sci_idx)
     }
 }
 
-#ifdef STDARG
+#ifdef STDARG_PROTOTYPES
 void ss_error (int sci_idx, long code, const char * fmt, ...)
 #else
 void ss_error (va_alist)
@@ -83,7 +83,7 @@ void ss_error (va_alist)
 {
     register char const *whoami;
     va_list pvar;
-#ifndef STDARG
+#ifndef STDARG_PROTOTYPES
     int sci_idx;
     long code;
     char * fmt;
