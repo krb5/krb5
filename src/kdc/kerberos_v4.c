@@ -286,7 +286,7 @@ hang()
         char buf[256];
         sprintf(buf,
 	   "Kerberos will wait %d seconds before dying so as not to loop init",
-	   pause_int);
+		(int) pause_int);
         klog(L_KRB_PERR, buf);
         sleep(pause_int);
         klog(L_KRB_PERR, "Do svedania....\n");
@@ -351,8 +351,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
     unsigned long *date;
     char* text;
     struct tm *tp;
-
-    int i, max_kvno, ok_key;
+    krb5_key_data *pkey;
 
     *more = 0;
     if ( maxn > 1) {
@@ -371,12 +370,12 @@ kerb_get_principal(name, inst, principal, maxn, more)
      *     in v5, null instance means the null-component doesn't exist.
      */
 
-    if (retval = krb5_425_conv_principal(kdc_context, name, inst, 
-					 local_realm, &search)) 
+    if ((retval = krb5_425_conv_principal(kdc_context, name, inst, 
+					  local_realm, &search)))
 	return(0);
 
-    if (retval = krb5_db_get_principal(kdc_context, search, &entries, 
-				       &nprinc, &more5)) {
+    if ((retval = krb5_db_get_principal(kdc_context, search, &entries, 
+					&nprinc, &more5))) {
         krb5_free_principal(kdc_context, search);
         return(0);
     }
@@ -388,32 +387,19 @@ kerb_get_principal(name, inst, principal, maxn, more)
         return(nprinc);
     } 
 
-    /* First find the max kvno */
-    for (max_kvno = i = 0; i < entries.n_key_data; i++) {
-	if (max_kvno < entries.key_data[i].key_data_kvno) {
-	    max_kvno = entries.key_data[i].key_data_kvno;
-	    ok_key = i;
-	}
+    if (krb5_dbe_find_keytype(kdc_context,
+			       &entries,
+			       KEYTYPE_DES,
+			       KRB5_KDB_SALTTYPE_V4,
+			       -1,
+			       &pkey)) {
+	lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s isn't V4 compatible",
+		  name, inst);
+	krb5_db_free_principal(kdc_context, &entries, nprinc);
+	return(0);
     }
-	
-    /* Find a KEYTYPE_DES key with a KRB5_KDB_SALTTYPE_V4 salt */
-    for (i = ok_key; i < entries.n_key_data; i++) {
-	if (max_kvno == entries.key_data[i].key_data_kvno) {
-	    if ((entries.key_data[0].key_data_type[0] == KEYTYPE_DES) &&
-	      (entries.key_data[0].key_data_type[1] == KRB5_KDB_SALTTYPE_V4)) {
-		goto found_one;
-	    }
-	}
-    }
-	
 
-    lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s isn't V4 compatible",
-	      name, inst);
-    krb5_db_free_principal(kdc_context, &entries, nprinc);
-    return(0);
-
-found_one:;
-    if (! compat_decrypt_key( &entries.key_data[i], k)) {
+    if (! compat_decrypt_key( pkey, k)) {
  	memcpy( &principal->key_low,           k,     LONGLEN);
        	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
     }
@@ -425,7 +411,7 @@ found_one:;
     principal->exp_date = (unsigned long) entries.expiration;
 /*    principal->mod_date = (unsigned long) entries.mod_date; */
     principal->kdc_key_ver = entries.mkvno;
-    principal->key_version = max_kvno;
+    principal->key_version = pkey->key_data_kvno;
     principal->attributes = 0;
 
     /* set up v4 format of each date's text: */
