@@ -13,6 +13,8 @@ NormalLibraryObjectRule()
 OBJS=	addr_comp.o	\
 	addr_order.o	\
 	addr_srch.o	\
+	bld_pr_ext.o	\
+	bld_princ.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
 	copy_athctr.o	\
@@ -31,6 +33,7 @@ OBJS=	addr_comp.o	\
 	faddr_ordr.o	\
 	gc_frm_kdc.o	\
 	gc_via_tgt.o	\
+	gc_2tgt.o	\
 	gen_seqnum.o	\
 	gen_subkey.o	\
 	get_creds.o	\
@@ -66,6 +69,8 @@ OBJS=	addr_comp.o	\
 SRCS=	addr_comp.c	\
 	addr_order.c	\
 	addr_srch.c	\
+	bld_pr_ext.c	\
+	bld_princ.c	\
 	copy_addrs.c	\
 	copy_auth.c	\
 	copy_athctr.c	\
@@ -84,6 +89,7 @@ SRCS=	addr_comp.c	\
 	faddr_ordr.c	\
 	gc_frm_kdc.c	\
 	gc_via_tgt.c	\
+	gc_2tgt.c	\
 	gen_seqnum.c	\
 	gen_subkey.c	\
 	get_creds.c	\
