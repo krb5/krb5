@@ -373,7 +373,6 @@ krb5_free_enc_sam_response_enc_2_contents
 krb5_free_enc_sam_response_enc_contents
 krb5_free_enc_tkt_part
 krb5_free_error
-krb5_free_ets
 krb5_free_etype_info
 krb5_free_host_realm
 krb5_free_kdc_rep
@@ -455,7 +454,6 @@ krb5_get_tgs_ktypes
 krb5_get_time_offsets
 krb5_get_validated_creds
 krb5_init_context
-krb5_init_ets
 krb5_init_keyblock
 krb5_init_secure_context
 krb5_internalize_opaque
@@ -465,7 +463,6 @@ krb5_kt_add_entry
 krb5_kt_close
 krb5_kt_default
 krb5_kt_default_name
-krb5_kt_default_vno
 krb5_kt_dfl_ops
 krb5_kt_end_seq_get
 krb5_kt_free_entry
@@ -684,7 +681,6 @@ krb5int_make_srv_query_realm
 krb5int_mk_chpw_req
 krb5int_mk_setpw_req
 krb5int_populate_gic_opt
-krb5int_profile_shared_data
 krb5int_rd_chpw_rep
 krb5int_rd_setpw_rep
 krb5int_sendto
