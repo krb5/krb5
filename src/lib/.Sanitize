@@ -40,7 +40,6 @@ gssapi
 gssapi.def
 kadm
 kdb
-kdb4
 krb4
 krb5
 krb5.saber.source
@@ -51,6 +50,7 @@ win_glue.c
 winsock.def
 
 Things-to-lose:
+kdb4
 
 Do-last:
 
