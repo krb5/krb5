@@ -59,7 +59,7 @@ krb5_old_decrypt(const struct krb5_enc_provider *enc,
     if (arg_output->length < input->length) {
 	output.length = input->length;
 
-	if ((output.data = (krb5_octet *) malloc(output.length)) == NULL) {
+	if ((output.data = (char *) malloc(output.length)) == NULL) {
 	    free(cksumdata);
 	    return(ENOMEM);
 	}
@@ -89,7 +89,7 @@ krb5_old_decrypt(const struct krb5_enc_provider *enc,
     /* XXX this is gross, but I don't have much choice */
     if ((key->enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
 	crcivec.length = key->length;
-	crcivec.data = key->contents;
+	crcivec.data = (char *) key->contents;
 	ivec = &crcivec;
     }
 

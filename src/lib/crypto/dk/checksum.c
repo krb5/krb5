@@ -73,7 +73,7 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
 
     /* derive the key */
  
-    datain.data = constantdata;
+    datain.data = (char *) constantdata;
     datain.length = K5CLENGTH;
 
     datain.data[0] = (usage>>24)&0xff;

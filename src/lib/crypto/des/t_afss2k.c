@@ -116,10 +116,13 @@ do_it (struct test_case *tcase)
 			abort ();
 	}
 
+	/* Run another pass to make sure the characters after the
+	   password in the buffer aren't influencing the output.  The
+	   password is *not* required to be null-terminated.  */
 	memset (longpass, '!', sizeof (longpass));
 	longpass[sizeof (longpass)-1] = '\0';
 	memcpy (longpass, "My Password", strlen ("My Password"));
-	passwd.data = longpass;
+	passwd.data = (char *) longpass;
 	for (i = 0; i < 12; i++) {
 		passwd.length = i;
 		err = mit_afs_string_to_key (&key, &passwd, &salt);

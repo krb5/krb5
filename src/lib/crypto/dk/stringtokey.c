@@ -78,7 +78,7 @@ krb5_dk_string_to_key(enc, string, salt, key)
     /* now derive the key from this one */
 
     indata.length = kerberos_len;
-    indata.data = (unsigned char *) kerberos;
+    indata.data = (char *) kerberos;
 
     if ((ret = krb5_derive_key(enc, &foldkey, key, &indata)))
 	memset(key->contents, 0, key->length);

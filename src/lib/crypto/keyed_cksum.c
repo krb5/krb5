@@ -46,5 +46,5 @@ is_keyed_cksum(ctype)
 
     /* ick, but it's better than coredumping, which is what the
        old code would have done */
-    return(-1);
+    return -1U;
 }

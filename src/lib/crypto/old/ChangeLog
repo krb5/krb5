@@ -1,3 +1,8 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* old_decrypt.c (krb5_old_decrypt): Fix casts.
+	* old_encrypt.c (krb5_old_encrypt): Likewise.
+
 2001-03-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (STLIBOBJS): Undo last change.

@@ -62,7 +62,7 @@ krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
 	return(ENOMEM);
 
     data.length = cksum->length;
-    data.data = cksum->contents;
+    data.data = (char *) cksum->contents;
 
     if (krb5_cksumtypes_list[i].keyhash) {
 	/* check if key is compatible */

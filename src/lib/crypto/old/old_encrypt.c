@@ -89,7 +89,7 @@ krb5_old_encrypt(const struct krb5_enc_provider *enc,
     /* XXX this is gross, but I don't have much choice */
     if ((key->enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
 	crcivec.length = key->length;
-	crcivec.data = key->contents;
+	crcivec.data = (char *) key->contents;
 	ivec = &crcivec;
 	real_ivec = 0;
     } else

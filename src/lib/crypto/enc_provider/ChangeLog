@@ -1,3 +1,9 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (k5_des_docrypt): Add casts when mixing pointer types with
+	different target signedness.
+	* des3.c (k5_des3_docrypt): Likewise.
+
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c, des3.c, enc_provider.h: Use krb5int_ prefix for internal

@@ -71,7 +71,10 @@ k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
     mit_des_cbc_encrypt((krb5_pointer) input->data,
 			(krb5_pointer) output->data, input->length,
-			schedule, ivec?ivec->data:(char *)mit_des_zeroblock,
+			schedule,
+			(ivec
+			 ? (unsigned char *) ivec->data
+			 : (unsigned char *) mit_des_zeroblock),
 			encrypt);
 
     memset(schedule, 0, sizeof(schedule));

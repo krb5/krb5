@@ -79,7 +79,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 
     /* derive the keys */
 
-    d1.data = constantdata;
+    d1.data = (char *) constantdata;
     d1.length = K5CLENGTH;
 
     d1.data[0] = (usage>>24)&0xff;
@@ -103,20 +103,20 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d1.data = input->data;
 
     d2.length = enclen;
-    d2.data = plaindata;
+    d2.data = (char *) plaindata;
 
     if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
     if (ivec != NULL && ivec->length == blocksize)
-	cn = d1.data + d1.length - blocksize;
+	cn = (unsigned char *) d1.data + d1.length - blocksize;
     else
 	cn = NULL;
 
     /* verify the hash */
 
     d1.length = hashsize;
-    d1.data = cksum;
+    d1.data = (char *) cksum;
 
     if ((ret = krb5_hmac(hash, &ki, 1, &d2, &d1)) != 0)
 	goto cleanup;

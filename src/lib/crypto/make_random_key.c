@@ -59,7 +59,7 @@ krb5_c_make_random_key(context, enctype, random_key)
 	return(ENOMEM);
     }
 
-    random_data.data = bytes;
+    random_data.data = (char *) bytes;
     random_data.length = keybytes;
 
     if ((ret = krb5_c_random_make_octets(context, &random_data)))

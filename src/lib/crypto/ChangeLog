@@ -1,3 +1,12 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* make_checksum.c (krb5_c_make_checksum): Add cast assigning to
+	krb5_data data field.
+	* make_random_key.c (krb5_c_make_random_key): Likewise.
+
+	* keyed_cksum.c (is_keyed_cksum): Use -1U to keep compiler quiet,
+	since return type is not signed.
+
 2001-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_nfold.c: Include assert.h.

@@ -1,5 +1,7 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_afss2k.c (do_it): Add cast to keep compiler quiet.
+
 	* f_cksum.c (mit_des_cbc_cksum): Use const for input, key
 	schedule, and initial vector.  Get rid of casts when possible.
 	* f_cbc.c (mit_des_cbc_encrypt): Likewise.

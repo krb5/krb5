@@ -1,3 +1,10 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum.c (krb5_dk_make_checksum): Add casts when mixing
+	pointers with different target signedness.
+	* dk_decrypt.c (krb5_dk_decrypt): Likewise.
+	* stringtokey.c (krb5_dk_string_to_key): Likewise.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* checksum.c, derive.c, dk.h, dk_decrypt.c, dk_encrypt.c,
