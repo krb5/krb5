@@ -45,7 +45,10 @@
 #ifndef	__P
 #define __P(x)	()
 #endif
+
+#if (!HAVE_GETENV || !HAVE_SETENV || !HAVE_UNSETENV)
 static char *__findenv __P((const char *, int *)); 
+#endif
 
 /*
  * setenv --
