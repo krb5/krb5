@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c (get_params): Change optind to optindex to prevent
+	shadowing. 
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c (main): Cast arguments to print_status to be consitant

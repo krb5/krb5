@@ -908,15 +908,15 @@ static void sweep_up(context, cc)
 get_params is to be called for the -a option or -e option to
            collect all params passed in for the shell or for
            cmd.  An aray is returned containing all params.
-           optind is incremented accordingly and the first
+           optindex is incremented accordingly and the first
            element in the returned array is reserved for the
            name of the command to be executed or the name of the
            shell.
 *****************************************************************/
 
 krb5_error_code
-get_params(optind, pargc, pargv, params)
-    int *optind;
+get_params(optindex, pargc, pargv, params)
+    int *optindex;
     int pargc;
     char **pargv;
     char ***params;
@@ -924,15 +924,15 @@ get_params(optind, pargc, pargv, params)
 
     int i,j;
     char ** ret_params;
-    int size = pargc - *optind + 2;
+    int size = pargc - *optindex + 2;
     
     if ((ret_params = (char **) calloc(size, sizeof (char *)))== NULL ){
 	return errno;
     }
     
-    for (i = *optind, j=1; i < pargc; i++,j++){
+    for (i = *optindex, j=1; i < pargc; i++,j++){
 	ret_params[j] = pargv[i];
-	*optind = *optind + 1;
+	*optindex = *optindex + 1;
     }
     
     ret_params[size-1] = NULL;
