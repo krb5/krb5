@@ -1,3 +1,12 @@
+2003-05-20  Ezra Peisach  <epeisach@bu.edu>
+
+	* asn1_k_encode.c (asn1_encode_krb_safe_body): Use
+	asn1_encode_unsigned_integer for sequence number.
+
+	* asn1_k_decode.c (asn1_decode_krb_safe_body): Use
+	asn1_decode_seqnum to decode sequence number.
+	
+
 2003-05-18  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_decode.c (asn1_decode_maybe_unsigned): New function; decode

@@ -605,7 +605,7 @@ asn1_error_code asn1_decode_krb_safe_body(asn1buf *buf, krb5_safe *val)
     get_lenfield(val->user_data.length,val->user_data.data,0,asn1_decode_charstring);
     opt_field(val->timestamp,1,asn1_decode_kerberos_time,0);
     opt_field(val->usec,2,asn1_decode_int32,0);
-    opt_field(val->seq_number,3,asn1_decode_int32,0);
+    opt_field(val->seq_number,3,asn1_decode_seqnum,0);
     alloc_field(val->s_address,krb5_address);
     get_field(*(val->s_address),4,asn1_decode_host_address);
     if(tagnum == 5){
