@@ -20,11 +20,15 @@ static char rcsid_in_tkt_pwd_c[] =
 #include <krb5/krb5_err.h>
 #include <errno.h>
 #include <krb5/ext-proto.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
 
 struct pwd_keyproc_arg {
     krb5_principal who;
     krb5_data password;
 };
+
+extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 
 /* 
  * key-producing procedure for use by krb5_get_in_tkt_with_password.
@@ -40,14 +44,25 @@ OLDDECLARG(krb5_pointer, keyseed)
 {
     krb5_error_code retval;
     struct pwd_keyproc_arg *arg;
+    char pwdbuf[BUFSIZ];
+    int pwsize = sizeof(pwdbuf);
 
     if (!valid_keytype(type))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
+
+    arg = (struct pwd_keyproc_arg *)keyseed;
+    if (!arg->password.length) {
+	if (retval = krb5_read_password(krb5_default_pwd_prompt1,
+					krb5_default_pwd_prompt2,
+					pwdbuf, &pwsize))
+	    return retval;
+	arg->password.length = pwsize;
+	arg->password.data = pwdbuf;
+    }
     *key = (krb5_keyblock *)malloc(sizeof(**key));
     if (!*key)
 	return ENOMEM;
     
-    arg = (struct pwd_keyproc_arg *)keyseed;
     if (retval = (*krb5_keytype_array[type]->system->
 		  string_to_key)(type,
 				 *key,
@@ -100,7 +115,10 @@ OLDDECLARG(krb5_creds *, creds)
 
 
     keyseed.password.data = (char *)password;
-    keyseed.password.length = strlen(password);
+    if (password)
+	keyseed.password.length = strlen(password);
+    else
+	keyseed.password.length = 0;
     keyseed.who = creds->client;
 
     retval = krb5_get_in_tkt(options, addrs, etype, keytype, pwd_keyproc,
