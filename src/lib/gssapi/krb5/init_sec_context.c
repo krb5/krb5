@@ -98,7 +98,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 
     /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
-    mk_req_flags |= AP_OPTS_USE_SUBKEY;
+    mk_req_flags = AP_OPTS_USE_SUBKEY;
 
     if (do_mutual)
 	mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED;
@@ -447,28 +447,6 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	    return(GSS_S_FAILURE);
 
 	 }
-      }
-
-      /* store away the sequence number */
-      ctx->seq_recv = ap_rep_data->seq_number;
-
-      /* free the ap_rep_data */
-      krb5_free_ap_rep_enc_part(context, ap_rep_data);
-
-      /* set established */
-      ctx->established = 1;
-
-      /* set returns */
-
-      if (time_rec) {
-	 if (code = krb5_timeofday(context, &now)) {
-	    (void)krb5_gss_delete_sec_context(context, minor_status, 
-					      (gss_ctx_id_t) ctx,
-					 NULL);
-	    *minor_status = code;
-	    return(GSS_S_FAILURE);
-	 }
-	 *time_rec = ctx->endtime - now;
       }
 
       if (ret_flags)
