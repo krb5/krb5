@@ -52,6 +52,12 @@ static char rcsid_adm_network[] =
 
 extern int errno;
 
+#ifdef POSIX_SIGTYPE
+#define SIGNAL_RETURN return
+#else
+#define SIGNAL_RETURN return(0)
+#endif
+
 krb5_error_code
 closedown_network(prog)
 const char *prog;
@@ -67,11 +73,7 @@ krb5_sigtype
 doexit()
 {
     exit_now = 1;
-#if defined (POSIX) || defined(SYSV) || defined(sun) && !defined(sysvimp) || defined(ultrix) || (defined(mips) && defined(SYSTYPE_BSD43)) || defined(convex)
-    return;
-#else /* !POSIX */
-    return(0);
-#endif /* POSIX */
+    SIGNAL_RETURN;
 }
 
 /*
@@ -95,17 +97,11 @@ do_child()
 #endif
     int pid, i, j;
 
+    signal(SIGCHLD, do_child);
+    
     pid = wait(&status);
-    if (pid < 0) {
-#ifdef SYSV
-	signal(SIGCHLD, do_child);
-#endif
-#if defined (POSIX) || defined(SYSV) || defined(sun) && !defined(sysvimp) || defined(ultrix) || (defined(mips) && defined(SYSTYPE_BSD43)) || defined(convex)
-	return;
-#else /* !POSIX */
-	return(0);
-#endif /* POSIX */
-    }
+    if (pid < 0)
+	SIGNAL_RETURN;
  
     for (i = 0; i < pidarraysize; i++)
 	if (pidarray[i] == pid) {
@@ -121,29 +117,14 @@ do_child()
 				WEXITSTATUS(status));
 		}
 
-#ifdef SYSV
-		 signal(SIGCHLD, do_child);
-#endif
-
-#if defined (POSIX) || defined(SYSV) || defined(sun) && !defined(sysvimp) || defined(ultrix) || (defined(mips) && defined(SYSTYPE_BSD43)) || defined(convex)
-		return;
-#else /* !POSIX */
-		return(0);
-#endif /* POSIX */
+		SIGNAL_RETURN;
 	}
-#ifdef SYSV
-        signal(SIGCHLD, do_child);
-#endif
 
     com_err("adm_network", 0, 
 	"child %d not in list: termsig %d, retcode %d", pid,
 	WTERMSIG(status), WEXITSTATUS(status));
 
-#if defined (POSIX) || defined(SYSV) || defined(sun) && !defined(sysvimp) || defined(ultrix) || (defined(mips) && defined(SYSTYPE_BSD43)) || defined(convex)
-    return;
-#else /* !POSIX */
-    return(0);
-#endif /* POSIX */
+    SIGNAL_RETURN;
 }
 
 krb5_error_code
