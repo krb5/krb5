@@ -96,14 +96,14 @@ acl_get_line(fp, lnp)
 	      (!feof(fp)) &&
 	      ((acl_buf[i] = fgetc(fp)) != '\n'));
 	     i++);
-	acl_buf[i] = '\0';
 
 	/* Check if we exceeded our buffer size */
 	if ((i == BUFSIZ) && (!feof(fp)) && (acl_buf[i] != '\n')) {
 	    fprintf(stderr, acl_line2long_msg, acl_acl_file, *lnp);
 	    while (fgetc(fp) != '\n');
 	}
-	if (acl_buf[0] == EOF)	/* ptooey */
+		acl_buf[i] = '\0';
+	if (acl_buf[0] == (char) EOF)	/* ptooey */
 	    acl_buf[0] = '\0';
 	else
 	    (*lnp)++;

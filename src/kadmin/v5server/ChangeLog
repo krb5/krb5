@@ -1,3 +1,15 @@
+Wed Jun 14 17:19:09 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* srv_acl.c (acl_get_line): Check to make sure we haven't exceeded
+        the buffer size before overwriting the newline we may have just
+        read.  If the newline is clobbered, there is no way of
+        distinguishing between a line that uses the full buffer from a
+        line longer than the full buffer.  Also, cast EOF to a char, so
+        that it works on unsigned char systems.  This means you can't
+        distinguish reading 0xff at the beginning of a line from EOF, but
+        the only other option is to introduce an intermediate variable.
+
+
 Tue Jun 13 11:36:52 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* srv_net.c: Include sys/select.h if it is found.
