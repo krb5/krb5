@@ -182,6 +182,7 @@ int trval2(fp, enc, len, lev, rlen)
 	int l, eid, elen, xlen, r, rlen2;
 	int rlen_ext = 0;
 	
+
 	if (len < 2) {
 		fprintf(fp, "missing id and length octets (%d)\n", len);
 		return(NOTOK);
@@ -312,7 +313,7 @@ int lev;
 int *rlen;
 {
     int n;
-    int r;
+    int r = 0;
     int rlen2;
     int rlent;
 

@@ -30,8 +30,10 @@ void encoder_print_results(code, typestring, description)
 			       code->length, rlen);
 			exit(1);
 		}
-		if (r != 0)
+		if (r != 0) {
+			printf("Error: Return from trval2 is %d.\n", r);
 			exit(1);
+		}
 	} else {
 		retval = asn1_krb5_data_unparse(code,&(code_string));
 		if(retval) {

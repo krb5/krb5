@@ -1,3 +1,12 @@
+Sat Aug 26 12:40:57 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5_encode_test.c (encoder_print_results): If trval2 returns
+		non zero, indicate with error before exiting.
+
+	* trval.c (do_cons): Initialize return value to zero in case of
+		zero length data. (instead of random stack value).
+
+
 Fri Aug 25 21:50:37 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_encode_test.c (main): Add tests for
