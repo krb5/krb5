@@ -1,4 +1,10 @@
 
+Mon Aug 7 17:40:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* encrypt_key.c - Handle keysalt specification with null data length.
+	* decrypt_key.c - Handle salttypes with zero salt length.  Also, copy
+		out stored salt.
+
+
 Mon Aug 7 14:15:59 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* decrypt_key.c - Deserialize key length into a 16 bit integer, then
 		jam it into the keyblock.
