@@ -463,7 +463,7 @@ Section "KfW SDK" secSDK
   File /r "${KFW_LIB_DIR}\*"
 
   SetOutPath "$INSTDIR\install"
-  File "${KFW_INSTALL_DIR}\*"
+  File /r "${KFW_INSTALL_DIR}\*"
 
   Call KFWCommon.Install
   
