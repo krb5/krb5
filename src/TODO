@@ -1,10 +1,10 @@
-
 Major projects:
 
 1.  Run a V5 KDC on the master KDC.
 	* audit code in v4 kadmind server
-	* convert syslog -> log (to real file)
-	* save versus deletion of rcache file
+DONE	* convert syslog -> log (to real file)
+	* save versus deletion of rcache file (HIGH PRIORITY)
+	* Use dbm as the default database. (HIGH PRIORITY)
 
 2.  API changes
 DONE	* context changes (mostly done)
@@ -12,6 +12,8 @@ DONE	* narrow types (done)
 DONE	* get_in_tkt for salt support, multi encryption
 DONE	* keytab lookup (for multi-encryption)
 DONE	* oracle forwarding support
+	* Remove krb5_enctype argument from string_to_key().  (HIGH)
+	* Functionalize krb5.h (HIGH)
 
 3.  Multi-encryption support
 DONE	* kdb5_edit support (show princal, set attributes)
@@ -19,7 +21,7 @@ DONE	* test DES-MD5
 DONE	* make DES-MD5 default, fall back to DES-CRC
 
 4.  Better Kerberos Database
-	* Design encoders/decoders
+DONE	* Design encoders/decoders
 
 5.  Configuration file
 DONE	* write configuration file library
@@ -33,35 +35,102 @@ DONE	* kdc support automatic fallback (done)
 	* don't need NEED_SYS_FCNTL.H; just always include <fnctl.h>
 	* utmp configure cleanup
 	* telnet portability
-	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
+DONE	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
 		stuff that's in every single configure.in file.
 	* klist and kdestroy drags in the entire libcrypto library
 		unnecessarily; this is because init_ctx references
 		krb5_csarray (via valid_etype) and
 		krb5_max_crypto_system, which drags in cryptoconf.c
-
+	* Make kinit not delete the credcache before tickets are
+		successfully obtained.
+	* Telnet/rlogin bug --- must do
+		gethostbyname()/gethostbyaddr() to get a real DNS name
+		so that we don't get bitten by athena.dialup.mit.edu
+		and resolvers which shuffle DNS records.  (HIGH)
+	* krb5 bugs
 
 7.  Future development
-	* support for realm name changes
-	* telnet rsh support
+	* support for realm name changes (POST 1.0)
+	* telnet rsh support (POST 1.0)
+	* Make routines for updating the master key in a database.
+		Thinking about this I think its easier to have the
+		routines update the master key and then update every
+		principal in the database.  Doing this will also allow
+		us to remove the mkvno field saving 2 bytes per entry.
+	* Fix preauthentication code
+	* Save the time offset between the kerberos server and the
+		current host in the credential cache. (Just need to
+		actually get and save the time.)
+	* Make a keysalt to salt function that takes keysalt info and
+		principal and returns a salt.
+		Routines: krb5_keysalt_to_salt(krb5_context,
+		krb5_keysalt, krb5_principal)
+	* Implement krb5_cc_remove_cred()  (LOW)
+	* Implement tl_data for server keys supported by the server
+		for client-server communications.  (LOW)
+	* Add profile entries for (HIGH)
+		default enctype (and salttype?) list for kinit and AS requests.
+		default enctype list for TGS requests in krb library
+		default enctype/salttype list for change password requests.
+		default enctype for change random key requests.
 
 8.  New applications
-	* POP
-	* FTP
+	* POP (POST 1.0)
+	* discuss (POST 1.0)
+	* FTP (POST 1.0?)
+	* Zephyr (POST 1.0)
+	* Encrypted telnet (POST 1.0?)
 
 9.  Kadmin
 DONE	* Password changing protocol.
+	* kadmin --- Have ank, ark, cpw, crk use new protocol.  (HIGH)
+	* kadmind  (HIGH)
+		Finish work on modify entry command.
+		Make sure that db opens log before becoming a daemon.
 
 10.  Install Cleanup
-	* krb5.h still #include's the com_err error include files.  krb5.h
+DONE	* krb5.h still #include's the com_err error include files.  krb5.h
 		should be constructed from krb5.hin, and those include
 		files should be inlined, so that we only need to
 		install the single krb5.h file.
-	* We shouldn't be installing into /krb5.  Should use the Gnu
+DONE	* We shouldn't be installing into /krb5.  Should use the Gnu
 		coding standard prefix and exec_prefic setup, with the
 		kerberos database living in /prefix/lib/kdb5.  (People
 		can symlink that off to another partition if they feel
 		the need.)
+
+11.  Testing
+	* A test for the new kdb locking code (HIGH)
+	* test cross realm authentication (HIGH)
+	* Test that db key_data crunching of enctypes actually works.  (HIGH)
+		Routines in kdb_cpw.c: add_key_pwd(), add_key_rnd()
+		Routines in kdb_xdr.c: krb5_dbe_find_enctype()
+	* Test that krb5_dbm_db_put_principal() doesn't save a krb5_db_entry 
+		with any keys with kvno = 0.  (HIGH)
+
+12.  Integration
+	* Merge in new GSSAPI code from OV.  (HIGH)
+
+13.  Post 1.0 items
+	* Incremental kprop
+	* Change krb5_enctype and krb5_checksumtype to be unsigned ints.
+	* Secure Network Key preauthentication.
+	* If configuring with --enable-athena, Athena-environment
+		setup for login.
+
+----------------------------------------------------------------------------
+I believe these are done but a double check would be nice.
+----------------------------------------------------------------------------
+
+Make sure kdb code doesn't save salt type KRB5_KDB_SALTTYPE_NORMAL (0) 
+into the db. 
+	Routines: krb5_dbekd_decrypt_key_data(), krb5_dbekd_encrypt_key_data()
+
+Check that dump/restore actually works
+	Each entry needs to have a version, length, and each integer entry
+	needs to be saved with a hexidecimal encoding. The principals should
+	use parse/unparse routines. (Paul did the work but nobody has checked it)
+
 
 -----------------------------------------------------
 
@@ -74,7 +143,6 @@ needed before beta4-patch2:
 
 not-quite-critical bug fixes:
 
-940808		Support for DES-MD5
 940802		double-check telnet problems, e.g. solaris pty grabbing
 940802		rethink using compile check for fopen() binary mode
 
@@ -83,7 +151,6 @@ future development:
 940808		check file vs stdio ccache code; replace file code with stdio
 940808		rewrite rcache code
 940808		fold in krb4 library
-940808		memory ccache
 940808		support for realm name changes
 940808		configuration file for krb5 clients to replace compile-time
 			constants
