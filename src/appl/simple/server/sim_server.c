@@ -64,10 +64,10 @@ char *argv[];
     krb5_error_code retval;
     krb5_data packet, message;
     unsigned char pktbuf[BUFSIZ];
-    krb5_address foreign_addr, *portforeign_addr;
     krb5_principal sprinc;
     krb5_context context;
     krb5_auth_context *auth_context = NULL;
+    krb5_address addr;
     krb5_ticket *ticket = NULL;
 
     if (argc != 2) {
@@ -124,10 +124,9 @@ char *argv[];
     /* GET KRB_AP_REQ MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(c_sock);
-    i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &i);
-    if (i < 0) {
+    i = sizeof(struct sockaddr_in);
+    if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
+		 (struct sockaddr *)&c_sock, &i)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }
@@ -150,30 +149,28 @@ char *argv[];
     free(cp);
 
     /* Set foreign_addr for rd_safe() and rd_priv() */
-    foreign_addr.contents = (krb5_octet *)&c_sock.sin_addr;
-    foreign_addr.length = sizeof(c_sock.sin_addr);
-    foreign_addr.addrtype = c_sock.sin_family;
-
-    if (retval = krb5_gen_portaddr(context, &foreign_addr,
-				   (krb5_pointer) &c_sock.sin_port,
-				   &portforeign_addr)) {
-	com_err(PROGNAME, retval, "while generating port address");
-	exit(1);
+    addr.addrtype = ADDRTYPE_INET;
+    addr.length = sizeof(c_sock.sin_addr);
+    addr.contents = (krb5_octet *)&c_sock.sin_addr;
+    if (retval = krb5_auth_con_setaddrs(context, auth_context, NULL, &addr)) {
+	com_err(PROGNAME, retval, "while setting foreign addr");
+        exit(1);
     }
 
-    if (retval = krb5_auth_con_setaddrs(context, auth_context, NULL,
-					portforeign_addr)) {
-	com_err(PROGNAME, retval, "while setting foreign addr");
+    addr.addrtype = ADDRTYPE_IPPORT;
+    addr.length = sizeof(c_sock.sin_port);
+    addr.contents = (krb5_octet *)&c_sock.sin_port;
+    if (retval = krb5_auth_con_setports(context, auth_context, NULL, &addr)) {
+	com_err(PROGNAME, retval, "while setting foreign port");
         exit(1);
     }
 
     /* GET KRB_MK_SAFE MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(c_sock);
-    i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &i);
-    if (i < 0) {
+    i = sizeof(struct sockaddr_in);
+    if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
+		 (struct sockaddr *)&c_sock, &i)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }
@@ -196,10 +193,9 @@ char *argv[];
     /* NOW GET ENCRYPTED MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(c_sock);
-    i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &i);
-    if (i < 0) {
+    i = sizeof(struct sockaddr_in);
+    if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
+		      (struct sockaddr *)&c_sock, &i)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }

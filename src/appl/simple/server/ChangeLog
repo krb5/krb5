@@ -1,3 +1,9 @@
+
+Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
+
+        * sim_server.c (main()): Changes to auth_context to better
+                support full addresses, for mk_safe() and friends.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * sim_server.c: Use new calling convention for krb5_rd_req(),
