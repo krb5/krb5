@@ -57,7 +57,7 @@ krb5_error_code do_connection(), lookup_service_key(), kdc_get_server_key();
 void usage(context)
      krb5_context context;
 {
-     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]]\n", whoami);
+     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork]\n", whoami);
      cleanup_and_exit(1, context);
 }
 
@@ -86,7 +86,7 @@ int main(argc, argv)
      struct servent *serv;
      struct sockaddr_in saddr;
      struct timeval timeout;
-     int ret, s;
+     int ret, s, nofork;
      fd_set rfds;
      krb5_context context;
      krb5_error_code retval;
@@ -101,7 +101,7 @@ int main(argc, argv)
      whoami = ((whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0]);
 
      argv++; argc--;
-     use_master = use_keytab = 0;
+     use_master = use_keytab = nofork = 0;
      config_params.mask = 0;
      
      while (argc) {
@@ -109,6 +109,8 @@ int main(argc, argv)
 	       use_keytab = 1;
 	  else if (strncmp(*argv, "-m", 2) == 0)
 	       use_master = 1;
+	  else if (strcmp(*argv, "-nofork") == 0)
+	       nofork = 1;
 	  else if (strcmp(*argv, "-r") == 0) {
 	       argv++; argc--;
 	       if (argc == 0 || !use_master)
@@ -152,6 +154,10 @@ int main(argc, argv)
      if ((ret = bind(s, (struct sockaddr *) &saddr,
 		     sizeof(struct sockaddr_in))) < 0) {
 	  com_err(whoami, errno, "binding main socket");
+	  cleanup_and_exit(1, context);
+     }
+     if (!nofork && daemon(0, 0)) {
+	  com_err(whoami, errno, "while detaching from tty");
 	  cleanup_and_exit(1, context);
      }
      

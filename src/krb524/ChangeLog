@@ -1,3 +1,8 @@
+Fri Jul 24 19:38:58 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Fork into the background by default, also
+	add a -nofork command line option.
+
 Sat Jul 18 22:10:29 1998  Geoffrey King  <gjking@mit.edu>
 
 	* krb524d.c (main): Remove the variable use_other_realm.
