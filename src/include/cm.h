@@ -27,7 +27,7 @@
 struct select_state {
     int max, nfds;
     fd_set rfds, wfds, xfds;
-    struct timeval end_time;
+    struct timeval end_time;	/* magic: tv_sec==0 => never time out */
 };
 
 /* Select state flags.  */
