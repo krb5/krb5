@@ -2,7 +2,7 @@ AC_INIT(configure.in)
 WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
-CONFIG_DIRS(unifdef et ss)
+CONFIG_DIRS(et ss)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 AC_OUTPUT(Makefile,[EXTRA_RULES])
