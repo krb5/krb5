@@ -1,9 +1,0 @@
-Fri Jul 12 14:43:56 1996  Marc Horowitz  <marc@mit.edu>
-
-	* configure.in (USE_GSSAPI_LIBRARY): shared libraries require that
- 	all symbols be resolved, even if they are not used by the
- 	executeable.  Thus, create needs to link against gssapi
-
-Wed Jul 10 01:24:29 1996  Marc Horowitz  <marc@mit.edu>
-
-	* Makefile.in, configure.in: added autoconf support
