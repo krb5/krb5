@@ -3,6 +3,7 @@ AC_INIT(db/db.c)
 AC_CONFIG_HEADER(include/config.h include/db-config.h)
 CONFIG_RULES
 
+AC_PROG_INSTALL
 AC_PATH_PROG(FALSE,false,:)
 AC_PATH_PROG(SH,sh,$FALSE)
 AC_PATH_PROG(SH5,sh5,$FALSE)
