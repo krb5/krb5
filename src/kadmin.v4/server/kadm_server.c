@@ -95,8 +95,8 @@ static void krb_log(format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)
     (void) time(&now);
     tm = localtime(&now);
 
-    fprintf(logfile,"%2d-%s-%02d %02d:%02d:%02d ",tm->tm_mday,
-            month_sname(tm->tm_mon + 1),tm->tm_year,
+    fprintf(logfile,"%2d-%s-%d %02d:%02d:%02d ",tm->tm_mday,
+            month_sname(tm->tm_mon + 1),1900+tm->tm_year,
             tm->tm_hour, tm->tm_min, tm->tm_sec);
     fprintf(logfile,format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0);
     fprintf(logfile,"\n");
