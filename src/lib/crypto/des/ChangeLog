@@ -1,3 +1,8 @@
+2001-04-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* f_tables.h: Do not define const to nothing on platforms that
+	fail to define __STDC__ - let autoconf do this if necessary.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_afss2k.c (do_it): Add cast to keep compiler quiet.

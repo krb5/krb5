@@ -14,12 +14,6 @@
 #ifndef	__DES_TABLES_H__
 #define	__DES_TABLES_H__	/* nothing */
 
-#ifndef const
-#if !defined(__STDC__) && !defined(_MSDOS) && !defined(_WIN32)
-#define const /* nothing */
-#endif
-#endif
-
 /*
  * These may be declared const if you wish.  Be sure to change the
  * declarations in des_tables.c as well.
