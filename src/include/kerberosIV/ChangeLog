@@ -1,3 +1,8 @@
+2000-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* krb.h: Add prototypes for krb_life_to_time() and
+	krb_time_to_life(), as well as the KRB_NEVERDATE constant.
+
 2000-08-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: Add prototypes for tf_init(), tf_get_pname(),

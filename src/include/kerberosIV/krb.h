@@ -99,6 +99,8 @@ typedef unsigned short gid_t;
 #define DEFAULT_TKT_LIFE	255	/* default lifetime for krb_mk_req */
 #endif
 
+#define KRB_NEVERDATE ((KRB4_32)-1)
+
 /* Definition of text structure used to pass text around */
 #define		MAX_KTXT_LEN	1250
 
@@ -540,6 +542,13 @@ KRB5_DLLIMP int KRB5_CALLCONV kname_parse
 /* kuserok.c */
 KRB5_DLLIMP int KRB5_CALLCONV kuserok
 	PROTOTYPE((AUTH_DAT FAR *kdata, char FAR *luser));
+
+/* lifetime.c */
+KRB5_DLLIMP KRB4_32 KRB5_CALLCONV krb_life_to_time
+	PROTOTYPE((KRB4_32 start, int life));
+KRB5_DLLIMP int KRB5_CALLCONV krb_time_to_life
+	PROTOTYPE((KRB4_32 start, KRB4_32 end));
+
 /* mk_auth.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_check_auth
 	PROTOTYPE((KTEXT, unsigned KRB4_32 cksum, MSG_DAT FAR *,
