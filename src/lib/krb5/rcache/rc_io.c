@@ -235,14 +235,14 @@ int num;
  if (write(d->fd,(char *) buf,num) == -1)
    switch(errno)
     {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; break;
-     case EFBIG: return KRB5_RC_IO_SPACE; break;
+     case EBADF: return KRB5_RC_IO_UNKNOWN; 
+     case EFBIG: return KRB5_RC_IO_SPACE; 
 #ifdef EDQUOT
-     case EDQUOT: return KRB5_RC_IO_SPACE; break;
+     case EDQUOT: return KRB5_RC_IO_SPACE; 
 #endif
-     case ENOSPC: return KRB5_RC_IO_SPACE; break;
-     case EIO: return KRB5_RC_IO_IO; break;
-     default: return KRB5_RC_IO_UNKNOWN; break;
+     case ENOSPC: return KRB5_RC_IO_SPACE; 
+     case EIO: return KRB5_RC_IO_IO; 
+     default: return KRB5_RC_IO_UNKNOWN; 
     }
  return 0;
 }
@@ -253,9 +253,9 @@ krb5_error_code krb5_rc_io_sync (d)
     if (fsync(d->fd) == -1) {
       switch(errno)
       {
-      case EBADF: return KRB5_RC_IO_UNKNOWN; break;
-      case EIO: return KRB5_RC_IO_IO; break;
-      default: return KRB5_RC_IO_UNKNOWN; break;
+      case EBADF: return KRB5_RC_IO_UNKNOWN; 
+      case EIO: return KRB5_RC_IO_IO; 
+      default: return KRB5_RC_IO_UNKNOWN; 
       }
     }
     return 0;
@@ -270,9 +270,9 @@ int num;
  if ((count = read(d->fd,(char *) buf,num)) == -1)
    switch(errno)
     {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; break;
-     case EIO: return KRB5_RC_IO_IO; break;
-     default: return KRB5_RC_IO_UNKNOWN; break;
+     case EBADF: return KRB5_RC_IO_UNKNOWN; 
+     case EIO: return KRB5_RC_IO_IO; 
+     default: return KRB5_RC_IO_UNKNOWN; 
     }
  if (count == 0)
      return KRB5_RC_IO_EOF;
@@ -295,12 +295,12 @@ krb5_rc_iostuff *d;
  if (unlink(d->fn) == -1)
    switch(errno)
     {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; break;
-     case EIO: return KRB5_RC_IO_IO; break;
-     case EPERM: return KRB5_RC_IO_PERM; break;
-     case EBUSY: return KRB5_RC_IO_PERM; break;
-     case EROFS: return KRB5_RC_IO_PERM; break;
-     default: return KRB5_RC_IO_UNKNOWN; break;
+     case EBADF: return KRB5_RC_IO_UNKNOWN; 
+     case EIO: return KRB5_RC_IO_IO; 
+     case EPERM: return KRB5_RC_IO_PERM; 
+     case EBUSY: return KRB5_RC_IO_PERM; 
+     case EROFS: return KRB5_RC_IO_PERM; 
+     default: return KRB5_RC_IO_UNKNOWN; 
     }
  return 0;
 }
