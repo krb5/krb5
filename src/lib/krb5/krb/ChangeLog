@@ -1,3 +1,8 @@
+2001-11-07  Sam Hartman  <hartmans@mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Add arcfour-hmac-md5; it really
+	is probably at least as good as DES 
+
 2001-10-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gic_pwd.c (krb5_get_as_key_password),

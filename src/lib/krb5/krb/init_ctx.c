@@ -65,7 +65,7 @@
    them.  This'll be fixed, but for better compatibility, let's prefer
    des-crc for now.  */
 #define DEFAULT_ETYPE_LIST	\
-	"des3-cbc-sha1 " \
+	"des3-cbc-sha1  arcfour-hmac-md5" \
 	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
 
 #if (defined(_WIN32))
