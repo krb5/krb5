@@ -1,3 +1,8 @@
+Wed May 19 13:23:16 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Improve rule to create gssapi include dir under
+		windows.
+
 Wed May 19 11:39:05 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Fix windows cleanup to ignore any errors while

@@ -172,7 +172,13 @@ EXPORTED_HEADERS= gssapi_krb5.h
 
 GSSAPI_KRB5_HDR=$(EHDRDIR)$(S)gssapi_krb5.h
 
-all-windows:: win-include $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
+all-windows:: $(EHDRDIR) $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
+
+##DOS##$(EHDRDIR):
+##DOS##	mkdir $(EHDRDIR)
+
+$(GSSAPI_KRB5_HDR): gssapi_krb5.h
+	$(CP) gssapi_krb5.h $@
 
 all-unix:: $(SRCS) $(HDRS) includes
 all-unix:: all-libobjs
@@ -188,12 +194,6 @@ includes:: gssapi_krb5.h
 
 clean-unix::
 	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h
-
-win-include::
-	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-
-$(GSSAPI_KRB5_HDR): gssapi_krb5.h
-	$(CP) gssapi_krb5.h $@
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)

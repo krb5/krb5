@@ -110,10 +110,10 @@ all-unix:: all-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: win-include $(HDRS)
+all-windows:: $(EHDRDIR) $(HDRS)
 
-win-include::
-	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
+##DOS##$(EHDRDIR):
+##DOS##	mkdir $(EHDRDIR)
 
 unixmac: $(SRCS) $(ETHDRS)
 

@@ -1,3 +1,8 @@
+Wed May 19 13:21:55 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Improve rule to create gssapi include dir under
+		windows.
+
 Wed May 19 11:40:52 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add windows build rules for putting header files in
