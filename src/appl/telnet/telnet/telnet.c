@@ -740,7 +740,7 @@ is_unique(name, as, ae)
 	return (1);
 }
 
-#ifdef	TERMCAP
+#ifndef	HAS_SETUPTERM
 char termbuf[1024];
 
 	/*ARGSUSED*/
