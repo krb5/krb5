@@ -8,6 +8,9 @@
 static	char sccsid[] = "@(#)getpass.c 1.1 90/04/28 SMI"; /* from UCB 5.4 3/7/86 */
 #endif /* not lint */
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <stdio.h>
 #include <signal.h>
 
@@ -20,6 +23,8 @@ static	struct termios ttyo, ttyb;
 #include <sgtty.h>
 static	struct sgttyb ttyo, ttyb;
 #endif
+
+#include "ftp_var.h"
 
 static	FILE *fi;
 
@@ -41,7 +46,7 @@ mygetpass(prompt)
 char *prompt;
 {
 	register char *p;
-	register c;
+	register int c;
 	static char pbuf[50+1];
 	sigtype (*sig)();
 

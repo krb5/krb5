@@ -41,6 +41,9 @@ static char sccsid[] = "@(#)ruserpass.c	5.3 (Berkeley) 3/1/91";
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <ctype.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -51,6 +54,7 @@ static char sccsid[] = "@(#)ruserpass.c	5.3 (Berkeley) 3/1/91";
 #endif
 
 char	*renvlook(), *getenv();
+static int token PROTOTYPE((void));
 static	FILE *cfile;
 
 #define	DEFAULT	1
@@ -67,18 +71,18 @@ static struct toktab {
 	char *tokstr;
 	int tval;
 } toktab[]= {
-	"default",	DEFAULT,
-	"login",	LOGIN,
-	"password",	PASSWD,
-	"passwd",	PASSWD,
-	"account",	ACCOUNT,
-	"machine",	MACH,
-	"macdef",	MACDEF,
-	0,		0
+	{ "default",	DEFAULT },
+	{ "login",	LOGIN },
+	{ "password",	PASSWD },
+	{ "passwd",	PASSWD },
+	{ "account",	ACCOUNT },
+	{ "machine",	MACH },
+	{ "macdef",	MACDEF },
+	{ NULL,		0 }
 };
 
 
-static
+static int
 token()
 {
 	char *cp;
@@ -117,11 +121,12 @@ token()
 	return (ID);
 }
 
+int 
 ruserpass(host, aname, apass, aacct)
 	char *host, **aname, **apass, **aacct;
 {
 	char *hdir, buf[FTP_BUFSIZ], *tmp;
-	char myname[MAXHOSTNAMELEN], *mydomain;
+	char myname[MAXHOSTNAMELEN + 1], *mydomain;
 	int t, i, c, usedefault = 0;
 	struct stat stb;
 
@@ -161,12 +166,14 @@ next:
 				goto match;
 			if ((tmp = strchr(hostname, '.')) != NULL &&
 			    strcasecmp(tmp, mydomain) == 0 &&
-			    strncasecmp(hostname, tokval, tmp-hostname) == 0 &&
+			    strncasecmp(hostname, tokval,
+					(unsigned) (tmp-hostname)) == 0 &&
 			    tokval[tmp - hostname] == '\0')
 				goto match;
 			if ((tmp = strchr(host, '.')) != NULL &&
 			    strcasecmp(tmp, mydomain) == 0 &&
-			    strncasecmp(host, tokval, tmp - host) == 0 &&
+			    strncasecmp(host, tokval,
+					(unsigned ) (tmp - host)) == 0 &&
 			    tokval[tmp - host] == '\0')
 				goto match;
 			continue;
@@ -175,7 +182,7 @@ next:
 		while ((t = token()) && t != MACH && t != DEFAULT) switch(t) {
 
 		case LOGIN:
-			if (token())
+			if (token()) {
 				if (*aname == 0) { 
 					*aname = malloc((unsigned) strlen(tokval) + 1);
 					(void) strcpy(*aname, tokval);
@@ -183,6 +190,7 @@ next:
 					if (strcmp(*aname, tokval))
 						goto next;
 				}
+			}
 			break;
 		case PASSWD:
 			if (strcmp(*aname, "anonymous") &&
@@ -214,7 +222,9 @@ next:
 				(void) fclose(cfile);
 				return(0);
 			}
-			while ((c=getc(cfile)) != EOF && c == ' ' || c == '\t');
+			while ((c = getc(cfile)) != EOF)
+				if (c != ' ' && c != '\t')
+					break;
 			if (c == EOF || c == '\n') {
 				printf("Missing macdef name argument.\n");
 				goto bad;

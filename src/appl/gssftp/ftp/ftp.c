@@ -64,6 +64,9 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -138,6 +141,18 @@ unsigned char *ucbuf;
  
 #define DEFINITIONS
 #include "ftp_var.h"
+#include "secure.h"
+
+#ifdef GSSAPI
+void user_gss_error PROTOTYPE((OM_uint32, OM_uint32, char *));
+#endif
+
+static void proxtrans PROTOTYPE((char *, char *, char *));
+static int initconn PROTOTYPE((void));
+static void ptransfer PROTOTYPE((char *, long, struct timeval *, struct timeval *));
+static void abort_remote PROTOTYPE((FILE *));
+static void tvsub PROTOTYPE((struct timeval *, struct timeval *, struct timeval *));
+static char *gunique PROTOTYPE((char *));
 
 #define sig_t my_sig_t
 #define sigtype krb5_sigtype
@@ -153,6 +168,7 @@ struct	sockaddr_in myctladdr;
 uid_t	getuid();
 sig_t	lostpeer();
 off_t	restart_point = 0;
+jmp_buf ptabort;
 
 #define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
@@ -164,7 +180,7 @@ extern int connected;
 #define herror()	printf("unknown host\n")
 
 FILE	*cin, *cout;
-FILE	*dataconn();
+FILE	*dataconn PROTOTYPE((char *));
 
 char *
 hookup(host, port)
@@ -280,19 +296,19 @@ bad:
 	return ((char *)0);
 }
 
-login(host)
+int login(host)
 	char *host;
 {
 	char tmp[80];
-	char *user, *pass, *acct, *getenv(), *getlogin(), *mygetpass();
+	char *l_user, *pass, *l_acct, *getenv(), *getlogin();
 	int n, aflag = 0;
 
-	user = pass = acct = 0;
-	if (ruserpass(host, &user, &pass, &acct) < 0) {
+	l_user = pass = l_acct = 0;
+	if (ruserpass(host, &l_user, &pass, &l_acct) < 0) {
 		code = -1;
 		return(0);
 	}
-	while (user == NULL) {
+	while (l_user == NULL) {
 		char *myname;
 
 		myname = getenv("LOGNAME");
@@ -313,11 +329,11 @@ login(host)
 		(void) fgets(tmp, sizeof(tmp) - 1, stdin);
 		tmp[strlen(tmp) - 1] = '\0';
 		if (*tmp == '\0')
-			user = myname;
+			l_user = myname;
 		else
-			user = tmp;
+			l_user = tmp;
 	}
-	n = command("USER %s", user);
+	n = command("USER %s", l_user);
 	if (n == COMPLETE) {
 	        /* determine if we need to send a dummy password */
 		int oldverbose = verbose;
@@ -348,15 +364,15 @@ login(host)
 	}
 	if (n == CONTINUE) {
 		aflag++;
-		acct = mygetpass("Account:");
-		n = command("ACCT %s", acct);
+		l_acct = mygetpass("Account:");
+		n = command("ACCT %s", l_acct);
 	}
 	if (n != COMPLETE) {
 		fprintf(stderr, "Login failed.\n");
 		return (0);
 	}
-	if (!aflag && acct != NULL)
-		(void) command("ACCT %s", acct);
+	if (!aflag && l_acct != NULL)
+		(void) command("ACCT %s", l_acct);
 	if (proxy)
 		return(1);
 	for (n = 0; n < macnum; ++n) {
@@ -370,12 +386,10 @@ login(host)
 	return (1);
 }
 
-sigtype
+static sigtype
 cmdabort(sig)
 	int sig;
 {
-	extern jmp_buf ptabort;
-
 	printf("\n");
 	(void) fflush(stdout);
 	abrtflag++;
@@ -383,10 +397,10 @@ cmdabort(sig)
 		longjmp(ptabort,1);
 }
 
-secure_command(cmd)
+static int secure_command(cmd)
 	char *cmd;
 {
-	char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
+	unsigned char in[FTP_BUFSIZ], out[FTP_BUFSIZ];
 	int length;
 
 	if (auth_type && clevel != PROT_C) {
@@ -395,9 +409,9 @@ secure_command(cmd)
 		    if ((length = clevel == PROT_P ?
 			krb_mk_priv((unsigned char *)cmd, (unsigned char *)out,
 				strlen(cmd), schedule,
-				&cred.session, &myctladdr, &hisctladdr)
+				cred.session, &myctladdr, &hisctladdr)
 		      : krb_mk_safe((unsigned char *)cmd, (unsigned char *)out,
-				strlen(cmd), &cred.session,
+				strlen(cmd), cred.session,
 				&myctladdr, &hisctladdr)) == -1) {
 			fprintf(stderr, "krb_mk_%s failed for KERBEROS_V4\n",
 					clevel == PROT_P ? "priv" : "safe");
@@ -432,14 +446,15 @@ secure_command(cmd)
 				  fprintf(stderr, "sealed (%s) %d bytes\n",
 					  clevel==PROT_P?"ENC":"MIC", 
 					  out_buf.length);
-				memcpy(out, out_buf.value, 
-				       length=out_buf.length);
+				length=out_buf.length;
+				memcpy(out, out_buf.value, out_buf.length);
 				gss_release_buffer(&min_stat, &out_buf);
 			}
 		}
 #endif /* GSSAPI */
 		/* Other auth types go here ... */
-		if (kerror = radix_encode(out, in, &length, 0)) {
+		kerror = radix_encode(out, in, &length, 0);
+		if (kerror) {
 			fprintf(stderr,"Couldn't base 64 encode command (%s)\n",
 					radix_error(kerror));
 			return(0);
@@ -455,10 +470,10 @@ secure_command(cmd)
 }
 
 #ifdef STDARG
-command(char *fmt, ...)
+int command(char *fmt, ...)
 #else
 /*VARARGS*/
-command(va_alist)
+int command(va_alist)
 va_dcl
 #endif
 {
@@ -469,7 +484,6 @@ va_dcl
 #endif
 	int r;
 	sig_t oldintr;
-	sigtype cmdabort();
 
 	abrtflag = 0;
 	if (debug) {
@@ -528,7 +542,7 @@ char *reply_parse, reply_buf[FTP_BUFSIZ], *reply_ptr;
 
 #include <ctype.h>
 
-getreply(expecteof)
+int getreply(expecteof)
 	int expecteof;
 {
 	register int i, c, n;
@@ -538,7 +552,6 @@ getreply(expecteof)
 	sig_t oldintr;
 	int pflag = 0;
 	char *pt = pasv;
-	sigtype cmdabort();
 	char ibuf[FTP_BUFSIZ], obuf[FTP_BUFSIZ];
 	int safe = 0;
 #ifndef strpbrk
@@ -603,7 +616,7 @@ getreply(expecteof)
 			    if (c != '\r' && (verbose > 0 ||
 				(verbose > -1 && n == '5' && dig > 4))) {
 				    if (proxflag &&
-					(dig == 1 || dig == 5 && verbose == 0))
+					(dig == 1 || (dig == 5 && verbose == 0)))
 						printf("%s:",hostname);
 				    (void) putchar(c);
 			    }
@@ -634,11 +647,12 @@ getreply(expecteof)
 		if (auth_type && !ibuf[0] && n != '6')
 			return(getreply(expecteof));
 		ibuf[0] = obuf[i] = '\0';
-		if (code && n == '6')
+		if (code && n == '6') {
 		    if (code != 631 && code != 632 && code != 633) {
 			printf("Unknown reply: %d %s\n", code, obuf);
 			n = '5';
 		    } else safe = (code == 631);
+		}
 		if (obuf[0])	/* if there is a string to decode */
 		    if (!auth_type) {
 			printf("Cannot decode reply:\n%d %s\n", code, obuf);
@@ -658,7 +672,10 @@ getreply(expecteof)
 #endif
 		    else {
 			int len;
-			if (kerror = radix_encode(obuf, ibuf, &len, 1)) {
+			kerror = radix_encode((unsigned char *)obuf,
+					      (unsigned char *)ibuf, 
+					      &len, 1);
+			if (kerror) {
 			    printf("Can't base 64 decode reply %d (%s)\n\"%s\"\n",
 					code, radix_error(kerror), obuf);
 			    n = '5';
@@ -666,12 +683,16 @@ getreply(expecteof)
 #ifdef KRB5_KRB4_COMPAT
 			else if (strcmp(auth_type, "KERBEROS_V4") == 0)
 				if ((kerror = safe ?
-				  krb_rd_safe((unsigned char *)ibuf, len,
-					&cred.session,
-					&hisctladdr, &myctladdr, &msg_data)
-				: krb_rd_priv((unsigned char *)ibuf, len,
-					schedule, &cred.session,
-					&hisctladdr, &myctladdr, &msg_data))
+				  krb_rd_safe((unsigned char *)ibuf, 
+					      (unsigned int) len,
+					      cred.session,
+					      &hisctladdr, 
+					      &myctladdr, &msg_data)
+				: krb_rd_priv((unsigned char *)ibuf, 
+					      (unsigned int) len,
+					      schedule, cred.session,
+					      &hisctladdr, &myctladdr,
+					      &msg_data))
 				!= KSUCCESS) {
 				  printf("%d reply %s! (krb_rd_%s: %s)\n", code,
 					safe ? "modified" : "garbled",
@@ -723,7 +744,7 @@ getreply(expecteof)
 			/* Other auth types go here... */
 		    }
 		else
-		if (verbose > 0 || verbose > -1 && n == '5') {
+		if (verbose > 0 || (verbose > -1 && n == '5')) {
 			(void) putchar(c);
 			(void) fflush (stdout);
 		}
@@ -742,9 +763,11 @@ getreply(expecteof)
 			(*oldintr)(SIGINT);
 		if (reply_parse) {
 			*reply_ptr = '\0';
-			if (reply_ptr = strstr(reply_buf, reply_parse)) {
+			reply_ptr = strstr(reply_buf, reply_parse);
+			if (reply_ptr) {
 				reply_parse = reply_ptr + strlen(reply_parse);
-				if (reply_ptr = strpbrk(reply_parse, " \r"))
+				reply_ptr = strpbrk(reply_parse, " \r");
+				if (reply_ptr)
 					*reply_ptr = '\0';
 			} else reply_parse = reply_ptr;
 		}
@@ -752,7 +775,7 @@ getreply(expecteof)
 	}
 }
 
-empty(mask, sec)
+static int empty(mask, sec)
  fd_set *mask;
 	int sec;
 {
@@ -765,7 +788,7 @@ empty(mask, sec)
 
 jmp_buf	sendabort;
 
-sigtype
+static sigtype
 abortsend(sig)
 	int sig;
 {
@@ -778,10 +801,10 @@ abortsend(sig)
 }
 
 #ifdef STDARG
-secure_error(char *fmt, ...)
+void secure_error(char *fmt, ...)
 #else
 /* VARARGS1 */
-secure_error(fmt, p1, p2, p3, p4, p5)
+void secure_error(fmt, p1, p2, p3, p4, p5)
 	char *fmt;
 #endif
 {
@@ -799,7 +822,7 @@ secure_error(fmt, p1, p2, p3, p4, p5)
 
 #define HASHBYTES 1024
 
-sendrequest(cmd, local, remote, printnames)
+void sendrequest(cmd, local, remote, printnames)
 	char *cmd, *local, *remote;
 	int printnames;
 {
@@ -810,8 +833,8 @@ sendrequest(cmd, local, remote, printnames)
 	int (*volatile closefunc)(), pclose(), fclose();
 	volatile sig_t oldintr, oldintp;
 	volatile long bytes = 0, hashbytes = HASHBYTES;
-	char *volatile lmode, buf[FTP_BUFSIZ], *bufp;
-	sigtype abortsend();
+	char *volatile lmode;
+	unsigned char buf[FTP_BUFSIZ], *bufp;
 
 	if (verbose && printnames) {
 		if (local && *local != '-')
@@ -887,7 +910,7 @@ sendrequest(cmd, local, remote, printnames)
 		return;
 	}
 	if (setjmp(sendabort))
-		goto abort;
+		goto die;
 
 	if (restart_point &&
 	    (strcmp(cmd, "STOR") == 0 || strcmp(cmd, "APPE") == 0)) {
@@ -929,7 +952,7 @@ sendrequest(cmd, local, remote, printnames)
 		}
 	dout = dataconn(lmode);
 	if (dout == NULL)
-		goto abort;
+		goto die;
 	(void) gettimeofday(&start, (struct timezone *)0);
 	oldintp = signal(SIGPIPE, SIG_IGN);
 	switch (curtype) {
@@ -940,7 +963,8 @@ sendrequest(cmd, local, remote, printnames)
 		while ((c = read(fileno(fin), buf, sizeof (buf))) > 0) {
 			bytes += c;
 			for (bufp = buf; c > 0; c -= d, bufp += d)
-				if ((d = secure_write(fileno(dout), bufp, c)) <= 0)
+				if ((d = secure_write(fileno(dout), bufp, 
+						      (unsigned int) c)) <= 0)
 					break;
 			if (hash) {
 				while (bytes >= hashbytes) {
@@ -985,7 +1009,7 @@ sendrequest(cmd, local, remote, printnames)
 				break;
 			bytes++;
 	/*		if (c == '\r') {			  	*/
-	/*		(void)	putc('\0', dout);  /* this violates rfc */
+	/*		(void)	putc('\0', dout);   this violates rfc */
 	/*			bytes++;				*/
 	/*		}                          			*/	
 		}
@@ -1017,7 +1041,7 @@ sendrequest(cmd, local, remote, printnames)
 	if (bytes > 0)
 		ptransfer("sent", bytes, &start, &stop);
 	return;
-abort:
+die:
 	(void) gettimeofday(&stop, (struct timezone *)0);
 	(void) signal(SIGINT, oldintr);
 	if (oldintp)
@@ -1042,7 +1066,7 @@ abort:
 
 jmp_buf	recvabort;
 
-sigtype
+static sigtype
 abortrecv(sig)
      int sig;
 {
@@ -1054,23 +1078,21 @@ abortrecv(sig)
 	longjmp(recvabort, 1);
 }
 
-recvrequest(cmd, local, remote, lmode, printnames)
+void recvrequest(cmd, local, remote, lmode, printnames)
 	char *cmd, *volatile local, *remote, *lmode;
 {
 	FILE *volatile fout, *volatile din = 0, *popen();
 	int (*volatile closefunc)(), pclose(), fclose();
 	volatile sig_t oldintr, oldintp;
 	volatile int is_retr, tcrflag, bare_lfs = 0;
-	char *gunique();
-	static int bufsize;
+	static unsigned int bufsize;
 	static char *buf;
-	int blksize;
+	unsigned int blksize;
 	volatile long bytes = 0, hashbytes = HASHBYTES;
 	register int c, d;
 	struct timeval start, stop;
 	struct stat st;
 	off_t lseek();
-	sigtype abortrecv();
 
 	is_retr = strcmp(cmd, "RETR") == 0;
 	if (is_retr && verbose && printnames) {
@@ -1157,7 +1179,7 @@ recvrequest(cmd, local, remote, lmode, printnames)
 		return;
 	}
 	if (setjmp(recvabort))
-		goto abort;
+		goto die;
 	if (is_retr && restart_point &&
 	    command("REST %ld", (long) restart_point) != CONTINUE)
 		return;
@@ -1174,7 +1196,7 @@ recvrequest(cmd, local, remote, lmode, printnames)
 	}
 	din = dataconn("r");
 	if (din == NULL)
-		goto abort;
+		goto die;
 	if (strcmp(local, "-") == 0)
 		fout = stdout;
 	else if (*local == '|') {
@@ -1182,7 +1204,7 @@ recvrequest(cmd, local, remote, lmode, printnames)
 		fout = popen(local + 1, "w");
 		if (fout == NULL) {
 			perror(local+1);
-			goto abort;
+			goto die;
 		}
 		closefunc = pclose;
 	} else {
@@ -1190,7 +1212,7 @@ recvrequest(cmd, local, remote, lmode, printnames)
 		if (fout == NULL) {
 			fprintf(stderr, "local: %s: %s\n", local,
 				strerror(errno));
-			goto abort;
+			goto die;
 		}
 		closefunc = fclose;
 	}
@@ -1206,7 +1228,7 @@ recvrequest(cmd, local, remote, lmode, printnames)
 		if (buf == NULL) {
 			perror("malloc");
 			bufsize = 0;
-			goto abort;
+			goto die;
 		}
 		bufsize = blksize;
 	}
@@ -1225,7 +1247,8 @@ recvrequest(cmd, local, remote, lmode, printnames)
 		}
 		errno = d = 0;
 		while ((c = secure_read(fileno(din), buf, bufsize)) > 0) {
-			if ((d = write(fileno(fout), buf, c)) != c)
+		        d = write(fileno(fout), buf,(unsigned int) c);
+			if (d != c)
 				break;
 			bytes += c;
 			if (hash) {
@@ -1338,7 +1361,7 @@ break2:
 	if (bytes > 0 && is_retr)
 		ptransfer("received", bytes, &start, &stop);
 	return;
-abort:
+die:
 
 /* abort using RFC959 recommended IP,SYNC sequence  */
 
@@ -1371,7 +1394,7 @@ abort:
  * Need to start a listen on the data channel before we send the command,
  * otherwise the server's connect may fail.
  */
-initconn()
+static int initconn()
 {
 	register char *p, *a;
 	int result, len, tmpno = 0;
@@ -1519,7 +1542,7 @@ if (passivemode)
 	return (fdopen(data, lmode));
 }
 
-ptransfer(direction, bytes, t0, t1)
+static void ptransfer(direction, bytes, t0, t1)
 	char *direction;
 	long bytes;
 	struct timeval *t0, *t1;
@@ -1547,7 +1570,7 @@ ptransfer(direction, bytes, t0, t1)
 		tsum->tv_sec++, tsum->tv_usec -= 1000000;
 } */
 
-tvsub(tdiff, t1, t0)
+static void tvsub(tdiff, t1, t0)
 	struct timeval *tdiff, *t1, *t0;
 {
 
@@ -1557,19 +1580,16 @@ tvsub(tdiff, t1, t0)
 		tdiff->tv_sec--, tdiff->tv_usec += 1000000;
 }
 
-sigtype
+static sigtype
 psabort(sig)
 	int sig;
 {
-	extern int abrtflag;
-
 	abrtflag++;
 }
 
-pswitch(flag)
+void pswitch(flag)
 	int flag;
 {
-	extern int proxy, abrtflag;
 	sig_t oldintr;
 	static struct comvars {
 		int connect;
@@ -1686,10 +1706,9 @@ pswitch(flag)
 	}
 }
 
-jmp_buf ptabort;
 int ptabflg;
 
-sigtype
+static sigtype
 abortpt(sig)
 	int sig;
 {
@@ -1701,16 +1720,15 @@ abortpt(sig)
 	longjmp(ptabort, 1);
 }
 
+static void
 proxtrans(cmd, local, remote)
 	char *cmd, *local, *remote;
 {
 	volatile sig_t oldintr;
 	volatile int secndflag = 0;
 	int prox_type, nfnd;
-	extern jmp_buf ptabort;
 	char *volatile cmd2;
 	 fd_set mask;
-	sigtype abortpt();
 
 	if (strcmp(cmd, "RETR"))
 		cmd2 = "RETR";
@@ -1742,7 +1760,7 @@ proxtrans(cmd, local, remote)
 		return;
 	}
 	if (setjmp(ptabort))
-		goto abort;
+		goto die;
 	oldintr = signal(SIGINT, abortpt);
 	if (command("%s %s", cmd, remote) != PRELIM) {
 		(void) signal(SIGINT, oldintr);
@@ -1753,7 +1771,7 @@ proxtrans(cmd, local, remote)
 	pswitch(1);
 	secndflag++;
 	if (command("%s %s", cmd2, local) != PRELIM)
-		goto abort;
+		goto die;
 	ptflag++;
 	(void) getreply(0);
 	pswitch(0);
@@ -1763,7 +1781,7 @@ proxtrans(cmd, local, remote)
 	ptflag = 0;
 	printf("local: %s remote: %s\n", local, remote);
 	return;
-abort:
+die:
 	(void) signal(SIGINT, SIG_IGN);
 	ptflag = 0;
 	if (strcmp(cmd, "RETR") && !proxy)
@@ -1822,7 +1840,7 @@ abort:
 	(void) signal(SIGINT, oldintr);
 }
 
-reset()
+void reset()
 {
    fd_set mask;
 	int nfnd = 1;
@@ -1841,7 +1859,7 @@ reset()
 	}
 }
 
-char *
+static char *
 gunique(local)
 	char *local;
 {
@@ -1903,13 +1921,12 @@ struct {
 int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 #endif /* GSSAPI */
 
-do_auth()
+int do_auth()
 {
-	extern int setsafe();
 	int oldverbose = verbose;
 #ifdef KRB5_KRB4_COMPAT
 	char *service, inst[INST_SZ];
-	u_long cksum, checksum = (u_long) getpid();
+	KRB4_32 cksum, checksum = getpid();
 #endif /* KRB5_KRB4_COMPAT */
 #if defined(KRB5_KRB4_COMPAT) || defined(GSSAPI)
 	u_char out_buf[FTP_BUFSIZ];
@@ -1973,7 +1990,8 @@ do_auth()
 				     target_name,
 				     *gss_trials[trial].mech_type,
 				     GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
-				     (forward ? GSS_C_DELEG_FLAG : 0),
+				       (forward ? GSS_C_DELEG_FLAG : 
+					(unsigned) 0),
 				     0,
 				     &chan,	/* channel bindings */
 				     token_ptr,
@@ -2027,7 +2045,8 @@ do_auth()
 		    user_gss_error(maj_stat, min_stat, "no reply, huh?");
 		    goto gss_complete_loop;
 		  }
-		} else if (kerror = radix_encode(reply_parse,out_buf,&i,1)) {
+		} else if ((kerror = radix_encode((unsigned char *)reply_parse,
+						  out_buf,&i,1))) {
 		  fprintf(stderr, "Base 64 decoding failed: %s\n",
 			  radix_error(kerror));
 		} else {
@@ -2073,6 +2092,7 @@ do_auth()
 	    if (realm[0] == '\0')
 	    	strncpy(realm, (char *) krb_realmofhost(hostname), sizeof(realm) - 1);
 	    realm[sizeof(realm) - 1] = '\0';
+   fprintf(stderr, "inst=%s, realm=%s, checksum %d\n", inst, realm, checksum);
 	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
 					inst, realm, checksum))
 		&& (kerror != KDC_PR_UNKNOWN ||
@@ -2080,7 +2100,7 @@ do_auth()
 					inst, realm, checksum))))
 			fprintf(stderr, "Kerberos V4 krb_mk_req failed: %s\n",
 					krb_get_err_text(kerror));
-	    else if (kerror = krb_get_cred(service, inst, realm, &cred))
+	    else if ((kerror = krb_get_cred(service, inst, realm, &cred)))
 			fprintf(stderr, "Kerberos V4 krb_get_cred failed: %s\n",
 					krb_get_err_text(kerror));
 	    else {
@@ -2089,7 +2109,7 @@ do_auth()
 		oldverbose = verbose;
 		verbose = 0;
 		i = ticket.length;
-		if (kerror = radix_encode(ticket.dat, out_buf, &i, 0))
+		if ((kerror = radix_encode(ticket.dat, out_buf, &i, 0)))
 			fprintf(stderr, "Base 64 encoding failed: %s\n",
 					radix_error(kerror));
 		else if (command("ADAT %s", out_buf) != COMPLETE)
@@ -2097,11 +2117,13 @@ do_auth()
 		else if (!reply_parse)
 			fprintf(stderr,
 			       "No authentication data received from server\n");
-		else if (kerror = radix_encode(reply_parse, out_buf, &i, 1))
+		else if ((kerror = radix_encode((unsigned char *)reply_parse, out_buf, &i, 1)))
 			fprintf(stderr, "Base 64 decoding failed: %s\n",
 					radix_error(kerror));
-		else if (kerror = krb_rd_safe(out_buf, i, &cred.session,
-					    &hisctladdr, &myctladdr, &msg_data))
+		else if ((kerror = krb_rd_safe(out_buf, (unsigned )i,
+					       cred.session,
+					       &hisctladdr, &myctladdr, 
+					       &msg_data)))
 			fprintf(stderr, "Kerberos V4 krb_rd_safe failed: %s\n",
 					krb_get_err_text(kerror));
 		else {
@@ -2129,6 +2151,7 @@ do_auth()
 	return(0);
 }
 
+void
 setpbsz(size)
 unsigned int size;
 {
@@ -2156,7 +2179,7 @@ unsigned int size;
 	verbose = oldverbose;
 }
 
-abort_remote(din)
+static void abort_remote(din)
 FILE *din;
 {
 	char buf[FTP_BUFSIZ];
@@ -2196,15 +2219,15 @@ FILE *din;
 	}
 	(void) getreply(0);
 }
+
 #ifdef GSSAPI
-user_gss_error(maj_stat, min_stat, s)
+void user_gss_error(maj_stat, min_stat, s)
 OM_uint32 maj_stat, min_stat;
 char *s;
 {
 	/* a lot of work just to report the error */
-	OM_uint32 gmaj_stat, gmin_stat;
+	OM_uint32 gmaj_stat, gmin_stat, msg_ctx;
 	gss_buffer_desc msg;
-	int msg_ctx;
 	msg_ctx = 0;
 	while (!msg_ctx) {
 		gmaj_stat = gss_display_status(&gmin_stat, maj_stat,
@@ -2238,10 +2261,11 @@ char *s;
 	fprintf(stderr, "GSSAPI error: %s\n", s);
 }
 
-secure_gss_error(maj_stat, min_stat, s)
+void secure_gss_error(maj_stat, min_stat, s)
      OM_uint32 maj_stat, min_stat;
      char *s;
 {
-  return user_gss_error(maj_stat, min_stat, s);
+  user_gss_error(maj_stat, min_stat, s);
+  return;
 }
 #endif /* GSSAPI */

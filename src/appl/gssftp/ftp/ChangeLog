@@ -1,3 +1,16 @@
+2000-08-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* domacro.c: Compiler warning cleanups and fix the overflow fix to
+	index the proper array.
+
+	* cmds.c, cmdtab.c, ftp.c, ftp_var.h, getpass.c, glob.c, main.c,
+	radix.c, ruserpass.c, secure.c, secure.h: Compiler warning
+	cleanups including providing prototypes, cleanup of assignments in
+	conditionals, including unistd.h and stdlib.h (if present),
+	declaring local functions as static.
+
+	* Makefile.in: Do not compile pclose.c - the code is not used. 
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* domacro.c (domacro): Don't overflow "line2"

@@ -44,6 +44,13 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 /*
  * FTP User Program -- Command Interface.
  */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include "ftp_var.h"
 #ifndef KRB5_KRB4_COMPAT
@@ -70,7 +77,7 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 typedef sigtype (*sig_t)();
 
 uid_t	getuid();
-sigtype	intr(), lostpeer();
+sigtype	intr PROTOTYPE((int)), lostpeer PROTOTYPE((int));
 extern	char *home;
 char	*getlogin();
 #ifdef KRB5_KRB4_COMPAT
@@ -79,6 +86,11 @@ struct servent staticsp;
 extern char realm[];
 #endif /* KRB5_KRB4_COMPAT */
 
+static void cmdscanner PROTOTYPE((int));
+static char *slurpstring PROTOTYPE((void));
+
+
+int 
 main(argc, argv)
 	volatile int argc;
 	char **volatile argv;
@@ -282,13 +294,12 @@ tail(filename)
 /*
  * Command parser.
  */
+static void
 cmdscanner(top)
 	int top;
 {
 	register struct cmd *c;
 	register int l;
-	struct cmd *getcmd();
-	extern int help();
 
 	if (!top)
 		(void) putchar('\n');
@@ -351,7 +362,7 @@ getcmd(name)
 	longest = 0;
 	nmatches = 0;
 	found = 0;
-	for (c = cmdtab; p = c->c_name; c++) {
+	for (c = cmdtab; (p = c->c_name) != NULL; c++) {
 		for (q = name; *q == *p++; q++)
 			if (*q == 0)		/* exact match? */
 				return (c);
@@ -375,17 +386,16 @@ getcmd(name)
 
 int slrflag;
 
-makeargv()
+void makeargv()
 {
 	char **argp;
-	char *slurpstring();
 
 	margc = 0;
 	argp = margv;
 	stringbase = line;		/* scan from first of buffer */
 	argbase = argbuf;		/* store from first of buffer */
 	slrflag = 0;
-	while (*argp++ = slurpstring())
+	while ((*argp++ = slurpstring()))
 		margc++;
 }
 
@@ -394,7 +404,7 @@ makeargv()
  * implemented with FSM to
  * handle quoting and strings
  */
-char *
+static char *
 slurpstring()
 {
 	int got_one = 0;
@@ -512,13 +522,13 @@ OUT:
 	return((char *)0);
 }
 
-#define HELPINDENT (sizeof ("directory"))
+#define	HELPINDENT ((int) sizeof("disconnect"))
 
 /*
  * Help command.
  * Call each command handler with argc == 0 and argv[0] == name.
  */
-help(argc, argv)
+void help(argc, argv)
 	int argc;
 	char *argv[];
 {

@@ -41,27 +41,6 @@ static char sccsid[] = "@(#)cmdtab.c	5.10 (Berkeley) 6/1/90";
 /*
  * User FTP -- Command Tables.
  */
-int	setascii(), setbell(), setbinary(), setdebug(), setform();
-int	setglob(), sethash(), setmode(), setpeer(), setport();
-int	setprompt(), setstruct();
-int	settenex(), settrace(), settype(), setverbose();
-int	setclevel(), setdlevel(), setclear(), setsafe(), ccc();
-#ifndef NOENCRYPTION
-int	setprivate();
-#endif
-int	disconnect(), restart(), reget(), syst();
-int	cd(), lcd(), delete_file(), mdelete(), user();
-int	ls(), mls(), get(), mget(), help(), append(), put(), mput();
-int	quit(), renamefile(), status();
-int	quote(), rmthelp(), shell(), site();
-int	pwd(), makedir(), removedir(), setcr();
-int	account(), doproxy(), reset(), setcase(), setntrans(), setnmap();
-int	setsunique(), setrunique(), cdup(), macdef(), domacro();
-int	sizecmd(), modtime(), newer(), rmtstatus();
-int	do_chmod(), do_umask(), siteidle();
-#ifndef NO_PASSIVE_MODE
-int	setpassive();
-#endif
 
 char	accounthelp[] =	"send account command to remote server";
 char	appendhelp[] =	"append to a file";

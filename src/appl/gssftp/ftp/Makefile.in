@@ -11,11 +11,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS	= $(srcdir)/cmds.c $(srcdir)/cmdtab.c $(srcdir)/domacro.c \
 	  $(srcdir)/ftp.c $(srcdir)/getpass.c $(srcdir)/glob.c \
-	  $(srcdir)/main.c $(srcdir)/pclose.c $(srcdir)/radix.c \
+	  $(srcdir)/main.c $(srcdir)/radix.c \
 	  $(srcdir)/ruserpass.c $(srcdir)/secure.c 
 
 
-OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o pclose.o \
+OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o \
 	  radix.o ruserpass.o secure.o
 
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
@@ -39,7 +39,7 @@ install::
 	done
 
 ftp.o cmds.o main.o:	$(srcdir)/../arpa/ftp.h
-ftp.o cmds.o cmdtab.o domacro.o main.o ruserpass.o: $(srcdir)/ftp_var.h
+ftp.o cmds.o cmdtab.o domacro.o main.o ruserpass.o: $(srcdir)/ftp_var.h 
 secure.o: secure.h
 
 cmds.o: $(srcdir)/cmds.c

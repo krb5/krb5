@@ -116,7 +116,7 @@ struct cmd {
 	char	c_bell;		/* give bell when command completes */
 	char	c_conn;		/* must be connected to use command */
 	char	c_proxy;	/* proxy server may execute */
-	int	(*c_handler)();	/* function to call */
+	void	(*c_handler)();	/* function to call */
 };
 
 struct macel {
@@ -134,10 +134,123 @@ extern char macbuf[4096];
 #endif
 
 extern	char *tail();
-extern	char *remglob();
 extern	int errno;
 extern	char *mktemp();
 
 #if (defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))) || defined(HAVE_STDARG_H)
-extern command(char *, ...);
+extern int command(char *, ...);
 #endif
+
+#if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif /* STDC or PROTOTYPES */
+
+char *remglob PROTOTYPE((char **, int));
+int another PROTOTYPE((int *, char ***, char *));
+void makeargv PROTOTYPE((void));
+void setpeer PROTOTYPE((int, char **));
+void setclevel PROTOTYPE((int, char **));
+void setdlevel PROTOTYPE((int, char **));
+void ccc PROTOTYPE((void));
+void setclear PROTOTYPE((void));
+void setsafe PROTOTYPE((void));
+void setprivate PROTOTYPE((void));
+void settype PROTOTYPE((int, char **));
+void changetype PROTOTYPE((int, int));
+void setbinary PROTOTYPE((void));
+void setascii PROTOTYPE((void));
+void settenex PROTOTYPE((void));
+void setmode  PROTOTYPE((int, char **));
+void setform  PROTOTYPE((int, char **));
+void setstruct  PROTOTYPE((int, char **));
+void siteidle  PROTOTYPE((int, char **));
+void put  PROTOTYPE((int, char **));
+void mput  PROTOTYPE((int, char **));
+void reget  PROTOTYPE((int, char **));
+void get  PROTOTYPE((int, char **));
+void mget  PROTOTYPE((int, char **));
+void status  PROTOTYPE((int, char **));
+void setbell PROTOTYPE((void));
+void settrace PROTOTYPE((void));
+void sethash PROTOTYPE((void));
+void setverbose PROTOTYPE((void));
+void setport PROTOTYPE((void));
+void setprompt PROTOTYPE((void));
+void setglob PROTOTYPE((void));
+void setdebug PROTOTYPE((int, char **));
+void cd PROTOTYPE((int, char **));
+void lcd PROTOTYPE((int, char **));
+void delete_file PROTOTYPE((int, char **));
+void mdelete PROTOTYPE((int, char **));
+void renamefile PROTOTYPE((int, char **));
+void ls PROTOTYPE((int, char **));
+void mls PROTOTYPE((int, char **));
+void shell PROTOTYPE((int, char **));
+void user PROTOTYPE((int, char **));
+void pwd PROTOTYPE((void));
+void makedir PROTOTYPE((int, char **));
+void removedir PROTOTYPE((int, char **));
+void quote PROTOTYPE((int, char **));
+void site PROTOTYPE((int, char **));
+void do_chmod PROTOTYPE((int, char **));
+void do_umask PROTOTYPE((int, char **));
+void setidle PROTOTYPE((int, char **));
+void rmthelp PROTOTYPE((int, char **));
+void quit PROTOTYPE((void));
+void disconnect PROTOTYPE((void));
+void fatal PROTOTYPE((char *));
+void account PROTOTYPE((int, char **));
+void doproxy PROTOTYPE((int, char **));
+void setcase PROTOTYPE((void));
+void setcr PROTOTYPE((void));
+void setntrans PROTOTYPE((int, char **));
+void setnmap PROTOTYPE((int, char **));
+void setsunique PROTOTYPE((void));
+void setrunique PROTOTYPE((void));
+void cdup PROTOTYPE((void));
+void restart PROTOTYPE((int, char **));
+void syst PROTOTYPE((void));
+void macdef PROTOTYPE((int, char **));
+void sizecmd PROTOTYPE((int, char **));
+void modtime PROTOTYPE((int, char **));
+void rmtstatus PROTOTYPE((int, char **));
+void newer PROTOTYPE((int, char **));
+void setpassive PROTOTYPE((void));
+
+/* ftp.c */
+void sendrequest PROTOTYPE((char *, char *, char *, int));
+void recvrequest PROTOTYPE((char *, char *, char *, char *, int));
+int login PROTOTYPE((char *));
+void setpbsz PROTOTYPE((unsigned int));
+void pswitch PROTOTYPE((int));
+int getreply PROTOTYPE((int));
+void reset PROTOTYPE((void));
+char *hookup PROTOTYPE((char *, int));
+int do_auth PROTOTYPE((void));
+
+/* glob.c */
+void blkfree PROTOTYPE((char **));
+
+/* domacro.c */
+void domacro PROTOTYPE((int, char **));
+
+
+/* main.c */
+void help PROTOTYPE((int, char **));
+struct cmd *getcmd PROTOTYPE((char *));
+
+
+/* ruserpass.c */
+int ruserpass PROTOTYPE((char *, char **, char **, char **));
+
+/* radix.h */
+int radix_encode PROTOTYPE((unsigned char *, unsigned char *, int *, int));
+char *radix_error PROTOTYPE((int));
+
+/* getpass.c */
+char *mygetpass PROTOTYPE((char *));
+
+/* glob.c */
+char **ftpglob PROTOTYPE((char *));

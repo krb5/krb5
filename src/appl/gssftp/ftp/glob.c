@@ -53,6 +53,8 @@ static char sccsid[] = "@(#)glob.c	5.9 (Berkeley) 2/25/91";
 #include <limits.h>
 #endif
 
+#include "ftp_var.h"
+
 #ifdef ARG_MAX
 #undef NCARGS
 #define NCARGS ARG_MAX
@@ -72,17 +74,24 @@ static	char **gargv;		/* Pointer to the (stack) arglist */
 static	int gargc;		/* Number args in gargv */
 static	int gnleft;
 static	short gflag;
-static	int tglob();
 char	**ftpglob();
 char	*globerr;
 char	*home;
 extern	int errno;
-static	char *strspl(), *strend();
-char	**copyblk();
+static	char *strspl PROTOTYPE((char *, char *)), *strend PROTOTYPE((char *));
+char	**copyblk PROTOTYPE((char **));
 
-static void acollect(), addpath(), collect(), expand(), Gcat();
-static void ginit(), matchdir(), rscan(), sort();
-static int amatch(), execbrc(), match();
+static void acollect PROTOTYPE((char *)), addpath PROTOTYPE((int)), 
+  collect PROTOTYPE((char *)), expand PROTOTYPE((char *)), 
+  Gcat PROTOTYPE((char *, char *));
+static void ginit PROTOTYPE((char **)), matchdir PROTOTYPE((char *)),
+  rscan PROTOTYPE((char **, int (*f)())), sort PROTOTYPE((void));
+static int amatch PROTOTYPE((char *, char *)), 
+  execbrc PROTOTYPE((char *, char *)), match PROTOTYPE((char *, char *));
+static int digit PROTOTYPE((int)), letter PROTOTYPE((int)),
+  any PROTOTYPE((int, char *));
+static int gethdir PROTOTYPE((char *));
+static int tglob PROTOTYPE((int ));
 
 static	int globcnt;
 
@@ -235,7 +244,9 @@ static void
 matchdir(pattern)
 	char *pattern;
 {
+#if 0
 	struct stat stb;
+#endif
 	register struct dirent *dp;
 	DIR *dirp;
 
@@ -267,7 +278,9 @@ matchdir(pattern)
 	closedir(dirp);
 	return;
 
+#if 0
 patherr1:
+#endif
 	closedir(dirp);
 patherr2:
 	globerr = "Bad directory components";
@@ -393,7 +406,7 @@ amatch(s, p)
 		case '[':
 			ok = 0;
 			lc = 077777;
-			while (cc = *p++) {
+			while ((cc = *p++)) {
 				if (cc == ']') {
 					if (ok)
 						break;
@@ -406,11 +419,12 @@ amatch(s, p)
 					if (scc == (lc = cc))
 						ok++;
 			}
-			if (cc == 0)
+			if (cc == 0) {
 				if (ok)
 					p--;
 				else
 					return 0;
+			}
 			continue;
 
 		case '*':
@@ -449,12 +463,13 @@ slash:
 			while (*s)
 				addpath(*s++);
 			addpath('/');
-			if (stat(gpath, &stb) == 0 && isdir(stb))
+			if (stat(gpath, &stb) == 0 && isdir(stb)) {
 				if (*p == 0) {
 					Gcat(gpath, "");
 					globcnt++;
 				} else
 					expand(p);
+			}
 			gpathp = sgpathp;
 			*gpathp = 0;
 			return (0);
@@ -462,7 +477,7 @@ slash:
 	}
 }
 
-static
+static int
 Gmatch(s, p)
 	register char *s, *p;
 {
@@ -477,7 +492,7 @@ Gmatch(s, p)
 		case '[':
 			ok = 0;
 			lc = 077777;
-			while (cc = *p++) {
+			while ((cc = *p++)) {
 				if (cc == ']') {
 					if (ok)
 						break;
@@ -490,11 +505,12 @@ Gmatch(s, p)
 					if (scc == (lc = cc))
 						ok++;
 			}
-			if (cc == 0)
+			if (cc == 0) {
 				if (ok)
 					p--;
 				else
 					return 0;
+			}
 			continue;
 
 		case '*':
@@ -540,13 +556,13 @@ Gcat(s1, s2)
 
 static void
 addpath(c)
-	char c;
+	int c;
 {
 
 	if (gpathp >= lastgpathp)
 		globerr = "Pathname too long";
 	else {
-		*gpathp++ = c;
+		*gpathp++ = c & 0xff;
 		*gpathp = 0;
 	}
 }
@@ -558,13 +574,14 @@ rscan(t, f)
 {
 	register char *p, c;
 
-	while (p = *t++) {
-		if (f == tglob)
+	while ((p = *t++)) {
+		if (f == tglob) {
 			if (*p == '~')
 				gflag |= 2;
 			else if (eq(p, "{") || eq(p, "{}"))
 				continue;
-		while (c = *p++)
+		}
+		while ((c = *p++))
 			(*f)(c);
 	}
 }
@@ -581,9 +598,9 @@ scan(t, f)
 			*p++ = (*f)(c);
 } */
 
-static
+static int
 tglob(c)
-	register char c;
+	register int c;
 {
 
 	if (any(c, globchars))
@@ -600,21 +617,23 @@ trim(c)
 } */
 
 
+static int
 letter(c)
-	register char c;
+	register int c;
 {
 
-	return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_');
+	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_');
 }
 
+static int
 digit(c)
-	register char c;
+	register int c;
 {
 
 	return (c >= '0' && c <= '9');
 }
 
-any(c, s)
+static int any(c, s)
 	register int c;
 	register char *s;
 {
@@ -624,7 +643,7 @@ any(c, s)
 			return(1);
 	return(0);
 }
-blklen(av)
+static int blklen(av)
 	register char **av;
 {
 	register int i = 0;
@@ -634,19 +653,19 @@ blklen(av)
 	return (i);
 }
 
-char **
+static char **
 blkcpy(oav, bv)
 	char **oav;
 	register char **bv;
 {
 	register char **av = oav;
 
-	while (*av++ = *bv++)
+	while ((*av++ = *bv++))
 		continue;
 	return (oav);
 }
 
-blkfree(av0)
+void blkfree(av0)
 	char **av0;
 {
 	register char **av = av0;
@@ -697,13 +716,13 @@ strend(cp)
  * user whose home directory is sought is currently.
  * We write the home directory of the user back there.
  */
-gethdir(home)
-	char *home;
+static int gethdir(mhome)
+	char *mhome;
 {
-	register struct passwd *pp = getpwnam(home);
+	register struct passwd *pp = getpwnam(mhome);
 
-	if (!pp || ((home + strlen(pp->pw_dir)) >= lastgpathp))
+	if (!pp || ((mhome + strlen(pp->pw_dir)) >= lastgpathp))
 		return (1);
-	(void) strcpy(home, pp->pw_dir);
+	(void) strcpy(mhome, pp->pw_dir);
 	return (0);
 }

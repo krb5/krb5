@@ -4,6 +4,12 @@
  * Only one security context, thus only work on one fd at a time!
  */
 
+#ifdef GSSAPI
+#include <gssapi/gssapi.h>
+#include <gssapi/gssapi_generic.h>
+extern gss_ctx_id_t gcontext;
+#endif /* GSSAPI */
+
 #include <secure.h>	/* stuff which is specific to client or server */
 
 #ifdef KRB5_KRB4_COMPAT
@@ -14,11 +20,6 @@ extern KTEXT_ST ticket;
 extern MSG_DAT msg_data;
 extern Key_schedule schedule;
 #endif /* KRB5_KRB4_COMPAT */
-#ifdef GSSAPI
-#include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
-extern gss_ctx_id_t gcontext;
-#endif /* GSSAPI */
 
 #include <arpa/ftp.h>
 
@@ -26,6 +27,9 @@ extern gss_ctx_id_t gcontext;
 #include <string.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -46,6 +50,7 @@ typedef unsigned long ftp_uint32;
 typedef long ftp_int32;
 #endif
 
+static int secure_putbuf PROTOTYPE((int, unsigned char *, unsigned int));
 
 extern struct	sockaddr_in hisaddr;
 extern struct	sockaddr_in myaddr;
@@ -60,7 +65,7 @@ extern char	*auth_type;
 #define MAX maxbuf
 extern unsigned int maxbuf; 	/* maximum output buffer size */
 extern unsigned char *ucbuf;	/* cleartext buffer */
-static unsigned int nout, bufp;	/* number of chars in ucbuf,
+static unsigned int nout;	/* number of chars in ucbuf,
 				 * pointer into ucbuf */
 
 #ifdef KRB5_KRB4_COMPAT
@@ -142,15 +147,10 @@ looping_read(fd, buf, len)
 #endif
 
 
-#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS)) || defined(HAVE_STDARG_H)
-extern secure_error(char *, ...);
-#else
-extern secure_error();
-#endif
 
 #define ERR	-2
 
-static
+static int
 secure_putbyte(fd, c)
 int fd;
 unsigned char c;
@@ -171,17 +171,19 @@ return (c);
  *	-1  on error (errno set)
  *	-2  on security error
  */
-secure_flush(fd)
+int secure_flush(fd)
 int fd;
 {
 	int ret;
 
 	if (dlevel == PROT_C)
 		return(0);
-	if (nout)
-		if (ret = secure_putbuf(fd, ucbuf, nout))
+	if (nout) {
+ 	        ret = secure_putbuf(fd, ucbuf, nout);
+		if (ret)
 			return(ret);
-	return(secure_putbuf(fd, "", nout = 0));
+	}
+	return(secure_putbuf(fd, (unsigned char *) "", nout = 0));
 }
 
 /* returns:
@@ -189,8 +191,8 @@ int fd;
  *	-1    on error
  *	-2    on security error
  */
-secure_putc(c, stream)
-char c;
+int secure_putc(c, stream)
+int c;
 FILE *stream;
 {
 	if (dlevel == PROT_C)
@@ -203,6 +205,7 @@ FILE *stream;
  *	-1  on error (errno set)
  *	-2  on security error
  */
+int 
 secure_write(fd, buf, nbyte)
 int fd;
 unsigned char *buf;
@@ -224,6 +227,7 @@ unsigned int nbyte;
  *	-1  on error (errno set)
  *	-2  on security error
  */
+static int
 secure_putbuf(fd, buf, nbyte)
   int fd;
 unsigned char *buf;
@@ -296,17 +300,18 @@ unsigned int nbyte;
 			}
 		}
 
-		memcpy(outbuf, out_buf.value, length=out_buf.length);
+		length=out_buf.length;
+		memcpy(outbuf, out_buf.value, out_buf.length);
 		gss_release_buffer(&min_stat, &out_buf);
 	}
 #endif /* GSSAPI */
 	net_len = htonl((u_long) length);
-	if (looping_write(fd, &net_len, 4) == -1) return(-1);
+	if (looping_write(fd, (char *) &net_len, 4) == -1) return(-1);
 	if (looping_write(fd, outbuf, length) != length) return(-1);
 	return(0);
 }
 
-static
+static int
 secure_getbyte(fd)
 int fd;
 {
@@ -316,7 +321,8 @@ int fd;
 	ftp_uint32 length;
 
 	if (nin == 0) {
-		if ((kerror = looping_read(fd, &length, sizeof(length)))
+		if ((kerror = looping_read(fd, (char *) &length,
+				sizeof(length)))
 				!= sizeof(length)) {
 			secure_error("Couldn't read PROT buffer length: %d/%s",
 				     kerror,
@@ -329,7 +335,7 @@ int fd;
 				     length, MAX);
 			return(ERR);
 		}
-		if ((kerror = looping_read(fd, ucbuf, length)) != length) {
+		if ((kerror = looping_read(fd, (char *) ucbuf, (int) length)) != length) {
 			secure_error("Couldn't read %u byte PROT buffer: %s",
 					length, kerror == -1 ?
 					sys_errlist[errno] : "premature EOF");
@@ -338,11 +344,11 @@ int fd;
 		/* Other auth types go here ... */
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-		  if (kerror = dlevel == PROT_P ?
+		  if ((kerror = dlevel == PROT_P ?
 		    krb_rd_priv(ucbuf, length, schedule, SESSION,
 				&hisaddr, &myaddr, &msg_data)
 		  : krb_rd_safe(ucbuf, length, SESSION,
-				&hisaddr, &myaddr, &msg_data)) {
+				&hisaddr, &myaddr, &msg_data))) {
 			secure_error("krb_rd_%s failed for KERBEROS_V4 (%s)",
 					dlevel == PROT_P ? "priv" : "safe",
 					krb_get_err_text(kerror));
@@ -388,7 +394,7 @@ int fd;
  *	-1   on EOF
  *	-2   on security error
  */
-secure_getc(stream)
+int secure_getc(stream)
 FILE *stream;
 {
 	if (dlevel == PROT_C)
@@ -402,10 +408,10 @@ FILE *stream;
  *	-1  on error (errno set), only for PROT_C
  *	-2  on security error
  */
-secure_read(fd, buf, nbyte)
+int secure_read(fd, buf, nbyte)
 int fd;
 char *buf;
-int nbyte;
+unsigned int nbyte;
 {
 	static int c;
 	int i;

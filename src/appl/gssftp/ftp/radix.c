@@ -2,12 +2,14 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "ftp_var.h"
+
 static char *radixN =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static char pad = '=';
 
-radix_encode(inbuf, outbuf, len, decode)
+int radix_encode(inbuf, outbuf, len, decode)
 unsigned char inbuf[], outbuf[];
 int *len, decode;
 {
@@ -72,6 +74,7 @@ int *len, decode;
 
 char *
 radix_error(e)
+int e;
 {
 	switch (e) {
 	    case 0:  return("Success");
