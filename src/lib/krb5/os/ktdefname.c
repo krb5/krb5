@@ -27,7 +27,7 @@ static char rcsid_ktdefname_c[] =
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
-static char krb5_defkeyname[] = DEFAULT_KEYTAB_NAME;
+extern char *krb5_defkeyname;
 
 krb5_error_code
 krb5_kt_default_name(name, namesize)
