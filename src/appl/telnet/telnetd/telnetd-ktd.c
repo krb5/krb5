@@ -549,24 +549,24 @@ getterminaltype(name)
     if (his_state_is_will(TELOPT_TSPEED)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_TSPEED, TELQUAL_SEND, IAC, SE };
 
-	bcopy(sbbuf, nfrontp, sizeof sbbuf);
+	memcpy(nfrontp, sbbuf, sizeof sbbuf);
 	nfrontp += sizeof sbbuf;
     }
     if (his_state_is_will(TELOPT_XDISPLOC)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_XDISPLOC, TELQUAL_SEND, IAC, SE };
 
-	bcopy(sbbuf, nfrontp, sizeof sbbuf);
+	memcpy(nfrontp, sbbuf, sizeof sbbuf);
 	nfrontp += sizeof sbbuf;
     }
     if (his_state_is_will(TELOPT_ENVIRON)) {
 	static char sbbuf[] = { IAC, SB, TELOPT_ENVIRON, TELQUAL_SEND, IAC, SE };
 
-	bcopy(sbbuf, nfrontp, sizeof sbbuf);
+	memcpy(nfrontp, sbbuf, sizeof sbbuf);
 	nfrontp += sizeof sbbuf;
     }
     if (his_state_is_will(TELOPT_TTYPE)) {
 
-	bcopy(ttytype_sbbuf, nfrontp, sizeof ttytype_sbbuf);
+	memcpy(nfrontp, ttytype_sbbuf, sizeof ttytype_sbbuf);
 	nfrontp += sizeof ttytype_sbbuf;
     }
     if (his_state_is_will(TELOPT_TSPEED)) {
@@ -636,7 +636,7 @@ _gettermname()
     if (his_state_is_wont(TELOPT_TTYPE))
 	return;
     settimer(baseline);
-    bcopy(ttytype_sbbuf, nfrontp, sizeof ttytype_sbbuf);
+    memcpy(nfrontp, ttytype_sbbuf, sizeof ttytype_sbbuf);
     nfrontp += sizeof ttytype_sbbuf;
     while (sequenceIs(ttypesubopt, baseline))
 	ttloop();

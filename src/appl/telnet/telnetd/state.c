@@ -366,7 +366,7 @@ gotiac:			switch (c) {
 		char	xbuf2[BUFSIZ];
 		register char *cp;
 		int n = pfrontp - opfrontp, oc;
-		bcopy(opfrontp, xptyobuf, n);
+		memcpy(xptyobuf, opfrontp, n);
 		pfrontp = opfrontp;
 		pfrontp += term_input(xptyobuf, pfrontp, n, BUFSIZ+NETSLOP,
 					xbuf2, &oc, BUFSIZ);

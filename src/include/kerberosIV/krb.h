@@ -293,7 +293,7 @@ typedef struct msg_dat MSG_DAT;
  swab(((char *) x) +10,((char *)  _krb_swap_tmp) +4 ,2); \
  swab(((char *) x) +12,((char *)  _krb_swap_tmp) +2 ,2); \
  swab(((char *) x) +14,((char *)  _krb_swap_tmp) +0 ,2); \
- bcopy((char *)_krb_swap_tmp,(char *)x,16);\
+ memcpy((char *)x,(char *)_krb_swap_tmp,16);\
                             }
 
 #define     swap_u_12(x) {\
@@ -304,7 +304,7 @@ typedef struct msg_dat MSG_DAT;
  swab(((char *) x) +6, ((char *)  _krb_swap_tmp) +4 ,2); \
  swab(((char *) x) +8, ((char *)  _krb_swap_tmp) +2 ,2); \
  swab(((char *) x) +10,((char *)  _krb_swap_tmp) +0 ,2); \
- bcopy((char *)_krb_swap_tmp,(char *)x,12);\
+ memcpy((char *)x,(char *)_krb_swap_tmp,12);\
                             }
 
 #define     swap_C_Block(x) {\
@@ -313,7 +313,7 @@ typedef struct msg_dat MSG_DAT;
  swab(((char *) x) +2,((char *)  _krb_swap_tmp) +4 ,2); \
  swab(((char *) x) +4,((char *)  _krb_swap_tmp) +2 ,2); \
  swab(((char *) x) +6,((char *)  _krb_swap_tmp)    ,2); \
- bcopy((char *)_krb_swap_tmp,(char *)x,8);\
+ memcpy((char *)x,(char *)_krb_swap_tmp,8);\
                             }
 #define     swap_u_quad(x) {\
  unsigned long   _krb_swap_tmp[4];\
@@ -321,7 +321,7 @@ typedef struct msg_dat MSG_DAT;
  swab(((char *) &x) +2,((char *)  _krb_swap_tmp) +4 ,2); \
  swab(((char *) &x) +4,((char *)  _krb_swap_tmp) +2 ,2); \
  swab(((char *) &x) +6,((char *)  _krb_swap_tmp)    ,2); \
- bcopy((char *)_krb_swap_tmp,(char *)&x,8);\
+ memcpy((char *)&x,(char *)_krb_swap_tmp,8);\
                             }
 
 #define     swap_u_long(x) {\

@@ -465,7 +465,7 @@ do_opt_slc(ptr, len)
 			def_slcbuf = (unsigned char *)malloc((unsigned)len);
 			if (def_slcbuf == (unsigned char *)0)
 				return;  /* too bad */
-			bcopy(ptr, def_slcbuf, len);
+			memcpy(def_slcbuf, ptr, len);
 		}
 	}
 

@@ -223,7 +223,7 @@ copy_termbuf(cp, len)
 {
 	if (len > sizeof(termbuf))
 		len = sizeof(termbuf);
-	bcopy(cp, (char *)&termbuf, len);
+	memcpy((char *)&termbuf, cp, len);
 	termbuf2 = termbuf;
 }
 #endif	/* defined(LINEMODE) && defined(TIOCPKT_IOCTL) */
