@@ -15,7 +15,7 @@
 \def\v#1{\verb+#1+}
 
 \title{Kerberos Administration System \\
-        Functional Specifications\thanks{\rcsId}}
+	KADM5 API Functional Specifications\thanks{\rcsId}}
 \author{Barry Jaspan}
 
 \begin{document}
@@ -25,12 +25,7 @@
 
 {\setlength{\parskip}{0pt}\tableofcontents}
 
-%\section{Multi-realm Operation}
-%
-%The behavior of any function when called with a principal name that is
-%not in the host's local realm is currently undefined.
-%
-\section{Admin API functional specification}
+\section{Introduction}
 
 This section describes the Admin API that can be used to maintain
 principals and policies.  It describes the data structures used for
@@ -43,7 +38,7 @@ Kerberos master server.  It is also be possible for a program running
 on the Kerberos master server to use the Admin API directly, without
 going through the admin server.
 
-\subsection{Versions of the API}
+\section{Versions of the API}
 
 The versions of this API and a brief description of the changes for
 each are:
@@ -86,7 +81,7 @@ kadm5_get_policies have been added.
 \end{enumerate}
 \end{description}
 
-\subsection{Policies and Password Quality}
+\section{Policies and Password Quality}
 
 The Admin API Password Quality mechanism provides the following
 controls.  Note that two strings are defined to be ``significantly
@@ -114,12 +109,12 @@ users; a password that is not significantly different from every word
 in the dictionary will not be accepted.
 \end{itemize}
 
-\subsection{Data Structures}
+\section{Data Structures}
 
 This section describes the data structures used by the Admin API.
 They are defined in $<$kadm5/admin.h$>$.
 
-\subsubsection{Principals, kadm5_principal_ent_t}
+\subsection{Principals, kadm5_principal_ent_t}
 \label{sec:principal-structure}
 
 A Kerberos principal entry is represented by a kadm5_principal_ent_t.
@@ -336,7 +331,7 @@ See section \ref{sec:keys} for a discussion of the krb5_key_data
 structure.
 \end{description}
 
-\subsubsection{Policies, kadm5_policy_ent_t}
+\subsection{Policies, kadm5_policy_ent_t}
 \label{sec:policy-fields}
 
 If the POLICY bit is set in aux_attributes, the \v{policy} name field
@@ -392,7 +387,7 @@ password to its current value.
 A policy cannot be deleted unless this number is zero.
 \end{description}
 
-\subsubsection{Configuration parameters}
+\subsection{Configuration parameters}
 \label{sec:configparams}
 
 The KADM5 API acquires configuration information from the Kerberos
@@ -444,7 +439,7 @@ typedef struct _kadm5_config_params {
 will actually be used)
 \end{description}
 
-\subsubsection{Principal keys}
+\subsection{Principal keys}
 \label{sec:keys}
 
 In KADM5_API_VERSION_1, all principals had a single key.  The
@@ -497,7 +492,7 @@ In a version 2 structure, the second element is the contents of the
 salt for this key.
 \end{description}
 
-\subsubsection{Field masks}
+\subsection{Field masks}
 \label{sec:masks}
 
 The API functions for creating, retrieving, and modifying principals
@@ -582,7 +577,7 @@ REF_COUNT               & 0x080000 & pw_refcnt & F & F
 \label{tab:policy-bits}
 \end{table}
 
-\subsection{Constants, Header Files, Libraries}
+\section{Constants, Header Files, Libraries}
 
 $<$kadm5/admin.h$>$ includes a number of required header files,
 including RPC, Kerberos 5, com_err, and admin com_err
@@ -630,7 +625,7 @@ libcom_err.a, and libdyn.a.  Server applications must also link
 against: libkdb5.a, libkrb5.a, libcrypto.a, librpclib.a, libcom_err.a,
 and libdyn.a.
 
-\subsection{Error Codes}
+\section{Error Codes}
 
 The error codes that can be returned by admin functions are listed
 below.  Error codes indicated with a ``*'' can be returned by every
@@ -705,7 +700,7 @@ Admin Server)
 \item[KADM5_SECURE_PRINC_MISSING] Database error! Required principal missing
 \end{description}
 
-\subsection{Authentication and Authorization}
+\section{Authentication and Authorization}
 \label{sec:auth}
 
 XXX Everything about server authorization has changed in version 2!
@@ -744,13 +739,15 @@ and policies.
 \end{description}
 
 Privileges are specified via an external configuration file on the
-Kerberos master server (see section \ref{sec:acls}).
+Kerberos master server.
 
 Table \ref{tab:func-overview} summarizes the authorization
 requirements of each function.  Additionally, each API function
 description identifies the privilege required to perform it.
 
-\subsection{Function Overview}
+\section{Functions}
+
+\subsection{Overview}
 
 The functions provided by the Admin API, and the authorization they
 require, are listed in the table \ref{tab:func-overview}.  The
@@ -1246,9 +1243,7 @@ principal's attributes, return KADM5_PASS_TOOSOON.
 return KADM5_PROTECT_PRINCIPAL.
 \item If the password does not meet the quality
 standards, return the appropriate KADM5_PASS_Q_* error code.
-\item Convert password to key.  The key is generated with
-Kerberos' string-to-key function, using the salt method specified on
-the admin server's command line; see section \ref{sec:commandline}.
+\item Convert password to key; see section \ref{sec:keys}.
 \item If the new key is in the principal's password history, return
 KADM5_PASS_REUSE.
 \item Store old key in history.
@@ -1759,267 +1754,5 @@ There is no guarantee that a caller will have a privilege indicated by
 this function for any length of time; applications using this function
 must still be prepared to handle all possible KADM5_AUTH_* error
 codes.
-
-\section{Server}
-
-The Admin API will be implemented by a server process running on the
-same machine as the Kerberos server, and a client library to
-communicate with the server.
-
-\subsection{Command Line}
-\label{sec:commandline}
-
-The command line syntax of the admin server is
-
-\begin{verbatim}
-ovsec_adm_server [-m] [-r realm] [-createsalt normal|none]
-        [-modifysalt normal|none|keep] 
-\end{verbatim}
-
-The -m argument specifies that the Kerberos master key should be read
-from the keyboard instead of from the stash file.  If the stash file
-does not exist and this argument is not specified, the server will
-not start.
-
-The -r argument specifies the Kerberos realm.  If this argument is not
-specified, the host's default realm is used. 
-
-The -createsalt and -modifysalt arguments control the type of salt
-used when creating and modifying keys in the Kerberos database,
-respectively.  ``normal'' means the standard V5 salt which uses the
-principal and realm name.  ``none'' means no salt, which is compatible
-with Kerberos V4.  ``keep'' means maintain the previous salt when a
-key is changed.
-
-If the either admin principal or policy databases are reloaded using
-the tools described in section \ref{sec:tools}, the admin server must
-be shut down during the process.  If the admin server is left running
-during the import process, at best the server may use old information
-and at worst the database may become inconsistent.
-
-\subsection{Protocol and Port Number}
-
-The admin server accepts TCP Sun RPC connections.  The port number
-(which the server listens on, and which clients should use to contact
-it) is determined by a three step process:
-
-\begin{enumerate}
-\item If kadm5/tcp exists in /etc/services, the specified port
-number is used.
-
-\item Otherwise, if kerberos_adm/tcp exists in /etc/services, the
-specified port number is used.
-
-\item Otherwise, port number 752 is used.
-\end{enumerate}
-
-\subsection{Key Table, Authorization ACLs}
-\label{sec:acls}
-
-The admin server's keytable is stored in /krb5/kadmin.srvtab.  It
-contains entries for the principals KADM5_ADMIN_SERVICE and
-KADM5_CHANGEPW_SERVICE.
-
-The admin server will use a simple ACL mechanism to grant privileges
-to principals.  The file KADM5_ACLFILE will contain a
-list of principals and their privileges.  It is read at start-up, and
-can only be reread by restarting the admin server.
-
-The format of this file is:
-
-\begin{itemize}
-\item Blank lines or lines beginning with ``\#'' are ignored.
-
-\item ACL entry lines contain two fields separated by any number of
-spaces, tabs, or newlines, and are terminated with a semi-colon.  The
-first field is a Kerberos name and the second field is the privilege
-list.
-
-\item The privilege list can contain a comma separated list of the
-words ``get'', ``add'', ``modify'', and ``delete''.
-\end{itemize}
-
-The principal named in the first field of each ACL entry has the
-privileges listed in the second field the ACL entry.
-
-\subsection{Logging}
-
-The Admin server will log various events via the syslog mechanism (see
-the syslog(3) manual page).  The level depends on the notice, the
-facility is LOG_LOCAL6, and notices are identified with the name
-``ovsec_adm_server''.  Each syslog message described below begins with
-a prefix including the time the message was logged, the host name of
-the logging machine, and the pid of the logging process:
-
-\begin{verbatim}
-Nov 11 12:37:26 suan-la-chow-show ovsec_adm_server[9229]: <message>
-\end{verbatim}
-
-\subsubsection{Miscellaneous Messages}
-
-When the server starts successfully and is ready to handle requests,
-is logs the message ``starting'' at the LOG_INFO level.  When it exits
-(due to a signal, for example) it logs the message ``finished,
-exiting'' at the LOG_INFO level.
-
-If the dictionary file does not exist, the server logs the message
-``WARNING: Cannot find the dictionary file $<$name$>$, continuing
-without one.'' at the LOG_ERR level and continues with dictionary
-checking disabled.
-
-If the server cannot register itself as an RPC server via the portmap
-daemon, it logs the message ``Cannot register RPC service, failing.''
-at the LOG_ERR level and exits with non-zero status.  This error can
-happen if the portmapper is not running.
-
-If the GSS-API authentication system cannot be initialized, the server
-logs the message ``Cannot initialize GSS-API authentication,
-failing.'' at the LOG_ERR level and exits with non-zero status.  This
-error can happen if, for example, the file ovsec_adm.srvtab does not
-exist or is incorrect.
-
-\subsubsection{Request Messages}
-
-In the event descriptions below, IP address refers to the originating
-remote IP address, procedure name refers to the name of the API
-function, client name refers to the authenticated name of the caller,
-service name refers to the service the client authenticated to (see
-section \ref{sec:auth}), primary argument refers to the name of the
-principal or policy affected by the call,\footnote{The first release
-only logs the primary argument, rather than logging the old and new
-values of all fields.} and status refers to the com_err string
-corresponding to the error code generated.  All of these messages are
-logged at the LOG_NOTICE level.
-
-\begin{itemize}
-\item Unsuccessful authentication attempts (e.g.: failures during
-GSS-API context establishment).  This error occurs inside the RPC; the
-admin server is notified via a callback.
-
-\begin{verbatim}
-Authentication attempt failed: <IP address>, <GSS-API error strings>
-\end{verbatim}
-
-Example:  A buggy client attempts to authenticate to the admin server
-as the existing but invalid service name ``mailserver@REALM.COM'':
-
-\begin{verbatim}
-Authentication attempt failed: 192.231.148.11, Miscellaneous error,
-Wrong principal in request
-\end{verbatim}
-
-\item Authentication failure.  This error can occur both within the
-RPC, while parsing the RPC call header, and while arguments are
-decoded by the admin server.  It can be the result of a a garbled
-{\it or retransmitted} packet, a replay attack, a packet-modification
-attack, or a header/argument splicing attack.
-
-\begin{verbatim}
-WARNING! Forged/garbled request: <procedure name>, claimed client =
-<client name>, service = <service name>, addr = <IP address>
-\end{verbatim}
-
-Example: An attacker attempts to replay a previously valid ``create
-principal'' message from jon/admin@REALM.COM:
-
-\begin{verbatim}
-WARNING! Forged/garbled request: kadm5_create_principal, claimed
-client = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
-192.231.148.12
-\end{verbatim}
-
-\item Unauthorized request.  This error occurs when a properly
-authenticated caller attempts to perform an operation for which it is
-not authorized.
-
-\begin{verbatim}
-Unauthorized request: <procedure name>, <primary argument>, client =
-<client name>, service = <service name>, addr = <IP address>
-\end{verbatim}
-
-Example: An attacker cracker@REALM.COM attempts to modify the Kerberos
-master principal:
-
-\begin{verbatim}
-Unauthorized request: kadm5_modify_principal, K/M@REALM.COM,
-client = cracker@REALM.COM, service = admin@REALM.COM, addr =
-192.231.148.12
-\end{verbatim}
-
-\item Authorized requests and miscellaneous errors.  A message is
-logged when an authorized request succeeds or fails for any reason
-other than those listed above.  In the case of success, the status is
-``success''; otherwise, the status can be anything from ``no space
-left on device'' (ENOSPC) to an KADM5 error such as ``principal
-does not exist'' (KADM5_UNK_PRINC).
-
-\begin{verbatim}
-Request: <procedure name>, <primary argument>, <status>, client =
-<client name>, service = <service name>, addr = <IP address>
-\end{verbatim}
-
-Example: jon/admin@REALM.COM creates a new principal new@REALM.COM:
-
-\begin{verbatim}
-Request: kadm5_create_principal, new@REALM.COM, success,
-client = jon/admin@REALM.COM, service = admin@REALM.COM, addr =
-192.231.148.12
-\end{verbatim}
-
-Example: A buggy client program attempts to create a principal with a
-NULL name:
-
-\begin{verbatim}
-Request: kadm5_create_principal, (null), Invalid argument, client
-= jon/admin@REALM.COM, service = admin@REALM.COM, addr =
-192.231.148.12
-\end{verbatim}
-
-Example: joe/user@REALM.COM changes its own password:
-
-\begin{verbatim}
-Request: kadm5_chpass_principal, joe/user@REALM.COM, success,
-client = joe/user@REALM.COM, server = kadmin/changepw@REALM.COM,
-addr = 192.231.148.12
-\end{verbatim}
-
-Example: jon/admin@REALM.COM attempts to get a principal that does not
-exist:
-
-\begin{verbatim}
-Request: kadm5_get_principal, does/not/exist@REALM.COM, principal
-does not exist, client = jon/admin@REALM.COM, server =
-admin@REALM.COM, addr = 192.231.148.12
-\end{verbatim}
-
-\end{itemize}
-
-\subsection{Password Dictionary}
-
-The Admin server's password dictionary is stored in
-KADM5_WORDFILE.  It is read once when the server starts.  It
-contains a list of entries, separated by newlines.  An entry may
-include any character except a newline and NULL, including spaces.
-The dictionary does not need to be sorted.
-
-\section{Tools}
-\label{sec:tools}
-
-Three tools will be provided to create and manage the admin databases.
-This need only run on the admin server machine and do not need to
-operate remotely.  The tools are:
-
-\begin{description}
-\item[ovsec_adm_create] create the admin service principal, the admin
-history principal, the admin password-changing principal, and empty
-admin policy database, and an admin principal database with an empty
-entry for every exist principal.
-\item[ovsec_adm_db_export/import] dump or load the admin policy and
-principal databases
-\item[ovsec_adm_check] check the KDC and admin databases for
-inconsistencies and repair them.\footnote{Not yet implemented.}
-\end{description}
-
-The details of these tools are described in their own documents.
 
 \end{document}
