@@ -1,3 +1,13 @@
+Fri Jan 22 02:08:59 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* trval.c: Added usage message, better options parsing, and
+		support for two new options: -hex, which will accept the
+		asn.1 encoding in hex (i.e., from a packet dump), and
+		-krb5, which instructs the trval to print out the krb5
+		interpretations of the data types.  Trval will now also
+		try to interpret the field names of known krb5 structures
+		if -krb5 is specified.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
