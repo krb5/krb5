@@ -69,6 +69,14 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <shadow.h>
 #endif
 #include <setjmp.h>
+#ifndef POSIX_SETJMP
+#undef sigjmp_buf
+#undef sigsetjmp
+#undef siglongjmp
+#define sigjmp_buf	jmp_buf
+#define sigsetjmp(j,s)	setjmp(j)
+#define siglongjmp	longjmp
+#endif
 #include <netdb.h>
 #include <errno.h>
 #include <syslog.h>
@@ -158,7 +166,8 @@ struct	sockaddr_in his_addr;
 struct	sockaddr_in pasv_addr;
 
 int	data;
-jmp_buf	errcatch, urgcatch;
+jmp_buf	errcatch;
+sigjmp_buf urgcatch;
 int	logged_in;
 struct	passwd *pw;
 int	debug;
@@ -399,9 +408,21 @@ nextopt:
 	(void) signal(SIGPIPE, lostconn);
 	(void) signal(SIGCHLD, SIG_IGN);
 #ifdef SIGURG
+#ifdef POSIX_SIGNALS
+	{
+		struct sigaction sa;
+
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sa.sa_handler = myoob;
+		if (sigaction(SIGURG, &sa, NULL) < 0)
+			syslog(LOG_ERR, "signal: %m");
+	}
+#else
 	if ((long)signal(SIGURG, myoob) < 0)
 		syslog(LOG_ERR, "signal: %m");
-#endif
+#endif /* POSIX_SIGNALS */
+#endif /* SIGURG */
 
 	/* Try to handle urgent data inline */
 #ifdef SO_OOBINLINE
@@ -1143,8 +1164,9 @@ send_data(instr, outstr, blksize)
 	int ret = 0;
 
 	transflag++;
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(outstr));
 		return;
 	}
 	switch (type) {
@@ -1225,7 +1247,7 @@ receive_data(instr, outstr)
 	int ret = 0;
 
 	transflag++;
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
 		return (-1);
 	}
@@ -1698,7 +1720,7 @@ myoob()
 		tmpline[0] = '\0';
 		reply(426, "Transfer aborted. Data connection closed.");
 		reply(226, "Abort successful");
-		longjmp(urgcatch, 1);
+		siglongjmp(urgcatch, 1);
 	}
 	if (strcmp(cp, "STAT") == 0) {
 		if (file_size != (off_t) -1)
@@ -2139,8 +2161,9 @@ send_file_list(whichfiles)
 		simple = 1;
 	}
 
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(dout));
 		return;
 	}
 	while (dirname = *dirlist++) {

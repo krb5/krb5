@@ -1,3 +1,32 @@
+Tue Apr 21 19:59:45 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SIGNALS and CHECK_SETJMP to help with
+	changes in ftpd.c.
+
+Fri Apr 10 20:06:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (receive_data):
+	(send_data): Add support for sigsetjmp().
+	(main): Use sigaction() if we can to avoid SysV lossage.
+	(send_file_list): Oops missed a sigsetjmp() call.
+	(send_data): Add call to secure_flush() to send a zero length
+	buffer when aborting.
+	(send_file_list): Add call to secure_flush() to send a zero length
+	buffer when aborting.
+
+	* ftpcmd.y (PBSZ): Remove restriction on shrinking buffer size.
+
+Thu Mar  5 13:59:47 1998  Dan Winship  <danw@mit.edu>
+
+	* ftpcmd.y (getline): Don't syslog passwords! (or newlines)
+
+Tue Feb 24 21:34:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Add production "nonguest" to catch things that
+	anonymous users aren't supposed to do.  Replace "check_login" with
+	"nonguest" in a few places to prevent w4r3z d00dz from being
+	lame with world-writable incoming directories.
+
 Fri Feb  6 13:25:28 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* popen.c (ftpd_popen): Make sure you can't overrun the argv[] and

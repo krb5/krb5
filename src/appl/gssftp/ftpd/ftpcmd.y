@@ -243,8 +243,6 @@ cmd:		USER SP username CRLF
 			else if (strlen($3) > 10 ||
 				 strlen($3) == 10 && strcmp($3,"4294967296") >= 0)
 			    reply(501, "Bad value for PBSZ: %s", $3);
-			else if (actualbuf >= (maxbuf =(unsigned int) atol($3)))
-			    reply(200, "PBSZ=%u", actualbuf);
 			else {
 			    if (ucbuf) (void) free(ucbuf);
 			    actualbuf = (unsigned int) atol($3);
@@ -1085,8 +1083,13 @@ getline(s, n, iop)
 	}
 #endif /* KERBEROS */
 
-	if (debug)
-		syslog(LOG_DEBUG, "command: <%s>(%d)", s, strlen(s));
+	if (debug) {
+		if (!strncmp(s, "PASS ", 5) && !guest)
+			syslog(LOG_DEBUG, "command: <PASS XXX>");
+		else
+			syslog(LOG_DEBUG, "command: <%.*s>(%d)",
+			       strlen(s) - 2, s, strlen(s));
+	}
 	return (s);
 }
 
