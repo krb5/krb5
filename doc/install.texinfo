@@ -565,7 +565,10 @@ instance ``root'', you would add the following line to the acl file:
 
 Next you need to add administrative principals to the Kerberos database.
 (You must add at least one now.)  To do this, use @code{kadmin.local}
-@emph{on the master KDC}, as in the following example:
+@emph{on the master KDC}.  The administrative principals you create
+should be the ones you added to the ACL file (see @xref{Add
+Administrators to the Acl File}).  In the following example, the
+administration principal @code{admin/admin} is created:
 
 @smallexample
 @group
@@ -585,6 +588,8 @@ Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{<= Type i
 kadmin.local:}
 @end group
 @end smallexample
+
+
 
 @node Create a kadmind Keytab, Start the Kerberos Daemons, Add Administrators to the Kerberos Database, Install the Master KDC
 @subsubsection Create a kadmind Keytab
