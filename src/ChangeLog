@@ -1,3 +1,11 @@
+Mon Feb  8 21:42:44 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Change Windows kerbsrc.zip target so this now does
+		what kerbsrc-nt.zip used to do.  We no longer support
+		building krb5 on systems with 8.3 limitations.  Also allow
+		binary files in windows/lib to be included into
+		kerbsrc.zip file.
+
 Wed Jan 27 17:10:18 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Fix typo so that lib/crypto actually gets
