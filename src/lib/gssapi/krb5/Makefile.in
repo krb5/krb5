@@ -179,7 +179,7 @@ MK_EHDRDIR=if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)); fi
 
 $(GSSAPI_KRB5_HDR): gssapi_krb5.h
 	@$(MK_EHDRDIR)
-	$(CP) $(srcdir)/gssapi_krb5.h "$@"
+	$(CP) $(srcdir)$(S)gssapi_krb5.h "$@"
 
 all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
 all-unix:: all-libobjs

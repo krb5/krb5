@@ -1,3 +1,8 @@
+2003-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in ($(GSSAPI_KRB5_HDR)): Use $(S) to avoid problems on
+	windows.
+
 2003-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (includes): Delete gssapi_krb5.h rule.
