@@ -695,13 +695,10 @@ command.
 .RS
 .TP
 EXAMPLE:
-kadmin: ktadd -k /krb5/kadmind.keytab kadmin/admin kadmin/changepw
-Entry for principal kadmin/admin@ATHENA.MIT.EDU with
+kadmin: ktadd -k /tmp/foo-new-keytab host/foo.mit.edu
+Entry for principal host/foo.mit.edu@ATHENA.MIT.EDU with
 	kvno 3, encryption type DES-CBC-CRC added to keytab
-	WRFILE:/krb5/kadmind.keytab.
-Entry for principal kadmin/changepw@ATHENA.MIT.EDU
-	with kvno 3, encryption type DES-CBC-CRC added to keytab
-	WRFILE:/krb5/kadmind.keytab.
+	WRFILE:/tmp/foo-new-keytab
 kadmin:
 .RE
 .fi

@@ -1,5 +1,7 @@
 Thu Dec  5 19:30:22 1996  Tom Yu  <tlyu@mit.edu>
 
+	* kadmin.M: Change example to no longer use /krb5. [PR 279]
+
 	* kadmin.M: v5srvtab -> krb5.keytab [PR 279]
 
 	* kadmin.c (DEFAULT_KEYTAB): v5srvtab -> krb5.keytab [PR 278]
