@@ -864,7 +864,9 @@ klog_vsyslog(priority, format, arglist)
 #endif	/* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
     sprintf(cp, " %s %s[%ld](%s): ",
-	    log_control.log_hostname, log_control.log_whoami, (long) getpid(),
+	    log_control.log_hostname ? log_control.log_hostname : "", 
+	    log_control.log_whoami ? log_control.log_whoami : "", 
+	    (long) getpid(),
 	    severity2string(priority));
 #else
     sprintf(cp, " ");
@@ -879,6 +881,17 @@ klog_vsyslog(priority, format, arglist)
 	    ((int *) arglist)[2], ((int *) arglist)[3],
 	    ((int *) arglist)[4], ((int *) arglist)[5]);
 #endif	/* HAVE_VSPRINTF */
+
+    /*
+     * If the user did not use krb5_klog_init() instead of dropping
+     * the request on the floor, syslog it - if it exists
+     */
+#ifdef HAVE_SYSLOG
+    if (log_control.log_nentries == 0) {
+	/* Log the message with our header trimmed off */
+	syslog(priority, "%s", syslogp);
+    }
+#endif
 
     /*
      * Now that we have the message formatted, perform the output to each

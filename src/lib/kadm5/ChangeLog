@@ -1,3 +1,10 @@
+2001-06-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c (klog_vsyslog): If krb5_klog_init() is not called, do
+	not pass a NULL pointer to vsprintf for a %s format. Also, if
+	syslog() exists on the system, fallback to using this so the
+	message is not dropped on the floor.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* logger.c (krb5_klog_init): Cleanup assignments in
