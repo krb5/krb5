@@ -53,7 +53,7 @@ typedef struct mit_des_ran_key_seed {
 
 /* cryptosystem entry descriptor for MIT's DES encryption library */
 extern krb5_cs_table_entry krb5_raw_des_cst_entry;
-extern krb5_cs_table_entry krb5_des_cst_entry;
+extern krb5_cs_table_entry krb5_des_crc_cst_entry;
 extern krb5_checksum_entry	krb5_des_cbc_cksumtable_entry;
 
 #endif /* KRB5_MIT_DES__ */
