@@ -1,3 +1,4 @@
+#if defined(_MSDOS) || defined(_WIN32)
 /*
  * winccld.c --- routine for dynamically loading the ccache DLL if
  * it's present.
@@ -84,6 +85,4 @@ int krb5_is_ccdll_loaded()
 	return krb5_win_ccdll_loaded;
 }
 
-
-
-
+#endif	/* Windows */
