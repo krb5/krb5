@@ -680,7 +680,6 @@ krb5_int32 *commit_point;
 #endif
 	    
             if (!xfwrite(&size, sizeof(size), 1, KTFILEP(id))) {
-            abend:
                 return KRB5_KT_IOERR;
             }
             found = TRUE;
