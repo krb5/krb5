@@ -65,7 +65,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     int nservers;
     
     /* in case we never get a TGT, zero the return */
-    tgts = 0;
+    *tgts = 0;
 
     /*
      * we know that the desired credentials aren't in the cache yet.
@@ -86,7 +86,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
      */
     tgtq.client = cred->client;
 
-    if (retval = krb5_tgtname(cred->server, cred->client, &tgtq.server))
+    if (retval = krb5_tgtname(krb5_princ_realm(cred->client),
+			      krb5_princ_realm(cred->server), &tgtq.server))
 	return retval;
 
     /* try to fetch it directly */
@@ -130,12 +131,14 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	    next_server++;
 	    break;			/* found one! */
 	}
+	krb5_free_realm_tree(tgs_list);
 	/* allocate storage for TGT pointers. */
 	ret_tgts = (krb5_creds **)calloc(nservers+1, sizeof(krb5_creds));
 	if (!ret_tgts) {
 	    retval = ENOMEM;
 	    goto out;
 	}
+	*tgts = ret_tgts;
 	for (nservers = 0; next_server; next_server++, nservers++) {
 	    /* now get the TGTs */
 	    tgtq.times = tgt.times;
