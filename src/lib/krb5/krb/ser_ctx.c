@@ -461,12 +461,22 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	goto cleanup;
     context->scc_default_format = (int) ibuf;
     
-    /* Attempt to read in the os_context */
-    kret = krb5_internalize_opaque(kcontext, KV5M_OS_CONTEXT,
-				   (krb5_pointer *) &context->os_context,
-				   &bp, &remain);
-    if (kret && (kret != EINVAL) && (kret != ENOENT))
-	goto cleanup;
+    /* Attempt to read in the os_context.  It's an array now, but
+       we still treat it in most places as a separate object with
+       a pointer.  */
+    {
+	krb5_os_context osp = 0;
+	kret = krb5_internalize_opaque(kcontext, KV5M_OS_CONTEXT,
+				       (krb5_pointer *) &osp,
+				       &bp, &remain);
+	if (kret && (kret != EINVAL) && (kret != ENOENT))
+	    goto cleanup;
+	/* Put the newly allocated data into the krb5_context
+	   structure where we're really keeping it these days.  */
+	if (osp)
+	    *context->os_context = *osp;
+	free(osp);
+    }
 
     /* Attempt to read in the db_context */
     kret = krb5_internalize_opaque(kcontext, KV5M_DB_CONTEXT,

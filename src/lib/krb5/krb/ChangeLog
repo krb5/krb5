@@ -1,3 +1,9 @@
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* ser_ctx.c (krb5_context_internalize): Copy read-in OS context
+	data into krb5_context and free up the newly allocated OS
+	context.
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Try with no specified enctype if
