@@ -263,7 +263,12 @@ Given a Kerberos principal \funcparam{principal}, and a local username
 determine whether user is authorized to login to the account \funcparam{luser}.
 Returns TRUE if authorized, FALSE if not authorized.
 
-\begin{funcdecl}{krb5_random_confounder}{krb5_confounder}{\funcvoid}
+\begin{funcdecl}{krb5_random_confounder}{krb5_error_code}{\funcin}
+\funcarg{int}{size}
+\funcout
+\funcarg{krb5_pointer}{fillin}
 \end{funcdecl}
 
-Generate a random confounder.
+Given a length and a pointer, fills in the area pointed to by
+\funcparam{fillin} with \funcparam{size} random octets suitable for use
+in a confounder.
