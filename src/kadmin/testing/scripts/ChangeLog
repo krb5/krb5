@@ -1,3 +1,8 @@
+2002-10-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: Telnet to 127.0.0.1, not "localhost", to
+	probe for kadmind, since kadmind does IPv4 only.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

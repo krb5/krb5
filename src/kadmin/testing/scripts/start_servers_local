@@ -154,7 +154,10 @@ while true; do
 		fi
 		if $EXPECT <<EOF
 		$LOG_USER
-		spawn telnet localhost 1751
+#		spawn telnet localhost 1751
+# Connect to 127.0.0.1 explicitly, so failure to connect to ::1 will not
+# cause bogus errors.
+		spawn telnet 127.0.0.1 1751
 		expect {
 			"Connection refused" {
 				close
