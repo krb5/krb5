@@ -6,29 +6,29 @@ Major projects:
 	* convert syslog -> log (to real file)
 	* save versus deletion of rcache file
 
- 2.  API changes
-	* context changes (mostly done)
-	* narrow types (done)
-	* get_in_tkt for salt support, multi encryption
-	* keytab lookup (for multi-encryption)
-	* oracle forwarding support
+2.  API changes
+DONE	* context changes (mostly done)
+DONE	* narrow types (done)
+DONE	* get_in_tkt for salt support, multi encryption
+DONE	* keytab lookup (for multi-encryption)
+DONE	* oracle forwarding support
 
 3.  Multi-encryption support
-	* kdb5_edit support (show princal, set attributes)
-	* test DES-MD5
-	* make DES-MD5 default, fall back to DES-CRC
+DONE	* kdb5_edit support (show princal, set attributes)
+DONE	* test DES-MD5
+DONE	* make DES-MD5 default, fall back to DES-CRC
 
 4.  Better Kerberos Database
 	* Design encoders/decoders
 
 5.  Configuration file
-	* write configuration file library
+DONE	* write configuration file library
 
 6.  Misc Cleanup
 	* check file vs stdio ccache code; replace file code with stdio
 	* rewrite rcache code
-	* fold in krb4 library
-	* kdc support automatic fallback (done)
+DONE	* fold in krb4 library
+DONE	* kdc support automatic fallback (done)
 	* DES glue code rewrite
 	* don't need NEED_SYS_FCNTL.H; just always include <fnctl.h>
 	* utmp configure cleanup
@@ -40,6 +40,7 @@ Major projects:
 		krb5_csarray (via valid_etype) and
 		krb5_max_crypto_system, which drags in cryptoconf.c
 
+
 7.  Future development
 	* support for realm name changes
 	* telnet rsh support
@@ -49,14 +50,27 @@ Major projects:
 	* FTP
 
 9.  Kadmin
-	* Password changing protocol.
+DONE	* Password changing protocol.
 
+10.  Install Cleanup
+	* krb5.h still #include's the com_err error include files.  krb5.h
+		should be constructed from krb5.hin, and those include
+		files should be inlined, so that we only need to
+		install the single krb5.h file.
+	* We shouldn't be installing into /krb5.  Should use the Gnu
+		coding standard prefix and exec_prefic setup, with the
+		kerberos database living in /prefix/lib/kdb5.  (People
+		can symlink that off to another partition if they feel
+		the need.)
+
+-----------------------------------------------------
+
+OLD TODO ITEMS (to be vetted later)
 
 
 needed before beta4-patch2:
 
 940802		stdargs/varargs breakage of ksu under SunOS
-940802		double-check make install
 
 not-quite-critical bug fixes:
 
