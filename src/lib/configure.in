@@ -21,9 +21,5 @@ fi
 CONFIG_DIRS(crypto des425 $kdb4 $krb4 krb5 kdb gssapi kadm)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
-_MAKE_SUBDIRS("making",all-unix-subdirs,all)
-MAKE_SUBDIRS("cleaning",clean)
-MAKE_SUBDIRS("installing",install)
-MAKE_SUBDIRS("checking",check)
-AppendRule([all-unix:: all-unix-subdirs])
+DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

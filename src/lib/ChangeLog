@@ -1,3 +1,11 @@
+Mon Sep 25 16:26:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+	* configure.in: Remove custom MAKE_SUBDIRS line with the
+		standard DO_SUBDIRS rule, which works now that we're
+		revamping how the foo-$(WHAT) system works.
 
 Wed Jul 12 12:25:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Temporarily add --with-kdb4 to select building of
