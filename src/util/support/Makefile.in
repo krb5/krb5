@@ -10,12 +10,12 @@ KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-LIB=$(SUPPORT_LIBNAME)
+LIB=krb5support
 LIBMAJOR=0
 LIBMINOR=0
 
 LIBINITFUNC=krb5int_thread_support_init
-#LIBFINIFUNC=
+LIBFINIFUNC=krb5int_thread_support_fini
 
 STLIBOBJS= \
 	threads.o \
