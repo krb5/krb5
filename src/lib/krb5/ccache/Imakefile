@@ -17,9 +17,11 @@ MakeSubdirs($(SUBDIRS))
 NormalLibraryObjectRule()
 
 OBJS=	ccbase.o \
-	ccdefault.o
+	ccdefault.o \
+	ccdefops.o
 
 SRCS=	ccbase.c \
-	ccdefault.c
+	ccdefault.c \
+	ccdefops.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
