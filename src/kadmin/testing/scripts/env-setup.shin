@@ -19,6 +19,7 @@ export STOP
 # The shared library run time setup
 TOPLIBD=@RBUILD@/lib
 PROG_LIBPATH=-L@RBUILD@/lib
+BUILDTOP=@RBUILD@
 # XXX kludge!
 PROG_RPATH=@RBUILD@/lib
 # This converts $(TOPLIBD) to $TOPLIBD

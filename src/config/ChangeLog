@@ -1,3 +1,7 @@
+2003-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Add Solaris support for LD_PRELOAD.
+
 2003-09-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (configure): Make configure depend on configure.in and

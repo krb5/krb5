@@ -1,3 +1,8 @@
+2003-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add support for building an LD_PRELOAD object for
+	Solaris, used by util/Makefile.in.
+
 2003-09-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_MAINTAINER_MODE): New macro.

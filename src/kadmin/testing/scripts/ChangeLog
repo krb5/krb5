@@ -1,3 +1,7 @@
+2003-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Allow BUILDTOP substitution.
+
 2003-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* start_servers_local: Set KRB5RCACHEDIR.
