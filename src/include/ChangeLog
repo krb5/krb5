@@ -1,3 +1,8 @@
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Define MAXPATHLEN only if not already defined.  This
+	avoids warnings under Windows.
+
 1999-08-04  Danilo Almeida  <dalmeida@mit.edu>
 
 	* k5-int.h: Keep invariant that profile_in_memory member of context
