@@ -16,18 +16,18 @@
 #ifndef __KRB5_GLUE_H__
 #define __KRB5_GLUE_H__
 
-#define krb5_string2qbuf(val) str2qb((val)->string, (val)->length, 1)
+#define krb5_data2qbuf(val) str2qb((val)->data, (val)->length, 1)
 
 #define krb5_kdcoptions2KRB5_KDCOptions(val, err) (struct type_KRB5_KDCOptions *)krb5_flags2KRB5_TicketFlags(val, err)
 #define KRB5_KDCOptions2krb5_kdcoptions(val, err) KRB5_TicketFlags2krb5_flags((struct type_KRB5_TicketFlags *) (val), err)
 #define krb5_apoptions2KRB5_APOptions(val, err) (struct type_KRB5_APOptions *)krb5_flags2KRB5_TicketFlags(val, err)
 #define KRB5_APOptions2krb5_apoptions(val, err) KRB5_TicketFlags2krb5_flags((struct type_KRB5_APOptions *) (val), err)
 
-#define free_krb5_string(val) { xfree((val)->string); xfree(val);}
+#define krb5_free_data(val) { xfree((val)->data); xfree(val);}
 
-#define free_krb5_ap_rep_enc_part xfree
-#define free_krb5_checksum xfree
-#define free_krb5_keyblock xfree
+#define krb5_free_ap_rep_enc_part xfree
+#define krb5_free_checksum xfree
+#define krb5_free_keyblock xfree
 
 /* to keep lint happy */
 #define xfree(val) free((char *)(val))
