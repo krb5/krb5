@@ -71,10 +71,12 @@ typedef void FAR * gss_name_t;
 typedef void FAR * gss_cred_id_t;
 typedef void FAR * gss_ctx_id_t;
 
+#if !defined(PROTOTYPE)
 #if defined(__STDC__) || defined(_WINDOWS)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
+#endif
 #endif
 
 /*

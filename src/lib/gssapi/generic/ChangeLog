@@ -1,3 +1,7 @@
+Sat Apr 29 15:29:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapi.h: Only define PROTOTYPE if it is not deined at all.
+
 Fri Apr 21 10:57:44 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* gssapi.h: If !stdc and !windows, define PROTOTYPE properly.
