@@ -120,8 +120,8 @@
 	(HP) = (gethostbyname_r((NAME), &my_h_ent,			\
 				my_h_buf, sizeof (my_h_buf), &my_hp,	\
 				&my_h_err)				\
-		? &my_h_ent						\
-		: 0);							\
+		? 0							\
+		: &my_h_ent);						\
 	(ERR) = my_h_err;						\
     }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
@@ -132,8 +132,8 @@
 	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
 				my_h_buf, sizeof (my_h_buf), &my_hp,	\
 				&my_h_err)				\
-		? &my_h_ent						\
-		: 0);							\
+		? 0							\
+		: &my_h_ent);						\
 	(ERR) = my_h_err;						\
     }
 #else
