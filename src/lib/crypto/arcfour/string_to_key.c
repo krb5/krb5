@@ -65,5 +65,6 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
   /* Zero out the data behind us */
   memset (copystr, 0, len);
   memset(&md4_context, 0, sizeof(md4_context));
+  free(copystr);
   return 0;
 }

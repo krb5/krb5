@@ -1,3 +1,8 @@
+2004-09-21  Sam Hartman  <hartmans@mit.edu>
+
+	* string_to_key.c (krb5int_arcfour_string_to_key): Free the copy
+	of the password, thanks to Derrick Schommer 
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* arcfour.c: Use ANSI C style function definitions.
