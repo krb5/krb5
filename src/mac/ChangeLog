@@ -1,3 +1,7 @@
+Thu Jul  2 17:40:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* version.r: Update Mac resource file to say 1.0.4b1
+
 Wed Jul  1 17:56:04 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.tmpl: Commit sarac's changes which make the Mac

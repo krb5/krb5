@@ -7,8 +7,8 @@
 #endif
 
 resource 'vers' (1) {
-	0x01, 0x00, final, 0x00,
+	0x01, 0x04, beta, 0x01,
 	verUS,
-	"1.0",
-	"1.0, Copyright 1996 Massachusetts Institute of Technology"
+	"1.0.4b1",
+	"1.0.4b1, Copyright 1996,1997,1998 Massachusetts Institute of Technology"
 };
