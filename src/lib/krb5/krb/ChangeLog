@@ -1,3 +1,8 @@
+2003-06-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* mk_req_ext.c (krb5_generate_authenticator): Sequence numbers are
+	unsigned now.
+
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_in_tkt.c (krb5_get_init_creds): Change hardcoded default
