@@ -83,7 +83,7 @@ TAGS: $(SRCS)
 
 clean:: clean-$(WHAT)
 
-clean-:: clean-unix
+clean-:: clean-windows
 
 clean-unix::
 	rm -f  *.o core
@@ -195,14 +195,15 @@ ZIPFILES= ./* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
-	windows/* windows/cns/*
+	windows/* windows/cns/* windows/wintel/*
 
-ZIPBINARYFILES=windows/cns/*.ico
+ZIPBINARYFILES=windows/cns/*.ico windows/wintel/*.ico
 
 ZIPEXCLUDE= LIB/KRB5.SAB \
 	INCLUDE/KRB5/AUTOCONF.H \
 	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
-	WINDOWS/CNS/*.ICO *.O *.A
+	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO \
+	*.O *.A
 
 kerbsrc.zip: awk-windows
 	rm -f kerbsrc.zip

@@ -1,3 +1,7 @@
+Mon Mar 27 20:02:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: added making and zipping in windows/wintel.
+
 Wed Mar 24 14:00:00 1995  Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed zip-windows target to kerbsrc.zip, and also
