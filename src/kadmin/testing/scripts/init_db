@@ -18,6 +18,11 @@ if [ "$TOP" = "" ]; then
 	exit 1
 fi
 
+if [ "$STOP" = "" ]; then
+	echo "init_db: Environment variable \$STOP must point to top of source tree" 1>&2
+	exit 1
+fi
+
 IROOT=$TOP/..
 ADMIN=$TOP/dbutil
 BIN=$IROOT/bin
@@ -26,8 +31,9 @@ SBIN=$TOP/keytab:$TOP/server
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
 
 DUMMY=${TESTDIR=$TOP/testing}; export TESTDIR
+DUMMY=${STESTDIR=$STOP/testing}
 DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
-DUMMY=${TCLUTIL=$TESTDIR/tcl/util.t}; export TCLUTIL
+DUMMY=${TCLUTIL=$STESTDIR/tcl/util.t}; export TCLUTIL
 DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
 PATH=$ADMIN:$BIN:$ETC:$SBIN:$PATH; export PATH
@@ -52,13 +58,13 @@ fi
 
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	-e "s/__KDCHOST__/localhost/g" \
-	< $TESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
+	< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
-	< $TESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
+	< $STESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
 
 kdb5_util -r $REALM create -P mrroot -s $REDIRECT
 
-cp $TESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
+cp $STESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
 
 eval $SRVTCL <<'EOF' $REDIRECT
 source $env(TCLUTIL)

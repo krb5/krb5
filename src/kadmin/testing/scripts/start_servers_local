@@ -1,12 +1,13 @@
 #!/bin/sh
 
 DUMMY=${TESTDIR=$TOP/testing}
-DUMMY=${SAVE_FILES=$TESTDIR/scripts/save_files.sh}
+DUMMY=${STESTDIR=$STOP/testing}
+DUMMY=${SAVE_FILES=$STESTDIR/scripts/save_files.sh}
 DUMMY=${FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl}
-DUMMY=${INITDB=$TESTDIR/scripts/init_db}
+DUMMY=${INITDB=$STESTDIR/scripts/init_db}
 DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
 DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
-DUMMY=${STOP_SERVERS_LOCAL=$TESTDIR/scripts/stop_servers_local}
+DUMMY=${STOP_SERVERS_LOCAL=$STESTDIR/scripts/stop_servers_local}
 
 if [ -d /usr/tmp ]; then
 	usrtmp=/usr/tmp

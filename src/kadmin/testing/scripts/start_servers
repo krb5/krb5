@@ -10,9 +10,10 @@
 # TOP is used.
 
 DUMMY=${TESTDIR=$TOP/testing}
-DUMMY=${SAVE_FILES=$TESTDIR/scripts/save_files.sh}
+DUMMY=${STESTDIR=$STOP/testing}
+DUMMY=${SAVE_FILES=$STESTDIR/scripts/save_files.sh}
 DUMMY=${FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl}
-DUMMY=${START_SERVERS_LOCAL=$TESTDIR/scripts/start_servers_local}
+DUMMY=${START_SERVERS_LOCAL=$STESTDIR/scripts/start_servers_local}
 # This'll be wrong sometimes
 DUMMY=${RSH_CMD=rsh}
 
@@ -43,7 +44,7 @@ if [ $local = 0 ]; then
 	# Fix up the local krb5.conf to point to the remote 
 	sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 		-e "s/__KDCHOST__/$hostname/g" \
-		< $TESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
+		< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
 
 # Using /usr/ucb/rsh and getting rid of "-k $REALM" until we get
 # around to fixing the fact that Kerberos rsh doesn't strip out "-k

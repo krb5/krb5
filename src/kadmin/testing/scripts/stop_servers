@@ -10,8 +10,9 @@
 # TOP is used.
 
 DUMMY=${TESTDIR=$TOP/testing}
+DUMMY=${STESTDIR=$STOP/testing}
 DUMMY=${FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl}
-DUMMY=${STOP_SERVERS_LOCAL=$TESTDIR/scripts/stop_servers_local}
+DUMMY=${STOP_SERVERS_LOCAL=$STESTDIR/scripts/stop_servers_local}
 # This'll be wrong sometimes
 DUMMY=${RSH_CMD=rsh}
 DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}

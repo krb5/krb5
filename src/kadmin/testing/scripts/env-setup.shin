@@ -11,12 +11,13 @@
 # Usage: env-setup.sh <command line>
 #
 
-if [ "$TOP" = "" ]; then
-	echo "Error! \$TOP is not set."
-	exit 1
-fi
+TOP=@BUILDTOP@/kadmin
+STOP=@SRCTOP@/kadmin
+export TOP
+export STOP
 
 TESTDIR=$TOP/testing; export TESTDIR
+STESTDIR=$STOP/testing; export STESTDIR
 if [ "$K5ROOT" = "" ]; then
 	K5ROOT="`cd $TESTDIR; pwd`/krb5-test-root"
 	export K5ROOT
@@ -30,14 +31,14 @@ EXPECT=/mit/gnu/bin/expect; export EXPECT
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl
 export FIX_CONF_FILES
-INITDB=$TESTDIR/scripts/init_db; export INITDB
+INITDB=$STESTDIR/scripts/init_db; export INITDB
 MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl; export MAKE_KEYTAB
 LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl
 export LOCAL_MAKE_KEYTAB
 RESTORE_FILES=$TESTDIR/scripts/restore_files.sh; export RESTORE_FILES
-SAVE_FILES=$TESTDIR/scripts/save_files.sh; export SAVE_FILES
+SAVE_FILES=$STESTDIR/scripts/save_files.sh; export SAVE_FILES
 SIMPLE_DUMP=$TESTDIR/scripts/simple_dump.pl; export SIMPLE_DUMP
-TCLUTIL=$TESTDIR/tcl/util.t; export TCLUTIL
+TCLUTIL=$STESTDIR/tcl/util.t; export TCLUTIL
 BSDDB_DUMP=$TESTDIR/util/bsddb_dump; export BSDDB_DUMP
 CLNTTCL=$TESTDIR/util/ovsec_kadm_clnt_tcl; export CLNTTCL
 SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl; export SRVTCL

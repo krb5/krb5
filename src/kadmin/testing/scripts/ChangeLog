@@ -1,3 +1,14 @@
+Thu Oct  3 13:16:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin: Renamed env-setup.sh for autoconf use.
+
+	* init_db, start_servers, start_servers_local, stop_servers:
+		Invoke scripts from source directory or build tree as needed.
+
+	* configure.in, Makefile.in: generate env-setup.sh with proper
+		paths already.
+
+
 Wed Oct  2 13:41:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in, Makefile.in: Let autoconf determine path to perl.

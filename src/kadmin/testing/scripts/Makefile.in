@@ -3,11 +3,19 @@ PERL=@PERL@
 GEN_SCRIPTS = compare_dump.pl fixup-conf-files.pl make-host-keytab.pl \
 	simple_dump.pl verify_xrunner_report.pl qualname.pl
 
-all:: $(GEN_SCRIPTS) restore_files.sh
+all:: env-setup.sh $(GEN_SCRIPTS) restore_files.sh 
+
+# Should only rebuild env_setup.sh here (use CONFIG_FILES=), but the weird krb5
+# makefile post-processing is unconditional and would trash the makefile.
+env-setup.sh: env-setup.stamp
+env-setup.stamp: $(srcdir)/env-setup.shin config.status
+	$(SHELL) config.status
+	chmod +x env-setup.sh
+	touch env-setup.stamp
 
 restore_files.sh:
 	rm -f restore_files.sh
-	ln -s save_files.sh restore_files.sh
+	ln -s $(srcdir)/save_files.sh restore_files.sh
 
 %.pl: %.pl.in
 	-rm -f $@.tmp
@@ -17,4 +25,4 @@ restore_files.sh:
 	mv $@.tmp $@
 
 clean::
-	-rm -f $(GEN_SCRIPTS) *.tmp
+	-rm -f $(GEN_SCRIPTS) *.tmp env-setup.sh env-setup.stamp restore_files.sh
