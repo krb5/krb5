@@ -8,7 +8,7 @@ SED=@SED@
 
 FILE=$1
 ROOT=`echo $1 | sed -e s/.ct$//`
-BASE=`basename $ROOT`
+BASE=`echo $ROOT | sed -e 's;.*/;;'`
 TMP=ct$$.c
 
 ${SED} -f ${DIR}/ct_c.sed  ${FILE} \
