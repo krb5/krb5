@@ -59,12 +59,18 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
-Notes, Major Changes, and Known Bugs for 1.3.2
-----------------------------------------------
+Major changes in 1.3.2
+----------------------
 
-* [2040, 1471, 2067, 2077, 2079] Support for AES in GSSAPI has been
-  implemented.  This corresponds to the in-progress work in the IETF
-  (CFX).
+* [2040, 1471, 2067, 2077, 2079, 2167] Support for AES in GSSAPI has
+  been implemented.  This corresponds to the in-progress work in the
+  IETF (CFX).
+
+* [2049, 2139, 2148, 2153, 2182, 2183, 2184, 2190] Added a new ccache
+  type "MSLSA:" for read-only access to the MS Windows LSA cache.
+
+* [982] On windows, krb5.exe now has a checkbox to request addressless
+  tickets.
 
 Minor changes in 1.3.2
 ----------------------
@@ -96,6 +102,9 @@ Minor changes in 1.3.2
 
 * [1712] Applied patch from Cesar Garcia to fix lifetime computation
   in krb524 ticket conversion.
+
+* [1714] Fixed a 64-bit endianness bug in ticket starttime encoding in
+  krb524d.  Found by Cesar Garcia.
 
 * [1715] kadmind4 and v5passwdd are no longer installed on Mac OS X.
 
@@ -139,9 +148,6 @@ Minor changes in 1.3.2
 * [2028] KfW now displays a kinit dialog when GSS fails to find
   tickets.
 
-* [2049] Added a new ccache type "MSLSA:" for read-only access to the
-  MS Windows LSA cache.
-
 * [2051] Missing exports have been added to krb4_32.def on Windows.
 
 * [2058] Some problems with krb4 ticket lifetime backdating have
@@ -163,6 +169,15 @@ Minor changes in 1.3.2
 
 * [2106] Return an error for unimplemented ccache functions, rather
   than calling through a null pointer.
+
+* [2144] Memory management errors in the Windows gss.exe test client
+  have been fixed.
+
+* [2180] The profile library now includes pthread.h when compiled with
+  USE_PTHREADS.
+
+* [2181] A timeout has been added to gss-server, and a missing
+  parameter to sign_server() has been added.
 
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
