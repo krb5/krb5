@@ -27,13 +27,13 @@ proc test101 {} {
     # it fails in that case.
     one_line_succeed_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1751}] \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list [info hostname] 1751]] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1}] \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list [info hostname] 1]] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     } "RPC_ERROR"

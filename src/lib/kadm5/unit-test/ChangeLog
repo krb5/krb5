@@ -1,3 +1,9 @@
+1999-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test101): Use local host name instead of
+	"localhost", since address 127.0.0.1 probably won't be listed in
+	credentials.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
