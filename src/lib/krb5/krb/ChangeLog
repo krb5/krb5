@@ -1,3 +1,8 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): Don't forget to actually
+	include the cache type in the cache name, after looking it up.
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (init_common): Don't call krb5_init_ets.

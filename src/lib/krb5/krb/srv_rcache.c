@@ -34,7 +34,8 @@
 /* Macro for valid RC name characters*/
 #define isvalidrcname(x) ((!ispunct(x))&&isgraph(x))
 krb5_error_code KRB5_CALLCONV
-krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache *rcptr)
+krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
+		       krb5_rcache *rcptr)
 {
     krb5_rcache rcache = 0;
     char *cachename = 0, *cachetype;
@@ -72,8 +73,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
 	retval = ENOMEM;
 	goto cleanup;
     }
+    strcpy(cachename, cachetype);
 
     p = strlen(cachename);
+    cachename[p++] = ':';
     for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '-') {
 	    cachename[p++] = '-';
