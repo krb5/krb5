@@ -347,7 +347,7 @@ typedef struct gss_config {
 gss_mechanism __gss_get_mechanism
 PROTOTYPE((gss_OID));
 OM_uint32 __gss_get_mech_type
-PROTOTYPE((gss_OID *, gss_buffer_t));
+PROTOTYPE((gss_OID, gss_buffer_t));
 OM_uint32 __gss_import_internal_name
 PROTOTYPE((OM_uint32 *, gss_OID, gss_union_name_t,
 	   gss_name_t *));

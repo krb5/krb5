@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #endif
 #include <string.h>
+#include <errno.h>
 
 OM_uint32 INTERFACE
 gss_accept_sec_context (minor_status,
@@ -66,7 +67,6 @@ gss_cred_id_t *		delegated_cred_handle;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
     gss_mechanism	mech;
-    int i;
     
     gss_initialize();
 
@@ -81,22 +81,32 @@ gss_cred_id_t *		delegated_cred_handle;
      */
     
     if(*context_handle == GSS_C_NO_CONTEXT) {
+	
+	/* Get the token mech type */
+	status = __gss_get_mech_type(token_mech_type, input_token_buffer);
+	if (status)
+	    return status;
 
+	status = GSS_S_FAILURE;
 	union_ctx_id = (gss_union_ctx_id_t)
 	    malloc(sizeof(gss_union_ctx_id_desc));
+	if (!union_ctx_id) {
+	    *minor_status = ENOMEM;
+	    goto error_out;
+	}
 
-	union_ctx_id->mech_type = (gss_OID)
-	    malloc(sizeof(gss_OID_desc));
-
-	/*
-	 * get the token mech type, create the context id mech type space
-	 * and copy in the OID
-	 */
-
-	__gss_get_mech_type(&token_mech_type, input_token_buffer);
-
+	union_ctx_id->mech_type = (gss_OID) malloc(sizeof(gss_OID_desc));
+	if (!union_ctx_id->mech_type) {
+	    *minor_status = ENOMEM;
+	    goto error_out;
+	}
+	
 	union_ctx_id->mech_type->elements = (void *)
 	    malloc(token_mech_type->length);
+	if (!union_ctx_id->mech_type->elements) {
+	    *minor_status = ENOMEM;
+	    goto error_out;
+	}
 
 	union_ctx_id->mech_type->length = token_mech_type->length;
 	memcpy(union_ctx_id->mech_type->elements,
@@ -106,8 +116,10 @@ gss_cred_id_t *		delegated_cred_handle;
 	/* copy the supplied context handle */
 
 	union_ctx_id->internal_ctx_id = *context_handle;
-    } else
+    } else {
 	union_ctx_id = *context_handle;
+	token_mech_type = union_ctx_id->mech_type;
+    }
     
     /* 
      * get the appropriate cred handle from the union cred struct.
@@ -139,12 +151,13 @@ gss_cred_id_t *		delegated_cred_handle;
 						  time_rec,
 						  delegated_cred_handle);
 
+	    /* If there's more work to do, keep going... */
+	    if (status == GSS_S_CONTINUE_NEEDED)
+		return GSS_S_CONTINUE_NEEDED;
+	    
 	    /* if the call failed, return with failure */
-
-	    if(status != GSS_S_COMPLETE
-	       &&
-	       status != GSS_S_CONTINUE_NEEDED)
-		return(status);
+	    if (status != GSS_S_COMPLETE)
+		goto error_out;
 
 	    /*
 	     * if src_name is non-NULL,
@@ -173,5 +186,16 @@ gss_cred_id_t *		delegated_cred_handle;
     }
     
     return(GSS_S_BAD_MECH);
+    
+error_out:
+    if (union_ctx_id) {
+	if (union_ctx_id->mech_type) {
+	    if (union_ctx_id->mech_type->elements)
+		free(union_ctx_id->mech_type->elements);
+	    free(union_ctx_id->mech_type);
+	}
+	free(union_ctx_id);
+    }
+    return (status);
 }
 

@@ -1,3 +1,12 @@
+Thu Feb 29 11:32:16 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_glue.c (__gss_get_mech_type): Fix code to properly parse token
+		headers.  It was working only by serendipity....
+
+	* g_accept_sec_context.c (gss_accept_sec_context): Add error
+		checking and memory cleanup.  Make gss_accept_sec_context
+		work for mechanisms that use multiple token roundtrips.
+
 Wed Feb 28 20:33:47 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* mglueP.h: For MS-DOS, add #include of malloc.h

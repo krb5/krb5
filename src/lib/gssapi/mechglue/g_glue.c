@@ -72,12 +72,11 @@ gss_mechanism __gss_get_mechanism (gss_OID type)
  */
 
 OM_uint32 __gss_get_mech_type(OID, token)
-
-gss_OID *	OID;
-gss_buffer_t	token;
-
+    gss_OID		OID;
+    gss_buffer_t	token;
 {
     unsigned char * buffer_ptr;
+    int length;
     
     /*
      * This routine reads the prefix of "token" in order to determine
@@ -99,33 +98,31 @@ gss_buffer_t	token;
      * <length> - assume only one byte, hence OID length < 127
      * <mech OID bytes>
      *
-     * The routine returns a pointer to the OID value. The return code is
-     * the length of the OID, if successful; otherwise it is 0.
+     * The routine fills in the OID value and returns an error as necessary.
      */
     
-    if (OID == NULL || *OID == GSS_C_NULL_OID)
-	return (0);
-
-    /* if the token is a null pointer, return a zero length OID */
-    
-    if(token == NULL) {
-	(*OID)->length = 0;
-	(*OID)->elements = NULL;
-	return (0);
-    }
+    if (token == NULL)
+	return (GSS_S_DEFECTIVE_TOKEN);
     
     /* Skip past the APP/Sequnce byte and the token length */
     
     buffer_ptr = (unsigned char *) token->value;
+
+    if (*(buffer_ptr++) != 0x60)
+	return (GSS_S_DEFECTIVE_TOKEN);
+    length = *buffer_ptr++;
+    if (length & 0x80) {
+	if ((length & 0x7f) > 4)
+	    return (GSS_S_DEFECTIVE_TOKEN);
+	buffer_ptr += length & 0x7f;
+    }
     
-    while(*(++buffer_ptr) & (1<<7))
-	continue;
+    if (*(buffer_ptr++) != 0x06)
+	return (GSS_S_DEFECTIVE_TOKEN);
     
-    /* increment buffer_ptr to point to the OID and return its length */
-    
-    (*OID)->length = (OM_uint32) *(buffer_ptr+3);
-    (*OID)->elements = (void *) (buffer_ptr+4);
-    return ((*OID)->length);
+    OID->length = (OM_uint32) *(buffer_ptr++);
+    OID->elements = (void *) buffer_ptr;
+    return (GSS_S_COMPLETE);
 }
 
 
