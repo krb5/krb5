@@ -43,7 +43,7 @@ static char rcsid_net_write_c[] =
 int
 krb5_net_write(fd, buf, len)
 int fd;
-register char *buf;
+register const char *buf;
 int len;
 {
     int cc;
