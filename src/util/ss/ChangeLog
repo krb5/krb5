@@ -1,3 +1,13 @@
+Wed Jun 28 11:24:20 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in, ct_c.sed.in, ct_c.awk.in, config_script: Rename
+		ct_c.* to ct_c.*.in.  ct_c.sed.in is now processed by sed
+		to remove comment lines beginning with '#', since some sed
+		programs can't handle that.  Change config_script so that
+		the directory where the ct_c.* files can be specified,
+		since those are in the build directory, instead of the
+		source directory.  (This is all for the sake of System V
+		sed's.  Sigh.)
 
 Tue Jun 27 15:46:06 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* listen.c(listen_int_handler) - Add argument to conform to signal

@@ -125,7 +125,7 @@ libss.o:	$(OBJS)
 	$(CHMOD) -x $@
 
 # program(mk_cmds,$(MKCMDSOBJS), , LEXLIB BSDLIB,$(PROGDIR)) 
-all:: mk_cmds
+all:: mk_cmds ct_c.awk ct_c.sed
 
 #mk_cmds: $(MKCMDSOBJS)
 #	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
@@ -135,15 +135,15 @@ all:: mk_cmds
 #install::
 #	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds
 
-mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script
-	$(srcdir)/config_script $(srcdir)/mk_cmds.sh $(AWK) $(SED) > mk_cmds
+mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script 
+	$(srcdir)/config_script $(srcdir)/mk_cmds.sh . $(AWK) $(SED) > mk_cmds
 	chmod 755 mk_cmds	
 
-ct_c.awk: $(srcdir)/ct_c.awk
-	$(CP) $(srcdir)/ct_c.awk ct_c.awk
+ct_c.awk: $(srcdir)/ct_c.awk.in
+	$(CP) $(srcdir)/ct_c.awk.in ct_c.awk
 
-ct_c.sed: $(srcdir)/ct_c.sed
-	$(CP) $(srcdir)/ct_c.sed ct_c.sed
+ct_c.sed: $(srcdir)/ct_c.sed.in
+	$(SED) -e '/^#/d' $(srcdir)/ct_c.sed.in > ct_c.sed
 
 clean::
 	$(RM) mk_cmds $(MKCMDSOBJS)
