@@ -61,20 +61,20 @@ main()
 		    expected_crc);
 	    exit(1);
 	}
-	outbytes[0] = expect & 0xff;
-	outbytes[1] = (expect >> 8) & 0xff;
-	outbytes[2] = (expect >> 16) & 0xff;
-	outbytes[3] = (expect >> 24) & 0xff;
+	outbytes[0] = (unsigned char) (expect & 0xff);
+	outbytes[1] = (unsigned char) ((expect >> 8) & 0xff);
+	outbytes[2] = (unsigned char) ((expect >> 16) & 0xff);
+	outbytes[3] = (unsigned char) ((expect >> 24) & 0xff);
 
 	if (sscanf(input, "%lx",  &expect) != 1) {
 	    fprintf(stderr, "bad expectation '%s', not hex\n",
 		    expected_crc);
 	    exit(1);
 	}
-	inbytes[0] = expect & 0xff;
-	inbytes[1] = (expect >> 8) & 0xff;
-	inbytes[2] = (expect >> 16) & 0xff;
-	inbytes[3] = (expect >> 24) & 0xff;
+	inbytes[0] = (unsigned char) (expect & 0xff);
+	inbytes[1] = (unsigned char) ((expect >> 8) & 0xff);
+	inbytes[2] = (unsigned char) ((expect >> 16) & 0xff);
+	inbytes[3] = (unsigned char) ((expect >> 24) & 0xff);
 
 	(*crc32_cksumtable_entry.sum_func)((krb5_pointer)inbytes,
 					   in_length, 0, 0, &outck);

@@ -221,9 +221,9 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 	(lr) |= (unsigned KRB_INT32)(*(ip)++)
 
 #define	PUT_HALF_BLOCK(lr, op) \
-	*(op)++ = ((lr) >> 24) & 0xff; \
-	*(op)++ = ((lr) >> 16) & 0xff; \
-	*(op)++ = ((lr) >> 8) & 0xff; \
-	*(op)++ = (lr) & 0xff
+	*(op)++ = (unsigned char) (((lr) >> 24) & 0xff); \
+	*(op)++ = (unsigned char) (((lr) >> 16) & 0xff); \
+	*(op)++ = (unsigned char) (((lr) >> 8) & 0xff); \
+	*(op)++ = (unsigned char) ((lr) & 0xff)
 
 #endif	/* __DES_TABLES_H__ */

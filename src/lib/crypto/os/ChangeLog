@@ -1,3 +1,9 @@
+Thu Mar 2 17:56:48 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed LIBNAME for the PC, and  brought in ustime
+           and localaddr from the krb/os directory.
+        * rnd_conf.c: added cast to the seed assignment.
+
 Mon Feb 20 16:25:36 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makfile.in: made to work for the PC

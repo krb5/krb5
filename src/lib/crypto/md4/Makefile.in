@@ -3,7 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)
 LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\libcrypto.$(LIBEXT)
+##DOSLIBNAME=..\crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)

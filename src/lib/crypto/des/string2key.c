@@ -51,7 +51,8 @@ const krb5_data FAR * salt;
     register char *str, *copystr;
     register krb5_octet *key;
 
-    register unsigned temp,i;
+    register unsigned temp;
+    register long i;        
     register int j;
     register long length;
     unsigned char *k_p;

@@ -1,7 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\libcrypto.$(LIBEXT)
+##DOSLIBNAME=..\crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS=	crc.$(OBJEXT)

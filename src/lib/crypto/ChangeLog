@@ -1,3 +1,8 @@
+Thu Mar 2 17:43:25 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: added rules to make a DLL from a lib.
+        * win_glue.c, librcrypto.def: needed for making a DLL.
+
 Tue Feb 28 00:15:06 1995  John Gilmore  (gnu at toad.com)
 
 	* cryptoconf.c, des_md5.c:  Avoid <krb5/...> includes.

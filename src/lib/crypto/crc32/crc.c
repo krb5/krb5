@@ -161,8 +161,8 @@ krb5_checksum FAR *outcksum;
     int i;
 
     data = (u_char *)in;
-    for (i=0; i<in_length;i++) {
-	idx = (data[i] ^ c);
+    for (i=0; i < (int) in_length;i++) {
+	idx = (int) (data[i] ^ c);
 	idx &= 0xff;
 	c >>= 8;
 	c ^= crc_table[idx];
@@ -170,10 +170,10 @@ krb5_checksum FAR *outcksum;
     /* c now holds the result */
     outcksum->checksum_type = CKSUMTYPE_CRC32;
     outcksum->length = 4;
-    outcksum->contents[0] = c & 0xff;
-    outcksum->contents[1] = (c >> 8) & 0xff;
-    outcksum->contents[2] = (c >> 16) & 0xff;
-    outcksum->contents[3] = (c >> 24) & 0xff;
+    outcksum->contents[0] = (krb5_octet) (c & 0xff);
+    outcksum->contents[1] = (krb5_octet) ((c >> 8) & 0xff);
+    outcksum->contents[2] = (krb5_octet) ((c >> 16) & 0xff);
+    outcksum->contents[3] = (krb5_octet) ((c >> 24) & 0xff);
     return 0;
 }
 

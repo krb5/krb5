@@ -1,3 +1,10 @@
+Thu Mar 2 17:50:39 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed LIBNAME for the PC.
+        * f_tables.h. f_cbc.c: added cast on the assignment of bits of
+           a long into characters.
+        * string2k.c: promoted an int into a long.
+
 Thu Mar  2 18:09:28 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

@@ -72,7 +72,7 @@ krb5_pointer fillin;
     if (!seeded) {
 	/* time() defined in 4.12.2.4, but returns a time_t, which is an
 	   "arithmetic type" (4.12.1) */
-	rval = time(0);
+	rval = (RAND_TYPE) time(0);
 	SRAND(rval);
 #ifdef HAVE_GETPID
 	rval = RAND();
