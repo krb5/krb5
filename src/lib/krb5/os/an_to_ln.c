@@ -340,9 +340,10 @@ do_replacement(char *regexp, char *repl, int doall, char *in, char *out)
 	    strncpy(op, repl, MAX_FORMAT_BUFFER - 1 - (op - out));
 	    op += strlen(repl);
 	    cp += edispl;
-	    if (!doall)
+	    if (!doall) {
 		use_bytes(strlen(cp));
 		strncpy(op, cp, MAX_FORMAT_BUFFER - 1 - (op - out));
+	    }
 	    matched = 1;
 	}
 	else {
