@@ -7,10 +7,10 @@
 #endif
 
 resource 'vers' (1) {
-	0x01, 0x10, beta, 0x02,
+	0x01, 0x10, beta, 0x03,
 	verUS,
-	"1.1b2",
-	"1.1b2, Copyright 1996-1998 Massachusetts Institute of Technology"
+	"1.1b3",
+	"1.1b3, Copyright 1996-1999 Massachusetts Institute of Technology"
 };
 
 resource 'vers' (2) {
