@@ -313,9 +313,14 @@ int compat_decrypt_key (in5, out4)
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
 	return(retval);
     }
-    if (out5.length != KRB5_MIT_DES_KEYSIZE) {
-	lt = klog( L_DEATH_REQ,"internal keysize error in kdc");
-    } else {
+    if (out5.length != KRB5_MIT_DES_KEYSIZE)
+	lt = klog(L_DEATH_REQ, "internal keysize error in kdc");
+    else if ((out5.enctype != ENCTYPE_DES_CBC_CRC) &&
+	     (out5.enctype != ENCTYPE_DES_CBC_MD4) &&
+	     (out5.enctype != ENCTYPE_DES_CBC_MD5) &&
+	     (out5.enctype != ENCTYPE_DES_CBC_RAW))
+	lt = klog(L_DEATH_REQ, "incompatible principal key type.");
+    else {
 	memcpy(out4, out5.contents, out5.length);
 	retval = 0;
     }

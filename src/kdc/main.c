@@ -311,6 +311,9 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     krb5_key_salt_tuple	*kslist;
     krb5_int32		nkslist;
     int			i;
+#ifdef KRB5_KRB4_COMPAT
+    static krb5_boolean	k4_inited = FALSE;
+#endif
 
     kret = EINVAL;
     db_inited = 0;
@@ -619,6 +622,10 @@ goto whoops;
 	    }
 	    if (!rkey_init_done) {
 		krb5_enctype enctype;
+#ifdef KRB5_KRB4_COMPAT
+		krb5_keyblock *temp_key;
+		krb5_encrypt_block temp_eblock;
+#endif
 		/*
 		 * If all that worked, then initialize the random key
 		 * generators.
@@ -633,6 +640,24 @@ goto whoops;
 				    "while setting up random key generator for enctype %d--enctype disabled",
 				    enctype);
 			    krb5_enctype_array[enctype] = 0;
+#ifdef KRB5_KRB4_COMPAT
+			} else if (!k4_inited &&
+				   (enctype == ENCTYPE_DES_CBC_CRC)) {
+			    krb5_use_enctype(rdp->realm_context,
+					     &temp_eblock, enctype);
+			    if ((kret = (*krb5_enctype_array[enctype]->
+					 system->random_key)
+				 (&temp_eblock,
+				  &krb5_enctype_array[enctype]->random_sequence,
+				  &temp_key)))
+				com_err(progname, kret,
+					"while initializing V4 random key generator");
+			    else {
+				k4_inited = 1;
+				(void) des_init_random_number_generator(temp_key->contents);
+				krb5_free_keyblock(rdp->realm_context, temp_key);
+			    }
+#endif
 			}
 		    }
 		}
@@ -887,9 +912,6 @@ char *argv[];
 	finish_realms(argv[0]);
 	return 1;
     }
-#ifdef KRB5_KRB4_COMPAT
-    des_init_random_number_generator(master_keyblock.contents);
-#endif
     if (!nofork && daemon(0, 0)) {
 	com_err(argv[0], errno, "while detaching from tty");
 	finish_realms(argv[0]);
