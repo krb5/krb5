@@ -34,9 +34,7 @@
 #include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_default(context, ccache)
-   krb5_context context;
-   krb5_ccache *ccache;
+krb5_cc_default(krb5_context context, krb5_ccache *ccache)
 {
     krb5_error_code retval;
 	krb5_os_context	os_ctx;
@@ -63,9 +61,7 @@ krb5_cc_default(context, ccache)
    should call this function, not krb5_cc_default() */
 
 krb5_error_code KRB5_CALLCONV
-krb5int_cc_default(context, ccache)
-	krb5_context context;
-	krb5_ccache *ccache;
+krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
 {
 #ifdef USE_LOGIN_LIBRARY
 	{

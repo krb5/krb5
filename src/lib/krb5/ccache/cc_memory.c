@@ -81,7 +81,7 @@ krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags
 	(krb5_context, krb5_ccache id , krb5_flags flags );
 
 extern krb5_cc_ops krb5_mcc_ops;
-krb5_error_code krb5_change_cache ();
+krb5_error_code krb5_change_cache (void);
 
 #define KRB5_OK 0
 
@@ -114,10 +114,7 @@ static krb5_mcc_data *mcc_head = 0;
 void krb5_mcc_free (krb5_context context, krb5_ccache id);
 
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_initialize(context, id, princ)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_principal princ;
+krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_error_code ret; 
 
@@ -138,9 +135,7 @@ krb5_mcc_initialize(context, id, princ)
  * associated with the cache.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_close(context, id)
-   krb5_context context;
-   krb5_ccache id;
+krb5_mcc_close(krb5_context context, krb5_ccache id)
 {
      krb5_xfree(id);
 
@@ -148,9 +143,7 @@ krb5_mcc_close(context, id)
 }
 
 void
-krb5_mcc_free(context, id)
-	krb5_context context;
-	krb5_ccache id;
+krb5_mcc_free(krb5_context context, krb5_ccache id)
 {
 	krb5_mcc_cursor curr,next;
      
@@ -173,9 +166,7 @@ krb5_mcc_free(context, id)
  * none
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_destroy(context, id)
-   krb5_context context;
-   krb5_ccache id;
+krb5_mcc_destroy(krb5_context context, krb5_ccache id)
 {
      krb5_mcc_data *curr;
 
@@ -222,10 +213,7 @@ krb5_mcc_destroy(context, id)
  * permission errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_resolve (context, id, residual)
-   krb5_context context;
-   krb5_ccache *id;
-   const char *residual;
+krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 {
      krb5_ccache lid;
      krb5_mcc_data *ptr;
@@ -285,10 +273,7 @@ krb5_mcc_resolve (context, id, residual)
  * system errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_start_seq_get(context, id, cursor)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_cc_cursor *cursor;
+krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
 {
      krb5_mcc_cursor mcursor;
      
@@ -318,11 +303,7 @@ krb5_mcc_start_seq_get(context, id, cursor)
  * system errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_next_cred(context, id, cursor, creds)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_cc_cursor *cursor;
-   krb5_creds *creds;
+krb5_mcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor, krb5_creds *creds)
 {
      krb5_mcc_cursor mcursor;
      krb5_error_code retval;
@@ -396,10 +377,7 @@ cleanclient:
  */
 /* ARGSUSED */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_end_seq_get(context, id, cursor)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_cc_cursor *cursor;
+krb5_mcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
 {
      *cursor = 0L;
      return KRB5_OK;
@@ -420,9 +398,7 @@ krb5_mcc_end_seq_get(context, id, cursor)
  * system errors (from open)
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_generate_new (context, id)
-   krb5_context context;
-   krb5_ccache *id;
+krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 {
      krb5_ccache lid;
      char scratch[6+1]; /* 6 for the scratch part, +1 for NUL */
@@ -475,9 +451,7 @@ krb5_mcc_generate_new (context, id)
  * The name of the file cred cache id.
  */
 const char * KRB5_CALLCONV
-krb5_mcc_get_name (context, id)
-   krb5_context context;
-   krb5_ccache id;
+krb5_mcc_get_name (krb5_context context, krb5_ccache id)
 {
      return (char *) ((krb5_mcc_data *) id->data)->name;
 }
@@ -496,10 +470,7 @@ krb5_mcc_get_name (context, id)
  * KRB5_CC_NOMEM
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_get_principal(context, id, princ)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_principal *princ;
+krb5_mcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
 {
      krb5_mcc_data *ptr = (krb5_mcc_data *)id->data;
      if (!ptr->prin)
@@ -511,12 +482,7 @@ krb5_mcc_get_principal(context, id, princ)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_retrieve(context, id, whichfields, mcreds, creds)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_flags whichfields;
-   krb5_creds *mcreds;
-   krb5_creds *creds;
+krb5_mcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds)
 {
     return krb5_cc_retrieve_cred_default (context, id, whichfields,
 					  mcreds, creds);
@@ -536,10 +502,7 @@ krb5_mcc_retrieve(context, id, whichfields, mcreds, creds)
  * storage failure errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_store(context, id, creds)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_creds *creds;
+krb5_mcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
      krb5_error_code ret;
      krb5_mcc_cursor mcursor;
@@ -568,10 +531,7 @@ krb5_mcc_store(context, id, creds)
  * Sets the operational flags of id to flags.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_set_flags(context, id, flags)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_flags flags;
+krb5_mcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
 {
     return KRB5_OK;
 }

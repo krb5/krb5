@@ -46,10 +46,7 @@ static struct krb5_cc_typelist *cc_typehead = &cc_entry;
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_register(context, ops, override)
-   krb5_context context;
-   krb5_cc_ops *ops;
-   krb5_boolean override;
+krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
 {
     struct krb5_cc_typelist *t;
     for (t = cc_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
@@ -80,10 +77,7 @@ krb5_cc_register(context, ops, override)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_resolve (context, name, cache)
-   krb5_context context;
-   const char *name;
-   krb5_ccache *cache;
+krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 {
     struct krb5_cc_typelist *tlist;
     char *pfx, *cp;

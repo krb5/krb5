@@ -58,10 +58,7 @@ static const krb5_ser_entry krb5_ccache_ser_entry = {
  *				  this krb5_ccache variant.
  */
 static krb5_error_code
-krb5_ccache_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_ccache_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     krb5_ccache		ccache;
@@ -95,11 +92,7 @@ krb5_ccache_size(kcontext, arg, sizep)
  * krb5_ccache_externalize()	- Externalize the krb5_ccache.
  */
 static krb5_error_code
-krb5_ccache_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_ccache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_ccache		ccache;
@@ -159,11 +152,7 @@ krb5_ccache_externalize(kcontext, arg, buffer, lenremain)
  * krb5_ccache_internalize()	- Internalize the krb5_ccache.
  */
 static krb5_error_code
-krb5_ccache_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_ccache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_ccache		ccache;
@@ -207,8 +196,7 @@ krb5_ccache_internalize(kcontext, argp, buffer, lenremain)
  * Register the ccache serializer.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_ser_ccache_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_ccache_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_ccache_ser_entry));
 }

@@ -41,7 +41,7 @@ krb5_creds test_creds;
 
 int debug=0;
 
-static void init_structs()
+static void init_structs(void)
 {
   static int add=0x12345;
 
@@ -80,8 +80,7 @@ static void init_structs()
   test_creds.authdata = NULL;
 }
 
-static void init_test_cred(context)
-krb5_context context;
+static void init_test_cred(krb5_context context)
 {
 #define REALM "REALM"
   krb5_build_principal(context, &test_creds.client, sizeof(REALM), REALM,
@@ -107,10 +106,7 @@ krb5_context context;
 #define CHECK_FAIL(experr, kret, msg) \
      if (experr != kret) { CHECK(kret, msg);}
 
-static void cc_test(context, name, flags)
-  krb5_context context;
-  const char *name;
-  int flags;
+static void cc_test(krb5_context context, const char *name, int flags)
 {
      krb5_ccache id, id2;
      krb5_creds creds;
@@ -199,9 +195,7 @@ static void cc_test(context, name, flags)
 #endif
 }
 
-static void do_test(context, prefix)
-krb5_context context;
-const char *prefix;
+static void do_test(krb5_context context, const char *prefix)
 {
   char name[300];
 
@@ -212,8 +206,7 @@ const char *prefix;
   printf("Test on %s passed\n", name);
 }
 
-static void test_misc(context)
-krb5_context context;
+static void test_misc(krb5_context context)
 {
   /* Tests for certain error returns */
   krb5_error_code	kret;
@@ -243,7 +236,7 @@ krb5_context context;
 extern krb5_cc_ops krb5_mcc_ops;
 extern krb5_cc_ops krb5_fcc_ops;
 
-int main () 
+int main (void)
 {
     krb5_context context;
     krb5_error_code	kret;
