@@ -93,6 +93,8 @@ krb5_error_code
 get_salt_from_key PROTOTYPE((krb5_context, krb5_principal,
 			     krb5_key_data *, krb5_data *));
 
+void limit_string PROTOTYPE((char *name));
+
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,

@@ -111,6 +111,7 @@ krb5_data **response;			/* filled in with a response packet */
 	status = "UNPARSING SERVER";
 	goto cleanup;
     }
+    limit_string(sname);
 
    /* errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat); */
     errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket, &subkey);
@@ -123,7 +124,8 @@ krb5_data **response;			/* filled in with a response packet */
 	errcode = errcode2;
 	goto cleanup;
     }
-
+    limit_string(cname);
+    
     if (errcode) {
 	status = "PROCESS_TGS";
 	goto cleanup;

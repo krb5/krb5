@@ -1,3 +1,12 @@
+Thu May 29 21:08:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_as_req.c (process_as_req), do_tgs_req (process_tgs_req): Use
+		limit_string() to make sure the length of cname and sname
+		are reasonable.
+
+	* kdc_util.c (limit_string): New function which limits the strings
+		that will end up in log files to "reasonable" lengths.
+
 Tue Feb 18 09:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos_v4.c: Remove include of krb4-proto.h
