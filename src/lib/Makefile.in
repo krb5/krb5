@@ -78,7 +78,7 @@ $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k4_glue, $*.dll, $*.map, \
-##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS), $(K4DEF)
+##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS) llibcew, $(K4DEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
