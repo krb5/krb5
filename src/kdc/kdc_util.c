@@ -1343,11 +1343,14 @@ get_salt_from_key(context, client, client_key, salt)
 	salt->data = 0;
 	salt->length = 0;
 	break;
-
     case KRB5_KDB_SALTTYPE_NOREALM:
 	if ((retval = krb5_principal2salt_norealm(context, client, salt)))
 	    return retval;
 	break;
+    case KRB5_KDB_SALTTYPE_AFS3:
+	/* send the same salt as with onlyrealm - but with no type info,
+	   we just hope they figure it out on the other end. */
+	/* fall through to onlyrealm: */
     case KRB5_KDB_SALTTYPE_ONLYREALM:
 	realm = krb5_princ_realm(context, client);
 	salt->length = realm->length;

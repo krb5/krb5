@@ -71,6 +71,16 @@ static krb5_error_code return_pw_salt
 		    krb5_keyblock *encrypting_key,
 		    krb5_pa_data **send_pa));
 
+/* SAM preauth support */
+static krb5_error_code verify_sam_response
+    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
+		    krb5_kdc_req *request,
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
+
+static krb5_error_code get_sam_edata
+    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+		    krb5_db_entry *client, krb5_db_entry *server,
+		    krb5_pa_data *data));
 /*
  * Preauth property flags
  */
@@ -99,6 +109,20 @@ static krb5_preauth_systems preauth_systems[] = {
 	0, 
 	0,
 	return_pw_salt
+    },
+    {
+	KRB5_PADATA_SAM_RESPONSE,
+	0,
+	0,
+	verify_sam_response,
+	0
+    },
+    {
+	KRB5_PADATA_SAM_CHALLENGE,
+	PA_HARDWARE,		/* causes get_preauth_hint_list to use this */
+	get_sam_edata,
+	0,
+	0
     },
     { -1,}
 };
@@ -232,6 +256,7 @@ check_padata (context, client, request, enc_tkt_reply)
 		break;
 	}
     }
+if (retval) com_err("krb5kdc", retval, "pa verify failure");
     if (retval)
 	retval = KRB5KDC_ERR_PREAUTH_FAILED;
     return retval;
@@ -504,6 +529,22 @@ return_pw_salt(context, in_padata, client, request, reply, client_key,
 	padata->contents = (krb5_octet *)salt_data.data;
 	padata->length = salt_data.length;
 	break;
+    case KRB5_KDB_SALTTYPE_AFS3:
+	/* send an AFS style realm-based salt */
+	/* for now, just pass the realm back and let the client
+	   do the work. In the future, add a kdc configuration
+	   variable that specifies the old cell name. */
+	padata->pa_type = KRB5_PADATA_AFS3_SALT;
+	/* it would be just like ONLYREALM, but we need to pass the 0 */
+	scratch = krb5_princ_realm(kdc_context, request->client);
+	if ((padata->contents = malloc(scratch->length+1)) == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+	memcpy(padata->contents, scratch->data, scratch->length);
+	padata->length = scratch->length+1;
+	padata->contents[scratch->length] = 0;
+	break;
     case KRB5_KDB_SALTTYPE_ONLYREALM:
 	scratch = krb5_princ_realm(kdc_context, request->client);
 	if ((padata->contents = malloc(scratch->length)) == NULL) {
@@ -537,4 +578,395 @@ cleanup:
 }
 
     
+static struct {
+  char* name;
+  int   sam_type;
+} *sam_ptr, sam_inst_map[] = {
+  "SNK4", PA_SAM_TYPE_DIGI_PATH,
+  "SECURID", PA_SAM_TYPE_SECURID,
+  "GRAIL", PA_SAM_TYPE_GRAIL,
+  0, 0
+};
 
+static krb5_error_code
+get_sam_edata(context, request, client, server, pa_data)
+    krb5_context 	context;
+    krb5_kdc_req *	request;
+    krb5_db_entry *	client;
+    krb5_db_entry *	server;
+    krb5_pa_data *	pa_data;
+{
+    krb5_error_code		retval;
+    krb5_sam_challenge		sc;
+    krb5_predicted_sam_response	psr;
+    krb5_data *			scratch;
+    int 			i = 0;
+    int 			start = 0;
+    krb5_encrypt_block		eblock;
+    krb5_keyblock encrypting_key;
+    char response[9];
+    char inputblock[8];
+    krb5_data predict_response;
+
+    /* Given the client name we can figure out what type of preauth
+       they need. The spec is currently for querying the database for
+       names that match the types of preauth used. Later we should
+       make this mapping show up in kdc.conf. In the meantime, we
+       hardcode the following:
+		/SNK4 -- Digital Pathways SNK/4 preauth.
+		/GRAIL -- experimental preauth
+       The first one found is used. See sam_inst_map above.
+
+       For SNK4 in particular, the key in the database is the key for
+       the device; kadmin needs a special interface for it.
+     */
+
+    {
+      char *uname;
+      int npr = 1, more;
+      krb5_db_entry assoc;
+      krb5_key_data  *assoc_key;
+      krb5_principal newp;
+      int newlen;
+      int probeslot;
+
+      sc.sam_type = 0;
+
+      retval = krb5_copy_principal(kdc_context, request->client, &newp);
+      if (retval) {
+	com_err("krb5kdc", retval, "copying client name for preauth probe");
+	return retval;
+      }
+
+      probeslot = krb5_princ_size(context, newp)++;
+      krb5_princ_name(kdc_context, newp) = 
+	realloc(krb5_princ_name(kdc_context, newp),
+		krb5_princ_size(context, newp) * sizeof(krb5_data));
+
+      for(sam_ptr = sam_inst_map; sam_ptr->name; sam_ptr++) {
+	krb5_princ_component(kdc_context,newp,probeslot)->data = sam_ptr->name;
+	krb5_princ_component(kdc_context,newp,probeslot)->length = 
+	  strlen(sam_ptr->name);
+	npr = 1;
+	retval = krb5_db_get_principal(kdc_context, newp, &assoc, &npr, &more);
+	if(!retval) {
+	  sc.sam_type = sam_ptr->sam_type;
+	  break;
+	}
+      }
+      /* if sc.sam_type is set, it worked */
+      if (sc.sam_type) {
+	/* so use assoc to get the key out! */
+	{
+	  /* here's what do_tgs_req does */
+	  retval = krb5_dbe_find_enctype(kdc_context, &assoc,
+					 ENCTYPE_DES_CBC_RAW,
+					 KRB5_KDB_SALTTYPE_NORMAL,
+					 0,		/* Get highest kvno */
+					 &assoc_key);
+	  if (retval) {
+	    char *sname;
+	    krb5_unparse_name(kdc_context, newp, &sname);
+	    com_err("krb5kdc", retval, 
+		    "snk4 finding the enctype and key <%s>", sname);
+	    return retval;
+	  }
+	  /* convert server.key into a real key */
+	  retval = krb5_dbekd_decrypt_key_data(kdc_context,
+					       &master_encblock, 
+					       assoc_key, &encrypting_key,
+					       NULL);
+	  if (retval) {
+	    com_err("krb5kdc", retval, 
+		    "snk4 pulling out key entry");
+	    return retval;
+	  }
+	  /* now we can use encrypting_key... */
+	}
+      }
+
+      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
+      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
+      krb5_princ_size(context, newp)--;
+      krb5_free_principal(kdc_context, newp);
+    }
+    sc.magic = KV5M_SAM_CHALLENGE;
+    sc.sam_flags = KRB5_SAM_USE_SAD_AS_KEY;
+
+    switch (sc.sam_type) {
+    case PA_SAM_TYPE_GRAIL:
+      sc.sam_type_name.data = "Experimental System";
+      sc.sam_type_name.length = strlen(sc.sam_type_name.data);
+      sc.sam_challenge_label.data = "experimental challenge label";
+      sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
+      sc.sam_challenge.data = "12345";
+      sc.sam_challenge.length = strlen(sc.sam_challenge.data);
+
+      psr.magic = KV5M_PREDICTED_SAM_RESPONSE;
+      /* string2key on sc.sam_challenge goes in here */
+      /* eblock is just to set the enctype */
+      {
+	const krb5_enctype type = ENCTYPE_DES_CBC_MD5;
+	if (!valid_enctype(type)) return KRB5_PROG_ETYPE_NOSUPP;
+	krb5_use_enctype(context, &eblock, type);
+	retval = krb5_string_to_key(context, &eblock, 
+				    &psr.sam_key, &sc.sam_challenge, 
+				    0 /* salt */);
+	retval = encode_krb5_predicted_sam_response(&psr, &scratch);
+	if (retval) goto cleanup;
+	
+	{
+	  krb5_enc_data tmpdata;
+	  retval = krb5_encrypt_data(context, master_encblock.key, 0, 
+				     scratch, &tmpdata);
+	  sc.sam_track_id = tmpdata.ciphertext;
+	}
+	if (retval) goto cleanup;
+      }
+
+      sc.sam_response_prompt.data = "response prompt";
+      sc.sam_response_prompt.length = strlen(sc.sam_response_prompt.data);
+      sc.sam_pk_for_sad.length = 0;
+      sc.sam_nonce = 0;
+      /* Generate checksum */
+      /*krb5_checksum_size(context, ctype)*/
+      /*krb5_calculate_checksum(context,ctype,in,in_length,seed,
+	seed_length,outcksum) */
+      /*krb5_verify_checksum(context,ctype,cksum,in,in_length,seed,
+	seed_length) */
+      sc.sam_cksum.contents = (krb5_octet *)
+	malloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5_DES));
+      if (sc.sam_cksum.contents == NULL) return(ENOMEM);
+
+      retval = krb5_calculate_checksum(context, CKSUMTYPE_RSA_MD5_DES,
+				       sc.sam_challenge.data,
+				       sc.sam_challenge.length,
+				       psr.sam_key.contents, /* key */
+				       psr.sam_key.length, /* key length */
+				       &sc.sam_cksum);
+      if (retval) { free(sc.sam_cksum.contents); return(retval); }
+      
+      retval = encode_krb5_sam_challenge(&sc, &scratch);
+      if (retval) goto cleanup;
+      pa_data->magic = KV5M_PA_DATA;
+      pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE;
+      pa_data->contents = scratch->data;
+      pa_data->length = scratch->length;
+      
+      retval = 0;
+      break;
+    case PA_SAM_TYPE_DIGI_PATH:
+      sc.sam_type_name.data = "Digital Pathways";
+      sc.sam_type_name.length = strlen(sc.sam_type_name.data);
+#if 1
+      sc.sam_challenge_label.data = "Enter the following on your keypad";
+      sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
+#endif
+      /* generate digit string, take it mod 1000000 (six digits.) */
+      {
+	int j;
+	krb5_encrypt_block eblock;
+	krb5_keyblock *session_key = 0;
+	char outputblock[8];
+	int i;
+	memset(inputblock, 0, 8);
+	krb5_use_enctype(kdc_context, &eblock, ENCTYPE_DES_CBC_CRC);
+	retval = krb5_random_key(kdc_context, &eblock, 
+				 krb5_enctype_array[ENCTYPE_DES_CBC_CRC]->random_sequence,
+				 &session_key);
+	if (retval) {
+	  /* random key failed */
+	  com_err("krb5kdc", retval,"generating random challenge for preauth");
+	  return retval;
+	}
+	/* now session_key has a key which we can pick bits out of */
+	/* we need six decimal digits. Grab 6 bytes, div 2, mod 10 each. */
+	if (session_key->length != 8) {
+	  com_err("krb5kdc", retval = KRB5KDC_ERR_ETYPE_NOSUPP,
+		  "keytype didn't match code expectations");
+	  return retval;
+	}
+	for(i = 0; i<6; i++) {
+	  inputblock[i] = '0' + ((session_key->contents[i]/2) % 10);
+	}
+	if (session_key)
+	  krb5_free_keyblock(kdc_context, session_key);
+
+	/* retval = krb5_finish_key(kdc_context, &eblock); */
+	/* now we have inputblock containing the 8 byte input to DES... */
+	sc.sam_challenge.data = inputblock;
+	sc.sam_challenge.length = 6;
+
+	krb5_use_enctype(kdc_context, &eblock, ENCTYPE_DES_CBC_RAW);
+	encrypting_key.enctype = ENCTYPE_DES_CBC_RAW;
+	/* do any necessary key pre-processing */
+	retval= krb5_process_key(kdc_context, &eblock, &encrypting_key);
+
+	if (retval) {
+	  com_err("krb5kdc", retval, "snk4 processing key");
+	}
+
+	{
+	  char ivec[8];
+	  memset(ivec,0,8);
+	  retval = krb5_encrypt(kdc_context, inputblock, outputblock, 8,
+				&eblock, ivec);
+	}
+	if (retval) {
+	  com_err("krb5kdc", retval, "snk4 response generation failed");
+	  return retval;
+	}
+	/* now output block is the raw bits of the response; convert it
+	   to display form */
+	for (j=0; j<4; j++) {
+	  char n[2];
+	  int k;
+	  n[0] = outputblock[j] & 0xf;
+	  n[1] = (outputblock[j]>>4) & 0xf;
+	  for (k=0; k<2; k++) {
+	    if(n[k] > 9) n[k] = ((n[k]-1)>>2);
+	    /* This is equivalent to:
+	       if(n[k]>=0xa && n[k]<=0xc) n[k] = 2;
+	       if(n[k]>=0xd && n[k]<=0xf) n[k] = 3;
+	       */
+	  }
+	  /* for v4, we keygen: *(j+(char*)&key1) = (n[1]<<4) | n[0]; */
+	  /* for v5, we just generate a string */
+	  response[2*j+0] = '0' + n[1];
+	  response[2*j+1] = '0' + n[0];
+	  /* and now, response has what we work with. */
+	}
+	response[8] = 0;
+	predict_response.data = response;
+	predict_response.length = 8;
+#if 0				/* for debugging, hack the output too! */
+sc.sam_challenge_label.data = response;
+sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
+#endif
+      }
+
+      psr.magic = KV5M_PREDICTED_SAM_RESPONSE;
+      /* string2key on sc.sam_challenge goes in here */
+      /* eblock is just to set the enctype */
+      {
+	const krb5_enctype type = ENCTYPE_DES_CBC_MD5;
+	if (!valid_enctype(type)) return KRB5_PROG_ETYPE_NOSUPP;
+	krb5_use_enctype(context, &eblock, type);
+	retval = krb5_string_to_key(context, &eblock, 
+				    &psr.sam_key, &predict_response, 
+				    0 /* salt */);
+	retval = encode_krb5_predicted_sam_response(&psr, &scratch);
+	if (retval) goto cleanup;
+	
+	{
+	  krb5_enc_data tmpdata;
+	  retval = krb5_encrypt_data(context, master_encblock.key, 0, 
+				     scratch, &tmpdata);
+	  sc.sam_track_id = tmpdata.ciphertext;
+	}
+	if (retval) goto cleanup;
+      }
+
+      sc.sam_response_prompt.data = "Enter the displayed response";
+      sc.sam_response_prompt.length = strlen(sc.sam_response_prompt.data);
+      sc.sam_pk_for_sad.length = 0;
+      sc.sam_nonce = 0;
+      /* Generate checksum */
+      /*krb5_checksum_size(context, ctype)*/
+      /*krb5_calculate_checksum(context,ctype,in,in_length,seed,
+	seed_length,outcksum) */
+      /*krb5_verify_checksum(context,ctype,cksum,in,in_length,seed,
+	seed_length) */
+      sc.sam_cksum.contents = (krb5_octet *)
+	malloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5_DES));
+      if (sc.sam_cksum.contents == NULL) return(ENOMEM);
+
+      retval = krb5_calculate_checksum(context, CKSUMTYPE_RSA_MD5_DES,
+				       sc.sam_challenge.data,
+				       sc.sam_challenge.length,
+				       psr.sam_key.contents, /* key */
+				       psr.sam_key.length, /* key length */
+				       &sc.sam_cksum);
+      if (retval) { free(sc.sam_cksum.contents); return(retval); }
+      
+      retval = encode_krb5_sam_challenge(&sc, &scratch);
+      if (retval) goto cleanup;
+      pa_data->magic = KV5M_PA_DATA;
+      pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE;
+      pa_data->contents = scratch->data;
+      pa_data->length = scratch->length;
+      
+      retval = 0;
+      break;
+    }
+
+cleanup:
+    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
+    krb5_xfree(encrypting_key.contents);
+    return retval;
+}
+
+static krb5_error_code
+verify_sam_response(context, client, request, enc_tkt_reply, pa)
+    krb5_context	context;
+    krb5_db_entry *	client;
+    krb5_kdc_req *	request;
+    krb5_enc_tkt_part * enc_tkt_reply;
+    krb5_pa_data *	pa;
+{
+    krb5_error_code		retval;
+    krb5_data			scratch;
+    krb5_sam_response		*sr = 0;
+    krb5_predicted_sam_response	*psr = 0;
+    krb5_enc_sam_response_enc	*esre = 0;
+    krb5_timestamp		timenow;
+
+    scratch.data = pa->contents;
+    scratch.length = pa->length;
+    
+    retval = decode_krb5_sam_response(&scratch, &sr);
+    if (retval) com_err("krb5kdc", retval, "decode_krb5_sam_response failed");
+    if (retval) goto cleanup;
+
+    {
+      krb5_enc_data tmpdata;
+      tmpdata.ciphertext = sr->sam_track_id;
+      retval = krb5_decrypt_data(context, master_encblock.key, 0, 
+				 &tmpdata, &scratch);
+      if (retval) com_err("krb5kdc", retval, "decrypt track_id failed");
+    }
+    if (retval) goto cleanup;
+    retval = decode_krb5_predicted_sam_response(&scratch, &psr);
+    if (retval) com_err("krb5kdc", retval, "decode_krb5_predicted_sam_response failed");
+    if (retval) goto cleanup;
+    {
+      /* now psr.sam_key is what we said to use... */
+      retval = krb5_decrypt_data(context, &psr->sam_key, 0, 
+				 &sr->sam_enc_nonce_or_ts, &scratch);
+      if (retval) com_err("krb5kdc", retval, "decrypt nonce_or_ts failed");
+    }
+    if (retval) goto cleanup;
+    retval = decode_krb5_enc_sam_response_enc(&scratch, &esre);
+    if (retval) com_err("krb5kdc", retval, "decode_krb5_enc_sam_response_enc failed");
+    if (retval) goto cleanup;
+    if (esre->sam_timestamp != sr->sam_patimestamp) {
+      retval = KRB5KDC_ERR_PREAUTH_FAILED;
+      goto cleanup;
+    }
+    retval = krb5_timeofday(context, &timenow);
+    if (retval) goto cleanup;
+    
+    if (labs(timenow - sr->sam_patimestamp) > context->clockskew) {
+	retval = KRB5KRB_AP_ERR_SKEW;
+	goto cleanup;
+    }
+
+    setflag(enc_tkt_reply->flags, TKT_FLG_HW_AUTH);
+  cleanup:
+    if (retval) com_err("krb5kdc", retval, "sam verify failure");
+    if (sr) krb5_xfree(sr);
+    if (psr) krb5_xfree(psr);
+    if (esre) krb5_xfree(esre);
+
+    return retval;
+}
