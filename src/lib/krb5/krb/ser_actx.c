@@ -240,6 +240,8 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 
 	    /* Convert to signed 32 bit integer */
 	    obuf32 = obuf;
+	    if (kret == 0 && obuf != obuf32)
+		kret = EINVAL;
 	    if (!kret)
 		(void) krb5_ser_pack_int32(obuf32, &bp, &remain);
 

@@ -1,3 +1,8 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* ser_actx.c (krb5_auth_context_externalize): Do bounds checking
+	on converted size value.
+
 2002-02-27  Sam Hartman  <hartmans@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred_basic): Don't check IP addresses; if
