@@ -34,6 +34,9 @@
 #ifdef WSHELPER
 #include <wshelper.h>
 #else /* WSHELPER */
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
