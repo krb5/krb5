@@ -61,9 +61,9 @@ layer and the Kerberos v5 subroutines for telnet.
 Thanks to Dan Bernstein, for providing the replay cache code.  
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Jay Berkenbilt, John Carr, Don Davis, Nancy Gilman,
-Barry Jaspan, John Kohl, Cliff Neuman, Paul Park, Chris Provenzano,
-Jon Rochlis, Jeff Schiller, Ted Ts'o, Tom Yu.
+past and present: Richard Basch, Jay Berkenbilt, John Carr, Don Davis,
+Nancy Gilman, Barry Jaspan, John Kohl, Cliff Neuman, Paul Park, Ezra 
+Peisach, Chris Provenzano, Jon Rochlis, Jeff Schiller, Ted Ts'o, Tom Yu.
 
 
 Note:
