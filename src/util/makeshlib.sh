@@ -100,37 +100,46 @@ mips-sni-sysv4)
 	do
 		sed -e "s;^;$i/;" -e "s; ; $i/;g" $i/DONE
 	done`
-echo rm $library 
-rm -f $library 2>/dev/null
-ar cq $library $FILES || exit $?
+	echo rm $library 
+	rm -f $library 2>/dev/null
+	echo ar cq $library $FILES
+	ar cq $library $FILES || exit $?
 	dump -g $library | sed -e 's/^[ 	]*[0-9][0-9]*[ 	]*\([^ 	.][^ 	]*\)$/\1/p;d' | sort | uniq > ${library}.syms
 	stat=$?
-	if [ $stat -eq 0 ]
-	then
-	if test "$HAVE_GCC" = "yes" ; then
+	if [ $stat -eq 0 ] ; then
+	    if test "$HAVE_GCC" = "yes-broken" ; then
+		# yikes!  this part won't handle gnu ld either!
+		# disable it for now.
 		$CC -o shr.o.$VERSION $library -nostartfiles -Xlinker -bgcbypass:1 -Xlinker -bfilelist -Xlinker -bM:SRE -Xlinker -bE:${library}.syms $ldflags $liblist $libdirfl
-		else ld -o shr.o.$VERSION $library -H512 -T512 -bM:SRE  $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist -lc
-            fi
- stat=$?
-	if [ $stat -eq 0 ]
-	      then
-	      rm $library ${library}.syms
-	      ar cq $library shr.o.$VERSION
-	      stat=$?
-	      rm shr.o.$VERSION
-	     else
-	     rm -f $library
-fi
-	   fi
-;;
+	    else
+		# Pull in by explicit pathname so we don't get gnu ld if
+		# installed (it could be even if we chose not to use gcc).
+		# Better still would be to do this through $CC -- how do
+		# we get crt0.o left out?
+    echo	/bin/ld -o shr.o.$VERSION $library -H512 -T512 -bM:SRE $ldflags -bgcbypass:1 -bnodelcsect -bE:${library}.syms $libdirfl $liblist -lc
+		/bin/ld -o shr.o.$VERSION $library -H512 -T512 -bM:SRE $ldflags -bgcbypass:1 -bnodelcsect -bE:${library}.syms $libdirfl $liblist -lc
+	    fi
+	    stat=$?
+	    if [ $stat -eq 0 ] ; then
+		rm $library ${library}.syms
+		ar cq $library shr.o.$VERSION
+		stat=$?
+		rm shr.o.$VERSION
+	    else
+		rm -f $library
+	    fi
+	fi
+	;;
 alpha-*-osf*)
 	FILES=`for i 
 	do
 		sed -e "s;^;$i/;" -e "s; ; $i/;g" $i/DONE
-
 	done`
 
-	echo 	ld -shared -expect_unresolved \* $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
+	# The "-expect_unresolved *" argument hides the fact that we don't
+	# provide the (static) db library when building the (dynamic) kadm5
+	# libraries.
+	echo ld -shared -expect_unresolved \* $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
 	ld -shared -expect_unresolved \* $ldflags -o $library -all $FILES $libdirfl $liblist -none -lc -update_registry ../../so_locations
 	stat=$?
 	;;

@@ -1,3 +1,9 @@
+Sat Aug 31 01:34:41 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* makeshlib.sh (*-*-aix*): Echo more stuff before running it.
+	Always use /bin/ld -- the GNU linker isn't supported yet.  Don't
+	pass -x or -bfilelist.  Whitespace changes.
+
 Thu Aug 15 20:48:16 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* makeshlib.sh (alpha-*-osf*): add -expect_unresolved (due to
