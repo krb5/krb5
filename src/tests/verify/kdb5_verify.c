@@ -77,18 +77,6 @@ static char *mkey_name = 0;
 static char *mkey_password = 0;
 static krb5_boolean manual_mkey = FALSE;
 
-void
-quit(context)
-    krb5_context context;
-{
-    krb5_error_code retval = krb5_db_fini(context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-    if (retval) {
-	com_err(progname, retval, "while closing database");
-	exit(1);
-    }
-    exit(0);
-}
 
 int check_princ PROTOTYPE((krb5_context, char *));
 
@@ -216,7 +204,7 @@ char *argv[];
     krb5_finish_key(context, &master_encblock);
 
     retval = krb5_db_fini(context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, (size_t) master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
@@ -290,7 +278,8 @@ errout:
       return(-1);
     }
     else {
-      if (memcmp((char *)pwd_key.contents, (char *) db_key.contents, pwd_key.length)) {
+      if (memcmp((char *)pwd_key.contents, (char *) db_key.contents, 
+		 (size_t) pwd_key.length)) {
 	fprintf(stderr, "\t key did not match stored value for %s\n", 
 		princ_name);
 	goto errout;

@@ -1,3 +1,8 @@
+2000-07-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_verify.c (check_princ): Compiler warning cleanup. Get rid
+	of unused function.
+
 2000-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb5_verify.c: Remove unused variable.
