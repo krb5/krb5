@@ -1,3 +1,7 @@
+2003-06-05  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Don't check for vfork as we no longer use it
+
 2003-05-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't use libkrb524.a any more.

@@ -1,3 +1,7 @@
+2003-06-05  Sam Hartman  <hartmans@mit.edu>
+
+	* popen.c (ftpd_popen): Use fork not vfork
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c: Don't declare errno.
