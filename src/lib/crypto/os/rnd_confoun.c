@@ -32,6 +32,11 @@ static char rcsid_rnd_counfoun_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#ifdef USE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
 
 /*
  * Generate a random confounder
