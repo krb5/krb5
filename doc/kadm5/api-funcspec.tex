@@ -593,6 +593,7 @@ modify_principal & modify & Modify the attributes of an existing
         principal (not password). \\
 rename_principal & add and delete & Rename a principal. \\
 get_principal & get\footnotemark & Retrieve a principal. \\
+get_principals & get & Retrieve some or all principal names. \\
 chpass_principal & modify\footnotemark[\thefootnote] &
          Change a principal's password. \\
 chpass_principal_util & modify\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
@@ -602,6 +603,7 @@ create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
+get_policies & get & Retrieve some or all policy names. \\
 free_principal_ent & none & Free the memory associated with an
                 ovsec_kadm_principal_ent_t. \\
 free_policy_ent & none & Free the memory associated with an
@@ -1207,6 +1209,32 @@ RETURN CODES:
 \item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
 \end{description}
 
+\subsection{ovsec_kadm_get_principals}
+
+\begin{verbatim}
+ovsec_kadm_ret_t
+ovsec_kadm_get_principals(void *server_handle, char *exp,
+                          char ***princs, int *count)
+\end{verbatim}
+
+Retrieves the list of principal names.  
+
+AUTHORIZATION REQUIRED: get
+
+If \v{exp} is NULL, all principal names are retrieved; otherwise,
+principal names that match the expression exp are retrieved.
+\v{princs} is filled in with a pointer to a NULL-terminated array of
+strings, and \v{count} is filled in with the number of principal names
+in the array.  \v{princs} must be freed with a call to
+\v{ovsec_kadm_free_name_list}.
+
+All characters in the expression match themselves except ``?'' which
+matches any single character, ``*'' which matches any number of
+consecutive characters, and ``[chars]'' which matches any single
+character of ``chars''. Any character which follows a ``$\backslash$''
+matches itself exactly, and a ``$\backslash$'' cannot be the last
+character in the string.
+
 \subsection{ovsec_kadm_create_policy}
 
 \begin{verbatim}
@@ -1329,6 +1357,32 @@ RETURN CODES:
 \item[OVSEC_KADM_UNK_POLICY] Policy not found.
 \end{description}
 
+\subsection{ovsec_kadm_get_policies}
+
+\begin{verbatim}
+ovsec_kadm_ret_t
+ovsec_kadm_get_policies(void *server_handle, char *exp,
+                          char ***pols, int *count)
+\end{verbatim}
+
+Retrieves the list of principal names.  
+
+AUTHORIZATION REQUIRED: get
+
+If \v{exp} is NULL, all principal names are retrieved; otherwise,
+principal names that match the expression exp are retrieved.  \v{pols}
+is filled in with a pointer to a NULL-terminated array of strings, and
+\v{count} is filled in with the number of principal names in the
+array.  \v{pols} must be freed with a call to
+\v{ovsec_kadm_free_name_list}.
+
+All characters in the expression match themselves except ``?'' which
+matches any single character, ``*'' which matches any number of
+consecutive characters, and ``[chars]'' which matches any single
+character of ``chars''. Any character which follows a ``$\backslash$''
+matches itself exactly, and a ``$\backslash$'' cannot be the last
+character in the string.
+
 \subsection{ovsec_kadm_free_principal_ent, _policy_ent}
 
 \begin{verbatim}
@@ -1350,6 +1404,17 @@ Free memory that was allocated by a call to ovsec_kadm_get_policy.  If
 the argument is NULL, the function returns succesfully.
 
 AUTHORIZATION REQUIRED: none (local operation)
+
+\subsection{ovsec_kadm_free_name_list}
+
+\begin{verbatim}
+void ovsec_kadm_free_name_list(void *server_handle,
+                               char **names, int *count);
+\end{verbatim}
+
+Free the memory that was allocated by ovsec_kadm_get_principals or
+ovsec_kadm_get_policies.  names and count must be a matched pair of
+values returned from one of those two functions.
 
 \subsection{ovsec_kadm_get_privs}
 
