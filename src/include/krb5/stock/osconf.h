@@ -47,13 +47,18 @@
 #ifdef HasInetTrue
 #define KRB5_USE_INET		/* Support IP address family */
 #endif
+
+#ifdef HasUnistdH
+#define	HAS_UNISTD_H
+#endif
+
 #define	USE_DBM_LNAME		/* Use a DBM database for the aname/lname
 				   conversion */
 
-#define	DEFAULT_CONFIG_FILENAME	"/krb5/krb.conf"
-#define	DEFAULT_TRANS_FILENAME	"/krb5/krb.realms"
-#define	DEFAULT_LNAME_FILENAME	"/krb5/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:/krb5/v5srvtab"
+#define	DEFAULT_CONFIG_FILENAME	"@KRB5ROOT/krb.conf"
+#define	DEFAULT_TRANS_FILENAME	"@KRB5ROOT/krb.realms"
+#define	DEFAULT_LNAME_FILENAME	"@KRB5ROOT/aname"
+#define	DEFAULT_KEYTAB_NAME	"FILE:@KRB5ROOT/v5srvtab"
 
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
