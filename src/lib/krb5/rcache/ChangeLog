@@ -1,3 +1,7 @@
+
+Tue Aug 29 14:19:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in, .Sanitize, ser_rc.c - Add routines to serialize rcache.
+
 Fri Aug  4 22:07:46 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* rc_conv.c (krb5_auth_to_rep): Add parens to shut up gcc -Wall

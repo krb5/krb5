@@ -39,6 +39,7 @@ rc_dfl.h
 rc_io.c
 rc_io.h
 rcdef.c
+ser_rc.c
 
 Things-to-lose:
 
