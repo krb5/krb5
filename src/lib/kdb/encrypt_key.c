@@ -30,7 +30,7 @@ static char rcsid_encrypt_key_c [] =
 krb5_error_code
 krb5_kdb_encrypt_key(eblock, in, out)
 krb5_encrypt_block *eblock;
-krb5_keyblock *in;
+const krb5_keyblock *in;
 krb5_keyblock *out;
 {
     /* encrypted rep has the real (unencrypted) key length stored
