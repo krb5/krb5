@@ -43,7 +43,9 @@ int errnum;
 	break;
     case EPERM:
     case EACCES:
-    case EISDIR:
+#ifdef EISDIR
+    case EISDIR:			/* Mac doesn't have EISDIR */
+#endif
     case ENOTDIR:
     case ETXTBSY:
     case EBUSY:

@@ -24,16 +24,8 @@
  * This file contains the source code for krb5_scc_generate_new.
  */
 
-
 #include "scc.h"
-
 #include "k5-int.h"
-
-#ifdef KRB5_USE_INET
-#include <netinet/in.h>
-#else
- #error find some way to use net-byte-order file version numbers.
-#endif
 
 extern krb5_cc_ops krb5_scc_ops;
 
@@ -103,9 +95,11 @@ krb5_scc_generate_new (context, id)
 	     retcode = krb5_scc_interpret (context, errno);
 	     goto err_out;
      } else {
-	 krb5_int16 scc_fvno = htons(KRB5_SCC_DEFAULT_FVNO);
+	 unsigned char scc_fvno[2] = {
+	    (unsigned char) (KRB5_SCC_DEFAULT_FVNO >> 8),
+	    (unsigned char) (KRB5_SCC_DEFAULT_FVNO & 0xFF)};
 
-	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
+	 if (!fwrite((char *)scc_fvno, sizeof(scc_fvno), 1, f)) {
 	     retcode = krb5_scc_interpret(context, errno);
 	     (void) fclose(f);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);

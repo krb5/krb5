@@ -1,3 +1,11 @@
+Fri Mar 17 19:24:05 1995  John Gilmore  (gnu at toad.com)
+
+	* scc_errs.c:  Mac doesn't have EISDIR error.
+	* scc_gennew.c, scc_maybe.c:  Eliminate the use of htons and ntohs
+	for byte order handling; just do it by hand.
+	* scc_read.c (krb5_scc_read_authdatum):  Zap unused variable "ret".
+	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.
+
 Tue Mar  7 19:55:01 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_DEFS.

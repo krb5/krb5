@@ -4,6 +4,8 @@
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
+ * Copyright 1995 by Cygnus Support.
+ *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
@@ -24,15 +26,8 @@
  * This file contains the source code for conditional open/close calls.
  */
 
-
 #include "scc.h"
 #include "k5-int.h"
-
-#ifdef KRB5_USE_INET
-#include <netinet/in.h>
-#else
- #error find some way to use net-byte-order file version numbers.
-#endif
 
 int krb5_scc_default_format = KRB5_SCC_DEFAULT_FVNO;
 
@@ -81,7 +76,7 @@ krb5_scc_open_file (context, id, mode)
     krb5_ccache id;
     int mode;
 {
-     krb5_int16 scc_fvno;
+     char fvno_bytes[2];	/* In nework standard byte order, big endian */
      krb5_scc_data *data;
      FILE *f;
      char *open_flag;
@@ -150,9 +145,10 @@ krb5_scc_open_file (context, id, mode)
 	 /* write the version number */
 	 int errsave;
 
-	 scc_fvno = htons(krb5_scc_default_format);
+	 fvno_bytes[0] = krb5_scc_default_format >> 8;
+	 fvno_bytes[1] = krb5_scc_default_format & 0xFF;
 	 data->version = krb5_scc_default_format;
-	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
+	 if (!fwrite((char *)fvno_bytes, sizeof(fvno_bytes), 1, f)) {
 	     errsave = errno;
 	     (void) krb5_unlock_file(context, f, data->filename);
 	     (void) fclose(f);
@@ -160,19 +156,19 @@ krb5_scc_open_file (context, id, mode)
 	 }
      } else {
 	 /* verify a valid version number is there */
-	 if (!fread((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
+	 if (!fread((char *)&fvno_bytes, sizeof(fvno_bytes), 1, f)) {
 	     (void) krb5_unlock_file(context, f, data->filename);
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if ((scc_fvno != htons(KRB5_SCC_FVNO_1)) &&
-	     (scc_fvno != htons(KRB5_SCC_FVNO_2)) &&
-	     (scc_fvno != htons(KRB5_SCC_FVNO_3))) {
+	 data->version = (fvno_bytes[0] << 8) + fvno_bytes[1];
+	 if ((data->version != KRB5_SCC_FVNO_1) &&
+	     (data->version != KRB5_SCC_FVNO_2) &&
+	     (data->version != KRB5_SCC_FVNO_3)) {
 	     (void) krb5_unlock_file(context, f, data->filename);
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 data->version = ntohs(scc_fvno);
      }
      data->file = f;
      return 0;

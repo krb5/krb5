@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 OBJS 	= scc_close.o scc_destry.o scc_eseq.o \
 	scc_gennew.o scc_getnam.o scc_gprin.o scc_init.o \

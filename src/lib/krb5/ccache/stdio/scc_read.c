@@ -442,7 +442,6 @@ krb5_scc_read_authdatum(context, id, a)
     krb5_error_code kret;
     krb5_int32 int32;
     krb5_ui_2 ui2;
-    int ret;
     
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
