@@ -245,5 +245,15 @@
     _krb5_read_password
     _krb5_prompter_posix
     _krb5_kuserok
-    _krb5_aname_to_localname
-    
+    _krb5_aname_to_localname    
+	_krb5_build_principal_va
+	_krb5_rc_default
+	_krb5_rc_default_name
+	_krb5_rc_default_type
+	_krb5_rc_get_type
+	_krb5_rc_register_type
+	_krb5_rc_resolve_full
+	_krb5_rc_resolve_type
+    _krb5_verify_init_creds
+	_krb5_verify_init_creds_opt_init
+	_krb5_verify_init_creds_opt_set_ap_req_nofail

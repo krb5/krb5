@@ -206,5 +206,16 @@
 	krb5_cc_get_type
 
 # Added for Carbon compat in Mac OS X (used by cvs)
-    krb5_kuserok
-    krb5_aname_to_localname
+	krb5_kuserok
+	krb5_aname_to_localname
+	krb5_build_principal_va
+	krb5_rc_default
+	krb5_rc_default_name
+	krb5_rc_default_type
+	krb5_rc_get_type
+	krb5_rc_register_type
+	krb5_rc_resolve_full
+	krb5_rc_resolve_type
+    krb5_verify_init_creds
+	krb5_verify_init_creds_opt_init
+	krb5_verify_init_creds_opt_set_ap_req_nofail
