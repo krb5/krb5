@@ -425,10 +425,18 @@ void profile_dereference_data(prf_data_t data)
     err = k5_mutex_lock(&g_shared_trees_mutex);
     if (err)
 	return;
+    profile_dereference_data_locked(data);
+    (void) k5_mutex_unlock(&g_shared_trees_mutex);
+#else
+    profile_free_file_data(data);
+#endif
+}
+void profile_dereference_data_locked(prf_data_t data)
+{
+#ifdef SHARE_TREE_DATA
     data->refcount--;
     if (data->refcount == 0)
 	profile_free_file_data(data);
-    (void) k5_mutex_unlock(&g_shared_trees_mutex);
 #else
     profile_free_file_data(data);
 #endif

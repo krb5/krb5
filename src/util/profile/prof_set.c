@@ -74,7 +74,7 @@ static errcode_t rw_setup(profile_t profile)
 		free(new_data);
 		return retval;
 	    }
-	    profile_dereference_data(file->data);
+	    profile_dereference_data_locked(file->data);
 	    file->data = new_data;
 	}
 #endif /* SHARE_TREE_DATA */

@@ -199,6 +199,7 @@ errcode_t profile_close_file
 	(prf_file_t profile);
 
 void profile_dereference_data (prf_data_t);
+void profile_dereference_data_locked (prf_data_t);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size

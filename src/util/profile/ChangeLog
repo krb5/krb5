@@ -1,3 +1,10 @@
+2004-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_dereference_data_locked): New function.
+	(profile_dereference_data): Call it.
+	* prof_set.c (rw_setup): Likewise.
+	* prof_int.h (profile_dereference_data_locked): Declare it.
+
 2004-09-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (check-unix-tcl-ok): Use KRB5_RUN_ENV.
