@@ -1,3 +1,10 @@
+Mon Mar 24 12:19:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* t_kdb.c (do_testing): Clean up error handling for krb5_init_context.
+
+	* Makefile.in (check): Define and use KRB5_CONFIG_SETUP which sets
+ 		up the environment variables appropriately.
+
 Sun Mar 16 21:20:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* keytab.c: Don't assume dbm_db_get_mkey() and dbe_find_enctype

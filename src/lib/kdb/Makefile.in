@@ -1,5 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -51,10 +52,8 @@ t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_kdb t_kdb.o $(OBJS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 check::	t_kdb
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(KRB5_RUN_ENV) ./t_kdb -tcv
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(KRB5_RUN_ENV) ./t_kdb -tcvr
+	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcv
+	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcvr
 
 clean::
 	$(RM) t_kdb t_kdb.o

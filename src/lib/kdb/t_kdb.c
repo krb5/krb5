@@ -487,11 +487,10 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     oparg = "";
 
     /* Set up some initial context */
+    op = "initializing krb5";
     kret = krb5_init_context(&kcontext);
-    if (kret) {
-	    com_err(programname, kret, "while initializing krb5");
-	    exit(1);
-    }
+    if (kret)
+	    goto goodbye;
 
     /* 
      * The database had better not exist.
