@@ -23,7 +23,7 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES)
 
 ##### Linker
 LINK 	 = link
-LIBS 	 = $(GLIB) $(WLIB)
+LIBS 	 = $(GLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew
 ##WIN32##SYSLIBS  = libc.lib kernel32.lib wsock32.lib user32.lib \
 ##WIN32##	gdi32.lib comdlg32.lib

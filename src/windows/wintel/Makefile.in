@@ -30,7 +30,7 @@ RFLAGS 	 = -D$(KRB)=1 $(KRBOPT)
 
 ##### Linker
 LINK 	 = link
-LIBS 	 = $(KLIB) $(WLIB)
+LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew commdlg winsock
 ##WIN32##SYSLIBS  = libc.lib kernel32.lib wsock32.lib user32.lib gdi32.lib \
 ##WIN32##	  comdlg32.lib
