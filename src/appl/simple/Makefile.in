@@ -1,5 +1,7 @@
 thisconfigdir=.
+myfulldir=appl/simple
+mydir=.
+MY_SUBDIRS = client server
 BUILDTOP=$(REL)$(U)$(S)$(U)
-LOCAL_SUBDIRS = client server
 
 CFLAGS = $(CCOPTS)

@@ -1,4 +1,7 @@
 thisconfigdir=.
+myfulldir=appl/user_user
+mydir=.
+MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG
 PROG_LIBPATH=-L$(TOPLIBD)

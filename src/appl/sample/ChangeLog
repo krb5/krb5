@@ -1,3 +1,12 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Removed and tests moved up to appl/configure.in
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+		Add a MY_SUBDIRS definition to control the directories
+		which are recursively descended by the Makefile.
+
 Wed Feb 18 15:31:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
