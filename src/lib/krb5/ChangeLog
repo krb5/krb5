@@ -1,3 +1,8 @@
+
+Fri Jun 30 14:43:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add Berkeley database code here.  Remove typo in
+		libupdate section.
+
 Wed Jun 28 21:25:29 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: with static libs, we need install-unix, not install.
