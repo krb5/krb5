@@ -30,6 +30,7 @@ SUBDIRS=krb5 kerberosIV
 MakeSubdirs($(SUBDIRS))
 
 #ifdef IsodeIncls
-includes::
-	$(LN) IsodeIncls isode
+includes:: isode
+
+LinkFile(isode, IsodeIncls)
 #endif
