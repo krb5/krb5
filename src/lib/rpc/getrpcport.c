@@ -37,7 +37,6 @@ static  char sccsid[] = "@(#)getrpcport.c 1.3 87/08/11 SMI";
 
 #include <stdio.h>
 #include <rpc/rpc.h>
-#include <netdb.h>
 #include <sys/socket.h>
 
 getrpcport(host, prognum, versnum, proto)

@@ -1,3 +1,15 @@
+Tue Jul 30 18:59:17 1996  Tom Yu  <tlyu@mit.edu>
+
+	* rpc.h: Don't include netdb.h (rpc/types.h already includes it)
+
+	* svc_auth_gssapi.c: #include <rpc/rpc.h> before <sys/stat.h> (to
+		get sys/types.h.
+
+	* clnt_generic.c, clnt_simple.c, clnt_tcp.c, clnt_udp.c,
+ 		getrpcent.c, getrpcport.c, pmap_getmaps.c, svc_simple.c:
+ 		Remove #include <netdb.h>; it's already included in
+ 		rpc/types.h.
+
 Mon Jul 29 22:02:47 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Determine whether netdb.h defines struct rpcent.
