@@ -75,6 +75,9 @@ clean-windows::
 	cd ..\memory
 	@echo Making clean in krb5\ccache\memory
 	-$(MAKE) -$(MFLAGS) clean
+	cd ..\ccapi
+	@echo Making clean in krb5\ccache\ccapi
+	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in krb5\ccache
 	$(RM) $(OBJFILE)

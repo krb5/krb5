@@ -1,3 +1,7 @@
+Mon May 17 14:11:45 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Clean ccapi subdirectory in clean-windows target.
+
 Mon May 10 15:24:08 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
