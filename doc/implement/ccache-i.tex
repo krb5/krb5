@@ -58,7 +58,7 @@ Errors:  permission errors.
 
 Closes the credentials cache \funcparam{id}, invalidates \funcparam{id},
 and releases any other resources acquired during use of the credentials cache.
-Requires that \funcparam{id} identify a valid credentials cache.
+Requires that \funcparam{id} identifies a valid credentials cache.
 
 
 \begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcin}
@@ -68,7 +68,7 @@ Requires that \funcparam{id} identify a valid credentials cache.
 
 Stores \funcparam{creds} in the cache \funcparam{id}, tagged with
 \funcparam{creds{\ptsto}client}.
-Requires that \funcparam{id} identify a valid credentials cache.
+Requires that \funcparam{id} identifies a valid credentials cache.
 
 Errors: permission errors, storage failure errors.
 
@@ -84,7 +84,7 @@ Searches the cache \funcparam{id} for credentials matching
 \funcparam{mcreds}.  The fields which are to be matched are specified by
 set bits in \funcparam{whichfields}, and always include the principal
 name \funcparam{mcreds{\ptsto}server}.
-Requires that \funcparam{id} identify a valid credentials cache.
+Requires that \funcparam{id} identifies a valid credentials cache.
 
 If at least one match is found, one of the matching credentials is
 returned in \funcparam{*creds}. XXX free the return creds?
@@ -102,7 +102,7 @@ The primary principal is filled into \funcparam{*principal}; the caller
 should release this memory by calling \funcname{krb5_free_principal} on
 \funcparam{*principal} when finished.
 
-Requires that \funcparam{id} identify a valid credentials cache.
+Requires that \funcparam{id} identifies a valid credentials cache.
 
 \begin{funcdecl}{krb5_cc_start_seq_get}{krb5_error_code}{\funcin}
 \funcarg{krb5_ccache}{id}
@@ -111,7 +111,7 @@ Requires that \funcparam{id} identify a valid credentials cache.
 \end{funcdecl}
 
 Prepares to sequentially read every set of cached credentials.
-Requires that \funcparam{id} identify a valid credentials cache opened by
+Requires that \funcparam{id} identifies a valid credentials cache opened by
 \funcname{krb5_cc_open}.
 \funcparam{cursor} is filled in with a cursor to be used in calls to
 \funcname{krb5_cc_next_cred}.
@@ -126,7 +126,7 @@ Requires that \funcparam{id} identify a valid credentials cache opened by
 
 Fetches the next entry from \funcparam{id}, returning its values in
 \funcparam{*creds}, and updates \funcparam{*cursor} for the next request.
-Requires that \funcparam{id} identify a valid credentials cache and
+Requires that \funcparam{id} identifies a valid credentials cache and
 \funcparam{*cursor} be a cursor returned by
 \funcname{krb5_cc_start_seq_get} or a subsequent call to
 \funcname{krb5_cc_next_cred}.
@@ -141,7 +141,7 @@ Errors: error code if no more cache entries.
 Finishes sequential processing mode and invalidates \funcparam{*cursor}.
 \funcparam{*cursor} must never be re-used after this call.
 
-Requires that \funcparam{id} identify a valid credentials cache and
+Requires that \funcparam{id} identifies a valid credentials cache and
 \funcparam{*cursor} be a cursor returned by
 \funcname{krb5_cc_start_seq_get} or a subsequent call to
 \funcname{krb5_cc_next_cred}.
@@ -158,7 +158,7 @@ Errors: may return error code if \funcparam{*cursor} is invalid.
 Removes any credentials from \funcparam{id} which match the principal
 name {cred{\ptsto}server} and the fields in \funcparam{cred} masked by
 \funcparam{which}.
-Requires that \funcparam{id} identify a valid credentials cache.
+Requires that \funcparam{id} identifies a valid credentials cache.
 
 Errors: returns error code if nothing matches; returns error code if
 couldn't delete.
@@ -218,12 +218,13 @@ Returns the name of the ccache denoted by \funcparam{id}.
 \end{funcdecl}
 
 Returns the name of the default credentials cache; this may be equivalent to
-{\funcfont getenv}({\tt "KRB5CCACHE"}) with an appropriate fallback.
+\funcnamenoparens{getenv}({\tt "KRB5CCACHE"}) with an appropriate fallback.
 
-\begin{funcdecl}{krb5_cc_default }{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_cc_default}{krb5_error_code}{\funcout}
 \funcarg{krb5_ccache *}{ccache}
 \end{funcdecl}
 
-Equivalent to {\funcfont krb5_cc_resolve}({\funcfont
-krb5_cc_default_name}(), \funcparam{ccache}).
+Equivalent to
+\funcnamenoparens{krb5_cc_resolve}(\funcname{krb5_cc_default_name},
+\funcparam{ccache}).
 
