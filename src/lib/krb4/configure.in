@@ -3,7 +3,7 @@ CONFIG_RULES
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 case $krb5_cv_host in
-     powerpc-apple-darwin*)
+     *-apple-darwin*)
      KRB_ERR_TXT=
      KRB_ERR=
      KRB_ERR_C=krb_err.c

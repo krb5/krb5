@@ -1,3 +1,8 @@
+2003-08-06  Alexandra Ellwood  <lxs@mit.edu>
+
+        * configure.in: Don't assume all darwin boxes are powerpc.
+        (eg: OpenDarwin/x86).
+
 2003-07-11  Alexandra Ellwood  <lxs@mit.edu>
 
         * RealmsConfig-glue.c: Check for NULL realm argument and n
