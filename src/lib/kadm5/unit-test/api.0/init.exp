@@ -104,7 +104,7 @@ proc test7 {} {
 
     expect {
 	{Enter password:} { }
-	-re "key:$" { }
+	-re "\n\[^\n\]+key:\[^\n\]*$" { }
 	eof {
 		fail "$test: eof instead of password prompt"
 		api_exit
@@ -338,7 +338,7 @@ proc test22 {} {
 	}]
 	send "\n"
 	expect {
-	    -re ":$" { set prompting 1}
+	    -re "\n\[^\n\]+:\[^\n\]*$" { set prompting 1}
 	    -re "\nOK .*$prompt$" { fail "$test: premature success" }
 	    -re "\nERROR .*$prompt$" { fail "$test: premature failure" }
 		timeout { fail "$test: timeout" }
@@ -363,7 +363,7 @@ proc test225 {} {
 	}]
 	send "\n"
 	expect {
-	    -re ":$" { set prompting 1}
+	    -re "\n\[^\n\]+:\[^\n\]*$" { set prompting 1}
 	    -re "\nOK .*$prompt$" { fail "$test: premature success" }
 	    -re "\nERROR .*$prompt$" { fail "$test: premature failure" }
 		timeout { fail "$test: timeout" }

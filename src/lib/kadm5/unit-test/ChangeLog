@@ -1,3 +1,11 @@
+2002-10-18  Tom Yu  <tlyu@mit.edu>
+
+	* api.2/init-v2.exp (test106): Make regexp more forgiving of
+	variant password prompts.
+
+	* api.0/init.exp (test7, test22, test225): Make regexp more
+	forgiving of variant password prompts.
+
 2002-09-15  Tom Yu  <tlyu@mit.edu>
 
 	* api.0/chpass-principal.exp:

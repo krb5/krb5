@@ -112,7 +112,8 @@ if {! $RPC} test103
 test "init 106"
 proc test106 {} {
     global test prompt
-    
+
+    set prompting 0
     send [string trim {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
 		[config_params {KADM5_CONFIG_MKEY_FROM_KBD} 1] \
@@ -121,7 +122,7 @@ proc test106 {} {
     }]
     send "\n"
     expect {
-	-re ":$" { set prompting 1}
+	-re "\n\[^\n\]+:\[^\n\]*$" { set prompting 1}
 	-re "\nOK .*$prompt$" { fail "$test: premature success" }
 	-re "\nERROR .*$prompt$" { fail "$test: premature failure" }
 	timeout { fail "$test: timeout" }
