@@ -1,3 +1,7 @@
+Fri Nov 18 00:17:29 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: move WITH_CCOPTS.
+
 Wed Oct 19 12:16:44 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: make install obey $(DESTDIR) completely
