@@ -73,13 +73,21 @@ main(argc, argv)
 	exit(2);
     }
 
-    if (cache == NULL)
-	cache = krb5_cc_default ();
+    if (cache == NULL) {
+	if (code = krb5_cc_default(&cache)) {
+	    com_err(argv[0], code, "while getting default ccache");
+	    exit(1);
+	}
+    }
 
     code = krb5_cc_destroy (cache);
     if (code != 0) {
 	com_err (argv[0], code, "while destroying cache");
+#ifdef __STDC__
+	fprintf(stderr, "Ticket cache \aNOT\a destroyed!\n");
+#else
 	fprintf(stderr, "Ticket cache \007NOT\007 destroyed!\n");
+#endif
 	exit (1);
     }
     exit (0);

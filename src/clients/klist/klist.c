@@ -78,8 +78,12 @@ main(argc, argv)
 	fprintf(stderr, "Usage: %s [ -c cache ]\n", argv[0]);
 	exit(2);
     }
-    if (cache == NULL)
-	cache = krb5_cc_default();
+    if (cache == NULL) {
+	if (code = krb5_cc_default(&cache)) {
+	    com_err(argv[0], code, "while getting default ccache");
+	    exit(1);
+	}
+    }
 
     flags = 0;				/* turns off OPENCLOSE mode */
     if (code = krb5_cc_set_flags(cache, flags)) {

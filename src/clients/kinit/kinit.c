@@ -108,12 +108,15 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -rp ] [ -l lifetime ] [ -c cachename ] principal", argv[0]);
+	fprintf(stderr, "Usage: %s [ -rp ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
 	exit(2);
     }
-    if (ccache == NULL)
-	ccache = krb5_cc_default();
-
+    if (ccache == NULL) {
+	if (code = krb5_cc_default(&ccache)) {
+	    com_err(argv[0], code, "while getting default ccache");
+	    exit(1);
+	}
+    }
     if (code = krb5_parse_name (argv[optind], &me)) {
 	com_err (argv[0], code, "when parsing name %s",argv[optind]);
 	exit(1);
