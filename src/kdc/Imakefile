@@ -1,4 +1,5 @@
 SRCS= \
+	kdc5_err.ct \
 	dispatch.c \
 	do_as_req.c \
 	do_tgs_req.c \
@@ -6,10 +7,10 @@ SRCS= \
 	main.c \
 	network.c \
 	policy.c \
-	extern.c \
-	kdc5_err.c
+	extern.c
 
 OBJS= \
+	kdc5_err.o \
  	dispatch.o \
 	do_as_req.o \
 	do_tgs_req.o \
@@ -17,8 +18,7 @@ OBJS= \
 	main.o \
 	network.o \
 	policy.o \
-	extern.o \
-	kdc5_err.o
+	extern.o
 
 ErrorTableObjectRule()
 
