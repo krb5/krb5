@@ -56,12 +56,16 @@ typedef	krb5_data **	krb5_principal;	/* array of strings */
 #ifdef __STDC__
 typedef	void * krb5_pointer;
 #define PROTOTYPE(x) x
+#define DECLARG(type, val) type val
+#define OLDDECLARG(type, val)
 #else
 /* make const & volatile available without effect */
 #define const
 #define volatile
 typedef char * krb5_pointer;
 #define PROTOTYPE(x) ()
+#define DECLARG(type, val) val
+#define OLDDECLARG(type, val) type val;
 #endif /* __STDC__ */
 
 #endif /* __KRB5_BASE_DEFS__ */
