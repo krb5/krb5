@@ -1,3 +1,8 @@
+Mon Feb  8 21:51:10 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.hin (krb5_get_realm_domain): Add appropriate modifiers so
+		that this function can get exported in a Windows DLL.
+
 1999-02-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Add an entry to the os_context to store the default
