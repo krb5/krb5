@@ -27,6 +27,7 @@
 #include <krb5/errors.h>
 #include <krb5/proto.h>
 #include <krb5/macros.h>
+#include <krb5/error_def.h>
 
 /* Time set */
 typedef struct _krb5_ticket_times {
