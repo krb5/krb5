@@ -1,3 +1,7 @@
+2000-10-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* init_ctx.c: Added #defines for Mac OS X (__MACH__) 
+
 2000-06-29  Tom Yu  <tlyu@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): NULL, not nil.
