@@ -1,3 +1,9 @@
+Thu Apr 11 22:15:44 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* ustime.c (krb5_us_timeofday): When doing the time offset
+		adjustments, make sure the microseconds field doesn't go
+		negative.
+
 Thu Mar 28 17:20:12 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* DNR.c: Replace eight-year-old version of this file with the

@@ -53,6 +53,10 @@ krb5_us_timeofday(context, seconds, microseconds)
 		    usec -= 1000000;
 		    sec++;
 	    }
+	    if (usec < 0) {
+		usec += 1000000;
+		sec--;
+	    }
 	    sec += os_ctx->time_offset;
     }
     *seconds = sec;
