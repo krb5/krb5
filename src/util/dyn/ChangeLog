@@ -1,3 +1,17 @@
+2001-04-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Add lclint support.
+
+	* dyn.h: Lclint annotate functions.
+
+	* dyn_create.c (DynCreate): Do not assume that malloc(0) is valid
+	and returns a valid pointer. Fix memory leak if malloc fails.
+
+	* dyn_realloc.c (_DynResize): Turn off warning of shifting a
+	signed variable.
+
+	* test.c: Check the return values of all library calls.
+
 Thu Nov  9 15:31:31 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* dyn_create.c (DynCopy): Arguments to memcpy were reversed. Found

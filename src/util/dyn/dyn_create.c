@@ -32,11 +32,13 @@ DynObjectP DynCreate(el_size, inc)
      if (obj == NULL)
 	  return NULL;
 
-#ifdef USE_DBMALLOC
      obj->array = (DynPtr) malloc(1);
-#else
-     obj->array = (DynPtr) malloc(0);
-#endif
+     if (obj->array == NULL) {
+	 free(obj);
+	 return NULL;
+     }
+     obj->array[0] = '\0';
+
      obj->el_size = el_size;
      obj->num_el = obj->size = 0;
      obj->debug = obj->paranoid = 0;
@@ -74,7 +76,7 @@ DynObjectP DynCopy(obj)
 }
 
 int DynDestroy(obj)
-   DynObjectP obj;
+     /*@only@*/DynObjectP obj;
 {
      if (obj->paranoid) {
 	  if (obj->debug)

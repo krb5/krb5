@@ -34,8 +34,10 @@ int _DynResize(obj, req)
 	  else 
 	       size = obj->size;
 	  
+	  /*@-shiftsigned@*/
 	  while (size <= req)
 	       size <<= 1;
+	  /*@=shiftsigned@*/
 
 	  return _DynRealloc(obj, size);
      }

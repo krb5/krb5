@@ -37,20 +37,21 @@ typedef struct _DynObject {
 #define DYN_BADVALUE	-1003
      
 /* Function declarations */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__LCLINT__)
 #define P(args) args
 #else
 #define P(args) ()
 #endif /* __STDC__ */
 
-DynObject DynCreate P((int el_size, int inc)), DynCopy P((DynObject obj));
-int DynDestroy P((DynObject obj)), DynRelease P((DynObject obj));
+/*@null@*//*@only@*/ DynObject DynCreate P((int el_size, int inc));
+/*@null@*//*@only@*/ DynObject DynCopy P((DynObject obj));
+int DynDestroy P((/*@only@*/DynObject obj)), DynRelease P((DynObject obj));
 int DynAdd P((DynObject obj, void *el));
 int DynPut P((DynObject obj, void *el, int idx));
-int DynInsert P((DynObject obj, int idx, void *els, int num));
+int DynInsert P((DynObject obj, int idx, /*@observer@*/void *els, int num));
 int DynDelete P((DynObject obj, int idx));
-DynPtr DynGet P((DynObject obj, int num));
-DynPtr DynArray P((DynObject obj));
+/*@dependent@*//*@null@*/ DynPtr DynGet P((DynObject obj, int num));
+/*@observer@*/ DynPtr DynArray P((DynObject obj));
 int DynDebug P((DynObject obj, int state));
 int DynParanoid P((DynObject obj, int state));
 int DynInitzero P((DynObject obj, int state));

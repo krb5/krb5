@@ -67,3 +67,21 @@ check-windows::
 clean-mac::
 clean-windows::
 
+# /u1/kr/lclint-2.5m/bin/lclint -warnposix -D__sparc
+LCLINT=lclint
+# +posixlib	gets more complete errno list than ansilib
+# -usedef	turns off bogus warnings from poor dataflow analysis (should be
+#		redundant with gcc warnings anyways)
+# -warnposix
+# +charintliteral
+# +ignoresigns
+# -predboolint
+# -exportlocal
+# -retvalint	allow ignoring of int return values (e.g., fputs)
+LCLINTOPTS=+posixlib \
+	+ignoresigns -predboolint \
+	+mod-uncon +modinternalstrict +modfilesys \
+	-expect 2
+
+do-lclint: $(SRCS)
+	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS) $(srcdir)/test.c

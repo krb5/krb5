@@ -30,9 +30,10 @@ static char insert3[] = "  This follows the random string.";
 
 int
 main(argc, argv)
-   int	argc;
-   char	**argv;
+/*@unused@*/int argc;
+/*@unused@*/char **argv;
 {
+     /*@-exitarg@*/
      DynObject	obj;
      int	i, s;
      char	d, *data;
@@ -50,16 +51,25 @@ main(argc, argv)
      o_size = malloc_inuse(&hist1);
 #endif 
 
+     /*@+matchanyintegral@*/
      obj = DynCreate(sizeof(char), -8);
      if (! obj) {
 	  fprintf(stderr, "test: create failed.\n");
 	  exit(1);
      }
      
-     DynDebug(obj, 1);
-     DynParanoid(obj, 1);
+     if(DynDebug(obj, 1) != DYN_OK) {
+	  fprintf(stderr, "test: setting paranoid failed.\n");
+	  exit(1);
+     }
+     if(DynParanoid(obj, 1) != DYN_OK) {
+	  fprintf(stderr, "test: setting paranoid failed.\n");
+	  exit(1);
+     }
+       
 
-     if (DynGet(obj, -5) || DynGet(obj, 0) || DynGet(obj, 1000)) {
+     if ((DynGet(obj, -5) != NULL) || 
+	 (DynGet(obj, 0) != NULL) || (DynGet(obj, 1000) != NULL)) {
 	  fprintf(stderr, "test: Get did not fail when it should have.\n");
 	  exit(1);
      }
@@ -96,19 +106,27 @@ main(argc, argv)
 	  exit(1);
      }
 
-     d = 200;
+     d = '\200';
      if (DynAdd(obj, &d) != DYN_OK) {
 	  fprintf(stderr, "test: Adding %d failed.\n", i);
 	  exit(1);
      }
 
      data = (char *) DynGet(obj, 0);
+     if(data == NULL) {
+	 fprintf(stderr, "test: getting object 0 failed.\n");
+	 exit(1);
+     }
      s = DynSize(obj);
      for (i=0; i < s; i++)
-	  printf("Element %d is %d.\n", i, (unsigned char) data[i]);
+	  printf("Element %d is %d.\n", i, (int) data[i]);
 
      data = (char *) DynGet(obj, 13);
-     printf("Element 13 is %d.\n", (unsigned char) *data);
+     if(data == NULL) {
+	 fprintf(stderr, "test: getting element 13 failed.\n");
+	 exit(1);
+     }
+     printf("Element 13 is %d.\n", (int) *data);
 
      data = (char *) DynGet(obj, DynSize(obj));
      if (data) {
@@ -116,7 +134,12 @@ main(argc, argv)
 	  exit(1);
      }
 
-     printf("This should be the random string: \"%s\"\n", DynGet(obj, 14));
+     data = DynGet(obj, 14);
+     if(data == NULL) {
+	 fprintf(stderr, "test: getting element 13 failed.\n");
+	 exit(1);
+     }
+     printf("This should be the random string: \"%s\"\n", data);
 
      if (DynInsert(obj, -1, "foo", 4) != DYN_BADINDEX ||
 	 DynInsert(obj, DynSize(obj) + 1, "foo", 4) != DYN_BADINDEX ||
@@ -141,11 +164,26 @@ main(argc, argv)
 	  exit(1);
      }	
 
-     printf("A new random string: \"%s\"\n", DynGet(obj, 14 +
-						    strlen(insert1) + 1));
-     printf("This was put at the beginning: \"%s\"\n", DynGet(obj, 0));
+     data = DynGet(obj, 14 + strlen(insert1) + 1);
+     if (data == NULL) {
+	  fprintf(stderr, "DynGet of 14+strelen(insert1) failed.\n");
+	  exit(1);
 
-     DynDestroy(obj);
+     }
+     printf("A new random string: \"%s\"\n", data);
+
+     data = DynGet(obj, 0);
+     if (data == NULL) {
+	  fprintf(stderr, "DynGet of 0 failed.\n");
+	  exit(1);
+
+     }
+     printf("This was put at the beginning: \"%s\"\n", data);
+
+     if(DynDestroy(obj) != DYN_OK) {
+	  fprintf(stderr, "test: destroy failed.\n");
+	  exit(1);
+     }
 
 #ifdef _DEBUG_MALLOC_INC
      c_size = malloc_inuse(&hist2);
@@ -156,6 +194,7 @@ main(argc, argv)
      }
 #endif
      
+     printf("All tests pass\n");
 
      return 0;
 }
