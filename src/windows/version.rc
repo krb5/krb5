@@ -38,6 +38,17 @@
  * BEGIN SPECIFIC VERSION INFO for GSS and Kerberos version resources
  */
 
+#ifdef SUPPORT_LIB
+#define K5_DESCRIPTION "Kerberos v5 support - internal support code for MIT Kerberos v5 /GSS distribution"
+#define K5_INTERNAL_NAME "krb5support\0"
+#define K5_FILETYPE	VFT_DLL
+#if !defined(_WIN32)
+#error not win32??
+#else
+#define K5_ORIGINAL_NAME "krb5support32.dll\0"
+#endif
+#endif /* support */
+
 #ifdef CE_LIB
 #define K5_DESCRIPTION "COM_ERR - Common Error Handler for MIT Kerberos v5 / GSS distribution\0"
 #define K5_INTERNAL_NAME "comerr\0"
