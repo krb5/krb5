@@ -1,5 +1,9 @@
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf (alpha*-dec-osf*): Add support for export list, using
+	a temporary file, and init/fini functions.
+	(mips-sgi-irix*): Previous support should not be used with gcc.
+
 	* pre.in (EXTRA_FILES): New variable.
 	* post.in (clean-unix): Delete extra files.
 
