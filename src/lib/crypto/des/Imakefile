@@ -49,6 +49,8 @@ VERIFYOBJ = verify.o
 
 DESTESTOBJ = destest.o
 
+depend:: des.c $(SRCS)
+
 NormalLibraryTarget(des,$(OBJS))
 
 $(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
@@ -105,8 +107,4 @@ NormalProgramTarget(make_st,make_st.o,misc.o,misc.o,)
 s_table.h: make_st
 	./make_st s_table.h
 
-depend:: des.c
-
 NormalLintTarget($(SRCS))
-
-DependTarget()
