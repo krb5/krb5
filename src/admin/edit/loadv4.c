@@ -91,7 +91,7 @@ char *who;
 int status;
 {
     fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k keytype]\n\
-\t[-e etype] [-M mkeyname] -f inputfile\n",
+\t[-M mkeyname] -f inputfile\n",
 	    who);
     return;
 }
@@ -152,8 +152,6 @@ char *argv[];
     krb5_realm_params *rparams;
     int	persist, op_ind;
 
-    krb5_enctype etype = 0xffff;
-
     krb5_init_context(&context);
 
     krb5_init_ets(context);
@@ -197,12 +195,6 @@ char *argv[];
 	    mkey_name = argv[op_ind+1];
 	    op_ind++;
 	}
-	else if (!strcmp(argv[op_ind], "-e") && ((argc - op_ind) >= 2)) {
-	    if (krb5_string_to_enctype(argv[op_ind+1], &etype))
-		com_err(argv[0], 0, "%s is an invalid encryption type",
-			argv[op_ind+1]);
-	    op_ind++;
-	}
 	else if (!strcmp(argv[op_ind], "-n")) {
 	    v4manual++;
 	}
@@ -242,10 +234,6 @@ char *argv[];
 	    keytypedone++;
 	}
 
-	/* Get the value for the encryption type */
-	if (rparams->realm_enctype_valid && (etype == 0xffff))
-	    etype = rparams->realm_enctype;
-
 	/* Get the value for the stashfile */
 	if (rparams->realm_stash_file)
 	    stash_file = strdup(rparams->realm_stash_file);
@@ -283,15 +271,7 @@ char *argv[];
 	return;
     }
 
-    if (etype == 0xffff)
-	etype = DEFAULT_KDC_ETYPE;
-
-    if (!valid_etype(etype)) {
-	com_err(PROGNAME, KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", etype);
-	return;
-    }
-    krb5_use_cstype(context, &master_encblock, etype);
+    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
 
     /* If the user has not requested locking, don't modify an existing database. */
     if (! tempdb) {
@@ -549,9 +529,8 @@ Principal *princ;
 		 DECRYPT);
 
     v4v5key.magic = KV5M_KEYBLOCK;
-    v4v5key.etype = master_keyblock.etype;
     v4v5key.contents = (krb5_octet *)v4key;
-    v4v5key.keytype = KEYTYPE_DES;
+    v4v5key.keytype = KEYTYPE_DES_CBC_CRC;
     v4v5key.length = sizeof(v4key);
 
     retval = krb5_dbe_create_key_data(context, &entry);

@@ -51,7 +51,7 @@ extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 extern krb5_boolean dbactive;
 extern FILE *scriptfile;
 
-static krb5_key_salt_tuple ks_tuple_rnd_def[] = {{ KEYTYPE_DES, 0 }};
+static krb5_key_salt_tuple ks_tuple_rnd_def[] = {{ KEYTYPE_DES_CBC_CRC, 0 }};
 static int ks_tuple_rnd_def_count = 1;
 
 static void
@@ -180,7 +180,7 @@ void change_rnd_key(argc, argv)
     }
 }
 
-static krb5_key_salt_tuple ks_tuple_default[] = {{ KEYTYPE_DES, 0 }};
+static krb5_key_salt_tuple ks_tuple_default[] = {{ KEYTYPE_DES_CBC_CRC, 0 }};
 static int ks_tuple_count_default = 1;
 
 void 

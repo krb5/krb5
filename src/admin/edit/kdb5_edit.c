@@ -78,7 +78,7 @@ usage(who, status)
     fprintf(stderr,
 	    "usage: %s [-d dbpathname] [-r realmname] [-R request ]\n",
 	    who);
-    fprintf(stderr, "\t [-k keytype] [-e etype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-k keytype] [-M mkeyname]\n");
     exit(status);
 }
 
@@ -108,8 +108,6 @@ char *kdb5_edit_Init(argc, argv)
     char *dbname = (char *) NULL;
     char *defrealm;
     int keytypedone = 0;
-    int etypedone = 0;
-    krb5_enctype etype = DEFAULT_KDC_ETYPE;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
     krb5_realm_params *rparams;
@@ -157,13 +155,6 @@ char *kdb5_edit_Init(argc, argv)
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
 	    break;
-	case 'e':
-	    if (krb5_string_to_enctype(optarg, &etype))
-		com_err(argv[0], 0, "%s is an invalid encryption type",
-			optarg);
-	    else
-		etypedone++;
-	    break;
 	case 'm':
 	    manual_mkey = TRUE;
 	    break;
@@ -204,10 +195,6 @@ char *kdb5_edit_Init(argc, argv)
 	    master_keyblock.keytype = rparams->realm_keytype;
 	    keytypedone++;
 	}
-
-	/* Get the value for the encryption type */
-	if (rparams->realm_enctype_valid && !etypedone)
-	    etype = rparams->realm_enctype;
 
 	/* Get the value for the stashfile */
 	if (rparams->realm_stash_file)
@@ -260,16 +247,7 @@ char *kdb5_edit_Init(argc, argv)
 	exit(1);
     }
 
-    if (!valid_etype(etype)) {
-	char tmp[32];
-	if (krb5_enctype_to_string(etype, tmp, sizeof(tmp)))
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
-		    "while setting up etype %d", etype);
-	else
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP, tmp);
-	exit(1);
-    }
-    krb5_use_cstype(edit_context, &master_encblock, etype);
+    krb5_use_keytype(edit_context, &master_encblock, master_keyblock.keytype);
 
     if (cur_realm) {
 	if ((retval = krb5_set_default_realm(edit_context, cur_realm))) {

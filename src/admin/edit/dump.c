@@ -398,11 +398,11 @@ dump_k5beta_iterator(ptr, entry)
 	 * Find the 'primary' key and the 'alternate' key.
 	 */
 	if ((retval = find_keytype(entry,
-				   KEYTYPE_DES,
+				   KEYTYPE_DES_CBC_CRC,
 				   KRB5_KDB_SALTTYPE_NORMAL,
 				   &pkey)) &&
 	    (retval = find_keytype(entry,
-				   KEYTYPE_DES,
+				   KEYTYPE_DES_CBC_CRC,
 				   KRB5_KDB_SALTTYPE_V4,
 				   &akey))) {
 	    fprintf(stderr, nokeys_err, arg->programname, name);
