@@ -1,3 +1,8 @@
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix freebsd CC_LINK_SHARED to have correct rpath
+	flags.  Thanks to David Cross.
+
 2000-06-08  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (CC_LINK_STATIC): Fix to use old library search
