@@ -1,6 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
 dnl CONFIG_DIRS(kpasswd v5server v5client)
-CONFIG_DIRS(export import cli dbutil passwd ktutil server v4server v5passwdd)
+CONFIG_DIRS(cli dbutil passwd ktutil server v4server v5passwdd)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

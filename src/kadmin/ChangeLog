@@ -1,3 +1,8 @@
+Wed Sep 11 16:27:04 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: no longer build import and export since they
+		are subsumed by kdb5_util.
+
 Tue Sep 10 18:20:51 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: no longer build keytab
