@@ -45,7 +45,7 @@ install:: libkadm.a
 
 clean::	clean-$(WHAT)
 clean-unix::
-	$(RM) libkadm.$(LIBEXT)
+	$(RM) libkadm.$(LIBEXT) $(UNIX_OBJS)
 clean-mac::
 	$(RM) libkadm.$(LIBEXT)
 clean-windows::

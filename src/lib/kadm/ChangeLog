@@ -1,3 +1,7 @@
+Sun Jun 11 09:24:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove $(UNIX_OBJS)
+
 Sat Jun 10 23:05:23 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* adm_conn.c, adm_rw.c: krb5_auth_context redefinitions
