@@ -158,7 +158,7 @@ int g_token_size (gss_OID mech, unsigned int body_size);
 void g_make_token_header (gss_OID mech, int body_size,
 			  unsigned char **buf, int tok_type);
 
-gss_int32 g_verify_token_header (gss_OID mech, int *body_size,
+gss_int32 g_verify_token_header (gss_OID mech, unsigned int *body_size,
 			  unsigned char **buf, int tok_type, int toksize);
 
 OM_uint32 g_display_major_status (OM_uint32 *minor_status,

@@ -163,7 +163,7 @@ void g_make_token_header(mech, body_size, buf, tok_type)
  */
 gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize)
      gss_OID mech;
-     int *body_size;
+     unsigned int *body_size;
      unsigned char **buf_in;
      int tok_type;
      int toksize;

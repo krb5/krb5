@@ -1,3 +1,8 @@
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gssapiP_generic.h, util_token.c (g_verify_token_header): Make
+	length argument a pointer to an unsigned int.
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS, OBJS, STLIBOBJS): Don't build util_dup.c.
