@@ -57,7 +57,7 @@ all-unix:: all-libs
 all-windows:: $(PROFILE_HDR)
 
 $(PROFILE_HDR):: profile.h
-	$(CP) profile.h $@
+	$(CP) profile.h "$@"
 
 includes:: profile.h
 	if cmp profile.h \

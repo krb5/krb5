@@ -175,7 +175,7 @@ all-windows:: $(EHDRDIR) $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
 ##DOS##	mkdir $(EHDRDIR)
 
 $(GSSAPI_KRB5_HDR): gssapi_krb5.h
-	$(CP) gssapi_krb5.h $@
+	$(CP) gssapi_krb5.h "$@"
 
 all-unix:: $(SRCS) $(HDRS) includes
 all-unix:: all-libobjs

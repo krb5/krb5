@@ -70,7 +70,7 @@ COM_ERR_HDR=$(BUILDTOP)/include/com_err.h
 all-windows:: $(COM_ERR_HDR)
 
 $(COM_ERR_HDR): com_err.h
-	$(CP) com_err.h $@
+	$(CP) com_err.h "$@"
 
 error_table.c: et_lex.lex.c 
 error_table.c: $(srcdir)/error_table.y

@@ -102,7 +102,7 @@ all-unix:: krb524d krb524test k524init
 includes:: $(KRB524_HDR) $(KRB524_ERR_HDR)
 
 $(KRB524_HDR): krb524.h
-##WIN32##	$(CP) $? $@
+##WIN32##	$(CP) $? "$@"
 ##WIN32##!if 0
 $(KRB524_HDR): krb524.h
 	if cmp $(srcdir)/krb524.h \
@@ -115,7 +115,7 @@ $(KRB524_HDR): krb524.h
 ##WIN32##!endif
 
 $(KRB524_ERR_HDR): krb524_err.h
-##WIN32##	$(CP) $? $@
+##WIN32##	$(CP) $? "$@"
 ##WIN32##!if 0
 $(KRB524_ERR_HDR): krb524_err.h
 	if cmp krb524_err.h \
