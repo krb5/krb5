@@ -92,6 +92,7 @@ main(argc,argv)
     int option;
     int oper_type;
     int nflag = 0;
+    int port = 0;
 
     krb5_auth_context * new_auth_context;
     krb5_replay_data replaydata;
@@ -102,13 +103,16 @@ main(argc,argv)
     client_name = (char *) malloc(755);
     memset((char *) client_name, 0, sizeof(client_name));
 
-    while ((option = getopt(argc, argv, "c:n")) != EOF) {
+    while ((option = getopt(argc, argv, "c:np:")) != EOF) {
 	switch (option) {
 	  case 'c':
 	    strcpy (cache_name, optarg);
 	    break;
 	  case 'n':
 	    nflag++;
+	    break;
+	  case 'p':
+	    port = htons(atoi(optarg));
 	    break;
 	  case '?':
 	  default:
@@ -178,7 +182,8 @@ main(argc,argv)
 
 
 	/* Initiate Link to Server */
-    if ((retval = adm5_init_link(context, requested_realm, &local_socket))) {
+    if ((retval = adm5_init_link(context, requested_realm, port,
+				 &local_socket))) {
 	(void) krb5_cc_destroy(context, cache);
 	exit(1);
     } 
@@ -508,9 +513,10 @@ get_first_ticket(context, cache, client, my_creds)
 }
 
 krb5_error_code
-adm5_init_link(context, realm_of_server, local_socket)
+adm5_init_link(context, realm_of_server, port, local_socket)
     krb5_context context;
     krb5_data *realm_of_server;
+    int port;
     int * local_socket;
 {
     struct servent *service_process;	       /* service we will talk to */
@@ -524,14 +530,18 @@ adm5_init_link(context, realm_of_server, local_socket)
     /* clear out the structure first */
     (void) memset((char *)&remote_sin, 0, sizeof(remote_sin));
 
-    if ((service_process = getservbyname(CPW_SNAME, "tcp")) == NULL) {
-	fprintf(stderr, "Unable to find Service (%s) Check services file!\n",
-		CPW_SNAME);
-	return(1);
-    }
+    if (port != 0) {
+        remote_sin.sin_port = port;
+    } else {
+	if ((service_process = getservbyname(CPW_SNAME, "tcp")) == NULL) {
+	    fprintf(stderr, "Unable to find Service (%s) Check services file!\n",
+		    CPW_SNAME);
+	    return(1);
+	}
 
-    		/* Copy the Port Number */
-    remote_sin.sin_port = service_process->s_port;
+		    /* Copy the Port Number */
+	remote_sin.sin_port = service_process->s_port;
+    }
 
     hostlist = 0;
 
@@ -655,7 +665,7 @@ get_def_princ(context, client)
 usage()
 {
     fprintf(stderr, "Usage:	");
-    fprintf(stderr, "kadmin [-n] [Administrator name]\n\n");
+    fprintf(stderr, "kadmin [-n] [-p port] [Administrator name]\n\n");
     fprintf(stderr, "	If an Administrator name is not supplied, kadmin ");
     fprintf(stderr, "will first\n	attempt to locate the name from ");
     fprintf(stderr, "the default ticket file, then\n	by using the ");
