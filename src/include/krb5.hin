@@ -1826,6 +1826,10 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_profile
 	KRB5_PROTOTYPE((krb5_context, profile_t *));
 
+/* DO NOT USE THIS ROUTINE! */
+krb5_error_code krb5_secure_config_files
+	KRB5_PROTOTYPE ((krb5_context));
+
 krb5_error_code krb5_send_tgs
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_flags,

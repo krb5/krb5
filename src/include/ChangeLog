@@ -1,7 +1,6 @@
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
-	* krb5.hin (krb5_secure_config_files): Delete declaration.
-	(krb5_init_secure_context): Declare.
+	* krb5.hin (krb5_init_secure_context): Declare.
 
 1999-09-08  Tom Yu  <tlyu@mit.edu>
 
