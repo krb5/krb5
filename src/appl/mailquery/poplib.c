@@ -29,7 +29,7 @@ static char rcsid[] = "@(#)$Header$";
 #include <netdb.h>
 #include <stdio.h>
 #if defined(KRB4) && defined(KRB5)
-# error You cannot define both KRB4 and KRB5
+error You cannot define both KRB4 and KRB5
 #endif
 #ifndef KPOP_SERVICE
 #define KPOP_SERVICE "kpop"

@@ -19,6 +19,6 @@ clean::
 	$(RM) mailquery.o poplib.o mailquery
 
 install::
-	cp mailquery ${DESTDIR}$(CLIENT_BINDIR)/mailquery
-	cp mailquery.M ${DESTDIR}$(CLIENT_MANDIR)/mailquery.1
+	$(INSTALL_PROGRAM) mailquery ${DESTDIR}$(CLIENT_BINDIR)/mailquery
+	$(INSTALL_DATA) mailquery.M ${DESTDIR}$(CLIENT_MANDIR)/mailquery.1
 

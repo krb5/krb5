@@ -1,4 +1,9 @@
 Tue Aug  9 16:45:53 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* Makefile.in:
+	* configure.in: make install fixes
+
+	* poplib.c: Ultrix cpp doesn't like '#error'
+
 	* Makefile.in: oops forgot about $(COMERRLIB)
 
