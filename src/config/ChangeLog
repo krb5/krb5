@@ -1,3 +1,15 @@
+Thu Mar 16 20:55:18 1995  John Gilmore  (gnu at toad.com)
+
+	First cut at Macintosh configuration support.
+
+	* mac-config.cache:  New file, a hand-built autoconf `config.cache'
+	file with the right values for building under MPW.
+	* mac-config.README:  Documentation for mac-config.cache.
+	* mac-pre.in, mac-post.in:  Versions of pre.in and post.in for 
+	configuring on MPW.
+	* mac-mf.sed:  A `sed' script which will turn carefully constructed
+	Unix Makefiles into carefully constructed Macintosh MPW Makefiles.
+
 Wed Mar 3 16:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* windows.in: changed included directories to reflect MAC changes

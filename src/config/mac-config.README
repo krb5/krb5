@@ -1,0 +1,11 @@
+# mac-config.cache is a:
+#
+# CUSTOMIZED, HAND-BUILT CONFIGURE CACHE FOR BUILDING ON MACINTOSH UNDER MPW
+# Built by John Gilmore, Cygnus Support, 22 Feb 95.
+#
+# These comments are not in mac-config.cache itself because 
+# mac-config.cache needs to have no extraneous comments, so that `configure'
+# doesn't think that the file differs from the current settings of
+# all the cached autoconf state variables.  This allows `configure' to
+# know that the config.cache doesn't need updating after every time configure
+# is run.
