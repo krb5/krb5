@@ -74,8 +74,11 @@ krb5_error_code verify_timestamp_padata
     PROTOTYPE((krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
-#ifdef KRBCONF_SECUREID
-krb5_preauth_obtain_proc get_securid_padata;
-krb5_preauth_verify_proc verify_securid_padata;
-#endif
+krb5_error_code get_securid_padata
+    PROTOTYPE((krb5_principal client, krb5_address **src_addr,
+	       krb5_pa_data *data));
+
+krb5_error_code verify_securid_padata
+    PROTOTYPE((krb5_principal client, krb5_address **src_addr,
+	       krb5_data *data));
 
