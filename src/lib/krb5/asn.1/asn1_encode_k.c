@@ -640,7 +640,8 @@ asn1_error_code asn1_encode_pa_data(DECLARG(asn1buf *, buf),
 {
   asn1_setup();
 
-  if(val == NULL) return ASN1_MISSING_FIELD;
+  if(val == NULL || (val->length != 0 && val->contents == NULL))
+     return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->length,val->contents,2,asn1_encode_octetstring);
   asn1_addfield(val->pa_type,1,asn1_encode_integer);

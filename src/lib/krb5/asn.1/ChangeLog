@@ -1,3 +1,8 @@
+Thu Jul 14 01:26:22 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* asn1_encode_k.c (asn1_encode_pa_data): oops still check NULL if
+	length != 0
+
 Sat Jul  9 00:26:48 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* asn1_encode_k.c (asn1_encode_pa_data): the contents field of a
