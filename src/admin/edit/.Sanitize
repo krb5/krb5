@@ -28,9 +28,9 @@ ChangeLog
 Makefile.in
 configure
 configure.in
+cpw.c
 dump.c
 dumpv4.c
-getdate.y
 kdb5_ed_ct.ct
 kdb5_edit.M
 kdb5_edit.c

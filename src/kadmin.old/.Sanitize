@@ -24,13 +24,13 @@ Do-first:
 Things-to-keep:
 
 .cvsignore
+ChangeLog
 Makefile.in
 client
 configure
 configure.in
 kpasswd
 server
-v4server
 
 Things-to-lose:
 

@@ -1,3 +1,6 @@
+Thu Aug 24 19:24:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Mon Aug 21 16:59:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc.conf.M - Change types of master_key_type and encryption_type to

@@ -26,11 +26,12 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
-client
 configure
 configure.in
-server
-simple.h
+ktutil.c
+ktutil.h
+ktutil_ct.ct
+ktutil_funcs.c
 
 Things-to-lose:
 

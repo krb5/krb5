@@ -1,3 +1,6 @@
+Thu Aug 24 19:20:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Added .Sanitize file.
 
 Mon Aug 21 17:01:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* ktutil.c - Remove English-specific date handling and let timestamp_

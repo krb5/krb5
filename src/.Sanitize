@@ -60,6 +60,7 @@ kadmin.new
 autotools
 isode
 TODO
+BADSYMS
 mac
 
 Do-last:

@@ -24,6 +24,8 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+config.guess
+config.sub
 doc
 install-sh
 mac-config.README

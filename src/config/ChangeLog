@@ -1,3 +1,6 @@
+Thu Aug 24 19:25:10 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Fri Jul 7 15:56:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* pre.in - Add DEPLIBS and LDFLAGS to be provided with each Makefile.

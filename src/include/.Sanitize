@@ -35,7 +35,7 @@ fake-stdlib.h
 k5-int.h
 kerberosIV
 krb5
-krb5.h
+krb5.hin
 sys
 syslog.h
 

@@ -29,6 +29,7 @@ Makefile.in
 configure
 configure.in
 kpasswd
+ktutil
 v5client
 v5server
 

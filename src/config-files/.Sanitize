@@ -25,6 +25,8 @@ Things-to-keep:
 
 ChangeLog
 convert-config-files
+kdc.conf
+kdc.conf.M
 krb5.conf
 krb5.conf.M
 services.append
