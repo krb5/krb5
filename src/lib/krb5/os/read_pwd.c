@@ -13,7 +13,7 @@
 #ifndef	lint
 static char rcsid_read_pwd_c[] =
 "$Id$";
-#endif	lint
+#endif	/* lint */
 
 #include <krb5/copyright.h>
 
