@@ -152,6 +152,20 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     *t = (unsigned char) AUTH_MSG_KDC_REQUEST;
     *t |= HOST_BYTE_ORDER;
 
+    /* Make sure the ticket data will fit into the buffer. */
+    if(sizeof(pkt->dat) < 2 +			/* protocol version + flags */
+		          3 + strlen(user) +
+			  1 + strlen(instance) +
+			  1 + strlen(realm) +
+			  4 +			/* timestamp */
+			  1 +			/* lifetime */
+			  1 + strlen(service) +
+			  1 + strlen(sinstance) +
+			  preauth_len) {
+        pkt->length = 0;
+	return INTK_ERR;
+    }
+
     /* Now for the variable info */
     (void) strcpy((char *)(pkt->dat+2),user); /* aname */
     pkt->length = 3 + strlen(user);

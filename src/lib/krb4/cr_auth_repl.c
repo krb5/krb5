@@ -83,6 +83,16 @@ create_auth_reply(pname,pinst,prealm,time_ws,n,x_date,kvno,cipher)
     if (n != 0)
 	*v = 3;
 
+    /* Make sure the response will actually fit into its buffer. */
+    if(sizeof(pkt->dat) < 3 + strlen(pname) +
+		    	  1 + strlen(pinst) +
+			  1 + strlen(prealm) +
+			  4 + 1 + 4 +
+			  1 + 2 + cipher->length) {
+	pkt->length = 0;
+        return NULL;
+    }
+			  
     /* Add the basic info */
     (void) strcpy((char *) (pkt->dat+2), pname);
     pkt->length = 3 + strlen(pname);

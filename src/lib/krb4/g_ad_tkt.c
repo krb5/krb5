@@ -19,6 +19,19 @@
 extern int krb_debug;
 extern int swap_bytes;
 
+/* Return the length of the string if a NUL is found within the first
+ * max_len bytes, otherwise, -1. */
+static int krb_strnlen(const char *str, int max_len)
+{
+    int i;
+    for(i = 0; i < max_len; i++) {
+        if(str[i] == '\0') {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /*
  * get_ad_tkt obtains a new service ticket from Kerberos, using
  * the ticket-granting ticket which must be in the ticket file.
@@ -136,11 +149,22 @@ get_ad_tkt(service,sinstance,realm,lifetime)
 	return(AD_NOTGT);
 
     /* timestamp */   /* FIXME -- always 0 now, should we fill it in??? */
+    if(pkt->length + 4 > sizeof(pkt->dat))
+        return(INTK_ERR);
     memcpy((char *) (pkt->dat+pkt->length), (char *) &time_ws, 4);
     pkt->length += 4;
+
+    if(pkt->length + 1 > sizeof(pkt->dat))
+        return(INTK_ERR);
     *(pkt->dat+(pkt->length)++) = (char) lifetime;
+
+    if(pkt->length + 1 + strlen(service) > sizeof(pkt->dat))
+        return(INTK_ERR);
     (void) strcpy((char *) (pkt->dat+pkt->length),service);
     pkt->length += 1 + strlen(service);
+
+    if(pkt->length + 1 + strlen(sinstance) > sizeof(pkt->dat))
+        return(INTK_ERR);
     (void) strcpy((char *)(pkt->dat+pkt->length),sinstance);
     pkt->length += 1 + strlen(sinstance);
 
@@ -199,13 +223,22 @@ get_ad_tkt(service,sinstance,realm,lifetime)
     memcpy((char *)ses, ptr, 8);
     ptr += 8;
 
-    (void) strcpy(s_name,ptr);
+    if(krb_strnlen(ptr, sizeof(s_name)) < 0)
+        return RD_AP_MODIFIED;
+    (void) strncpy(s_name,ptr,sizeof(s_name) - 1);
+    s_name[sizeof(s_name) - 1] = '\0';
     ptr += strlen(s_name) + 1;
 
-    (void) strcpy(s_instance,ptr);
+    if(krb_strnlen(ptr, sizeof(s_instance)) < 0)
+        return RD_AP_MODIFIED;
+    (void) strncpy(s_instance,ptr,sizeof(s_instance)-1);
+    s_instance[sizeof(s_instance)-1] = '\0';
     ptr += strlen(s_instance) + 1;
 
-    (void) strcpy(rlm,ptr);
+    if(krb_strnlen(ptr, sizeof(rlm)) < 0)
+        return RD_AP_MODIFIED;
+    (void) strncpy(rlm,ptr,sizeof(rlm) - 1);
+    rlm[sizeof(rlm)-1];
     ptr += strlen(rlm) + 1;
 
     lifetime = (unsigned long) ptr[0];

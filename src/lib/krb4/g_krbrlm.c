@@ -44,7 +44,8 @@ krb_get_lrealm(r,n)
     cnffile = krb__get_cnffile();
     if (!cnffile) {
 	if (n == 1) {
-	    (void) strcpy(r, KRB_REALM);
+	    (void) strncpy(r, KRB_REALM, REALM_SZ);
+	    r[REALM_SZ - 1] = '\0';
 	    return(KSUCCESS);
 	}
 	else

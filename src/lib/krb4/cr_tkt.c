@@ -135,6 +135,23 @@ krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
     register char *data;        /* running index into ticket */
 
     tkt->length = 0;            /* Clear previous data  */
+
+    /* Check length of ticket */
+    if (sizeof(tkt->dat) < (sizeof(flags) +
+                            1 + strlen(pname) +
+                            1 + strlen(pinstance) +
+                            1 + strlen(prealm) +
+                            4 +                         /* address */
+			    8 +                         /* session */
+			    1 +                         /* life */
+			    4 +                         /* issue time */
+                            1 + strlen(sname) +
+                            1 + strlen(sinstance) +
+			    7) / 8) {                   /* roundoff */
+        memset(tkt->dat, 0, sizeof(tkt->dat));
+        return KFAILURE /* XXX */;
+    }
+
     flags |= HOST_BYTE_ORDER;   /* ticket byte order   */
     memcpy((char *) (tkt->dat), (char *) &flags, sizeof(flags));
     data = ((char *)tkt->dat) + sizeof(flags);

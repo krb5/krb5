@@ -1,3 +1,35 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* Password.c (GetUserInfo): Truncate user name if it's too long
+	to fit.
+	* cr_auth_repl.c (cr_auth_reply): Bail if the reply packet won't
+	fit into its buffer.
+	* cr_ciph.c (create_ciph): Ditto.
+	* cr_death_pkt.c (krb_create_death_packet): Truncate "aname" to
+	make it fit into the packet's data buffer.
+	* cr_err_repl.c (cr_err_reply): Bail if the reply packet won't
+	fit into its buffer.
+	* cr_tkt.c (krb_create_ticket): Ditto.
+	* g_ad_tkt.c (get_ad_tkt): Stop if data being added to buffer
+	would overflow it.  Add more sanity checks when decomposing the
+	credential received.
+	* g_in_tkt.c (krb_mk_in_tkt_preauth): Bail if the request packet
+	won't fit into its buffer.
+	* g_krbhst.c (get_krbhst_default): Truncate the guessed KDC's
+	hostname if it is too long.
+	* g_pw_in_tkt.c: Remove useless strcpy() prototype.
+	* kntoln.c (krb_kntoln): Don't overflow buffer "lname".
+	* mk_err.c (krb_mk_err): Return the needed buffer length if the
+	pointer passed in is NULL.
+	* mk_req.c (krb_mk_req): Bail if the reply packet won't 
+        fit into its buffer.
+	* rd_req.c (krb_rd_req): Sanity check the realm name being read,
+	and truncate the service name, nstance, and realm from credential
+	read from keytab.
+	* realmofhost.c (krb_realmofhost): Truncate realm names read
+	from file if they are too long.
+	* send_to_kdc.c (send_to_kdc): Truncate passed-in realm name.
+
 2000-05-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* rd_req.c (krb_rd_req): Mask length byte with 0xff in case the

@@ -108,6 +108,19 @@ krb_clear_key_krb5(ctx)
     krb5_key = 0;
 }
 
+/* A helper function to let us see if a buffer is properly terminated. */
+static int
+krb_strnlen(const char *str, size_t max_len)
+{
+    int i = 0;
+    for(i = 0; i < max_len; i++) {
+        if(str[i] == '\0') {
+            return i;
+	}
+    }
+    return -1;
+}
+
 /*
  * krb_rd_req() takes an AUTH_MSG_APPL_REQUEST or
  * AUTH_MSG_APPL_REQUEST_MUTUAL message created by krb_mk_req(),
@@ -221,6 +234,10 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
         mutual = 0;
 #endif /* lint */
     s_kvno = *ptr++;		/* get server key version */
+    if(krb_strnlen(ptr, sizeof(realm)) < 0) {
+	return RD_AP_MODIFIED;  /* must have been modified, the client wouldn't
+	                           try to trick us with wacky data */
+    }
     (void) strncpy(realm,ptr,REALM_SZ);	/* And the realm of the issuing KDC */
     realm[REALM_SZ-1] = '\0';
     ptr += strlen(realm) + 1;	/* skip the realm "hint" */
@@ -252,9 +269,12 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 		return(RD_AP_UNDEC);
 	
 #endif /* !NOENCRYPTION */
-        (void) strcpy(st_rlm,realm);
-        (void) strcpy(st_nam,service);
-        (void) strcpy(st_inst,instance);
+        (void) strncpy(st_rlm,realm, sizeof(st_rlm) - 1);
+	st_rlm[sizeof(st_rlm) - 1] = '\0';
+        (void) strncpy(st_nam,service, sizeof(st_nam) - 1);
+	st_nam[sizeof(st_nam) - 1] = '\0';
+        (void) strncpy(st_inst,instance, sizeof(st_inst) - 1);
+	st_inst[sizeof(st_inst) - 1] = '\0';
     }
 
     /* Get ticket from authenticator */

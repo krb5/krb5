@@ -130,6 +130,19 @@ krb_mk_req(authent,service,instance,realm,checksum)
 
     if (retval != KSUCCESS) return (retval);
 
+    if(sizeof(authent->dat) / 8 < (3 +
+			           strlen(realm) + 1 + 2 +
+				   3 + ticket->length +
+				   strlen(cr.pname) + 1 +
+				   strlen(cr.pinst) + 1 +
+				   strlen(myrealm) + 1 +
+				   4 +				/* checksum */
+				   4 +				/* timestamp */
+				   7) / 8) {			/* round-up */
+	    authent->length = 0;
+	    return KFAILURE;
+    }
+
     if (krb_ap_req_debug)
         DEB (("%s %s %s %s %s\n", service, instance, realm,
                cr.pname, cr.pinst));

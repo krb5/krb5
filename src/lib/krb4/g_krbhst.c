@@ -52,9 +52,11 @@ get_krbhst_default(h, r, n)
      int n;
 {
     if (n==1) {
-        (void) strcpy(h,KRB_HOST);
-	(void) strcat(h,".");
-	(void) strcat(h,r);	/* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
+        (void) strncpy(h,KRB_HOST,MAXHOSTNAMELEN-1);
+	h[MAXHOSTNAMELEN-1] = '\0';
+	(void) strncat(h,".",MAXHOSTNAMELEN-1-strlen(h));
+	(void) strncat(h,r,MAXHOSTNAMELEN-1-strlen(h));
+				/* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
 	return(KSUCCESS);
     }
     else

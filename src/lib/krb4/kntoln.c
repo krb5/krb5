@@ -38,6 +38,10 @@
  * KSUCCESS if all goes well, otherwise KFAILURE.
  */
 
+/* The definition of MAX_USERNAME here MUST agree with kuserok.c, or bad
+ * things will happen. */
+#define MAX_USERNAME 10
+
 krb_kntoln(ad,lname)
     AUTH_DAT *ad;
     char *lname;
@@ -51,6 +55,7 @@ krb_kntoln(ad,lname)
         return(KFAILURE);
     if (strcmp(ad->prealm,lrealm))
         return(KFAILURE);
-    (void) strcpy(lname,ad->pname);
+    (void) strncpy(lname,ad->pname,MAX_USERNAME-1);
+    lname[MAX_USERNAME - 1] = '\0';
     return(KSUCCESS);
 }

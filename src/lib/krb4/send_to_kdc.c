@@ -94,12 +94,13 @@ send_to_kdc(pkt,rpkt,realm)
      * local realm.
      */
     if (realm)
-	(void) strcpy(lrealm, realm);
+	(void) strncpy(lrealm, realm, sizeof(lrealm) - 1);
     else
 	if (krb_get_lrealm(lrealm,1)) {
 	    DEB (("%s: can't get local realm\n", prog));
 	    return(SKDC_CANT);
 	}
+    lrealm[sizeof(lrealm) - 1] = '\0';
     DEB (("lrealm is %s\n", lrealm));
 
     if (SOCKET_INITIALIZE()) {

@@ -78,6 +78,15 @@ cr_err_reply(pkt,pname,pinst,prealm,time_ws,e,e_string)
     *t = (unsigned char) AUTH_MSG_ERR_REPLY;
     *t |= HOST_BYTE_ORDER;
 
+    /* Make sure the reply will fit into the buffer. */
+    if(sizeof(pkt->dat) < 3 + strlen(pname) +
+		    	  1 + strlen(pinst) +
+			  1 + strlen(prealm) +
+			  4 + 4 +
+			  1 + strlen(e_string)) {
+        pkt->length = 0;
+	return;
+    }
     /* Add the basic info */
     (void) strcpy((char *) (pkt->dat+2),pname);
     pkt->length = 3 + strlen(pname);
