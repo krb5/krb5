@@ -14,10 +14,13 @@
 #define OSMajorVersion    4
 #define OSMinorVersion    3
 
+#undef HasGcc
 #define HasGcc NO
 
 #define HasVoidSignalReturn NO
 #define HasSaberC YES
+#undef HasNdbm
+#define HasNdbm		YES
 
 /* HC lies */
 #define StandardCppDefines -U__STDC__
@@ -25,3 +28,16 @@
 #define StandardDefines -U__STDC__ -DBITS32
 
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
+
+/* On RT */
+#ifdef RtArchitecture
+#undef HCRevision
+#define HCRevision	21019
+
+#if HCRevision < 21001
+#define BandAidCompiler "rtcchack.bac"
+#undef MacroFile
+#define MacroFile ibm.cf $(IRULESRC)/rtcchack.bac
+#endif
+
+#endif /* RtArchitecture */
