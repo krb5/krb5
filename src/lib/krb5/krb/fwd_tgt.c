@@ -42,8 +42,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     krb5_data *outbuf;
 {
     krb5_replay_data replaydata;
-    krb5_data * scratch;
-    krb5_address **addrs;
+    krb5_data * scratch = 0;
+    krb5_address **addrs = 0;
     krb5_error_code retval;
     krb5_creds creds, tgt;
     krb5_creds *pcreds;

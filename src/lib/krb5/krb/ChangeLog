@@ -1,5 +1,8 @@
 Wed Jan 10 21:01:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Initialize addrs to 0 so that we
+		don't try to free stack garbage on an error.
+
 	* krbconfig.c, Makefile.in: Removed krbconfig.c; it contained
 		global variables which are no longer used.
 
