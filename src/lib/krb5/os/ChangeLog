@@ -1,3 +1,8 @@
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * dnssrv.c:  wrap within #ifdef KRB5_DNS_LOOKUP to prevent references
+      to resolver functions when DNS support is not being compiled 
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* realm_iter.c (krb5_realm_iterator_create): Array NAMES is now

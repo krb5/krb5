@@ -27,6 +27,7 @@
  * do DNS SRV RR queries
  */
 
+#ifdef KRB5_DNS_LOOKUP
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
@@ -269,3 +270,4 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     *answers = head;
     return 0;
 }
+#endif
