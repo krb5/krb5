@@ -1,3 +1,11 @@
+Thu Jul 13 15:40:56 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* com_err.h: error_message should be const char * (as it is in
+        error_message.c), not char const * (as currently presented).
+
+Alspo, since error_message
+ets declared const even on non-ansi compilers, set the return type that way so AIX cc doesn't barf.	
+
 Wed Jul 12 12:37:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* error_message.c: Do not include stdlib.h unless it exists
