@@ -49,7 +49,7 @@ struct sockaddr_in *receiver;
 	raddr.length = 4;
 	raddr.contents = (krb5_octet *)ra;
 
-	memcpy(sa, (char *)&sender->sin_addr, sa, 4);
+	memcpy(sa, (char *)&sender->sin_addr, 4);
 	memcpy(ra, (char *)&receiver->sin_addr, 4);
 
 	sfaddr.address = &saddr;
