@@ -21,6 +21,14 @@
  * or implied warranty.
  */
 
+/* 
+ * The hand-coded parser used in the Beta 4 distribution didn't
+ * reverse the order of the bit string fields.  This define allows partial
+ * interoperability with the Beta 4 distribution by doing a bit reversal
+ * on bitfields which have bits set in the high 16 bits.
+ */
+#define BACKWARD_BITMASK_COMPAT
+
 #include "asn1_k_decode.h"
 #include "asn1_decode.h"
 #include "asn1_get.h"

@@ -1,3 +1,9 @@
+Thu Apr 20 17:41:24 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_k_decode.c, krbasn1.h: Move the define of
+		BACKWARDS_BITMASK_COMPAT to asn1_k_decode.c, since it
+		doesn't #include krbasn1.h
+
 Tue Apr 18 21:46:30 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_k_decode.c (asn1_decode_krb5_flags): Make the function
