@@ -20,6 +20,7 @@
 	before processing the input.
 	(krb5_c_random_make_octets): Lock the mutex before extracting
 	random bytes.
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.
 
 	* libk5crypto.exports: Drop the library init/fini functions and
 	the DES tables from the export list.
