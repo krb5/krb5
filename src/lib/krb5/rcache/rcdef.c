@@ -37,6 +37,7 @@ const krb5_rc_ops krb5_rc_dfl_ops =
   "dfl",
   krb5_rc_dfl_init,
   krb5_rc_dfl_recover,
+  krb5_rc_dfl_recover_or_init,
   krb5_rc_dfl_destroy,
   krb5_rc_dfl_close,
   krb5_rc_dfl_store,

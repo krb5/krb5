@@ -20,6 +20,8 @@ krb5_error_code KRB5_CALLCONV krb5_rc_dfl_init
 krb5_error_code KRB5_CALLCONV krb5_rc_dfl_recover 
 	(krb5_context,
 		   krb5_rcache); 
+krb5_error_code KRB5_CALLCONV krb5_rc_dfl_recover_or_init
+    	(krb5_context, krb5_rcache, krb5_deltat);
 krb5_error_code KRB5_CALLCONV krb5_rc_dfl_destroy 
 	(krb5_context,
 		   krb5_rcache);

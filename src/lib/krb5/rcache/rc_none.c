@@ -35,6 +35,7 @@ krb5_rc_none_init(krb5_context ctx, krb5_rcache rc, krb5_deltat d)
 {
     return 0;
 }
+#define krb5_rc_none_recover_or_init krb5_rc_none_init
 
 static krb5_error_code KRB5_CALLCONV
 krb5_rc_none_noargs(krb5_context ctx, krb5_rcache rc)
@@ -76,6 +77,7 @@ const krb5_rc_ops krb5_rc_none_ops = {
     "none",
     krb5_rc_none_init,
     krb5_rc_none_recover,
+    krb5_rc_none_recover_or_init,
     krb5_rc_none_destroy,
     krb5_rc_none_close,
     krb5_rc_none_store,

@@ -49,6 +49,8 @@ struct _krb5_rc_ops {
 	(krb5_context, krb5_rcache,krb5_deltat); /* create */
     krb5_error_code (KRB5_CALLCONV *recover)
 	(krb5_context, krb5_rcache); /* open */
+    krb5_error_code (KRB5_CALLCONV *recover_or_init)
+	(krb5_context, krb5_rcache,krb5_deltat);
     krb5_error_code (KRB5_CALLCONV *destroy)
 	(krb5_context, krb5_rcache);
     krb5_error_code (KRB5_CALLCONV *close)
