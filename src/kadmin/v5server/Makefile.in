@@ -1,5 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) \
-	-DKRB5_DEFAULT_ACL_FILE='"'$(KRB5ROOT)$(S)krb5_adm.acl'"'
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) 
 LDFLAGS = -g
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a

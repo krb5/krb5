@@ -63,10 +63,6 @@ static const aop_t acl_op_table[] = {
 static aent_t	*acl_list_head = (aent_t *) NULL;
 static aent_t	*acl_list_tail = (aent_t *) NULL;
 
-#ifndef	KRB5_DEFAULT_ACL_FILE
-#define	KRB5_DEFAULT_ACL_FILE	"/krb5/krb5_adm.acl";
-#endif	/* KRB5_DEFAULT_ACL_FILE */
-static const char *acl_default_file = KRB5_DEFAULT_ACL_FILE;
 static const char *acl_acl_file = (char *) NULL;
 static int acl_inited = 0;
 static int acl_debug_level = 0;
@@ -385,7 +381,7 @@ acl_init(kcontext, debug_level, acl_file)
     DPRINT(DEBUG_CALLS, acl_debug_level,
 	   ("* acl_init(afile=%s)\n",
 	    ((acl_file) ? acl_file : "(null)")));
-    acl_acl_file = (acl_file) ? acl_file : (char *) acl_default_file;
+    acl_acl_file = (acl_file) ? acl_file : (char *) KRB5_DEFAULT_ADMIN_ACL;
     acl_inited = acl_load_acl_file();
 #if	POSIX_SIGNALS
     (void) sigemptyset(&s_action.sa_mask);
