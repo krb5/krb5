@@ -1,3 +1,7 @@
+2001-11-19  Sam Hartman  <hartmans@mit.edu>
+
+	* yhash.h: Work around sha1 implementation using host byte order
+
 2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Fix typo OUTP -> OUTPRE.
