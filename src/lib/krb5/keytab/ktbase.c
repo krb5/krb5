@@ -29,6 +29,7 @@
 
 #include "k5-int.h"
 #include "k5-thread.h"
+#include "kt-int.h"
 
 extern const krb5_kt_ops krb5_ktf_ops;
 extern const krb5_kt_ops krb5_ktf_writable_ops;

@@ -31,6 +31,7 @@
 #include "k5-thread.h"
 
 #include "fcc.h"
+#include "cc-int.h"
 
 struct krb5_cc_typelist {
     const krb5_cc_ops *ops;

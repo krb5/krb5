@@ -51,7 +51,7 @@ rc_base.so rc_base.po $(OUTPRE)rc_base.$(OBJEXT): rc_base.c rc_base.h $(SRCTOP)/
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/krb5/kdb.h rc-int.h
 rc_dfl.so rc_dfl.po $(OUTPRE)rc_dfl.$(OBJEXT): rc_dfl.c rc_base.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

@@ -12,6 +12,7 @@
  */
 
 #include "rc_base.h"
+#include "rc-int.h"
 #include "k5-thread.h"
 
 #define FREE(x) ((void) free((char *) (x)))

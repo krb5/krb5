@@ -1,3 +1,10 @@
+2004-05-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* rc_base.c: Include rc-int.h
+
+	* rc-int.h: Create file with prototypes for krb5int_rc_finish_init and 
+	krb5int_rc_terminate.
+
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* rc_io.c (krb5_rc_io_open_internal): If file could not be open,

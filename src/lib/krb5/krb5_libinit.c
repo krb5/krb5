@@ -14,6 +14,9 @@
 
 #include "krb5_libinit.h"
 #include "k5-platform.h"
+#include "cc-int.h"
+#include "kt-int.h"
+#include "rc-int.h"
 
 static	int		initialized = 0;
 
@@ -43,8 +46,6 @@ int krb5int_lib_init(void)
 /* Always-delayed initialization -- error table linkage, etc.  */
 krb5_error_code krb5int_initialize_library (void)
 {
-    int err;
-
     if (!initialized) {
 #if !USE_BUNDLE_ERROR_STRINGS
 	add_error_table(&et_krb5_error_table);

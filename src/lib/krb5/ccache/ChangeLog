@@ -1,3 +1,10 @@
+2004-05-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* ccbase.c: Include cc-int.h.
+
+	* cc-int.h (krb5int_cc_finalize): Add prototypes for 
+	krb5int_cc_{finalize,initialize}.
+
 2004-05-25  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:  GetMSTGT().  Initialize pTicketRequest to NULL 
@@ -6,6 +13,7 @@
       instead of using a hardcoded list of enctypes which may change
       in the future.
       krb5_lcc_get_name(): fix return value if Kerberos is not supported.
+
 
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 

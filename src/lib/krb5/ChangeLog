@@ -1,3 +1,11 @@
+2004-05-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Include ccache, keytab and rcache
+	directories.
+
+	* krb5_libinit.c: Include cc-int.h, kt-int.h, rc-int.h for
+	init/fini prototypes.
+
 2004-05-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5.exports: Export krb5int_foreach_localaddr for now.

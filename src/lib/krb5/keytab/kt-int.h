@@ -1,7 +1,7 @@
 /*
- * lib/krb5/ccache/file/cc-int.h
+ * lib/krb5/keytab/kt-int.h
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -28,18 +28,12 @@
  * file-based credential cache routines.
  */
 
-#ifndef __KRB5_CCACHE_H__
-#define __KRB5_CCACHE_H__
+#ifndef __KRB5_KEYTAB_INT_H__
+#define __KRB5_KEYTAB_INT_H__
 
-#include "k5-int.h"
 
-krb5_boolean
-krb5int_cc_creds_match_request(krb5_context, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds);
+int krb5int_kt_initialize(void);
 
-int
-krb5int_cc_initialize(void);
+void krb5int_kt_finalize(void);
 
-void
-krb5int_cc_finalize(void);
-
-#endif /* __KRB5_CCACHE_H__ */
+#endif /* __KRB5_KEYTAB_INT_H__ */

@@ -1,3 +1,11 @@
+2004-05-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c: Include kt-int.h
+
+	* kt-int.h: Create file with prototypes for krb5int_kt_initialize and 
+	krb5int_kt_finalize(void);
+
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktbase.c: Include ctype.h.
