@@ -1,3 +1,8 @@
+Tue Sep 26 22:47:15 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* osconf.h (DEFAULT_PROFILE_PATH): look in $(prefix)/lib/krb5.conf
+	if /etc/krb5.conf isn't found.
+
 Fri Sep 29 01:45:27 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* osconf.h: Don't include autoconf.h under Windows, since it
