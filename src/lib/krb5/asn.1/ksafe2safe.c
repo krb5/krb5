@@ -48,6 +48,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
+    xbzero(rv2, sizeof(*rv2));
 
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_SAFE;
