@@ -366,12 +366,20 @@ gen_principal(kcontext, realm, do_rand, n, princp, namep)
 		while (!isalnum(*cp & 0xff))
 		    *cp = (char) RANDOM(0,256);
 		cp++;
+	        if(cp + strlen(realm) >= pnamebuf + sizeof(pnamebuf))
+		    break;
 	    }
+	    if(cp + strlen(realm) >= pnamebuf + sizeof(pnamebuf))
+		break;
 	    *cp = '/';
 	    cp++;
 	}
-	cp[-1] = '@';
-	strcpy(cp, realm);
+	if(cp + strlen(realm) < pnamebuf + sizeof(pnamebuf)) {
+	    cp[-1] = '@';
+	    strcpy(cp, realm);
+	} else {
+            strcpy(cp , "");
+	}
     }
     else {
 	instname = instnames[n % (sizeof(instnames)/sizeof(instnames[0]))];
