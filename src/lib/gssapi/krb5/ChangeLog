@@ -1,3 +1,8 @@
+Tue Sep 12 13:05:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* k5seal.c, k5unseal.c, accept_sec_context.c: Undo MACINTOSH
+		change for paths. The old ones were correct.
+
 Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
 
 	* gssapi_krb5.h:  changed a path bearing include for MACINTOSH
