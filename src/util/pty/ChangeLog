@@ -1,5 +1,9 @@
 2001-04-27  Tom Yu  <tlyu@mit.edu>
 
+	* configure.in(K5_CHECK_UT_MEMBER): Fix typo in previous; make
+	sure to include the correct header when checking structure
+	members.
+
 	* configure.in: Many changes to support the rewriting of the utmp
 	pieces of libpty.  Do a large amount of checking for consistency
 	of various utmp and utmpx APIs as currently understood.  See rant

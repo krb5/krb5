@@ -76,7 +76,7 @@ AC_DEFUN(K5_CHECK_UT_MEMBER,
 [AC_MSG_CHECKING([for $2 in struct $1])
 AC_CACHE_VAL([krb5_cv_struct_$1_$2],
 [AC_TRY_COMPILE([#include <sys/types.h>
-#include <utmp.h>], [struct $1 u; u.$2;],
+#include <$1.h>], [struct $1 u; u.$2;],
 eval "krb5_cv_struct_$1_$2=yes", eval "krb5_cv_struct_$1_$2=no")])
 if eval "test \"`echo '$krb5_cv_struct_'$1'_'$2`\" = yes"; then
   AC_MSG_RESULT(yes)
