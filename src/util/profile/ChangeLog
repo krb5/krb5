@@ -1,3 +1,8 @@
+2004-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* libprofile.exports: Don't try to export
+	krb5int_profile_shared_data.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h, prof_parse.c, profile.hin: Don't test macintosh or

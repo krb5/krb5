@@ -1,6 +1,5 @@
 et_prof_error_table
 initialize_prof_error_table
-krb5int_profile_shared_data
 profile_abandon
 profile_add_node
 profile_add_relation
