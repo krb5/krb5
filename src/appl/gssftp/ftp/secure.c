@@ -24,6 +24,9 @@ extern gss_ctx_id_t gcontext;
 
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>

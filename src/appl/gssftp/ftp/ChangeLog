@@ -1,3 +1,10 @@
+Mon Feb 5 09:06:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Check for stdlib.h
+
+	* secure.c, pclose.c, ruserpass.c, ftp.c: Include stdlib.h if
+		present for malloc declarations.
+
 Thu Jan 18 18:33:18 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
 
 	* cmds.c: Handle sys_errlist and remove declaration of errno.

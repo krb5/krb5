@@ -38,7 +38,7 @@ static char sccsid[] = "@(#)ruserpass.c	5.3 (Berkeley) 3/1/91";
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef POSIX
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <ctype.h>

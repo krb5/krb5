@@ -9,6 +9,9 @@ static	char sccsid[] = "@(#)pclose.c 1.1 90/04/28 SMI"; /* from UCB 1.2 3/7/86 *
 #endif /* not lint */
 
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <signal.h>
 #include <sys/param.h>
 #include <sys/wait.h>
