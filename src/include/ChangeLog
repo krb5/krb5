@@ -1,3 +1,8 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-windows): Remove new "timestamp" file when
+	cleaning up.
+
 2003-05-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Sequence number of krb5_replay_data should be unsigned.
