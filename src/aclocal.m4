@@ -303,6 +303,8 @@ if test $withval = no; then
 	DES425_DEPLIB=
 	KRB4_INCLUDES=
 	KRB4_LIBPATH=
+	KRB524_DEPLIB=
+	KRB524_LIB=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir=
 else 
@@ -315,6 +317,8 @@ else
 	KRB4_LIB=-lkrb4
 	KRB4_INCLUDES='-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV'
 	KRB4_LIBPATH=
+	KRB524_DEPLIB='$(BUILDTOP)/krb524/libkrb524.a'
+	KRB524_LIB='$(BUILDTOP)/krb524/libkrb524.a'
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
  else
@@ -331,6 +335,8 @@ AC_SUBST(KRB4_INCLUDES)
 AC_SUBST(KRB4_LIBPATH)
 AC_SUBST(KRB4_LIB)
 AC_SUBST(KRB4_DEPLIB)
+AC_SUBST(KRB524_DEPLIB)
+AC_SUBST(KRB524_LIB)
 AC_SUBST(DES425_DEPLIB)
 AC_SUBST(DES425_LIB)
 ])dnl

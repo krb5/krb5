@@ -1,3 +1,7 @@
+2000-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add support to substitute KRB524_LIB in places.
+
 2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Build gss-sample on Windows.
