@@ -1,3 +1,8 @@
+2002-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (conf_yes, conf_no): Now const.
+	(profile_parse_boolean): Local variable P points to const.
+
 2002-02-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBMINOR): Bump, due to error table changes.

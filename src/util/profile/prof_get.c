@@ -283,12 +283,12 @@ profile_get_integer(profile, name, subname, subsubname,
 	return 0;
 }
 
-static char *conf_yes[] = {
+static char *const conf_yes[] = {
     "y", "yes", "true", "t", "1", "on",
     0,
 };
 
-static char *conf_no[] = {
+static char *const conf_no[] = {
     "n", "no", "false", "nil", "0", "off",
     0,
 };
@@ -298,7 +298,7 @@ profile_parse_boolean(s, ret_boolean)
      char *s;
      int* ret_boolean;
 {
-    char **p;
+    char *const *p;
     
     if (ret_boolean == NULL)
     	return PROF_EINVAL;
