@@ -62,7 +62,6 @@ int	portnum;
 krb5_data **response;			/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
-    krb5_encrypt_block eblock;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -76,7 +75,7 @@ krb5_data **response;			/* filled in with a response packet */
     int nprincs = 0;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime=0;
-    krb5_keyblock *session_key = 0;
+    krb5_keyblock session_key;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     krb5_key_data  *server_key;
@@ -88,6 +87,8 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     int firstpass = 1;
     const char	*status = 0;
+
+    session_key.contents = 0;
     
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
@@ -258,10 +259,8 @@ tgt_again:
 	goto cleanup;
     }
     
-    krb5_use_enctype(kdc_context, &eblock, useenctype);
-    errcode = krb5_random_key(kdc_context, &eblock, 
-			     krb5_enctype_array[useenctype]->random_sequence,
-			     &session_key);
+    errcode = krb5_c_make_random_key(kdc_context, useenctype, &session_key);
+
     if (errcode) {
 	/* random key failed */
 	status = "RANDOM_KEY_FAILED";
@@ -404,19 +403,7 @@ tgt_again:
 
     /* assemble any authorization data */
     if (request->authorization_data.ciphertext.data) {
-	krb5_encrypt_block eblock;
 	krb5_data scratch;
-
-	/* decrypt the authdata in the request */
-	if (!valid_enctype(request->authorization_data.enctype)) {
-	    status = "BAD_AUTH_ETYPE";
-	    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-	    goto cleanup;
-	}
-	/* put together an eblock for this encryption */
-
-	krb5_use_enctype(kdc_context, &eblock,
-			 request->authorization_data.enctype);
 
 	scratch.length = request->authorization_data.ciphertext.length;
 	if (!(scratch.data =
@@ -425,28 +412,17 @@ tgt_again:
 	    errcode = ENOMEM;
 	    goto cleanup;
 	}
-	/* do any necessary key pre-processing */
-	if ((errcode = krb5_process_key(kdc_context, &eblock,
-				      header_ticket->enc_part2->session))) {
-	    status = "AUTH_PROCESS_KEY";
+
+	if ((errcode = krb5_c_decrypt(kdc_context,
+				      header_ticket->enc_part2->session,
+				      KRB5_KEYUSAGE_TGS_REQ_AD_SESSKEY,
+				      0, &request->authorization_data,
+				      &scratch))) {
+	    status = "AUTH_ENCRYPT_FAIL";
 	    free(scratch.data);
 	    goto cleanup;
 	}
 
-	/* call the encryption routine */
-	if ((errcode = krb5_decrypt(kdc_context, (krb5_pointer) request->authorization_data.ciphertext.data,
-				  (krb5_pointer) scratch.data,
-				  scratch.length, &eblock, 0))) {
-	    status = "AUTH_ENCRYPT_FAIL";
-	    (void) krb5_finish_key(kdc_context, &eblock);
-	    free(scratch.data);
-	    goto cleanup;
-	}
-	if ((errcode = krb5_finish_key(kdc_context, &eblock))) {
-	    status = "AUTH_FINISH_KEY";
-	    free(scratch.data);
-	    goto cleanup;
-	}
 	/* scratch now has the authorization data, so we decode it */
 	errcode = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
 	free(scratch.data);
@@ -466,7 +442,7 @@ tgt_again:
 	enc_tkt_reply.authorization_data =
 	    header_ticket->enc_part2->authorization_data;
 
-    enc_tkt_reply.session = session_key;
+    enc_tkt_reply.session = &session_key;
     enc_tkt_reply.client = header_ticket->enc_part2->client;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
@@ -562,7 +538,7 @@ tgt_again:
 	/* convert server.key into a real key (it may be encrypted
 	 *        in the database) */
 	if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context,
-						   &master_encblock, 
+						   &master_keyblock, 
 						   server_key, &encrypting_key,
 						   NULL))) {
 	    status = "DECRYPT_SERVER_KEY";
@@ -588,7 +564,7 @@ tgt_again:
     reply.enc_part.kvno = 0;		/* We are using the session key */
     reply.ticket = &ticket_reply;
 
-    reply_encpart.session = session_key;
+    reply_encpart.session = &session_key;
     reply_encpart.nonce = request->nonce;
 
     /* copy the time fields EXCEPT for authtime; its location
@@ -616,6 +592,7 @@ tgt_again:
     reply.enc_part.enctype = subkey ? subkey->enctype :
 		    header_ticket->enc_part2->session->enctype;
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
+				  subkey ? 1 : 0,
 				  subkey ? subkey :
 				  header_ticket->enc_part2->session,
 				  &reply, response);
@@ -661,8 +638,8 @@ cleanup:
 	free(sname);
     if (nprincs)
 	krb5_db_free_principal(kdc_context, &server, 1);
-    if (session_key)
-	krb5_free_keyblock(kdc_context, session_key);
+    if (session_key.contents)
+	krb5_free_keyblock_contents(kdc_context, &session_key);
     if (newtransited)
 	free(enc_tkt_reply.transited.tr_contents.data); 
 

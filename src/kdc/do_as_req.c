@@ -65,10 +65,9 @@ krb5_data **response;			/* filled in with a response packet */
     int c_nprincs = 0, s_nprincs = 0;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime;
-    krb5_keyblock *session_key = 0;
+    krb5_keyblock session_key;
     krb5_keyblock encrypting_key;
     const char *status;
-    krb5_encrypt_block eblock;
     krb5_key_data  *server_key, *client_key;
     krb5_enctype useenctype;
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
@@ -82,6 +81,7 @@ krb5_data **response;			/* filled in with a response packet */
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
     encrypting_key.contents = 0;
+    session_key.contents = 0;
 
 #ifdef HAVE_NETINET_IN_H
     if (from->address->addrtype == ADDRTYPE_INET)
@@ -172,12 +172,9 @@ krb5_data **response;			/* filled in with a response packet */
 	errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
 	goto errout;
     }
-    krb5_use_enctype(kdc_context, &eblock, useenctype);
-    
-    if ((errcode = krb5_random_key(kdc_context, &eblock,
-				  krb5_enctype_array[useenctype]->random_sequence,
-				  &session_key))) {
-	/* random key failed */
+
+    if ((errcode = krb5_c_make_random_key(kdc_context, useenctype,
+					  &session_key))) {
 	status = "RANDOM_KEY_FAILED";
 	goto errout;
     }
@@ -200,7 +197,7 @@ krb5_data **response;			/* filled in with a response packet */
     if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
 	    setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
-    enc_tkt_reply.session = session_key;
+    enc_tkt_reply.session = &session_key;
     enc_tkt_reply.client = request->client;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
@@ -312,7 +309,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
 					       server_key, &encrypting_key,
 					       NULL))) {
 	status = "DECRYPT_SERVER_KEY";
@@ -353,7 +350,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock, 
 					       client_key, &encrypting_key,
 					       NULL))) {
 	status = "DECRYPT_CLIENT_KEY";
@@ -366,7 +363,7 @@ krb5_data **response;			/* filled in with a response packet */
     reply.padata = 0;
     reply.client = request->client;
     reply.ticket = &ticket_reply;
-    reply_encpart.session = session_key;
+    reply_encpart.session = &session_key;
     if ((errcode = fetch_last_req_info(&client, &reply_encpart.last_req))) {
 	status = "FETCH_LAST_REQ";
 	goto errout;
@@ -397,7 +394,7 @@ krb5_data **response;			/* filled in with a response packet */
     reply.enc_part.enctype = encrypting_key.enctype;
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
-				  &encrypting_key,  &reply, response);
+				  0, &encrypting_key,  &reply, response);
     krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     encrypting_key.contents = 0;
 
@@ -465,8 +462,8 @@ errout:
     }
     if (s_nprincs)
 	krb5_db_free_principal(kdc_context, &server, s_nprincs);
-    if (session_key)
-	krb5_free_keyblock(kdc_context, session_key);
+    if (session_key.contents)
+	krb5_free_keyblock_contents(kdc_context, &session_key);
     if (ticket_reply.enc_part.ciphertext.data) {
 	memset(ticket_reply.enc_part.ciphertext.data , 0,
 	       ticket_reply.enc_part.ciphertext.length);
