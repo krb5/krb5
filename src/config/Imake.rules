@@ -1266,9 +1266,9 @@ subdirMakefiles:							@@\
 	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile"; \ @@\
 	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	fi;								@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
-	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
-	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; 		@@\
 									@@\
 subsubdirMakefiles:							@@\
 	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
