@@ -1,3 +1,11 @@
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update to more clearly specify the build environment 
+      requirements.  Supported compilers include MSVC++ 6.0, MSVS.NET,
+      and MSVS.NET 2003.  Clarify requirements for building with DNS
+      support.  Also, add text describing MSLSA: credential cache 
+      and how to configure Windows so it can be used.
+
 2003-07-22  Tom Yu  <tlyu@mit.edu>
 
 	* README: Revert previous change, as it was in error; socklen_t
