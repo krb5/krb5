@@ -59,7 +59,7 @@ SRCS = \
 OBJS = \
 	accept_sec_context.$(OBJEXT) \
 	acquire_cred.$(OBJEXT) \
-	canon_name.$(OBJECT) \
+	canon_name.$(OBJEXT) \
 	compare_name.$(OBJEXT) \
 	context_time.$(OBJEXT) \
 	delete_sec_context.$(OBJEXT) \
