@@ -1,3 +1,8 @@
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Change default max_life to
+	one day.
+
 2003-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): Remove aes256 from the
