@@ -134,7 +134,11 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
 
-all:: shared $(OBJS)
+all:: all-$(WHAT) $(OBJS)
+
+all-unix:: shared
+all-mac:: shared
+all-windows::
 
 shared:
 	mkdir shared
@@ -177,7 +181,12 @@ check-mac:: $(TEST_PROGS)
 
 check-windows::
 
-clean::
+clean:: clean-$(WHAT)
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
+
+clean-unix::
 	$(RM) shared/*
+clean-mac::
+	$(RM) shared/*
+clean-windows::

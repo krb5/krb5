@@ -1,3 +1,9 @@
+Fri May 26 10:18:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile.in: removed for the PC creating shared directory.
+	  (still bug with the '@SHARED_RULE@' line but I'm waiting
+	  on tytso for that since I don't want to break Unix).
+
 Thu May 25 09:58:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gc_via_tkt.c (krb5_kdcrep2creds): Fix syntax error in the
