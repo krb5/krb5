@@ -42,7 +42,7 @@ install:: $(KRB5_HEADERS) osconf.h autoconf.h
 		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
 		cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
 	fi; done
-	@set -x; for f in osconf.h autoconf.h ; \
+	@set -x; for f in osconf.h autoconf.h $(ET_HEADERS); \
 	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
 	then true; else \
 		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \

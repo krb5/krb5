@@ -1,3 +1,6 @@
+Wed May 10 13:20:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (install): Install ET_HEADERS...
 
 Tue May 9 15:17:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Add definitions and prototypes for new administrative protocol.
