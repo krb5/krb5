@@ -576,7 +576,9 @@
 
 #ifdef SourceTop
            SRCDIR = SourceTop/CURDIR/
+#ifdef Use_VPATH
             VPATH = SourceTop/CURDIR
+#endif
            SRCTOP = SourceTop
        SRCINCLUDE = -I/**/SourceTop/CURDIR
 #endif
