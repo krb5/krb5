@@ -1,3 +1,8 @@
+Sat Mar 18 18:49:03 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Use AC_CHECK_HEADERS(stdarg.h), not CHECK_STDARG.
+	* error.c:  Use HAVE_STDARG_H, not STDARG_PROTOTYPES.
+
 Mon Feb 27 22:40:18 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in:  Avoid recompilation of std_rqs.c every single time

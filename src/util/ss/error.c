@@ -62,7 +62,7 @@ char * ss_name(sci_idx)
     }
 }
 
-#ifdef STDARG_PROTOTYPES
+#ifdef HAVE_STDARG_H
 void ss_error (int sci_idx, long code, const char * fmt, ...)
 #else
 void ss_error (va_alist)
@@ -71,7 +71,7 @@ void ss_error (va_alist)
 {
     register char const *whoami;
     va_list pvar;
-#ifndef STDARG_PROTOTYPES
+#ifndef HAVE_STDARG_H
     int sci_idx;
     long code;
     char * fmt;
