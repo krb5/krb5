@@ -1,3 +1,22 @@
+2005-02-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Check that the root node
+	pointer is not null; raise assertion failure if it is.
+
+	* prof_int.h: Include k5-platform.h.
+	(struct _prf_data_t): Reorder fields, and insert some padding.
+
+	* prof_file.c (scan_shared_trees_locked): Check that the "root"
+	field isn't null.
+	(profile_open_file): Update the in-memory file contents after
+	updating the refcount instead of before.
+	(profile_update_file_data): If the root node in the file data is
+	null, always do the update.  Check that it's not null before
+	returning a success indication.
+	(profile_dereference_data_locked): Scan linked list of file data
+	objects for sanity check, before and after.
+	(profile_dereference_data_locked): Don't do it here.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_free_file_data): Destroy mutex before
