@@ -155,10 +155,23 @@ krb5_tkt_authent *tktauthent;
 
     /* only check rcache if sender has provided one---some services
        may not be able to use replay caches (such as datagram servers) */
-    if (rcache && (retval = krb5_rc_store(rcache, tktauthent))) {
-	tktauthent->ticket = 0;
-	clean_authenticator();
-	return retval;
+    if (rcache) {
+	krb5_donot_replay rep;
+
+	if (retval = krb5_auth_to_rep(tktauthent, &rep)) {
+	    tktauthent->ticket = 0;
+	    clean_authenticator();
+	    return retval;
+	}
+	if (retval = krb5_rc_store(rcache, &rep)) {
+	    xfree(rep.server);
+	    xfree(rep.client);
+	    tktauthent->ticket = 0;
+	    clean_authenticator();
+	    return retval;
+	}
+	xfree(rep.server);
+	xfree(rep.client);
     }
     tktauthent->ticket = 0;
 
