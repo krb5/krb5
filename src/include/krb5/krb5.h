@@ -160,7 +160,7 @@ typedef struct _krb5_error {
 typedef struct _krb5_ap_req {
     krb5_flags ap_options;		/* requested options */
     krb5_ticket *ticket;		/* ticket */
-    krb5_data authenticator;		/* authenticator (already encrypted) */
+    krb5_enc_data authenticator;	/* authenticator (already encrypted) */
 } krb5_ap_req;
 
 typedef struct _krb5_ap_rep {
