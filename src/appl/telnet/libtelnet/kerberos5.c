@@ -117,14 +117,15 @@ static	krb5_tkt_authent *authdat = NULL;
 /* telnet matches the AP_REQ and AP_REP with this */
 static	krb5_authenticator authenticator;
 
+void kerberos5_forward();
+
 /* some compilers can't hack void *, so we use the Kerberos krb5_pointer,
    which is either void * or char *, depending on the compiler. */
 
 #define Voidptr krb5_pointer
 
-#if	defined(ENCRYPTION)
 Block	session_key;
-#endif
+
 	static int
 Data(ap, type, d, c)
 	Authenticator *ap;
@@ -346,7 +347,9 @@ kerberos5_is(ap, data, cnt)
 	krb5_principal server;
 	krb5_ap_rep_enc_part reply;
 	krb5_data outbuf;
+#ifdef ENCRYPTION
 	Session_Key skey;
+#endif
 	char *name;
 	char *getenv();
 	krb5_data inbuf;
@@ -454,11 +457,13 @@ kerberos5_is(ap, data, cnt)
 			  (Voidptr )session_key, sizeof(Block));
 		} else
 		    break;
-
+		
+#ifdef ENCRYPTION
 		skey.type = SK_DES;
 		skey.length = 8;
 		skey.data = session_key;
 		encrypt_session_key(&skey, 1);
+#endif
 		break;
 	case KRB_FORWARD:
 		inbuf.data = (char *)data;
