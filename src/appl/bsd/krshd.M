@@ -6,9 +6,9 @@
 .\"
 .TH KRSHD 8C "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
-krshd \- kerberized remote shell server
+kshd \- kerberized remote shell server
 .SH SYNOPSIS
-.B /usr/etc/krshd -kKrR
+.B /usr/local/sbin/kshd -kr45ec
 .SH DESCRIPTION
 .I Krshd
 is the server for the 
@@ -16,22 +16,23 @@ is the server for the
 routine and, consequently, for the
 .IR rsh (1C)
 program.  The server provides remote execution facilities
-with authentication based on privileged port numbers from trusted hosts.
+with authentication based on privileged port numbers from trusted hosts or 
+the Kerberos authentication system.
 .PP
 The
-.I krshd
+.I kshd
 server is invoked by \fIinetd(8c)\fP when it receives a connection
 on the port indicated in /etc/inetd.conf.  A typical /etc/inetd.conf
 configuration line for \fIkrshd\fP might be:
 
-kshell	stream	tcp	nowait	root	/krb5/sbin/krshd	krshd -K
+kshell	stream	tcp	nowait	root	/usr/local/sbin/kshd	kshd -5c
 
-When a service request is received, the follow protocol is initiated:
+When a service request is received, the following protocol is initiated:
 
 .IP 1) 
 Authentication is checked
 .IP 2)
-Authorization is checked via the access-control files \fI.k5login\fP 
+Check authorization via the access-control files \fI.k5login\fP, \fI.klogin\fP 
 and \fI.rhosts\fP in the user's home directory.
 .IP 3)
 A null byte is returned on the initial socket
@@ -46,19 +47,39 @@ by \fIinetd(8)\fP,
 or by the name of the daemon. If command-line arguments are present, they 
 take priority.  The options are:
 
-.IP \fB\-k\fP 10
-Check authorization in ~/.k5login.
+.IP \fB\-5\fP 10
+Allow Kerberos5 authentication with the \fI.k5login\fP access control file
+to be trusted.  If this authentication system is used by the client and the
+authorization check is passed, then the user is allowed to log in.
 
-.IP \fB\-K\fP
-Similar to \fb\-k\fP except that the authorization check must succeed
-inorder for the login to succeed.
+.IP \fB\-4\fP 
+Allow Kerberos4 authentication with the \fI.klogin\fP access control file
+to be trusted.  If this authentication system is used by the client and the
+authorization check is passed, then the user is allowed to log in.
+
+.IP \fB\-k\fP 
+Allow Kerberos5 and Kerberos4 as acceptable authentication
+mechanisms.  This is the same as including \fB\-4\fP and \fB\-5\fP.
 
 .IP \fB\-r\fP 
-Check authorization in ~/.rhosts.
+Trust the remote hostname as an authentication system using the 
+ \fI.rhosts\fP authorization list.
 
-.IP \fB\-K\fP
-Similar to \fb\-r\fP except that the authorization check must succeed
-inorder for the login to succeed.
+
+.IP \fB\-e\fP
+Require the client to encrypt the connection.  Only Kerberos5 clients
+support encryption.
+
+.IP \fB\-c\fP
+Require Kerberos5 clients to present a cryptographic checksum of
+initial connection information like the name of the user that the
+client is trying to access in the initial authenticator.  This
+checksum provides additionl security by preventing an attacker from
+changing the initial connection information.  To benefit from this
+security, only Kerberos5 should be trusted; Kerberos4 and rhosts
+authentication do not include this checksum.  If this option is
+specified, older Kerberos5 clients that do not send a checksum in the
+authenticator will not be able to authenticate to this server.
 
 .PP
 If no command-line arguments are present, then the presence of the 

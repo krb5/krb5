@@ -1,5 +1,7 @@
 Wed Jan 24 00:34:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
+	* krlogind.M krshd.M: Update to document new options.
+
 	* Makefile.in (install): Install as kshd and klogind not krshd and
  	krlogind.
 
