@@ -771,9 +771,8 @@ proc start_kerberos_daemons { standalone } {
 
     if ![file exists $kdc_lfile] then {
 	catch [touch $kdc_lfile]
-	sleep 1
     }
-
+		sleep 2
     set kdc_start [file mtime $kdc_lfile]
 
     spawn $KRB5KDC -r $REALMNAME -n
@@ -784,7 +783,7 @@ proc start_kerberos_daemons { standalone } {
 	if { [file mtime $kdc_lfile] != $kdc_start } then  {
 		break;
 	}	
-	sleep 1
+	sleep 2
     }
 
     if {$count >= $retry} {
@@ -919,7 +918,6 @@ proc add_kerberos_key { kkey standalone } {
 	}
 	eof {
 	    fail "kadmin $kkey"
-	    catch "expect_after"
 	    return 0
 	}
     }
@@ -933,9 +931,9 @@ proc add_kerberos_key { kkey standalone } {
     send "$KEY\r"
     expect {
 	"Principal \"$kkey@$REALMNAME\" created" { }
-	"Principal or policy already exists while creating" { }
+	"Principal or policy already exists while creating*" { expect eof }
     }
-    expect_after
+    catch "expect_after"
     if ![check_exit_status kadmin] {
 	return 0
     }
@@ -977,9 +975,9 @@ proc add_random_key { kkey standalone } {
     send "adminpass$KEY\r"
     expect {
 	"Principal \"$kkey@$REALMNAME\" created" { }
-	"Principal or policy already exists while creating" { }
+	"Principal or policy already exists while creating*" { expect eof}
     }
-    expect_after
+    catch "expect_after"
     if ![check_exit_status kadmin] {
 	return 0
     }

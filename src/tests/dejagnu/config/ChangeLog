@@ -1,3 +1,14 @@
+Thu Aug  8 23:08:13 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* default.exp: In add_kerberos_key and add_random_key only execute
+ 	the final expect_after if the spawn ID is still open; also soak up
+ 	all the kadmin responses.
+
+Thu Aug  8 22:13:27 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* default.exp: Sleep for two seconds while waiting for KDC to
+        start; sleep(1) doesn't always take up any time.
+
 Mon Aug  5 21:16:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Update to new kdb5_util convention.
