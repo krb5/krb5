@@ -1,12 +1,5 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-if test "$KRB4_LIB" = ''; then
-	AC_MSG_RESULT(disabling kdb5_convert)
-	convert=
-else
-	AC_MSG_RESULT(kdb5_convert included)
-	convert=convert
-fi
-CONFIG_DIRS(create destroy edit stash aname $convert)
+CONFIG_DIRS(create destroy edit stash aname)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

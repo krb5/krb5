@@ -1,4 +1,9 @@
 
+Thu Aug 03 12:04:59 1995  Chris Provenzano (proven@mit.edu)
+
+	* configure.in: Remove convert utility. All of its functionality 
+		has been moved into kdb5_edit.
+
 Fri Jul 7 15:33:25 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit setting of LDFLAGS.  It's now set and
 		passed down.
