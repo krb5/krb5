@@ -1445,7 +1445,7 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @ifhtml
 @html
 <a href="kinit.html"> kinit manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node klist Reference, kdestroy Reference, kinit Reference, Kerberos V5 Reference
@@ -1456,6 +1456,12 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @centerline{Reference Manual for @code{klist}}
 @page
 @end iftex
+
+@iftex
+@special{psfile=klist2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{klist}}
+@page
+@end iftex
 @ifinfo
 Type @kbd{M-x manual-entry klist} to read this manual page.
 @end ifinfo
@@ -1463,7 +1469,7 @@ Type @kbd{M-x manual-entry klist} to read this manual page.
 @ifhtml
 @html
 <a href="klist.html"> klist manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node kdestroy Reference, kpasswd Reference, klist Reference, Kerberos V5 Reference
@@ -1481,7 +1487,7 @@ Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @ifhtml
 @html
 <a href="kdestroy.html"> kdestroy manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node kpasswd Reference, telnet Reference, kdestroy Reference, Kerberos V5 Reference
@@ -1499,7 +1505,7 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @ifhtml
 @html
 <a href="kpasswd.html"> kpasswd manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node telnet Reference, rlogin Reference, kpasswd Reference, Kerberos V5 Reference
@@ -1549,7 +1555,7 @@ Type @kbd{M-x manual-entry telnet} to read this manual page.
 @ifhtml
 @html
 <a href="telnet.html"> telnet manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node rlogin Reference, FTP Reference, telnet Reference, Kerberos V5 Reference
@@ -1571,7 +1577,7 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @ifhtml
 @html
 <a href="rlogin.html"> rlogin manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node FTP Reference, rsh Reference, rlogin Reference, Kerberos V5 Reference
@@ -1609,6 +1615,10 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @special{psfile=ftp8.ps voffset=-700 hoffset=-40}
 @centerline{Reference Manual for @code{FTP}}
 @page
+
+@special{psfile=ftp9.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
 @end iftex
 @ifinfo
 Type @kbd{M-x manual-entry FTP} to read this manual page.
@@ -1617,7 +1627,7 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 @ifhtml
 @html
 <a href="ftp.html"> ftp manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node rsh Reference, rcp Reference, FTP Reference, Kerberos V5 Reference
@@ -1639,7 +1649,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @ifhtml
 @html
 <a href="rsh.html"> rsh manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node rcp Reference, ksu Reference, rsh Reference, Kerberos V5 Reference
@@ -1650,6 +1660,12 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @centerline{Reference Manual for @code{rcp}}
 @page
 @end iftex
+
+@iftex
+@special{psfile=rcp2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rcp}}
+@page
+@end iftex
 @ifinfo
 Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end ifinfo
@@ -1657,7 +1673,7 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @ifhtml
 @html
 <a href="rcp.html"> rcp manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node ksu Reference,  , rcp Reference, Kerberos V5 Reference
@@ -1691,7 +1707,7 @@ Type @kbd{M-x manual-entry ksu} to read this manual page.
 @ifhtml
 @html
 <a href="ksu.html"> ksu manpage</a>
-@end rawhtml
+@end html
 @end ifhtml
 
 @node Kerberos Glossary,  , Kerberos V5 Reference, Top
