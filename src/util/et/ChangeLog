@@ -1,3 +1,12 @@
+2004-05-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Invoke KRB5_BUILD_PROGRAM and KRB5_RUN_FLAGS.
+	* Makefile.in (PROG_RPATH, PROG_LIBPATH, RUN_SETUP): New
+	variables.
+	(test_et, t_com_err): Use the built library, even if shared.
+	(check-unix): Set up the environment properly to load shared
+	libraries when running the test programs.
+
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.
