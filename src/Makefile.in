@@ -295,12 +295,13 @@ MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 	include/krb5/asn.1/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
-WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
+WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp windows/*/*.hpj
 
 #
 # Part of building the PC release has to be done on Unix. This includes
 # anything the requires awk.
 #
+AWK = gawk
 AH  = util/et/et_h.awk
 AC  = util/et/et_c.awk
 INC = include/
@@ -409,42 +410,42 @@ kerbsrc.mac.tar: awk-windows-mac macfile.list mac-bin-dirs Macfile
 
 
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
-	gawk -f $(AH) outfile=$@ $(ET)asn1_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et
 $(INC)kdb5_err.h: $(AH) $(ET)kdb5_err.et
-	gawk -f $(AH) outfile=$@ $(ET)kdb5_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)kdb5_err.et
 $(INC)krb5_err.h: $(AH) $(ET)krb5_err.et
-	gawk -f $(AH) outfile=$@ $(ET)krb5_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)krb5_err.et
 $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
-	gawk -f $(AH) outfile=$@ $(ET)kv5m_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)kv5m_err.et
 $(INC)adm_err.h: $(AH) $(ET)adm_err.et
-	gawk -f $(AH) outfile=$@ $(ET)adm_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)adm_err.et
 $(INC)/kerberosIV/krb_err.h: $(AH) lib/krb4/krb_err.et
-	gawk -f $(AH) outfile=$@ lib/krb4/krb_err.et
+	$(AWK) -f $(AH) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.h: $(AH) $(PR)prof_err.et
-	gawk -f $(AH) outfile=$@ $(PR)prof_err.et
+	$(AWK) -f $(AH) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
-	gawk -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
+	$(AWK) -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.h: $(AH) $(GK)gssapi_err_krb5.et
-	gawk -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
+	$(AWK) -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
 
 $(ET)asn1_err.c: $(AC) $(ET)asn1_err.et
-	gawk -f $(AC) outfile=$@ $(ET)asn1_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)asn1_err.et
 $(ET)kdb5_err.c: $(AC) $(ET)kdb5_err.et
-	gawk -f $(AC) outfile=$@ $(ET)kdb5_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)kdb5_err.et
 $(ET)krb5_err.c: $(AC) $(ET)krb5_err.et
-	gawk -f $(AC) outfile=$@ $(ET)krb5_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)krb5_err.et
 $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
-	gawk -f $(AC) outfile=$@ $(ET)kv5m_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)kv5m_err.et
 $(ET)adm_err.c: $(AC) $(ET)adm_err.et
-	gawk -f $(AC) outfile=$@ $(ET)adm_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)adm_err.et
 lib/krb4/krb_err.c: $(AC) lib/krb4/krb_err.et
-	gawk -f $(AC) outfile=$@ lib/krb4/krb_err.et
+	$(AWK) -f $(AC) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.c: $(AC) $(PR)prof_err.et
-	gawk -f $(AC) outfile=$@ $(PR)prof_err.et
+	$(AWK) -f $(AC) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
-	gawk -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
+	$(AWK) -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
-	gawk -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
+	$(AWK) -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
 
 KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
 	$(INC)kv5m_err.h $(INC)asn1_err.h

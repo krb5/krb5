@@ -6,6 +6,9 @@
 /\.orig$/d
 /\.rej/d
 /\.ico$/d
+/\.doc$/d
+/\.hlp$/d
+/\.hpj$/d
 /\.o$/d
 /\.a$/d
 /\.zip$/d
