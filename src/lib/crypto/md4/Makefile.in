@@ -3,6 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\crypto.lib
+RUN_SETUP=@KRB5_RUN_ENV@
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -43,8 +44,8 @@ t_cksum: t_cksum.o $(TOPLIBD)/libcrypto.a
 	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libcrypto.a $(LIBS)
 
 check-unix:: t_mddriver t_cksum
-	$(C)t_mddriver -x
-	$(C)t_cksum "this is a test"
+	$(RUN_SETUP) $(C)t_mddriver -x
+	$(RUN_SETUP) $(C)t_cksum "this is a test"
 
 check-windows:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x

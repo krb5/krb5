@@ -1,3 +1,7 @@
+Tue May 21 20:29:03 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (check-unix): Use KRB5_RUN_FLAGS 
+
 Mon May 20 17:19:00 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* md5crypto.c, md5crypto.h: Change use of RSA_MD5_DES_CKSUM_LENGTH

@@ -2,6 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/k
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libdes425.lib
+RUN_SETUP=@KRB5_RUN_ENV@
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
@@ -65,9 +66,9 @@ verify: verify.o libdes425.a $(DEPKLIB)
 	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
 
 check-unix:: verify
-	./verify -z
-	./verify -m
-	./verify
+	$(RUN_SETUP) ./verify -z
+	$(RUN_SETUP) ./verify -m
+	$(RUN_SETUP) ./verify
 
 check-windows::
 
