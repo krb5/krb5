@@ -1,3 +1,10 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* conv_creds.c: Nuke prototype in file.
+
+	* krb524.h: Replace profile for krb524_send_message() with
+ 	krb524_sendto_kdc(). (krb524_send_message no longer exists).
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Test need for daemon prototype.

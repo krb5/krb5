@@ -37,10 +37,6 @@ krb5_error_code krb524_convert_creds_plain
 (krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds);
 
-krb5_error_code krb524_sendto_kdc
-(krb5_context context, const krb5_data *message,
-		krb5_data *realm, krb5_data *reply);
-
 krb5_error_code
 krb524_convert_creds_kdc(context, v5creds, v4creds)
      krb5_context context;

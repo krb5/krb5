@@ -74,8 +74,8 @@ void krb524_init_ets
 
 /* sendmsg.c */
 
-int krb524_send_message 
-	(const struct sockaddr * addr, const krb5_data * message,
-		   krb5_data * reply);
+int krb524_sendto_kdc
+        (krb5_context context, const krb5_data * message, 
+	 const krb5_data * realm, krb5_data * reply);
 
 #endif /* __KRB524_H__ */
