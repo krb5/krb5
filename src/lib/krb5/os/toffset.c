@@ -35,7 +35,7 @@
  * between the system time and the "real time" as passed to this
  * routine
  */
-krb5_error_code 
+krb5_error_code KRB5_CALLCONV
 krb5_set_real_time(krb5_context context, krb5_int32 seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = context->os_context;

@@ -91,6 +91,8 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    gss_OID_set mechs;
    OM_uint32 ret;
 
+   ret = GSS_S_FAILURE;
+
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
 
@@ -102,7 +104,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    if (cred_handle == GSS_C_NO_CREDENTIAL) {
       OM_uint32 major;
 
-      if ((major = kg_get_defcred(minor_status, &cred_handle)) &&
+      if ((major = kg_get_defcred(minor_status, (gss_cred_id_t)&cred)) &&
 	  GSS_ERROR(major)) {
 	 return(major);
       }
@@ -112,13 +114,13 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       major = krb5_gss_validate_cred(minor_status, cred_handle);
       if (GSS_ERROR(major))
 	  return(major);
+      cred = (krb5_gss_cred_id_t) cred_handle;
    }
-
-   cred = (krb5_gss_cred_id_t) cred_handle;
 
    if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
-      return(GSS_S_FAILURE);
+      ret = GSS_S_FAILURE;
+      goto fail;
    }
 
    if (cred->tgt_expire > 0) {
@@ -132,7 +134,8 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       if (cred->princ &&
 	  (code = krb5_copy_principal(context, cred->princ, &ret_name))) {
 	 *minor_status = code;
-	 return(GSS_S_FAILURE);
+	 ret = GSS_S_FAILURE;
+	 goto fail;
       }
    }
 
@@ -149,7 +152,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 							   &mechs)))) {
 	   krb5_free_principal(context, ret_name);
 	   /* *minor_status set above */
-	   return(ret);
+	   goto fail;
        }
    }
 
@@ -172,8 +175,18 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    if (mechanisms)
       *mechanisms = mechs;
 
+   if (cred_handle == GSS_C_NO_CREDENTIAL)
+       krb5_gss_release_cred(minor_status, (gss_cred_id_t)cred);
+
    *minor_status = 0;
    return((lifetime == 0)?GSS_S_CREDENTIALS_EXPIRED:GSS_S_COMPLETE);
+fail:
+   if (cred_handle == GSS_C_NO_CREDENTIAL) {
+       OM_uint32 tmp_min_stat;
+
+       krb5_gss_release_cred(&tmp_min_stat, (gss_cred_id_t)cred);
+   }
+   return ret;
 }
 
 /* V2 interface */

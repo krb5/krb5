@@ -1,3 +1,8 @@
+2003-07-17  Tom Yu  <tlyu@mit.edu>
+
+	* gss_libinit.c (gssint_initialize_library): Don't call
+	kg_release_defcred(); it doesn't exist any more.
+
 2003-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,

@@ -1,3 +1,7 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (check-runtest-yes): Add PRIOCNTL_HACK.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* t_inetd.c: Remove declaration of errno

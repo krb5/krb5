@@ -280,7 +280,7 @@ proc doit { } {
     verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
 
     # Now start the gss-server.
-    spawn $GSSSERVER -port 5556 gssservice@$hostname
+    spawn $GSSSERVER -export -logfile $tmppwd/gss-server.log -verbose -port 5556 gssservice@$hostname
     set gss_server_pid [exp_pid]
     set gss_server_spawn_id $spawn_id
     sleep 2

@@ -9,6 +9,7 @@ krb5_get_as_key_password(
     krb5_prompter_fct prompter,
     void *prompter_data,
     krb5_data *salt,
+    krb5_data *params,
     krb5_keyblock *as_key,
     void *gak_data)
 {
@@ -42,7 +43,7 @@ krb5_get_as_key_password(
 	    return(EIO);
 
 	if ((ret = krb5_unparse_name(context, client, &clientstr)))
-	    return(ret);
+	  return(ret);
 
 	strcpy(promptstr, "Password for ");
 	strncat(promptstr, clientstr, sizeof(promptstr)-strlen(promptstr)-1);
@@ -74,7 +75,8 @@ krb5_get_as_key_password(
 	defsalt.length = 0;
     }
 
-    ret = krb5_c_string_to_key(context, etype, password, salt, as_key);
+    ret = krb5_c_string_to_key_with_params(context, etype, password, salt,
+					   params->data?params:NULL, as_key);
 
     if (defsalt.length)
 	krb5_xfree(defsalt.data);
@@ -144,6 +146,10 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
    if (!use_master) {
       use_master = 1;
 
+      if (as_reply) {
+	  krb5_free_kdc_rep( context, as_reply);
+	  as_reply = NULL;
+      }
       ret2 = krb5_get_init_creds(context, creds, client, prompter, data,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_password, (void *) &pw0,
@@ -158,7 +164,8 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
 	 slave we were able to contact */
 
       if ((ret2 == KRB5_KDC_UNREACH) ||
-		  (ret2 == KRB5_REALM_CANT_RESOLVE))
+	  (ret2 == KRB5_REALM_CANT_RESOLVE) ||
+	  (ret2 == KRB5_REALM_UNKNOWN))
 	 goto cleanup;
 
       ret = ret2;
@@ -366,3 +373,109 @@ cleanup:
 
    return(ret);
 }
+void krb5int_populate_gic_opt (
+    krb5_context context, krb5_get_init_creds_opt *opt,
+    krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
+    krb5_preauthtype *pre_auth_types)
+{
+  int i;
+    krb5_get_init_creds_opt_init(opt);
+    if (addrs)
+      krb5_get_init_creds_opt_set_address_list(opt, (krb5_address **) addrs);
+    if (ktypes) {
+	for (i=0; ktypes[i]; i++);
+	if (i)
+	    krb5_get_init_creds_opt_set_etype_list(opt, ktypes, i);
+    }
+    if (pre_auth_types) {
+	for (i=0; pre_auth_types[i]; i++);
+	if (i)
+	    krb5_get_init_creds_opt_set_preauth_list(opt, pre_auth_types, i);
+    }
+    if (options&KDC_OPT_FORWARDABLE)
+	krb5_get_init_creds_opt_set_forwardable(opt, 1);
+    else krb5_get_init_creds_opt_set_forwardable(opt, 0);
+    if (options&KDC_OPT_PROXIABLE)
+	krb5_get_init_creds_opt_set_proxiable(opt, 1);
+    else krb5_get_init_creds_opt_set_proxiable(opt, 0);
+    
+
+}
+
+/*
+  Rewrites get_in_tkt in terms of newer get_init_creds API.
+ Attempts to get an initial ticket for creds->client to use server
+ creds->server, (realm is taken from creds->client), with options
+ options, and using creds->times.starttime, creds->times.endtime,
+ creds->times.renew_till as from, till, and rtime.  
+ creds->times.renew_till is ignored unless the RENEWABLE option is requested.
+
+ If addrs is non-NULL, it is used for the addresses requested.  If it is
+ null, the system standard addresses are used.
+
+ If password is non-NULL, it is converted using the cryptosystem entry
+ point for a string conversion routine, seeded with the client's name.
+ If password is passed as NULL, the password is read from the terminal,
+ and then converted into a key.
+
+ A succesful call will place the ticket in the credentials cache ccache.
+
+ returns system errors, encryption errors
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
+			      krb5_address *const *addrs, krb5_enctype *ktypes,
+			      krb5_preauthtype *pre_auth_types,
+			      const char *password, krb5_ccache ccache,
+			      krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
+{
+    krb5_error_code retval;
+    krb5_data pw0;
+    char pw0array[1024];
+    krb5_get_init_creds_opt opt;
+    char * server;
+    krb5_principal server_princ, client_princ;
+
+    pw0array[0] = '\0';
+    pw0.data = pw0array;
+    if (password) {
+	pw0.length = strlen(password);
+	if (pw0.length > sizeof(pw0array))
+	    return EINVAL;
+	strncpy(pw0.data, password, sizeof(pw0array));
+	if (pw0.length == 0)
+	    pw0.length = sizeof(pw0array);
+    } else {
+	pw0.length = sizeof(pw0array);
+    }
+    krb5int_populate_gic_opt(context, &opt,
+			     options, addrs, ktypes,
+			     pre_auth_types);
+    retval = krb5_unparse_name( context, creds->server, &server);
+    if (retval)
+      return (retval);
+    server_princ = creds->server;
+    client_princ = creds->client;
+        retval = krb5_get_init_creds (context,
+					   creds, creds->client,  
+					   krb5_prompter_posix,  NULL,
+					   0, server, &opt,
+				      krb5_get_as_key_password, &pw0,
+				      0, ret_as_reply);
+	  krb5_free_unparsed_name( context, server);
+	if (retval) {
+	  return (retval);
+	}
+	if (creds->server)
+	    krb5_free_principal( context, creds->server);
+	if (creds->client)
+	    krb5_free_principal( context, creds->client);
+	creds->client = client_princ;
+	creds->server = server_princ;
+	/* store it in the ccache! */
+	if (ccache)
+	  if ((retval = krb5_cc_store_cred(context, ccache, creds)))
+	    return (retval);
+	return retval;
+  }
+

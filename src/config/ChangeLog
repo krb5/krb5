@@ -1,3 +1,56 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (FAKEDEST, FAKEPREFIX, FAKELIBDIR): Support variables for
+	the _RLD_ROOT hack.
+
+	* shlib.conf: For alpha/Tru64 and Irix, construct _RLD_ROOT values
+	pointing to a fake destdir, as well as to the real root directory.
+	Previously, pointing _RLD_ROOT at a non-existent directory and
+	putting everything in LD_LIBRARY_PATH caused other installed
+	utilities with RPATHs which were run by the test suite to fail to
+	run.
+
+2004-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess: Update from autoconf-2.59.
+
+	* config.sub: Update from autoconf-2.59.
+
+	* install-sh: Update from autoconf-2.59.
+
+2003-11-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * win-pre.in (KFWFLAGS): conditionally define USE_LEASH=1
+      to enable access to Leash apis for kinit dialogs within 
+      gssapi32.dll
+
+2003-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use $(CC) for linking shared libraries,
+	and -Wl to pass linker flags in, so it can supply the necessary
+	support libraries.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-pre.in (CPPFLAGS): Define KRB5_DEPRECATED=1.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KRB524_H_DEP, KRB524_ERR_H_DEP, KRB524_LIB,
+	KRB524_DEPLIB): Deleted.
+
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (configure): Try running autoconf with --include, and if
+	that doesn't work, try --localdir.  Don't use AUTOCONFINCFLAGS.
+
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KDB5_DEPLIBS): Don't depend on $(DB_DEPLIB) anymore.
+	(KDB5_DB_LIB): New variable; is empty if not building with system
+	libdb.
+	(KDB5_LIBS): Use $(KDB5_DB_LIB) instead of $(DB_LIB).
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* libobj.in: Change .c.so and .c.po rules to use ALL_CFLAGS.

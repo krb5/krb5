@@ -63,7 +63,11 @@ AC_COMPILE_TYPE(u_int32_t, unsigned int)
 
 dnl checks for structures
 dnl checks for compiler characteristics
-AC_C_BIGENDIAN
+dnl AC_C_BIGENDIAN - No, check at compile time; Darwin can build for multiple
+dnl                  targets in one tree.
+AC_CHECK_HEADERS(endian.h machine/endian.h sys/param.h)
+dnl sys/param.h for AIX 4.3.3 (actually sys/machine.h)
+dnl There's also sys/endian.h on IRIX, but we already check _MIPSE{L,B}.
 AC_C_CONST
 AC_CHECK_SIZEOF(int)
 
