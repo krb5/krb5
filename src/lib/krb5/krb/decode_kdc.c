@@ -48,9 +48,6 @@ krb5_kdc_rep **dec_rep;
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
-    krb5_encrypt_block eblock;
-    krb5_data scratch;
-    krb5_enc_kdc_rep_part *local_encpart;
 
 
     /* XXX maybe caller should specify type expected? */
@@ -69,50 +66,14 @@ krb5_kdc_rep **dec_rep;
     default:
 	return (retval);
     }
-    scratch.length = local_dec_rep->enc_part.length;
-    if (!(scratch.data = malloc(local_dec_rep->enc_part.length))) {
-	krb5_free_kdc_rep(local_dec_rep);
-	return(ENOMEM);
+
+    if (local_dec_rep->etype != etype) {
+	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
     }
-
-    if (!valid_etype(etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
-
-    /* put together an eblock for this encryption */
-
-    eblock.crypto_entry = krb5_csarray[etype]->system;
-
-    /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, key)) {
+    if (retval = krb5_kdc_rep_decrypt_proc(local_dec_rep, key, 0)) {
 	krb5_free_kdc_rep(local_dec_rep);
-	free(scratch.data);
 	return(retval);
     }
-
-    /* call the encryption routine */
-    if (retval =
-	(*eblock.crypto_entry->decrypt_func)((krb5_pointer) local_dec_rep->enc_part.data,
-					     (krb5_pointer) scratch.data,
-					     scratch.length, &eblock)) {
-	(void) (*eblock.crypto_entry->finish_key)(&eblock);
-	krb5_free_kdc_rep(local_dec_rep);
-	free(scratch.data);
-	return retval;
-    }
-#define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
-	krb5_free_kdc_rep(local_dec_rep);
-	clean_scratch();
-	return retval;
-    }
-    if (retval = decode_krb5_enc_kdc_rep_part(&scratch, &local_encpart)) {
-	krb5_free_kdc_rep(local_dec_rep);
-	clean_scratch();
-	return retval;
-    }
-    clean_scratch();
-
-    local_dec_rep->enc_part2 = local_encpart;
     *dec_rep = local_dec_rep;
     return 0;
 }
