@@ -1,3 +1,8 @@
+Fri Jan 30 15:56:15 1998  Tom Yu  <tlyu@mit.edu>
+
+	* changepw.c (krb5_change_password): KRB5_USE_INET ->
+	HAVE_NETINET_IN_H.
+
 Fri Jan  2 21:28:56 1998  Tom Yu  <tlyu@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Check return of

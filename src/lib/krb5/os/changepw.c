@@ -64,7 +64,7 @@ krb5_change_password(context, creds, newpw, result_code,
     struct sockaddr_in *sin_p;
     struct hostent *hp;
     struct servent *sp;
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     u_short udpport = htons(KRB5_DEFAULT_PORT);
 #endif
     int cc, local_result_code, tmp_len;
@@ -112,7 +112,7 @@ krb5_change_password(context, creds, newpw, result_code,
     else if (code)
 	return code;
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     /* XXX should look for "kpasswd" in /etc/services */
     udpport = htons(DEFAULT_KPASSWD_PORT);
 #endif
@@ -154,7 +154,7 @@ krb5_change_password(context, creds, newpw, result_code,
 
     if (hp != 0) {
 	switch (hp->h_addrtype) {
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 	case AF_INET:
 	    for (j=0; hp->h_addr_list[j]; j++) {
 		sin_p = (struct sockaddr_in *) &addr_p[out++];
