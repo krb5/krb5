@@ -30,7 +30,7 @@
 /* #define	KDC_OPT_UNUSED		0x01000000 */
 #define	KDC_OPT_RENEWABLE		0x00800000
 /* #define	KDC_OPT_UNUSED		0x00400000 */
-#define	KDC_OPT_DUPLICATE_SKEY		0x00200000
+/* #define	KDC_OPT_RESERVED	0x00200000 */
 /* #define	KDC_OPT_RESERVED	0x00100000 */
 /* #define	KDC_OPT_RESERVED	0x00080000 */
 /* #define	KDC_OPT_RESERVED	0x00040000 */
@@ -49,12 +49,12 @@
 /* #define	KDC_OPT_RESERVED	0x00000020 */
 #define	KDC_OPT_RENEWABLE_OK		0x00000010
 #define	KDC_OPT_ENC_TKT_IN_SKEY		0x00000008
-#define	KDC_OPT_REUSE_SKEY		0x00000004
+/* #define	KDC_OPT_UNUSED		0x00000004 */
 #define	KDC_OPT_RENEW			0x00000002
 #define	KDC_OPT_VALIDATE		0x00000001
 
 /* fields common which can be masked and copied */
-#define KDC_TKT_COMMON_MASK		0x7ea00000
+#define KDC_TKT_COMMON_MASK		0x7e800000
 
 /* definitions for ap_options fields */
 /* ap_options are 32 bits; each host is responsible to put the 4 bytes
@@ -112,7 +112,7 @@
 #define	TKT_FLG_INVALID			0x01000000
 #define	TKT_FLG_RENEWABLE		0x00800000
 #define	TKT_FLG_INITIAL			0x00400000
-#define	TKT_FLG_DUPLICATE_SKEY		0x00200000
+/* #define	TKT_FLG_RESERVED	0x00200000 */
 /* #define	TKT_FLG_RESERVED	0x00100000 */
 /* #define	TKT_FLG_RESERVED	0x00080000 */
 /* #define	TKT_FLG_RESERVED	0x00040000 */
