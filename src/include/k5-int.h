@@ -215,6 +215,10 @@ int stat(const char *path, struct stat *buf);
 int fstat(int fildes, struct stat *buf);
 
 #define EFBIG 1000
+#define OLD_CONFIG_FILES
+#define PROF_NO_SECTION 1
+#define PROF_NO_RELATION 2
+#define KRB5_REALM_CANT_RESOLVE 1
 
 #define NOFCHMOD 1
 #define NOCHMOD 1
@@ -401,7 +405,7 @@ int win_socket_initialize();
 #define	KDC_ERR_NEVER_VALID		11 /* Requested starttime > endtime */
 #define	KDC_ERR_POLICY			12 /* KDC policy rejects request */
 #define	KDC_ERR_BADOPTION		13 /* KDC can't do requested opt. */
-#define	KDC_ERR_ETYPE_NOSUPP		14 /* No support for encryption type */
+#define	KDC_ERR_ENCTYPE_NOSUPP		14 /* No support for encryption type */
 #define KDC_ERR_SUMTYPE_NOSUPP		15 /* No support for checksum type */
 #define KDC_ERR_PADATA_TYPE_NOSUPP	16 /* No support for padata type */
 #define KDC_ERR_TRTYPE_NOSUPP		17 /* No support for transited type */
@@ -885,15 +889,21 @@ krb5_error_code verify_securid_padata
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype  FAR *etypes;
-	int		etype_count;
+	krb5_enctype  FAR *ktypes;
+	int		ktype_count;
 	void	      FAR *os_context;
 	char	      FAR *default_realm;
 	profile_t     profile;
 	void	      FAR *db_context;
 	int		ser_ctx_count;
-	void	      FAR *ser_ctx;
+	void	      	FAR *ser_ctx;
+	krb5_deltat 	clockskew; /* allowable clock skew */
+	krb5_cksumtype	kdc_req_sumtype;
+	krb5_flags 	kdc_default_options;
+	krb5_flags	library_options;
 };
+
+#define KRB5_LIBOPT_SYNC_KDCTIME	0x0001
 
 /*
  * Begin "asn1.h"
