@@ -42,7 +42,6 @@ krshd.M
 krshd.c
 login.c
 loginpaths.h
-logutil.c
 rcp.M
 rlogin.M
 rpaths.h

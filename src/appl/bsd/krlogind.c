@@ -578,7 +578,7 @@ int syncpipe[2];
 #endif
     
     write(f, "", 1);
-    if (retval = pty_getpty(&p,line)) {
+    if (retval = pty_getpty(&p,line, sizeof(line))) {
 	com_err(progname, retval, "while getting master pty");
 	exit(2);
     }

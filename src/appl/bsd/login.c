@@ -256,6 +256,8 @@ int main(argc, argv)
 	char tbuf[MAXPATHLEN + 2];
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
 	time_t login_time;
+int retval;
+	
 	off_t lseek();
 #ifdef POSIX_TERMIOS
 	struct termios tc;
@@ -785,7 +787,8 @@ bad_login:
 		utmp.ut_pid = getppid();
 #endif
 		login_time = time(&utmp.ut_time);
-		update_utmp(&utmp, username, ttyn, hostname);
+		if ( (retval = pty_update_utmp(&utmp, username, ttyn, hostname)) < 0 )
+		    com_err (argv[0], retval, "while updating utmp");
 	}
 
 	quietlog = access(HUSHLOGIN, F_OK) == 0;

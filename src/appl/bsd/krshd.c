@@ -820,13 +820,13 @@ doit(f, fromp)
     if (port) {
 	/* Place entry into wtmp */
 	sprintf(ttyn,"krsh%1d",getpid());
-	logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,hostname);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-	logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,hostname);
     }
     
 #ifdef CRAY
@@ -1185,7 +1185,7 @@ doit(f, fromp)
 		   "Shell process completed.");
 #endif
 	    /* Finish session in wmtp */
-	    logwtmp(ttyn,"","");
+	    pty_logwtmp(ttyn,"","");
 	    exit(0);
 	}
 #ifdef SETPGRP_TWOARG
@@ -1212,7 +1212,7 @@ doit(f, fromp)
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-	logwtmp(ttyn,"","");
+	pty_logwtmp(ttyn,"","");
     }
     
     if (*pwd->pw_shell == '\0')
@@ -1288,7 +1288,7 @@ doit(f, fromp)
     exit(1);
     
   signout_please:
-    logwtmp(ttyn,"","");
+    pty_logwtmp(ttyn,"","");
     exit(1);
 }
     
@@ -1357,7 +1357,7 @@ krb5_sigtype
 #endif
     wait(0);
     
-    logwtmp(ttyn,"","");
+    pty_logwtmp(ttyn,"","");
     syslog(LOG_INFO ,"Shell process completed.");
     exit(0);
 }
