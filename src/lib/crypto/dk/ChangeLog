@@ -1,3 +1,17 @@
+Tue Jan  5 00:09:13 1999  Tom Yu  <tlyu@mit.edu>
+
+	* dk.h: Add prototypes for krb5_marc_dk_*.
+
+	* dk_encrypt.c (krb5_marc_dk_encrypt): Add compat for 32-bit
+	length coded ciphertext.
+
+	* dk_decrypt.c (krb5_marc_dk_decrypt): Add compat for 32-bit
+	length coded ciphertext.
+
+	* checksum.c: Add compat for 32-bit length included checksum.
+	Note that nothing uses this at the moment, and probably
+	shouldn't.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
