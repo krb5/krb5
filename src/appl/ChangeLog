@@ -1,3 +1,8 @@
+2001-11-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Add KRB5_GETPEERNAME_ARGS and
+	KRB5_GETSOCKNAME_ARGS for sample apps.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_C_CONST instead of AC_CONST. 

@@ -11,6 +11,8 @@ if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
 fi
 dnl
 dnl
+KRB5_GETSOCKNAME_ARGS
+KRB5_GETPEERNAME_ARGS
 KRB5_BUILD_PROGRAM
 AC_CONFIG_SUBDIRS(bsd gssftp telnet)
 K5_GEN_MAKEFILE(.)
