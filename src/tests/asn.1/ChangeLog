@@ -1,3 +1,8 @@
+Fri Jun  9 18:57:22 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Thu Mar  2 12:33:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

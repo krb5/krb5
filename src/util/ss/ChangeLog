@@ -1,3 +1,8 @@
+Fri Jun  9 19:00:11 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Fri Jun  9 06:20:37 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* error.c (ss_error): remove const declaration from local

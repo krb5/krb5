@@ -1,3 +1,8 @@
+Fri Jun  9 19:07:25 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Fri Jun  9 06:49:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadm_stream.c (vts_long, stv_long): Change u_long to krb5_ui_4

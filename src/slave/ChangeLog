@@ -1,3 +1,8 @@
+Fri Jun  9 18:56:39 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Sat May 20 13:46:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kpropd.c (load_database): If realm specified then invoke

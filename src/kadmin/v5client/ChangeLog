@@ -1,3 +1,7 @@
+Fri Jun  9 19:05:57 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
 
 Mon Jun 5 16:00:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* network.c : add ability to perform net_connect() whenever the caller

@@ -1,3 +1,8 @@
+Fri Jun  9 18:58:43 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Mon May  1 20:00:18 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* resolve.c (main): Add --quiet option which only prints the fully

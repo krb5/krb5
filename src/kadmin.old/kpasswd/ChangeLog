@@ -1,3 +1,8 @@
+Fri Jun  9 19:06:53 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Wed May 24 07:12:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Check for stdlib.h.
