@@ -364,6 +364,12 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list, desonly)
 	profile_release_string(retval);
     }
 
+    if (old_ktypes[0] == 0) {
+	free (old_ktypes);
+	*ktypes = 0;
+	return KRB5_CONFIG_ETYPE_NOSUPP;
+    }
+
     *ktypes = old_ktypes;
     return 0;
 }

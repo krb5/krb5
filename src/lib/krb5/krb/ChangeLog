@@ -1,3 +1,8 @@
+1999-12-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Report an error if no
+	recognized enctypes are found in the config file.
+
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (init_common): Renamed from krb5_init_context, now
