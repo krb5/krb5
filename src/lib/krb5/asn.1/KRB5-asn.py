@@ -5,7 +5,7 @@
 -- Copyright 1989 by the Massachusetts Institute of Technology.
 --
 -- For copying and distribution information, please see the file
--- <krb5/mit-copyright.h>.
+-- <krb5/copyright.h>.
 --
 -- ASN.1 definitions for the kerberos network objects
 --

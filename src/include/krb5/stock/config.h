@@ -6,7 +6,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Configuration file for Kerberos V5 library.
  * This config file works for IBM RT/PC running AOS 4.3 and VAX running 4.3BSD

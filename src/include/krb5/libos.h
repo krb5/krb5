@@ -6,7 +6,7 @@
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Definitions for this implementation of the libos layer.
  */
