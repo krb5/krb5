@@ -859,9 +859,9 @@ AC_SUBST(LD_SHLIBDIR_PREFIX)
 SHLIB_RPATH_DIRS=
 if test $krb5_cv_shlibs_use_dirs = yes ; then
 	if test $krb5_cv_shlibs_use_colon_dirs = yes ; then
-		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}$(KRB5_SHLIBDIR):`pwd`/\$(TOPLIBD)"
+		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}$(KRB5_SHLIBDIR)"
 	else
-		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR) ${krb5_cv_shlibs_dirhead}`pwd`/\$(TOPLIBD)"
+		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
 	fi
 fi
 AC_SUBST(SHLIB_RPATH_DIRS)
@@ -997,17 +997,17 @@ dnl Check for missing DBM prototypes
 dnl
 AC_DEFUN(AC_CHECK_DBM_PROTO,[
  AC_MSG_CHECKING([for missing $2 prototype])
- AC_CACHE_VAL(krb_cv_missing_$2_prototype,
+ AC_CACHE_VAL(krb5_cv_missing_$2_prototype,
   AC_EGREP_HEADER([$2], [$1.h],
-   eval krb_cv_missing_$2_prototype=no,
+   eval krb5_cv_missing_$2_prototype=no,
    AC_TRY_LINK(
 [#include <$1.h>
 int $2();],
 [$2();], $4
-    eval krb_cv_missing_$2_prototype=yes,
+    eval krb5_cv_missing_$2_prototype=yes,
     $3
-    eval krb_cv_missing_$2_prototype=no)))
- if eval "test \"`echo '$krb_cv_missing_'$1_prototype`\" = yes"; then
+    eval krb5_cv_missing_$2_prototype=no)))
+ if eval "test \"`echo '$krb5_cv_missing_'$1_prototype`\" = yes"; then
   AC_MSG_RESULT(yes)
  else
   AC_MSG_RESULT(no)
