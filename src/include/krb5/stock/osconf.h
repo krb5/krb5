@@ -93,5 +93,5 @@
 /* where to find the bad password table */
 #define PW_CHECK_FILE "@KRB5ROOT/bad_passwd"
 
-#define DEFAULT_ACL_DIR	"KDBDIR"
+#define DEFAULT_ACL_DIR	"@KDB5DIR"
 #endif /* KRB5_OSCONF__ */
