@@ -32,7 +32,8 @@ kdb5_destroy \- destroy a Kerberos principal database
 .br
 .SH DESCRIPTION
 .I kdb5_destroy
-destroys a Kerberos principal database.
+destroys a Kerberos principal database, i.e. all of the data is
+overwritten and then the file is removed.
 The user is prompted to confirm deletion of the database.
 .PP
 The

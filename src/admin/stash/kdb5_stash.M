@@ -50,7 +50,6 @@ kdb5_stash \- store a principal database master key on disk
 stores a Kerberos principal database master key in a file;
 this key may subsequently be used for unattended re-start of a Kerberos
 V5 KDC.
-create a Kerberos version 5 principal database.
 The user is prompted for the master password, which will be verified
 against the database, and then stored in a file.
 .PP

@@ -44,7 +44,7 @@ kdb5_create \- create a new Kerberos V5 principal database
 .br
 .SH DESCRIPTION
 .I kdb5_create
-is used to create a Kerberos version 5 principal database.
+is used to create an empty Kerberos version 5 principal database.
 The user is prompted for the master password, which will be used to
 generate an encryption key under which all entries are stored (in order
 to provide some security against database theft).

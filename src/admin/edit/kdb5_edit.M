@@ -50,8 +50,7 @@ allows an administrator to add, delete, and edit entries in a Kerberos
 version 5 principal database.
 After the master key is verified, the administrator is placed into a
 shell-like command loop, from which he may issue commands to modify the
-database.  '?' lists the commands available; 'exit' or 'quit' exits the
-program.
+database.  
 .PP
 The
 .B \-r
@@ -91,7 +90,66 @@ The
 .B \-m
 option specifies that the master database password should be fetched
 from the keyboard rather than from a file on disk.
+.SH AVAILABLE COMMANDS
+
+The following is a list of commands and their aliases that the system
+administrator may use to manipulate the database:
+
+.IP add_new_key,ank
+Add new entry to Kerberos database (prompting for password)
+
+.IP change_pwd_key,cpw      
+Change key of an entry in the Kerberos database (prompting for password)
+
+.IP add_rnd_key,ark         
+Add new entry to Kerberos database, using a random key
+
+.IP change_rnd_key,crk      
+Change key of an entry in the Kerberos database (select a new random key)
+
+.IP add_v4_key,av4k         
+Add new entry to Kerberos database (using V4 string-to-key)
+
+.IP change_v4_key,cv4k     
+Change key of an entry in the Kerberos database (using V4 string-to-key)
+
+.IP delete_entry,delent,del
+Delete an entry from the database
+
+.IP extract_srvtab,xst,ex_st
+Extract service key table
+
+.IP extract_v4_srvtab,xst4  
+Extract service key table
+
+.IP list_db,ldb             
+List database entries
+
+.IP dump_db,ddb             
+Dump database entries to a file
+
+.IP load_db,lddb            
+Load database entries from a file
+
+.IP set_dbname,sdbn         
+Change database name
+
+.IP enter_master_key,emk    
+Enter the master key for a database
+
+.IP change_working_directory,cwd,cd
+Change working directory
+
+.IP print_working_direcotry,pwd
+Print working directory
+
+.IP list_requests,lr,?     
+List available requests.
+
+.IP quit,exit,q            
+Exit program.
+
 .SH SEE ALSO
 krb5(3), krb5kdc(8), ss(3)
 .SH BUGS
-This man page needs to document the ss commands.
+This routine must be run interactively.  There is no command-line interface.

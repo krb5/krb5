@@ -32,12 +32,6 @@ kdb5_convert \- convert a v4 Kerberos principal database to a v5 database
 .B \-d
 .I v5dbname
 ] [
-.B \-D
-.I v4dbname
-] [
-.B \-f
-.I v4dumpfile
-] [
 .B \-k
 .I keytype
 ] [
@@ -49,6 +43,30 @@ kdb5_convert \- convert a v4 Kerberos principal database to a v5 database
 ] [
 .B \-n
 ]
+.B \-D
+.I v4dbname
+.br
+.B kdb5_convert
+[
+.B \-r
+.I realm
+] [
+.B \-d
+.I v5dbname
+] [
+.B \-k
+.I keytype
+] [
+.B \-M
+.I mkeyname
+] [
+.B \-e
+.I enctype
+] [
+.B \-n
+] 
+.B \-f
+.I v4dumpfile
 .br
 .SH DESCRIPTION
 .I kdb5_convert
@@ -104,7 +122,7 @@ The
 .B \-M
 .I mkeyname
 option specifies the principal name for the master key in the database;
-the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
+the default is KRB5_KDB_M_NAME (usually "K/M" in the local realm).
 .PP
 The
 .B \-e
@@ -117,7 +135,7 @@ keytype.
 The
 .B \-n
 option specifies that the master key for the v4 database should be
-entered manually rather than fetched from the normal v4 master key file.
+entered manually rather than fetched from the normal v5 master key file.
 The
 .B \-K
 option specifies that the master key for the v5 (new) database should
@@ -130,9 +148,10 @@ to the new database or ignored.
 .SH SEE ALSO
 krb5(3), krb5kdc(8)
 .SH BUGS
-Doesn't have flexibility about expiration times.  Probably doesn't
-handle any v4 inter-realm keys.
+Doesn't have flexibility about expiration times. 
 .sp
 When the underlying databases are built on the old DBM (not NDBM), the
+.B \-D
+option is not allowed, i.e. the
 conversion must be done from a dump file rather than from a DBM
 database, due to restrictions in the old DBM implementation.
