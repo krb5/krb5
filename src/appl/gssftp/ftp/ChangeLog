@@ -1,3 +1,12 @@
+1998-10-26  Geoffrey King  <gjking@mit.edu>
+
+	* ftp.M: Add documentation for new ccc and cprotect commands.
+	Also, add previously omitted command line options -u and -t and
+	"passive" command to the man page.
+	
+	* main.c (main): Print out a usage message instead of just
+	"unknown option."
+
 Fri Oct  2 16:16:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* cmdtab.c: Update help message for passive mode so that it
