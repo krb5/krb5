@@ -1,3 +1,11 @@
+2005-03-22  Tom Yu  <tlyu@mit.edu>
+
+	* gic_keytab.c (krb5_get_init_creds_keytab): When calling
+	krb5_get_init_creds() for the second time (with use_master=1),
+	also accept KRB5_REALM_UNKNOWN as a soft error, and use the result
+	from the first call to krb5_get_init_creds().  This can happen
+	when no master KDC is configured.
+
 2005-03-14  Jeffrey Altman <jaltman@mit.edu>
 
         * Makefile.in: fix maintainer mode since it is not supported on 
