@@ -1,3 +1,8 @@
+1999-12-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb_auth_su.c (krb5_get_tkt_via_passwd): Move check of
+	principal name length up *before* it gets copied.
+
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb_auth_su.c (krb5_get_tkt_via_passwd): Check length of
