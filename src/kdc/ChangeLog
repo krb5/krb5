@@ -1,3 +1,7 @@
+2004-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.h (sockaddr2p): Don't declare.
+
 2004-07-23  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (kerberos_v4): Duplicate backdating fix for

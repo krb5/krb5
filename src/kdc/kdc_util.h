@@ -160,9 +160,6 @@ void kdc_insert_lookaside (krb5_data *, const krb5_fulladdr *,
 				     krb5_data *);
 void kdc_free_lookaside(krb5_context);
 
-/* sock2p.c */
-extern void sockaddr2p (const struct sockaddr *, char *, size_t, int *);
-
 /* which way to convert key? */
 #define CONVERT_INTO_DB	0
 #define CONVERT_OUTOF_DB 1
