@@ -109,6 +109,22 @@ init_common (krb5_context *context, krb5_boolean secure)
 	krb5_data seed;
 	int tmp;
 
+	/* Verify some assumptions.  If the assumptions hold and the
+	   compiler is optimizing, this should result in no code being
+	   executed.  If we're guessing "unsigned long long" instead
+	   of using uint64_t, the possibility does exist that we're
+	   wrong.  */
+	{
+	    krb5_ui_8 i64;
+	    assert(sizeof(i64) == 8);
+	    i64 = 0, i64--, i64 >>= 62;
+	    assert(i64 == 3);
+	    i64 = 1, i64 <<= 31, i64 <<= 31, i64 <<= 1;
+	    assert(i64 != 0);
+	    i64 <<= 1;
+	    assert(i64 == 0);
+	}
+
 	retval = krb5int_initialize_library();
 	if (retval)
 	    return retval;
@@ -128,10 +144,6 @@ init_common (krb5_context *context, krb5_boolean secure)
 	retval = krb5_vercheck();
 	if (retval)
 		return retval;
-#else /* assume UNIX for now */
-	retval = krb5int_initialize_library ();
-	if (retval)
-	    return retval;
 #endif
 
 	*context = 0;

@@ -1,3 +1,9 @@
+2005-02-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Delete redundant library
+	initialization call that was run only on UNIX.  Test assertion
+	that krb5_ui_8 really did get a proper 64-bit type.
+
 2005-02-09  Tom Yu  <tlyu@mit.edu>
 
 	* gic_pwd.c (krb5_get_init_creds_password): Fix so empty password
