@@ -14,10 +14,8 @@ OBJS=	addr_comp.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
 	faddr_ordr.o	\
-	free_krbhs.o	\
 	gc_via_tgt.o	\
 	get_in_tkt.o	\
-	get_krbhst.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
 	kdc_rep_dc.o	\
@@ -46,10 +44,8 @@ SRCS=	addr_comp.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
 	faddr_ordr.c	\
-	free_krbhs.c	\
 	gc_via_tgt.c	\
 	get_in_tkt.c	\
-	get_krbhst.c	\
 	in_tkt_pwd.c	\
 	in_tkt_sky.c	\
 	kdc_rep_dc.c	\
