@@ -212,7 +212,7 @@ EXPORTS
 	des_pcbc_encrypt
 	des_quad_cksum
 	des_string_to_key
-;	des_set_random_generator_seed
+;	des_set_random_generator_seed     -- no longer in library
 	des_init_random_number_generator
 	krb5_random_confounder
 	krb5_size_opaque
@@ -229,3 +229,10 @@ EXPORTS
 	krb5_ser_rcache_init
 	decode_krb5_ap_req
 	krb5_mcc_ops
+
+;
+;Added for Kermit 95
+        krb5_address_search
+        krb5_auth_con_getrcache
+        krb5_c_enctype_compare
+
