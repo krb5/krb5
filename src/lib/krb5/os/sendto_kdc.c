@@ -135,21 +135,24 @@ OLDDECLARG(krb5_data *, reply)
 				   0,
 				   &fromaddr,
 				   &fromlen)) == -1)
-		    continue;		/* XXX */
-		if (bcmp((char *)&fromaddr, (char *)&addr[host],
-			 fromlen)) {
-		    /* not from this one, perhaps from an earlier
-		       request? */
-		    for (i = host-1; i >= 0; i--) {
-			if (!bcmp((char *)&fromaddr, (char *)&addr[host],
-				  fromlen))
-			    break;
-		    }
-		    if (i < 0)		/* not from someone we asked */
-			continue;	/* XXX */
-		}
-		/* reply came from where we sent a request,
-		   so clean up and return. */
+		    /* man page says error could be:
+		       EBADF: won't happen
+		       ENOTSOCK: it's a socket.
+		       EWOULDBLOCK: not marked non-blocking, and we selected.
+		       EINTR: could happen
+		       EFAULT: we allocated the reply packet.
+
+		       so we continue on an EINTR.
+		       */
+		    continue;
+
+		/* We might consider here verifying that the reply
+		   came from one of the KDC's listed for that address type,
+		   but that check can be fouled by some implementations of
+		   some network types which might show a loopback return
+		   address, for example, if the KDC is on the same host
+		   as the client. */
+
 		reply->length = cc;
 		retval = 0;
 		goto out;
