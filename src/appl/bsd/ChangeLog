@@ -1,3 +1,9 @@
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): If ospeed is outside of compiled-in table
+	index range but not high enough to be a baud rate, use the highest
+	rate in the table.
+
 1999-08-02  Ken Raeburn  <raeburn@mit.edu>
 	and Brad Thompson  <yak@mit.edu>
 
