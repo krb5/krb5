@@ -1,3 +1,10 @@
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Calling send_error from within a dejagnu test is
+	wrong.  So is calling exit.  Fix to not do these things.  Expect
+	eof rather than "\r" so as to drain pty buffers and avoid
+	deadlock.
+
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* rcp.exp, rsh_exp (stop_rsh_daemon): Do not close a process and
