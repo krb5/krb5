@@ -280,6 +280,28 @@ krb5_get_host_realm(context, host, realmsp)
     char local_host[MAX_DNS_NAMELEN+1];
 
     if (host) {
+	/* Filter out numeric addresses if the caller utterly failed to
+	   convert them to names.  */
+	/* IPv4 - dotted quads only */
+	if (strspn(host, "01234567890.") == strlen(host)) {
+	    /* All numbers and dots... if it's three dots, it's an
+	       IP address, and we reject it.  But "12345" could be
+	       a local hostname, couldn't it?  We'll just assume
+	       that a name with three dots is not meant to be an
+	       all-numeric hostname three all-numeric domains down
+	       from the current domain.  */
+	    int ndots = 0;
+	    const char *p;
+	    for (p = host; *p; p++)
+		if (*p == '.')
+		    ndots++;
+	    if (ndots == 3)
+		return KRB5_ERR_NUMERIC_REALM;
+	}
+	if (strchr(host, ':'))
+	    /* IPv6 numeric address form?  Bye bye.  */
+	    return KRB5_ERR_NUMERIC_REALM;
+
 	/* Should probably error out if strlen(host) > MAX_DNS_NAMELEN.  */
 	strncpy(local_host, host, sizeof(local_host));
 	local_host[sizeof(local_host) - 1] = '\0';
