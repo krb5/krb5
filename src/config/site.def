@@ -165,10 +165,6 @@
 
 #define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
 #define IsodeDir /mit/isode/isode-7.0
-/*
-#define IsodeLib -L/mit/isode/isode-6.8/@sys/lib -lisode
-#define IsodeDir /mit/isode/isode-6.8
-*/
 
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
@@ -212,12 +208,50 @@
 
 #if defined(AIXArchitecture) && OSMajorVersion == 3
 #define	StandardDefines	-D_ALL_SOURCE
+/* For all its flaws, gmake has one advantage over AIX make: it supports
+   VPATH in the way the Kerberos config files want.   WARNING: if you combine
+   RCS and VPATH with gmake will will probably lose.  */
+#define MakeCmd gmake
+.SUFFIXES:
+.SUFFIXES: .et .c .h .o
+
+#define Krb5Root	/mit/krb5/rsaix
+#undef LdLibLocations
+#define LdLibLocations -L/usr/athena/lib/shared -L/mit/krb5/rsaix/lib/shared
+#endif
+
+#ifdef UltrixArchitecture
+#define	Krb5Root	/mit/krb5/decmips
 #endif
 
 #define	AthenaEnv YES		/* Define this if you are in the
 				   athena environment.
 				   No one else should define this.  */
 
+/* Define this if you are building for multiple architectures or operating
+   systems.  This tells the build where to look for the sources.  */
+#ifndef UseInstalled
+#define SourceTop /mit/krb5/src
+#endif
+
 #if defined(VaxArchitecture) || defined(RtArchitecture)
+#ifdef HasGCC
+#ifdef SourceTop
+#define	STDCTopIncludes	-I$(SRCTOP)/include/stdc-incl
+#else
 #define	STDCTopIncludes	-I$(TOP)/include/stdc-incl
+#endif
+#endif /* HasGCC */
+#endif
+
+#ifdef UltrixArchitecture
+#define MakeCmd gmake
+#endif
+
+#if defined(VaxArchitecture) && defined(UltrixArchitecture)
+#undef STDCTopIncludes
+#undef CcCmd
+#define CcCmd gcc -pedantic -pipe -Wall -fpcc-struct-return
+#define	OptimizedCDebugFlags -O3
+#define DefaultCDebugFlags OptimizedCDebugFlags -g
 #endif
