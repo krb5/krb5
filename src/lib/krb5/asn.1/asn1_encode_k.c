@@ -580,7 +580,9 @@ asn1_error_code asn1_encode_transited_encoding(DECLARG(asn1buf *, buf),
 {
   asn1_setup();
 
-  if(val == NULL || val->tr_contents.data == NULL) return ASN1_MISSING_FIELD;
+  if(val == NULL ||
+     (val->tr_contents.length != 0 && val->tr_contents.data == NULL))
+    return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->tr_contents.length,val->tr_contents.data,
 		   1,asn1_encode_charstring);

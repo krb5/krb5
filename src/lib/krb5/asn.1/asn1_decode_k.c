@@ -281,7 +281,7 @@ asn1_error_code asn1_decode_encrypted_data(DECLARG(asn1buf *, buf),
   setup();
   { begin_structure();
     get_field(val->etype,0,asn1_decode_enctype);
-    opt_field(val->kvno,1,asn1_decode_kvno,5);
+    opt_field(val->kvno,1,asn1_decode_kvno,0);
     get_lenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_decode_charstring);
     end_structure();
   }

@@ -1,3 +1,12 @@
+Sat Jul 16 00:19:18 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* asn1_encode_k.c (asn1_encode_transited_encoding): whoops don't
+	bomb if val->tr_contents.dlength == 0
+
+	* asn1_decode_k.c (asn1_decode_encrypted_data): oops looks like
+	Harry made a brain fart here.... default value for kvno was 5, not
+	0.
+
 Thu Jul 14 11:37:59 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* asn1_*.[ch]: 
