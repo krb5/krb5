@@ -228,7 +228,7 @@ typedef struct {
 				 assert(0==pthread_mutex_unlock(&(M)->lock)), \
 				 0)
 
-#if defined(__mips) && defined(__sgi) && defined(_SYSTYPE_SVR4)
+#if defined(__mips) && defined(__sgi) && (defined(_SYSTYPE_SVR4) || defined(__SYSTYPE_SVR4__))
 /* IRIX 6.5 stub pthread support in libc is really annoying.
    The pthread_mutex_lock function returns ENOSYS for a program
    not linked against -lpthread.  No link-time failure, no weak
@@ -236,6 +236,9 @@ typedef struct {
 
    The C library doesn't provide pthread_once; we can use weak
    reference support for that.  */
+#if defined(__GNUC__) && __GNUC__ < 3
+# error "Please update to a newer gcc with weak symbol support, reconfigure and recompile."
+#endif
 #undef k5_mutex_lock
 #undef k5_mutex_unlock
 #define k5_mutex_lock(M)			\

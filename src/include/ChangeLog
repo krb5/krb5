@@ -1,3 +1,8 @@
+2004-05-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h: On IRIX, if gcc is older than v3, tell the user to
+	get a newer one, and error out.
+
 2004-05-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* foreachaddr.c: Implementation moved to lib/krb5/os/localaddr.c.
