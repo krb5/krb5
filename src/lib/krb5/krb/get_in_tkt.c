@@ -877,6 +877,8 @@ krb5_get_init_creds(krb5_context context,
     if (renew_life > 0) {
 	request.rtime = request.from;
 	request.rtime += renew_life;
+	if (request.rtime >= request.till)
+	    request.kdc_options &= ~(KDC_OPT_RENEWABLE_OK);
     } else {
 	request.rtime = 0;
     }

@@ -1,3 +1,8 @@
+2003-06-06  Sam Hartman  <hartmans@mit.edu>
+
+	* get_in_tkt.c (krb5_get_init_creds): Mask out renewable_ok if the
+	request is for a renewable ticket with rtime greater than till 
+
 2003-06-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* mk_req_ext.c (krb5_generate_authenticator): Sequence numbers are
