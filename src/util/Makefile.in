@@ -24,7 +24,7 @@ makeshlib: $(srcdir)/makeshlib.sh Makefile
 aix.bincmds: Makefile
 	 echo libpath $(KRB5_SHLIBDIR):`pwd`/$(TOPLIBD):/usr/lib:/lib >aix.bincmds
 clean::
-	$(RM) libupdate
+	$(RM) libupdate makeshlib
 
 install::
 	@echo nothing to install in util
