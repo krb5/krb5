@@ -1,3 +1,7 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-pre.in (SLIB): New variable.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* mac-config.README, mac-config.cache, mac-mf.sed, mac-post.in,

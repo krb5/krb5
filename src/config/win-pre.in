@@ -170,7 +170,7 @@ CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr32.lib
 PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof32.lib
 KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_32.lib
 K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
-
+SLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5support_32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
 WLIB=
 
