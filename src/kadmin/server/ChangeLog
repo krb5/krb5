@@ -1,5 +1,7 @@
 Wed Jul 31 15:22:10 1996  Tom Yu  <tlyu@mit.edu>
 
+	* ovsec_kadmd.c: Revert prior change due to netdb.h shuffle
+
 	* ovsec_kadmd.c: remove #include <netdb.h> (already gotten by
 		kadm5/kadm_rpc.h)
 
