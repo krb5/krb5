@@ -43,10 +43,12 @@
 #include    <arpa/inet.h>  /* inet_ntoa */
 #include    <netdb.h>
 #include    <gssrpc/rpc.h>
-#include    <gssapi/gssapi_krb5.h>
+#include    <gssapi/gssapi.h>
 #include    <gssrpc/auth_gssapi.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
+#include    <kadm5/server_acl.h>
+#include    <krb5/adm_proto.h>
 #include    <string.h>
 
 #ifdef PURIFY
@@ -130,6 +132,58 @@ void usage()
      exit(1);
 }
 
+/*
+ * Function: display_status
+ *
+ * Purpose: displays GSS-API messages
+ *
+ * Arguments:
+ *
+ * 	msg		a string to be displayed with the message
+ * 	maj_stat	the GSS-API major status code
+ * 	min_stat	the GSS-API minor status code
+ *
+ * Effects:
+ *
+ * The GSS-API messages associated with maj_stat and min_stat are
+ * displayed on stderr, each preceeded by "GSS-API error <msg>: " and
+ * followed by a newline.
+ */
+static void display_status_1();
+
+void display_status(msg, maj_stat, min_stat)
+     char *msg;
+     OM_uint32 maj_stat;
+     OM_uint32 min_stat;
+{
+     display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
+     display_status_1(msg, min_stat, GSS_C_MECH_CODE);
+}
+
+static void display_status_1(m, code, type)
+     char *m;
+     OM_uint32 code;
+     int type;
+{
+	OM_uint32 maj_stat, min_stat;
+	gss_buffer_desc msg;
+	OM_uint32 msg_ctx;
+     
+	msg_ctx = 0;
+	while (1) {
+		maj_stat = gss_display_status(&min_stat, code,
+					      type, GSS_C_NULL_OID,
+					      &msg_ctx, &msg);
+		fprintf(stderr, "GSS-API error %s: %s\n", m,
+			(char *)msg.value); 
+		(void) gss_release_buffer(&min_stat, &msg);
+	  
+		if (!msg_ctx)
+			break;
+	}
+}
+
+
 /* XXX yuck.  the signal handlers need this */
 static krb5_context context;
 
@@ -139,20 +193,29 @@ int main(int argc, char *argv[])
      register	SVCXPRT *transp;
      extern	char *optarg;
      extern	int optind, opterr;
-     int ret, rlen, nofork, oldnames = 0;
-     OM_uint32 OMret;
+     int ret, nofork, oldnames = 0;
+     OM_uint32 OMret, major_status, minor_status;
      char *whoami;
-     FILE *acl_file;
      gss_buffer_desc in_buf;
-     struct servent *srv;
      struct sockaddr_in addr;
      int s;
-     short port = 0;
      auth_gssapi_name names[4];
-
+     gss_buffer_desc gssbuf;
+     gss_OID nt_krb5_name_oid;
+     
+     /* This is OID value the Krb5_Name NameType */
+     gssbuf.value = "1.2.840.113554.1.2.2.1";
+     gssbuf.length = strlen(gssbuf.value);
+     major_status = gss_str_to_oid(&minor_status, &gssbuf, &nt_krb5_name_oid);
+     if (major_status != GSS_S_COMPLETE) {
+	     fprintf(stderr, "Couldn't create KRB5 Name NameType OID\n");
+	     display_status("str_to_oid", major_status, minor_status);
+	     exit(1);
+     }
+     
      names[0].name = names[1].name = names[2].name = names[3].name = NULL;
      names[0].type = names[1].type = names[2].type = names[3].type =
-	  (gss_OID) gss_nt_krb5_name;
+	     nt_krb5_name_oid;
 
 #ifdef PURIFY
      purify_start_batch();
@@ -192,7 +255,7 @@ int main(int argc, char *argv[])
      if (argc != 0)
 	  usage();
 
-     if (ret = krb5_init_context(&context)) {
+     if ((ret = krb5_init_context(&context))) {
 	  fprintf(stderr, "%s: %s while initializing context, aborting\n",
 		  whoami, error_message(ret));
 	  exit(1);
@@ -210,18 +273,18 @@ int main(int argc, char *argv[])
 		 error_message(ret));
 	  fprintf(stderr, "%s: %s while initializing, aborting\n",
 		  whoami, error_message(ret));
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
      
-     if (ret = kadm5_get_config_params(context, NULL, NULL, &params,
-				       &params)) {
+     if ((ret = kadm5_get_config_params(context, NULL, NULL, &params,
+					&params))) {
 	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting",
 			   whoami, error_message(ret));
 	  fprintf(stderr, "%s: %s while initializing, aborting\n",
 		  whoami, error_message(ret));
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
 
@@ -235,7 +298,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "%s: Missing required configuration values "
 		  "(%x) while initializing, aborting\n", whoami,
 		  (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  kadm5_destroy(global_server_handle);
 	  exit(1);
      }
@@ -251,7 +314,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "Cannot create TCP socket: %s",
 		  error_message(errno));
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close(context);	  
 	  exit(1);
      }
 
@@ -262,7 +325,7 @@ int main(int argc, char *argv[])
 	 fprintf(stderr, "Cannot create simple chpw socket: %s",
 		 error_message(errno));
 	 kadm5_destroy(global_server_handle);
-	 krb5_klog_close();
+	 krb5_klog_close(context);
 	 exit(1);
      }
 
@@ -289,7 +352,7 @@ int main(int argc, char *argv[])
 	     fprintf(stderr, "Cannot set SO_REUSEADDR: %s",
 		     error_message(errno));
 	     kadm5_destroy(global_server_handle);
-	     krb5_klog_close();	  
+	     krb5_klog_close(context);	  
 	     exit(1);
 	 }
 	 if (setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
@@ -301,7 +364,7 @@ int main(int argc, char *argv[])
 		     "Cannot set SO_REUSEADDR on simple chpw socket: %s",
  		     error_message(errno));
  	     kadm5_destroy(global_server_handle);
- 	     krb5_klog_close();
+ 	     krb5_klog_close(context);
 	 }
 
      }
@@ -341,7 +404,7 @@ int main(int argc, char *argv[])
 		      htons(addr.sin_port));
 	  }
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
      memset(&addr, 0, sizeof(addr));
@@ -375,7 +438,7 @@ int main(int argc, char *argv[])
 		       w, ntohs(addr.sin_port), w);
  	  }
  	  kadm5_destroy(global_server_handle);
- 	  krb5_klog_close();
+ 	  krb5_klog_close(context);
 	  exit(1);
      }
      
@@ -384,14 +447,14 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "%s: Cannot create RPC service.\n", whoami);
 	  krb5_klog_syslog(LOG_ERR, "Cannot create RPC service: %m");
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close(context);	  
 	  exit(1);
      }
      if(!svc_register(transp, KADM, KADMVERS, kadm_1, 0)) {
 	  fprintf(stderr, "%s: Cannot register RPC service.\n", whoami);
 	  krb5_klog_syslog(LOG_ERR, "Cannot register RPC service, failing.");
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close(context);	  
 	  exit(1);
      }
 
@@ -408,7 +471,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "%s: Cannot build GSS-API authentication names.\n",
 		  whoami);
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close(context);	  
 	  exit(1);
      }
 
@@ -431,19 +494,19 @@ int main(int argc, char *argv[])
 		  whoami);
 	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();	  
+	  krb5_klog_close(context);	  
 	  exit(1);
      }
 
      /* if set_names succeeded, this will too */
      in_buf.value = names[1].name;
      in_buf.length = strlen(names[1].name) + 1;
-     (void) gss_import_name(&OMret, &in_buf, (gss_OID) gss_nt_krb5_name,
+     (void) gss_import_name(&OMret, &in_buf, nt_krb5_name_oid,
 			    &gss_changepw_name);
      if (oldnames) {
 	  in_buf.value = names[3].name;
 	  in_buf.length = strlen(names[3].name) + 1;
-	  (void) gss_import_name(&OMret, &in_buf, (gss_OID) gss_nt_krb5_name,
+	  (void) gss_import_name(&OMret, &in_buf, nt_krb5_name_oid,
 				 &gss_oldchangepw_name);
      }
 
@@ -451,14 +514,14 @@ int main(int argc, char *argv[])
      _svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);
      _svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
      
-     if (ret = acl_init(context, 0, params.acl_file)) {
+     if ((ret = acl_init(context, 0, params.acl_file))) {
 	  krb5_klog_syslog(LOG_ERR, "Cannot initialize acl file: %s",
 		 error_message(ret));
 	  fprintf(stderr, "%s: Cannot initialize acl file: %s\n",
 		  whoami, error_message(ret));
 	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
 
@@ -469,7 +532,7 @@ int main(int argc, char *argv[])
 		  whoami, error_message(ret));
 	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
      
@@ -495,7 +558,7 @@ int main(int argc, char *argv[])
 	  }
      }
 
-     krb5_klog_close();
+     krb5_klog_close(context);
      krb5_free_context(context);
      exit(2);
 }
@@ -558,7 +621,7 @@ void kadm_svc_run(void)
      while(signal_request_exit == 0) {
 	  if (signal_request_hup) {
 	      reset_db();
-	      krb5_klog_reopen();
+	      krb5_klog_reopen(context);
 	      signal_request_hup = 0;
 	  }
 #ifdef PURIFY
@@ -684,7 +747,7 @@ void reset_db(void)
 	  krb5_klog_syslog(LOG_ERR, "FATAL ERROR!  %s while flushing databases.  "
 		 "Databases may be corrupt!  Aborting.",
 		 error_message(ret));
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(3);
      }
 #endif
@@ -962,7 +1025,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 	return;
     }
 
-    if (ret = krb5_kt_resolve(context, params->admin_keytab, &kt)) {
+    if ((ret = krb5_kt_resolve(context, params->admin_keytab, &kt))) {
 	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
 			 error_message(ret));
 	return;
@@ -994,7 +1057,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 		error_message(errno));
 	_svcauth_gssapi_unset_names();
 	kadm5_destroy(global_server_handle);
-	krb5_klog_close();	  
+	krb5_klog_close(context);	  
 	exit(1);
     }
 
@@ -1004,9 +1067,9 @@ void do_schpw(int s1, kadm5_config_params *params)
 	goto cleanup;
     }
 
-    if (ret = process_chpw_request(context, global_server_handle,
-				   params->realm, s2, kt, &from,
-				   &reqdata, &repdata)) {
+    if ((ret = process_chpw_request(context, global_server_handle,
+				    params->realm, s2, kt, &from,
+				    &reqdata, &repdata))) {
 	krb5_klog_syslog(LOG_ERR, "chpw: Error processing request: %s", 
 			 error_message(ret));
     }

@@ -1,3 +1,11 @@
+Fri May  7 17:15:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ovsec_kadmd.c: Remove dependency on gssapi_krb5.h by using
+ 		gss_str_to_oid() to get the necessary oid for the
+ 		krb5_name name type.  Also added #include files to get
+ 		prototypes and fixed some gcc -Wall nits.  Fixed calls to
+ 		krb5_klog_close() to pass the krb5_context as an argument.
+
 Mon Mar  1 21:24:49 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (log_badverf): Actually make a real lookup table
