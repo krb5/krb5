@@ -104,7 +104,7 @@ AllTarget(foo/**/libname)						@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
 	$(TOUCH) foo/**/libname						@@\
-libdir/lib/**/libname.a::						@@\
+libdir/lib/**/libname.a:						@@\
 	$(ARADD) $@ objlist						@@\
 	$(TOUCH) foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
