@@ -1,3 +1,11 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * gss_libinit.c: Removed Mac header goober.
+    Fixed USE_HARDCODED_FALLBACK_ERROR_TABLES macro used by KfM.
+
+    * gss_libinit.h: do not use the same multiple include
+    protection macro as krb5_libinit.h.  Changed to GSSAPI_LIBINIT_H.
+
 2003-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h): Add

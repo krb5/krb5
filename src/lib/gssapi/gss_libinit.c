@@ -1,10 +1,5 @@
 #include <assert.h>
 
-#if TARGET_OS_MAC
-/* Mac OS X com_err files do not include com_err for you */
-#include <Kerberos/com_err.h>
-#endif
-
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
 #include "gssapiP_krb5.h"
@@ -44,8 +39,10 @@ void gssint_cleanup_library (void)
 	
 	(void) kg_release_defcred (&min_stat);
 	
+#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
 	remove_error_table(&et_k5g_error_table);
 	remove_error_table(&et_ggss_error_table);
+#endif
 	
 	initialized = 0;
 }
