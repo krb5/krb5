@@ -10,10 +10,13 @@
 
 #include "mit-copyright.h"
 #define	DEFINE_SOCKADDR
-#define NEED_TIME_H
 #include "krb.h"
 #include "krb4int.h"
 #include <stdio.h>                      /* for sprintf() */
+#ifndef _WINDOWS
+#include <time.h>
+#include <sys/time.h>
+#endif
 
 /*
  * Given a pointer to a long containing the number of seconds

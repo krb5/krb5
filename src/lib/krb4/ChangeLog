@@ -1,5 +1,9 @@
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
+	* mac_time.c, stime.c: Don't define NEED_TIME_H; instead, include
+	time.h and sys/time.h when _WINDOWS isn't defined, which is what
+	krb.h used to do for NEED_TIME_H.
+
 	* ad_print.c, cr_tkt.c, decomp_tkt.c, g_krbhst.c, g_phost.c,
 	g_tkt_svc.c, mk_priv.c, mk_safe.c, netread.c, netwrite.c,
 	prot_kdc.c, rd_priv.c, rd_safe.c, realmofhost.c, recvauth.c,

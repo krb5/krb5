@@ -1,6 +1,8 @@
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
-	* krb.h: Don't include port-sockets.h.
+	* krb.h: Don't include port-sockets.h.  Don't check for
+	NEED_TIME_H, just don't include time.h and sys/time.h on
+	non-Windows platforms.
 
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 

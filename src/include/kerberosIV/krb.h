@@ -336,14 +336,6 @@ typedef struct msg_dat MSG_DAT;
 /* Define u_char, u_short, u_int, and u_long. */
 #include <sys/types.h>
 
-#if !defined(_WINDOWS)
-#ifdef NEED_TIME_H
-#include <time.h>		/* For localtime, etc */
-#include <sys/time.h>
-#endif
-#endif /* !_WINDOWS */
-
-
 /* ask to disable IP address checking in the library */
 extern int krb_ignore_ip_address;
 

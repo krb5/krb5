@@ -12,10 +12,11 @@
 
 #include "mit-copyright.h"
 #define	DEFINE_SOCKADDR		/* For struct hostent, <netdb.h>, etc */
-#define NEED_TIME_H
 #include "krb.h"
 #include "des.h"
 #include "AddressXlation.h"	/* for ip_addr */
+#include <time.h>
+#include <sys/time.h>
 
 #include <script.h>			/* Defines MachineLocation, used by getTimeZoneOffset */
 #include <ToolUtils.h>		/* Defines BitTst(), called by getTimeZoneOffset() */
