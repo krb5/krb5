@@ -17,6 +17,12 @@
 #define ID_READ_PWD_PROMPT2 10002
 #define ID_READ_PWD_PWD     10003
 
+#ifdef RES_ONLY
+
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+
+#else
 
 #if defined(_MSDOS)
 	/* Windows 16 specific */
@@ -209,6 +215,8 @@ typedef unsigned char	u_char;
 #define strncasecmp  strnicmp
 
 HINSTANCE get_lib_instance(void);
+
+#endif /* !RES_ONLY */
 
 #endif /* _MSDOS || _WIN32 */
 
