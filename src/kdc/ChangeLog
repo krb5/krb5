@@ -1,3 +1,9 @@
+Fri Apr 30 00:05:07 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Fix bug where krb_create_ticket()
+	was getting called for an APPL_REQUEST even when there was no
+	single-DES key, resulting in random weirdness.
+
 Wed Feb 17 17:07:43 1999  Tom Yu  <tlyu@mit.edu>
 
 	* do_as_req.c (process_as_req): Fix to assign kvno to
