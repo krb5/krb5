@@ -1,3 +1,8 @@
+2004-07-23  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Duplicate backdating fix for
+	APPL_REQUEST as well.  Fix comments.
+
 2004-06-07  Ezra Peisach  <epeisach@mit.edu.edu>
 
 	* network.c (paddr): Use unsigned int for length.
