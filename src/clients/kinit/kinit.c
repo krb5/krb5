@@ -163,7 +163,7 @@ main(argc, argv)
 					 ccache,
 					 &my_creds);
     if (code != 0) {
-	com_err (argv[0], code, "getting initial credentials");
+	com_err (argv[0], code, "while getting initial credentials");
 	exit(1);
     }
     exit(0);
