@@ -1,3 +1,9 @@
+Tue Sep  2 19:44:21 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (main): Changes to allow for standalone daemon
+	operation.  Use the "-f" flag to enable.  This automagically
+	figures out which port to bind to if you don't specify it.
+
 Mon Jun 30 13:21:34 1997  Kevin L Mitchell  <klmitch@mit.edu>
 
 	* login.c (dofork): Solaris 2.4 puts killpg in the bsd compatibility

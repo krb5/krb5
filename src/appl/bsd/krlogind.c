@@ -246,9 +246,9 @@ krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"k54ciepPD:S:M:L:?"
+#define ARGSTR	"k54ciepPD:S:M:L:f?"
 #else /* !KERBEROS */
-#define ARGSTR	"rpPD:?"
+#define ARGSTR	"rpPD:f?"
 #define (*des_read)  read
 #define (*des_write) write
 #endif /* KERBEROS */
@@ -325,6 +325,7 @@ int main(argc, argv)
     char *options;
     int debug_port = 0;
     int fd;
+    int do_fork = 0;
 #ifdef KERBEROS
     krb5_error_code status;
 #endif
@@ -411,6 +412,9 @@ int main(argc, argv)
 	case 'L':
 	  login_program = optarg;
 	  break;
+        case 'f':
+	  do_fork = 1;
+	  break;
 	case '?':
 	default:
 	  usage();
@@ -422,65 +426,97 @@ int main(argc, argv)
     
     fromlen = sizeof (from);
 
-     if (debug_port) {
-	 int s;
-	 struct sockaddr_in sin;
-	 
-	 if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
-	     fprintf(stderr, "Error in socket: %s\n", strerror(errno));
-	     exit(2);
-	 }
-	 
-	 memset((char *) &sin, 0,sizeof(sin));
-	 sin.sin_family = AF_INET;
-	 sin.sin_port = htons(debug_port);
-	 sin.sin_addr.s_addr = INADDR_ANY;
-	 
-	 (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
-			   (char *)&on, sizeof(on));
+    if (debug_port || do_fork) {
+	int s;
+	struct servent *ent;
+	struct sockaddr_in sin;
 
-	 if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
-	     fprintf(stderr, "Error in bind: %s\n", strerror(errno));
-	     exit(2);
-	 }
-	 
-	 if ((listen(s, 5)) < 0) {
-	     fprintf(stderr, "Error in listen: %s\n", strerror(errno));
-	     exit(2);
-	 }
-	 
-	 if ((fd = accept(s, (struct sockaddr *) &from, &fromlen)) < 0) {
-	     fprintf(stderr, "Error in accept: %s\n", strerror(errno));
-	     exit(2);
-	 }
-	 
-	 close(s);
-     } 
-     else {
-	 if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
-	     syslog(LOG_ERR,"Can't get peer name of remote host: %m");
+	if (!debug_port) {
+	    if (do_encrypt) {
+		ent = getservbyname("eklogin", "tcp");
+		if (ent == NULL)
+		    debug_port = 2105;
+		else
+		    debug_port = ent->s_port;
+	    } else {
+		ent = getservbyname("klogin", "tcp");
+		if (ent == NULL)
+		    debug_port = 543;
+		else
+		    debug_port = ent->s_port;
+	    }
+	}
+	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
+	    exit(2);
+	}
+	memset((char *) &sin, 0,sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(debug_port);
+	sin.sin_addr.s_addr = INADDR_ANY;
+
+	if (!do_fork)
+	    (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			      (char *)&on, sizeof(on));
+
+	if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
+	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	if (do_fork) {
+	    if (daemon(0, 0)) {
+		fprintf(stderr, "daemon() failed\n");
+		exit(2);
+	    }
+	    while (1) {
+		int child_pid;
+
+		fd = accept(s, (struct sockaddr *) &from, &fromlen);
+		if (s < 0) {
+		    if (errno != EINTR)
+			syslog(LOG_ERR, "accept: %s", error_message(errno));
+		    continue;
+		}
+		child_pid = fork();
+		switch (child_pid) {
+		case -1:
+		    syslog(LOG_ERR, "fork: %s", error_message(errno));
+		case 0:
+		    (void) close(s);
+		    doit(fd, &from);
+		    close(fd);
+		    exit(0);
+		default:
+		    wait(0);
+		    close(fd);
+		}
+	    }
+	}
+
+	if ((fd = accept(s, (struct sockaddr *) &from, &fromlen)) < 0) {
+	    fprintf(stderr, "Error in accept: %s\n", strerror(errno));
+	    exit(2);
+	}
+
+	close(s);
+    } else {			/* !do_fork && !debug_port */
+	if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
+	    syslog(LOG_ERR,"Can't get peer name of remote host: %m");
 #ifdef STDERR_FILENO
-	     fatal(STDERR_FILENO, "Can't get peer name of remote host", 1);
+	    fatal(STDERR_FILENO, "Can't get peer name of remote host", 1);
 #else
-	     fatal(2, "Can't get peer name of remote host", 1);
+	    fatal(2, "Can't get peer name of remote host", 1);
 #endif
-	 }
-	 fd = 0;
-     }
-
-    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE,
-		   (const char *) &on, sizeof (on)) < 0)
-      syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
-    if (auth_ok == 0) {
-      syslog(LOG_CRIT, "No authentication systems were enabled; all connections will be refused.");
-      fatal(fd, "All authentication systems disabled; connection refused.");
+	}
+	fd = 0;
     }
 
-    if (checksum_required&&checksum_ignored) {
-      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
-      fatal(fd, "Configuration error: mutually exclusive options specified");
-    }
-    
     doit(fd, &from);
     return 0;
 }
@@ -517,6 +553,19 @@ void doit(f, fromp)
     int retval;
 int syncpipe[2];
     netf = -1;
+    if (setsockopt(f, SOL_SOCKET, SO_KEEPALIVE,
+		   (const char *) &on, sizeof (on)) < 0)
+	syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
+    if (auth_ok == 0) {
+	syslog(LOG_CRIT, "No authentication systems were enabled; all connections will be refused.");
+	fatal(f, "All authentication systems disabled; connection refused.");
+    }
+
+    if (checksum_required&&checksum_ignored) {
+	syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
+	fatal(f, "Configuration error: mutually exclusive options specified");
+    }
+    
     alarm(60);
     read(f, &c, 1);
     
@@ -1329,10 +1378,10 @@ void usage()
 {
 #ifdef KERBEROS
     syslog(LOG_ERR, 
-	   "usage: klogind [-ke45pP] [-D port] or [r/R][k/K][x/e][p/P]logind");
+	   "usage: klogind [-ke45pPf] [-D port] or [r/R][k/K][x/e][p/P]logind");
 #else
     syslog(LOG_ERR, 
-	   "usage: rlogind [-rpP] [-D port] or [r/R][p/P]logind");
+	   "usage: rlogind [-rpPf] [-D port] or [r/R][p/P]logind");
 #endif
 }
 
