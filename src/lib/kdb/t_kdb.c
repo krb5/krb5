@@ -27,6 +27,7 @@
  *		  Kerberos database functions.
  */
 
+#define	KDB5_DISPATCH
 #include "k5-int.h"
 #include <sys/time.h>
 
@@ -54,6 +55,8 @@ need a random number generator
 
 #define	RANDOM(a,b)	(a + (RAND() % (b-a)))
 
+enum dbtype { DB_UFO, DB_DEFAULT, DB_BERKELEY, DB_DBM };
+
 char			*programname = (char *) NULL;
 krb5_data		mprinc_data_entries[] = {
     { 0, sizeof("master")-1, "master"},
@@ -73,6 +76,74 @@ struct timeval	tstart_time, tend_time;
 struct timezone	dontcare;
 krb5_principal	*recorded_principals = (krb5_principal *) NULL;
 char		**recorded_names = (char **) NULL;
+
+extern DBM	*db_dbm_open PROTOTYPE((char *, int, int));
+extern void     db_dbm_close PROTOTYPE((DBM *));
+extern datum    db_dbm_fetch PROTOTYPE((DBM *, datum));
+extern datum    db_dbm_firstkey PROTOTYPE((DBM *));
+extern datum    db_dbm_nextkey PROTOTYPE((DBM *));
+extern int      db_dbm_delete PROTOTYPE((DBM *, datum));
+extern int      db_dbm_store PROTOTYPE((DBM *, datum, datum, int));
+extern int	db_dbm_error PROTOTYPE((DBM *));
+extern int	db_dbm_clearerr PROTOTYPE((DBM *));
+extern int	db_dbm_dirfno PROTOTYPE((DBM *));
+
+static kdb5_dispatch_table berkeley_dispatch = {
+    "Berkeley Hashed Database",
+    ".db",			/* Index file name ext	*/
+    (char *) NULL,		/* Data file name ext	*/
+    ".ok",			/* Lock file name ext	*/
+    db_dbm_open,		/* Open Database	*/
+    db_dbm_close,		/* Close Database	*/
+    db_dbm_fetch,		/* Fetch Key		*/
+    db_dbm_firstkey,		/* Fetch First Key	*/
+    db_dbm_nextkey,		/* Fetch Next Key	*/
+    db_dbm_delete,		/* Delete Key		*/
+    db_dbm_store,		/* Store Key		*/
+    db_dbm_error,		/* Get Database Error	*/
+    db_dbm_clearerr,		/* Clear Database Error	*/
+    db_dbm_dirfno,		/* Get Database FD num	*/
+    (int (*)()) NULL		/* Get Database FD num	*/
+};
+
+static kdb5_dispatch_table dbm_dispatch = {
+    "Stock [N]DBM Database",
+    ".dir",			/* Index file name ext	*/
+    ".pag",			/* Data file name ext	*/
+    ".ok",			/* Lock file name ext	*/
+    dbm_open,			/* Open Database	*/
+    dbm_close,			/* Close Database	*/
+    dbm_fetch,			/* Fetch Key		*/
+    dbm_firstkey,		/* Fetch First Key	*/
+    dbm_nextkey,		/* Fetch Next Key	*/
+    dbm_delete,			/* Delete Key		*/
+    dbm_store,			/* Store Key		*/
+    /*
+     * The following are #ifdef'd because they have the potential to be
+     * macros rather than functions.
+     */
+#ifdef	dbm_error
+    (int (*)()) NULL,		/* Get Database Error	*/
+#else	/* dbm_error */
+    dbm_error,			/* Get Database Error	*/
+#endif	/* dbm_error */
+#ifdef	dbm_clearerr
+    (int (*)()) NULL,		/* Clear Database Error	*/
+#else	/* dbm_clearerr */
+    dbm_clearerr,		/* Clear Database Error	*/
+#endif	/* dbm_clearerr */
+#ifdef	dbm_dirfno
+    (int (*)()) NULL,		/* Get Database FD num	*/
+#else	/* dbm_dirfno */
+    dbm_dirfno,			/* Get Database FD num	*/
+#endif	/* dbm_dirfno */
+#ifdef	dbm_pagfno
+    (int (*)()) NULL,		/* Get Database FD num	*/
+#else	/* dbm_pagfno */
+    dbm_pagfno,			/* Get Database FD num	*/
+#endif	/* dbm_pagfno */
+};
+
 
 /*
  * Timer macros.
@@ -334,7 +405,8 @@ delete_principal(kcontext, principal)
 }
 
 int
-do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
+do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
+	   db_type)
     char	*db;
     int		passes;
     int		verbose;
@@ -343,6 +415,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
     int		check;
     int		save_db;
     int		dontclean;
+    enum dbtype	db_type;
 {
     krb5_error_code	kret;
     krb5_context	kcontext;
@@ -377,6 +450,26 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
     /* Set up some initial context */
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
+
+    switch (db_type) {
+    case DB_BERKELEY:
+	op = "setting up Berkeley database operations";
+	if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
+	    goto goodbye;
+	break;
+    case DB_DBM:
+	op = "setting up DBM database operations";
+	if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
+	    goto goodbye;
+	break;
+    case DB_DEFAULT:
+	break;
+    default:
+	op = "checking database type";
+	kret = EINVAL;
+	goto goodbye;
+	break;
+    }
 
     /* 
      * The database had better not exist.
@@ -762,21 +855,28 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
     if (db_open)
 	(void) krb5_db_fini(kcontext);
     if (db_created) {
-	char *fnbuf;
-
 	if (!kret && !save_db) {
-	    fnbuf = (char *) malloc(MAXPATHLEN);
-	    if (fnbuf) {
-		sprintf(fnbuf, "%s.ok", db);
-		unlink(fnbuf);
-		sprintf(fnbuf, "%s.dir", db);
-		unlink(fnbuf);
-		sprintf(fnbuf, "%s.pag", db);
-		unlink(fnbuf);
-		sprintf(fnbuf, "%s.db", db);
-		unlink(fnbuf);
-		free(fnbuf);
+	    switch (db_type) {
+	    case DB_BERKELEY:
+		op = "setting up Berkeley database operations";
+		if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
+		    goto goodbye1;
+		break;
+	    case DB_DBM:
+		op = "setting up DBM database operations";
+		if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
+		    goto goodbye1;
+		break;
+	    case DB_DEFAULT:
+		break;
+	    default:
+		op = "checking database type";
+		kret = EINVAL;
+		goto goodbye1;
+		break;
 	    }
+	    kdb5_db_destroy(kcontext, db);
+	    krb5_db_fini(kcontext);
 	}
 	else {
 	    if (kret && verbose)
@@ -784,6 +884,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
 			programname);
 	}
     }
+ goodbye1:
     return((kret) ? 1 : 0);
 }
 
@@ -797,6 +898,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean)
  *		[-d <dbname>]	- Database name.
  *		[-s]		- Save database even on successful completion.
  *		[-D]		- Leave database dirty.
+ *		[-o]		- Use dbm instead of default.
+ *		[-O]		- Use Berkeley db instead of default.
  */
 int
 main(argc, argv)
@@ -808,6 +911,7 @@ main(argc, argv)
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;
     int		save_db, dont_clean;
+    enum dbtype	db_type;
     char	*db_name;
 
     programname = argv[0];
@@ -824,10 +928,11 @@ main(argc, argv)
     db_name = T_KDB_DEF_DB;
     save_db = 0;
     dont_clean = 0;
+    db_type = DB_DEFAULT;
     error = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:rstvD")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:orstvDO")) != EOF) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;
@@ -857,6 +962,12 @@ main(argc, argv)
 	case 'D':
 	    dont_clean = 1;
 	    break;
+	case 'o':
+	    db_type = DB_DBM;
+	    break;
+	case 'O':
+	    db_type = DB_BERKELEY;
+	    break;
 	default:
 	    error++;
 	    break;
@@ -873,6 +984,8 @@ main(argc, argv)
 			   do_random,
 			   check_cont,
 			   save_db,
-			   dont_clean);
+			   dont_clean,
+			   db_type);
     return(error);
 }
+
