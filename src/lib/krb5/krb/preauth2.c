@@ -279,7 +279,7 @@ krb5_error_code pa_sam(krb5_context context,
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
-	enc_sam_response_enc.sam_passcode = response_data;
+	enc_sam_response_enc.sam_sad = response_data;
     } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
 	if (sam_challenge->sam_nonce == 0) {
 	    if (ret = krb5_us_timeofday(context, 
@@ -329,7 +329,7 @@ krb5_error_code pa_sam(krb5_context context,
 	    return(ret);
 	}
 
-	enc_sam_response_enc.sam_passcode.length = 0;
+	enc_sam_response_enc.sam_sad.length = 0;
     }
 
     /* copy things from the challenge */

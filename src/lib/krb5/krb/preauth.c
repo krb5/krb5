@@ -565,8 +565,8 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
 	free(passcode);
 	return retval;
       }
-      enc_sam_response_enc.sam_passcode.data = passcode;
-      enc_sam_response_enc.sam_passcode.length = pcsize;
+      enc_sam_response_enc.sam_sad.data = passcode;
+      enc_sam_response_enc.sam_sad.length = pcsize;
     } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
       prompt = handle_sam_labels(sam_challenge);
       if (prompt == NULL)
@@ -577,14 +577,14 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
       free(prompt);
       if (retval)
 	return retval;      
-      enc_sam_response_enc.sam_passcode.length = 0;
+      enc_sam_response_enc.sam_sad.length = 0;
     } else {
       /* what *was* it? */
       return KRB5_SAM_UNSUPPORTED;
     }
 
     /* so at this point, either sam_use_key is generated from the passcode
-     * or enc_sam_response_enc.sam_passcode is set to it, and we use 
+     * or enc_sam_response_enc.sam_sad is set to it, and we use 
      * def_enc_key instead. */
     /* encode the encoded part of the response */
     if ((retval = encode_krb5_enc_sam_response_enc(&enc_sam_response_enc,

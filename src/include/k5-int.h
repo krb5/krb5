@@ -356,6 +356,11 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 typedef struct _krb5_predicted_sam_response {
 	krb5_magic	magic;
 	krb5_keyblock	sam_key;
+	krb5_timestamp  stime;	/* time on server, for replay detection */
+	krb5_int32      susec;
+	krb5_principal  client;
+	krb5_data       msd;	/* mechanism specific data */
+
 } krb5_predicted_sam_response;
 
 typedef struct _krb5_sam_challenge {
@@ -382,7 +387,7 @@ typedef struct _krb5_enc_sam_response_enc {
 	krb5_int32	sam_nonce;
 	krb5_timestamp	sam_timestamp;
 	krb5_int32	sam_usec;
-	krb5_data	sam_passcode;
+	krb5_data	sam_sad;
 } krb5_enc_sam_response_enc;
 
 typedef struct _krb5_sam_response {

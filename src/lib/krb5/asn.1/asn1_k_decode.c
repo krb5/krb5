@@ -784,7 +784,7 @@ asn1_error_code asn1_decode_enc_sam_response_enc(buf, val)
     opt_field(val->sam_nonce,0,asn1_decode_int32,0);
     opt_field(val->sam_timestamp,1,asn1_decode_kerberos_time,0);
     opt_field(val->sam_usec,2,asn1_decode_int32,0);
-    opt_string(val->sam_passcode,3,asn1_decode_charstring);
+    opt_string(val->sam_sad,3,asn1_decode_charstring);
     end_structure();
     val->magic = KV5M_ENC_SAM_RESPONSE_ENC;
   }

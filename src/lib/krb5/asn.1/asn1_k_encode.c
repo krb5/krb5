@@ -912,7 +912,7 @@ asn1_error_code asn1_encode_enc_sam_response_enc(buf, val, retlen)
      int * retlen;
 {
   asn1_setup();
-  add_optstring(val->sam_passcode,3,asn1_encode_charstring);
+  add_optstring(val->sam_sad,3,asn1_encode_charstring);
   asn1_addfield(val->sam_usec,2,asn1_encode_integer);
   asn1_addfield(val->sam_timestamp,1,asn1_encode_kerberos_time);
   asn1_addfield(val->sam_nonce,0,asn1_encode_integer);

@@ -1,3 +1,12 @@
+2000-02-06  Ken Raeburn  <raeburn@raeburn.org>
+
+	* kfree.c (krb5_free_predicted_sam_response_contents): Fix typo.
+	Free new data fields if needed.
+	(krb5_free_enc_sam_response_enc_contents): Update for field name
+	change.
+	* preauth.c (obtain_sam_padata): Update for field name change.
+	* preauth2.c (pa_sam): Likewise.
+
 2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
 
 	* init_ctx.c (get_profile_etype_list): Discard DESONLY changes

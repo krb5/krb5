@@ -654,8 +654,12 @@ krb5_free_predicted_sam_response_contents(krb5_context ctx,
 {
     if (!psr)
 	return;
-    if (psr->sam_key.contents);
+    if (psr->sam_key.contents)
 	krb5_free_keyblock_contents(ctx, &psr->sam_key);
+    if (psr->client)
+	krb5_free_principal(ctx, psr->client);
+    if (psr->msd.data)
+	krb5_free_data_contents(ctx, &psr->msd);
 }
 
 KRB5_DLLIMP void KRB5_CALLCONV
@@ -674,8 +678,8 @@ krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
 {
     if (!esre)
 	return;
-    if (esre->sam_passcode.data)
-	krb5_free_data_contents(ctx, &esre->sam_passcode);
+    if (esre->sam_sad.data)
+	krb5_free_data_contents(ctx, &esre->sam_sad);
 }
 
 KRB5_DLLIMP void KRB5_CALLCONV

@@ -1,3 +1,9 @@
+2000-02-06  Ken Raeburn  <raeburn@raeburn.org>
+
+	* asn1_k_decode.c (asn1_decode_enc_sam_response_enc): Update for
+	field name change.
+	* asn1_k_encode.c (asn1_encode_enc_sam_response_enc): Likewise.
+
 2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_decode.c (krb5_decode_ticket): Add function to provide
