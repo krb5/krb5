@@ -14,4 +14,4 @@ SRCS=	\
 	rc_io.c		\
 	rcdef.c
 
-NormalLibraryTarget(rc,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))

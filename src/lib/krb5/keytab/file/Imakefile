@@ -14,4 +14,4 @@ OBJS = \
 	ktf_ops.o	\
 	ktf_wops.o
 
-NormalLibraryTarget(ktfile,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))

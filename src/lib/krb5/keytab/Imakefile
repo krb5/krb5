@@ -28,4 +28,4 @@ SRCS=	\
 	ktresolve.c	\
 	read_servi.c
 
-NormalLibraryTarget(kt,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))

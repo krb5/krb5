@@ -48,4 +48,4 @@ SRCS=	\
 	f_tgs_req.c	\
 	f_ticket.c
 
-NormalLibraryTarget(kfree,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))

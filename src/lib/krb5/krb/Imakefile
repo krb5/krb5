@@ -82,4 +82,4 @@ SRCS=	addr_comp.c	\
 	unparse.c	\
 	walk_rtree.c
 
-NormalLibraryTarget(krb,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
