@@ -40,6 +40,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    krb5_error_code code;
    krb5_MD5_CTX md5;
    krb5_checksum desmac;
+   krb5_octet cbc_checksum[KRB5_MIT_DES_KEYSIZE];
    int tmsglen, tlen;
    unsigned char *t, *ptr;
 
@@ -146,6 +147,8 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    /* XXX this depends on the key being a single-des key, but that's
       all that kerberos supports right now */
 
+   desmac.length = sizeof(cbc_checksum);
+   desmac.contents = cbc_checksum;
    if (code = krb5_calculate_checksum(context, CKSUMTYPE_DESCBC, md5.digest, 16,
 				      seq_ed->key->contents, 
 				      seq_ed->key->length,
@@ -155,9 +158,6 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    }
 
    memcpy(ptr+14, desmac.contents, 8);
-
-   /* XXX krb5_free_checksum_contents? */
-   xfree(desmac.contents);
 
    /* create the seq_num */
 

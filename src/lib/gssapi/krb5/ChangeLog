@@ -1,3 +1,9 @@
+Tue May 14 19:09:49 1996  Richard Basch  <basch@lehman.com>
+
+	* k5seal.c k5unseal.c util_cksum.c:
+		setup krb5_checksum "contents" and "length" field prior to
+		calling krb5_calculate_checksum().
+
 Tue May 14 04:42:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_sec_context.c (make_ap_req): Change call to

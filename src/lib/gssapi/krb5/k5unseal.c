@@ -49,6 +49,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    gss_buffer_desc token;
    unsigned char *ptr;
    krb5_checksum desmac;
+   krb5_octet cbc_checksum[KRB5_MIT_DES_KEYSIZE];
    krb5_MD5_CTX md5;
    unsigned char *cksum;
    krb5_timestamp now;
@@ -174,7 +175,8 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
       /* XXX this depends on the key being a single-des key, but that's
 	 all that kerberos supports right now */
-
+      desmac.length = sizeof(cbc_checksum);
+      desmac.contents = cbc_checksum;
       if (code = krb5_calculate_checksum(context, CKSUMTYPE_DESCBC, md5.digest,
 					 16, ctx->seq.key->contents, 
 					 ctx->seq.key->length,
@@ -217,16 +219,11 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    /* compare the computed checksum against the transmitted checksum */
 
    if (memcmp(cksum, ptr+14, 8) != 0) {
-      if (signalg == 0)
-	 xfree(desmac.contents);
       if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
 	 xfree(token.value);
       *minor_status = 0;
       return(GSS_S_BAD_SIG);
    }
-
-   if (signalg == 0)
-      xfree(desmac.contents);
 
    /* XXX this is where the seq_num check would go */
    
