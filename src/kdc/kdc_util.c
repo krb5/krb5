@@ -532,7 +532,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 {
   char        *realm;
   char        *trans;
-  char        *otrans;
+  char        *otrans, *otrans_ptr;
 
   /* The following are for stepping through the transited field     */
 
@@ -553,17 +553,28 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
   realm[krb5_princ_realm(kdc_context, tgs)->length] = '\0';
 
   if (!(otrans = (char *) malloc(tgt_trans->length+1))) {
+    free(realm);
     return(ENOMEM);
   }
   memcpy(otrans, tgt_trans->data, tgt_trans->length);
   otrans[tgt_trans->length] = '\0';
+  /* Keep track of start so we can free */
+  otrans_ptr = otrans;
 
-  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 1))) {
+  /* +1 for null, 
+     +1 for extra comma which may be added between
+     +1 for potential space when leading slash in realm */
+  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 3))) {
+    free(realm);
+    free(otrans_ptr);
     return(ENOMEM);
   }
 
   if (new_trans->data)  free(new_trans->data);
   new_trans->data = trans;
+  new_trans->length = 0;
+
+  trans[0] = '\0';
 
   /* For the purpose of appending, the realm preceding the first */
   /* realm in the transited field is considered the null realm   */
@@ -701,6 +712,8 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
     new_trans->length = strlen(trans) + 1;
   }
 
+  free(realm);
+  free(otrans_ptr);
   return(0);
 }
 
@@ -912,7 +925,7 @@ krb5_data *data;
 {
     unsigned char *estream;	/* end of stream */
     int classes;		/* # classes seen so far this level */
-    int levels = 0;		/* levels seen so far */
+    unsigned int levels = 0;		/* levels seen so far */
     int lastlevel = 1000;       /* last level seen */
     int length;			/* various lengths */
     int tag;			/* tag number */
@@ -1375,8 +1388,23 @@ get_salt_from_key(context, client, client_key, salt)
     return 0;
 }
 
+/*
+ * Limit strings to a "reasonable" length to prevent crowding out of
+ * other useful information in the log entry
+ */
+#define NAME_LENGTH_LIMIT 128
 
-    
-   
-    
-    
+void limit_string(char *name)
+{
+	int	i;
+
+	if (strlen(name) < NAME_LENGTH_LIMIT)
+		return;
+
+	i = NAME_LENGTH_LIMIT-4;
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i] = '\0';
+	return;
+}

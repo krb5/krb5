@@ -1,3 +1,33 @@
+Tue Mar 25 01:00:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): A zero-length
+		token should be treated like a GSS_C_NO_BUFFER during the
+		initial context establishment.  [krb5-libs/352]
+
+Wed Nov 20 19:55:29 1996  Marc Horowitz  <marc@cygnus.com>
+
+	* init_sec_context.c (make_ap_rep, krb5_gss_init_sec_context),
+ 	accept_sec_context.c (krb5_gss_accept_sec_context): fix up use of
+ 	gss flags.  under some circumstances, the context would not have
+ 	checked for replay or sequencing, even if those features were
+	requested.
+
+	* init_sec_context.c (make_ap_req), (krb5_gss_init_sec_context):
+ 	If delegation is requested, but forwarding the credentials fails,
+	instead of aborting the context setup, just don't forward
+	credentials.
+
+	* gssapiP_krb5.h (krb5_gss_ctx_id_t), ser_sctx.c
+ 	(kg_ctx_externalize, kg_ctx_internalize), init_sec_context.c
+ 	(krb5_gss_init_sec_context), get_tkt_flags.c
+ 	(gss_krb5_get_tkt_flags), accept_sec_context.c
+ 	(krb5_gss_accept_sec_context): rename ctx->flags to
+ 	ctx->krb_flags, to disambiguate it from ctx->gss_flags
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): If the subkey
+	isn't present in the authenticator, then use the session key
+	instead.
+
 Sat Oct 19 00:38:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ser_sctx.c (kg_oid_externalize, kg_oid_internalize,

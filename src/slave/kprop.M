@@ -35,8 +35,8 @@ Kerberos server to a slave Kerberos server, which is specfied by
 .IR slave_host .  
 This is done by transmitting the dumped database file to the slave
 server over an encrypted, secure channel.  The dump file must be created
-by kdb5_edit, and is normally KPROP_DEFAULT_FILE
-(/krb5/slave_datatrans).
+by kdb5_util, and is normally KPROP_DEFAULT_FILE
+(/usr/local/var/krb5kdc/slave_datatrans).
 .SH OPTIONS
 .TP
 \fB\-r\fP \fIrealm\fP
@@ -48,7 +48,7 @@ is used.
 \fB\-f\fP \fIfile\fP
 specifies the filename where the dumped principal database file is to be
 found; by default the dumped database file is KPROP_DEFAULT_FILE
-(normally /krb5/slave_datatrans).
+(normally /usr/local/var/krb5kdc/slave_datatrans).
 .TP
 \fB\-P\fP \fIport\fP
 specifies the port to use to contact the
@@ -61,4 +61,4 @@ prints debugging information.
 \fB\-s\fP \fIkeytab\fP
 specifies the location of the keytab file.
 .SH SEE ALSO
-kpropd(8), kdb5_edit(8), krb5kdc(8)
+kpropd(8), kdb5_util(8), krb5kdc(8)

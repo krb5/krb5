@@ -310,7 +310,8 @@ void	lostconn();
 int	lostconn();
 #endif
 int	errno;
-#ifndef __NetBSD__
+/* Kludge!!!! */
+#if (!defined(__NetBSD__) && !defined(__FreeBSD__))
 extern char	*sys_errlist[];
 #endif
 int	iamremote, targetshouldbedirectory;

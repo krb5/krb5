@@ -1,5 +1,5 @@
-NAME            CNS
-DESCRIPTION     'CNS - Cygnus Network Security'
+NAME            KRB5
+DESCRIPTION     'KRB5 - Credentials Manager'
 EXETYPE         WINDOWS
 STUB            'WINSTUB.EXE'
 SEGMENTS _TEXT CLASS 'CODE' PRELOAD
