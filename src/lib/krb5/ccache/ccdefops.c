@@ -44,19 +44,7 @@ krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
 
 #else
 
-#ifdef HAVE_SYS_TYPES_H
-/* Systems that have <sys/types.h> probably have Unix-like files (off_t,
-   for example, which is needed by fcc.h).  */
-
-#include "fcc.h"		/* From file subdir */
+#include "fcc.h"
 krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_file_ops;
-
-#else
-/* Systems that don't have <sys/types.h> probably have stdio anyway.  */
-
-#include "scc.h"		/* From stdio subdir */
-krb5_cc_ops *krb5_cc_dfl_ops = &krb5_scc_ops;
-
-#endif
 
 #endif

@@ -1,11 +1,19 @@
 2002-08-14  Ken Raeburn  <raeburn@mit.edu>
 
-	* cc_stdio.c (krb5_fcc_next_cred): Use a krb5_error_code to hold
-	the return value from krb5_fcc_interpret.
-	(krb5_fcc_get_principal): Initialize return-value variable.
-	(krb5_fcc_initialize): Likewise.
-	(krb5_fcc_interpret): Change retval to a krb5_error_code.  Reorder
-	cases for consistency with cc_file.c.
+	* cc_file.c: Merge in cc_stdio.c, under preprocessor test for
+	USE_STDIO.
+	(USE_STDIO): Define it if HAVE_SYS_TYPES_H.
+	(krb5_change_cache, krb5_get_notification_message): Always
+	define.
+	(ALLOC): New macro, with overflow checking.
+	(krb5_fcc_read_principal, krb5_fcc_read_addrs,
+	krb5_fcc_read_authdata): Use it, and fix other overflow checks.
+	(my_fopen): Support non-Mac environments.
+	(krb5_fcc_open_file) [USE_STDIO]: Always use my_fopen.
+	* cc_stdio.c: Deleted.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated.
+	* ccdefops.c (krb5_cc_dfl_ops) [!USE_CCAPI]: Always use
+	krb5_fcc_ops.
 
 2002-08-09  Ken Raeburn  <raeburn@mit.edu>
 
