@@ -1,3 +1,7 @@
+Fri Nov 18 00:17:47 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: move WITH_CCOPTS, WITH_KRB5ROOT.
+
 Wed Nov  2 02:35:44 1994  Mark W. Eichin  (eichin@paycheck.cygnus.com)
 
 	* Makefile.in (libkrb5.a): done needs a trailing semicolon if it
