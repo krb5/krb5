@@ -1,3 +1,7 @@
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (ALL_CFLAGS): Put LOCALINCLUDES before CPPFLAGS.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (COM_ERR_DEPLIB-sys, COM_ERR_DEPLIB-k5, SS_DEPLIB-k5,
