@@ -1,3 +1,22 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Check principal name
+	length before examining components.
+
+	* parse.c (krb5_parse_name): Double-check principal name length
+	before filling in components.
+
+	* srv_rcache.c (krb5_get_server_rcache): Check for null pointer
+	supplied in place of name.
+
+	* unparse.c (krb5_unparse_name_ext): Don't move buffer pointer
+	backwards if nothing has been put into the buffer yet.
+
+2003-04-01  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_req.c (krb5_rd_req): If AUTH_CONTEXT_DO_TIME is cleared,
+	don't set up a replay cache. 
+
 2003-03-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_kerb.c: Only include krb.h if krb4 support compiled in,

@@ -1,3 +1,26 @@
+2003-04-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [NUMERIC_SERVICE_BROKEN]:
+	Overwrite the port number only if a numeric service port was
+	supplied.
+
+2003-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (COPY_FIRST_CANONNAME) [_AIX]: Define.
+	(GET_HOST_BY_NAME) [_AIX]: New version for AIX version of
+	gethostbyname_r.
+	(getaddrinfo) [NUMERIC_SERVICE_BROKEN]: Use "discard" as a dummy
+	service name instead of none at all.  Don't check for unsigned
+	value less than zero.
+	(getaddrinfo) [COPY_FIRST_CANONNAME]: Set any ai_canonname fields
+	other than the first one to null.
+
+2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
+
+    * configure.in: Use KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
+    and higher.  When bind 9 is present, BIND_8_COMPAT needs to be 
+    defined to get bind 8 types.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     
     * krb5.h: Removed enumsalwaysint because there are no typed

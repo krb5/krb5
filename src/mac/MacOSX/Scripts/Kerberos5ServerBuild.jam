@@ -45,6 +45,17 @@ rule Make
 actions Make
 {
     mkdir -p "$(1:D)"
+    echo "*******************************************************"
+    echo "*** WARNING! Deleting KfM /usr/lib compat symlinks! ***"
+    echo "*******************************************************"
+    echo "(If you want us to stop doing this, fix ld: Radar 3176974)"
+    rm -f /usr/lib/libcom_err.dylib
+    rm -f /usr/lib/libdes425.dylib
+    rm -f /usr/lib/libgssapi_krb5.dylib
+    rm -f /usr/lib/libk5crypto.dylib
+    rm -f /usr/lib/libkrb4.dylib
+    rm -f /usr/lib/libkrb5.dylib
+    rm -f /usr/lib/libkrb524.dylib
     cd "$(1:D)" && make && touch "$(1)" && echo "### HAPPINESS ###"
 }
 

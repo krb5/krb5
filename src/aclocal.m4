@@ -1506,16 +1506,41 @@ if test "x$with_system_db" = xyes ; then
   else
     DB_HEADER_VERSION=redirect
   fi
+  KDB5_DB_LIB="$DB_LIB"
 else
   DB_VERSION=k5
   AC_DEFINE(HAVE_BT_RSEQ,1,[Define if bt_rseq is available, for recursive btree traversal.])
   DB_HEADER=db.h
   DB_HEADER_VERSION=k5
+  # libdb gets sucked into libkdb
+  KDB5_DB_LIB=
+  # needed for a couple of things that need libdb for its own sake
   DB_LIB=-ldb
 fi
 AC_SUBST(DB_VERSION)
 AC_SUBST(DB_HEADER)
 AC_SUBST(DB_HEADER_VERSION)
 AC_SUBST(DB_LIB)
+AC_SUBST(KDB5_DB_LIB)
+])
+dnl
+dnl
+dnl KRB5_AC_NEED_BIND_8_COMPAT --- check to see if we are on a bind 9 system
+dnl
+dnl
+AC_DEFUN(KRB5_AC_NEED_BIND_8_COMPAT,[
+AC_REQUIRE([AC_PROG_CC])dnl
+dnl
+dnl On a bind 9 system, we need to define BIND_8_COMPAT
+dnl
+AC_MSG_CHECKING(for bind 9 or higher)
+AC_CACHE_VAL(krb5_cv_need_bind_8_compat,[
+AC_TRY_COMPILE([#include <arpa/nameser.h>], [HEADER hdr;],
+krb5_cv_need_bind_8_compat=no, 
+[AC_TRY_COMPILE([#define BIND_8_COMPAT
+#include <arpa/nameser.h>], [HEADER hdr;],
+krb5_cv_need_bind_8_compat=yes, krb5_cv_need_bind_8_compat=no)])])
+AC_MSG_RESULT($krb5_cv_need_bind_8_compat)
+test $krb5_cv_need_bind_8_compat = yes && AC_DEFINE(BIND_8_COMPAT,1,[Define if OS has bind 9])
 ])
 dnl

@@ -184,26 +184,8 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 				 sname,
 				 sinst,
 				 v4_skey->contents);
-     } else {
-	 /* Force enctype to be raw if using DES3. */
-	 if (v4_skey->enctype == ENCTYPE_DES3_CBC_SHA1 ||
-	     v4_skey->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
-	     v4_skey->enctype = ENCTYPE_DES3_CBC_RAW;
-	 ret = krb524int_krb_cr_tkt_krb5(v4tkt,
-			       0, /* flags */			     
-			       pname,
-			       pinst,
-			       prealm,
-			       sinp->sin_addr.s_addr,
-			       (char *) v5etkt->session->contents,
-			       lifetime,
-			       /* issue_data */
-			       server_time,
-			       sname,
-			       sinst,
-			       v4_skey);
      }
-
+     else abort();
      krb5_free_enc_tkt_part(context, v5etkt);
      v5tkt->enc_part2 = NULL;
      if (ret == KSUCCESS)

@@ -457,7 +457,8 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     krb5_key_data *		client_key;
     krb5_int32			start;
     krb5_timestamp		timenow;
-    
+    krb5_error_code		decrypt_err;
+
     scratch.data = pa->contents;
     scratch.length = pa->length;
 
@@ -471,6 +472,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 	goto cleanup;
 
     start = 0;
+    decrypt_err = 0;
     while (1) {
 	if ((retval = krb5_dbe_search_enctype(context, client,
 					      &start, enc_data->enctype,
@@ -488,6 +490,8 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 	krb5_free_keyblock_contents(context, &key);
 	if (retval == 0)
 	    break;
+	else
+	    decrypt_err = retval;
     }
 
     if ((retval = decode_krb5_pa_enc_ts(&enc_ts_data, &pa_enc)) != 0)
@@ -513,6 +517,14 @@ cleanup:
     krb5_free_data_contents(context, &enc_ts_data);
     if (pa_enc)
 	free(pa_enc);
+    /*
+     * If we get NO_MATCHING_KEY and decryption previously failed, and
+     * we failed to find any other keys of the correct enctype after
+     * that failed decryption, it probably means that the password was
+     * incorrect.
+     */
+    if (retval == KRB5_KDB_NO_MATCHING_KEY && decrypt_err != 0)
+	retval = decrypt_err;
     return retval;
 }
 
@@ -556,8 +568,10 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 	while (1) {
 	    if (!request_contains_enctype(context,
 					  request, db_etype)) {
-		if (db_etype == ENCTYPE_DES_CBC_CRC)
-                    continue;
+	      if (db_etype == ENCTYPE_DES_CBC_CRC) {
+		  db_etype = ENCTYPE_DES_CBC_MD5;
+		  continue;
+	      }
                 else break;
             }
 
