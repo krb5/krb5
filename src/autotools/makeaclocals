@@ -1,10 +1,14 @@
 #!/bin/sh
 for i in `find . -type d ! -name CVS -print`; do
-	k=`echo $i | sed -e 's/[^/]//g' | sed -e 's/\//..\//g'`
+	k=`echo $i | sed -e 's/[^/]//g' \
+		-e 's/\//..\//g' \
+		-e 's/\(.*\)\/$/.\/\1/'`
 	if test $i != . ; then
 		echo match: $i $k
-
-		echo 'sinclude(['$k'aclocal.m4])' > $i/aclocal.m4
-#		echo 'sinclude(['$k'aclocal.m4])' 
+		cat >$i/aclocal.m4<<EOF
+sinclude([$k/aclocal.m4])dnl
+undefine([AC_BUILDTOP])dnl
+define(AC_BUILDTOP,[$k])dnl
+EOF
 	fi
 done
