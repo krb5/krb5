@@ -3,7 +3,8 @@
     * cc_mslsa.c:  The FAILED() macro only considered an error 
       to be a failure if the value is negative.  ConstructTicketRequest()
       returns positive errors.  Do not use FAILED() to test the result.
-      Also, fix a potential leak of LSA allocated memory.
+      Fix a potential leak of LSA allocated memory.  Fix a leak of 
+      LocalAlloc memory.
 
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 

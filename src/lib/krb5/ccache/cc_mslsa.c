@@ -854,7 +854,7 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
 
   cleanup:
     if ( pTicketRequest )
-        LsaFreeReturnBuffer(pTicketRequest);
+        LocalFree(pTicketRequest);
 
     if (FAILED(Status) || FAILED(SubStatus))
     {
