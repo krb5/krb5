@@ -34,5 +34,13 @@ typedef struct _krb5_address {
 /* macros to determine if a type is a local type */
 #define ADDRTYPE_IS_LOCAL(addrtype) (addrtype & 0x8000)
 
+/* implementation-specific stuff: */
+typedef struct _krb5_fulladdr {
+    krb5_address address;
+    unsigned long port;			/* port, for some address types.
+					   large enough for most protos? */
+} krb5_fulladdr;
+
 #endif /* __KRB5_HOSTADDR__ */
+
 
