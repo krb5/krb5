@@ -30,4 +30,8 @@ extern krb5_principal master_princ;
 extern volatile int signal_requests_exit;
 extern char *dbm_db_name;
 
+extern krb5_keyblock tgs_key;
+extern krb5_kvno tgs_kvno;
+extern krb5_data *tgs_server[4];
+
 #endif /* __KRB5_KDC_EXTERN__ */

@@ -237,6 +237,9 @@ krb5_principal masterkeyname;
 krb5_keyblock *masterkeyblock;
 {
     krb5_error_code retval;
+    int nprincs;
+    krb5_boolean more;
+    krb5_db_entry server;
 
     /* set db name if appropriate */
     if (dbname && (retval = krb5_db_set_name(dbname)))
@@ -259,6 +262,46 @@ krb5_keyblock *masterkeyblock;
 	return(retval);
     }
 
+    /* fetch the TGS key, and hold onto it; this is an efficiency hack */
+
+    /* the master key name here is from the master_princ global,
+       so we can safely share its substructure */
+
+    tgs_server[0] = krb5_princ_realm(masterkeyname);
+    /* tgs_server[1] is init data */
+    tgs_server[2] = krb5_princ_realm(masterkeyname);
+    /* tgs_server[3] is init data (0) */
+
+    nprincs = 1;
+    if (retval = krb5_db_get_principal(tgs_server,
+				       &server, &nprincs,
+				       &more)) {
+	return(retval);
+    }
+    if (more) {
+	krb5_db_free_principal(&server, nprincs);
+	(void) krb5_finish_key(&master_encblock);
+	memset((char *)&master_encblock, 0, sizeof(master_encblock));
+	(void) krb5_db_fini();
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    } else if (nprincs != 1) {
+	krb5_db_free_principal(&server, nprincs);
+	(void) krb5_finish_key(&master_encblock);
+	memset((char *)&master_encblock, 0, sizeof(master_encblock));
+	(void) krb5_db_fini();
+	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+    /* convert server.key into a real key (it may be encrypted
+       in the database) */
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &tgs_key)) {
+	krb5_db_free_principal(&server, nprincs);
+	(void) krb5_finish_key(&master_encblock);
+	memset((char *)&master_encblock, 0, sizeof(master_encblock));
+	(void) krb5_db_fini();
+	return retval;
+    }
+    tgs_kvno = server.kvno;
+    krb5_db_free_principal(&server, nprincs);
     return 0;
 }
 
@@ -271,6 +314,8 @@ closedown_db()
     retval = krb5_finish_key(&master_encblock);
 
     memset((char *)&master_encblock, 0, sizeof(master_encblock));
+
+    memset((char *)tgs_key.contents, 0, tgs_key.length);
 
     /* close database */
     if (retval) {

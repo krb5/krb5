@@ -36,3 +36,8 @@ volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 
 char *dbm_db_name = DEFAULT_DBM_FILE;
 
+krb5_keyblock tgs_key;
+krb5_kvno tgs_kvno;
+
+static krb5_data tgs_name = {sizeof(TGTNAME)-1, TGTNAME};
+krb5_data *tgs_server[4] = {0, &tgs_name, 0, 0};

@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -127,6 +127,7 @@ krb5_ticket **ticket;
     krb5_checksum our_cksum;
     krb5_data *scratch, scratch2;
     krb5_pa_data **tmppa;
+    krb5_boolean freeprinc = FALSE;
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -169,31 +170,35 @@ krb5_ticket **ticket;
 	return KRB5KDC_ERR_POLICY;
     }
 
-    /* XXX perhaps we should optimize the case of the TGS, by having
-       the key always hanging around? */
-
-    nprincs = 1;
-    if (retval = krb5_db_get_principal(apreq->ticket->server,
-				       &server, &nprincs,
-				       &more)) {
-	cleanup_apreq();
-	return(retval);
-    }
-    if (more) {
-	krb5_db_free_principal(&server, nprincs);
-	cleanup_apreq();
-	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-    } else if (nprincs != 1) {
-	krb5_db_free_principal(&server, nprincs);
-	cleanup_apreq();
-	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-    }
-    /* convert server.key into a real key (it may be encrypted
-       in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
-	krb5_db_free_principal(&server, nprincs);
-	cleanup_apreq();
-	return retval;
+    if (krb5_principal_compare(tgs_server, apreq->ticket->server)) {
+	encrypting_key = tgs_key;
+	server.kvno = tgs_kvno;
+	server.principal = tgs_server;
+    } else {
+	nprincs = 1;
+	if (retval = krb5_db_get_principal(apreq->ticket->server,
+					   &server, &nprincs,
+					   &more)) {
+	    cleanup_apreq();
+	    return(retval);
+	}
+	if (more) {
+	    krb5_db_free_principal(&server, nprincs);
+	    cleanup_apreq();
+	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+	} else if (nprincs != 1) {
+	    krb5_db_free_principal(&server, nprincs);
+	    cleanup_apreq();
+	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+	}
+	/* convert server.key into a real key (it may be encrypted
+	   in the database) */
+	if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
+	    krb5_db_free_principal(&server, nprincs);
+	    cleanup_apreq();
+	    return retval;
+	}
+	freeprinc = TRUE;
     }
     who.dbentry = &server;
     who.key = &encrypting_key;
@@ -204,9 +209,11 @@ krb5_ticket **ticket;
 				 (krb5_pointer)&who,
 				 0,	/* no replay cache */
 				 &authdat);
-    krb5_db_free_principal(&server, nprincs);
-    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    free((char *)encrypting_key.contents);
+    if (freeprinc) {
+	krb5_db_free_principal(&server, nprincs);
+	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
+	free((char *)encrypting_key.contents);
+    }
     if (retval) {
 	cleanup_apreq();
 	return(retval);
