@@ -1,3 +1,12 @@
+Tue Oct  8 13:35:56 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* dump.c (load_db): rework the way policy database naming and
+ 	renaming is handled; the code no longer depends on being able to
+ 	specify admin_dbname specifically (which is no longer supported by
+ 	the libraries), uses osa_adb_rename_policy instead of doing it
+ 	directly, and will create a policy db if one does not already
+ 	exist.  Automated testing is needed.
+
 Thu Oct  3 18:17:36 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdb5_util.c (ARG_VAL): case second half of ?: operator to char *
