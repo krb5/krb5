@@ -1,3 +1,8 @@
+Thu Feb  1 15:47:25 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* mcc_retrv.c (ktype_reasonable): removed.
+	(krb5_mcc_retrieve): Accept any enctype unless matching spefic enctype match.
+
 Thu Jan 25 14:50:51 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* mcc_retrv.c (ktype_reasonable): Rename ktype_match

@@ -1,3 +1,7 @@
+Thu Feb  1 15:50:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* scc_retrv.c (krb5_scc_retrieve): Accept any enctype unless doing a specific match.
+
 Thu Jan 25 14:44:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* scc_retrv.c (ktype_reasonable): Rename ktype_match; see fcc  for explanation.
