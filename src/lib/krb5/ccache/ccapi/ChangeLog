@@ -1,3 +1,11 @@
+2000-02-04  Scott McGuire  <smcguire@mit.edu>
+
+	* stdcc.c (krb5_stdcc_initialize):  Removed calls that destroyed
+	   and recreated ccapi_data->NamedCache; instead close
+	   and call create on it again.  (This makes sure the data stays
+	   in the same cache the whole time so external pointers don't
+	   get confused.)
+	
 1999-11-22  Miro Jurisic  <meeroh@mit.edu>
 
 	* stdcc.h, stdcc_util.h: use CCache2.h under MacOS for CCAPI v2

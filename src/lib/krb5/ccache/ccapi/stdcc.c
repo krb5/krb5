@@ -331,16 +331,9 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 
 	ccapi_data = id->data;
 
-	if (!ccapi_data->NamedCache) {
-		err = cc_open(gCntrlBlock, ccapi_data->cache_name,
-			      CC_CRED_V5, 0L, 
-			      &ccapi_data->NamedCache);
-		if (err != CC_NOERROR)
-			ccapi_data->NamedCache = NULL;
-	}
 
 	if (ccapi_data->NamedCache)
-		cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
+		cc_close(gCntrlBlock, &ccapi_data->NamedCache);
 
 	err = cc_create(gCntrlBlock, ccapi_data->cache_name, cName,
 			CC_CRED_V5, 0L, &ccapi_data->NamedCache);
