@@ -22,6 +22,8 @@
  *
  */
 
+#if !defined(_MSDOS)
+
 /*
  * logger.c	- Handle logging functions for those who want it.
  */
@@ -928,3 +930,4 @@ krb5_klog_syslog(priority, format, va_alist)
     va_end(pvar);
     return(retval);
 }
+#endif /* !defined(_MSDOS) */

@@ -1,3 +1,7 @@
+Fri Sep 29 17:06:18 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* logger.c: #ifdef the entire file so it's not built under Windows.
+
 Tue Sep 27 12:00:00 1995    <jrivlin@fusion.com>
 
 	* adm_kw_dec.c (krb5_adm_proto_to_dbent): Routine removed for 
