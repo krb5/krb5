@@ -722,8 +722,7 @@ if test -n "$tcl_conf" ; then
       done
       LIBS="$old_LIBS `eval echo x $TCL_LIB_SPEC $TCL_LIBS | sed 's/^x//'`"
       LDFLAGS="$old_LDFLAGS $TCL_LD_FLAGS"
-      AC_TRY_LINK([#include <tcl.h>
-],[Tcl_CreateInterp ();],
+      AC_TRY_LINK( , [Tcl_CreateInterp ();],
 	tcl_ok_conf=$file
 	tcl_vers_maj=$TCL_MAJOR_VERSION
 	tcl_vers_min=$TCL_MINOR_VERSION
@@ -743,17 +742,19 @@ tcl_lib=no
 if test -n "$tcl_ok_conf" ; then
   . $tcl_ok_conf
   TCL_INCLUDES=
-  if test "$TCL_PREFIX" != /usr ; then
-    for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
-      if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+  for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
+    if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+      if test "$incdir" != "/usr/include" ; then
         TCL_INCLUDES=-I$incdir
-        break
       fi
-    done
-  fi
-  TCL_LIBS="$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS"
-  TCL_LIBPATH=
-  TCL_RPATH=
+      break
+    fi
+  done
+  # Need eval because the first-level expansion could reference
+  # variables like ${TCL_DBGX}.
+  eval TCL_LIBS='"'$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS'"'
+  TCL_LIBPATH="-L$TCL_EXEC_PREFIX/lib"
+  TCL_RPATH=":$TCL_EXEC_PREFIX/lib"
   CPPFLAGS="$old_CPPFLAGS $TCL_INCLUDES"
   AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
   if test $tcl_header=no; then
@@ -857,10 +858,15 @@ if test "$with_tcl" != no ; then
   if test $tcl_lib = no ; then
     if test "$with_tcl" != try ; then
       AC_KRB5_TCL_TRYOLD
-dnl      AC_MSG_ERROR(Could not find Tcl)
     else
       AC_MSG_WARN(Could not find Tcl which is needed for some tests)
     fi
+  fi
+fi
+# If "yes" or pathname, error out if not found.
+if test "$with_tcl" != no -a "$with_tcl" != try ; then
+  if test "$tcl_header $tcl_lib" != "yes yes" ; then
+    AC_MSG_ERROR(Could not find Tcl)
   fi
 fi
 ])dnl

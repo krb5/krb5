@@ -1,3 +1,9 @@
+2002-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp: Work around tcl 8.4's (incorrect?) output EOL
+	translation.
+	[pullup from trunk]
+
 2000-05-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* api.2/chpass-principal-v2.exp (test200): Expect an additional

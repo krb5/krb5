@@ -1,3 +1,9 @@
+2002-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp (rsh_test): Explicitly call stop_rsh_daemon upon pass
+	for "encrypted rsh" test, to avoid zombies.
+	[pullup from trunk]
+
 2002-02-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* standalone.exp (doit): Don't use "file delete", it isn't in Tcl

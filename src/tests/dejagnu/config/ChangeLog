@@ -1,3 +1,21 @@
+2002-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (stop_kerberos_daemons): Kill, expect eof, wait, in
+	that order.  Avoids delivery of multiple signals (HUP+TERM) to KDC
+	daemons when shutting down.
+
+	* default.exp (start_kerberos_daemons): Fix to use "tail -f" to
+	check for setup messages from daemons; this avoids a few race
+	conditions.
+
+	[pullups from trunk]
+
+2002-11-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): When standalone, delete
+	KDC replay cache before starting it up.
+	[pullup from trunk]
+
 2002-02-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (modify_principal): Call check_exit_status.
