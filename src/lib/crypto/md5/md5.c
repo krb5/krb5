@@ -76,29 +76,37 @@ static unsigned char PADDING[64] = {
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
 /* ROTATE_LEFT rotates x left n bits */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#define ROTATE_LEFT(x, n) (((x) << (n)) & 0xffffffff | ((x) >> (32-(n))))
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4 */
 /* Rotation is separate from addition to prevent recomputation */
 #define FF(a, b, c, d, x, s, ac) \
   {(a) += F ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
+   (a) &= 0xffffffff; \
   }
 #define GG(a, b, c, d, x, s, ac) \
   {(a) += G ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
+   (a) &= 0xffffffff; \
   }
 #define HH(a, b, c, d, x, s, ac) \
   {(a) += H ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
+   (a) &= 0xffffffff; \
   }
 #define II(a, b, c, d, x, s, ac) \
   {(a) += I ((b), (c), (d)) + (x) + (krb5_ui_4)(ac); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s)); \
    (a) += (b); \
+   (a) &= 0xffffffff; \
   }
 
 /* The routine krb5_MD5Init initializes the message-digest context

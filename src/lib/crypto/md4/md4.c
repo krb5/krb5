@@ -68,18 +68,21 @@ static unsigned char PADDING[64] = {
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 
 /* ROTATE_LEFT rotates x left n bits */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#define ROTATE_LEFT(x, n) (((x) << (n)) & 0xffffffff | ((x) >> (32-(n))))
 
 /* FF, GG and HH are MD4 transformations for rounds 1, 2 and 3 */
 /* Rotation is separate from addition to prevent recomputation */
 #define FF(a, b, c, d, x, s) \
   {(a) += F ((b), (c), (d)) + (x); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s));}
 #define GG(a, b, c, d, x, s) \
   {(a) += G ((b), (c), (d)) + (x) + UL(013240474631); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s));}
 #define HH(a, b, c, d, x, s) \
   {(a) += H ((b), (c), (d)) + (x) + UL(015666365641); \
+   (a) &= 0xffffffff; \
    (a) = ROTATE_LEFT ((a), (s));}
 
 void

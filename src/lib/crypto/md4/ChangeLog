@@ -1,3 +1,7 @@
+Tue Oct 28 16:36:15 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* md4.c: Fix to deal with types longer than 32 bits.
+
 Sat Feb 22 18:53:00 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in
