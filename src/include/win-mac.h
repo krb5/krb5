@@ -240,7 +240,7 @@ HINSTANCE get_lib_instance(void);
 #define HAVE_SRAND
 #define NO_PASSWORD
 #define HAVE_LABS
-#define ENOMEM -1
+#define ENOMEM 12
 #define ANSI_STDIO
 #ifndef _SIZET
 typedef unsigned long size_t;
