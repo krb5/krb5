@@ -187,7 +187,6 @@ kerberos5_send(ap)
 	krb5_ccache ccache;
 	krb5_creds creds;		/* telnet gets session key from here */
 	krb5_creds * new_creds = 0;
-	extern krb5_flags krb5_kdc_default_options;
 	int ap_opts;
 
 #ifdef	ENCRYPTION
@@ -201,7 +200,7 @@ kerberos5_send(ap)
                 return(0);
         }
 
-	if (r = krb5_cc_default(telnet_context, &ccache)) {
+	if ((r = krb5_cc_default(telnet_context, &ccache))) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: could not get default ccache\r\n");
 		}
@@ -209,8 +208,9 @@ kerberos5_send(ap)
 	}
 
 	memset((char *)&creds, 0, sizeof(creds));
-	if (r = krb5_sname_to_principal(telnet_context, RemoteHostName, "host",
-				        KRB5_NT_SRV_HST, &creds.server)) {
+	if ((r = krb5_sname_to_principal(telnet_context, RemoteHostName,
+					 "host", KRB5_NT_SRV_HST,
+					 &creds.server))) {
 	    if (auth_debug_mode)
 		printf("Kerberos V5: error while constructing service name: %s\r\n", error_message(r));
 	    return(0);
@@ -229,7 +229,8 @@ kerberos5_send(ap)
 	    krb5_princ_set_realm(telnet_context, creds.server, &rdata);
 	}
 
-	if (r = krb5_cc_get_principal(telnet_context, ccache, &creds.client)) {
+	if ((r = krb5_cc_get_principal(telnet_context, ccache,
+				       &creds.client))) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on principal (%s)\r\n",
 				error_message(r));
@@ -238,8 +239,8 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-	if (r = krb5_get_credentials(telnet_context, 0,
-				     ccache, &creds, &new_creds)) {
+	if ((r = krb5_get_credentials(telnet_context, 0,
+				      ccache, &creds, &new_creds))) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on credentials(%s)\r\n",
 			       error_message(r));
@@ -257,7 +258,7 @@ kerberos5_send(ap)
 	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
 	    
-    if (r = krb5_auth_con_init(telnet_context, &auth_context)) {
+    if ((r = krb5_auth_con_init(telnet_context, &auth_context))) {
 	if (auth_debug_mode) {
 	    printf("Kerberos V5: failed to init auth_context (%s)\r\n",
 		   error_message(r));
@@ -380,7 +381,8 @@ kerberos5_is(ap, data, cnt)
 		}
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 		    /* do ap_rep stuff here */
-		    if (r = krb5_mk_rep(telnet_context, auth_context, &outbuf))
+		    if ((r = krb5_mk_rep(telnet_context, auth_context,
+					 &outbuf)))
 			goto errout;
 
 		    Data(ap, KRB_RESPONSE, outbuf.data, outbuf.length);
@@ -506,8 +508,8 @@ kerberos5_reply(ap, data, cnt)
 		    inbuf.length = cnt;
 		    inbuf.data = (char *)data;
 
-		    if (r = krb5_rd_rep(telnet_context, auth_context, &inbuf,
-					&reply)) {
+		    if ((r = krb5_rd_rep(telnet_context, auth_context, &inbuf,
+					 &reply))) {
 			printf("[ Mutual authentication failed: %s ]\r\n",
 			       error_message(r));
 			auth_send_retry();
@@ -638,37 +640,51 @@ kerberos5_forward(ap)
 {
     krb5_error_code r;
     krb5_ccache ccache;
-    krb5_principal client;
+    krb5_principal client = 0;
+    krb5_principal server = 0;
     krb5_data forw_creds;
 
-    if (r = krb5_cc_default(telnet_context, &ccache)) {
+    forw_creds.data = 0;
+
+    if ((r = krb5_cc_default(telnet_context, &ccache))) {
 	if (auth_debug_mode) 
 	    printf("Kerberos V5: could not get default ccache - %s\r\n",
 		   error_message(r));
 	return;
     }
 
-    if (r = krb5_cc_get_principal(telnet_context, ccache, &client)) {
+    if ((r = krb5_cc_get_principal(telnet_context, ccache, &client))) {
 	if (auth_debug_mode) 
 	    printf("Kerberos V5: could not get default principal - %s\r\n",
 		   error_message(r));
-	return;
+	goto cleanup;
     }
 
-    if (r = krb5_auth_con_genaddrs(telnet_context, auth_context, net,
-			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR)) {
+    if ((r = krb5_sname_to_principal(telnet_context, RemoteHostName, "host",
+				     KRB5_NT_SRV_HST, &server))) {
+	if (auth_debug_mode) 
+	    printf("Kerberos V5: could not make server principal - %s\r\n",
+		   error_message(r));
+	goto cleanup;
+    }
+    
+
+    if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, net,
+			    KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR))) {
 	if (auth_debug_mode)
 	    printf("Kerberos V5: could not gen local full address - %s\r\n",
 		    error_message(r));
-	return;
+	goto cleanup;
     }
 
-    if (r = get_for_creds(telnet_context, auth_context, RemoteHostName, client,
-			  forward_flags & OPTS_FORWARDABLE_CREDS, &forw_creds)){
+    if ((r = krb5_fwd_tgt_creds(telnet_context, auth_context, 0, client,
+				server, ccache,
+				forward_flags & OPTS_FORWARDABLE_CREDS,
+				&forw_creds))) {
 	if (auth_debug_mode) 
 	    printf("Kerberos V5: error getting forwarded creds - %s\r\n",
 	  	   error_message(r));
-	return;
+	goto cleanup;
     }
     
     /* Send forwarded credentials */
@@ -679,6 +695,15 @@ kerberos5_forward(ap)
 	if (auth_debug_mode)
 	    printf("Forwarded local Kerberos V5 credentials to server\r\n");
     }
+    
+cleanup:
+    if (client)
+	krb5_free_principal(telnet_context, client);
+    if (server)
+	krb5_free_principal(telnet_context, server);
+    if (forw_creds.data)
+	free(forw_creds.data);
+    krb5_cc_close(telnet_context, ccache);
 }
 #endif	/* FORWARD */
 

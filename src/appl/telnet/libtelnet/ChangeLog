@@ -1,3 +1,12 @@
+Tue Jan  9 22:53:58 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* forward.c (get_for_creds): Removed no longer used function.
+
+	* kerberos5.c (kerberos5_forward): Convert from using
+		get_for_creds() from forward.c to using the official
+		library routine, krb5_fwd_tgt_creds().  Misc. lint
+		cleanups. 
+
 Sun Nov 12 04:48:41 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* forward.c: set KRB5_DEFAULT_LIFE to 10 hours, not 8.
