@@ -809,6 +809,9 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
               exit(1);
        }
 
+       if ( cc_source)
+	 krb5_cc_close(ksu_context, cc_source);
+
 	if (cmd){
 		if ((source_uid == 0) || (source_uid == target_uid )){
 			exec_cmd = cmd;

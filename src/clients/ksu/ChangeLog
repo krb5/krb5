@@ -1,3 +1,7 @@
+Thu Aug  8 12:31:30 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (main): Close source cache before executing command.
+
 Sat May 25 16:11:55 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in: Use aname db libs.
