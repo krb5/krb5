@@ -1,3 +1,8 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in: Remove the kdb5 and db libraries from the
+	common application list but list them for server applications.
+
 2000-07-01  Tom Yu  <tlyu@mit.edu>
 
 	* lib.in: Fix up lib build rules to deal properly (hopefuly) with
