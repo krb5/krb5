@@ -58,7 +58,7 @@ first two inner bytes, which indicate the token type.  The token
 
 */
 
-static int der_length_size(length)
+static unsigned int der_length_size(length)
      int length;
 {
    if (length < (1<<7))
@@ -131,7 +131,7 @@ static int der_read_length(buf, bufsize)
 
 /* returns the length of a token, given the mech oid and the body size */
 
-int g_token_size(mech, body_size)
+unsigned int g_token_size(mech, body_size)
      gss_OID mech;
      unsigned int body_size;
 {

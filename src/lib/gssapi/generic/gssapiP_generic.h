@@ -153,7 +153,7 @@ int g_make_string_buffer (const char *str, gss_buffer_t buffer);
 
 int g_copy_OID_set (const gss_OID_set_desc * const in, gss_OID_set *out);
 
-int g_token_size (gss_OID mech, unsigned int body_size);
+unsigned int g_token_size (gss_OID mech, unsigned int body_size);
 
 void g_make_token_header (gss_OID mech, unsigned int body_size,
 			  unsigned char **buf, int tok_type);

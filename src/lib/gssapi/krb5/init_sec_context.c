@@ -241,7 +241,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     krb5_data *checksum_data = NULL;
     unsigned char *ptr;
     unsigned char *t;
-    int tlen;
+    unsigned int tlen;
 
 
     ap_req.data = 0;

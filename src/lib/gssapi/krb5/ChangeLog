@@ -1,3 +1,7 @@
+2003-02-09  Ezra Peisach  <epeisach@bu.edu>
+
+	* init_sec_context.c (make_ap_req_v1): Unsigned/signed cleanup.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
