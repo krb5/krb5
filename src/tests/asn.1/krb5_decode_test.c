@@ -22,19 +22,19 @@ void main()
   type ref, *var;\
   retval = constructor(&ref);\
   if(retval){\
-    com_err(strcat("making sample ",typestring),retval,"");\
+    com_err("krb5_decode_test", retval, "while making sample %s", typestring);\
     exit(1);\
   }
     
 #define decode_run(typestring,description,encoding,decoder,comparator)\
     retval = krb5_data_hex_parse(&code,encoding);\
     if(retval){\
-      com_err(strcat("parsing ",strcat(typestring,description)),retval,"");\
+      com_err("krb5_decode_test", retval, "while parsing %s", typestring);\
       exit(1);\
     }\
     retval = decoder(&code,&var);\
     if(retval){\
-      com_err(strcat("decoding ",strcat(typestring,description)),retval,"");\
+      com_err("krb5_decode_test", retval, "while decoding %s", typestring);\
     }\
     assert(comparator(&ref,var),typestring);\
     printf("%s\n",description)

@@ -26,19 +26,19 @@ void main()
 #define setup(value,type,typestring,constructor)\
   retval = constructor(&(value));\
   if(retval){\
-    com_err(strcat("making sample ",typestring),retval,"");\
+    com_err("krb5_encode_test", retval, "while making sample %s", typestring);\
     exit(1);\
   }
     
 #define encode_run(value,type,typestring,description,encoder)\
   retval = encoder(&(value),&(code));\
   if(retval){\
-    com_err(strcat("encoding ",typestring),retval,"");\
+    com_err("krb5_encode_test", retval,"while encoding %s", typestring);\
     exit(1);\
   }\
   retval = asn1_krb5_data_unparse(code,&(code_string));\
   if(retval){\
-    com_err(strcat("unparsing ",typestring),retval,"");\
+    com_err("krb5_encode_test", retval ,"while unparsing %s", typestring);\
     exit(1);\
   }\
   ktest_destroy_data(&code);\

@@ -1,3 +1,9 @@
+Tue Oct  4 14:32:39 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_decode_test.c (setup, decode_run):
+	* krb5_encode_test.c (setup, encode_run): Don't call strcat on a
+		constant string --- you can't modify a read only string!
+
 Thu Sep 29 23:01:58 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executabes when libraries change
