@@ -1,3 +1,9 @@
+Tue Nov 26 20:41:31 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* commands.c: Remove explicit declaration of inet_addr, and
+	declare INADDR_NONE to be 0xffffffff again, but mask off the lower
+	32 bits while doing the compare.
+
 Sat Nov 23 00:33:58 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* commands.c (tn): Patch from mycroft@mit.edu for Alpha NetBSD.

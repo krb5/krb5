@@ -44,6 +44,9 @@
 #endif	/* defined(unix) */
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif /* HAVE_ARPA_INET_H */
 #ifdef	CRAY
 #include <fcntl.h>
 #endif	/* CRAY */
@@ -90,7 +93,7 @@
 #define MAXDNAME 256 /*per the rfc*/
 #endif
 #ifndef INADDR_NONE
-#define INADDR_NONE -1
+#define INADDR_NONE 0xffffffff
 #endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
@@ -2355,8 +2358,6 @@ ayt_status()
 }
 #endif
 
-unsigned long inet_addr();
-
     int
 tn(argc, argv)
     int argc;
@@ -2446,7 +2447,7 @@ tn(argc, argv)
     } else {
 #endif
 	temp = inet_addr(hostp);
-	if (temp != INADDR_NONE) {
+	if (temp & 0xffffffff != INADDR_NONE) {
 	    sin.sin_addr.s_addr = temp;
 	    sin.sin_family = AF_INET;
 	    (void) strcpy(_hostname, hostp);  
