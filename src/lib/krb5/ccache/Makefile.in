@@ -5,7 +5,9 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = stdio file memory
 
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio \
-		-I$(srcdir)$(S)ccapi
+		-I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
+
+##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=ccache
@@ -37,37 +39,32 @@ all-unix:: all-libobjs
 
 all-windows:: subdirs $(OBJFILE) 
 
-##DOSsubdirs:: file\file.lst memory\file.lst # ccapi\file.lst
-##DOS
-##DOSfile\file.lst::
-##DOS	cd file
-##DOS	@echo Making in krb5\ccache\file
-##DOS	-$(MAKE) -$(MFLAGS)
-##DOS	cd ..
+##DOS##subdirs:: file\file.lst memory\file.lst ccapi\file.lst
+##DOS##
+##DOS##file\file.lst::
+##DOS##	cd file
+##DOS##	@echo Making in krb5\ccache\file
+##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	cd ..
 
-##DOSmemory\file.lst::
-##DOS	cd memory
-##DOS	@echo Making in krb5\ccache\memory
-##DOS	-$(MAKE) -$(MFLAGS)
-##DOS	cd ..
+##DOS##memory\file.lst::
+##DOS##	cd memory
+##DOS##	@echo Making in krb5\ccache\memory
+##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	cd ..
 
-# ##DOSccapi\file.lst::
-# ##DOS	cd ccapi
-# ##DOS	@echo Making in krb5\ccache\ccapi
-# ##DOS	-$(MAKE) -$(MFLAGS)
-# ##DOS	cd ..
+##DOS##ccapi\file.lst::
+##DOS##	cd ccapi
+##DOS##	@echo Making in krb5\ccache\ccapi
+##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	cd ..
 
-# ##DOS$(OBJFILE): $(OBJS) file\file.lst memory\file.lst ccapi\file.lst
-# ##DOS	$(RM) $(OBJFILE)
-# ##WIN16##	$(CP) nul: $(OBJFILE)
-# ##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ *.obj file\*.obj memory\*.obj \
-# ##WIN32##		ccapi\*.obj > $(OBJFILE)
-
-##DOS$(OBJFILE): $(OBJS) file\file.lst memory\file.lst 
-##DOS	$(RM) $(OBJFILE)
+##DOS##$(OBJFILE): $(OBJS) file\file.lst memory\file.lst ccapi\file.lst
+##DOS##	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ *.obj file\*.obj memory\*.obj \
-##WIN32##		> $(OBJFILE)
+##WIN32##		ccapi\*.obj > $(OBJFILE)
+
 
 clean-unix:: clean-libobjs
 

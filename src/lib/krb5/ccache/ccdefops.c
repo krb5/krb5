@@ -27,7 +27,7 @@
 
 #include "k5-int.h"
 
-#if defined(macintosh) /* || defined(_MSDOS) || defined(_WIN32) */
+#if defined(macintosh) || defined(_MSDOS) || defined(_WIN32)
 
 /* Macs and PCs use the shared, memory based credentials cache */
 #include "stdcc.h" /* from ccapi subdir */
