@@ -27,13 +27,16 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__)
+	#include <KerberosSupport/KerberosConditionalMacros.h>
+	
+	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
+		#include <Kerberos5/win-mac.h>
+	#endif
 #endif
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include <win-mac.h>
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -329,6 +332,19 @@ typedef	int		gss_cred_usage_t;
 
 #ifdef __cplusplus
 extern "C" {
+#endif /* __cplusplus */
+
+/* Macintoh CFM-68K magic incantation */
+#if PRAGMA_IMPORT
+#pragma import on
+#endif
+
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=mac68k
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(push, 2)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack(2)
 #endif
 
 GSS_DLLIMP OM_uint32 KRB5_CALLCONV gss_acquire_cred
@@ -684,9 +700,24 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 		 gss_name_t *		/* output_name */
 	));
 
+/* Macintosh CFM-68K magic incantation */
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=reset
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(pop)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack()
+#endif
+
+#ifdef PRAGMA_IMPORT_OFF
+#pragma import off
+#elif PRAGMA_IMPORT
+#pragma import reset
+#endif
+
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 /* XXXX these are not part of the GSSAPI C bindings!  (but should be) */
 
@@ -699,10 +730,5 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 
 /* XXXX This is a necessary evil until the spec is fixed */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
 
 #endif /* _GSSAPI_H_ */
