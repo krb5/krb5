@@ -20,6 +20,7 @@ static char rcsid_krb_dbm_c[] =
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
 #include <krb5/sysincl.h>
+#include <stdio.h>
 
 #define KRB5_DBM_MAX_RETRY 5
 
@@ -642,6 +643,66 @@ char *db_name;
 	}
     }
     return retval;
+}
+
+/*
+ * Destroy the database.  Zero's out all of the files, just to be sure.
+ */
+krb5_error_code
+destroy_file_suffix(dbname, suffix)
+	char	*dbname;
+	char	*suffix;
+{
+	char	*filename;
+	struct stat	statb;
+	int		nb,fd,i;
+	char		buf[BUFSIZ];
+
+	filename = gen_dbsuffix(dbname, suffix);
+	if (stat(filename, &statb)) {
+		free(filename);
+		if (errno == ENOENT)
+			return(0);
+		else
+			return(errno);
+	}
+	if ((fd = open(filename, O_RDWR, 0)) < 0) {
+		free(filename);
+		return(errno);
+	}
+	i = 0;
+	while (i < statb.st_size) {
+		nb = write(fd, buf, BUFSIZ);
+		if (nb < 0) {
+			free(filename);
+			return(errno);
+		}
+		i += nb;
+	}
+	fsync(fd);
+	close(fd);
+
+	if (unlink(filename)) {
+		free(filename);
+		return(errno);
+	}
+	free(filename);
+	return(0);
+}
+
+krb5_error_code
+krb5_dbm_db_destroy(dbname)
+	char	*dbname;
+{
+	krb5_error_code	retval;
+
+	if (retval = destroy_file_suffix(dbname, ".pag"))
+		return(retval);
+	if (retval = destroy_file_suffix(dbname, ".dir"))
+		return(retval);
+	if (retval = destroy_file_suffix(dbname, ".ok"))
+		return(retval);
+	return(0);
 }
 
 /*
