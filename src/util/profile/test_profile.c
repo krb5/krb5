@@ -17,6 +17,7 @@ int main(argc, argv)
     long	retval;
     const char	*filenames[2];
     char	**values, **cpp;
+    const char	**names;
     
     filenames[0] = argv[1];
     filenames[1] = 0;
@@ -28,7 +29,8 @@ int main(argc, argv)
 	com_err(argv[0], retval, "while initializing profile");
 	exit(1);
     }
-    retval = profile_get_values(profile, argv+2, &values);
+    names = (const char **) argv+2;
+    retval = profile_get_values(profile, names, &values);
     if (retval) {
 	com_err(argv[0], retval, "while getting values");
 	exit(1);
