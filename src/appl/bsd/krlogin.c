@@ -168,7 +168,6 @@ struct sockaddr_in local, foreign;
 struct termios deftty;
 #endif
 
-krb5_sigtype exit();
 char	*getenv();
 
 char	*name;
@@ -222,6 +221,12 @@ krb5_sigtype	lostpeer();
 #if __STDC__
 int setsignal(int sig, krb5_sigtype (*act)());
 #endif
+
+/* to allow exits from signal handlers, without conflicting declarations */
+krb5_sigtype exit_handler() {
+  exit(1);
+}
+
 
 /*
  * The following routine provides compatibility (such as it is)
@@ -774,8 +779,8 @@ doit(oldmask)
     (void) signal(SIGINT, SIG_IGN);
 #endif
 
-    setsignal(SIGHUP, exit);
-    setsignal(SIGQUIT, exit);
+    setsignal(SIGHUP, exit_handler);
+    setsignal(SIGQUIT, exit_handler);
 
     child = fork();
     if (child == -1) {
