@@ -1,3 +1,8 @@
+2003-07-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* acquire_cred.c (krb5_gss_register_acceptor_identity): Allocate
+	enough memory to include the null at the end of the keytab char *.
+
 2003-07-17  Tom Yu  <tlyu@mit.edu>
 
 	* gssapiP_krb5.h: Delete kg_release_defcred(); it's no longer

@@ -92,7 +92,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
 	free(krb5_gss_keytab);
 
     len = strlen(keytab);
-    krb5_gss_keytab = malloc(len);
+    krb5_gss_keytab = malloc(len + 1);
     if (krb5_gss_keytab == NULL)
 	return GSS_S_FAILURE;
 
