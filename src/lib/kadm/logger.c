@@ -151,14 +151,13 @@ static struct log_entry	def_log_entry;
  * These macros define any special processing that needs to happen for
  * devices.  For unix, of course, this is hardly anything.
  */
-#if	defined(unix) || defined(__unix__)
 #define	DEVICE_OPEN(d, m)	fopen(d, m)
 #define	CONSOLE_OPEN(m)		fopen("/dev/console", m)
 #define	DEVICE_PRINT(f, m)	((fprintf(f, m) >= 0) ? 		\
 				 (fprintf(f, "\r\n"), fflush(f), 0) :	\
 				 -1)
 #define	DEVICE_CLOSE(d)		fclose(d)
-#endif	/* unix */
+
 
 /*
  * klog_com_err_proc()	- Handle com_err(3) messages as specified by the

@@ -1,3 +1,12 @@
+Tue Jun 13 14:37:25 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* logger.c: Don't check to make sure unix is defined for
+        DEVICE_OPEN et al.  Currently, there are no special cases where
+        special handling is required; if they are, then they should be
+        checked for, and the generic case taken if no special case fits.
+        The previous behavior broke under AIX.
+
+
 Sun Jun 11 09:24:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove $(UNIX_OBJS)
