@@ -56,7 +56,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-D depth] [-k enctype] [-M mkeyname]\n");
 
     exit(status);
 }
@@ -102,7 +102,7 @@ char *argv[];
     krb5_context context;
     krb5_error_code retval;
     char *dbname = 0;
-    int keytypedone = 0;
+    int enctypedone = 0;
     register krb5_cryptosystem_entry *csentry;
     int num_to_check;
     char principal_string[BUFSIZ];
@@ -143,8 +143,8 @@ char *argv[];
 	    cur_realm = optarg;
 	    break;
 	case 'k':
-	    master_keyblock.keytype = atoi(optarg);
-	    keytypedone++;
+	    master_keyblock.enctype = atoi(optarg);
+	    enctypedone++;
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
@@ -161,16 +161,16 @@ char *argv[];
 
     if (!(num_to_check && suffix)) usage(progname, 1);
 
-    if (!keytypedone)
-	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
+    if (!enctypedone)
+	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
-    if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-		"while setting up keytype %d", master_keyblock.keytype);
+    if (!valid_enctype(master_keyblock.enctype)) {
+	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
+		"while setting up enctype %d", master_keyblock.enctype);
 	exit(1);
     }
 
-    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)
@@ -255,7 +255,7 @@ check_princ(context, str_princ)
 	goto out;
     }
 
-    retval = krb5_string_to_key(context, &master_encblock, master_keyblock.keytype,
+    retval = krb5_string_to_key(context, &master_encblock, master_keyblock.enctype,
 				&pwd_key,
 				&pwd,
 				&salt);
@@ -281,10 +281,10 @@ check_princ(context, str_princ)
 	goto errout;
     }
 
-    if ((pwd_key.keytype != db_key.keytype) ||
+    if ((pwd_key.enctype != db_key.enctype) ||
 	(pwd_key.length != db_key.length)) {
       fprintf (stderr, "\tKey types do not agree (%d expected, %d from db)\n",
-	       pwd_key.keytype, db_key.keytype);
+	       pwd_key.enctype, db_key.enctype);
 errout:
       krb5_db_free_principal(context, &kdbe, nprincs);
       return(-1);
@@ -391,7 +391,7 @@ set_dbname_help(context, pname, dbname)
 	    return(1);
 	}
 	retval = krb5_string_to_key(context, &master_encblock, 
-				    master_keyblock.keytype, &master_keyblock,
+				    master_keyblock.enctype, &master_keyblock,
 				    &pwd, &scratch);
 	if (retval) {
 	    com_err(pname, retval,
