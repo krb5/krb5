@@ -67,6 +67,7 @@ This file documents how to install the @value{RELEASE} release of
 * Realm Configuration Decisions::  
 * Building Kerberos V5::        
 * Installing Kerberos V5::      
+* Upgrading Existing Kerberos V5 Installations::  
 * Bug Reports for Kerberos V5::  
 * Files::                       
 @end menu
@@ -311,7 +312,7 @@ to additional slaves.
 
 @include build.texinfo
 
-@node Installing Kerberos V5, Bug Reports for Kerberos V5, Building Kerberos V5, Top
+@node Installing Kerberos V5, Upgrading Existing Kerberos V5 Installations, Building Kerberos V5, Top
 @chapter Installing @value{PRODUCT}
 
 The sections of this chapter describe procedures for installing
@@ -372,7 +373,6 @@ procedure is based on that recommendation.
 * Add Kerberos Principals to the Database::  
 * Limit Access to the KDCs::    
 * Switching Master and Slave KDCs::  
-* Upgrading existing Master and Slave KDCs to the current release::
 @end menu
 
 @node Install the Master KDC, Install the Slave KDCs, Installing KDCs, Installing KDCs
@@ -698,7 +698,7 @@ command:
 @b{kadmin:} ktadd host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}
 @b{kadmin: Entry for principal host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
      kvno 1, encryption type DES-CBC-CRC added to keytab
-     WRFILE:/etc/v5srvtab.
+     WRFILE:/etc/krb5.keytab.
 kadmin:}
 @end group
 @end smallexample
@@ -935,7 +935,7 @@ eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind
 @end group
 @end smallexample
 
-@node Switching Master and Slave KDCs,  Upgrading existing Master and Slave KDCs to the current release, Limit Access to the KDCs, Installing KDCs
+@node Switching Master and Slave KDCs,  , Limit Access to the KDCs, Installing KDCs
 @subsection Switching Master and Slave KDCs
 
 You may occasionally want to use one of your slave KDCs as the master.
@@ -980,86 +980,6 @@ Switch the CNAMEs of the old and new master KDCs.  (If you don't do
 this, you'll need to change the @code{krb5.conf} file on every client
 machine in your Kerberos realm.)
 @end enumerate
-
-@node Upgrading existing Master and Slave KDCs to the current release, , Switching Master and Slave KDCs, Installing KDCs
-@subsection Upgrading existing Master and Slave KDCs to the current release
-
-If you already have an existing Kerberos database that you created with
-a prior release of Kerberos 5, you can upgrade it to work with the
-current release with the @code{kdb5_util} command.  As of Kerberos 5
-version 1.0, this upgrade process is only necessary if you are using a
-Kerberos database created with Kerberos 5 beta 6 or earlier; newer
-installations can continue to be used without modification.  The process
-for upgrading a Master KDC involves the following steps (the lines
-beginning with => indicate a continuation of the previous line):
-
-@enumerate
-
-@item Stopping your current KDC and administration
-server processes, if any.
-
-@item Dumping your existing Kerberos database to an ASCII file with 
-@code{kdb5_edit}'s ``dump'' command:
-
-@smallexample
-@group
-@b{shell%} kdb5_edit -r @value{PRIMARYREALM} -R 'dump_db' > 
-@result{} @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
-@b{shell%}
-@end group
-@end smallexample
-
-@item If you were using OpenV*Secure or AXXiON*Authenticate, dumping your
-policy database to an ASCII file with the @code{ovsec_adm_export}
-command:
-
-@smallexample
-@group
-@b{shell%} ovsec_adm_export -r @value{PRIMARYREALM} > 
-@result{} @value{ROOTDIR}/var/krb5kdc/old-adb-dump
-@b{shell%}
-@end group
-@end smallexample
-
-@item Creating a new Master KDC installation (@xref{Install the Master
-KDC}).  If you have a stash file for your current database, choose any
-new master password but then copy your existing stash file to the
-location specified by your kdc.conf; if you do not have a stash file for
-your current database, you must choose the same master password.
-
-@item Load your old Kerberos database into the new system with
-@code{kdb5_util}'s ``load'' command:
-
-@smallexample
-@group
-@b{shell%} kdb5_util load @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
-@b{shell%}
-@end group
-@end smallexample
-
-@item If you were using OpenV*Secure or AXXiON*Authenticate, merging
-your policy database with @code{kdb5_util}'s ``load'' command with the
-``-update'' option:
-
-@smallexample
-@group
-@b{shell%} kdb5_util load -update @value{ROOTDIR}/var/krb5kdc/old-adb-dump
-@b{shell%}
-@end group
-@end smallexample
-
-@end enumerate
-
-The process for upgrading a Slave KDC is simpler.  All you have to do is
-make sure that the stash file on the Slave KDC is correct, stop the old
-server processes on the Slave KDC, install the new server binaries, and
-re-start the server processes.  The Slave KDC database will be upgraded
-automatically when the next propagation is run.  Note that if you
-changed your master key when creating your new Master KDC database, you
-will have to run a Slave KDC propagation before you can restart the
-server processes on the Slave KDC itself; otherwise, the new stash file
-that you create on the slave will not match the old database that exists
-until the propagation occurs, and the server processes will not start.
 
 @node Installing and Configuring UNIX Client Machines, UNIX Application Servers, Installing KDCs, Installing Kerberos V5
 @section Installing and Configuring UNIX Client Machines
@@ -1238,17 +1158,15 @@ telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
 @subsection The Keytab File
 
 All Kerberos server machines need a @dfn{keytab} file, called
-@code{/etc/v5srvtab},@footnote{The keytab was called a @dfn{srvtab} in
-Kerberos V4.  The @code{v5srvtab} file has not been renamed to reflect
-the change in terminology.} to authenticate to the KDC.  The keytab file
-is an encrypted, local, on-disk copy of the host's key.  The keytab
-file, like the stash file (@ref{Create the Database}) is a potential
-point-of-entry for a break-in, and if compromised, would allow
-unrestricted access to its host.  The keytab file should be readable
-only by root, and should exist only on the machine's local disk.  The
-file should not be part of any backup of the machine, unless access to
-the backup data is secured as tightly as access to the machine's root
-password itself.
+@code{/etc/krb5.keytab} (@xref{Upgrading the application servers}), to
+authenticate to the KDC.  The keytab file is an encrypted, local,
+on-disk copy of the host's key.  The keytab file, like the stash file
+(@ref{Create the Database}) is a potential point-of-entry for a
+break-in, and if compromised, would allow unrestricted access to its
+host.  The keytab file should be readable only by root, and should exist
+only on the machine's local disk.  The file should not be part of any
+backup of the machine, unless access to the backup data is secured as
+tightly as access to the machine's root password itself.
 
 In order to generate a keytab for a host, the host must have a principal
 in the Kerberos database.  The procedure for adding hosts to the
@@ -1272,13 +1190,13 @@ trillium.@value{PRIMARYDOMAIN}):
 @result{} pop/trillium.@value{PRIMARYDOMAIN}
 @b{kadmin: Entry for principal host/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
 kvno 3, encryption type DES-CBC-CRC added to keytab
-WRFILE:/etc/v5srvtab.
+WRFILE:/etc/krb5.keytab.
 kadmin: Entry for principal ftp/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
 kvno 3, encryption type DES-CBC-CRC added to keytab
-WRFILE:/etc/v5srvtab.
+WRFILE:/etc/krb5.keytab.
 kadmin: Entry for principal pop/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
 kvno 3, encryption type DES-CBC-CRC added to keytab
-WRFILE:/etc/v5srvtab.
+WRFILE:/etc/krb5.keytab.
 kadmin5:} quit
 @b{trillium%}
 @end group
@@ -1310,15 +1228,124 @@ root access to specific Kerberos principals by placing those principals
 in the file @code{.k5login} in root's home directory.
 
 We recommend that backups of secure machines exclude the keytab file
-(@code{/etc/v5srvtab}).  If this is not possible, the backups should at
-least be done locally, rather than over a network, and the backup tapes
-should be physically secured.
+(@code{/etc/krb5.keytab}).  If this is not possible, the backups should
+at least be done locally, rather than over a network, and the backup
+tapes should be physically secured.
 
 Finally, the keytab file and any programs run by root, including the
 @value{PRODUCT} binaries, should be kept on local disk.  The keytab file
 should be readable only by root.
 
-@node Bug Reports for Kerberos V5, Files, Installing Kerberos V5, Top
+@node Upgrading Existing Kerberos V5 Installations, Bug Reports for Kerberos V5, Installing Kerberos V5, Top
+@chapter Upgrading Existing @value{PRODUCT} Installations
+
+@menu
+* Upgrading existing Master and Slave KDCs to the current release::  
+* Upgrading the application servers::  
+@end menu
+
+@node Upgrading existing Master and Slave KDCs to the current release, Upgrading the application servers, Upgrading Existing Kerberos V5 Installations, Upgrading Existing Kerberos V5 Installations
+@section Upgrading existing Master and Slave KDCs to the current release
+
+If you already have an existing Kerberos database that you created with
+a prior release of Kerberos 5, you can upgrade it to work with the
+current release with the @code{kdb5_util} command.  As of Kerberos 5
+version 1.0, this upgrade process is only necessary if you are using a
+Kerberos database created with Kerberos 5 beta 6 or earlier; newer
+installations can continue to be used without modification.  The process
+for upgrading a Master KDC involves the following steps (the lines
+beginning with => indicate a continuation of the previous line):
+
+@enumerate
+
+@item Stopping your current KDC and administration
+server processes, if any.
+
+@item Dumping your existing Kerberos database to an ASCII file with 
+@code{kdb5_edit}'s ``dump'' command:
+
+@smallexample
+@group
+@b{shell%} kdb5_edit -r @value{PRIMARYREALM} -R 'dump_db' > 
+@result{} @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
+@b{shell%}
+@end group
+@end smallexample
+
+@item If you were using OpenV*Secure or AXXiON*Authenticate, dumping your
+policy database to an ASCII file with the @code{ovsec_adm_export}
+command:
+
+@smallexample
+@group
+@b{shell%} ovsec_adm_export -r @value{PRIMARYREALM} > 
+@result{} @value{ROOTDIR}/var/krb5kdc/old-adb-dump
+@b{shell%}
+@end group
+@end smallexample
+
+@item Creating a new Master KDC installation (@xref{Install the Master
+KDC}).  If you have a stash file for your current database, choose any
+new master password but then copy your existing stash file to the
+location specified by your kdc.conf; if you do not have a stash file for
+your current database, you must choose the same master password.
+
+@item Load your old Kerberos database into the new system with
+@code{kdb5_util}'s ``load'' command:
+
+@smallexample
+@group
+@b{shell%} kdb5_util load @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
+@b{shell%}
+@end group
+@end smallexample
+
+@item If you were using OpenV*Secure or AXXiON*Authenticate, merging
+your policy database with @code{kdb5_util}'s ``load'' command with the
+``-update'' option:
+
+@smallexample
+@group
+@b{shell%} kdb5_util load -update @value{ROOTDIR}/var/krb5kdc/old-adb-dump
+@b{shell%}
+@end group
+@end smallexample
+
+@end enumerate
+
+The process for upgrading a Slave KDC is simpler.  All you have to do is
+make sure that the stash file on the Slave KDC is correct, stop the old
+server processes on the Slave KDC, install the new server binaries, and
+re-start the server processes.  The Slave KDC database will be upgraded
+automatically when the next propagation is run.  Note that if you
+changed your master key when creating your new Master KDC database, you
+will have to run a Slave KDC propagation before you can restart the
+server processes on the Slave KDC itself; otherwise, the new stash file
+that you create on the slave will not match the old database that exists
+until the propagation occurs, and the server processes will not start.
+
+@node Upgrading the application servers,  , Upgrading existing Master and Slave KDCs to the current release, Upgrading Existing Kerberos V5 Installations
+@section Upgrading the application servers
+
+The default keytab name has changed from @code{/etc/v5srvtab} to
+@code{/etc/krb5.keytab}.  You should rename the old keytab files on all
+of your application servers when you update their server binaries.
+Alternatively, you may add a relation to the library configuration file
+to override the new name, for example:
+
+@smallexample
+@group
+[libdefaults]
+    default_keytab_name = /etc/v5srvtab
+@end group
+@end smallexample
+
+The keytab name defaulted to /etc/v5srvtab in prior releases of Kerberos
+V5.  It was called a @dfn{srvtab} in Kerberos V4.  The @code{v5srvtab}
+file has been renamed to @code{krb5.keytab} to reflect the change in
+terminology.
+
+@node Bug Reports for Kerberos V5, Files, Upgrading Existing Kerberos V5 Installations, Top
 @chapter Bug Reports for @value{PRODUCT}
 @include bug-report.texinfo
 

@@ -1,3 +1,12 @@
+Fri Nov 15 00:06:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo (The Keytab File): 
+	(Extract Host Keytabs for the KDCs): 
+	(The Keytab File): 
+	(Some Advice about Secure Hosts): Update filename to krb5.keytab.
+	(Upgrading the application servers): Add node to explain keytab
+	rename.
+
 Wed Nov 13 15:17:22 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* install.texinfo (kdc.conf): remove profile relation from
