@@ -10,6 +10,13 @@
 	krb5_fcc_read_authdata): Use it, and fix other overflow checks.
 	(my_fopen): Support non-Mac environments.
 	(krb5_fcc_open_file) [USE_STDIO]: Always use my_fopen.
+	(NO_FILE): New macro.  All functions changed to test or assign it
+	rather than -1 or (FILE*)NULL.
+	(krb5_fcc_read_keyblock, krb5_fcc_read_data): Rewrite bounds
+	check.
+	(BINARY_MODE): Always define.
+	(setvbuf) [!HAVE_SETVBUF]: Define as macro using setbuf.
+
 	* cc_stdio.c: Deleted.
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated.
 	* ccdefops.c (krb5_cc_dfl_ops) [!USE_CCAPI]: Always use
