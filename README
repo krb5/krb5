@@ -337,10 +337,14 @@ suggestions.
 Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
 
+Thanks to Nalin Dahyabhai and Chris Evans of RedHat for locating and
+providing patches for numerous buffer overruns.
+
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danillo Almeida, Jay Berkenbilt, Richard Basch, John
 Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt Hancher, Sam
-Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Barry Jaspan, Geoffrey
-King, John Kohl, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul
-Park, Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
-Schiller, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
+Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Miroslav Jurisic,
+Barry Jaspan, Geoffrey King, John Kohl, Peter Litwack, Scott McGuire,
+Kevin Mitchell, Cliff Neuman, Paul Park, Ezra Peisach, Chris
+Provenzano, Ken Raeburn, Jon Rochlis, Jeff Schiller, Brad Thompson,
+Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
