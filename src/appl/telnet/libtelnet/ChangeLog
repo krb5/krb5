@@ -1,3 +1,37 @@
+Tue Jun 20 13:59:43 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* strrchr.c: NO_STRING_H -> HAVE_STRING_H
+
+	* strftime.c: NO_STRING_H -> HAVE_STRING_H
+
+	* strerror.c: NO_STRING_H -> HAVE_STRING_H
+
+	* strdup.c: NO_STRING_H -> HAVE_STRING_H
+
+	* strchr.c: NO_STRING_H -> HAVE_STRING_H
+
+	* strcasecmp.c: NO_STRING_H -> HAVE_STRING_H
+
+	* spx.c: NO_STRING_H -> HAVE_STRING_H
+
+	* rsaencpwd: NO_STRING_H -> HAVE_STRING_H
+
+	* read_password.c: NO_STRING_H -> HAVE_STRING_H
+
+	* mem.c: NO_STRING_H -> HAVE_STRING_H
+
+	* krb4encpwd.c: NO_STRING_H -> HAVE_STRING_H
+
+	* kerberos5.c: NO_STRING_H -> HAVE_STRING_H
+
+	* kerberos.c: NO_STRING_H -> HAVE_STRING_H
+
+	* encrypt.c: NO_STRING_H -> HAVE_STRING_H
+
+	* auth.c: NO_STRING_H -> HAVE_STRING_H for consistency
+
+	* configure.in: added missing tests for string.h, stdlib.h
+
 Sat Jun 10 22:59:42 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* forward.c, kerberos5.c: krb5_auth_context redefinitions

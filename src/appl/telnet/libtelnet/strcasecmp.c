@@ -36,10 +36,10 @@
 #endif
 
 #include <sys/cdefs.h>
-#ifdef NO_STRING_H
-#include <strings.h>
-#else
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 /* based on @(#)strcasecmp.c	8.1 (Berkeley) 6/4/93 */

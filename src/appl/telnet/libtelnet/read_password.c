@@ -50,10 +50,10 @@
 #if	defined(RSA_ENCPWD) || defined(KRB4_ENCPWD)
 
 #include <stdio.h>
-#ifdef	NO_STRING_H
-#include <strings.h>
-#else
+#ifdef	HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <sys/ioctl.h>
 #include <signal.h>

@@ -44,10 +44,10 @@
 #else
 #define TM_YEAR_BASE	1900	/* from <tzfile.h> */
 #endif
-#ifdef	NO_STRING_H
-#include <strings.h>
-#else
+#ifdef	HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 static char *afmt[] = {

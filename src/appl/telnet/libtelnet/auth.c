@@ -63,10 +63,10 @@
 #ifdef	__STDC__
 #include <stdlib.h>
 #endif
-#ifdef	NO_STRING_H
-#include <strings.h>
-#else
+#ifdef	HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include "encrypt.h"

@@ -48,10 +48,10 @@ typedef int size_t;
 
 #include <sys/types.h>
 #include <sys/cdefs.h>
-#ifdef	NO_STRING_H
-#include <strings.h>
-#else
+#ifdef	HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <limits.h>
 
