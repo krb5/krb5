@@ -129,12 +129,34 @@ OLDDECLARG(krb5_kvno, vno)
 OLDDECLARG(krb5_keyblock **, key)
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
+    char	*sname;
 
-    if (vno != whoisit->kvno)
+    if (vno != whoisit->kvno) {
+	if (!krb5_unparse_name(principal, &sname)) {
+	    syslog(LOG_ERR,
+		   "TGS_REQ: BAD KEY VNO: server='%s', expecting %d, got %d",
+		   sname, vno, whoisit->kvno);
+	    free(sname);
+	}
 	return KRB5KRB_AP_ERR_BADKEYVER;
+    }
     return(krb5_copy_keyblock(whoisit->key, key));
 }
 
+/*
+ * Returns TRUE if the kerberos principal is the name of a Kerberos ticket
+ * service.
+ */
+krb5_boolean krb5_is_tgs_principal(principal)
+	krb5_principal	principal;
+{
+	if ((krb5_princ_component(principal, 0)->length ==
+	     KRB5_TGS_NAME_SIZE) &&
+	    (!memcmp(krb5_princ_component(principal, 0)->data,
+		     KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
+		return TRUE;
+	return FALSE;
+}
 
 /*
  * given authentication data (provides seed for checksum), calculate checksum
@@ -182,7 +204,7 @@ krb5_tkt_authent **ret_authdat;
     krb5_checksum our_cksum;
     krb5_data *scratch = 0, scratch1, scratch2;
     krb5_pa_data **tmppa;
-    krb5_boolean local_client = TRUE;
+    krb5_boolean foreign_server = FALSE;
     krb5_enc_tkt_part *ticket_enc;
 
     our_cksum.contents = 0;
@@ -201,7 +223,7 @@ krb5_tkt_authent **ret_authdat;
 
     if (retval = decode_krb5_ap_req(&scratch2, &apreq))
 	return retval;
-
+    
     if (!(authdat = (krb5_tkt_authent *)malloc(sizeof(*authdat)))) {
 	retval = ENOMEM;
 	goto cleanup;
@@ -212,6 +234,7 @@ krb5_tkt_authent **ret_authdat;
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
+	syslog(LOG_INFO, "TGS_REQ: SESSION KEY or MUTUAL");
 	retval = KRB5KDC_ERR_POLICY;
 	apreq->ticket = 0;		/* Caller will free the ticket */
 	goto cleanup;
@@ -238,7 +261,14 @@ krb5_tkt_authent **ret_authdat;
 	memcmp(krb5_princ_realm(apreq->ticket->server)->data,
 	       krb5_princ_realm(tgs_server)->data,
 	       krb5_princ_realm(tgs_server)->length))
-	local_client = FALSE;
+	foreign_server = TRUE;
+    {
+	char	*tmp, *tmp1;
+
+	krb5_unparse_name(apreq->ticket->server, &tmp);
+	krb5_unparse_name(tgs_server, &tmp1);
+	syslog(LOG_INFO, "server: %s, tgs_server: %s", tmp, tmp1);
+    }
 
     retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
 				 from->address,
@@ -267,15 +297,20 @@ krb5_tkt_authent **ret_authdat;
     /* now rearrange output from rd_req_decoded */
 
     /* make sure the client is of proper lineage (see above) */
-    if (!local_client) {
+    if (foreign_server) {
 	krb5_data *tkt_realm = krb5_princ_realm(ticket_enc->client);
 	krb5_data *tgs_realm = krb5_princ_realm(tgs_server);
-	if (tkt_realm->length != tgs_realm->length ||
-	    memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
+	if (tkt_realm->length == tgs_realm->length ||
+	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
+	    syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
 	    retval = KRB5KDC_ERR_POLICY;
 	    goto cleanup;
 	}
+    }
+    if (!authdat->authenticator->checksum) {
+	    retval = KRB5KRB_AP_ERR_INAPP_CKSUM; 
+	    goto cleanup;
     }
     our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {
@@ -354,7 +389,7 @@ krb5_kvno *kvno;
 
 	    krb5_db_free_principal(&server, nprincs);
 	    if (!krb5_unparse_name(ticket->server, &sname)) {
-		syslog(LOG_ERR, "TGS_REQ: can't find key for '%s'",
+		syslog(LOG_ERR, "TGS_REQ: UNKNOWN SERVER: server='%s'",
 		       sname);
 		free(sname);
 	    }
@@ -865,6 +900,7 @@ krb5_data *data;
     int lastlevel = 1000;       /* last level seen */
     int length;			/* various lengths */
     int tag;			/* tag number */
+    unsigned char savelen;      /* saved length of our field */
 
     /* we assume that the first identifier/length will tell us 
        how long the entire stream is. */
@@ -892,9 +928,17 @@ krb5_data *data;
 	        if (tag == field) {
 		    /* return length and data */ 
 		    astream++;
+		    savelen = *astream;
 		    if ((data->length = asn1length(&astream)) < 0) {
 		        return(-1);
 	 	    }
+		    /* if the field length is indefinite, we will have to subtract two
+                       (terminating octets) from the length returned since we don't want
+                       to pass any info from the "wrapper" back.  asn1length will always return
+                       the *total* length of the field, not just what's contained in it */ 
+		    if ((savelen & 0xff) == 0x80) {
+		      data->length -=2 ;
+		    }
 		    data->data = (char *)astream;
 		    return(0);
 	        } else if (tag <= classes) {
@@ -915,7 +959,7 @@ krb5_data *data;
 	}
     }
     return(-1);
-}
+}	
 
 /*
  * Routines that validate a TGS request; checks a lot of things.  :-)
@@ -957,23 +1001,55 @@ char **status;
 
     /*
      * Verify that the server principal in authdat->ticket is correct
-     * (either the ticket granting service or the service we're
-     * looking for)
+     * (either the ticket granting service or the service that was
+     * originally requested)
      */
-    if (krb5_principal_compare(ticket->server, tgs_server)) {
-	/* Server must allow TGS based issuances */
-	if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
-	    *status = "TGT BASED NOT ALLOWED";
-	    return(KDC_ERR_POLICY);
-	}
-    } else {
-	if (!krb5_principal_compare(ticket->server,
-				    request->server)) {
-	    *status = "BAD SERVER IN TKT";
-	    return KRB5KRB_AP_ERR_NOT_US;
-	}
+    if (!krb5_principal_compare(ticket->server, request->server)) {
+	    /*
+	     * OK, we need to validate the krbtgt service in the ticket.
+	     *
+	     * The krbtgt service is of the form:
+	     * 		krbtgt/realm-A@realm-B
+	     *
+	     * Realm A is the "server realm"; the realm of the
+	     * server of the requested ticket must match this realm.
+	     * Of course, it should be a realm serviced by this KDC.
+	     *
+	     * Realm B is the "client realm"; this is what should be
+	     * added to the transited field.  (which is done elsewhere)
+	     */
+	    char 	*destination_realm;
+
+	    /* Make sure there are two components... */
+	    if (krb5_princ_size(ticket->server) != 2) {
+		    *status = "BAD TGS SERVER LENGTH";
+		    return KRB_AP_ERR_NOT_US;
+	    }
+	    /* ...that the first component is krbtgt... */
+	    if (!krb5_is_tgs_principal(ticket->server)) {
+		    *status = "BAD TGS SERVER NAME";
+		    return KRB_AP_ERR_NOT_US;
+	    }
+	    /* ...and that the second component matches the server realm... */
+	    if ((krb5_princ_component(ticket->server, 1)->length !=
+		 krb5_princ_realm(request->server)->length) ||
+		memcmp(krb5_princ_component(ticket->server, 1)->data,
+		       krb5_princ_realm(request->server)->data,
+		       krb5_princ_realm(request->server)->length)) {
+		    *status = "BAD TGS SERVER INSTANCE";
+		    return KRB_AP_ERR_NOT_US;
+	    }
+	    /* XXX add check that second component must match locally
+	     * supported realm?
+	     */
+
+	    /* Server must allow TGS based issuances */
+	    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
+		    *status = "TGT BASED NOT ALLOWED";
+		    return(KDC_ERR_POLICY);
+	    }
     }
-    
+	    
     /* TGS must be forwardable to get forwarded or forwardable ticket */
     if ((isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
 	 isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) &&

@@ -58,5 +58,5 @@ char *dbm_db_name = DEFAULT_KDB_FILE;
 krb5_keyblock tgs_key;
 krb5_kvno tgs_kvno;
 
-static krb5_data tgs_data[3] = { {sizeof(TGTNAME)-1, TGTNAME}, {0, 0}};
+static krb5_data tgs_data[3] = { {KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME}, {0, 0}};
 krb5_principal_data tgs_server_struct = { { 0, 0}, tgs_data, 2, 0};

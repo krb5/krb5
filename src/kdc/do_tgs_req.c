@@ -92,7 +92,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_last_req_entry *nolrarray[2], nolrentry;
 /*    krb5_address *noaddrarray[1]; */
     krb5_enctype useetype;
-    int	errcode;
+    int	errcode, errcode2;
     register int i;
     int firstpass = 1;
     char	*status = 0;
@@ -115,11 +115,32 @@ krb5_data **response;			/* filled in with a response packet */
     if (!fromstring)
 	fromstring = "<unknown>";
 
+    if (errcode = krb5_unparse_name(request->server, &sname)) {
+	status = "UNPARSING SERVER";
+	goto cleanup;
+    }
+
     errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat);
     if (req_authdat)
 	header_ticket = req_authdat->ticket;
-    if (errcode)
+
+    if (header_ticket && header_ticket->enc_part2 &&
+	(errcode2 = krb5_unparse_name(header_ticket->enc_part2->client,
+				      &cname))) {
+	status = "UNPARSING CLIENT";
+	errcode = errcode2;
 	goto cleanup;
+    }
+
+    if (errcode) {
+	status = "PROCESS_TGS";
+	goto cleanup;
+    }
+
+    if (!header_ticket) {
+	status="UNEXPECTED NULL in header_ticket";
+	goto cleanup;
+    }
     
     /*
      * We've already dealt with the AP_REQ authentication, so we can
@@ -127,12 +148,6 @@ krb5_data **response;			/* filled in with a response packet */
      * decrypted with the session key.
      */
 
-    if (errcode = krb5_unparse_name(header_ticket->enc_part2->client, &cname))
-	goto cleanup;
-
-    if (errcode = krb5_unparse_name(request->server, &sname))
-	goto cleanup;
-    
     authtime = header_ticket->enc_part2->times.authtime;
 
     /* XXX make sure server here has the proper realm...taken from AP_REQ
@@ -554,8 +569,12 @@ tgt_again:
     
 cleanup:
     if (status)
-        syslog(LOG_INFO, "TGS_REQ%c %s: authtime %d, host %s, %s for %s",
-	       secondary_ch, status, authtime, fromstring, cname, sname);
+        syslog(LOG_INFO, "TGS_REQ%c %s: authtime %d, host %s, %s for %s%s%s",
+	       secondary_ch, status, authtime, fromstring,
+	       cname ? cname : "<unknown client>",
+	       sname ? sname : "<unknown server>",
+	       errcode ? ", " : "",
+	       errcode ? error_message(errcode) : "");
     if (errcode) {
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
@@ -564,6 +583,7 @@ cleanup:
 	retval = prepare_error_tgs(request, header_ticket, errcode,
 				   fromstring, response);
     }
+    
     if (request)
 	krb5_free_kdc_req(request);
     if (req_authdat)
@@ -578,7 +598,7 @@ cleanup:
 	krb5_free_keyblock(session_key);
     if (newtransited)
 	free(enc_tkt_reply.transited.tr_contents.data); 
-    
+
     return retval;
 }
 
@@ -604,8 +624,10 @@ krb5_data **response;
     }
     errpkt.error = error;
     errpkt.server = request->server;
-    errpkt.client = ticket ? ticket->enc_part2->client : 0; /* may not know
-							       the name */
+    if (ticket && ticket->enc_part2)
+	errpkt.client = ticket->enc_part2->client;
+    else
+	errpkt.client = 0;
     errpkt.text.length = strlen(error_message(error+KRB5KDC_ERR_NONE))+1;
     if (!(errpkt.text.data = malloc(errpkt.text.length))) {
 	if (ticket)
