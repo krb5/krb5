@@ -1,5 +1,7 @@
 2001-04-25  Ezra Peisach  <epeisach@mit.edu>
 
+	* test.c: Always include stdlib.h
+
 	* Makefile.in: Add lclint support.
 
 	* dyn.h: Lclint annotate functions.
