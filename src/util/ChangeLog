@@ -1,3 +1,8 @@
+2004-10-31  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Rework quoting for RELTAIL check.  Don't check RELTAIL if
+	doing a "-current" snapshot.
+
 2004-09-24  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Rework somewhat to handle patchlevel.h being the new
