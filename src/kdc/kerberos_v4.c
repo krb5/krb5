@@ -2,18 +2,19 @@
  * $Source$
  * $Author$
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988,1991 by the Massachusetts Institute
  * of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  */
 
 #ifdef KRB4
-#ifndef lint
-static char rcsid_kerberos_c[] =
+#if !defined(lint) && !defined(SABER)
+static char rcsid_kerberos_v4_c[] =
 "$Id$";
-#endif  /* lint */
+#endif	/* !lint & !SABER */
 
 
 #ifdef __STDC__
@@ -22,7 +23,6 @@ static char rcsid_kerberos_c[] =
 #include <varargs.h>
 #endif
 
-#include <mit-copyright.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -412,13 +412,13 @@ krb5_data **resp;
     client_sockaddr.sin_port	= client_fulladdr->port;
     bcopy( addr->contents, &client_sockaddr.sin_addr, 
 		     sizeof client_sockaddr.sin_addr);
-    bzero( &client_sockaddr.sin_zero, sizeof client_sockaddr.sin_zero);
+    bzero( client_sockaddr.sin_zero, sizeof client_sockaddr.sin_zero);
 
     /* convert v5 packet structure to v5's.
      * this copy is gross, but necessary:
      */
     v4_pkt.length = pkt->length;
-    bcopy( pkt->data, &v4_pkt.dat, pkt->length);
+    bcopy( pkt->data, v4_pkt.dat, pkt->length);
 
     kerberos_v4( &client_sockaddr, &v4_pkt);
     *resp = response;
