@@ -4,6 +4,7 @@
 all:: all-$(WHAT)
 
 all-unix::
+all-mac::
 
 all-windows::
 	copy $(BUILDTOP)\util\et\com_err.h .
@@ -15,6 +16,7 @@ all-windows::
 clean:: clean-$(WHAT)
 
 clean-unix::
+clean-mac::
 
 clean-windows::
 	$(RM) com_err.h

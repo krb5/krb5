@@ -29,19 +29,6 @@
 
 #include "k5-config.h"
 
-#ifndef KRB5_SYSTYPES__
-#define KRB5_SYSTYPES__
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#else /* HAVE_SYS_TYPES_H */
-typedef unsigned long 	u_long;
-typedef unsigned int	u_int;
-typedef unsigned short	u_short;
-typedef unsigned char	u_char;
-#endif /* HAVE_SYS_TYPES_H */
-#endif /* KRB5_SYSTYPES__ */
-
 #include "base-defs.h"
 #include "hostaddr.h"
 
