@@ -111,6 +111,11 @@ krb5_error_code krb5_mk_req_extended
 		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_data * ));
+krb5_error_code krb5_rd_req_simple
+	PROTOTYPE((const krb5_data *,
+		   const krb5_principal,
+		   const krb5_address *,
+		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req
 	PROTOTYPE((const krb5_data *,
 		   const krb5_principal,
