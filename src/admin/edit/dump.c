@@ -126,7 +126,7 @@ void update_ok_file (file_name)
 
     if ((file_ok = (char *)malloc(strlen(file_name) + strlen(ok) + 1))
 	== NULL) {
-	fprintf(stderr, "kdb_util: out of memory.\n");
+	fprintf(stderr, "%s: out of memory.\n", progname);
 	(void) fflush (stderr);
 	perror ("malloc");
 	exit (1);
