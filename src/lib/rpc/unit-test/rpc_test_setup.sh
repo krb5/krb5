@@ -12,14 +12,6 @@ DUMMY=${CLNTTCL=$TESTDIR/util/ovsec_kadm_clnt_tcl}
 DUMMY=${TCLUTIL=$TESTDIR/tcl/util.t}; export TCLUTIL
 DUMMY=${MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
-# If it's set, set it to true
-if test x$VERBOSE_TEST = x; then
-	VERBOSE=true
-# Otherwise, set it to false
-else
-	VERBOSE=false
-fi
-
 if $VERBOSE; then
 	REDIRECT=
 else

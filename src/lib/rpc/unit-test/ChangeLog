@@ -1,3 +1,7 @@
+Thu Nov 14 15:27:05 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* rpc_test_setup.sh: VERBOSE is now inherited from env-setup.sh
+
 Wed Nov 13 10:00:05 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean): Remove test programs and objects.
