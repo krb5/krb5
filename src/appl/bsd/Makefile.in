@@ -21,8 +21,8 @@ rsh: krsh.o kcmd.o forward.o
 install::
 	$(INSTALL_PROGRAM) rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
 
-rcp: krcp.o kcmd.o forward.o
-	$(CC) $(CFLAGS) -o rcp krcp.o kcmd.o forward.o $(KLIB) $(LIBS)
+rcp: krcp.o kcmd.o forward.o $(LIBOBJS)
+	$(CC) $(CFLAGS) -o rcp krcp.o kcmd.o forward.o $(LIBOBJS) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
@@ -45,8 +45,8 @@ krlogind: krlogind.o logutil.o kcmd.o forward.o
 install::
 	$(INSTALL_PROGRAM) krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
 
-login.krb5: login.o logutil.o $(SETENVOBJ)
-	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(KLIB) $(LIBS)
+login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS)
+	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
