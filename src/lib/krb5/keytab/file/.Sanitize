@@ -43,6 +43,7 @@ ktf_util.c
 ktf_wops.c
 ktf_wreslv.c
 ktfile.h
+ser_ktf.c
 
 Things-to-lose:
 

@@ -55,7 +55,7 @@ krb5_ktfile_wresolve(context, name, id)
     data->openf = 0;
 
     (*id)->data = (krb5_pointer)data;
-
+    (*id)->magic = KV5M_KEYTAB;
     return(0);
 }
 

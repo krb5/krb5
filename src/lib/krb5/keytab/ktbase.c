@@ -104,3 +104,89 @@ krb5_kt_resolve (context, name, ktid)
     free(pfx);
     return KRB5_KT_UNKNOWN_TYPE;
 }
+
+/*
+ * Routines to deal with externalizingt krb5_keytab.
+ *	krb5_keytab_size();
+ *	krb5_keytab_externalize();
+ *	krb5_keytab_internalize();
+ */
+static krb5_error_code krb5_keytab_size
+	KRB5_PROTOTYPE((krb5_context, krb5_pointer, size_t *));
+static krb5_error_code krb5_keytab_externalize
+	KRB5_PROTOTYPE((krb5_context, krb5_pointer, krb5_octet **, size_t *));
+static krb5_error_code krb5_keytab_internalize
+	KRB5_PROTOTYPE((krb5_context,krb5_pointer *, krb5_octet **, size_t *));
+
+/*
+ * Serialization entry for this type.
+ */
+static const krb5_ser_entry krb5_keytab_ser_entry = {
+    KV5M_KEYTAB,			/* Type			*/
+    krb5_keytab_size,			/* Sizer routine	*/
+    krb5_keytab_externalize,		/* Externalize routine	*/
+    krb5_keytab_internalize		/* Internalize routine	*/
+};
+
+static krb5_error_code
+krb5_keytab_size(kcontext, arg, sizep)
+    krb5_context	kcontext;
+    krb5_pointer	arg;
+    size_t		*sizep;
+{
+    krb5_error_code	kret;
+    krb5_keytab		keytab;
+    krb5_ser_handle	shandle;
+
+    kret = EINVAL;
+    if ((keytab = (krb5_keytab) arg) &&
+	keytab->ops &&
+	(shandle = (krb5_ser_handle) keytab->ops->serializer) &&
+	shandle->sizer)
+	kret = (*shandle->sizer)(kcontext, arg, sizep);
+    return(kret);
+}
+
+static krb5_error_code
+krb5_keytab_externalize(kcontext, arg, buffer, lenremain)
+    krb5_context	kcontext;
+    krb5_pointer	arg;
+    krb5_octet		**buffer;
+    size_t		*lenremain;
+{
+    krb5_error_code	kret;
+    krb5_keytab		keytab;
+    krb5_ser_handle	shandle;
+
+    kret = EINVAL;
+    if ((keytab = (krb5_keytab) arg) &&
+	keytab->ops &&
+	(shandle = (krb5_ser_handle) keytab->ops->serializer) &&
+	shandle->externalizer)
+	kret = (*shandle->externalizer)(kcontext, arg, buffer, lenremain);
+    return(kret);
+}
+
+static krb5_error_code
+krb5_keytab_internalize(kcontext, argp, buffer, lenremain)
+    krb5_context	kcontext;
+    krb5_pointer	*argp;
+    krb5_octet		**buffer;
+    size_t		*lenremain;
+{
+    krb5_error_code	kret;
+    krb5_ser_handle	shandle;
+
+    kret = EINVAL;
+    if ((shandle = (krb5_ser_handle) krb5_kt_dfl_ops.serializer) &&
+	shandle->internalizer)
+	kret = (*shandle->internalizer)(kcontext, argp, buffer, lenremain);
+    return(kret);
+}
+
+krb5_error_code
+krb5_ser_keytab_init(kcontext)
+    krb5_context	kcontext;
+{
+    return(krb5_register_serializer(kcontext, &krb5_keytab_ser_entry));
+}

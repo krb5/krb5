@@ -22,7 +22,8 @@ SRCS= \
 	$(srcdir)/ktf_defops.c \
 	$(srcdir)/ktf_g_name.c \
 	$(srcdir)/ktf_remove.c \
-	$(srcdir)/ktf_util.c
+	$(srcdir)/ktf_util.c \
+	$(srcdir)/ser_ktf.c
 
 OBJS = \
 	ktf_add.$(OBJEXT)	\
@@ -38,7 +39,8 @@ OBJS = \
 	ktf_ops.$(OBJEXT)	\
 	ktf_wops.$(OBJEXT)	\
 	ktf_wreslv.$(OBJEXT)	\
-	ktf_defops.$(OBJEXT)
+	ktf_defops.$(OBJEXT)	\
+	ser_ktf.$(OBJEXT)
 
 all:: all-$(WHAT)
 

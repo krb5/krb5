@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "ktfile.h"
 
+extern krb5_ser_entry krb5_ktfile_ser_entry;
 krb5_kt_ops krb5_kt_dfl_ops = {
     0,
     "FILE", 	/* Prefix -- this string should not appear anywhere else! */
@@ -39,4 +40,5 @@ krb5_kt_ops krb5_kt_dfl_ops = {
     krb5_ktfile_end_get,
     0,
     0,
+    (void *) &krb5_ktfile_ser_entry
 };

@@ -1,3 +1,11 @@
+
+Tue Aug 29 13:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in, .Sanitize, ser_ktf.c - Add new module to support
+		serialization of [WR]FILE keytabs.
+	* ktf_{defops,ops,wops}.c - Add serializer entry.
+	* ktf_{resolv,wreslv}.c - Set magic number in successfully resolved
+		keytab.
+
 Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
 
         * ktf_util.c: Pass fds to krb5_lock_file() and krb5_unlock_file()

@@ -1,3 +1,9 @@
+
+Tue Aug 29 13:37:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* ktbase.c - Add routines to deal with externalizing krb5_keytab.  These
+		search the registered keytab types for a match and dispatch
+		via the serializer handle.
+
 Fri Aug  4 21:48:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* read_servi.c (krb5_kt_read_service_key): add more parens to shut
