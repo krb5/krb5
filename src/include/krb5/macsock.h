@@ -208,6 +208,9 @@ getmyipaddr PROTOTYPE ((void));
 extern int
 getsockname PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
 
+extern int
+getpeername PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
+    
 /* Bypass a few other functions we don't really need. */
 
 #define	getservbyname(name,prot)	0

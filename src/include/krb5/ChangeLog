@@ -1,3 +1,7 @@
+Tue Apr 30 15:03:34 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* macsock.h: Added prototype for getpeername().
+
 Thu Mar 28 17:57:04 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* AddressXlation.h: Updated to use latest versions from the Apple's
