@@ -257,7 +257,7 @@ return_padata(context, client, request, reply,
     krb5_pa_data **		send_pa;
     krb5_pa_data *		pa = 0;
     krb5_preauth_systems *	ap;
-    int 			size;
+    int 			size = 0;
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
 	if (ap->return_padata)
