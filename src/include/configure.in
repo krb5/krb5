@@ -5,7 +5,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_CONST
-AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy)
+AC_CHECK_FUNCS(strdup labs setvbuf memmove bcopy inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo inet_ntoa inet_aton)
 HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T

@@ -302,6 +302,7 @@ typedef struct _krb5_address {
 #define	ADDRTYPE_XNS		0x0006
 #define	ADDRTYPE_ISO		0x0007
 #define ADDRTYPE_DDP		0x0010
+#define ADDRTYPE_INET6		0x0018
 /* not yet in the spec... */
 #define ADDRTYPE_ADDRPORT	0x0100
 #define ADDRTYPE_IPPORT		0x0101
