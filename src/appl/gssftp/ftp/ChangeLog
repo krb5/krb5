@@ -1,3 +1,9 @@
+Mon Jul 29 22:37:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* secure.c: Do not assume sizeof(long) = 4 for sending lengths OTW
+
+	* configure.in: Determine sizeof short, int, long for secure.c
+
 Fri Jul 26 20:55:12 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* secure.c (secure_putbyte): Reset nout to zero on errorso we

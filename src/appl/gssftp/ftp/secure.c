@@ -35,6 +35,18 @@ extern gss_ctx_id_t gcontext;
 extern char *sys_errlist[];
 #endif
 
+#if (SIZEOF_SHORT == 4)
+typedef unsigned short ftp_uint32;
+typedef short ftp_int32;
+#elif (SIZEOF_INT == 4)
+typedef unsigned int ftp_uint32;
+typedef int ftp_int32;
+#elif (SIZEOF_LONG == 4)
+typedef unsigned long ftp_uint32;
+typedef long ftp_int32;
+#endif
+
+
 extern struct	sockaddr_in hisaddr;
 extern struct	sockaddr_in myaddr;
 extern int	level;
@@ -213,8 +225,8 @@ unsigned int nbyte;
 {
   static char *outbuf;		/* output ciphertext */
 	static unsigned int bufsize;	/* size of outbuf */
-	long length;
-	u_long net_len;
+	ftp_int32 length;
+	ftp_uint32 net_len;
 
 	/* Other auth types go here ... */
 #ifdef KERBEROS
@@ -295,7 +307,7 @@ int fd;
 	/* number of chars in ucbuf, pointer into ucbuf */
 	static unsigned int nin, bufp;
 	int kerror;
-	u_long length;
+	ftp_uint32 length;
 
 	if (nin == 0) {
 		if ((kerror = looping_read(fd, &length, sizeof(length)))
