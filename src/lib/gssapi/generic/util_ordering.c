@@ -247,7 +247,7 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 #include <time.h>
 #define LOGPATH "/tmp/gsslog"
 void _log(const char *fmt, ...) {
-#if 1
+#if 0
     static FILE *logf;
     va_list x;
     if (logf == 0) {
