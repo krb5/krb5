@@ -5,6 +5,7 @@ krb5-clients
 krb5-appl
 krb5-doc
 krb5-misc
+krb5-build
 pty
 telnet
 test

@@ -55,12 +55,17 @@ GNATS_SITE=mit
 
 # What mailer to use.  This must come after the config file, since it is
 # host-dependent.
-MAIL_AGENT="/usr/sbin/sendmail -oi -t"
+MAIL_AGENT="/usr/lib/sendmail -oi -t"
+if [ ! -x $MAIL_AGENT ] ; then
+    ( [-x /usr/lib/sendmail ] && MAIL_AGENT="/usr/lib/sendmail -oi -t" ) || \
+     ( [ -x /usr/sbin/sendmail ] && MAIL_AGENT="/usr/sbin/sendmail -oi -t " ) || \
+     MAIL_AGENT="sendmail -oi -t "
+fi
 
 # How to read the passwd database.
 PASSWD="cat /etc/passwd"
 
-ECHON=bsd
+ECHON=sysv
 
 if [ $ECHON = bsd ] ; then
   ECHON1="echo -n"
