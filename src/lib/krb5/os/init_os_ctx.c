@@ -31,11 +31,13 @@
 
 #ifdef macintosh
 OSErr
-GetMacProfileFileSpec (FSSpec* outFileSpec, StringPtr inName)
+GetMacProfileFileSpec (FSSpec* outFileSpec, StringPtr inName, UInt32 whichFolder)
 {
 	OSErr err;
 	
-	err = FindFolder (kOnSystemDisk, kPreferencesFolderType, kCreateFolder,
+	
+	
+	err = FindFolder (kOnSystemDisk, whichFolder, kCreateFolder,
 		&(outFileSpec -> vRefNum) , &(outFileSpec -> parID));
 	
 	if (err == noErr) {
@@ -202,15 +204,29 @@ os_get_default_config_files(pfiles, secure)
 {
     profile_filespec_t* files;
 #ifdef macintosh
-    files = malloc(3 * sizeof(FSSpec));
+	files = malloc(5 * sizeof(FSSpec));
+
     if (files != 0) {
-		OSErr err = GetMacProfileFileSpec(&(files [0]), "\pKerberos5 Configuration");
+    	OSErr err = GetMacProfileFileSpec(&(files [2]), "\pKerberos5 Configuration", kApplicationSupportFolderType);
 		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini");
+			err = GetMacProfileFileSpec( &(files [3]), "\pkrb5.ini", kApplicationSupportFolderType);
 		}
-		files[2].vRefNum = 0;
-		files[2].parID = 0;
-		files[2].name[0] = '\0';
+    
+    	if (err == noErr) {
+			files[4].vRefNum = 0;
+			files[4].parID = 0;
+			files[4].name[0] = '\0';
+		} else {
+			files[2].vRefNum = 0;
+			files[2].parID = 0;
+			files[2].name[0] = '\0';
+		}
+
+		err = GetMacProfileFileSpec(&(files [0]), "\pKerberos5 Configuration", kPreferencesFolderType);
+		if (err == noErr) {
+			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini", kPreferencesFolderType);
+		}
+		
 		if (err != noErr) {
 			free (files);
 			return ENFILE;
