@@ -1,5 +1,10 @@
 2001-07-30  Ezra Peisach  <epeisach@mit.edu>
 
+	* aclocal.m4: Fix typo in last change. Do not get rid of 
+	spaces in definitions.
+	
+2001-07-30  Ezra Peisach  <epeisach@mit.edu>
+
 	* aclocal.m4: Add functions KRB5_GETSOCKNAME_ARGS and
 	KRB5_GETPEERNAME_ARGS to elucidate the argument types to
 	getsockname() and getpeername().
