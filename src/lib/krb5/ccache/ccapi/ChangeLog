@@ -1,3 +1,7 @@
+1999-06-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* winccld.h:  Remove references to cc_*_instance functions.
+
 Thu May 13 18:01:58 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* winccld.c (krb5_win_ccdll_load): Register the FILE ccache type

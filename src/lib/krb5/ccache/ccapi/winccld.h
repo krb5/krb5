@@ -25,8 +25,6 @@ typedef cc_int32 (*FP_cc_get_name)(apiCB*, const ccache_p*, char**);
 typedef cc_int32 (*FP_cc_set_principal)(apiCB*, const ccache_p*,
 			const enum cc_cred_vers, const char*);
 typedef cc_int32 (*FP_cc_get_principal)(apiCB*, ccache_p*, char**);
-typedef cc_int32 (*FP_cc_set_instance)(apiCB*, const char*);
-typedef cc_int32 (*FP_cc_get_instance)(apiCB*, char**);
 typedef cc_int32 (*FP_cc_get_cred_version)(apiCB*, const ccache_p*,
 			enum cc_cred_vers*);
 typedef cc_int32 (*FP_cc_lock_request)(apiCB*, const ccache_p*,
@@ -37,7 +35,6 @@ typedef cc_int32 (*FP_cc_remove_cred)(apiCB*, const ccache_p*,
 typedef cc_int32 (*FP_cc_seq_fetch_creds)(apiCB*, const ccache_p*, 
 			cred_union**, ccache_cit**);
 typedef cc_int32 (*FP_cc_free_principal)(apiCB*, char**);
-typedef cc_int32 (*FP_cc_free_instance)(apiCB*, char**);
 typedef cc_int32 (*FP_cc_free_name)(apiCB*, char** name);
 typedef cc_int32 (*FP_cc_free_creds)(apiCB*, cred_union** pCred);
 
@@ -67,15 +64,12 @@ DECL_FUNC_PTR(cc_free_NC_info);
 DECL_FUNC_PTR(cc_get_name);
 DECL_FUNC_PTR(cc_set_principal);
 DECL_FUNC_PTR(cc_get_principal);
-DECL_FUNC_PTR(cc_set_instance);
-DECL_FUNC_PTR(cc_get_instance);
 DECL_FUNC_PTR(cc_get_cred_version);
 DECL_FUNC_PTR(cc_lock_request);
 DECL_FUNC_PTR(cc_store);
 DECL_FUNC_PTR(cc_remove_cred);
 DECL_FUNC_PTR(cc_seq_fetch_creds);
 DECL_FUNC_PTR(cc_free_principal);
-DECL_FUNC_PTR(cc_free_instance);
 DECL_FUNC_PTR(cc_free_name);
 DECL_FUNC_PTR(cc_free_creds);
 
@@ -94,15 +88,12 @@ FUNC_INFO krbcc_fi[] = {
     MAKE_FUNC_INFO(cc_get_name),
     MAKE_FUNC_INFO(cc_set_principal),
     MAKE_FUNC_INFO(cc_get_principal),
-    MAKE_FUNC_INFO(cc_set_instance),
-    MAKE_FUNC_INFO(cc_get_instance),
     MAKE_FUNC_INFO(cc_get_cred_version),
     MAKE_FUNC_INFO(cc_lock_request),
     MAKE_FUNC_INFO(cc_store),
     MAKE_FUNC_INFO(cc_remove_cred),
     MAKE_FUNC_INFO(cc_seq_fetch_creds),
     MAKE_FUNC_INFO(cc_free_principal),
-    MAKE_FUNC_INFO(cc_free_instance),
     MAKE_FUNC_INFO(cc_free_name),
     MAKE_FUNC_INFO(cc_free_creds),
     END_FUNC_INFO
@@ -124,15 +115,12 @@ FUNC_INFO krbcc_fi[] = {
 #define cc_get_name pcc_get_name
 #define cc_set_principal pcc_set_principal
 #define cc_get_principal pcc_get_principal
-#define cc_set_instance pcc_set_instance
-#define cc_get_instance pcc_get_instance
 #define cc_get_cred_version pcc_get_cred_version
 #define cc_lock_request pcc_lock_request
 #define cc_store pcc_store
 #define cc_remove_cred pcc_remove_cred
 #define cc_seq_fetch_creds pcc_seq_fetch_creds
 #define cc_free_principal pcc_free_principal
-#define cc_free_instance pcc_free_instance
 #define cc_free_name pcc_free_name
 #define cc_free_creds pcc_free_creds
 #endif
