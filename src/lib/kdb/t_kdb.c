@@ -276,12 +276,11 @@ principal_found(nvalid, pname)
  * Add a principal to the database.
  */
 static krb5_error_code
-add_principal(kcontext, principal, mkey, key, rseed)
+add_principal(kcontext, principal, mkey, key)
     krb5_context	  kcontext;
     krb5_principal	  principal;
     krb5_keyblock	* mkey;
     krb5_keyblock	* key;
-    krb5_pointer	  rseed;
 {
     krb5_error_code	  kret;
     krb5_db_entry	  dbent;
@@ -585,8 +584,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     if ((kret = add_principal(kcontext,
 			      master_princ,
 			      &master_keyblock,
-			      &master_keyblock,
-			      rseed)))
+			      &master_keyblock)))
 	goto goodbye;
 
 
@@ -648,7 +646,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		swatch_on();
 	    }
 	    if ((kret = add_principal(kcontext, playback_principal(passno),
-				      &master_keyblock, kbp, rseed))) {
+				      &master_keyblock, kbp))) {
 		linkage = "initially ";
 		oparg = playback_name(passno);
 		goto cya;
@@ -679,8 +677,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		}
 		if ((kret = add_principal(kcontext,
 					  playback_principal(nvalid),
-					  &master_keyblock,
-					  kbp, rseed))) {
+					  &master_keyblock, kbp))) {
 		    oparg = playback_name(nvalid);
 		    goto cya;
 		}
@@ -809,7 +806,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	for (passno=0; passno<passes; passno++) {
 	    op = "adding principal";
 	    if ((kret = add_principal(kcontext, playback_principal(passno),
-				     &master_keyblock, &stat_kb, rseed)))
+				     &master_keyblock, &stat_kb)))
 		goto goodbye;
 	    if (verbose > 4)
 		fprintf(stderr, "*A(%s)\n", playback_name(passno));
@@ -909,8 +906,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		    if ((kret = add_principal(ccontext,
 					      playback_principal(base+j),
 					      &master_keyblock,
-					      &stat_kb,
-					      rseed))) {
+					      &stat_kb))) {
 			fprintf(stderr,
 				"%ld: (%d,%d) Failed add of %s with %s\n",
 				(long) getpid(), i, j, playback_name(base+j),

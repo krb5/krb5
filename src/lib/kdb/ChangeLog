@@ -1,5 +1,8 @@
 2004-04-02  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_kdb.c (add_principal): Delete unused argument 'rseed'.
+	(do_testing): Update callers.
+
 	* keytab.c (krb5_ktkdb_get_entry): Don't use local variable
 	"context" until after it's been set.
 
