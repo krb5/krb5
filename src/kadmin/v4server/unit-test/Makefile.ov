@@ -12,8 +12,7 @@ unit-test-setup::
 	$(LOCAL_MAKE_KEYTAB) -princ changepw/kerberos /krb5/ovsec_adm.srvtab
 
 unit-test-body::
-	$(RUNTEST) VFOURSERVER=../kadmind4 --tool v4server \
-		KDBFIVE_EDIT=../../../admin/edit/kdb5_edit
+	$(RUNTEST) VFOURSERVER=../kadmind4 --tool v4server
 
 unit-test-cleanup::
 	$(STOP_SERVERS_LOCAL) -v4files

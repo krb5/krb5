@@ -1,3 +1,8 @@
+Tue Aug 20 13:33:29 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.ov, helpers.exp, v4server.1/change-password.exp: use
+ 	kadmin.local instead of kdb5_edit
+
 Mon Jul 15 17:15:51 1996  Marc Horowitz  <marc@mit.edu>
 
 	* helpers.exp (exp_prog): the check for non-newline-terminated

@@ -190,16 +190,22 @@ proc exp_prog { name prog cmdline status args } {
 }
 
 proc fix_salt { name fullname oldpw newpw } {
-	global kdb5_edit
+	global kadmin_local
 
-	exp_prog "$name: kdb5_edit" $kdb5_edit "" 0 {
-		"kdb5_edit:" { send "cpw $fullname\n" }
+	exp_prog "$name: kadmin.local" $kadmin_local "" 0 {
+		"kadmin.local:" { send "cpw $fullname\n" }
 	} {
-		"Enter password:" { send "$newpw\n" }
+		"Enter password for principal \"$fullname\":" { 
+		    send "$newpw\n" 
+		}
 	} {
-		"Re-enter password for verification:" { send "$newpw\n" }
+		"Re-enter password for principal \"$fullname\":" { 
+		    send "$newpw\n"
+		}
 	} {
-		"kdb5_edit:" { send "quit\n" }
+	        # if we get cannot reuse pw, the salt is already right
+	        -re "Password .* changed." { send "quit\n" }
+		-re "Cannot reuse password" { send "quit\n" }
 	}
 }
 
