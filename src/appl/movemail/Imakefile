@@ -28,6 +28,8 @@
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB) $(HESLIBS)
         DEFINES = -DKERBEROS -DKRB5 -DMAIL_USE_POP $(OSDEFS) $(HESDEFS)
+#ifndef AIXArchitecture
          OSDEFS = -DMAIL_USE_FLOCK -DBSD
+#endif
 
 SimpleTestProgramTarget(movemail)
