@@ -254,12 +254,15 @@ char *name;
 	return KRB5_RC_MALLOC;
     id->data = (krb5_pointer) t;
     memset(t, 0, sizeof(struct dfl_data));
-    t->name = malloc(strlen(name)+1);
-    if (!t->name) {
-	retval = KRB5_RC_MALLOC;
-	goto cleanup;
-    }
-    strcpy(t->name, name);
+    if (name) {
+	t->name = malloc(strlen(name)+1);
+	if (!t->name) {
+	    retval = KRB5_RC_MALLOC;
+	    goto cleanup;
+	}
+	strcpy(t->name, name);
+    } else
+	t->name = 0;
     t->numhits = t->nummisses = 0;
     t->hsize = HASHSIZE; /* no need to store---it's memory-only */
     t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *));
