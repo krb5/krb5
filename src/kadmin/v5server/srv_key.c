@@ -641,6 +641,7 @@ key_string2key_keysalt(ksent, ptr)
     krb5_data		salt;
     krb5_keyblock	key;
     krb5_key_data	*okeyp;
+    krb5_enctype	old_enctype;
 
     argp = (struct keysalt_iterate_args *) ptr;
     kret = 0;
@@ -648,6 +649,17 @@ key_string2key_keysalt(ksent, ptr)
      * Determine if this key/salt pair is salted.
      */
     salted = 0;
+    /*
+     * XXXXX this is totally, totally wrong.  We should never be using
+     * krb5_use_enctype on master_encblock.  In particular, it won't
+     * work once we start having non-DES encryption systems.
+     *
+     * For now, we're going to do ths ugly kludge where we save the
+     * master_encblock's old encryption system, and restore it at the
+     * end of this routine.  This is wrong, and it *will* break in the
+     * future.  We need to fix this before we let this code go out....
+     */
+    old_enctype = master_encblock.crypto_entry->proto_enctype;
     krb5_use_enctype(argp->context, &master_encblock, ksent->ks_enctype);
     if (!krb5_dbe_find_enctype(argp->context,
 			       argp->dbentry,
@@ -749,6 +761,7 @@ key_string2key_keysalt(ksent, ptr)
 	okeyp->key_data_contents[1] = (krb5_octet *) salt.data;
     }
  done:
+    krb5_use_enctype(argp->context, &master_encblock, old_enctype);
     return(kret);
 }
 
@@ -831,10 +844,22 @@ key_randomkey_keysalt(ksent, ptr)
     krb5_error_code	kret;
     krb5_keyblock	*key;
     krb5_key_data	*okeyp;
+    krb5_enctype	old_enctype;
 
     argp = (struct keysalt_iterate_args *) ptr;
     kret = 0;
 
+    /*
+     * XXXXX this is totally, totally wrong.  We should never be using
+     * krb5_use_enctype on master_encblock.  In particular, it won't
+     * work once we start having non-DES encryption systems.
+     *
+     * For now, we're going to do ths ugly kludge where we save the
+     * master_encblock's old encryption system, and restore it at the
+     * end of this routine.  This is wrong, and it *will* break in the
+     * future.  We need to fix this before we let this code go out....
+     */
+    old_enctype = master_encblock.crypto_entry->proto_enctype;
     krb5_use_enctype(argp->context, &master_encblock, ksent->ks_enctype);
     if (krb5_dbe_find_enctype(argp->context,
 			      argp->dbentry,
@@ -879,6 +904,10 @@ key_randomkey_keysalt(ksent, ptr)
 	    krb5_xfree(key);
 	}
     }
+    /*
+     * XXXX  This is a kludge!!!  See above.
+     */
+    krb5_use_enctype(argp->context, &master_encblock, old_enctype);
     return(kret);
 }
 
@@ -960,9 +989,6 @@ key_encrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     ndone = 0;
     nkeys = *nkeysp;
     for (i=0; i<nkeys; i++) {
-	krb5_use_enctype(kcontext,
-			 &master_encblock,
-			 (krb5_enctype) inkeys[i].key_data_type[0]);
 	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
 	    tmpkey.enctype = inkeys[i].key_data_type[0];
 	    tmpkey.length = inkeys[i].key_data_length[0];

@@ -1,5 +1,14 @@
 Wed Sep 13 22:08:56 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* srv_key.c (key_string2key_keysalt and key_randomkey_keysalt):
+		Install really ugly hack to prevent these routines from munging
+		the master_encblock.  This is not the correct fix.  Proven
+		will be making the correct fix which will involve removing
+		these routines and using the corect libkdb functions.
+
+	* srv_key.c (key_encrypt_keys):  Remove equally errneous
+		krb5_use_enctype() call from key_encrypt_keys().
+
 	* srv_key.c (key_decrypt_keys):  Keys are encrypted in the key of
 		the master key encryption type, not in the keytype of the
 		key!!!  Removed erroneous krb5_use_enctype() call.
