@@ -1,3 +1,14 @@
+2000-06-06  Kenneth Raeburn  <raeburn@raeburn.org>
+
+	* install.texinfo: Describe new DNS support, and 3DES upgrade
+	path.  Update "enctypes" config file sample lines.
+
+	* build.texinfo: No kpasswd directory.  Describe new configure
+	options.
+
+	* send-pr.texinfo: Suggest caution regarding tab expansion for
+	patches.
+
 2000-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* definitions.texinfo: Update for 1.2 release.
