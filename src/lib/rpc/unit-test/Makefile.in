@@ -44,21 +44,13 @@ unit-test-:
 
 unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 
-unit-test-body:: unit-test-body-tcp @UDP_TEST@
-
-unit-test-body-tcp:
+PASS=@PASS@
+unit-test-body:
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \
 		$(RUNTEST) SERVER=./server CLIENT=./client \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
-		PROT=-t --tool rpc_test $(RUNTESTFLAGS)
-
-unit-test-body-udp:
-	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \
-		$(RUNTEST) SERVER=./server CLIENT=./client \
-		KINIT=$(BUILDTOP)/clients/kinit/kinit \
-		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
-		PROT=-u --tool rpc_test $(RUNTESTFLAGS)
+		PASS="$(PASS)" --tool rpc_test $(RUNTESTFLAGS)
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS)

@@ -1,3 +1,14 @@
+2000-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unit-test-body): Combine -tcp and -udp versions,
+	setting PASS instead of PROT.
+	* configure.in: Set and substitute PASS instead of UDP_TEST.
+	* config/unix.exp: Don't invoke rpc_test_start.  Set MULTIPASS,
+	including a setting for PROT and a dummy to trigger rpc_test_start
+	invocation.
+	(rpc_test_start): If a server has already been started, call
+	rpc_test_exit to verify that it's still running.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* server.c: Include gssrpc/pmap_clnt.h in order to get renaming of

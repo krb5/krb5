@@ -52,6 +52,8 @@ proc rpc_test_start { } {
 	global server_started
 	global env
 
+	if [info exists server_pid] { rpc_test_exit }
+
 	set env(KRB5_KTNAME) FILE:$env(RPC_TEST_SRVTAB)
 
  	verbose "% $SERVER" 1
@@ -76,4 +78,7 @@ proc rpc_test_start { } {
 
 }
 
-rpc_test_start
+set MULTIPASS {
+    {tcp PROT=-t dummy=[rpc_test_start]}
+    {udp PROT=-u dummy=[rpc_test_start]}
+}
