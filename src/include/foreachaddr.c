@@ -108,7 +108,7 @@ foreach_localaddr (/*@null@*/ void *data,
 #define LINUX_IPV6_HACK
 #endif
 
-extern int errno;
+#include <errno.h>
 
 /*
  * Return all the protocol addresses of this host.

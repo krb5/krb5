@@ -3,6 +3,8 @@
 	* fake-addrinfo.h (gaiptr, faiptr, gniptr): Delete duplicate
 	declarations.
 
+	* foreachaddr.c: Include errno.h instead of declaring errno.
+
 2002-09-03  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Use AH_TEMPLATE to put undefined definition of
