@@ -45,7 +45,7 @@
 #endif    
 
 /* forward declaration */
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
+#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
 static void Transform (krb5_ui_4 FAR *, krb5_ui_4 FAR *);
 #else
 static void Transform ();
