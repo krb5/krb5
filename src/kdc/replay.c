@@ -72,7 +72,7 @@ register krb5_data **outpkt;
        stale entries while we're here */
 
     if (root_ptr.next) {
-	for (last=&root_ptr, eptr = root_ptr.next;
+	for (last = &root_ptr, eptr = root_ptr.next;
 	     eptr;
 	     eptr = eptr->next) {
 	    if (MATCH(eptr)) {
