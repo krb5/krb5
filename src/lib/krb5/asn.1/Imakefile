@@ -30,60 +30,60 @@ EHDRDIR=$(TOP)/include/krb5/asn.1
 
 SRCS= \
 	KRB5_tables.c	\
-	encode.c 	\
-	decode.c	\
-	adat2kadat.c	\
-	addr2kaddr.c	\
-	adr2kadr.c	\
-	aprp2kaprp.c	\
-	aprq2kaprq.c	\
-	arep2karep.c	\
-	auth2kauth.c	\
-	cvt_flags.c	\
-	ck2kck.c	\
-	edat2kedat.c	\
-	ekrp2kekrp.c	\
-	enck2kkey.c	\
-	err2kerr.c	\
-	etpt2ketpt.c	\
-	g2unix.c	\
-	kadat2adat.c	\
-	kaddr2addr.c	\
-	kadr2adr.c	\
-	kaprp2aprp.c	\
-	kaprq2aprq.c	\
-	karep2arep.c	\
-	kauth2auth.c	\
-	kck2ck.c	\
-	kdcr2kkdcr.c	\
-	kdcr2ktgsr.c	\
-	kedat2edat.c	\
-	kekrp2ekrp.c	\
-	kerr2err.c	\
-	ketpt2etpt.c	\
-	kkdcr2kdcr.c	\
-	kkey2enck.c	\
-	klsrq2lsrq.c	\
-	kpadt2padt.c	\
-	kprep2prep.c	\
-	kprin2prin.c	\
-	kpriv2priv.c	\
-	ksafe2safe.c	\
-	ktran2tran.c	\
-	ktgrq2tgrq.c	\
-	ktgsr2kdcr.c	\
-	ktkt2tkt.c	\
-	lsrq2klsrq.c	\
-	padt2kpadt.c	\
-	prep2kprep.c	\
-	prin2kprin.c	\
-	priv2kpriv.c	\
-	qbuf2data.c	\
-	safe2ksafe.c	\
-	tran2ktran.c	\
-	tgrq2ktgrq.c	\
-	tkt2ktkt.c	\
-	u2gen.c
+	$(SRCDIR)encode.c 	\
+	$(SRCDIR)decode.c	\
+	$(SRCDIR)adat2kadat.c	\
+	$(SRCDIR)addr2kaddr.c	\
+	$(SRCDIR)adr2kadr.c	\
+	$(SRCDIR)aprp2kaprp.c	\
+	$(SRCDIR)aprq2kaprq.c	\
+	$(SRCDIR)arep2karep.c	\
+	$(SRCDIR)auth2kauth.c	\
+	$(SRCDIR)cvt_flags.c	\
+	$(SRCDIR)ck2kck.c	\
+	$(SRCDIR)edat2kedat.c	\
+	$(SRCDIR)ekrp2kekrp.c	\
+	$(SRCDIR)enck2kkey.c	\
+	$(SRCDIR)err2kerr.c	\
+	$(SRCDIR)etpt2ketpt.c	\
+	$(SRCDIR)g2unix.c	\
+	$(SRCDIR)kadat2adat.c	\
+	$(SRCDIR)kaddr2addr.c	\
+	$(SRCDIR)kadr2adr.c	\
+	$(SRCDIR)kaprp2aprp.c	\
+	$(SRCDIR)kaprq2aprq.c	\
+	$(SRCDIR)karep2arep.c	\
+	$(SRCDIR)kauth2auth.c	\
+	$(SRCDIR)kck2ck.c	\
+	$(SRCDIR)kdcr2kkdcr.c	\
+	$(SRCDIR)kdcr2ktgsr.c	\
+	$(SRCDIR)kedat2edat.c	\
+	$(SRCDIR)kekrp2ekrp.c	\
+	$(SRCDIR)kerr2err.c	\
+	$(SRCDIR)ketpt2etpt.c	\
+	$(SRCDIR)kkdcr2kdcr.c	\
+	$(SRCDIR)kkey2enck.c	\
+	$(SRCDIR)klsrq2lsrq.c	\
+	$(SRCDIR)kpadt2padt.c	\
+	$(SRCDIR)kprep2prep.c	\
+	$(SRCDIR)kprin2prin.c	\
+	$(SRCDIR)kpriv2priv.c	\
+	$(SRCDIR)ksafe2safe.c	\
+	$(SRCDIR)ktran2tran.c	\
+	$(SRCDIR)ktgrq2tgrq.c	\
+	$(SRCDIR)ktgsr2kdcr.c	\
+	$(SRCDIR)ktkt2tkt.c	\
+	$(SRCDIR)lsrq2klsrq.c	\
+	$(SRCDIR)padt2kpadt.c	\
+	$(SRCDIR)prep2kprep.c	\
+	$(SRCDIR)prin2kprin.c	\
+	$(SRCDIR)priv2kpriv.c	\
+	$(SRCDIR)qbuf2data.c	\
+	$(SRCDIR)safe2ksafe.c	\
+	$(SRCDIR)tran2ktran.c	\
+	$(SRCDIR)tgrq2ktgrq.c	\
+	$(SRCDIR)tkt2ktkt.c	\
+	$(SRCDIR)u2gen.c
 
 OBJS= \
 	KRB5_tables.o	\
@@ -161,13 +161,15 @@ clean::
 
 SpecialObjectRule(KRB5_tables.o,KRB5_tables.c,)
 
+depend:: KRB5_tables.c
+
 DependTarget()
 
 #ifdef UseSedHack
 
 #define IHaveSpecialMakefileTarget
 
-Makefile:: Imakefile
+Makefile:: $(SRCDIR)Imakefile
 	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) $(SRCSUBDIR)Imakefile -s Makefile.new
 	$(MAKE) -f Makefile.new noop
 	-@if [ -f Makefile ]; then \
