@@ -5,6 +5,10 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.44  1997/12/16 16:23:38  epeisach
+ * 	* svc_auth_gssapi.c (_svcauth_gssapi): When looping over services,
+ * 		free previous output_tokens.
+ *
  * Revision 1.43  1997/10/21 18:33:55  epeisach
  * Fix to not lose entries in the chain linked client list.
  *
@@ -568,6 +572,9 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 		    server_creds = server_creds_list[i];
 	       }
 	       
+	       /* Free previous output_token from loop */
+	       if(i != 0) gss_release_buffer(&minor_stat, &output_token);
+
 	       call_res.gss_major =
 		    gss_accept_sec_context(&call_res.gss_minor,
 					   &client_data->context,
@@ -627,6 +634,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 				   &rqst->rq_xprt->xp_raddr,
 				   log_badauth_data);
 	       
+	       gss_release_buffer(&minor_stat, &output_token);
 	       svc_sendreply(rqst->rq_xprt, xdr_authgssapi_init_res,
 			     (caddr_t) &call_res);
 	       *no_dispatch = TRUE;
@@ -654,6 +662,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 		   FALSE) {
 		    ret = AUTH_FAILED;
 		    LOG_MISCERR("internal error sealing sequence number");
+		    gss_release_buffer(&minor_stat, &output_token);
 		    goto error;
 	       }
 	  }
