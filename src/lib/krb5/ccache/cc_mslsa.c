@@ -592,9 +592,9 @@ does_query_ticket_cache_ex2 (void)
        LocalFree(pCacheRequest);
        CloseHandle(LogonHandle);
 
-       if (FAILED(Status) || FAILED(SubStatus)) {
-           if ( SubStatus != STATUS_NOT_SUPPORTED )
-               fEx2Response = TRUE;
+       if (!(FAILED(Status) || FAILED(SubStatus))) {
+           LsaFreeReturnBuffer(pCacheResponse);
+           fEx2Response = TRUE;
        }
        fChecked = TRUE;
    }
