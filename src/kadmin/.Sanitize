@@ -26,14 +26,16 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
-client
 configure
 configure.in
 kpasswd
 v5server
 
 Things-to-lose:
+
 v4server
+server
+client
 
 Do-last:
 
