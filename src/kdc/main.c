@@ -730,6 +730,7 @@ initialize_realms(kcontext, argc, argv)
 	    if (default_ports)
 		free(default_ports);
 	    default_ports = strdup(optarg);
+	    break;
 	case '?':
 	default:
 	    usage(argv[0]);
