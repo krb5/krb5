@@ -1,3 +1,9 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* Makefile.in: Added ccfns.c
+	* ccdefault.h: Updated Mac OS #defines and #includes for new header layout 
+	and Mac OS X frameworks
+	
 2000-09-12	Alexandra Ellwood <lxs@mit.edu>
 
         * ccdefops.c: created #define for USE_CCAPI now that both Mac OS 9 and
