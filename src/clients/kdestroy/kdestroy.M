@@ -26,7 +26,7 @@
 kdestroy \- destroy Kerberos tickets
 .SH SYNOPSIS
 .B kdestroy
-[\fB\-q\fP] [\fB\-c\fP \fIcache_name]
+[\fB\-5\fP] [\fB\-4\fP] [\fB\-q\fP] [\fB\-c\fP \fIcache_name]
 .br
 .SH DESCRIPTION
 The
@@ -35,7 +35,23 @@ utility destroys the user's active Kerberos authorization tickets by
 writing zeros to the specified credentials cache that contains them.  If
 the credentials cache is not specified, the default credentials cache is
 destroyed.
+If kdestroy was built with Kerberos 4 support, the default behavior is to
+destroy both Kerberos 5 and Kerberos 4 credentials.  Otherwise, kdestroy 
+will default to destroying only Kerberos 5 credentials.
 .SH OPTIONS
+.TP
+.B \-5
+destroy Kerberos 5 credentials.  This overrides whatever the default built-in
+behavior may be.  This option may be used with
+.B \-4
+.
+.TP
+.B \-4
+destroy Kerberos 4 credentials.  This overrides whatever the default built-in
+behavior may be.  This option is only available if kinit was built
+with Kerberos 4 compatibility.  This option may be used with 
+.B \-5
+.
 .TP
 .B \-q
 Run quietly.  Normally
@@ -62,16 +78,24 @@ command in your
 file, so that your tickets are destroyed automatically when you log out.
 .SH ENVIRONMENT
 .B Kdestroy
-uses the following environment variable:
+uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
-Location of the credentials (ticket) cache.
+Location of the Kerberos 5 credentials (ticket) cache.
+.TP "\w'.SM KRBTKFILE\ \ 'u"
+.SM KRBTKFILE
+Filename of the Kerberos 4 credentials (ticket) cache.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
-default credentials cache ([uid] is the decimal UID of the user).
+default location of Kerberos 5 credentials cache 
+([uid] is the decimal UID of the user).
+.TP "\w'/tmp/tkt[uid]\ \ 'u"
+/tmp/tkt[uid]
+default location of Kerberos 4 credentials cache 
+([uid] is the decimal UID of the user).
 .SH SEE ALSO
-kinit(1), klist(1)
+kinit(1), klist(1), krb5(3)
 .SH BUGS
 .PP
 Only the tickets in the specified credentials cache are destroyed.

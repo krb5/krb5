@@ -1,3 +1,11 @@
+2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kdestroy.M: Make up-to-date.
+
+	* kdestroy.c: Add support for combining -5 and -4.  Add ability to
+	easily change defaults in terms of whether to use 5, 4 or both.
+	Expand usage info.
+
 2000-02-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kdestroy.c: Fix GET_PROGNAME macro to properly return program

@@ -34,11 +34,6 @@
 
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
-#define K54_OPT_STRING "45"
-#define K54_USAGE_STRING "[-4] [-5] "
-#else
-#define K54_OPT_STRING ""
-#define K54_USAGE_STRING ""
 #endif
 
 #ifdef __STDC__
@@ -56,6 +51,36 @@ extern char *optarg;
 #define GET_PROGNAME(x) max(max(strrchr((x), '/'), strrchr((x), '\\')) + 1,(x))
 #endif
 
+char *progname;
+
+int got_k5 = 0;
+int got_k4 = 0;
+
+int default_k5 = 1;
+#ifdef KRB5_KRB4_COMPAT
+int default_k4 = 1;
+#else
+int default_k4 = 0;
+#endif
+
+
+void usage()
+{
+#define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
+
+    fprintf(stderr, "Usage: %s [-5] [-4] [-q] [-c cache_name]\n", progname);
+    fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
+    fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
+    fprintf(stderr, "\t   (Default is %s%s%s%s)\n",
+	    default_k5?"Kerberos 5":"",
+	    (default_k5 && default_k4)?" and ":"",
+	    default_k4?"Kerberos 4":"",
+	    (!default_k5 && !default_k4)?"neither":"");
+    fprintf(stderr, "\t-q quiet mode\n");
+    fprintf(stderr, "\t-c specify name of credentials cache\n");
+    exit(2);
+}
+
 int
 main(argc, argv)
     int argc;
@@ -72,20 +97,17 @@ main(argc, argv)
     int quiet = 0;
     int v4 = 1;
 
-    int got_k4 = 0;
-    int got_k5 = 0;
+    int use_k5 = 0;
+    int use_k4 = 0;
 
-    int use_k4_only = 0;
-    int use_k5_only = 0;
-
-    char * progname = GET_PROGNAME(argv[0]);
+    progname = GET_PROGNAME(argv[0]);
 
     got_k5 = 1;
 #ifdef KRB5_KRB4_COMPAT
     got_k4 = 1;
 #endif
 
-    while ((c = getopt(argc, argv, K54_OPT_STRING "qc:")) != -1) {
+    while ((c = getopt(argc, argv, "54qc:")) != -1) {
 	switch (c) {
 	case 'q':
 	    quiet = 1;
@@ -98,14 +120,26 @@ main(argc, argv)
 		cache_name = optarg;
 	    }
 	    break;
-#ifdef KRB5_KRB4_COMPAT
 	case '4':
-	    use_k4_only = 1;
+	    if (!got_k4)
+	    {
+#ifdef KRB5_KRB4_COMPAT
+		fprintf(stderr, "Kerberos 4 support could not be loaded\n");
+#else
+		fprintf(stderr, "This was not built with Kerberos 4 support\n");
+#endif
+		exit(3);
+	    }
+	    use_k4 = 1;
 	    break;
 	case '5':
-	    use_k5_only = 1;
+	    if (!got_k5)
+	    {
+		fprintf(stderr, "Kerberos 5 support could not be loaded\n");
+		exit(3);
+	    }
+	    use_k5 = 1;
 	    break;
-#endif
 	case '?':
 	default:
 	    errflg++;
@@ -113,24 +147,22 @@ main(argc, argv)
 	}
     }
 
-    if (use_k4_only && use_k5_only)
-    {
-	fprintf(stderr, "Only one of -4 and -5 allowed\n");
-	errflg++;
-    }
-
     if (optind != argc)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s " K54_USAGE_STRING 
-		"[-q] [ -c cache-name ]\n", progname);
-	exit(2);
+	usage();
     }
 
-    if (use_k4_only)
+    if (!use_k5 && !use_k4)
+    {
+	use_k5 = default_k5;
+	use_k4 = default_k4;
+    }
+
+    if (!use_k5)
 	got_k5 = 0;
-    if (use_k5_only)
+    if (!use_k4)
 	got_k4 = 0;
 
     if (got_k5) {
