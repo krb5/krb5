@@ -1,3 +1,7 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos5.c: Add prototype for rd_and_store_for_creds().
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* encrypt.c (encrypt_is): Cast arguments to printf to match format. 

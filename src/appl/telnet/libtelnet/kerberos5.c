@@ -93,6 +93,10 @@ int forward_flags = 0;  /* Flags get set in telnet/main.c on -f and -F */
 
 void kerberos5_forward();
 
+extern krb5_error_code
+rd_and_store_for_creds(krb5_context, krb5_auth_context, krb5_data *, 
+		       krb5_ticket *);
+
 #endif	/* FORWARD */
 
 static unsigned char str_data[2048] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
