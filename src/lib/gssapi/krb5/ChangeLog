@@ -1,3 +1,8 @@
+1999-03-11  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* set_ccache.c (gss_krb5_ccache_name): Added new Krb5 specific
+		interface to set the default credentials cache name.
+
 1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (DLL_FILE_DEF): Tell the Makefile template that we

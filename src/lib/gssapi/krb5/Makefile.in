@@ -51,6 +51,7 @@ SRCS = \
 	$(srcdir)/rel_name.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/ser_sctx.c \
+	$(srcdir)/set_ccache.c \
 	$(srcdir)/sign.c \
 	$(srcdir)/unseal.c \
 	$(srcdir)/util_cksum.c \
@@ -98,6 +99,7 @@ OBJS = \
 	rel_name.$(OBJEXT) \
 	seal.$(OBJEXT) \
 	ser_sctx.$(OBJEXT) \
+	set_ccache.$(OBJEXT) \
 	sign.$(OBJEXT) \
 	unseal.$(OBJEXT) \
 	util_cksum.$(OBJEXT) \
