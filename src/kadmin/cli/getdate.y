@@ -84,22 +84,17 @@ void *alloca ();
 #undef timezone /* needed for sgi */
 #endif
 
-#if defined(HAVE_SYS_TIMEB_H)
-#include <sys/timeb.h>
-#else
 /*
-** We use the obsolete `struct timeb' as part of our interface!
+** We use the obsolete `struct my_timeb' as part of our interface!
 ** Since the system doesn't have it, we define it here;
 ** our callers must do likewise.
 */
-struct timeb {
+struct my_timeb {
     time_t		time;		/* Seconds since the epoch	*/
     unsigned short	millitm;	/* Field not used		*/
     short		timezone;	/* Minutes west of GMT		*/
     short		dstflag;	/* Field not used		*/
 };
-#endif /* defined(HAVE_SYS_TIMEB_H) */
-
 #endif	/* defined(vms) */
 
 #if defined (STDC_HEADERS) || defined (USG)
@@ -927,17 +922,18 @@ difftm(a, b)
 time_t
 get_date(p, now)
     char		*p;
-    struct timeb	*now;
+    struct my_timeb	*now;
 {
     struct tm		*tm, gmt;
-    struct timeb	ftz;
+    struct my_timeb	ftz;
     time_t		Start;
     time_t		tod;
 
     yyInput = p;
     if (now == NULL) {
         now = &ftz;
-	(void)time(&ftz.time);
+
+	ftz.time = time((time_t *) 0);
 
 	if (! (tm = gmtime (&ftz.time)))
 	    return -1;
@@ -1006,7 +1002,7 @@ main(ac, av)
     (void)printf("Enter date, or blank line to exit.\n\t> ");
     (void)fflush(stdout);
     while (gets(buff) && buff[0]) {
-	d = get_date(buff, (struct timeb *)NULL);
+	d = get_date(buff, (struct my_timeb *)NULL);
 	if (d == -1)
 	    (void)printf("Bad format - couldn't convert.\n");
 	else
