@@ -32,3 +32,5 @@ Krb5AdminProgramTarget(kdb5_convert)
 all::
 	echo "Not defined to use Kerberos V4 backwards compatibility"
 #endif
+
+DependTarget()
