@@ -56,4 +56,6 @@ ec KRB5_KDB_INVALIDKEYSIZE,	"Key size in database is invalid"
 ec KRB5_KDB_CANTREAD_STORED,	"Cannot find/read stored master key"
 ec KRB5_KDB_BADSTORED_MKEY,	"Stored master key is corrupted"
 
+ec KRB5_KDB_CANTLOCK_DB,	"Insufficient access to lock database"
+
 end
