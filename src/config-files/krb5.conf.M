@@ -61,15 +61,15 @@ to multiple values.   Here is an example of the INI-style format used by
 The following sections are currently used in the 
 .I krb5.conf
 file:
-.IP libdefaults
+.IP [libdefaults]
 Contains various default values used by the Kerberos V5 library.
 
-.IP realms
+.IP [realms]
 Contains subsections keyed by Kerberos realm names which describe
 where to find the Kerberos servers for a particular realm, and other
 realm-specific information.
 
-.IP domain_realm 
+.IP [domain_realm]
 Contains relations which map subdomains and domain names to Kerberos
 realm names.  This is used by programs to determine what realm a host
 should be in, given its fully qualified domain name.
@@ -88,9 +88,11 @@ host's Kerberos activity.
 
 .SH REALMS SECTION
 
-Each tag in the [realms] section of the file names as Kerberos realm,
-containing a subsection where the relations in that subsection define the 
-properties of that particular realm.  For example:
+Each tag in the [realms] section of the file names a Kerberos realm.
+The value of the tag is a subsection where the relations in that
+subsection define the properties of that particular realm.  For
+example:
+
 .sp
 .nf
 .in +1i
@@ -105,11 +107,13 @@ properties of that particular realm.  For example:
 .in -1i
 .fi
 .sp
-The meaings of each of the relations in the subsection are defined here:
+
+For each realm, the following tags may be specified in the realm's
+subsection:
 
 .IP kdc
 The value of this relation is the name of a host running a KDC for that realm.
-An optional port number (preceeded by a colon) may be appended to the
+An optional port number (preceded by a colon) may be appended to the
 hostname.
 
 .IP admin_server
@@ -145,6 +149,7 @@ For example, the following [domain_realm] section:
 	.ucsc.edu = CATS.UCSC.EDU
 .in -1i
 .fi
+.sp
 maps dodo.mit.edu into the SMS_TEST.MIT.EDU realm, all other hosts in
 the MIT.EDU domain to the ATHENA.MIT.EDU realm, and all hosts in the
 UCSC.EDU domain into the CATS.UCSC.EDU realm.  ucbvax.berkeley.edu
