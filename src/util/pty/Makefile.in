@@ -21,11 +21,14 @@ LOCALINCLUDE=-I. -I$(srcdir)
 FILES= Makefile cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
 logwtmp.c init.c
 
-CFILES=cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c\
-update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.c logwtmp.c init.c
+CFILES=$(srcdir)/cleanup.c $(srcdir)/getpty.c $(srcdir)/init_slave.c \
+	$(srcdir)/open_ctty.c $(srcdir)/open_slave.c \
+	$(srcdir)/update_utmp.c $(srcdir)/update_wtmp.c $(srcdir)/vhangup.c \
+	$(srcdir)/void_assoc.c $(srcdir)/logwtmp.c \
+	$(srcdir)/init.c
 
 
-SRCS=pty_err.h $(CFILES)
+SRCS=pty_err.c $(CFILES)
 
 DEPLIBS=
 
@@ -40,7 +43,7 @@ clean-unix::
 	$(RM) libpty.a $(BUILDTOP)/include/libpty.h pty_err.c pty_err.h
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-depend:: 
+depend::  pty_err.h
 
 install:: libpty.h
 	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
