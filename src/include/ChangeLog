@@ -9,6 +9,14 @@
 	variable declaration.
 	(GET_SERV_BY_NAME, GET_SERV_BY_PORT): New macros, in three
 	flavors, parallel to GET_HOST macros; not used yet.
+	(getaddrinfo, getnameinfo, gai_strerror, freeaddrinfo)
+	[S_SPLINT_S]: Add Splint annotations.
+	(getaddrinfo, getnameinfo): Buffer sizes are supposed to be
+	socklen_t, not size_t.
+	(freeaddrinfo) [COPY_FIRST_CANONNAME]: Handle null pointer
+	argument.
+	(getaddrinfo) [COPY_FIRST_CANONNAME]: Always do the copying if the
+	ai_canonname is non-null, regardless of the supplied flags.
 
 2002-05-24  Ken Raeburn  <raeburn@mit.edu>
 

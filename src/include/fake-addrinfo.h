@@ -90,6 +90,29 @@
 #include "port-sockets.h"
 #include "socket-utils.h"
 
+#ifdef S_SPLINT_S
+extern int
+getaddrinfo (/*@in@*/ /*@null@*/ const char *,
+	     /*@in@*/ /*@null@*/ const char *,
+	     /*@in@*/ /*@null@*/ const struct addrinfo *,
+	     /*@out@*/ struct addrinfo **)
+    ;
+extern void
+freeaddrinfo (/*@only@*/ /*@out@*/ struct addrinfo *)
+    ;
+extern int
+getnameinfo (const struct sockaddr *addr, socklen_t addrsz,
+	     /*@out@*/ /*@null@*/ char *h, socklen_t hsz,
+	     /*@out@*/ /*@null@*/ char *s, socklen_t ssz,
+	     int flags)
+    /*@requires (maxSet(h)+1) >= hsz /\ (maxSet(s)+1) >= ssz @*/
+    /* too hard: maxRead(addr) >= (addrsz-1) */
+    /*@modifies *h, *s@*/;
+extern /*@dependent@*/ char *
+gai_strerror (int code) /*@*/;
+#endif
+
+
 #if defined (__linux__) || defined (_AIX)
 /* See comments below.  */
 #  define WRAP_GETADDRINFO
@@ -223,7 +246,7 @@ static void (*const faiptr) (struct addrinfo *) = &freeaddrinfo;
 
 #ifdef WRAP_GETNAMEINFO
 static int (*const gniptr) (const struct sockaddr *, socklen_t,
-			    char *, size_t, char *, size_t,
+			    char *, socklen_t, char *, socklen_t,
 			    int) = &getnameinfo;
 #endif
 
@@ -337,8 +360,8 @@ void freeaddrinfo (struct addrinfo *ai);
 #if !defined (HAVE_GETADDRINFO) || defined (WRAP_GETNAMEINFO)
 static
 int getnameinfo (const struct sockaddr *addr, socklen_t len,
-		 char *host, size_t hostlen,
-		 char *service, size_t servicelen,
+		 char *host, socklen_t hostlen,
+		 char *service, socklen_t servicelen,
 		 int flags);
 #endif
 
@@ -378,6 +401,10 @@ char *gai_strerror (int code);
 
 #ifdef HAVE_FAKE_GETADDRINFO
 #define NEED_FAKE_GETADDRINFO
+#endif
+
+#if defined(NEED_FAKE_GETADDRINFO) || defined(WRAP_GETADDRINFO)
+#include <stdlib.h>
 #endif
 
 #ifdef NEED_FAKE_GETADDRINFO
@@ -553,8 +580,8 @@ fake_getaddrinfo (const char *name, const char *serv,
 
 static inline int
 fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
-		  char *host, size_t hostlen,
-		  char *service, size_t servicelen,
+		  char *host, socklen_t hostlen,
+		  char *service, socklen_t servicelen,
 		  int flags)
 {
     struct hostent *hp;
@@ -697,8 +724,8 @@ void freeaddrinfo (struct addrinfo *ai)
 
 static inline
 int getnameinfo (const struct sockaddr *sa, socklen_t len,
-		 char *host, size_t hostlen,
-		 char *service, size_t servicelen,
+		 char *host, socklen_t hostlen,
+		 char *service, socklen_t servicelen,
 		 int flags)
 {
     return fake_getnameinfo(sa, len, host, hostlen, service, servicelen,
@@ -719,7 +746,7 @@ static int (*const gaiptr) (const char *, const char *,
 static void (*const faiptr) (struct addrinfo *);
 #ifdef WRAP_GETNAMEINFO
 static int (*const gniptr) (const struct sockaddr *, socklen_t,
-			    char *, size_t, char *, size_t, int);
+			    char *, socklen_t, char *, socklen_t, int);
 #endif
 
 #ifdef WRAP_GETADDRINFO
@@ -771,7 +798,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        they get around to fixing it, add a compile-time or run-time
        check for the glibc version in use.  */
 #define COPY_FIRST_CANONNAME
-    if (name && hint && (hint->ai_flags & AI_CANONNAME)) {
+    if (/* name && hint && (hint->ai_flags & AI_CANONNAME) */ (*result)->ai_canonname) {
 	struct hostent *hp;
 	const char *name2 = 0;
 	int i, herr;
@@ -835,9 +862,11 @@ static inline
 void freeaddrinfo (struct addrinfo *ai)
 {
 #ifdef COPY_FIRST_CANONNAME
-    free(ai->ai_canonname);
-    ai->ai_canonname = 0;
-    (*faiptr)(ai);
+    if (ai) {
+	free(ai->ai_canonname);
+	ai->ai_canonname = 0;
+	(*faiptr)(ai);
+    }
 #else
     (*faiptr)(ai);
 #endif
@@ -847,8 +876,8 @@ void freeaddrinfo (struct addrinfo *ai)
 #ifdef WRAP_GETNAMEINFO
 static inline
 int getnameinfo (const struct sockaddr *sa, socklen_t len,
-		 char *host, size_t hostlen,
-		 char *service, size_t servicelen,
+		 char *host, socklen_t hostlen,
+		 char *service, socklen_t servicelen,
 		 int flags)
 {
     return (*gniptr)(sa, len, host, hostlen, service, servicelen, flags);
