@@ -325,7 +325,7 @@ static char *afs_crypt(pw, salt)
      char *pw;
      char *salt;
 {
-	register i, j, c;
+	register int i, j, c;
 	int temp;
 	static char block[66], iobuf[16];
  
@@ -384,7 +384,7 @@ static char *afs_crypt(pw, salt)
 static void krb5_afs_crypt_setkey(key)
      char *key;
 {
-	register i, j, k;
+	register int i, j, k;
 	int t;
  
 	/*
@@ -439,7 +439,7 @@ static void krb5_afs_encrypt(block, edflag)
      long edflag;
 {
 	int i, ii;
-	register t, j, k;
+	register int t, j, k;
 
 	/*
 	 * First, permute the bits in the input
