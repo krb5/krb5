@@ -74,7 +74,7 @@ void update_utmp(ent, username, line, host)
 	ent->ut_host[0] = '\0';
 #endif
 
-#ifdef HAVE_SETUTENT
+#ifndef NO_UT_PID
     tmpx = line + strlen(line)-1;
     if (*(tmpx-1) != '/') tmpx--; /* last two characters, unless it's a / */
     sprintf(utmp_id, "kl%s", tmpx);
@@ -158,19 +158,22 @@ void logwtmp(tty, locuser, host, loggingin)
     strncpy(ut.ut_line, tty, sizeof(ut.ut_line));
     ut.ut_time = time(0);
     
-#ifdef HAVE_SETUTENT
+#ifndef NO_UT_PID
+    ut.ut_pid = getpid();
     strncpy(ut.ut_user, locuser, sizeof(ut.ut_user));
 
     tmpx = tty + strlen(tty) - 2;
     sprintf(utmp_id, "kr%s", tmpx);
     strncpy(ut.ut_id, utmp_id, sizeof(ut.ut_id));
+#else
+    strncpy(ut.ut_name, locuser, sizeof(ut.ut_name));
+#endif
 
 #ifndef NO_UT_TYPE
     ut.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
 #endif
 #ifndef NO_UT_PID
     ut.ut_pid = (loggingin ? getpid() : 0);
-#endif
 #endif
 
     update_wtmp(&ut);

@@ -44,7 +44,7 @@ CHECK_SETJMP
 CHECK_DIRENT
 CHECK_FCNTL
 CHECK_WAIT_TYPE
-AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([cfsetispeed],AC_DEFINE(POSIX_TERMIOS)))
+AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
 KRB_INCLUDE
 CHECK_UTMP
 WITH_KRB5ROOT
@@ -123,7 +123,7 @@ AC_CACHE_VAL(krb5_cv_setpgrp_args,
 krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_setpgrp_args)
 if test $krb5_cv_setpgrp_args = two; then
-AC_DEFINE(SETPGRP_TWOARG)],
+AC_DEFINE(SETPGRP_TWOARG)
 fi
 dnl
 dnl

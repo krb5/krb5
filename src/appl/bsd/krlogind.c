@@ -1374,57 +1374,54 @@ getpty(fd,slave)
     int i,ptynum;
     struct stat stb;
 
-#ifdef HAVE_STREAMS
-
     *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris, IRIX */
     if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
-    if (*fd < 0) *fd = open("/dev/ptm", O_RDWR|O_NDELAY); /* OSF/1 */
     if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
 
-    if (*fd < 0) return 1;
+    if (*fd >= 0) {
 
 #ifdef HAVE_GRANTPT
-    if (grantpt(*fd) || unlockpt(*fd)) return 1;
+	if (grantpt(*fd) || unlockpt(*fd)) return 1;
 #endif
     
 #ifdef HAVE_PTSNAME
-    p = ptsname(*fd);
+	p = ptsname(*fd);
 #else
-    p = ttyname(*fd);
+	p = ttyname(*fd);
 #endif
-    if (p) {
-	strcpy(slave, p);
-	return 0;
-    }
+	if (p) {
+	    strcpy(slave, p);
+	    return 0;
+	}
 
-    if (fstat(*fd, &stb) < 0) {
-	close(*fd);
+	if (fstat(*fd, &stb) < 0) {
+	    close(*fd);
+	    return 1;
+	}
+	ptynum = (int)(stb.st_rdev&0xFF);
+	sprintf(slave, "/dev/ttyp%x", ptynum);
+	return 0;
+
+    } else {
+    
+	for (c = 'p'; c <= 's'; c++) {
+	    sprintf(slave,"/dev/ptyXX");
+	    slave[strlen("/dev/pty")] = c;
+	    slave[strlen("/dev/ptyp")] = '0';
+	    if (stat(slave, &stb) < 0)
+		break;
+	    for (i = 0; i < 16; i++) {
+		slave[sizeof("/dev/ptyp") - 1] = "0123456789abcdef"[i];
+		*fd = open(slave, O_RDWR);
+		if (*fd < 0) continue;
+
+		/* got pty */
+		slave[strlen("/dev/")] = 't';
+		return 0;
+	    }
+	}
 	return 1;
     }
-    ptynum = (int)(stb.st_rdev&0xFF);
-    sprintf(slave, "/dev/ttyp%x", ptynum);
-    return 0;
-    
-#else /* NOT STREAMS */
-
-    for (c = 'p'; c <= 's'; c++) {
-	sprintf(slave,"/dev/ptyXX");
-	slave[strlen("/dev/pty")] = c;
-	slave[strlen("/dev/ptyp")] = '0';
-	if (stat(slave, &stb) < 0)
-	  break;
-	for (i = 0; i < 16; i++) {
-	    slave[sizeof("/dev/ptyp") - 1] = "0123456789abcdef"[i];
-	    *fd = open(slave, O_RDWR);
-	    if (*fd > 0)
-	      goto gotpty;
-	}
-    }
-    return 1;
-  gotpty:
-    slave[strlen("/dev/")] = 't';
-    return 0;
-#endif /* STREAMS */
 }
 
 

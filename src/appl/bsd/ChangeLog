@@ -1,28 +1,27 @@
 Thu Dec 29 10:12:48 1994  Richard Basch  (probe@tardis)
 
 	* krlogind.c
-	* logutil.c
-	  	Conditionalized references to ut_type.
+	  	Conditionalize grantpt/unlockpt on HAVE_GRANTPT (not just Sun)
+	  	Conditionalized references to ut_type and ut_pid.
+		Try all the methods for getting a pty...
 
-	* krlogind.c
+	* logutil.c
+	  	Conditionalized references to ut_type and ut_pid.
+
 	* configure.in
 	  	Conditionalize grantpt/unlockpt on HAVE_GRANTPT
-			(added check to configure.in)
-
-	* krlogind.c
-	  	Try all the pty master devices.  Other systems frequently
-		use the same names.
+		Corrected a minor syntactical error with extraneous "],"
 
 Thu Dec 29 01:38:17 1994  Richard Basch  <probe@k9>
 
 	* krlogind.c:
-	More error checking for Solaris tty setup routines (grantpt/unlockpt)
-	Commented out the OOB code, as it causes problems currently.
-	Cleaned up some of the #ifdef's for logging incoming users
-	Removed extraneous declaration of malloc()
-	Pass a "" for the hostname rather than NULL to update_utmp.
-	Some additional cosmetic changes.
-	Included/excluded #ifdef SYSV code (SYSV is not defined anywhere)
+	  	Error checks for Solaris tty setup routines (grantpt/unlockpt)
+		Commented out the OOB code, as it causes problems currently.
+		Cleaned up some of the #ifdef's for logging incoming users
+		Removed extraneous declaration of malloc()
+		Pass a "" for the hostname rather than NULL to update_utmp.
+		Some additional cosmetic changes.
+		Included/excluded SYSV code (SYSV is not defined anywhere)
 
 Wed Dec 28 14:59:58 1994  Richard Basch  (probe@tardis)
 
