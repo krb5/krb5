@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2001, 2002 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * 
@@ -114,3 +114,93 @@ void prng_cleanup (void)
   if (inited) krb5int_yarrow_final (&y_ctx);
 	inited = 0;
 }
+
+
+/*
+ * Routines to get entropy from the OS.  For UNIX we try /dev/urandom
+ * and /dev/random.  Currently we don't do anything for pre-OSX Mac and
+ * Windows.
+ */
+#if defined(_WIN32) || (defined(TARGET_OS_MAC) && !defined(TARGET_API_MAC_OSX))
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_os_entropy (
+			  krb5_context context, int strong, int *success)
+{
+  if (success)
+    *success  = 0;
+  return 0;
+}
+
+#else /*Windows and non-OSX Mac*/
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+/*
+ * Helper function to read entropy from  a random device.  Takes the
+ * name of a device, opens it, makes sure it is a device and if so,
+ * reads entropy.  Returns  a boolean indicating whether entropy was
+ * read.
+ */
+
+static int
+read_entropy_from_device (krb5_context context, const char *device)
+{
+  krb5_data data;
+  struct stat sb;
+  int fd;
+  unsigned char buf[YARROW_SLOW_THRESH/8];
+  int left;
+  fd = open (device, O_RDONLY);
+  if (fd == -1)
+    return 0;
+  if (fstat (fd, &sb) == -1)
+    return 0;
+  if (S_ISREG(sb.st_mode)) {
+    close(fd);
+    return 0;
+  }
+  for (left = sizeof (buf); left > 0;) {
+    size_t count;
+    count = read (fd, &buf, (unsigned) left);
+    if (count <= 0) {
+      close(fd);
+      return 0;
+    }
+    left -= count;
+  }
+  close (fd);
+  data.length = sizeof (buf);
+  data.data = ( char * ) buf;
+  if ( krb5_c_random_add_entropy (context, KRB5_C_RANDSOURCE_OSRAND, 
+				  &data) != 0) {
+    return 0;
+  }
+  return 1;
+}
+    
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_os_entropy (krb5_context context,
+			  int strong, int *success)
+{
+  int unused;
+  int *oursuccess = success?success:&unused;
+  *oursuccess = 0;
+  /* If we are getting strong data then try that first.  We aare
+     guaranteed to cause a reseed of some kind if strong is true and
+     we have both /dev/random and /dev/urandom.  We want the strong
+     data included in the reseed so we get it first.*/
+  if (strong) {
+    if (read_entropy_from_device (context, "/dev/random"))
+      *oursuccess = 1;
+  }
+  if (read_entropy_from_device (context, "/dev/urandom"))
+    *oursuccess = 1;
+  return 0;
+}
+
+#endif /*Windows or pre-OSX Mac*/

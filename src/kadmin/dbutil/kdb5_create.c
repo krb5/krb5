@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/kdb5_create.c
  *
- * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001, 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -197,6 +197,13 @@ void kdb5_create(argc, argv)
 	exit_status++; return;
     }
 
+    printf ("Loading random data\n");
+    retval = krb5_c_random_os_entropy (util_context, 1, NULL);
+    if (retval) {
+      com_err (argv[0], retval, "Loading random data");
+      exit_status++; return;
+    }
+    
     /* assemble & parse the master key name */
 
     if ((retval = krb5_db_setup_mkey_name(util_context,

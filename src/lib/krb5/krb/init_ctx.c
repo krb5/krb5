@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/init_ctx.c
  *
- * Copyright 1994,1999,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1994,1999,2000, 2002  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -150,6 +150,8 @@ init_common (context, secure)
 		goto cleanup;
 
 	/* initialize the prng (not well, but passable) */
+	if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
+	  goto cleanup;
 	if ((retval = krb5_crypto_us_timeofday(&seed_data.now, &seed_data.now_usec)))
 		goto cleanup;
 	seed_data.pid = getpid ();

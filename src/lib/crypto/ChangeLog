@@ -1,3 +1,7 @@
+2002-01-08  Sam Hartman  <hartmans@tir-na-nogth.mit.edu>
+
+	* prng.c (krb5_c_random_os_entropy):  Implement.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_encrypt.c (main): Free memory when finished to test for memory
