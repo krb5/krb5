@@ -172,9 +172,6 @@ struct tab sitetab[];
 %union { int num; char *str; }
 
 %token
-	A	B	C	E	F	I
-	L	N	P	R	S	T
-
 	SP	CRLF	COMMA	STRING	NUMBER
 
 	USER	PASS	ACCT	REIN	QUIT	PORT
@@ -353,7 +350,7 @@ cmd:		USER SP username CRLF
 		= {
 			reply(202, "ALLO command ignored.");
 		}
-	|	ALLO SP NUMBER SP R SP NUMBER CRLF
+	|	ALLO SP NUMBER SP 'R' SP NUMBER CRLF
 		= {
 			reply(202, "ALLO command ignored.");
 		}
@@ -698,103 +695,103 @@ host_port:	NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER COMMA
 		}
 	;
 
-form_code:	N
+form_code:	'N'
 	= {
 		$$ = FORM_N;
 	}
-	|	T
+	|	'T'
 	= {
 		$$ = FORM_T;
 	}
-	|	C
+	|	'C'
 	= {
 		$$ = FORM_C;
 	}
 	;
 
-prot_code:	C
+prot_code:	'C'
 	= {
 		$$ = PROT_C;
 	}
-	|	S
+	|	'S'
 	= {
 		$$ = PROT_S;
 	}
-	|	P
+	|	'P'
 	= {
 		$$ = PROT_P;
 	}
-	|	E
+	|	'E'
 	= {
 		$$ = PROT_E;
 	}
 	;
 
-type_code:	A
+type_code:	'A'
 	= {
 		cmd_type = TYPE_A;
 		cmd_form = FORM_N;
 	}
-	|	A SP form_code
+	|	'A' SP form_code
 	= {
 		cmd_type = TYPE_A;
 		cmd_form = $3;
 	}
-	|	E
+	|	'E'
 	= {
 		cmd_type = TYPE_E;
 		cmd_form = FORM_N;
 	}
-	|	E SP form_code
+	|	'E' SP form_code
 	= {
 		cmd_type = TYPE_E;
 		cmd_form = $3;
 	}
-	|	I
+	|	'I'
 	= {
 		cmd_type = TYPE_I;
 	}
-	|	L
+	|	'L'
 	= {
 		cmd_type = TYPE_L;
 		cmd_bytesz = NBBY;
 	}
-	|	L SP byte_size
+	|	'L' SP byte_size
 	= {
 		cmd_type = TYPE_L;
 		cmd_bytesz = $3;
 	}
 	/* this is for a bug in the BBN ftp */
-	|	L byte_size
+	|	'L' byte_size
 	= {
 		cmd_type = TYPE_L;
 		cmd_bytesz = $2;
 	}
 	;
 
-struct_code:	F
+struct_code:	'F'
 	= {
 		$$ = STRU_F;
 	}
-	|	R
+	|	'R'
 	= {
 		$$ = STRU_R;
 	}
-	|	P
+	|	'P'
 	= {
 		$$ = STRU_P;
 	}
 	;
 
-mode_code:	S
+mode_code:	'S'
 	= {
 		$$ = MODE_S;
 	}
-	|	B
+	|	'B'
 	= {
 		$$ = MODE_B;
 	}
-	|	C
+	|	'C'
 	= {
 		$$ = MODE_C;
 	}
@@ -1349,51 +1346,51 @@ yylex()
 
 			case 'A':
 			case 'a':
-				return (A);
+				return ('A');
 
 			case 'B':
 			case 'b':
-				return (B);
+				return ('B');
 
 			case 'C':
 			case 'c':
-				return (C);
+				return ('C');
 
 			case 'E':
 			case 'e':
-				return (E);
+				return ('E');
 
 			case 'F':
 			case 'f':
-				return (F);
+				return ('F');
 
 			case 'I':
 			case 'i':
-				return (I);
+				return ('I');
 
 			case 'L':
 			case 'l':
-				return (L);
+				return ('L');
 
 			case 'N':
 			case 'n':
-				return (N);
+				return ('N');
 
 			case 'P':
 			case 'p':
-				return (P);
+				return ('P');
 
 			case 'R':
 			case 'r':
-				return (R);
+				return ('R');
 
 			case 'S':
 			case 's':
-				return (S);
+				return ('S');
 
 			case 'T':
 			case 't':
-				return (T);
+				return ('T');
 
 			}
 			break;
