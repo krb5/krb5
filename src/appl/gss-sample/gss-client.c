@@ -107,11 +107,12 @@ static int connect_to_server(host, port)
  *
  * Arguments:
  *
- * 	s		(r) an established TCP connection to the service
- * 	service_name	(r) the ASCII service name of the service
+ * 	s		    (r) an established TCP connection to the service
+ * 	service_name(r) the ASCII service name of the service
  *	gss_flags	(r) GSS-API delegation flag (if any)
  *	auth_flag	(r) whether to actually do authentication
- *	oid		(r) OID of the mechanism to use
+ *  v1_format   (r) whether the v1 sample protocol should be used
+ *	oid		    (r) OID of the mechanism to use
  * 	context		(w) the established GSS-API context
  *	ret_flags	(w) the returned flags from init_sec_context
  *
@@ -130,8 +131,7 @@ static int connect_to_server(host, port)
  * and -1 is returned.
  */
 static int client_establish_context(s, service_name, gss_flags, auth_flag,
-				    v1_format, oid, gss_context, ret_flags, replay_flag,
-                    seq_flag, mutual_flag)
+				    v1_format, oid, gss_context, ret_flags)
      int s;
      char *service_name;
      gss_OID oid;
