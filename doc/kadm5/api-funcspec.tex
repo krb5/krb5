@@ -349,10 +349,10 @@ A policy cannot be deleted unless this number is zero.
 \label{sec:configparams}
 
 The KADM5 API acquires configuration information from the Kerberos
-configuration file (\$KRB5_CONFIG or /etc/krb5.conf) and from the KDC
-configuration file (\$KRB5_KDC_CONFIG or DEFAULT_KDC_PROFILE).  In
-KADM5_API_VERSION_2, some of the configuration parameters used by the
-KADM5 API can be controlled by the caller by providing a
+configuration file (\$KRB5_CONFIG or DEFAULT_PROFILE_PATH) and from
+the KDC configuration file (\$KRB5_KDC_CONFIG or DEFAULT_KDC_PROFILE).
+In KADM5_API_VERSION_2, some of the configuration parameters used by
+the KADM5 API can be controlled by the caller by providing a
 kadm5_config_params structure to kadm5_init:
 %
 \begin{verbatim}
@@ -390,7 +390,7 @@ typedef struct _kadm5_config_params {
 \end{verbatim}
 %
 The following list describes each of the fields of the structure,
-along with the profile variable name it overrides, its mask value, its
+along with the profile relation it overrides, its mask value, its
 default value, and whether it is valid on the client, server, or both.
 \begin{description}
 \item[mask] No variable.  No mask value.  A bitfield specifying which
@@ -407,16 +407,17 @@ in the mask, the default local realm is used.
 
 \item[profile] Variable: profile (server only).  PROFILE.  Client and
 server.  The Kerberos profile to use.  On the client, the default is
-the value of the KRB5_CONFIG environment variable, or /etc/krb5.conf
-if that is not set.  On the server, the value of the ``profile''
-variable of the KDC configuration file will be used as the first
-default if it exists; otherwise, the default is the value of the
-KRB5_KDC_PROFILE environment variable or DEFAULT_KDC_PROFILE.
+the value of the KRB5_CONFIG environment variable, or
+DEFAULT_PROFILE_PATH if that is not set.  On the server, the value of
+the ``profile'' variable of the KDC configuration file will be used as
+the first default if it exists; otherwise, the default is the value of
+the KRB5_KDC_PROFILE environment variable or DEFAULT_KDC_PROFILE.
 
 \item[kadmind_port] Variable: kadmind_port.  KADMIND_PORT.  Client and
 server.  The port number the kadmind server listens on.  The client
 uses this field to determine where to connect, and the server to
-determine where to listen.  The default is 752 (XXX).
+determine where to listen.  The default is 749, which has been
+assigned by IANA.
 
 \item[admin_server] Variable: admin_server.  ADMIN_SERVER.  Client.
 The host name of the admin server to which to connect.  There is no
@@ -426,7 +427,7 @@ kadmind_port field, overriding any value of the kadmind_port variable.
 
 \item[dbname] Variable: dbname.  DBNAME.  Server.  The Kerberos
 database name to use; the Kerberos database stores principal
-information.  There is no default.
+information.  The default is DEFAULT_KDB_FILE.
 
 \item[admin_dbname] Variable: admin_database_name.  ADBNAME.  Server.
 The administration database name to use; the administration database
@@ -435,7 +436,10 @@ parameters and ADBNAME is not, the admin_database_name variable is
 overridden and the field is set to the value of dbname followed by
 ``.kadm5''.  The default, if DBNAME is not set and the variable is not
 defined, is also the value of dbname followed by ``.kadm5'', if dbname
-is set.
+is set.  NOTE: The ADBNAME mask value is allowed to be set by callers
+{\it only} for testing purposes; it should {\it never} be set by
+normal clients, which instead should allow it to be derived from the
+database name.
 
 \item[admin_lockfile] Variable: admin_database_lockfile.
 ADB_LOCKFILE.  Server.  The administration database lock file name,
@@ -446,10 +450,13 @@ the value of admin_dbname followed by ``.lock'' (this depends on
 admin_dbname already being set based on DBNAME as described above).
 The default, if neither DBNAME nor ADBNAME is set in the input
 parameters and the variable is not defined, is admin_dbname followed
-by ``.lock'', if admin_dbname is set.
+by ``.lock'', if admin_dbname is set.  NOTE: The ADBNAME mask value is
+allowed to be set by callers {\it only} for testing purposes; it
+should {\it never} be set by normal clients, which instead should
+allow it to be derived from the database name.
 
 \item[acl_file] Variable: acl_file.  ACL_FILE.  Server.  The admin
-server's ACL file.  No default.
+server's ACL file.  The default is DEFAULT_KADM5_ACL_FILE.
 
 \item[dict_file] Variable: admin_dict_file.  DICT_FILE.  Server.  The
 admin server's dictionary file of passwords to disallow.  No default.
@@ -457,7 +464,8 @@ admin server's dictionary file of passwords to disallow.  No default.
 \item[admin_keytab] Variable: admin_keytab. ADMIN_KEYTAB.  Server.
 The keytab file containing the kadmin/admin and kadmin/changepw
 entries for the server to use.  The default is the value of the
-KRB5_KTNAME environment variable, if defined.
+KRB5_KTNAME environment variable, if defined, else
+DEFAULT_KADM5_KEYTAB.
 
 \item[mkey_from_keyboard] No variable. MKEY_FROM_KEYBOARD.  Server.
 If non-zero, prompt for the master password via the tty instead of
@@ -473,7 +481,8 @@ name of the master principal for the realm.  No default; lbkdb will
 work with a NULL value.
 
 \item[enctype] Variable: master_key_type.  ENCTYPE.  Server.  The
-encryption type of the master principal.  No default.
+encryption type of the master principal.  The default is
+DEFAULT_KDC_ENCTYPE.
 
 \item[max_life, max_rlife, expiration, flags] Variables: max_life,
 max_renewable_life, default_principal_expiration,
@@ -482,7 +491,8 @@ Server.  Default values for new principals.  All default to 0.
 
 \item[keysalts, num_keysalts] Variable: supported_enctypes.  ENCTYPES.
 Server.  The list of supported encryption type/salt type tuples; both
-fields must be assigned if ENCTYPES is set.  No default.
+fields must be assigned if ENCTYPES is set.  The default is a list
+containing one enctype, DES-CBC-CRC with normal salt.
 \end{description}
 
 \subsection{Principal keys}
@@ -741,7 +751,7 @@ expired
 \item[* KADM5_BAD_STRUCT_VERSION] Programmer error!  Bad API structure version
 \item[* KADM5_OLD_STRUCT_VERSION] API structure version specified by application is no longer supported (to fix, recompile application against current Admin API header files and libraries)
 \item[* KADM5_NEW_STRUCT_VERSION] API structure version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
-\item[* KADM5_BAD_API_VERION] Programmer error!  Bad API version
+\item[* KADM5_BAD_API_VERSION] Programmer error!  Bad API version
 \item[* KADM5_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
 \item[* KADM5_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
 \item[* KADM5_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current Admin API header files and libraries and recompile application)
