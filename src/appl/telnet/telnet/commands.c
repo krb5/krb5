@@ -61,7 +61,11 @@
 #include <netdb.h>
 #include <ctype.h>
 #include <pwd.h>
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <errno.h>
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
@@ -124,7 +128,8 @@ extern int isprefix();
 extern char **genget();
 extern int Ambiguous();
 
-static int call ();
+typedef int (*intrtn_t)();
+static int call (intrtn_t, ...);
 void cmdrc P((char *, char *));
 static    int
 send_tncmd P((void (*func)(), char *, char *));
@@ -2729,17 +2734,24 @@ static Command cmdtab2[] = {
 
     /*VARARGS1*/
 static int
-call(va_alist)
+#ifdef HAVE_STDARG_H
+call(intrtn_t routine, ...)
+#else
+call(routine, va_alist)
+    intrtn_t routine;
     va_dcl
+#endif
 {
     va_list ap;
-    typedef int (*intrtn_t)();
-    intrtn_t routine;
     char *args[100];
     int argno = 0;
 
+#ifdef HAVE_STDARG_H
+    va_start(ap, routine);
+#else
     va_start(ap);
-    routine = (va_arg(ap, intrtn_t));
+#endif
+
     while ((args[argno++] = va_arg(ap, char *)) != 0) {
 	;
     }

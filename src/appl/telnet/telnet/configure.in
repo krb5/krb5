@@ -2,6 +2,7 @@ AC_INIT(telnet.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_FUNC_VFORK
+AC_HEADER_STDARG
 AC_CHECK_HEADERS(string.h arpa/nameser.h unistd.h sys/select.h stdlib.h arpa/inet.h sys/filio.h curses.h term.h)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
