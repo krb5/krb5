@@ -32,6 +32,7 @@ configure
 configure.in
 generic
 krb5
+mechglue
 sample
 
 Things-to-lose:

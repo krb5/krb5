@@ -49,9 +49,10 @@ init_sec_context.c
 inq_context.c
 inq_cred.c
 inq_names.c
+k5mech.c
 k5seal.c
 k5unseal.c
-krb5_gss_glue.c
+pname_to_uid.c
 process_context_token.c
 rel_cred.c
 rel_name.c
