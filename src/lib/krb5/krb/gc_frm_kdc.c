@@ -1,8 +1,8 @@
 /*
- * $Source$
- * $Author$
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright (c) 1994 by the Massachusetts Institute of Technology.
+ * Copyright (c) 1994 CyberSAFE Corporation
+ * Copyright (c) 1993 Open Computing Security Group
+ * Copyright (c) 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -17,11 +17,12 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Neither M.I.T., the Open Computing Security Group, nor 
+ * CyberSAFE Corporation make any representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
+ * krb5_get_cred_from_kdc()
  * Get credentials from some KDC somewhere, possibly accumulating tgts
  * along the way.
  */
@@ -31,7 +32,7 @@ static char rcsid_gcfkdc_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-
+#include <stdio.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include "int-proto.h"
@@ -62,186 +63,355 @@ static char rcsid_gcfkdc_c[] =
 
 extern krb5_cksumtype krb5_kdc_req_sumtype;
 
-/* helper function: convert flags to necessary KDC options */
-#define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
+/* helper macro: convert flags to necessary KDC options */
 
-krb5_error_code
-krb5_get_cred_from_kdc (ccache, cred, tgts)
-    krb5_ccache ccache;
-    krb5_creds *cred;
-    krb5_creds ***tgts;
+#define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
+#define TGT_ETYPE \
+      krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
+
+
+#ifdef __STDC__
+krb5_error_code krb5_get_cred_from_kdc(
+  krb5_ccache ccache,
+  krb5_creds  *cred,
+  krb5_creds  ***tgts
+)
+#else
+krb5_error_code krb5_get_cred_from_kdc(ccache, cred, tgts)
+  krb5_ccache ccache;
+  krb5_creds  *cred;
+  krb5_creds  ***tgts;
+#endif
 {
-    krb5_creds tgt, tgtq;
-    krb5_creds **ret_tgts = 0;
-    krb5_principal *tgs_list = 0, *next_server;
-    krb5_principal final_server;
-    krb5_error_code retval;
-    int nservers;
-    int returning_tgt = 0;
-    krb5_enctype etype;
+  krb5_creds      **ret_tgts = NULL;
+  int             ntgts = 0;
 
-    /* in case we never get a TGT, zero the return */
-    *tgts = 0;
-    
-    memset((char *)&tgtq, 0, sizeof(tgtq));
-    memset((char *)&tgt, 0, sizeof(tgt));
+  krb5_creds      tgt, tgtq;
+  krb5_enctype    etype;
+  krb5_error_code retval;
+  krb5_principal  int_server = NULL;    /* Intermediate server for request */
+
+  krb5_principal  *tgs_list = NULL;
+  krb5_principal  *top_server = NULL;
+  krb5_principal  *next_server = NULL;
+  int             nservers = 0;
+
+  /* in case we never get a TGT, zero the return */
+
+  *tgts = NULL;
+     
+  memset((char *)&tgtq, 0, sizeof(tgtq));
+  memset((char *)&tgt, 0, sizeof(tgt));
+
+  /*
+   * we know that the desired credentials aren't in the cache yet.
+   *
+   * To get them, we first need a tgt for the realm of the server.
+   * first, we see if we have such a TGT in cache.  if not, then
+   * we ask the kdc to give us one.  if that doesn't work, then
+   * we try to get a tgt for a realm that is closest to the target.
+   * once we have that, then we ask that realm if it can give us
+   * tgt for the target.  if not, we do the process over with this
+   * new tgt.
+   */
+  
+  /*
+   * (the ticket may be issued by some other intermediate
+   *  realm's KDC; so we use KRB5_TC_MATCH_SRV_NAMEONLY)
+   */
+  if (retval = krb5_copy_principal(cred->client, &tgtq.client))
+      goto cleanup;
+
+  /* get target tgt from cache */
+  if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
+                            krb5_princ_realm(cred->client),
+                            &int_server)) {
+      goto cleanup;
+  }
+
+  if (retval = krb5_copy_principal(int_server, &tgtq.server)) {
+      goto cleanup;
+  }
+
+  if (retval = krb5_cc_retrieve_cred(ccache,
+                                     KRB5_TC_MATCH_SRV_NAMEONLY,
+                                     &tgtq,
+                                     &tgt)) {
+
+    if (retval != KRB5_CC_NOTFOUND) {
+	goto cleanup;
+    }
 
     /*
-     * we know that the desired credentials aren't in the cache yet.
-     *
-     * To get them, we first need a tgt for the realm of the server.
-     * first, we see if we have such a TGT in cache.
+     * Note that we want to request a TGT from our local KDC, even
+     * if we already have a TGT for some intermediate realm.  The 
+     * reason is that our local KDC may have a shortcut to the
+     * destination realm, and if it does we want to use the
+     * shortcut because it will provide greater security. - bcn
      */
-    
+  
     /*
-     * look for ticket with:
-     * client == cred->client,
-     * server == "krbtgt/realmof(cred->server)@realmof(cred->client)"
-     *
-     * (actually, the ticket may be issued by some other intermediate
-     *  realm's KDC; so we use KRB5_TC_MATCH_SRV_NAMEONLY below)
+     * didn't find it in the cache so it is time to get a local
+     * tgt and walk the realms tree.
      */
-
-    if (retval = krb5_copy_principal(cred->client, &tgtq.client))
-	goto errout;
-    if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
-			      krb5_princ_realm(cred->client), &final_server))
-	goto errout;
-    if (retval = krb5_copy_principal(final_server, &tgtq.server))
-	goto errout;
-
-    retval = krb5_cc_retrieve_cred (ccache,
-				    KRB5_TC_MATCH_SRV_NAMEONLY,
-				    &tgtq,
-				    &tgt);
-
-    if (retval != 0) {
-	if (retval != KRB5_CC_NOTFOUND)
-	    goto errout;
-	/* don't have the right TGT in the cred cache.  Time to iterate
-	   across realms to get the right TGT. */
-
-	/* get a list of realms to consult */
-	if (retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
-					  krb5_princ_realm(cred->server),
-					  &tgs_list, KRB5_REALM_BRANCH_CHAR))
-	    goto errout;
-
-	/* walk the list BACKWARDS until we find a cached
-	   TGT, then move forward obtaining TGTs until we get the last
-	   TGT needed */
-	for (next_server = tgs_list; *next_server;)
-		next_server++;
-	nservers = next_server - tgs_list;
-	next_server--;
-
-	/* next_server now points to the last TGT */
-	for (; next_server >= tgs_list; next_server--) {
-	    krb5_free_principal(tgtq.server);
-	    if (retval = krb5_copy_principal(*next_server, &tgt.server))
-		goto errout;
-	    retval = krb5_cc_retrieve_cred (ccache,
-					    KRB5_TC_MATCH_SRV_NAMEONLY,
-					    &tgtq,
-					    &tgt);
-	    if (retval) {
-		if (retval != KRB5_CC_NOTFOUND)
-		    goto errout;
-		continue;
-	    }
-	    next_server++;
-	    break;			/* found one! */
-	}
-	if (next_server < tgs_list) {
-	    /* didn't find any */
-	    retval = KRB5_NO_TKT_IN_RLM;
-	    goto errout;
-	}
-	/* allocate storage for TGT pointers. */
-	ret_tgts = (krb5_creds **)calloc(nservers+1, sizeof(krb5_creds));
-	if (!ret_tgts) {
-	    retval = ENOMEM;
-	    goto errout;
-	}
-	*tgts = ret_tgts;
-	for (nservers = 0; *next_server; next_server++, nservers++) {
-	    krb5_data *tmpdata;
-
-	    if (!valid_keytype(tgt.keyblock.keytype)) {
-		retval = KRB5_PROG_KEYTYPE_NOSUPP;
-		goto errout;
-	    }
-	    /* now get the TGTs */
-	    krb5_free_cred_contents(&tgtq);
-	    memset((char *)&tgtq, 0, sizeof(tgtq));
-	    tgtq.times = tgt.times;
-	    if (retval = krb5_copy_principal(tgt.client, &tgtq.client))
-		goto errout;
-
-	    /* ask each realm for a tgt to the end */
-	    if (retval = krb5_copy_data(krb5_princ_realm(*next_server),
-					&tmpdata)) {
-		goto errout;
-	    }
-	    free(krb5_princ_realm(final_server)->data);
-	    krb5_princ_set_realm(final_server, tmpdata);
-	    if (retval = krb5_copy_principal(final_server, &tgtq.server))
-		goto errout;
-
-	    tgtq.is_skey = FALSE;
-	    tgtq.ticket_flags = tgt.ticket_flags;
-
-	    etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
-	    if (retval = krb5_get_cred_via_tgt(&tgt,
-					       flags2options(tgtq.ticket_flags),
-					       etype,
-					       krb5_kdc_req_sumtype,
-					       &tgtq))
-		goto errout;
-
-	    /* make sure the returned ticket is somewhere in the remaining
-	       list, but we can tolerate different expected issuing realms */
-	    while (*++next_server &&
-		   !krb5_principal_compare(&(next_server[0])[1],
-					   &(tgtq.server[1])));
-	    if (!next_server) {
-		/* what we got back wasn't in the list! */
-		retval = KRB5_KDCREP_MODIFIED;
-		goto errout;
-	    }
-							   
-	    /* save tgt in return array */
-	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers]))
-		goto errout;
-	    tgt = *ret_tgts[nservers];
-	    returning_tgt = 1;		/* don't free it below... */
-	}
+    krb5_free_principal(int_server);
+    int_server = NULL;
+    if (retval = krb5_tgtname(krb5_princ_realm(cred->client),
+                              krb5_princ_realm(cred->client),
+                              &int_server)) {
+	goto cleanup;
     }
-    /* got/finally have tgt! */
-    if (!valid_keytype(tgt.keyblock.keytype)) {
-	retval = KRB5_PROG_KEYTYPE_NOSUPP;
-	goto errout;
-    }
-    etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
-
-    if (cred->second_ticket.length)
-	retval = krb5_get_cred_via_2tgt(&tgt,
-				       KDC_OPT_ENC_TKT_IN_SKEY | flags2options(tgt.ticket_flags),
-				       etype, krb5_kdc_req_sumtype, cred);
-
-    else
-	retval = krb5_get_cred_via_tgt(&tgt,
-				       flags2options(tgt.ticket_flags),
-				       etype,
-				       krb5_kdc_req_sumtype,
-				       cred);
-errout:
-    if (!returning_tgt)
-	krb5_free_cred_contents(&tgt);
-    if (final_server)
-	    krb5_free_principal(final_server);
+  
     krb5_free_cred_contents(&tgtq);
-    if (tgs_list)
-	krb5_free_realm_tree(tgs_list);
-    return retval;
+    memset((char *)&tgtq, 0, sizeof(tgtq));
+    if(retval = krb5_copy_principal(cred->client, &tgtq.client))
+	goto cleanup;
+    if(retval = krb5_copy_principal(int_server, &tgtq.server))
+	goto cleanup;
+
+    if (retval = krb5_cc_retrieve_cred(ccache,
+                                       KRB5_TC_MATCH_SRV_NAMEONLY,
+                                       &tgtq,
+                                       &tgt)) {
+	goto cleanup;
+    }
+  
+    /* get a list of realms to consult */
+  
+    if (retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
+                                      krb5_princ_realm(cred->server),
+                                      &tgs_list, 
+                                      KRB5_REALM_BRANCH_CHAR)) {
+	goto cleanup;
+    }
+  
+    for (nservers = 0; tgs_list[nservers]; nservers++)
+      ;
+  
+    /* allocate storage for TGT pointers. */
+    
+    if (!(ret_tgts = (krb5_creds **) calloc(nservers+1, sizeof(krb5_creds)))) {
+      retval = ENOMEM;
+      goto cleanup;
+    }
+    *tgts = ret_tgts;
+    
+    /*
+     * step one is to take the current tgt and see if there is a tgt for
+     * krbtgt/realmof(target)@realmof(tgt).  if not, try to get one with
+     * the tgt.
+     *
+     * if we don't get a tgt for the target, then try to find a tgt as
+     * close to the target realm as possible. at each step if there isn't
+     * a tgt in the cache we have to try and get one with our latest tgt.
+     * once we have a tgt for a closer realm, we go back to step one.
+     *
+     * once we have a tgt for the target, we go try and get credentials.
+     */
+  
+    for (top_server = tgs_list;
+         top_server < tgs_list + nservers;
+         top_server = next_server) {
+    
+      /* look in cache for a tgt for the destination */
+    
+      krb5_free_cred_contents(&tgtq);
+      memset(&tgtq, 0, sizeof(tgtq));
+      if(retval = krb5_copy_principal(tgt.client, &tgtq.client))
+	  goto cleanup;
+
+      krb5_free_principal(int_server);
+      int_server = NULL;
+      if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
+				krb5_princ_realm(*top_server),
+				&int_server)) {
+	  goto cleanup;
+      }
+    
+      if(retval = krb5_copy_principal(int_server, &tgtq.server))
+	  goto cleanup;
+
+      if (retval = krb5_cc_retrieve_cred(ccache,
+					 KRB5_TC_MATCH_SRV_NAMEONLY,
+					 &tgtq,
+					 &tgt)) {
+    
+	if (retval != KRB5_CC_NOTFOUND) {
+	    goto cleanup;
+	}
+  
+	/* didn't find it in the cache so try and get one */
+	/* with current tgt.                              */
+    
+	if (!valid_keytype(tgt.keyblock.keytype)) {
+	    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+	    goto cleanup;
+	}
+    
+	krb5_free_cred_contents(&tgtq);
+	memset(&tgtq, 0, sizeof(tgtq));
+	tgtq.times        = tgt.times;
+	if (retval = krb5_copy_principal(tgt.client, &tgtq.client))
+	    goto cleanup;
+	if(retval = krb5_copy_principal(int_server, &tgtq.server))
+	    goto cleanup;
+	tgtq.is_skey      = FALSE;
+	tgtq.ticket_flags = tgt.ticket_flags;
+	etype             = TGT_ETYPE;
+	if(retval = krb5_get_cred_via_tgt(&tgt,
+					  FLAGS2OPTS(tgtq.ticket_flags),
+					  etype,
+					  krb5_kdc_req_sumtype,
+					  &tgtq)) {
+	      
+       /*
+	* couldn't get one so now loop backwards through the realms
+	* list and try and get a tgt for a realm as close to the
+	* target as possible. the kdc should give us a tgt for the
+	* closest one it knows about, but not all kdc's do this yet.
+	*/
+  
+	  for (next_server = tgs_list + nservers - 1;
+	       next_server > top_server;
+	       next_server--) {
+	    krb5_free_cred_contents(&tgtq);
+	    memset(&tgtq, 0, sizeof(tgtq));
+	    if (retval = krb5_copy_principal(tgt.client, &tgtq.client))
+		goto cleanup;
+
+	    krb5_free_principal(int_server);
+	    int_server = NULL;
+	    if (retval = krb5_tgtname(krb5_princ_realm(*next_server),
+				      krb5_princ_realm(*top_server),
+				      &int_server)) {
+		goto cleanup;
+	    }
+    
+	    if(retval = krb5_copy_principal(int_server, &tgtq.server))
+		goto cleanup;
+
+	    if(retval = krb5_cc_retrieve_cred(ccache,
+					      KRB5_TC_MATCH_SRV_NAMEONLY,
+					      &tgtq,
+					      &tgt)) {
+	      if (retval != KRB5_CC_NOTFOUND) {
+		  goto cleanup;
+	      }
+  
+	      /* not in the cache so try and get one with our current tgt. */
+  
+	      if (!valid_keytype(tgt.keyblock.keytype)) {
+		  retval = KRB5_PROG_KEYTYPE_NOSUPP;
+		  goto cleanup;
+	      }
+            
+	      krb5_free_cred_contents(&tgtq);
+	      memset(&tgtq, 0, sizeof(tgtq));
+	      tgtq.times        = tgt.times;
+	      if (retval = krb5_copy_principal(tgt.client, &tgtq.client))
+		  goto cleanup;
+	      if(retval = krb5_copy_principal(int_server, &tgtq.server))
+		  goto cleanup;
+	      tgtq.is_skey      = FALSE;
+	      tgtq.ticket_flags = tgt.ticket_flags;
+	      etype             = TGT_ETYPE;
+	      if (retval = krb5_get_cred_via_tgt(&tgt,
+                                                 FLAGS2OPTS(tgtq.ticket_flags),
+                                                 etype,
+                                                 krb5_kdc_req_sumtype,
+                                                 &tgtq)) {
+		  continue;
+	      }
+	      
+	      /* save tgt in return array */
+	      if (retval = krb5_copy_creds(&tgtq, &ret_tgts[ntgts])) {
+		  goto cleanup;
+	      }
+	      
+	      tgt = *ret_tgts[ntgts++];
+	    }
+          
+	    /* got one as close as possible, now start all over */
+  
+	    break;
+	  }
+  
+	  if (next_server == top_server) {
+	      goto cleanup;
+	  }
+	  continue;
+        }
+ 
+	/*
+	 * Got a tgt.  If it is for the target realm we can go try for the
+	 * credentials.  If it is not for the target realm, then make sure it
+	 * is in the realms hierarchy and if so, save it and start the loop
+	 * over from there.  Note that we only need to compare the instance
+	 * names since that is the target realm of the tgt.
+	 */
+    
+	for (next_server = top_server; *next_server; next_server++) {
+            krb5_data *realm_1 = krb5_princ_component(next_server[0], 1);
+            krb5_data *realm_2 = krb5_princ_component(tgtq.server, 1);
+            if (realm_1->length == realm_2->length &&
+                !memcmp(realm_1->data, realm_2->data, realm_1->length)) {
+		break;
+            }
+	}
+
+	if (!next_server) {
+	    retval = KRB5_KDCREP_MODIFIED;
+	    goto cleanup;
+	}
+
+	if (retval = krb5_copy_creds(&tgtq, &ret_tgts[ntgts])) {
+	    goto cleanup;
+	}
+    
+        tgt = *ret_tgts[ntgts++];
+
+        /* we're done if it is the target */
+
+        if (!*next_server++) break;
+      }
+    }
+  }
+
+  /* got/finally have tgt!  try for the creds */
+
+  if (!valid_keytype(tgt.keyblock.keytype)) {
+    retval = KRB5_PROG_KEYTYPE_NOSUPP;
+    goto cleanup;
+  }
+
+  etype = TGT_ETYPE;
+  if (cred->second_ticket.length) {
+      retval = krb5_get_cred_via_2tgt(&tgt,
+				      KDC_OPT_ENC_TKT_IN_SKEY |
+				      FLAGS2OPTS(tgt.ticket_flags),
+				      etype,
+				      krb5_kdc_req_sumtype,
+				      cred);
+  }
+  else {
+      retval = krb5_get_cred_via_tgt(&tgt,
+                                   FLAGS2OPTS(tgt.ticket_flags), 
+                                   etype,
+                                   krb5_kdc_req_sumtype,
+                                   cred);
+  }
+
+  /* cleanup and return */
+
+cleanup:
+
+  if(tgs_list)  krb5_free_realm_tree(tgs_list);
+  krb5_free_cred_contents(&tgtq); 
+  if (int_server) krb5_free_principal(int_server); 
+  if (ntgts == 0) {
+      *tgts = NULL;
+      if (ret_tgts)  free(ret_tgts);
+      krb5_free_cred_contents(&tgt);
+  }
+  return(retval);
 }

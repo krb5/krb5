@@ -58,17 +58,20 @@ OLDDECLARG(krb5_creds *, cred)
     krb5_response tgsrep;
 
     /* tgt->client must be equal to cred->client */
-    /* tgt->server must be equal to krbtgt/realmof(cred->client) */
+
     if (!krb5_principal_compare(tgt->client, cred->client))
 	return KRB5_PRINC_NOMATCH;
 
     if (!tgt->ticket.length)
 	return(KRB5_NO_TKT_SUPPLIED);
 
-    if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
-			      krb5_princ_realm(cred->client), &tempprinc))
+    /* check if we have the right TGT                    */
+    /* tgt->server must be equal to                      */
+    /* krbtgt/realmof(cred->server)@realmof(tgt->server) */
+
+    if(retval = krb5_tgtname(krb5_princ_realm(cred->server),
+			     krb5_princ_realm(tgt->server), &tempprinc))
 	return(retval);
-    
     if (!krb5_principal_compare(tempprinc, tgt->server)) {
 	krb5_free_principal(tempprinc);
 	return KRB5_PRINC_NOMATCH;
