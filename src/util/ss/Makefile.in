@@ -111,10 +111,12 @@ includes:: $(SRC_HDRS_DEP) $(BUILD_HDRS)
 		fi ; \
 	done
 
+$(HDRS): includes
+
 clean-unix::
 	$(RM) $(HDRS)
 
-std_rqs.c: std_rqs.ct
+std_rqs.c: std_rqs.ct mk_cmds
 
 ss_err.h: ss_err.et
 
