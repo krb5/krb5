@@ -917,20 +917,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb_error_data.error = code;
        (void) krb5_us_timeofday(context, &krb_error_data.stime,
 				&krb_error_data.susec);
-       if (cred)
-	   krb_error_data.server = cred->princ;
-       else {
-	   code = krb5_parse_name(context, "server/principal/name@unknown",
-				  &krb_error_data.server);
-	   if (code)
-	       return major_status;
-       }
-	   
+       krb_error_data.server = cred->princ;
+
        code = krb5_mk_error(context, &krb_error_data, &scratch);
-       if (cred == NULL) {
-	   krb5_free_principal(context, krb_error_data.server);
-	   krb_error_data.server = NULL;
-       }
        if (code)
 	   return (major_status);
 
