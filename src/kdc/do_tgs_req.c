@@ -666,7 +666,7 @@ int *nprincs;
 {
     krb5_error_code retval;
     krb5_principal *plist, *pl2;
-    krb5_data *tmp;
+    krb5_data tmp;
 
     *nprincs = 0;
     *more = FALSE;
@@ -683,10 +683,10 @@ int *nprincs;
        ignore it */
     while (--pl2 > plist) {
 	*nprincs = 1;
-	tmp = krb5_princ_realm(*pl2);
+	tmp = *krb5_princ_realm(*pl2);
 	krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
 	retval = krb5_db_get_principal(*pl2, server, nprincs, more);
-	krb5_princ_set_realm(*pl2, tmp);
+	krb5_princ_set_realm(*pl2, &tmp);
 	if (retval) {
 	    *nprincs = 0;
 	    *more = FALSE;
@@ -701,14 +701,14 @@ int *nprincs;
 	    krb5_principal tmpprinc;
 	    char *sname;
 
-	    tmp = krb5_princ_realm(*pl2);
+	    tmp = *krb5_princ_realm(*pl2);
 	    krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
 	    if (retval = krb5_copy_principal(*pl2, &tmpprinc)) {
 		krb5_db_free_principal(server, *nprincs);
-		krb5_princ_set_realm(*pl2, tmp);
+		krb5_princ_set_realm(*pl2, &tmp);
 		continue;
 	    }
-	    krb5_princ_set_realm(*pl2, tmp);
+	    krb5_princ_set_realm(*pl2, &tmp);
 
 	    krb5_free_principal(request->server);
 	    request->server = tmpprinc;
