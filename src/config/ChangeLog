@@ -1,3 +1,10 @@
+2001-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (COMPILE_ET): New variable.
+	(COMPILE_ET_H, COMPILE_ET_C): Deleted.
+	(.et.h, .et.c): Use $(COMPILE_ET) instead of invoking awk
+	explicitly.
+
 2000-10-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* post.in (Makefile): When running autoconf, use AUTOCONFFLAGS

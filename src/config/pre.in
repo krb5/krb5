@@ -302,16 +302,15 @@ TCL_INCLUDES	= @TCL_INCLUDES@
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
-COMPILE_ET_H= $(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$@
-COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
+COMPILE_ET= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 
 .SUFFIXES:  .h .c .et .ct
 
 .et.h:
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+	$(COMPILE_ET) $<
 
 .et.c:
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$*.c $<
+	$(COMPILE_ET) $<
 
 # rule to make object files
 #
