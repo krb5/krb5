@@ -54,7 +54,9 @@ export VERBOSE
 
 REALM=SECURE-TEST.OV.COM; export REALM
 
-EXPECT=@EXPECT@; export EXPECT
+if test x$EXPECT = x; then
+    EXPECT=@EXPECT@; export EXPECT
+fi
 
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl

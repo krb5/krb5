@@ -1,3 +1,8 @@
+2000-06-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* env-setup.shin: Do not override the EXPECT environment variable
+		if set.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
