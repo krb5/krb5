@@ -1,3 +1,8 @@
+Fri May  5 14:06:20 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* osconf.h: Change default KDC etype to be DES_CBC_MD5, to be
+		conformant with RFC-1510.
+
 Fri Apr 21 21:00:40 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* osconf.h: Add #define's for DEFAULT_PROFILE_FILENAME.  
