@@ -1378,6 +1378,8 @@ extern krb5_kt_ops krb5_kt_dfl_ops;
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_context
 	KRB5_PROTOTYPE((krb5_context FAR *));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_secure_context
+	KRB5_PROTOTYPE((krb5_context FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_context
 	KRB5_PROTOTYPE((krb5_context));
 
@@ -1823,9 +1825,6 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_config_files
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_profile
 	KRB5_PROTOTYPE((krb5_context, profile_t *));
-
-krb5_error_code krb5_secure_config_files
-	KRB5_PROTOTYPE ((krb5_context));
 
 krb5_error_code krb5_send_tgs
 	KRB5_PROTOTYPE((krb5_context,
