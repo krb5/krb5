@@ -35,6 +35,7 @@ kadm5_ret_t
     while (count--)
 	  free(names[count]);
      free(names);
+    return KADM5_OK;
 }
 
 
@@ -52,6 +53,7 @@ kadm5_ret_t krb5_free_key_data_contents(context, key)
 	       free(key->key_data_contents[i]);
 	  }
      }
+     return KADM5_OK;
 }
 
 kadm5_ret_t
