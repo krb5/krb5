@@ -1,3 +1,7 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_C_CONST instead of AC_CONST.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5_libinit.c: Include krb5_libinit.h for prototypes. 
