@@ -93,6 +93,11 @@ krb5_error_code krb5_gen_portaddr
     PROTOTYPE((const krb5_address *,
 	       krb5_const_pointer,
 	       krb5_address **));
+krb5_error_code krb5_create_secure_file
+	PROTOTYPE((const char const * pathname));
+krb5_error_code krb5_sync_disk_file
+	PROTOTYPE((FILE *fp));
+
 
 krb5_error_code krb5_read_message PROTOTYPE((krb5_pointer, krb5_data *));
 krb5_error_code krb5_write_message PROTOTYPE((krb5_pointer, krb5_data *));
