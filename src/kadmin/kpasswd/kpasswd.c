@@ -460,6 +460,11 @@ main(argc,argv)
 	free(new_password);
         goto finish;
     }
+    if (new_pwsize == 0) {
+	fprintf(stderr, "A null password is not allowed!\n");
+	free(new_password);
+	goto finish;
+    }
 #endif
 
     inbuf.data = new_password;
