@@ -22,19 +22,6 @@
 #include <com_err.h>
 #include "ss_internal.h"
 
-#if (defined(_STDARG_H_) || defined(_STDARG_H))
-#define STDARG_PROTOTYPES
-#endif
-
-#ifndef __STDC__
-/* we didn't get it in com_err.h if it wasn't STDC. */
-#ifdef STDARG_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-#endif
-  
 #undef ss_error
 
 char * ss_name(sci_idx)
