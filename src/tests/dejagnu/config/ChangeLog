@@ -1,3 +1,8 @@
+Mon Jul 29 11:19:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: (kinit): Wait for eof from kinit before waiting for
+		exit. 
+
 Sat Jul 27 02:20:54 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Rewrite to use kdb5_util instead of kdb5_create and
