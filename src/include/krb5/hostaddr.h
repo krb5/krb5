@@ -3,15 +3,14 @@
  * $Author$
  * $Id$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
  * hostaddr definitions for Kerberos version 5.
  */
-
-#include <krb5/copyright.h>
 
 #ifndef KRB5_HOSTADDR__
 #define KRB5_HOSTADDR__
@@ -29,6 +28,9 @@ typedef struct _krb5_address {
 #define	ADDRTYPE_XNS	0x0006
 #define	ADDRTYPE_ISO	0x0007
 #define ADDRTYPE_DDP	0x0010
+/* not yet in the spec... */
+#define ADDRTYPE_ADDRPORT	0x0100
+#define ADDRTYPE_IPPORT		0x0101
 
 /* macros to determine if a type is a local type */
 #define ADDRTYPE_IS_LOCAL(addrtype) (addrtype & 0x8000)
