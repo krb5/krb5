@@ -7,7 +7,7 @@ AC_REPLACE_FUNCS([strcasecmp strdup setenv setsid strerror strftime getopt herro
 AC_CHECK_FUNCS(gettosbyname cgetent)
 AC_CHECK_HEADERS(stdlib.h string.h)
 LIBOBJS="$LIBOBJS getent.o"
-AC_CONST
+AC_C_CONST
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)
 else

@@ -1,3 +1,7 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+        * configure.in: Use AC_C_CONST instead of AC_CONST.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* gettytab.c (nchktc): Don't overflow tcname if tty type name is too
