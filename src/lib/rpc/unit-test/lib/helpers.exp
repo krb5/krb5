@@ -1,0 +1,128 @@
+if {[info commands exp_version] != {}} {
+	set exp_version_4 [regexp {^4} [exp_version]]
+} else {
+	set exp_version_4 [regexp {^4} [expect_version]]
+}
+
+# Backward compatibility until we're using expect 5 everywhere
+if {$exp_version_4} {
+	global wait_error_index wait_errno_index wait_status_index
+	set wait_error_index 0
+	set wait_errno_index 1
+	set wait_status_index 1
+} else {
+	set wait_error_index 2
+	set wait_errno_index 3
+	set wait_status_index 3
+}
+				
+
+proc kinit {princ pass lifetime} {
+	global kinit
+	global wait_error_index wait_errno_index wait_status_index
+
+	spawn -noecho $kinit -l $lifetime $princ
+	expect {
+		-re "Password for $princ.*: " { send "$pass\n" }
+		timeout { error "Timeout waiting for kinit"; close }
+	}
+	expect { eof {} }
+
+	set ret [wait]
+	if {[lindex $ret $wait_error_index] == -1} {
+	 	error \
+	    "wait(kinit $princ) returned error [lindex $ret $wait_errno_index]"
+	} else {
+		if {[lindex $ret $wait_status_index] != 0} {
+			error \
+		    "kinit $princ failed with [lindex $ret $wait_status_index]"
+		}
+	}
+}
+
+proc flush_server {} {
+	global server_id
+	global expect_out
+
+	verbose "flushing server output" 1
+
+	while {1} {
+		set timeout 5
+
+		expect {
+			-i $server_id
+			-re "^.+$" {
+			    verbose "server output: $expect_out(buffer)"
+			}
+			timeout { break }
+		}
+	}
+}
+
+proc start_client {testname ccname user password lifetime count
+		  {target ""}} {
+	global env
+	global CLIENT
+	global hostname
+	global spawn_id
+	global verbose
+
+	if {$target == ""} {
+		set target "server@$hostname"
+	}
+
+	set env(KRB5CCNAME) FILE:/tmp/krb5cc_rpc_test_$ccname
+	kinit $user $password $lifetime
+
+	if {$verbose > 0} {
+		spawn $CLIENT -a 1 -s 1 -m 1 $hostname $target $count
+	} else {
+		spawn $CLIENT $hostname $target $count
+	}
+
+	verbose "$testname: client $ccname started"
+
+	unset env(KRB5CCNAME)
+}
+
+proc eof_client {testname ccname id status} {
+	verbose "$testname: eof'ing for client $ccname" 1
+
+	expect {
+		-i $id
+		eof { verbose $expect_out(buffer) 1 }
+		timeout { 
+			fail "$testname: timeout waiting for client $ccname to exit"
+		}
+	}
+	wait_client $testname $ccname $id $status
+}
+
+
+proc wait_client {testname ccname id status} {
+	global env
+	global kill
+	global kdestroy
+	global wait_error_index wait_errno_index wait_status_index
+
+	verbose "$testname: waiting for client $ccname" 1
+
+	set ret [wait -i $id]
+	if {[lindex $ret $wait_error_index] == -1} {
+		fail \
+       "$testname: wait $ccname returned error [lindex $ret $wait_errno_index]"
+	} else {
+		if {[lindex $ret $wait_status_index] == $status} {
+			pass "$testname: client $ccname"
+		} else {
+			fail "$testname: client $ccname: unexpected return status [lindex $ret $wait_status_index], should be $status."
+		}
+	}
+
+	set env(KRB5CCNAME) FILE:/tmp/krb5cc_rpc_test_$ccname
+ 	if {[catch "exec $kdestroy"] != 0} {
+ 		error "$testname: cannot destroy client $ccname ccache"
+ 	}
+
+	unset env(KRB5CCNAME)
+}

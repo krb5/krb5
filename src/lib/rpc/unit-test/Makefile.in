@@ -1,0 +1,38 @@
+CFLAGS	= $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I.
+
+all:: client server
+
+client: client.o rpc_test_clnt.o $(DEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o client client.o rpc_test_clnt.o $(LIBS)
+
+server: server.o rpc_test_svc.o $(DEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o server server.o rpc_test_svc.o $(LIBS)
+
+client.c server.c: rpc_test.h
+
+rpc_test.h rpc_test_clnt.c rpc_test_svc.c: rpc_test.x
+	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h rpc_test.x
+	ln -s $(srcdir)/rpc_test.x .
+	rpcgen -l rpc_test.x -o rpc_test_clnt.c
+	rpcgen -m rpc_test.x -o rpc_test_svc.c
+	rpcgen -h rpc_test.x -o rpc_test.h
+
+clean::
+	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c
+
+check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-body::	
+	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \
+		$(RUNTEST) SERVER=./server CLIENT=./client \
+		KINIT=$(BUILDTOP)/clients/kinit/kinit \
+		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
+		--tool rpc_test
+
+unit-test-setup::
+	$(ENV_SETUP) $(START_SERVERS)
+	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) $(srcdir)/rpc_test_setup.sh
+
+unit-test-cleanup::
+	$(ENV_SETUP) $(STOP_SERVERS)
+	-rm -f /tmp/rpc_test_v5srvtab /tmp/krb5cc_rpc_test_fullrun

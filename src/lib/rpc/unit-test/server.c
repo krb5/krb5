@@ -5,6 +5,10 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.16  1996/10/15 20:15:06  bjaspan
+ * 	* initial changes to make rpc unit tests work with new build/test
+ *  	system
+ *
  * Revision 1.15  1996/07/22 20:41:44  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -122,7 +126,7 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
 			     caddr_t data);
 
 #ifndef SERVICE_NAME
-#define SERVICE_NAME "host"
+#define SERVICE_NAME "server"
 #endif
 
 main(int argc, char **argv)

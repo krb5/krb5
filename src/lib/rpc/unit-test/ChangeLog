@@ -1,0 +1,5 @@
+Tue Oct 15 16:12:04 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* initial changes to make rpc unit tests work with new build/test
+ 	system
+

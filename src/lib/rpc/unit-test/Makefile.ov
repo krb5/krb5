@@ -4,6 +4,10 @@
 # $Source$
 # 
 # $Log$
+# Revision 1.1  1996/10/15 20:15:02  bjaspan
+# 	* initial changes to make rpc unit tests work with new build/test
+#  	system
+#
 # Revision 1.9  1996/07/22 20:41:38  marc
 # this commit includes all the changes on the OV_9510_INTEGRATION and
 # OV_MERGE branches.  This includes, but is not limited to, the new openvision
