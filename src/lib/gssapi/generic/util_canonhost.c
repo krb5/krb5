@@ -25,10 +25,6 @@
 #include "gssapiP_generic.h"
 
 #include <sys/types.h>
-#ifndef _WINSOCKAPI_
-#include <sys/socket.h>
-#include <netdb.h>
-#endif
 #include <ctype.h>
 #include <string.h>
 

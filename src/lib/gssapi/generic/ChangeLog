@@ -1,3 +1,8 @@
+Fri Mar 24 18:02:15 1995  Theodore Y. Ts'o  (tytso@rt-11)
+
+	* util_canonhost.c: Don't include sys/socket.h and netdb.h, since
+		they are included by k5-config.h
+
 Tue Mar 21 19:09:34 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed the name of the library the PC
