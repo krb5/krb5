@@ -239,7 +239,7 @@ char	*rhost_sane;
 int	swaitmax = SWAITMAX;
 int	swaitint = SWAITINT;
 
-void	lostconn(), myoob();
+void	lostconn(int), myoob(int);
 FILE	*getdatasock(char *); 
 #if defined(__STDC__)
 /* 
@@ -582,7 +582,8 @@ nextopt:
 }
 
 void
-lostconn()
+lostconn(sig)
+int sig;
 {
 	if (debug)
 		syslog(LOG_DEBUG, "lost connection");
@@ -2149,7 +2150,8 @@ dologout(status)
 }
 
 void
-myoob()
+myoob(sig)
+    int sig;
 {
 	char *cp, *cs;
 #ifndef strpbrk
