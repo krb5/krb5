@@ -149,7 +149,7 @@ krb5_error_code kadmin_parse_name(name, principal)
 	if (cp - fullname && *(cp - 1) != '\\')
 	    break;
 	else
-	    cp = strchr(cp, '@');
+	    cp = strchr(cp + 1, '@');
     }
     if (cp == NULL) {
 	strcat(fullname, "@");

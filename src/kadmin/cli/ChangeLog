@@ -1,3 +1,10 @@
+2001-10-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (kadmin_parse_name): Properly advance pointer in
+	certain error cases involving '@'.  Patch from Emily Ratliff,
+	<ratliff@austin.ibm.com>.
+	[pulled up 1.54->1.55 from trunk]
+
 2001-02-22  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.M: Remove references to "rename_principal".
