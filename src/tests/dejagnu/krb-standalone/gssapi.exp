@@ -36,7 +36,7 @@ proc our_kinit { name pass ccache } {
     global spawn_id
 
     # Use kinit to get a ticket.
-    spawn $KINIT -c $ccache $name@$REALMNAME
+    spawn $KINIT -5 -c $ccache $name@$REALMNAME
     expect {
 	"Password for $name@$REALMNAME:" {
 	    verbose "kinit started"
@@ -56,6 +56,7 @@ proc our_kinit { name pass ccache } {
     expect {
         "\r" { }
     }
+    expect eof
     if ![check_exit_status kinit] {
 	return 0
     }

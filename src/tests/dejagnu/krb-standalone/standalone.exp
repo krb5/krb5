@@ -57,9 +57,9 @@ proc doit { } {
     }
 
     # Make sure that klist can see the ticket.
-    spawn $KLIST
+    spawn $KLIST -5
     expect {
-	-re "Ticket cache:\[ 	\]*$tmppwd/tkt.*Default principal:\[ 	\]*krbtest/admin@$REALMNAME.*krbtgt/$REALMNAME@$REALMNAME\r\n" {
+	-re "Ticket cache:\[ 	\]*(.+:)?$tmppwd/tkt.*Default principal:\[ 	\]*krbtest/admin@$REALMNAME.*krbtgt/$REALMNAME@$REALMNAME\r\n" {
 	    verbose "klist started"
 	}
 	timeout {
@@ -72,8 +72,9 @@ proc doit { } {
 	}
     }
 
-   expect {
+    expect {
         "\r" { }
+	eof { }
     }
 
     if ![check_exit_status "klist"] {
@@ -82,14 +83,14 @@ proc doit { } {
     pass "klist"
 
     # Destroy the ticket.
-    spawn $KDESTROY
+    spawn $KDESTROY -5
     if ![check_exit_status "kdestroy"] {
 	return
     }
     pass "kdestroy"
 
     # Double check that the ticket was destroyed.
-    spawn $KLIST
+    spawn $KLIST -5
     expect {
 	-re "klist: No credentials cache file found.*\r\n" {
 	    verbose "klist started"

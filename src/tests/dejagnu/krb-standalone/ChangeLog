@@ -1,3 +1,13 @@
+2000-02-06  Tom Yu  <tlyu@mit.edu>
+
+	* standalone.exp: Use $KLIST -5 and $KDESTROY -5 to deal with
+	changed behavior in these programs.  Wait for eof in some cases to
+	avoid hanging.
+
+	* rsh.exp: Wait for eof to prevent hanging.
+
+	* gssapi.exp: Use $KINIT -5 to deal with new kinit behavior.
+
 Fri Nov  6 10:05:31 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* gssftp.exp: Changes to deal with new text messages in ftp/ftpd.

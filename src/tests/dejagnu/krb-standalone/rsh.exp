@@ -108,7 +108,7 @@ proc rsh_test { } {
 	    return
 	}
     }
-
+    expect eof
     if ![check_exit_status $testname] {
 	return
     }
