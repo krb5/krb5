@@ -19,7 +19,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 0.91 beta
+@set EDITION b6-1
 
 @finalout                               @c don't print black warning boxes
 
@@ -325,14 +325,14 @@ parallel.  To do this, have the master KDC propagate the database to one
 set of slaves, and then have each of these slaves propagate the database
 to additional slaves.
 
-@ifset MIT
+@ifclear CYGNUS
 
 @node Compiling @value{PRODUCT}, Installing @value{PRODUCT}, Realm Configuration Decisions, Top
 @chapter Compiling @value{PRODUCT}
 
 @include build.texinfo
 
-@end ifset
+@end ifclear
 
 @node Installing @value{PRODUCT}, Support, Compiling @value{PRODUCT}, Top
 @chapter Installing @value{PRODUCT}

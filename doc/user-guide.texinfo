@@ -1,8 +1,8 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
 @c guide
-@setfilename KerbNet-User.info
-@settitle Kerb*Net UNIX User's Guide
+@setfilename kerberos-user.info
+@settitle Kerberos V5 UNIX User's Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @smallbook                              @c Format for 7" X 9.25" paper
@@ -14,7 +14,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 0.9 beta
+@set EDITION b6-1
 
 @finalout                               @c don't print black warning boxes
 
@@ -46,7 +46,6 @@ This file describes how to use the @value{PRODUCT} client programs.
 @c comand before each @section or @subsection!  All you need to enter
 @c is:
 @c
-
 @c @section New Section Name
 @c
 @c M-x texinfo-every-node-update will take care of calculating the
@@ -212,7 +211,7 @@ versions, when you type their command names.
 
 On many systems, Kerberos is built into the login program, and you get
 tickets automatically when you log in.  Other programs, such as
-@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
+/@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
 copies of your tickets to the remote host.  Most of these programs also
 automatically destroy your tickets when they exit.  However,
 @value{COMPANY} recommends that you explicitly destroy your Kerberos

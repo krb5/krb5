@@ -3,8 +3,8 @@
 @c definitions added by jcb.
 @c %**start of header
 @c guide
-@setfilename kerbnet-admin.info
-@settitle Kerb*Net System Administrator's Guide
+@setfilename kerberos-admin.info
+@settitle Kerberos V5 System Administrator's Guide
 @c @setchapternewpage odd                  @c chapter begins on next odd page
 @setchapternewpage on                   @c chapter begins on next page
 @smallbook                              @c Format for 7" X 9.25" paper
@@ -15,7 +15,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 0.9 beta
+@set EDITION b6-1
 
 @finalout                               @c don't print black warning boxes
 
@@ -50,7 +50,6 @@ installation.
 @c is:
 @c
 @c @node New Section Name
-
 @c @section New Section Name
 @c
 @c M-x texinfo-every-node-update will take care of calculating the
@@ -65,6 +64,7 @@ installation.
 * Updates::                     
 * Backups of Secure Hosts::     
 * Support::                     
+* Bug Reporting::               
 * Appendix::                    
 @end menu
 
@@ -73,10 +73,12 @@ installation.
 @node Introduction, How Kerberos Works, Top, Top
 @chapter Introduction
 
+@ifset CYGNUS
 Congratulations on your purchase of @value{PRODUCT}.  @value{COMPANY}
 believes @value{PRODUCT} provides the best network security available.
 Please let us know if we can be of assistance in getting your
 installation of @value{PRODUCT} set up and running.
+@end ifset
 
 @menu
 * Why Should I use Kerberos?::  
@@ -1643,6 +1645,7 @@ Security}, by David Curry, is also a good starting point.
 This will have to wait until the next release.  *sigh*
 @end ignore
 
+@ifset CYGNUS
 @node Updates, Backups of Secure Hosts, Application Servers, Top
 @chapter Updates
 
@@ -1697,6 +1700,7 @@ new release and change any symbolic links to point to the new programs.
 Other than any functionality changes in the programs, the upgrade should
 be completely user-transparent.
 @c Reference to upgrading from Kerberos V4 document, once it's written.
+@end ifset
 
 @node Backups of Secure Hosts, Support, Updates, Top
 @chapter Backups of Secure Hosts
@@ -1718,22 +1722,24 @@ backups are kept as secure as the host's root password.
 @node Backing Up the Kerberos Database,  , Backups of Secure Hosts, Backups of Secure Hosts
 @section Backing Up the Kerberos Database
 
-It is possible that the Kerberos database could be corrupted.  If this
-happens on one of the slave KDCs, you might never notice, since the next
-automatic propagation of the database would install a fresh copy.
-However, if it happens to the master KDC, the corrupted database would
-be propagated to all of the slaves during the next propagation.  For
-this reason, @value{COMPANY} recommends that you back up your Kerberos
-database regularly.  Because the master KDC is continuously dumping the
-database to a file in order to propagate it to the slave KDCs, it is a
-simple matter to have a cron job periodically copy the dump file to a
-secure machine elsewhere on your network.  (Of course, it is important
-to make the host where these backups are stored as secure as your KDCs,
-and to encrypt its transmission across your network.)  Then if your
-database becomes corrupted, you can load the most recent dump onto the
-master KDC.  (@xref{Restoring a Kerberos Database from a Dump File}.)
+As with any file, it is possible that your Kerberos database could
+become corrupted.  If this happens on one of the slave KDCs, you might
+never notice, since the next automatic propagation of the database would
+install a fresh copy.  However, if it happens to the master KDC, the
+corrupted database would be propagated to all of the slaves during the
+next propagation.  For this reason, @value{COMPANY} recommends that you
+back up your Kerberos database regularly.  Because the master KDC is
+continuously dumping the database to a file in order to propagate it to
+the slave KDCs, it is a simple matter to have a cron job periodically
+copy the dump file to a secure machine elsewhere on your network.  (Of
+course, it is important to make the host where these backups are stored
+as secure as your KDCs, and to encrypt its transmission across your
+network.)  Then if your database becomes corrupted, you can load the
+most recent dump onto the master KDC.  (@xref{Restoring a Kerberos
+Database from a Dump File}.)
 
-@node Support, Appendix, Backups of Secure Hosts, Top
+@ifset CYGNUS
+@node Support, Bug Reporting, Backups of Secure Hosts, Top
 @chapter Support
 
 @menu
@@ -1748,8 +1754,23 @@ master KDC.  (@xref{Restoring a Kerberos Database from a Dump File}.)
 @section Using sendpr
 
 @include send-pr.texinfo
+@end ifset
 
-@node Appendix,  , Support, Top
+@ifset MIT
+@node Bug Reporting, Appendix, Support, Top
+@chapter Bug Reporting
+
+In any complex software, there will be bugs. Please send bug reports or
+other problems you may uncover to the e-mail address
+@b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos V5
+distribution you are using, and whether you have made any private
+changes.  Bug reports that include proposed fixes are especially
+welcome.  If you do include fixes, please send them using either context
+diffs or unified diffs (using @samp{diff -c} or @samp{diff -u},
+respectively).
+@end ifset
+
+@node Appendix,  , Bug Reporting, Top
 @appendix Appendix
 
 @menu
