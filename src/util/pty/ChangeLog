@@ -1,3 +1,8 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* pty-int.h: Include port-sockets.h instead of netdb.h and
+	netinet/in.h.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (clean-mac): Target deleted.

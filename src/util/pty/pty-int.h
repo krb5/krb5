@@ -45,7 +45,6 @@
 #include <sys/time.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <netinet/in.h>
 #include <errno.h>
 #include <pwd.h>
      
@@ -80,7 +79,7 @@
 #include <sgtty.h>
 #endif
      
-#include <netdb.h>
+#include "port-sockets.h"
 #include <string.h>
 #include <sys/param.h>
 
