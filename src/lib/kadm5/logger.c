@@ -942,4 +942,43 @@ krb5_klog_syslog(priority, format, va_alist)
     va_end(pvar);
     return(retval);
 }
+
+/*
+ * krb5_klog_reopen() - Close and reopen any open (non-syslog) log files.
+ *                      This function is called when a SIGHUP is received
+ *                      so that external log-archival utilities may
+ *                      alert the Kerberos daemons that they should get
+ *                      a new file descriptor for the give filename.
+ */
+void
+krb5_klog_reopen(kcontext)
+krb5_context kcontext;
+{
+    int lindex;
+    FILE *f;
+
+    /*
+     * Only logs which are actually files need to be closed
+     * and reopened in response to a SIGHUP
+     */
+    for (lindex = 0; lindex < log_control.log_nentries; lindex++) {
+	if (log_control.log_entries[lindex].log_type == K_LOG_FILE) {
+	    fclose(log_control.log_entries[lindex].lfu_filep);
+	    /*
+	     * In case the old logfile did not get moved out of the
+	     * way, open for append to prevent squashing the old logs.
+	     */
+	    f = fopen(log_control.log_entries[lindex].lfu_fname, "a+");
+	    if (f) {
+		log_control.log_entries[lindex].lfu_filep = f;
+	    } else {
+		fprintf(stderr, "Couldn't open log file %s: %s\n",
+			log_control.log_entries[lindex].lfu_fname,
+			error_message(errno));
+	    }
+	}
+    }
+}
+
 #endif /* !defined(_MSDOS) */
+

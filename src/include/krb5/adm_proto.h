@@ -137,6 +137,7 @@ krb5_error_code krb5_klog_init
 		   krb5_boolean));
 void krb5_klog_close KRB5_PROTOTYPE((krb5_context));
 int krb5_klog_syslog KRB5_PROTOTYPE((int, const char *, ...));
+void krb5_klog_reopen KRB5_PROTOTYPE((krb5_context));
 
 /* alt_prof.c */
 krb5_error_code krb5_aprof_init

@@ -1,3 +1,8 @@
+Wed Jul  8 04:48:50 1998  Geoffrey J. King  <gjking@mit.edu>
+
+	* logger.c: Add the function krb5_klog_reopen() which closes
+	        and reopens the log files.
+
 Mon Apr  6 19:40:05 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (includes): Don't call mkdir unless the directory

@@ -46,6 +46,7 @@ kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
 void usage PROTOTYPE((char *));
 
 krb5_sigtype request_exit PROTOTYPE((int));
+krb5_sigtype request_hup  PROTOTYPE((int));
 
 void setup_signal_handlers PROTOTYPE((void));
 
@@ -56,6 +57,10 @@ void finish_realms PROTOTYPE((char *));
 static int nofork = 0;
 static char *kdc_current_rcname = (char *) NULL;
 static int rkey_init_done = 0;
+
+#ifdef POSIX_SIGNALS
+static struct sigaction s_action;
+#endif /* POSIX_SIGNALS */
 
 #define	KRB5_KDC_MAX_REALMS	32
 
@@ -565,12 +570,35 @@ request_exit(signo)
 #endif
 }
 
+krb5_sigtype
+request_hup(signo)
+    int signo;
+{
+    signal_requests_hup = 1;
+
+#ifdef POSIX_SIGTYPE
+    return;
+#else
+    return(0);
+#endif
+}
+
 void
 setup_signal_handlers()
 {
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&s_action.sa_mask);
+    s_action.saflags = 0;
+    s_action.sa_handler = request_exit;
+    (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
+    (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
+    s_action.sa_handler = request_hup;
+    (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
+#else  /* POSIX_SIGNALS */
     signal(SIGINT, request_exit);
-    signal(SIGHUP, request_exit);
     signal(SIGTERM, request_exit);
+    signal(SIGHUP, request_hup);
+#endif /* POSIX_SIGNALS */
 
     return;
 }
@@ -835,4 +863,7 @@ char *argv[];
     krb5_free_context(kcontext);
     return errout;
 }
+
+
+
 

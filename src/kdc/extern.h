@@ -95,4 +95,5 @@ extern krb5_timestamp 	kdc_infinity;	/* greater than all other timestamps */
 extern krb5_rcache	kdc_rcache;	/* replay cache */
 
 extern volatile int signal_requests_exit;
+extern volatile int signal_requests_hup;
 #endif /* __KRB5_KDC_EXTERN__ */

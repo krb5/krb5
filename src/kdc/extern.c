@@ -35,3 +35,4 @@ krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
+volatile int signal_requests_hup = 0;   /* ditto */

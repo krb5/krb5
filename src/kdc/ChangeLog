@@ -1,3 +1,16 @@
+Wed Jul  8 04:36:28 1998  Geoffrey King  <gjking@mit.edu>
+
+	* extern.h: Added declaration for new variable
+	        signal_requests_hup, which is set when the KDC
+	        is sent a SIGHUP
+	
+	* extern.c: Added definition for signal_requests_hup
+
+	* main.c: Added new signal handling code for SIGHUP, including
+	        the new function request_hup()
+
+	* network.c: Check signal_requests_hup in the main KDC loop
+
 Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log
