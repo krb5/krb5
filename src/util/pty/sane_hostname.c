@@ -17,9 +17,9 @@
  * 
  */
 #include <com_err.h>
-#include <arpa/inet.h>
-#include "libpty.h"
 #include "pty-int.h"
+#include "libpty.h"
+#include <arpa/inet.h>
 
 static long
 do_ntoa(struct sockaddr_in *addr,
@@ -44,7 +44,6 @@ pty_make_sane_hostname(struct sockaddr_in *addr,
 #else
     struct utmpx utx;
 #endif
-    char *scratch;
     char *cp, *domain;
     char lhost[MAXHOSTNAMELEN];
     size_t ut_host_len;

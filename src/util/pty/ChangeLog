@@ -1,3 +1,13 @@
+Wed Feb 17 19:47:36 1999  Tom Yu  <tlyu@mit.edu>
+
+	* sane_hostname.c (pty_make_sane_hostname): Remove unused
+	"char *scratch".
+
+Tue Feb 16 20:18:40 1999  Tom Yu  <tlyu@mit.edu>
+
+	* sane_hostname.c: Re-order so that pty-int.h precedes libpty.h to
+	prevent conflicting definitions of struct sockaddr_in
+
 Thu Feb 11 22:24:03 1999  Tom Yu  <tlyu@mit.edu>
 
 	* sane_hostname.c: Force maxlen to be 16 if it's less than 16,
