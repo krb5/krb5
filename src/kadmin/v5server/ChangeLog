@@ -1,4 +1,15 @@
 
+Tue Aug 8 17:30:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c - Allow multiple key/salt strings to be parsed.  Fix key
+		merging logic.  Fix some Purify complaints.
+	* srv_key.c(key_string_to_key) - Don't deallocate key/salt tuples if
+		supplied by caller.
+	* proto_serv.c - Under POSIX_SETJMP use sigjmp_buf.
+	* srv_main.c - Under POSIX_SETJMP, use sigjmp_buf.
+	* srv_net.c - Under POSIX_SETJMP, use sigjmp_buf.
+	* srv_output.c - Support new protocol error messages.
+
+
 Mon Aug 7 17:34:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin.c - Fix key list merging so that key version numbers are
 		generated and merged correctly.

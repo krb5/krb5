@@ -1,4 +1,11 @@
 
+Tue Aug 8 17:35:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* encrypt_key.c - When allocating the actual key_data_contents use the
+		correct length (e.g. containing the two length bytes).
+	* kdb_xdr.c - Clean the each key_data structure so that unfilled
+		data becomes zero.
+
+
 Mon Aug 7 17:40:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* encrypt_key.c - Handle keysalt specification with null data length.
 	* decrypt_key.c - Handle salttypes with zero salt length.  Also, copy
