@@ -1,3 +1,10 @@
+Fri Nov 17 22:21:58 1995    <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, ChangeLog: Add support to compile shared libraries.
+
+	* gssapi.h: Include sys/types.h, since that's where POSIX says
+		size_t is defined.
+
 Fri Oct  6 22:01:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

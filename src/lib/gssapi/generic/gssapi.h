@@ -93,6 +93,11 @@
 #endif	/* HAVE_STDDEF_H */
 
 /*
+ * POSIX says that sys/types.h is where size_t is defined.
+ */
+#include <sys/types.h>
+
+/*
  * If the platform supports the xom.h header file, it should be included here.
  */
 #if	HAVE_XOM_H
