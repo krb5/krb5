@@ -92,7 +92,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		    return ENOMEM;
 	    }
 	} else /* type == KRB5_NT_UNKNOWN */ {
-	    remote_host = strdup((char *) hostname);
+	    remote_host = strdup(hostname);
 	}
 	if (!remote_host)
 	    return ENOMEM;
