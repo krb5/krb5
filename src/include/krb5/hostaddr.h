@@ -29,6 +29,7 @@
 
 /* structure for address */
 typedef struct _krb5_address {
+    krb5_magic magic;
     krb5_addrtype addrtype;
     int length;
     krb5_octet *contents;

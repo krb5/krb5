@@ -1,3 +1,7 @@
+Thu Nov 10 22:04:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* hostaddr.h (krb5_address): Add magic number field.
+
 Tue Nov  8 17:55:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* encryption.h (krb5_string_to_key, krb5_random_key): Change
