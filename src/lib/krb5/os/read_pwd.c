@@ -46,7 +46,7 @@ extern int errno;
 static jmp_buf pwd_jump;
 
 
-sigtype
+static sigtype
 intr_routine()
 {
     longjmp(pwd_jump, 1);
