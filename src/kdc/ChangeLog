@@ -1,3 +1,8 @@
+2002-09-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (initialize_realms): Include replay cache name in error
+	if it can't be initialized.
+
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_preauth.c,

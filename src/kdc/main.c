@@ -700,7 +700,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
      * Now handle the replay cache.
      */
     if ((retval = kdc_initialize_rcache(kcontext, rcname))) {
-	com_err(argv[0], retval, "while initializing KDC replay cache");
+	com_err(argv[0], retval, "while initializing KDC replay cache '%s'",
+		rcname);
 	exit(1);
     }
 #endif
