@@ -1,3 +1,7 @@
+Sat Feb 22 19:43:35 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (kpropd): Build using KDB5_LIBS, not KDB5_LIB.
+
 Tue Feb 18 18:18:44 1997  Richard Basch  <basch@lehman.com>
 
 	* kprop.c kpropd.c: Use krb5_free_data_contents, where appropriate.
