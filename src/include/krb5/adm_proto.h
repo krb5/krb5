@@ -46,7 +46,7 @@ typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
  */
 
 /* adm_conn.c */
-krb5_error_code INTERFACE krb5_adm_connect
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_adm_connect
 	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   char *,
@@ -56,13 +56,13 @@ krb5_error_code INTERFACE krb5_adm_connect
 		   krb5_ccache *,
 		   char *,
 		   krb5_timestamp));
-void INTERFACE krb5_adm_disconnect
+KRB5_DLLIMP void KRB5_CALLCONV krb5_adm_disconnect
 	KRB5_PROTOTYPE((krb5_context,
 		   int *,
 		   krb5_auth_context,
 		   krb5_ccache));
 
-#if ! defined(_WINDOWS) && ! defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
 	KRB5_PROTOTYPE((krb5_context,
@@ -80,7 +80,7 @@ krb5_error_code krb5_adm_dbent_to_proto
 		   char *,
 		   krb5_int32 *,
 		   krb5_data **));
-#endif /* _WINDOWS */
+#endif /* !(windows or macintosh) */
 
 /* adm_kt_dec.c */
 krb5_error_code krb5_adm_proto_to_ktent
@@ -97,12 +97,12 @@ krb5_error_code krb5_adm_ktent_to_proto
 		   krb5_data **));
 
 /* adm_rw.c */
-void INTERFACE krb5_free_adm_data
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_adm_data
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   krb5_data *));
 
-krb5_error_code INTERFACE krb5_send_adm_cmd
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_send_adm_cmd
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,
@@ -121,7 +121,7 @@ krb5_error_code krb5_read_adm_cmd
 		   krb5_auth_context,
 		   krb5_int32 *,
 		   krb5_data **));
-krb5_error_code INTERFACE krb5_read_adm_reply
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_read_adm_reply
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,

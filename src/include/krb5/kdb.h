@@ -52,7 +52,7 @@
 #define KRB5_KDB_SUPPORT_DESMD5         0x00004000
 #define	KRB5_KDB_NEW_PRINC		0x00008000
 
-#if !defined(_MACINTOSH) && !defined(_MSDOS)
+#if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
 
 /*
  * Note --- these structures cannot be modified without changing the
@@ -425,5 +425,5 @@ krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 #else
 typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
 #endif	/* KDB5_DISPATCH */
-#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) */
+#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) &&!defined(_WIN32) */
 #endif /* KRB5_KDB5__ */
