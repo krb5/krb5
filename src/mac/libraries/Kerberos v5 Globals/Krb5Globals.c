@@ -25,6 +25,7 @@
 #include <CCache.h>
 
 #include <string.h>
+#include <stdio.h>
  
 #include "Krb5Globals.h"
 #include "Krb5GlobalsData.h"

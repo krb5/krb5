@@ -9,7 +9,15 @@
 
 #include <Types.h>
 
+#if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#	pragma import on
+#endif
+
 extern	UInt32	gKerberos5GlobalsRefCount;
 extern	char*	gKerberos5SystemDefaultCacheName;
+
+#if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#	pragma import reset
+#endif
 
 #endif /* __Krb5GlobalsData_h__ */
