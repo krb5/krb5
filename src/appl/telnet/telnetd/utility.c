@@ -61,10 +61,10 @@ ttloop()
     }
     ncc = read(net, netibuf, sizeof netibuf);
     if (ncc < 0) {
-	syslog(LOG_INFO, "ttloop:  read: %m\n");
+	syslog(LOG_INFO, "ttloop:  read: %m");
 	exit(1);
     } else if (ncc == 0) {
-	syslog(LOG_INFO, "ttloop:  peer died: %m\n");
+	syslog(LOG_INFO, "ttloop:  peer died: %m");
 	exit(1);
     }
     DIAG(TD_REPORT, {sprintf(nfrontp, "td: ttloop read %d chars\r\n", ncc);

@@ -1443,7 +1443,7 @@ start_login(host, autologin, name)
 	closelog();
 	execv(login_program, argv);
 
-	syslog(LOG_ERR, "%s: %m\n", login_program);
+	syslog(LOG_ERR, "%s: %m", login_program);
 	fatalperror(net, login_program);
 	/*NOTREACHED*/
 }
@@ -1665,12 +1665,12 @@ cleantmpdir(jid, tpath, user)
 {
 	switch(fork()) {
 	case -1:
-		syslog(LOG_ERR, "TMPDIR cleanup(%s): fork() failed: %m\n",
+		syslog(LOG_ERR, "TMPDIR cleanup(%s): fork() failed: %m",
 							tpath);
 		break;
 	case 0:
 		execl(CLEANTMPCMD, CLEANTMPCMD, user, tpath, 0);
-		syslog(LOG_ERR, "TMPDIR cleanup(%s): execl(%s) failed: %m\n",
+		syslog(LOG_ERR, "TMPDIR cleanup(%s): execl(%s) failed: %m",
 							tpath, CLEANTMPCMD);
 		exit(1);
 	default:
