@@ -1,0 +1,5 @@
+Wed Feb 22 18:56:06 1995  John Gilmore  (gnu at toad.com)
+
+	* install.texi:  Minor corrections.  Add info about bare source
+	trees (without configure scripts).
+

@@ -118,15 +118,14 @@ How Kerberos Works: A Schematic Description
 Building Kerberos
 
 * Build Requirements::          How much disk space, etc. you need to
-                                           build Kerberos.
+				build Kerberos.
 * Unpacking the Sources::       Preparing the source tree.
 * Doing the Build::             Compiling Kerberos.
 * Testing the Build::           Making sure Kerberos built correctly.
 * Configure options::           Options to the configuration script.
 * OS Incompatibilities::        Special cases to watch for.
 * Configuration .h files::      Kerberos V5's header files.
-* Using Autoconf::              Modifying Kerberos V5's 
-                                            configuration scripts.
+* Using Autoconf::              Modifying Kerberos V5's configuration scripts.
 
 Doing the Build
 
@@ -196,7 +195,7 @@ platform which we haven't tried building yet.  Please send bugs or other
 problems you may uncover to the e-mail address @b{krb5-bugs@@mit.edu}.
 Please mention which version of the Kerberos V5 distribution you are
 using, and whether you have made any private changes.  Bug reports that
-include context diffs describe the fix are especially welcome.
+include context diffs describing the fix are especially welcome.
 
 Please note that there are still a number of aspects of Kerberos V5
 which will likely change before the 1.0 release.  In particular, the
@@ -356,9 +355,12 @@ for an @samp{host/laughter.mit.edu} entry.  If the entry exists, the
 ticket-granting service issues you a ticket for that service.  That
 ticket is also cached in your credentials cache.
 
-@item The @samp{rlogin} client now uses that ticket to request service from
-the @samp{laughter} @samp{rlogin} service program.  The service program
-lets you login to that host if the ticket is valid.
+@item The @samp{rlogin} client now sends that ticket to 
+the @samp{laughter} @samp{rlogin} service program.
+The service program checks the ticket by using its own service key.
+If the ticket is valid, it knows the identity of the user.  If that user 
+is permitted to log in on @samp{laughter} (because the user's name 
+matches one in /etc/passwd), it lets the user log in.
 
 @end enumerate
 @end enumerate
@@ -440,7 +442,7 @@ use the following abbreviated procedure.
 
 @enumerate
 @item @samp{cd /u1/krb5/src}
-@item @samp{configure}
+@item @samp{./configure}
 @item @samp{make}
 @end enumerate
 
@@ -479,10 +481,13 @@ you might use the following procedure:
 @enumerate
 @item @samp{mkdir /u1/krb5/solaris}
 @item @samp{cd /u1/krb5/solaris}
-@item @samp{/u1/krb5/src/util/lndir ../src}
-@item @samp{configure}
+@item @samp{/u1/krb5/src/util/lndir `pwd`/../src}
+@item @samp{./configure}
 @item @samp{make}
 @end enumerate
+
+You must give an absolute pathname to lndir because it has a bug that
+makes it fail for relative pathnames.
 
 @node Testing the Build, Configure options, Doing the Build, Building Kerberos
 @section Testing the Build
@@ -736,12 +741,36 @@ found in @file{src/util/reconf}.  This program should be run while the
 current directory is the source directory.  It will automatically rebuild any
 @file{configure} files which need rebuilding.  If you know that you have
 made a change that will require that all the @file{configure} files need to
-be rebuilt from scratch, specify the @code{--reconf} option: 
+be rebuilt from scratch, specify the @code{--force} option: 
 
 @example
 % cd /u1/krb5/src
 % ./util/reconf --force
 @end example
+
+The developmental sources are a raw source tree (before it's been packaged
+for public release), without the pre-built @file{configure} files.
+In order to build from such a source tree, you must do:
+
+@example
+% cd krb5/util/autoconf
+% ./configure
+% make
+% cd ../..
+% util/reconf
+@end example
+
+Then follow the instructions for building packaged source trees (above).
+To install the binaries into a binary tree, do:
+
+@example
+% cd /u1/krb5/src
+% make all
+% make install KRB5ROOT=somewhere-else
+@end example
+
+Currently this only works if @samp{somewhere-else} is @file{/krb5}.
+(It's a bug.)
 
 @node Installation,  , Building Kerberos, Top
 @chapter Installation
@@ -852,7 +881,9 @@ leading realm name) and how to designate servers for remote realms.
 @subsubsection The @file{krb.realms} File
 
 In many situations, the default realm in which a host operates will be
-identical to the domain portion its Internet domain name.
+identical to its Internet domain name, with the first component removed
+and all letters capitalized.  For example, @code{ftp.cygnus.com} is
+traditionally in the realm @code{CYGNUS.COM}.
 
 If this is not the case, you will need to establish a translation from
 host name or domain name to realm name.  This is accomplished with the
@@ -1233,7 +1264,7 @@ applications.
 @table @code
 
 @item host
-Used by telnet, rlogin, rsh, rcp, and other services which give
+Used by telnet, rlogin, rsh, rcp, and other services which
 generally give login access to the host.
 
 @item pop
