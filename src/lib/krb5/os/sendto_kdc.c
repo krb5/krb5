@@ -632,23 +632,24 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	    state->state = FAILED;
 	    return -3;
 	} else {
-#ifdef DEBUG
-	    struct sockaddr_storage ss;
-	    socklen_t sslen = sizeof(ss);
-	    if (0 == getsockname(state->fd, (struct sockaddr *) &ss, &sslen)) {
-		struct addrinfo hack_ai;
-		memset(&hack_ai, 0, sizeof(hack_ai));
-		hack_ai.ai_addr = (struct sockaddr *) &ss;
-		hack_ai.ai_addrlen = sslen;
-		hack_ai.ai_socktype = SOCK_DGRAM;
-		hack_ai.ai_family = ai->ai_family;
-		dprint("local address used was %A\n", &hack_ai);
-	    }
-#endif
 	    state->state = READING;
 	}
     }
-
+#ifdef DEBUG
+    if (debug) {
+	struct sockaddr_storage ss;
+	socklen_t sslen = sizeof(ss);
+	if (getsockname(state->fd, (struct sockaddr *)&ss, &sslen) == 0) {
+	    struct addrinfo hack_ai;
+	    memset(&hack_ai, 0, sizeof(hack_ai));
+	    hack_ai.ai_addr = (struct sockaddr *) &ss;
+	    hack_ai.ai_addrlen = sslen;
+	    hack_ai.ai_socktype = SOCK_DGRAM;
+	    hack_ai.ai_family = ai->ai_family;
+	    dprint("local socket address is %A\n", &hack_ai);
+	}
+    }
+#endif
     FD_SET(state->fd, &selstate->rfds);
     if (state->state == CONNECTING || state->state == WRITING)
 	FD_SET(state->fd, &selstate->wfds);
