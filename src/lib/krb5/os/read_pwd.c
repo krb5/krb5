@@ -20,7 +20,6 @@ static char rcsid_read_pwd_c[] =
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
 
-#include <sys/ioctl.h>
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -29,14 +28,20 @@ static char rcsid_read_pwd_c[] =
 #include <krb5/ext-proto.h>
 
 #ifdef POSIX
+#include <termios.h>
 #define sigtype void
 #else
+#include <sys/ioctl.h>
 #define sigtype int
 #endif /* POSIX */
 
 extern int errno;
 
+#ifdef POSIX
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(0, TCSANOW, &save_control); return errcode;
+#else
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(0, TIOCSETP, (char *)&tty_savestate); return errcode;
+#endif
 
 static jmp_buf pwd_jump;
 
@@ -57,11 +62,24 @@ int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
 
-    struct sgttyb tty_state, tty_savestate;
     char *readin_string = 0;
     register char *ptr;
     int scratchchar;
     sigtype (*ointrfunc)();
+#ifdef POSIX
+    struct termios echo_control, save_control;
+
+    if (tcgetattr(0, &echo_control) == -1)
+	return errno;
+
+    save_control = echo_control;
+    echo_control.c_lflag &= ~(ECHO|ECHONL);
+    
+    if (tcsetattr(0, TCSANOW, &echo_control) == -1)
+	return errno;
+#else
+    /* 4.3BSD style */
+    struct sgttyb tty_state, tty_savestate;
 
     /* save terminal state */
     if (ioctl(0,TIOCGETP,(char *)&tty_savestate) == -1) 
@@ -72,6 +90,7 @@ int *size_return;
     tty_state.sg_flags &= ~ECHO;
     if (ioctl(0,TIOCSETP,(char *)&tty_state) == -1)
 	return errno;
+#endif
 
     if (setjmp(pwd_jump)) {
 	/* interrupted */
@@ -148,9 +167,13 @@ int *size_return;
     /* reset intrfunc */
     (void) signal(SIGINT, ointrfunc);
 
+#ifdef POSIX
+    if (tcsetattr(0, TCSANOW, &save_control) == -1)
+	return errno;
+#else
     if (ioctl(0, TIOCSETP, (char *)&tty_savestate) == -1)
 	return errno;
-
+#endif
     *size_return = strlen(return_pwd);
 
     return 0;
