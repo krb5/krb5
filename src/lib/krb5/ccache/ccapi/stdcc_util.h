@@ -3,8 +3,8 @@
  * Frank Dabek, July 1998
  */
 
-#if defined(USE_CCAPI)
-#include "CCache2.h"
+#if TARGET_OS_MAC
+#include <CredentialsCache/CredentialsCache2.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)

@@ -1,3 +1,9 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* stdcc.c: Replaced cc_* macros with functions
+	* stdcc.h, stdcc_util.h: Updated Mac OS #defines and #includes for new 
+	header layout and Mac OS X frameworks
+
 2000-10-02	Alexandra Ellwood <lxs@mit.edu>
 
         * stdcc_util.c: now Mac OS X uses get_time_offsets to store offset time
