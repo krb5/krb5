@@ -329,6 +329,8 @@ krb5int_aes_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 	goto cleanup;
     }
 
+    output->length = enclen;
+
     /* update ivec */
     if (cn != NULL)
 	memcpy(ivec->data, cn, blocksize);
