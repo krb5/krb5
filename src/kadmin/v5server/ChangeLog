@@ -1,4 +1,20 @@
 
+Fri Aug 4 16:14:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c - Add support for "ADD-KEY" and "DELETE-KEY" protocol requests
+		as well as adding the ability to keep previous random keys
+		lying around after change.
+	* kadm5_defs.h - Update key handling prototypes and add prototypes for
+		newly visible routines.
+	* passwd.c - Make passwd_check_opass_ok() visible so that admin.c can
+		use it to check the password against existing keys.  Also, use
+		macro to encode last_pwd_change and mod_date data.
+	* proto_serv.c - Add support for "ADD-KEY" and "DELETE-KEY" protocol
+		requests.  Change KRB_ERR_GENERIC to KRB5KRB_ERR_GENERIC.
+	* srv_key.c - Use krb5_keysalt_iterate() to iterate over the desired
+		key/salt types for key_string_to_keys() and key_random_key().
+		Find the latest admin key instead of assuming that the first
+		key is the one to use.
+
 Thu Aug 3 11:40:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadm5_defs.h - Include adm.h, update prototypes.
 	* admin,passwd.c - Rework database entry merge logic to use new database
