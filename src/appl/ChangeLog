@@ -1,0 +1,4 @@
+Thu Jul 14 02:04:07 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: suck in bsd now
+
