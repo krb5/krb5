@@ -1,3 +1,9 @@
+Fri Sep 30 18:49:41 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* aclocal.m4 (CONFIG_RULES): set SHELL=/bin/sh explicitly, as per
+	GCS and to deal with SGI and OSF makes. This should cover all
+	Makefiles.
+
 Thu Aug 18 02:05:14 1994  Mark Eichin  (eichin@perdiem)
 
 	* .../*.[ch]: remove rcsid, sccsid strings; punt all RCS variable

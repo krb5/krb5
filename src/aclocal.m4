@@ -167,6 +167,8 @@ define(CONFIG_RULES,[
 WITH_CC dnl
 divert(9)dnl
 [
+SHELL=/bin/sh
+
 Makefile: $(srcdir)/Makefile.in config.status
 	$(SHELL) config.status
 config.status: $(srcdir)/configure
