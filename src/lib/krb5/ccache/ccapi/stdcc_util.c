@@ -454,7 +454,7 @@ static void deep_free_cc_data (cc_data data) {
 
 static void deep_free_cc_data_array (cc_data** data) {
 	
-	cc_uint32		index;
+	unsigned int	index;
 	
 	if (data == NULL)
 		return;
