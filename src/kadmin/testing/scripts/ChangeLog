@@ -1,3 +1,8 @@
+2002-10-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: Set names of replay cache and log files to
+	be per-user, since they're in system-wide shared directories.
+
 2002-10-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* start_servers_local: Telnet to 127.0.0.1, not "localhost", to
