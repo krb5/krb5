@@ -5,7 +5,7 @@
 !if defined(NO_OUTPRE) || defined(NO_OUTDIR)
 outpre-dir::
 !else
-outpre-dir:: $(OUTPRE3)
+outpre-dir:: $(OUTPRE3)$(DIRNUL)
 !endif
 
 #
@@ -49,11 +49,9 @@ $(LIBNAME): $(OBJFILEDEP)
 
 !if defined(OBJFILE)
 all-windows:: $(OBJFILE)
-clean-windows::
-	$(RM) $(OBJFILE)
 !if defined(LIBOBJS)
 $(OBJFILE): $(LIBOBJS)
-	$(RM) $(OBJFILE)
+	if exist $(OBJFILE) del $(OBJFILE)
 !if defined(PREFIXDIR)
 	$(LIBECHO) -p $(PREFIXDIR)\ $** > $(OBJFILE)
 !else
@@ -66,48 +64,35 @@ $(OBJFILE): $(LIBOBJS)
 check::
 check-windows::
 
-.depend: $(SRCS) $(SRCTOP)/util/depfix.sed
-	if test -n "$(SRCS)" ; then \
-		$(CC) -M $(CFLAGS) $(SRCS) | \
-			sed -f $(SRCTOP)/util/depfix.sed | \
-			sed -e 's; $(SRCTOP)/; $$(SRCTOP)/;g' | \
-			sed -e 's; $(srcdir)/; $$(srcdir)/;g' | \
-			sed -e 's; $(BUILDTOP)/; $$(BUILDTOP)/;g' | \
-			sed -e 's; \./; ;g' > .depend; \
-	else :; fi
-
-depend:: .depend
-	if test -n "$(SRCS)" ; then \
-		sed -e '/^# +++ Dependency line eater +++/,$$d' \
-			< $(srcdir)/Makefile.in | cat - .depend \
-			> $(srcdir)/Makefile.in.new; \
-	$(MV) $(srcdir)/Makefile.in $(srcdir)/Makefile.in.old; \
-	$(MV) $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in; \
-	else :; fi
-
-clean:: clean-$(WHAT)
-	$(RM) config.log pre.out post.out Makefile.out
-
-clean-unix::
-	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
-	$(RM) .depend
-
 !if defined(LIBNAME)
 clean-windows::
-	$(RM) $(LIBNAME)
+# NO LONGER NEEDED BECAUSE WE CLEAN OUT THE DIR...
+#	if exist $(LIBNAME) del $(LIBNAME)
 !endif
 !if defined(OBJFILE)
 clean-windows::
-	$(RM) $(OBJFILE)
+# NO LONGER NEEDED BECAUSE WE CLEAN OUT THE DIR...
+#	if exist $(OBJFILE) del $(OBJFILE)
 !endif
 
 clean-windows:: clean-windows-files clean-windows-dir
 
+
 # This needs to be in the post because we need RM to be defined in terms
 # of BUILDTOP
 clean-windows-files::
+!if "$(OUTPRE3)" == ""
+!error ASSERTION FAILURE: OUTPRE3 must be defined!!!
+!endif
+!if "$(OS)" == "Windows_NT"
+	@if exist $(OUTPRE3)$(DIRNUL) rd /s/q $(OUTPRE3)
+!else
+	@if exist $(OUTPRE3)$(DIRNUL) deltree /y $(OUTPRE3)
+!endif
+!if 0
 	$(RM) .\$(OUTPRE)*.obj .\$(OUTPRE)*.res
 	$(RM) .\$(OUTPRE)*.exe .\$(OUTPRE)*.dll
 	$(RM) .\$(OUTPRE)*.lib .\$(OUTPRE)*.pdb
 	$(RM) .\$(OUTPRE)*.exp .\$(OUTPRE)*.map
 	$(RM) .\$(OUTPRE)*.idb .\$(OUTPRE)*.ilk
+!endif

@@ -39,9 +39,9 @@ CPU=i386
 #
 
 !if "$(OS)" == "Windows_NT"
-NULL=
+DIRNUL=
 !else 
-NULL=nul
+DIRNUL=\nul
 !endif
 
 # NOTE: ^ is an escape char for NMAKE.
@@ -55,17 +55,22 @@ OUTPRE2=$(OUTPRE1)\$(CPU)
 OUTPRE3=$(OUTPRE2)\$(OUTPRE_DBG)
 OUTPRE=$(OUTPRE3)^\
 
-$(OUTPRE3):
-	-@if not exist $(OUTPRE1)\nul mkdir $(OUTPRE1)
-	-@if not exist $(OUTPRE2)\nul mkdir $(OUTPRE2)
-	-@if not exist $(OUTPRE3)\nul mkdir $(OUTPRE3)
-	-@if exist $(OUTPRE3)\nul echo Output will go to $(OUTPRE3).
-	-@if not exist $(OUTPRE3)\nul echo Could not create $(OUTPRE3).
+$(OUTPRE3)$(DIRNUL):
+	-@if not exist $(OUTPRE1)$(DIRNUL) mkdir $(OUTPRE1)
+	-@if not exist $(OUTPRE2)$(DIRNUL) mkdir $(OUTPRE2)
+	-@if not exist $(OUTPRE3)$(DIRNUL) mkdir $(OUTPRE3)
+	@if exist $(OUTPRE3)$(DIRNUL) echo Output going into $(OUTPRE3)
+	@if not exist $(OUTPRE1)$(DIRNUL) echo The directory $(OUTPRE1) could not be created.
+	@if exist $(OUTPRE1)$(DIRNUL) if not exist $(OUTPRE2)$(DIRNUL) echo The directory $(OUTPRE2) could not be created.
+	@if exist $(OUTPRE2)$(DIRNUL) if not exist $(OUTPRE3)$(DIRNUL) echo The directory $(OUTPRE3) could not be created.
+
 
 clean-windows-dir::
-	-@if exist $(OUTPRE3)\nul rmdir $(OUTPRE3)
-	-@if exist $(OUTPRE2)\nul rmdir $(OUTPRE2)
-	-@if exist $(OUTPRE1)\nul rmdir $(OUTPRE1)
+	-@if exist $(OUTPRE3)$(DIRNUL) rmdir $(OUTPRE3)
+	-@if exist $(OUTPRE2)$(DIRNUL) rmdir $(OUTPRE2)
+	-@if exist $(OUTPRE1)$(DIRNUL) rmdir $(OUTPRE1)
+	@if exist $(OUTPRE2)$(DIRNUL) echo The directory $(OUTPRE2) is not empty.
+	@if not exist $(OUTPRE2)$(DIRNUL) if exist $(OUTPRE1)$(DIRNUL) echo The directory $(OUTPRE1) is not empty.
 
 # Directory syntax:
 #

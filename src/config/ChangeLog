@@ -1,3 +1,8 @@
+2001-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in, win-post.in: Improve output directory creation and
+	cleanup.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* pre.in (KADM_COMM_DEPLIBS): Depend on GSSRPC_DEPLIBS and not
