@@ -957,6 +957,7 @@ AC_SUBST(SHLIB_EXPFLAGS)
 AC_SUBST(STLIBEXT)
 AC_SUBST(SHLIBEXT)
 AC_SUBST(SHLIBVEXT)
+AC_SUBST(SHLIBSEXT)
 AC_SUBST(PFLIBEXT)
 AC_SUBST(LIBINSTLIST)])
 
@@ -990,6 +991,7 @@ AC_SUBST(SHLIB_EXPFLAGS)
 AC_SUBST(STLIBEXT)
 AC_SUBST(SHLIBEXT)
 AC_SUBST(SHLIBVEXT)
+AC_SUBST(SHLIBSEXT)
 AC_SUBST(PFLIBEXT)
 AC_SUBST(LIBINSTLIST)])
 
@@ -1069,9 +1071,18 @@ AC_ARG_ENABLE([shared],
 	*)
 		AC_MSG_RESULT([Enabling shared libraries.])
 		LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT)'
+		case "$SHLIBSEXT" in
+		.so-snobuild)
+			LIBINSTLIST="$LIBINSTLIST install-shared"
+			;;
+		*)
+			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBSEXT)'
+			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)'
+			LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
+			;;
+		esac
 		OBJLISTS="$OBJLISTS OBJS.SH"
-		LIBINSTLIST="$LIBINSTLIST install-shared"
 		DEPLIBEXT=$SHLIBEXT
 		CC_LINK="$CC_LINK_SHARED"
 		if test "$STLIBEXT" = "$SHLIBEXT" ; then
@@ -1129,6 +1140,7 @@ STLIBEXT=.a
 # Default to being unable to build shared libraries.
 SHLIBEXT=.so-nobuild
 SHLIBVEXT=.so.v-nobuild
+SHLIBSEXT=.so.s-nobuild
 # Most systems support profiled libraries.
 PFLIBEXT=_p.a
 
@@ -1142,10 +1154,11 @@ CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 case $krb5_cv_host in
 alpha-dec-osf*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	# Alpha OSF/1 doesn't need separate PIC objects
 	SHOBJEXT=.o
-	LDCOMBINE='ld -shared -expect_unresolved \* -update_registry $(BUILDTOP)/so_locations'
+	LDCOMBINE='ld -shared -expect_unresolved \* -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
@@ -1155,9 +1168,10 @@ alpha-dec-osf*)
 	;;
 mips-sgi-irix*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	SHOBJEXT=.o
-	LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations'
+	LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	# no gprof for Irix...
 	PROFFLAGS=-p
@@ -1179,13 +1193,14 @@ mips-sgi-irix*)
 *-*-solaris*)
 	if test "$GCC" = yes; then
 		PICFLAGS=-fpic
-		LDCOMBINE='$(CC) -shared'
+		LDCOMBINE='$(CC) -shared -h lib$(LIB)$(SHLIBSEXT)'
 	else
 		PICFLAGS=-Kpic
 		# Solaris cc doesn't default to stuffing the SONAME field...
-		LDCOMBINE='$(CC) -dy -G -z text -h lib$(LIB)$(SHLIBEXT).$(LIBMAJOR).$(LIBMINOR)'
+		LDCOMBINE='$(CC) -dy -G -z text -h lib$(LIB)$(SHLIBSEXT)'
 	fi
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
@@ -1212,10 +1227,11 @@ mips-sgi-irix*)
 *-*-linux*)
 	PICFLAGS=-fPIC
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	# Linux ld doesn't default to stuffing the SONAME field...
 	# Use objdump -x to examine the fields of the library
-	LDCOMBINE='ld -shared -h lib$(LIB)$(SHLIBEXT).$(LIBMAJOR).$(LIBMINOR)'
+	LDCOMBINE='ld -shared -h lib$(LIB)$(SHLIBSEXT)'
 	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'

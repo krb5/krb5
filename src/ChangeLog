@@ -1,3 +1,8 @@
+Sun Mar  9 22:29:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add provisions to make major version number
+	compatibility work for shared libaries.
+
 Sat Feb 22 20:50:49 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4 (CC_LINK_STATIC): Added RUN_ENV line for Linux
