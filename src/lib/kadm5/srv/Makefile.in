@@ -56,7 +56,7 @@ DEPLIBS=$(TOPLIBD)/libgssrpc.$(SHEXT).$(GSSRPC_VER) \
 	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
 	$(TOPLIBD)/libdyn.$(SHEXT).$(DYN_VER)
 
-SHLIB_LIBS=-lgssrpc -lgssapi_krb5 -lkdb5 -ldb -lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_LIBS=-lgssrpc -lgssapi_krb5 -lkdb5  -lkrb5 -lcrypto -lcom_err -ldyn @LIBS@
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 

@@ -1,3 +1,7 @@
+Fri Nov 22 11:11:34 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (SHLIB_LIBS): Do not link shared against -ldb [224]
+
 Wed Nov 13 19:20:36 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (clean-unix): Remove shared/*.
