@@ -1,3 +1,9 @@
+1999-08-16  Geoffrey King  <gjking@mit.edu>
+
+	* ktutil.c (ktutil_add_entry):
+	* ktutil_funcs.c (ktutil_add): Implement addent command to allow
+	creation of new keytab entries by specifying a key or password.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

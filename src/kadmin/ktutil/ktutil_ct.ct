@@ -38,6 +38,9 @@ request ktutil_write_v5, "Write the current keylist to a krb5 keytab.",
 request ktutil_write_v4, "Write the current keylist to a krb4 srvtab.",
 	write_st, wst;
 
+request ktutil_add_entry, "Add an entry to the current keylist.",
+	add_entry, addent;
+
 request ktutil_delete_entry, "Delete an entry from the current keylist.",
 	delete_entry, delent;
 
@@ -49,3 +52,4 @@ request ss_list_requests, "List available requests.",
 
 request ss_quit, "Exit program.",
 	quit, exit, q;
+

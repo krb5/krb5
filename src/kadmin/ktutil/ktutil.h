@@ -36,6 +36,14 @@ krb5_error_code ktutil_delete
 			krb5_kt_list *,
 			int));
 
+krb5_error_code ktutil_add
+	KRB5_PROTOTYPE((krb5_context,
+			krb5_kt_list *,
+			char *,
+			krb5_kvno,
+			char *,
+			int));
+
 krb5_error_code ktutil_read_keytab
 	KRB5_PROTOTYPE((krb5_context,
 			char *,

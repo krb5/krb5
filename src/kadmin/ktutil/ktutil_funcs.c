@@ -30,6 +30,7 @@
 #include <stdio.h>
 #endif
 #include <string.h>
+#include <ctype.h>
 
 /*
  * Free a kt_list
@@ -76,6 +77,137 @@ krb5_error_code ktutil_delete(context, list, index)
 	}
     }
     return EINVAL;
+}
+
+/*
+ * Create a new keytab entry and add it to the keytab list.
+ * Based on the value of use_pass, either prompt the user for a
+ * password or key.  If the keytab list is NULL, allocate a new
+ * one first.
+ */
+krb5_error_code ktutil_add(context, list, princ_str, kvno,
+			   enctype_str, use_pass)
+    krb5_context context;
+    krb5_kt_list *list;
+    char *princ_str;
+    krb5_kvno kvno;
+    char *enctype_str;
+    int use_pass;
+{
+    krb5_keytab_entry *entry;
+    krb5_kt_list lp = NULL, tail = NULL, back = NULL;
+    krb5_principal princ;
+    krb5_enctype enctype;
+    krb5_timestamp now;
+    krb5_error_code retval;
+    krb5_data password, salt;
+    krb5_keyblock key;
+    char buf[BUFSIZ];
+    char promptstr[1024];
+
+    char *cp;
+    int i, tmp, pwsize = BUFSIZ;
+
+    retval = krb5_timeofday(context, &now);
+    if (retval)
+        return retval;
+    retval = krb5_parse_name(context, princ_str, &princ);
+    if (retval)
+        return retval;
+    /* now unparse in order to get the default realm appended
+       to princ_str, if no realm was specified */
+    retval = krb5_unparse_name(context, princ, &princ_str);
+    if (retval)
+        return retval;
+    retval = krb5_string_to_enctype(enctype_str, &enctype);
+    if (retval) 
+        return KRB5_BAD_ENCTYPE;
+
+    if (*list) {
+        /* point lp at the tail of the list */
+        for (lp = *list; lp->next; lp = lp->next);
+	back = lp;
+    }
+
+    entry = (krb5_keytab_entry *) malloc(sizeof(krb5_keytab_entry));
+    if (!entry) {
+        return ENOMEM;
+    }
+    memset((char *) entry, 0, sizeof(*entry));
+
+    if (!lp) {		/* if list is empty, start one */
+        lp = (krb5_kt_list) malloc(sizeof(krb5_kt_list));
+	if (!lp) {
+	    return ENOMEM;
+	}
+    } else {
+        lp->next = (krb5_kt_list) malloc(sizeof(krb5_kt_list));
+	if (!lp->next) {
+	    return ENOMEM;
+	}
+	lp = lp->next;
+    }          
+
+    if (!tail)
+        tail = lp;
+    lp->next = NULL;
+    lp->entry = entry;
+
+    if (use_pass) {
+        password.length = pwsize;
+	password.data = (char *) malloc(pwsize);
+	if (!password.data)
+	    return ENOMEM;
+
+	sprintf(promptstr, "Password for %.1000s: ", princ_str);
+        krb5_read_password(context, promptstr, NULL, password.data,
+			   &password.length);
+	krb5_principal2salt(context, princ, &salt);
+	krb5_c_string_to_key(context, enctype, &password, &salt, &key);
+	memset(password.data, 0, password.length);
+	password.length = 0;
+	memcpy(&lp->entry->key, &key, sizeof(krb5_keyblock));
+    } else {
+        printf("Key for %s (hex): ", princ_str);
+	fgets(buf, BUFSIZ, stdin);
+	/*
+	 * We need to get rid of the trailing '\n' from fgets.
+	 * If we have an even number of hex digits (as we should),
+	 * write a '\0' over the '\n'.  If for some reason we have
+	 * an odd number of hex digits, force an even number of hex
+	 * digits by writing a '0' into the last position (the string
+	 * will still be null-terminated).
+	 */
+	buf[strlen(buf) - 1] = strlen(buf) % 2 ? '\0' : '0';
+	if (strlen(buf) == 0) {
+	    fprintf(stderr, "addent: Error reading key.\n");
+	    return 0;
+	}
+	
+        lp->entry->key.enctype = enctype;
+	lp->entry->key.contents = (krb5_octet *) malloc((strlen(buf) + 1) / 2);
+	if (!lp->entry->key.contents)
+	    return ENOMEM;
+
+	i = 0;
+	for (cp = buf; *cp; cp += 2) {
+	    if (!isxdigit(cp[0]) || !isxdigit(cp[1])) {
+	        fprintf(stderr, "addent: Illegal character in key.\n");
+		return 0;
+	    }
+	    sscanf(cp, "%02x", &tmp);
+	    lp->entry->key.contents[i++] = (krb5_octet) tmp;
+	}
+	lp->entry->key.length = i;
+    }
+    lp->entry->principal = princ;
+    lp->entry->vno = kvno;
+    lp->entry->timestamp = now;
+
+    if (!*list)
+	*list = tail;
+
+    return 0;
 }
 
 /*

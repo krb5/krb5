@@ -151,6 +151,50 @@ void ktutil_write_v4(argc, argv)
 #endif
 }
 
+void ktutil_add_entry(argc, argv)
+    int argc;
+    char *argv[];
+{
+    krb5_error_code retval;
+    char *princ = NULL;
+    char *enctype = NULL;
+    krb5_kvno kvno = 0;
+    int use_pass = 0, use_key = 0, i;    
+
+    for (i = 1; i < argc; i++) {
+	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-p", 2)) {
+	    princ = argv[++i];
+	    continue;
+	}
+	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-k", 2)) {
+	    kvno = (krb5_kvno) atoi(argv[++i]);
+	    continue;
+	}
+	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
+	    enctype = argv[++i];
+	    continue;
+	}
+	if ((strlen(argv[i]) == 9) && !strncmp(argv[i], "-password", 9)) {
+	    use_pass++;
+	    continue;
+	}
+	if ((strlen(argv[i]) == 4) && !strncmp(argv[i], "-key", 4)) {
+	    use_key++;
+	    continue;
+	}
+    }
+
+    if (argc != 8 || !(princ && kvno && enctype) || (use_pass+use_key != 1)) {
+        fprintf(stderr, "usage: %s (-key | -password) -p principal "
+		"-k kvno -e enctype\n", argv[0]);
+	return;
+    }
+
+    retval = ktutil_add(kcontext, &ktlist, princ, kvno, enctype, use_pass);
+    if (retval)
+        com_err(argv[0], retval, "while adding new entry");
+}
+
 void ktutil_delete_entry(argc, argv)
     int argc;
     char *argv[];
@@ -186,21 +230,20 @@ void ktutil_list(argc, argv)
 	    show_keys++;
 	    continue;
 	}
-if ( (strlen(argv[i]) == 2)&&
-     (!strncmp(argv[i],"-e",2))) {
-    show_enctype = 1;
-    continue;
-}
+	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
+	    show_enctype++;
+	    continue;
+	}
 	
 	fprintf(stderr, "%s: illegal arguments\n", argv[0]);
 	return;
     }
     if (show_time) {
-	printf("slot KVNO Timestamp          Principal\n");
-	printf("---- ---- ------------------ -------------------------------------------------------\n");
+	printf("slot KVNO Timestamp         Principal\n");
+	printf("---- ---- ----------------- ---------------------------------------------------\n");
     } else {
 	printf("slot KVNO Principal\n");
-	printf("---- ---- --------------------------------------------------------------------------\n");
+	printf("---- ---- ---------------------------------------------------------------------\n");
     }
     for (i = 1, lp = ktlist; lp; i++, lp = lp->next) {
 	retval = krb5_unparse_name(kcontext, lp->entry->principal, &pname);
@@ -220,7 +263,7 @@ if ( (strlen(argv[i]) == 2)&&
 					    fmtbuf,
 					    sizeof(fmtbuf),
 					    &fill))
-		printf(fmtbuf);
+		printf("%s ", fmtbuf);
 	}
 	printf("%40s", pname);
 	if (show_enctype) {
@@ -243,3 +286,13 @@ if ( (strlen(argv[i]) == 2)&&
 	krb5_xfree(pname);
     }
 }
+
+
+
+
+
+
+
+
+
+
