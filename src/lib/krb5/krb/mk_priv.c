@@ -145,6 +145,9 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
     krb5_keyblock       * keyblock;
     krb5_replay_data      replaydata;
 
+    /* Clear replaydata block */
+    memset((char *) &replaydata, 0, sizeof(krb5_replay_data));
+
     /* Get keyblock */
     if ((keyblock = auth_context->local_subkey) == NULL)
         if ((keyblock = auth_context->remote_subkey) == NULL)
@@ -161,14 +164,15 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 	/* Need a better error */
 	return KRB5_RC_REQUIRED;
 
-    /* Do the time, regardless */
-    if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
-				   &replaydata.usec))
-      return retval;
-
-    if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
-	outdata->timestamp = replaydata.timestamp;
-    	outdata->usec = replaydata.usec;
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
+	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
+	if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
+				       &replaydata.usec))
+	    return retval;
+	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
+    	    outdata->timestamp = replaydata.timestamp;
+    	    outdata->usec = replaydata.usec;
+	}
     }
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
