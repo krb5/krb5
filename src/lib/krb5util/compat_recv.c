@@ -37,7 +37,6 @@
 #include "k5-int.h"
 #if !defined(_MSDOS) && !defined(_MACINTOSH)
 #include <kerberosIV/krb.h>
-#include <kerberosIV/krb4-proto.h>
 #include "com_err.h"
 #include <errno.h>
 
