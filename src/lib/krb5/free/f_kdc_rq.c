@@ -37,8 +37,8 @@ krb5_free_kdc_req(context, val)
 	krb5_free_principal(context, val->client);
     if (val->server)
 	krb5_free_principal(context, val->server);
-    if (val->etype)
-	krb5_xfree(val->etype);
+    if (val->ktype)
+	krb5_xfree(val->ktype);
     if (val->addresses)
 	krb5_free_addresses(context, val->addresses);
     if (val->authorization_data.ciphertext.data)
