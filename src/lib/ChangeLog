@@ -1,3 +1,7 @@
+Thu Mar 23 14:26:35 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: also produces a map for the dll.
+
 Tue Mar 21 18:59:15 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added xxx-MAC targets for macintosh compatibility,

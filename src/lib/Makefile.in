@@ -21,7 +21,7 @@ clean-mac::
 	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
 
 clean-windows::
-	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak winsock.lib
+	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak libkrb5.map winsock.lib
 #
 # Windows stuff to make libkrb5.dll and libkrb5.lib. Currently it
 # combines crypto, krb5 and the util/et directories.
@@ -51,8 +51,8 @@ fast: win_glue.obj winsock.lib
 	cd ..\..\lib\gssapi
 	$(MAKE) -$(MFLAGS)
 	cd ..
-	link /co /seg:400 /noe /nologo win_glue, libkrb5.dll,nul, \
-	   $(LIBS) ldllcew libw,libkrb5.def
+	link /co /seg:400 /noe /nologo win_glue, libkrb5.dll, libkrb5.map, \
+	   $(LIBS) ldllcew libw, libkrb5.def
 	rc /nologo /p /k libkrb5.dll
 	implib /nologo libkrb5.lib libkrb5.dll
 		
@@ -60,8 +60,8 @@ libkrb5.lib:: libkrb5.dll
 	implib /nologo libkrb5.lib libkrb5.dll
 	
 libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
-	link /co /seg:400 /noe /nol win_glue, libkrb5.dll,nul, \
-	   $(LIBS) ldllcew libw,libkrb5.def
+	link /co /seg:400 /noe /nol win_glue, libkrb5.dll, libkrb5.map, \
+	   $(LIBS) ldllcew libw, libkrb5.def
 	rc /nologo /p /k libkrb5.dll
 
 winsock.lib:  winsock.def
