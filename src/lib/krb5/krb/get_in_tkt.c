@@ -778,7 +778,7 @@ krb5_get_init_creds(krb5_context context,
 
     /* request.padata is filled in later */
 
-    request.kdc_options = 0;
+    request.kdc_options = context->kdc_default_options;
 
     /* forwardable */
 

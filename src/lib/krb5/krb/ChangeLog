@@ -1,3 +1,7 @@
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* get_in_tkt.c (krb5_get_init_creds): Initialize options based on
+	context.kdc_default_options 
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* gen_seqnum.c (krb5_generate_seq_number): Fix think-o on sequence
