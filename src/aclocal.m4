@@ -1179,6 +1179,18 @@ mips-sgi-irix*)
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
+mips-*-netbsd*)
+	PICFLAGS=-fPIC
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
+	SHLIBEXT=.so
+	LDCOMBINE='ld -shared -soname lib$(LIB)$(SHLIBSEXT)'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
 *-*-netbsd*)
 	PICFLAGS=-fpic
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'

@@ -1,3 +1,7 @@
+Fri Mar 21 15:12:46 1997  Tom Yu  <chaoself@avalanche-breakdown.mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Add support for mips-dec-netbsd.
+
 Sun Mar  9 22:29:31 1997  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Add provisions to make major version number
