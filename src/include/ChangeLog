@@ -1,3 +1,10 @@
+2002-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Move a whole bunch of stuff under KRB5_DEPRECATED or
+	KRB5_PRIVATE as a first pass for cleaning up the API.  [merge from
+	trunk] Note that KRB5_DEPRECATED=1 by default, and KRB5_PRIVATE=1
+	on all but MacOS X.
+
 2000-04-01  Miro Jurisic  <meeroh@mit.edu>
     * krb5.hin: Conditionalized krb5_kt_* macros vs. functions with
         KRB5_KEYTAB_ACCESSOR_FUNCTIONS
