@@ -1753,9 +1753,9 @@ int des_write(fd, buf, len)
 	return(-1);
     }
     
-    len_buf[0] = (len & 0xff000000);
-    len_buf[1] = (len & 0xff0000);
-    len_buf[2] = (len & 0xff00);
+    len_buf[0] = (len & 0xff000000) >> 24;
+    len_buf[1] = (len & 0xff0000) >> 16;
+    len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
     (void) write(fd, len_buf, 4);
     if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
@@ -1882,9 +1882,9 @@ int des_write(fd, buf, len)
     
     /* tell the other end the real amount, but send an 8-byte padded
        packet */
-    len_buf[0] = (len & 0xff000000);
-    len_buf[1] = (len & 0xff0000);
-    len_buf[2] = (len & 0xff00);
+    len_buf[0] = (len & 0xff000000) >> 24;
+    len_buf[1] = (len & 0xff0000) >> 16;
+    len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
     (void) write(fd, len_buf, 4);
 #ifdef NOROUNDUP

@@ -879,7 +879,7 @@ char    oobdata[] = {0};
  */
 control(pty, cp, n)
      int pty;
-     char *cp;
+     unsigned char *cp;
      int n;
 {
     struct winsize w;
@@ -1259,7 +1259,7 @@ v5_des_read(fd, buf, len)
      int len;
 {
     int nreturned = 0;
-    long net_len,rd_len;
+    krb5_ui_4 net_len,rd_len;
     int cc,retry;
     unsigned char len_buf[4];
     
@@ -1364,9 +1364,9 @@ v5_des_write(fd, buf, len)
 	return(-1);
     }
 
-    len_buf[0] = (len & 0xff000000);
-    len_buf[1] = (len & 0xff0000);
-    len_buf[2] = (len & 0xff00);
+    len_buf[0] = (len & 0xff000000) >> 24;
+    len_buf[1] = (len & 0xff0000) >> 16;
+    len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
     (void) write(fd, len_buf, 4);
     if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
@@ -1634,8 +1634,9 @@ register char *buf;
 int len;
 {
 	int nreturned = 0;
-	long net_len, rd_len;
+	krb5_ui_4 net_len, rd_len;
 	int cc;
+	unsigned char len_buf[4];
 
 	if (!do_encrypt)
 		return(read(fd, buf, len));
@@ -1653,12 +1654,13 @@ int len;
 		nstored = 0;
 	}
 	
-	if ((cc = krb_net_read(fd, &net_len, sizeof(net_len))) != sizeof(net_len)) {
+	if ((cc = krb_net_read(fd, (char *)&len_buf, 4)) != 4) {
 		/* XXX can't read enough, pipe
 		   must have closed */
 		return(0);
 	}
-	net_len = ntohl(net_len);
+ 	net_len = ((len_buf[0]<<24) | (len_buf[1]<<16) |
+		   (len_buf[2]<<8) | len_buf[3]);
 	if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 		/* XXX preposterous length, probably out of sync.
 		   act as if pipe closed */
@@ -1707,8 +1709,8 @@ int fd;
 char *buf;
 int len;
 {
-	long net_len;
 	static char garbage_buf[8];
+	unsigned char len_buf[4];
 
 	if (!do_encrypt)
 		return(write(fd, buf, len));
@@ -1744,8 +1746,11 @@ int len;
 
 	/* tell the other end the real amount, but send an 8-byte padded
 	   packet */
-	net_len = htonl(len);
-	(void) write(fd, &net_len, sizeof(net_len));
+	len_buf[0] = (len & 0xff000000) >> 24;
+	len_buf[1] = (len & 0xff0000) >> 16;
+	len_buf[2] = (len & 0xff00) >> 8;
+	len_buf[3] = (len & 0xff);
+	(void) write(fd, len_buf, 4);
 	(void) write(fd, des_outbuf, roundup(len,8));
 	return(len);
 }

@@ -1,3 +1,14 @@
+Mon Dec 19 15:09:57 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krcp.c (des_write):
+	* krlogin.c (des_write):
+	* krlogind.c (v5_des_write): Fix byte swapping code (Missing shift
+		instructions).
+
+	* krlogind.c (v4_des_read, v4_des_write): Fixed byte swapping code
+		so that V4 des compatibility works on 64 bit
+		architectures.
+
 Fri Nov 18 01:19:13 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): add install rules for krlogind.M,
