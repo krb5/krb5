@@ -194,6 +194,7 @@ int ttyfd = -1;
 #endif
 
 int dup_tty(int);
+static char **addarg(char **, char *);
 
 /*
  * init_termbuf()
@@ -906,7 +907,7 @@ tty_isnewmap()
  * that is necessary.  The return value is a file descriptor
  * for the slave side.
  */
-void
+static void
 getptyslave()
 {
      int t = -1;
@@ -1216,7 +1217,6 @@ start_login(host, autologin, name)
 	char *name;
 {
 	register char **argv;
-	char **addarg();
 	extern char *getenv();
 
 #ifdef SOLARIS
@@ -1409,7 +1409,7 @@ start_login(host, autologin, name)
 	/*NOTREACHED*/
 }
 
-	char **
+static char **
 addarg(argv, val)
 	register char **argv;
 	register char *val;

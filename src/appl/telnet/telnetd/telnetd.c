@@ -136,6 +136,7 @@ char	ptyibuf2[BUFSIZ];
 
 void doit P((struct sockaddr_in *));
 int terminaltypeok P((char *));
+static void _gettermname(void);
 
 int	hostinfo = 1;			/* do we print login banner? */
 
@@ -707,12 +708,11 @@ static unsigned char ttytype_sbbuf[] = {
 	IAC, SB, TELOPT_TTYPE, TELQUAL_SEND, IAC, SE
 };
 
-    int
+static int
 getterminaltype(name)
     char *name;
 {
     int retval = -1;
-    void _gettermname();
 
     settimer(baseline);
 #if	defined(AUTHENTICATION)
@@ -889,7 +889,7 @@ getterminaltype(name)
     return(retval);
 }  /* end of getterminaltype */
 
-    void
+static void
 _gettermname()
 {
     /*

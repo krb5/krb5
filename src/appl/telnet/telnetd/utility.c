@@ -151,7 +151,7 @@ ptyflush()
  * if the current address is a TELNET IAC ("I Am a Command")
  * character.
  */
-    char *
+static char *
 nextitem(current)
     char	*current;
 {
@@ -430,7 +430,7 @@ edithost(pat, host)
 
 static char *putlocation;
 
-	void
+static	void
 putstr(s)
 	register char *s;
 {

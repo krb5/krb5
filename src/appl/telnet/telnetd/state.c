@@ -476,7 +476,7 @@ send_do(option, init)
 extern void auth_request();
 #endif
 #ifdef	LINEMODE
-extern void doclientstat();
+static void doclientstat(void);
 #endif
 #ifdef	ENCRYPTION
 extern void encrypt_send_support();
@@ -1538,11 +1538,13 @@ suboption()
 
 }  /* end of suboption */
 
-	void
+#ifdef	LINEMODE
+static	void
 doclientstat()
 {
 	clientstat(TELOPT_LINEMODE, WILL, 0);
 }
+#endif
 
 #define	ADD(c)	 *ncp++ = c;
 #define	ADD_DATA(c) { *ncp++ = c; if (c == SE) *ncp++ = c; }

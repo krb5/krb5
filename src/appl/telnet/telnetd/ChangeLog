@@ -1,3 +1,14 @@
+2001-07-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* state.c: Declate doclientstat() static and conditionalize
+	inclusion if LINEMODE defined. 
+
+	* sys_term.c: Declare getptyslave() and addard() static.
+
+	* telnetd.c: Declare _gettermname() and getterminaltype() static.
+
+	* utility.c: Declare putstr() and nextitem() static.
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* telnetd.c (main): Change variable sin to sin4.
