@@ -47,6 +47,9 @@ krb5_init_context(context)
 	if (krb5_os_init_context(ctx))
 		goto cleanup;
 	
+
+	ctx->default_realm = 0;
+
 	*context = ctx;
 	return 0;
 
@@ -63,6 +66,9 @@ krb5_free_context(ctx)
 
      if (ctx->etypes);
           free(ctx->etypes);
+
+     if (ctx->default_realm)
+	  free(ctx->default_realm);
 
      ctx->magic = 0;
      free(ctx);

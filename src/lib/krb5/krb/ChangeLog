@@ -1,3 +1,8 @@
+Wed Apr 19 13:39:34 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* init_ctx.c: (krb5_init_context) initialize context default
+		realm. (krb5_free_context) free default realm.
+
 Fri Apr 14 15:05:51 1995    <tytso@rsx-11.mit.edu>
 
 	* sendauth.c (krb5_sendauth): initialize error return parameter
