@@ -1,3 +1,8 @@
+2004-07-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
+	CC_LINK_SHARED and CC_LINK_STATIC.
+
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
