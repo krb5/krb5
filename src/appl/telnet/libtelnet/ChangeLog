@@ -1,3 +1,8 @@
+Mon Jul 25 01:05:31 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: remove reference to lorder (linux doesn't have
+	lorder, it seems)
+
 Fri Jul 15 23:36:50 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* kerberos5.c (kerberos5_is): Avoid coredump caused by freeing of

@@ -56,7 +56,7 @@ TELNET_H= ../arpa/telnet.h
 all:: $(LIB)
 $(LIB): $(OBJS)
 	$(RM) $(LIB)
-	$(ARADD) $@ `lorder ${OBJS} | tsort`
+	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
 clean::
