@@ -60,7 +60,6 @@ main(argc, argv)
     krb5_creds creds;
     char *cache_name;
     krb5_principal princ;
-    char *name;
     krb5_flags flags;
 
     krb5_init_ets();
@@ -131,12 +130,14 @@ main(argc, argv)
 	com_err(progname, code, "while unparsing principal name");
 	exit(1);
     }
-    printf("Ticket cache: %s\nDefault principal: %s\n",
+    printf("Ticket cache: %s\nDefault principal: %s\n\n",
            krb5_cc_get_name(cache), defname);
     if (code = krb5_cc_start_seq_get(cache, &cur)) {
 	com_err(progname, code, "while starting to retrieve tickets");
 	exit(1);
     }
+    fputs("  Valid starting       Expires          Service principal\n",
+	  stdout);
     while (!(code = krb5_cc_next_cred(cache, &cur, &creds)))
 	show_credential(&creds);
     if (code == KRB5_CC_END) {
@@ -156,60 +157,51 @@ main(argc, argv)
     }	
 }
 
-void
-print_flags(cred)
+char *flags_string(cred)
 register krb5_creds *cred;
 {
-    printf("F: %X (", cred->ticket_flags);
+    static char buf[32];
+    int i = 0;
+	
     if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
-	putchar('F');
-    else
-	putchar(' ');
+        buf[i++] = 'F';
     if (cred->ticket_flags & TKT_FLG_FORWARDED)
-	putchar('f');
-    else
-	putchar(' ');
+        buf[i++] = 'f';
     if (cred->ticket_flags & TKT_FLG_PROXIABLE)
-	putchar('P');
-    else
-	putchar(' ');
+        buf[i++] = 'P';
     if (cred->ticket_flags & TKT_FLG_PROXY)
-	putchar('p');
-    else
-	putchar(' ');
+        buf[i++] = 'p';
     if (cred->ticket_flags & TKT_FLG_MAY_POSTDATE)
-	putchar('D');
-    else
-	putchar(' ');
+        buf[i++] = 'D';
     if (cred->ticket_flags & TKT_FLG_POSTDATED)
-	putchar('d');
-    else
-	putchar(' ');
+        buf[i++] = 'd';
     if (cred->ticket_flags & TKT_FLG_INVALID)
-	putchar('i');
-    else
-	putchar(' ');
+        buf[i++] = 'i';
     if (cred->ticket_flags & TKT_FLG_RENEWABLE)
-	putchar('R');
-    else
-	putchar(' ');
+        buf[i++] = 'R';
     if (cred->ticket_flags & TKT_FLG_INITIAL)
-	putchar('I');
-    else
-	putchar(' ');
-    putchar(')');
+        buf[i++] = 'I';
+    if (cred->ticket_flags & TKT_FLG_HW_AUTH)
+        buf[i++] = 'H';
+    if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
+        buf[i++] = 'A';
+    buf[i] = '\0';
+    return(buf);
 }
+
+static  char *Month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+				"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 void printtime(tv)
     time_t tv;
 {
     struct tm *stime;
+
     stime = localtime((time_t *)&tv);
-    
-    printf("%02d/%02d/%02d:%02d:%02d:%02d",
-           stime->tm_year,
-           stime->tm_mon + 1,
+    printf("%2d-%s-%2d %02d:%02d:%02d",
            stime->tm_mday,
+           Month_names[stime->tm_mon],
+           stime->tm_year,
            stime->tm_hour,
            stime->tm_min,
            stime->tm_sec);
@@ -220,7 +212,8 @@ show_credential(cred)
 register krb5_creds *cred;
 {
     krb5_error_code retval;
-    char *name, *sname;
+    char *name, *sname, *flags;
+    int	first = 1;
 
     retval = krb5_unparse_name(cred->client, &name);
     if (retval) {
@@ -233,31 +226,42 @@ register krb5_creds *cred;
 	free(name);
 	return;
     }
-    if (strcmp(name, defname) == 0) {
-        printf("S: %s\n\t", sname);
-    } else {
-    printf("C: %s\tS: %s\n\t", name, sname);
-    }
-
     if (!cred->times.starttime)
 	cred->times.starttime = cred->times.authtime;
 
-    if (cred->times.endtime < now) {
-        printf("EXPIRED; was ");
-    }
-    printf("valid ");
     printtime(cred->times.starttime);
-    printf(" to ");
+    putchar(' '); putchar(' ');
     printtime(cred->times.endtime);
+    putchar(' '); putchar(' ');
+
+    printf("%s\n", sname);
+
+    if (strcmp(name, defname)) {
+	    printf("\tfor client %s", name);
+	    first = 0;
+    }
+    
     if (cred->times.renew_till) {
-        printf("\n\trenew until ");
+	if (first)
+		fputs("\t",stdout);
+	else
+		fputs(", ",stdout);
+	fputs("renew until ", stdout);
         printtime(cred->times.renew_till);
     }
     if (show_flags) {
-	fputs("\n\t",stdout);
-	print_flags(cred);
+	flags = flags_string(cred);
+	if (flags && *flags) {
+	    if (first)
+		fputs("\t",stdout);
+	    else
+		fputs(", ",stdout);
+	    printf("Flags: %s", flags);
+	    first = 0;
+        }
     }
     putchar('\n');
     free(name);
     free(sname);
 }
+
