@@ -25,7 +25,6 @@ krb5_copy_checksum(ckfrom, ckto)
 const krb5_checksum *ckfrom;
 krb5_checksum **ckto;
 {
-    krb5_error_code retval;
     krb5_checksum *tempto;
 
     if (!(tempto = (krb5_checksum *)malloc(sizeof(*tempto))))
