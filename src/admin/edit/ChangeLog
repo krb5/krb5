@@ -1,3 +1,8 @@
+Thu Sep  7 20:41:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* loadv4.c (load_v4db): Provide a dummy routine if krb4
+		compatibility is not compiled in. 
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * cpw.c, dump.c, dumpv4.c, kdb5_edit.c, loadv4.c : 

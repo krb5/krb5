@@ -25,6 +25,8 @@
  * entries from a V4 database.
  */
 
+#ifdef KRB5_KRB4_COMPAT
+
 #include <des.h>
 #include <krb.h>
 #include <krb_db.h>
@@ -863,5 +865,13 @@ static krb5_error_code fixup_database(context, realm)
     
     return retval;
 }
-
     
+#else /* KRB5_KRB4_COMPAT */
+void
+load_v4db(argc, argv)
+	int argc;
+	char *argv[];
+{
+	printf("This version of krb5_edit does not support the V4 load command.\n");
+}
+#endif /* KRB5_KRB4_COMPAT */
