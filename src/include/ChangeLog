@@ -1,3 +1,28 @@
+2002-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (fixup_addrinfo): Deleted.
+	(fake_getaddrinfo, fake_getnameinfo, fake_freeaddrinfo): Renamed
+	from non-"fake_" versions, and made static.  Compile if
+	NEED_FAKE_GETADDRINFO is defined.
+	(fake_getnameinfo): Truncate results if provided buffers are too
+	small.
+	(getaddrinfo, getnameinfo, freeaddrinfo) [HAVE_FAKE_GETADDRINFO]:
+	New functions, simple wrappers around the "fake_" versions.
+	(getaddrinfo, freeaddrinfo) [WRAP_GETADDRINFO]: New functions
+	which call the system versions via function pointers and then fix
+	up some known problems in the returned data.
+	(getnameinfo) [WRAP_GETNAMEINFO]: Likewise.
+	(gaiptr, faiptr, gniptr) [WRAP_GETADDRINFO || WRAP_GETNAMEINFO]:
+	New static variables, initialized with addresses of system
+	versions of getaddrinfo, etc.
+	* fake-addrinfo.h (fixup_addrinfo): Declaration deleted.
+	(WRAP_GETADDRINFO): New macro, defined on Linux and AIX.
+	(getaddrinfo, getnameinfo, freeaddrinfo): Define as macros, and
+	declare functions, if WRAP_GETADDRINFO is defined or
+	HAVE_GETADDRINFO is not defined; drop BROKEN_GETADDRINFO check.
+	(gai_strerror, addrinfo, EAI_*): Define macros and declare
+	functions only if HAVE_GETADDRINFO isn't defined.
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_const): Restore macro definition, but include a

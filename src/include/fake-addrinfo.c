@@ -41,10 +41,32 @@
 
 /* To do, maybe:
 
-   IPv6 support for systems with working inet6 socket code but broken
-   getaddrinfo implementations?  (RH Linux 6.1 libc getaddrinfo
-   ignores AI_NUMERICHOST.  Solaris 8 doesn't appear to support
-   IPv6.)  Could use gethostbyname2 if available.  */
+   + For AIX 4.3.3, using the RFC 2133 definition: Implement
+     AI_NUMERICHOST.  It's not defined in the header file.
+
+     For certain (old?) versions of GNU libc, AI_NUMERICHOST is
+     defined but not implemented.
+
+   + Windows support.
+
+     Apparently XP and .Net provide getaddrinfo and friends, but
+     earlier versions do not.  Since we want one binary to work on
+     multiple platforms, the best option appears to be to use the OS
+     version if it's available, and the fake one here otherwise.  This
+     means both the wrapper and the fake versions need to be compiled,
+     and they need to use the OS version of structures and macros.
+
+     Try defining NEED_FAKE_GETADDRINFO and WRAP_GETADDRINFO but not
+     HAVE_FAKE_GETADDRINFO, and put in the right magic to look up the
+     function addresses at run time.
+
+   + Use gethostbyname2, inet_aton and other IPv6 or thread-safe
+     functions if available.  But, see
+     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=135182 for one
+     gethostbyname2 problem on Linux.
+
+   + Upgrade host requirements to include working implementations of
+     these functions, and throw all this away. :-)  */
 
 #include "fake-addrinfo.h"
 
@@ -55,54 +77,11 @@
 # undef _XOPEN_SOURCE_EXTENDED
 #endif
 
-void fixup_addrinfo (struct addrinfo *ai)
-{
-    struct addrinfo *ai2;
-
-    if (ai == 0)
-	return;
-
-    /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
-
-       RFC 2553 says that when AI_CANONNAME is set, the ai_canonname
-       flag of the first returned structure has the canonical name of
-       the host.  Instead, GNU libc sets ai_canonname in all the
-       returned structures, sometimes it's the canonical name and
-       sometimes it's the numeric form of an address.  So if we
-       actually want the canonical name, we may have to look through
-       the list and discard numeric addresses.
-
-       Since it's dependent on the target hostname, it's hard to check
-       for at configure time.  */
-    if (ai->ai_canonname && strchr(ai->ai_canonname, ':')) {
-	for (ai2 = ai->ai_next; ai2; ai2 = ai2->ai_next) {
-	    if (ai2->ai_canonname == 0)
-		continue;
-	    if (!strchr(ai2->ai_canonname, ':')) {
-		char *p = ai->ai_canonname;
-		ai->ai_canonname = ai2->ai_canonname;
-		ai2->ai_canonname = p;
-		break;
-	    }
-	}
-	if (ai2 == 0)
-	    /* Ran off end, with no non-numeric name.  What to do?  */
-	    ;
-    }
-
-    for (; ai; ai = ai->ai_next) {
-	/* AIX 4.3.3 libc is broken.  It doesn't set the family or len
-	   fields of the sockaddr structures.  */
-	if (ai->ai_addr->sa_family == 0)
-	    ai->ai_addr->sa_family = ai->ai_family;
-#ifdef HAVE_SA_LEN
-	if (ai->ai_addr->sa_len == 0)
-	    ai->ai_addr->sa_len = ai->ai_addrlen;
-#endif
-    }
-}
-
 #ifdef HAVE_FAKE_GETADDRINFO
+#define NEED_FAKE_GETADDRINFO
+#endif
+
+#ifdef NEED_FAKE_GETADDRINFO
 
 static int translate_h_errno (int h);
 
@@ -155,8 +134,9 @@ static int fai_add_hosts_by_name (const char *name, int af,
     return 0;
 }
 
-int getaddrinfo (const char *name, const char *serv,
-		 const struct addrinfo *hint, struct addrinfo **result)
+static int
+fake_getaddrinfo (const char *name, const char *serv,
+		  const struct addrinfo *hint, struct addrinfo **result)
 {
     struct addrinfo *res = 0;
     int ret;
@@ -246,10 +226,11 @@ int getaddrinfo (const char *name, const char *serv,
     return 0;
 }
 
-int getnameinfo (const struct sockaddr *sa, socklen_t len,
-		 char *host, size_t hostlen,
-		 char *service, size_t servicelen,
-		 int flags)
+static int
+fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
+		  char *host, size_t hostlen,
+		  char *service, size_t servicelen,
+		  int flags)
 {
     struct hostent *hp;
     const struct sockaddr_in *sinp;
@@ -265,10 +246,7 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    char *p;
 	numeric_host:
 	    p = inet_ntoa (sinp->sin_addr);
-	    if (strlen (p) < hostlen)
-		strcpy (host, p);
-	    else
-		return EAI_FAIL; /* ?? */
+	    strncpy (host, p, hostlen);
 	} else {
 	    hp = gethostbyaddr ((const char *) &sinp->sin_addr,
 				sizeof (struct in_addr),
@@ -278,11 +256,12 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 		    goto numeric_host;
 		return translate_h_errno (h_errno);
 	    }
-	    if (strlen (hp->h_name) < hostlen)
-		strcpy (host, hp->h_name);
-	    else
-		return EAI_FAIL; /* ?? */
+	    /* According to the Open Group spec, getnameinfo can
+	       silently truncate, but must still return a
+	       null-terminated string.  */
+	    strncpy (host, hp->h_name, hostlen);
 	}
+	host[hostlen-1] = 0;
     }
 
     if (service) {
@@ -294,26 +273,22 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    if (port < 0 || port > 65535)
 		return EAI_FAIL;
 	    sprintf (numbuf, "%d", port);
-	    if (strlen (numbuf) < servicelen)
-		strcpy (service, numbuf);
-	    else
-		return EAI_FAIL;
+	    strncpy (service, numbuf, servicelen);
 	} else {
 	    sp = getservbyport (sinp->sin_port,
 				(flags & NI_DGRAM) ? "udp" : "tcp");
 	    if (sp == 0)
 		goto numeric_service;
-	    if (strlen (sp->s_name) < servicelen)
-		strcpy (service, sp->s_name);
-	    else
-		return EAI_FAIL;
+	    strncpy (service, sp->s_name, servicelen);
 	}
+	service[servicelen-1] = 0;
     }
 
     return 0;
 }
 
-void freeaddrinfo (struct addrinfo *ai)
+static void
+fake_freeaddrinfo (struct addrinfo *ai)
 {
     struct addrinfo *next;
     while (ai) {
@@ -372,4 +347,182 @@ static int translate_h_errno (int h)
     }
 }
 
+#ifdef HAVE_FAKE_GETADDRINFO
+int getaddrinfo (const char *name, const char *serv,
+		 const struct addrinfo *hint, struct addrinfo **result)
+{
+    return fake_getaddrinfo(name, serv, hint, result);
+}
+
+void freeaddrinfo (struct addrinfo *ai)
+{
+    fake_freeaddrinfo(ai);
+}
+
+int getnameinfo (const struct sockaddr *sa, socklen_t len,
+		 char *host, size_t hostlen,
+		 char *service, size_t servicelen,
+		 int flags)
+{
+    return fake_getnameinfo(sa, len, host, hostlen, service, servicelen,
+			    flags);
+}
+#endif /* HAVE_FAKE_GETADDRINFO */
+#endif /* NEED_FAKE_GETADDRINFO */
+
+
+#if defined (WRAP_GETADDRINFO) || defined (WRAP_GETNAMEINFO)
+/* These variables will contain pointers to the system versions.  They
+   have to be initialized at the end, because the way we initialize
+   them (for UNIX) is #undef and a reference to the C library symbol
+   name.  */
+static int (*gaiptr) (const char *, const char *, const struct addrinfo *,
+		      struct addrinfo **);
+static void (*faiptr) (struct addrinfo *);
+#ifdef WRAP_GETNAMEINFO
+static int (*gniptr) (const struct sockaddr *, socklen_t,
+		      char *, size_t, char *, size_t, int);
 #endif
+
+#ifdef WRAP_GETADDRINFO
+
+int
+getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
+	     struct addrinfo **result)
+{
+    int aierr;
+
+    aierr = (*gaiptr) (name, serv, hint, result);
+    if (aierr || *result == 0)
+	return aierr;
+
+#ifdef __linux__
+    /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
+
+       RFC 2553 says that when AI_CANONNAME is set, the ai_canonname
+       flag of the first returned structure has the canonical name of
+       the host.  Instead, GNU libc sets ai_canonname in each returned
+       structure to the name that the corresponding address maps to,
+       if any, or a printable numeric form.
+
+       RFC 2553 bis and the new Open Group spec say that field will be
+       the canonical name if it can be determined, otherwise, the
+       provided hostname or a copy of it.
+
+       IMNSHO, "canonical name" means CNAME processing and not PTR
+       processing, but I can see arguing it.  Using the numeric form
+       when that's not the form provided is just wrong.  So, let's fix
+       it.
+
+       The glibc 2.2.5 sources indicate that the canonical name is
+       *not* allocated separately, it's just some extra storage tacked
+       on the end of the addrinfo structure.  So, let's try this
+       approach: If getaddrinfo sets ai_canonname, we'll replace the
+       *first* one with allocated storage, and free up that pointer in
+       freeaddrinfo if it's set; the other ai_canonname fields will be
+       left untouched.
+
+       Ref: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=133668 .
+
+       Since it's dependent on the target hostname, it's hard to check
+       for at configure time.  Always do it on Linux for now.  When
+       they get around to fixing it, add a compile-time or run-time
+       check for the glibc version in use.  */
+#define COPY_FIRST_CANONNAME
+    if (name && (hint->ai_flags & AI_CANONNAME)) {
+	struct hostent *hp;
+	const char *name2 = 0;
+	int i;
+
+	hp = gethostbyname(name);
+	if (hp == 0) {
+	    if ((*result)->ai_canonname != 0)
+		/* XXX Indicate success with the existing name?  */
+		return 0;
+	    /* No canonname listed, and gethostbyname failed.  */
+	    name2 = name;
+	} else {
+	    /* Sometimes gethostbyname will be directed to /etc/hosts
+	       first, and sometimes that file will have entries with
+	       the unqualified name first.  So take the first entry
+	       that looks like it could be a FQDN.  */
+	    for (i = 0; hp->h_aliases[i]; i++) {
+		if (strchr(hp->h_aliases[i], '.') != 0) {
+		    name2 = hp->h_aliases[i];
+		    break;
+		}
+	    }
+	    /* Give up, just use the first name (h_name ==
+	       h_aliases[0] on all systems I've seen).  */
+	    if (hp->h_aliases[i] == 0)
+		name2 = hp->h_name;
+	}
+
+	(*result)->ai_canonname = strdup(name2);
+	if ((*result)->ai_canonname == 0) {
+	    (*faiptr)(*result);
+	    *result = 0;
+	    return EAI_MEMORY;
+	}
+    }
+#endif
+
+#ifdef _AIX
+    for (; ai; ai = ai->ai_next) {
+	/* AIX 4.3.3 libc is broken.  It doesn't set the family or len
+	   fields of the sockaddr structures.  */
+	if (ai->ai_addr->sa_family == 0)
+	    ai->ai_addr->sa_family = ai->ai_family;
+#ifdef HAVE_SA_LEN /* always true on aix, actually */
+	if (ai->ai_addr->sa_len == 0)
+	    ai->ai_addr->sa_len = ai->ai_addrlen;
+#endif
+    }
+#endif
+
+    /* Not dealt with yet:
+
+       - Some versions of GNU libc can lose some IPv4 addresses in
+	 certain cases when multiple IPv4 and IPv6 addresses are
+	 available.
+
+       - Wrapping a possibly-missing system version, as we'll need to
+	 do for Windows.  */
+
+    return 0;
+}
+
+void freeaddrinfo (struct addrinfo *ai)
+{
+#ifdef COPY_FIRST_CANONNAME
+    free(ai->ai_canonname);
+    ai->ai_canonname = 0;
+    (*faiptr)(ai);
+#else
+    (*faiptr)(ai);
+#endif
+}
+#endif /* WRAP_GETADDRINFO */
+
+#ifdef WRAP_GETNAMEINFO
+int getnameinfo (const struct sockaddr *sa, socklen_t len,
+		 char *host, size_t hostlen,
+		 char *service, size_t servicelen,
+		 int flags)
+{
+    return (*gniptr)(sa, len, host, hostlen, service, servicelen, flags);
+}
+#endif /* WRAP_GETNAMEINFO */
+
+#undef getaddrinfo
+#undef getnameinfo
+#undef freeaddrinfo
+static int (*gaiptr) (const char *, const char *, const struct addrinfo *,
+		      struct addrinfo **) = &getaddrinfo;
+static void (*faiptr) (struct addrinfo *) = &freeaddrinfo;
+#ifdef WRAP_GETNAMEINFO
+static int (*gniptr) (const struct sockaddr *, socklen_t,
+		      char *, size_t, char *, size_t, int) = &getnameinfo;
+#endif
+
+#endif /* WRAP_GETADDRINFO || WRAP_GETNAMEINFO */

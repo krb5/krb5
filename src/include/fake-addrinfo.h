@@ -51,13 +51,15 @@
 #define FAI_CONCAT(A,B) FAI_CONCAT2(A,B)
 #define FAI_CONCAT2(A,B) A ## B
 
-/* Various C libraries have broken implementations of getaddrinfo.  */
-#undef fixup_addrinfo
-#define fixup_addrinfo FAI_CONCAT(FAI_PREFIX, _fixup_addrinfo)
+#define fixup_addrinfo	do not call me!
 
-extern void fixup_addrinfo (struct addrinfo *ai);
+#if defined (__linux__) || defined (_AIX)
+/* See comments in fake-addrinfo.c.  */
+#  define WRAP_GETADDRINFO
+/* #  define WRAP_GETNAMEINFO */
+#endif
 
-#if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
+#if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETADDRINFO)
 
 #undef  getaddrinfo
 #define getaddrinfo	FAI_CONCAT(FAI_PREFIX, _fake_getaddrinfo)
@@ -65,6 +67,11 @@ extern void fixup_addrinfo (struct addrinfo *ai);
 #define getnameinfo	FAI_CONCAT(FAI_PREFIX, _fake_getnameinfo)
 #undef  freeaddrinfo
 #define freeaddrinfo	FAI_CONCAT(FAI_PREFIX, _fake_freeaddrinfo)
+
+#endif
+
+#if !defined (HAVE_GETADDRINFO)
+
 #undef  gai_strerror
 #define gai_strerror	FAI_CONCAT(FAI_PREFIX, _fake_gai_strerror)
 #undef  addrinfo
@@ -141,6 +148,10 @@ struct addrinfo {
 #undef  EAI_SYSTEM
 #define EAI_SYSTEM	11
 
+#endif /* ! HAVE_GETADDRINFO */
+
+#if !defined (HAVE_GETADDRINFO) || defined (WRAP_GETADDRINFO)
+
 int getaddrinfo (const char *name, const char *serv,
 		 const struct addrinfo *hint, struct addrinfo **result);
 
@@ -151,14 +162,18 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 
 void freeaddrinfo (struct addrinfo *ai);
 
-char *gai_strerror (int code);
+#endif
+
+#if !defined (HAVE_GETADDRINFO)
 
 #define HAVE_FAKE_GETADDRINFO
 #define HAVE_GETADDRINFO
 #undef  HAVE_GETNAMEINFO
 #define HAVE_GETNAMEINFO
 
-#endif /* HAVE_GETADDRINFO */
+char *gai_strerror (int code);
+
+#endif
 
 /* Fudge things on older gai implementations.  */
 /* AIX 4.3.3 is based on RFC 2133; no AI_NUMERICHOST.  */
