@@ -316,7 +316,10 @@ master key name '%s'\n",
 
     /* now open the database */
     open_db_and_mkey();
-    
+
+    exit_status = 0;	/* It's OK if we get errors in open_db_and_mkey */
+                        /* We do not have the key stashed in the database! */
+
     return;
 
 }
