@@ -153,8 +153,9 @@ includes:: hfile							@@\
 #ifndef ProcessStockHeader
 #define ProcessStockHeader(stockname,newname)				@@\
 newname: stockname Makefile						@@\
-	-$(RM) newname							@@\
-	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname
+	-$(RM) newname.new						@@\
+	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname.new		@@\
+	CopyHeaderNewName(newname.new,.,newname)
 #endif /* ProcessStockHeader */
 
 /*
