@@ -65,16 +65,16 @@ const krb5_data FAR * salt;
 #define min(A, B) ((A) < (B) ? (A): (B))
 #endif
 
-    if ( keytype != KEYTYPE_DES )
+    if ((keytype != KEYTYPE_DES_CBC_CRC) && (keytype != KEYTYPE_DES_CBC_MD4) &&
+       (keytype != KEYTYPE_DES_CBC_MD5) && (keytype != KEYTYPE_DES_CBC_RAW)) 
 	return (KRB5_PROG_KEYTYPE_NOSUPP);
 
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
     keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->etype = eblock->crypto_entry->proto_enctype;
-    keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
+    keyblock->keytype = eblock->crypto_entry->proto_keytype;
     key = keyblock->contents;
 
     if (salt)

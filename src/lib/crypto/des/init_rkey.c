@@ -38,7 +38,10 @@ mit_des_init_random_key (seedblock, seed)
     krb5_pointer * seed;
 {
     mit_des_random_key_seed * p_seed;
-    if (seedblock->keytype != KEYTYPE_DES)
+    if ((seedblock->keytype != KEYTYPE_DES_CBC_CRC) &&
+	(seedblock->keytype != KEYTYPE_DES_CBC_MD4) && 
+	(seedblock->keytype != KEYTYPE_DES_CBC_MD5) && 
+	(seedblock->keytype != KEYTYPE_DES_CBC_RAW))
 	return KRB5_BAD_KEYTYPE;
     if ( !(p_seed = (mit_des_random_key_seed *) 
 	   malloc(sizeof(mit_des_random_key_seed))) ) 
