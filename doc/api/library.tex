@@ -6,18 +6,23 @@
 \setlength{\parskip}{.1in}
 \setlength{\parindent}{2em}
 \setlength{\textwidth}{6.25in}
+\setlength{\footrulewidth}{0.4pt}
+\setlength{\plainfootrulewidth}{0.4pt}
+\setlength{\plainheadrulewidth}{0.4pt}
 \makeindex
 \newif\ifdraft
 \drafttrue
 \typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
 \ifdraft
-\pagestyle{fancy}
+\pagestyle{fancyplain}
 \makeatletter
 \renewcommand{\sectionmark}[1]{\markboth {\uppercase{\ifnum \c@secnumdepth >\z@
     \thesection\hskip 1em\relax \fi #1}}{}}%
 \renewcommand{\subsectionmark}[1]{\markright {\ifnum \c@secnumdepth >\@ne
           \thesubsection\hskip 1em\relax \fi #1}}
 \makeatother
+\lhead[\thepage]{\fancyplain{}{\sl\rightmark}}
+\rhead[\fancyplain{}{\sl\rightmark}]{\thepage}
 \cfoot{{\bf DRAFT---DO NOT REDISTRIBUTE}}
 \else\pagestyle{headings}\fi
 \begin{document}
