@@ -186,7 +186,7 @@ long krb_rd_priv P_TYPE_((u_char *, u_long , Key_schedule , C_Block *, struct so
 
 /* rd_req.c */
 int krb_set_key P_TYPE_((char *, int ));
-int krb_rd_req P_TYPE_((KTEXT , char *, char *, long , AUTH_DAT *, char *));
+int krb_rd_req P_TYPE_((KTEXT , char *, char *, unsigned KRB4_32 , AUTH_DAT *, char *));
 
 /* rd_safe.c */
 long krb_rd_safe P_TYPE_((u_char *, u_long , C_Block *, struct sockaddr_in *, struct sockaddr_in *, MSG_DAT *));

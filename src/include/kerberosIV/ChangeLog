@@ -1,3 +1,11 @@
+Wed Jun 28 00:01:52 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb4-proto.h: correct signature for krb_rd_req.
+
+Tue Jun 27 23:53:22 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb.h (swap_u_long): use KRB4_32 in swap() macros.
+
 Thu Jun 22 16:06:26 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* krb4-proto.h, krb.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
