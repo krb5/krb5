@@ -31,6 +31,8 @@ static char rcsid_anadd_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
+#include <krb5/sysincl.h>
 #include <krb5/ext-proto.h>
 #include <krb5/dbm.h>
 #include <sys/file.h>
