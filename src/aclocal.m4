@@ -348,8 +348,6 @@ if test $withval = no; then
 	DEPKRB4_LIB=
 	KRB4_CRYPTO_LIB=
 	DEPKRB4_CRYPTO_LIB=
-	KDB4_LIB=
-	DEPKDB4_LIB=
 	LDARGS=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir=
@@ -361,8 +359,6 @@ else
 	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
 	KRB4_CRYPTO_LIB='-ldes425'
 	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
-	KDB4_LIB='-lkdb4'
-	DEPKDB4_LIB='$(TOPLIBD)/libkdb4.a'
 	LDARGS=
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
@@ -372,18 +368,14 @@ else
 	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_CRYPTO_LIB='-ldes425'
 	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
-	KDB4_LIB="-lkdb"
-	DEPKDB4_LIB="$withval/lib/libkdb.a"
 	LDARGS="-L$withval/lib"
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir="$withval/lib"
  fi
 fi
 AC_SUBST(KRB4_LIB)
-AC_SUBST(KDB4_LIB)
 AC_SUBST(KRB4_CRYPTO_LIB)
 AC_SUBST(DEPKRB4_LIB)
-AC_SUBST(DEPKDB4_LIB)
 AC_SUBST(DEPKRB4_CRYPTO_LIB)
 ])dnl
 dnl
@@ -864,14 +856,6 @@ if test "$dbval" = "db"; then
 fi
 ])
 dnl
-dnl This rule tells KRB5_LIBRARIES to include the kdb4 library.
-dnl
-kdb4_deplib=''
-kdb4_lib=''
-define(USE_KDB4_LIBRARY,[
-kdb4_deplib=$DEPKRB4_LIB
-kdb4_lib=$KDB4_LIB])
-dnl
 dnl This rule tells KRB5_LIBRARIES to include the krb4 libraries.
 dnl
 krb4_deplib=''
@@ -895,8 +879,8 @@ define(KRB5_LIBRARIES,[
 if test ${kdbm_deplib}x = x; then
 USE_ANAME
 fi
-DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib $kdbm_deplib $kaname_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
-LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kdb4_lib $kutil_lib $krb4_lib -lkrb5 $kdbm_libs $kaname_libs -lcrypto $ss_lib -lcom_err $LIBS"
+DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $krb4_deplib $kdbm_deplib $kaname_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
+LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kutil_lib $krb4_lib -lkrb5 $kdbm_libs $kaname_libs -lcrypto $ss_lib -lcom_err $LIBS"
 LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
 AC_SUBST(LDFLAGS)
 AC_SUBST(LDARGS)
@@ -1163,23 +1147,6 @@ if test "$dbval" = "" -o "$dbval" = db; then
 fi
 ])dnl
 dnl
-dnl
-dnl
-dnl
-AC_DEFUN(WITH_KDB4,[
-AC_ARG_WITH([kdb4],
-[  --with-kdb4		use Kerberos version 4 database library.
-  --without-kdb4	Avoid using Kerberos version 4 database library.],
-,
-withval=no)dnl
-if test "$withval" = no; then
-$2
-:
-else
-$1
-:
-fi
-])dnl
 dnl
 dnl Check for prototype support - used by application not including k5-int.h
 dnl
