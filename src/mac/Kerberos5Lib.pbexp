@@ -1,5 +1,5 @@
 #----------------------------------------------------
-#   Kerberos5Lib.exp
+#   Kerberos5Lib.pbexp
 #
 # Public Kerberos v5 API
 #----------------------------------------------------
@@ -102,7 +102,6 @@
 	_krb5_rd_rep
 	_krb5_rd_req
 	_krb5_rd_safe
-	_krb5_read_password
 	_krb5_recvauth
 	_krb5_sendauth
 	_krb5_sname_to_principal
