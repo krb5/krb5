@@ -1,3 +1,7 @@
+Fri Feb 16 12:04:06 1996  Theodore Y. Ts'o  <tytso@pao.MIT.EDU>
+
+	* krb5_err.et: Added new error table code KRB5_CONFIG_NODEFREALM.
+
 Fri Jan  5 12:23:44 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_err.et: Added error table code KRB5_FWD_BAD_PRINCIPAL.
