@@ -3,6 +3,8 @@
 	* default.exp: Add (disabled) debugging code for catching leaking
 	ptys.  expect eof from the correct spawn_ids when killing kdc and
 	kadmind to avoid leaking ptys.
+	(do_klist, v4klist, v4klist_none): Check for eof to avoid leaking
+	ptys.
 
 2002-10-07  Tom Yu  <tlyu@mit.edu>
 

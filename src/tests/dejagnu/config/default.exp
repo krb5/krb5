@@ -1871,10 +1871,7 @@ proc do_klist { myname servname testname } {
 	}
     }
 
-    expect {
-        "\r" { }
-	eof { }
-    }
+    expect eof
 
     if ![check_exit_status $testname] {
 	return 0
@@ -1939,6 +1936,7 @@ proc do_klist_err { testname } {
     }
     # We can't use check_exit_status, because we expect an exit status
     # of 1.
+    catch "expect eof"
     set status_list [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $status_list ($testname)"
     if { [lindex $status_list 2] != 0 } {
@@ -2113,10 +2111,7 @@ proc v4klist { client server testname } {
 	}
     }
 
-    expect {
-        "\r" { }
-	eof { }
-    }
+    expect eof
 
     if ![check_exit_status $testname] {
 	return 0
@@ -2160,6 +2155,7 @@ proc v4klist_none { testname } {
     }
     # We can't use check_exit_status, because we expect an exit status
     # of 1.
+    expect eof
     set status_list [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $status_list (v4klist)"
     if { [lindex $status_list 2] != 0 } {
