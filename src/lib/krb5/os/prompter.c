@@ -25,6 +25,7 @@ intr_routine(signo)
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
 		    void *data,
+		    const char *name,
 		    const char *banner,
 		    int num_prompts,
 		    krb5_prompt prompts[])
@@ -40,6 +41,11 @@ krb5_prompter_posix(krb5_context context,
     struct termios echo_control, save_control;
     int fd;
 #endif
+
+    if (name) {
+	fputs(name, stdout);
+	fputs("\n", stdout);
+    }
 
     if (banner) {
        fputs(banner, stdout);
@@ -117,10 +123,11 @@ cleanup:
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
-				    void *data,
-				    const char *banner,
-				    int num_prompts,
-				    krb5_prompt prompts[])
+		    void *data,
+		    const char *name,
+		    const char *banner,
+		    int num_prompts,
+		    krb5_prompt prompts[])
 {
    return(EINVAL);
 }
