@@ -30,6 +30,7 @@
 
 #include <krb5/krb5_err.h>
 #include <krb5/kdb5_err.h>
+#include <krb5/kv5m_err.h>
 #ifndef KRB5_USE_ISODE
 #include <krb5/asn1_err.h>
 #else
