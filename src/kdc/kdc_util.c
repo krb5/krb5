@@ -402,7 +402,7 @@ kdc_get_server_key(ticket, key, kvno)
 
 /* This probably wants to be updated if you support last_req stuff */
 
-static krb5_last_req_entry nolrentry = { KRB5_LRQ_NONE, 0 };
+static krb5_last_req_entry nolrentry = { KV5M_LAST_REQ_ENTRY, KRB5_LRQ_NONE, 0 };
 static krb5_last_req_entry *nolrarray[] = { &nolrentry, 0 };
 
 krb5_error_code
