@@ -43,11 +43,6 @@ static char rcsid_kdb_edit_c[] =
 #include <ss/ss.h>
 #include <stdio.h>
 
-struct saltblock {
-    int salttype;
-    krb5_data saltdata;
-};
-
 #include "./kdb5_edit.h"
 
 #define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
@@ -271,112 +266,38 @@ krb5_principal principal;
     return(vno);
 }
 
-void
-add_new_key(argc, argv)
-int argc;
-char *argv[];
+int create_db_entry(principal, newentry)
+    krb5_principal principal;
+    krb5_db_entry  *newentry;
 {
-    krb5_error_code retval;
-    krb5_principal newprinc;
-    int		salttype = KRB5_KDB_SALTTYPE_NORMAL;
-    char	*cmdname = argv[0];
+    int	retval;
 
-    if (argc > 2) {
-	    if (!strcmp(argv[1], "-onlyrealmsalt")) {
-		    salttype = KRB5_KDB_SALTTYPE_ONLYREALM;
-		    argc--;
-		    argv++;
-	    } else if (!strcmp(argv[1], "-norealmsalt")) {
-		    salttype = KRB5_KDB_SALTTYPE_NOREALM;
-		    argc--;
-		    argv++;
-	    }
-    }
-    if (argc != 2) {
-	com_err(cmdname, 0,
-		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
-	return;
-    }
-    if (!valid_master_key) {
-	    com_err(cmdname, 0, Err_no_master_msg);
-	    return;
-    }
-    if (retval = krb5_parse_name(argv[1], &newprinc)) {
-	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
-	return;
-    }
-    if (princ_exists(cmdname, newprinc) != NO_PRINC) {
-	com_err(cmdname, 0, "principal '%s' already exists", argv[1]);
-	krb5_free_principal(newprinc);
-	return;
-    }
-    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, 0, salttype);
-    krb5_free_principal(newprinc);
-    return;
-}
+    memset(newentry, 0, sizeof(krb5_db_entry));
+    
+    if (retval = krb5_copy_principal(principal, &newentry->principal))
+	return retval;
+    newentry->kvno = 1;
+    newentry->max_life = mblock.max_life;
+    newentry->max_renewable_life = mblock.max_rlife;
+    newentry->mkvno = mblock.mkvno;
+    newentry->expiration = mblock.expiration;
+    if (retval = krb5_copy_principal(master_princ, &newentry->mod_name))
+	goto errout;
+    
+    newentry->attributes = mblock.flags;
+    newentry->salt_type = KRB5_KDB_SALTTYPE_NORMAL;
 
-void
-add_v4_key(argc, argv)
-int argc;
-char *argv[];
-{
-    krb5_error_code retval;
-    krb5_principal newprinc;
+    if (retval = krb5_timeofday(&newentry->mod_date))
+	goto errout;
 
-    if (argc < 2) {
-	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
-	return;
-    }
-    if (!valid_master_key) {
-	    com_err(argv[0], 0, Err_no_master_msg);
-	    return;
-    }
-    if (retval = krb5_parse_name(argv[1], &newprinc)) {
-	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
-	return;
-    }
-    if (princ_exists(argv[0], newprinc) != NO_PRINC) {
-	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
-	krb5_free_principal(newprinc);
-	return;
-    }
-    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, 0,
-		  KRB5_KDB_SALTTYPE_V4);
-    krb5_free_principal(newprinc);
-    return;
-}
+    return 0;
 
-void
-add_rnd_key(argc, argv)
-int argc;
-char *argv[];
-{
-    krb5_error_code retval;
-    krb5_principal newprinc;
-
-    if (argc < 2) {
-	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
-	return;
-    }
-    if (!valid_master_key) {
-	    com_err(argv[0], 0, Err_no_master_msg);
-	    return;
-    }
-    if (retval = krb5_parse_name(argv[1], &newprinc)) {
-	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
-	return;
-    }
-    if (princ_exists(argv[0], newprinc) != NO_PRINC) {
-	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
-	krb5_free_principal(newprinc);
-	return;
-    }
-    enter_rnd_key(argv, newprinc, 0);
-    krb5_free_principal(newprinc);
-    return;
-}
+errout:
+    if (newentry->principal)
+	krb5_free_principal(newentry->principal);
+    memset(newentry, 0, sizeof(krb5_db_entry));
+    return retval;
+}    
 
 void
 add_key(DECLARG(char const *, cmdname),
@@ -467,6 +388,7 @@ krb5_pointer infop;
 		       master_keyblock.length);
 		krb5_xfree(master_keyblock.contents);
 		master_keyblock.contents = NULL;
+		valid_master_key = 0;
 	}
 	krb5_free_principal(master_princ);
 	dbactive = FALSE;
@@ -593,6 +515,15 @@ void enter_master_key(argc, argv)
 	if (!dbactive) {
 		com_err(pname, 0, Err_no_database);
 		return;
+	}
+	if (valid_master_key) {
+		(void) krb5_finish_key(&master_encblock);
+		(void) krb5_finish_random_key(&master_encblock,
+					      &master_random);
+		memset((char *)master_keyblock.contents, 0,
+		       master_keyblock.length);
+		krb5_xfree(master_keyblock.contents);
+		master_keyblock.contents = NULL;
 	}
 	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
 					TRUE, FALSE, 0, &master_keyblock)) {
@@ -885,17 +816,22 @@ krb5_db_entry *chk_entry;
     return(0);
 }
 
+struct list_iterator_struct {
+    char	*cmdname;
+    int		verbose;
+};
+
 krb5_error_code
 list_iterator(ptr, entry)
 krb5_pointer ptr;
 krb5_db_entry *entry;
 {
     krb5_error_code retval;
-    char *comerrname = (char *)ptr;
+    struct list_iterator_struct *lis = (struct list_iterator_struct *)ptr;
     char *name;
 
     if (retval = krb5_unparse_name(entry->principal, &name)) {
-	com_err(comerrname, retval, "while unparsing principal");
+	com_err(lis->cmdname, retval, "while unparsing principal");
 	return retval;
     }
     if (check_print(entry)) {
@@ -911,24 +847,36 @@ list_db(argc, argv)
 int argc;
 char *argv[];
 {
+    struct list_iterator_struct lis;
     char *start;
     char *argbuf;
     char *p;
     int i;
 
-    if (argc > 2) {
-        printf("Usage: ldb {name/instance}\n");
-	printf("       name and instance may contain \"*\" wildcards\n");
-        return;
-    }
-
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
 	    return;
     }
+    
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
 	    return;
+    }
+    lis.cmdname = argv[0];
+    lis.verbose = 0;
+
+    if (argc > 2) {
+	if (!strcmp(argv[1], "-v")) {
+	    lis.verbose = 1;
+	    argc--;
+	    argv++;
+	} 
+    }
+    
+    if (argc > 2) {
+        printf("Usage: ldb [-v] {name/instance}\n");
+	printf("       name and instance may contain \"*\" wildcards\n");
+        return;
     }
 
     num_name_tokens = 0;
@@ -1003,13 +951,21 @@ char *argv[];
     return;
 }
 
+/*
+ * This is the guts of add_rnd_key() and change_rnd_key()
+ */
 void
-change_rnd_key(argc, argv)
-int argc;
-char *argv[];
+enter_rnd_key(argc, argv, change)
+    int			argc;
+    char		**argv;
+    int			change;
 {
     krb5_error_code retval;
+    krb5_keyblock *tempkey;
     krb5_principal newprinc;
+    int nprincs = 1;
+    krb5_db_entry entry;
+    krb5_boolean more;
     krb5_kvno vno;
 
     if (argc < 2) {
@@ -1029,34 +985,169 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
+    if (retval = krb5_db_get_principal(newprinc, &entry, &nprincs, &more)) {
+	com_err(argv[0], retval, "while trying to get principal's database entry");
+	return;
+    }
+    if (change && !nprincs) {
 	com_err(argv[0], 0, "No principal '%s' exists", argv[1]);
+	goto errout;
+    }
+    if (!change && nprincs) {
+	com_err(argv[0], 0, "Principal '%s' already exists.", argv[1]);
+	goto errout;
+    }
+    
+    if (!change) {
+	retval = create_db_entry(newprinc, &entry);
+	if (retval) {
+	    com_err(argv[0], retval, "While creating new db entry.");
+	    goto errout;
+	}
+	nprincs = 1;
+    }
+    
+    if (retval = krb5_random_key(&master_encblock, master_random, &tempkey)) {
+	com_err(argv[0], retval, "while generating random key");
+	return;
+    }
+
+    /*
+     * Free the old key, if it exists.  Also nuke the alternative key,
+     * and associated salting information, since it all doesn't apply
+     * for random keys.
+     */
+    if (entry.key.contents) {
+	memset((char *)entry.key.contents, 0, entry.key.length);
+	krb5_xfree(entry.key.contents);
+    }
+    if (entry.alt_key.contents) {
+	memset((char *)entry.alt_key.contents, 0, entry.alt_key.length);
+	krb5_xfree(entry.alt_key.contents);
+	entry.alt_key.contents = 0;
+    }
+    if (entry.salt) {
+	krb5_xfree(entry.salt);
+	entry.salt = 0;
+    }
+    if (entry.alt_salt) {
+	krb5_xfree(entry.alt_salt);
+	entry.alt_salt = 0;
+    }
+    entry.salt_type = entry.alt_salt_type = 0;
+    entry.salt_length = entry.alt_salt_length = 0;
+
+    retval = krb5_kdb_encrypt_key(&master_encblock, tempkey, &entry.key);
+    krb5_free_keyblock(tempkey);
+    if (retval) {
+	com_err(argv[0], retval, "while encrypting key for '%s'", argv[1]);
+	goto errout;
+    }
+
+    if (retval = krb5_db_put_principal(&entry, &nprincs)) {
+	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
+	goto errout;
+    }
+    
+    if (nprincs != 1)
+	com_err(argv[0], 0, "entry not stored in database (unknown failure)");
+	
+errout:
+    krb5_free_principal(newprinc);
+    if (nprincs)
+	krb5_db_free_principal(&entry, nprincs);
+    return;
+}
+
+void
+add_rnd_key(argc, argv)
+int argc;
+char *argv[];
+{
+    enter_rnd_key(argc, argv, 0);
+}
+
+void
+change_rnd_key(argc, argv)
+int argc;
+char *argv[];
+{
+    enter_rnd_key(argc, argv, 1);
+}
+
+void
+add_new_key(argc, argv)
+int argc;
+char *argv[];
+{
+    krb5_error_code retval;
+    krb5_principal newprinc;
+    int		salttype = KRB5_KDB_SALTTYPE_NORMAL;
+    char	*cmdname = argv[0];
+
+    if (argc > 2) {
+	    if (!strcmp(argv[1], "-onlyrealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_ONLYREALM;
+		    argc--;
+		    argv++;
+	    } else if (!strcmp(argv[1], "-norealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_NOREALM;
+		    argc--;
+		    argv++;
+	    }
+    }
+    if (argc != 2) {
+	com_err(cmdname, 0,
+		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
+	return;
+    }
+    if (!valid_master_key) {
+	    com_err(cmdname, 0, Err_no_master_msg);
+	    return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (princ_exists(cmdname, newprinc) != NO_PRINC) {
+	com_err(cmdname, 0, "principal '%s' already exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_rnd_key(argv, newprinc, vno);
+    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, 0, salttype);
     krb5_free_principal(newprinc);
     return;
 }
 
 void
-enter_rnd_key(DECLARG(char **, argv),
-	      DECLARG(krb5_principal, princ),
-	      DECLARG(krb5_kvno, vno))
-OLDDECLARG(char **, argv)
-OLDDECLARG(krb5_principal, princ)
-OLDDECLARG(krb5_kvno, vno)
+add_v4_key(argc, argv)
+int argc;
+char *argv[];
 {
     krb5_error_code retval;
-    krb5_keyblock *tempkey;
+    krb5_principal newprinc;
 
-    if (retval = krb5_random_key(&master_encblock, master_random, &tempkey)) {
-	com_err(argv[0], retval, "while generating random key");
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
-    add_key(argv[0], argv[1], princ, tempkey, ++vno, 0);
-    memset((char *)tempkey->contents, 0, tempkey->length);
-    krb5_free_keyblock(tempkey);
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
+    if (retval = krb5_parse_name(argv[1], &newprinc)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+    if (princ_exists(argv[0], newprinc) != NO_PRINC) {
+	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
+	krb5_free_principal(newprinc);
+	return;
+    }
+    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, 0,
+		  KRB5_KDB_SALTTYPE_V4);
+    krb5_free_principal(newprinc);
     return;
 }
 
@@ -1104,7 +1195,7 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, vno+1, salttype);
+    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, vno, salttype);
     krb5_free_principal(newprinc);
     return;
 }
@@ -1140,7 +1231,7 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, vno+1,
+    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, vno,
 		  KRB5_KDB_SALTTYPE_V4);
     krb5_free_principal(newprinc);
     return;
@@ -1231,6 +1322,75 @@ OLDDECLARG(int, salttype)
     memset((char *)tempkey.contents, 0, tempkey.length);
     krb5_xfree(tempkey.contents);
     return;
+}
+
+/*
+ * XXX Still under construction....
+ */
+void show_principal(argc, argv)
+    int	argc;
+    char **argv;
+{
+    krb5_principal princ;
+    int nprincs = 1;
+    krb5_db_entry entry;
+    krb5_boolean more;
+    krb5_error_code retval;
+    char *pr_name = 0;
+    char *pr_mod = 0;
+    
+    if (argc < 2) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
+    }
+    if (!valid_master_key) {
+	    com_err(argv[0], 0, Err_no_master_msg);
+	    return;
+    }
+    if (retval = krb5_parse_name(argv[1], &princ)) {
+	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	return;
+    }
+
+    if (retval = krb5_db_get_principal(princ, &entry, &nprincs, &more)) {
+	com_err(argv[0], retval, "while trying to get principal's database entry");
+	goto errout;
+    }
+
+    if (!nprincs) {
+	com_err(argv[0], 0, "Principal %s not found.", argv[1]);
+	goto errout;
+    }
+    
+    if (retval = krb5_unparse_name(entry.principal, &pr_name)) {
+	com_err(argv[0], retval, "while unparsing principal");
+	goto errout;
+    }
+
+    if (retval = krb5_unparse_name(entry.mod_name, &pr_mod)) {
+	com_err(argv[0], retval, "while unparsing 'modified by' principal");
+	goto errout;
+    }
+
+    printf("Name: %s\n", pr_name);
+    printf("Salt: %d\n", entry.salt_type);
+    printf("Alt salt: %d\n", entry.salt_type);
+    printf("Last modified by %s on %s\n", pr_mod, ctime(&entry.mod_date));
+    
+    if (!nprincs) {
+	com_err(argv[0], 0, "Principal '%s' does not exist", argv[1]);
+	goto errout;
+    }
+    
+errout:
+    krb5_free_principal(princ);
+    if (nprincs)
+	krb5_db_free_principal(&entry, nprincs);
 }
 
 void change_working_dir(argc, argv)
