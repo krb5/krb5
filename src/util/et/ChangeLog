@@ -1,3 +1,7 @@
+Fri Nov 18 00:34:29 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: add caching to perror check (from epeisach).
+
 Fri Oct 21 21:06:48 1994    (tytso@rsx-11)
 
 	* Makefile.in (SED): Don't specify an explicit pathname for sed.
