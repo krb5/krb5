@@ -793,7 +793,7 @@ char	**status;
 #ifdef KRBCONF_VAGUE_ERRORS
 	return KRB_ERR_GENERIC;
 #else
-	return KDC_PREAUTH_FAILED;
+	return KDC_ERR_PREAUTH_REQUIRED;
 #endif
     }
 
@@ -967,6 +967,9 @@ krb5_data *data;
 			     KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_RENEW | \
 			     KDC_OPT_VALIDATE)
 
+#define NO_TGT_OPTION (KDC_OPT_FORWARDED | KDC_OPT_PROXY | KDC_OPT_RENEW | \
+		       KDC_OPT_VALIDATE)
+
 int
 validate_tgs_request(request, server, ticket, kdc_time, status)
 register krb5_kdc_req *request;
@@ -997,50 +1000,55 @@ char **status;
      * (either the ticket granting service or the service that was
      * originally requested)
      */
-    if (!krb5_principal_compare(ticket->server, request->server)) {
-	    /*
-	     * OK, we need to validate the krbtgt service in the ticket.
-	     *
-	     * The krbtgt service is of the form:
-	     * 		krbtgt/realm-A@realm-B
-	     *
-	     * Realm A is the "server realm"; the realm of the
-	     * server of the requested ticket must match this realm.
-	     * Of course, it should be a realm serviced by this KDC.
-	     *
-	     * Realm B is the "client realm"; this is what should be
-	     * added to the transited field.  (which is done elsewhere)
-	     */
-	    char 	*destination_realm;
+    if (request->kdc_options & NO_TGT_OPTION) {
+	if (!krb5_principal_compare(ticket->server, request->server)) {
+	    *status = "SERVER DIDN'T MATCH TICKET FOR RENEW/FORWARD/ETC";
+	    return(KDC_ERR_SERVER_NOMATCH);
+	}
+    } else {
+	/*
+	 * OK, we need to validate the krbtgt service in the ticket.
+	 *
+	 * The krbtgt service is of the form:
+	 * 		krbtgt/realm-A@realm-B
+	 *
+	 * Realm A is the "server realm"; the realm of the
+	 * server of the requested ticket must match this realm.
+	 * Of course, it should be a realm serviced by this KDC.
+	 *
+	 * Realm B is the "client realm"; this is what should be
+	 * added to the transited field.  (which is done elsewhere)
+	 */
+	char 	*destination_realm;
 
-	    /* Make sure there are two components... */
-	    if (krb5_princ_size(ticket->server) != 2) {
-		    *status = "BAD TGS SERVER LENGTH";
-		    return KRB_AP_ERR_NOT_US;
-	    }
-	    /* ...that the first component is krbtgt... */
-	    if (!krb5_is_tgs_principal(ticket->server)) {
-		    *status = "BAD TGS SERVER NAME";
-		    return KRB_AP_ERR_NOT_US;
-	    }
-	    /* ...and that the second component matches the server realm... */
-	    if ((krb5_princ_component(ticket->server, 1)->length !=
-		 krb5_princ_realm(request->server)->length) ||
-		memcmp(krb5_princ_component(ticket->server, 1)->data,
-		       krb5_princ_realm(request->server)->data,
-		       krb5_princ_realm(request->server)->length)) {
-		    *status = "BAD TGS SERVER INSTANCE";
-		    return KRB_AP_ERR_NOT_US;
-	    }
-	    /* XXX add check that second component must match locally
-	     * supported realm?
-	     */
+	/* Make sure there are two components... */
+	if (krb5_princ_size(ticket->server) != 2) {
+	    *status = "BAD TGS SERVER LENGTH";
+	    return KRB_AP_ERR_NOT_US;
+	}
+	/* ...that the first component is krbtgt... */
+	if (!krb5_is_tgs_principal(ticket->server)) {
+	    *status = "BAD TGS SERVER NAME";
+	    return KRB_AP_ERR_NOT_US;
+	}
+	/* ...and that the second component matches the server realm... */
+	if ((krb5_princ_component(ticket->server, 1)->length !=
+	     krb5_princ_realm(request->server)->length) ||
+	    memcmp(krb5_princ_component(ticket->server, 1)->data,
+		   krb5_princ_realm(request->server)->data,
+		   krb5_princ_realm(request->server)->length)) {
+	    *status = "BAD TGS SERVER INSTANCE";
+	    return KRB_AP_ERR_NOT_US;
+	}
+	/* XXX add check that second component must match locally
+	 * supported realm?
+	 */
 
-	    /* Server must allow TGS based issuances */
-	    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
-		    *status = "TGT BASED NOT ALLOWED";
-		    return(KDC_ERR_POLICY);
-	    }
+	/* Server must allow TGS based issuances */
+	if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
+	    *status = "TGT BASED NOT ALLOWED";
+	    return(KDC_ERR_POLICY);
+	}
     }
 	    
     /* TGS must be forwardable to get forwarded or forwardable ticket */

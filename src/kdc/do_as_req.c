@@ -356,7 +356,7 @@ krb5_data **response;			/* filled in with a response packet */
 #else
 	    retval -= ERROR_TABLE_BASE_krb5;
 	    if ((retval < 0) || (retval > 127))
-		    retval = KDC_PREAUTH_FAILED;
+		    retval = KDC_ERR_PREAUTH_FAILED;
             retval = prepare_error_as(request, retval, response);
 #endif
 	    goto errout;
