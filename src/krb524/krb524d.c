@@ -111,8 +111,10 @@ int main(argc, argv)
 	  argv++; argc--;
      }
      if (argc || use_keytab + use_master > 1 ||
-	 use_keytab + use_master == 0)
+	 use_keytab + use_master == 0) {
+	  use_keytab = use_master = 0;
 	  usage(context);
+     }
      
      signal(SIGINT, request_exit);
      signal(SIGHUP, request_exit);
@@ -200,6 +202,7 @@ void init_keytab(context)
      krb5_context context;
 {
      int ret;
+     use_keytab = 0;
      if (keytab == NULL) {
 	  if ((ret = krb5_kt_default(context, &kt))) {
 	       com_err(whoami, ret, "while opening default keytab");
@@ -212,17 +215,19 @@ void init_keytab(context)
 	       cleanup_and_exit(1, context);
 	  }
      }
+     use_keytab = 1;		/* now safe to close keytab */
 }
 
 void init_master(context)
      krb5_context context;
 {
      int ret;
-krb5_realm_params *rparams;
+     krb5_realm_params *rparams;
      char *realm = 0;
      char *key_name =0, *dbname = 0;
      char *stash_file = 0;
 
+     use_master = 0;
      /* Use the stashed enctype */
      master_keyblock.enctype = ENCTYPE_UNKNOWN;
 
@@ -280,16 +285,17 @@ krb5_xfree(realm);
      }
      
      if ((ret = krb5_db_init(context))) {
-					  com_err(whoami, ret, "while initializing master database");
-					  cleanup_and_exit(1, context);
-					}
+	  com_err(whoami, ret, "while initializing master database");
+	  cleanup_and_exit(1, context);
+     }
      if ((ret = krb5_process_key(context, &master_encblock, 
 				 &master_keyblock))) {
-       krb5_db_fini(context);
-       com_err(whoami, ret, "while processing master key");
-       cleanup_and_exit(1, context);
+	  krb5_db_fini(context);
+	  com_err(whoami, ret, "while processing master key");
+	  cleanup_and_exit(1, context);
      }
-   }
+     use_master = 1;		/* now safe to finish master key */
+}
 
 krb5_error_code do_connection(s, context)
      int s;
@@ -334,7 +340,7 @@ krb5_error_code do_connection(s, context)
 	    if (msgdata.length == sizeof(int))
 	      return KRB5_BADMSGTYPE;
 	    else
-	  goto error;
+	      goto error;
 	  }
      }
      if (debug)
