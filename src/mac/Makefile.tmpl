@@ -29,6 +29,8 @@ create-directories :
 ################################################################################
 
 GLUE_OUTPUT = /K5.CFMglue.c /GSS.CFMglue.c
+GLUE_INPUT = /mac/K5.CFMglue.cin /mac/K5.CFMglue.proto.h /mac/K5.CFMglue.c /mac/K5.moreCFMglue.cin \
+	/mac/GSS.CFMglue.cin /mac/GSS.CFMglue.proto.h /mac/GSS.moreCFMglue.cin
 
 glue : {GLUE_OUTPUT}
 glue-clean :
