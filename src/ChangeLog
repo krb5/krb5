@@ -1,3 +1,8 @@
+Wed Jun  7 16:10:22 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (INSTALLMKDIRS): Make sure that the
+		$(INSTALL_PREFIX) directory exists, not $(KRB5ROOT).
+
 Tue Jun  6 12:38:12 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Build the krb524 directory.
