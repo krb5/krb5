@@ -291,6 +291,8 @@ krb5_error_code krb5_rc_io_fetch(t, rep, maxlen)
 {
     int len;
     krb5_error_code retval;
+
+    rep->client = rep->server = 0;
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) &len, sizeof(len));
     if (retval) 
@@ -304,29 +306,43 @@ krb5_error_code krb5_rc_io_fetch(t, rep, maxlen)
 	return KRB5_RC_MALLOC;
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) rep->client, len);
-    if (retval) 
-	return retval;
+    if (retval)
+	goto errout;
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) &len, sizeof(len));
-    if (retval) 
-	return retval;
+    if (retval)
+	goto errout;
     
-    if ((len <= 0) || (len >= maxlen))
-	return KRB5_RC_IO_EOF;
+    if ((len <= 0) || (len >= maxlen)) {
+	retval = KRB5_RC_IO_EOF;
+	goto errout;
+    }
 
     rep->server = malloc (len);
-    if (!rep->server)
-	return KRB5_RC_MALLOC;
+    if (!rep->server) {
+	retval = KRB5_RC_MALLOC;
+	goto errout;
+    }
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) rep->server, len);
-    if (retval) 
-	return retval;
+    if (retval)
+	goto errout;
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) &rep->cusec, sizeof(rep->cusec));
     if (retval)
-	return retval;
+	goto errout;
     
     retval = krb5_rc_io_read (&t->d, (krb5_pointer) &rep->ctime, sizeof(rep->ctime));
+    if (retval)
+	goto errout;
+
+    return 0;
+    
+errout:
+    if (rep->client)
+	krb5_xfree(rep->client);
+    if (rep->server)
+	krb5_xfree(rep->server);
     return retval;
 }
     
