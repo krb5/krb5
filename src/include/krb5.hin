@@ -1444,7 +1444,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C krb5_build_principal
 /* XXX depending on varargs include file defining va_start... */
 krb5_error_code krb5_build_principal_va
 	KRB5_PROTOTYPE((krb5_context,
-		krb5_principal *, int, krb5_const char *, va_list));
+		krb5_principal, int, krb5_const char *, va_list));
 #endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_425_conv_principal
