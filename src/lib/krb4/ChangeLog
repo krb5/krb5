@@ -1,3 +1,21 @@
+2002-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	Handle IPv6 sockets that are used to communicate over IPv4, and
+	permit use of non-IPv4 addresses if address checking is turned
+	off:
+	* mk_priv.c (krb4int_address_less): New function.  Compares IPv4
+	addresses for ordering, but also handles the IPv6 v4-mapped form.
+	(krb_mk_priv): Use krb4int_address_less.  Handle sender/receiver
+	addresses that are IPv6 v4-mapped like IPv4 addresses, or store
+	zero for other addresses.
+	* mk_safe.c (krb_mk_safe): Use krb4int_address_less.  Handle
+	sender/receiver addresses that are IPv6 v4-mapped like IPv4
+	addresses, or store zero for other addresses.
+	* rd_priv.c (krb_rd_priv): Use krb4int_address_less.  Deal with
+	socket addresses that are v4-mapped IPv6 addresses.
+	* rd_safe.c (krb_rd_safe): Use krb4int_address_less.  Deal with
+	socket addresses that are v4-mapped IPv6 addresses.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* cr_tkt.c, decomp_tkt.c, g_in_tkt.c, tf_util.c: Make prototypes

@@ -154,9 +154,26 @@ krb_rd_priv(in, in_length, schedule, key, sender, receiver, m_data)
     /* don't swap, net order always */
     p += sizeof(src_addr.s_addr);
 
-    if (!krb_ignore_ip_address
-	&& src_addr.s_addr != sender->sin_addr.s_addr)
-	return RD_AP_MODIFIED;
+    if (!krb_ignore_ip_address) {
+	switch (sender->sin_family) {
+	case AF_INET:
+	    if (src_addr.s_addr != sender->sin_addr.s_addr)
+		return RD_AP_MODIFIED;
+	    break;
+#ifdef KRB5_USE_INET6
+	case AF_INET6:
+	    if (IN6_IS_ADDR_V4MAPPED (&((struct sockaddr_in6 *)sender)->sin6_addr)
+		&& !memcmp (&src_addr.s_addr,
+			    12 + (char *) &((struct sockaddr_in6 *)sender)->sin6_addr,
+			    4))
+		break;
+	    /* Not v4 mapped?  Not ignoring addresses?  You lose.  */
+	    return RD_AP_MODIFIED;
+#endif
+	default:
+	    return RD_AP_MODIFIED;
+	}
+    }
 
     /* safely get time_sec */
     KRB4_GET32(m_data->time_sec, p, le);
@@ -169,31 +186,26 @@ krb_rd_priv(in, in_length, schedule, key, sender, receiver, m_data)
        back to the receiver, but most higher level protocols can deal
        with that more directly. */
     if (krb_ignore_ip_address) {
-        if (m_data->time_sec < 0)
-            m_data->time_sec = -m_data->time_sec;
-    } else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
-				  receiver->sin_addr.s_addr) == -1)
-	/* src < recv */ 
-	m_data->time_sec = -m_data->time_sec;
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
-				receiver->sin_addr.s_addr) == 0)
-	if (lsb_net_ushort_less(sender->sin_port,
-				receiver->sin_port) == -1)
-	    /* src < recv */
+	if (m_data->time_sec < 0)
 	    m_data->time_sec = -m_data->time_sec;
-    /*
-     * all that for one tiny bit!
-     * Heaven help those that talk to themselves.
-     */
+    } else
+	switch (krb4int_address_less (sender, receiver)) {
+	case 1:
+	    m_data->time_sec = -m_data->time_sec;
+	    break;
+	case -1:
+	    if (m_data->time_sec < 0)
+		m_data->time_sec = -m_data->time_sec;
+	    break;
+	}
 
     /* check the time integrity of the msg */
     t_local = TIME_GMT_UNIXSEC;
     delta_t = t_local - m_data->time_sec;
     if (delta_t < 0)
 	delta_t = -delta_t;	/* Absolute value of difference */
-    if (delta_t > CLOCK_SKEW) {
+    if (delta_t > CLOCK_SKEW)
         return RD_AP_TIME;	/* XXX should probably be better code */
-    }
     DEB(("\ndelta_t = %d", delta_t));
 
     /*

@@ -93,6 +93,72 @@ extern int krb_debug;
 #endif
  */
 
+/* Utility function:
+
+   Determine order of addresses, if SENDER less than RECEIVER return 1
+   so caller will negate timestamp.  Return -1 for failure.  */
+int
+krb4int_address_less (struct sockaddr_in *sender, struct sockaddr_in *receiver)
+{
+    unsigned long sender_addr, receiver_addr;
+    unsigned short sender_port, receiver_port;
+    switch (sender->sin_family) {
+    case AF_INET:
+	sender_addr = sender->sin_addr.s_addr;
+	sender_port = sender->sin_port;
+	break;
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+	struct sockaddr_in6 *s6 = (struct sockaddr_in6 *) sender;
+	if (IN6_IS_ADDR_V4MAPPED (s6)) {
+	    struct sockaddr_in sintmp = { 0 };
+	    memcpy (&sintmp.sin_addr.s_addr,
+		    12+(char*)&s6->sin6_addr.s6_addr,
+		    4);
+	    sender_addr = sintmp.sin_addr.s_addr;
+	} else
+	    return -1;
+	sender_port = s6->sin6_port;
+	break;
+#endif
+    default:
+	return -1;
+    }
+    switch (receiver->sin_family) {
+    case AF_INET:
+	receiver_addr = receiver->sin_addr.s_addr;
+	receiver_port = receiver->sin_port;
+	break;
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+	struct sockaddr_in6 *s6 = (struct sockaddr_in6 *) receiver;
+	if (IN6_IS_ADDR_V4MAPPED (s6)) {
+	    struct sockaddr_in sintmp = { 0 };
+	    memcpy (&sintmp.sin_addr.s_addr,
+		    12+(char*)&s6->sin6_addr.s6_addr,
+		    4);
+	    receiver_addr = sintmp.sin_addr.s_addr;
+	} else
+	    return -1;
+	receiver_port = s6->sin6_port;
+	break;
+#endif
+    default:
+	return -1;
+    }
+    /* For compatibility with broken old code, compares are done in
+       VAX byte order (LSBFIRST).  */
+    if (lsb_net_ulong_less(sender_addr, receiver_addr) == -1
+	|| (lsb_net_ulong_less(sender_addr, receiver_addr) == 0
+	    && lsb_net_ushort_less(sender_port, receiver_port) == -1))
+	return 1;
+    return 0;
+    /*
+     * all that for one tiny bit!  Heaven help those that talk to
+     * themselves.
+     */
+}
+
 long KRB5_CALLCONV
 krb_mk_priv(in, out, length, schedule, key, sender, receiver)
     u_char *in;		/* application data */
@@ -155,24 +221,33 @@ krb_mk_priv(in, out, length, schedule, key, sender, receiver)
     *p++ = msg_time_5ms;
 
     /* stuff source address */
-    memcpy(p, &sender->sin_addr.s_addr,
-	   sizeof(sender->sin_addr.s_addr));
+    if (sender->sin_family == AF_INET)
+	memcpy(p, &sender->sin_addr.s_addr, sizeof(sender->sin_addr.s_addr));
+#ifdef KRB5_USE_INET6
+    else if (sender->sin_family == AF_INET6
+	     && IN6_IS_ADDR_V4MAPPED (&((struct sockaddr_in6 *)sender)->sin6_addr))
+	memcpy(p, 12+(char*)&((struct sockaddr_in6 *)sender)->sin6_addr, 4);
+#endif
+    else
+	/* The address isn't one we can encode in 4 bytes -- but
+	   that's okay if the receiver doesn't care.  */
+	memset(p, 0, 4);
     p += sizeof(sender->sin_addr.s_addr);
 
     /*
      * direction bit is the sign bit of the timestamp.  Ok
      * until 2038??
      */
-    /* For compatibility with broken old code, compares are done in VAX 
-       byte order (LSBFIRST) */ 
-    if (lsb_net_ulong_less(sender->sin_addr.s_addr, /* src < recv */ 
-			  receiver->sin_addr.s_addr) == -1)
-        msg_time_sec = -msg_time_sec;
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
-				receiver->sin_addr.s_addr) == 0)
-        if (lsb_net_ushort_less(sender->sin_port,
-				receiver->sin_port) == -1)
-            msg_time_sec = -msg_time_sec;
+    switch (krb4int_address_less (sender, receiver)) {
+    case 1:
+	msg_time_sec = -msg_time_sec;
+	break;
+    case -1:
+	/* Which way should we go in this case?  */
+    case 0:
+	break;
+    }
+
     /* stuff time sec */
     KRB4_PUT32BE(p, msg_time_sec);
 

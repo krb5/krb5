@@ -127,29 +127,25 @@ krb_mk_safe(in, out, length, key, sender, receiver)
     *p++ = msg_time_5ms;
 
     /* stuff source address */
-    memcpy(p, &sender->sin_addr.s_addr,
-	   sizeof(sender->sin_addr.s_addr));
+    if (sender->sin_family == AF_INET)
+	memcpy(p, &sender->sin_addr.s_addr, sizeof(sender->sin_addr.s_addr));
+#ifdef KRB5_USE_INET6
+    else if (sender->sin_family == AF_INET6
+	     && IN6_IS_ADDR_V4MAPPED (&((struct sockaddr_in6 *)sender)->sin6_addr))
+	memcpy(p, 12+(char*)&((struct sockaddr_in6 *)sender)->sin6_addr, 4);
+#endif
+    else
+	/* The address isn't one we can encode in 4 bytes -- but
+	   that's okay if the receiver doesn't care.  */
+	memset(p, 0, 4);
     p += sizeof(sender->sin_addr.s_addr);
 
     /*
      * direction bit is the sign bit of the timestamp.  Ok until
      * 2038??
      */
-    /* For compatibility with broken old code, compares are done in VAX 
-       byte order (LSBFIRST) */ 
-    if (lsb_net_ulong_less(sender->sin_addr.s_addr, /* src < recv */ 
-			   receiver->sin_addr.s_addr) == -1)
-        msg_time_sec = -msg_time_sec;
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
-				receiver->sin_addr.s_addr) == 0)
-        if (lsb_net_ushort_less(sender->sin_port,
-				receiver->sin_port) == -1)
-            msg_time_sec = -msg_time_sec;
-    /*
-     * all that for one tiny bit!  Heaven help those that talk to
-     * themselves.
-     */
-
+    if (krb4int_address_less (sender, receiver) == 1)
+	msg_time_sec = -msg_time_sec;
     /* stuff time sec */
     KRB4_PUT32BE(p, msg_time_sec);
 
