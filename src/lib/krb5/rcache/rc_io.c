@@ -321,7 +321,7 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
     if (retval)
 	goto cleanup;
 
-    if (lseek(new->fd, offset, SEEK_SET) == -1) {
+    if (lseek(new1->fd, offset, SEEK_SET) == -1) {
 	retval = KRB5_RC_IO_UNKNOWN;
 	goto cleanup;
     }
