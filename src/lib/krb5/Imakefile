@@ -1,7 +1,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 NormalLibraryObjectRule()
-        SUBDIRS = ccache crc-32 des kdb keytab krb os-4.3 rcache free
+        SUBDIRS = ccache crc-32 des_new kdb keytab krb os-4.3 rcache free
 OBJS =	\
 	cryptoconf.o \
 	perror.o \
