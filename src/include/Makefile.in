@@ -8,6 +8,7 @@ all-mac::
 
 all-windows::
 	copy $(BUILDTOP)\util\et\com_err.h .
+	copy $(BUILDTOP)\util\profile\profile.h .
 	if not exist gssapi\nul mkdir gssapi
 	copy $(BUILDTOP)\lib\gssapi\generic\gssapi.h gssapi
 	copy $(BUILDTOP)\lib\gssapi\generic\gssapi_generic.h gssapi
