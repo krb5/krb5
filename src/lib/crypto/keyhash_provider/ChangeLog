@@ -1,3 +1,8 @@
+2002-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_cksum4, t_cksum5): Include com_err library when
+	linking.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
