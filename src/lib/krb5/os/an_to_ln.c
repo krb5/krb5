@@ -694,7 +694,7 @@ default_an_to_ln(context, aname, lnsize, lname)
 */
 
 krb5_error_code KRB5_CALLCONV
-krb5_aname_to_localname(context, aname, lnsize, lname)
+krb5_aname_to_localname(context, aname, lnsize_in, lname)
     krb5_context context;
     krb5_const_principal aname;
     const int lnsize_in;
