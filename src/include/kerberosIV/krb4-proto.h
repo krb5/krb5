@@ -207,7 +207,7 @@ int send_to_kdc P_TYPE_((KTEXT , KTEXT , char *));
 int krb_sendauth P_TYPE_((long , int , KTEXT , char *, char *, char *, u_long , MSG_DAT *, CREDENTIALS *, Key_schedule , struct sockaddr_in *, struct sockaddr_in *, char *));
 int krb_sendsvc P_TYPE_((int , char *));
 
-#ifdef 0    
+#if 0    
 /* setenv.c */
 /* int setenv P_TYPE_((char *, char *, int )); -- is also in telnetd/local-proto.h */
 void unsetenv P_TYPE_((char *));
