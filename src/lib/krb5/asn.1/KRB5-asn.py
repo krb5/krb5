@@ -126,6 +126,14 @@ TGS-REQ ::= [APPLICATION 12] SEQUENCE {
 -- the preceding two sequences MUST be the same except for the
 -- APPLICATION identifier
 
+-- Note that the RFC specifies that PA-DATA is just a SEQUENCE, and when
+-- it appears in the messages, it's a SEQUENCE OF PA-DATA.
+-- However, this has an identical encoding to the data defined here,
+-- which has PA-DATA as SEQUENCE OF SEQUENCE, and the messages use a
+-- straight PA-DATA. This has the advantage (at least under ISODE) of
+-- giving a "known" name to the PA-DATA array, making it more easily
+-- manipulated by "glue code".
+
 PA-DATA ::=	SEQUENCE OF SEQUENCE {
 	padata-type[1]	INTEGER,
 	pa-data[2]	OCTET STRING -- might be encoded AP-REQ
