@@ -23,7 +23,6 @@ OBJS=	addr_comp.o	\
 	decrypt_tk.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
-	f_tgt_cred.o	\
 	free_rtree.o	\
 	faddr_ordr.o	\
 	gc_frm_kdc.o	\
@@ -68,7 +67,6 @@ SRCS=	addr_comp.c	\
 	decrypt_tk.c	\
 	encode_kdc.c	\
 	encrypt_tk.c	\
-	f_tgt_cred.c	\
 	free_rtree.c	\
 	faddr_ordr.c	\
 	gc_frm_kdc.c	\
