@@ -24,9 +24,7 @@
  * krb5_kt_free_entry()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 krb5_error_code INTERFACE
 krb5_kt_free_entry (context, entry)

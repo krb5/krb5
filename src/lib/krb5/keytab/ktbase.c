@@ -24,9 +24,7 @@
  * Registration functions for keytab.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 struct krb5_kt_typelist
  {

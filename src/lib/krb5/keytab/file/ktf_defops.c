@@ -24,9 +24,7 @@
  * krb5_kt_dfl_ops
  */
 
-
-#include <krb5/krb5.h>
-
+#include "k5-int.h"
 #include "ktfile.h"
 
 krb5_kt_ops krb5_kt_dfl_ops = {

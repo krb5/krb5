@@ -24,10 +24,7 @@
  * Get the name of the file containing a file-based keytab.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-
+#include "k5-int.h"
 #include "ktfile.h"
 
 krb5_error_code INTERFACE

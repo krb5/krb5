@@ -65,16 +65,9 @@
  * sizeof(krb5_octet) bytes for the key version number
  * sizeof(krb5_int16) bytes for the keytype
  * sizeof(krb5_int32) bytes for the key length, followed by the key
- *
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/libos.h>
-#include <krb5/los-proto.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 #include <stdio.h>
 
 #include "ktfile.h"

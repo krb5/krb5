@@ -24,9 +24,7 @@
  * krb5_ktf_writable_ops
  */
 
-
-#include <krb5/krb5.h>
-
+#include "k5-int.h"
 #include "ktfile.h"
 
 struct _krb5_kt_ops krb5_ktf_writable_ops = {

@@ -24,8 +24,7 @@
  * Get a default keytab.
  */
 
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include <stdio.h>
 
 krb5_error_code INTERFACE

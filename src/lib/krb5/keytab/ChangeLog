@@ -1,3 +1,7 @@
+Tue Feb 28 00:59:22 1995  John Gilmore  (gnu at toad.com)
+
+	* *.c:  Avoid <krb5/...> includes.
+
 Wed Feb 22 01:38:54 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work on the PC
