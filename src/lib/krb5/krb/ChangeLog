@@ -1,3 +1,8 @@
+Thu Dec 21 18:47:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_rep.c (krb5_rd_rep): Change use of
+		KRB5_SENDAUTH_MUTUAL_FAILED to KRB5_MUTUAL_FAILED.
+
 Tue Dec 19 17:15:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_cred.c (krb5_rd_cred_basic): Missing parenthesis meant that

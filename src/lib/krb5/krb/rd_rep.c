@@ -97,7 +97,7 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
     /* Check reply fields */
     if (((*repl)->ctime != auth_context->authentp->ctime) ||
       ((*repl)->cusec != auth_context->authentp->cusec)) {
-	retval = KRB5_SENDAUTH_MUTUAL_FAILED;
+	retval = KRB5_MUTUAL_FAILED;
 	goto clean_scratch;
     }
 
