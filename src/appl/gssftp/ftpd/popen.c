@@ -50,10 +50,8 @@ static char sccsid[] = "@(#)popen.c	5.9 (Berkeley) 2/25/91";
 #include <vfork.h>
 #endif
 
-#include "extern.h"
-
 /*
- * Special version of popen which avoids call to shell.  This insures no-one
+ * Special version of popen which avoids call to shell.  This insures noone
  * may create a pipe to a hidden program as a side effect of a list or dir
  * command.
  */
@@ -67,13 +65,13 @@ FILE *
 ftpd_popen(program, type)
 	char *program, *type;
 {
-	char *cp;
-	FILE *iop;
+	register char *cp;
+	FILE *volatile iop;
 	int argc, gargc, pdes[2], pid;
 	char **pop, *argv[MAX_ARGV], *gargv[MAX_GARGV], *vv[2];
-	extern char **ftpglob();
+	extern char **ftpglob(), **copyblk();
 
-	if ((*type != 'r' && *type != 'w') || type[1])
+	if (*type != 'r' && *type != 'w' || type[1])
 		return(NULL);
 
 	if (!pids) {
@@ -145,14 +143,11 @@ ftpd_popen(program, type)
 
 pfree:	for (argc = 1; argv[argc] != NULL; argc++) {
 		blkfree((char **)argv[argc]);
-#if 0
 		free((char *)argv[argc]);
-#endif
 	}
 	return(iop);
 }
 
-int
 ftpd_pclose(iop)
 	FILE *iop;
 {
