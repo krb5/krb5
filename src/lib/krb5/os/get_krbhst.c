@@ -77,24 +77,6 @@ krb5_get_krbhst(context, realm, hostlist)
                                          * case.
                                          */
 
-    cp = getenv(KRB5_ENV_KDC);
-    /* Format is REALM:SERVER */
-    if (cp != NULL
-	 && strncmp (realm->data, cp, realm->length) == 0
-	 && cp[realm->length] == ':') {
-        rethlist = (char **)calloc(2, sizeof (*rethlist));
-	if (rethlist == NULL)
-	    return ENOMEM;
-	rethlist[0] = strdup(cp + realm->length + 1);
-	if (rethlist[0] == NULL) {
-	    krb5_xfree(rethlist);
-	    return ENOMEM;
-	}
-	rethlist[1] = NULL;
-	*hostlist = rethlist;
-	return 0;
-    }
-
     krb5_find_config_files();
     if (!(config_file = fopen(krb5_config_file, "r")))
 	/* can't open */
