@@ -1,9 +1,16 @@
 KH = /mac/libraries/
 KH68K = {KH}KerberosHeaders68K
+KHCFM-68K = {KH}KerberosHeadersCFM-68K
 KHPPC = {KH}KerberosHeadersPPC
 
-GSSOBJSCFMPPC = "{MWPPCLibraries}ANSI C.PPC.Lib" \
-	{MWPPCLibraries}MWCRuntime.Lib {MWPPCLibraries}SIOUX.PPC.Lib \
+GSSRTLCFM68K = "{MW68KLibraries}ANSI (4i/8d) C.CFM68K.Lib" \
+	{MW68KLibraries}SIOUX.CFM68K.Lib \
+	{MW68KLibraries}InterfaceLib \
+	{MW68KLibraries}MWCFM68KRuntime.Lib \
+	"{MW68KLibraries}MathLibCFM68K (4i/8d).Lib"
+
+GSSRTLCFMPPC = "{MWPPCLibraries}ANSI C.PPC.Lib" \
+	{MWPPCLibraries}SIOUX.PPC.Lib {MWPPCLibraries}MWCRuntime.Lib \
 	{SharedLibraries}InterfaceLib {SharedLibraries}MathLib
 
 OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
@@ -12,11 +19,19 @@ OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
 
 all : build link
 
-libs : {KH68K} {KHPPC} {GSSOBJS68K} {GSSOBJSPPC} link
+libs : {KH68K} {KHPPC} {GSSOBJS68K} {GSSOBJS68KCFM} {GSSOBJSPPC} link
 
-build : {KH68K} {KHPPC}
-	MWC68K {OPTIONS} -prefix {KH68K} -model far {SRCS}
-	MWCPPC {OPTIONS} -prefix {KHPPC} {SRCS}
+build : build-PPC build-68K build-68KCFM
+
+build-68K : {KH68K}
+	MWC68K {OPTIONS} -o "/bin/68K/" -prefix {KH68K} -model far {SRCS}
+
+build-68KCFM : {KHCFM-68K} 
+	MWC68K {OPTIONS} -o "/bin/CFM-68K/" -prefix {KHCFM-68K} \
+		-model cfmflat {SRCS}
+
+build-PPC : {KHPPC}
+	MWCPPC {OPTIONS} -o "/bin/PPC/" -prefix {KHPPC} {SRCS}
 
 .c.68K.o : .c
 	MWC68K {DepDir}{Default}.c {OPTIONS} -prefix {KH68K} -model far
@@ -27,18 +42,79 @@ build : {KH68K} {KHPPC}
 {KH68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
 
+{KHCFM-68K} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
+	MWC68K {KH}KerberosHeaders.pch -precompile {KHCFM-68K} {OPTIONS} \
+		-i {KH} -model cfmflat
+
 {KHPPC} : {KH}KerberosHeaders.pch {KH}KerberosHeaders.h
 	MWCPPC {KH}KerberosHeaders.pch -precompile {KHPPC} {OPTIONS} -i {KH}
 
-link :
-	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
-	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
-	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
-	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
-        MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-		-@export GSSLibrary.ppc.exp -sym fullpath \
-                -sharedata -map libgss.ppc.MAP -o GSSLibraryPPC \
-		{GSSOBJSCFMPPC} {GSSOBJSPPC}
+link : link-68K link-68KCFM link-PPC link-CFMFAT
 
+link-68K :
+	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
+	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
+
+link-68KCFM :
+        MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
+		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym fullpath \
+                -map libgss.68K.MAP -o GSSLibrary68K \
+		{GSSRTLCFM68K} {GSSOBJS68KCFM}
+
+link-PPC :
+	MWLinkPPC -library -o libkrb5.PPC {K5OBJSPPC}
+	MWLinkPPC -library -o libgss.PPC {GSSOBJSPPC}
+    MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
+		-@export "/mac/GSSLibrary.exp" -sym fullpath \
+        -map libgss.ppc.MAP -o GSSLibraryPPC \
+		{GSSRTLCFMPPC} {GSSOBJSPPC}
+
+link-CFMFAT :
+	Duplicate -y GSSLibrary68K GSSLib
+	MergeFragment GSSLibraryPPC GSSLib
+	
 clean :
-	Delete -i {GSSOBJS68K} {GSSOBJSPPC}
+	Delete -i {GSSOBJS68K} {GSSOBJSPPC} {GSSOBJS68KCFM}
+
+# ---------------------
+# SAP related commands
+# ---------------------
+SRCS-SAP = /mac/SAP/macSAPglue.c
+GSSOBJS68KCFM-SAP = /bin/CFM-68K/macSAPglue.c.68k.o
+GSSOBJSPPC-SAP = /bin/PPC/macSAPglue.c.PPC.o
+INCLUDES-SAP = -i /mac/SAP/
+
+OPTIONS-SAP = {INCLUDES-SAP} -enum int -opt all -strings pool -mapcr \
+        -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
+        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath
+
+sap : build-SAP link-SAP
+
+build-SAP : build-68KCFM build-PPC build-SAPINIT
+
+build-SAPINIT : {KHCFM-68K} {KHPPC}
+	MWC68K {OPTIONS-SAP} -o "/bin/CFM-68K/" -prefix {KHCFM-68K} \
+		-model cfmflat {SRCS-SAP}
+	MWCPPC {OPTIONS-SAP} -o "/bin/PPC/" -prefix {KHPPC} {SRCS-SAP}
+
+link-SAP : link-68KCFM-SAP link-PPC-SAP link-CFMFAT-SAP
+
+link-68KCFM-SAP :
+	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
+		-model cfmflat -@export "/mac/GSSLibrary.SAP.exp" \
+		-init "__initializeSAPglue" \
+	        -sym fullpath -map libgss.68K.MAP -o GSSLibrarySAP.68K \
+		{GSSRTLCFM68K} {GSSOBJS68KCFM-SAP} {GSSOBJS68KCFM}
+	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.68K
+		
+link-PPC-SAP :
+	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
+		-@export "/mac/GSSLibrary.SAP.exp" \
+		-init "__initializeSAPglue" \
+	        -sym fullpath -map libgss.PPC.MAP -o GSSLibrarySAP.PPC \
+		{GSSRTLCFMPPC} {GSSOBJSPPC-SAP} {GSSOBJSPPC}
+	Rez "/mac/SAP/GSSforSAP.r" -a -o GSSLibrarySAP.PPC
+	
+link-CFMFAT-SAP : 
+	Duplicate -y GSSLibrarySAP.68K GSSLibSAP
+	MergeFragment GSSLibrarySAP.PPC GSSLibSAP

@@ -1,3 +1,8 @@
+Tue Oct 29 22:48:23 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.tmpl (SRCS-SAP): Added support for building 68K CFM
+		shared libraries.
+
 Fri Jun 21 11:29:40 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* macfiles.sh: Call macfiles.sh explicitly using /bin/sh, so that
