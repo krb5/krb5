@@ -5,7 +5,12 @@
  * For copyright info, see mit-sipb-copyright.h.
  */
 #include <stdio.h>
+#include <string.h>
 #include "mit-sipb-copyright.h"
+
+#ifndef HAS_STRDUP
+extern char *strdup();
+#endif
 
 char *str_concat3(), *generate_rqte(), *quote();
 long flag_value();

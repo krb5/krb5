@@ -34,6 +34,10 @@ end		return l_end();
 #include "ct.tab.h"
 #include "mit-sipb-copyright.h"
 
+#ifndef HAS_STRDUP
+extern char *strdup();
+#endif
+
 extern char *last_token;
 
 static l_command_table()
