@@ -42,7 +42,6 @@ include
 isode
 kadmin
 kadmin.v4
-kadmin.old
 kdc
 krb524
 lib
