@@ -1,5 +1,10 @@
 2005-01-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* build.texinfo (The util Directory): Add the new support
+	library.
+	(Installing the Binaries): Discuss parallel builds under GNU
+	make.
+
 	* implementor.texinfo (Host Address Lookup): Document Mac OS X
 	issues.
 
