@@ -63,6 +63,8 @@ EXPORTS
 	krb5_free_tkt_authent
 	krb5_fwd_tgt_creds
 	krb5_get_credentials
+	krb5_get_credentials_renew
+	krb5_get_credentials_validate
 	krb5_get_default_realm
 	krb5_get_host_realm
 	krb5_get_in_tkt

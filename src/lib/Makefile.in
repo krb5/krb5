@@ -21,10 +21,9 @@ clean-unix::
 clean-windows::
 	$(RM) *.dll *.lib *.exp *.map *.bak
 
-#
-# Windows stuff to make krb5.dll and krb5.lib. Currently it
-# combines crypto, krb5, kadm and the util/et directories.
-#
+
+# Windows stuff to make krb5 and gssapi DLLs.
+
 GLIBS = gssapi\gssapi.lib
 KLIBS = krb5\krb5.lib crypto\crypto.lib \
 	$(BUILDTOP)\util\profile\profile.lib \
@@ -36,7 +35,6 @@ KLIBS = krb5\krb5.lib crypto\crypto.lib \
 ##WIN16##GDEF = gssapi16.def
 ##WIN32##GDEF = gssapi32.def
 
-##WIN16##WLIB  = .\winsock.lib
 ##WIN16##WINLIBS = $(WLIB) ldllcew libw oldnames
 ##WIN32##WINLIBS = msvcrt.lib kernel32.lib wsock32.lib \
 ##WIN32##	user32.lib shell32.lib oldnames.lib
@@ -63,25 +61,21 @@ $(GLIB): $(GLIBS) $(KLIB) $(GDEF) win_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
 ##WIN32##	   win_glue.obj $(GLIBS) $(KLIB) $(WINLIBS)
 
-
-
-sap_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -I$(VERS_DIR) /c \
-		/Fosap_glue.obj win_glue.c
-
 win_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c win_glue.c
 
+##WIN16##$(WLIB):  winsock.def
+##WIN16##	implib /nologo $@ winsock.def
 
 
-##WIN16##sapkrb5.dll: $(GLIB) $(LIBS) gssapi.def sap_glue.obj
-##WIN16##	link /co /seg:400 /noe /nod /nol sap_glue, sapkrb5.dll, sapkrb5.map, \
-##WIN16##	   $(LIBS) $(VERS_DIR)\vswin.lib ldllcew libw oldnames, sapkrb5.def
-##WIN16##	rc /nologo /p /k sapkrb5.dll
+sap_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -I$(VERS_DIR) /c /Fo$@ win_glue.c
 
-##WIN16##winsock.lib:  winsock.def
-##WIN16##	implib /nologo winsock.lib winsock.def
-
+##WIN16##sapkrb5.dll: $(GLIBS) $(KLIB) sapkrb5.def sap_glue.obj
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   sap_glue, $*.dll, $*.map, \
+##WIN16##	   $(GLIBS) $(KLIB) $(VERS_DIR)\vswin.lib $(WINLIBS), $(GDEF)
+##WIN16##	rc /nologo /p /k $*.dll
 
 
 all-windows:: 

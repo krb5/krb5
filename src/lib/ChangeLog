@@ -1,14 +1,20 @@
-Tue Feb  4 15:52:34 1997  Richard Basch  <basch@lehman.com>
+Sat Feb  8 12:21:53 1997  Richard Basch  <basch@lehman.com>
 
-	* gssapi16.def: Declare the library name (win16)
+	* krb5_16.def krb5_32.def:
+		Export krb5_get_credentials_renew,krb5_get_credentials_validate
+
+	* Makefile.in:
+		Use WLIB definition in config/windows.in
+		Attempt at making a functional SAP library build
+
+Tue Feb  4 15:52:34 1997  Richard Basch  <basch@lehman.com>
 
 	* krb5_16.def krb5_32.def: New ComErr interface definitions
 
-	* krb5_32.def: Remove unsupported statements (EXETYPE, RESIDENTNAME)
+	* gssapi32.def krb5_32.def:
+		Remove unsupported statements (EXETYPE, RESIDENTNAME)
 
-Sun Feb  2 11:22:24 1997  Richard Basch  <basch@lehman.com>
-
-	* krb5_16.def: Need to declare the library name
+	* gssapi16.def krb5_16.def: Need to declare the library name (win16)
 
 Thu Jan 30 21:27:07 1997  Richard Basch  <basch@lehman.com>
 
