@@ -45,6 +45,82 @@
 #endif
 #endif /* _WIN32 && !__CYGWIN32__ */
 
+/*
+ * Wrapper function for the two backends
+ */
+
+krb5_error_code 
+krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmasters);
+#ifdef KRB5_DNS_LOOKUP
+krb5_error_code krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs);
+#endif
+
+static krb5_error_code
+krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
+    krb5_context context;
+    const krb5_data *realm;
+    struct sockaddr **addr_pp;
+    int *naddrs;
+    int *master_index;
+    int *nmasters;
+{
+    krb5_error_code code;
+#ifdef KRB5_DNS_LOOKUP
+    struct sockaddr *admin_addr_p, *kdc_addr_p;
+    int nadmin_addrs, nkdc_addrs;
+    int i,j;
+#endif /* KRB5_DNS_LOOKUP */
+
+    /*
+     * We always try the local file first
+     */
+
+    code = krb5_locate_srv_conf(context, realm, "kpasswd_server", addr_pp, naddrs,
+                                 master_index, nmasters);
+    if (code) {
+        code = krb5_locate_srv_conf(context, realm, "admin_server", addr_pp, naddrs,
+                                     master_index, nmasters);
+        if ( !code ) {
+            /* success with admin_server but now we need to change the port */
+            /* number to use DEFAULT_KPASSWD_PORT.                          */
+            for ( i=0;i<*naddrs;i++ ) {
+                struct sockaddr_in *sin = (struct sockaddr_in *) &addr_pp[i];
+                sin->sin_port = htons(DEFAULT_KPASSWD_PORT);
+            }
+        }
+    }
+
+#ifdef KRB5_DNS_LOOKUP
+    if (code) {
+        int use_dns = _krb5_use_dns(context);
+        if ( use_dns ) {
+            code = krb5_locate_srv_dns(realm, "_kpasswd", "_udp",
+                                        addr_pp, naddrs);
+            if ( code ) {
+                code = krb5_locate_srv_dns(realm, 
+                                            "_kerberos-adm", 
+                                            "_tcp",
+                                            addr_pp, naddrs);
+                if ( !code ) {
+                    /* success with admin_server but now we need to change the port */
+                    /* number to use DEFAULT_KPASSWD_PORT.                          */
+                    for ( i=0;i<*naddrs;i++ ) {
+                        struct sockaddr_in *sin = (struct sockaddr_in *) &(*addr_pp)[i];
+                        sin->sin_port = htons(DEFAULT_KPASSWD_PORT);
+                    }
+                }
+            }
+            if ( !code && master_index && nmasters ) {
+                *master_index = 1;
+                *nmasters = *naddrs;
+            }
+        }
+    }
+#endif /* KRB5_DNS_LOOKUP */
+    return (code);
+}
+
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_change_password(context, creds, newpw, result_code,
 		     result_code_string, result_string)
@@ -58,26 +134,18 @@ krb5_change_password(context, creds, newpw, result_code,
     krb5_auth_context auth_context;
     krb5_data ap_req, chpw_req, chpw_rep;
     krb5_address local_kaddr, remote_kaddr;
-    const char *realm_kdc_names[4];
-    int default_port;
-    char **hostlist, *host, *tmphost, *port, *cp, *code_string;
+    char *code_string;
     krb5_error_code code = 0;
-    int i, j, out, count, addrlen;
+    int i, addrlen;
     struct sockaddr *addr_p, local_addr, remote_addr, tmp_addr;
-    struct sockaddr_in *sin_p;
-    struct hostent *hp;
-    struct servent *sp;
-#ifdef HAVE_NETINET_IN_H
-    u_short udpport = htons(KRB5_DEFAULT_PORT);
-#endif
+    int naddr_p;
     int cc, local_result_code, tmp_len;
     SOCKET s1 = INVALID_SOCKET, s2 = INVALID_SOCKET;
+
 
     /* Initialize values so that cleanup call can safely check for NULL */
     auth_context = NULL;
     addr_p = NULL;
-    host = NULL;
-    hostlist = NULL;
     memset(&chpw_req, 0, sizeof(krb5_data));
     memset(&chpw_rep, 0, sizeof(krb5_data));
     memset(&ap_req, 0, sizeof(krb5_data));
@@ -90,134 +158,10 @@ krb5_change_password(context, creds, newpw, result_code,
 				    NULL, creds, &ap_req))
 	  goto cleanup;
 
-    if ((host = malloc(krb5_princ_realm(context, creds->client)->length + 1)) == NULL) 
-	  {
-	    code = ENOMEM;
-	    goto cleanup;
-	  }
-
-    strncpy(host, krb5_princ_realm(context, creds->client)->data,
-	    krb5_princ_realm(context, creds->client)->length);
-    host[krb5_princ_realm(context, creds->client)->length] = '\0';
-    hostlist = 0;
-    
-    realm_kdc_names[0] = "realms";
-    realm_kdc_names[1] = host;
-    realm_kdc_names[2] = "kpasswd_server";
-    realm_kdc_names[3] = 0;
-
-    default_port = 0;
-
-    code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
-
-    if (code == PROF_NO_RELATION) 
-      {
-        realm_kdc_names[2] = "admin_server";
-        default_port = 1;
-        code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
-      }
-
-    if (code == PROF_NO_SECTION)
-      {
-        code = KRB5_REALM_UNKNOWN;
+    if (code = krb5_locate_kpasswd(context, 
+                                    krb5_princ_realm(context, creds->client), 
+                                    &addr_p, &naddr_p,NULL,NULL))
         goto cleanup;
-      }
-    else 
-      if (code == PROF_NO_RELATION)
-        {
-          code = KRB5_CONFIG_BADFORMAT;
-          goto cleanup;
-        }
-      else 
-        if (code)
-          goto cleanup;
-
-#ifdef HAVE_NETINET_IN_H
-    /* XXX should look for "kpasswd" in /etc/services */
-    udpport = htons(DEFAULT_KPASSWD_PORT);
-#endif
-
-    count = 0;
-    while (hostlist && hostlist[count])
-	    count++;
-    
-    if (count == 0)
-      {
-        /* XXX */
-        code = KADM_NO_HOST;
-        goto cleanup;
-      }
-    
-    addr_p = (struct sockaddr *) malloc(sizeof(struct sockaddr) * count);
-    if (addr_p == NULL)
-      {
-        code = ENOMEM;
-        goto cleanup;
-      }
-
-    tmphost = hostlist[0];
-    out = 0;
-
-    /*
-     * Strip off excess whitespace
-     */
-    cp = strchr(tmphost, ' ');
-    if (cp)
-      *cp = 0;
-    cp = strchr(tmphost, '\t');
-    if (cp)
-      *cp = 0;
-    port = strchr(tmphost, ':');
-    if (port) {
-      *port = 0;
-	port++;
-	/* if the admin_server line was used, ignore the specified
-           port */
-	if (default_port)
-	    port = NULL;
-    }
-    hp = gethostbyname(hostlist[0]);
-
-    if (hp != 0) 
-      {
-        switch (hp->h_addrtype) 
-          {
-#ifdef HAVE_NETINET_IN_H
-          case AF_INET:
-            for (j=0; hp->h_addr_list[j]; j++) 
-              {
-                sin_p = (struct sockaddr_in *) &addr_p[out++];
-                memset ((char *)sin_p, 0, sizeof(struct sockaddr));
-                sin_p->sin_family = hp->h_addrtype;
-                sin_p->sin_port = port ? htons(atoi(port)) : udpport;
-                memcpy((char *)&sin_p->sin_addr,
-                       (char *)hp->h_addr_list[j],
-                       sizeof(struct in_addr));
-                if (out+1 >= count) 
-                  {
-                    count += 5;
-                    addr_p = (struct sockaddr *)
-                    realloc ((char *)addr_p, sizeof(struct sockaddr) * count);
-                    if (addr_p == NULL)
-                      {
-                        code = ENOMEM;
-                        goto cleanup;
-                      }
-                  }
-                }
-              break;
-#endif
-          default:
-            break;
-        }
-      }
-
-    if (out == 0) 
-      {     
-        /* Couldn't resolve any KDC names */
-        code = KADM_NO_HOST;
-        goto cleanup;
-      }
 
     /* this is really obscure.  s1 is used for all communications.  it
        is left unconnected in case the server is multihomed and routes
@@ -247,7 +191,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	    goto cleanup;
       }
 
-    for (i=0; i<out; i++) 
+    for (i=0; i<naddr_p; i++) 
       {
 		if (connect(s2, &addr_p[i], sizeof(addr_p[i])) == SOCKET_ERROR) 
 		  {
@@ -405,15 +349,9 @@ cleanup:
     if(auth_context != NULL)
       krb5_auth_con_free(context, auth_context);
     
-    if(host != NULL)
-      krb5_xfree(host);
-    
     if(addr_p != NULL)
       krb5_xfree(addr_p);
     
-    if(hostlist != NULL)
-      profile_free_list(hostlist);
-      
     if(s1 != INVALID_SOCKET)
       closesocket(s1);
     
