@@ -1233,7 +1233,8 @@ void kadmin_addpol(argc, argv)
     krb5_error_code retval;
     long mask;
     kadm5_policy_ent_rec policy;
-    
+
+    memset(&policy, 0, sizeof(policy));
     if (kadmin_parse_policy_args(argc, argv, &policy, &mask, "add_policy")) {
 	 kadmin_addmodpol_usage("add_policy");
 	 return;
@@ -1257,7 +1258,8 @@ void kadmin_modpol(argc, argv)
     krb5_error_code retval;
     long mask;
     kadm5_policy_ent_rec policy;
-    
+
+    memset(&policy, 0, sizeof(policy));
     if (kadmin_parse_policy_args(argc, argv, &policy, &mask,
 				 "modify_policy")) {
 	kadmin_addmodpol_usage("modify_policy");

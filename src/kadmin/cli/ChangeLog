@@ -1,3 +1,9 @@
+Wed Aug 21 14:10:36 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.c: memset policy structures before passing them to
+ 	kadm5_*_policy functions, so stack garbage >=2^32 doesn't end up
+ 	in a long field and confuse xdr
+
 Mon Aug 19 12:11:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c: prints absolute 0 dates as "[never]", print mod date
