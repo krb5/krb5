@@ -98,3 +98,4 @@ if test $? = 0 ; then
 	cp /dev/null include/krb5/autoconf.stmp
     fi
 fi
+find . -name autom4te.cache -print | xargs rm -rf
