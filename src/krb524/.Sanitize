@@ -23,10 +23,13 @@ Do-first:
 
 Things-to-keep:
 
+.cvsignore
 ChangeLog
-Makefile
+Makefile.in
 README
 RELEASE_NOTES
+configure
+configure.in
 cnv_tkt_skey.c
 conv_creds.c
 conv_princ.c
