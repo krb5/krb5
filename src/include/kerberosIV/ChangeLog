@@ -1,0 +1,5 @@
+Mon Oct  3 18:50:25 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Fix "make install" to use $(srcdir) when copying in
+		header files.
+
