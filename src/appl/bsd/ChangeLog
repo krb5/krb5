@@ -1,3 +1,7 @@
+Mon Oct 16 17:27:43 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* login.c (main): Don't print warning about no tickets obtained if we didn't ask for a password.  Also, define LOGNAME for so sysvish systems are happy.  Patch from ramus@nersc.gov.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * krcp.c, krlogin.c, krlogind.c, krsh.c, krshd.c : 

@@ -894,6 +894,7 @@ bad_login:
 	setenv("PATH", LPATH, 0);
 	setenv("USER", pwd->pw_name, 0);
 	setenv("SHELL", pwd->pw_shell, 0);
+	setenv("LOGNAME", pwd->pw_name, 0);
 
 	if (term[0] == '\0')
 		(void) strncpy(term, stypeof(tty), sizeof(term));
@@ -960,7 +961,7 @@ bad_login:
 		struct stat st;
 
 #ifdef KRB4
-		if (!krbflag)
+		if (!krbflag && !fflag && !Fflag && !eflag )
 		    printf("\nWarning: No Kerberos tickets obtained.\n\n");
 #endif /* KRB4 */
 		motd();
