@@ -1,3 +1,9 @@
+2001-10-11  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code
+	that compiles and works.
+	[pullup 5.78->5.79 from trunk]
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* do_tgs_req.c (process_tgs_req): Fix logging of bad transit path
