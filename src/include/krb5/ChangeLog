@@ -1,3 +1,15 @@
+Mon Dec 19 21:53:33 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5.h (krb5_context): Add new typdef for krb5_context.
+
+	* libos.h (krb5_os_context): Add new typedef for krb5_os_context.
+
+	* func-proto.h (krb5_init_context, krb5_free_context): Add new
+	  declarations.
+
+	* los-proto.h (krb5_init_os_context, krb5_free_os_context): Add new
+	  declarations.
+
 Wed Nov 30 16:16:54 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add support for --enable-athena and --with-krb4

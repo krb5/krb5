@@ -28,6 +28,10 @@
 #ifndef KRB5_LIBOS__
 #define KRB5_LIBOS__
 
+typedef struct _krb5_os_context {
+	krb5_magic	magic;
+} krb5_os_context;
+
 /* lock mode flags */
 #define	KRB5_LOCKMODE_SHARED	0x0001
 #define	KRB5_LOCKMODE_EXCLUSIVE	0x0002

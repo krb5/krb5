@@ -29,6 +29,11 @@
 
 #include <stdio.h>
 
+krb5_error_code krb5_init_os_context
+	PROTOTYPE((krb5_context *));
+void krb5_free_os_context
+	PROTOTYPE((krb5_context *));
+
 /* libos.spec */
 krb5_error_code krb5_read_password
 	PROTOTYPE((char *,
