@@ -76,7 +76,6 @@ static char *prflags[] = {
 };
 
 char *getenv();
-struct passwd *getpwuid();
 int exit_status = 0;
 char *def_realm = NULL;
 char *whoami = NULL;
