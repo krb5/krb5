@@ -1,0 +1,157 @@
+SHELL = /bin/sh
+
+LIBDB =	libdb.a
+
+HASH_OBJS =	hash.o hash_bigkey.o hash_debug.o hash_func.o hash_log2.o \
+		hash_page.o hsearch.o dbm.o
+BT_OBJS =	bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o \
+		bt_open.o bt_overflow.o bt_page.o bt_put.o bt_search.o \
+		bt_seq.o bt_split.o bt_utils.o
+DB_OBJS =	db.o
+MPOOL_OBJS =	mpool.o
+REC_OBJS =	rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o \
+		rec_search.o rec_seq.o rec_utils.o
+
+MEMMOVE_OBJ = @MEMMOVE_OBJ@
+MKSTEMP_OBJ = @MKSTEMP_OBJ@
+STRERROR_OBJ = @STRERROR_OBJ@
+
+MISC_OBJS =	$(MEMMOVE_OBJ) $(MKSTEMP_OBJ)
+
+ALL_OBJS =	$(HASH_OBJS) $(BT_OBJS) $(DB_OBJS) $(MPOOL_OBJS) \
+		$(REC_OBJS) $(MISC_OBJS)
+
+TMPDIR =	/tmp
+
+AR = ar
+CC = @CC@
+RANLIB = @RANLIB@
+FCTSH = @FCTSH@
+top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+includedir = @includedir@
+libdir = @libdir@
+
+CDEBUGFLAGS = @CFLAGS@
+
+CFLAGS = $(CDEBUGFLAGS) @CPPFLAGS@ @DEFS@ \
+	-I. -I$(top_srcdir)/include -I$(top_srcdir)/mpool -I$(top_srcdir)/db \
+	-I$(top_srcdir)/hash -I$(top_srcdir)/btree -I$(top_srcdir)/recno
+
+all:: $(LIBDB) db.h
+
+$(LIBDB): $(ALL_OBJS)
+	$(AR) cru $@ $(ALL_OBJS)
+	$(RANLIB) $@
+
+db.h: $(top_srcdir)/include/db.h
+	ln -s $(top_srcdir)/include/db.h .
+
+dbtest: dbtest.o $(STRERROR_OBJ) $(LIBDB)
+	$(CC) -o $@ dbtest.o $(STRERROR_OBJ) $(LIBDB)
+
+check:: dbtest
+	TMPDIR=$(TMPDIR) $(FCTSH) $(top_srcdir)/test/run.test
+
+install::
+	cp $(LIBDB) $(libdir)
+	$(RANLIB) $(libdir)/$(LIBDB)
+	cp $(top_srcdir)/include/db.h $(includedir)
+	cp ../db-config.h $(includedir)
+
+clean::
+	rm -f $(ALL_OBJS) $(LIBDB) \
+		dbtest.o $(STRERROR_OBJ) dbtest \
+		core t1 t2 t3 *~
+
+## if VPATH worked everywhere, I could do this:
+## 
+## VPATH = @top_srcdir@/db @top_srcdir@/mpool \
+## 	@top_srcdir@/hash @top_srcdir@/btree @top_srcdir@/recno \
+## 	@top_srcdir@/clib
+##
+## but it doesn't, so I do this instead:
+
+db.o: $(top_srcdir)/db/db.c
+	$(CC) $(CFLAGS) -c -o db.o $(top_srcdir)/db/db.c
+
+mpool.o: $(top_srcdir)/mpool/mpool.c
+	$(CC) $(CFLAGS) -c -o mpool.o $(top_srcdir)/mpool/mpool.c
+
+hash.o: $(top_srcdir)/hash/hash.c
+	$(CC) $(CFLAGS) -c -o hash.o $(top_srcdir)/hash/hash.c
+hash_bigkey.o: $(top_srcdir)/hash/hash_bigkey.c
+	$(CC) $(CFLAGS) -c -o hash_bigkey.o $(top_srcdir)/hash/hash_bigkey.c
+hash_debug.o: $(top_srcdir)/hash/hash_debug.c
+	$(CC) $(CFLAGS) -c -o hash_debug.o $(top_srcdir)/hash/hash_debug.c
+hash_func.o: $(top_srcdir)/hash/hash_func.c
+	$(CC) $(CFLAGS) -c -o hash_func.o $(top_srcdir)/hash/hash_func.c
+hash_log2.o: $(top_srcdir)/hash/hash_log2.c
+	$(CC) $(CFLAGS) -c -o hash_log2.o $(top_srcdir)/hash/hash_log2.c
+hash_page.o: $(top_srcdir)/hash/hash_page.c
+	$(CC) $(CFLAGS) -c -o hash_page.o $(top_srcdir)/hash/hash_page.c
+hsearch.o: $(top_srcdir)/hash/hsearch.c
+	$(CC) $(CFLAGS) -c -o hsearch.o $(top_srcdir)/hash/hsearch.c
+dbm.o: $(top_srcdir)/hash/dbm.c
+	$(CC) $(CFLAGS) -c -o dbm.o $(top_srcdir)/hash/dbm.c
+
+bt_close.o: $(top_srcdir)/btree/bt_close.c
+	$(CC) $(CFLAGS) -c -o bt_close.o $(top_srcdir)/btree/bt_close.c
+bt_conv.o: $(top_srcdir)/btree/bt_conv.c
+	$(CC) $(CFLAGS) -c -o bt_conv.o $(top_srcdir)/btree/bt_conv.c
+bt_debug.o: $(top_srcdir)/btree/bt_debug.c
+	$(CC) $(CFLAGS) -c -o bt_debug.o $(top_srcdir)/btree/bt_debug.c
+bt_delete.o: $(top_srcdir)/btree/bt_delete.c
+	$(CC) $(CFLAGS) -c -o bt_delete.o $(top_srcdir)/btree/bt_delete.c
+bt_get.o: $(top_srcdir)/btree/bt_get.c
+	$(CC) $(CFLAGS) -c -o bt_get.o $(top_srcdir)/btree/bt_get.c
+bt_open.o: $(top_srcdir)/btree/bt_open.c
+	$(CC) $(CFLAGS) -c -o bt_open.o $(top_srcdir)/btree/bt_open.c
+bt_overflow.o: $(top_srcdir)/btree/bt_overflow.c
+	$(CC) $(CFLAGS) -c -o bt_overflow.o $(top_srcdir)/btree/bt_overflow.c
+bt_page.o: $(top_srcdir)/btree/bt_page.c
+	$(CC) $(CFLAGS) -c -o bt_page.o $(top_srcdir)/btree/bt_page.c
+bt_put.o: $(top_srcdir)/btree/bt_put.c
+	$(CC) $(CFLAGS) -c -o bt_put.o $(top_srcdir)/btree/bt_put.c
+bt_search.o: $(top_srcdir)/btree/bt_search.c
+	$(CC) $(CFLAGS) -c -o bt_search.o $(top_srcdir)/btree/bt_search.c
+bt_seq.o: $(top_srcdir)/btree/bt_seq.c
+	$(CC) $(CFLAGS) -c -o bt_seq.o $(top_srcdir)/btree/bt_seq.c
+bt_split.o: $(top_srcdir)/btree/bt_split.c
+	$(CC) $(CFLAGS) -c -o bt_split.o $(top_srcdir)/btree/bt_split.c
+bt_stack.o: $(top_srcdir)/btree/bt_stack.c
+	$(CC) $(CFLAGS) -c -o bt_stack.o $(top_srcdir)/btree/bt_stack.c
+bt_utils.o: $(top_srcdir)/btree/bt_utils.c
+	$(CC) $(CFLAGS) -c -o bt_utils.o $(top_srcdir)/btree/bt_utils.c
+
+rec_close.o: $(top_srcdir)/recno/rec_close.c
+	$(CC) $(CFLAGS) -c -o rec_close.o $(top_srcdir)/recno/rec_close.c
+rec_delete.o: $(top_srcdir)/recno/rec_delete.c
+	$(CC) $(CFLAGS) -c -o rec_delete.o $(top_srcdir)/recno/rec_delete.c
+rec_get.o: $(top_srcdir)/recno/rec_get.c
+	$(CC) $(CFLAGS) -c -o rec_get.o $(top_srcdir)/recno/rec_get.c
+rec_open.o: $(top_srcdir)/recno/rec_open.c
+	$(CC) $(CFLAGS) -c -o rec_open.o $(top_srcdir)/recno/rec_open.c
+rec_put.o: $(top_srcdir)/recno/rec_put.c
+	$(CC) $(CFLAGS) -c -o rec_put.o $(top_srcdir)/recno/rec_put.c
+rec_search.o: $(top_srcdir)/recno/rec_search.c
+	$(CC) $(CFLAGS) -c -o rec_search.o $(top_srcdir)/recno/rec_search.c
+rec_seq.o: $(top_srcdir)/recno/rec_seq.c
+	$(CC) $(CFLAGS) -c -o rec_seq.o $(top_srcdir)/recno/rec_seq.c
+rec_utils.o: $(top_srcdir)/recno/rec_utils.c
+	$(CC) $(CFLAGS) -c -o rec_utils.o $(top_srcdir)/recno/rec_utils.c
+
+dbtest.o: $(top_srcdir)/test/dbtest.c
+	$(CC) $(CFLAGS) -c -o dbtest.o $(top_srcdir)/test/dbtest.c
+
+memmove.o: $(top_srcdir)/clib/memmove.c
+	$(CC) $(CFLAGS) -c -o memmove.o $(top_srcdir)/clib/memmove.c
+mkstemp.o: $(top_srcdir)/clib/mkstemp.c
+	$(CC) $(CFLAGS) -c -o mkstemp.o $(top_srcdir)/clib/mkstemp.c
+strerror.o: $(top_srcdir)/clib/strerror.c
+	$(CC) $(CFLAGS) -c -o strerror.o $(top_srcdir)/clib/strerror.c
+
+distclean:: clean
+	rm -f Makefile

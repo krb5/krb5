@@ -1,0 +1,18 @@
+Thu Jul 18 20:18:30 1996  Marc Horowitz  <marc@mit.edu>
+
+	* api.2/init-v2.exp (test150, test151): -s flag is now -S
+
+Mon Jul  8 17:00:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/init-v2.exp: admin databases must now be created before
+ 	use (not created implicitly)
+
+	* api.1/lock.exp: lock-test 13 should be a warning, not a failure.
+
+	* api.0/rename-principal.exp: fix rename test to create principal
+ 	with correct salt first, and check explicitly for NO_RENAME_SALT
+ 	when appropriate
+
+	* lib.t: add create_principal_with_keysalts
+	
+

@@ -1,0 +1,61 @@
+TOP = ../../kadmin
+include $(TOP)/config.mk/template
+
+# All but D_REGEXP_TYPE are needed only for logger.c
+CFLAGS += $(D_REGEXP_TYPE) $(D_HAVE_SYSLOG_H) $(D_HAVE_STDARG_H) \
+	$(D_HAVE_SYSLOG) $(D_HAVE_VSPRINTF) $(D_HAVE_OPENLOG) \
+	$(D_HAVE_CLOSELOG) $(D_HAVE_STRFTIME)
+
+ifdef D_NO_SETENV
+SETENVC = setenv.c
+SETENVO = setenv.o
+endif
+
+SUBDIRS	= unit-test
+
+COMMON_SRCS := kadm_err.c adb_err.c chpass_util_strings.c ovsec_glue.c \
+	misc_free.c kadm_rpc_xdr.c chpass_util.c alt_prof.c str_conv.c \
+	logger.c $(SETENVC)
+COMMON_OBJS := kadm_err.o adb_err.o chpass_util_strings.o ovsec_glue.o \
+	misc_free.o kadm_rpc_xdr.o chpass_util.o alt_prof.o str_conv.o \
+	logger.o $(SETENVO)
+
+SERVER_SRCS := svr_policy.c svr_principal.c server_kdb.c server_misc.c \
+		server_init.c server_dict.c server_acl.c svr_iters.c \
+		svr_chpass_util.c
+SERVER_OBJS := svr_policy.o svr_principal.o server_kdb.o server_misc.o \
+		server_init.o server_dict.o server_acl.o svr_iters.o \
+		svr_chpass_util.o
+DB_SRCS := adb_xdr.c adb_policy.c adb_free.c adb_openclose.c
+DB_OBJS := adb_xdr.o adb_policy.o adb_free.o adb_openclose.o
+
+CLIENT_SRCS := clnt_policy.c client_rpc.c  client_principal.c \
+		client_init.c clnt_privs.c clnt_chpass_util.c
+CLIENT_OBJS := clnt_policy.o client_rpc.o  client_principal.o \
+		client_init.o clnt_privs.o clnt_chpass_util.o
+
+HDRS := kadm_rpc.h admin.h admin_xdr.h adb.h admin_internal.h \
+	server_internal.h server_acl.h
+HDRS_DIR := kadm5
+ETABLES := chpass_util_strings.et kadm_err.et adb_err.et
+
+SRCS := $(COMMON_SRCS) $(SERVER_SRCS) $(DB_SRCS)
+OBJS := $(COMMON_OBJS) $(SERVER_OBJS) $(DB_OBJS)
+LIB := libkadm5srv.a
+
+expand StageLibrary
+expand Depend
+
+SRCS = $(COMMON_SRCS) $(CLIENT_SRCS)
+OBJS = $(COMMON_OBJS) $(CLIENT_OBJS)
+LIB = libkadm5clnt.a
+
+expand StageLibrary
+expand Depend
+
+expand SubdirTarget
+expand StageIncludes
+expand StageErrorTables
+
+# Not sure if/why this is needed...
+chpass_util.c: chpass_util_strings.h

@@ -1,0 +1,17 @@
+[libdefaults]
+	default_realm = __REALM__
+	default_keytab_name = FILE:/krb5/v5srvtab
+
+[realms]
+	__REALM__ = {
+		kdc = localhost:1750
+		admin_server = localhost:1751
+	}
+
+[domain_realm]
+	localhost = __REALM__
+
+[logging]
+	admin_server = SYSLOG=ERR:LOCAL6
+	kdc = SYSLOG=ERR:LOCAL6
+	default = SYSLOG=ERR:LOCAL6

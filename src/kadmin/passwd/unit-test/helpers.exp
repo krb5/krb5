@@ -1,0 +1,217 @@
+#
+# $Id$
+#
+
+global s
+set s "\[\r\n\t\ \]"
+
+if {[info commands exp_version] != {}} {
+	set exp_version_4 [regexp {^4} [exp_version]]
+} else {
+	set exp_version_4 [regexp {^4} [expect_version]]
+}
+
+# Backward compatibility until we're using expect 5 everywhere
+if {$exp_version_4} {
+	global wait_error_index wait_errno_index wait_status_index
+	set wait_error_index 0
+	set wait_errno_index 1
+	set wait_status_index 1
+} else {
+	set wait_error_index 2
+	set wait_errno_index 3
+	set wait_status_index 3
+}
+
+proc myfail { comment } {
+	global mytest_name
+	global mytest_status
+	wait
+	fail "$mytest_name: $comment"
+	set mytest_status 1
+}
+
+proc mypass {} {
+}
+
+##
+## When you expect on an id, and eof is detected, the spawn_id is closed.
+## It may be waited for, but calling expect or close on this id is an ERROR!
+##
+
+proc mytest { name kpargs status args } {
+	global spawn_id
+	global timeout
+	global mytest_name
+	global mytest_status
+	global wait_error_index wait_errno_index wait_status_index
+
+	verbose "starting test: $name"
+
+	set mytest_name "$name"
+
+	eval kpasswd_start $kpargs
+
+	# at the end, eof is success
+
+	lappend args { eof { if {[regexp "\[\r\n\]$" $expect_out(buffer)] == 0} { myfail "final status message not newline-terminated" } } }
+
+	# for each test argument....
+	# rep invariant:  when this foreach ends, the id is close'd, but
+	#   not wait'ed.
+
+	foreach test $args {
+		set mytest_status 0
+
+		# treat the arg as an expect parameter
+		# if failure, the process will be closed and waited.
+
+		uplevel 1 "expect {
+			$test
+			timeout { close; myfail \"timeout\"}
+			eof { myfail \"eof read before expected message string\" }
+		}"			
+
+		if {$mytest_status == 1} { return }
+	}
+
+	# at this point, the id is closed and we can wait on it.
+
+	set ret [wait]
+	verbose "% Exit $ret" 1
+	if {[lindex $ret $wait_error_index] == -1} {
+		fail "$name: wait returned error [lindex $ret $wait_errno_index]"
+	} else {
+		if { [lindex $ret $wait_status_index] == $status ||
+		     (($status<0) && ([lindex $ret $wait_status_index] == ($status+256))) } {
+			pass "$name"
+		} else {
+			fail "$name: unexpected return status [lindex $ret $wait_status_index], should be $status"
+		}
+	}
+}
+
+proc kinit { princ pass } {
+	global env;
+        global KINIT
+	spawn -noecho $KINIT $princ;
+
+	expect {
+		-re {Password for .*: $}
+		    {send "$pass\n"}
+		timeout {puts "Timeout waiting for prompt" ; close }
+	}
+
+	# this necessary so close(1) in the child will not sleep waiting for
+	# the parent, which is us, to read pending data.
+
+	expect {
+		eof {}
+	}
+	wait
+}
+
+proc kdestroy {} {
+        global KDESTROY
+	global errorCode errorInfo
+	global env
+
+	if {[info exists errorCode]} {
+		set saveErrorCode $errorCode
+	}
+	if {[info exists errorInfo]} {
+		set saveErrorInfo $errorInfo
+	}
+	catch "system $KDESTROY 2>/dev/null"
+	if {[info exists saveErrorCode]} {
+		set errorCode $saveErrorCode
+	} elseif {[info exists errorCode]} {
+		unset errorCode
+	}
+	if {[info exists saveErrorInfo]} {
+		set errorInfo $saveErrorInfo
+	} elseif {[info exists errorInfo]} {
+		unset errorInfo
+	}
+}
+
+global initerr_str
+global initerr_regexp
+set initerr_str "Cannot establish a session with the Kerberos administrative server for realm \[^\r\n\]*\\. "
+set initerr_regexp "Cannot establish a session with the Kerberos administrative server for$s+realm \[^\r\n\]*\\.$s+"
+
+proc test_win { args name princ pass1 { pass2 "\001\001" } } {
+	global s
+	global initerr_regexp
+
+	if { $pass2 == "\001\001" } { set pass2 "$pass1" }
+
+	mytest "$name" $args 0 {
+		-re "Changing password for $princ.*\\.$s+Old password:"
+			{ send "$pass1\n" }
+	} {
+		-re "Old Kerberos password is incorrect. Please try again."
+			{ close; myfail "Old password incorrect" }
+		-re "${initerr_regexp}(.+\[^\r\n\t\ \])\r\n"
+			{ close; myfail "init error: $expect_out(1,string)" }
+		-re "^$s+New password:"
+			{ send "$pass2\n" }
+		-re "^$s+.*$s+.*$s+.*$s+New password:"
+			{ send "$pass2\n" }
+	} {
+		-re "^$s+New password \\(again\\):"
+			{ send "$pass2\n" }
+	} {
+		-re "^$s+Kerberos password changed."
+			{ mypass }
+		-re "^$s+Password changed."
+			{ close; myfail "Wrong message on success." }
+	}
+}
+
+proc test_initerr { args name princ pass status err } {
+	global s
+	global initerr_regexp
+
+	regsub -all "$s+" $err "$s+" err2
+
+	mytest "$name" $args $status {
+		-re "Changing password for $princ.*\\.$s+Old password:"
+			{ send "$pass\n" }
+	} {
+		-re "$err2"
+			{ mypass }
+		-re "Old Kerberos password is incorrect. Please try again."
+			{ close; myfail "Old password incorrect" }
+		-re "${initerr_regexp}(.+)\r\n"
+			{ close; myfail "init error: $expect_out(1,string)" }
+	}
+}
+
+proc test_3pass { args name princ pass1 pass2 pass3 status err } {
+	global s
+	global initerr_regexp
+
+	regsub -all "$s+" $err "$s+" err2
+
+	mytest "$name" $args $status {
+		-re "Changing password for $princ.*\\.$s+Old password:"
+			{ send "$pass1\n" }
+	} {
+		-re "Old Kerberos password is incorrect. Please try again."
+			{ close; myfail "Old password incorrect" }
+		-re "${initerr_regexp}(.+)\r\n"
+			{ close; myfail "init error: $expect_out(1,string)" }
+		-re "^$s+New password:"
+			{ send "$pass2\n" }
+		-re "^$s+.*$s+.*$s+.*$s+New password:"
+			{ send "$pass2\n" }
+	} {
+		-re "^$s+New password \\(again\\):"
+			{ send "$pass3\n" }
+	} {
+		-re "$s+$err2"
+			{ mypass }
+	}
+}
+

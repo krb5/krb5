@@ -1,0 +1,198 @@
+
+
+
+15 March 1990                                             DYN(3M)
+
+
+
+NAME
+     dyn - the C Dynamic Object library
+
+
+DESCRIPTION
+     A C Dynamic Object is an array that takes care of resizing
+     itself as you add and delete elements from it.  It can be of
+     any type for which sizeof is defined and for which an
+     address of a variable of that type can be passed to a func-
+     tion.  The library containing the functions described below
+     is called _l_i_b_d_y_n._a, and the necessary declarations to use
+     them are in <_d_y_n._h>.
+
+     A DynObject is actually a structure that contains an array
+     and a couple of integers to maintain necessary state infor-
+     mation.  When a Dyn function is said to operate on "the
+     object" or "the array", it is operating on the array stored
+     in the structure while at the same time updating internal
+     state information.
+
+
+LIST OF FUNCTIONS
+     DynObject DynCreate(size, increment)
+          int size, increment;
+
+     _R_e_q_u_i_r_e_s: _s_i_z_e and _i_n_c_r_e_m_e_n_t are greater than zero.
+
+     _E_f_f_e_c_t_s: Creates a new DynObject that will store elements of
+     size _s_i_z_e and will allocate memory in blocks large enough to
+     hold exactly _i_n_c_r_e_m_e_n_t elements.  For example, if you are
+     storing 8-byte double precision numbers and _i_n_c_r_e_m_e_n_t is 5,
+     each 5th element you add to the object will cause it to
+     request 40 more bytes (8 * 5) from the operating system.  If
+     _i_n_c_r_e_m_e_n_t is zero, a default value is used (currently 100).
+     This is the only time the programmer deals with a dynamic
+     object's memory allocation.
+
+     _R_e_t_u_r_n_s: DynCreate returns the new DynObject, or NULL if
+     there is insufficient memory.
+
+     int DynDestroy(obj)
+          DynObject obj;
+
+     _M_o_d_i_f_i_e_s: obj
+
+     _E_f_f_e_c_t_s: Frees all memory associated with _o_b_j.  The results
+     of calling any Dyn function on a destroyed object are unde-
+     fined (except for DynCreate, which resets the object).
+
+     _R_e_t_u_r_n_s: DynDestroy returns DYN_OK.
+
+
+
+
+
+                                                                1
+
+
+
+
+
+
+DYN(3M)                                             15 March 1990
+
+
+
+     int DynAdd(obj, el)
+          DynObject obj;
+          DynPtr el;
+
+     _M_o_d_i_f_i_e_s: obj
+
+     _E_f_f_e_c_t_s: Adds the element pointed to by _e_l to the object
+     _o_b_j, resizing the object if necessary.  The new element
+     becomes the last element in obj's array.
+
+     _R_e_t_u_r_n_s: DynAdd returns DYN_OK on success or DYN_NOMEM if
+     there is insufficient memory.
+
+     int DynInsert(obj, index, els, num)
+             DynObject obj;
+             DynPtr els;
+             int index, num;
+
+     _M_o_d_i_f_i_e_s: obj
+
+     _E_f_f_e_c_t_s: Inserts the array of _n_u_m elements, pointed to by
+     _e_l_s, into the object _o_b_j starting at the array location
+     _i_n_d_e_x, resizing the object if necessary.  Order is
+     preserved; if you have the array "1 2 3 4 5" and insert "10
+     11 12" at the third position, you will have the array "1 2
+     10 11 12 3 4 5".
+
+     _R_e_t_u_r_n_s: DynInsert returns DYN_BADINDEX if _i_n_d_e_x is not
+     between 0 and DynSize(obj); DYN_BADVALUE if _n_u_m is less than
+     1; DYN_NOMEM if there is insufficient memory.
+
+     int DynGet(obj, index)
+          DynObject obj;
+          int index;
+
+     _E_f_f_e_c_t_s: Returns the address of the element _i_n_d_e_x in the
+     array of _o_b_j.  This pointer can be treated as a normal array
+     of the type specified to DynCreate.  The order of elements
+     in this array is the order in which they were added to the
+     object.  The returned pointer is guaranteed to be valid only
+     until obj is modified.
+
+     _R_e_t_u_r_n_s: DynGet returns NULL if _i_n_d_e_x is larger than the
+     number of elements in the array of less than zero.
+
+     int DynDelete(obj, index)
+          DynObject obj;
+          int index;
+
+     _M_o_d_i_f_i_e_s: obj
+
+
+
+
+
+2
+
+
+
+
+
+
+15 March 1990                                             DYN(3M)
+
+
+
+     _E_f_f_e_c_t_s: The element _i_n_d_e_x is deleted from the object _o_b_j.
+     Note that the element is actually removed permanently from
+     the array.  If you have the array "1 2 3 4 5" and delete the
+     third element, you will have the array "1 2 4 5".  The order
+     of elements in not affected.
+
+     _R_e_t_u_r_n_s: DynDelete will return DYN_OK on success or
+     DYN_BADINDEX if the element _i_n_d_e_x does not exist in the
+     array or is less than zero.
+
+     int DynSize(obj)
+          DynObject obj;
+
+     _E_f_f_e_c_t_s: Returns the number of elements in the object _o_b_j.
+
+     int DynHigh(obj)
+          DynObject obj;
+
+     _E_f_f_e_c_t_s: Returns the index of the highest element in the
+     object _o_b_j.  In this version, DynHigh is macro that expands
+     to DynSize - 1.
+
+     int DynLow(obj)
+          DynObject obj;
+
+     _E_f_f_e_c_t_s: Returns the index of the lowest element in the
+     object _o_b_j.  In this version, DynLow is macro that expands
+     to 0.
+
+     int DynDebug(obj, state)
+          DynObject obj;
+          int state;
+
+     _M_o_d_i_f_i_e_s: obj
+
+     _E_f_f_e_c_t_s: Sets the debugging state of _o_b_j to _s_t_a_t_e and prints
+     a message on stderr saying what state debugging was set to.
+     Any non-zero value for _s_t_a_t_e turns debugging ``on''.  When
+     debugging is on, all Dyn functions will produce (hopefully
+     useful) output to stderr describing what is going on.
+
+     _R_e_t_u_r_n_s: DynDebug returns DYN_OK.
+
+AUTHOR
+     Barr3y Jaspan, Student Information Processing Board (SIPB)
+     and MIT-Project Athena, bjaspan@athena.mit.edu
+
+
+
+
+
+
+
+
+
+                                                                3
+
+
+

@@ -1,0 +1,119 @@
+#
+# $Id$
+#
+
+set timeout 20
+
+load_lib "helpers.exp"
+
+if {[regexp {(.*/)?([^/]*)} $KEYTAB dummy dir progname] == 0} {
+	error "cannot set progname from $KEYTAB"
+}
+
+set ktscratch_file /tmp/keytab_test
+set ktscratch WRFILE:$ktscratch_file
+set ktarg "-k $ktscratch"
+set add_admin "$ktarg -a -p admin"
+set pwprompt { "Enter password:" { send "admin\n" } }
+
+setup_keytab "A1,A6" $ktscratch admin admin {} 
+keytab_run "A1,A6" "$add_admin kttest1" 0 "$pwprompt" {
+	-re \
+  "$progname: Entry.*kttest1.*kvno \[0-9\]+.*keytab $ktscratch." {}
+}
+klist_check "A1,A6" $ktscratch {kttest1 0}
+
+setup_keytab "A2" $ktscratch admin admin {} 
+keytab_run "A2" "-q $add_admin kttest1" 0 "$pwprompt" {
+	-re
+  "$progname: Entry.*kttest1.*kvno \[0-9\]+.*keytab $ktscratch." {
+		close; fail "A2: -q"; return }
+	eof { break }
+}
+klist_check "A2" $ktscratch {kttest1 0}
+
+setup_keytab "A3" $ktscratch admin admin {kttest1 kttest1} 
+set kvno_key1 [exec $klist -k -K FILE:$ktscratch_file | \
+		awk "/kttest1/ && NR==4 {print \$1 \" \" \$3}"]
+set kvno_key2 [exec $klist -k -K FILE:$ktscratch_file | \
+		awk "/kttest1/ && NR==5 {print \$1 \" \" \$3}"]
+if {[lindex $kvno_key1 1] == [lindex $kvno_key2 1]} {
+	fail "A3: key compare"
+} else {
+	klist_check "A3" $ktscratch "kttest1 [lindex $kvno_key1 0]" \
+				    "kttest1 [expr [lindex $kvno_key1 0]+1]"
+}
+
+setup_keytab "A7" $ktscratch admin admin {}
+keytab_run "A7" "$add_admin does-not-exist" 1 "$pwprompt" {
+	-re
+  "$progname: Principal does-not-exist does not exist." {}
+}
+
+setup_keytab "A4,A10,A11,A13,A15" $ktscratch admin admin { kttest1  kttest2}
+keytab_run "A4,A10,A11,A13,A15" "$ktarg -a kttest1" 0
+keytab_run "A4,A10,A11,A13,A15" "$ktarg -a  kttest2" 0
+keytab_run "A4,A10,A11,A13,A15" "$ktarg -a kttest1" 0
+keytab_run "A4,A10,A11,A13,A15" "$ktarg -a  kttest2" 0
+klist_check "A4,A10,A11,A13,A15" $ktscratch { kttest1 0 } \
+	{ kttest2 0 } { kttest1 0 } { kttest2 0 } { kttest1 0 } { kttest2 0 }
+
+setup_keytab "A12" $ktscratch admin admin {}
+keytab_run "A12" "$ktarg -a -p admin/get-add kttest1" 1 "$pwprompt" {
+	"Operation requires ``change-password'' privilege while changing" {}
+}
+
+setup_keytab "A14" $ktscratch admin admin {}
+# assume the exit status won't be -1, so if the password prompt
+# doesn't appear the test will fail 
+keytab_run "A14" "$ktarg -a kttest1" -1 {
+	"Enter password:" { send "\n"; expect eof; pass "A14: no -p"; return }
+}
+
+setup_keytab "A16" $ktscratch admin admin {}
+keytab_run "A16" "$ktarg -a -p does-not-exist kttest1" 1 {
+	"$progname: Principal does-not-exist does not exist." {}
+}
+
+setup_keytab "A17" $ktscratch admin admin { kttest1  kttest2}
+keytab_run "A17" "$ktarg -a -p kttest2 kttest1" 1 {
+	"Enter password:" { close; fail "A17: no password prompt"; return }
+	default { break }
+}
+
+setup_keytab "A18" $ktscratch admin admin { }
+keytab_run "A18" "$ktarg -a -c -p admin dne1" 0 "$pwprompt" {
+	"$progname: Created principal dne1" {}
+} {
+	-re
+  "$progname: Entry.*dne1.*kvno \[0-9\]+.*keytab $ktscratch." {}
+}
+klist_check "A18" $ktscratch {dne1 0}
+	
+setup_keytab "A19" $ktscratch admin admin {} 
+keytab_run "A9" "-q $ktarg -a -c -p admin dne2" 0 "$pwprompt" {
+	"$progname: Created principal dne2" { close; fail "A19: -q"; return }
+	eof { break }
+}
+klist_check "A19" $ktscratch {dne2 0}
+
+setup_keytab "A21" $ktscratch admin admin {} 
+keytab_run "A21" "$ktarg -a -c -p admin kttest1" 0 "$pwprompt" {
+	"$progname: Principal kttest1 already exists." {}
+} {
+	-re \
+  "$progname: Entry.*kttest1.*kvno \[0-9\]+.*keytab $ktscratch." {}
+}
+klist_check "A21" $ktscratch {kttest1 0}
+
+setup_keytab "A22" $ktscratch admin admin {}
+keytab_run "A22" "$ktarg -a -c -p admin/modify kttest1" 1 "$pwprompt" {
+	"Operation requires ``add'' and ``modify'' privileges while creating" {}
+}
+
+setup_keytab "A23" $ktscratch admin admin {}
+keytab_run "A23" "$ktarg -a -c -p admin/get kttest1" 1 "$pwprompt" {
+	"Operation requires ``add'' and ``modify'' privileges while creating" {}
+}
+
+exec rm -f $ktscratch_file

@@ -1,0 +1,113 @@
+set stty_init {-onlcr -opost intr \^C kill \^U}
+set kdb5_edit $KDBFIVE_EDIT
+set kadmin_local $KADMIN_LOCAL
+
+# Backward compatibility until we're using expect 5 everywhere
+if {[info exists exp_version_4]} {
+	global wait_error_index wait_errno_index wait_status_index
+	set wait_error_index 0
+	set wait_errno_index 1
+	set wait_status_index 1
+} else {
+	set wait_error_index 2
+	set wait_errno_index 3
+	set wait_status_index 3
+}
+
+proc api_exit {} {
+	global spawn_id
+
+#	puts stdout "Starting api_exit (spawn_id $spawn_id)."
+	catch {close} errMsg
+        catch {wait} errMsg
+#	puts stdout "Finishing api_exit."
+}
+
+proc api_version {} {
+}
+
+proc api_start {} {
+	global API
+	global env
+	global spawn_id
+	global prompt
+
+	spawn $API
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF starting API" }
+		timeout { error "Timeout starting API" }
+	}
+	if {! [info exists env(TCLUTIL)]} {
+		error "TCLUTIL environment variable isn't set"
+	}
+	send "source $env(TCLUTIL)\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF starting API" }
+		timeout { error "Timeout starting API" }
+	}
+	send "set current_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION &~ \$OVSEC_KADM_STRUCT_VERSION_MASK\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set current_api_version \[expr \$OVSEC_KADM_API_VERSION_1 &~ \$OVSEC_KADM_API_VERSION_MASK\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set bad_struct_version_mask \[expr 0x65432100 | \$current_struct_version\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set bad_api_version_mask \[expr 0x65432100 | \$current_api_version\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set no_api_version_mask \$current_api_version\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set no_struct_version_mask \$current_struct_version\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set old_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0x00\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set old_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0x00\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set new_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0xca\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+	send "set new_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0xca\]\n"
+	expect {
+		-re "$prompt$" {}
+		eof { error "EOF setting API varibles"}
+		timeout { error "timeout setting API varibles"}
+	}
+#	puts stdout "Finishing api_start (spawn_id $spawn_id)."
+}
+api_start
+

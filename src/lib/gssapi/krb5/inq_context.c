@@ -23,10 +23,9 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_inquire_context(ct, minor_status, context_handle, initiator_name, 
+krb5_gss_inquire_context(minor_status, context_handle, initiator_name, 
 			 acceptor_name, lifetime_rec, mech_type, ret_flags,
 			 locally_initiated, open)
-     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_name_t *initiator_name;
@@ -37,12 +36,15 @@ krb5_gss_inquire_context(ct, minor_status, context_handle, initiator_name,
      int *locally_initiated;
      int *open;
 {
-   krb5_context context = ct;
+   krb5_context context;
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;
    krb5_principal init, accept;
    krb5_timestamp now;
    krb5_deltat lifetime;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    if (initiator_name)
       *initiator_name = (gss_name_t) NULL;
@@ -116,7 +118,7 @@ krb5_gss_inquire_context(ct, minor_status, context_handle, initiator_name,
       *lifetime_rec = lifetime;
 
    if (mech_type)
-      *mech_type = (gss_OID) gss_mech_krb5;
+      *mech_type = (gss_OID) ctx->mech_used;
 
    if (ret_flags)
       *ret_flags = ctx->gss_flags;

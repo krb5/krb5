@@ -1,0 +1,25 @@
+#
+# $Id$
+#
+
+set timeout 30
+
+load_lib "helpers.exp"
+
+#
+# Here are the tests
+#
+
+export_lose "A.9: output file not writable" /foo/bar/baz \
+	"No such file or directory while opening output file"
+
+export_lose "A.10: two arguments" {foo bar} \
+	"Usage:"
+
+# XXX this depends on this being the last test run
+
+system {rm /krb5/kadb5}
+
+export_lose "A.2: /krb5 doesn't exist" /tmp/dbexport \
+	"No such file or directory while opening database"
+

@@ -252,7 +252,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest0\""
     catch "expect_after"
     if ![check_exit_status gssclient0] {
@@ -293,7 +293,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest1\""
     catch "expect_after"
     if ![check_exit_status gssclient1] {
@@ -334,7 +334,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest2\""
     catch "expect_after"
     if ![check_exit_status gssclient2] {
@@ -360,7 +360,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
     expect_after {
@@ -388,7 +388,7 @@ proc doit { } {
 
     # Try some V2 services.
     # Now start the gss-server.
-    spawn $GSSSERVER -port 5557 -v2 gssservice@$hostname
+    spawn $GSSSERVER -port 5557 gssservice@$hostname
     set gss_server_pid [exp_pid]
     set gss_server_spawn_id $spawn_id
     catch "exec sleep 4"
@@ -396,7 +396,7 @@ proc doit { } {
     # Start the client with client identity 0
     set env(KRB5CCNAME) $tmppwd/gss_tk_0
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
-    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest0"
+    spawn $GSSCLIENT -port 5557 $hostname gssservice@$hostname "message from gsstest0"
     expect_after {
 	-i $spawn_id
 	timeout {
@@ -425,7 +425,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest0\""
     catch "expect_after"
     if ![check_exit_status gssclient0] {
@@ -437,7 +437,7 @@ proc doit { } {
     # Start the client with client identity 1
     set env(KRB5CCNAME) $tmppwd/gss_tk_1
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
-    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest1"
+    spawn $GSSCLIENT -port 5557 $hostname gssservice@$hostname "message from gsstest1"
     expect_after {
 	-i $spawn_id
 	timeout {
@@ -466,7 +466,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest1\""
     catch "expect_after"
     if ![check_exit_status gssclient1] {
@@ -478,7 +478,7 @@ proc doit { } {
     # Start the client with client identity 2
     set env(KRB5CCNAME) $tmppwd/gss_tk_2
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
-    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest2"
+    spawn $GSSCLIENT -port 5557 $hostname gssservice@$hostname "message from gsstest2"
     expect_after {
 	-i $spawn_id
 	timeout {
@@ -507,7 +507,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest2\""
     catch "expect_after"
     if ![check_exit_status gssclient2] {
@@ -519,7 +519,7 @@ proc doit { } {
     # Start the client with client identity 3
     set env(KRB5CCNAME) $tmppwd/gss_tk_3
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
-    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest3"
+    spawn $GSSCLIENT -port 5557 $hostname gssservice@$hostname "message from gsstest3"
     expect_after {
 	-i $gss_server_spawn_id
 	timeout {
@@ -533,7 +533,7 @@ proc doit { } {
 	    return
 	}
     }
-    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\" at"
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\""
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
     expect_after {

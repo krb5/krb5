@@ -1,0 +1,538 @@
+#
+# $Id$
+# $Source$
+#
+
+#
+# DefaultRules --- clean, depend, all, stage, includes, and
+# install.
+#
+
+define DefaultRules
+clean::
+	$(CLEAN) core *.o *~ *.bak #* y.output
+
+depend::
+
+all::
+
+includes::
+
+stage::
+
+install::
+
+unit-test::
+
+traverse::
+
+endef
+
+
+#
+# SubdirTarget
+#
+# 	SUBDIRS = subdirs to work in
+#
+define SubdirTarget
+__SUBDIR_TARGET := clean
+expand _DoSubdir
+
+__SUBDIR_TARGET := depend
+expand _DoSubdir
+
+__SUBDIR_TARGET := all
+expand _DoSubdir
+
+__SUBDIR_TARGET := includes
+expand _DoSubdir
+
+__SUBDIR_TARGET := stage
+expand _DoSubdir
+
+__SUBDIR_TARGET := install
+expand _DoSubdir
+
+__SUBDIR_TARGET := unit-test
+expand _DoSubdir
+
+__SUBDIR_TARGET := traverse
+expand _DoSubdir
+
+ALL_SUBDIRS_TARGET := everything
+expand AllTargetsTarget
+endef
+
+#
+# Makes the target $(ALL_SUBDIRS_TARGET) perform the targets includes
+# depend stage all install in $(SUBDIRS).
+#
+define AllTargetsTarget
+$(ALL_SUBDIRS_TARGET)::
+	@cwd=`pwd`; \
+	for d in $(SUBDIRS); do \
+		echo "--- Making includes depend stage all install in $(CUR_DIR)/$$$$d"; \
+		cd $$$$d && \
+		$(MAKE) includes depend CUR_DIR=$(CUR_DIR)/$$$$d; \
+		$(MAKE) stage all install CUR_DIR=$(CUR_DIR)/$$$$d; \
+		cd $$$$cwd; \
+	done
+
+endef
+
+define _DoSubdir
+# $(__SUBDIR_TARGET)::
+#	@echo "--- SKIPPING $(__SUBDIR_TARGET) in $(SUBDIRS)"
+$(__SUBDIR_TARGET)::
+	@cwd=`pwd`; \
+	for d in $(SUBDIRS); do \
+		echo "--- Making $(__SUBDIR_TARGET) in $(CUR_DIR)/$$$$d"; \
+		cd $$$$d && \
+		$(MAKE) $(SITEMAKEFLAGS) $(__SUBDIR_TARGET) CUR_DIR=$(CUR_DIR)/$$$$d; \
+		cd $$$$cwd; \
+ 	done
+endef
+
+#
+# Program -- compile prog, adds all and clean targets
+#
+#	PROG	program name
+#	OBJS	object files
+#	DEPS	additional dependencies (e.g.: libraries)
+#	LIBS	libraries
+#	LDFLAGS	arguments for link stage
+#	PUREFLAGS arguments for purify
+#	PURELIBS extra libraries to link in when using purify
+#
+define Program
+all:: $(PROG)
+
+$(PROG): $(OBJS) $(DEPS) $(filter-out -L% -l%, $(LIBS))
+ifdef BUILD_IN_TMP
+	rm -f /tmp/$(PROG).$(__PID__)
+	$(CC) $(LDFLAGS) -o /tmp/$(PROG).$(__PID__) $(OBJS) $(LIBS) $(STD_LIBS)
+	mv /tmp/$(PROG).$(__PID__) $(PROG)
+else
+	$(CC) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS) $(STD_LIBS)
+endif
+
+clean::
+	$(CLEAN) $(PROG)
+
+proof:: $(PROG).tc
+
+$(PROG).tc: $(OBJS) $(DEPS) $(filter-out -L% -l%, $(LIBS))
+ifdef BUILD_IN_TMP
+	rm -f /tmp/$(PROG).tc.$(__PID__)
+	$(PROOF) $(CC) $(LDFLAGS) -o /tmp/$(PROG).tc.$(__PID__) $(OBJS) \
+		$(LIBS) $(STD_LIBS)
+	mv /tmp/$(PROG).tc.$(__PID__) $(PROG).tc
+else
+	$(PROOF) $(CC) $(LDFLAGS) -o $(PROG).tc $(OBJS) $(LIBS) $(STD_LIBS)
+endif
+
+clean::
+	$(CLEAN) $(PROG).tc $(PROG).tc.*
+
+pure:: $(PROG).pure
+
+$(PROG).pure: $(OBJS) $(DEPS) $(filter-out -L% -l%, $(LIBS))
+ifdef BUILD_IN_TMP
+	rm -f /tmp/$(PROG).pure.$(__PID__)
+	$(PURIFY) $(PUREFLAGS) \
+		$(CC) $(LDFLAGS) -o /tmp/$(PROG).pure.$(__PID__) $(OBJS) \
+		$(LIBS) $(STD_LIBS) $(PURELIBS)
+	mv /tmp/$(PROG).pure.$(__PID__) $(PROG).pure
+else
+	$(PURIFY) $(PUREFLAGS) $(CC) $(LDFLAGS) -o $(PROG).pure $(OBJS) $(LIBS) $(STD_LIBS) $(PURELIBS)
+endif
+
+clean::
+	$(CLEAN) $(PROG).pure $(PROG).pure.pure_*
+
+quant:: $(PROG).quant
+
+$(PROG).quant: $(OBJS) $(DEPS) $(filter-out -L% -l%, $(LIBS))
+ifdef BUILD_IN_TMP
+	rm -f /tmp/$(PROG).quant.$(__PID__)
+	$(QUANTIFY) $(QUANTFLAGS) \
+		$(CC) $(LDFLAGS) -o /tmp/$(PROG).quant.$(__PID__) $(OBJS) \
+		$(LIBS) $(STD_LIBS) $(QUANTLIBS)
+	mv /tmp/$(PROG).quant.$(__PID__) $(PROG).quant
+else
+	$(QUANTIFY) $(QUANTFLAGS) $(CC) $(LDFLAGS) -o $(PROG).quant $(OBJS) $(LIBS) $(STD_LIBS) $(QUANTLIBS)
+endif
+
+clean::
+	$(CLEAN) $(PROG).quant $(PROG).quant.quant.*.qv
+endef
+
+#
+# InstallProgram -- build program, install in INSTALL_BINDIR, adds
+# install target
+#
+define InstallProgram
+__INST_DIR := $(INSTALL_BINDIR)
+expand Program
+expand InstallExecutable
+endef
+
+#
+# InstallUtil -- build program, install in INSTALL_ETCDIR, adds
+# install target
+#
+define InstallUtil
+__INST_DIR := $(INSTALL_ETCDIR)
+expand Program
+expand InstallExecutable
+endef
+
+#
+# InstallAdmin -- build program, install in INSTALL_ADMINDIR, adds
+# install target
+#
+define InstallAdmin
+__INST_DIR := $(INSTALL_ADMINDIR)
+expand Program
+expand InstallExecutable
+endef
+
+#
+# InstallServer -- build program, install in INSTALL_SERVERDIR, adds
+# install target
+#
+define InstallServer
+__INST_DIR := $(INSTALL_SERVERDIR)
+expand Program
+expand InstallExecutable
+endef
+
+#
+# InstallExecuteable(bin, as, dir)
+#
+define InstallExecutable
+ifndef INST_NAME
+install:: $(PROG)
+	rm -f $(__INST_DIR)/$(PROG)
+	$(INSTCMD) $(INST_PROG_FLAGS) $(PROG) $(__INST_DIR)/$(PROG)
+else
+install:: $(PROG)
+	rm -f $(__INST_DIR)/$(INST_NAME)
+	$(INSTCMD) $(INST_PROG_FLAGS) $(PROG) $(__INST_DIR)/$(INST_NAME)
+endif
+endef
+
+#
+# Library -- create library from object files and ranlib it, adds all
+# and clean targets
+#
+#	LIB		name of library (e.g. libfoo.a)
+#	OBJS		object files in library
+#
+define Library
+all:: $(LIB)
+
+$(LIB): $(OBJS) $(OTHER_OBJS)
+	$(RM) -f $(LIB)
+	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+ifndef ARCH_SKIP_RANLIB
+	$(RANLIB) $(LIB)
+endif
+
+clean::
+	$(CLEAN) $(LIB)
+endef
+
+#
+# SharedLibrary -- create shared library from object files, adds all
+# and clean targets
+#
+#	LIB		basename of library (e.g. libfoo)
+#			(this will be basenamified, anyway)
+#	OBJS		object files in library
+#	VERSION		version of shared library
+#
+define SharedLibrary
+ifdef DO_SHARED_LIBRARIES
+ifdef SHLIBLDFLAGS
+ifdef SHLIBSEP
+__LIB := $(basename $(LIB)).$(SHLIBEXT)$(SHLIBSEP)$(VERSION)
+else
+__LIB := $(basename $(LIB)).$(SHLIBEXT)
+endif
+__LIBNV := $(basename $(LIB)).$(SHLIBEXT)
+expand SharedLibrary_1
+endif
+endif
+endef
+
+define SharedLibrary_1
+ifdef DO_SHARED_LIBRARIES
+all:: $(__LIB)
+
+$(__LIB): $(OBJS) $(OTHER_OBJS)
+	$(RM) -f $(__LIB) $(__LIBNV)
+	$(LD) -o $(__LIB) $(SHLIBLDFLAGS) $(OBJS)
+	$(LNSOFT) $(__LIB) $(__LIBNV)
+clean::
+	$(CLEAN) $(__LIB) $(__LIBNV)
+endif
+endef
+
+#
+# StageLibrary -- build library, install in STAGE_LIBDIR, adds stage target
+# 	
+define StageLibrary
+expand Library
+
+stage::	$(STAGE_LIBDIR)/$(LIB)
+
+$(STAGE_LIBDIR)/$(LIB): $(LIB)
+	$(INSTCMD) $(LIB) $(STAGE_LIBDIR)/$(LIB)
+ifndef ARCH_SKIP_RANLIB
+	$(RANLIB) $(STAGE_LIBDIR)/$(LIB)
+endif
+endef
+
+#
+# StageSharedLibrary -- build library, install in STAGE_LIBDIR, adds 
+# stage target
+# 	
+define StageSharedLibrary
+ifdef DO_SHARED_LIBRARIES
+expand SharedLibrary
+expand StageSharedLibrary_1
+endif
+endef
+
+define StageSharedLibrary_1
+ifdef DO_SHARED_LIBRARIES
+ifdef __LIB
+stage::	$(STAGE_LIBDIR)/$(__LIB)
+
+$(STAGE_LIBDIR)/$(__LIB): $(__LIB)
+	$(INSTCMD) $(__LIB) $(STAGE_LIBDIR)/$(__LIB)
+endif
+endif
+endef
+
+#
+# InstallLibrary -- build library, install in INSTALL_LIBDIR, 
+# adds install target
+# 	
+define InstallLibrary
+expand Library
+
+install:: $(INSTALL_LIBDIR)/$(LIB)
+
+$(INSTALL_LIBDIR)/$(LIB): $(LIB)
+	$(INSTCMD) $(LIB) $(INSTALL_LIBDIR)/$(LIB)
+ifndef ARCH_SKIP_RANLIB
+	$(RANLIB) $(INSTALL_LIBDIR)/$(LIB)
+endif
+endef
+
+#
+# InstallSharedLibrary -- build library, install in INSTALL_LIBDIR, 
+# adds install target
+# 	
+define InstallSharedLibrary
+ifdef DO_SHARED_LIBRARIES
+expand SharedLibrary
+expand InstallSharedLibrary_1
+endif
+endef
+
+define InstallSharedLibrary_1
+ifdef DO_SHARED_LIBRARIES
+ifdef __LIB
+install:: $(INSTALL_LIBDIR)/$(__LIB)
+
+$(INSTALL_LIBDIR)/$(__LIB): $(__LIB)
+	$(INSTCMD) $(__LIB) $(INSTALL_LIBDIR)/$(__LIB)
+endif
+endif
+endef
+
+#
+# StageFiles(files, dir)
+#
+define StageFiles
+stage:: $(FILES)
+	$(INSTCMD) $(FILES) $(DIR)
+endef
+
+#
+# StageIncludes -- copy include files to staging area, adds includes
+# and stage target
+#
+#	HDRS		header files to copy
+#	HDRS_DIR	subdir of STAGE_INCDIR to copy to
+#
+define StageIncludes
+includes:: $(HDRS)
+	$(INSTHDRS) $(STAGE_INCDIR)/$(HDRS_DIR) $(HDRS)
+
+stage:: $(HDRS)
+	$(INSTHDRS) $(STAGE_INCDIR)/$(HDRS_DIR) $(HDRS)
+endef
+
+#
+# InstallIncludes -- copy include files to staging area, adds includes
+# and install target
+#
+#	HDRS		header files to copy
+#	HDRS_DIR	subdir of INSTALL_INCDIR to copy to
+#
+define InstallIncludes
+includes:: $(HDRS)
+	$(INSTHDRS) $(INSTALL_INCDIR)/$(HDRS_DIR) $(HDRS)
+
+install:: $(HDRS)
+	$(INSTHDRS) $(INSTALL_INCDIR)/$(HDRS_DIR) $(HDRS)
+endef
+
+#
+# Depend -- run makedepend
+#
+#	SRCS	source files to generate dependencies for
+#	DEPENDS	dependencies for "make depend"
+#	ETABLES error tables whose .c and .h files are implicitly
+#		dependencies of make depend
+#
+define Depend
+depend:: $(DEPENDS) $(addsuffix .c,$(basename $(ETABLES))) $(addsuffix .h,$(basename $(ETABLES)))
+
+ifeq (,$(findstring -a,$(__MDFLAGS)))
+	@rm -f Makefile.depend; touch Makefile.depend
+endif
+	$(MAKEDEPEND) $(__MDFLAGS) $(MDFLAGS) -fMakefile.depend -- $(CFLAGS) -- $(SRCS)
+
+clean::
+	$(CLEAN) Makefile.depend
+
+ifeq (,$(findstring -a,$(__MDFLAGS)))
+__MDFLAGS += -a
+endif
+endef
+
+#
+# NormalProgram -- everything for a single program
+#
+# 	PROG = program name
+# 	SRCS = list of .c sources
+# 	HDRS = list of .h sources
+# 	OBJS = list of .o files to depend and link against
+# 	STAGELIBS = foo.a within the stage area tree to link against
+#	INSTALLLIBS = foo.a within the install area tree to link against
+# 	LIBS = system libraries to link against
+#
+# STAGELIBS And INSTALLLIBS are added to the dependencies for PROG.
+#
+define NormalProgram
+expand SaveStuff
+LIBS	:= $(addprefix $(STAGE_LIBDIR)/,$(STAGELIBS)) \
+	   $(addprefix $(INSTALL_LIBDIR)/,$(INSTALLLIBS)) \
+	   $(LIBS)
+DEPS	:= $(addprefix $(STAGE_LIBDIR)/,$(STAGELIBS)) \
+	   $(addprefix $(INSTALL_LIBDIR)/,$(INSTALLLIBS)) \
+	   $(DEPS)
+
+clean::
+	$(CLEAN) $(OBJS)
+
+expand InstallProgram
+expand Depend
+expand RestoreStuff
+endef
+
+define NormalLibrary
+expand Library
+
+clean::
+	$(CLEAN) $(OBJS)
+
+expand Depend
+endef
+
+#
+# ErrorTables -- compile an error table with compile_et
+#
+#	ETABLES		list of .et files
+#	CFLAGS		for saber target
+#
+#
+define ErrorTables
+__ETABLE_HS := $(addsuffix .h,$(basename $(ETABLES)))
+__ETABLE_CS := $(addsuffix .c,$(basename $(ETABLES)))
+expand ErrorTables_1
+endef
+
+define ErrorTables_1
+
+saber::
+	#load $(CFLAGS) $(__ETABLE_CS)
+
+clean::
+	$(CLEAN) $(__ETABLE_HS) $(__ETABLE_CS)
+endef
+
+#
+# StageErrorTables -- copy generated include file into staging area.
+#
+#	ETABLES		list of .et file
+#	HDRS_DIR	subdir of STAGE_INCDIR to copy to
+#
+define StageErrorTables
+expand ErrorTables
+expand StageErrorTables_1
+endef
+
+define StageErrorTables_1
+includes:: $(__ETABLE_HS)
+	$(INSTHDRS) $(STAGE_INCDIR)/$(HDRS_DIR) $(__ETABLE_HS)
+
+stage:: $(__ETABLE_HS)
+	$(INSTHDRS) $(STAGE_INCDIR)/$(HDRS_DIR) $(__ETABLE_HS)
+endef
+
+define SaveStuff
+__LIBS	:= $(LIBS)
+__DEPS	:= $(DEPS)
+endef
+
+define RestoreStuff
+LIBS	:= $(__LIBS)
+DEPS	:= $(__DEPS)
+endef
+
+#
+# XDR -- generate .c and .h from .x
+#
+#	XDRS		list of .x files
+#
+define XDR
+__XDR_HS := $(addsuffix .h,$(basename $(XDRS)))
+__XDR_CS := $(addsuffix .c,$(basename $(XDRS)))
+expand XDR_1
+endef
+
+define XDR_1
+saber::
+	#load $(CFLAGS) $(__XDR_CS)
+
+clean::
+	$(CLEAN) $(__XDR_HS) $(__XDR_CS)
+endef
+
+
+
+#
+# Saber -- load files into saber
+#
+#	SRCS		list of .c files
+#
+define Saber
+saber::
+	#load $(CFLAGS) $(SRCS)
+endef

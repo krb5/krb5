@@ -1,0 +1,126 @@
+#
+# $Id$
+#
+
+if {[info commands exp_version] != {}} {
+	set exp_version_4 [regexp {^4} [exp_version]]
+} else {
+	set exp_version_4 [regexp {^4} [expect_version]]
+}
+
+# Backward compatibility until we're using expect 5 everywhere
+if {$exp_version_4} {
+	global wait_error_index wait_errno_index wait_status_index
+	set wait_error_index 0
+	set wait_errno_index 1
+	set wait_status_index 1
+} else {
+	set wait_error_index 2
+	set wait_errno_index 3
+	set wait_status_index 3
+}
+
+proc myfail { comment } {
+	global mytest_name
+	global mytest_status
+	wait
+	fail "$mytest_name: $comment"
+	set mytest_status 1
+}
+
+proc mypass {} {
+}
+
+##
+## When you expect on an id, and eof is detected, the spawn_id is closed.
+## It may be waited for, but calling expect or close on this id is an ERROR!
+##
+
+proc mytest { name kpargs status args } {
+	global spawn_id
+	global timeout
+	global mytest_name
+	global mytest_status
+	global wait_error_index wait_errno_index wait_status_index
+
+	verbose "starting test: $name"
+
+	set mytest_name "$name"
+
+	eval export_start $kpargs
+
+	# at the end, eof is success
+
+	lappend args { eof { if {[regexp "\[\r\n\]$" $expect_out(buffer)] == 0} { myfail "final status message not newline-terminated" } } }
+
+	# for each test argument....
+	# rep invariant:  when this foreach ends, the id is close'd, but
+	#   not wait'ed.
+
+	foreach test $args {
+		set mytest_status 0
+
+		# treat the arg as an expect parameter
+		# if failure, the process will be closed and waited.
+
+		uplevel 1 "expect {
+			$test
+			timeout { close; myfail \"timeout\"}
+			eof { myfail \"eof read before expected message string\" }
+		}"			
+
+		if {$mytest_status == 1} { return }
+	}
+
+	# at this point, the id is closed and we can wait on it.
+
+	set ret [wait]
+	verbose "% Exit $ret" 1
+	if {[lindex $ret $wait_error_index] == -1} {
+		fail "$name: wait returned error [lindex $ret $wait_errno_index]"
+	} else {
+		if { ((![string compare $status zero]) &&
+		      ([lindex $ret $wait_status_index] == 0)) ||
+		     ((![string compare $status nonzero]) &&
+		      ([lindex $ret $wait_status_index] != 0)) } {
+			pass "$name"
+		} else {
+			fail "$name: unexpected return status [lindex $ret $wait_status_index], should be $status"
+		}
+	}
+}
+
+proc export_win { name args } {
+	mytest "$name" "$args" zero {
+		-re "Database export complete, \[0-9\]+ records processed."
+			{ mypass }
+		eof
+			{ myfail "error: $expect_out(buffer)" }
+	} 
+}
+
+proc export_lose { name args error } {
+	mytest "$name" "$args" nonzero {
+		-re "Database export complete, \[0-9\]+ records processed."
+			{ close; myfail "unexpected success" }
+		-re "ovsec_adm_export: .*$error"
+			{ mypass }
+		eof
+			{ myfail "error: $expect_out(buffer)" }
+	} 
+}
+
+proc check_mode { test file mode } {
+	if {[catch "file stat $file stats" output]} {
+		unresolved "$test: can't stat $file: $output"
+	} else {
+		set stats(mode) [format "%o" [expr $stats(mode) & 07777]]
+		set mode [format "%o" [expr $mode]]
+		if {$stats(mode) != $mode} {
+			fail "$test: wrong mode ($stats(mode) should be $mode)"
+		} else {
+			verbose "$test: file $file has mode $mode"
+			pass $test
+		}
+	}
+}

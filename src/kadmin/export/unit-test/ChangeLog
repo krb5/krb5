@@ -1,0 +1,5 @@
+Mon Jul 15 16:55:03 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.ov (unit-test-body), dotest.sh: ovsec_adm_*port is now
+ 	kadm5_*port
+

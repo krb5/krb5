@@ -60,6 +60,7 @@ main(argc, argv)
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     char *keytab_name = NULL;		/* -t option */
+    char *service_name = NULL;		/* -s option */
     krb5_deltat lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
     krb5_timestamp starttime = 0;
     krb5_deltat rlife = 0;
@@ -90,7 +91,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:Rfpl:s:c:kt:v")) != EOF) {
+    while ((option = getopt(argc, argv, "r:Rfpl:s:c:kt:vS:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
@@ -107,6 +108,9 @@ main(argc, argv)
 	case 'v':
 	    /* validate the ticket */
 	    options |= KDC_OPT_VALIDATE;
+	    break;
+        case 'S':
+	    service_name = optarg;
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
@@ -186,7 +190,7 @@ main(argc, argv)
     }
 
     if (errflg) {
-	fprintf(stderr, "Usage: %s [-r time] [-R] [-s time] [-v] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [principal]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-r time] [-R] [-s time] [-v] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [-S target_service] [principal]\n", argv[0]);
 	exit(2);
     }
 
@@ -250,17 +254,25 @@ main(argc, argv)
     
     my_creds.client = me;
 
-    if((code = krb5_build_principal_ext(kcontext, &server,
-					krb5_princ_realm(kcontext, me)->length,
-					krb5_princ_realm(kcontext, me)->data,
-					tgtname.length, tgtname.data,
-					krb5_princ_realm(kcontext, me)->length,
-					krb5_princ_realm(kcontext, me)->data,
-					0))) {
-	com_err(argv[0], code, "while building server name");
-	exit(1);
+    if (service_name == NULL) {
+	 if((code = krb5_build_principal_ext(kcontext, &server,
+					     krb5_princ_realm(kcontext, me)->length,
+					     krb5_princ_realm(kcontext, me)->data,
+					     tgtname.length, tgtname.data,
+					     krb5_princ_realm(kcontext, me)->length,
+					     krb5_princ_realm(kcontext, me)->data,
+					     0))) {
+	      com_err(argv[0], code, "while building server name");
+	      exit(1);
+	 }
+    } else {
+	 if (code = krb5_parse_name(kcontext, service_name, &server)) {
+	      com_err(argv[0], code, "while parsing service name %s",
+		      service_name);
+	      exit(1);
+	 }
     }
-
+	
     my_creds.server = server;
 
     if (options & KDC_OPT_POSTDATED) {

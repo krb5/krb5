@@ -1,0 +1,23 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) \
+	-DOVSEC_KADM -DUSE_KADM5_API_VERSION=1 -DNEED_SOCKETS
+
+LOCALINCLUDE = -I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV -I.
+
+PROG = kadmind4
+OBJS = kadm_server.o admin_server.o kadm_ser_wrap.o \
+	kadm_stream.o kadm_supp.o acl_files.o kadm_err.o
+
+all:: $(PROG)
+
+kadm_err.c kadm_err.h: $(srcdir)/kadm_err.et
+
+$(OBJS): kadm_err.h
+
+$(PROG): $(OBJS) $(DEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+
+install::
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+
+clean::
+	$(RM) $(PROG) $(OBJS)

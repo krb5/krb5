@@ -1,0 +1,45 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(OVSECINC)
+OVSECROOT=/home/tlyu/ovsecure
+OVSECSTAGE=/afs/dev.mit.edu/reference/ovsecure/sunos/stage
+OVSECINC=-I$(OVSECROOT)/include -I$(OVSECSTAGE)/include
+OVSECLIB=-L$(OVSECSTAGE)/lib -lclient -lcommon -lrpclib -ldyn
+LDFLAGS = -g
+LIBOBJS=@LIBOBJS@
+ISODELIB=$(OVSECROOT)/lib/libisode.a
+COMERRLIB=$(OVSECROOT)/lib/libcom_err.a
+SSLIB=$(OVSECSTAGE)/lib/libss.a
+DBMLIB=$(OVSECROOT)/lib/libdb.a
+KDBLIB=$(OVSECROOT)/lib/libkdb5.a 
+
+all::
+
+KLIB = $(OVSECROOT)/lib/libgssapi_krb5.a $(OVSECROOT)/lib/libkrb5.a $(OVSECROOT)/lib/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+SRCS =
+
+OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o $(LIBOBJS)
+
+all:: kadmin
+kadmin.o:
+	$(CC) -c $(CCOPTS) $(OVSECINC) $(DEFS) kadmin.c
+getdate.c getdate.h: getdate.y
+	$(RM) getdate.c getdate.h y.tab.*
+	$(YACC) -d $(srcdir)/getdate.y
+	$(MV) y.tab.c getdate.c
+	$(MV) y.tab.h getdate.h
+
+kadmin: $(OBJS)
+	$(CC) -o kadmin $(CFLAGS) $(OBJS) $(OVSECLIB) $(KLIB) $(LIBS)
+
+# needed until we run makedepend
+kadmin_ct.c: kadmin_ct.ct
+
+kadmin_ct.o: kadmin_ct.c
+
+clean::
+	$(RM) kadmin $(OBJS) kadmin_ct.c getdate.c getdate.h y.tab.c y.tab.h
+
+# testing rule for building getdate
+getdate: getdate.c
+	$(CC) -o getdate $(CFLAGS) -DTEST getdate.c

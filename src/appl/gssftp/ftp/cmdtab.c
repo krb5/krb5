@@ -50,7 +50,7 @@ int	setlevel(), setclear(), setsafe();
 int	setprivate();
 #endif
 int	disconnect(), restart(), reget(), syst();
-int	cd(), lcd(), delete(), mdelete(), user();
+int	cd(), lcd(), delete_file(), mdelete(), user();
 int	ls(), mls(), get(), mget(), help(), append(), put(), mput();
 int	quit(), renamefile(), status();
 int	quote(), rmthelp(), shell(), site();
@@ -154,7 +154,7 @@ struct cmd cmdtab[] = {
 	{ "clear",	clearhelp,	0,	1,	1,	setclear },
 	{ "close",	disconhelp,	0,	1,	1,	disconnect },
 	{ "cr",		crhelp,		0,	0,	0,	setcr },
-	{ "delete",	deletehelp,	0,	1,	1,	delete },
+	{ "delete",	deletehelp,	0,	1,	1,	delete_file },
 	{ "debug",	debughelp,	0,	0,	0,	setdebug },
 	{ "dir",	dirhelp,	1,	1,	1,	ls },
 	{ "disconnect",	disconhelp,	0,	1,	1,	disconnect },

@@ -1,0 +1,22 @@
+export PS_ALL			= ps auxww
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID			= ps auxww
+# Make sure there's no extra whitespace at the end of this line!
+export PS_TTY			= ps -t
+export RSH_CMD			= /usr/bin/rsh
+
+PCC_STRUCT_RETURN   = 
+TERMCAPLIB	    = -ltermcap
+
+XINCDIR		    = /usr/X11/include
+XLIBDIR		    = /usr/X11/lib
+
+UTMP_FILE = /etc/utmp
+WTMP_FILE = /usr/adm/wtmp
+
+D_NO_SETENV = -DNO_SETENV
+
+SHLIBCFLAGS := -fpic
+SHLIBLDFLAGS := -assert pure-text
+SHLIBEXT := so
+SHLIBSEP := .

@@ -1,0 +1,65 @@
+CFLAGS = $(CCOPTS) $(DEFS)
+
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libdyn.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+SRCS = $(srcdir)/dyn_create.c \
+	$(srcdir)/dyn_put.c \
+	$(srcdir)/dyn_debug.c \
+	$(srcdir)/dyn_delete.c \
+	$(srcdir)/dyn_size.c \
+	$(srcdir)/dyn_append.c \
+	$(srcdir)/dyn_realloc.c \
+	$(srcdir)/dyn_paranoid.c \
+	$(srcdir)/dyn_insert.c \
+	$(srcdir)/dyn_initzero.c
+
+OBJS = dyn_create.$(OBJEXT) \
+	dyn_put.$(OBJEXT) \
+	dyn_debug.$(OBJEXT) \
+	dyn_delete.$(OBJEXT) \
+	dyn_size.$(OBJEXT) \
+	dyn_append.$(OBJEXT) \
+	dyn_realloc.$(OBJEXT) \
+	dyn_paranoid.$(OBJEXT) \
+	dyn_insert.$(OBJEXT) \
+	dyn_initzero.$(OBJEXT)
+
+LIB_SUBDIRS= .
+LIBDONE= DONE
+
+all-unix:: shared includes $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
+
+check-windows::
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
+
+DONE:: $(OBJS)
+	 $(RM) DONE
+	 echo $(OBJS) >DONE
+
+libdyn.$(STEXT): $(OBJS)
+	$(RM) $@
+	$(ARADD) $@ $(OBJS)
+	$(RANLIB) $@
+
+install:: libdyn.a
+	$(INSTALL_DATA) libdyn.a $(DESTDIR)$(KRB5_LIBDIR)/libdyn.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdyn.a
+
+clean::
+	$(RM) libdyn.$(LIBEXT) libdyn.bak DONE
+

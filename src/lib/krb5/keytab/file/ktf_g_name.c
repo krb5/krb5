@@ -36,10 +36,24 @@ krb5_ktfile_get_name(context, id, name, len)
   /* 
    * This routine returns the name of the name of the file associated with
    * this file-based keytab.  name is zeroed and the filename is truncated
-   * to fit in name if necessary.
+   * to fit in name if necessary.  The name is prefixed with PREFIX:, so that
+   * trt will happen if the name is passed back to resolve.
    */
 {
     memset(name, 0, len);
-    strncpy(name, KTFILENAME(id), len);
+
+    if (len < strlen(id->ops->prefix)+2)
+	return(ENAMETOOLONG);
+    strcpy(name, id->ops->prefix);
+    name += strlen(id->ops->prefix);
+    name[0] = ':';
+    name++;
+    len -= strlen(id->ops->prefix)+1;
+
+    if (len < strlen(KTFILENAME(id)+1))
+	return(ENAMETOOLONG);
+    strcpy(name, KTFILENAME(id));
+    /* strcpy will NUL-terminate the destination */
+
     return(0);
 }

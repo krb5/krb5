@@ -1,6 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
 KRB5_RUN_FLAGS
-CONFIG_DIRS(resolve asn.1 create hammer verify gssapi dejagnu)
+CONFIG_DIRS(resolve asn.1 hammer verify gssapi dejagnu)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

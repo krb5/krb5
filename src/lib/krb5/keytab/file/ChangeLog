@@ -1,3 +1,8 @@
+Fri Jul 12 21:16:50 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ktf_g_name.c (krb5_ktfile_get_name): include the prefix in the
+ 	returned name.
+
 Wed Jun 12 01:09:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* ser_ktf.c: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS

@@ -1,3 +1,15 @@
+Wed Jul 10 00:52:28 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in (all-unix): "install" the db2 headers and libs with
+ 	symlinks.  db2 has its own self-contained autoconf setup, so this
+ 	is necessary here.
+	(all-unix): before installing db2, remove the links, so ln won't
+	fail the second time.
+
+Tue Jul  9 19:29:12 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (CONFIG_DIRS): always build db2
+
 Mon May 20 11:05:49 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* libupdate.sh: allow to deal with multiple directories at once

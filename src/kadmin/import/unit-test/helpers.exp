@@ -1,0 +1,93 @@
+#
+# $Id$
+#
+
+proc myfail { comment } {
+	global mytest_name
+	global mytest_status
+	wait
+	fail "$mytest_name: $comment"
+	set mytest_status 1
+}
+
+proc mypass {} {
+}
+
+##
+## When you expect on an id, and eof is detected, the spawn_id is closed.
+## It may be waited for, but calling expect or close on this id is an ERROR!
+##
+
+proc mytest { name kpargs status args } {
+	global spawn_id
+	global timeout
+	global mytest_name
+	global mytest_status
+
+	verbose "starting test: $name"
+
+	set mytest_name "$name"
+
+	eval import_start $kpargs
+
+	# at the end, eof is success
+
+	lappend args { eof { if {[regexp "\[\r\n\]$" $expect_out(buffer)] == 0} { myfail "final status message not newline-terminated" } } }
+
+	# for each test argument....
+	# rep invariant:  when this foreach ends, the id is close'd, but
+	#   not wait'ed.
+
+	foreach test $args {
+		set mytest_status 0
+
+		# treat the arg as an expect parameter
+		# if failure, the process will be closed and waited.
+
+		uplevel 1 "expect {
+			$test
+			timeout { close; myfail \"timeout\"}
+			eof { myfail \"eof read before expected message string\" }
+		}"			
+
+		if {$mytest_status == 1} { return }
+	}
+
+	# at this point, the id is closed and we can wait on it.
+
+	set ret [wait]
+	verbose "% Exit $ret" 1
+	if {[lindex $ret 0] == -1} {
+		fail "$name: wait returned error [lindex $ret 1]"
+	} else {
+		if { ((![string compare $status zero]) &&
+		      ([lindex $ret 1] == 0)) ||
+		     ((![string compare $status nonzero]) &&
+		      ([lindex $ret 1] != 0)) } {
+			pass "$name"
+		} else {
+			fail "$name: unexpected return status [lindex $ret 1], should be $status"
+		}
+	}
+}
+
+proc import_win { name args } {
+	mytest "$name" "$args" zero {
+		-re "Successfully imported \[0-9\]+ records."
+			{ mypass }
+		eof
+			{ myfail "error: $expect_out(buffer)" }
+	} 
+}
+
+proc import_lose { name args error } {
+	mytest "$name" "$args" nonzero {
+		-re "Successfully imported \[0-9\]+ records."
+			{ myfail "unexpected success" }
+		-re "ovsec_adm_import: .*$error"
+			{ mypass }
+		eof
+			{ myfail "error: $expect_out(buffer)" }
+	} 
+}
+

@@ -1,0 +1,10 @@
+Fri Jul 12 14:39:28 1996  Marc Horowitz  <marc@mit.edu>
+
+	* architecture: add uname test for NetBSD
+	* netbsd1.def: added
+
+Mon Jul  8 16:39:36 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* template, site.def, rules: Add SITEMAKEFILES to specify -f
+ 	Makefile.ov, add .ct default rule.
+

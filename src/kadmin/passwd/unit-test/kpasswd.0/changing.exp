@@ -1,0 +1,102 @@
+#
+# $Id$
+#
+
+set timeout 15
+
+load_lib "helpers.exp"
+
+if [info exist env(DEBUG)] { debug 1 }
+
+#
+# Here are the tests
+#
+
+test_3pass {test2} {D.5: different new passwords} test2 test2 test2 foobar \
+	4 {New passwords do not match - password not changed.}
+
+test_3pass {test2} {D.7.5: empty/empty} test2 test2 {} {} \
+	5 {You must type a password.  Passwords must be at least one character long.}
+
+test_3pass {test2} {D.6: empty/non-empty} test2 test2 {} test2 \
+	4 {New passwords do not match - password not changed.}
+
+test_3pass {test2} {D.7: non-empty/empty} test2 test2 test2 {} \
+	4 {New passwords do not match - password not changed.}
+
+
+test_win {test1} {D.8: change password} test1 test1 newpass
+
+test_win {test1} {D.9: test changed password} test1 newpass test1
+
+mytest "D.22: No policy description was shown" test1 4 {
+	-re "Changing password for test1.*\\.$s+Old password:"
+		{ send "test1\n" }
+} {
+	-re "$s+.*$s+.*$s+.*char.*classes.*"
+		{ myfail "policy description displayed" }
+	timeout { mypass }
+} {
+	-re "^$s+New password:"
+		{ send "newpass\n" }
+} {
+	-re "^$s+New password \\(again\\):"
+		{ send "ssapwen\n" }
+} {
+	-re "$s+New passwords do not match - password not changed."
+		{ mypass }
+}
+
+test_3pass {pol1} {D.10: new password too short} pol1 pol111111 que que \
+	4 {New password is too short.  Please choose a password which is at least [0-9]+ characters long.}
+
+test_3pass {pol1} {D.13: too few char classes in new password} pol1 \
+	pol111111 123456789 123456789 \
+	4 {New password does not have enough character classes.  The character classes are: - lower-case letters, - upper-case letters, - digits, - punctuation, and - all other characters \(e.g., control characters\). Please choose a password with at least [0-9]+ character classes.}
+
+test_3pass {pol1} {D.14: new password in dictionary} pol1 \
+	pol111111 Discordianism Discordianism \
+	4 {New password was found in a dictionary of possible passwords and therefore may be easily guessed.  Please choose another password.  See the ovpasswd man page for help in choosing a good password.}
+
+test_win {pol1} {successful change} pol1 pol111111 polAAAAAA
+# fail "successful change: XXXX password history is majorly broken"
+
+test_3pass {pol1} {D.11: new password same as old} pol1 \
+	polAAAAAA polAAAAAA polAAAAAA \
+	4 {New password was used previously.  Please choose a different password.}
+
+test_3pass {pol1} {D.12: new password in history} pol1 \
+	polAAAAAA pol111111 pol111111 \
+	4 {New password was used previously.  Please choose a different password.}
+
+mytest "D.18: Policy description was shown" pol1 4 {
+	-re "Changing password for pol1.*\\.$s+Old password:"
+		{ send "polAAAAAA\n" }
+} {
+	-re "$s+.*$s+.*$s+.*8 char.*2 classes.*$s+New password:"
+		{ send "newpass1234\n" }
+} {
+	-re "^$s+New password \\(again\\):"
+		{ send "newpass4321\n" }
+} {
+	-re "$s+New passwords do not match - password not changed."
+		{ mypass }
+}
+
+# restore pol1's password to its initial value; see discussion in 
+# secure-kpasswd/2204 about secure-releng/2191 if you are confused
+test_win {pol1} {successful change} pol1 polAAAAAA polBBBBBB
+test_win {pol1} {successful change} pol1 polBBBBBB polCCCCCC
+test_win {pol1} {successful change} pol1 polCCCCCC pol111111
+
+test_win {pol2} {successful change} pol2 pol222222 polbbbbbb
+
+test_3pass {pol2} {D.15: too soon to change password} pol2 \
+	polbbbbbb pol222222 pol222222 \
+	4 {Password cannot be changed because it was changed too recently.  Please wait until .*199[0-9] before you change it.  If you need to change your password before then, contact your system security administrator.}
+
+verbose "(sleeping 30 seconds)"
+catch "exec sleep 30"
+
+test_win {pol2} {password min life passed} pol2 polbbbbbb pol222222
+

@@ -1,0 +1,132 @@
+#
+# $Id$
+#
+
+#
+# Create a keytab "name" with an entry for each element in the array
+# "entries".  If "name" already exists it is destroyed.  Connections
+# to the admin server are made as the principal "admin" with the
+# password "password".
+#
+proc setup_keytab { testname ktname admin password entries } {
+	global klist rm
+	global wait_error_index wait_status_index
+	global verbose
+
+	verbose "setting up test: $testname" 1
+
+	if {[regexp {(.+):(.+)} $ktname dummy type filename] == 0} {
+		set filename $ktname
+	}
+
+	if {[file exists $filename] && [catch "exec $rm $filename"] != 0} {
+		error "$testname: cannot delete keytab file $filename";
+	}
+
+	if {$type == "WRFILE"} {
+		set type "FILE"
+	}
+
+	foreach entry $entries {
+		keytab_run "$testname setup" \
+			"-k $ktname -a -p $admin $entry" 0 {
+			"Enter password:" { 
+				send "$password\n"
+			}
+		}
+		# if "Enter password:" needs to be optional:
+		# { timeout { } }
+	}
+	
+	if {$verbose > 1} {
+		if {[file exists $filename]} {
+			puts "% exec $klist -k $type:$filename\n"
+			if {[catch "exec $klist -k $type:$filename"] != 0} {
+				error "$testname: $klist failed"
+			}
+		}
+	}
+}
+
+# 
+# Run $KEYTAB with args ktargs.  Each element of args is treated as an
+# expect block for the process, in turn.  If all elements match and
+# then eof occurs with exit status status, the test passes; otherwise
+# it fails.
+#
+proc keytab_run { testname ktargs status args } {
+	global spawn_id timeout
+	global wait_error_index wait_status_index
+	global progname
+
+	verbose "running $progname for test: $testname" 2
+
+	eval keytab_start $ktargs
+
+	# wait for eof after exps
+	lappend args { eof { verbose $expect_out(buffer) 2 } }
+
+	foreach exp $args {
+		uplevel 1 "expect {
+			$exp
+			timeout { close; fail \"$testname: timeout\"; return }
+			eof { fail \"$testname: eof before expected message\"; return }
+		}"
+	}
+
+	set ret [wait]
+	verbose "% Exit $ret" 2
+
+	if {[lindex $ret $wait_error_index] == -1} {
+		fail "$testname: wait returned error [lindex $ret $wait_errno_index]"
+	} else {
+		if { [lindex $ret $wait_status_index] == $status ||
+		     (($status<0) && ([lindex $ret $wait_status_index] == ($status+256))) } {
+			pass "$testname"
+		} else {
+			fail "$testname: unexpected return status [lindex $ret $wait_status_index], should be $status"
+		}
+	}
+}
+
+
+proc klist_check { testname ktname args } {
+	global klist
+
+	if {[regexp {(.+):(.+)} $ktname dummy type filename] == 0} {
+		set filename $ktname
+	}
+
+	set lines [list "^Keytab name: (WR)?FILE:$filename" \
+			"^KVNO Principal" "^---- -------"]
+
+	foreach entry $args {
+		if {[lindex $entry 1] == 0} {
+			set line "^ *\[0-9\]+ [lindex $entry 0]"
+		} else {
+			set line "^ *[lindex $entry 1] [lindex $entry 0]"
+		}
+		lappend lines $line
+	}
+
+	set kl [open "|$klist -k FILE:$filename" r]
+
+	while {[gets $kl line] >= 0} {
+		if {([llength $lines] == 0) ||
+		    ([regexp [lindex $lines 0] $line] == 0)} {
+			fail "$testname: klist check: \
+				[lindex $lines 0] does not match $line"
+		}
+		set lines [lrange $lines 1 end]
+	}
+	if {[catch "close $kl" msg] != 0} {
+		fail "$testname: klist: $msg"
+		return
+	}
+
+	if {[llength $lines] == 0} {
+		pass "$testname: klist check"
+	} else {
+		fail "$testname: klist check: too few entries in keytab"
+	}
+}

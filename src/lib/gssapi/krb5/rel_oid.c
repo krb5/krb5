@@ -73,6 +73,7 @@ krb5_gss_internal_release_oid(ct, minor_status, oid)
      */
    
     if ((*oid != gss_mech_krb5) &&
+	(*oid != gss_mech_krb5_old) &&
 	(*oid != gss_nt_krb5_name) &&
 	(*oid != gss_nt_krb5_principal)) {
 	/* We don't know about this OID */

@@ -1,0 +1,7 @@
+Mon Jul 15 17:18:56 1996  Marc Horowitz  <marc@mit.edu>
+
+	* unix.exp: some versions of runtest do not like digits in
+ 	command-line variable names.  ovsec_edit_keytab renamed to
+ 	kadm5_keytab
+	
+

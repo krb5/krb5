@@ -22,11 +22,14 @@
 
 #include "gssapiP_krb5.h"
 
+/*
+ * $Id$
+ */
+
 OM_uint32
-krb5_gss_unseal(ctx, minor_status, context_handle,
+krb5_gss_unseal(minor_status, context_handle,
 		input_message_buffer, output_message_buffer,
 		conf_state, qop_state)
-     void *ctx;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t input_message_buffer;
@@ -34,7 +37,11 @@ krb5_gss_unseal(ctx, minor_status, context_handle,
      int *conf_state;
      int *qop_state;
 {
-   krb5_context context = ctx;
+   krb5_context context;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
+
    return(kg_unseal(context, minor_status, context_handle,
 		    input_message_buffer, output_message_buffer,
 		    conf_state, qop_state, KG_TOK_SEAL_MSG));
@@ -42,10 +49,9 @@ krb5_gss_unseal(ctx, minor_status, context_handle,
 
 /* V2 interface */
 OM_uint32
-krb5_gss_unwrap(ctx, minor_status, context_handle,
+krb5_gss_unwrap(minor_status, context_handle,
 		input_message_buffer, output_message_buffer,
 		conf_state, qop_state)
-    void 		*ctx;
     OM_uint32		*minor_status;
     gss_ctx_id_t	context_handle;
     gss_buffer_t	input_message_buffer;
@@ -53,9 +59,12 @@ krb5_gss_unwrap(ctx, minor_status, context_handle,
     int			*conf_state;
     gss_qop_t		*qop_state;
 {
-    krb5_context	context = ctx;
+    krb5_context	context;
     OM_uint32		rstat;
     int			qstate;
+
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+       return(GSS_S_FAILURE);
 
     rstat = kg_unseal(context, minor_status, context_handle,
 		      input_message_buffer, output_message_buffer,

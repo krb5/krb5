@@ -1,3 +1,9 @@
+Fri Jul 19 19:50:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* default.exp: changes to work with the new admin system.  This is
+ 	primarily creating the correct keytab for the new admin server,
+ 	and using the new admin client for principal creation.
+
 Mon May  6 11:54:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Add procedure setup_wrapper to first setup shared

@@ -83,7 +83,6 @@ static int test_import_name(name)
 	printf("\n");
 	(void) gss_release_buffer(&min_stat, &buffer_name);
 
-	(void) gss_release_oid(&min_stat, &name_oid);
 	(void) gss_release_name(&min_stat, &gss_name);
 	return 0;
 }

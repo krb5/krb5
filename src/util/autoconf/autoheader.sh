@@ -85,6 +85,7 @@ if test $show_version = yes; then
 fi
 
 TEMPLATES="${AC_MACRODIR}/acconfig.h"
+test -r ./acconfig.h && TEMPLATES="${TEMPLATES} ./acconfig.h"
 test -r $localdir/acconfig.h && TEMPLATES="${TEMPLATES} $localdir/acconfig.h"
 
 case $# in

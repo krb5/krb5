@@ -1,0 +1,34 @@
+# $Id$
+
+TOP = ../..
+include $(TOP)/config.mk/template
+
+CFLAGS	+=	-I$(TCLINC)
+
+SRCS	=	tcl_ovsec_kadm.c tcl_kadm5.c test.c
+OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
+
+PROG	=	ovsec_kadm_srv_tcl
+LIBS	= 	$(LIBADMSRV) $(LIBRPCLIB) $(LIBDYN) $(LIBGSSAPI_KRB5) \
+		$(LIBKDB5) $(LIBKRB5) $(LIBCRYPTO) \
+		$(LIBISODE) $(LIBTCL) $(LIBM) $(LIBDB) $(LIBCOM_ERR) \
+		$(NDBMLIB) $(NETLIB)
+
+expand Program
+expand Depend
+
+PROG	=	ovsec_kadm_clnt_tcl
+LIBS	= 	$(LIBADMCLNT) $(LIBRPCLIB) $(LIBDYN) $(LIBGSSAPI_KRB5) \
+		$(LIBKDB5) $(LIBKRB5) $(LIBCRYPTO) \
+		$(LIBISODE) $(LIBTCL) $(LIBM) $(LIBDB) $(LIBCOM_ERR) \
+		$(NDBMLIB) $(BSDLIB) $(NETLIB)
+
+expand Program
+
+PROG	=	bsddb_dump
+SRCS	=	bsddb_dump.c
+OBJS	=	bsddb_dump.o
+LIBS	=	$(LIBDB)
+
+expand Program
+expand Depend

@@ -1,0 +1,15 @@
+Fri Jul 12 14:48:20 1996  Marc Horowitz  <marc@mit.edu>
+
+	* stop_servers_local (true, false): use the path to find these,
+ 	instead of looking in /bin explicitly.
+
+	* start_servers_local (/usr/tmp): /usr/tmp doesn't exist on some
+ 	systems.  Check for that and /var/tmp, and use the one which
+ 	exists.  (true, false): use the path to find these, instead of
+ 	looking in /bin explicitly.
+
+	* make-host-keytab.pl.in: perl5 requires that @ in strings be
+ 	backwhacked.  (EDIT_KEYTAB): ovsec_adm_keytab is now kadm5_keytab.
+	
+  	* init_db: kadmin_create should be kdb5_create
+

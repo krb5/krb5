@@ -1,0 +1,249 @@
+Thu Jul 18 19:46:49 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK
+
+Tue Jul  9 17:18:56 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kadm_stream.c: rename HAS_STDLIB_H to HAVE_STDLIB_H to conform
+ 	to the autoconf convention
+	* configure.in: the old configure.in seemed to be written for some
+ 	other directory.  Now it's right.
+	* admin_server.c, kadm_ser_wrap.c, kadm_server.c: renamed
+ 	<ovsec_admin/foo.h> to <kadm5/foo.h>
+	* Makefile.in: complete rewrite.
+
+Thu Mar 21 20:33:43 1996  Richard Basch  <basch@lehman.com>
+
+	* kadm_funcs.c: new principals were being created with two keys,
+	one of which the key_data_ver=0 and had no valid data.
+
+Tue Mar 19 19:42:37 1996  Richard Basch  <basch@lehman.com>
+
+	* kadm_funcs.c:
+		changed all references of des-cbc-md5 to des-cbc-crc
+		fixed uninitialized variable
+		set kvno modulo 256 in database
+
+Wed Feb 21 23:34:31 1996  Richard Basch  <basch@lehman.com>
+
+	* kadm_funcs.c: Initialize the length element of the krb5_db_entry
+		structure in kadm_princ2entry (add_entry was failing).
+
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * kadm_funcs.c : Remove mkvno for krb5_db_entry
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * admin_server.c, kadm_funcs.c kadm_ser_wrap.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * admin_server.c, kadm_funcs.c, kadm_ser_wrap.c : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate.
+
+Tue Aug 15 14:31:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin_server,kadm_funcs,kadm_ser_wrap.c - Replace kadm_find_keytype()
+		with krb5_dbe_find_keytype().
+
+
+Thu Aug 10 14:48:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm_funcs.c - Add kadm_find_keytype() to find a particular key/salt
+		pair.  Use this to find keys instead of assuming that the
+		right one's in the first slot.
+		Fix transposed arguments to strncpy().
+		Handle mod_princ_data stuff.
+		Supply saltblock to encrypt_key_data().
+	* admin_server, kadm_ser_wrap.c - Use kadm_find_keytype() to find keys.
+
+
+Mon Aug 7 13:30:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin_server,kadm_funcs,kadm_ser_wrap.c - Brute force substitutions
+		to get this to compile. 
+
+
+Mon Jul 17 15:12:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm_ser_wrap.c - Add NULL stash file argument to krb5_db_fetch_mkey.
+
+
+Fri Jul 7 16:05:11 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
+Tue Jun 27 16:05:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* acl_files.c - Change check for return value from fputs(3) from NULL
+		to EOF.  That's what's returned on error.
+	* admin_server.c - Cast 4th argument of setsockopt(2) to be const char *
+	* kadm_funcs.c - Cast argument to ctime(3)
+	* kadm_server.c - Cast first argument to strcpy(3) and strcat(3).
+
+Tue Jun 20 14:44:54 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: add tests for TIME_WITH_SYS_TIME and sys/time.h
+
+Thu Jun 15 17:52:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+        * Makefile.in - Change explicit library names to -l<lib> form, and
+                change target link line to use $(LD) and associated flags.
+                Also, for K4, use KRB4_LIB and KRB4_CRYPTO_LIB, these were
+                split out.
+        * configure.in - Add shared library usage check.
+
+Fri Jun  9 19:07:25 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Fri Jun  9 06:49:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadm_stream.c (vts_long, stv_long): Change u_long to krb5_ui_4
+
+	* kadm_server.c (kadm_ser_ckpw): Change u_long to krb5_ui_4
+
+	* kadm_ser_wrap.c (errpkt, kadm_ser_in):  Change u_long to krb5_ui_4
+
+	* kadm_funcs.c (kadm_add_entry):  Change u_long to krb5_ui_4
+
+	* admin_server.c (process_client): Change u_long to krb5_ui_4
+
+Sat May 20 22:33:58 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadm_stream.c: Based on presence of stdlib.h, include or declare
+		malloc. 
+
+	* configure.in: Check for stdlib.h
+
+Sun May  7 13:49:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* admin_server.c: Avoid warning of redeclaring POSIX_SIGNALS if
+		already defined. 
+
+Sat Apr 29 00:34:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* admin_server.c (kadm_listen): Use Posix sigaction() instead of
+		signal() to set signal handlers.  This allows us not to
+		worry about System V signal semantics.  Make the code use 
+		POSIX_SIGNALS by default.
+
+Fri Apr 28 18:08:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
+
+Thu Apr 27 13:53:41 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (v4kadmind): use KRB4_LIB directly.
+
+Thu Apr 20 23:21:42 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kadm_funcs.c: Don't #include <ndbm.h>, since that's
+		automatically included by k5-config.h
+
+Thu Apr 20 15:26:48 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* kadm_server.c (kadm_ser_cpw, kadm_ser_ckpw): krb_int32 should be
+	krb5_int32. 
+
+	* acl_files.c: Declare acl_abort as static at top of file.
+
+Sun Apr 16 19:10:17 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kadm_server.c (kadm_ser_cpw, kadm_ser_ckpw): use krb_int32, not
+	long, for network 4 byte quantities. Should get rid of the
+	use of memcpy at some point.
+
+Sat Mar 25 16:59:55 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kadm_funcs.c (kadm_entry2princ): pass kadm_context in to
+	krb5_524_conv_principal.
+
+Tue Mar 14 16:45:18 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in: Don't link in the V4 DES library; use the des425
+		library to avoid linking the DES code in twice.
+
+Thu Mar  2 12:25:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
+Wed Mar  1 16:30:08 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadm_server.c: Remove declataions of malloc(); should be done by
+		header files.
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
+Tue Feb 28 02:24:56 1995  John Gilmore  (gnu at toad.com)
+
+	* admin_server.c, kadm_server.c, kadm-server.h:  Avoid 
+	<krb5/...> includes.
+
+Tue Feb  7 16:42:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kadm_funcs.c (kadm_del_entry): fixed call to db_delete_principal.
+
+Wed Jan 25 18:42:42 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* kadm_server.h (DEL_ACL_FILE): new define, acl file for V4 delete
+	function.
+	* kadm_server.c (kadm_ser_add): new function, wrapper for V4 delete.
+	* kadm_funcs.c (check_access): declare int; add DEL.
+	(kadm_del_entry): new function, V4 delete from CNS.
+	(failadd): fix spelling error in log entry.
+
+Mon Dec 12 13:21:48 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kadm_funcs.c (kadm_entry2princ, kadm_princ2entry,
+	kadm_chg_srvtab): V4 and V5 max_life are in *different units* so
+	use the 60*5 conversion factor.
+
+Fri Nov 18 15:51:11 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kadm_funcs.c (kadm_add_entry, kadm_mod_entry, kadm_change): Add
+		magic numbers of keyblock structre.
+
+Fri Nov 18 01:11:58 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use CHECK_SIGNALS instead of expansion (from
+	epeisach).
+
+Wed Oct 19 18:53:45 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kadm_ser_wrap.c (kadm_ser_init): Use krb5_use_cstype() to
+		initialize the master_encblock structure.
+
+Thu Sep 29 22:41:20 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: relink executable if libraries change
+
+Thu Sep 15 10:53:37 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* admin_server.c (close_syslog, byebye): Move these two functions
+	before main(), so that they get declared properly.  Otherwise
+	suncc will refuse to compile the file.
+
+	* kadm_funcs.c (kadm_add_entry, kadm_mod_entry, kadm_change,
+	kadm_chg_srvtab): use krb5_timeofday instead of time(0).
+
+Thu Aug  4 16:37:33 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* admin_server.c: pick up <sys/time.h> (needed to get FD_SET,
+	etc.)
+
+Sat Jul 16 09:21:22 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: no longer trying to install v4kadmind as krb5kdc
+	:-)
+	* configure.in: another try at making dbm libs dtrt
+
+Wed Jun 29 00:24:28 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* admin_server.c: fixed calls that should have invoked
+	krb5_init_ets
+
+Sat Jun 25 09:07:48 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* kadm_ser_wrap.c: fixed lack of a terminal 0 in a call to
+	krb5_build_principal
+

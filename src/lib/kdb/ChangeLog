@@ -1,3 +1,25 @@
+Fri Jul 12 15:32:26 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kdb_cpw.c (add_key_pwd): initialize retval = 0, in case the
+ 	function is called with ks_tuple_count == 0.
+
+Wed Jul 10 16:22:14 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (USE_KDB5_LIBRARY): removed.  the library does not
+ 	need itself to build, and in fact fails to do so if I try.
+	* Makefile.in (clean-unix): remove the shared/ subdir
+
+Tue Jul  9 17:55:30 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in, Makefile.in: added rules and macros to do shared
+ 	library creation
+
+Mon Jul  8 17:06:00 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdb_dbm.c: Create DB_OPENCLOSE, which opens and closes the
+ 	databases for each lock.  This is slower than the previous method,
+ 	but unlike the previous method it works.
+
 Tue Jun 11 19:27:22 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* keytab.c (krb5_ktkdb_close): Free memory allocated by
@@ -11,6 +33,24 @@ Sat May 18 15:07:09 1996  Ezra Peisach  (epeisach@paris)
 
 	* kdb_dbm.c: Do not provide prototypes for dbm_error or
 		dbm_clearerr if they are really macros.
+
+Sun May 12 01:03:07 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kdb_xdr.c: reworked all of the krb5_dbe_* tl_data functions.
+  	This was necessary so that the admin system could store it's own
+ 	tl_data, without needing code here.  This has the side-effect of
+ 	eliminating some structures which added no value, therefore
+ 	changing about a half-dozen files elsewhere in the tree.
+
+	* kdb_cpw.c (add_key_rnd): handle kvno incrementing in the caller,
+ 	not here.
+	(krb5_dbe_crk): increment the kvno here, not in add_key_rnd
+	(krb5_dbe_ark): increment the kvno here, not in add_key_rnd
+	(add_key_pwd): handle kvno incrementing in the caller, not here.
+	(krb5_dbe_cpw): take an arg to specify the new kvno.  if it's
+	<= the old kvno, just increment.  Otherwise, pass it to add_key_pwd.
+	This is why all the code in this revision was changed.
+	(krb5_dbe_apw): increment the kvno here, not in add_key_pwd
 
 Tue May  7 19:48:57 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 

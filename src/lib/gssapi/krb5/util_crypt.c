@@ -23,6 +23,10 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
+/*
+ * $Id$
+ */
+
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
 int
@@ -39,7 +43,7 @@ kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
 {
-   return(krb5_random_confounder( ed->eblock.crypto_entry->block_length, buf));
+   return(krb5_random_confounder(ed->eblock.crypto_entry->block_length, buf));
 }
 
 int
@@ -51,7 +55,8 @@ kg_encrypt_size(ed, n)
 }
 
 krb5_error_code
-kg_encrypt(ed, iv, in, out, length)
+kg_encrypt(context, ed, iv, in, out, length)
+     krb5_context context;
      krb5_gss_enc_desc *ed;
      krb5_pointer iv;
      krb5_pointer in;
@@ -59,18 +64,29 @@ kg_encrypt(ed, iv, in, out, length)
      int length;
 {
    krb5_error_code code;
+   krb5_pointer tmp;
 
-   if (!kg_context && (code=kg_get_context()))
-	   return code;
-   
    if (! ed->processed) {
-      if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
+      if (code = krb5_process_key(context, &ed->eblock, ed->key))
 	 return(code);
       ed->processed = 1;
    }
 
-   if (code = krb5_encrypt(kg_context, in, out, length, &ed->eblock, 
-			   iv?iv:(krb5_pointer)zeros))
+   /* this is lame.  the krb5 encryption interfaces no longer allow
+      you to encrypt in place.  perhaps this should be fixed, but
+      dealing here is easier for now --marc */
+
+   if ((tmp = (krb5_pointer) xmalloc(length)) == NULL)
+      return(ENOMEM);
+
+   memcpy(tmp, in, length);
+
+   code = krb5_encrypt(context, tmp, out, length, &ed->eblock, 
+		       iv?iv:(krb5_pointer)zeros);
+
+   xfree(tmp);
+
+   if (code)
       return(code);
 
    return(0);
@@ -79,7 +95,8 @@ kg_encrypt(ed, iv, in, out, length)
 /* length is the length of the cleartext. */
 
 krb5_error_code
-kg_decrypt(ed, iv, in, out, length)
+kg_decrypt(context, ed, iv, in, out, length)
+     krb5_context context;
      krb5_gss_enc_desc *ed;
      krb5_pointer iv;
      krb5_pointer in;
@@ -90,11 +107,8 @@ kg_decrypt(ed, iv, in, out, length)
    int elen;
    char *buf;
 
-   if (!kg_context && (code=kg_get_context()))
-	   return code;
-   
    if (! ed->processed) {
-      if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
+      if (code = krb5_process_key(context, &ed->eblock, ed->key))
 	 return(code);
       ed->processed = 1;
    }
@@ -103,7 +117,7 @@ kg_decrypt(ed, iv, in, out, length)
    if ((buf = (char *) xmalloc(elen)) == NULL)
       return(ENOMEM);
 
-   if (code = krb5_decrypt(kg_context, in, buf, elen, &ed->eblock, 
+   if (code = krb5_decrypt(context, in, buf, elen, &ed->eblock, 
 			   iv?iv:(krb5_pointer)zeros)) {
       xfree(buf);
       return(code);

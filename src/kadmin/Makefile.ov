@@ -1,0 +1,11 @@
+#
+# $Id$
+#
+
+TOP = .
+include $(TOP)/config.mk/template
+
+SUBDIRS = ../lib/kadm5 server create passwd import export v4server \
+	keytab cli testing dbutil
+
+expand SubdirTarget

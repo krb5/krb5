@@ -1,0 +1,21 @@
+#
+# $Id$
+#
+
+TOP = ../..
+include $(TOP)/config.mk/template
+
+unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-body::
+	$(CLNTTCL) ./del-princs.tcl
+	$(RUNTEST) KEYTAB=../kadm5_keytab \
+		KLIST=../../../clients/klist/klist \
+		QUALNAME=../../testing/scripts/qualname --tool keytab
+    
+unit-test-setup::
+	$(START_SERVERS)
+	$(CLNTTCL) ./add-princs.tcl
+
+unit-test-cleanup::
+	$(STOP_SERVERS)

@@ -1,0 +1,39 @@
+TOP = ..
+include $(TOP)/config.mk/template
+CFLAGS := $(CFLAGS)
+
+ifdef KRB5B4
+CFLAGS += -DKRB5B4
+endif
+
+PROG := kadmind
+SRCS := kadm_rpc_svc.c server_stubs.c ovsec_kadmd.c misc.c server_glue_v1.c
+OBJS := kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o misc.o server_glue_v1.o
+LIBS := $(LIBADMSRV) $(LIBRPCLIB) $(LIBGSSAPI_KRB5) $(LIBDYN) \
+	$(LIBKDB5) $(LIBKRB5_ALL) $(LIBDB) \
+	$(NDBMLIB) $(NETLIB) $(BSDLIB) $(REGEXLIB)
+
+expand InstallServer
+expand Depend
+
+clean::
+	$(CLEAN) acls.c
+
+expand Saber
+
+SABER_LIBS := $(LIBDB) $(LIBGSSAPI_KRB5) $(LIBDYN) $(LIBKDB5) \
+	$(LIBKRB5) $(LIBCRYPTO) $(LIBISODE) $(LIBCOM_ERR)
+SABER_FLAGS := -G
+
+saber::
+	#cd ../../rpc
+	#make saber
+	#cd ../admin/lib/adb
+	#make saber
+	#cd ../common
+	#make saber
+	#cd ../server
+	#make saber
+	#cd ../../server
+	#load /usr/local/lib/gcc-lib/sparc-sun-sunos4.1.3/2.4.5/libgcc.a
+	#load $(SABER_FLAGS) $(LDFLAGS) $(GSSLIB) $(SABER_LIBS)

@@ -305,6 +305,11 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
 	rparams->realm_kdc_ports = svalue;
 	    
+    /* Get the name of the acl file */
+    hierarchy[2] = "acl_file";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_acl_file = svalue;
+	    
     /* Get the value for the kadmind port */
     hierarchy[2] = "kadmind_port";
     if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {

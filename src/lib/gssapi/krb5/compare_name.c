@@ -20,17 +20,24 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_compare_name(ctx, minor_status, name1, name2, name_equal)
-     void *ctx;
+krb5_gss_compare_name(minor_status, name1, name2, name_equal)
      OM_uint32 *minor_status;
      gss_name_t name1;
      gss_name_t name2;
      int *name_equal;
 { 
-   krb5_context context = ctx;
+   krb5_context context;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
+
    if (! kg_validate_name(name1)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);

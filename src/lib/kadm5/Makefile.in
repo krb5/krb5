@@ -1,0 +1,165 @@
+CFLAGS = $(CCOPTS) $(DEFS)
+
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libkadm5srv.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+kadm_err.$(OBJEXT): kadm_err.c
+	$(CC) $(CFLAGS) -c $*.c
+@SHARED_RULE_LOCAL@
+
+adb_err.$(OBJEXT): adb_err.c
+	$(CC) $(CFLAGS) -c $*.c
+@SHARED_RULE_LOCAL@
+
+chpass_util_strings.$(OBJEXT): chpass_util_strings.c
+	$(CC) $(CFLAGS) -c $*.c
+@SHARED_RULE_LOCAL@
+
+kadm_err.c kadm_err.h: $(srcdir)/kadm_err.et
+adb_err.c adb_err.h: $(srcdir)/adb_err.et
+chpass_util_strings.c chpass_util_strings.h: $(srcdir)/chpass_util_strings.et
+
+clean::
+	$(RM) kadm_err.c kadm_err.h kadm_err.o
+	$(RM) adb_err.c adb_err.h adb_err.o
+	$(RM) chpass_util_strings.c chpass_util_strings.h chpass_util_strings.o
+
+GENSRCS = kadm_err.c \
+	adb_err.c \
+	chpass_util_strings.c \
+	$(srcdir)/ovsec_glue.c \
+	$(srcdir)/misc_free.c \
+	$(srcdir)/kadm_rpc_xdr.c \
+	$(srcdir)/chpass_util.c \
+	$(srcdir)/alt_prof.c \
+	$(srcdir)/str_conv.c \
+	$(srcdir)/logger.c \
+
+SRVSRCS = $(GENSRCS) \
+	$(srcdir)/svr_policy.c \
+	$(srcdir)/svr_principal.c \
+	$(srcdir)/server_acl.c \
+	$(srcdir)/server_kdb.c \
+	$(srcdir)/server_misc.c \
+	$(srcdir)/server_init.c \
+	$(srcdir)/server_dict.c \
+	$(srcdir)/svr_iters.c \
+	$(srcdir)/svr_chpass_util.c \
+	$(srcdir)/adb_xdr.c \
+	$(srcdir)/adb_policy.c \
+	$(srcdir)/adb_free.c \
+	$(srcdir)/adb_openclose.c
+
+CLNTSRCS = $(GENSRCS) \
+	$(srcdir)/clnt_policy.c \
+	$(srcdir)/client_rpc.c \
+	$(srcdir)/client_principal.c \
+	$(srcdir)/client_init.c \
+	$(srcdir)/clnt_privs.c \
+	$(srcdir)/clnt_chpass_util.c
+
+GENOBJS = kadm_err.$(OBJEXT) \
+	adb_err.$(OBJEXT) \
+	chpass_util_strings.$(OBJEXT) \
+	ovsec_glue.$(OBJEXT) \
+	misc_free.$(OBJEXT) \
+	kadm_rpc_xdr.$(OBJEXT) \
+	chpass_util.$(OBJEXT) \
+	alt_prof.$(OBJEXT) \
+	str_conv.$(OBJEXT) \
+	logger.$(OBJEXT) \
+
+SRVOBJS = $(GENOBJS) \
+	svr_policy.$(OBJEXT) \
+	svr_principal.$(OBJEXT) \
+	server_acl.$(OBJEXT) \
+	server_kdb.$(OBJEXT) \
+	server_misc.$(OBJEXT) \
+	server_init.$(OBJEXT) \
+	server_dict.$(OBJEXT) \
+	svr_iters.$(OBJEXT) \
+	svr_chpass_util.$(OBJEXT) \
+	adb_xdr.$(OBJEXT) \
+	adb_policy.$(OBJEXT) \
+	adb_free.$(OBJEXT) \
+	adb_openclose.$(OBJEXT)
+
+CLNTOBJS = $(GENOBJS) @LIBOBJS@ \
+	clnt_policy.$(OBJEXT) \
+	client_rpc.$(OBJEXT) \
+	client_principal.$(OBJEXT) \
+	client_init.$(OBJEXT) \
+	clnt_privs.$(OBJEXT) \
+	clnt_chpass_util.$(OBJEXT)
+
+#
+# Depends on libkdb5, libkrb5, libcrypto, libcom_err, libdyn
+#
+KDB5_VER=@KDB5_SH_VERS@
+KRB5_VER=@KRB5_SH_VERS@
+CRYPTO_VER=@CRYPTO_SH_VERS@
+COMERR_VER=@COMERR_SH_VERS@
+DYN_VER=@DYN_SH_VERS@
+DEPLIBS=$(TOPLIBD)/libkdb5.$(SHEXT).$(KDB5_VER) \
+	$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
+	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
+	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
+	$(TOPLIBD)/libdyn.$(SHEXT).$(DYN_VER)
+
+SHLIB_LIBS=-lkdb5 -lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+
+all-unix:: shared includes $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+# don't think about this very hard.  when the build system goes away,
+# so will this.
+LIBDONE = srv/DONE clnt/DONE
+LIB_SUBDIRS= 
+shared:
+	-mkdir shared srv clnt
+	ln -s ../shared srv/shared
+	ln -s ../shared clnt/shared
+
+srv/DONE: $(SRVOBJS)
+	$(RM) srv/DONE
+	echo $(SRVOBJS) > srv/DONE
+
+clnt/DONE: $(CLNTOBJS)
+	$(RM) clnt/DONE
+	echo $(CLNTOBJS) > clnt/DONE
+
+check-windows::
+
+clean-unix::
+	$(RM) shared/* srv/* clnt/*
+	-rmdir shared srv clnt
+
+clean-mac::
+clean-windows::
+
+libkadm5srv.a: $(SRVOBJS)
+	$(RM) $@
+	$(ARADD) $@ $(SRVOBJS)
+	$(RANLIB) $@
+
+libkadm5clnt.a: $(CLNTOBJS)
+	$(RM) $@
+	$(ARADD) $@ $(CLNTOBJS)
+	$(RANLIB) $@
+
+install:: libkadm5srv.a libkadm5clnt.a
+	$(INSTALL_DATA) libkadm5srv.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm5srv.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5srv.a
+	$(INSTALL_DATA) libkadm5clnt.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt.a
+
+clean::
+	$(RM) libkadm5srv.a libkadm5srv.bak DONESRV
+	$(RM) libkadm5clnt.a libkadm5clnt.bak DONECLNT

@@ -1,0 +1,545 @@
+source lib.t
+
+api_exit
+api_start
+
+test "init 100"
+proc test100 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_PROFILE} /does-not-exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "ENOENT"
+}
+test100
+
+test "init 101"
+proc test101 {} {
+    global test
+
+    # XXX Fix to work with a remote TEST_SERVER.  For now, make sure
+    # it fails in that case.
+    one_line_succeed_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1751}] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1}] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "RPC_ERROR"
+}
+if {$RPC} test101
+
+test "init 102"
+proc test102 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "CONFIG_BADFORMAT"
+}
+if {$RPC} test102
+
+test "init 103"
+proc test103 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_DBNAME} /does-not-exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "ENOENT"
+}
+if {! $RPC} test103
+
+test "init 104"
+proc test104 {} {
+    global test
+
+    # This is slightly lame, but it works: if CONFIG_ADBNAME is obeyed, 
+    # then the lock file will be set based on it, and it won't exist.
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADBNAME} /does-not-exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "NOLOCKFILE"
+}
+if {! $RPC} test104
+
+test "init 105"
+proc test105 {} {
+    global test
+
+    # The lock info is stored in a static structure so that it applies
+    # to all handles in the process (why?).  We need to restart the api
+    # in order to ensure we are using the new lockfile.
+    api_exit
+    api_start
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADB_LOCKFILE} /does-not-exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "NOLOCKFILE"
+
+    api_exit
+    api_start
+}
+if {! $RPC} test105
+
+test "init 106"
+proc test106 {} {
+    global test prompt
+    
+    send [string trim {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MKEY_FROM_KBD} 1] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }]
+    send "\n"
+    expect {
+	-re ":$" { set prompting 1}
+	-re "\nOK .*$prompt$" { fail "$test: premature success" }
+	-re "\nERROR .*$prompt$" { fail "$test: premature failure" }
+	timeout { fail "$test: timeout" }
+	eof { fail "$test: eof" }
+    }
+    if {$prompting} {
+	one_line_succeed_test mrroot
+    }
+    if {! [cmd {kadm5_destroy $server_handle}]} {
+	error_and_restart "$test: couldn't close database"
+    }
+}
+if {! $RPC} test106
+
+test "init 107"
+proc test107 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_STASH_FILE} /does-not-exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "KDB_CANTREAD_STORED"
+}
+if {! $RPC} test107
+
+test "init 108"
+proc test108 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MKEY_NAME} does/not/exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "KDB_NOMASTERKEY"
+}
+if {! $RPC} test108
+
+test "init 109-113"
+proc test109 {} {
+    global test prompt
+
+    delete_principal "$test/a"
+
+    # I'd like to specify flags explicitly and check them, as in the
+    # following config_params, but tcl gets mighty confused if I do and 
+    # I have no idea why.
+#		[config_params {KADM5_CONFIG_MAX_LIFE KADM5_CONFIG_MAX_RLIFE KADM5_CONFIG_EXPIRATION KADM5_CONFIG_FLAGS KADM5_CONFIG_ENCTYPES} {10 20 30 KRB5_KDB_DISALLOW_TGT_BASED {}} ]
+    
+    if {! [cmd {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MAX_LIFE KADM5_CONFIG_MAX_RLIFE KADM5_CONFIG_EXPIRATION KADM5_CONFIG_ENCTYPES} {10 20 30 {}} ] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }]} {
+	fail "$test: cannot init with max_life"
+	return
+    }
+    if {! [cmd [format {
+	kadm5_create_principal $server_handle [simple_principal "%s/a"] \
+		{KADM5_PRINCIPAL} testpass
+    } $test]]} {
+	fail "$test: can not create principal"
+	return;
+    }
+    if {! [cmd [format {
+	kadm5_get_principal $server_handle "%s/a" p \
+		{KADM5_PRINCIPAL_NORMAL_MASK KADM5_KEY_DATA}
+    } $test]]} {
+	fail "$test: can not get principal"
+	return;
+    }
+    send "puts \$p\n"
+    send "lindex \$p 4\n"
+    expect {
+	-re "(\[0-9\]+)\n$prompt" {set max_life $expect_out(1,string) }
+	timeout {
+	    error_and_restart "$test: timeout getting max_life"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting max_life"
+	    return
+	}
+    }
+    send "lindex \$p 12\n"
+    expect {
+	-re "(\[0-9\]+)\n$prompt" {set max_rlife $expect_out(1,string) }
+	timeout {
+	    error_and_restart "$test: timeout getting max_rlife"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting max_rlife"
+	    return
+	}
+    }
+    send "lindex \$p 1\n"
+    expect {
+	-re "(\[0-9\]+)\n$prompt" {set expiration $expect_out(1,string) }
+	timeout {
+	    error_and_restart "$test: timeout getting expiration"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting expiration"
+	    return
+	}
+    }
+    send "lindex \$p 7\n"
+    expect {
+	-re "(\[A-Z_\]*)\n$prompt" {set flags $expect_out(1,string) }
+	timeout {
+	    error_and_restart "$test: timeout getting flags"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting flags"
+	    return
+	}
+    }
+    # This sorta worries me.  Since the test is setting ENCTYPES to
+    # nothing, the principal has no keys.  That means that nothing is
+    # printed for the keys in the correct case; but it feels too
+    # likely that nothing will be printed in the case of some problem.
+    send "lindex \$p 18\n"
+    expect {
+	-re "({.*})\n$prompt" {set key_data $expect_out(1,string) }
+	-re "\n$prompt" { set key_data {} }
+	timeout {
+	    error_and_restart "$test: timeout getting flags"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting flags"
+	    return
+	}
+    }
+    if { ! [cmd {kadm5_destroy $server_handle}]} {
+	error "$test: unexpected failure in destroy"
+	return
+    }
+    if {$max_life == 10} {
+	pass "$test"
+    } else {
+	fail "$test: $max_life is not 10"
+    }
+    if {$max_rlife == 20} {
+	pass "$test"
+    } else {
+	fail "$test: $max_rlife is not 20"
+    }
+    if {$expiration == 30} {
+	pass "$test"
+    } else {
+	fail "$test: $expiration is not 30"
+    }
+    if {$flags == ""} {
+	pass "$test"
+    } else {
+	fail "$test: flags $flags are wrong"
+    }
+    if {$key_data == {}} {
+	pass "$test"
+    } else {
+	fail "$test: key_data $key_data is wrong"
+    }
+}
+if {! $RPC} test109
+
+test "init 114"
+proc test114 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_SERVER_PARAMS"
+}
+if {! $RPC} test114
+
+test "init 115"
+proc test115 {} {
+    global test
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_DBNAME} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADBNAME} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ACL_FILE} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_DICT_FILE} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ADMIN_KEYTAB} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MKEY_FROM_KBD} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_STASH_FILE} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MKEY_NAME} does.not.exist] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ENCTYPE} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MAX_LIFE} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_MAX_RLIFE} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_EXPIRATION} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_FLAGS} 0] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
+		[config_params {KADM5_CONFIG_ENCTYPES} {{}}] \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "BAD_CLIENT_PARAMS"
+}
+if {$RPC} test115
+
+test "init 116"
+proc test116 {} {
+    global test
+
+    delete_principal "$test/a"
+
+    if {! [cmd {kadm5_init admin/get-add admin $KADM5_ADMIN_SERVICE \
+	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    get_add_handle}]} {
+	error_and_restart "$test: couldn't init with admin/get-add"
+    }
+
+    if {! [cmd {kadm5_init admin/mod-delete admin $KADM5_ADMIN_SERVICE \
+	    null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+	    mod_delete_handle}]} {
+	error_and_restart "$test: couldn't init with admin/get-add"
+    }
+
+    one_line_succeed_test {
+	kadm5_get_principal $get_add_handle testuser p \
+		KADM5_PRINCIPAL_NORMAL_MASK
+    }
+    one_line_succeed_test [format {
+	kadm5_create_principal $get_add_handle [simple_principal "%s/a"] \
+		{KADM5_PRINCIPAL} testpass
+    } $test]
+    one_line_fail_test { 
+	kadm5_modify_principal $get_add_handle [simple_principal testuser] \
+		{KADM5_PRINC_EXPIRE_TIME}
+    } "AUTH_MODIFY"
+    one_line_fail_test {
+	kadm5_delete_principal $get_add_handle testuser
+    } "AUTH_DELETE"
+
+    one_line_fail_test {
+	kadm5_get_principal $mod_delete_handle testuser p \
+		KADM5_PRINCIPAL_NORMAL_MASK
+    } "AUTH_GET"
+    one_line_fail_test [format {
+	kadm5_create_principal $mod_delete_handle [simple_principal "%s/a"] \
+		{KADM5_PRINCIPAL} testpass
+    } $test] "AUTH_ADD"
+    one_line_succeed_test { 
+	kadm5_modify_principal $mod_delete_handle [simple_principal testuser] \
+		{KADM5_PRINC_EXPIRE_TIME}
+    }
+    one_line_succeed_test [format {
+	kadm5_delete_principal $mod_delete_handle "%s/a"
+    } $test]
+
+    if {! [cmd {kadm5_destroy $get_add_handle}]} {
+	error_and_restart "$test: couldn't close get_add_handle"
+    }
+    if {! [cmd {kadm5_destroy $mod_delete_handle}]} {
+	error_and_restart "$test: couldn't close mod_delete_handle"
+    }
+}
+if {$RPC} test116
+    
+send "puts \$KADM5_ADMIN_SERVICE\n"
+expect {
+    -re "(\[a-zA-Z/@\]+)\n$prompt" {
+	set KADM5_ADMIN_SERVICE $expect_out(1,string) 
+    }
+    default {
+	error_and_restart "$test: timeout/eof getting admin_service"
+	return
+    }
+}
+
+send "puts \$KADM5_CHANGEPW_SERVICE\n"
+expect {
+    -re "(\[a-zA-Z/@\]+)\n$prompt" {
+	set KADM5_CHANGEPW_SERVICE $expect_out(1,string) 
+    }
+    default {
+	error_and_restart "$test: timeout/eof getting changepw_service"
+	return
+    }
+}
+
+test "init 150"
+proc test150 {} {
+    global test KADM5_ADMIN_SERVICE
+
+    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
+    kdestroy
+    kinit testuser notathena "-S $KADM5_ADMIN_SERVICE"
+    one_line_succeed_test {
+	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }
+    kdestroy
+}
+if {$RPC} test150
+
+test "init 151"
+proc test151 {} {
+    global test KADM5_CHANGEPW_SERVICE
+
+    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
+    kdestroy
+    kinit testuser notathena "-S $KADM5_CHANGEPW_SERVICE"
+    one_line_succeed_test {
+	kadm5_init_with_creds testuser null $KADM5_CHANGEPW_SERVICE \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    }
+    kdestroy
+}
+if {$RPC} test151
+
+test "init 152"
+proc test152 {} {
+    global test KADM5_ADMIN_SERVICE
+
+    kdestroy
+    one_line_fail_test {
+	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "GSS_ERROR"
+}
+if {$RPC} test152
+
+test "init 153"
+proc test153 {} {
+    global test KADM5_ADMIN_SERVICE
+
+    set env(KRB5CCNAME) /tmp/krb5cc_kadm5_init_v2
+    kinit testuser notathena
+    one_line_fail_test {
+	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
+		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "GSS_ERROR"
+}
+if {$RPC} test153
+
+return ""

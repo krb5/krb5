@@ -28,19 +28,20 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_export_sec_context(ct,
-			    minor_status, context_handle, interprocess_token)
-    void		*ct;
+krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     OM_uint32		*minor_status;
     gss_ctx_id_t	*context_handle;
     gss_buffer_t	interprocess_token;
 {
-    krb5_context	ser_ctx = ct;
+    krb5_context	context;
     krb5_error_code	kret;
     OM_uint32		retval;
     size_t		bufsize, blen;
-    krb5_gss_ctx_id_t	*ctx;
+    krb5_gss_ctx_id_t	ctx;
     krb5_octet		*obuffer, *obp;
+
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+       return(GSS_S_FAILURE);
 
     /* Assume a tragic failure */
     obuffer = (krb5_octet *) NULL;
@@ -53,12 +54,12 @@ krb5_gss_export_sec_context(ct,
 	    goto error_out;
     }
 
-    ctx = (krb5_gss_ctx_id_t *) *context_handle;
+    ctx = (krb5_gss_ctx_id_t) *context_handle;
 
     /* Determine size needed for externalization of context */
     bufsize = 0;
-    if ((kret = krb5_size_opaque(ser_ctx, KG_CONTEXT, (krb5_pointer) ctx,
-				  &bufsize)))
+    if ((kret = kg_ctx_size(context, (krb5_pointer) ctx,
+			    &bufsize)))
 	    goto error_out;
 
     /* Allocate the buffer */
@@ -70,8 +71,8 @@ krb5_gss_export_sec_context(ct,
     obp = obuffer;
     blen = bufsize;
     /* Externalize the context */
-    if ((kret = krb5_externalize_opaque(ser_ctx, KG_CONTEXT,
-					(krb5_pointer)ctx, &obp, &blen)))
+    if ((kret = kg_ctx_externalize(context,
+				   (krb5_pointer) ctx, &obp, &blen)))
 	    goto error_out;
 
     /* Success!  Return the buffer */
@@ -81,23 +82,7 @@ krb5_gss_export_sec_context(ct,
     retval = GSS_S_COMPLETE;
 
     /* Now, clean up the context state */
-    (void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
-    if (ctx->enc.processed)
-	    krb5_finish_key(ser_ctx, &ctx->enc.eblock);
-    krb5_free_keyblock(ser_ctx, ctx->enc.key);
-    if (ctx->seq.processed)
-	    krb5_finish_key(ser_ctx, &ctx->seq.eblock);
-    krb5_free_keyblock(ser_ctx, ctx->seq.key);
-    krb5_free_principal(ser_ctx, ctx->here);
-    krb5_free_principal(ser_ctx, ctx->there);
-    krb5_free_keyblock(ser_ctx, ctx->subkey);
-
-    if (ctx->auth_context)
-	    krb5_auth_con_free(ser_ctx, ctx->auth_context);
-
-    /* Zero out context */
-    memset(ctx, 0, sizeof(*ctx));
-    xfree(ctx);
+    (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
     *context_handle = GSS_C_NO_CONTEXT;
 
     return (GSS_S_COMPLETE);

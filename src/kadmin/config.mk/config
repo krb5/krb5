@@ -1,0 +1,141 @@
+# $Id$
+# $Source$
+
+#
+# local Programs
+#
+
+INSTHDRS	= $(TOP)/scripts/inst-hdrs.sh
+COMPILE_ET	= $(TOP)/../util/et/compile_et
+MK_CMDS		= $(TOP)/../util/ss/mk_cmds
+SYM_RANDOMIZE	= $(TOP)/intl/sym-randomize.pl
+
+#
+# Directories
+#
+
+STAGETOP= $(TOP)/..
+STAGE_BINDIR = $(STAGETOP)/bin
+STAGE_INCDIR = $(STAGETOP)/include
+STAGE_LIBDIR = $(STAGETOP)/lib
+
+INSTALLTOP= $(TOP)/..
+INSTALL_BINDIR = $(INSTALLTOP)/bin
+INSTALL_ETCDIR = $(INSTALLTOP)/etc
+INSTALL_INCDIR = $(INSTALLTOP)/include
+INSTALL_LIBDIR = $(INSTALLTOP)/lib
+INSTALL_CONFDIR = $(INSTALLTOP)/config
+INSTALL_PROTODIR = $(INSTALLTOP)/proto
+INSTALL_ADMINDIR = $(INSTALLTOP)/admin
+INSTALL_SERVERDIR = $(INSTALLTOP)/sbin
+INSTALL_INSTDIR = $(INSTALLTOP)/install
+INSTALL_DOCDIR = $(INSTALLTOP)/doc
+INSTALL_MANDIR = $(INSTALLTOP)/man
+INSTALL_SRCDIR = $(INSTALLTOP)/src
+
+#
+# libraries
+#
+
+# system
+LIBM		= -lm
+
+# stage
+LIBADMCLNT	:= $(STAGE_LIBDIR)/libkadm5clnt.a
+LIBADMSRV	:= $(STAGE_LIBDIR)/libkadm5srv.a
+LIBRPCLIB	:= $(STAGE_LIBDIR)/libgssrpc.a
+LIBDYN		:= $(STAGE_LIBDIR)/libdyn.a
+LIBSS		:= $(STAGE_LIBDIR)/libss.a
+LIBOVSEC_UTIL	:= $(STAGE_LIBDIR)/libkadm5_util.a
+LIBFTPSEC	:= $(STAGE_LIBDIR)/libftpsec.a
+
+# install
+LIBGSSAPI_KRB5	:= $(INSTALL_LIBDIR)/libgssapi_krb5.a
+LIBGSSAPI_KRB5_DX := $(INSTALL_LIBDIR)/libgssapi_krb5_dx.a
+LIBGSSAPI_KRB5_WX := $(INSTALL_LIBDIR)/libgssapi_krb5_wx.a
+LIBGSSAPI_KRB5_NX := $(INSTALL_LIBDIR)/libgssapi_krb5_nx.a
+LIBGSSAPI_TRUST := $(INSTALL_LIBDIR)/libgssapi_trust.a
+LIBDB		:= $(INSTALL_LIBDIR)/libdb.a
+LIBKRB5		:= $(INSTALL_LIBDIR)/libkrb5.a
+LIBKDB5		:= $(INSTALL_LIBDIR)/libkdb5.a
+LIBCRYPTO	:= $(INSTALL_LIBDIR)/libcrypto.a
+ifndef KRB5B4
+LIBISODE	:= $(INSTALL_LIBDIR)/libisode.a
+endif
+LIBCOM_ERR	:= $(INSTALL_LIBDIR)/libcom_err.a
+LIBKRB5_ALL	:= $(LIBKRB5) $(LIBCRYPTO) $(LIBISODE) $(LIBCOM_ERR)
+LIBKRB		:= $(INSTALL_LIBDIR)/libkrb4.a
+LIBKDB		:= $(INSTALL_LIBDIR)/libkdb.a
+LIBKADM		:= $(INSTALL_LIBDIR)/libkadm.a
+LIBKRB425	:= $(INSTALL_LIBDIR)/libkrb425.a
+LIBDES425	:= $(INSTALL_LIBDIR)/libdes425.a
+
+# X libraries.  XXX this uses -L!  but perhaps it doesn't matter, see
+# [secure-build/2649]
+XLIB		= -L$(XLIBDIR) -lXext -lX11
+
+#
+# library name mangling for export
+#
+
+ADMIN_INTERFACE_SYMBOL_FILES := $(TOP)/intl/adm-export-symbols \
+				$(TOP)/intl/misc-export-symbols
+OTHER_INTERFACE_SYMBOL_FILES :=	$(TOP)/intl/gss-export-symbols
+
+ADMIN_CRYPTO_LIBS := $(LIBADMCLNT) $(LIBADMSRV) $(LIBRPCLIB) \
+	$(LIBGSSAPI_KRB5) $(LIBKRB5) $(LIBKDB5) $(LIBCRYPTO) \
+	$(LIBISODE) $(LIBKRB) $(LIBKDB) $(LIBDES425)
+OTHER_CRYPTO_LIBS := $(LIBGSSAPI_KRB5_DX) $(LIBGSSAPI_KRB5_WX) \
+	$(LIBGSSAPI_KRB5_NX) 
+
+#
+# compiler/linker flags
+#
+
+CFLAGS	:= $(CFLAGS) -I$(INSTALL_INCDIR)
+
+#
+# Variables for testing
+# 
+# These are all exported because lots of test scripts (/bin/sh, perl,
+# tcl) use them.
+#
+
+export TESTDIR		= $(TOP)/testing
+export COMPARE_DUMP	= $(TESTDIR)/scripts/compare_dump.pl
+export FIX_CONF_FILES	= $(TESTDIR)/scripts/fixup-conf-files.pl
+export INITDB		= $(TESTDIR)/scripts/init_db
+export MAKE_KEYTAB	= $(TESTDIR)/scripts/make-host-keytab.pl
+export LOCAL_MAKE_KEYTAB= $(TESTDIR)/scripts/make-host-keytab.pl
+export RESTORE_FILES	= $(TESTDIR)/scripts/restore_files.sh
+export SAVE_FILES	= $(TESTDIR)/scripts/save_files.sh
+export SIMPLE_DUMP	= $(TESTDIR)/scripts/simple_dump.pl
+export TCLUTIL		= $(TESTDIR)/tcl/util.t
+export BSDDB_DUMP	= $(TESTDIR)/util/bsddb_dump
+export CLNTTCL		= $(TESTDIR)/util/ovsec_kadm_clnt_tcl
+export SRVTCL		= $(TESTDIR)/util/ovsec_kadm_srv_tcl
+export QUALNAME		= $(TOP)/inst-scripts/qualname
+
+export START_SERVERS	= $(TESTDIR)/scripts/start_servers $(TEST_SERVER)
+export START_SERVERS_LOCAL = $(TESTDIR)/scripts/start_servers_local
+
+export STOP_SERVERS	= $(TESTDIR)/scripts/stop_servers $(TEST_SERVER)
+export STOP_SERVERS_LOCAL = $(TESTDIR)/scripts/stop_servers_local
+
+export KRB5_CONFIG	= /krb5/krb5.conf
+export KRB5_KDC_PROFILE	= /krb5/kdc.conf
+export KRB5_KTNAME	= /krb5/ovsec_adm.srvtab
+
+ifdef TEST_SERVER
+MAKE_KEYTAB += -server $(TEST_SERVER)
+ifdef TEST_PATH
+MAKE_KEYTAB += -top $(TEST_PATH)
+START_SERVERS += $(TEST_PATH)
+STOP_SERVERS += $(TEST_PATH)
+endif
+endif
+
+export VERBOSE_TEST DEJALFLAGS
+
+# We're running low on disk space, so strip installed binaries
+STRIP_INSTALLED = true

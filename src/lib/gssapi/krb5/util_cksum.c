@@ -20,11 +20,16 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
 krb5_error_code
-kg_checksum_channel_bindings(cb, cksum, bigend)
+kg_checksum_channel_bindings(context, cb, cksum, bigend)
+     krb5_context context;
      gss_channel_bindings_t cb;
      krb5_checksum *cksum;
      int bigend;
@@ -33,20 +38,18 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
    char *buf, *ptr;
    krb5_error_code code;
 
-   if (!kg_context && (code=kg_get_context()))
-	   return code;
-   
+   /* initialize the the cksum and allocate the contents buffer */
+   cksum->checksum_type = CKSUMTYPE_RSA_MD5;
+   cksum->length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
+   if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
+      free(buf);
+      return(ENOMEM);
+   }
+ 
    /* generate a buffer full of zeros if no cb specified */
 
    if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
-      /* allocate the cksum contents buffer */
-      if ((cksum->contents = (krb5_octet *)
-	   xmalloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5))) == NULL)
-	 return(ENOMEM);
-
-      cksum->checksum_type = CKSUMTYPE_RSA_MD5;
-      memset(cksum->contents, '\0',
-	     (cksum->length = krb5_checksum_size(kg_context, CKSUMTYPE_RSA_MD5)));
+      memset(cksum->contents, '\0', cksum->length);
       return(0);
    }
 
@@ -59,13 +62,6 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
 
    if ((buf = (char *) xmalloc(len)) == NULL)
       return(ENOMEM);
-
-   /* allocate the cksum contents buffer */
-   cksum->length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
-   if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
-      free(buf);
-      return(ENOMEM);
-   }
 
    /* helper macros.  This code currently depends on a long being 32
       bits, and htonl dtrt. */
@@ -80,7 +76,7 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
 
    /* checksum the data */
 
-   if (code = krb5_calculate_checksum(kg_context, CKSUMTYPE_RSA_MD5, 
+   if (code = krb5_calculate_checksum(context, CKSUMTYPE_RSA_MD5, 
 				      buf, len, NULL, 0, cksum)) {
       xfree(cksum->contents);
       xfree(buf);

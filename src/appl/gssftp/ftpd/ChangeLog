@@ -1,3 +1,10 @@
+Wed Jul 10 16:38:01 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ftpd.c (store), ftpcmd.y (STOR, APPE, STOU): rename store() to
+ 	store_file() to avoid conflict with dbm store() function
+	* ftpd.c (delete), ftpcmd.y (DELE): rename delete() to
+ 	delete_file() to avoid conflict with the dbm delete() function
+
 Thu Jun 13 18:35:19 1996  Kevin L Mitchell  <klmitch@mit.edu>
 
 	* ftpd.c (authdata): misplaced braces caused server to not be able to

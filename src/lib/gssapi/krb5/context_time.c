@@ -22,18 +22,24 @@
 
 #include "gssapiP_krb5.h"
 
+/*
+ * $Id$
+ */
+
 OM_uint32
-krb5_gss_context_time(ct, minor_status, context_handle, time_rec)
-     void *ct;
+krb5_gss_context_time(minor_status, context_handle, time_rec)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      OM_uint32 *time_rec;
 {
-   krb5_context context = ct;
+   krb5_context context;
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;
    krb5_deltat lifetime;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {

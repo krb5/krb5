@@ -9,6 +9,11 @@ Sun Jul  7 15:21:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	and only new tgt is stored.
 	(main): New option -R to renew tickets.
 
+Thu Jun 20 20:19:44 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kinit.M, kinit.c (main): Add a -s option to kinit which specifies
+ 	the service name to be used in the TGS_REQ.
+
 Fri May  3 00:28:10 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kinit.c (krb5_validate_tgt): new function, takes a credential

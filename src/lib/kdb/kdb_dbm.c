@@ -22,6 +22,8 @@
  * 
  */
 
+#define DB_OPENCLOSE
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -341,9 +343,13 @@ krb5_dbm_db_init(context)
 	return(retval);
 
     db_ctx = context->db_context;
+#ifdef DB_OPENCLOSE
+    db_ctx->db_dbm_ctx = NULL;
+#else
     if (!(db_ctx->db_dbm_ctx = (DBM *)KDBM_OPEN(db_ctx, db_ctx->db_name, 
 						O_RDWR, 0600)))
     	return errno;
+#endif
 
     if (!(filename = gen_dbsuffix (db_ctx->db_name, KDBM_LOCK_EXT(db_ctx))))
 	return ENOMEM;
@@ -367,7 +373,9 @@ krb5_dbm_db_init(context)
     return 0;
     
 err_out:
+#ifndef DB_OPENCLOSE
     KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
+#endif
     db_ctx->db_dbm_ctx = (DBM *) NULL;
     k5dbm_clear_context(db_ctx);
     return (retval);
@@ -387,6 +395,7 @@ krb5_dbm_db_fini(context)
     db_ctx = (krb5_db_context *) context->db_context;
 
     if (k5dbm_inited(context)) {
+#ifndef DB_OPENCLOSE
 	if (db_ctx->db_dbm_ctx) {
 	    /* dbm_close returns void, but it is possible for there to be an
 	       error in close().  Possible changes to this routine: check errno
@@ -395,6 +404,7 @@ krb5_dbm_db_fini(context)
 	    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
 	    db_ctx->db_dbm_ctx = NULL;
 	}
+#endif
 
 	if (close(db_ctx->db_lf_file))
 	    retval = errno;
@@ -471,6 +481,8 @@ krb5_dbm_db_get_mkey(context, db_context, eblock)
  *
  * Passing a null pointer as "name" will set back to the default.
  * If the alternate database doesn't exist, nothing is changed.
+ *
+ * XXX rethink this
  */
 
 krb5_error_code
@@ -621,6 +633,17 @@ krb5_dbm_db_lock(context, mode)
     if ((retval = krb5_dbm_db_get_age(context, NULL, &mod_time)))
 	goto lock_error;
 
+#ifdef DB_OPENCLOSE
+    if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name,
+			mode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
+			0600))) {
+	 db_ctx->db_lf_time = mod_time;
+	 db_ctx->db_dbm_ctx = db;
+    } else {
+	 retval = errno;
+	 goto lock_error;
+    }
+#else
     if (mod_time != db_ctx->db_lf_time) {
   	KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
 	if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
@@ -631,12 +654,15 @@ krb5_dbm_db_lock(context, mode)
 	    goto lock_error;
 	}
     }
+#endif
 
     db_ctx->db_lock_mode = mode;
     db_ctx->db_locks_held++;
     return 0;
 
 lock_error:;
+    db_ctx->db_lock_mode = 0;
+    db_ctx->db_locks_held = 0;
     (void) krb5_dbm_db_unlock(context);
     return retval;
 }
@@ -654,6 +680,10 @@ krb5_dbm_db_unlock(context)
     db_ctx = (krb5_db_context *) context->db_context;
     if (!db_ctx->db_locks_held)		/* lock already unlocked */
 	return KRB5_KDB_NOTLOCKED;
+
+#ifdef DB_OPENCLOSE
+    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
+#endif
 
     if (--(db_ctx->db_locks_held) == 0) {
     	retval = krb5_lock_file(context, db_ctx->db_lf_file,
@@ -720,9 +750,8 @@ destroy_file_suffix(dbname, suffix)
 	if (filename == 0)
 		return ENOMEM;
 	if ((fd = open(filename, O_RDWR, 0)) < 0) {
-		int retval = errno == ENOENT ? 0 : errno;
 		free(filename);
-		return retval;
+		return errno;
 	}
 	/* fstat() will probably not fail unless using a remote filesystem
 	   (which is inappropriate for the kerberos database) so this check
@@ -796,26 +825,40 @@ krb5_dbm_db_destroy(context, dbname)
     krb5_context context;
 	char	*dbname;
 {
-	krb5_error_code	retval;
+	krb5_error_code	retval1, retval2, retval3;
 	krb5_boolean tmpcontext;
 
 	tmpcontext = 0;
 	if (!context->db_context) {
 	    tmpcontext = 1;
-	    if ((retval = k5dbm_init_context(context)))
-		return(retval);
+	    if ((retval1 = k5dbm_init_context(context)))
+		return(retval1);
 	}
-	if (KDBM_DATA_EXT(context->db_context) &&
-	    (retval = destroy_file_suffix(dbname, 
-					  KDBM_DATA_EXT(context->db_context))))
-		return(retval);
-	if (KDBM_INDEX_EXT(context->db_context) &&
-	    (retval = destroy_file_suffix(dbname, 
-					  KDBM_INDEX_EXT(context->db_context))))
-		return(retval);
-	if ((retval = destroy_file_suffix(dbname,
-					 KDBM_LOCK_EXT(context->db_context))))
-		return(retval);
+	retval1 = retval2 = retval3 = 0;
+	if (KDBM_DATA_EXT(context->db_context))
+	     retval1 = destroy_file_suffix(dbname, 
+					   KDBM_DATA_EXT(context->db_context));
+	if (KDBM_INDEX_EXT(context->db_context))
+	     retval2 = destroy_file_suffix(dbname, 
+					  KDBM_INDEX_EXT(context->db_context));
+	retval3 = destroy_file_suffix(dbname,
+				      KDBM_LOCK_EXT(context->db_context));
+	/*
+	 * This kludgery is needed because it is possible to link
+	 * against BSD DB but use the ndbm interface.  The result is
+	 * that the dispatch table thinks the file extensions are
+	 * .dir and .pag, but the database layer uses .db.
+	 */
+	if (retval1 == ENOENT && retval2 == ENOENT &&
+	    KDBM_INDEX_EXT(context->db_context) &&
+	    strcmp(KDBM_INDEX_EXT(context->db_context), ".dir") == 0 &&
+	    KDBM_DATA_EXT(context->db_context) &&
+	    strcmp(KDBM_DATA_EXT(context->db_context), ".pag") == 0) {
+	     retval1 = retval2 = destroy_file_suffix(dbname, ".db");
+	}
+	if (retval1 || retval2 || retval3)
+	     return (retval1 ? retval1 : (retval2 ? retval2 : retval3));
+
 	if (tmpcontext) {
 	    k5dbm_clear_context((krb5_db_context *) context->db_context);
 	    free(context->db_context);
@@ -841,6 +884,7 @@ krb5_dbm_db_rename(context, from, to)
     char *from;
     char *to;
 {
+    DBM *db;
     char *fromdir = 0;
     char *todir = 0;
     char *frompag = 0;
@@ -853,19 +897,28 @@ krb5_dbm_db_rename(context, from, to)
     s_context = context->db_context;
     context->db_context = (void *) NULL;
     if (!(retval = k5dbm_init_context(context))) {
+	db_ctx = (krb5_db_context *) context->db_context;
+
+	/*
+	 * Create the database, failing if it already exists; the
+	 * files must exist because krb5_dbm_db_lock, called below,
+	 * will fail otherwise.
+	 */
+	db = KDBM_OPEN(db_ctx, to, O_RDWR|O_CREAT|O_EXCL, 0600); 
+	if (db == NULL) {
+	     retval = errno;
+	     goto errout;
+	}
+	else
+	     KDBM_CLOSE(db_ctx, db);
+	
 	/*
 	 * Set the database to the target, so that other processes sharing
 	 * the target will stop their activity, and notice the new database.
 	 */
-	db_ctx = (krb5_db_context *) context->db_context;
-
 	retval = krb5_dbm_db_set_name(context, to);
-	if (retval) {
-	    if (retval == ENOENT)
-		db_ctx->db_name = strdup(to);
-	    else
+	if (retval)
 		goto errout;
-	}
 	
 	db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name,
 					  KDBM_LOCK_EXT(db_ctx));
@@ -931,8 +984,39 @@ krb5_dbm_db_rename(context, from, to)
 		(void) unlink(fromok);
 	    retval = krb5_dbm_db_end_update(context);
     } else {
-	    (void) krb5_dbm_db_end_update(context);
-	    retval = errno;
+	 /*
+	  * This kludgery is needed because it is possible to link
+	  * against BSD DB but use the ndbm interface.  The result is
+	  * that the dispatch table thinks the file extensions are
+	  * .dir and .pag, but the database layer uses .db.
+	  */
+	 if (errno == ENOENT &&
+	     KDBM_INDEX_EXT(context->db_context) &&
+	     strcmp(KDBM_INDEX_EXT(context->db_context), ".dir") == 0 &&
+	     KDBM_DATA_EXT(context->db_context) &&
+	     strcmp(KDBM_DATA_EXT(context->db_context), ".pag") == 0) {
+	      free(fromdir); free(todir); free(frompag); free(topag);
+
+	      fromdir = todir = NULL;
+	      frompag = gen_dbsuffix (from, ".db");
+	      topag = gen_dbsuffix (to, ".db");
+	      if (!frompag || !topag) {
+		   retval = ENOMEM;
+		   goto errout;
+	      }
+	      if (rename(frompag, topag) == 0) {
+		   /* We only need to unlink the source lock file */
+		   if (fromok)
+			(void) unlink(fromok);
+		   retval = krb5_dbm_db_end_update(context);
+	      } else {
+		   (void) krb5_dbm_db_end_update(context);
+		   retval = errno;
+	      }
+	 } else {
+	      (void) krb5_dbm_db_end_update(context);
+	      retval = errno;
+	 }
     }
     
     
@@ -1082,6 +1166,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	}
 	if (KDBM_STORE(db_ctx, db_ctx->db_dbm_ctx, key, contents, DBM_REPLACE))
 	    retval = errno;
+#ifndef DB_OPENCLOSE
 	else {
 	    DBM *db;
 
@@ -1093,6 +1178,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	    else
 		retval = errno;
 	}
+#endif
 	krb5_free_princ_contents(context, &contents);
 	krb5_free_princ_dbmkey(context, &key);
 	if (retval)
@@ -1166,6 +1252,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	else {
 	    if (KDBM_DELETE(db_ctx, db, key))
 		retval = errno;
+#ifndef DB_OPENCLOSE
 	    else {
 		DBM *db;
 
@@ -1177,6 +1264,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 		else
 		    retval = errno;
 	    }
+#endif
 	}
 	krb5_free_princ_contents(context, &contents2);
     cleancontents:

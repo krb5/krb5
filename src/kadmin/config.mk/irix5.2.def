@@ -1,0 +1,22 @@
+export PS_ALL		= /usr/bin/ps -ef
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID		= /usr/bin/ps -fp
+# Make sure there is a blank space at the end of this line!
+export PS_TTY		= /usr/bin/ps -t 
+
+RANLIB			= /bin/true
+D_NO_SETENV		= -DNO_SETENV
+D_HAVE_SYSLOG_H		= -DHAVE_SYSLOG_H
+D_HAVE_STDARG_H		= -DHAVE_STDARG_H
+D_HAVE_SYSLOG		= -DHAVE_SYSLOG
+D_HAVE_VSPRINTF		= -DHAVE_VSPRINTF
+D_HAVE_OPENLOG		= -DHAVE_OPENLOG
+D_HAVE_CLOSELOG		= -DHAVE_CLOSELOG
+D_HAVE_STRFTIME		= -DHAVE_STRFTIME
+
+# libgen.a is for regcmp and regex, used in /usr/lib/libXm.a; this is
+# a different set of regexp routines than used by svr_iters.c
+XM_LIB	= /usr/lib/libXm.a /usr/lib/libgen.a
+XT_LIB	= /usr/lib/libXt.a
+X_LIB	= /usr/lib/libX11.so
+

@@ -1243,7 +1243,7 @@ lcd(argc, argv)
 /*
  * Delete a single file.
  */
-delete(argc, argv)
+delete_file(argc, argv)
 	int argc;
 	char *argv[];
 {

@@ -1,3 +1,4 @@
+<<<<<<< ChangeLog
 Wed Jun 12 00:40:29 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* adm_proto.h: Change usage of INTERFACE to use KRB5_CALLCONV and
@@ -24,6 +25,12 @@ Sun May 19 14:32:19 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Check for uid_t.
 
+Sun May 12 00:46:05 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kdb.h: convert to use new krb5_dbe_* tl_data functions.
+
+	* adm.h (struct __krb5_realm_params): add realm_acl_file
+	
 Tue Apr 30 17:15:57 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Invoke AC_C_CROSS before AC_TRY_RUN to pretty up

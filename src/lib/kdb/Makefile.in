@@ -3,6 +3,10 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 
 all:: $(OBJS)
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 SRCS= \
 	$(srcdir)/keytab.c \
 	$(srcdir)/encrypt_key.c \
@@ -27,6 +31,21 @@ OBJS= \
 	setup_mkey.o \
 	store_mkey.o
 
+LIB_SUBDIRS= .
+LIBDONE = DONE
+
+all-unix:: shared
+shared::
+	test -d shared || mkdir shared
+
+clean-unix::
+	$(RM) shared/*
+	-rmdir shared
+
+DONE: $(OBJS)
+	$(RM) DONE
+	echo $(OBJS) > DONE
+
 libkdb5.a: $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
@@ -37,7 +56,7 @@ install:: libkdb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkdb5.a
 
 clean::
-	$(RM) libkdb5.a
+	$(RM) libkdb5.a DONE
 
 t_kdb:	t_kdb.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(LIBS)

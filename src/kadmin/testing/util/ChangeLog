@@ -1,0 +1,3 @@
+Fri Jul 12 15:04:52 1996  Marc Horowitz  <marc@mit.edu>
+
+	* tcl_ovsec_kadm.c: renamed <ovsec_admin/foo.h> to <kadm5/foo.h>

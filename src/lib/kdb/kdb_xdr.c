@@ -23,200 +23,223 @@
  */
 
 #include "k5-int.h"
+#include <string.h>
 #include <stdio.h>
 #include <errno.h>
+
+#define safe_realloc(p,n) ((p)?(realloc(p,n)):(malloc(n)))
 
 krb5_error_code
 krb5_dbe_create_key_data(context, entry) 
     krb5_context	  context;
     krb5_db_entry	* entry;
 {
-    if (entry->n_key_data) {
-	if ((entry->key_data = (krb5_key_data *)realloc(entry->key_data, 
-	         sizeof(krb5_key_data) * (entry->n_key_data + 1))))
-    	    memset(entry->key_data + entry->n_key_data,0,sizeof(krb5_key_data));
-	else 
-	    return ENOMEM;
-    } else { 
-	if ((entry->key_data = (krb5_key_data *)malloc(sizeof(krb5_key_data))))
-    	    memset(entry->key_data, 0, sizeof(krb5_key_data));
-	else 
-	    return ENOMEM;
-    }
+    if ((entry->key_data =
+	 (krb5_key_data *) safe_realloc(entry->key_data,
+					(sizeof(krb5_key_data)*
+					 (entry->n_key_data + 1)))) == NULL)
+	return(ENOMEM);
+	
+
+    memset(entry->key_data + entry->n_key_data, 0, sizeof(krb5_key_data));
     entry->n_key_data++;
+
     return 0;
 }
 
 krb5_error_code
-krb5_dbe_encode_last_pwd_change(context, stamp, entry)
-    krb5_context          context;
-    krb5_tl_last_change * stamp;
-    krb5_db_entry       * entry;
-{
-    krb5_tl_data       ** tl_data;
-    krb5_octet          * nextloc;
-
-    /* Find any old versions and delete them. */
-    for (tl_data = &(entry->tl_data); *tl_data;
-         tl_data = &((*tl_data)->tl_data_next)) {
-        if ((*tl_data)->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
-            break;
-        }
-    }
-
-    if ((*tl_data) ||
-      /* Only zero data if it is freshly allocated */
-      ((*tl_data) = (krb5_tl_data *)calloc(1, sizeof(krb5_tl_data)))) {
-        if (!(*tl_data)->tl_data_type) {
-            if ((nextloc = (*tl_data)->tl_data_contents =
-              (krb5_octet *)malloc(sizeof(krb5_timestamp))) == NULL) {
-                krb5_xfree(*tl_data);
-                (*tl_data) = NULL;
-                return ENOMEM;
-            }
-            (*tl_data)->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
-            (*tl_data)->tl_data_length = sizeof(krb5_timestamp);
-            entry->n_tl_data++;
-        }
-
-        *nextloc++ = (krb5_octet)(stamp->last_pwd_change & 0xff);
-        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 8) & 0xff);
-        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 16) & 0xff);
-        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 24) & 0xff);
-
-        return 0;
-    }
-    return ENOMEM;
-}
-
-krb5_error_code
-krb5_dbe_decode_last_pwd_change(context, entry, stamp)
+krb5_dbe_update_tl_data(context, entry, new_tl_data)
     krb5_context          context;
     krb5_db_entry       * entry;
-    krb5_tl_last_change * stamp;
+    krb5_tl_data	* new_tl_data;
 {
     krb5_tl_data        * tl_data;
+    krb5_octet          * tmp;
 
-    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
-        if (tl_data->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
-            krb5_octet * nextloc = tl_data->tl_data_contents;
+    /* copy the new data first, so we can fail cleanly if malloc()
+       fails */
 
-            stamp->last_pwd_change = *nextloc++;
-            stamp->last_pwd_change += (*nextloc++ << 8);
-            stamp->last_pwd_change += (*nextloc++ << 16);
-            stamp->last_pwd_change += (*nextloc++ << 24);
-            return 0;
-        }
+    if ((tmp = (krb5_octet *) malloc(new_tl_data->tl_data_length)) == NULL)
+	return(ENOMEM);
+
+    /* Find an existing entry of the specified type and point at
+       it, or NULL if not found */
+
+    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next)
+	if (tl_data->tl_data_type == new_tl_data->tl_data_type)
+	    break;
+
+    /* if necessary, chain a new record in the beginning and point at it */
+
+    if (!tl_data) {
+	if ((tl_data = (krb5_tl_data *) calloc(1, sizeof(krb5_tl_data)))
+	    == NULL) {
+	    free(tmp);
+	    return(ENOMEM);
+	}
+	tl_data->tl_data_next = entry->tl_data;
+	entry->tl_data = tl_data;
+	entry->n_tl_data++;
     }
-    stamp->last_pwd_change = 0;
-    return 0;
+
+    /* fill in the record */
+
+    if (tl_data->tl_data_contents)
+	free(tl_data->tl_data_contents);
+
+    tl_data->tl_data_type = new_tl_data->tl_data_type;
+    tl_data->tl_data_length = new_tl_data->tl_data_length;
+    tl_data->tl_data_contents = tmp;
+    memcpy(tmp, new_tl_data->tl_data_contents, tl_data->tl_data_length);
+
+    return(0);
 }
 
 krb5_error_code
-krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
-    krb5_context	  context;
-    krb5_tl_mod_princ	* mod_princ;
-    krb5_db_entry	* entry;
+krb5_dbe_lookup_tl_data(context, entry, ret_tl_data)
+    krb5_context          context;
+    krb5_db_entry       * entry;
+    krb5_tl_data        * ret_tl_data;
 {
+    krb5_tl_data *tl_data;
+
+    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
+        if (tl_data->tl_data_type == ret_tl_data->tl_data_type) {
+	    *ret_tl_data = *tl_data;
+	    return(0);
+	}
+    }
+
+    /* if the requested record isn't found, return zero bytes.
+       if it ever means something to have a zero-length tl_data,
+       this code and its callers will have to be changed */
+
+    ret_tl_data->tl_data_length = 0;
+    ret_tl_data->tl_data_contents = NULL;
+    return(0);
+}
+
+krb5_error_code
+krb5_dbe_update_last_pwd_change(context, entry, stamp)
+    krb5_context          context;
+    krb5_db_entry       * entry;
+    krb5_timestamp	  stamp;
+{
+    krb5_tl_data        tl_data;
+    krb5_octet          buf[4]; /* this is the encoded size of an int32 */
+
+    tl_data.tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+    tl_data.tl_data_length = sizeof(buf); 
+    krb5_kdb_encode_int32((krb5_int32) stamp, buf);
+    tl_data.tl_data_contents = buf;
+
+    return(krb5_dbe_update_tl_data(context, entry, &tl_data));
+}
+
+krb5_error_code
+krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
+    krb5_context          context;
+    krb5_db_entry       * entry;
+    krb5_timestamp	* stamp;
+{
+    krb5_tl_data        tl_data;
+    krb5_error_code	code;
+    krb5_int32		tmp;
+
+    tl_data.tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+
+    if (code = krb5_dbe_lookup_tl_data(context, entry, &tl_data))
+	return(code);
+    
+    if (tl_data.tl_data_length != 4) {
+	*stamp = 0;
+	return(0);
+    }
+
+    krb5_kdb_decode_int32(tl_data.tl_data_contents, tmp);
+
+    *stamp = (krb5_timestamp) tmp;
+
+    return(0);
+}
+
+/* it seems odd that there's no function to remove a tl_data, but if
+   I need one, I'll add one */
+
+krb5_error_code
+krb5_dbe_update_mod_princ_data(context, entry, mod_date, mod_princ)
+    krb5_context	  context;
+    krb5_db_entry	* entry;
+    krb5_timestamp	  mod_date;
+    krb5_principal	  mod_princ;
+{
+    krb5_tl_data          tl_data;
+
     krb5_error_code 	  retval = 0;
-    krb5_tl_data       ** tl_data;
     krb5_octet		* nextloc = 0;
     char		* unparse_mod_princ = 0;
     int			  unparse_mod_princ_size;
 
-    /* 
-     * Allocate *tl_data if necessary otherwise reuse it 
-     * Need 04 bytes for date
-     * Need XX bytes for string
-     */
-    if ((retval = krb5_unparse_name(context, mod_princ->mod_princ, 
-				   &unparse_mod_princ)))
+    if ((retval = krb5_unparse_name(context, mod_princ, 
+				    &unparse_mod_princ)))
 	return(retval);
 
     unparse_mod_princ_size = (int) strlen(unparse_mod_princ) + 1;
 
-    if ((nextloc = malloc(unparse_mod_princ_size + 4)) == NULL) {
-	retval = ENOMEM;
-	goto cleanup;
+    if ((nextloc = (krb5_octet *) malloc(unparse_mod_princ_size + 4))
+	== NULL) {
+	free(unparse_mod_princ);
+	return(ENOMEM);
     }
 
-    /* Find any old versions and delete them. */
-    for (tl_data = &(entry->tl_data); *tl_data; 
-      	 tl_data = &((*tl_data)->tl_data_next)) {
-	if ((*tl_data)->tl_data_type == KRB5_TL_MOD_PRINC) {
-	    free((*tl_data)->tl_data_contents);
-	    entry->n_tl_data--;
-	    break;
-	}
-    }
-
-    /* Allocate a new TL_MOD_PRINC structure if necessary */
-    if (*tl_data == 0) {
-	(*tl_data) = (krb5_tl_data *)calloc(1, sizeof(krb5_tl_data));
-	if (*tl_data == 0) {
-	    retval = ENOMEM;
-	    goto cleanup;
-	}
-    }
-	
-    entry->n_tl_data++;
-    (*tl_data)->tl_data_type = KRB5_TL_MOD_PRINC;
-    (*tl_data)->tl_data_length = unparse_mod_princ_size + 4;
-    (*tl_data)->tl_data_contents = nextloc;
+    tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
+    tl_data.tl_data_length = unparse_mod_princ_size + 4;
+    tl_data.tl_data_contents = nextloc;
 
     /* Mod Date */
-    krb5_kdb_encode_int32(mod_princ->mod_date, nextloc);
-    nextloc += 4;
+    krb5_kdb_encode_int32(mod_date, nextloc);
 
     /* Mod Princ */
-    memcpy(nextloc, unparse_mod_princ, unparse_mod_princ_size);
-    nextloc = 0;
+    memcpy(nextloc+4, unparse_mod_princ, unparse_mod_princ_size);
 
-cleanup:
-    if (nextloc)
-	free(nextloc);
-    if (unparse_mod_princ)
-	free(unparse_mod_princ);
-    return retval;
+    retval = krb5_dbe_update_tl_data(context, entry, &tl_data);
+
+    free(unparse_mod_princ);
+    free(nextloc);
+
+    return(retval);
 }
 
 krb5_error_code
-krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
+krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
     krb5_context	  context;
     krb5_db_entry	* entry;
-    krb5_tl_mod_princ  ** mod_princ;
+    krb5_timestamp	* mod_time;
+    krb5_principal	* mod_princ;
 {
-    krb5_error_code 	  retval;
-    krb5_tl_data        * tl_data;
-    krb5_octet		* nextloc;
+    krb5_tl_data        tl_data;
+    krb5_error_code	code;
+    krb5_int32		tmp;
 
-    retval = 0;
-    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
-	if (tl_data->tl_data_type == KRB5_TL_MOD_PRINC) {
-    	    if ((*mod_princ = malloc(sizeof(krb5_tl_mod_princ))) == NULL)
-	  	return ENOMEM;
+    tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
 
-	    nextloc = tl_data->tl_data_contents;
+    if (code = krb5_dbe_lookup_tl_data(context, entry, &tl_data))
+	return(code);
+    
+    if ((tl_data.tl_data_length < 5) ||
+	(tl_data.tl_data_contents[tl_data.tl_data_length-1] != '\0'))
+	return(KRB5_KDB_TRUNCATED_RECORD);
 
-	    /* Mod Date */
-	    krb5_kdb_decode_int32(nextloc, (*mod_princ)->mod_date);
-	    nextloc += 4;
+    /* Mod Date */
+    krb5_kdb_decode_int32(tl_data.tl_data_contents, *mod_time);
 
-	    /* Mod Princ */
-    	    if ((retval = krb5_parse_name(context, (const char *) nextloc, 
-					 &((*mod_princ)->mod_princ))))
-		break;
-    	    if ((strlen((char *) nextloc) + 1 + 4) !=
-		(size_t) tl_data->tl_data_length) {
-		retval = KRB5_KDB_TRUNCATED_RECORD;
-		break;
-	    }
-	}
-    }
+    /* Mod Princ */
+    if ((code = krb5_parse_name(context,
+				(const char *) (tl_data.tl_data_contents+4),
+				mod_princ)))
+	return(code);
 
-    if (retval && (*mod_princ)) 
-	free(*mod_princ);
-    return retval;
+    return(0);
 }
 
 krb5_error_code

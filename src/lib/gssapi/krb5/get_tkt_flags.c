@@ -22,6 +22,10 @@
 
 #include "gssapiP_krb5.h"
 
+/*
+ * $Id$
+ */
+
 OM_uint32
 gss_krb5_get_tkt_flags(minor_status, context_handle, ticket_flags)
      OM_uint32 *minor_status;

@@ -20,7 +20,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 #include "gssapiP_krb5.h"
+
 #ifndef NO_PASSWORD
 #include <pwd.h>
 #endif
@@ -39,21 +44,24 @@
  */
 
 OM_uint32
-krb5_gss_import_name(ctx, minor_status, input_name_buffer, 
+krb5_gss_import_name(minor_status, input_name_buffer, 
 		     input_name_type, output_name)
-     void *ctx;
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
      gss_OID input_name_type;
      gss_name_t *output_name;
 {
-   krb5_context context = ctx;
+   krb5_context context;
    krb5_principal princ;
    krb5_error_code code;
    char *stringrep, *tmp;
 #ifndef NO_PASSWORD
    struct passwd *pw;
 #endif
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
+
    /* set up default returns */
 
    *output_name = NULL;
@@ -75,13 +83,10 @@ krb5_gss_import_name(ctx, minor_status, input_name_buffer,
       tmp[input_name_buffer->length] = 0;
 
       service = tmp;
-      if ((host = strchr(tmp, '@')) == NULL) {
-	 xfree(tmp);
-	 *minor_status = (OM_uint32) G_BAD_SERVICE_NAME;
-	 return(GSS_S_BAD_NAME);
+      if (host = strchr(tmp, '@')) {
+	 *host = '\0';
+	 host++;
       }
-      *host = '\0';
-      host++;
 
       code = krb5_sname_to_principal(context, host, service, KRB5_NT_SRV_HST,
 				     &princ);

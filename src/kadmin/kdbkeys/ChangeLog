@@ -1,0 +1,16 @@
+Thu Jul 18 19:44:10 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK
+
+Wed Jul 10 01:00:49 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, configure.in: added autoconf support
+
+	* kdbkeys.c: rename <ovsec_adm/foo.h> to <kadm5/foo.h>, rename
+ 	<krb5/krb5.h to <krb5.h>
+
+Tue Jul  9 13:25:00 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* do-test.pl: rewrite to use kdb5_util instead of kdbkeys
+	
+

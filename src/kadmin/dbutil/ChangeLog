@@ -1,0 +1,440 @@
+Thu Jul 18 19:22:04 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed SS_RULES
+
+Wed Jul 10 19:43:22 1996  Marc Horowitz  <marc@mit.edu>
+
+	* dumpv4.c (configure.in, Makefile.in): make autoconf work after
+ 	barry's carnage
+
+Sun May 12 00:27:44 1996  Marc Horowitz  <marc@mit.edu>
+
+	* loadv4.c (enter_in_v5_db, add_principal), kdb5_edit.c
+ 	(create_db_entry, modent), dumpv4.c (dump_v4_iterator), dump.c
+ 	(dump_k5beta_iterator, process_k5beta_record): convert to use new
+ 	krb5_dbe_* tl_data functions.
+
+	* cpw.c (enter_pwd_key): krb5_dbe_cpw() takes a kvno now.
+
+Tue May  7 23:16:57 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: USE_KADM_LIBRARY replaced by USE_KADMSRV_LIBRARY
+
+Thu Apr 11 19:32:36 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): Use the matching key_data's kvno;
+	don't assume that key_data[0]'s kvno is necessarily the matching
+	key_data's kvno.
+
+Wed Apr 10 19:17:58 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): Translate the principal name to
+	the common V4 name.
+
+Tue Mar 19 18:00:58 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): do not test to make sure we
+	fetched a key of enctype 1 (des-cbc-crc), since we may have gotten
+	another des key from the database, which is just as useful in a
+	v4 srvtab
+
+	* dumpv4.c (dump_v4_iterator): use krb5_524_conv_principal to do the
+	v5 to v4 principal translation, instead of having yet another
+	hard-coded table.
+
+Wed Mar  6 16:17:20 1996  Richard Basch  <basch@lehman.com>
+
+	* dumpv4.c: The V4 master key & schedule was never initialized,
+	so the dump created by dump_v4db was garbage.	Read the V4
+	master key from /.k or prompt for the V4 master key password.
+	  If there is no V4-salt key in the database, but there is a DES
+	key, include it in the V4 dump, in case it is merely a random 
+	service key for which there is no associated password.
+	  Skip over K/M in the V5 database (use the entered V4 master key).
+	  Both krbtgt and afs keys often have domain-qualifed instances.
+
+Tue Mar  5 12:18:22 1996  Richard Basch  <basch@lehman.com>
+
+	* dump.c: POSIX locking requires that the file be opened read-write.
+
+Mon Feb 26 22:42:09 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdb5_edit.c: new command line option -f stashfile.
+	* kdb5_edit.M: document stashfile option.
+
+Mon Feb 26 22:13:45 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (process_k5beta_record): since V4 salt type has no data
+ 	either, only set key_data_ver to 1 for data_type 0 with 0-length
+ 	salt. Also, don't include alternate key if akey has all-zero type
+	and length in both fields.
+
+Sat Feb 24 04:02:18 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* dump.c (process_k5beta_record): encrypted keys used to have 4
+	byte lengths in MSB order, need to convert to 2 byte LSB order
+	lengths before storing. Handle primary key and alternate key.
+
+Fri Feb 23 18:44:10 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdb5_edit.c (kdb5_edit_Init): set manual_mkey for testing with -P
+
+Wed Feb 14 09:52:18 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (enter_master_key, set_dbname_help): If master key
+		enctype is unknown, set to DEFAULT_KDC_ENCTYPE.
+
+Tue Feb 13 16:08:07 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (extract_v4_srvtab): krb5_dbekd_decrypt_key_data
+		takes krb5_key_data *, not **.
+
+Tue Jan 30 18:28:57 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (load_db): dbrenerr_fmt prints "from" first, so pass it
+	to fprintf correctly.
+
+Sun Jan 28 14:31:47 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (process_k5_record): t2..t9 is only 8 vars, not 9.
+
+Thu Jan 25 16:07:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kdb5_edit.c (extract_srvtab): Extract *all* the keys in a
+        dbentry, not the first one.
+	(extract_v4_srvtab): Attempt to find the right v4 keys.
+
+Wed Jan 24 18:48:38 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in: Remove spurious @DEFS@
+
+
+Wed Dec 13 03:44:58 1995  Chris Provenzano (proven@mit.edu)
+
+        * dump.c, dumpv4.c, kdb5_edit.c, loadv4.c : 
+		Remove mkvno from krb5_db_entry.
+
+Sun Dec 10 11:07:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.M: Document that modent exists
+
+	* kdb5_edit.c (modent): Add usage as suggested by jhawk@mit.edu.
+
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * kdb5_edit.c : Remove krb5_enctype from krb5_string_to_key() args.
+
+Fri Oct 27 13:37:04 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* dump.c (process_k5_record): Fix off by one in malloc.
+
+Mon Oct  9 16:35:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (extract_v4_srvtab): Extract a one byte version
+		number for v4 srvtabs (from warlord).
+
+Thu Oct  5 10:35:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* cpw.c: Declare std_ks_tuple as extern.
+	* kdb5_edit.h: Remove std_ks_tuple declaration as not all sources
+		include adm.h for structures
+
+Tue Oct  3 23:10:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cpw.c (enter_rnd_key, enter_pwd_key):
+	* kdb5_edit.c (kdb5_edit_Init): Use the kdc.conf file to determine
+		the default list of keysalt tuples to be used.  This is
+		stored in std_ks_tuple, and is used by cpw.c for random
+		keys and when a list of keysalts is not specified.
+
+Mon Sep 18 03:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (show_principal): Show key version and last password
+		change. 
+
+	* cpw.c: Fix typo in below change in which list was terminated
+		after third entry. (extra } removed)
+
+Fri Sep 15 14:21:25 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cpw.c: Add DES_CBC_MD5 and DES_CBC_CRC with the V4 salt as
+		default key/salt tuples to be added.  (Once proven's DES_*
+		folding code is implemented, we can shorten this list.)
+		Eventually, this list should be read in from kdc.conf.
+
+Thu Sep  7 20:41:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* loadv4.c (load_v4db): Provide a dummy routine if krb4
+		compatibility is not compiled in. 
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * cpw.c, dump.c, dumpv4.c, kdb5_edit.c, loadv4.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * cpw.c, dump.c, dumpv4.c, kdb5_edit.c, loadv4.c : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate.
+
+Fri Aug 25 17:37:33 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* dumpv4.c - Fix handle_keys().  It was trying to recreate work that
+		has already been done.
+	* Makefile.in, .Sanitize, loadv4.c, kdb5_ed_ct.ct - Add lddb4, the
+		command to load a v4 dump file.  This is basically, kdb5_
+		convert reconstituted to fit within the framework of kdb5_edit.
+
+Thu Aug 24 19:28:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
+Mon Aug 21 16:45:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* dump.c - Completely rework this logic to support old (e.g. Beta 5
+		and previous) dump format and new dump format using the same
+		commands.  This is differentiated by using the "-old" command
+		qualifier.
+
+	* kdb5_edit.M - Add description of -R and -s.  Remove "ascii represen-
+		tation of a decimal number".  Remove "Bugs".
+
+Fri Aug 18 17:06:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* ss_wrapper.c - Change sense of fgets() check so scripts work.
+
+
+Tue Aug 15 14:22:50 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* kdb5_edit.c, ss_wrapper.c, cpw.c, kdb5_edit.h - Add support for
+		-s scriptfile and fix up assorted gcc -Wall complaints.
+
+
+Mon Aug 7 17:32:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* cpw.c - Use krb5_string_to_keysalts() to generate a list of unique
+		key/salt pairs supplied in argv.
+
+
+Mon Aug 07 11:16:03 1995  Chris Provenzano   (proven@mit.edu)
+
+	* cpw.c : Uses new kdb change password routines for ank, ark, cpw,
+		and crk. Also remove v4 variants of ank and cpw.
+	* krb5_edit.c : Deleted old variants of rotuines now in cpw.c
+	* kdb5_ed_ct.ct, kdb5_edit.M, tcl_wrapper.c: 
+		Removed references to v4 variants of ank and cpw.
+	* kdb5_edit.h (enter_pwd_key()) : Removed proto, it's nolonger 
+		necessary as it's a static routine in cpw.c
+
+Thu Aug 03 12:13:50 1995  Chris Provenzano   (proven@mit.edu)
+
+	* cpw.c : New change password code for kdb5_edit.
+	* dumpv4.c : Get it to compile with new kdb format.
+
+Mon Jul 31 15:47:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_edit.c - Use libkadm string conversion routines.  These are
+		shared by all utilities.
+	* Makefile.in - Remove getdate.y.
+	* configure.in - Remove getdate.y dependency checks.
+	* getdate.y - Sayonara.
+
+
+Thu Jul 27 15:01:01 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm and check for already checking for dbm.
+
+
+Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
+
+        * dump.c kdb5_edit.c kdb5_edit.h util.c : Use new kdb format.
+
+Mon Jul 17 15:00:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add KADM library.
+	* dumpv4.c - Change calling sequence to krb5_db_fetch_mkey().
+	* kdb5_edit.c - Change calling sequence to krb5_db_fetch_mkey() which
+		uses the stash file.  Add KDC profile reading/handling as a
+		supplement to command line supplied arguments.
+
+
+Wed Jul 12 12:01:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Temporarily add --with-kdb4 option.  Default is without
+		kdb4.  Without kdb4 enables a define.  With kdb4 uses -lkdb4 and
+		-l[n]dbm libraries.
+	* dumpv4.c -  Conditionalize references to kdb4 routines with
+		KDB4_DISABLE.  Replace two required routines:
+			kdb_encrypt_key -> pcbc_encrypt
+			kdb_get_master_key -> des_read_password/printf/key_sched
+
+
+Fri Jul 7 15:38:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
+Thu Jun 15 15:34:59 EDT 1995	Paul Park	(pjpark@mit.edu)
+        * Makefile.in - Change explicit library names to -l<lib> form, and
+                change target link line to use $(LD) and associated flags.
+                Also, for K4, use KRB4_LIB and KRB4_CRYPTO_LIB, these wer
+                split out.
+        * configure.in - Add shared library usage check.
+
+Fri Jun  9 18:14:43 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+	* dumpv4.c: Change name of controlling #ifdef to be
+		KRB5_KRB4_COMPAT instead of KRB4.
+
+Sun May 21 14:20:32 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* dumpv4.c: Include k5-int.h before krb.h so that PROTOTYPE is not
+		redefined. 
+
+Sun May  7 13:46:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_HEADER_STDC to define STDC_HEADERS for
+		getdate.y. 
+
+Mon May  1 13:36:41 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_edit.c (kdb5_edit_Init): Check the return code from
+		kdb5_init_context().
+
+Fri Apr 28 18:04:26 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCAL_LIBRARIES): put KRB4_LIB inside KLIB, and put
+	KDB4_LIB ahead of them both.
+
+Thu Apr 27 13:47:23 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCAL_LIBRARIES): use KRB4_LIB and KDB4_LIB
+	directly.
+	* configure.in: just use WITH_KRB4.
+
+Wed Apr 19 13:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (kdb5_edit_Init): If a default realm is specified
+		(with -r), use krb5_set_default_realm so that created keys
+		will have the correct realm.
+
+Thu Mar 23 23:28:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb5_edit.c (show_principal, parse_princ_args): Add
+		"support_desmd5" flag.
+
+Tue Mar 14 16:29:05 1995    <tytso@rsx-11.mit.edu>
+
+	* ss_wrapper.c (main): Set the return code from ss_execute_line(),
+		so that appropriate error checking is done.
+
+Thu Mar  2 12:18:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
+Wed Mar  1 11:53:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
+Tue Feb 28 02:06:26 1995  John Gilmore  (gnu at toad.com)
+
+	* dump.c, dumpv4.c, kdb5_edit.c, ss_wrapper.c, tcl_wrapper.c,
+	util.c: Avoid <krb5/...> includes.
+
+Thu Feb 23 19:52:35 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* kdb5_edit.c: add struct timeb and sys/timeb includes from
+	getdate.y.
+	(ftime): new function, in case we don't HAVE_FTIME.
+
+Tue Feb 14 17:55:47 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdb5_edit.c: add modent
+	* getdate.y: import get_date
+	* kdbt_ed_ct.ct: add modent
+	* configure.in:
+	* Makefile.in: support for getdate.y
+
+Wed Feb  8 20:08:36 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdb5_edit.c (show_principal): make sane and print all useful
+	fields
+
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+Mon Dec 19 18:04:11 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in:
+	* Makefile.in:
+	* dumpv4.c (dump_v4db): Do the right thing if we are compiling
+		without V4 support.  (The dump_v4db command is disabled.)
+
+Wed Dec  7 00:07:46 1994    <tytso@rsx-11.mit.edu>
+
+	* dumpv4.c (v4_print_time): gmtime expects a pointer to a time_t,
+		not a long. On most systems these are the same, on
+		others.... 
+
+Wed Nov 16 01:03:42 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* dumpv4.c: new file. New command dump_v4db which creates a v4
+	slave dump out of a v5 database, leaving out any keys which aren't
+	using v4 salt, and any keys that aren't for the current
+	realm. Reencrypts using v4 master key, synthesizes arbitrary
+	master key version number.
+	* configure.in: use WITH_KRB4 for dump support.
+	* kdb5_ed_ct.ct: add new dump_v4 command.
+	* Makefile.in: link in dumpv4.
+
+Fri Oct 14 23:31:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* dump.c (load_db): When scanning a database entry, read
+		fail_auth_count into a temporary integer variable, and
+		then copy that into entry.fail_auth_count, which is a
+		char.  
+
+Fri Oct  7 00:01:40 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_edit.c (kdb5_edit_Init): Don't let errors in
+		set_dbname_help initially cause the exit status to be set.
+		Commands like load_db don't need a valid database to be
+		opened.
+
+	* ss_wrapper.c (main): Clear code before ss_execute_line, since
+		ss_execute_line doesn't set code to 0 if there are no
+	problems. 
+
+	* kdb5_edit.c (kdb5_edit_Init): Add a new option so that the
+		master key password can be entered on the command line ---
+		for testing only; not documented!!
+
+Mon Oct  3 19:10:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
+Thu Sep 29 15:52:22 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* dump.c (update_ok_file): Make sure mod time on the dump_ok file
+		is updated.  (Some systems don't update the mod-time when
+		a file is opened for writing.)
+
+	* Makefile.in: Relink executable when libraries change.
+
+	* kdb5_edit.c (show_principal): Pass variable with correct type to
+		ctime().
+
+	* tcl_wrapper.c (doquit):
+	  ss_wrapper.c (main):
+	  kdb5_edit.c:
+	  dump.c: Exit with a non-zero exit status if there was an error
+	  	  in a executed command.
+
+Thu Sep 15 11:00:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* dump.c (load_db): Fix error string on failed fopen. ("for
+		writing" -> "for reading")
+
+

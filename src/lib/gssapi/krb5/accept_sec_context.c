@@ -21,8 +21,39 @@
  */
 
 #include "gssapiP_krb5.h"
-#include "rsa-md5.h"
 #include <memory.h>
+
+/*
+ * $Id$
+ */
+
+#if 0
+
+/* XXXX This widen/narrow stuff is bletcherous, but it seems to be
+   necessary.  Perhaps there is a "better" way, but I don't know what it
+   is */
+
+#include <krb5/widen.h>
+static krb5_error_code
+rd_req_keyproc(krb5_pointer keyprocarg, krb5_principal server,
+	       krb5_kvno kvno, krb5_keyblock **keyblock)
+#include <krb5/narrow.h>
+{
+   krb5_error_code code;
+   krb5_keytab_entry ktentry;
+
+   if (code = krb5_kt_get_entry((krb5_keytab) keyprocarg, server, kvno,
+				&ktentry))
+      return(code);
+
+   code = krb5_copy_keyblock(&ktentry.key, keyblock);
+
+   (void) krb5_kt_free_entry(&ktentry);
+
+   return(code);
+}
+
+#endif
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
@@ -56,12 +87,11 @@ cleanup:
 }
 
 OM_uint32
-krb5_gss_accept_sec_context(ct, minor_status, context_handle, 
+krb5_gss_accept_sec_context(minor_status, context_handle, 
 			    verifier_cred_handle, input_token,
 			    input_chan_bindings, src_name, mech_type,
 			    output_token, ret_flags, time_rec,
 			    delegated_cred_handle)
-     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
      gss_cred_id_t verifier_cred_handle;
@@ -74,7 +104,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
      OM_uint32 *time_rec;
      gss_cred_id_t *delegated_cred_handle;
 {
-   krb5_context context = ct;
+   krb5_context context;
    unsigned char *ptr, *ptr2;
    char *sptr;
    long tmp;
@@ -89,14 +119,20 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    krb5_principal name;
    int gss_flags;
    krb5_gss_ctx_id_rec *ctx;
+   krb5_enctype enctype;
    krb5_timestamp now;
    gss_buffer_desc token;
+   int err;
    krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
    int option_id;
    krb5_data option;
    krb5_auth_context auth_context_cred = NULL;
+   const gss_OID_desc *mech_used = NULL;
 
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    /* set up returns to be freeable */
 
@@ -141,14 +177,43 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
       return(GSS_S_NO_CRED);
    }
 
-   /* verify the token's integrity, and leave the token in ap_req */
+   /* verify the token's integrity, and leave the token in ap_req.
+      figure out which mech oid was used, and save it */
 
    ptr = (unsigned char *) input_token->value;
 
-   if (! g_verify_token_header((gss_OID) gss_mech_krb5, &(ap_req.length),
-			       &ptr, KG_TOK_CTX_AP_REQ, input_token->length)) {
-      *minor_status = 0;
-      return(GSS_S_DEFECTIVE_TOKEN);
+   if (err = g_verify_token_header((gss_OID) gss_mech_krb5, &(ap_req.length),
+				   &ptr, KG_TOK_CTX_AP_REQ,
+				   input_token->length)) {
+	/*
+	 * Previous versions of this library used the old mech_id
+	 * and some broken behavior (wrong IV on checksum
+	 * encryption).  We support the old mech_id for
+	 * compatibility, and use it to decide when to use the
+	 * old behavior.
+	 */
+	if (err != G_WRONG_MECH ||
+	    (err = g_verify_token_header((gss_OID) gss_mech_krb5_old,
+					 &(ap_req.length), 
+					 &ptr, KG_TOK_CTX_AP_REQ,
+					 input_token->length))) {
+	     *minor_status = err;
+	     return(GSS_S_DEFECTIVE_TOKEN);
+	} else {
+	     if (! cred->prerfc_mech) {
+		  *minor_status = G_WRONG_MECH;
+		  return(GSS_S_DEFECTIVE_TOKEN);
+	     }
+
+	     mech_used = gss_mech_krb5_old;
+	}
+   } else {
+	if (! cred->rfc_mech) {
+	     *minor_status = G_WRONG_MECH;
+	     return(GSS_S_DEFECTIVE_TOKEN);
+	}
+
+	mech_used = gss_mech_krb5;
    }
 
    sptr = (char *) ptr;
@@ -180,6 +245,17 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
    krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
+#if 0
+   /* make sure the necessary parts of the authdat are present */
+
+   if ((authdat->authenticator->subkey == NULL) ||
+       (authdat->ticket->enc_part2 == NULL)) {
+      krb5_free_tkt_authent(authdat);
+      *minor_status = KG_NO_SUBKEY;
+      return(GSS_S_FAILURE);
+   }
+#endif
+
    /* verify that the checksum is correct */
 
    /*
@@ -210,13 +286,13 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
    TREAD_INT(ptr, tmp, bigend);
 
-   if (tmp != RSA_MD5_CKSUM_LENGTH) {
+   if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
       ptr = (unsigned char *) authdat->checksum->contents;
       bigend = 1;
 
       TREAD_INT(ptr, tmp, bigend);
 
-      if (tmp != RSA_MD5_CKSUM_LENGTH) {
+      if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
 	 xfree(md5.contents);
 	 krb5_free_authenticator(context, authdat);
 	 *minor_status = KG_BAD_LENGTH;
@@ -226,7 +302,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
    /* at this point, bigend is set according to the initiator's byte order */
 
-   if ((code = kg_checksum_channel_bindings(input_chan_bindings, &md5,
+   if ((code = kg_checksum_channel_bindings(context, input_chan_bindings, &md5,
 					    bigend))) {
       krb5_free_authenticator(context, authdat);
       *minor_status = code;
@@ -289,21 +365,13 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
 		    break;
 
-		default :
+		    /* default: */
+		    /* unknown options aren't an error */
 
-		     /* any other options are unrecognized. return
-			generic GSS_C_FAILURE error with a minor status
-			of KRB5_PARSE_MALFORMED (XXX this is probably
-			not the right error, since it is used for
-			string parsing errors not token parsing errors.) */
-
-		    *minor_status = KRB5_PARSE_MALFORMED;
-		    return(GSS_S_FAILURE);
 	    } /* switch */
 	} /* while */
     } /* if */
 			
-
    /* create the ctx struct and start filling it in */
 
    if ((ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(krb5_gss_ctx_id_rec)))
@@ -313,6 +381,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    }
 
    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
+   ctx->mech_used = mech_used;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
    ctx->gss_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
@@ -345,26 +414,52 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
+   switch(ctx->subkey->enctype) {
+   case ENCTYPE_DES_CBC_MD5:
+   case ENCTYPE_DES_CBC_CRC:
+       enctype = ENCTYPE_DES_CBC_RAW;
+       ctx->signalg = 0;
+       ctx->cksum_size = 8;
+       ctx->sealalg = 0;
+       break;
+#if 0
+   case ENCTYPE_DES3_CBC_MD5:
+       enctype = ENCTYPE_DES3_CBC_RAW;
+       ctx->signalg = 3;
+       ctx->cksum_size = 16;
+       ctx->sealalg = 1;
+       break;
+#endif
+   default:
+       return GSS_S_FAILURE;
+   }
+
    /* fill in the encryption descriptors */
 
-   krb5_use_enctype(context, &ctx->enc.eblock, ENCTYPE_DES_CBC_RAW);
+   krb5_use_enctype(context, &ctx->enc.eblock, enctype);
    ctx->enc.processed = 0;
-   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key)))
+
+   if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
       return(code); 
    for (i=0; i<ctx->enc.key->length; i++)
       /*SUPPRESS 113*/
       ctx->enc.key->contents[i] ^= 0xf0;
 
-   krb5_use_enctype(context, &ctx->seq.eblock, ENCTYPE_DES_CBC_RAW);
+   krb5_use_enctype(context, &ctx->seq.eblock, enctype);
    ctx->seq.processed = 0;
    if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key)))
        return(code);
+
    ctx->endtime = ticket->enc_part2->times.endtime;
    ctx->flags = ticket->enc_part2->flags;
 
    krb5_free_ticket(context, ticket); /* Done with ticket */
 
    krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
+
+   g_order_init(&(ctx->seqstate), ctx->seq_recv,
+		gss_flags & GSS_C_REPLAY_FLAG,
+		gss_flags & GSS_C_SEQUENCE_FLAG);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */
@@ -375,23 +470,23 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
       krb5_data ap_rep;
       unsigned char * ptr;
       if ((code = krb5_mk_rep(context, auth_context, &ap_rep))) {
-	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+	 (void)krb5_gss_delete_sec_context(minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
       krb5_auth_con_getlocalseqnumber(context, auth_context, &ctx->seq_send);
-      token.length = g_token_size((gss_OID) gss_mech_krb5, ap_rep.length);
+      token.length = g_token_size((gss_OID) mech_used, ap_rep.length);
 
       if ((token.value = (unsigned char *) xmalloc(token.length)) == NULL) {
-	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+	 (void)krb5_gss_delete_sec_context(minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
-	 *minor_status = code;
+	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
       }
       ptr = token.value;
-      g_make_token_header((gss_OID) gss_mech_krb5, ap_rep.length,
-                       &ptr, KG_TOK_CTX_AP_REP);
+      g_make_token_header((gss_OID) mech_used, ap_rep.length,
+			  &ptr, KG_TOK_CTX_AP_REP);
 
       TWRITE_STR(ptr, ap_rep.data, ap_rep.length);
       xfree(ap_rep.data);
@@ -410,7 +505,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
       if ((code = krb5_copy_principal(context, ctx->there, &name))) {
 	 if (token.value)
 	    xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+	 (void)krb5_gss_delete_sec_context(minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -418,14 +513,14 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    }
 
    if (mech_type)
-      *mech_type = (gss_OID) gss_mech_krb5;
+      *mech_type = (gss_OID) mech_used;
 
    if (time_rec) {
       if ((code = krb5_timeofday(context, &now))) {
 	 if (src_name)
 	    krb5_free_principal(context, name);
 	 xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+	 (void)krb5_gss_delete_sec_context(minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -434,7 +529,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    }
 
    if (ret_flags)
-      *ret_flags = ctx->gss_flags;
+      *ret_flags = KG_IMPLFLAGS(gss_flags);
 
    ctx->established = 1;
 
@@ -445,7 +540,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 	 krb5_free_principal(context, name);
 	 if (token.value)
 	    xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(context, minor_status,
+	 (void)krb5_gss_delete_sec_context(minor_status,
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
@@ -460,7 +555,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
       }
       if (token.value)
 	 xfree(token.value);
-      (void)krb5_gss_delete_sec_context(context, minor_status, 
+      (void)krb5_gss_delete_sec_context(minor_status, 
 					(gss_ctx_id_t *) &ctx, NULL);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);

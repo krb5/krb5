@@ -1,0 +1,19 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+
+PROG = kadmin
+OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o keytab.o
+
+all:: $(PROG).local $(PROG)
+
+$(PROG).local: $(OBJS) $(SRVDEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG).local $(OBJS) $(SRVLIBS)
+
+$(PROG): $(OBJS) $(CLNTDEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
+
+install::
+	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+
+clean::
+	$(RM) $(PROG).local $(PROG) $(OBJS)

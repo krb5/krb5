@@ -1,0 +1,13 @@
+Mon Jul 15 17:15:51 1996  Marc Horowitz  <marc@mit.edu>
+
+	* helpers.exp (exp_prog): the check for non-newline-terminated
+ 	stdout was causing failures where there weren't any.  Barry
+ 	doesn't remember why this was here to begin with.
+	* Makefile.ov (unit-test-body), helpers.exp: some versions of
+ 	runtest do not like digits in command-line variable names. 
+ 	* Makefile.ov (unit-test-body), helpers.exp: ovsec_v4adm_server
+ 	renamed to kadmind4
+	* getpid.sh: grep out any programs with expect or kadmind4 in
+ 	their names.
+
+

@@ -1,0 +1,21 @@
+#
+# $Id$ 
+#
+
+TOP = ..
+include $(TOP)/config.mk/template
+
+# Need $(STOP_SERVERS_LOCAL) because any running servers need to be
+# killed so that they won't keep the database open so that we can't
+# blow it away.
+
+unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-setup::
+	$(START_SERVERS_LOCAL)
+	$(STOP_SERVERS_LOCAL)
+
+unit-test-body::
+	$(PERL) ./do-test.pl 10
+
+unit-test-cleanup::

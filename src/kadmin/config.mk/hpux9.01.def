@@ -1,0 +1,32 @@
+export ARCH_SKIP_RANLIB 	:= 1
+export INSTCMD			= ginstall -c
+export PS_ALL			= ps -ef
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID			= ps -fp
+# Make sure there is a blank space at the end of this line!
+export PS_TTY			= ps -t 
+export STATIC_LINK_GUI		:= 1
+export RSH_CMD			= /usr/bin/remsh
+
+PCC_STRUCT_RETURN	= -fpcc-struct-return
+# this must always be at the end.
+REGEXLIB		= -lc -lPW
+TERMCAPLIB		= -ltermcap
+
+XINCDIR		= /usr/include/X11R5
+XLIBDIR		= /usr/lib/X11R5
+NDBMLIB 	:= /usr/lib/libndbm.a
+ARCH_CFLAGS	= -mpa-risc-1-0
+
+CFLAGS		:= $(ARCH_CFLAGS) $(CFLAGS)
+
+UTMP_FILE = /etc/utmp
+WTMP_FILE = /etc/wtmp
+
+D_RANDOM 	= -Dsrandom=srand48 -Drandom=lrand48
+D_SETEUID	= -DNO_SETEUID \
+	 -DSETEUIDPRE='setresuid(-1,' -DSETEUIDPOST=',-1)'
+D_FATALINLIBS	= -Dfatal=ftpd_fatal
+D_NO_SETENV	= -DNO_SETENV
+D_REGEXP_TYPE	= -DPOSIX_REGEXPS
+

@@ -1,3 +1,4 @@
+<<<<<<< ChangeLog
 Sat Jun 15 03:51:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Add space before \
@@ -65,6 +66,11 @@ Thu May  2 18:29:01 1996  Richard Basch  <basch@lehman.com>
 		incrementing sequence number with a unique key schedule)
 		[3-DES uses DES3-CBC-CRC to increment a 192 bit sequence
 		number, instead of being only as secure as DES.]
+
+Wed Apr 17 19:25:01 1996  Marc Horowitz  <marc@mit.edu>
+
+	* cbc_cksum.c (mit_des_cbc_checksum): don't allocate the checksum
+	contents.  The caller is supposed to do this.
 
 Wed Apr 10 17:46:40 1996  Theodore Y. Ts'o  <tytso@dcl>
 

@@ -1,0 +1,20 @@
+Mon Jul 22 04:07:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* tty_kpasswd.c: main returns int, not void
+
+Thu Jul 18 19:46:24 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK
+
+Wed Jul 10 01:28:12 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, configure.in: added autoconf support
+
+Tue Jul  9 15:03:13 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kpasswd.c, tty_kpasswd.c, xm_kpasswd.c: renamed
+ 	<ovsec_admin/foo.h> to <kadm5/foo.h>
+
+	* configure.in (CONFIG_DIRS): build the subdirs for the new admin
+ 	system, not the old one.
+

@@ -1,3 +1,8 @@
+Wed Jul 10 16:40:19 1996  Marc Horowitz  <marc@mit.edu>
+
+	* cmdtab.c (cmdtab[]), cmds.c (delete_file): rename delete() to
+ 	delete_file() to avoid conflict with the dbm delete() function
+
 Thu Mar 28 21:07:40 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* cmds.c (setpeer): Define unix for HP-UX.
@@ -13,7 +18,7 @@ Thu Mar 28 19:26:53 1996  Marc Horowitz  <marc@mit.edu>
 Mon Mar 18 12:12:44 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* secure.c, ftp.c, ftp_var.h: Define STDARG if HAVE_STDARG_H is
-		defined (in addition to the other tests)
+ 		defined (in addition to the other tests)
 
 	* configure.in: Add AC_HEADER_STDARG
 

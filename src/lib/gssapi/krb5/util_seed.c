@@ -23,10 +23,15 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
+/*
+ * $Id$
+ */
+
 static unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
 krb5_error_code
-kg_make_seed(key, seed)
+kg_make_seed(context, key, seed)
+     krb5_context context;
      krb5_keyblock *key;
      unsigned char *seed;
 {
@@ -34,10 +39,7 @@ kg_make_seed(key, seed)
    krb5_gss_enc_desc ed;
    int i;
 
-   if (!kg_context && (code=kg_get_context()))
-	   return code;
-   
-   if (code = krb5_copy_keyblock(kg_context, key, &ed.key))
+   if (code = krb5_copy_keyblock(context, key, &ed.key))
       return(code);
 
    /* reverse the key bytes, as per spec */
@@ -45,13 +47,13 @@ kg_make_seed(key, seed)
    for (i=0; i<ed.key->length; i++)
       ed.key->contents[i] = key->contents[key->length - 1 - i];
 
-   krb5_use_enctype(kg_context, &ed.eblock, ENCTYPE_DES_CBC_RAW);
+   krb5_use_enctype(context, &ed.eblock, ENCTYPE_DES_CBC_RAW);
    ed.processed = 0;
 
-   code = kg_encrypt(&ed, NULL, zeros, seed, 16);
+   code = kg_encrypt(context, &ed, NULL, zeros, seed, 16);
 
-   krb5_finish_key(kg_context, &ed.eblock);
-   krb5_free_keyblock(kg_context, ed.key);
+   krb5_finish_key(context, &ed.eblock);
+   krb5_free_keyblock(context, ed.key);
 
    return(code);
 }

@@ -1,0 +1,16 @@
+#!/bin/csh
+
+echo '/*'
+echo '  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.'
+echo '  * '
+echo '  * $Header$'
+echo '  *'
+echo '  */'
+echo ' '
+echo '#ifndef _OVSEC_ADM_STRINGS_'
+echo ' '
+
+cat $1 | grep -v rcsid | grep ^char | awk '{printf "extern %s %s;\n",$1,$2}'
+
+echo ' '
+echo '#endif /* _OVSEC_ADM_STRINGS_ */'

@@ -1,0 +1,148 @@
+CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG_GSSAPI -I$(srcdir)/..
+
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libgssrpc.lib
+
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
+SRCS = $(srcdir)/auth_none.c \
+	$(srcdir)/auth_unix.c \
+	$(srcdir)/auth_any.c \
+	$(srcdir)/authunix_prot.c \
+	$(srcdir)/auth_gssapi.c \
+	$(srcdir)/auth_gssapi_misc.c \
+	$(srcdir)/bindresvport.c \
+	$(srcdir)/clnt_generic.c \
+	$(srcdir)/clnt_perror.c \
+	$(srcdir)/clnt_raw.c \
+	$(srcdir)/clnt_simple.c \
+	$(srcdir)/clnt_tcp.c \
+	$(srcdir)/clnt_udp.c \
+	$(srcdir)/rpc_dtablesize.c \
+	$(srcdir)/get_myaddress.c \
+	$(srcdir)/getrpcent.c \
+	$(srcdir)/getrpcport.c \
+	$(srcdir)/pmap_clnt.c \
+	$(srcdir)/pmap_getmaps.c \
+	$(srcdir)/pmap_getport.c \
+	$(srcdir)/pmap_prot.c \
+	$(srcdir)/pmap_prot2.c \
+	$(srcdir)/pmap_rmt.c \
+	$(srcdir)/rpc_prot.c \
+	$(srcdir)/rpc_commondata.c \
+	$(srcdir)/rpc_callmsg.c \
+	$(srcdir)/svc.c \
+	$(srcdir)/svc_auth.c \
+	$(srcdir)/svc_auth_unix.c \
+	$(srcdir)/svc_auth_any.c \
+	$(srcdir)/svc_auth_gssapi.c \
+	$(srcdir)/svc_raw.c \
+	$(srcdir)/svc_run.c \
+	$(srcdir)/svc_simple.c \
+	$(srcdir)/svc_tcp.c \
+	$(srcdir)/svc_udp.c \
+	$(srcdir)/xdr.c \
+	$(srcdir)/xdr_array.c \
+	$(srcdir)/xdr_float.c \
+	$(srcdir)/xdr_mem.c \
+	$(srcdir)/xdr_rec.c \
+	$(srcdir)/xdr_reference.c \
+	$(srcdir)/xdr_stdio.c \
+	$(srcdir)/xdr_alloc.c
+
+OBJS = auth_none.$(OBJEXT) \
+	auth_unix.$(OBJEXT) \
+	auth_any.$(OBJEXT) \
+	authunix_prot.$(OBJEXT) \
+	auth_gssapi.$(OBJEXT) \
+	auth_gssapi_misc.$(OBJEXT) \
+	bindresvport.$(OBJEXT) \
+	clnt_generic.$(OBJEXT) \
+	clnt_perror.$(OBJEXT) \
+	clnt_raw.$(OBJEXT) \
+	clnt_simple.$(OBJEXT) \
+	clnt_tcp.$(OBJEXT) \
+	clnt_udp.$(OBJEXT) \
+	rpc_dtablesize.$(OBJEXT) \
+	get_myaddress.$(OBJEXT) \
+	getrpcent.$(OBJEXT) \
+	getrpcport.$(OBJEXT) \
+	pmap_clnt.$(OBJEXT) \
+	pmap_getmaps.$(OBJEXT) \
+	pmap_getport.$(OBJEXT) \
+	pmap_prot.$(OBJEXT) \
+	pmap_prot2.$(OBJEXT) \
+	pmap_rmt.$(OBJEXT) \
+	rpc_prot.$(OBJEXT) \
+	rpc_commondata.$(OBJEXT) \
+	rpc_callmsg.$(OBJEXT) \
+	svc.$(OBJEXT) \
+	svc_auth.$(OBJEXT) \
+	svc_auth_unix.$(OBJEXT) \
+	svc_auth_any.$(OBJEXT) \
+	svc_auth_gssapi.$(OBJEXT) \
+	svc_raw.$(OBJEXT) \
+	svc_run.$(OBJEXT) \
+	svc_simple.$(OBJEXT) \
+	svc_tcp.$(OBJEXT) \
+	svc_udp.$(OBJEXT) \
+	xdr.$(OBJEXT) \
+	xdr_array.$(OBJEXT) \
+	xdr_float.$(OBJEXT) \
+	xdr_mem.$(OBJEXT) \
+	xdr_rec.$(OBJEXT) \
+	xdr_reference.$(OBJEXT) \
+	xdr_stdio.$(OBJEXT) \
+	xdr_alloc.$(OBJEXT)
+
+LIB_SUBDIRS= .
+LIBDONE= DONE
+#
+# Depends on libgssapi_krb5, libkrb5, libcrypto, libcom_err
+#
+GSSAPI_KRB5_VER=@GSSAPI_KRB5_SH_VERS@
+KRB5_VER=@KRB5_SH_VERS@
+CRYPTO_VER=@CRYPTO_SH_VERS@
+COMERR_VER=@COMERR_SH_VERS@
+DEPLIBS=$(TOPLIBD)/libgssapi_krb5.$(SHEXT).$(COMERR_VER) \
+	$(TOPLIBD)/libkrb5.$(SHEXT).$(KRB5_VER) \
+	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
+	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER)
+
+SHLIB_LIBS=-lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
+
+all-unix:: shared includes $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
+
+check-windows::
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
+
+DONE: $(OBJS)
+	$(RM) DONE
+	echo $(OBJS) > DONE
+
+libgssrpc.$(STEXT): $(OBJS)
+	$(RM) $@
+	$(ARADD) $@ $(OBJS)
+	$(RANLIB) $@
+
+install:: libgssrpc.a
+	$(INSTALL_DATA) libgssrpc.a $(DESTDIR)$(KRB5_LIBDIR)/libgssrpc.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssrpc.a
+
+clean::
+	$(RM) libgssrpc.$(LIBEXT) libgssrpc.bak DONE
+

@@ -1,0 +1,23 @@
+export PS_ALL			= ps auxww
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID			= ps auxww
+export RSH_CMD			= /usr/bin/rsh
+
+XINCDIR		    = /usr/include
+XLIBDIR		    = /usr/lib
+
+NDBMLIB		    = -ldbm
+
+PERL	= /usr/bin/perl
+LEX_LIB	= -lfl
+
+OMIT_GUI = true
+OMIT_XM_KPASSWD = true
+OMIT_DOC = true
+
+UTMP_FILE = /etc/utmp
+WTMP_FILE = /var/adm/wtmp
+
+LIBTCL = -ltcl
+
+TERMCAPLIB = -ltermcap

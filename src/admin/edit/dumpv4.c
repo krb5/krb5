@@ -112,7 +112,8 @@ dump_v4_iterator(ptr, entry)
     krb5_db_entry *entry;
 {
     struct dump_record *arg = (struct dump_record *) ptr;
-    krb5_tl_mod_princ *mod_princ = NULL;
+    krb5_principal mod_princ;
+    krb5_timestamp mod_time;
     krb5_error_code retval;
     int	i, max_kvno, ok_key;
 
@@ -152,12 +153,13 @@ dump_v4_iterator(ptr, entry)
 	strcpy(principal->instance, "*");
 
     /* Now move to mod princ */
-    if (retval = krb5_dbe_decode_mod_princ_data(edit_context,entry,&mod_princ)){
+    if (retval = krb5_dbe_lookup_mod_princ_data(edit_context,entry,
+						&mod_time, &mod_princ)){
 	com_err(arg->comerr_name, retval, "while unparsing db entry");
 	exit_status++;
 	return retval;
     }
-    retval = krb5_524_conv_principal(edit_context, mod_princ->mod_princ,
+    retval = krb5_524_conv_principal(edit_context, mod_princ,
 				     principal->mod_name, principal->mod_instance,
 				     principal->mod_realm);
     if (retval) {
@@ -228,7 +230,7 @@ found_one:;
     }
 
     v4_print_time(arg->f, entry->expiration);
-    v4_print_time(arg->f, mod_princ->mod_date);
+    v4_print_time(arg->f, mod_time);
 
     fprintf(arg->f, " %s %s\n", principal->mod_name, principal->mod_instance);
     return 0;

@@ -131,14 +131,6 @@ typedef unsigned int uid_t;
 #endif
 #endif
 
-#ifndef NPROTOTYPE
-#if defined(__ultrix) && !defined (__GNUC__)
-#define NPROTOTYPE(x) ()
-#else
-#define NPROTOTYPE(x) PROTOTYPE(x)
-#endif
-#endif
-
 /*
  * First, include stddef.h to get size_t defined.
  */
@@ -161,8 +153,13 @@ typedef unsigned int uid_t;
 #endif	/* HAVE_XOM_H */
 
 /*
+ * $Id$
+ */
+
+/*
  * First, define the three platform-dependent pointer types.
  */
+
 typedef void FAR * gss_name_t;
 typedef void FAR * gss_cred_id_t;
 typedef void FAR * gss_ctx_id_t;
@@ -305,7 +302,7 @@ typedef	int		gss_cred_usage_t;
  * Expiration time of 2^32-1 seconds means infinite lifetime for a
  * credential or security context
  */
-#define GSS_C_INDEFINITE 0xffffffffl
+#define GSS_C_INDEFINITE ((OM_uint32) 0xfffffffful)
 
 
 /* Major status codes */
@@ -318,9 +315,9 @@ typedef	int		gss_cred_usage_t;
 #define GSS_C_CALLING_ERROR_OFFSET 24
 #define GSS_C_ROUTINE_ERROR_OFFSET 16
 #define GSS_C_SUPPLEMENTARY_OFFSET 0
-#define GSS_C_CALLING_ERROR_MASK 0377l
-#define GSS_C_ROUTINE_ERROR_MASK 0377l
-#define GSS_C_SUPPLEMENTARY_MASK 0177777l
+#define GSS_C_CALLING_ERROR_MASK ((OM_uint32) 0377ul)
+#define GSS_C_ROUTINE_ERROR_MASK ((OM_uint32) 0377ul)
+#define GSS_C_SUPPLEMENTARY_MASK ((OM_uint32) 0177777ul)
 
 /*
  * The macros that test status codes for error conditions.  Note that the
@@ -345,43 +342,51 @@ typedef	int		gss_cred_usage_t;
  * Calling errors:
  */
 #define GSS_S_CALL_INACCESSIBLE_READ \
-                             (1l << GSS_C_CALLING_ERROR_OFFSET)
+                             (((OM_uint32) 1ul) << GSS_C_CALLING_ERROR_OFFSET)
 #define GSS_S_CALL_INACCESSIBLE_WRITE \
-                             (2l << GSS_C_CALLING_ERROR_OFFSET)
+                             (((OM_uint32) 2ul) << GSS_C_CALLING_ERROR_OFFSET)
 #define GSS_S_CALL_BAD_STRUCTURE \
-                             (3l << GSS_C_CALLING_ERROR_OFFSET)
+                             (((OM_uint32) 3ul) << GSS_C_CALLING_ERROR_OFFSET)
 
 /*
  * Routine errors:
  */
-#define GSS_S_BAD_MECH (1l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_NAME (2l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_NAMETYPE (3l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_BINDINGS (4l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_STATUS (5l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_SIG (6l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_NO_CRED (7l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_NO_CONTEXT (8l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_DEFECTIVE_TOKEN (9l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_DEFECTIVE_CREDENTIAL (10l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_CREDENTIALS_EXPIRED (11l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_CONTEXT_EXPIRED (12l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_FAILURE (13l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_QOP (14l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_UNAUTHORIZED (15l << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_UNAVAILABLE (16l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_MECH (((OM_uint32) 1ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_NAME (((OM_uint32) 2ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_NAMETYPE (((OM_uint32) 3ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_BINDINGS (((OM_uint32) 4ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_STATUS (((OM_uint32) 5ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_SIG (((OM_uint32) 6ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_NO_CRED (((OM_uint32) 7ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_NO_CONTEXT (((OM_uint32) 8ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_DEFECTIVE_TOKEN (((OM_uint32) 9ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_DEFECTIVE_CREDENTIAL \
+     (((OM_uint32) 10ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_CREDENTIALS_EXPIRED \
+     (((OM_uint32) 11ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_CONTEXT_EXPIRED \
+     (((OM_uint32) 12ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_FAILURE (((OM_uint32) 13ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_QOP (((OM_uint32) 14ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_UNAUTHORIZED (((OM_uint32) 15ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_UNAVAILABLE (((OM_uint32) 16ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 /*
  * XXX new functions.  Check to get official error number assigments?
  */
-#define GSS_S_DUPLICATE_ELEMENT (17l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_DUPLICATE_ELEMENT \
+     (((OM_uint32) 17ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 
 /*
  * Supplementary info bits:
  */
-#define GSS_S_CONTINUE_NEEDED (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 0))
-#define GSS_S_DUPLICATE_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 1))
-#define GSS_S_OLD_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 2))
-#define GSS_S_UNSEQ_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 3))
+#define GSS_S_CONTINUE_NEEDED (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 0))
+#define GSS_S_DUPLICATE_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 1))
+#define GSS_S_OLD_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 2))
+#define GSS_S_UNSEQ_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 3))
+/*
+ * XXX not in the cbindings yet.  remove this comment when it is
+ */
+#define GSS_S_GAP_TOKEN (1 << (GSS_C_SUPPLEMENTARY_OFFSET + 4))
 
 
 /*

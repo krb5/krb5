@@ -1,0 +1,39 @@
+export PS_ALL		= /usr/bin/ps -ef
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID		= /usr/bin/ps -fp
+# Make sure there is a blank space at the end of this line!
+export PS_TTY		= /usr/bin/ps -t 
+export RSH_CMD		= /usr/ucb/rsh
+export INSTCMD		= /usr/ucb/install
+export PATH		:= $(PATH):/usr/ucb:/usr/ccs/bin
+
+PCC_STRUCT_RETURN	= -fpcc-struct-return
+D_NEEDS_RPCENT		= -DNEEDS_RPCENT
+D_SYSV			= -DSYSV
+D_POSIX			= -DPOSIX
+D_NO_SETENV		= -DNO_SETENV
+D_POSIX_SIGNALS		= -DPOSIX_SIGNALS
+D_RANDOM		= -Dsrandom=srand48 -Drandom=lrand48
+D_REGEXP_TYPE		= -DSOLARIS_REGEXPS
+NETLIB			= -lsocket -lnsl
+#BSDLIB			= /usr/ucblib/libucb.a
+TERMCAPLIB		= -lcurses -ltermcap
+REGEXLIB		= -lgen
+LOGINLIB		= -lcmd
+
+XINCDIR			= /usr/openwin/include
+XLIBDIR			= /usr/openwin/lib
+RANLIB			= /bin/true
+
+OMIT_GUI		= true
+
+# These are used by admin/v4server/Makefile.  They are determined
+# automatically by the krb5 beta 4 auto-configure, but we're not using
+# that right now.
+WAIT_USES_INT		= true
+OPEN_NEEDS_FCNTL	= true
+
+UTMP_FILE = /var/adm/utmp
+WTMP_FILE = /var/adm/wtmp
+UTMPX_FILE = /var/adm/utmpx
+WTMPX_FILE = /var/adm/wtmpx

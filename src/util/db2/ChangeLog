@@ -1,0 +1,77 @@
+Fri Jun 21 00:07:57 1996  Marc Horowitz  <marc@mit.edu>
+
+	* hash/dbm.c (delete, store): dbm_rdonly() doesn't exist on some
+ 	systems.  In addition, the handle is really a DB handle, so it
+ 	would break if it did exist.  Remove calls to it.
+
+Wed Apr 10 21:39:54 1996  Marc Horowitz  <marc@mit.edu>
+
+	* hash/hash_page.c (__addel): It is possible to damage a page if a
+ 	bigpair is added and there's not enough room.  Check to make sure
+	there's enough room before adding anything.
+
+	* hash/hash.c (hdestroy, cursor_delete): there were still a few
+ 	things in the hashp which weren't being freed, causing a small
+ 	memory leak.
+
+Sun Apr  7 01:40:54 1996  Marc Horowitz  <marc@mit.edu>
+
+	* clib/mk{,s}temp.c: renamed to accurately reflect the function
+        being provided (ultrix 4.2 has one, but not the other).
+
+	* [way too many files to list here]: rename pgno_t to db_pgno_t,
+        since this symbol is defined in <sys/types> on at least one OS to
+        a non-compatible type (irix 5.2 defines it as long; db wants it to
+        be u_int32_t).
+
+	* hash/dbm.c, include/db-ndbm.h: use and reference the compat
+        ndbm.h file
+
+	* btree/bt_open.c, hash/hash.c, hash/hash_page.c,
+        include/db-int.h, include/db.h: build fixes - use configure to set
+        db internal cpp symbols for endianness stuff, move __P definition
+        from db-int.h to db.h.
+
+	* configure.in, acconfig.h, Makefile.in, obj/configure.in,
+        obj/acconfig.in, obj/Makefile.in: rearrange the configure inputs
+        to deal properly with configure at the top level, and with a
+        multiarchitecture build using VPATH
+
+Sat Apr  6 16:43:26 1996  Marc Horowitz  <marc@mit.edu>
+
+	* obj/Makefile.in: random cleanup
+
+	* btree/*.c db/db.c hash/*.c mpool/mpool.c recno/*.c
+        test/SEQ_TEST/t.c test/dbtest.c test/*/*.c: use "db-int.h" instead
+        of "db.h".
+
+	* include/db.h, include/db-int.h: rototilled to be portable and
+        sensible, using configure whenever possible.
+
+	* btree/*.c db/db.c hash/*.c mpool/mpool.c recno/*.c
+        test/SEQ_TEST/t.c test/dbtest.c test/*/*.c: use "db.h" instead of
+        <db.h>.
+
+	* hash/hash.h, btree/btree.h, mpool/mpool.c: #include "mpool.h"
+        instead of <mpool.h>.
+
+	* test/hash1.tests/thash4.c: remove unused and nonportable
+        <sys/timeb.h>
+
+	* test/hash2.tests/bigtest.c: replace <malloc.h> with <stdlib.h>
+
+	* clib/memmove.c: remove <sys/cdefs.h>
+
+	* mpool/mpool.c, mpool/mpool.h, hash/hash.h, include/db-queue.h:
+        include "db-queue.h" instead of <sys/queue.h>, since it's not part
+        of any OS standard.
+
+	* obj/*: first attempt at autoconfiscation
+
+	* test/hash1.tests/driver2.c (main), test/hash1.tests/tseq.c
+        (main): replace berkeley memoryisms with ansi ones.
+
+	* btree/bt_open.c (tmp): use sprintf instead of snprintf().
+	conditionalize signal stuff on SIG_BLOCK instead of using special
+	magic in a header file.
+

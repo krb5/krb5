@@ -923,7 +923,7 @@ done:
 	(*closefunc)(fin);
 }
 
-store(name, mode, unique)
+store_file(name, mode, unique)
 	char *name, *mode;
 	int unique;
 {
@@ -1549,7 +1549,7 @@ yyerror(s)
 	reply(500, "'%s': command not understood.", cbuf);
 }
 
-delete(name)
+delete_file(name)
 	char *name;
 {
 	struct stat st;

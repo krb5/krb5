@@ -1,0 +1,32 @@
+libdyn.a -- Release 1.0
+
+A C Dynamic Object is an array that takes care of resizing itself as
+elements are added and deleted from it.  It can be of any type for
+which sizeof is defined and for which an address of a variable of that
+type can be passed to a function.
+
+To build libdyn.a, simply type "make depend all" (if you don't have
+the program makedepend, of course, leave out the "depend" part).  If
+your system's bcopy() cannot handle overlapping regions, you'll need
+to write one that can.  (Left as an excercise for the reader..)
+
+The library should compile and work without modification on a vast
+number of systems.  It only uses 5 external functions: malloc,
+realloc, free, bcopy, and fprintf (to stderr).  Of these, only bcopy
+should need to be changed for other systems (such as MS-DOS) and it
+could probably be done with a -D flag to the compiler.
+
+The test/demo program is built by "make all".  This program produces
+the library's debugging output (to stderr) as well as some of its own
+output (to stdout).
+
+The library has been tested (with test.c) on a VAX VSII, VAXstation
+3100, DECstation 3100, and IBM RT all running BSD4.3 (except for the
+DECstation, which was running Ultrix V2.1).
+
+An earlier version of this library was posted to alt.sources.  This
+version contains one new function (DynInsert) and slightly cleaner
+code, but no bugfixes (no bugs were found).
+
+Author: Barr3y Jaspan, Student Information Processing Board (SIPB) and
+MIT-Project Athena, bjaspan@athena.mit.edu, 1990

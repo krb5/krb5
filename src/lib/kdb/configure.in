@@ -8,8 +8,9 @@ AC_HAVE_HEADERS(unistd.h)
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 KRB5_RUN_FLAGS
 V5_USE_SHARED_LIB
-USE_KDB5_LIBRARY
 KRB5_LIBRARIES
+V5_SHARED_LIB_OBJS
+V5_MAKE_SHARED_LIB(libkdb5,0.1,.., ./kdb)
 LinkFileDir(../libkdb5.a, libkdb5.a, ./kdb)
 AppendRule([all:: libkdb5.a])
 AppendRule([all-unix:: ../libkdb5.a])

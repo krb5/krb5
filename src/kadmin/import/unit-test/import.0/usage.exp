@@ -1,0 +1,23 @@
+#
+# $Id$
+#
+
+set timeout 5
+
+load_lib "helpers.exp"
+
+#
+# Here are the tests
+#
+
+import_lose "C.6: input file not readable" /foo/bar/baz \
+	"No such file or directory while opening input file"
+
+import_lose "C.7: two arguments" {foo bar} \
+	"Usage:"
+
+system {rm -rf /krb5}
+
+import_lose "C.2: /krb5 doesn't exist" ./valid_export_file \
+	"Secure administration database lock file missing while importing"
+

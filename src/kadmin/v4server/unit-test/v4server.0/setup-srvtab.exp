@@ -1,0 +1,11 @@
+load_lib "helpers.exp"
+
+set timeout 10
+
+exp_prog "setup" $ovsec_edit_keytab \
+	"-k /krb5/ovsec_adm.srvtab -a -c -p admin changepw/kerberos" \
+	0 {
+	"Enter password:" { send "admin\n" }
+} {
+	-re "Entry for principal changepw/kerberos .* added to keytab" {}
+}

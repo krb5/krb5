@@ -1,0 +1,28 @@
+Fri Jul 19 16:10:39 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ss_wrapper.c (main): ss_execute_line was being called with three
+ 	args.  There are only two, so no error was ever being returned.
+
+Thu Jul 18 19:14:51 1996  Marc Horowitz  <marc@mit.edu>
+
+	* attic/configure.in: removed SS_RULES
+
+	* keytab.c (etype_string): ifdef out des3 reference
+
+	* configure.in: removed SS_RULES
+
+Mon Jul 15 16:56:43 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.1, keytab.c (kadmin_keytab_add): change ktadd usage to
+ 	accept -glob
+
+Tue Jul  9 16:15:46 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in: complete rewrite
+	* configure.in: add the necessary USE_*_LIBRARY macros
+	
+Mon Jul  8 16:45:20 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.1: Update man page for kadm5 changes and functionality.
+	
+

@@ -20,6 +20,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 #include "gssapiP_generic.h"
 #include "com_err.h"
 

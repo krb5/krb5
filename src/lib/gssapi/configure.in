@@ -1,6 +1,7 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(generic krb5 mechglue)
+CONFIG_DIRS(generic krb5)
+dnl CONFIG_DIRS(generic krb5 mechglue)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB

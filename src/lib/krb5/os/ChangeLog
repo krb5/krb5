@@ -1,3 +1,8 @@
+Fri Jul 12 21:38:15 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ktdefname.c (krb5_kt_default_name): allow the default keytab name
+	to be specified in the config file.
+
 Wed Jun 12 01:12:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* net_read.c (krb5_net_read):

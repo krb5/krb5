@@ -330,7 +330,7 @@ int create_db_entry(principal, newentry)
     krb5_principal 	  principal;
     krb5_db_entry  	* newentry;
 {
-    krb5_tl_mod_princ	  mod_princ;
+    krb5_timestamp	  now;
     int	retval;
 
     memset(newentry, 0, sizeof(krb5_db_entry));
@@ -345,16 +345,11 @@ int create_db_entry(principal, newentry)
 				      &newentry->princ)))
 	return retval;
 
-    if ((retval = krb5_timeofday(edit_context, &mod_princ.mod_date)))
+    if ((retval = krb5_timeofday(edit_context, &now)))
 	goto create_db_entry_error;
 
-    if ((retval = krb5_copy_principal(edit_context, master_princ, 
-				      &mod_princ.mod_princ)))
-	goto create_db_entry_error;
-
-    retval = krb5_dbe_encode_mod_princ_data(edit_context, &mod_princ, newentry);
-    krb5_xfree(mod_princ.mod_princ->data);
-
+    retval = krb5_dbe_update_mod_princ_data(edit_context, newentry, now,
+					    master_princ);
     if (!retval)
     	return 0;
 
@@ -1314,7 +1309,7 @@ void modent(argc, argv)
     char *argv[];
 {
     krb5_db_entry entry, oldentry;
-    krb5_tl_mod_princ mod_princ;
+    krb5_timestamp now;
     krb5_principal kprinc;
     krb5_error_code retval;
     krb5_boolean more;
@@ -1386,17 +1381,16 @@ void modent(argc, argv)
 	free(canon);
 	return;
     }
-    mod_princ.mod_princ = master_princ;
-    if ((retval = krb5_timeofday(edit_context, &mod_princ.mod_date))) {
-	com_err(argv[0], retval, "while fetching date");
+    if ((retval = krb5_timeofday(edit_context, &now))) {
+	com_err(argv[0], retval, "while getting current time");
 	krb5_free_principal(edit_context, entry.princ);
 	exit_status++;
 	free(canon);
 	return;
     }
-    if ((retval=krb5_dbe_encode_mod_princ_data(edit_context,
-					       &mod_princ,&entry))) {
-	com_err(argv[0], retval, "while setting mod_prince and mod_date");
+    if ((retval=krb5_dbe_update_mod_princ_data(edit_context,
+					       &entry, now, master_princ))) {
+	com_err(argv[0], retval, "while setting mod_princ_data");
 	krb5_free_principal(edit_context, entry.princ);
 	exit_status++;
 	free(canon);

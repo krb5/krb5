@@ -1,3 +1,8 @@
+Tue Jul  9 15:02:00 1996  Marc Horowitz  <marc@mit.edu>
+
+	* pre.in (SRVLIBS, SRVDEPLIBS, CLNTLIBS, CLNTDEPLIBS): added for
+ 	support of new aclocal.m4 KRB5_LIBRARIES macro
+
 Thu Jun 13 23:02:23 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* post.in,pre.in: break some things out from aclocal.m4 and put

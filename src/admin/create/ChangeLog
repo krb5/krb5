@@ -1,3 +1,10 @@
+Tue May  7 23:04:17 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kdb5_create.c (add_principal): convert to used new krb5_dbe_*
+ 	tl_data functions.
+
+	* configure.in: use USE_KADMSRV_LIBRARY instead of
+ 	USE_KADM_LIBRARY.
 
 Wed Dec 13 03:44:58 1995  Chris Provenzano (proven@mit.edu)
 

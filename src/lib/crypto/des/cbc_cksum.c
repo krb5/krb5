@@ -86,7 +86,6 @@ mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
 
     cksum->checksum_type = CKSUMTYPE_DESCBC;
     cksum->length = sizeof(mit_des_cblock);
-
     mit_des_cbc_cksum(in, cksum->contents, in_length, schedule, key);
 
     cleanup();

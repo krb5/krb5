@@ -27,6 +27,10 @@
 #include <strings.h>
 #endif
 
+/*
+ * $Id$
+ */
+
 /* get credentials corresponding to a key in the krb5 keytab.
    If the default name is requested, return the name in output_princ.
      If output_princ is non-NULL, the caller will use or free it, regardless
@@ -35,14 +39,13 @@
    */
 
 static OM_uint32 
-acquire_accept_cred(ctx, minor_status, desired_name, output_princ, cred)
-     void *ctx;
+acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_name_t desired_name;
      krb5_principal *output_princ;
      krb5_gss_cred_id_rec *cred;
 {
-   krb5_context context = ctx;
    krb5_error_code code;
    krb5_principal princ;
    krb5_keytab kt;
@@ -65,6 +68,7 @@ acquire_accept_cred(ctx, minor_status, desired_name, output_princ, cred)
    if (desired_name == (gss_name_t) NULL) {
       if (code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
 					 &princ)) {
+	 (void) krb5_kt_close(context, kt);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -76,6 +80,7 @@ acquire_accept_cred(ctx, minor_status, desired_name, output_princ, cred)
    /* iterate over the keytab searching for the principal */
 
    if (code = krb5_kt_start_seq_get(context, kt, &cur)) {
+      (void) krb5_kt_close(context, kt);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -92,16 +97,19 @@ acquire_accept_cred(ctx, minor_status, desired_name, output_princ, cred)
    if (code == KRB5_KT_END) {
       /* this means that the principal wasn't in the keytab */
       (void)krb5_kt_end_seq_get(context, kt, &cur);
+      (void) krb5_kt_close(context, kt);
       *minor_status = KG_KEYTAB_NOMATCH;
       return(GSS_S_CRED_UNAVAIL);
    } else if (code) {
       /* this means some error occurred reading the keytab */
       (void)krb5_kt_end_seq_get(context, kt, &cur);
+      (void) krb5_kt_close(context, kt);
       *minor_status = code;
       return(GSS_S_FAILURE);
    } else {
       /* this means that we found a matching entry */
       if (code = krb5_kt_end_seq_get(context, kt, &cur)) {
+	 (void) krb5_kt_close(context, kt);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -204,7 +212,6 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
       if (got_endtime == 0) {
 	 cred->tgt_expire = creds.times.endtime;
 	 got_endtime = 1;
-	 *minor_status = KG_TGT_MISSING;
       }
       krb5_free_cred_contents(context, &creds);
    }
@@ -214,6 +221,12 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
       (void)krb5_cc_end_seq_get(context, ccache, &cur);
       (void)krb5_cc_close(context, ccache);
       *minor_status = code;
+      return(GSS_S_FAILURE);
+   } else if (! got_endtime) {
+      /* this means the ccache was entirely empty */
+      (void)krb5_cc_end_seq_get(context, ccache, &cur);
+      (void)krb5_cc_close(context, ccache);
+      *minor_status = KG_EMPTY_CCACHE;
       return(GSS_S_FAILURE);
    } else {
       /* this means that we found an endtime to use. */
@@ -239,10 +252,9 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    
 /*ARGSUSED*/
 OM_uint32
-krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
+krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 		      desired_mechs, cred_usage, output_cred_handle,
 		      actual_mechs, time_rec)
-     void *ctx;
      OM_uint32 *minor_status;
      gss_name_t desired_name;
      OM_uint32 time_req;
@@ -252,12 +264,16 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
      gss_OID_set *actual_mechs;
      OM_uint32 *time_rec;
 {
-   krb5_context context = ctx;
+   krb5_context context;
    size_t i;
    krb5_gss_cred_id_t cred;
-   gss_OID_set mechs;
+   gss_OID_set valid_mechs, ret_mechs;
+   int req_old, req_new;
    OM_uint32 ret;
    krb5_error_code code;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    /* make sure all outputs are valid */
 
@@ -279,11 +295,26 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
    /* verify that the requested mechanism set is the default, or
       contains krb5 */
 
-   if (desired_mechs != GSS_C_NULL_OID_SET) {
-      for (i=0; i<desired_mechs->count; i++)
+   if (desired_mechs == GSS_C_NULL_OID_SET) {
+      valid_mechs = gss_mech_set_krb5_both;
+   } else {
+      req_old = 0;
+      req_new = 0;
+
+      for (i=0; i<desired_mechs->count; i++) {
+	 if (g_OID_equal(gss_mech_krb5_old, &(desired_mechs->elements[i])))
+	    req_old++;
 	 if (g_OID_equal(gss_mech_krb5, &(desired_mechs->elements[i])))
-	    break;
-      if (i == desired_mechs->count) {
+	    req_new++;
+      }
+
+      if (req_old && req_new) {
+	 valid_mechs = gss_mech_set_krb5_both;
+      } else if (req_old) {
+	 valid_mechs = gss_mech_set_krb5_old;
+      } else if (req_new) {
+	 valid_mechs = gss_mech_set_krb5;
+      } else {
 	 *minor_status = 0;
 	 return(GSS_S_BAD_MECH);
       }
@@ -300,6 +331,9 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
 
    cred->usage = cred_usage;
    cred->princ = NULL;
+   cred->actual_mechs = valid_mechs;
+   cred->prerfc_mech = req_old;
+   cred->rfc_mech = req_new;
 
    cred->keytab = NULL;
    cred->ccache = NULL;
@@ -390,7 +424,7 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
    /* create mechs */
 
    if (actual_mechs) {
-      if (! g_copy_OID_set(gss_mech_set_krb5, &mechs)) {
+      if (! g_copy_OID_set(cred->actual_mechs, &ret_mechs)) {
 	 if (cred->ccache)
 	    (void)krb5_cc_close(context, cred->ccache);
 	 if (cred->keytab)
@@ -406,8 +440,8 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
    /* intern the credential handle */
 
    if (! kg_save_cred_id((gss_cred_id_t) cred)) {
-      free(mechs->elements);
-      free(mechs);
+      free(ret_mechs->elements);
+      free(ret_mechs);
       if (cred->ccache)
 	 (void)krb5_cc_close(context, cred->ccache);
       if (cred->keytab)
@@ -424,19 +458,18 @@ krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
    *minor_status = 0;
    *output_cred_handle = (gss_cred_id_t) cred;
    if (actual_mechs)
-      *actual_mechs = mechs;
+      *actual_mechs = ret_mechs;
 
    return(GSS_S_COMPLETE);
 }
 
 /* V2 interface */
 OM_uint32
-krb5_gss_add_cred(ctx, minor_status, input_cred_handle,
+krb5_gss_add_cred(minor_status, input_cred_handle,
 		  desired_name, desired_mech, cred_usage,
 		  initiator_time_req, acceptor_time_req,
 		  output_cred_handle, actual_mechs, 
 		  initiator_time_rec, acceptor_time_rec)
-    void		*ctx;
     OM_uint32		*minor_status;
     gss_cred_id_t	input_cred_handle;
     gss_name_t		desired_name;
@@ -449,12 +482,19 @@ krb5_gss_add_cred(ctx, minor_status, input_cred_handle,
     OM_uint32		*initiator_time_rec;
     OM_uint32		*acceptor_time_rec;
 {
-    krb5_context	context = ctx;
     /*
-     * This does not apply to our single-mechanism implementation.  Until we
-     * come up with a better error code, return failure.
+     * This does not apply to our single-mechanism implementation.  Decide
+     * if the correct error is BAD_MECH or DUPLICATE_ELEMENT.
      */
+
+    /* verify that the requested mechanism is the default, or
+       is krb5 */
+
+    if ((desired_mech != GSS_C_NULL_OID) &&
+	(g_OID_equal(desired_mech, gss_mech_krb5)))
+       return(GSS_S_BAD_MECH);
+
     *minor_status = 0;
-    return(GSS_S_FAILURE);
+    return(GSS_S_DUPLICATE_ELEMENT);
 }
 

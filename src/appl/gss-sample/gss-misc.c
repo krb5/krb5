@@ -20,16 +20,21 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if !defined(lint) && !defined(__CODECENTER__)
+static char *rcsid = "$Header$";
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <errno.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
 
-#include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
+#include "gss-misc.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -37,9 +42,48 @@
 extern char *malloc();
 #endif
 
-static void display_status_1();
+FILE *display_file;
 
-FILE *display_file = NULL;
+static void display_status_1
+	PROTOTYPE( (char *m, OM_uint32 code, int type) );
+
+static int write_all(int fildes, char *buf, unsigned int nbyte)
+{
+     int ret;
+     char *ptr;
+
+     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
+	  ret = write(fildes, ptr, nbyte);
+	  if (ret < 0) {
+	       if (errno == EINTR)
+		    continue;
+	       return(ret);
+	  } else if (ret == 0) {
+	       return(ptr-buf);
+	  }
+     }
+
+     return(ptr-buf);
+}
+
+static int read_all(int fildes, char *buf, unsigned int nbyte)
+{
+     int ret;
+     char *ptr;
+
+     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
+	  ret = read(fildes, ptr, nbyte);
+	  if (ret < 0) {
+	       if (errno == EINTR)
+		    continue;
+	       return(ret);
+	  } else if (ret == 0) {
+	       return(ptr-buf);
+	  }
+     }
+
+     return(ptr-buf);
+}
 
 /*
  * Function: send_token
@@ -67,7 +111,7 @@ int send_token(s, tok)
 
      len = htonl(tok->length);
 
-     ret = write(s, (char *) &len, 4);
+     ret = write_all(s, (char *) &len, 4);
      if (ret < 0) {
 	  perror("sending token length");
 	  return -1;
@@ -79,7 +123,7 @@ int send_token(s, tok)
 	  return -1;
      }
 
-     ret = write(s, tok->value, tok->length);
+     ret = write_all(s, tok->value, tok->length);
      if (ret < 0) {
 	  perror("sending token data");
 	  return -1;
@@ -120,9 +164,8 @@ int recv_token(s, tok)
      gss_buffer_t tok;
 {
      int ret;
-     int readsofar = 0;
 
-     ret = read(s, (char *) &tok->length, 4);
+     ret = read_all(s, (char *) &tok->length, 4);
      if (ret < 0) {
 	  perror("reading token length");
 	  return -1;
@@ -143,18 +186,43 @@ int recv_token(s, tok)
 	  return -1;
      }
 
-     while (readsofar < tok->length) {
-	 ret = read(s, (char *) tok->value + readsofar, 
-		    tok->length - readsofar);
-	 readsofar += ret;
-	 if (ret < 0) {
-	     perror("reading token data");
-	     free(tok->value);
-	     return -1;
-	 }
+     ret = read_all(s, (char *) tok->value, tok->length);
+     if (ret < 0) {
+	  perror("reading token data");
+	  free(tok->value);
+	  return -1;
+     } else if (ret != tok->length) {
+	  fprintf(stderr, "sending token data: %d of %d bytes written\n", 
+		  ret, tok->length);
+	  free(tok->value);
+	  return -1;
      }
 
      return 0;
+}
+
+static void display_status_1(m, code, type)
+     char *m;
+     OM_uint32 code;
+     int type;
+{
+     OM_uint32 maj_stat, min_stat;
+     gss_buffer_desc msg;
+     OM_uint32 msg_ctx;
+     
+     msg_ctx = 0;
+     while (1) {
+	  maj_stat = gss_display_status(&min_stat, code,
+				       type, GSS_C_NULL_OID,
+				       &msg_ctx, &msg);
+	  if (display_file)
+	      fprintf(display_file, "GSS-API error %s: %s\n", m,
+		      (char *)msg.value); 
+	  (void) gss_release_buffer(&min_stat, &msg);
+	  
+	  if (!msg_ctx)
+	       break;
+     }
 }
 
 /*
@@ -183,32 +251,37 @@ void display_status(msg, maj_stat, min_stat)
      display_status_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
-static void display_status_1(m, code, type)
-     char *m;
-     OM_uint32 code;
-     int type;
+/*
+ * Function: display_ctx_flags
+ *
+ * Purpose: displays the flags returned by context initation in
+ *	    a human-readable form
+ *
+ * Arguments:
+ *
+ * 	int		ret_flags
+ *
+ * Effects:
+ *
+ * Strings corresponding to the context flags are printed on
+ * stdout, preceded by "context flag: " and followed by a newline
+ */
+
+void display_ctx_flags(flags)
+     OM_uint32 flags;
 {
-     OM_uint32 maj_stat, min_stat;
-     gss_buffer_desc msg;
-#ifdef	GSSAPI_V2
-     OM_uint32 msg_ctx;
-#else	/* GSSAPI_V2 */
-     int msg_ctx;
-#endif	/* GSSAPI_V2 */
-     
-     msg_ctx = 0;
-     while (1) {
-	  maj_stat = gss_display_status(&min_stat, code,
-				       type, GSS_C_NULL_OID,
-				       &msg_ctx, &msg);
-	  if (display_file)
-	      fprintf(display_file, "GSS-API error %s: %s\n", m,
-		      (char *)msg.value); 
-	  (void) gss_release_buffer(&min_stat, &msg);
-	  
-	  if (!msg_ctx)
-	       break;
-     }
+     if (flags & GSS_C_DELEG_FLAG)
+	  fprintf(display_file, "context flag: GSS_C_DELEG_FLAG\n");
+     if (flags & GSS_C_MUTUAL_FLAG)
+	  fprintf(display_file, "context flag: GSS_C_MUTUAL_FLAG\n");
+     if (flags & GSS_C_REPLAY_FLAG)
+	  fprintf(display_file, "context flag: GSS_C_REPLAY_FLAG\n");
+     if (flags & GSS_C_SEQUENCE_FLAG)
+	  fprintf(display_file, "context flag: GSS_C_SEQUENCE_FLAG\n");
+     if (flags & GSS_C_CONF_FLAG )
+	  fprintf(display_file, "context flag: GSS_C_CONF_FLAG \n");
+     if (flags & GSS_C_INTEG_FLAG )
+	  fprintf(display_file, "context flag: GSS_C_INTEG_FLAG \n");
 }
 
 void print_token(tok)
@@ -228,24 +301,3 @@ void print_token(tok)
     fprintf(display_file, "\n");
     fflush(display_file);
 }
-
-void display_buffer(buffer)
-	gss_buffer_desc buffer;
-{
-    char *namebuf;
-    
-    if (!display_file)
-	return;
-    namebuf = malloc(buffer.length+1);    
-    if (!namebuf) {
-	fprintf(stderr, "display_buffer: couldn't allocate buffer!\n");
-	exit(1);
-    }
-    strncpy(namebuf, buffer.value, buffer.length);
-    namebuf[buffer.length] = '\0';
-    fprintf(display_file, "%s", namebuf);
-    free(namebuf);
-}
-
-    
-    

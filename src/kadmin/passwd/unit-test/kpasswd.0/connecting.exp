@@ -1,0 +1,29 @@
+#
+# $Id$
+#
+
+set timeout 15
+
+load_lib "helpers.exp"
+
+if [info exist env(DEBUG)] { debug 1 }
+
+#
+# Here are the tests
+#
+
+test_initerr {test2} {C.4: empty old password (XXXX)} test2 {} \
+	5 {You must type a password.  Passwords must be at least one character long.}
+
+test_initerr {test2} {C.5: incorrect old password} test2 foobar \
+	2 "Old Kerberos password is incorrect. Please try again."
+
+# set timeout 60
+#
+#test_initerr {test2@SECURE-TEST-DEAD.OV.COM} {C.8: server up, daemon down} \
+#	test2 test2 \
+#	3 "" 
+#
+#test_initerr {test2@SECURE-TEST-DOWN.OV.COM} {C.8.5: server down} \
+#	test2 test2 \
+#	3 "${initerr_str}Cannot contact any KDC for requested realm"

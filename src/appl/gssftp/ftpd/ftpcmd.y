@@ -338,14 +338,14 @@ cmd:		USER SP username CRLF
 	|	STOR check_login SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
-				store((char *) $4, "w", 0);
+				store_file((char *) $4, "w", 0);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
 	|	APPE check_login SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
-				store((char *) $4, "a", 0);
+				store_file((char *) $4, "a", 0);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
@@ -387,7 +387,7 @@ cmd:		USER SP username CRLF
 	|	DELE check_login SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
-				delete((char *) $4);
+				delete_file((char *) $4);
 			if ($4 != NULL)
 				free((char *) $4);
 		}
@@ -535,7 +535,7 @@ cmd:		USER SP username CRLF
 	|	STOU check_login SP pathname CRLF
 		= {
 			if ($2 && $4 != NULL)
-				store((char *) $4, "w", 1);
+				store_file((char *) $4, "w", 1);
 			if ($4 != NULL)
 				free((char *) $4);
 		}

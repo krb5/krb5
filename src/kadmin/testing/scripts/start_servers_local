@@ -1,0 +1,196 @@
+#!/bin/sh
+
+DUMMY=${TESTDIR=$TOP/testing}
+DUMMY=${SAVE_FILES=$TESTDIR/scripts/save_files.sh}
+DUMMY=${FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl}
+DUMMY=${INITDB=$TESTDIR/scripts/init_db}
+DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
+DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
+DUMMY=${STOP_SERVERS_LOCAL=$TESTDIR/scripts/stop_servers_local}
+
+if [ -d /usr/tmp ]; then
+	usrtmp=/usr/tmp
+else
+	usrtmp=/var/tmp
+fi
+
+$STOP_SERVERS_LOCAL -start_servers
+
+# If it's set, set it to true
+VERBOSE=${VERBOSE_TEST:+true}
+# Otherwise, set it to false
+DUMMY=${VERBOSE:=false}
+
+if $VERBOSE; then
+	REDIRECT=
+else
+	REDIRECT='>/dev/null'
+fi
+
+v4files=false
+while :; do
+	case $1 in
+	-keysalt)
+		shift
+		if [ $# -gt 0 ]; then
+			keysalts="$keysalts $1"
+		else
+			break
+		fi
+		;;
+	-kdcport)
+		shift
+		if [ $# -gt 0 ]; then
+			kdcport=$1
+		else
+			break
+		fi
+		;;
+	-v4files)
+		if [ "`whoami`" != "root" ]; then
+			echo "You must be root to use -v4files!" 1>&2
+			exit 1
+		fi
+		v4files=true
+		;;
+	*)
+		break
+		;;
+	esac
+	shift
+done
+
+if [ $# -gt 1 ]; then
+	echo "Usage: $0 [-kdcport port] [-keysalts tuple] ... [top]" 1>&2
+	exit 1
+elif [ $# = 1 ]; then
+	TOP=$1
+	export TOP
+fi
+
+# fixup the system config files
+if $v4files; then
+	$SAVE_FILES || exit 1
+	$FIX_CONF_FILES || exit 1
+fi
+
+# create a fresh db
+
+$INITDB "$keysalts" || exit 1
+
+# Post-process the config files based on our arguments
+if [ "$keysalts" != "" ]; then
+	sedcmd="s/\([ 	]*supported_enctypes =\).*/\1 $keysalts/"
+	sed -e "$sedcmd" < /krb5/kdc.conf > /krb5/kdc.conf.new
+	mv /krb5/kdc.conf.new /krb5/kdc.conf
+fi
+if [ "$kdcport" != "" ] ; then
+	sedcmd="s/\(kdc_ports = .*\)[ 	]*/\1, $kdcport/"
+	sed -e "$sedcmd" < /krb5/kdc.conf > /krb5/kdc.conf.new
+	mv /krb5/kdc.conf.new /krb5/kdc.conf
+fi
+
+# allow admin to krlogin as root (for cleanup)
+DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
+hostname=`hostname`
+QUALNAME=`$TOP/testing/scripts/qualname $hostname`; export QUALNAME
+
+eval $SRVTCL <<'EOF' $REDIRECT
+source $env(TOP)/testing/tcl/util.t
+set r $env(REALM)
+set q $env(QUALNAME)
+puts stdout [ovsec_kadm_init $env(SRVTCL) mrroot null $r \
+	$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle]
+puts stdout [ovsec_kadm_create_principal $server_handle \
+	[simple_principal host/$q@$r] {OVSEC_KADM_PRINCIPAL} notathena]
+puts stdout [ovsec_kadm_destroy $server_handle]
+EOF
+
+# rm -f /etc/v5srvtab
+# eval $LOCAL_MAKE_KEYTAB -princ host/xCANONHOSTx /etc/v5srvtab $REDIRECT
+
+# run the servers (from the build tree)
+
+adm_start_file=/tmp/adm_server_start.$$
+kdc_start_file=/tmp/kdc_server_start.$$
+
+rm -f $kdc_start_file
+
+(trap "" 2; cd $TOP/../kdc; ./krb5kdc; touch $kdc_start_file) \
+	< /dev/null > $usrtmp/kdc-log 2>&1 &
+
+s=10
+max_s=60
+sofar_s=0
+timewait_s=300
+
+while true; do
+	rm -f $adm_start_file
+
+	(sleep 5; cd $TOP/server; ./kadmind $ovadm_args; \
+		touch $adm_start_file) < /dev/null > $usrtmp/kadm-log 2>&1 &
+
+	# wait until they start
+
+	while [ $sofar_s -le $max_s ]; do
+		if $VERBOSE; then
+			echo "Sleeping for $s seconds to allow servers" \
+				"to start..."
+		fi
+
+		sofar_s=`expr $sofar_s + $s`
+
+		sleep $s
+
+		if [ -f $adm_start_file -a -f $kdc_start_file ]; then
+			break
+		fi
+
+	done
+
+	if [ $sofar_s -le $max_s ]; then
+		if $VERBOSE; then
+			LOG_USER='log_user 1'
+		else
+			LOG_USER='log_user 0'
+		fi
+		if expect <<EOF
+		$LOG_USER
+		spawn telnet localhost 1751
+		expect {
+			"Connection refused" {
+				close
+				wait
+				exit 1
+			}
+			"Connected" {
+				send "close\n"
+				close
+				wait
+				exit 0
+			}
+			default {
+				catch {close}
+				wait
+				exit 1
+			}
+		}
+EOF
+		then
+			rm -f $kdc_start_file $adm_start_file
+			break
+		else
+			if $VERBOSE; then
+				echo "Could not connect to Admin server;" \
+					"attempting restart ($sofar_s" \
+					"seconds so far)."
+			fi
+			max_s=$timewait_s
+			continue
+		fi
+	else
+		echo "Admin server or KDC failed to start after $sofar_s" \
+			"seconds." 1>&2
+		exit 1
+	fi
+done

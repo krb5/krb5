@@ -1,0 +1,55 @@
+#
+# $Id$
+#
+
+set timeout 15
+
+load_lib "helpers.exp"
+
+if [info exist env(DEBUG)] { debug 1 }
+
+#
+# Here are the tests
+#
+
+if {[info exists env(KRB5CCNAME)]} {
+	unset env(KRB5CCNAME)
+}
+kdestroy
+
+#### no principal specified
+
+set whoami $USER
+test_win {} {B.7: default nonexisting ccache(1)} $whoami $whoami newpass
+test_win {} {B.7: default nonexisting ccache(2)} $whoami newpass $whoami
+
+kinit test2 test2
+test_win {} {B.4: default existing cache containing existing principal} \
+	test2 test2 newpass
+kdestroy
+
+set env(KRB5CCNAME) FILE:/tmp/ovsec_adm_test_ccache
+kinit test2 newpass
+test_win {} {B.3: specified existing cache containing existing principal} \
+	test2 newpass test2
+kdestroy
+unset env(KRB5CCNAME)
+
+#### principal on command line
+
+#
+test_win {test2} {B.14: existing principal, no realm} test2 test2 newpass
+
+#
+test_initerr {bogus} {B.15, C.6: non-existent principal, no realm} bogus bogus \
+	3 "${initerr_str}Client not found in Kerberos database"
+
+#
+test_win {test2@SECURE-TEST.OV.COM} {B.16: existing principal, with realm} \
+	test2 newpass test2
+
+#
+test_initerr {bogus@SECURE-TEST.OV.COM} \
+	{B.17: non-existent principal, with realm} \
+	bogus bogus \
+	3 "${initerr_str}Client not found in Kerberos database"

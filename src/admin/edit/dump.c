@@ -328,7 +328,7 @@ dump_k5beta_iterator(ptr, entry)
     krb5_error_code	retval;
     struct dump_args	*arg;
     char		*name, *mod_name;
-    krb5_tl_mod_princ	*mprinc;
+    krb5_principal	mod_princ;
     krb5_tl_data	*pwchg;
     krb5_key_data	*pkey, *akey, nullkey;
     krb5_timestamp	mod_date, last_pwd_change;
@@ -358,27 +358,24 @@ dump_k5beta_iterator(ptr, entry)
 	/*
 	 * Deserialize the modifier record.
 	 */
-	mprinc = (krb5_tl_mod_princ *) NULL;
 	mod_name = (char *) NULL;
+	mod_princ = NULL;
 	last_pwd_change = mod_date = 0;
 	pkey = akey = (krb5_key_data *) NULL;
-	if (!(retval = krb5_dbe_decode_mod_princ_data(arg->kcontext,
+	if (!(retval = krb5_dbe_lookup_mod_princ_data(arg->kcontext,
 						      entry,
-						      &mprinc))) {
-	    if (mprinc) {
-		if (mprinc->mod_princ) {
-		    /*
-		     * Flatten the modifier name.
-		     */
-		    if ((retval = krb5_unparse_name(arg->kcontext,
-						    mprinc->mod_princ,
-						    &mod_name)))
-			fprintf(stderr, mname_unp_err, arg->programname,
-				error_message(retval));
-		    krb5_free_principal(arg->kcontext, mprinc->mod_princ);
-		}
-		mod_date = mprinc->mod_date;
-		krb5_xfree(mprinc);
+						      &mod_date,
+						      &mod_princ))) {
+	    if (mod_princ) {
+		/*
+		 * Flatten the modifier name.
+		 */
+		if ((retval = krb5_unparse_name(arg->kcontext,
+						mod_princ,
+						&mod_name)))
+		    fprintf(stderr, mname_unp_err, arg->programname,
+			    error_message(retval));
+		krb5_free_principal(arg->kcontext, mod_princ);
 	    }
 	}
 	if (!mod_name)
@@ -387,11 +384,13 @@ dump_k5beta_iterator(ptr, entry)
 	/*
 	 * Find the last password change record and set it straight.
 	 */
-	for (pwchg = entry->tl_data;
-	     (pwchg) && (pwchg->tl_data_type != KRB5_TL_LAST_PWD_CHANGE);
-	     pwchg = pwchg->tl_data_next);
-	if (pwchg) {
-	    krb5_kdb_decode_int32(pwchg->tl_data_contents, last_pwd_change);
+	if (retval =
+	    krb5_dbe_lookup_last_pwd_change(arg->kcontext, entry,
+					    &last_pwd_change)) {
+	    fprintf(stderr, nokeys_err, arg->programname, name);
+	    krb5_xfree(mod_name);
+	    krb5_xfree(name);
+	    return(retval);
 	}
 
 	/*
@@ -823,7 +822,8 @@ find_record_end(f, fn, lineno)
 	putc(ch, stderr);
     }
 }
-
+
+#if 0
 /*
  * update_tl_data()	- Generate the tl_data entries.
  */
@@ -908,7 +908,8 @@ update_tl_data(kcontext, dbentp, mod_name, mod_date, last_pwd_change)
 
     return(kret);
 }
-
+#endif
+
 /*
  * process_k5beta_record()	- Handle a dump record in old format.
  *
@@ -1129,11 +1130,15 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 		    if (!(kret = krb5_parse_name(kcontext,
 						 mod_name,
 						 &mod_princ))) {
-			if (!(kret = update_tl_data(kcontext,
-						    &dbent,
-						    mod_princ,
-						    mod_date,
-						    last_pwd_change))) {
+			if (!(kret =
+			      krb5_dbe_update_mod_princ_data(kcontext,
+							     &dbent,
+							     mod_date,
+							     mod_princ)) &&
+			    !(kret =
+			      krb5_dbe_update_last_pwd_change(kcontext,
+							      &dbent,
+							      last_pwd_change))) {
 			    int one = 1;
 
 			    dbent.len = KRB5_KDB_V1_BASE_LENGTH;

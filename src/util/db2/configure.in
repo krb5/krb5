@@ -1,0 +1,63 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(db/db.c)
+AC_CONFIG_HEADER(obj/db-config.h)
+dnl checks for programs
+AC_PROG_CC
+AC_PROG_RANLIB
+
+AC_PATH_PROG(FALSE,false,:)
+AC_PATH_PROG(SH,sh,$FALSE)
+AC_PATH_PROG(SH5,sh5,$FALSE)
+AC_PATH_PROG(BASH,bash,$FALSE)
+
+AC_CACHE_CHECK([checking for shell with functions],local_cv_program_fctsh,
+[if $SH -c 'foo() { true; }; foo' > /dev/null 2>&1; then
+	local_cv_program_fctsh=$SH
+else
+	if $SH5 -c 'foo() { true; }; foo' > /dev/null 2>&1; then
+		local_cv_program_fctsh=$SH5
+	else
+		if $BASH -c 'foo() { true; }; foo' > /dev/null 2>&1; then
+			local_cv_program_fctsh=$BASH
+		else
+			local_cv_program_fctsh=$FALSE
+		fi
+	fi
+fi])
+
+FCTSH=$local_cv_program_fctsh
+AC_SUBST(FCTSH)
+
+dnl checks for libraries
+dnl checks for header files
+AC_CHECK_HEADERS(unistd.h)
+dnl checks for typedefs
+AC_TYPE_SIZE_T
+
+AC_CHECK_TYPE(ssize_t, int)
+
+AC_CHECK_TYPE(u_char, unsigned char)
+AC_CHECK_TYPE(u_short, unsigned short)
+AC_CHECK_TYPE(u_int, unsigned int)
+AC_CHECK_TYPE(u_long, unsigned long)
+
+AC_CHECK_TYPE(int8_t, signed char)
+AC_CHECK_TYPE(u_int8_t, unsigned char)
+AC_CHECK_TYPE(int16_t, short)
+AC_CHECK_TYPE(u_int16_t, unsigned short)
+AC_CHECK_TYPE(int32_t, int)
+AC_CHECK_TYPE(u_int32_t, unsigned int)
+dnl checks for structures
+dnl checks for compiler characteristics
+AC_C_BIGENDIAN
+AC_C_CONST
+dnl checks for library functions
+AC_CHECK_FUNC(memmove,,MEMMOVE_OBJ=memmove.o)
+AC_CHECK_FUNC(mkstemp,,MKSTEMP_OBJ=mkstemp.o)
+AC_CHECK_FUNC(strerror,,STRERROR_OBJ=strerror.o)
+AC_SUBST(MEMMOVE_OBJ)
+AC_SUBST(MKSTEMP_OBJ)
+AC_SUBST(STRERROR_OBJ)
+AC_CHECK_FUNCS(memmove mkstemp strerror)
+dnl checks for system services
+AC_OUTPUT(Makefile obj/Makefile)

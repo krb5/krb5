@@ -1,0 +1,81 @@
+Mon Jul 22 04:17:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (LIBS): add -lgen to LIBS whenever compile is
+ 	found.  Solaris requires it.
+
+	* chpass_util.c (_kadm5_chpass_principal_util): the calls to
+ 	kadm5_free_{princicpal,policy}_ent used server_handle instead of
+ 	lhandle, which caused problems in the api versioning code.
+
+Thu Jul 18 19:50:39 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK
+
+Mon Jul 15 16:52:44 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_init.c (_kadm5_init_any): use krb5_get_in_tkt_keytab
+ 	instead of changing krb5_defkeyname
+
+Mon Jul 15 16:36:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in (CLNTOBJS), AC_REPLACE_FUNCS: check for setenv, and
+ 	link against setenv.o if it's needed.
+
+Fri Jul 12 15:06:48 1996  Marc Horowitz  <marc@mit.edu>
+
+	* svr_iters.c (glob_to_regexp:append_realm): the semantics and
+ 	code were somewhat confused.  they are now fixed.
+
+	* logger.c (HAVE_*): turn all the "#if HAVE_*" into
+	"#ifdef HAVE_*"
+
+	* configure.in (AC_CHECK_FUNCS): check for the functions which
+ 	logger.c checks for.
+
+	* svr_principal.c (kadm5_get_principal): due to the the api
+ 	versioning, it is possible for this function to be called with a
+ 	three argument prototype.  in this case, do not modify mask,
+ 	because this will clobber the stack on some platforms.
+
+	* client_principal.c (kadm5_create_principal): be more careful
+ 	about what sorts of things are referenced, passed down, and passed
+ 	back if the caller is api v1.
+
+Wed Jul 10 01:29:34 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: added autoconf support
+
+Tue Jul  9 17:38:43 1996  Marc Horowitz  <marc@mit.edu>
+
+	* svr_iters.c (*_REGEXPS): rework the conditionals to operate
+ 	as functions of function symbols tested by configure.
+	* client_init.c (setenv, unsetenv declarations): make them the
+ 	same as the stdlib declarations, if they're going to be here at
+ 	all.
+	* Makefile.in: reworked to support building both libraries.  this
+ 	required a bunch of changes, including some coordinating ones in
+ 	aclocal.m4
+	
+Tue Jul  9 16:26:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_principal.c (kadm5_decrypt_key): add kadm5_decrypt_key
+
+Mon Jul  8 16:55:22 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_iters.c (kadm5_get_either): append local ream to globs with
+ 	no realm
+
+	* alt_prof.c: fix dbname, admin_dbname, and admin_lockfile to
+ 	derive from each other as in spec
+
+	* adb_policy.c: add create_db/destroy_db
+
+	* adb_openclose.c: add create_db/destroy_db, fix handling of
+ 	permanent locks, handle multiple lock files via static linked list
+
+	* adb.h: update create_db/destroy_db to make params instead of
+ 	explicit values
+
+	* Makefile.ov (TOP): Use ../../kadmin, not kadmin.ov
+	
+

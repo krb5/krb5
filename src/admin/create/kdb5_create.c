@@ -454,7 +454,7 @@ add_principal(context, princ, op, pblock)
     krb5_error_code 	  retval;
     krb5_db_entry 	  entry;
 
-    krb5_tl_mod_princ	  mod_princ;
+    krb5_timestamp	  now;
     struct iterate_args	  iargs;
 
     int			  nentries = 1;
@@ -470,10 +470,11 @@ add_principal(context, princ, op, pblock)
     if ((retval = krb5_copy_principal(context, princ, &entry.princ)))
 	goto error_out;
 
-    mod_princ.mod_princ = &db_create_princ;
-    if ((retval = krb5_timeofday(context, &mod_princ.mod_date)))
+    if ((retval = krb5_timeofday(context, &now)))
 	goto error_out;
-    if ((retval = krb5_dbe_encode_mod_princ_data(context, &mod_princ, &entry)))
+
+    if ((retval = krb5_dbe_update_mod_princ_data(context, &entry,
+						 now, &db_create_princ)))
 	goto error_out;
 
     switch (op) {

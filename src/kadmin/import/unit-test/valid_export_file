@@ -1,0 +1,27 @@
+OpenV*Secure V1.0	Tue Dec 21 14:18:18 1993
+policy	test-pol	0	10000	8	2	3	1
+policy	dict-only	0	0	1	1	1	1
+policy	once-a-min	30	0	1	1	1	1
+policy	test-pol-nopw	0	0	1	1	1	2
+princ	admin/delete@SECURE-TEST.OV.COM		0	0	0	0	
+princ	test3@SECURE-TEST.OV.COM		0	0	0	0	
+princ	admin/modify@SECURE-TEST.OV.COM		0	0	0	0	
+princ	ovsec_adm/changepw@SECURE-TEST.OV.COM		0	0	0	0	
+princ	test2@SECURE-TEST.OV.COM		0	0	0	0	
+princ	admin/pol@SECURE-TEST.OV.COM	test-pol-nopw	800	0	0	0	
+princ	admin/rename@SECURE-TEST.OV.COM		0	0	0	0	
+princ	test1@SECURE-TEST.OV.COM		0	0	0	0	
+princ	krbtgt/SECURE-TEST.OV.COM@SECURE-TEST.OV.COM		0	0	0	0	
+princ	pol3@SECURE-TEST.OV.COM	dict-only	800	0	0	0	
+princ	admin/get-pol@SECURE-TEST.OV.COM	test-pol-nopw	800	0	0	0	
+princ	admin/none@SECURE-TEST.OV.COM		0	0	0	0	
+princ	testuser@SECURE-TEST.OV.COM		0	0	0	0	
+princ	pol2@SECURE-TEST.OV.COM	once-a-min	800	0	0	0	
+princ	K/M@SECURE-TEST.OV.COM		0	0	0	0	
+princ	pol1@SECURE-TEST.OV.COM	test-pol	800	0	0	0	
+princ	ovsec_adm/history@SECURE-TEST.OV.COM		0	0	0	0	
+princ	admin@SECURE-TEST.OV.COM		0	0	0	0	
+princ	admin/add@SECURE-TEST.OV.COM		0	0	0	0	
+princ	admin/get@SECURE-TEST.OV.COM		0	0	0	0	
+princ	ovsec_adm/admin@SECURE-TEST.OV.COM		0	0	0	0	
+End of Database	25	records

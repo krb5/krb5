@@ -1,3 +1,11 @@
+Fri Jul 19 20:22:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: added AC_PROG_AWK and USE_GSSAPI_LIBRARY
+
+Tue Jul  9 16:14:33 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb524d.c: use kadm5 instead of kdb
+
 Tue Jul  9 07:16:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* test.c (krb4_print_ticket): Change addr to unsigned KRB4_32 from

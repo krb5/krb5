@@ -22,7 +22,10 @@
 
 #include "gssapiP_krb5.h"
 #include <memory.h>
-#include "rsa-md5.h"
+
+/*
+ * $Id$
+ */
 
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL.
@@ -44,19 +47,25 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    krb5_error_code code;
    int bodysize;
    int tmsglen;
+   int conflen;
    int signalg;
    int sealalg;
    gss_buffer_desc token;
    unsigned char *ptr;
+   krb5_checksum cksum;
    krb5_checksum desmac;
-   krb5_octet cbc_checksum[KRB5_MIT_DES_KEYSIZE];
-   krb5_MD5_CTX md5;
-   unsigned char *cksum;
+   krb5_checksum md5cksum;
+   char *data_ptr;
    krb5_timestamp now;
    unsigned char *plain;
+   int cksum_len;
    int plainlen;
+   int err;
+   int direction;
+   krb5_int32 seqnum;
+   OM_uint32 retval;
 
-   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
+   if (toktype == KG_TOK_SEAL_MSG) {
       message_buffer->length = 0;
       message_buffer->value = NULL;
    }
@@ -80,73 +89,109 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    ptr = (unsigned char *) input_token_buffer->value;
 
-   if (! g_verify_token_header((gss_OID) gss_mech_krb5, &bodysize,
-			       &ptr, toktype, input_token_buffer->length)) {
-      *minor_status = 0;
+   if (err = g_verify_token_header((gss_OID) ctx->mech_used, &bodysize,
+				   &ptr, toktype,
+				   input_token_buffer->length)) {
+      *minor_status = err;
       return(GSS_S_DEFECTIVE_TOKEN);
    }
-
-   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
-      tmsglen = bodysize-22;
 
    /* get the sign and seal algorithms */
 
    signalg = ptr[0] + (ptr[1]<<8);
    sealalg = ptr[2] + (ptr[3]<<8);
 
-   if (((signalg != 0) && (signalg != 1)) ||
-       (((toktype != KG_TOK_SEAL_MSG) &&
-	 (toktype != KG_TOK_WRAP_MSG)) && (sealalg != 0xffff)) ||
-       (((toktype == KG_TOK_SEAL_MSG) ||
-	 (toktype == KG_TOK_WRAP_MSG)) && 
-	((sealalg != 0xffff) && (sealalg != 0))) ||
-       (ptr[4] != 0xff) ||
-       (ptr[5] != 0xff)) {
-      *minor_status = 0;
-      return(GSS_S_DEFECTIVE_TOKEN);
+   /* Sanity checks */
+
+   if ((ptr[4] != 0xff) || (ptr[5] != 0xff)) {
+       *minor_status = 0;
+       return GSS_S_DEFECTIVE_TOKEN;
    }
+
+   if ((toktype != KG_TOK_SEAL_MSG) &&
+       (sealalg != 0xffff)) {
+       *minor_status = 0;
+       return GSS_S_DEFECTIVE_TOKEN;
+   }
+
+   /* in the current spec, there is only one valid seal algorithm per
+      key type, so a simple comparison is ok */
+
+   if ((toktype == KG_TOK_SEAL_MSG) &&
+       !((sealalg == 0xffff) ||
+	 (sealalg == ctx->sealalg))) {
+       *minor_status = 0;
+       return GSS_S_DEFECTIVE_TOKEN;
+   }
+
+   /* there are several mappings of seal algorithms to sign algorithms,
+      but few enough that we can try them all. */
+
+   if (((ctx->sealalg == 0) &&
+	(signalg > 1)) ||
+       ((ctx->sealalg == 1) &&
+	(signalg != 3))) {
+       *minor_status = 0;
+       return GSS_S_DEFECTIVE_TOKEN;
+   }
+
+   switch (signalg) {
+   case 0:
+   case 1:
+      cksum_len = 8;
+      break;
+   case 3:
+      cksum_len = 16;
+      break;
+   }
+
+   if (toktype == KG_TOK_SEAL_MSG)
+       tmsglen = bodysize-(14+cksum_len);
 
    /* get the token parameters */
 
    /* decode the message, if SEAL */
 
-   if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG)) {
-      if (sealalg == 0) {
+   if (toktype == KG_TOK_SEAL_MSG) {
+      if (sealalg != 0xffff) {
 	 if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
 	    *minor_status = ENOMEM;
 	    return(GSS_S_FAILURE);
 	 }
 
-	 if (code = kg_decrypt(&ctx->enc, NULL, ptr+22, plain, tmsglen)) {
+	 if (code = kg_decrypt(context, &ctx->enc, NULL,
+			       ptr+14+cksum_len, plain, tmsglen)) {
 	    xfree(plain);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
 	 }
       } else {
-	 plain = ptr+22;
+	 plain = ptr+14+cksum_len;
       }
 
       plainlen = tmsglen;
 
-      if (sealalg && ctx->big_endian)
+      if ((sealalg == 0xffff) && ctx->big_endian) {
 	 token.length = tmsglen;
-      else
-	 token.length = tmsglen - 8 - plain[tmsglen-1];
+      } else {
+	 conflen = kg_confounder_size(&ctx->enc);
+	 token.length = tmsglen - conflen - plain[tmsglen-1];
+      }
 
       if (token.length) {
-	 if ((token.value = xmalloc(token.length)) == NULL) {
-	    if (sealalg == 0)
+	 if ((token.value = (void *) xmalloc(token.length)) == NULL) {
+	    if (sealalg != 0xffff)
 	       xfree(plain);
 	    *minor_status = ENOMEM;
 	    return(GSS_S_FAILURE);
 	 }
 
-	 if (sealalg && ctx->big_endian)
+	 if ((sealalg == 0xffff) && ctx->big_endian)
 	    memcpy(token.value, plain, token.length);
 	 else
-	    memcpy(token.value, plain+8, token.length);
+	    memcpy(token.value, plain+conflen, token.length);
       }
-   } else if ((toktype == KG_TOK_SIGN_MSG) || (toktype == KG_TOK_MIC_MSG)) {
+   } else if (toktype == KG_TOK_SIGN_MSG) {
       token = *message_buffer;
       plain = token.value;
       plainlen = token.length;
@@ -159,81 +204,184 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    /* compute the checksum of the message */
 
-   if (signalg == 0) {
+   /* initialize the the cksum and allocate the contents buffer */
+   md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
+   md5cksum.length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
+   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL) {
+      if (sealalg != 0xffff)
+	 xfree(plain);
+      *minor_status = ENOMEM;
+      return(GSS_S_FAILURE);
+   }
+
+   switch (signalg) {
+   case 0:
+   case 3:
       /* compute the checksum of the message */
 
-      krb5_MD5Init(&md5);
-      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      /* 8 = bytes of token body to be checksummed according to spec */
+
+      if (! (data_ptr = (void *)
+	     xmalloc(8 + (ctx->big_endian ? token.length : plainlen)))) {
+	  xfree(md5cksum.contents);
+	  if (sealalg != 0xffff)
+	      xfree(plain);
+	  if (toktype == KG_TOK_SEAL_MSG)
+	      xfree(token.value);
+	  *minor_status = ENOMEM;
+	  return(GSS_S_FAILURE);
+      }
+
+      (void) memcpy(data_ptr, ptr-2, 8);
+
       if (ctx->big_endian)
-	 krb5_MD5Update(&md5, token.value, token.length);
+	  (void) memcpy(data_ptr+8, token.value, token.length);
       else
-	 krb5_MD5Update(&md5, plain, plainlen);
-      krb5_MD5Final(&md5);
+	  (void) memcpy(data_ptr+8, plain, plainlen);
 
-      if (sealalg == 0)
-	 xfree(plain);
+      code = krb5_calculate_checksum(context, md5cksum.checksum_type,
+				     data_ptr, 8 +
+				     (ctx->big_endian ? token.length :
+				      plainlen), 0, 0, &md5cksum);
+      xfree(data_ptr);
 
+      if (code) {
+	  xfree(md5cksum.contents);
+	  if (toktype == KG_TOK_SEAL_MSG)
+	      xfree(token.value);
+	  *minor_status = code;
+	  return(GSS_S_FAILURE);
+      }
+
+#if 0
       /* XXX this depends on the key being a single-des key, but that's
 	 all that kerberos supports right now */
-      desmac.length = sizeof(cbc_checksum);
-      desmac.contents = cbc_checksum;
-      if (code = krb5_calculate_checksum(context, CKSUMTYPE_DESCBC, md5.digest,
-					 16, ctx->seq.key->contents, 
+
+      /* initialize the the cksum and allocate the contents buffer */
+      cksum.checksum_type = CKSUMTYPE_DESCBC;
+      cksum.length = krb5_checksum_size(context, CKSUMTYPE_DESCBC);
+      if ((cksum.contents = (krb5_octet *) xmalloc(cksum.length)) == NULL) {
+	  xfree(md5cksum.contents);
+	  if (toktype == KG_TOK_SEAL_MSG)
+	      xfree(token.value);
+	  *minor_status = ENOMEM;
+	  return(GSS_S_FAILURE);
+      }
+
+      if (code = krb5_calculate_checksum(context, cksum.checksum_type,
+					 md5cksum.contents, 16,
+					 ctx->seq.key->contents, 
 					 ctx->seq.key->length,
-					 &desmac)) {
-	 if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
+					 &cksum)) {
+	 xfree(cksum.contents);
+	 xfree(md5cksum.contents);
+	 if (toktype == KG_TOK_SEAL_MSG)
 	    xfree(token.value);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
 
-      cksum = desmac.contents;
-   } else {
-      if (! ctx->seed_init) {
-	 if (code = kg_make_seed(ctx->subkey, ctx->seed)) {
-	    if (sealalg == 0)
-	       xfree(plain);
-	    if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
-	       xfree(token.value);
-	    *minor_status = code;
-	    return(GSS_S_FAILURE);
-	 }
-	 ctx->seed_init = 1;
+      code = memcmp(cksum.contents, ptr+14, cksum.length);
+
+      xfree(cksum.contents);
+#else
+      if (code = kg_encrypt(context, &ctx->seq,
+			    (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
+			     ctx->seq.key->contents : NULL),
+			    md5cksum.contents, md5cksum.contents, 16)) {
+	 xfree(md5cksum.contents);
+	 if (toktype == KG_TOK_SEAL_MSG)
+	    xfree(token.value);
+	 *minor_status = code;
+	 return GSS_S_FAILURE;
       }
 
-      krb5_MD5Init(&md5);
-      krb5_MD5Update(&md5, ctx->seed, sizeof(ctx->seed));
-      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
-      if (ctx->big_endian)
-	 krb5_MD5Update(&md5, token.value, token.length);
+      if (signalg == 0)
+	 cksum.length = 8;
       else
-	 krb5_MD5Update(&md5, plain, plainlen);
-      krb5_MD5Final(&md5);
+	 cksum.length = 16;
+      cksum.contents = md5cksum.contents + 16 - cksum.length;
 
-      if (sealalg == 0)
-	 xfree(plain);
+      code = memcmp(cksum.contents, ptr+14, cksum.length);
+#endif
+      break;
 
-      cksum = md5.digest;
+   case 1:
+       if (!ctx->seed_init &&
+	   (code = kg_make_seed(context, ctx->subkey, ctx->seed))) {
+	   xfree(md5cksum.contents);
+	   if (sealalg != 0xffff)
+	       xfree(plain);
+	   if (toktype == KG_TOK_SEAL_MSG)
+	       xfree(token.value);
+	   *minor_status = code;
+	   return GSS_S_FAILURE;
+       }
+
+      if (! (data_ptr = (void *)
+	     xmalloc(sizeof(ctx->seed) + 8 +
+		     (ctx->big_endian ? token.length : plainlen)))) {
+	  xfree(md5cksum.contents);
+	  if (sealalg == 0)
+	      xfree(plain);
+	  if (toktype == KG_TOK_SEAL_MSG)
+	      xfree(token.value);
+	  *minor_status = ENOMEM;
+	  return(GSS_S_FAILURE);
+      }
+      (void) memcpy(data_ptr, ptr-2, 8);
+      (void) memcpy(data_ptr+8, ctx->seed, sizeof(ctx->seed));
+      if (ctx->big_endian)
+	  (void) memcpy(data_ptr+8+sizeof(ctx->seed),
+			token.value, token.length);
+      else
+	  (void) memcpy(data_ptr+8+sizeof(ctx->seed),
+			plain, plainlen);
+      code = krb5_calculate_checksum(context, md5cksum.checksum_type,
+				     data_ptr, 8 + sizeof(ctx->seed) +
+				     (ctx->big_endian ? token.length :
+				      plainlen), 0, 0, &md5cksum);
+
+      xfree(data_ptr);
+
+      if (code) {
+	  xfree(md5cksum.contents);
+	  if (sealalg == 0)
+	      xfree(plain);
+	  if (toktype == KG_TOK_SEAL_MSG)
+	      xfree(token.value);
+	  *minor_status = code;
+	  return(GSS_S_FAILURE);
+      }
+
+      code = memcmp(md5cksum.contents, ptr+14, 8);
+
+   default:
+      *minor_status = 0;
+      return(GSS_S_DEFECTIVE_TOKEN);
    }
-      
+
+   xfree(md5cksum.contents);
+   if (sealalg != 0xffff)
+      xfree(plain);
+
    /* compare the computed checksum against the transmitted checksum */
 
-   if (memcmp(cksum, ptr+14, 8) != 0) {
-      if ((toktype == KG_TOK_SEAL_MSG) || (toktype == KG_TOK_WRAP_MSG))
+   if (code) {
+      if (toktype == KG_TOK_SEAL_MSG)
 	 xfree(token.value);
       *minor_status = 0;
       return(GSS_S_BAD_SIG);
    }
+      
 
-   /* XXX this is where the seq_num check would go */
-   
    /* it got through unscathed.  Make sure the context is unexpired */
 
-   if ((toktype == KG_TOK_SEAL_MSG) || (toktype = KG_TOK_WRAP_MSG))
+   if (toktype == KG_TOK_SEAL_MSG)
       *message_buffer = token;
 
    if (conf_state)
-      *conf_state = (sealalg == 0);
+      *conf_state = (sealalg != 0xffff);
 
    if (qop_state)
       *qop_state = GSS_C_QOP_DEFAULT;
@@ -248,8 +396,28 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
       return(GSS_S_CONTEXT_EXPIRED);
    }
 
-   /* success */
+   /* do sequencing checks */
+
+   if (code = kg_get_seq_num(context, &(ctx->seq), ptr+14, ptr+6, &direction,
+			     &seqnum)) {
+      if (toktype == KG_TOK_SEAL_MSG)
+	 xfree(token.value);
+      *minor_status = code;
+      return(GSS_S_BAD_SIG);
+   }
+
+   if ((ctx->initiate && direction != 0xff) ||
+       (!ctx->initiate && direction != 0)) {
+      if (toktype == KG_TOK_SEAL_MSG)
+	 xfree(token.value);
+      *minor_status = G_BAD_DIRECTION;
+      return(GSS_S_BAD_SIG);
+   }
+
+   retval = g_order_check(&(ctx->seqstate), seqnum);
+   
+   /* success or ordering violation */
 
    *minor_status = 0;
-   return(GSS_S_COMPLETE);
+   return(retval);
 }

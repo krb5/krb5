@@ -37,11 +37,21 @@ krb5_kt_default_name(context, name, namesize)
     int namesize;
 {
     char *cp = 0;
+    krb5_error_code code;
+    char *retval;
 
-    if (context->profile_secure == FALSE) cp = getenv("KRB5_KTNAME");
-    if (cp) {
+    if ((context->profile_secure == FALSE) &&
+	(cp = getenv("KRB5_KTNAME"))) {
 	strncpy(name, cp, namesize);
 	if (strlen(cp) >= (size_t) namesize)
+	    return KRB5_CONFIG_NOTENUFSPACE;
+    } else if (((code = profile_get_string(context->profile,
+					   "libdefaults",
+					   "default_keytab_name", NULL, 
+					   NULL, &retval)) == 0) &&
+	       retval) {
+	strncpy(name, retval, namesize);
+	if ((size_t) namesize < strlen(retval))
 	    return KRB5_CONFIG_NOTENUFSPACE;
     } else {
 #if defined (_MSDOS) || defined(_WIN32)

@@ -223,7 +223,7 @@ enter_pwd_key(cmdname, princ, ks_tuple, ks_tuple_count, entry)
 	ks_tuple = std_ks_tuple;
     }
     if ((retval = krb5_dbe_cpw(edit_context, &master_encblock, ks_tuple,
-			       ks_tuple_count, password, entry))) {
+			       ks_tuple_count, password, 0, entry))) {
 	com_err(cmdname, retval, "while storing entry for '%s'\n", princ);
         memset(password, 0, sizeof(password)); /* erase it */
 	krb5_dbe_free_contents(edit_context, entry);

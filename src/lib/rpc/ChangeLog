@@ -1,0 +1,20 @@
+Fri Jul 12 15:33:50 1996  Marc Horowitz  <marc@mit.edu>
+
+	* rpc_dtablesize.c (_rpc_dtablesize): put in a few checks to make
+ 	sure that the return value is never larger than FD_SETSIZE, since
+ 	this function's purpose is to be used as the first arg to
+ 	select().
+
+Tue Jul  9 17:56:54 1996  Marc Horowitz  <marc@mit.edu>
+
+	* rpc.h, netdb.h, getrpcent.c: Our build can (and will) require
+ 	that the rpc header files shipped with kerberos be used if the
+ 	library shipped with kerberos is used.  Thus, some simplifying
+ 	assumptions can be made, mostly having to do with the declaration
+ 	of struct rpcent and the related functions.
+	* clnt_perror.c: made usage of sys_errlist conditional on
+ 	NEED_SYS_ERRLIST
+	* configure.in (DECLARE_SYS_ERRLIST): added
+ 	* Makefile.in (DONE): added a few rules and variable so shared
+ 	library creation would work
+

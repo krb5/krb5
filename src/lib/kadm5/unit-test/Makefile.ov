@@ -1,0 +1,154 @@
+TOP	=	../../../kadmin
+include 	$(TOP)/config.mk/template
+
+CFLAGS  :=	$(CFLAGS) -DUSE_KADM5_API_VERSION=1
+
+LIBS	:= 	$(LIBADMCLNT) $(LIBCOM_ERR) $(LIBRPCLIB) $(LIBDYN) \
+		$(LIBGSSAPI_KRB5) $(LIBKDB5) \
+		$(LIBKRB5) $(LIBCRYPTO) $(LIBISODE) $(LIBTCL) $(LIBM) \
+		$(LIBDB) $(NDBMLIB) $(BSDLIB) $(NETLIB)
+
+INIT_SRCS =	init-test.c ../client_init.c
+DESTROY_SRCS =	destroy-test.c
+HANDLE_SRCS =	handle-test.c
+RANDKEY_SRCS =	randkey-test.c
+ITER_SRCS =	iter-test.c
+LOCKTEST_SRCS = lock-test.c
+SIZE_SRCS =	sizes-test.c
+
+PROG	=	init-test
+SRCS	=	$(INIT_SRCS)
+OBJS	=	init-test.o client_init.o
+
+client_init.o: ../client_init.c
+	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I.. $<
+
+expand Program
+
+PROG	=	destroy-test
+SRCS	=	$(DESTROY_SRCS)
+OBJS	=	destroy-test.o
+
+expand Program
+
+PROG	=	client-handle-test
+SRCS	=	$(HANDLE_SRCS)
+OBJS	=	handle-test.o
+
+expand Program
+
+PROG	=	client-iter-test
+SRCS	=	$(ITER_SRCS)
+OBJS	=	iter-test.o
+
+expand Program
+
+LIBS	:= 	$(LIBADMSRV) $(LIBCOM_ERR) $(LIBRPCLIB) $(LIBDYN) \
+		$(LIBGSSAPI_KRB5) $(LIBKDB5) $(LIBKRB5) \
+		$(LIBCRYPTO) $(LIBISODE) $(LIBTCL) $(LIBM) $(LIBDB) \
+		$(NDBMLIB) $(BSDLIB) $(NETLIB) 
+
+PROG	=	randkey-test
+SRCS	=	$(RANDKEY_SRCS)
+OBJS	=	randkey-test.o
+
+expand Program
+
+PROG	=	server-handle-test
+SRCS	=	$(HANDLE_SRCS)
+OBJS	=	handle-test.o
+
+expand Program
+
+PROG	=	lock-test
+SRCS	=	$(LOCKTEST_SRCS)
+OBJS	=	lock-test.o
+
+expand Program
+
+LIBS	:=	$(LIBS) $(REGEXLIB)
+PROG	=	server-iter-test
+SRCS	=	$(ITER_SRCS)
+OBJS	=	iter-test.o
+
+expand Program
+
+PROG	=	sizes-test
+SRCS	=	$(SIZE_SRCS)
+OBJS	=	sizes-test.o
+
+expand Program
+
+SRCS	=	$(INIT_SRCS) $(DESTROY_SRCS) $(HANDLE_SRCS) \
+		$(RANDKEY_SRCS) $(LOCKTEST_SRCS) $(ITER_SRCS) \
+		$(SIZE_SRCS)
+
+expand Depend
+
+unit-test:: unit-test-client unit-test-server
+
+unit-test-client: unit-test-client-setup unit-test-client-body \
+	unit-test-client-cleanup
+
+unit-test-server: unit-test-server-setup unit-test-server-body \
+	unit-test-server-cleanup
+
+test-randkey:: randkey-test
+	./randkey-test
+
+test-handle-server:: server-handle-test
+	./server-handle-test
+
+test-handle-client:: client-handle-test
+	./client-handle-test
+
+test-noauth: init-test
+	./init-test
+
+test-destroy: destroy-test
+	./destroy-test
+
+test-sizes: sizes-test
+	./sizes-test
+
+unit-test-client-setup::
+	$(START_SERVERS)
+
+unit-test-client-cleanup::
+	$(STOP_SERVERS)
+
+unit-test-server-setup::
+	$(START_SERVERS_LOCAL)
+
+unit-test-server-cleanup::
+	$(STOP_SERVERS_LOCAL)
+
+capi.0: api.0
+	-rm -f capi.0
+	ln -s api.0 capi.0
+
+capi.2: api.2
+	-rm -f capi.2
+	ln -s api.2 capi.2
+
+unit-test-client-body: capi.0 capi.2 site.exp test-noauth test-destroy test-handle-client test-sizes
+	$(RUNTEST) --tool capi API=$(CLNTTCL) KDBFIVE_EDIT=$(TOP)/../admin/edit/kdb5_edit KINIT=$(TOP)/../clients/kinit/kinit KDESTROY=$(TOP)/../clients/kdestroy/kdestroy KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=1
+
+sapi.0: api.0
+	-rm -f sapi.0
+	ln -s api.0 sapi.0
+
+sapi.1: api.1
+	-rm -f sapi.1
+	ln -s api.1 sapi.1
+
+sapi.2: api.2
+	-rm -f sapi.2
+	ln -s api.2 sapi.2
+
+unit-test-server-body: sapi.0 sapi.1 sapi.2 site.exp randkey-test test-handle-server \
+	lock-test test-sizes
+	$(RUNTEST) --tool sapi API=$(SRVTCL) LOCKTEST=./lock-test KDBFIVE_EDIT=$(TOP)/../admin/edit/kdb5_edit KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=0
+
+clean::
+	$(CLEAN) -r *.log *.plog *.sum *.psum unit-test-log.*

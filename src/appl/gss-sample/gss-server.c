@@ -20,6 +20,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if !defined(lint) && !defined(__CODECENTER__)
+static char *rcsid = "$Header$";
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -29,11 +33,9 @@
 #endif
 #include <stdlib.h>
 #include <ctype.h>
-#include <sys/time.h>
-#include <time.h>
 
-#include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
+#include "gss-misc.h"
 
 #ifdef USE_STRING_H
 #include <string.h>
@@ -41,292 +43,16 @@
 #include <strings.h>
 #endif
 
-int create_socket();
-
-int send_token();
-int recv_token();
-void display_status();
-int test_import_export_context();
-void print_token();
-
-int server_acquire_creds();
-int server_establish_context();
-int sign_server();
-
-extern FILE *display_file;
-FILE *log;
-
-int verbose = 0;
-
-void
 usage()
 {
-     fprintf(stderr, "Usage: gss-server [-port port] [-v2] [-inetd] [-logfile file] service_name\n");
+     fprintf(stderr, "Usage: gss-server [-port port] [-verbose]\n");
+     fprintf(stderr, "       [-inetd] [-logfile file] [service_name]\n");
      exit(1);
 }
 
-int
-main(argc, argv)
-     int argc;
-     char **argv;
-{
-     char *service_name;
-     u_short port = 4444;
-     int s;
-     int do_inetd = 0;
-     int dov2 = 0;
-     int once = 0;
+FILE *log;
 
-     log = stdout;
-     display_file = stdout;
-     argc--; argv++;
-     while (argc) {
-	  if (strcmp(*argv, "-port") == 0) {
-	       argc--; argv++;
-	       if (!argc) usage();
-	       port = atoi(*argv);
-	  } else if (strcmp(*argv, "-inetd") == 0) {
-	      do_inetd = 1;
-	      display_file = 0;
-	  } else if (strcmp(*argv, "-verbose") == 0) {
-	      verbose = 1;
-	  } else if (strcmp(*argv, "-v2") == 0) {
-	      dov2 = 1;
-	  } else if (strcmp(*argv, "-once") == 0) {
-	      once = 1;
-	  } else if (strcmp(*argv, "-logfile") == 0) {
-	      argc--; argv++;
-	      if (!argc) usage();
-	      log = fopen(*argv, "a");
-	      display_file = log;
-	      if (!log) {
-		  perror(*argv);
-		  exit(1);
-	      }
-	  } else
-	       break;
-	  argc--; argv++;
-     }
-     if (argc != 1)
-	  usage();
-
-     service_name = *argv;
-
-     if (do_inetd == 0) {
-	 if ((s = create_socket(port)) < 0)
-	     exit(1);
-     } else {
-	 s = -1;
-	 close(1);
-	 close(2);
-     }
-
-     if (sign_server(s, service_name, dov2, once) < 0)
-	  exit(1);
-     
-     /*NOTREACHED*/
-     return 0;
-}
-
-/*
- * Function: create_socket
- *
- * Purpose: Opens a listening TCP socket.
- *
- * Arguments:
- *
- * 	port		(r) the port number on which to listen
- *
- * Returns: the listening socket file descriptor, or -1 on failure
- *
- * Effects:
- *
- * A listening socket on the specified port and created and returned.
- * On error, an error message is displayed and -1 is returned.
- */
-int create_socket(port)
-     u_short port;
-{
-     struct sockaddr_in saddr;
-     int s;
-     int on = 1;
-     
-     saddr.sin_family = AF_INET;
-     saddr.sin_port = htons(port);
-     saddr.sin_addr.s_addr = INADDR_ANY;
-
-     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	  perror("creating socket");
-	  return -1;
-     }
-     /* Let the socket be reused right away */
-     (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
-     if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
-	  perror("binding socket");
-	  return -1;
-     }
-     if (listen(s, 5) < 0) {
-	  perror("listening on socket");
-	  return -1;
-     }
-     return s;
-}
-
-/*
- * Function: sign_server
- *
- * Purpose: Performs the "sign" service.
- *
- * Arguments:
- *
- * 	s		(r) a TCP socket on which to listen for connections.
- * 			If s is -1, then assume that we were started out of 
- * 			inetd and use file descriptor 0.
- * 	service_name	(r) the ASCII name of the GSS-API service to
- * 			establish a context as
- *	dov2		(r) a boolean indicating whether we should use GSSAPI
- *			V2 interfaces, if available.
- *	once		(r) a boolean indicating whether we should
- * 			only accept one connection, then exit.
- * 
- * Returns: -1 on error
- *
- * Effects:
- *
- * sign_server acquires GSS-API credentials for service_name and then
- * loops forever accepting TCP connections on s, establishing a
- * context, and performing a single sign request.
- *
- * A sign request is a single GSS-API sealed token.  The token is
- * unsealed and a signature block, produced with gss_sign, is returned
- * to the sender.  The context is the destroyed and the connection
- * closed.
- *
- * If any error occurs, -1 is returned.
- */
-int sign_server(s, service_name, dov2, once)
-     int s;
-     char *service_name;
-     int dov2;
-     int once;
-{
-     gss_cred_id_t server_creds;     
-     gss_buffer_desc client_name, xmit_buf, msg_buf;
-     gss_ctx_id_t context;
-     OM_uint32 maj_stat, min_stat;
-     int i,s2;
-     time_t	now;
-     char	*cp;
-     
-     if (server_acquire_creds(service_name, &server_creds) < 0)
-	  return -1;
-     
-     while (1) {
-	  if (s >= 0) {
-	       /* Accept a TCP connection */
-	      if ((s2 = accept(s, NULL, 0)) < 0) {
-		    perror("accepting connection");
-		    exit(1);
-	       }
-	  } else 
-	       s2 = 0;
-
-	  /* Establish a context with the client */
-	  if (server_establish_context(s2, server_creds, &context,
-				       &client_name) < 0)
-	       break;
-	  
-	  time(&now);
-	  fprintf(log, "Accepted connection: \"%s\" at %s", 
-		  (char *) client_name.value, ctime(&now));
-	  (void) gss_release_buffer(&min_stat, &client_name);
-
-	  if (dov2) {
-		  for (i=0; i < 3; i++)
-			  if (test_import_export_context(&context))
-				  break;
-		  if (i < 3)
-			  break;
-	  }
-
-	  /* Receive the sealed message token */
-	  if (recv_token(s2, &xmit_buf) < 0)
-	       break;
-	  
-	  if (verbose && log) {
-	      fprintf(log, "Sealed message token:\n");
-	      print_token(xmit_buf);
-	  }
-
-#ifdef	GSSAPI_V2
-	  if (dov2)
-	      maj_stat = gss_unwrap(&min_stat, context, &xmit_buf, &msg_buf,
-				    (int *) NULL, (gss_qop_t *) NULL);
-	  else
-#endif	/* GSSAPI_V2 */
-	  /* Unseal the message token */
-	  maj_stat = gss_unseal(&min_stat, context, &xmit_buf,
-				&msg_buf, NULL, NULL);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	       display_status("unsealing message", maj_stat, min_stat);
-	       break;
-	  }
-
-	  (void) gss_release_buffer(&min_stat, &xmit_buf);
-
-	  fprintf(log, "Received message: ");
-	  cp = msg_buf.value;
-	  if (isprint(cp[0]) && isprint(cp[1]))
-	      fprintf(log, "\"%s\"\n", cp);
-	  else {
-	      printf("\n");
-	      print_token(msg_buf);
-	  }
-	  
-	  /* Produce a signature block for the message */
-#ifdef	GSSAPI_V2
-	  if (dov2)
-	      maj_stat = gss_get_mic(&min_stat, context, GSS_C_QOP_DEFAULT,
-				     &msg_buf, &xmit_buf);
-	  else
-#endif	/* GSSAPI_V2 */
-	  maj_stat = gss_sign(&min_stat, context, GSS_C_QOP_DEFAULT,
-			      &msg_buf, &xmit_buf);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	       display_status("signing message", maj_stat, min_stat);
-	       break;
-	  }
-
-	  (void) gss_release_buffer(&min_stat, &msg_buf);
-
-	  /* Send the signature block to the client */
-	  if (send_token(s2, &xmit_buf) < 0)
-	       break;
-
-	  (void) gss_release_buffer(&min_stat, &xmit_buf);
-
-	  /* Delete context */
-	  maj_stat = gss_delete_sec_context(&min_stat, &context, &xmit_buf);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	       display_status("deleting context", maj_stat, min_stat);
-	       break;
-	  }
-
-	  (void) gss_release_buffer(&min_stat, &xmit_buf);
-
-	  /* Close TCP connection */
-	  close(s2);
-
-	  fflush(log);
-
-	  if (s < 0 || once)
-	       break;
-     }
-
-     /*NOTREACHED*/
-     (void) gss_release_cred(&min_stat, &server_creds);
-     return -1;
-}
+int verbose = 0;
 
 /*
  * Function: server_acquire_creds
@@ -400,17 +126,17 @@ int server_acquire_creds(service_name, server_creds)
  * in client_name and 0 is returned.  If unsuccessful, an error
  * message is displayed and -1 is returned.
  */
-int server_establish_context(s, server_creds, context, client_name)
+int server_establish_context(s, server_creds, context, client_name, ret_flags)
      int s;
      gss_cred_id_t server_creds;
      gss_ctx_id_t *context;
      gss_buffer_t client_name;
+     OM_uint32 *ret_flags;
 {
      gss_buffer_desc send_tok, recv_tok;
      gss_name_t client;
      gss_OID doid;
      OM_uint32 maj_stat, min_stat;
-     OM_uint32 ret_flags;
 
      *context = GSS_C_NO_CONTEXT;
      
@@ -432,7 +158,7 @@ int server_establish_context(s, server_creds, context, client_name)
 				      &client,
 				      &doid,
 				      &send_tok,
-				      &ret_flags,
+				      ret_flags,
 				      NULL, 	/* ignore time_rec */
 				      NULL); 	/* ignore del_cred_handle */
 
@@ -441,8 +167,9 @@ int server_establish_context(s, server_creds, context, client_name)
 	       (void) gss_release_buffer(&min_stat, &recv_tok);
 	       return -1;
 	  }
+
 	  (void) gss_release_buffer(&min_stat, &recv_tok);
-	  
+
 	  if (send_tok.length != 0) {
 	      if (verbose && log) {
 		  fprintf(log,
@@ -457,14 +184,17 @@ int server_establish_context(s, server_creds, context, client_name)
 
 	       (void) gss_release_buffer(&min_stat, &send_tok);
 	  }
-	  if (maj_stat == GSS_S_CONTINUE_NEEDED)
-	      if (log)
-		  fprintf(log, "continue needed...");
 	  if (log) {
-	      fprintf(log, "\n");
+	      if (maj_stat == GSS_S_CONTINUE_NEEDED)
+		  fprintf(log, "\n");
+	      else
+		  fprintf(log, "continue needed...\n");
 	      fflush(log);
 	  }
      } while (maj_stat == GSS_S_CONTINUE_NEEDED);
+
+     /* display the flags */
+     display_ctx_flags(*ret_flags);
 
      maj_stat = gss_display_name(&min_stat, client, client_name, &doid);
      if (maj_stat != GSS_S_COMPLETE) {
@@ -479,42 +209,232 @@ int server_establish_context(s, server_creds, context, client_name)
      return 0;
 }
 
-static float timeval_subtract(tv1, tv2)
-	struct timeval *tv1, *tv2;
+/*
+ * Function: create_socket
+ *
+ * Purpose: Opens a listening TCP socket.
+ *
+ * Arguments:
+ *
+ * 	port		(r) the port number on which to listen
+ *
+ * Returns: the listening socket file descriptor, or -1 on failure
+ *
+ * Effects:
+ *
+ * A listening socket on the specified port and created and returned.
+ * On error, an error message is displayed and -1 is returned.
+ */
+int create_socket(port)
+     u_short port;
 {
-	return ((tv1->tv_sec - tv2->tv_sec) +
-		((float) (tv1->tv_usec - tv2->tv_usec)) / 1000000);
+     struct sockaddr_in saddr;
+     int s;
+     int on = 1;
+     
+     saddr.sin_family = AF_INET;
+     saddr.sin_port = htons(port);
+     saddr.sin_addr.s_addr = INADDR_ANY;
+
+     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	  perror("creating socket");
+	  return -1;
+     }
+     /* Let the socket be reused right away */
+     (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
+     if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
+	  perror("binding socket");
+	  (void) close(s);
+	  return -1;
+     }
+     if (listen(s, 5) < 0) {
+	  perror("listening on socket");
+	  (void) close(s);
+	  return -1;
+     }
+     return s;
 }
 
-int test_import_export_context(context)
-	gss_ctx_id_t *context;
+/*
+ * Function: sign_server
+ *
+ * Purpose: Performs the "sign" service.
+ *
+ * Arguments:
+ *
+ * 	s		(r) a TCP socket on which a connection has been
+ *			accept()ed
+ * 	service_name	(r) the ASCII name of the GSS-API service to
+ * 			establish a context as
+ * 
+ * Returns: -1 on error
+ *
+ * Effects:
+ *
+ * sign_server establishes a context, and performs a single sign request.
+ *
+ * A sign request is a single GSS-API sealed token.  The token is
+ * unsealed and a signature block, produced with gss_sign, is returned
+ * to the sender.  The context is the destroyed and the connection
+ * closed.
+ *
+ * If any error occurs, -1 is returned.
+ */
+int sign_server(s, server_creds)
+     int s;
+     gss_cred_id_t server_creds;
 {
-	OM_uint32	min_stat, maj_stat;
-	gss_buffer_desc context_token;
-	struct timeval tm1, tm2;
-	
-	/*
-	 * Attempt to save and then restore the context.
-	 */
-	gettimeofday(&tm1, (struct timezone *)0);
-	maj_stat = gss_export_sec_context(&min_stat, context, &context_token);
-	if (maj_stat != GSS_S_COMPLETE) {
-		display_status("exporting context", maj_stat, min_stat);
-		return 1;
-	}
-	gettimeofday(&tm2, (struct timezone *)0);
-	if (verbose && log)
-		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
-			context_token.length, timeval_subtract(&tm2, &tm1));
-	maj_stat = gss_import_sec_context(&min_stat, &context_token, context);
-	if (maj_stat != GSS_S_COMPLETE) {
-		display_status("importing context", maj_stat, min_stat);
-		return 1;
-	}
-	gettimeofday(&tm1, (struct timezone *)0);
-	if (verbose && log)
-		fprintf(log, "Importing context: %7.4f seconds\n",
-			timeval_subtract(&tm1, &tm2));
-	(void) gss_release_buffer(&min_stat, &context_token);
-	return 0;
+     gss_buffer_desc client_name, xmit_buf, msg_buf;
+     gss_ctx_id_t context;
+     OM_uint32 maj_stat, min_stat;
+     int i, conf_state, ret_flags;
+     char	*cp;
+     
+     /* Establish a context with the client */
+     if (server_establish_context(s, server_creds, &context,
+				  &client_name, &ret_flags) < 0)
+	return(-1);
+	  
+     printf("Accepted connection: \"%.*s\"\n",
+	    client_name.length, client_name.value);
+     (void) gss_release_buffer(&min_stat, &client_name);
+
+     /* Receive the sealed message token */
+     if (recv_token(s, &xmit_buf) < 0)
+	return(-1);
+	  
+     if (verbose && log) {
+	fprintf(log, "Sealed message token:\n");
+	print_token(&xmit_buf);
+     }
+
+     maj_stat = gss_unwrap(&min_stat, context, &xmit_buf, &msg_buf,
+			   &conf_state, (gss_qop_t *) NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	display_status("unsealing message", maj_stat, min_stat);
+	return(-1);
+     } else if (! conf_state) {
+	fprintf(stderr, "Warning!  Message not encrypted.\n");
+     }
+
+     (void) gss_release_buffer(&min_stat, &xmit_buf);
+
+     fprintf(log, "Received message: ");
+     cp = msg_buf.value;
+     if (isprint(cp[0]) && isprint(cp[1]))
+	fprintf(log, "\"%s\"\n", cp);
+     else {
+	printf("\n");
+	print_token(&msg_buf);
+     }
+	  
+     /* Produce a signature block for the message */
+     maj_stat = gss_get_mic(&min_stat, context, GSS_C_QOP_DEFAULT,
+			    &msg_buf, &xmit_buf);
+     if (maj_stat != GSS_S_COMPLETE) {
+	display_status("signing message", maj_stat, min_stat);
+	return(-1);
+     }
+
+     (void) gss_release_buffer(&min_stat, &msg_buf);
+
+     /* Send the signature block to the client */
+     if (send_token(s, &xmit_buf) < 0)
+	return(-1);
+
+     (void) gss_release_buffer(&min_stat, &xmit_buf);
+
+     /* Delete context */
+     maj_stat = gss_delete_sec_context(&min_stat, &context, NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	display_status("deleting context", maj_stat, min_stat);
+	return(-1);
+     }
+
+     fflush(log);
+
+     return(0);
+}
+
+int
+main(argc, argv)
+     int argc;
+     char **argv;
+{
+     char *service_name;
+     gss_cred_id_t server_creds;
+     OM_uint32 min_stat;
+     u_short port = 4444;
+     int s;
+     int once = 0;
+     int do_inetd = 0;
+
+     log = stdout;
+     display_file = stdout;
+     argc--; argv++;
+     while (argc) {
+	  if (strcmp(*argv, "-port") == 0) {
+	       argc--; argv++;
+	       if (!argc) usage();
+	       port = atoi(*argv);
+	  } else if (strcmp(*argv, "-verbose") == 0) {
+	      verbose = 1;
+	  } else if (strcmp(*argv, "-once") == 0) {
+	      once = 1;
+	  } else if (strcmp(*argv, "-inetd") == 0) {
+	      do_inetd = 1;
+	  } else if (strcmp(*argv, "-logfile") == 0) {
+	      argc--; argv++;
+	      if (!argc) usage();
+	      log = fopen(*argv, "a");
+	      display_file = log;
+	      if (!log) {
+		  perror(*argv);
+		  exit(1);
+	      }
+	  } else
+	       break;
+	  argc--; argv++;
+     }
+     if (argc != 1)
+	  usage();
+
+     if ((*argv)[0] == '-')
+	  usage();
+
+     service_name = *argv;
+
+     if (server_acquire_creds(service_name, &server_creds) < 0)
+	 return -1;
+     
+     if (do_inetd) {
+	 close(1);
+	 close(2);
+
+	 sign_server(0, server_creds);
+	 close(0);
+     } else {
+	 int stmp;
+
+	 if (stmp = create_socket(port)) {
+	     do {
+		 /* Accept a TCP connection */
+		 if ((s = accept(stmp, NULL, 0)) < 0) {
+		     perror("accepting connection");
+		 } else {
+		     /* this return value is not checked, because there's
+			not really anything to do if it fails */
+		     sign_server(s, server_creds);
+		 }
+	     } while (!once);
+	 }
+
+	 close(stmp);
+     }
+
+     (void) gss_release_cred(&min_stat, &server_creds);
+
+     /*NOTREACHED*/
+     (void) close(s);
+     return 0;
 }

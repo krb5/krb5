@@ -1,0 +1,26 @@
+#
+# $Id$
+#
+
+set timeout 15
+
+load_lib "helpers.exp"
+
+#
+# Here are the tests
+#
+
+mytest {A.1: two args} {foo bar} 7 {
+	-re {[a-z./]+passwd: Usage: [a-z./]+passwd \[principal_name\]} { mypass }
+}
+
+mytest {A.2: three args} {foo bar baz} 7 {
+	-re {[a-z./]+passwd: Usage: [a-z./]+passwd \[principal_name\]} { mypass }
+}
+
+set env(KRB5CCNAME) bogus_type:bogus_ccname
+mytest {B.5: malformed ccache name} {} 6 {
+	-re {[a-z./]+passwd: Unknown credential cache type while reading principal name from credential cache} { mypass }
+}
+unset env(KRB5CCNAME)
+

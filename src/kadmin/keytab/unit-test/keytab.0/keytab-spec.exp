@@ -1,0 +1,47 @@
+#
+# $Id$
+#
+
+set timeout 10
+
+load_lib "helpers.exp"
+
+if {[regexp {(.*/)?([^/]*)} $KEYTAB dummy dir progname] == 0} {
+	error "cannot set progname from $KEYTAB"
+}
+
+set hname [exec $hostname]
+set qname [exec $qualname $hname]
+
+set testfile1 /tmp/keytab-test1
+set testfile2 /tmp/keytab-test2
+
+if {[info exists env(KRB5_KTNAME)]} {
+    set ktname_orig $env(KRB5_KTNAME)
+    unset env(KRB5_KTNAME)
+}
+
+setup_keytab "K1" WRFILE:/krb5/v5srvtab admin admin "host/$qname"
+klist_check "K1" FILE:/krb5/v5srvtab "host/$qname 0" 
+keytab_run "K1" "-a host/$qname" 0
+klist_check "K1" FILE:/krb5/v5srvtab "host/$qname 0" "host/$qname 0"
+keytab_run "K1" "-r host/$qname old" 0
+klist_check "K1" FILE:/krb5/v5srvtab "host/$qname 0"
+
+if {[info exists ktname_orig]} {
+    set env(KRB5_KTNAME) $ktname_orig
+}
+
+setup_keytab "K2" WRFILE:$testfile1 admin admin {}
+keytab_run "K2" "-k WRFILE:$testfile1 -a -p admin kttest1" 0 {
+	"Enter password:" { send "admin\n" }
+}
+klist_check "K2" FILE:$testfile1 "kttest1 0"
+
+setup_keytab "K2" WRFILE:$testfile2 admin admin {}
+keytab_run "K3" "-k $testfile2 -a -p admin kttest1" 0 {
+	"Enter password:" { send "admin\n" }
+}
+klist_check "K3" FILE:$testfile2 "kttest1 0"
+
+exec rm -f $testfile1 $testfile2

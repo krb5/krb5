@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -I$(srcdir)/../../crypto/md5 -DUSE_AUTOCONF_H
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -DUSE_AUTOCONF_H
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
@@ -50,12 +50,10 @@ SRCS = \
 	$(srcdir)/inq_names.c \
 	$(srcdir)/k5seal.c \
 	$(srcdir)/k5unseal.c \
-	$(srcdir)/k5mech.c \
-	$(srcdir)/pname_to_uid.c \
+	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_name.c \
-	$(srcdir)/rel_oid.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/sign.c \
@@ -65,7 +63,12 @@ SRCS = \
 	$(srcdir)/util_seed.c \
 	$(srcdir)/util_seqnum.c \
 	$(srcdir)/verify.c \
+	$(srcdir)/wrap_size_limit.c \
 	gssapi_err_krb5.c
+
+#	$(srcdir)/pname_to_uid.c \
+#	$(srcdir)/k5mech.c \
+#	$(srcdir)/rel_oid.c
 
 OBJS = \
 	accept_sec_context.$(OBJEXT) \
@@ -87,12 +90,10 @@ OBJS = \
 	inq_names.$(OBJEXT) \
 	k5seal.$(OBJEXT) \
 	k5unseal.$(OBJEXT) \
-	k5mech.$(OBJEXT) \
-	pname_to_uid.$(OBJEXT) \
+	krb5_gss_glue.$(OBJEXT) \
 	process_context_token.$(OBJEXT) \
 	rel_cred.$(OBJEXT) \
 	rel_name.$(OBJEXT) \
-	rel_oid.$(OBJEXT) \
 	seal.$(OBJEXT) \
 	ser_sctx.$(OBJEXT) \
 	sign.$(OBJEXT) \
@@ -102,15 +103,23 @@ OBJS = \
 	util_seed.$(OBJEXT) \
 	util_seqnum.$(OBJEXT) \
 	verify.$(OBJEXT) \
+	wrap_size_limit.$(OBJEXT) \
 	gssapi_err_krb5.$(OBJEXT)
+
+#	k5mech.$(OBJEXT) \
+#	pname_to_uid.$(OBJEXT) \
+#	rel_oid.$(OBJEXT)
 
 HDRS= $(ETHDRS)
 
 EHDRDIR=$(TOP)/include/gssapi
+EXPORTED_HEADERS= gssapi_krb5.h
 
 all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
 all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
 all-windows:: $(SRCS) $(HDRS) includes $(OBJS)
+	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
+	copy gssapi_krb5.h $(EHDRDIR)
 
 clean-unix::
 	$(RM) $(ETHDRS) $(ETSRCS) shared/*
@@ -119,6 +128,14 @@ clean-mac::
 	$(RM) $(ETHDRS) $(ETSRCS) shared/*
 
 clean-windows::
+	$(RM) $(EHDRDIR)\gssapi_krb5.h
+	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+
+install::
+	@set -x; for f in $(EXPORTED_HEADERS) ; \
+	do $(INSTALL_DATA) $(srcdir)/$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
+	done
 
 depend:: $(ETSRCS)
 

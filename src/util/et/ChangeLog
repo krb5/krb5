@@ -14,6 +14,10 @@ Mon Jun 10 21:54:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 	* vfprintf.c, internal.h, compile_et.c, et_c.awk, com_err.c:
 	 	Change _WINDOWS to _MSDOS, and add check for _WIN32.
 
+Sun May 12 01:13:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* et_c.awk: deal with continuations in the input .et file.
+
 Wed Mar 20 00:19:08 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Fix SRCS definition so that it doesn't fool

@@ -1,0 +1,4 @@
+Mon Jul 15 17:03:28 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.ov (unit-test-body): ovsec_adm_keytab is now
+ 	kadm5_keytab

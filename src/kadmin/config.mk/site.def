@@ -1,0 +1,52 @@
+# $Id$
+
+# XXXX this file will probably have lots of ARCH_OS defines in it.
+
+#
+# Misc settings
+#
+
+#
+# site-specific compiler/linker flags
+#
+
+CFLAGS := $(CFLAGS) -I$(TOP)/../../src/include \
+	-I$(TOP)/../../src/include/krb5 \
+	-I$(TOP)/../include \
+	-I$(TOP)/../include/krb5 \
+	$(PCC_STRUCT_RETURN) -g
+
+SITEMAKEFLAGS	:= -f Makefile.ov
+
+#
+# Packages whose locations we need to know
+#
+
+ifeq ($(shell ls -d /.afs/gza.com/product/secure 2>/dev/null),/.afs/gza.com/product/secure)
+AFS_ROOT=/.afs
+else
+AFS_ROOT=/afs
+endif
+
+PERL		= /afs/athena/contrib/perl/p
+# /afs/sipb/project/tcl/lib/libtcl.a
+LIBTCL		= /mit/gnu/lib/libtcl.a 
+# /afs/sipb/project/tcl/include
+TCLINC		= /mit/gnu/include 
+
+#
+# Default locations
+#
+
+YACC	= bison -y
+
+#
+# I'm not really sure where this should go, but it is often useful to
+# be able to set up a test environment from anywhere in the build
+# tree.
+#
+start-servers:
+	$(START_SERVERS)
+
+stop-servers:
+	$(STOP_SERVERS)

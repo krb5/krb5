@@ -1,0 +1,79 @@
+#
+# $Id$
+#
+
+set kill /bin/kill
+set sleep /bin/sleep
+set kinit $env(TOP)/install/bin/kinit
+set kdestroy $env(TOP)/install/bin/kdestroy
+
+set hostname [exec hostname]
+
+proc rpc_test_version {} {
+	global CLIENT
+	global SERVER
+
+	clone_output "$CLIENT version <unknown>"
+	clone_output "$SERVER version <unknown>"
+}
+
+proc rpc_test_load {} {
+	#
+}
+
+# rpc_test_exit -- clean up and exit
+proc rpc_test_exit {} {
+	global server_id
+	global server_pid
+	global server_started
+	global kill
+
+ 	if {[catch {
+		expect {
+			-i $server_id
+			eof { 
+				fail "server exited!"
+				verbose $expect_out(buffer) 1
+			}
+			timeout { pass "server survived" }
+		}
+	} tmp]} {
+		fail "server exited! (expect failed)"
+	}
+}
+
+#
+# rpc_test_start -- start the rpc_test server running
+#
+proc rpc_test_start { } {
+ 	global SERVER
+	global server_id
+	global server_pid
+	global server_started
+	global env
+
+	set env(KRB5KTNAME) FILE:$env(RPC_TEST_SRVTAB)
+
+ 	verbose "% $SERVER" 1
+	set server_pid [spawn $SERVER]
+	set server_id $spawn_id
+
+	unset env(KRB5KTNAME)
+
+	set timeout 30
+
+	expect {
+		"running" { }
+		eof { 
+			fail "server exited!"
+			verbose $expect_out(buffer) 1
+		}
+		timeout { 
+			fail "server didn't start in $timeout seconds"
+			verbose $expect_out(buffer) 1
+		}
+	}
+
+}
+
+rpc_test_start

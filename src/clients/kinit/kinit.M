@@ -94,6 +94,11 @@ option is not used, the default cache is used.  Any contents of the
 cache are destroyed by
 .IR kinit .
 .PP
+The
+.B \-s
+option can be used to specify an alternate service name to use when
+getting initial tickets.
+.PP
 The default credentials cache may vary between systems; however, if the
 .B KRB5CCNAME
 environment variable is set, its value is used to name the default

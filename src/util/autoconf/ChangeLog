@@ -1,3 +1,12 @@
+Tue Jul  9 18:24:12 1996  Marc Horowitz  <marc@mit.edu>
+
+	* autoheader.sh (TEMPLATES): add ./acconfig.h to the list of
+ 	header templates used.  This is necessary when a subpackage is
+ 	being autoreconf'd.
+
+	* acgeneral.m4 (AC_CACHE_CHECK): added, from autoconf 2.7.  db2
+ 	needs it.
+
 Wed Jun 12 18:17:17 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* autoconf.texi (Output): document changes to AC_OUTPUT

@@ -1,0 +1,97 @@
+# Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
+#
+# $Id$
+# $Source$
+# 
+# $Log$
+# Revision 1.9  1996/07/22 20:41:38  marc
+# this commit includes all the changes on the OV_9510_INTEGRATION and
+# OV_MERGE branches.  This includes, but is not limited to, the new openvision
+# admin system, and major changes to gssapi to add functionality, and bring
+# the implementation in line with rfc1964.  before committing, the
+# code was built and tested for netbsd and solaris.
+#
+# Revision 1.8.4.1  1996/07/18 04:20:01  marc
+# merged in changes from OV_9510_BP to OV_9510_FINAL1
+#
+# Revision 1.8.2.1  1996/06/20  23:41:48  marc
+# File added to the repository on a branch
+#
+# Revision 1.8  1995/12/07  17:36:54  jik
+# Use "rpc_test" instead of "rpc-test", to avoid problems with rpcgen on
+# some systems.  See PR 3553.
+#
+# Revision 1.7  1995/10/02 08:02:49  jik
+# Delete rpc-tset_clnt.c, rpc-test_svc.c and rpc-test.h before creating
+# them, because rpcgen on some platforms won't output to a file that
+# already exists.
+#
+# Revision 1.6  1994/10/24 19:35:57  bjaspan
+# [secure-build/2649: cannot use -L when compiling]
+#
+# Sandbox:
+#
+#  [secure-build/2649] don't use -L
+#
+# Revision 1.7  1994/10/11  20:06:14  bjaspan
+# [secure-build/2649] don't use -L
+#
+# Revision 1.6  1994/09/30  22:25:29  jik
+# Don't need to set MDFLAGS to -a anymore, because it's done
+# automatically by the rules now.
+#
+# Revision 1.5  1994/03/22  19:55:34  shanzer
+# change NETLIBS to NETLIB
+#
+# Revision 1.4  1994/03/18  17:47:00  shanzer
+# added NETLIBS and BSDLIB
+#
+# Revision 1.3  1993/12/13  02:00:39  bjaspan
+# recurse to testsuite subdir.
+#
+# Revision 1.2  1993/12/08  21:45:47  bjaspan
+# misc
+#
+# Revision 1.1  1993/11/03  23:53:58  bjaspan
+# Initial revision
+#
+
+TOP = ../..
+include $(TOP)/config.mk/template
+
+SUBDIRS	= testsuite
+
+expand SubdirTarget
+
+SRCS	= client.c server.c
+
+CFLAGS	:= -I../.. -I. $(CFLAGS)
+
+#LIBS	= ../librpclib.a $(LIBGSSAPI_TRUST) $(LIBDB) $(LIBCOM_ERR) $(LIBDYN)
+LIBS	= ../librpclib.a $(LIBGSSAPI_KRB5) $(LIBDB) $(LIBKRB5) \
+	$(LIBCRYPTO) $(LIBISODE) $(LIBCOM_ERR) $(LIBDYN) $(BSDLIB) $(NETLIB) 
+DEPS 	= ../librpclib.a rpc_test.h
+DEPENDS	= rpc_test.h
+
+PROG	= client
+SRCS	= client.c
+OBJS	= client.o rpc_test_clnt.o
+
+expand Program
+expand Depend
+
+PROG	= server
+SRCS	= server.c
+OBJS	= server.o rpc_test_svc.o
+
+expand Program
+expand Depend
+
+rpc_test.h rpc_test_clnt.c rpc_test_svc.c: rpc_test.x
+	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h
+	rpcgen -l rpc_test.x -o rpc_test_clnt.c
+	rpcgen -m rpc_test.x -o rpc_test_svc.c
+	rpcgen -h rpc_test.x -o rpc_test.h
+
+clean::
+	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c

@@ -20,9 +20,15 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 /* This file could be OS specific */
-#define NEED_SOCKETS
+
 #include "gssapiP_generic.h"
+
+#include "port-sockets.h"
 
 #ifndef _MACINTOSH
 #include <sys/types.h>
@@ -41,7 +47,7 @@ g_canonicalize_host(hostname)
    if ((hent = gethostbyname(hostname)) == NULL)
       return(NULL);
 
-   if (! (haddr = xmalloc(hent->h_length))) {
+   if (! (haddr = (char *) xmalloc(hent->h_length))) {
 	return(NULL);
    }
 
@@ -53,7 +59,7 @@ g_canonicalize_host(hostname)
 
    xfree(haddr);
 
-   if ((canon = xmalloc(strlen(hent->h_name)+1)) == NULL)
+   if ((canon = (char *) xmalloc(strlen(hent->h_name)+1)) == NULL)
       return(NULL);
 
    strcpy(canon, hent->h_name);

@@ -32,9 +32,8 @@ static int init_et = 0;
 /**/
 
 OM_uint32
-krb5_gss_display_status(ctx, minor_status, status_value, status_type,
+krb5_gss_display_status(minor_status, status_value, status_type,
 			mech_type, message_context, status_string)
-     void *ctx;
      OM_uint32 *minor_status;
      OM_uint32 status_value;
      int status_type;
@@ -42,9 +41,12 @@ krb5_gss_display_status(ctx, minor_status, status_value, status_type,
      OM_uint32 *message_context;
      gss_buffer_t status_string;
 {
-   krb5_context context = ctx;
+   krb5_context context;
    status_string->length = 0;
    status_string->value = NULL;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    if ((mech_type != GSS_C_NULL_OID) &&
        (! g_OID_equal(gss_mech_krb5, mech_type))) {

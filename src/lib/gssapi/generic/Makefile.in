@@ -39,28 +39,40 @@ gssapi_err_generic.c: gssapi_err_generic.et
 #endif
 
 SRCS = \
-	$(srcdir)/disp_major_status.c \
 	$(srcdir)/disp_com_err_status.c \
+	$(srcdir)/disp_major_status.c \
+	$(srcdir)/gssapi_generic.c \
+	$(srcdir)/oid_ops.c \
+	$(srcdir)/release_buffer.c \
+	$(srcdir)/release_oid_set.c \
 	$(srcdir)/util_buffer.c \
 	$(srcdir)/util_canonhost.c \
 	$(srcdir)/util_dup.c \
 	$(srcdir)/util_oid.c \
+	$(srcdir)/util_ordering.c \
+	$(srcdir)/util_set.c \
 	$(srcdir)/util_token.c \
-	$(srcdir)/utl_nohash_validate.c \
+	$(srcdir)/util_validate.c \
 	gssapi_err_generic.c
 
 OBJS = \
-	disp_major_status.$(OBJEXT) \
 	disp_com_err_status.$(OBJEXT) \
+	disp_major_status.$(OBJEXT) \
+	gssapi_generic.$(OBJEXT) \
+	oid_ops.$(OBJEXT) \
+	release_buffer.$(OBJEXT) \
+	release_oid_set.$(OBJEXT) \
 	util_buffer.$(OBJEXT) \
 	util_canonhost.$(OBJEXT) \
 	util_dup.$(OBJEXT) \
 	util_oid.$(OBJEXT) \
+	util_ordering.$(OBJEXT) \
+	util_set.$(OBJEXT) \
 	util_token.$(OBJEXT) \
-	utl_nohash_validate.$(OBJEXT) \
+	util_validate.$(OBJEXT) \
 	gssapi_err_generic.$(OBJEXT)
 
-EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
+EHDRDIR= $(BUILDTOP)/include/gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
 HDRS= $(ETHDRS)
@@ -89,8 +101,8 @@ clean-windows::
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
-	do $(INSTALL_DATA) $(srcdir)$(S)$$f	\
-		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
+	do $(INSTALL_DATA) $(srcdir)/$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
 depend:: $(ETSRCS)

@@ -1,0 +1,26 @@
+# This file is part of libdyn.a, the C Dynamic Object library.  It
+# contains the Imakefile.
+#
+# There are no restrictions on this code; however, if you make any
+# changes, I request that you document them so that I do not get
+# credit or blame for your modifications.
+#
+# Written by Barr3y Jaspan, Student Information Processing Board (SIPB)
+# and MIT-Project Athena, 1989.
+
+SRCS	= dyn_create.c dyn_put.c dyn_debug.c dyn_delete.c dyn_size.c \
+	dyn_append.c dyn_realloc.c dyn_paranoid.c dyn_insert.c \
+	dyn_initzero.c
+OBJS	= dyn_create.o dyn_put.o dyn_debug.o dyn_delete.o dyn_size.o \
+	dyn_append.o dyn_realloc.o dyn_paranoid.o dyn_insert.o \
+	dyn_initzero.o
+HDRS	= dyn.h dynP.h
+
+DEST	= libdyn.a
+
+StageLibrary($(DEST), $(OBJS))
+StageIncludes(dyn.h,)
+
+Program(test, test.o, $(DEST), $(DEST))
+
+Depend(,, $(SRCS) $(HDRS))

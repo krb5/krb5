@@ -1,3 +1,30 @@
+Thu Jul 18 19:12:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: $krb524 works with the admin system, now
+
+Tue Jul  9 14:32:14 1996  Marc Horowitz  <marc@mit.edu>
+
+	* aclocal.m4 (USE_ANAME, USE_KDB5_LIBRARY, KRB5_LIBRARIES): change
+ 	these macros so that db (as provided in util/db2) will *always* be
+ 	used.
+
+	* configure.in (CONFIG_DIRS): removed $kadminv4 and $krb524 for
+ 	now, since they don't work with the new admin system.  this needs
+ 	to be fixed.
+
+	* aclocal.m4 (WITH_KRB4): create new substituted variable
+ 	KRB4_INCLUDES, which is conditional on internal vs external vs no
+ 	krb4.
+	(USE_KADMCLNT_LIBRARY): added.
+	(KRB5_LIBRARIES): this macro didn't have any clue how to deal with
+ 	multiple executeables built in the same dir with different
+ 	libraries.  it does now, at least for what the admin system needs.
+	(V5_MAKE_SHARED_LIB): this macro currently uses the LIB_SUBDIRS
+ 	make var to find the directories to build the shared library in.
+  	This adds an optional fifth argument which is used in conjunction
+ 	with LIB_SUBDIRS for that purpose.  Now, both kadm5 libraries can
+ 	be built in the same directory.
+
 Mon Jun 17 18:34:10 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* aclocal.m4 (CHECK_DB): explicitly set $LIBS before calling
@@ -96,6 +123,15 @@ Tue May 14 21:56:08 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (AC_CHECK_DBM_PROTO): Arguments were not executed if
 		using cached results.
+
+Tue May  7 22:56:46 1996  Marc Horowitz  <marc@mit.edu>
+
+	* aclocal.m4 (V5_AC_OUTPUT_MAKEFILE): add a second optional
+ 	argument to specify files besides Makefile.in which should be
+ 	configureified.
+	* aclocal.m4 (USE_KADM_LIBRARY): removed.
+	* aclocal.m4 (USE_KADMSRV_LIBRARY, USE_GSSRPC_LIBRARY,
+ 	USE_GSSAPI_LIBRARY, USE_DYN_LIBRARY, USE_DB_LIBRARY): added.
 
 Tue Apr 30 23:25:07 1996  Ken Raeburn  <raeburn@cygnus.com>
 

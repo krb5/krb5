@@ -28,59 +28,46 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_import_sec_context(ct,
-			    minor_status, interprocess_token, context_handle)
-    void		*ct;
+krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     OM_uint32		*minor_status;
     gss_buffer_t	interprocess_token;
     gss_ctx_id_t	*context_handle;
 {
-    krb5_context	ser_ctx = ct;
+    krb5_context	context;
     krb5_error_code	kret = 0;
     OM_uint32		retval;
     size_t		blen;
-    krb5_gss_ctx_id_t	*ctx;
+    krb5_gss_ctx_id_t	ctx;
     krb5_octet		*ibp;
 
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+       return(GSS_S_FAILURE);
+
     /* Assume a tragic failure */
-    ctx = (krb5_gss_ctx_id_t *) NULL;
+    ctx = (krb5_gss_ctx_id_t) NULL;
     retval = GSS_S_FAILURE;
     *minor_status = 0;
 
     /* Internalize the context */
     ibp = (krb5_octet *) interprocess_token->value;
     blen = (size_t) interprocess_token->length;
-    if ((kret = krb5_internalize_opaque(ser_ctx, KG_CONTEXT,
-					(krb5_pointer *) &ctx,
-					&ibp, &blen)))
-	goto error_out;
+    if ((kret = kg_ctx_internalize(context,
+				   (krb5_pointer *) &ctx,
+				   &ibp, &blen))) {
+       *minor_status = (OM_uint32) kret;
+       return(GSS_S_FAILURE);
+    }
 
-
-    /* Make sure that everything is cool. */
-    if (!kg_validate_ctx_id((gss_ctx_id_t) ctx))
-	goto error_out;
+    /* intern the context handle */
+    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
+       (void)krb5_gss_delete_sec_context(minor_status, 
+					 (gss_ctx_id_t *) &ctx, NULL);
+       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+       return(GSS_S_FAILURE);
+    }
     
     *context_handle = (gss_ctx_id_t) ctx;
 
+    *minor_status = 0;
     return (GSS_S_COMPLETE);
-
-error_out:
-    if (ctx) {
-	(void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
-	if (ctx->enc.processed)
-	    krb5_finish_key(ser_ctx, &ctx->enc.eblock);
-	krb5_free_keyblock(ser_ctx, ctx->enc.key);
-	if (ctx->seq.processed)
-	    krb5_finish_key(ser_ctx, &ctx->seq.eblock);
-	krb5_free_principal(ser_ctx, ctx->here);
-	krb5_free_principal(ser_ctx, ctx->there);
-	krb5_free_keyblock(ser_ctx, ctx->subkey);
-	    
-	/* Zero out context */
-	memset(ctx, 0, sizeof(*ctx));
-	xfree(ctx);
-    }
-    if (*minor_status == 0)
-	*minor_status = (OM_uint32) kret;
-    return(retval);
 }

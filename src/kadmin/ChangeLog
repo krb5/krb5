@@ -1,3 +1,13 @@
+Fri Jul 12 14:38:30 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (CONFIG_DIRS): ktutil is still useful
+ 	functionality; add it back to the build.
+
+Wed Jul 10 16:27:11 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: kdbkeys is no longer necessary.
+	* configure.in (CONFIG_DIRS): added dbutil
+
 Thu Aug 24 19:21:14 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Add ktutil directory

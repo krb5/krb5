@@ -89,6 +89,11 @@ Tue Apr 30 14:51:55 1996    <tytso@rsts-11.mit.edu>
 		Macintosh definitions of PROVIDE_* since that is done in
 		mac/libaries/KerberosHeaders.h.
 
+Wed Apr 17 20:56:51 1996  Marc Horowitz  <marc@mit.edu>
+
+	* k5-int.h, port-sockets.h: moved socket stuff into a separate
+	file so that gssapi doesn't have to include k5-int.h
+
 Thu Apr 11 23:50:24 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin (krb5_x, krb5_xc): Fix wrapper macros so they don't

@@ -1,0 +1,142 @@
+# $Id$
+# $Source$
+
+export TOP
+
+KRB5B4		= true
+CONFDIR		= $(TOP)/config.mk
+
+ifndef CUR_DIR
+CUR_DIR 	= .
+endif
+
+#
+# get the os name
+#
+
+include $(CONFDIR)/architecture
+
+# 
+# Programs
+#
+IMAKE		= imake
+# The purpose of this variable setting is to prevent -w from being
+# passed down via environment variables into sub-makes that use SunOS
+# Make rather than GNU make.
+ifndef MAKE_PRINT_DIRECTORY
+MAKE	       := $(MAKE) --no-print-directory MAKEFLAGS=$(MAKEFLAGS) MFLAGS=$(MFLAGS)
+endif
+CC		= gcc
+AR		= ar
+RANLIB		= ranlib
+LD		= ld
+RM		= rm
+CLEAN		= rm -f
+MV		= mv
+LN		= ln
+LNSOFT		= $(LN) -s
+MAKEDEPEND 	= makedepend
+RPCGEN		= rpcgen
+PERL		= /usr/local/bin/perl
+DUMPPERL 	= /usr/local/bin/perl.static
+UNDUMP		= undump
+YACC		= $(TOP)/scripts/newyacc.sh
+GENPROT 	= $(TOP)/scripts/genproto.sh
+INSTCMD		= install -c
+export INSTCMD
+PURIFY		= purify
+PROOF		= proof
+QUANTIFY	= quantify
+LEX_LIB		= -ll
+PERL		= /usr/local/bin/perl
+OBJDUMP		= /usr/local/bin/gobjdump
+OBJCOPY		= /usr/local/bin/gobjcopy
+
+# Dejagnu variables
+
+# We have to set the host with --host so that setup_xfail will work.
+# If we don't set it, then the host type used is "native", which
+# doesn't match "*-*-*".
+
+DEJAFLAGS	:= $(DEJALFLAGS) $(CLFLAGS) --debug --host \
+		   unknown-$(shell uname -m)-$(shell uname -s)$(shell uname -r)
+ifdef VERBOSE_TEST
+DEJAFLAGS	+= --verbose
+endif
+
+RUNTEST		:= runtest $(DEJAFLAGS)
+
+#
+# Flags.  Since this is the initial setting, don't preserve current
+# values; otherwise, recursive makes will get the sum of everything.
+#
+YFLAGS		= -d
+ARFLAGS		= cru
+CFLAGS		:= $(CLFLAGS)
+LDFLAGS		:= $(CLFLAGS)
+
+#
+# The default target is "all".  Put this before any includes, in case
+# the includes define new targets.  Or perhaps they should be allowed
+# to define a new default target...
+#
+all::
+
+#
+# Get a unique number for files built in /tmp
+#
+__PID__ := $(shell echo $$$$)
+
+include $(CONFDIR)/config
+
+include $(CONFDIR)/rules
+
+expand IncludeArchFile
+
+include $(CONFDIR)/site.def
+
+ifdef STRIP_INSTALLED
+INST_PROG_FLAGS	= -s
+endif
+
+# avoid makefiles from failing on default rules
+expand DefaultRules
+
+# include dependencies
+ifeq ($(shell [ -r Makefile.depend ] && echo yes),yes)
+include Makefile.depend
+endif
+
+# disable RCS frobbing
+% :: RCS/%,v
+
+# fix lex rule
+.l.c:
+	$(RM) -f $@
+	$(LEX) $(LFLAGS) -t $< > $@
+
+# error table rule
+.SUFFIXES: .et
+.et.c:
+	$(COMPILE_ET) $<
+.et.h:
+	$(COMPILE_ET) $<
+
+# rpcgen rule
+.SUFFIXES: .x
+.x.c:
+	$(RPCGEN) -o $@ -c $<
+.x.h:
+	$(RPCGEN) -o $@ -h $<
+
+# command table rule
+.SUFFIXES: .ct
+.ct.c:
+	$(MK_CMDS) $<
+.ct.h:
+	$(MK_CMDS) $<
+
+CMD="echo 'You must specify CMD to use the 'execute' rule.'; exit 1"
+
+execute:
+	@eval $(CMD)

@@ -22,17 +22,23 @@
 
 #include "gssapiP_krb5.h"
 
+/*
+ * $Id$
+ */
+
 OM_uint32
-krb5_gss_process_context_token(ct, minor_status, context_handle, 
+krb5_gss_process_context_token(minor_status, context_handle, 
 			       token_buffer)
-     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t token_buffer;
 {
-   krb5_context context = ct;
+   krb5_context context;
    krb5_gss_ctx_id_rec *ctx;
    OM_uint32 majerr;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
@@ -56,6 +62,6 @@ krb5_gss_process_context_token(ct, minor_status, context_handle,
 
    /* that's it.  delete the context */
 
-   return(krb5_gss_delete_sec_context(context, minor_status, &context_handle,
+   return(krb5_gss_delete_sec_context(minor_status, &context_handle,
 				      GSS_C_NO_BUFFER));
 }

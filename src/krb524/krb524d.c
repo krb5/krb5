@@ -20,8 +20,9 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "k5-int.h"
-#include "com_err.h"
+#include <krb5.h>
+#include <kadm5/admin.h>
+#include <com_err.h>
 
 #include <stdio.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -36,7 +37,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "adm.h"
 #include <krb.h>
 #include "krb524.h"
 
@@ -47,15 +47,11 @@
 char *whoami;
 int signalled = 0;
 static int debug = 0;
+void *handle;
 
-int use_keytab;
+int use_keytab, use_master;
 char *keytab = NULL;
 krb5_keytab kt;
-
-int use_master;
-krb5_principal master_princ;
-krb5_encrypt_block master_encblock;
-krb5_keyblock master_keyblock;
 
 void init_keytab(), init_master(), cleanup_and_exit();
 krb5_error_code do_connection(), lookup_service_key(), kdc_get_server_key();
@@ -73,6 +69,8 @@ RETSIGTYPE request_exit(signo)
      signalled = 1;
 }
 
+#if 0
+/* this is in the kadm5 library */
 int krb5_free_keyblock_contents(context, key)
      krb5_context context;
      krb5_keyblock *key;
@@ -81,6 +79,7 @@ int krb5_free_keyblock_contents(context, key)
      krb5_xfree(key->contents);
      return 0;
 }
+#endif
 
 int main(argc, argv)
      int argc;
@@ -92,8 +91,7 @@ int main(argc, argv)
      int ret, s;
      fd_set rfds;
      krb5_context context;
-     krb5_realm_params *rparams;
-     char *realm = 0;
+
      krb5_init_context(&context);
      krb524_init_ets(context);
 
@@ -119,16 +117,12 @@ int main(argc, argv)
      signal(SIGINT, request_exit);
      signal(SIGHUP, request_exit);
      signal(SIGTERM, request_exit);
-     if (!realm&&(ret = krb5_get_default_realm(context, &realm)))
-       {
-com_err(whoami, ret, "Getting default realm");
-exit(1);
-}
 
      if (use_keytab)
 	  init_keytab(context);
      if (use_master)
-	  init_master(context);
+	  /* someday maybe there will be some config param options */
+	  init_master(context, NULL);
 
      memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
      saddr.sin_family = AF_INET;
@@ -161,7 +155,7 @@ exit(1);
 	       cleanup_and_exit(0, context);
 	  else if (ret == 0) {
 	       if (use_master) {
-		    ret = krb5_db_fini(context);
+		    ret = kadm5_flush(handle);
 		    if (ret && ret != KRB5_KDB_DBNOTINITED) {
 			 com_err(whoami, ret, "closing kerberos database");
 			 cleanup_and_exit(1, context);
@@ -188,11 +182,8 @@ void cleanup_and_exit(ret, context)
      krb5_context context;
 {
      if (use_master) {
-	  krb5_finish_key(context, &master_encblock);
-	  memset((char *)&master_encblock, 0, sizeof(master_encblock));
-	  (void) krb5_db_fini(context);
+	  (void) kadm5_destroy(handle);
      }
-     if (use_master) krb5_free_principal(context, master_princ);
      if (use_keytab) krb5_kt_close(context, kt);
      krb5_free_context(context);
      exit(ret);
@@ -218,83 +209,20 @@ void init_keytab(context)
      use_keytab = 1;		/* now safe to close keytab */
 }
 
-void init_master(context)
+void init_master(context, params)
      krb5_context context;
+     kadm5_config_params *params;
 {
      int ret;
-     krb5_realm_params *rparams;
-     char *realm = 0;
-     char *key_name =0, *dbname = 0;
-     char *stash_file = 0;
 
      use_master = 0;
-     /* Use the stashed enctype */
-     master_keyblock.enctype = ENCTYPE_UNKNOWN;
-
-     if (!realm&&(ret = krb5_get_default_realm(context, &realm))) {
-	  com_err(whoami, ret, "getting default realm");
+     if (ret = kadm5_init(whoami, NULL, KADM5_ADMIN_SERVICE, params,
+			  KADM5_STRUCT_VERSION, KADM5_API_VERSION_2,
+			  &handle)) {
+	  com_err(whoami, ret, "initializing kadm5 library");
 	  cleanup_and_exit(1, context);
      }
-     if ((ret = krb5_read_realm_params(context,
-					realm,
-					(char *) NULL, (char *) NULL,
-					&rparams))) {
-       com_err(whoami, ret, "Reading KDC profile");
-krb5_xfree(realm);
-       cleanup_and_exit(1,context);
-     }
-     
-	/* Get the value for the database */
-	if (rparams->realm_dbname && !dbname)
-	    dbname = strdup(rparams->realm_dbname);
-
-	/* Get the value for the master key name */
-	if (rparams->realm_mkey_name && !key_name)
-	  key_name = strdup(rparams->realm_mkey_name);
-
-	/* Get the value for the master key type */
-	if (rparams->realm_enctype_valid  ) 
-	  master_keyblock.enctype = rparams->realm_enctype;
-     
-     /* Get the value for the stashfile */
-     if (rparams->realm_stash_file)
-       stash_file = strdup(rparams->realm_stash_file);
-     
-     if ((ret = krb5_db_set_name(context, dbname))) {
-						      com_err(whoami, ret, "Setting database name");
-						      cleanup_and_exit(1,context);
-						    }
-     
-     if ((ret = krb5_db_setup_mkey_name(context, key_name, realm, (char **) 0,
-					&master_princ))) {
-       free(realm);
-       com_err(whoami, ret, "while setting up master key name");
-       cleanup_and_exit(1, context);
-     } else {
-       free(realm);
-     }
-     
-     
-     if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
-				   FALSE, /* non-manual type-in */
-				   FALSE, /* irrelevant, given prev. arg */
-				   stash_file,
-				   0, &master_keyblock))) {
-       com_err(whoami, ret, "while fetching master key");
-       cleanup_and_exit(1, context);
-     }
-     
-     if ((ret = krb5_db_init(context))) {
-	  com_err(whoami, ret, "while initializing master database");
-	  cleanup_and_exit(1, context);
-     }
-     if ((ret = krb5_process_key(context, &master_encblock, 
-				 &master_keyblock))) {
-	  krb5_db_fini(context);
-	  com_err(whoami, ret, "while processing master key");
-	  cleanup_and_exit(1, context);
-     }
-     use_master = 1;		/* now safe to finish master key */
+     use_master = 1;		/* now safe to close kadm5 */
 }
 
 krb5_error_code do_connection(s, context)
@@ -434,14 +362,11 @@ krb5_error_code lookup_service_key(context, p, ktype, key)
 	  memcpy(key, (char *) &entry.key, sizeof(krb5_keyblock));
 	  return 0;
      } else if (use_master) {
-	  if ((ret = krb5_db_init(context)))
-	       return ret;
 	  return kdc_get_server_key(context, p, key, NULL, ktype);
      }
      return 0;
 }
 
-/* taken from kdc/kdc_util.c, and modified somewhat */
 krb5_error_code kdc_get_server_key(context, service, key, kvno, ktype)
     krb5_context context;
     krb5_principal service;
@@ -450,54 +375,36 @@ krb5_error_code kdc_get_server_key(context, service, key, kvno, ktype)
     krb5_enctype ktype;
 {
     krb5_error_code ret;
-    int nprincs;
-    krb5_db_entry server;
-    krb5_boolean more;
-    int i, vno, ok_key;
-    krb5_key_data *pkey;
-    nprincs = 1;
-    if ((ret = krb5_db_get_principal(context, service, &server, 
-				     &nprincs, &more))) 
-	return(ret);
-     
-    if (more) {
-	krb5_db_free_principal(context, &server, nprincs);
-	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-    } else if (nprincs != 1) {
-	krb5_db_free_principal(context, &server, nprincs);
-	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-    }
-/* We use krb5_dbe_find_enctype twice because
-   * in the case of a ENCTYPE_DES_CBC_CRC key, we prefer to find a krb4
-   * salt type over a normal key..  Note this may create a problem if the
-   * server key is passworded and has both a normal and v4 salt.  There is
-   * no good solution to this.*/
+    kadm5_principal_ent_rec server;
     
-    if (krb5_dbe_find_enctype(context,
-			      &server,
-			      ktype,
-			      (ktype == ENCTYPE_DES_CBC_CRC)?
-			      KRB5_KDB_SALTTYPE_V4:-1,
-			      -1,
-			      &pkey) &&
-	krb5_dbe_find_enctype(context,
-			      &server,
-			      ktype,
-			      -1,
-			      -1,
-			      &pkey))
-      {
-	krb5_db_free_principal(context, &server, nprincs);
-	return (KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-      }
-if (kvno)
-    *kvno = pkey->key_data_kvno;
-    ret = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
-				      pkey, key, NULL);
-    krb5_db_free_principal(context, &server, nprincs);
+    if (ret = kadm5_get_principal(handle, service, &server,
+				  KADM5_KEY_DATA))
+	 return ret;
 
+    /*
+     * We try kadm5_decrypt_key twice because in the case of a
+     * ENCTYPE_DES_CBC_CRC key, we prefer to find a krb4 salt type
+     * over a normal key.  Note this may create a problem if the
+     * server key is passworded and has both a normal and v4 salt.
+     * There is no good solution to this.
+     */
+    if ((ret = kadm5_decrypt_key(handle,
+				 &server,
+				 ktype,
+				 (ktype == ENCTYPE_DES_CBC_CRC) ? 
+				 KRB5_KDB_SALTTYPE_V4 : -1,
+				 -1,
+				 key, NULL, kvno)) &&
+	(ret = kadm5_decrypt_key(handle,
+				 &server,
+				 ktype,
+				 -1,
+				 -1,
+				 key, NULL, kvno))) {
+	 kadm5_free_principal_ent(handle, &server);
+	 return (KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
 
-
+    kadm5_free_principal_ent(handle, &server);
     return ret;
 }
-

@@ -4,6 +4,11 @@ Wed Jun  5 00:08:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
  		a file, don't free free inbuf.value until after the last
  		place where we use it.
 
+Wed Apr 17 20:54:37 1996  Marc Horowitz  <marc@mit.edu>
+
+	* all files: integrated changes from OpenVision as of
+	October 1995
+
 Tue Mar 12 23:46:26 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* gss-server.c (timeval_subtract): Use old-style function

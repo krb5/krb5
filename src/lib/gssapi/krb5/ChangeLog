@@ -1,3 +1,43 @@
+Thu Jul 18 19:48:48 1996  Marc Horowitz  <marc@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context),
+ 	accept_sec_context.c (krb5_gss_accept_sec_context): ifdef'd out
+ 	reference to 3des.
+
+Fri Jul  5 15:27:29 1996  Marc Horowitz  <marc@mit.edu>
+
+	* gssapi_krb5.h: Add declarations for _old mech set, and _both
+ 	mech set
+
+Thu Jun 20 23:15:57 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ser_sctx.c (kg_oid_size, kg_ctx_size): pull the oid-related code
+ 	out of kg_ctx_size into kg_oid_size.
+	
+	* k5unseal.c (kg_unseal), k5seal.c (make_seal_token): == cannot be
+ 	used to compare oid's.  The g_OID_equal macro must be used.
+
+	* init_sec_context.c (make_ap_req, krb5_gss_init_sec_context): -
+ 	gss_init_sec_context should use the mech set in the credential.
+  	If the default mech is requested, but the old mech oid was
+ 	explicitly passed to gss_acquire_cred, then the context should be
+ 	the old mech, otherwise, the new mech.  If a mech was requested
+ 	explicitly, then the code should insure that the credential is
+ 	compatible.
+
+	* acquire_cred.c (krb5_gss_acquire_cred), gssapiP_krb5.h (struct
+ 	_krb5_gss_cred_it_rec), gssapi_krb5.c (gss_mech_set_krb5*),
+ 	inq_cred.c (krb5_gss_inquire_cred): gss_acquire_cred needs to be
+ 	able to deal with both mech oid's.  It should return in
+ 	actual_mechs the intersection of the set passed in and the
+ 	{old,new} mechs, or if the default was requested, it should return
+ 	both mech oid's.  This state should be stored in the credential
+ 	handle, and regurgitated by gss_inquire_cred.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): make sure
+ 	that the oid in the token is compatible with the mechanisms
+ 	specified by the credential.
+
 Thu Jun 13 22:11:30 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES
@@ -28,6 +68,63 @@ Tue May 14 04:42:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 	* init_sec_context.c (make_ap_req): Change call to
  		krb5_auth_con_setcksumtype to use
  		krb5_auth_con_set_req_cksumtype by default instead.
+
+Sun May 12 00:54:35 1996  Marc Horowitz  <marc@mit.edu>
+
+	* util_crypt.c (kg_encrypt): It used to be that krb5_encrypt could
+ 	be used to encrypt in place.  That's broken now.  This would need
+ 	to be fixed in several places in the crypto layer, and it's not
+ 	clear what the right thing is, so it's worked around here in the
+ 	interests of portability and reliablility, at the expense of a
+ 	malloc/memcpy/free.
+
+	* Makefile.in, configure.in: gssapi_krb5.h should be installed
+ 	inside the tree.  This is really only half the work, as it should
+ 	be installed outside of the tree, too.
+
+Sat Apr 20 00:02:51 1996  Marc Horowitz  <marc@mit.edu>
+
+	* accept_sec_context.c, export_sec_context.c, gssapiP_krb5.h,
+ 	import_sec_context.c, init_sec_context.c, k5seal.c, k5unseal.c,
+ 	ser_sctx.c, wrap_size_limit.c: Implemented triple-des changes
+ 	based on Richard's patches.
+
+Wed Apr 17 21:08:59 1996  Marc Horowitz  <marc@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_set_backward_mode): removed
+
+	* krb5_gss_glue.c, wrap_size_limit.c: added
+	
+	* import_sec_context.c: intern the newly created context id so
+ 	that the validation functions will accept it.
+	
+	* Makefile.in (CFLAGS): Don't need md5 header files anymore.
+  	(OBJS, SRCS): Change the list of files to build.
+
+	* export_sec_context.c, import_sec_context.c, gssapiP_krb5.h,
+ 	ser_sctx.c: don't use the serialization abstraction, since it
+ 	doesn't add anything, and is internal to kerberos.  Instead, make
+ 	the {de,}serialization functions internal gssapi functions, and
+ 	call those directly.
+
+	* accept_sec_context.c, acquire_cred.c, context_time.c,
+ 	delete_sec_context.c, disp_name.c, disp_status.c,
+ 	export_sec_context.c, gssapi_krb5.c (kg_get_context),
+ 	import_name.c, import_sec_context.c, indicate_mechs.c,
+ 	init_sec_context.c, inq_context.c, inq_cred.c, inq_names.c,
+ 	process_context_token.c, rel_cred.c, rel_name.c, seal.c, sign.c,
+ 	unseal.c, verify.c:
+ 	Don't pass in the context from the caller.  Instead, call
+ 	kg_get_context() to find out the kerberos library context.  Also,
+ 	random minor compile-time fixes.
+
+	* accept_sec_context.c, gssapi_krb5.c (kg_get_defcred),
+ 	gssapiP_krb5.h, init_sec_context.c, k5seal.c, k5unseal.c,
+ 	util_cksum.c (kg_checksum_channel_bindings), util_seqnum.c
+ 	(kg_make_seq_num, kg_get_seq_num), util_seed.c (kg_make_seed),
+ 	util_crypt.c (kg_encrypt, kg_decrypt): 
+	pass the context to the kg_* functions which need it instead of
+ 	determining it directly.
 
 Fri Apr 12 21:47:46 1996  Richard Basch  <basch@lehman.com>
 

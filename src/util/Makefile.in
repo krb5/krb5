@@ -11,6 +11,20 @@ all-unix:: libupdate makeshlib
 all-mac::
 all-windows: libupdate
 
+# this is necessary because the db2 build, which is intended to be
+# standalone, of course does not know to make symlinks in the right
+# magic places in the krb5 build tree so other parts of the tree can
+# find db2.  So we make those links here.  this can't use CopyHeader,
+# because there's no way in this make setup to do stuff after the
+# subdirectory recursion.  fortunately, one does not need a
+# destination to make a link...
+
+all-unix::
+	$(RM) ../include/db.h ../include/db-config.h ../lib/libdb.a
+	ln -s ../util/db2/obj/db.h ../include
+	ln -s ../util/db2/obj/db-config.h ../include
+	ln -s ../util/db2/obj/libdb.a ../lib
+
 unixmac: libupdate
 
 libupdate: $(srcdir)/libupdate.sh

@@ -20,11 +20,14 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * $Id$
+ */
+
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_indicate_mechs(ctx, minor_status, mech_set)
-     void *ctx;
+krb5_gss_indicate_mechs(minor_status, mech_set)
      OM_uint32 *minor_status;
      gss_OID_set *mech_set;
 {

@@ -1,0 +1,20 @@
+[kdcdefaults]
+	kdc_ports = 1750 
+
+[realms]
+	__REALM__ = {
+		profile = /krb5/krb5.conf
+		database_name = /krb5/kdb5
+		admin_database_name = /krb5/kadb5
+		admin_database_lockfile = /krb5/ovsec_adm.lock
+		admin_keytab = /krb5/ovsec_adm.srvtab
+		key_stash_file = /krb5/.k5.__REALM__
+		acl_file = /krb5/ovsec_adm.acl
+		dict_file = /krb5/ovsec_adm.dict
+		kadmind_port = 1751
+		max_life = 10h 0m 0s
+		max_renewable_life = 7d 0h 0m 0s
+		master_key_type = des-cbc-crc
+		supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
+	}
+

@@ -23,9 +23,8 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_inquire_cred(ctx, minor_status, cred_handle, name, lifetime_ret,
+krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 		      cred_usage, mechanisms)
-     void *ctx;
      OM_uint32 *minor_status;
      gss_cred_id_t cred_handle;
      gss_name_t *name;
@@ -33,13 +32,16 @@ krb5_gss_inquire_cred(ctx, minor_status, cred_handle, name, lifetime_ret,
      gss_cred_usage_t *cred_usage;
      gss_OID_set *mechanisms;
 {
-   krb5_context context = ctx;
+   krb5_context context;
    krb5_gss_cred_id_t cred;
    krb5_error_code code;
    krb5_timestamp now;
    krb5_deltat lifetime;
    krb5_principal ret_name;
    gss_OID_set mechs;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    if (name) *name = NULL;
    if (mechanisms) *mechanisms = NULL;
@@ -82,7 +84,7 @@ krb5_gss_inquire_cred(ctx, minor_status, cred_handle, name, lifetime_ret,
    }
 
    if (mechanisms)
-      if (! g_copy_OID_set(gss_mech_set_krb5, &mechs)) {
+      if (! g_copy_OID_set(cred->actual_mechs, &mechs)) {
 	 krb5_free_principal(context, ret_name);
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
@@ -113,10 +115,9 @@ krb5_gss_inquire_cred(ctx, minor_status, cred_handle, name, lifetime_ret,
 
 /* V2 interface */
 OM_uint32
-krb5_gss_inquire_cred_by_mech(ctx, minor_status, cred_handle,
+krb5_gss_inquire_cred_by_mech(minor_status, cred_handle,
 			      mech_type, name, initiator_lifetime,
 			      acceptor_lifetime, cred_usage)
-    void		*ctx;
     OM_uint32		*minor_status;
     gss_cred_id_t	cred_handle;
     gss_OID		mech_type;
@@ -125,10 +126,13 @@ krb5_gss_inquire_cred_by_mech(ctx, minor_status, cred_handle,
     OM_uint32		*acceptor_lifetime;
     gss_cred_usage_t *cred_usage;
 {
-    krb5_context	context = ctx;
+    krb5_context	context;
     krb5_gss_cred_id_t	cred;
     OM_uint32		lifetime;
     OM_uint32		mstat;
+
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+       return(GSS_S_FAILURE);
 
     /*
      * We only know how to handle our own creds.
@@ -140,8 +144,7 @@ krb5_gss_inquire_cred_by_mech(ctx, minor_status, cred_handle,
     }
 
     cred = (krb5_gss_cred_id_t) cred_handle;
-    mstat = krb5_gss_inquire_cred(context,
-				  minor_status,
+    mstat = krb5_gss_inquire_cred(minor_status,
 				  cred_handle,
 				  name,
 				  &lifetime,

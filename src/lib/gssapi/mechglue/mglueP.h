@@ -74,6 +74,17 @@ typedef struct gss_union_cred_t {
 /* define one of these and provide a function to return */
 /* it to initialize the GSSAPI library                  */
 
+/* ultrix cc doesn't understand prototypes in structures.
+   we could autoconf test for this --marc */
+
+#ifndef NPROTOTYPE
+#if defined(__ultrix) && !defined (__GNUC__)
+#define NPROTOTYPE(x) ()
+#else
+#define NPROTOTYPE(x) PROTOTYPE(x)
+#endif
+#endif
+
 /*
  * This is the definition of the mechs_array struct, which is used to
  * define the mechs array table. This table is used to indirectly

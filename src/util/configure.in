@@ -18,15 +18,6 @@ esac
 SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 AC_SUBST(SHLIB_TAIL_COMP)
 
-dbdir=
-WITH_ANAME_DB
-if test "$dbval" = db; then
- db=berk_db
-else
- WITH_KDB_DB
- if test "$dbval" = db; then db=berk_db; fi
-fi
-
-CONFIG_DIRS(et ss profile $db pty)
+CONFIG_DIRS(et ss profile pty dyn db2)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

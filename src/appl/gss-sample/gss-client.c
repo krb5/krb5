@@ -20,6 +20,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if !defined(lint) && !defined(__CODECENTER__)
+static char *rcsid = "$Header$";
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -31,335 +35,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
-
-#ifdef USE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-
-int establish_context();
-int connect_to_server();
-int call_server();
-int client_establish_context();
-
-int send_token();
-int recv_token();
-void read_file();
-
-int deleg_flag;
-void display_status();
-
-extern FILE *display_file;
-
+#include "gss-misc.h"
 
 void usage()
 {
-     fprintf(stderr, "Usage: gss-client [-port port] [-d] [-v2] host service \
+     fprintf(stderr, "Usage: gss-client [-port port] [-d] host service \
 msg\n");
      exit(1);
-}
-
-int main(argc, argv)
-     int argc;
-     char **argv;
-{
-     char *service_name, *server_host, *msg;
-     u_short port = 4444;
-     int v2 = 0;
-     int use_file = 0;
-     
-     display_file = stdout;
-     deleg_flag = 0;
-
-     /* Parse arguments. */
-     argc--; argv++;
-     while (argc) {
-	  if (strcmp(*argv, "-port") == 0) {
-	       argc--; argv++;
-	       if (!argc) usage();
-	       port = atoi(*argv);
-	  } else if (strcmp(*argv, "-v2") == 0) {
-	       v2 = 1;
-	  } else if (strcmp(*argv, "-d") == 0) {
-	       deleg_flag = GSS_C_DELEG_FLAG;
-	  } else if (strcmp(*argv, "-f") == 0) {
-	       use_file = 1;
-	  } else 
-	       break;
-	  argc--; argv++;
-     }
-     if (argc != 3)
-	  usage();
-
-     server_host = *argv++;
-     service_name = *argv++;
-     msg = *argv++;
-
-     if (call_server(server_host, port, v2, service_name, msg, use_file) < 0)
-	  exit(1);
-
-     return 0;
-}
-
-/*
- * Function: call_server
- *
- * Purpose: Call the "sign" service.
- *
- * Arguments:
- *
- * 	host		(r) the host providing the service
- * 	port		(r) the port to connect to on host
- * 	service_name	(r) the GSS-API service name to authenticate to	
- * 	msg		(r) the message to have "signed"
- *
- * Returns: 0 on success, -1 on failure
- *
- * Effects:
- * 
- * call_server opens a TCP connection to <host:port> and establishes a
- * GSS-API context with service_name over the connection.  It then
- * seals msg in a GSS-API token with gss_seal, sends it to the server,
- * reads back a GSS-API signature block for msg from the server, and
- * verifies it with gss_verify.  -1 is returned if any step fails,
- * otherwise 0 is returned.
- */
-int call_server(host, port, dov2, service_name, msg, use_file)
-     char *host;
-     u_short port;
-     int dov2;
-     char *service_name;
-     char *msg;
-     int use_file;
-{
-     gss_ctx_id_t context;
-     gss_buffer_desc in_buf, out_buf, context_token;
-     int s, state;
-     OM_uint32 maj_stat, min_stat;
-     gss_name_t		src_name, targ_name;
-     gss_buffer_desc	sname, tname;
-     OM_uint32		lifetime;
-     gss_OID		mechanism, name_type;
-     int		is_local;
-#ifdef	GSSAPI_V2
-     OM_uint32		context_flags;
-     int		is_open;
-     gss_qop_t		qop_state;
-     gss_OID_set	mech_names;
-     gss_buffer_desc	oid_name;
-#else	/* GSSAPI_V2 */
-     int		context_flags;
-#endif	/* GSSAPI_V2 */
-
-     /* Open connection */
-     if ((s = connect_to_server(host, port)) < 0)
-	  return -1;
-
-     /* Establish context */
-     if (client_establish_context(s, service_name, &context) < 0)
-	  return -1;
-
-#ifdef	GSSAPI_V2
-     if (dov2) {
-	 /*
-	  * Attempt to save and then restore the context.
-	  */
-	 maj_stat = gss_export_sec_context(&min_stat,
-					   &context,
-					   &context_token);
-	 if (maj_stat != GSS_S_COMPLETE) {
-	     display_status("exporting context", maj_stat, min_stat);
-	     return -1;
-	 }
-	 maj_stat = gss_import_sec_context(&min_stat,
-					   &context_token,
-					   &context);
-	 if (maj_stat != GSS_S_COMPLETE) {
-	     display_status("importing context", maj_stat, min_stat);
-	     return -1;
-	 }
-	 (void) gss_release_buffer(&min_stat, &context_token);
-     }
-#endif	/* GSSAPI_V2 */
-
-     /* Get context information */
-     maj_stat = gss_inquire_context(&min_stat, context,
-				    &src_name, &targ_name, &lifetime,
-				    &mechanism, &context_flags,
-				    &is_local
-#ifdef	GSSAPI_V2
-				    , &is_open
-#endif	/* GSSAPI_V2 */
-				    );
-     if (maj_stat != GSS_S_COMPLETE) {
-	 display_status("inquiring context", maj_stat, min_stat);
-	 return -1;
-     }
-
-     maj_stat = gss_display_name(&min_stat, src_name, &sname,
-				 &name_type);
-     if (maj_stat != GSS_S_COMPLETE) {
-	 display_status("displaying context", maj_stat, min_stat);
-	 return -1;
-     }
-     maj_stat = gss_display_name(&min_stat, targ_name, &tname,
-				 (gss_OID *) NULL);
-     if (maj_stat != GSS_S_COMPLETE) {
-	 display_status("displaying context", maj_stat, min_stat);
-	 return -1;
-     }
-     fprintf(stderr, "\"%s\" to \"%s\", lifetime %d, flags %x, %s",
-	     (char *) sname.value, (char *) tname.value, lifetime,
-	     context_flags,
-	     (is_local) ? "locally initiated" : "remotely initiated");
-#ifdef	GSSAPI_V2
-     fprintf(stderr, " %s", (is_open) ? "open" : "closed");
-#endif	/* GSSAPI_V2 */
-     fprintf(stderr, "\n");
-
-     (void) gss_release_name(&min_stat, &src_name);
-     (void) gss_release_name(&min_stat, &targ_name);
-     (void) gss_release_buffer(&min_stat, &sname);
-     (void) gss_release_buffer(&min_stat, &tname);
-
-#ifdef	GSSAPI_V2
-     if (dov2) {
-	 size_t	i;
-
-	 maj_stat = gss_oid_to_str(&min_stat,
-				   name_type,
-				   &oid_name);
-	 if (maj_stat != GSS_S_COMPLETE) {
-	     display_status("converting oid->string", maj_stat, min_stat);
-	     return -1;
-	 }
-	 fprintf(stderr, "Name type of source name is %s.\n",
-		 (char *) oid_name.value);
-	 (void) gss_release_buffer(&min_stat, &oid_name);
-	 (void) gss_release_oid(&min_stat, &name_type);
-
-	 /* Now get the names supported by the mechanism */
-	 maj_stat = gss_inquire_names_for_mech(&min_stat,
-					       mechanism,
-					       &mech_names);
-	 if (maj_stat != GSS_S_COMPLETE) {
-	     display_status("inquiring mech names", maj_stat, min_stat);
-	     return -1;
-	 }
-
-	 maj_stat = gss_oid_to_str(&min_stat,
-				   mechanism,
-				   &oid_name);
-	 if (maj_stat != GSS_S_COMPLETE) {
-	     display_status("converting oid->string", maj_stat, min_stat);
-	     return -1;
-	 }
-	 fprintf(stderr, "Mechanism %s supports %d names\n",
-		 (char *) oid_name.value, mech_names->count);
-	 (void) gss_release_buffer(&min_stat, &oid_name);
-	 for (i=0; i<mech_names->count; i++) {
-	     gss_OID	tmpoid;
-	     int	is_present;
-
-	     maj_stat = gss_oid_to_str(&min_stat,
-				       &mech_names->elements[i],
-				       &oid_name);
-	     if (maj_stat != GSS_S_COMPLETE) {
-		 display_status("converting oid->string", maj_stat, min_stat);
-		 return -1;
-	     }
-	     fprintf(stderr, "%d: %s\n", i, (char *) oid_name.value);
-
-	     maj_stat = gss_str_to_oid(&min_stat,
-				       &oid_name,
-				       &tmpoid);
-	     if (maj_stat != GSS_S_COMPLETE) {
-		 display_status("converting string->oid", maj_stat, min_stat);
-		 return -1;
-	     }
-
-	     maj_stat = gss_test_oid_set_member(&min_stat,
-						tmpoid,
-						mech_names,
-						&is_present);
-	     if (maj_stat != GSS_S_COMPLETE) {
-		 display_status("testing oid presence", maj_stat, min_stat);
-		 return -1;
-	     }
-	     if (!is_present) {
-		 fprintf(stderr, "%s is not present in list?\n",
-			 (char *) oid_name.value);
-	     }
-	     (void) gss_release_oid(&min_stat, &tmpoid);
-	     (void) gss_release_buffer(&min_stat, &oid_name);
-	 }
-
-	 (void) gss_release_oid_set(&min_stat, &mech_names);
-	 (void) gss_release_oid(&min_stat, &mechanism);
-     }
-#endif	/* GSSAPI_V2 */
-
-     if (use_file) {
-	 read_file(msg, &in_buf);
-     } else {
-	 /* Seal the message */
-	 in_buf.value = msg;
-	 in_buf.length = strlen(msg) + 1;
-     }
-#ifdef	GSSAPI_V2
-     if (dov2)
-	 maj_stat = gss_wrap(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
-			     &in_buf, &state, &out_buf);
-     else
-#endif	/* GSSAPI_V2 */
-     maj_stat = gss_seal(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
-			 &in_buf, &state, &out_buf);
-     if (maj_stat != GSS_S_COMPLETE) {
-	  display_status("sealing message", maj_stat, min_stat);
-	  return -1;
-     } else if (! state) {
-	  fprintf(stderr, "Warning!  Message not encrypted.\n");
-     }
-
-     /* Send to server */
-     if (send_token(s, &out_buf) < 0)
-	  return -1;
-     (void) gss_release_buffer(&min_stat, &out_buf);
-
-     /* Read signature block into out_buf */
-     if (recv_token(s, &out_buf) < 0)
-	  return -1;
-
-     /* Verify signature block */
-#ifdef	GSSAPI_V2
-     if (dov2)
-	 maj_stat = gss_verify_mic(&min_stat, context, &in_buf,
-				   &out_buf, &qop_state);
-     else
-#endif	/* GSSAPI_V2 */
-     maj_stat = gss_verify(&min_stat, context, &in_buf, &out_buf, &state);
-     if (maj_stat != GSS_S_COMPLETE) {
-	  display_status("verifying signature", maj_stat, min_stat);
-	  return -1;
-     }
-     (void) gss_release_buffer(&min_stat, &out_buf);
-     if (use_file)
-	 free(in_buf.value);
-
-     printf("Signature verified.\n");
-
-     /* Delete context */
-     maj_stat = gss_delete_sec_context(&min_stat, &context, &out_buf);
-     if (maj_stat != GSS_S_COMPLETE) {
-	  display_status("deleting context", maj_stat, min_stat);
-	  return -1;
-     }
-     (void) gss_release_buffer(&min_stat, &out_buf);
-     
-     return 0;
 }
 
 /*
@@ -403,6 +86,7 @@ int connect_to_server(host, port)
      }
      if (connect(s, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 	  perror("connecting to server");
+	  (void) close(s);
 	  return -1;
      }
      return s;
@@ -419,6 +103,7 @@ int connect_to_server(host, port)
  * 	s		(r) an established TCP connection to the service
  * 	service_name	(r) the ASCII service name of the service
  * 	context		(w) the established GSS-API context
+ *	ret_flags	(w) the returned flags from init_sec_context
  *
  * Returns: 0 on success, -1 on failure
  *
@@ -434,10 +119,13 @@ int connect_to_server(host, port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-int client_establish_context(s, service_name, gss_context)
+int client_establish_context(s, service_name, deleg_flag,
+			     gss_context, ret_flags)
      int s;
      char *service_name;
+     OM_uint32 deleg_flag;
      gss_ctx_id_t *gss_context;
+     OM_uint32 *ret_flags;
 {
      gss_buffer_desc send_tok, recv_tok, *token_ptr;
      gss_name_t target_name;
@@ -489,7 +177,7 @@ int client_establish_context(s, service_name, gss_context)
 				    token_ptr,
 				    NULL,	/* ignore mech type */
 				    &send_tok,
-				    NULL,	/* ignore ret_flags */
+				    ret_flags,
 				    NULL);	/* ignore time_rec */
 
 	  if (token_ptr != GSS_C_NO_BUFFER)
@@ -527,7 +215,6 @@ int client_establish_context(s, service_name, gss_context)
      return 0;
 }
 
-
 void read_file(file_name, in_buf)
     char		*file_name;
     gss_buffer_t	in_buf;
@@ -564,5 +251,253 @@ void read_file(file_name, in_buf)
     if (bytes_in != count)
 	fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
 		bytes_in, count);
+}
+
+/*
+ * Function: call_server
+ *
+ * Purpose: Call the "sign" service.
+ *
+ * Arguments:
+ *
+ * 	host		(r) the host providing the service
+ * 	port		(r) the port to connect to on host
+ * 	service_name	(r) the GSS-API service name to authenticate to	
+ * 	msg		(r) the message to have "signed"
+ *
+ * Returns: 0 on success, -1 on failure
+ *
+ * Effects:
+ * 
+ * call_server opens a TCP connection to <host:port> and establishes a
+ * GSS-API context with service_name over the connection.  It then
+ * seals msg in a GSS-API token with gss_seal, sends it to the server,
+ * reads back a GSS-API signature block for msg from the server, and
+ * verifies it with gss_verify.  -1 is returned if any step fails,
+ * otherwise 0 is returned.
+ */
+int call_server(host, port, service_name, deleg_flag, msg, use_file)
+     char *host;
+     u_short port;
+     char *service_name;
+     OM_uint32 deleg_flag;
+     char *msg;
+     int use_file;
+{
+     gss_ctx_id_t context;
+     gss_buffer_desc in_buf, out_buf;
+     int s, state;
+     OM_uint32 ret_flags;
+     OM_uint32 maj_stat, min_stat;
+     gss_name_t		src_name, targ_name;
+     gss_buffer_desc	sname, tname;
+     OM_uint32		lifetime;
+     gss_OID		mechanism, name_type;
+     int		is_local;
+     OM_uint32		context_flags;
+     int		is_open;
+     gss_qop_t		qop_state;
+     gss_OID_set	mech_names;
+     gss_buffer_desc	oid_name;
+     size_t	i;
+
+     /* Open connection */
+     if ((s = connect_to_server(host, port)) < 0)
+	  return -1;
+
+     /* Establish context */
+     if (client_establish_context(s, service_name, deleg_flag, &context,
+				  &ret_flags) < 0) {
+	  (void) close(s);
+	  return -1;
+     }
+
+     /* display the flags */
+     display_ctx_flags(ret_flags);
+
+     /* Get context information */
+     maj_stat = gss_inquire_context(&min_stat, context,
+				    &src_name, &targ_name, &lifetime,
+				    &mechanism, &context_flags,
+				    &is_local,
+				    &is_open);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("inquiring context", maj_stat, min_stat);
+	 return -1;
+     }
+
+     maj_stat = gss_display_name(&min_stat, src_name, &sname,
+				 &name_type);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("displaying source name", maj_stat, min_stat);
+	 return -1;
+     }
+     maj_stat = gss_display_name(&min_stat, targ_name, &tname,
+				 (gss_OID *) NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("displaying target name", maj_stat, min_stat);
+	 return -1;
+     }
+     fprintf(stderr, "\"%.*s\" to \"%.*s\", lifetime %d, flags %x, %s, %s\n",
+	     (int) sname.length, (char *) sname.value,
+	     (int) tname.length, (char *) tname.value, lifetime,
+	     context_flags,
+	     (is_local) ? "locally initiated" : "remotely initiated",
+	     (is_open) ? "open" : "closed");
+
+     (void) gss_release_name(&min_stat, &src_name);
+     (void) gss_release_name(&min_stat, &targ_name);
+     (void) gss_release_buffer(&min_stat, &sname);
+     (void) gss_release_buffer(&min_stat, &tname);
+
+     maj_stat = gss_oid_to_str(&min_stat,
+			       name_type,
+			       &oid_name);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("converting oid->string", maj_stat, min_stat);
+	 return -1;
+     }
+     fprintf(stderr, "Name type of source name is %.*s.\n",
+	     (int) oid_name.length, (char *) oid_name.value);
+     (void) gss_release_buffer(&min_stat, &oid_name);
+
+     /* Now get the names supported by the mechanism */
+     maj_stat = gss_inquire_names_for_mech(&min_stat,
+					   mechanism,
+					   &mech_names);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("inquiring mech names", maj_stat, min_stat);
+	 return -1;
+     }
+
+     maj_stat = gss_oid_to_str(&min_stat,
+			       mechanism,
+			       &oid_name);
+     if (maj_stat != GSS_S_COMPLETE) {
+	 display_status("converting oid->string", maj_stat, min_stat);
+	 return -1;
+     }
+     fprintf(stderr, "Mechanism %.*s supports %d names\n",
+	     (int) oid_name.length, (char *) oid_name.value,
+	     mech_names->count);
+     (void) gss_release_buffer(&min_stat, &oid_name);
+
+     for (i=0; i<mech_names->count; i++) {
+	 maj_stat = gss_oid_to_str(&min_stat,
+				   &mech_names->elements[i],
+				   &oid_name);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("converting oid->string", maj_stat, min_stat);
+	     return -1;
+	 }
+	 fprintf(stderr, "  %d: %.*s\n", i,
+		 (int) oid_name.length, (char *) oid_name.value);
+
+	 (void) gss_release_buffer(&min_stat, &oid_name);
+     }
+     (void) gss_release_oid_set(&min_stat, &mech_names);
+
+     if (use_file) {
+	 read_file(msg, &in_buf);
+     } else {
+	 /* Seal the message */
+	 in_buf.value = msg;
+	 in_buf.length = strlen(msg) + 1;
+     }
+
+     maj_stat = gss_wrap(&min_stat, context, 1, GSS_C_QOP_DEFAULT,
+			 &in_buf, &state, &out_buf);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  display_status("sealing message", maj_stat, min_stat);
+	  (void) close(s);
+	  (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+	  return -1;
+     } else if (! state) {
+	  fprintf(stderr, "Warning!  Message not encrypted.\n");
+     }
+
+     /* Send to server */
+     if (send_token(s, &out_buf) < 0) {
+	  (void) close(s);
+	  (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+	  return -1;
+     }
+     (void) gss_release_buffer(&min_stat, &out_buf);
+
+     /* Read signature block into out_buf */
+     if (recv_token(s, &out_buf) < 0) {
+	  (void) close(s);
+	  (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+	  return -1;
+     }
+
+     /* Verify signature block */
+     maj_stat = gss_verify_mic(&min_stat, context, &in_buf,
+			       &out_buf, &qop_state);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  display_status("verifying signature", maj_stat, min_stat);
+	  (void) close(s);
+	  (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+	  return -1;
+     }
+     (void) gss_release_buffer(&min_stat, &out_buf);
+
+     if (use_file)
+	 free(in_buf.value);
+
+     printf("Signature verified.\n");
+
+     /* Delete context */
+     maj_stat = gss_delete_sec_context(&min_stat, &context, &out_buf);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  display_status("deleting context", maj_stat, min_stat);
+	  (void) close(s);
+	  (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+	  return -1;
+     }
+
+     (void) gss_release_buffer(&min_stat, &out_buf);
+     (void) close(s);
+     return 0;
+}
+
+int main(argc, argv)
+     int argc;
+     char **argv;
+{
+     char *service_name, *server_host, *msg;
+     u_short port = 4444;
+     int use_file = 0;
+     OM_uint32 deleg_flag = 0;
+     
+     display_file = stdout;
+
+     /* Parse arguments. */
+     argc--; argv++;
+     while (argc) {
+	  if (strcmp(*argv, "-port") == 0) {
+	       argc--; argv++;
+	       if (!argc) usage();
+	       port = atoi(*argv);
+	  } else if (strcmp(*argv, "-d") == 0) {
+	       deleg_flag = GSS_C_DELEG_FLAG;
+	  } else if (strcmp(*argv, "-f") == 0) {
+	       use_file = 1;
+	  } else 
+	       break;
+	  argc--; argv++;
+     }
+     if (argc != 3)
+	  usage();
+
+     server_host = *argv++;
+     service_name = *argv++;
+     msg = *argv++;
+
+     if (call_server(server_host, port, service_name,
+		     deleg_flag, msg, use_file) < 0)
+	  exit(1);
+
+     return 0;
 }
 

@@ -28,6 +28,26 @@ Wed Jun 12 00:46:41 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 		all uses of INTERFACE in favor of KRB5_CALLCONV and
 		KRB5_DLLIMP.
 
+Sun Apr 21 03:07:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* gssapi_generic.c, release_buffer.c, release_oid_set.c: added
+ 	files which should have been added before, but either I or commit
+ 	was confused.
+
+Wed Apr 17 20:59:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* oid_ops.c: moved from mechglue
+	
+	* util_canonhost.c (g_canonicalize_host): cast the return value of
+ 	malloc()
+
+	* gssapiP_generic.h: Added prototypes for oid_ops.c
+
+	* gssapi.h: Make the types of OM_uint32 constants portable,
+	fix some minor compile-time nits
+
+	* Makefile.in: change the list of files which need to be built
+
 Tue Apr  2 15:31:25 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Inlined list of source files for SRCS and

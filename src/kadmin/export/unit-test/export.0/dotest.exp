@@ -1,0 +1,29 @@
+#
+# $Id$
+#
+
+verbose "starting test: dotest.sh"
+
+spawn ./dotest.sh
+
+set timeout 60
+
+expect {
+	-re "error dumping (princ|policy)\.(\[12\])"
+		{ fail $expect_out(0,string); exp_continue }
+	-re "export/import (principal|policy) db (failed|succeeded)"
+	{ 
+		if {![string compare $expect_out(2,string) failed]} {
+			fail $expect_out(0,string)
+		} else {
+			pass $expect_out(0,string)
+		}
+		exp_continue
+	}
+	eof break
+	timeout { fail "timeout"; close }
+}
+
+set w [wait]
+
+verbose "% Exit $w"

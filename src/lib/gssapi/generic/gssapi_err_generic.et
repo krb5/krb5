@@ -20,6 +20,10 @@
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
+#
+# $Id$
+#
+
 error_table ggss
 
 error_code G_BAD_SERVICE_NAME, "No @ in SERVICE-NAME name string"
@@ -31,5 +35,9 @@ error_code G_BAD_MSG_CTX, "Message context invalid"
 error_code G_WRONG_SIZE, "Buffer is the wrong size"
 error_code G_BAD_USAGE, "Credential usage type is unknown"
 error_code G_UNKNOWN_QOP, "Unknown quality of protection specified"
+error_code G_NO_HOSTNAME, "Local host name could not be determined"
 error_code G_BAD_HOSTNAME, "Hostname in SERVICE-NAME string could not be canonicalized"
+error_code G_WRONG_MECH, "Mechanism is incorrect"
+error_code G_BAD_TOK_HEADER, "Token header is malformed or corrupt"
+error_code G_BAD_DIRECTION, "Packet was replayed in wrong direction"
 end

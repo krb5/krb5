@@ -28,19 +28,23 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_inquire_names_for_mech(context, minor_status, mechanism, name_types)
-    void	*context;
+krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
     OM_uint32	*minor_status;
     gss_OID	mechanism;
     gss_OID_set	*name_types;
 {
+    krb5_context context;
     OM_uint32	major, minor;
+
+    if (GSS_ERROR(kg_get_context(minor_status, &context)))
+       return(GSS_S_FAILURE);
 
     /*
      * We only know how to handle our own mechanism.
      */
     if ((mechanism != GSS_C_NULL_OID) &&
-	!g_OID_equal(gss_mech_krb5, mechanism)) {
+	!g_OID_equal(gss_mech_krb5, mechanism) &&
+	!g_OID_equal(gss_mech_krb5_old, mechanism)) {
 	*minor_status = 0;
 	return(GSS_S_FAILURE);
     }

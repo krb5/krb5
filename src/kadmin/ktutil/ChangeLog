@@ -2,6 +2,10 @@ Thu Jun 13 21:42:11 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to SS_RULES
 
+Fri Jul 12 14:37:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (USE_KADM_LIBRARY): removed.  it wasn't needed.
+
 Tue Mar 19 19:41:31 1996  Richard Basch  <basch@lehman.com>
 
 	* ktutil_funcs.c (ktutil_write_srvtab): use any type of des key

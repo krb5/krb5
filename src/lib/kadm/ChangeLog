@@ -13,6 +13,11 @@ Tue May 21 20:51:06 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (check-unix):  Use KRB5_RUN_FLAGS
 
+Sun May 12 00:46:57 1996  Marc Horowitz  <marc@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): added "acl_file" variable
+ 	for the admin server.
+
 Wed Mar 13 17:37:00 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Use AC_HEADER_STDARG.

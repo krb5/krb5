@@ -1,0 +1,40 @@
+export PS_ALL			= ps auxww
+# Make sure there's no extra whitespace at the end of this line!
+export PS_PID			= ps auxww
+# Make sure there is a blank space at the end of this line!
+export PS_TTY			= ps -t 
+export RSH_CMD			= /usr/bin/rsh
+export INSTCMD			= /usr/local/bin/ginstall -c
+export LEX			= /usr/local/bin/flex
+export AWK_CMD			= /usr/local/bin/gawk
+
+# needed for fd_set to be defined
+# Not convinced!  Experimenting with disabling _BSD. - jik 3/21/95
+ifndef KRB5B4
+CFLAGS += -D_BSD
+endif
+CFLAGS += -D_ALL_SOURCE
+
+PCC_STRUCT_RETURN	= -fpcc-struct-return
+D_NEEDS_RPCENT		= -D_SUN
+
+D_NEEDS_GETUSERSHELL	= -DNEEDS_GETUSERSHELL
+D_NEEDS_TREEWALK	= -DNEEDS_TREEWALK
+D_SETEUID		= -DNO_SETEUID -DSETEUID_INCLUDE='<sys/id.h>' \
+	 -DSETEUIDPRE='setuidx(ID_REAL|ID_EFFECTIVE,' -DSETEUIDPOST=')'
+D_NO_SETENV		= -DNO_SETENV
+D_REGEXP_TYPE		= -DPOSIX_REGEXPS
+
+TERMCAPLIB		= -ltermcap
+
+# extra libraries needed for login
+LOGINLIB		= -ls -lcfg -lodm
+
+UTMP_FILE = /etc/utmp
+WTMP_FILE = /usr/adm/wtmp
+
+XINCDIR = /usr/lpp/X11/include
+XLIBDIR = /usr/lpp/X11/lib
+
+OMIT_DOC = true
+DONT_STRIP_NXLIBS = true

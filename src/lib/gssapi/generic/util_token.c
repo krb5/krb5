@@ -23,11 +23,9 @@
 #include "gssapiP_generic.h"
 #include <memory.h>
 
-#if (SIZEOF_INT == 2)
-#define VALID_INT_BITS    0x7fff
-#elif (SIZEOF_INT == 4)
-#define VALID_INT_BITS    0x7fffffff
-#endif	
+/*
+ * $Id$
+ */
 
 /* XXXX this code currently makes the assumption that a mech oid will
    never be longer than 127 bytes.  This assumption is not inherent in
@@ -153,58 +151,68 @@ void g_make_token_header(mech, body_size, buf, tok_type)
    *(*buf)++ = (unsigned char) (tok_type&0xff);
 }
 
-/* given a buffer containing a token, reads and verifies the token,
-   leaving buf advanced past the token header, and setting body_size
-   to the number of remaining bytes */
-
-int g_verify_token_header(mech, body_size, buf, tok_type, toksize)
+/*
+ * Given a buffer containing a token, reads and verifies the token,
+ * leaving buf advanced past the token header, and setting body_size
+ * to the number of remaining bytes.  Returns 0 on success,
+ * G_BAD_TOK_HEADER for a variety of errors, and G_WRONG_MECH if the
+ * mechanism in the token does not match the mech argument.  buf and
+ * *body_size are left unmodified on error.
+ */
+int g_verify_token_header(mech, body_size, buf_in, tok_type, toksize)
      gss_OID mech;
      int *body_size;
-     unsigned char **buf;
+     unsigned char **buf_in;
      int tok_type;
      int toksize;
 {
+   char *buf = *buf_in;
    int seqsize;
    gss_OID_desc toid;
+   int ret = 0;
 
    if ((toksize-=1) < 0)
-      return(0);
-   if (*(*buf)++ != 0x60)
-      return(0);
+      return(G_BAD_TOK_HEADER);
+   if (*buf++ != 0x60)
+      return(G_BAD_TOK_HEADER);
 
-   if ((seqsize = der_read_length(buf, &toksize)) < 0)
-      return(0);
+   if ((seqsize = der_read_length(&buf, &toksize)) < 0)
+      return(G_BAD_TOK_HEADER);
 
    if (seqsize != toksize)
-      return(0);
+      return(G_BAD_TOK_HEADER);
 
    if ((toksize-=1) < 0)
-      return(0);
-   if (*(*buf)++ != 0x06)
-      return(0);
+      return(G_BAD_TOK_HEADER);
+   if (*buf++ != 0x06)
+      return(G_BAD_TOK_HEADER);
  
    if ((toksize-=1) < 0)
-      return(0);
-   toid.length = *(*buf)++;
+      return(G_BAD_TOK_HEADER);
+   toid.length = *buf++;
 
-   if ((toid.length & VALID_INT_BITS) != toid.length) /* Overflow??? */
-      return(0);
-   if ((toksize-= (int) toid.length) < 0)
-      return(0);
-   toid.elements = *buf;
-   (*buf)+=toid.length;
+   if ((toksize-=toid.length) < 0)
+      return(G_BAD_TOK_HEADER);
+   toid.elements = buf;
+   buf+=toid.length;
 
-   if (! g_OID_equal(&toid, mech))
-      return(0);
+   if (! g_OID_equal(&toid, mech)) 
+      ret = G_WRONG_MECH;
  
+   /* G_WRONG_MECH is not returned immediately because it's more important
+      to return G_BAD_TOK_HEADER if the token header is in fact bad */
+
    if ((toksize-=2) < 0)
-      return(0);
+      return(G_BAD_TOK_HEADER);
 
-   if ((*(*buf)++ != ((tok_type>>8)&0xff)) ||
-       (*(*buf)++ != (tok_type&0xff)))
-      return(0);
+   if ((*buf++ != ((tok_type>>8)&0xff)) ||
+       (*buf++ != (tok_type&0xff)))
+      return(G_BAD_TOK_HEADER);
 
-   *body_size = toksize;
+   if (!ret) {
+	*buf_in = buf;
+	*body_size = toksize;
+   }
 
-   return(1);
+   return(ret);
 }

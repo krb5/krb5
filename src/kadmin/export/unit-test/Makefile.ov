@@ -1,0 +1,19 @@
+#
+# $Id$
+#
+
+TOP = ../..
+include $(TOP)/config.mk/template
+
+unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-setup::
+	$(SAVE_FILES)
+	$(FIX_CONF_FILES)
+	$(INITDB)
+
+unit-test-body::
+	$(RUNTEST) EXPORT=../kadm5_export --tool export
+
+unit-test-cleanup::
+	$(RESTORE_FILES)

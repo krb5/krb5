@@ -23,14 +23,16 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 
-krb5_gss_release_cred(ctx, minor_status, cred_handle)
-     void *ctx;
+krb5_gss_release_cred(minor_status, cred_handle)
      OM_uint32 *minor_status;
      gss_cred_id_t *cred_handle;
 {
-   krb5_context context = ctx;
+   krb5_context context;
    krb5_gss_cred_id_t cred;
    krb5_error_code code1, code2;
+
+   if (GSS_ERROR(kg_get_context(minor_status, &context)))
+      return(GSS_S_FAILURE);
 
    if (*cred_handle == GSS_C_NO_CREDENTIAL)
       return(kg_release_defcred(minor_status));

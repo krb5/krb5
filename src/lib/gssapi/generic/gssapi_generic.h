@@ -23,6 +23,10 @@
 #ifndef _GSSAPI_GENERIC_H_
 #define _GSSAPI_GENERIC_H_
 
+/*
+ * $Id$
+ */
+
 #if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
 #include <gssapi.h>
 #else
