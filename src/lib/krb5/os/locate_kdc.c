@@ -508,12 +508,19 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
  * Lookup a KDC via DNS SRV records
  */
 
+struct srv_dns_entry {
+    struct srv_dns_entry *next;
+    int priority;
+    int weight;
+    unsigned short port;
+    char *host;
+};
+
 static krb5_error_code
-krb5_locate_srv_dns_1 (const krb5_data *realm,
-		       const char *service,
-		       const char *protocol,
-		       struct addrlist *addrlist,
-		       int family)
+make_srv_query_realm(const krb5_data *realm,
+		     const char *service,
+		     const char *protocol,
+		     struct srv_dns_entry **answers)
 {
     union {
         unsigned char bytes[2048];
@@ -525,13 +532,6 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     int priority, weight, size, len, numanswers, numqueries, rdlen;
     unsigned short port;
     const int hdrsize = sizeof(HEADER);
-    struct srv_dns_entry {
-	struct srv_dns_entry *next;
-	int priority;
-	int weight;
-	unsigned short port;
-	char *host;
-    };
 
     struct srv_dns_entry *head = NULL;
     struct srv_dns_entry *srv = NULL, *entry = NULL;
@@ -548,9 +548,12 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
      *
      */
 
+    *answers = 0;
+    if (memchr(realm->data, 0, realm->length))
+	return 0;
     if ( strlen(service) + strlen(protocol) + realm->length + 6 
          > MAX_DNS_NAMELEN )
-        goto out;
+	return 0;
     sprintf(host, "%s.%s.%.*s", service, protocol, (int) realm->length,
 	    realm->data);
 
@@ -564,7 +567,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
        the local domain or domain search lists to be expanded.  */
 
     h = host + strlen (host);
-    if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
+    if ((h[-1] != '.') && ((h - host + 1) < sizeof(host)))
         strcpy (h, ".");
 
 #ifdef TEST
@@ -705,6 +708,38 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 	    INCR_CHECK(p, rdlen);
     }
 	
+    *answers = head;
+
+  out:
+    return code;
+}
+
+static krb5_error_code
+krb5_locate_srv_dns_1 (const krb5_data *realm,
+		       const char *service,
+		       const char *protocol,
+		       struct addrlist *addrlist,
+		       int family)
+{
+    struct srv_dns_entry *head = NULL;
+    struct srv_dns_entry *entry = NULL;
+    krb5_error_code code = 0;
+
+    /*
+     * First off, build a query of the form:
+     *
+     * service.protocol.realm
+     *
+     * which will most likely be something like:
+     *
+     * _kerberos._udp.REALM
+     *
+     */
+
+    code = make_srv_query_realm(realm, service, protocol, &head);
+    if (code)
+	goto out;
+
     /*
      * Okay!  Now we've got a linked list of entries sorted by
      * priority.  Start looking up A records and returning
@@ -713,6 +748,12 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 
     if (head == NULL)
 	goto out;
+
+    /* Check for the "." case indicating no support.  */
+    if (head->next == 0 && head->host[0] == 0) {
+	code = KRB5_ERR_NO_SERVICE;
+	goto out;
+    }
 
 #ifdef TEST
     fprintf (stderr, "walking answer list:\n");
@@ -732,31 +773,19 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     fprintf (stderr, "[end]\n");
 #endif
 
+  out:
+
     for (entry = head; entry != NULL; ) {
+	struct srv_dns_entry *srv;
 	free(entry->host);
         entry->host = NULL;
 	srv = entry;
 	entry = entry->next;
 	free(srv);
-        srv = NULL;
     }
-
-  out:
-    if (srv)
-        free(srv);
 
     return code;
 }
-
-#ifdef TEST
-static krb5_error_code
-krb5_locate_srv_dns(const krb5_data *realm,
-		    const char *service, const char *protocol,
-		    struct addrlist *al)
-{
-    return krb5_locate_srv_dns_1 (realm, service, protocol, al, 0);
-}
-#endif
 #endif /* KRB5_DNS_LOOKUP */
 
 /*

@@ -1,5 +1,12 @@
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* locate_kdc.c (struct srv_dns_entry): Move to top level.
+	(make_srv_query_realm): Separate from krb5_locate_srv_dns_1; just
+	do query and return results.
+	(krb5_locate_srv_dns_1): Call it, and build addlist entries.
+	Check for one RR with a target of ".", and return an error.
+	(krb5_locate_srv_dns): Deleted.
+
 	* t_locate_kdc.c (main): Call krb5_locate_srv_dns_1.
 
 	* changepw.c (krb5_locate_kpasswd): Check specifically for certain
