@@ -200,7 +200,7 @@ size_t seed_length;
 	    if ((cksum->contents[0] != (krb5_octet) (c & 0xff)) ||
 		(cksum->contents[1] != (krb5_octet) ((c >> 8) & 0xff)) ||
 		(cksum->contents[2] != (krb5_octet) ((c >> 16) & 0xff)) ||
-		(cksum->contents[3] != (krb5_octet) ((c >> 32) & 0xff)))
+		(cksum->contents[3] != (krb5_octet) ((c >> 24) & 0xff)))
 		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	}
 	else
