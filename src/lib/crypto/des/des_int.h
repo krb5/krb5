@@ -15,8 +15,6 @@
 #ifndef DES_INTERNAL_DEFS
 #define DES_INTERNAL_DEFS
 
-#include <krb5/config.h>
-#include <krb5/osconf.h>
 #include <krb5/mit-des.h>
 
 /*
