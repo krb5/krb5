@@ -70,7 +70,7 @@ AllTarget(foo/**/libname)						@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) lib/**/libname.a objlist				@@\
 	$(TOUCH) foo/**/libname						@@\
-	$(RANLIB) $@							@@\
+	$(RANLIB) lib/**/libname.a					@@\
 lib/**/libname.a: objlist						@@\
 	$(ARADD) $@ objlist						@@\
 	$(RANLIB) $@
