@@ -278,21 +278,24 @@ kadm5_randkey_principal(void *server_handle,
 	 if (n_keys)
 	      *n_keys = r->n_keys;
 	 if (key) {
-	      *key = (krb5_keyblock *) malloc(r->n_keys*sizeof(krb5_keyblock));
-	      if (*key == NULL)
-		   return ENOMEM;
-	      for (i = 0; i < r->n_keys; i++) {
-		   ret = krb5_copy_keyblock_contents(handle->context,
-						     &r->keys[i],
-						     &(*key)[i]);
-		   if (ret) {
-			free(*key);
-			return ENOMEM;
-		   }
-	      }
-	 }
+	      if(r->n_keys) {
+		      *key = (krb5_keyblock *) 
+			      malloc(r->n_keys*sizeof(krb5_keyblock));
+		      if (*key == NULL)
+			      return ENOMEM;
+		      for (i = 0; i < r->n_keys; i++) {
+			      ret = krb5_copy_keyblock_contents(handle->context,
+								&r->keys[i],
+								&(*key)[i]);
+			      if (ret) {
+				      free(*key);
+				      return ENOMEM;
+			      }
+		      }
+	      } else *key = NULL;
+         }
     }
-	 
+
     return r->code;
 }
 
