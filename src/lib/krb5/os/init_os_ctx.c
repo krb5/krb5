@@ -23,6 +23,7 @@
  * krb5_init_contex()
  */
 
+#define NEED_WINDOWS
 #include "k5-int.h"
 
 krb5_error_code
@@ -30,7 +31,7 @@ krb5_os_init_context(ctx)
 	krb5_context ctx;
 {
 	krb5_os_context os_ctx;
-	krb5_error_code	retval;
+	krb5_error_code	retval = 0;
 	char *name;
 	const char *filenames[2];
 	
@@ -46,6 +47,24 @@ krb5_os_init_context(ctx)
 	ctx->os_context = (void *) os_ctx;
 
 #ifndef OLD_CONFIG_FILES
+#ifdef _WINDOWS
+    {
+        char defname[160];                      /* Default value */
+        char krb5conf[160];                     /* Actual value */
+
+        GetWindowsDirectory(defname, sizeof(defname) - 10);
+        strcat (defname, "\\");
+        strcat (defname, DEFAULT_PROFILE_FILENAME);
+        GetPrivateProfileString(INI_FILES, INI_KRB5_CONF, defname,
+            krb5conf, sizeof(krb5conf), KERBEROS_INI);
+        name = krb5conf;
+
+        filenames[0] = name;
+        filenames[1] = 0;
+    }
+
+#else /* _WINDOWS */
+
 	/*
 	 * When the profile routines are later enhanced, we will try
 	 * including a config file from user's home directory here.
@@ -54,12 +73,14 @@ krb5_os_init_context(ctx)
 	filenames[0] = name ? name : DEFAULT_PROFILE_FILENAME;
 	filenames[1] = 0;
 
+#endif /* _WINDOWS */
+
 	retval = profile_init(filenames, &ctx->profile);
 	if (retval)
 	    ctx->profile = 0;
 #endif
-	
-	return 0;
+
+	return retval;
 }
 
 void

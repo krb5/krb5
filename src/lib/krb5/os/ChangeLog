@@ -1,3 +1,8 @@
+Wed Apr 27 11:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* osconfig.c: krb5_find_config_files only used for OLD_CONFIG_FILES.
+	* init_os_.c: Get config file location via windows ini files.
+
 Thu Apr 27 13:04:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove t_std_conf.o 

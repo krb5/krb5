@@ -24,7 +24,9 @@
  * Definition of default configuration parameters.
  */
 
+#ifdef OLD_CONFIG_FILES
 #define NEED_WINDOWS
+#endif
 #include "k5-int.h"
 
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
@@ -42,6 +44,7 @@ int krb5_skdc_timeout_1 = SKDC_TIMEOUT_1;
 char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
 char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
 
+#ifdef OLD_CONFIG_FILES
 /*
  * On Windows, we want to let the user specify in the kerberos.ini file
  * where the config and realms files, krb.con and krb.rea, reside. If they
@@ -79,3 +82,5 @@ krb5_find_config_files ()
 
     return 0;
 }
+#endif /* OLD_CONFIG_FILES */
+

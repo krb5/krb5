@@ -31,8 +31,9 @@ CLIB  = crypto\crypto.lib
 KLIB  = krb5\krb5.lib
 GLIB  = gssapi\gssapi.lib
 ETLIB = $(BUILDTOP)\util\et\comerr.lib
+PLIB  = $(BUILDTOP)\util\profile\profile.lib
 WLIB  = .\winsock.lib
-LIBS  = $(CLIB) $(KLIB) $(GLIB) $(ETLIB) $(WLIB)
+LIBS  = $(CLIB) $(KLIB) $(GLIB) $(ETLIB) $(PLIB) $(WLIB)
 
 lib-windows: winsock.lib libkrb5.lib gssapi.lib 
 
@@ -68,7 +69,7 @@ all-windows::
 	@echo Making in lib\des425
 	cd ..\des425
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	@echo Making locally
+	@echo Making in lib
 	cd ..
 
 all-windows:: libkrb5.lib gssapi.lib
@@ -86,6 +87,6 @@ clean-windows::
 	@echo Making clean in lib\des425
 	cd ..\des425
 	-$(MAKE) -$(MFLAGS) clean
-	@echo Making clean locally
+	@echo Making clean in lib
 	cd ..
 

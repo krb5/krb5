@@ -1,3 +1,7 @@
+Wed Apr 27 11:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: need to include profile.lib in the DLL.
+
 Thu Apr 27 13:32:35 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: add kdb4 directory.

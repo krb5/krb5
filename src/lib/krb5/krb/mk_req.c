@@ -64,7 +64,6 @@ krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
     krb5_principal	  server;
     krb5_creds 		* credsp;
     krb5_creds 		  creds;
-    char	       ** realm;
 
     retval = krb5_sname_to_principal(context, hostname, service, 
 				     KRB5_NT_SRV_HST, &server);
