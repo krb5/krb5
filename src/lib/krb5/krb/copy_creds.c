@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_copy_creds_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
@@ -41,20 +41,21 @@ krb5_creds **outcred;
 	goto cleanlast;
     if (retval = krb5_copy_principal(incred->server, &tempcred->server))
 	goto cleanclient;
-    if (retval = krb5_copy_keyblock(&incred->keyblock, &tempcred->keyblock))
+    if (retval = krb5_copy_keyblock_contents(&incred->keyblock,
+					     &tempcred->keyblock))
 	goto cleanserver;
     if (retval = krb5_copy_addresses(incred->addresses, &tempcred->addresses))
 	goto cleanblock;
     if (retval = krb5_copy_data(&incred->ticket, &scratch))
 	goto cleanaddrs;
     tempcred->ticket = *scratch;
-    free((char *)scratch);
+    xfree(scratch);
     if (retval = krb5_copy_data(&incred->second_ticket,
 				&scratch))
 	goto cleanticket;
 
     tempcred->second_ticket = *scratch;
-    free((char *)scratch);
+    xfree(scratch);
 
     *outcred = tempcred;
     return 0;
@@ -64,12 +65,12 @@ krb5_creds **outcred;
  cleanaddrs:
     krb5_free_address(tempcred->addresses);
  cleanblock:
-    free((char *)tempcred->keyblock.contents);
+    xfree(tempcred->keyblock.contents);
  cleanserver:
     krb5_free_principal(tempcred->server);
  cleanclient:
     krb5_free_principal(tempcred->client);
  cleanlast:
-    free((char *)tempcred);
+    xfree(tempcred);
     return retval;
 }

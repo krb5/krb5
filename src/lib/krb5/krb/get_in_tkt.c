@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_get_in_tkt_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 #include <krb5/libos-proto.h>
@@ -212,8 +212,8 @@ OLDDECLARG(krb5_ccache, ccache)
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
     /* fill in the credentials */
-    if (retval = krb5_copy_keyblock(as_reply->enc_part2->session,
-				    &creds->keyblock)) {
+    if (retval = krb5_copy_keyblock_contents(as_reply->enc_part2->session,
+					     &creds->keyblock)) {
 	memset((char *)as_reply->enc_part2->session->contents, 0,
 	      as_reply->enc_part2->session->length);
 	krb5_free_kdc_rep(as_reply);
@@ -221,7 +221,7 @@ OLDDECLARG(krb5_ccache, ccache)
     }
 #define cleanup_key() {memset((char *)creds->keyblock.contents, 0,\
 			     creds->keyblock.length); \
-		       free((char *)creds->keyblock.contents); \
+		       xfree(creds->keyblock.contents); \
 		       creds->keyblock.contents = 0; \
 		       creds->keyblock.length = 0;}
 
@@ -245,12 +245,12 @@ OLDDECLARG(krb5_ccache, ccache)
 	return retval;
     }	
     creds->ticket = *packet;
-    free((char *) packet);
+    xfree(packet);
 
     /* store it in the ccache! */
     if (retval = krb5_cc_store_cred(ccache, creds)) {
 	/* clean up the pieces */
-	free((char *)creds->ticket.data);
+	xfree(creds->ticket.data);
 	krb5_free_address(creds->addresses);
 	cleanup_key();
 	return retval;

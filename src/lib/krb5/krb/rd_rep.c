@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_rd_req_dec_c[] =
+static char rcsid_rd_rep_dec_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -22,26 +22,26 @@ static char rcsid_rd_req_dec_c[] =
 #include <krb5/asn1.h>
 
 /*
- Parses a KRB_AP_REP message, returning its contents.
-
- repl is filled in with the fields from the encrypted response.
-
- the key in kblock is used to decrypt the message.
-
- returns system errors, encryption errors, replay errors
+ *  Parses a KRB_AP_REP message, returning its contents.
+ * 
+ *  repl is filled in with with a pointer to allocated memory containing
+ * the fields from the encrypted response. 
+ * 
+ *  the key in kblock is used to decrypt the message.
+ * 
+ *  returns system errors, encryption errors, replay errors
  */
 
 krb5_error_code
 krb5_rd_rep(inbuf, kblock, repl)
 const krb5_data *inbuf;
 const krb5_keyblock *kblock;
-krb5_ap_rep_enc_part *repl;
+krb5_ap_rep_enc_part **repl;
 {
     krb5_error_code retval;
     krb5_ap_rep *reply;
     krb5_encrypt_block eblock;
     krb5_data scratch;
-    krb5_ap_rep_enc_part *local_repl;
 
     if (!krb5_is_ap_rep(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -93,10 +93,7 @@ free(scratch.data);}
 	return retval;
     }
     /*  now decode the decrypted stuff */
-    if (!(retval = decode_krb5_ap_rep_enc_part(&scratch, &local_repl))) {
-	*repl = *local_repl;
-	free((char *)local_repl);
-    }
+    retval = decode_krb5_ap_rep_enc_part(&scratch, repl);
     clean_scratch();
     return retval;
 }

@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -16,7 +17,6 @@ static char rcsid_in_tkt_skey_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 #include <krb5/ext-proto.h>
@@ -64,18 +64,12 @@ OLDDECLARG(krb5_pa_data **,padata)
     }
 #define cleanup() {if (arg->client) (void) krb5_kt_free_entry(&kt_ent);}
 
-    realkey = (krb5_keyblock *)malloc(sizeof(*realkey));
-    if (!realkey) {
-	cleanup();
-	return ENOMEM;
-    }    
-
     if (arg->key)
-	retval = krb5_copy_keyblock(arg->key, realkey);
+	retval = krb5_copy_keyblock(arg->key, &realkey);
     else
-	retval = krb5_copy_keyblock(&kt_ent.key, realkey);
+	retval = krb5_copy_keyblock(&kt_ent.key, &realkey);
     if (retval) {
-	free((char *)realkey);
+	xfree(realkey);
 	cleanup();
 	return retval;
     }

@@ -38,13 +38,15 @@ extern krb5_deltat krb5_clockskew;
  returns system errors, integrity errors
  */
 krb5_error_code
-krb5_rd_safe(inbuf, key, sender_addr, recv_addr, seq_number, safe_flags, outbuf)
+krb5_rd_safe(inbuf, key, sender_addr, recv_addr, seq_number, safe_flags,
+	     rcache, outbuf)
 const krb5_data *inbuf;
 const krb5_keyblock *key;
 const krb5_address *sender_addr;
 const krb5_address *recv_addr;
 krb5_int32 seq_number;
 krb5_int32 safe_flags;
+krb5_rcache rcache;
 krb5_data *outbuf;
 {
     krb5_error_code retval;

@@ -61,7 +61,7 @@ krb5_parse_name(name, nprincipal)
 	int		components = 0;
 	const char	*parsed_realm = NULL;
 	int		fcompsize[FCOMPNUM];
-	char		default_realm[512];
+	static char	*default_realm = NULL;
 	krb5_data	**principal;
 	krb5_error_code retval;
 	
@@ -136,9 +136,8 @@ krb5_parse_name(name, nprincipal)
 	 * realm....
 	 */
 	if (!parsed_realm) {
-		retval = krb5_get_default_realm(sizeof(default_realm),
-						default_realm);
-		if (retval)
+		if (!default_realm &&
+		    (retval = krb5_get_default_realm(&default_realm)))
 			return(retval);
 		principal[0]->length = fcompsize[0] = strlen(default_realm);
 	}

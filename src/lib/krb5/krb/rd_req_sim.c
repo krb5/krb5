@@ -21,22 +21,22 @@ static char rcsid_rd_req_sim_c[] =
 #include <krb5/ext-proto.h>
 
 /*
- Parses a KRB_AP_REQ message, returning its contents.
-
- server specifies the expected server's name for the ticket.
-
- sender_addr specifies the address(es) expected to be present in the
- ticket.
-
- A replay cache name derived from the first component of the service name
- is used.
-
- The default key store is consulted to find the service key.
-
- authdat->ticket and authdat->authenticator are set to allocated storage
- structures; the caller should free them when finished.
-
- returns system errors, encryption errors, replay errors
+ *  Parses a KRB_AP_REQ message, returning its contents.
+ * 
+ *  server specifies the expected server's name for the ticket.
+ * 
+ *  sender_addr specifies the address(es) expected to be present in the
+ *  ticket.
+ * 
+ *  A replay cache name derived from the first component of the service name
+ *  is used.
+ * 
+ *  The default key store is consulted to find the service key.
+ *
+ * authdat isset to point at allocated structures; the caller should
+ * free it when finished. 
+ * 
+ *  returns system errors, encryption errors, replay errors
  */
 
 krb5_error_code
@@ -44,7 +44,7 @@ krb5_rd_req_simple(inbuf, server, sender_addr, authdat)
 const krb5_data *inbuf;
 krb5_const_principal server;
 const krb5_address *sender_addr;
-krb5_tkt_authent *authdat;
+krb5_tkt_authent **authdat;
 {
     krb5_error_code retval;
     krb5_ap_req *request;

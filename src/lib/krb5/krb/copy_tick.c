@@ -31,13 +31,8 @@ krb5_enc_tkt_part **partto;
     if (!(tempto = (krb5_enc_tkt_part *)malloc(sizeof(*tempto))))
 	return ENOMEM;
     *tempto = *partfrom;
-    if (!(tempto->session =
-	  (krb5_keyblock *)malloc(sizeof(*tempto->session)))) {
-	xfree(tempto);
-	return ENOMEM;
-    }
     if (retval = krb5_copy_keyblock(partfrom->session,
-				    tempto->session)) {
+				    &tempto->session)) {
 	xfree(tempto->session);
 	xfree(tempto);
 	return retval;

@@ -54,6 +54,7 @@ krb5_rd_priv(DECLARG(const krb5_data *, inbuf),
 	     DECLARG(krb5_int32, seq_number),
 	     DECLARG(krb5_int32, priv_flags),
 	     DECLARG(krb5_pointer, i_vector),
+	     DECLARG(krb5_rcache, rcache),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, inbuf)
 OLDDECLARG(const krb5_keyblock *, key)
@@ -62,6 +63,7 @@ OLDDECLARG(const krb5_address *, recv_addr)
 OLDDECLARG(krb5_int32, seq_number)
 OLDDECLARG(krb5_int32, priv_flags)
 OLDDECLARG(krb5_pointer, i_vector)
+OLDDECLARG(krb5_rcache, rcache),
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;

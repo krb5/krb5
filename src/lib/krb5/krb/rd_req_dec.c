@@ -22,44 +22,43 @@ static char rcsid_rd_req_dec_c[] =
 #include <krb5/asn1.h>
 
 /*
- essentially the same as krb_rd_req, but uses a decoded AP_REQ as the input
- rather than an encoded input.
+ * essentially the same as krb_rd_req, but uses a decoded AP_REQ as
+ * the input rather than an encoded input.
  */
 /*
- Parses a KRB_AP_REQ message, returning its contents.
-
- server specifies the expected server's name for the ticket; if NULL, then
- any server will be accepted if the key can be found, and the caller should
- verify that the principal is something it trusts.
-
- sender_addr specifies the address(es) expected to be present in the
- ticket.
-
- rcache specifies a replay detection cache used to store authenticators and
- server names
-
- keyproc specifies a procedure to generate a decryption key for the
- ticket.  If keyproc is non-NULL, keyprocarg is passed to it, and the result
- used as a decryption key. If keyproc is NULL, then fetchfrom is checked;
- if it is non-NULL, it specifies a parameter name from which to retrieve the
- decryption key.  If fetchfrom is NULL, then the default key store is
- consulted.
-
- authdat->ticket and authdat->authenticator are set to allocated storage
- structures; the caller should free them when finished.
-
- returns system errors, encryption errors, replay errors
+ *  Parses a KRB_AP_REQ message, returning its contents.
+ * 
+ *  server specifies the expected server's name for the ticket; if NULL, then
+ *  any server will be accepted if the key can be found, and the caller should
+ *  verify that the principal is something it trusts.
+ * 
+ *  sender_addr specifies the address(es) expected to be present in the
+ *  ticket.
+ * 
+ *  rcache specifies a replay detection cache used to store authenticators and
+ *  server names
+ * 
+ *  keyproc specifies a procedure to generate a decryption key for the
+ *  ticket.  If keyproc is non-NULL, keyprocarg is passed to it, and the result
+ *  used as a decryption key. If keyproc is NULL, then fetchfrom is checked;
+ *  if it is non-NULL, it specifies a parameter name from which to retrieve the
+ *  decryption key.  If fetchfrom is NULL, then the default key store is
+ *  consulted.
+ * 
+ *  authdat is set to point at allocated storage structures; the caller
+ *  should free them when finished. 
+ * 
+ *  returns system errors, encryption errors, replay errors
  */
 
 /* widen prototypes, if needed */
 #include <krb5/widen.h>
 
-static krb5_error_code decrypt_authenticator PROTOTYPE((const krb5_ap_req *,
-							krb5_authenticator **));
-typedef krb5_error_code (*rdreq_key_proc) PROTOTYPE((krb5_pointer, 
-						     krb5_principal,
-						     krb5_kvno,
-						     krb5_keyblock **));
+static krb5_error_code decrypt_authenticator
+	PROTOTYPE((const krb5_ap_req *, krb5_authenticator **));
+typedef krb5_error_code (*rdreq_key_proc)
+	PROTOTYPE((krb5_pointer, krb5_principal, krb5_kvno, krb5_keyblock **));
+
 /* and back to normal... */
 #include <krb5/narrow.h>
 
@@ -68,7 +67,7 @@ extern krb5_deltat krb5_clockskew;
 
 krb5_error_code
 krb5_rd_req_decoded(req, server, sender_addr, fetchfrom, keyproc, keyprocarg,
-		    rcache, tktauthent)
+		    rcache, authdat)
 const krb5_ap_req *req;
 krb5_const_principal server;
 const krb5_address *sender_addr;
@@ -76,13 +75,12 @@ krb5_const_pointer fetchfrom;
 rdreq_key_proc keyproc;
 krb5_pointer keyprocarg;
 krb5_rcache rcache;
-krb5_tkt_authent *tktauthent;
+krb5_tkt_authent **authdat;
 {
-    krb5_error_code retval;
-    krb5_keyblock *tkt_key;
-    krb5_keyblock tkt_key_real;
+    krb5_error_code retval = 0;
+    krb5_keyblock *tkt_key = NULL;
     krb5_timestamp currenttime, starttime;
-
+    krb5_tkt_authent	*tktauthent = NULL;
 
     if (server && !krb5_principal_compare(server, req->ticket->server))
 	return KRB5KRB_AP_WRONG_PRINC;
@@ -110,8 +108,7 @@ krb5_tkt_authent *tktauthent;
 				       req->ticket->enc_part.kvno, &ktentry);
 	    (void) krb5_kt_close(keytabid);
 	    if (!retval) {
-		retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
-		tkt_key = &tkt_key_real;
+		retval = krb5_copy_keyblock(&ktentry.key, &tkt_key);
 		(void) krb5_kt_free_entry(&ktentry);
 	    }
 	}
@@ -120,34 +117,40 @@ krb5_tkt_authent *tktauthent;
 	return retval;			/* some error in getting the key */
 
     /* decrypt the ticket */
-    if (retval = krb5_decrypt_tkt_part(tkt_key, req->ticket))
+    if (retval = krb5_decrypt_tkt_part(tkt_key, req->ticket)) {
+	krb5_free_keyblock(tkt_key);
 	return(retval);
-
-#define clean_ticket() krb5_free_enc_tkt_part(req->ticket->enc_part2)
-
-    if (retval = decrypt_authenticator(req, &tktauthent->authenticator)) {
-	clean_ticket();
-	return retval;
     }
-#define clean_authenticator() {(void) krb5_free_authenticator(tktauthent->authenticator); tktauthent->authenticator = 0;}
+
+    /*
+     * Now we allocate space for the krb5_tkt_authent structure.  If
+     * we ever have an error, we're responsible for freeing it.
+     */
+    if (!(tktauthent =
+	  (krb5_tkt_authent *) malloc(sizeof(krb5_tkt_authent)))) {
+	    retval = ENOMEM;
+	    goto cleanup;
+    }
+    
+    if (retval = decrypt_authenticator(req, &tktauthent->authenticator))
+	goto cleanup;
+    *authdat = NULL;		/* Set authdat to tktauthent when we finish */
 
     if (!krb5_principal_compare(tktauthent->authenticator->client,
 				req->ticket->enc_part2->client)) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_BADMATCH;
+	retval = KRB5KRB_AP_ERR_BADMATCH;
+	goto cleanup;
     }
     if (sender_addr && !krb5_address_search(sender_addr, req->ticket->enc_part2->caddrs)) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_BADADDR;
+	retval = KRB5KRB_AP_ERR_BADADDR;
+	goto cleanup;
     }
 
-    if (retval = krb5_timeofday(&currenttime)) {
-	clean_authenticator();
-	return retval;
-    }
+    if (retval = krb5_timeofday(&currenttime))
+	goto cleanup;
     if (!in_clock_skew(tktauthent->authenticator->ctime)) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_SKEW;
+	retval = KRB5KRB_AP_ERR_SKEW;
+	goto cleanup;
     }
 
     tktauthent->ticket = req->ticket;	/* only temporarily...allocated
@@ -158,20 +161,13 @@ krb5_tkt_authent *tktauthent;
     if (rcache) {
 	krb5_donot_replay rep;
 
-	if (retval = krb5_auth_to_rep(tktauthent, &rep)) {
-	    tktauthent->ticket = 0;
-	    clean_authenticator();
-	    return retval;
-	}
-	if (retval = krb5_rc_store(rcache, &rep)) {
-	    xfree(rep.server);
-	    xfree(rep.client);
-	    tktauthent->ticket = 0;
-	    clean_authenticator();
-	    return retval;
-	}
+	if (retval = krb5_auth_to_rep(tktauthent, &rep))
+	    goto cleanup;
+	retval = krb5_rc_store(rcache, &rep);
 	xfree(rep.server);
 	xfree(rep.client);
+	if (retval)
+	    goto cleanup;
     }
     tktauthent->ticket = 0;
 
@@ -182,21 +178,36 @@ krb5_tkt_authent *tktauthent;
 	starttime = req->ticket->enc_part2->times.authtime;
 
     if (starttime - currenttime > krb5_clockskew) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
+	retval = KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
+	goto cleanup;
     }	
     if (currenttime - req->ticket->enc_part2->times.endtime > krb5_clockskew) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_TKT_EXPIRED;	/* ticket expired */
+	retval = KRB5KRB_AP_ERR_TKT_EXPIRED;	/* ticket expired */
+	goto cleanup;
     }	
     if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {
-	clean_authenticator();
-	return KRB5KRB_AP_ERR_TKT_INVALID;
+	retval = KRB5KRB_AP_ERR_TKT_INVALID;
+	goto cleanup;
     }
-    if (retval = krb5_copy_ticket(req->ticket, &tktauthent->ticket)) {
-	clean_authenticator();
-    } else
-	tktauthent->ap_options = req->ap_options;
+    retval = krb5_copy_ticket(req->ticket, &tktauthent->ticket);
+    
+cleanup:
+    if (tktauthent) {
+        if (retval) {
+	    krb5_free_tkt_authent(tktauthent);
+        } else {
+	    tktauthent->ap_options = req->ap_options;
+	    *authdat = tktauthent;
+	}
+    }
+    if (retval && req->ticket->enc_part2) {
+	/* only free if we're erroring out...otherwise some
+	   applications will need the output. */
+        krb5_free_enc_tkt_part(req->ticket->enc_part2);
+	req->ticket->enc_part2 = NULL;
+    }
+    if (tkt_key)
+	krb5_free_keyblock(tkt_key);
     return retval;
 }
 
