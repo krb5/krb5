@@ -2,7 +2,9 @@
 
 	* pre.in (COM_ERR_DEPS): New variable.
 
-	* post.in (clean-unix): Delete .d files.
+	* post.in (clean-unix): Delete .d and .depend files along with
+	$(OBJS) in one command, to avoid needing to test whether the
+	latter is empty.
 
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 

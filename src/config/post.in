@@ -50,8 +50,7 @@ depend-prerecurse::
 clean:: clean-$(WHAT)
 
 clean-unix::
-	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
-	$(RM) .depend .d
+	$(RM) $(OBJS) .depend .d
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
