@@ -33,6 +33,7 @@
 #include "com_err.h"
 #include "kadm5_defs.h"
 #include "adm.h"
+#include "adm_proto.h"
 #include <setjmp.h>
 
 static const char *proto_addrs_msg = "%d: cannot get memory for addresses";
@@ -128,6 +129,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     local = (krb5_address *) NULL;
     remote = (krb5_address *) NULL;
     ticket = (krb5_ticket *) NULL;
+    rcache = (krb5_rcache) NULL;
 
     /* Get memory for addresses */
     local = (krb5_address *) malloc(sizeof(krb5_address));
@@ -202,7 +204,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			   &auth_context,
 			   &in_data,
 			   net_server_princ(),
-			   (krb5_keytab) NULL,
+			   key_keytab_id(),
 			   &ap_options,
 			   &ticket)) {
 	com_err(programname, kret, proto_rd_req_msg, my_id);
@@ -297,6 +299,9 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	    err_aux = 0;
 	    if (num_args > 0) {
 		if (!strcasecmp(arglist[0].data, KRB5_ADM_QUIT_CMD)) {
+		    /*
+		     * QUIT command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:QUIT command\n", my_id));
 		    /* QUIT takes no arguments */
@@ -309,10 +314,13 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:QUIT command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN;
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_CHECKPW_CMD)) {
+		    /*
+		     * CHECKPW command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:CHECKPW command\n", my_id));
 		    if (num_args == 2) {
@@ -329,10 +337,13 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:CHECKPW command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN;
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_CHANGEPW_CMD)) {
+		    /*
+		     * CHANGEPW command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:CHANGEPW command\n", my_id));
 		    if (num_args == 3) {
@@ -350,11 +361,14 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:CHANGEPW command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN; 
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 #ifdef	MOTD_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MOTD_CMD)) {
+		    /*
+		     * MOTD command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MOTD command\n", my_id));
 		    if (num_args <= 2) {
@@ -369,12 +383,15 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:MOTD command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN;
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 #endif	/* MOTD_SUPPORTED */
 #ifdef	MIME_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MIME_CMD)) {
+		    /*
+		     * MIME command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MIME command\n", my_id));
 		    if (num_args == 1) {
@@ -386,12 +403,15 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:MIME command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN;
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 #endif	/* MIME_SUPPORTED */
 #ifdef	LANGUAGES_SUPPORTED
 		else if (!strcasecmp(arglist[0].data, KRB5_ADM_LANGUAGE_CMD)) {
+		    /*
+		     * LANGUAGE command handling here.
+		     */
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:LANGUAGE command\n", my_id));
 		    if (num_args == 2) {
@@ -412,23 +432,208 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			       ("> %d:LANGUAGE command syntax BAD\n", my_id));
 			cmd_error = KRB5_ADM_CMD_UNKNOWN;
-			err_aux = KRB5_ADM_BAD_ARGS;
+			err_aux = KADM_BAD_ARGS;
 		    }
 		}
 #endif	/* LANGUAGES_SUPPORTED */
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_ADD_PRINC_CMD)) {
+		    /*
+		     * ADD PRINCIPAL command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:ADD PRINCIPAL command\n", my_id));
+		    /* At least one argument */
+		    if (num_args > 1) {
+			cmd_error = admin_add_principal(kcontext,
+							proto_debug_level,
+							ticket,
+							num_args-1,
+							&arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:ADD PRINCIPAL command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_DEL_PRINC_CMD)) {
+		    /*
+		     * DELETE PRINCIPAL command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:DELETE PRINCIPAL command\n", my_id));
+		    /* Only one argument */
+		    if (num_args == 2) {
+			cmd_error = admin_delete_principal(kcontext,
+							   proto_debug_level,
+							   ticket,
+							   &arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:DELETE PRINCIPAL command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_REN_PRINC_CMD)) {
+		    /*
+		     * RENAME PRINCIPAL command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:RENAME PRINCIPAL command\n", my_id));
+		    /* Two arguments */
+		    if (num_args == 3) {
+			cmd_error = admin_rename_principal(kcontext,
+							   proto_debug_level,
+							   ticket,
+							   &arglist[1],
+							   &arglist[2]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:RENAME PRINCIPAL command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_MOD_PRINC_CMD)) {
+		    /*
+		     * MODIFY PRINCIPAL command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:MODIFY PRINCIPAL command\n", my_id));
+		    /* At least one argument */
+		    if (num_args > 1) {
+			cmd_error = admin_modify_principal(kcontext,
+							   proto_debug_level,
+							   ticket,
+							   num_args-1,
+							   &arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:MODIFY PRINCIPAL command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_CHG_OPW_CMD)) {
+		    /*
+		     * CHANGE OTHER'S PASSWORD command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:CHANGE OTHER'S PASSWORD command\n", my_id));
+		    /* Two arguments */
+		    if (num_args == 3) {
+			cmd_error = admin_change_opwd(kcontext,
+						      proto_debug_level,
+						      ticket,
+						      &arglist[1],
+						      &arglist[2]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:CHANGE OTHER'S PASSWORD command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_CHG_ORPW_CMD)) {
+		    /*
+		     * CHANGE OTHER'S RANDOM PASSWORD command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:CHANGE OTHER'S RANDOM PASSWORD command\n", my_id));
+		    /* One argument */
+		    if (num_args == 2) {
+			cmd_error = admin_change_orandpwd(kcontext,
+							  proto_debug_level,
+							  ticket,
+							  &arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:CHANGE OTHER'S RANDOM PASSWORD command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_INQ_PRINC_CMD)) {
+		    /*
+		     * INQUIRE PRINCIPAL command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:INQUIRE PRINCIPAL command\n", my_id));
+		    /* One argument */
+		    if (num_args == 2) {
+			cmd_error = admin_inquire(kcontext,
+						  proto_debug_level,
+						  ticket,
+						  &arglist[1],
+						  &cmd_repl_ncomps,
+						  &cmd_repl_complist);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:INQUIRE PRINCIPAL command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_EXT_KEY_CMD)) {
+		    /*
+		     * EXTRACT KEY command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:EXTRACT KEY command\n", my_id));
+		    /* Two arguments */
+		    if (num_args == 3) {
+			cmd_error = admin_extract_key(kcontext,
+						      proto_debug_level,
+						      ticket,
+						      &arglist[1],
+						      &arglist[2],
+						      &cmd_repl_ncomps,
+						      &cmd_repl_complist);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:EXTRACT KEY command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
 		else {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:UNKNOWN command %s\n", my_id,
 			  arglist[0].data));
 		    cmd_error = KRB5_ADM_CMD_UNKNOWN;
-		    err_aux = KRB5_ADM_BAD_CMD;
+		    err_aux = KADM_BAD_CMD;
 		}
 	    }
 	    else {
 		DPRINT(DEBUG_REQUESTS, proto_debug_level,
 		       ("> %d:NO command!\n", my_id));
 		cmd_error = KRB5_ADM_CMD_UNKNOWN;
-		err_aux = KRB5_ADM_NO_CMD;
+		err_aux = KADM_NO_CMD;
 	    }
 
 	    /*
@@ -522,7 +727,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     if (ticket)
 	krb5_free_ticket(kcontext, ticket);
     if (rcache)
-	krb5_rc_close(kcontext, rcache);
+	/* krb5_rc_close(kcontext, rcache); */
+	krb5_rc_destroy(kcontext, rcache);
     if (auth_context)
 	krb5_xfree(auth_context);
     if (curr_lang)
