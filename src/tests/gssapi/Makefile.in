@@ -1,0 +1,17 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_AUTOCONF_H
+
+SRCS= t_imp_name.c
+
+OBJS= t_imp_name.o
+
+all:: t_imp_name
+
+LOCAL_LIBRARIES = -lgssapi_krb5
+DEPLOCAL_LIBRARIES = $(TOPLIBD)/gssapi/libgssapi_krb5.a
+
+t_imp_name: t_imp_name.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_imp_name t_imp_name.o $(LIBS)
+
+clean::
+	$(RM) t_imp_name
+
