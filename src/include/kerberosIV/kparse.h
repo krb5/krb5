@@ -52,7 +52,7 @@
  */
 
 #define ISOCTAL(CH) 	( (CH>='0')  && (CH<='7') )
-#define ISQUOTE(CH) 	( (CH=='\"') || (CH=='\'') || (CH=='\`') )
+#define ISQUOTE(CH) 	( (CH=='\"') || (CH=='\'') || (CH=='`') )
 #define ISWHITESPACE(C) ( (C==' ')   || (C=='\t') )
 #define ISLINEFEED(C) 	( (C=='\n')  || (C=='\r')  || (C=='\f') )
 
