@@ -1,3 +1,9 @@
+2004-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_init.c (profile_init): Don't add error table here.
+	* prof_file.c (profile_library_initializer): Add it here.
+	(profile_library_finalizer): Remove it here.
+
 2004-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_dereference_data_locked): New function.

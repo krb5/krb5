@@ -31,8 +31,6 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 	prf_file_t  new_file, last = 0;
 	errcode_t retval = 0;
 
-	initialize_prof_error_table();
-
 	profile = malloc(sizeof(struct _profile_t));
 	if (!profile)
 		return ENOMEM;
