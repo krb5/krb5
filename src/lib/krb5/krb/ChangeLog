@@ -1,4 +1,12 @@
-Thu Sep 29 15:10:42 1994  Theodore Y. Ts'o  (tytso@dcl)
+Thu Sep 29 15:31:10 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* get_in_tkt.c (krb5_get_in_tkt): Return KRB5_IN_TKT_REALM_MISATCH
+		if the client and server realms don't match.  Return
+		KRB5_KDCREP_SKEW if the KDC reply has an unacceptible
+		clock skew (instead of KDCREP_MODIFIED.)
+
+	* gc_via_tgt.c (krb5_get_cred_via_tgt): Use a distinct error code
+		for KDC skew separate from the standard KDCREP_MODIFIED
 
 	* princ_comp.c (krb5_realm_compare): Added new function from
 		OpenVision.

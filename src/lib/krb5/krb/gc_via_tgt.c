@@ -169,8 +169,6 @@ OLDDECLARG(krb5_creds *, cred)
 	|| (request.nonce != dec_rep->enc_part2->nonce)
 	/* XXX check for extraneous flags */
 	/* XXX || (!krb5_addresses_compare(addrs, dec_rep->enc_part2->caddrs)) */
-	|| ((request.from == 0) &&
-	    !in_clock_skew(dec_rep->enc_part2->times.starttime))
 	|| ((request.from != 0) &&
 	    (request.from != dec_rep->enc_part2->times.starttime))
 	|| ((request.till != 0) &&
@@ -182,10 +180,18 @@ OLDDECLARG(krb5_creds *, cred)
 	    (dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
 	    (request.till != 0) &&
 	    (dec_rep->enc_part2->times.renew_till > request.till))
-	) {
+	)
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if ((request.from == 0) &&
+	!in_clock_skew(dec_rep->enc_part2->times.starttime))
+	retval = KRB5_KDCREP_SKEW;
+    
+    if (retval) {
 	cleanup();
-	return KRB5_KDCREP_MODIFIED;
+	return retval;
     }
+    
 #endif
 
     cred->ticket_flags = dec_rep->enc_part2->flags;

@@ -113,6 +113,9 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     krb5_timestamp time_now;
     krb5_pa_data	*padata;
 
+    if (! krb5_realm_compare(creds->client, creds->server))
+	return KRB5_IN_TKT_REALM_MISMATCH;
+
     if (ret_as_reply)
 	*ret_as_reply = 0;
     
@@ -248,8 +251,6 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	|| (request.nonce != as_reply->enc_part2->nonce)
 	/* XXX check for extraneous flags */
 	/* XXX || (!krb5_addresses_compare(addrs, as_reply->enc_part2->caddrs)) */
-	|| ((request.from == 0) &&
-	    !in_clock_skew(as_reply->enc_part2->times.starttime))
 	|| ((request.from != 0) &&
 	    (request.from != as_reply->enc_part2->times.starttime))
 	|| ((request.till != 0) &&
@@ -265,6 +266,12 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	retval = KRB5_KDCREP_MODIFIED;
 	goto cleanup;
     }
+    if ((request.from == 0) &&
+	!in_clock_skew(as_reply->enc_part2->times.starttime)) {
+	retval = KRB5_KDCREP_MODIFIED;
+	goto cleanup;
+    }
+    
 
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
