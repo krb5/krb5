@@ -1,25 +1,8 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
 CFLAGS=$(CCOPTS) $(DEFS)
-LDFLAGS = -g
-
-RM = rm -f
-CP = cp
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
-
-PEPSY = @PEPSY@
-PSYFLAGS = @PSYFLAGS@
-
-KRB5ROOT = @KRB5ROOT@
-
-KRB5_INCDIR = $(KRB5ROOT)/include
-
-SRCTOP=$(srcdir)/$(BUILDTOP)
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 
@@ -52,6 +35,9 @@ all:: $(OBJS)
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) $(OBJS)
+
+clean-mac::
 	$(RM) $(OBJS)
 
 clean-windows::

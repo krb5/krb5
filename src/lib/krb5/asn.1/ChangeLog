@@ -1,3 +1,13 @@
+Fri Mar 17 19:05:22 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in:  Remove redundant definitions from config/pre.in
+	(clean-mac):  Add.
+	* asn1_misc.c:  Avoid <malloc.h> and <memory.h> includes, for Mac.
+	(asn1_krb5_realm_copy):  Use malloc, not calloc, since we're
+	about to clobber the storage anyway.
+	* configure.in (WITH_KRB5ROOT):  Remove, not needed.
+	* krbasn1.h:  Document that <limits.h> is needed for INT_MAX.
+
 Fri Mar 10 15:39:24 1995  Theodore Y. Ts'o  (tytso@kenmore)
 
 	* asn1buf.c. asn1buf.h (asn1buf_insert_octet): Make the second

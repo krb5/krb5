@@ -22,17 +22,14 @@
  */
 
 #include "asn1_misc.h"
-#include <malloc.h>
-#include <memory.h>
 
 asn1_error_code INTERFACE asn1_krb5_realm_copy(target, source)
      krb5_principal target;
      krb5_principal source;
 {
   target->realm.length = source->realm.length;
-  target->realm.data = (char*)calloc(target->realm.length,
-					  sizeof(char)); /* copy realm */
-  if(target->realm.data == NULL) return ENOMEM;
+  target->realm.data = (char*)malloc(target->realm.length); /* copy realm */
+  if (target->realm.data == NULL) return ENOMEM;
   memcpy(target->realm.data,source->realm.data, /* to client */
 	 target->realm.length);
   return 0;
