@@ -24,10 +24,8 @@
  * CRC-32/AUTODIN-II routines
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/crc-32.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
+#include "crc-32.h"
 
 /* This table and block of comments are taken from code labeled: */
 /*

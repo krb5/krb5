@@ -25,8 +25,8 @@
  */
 
 
-#include <krb5/krb5.h>
-#include <krb5/crc-32.h>
+#include "k5-int.h"
+#include "crc-32.h"
 #include <stdio.h>
 
 void
