@@ -99,7 +99,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	return(retval);
     
     /* verify a valid enctype is available */
-    if (!valid_enctype(request.ticket->enc_part.enctype)) {
+    if (!valid_enctype(in_creds->keyblock.enctype)) {
 	retval = KRB5_PROG_ETYPE_NOSUPP;
 	goto cleanup;
     }
