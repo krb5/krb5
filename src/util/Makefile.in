@@ -1,12 +1,17 @@
 CFLAGS = $(CCOPTS)
-LDFLAGS = -g
 
 editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
 
-all:: libupdate
+all:: all-$(WHAT)
+
+all-unix:: libupdate
+all-mac::
+all-windows: libupdate
+
+unixmac: libupdate
 
 libupdate: $(srcdir)/libupdate.sh
-	rm -f $@ $@.tmp
+	$(RM) $@ $@.tmp
 	$(editsh) $(srcdir)/libupdate.sh > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
 
 clean::

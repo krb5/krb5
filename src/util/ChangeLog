@@ -1,3 +1,9 @@
+Tue Mar 28 18:50:04 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (all):  Split into all-$(WHAT).
+	(unixmac):  Add.
+	(libupdate):  Use $(RM).
+
 Mon Feb 27 00:01:41 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* lndir: if $0 contains slashes, but does not have a leading
