@@ -72,8 +72,17 @@ set file [open $tmppwd/ftp-test w]
 puts $file "This file is used for ftp testing."
 close $file
 
+# Create a large file to use for ftp testing. File needs to be 
+# larger that 2^20 or 1MB for PBSZ testing.
+set file [open $tmppwd/bigftp-test w]
+puts $file "This file is used for ftp testing.\n"
+seek $file 1048576 current
+puts $file "This file is used for ftp testing."
+close $file
+
+
 # Test that a file was copied correctly.
-proc check_file { filename } {
+proc check_file { filename {bigfile 0}} {
     if ![file exists $filename] {
 	verbose "$filename does not exist"
 	send_log "$filename does not exist\n"
@@ -93,6 +102,24 @@ proc check_file { filename } {
 	send_log "$filename contains $line\n"
 	close $file
 	return 0
+    }
+
+    if {$bigfile} {
+	# + 1 for the newline
+	seek $file 1048577 current
+	if { [gets $file line] == -1 } {
+	    verbose "$filename is truncated"
+	    send_log "$filename is truncated\n"
+	    close $file
+	    return 0
+	}
+
+	if ![string match "This file is used for ftp testing." $line] {
+	    verbose "$filename contains $line"
+	    send_log "$filename contains $line\n"
+	    close $file
+	    return 0
+	}
     }
 
     if { [gets $file line] != -1} {
@@ -293,6 +320,19 @@ proc ftp_test { } {
 	fail $testname
     }
 
+    set testname "big local get"
+    catch "exec rm -f $tmppwd/copy"
+    send "get bigftp-test copy\r"
+    expect "Opening BINARY mode data connection for bigftp-test"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file $tmppwd/copy 1] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
     set testname "start encryption"
     send "private\r"
     expect "Data channel protection level set to private"
@@ -320,6 +360,26 @@ proc ftp_test { } {
 	fail $testname
     }
 
+    set testname "big encrypted get"
+    catch "exec rm -f $tmppwd/copy"
+    send "get bigftp-test copy\r"
+    expect "Opening BINARY mode data connection for bigftp-test"
+    expect {
+	-timeout 300
+	"Transfer complete" {}
+	-re "Length .* of PROT buffer > PBSZ" {
+	    fail "$testname (PBSZ)"
+	    return 0
+	}
+    }
+    expect -re "\[0-9\]+ bytes received in \[0-9.e+-\]+ seconds"
+    expect "ftp> "
+    if [check_file $tmppwd/copy 1] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+    
     set testname "close"
     send "close\r"
     expect "Goodbye."
