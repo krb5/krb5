@@ -23,11 +23,13 @@ password into a 3-DES key is a one-way function, evenly distributing the
 user's input in the resulting key.  The user's input is appended with
 the salt information (typically the realm name), and 168-folded to
 produce three DES keys sans parity.  The 168 bits are then expanded to
-include odd parity, for use within the DES routines.  The three DES keys
-are then used to encrypt themselves in 3-DES CBC mode, and the result is
-parity adjusted.  Any weak or semi-weak DES keys are first strengthened
-by eXclusive-ORing the key with the constant 0x00000000000000F0 prior to
-its use.
+include odd parity, for use within the DES routines.  If any of the keys
+are weak or semi-weak, they are strengthened by eXclusive-ORing the
+questionable key with the constant 00000000000000F0.  The three DES keys
+are then used to encrypt themselves in 3-DES CBC mode.  This result is
+once again encrypted using the same keys and key schedule, and the
+result is parity adjusted.  If the final result yields weak or semi-weak
+keys, they are also strengthened in the same manner as the input keys.
 
 The n-fold operation used by the string-to-key algorithm 
 replicates the input bit array X until its length is the least common
