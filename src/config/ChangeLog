@@ -1,5 +1,8 @@
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf: For Linux, always add "-lc" at the end of the link
+	command.
+
 	* libobj.in (config.status): Depend on shlib.conf.
 
 2001-10-20  Ken Raeburn  <raeburn@mit.edu>
