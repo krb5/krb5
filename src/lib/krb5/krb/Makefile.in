@@ -340,7 +340,7 @@ check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) ./t_ser
 	./t_deltat
-	sh $(srcdir)/transit-tests
+	$(RUN_SETUP) sh $(srcdir)/transit-tests
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \

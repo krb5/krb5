@@ -1,3 +1,8 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (check-unix): Add $(RUN_SETUP) before invocation of
+	transit-tests for shared library environment variables.
+
 2001-06-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* chk_trans.c: Reimplemented from scratch.
