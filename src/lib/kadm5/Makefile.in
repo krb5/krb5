@@ -49,7 +49,20 @@ OBJS =	kadm_err.$(OBJEXT) \
 	str_conv.$(OBJEXT) \
 	logger.$(OBJEXT)
 
-all-unix:: shared includes $(OBJS) DONE
+HDRDIR=$(BUILDTOP)/include/kadm5
+HDRS =	$(HDRDIR)/adb.h \
+	$(HDRDIR)/admin.h \
+	$(HDRDIR)/admin_internal.h \
+	$(HDRDIR)/admin_xdr.h \
+	$(HDRDIR)/kadm_rpc.h \
+	$(HDRDIR)/server_internal.h \
+	$(HDRDIR)/adb_err.h \
+	$(HDRDIR)/chpass_util_strings.h \
+	$(HDRDIR)/kadm_err.h
+
+$(OBJS): $(HDRS) shared
+
+all-unix:: $(OBJS) DONE
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
@@ -64,3 +77,5 @@ clean-unix::
 
 clean-mac::
 clean-windows::
+
+all-recurse: $(OBJS) DONE
