@@ -1393,7 +1393,7 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
  *    KRB5_CC_READONLY: 
  */
 static krb5_error_code KRB5_CALLCONV
-krb5_fcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
+krb5_lcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                      krb5_creds *creds)
 {
     return KRB5_CC_READONLY;
@@ -1425,7 +1425,7 @@ const krb5_cc_ops krb5_lcc_ops = {
      krb5_lcc_start_seq_get,
      krb5_lcc_next_cred,
      krb5_lcc_end_seq_get,
-     krb5_lcc_remove,
+     krb5_lcc_remove_cred,
      krb5_lcc_set_flags
 };
 #endif /* _WIN32 */

@@ -567,6 +567,6 @@ const krb5_cc_ops krb5_mcc_ops = {
      krb5_mcc_start_seq_get,
      krb5_mcc_next_cred,
      krb5_mcc_end_seq_get,
-     krb5_mcc_remove,
+     krb5_mcc_remove_cred,
      krb5_mcc_set_flags,
 };

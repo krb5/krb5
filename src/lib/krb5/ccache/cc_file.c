@@ -2374,7 +2374,7 @@ const krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_start_seq_get,
      krb5_fcc_next_cred,
      krb5_fcc_end_seq_get,
-     krb5_fcc_remove,
+     krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
 };
 
@@ -2434,6 +2434,6 @@ const krb5_cc_ops krb5_cc_file_ops = {
      krb5_fcc_start_seq_get,
      krb5_fcc_next_cred,
      krb5_fcc_end_seq_get,
-     krb5_fcc_remove,
+     krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
 };
