@@ -1,3 +1,11 @@
+2001-01-26  Tom Yu  <tlyu@mit.edu>
+
+	* dest_tkt.c: Clean up uid handling.  Fix stat checks.
+
+	* in_tkt.c: Clean up uid handling.  Fix stat checks.
+
+	* tf_util.c: Clean up uid handling.  Fix stat checks.
+
 2001-01-25  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS, SRCS): Add prot_client.o, prot_client.c.
