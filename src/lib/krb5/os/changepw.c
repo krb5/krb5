@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/changepw.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1999 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -42,6 +42,9 @@
 #endif
 #ifndef EHOSTUNREACH
 #define EHOSTUNREACH WSAEHOSTUNREACH
+#endif
+#ifndef ETIMEDOUT
+#define ETIMEDOUT WSAETIMEDOUT
 #endif
 #endif /* _WIN32 && !__CYGWIN32__ */
 
