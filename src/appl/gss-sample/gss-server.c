@@ -52,7 +52,7 @@ static char *rcsid = "$Header$";
 static void usage()
 {
      fprintf(stderr, "Usage: gss-server [-port port] [-verbose] [-once]\n");
-     fprintf(stderr, "       [-inetd] [-export] [-logfile file] [service_name]\n");
+     fprintf(stderr, "       [-inetd] [-export] [-logfile file] service_name\n");
      exit(1);
 }
 

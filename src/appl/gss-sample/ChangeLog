@@ -1,3 +1,8 @@
+2001-05-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* gss-server.c (usage): Fix usage info *again* to reflect that
+	service_name is required.
+
 Tue Sep 26 18:13:54 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* gss-misc.c: Include <sys/socket.h> for prototype definitions. 
