@@ -1,3 +1,9 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (RCFLAGS): Don't define _MSDOS_.
+
+	* win_glue.c: Don't explicitly declare pointers FAR any more.
+
 2001-07-27  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gssapi32.def: Do no export gss_mech_krb5.

@@ -25,8 +25,6 @@
  *
  */
 
-#if !defined(_MSDOS)
-
 /* KADM5 wants non-syslog log files to contain syslog-like entries */
 #define VERBOSE_LOGS
 
@@ -987,6 +985,3 @@ krb5_context kcontext;
 	}
     }
 }
-
-#endif /* !defined(_MSDOS) */
-

@@ -137,10 +137,10 @@ typedef struct _cc_creds {
     cc_time_t       renew_till;
     cc_uint32       is_skey;
     cc_uint32       ticket_flags;
-    cc_data FAR **  addresses;
+    cc_data **  addresses;
     cc_data         ticket;
     cc_data         second_ticket;
-    cc_data FAR **  authdata;
+    cc_data **  authdata;
 } cc_creds;
 
 

@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* auth_gssapi.h, getrpcent.c, xdr.h: Drop _MSDOS support.
+
 2001-08-10    <epeisach@mit.edu>
 
 	* clnt_udp.c (clntudp_call): Do not assume that select will not

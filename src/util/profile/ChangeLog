@@ -1,3 +1,10 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c, prof_int.h, prof_parse.c, profile.hin,
+	test_profile.c: Drop _MSDOS support.
+
+	* profile.hin (NEAR, FAR): Don't define.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_get.c, prof_init.c, prof_set.c, profile.hin: Don't use

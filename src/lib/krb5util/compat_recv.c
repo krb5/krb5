@@ -38,7 +38,7 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
-#if !defined(_MSDOS) && !defined(_MACINTOSH)
+#if !defined(_MACINTOSH)
 #include <kerberosIV/krb.h>
 #include "com_err.h"
 #include <errno.h>

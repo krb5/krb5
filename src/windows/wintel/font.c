@@ -72,7 +72,7 @@ void ProcessFontChange(
 } /* ProcessFontChange */
 
 
-void NEAR InitializeStruct(
+void InitializeStruct(
 			   WORD wCommDlgType,
 			   LPSTR lpStruct,
 			   HWND hWnd)

@@ -89,14 +89,14 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh)
 #include "win-mac.h"
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI	"kerberos.ini"
 #define INI_FILES	"Files"
@@ -160,8 +160,6 @@ typedef unsigned char	u_char;
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_EXPORTVAR
-#define FAR
-#define NEAR
 #endif
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -633,28 +631,28 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*encrypt_func) ( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       krb5_const size_t,
-					       krb5_encrypt_block FAR *,
+					       krb5_encrypt_block *,
 					       krb5_pointer);
     krb5_error_code (*decrypt_func) ( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       krb5_const size_t,
-					       krb5_encrypt_block FAR *,
+					       krb5_encrypt_block *,
 					       krb5_pointer);
-    krb5_error_code (*process_key) ( krb5_encrypt_block FAR *,
-					      krb5_const krb5_keyblock FAR *);
-    krb5_error_code (*finish_key) ( krb5_encrypt_block FAR *);
-    krb5_error_code (*string_to_key) (krb5_const krb5_encrypt_block FAR *,
-						krb5_keyblock FAR *,
-						krb5_const krb5_data FAR *,
-						krb5_const krb5_data FAR *);
-    krb5_error_code (*init_random_key) ( krb5_const krb5_encrypt_block FAR *,
-						krb5_const krb5_keyblock FAR *,
-						krb5_pointer FAR *);
-    krb5_error_code (*finish_random_key) ( krb5_const krb5_encrypt_block FAR *,
-						krb5_pointer FAR *);
-    krb5_error_code (*random_key) ( krb5_const krb5_encrypt_block FAR *,
+    krb5_error_code (*process_key) ( krb5_encrypt_block *,
+					      krb5_const krb5_keyblock *);
+    krb5_error_code (*finish_key) ( krb5_encrypt_block *);
+    krb5_error_code (*string_to_key) (krb5_const krb5_encrypt_block *,
+						krb5_keyblock *,
+						krb5_const krb5_data *,
+						krb5_const krb5_data *);
+    krb5_error_code (*init_random_key) ( krb5_const krb5_encrypt_block *,
+						krb5_const krb5_keyblock *,
+						krb5_pointer *);
+    krb5_error_code (*finish_random_key) ( krb5_const krb5_encrypt_block *,
+						krb5_pointer *);
+    krb5_error_code (*random_key) ( krb5_const krb5_encrypt_block *,
 					      krb5_pointer,
-					      krb5_keyblock FAR * FAR *);
+					      krb5_keyblock **);
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
@@ -665,7 +663,7 @@ typedef struct _krb5_cryptosystem_entry {
 
 typedef struct _krb5_cs_table_entry {
     krb5_magic magic;
-    krb5_cryptosystem_entry FAR * system;
+    krb5_cryptosystem_entry * system;
     krb5_pointer random_sequence;	/* from init_random_key() */
 } krb5_cs_table_entry;
 
@@ -677,11 +675,11 @@ typedef krb5_error_code
 		krb5_const size_t /* in_length */,
 		krb5_const krb5_pointer /* key/seed */,
 		krb5_const size_t /* key/seed size */,
-		krb5_checksum FAR * /* out_cksum */);
+		krb5_checksum * /* out_cksum */);
 
 typedef krb5_error_code
 	(*SUM_VERF_FUNC) (
-		krb5_const krb5_checksum FAR * /* out_cksum */,
+		krb5_const krb5_checksum * /* out_cksum */,
 		krb5_const krb5_pointer /* in */,
 		krb5_const size_t /* in_length */,
 		krb5_const krb5_pointer /* key/seed */,
@@ -921,40 +919,40 @@ krb5_error_code krb5_do_preauth
 		krb5_gic_get_as_key_fct, void *);
 
 void KRB5_CALLCONV krb5_free_sam_challenge
-	(krb5_context, krb5_sam_challenge FAR * );
+	(krb5_context, krb5_sam_challenge * );
 void KRB5_CALLCONV krb5_free_sam_response
-	(krb5_context, krb5_sam_response FAR * );
+	(krb5_context, krb5_sam_response * );
 void KRB5_CALLCONV krb5_free_predicted_sam_response
-	(krb5_context, krb5_predicted_sam_response FAR * );
+	(krb5_context, krb5_predicted_sam_response * );
 void KRB5_CALLCONV krb5_free_enc_sam_response_enc
-	(krb5_context, krb5_enc_sam_response_enc FAR * );
+	(krb5_context, krb5_enc_sam_response_enc * );
 void KRB5_CALLCONV krb5_free_sam_challenge_contents
-	(krb5_context, krb5_sam_challenge FAR * );
+	(krb5_context, krb5_sam_challenge * );
 void KRB5_CALLCONV krb5_free_sam_response_contents
-	(krb5_context, krb5_sam_response FAR * );
+	(krb5_context, krb5_sam_response * );
 void KRB5_CALLCONV krb5_free_predicted_sam_response_contents
-	(krb5_context, krb5_predicted_sam_response FAR * );
+	(krb5_context, krb5_predicted_sam_response * );
 void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
-	(krb5_context, krb5_enc_sam_response_enc FAR * );
+	(krb5_context, krb5_enc_sam_response_enc * );
  
 void KRB5_CALLCONV krb5_free_pa_enc_ts
-	(krb5_context, krb5_pa_enc_ts FAR *);
+	(krb5_context, krb5_pa_enc_ts *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "profile.h"
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype  FAR *in_tkt_ktypes;
+	krb5_enctype *in_tkt_ktypes;
 	int		in_tkt_ktype_count;
-	krb5_enctype  FAR *tgs_ktypes;
+	krb5_enctype *tgs_ktypes;
 	int		tgs_ktype_count;
-	void	      FAR *os_context;
-	char	      FAR *default_realm;
+	void	 *os_context;
+	char	 *default_realm;
 	profile_t     profile;
-	void	      FAR *db_context;
+	void	 *db_context;
 	int		ser_ctx_count;
-	void	      	FAR *ser_ctx;
+	void	      	 *ser_ctx;
 	krb5_deltat 	clockskew; /* allowable clock skew */
 	krb5_cksumtype	kdc_req_sumtype;
 	krb5_cksumtype	default_ap_req_sumtype;
@@ -984,9 +982,9 @@ typedef struct _krb5_safe {
     krb5_int32 usec;			/* microsecond portion of time,
 					   optional */
     krb5_int32 seq_number;		/* sequence #, optional */
-    krb5_address FAR *s_address;	/* sender address */
-    krb5_address FAR *r_address;	/* recipient address, optional */
-    krb5_checksum FAR *checksum;	/* data integrity checksum */
+    krb5_address *s_address;	/* sender address */
+    krb5_address *r_address;	/* recipient address, optional */
+    krb5_checksum *checksum;	/* data integrity checksum */
 } krb5_safe;
 
 typedef struct _krb5_priv {
@@ -1000,16 +998,16 @@ typedef struct _krb5_priv_enc_part {
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time, opt. */
     krb5_int32 seq_number;		/* sequence #, optional */
-    krb5_address FAR *s_address;	/* sender address */
-    krb5_address FAR *r_address;	/* recipient address, optional */
+    krb5_address *s_address;	/* sender address */
+    krb5_address *r_address;	/* recipient address, optional */
 } krb5_priv_enc_part;
 
 void KRB5_CALLCONV krb5_free_safe
-	(krb5_context, krb5_safe FAR * );
+	(krb5_context, krb5_safe * );
 void KRB5_CALLCONV krb5_free_priv
-	(krb5_context, krb5_priv FAR * );
+	(krb5_context, krb5_priv * );
 void KRB5_CALLCONV krb5_free_priv_enc_part
-	(krb5_context, krb5_priv_enc_part FAR * );
+	(krb5_context, krb5_priv_enc_part * );
 
 /*
  * Begin "asn1.h"
@@ -1416,23 +1414,23 @@ krb5_error_code KRB5_CALLCONV krb5_size_opaque
 	(krb5_context,
 		krb5_magic,
 		krb5_pointer,
-		size_t FAR *);
+		size_t *);
 
 /* Serialize the structure into a buffer */
 krb5_error_code KRB5_CALLCONV krb5_externalize_opaque
 	(krb5_context,
 		krb5_magic,
 		krb5_pointer,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_octet **,
+		size_t *);
 
 /* Deserialize the structure from a buffer */
 krb5_error_code KRB5_CALLCONV krb5_internalize_opaque
 	(krb5_context,
 		krb5_magic,
-		krb5_pointer FAR *,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_pointer *,
+		krb5_octet **,
+		size_t *);
 
 /* Serialize data into a buffer */
 krb5_error_code krb5_externalize_data
@@ -1467,26 +1465,26 @@ krb5_error_code KRB5_CALLCONV krb5_ser_rcache_init
 /* [De]serialize 4-byte integer */
 krb5_error_code KRB5_CALLCONV krb5_ser_pack_int32
 	(krb5_int32,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_octet **,
+		size_t *);
 krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
 	(krb5_int32 *,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_octet **,
+		size_t *);
 /* [De]serialize byte string */
 krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
-	(krb5_octet FAR *,
+	(krb5_octet *,
 		size_t,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_octet **,
+		size_t *);
 krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
-	(krb5_octet FAR *,
+	(krb5_octet *,
 		size_t,
-		krb5_octet FAR * FAR *,
-		size_t FAR *);
+		krb5_octet **,
+		size_t *);
 
 krb5_error_code KRB5_CALLCONV krb5int_cc_default
-	(krb5_context, krb5_ccache FAR *);
+	(krb5_context, krb5_ccache *);
 
 krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	(krb5_context, krb5_ccache, krb5_flags,
@@ -1508,7 +1506,7 @@ void krb5int_set_prompt_types
     if ((structure)->magic != (magic_number)) return (magic_number);
 
 /* to keep lint happy */
-#define krb5_xfree(val) free((char FAR *)(val))
+#define krb5_xfree(val) free((char *)(val))
 
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
@@ -1540,36 +1538,36 @@ krb5_error_code KRB5_CALLCONV krb5int_accessor
 
 struct _krb5_ccache {
     krb5_magic magic;
-    struct _krb5_cc_ops FAR *ops;
+    struct _krb5_cc_ops *ops;
     krb5_pointer data;
 };
 
 struct _krb5_cc_ops {
     krb5_magic magic;
-    char FAR *prefix;
-    const char FAR * (KRB5_CALLCONV *get_name) (krb5_context, krb5_ccache);
-    krb5_error_code (KRB5_CALLCONV *resolve) (krb5_context, krb5_ccache FAR *,
-					    const char FAR *);
-    krb5_error_code (KRB5_CALLCONV *gen_new) (krb5_context, krb5_ccache FAR *);
+    char *prefix;
+    const char * (KRB5_CALLCONV *get_name) (krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *resolve) (krb5_context, krb5_ccache *,
+					    const char *);
+    krb5_error_code (KRB5_CALLCONV *gen_new) (krb5_context, krb5_ccache *);
     krb5_error_code (KRB5_CALLCONV *init) (krb5_context, krb5_ccache,
 					    krb5_principal);
     krb5_error_code (KRB5_CALLCONV *destroy) (krb5_context, krb5_ccache);
     krb5_error_code (KRB5_CALLCONV *close) (krb5_context, krb5_ccache);
     krb5_error_code (KRB5_CALLCONV *store) (krb5_context, krb5_ccache,
-					    krb5_creds FAR *);
+					    krb5_creds *);
     krb5_error_code (KRB5_CALLCONV *retrieve) (krb5_context, krb5_ccache,
-					    krb5_flags, krb5_creds FAR *,
-					    krb5_creds FAR *);
+					    krb5_flags, krb5_creds *,
+					    krb5_creds *);
     krb5_error_code (KRB5_CALLCONV *get_princ) (krb5_context, krb5_ccache,
-					    krb5_principal FAR *);
+					    krb5_principal *);
     krb5_error_code (KRB5_CALLCONV *get_first) (krb5_context, krb5_ccache,
-					    krb5_cc_cursor FAR *);
+					    krb5_cc_cursor *);
     krb5_error_code (KRB5_CALLCONV *get_next) (krb5_context, krb5_ccache,
-					    krb5_cc_cursor FAR *, krb5_creds FAR *);
+					    krb5_cc_cursor *, krb5_creds *);
     krb5_error_code (KRB5_CALLCONV *end_get) (krb5_context, krb5_ccache,
-					    krb5_cc_cursor FAR *);
+					    krb5_cc_cursor *);
     krb5_error_code (KRB5_CALLCONV *remove_cred) (krb5_context, krb5_ccache,
-					    krb5_flags, krb5_creds FAR *);
+					    krb5_flags, krb5_creds *);
     krb5_error_code (KRB5_CALLCONV *set_flags) (krb5_context, krb5_ccache,
 					    krb5_flags);
 };
@@ -1580,13 +1578,13 @@ extern krb5_cc_ops *krb5_cc_dfl_ops;
 
 struct krb5_rc_st {
     krb5_magic magic;
-    struct _krb5_rc_ops FAR *ops;
+    struct _krb5_rc_ops *ops;
     krb5_pointer data;
 };
 
 struct _krb5_rc_ops {
     krb5_magic magic;
-    char FAR *type;
+    char *type;
     krb5_error_code (KRB5_CALLCONV *init)
 	(krb5_context, krb5_rcache,krb5_deltat); /* create */
     krb5_error_code (KRB5_CALLCONV *recover)
@@ -1596,22 +1594,22 @@ struct _krb5_rc_ops {
     krb5_error_code (KRB5_CALLCONV *close)
 	(krb5_context, krb5_rcache);
     krb5_error_code (KRB5_CALLCONV *store)
-	(krb5_context, krb5_rcache,krb5_donot_replay FAR *);
+	(krb5_context, krb5_rcache,krb5_donot_replay *);
     krb5_error_code (KRB5_CALLCONV *expunge)
 	(krb5_context, krb5_rcache);
     krb5_error_code (KRB5_CALLCONV *get_span)
-	(krb5_context, krb5_rcache,krb5_deltat FAR *);
-    char FAR *(KRB5_CALLCONV *get_name)
+	(krb5_context, krb5_rcache,krb5_deltat *);
+    char *(KRB5_CALLCONV *get_name)
 	(krb5_context, krb5_rcache);
     krb5_error_code (KRB5_CALLCONV *resolve)
-	(krb5_context, krb5_rcache, char FAR *);
+	(krb5_context, krb5_rcache, char *);
 };
 
 typedef struct _krb5_rc_ops krb5_rc_ops;
 
 krb5_error_code krb5_rc_register_type 
 	(krb5_context,
-		krb5_rc_ops FAR *);
+		krb5_rc_ops *);
 
 extern krb5_rc_ops krb5_rc_dfl_ops;
 

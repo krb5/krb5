@@ -36,7 +36,7 @@
 
 apiCB *gCntrlBlock = NULL;
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include "winccld.h"	
 #endif
 
@@ -45,7 +45,7 @@ apiCB *gCntrlBlock = NULL;
 #endif
 
 #ifdef DEBUG
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include <io.h>
 #define SHOW_DEBUG(buf)   MessageBox((HWND)NULL, (buf), "ccapi debug", MB_OK)
 #endif
@@ -79,7 +79,7 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdcc_set_flags,
 };
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 /*
  * cache_changed be called after the cache changes.
  * A notification message is is posted out to all top level
@@ -96,13 +96,13 @@ void cache_changed()
 
 	PostMessage(HWND_BROADCAST, message, 0, 0);
 }
-#else /* _MSDOS || _WIN32 */
+#else /* _WIN32 */
 
 void cache_changed()
 {
 	return;
 }
-#endif /* _MSDOS || _WIN32 */
+#endif /* _WIN32 */
 
 struct err_xlate
 {

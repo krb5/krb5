@@ -63,9 +63,9 @@ static int srvtab_to_key(user, instance, realm, srvtab, key)
 
 int KRB5_CALLCONV
 krb_get_svc_in_tkt(user, instance, realm, service, sinstance, life, srvtab)
-    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
+    char *user, *instance, *realm, *service, *sinstance;
     int life;
-    char FAR *srvtab;
+    char *srvtab;
 {
     return(krb_get_in_tkt(user, instance, realm, service, sinstance, life,
                           (key_proc_type) srvtab_to_key, NULL, srvtab));

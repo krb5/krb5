@@ -43,9 +43,9 @@ extern char *malloc();
 
 static char ret_realm[REALM_SZ+1];
 
-char FAR * KRB5_CALLCONV
+char * KRB5_CALLCONV
 krb_realmofhost(host)
-    char FAR *host;
+    char *host;
 {
 	char *domain;
 	FILE *trans_file;

@@ -88,7 +88,7 @@ krb5_error_code krb5_change_cache PROTOTYPE(());
 typedef struct _krb5_mcc_link {
      struct _krb5_mcc_link *next;
      krb5_creds *creds;
-} krb5_mcc_link, FAR *krb5_mcc_cursor;
+} krb5_mcc_link, *krb5_mcc_cursor;
 
 typedef struct _krb5_mcc_data {
      struct _krb5_mcc_data *next;
@@ -97,7 +97,7 @@ typedef struct _krb5_mcc_data {
      krb5_mcc_cursor link;
 } krb5_mcc_data;
 
-static krb5_mcc_data FAR *mcc_head = 0;
+static krb5_mcc_data *mcc_head = 0;
 
 /*
  * Modifies:

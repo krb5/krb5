@@ -517,12 +517,8 @@ krb5_scc_read_keyblock(context, id, keyblock)
 
      kret = krb5_scc_read_int32(context, id, &int32);
      CHECK(kret);
-#ifdef _MSDOS
-     int32 &= VALID_INT_BITS;    /* Gradient does not write  correctly */     
-#else
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow size_t??? */
 	  return KRB5_CC_NOMEM;
-#endif
      keyblock->length = int32;
      if ( keyblock->length == 0 )
 	     return KRB5_OK;
@@ -556,12 +552,8 @@ krb5_scc_read_data(context, id, data)
 
      kret = krb5_scc_read_int32(context, id, &len);
      CHECK(kret);
-#ifdef _MSDOS
-     len &= VALID_INT_BITS;
-#else
      if ((len & VALID_INT_BITS) != len)
         return KRB5_CC_NOMEM;
-#endif
      data->length = (int) len;
 
      if (data->length == 0) {
@@ -603,12 +595,8 @@ krb5_scc_read_addr(context, id, addr)
      
      kret = krb5_scc_read_int32(context, id, &int32);
      CHECK(kret);
-#ifdef _MSDOS
-     int32 &= VALID_INT_BITS;	/* Gradient DCE does this wrong */
-#else
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
 	  return KRB5_CC_NOMEM;
-#endif
      addr->length = int32;
 
      if (addr->length == 0)
@@ -779,12 +767,8 @@ krb5_scc_read_authdatum(context, id, a)
     a->ad_type = (krb5_authdatatype)ui2;
     kret = krb5_scc_read_int32(context, id, &int32);
     CHECK(kret);
-#ifdef _MSDOS
-    int32 &= VALID_INT_BITS;
-#else
     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
           return KRB5_CC_NOMEM;
-#endif
     a->length = int32;
     
     if (a->length == 0 )
@@ -1896,7 +1880,7 @@ krb5_scc_generate_new (context, id)
      strcpy(((krb5_scc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is useable */
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
+#if defined(__STDC__) || defined(_WIN32)
      f = fopen (((krb5_scc_data *) lid->data)->filename, "wb+");
 #else
      f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");

@@ -64,12 +64,12 @@ extern int krb_debug;
 
 long KRB5_CALLCONV
 krb_rd_safe(in,in_length,key,sender,receiver,m_data)
-    u_char FAR *in;			/* pointer to the msg received */
+    u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length;		/* length of "in" msg */
-    C_Block FAR *key;			/* encryption key for seed and ivec */
-    struct sockaddr_in FAR *sender;	/* sender's address */
-    struct sockaddr_in FAR *receiver;	/* receiver's address -- me */
-    MSG_DAT FAR *m_data;		/* where to put message information */
+    C_Block *key;			/* encryption key for seed and ivec */
+    struct sockaddr_in *sender;	/* sender's address */
+    struct sockaddr_in *receiver;	/* receiver's address -- me */
+    MSG_DAT *m_data;		/* where to put message information */
 {
     int i;
     unsigned KRB4_32 calc_cksum[4];

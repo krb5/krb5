@@ -56,7 +56,7 @@ krb5_rc_close (krb5_context context, krb5_rcache id)
 
 krb5_error_code KRB5_CALLCONV
 krb5_rc_store (krb5_context context, krb5_rcache id,
-	       krb5_donot_replay FAR *dontreplay)
+	       krb5_donot_replay *dontreplay)
 {
     return krb5_x((id)->ops->store,(context, id, dontreplay));
 }
@@ -69,19 +69,19 @@ krb5_rc_expunge (krb5_context context, krb5_rcache id)
 
 krb5_error_code KRB5_CALLCONV
 krb5_rc_get_lifespan (krb5_context context, krb5_rcache id,
-		      krb5_deltat FAR *spanp)
+		      krb5_deltat *spanp)
 {
     return krb5_x((id)->ops->get_span,(context, id, spanp));
 }
 
-char FAR *KRB5_CALLCONV
+char *KRB5_CALLCONV
 krb5_rc_get_name (krb5_context context, krb5_rcache id)
 {
     return krb5_xc((id)->ops->get_name,(context, id));
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_rc_resolve (krb5_context context, krb5_rcache id, char FAR *name)
+krb5_rc_resolve (krb5_context context, krb5_rcache id, char *name)
 {
     return krb5_x((id)->ops->resolve,(context, id, name));
 }

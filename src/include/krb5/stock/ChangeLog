@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* osconf.h: Drop _MSDOS support.
+
 1999-09-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* osconf.h (KPASSWD_PORTNAME): Define.

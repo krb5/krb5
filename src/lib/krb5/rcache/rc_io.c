@@ -11,7 +11,7 @@
  * I/O functions for the replay cache default implementation.
  */
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #  define PATH_SEPARATOR "\\"
 #else
 #  define PATH_SEPARATOR "/"
@@ -59,7 +59,7 @@ static void
 getdir()
 {
     if (!(dir = getenv("KRB5RCACHEDIR"))) {
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 	if (!(dir = getenv("TEMP")))
 	    if (!(dir = getenv("TMP")))
 		dir = "C:";
@@ -275,7 +275,7 @@ krb5_error_code
 krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
 		krb5_rc_iostuff *old)
 {
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
     char *new_fn = NULL;
     char *old_fn = NULL;
     off_t offset = 0;
@@ -373,7 +373,7 @@ krb5_rc_io_write(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
 krb5_error_code
 krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
 {
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #ifndef fsync
 #define fsync _commit
 #endif

@@ -48,10 +48,10 @@
 
 int KRB5_CALLCONV
 krb_rd_err(in, in_length, code, m_data)
-    u_char FAR *in;                 /* pointer to the msg received */
+    u_char *in;                 /* pointer to the msg received */
     u_long in_length;           /* of in msg */
-    long FAR *code;                 /* received error code */
-    MSG_DAT FAR *m_data;
+    long *code;                 /* received error code */
+    MSG_DAT *m_data;
 {
     register u_char *p;
     int le;

@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* wconfig.c (main): Delete _MSDOS support.
+
 2001-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_CHECK_TYPE_WITH_HEADERS): Need brackets

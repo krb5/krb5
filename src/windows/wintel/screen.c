@@ -631,7 +631,7 @@ static int ScreenAdjustDown(
 } /* ScreenAdjustDown */
 
 
-long FAR PASCAL ScreenWndProc(
+long PASCAL ScreenWndProc(
 			      HWND hWnd,
 			      UINT message,
 			      WPARAM wParam,
@@ -883,7 +883,7 @@ long FAR PASCAL ScreenWndProc(
 	wParam = wParam - VK_LEFT + (pScr->DECCKM ? 4 : 0);
 	SendMessage (pScr->hwndTel, WM_MYCURSORKEY,
 		     strlen(cursor_key[wParam]),
-		     (LPARAM) (char FAR *) cursor_key[wParam]);
+		     (LPARAM) (char *) cursor_key[wParam]);
       }
     } else {								/* Control is down */
       switch (wParam) {

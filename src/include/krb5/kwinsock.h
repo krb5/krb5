@@ -70,7 +70,7 @@ typedef struct fd_set {
 extern "C" {
 #endif
 
-extern int PASCAL FAR __WSAFDIsSet(SOCKET, fd_set FAR *);
+extern int PASCAL __WSAFDIsSet(SOCKET, fd_set *);
 
 #ifdef __cplusplus
 }
@@ -78,27 +78,27 @@ extern int PASCAL FAR __WSAFDIsSet(SOCKET, fd_set FAR *);
 
 #define FD_CLR(fd, set) do { \
     u_int __i; \
-    for (__i = 0; __i < ((fd_set FAR *)(set))->fd_count ; __i++) { \
-        if (((fd_set FAR *)(set))->fd_array[__i] == fd) { \
-            while (__i < ((fd_set FAR *)(set))->fd_count-1) { \
-                ((fd_set FAR *)(set))->fd_array[__i] = \
-                    ((fd_set FAR *)(set))->fd_array[__i+1]; \
+    for (__i = 0; __i < ((fd_set *)(set))->fd_count ; __i++) { \
+        if (((fd_set *)(set))->fd_array[__i] == fd) { \
+            while (__i < ((fd_set *)(set))->fd_count-1) { \
+                ((fd_set *)(set))->fd_array[__i] = \
+                    ((fd_set *)(set))->fd_array[__i+1]; \
                 __i++; \
             } \
-            ((fd_set FAR *)(set))->fd_count--; \
+            ((fd_set *)(set))->fd_count--; \
             break; \
         } \
     } \
 } while(0)
 
 #define FD_SET(fd, set) do { \
-    if (((fd_set FAR *)(set))->fd_count < FD_SETSIZE) \
-        ((fd_set FAR *)(set))->fd_array[((fd_set FAR *)(set))->fd_count++]=fd;\
+    if (((fd_set *)(set))->fd_count < FD_SETSIZE) \
+        ((fd_set *)(set))->fd_array[((fd_set *)(set))->fd_count++]=fd;\
 } while(0)
 
-#define FD_ZERO(set) (((fd_set FAR *)(set))->fd_count=0)
+#define FD_ZERO(set) (((fd_set *)(set))->fd_count=0)
 
-#define FD_ISSET(fd, set) __WSAFDIsSet((SOCKET)fd, (fd_set FAR *)set)
+#define FD_ISSET(fd, set) __WSAFDIsSet((SOCKET)fd, (fd_set *)set)
 
 /*
  * Structure used in select() call, taken from the BSD file sys/time.h.
@@ -160,11 +160,11 @@ struct timeval {
  */
 
 struct  hostent {
-        char    FAR * h_name;           /* official name of host */
-        char    FAR * FAR * h_aliases;  /* alias list */
+        char * h_name;           /* official name of host */
+        char ** h_aliases;  /* alias list */
         short   h_addrtype;             /* host address type */
         short   h_length;               /* length of address */
-        char    FAR * FAR * h_addr_list; /* list of addresses */
+        char ** h_addr_list; /* list of addresses */
 #define h_addr  h_addr_list[0]          /* address, for backward compat */
 };
 
@@ -173,22 +173,22 @@ struct  hostent {
  * fits in 32 bits.
  */
 struct  netent {
-        char    FAR * n_name;           /* official name of net */
-        char    FAR * FAR * n_aliases;  /* alias list */
+        char * n_name;           /* official name of net */
+        char ** n_aliases;  /* alias list */
         short   n_addrtype;             /* net address type */
         u_long  n_net;                  /* network # */
 };
 
 struct  servent {
-        char    FAR * s_name;           /* official service name */
-        char    FAR * FAR * s_aliases;  /* alias list */
+        char * s_name;           /* official service name */
+        char ** s_aliases;  /* alias list */
         short   s_port;                 /* port # */
-        char    FAR * s_proto;          /* protocol to use */
+        char * s_proto;          /* protocol to use */
 };
 
 struct  protoent {
-        char    FAR * p_name;           /* official protocol name */
-        char    FAR * FAR * p_aliases;  /* alias list */
+        char * p_name;           /* official protocol name */
+        char ** p_aliases;  /* alias list */
         short   p_proto;                /* protocol # */
 };
 
@@ -336,10 +336,10 @@ typedef struct WSAData {
         char                    szSystemStatus[WSASYS_STATUS_LEN+1];
         unsigned short          iMaxSockets;
         unsigned short          iMaxUdpDg;
-        char FAR *              lpVendorInfo;
+        char *              lpVendorInfo;
 } WSADATA;
 
-typedef WSADATA FAR *LPWSADATA;
+typedef WSADATA *LPWSADATA;
 
 /*
  * Options for use with [gs]etsockopt at the IP level.
@@ -650,124 +650,124 @@ struct  linger {
 extern "C" {
 #endif
 
-SOCKET PASCAL FAR accept (SOCKET s, struct sockaddr FAR *addr,
-                          int FAR *addrlen);
+SOCKET PASCAL accept (SOCKET s, struct sockaddr *addr,
+                          int *addrlen);
 
-int PASCAL FAR bind (SOCKET s, const struct sockaddr FAR *addr, int namelen);
+int PASCAL bind (SOCKET s, const struct sockaddr *addr, int namelen);
 
-int PASCAL FAR closesocket (SOCKET s);
+int PASCAL closesocket (SOCKET s);
 
-int PASCAL FAR connect (SOCKET s, const struct sockaddr FAR *name, int namelen);
+int PASCAL connect (SOCKET s, const struct sockaddr *name, int namelen);
 
-int PASCAL FAR ioctlsocket (SOCKET s, long cmd, u_long FAR *argp);
+int PASCAL ioctlsocket (SOCKET s, long cmd, u_long *argp);
 
-int PASCAL FAR getpeername (SOCKET s, struct sockaddr FAR *name,
-                            int FAR * namelen);
+int PASCAL getpeername (SOCKET s, struct sockaddr *name,
+                            int * namelen);
 
-int PASCAL FAR getsockname (SOCKET s, struct sockaddr FAR *name,
-                            int FAR * namelen);
+int PASCAL getsockname (SOCKET s, struct sockaddr *name,
+                            int * namelen);
 
-int PASCAL FAR getsockopt (SOCKET s, int level, int optname,
-                           char FAR * optval, int FAR *optlen);
+int PASCAL getsockopt (SOCKET s, int level, int optname,
+                           char * optval, int *optlen);
 
-u_long PASCAL FAR htonl (u_long hostlong);
+u_long PASCAL htonl (u_long hostlong);
 
-u_short PASCAL FAR htons (u_short hostshort);
+u_short PASCAL htons (u_short hostshort);
 
-unsigned long PASCAL FAR inet_addr (const char FAR * cp);
+unsigned long PASCAL inet_addr (const char * cp);
 
-char FAR * PASCAL FAR inet_ntoa (struct in_addr in);
+char * PASCAL inet_ntoa (struct in_addr in);
 
-int PASCAL FAR listen (SOCKET s, int backlog);
+int PASCAL listen (SOCKET s, int backlog);
 
-u_long PASCAL FAR ntohl (u_long netlong);
+u_long PASCAL ntohl (u_long netlong);
 
-u_short PASCAL FAR ntohs (u_short netshort);
+u_short PASCAL ntohs (u_short netshort);
 
-int PASCAL FAR recv (SOCKET s, char FAR * buf, int len, int flags);
+int PASCAL recv (SOCKET s, char * buf, int len, int flags);
 
-int PASCAL FAR recvfrom (SOCKET s, char FAR * buf, int len, int flags,
-                         struct sockaddr FAR *from, int FAR * fromlen);
+int PASCAL recvfrom (SOCKET s, char * buf, int len, int flags,
+                         struct sockaddr *from, int * fromlen);
 
-int PASCAL FAR select (int nfds, fd_set FAR *readfds, fd_set FAR *writefds,
-                       fd_set FAR *exceptfds, const struct timeval FAR *timeout);
+int PASCAL select (int nfds, fd_set *readfds, fd_set *writefds,
+                       fd_set *exceptfds, const struct timeval *timeout);
 
-int PASCAL FAR send (SOCKET s, const char FAR * buf, int len, int flags);
+int PASCAL send (SOCKET s, const char * buf, int len, int flags);
 
-int PASCAL FAR sendto (SOCKET s, const char FAR * buf, int len, int flags,
-                       const struct sockaddr FAR *to, int tolen);
+int PASCAL sendto (SOCKET s, const char * buf, int len, int flags,
+                       const struct sockaddr *to, int tolen);
 
-int PASCAL FAR setsockopt (SOCKET s, int level, int optname,
-                           const char FAR * optval, int optlen);
+int PASCAL setsockopt (SOCKET s, int level, int optname,
+                           const char * optval, int optlen);
 
-int PASCAL FAR shutdown (SOCKET s, int how);
+int PASCAL shutdown (SOCKET s, int how);
 
-SOCKET PASCAL FAR socket (int af, int type, int protocol);
+SOCKET PASCAL socket (int af, int type, int protocol);
 
 /* Database function prototypes */
 
-struct hostent FAR * PASCAL FAR gethostbyaddr(const char FAR * addr,
+struct hostent * PASCAL gethostbyaddr(const char * addr,
                                               int len, int type);
 
-struct hostent FAR * PASCAL FAR gethostbyname(const char FAR * name);
+struct hostent * PASCAL gethostbyname(const char * name);
 
-int PASCAL FAR gethostname (char FAR * name, int namelen);
+int PASCAL gethostname (char * name, int namelen);
 
-struct servent FAR * PASCAL FAR getservbyport(int port, const char FAR * proto);
+struct servent * PASCAL getservbyport(int port, const char * proto);
 
-struct servent FAR * PASCAL FAR getservbyname(const char FAR * name,
-                                              const char FAR * proto);
+struct servent * PASCAL getservbyname(const char * name,
+                                              const char * proto);
 
-struct protoent FAR * PASCAL FAR getprotobynumber(int proto);
+struct protoent * PASCAL getprotobynumber(int proto);
 
-struct protoent FAR * PASCAL FAR getprotobyname(const char FAR * name);
+struct protoent * PASCAL getprotobyname(const char * name);
 
 /* Microsoft Windows Extension function prototypes */
 
-int PASCAL FAR WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
+int PASCAL WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
 
-int PASCAL FAR WSACleanup(void);
+int PASCAL WSACleanup(void);
 
-void PASCAL FAR WSASetLastError(int iError);
+void PASCAL WSASetLastError(int iError);
 
-int PASCAL FAR WSAGetLastError(void);
+int PASCAL WSAGetLastError(void);
 
-BOOL PASCAL FAR WSAIsBlocking(void);
+BOOL PASCAL WSAIsBlocking(void);
 
-int PASCAL FAR WSAUnhookBlockingHook(void);
+int PASCAL WSAUnhookBlockingHook(void);
 
-FARPROC PASCAL FAR WSASetBlockingHook(FARPROC lpBlockFunc);
+FARPROC PASCAL WSASetBlockingHook(FARPROC lpBlockFunc);
 
-int PASCAL FAR WSACancelBlockingCall(void);
+int PASCAL WSACancelBlockingCall(void);
 
-HANDLE PASCAL FAR WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
-                                        const char FAR * name,
-                                        const char FAR * proto,
-                                        char FAR * buf, int buflen);
+HANDLE PASCAL WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
+                                        const char * name,
+                                        const char * proto,
+                                        char * buf, int buflen);
 
-HANDLE PASCAL FAR WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
-                                        const char FAR * proto, char FAR * buf,
+HANDLE PASCAL WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
+                                        const char * proto, char * buf,
                                         int buflen);
 
-HANDLE PASCAL FAR WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
-                                         const char FAR * name, char FAR * buf,
+HANDLE PASCAL WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
+                                         const char * name, char * buf,
                                          int buflen);
 
-HANDLE PASCAL FAR WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
-                                           int number, char FAR * buf,
+HANDLE PASCAL WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
+                                           int number, char * buf,
                                            int buflen);
 
-HANDLE PASCAL FAR WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
-                                        const char FAR * name, char FAR * buf,
+HANDLE PASCAL WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
+                                        const char * name, char * buf,
                                         int buflen);
 
-HANDLE PASCAL FAR WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
-                                        const char FAR * addr, int len, int type,
-                                        char FAR * buf, int buflen);
+HANDLE PASCAL WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
+                                        const char * addr, int len, int type,
+                                        char * buf, int buflen);
 
-int PASCAL FAR WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
+int PASCAL WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
 
-int PASCAL FAR WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
+int PASCAL WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
                                long lEvent);
 
 #ifdef __cplusplus
@@ -777,39 +777,39 @@ int PASCAL FAR WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
 /* Microsoft Windows Extended data types */
 typedef struct sockaddr SOCKADDR;
 typedef struct sockaddr *PSOCKADDR;
-typedef struct sockaddr FAR *LPSOCKADDR;
+typedef struct sockaddr *LPSOCKADDR;
 
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr_in *PSOCKADDR_IN;
-typedef struct sockaddr_in FAR *LPSOCKADDR_IN;
+typedef struct sockaddr_in *LPSOCKADDR_IN;
 
 typedef struct linger LINGER;
 typedef struct linger *PLINGER;
-typedef struct linger FAR *LPLINGER;
+typedef struct linger *LPLINGER;
 
 typedef struct in_addr IN_ADDR;
 typedef struct in_addr *PIN_ADDR;
-typedef struct in_addr FAR *LPIN_ADDR;
+typedef struct in_addr *LPIN_ADDR;
 
 typedef struct fd_set FD_SET;
 typedef struct fd_set *PFD_SET;
-typedef struct fd_set FAR *LPFD_SET;
+typedef struct fd_set *LPFD_SET;
 
 typedef struct hostent HOSTENT;
 typedef struct hostent *PHOSTENT;
-typedef struct hostent FAR *LPHOSTENT;
+typedef struct hostent *LPHOSTENT;
 
 typedef struct servent SERVENT;
 typedef struct servent *PSERVENT;
-typedef struct servent FAR *LPSERVENT;
+typedef struct servent *LPSERVENT;
 
 typedef struct protoent PROTOENT;
 typedef struct protoent *PPROTOENT;
-typedef struct protoent FAR *LPPROTOENT;
+typedef struct protoent *LPPROTOENT;
 
 typedef struct timeval TIMEVAL;
 typedef struct timeval *PTIMEVAL;
-typedef struct timeval FAR *LPTIMEVAL;
+typedef struct timeval *LPTIMEVAL;
 
 /*
  * Windows message parameter composition and decomposition

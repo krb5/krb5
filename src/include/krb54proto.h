@@ -3,9 +3,9 @@
  */
 
 extern krb5_error_code krb54_get_service_keyblock
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
-		   int kvno, char FAR *file,
-		   krb5_keyblock FAR * keyblock));
+	PROTOTYPE((char *service, char *instance, char *realm,
+		   int kvno, char *file,
+		   krb5_keyblock * keyblock));
 extern int decomp_tkt_krb5
 	PROTOTYPE((KTEXT tkt, unsigned char *flags, char *pname,
 		   char *pinstance, char *prealm, unsigned KRB4_32 *paddress,

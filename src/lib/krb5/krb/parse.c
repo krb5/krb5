@@ -66,8 +66,8 @@
 krb5_error_code KRB5_CALLCONV
 krb5_parse_name(context, name, nprincipal)
     	krb5_context context;
-	const char	FAR *name;
-	krb5_principal	FAR *nprincipal;
+	const char	*name;
+	krb5_principal	*nprincipal;
 {
 	register const char	*cp;
 	register char	*q;
@@ -188,7 +188,7 @@ krb5_parse_name(context, name, nprincipal)
 		else
 			krb5_princ_component(context, principal, i)->length = size;
 		if (i + 1 != components) {
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh)
 			fprintf(stderr,
 				"Programming error in krb5_parse_name!");
 			exit(1);

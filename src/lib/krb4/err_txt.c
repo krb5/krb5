@@ -22,7 +22,7 @@ const
 #ifdef MULTIDIMENSIONAL_ERR_TXT
  char krb_err_txt[256][60] = {  
 #else 
- char FAR *const krb_err_txt [256] = { 
+ char *const krb_err_txt [256] = { 
 #endif
   "OK",							/* 000 */
   "Principal expired (kerberos)",			/* 001 */
@@ -283,7 +283,7 @@ const
 };
 
 
-const char FAR * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb_get_err_text (code)
     int code;
 {

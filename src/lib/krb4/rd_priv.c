@@ -84,7 +84,7 @@ krb_rd_priv(in, in_length, schedule, key, sender, receiver, m_data)
     u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length; /* length of "in" msg */
     Key_schedule schedule;	/* precomputed key schedule */
-    C_Block FAR *key;		/* encryption key for seed and ivec */
+    C_Block *key;		/* encryption key for seed and ivec */
     struct sockaddr_in *sender;
     struct sockaddr_in *receiver;
     MSG_DAT *m_data;		/*various input/output data from msg */

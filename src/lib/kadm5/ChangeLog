@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c: Drop _MSDOS support.
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.h (krb5_realm_params): Add fields realm_reject_bad_transit

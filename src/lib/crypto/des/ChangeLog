@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* afsstring2key.c, d3_cbc.c, des_int.h, f_cbc.c, f_cksum.c,
+	string2key.c: Don't explicitly declare pointers FAR any more.
+
 2001-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* string2key.c (mit_des_string_to_key_int): Undo last change.

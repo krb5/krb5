@@ -61,14 +61,10 @@ int main(int argc, char *argv[])
 	char *win_flag;
 	char wflags[1024];
 
-#ifdef _MSDOS
-	win_flag = win16_flag;
-#else
 #ifdef _WIN32
 	win_flag = win32_flag;
 #else
 	win_flag = "UNIX##";
-#endif
 #endif
 
 	wflags[0] = 0;
@@ -184,7 +180,7 @@ copy_file (char *path, char *fname)
     if (strcmp(fname, "-") == 0) {
 	    fin = stdin;
     } else {
-#if (defined(_MSDOS) || defined(_WIN32))
+#ifdef _WIN32
 	    sprintf(buf, "%s\\%s", path, fname);
 #else
 	    sprintf(buf, "%s/%s", path, fname);

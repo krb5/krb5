@@ -146,40 +146,40 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 
 /* afsstring2key.c */
 extern krb5_error_code mit_afs_string_to_key
-	(krb5_keyblock FAR *keyblock,
-		   const krb5_data FAR *data,
-		   const krb5_data FAR *salt);
+	(krb5_keyblock *keyblock,
+		   const krb5_data *data,
+		   const krb5_data *salt);
 
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
-    (const krb5_octet FAR *, krb5_octet FAR *, unsigned long ,
-     const mit_des_key_schedule, const krb5_octet FAR *);
+    (const krb5_octet *, krb5_octet *, unsigned long ,
+     const mit_des_key_schedule, const krb5_octet *);
 
 /* f_ecb.c */
 extern int mit_des_ecb_encrypt
-    (const mit_des_cblock FAR *, mit_des_cblock FAR *, mit_des_key_schedule , int );
+    (const mit_des_cblock *, mit_des_cblock *, mit_des_key_schedule , int );
 
 /* f_cbc.c */
-extern int mit_des_cbc_encrypt (const mit_des_cblock FAR *in,
-				mit_des_cblock FAR *out,
+extern int mit_des_cbc_encrypt (const mit_des_cblock *in,
+				mit_des_cblock *out,
 				unsigned long length,
 				const mit_des_key_schedule schedule,
 				const mit_des_cblock ivec, int enc);
     
 /* fin_rndkey.c */
 extern krb5_error_code mit_des_finish_random_key
-    ( const krb5_encrypt_block FAR *,
-		krb5_pointer FAR *);
+    ( const krb5_encrypt_block *,
+		krb5_pointer *);
 
 /* finish_key.c */
 extern krb5_error_code mit_des_finish_key
-    ( krb5_encrypt_block FAR *);
+    ( krb5_encrypt_block *);
 
 /* init_rkey.c */
 extern krb5_error_code mit_des_init_random_key
-    ( const krb5_encrypt_block FAR *,
-		const krb5_keyblock FAR *,
-		krb5_pointer FAR *);
+    ( const krb5_encrypt_block *,
+		const krb5_keyblock *,
+		krb5_pointer *);
 
 /* key_parity.c */
 extern void mit_des_fixup_key_parity (mit_des_cblock );
@@ -191,27 +191,27 @@ extern int mit_des_key_sched
 
 /* process_ky.c */
 extern krb5_error_code mit_des_process_key
-    ( krb5_encrypt_block FAR *,  const krb5_keyblock FAR *);
+    ( krb5_encrypt_block *,  const krb5_keyblock *);
 
 /* random_key.c */
 extern krb5_error_code mit_des_random_key
-    ( const krb5_encrypt_block FAR *, krb5_pointer ,
-                krb5_keyblock FAR * FAR *);
+    ( const krb5_encrypt_block *, krb5_pointer ,
+                krb5_keyblock **);
 
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    ( const krb5_encrypt_block FAR *, 
-	       krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *);
+    ( const krb5_encrypt_block *, 
+	       krb5_keyblock *, const krb5_data *, const krb5_data *);
 extern krb5_error_code mit_des_string_to_key_int
-	(krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *);
+	(krb5_keyblock *, const krb5_data *, const krb5_data *);
 
 /* weak_key.c */
 extern int mit_des_is_weak_key (mit_des_cblock );
 
 /* cmb_keys.c */
 krb5_error_code mit_des_combine_subkeys
-    (const krb5_keyblock FAR *, const krb5_keyblock FAR *,
-	       krb5_keyblock FAR * FAR *);
+    (const krb5_keyblock *, const krb5_keyblock *,
+	       krb5_keyblock **);
 
 /* f_pcbc.c */
 int mit_des_pcbc_encrypt ();
@@ -222,7 +222,7 @@ int make_key_sched (mit_des_cblock, mit_des_key_schedule);
 
 
 /* misc.c */
-extern void swap_bits (char FAR *);
+extern void swap_bits (char *);
 extern unsigned long long_swap_bits (unsigned long );
 extern unsigned long swap_six_bits_to_ansi (unsigned long );
 extern unsigned long swap_four_bits_to_ansi (unsigned long );
@@ -239,8 +239,8 @@ extern void test_set (FILE *, const char *, int, const char *, int);
 
 /* d3_ecb.c */
 extern int mit_des3_ecb_encrypt
-	(const mit_des_cblock FAR *in,
-		   mit_des_cblock FAR *out,
+	(const mit_des_cblock *in,
+		   mit_des_cblock *out,
 		   mit_des_key_schedule sched1,
 		   mit_des_key_schedule sched2,
 		   mit_des_key_schedule sched3,
@@ -248,8 +248,8 @@ extern int mit_des3_ecb_encrypt
 
 /* d3_cbc.c */
 extern int mit_des3_cbc_encrypt
-	(const mit_des_cblock FAR *in,
-	 mit_des_cblock FAR *out,
+	(const mit_des_cblock *in,
+	 mit_des_cblock *out,
 	 unsigned long length,
 	 const mit_des_key_schedule ks1,
 	 const mit_des_key_schedule ks2,
@@ -269,10 +269,10 @@ extern int mit_des3_key_sched
 
 /* d3_str2ky.c */
 extern krb5_error_code mit_des3_string_to_key
-	(const krb5_encrypt_block FAR * eblock,
-		   krb5_keyblock FAR * keyblock,
-		   const krb5_data FAR * data,
-		   const krb5_data FAR * salt);
+	(const krb5_encrypt_block * eblock,
+		   krb5_keyblock * keyblock,
+		   const krb5_data * data,
+		   const krb5_data * salt);
 
 /* u_nfold.c */
 extern krb5_error_code mit_des_n_fold

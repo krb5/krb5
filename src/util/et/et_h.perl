@@ -194,7 +194,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh
 
-      '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)');
+      '#if !defined(_WIN32) && !defined(macintosh)');
 &Pick('>', $outfile) &&
     (print $fh '/* for compatibility with older versions... */');
 &Pick('>', $outfile) &&

@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss.c, gss.h: Don't declare functions FAR any more.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: 	* Makefile.in: Windows fix for updated win-pre.in.

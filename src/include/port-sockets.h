@@ -1,6 +1,6 @@
 #ifndef _PORT_SOCKET_H
 #define _PORT_SOCKET_H
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 
 #include <winsock.h>
 
@@ -18,7 +18,7 @@
 
 int win_socket_initialize();
 
-#else /* not _MSDOS and not _WIN32 */
+#else /* not _WIN32 */
 
 /* If this source file requires it, define struct sockaddr_in
    (and possibly other things related to network I/O).  */
@@ -59,5 +59,5 @@ int win_socket_initialize();
 
 #endif /* HAVE_MACSOCK_H */
 
-#endif /* _MSDOS */
+#endif /* _WIN32 */
 #endif /*_PORT_SOCKET_H*/

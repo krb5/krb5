@@ -6,7 +6,8 @@
 	keyed_cksum.c, make_checksum.c, make_random_key.c, old_api_glue.c,
 	prng.c, string_to_cksumtype.c, string_to_enctype.c,
 	string_to_key.c, valid_cksumtype.c, valid_enctype.c,
-	verify_checksum.c: Don't use KRB5_DLLIMP.
+	verify_checksum.c: Don't use KRB5_DLLIMP.  Don't explicitly
+	declare pointers FAR any more.
 
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 

@@ -155,9 +155,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
     krb5_context 	  context;
     krb5_auth_context 	  auth_context;
-    const krb5_data   	FAR * inbuf;
-    krb5_data 	      	FAR * outbuf;
-    krb5_replay_data  	FAR * outdata;
+    const krb5_data   	* inbuf;
+    krb5_data 	      	* outbuf;
+    krb5_replay_data  	* outdata;
 {
     krb5_error_code 	  retval;
     krb5_keyblock	* keyblock;

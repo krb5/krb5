@@ -1,3 +1,14 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* an_to_ln.c, c_ustime.c, ccdefname.c, init_os_ctx.c, ktdefname.c,
+	kuserok.c, localaddr.c, lock_file.c, prompter.c, promptusr.c,
+	read_pwd.c: Drop _MSDOS support.
+
+	* ccdefname.c, def_realm.c, free_hstrl.c, hst_realm.c,
+	ktdefname.c, localaddr.c, mk_faddr.c, read_pwd.c, sn2princ.c,
+	timeofday.c, ustime.c: Don't explicitly declare pointers FAR any
+	more.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* accessor.c, ccdefname.c, changepw.c, def_realm.c, free_hstrl.c,

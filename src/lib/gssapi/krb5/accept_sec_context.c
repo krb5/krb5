@@ -492,7 +492,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	       }
 
 	       TREAD_STR(ptr, ptr2, bigend);
-	       option.data = (char FAR *) ptr2;
+	       option.data = (char *) ptr2;
 
 	       i -= option.length;
 

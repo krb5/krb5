@@ -12,7 +12,7 @@
 
 #ifndef __COM_ERR_H
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 #endif
 
@@ -26,19 +26,14 @@
 #define KRB5_EXPORTVAR
 #endif
 
-#ifndef FAR
-#define FAR
-#define NEAR
-#endif
-
 #include <stdarg.h>
 
 typedef long errcode_t;
-typedef void (*et_old_error_hook_func) (const char FAR *, errcode_t,
-					const char FAR *, va_list ap);
+typedef void (*et_old_error_hook_func) (const char *, errcode_t,
+					const char *, va_list ap);
 	
 struct error_table {
-	/*@shared@*/ char const FAR * const FAR * msgs;
+	/*@shared@*/ char const * const * msgs;
         long base;
 	unsigned int n_msgs;
 };
@@ -49,21 +44,21 @@ extern "C" {
 
 /* Public interfaces */
 extern void KRB5_CALLCONV_C com_err
-	(const char FAR *, errcode_t, const char FAR *, ...);
+	(const char *, errcode_t, const char *, ...);
 extern void KRB5_CALLCONV com_err_va
-	(const char FAR *whoami, errcode_t code, const char FAR *fmt,
+	(const char *whoami, errcode_t code, const char *fmt,
 	 va_list ap);
-extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV error_message
+extern /*@observer@*//*@dependent@*/ const char * KRB5_CALLCONV error_message
 	(errcode_t)
        /*@modifies internalState@*/;
 extern errcode_t KRB5_CALLCONV add_error_table
-	(/*@dependent@*/ const struct error_table FAR *)
+	(/*@dependent@*/ const struct error_table *)
        /*@modifies internalState@*/;
 extern errcode_t KRB5_CALLCONV remove_error_table
-	(const struct error_table FAR *)
+	(const struct error_table *)
        /*@modifies internalState@*/;
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh)
 /*
  * The display routine should be application specific.  A global hook,
  * may cause inappropriate display procedures to be called between

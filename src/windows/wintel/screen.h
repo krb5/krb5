@@ -1,4 +1,4 @@
-extern long FAR PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
+extern long PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 
 /*
 *          Definition of attribute bits in the Virtual Screen

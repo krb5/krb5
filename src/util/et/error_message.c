@@ -31,7 +31,7 @@
 #include <ErrorLib.h>
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #define HAVE_STRERROR
 #endif
 
@@ -48,7 +48,7 @@ extern const int sys_nerr;
 
 static char buffer[ET_EBUFSIZ];
 
-#if (defined(_MSDOS) || defined(_WIN32) || defined(macintosh))
+#if (defined(_WIN32) || defined(macintosh))
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
@@ -57,24 +57,13 @@ static char buffer[ET_EBUFSIZ];
 
 /*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
 
-#ifdef _MSDOS
-/*
- * Win16 applications cannot call malloc while the DLL is being
- * initialized...  To get around this, we pre-allocate an array
- * sufficient to hold several error tables.
- */
-#define PREALLOCATE_ETL 32
-static struct et_list etl[PREALLOCATE_ETL];
-static int etl_used = 0;
-#endif
-
 #ifndef DEBUG_TABLE_LIST
 #define dprintf(X)
 #else
 #define dprintf(X) printf X
 #endif
 
-const char FAR * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 error_message(long code)
     /*@modifies internalState@*/
 {
@@ -161,7 +150,7 @@ error_message(long code)
 	return table->msgs[offset];
 
  no_table_found:
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 	/*
 	 * WinSock errors exist in the 10000 and 11000 ranges
 	 * but might not appear if WinSock is not initialized
@@ -243,25 +232,11 @@ oops:
 
 /*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 errcode_t KRB5_CALLCONV
-add_error_table(/*@dependent@*/ const struct error_table FAR * et)
-#ifndef _MSDOS
+add_error_table(/*@dependent@*/ const struct error_table * et)
      /*@modifies _et_list,et_list_dynamic@*/
-#else
-     /*@modifies _et_list,et_list_dynamic,etl_used,etl@*/
-#endif
 /*@=incondefs@*/
 {
     struct dynamic_et_list *del;
-
-#ifdef _MSDOS
-    if (etl_used < PREALLOCATE_ETL) {
-	el = &etl[etl_used++];
-	el->table = et;
-	el->next = _et_list;
-	et_list = el;
-	return 0;
-    }
-#endif
 
     del = (struct dynamic_et_list *)malloc(sizeof(struct dynamic_et_list));
     if (del == NULL)
@@ -275,12 +250,8 @@ add_error_table(/*@dependent@*/ const struct error_table FAR * et)
 
 /*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 errcode_t KRB5_CALLCONV
-remove_error_table(const struct error_table FAR * et)
-#ifdef _MSDOS
-     /*@modifies _et_list,et_list_dynamic,etl_used,etl@*/
-#else
+remove_error_table(const struct error_table * et)
      /*@modifies _et_list,et_list_dynamic@*/
-#endif
 /*@=incondefs@*/
 {
     struct dynamic_et_list **del;
@@ -301,10 +272,6 @@ remove_error_table(const struct error_table FAR * et)
 	    *el = old->next;
 	    old->next = NULL;
 	    old->table = NULL;
-#ifdef _MSDOS
-	    if ((old >= etl) && (old < &etl[PREALLOCATE_ETL-1]))
-		/* do something? */;
-#endif
 	    return 0;
 	}
     return ENOENT;

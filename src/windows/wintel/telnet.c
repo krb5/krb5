@@ -238,7 +238,7 @@ char buf[2048];
  * WM_COMMAND    - application menu (About dialog box)
  * WM_DESTROY    - destroy window
  */
-long FAR PASCAL
+long PASCAL
 MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   HGLOBAL hBuffer;
@@ -647,7 +647,7 @@ DoDialog(char *szDialog, FARPROC lpfnDlgProc)
  * WM_INITDIALOG - initialize dialog box
  * WM_COMMAND    - Input received
  */
-BOOL FAR PASCAL
+BOOL PASCAL
 OpenTelnetDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
   char szConnectName[256];

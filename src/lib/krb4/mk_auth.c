@@ -119,11 +119,11 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
      long options;		/* bit-pattern of options */
      KTEXT ticket;		/* where to put ticket (return); or
 				   supplied in case of KOPT_DONT_MK_REQ */
-     char FAR *service;		/* service name */
-     char FAR *inst;		/* instance (OUTPUT canonicalized) */
-     char FAR *realm;		/* realm */
+     char *service;		/* service name */
+     char *inst;		/* instance (OUTPUT canonicalized) */
+     char *realm;		/* realm */
      unsigned KRB4_32 checksum; /* checksum to include in request */
-     char FAR *version;		/* version string */
+     char *version;		/* version string */
      KTEXT buf;			/* Output buffer to fill  */
 {
     int rem;
@@ -213,11 +213,11 @@ int KRB5_CALLCONV
 krb_check_auth (buf, checksum, msg_data, session, schedule, laddr, faddr)
      KTEXT buf;			/* The response we read from app server */
      unsigned KRB4_32 checksum; /* checksum we included in request */
-     MSG_DAT FAR *msg_data;	/* mutual auth MSG_DAT (return) */
+     MSG_DAT *msg_data;	/* mutual auth MSG_DAT (return) */
      C_Block session;		/* credentials (input) */
      Key_schedule schedule;	/* key schedule (return) */
-     struct sockaddr_in FAR *laddr;	/* local address */
-     struct sockaddr_in FAR *faddr;	/* address of foreign host on fd */
+     struct sockaddr_in *laddr;	/* local address */
+     struct sockaddr_in *faddr;	/* address of foreign host on fd */
 {
     int cc;
     unsigned KRB4_32 cksum;

@@ -29,8 +29,8 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(string, enctypep)
-    char		FAR * string;
-    krb5_enctype	FAR * enctypep;
+    char		* string;
+    krb5_enctype	* enctypep;
 {
     int i;
 

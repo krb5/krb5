@@ -86,7 +86,7 @@ krb5_c_keyed_checksum_types(context, enctype, count, cksumtypes)
 void KRB5_CALLCONV
 krb5_free_cksumtypes(context, val)
     krb5_context context;
-    krb5_cksumtype FAR * val;
+    krb5_cksumtype * val;
 {
     if (val)
 	krb5_xfree(val);

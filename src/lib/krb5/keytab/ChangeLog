@@ -1,7 +1,8 @@
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktadd.c, ktbase.c, ktdefault.c, ktfr_entry.c, ktremove.c,
-	read_servi.c: Don't use KRB5_DLLIMP.
+	read_servi.c: Don't use KRB5_DLLIMP.  Don't explicitly declare
+	pointers FAR any more.
 
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 

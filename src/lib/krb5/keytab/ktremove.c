@@ -33,7 +33,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_remove_entry (context, id, entry)
     krb5_context context;
     krb5_keytab id;
-    krb5_keytab_entry FAR *entry;
+    krb5_keytab_entry *entry;
 {
     if (id->ops->remove)
 	return (*id->ops->remove)(context, id, entry);

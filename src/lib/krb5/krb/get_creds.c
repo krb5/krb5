@@ -105,8 +105,8 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
     krb5_ccache ccache;
-    krb5_creds FAR *in_creds;
-    krb5_creds FAR * FAR *out_creds;
+    krb5_creds *in_creds;
+    krb5_creds **out_creds;
 {
     krb5_error_code retval;
     krb5_creds mcreds;

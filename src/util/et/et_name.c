@@ -27,7 +27,7 @@ static const char char_set[] =
 
 const char *
 error_table_name_r (unsigned long num,
-		    /*@out@*/ /*@returned@*/ char FAR *outbuf)
+		    /*@out@*/ /*@returned@*/ char *outbuf)
      /*@modifies outbuf@*/
 {
 	long ch;
@@ -47,7 +47,7 @@ error_table_name_r (unsigned long num,
 }
 
 /*@observer@*/
-const char FAR * error_table_name(unsigned long num)
+const char * error_table_name(unsigned long num)
      /*@modifies internalState@*/
 {
 	static char buf[6];

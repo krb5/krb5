@@ -1,3 +1,10 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* accept_sec_context.c, gssapiP_krb5.h, import_sec_context.c,
+	krb5_gss_glue.c: Don't explicitly declare pointers FAR any more.
+
+	* pname_to_uid.c: Drop _MSDOS support.
+
 2001-10-04  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Ignore

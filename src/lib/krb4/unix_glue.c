@@ -26,7 +26,7 @@ krb_end_session (x)
 	return KSUCCESS;
 }
 
-char FAR *
+char *
 krb_get_default_user ()
 {
 	return 0;		/* FIXME */

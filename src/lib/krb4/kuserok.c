@@ -97,8 +97,8 @@ parmtable kparm[] = {
 
 int KRB5_CALLCONV
 kuserok(kdata, luser)
-    AUTH_DAT	FAR *kdata;
-    char	FAR *luser;
+    AUTH_DAT	*kdata;
+    char	*luser;
 {
     struct stat sbuf;
     struct passwd *pwd;

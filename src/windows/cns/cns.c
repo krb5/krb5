@@ -1916,9 +1916,9 @@ krb_gethostbyname_wnd_proc(HWND hwnd, UINT message,
  * the async routines to emulate the functionality of the synchronous
  * routines
  */
-struct hostent FAR *PASCAL FAR
+struct hostent *PASCAL
 krb_gethostbyname(
-		  const char FAR *name)
+		  const char *name)
 {
   HWND hwnd;
   char buf[MAXGETHOSTSTRUCT];

@@ -120,8 +120,8 @@ krb5_externalize_opaque(kcontext, odtype, arg, bufpp, sizep)
     krb5_context	kcontext;
     krb5_magic		odtype;
     krb5_pointer	arg;
-    krb5_octet		FAR * FAR *bufpp;
-    size_t		FAR *sizep;
+    krb5_octet		 **bufpp;
+    size_t		 *sizep;
 {
     krb5_error_code	kret;
     krb5_ser_handle	shandle;
@@ -180,9 +180,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_internalize_opaque(kcontext, odtype, argp, bufpp, sizep)
     krb5_context	kcontext;
     krb5_magic		odtype;
-    krb5_pointer	FAR *argp;
-    krb5_octet		FAR * FAR *bufpp;
-    size_t		FAR *sizep;
+    krb5_pointer	 *argp;
+    krb5_octet		 **bufpp;
+    size_t		 *sizep;
 {
     krb5_error_code	kret;
     krb5_ser_handle	shandle;
@@ -202,8 +202,8 @@ krb5_internalize_opaque(kcontext, odtype, argp, bufpp, sizep)
 krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_int32(iarg, bufp, remainp)
     krb5_int32		iarg;
-    krb5_octet		FAR * FAR *bufp;
-    size_t		FAR *remainp;
+    krb5_octet		 **bufp;
+    size_t		 *remainp;
 {
     if (*remainp >= sizeof(krb5_int32)) {
 	(*bufp)[0] = (krb5_octet) ((iarg >> 24) & 0xff);
@@ -223,10 +223,10 @@ krb5_ser_pack_int32(iarg, bufp, remainp)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_bytes(ostring, osize, bufp, remainp)
-    krb5_octet	FAR *ostring;
+    krb5_octet	 *ostring;
     size_t	osize;
-    krb5_octet	FAR * FAR *bufp;
-    size_t	FAR *remainp;
+    krb5_octet	 **bufp;
+    size_t	 *remainp;
 {
     if (*remainp >= osize) {
 	memcpy(*bufp, ostring, osize);
@@ -243,9 +243,9 @@ krb5_ser_pack_bytes(ostring, osize, bufp, remainp)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_ser_unpack_int32(intp, bufp, remainp)
-    krb5_int32	FAR *intp;
-    krb5_octet	FAR * FAR *bufp;
-    size_t	FAR *remainp;
+    krb5_int32	 *intp;
+    krb5_octet	 **bufp;
+    size_t	 *remainp;
 {
     if (*remainp >= sizeof(krb5_int32)) {
 	*intp = (((krb5_int32) ((unsigned char) (*bufp)[0]) << 24) |
@@ -265,10 +265,10 @@ krb5_ser_unpack_int32(intp, bufp, remainp)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_ser_unpack_bytes(istring, isize, bufp, remainp)
-    krb5_octet	FAR *istring;
+    krb5_octet	 *istring;
     size_t	isize;
-    krb5_octet	FAR * FAR *bufp;
-    size_t	FAR *remainp;
+    krb5_octet	 **bufp;
+    size_t	 *remainp;
 {
     if (*remainp >= isize) {
 	memcpy(istring, *bufp, isize);

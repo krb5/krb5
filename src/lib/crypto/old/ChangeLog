@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* des_stringtokey.c: Don't explicitly declare pointers FAR any
+	more.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* old_decrypt.c (krb5_old_decrypt): Fix casts.

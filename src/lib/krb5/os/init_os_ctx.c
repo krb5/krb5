@@ -34,7 +34,7 @@
 #include <PreferencesLib.h>
 #endif /* macintosh */
 
-#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
+#if !defined(macintosh) && !defined(_WIN32)
 #define USE_RANDOM_DEVICE
 #include <sys/ioctl.h> /* for FIONBIO */
 #ifdef HAVE_SYS_FILIO_H
@@ -42,7 +42,7 @@
 #endif
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 
 static krb5_error_code
 get_from_windows_dir(
@@ -173,7 +173,7 @@ get_from_registry(
     return retval;
 }
 
-#endif /* _MSDOS || _WIN32 */
+#endif /* _WIN32 */
 
 static void
 free_filespecs(files)
@@ -287,7 +287,7 @@ os_get_default_config_files(pfiles, secure)
 		return ENOENT;
 	
 #else /* !macintosh */
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
     krb5_error_code retval = 0;
     char *name = 0;
 
@@ -332,7 +332,7 @@ os_get_default_config_files(pfiles, secure)
     files = malloc(2 * sizeof(char *));
     files[0] = name;
     files[1] = 0;
-#else /* !_MSDOS && !_WIN32 */
+#else /* !_WIN32 */
     char* filepath = 0;
     int n_entries, i;
     unsigned int ent_len;
@@ -372,7 +372,7 @@ os_get_default_config_files(pfiles, secure)
     }
     /* cap the array */
     files[i] = 0;
-#endif /* !_MSDOS && !_WIN32 */
+#endif /* !_WIN32 */
 #endif /* !macintosh */
     *pfiles = files;
     return 0;

@@ -1,6 +1,7 @@
 
 /*  A Bison parser, made from ../../../../src/lib/krb5/krb/x-deltat.y
-    by GNU Bison version 1.28  */
+ by  GNU Bison version 1.27
+  */
 
 #define YYBISON 1  /* Identify Bison output.  */
 
@@ -233,8 +234,8 @@ static const short yycheck[] = {     0,
 #define YYPURE 1
 
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/tmp/bison/share/bison.simple"
-/* This file comes from bison-1.28.  */
+#line 3 "/mit/gnu/share/bison.simple"
+/* This file comes from bison-1.27.  */
 
 /* Skeleton output parser for bison,
    Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
@@ -447,7 +448,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 217 "/tmp/bison/share/bison.simple"
+#line 216 "/mit/gnu/share/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -831,7 +832,7 @@ case 21:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 543 "/tmp/bison/share/bison.simple"
+#line 542 "/mit/gnu/share/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1108,8 +1109,8 @@ mylex (krb5_int32 *intp, char **pp)
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_deltat(string, deltatp)
-    char	FAR * string;
-    krb5_deltat	FAR * deltatp;
+    char	* string;
+    krb5_deltat	* deltatp;
 {
     struct param p;
     p.delta = 0;

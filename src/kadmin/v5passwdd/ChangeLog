@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_conn.c: Drop _MSDOS support.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (COMMON_SRCS, SERV_SRCS, CLI_SRCS): All live in

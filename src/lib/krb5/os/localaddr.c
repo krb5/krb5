@@ -32,7 +32,7 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
-#if !defined(HAVE_MACSOCK_H) && !defined(_MSDOS) && !defined(_WIN32)
+#if !defined(HAVE_MACSOCK_H) && !defined(_WIN32)
 
 /* needed for solaris, harmless elsewhere... */
 #define BSD_COMP
@@ -909,7 +909,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(context, addr)
     krb5_context context;
-    krb5_address FAR * FAR * FAR *addr;
+    krb5_address ***addr;
 {
     struct localaddr_data data = { 0 };
     int r;
@@ -1015,7 +1015,7 @@ krb5_os_localaddr(context, addr)
  * local IP address, courtesy of Windows Socket Network Programming,
  * by Robert Quinn
  */
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 static struct hostent *local_addr_fallback_kludge()
 {
 	static struct hostent	host;
@@ -1038,7 +1038,7 @@ static struct hostent *local_addr_fallback_kludge()
 	if (err == SOCKET_ERROR)
 		return NULL;
 
-	err = getsockname(sock, (LPSOCKADDR) &addr, (int FAR *) size);
+	err = getsockname(sock, (LPSOCKADDR) &addr, (int *) size);
 	if (err == SOCKET_ERROR)
 		return NULL;
 

@@ -49,9 +49,9 @@ struct kstream_crypt_ctl_block {
 int kstream_destroy(kstream);
 void kstream_set_buffer_mode(kstream, int);
 kstream kstream_create_from_fd(int fd,
-			       const struct kstream_crypt_ctl_block FAR *,
+			       const struct kstream_crypt_ctl_block *,
 			       kstream_ptr);
-int kstream_write(kstream, void FAR *, size_t);
-int kstream_read(kstream, void FAR *, size_t);
+int kstream_write(kstream, void *, size_t);
+int kstream_read(kstream, void *, size_t);
 
 #endif /* K5STREAM_H */

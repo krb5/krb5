@@ -61,23 +61,23 @@ krb5_sendauth(context, auth_context,
 	      /* OUT */
 	      error, rep_result, out_creds)
     	krb5_context 		  context;
-    	krb5_auth_context       FAR * auth_context;
+    	krb5_auth_context * auth_context;
 	krb5_pointer		  fd;
-	char			FAR * appl_version;
+	char			 * appl_version;
 	krb5_principal		  client;
 	krb5_principal		  server;
 	krb5_flags		  ap_req_options;
-	krb5_data		FAR * in_data;
-	krb5_creds		FAR * in_creds;
+	krb5_data		 * in_data;
+	krb5_creds		 * in_creds;
 	krb5_ccache	  	  ccache;
-	krb5_error             FAR * FAR * error;
-	krb5_ap_rep_enc_part   FAR * FAR * rep_result;
-	krb5_creds	       FAR * FAR * out_creds;
+	krb5_error ** error;
+	krb5_ap_rep_enc_part ** rep_result;
+	krb5_creds	 ** out_creds;
 {
 	krb5_octet		result;
 	krb5_creds 		creds;
-	krb5_creds		FAR * credsp = NULL;
-	krb5_creds		FAR * credspout = NULL;
+	krb5_creds		 * credsp = NULL;
+	krb5_creds		 * credspout = NULL;
 	krb5_error_code		retval = 0;
 	krb5_data		inbuf, outbuf;
 	int			len;

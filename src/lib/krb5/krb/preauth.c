@@ -33,10 +33,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <syslog.h>
-#ifdef _MSDOS
-#define getpid _getpid
-#include <process.h>
-#endif
 
 static krb5_error_code obtain_enc_ts_padata
 	(krb5_context,

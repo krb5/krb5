@@ -48,11 +48,11 @@
  * to the original "alias" argument is returned.
  */
 
-char FAR * KRB5_CALLCONV
+char * KRB5_CALLCONV
 krb_get_phost(alias)
-    char FAR *alias;
+    char *alias;
 {
-    struct hostent FAR *h;
+    struct hostent *h;
     char *p;
     unsigned char *ucp;
     static char hostname_mem[MAXHOSTNAMELEN];
@@ -75,7 +75,7 @@ krb_get_phost(alias)
 		return (0);
 	}
 #endif
-	/* We don't want to return a FAR *, so we copy to a safe location. */
+	/* We don't want to return a *, so we copy to a safe location. */
 	strncpy (hostname_mem, h->h_name, sizeof (hostname_mem));
 	/* Bail out if h_name is too long. */
 	if (hostname_mem[MAXHOSTNAMELEN-1] != '\0')

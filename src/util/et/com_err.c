@@ -25,7 +25,7 @@
 #include "com_err.h"
 #include "error_table.h"
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include <io.h>
 #endif
 #ifdef macintosh
@@ -35,16 +35,16 @@ static void MacMessageBox(char *errbuf);
 
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 
-static void default_com_err_proc (const char FAR *whoami, errcode_t code,
-				  const char FAR *fmt, va_list ap);
+static void default_com_err_proc (const char *whoami, errcode_t code,
+				  const char *fmt, va_list ap);
 
 static void default_com_err_proc(whoami, code, fmt, ap)
-	const char FAR *whoami;
+	const char *whoami;
 	errcode_t code;
-	const char FAR *fmt;
+	const char *fmt;
 	va_list ap;
 {
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh)
 
 	char errbuf[1024] = "";
 
@@ -77,7 +77,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
 #endif /* macintosh */
 
-#else /* !_MSDOS && !_WIN32 && !macintosh */
+#else /* !_WIN32 && !macintosh */
     
 	if (whoami) {
 		fputs(whoami, stderr);
@@ -99,9 +99,9 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 }
 
 void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
-	const char FAR *whoami;
+	const char *whoami;
 	errcode_t code;
-	const char FAR *fmt;
+	const char *fmt;
 	va_list ap;
 {
 	if (!com_err_hook)
@@ -111,9 +111,9 @@ void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
 }
 
 
-void KRB5_CALLCONV_C com_err(const char FAR *whoami,
+void KRB5_CALLCONV_C com_err(const char *whoami,
 					 errcode_t code,
-					 const char FAR *fmt, ...)
+					 const char *fmt, ...)
 {
 	va_list ap;
 
@@ -122,7 +122,7 @@ void KRB5_CALLCONV_C com_err(const char FAR *whoami,
 	va_end(ap);
 }
 
-#if !(defined(_MSDOS)||defined(_WIN32))
+#if !(defined(_WIN32))
 et_old_error_hook_func set_com_err_hook (new_proc)
 	et_old_error_hook_func new_proc;
 {

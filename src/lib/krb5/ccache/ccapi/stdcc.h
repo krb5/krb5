@@ -5,7 +5,7 @@
 #include "CCache2.h"
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include "cacheapi.h"
 #endif
 

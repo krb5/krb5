@@ -22,7 +22,7 @@
 #include <errno.h>
 
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include <io.h>
 #define HAVE_STAT	
 #define stat _stat

@@ -61,7 +61,7 @@ static	Session		**fSessions = 0;
 
 #if defined (_WINDOWS) || defined (unix)
 /* Fake Mac handles up for general use.  */
-#define	Handle	char FAR * FAR *
+#define	Handle	char **
 #define	Size	int
 
 static OSErr memerror = noErr;

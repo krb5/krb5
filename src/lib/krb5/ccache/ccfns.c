@@ -30,14 +30,14 @@
 
 #include "k5-int.h"
 
-const char FAR * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_cc_get_name (krb5_context context, krb5_ccache cache)
 {
     return cache->ops->get_name(context, cache);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_gen_new (krb5_context context, krb5_ccache FAR *cache)
+krb5_cc_gen_new (krb5_context context, krb5_ccache *cache)
 {
     return (*cache)->ops->gen_new(context, cache);
 }
@@ -63,50 +63,50 @@ krb5_cc_close (krb5_context context, krb5_ccache cache)
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
-		    krb5_creds FAR *creds)
+		    krb5_creds *creds)
 {
     return cache->ops->store(context, cache, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
-		       krb5_flags flags, krb5_creds FAR *mcreds,
-		       krb5_creds FAR *creds)
+		       krb5_flags flags, krb5_creds *mcreds,
+		       krb5_creds *creds)
 {
     return cache->ops->retrieve(context, cache, flags, mcreds, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_principal (krb5_context context, krb5_ccache cache,
-		       krb5_principal FAR *principal)
+		       krb5_principal *principal)
 {
     return cache->ops->get_princ(context, cache, principal);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_start_seq_get (krb5_context context, krb5_ccache cache,
-		       krb5_cc_cursor FAR *cursor)
+		       krb5_cc_cursor *cursor)
 {
     return cache->ops->get_first(context, cache, cursor);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_next_cred (krb5_context context, krb5_ccache cache,
-		   krb5_cc_cursor FAR *cursor, krb5_creds FAR *creds)
+		   krb5_cc_cursor *cursor, krb5_creds *creds)
 {
     return cache->ops->get_next(context, cache, cursor, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_end_seq_get (krb5_context context, krb5_ccache cache,
-		     krb5_cc_cursor FAR *cursor)
+		     krb5_cc_cursor *cursor)
 {
     return cache->ops->end_get(context, cache, cursor);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_remove_cred (krb5_context context, krb5_ccache cache, krb5_flags flags,
-		     krb5_creds FAR *creds)
+		     krb5_creds *creds)
 {
     return cache->ops->remove_cred(context, cache, flags, creds);
 }
@@ -117,7 +117,7 @@ krb5_cc_set_flags (krb5_context context, krb5_ccache cache, krb5_flags flags)
     return cache->ops->set_flags(context, cache, flags);
 }
 
-const char FAR * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_cc_get_type (krb5_context context, krb5_ccache cache)
 {
     return cache->ops->prefix;

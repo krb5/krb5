@@ -35,7 +35,7 @@
  * the OID if possible.
  */
 gss_OID krb5_gss_convert_static_mech_oid(oid)
-     gss_OID	FAR oid;
+     gss_OID	oid;
 {
 	const gss_OID_desc 	*p;
 	OM_uint32		minor_status;

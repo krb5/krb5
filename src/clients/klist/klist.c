@@ -49,7 +49,7 @@
 #define GET_PROGNAME(x) max(max(strrchr((x), '/'), strrchr((x), '\\')) + 1,(x))
 #endif
 
-#if (defined(_MSDOS) || defined(_WIN32))
+#ifdef _WIN32
 #include <winsock.h>
 #else
 #include <sys/socket.h>

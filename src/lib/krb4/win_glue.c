@@ -20,12 +20,12 @@
  * but might be ordinary pointers on real machines.  Printf modifiers
  * scattered through the code don't cut it,
  * since they might break on real machines.  Microloss
- * didn't provide a function to print a char FAR *, so we wrote one.
+ * didn't provide a function to print a char *, so we wrote one.
  * It gets #define'd to fputs on real machines. 
  */
 int
 far_fputs(string, stream)
-	char FAR *string;
+	char *string;
 	FILE *stream;
 {
 	return fprintf(stream, "%Fs", string);

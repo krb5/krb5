@@ -51,10 +51,6 @@
 #define KRB5_CALLCONV_C
 #define KRB5_EXPORTVAR
 #endif
-#ifndef FAR
-#define FAR
-#define NEAR
-#endif
 
 #ifndef KRB4_32
 #ifdef SIZEOF_INT
@@ -132,15 +128,15 @@ typedef struct des_ks_struct bit_64;
 int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
 
 int KRB5_CALLCONV
-des_pcbc_encrypt (C_Block FAR *in, C_Block FAR *out, long length,
-		  const des_key_schedule schedule, C_Block FAR *ivec,
+des_pcbc_encrypt (C_Block *in, C_Block *out, long length,
+		  const des_key_schedule schedule, C_Block *ivec,
 		  int enc);
 
 unsigned long KRB5_CALLCONV
-des_quad_cksum (const unsigned char FAR *in, unsigned KRB4_32 FAR *out,
-		long length, int out_count, C_Block FAR *seed);
+des_quad_cksum (const unsigned char *in, unsigned KRB4_32 *out,
+		long length, int out_count, C_Block *seed);
 
-int KRB5_CALLCONV des_string_to_key (const char FAR *, C_Block);
+int KRB5_CALLCONV des_string_to_key (const char *, C_Block);
 
 /* new */
 #ifdef KRB5_GENERAL__

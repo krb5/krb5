@@ -36,7 +36,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_principal(context, inprinc, outprinc)
     krb5_context context;
     krb5_const_principal inprinc;
-    krb5_principal FAR *outprinc;
+    krb5_principal *outprinc;
 {
     register krb5_principal tempprinc;
     register int i, nelems;

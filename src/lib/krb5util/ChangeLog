@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c: Drop _MSDOS support.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* compat_recv.c: Flush out prototype for static krb_v4_recvauth.

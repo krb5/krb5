@@ -66,8 +66,8 @@ get_krbhst_default(h, r, n)
 
 int KRB5_CALLCONV
 krb_get_krbhst(h,r,n)
-    char FAR *h;
-    char FAR *r;
+    char *h;
+    char *r;
     int n;
 {
     FILE *cnffile;

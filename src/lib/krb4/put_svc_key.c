@@ -40,12 +40,12 @@
  */
 int KRB5_CALLCONV
 put_svc_key(sfile,name,inst,realm,newvno,key)
-	char FAR *sfile;
-	char FAR *name;
-	char FAR *inst;
-	char FAR *realm;
+	char *sfile;
+	char *name;
+	char *inst;
+	char *realm;
 	int newvno;
-	char FAR *key;
+	char *key;
 {
 	int fd;
 	char fname[SNAME_SZ], finst[INST_SZ], frlm[REALM_SZ];

@@ -30,7 +30,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_enctype_to_string(enctype, buffer, buflen)
     krb5_enctype	enctype;
-    char		FAR * buffer;
+    char		* buffer;
     size_t		buflen;
 {
     int i;

@@ -311,7 +311,7 @@ static void output_quoted_string(str, f)
 
 
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #define EOL "\r\n"
 #endif
 

@@ -50,9 +50,9 @@
 
 long KRB5_CALLCONV
 krb_mk_err(p, e, e_string)
-    u_char FAR *p;		/* Where to build error packet */
+    u_char *p;		/* Where to build error packet */
     KRB4_32 e;			/* Error code */
-    char FAR *e_string;		/* Text of error */
+    char *e_string;		/* Text of error */
 {
     u_char      *start;
     size_t	e_len;

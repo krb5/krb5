@@ -68,7 +68,7 @@
 	"des3-cbc-sha1 " \
 	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
 
-#if (defined(_MSDOS) || defined(_WIN32))
+#if (defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
@@ -110,7 +110,7 @@ init_common (context, secure)
 	/* Initialize error tables */
 	krb5_init_ets(ctx);
 
-#if (defined(_MSDOS) || defined(_WIN32))
+#if (defined(_WIN32))
 	/* 
 	 * Load the krbcc32.dll if necessary.  We do this here so that
 	 * we know to use API: later on during initialization.
@@ -299,7 +299,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
      krb5_enctype **ktypes;
      char *profstr;
      int ctx_count;
-     krb5_enctype FAR *ctx_list;
+     krb5_enctype *ctx_list;
 {
     krb5_enctype *old_ktypes;
 
@@ -424,7 +424,7 @@ void
 KRB5_CALLCONV
 krb5_free_ktypes (context, val)
      krb5_context context;
-     krb5_enctype FAR *val;
+     krb5_enctype *val;
 {
     free (val);
 }

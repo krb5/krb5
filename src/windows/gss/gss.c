@@ -105,7 +105,7 @@ do_gssapi_test (char *name) {
 ** 	WM_COMMAND    - Input received
 **
 ***************************************************************************/
-BOOL FAR PASCAL
+BOOL PASCAL
 OpenGssapiDlg(
 	HWND hDlg,
 	WORD message,

@@ -131,9 +131,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_524_conv_principal(context, princ, name, inst, realm)
     krb5_context context;
     const krb5_principal princ;
-    char FAR *name;
-    char FAR *inst;
-    char FAR *realm;
+    char *name;
+    char *inst;
+    char *realm;
 {
      const struct krb_convert *p;
      krb5_data *compo;
@@ -232,10 +232,10 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(context, name, instance, realm, princ)
    krb5_context context;
-   const char	FAR *name;
-   const char	FAR *instance;
-   const char	FAR *realm;
-   krb5_principal	FAR *princ;
+   const char	 *name;
+   const char	 *instance;
+   const char	 *realm;
+   krb5_principal	 *princ;
 {
      const struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */

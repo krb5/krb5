@@ -1,3 +1,10 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c, cc_stdio.c: Delete _MSDOS (win16) support.
+
+	* cc_memory.c, ccbase.c, ccdefault.c, ccfns.c: Don't explicitly
+	declare pointers FAR any more.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c, ccbase.c, cccopy.c, ccdefault.c, fcc.h, ser_cc.c:

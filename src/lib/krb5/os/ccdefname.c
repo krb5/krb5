@@ -142,7 +142,7 @@ try_dir(
 }
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	char *prefix = krb5_cc_dfl_ops->prefix;
@@ -221,7 +221,7 @@ cleanup:
 }
 
 #else
-#if !(defined(_MSDOS) || defined(_WIN32))
+#if !(defined(_WIN32))
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%ld", (long) getuid());
@@ -276,7 +276,7 @@ krb5_cc_set_default_name(context, name)
 }
 
 	
-const char FAR * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_cc_default_name(context)
     krb5_context context;
 {

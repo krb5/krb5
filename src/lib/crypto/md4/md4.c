@@ -39,7 +39,7 @@
 #include "rsa-md4.h"
 
 /* forward declaration */
-static void Transform (krb5_ui_4 FAR *, krb5_ui_4 FAR *);
+static void Transform (krb5_ui_4 *, krb5_ui_4 *);
 
 static const unsigned char PADDING[64] = {
   0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -77,7 +77,7 @@ static const unsigned char PADDING[64] = {
 
 void
 krb5_MD4Init (mdContext)
-krb5_MD4_CTX FAR *mdContext;
+krb5_MD4_CTX *mdContext;
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -91,8 +91,8 @@ krb5_MD4_CTX FAR *mdContext;
 
 void
 krb5_MD4Update (mdContext, inBuf, inLen)
-krb5_MD4_CTX FAR *mdContext;
-const unsigned char FAR *inBuf;
+krb5_MD4_CTX *mdContext;
+const unsigned char *inBuf;
 unsigned int inLen;
 {
   krb5_ui_4 in[16];
@@ -127,7 +127,7 @@ unsigned int inLen;
 
 void
 krb5_MD4Final (mdContext)
-krb5_MD4_CTX FAR *mdContext;
+krb5_MD4_CTX *mdContext;
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -169,8 +169,8 @@ krb5_MD4_CTX FAR *mdContext;
 /* Basic MD4 step. Transform buf based on in.
  */
 static void Transform (buf, in)
-krb5_ui_4 FAR *buf;
-krb5_ui_4 FAR *in;
+krb5_ui_4 *buf;
+krb5_ui_4 *in;
 {
   register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 

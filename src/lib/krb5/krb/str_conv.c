@@ -79,8 +79,8 @@ static const int salttype_table_nents = sizeof(salttype_table)/
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_salttype(string, salttypep)
-    char	FAR * string;
-    krb5_int32	FAR * salttypep;
+    char	* string;
+    krb5_int32	* salttypep;
 {
     int i;
     int found;
@@ -105,7 +105,7 @@ krb5_string_to_salttype(string, salttypep)
 krb5_error_code KRB5_CALLCONV
 krb5_salttype_to_string(salttype, buffer, buflen)
     krb5_int32	salttype;
-    char	FAR * buffer;
+    char	* buffer;
     size_t	buflen;
 {
     int i;
@@ -150,8 +150,8 @@ static char *strptime (const char *, const char *, struct tm *);
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_timestamp(string, timestampp)
-    char		FAR * string;
-    krb5_timestamp	FAR * timestampp;
+    char		* string;
+    krb5_timestamp	* timestampp;
 {
     int i;
     struct tm timebuf;
@@ -204,7 +204,7 @@ krb5_string_to_timestamp(string, timestampp)
 krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(timestamp, buffer, buflen)
     krb5_timestamp	timestamp;
-    char		FAR * buffer;
+    char		* buffer;
     size_t		buflen;
 {
     int ret;
@@ -221,9 +221,9 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
 krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     krb5_timestamp	timestamp;
-    char		FAR * buffer;
+    char		* buffer;
     size_t		buflen;
-    char		FAR * pad;
+    char		* pad;
 {
     struct tm	*tmp;
     size_t i;
@@ -269,7 +269,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
 krb5_error_code KRB5_CALLCONV
 krb5_deltat_to_string(deltat, buffer, buflen)
     krb5_deltat	deltat;
-    char	FAR * buffer;
+    char	* buffer;
     size_t	buflen;
 {
     int			days, hours, minutes, seconds;

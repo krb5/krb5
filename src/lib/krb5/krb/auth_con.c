@@ -28,7 +28,7 @@ actx_copy_addr(context, inad, outad)
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_init(context, auth_context)
     krb5_context      	  context;
-    krb5_auth_context  FAR * auth_context;
+    krb5_auth_context * auth_context;
 {
     *auth_context =
             (krb5_auth_context)malloc(sizeof(struct _krb5_auth_context));
@@ -177,7 +177,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_keyblock   FAR * keyblock;		
+    krb5_keyblock * keyblock;		
 {
     if (auth_context->keyblock)
 	krb5_free_keyblock(context, auth_context->keyblock);
@@ -200,7 +200,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_keyblock FAR * FAR * keyblock;		
+    krb5_keyblock ** keyblock;		
 {
     if (auth_context->local_subkey)
     	return krb5_copy_keyblock(context,auth_context->local_subkey,keyblock);
@@ -212,7 +212,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_keyblock FAR * FAR * keyblock;		
+    krb5_keyblock ** keyblock;		
 {
     if (auth_context->remote_subkey)
     	return krb5_copy_keyblock(context,auth_context->remote_subkey,keyblock);
@@ -254,7 +254,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getauthenticator(context, auth_context, authenticator)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_authenticator FAR * FAR * authenticator;		
+    krb5_authenticator ** authenticator;		
 {
     return (krb5_copy_authenticator(context, auth_context->authentp,
 				    authenticator));
@@ -264,7 +264,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_int32	    FAR * seqnumber;		
+    krb5_int32	 * seqnumber;		
 {
     *seqnumber = auth_context->remote_seq_number;
     return 0;
@@ -326,7 +326,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getflags(context, auth_context, flags)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
-    krb5_int32	    FAR * flags;
+    krb5_int32	 * flags;
 {
     *flags = auth_context->auth_context_flags;
     return 0;

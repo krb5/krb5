@@ -33,7 +33,7 @@ kstream_set_buffer_mode(kstream ks, int mode)
 
 kstream 
 kstream_create_from_fd(int fd,
-		       const struct kstream_crypt_ctl_block FAR *ctl,
+		       const struct kstream_crypt_ctl_block *ctl,
 		       kstream_ptr data)
 {
   kstream ks;
@@ -61,7 +61,7 @@ kstream_create_from_fd(int fd,
 }
 
 int 
-kstream_write(kstream ks, void FAR *p_data, size_t p_len)
+kstream_write(kstream ks, void *p_data, size_t p_len)
 {
   int n;
   struct kstream_data_block i;
@@ -86,7 +86,7 @@ kstream_write(kstream ks, void FAR *p_data, size_t p_len)
 
 
 int 
-kstream_read(kstream ks, void FAR *p_data, size_t p_len)
+kstream_read(kstream ks, void *p_data, size_t p_len)
 {
   int n;
   struct kstream_data_block i;

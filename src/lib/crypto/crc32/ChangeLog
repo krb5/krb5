@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* crc.c: Don't declare pointers FAR any more.
+
 2001-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* crc-32.h: Stop using PROTOTYPE macro.

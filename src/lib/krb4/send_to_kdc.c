@@ -83,7 +83,7 @@ send_to_kdc(pkt,rpkt,realm)
     int n_hosts;
     int retval;
     struct sockaddr_in to;
-    struct hostent FAR *farkedhost;
+    struct hostent *farkedhost;
     struct hostent *host, *hostlist;
     char *cp;
     char krbhst[MAXHOSTNAMELEN];
@@ -114,7 +114,7 @@ send_to_kdc(pkt,rpkt,realm)
 
     /* The first time, decide what port to use for the KDC.  */
     if (cached_krb_udp_port == 0) {
-        register struct servent FAR *sp;
+        register struct servent *sp;
 	sp = getservbyname("kerberos","udp");
         if (sp)
 	    cached_krb_udp_port = sp->s_port;
@@ -126,7 +126,7 @@ send_to_kdc(pkt,rpkt,realm)
        as a fallback. */
     if (cached_krbsec_udp_port == 0 && 
 	cached_krb_udp_port != htons(KERBEROS_PORT)) {
-        register struct servent FAR *sp;
+        register struct servent *sp;
 	sp = getservbyname("kerberos-sec","udp");
         if (sp)
 	    cached_krbsec_udp_port = sp->s_port;

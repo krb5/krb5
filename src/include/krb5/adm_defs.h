@@ -95,11 +95,11 @@ typedef struct {
     char appl_code;
     char oper_code;
     char retn_code;
-    char FAR *message;
+    char *message;
 } kadmin_requests;
 
 #if 0
-static char FAR *oper_type[] = {
+static char *oper_type[] = {
 	"complete",					/* 0 */
 	"addition",					/* 1 */
 	"deletion",					/* 2 */
@@ -114,7 +114,7 @@ static char FAR *oper_type[] = {
 
 
 #if 0
-static char FAR *ksrvutil_message[] = {
+static char *ksrvutil_message[] = {
 	"Service Key Changed",				/* 0 */
 	"New Key and Version Received"			/* 1 */
 };
@@ -124,7 +124,7 @@ static char FAR *ksrvutil_message[] = {
 #define KADMSAG		0x01
 
 #if 0
-static char FAR *kadmind_general_response[] = {
+static char *kadmind_general_response[] = {
 	"Success",					/* 0 */
 	"Service Access Granted"			/* 1 */
 };
@@ -135,7 +135,7 @@ static char FAR *kadmind_general_response[] = {
 #define KPASSBAD	0x01
 
 #if 0
-static char FAR *kadmind_kpasswd_response[] = {
+static char *kadmind_kpasswd_response[] = {
 	"Password Changed",				/* 0 */
 	"Password NOT Changed!"				/* 1 */
 };
@@ -146,7 +146,7 @@ static char FAR *kadmind_kpasswd_response[] = {
 #define KSRVCATASTROPHE	0x02
 
 #if 0
-static char FAR *kadmind_ksrvutil_response[] = {
+static char *kadmind_ksrvutil_response[] = {
 	"Service Password Change Complete",		/* 0 */
 	"One or More Service Password Change(s) Failed!",	/* 1 */
 	"Database Update Failure - Possible Catastrophe!!"	/* 2 */
@@ -157,7 +157,7 @@ static char FAR *kadmind_ksrvutil_response[] = {
 #define KADMBAD		0x01
 
 #if 0
-static char FAR *kadmind_kadmin_response[] = {
+static char *kadmind_kadmin_response[] = {
 	"Administrative Service Completed",		/* 0 */
 	"Principal Unknown!",				/* 1 */
 	"Principal Already Exists!",			/* 2 */

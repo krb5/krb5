@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #include <malloc.h>
 #endif
 

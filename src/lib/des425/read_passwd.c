@@ -30,7 +30,7 @@
  * echoing.
  */
 
-#if !defined(_MSDOS)&&!defined(_WIN32)
+#if !defined(_WIN32)
 
 #include "des_int.h"
 #include "des.h"

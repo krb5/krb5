@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* syslog.c: Drop _MSDOS support.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* sscanf.c: Don't use KRB5_DLLIMP.

@@ -7,18 +7,11 @@
 #include "prof_err.h"
 #include "profile.h"
 
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
+#if defined(__STDC__) || defined(_WIN32)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
 #endif
-
-#if defined(_MSDOS)
-/* From k5-config.h */
-#define SIZEOF_INT      2
-#define SIZEOF_SHORT    2
-#define SIZEOF_LONG     4
-#endif 
 
 #if defined(_WIN32)
 #define SIZEOF_INT      4

@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #if !defined(macintosh)
-#if defined(HAVE_STDARG_H) || defined(_MSDOS) || defined(_WIN32)
+#if defined(HAVE_STDARG_H) || defined(_WIN32)
 #include <stdarg.h>
 #else
 #include <varargs.h>

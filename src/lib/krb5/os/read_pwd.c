@@ -29,7 +29,7 @@
 
 #include "k5-int.h"
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh)
 #define DEFINED_KRB5_READ_PASSWORD
 #include <stdio.h>
 #include <errno.h>
@@ -162,7 +162,7 @@ cleanup:
 }
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 #define DEFINED_KRB5_READ_PASSWORD
 
 #include <io.h>
@@ -287,11 +287,11 @@ cleanup:
 static int CALLBACK
 read_pwd_proc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    pwd_params FAR *dp;
+    pwd_params *dp;
     
     switch(msg) {
     case WM_INITDIALOG:
-	dp = (pwd_params FAR *) lParam;
+	dp = (pwd_params *) lParam;
 	SetWindowLong(hdlg, DWL_USER, lParam);
 	SetDlgItemText(hdlg, ID_READ_PWD_PROMPT, dp->pwd_prompt);
 	SetDlgItemText(hdlg, ID_READ_PWD_PROMPT2, dp->pwd_prompt2);
@@ -300,7 +300,7 @@ read_pwd_proc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 
     case WM_COMMAND:
-	dp = (pwd_params FAR *) GetWindowLong(hdlg, DWL_USER);
+	dp = (pwd_params *) GetWindowLong(hdlg, DWL_USER);
         switch (wParam) {
 	case IDOK:
 	    *(dp->pwd_size_return) =

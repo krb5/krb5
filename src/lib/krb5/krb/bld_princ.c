@@ -103,13 +103,13 @@ krb5_error_code KRB5_CALLCONV_C
 #ifdef HAVE_STDARG_H
 krb5_build_principal(krb5_context context,  krb5_principal * princ, 
 		     unsigned int rlen,
-		     krb5_const char FAR * realm, ...)
+		     krb5_const char * realm, ...)
 #else
 krb5_build_principal(context, princ, rlen, realm, va_alist)
     krb5_context context;
     krb5_principal *princ;
     unsigned int rlen;
-    krb5_const char FAR *realm;
+    krb5_const char *realm;
     va_dcl
 #endif
 {

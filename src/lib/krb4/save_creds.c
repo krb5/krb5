@@ -32,9 +32,9 @@
 int KRB5_CALLCONV
 krb_save_credentials(service, instance, realm, session, lifetime, kvno,
                  ticket, issue_date)
-    char FAR *service;		/* Service name */
-    char FAR *instance;		/* Instance */
-    char FAR *realm;		/* Auth domain */
+    char *service;		/* Service name */
+    char *instance;		/* Instance */
+    char *realm;		/* Auth domain */
     C_Block session;		/* Session key */
     int lifetime;		/* Lifetime */
     int kvno;			/* Key version number */

@@ -106,13 +106,13 @@ CredIsExpired( cr )
 int KRB5_CALLCONV
 krb_get_ticket_for_service (serviceName, buf, buflen, checksum, sessionKey,
 		schedule, version, includeVersion)
-	char FAR *serviceName;
-	char FAR *buf;
-	unsigned KRB4_32 FAR *buflen;
+	char *serviceName;
+	char *buf;
+	unsigned KRB4_32 *buflen;
 	int checksum;
 	des_cblock sessionKey;
 	Key_schedule schedule;
-	char FAR *version;
+	char *version;
 	int includeVersion;
 {
 	char service[SNAME_SZ];

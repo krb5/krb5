@@ -30,7 +30,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_cksumtype_to_string(cksumtype, buffer, buflen)
     krb5_cksumtype	cksumtype;
-    char		FAR * buffer;
+    char		* buffer;
     size_t		buflen;
 {
     int i;

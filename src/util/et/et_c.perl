@@ -79,7 +79,7 @@ $c2n{'9'} = 62;
 $c2n{'_'} = 63;
 
 line: while (<>) {
-    chop;	# strip record separator
+    chomp;	# strip record separator
     @Fld = split($FS, $_, 9999);
     if (/^#/) {
 	next line;
@@ -137,13 +137,9 @@ line: while (<>) {
 	    (print $fh ' */');
 
 	&Pick('>', $outfile) &&
-	    (print $fh '#if defined(_MSDOS) || defined(_WIN32)');
+	    (print $fh '#if defined(_WIN32)');
 	&Pick('>', $outfile) &&
 	    (print $fh "# include \"win-mac.h\"");
-	&Pick('>', $outfile) &&
-	    (print $fh '#else');
-	&Pick('>', $outfile) &&
-	    (print $fh '# define FAR');
 	&Pick('>', $outfile) &&
 	    (print $fh '#endif');
 	&Pick('>', $outfile) &&
@@ -163,7 +159,7 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh '/*@-redef@*/');
 	&Pick('>', $outfile) &&
-	    (print $fh 'typedef /*@null@*/ const char FAR *ncptr;');
+	    (print $fh 'typedef /*@null@*/ const char *ncptr;');
 	&Pick('>', $outfile) &&
 	    (print $fh '/*@=redef@*/');
 	&Pick('>', $outfile) &&
@@ -262,7 +258,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh
 
-      '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)');
+      '#if !defined(_WIN32) && !defined(macintosh)');
 &Pick('>', $outfile) &&
     (print $fh 'void initialize_' . $table_name . '_error_table (void)');
 &Pick('>', $outfile) &&

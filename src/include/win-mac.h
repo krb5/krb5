@@ -7,10 +7,11 @@
 #ifndef _KRB5_WIN_MAC_H
 #define _KRB5_WIN_MAC_H
 
-#if (defined(_MSDOS) || defined(_WIN32))
+#if defined(_WIN32)
 /* 
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
+/* Windows 32 specific */
 
 #define ID_READ_PWD_DIALOG  10000
 #define ID_READ_PWD_PROMPT  10001
@@ -24,45 +25,11 @@
 
 #else
 
-#if defined(_MSDOS)
-	/* Windows 16 specific */
-#define BITS16
-#define SIZEOF_INT      2
-#define SIZEOF_SHORT    2
-#define SIZEOF_LONG     4
-
-#ifndef KRB5_CALLCONV
-#define KRB5_CALLCONV __far __export __pascal
-#define KRB5_CALLCONV_C __far __export __cdecl
-#define KRB5_EXPORTVAR __far __export
-#endif /* !KRB5_CALLCONV */
-
-#include <windows.h>
-	
-/*
- * The following defines are needed to make <windows.h> work
- * in stdc mode (/Za flag). Winsock.h needs <windows.h>.
- */
-#ifndef FAR
-#define FAR     __far
-#define NEAR    __near
-#endif
-
-#ifndef _far
-#define _far    __far
-#define _near   __near
-#define _pascal __pascal
-#define _cdecl  __cdecl
-#define _huge   __huge
-#endif
-
-#else
-	/* Windows 32 specific */
 #define SIZEOF_INT      4
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 
-#include <windows.h>   /* always include this here, to get correct FAR and NEAR */
+#include <windows.h>
 
 #define HAVE_LABS
 
@@ -71,8 +38,6 @@
 #  define KRB5_CALLCONV_C __cdecl
 #  define KRB5_EXPORTVAR
 #endif /* !KRB5_CALLCONV */
-
-#endif /* _MSDOS */
 
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
@@ -204,7 +169,7 @@ HINSTANCE get_lib_instance(void);
 
 #endif /* !RES_ONLY */
 
-#endif /* _MSDOS || _WIN32 */
+#endif /* _WIN32 */
 
 #ifdef macintosh
 
@@ -212,12 +177,6 @@ HINSTANCE get_lib_instance(void);
 
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#ifndef FAR
-#define FAR
-#endif
-#ifndef NEAR
-#define NEAR
-#endif
 
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
@@ -284,12 +243,6 @@ int fstat(int fildes, struct stat *buf);
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#endif
-#ifndef FAR
-#define FAR
-#endif
-#ifndef NEAR
-#define NEAR
 #endif
 
 #endif /* _KRB5_WIN_MAC_H */

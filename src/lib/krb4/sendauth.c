@@ -186,16 +186,16 @@ krb_sendauth(options, fd, ticket, service, inst, realm, checksum,
      int fd;			/* file descriptor to write onto */
      KTEXT ticket;		/* where to put ticket (return); or
 				   supplied in case of KOPT_DONT_MK_REQ */
-     char FAR *service;         /* service name */
-     char FAR *inst;            /* service instance */
-     char FAR *realm;           /* service realm */
+     char *service;         /* service name */
+     char *inst;            /* service instance */
+     char *realm;           /* service realm */
      unsigned KRB4_32 checksum; /* checksum to include in request */
      MSG_DAT *msg_data;		/* mutual auth MSG_DAT (return) */
      CREDENTIALS *cred;		/* credentials (return) */
      Key_schedule schedule;	/* key schedule (return) */
-     struct sockaddr_in FAR *laddr;	/* local address */
-     struct sockaddr_in FAR *faddr;	/* address of foreign host on fd */
-     char FAR *version;		/* version string */
+     struct sockaddr_in *laddr;	/* local address */
+     struct sockaddr_in *faddr;	/* address of foreign host on fd */
+     char *version;		/* version string */
 {
     int rem, cc;
     char srv_inst[INST_SZ];

@@ -12,7 +12,7 @@
 #include <gssapi/gssapi_generic.h>
 
 // gss.c
-BOOL FAR PASCAL OpenGssapiDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam);
+BOOL PASCAL OpenGssapiDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam);
 
 // gss-misc.c
 int send_token(int s, gss_buffer_t tok);

@@ -32,7 +32,7 @@ krb5_encrypt(context, inptr, outptr, size, eblock, ivec)
      const krb5_pointer inptr;
      krb5_pointer outptr;
      const size_t size;
-     krb5_encrypt_block FAR * eblock;
+     krb5_encrypt_block * eblock;
      krb5_pointer ivec;
 {
     krb5_data inputd, ivecd;
@@ -71,7 +71,7 @@ krb5_decrypt(context, inptr, outptr, size, eblock, ivec)
      const krb5_pointer inptr;
      krb5_pointer outptr;
      const size_t size;
-     krb5_encrypt_block FAR * eblock;
+     krb5_encrypt_block * eblock;
      krb5_pointer ivec;
 {
     krb5_enc_data inputd;
@@ -105,8 +105,8 @@ krb5_decrypt(context, inptr, outptr, size, eblock, ivec)
 krb5_error_code KRB5_CALLCONV
 krb5_process_key(context, eblock, key)
      krb5_context context;
-     krb5_encrypt_block FAR * eblock;
-     const krb5_keyblock FAR * key;
+     krb5_encrypt_block * eblock;
+     const krb5_keyblock * key;
 {
     eblock->key = (krb5_keyblock *) key;
 
@@ -116,7 +116,7 @@ krb5_process_key(context, eblock, key)
 krb5_error_code KRB5_CALLCONV
 krb5_finish_key(context, eblock)
      krb5_context context;
-     krb5_encrypt_block FAR * eblock;
+     krb5_encrypt_block * eblock;
 {
     return(0);
 }
@@ -124,10 +124,10 @@ krb5_finish_key(context, eblock)
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_key(context, eblock, keyblock, data, salt)
      krb5_context context;
-     const krb5_encrypt_block FAR * eblock;
-     krb5_keyblock FAR * keyblock;
-     const krb5_data FAR * data;
-     const krb5_data FAR * salt;
+     const krb5_encrypt_block * eblock;
+     krb5_keyblock * keyblock;
+     const krb5_data * data;
+     const krb5_data * salt;
 {
     return(krb5_c_string_to_key(context, eblock->crypto_entry, data, salt,
 				keyblock));
@@ -136,9 +136,9 @@ krb5_string_to_key(context, eblock, keyblock, data, salt)
 krb5_error_code KRB5_CALLCONV
 krb5_init_random_key(context, eblock, keyblock, ptr)
      krb5_context context;
-     const krb5_encrypt_block FAR * eblock;
-     const krb5_keyblock FAR * keyblock;
-     krb5_pointer FAR * ptr;
+     const krb5_encrypt_block * eblock;
+     const krb5_keyblock * keyblock;
+     krb5_pointer * ptr;
 {
     krb5_data data;
 
@@ -151,8 +151,8 @@ krb5_init_random_key(context, eblock, keyblock, ptr)
 krb5_error_code KRB5_CALLCONV
 krb5_finish_random_key(context, eblock, ptr)
      krb5_context context;
-     const krb5_encrypt_block FAR * eblock;
-     krb5_pointer FAR * ptr;
+     const krb5_encrypt_block * eblock;
+     krb5_pointer * ptr;
 {
     return(0);
 }
@@ -160,9 +160,9 @@ krb5_finish_random_key(context, eblock, ptr)
 krb5_error_code KRB5_CALLCONV
 krb5_random_key(context, eblock, ptr, keyblock)
      krb5_context context;
-     const krb5_encrypt_block FAR * eblock;
+     const krb5_encrypt_block * eblock;
      krb5_pointer ptr;
-     krb5_keyblock FAR * FAR * keyblock;
+     krb5_keyblock ** keyblock;
 {
     krb5_keyblock *key;
     krb5_error_code ret;
@@ -181,7 +181,7 @@ krb5_random_key(context, eblock, ptr, keyblock)
 krb5_enctype KRB5_CALLCONV
 krb5_eblock_enctype(context, eblock)
      krb5_context context;
-     const krb5_encrypt_block FAR * eblock;
+     const krb5_encrypt_block * eblock;
 {
     return(eblock->crypto_entry);
 }
@@ -189,7 +189,7 @@ krb5_eblock_enctype(context, eblock)
 krb5_error_code KRB5_CALLCONV
 krb5_use_enctype(context, eblock, enctype)
      krb5_context context;
-     krb5_encrypt_block FAR * eblock;
+     krb5_encrypt_block * eblock;
      const krb5_enctype enctype;
 {
     eblock->crypto_entry = enctype;
@@ -232,7 +232,7 @@ krb5_calculate_checksum(context, ctype, in, in_length,
      const size_t in_length;
      const krb5_pointer seed;
      const size_t seed_length;
-     krb5_checksum FAR * outcksum;
+     krb5_checksum * outcksum;
 {
     krb5_data input;
     krb5_keyblock key;
@@ -269,7 +269,7 @@ krb5_verify_checksum(context, ctype, cksum, in, in_length,
 				     seed, seed_length)
      krb5_context context;
      krb5_cksumtype ctype;
-     const krb5_checksum FAR * cksum;
+     const krb5_checksum * cksum;
      const krb5_pointer in;
      const size_t in_length;
      const krb5_pointer seed;

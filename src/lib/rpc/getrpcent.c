@@ -47,7 +47,7 @@ static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
  * Make sure we have a definition for PROTOTYPE.
  */
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#if defined(__STDC__) || defined(_WIN32) || defined(__ultrix)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()

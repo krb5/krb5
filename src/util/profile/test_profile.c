@@ -10,17 +10,7 @@
 
 #include "prof_int.h"
 #include "argv_parse.h"
-#ifndef _MSDOS
 #include "com_err.h"
-#else
-
-/* Stubs for the error handling routines */
-#include "prof_int.h"
-void initialize_prof_error_table() {}
-void com_err (char *fmt, long err, char *msg) {
-    printf (fmt, err, msg);
-}
-#endif
 
 const char *program_name = "test_profile";
 

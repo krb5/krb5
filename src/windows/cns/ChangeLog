@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* cns.c: Don't declare pointers or functions FAR any more.
+
 2000-05-08  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 	

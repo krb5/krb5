@@ -1,3 +1,9 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* read_passwd.c, unix_time.c: Drop _MSDOS support.
+
+	* quad_cksum.c: Don't explicitly declare pointers FAR any more.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c, key_sched.c, new_rnd_key.c, des_pcbc_encrypt.c,

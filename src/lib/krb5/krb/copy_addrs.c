@@ -32,12 +32,12 @@
 krb5_error_code KRB5_CALLCONV
 krb5_copy_addr(context, inad, outad)
     krb5_context context;
-    const krb5_address FAR *inad;
-    krb5_address FAR * FAR *outad;
+    const krb5_address *inad;
+    krb5_address **outad;
 {
-    krb5_address FAR *tmpad;
+    krb5_address *tmpad;
 
-    if (!(tmpad = (krb5_address FAR *)malloc(sizeof(*tmpad))))
+    if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
 	return ENOMEM;
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tmpad = *inad;
@@ -59,8 +59,8 @@ krb5_copy_addr(context, inad, outad)
 krb5_error_code KRB5_CALLCONV
 krb5_copy_addresses(context, inaddr, outaddr)
     krb5_context context;
-    krb5_address FAR * const FAR * inaddr;
-    krb5_address FAR * FAR * FAR *outaddr;
+    krb5_address * const * inaddr;
+    krb5_address ***outaddr;
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;

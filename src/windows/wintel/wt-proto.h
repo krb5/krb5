@@ -12,19 +12,19 @@
 		HANDLE,
 		int);
 
-	long FAR PASCAL MainWndProc(
+	long PASCAL MainWndProc(
 		HWND,
 		UINT,
 		WPARAM,
 		LPARAM);
 
-	BOOL FAR PASCAL About(
+	BOOL PASCAL About(
 		HWND,
 		WORD,
 		WORD,
 		LONG);
 
-	BOOL FAR PASCAL OpenTelnetDlg(
+	BOOL PASCAL OpenTelnetDlg(
 		HWND,
 		WORD,
 		WORD,
@@ -36,7 +36,7 @@
 		int,
 		int);
 
-	BOOL FAR PASCAL ConfigSessionDlg(
+	BOOL PASCAL ConfigSessionDlg(
 		HWND,
 		WORD,
 		WORD,
@@ -56,5 +56,5 @@
 		kstream ks);
 
 	/* somewhere... */
-	struct machinfo *FAR PASCAL Shostlook(
+	struct machinfo *PASCAL Shostlook(
 		char *hname);

@@ -1,5 +1,5 @@
 #include "k5-int.h"
-#if !defined(_MSDOS) && (!defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN32__))) && !defined(macintosh)
+#if (!defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN32__))) && !defined(macintosh)
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -131,7 +131,7 @@ cleanup:
 #endif
     return(errcode);
 }
-#else /* MSDOS */
+#else /* non-Cygwin Windows, or Mac */
 
 #if defined(_WIN32)
 
@@ -240,7 +240,7 @@ krb5_prompter_posix(krb5_context context,
     return(EINVAL);
 }
 #endif /* !_WIN32 */
-#endif /* !MSDOS */
+#endif /* Windows or Mac */
 
 void
 krb5int_set_prompt_types(context, types)

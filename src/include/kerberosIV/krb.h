@@ -171,7 +171,7 @@ typedef struct credentials CREDENTIALS;
 /* Structure definition for rd_private_msg and rd_safe_msg */
 
 struct msg_dat {
-    unsigned char FAR *app_data;	/* pointer to appl data */
+    unsigned char *app_data;	/* pointer to appl data */
     unsigned KRB4_32 app_length;	/* length of appl data */
     unsigned KRB4_32 hash;		/* hash to lookup replay */
     int     swap;			/* swap bytes? */
@@ -374,16 +374,16 @@ extern int errno;
    to the proper types during calls.  */
 
 typedef int (KRB5_CALLCONV *key_proc_type)
-	(char FAR *, char FAR *, char FAR *,
-		    char FAR *, C_Block);
+	(char *, char *, char *,
+		    char *, C_Block);
 #define KEY_PROC_TYPE_DEFINED
 
 typedef int (KRB5_CALLCONV *decrypt_tkt_type)
-	(char FAR *, char FAR *, char FAR *,
-		    char FAR *, key_proc_type, KTEXT FAR *);
+	(char *, char *, char *,
+		    char *, key_proc_type, KTEXT *);
 #define DECRYPT_TKT_TYPE_DEFINED
 
-extern struct _krb5_context FAR * krb5__krb4_context;
+extern struct _krb5_context * krb5__krb4_context;
 
 /*
  * Function Prototypes for Kerberos V4.
@@ -395,18 +395,18 @@ struct sockaddr_in;
 int KRB5_CALLCONV dest_tkt
 	(void);
 /* err_txt.c */
-const char FAR * KRB5_CALLCONV krb_get_err_text
+const char * KRB5_CALLCONV krb_get_err_text
 	(int errnum);
 /* g_ad_tkt.c */
 int get_ad_tkt
 	(char *service, char *sinst, char *realm, int lifetime);
 /* g_admhst.c */
 int KRB5_CALLCONV krb_get_admhst
-	(char FAR *host, char FAR *realm, int idx);
+	(char *host, char *realm, int idx);
 /* g_cred.c */
 int KRB5_CALLCONV krb_get_cred
-	(char FAR *service, char FAR *instance, char FAR *realm,
-		   CREDENTIALS FAR *c);
+	(char *service, char *instance, char *realm,
+		   CREDENTIALS *c);
 /* g_in_tkt.c */
 int krb_get_in_tkt
 	(char *k_user, char *instance, char *realm,
@@ -419,30 +419,30 @@ int krb_get_in_tkt_preauth
 		   char *preauth_p, int preauth_len);
 /* g_krbhst.c */
 int KRB5_CALLCONV krb_get_krbhst
-	(char FAR *host, char FAR *realm, int idx);
+	(char *host, char *realm, int idx);
 /* g_krbrlm.c */
 int KRB5_CALLCONV krb_get_lrealm
-	(char FAR *realm, int idx);
+	(char *realm, int idx);
 /* g_phost.c */
-char FAR * KRB5_CALLCONV krb_get_phost
-	(char FAR * alias);
+char * KRB5_CALLCONV krb_get_phost
+	(char * alias);
 /* get_pw_tkt */
 int KRB5_CALLCONV get_pw_tkt 
         (char *, char *, char *, char *);
 /* g_pw_in_tkt.c */
 int KRB5_CALLCONV krb_get_pw_in_tkt
-	(char FAR *k_user, char FAR *instance, char FAR *realm,
-		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *password);
+	(char *k_user, char *instance, char *realm,
+		   char *service, char *sinstance,
+		   int life, char *password);
 int KRB5_CALLCONV krb_get_pw_in_tkt_preauth
-	(char FAR *k_user, char FAR *instance, char FAR *realm,
-		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *password);
+	(char *k_user, char *instance, char *realm,
+		   char *service, char *sinstance,
+		   int life, char *password);
 /* g_svc_in_tkt.c */
 int KRB5_CALLCONV krb_get_svc_in_tkt
-	(char FAR *k_user, char FAR *instance, char FAR *realm,
-		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *srvtab);
+	(char *k_user, char *instance, char *realm,
+		   char *service, char *sinstance,
+		   int life, char *srvtab);
 /* g_tf_fname.c */
 int KRB5_CALLCONV krb_get_tf_fullname
 	(char *ticket_file, char *name, char *inst, char *realm);
@@ -451,10 +451,10 @@ int KRB5_CALLCONV krb_get_tf_realm
 	(char *ticket_file, char *realm);
 /* g_tkt_svc.c */
 int KRB5_CALLCONV krb_get_ticket_for_service
-	(char FAR *serviceName,
-		   char FAR *buf, unsigned KRB4_32 FAR *buflen,
+	(char *serviceName,
+		   char *buf, unsigned KRB4_32 *buflen,
 		   int checksum, des_cblock, Key_schedule,
-		   char FAR *version, int includeVersion);
+		   char *version, int includeVersion);
 /* in_tkt.c */
 int KRB5_CALLCONV in_tkt
 	(char *name, char *inst);
@@ -462,19 +462,19 @@ int KRB5_CALLCONV krb_in_tkt
         (char *pname, char *pinst, char *realm);
 /* kname_parse.c */
 int KRB5_CALLCONV kname_parse
-	(char FAR *name, char FAR *inst, char FAR *realm,
-		   char FAR *fullname);
+	(char *name, char *inst, char *realm,
+		   char *fullname);
 int KRB5_CALLCONV k_isname
-        (char FAR *);
+        (char *);
 int KRB5_CALLCONV k_isinst
-        (char FAR *);
+        (char *);
 int KRB5_CALLCONV k_isrealm
-        (char FAR *);
+        (char *);
 
 
 /* kuserok.c */
 int KRB5_CALLCONV kuserok
-	(AUTH_DAT FAR *kdata, char FAR *luser);
+	(AUTH_DAT *kdata, char *luser);
 
 /* lifetime.c */
 KRB4_32 KRB5_CALLCONV krb_life_to_time
@@ -484,17 +484,17 @@ int KRB5_CALLCONV krb_time_to_life
 
 /* mk_auth.c */
 int KRB5_CALLCONV krb_check_auth
-	(KTEXT, unsigned KRB4_32 cksum, MSG_DAT FAR *,
+	(KTEXT, unsigned KRB4_32 cksum, MSG_DAT *,
 		   C_Block, Key_schedule,
-		   struct sockaddr_in FAR * local_addr,
-		   struct sockaddr_in FAR * foreign_addr);
+		   struct sockaddr_in * local_addr,
+		   struct sockaddr_in * foreign_addr);
 int KRB5_CALLCONV krb_mk_auth
 	(long k4_options, KTEXT ticket,
-		   char FAR *service, char FAR *inst, char FAR *realm,
-		   unsigned KRB4_32 checksum, char FAR *version, KTEXT buf);
+		   char *service, char *inst, char *realm,
+		   unsigned KRB4_32 checksum, char *version, KTEXT buf);
 /* mk_err.c */
 long KRB5_CALLCONV krb_mk_err
-	(u_char FAR *out, KRB4_32 k4_code, char FAR *text);
+	(u_char *out, KRB4_32 k4_code, char *text);
 /* mk_preauth.c */
 int krb_mk_preauth
 	(char **preauth_p, int *preauth_len, key_proc_type,
@@ -504,22 +504,22 @@ void krb_free_preauth
 	(char * preauth_p, int len);
 /* mk_priv.c */
 long KRB5_CALLCONV krb_mk_priv
-	(u_char FAR *in, u_char FAR *out,
+	(u_char *in, u_char *out,
 		   unsigned KRB4_32 length,
-		   Key_schedule, C_Block FAR *,
-		   struct sockaddr_in FAR * sender,
-		   struct sockaddr_in FAR * receiver);
+		   Key_schedule, C_Block *,
+		   struct sockaddr_in * sender,
+		   struct sockaddr_in * receiver);
 /* mk_req.c */
 int KRB5_CALLCONV krb_mk_req
 	(KTEXT authent,
-		   char FAR *service, char FAR *instance, char FAR *realm,
+		   char *service, char *instance, char *realm,
 		   KRB4_32 checksum);
 /* mk_safe.c */
 long KRB5_CALLCONV krb_mk_safe
-	(u_char FAR *in, u_char FAR *out, unsigned KRB4_32 length,
-		   C_Block FAR *,
-		   struct sockaddr_in FAR *sender,
-		   struct sockaddr_in FAR *receiver);
+	(u_char *in, u_char *out, unsigned KRB4_32 length,
+		   C_Block *,
+		   struct sockaddr_in *sender,
+		   struct sockaddr_in *receiver);
 /* netread.c */
 int krb_net_read
 	(int fd, char *buf, int len);
@@ -531,62 +531,62 @@ int pkt_clen
 	(KTEXT);
 /* put_svc_key.c */
 int KRB5_CALLCONV put_svc_key
-	(char FAR *sfile,
-		   char FAR *name, char FAR *inst, char FAR *realm,
-		   int newvno, char FAR *key);
+	(char *sfile,
+		   char *name, char *inst, char *realm,
+		   int newvno, char *key);
 /* rd_err.c */
 int KRB5_CALLCONV krb_rd_err
-	(u_char FAR *in, u_long in_length,
-		   long FAR *k4_code, MSG_DAT FAR *m_data);
+	(u_char *in, u_long in_length,
+		   long *k4_code, MSG_DAT *m_data);
 /* rd_priv.c */
 long KRB5_CALLCONV krb_rd_priv
-	(u_char FAR *in,unsigned KRB4_32 in_length,
-		   Key_schedule, C_Block FAR *,
-		   struct sockaddr_in FAR *sender,
-		   struct sockaddr_in FAR *receiver,
-		   MSG_DAT FAR *m_data);
+	(u_char *in,unsigned KRB4_32 in_length,
+		   Key_schedule, C_Block *,
+		   struct sockaddr_in *sender,
+		   struct sockaddr_in *receiver,
+		   MSG_DAT *m_data);
 /* rd_req.c */
 int KRB5_CALLCONV krb_rd_req
-	(KTEXT, char FAR *service, char FAR *inst,
-		   unsigned KRB4_32 from_addr, AUTH_DAT FAR *,
-		   char FAR *srvtab);
+	(KTEXT, char *service, char *inst,
+		   unsigned KRB4_32 from_addr, AUTH_DAT *,
+		   char *srvtab);
 /* rd_safe.c */
 long KRB5_CALLCONV krb_rd_safe
-	(u_char FAR *in, unsigned KRB4_32 in_length,
-		   C_Block FAR *,
-		   struct sockaddr_in FAR *sender,
-		   struct sockaddr_in FAR *receiver,
-		   MSG_DAT FAR *m_data);
+	(u_char *in, unsigned KRB4_32 in_length,
+		   C_Block *,
+		   struct sockaddr_in *sender,
+		   struct sockaddr_in *receiver,
+		   MSG_DAT *m_data);
 /* rd_svc_key.c */
 int KRB5_CALLCONV read_service_key
-	(char FAR *service, char FAR *instance, char FAR *realm,
-		   int kvno, char FAR *file, char FAR *key);
+	(char *service, char *instance, char *realm,
+		   int kvno, char *file, char *key);
 int KRB5_CALLCONV get_service_key
-	(char FAR *service, char FAR *instance, char FAR *realm,
-		   int FAR *kvno, char FAR *file, char FAR *key);
+	(char *service, char *instance, char *realm,
+		   int *kvno, char *file, char *key);
 /* realmofhost.c */
-char FAR * KRB5_CALLCONV krb_realmofhost
-	(char FAR *host);
+char * KRB5_CALLCONV krb_realmofhost
+	(char *host);
 /* recvauth.c */
 int KRB5_CALLCONV krb_recvauth
 	(long k4_options, int fd, KTEXT ticket,
-		   char FAR *service, char FAR *instance,
-		   struct sockaddr_in FAR *foreign_addr,
-		   struct sockaddr_in FAR *local_addr,
-		   AUTH_DAT FAR *kdata, char FAR *srvtab,
-		   Key_schedule schedule, char FAR *version);
+		   char *service, char *instance,
+		   struct sockaddr_in *foreign_addr,
+		   struct sockaddr_in *local_addr,
+		   AUTH_DAT *kdata, char *srvtab,
+		   Key_schedule schedule, char *version);
 /* sendauth.c */
 int KRB5_CALLCONV krb_sendauth
         (long k4_options, int fd, KTEXT ticket,
-	 char FAR *service, char FAR *inst, char FAR *realm,
+	 char *service, char *inst, char *realm,
 	 unsigned KRB4_32 checksum, MSG_DAT *msg_data,
 	 CREDENTIALS *cred, Key_schedule schedule, 
-	 struct sockaddr_in FAR *laddr, struct sockaddr_in *FAR faddr, 
-	 char FAR *version);
+	 struct sockaddr_in *laddr, struct sockaddr_in *faddr, 
+	 char *version);
 
 /* save_creds.c */
 int KRB5_CALLCONV krb_save_credentials
-	(char FAR *service, char FAR *instance, char FAR *realm,
+	(char *service, char *instance, char *realm,
 		   C_Block session, int lifetime, int kvno,
 		   KTEXT ticket, long issue_date);
 /* send_to_kdc.c */
@@ -659,7 +659,7 @@ extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);
 unsigned int krb_get_notification_message(void);
-char FAR * KRB5_CALLCONV krb_get_default_user(void);
+char * KRB5_CALLCONV krb_get_default_user(void);
 int KRB5_CALLCONV krb_set_default_user(char *);
 unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
 long win_time_get_epoch(void);

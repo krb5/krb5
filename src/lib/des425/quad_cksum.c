@@ -129,11 +129,11 @@ extern int des_debug;
 
 unsigned long KRB5_CALLCONV
 des_quad_cksum(in,out,length,out_count,c_seed)
-    const unsigned char FAR *in;	/* input block */
-    unsigned DES_INT32 FAR *out;	/* optional longer output */
+    const unsigned char *in;	/* input block */
+    unsigned DES_INT32 *out;	/* optional longer output */
     long length;			/* original length in bytes */
     int out_count;			/* number of iterations */
-    mit_des_cblock FAR *c_seed;		/* secret seed, 8 bytes */
+    mit_des_cblock *c_seed;		/* secret seed, 8 bytes */
 {
 
     /*

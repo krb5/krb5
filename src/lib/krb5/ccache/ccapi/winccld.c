@@ -1,4 +1,4 @@
-#if defined(_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 /*
  * winccld.c --- routine for dynamically loading the ccache DLL if
  * it's present.

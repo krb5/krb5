@@ -73,10 +73,10 @@
 
 int KRB5_CALLCONV
 kname_parse(np, ip, rp, fullname)
-    char FAR *np;
-    char FAR *ip;
-    char FAR *rp;
-    char FAR *fullname;
+    char *np;
+    char *ip;
+    char *rp;
+    char *fullname;
 {
     char buf[FULL_SZ];
     char *rnext, *wnext;	/* next char to read, write */
@@ -176,7 +176,7 @@ kname_parse(np, ip, rp, fullname)
 
 int KRB5_CALLCONV
 k_isname(s)
-    char FAR *s;
+    char *s;
 {
     register char c;
     int backslash = 0;
@@ -215,7 +215,7 @@ k_isname(s)
 
 int KRB5_CALLCONV
 k_isinst(s)
-    char FAR *s;
+    char *s;
 {
     register char c;
     int backslash = 0;
@@ -246,7 +246,7 @@ k_isinst(s)
 
 int KRB5_CALLCONV
 k_isrealm(s)
-    char FAR *s;
+    char *s;
 {
     register char c;
     int backslash = 0;

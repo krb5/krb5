@@ -1,3 +1,9 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_io.c: Drop _MSDOS support.
+
+	* rcfns.c: Don't explicitly declare pointers FAR any more.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_rc.c: Don't use KRB5_DLLIMP.

@@ -45,7 +45,7 @@
  * Make sure we have a definition for PROTOTYPE.
  */
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#if defined(__STDC__) || defined(_WIN32) || defined(__ultrix)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()

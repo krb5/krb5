@@ -617,7 +617,7 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
          ));
 
 gss_OID krb5_gss_convert_static_mech_oid
-PROTOTYPE( (gss_OID FAR oid
+PROTOTYPE( (gss_OID oid
 	 ));
 	
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -3,7 +3,7 @@
  */
 
 #include "k5-int.h"
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh)
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -30,7 +30,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WIN32) && !defined(HAVE_MACSOCK_H)
 
 /* Unix version...  */
 
@@ -132,7 +132,7 @@ krb5_lock_file(context, fd, mode)
     
     return retval;
 }
-#else   /* MSDOS or Macintosh */
+#else   /* Windows or Macintosh */
 
 krb5_error_code
 krb5_lock_file(context, fd, mode)

@@ -48,7 +48,7 @@ static struct krb5_cc_typelist *cc_typehead = &cc_entry;
 krb5_error_code KRB5_CALLCONV
 krb5_cc_register(context, ops, override)
    krb5_context context;
-   krb5_cc_ops FAR *ops;
+   krb5_cc_ops *ops;
    krb5_boolean override;
 {
     struct krb5_cc_typelist *t;

@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c: Drop _MSDOS support.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir) not $(subdir).

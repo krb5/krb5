@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* md4.c, rsa-md4.h: Don't explicitly declare pointers FAR any
+	more.
+
 2001-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* md4.c (GG, HH, krb5_MD4Init): Use UL suffix on numbers, don't

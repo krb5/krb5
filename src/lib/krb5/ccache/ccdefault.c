@@ -36,7 +36,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(context, ccache)
    krb5_context context;
-   krb5_ccache FAR *ccache;
+   krb5_ccache *ccache;
 {
     krb5_error_code retval;
 	krb5_os_context	os_ctx;
@@ -65,7 +65,7 @@ krb5_cc_default(context, ccache)
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(context, ccache)
 	krb5_context context;
-	krb5_ccache FAR *ccache;
+	krb5_ccache *ccache;
 {
 #ifdef USE_LOGIN_LIBRARY
 	{

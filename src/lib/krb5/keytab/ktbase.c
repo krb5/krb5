@@ -55,7 +55,7 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
 krb5_error_code KRB5_CALLCONV
 krb5_kt_register(context, ops)
     krb5_context context;
-    krb5_kt_ops FAR *ops;
+    krb5_kt_ops *ops;
 {
     struct krb5_kt_typelist *t;
     for (t = kt_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
@@ -84,8 +84,8 @@ krb5_kt_register(context, ops)
 krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (context, name, ktid)
     krb5_context context;
-    krb5_const char FAR *name;
-    krb5_keytab FAR *ktid;
+    krb5_const char *name;
+    krb5_keytab *ktid;
 {
     struct krb5_kt_typelist *tlist;
     char *pfx;

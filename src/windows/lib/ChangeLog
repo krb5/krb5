@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* cacheapi.h: Don't declare pointers FAR any more, nor functions
+	NEAR.
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* cacheapi.h: Update to v2.

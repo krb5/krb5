@@ -61,8 +61,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_unparse_name_ext(context, principal, name, size)
     krb5_context context;
     krb5_const_principal principal;
-    register char FAR * FAR *name;
-    unsigned int	FAR *size;
+    register char **name;
+    unsigned int	 *size;
 {
 	register char *cp, *q;
 	register int i,j;

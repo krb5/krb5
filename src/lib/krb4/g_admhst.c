@@ -37,8 +37,8 @@
 
 int KRB5_CALLCONV
 krb_get_admhst(h, r, n)
-    char FAR *h;
-    char FAR *r;
+    char *h;
+    char *r;
     int n;
 {
     FILE *cnffile;

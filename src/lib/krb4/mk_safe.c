@@ -84,7 +84,7 @@ krb_mk_safe(in, out, length, key, sender, receiver)
 				 * overlap
 				 */
     unsigned KRB4_32 length;	/* of in data */
-    C_Block FAR *key;		/* encryption key for seed and ivec */
+    C_Block *key;		/* encryption key for seed and ivec */
     struct sockaddr_in *sender;	/* sender address */
     struct sockaddr_in *receiver; /* receiver address */
 {

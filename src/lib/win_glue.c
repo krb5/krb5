@@ -101,7 +101,7 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 			  BOOL *VSflag)
 {
 	char CallerFilename[_MAX_PATH];
-	LONG FAR *lpLangInfo;
+	LONG *lpLangInfo;
 	DWORD hVersionInfoID, size;
 	GLOBALHANDLE hVersionInfo;
 	LPSTR lpVersionInfo;
@@ -158,7 +158,7 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 				    lpVersionInfo);
 
 	retval = VerQueryValue(lpVersionInfo, "\\VarFileInfo\\Translation",
-			       (LPSTR FAR *)&lpLangInfo, &dumint);
+			       (LPSTR *)&lpLangInfo, &dumint);
 	wsprintf(szVerQ,
 		 "\\StringFileInfo\\%04x%04x\\",
 		 LOWORD(*lpLangInfo), HIWORD(*lpLangInfo));
@@ -221,10 +221,10 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
  * We're going to test track as well
  */
 static int CallVersionServer(app_title, app_version, app_ini, code_cover)
-	char FAR *app_title;
-	char FAR *app_version;
-	char FAR *app_ini;
-	char FAR *code_cover;
+	char *app_title;
+	char *app_version;
+	char *app_ini;
+	char *code_cover;
 {
 	VS_Request vrequest;
 	VS_Status  vstatus;
@@ -366,7 +366,7 @@ HINSTANCE get_lib_instance()
 static int
 control(int mode)
 {
-    void ((KRB5_CALLCONV *et_func)(struct error_table FAR *));
+    void ((KRB5_CALLCONV *et_func)(struct error_table *));
 #ifdef NEED_WINSOCK
     WORD wVersionRequested;
     WSADATA wsaData;

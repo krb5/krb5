@@ -39,7 +39,7 @@ char *krb5_overridekeyname = NULL;
 krb5_error_code KRB5_CALLCONV
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
-    char FAR *name;
+    char *name;
     int namesize;
 {
     char *cp = 0;
@@ -64,7 +64,7 @@ krb5_kt_default_name(context, name, namesize)
 	strcpy(name, retval);
 	profile_release_string(retval);
     } else {
-#if defined (_MSDOS) || defined(_WIN32)
+#if defined(_WIN32)
 	{
 	    char    defname[160];
 	    int     len;

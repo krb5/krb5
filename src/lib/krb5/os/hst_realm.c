@@ -235,8 +235,8 @@ krb5_try_realm_txt_rr(prefix, name, realm)
 krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
-    const char FAR *host;
-    char FAR * FAR * FAR *realmsp;
+    const char *host;
+    char ***realmsp;
 {
     char **retrealms;
     char *default_realm, *realm, *cp, *temp_realm;

@@ -71,9 +71,9 @@
 
 krb5_error_code
 mit_des_string_to_key_int (keyblock, data, salt)
-    krb5_keyblock FAR * keyblock;
-    const krb5_data FAR * data;
-    const krb5_data FAR * salt;
+    krb5_keyblock * keyblock;
+    const krb5_data * data;
+    const krb5_data * salt;
 {
     register krb5_octet *str, *copystr;
     register krb5_octet *key;

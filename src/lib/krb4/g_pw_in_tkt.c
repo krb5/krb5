@@ -95,9 +95,9 @@ passwd_to_key(user,instance,realm,passwd,key)
 
 int KRB5_CALLCONV
 krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
-    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
+    char *user, *instance, *realm, *service, *sinstance;
     int life;
-    char FAR *password;
+    char *password;
 {
 #if defined(_WINDOWS) || defined(macintosh)
     /* In spite of the comments above, we don't allow that path here,
@@ -134,9 +134,9 @@ static int stub_key(user,instance,realm,passwd,key)
 
 int KRB5_CALLCONV
 krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
-    char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
+    char *user, *instance, *realm, *service, *sinstance;
     int life;
-    char FAR *password;
+    char *password;
 {
    char *preauth_p;
    int   preauth_len;

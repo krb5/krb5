@@ -95,15 +95,15 @@ extern int krb_debug;
 
 long KRB5_CALLCONV
 krb_mk_priv(in, out, length, schedule, key, sender, receiver)
-    u_char FAR *in;		/* application data */
-    u_char FAR *out;		/* put msg here, leave room for
+    u_char *in;		/* application data */
+    u_char *out;		/* put msg here, leave room for
 				 * header! breaks if in and out
 				 * (header stuff) overlap */
     unsigned KRB4_32 length;	/* of in data */
     Key_schedule schedule;	/* precomputed key schedule */
-    C_Block FAR *key;		/* encryption key for seed and ivec */
-    struct sockaddr_in FAR *sender;   /* sender address */
-    struct sockaddr_in FAR *receiver; /* receiver address */
+    C_Block *key;		/* encryption key for seed and ivec */
+    struct sockaddr_in *sender;   /* sender address */
+    struct sockaddr_in *receiver; /* receiver address */
 {
     register u_char     *p,*q;
     u_char *c_length_ptr;

@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* klist.c: Delete _MSDOS support.
+
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* klist.c: Include fake-addrinfo.c instead of .h file.

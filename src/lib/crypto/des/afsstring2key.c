@@ -68,9 +68,9 @@ static char *afs_crypt (char*,char*,char*);
 
 krb5_error_code
 mit_afs_string_to_key (keyblock, data, salt)
-     krb5_keyblock FAR * keyblock;
-     const krb5_data FAR * data;
-     const krb5_data FAR * salt;
+     krb5_keyblock * keyblock;
+     const krb5_data * data;
+     const krb5_data * salt;
 {
   /* totally different approach from MIT string2key. */
   /* much of the work has already been done by the only caller 

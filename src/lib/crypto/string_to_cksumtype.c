@@ -29,8 +29,8 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_cksumtype(string, cksumtypep)
-    char		FAR * string;
-    krb5_cksumtype	FAR * cksumtypep;
+    char		* string;
+    krb5_cksumtype	* cksumtypep;
 {
     int i;
 

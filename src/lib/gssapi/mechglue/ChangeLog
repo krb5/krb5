@@ -1,3 +1,9 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* g_initialize.c, mglueP.h: Drop _MSDOS support.
+
+	* g_init_sec_context.c: Don't declare pointers FAR any more.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* g_acquire_cred.c, g_oid_ops.c: Don't use GSS_DLLIMP.
