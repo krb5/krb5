@@ -65,22 +65,11 @@ krb5_error_code pa_salt(krb5_context context,
 {
     krb5_data tmp;
 
-    /* screw the abstraction.  If there was a *reasonable* copy_data,
-       I'd use it.  But I'm inside the library, which is the twilight
-       zone of source code, so I can do anything. */
-
+    tmp.data = in_padata->contents;
     tmp.length = in_padata->length;
-    if (tmp.length) {
-	if ((tmp.data = malloc(tmp.length)) == NULL)
-	    return ENOMEM;
-	memcpy(tmp.data, in_padata->contents, tmp.length);
-    } else {
-	tmp.data = NULL;
-    }
-
-    *salt = tmp;
-
-    /* assume that no other salt was allocated */
+    krb5_free_data_contents(context, salt);
+    krb5int_copy_data_contents(context, &tmp, salt);
+    
 
     if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
 	salt->length = SALT_TYPE_AFS_LENGTH;
@@ -842,7 +831,7 @@ krb5_do_preauth(krb5_context context,
 {
     int h, i, j, out_pa_list_size;
     int seen_etype_info2 = 0;
-    krb5_pa_data *out_pa, **out_pa_list;
+    krb5_pa_data *out_pa = NULL, **out_pa_list = NULL;
     krb5_data scratch;
     krb5_etype_info etype_info = NULL;
     krb5_error_code ret;
@@ -900,11 +889,7 @@ krb5_do_preauth(krb5_context context,
 		scratch.data = (char *) in_padata[i]->contents;
 		ret = decode_krb5_etype_info(&scratch, &etype_info);
 		if (ret) {
-		    if (out_pa_list) {
-			out_pa_list[out_pa_list_size++] = NULL;
-			krb5_free_pa_data(context, out_pa_list);
-		    }
-		    return ret;
+		  goto cleanup;
 		}
 		if (etype_info[0] == NULL) {
 		    krb5_free_etype_info(context, etype_info);
@@ -930,18 +915,32 @@ krb5_do_preauth(krb5_context context,
 		    }
 		}
 		if (!etype_found) {
-		    if (valid_etype_found)
+		  if (valid_etype_found) {
 			/* supported enctype but not requested */
-			return KRB5_CONFIG_ETYPE_NOSUPP;
-		    else
-			/* unsupported enctype */
-			return KRB5_PROG_ETYPE_NOSUPP;
+		    ret =  KRB5_CONFIG_ETYPE_NOSUPP;
+		    goto cleanup;
+		  }
+		  else {
+		    /* unsupported enctype */
+		    ret =  KRB5_PROG_ETYPE_NOSUPP;
+		    goto cleanup;
+		  }
 
 		}
-		salt->data = (char *) etype_info[l]->salt;
-		salt->length = etype_info[l]->length;
+		scratch.data = (char *) etype_info[l]->salt;
+		scratch.length = etype_info[l]->length;
+		krb5_free_data_contents(context, salt);
+		if (scratch.length == KRB5_ETYPE_NO_SALT) 
+		  salt->data = NULL;
+		else
+		    if ((ret = krb5int_copy_data_contents( context, &scratch, salt)) != 0)
+		  goto cleanup;
 		*etype = etype_info[l]->etype;
-		*s2kparams = etype_info[l]->s2kparams;
+		krb5_free_data_contents(context, s2kparams);
+		if ((ret = krb5int_copy_data_contents(context,
+						      &etype_info[l]->s2kparams,
+						      s2kparams)) != 0)
+		  goto cleanup;
 #ifdef DEBUG
 		for (j = 0; etype_info[j]; j++) {
 		    krb5_etype_info_entry *e = etype_info[j];
@@ -972,13 +971,7 @@ krb5_do_preauth(krb5_context context,
 						   salt, s2kparams, etype, as_key,
 						   prompter, prompter_data,
 						   gak_fct, gak_data)))) {
-			if (out_pa_list) {
-			    out_pa_list[out_pa_list_size++] = NULL;
-			    krb5_free_pa_data(context, out_pa_list);
-			}
-			if (etype_info)
-			    krb5_free_etype_info(context, etype_info);
-			return(ret);
+		      goto cleanup;
 		    }
 
 		    if (out_pa) {
@@ -986,18 +979,22 @@ krb5_do_preauth(krb5_context context,
 			    if ((out_pa_list =
 				 (krb5_pa_data **)
 				 malloc(2*sizeof(krb5_pa_data *)))
-				== NULL)
-				return(ENOMEM);
+				== NULL) {
+			      ret = ENOMEM;
+			      goto cleanup;
+			    }
 			} else {
 			    if ((out_pa_list =
 				 (krb5_pa_data **)
 				 realloc(out_pa_list,
 					 (out_pa_list_size+2)*
 					 sizeof(krb5_pa_data *)))
-				== NULL)
-				/* XXX this will leak the pointers which
+				== NULL) {
+			      /* XXX this will leak the pointers which
 				   have already been allocated.  oh well. */
-				return(ENOMEM);
+			      ret = ENOMEM;
+			      goto cleanup;
+			    }
 			}
 			
 			out_pa_list[out_pa_list_size++] = out_pa;
@@ -1013,6 +1010,16 @@ krb5_do_preauth(krb5_context context,
 	out_pa_list[out_pa_list_size++] = NULL;
 
     *out_padata = out_pa_list;
-
+    if (etype_info)
+      krb5_free_etype_info(context, etype_info);
+    
     return(0);
+ cleanup:
+    if (out_pa_list) {
+      out_pa_list[out_pa_list_size++] = NULL;
+      krb5_free_pa_data(context, out_pa_list);
+    }
+    if (etype_info)
+      krb5_free_etype_info(context, etype_info);
+    return (ret);
 }

@@ -1,3 +1,7 @@
+2003-05-13  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add krb5int_copy_data_contents
+
 2003-05-08  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.hin: Add prototype for krb5_c_string_to_key_with_params
