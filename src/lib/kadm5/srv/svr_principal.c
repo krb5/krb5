@@ -522,8 +522,13 @@ kadm5_modify_principal(void *server_handle,
 	 kdb.n_tl_data = entry->n_tl_data;
     }
 
-    if ((ret = kdb_put_entry(handle, &kdb, &adb)))
-	goto done;
+    ret = kdb_put_entry(handle, &kdb, &adb);
+    if (mask & KADM5_TL_DATA) {
+	 /* prevent kdb_free_entry from freeing the caller's data */
+	 kdb.tl_data = NULL;
+	 kdb.n_tl_data = 0;
+    }
+    if (ret) goto done;
 
     ret = KADM5_OK;
 done:
