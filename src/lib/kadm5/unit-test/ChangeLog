@@ -1,3 +1,8 @@
+Tue Oct  1 14:45:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* api.2/init-v2.exp: Remove tests 104 & 105 as lockfile and
+		policy database names are hard wired. [krb5-admin/46]
+
 Thu Sep 26 17:44:10 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.0/init.exp, api.1/lock.exp, api.2/init.exp: use $K5ROOT

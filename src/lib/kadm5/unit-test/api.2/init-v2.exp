@@ -66,42 +66,6 @@ proc test103 {} {
 }
 if {! $RPC} test103
 
-test "init 104"
-proc test104 {} {
-    global test
-
-    # This is slightly lame, but it works: if CONFIG_ADBNAME is obeyed, 
-    # then the lock file will be set based on it, and it won't exist.
-    one_line_fail_test {
-	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADBNAME} /does-not-exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
-		server_handle
-    } "NOLOCKFILE"
-}
-if {! $RPC} test104
-
-test "init 105"
-proc test105 {} {
-    global test
-
-    # The lock info is stored in a static structure so that it applies
-    # to all handles in the process (why?).  We need to restart the api
-    # in order to ensure we are using the new lockfile.
-    api_exit
-    api_start
-
-    one_line_fail_test {
-	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADB_LOCKFILE} /does-not-exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
-		server_handle
-    } "NOLOCKFILE"
-
-    api_exit
-    api_start
-}
-if {! $RPC} test105
 
 test "init 106"
 proc test106 {} {
