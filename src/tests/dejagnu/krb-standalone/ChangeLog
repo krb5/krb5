@@ -1,3 +1,9 @@
+2002-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4gssftp.exp (v4ftp_test): Update checked messages for change of
+	"credentials cache file" to "credentials cache" in error message
+	table.
+
 2002-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* standalone.exp: Move setting of KLIST and KDESTROY into
