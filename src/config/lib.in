@@ -49,6 +49,9 @@ STLIBEXT=@STLIBEXT@
 # usually .so.$(LIBMAJOR).$(LIBMINOR)
 SHLIBVEXT=@SHLIBVEXT@
 
+# usually .so.$(LIBMAJOR) (to allow for major-version compat)
+SHLIBSEXT=@SHLIBSEXT@
+
 # usually .so
 SHLIBEXT=@SHLIBEXT@
 
@@ -89,6 +92,9 @@ lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS)
 				$$d/OBJS.SH; done` \
 			$(SHLIB_EXPFLAGS) \
 			$(LDCOMBINE_TAIL)
+lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBVEXT)
+	$(RM) $@
+	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@
 lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBVEXT)
 	$(RM) $@
 	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@
@@ -109,6 +115,9 @@ $(TOPLIBD)/lib$(LIB)$(STLIBEXT): lib$(LIB)$(STLIBEXT)
 $(TOPLIBD)/lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBEXT)
 	$(RM) $@
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBEXT) .)
+$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBSEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBSEXT) .)
 $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT): lib$(LIB)$(SHLIBVEXT)
 	$(RM) $@
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBVEXT) .)
@@ -128,6 +137,7 @@ clean-libs:
 clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIB)$(STLIBEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)
+	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBEXT)
 	$(RM) $(TOPLIBD)/lib$(LIB)$(PFLIBEXT)
 
@@ -142,6 +152,10 @@ install-shared:
 	$(INSTALL_DATA) lib$(LIB)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
 	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
 		lib$(LIB)$(SHLIBEXT))
+install-shlib-soname: install-shared
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBSEXT)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
+		lib$(LIB)$(SHLIBSEXT))
 install-profiled:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
 	$(INSTALL_DATA) lib$(LIB)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
