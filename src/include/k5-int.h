@@ -990,6 +990,7 @@ struct _krb5_context {
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
 	int		scc_default_format;
+        krb5_boolean    profile_in_memory;
 };
 
 /* could be used in a table to find an etype and initialize a block */
