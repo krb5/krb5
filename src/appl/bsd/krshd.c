@@ -1299,12 +1299,6 @@ envinit[i] =buf;
     }
     environ = envinit;
     
-    cp = strrchr(pwd->pw_shell, '/');
-    if (cp)
-      cp++;
-    else
-      cp = pwd->pw_shell;
-    
 #ifdef KERBEROS
     /* To make Kerberos rcp work correctly, we must ensure that we
        invoke Kerberos rcp on this end, not normal rcp, even if the
@@ -1313,6 +1307,7 @@ envinit[i] =buf;
 	(do_encrypt && !strncmp(cmdbuf, "-x rcp ", 7))) {
         char *copy;
 	struct stat s;
+	int offst = 0;
 
 	copy = malloc(strlen(cmdbuf) + 1);
 	if (copy == NULL) {
@@ -1321,14 +1316,14 @@ envinit[i] =buf;
 	}
 	strcpy(copy, cmdbuf);
 	if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
-	    strcpy(cmdbuf + 3, kprogdir);
-	    cp = copy + 6;
-	} else {
-	    strcpy(cmdbuf, kprogdir);
-	    cp = copy + 3;
+		offst = 3;
 	}
+
+        strcpy((char *) cmdbuf + offst, kprogdir);
+	cp = copy + 3 + offst;
+
 	strcat(cmdbuf, "/rcp");
-	if (stat(cmdbuf, &s) >= 0)
+	if (stat((char *)cmdbuf + offst, &s) >= 0)
 	  strcat(cmdbuf, cp);
 	else
 	  strcpy(cmdbuf, copy);
@@ -1336,12 +1331,18 @@ envinit[i] =buf;
     }
 #endif
 
+    cp = strrchr(pwd->pw_shell, '/');
+    if (cp)
+      cp++;
+    else
+      cp = pwd->pw_shell;
+    
     if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
 	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, 0);
     }
-    else
+    else {
 	execl(pwd->pw_shell, cp, "-c", cmdbuf, 0);
-
+}
     perror(pwd->pw_shell);
     perror(cp);
     exit(1);

@@ -84,7 +84,7 @@ client is trying to access in the initial authenticator.  This
 checksum provides additionl security by preventing an attacker from
 changing the initial connection information.  To benefit from this
 security, only Kerberos5 should be trusted; Kerberos4 and rhosts
-authentication do not include this checksum.  If thi options is
+authentication do not include this checksum.  If this options is
 specified, older Kerberos5 clients that do not send a checksum in the
 authenticator will not be able to authenticate to this server.
 .PP
