@@ -114,10 +114,9 @@ __bt_dump(dbp)
 		(void)fprintf(tracefp, ")\n");
 	}
 #undef X
-
-	for (i = P_ROOT;
+	for (i = P_ROOT; i < t->bt_mp->npages &&
 	    (h = mpool_get(t->bt_mp, i, MPOOL_IGNOREPIN)) != NULL; ++i)
-		__bt_dpage(h);
+		__bt_dpage(dbp, h);
 	(void)fflush(tracefp);
 	return (0);
 }
@@ -156,6 +155,7 @@ __bt_dmpage(h)
 		X(R_RECNO,	"RECNO");
 		(void)fprintf(tracefp, ")");
 	}
+	(void)fprintf(tracefp, "\n");
 	(void)fflush(tracefp);
 	return (0);
 }
@@ -178,7 +178,7 @@ __bt_dnpage(dbp, pgno)
 
 	t = dbp->internal;
 	if ((h = mpool_get(t->bt_mp, pgno, MPOOL_IGNOREPIN)) != NULL)
-		__bt_dpage(h);
+		__bt_dpage(dbp, h);
 	(void)fflush(tracefp);
 	return (0);
 }
@@ -190,14 +190,16 @@ __bt_dnpage(dbp, pgno)
  *	h:	pointer to the PAGE
  */
 int
-__bt_dpage(h)
+__bt_dpage(dbp, h)
+	DB *dbp;
 	PAGE *h;
 {
 	BINTERNAL *bi;
 	BLEAF *bl;
 	RINTERNAL *ri;
 	RLEAF *rl;
-	indx_t cur, top;
+	u_long pgsize;
+	indx_t cur, top, lim;
 	char *sep;
 
 	__bt_dinit();
@@ -223,10 +225,13 @@ __bt_dpage(h)
 	if (h->flags & P_OVERFLOW)
 		return;
 
+	pgsize = ((BTREE *)dbp->internal)->bt_mp->pagesize;
+	lim = (pgsize - BTDATAOFF) / sizeof(indx_t);
 	top = NEXTINDEX(h);
+	lim = top > lim ? lim : top;
 	(void)fprintf(tracefp, " lower %3d upper %3d nextind %d\n",
 	    h->lower, h->upper, top);
-	for (cur = 0; cur < top; cur++) {
+	for (cur = 0; cur < lim; cur++) {
 		(void)fprintf(tracefp, "\t[%03d] %4d ", cur, h->linp[cur]);
 		switch (h->flags & P_TYPE) {
 		case P_BINTERNAL:
@@ -307,7 +312,7 @@ __bt_stat(dbp)
 	t = dbp->internal;
 	pcont = pinternal = pleaf = 0;
 	nkeys = ifree = lfree = 0;
-	for (i = P_ROOT;
+	for (i = P_ROOT; i < t->bt_mp->npages &&
 	    (h = mpool_get(t->bt_mp, i, MPOOL_IGNOREPIN)) != NULL; ++i)
 		switch (h->flags & P_TYPE) {
 		case P_BINTERNAL:

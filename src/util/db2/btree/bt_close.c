@@ -137,7 +137,8 @@ __bt_sync(dbp, flags)
 		return (RET_ERROR);
 	}
 
-	if (F_ISSET(t, B_INMEM | B_RDONLY) || !F_ISSET(t, B_MODIFIED))
+	if (F_ISSET(t, B_INMEM | B_RDONLY)
+	    || !F_ISSET(t, B_MODIFIED | B_METADIRTY))
 		return (RET_SUCCESS);
 
 	if (F_ISSET(t, B_METADIRTY) && bt_meta(t) == RET_ERROR)

@@ -25,6 +25,7 @@
  *	Set the value of the environmental variable "name" to be
  *	"value".  If rewrite is set, replace any current value.
  */
+#ifndef HAVE_SETENV
 setenv(name, value, rewrite)
 	register char *name, *value;
 	int rewrite;
@@ -77,11 +78,13 @@ setenv(name, value, rewrite)
 	for (*C++ = '='; *C++ = *value++;);
 	return(0);
 }
+#endif
 
 /*
  * unsetenv(name) --
  *	Delete environmental variable "name".
  */
+#ifndef HAVE_UNSETENV
 void
 unsetenv(name)
 	char	*name;
@@ -96,6 +99,7 @@ unsetenv(name)
 			if (!(*P = *(P + 1)))
 				break;
 }
+#endif
 /*
  * Copyright (c) 1987 Regents of the University of California.
  * All rights reserved.
@@ -119,6 +123,7 @@ unsetenv(name)
  * getenv --
  *	Returns ptr to value associated with name, if any, else NULL.
  */
+#ifndef HAVE_GETENV
 char *
 getenv(name)
 	char *name;
@@ -128,6 +133,7 @@ getenv(name)
 
 	return(_findenv(name, &offset));
 }
+#endif
 
 /*
  * _findenv --
@@ -136,9 +142,8 @@ getenv(name)
  *	environmental array, for use by setenv(3) and unsetenv(3).
  *	Explicitly removes '=' in argument name.
  *
- *	This routine *should* be a static; don't use it.
  */
-char *
+static char *
 _findenv(name, offset)
 	register char *name;
 	int *offset;

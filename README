@@ -1,49 +1,39 @@
-these were the
-		   Kerberos Version 5, Release 1.1
+
+		  Kerberos Version 5, Release 1.2.7
 
 			    Release Notes
-which will be updated before the next release by
+
 			The MIT Kerberos Team
 
 Unpacking the Source Distribution
 ---------------------------------
 
-The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.1.src.tar.gz, krb5-1.1.doc.tar.gz, and krb5-1.1.crypto.tar.gz.
-The krb5-1.1.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.1.src.tar.gz contains the src/ directory and this
-README file, except for the crypto library sources, which are in
-krb5-1.1.crypto.tar.gz.
-
-Instruction on how to extract the entire distribution follow.  These
-directions assume that you want to extract into a directory called
-DIST.
+The source distribution of Kerberos 5 comes in a gzipped tarfile,
+krb5-1.2.7.tar.gz.  Instruction on how to extract the entire
+distribution follow.  These directions assume that you want to extract
+into a directory called DIST.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.1.src.tar.gz
-	gtar zxpf krb5-1.1.crypto.tar.gz
-	gtar zxpf krb5-1.1.doc.tar.gz
+	gtar zxpf krb5-1.2.7.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.1.src.tar.gz | tar xpf -
-	gzcat krb5-1.1.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.1.doc.tar.gz | tar xpf -
+	gzcat krb5-1.2.7.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.1/src
-and the documentation into DIST/krb5-1.1/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.7/src
+and the documentation into DIST/krb5-1.2.7/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
 
-The first file you should look at is doc/install.ps; it contains the
-notes for building and installing Kerberos 5.  The info file
+The first file you should look at is doc/install-guide.ps; it contains
+the notes for building and installing Kerberos 5.  The info file
 krb5-install.info has the same information in info file format.  You
 can view this using the GNU emacs info-mode, or by using the
 standalone info file viewer from the Free Software Foundation.  This
@@ -70,53 +60,552 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
-Notes, Major Changes, and Known Bugs
-------------------------------------
+Notes, Major Changes, and Known Bugs for 1.2.7
+----------------------------------------------
 
-* Triple DES support is included; however, it is only usable for
-  service keys at the moment, due to a large number of compatibility
-  issues.  For example, the GSSAPI library has some (buggy) support
-  for a triple DES session key, but it is intentionally disabled.
-  ** Do not use triple-DES in your config files except as described in
-  ** the documentation.
+Notes:
 
-* The principal database now uses the btree backend of Berkeley DB.
-  This should result in improved KDC performance.
+* This release includes a significant security patch.  If you are
+  running kadmind4 from an earlier release, you are highly encouraged
+  to update, as an exploit is believed to be circulating.
 
-* The lib/rpc tests do not appear to work under NetBSD-1.4, for
-  reasons that are not completely clear at the moment, but probably
-  have something to do with portmapper interfacing.  This should not
-  affect other operations, such as kadmind operation.
+Major Changes:
 
-* Shared library builds are under a new framework; at this point only
-  Solaris (2.x), Irix (6.5), NetBSD (1.4 i386), and possibly Linux are
-  known to work.  All other working shared library builds may be
-  figments of your imagination.
+* [1238] The exploitable buffer overflow in kadmind4
+  [MITKRB5-SA-2002-002] has been patched.  Thanks to Johan Danielsson,
+  Love Hornquist-Astrand, and Assar Westerlund.
 
-* Many existing databases, especially those converted from krb4
-  original databases, may contain expiration dates in 1999.  You
-  should make sure to update these expiration dates, and also change
-  any config file entries that have two-digit years.
+* [1230, 1236] Hierarchical cross-realm has been repaired somewhat.
+  Terminating NUL characters are no longer generated, and are ignored
+  on receipt.
 
-* Hardware preauthentication is known to be broken; this will be fixed
-  in an upcoming release.
+Minor Changes:
 
-* krb524d now defaults to forking into the background; use
-  "krb524d -nofork" to avoid forking.
+* [1206] Fixed memory leak in padata handling in KDC.  Thanks to Ben
+  Cox.
 
-* Not all reported bugs have been fixed in this release, due to time
-  constraints.  We are planning to make another release in the near
-  future with more complete triple DES support, and additional
-  bugfixes.  Many of the bugs in our database are reported against
-  what is now quite old code, or require hardware that we do not have,
-  which make them difficult to reproduce and debug.  We will work on
-  these older bugs and some externally submitted patches for the
-  following release.
+* [1207] Clients can now successfully specify explicit keysalt tuples
+  to password-changing kadm5 functions.  Thanks to Ben Cox.
+
+* [1216] Fixed client-side read overruns in calls to res_search().
+  Thanks to Nalin Dahyabhai.
+
+* [1241] The test suite has been stabilized somewhat to work better
+  with modern versions of tcl and expect.
+
+Known Bugs:
+
+* [1228] If tcl is built shared, and krb5 is built static, some
+  utility programs used by the test suite may fail to run due to RPATH
+  issues. (long-standing but recently acknowledged)
+
+* Most of the other known bugs noted in earlier 1.2.x releases (other
+  than those listed as fixed above) are still present.
+
+Notes, Major Changes, and Known Bugs for 1.2.6
+----------------------------------------------
+
+Notes:
+
+* This release includes a significant security patch.  If you are
+  running an earlier release, you are highly encouraged to update, as
+  it is theoretically possible for an intruder to compromise your
+  KDC.
+
+Major Changes:
+
+* The security vulnerability in xdr_array() [MITKRB5-SA-2002-001] has
+  been patched.  Thanks to Jeffrey Hutzelman and Nikolai Zeldovich.
+
+* A NULL pointer dereference in kadmind has been fixed
+  [krb5-admin/1140].  Thanks to Mark Levinson.
+
+* There was a botched buffer overflow patch in kadmind4 that caused
+  problems with kadmind4 acl handling.  It has been fixed.  Thanks to
+  Mark Silis.
+
+* Correct ETYPE_INFO padata are now generated.  Thanks to Lubos
+  Kejzlar.
+
+* A bug in AFS salt handling has been worked
+  around. [krb5-clients/1146] Thanks to Wolfgang Friebel.
+
+* The KDC, in handling both krb5 and krb4 TGS_REQs, now honors the
+  DISALLOW_ALL_TIX and DISALLOW_SVR attributes on the server
+  principal.  This also now happens with krb524d.
+
+* krb524d will now, by default, convert krb5 tickets for afs service
+  princpals to special tokens that are actually just the EncryptedData
+  part of a krb5 Ticket structure.  This may be overridden; please
+  consult src/krb524/README for details.
+
+* Patches from Sleepycat have been applied to the btree backend of the
+  Brekeley DB library; these fix potential problems with the page free
+  and page split operations.
+
+* The kdb5_util dump command has additional options to allow for
+  reversed or recursive (for btree only) dumps of the principal
+  database.  This permits the recovery of prinicpals that might
+  otherwise be omitted in a database dump in the presence of certain
+  types of corruption.
+
+* The dump command in kdb5_util now handles master key conversion
+  without crashing.
+
+Known Bugs:
+
+* Most of the other known bugs noted in earlier 1.2.x releases (other
+  than those listed as fixed above) are still present.
+
+Notes, Major Changes, and Known Bugs for 1.2.5
+----------------------------------------------
+
+Major Changes:
+
+* On MacOS X, we have reviewed the list of exported symbol names.  As
+  in earlier MacOS releases, and the Windows releases, but unlike the
+  UNIX releases, the list of exported names accessible to applications
+  is reduced to a predefined set of symbols.  We are attempting to
+  define a "stable" subset of the API we feel confident about
+  providing, as opposed to giving applications access to half of the
+  packet-manipulation functions we have.
+
+  In future releases, we may investigate applying a similar export
+  list under some UNIX shared library implementations.
+
+  If a function you use is not exported, we probably figured it was
+  functionality that should be internal to the library, or something
+  that should be done with a different interface, or something we
+  didn't know anyone was using at the moment and thought we'd like to
+  clean up the interface later on.  If you need it, and there isn't a
+  cleaner way, contact us about getting it added back in to the export
+  list.
+
+  A few things are marked "deprecated" in the header file, but will
+  continue to be provided under "#if KRB5_DEPRECATED" because even
+  though they're ugly, we also know they're in use and we can't phase
+  them out fast enough.  We may replace the implementation later on
+  with a shim on top of some cleaner mechanism.
+
+* For Heimdal (and possibly Microsoft) compatibility, we now accept
+  encrypted delegated credentials in gssapi.  Historically, the MIT
+  implementation has sent delegated gssapi credentials "in the clear",
+  but still encrypted in the AP-REQ.
+
+* IP address checks have been removed from rd_cred; this improves
+  compatibility with Heimdal.
+
+Minor changes:
+
+* A null pointer dereference in the krb5 library has been fixed.
+
+Known bugs:
+
+* Most of the other known bugs from 1.2.3 and 1.2.4 are unchanged.
+
+Notes, Major Changes, and Known Bugs for 1.2.4
+----------------------------------------------
+
+Notes:
+
+* Like the 1.2.3 release, this is a patch release.  One critical login
+  problem is fixed, and a problem with interoperability with
+  Microsoft software is worked around.
+
+Major Changes:
+
+* The one-character bug introduced into the login.krb5 program that
+  caused 8-character usernames to be rejected in some circumstances
+  has been fixed.
+
+* The handling of key version numbers has been modified in places.
+  The current formats of the keytab and srvtab files, as well as parts
+  of the remote kadmin protocol, handle key version numbers as 8-bit
+  quantities, when in fact they are 32-bit quantities.
+
+  * In the keytab and srvtab support for krb5, searching for the
+    "highest numbered" key version now has some heuristics to deal
+    with the 8-bit kvno wrapping from 255 to 0 to 1....  If a kvno
+    greater than 240 is found, the kvno values are assumed to range
+    from 128 to 383 (127+256).  This should handle cases like storing
+    kvno values 255 and 256 in the file.
+
+  * In the keytab and srvtab support for krb5, when looking for a key
+    with a specific version number, the low 8 bits of the requested
+    kvno are compared against the value stored in the file.
+
+  * The "ktutil" program also has a new heuristic for choosing the
+    "highest numbered" key in a keytab to be written out into a krb4
+    srvtab file.
+
+  These heuristics all assume that key version numbers will be
+  assigned sequentially, and that there will not be a large set of key
+  version numbers in use at one time for any given principal in a
+  keytab file.
+
+  These changes were prompted by the discovery by Microsoft (while
+  trying to write tools to generate MIT-style keytab files) that we
+  could not store arbitrary 32-bit version numbers for keys.
+
+* Some issues with multiple enctype support in GSSAPI credential
+  forwarding have been fixed.
+
+Minor Changes:
+
+* A few compilation problems have been fixed.
+
+* New test cases have been added to the test suite to exercise some of
+  the new changes.
+
+Known Bugs:
+
+* Non-sequential key version numbering will confuse the new kvno
+  handling heuristics.
+
+* Long-standing but newly recognized:
+
+  * The remote kadmin protocol will produce incorrect results when key
+    version numbers greater than 255 are being retrieved or stored.
+    The kadmin.local program does not suffer from this problem.
+
+  * We do not support storing multiple key versions for a principal in
+    a srvtab file.
+
+  * We do not support acquiring krb4 tickets using a srvtab or keytab
+    file without acquiring krb5 tickets at the same time (i.e., the
+    old krb4 "ksrvtgt" program).
+
+* most of the other known bugs from 1.2.3
+
+Notes, Major Changes, and Known Bugs for 1.2.3
+----------------------------------------------
+
+Notes:
+
+* This release is a patch release; some non-critical bugs and feature
+  requests have not been incorporated.  We have focussed mainly on
+  important security fixes and usability fixes.
+
+Major Changes:
+
+* Certain problems with shared library builds have been eliminated or
+  reduced on Linux and HP-UX.
+
+* Various bugs in single-DES enctype similarity have been fixed; the
+  1.0.x behavior of treating all single-DES enctype as equivalent has
+  been restored for now.  This may go away in a future release.  Note
+  that SUPPORT_DESMD5 will be treated as always false for now.
+
+* The KDC will now log a number of enctype parameters associated with
+  KDC requests, in order to allow easier debugging of enctype-related
+  problems.
+
+* A client will no longer attempt obtain a forwarded TGT with a
+  session key enctype that the target server won't understand.
+
+* Triple-DES should work on Windows now.  The SHA-1 implementation had
+  a Windows-specific bug preventing it from working in most cases.
+
+* Various bugs in pty handling have been fixed.
+
+* Bogus utmp files with garbage characters in their names should not
+  get created on Solaris.  Also, utmp/wtmp handling code has been
+  mostly rewritten, eliminating numerous bugs.
+
+* Potential buffer-overrun problems and null-pointer dereferences have
+  been fixed in ftpd, telnetd, login.krb5, and SHA-1.  The first three
+  may be exploitable under certain conditions; the SHA-1 bug probably
+  isn't, as far as we know.
+
+* For multiple-hop interrealm authentication, the realm transit path
+  checking has been rewritten.  The old code had a serious bug where
+  some of the transited realms may not have been checked against the
+  computed path.  It was therefore possible to forge a remote client
+  name in certain cases.  We strongly recommend updating application
+  server code where non-local principals may be found on ACLs.
+
+* In conjunction with the above fix, we've implemented KDC checking of
+  the realm transit path, as described in the IETF's current
+  kerberos-revisions draft, and set up the KDC to refuse to issue
+  tickets with unacceptable transit paths.  (Strictly speaking,
+  according to the Kerberos specification, enforcement of these checks
+  is supposed to be left to the application servers.)  Thus, if your
+  application servers can't be updated promptly but your KDC can, you
+  can still prevent such tickets from being issued.  This checking is
+  controlled by a per-realm flag, and is enabled by default.
+
+* On AIX systems, the rlogin server should no longer hang when
+  control-C is pressed.
+
+* New databases will be created in btree format by default.  We
+  believe the btree code to be less buggy than the hash format code we
+  have been using.  This should not affect the use of any existing
+  databases, only newly created ones, and even that should be a
+  transparent change.
+
+Known Bugs:
+
+* There may be problems with running a KDC on 64-bit platforms
+  (environments where size_t and long are wider than 32 bits, such as
+  alpha/Tru64, or Solaris/SPARC in SPARCv9 mode, for example), as
+  indicated by the util/db2 tests not passing.  These problems may
+  also extend to the rpc library, which may prevent the kadmin
+  protocol from functioning.  These are being investigated.
+
+* ETYPE_INFO preauthentication data returned from the KDC are not
+  sorted in the order requested by the client.  This may result in
+  preauthentication failure when encrypted timestamp preauthentication
+  is required but the client doesn't understand some of the enctypes
+  of the keys stored for it in the database.
+
+* The gssftp daemon and client, when running in krb4 mode, are
+  inconsistent with respect to port numbers passed to the
+  {mk,rd}_{priv,safe} functions.  As a result, there is a small but
+  nonzero probability that krb4 ftp with client and server on the same
+  IP address will fail with a "Time is out of bounds" error.  This
+  includes the tests/dejagnu test suite, which tests the krb4 ftp
+  functionality.  The probability of this occuring seems to be less
+  than 50%.
+
+* The gss-sample test application suite is known to not communicate
+  with the gss-sample suite in 1.1.x and earlier releases.  This is
+  the result of changes to gss-sample to increase its functionality;
+  fixes to allow for backwards compatibility will occur in a later
+  release.
+
+* BSD/OS 4.x may have some problems compiling.  These are being
+  investigated.
+
+Notes, Major Changes, and Known Bugs for 1.2.2
+----------------------------------------------
+
+Notes:
+
+* This release is a patch release; some non-critical bugs and feature
+  requests have not been incorporated.
+
+Major Changes:
+
+* The KDC dump format has been updated to include per-principal policy
+  information.  This will require updating your slave KDCs before your
+  master if you want things to still work.
+
+* A library bug that prevented kprop from working properly with DES3
+  keys has been fixed.
+
+* kpasswd should no longer coredump when there is no kadmin_server
+  line in krb5.conf.
+
+* ASN.1 parsing has been improved to deal with indefinite encodings,
+  such as those emitted by DCE-1.0 derived systems.
+
+* Preauthentication handling code in the initial ticket APIs has been
+  fixed to handle zero-length ETYPE_INFO sequences without causing a
+  NULL pointer dereference.
+
+* The replay cache should no longer leak temporary files.  Related
+  hard-to-analyze filename bugs in the rcache code should also be
+  fixed.
+
+* Library builds should now work on AIX.
+
+* KDC local address search code should now work on AIX.
+
+* The yacc grammar for the ftp daemon has been modified to be
+  compilable on HP/UX with Bison; namespace pollution from system
+  headers was causing trouble before.
+
+Known Bugs:
+
+* The gss-sample test application suite is known to not communicate
+  with the gss-sample suite in 1.1.x and earlier releases.  This is
+  the result of changes to increase functionality; fixes to allow for
+  backwards compatibility will occur in a later release.
+
+* Handling of utmp and utmpx updates is known to be broken on some
+  systems, such as Solaris 8.  We are investigating possible solutions
+  to this problem.
+
+* Tru64 Unix 5.0 (aka OSF/1 5.0), at least, has some problems with
+  revoke() returning ENOTTY in open_slave in the pty library.  One
+  possible workaround is to insert
+
+	vfs:
+		revoke_tty_only = 0
+
+  in /etc/sysconfigtab.  It is not known whether this workaround will
+  cause other problems.
+
+* BSD/OS 4.x may have some problems compiling.  These are being
+  investigated.
+
+Notes, Major Changes, and Known Bugs for 1.2.1 and 1.2
+------------------------------------------------------
+
+* Triple DES support, for session keys as well as user or service
+  keys, should be nearly complete in this release.  Much of the work
+  that has been needed is generic multiple-cryptosystem support, so
+  the addition of another cryptosystem should be much easier.
+
+  * GSSAPI support for 3DES has been added.  An Internet Draft is
+    being worked on that will describe how this works; it is not
+    currently standardized.  Some backwards-compatibility issues in
+    this area mean that enabling 3DES support must be done with
+    caution; service keys that are used for GSSAPI must not be updated
+    to 3DES until the services themselves are upgraded to support 3DES
+    under GSSAPI.
+
+* DNS support for locating KDCs is enabled by default.  DNS support
+  for looking up the realm of a host is compiled in but disabled by
+  default (due to some concerns with DNS spoofing).
+
+  We recommend that you publish your KDC information through DNS even
+  if you intend to rely on config files at your own site; otherwise,
+  sites that wish to communicate with you will have to keep their
+  config files updated with your information.  One of the goals of
+  this code is to reduce the client-side configuration maintenance
+  requirements as much as is possible, without compromising security.
+
+  See the administrator's guide for information on setting up DNS
+  information for your realm.
+
+  One important effect of this for developers is that on many systems,
+  "-lresolv" must be added to the compiler command line when linking
+  Kerberos programs.
+
+  Configure-time options are available to control the inclusion of the
+  DNS code and the setting of the defaults.  Entries in krb5.conf will
+  also modify the behavior if the code has been compiled in.
+
+* Numerous buffer-overrun problems have been found and fixed.  Many of
+  these were in locations we don't expect can be exploited in any
+  useful way (for example, overrunning a buffer of MAXPATHLEN bytes if
+  a compiled-in pathname is too long, in a program that has no special
+  privileges).  It may be possible to exploit a few of these to
+  compromise system security.
+
+* Partial support for IPv6 addresses has been added.  It can be
+  enabled or disabled at configure time with --enable-ipv6 or
+  --disable-ipv6; by default, the configure script will search for
+  certain types and macros, and enable the IPv6 code if they're found.
+  The IPv6 support at this time mostly consists of including the
+  addresses in credentials.
+
+* A protocol change has been made to the "rcmd" suite (rlogin, rsh,
+  rcp) to address several security problems described in Kris
+  Hildrum's paper presented at NDSS 2000.  New command-line options
+  have been added to control the selection of protocol, since the
+  revised protocol is not compatible with the old one.
+
+* A security problem in login.krb5 has been fixed.  This problem was
+  only present if the krb4 compatibility code was not compiled in.
+
+* A security problem with ftpd has been fixed.  An error in the in the
+  yacc grammar permitted potential root access.
+
+* The client programs kinit, klist and kdestroy have been changed to
+  incorporate krb4 support.  New command-line options control whether
+  krb4 behavior, krb5 behavior, or both are used.
+
+* Patches from Frank Cusack for much better hardware preauth support
+  have been incorporated.
+
+* Patches from Matt Crawford extend the kadmin ACL syntax so that
+  restrictions can be imposed on what certain administrators may do to
+  certain accounts.
+
+* A KDC on a host with multiple network addresses will now respond to
+  a client from the address that the client used to contact it.  The
+  means used to implement this will however cause the KDC not to
+  listen on network addresses configured after the KDC has started.
+
+Minor changes
+-------------
+
+* The shell code for searching for the Tcl package at configure time
+  has been modified.  If a tclConfig.sh can be found, the information
+  it contains is used, otherwise the old searching method is tried.
+  Let us know if this new scheme causes any problems.
+
+* Shared library builds may work on HPUX, Rhapsody/MacOS X, and newer
+  Alpha systems now.
+
+* The Windows build will now include kvno and gss-sample.
+
+* The routine krb5_secure_config_files has been disabled.  A new
+  routine, krb5_init_secure_context, has been added in its place.
+
+* The routine decode_krb5_ticket is now being exported as
+  krb5_decode_ticket.  Any programs that used the old name (which
+  should be few) should be changed to use the new name; we will
+  probably eliminate the old name in the future.
+
+* The CCAPI-based credentials cache code has been changed to store the
+  local-clock time of issue and expiration rather than the KDC-clock
+  times.
+
+* On systems with large numbers of IP addresses, "kinit" should do a
+  better job of acquiring those addresses to put in the user's
+  credentials.
+
+* Several memory leaks in error cases in the gssrpc code have been
+  fixed.
+
+* A bug with login clobbering some internal static storage on AIX has
+  been fixed.
+
+* Per-library initialization and cleanup functions have been added,
+  for use in configurations that dynamically load and unload these
+  libraries.
+
+* Many compile-time warnings have been fixed.
+
+* The GSS sample programs have been updated to exercise more of the
+  API.
+
+* The telnet server should produce a more meaningful error message if
+  authentication is required but not provided.
+
+* Changes have been made to ksu to make it more difficult to use it to
+  leak information the user does not have access to.
+
+* The sample config file information for the CYGNUS.COM realm has been
+  updated, and the GNU.ORG realm has been added.
+
+* A configure-time option has been added to enable a replay cache in
+  the KDC.  We recommend its use when hardware preauthentication is
+  being used.  It is enabled by default, and can be disabled if
+  desired with the configure-time option --disable-kdc-replay-cache.
+
+* Some new routines have been added to the library and krb5.h.
+
+* A new routine has been added to the prompter interface to allow the
+  application to determine which of the strings prompted for is the
+  user's password, in case it is needed for other purposes.
+
+* The remote kadmin interface has been enhanced to support the
+  specification of key/salt types for a principal.
+
+* New keytab entries' key values can now be specified manually with a
+  new command in the ktutil program.
+
+* A longstanding bug where certain krb4 exchanges using the
+  compatibility library between systems with different byte orders
+  would fail half the time has been fixed.
+
+* A source file under the GPL has been replaced with an equivalent
+  under the BSD license.  The file, strftime.c, was part of one of the
+  OpenVision admin system applications, and was only used on systems
+  that don't have strftime() in their C libraries.
+
+* Many bug reports are still outstanding in our database.  We are
+  continuing to work on this backlog.
+
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-1999 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2002 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
@@ -156,6 +645,8 @@ manner.  It does NOT prevent a commercial firm from referring to the
 MIT trademarks in order to convey information (although in doing so,
 recognition of their trademark status should be given).
 
+----
+
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
 kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
@@ -194,6 +685,13 @@ of lib/rpc:
    and our gratitude for the valuable work which has been 
    performed by MIT and the Kerberos community.
 
+----
+
+    Portions contributed by Matt Crawford <crawdad@fnal.gov> were
+    work performed at Fermi National Accelerator Laboratory, which is
+    operated by Universities Research Association, Inc., under
+    contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
+
 Acknowledgements
 ----------------
 
@@ -222,13 +720,22 @@ as testing to ensure DCE interoperability.
 Thanks to Ken Hornstein at NRL for providing many bug fixes and
 suggestions.
 
+Thanks to Matt Crawford at FNAL for bugfixes and enhancements.
+
 Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
 
+Thanks to Nalin Dahyabhai of RedHat and Chris Evans for locating and
+providing patches for numerous buffer overruns.
+
+Thanks to Christopher Thompson and Marcus Watts for discovering the
+ftpd security bug.
+
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Danillo Almeida, Jay Berkenbilt, Richard Basch, John
-Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt Hancher, Sam
-Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Barry Jaspan, Geoffrey
-King, John Kohl, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul
-Park, Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
-Schiller, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
+past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, Mitch
+Berger, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt
+Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Miroslav
+Jurisic, Barry Jaspan, Geoffrey King, John Kohl, Peter Litwack, Scott
+McGuire, Kevin Mitchell, Cliff Neuman, Paul Park, Ezra Peisach, Chris
+Provenzano, Ken Raeburn, Jon Rochlis, Jeff Schiller, Jen Selby, Brad
+Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.

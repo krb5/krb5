@@ -14,7 +14,7 @@ static char *rcsid = "$Header$";
 #include    "misc.h"
 
 /*
- * Function: chpass_principal_wrapper
+ * Function: chpass_principal_wrapper_3
  * 
  * Purpose: wrapper to kadm5_chpass_principal that checks to see if
  *	    pw_min_life has been reached. if not it returns an error.
@@ -23,8 +23,12 @@ static char *rcsid = "$Header$";
  * Arguments:
  *	principal	(input) krb5_principals whose password we are
  *				changing
- *	passoword	(input) passowrd we are going to change to.
- * 	<return value>	0 on sucsess error code on failure.
+ *	keepold 	(input) whether to preserve old keys
+ *	n_ks_tuple	(input) the number of key-salt tuples in ks_tuple
+ *	ks_tuple	(input) array of tuples indicating the caller's
+ *				requested enctypes/salttypes
+ *	password	(input) password we are going to change to.
+ * 	<return value>	0 on success error code on failure.
  *
  * Requires:
  *	kadm5_init to have been run.
@@ -35,8 +39,12 @@ static char *rcsid = "$Header$";
  *
  */
 kadm5_ret_t
-chpass_principal_wrapper(void *server_handle,
-			 krb5_principal principal, char *password)
+chpass_principal_wrapper_3(void *server_handle,
+			   krb5_principal principal,
+			   krb5_boolean keepold,
+			   int n_ks_tuple,
+			   krb5_key_salt_tuple *ks_tuple,
+			   char *password)
 {
     krb5_int32			now;
     kadm5_ret_t			ret;
@@ -72,12 +80,14 @@ chpass_principal_wrapper(void *server_handle,
     if (ret = kadm5_free_principal_ent(handle->lhandle, &princ))
 	 return ret;
     
-    return kadm5_chpass_principal(server_handle, principal, password);
+    return kadm5_chpass_principal_3(server_handle, principal,
+				    keepold, n_ks_tuple, ks_tuple,
+				    password);
 }
 
 
 /*
- * Function: randkey_principal_wrapper
+ * Function: randkey_principal_wrapper_3
  * 
  * Purpose: wrapper to kadm5_randkey_principal which checks the
 	    passwords min. life.
@@ -85,6 +95,10 @@ chpass_principal_wrapper(void *server_handle,
  * Arguments:
  *	principal	    (input) krb5_principal whose password we are
  *				    changing
+ *	keepold 	(input) whether to preserve old keys
+ *	n_ks_tuple	(input) the number of key-salt tuples in ks_tuple
+ *	ks_tuple	(input) array of tuples indicating the caller's
+ *				requested enctypes/salttypes
  *	key		    (output) new random key
  * 	<return value>	    0, error code on error.
  *
@@ -96,9 +110,12 @@ chpass_principal_wrapper(void *server_handle,
  *
  */
 kadm5_ret_t
-randkey_principal_wrapper(void *server_handle,
-			  krb5_principal principal,
-			  krb5_keyblock **keys, int *n_keys)
+randkey_principal_wrapper_3(void *server_handle,
+			    krb5_principal principal,
+			    krb5_boolean keepold,
+			    int n_ks_tuple,
+			    krb5_key_salt_tuple *ks_tuple,
+			    krb5_keyblock **keys, int *n_keys)
 {
 
     krb5_int32			now;
@@ -134,5 +151,7 @@ randkey_principal_wrapper(void *server_handle,
     }
     if (ret = kadm5_free_principal_ent(handle->lhandle, &princ))
 	 return ret;
-    return kadm5_randkey_principal(server_handle, principal, keys, n_keys);
+    return kadm5_randkey_principal_3(server_handle, principal,
+				     keepold, n_ks_tuple, ks_tuple,
+				     keys, n_keys);
 }

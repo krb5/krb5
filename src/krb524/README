@@ -48,6 +48,16 @@ information in the V5 credential and {C,S}_4.
 Steps (2) through (4) are encapsulated in a single function call in
 the krb524 library.
 
+An alternate conversion is provided for AFS servers that support the
+encrypted part of a krb5 ticket as an AFS token.  If the krb524d is
+converting a principal whose first component is afs and if the
+encrypted part of the ticket fits in 344 bytes, then it will default
+to simply returning the encrypted part of the ticket as a token.  If
+it turns out that the AFS server does not support the ticket, then
+users will get an unknown key version error and the krb524d must be
+configured to use v4 tickets for this AFS service.
+
+
 Obviously, not all V5 credentials can be completely converted to V4
 credentials, since the former is a superset of the latter.  The
 precise semantics of the conversion function are still undecided.
@@ -81,6 +91,29 @@ ticket file.  The client is 'principal', or krbtgt at the V5 ccache's
 default principal's realm if not specified.  The -n argument causes
 the new ticket to be added to the existing ticket file; otherwise, the
 ticket file is initialized.
+
+Configuring krb524d AFS Conversion
+======================================================================
+
+The krb524d looks in the appdefaults  section of krb5.conf for an
+application called afs_krb5 to determine whether  afs principals
+support encrypted ticket parts as tokens.  The following configuration
+fragment says that afs/sipb.mit.edu@ATHENA.MIT.EDU supports the new
+token format but afs@ATHENA.MIT.EDU and
+afs/athena.mit.edu@ATHENA.MIT.EDU do not.  Note that the default is to
+assume afs servers support the new format.
+
+[appdefaults]
+afs_krb5 = { 
+	ATHENA.MIT.EDU = {
+		# This stanza describes principals in the
+		#ATHENA.MIT.EDU realm
+		afs = false
+		afs/athena.mit.edu = false
+		afs/sipb.mit.edu = true
+	}
+}
+
 
 Using libkrb524.a
 ======================================================================

@@ -91,7 +91,7 @@ krb5_use_natural_time(context)
 /*
  * This routine returns the current time offsets in use.
  */
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_get_time_offsets(context, seconds, microseconds)
     krb5_context context;
     krb5_int32 *seconds, *microseconds;

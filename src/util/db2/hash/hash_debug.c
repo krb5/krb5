@@ -56,7 +56,6 @@ static char sccsid[] = "@(#)hash_debug.c	8.4 (Berkeley) 11/7/95";
 #include "hash.h"
 #include "page.h"
 #include "extern.h"
-#include "compat.h"
 
 void
 __dump_bucket(hashp, bucket)

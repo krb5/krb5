@@ -117,6 +117,8 @@ krb5_try_realm_txt_rr(prefix, name, realm)
      */
 
     if (name == NULL || name[0] == '\0') {
+	if (strlen (prefix) >= sizeof(host)-1)
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
         strcpy(host,prefix);
     } else {
         if ( strlen(prefix) + strlen(name) + 3 > MAX_DNS_NAMELEN )
@@ -134,12 +136,12 @@ krb5_try_realm_txt_rr(prefix, name, realm)
         */
 
         h = host + strlen (host);
-        if (h > host && h[-1] != '.')
+        if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
             strcpy (h, ".");
     }
     size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
 
-    if (size < 0)
+    if ((size < sizeof(HEADER)) || (size > sizeof(answer.bytes)))
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
 
     p = answer.bytes;
@@ -312,7 +314,7 @@ krb5_get_host_realm(context, host, realmsp)
 
 #ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_realm(context);
         if ( use_dns ) {
             /*
              * Since this didn't appear in our config file, try looking
@@ -330,17 +332,6 @@ krb5_get_host_realm(context, host, realmsp)
                 if (cp) 
                     cp++;
             } while (retval && cp && cp[0]);
-            if (retval)
-                retval = krb5_try_realm_txt_rr("_kerberos", "", &realm);
-            if (retval && default_realm) {
-                cp = default_realm;
-                do {
-                    retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
-                    cp = strchr(cp,'.');
-                    if (cp) 
-                        cp++;
-                } while (retval && cp && cp[0]);
-            }
         }
     }
 #endif /* KRB5_DNS_LOOKUP */

@@ -31,9 +31,11 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
+#include <ctype.h>
 #include <syslog.h>
 #include "adm.h"
 #include "adm_proto.h"
+#include <limits.h>
 
 #ifdef USE_RCACHE
 static char *kdc_current_rcname = (char *) NULL;
@@ -657,26 +659,30 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 
     clst = strlen(current) - 1;
     if (current[0] == ' ') {
-      strcpy(exp, current+1);
+      strncpy(exp, current+1, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
     }
     else if ((current[0] == '/') && (prev[0] == '/')) {
-      strcpy(exp, prev);
+      strncpy(exp, prev, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
       if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(exp, current);
+      strncat(exp, current, sizeof(exp) - 1 - strlen(exp));
     }
     else if (current[clst] == '.') {
-      strcpy(exp, current);
-      if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
+      strncpy(exp, current, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
+      if (strlen(exp) + strlen(prev) + 1 >= MAX_REALM_LN) {
 	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	goto fail;
       }
-      strcat(exp, prev);
+      strncat(exp, prev, sizeof(exp) - 1 - strlen(exp));
     }
     else {
-      strcpy(exp, current);
+      strncpy(exp, current, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
     }
 
     /* read field into next */
@@ -718,11 +724,12 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       if ((next[nlst] != '.') && (next[0] != '/') &&
           (pl = subrealm(exp, realm))) {
         added = TRUE;
+	current[sizeof(current) - 1] = '\0';
 	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
 	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	  goto fail;
 	}
-        strcat(current, ",");
+        strncat(current, ",", sizeof(current) - 1 - strlen(current));
         if (pl > 0) {
           strncat(current, realm, pl);
         }
@@ -762,19 +769,22 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 	      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	      goto fail;
 	    }
-	    strcat(current, " ");
+	    strncat(current, " ", sizeof(current) - 1 - strlen(current));
+	    current[sizeof(current) - 1] = '\0';
           }
 	  if (strlen(current) + strlen(realm) + 1 >= MAX_REALM_LN) {
 	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	    goto fail;
 	  }
-          strcat(current, realm);
+          strncat(current, realm, sizeof(current) - 1 - strlen(current));
+	  current[sizeof(current) - 1] = '\0';
         }
 	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
 	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
 	  goto fail;
 	}
-        strcat(current,",");
+        strncat(current,",", sizeof(current) - 1 - strlen(current));
+	current[sizeof(current) - 1] = '\0';
         if (pl > 0) {
           strncat(current, exp, pl);
         }
@@ -796,10 +806,12 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       goto fail;
     }
     strcat(trans, current);
-    new_trans->length = strlen(trans) + 1;
+    new_trans->length = strlen(trans);
 
-    strcpy(prev, exp);
-    strcpy(current, next);
+    strncpy(prev, exp, sizeof(prev) - 1);
+    prev[sizeof(prev) - 1] = '\0';
+    strncpy(current, next, sizeof(current) - 1);
+    current[sizeof(current) - 1] = '\0';
   }
 
   if (!added) {
@@ -822,7 +834,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       goto fail;
     }
     strcat(trans, realm);
-    new_trans->length = strlen(trans) + 1;
+    new_trans->length = strlen(trans);
   }
 
   retval = 0;
@@ -1406,13 +1418,14 @@ dbentry_supports_enctype(context, client, enctype)
 {
     /*
      * If it's DES_CBC_MD5, there's a bit in the attribute mask which
-     * checks to see if we support it.
+     * checks to see if we support it.  For now, treat it as always
+     * clear.
      *
      * In theory everything's supposed to support DES_CBC_MD5, but
      * that's not the reality....
      */
     if (enctype == ENCTYPE_DES_CBC_MD5)
-	return isflagset(client->attributes, KRB5_KDB_SUPPORT_DESMD5);
+	return 0;
 
     /*
      * XXX we assume everything can understand DES_CBC_CRC
@@ -1444,6 +1457,9 @@ select_session_keytype(context, server, nktypes, ktype)
     
     for (i = 0; i < nktypes; i++) {
 	if (!valid_enctype(ktype[i]))
+	    continue;
+
+	if (!krb5_is_permitted_enctype(context, ktype[i]))
 	    continue;
 
 	if (dbentry_supports_enctype(context, server, ktype[i]))
@@ -1526,4 +1542,83 @@ void limit_string(char *name)
 	name[i++] = '.';
 	name[i] = '\0';
 	return;
+}
+
+/*
+ * L10_2 = log10(2**x), rounded up; log10(2) ~= 0.301.
+ */
+#define L10_2(x) ((int)(((x * 301) + 999) / 1000))
+
+/*
+ * Max length of sprintf("%ld") for an int of type T; includes leading
+ * minus sign and terminating NUL.
+ */
+#define D_LEN(t) (L10_2(sizeof(t) * CHAR_BIT) + 2)
+
+void
+ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
+{
+    int i;
+    char stmp[D_LEN(krb5_enctype) + 1];
+    char *p;
+
+    if (nktypes < 0
+	|| len < (sizeof(" etypes {...}") + D_LEN(int))) {
+	*s = '\0';
+	return;
+    }
+
+    sprintf(s, "%d etypes {", nktypes);
+    for (i = 0; i < nktypes; i++) {
+	sprintf(stmp, "%s%ld", i ? " " : "", (long)ktype[i]);
+	if (strlen(s) + strlen(stmp) + sizeof("}") > len)
+	    break;
+	strcat(s, stmp);
+    }
+    if (i < nktypes) {
+	/*
+	 * We broke out of the loop. Try to truncate the list.
+	 */
+	p = s + strlen(s);
+	while (p - s + sizeof("...}") > len) {
+	    while (p > s && *p != ' ' && *p != '{')
+		*p-- = '\0';
+	    if (p > s && *p == ' ') {
+		*p-- = '\0';
+		continue;
+	    }
+	}
+	strcat(s, "...");
+    }
+    strcat(s, "}");
+    return;
+}
+
+void
+rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
+{
+    char stmp[sizeof("ses=") + D_LEN(krb5_enctype)];
+
+    if (len < (3 * D_LEN(krb5_enctype)
+	       + sizeof("etypes {rep= tkt= ses=}"))) {
+	*s = '\0';
+	return;
+    }
+
+    sprintf(s, "etypes {rep=%ld", (long)rep->enc_part.enctype);
+
+    if (rep->ticket != NULL) {
+	sprintf(stmp, " tkt=%ld", (long)rep->ticket->enc_part.enctype);
+	strcat(s, stmp);
+    }
+
+    if (rep->ticket != NULL
+	&& rep->ticket->enc_part2 != NULL
+	&& rep->ticket->enc_part2->session != NULL) {
+	sprintf(stmp, " ses=%ld",
+		(long)rep->ticket->enc_part2->session->enctype);
+	strcat(s, stmp);
+    }
+    strcat(s, "}");
+    return;
 }
