@@ -1,6 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
+##DOSBUILDTOP = .
+##DOS!include $(BUILDTOP)\config\windows.in
+
 prefix = /usr/local
 exec_prefix = $(prefix)
 binprefix =
@@ -22,6 +25,7 @@ all:: all-$(WHAT)
 all-unix::
 
 all-: all-windows
+
 all-windows:: makefile-windows
 	@echo Making in include
 	cd include
@@ -32,10 +36,10 @@ all-windows:: makefile-windows
 	@echo Making in lib
 	cd ..\..\lib
 	-$(MAKE) -$(MAKEFLAGS)
-	@echo Making in windows\cns
-	cd ..\windows\cns
+	@echo Making in windows
+	cd ..\windows
 	-$(MAKE) -$(MAKEFLAGS)
-	cd ..\..
+	cd ..
 
 world::
 	date
@@ -78,8 +82,12 @@ TAGS: $(SRCS)
 clean:: clean-$(WHAT)
 
 clean-:: clean-unix
+
 clean-unix::
 	rm -f  *.o core
+
+clean-mac::
+	rm -f *.o core
 
 mostlyclean: clean
 
@@ -100,7 +108,9 @@ dist: $(DISTFILES)
 	done
 	tar chzf `cat .fname`.tar.gz `cat .fname`
 	rm -rf `cat .fname` .fname
-
+#
+# Windows configuration
+#
 makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 		include\makefile.in include\krb5\makefile.in \
 		lib\makefile.in lib\crypto\makefile.in \
@@ -116,7 +126,7 @@ makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 		lib\krb5\free\makefile.in lib\krb5\keytab\makefile.in \
 		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
-		lib\krb5\rcache\makefile.in lib\krb425\makefile.in \
+		lib\krb5\rcache\makefile.in \
 		util\et\makefile.in
 	SET CL=/nologo
 	$(CC) /AL wconfig.c
@@ -148,7 +158,6 @@ makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 	.\wconfig config <lib\krb5\os\makefile.in >lib\krb5\os\makefile
 	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
 	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
-	.\wconfig config <lib\krb425\makefile.in >lib\krb425\makefile
 	.\wconfig config <util\et\makefile.in >util\et\makefile
 	config\rm.bat wconfig.obj wconfig.exe
 
@@ -162,10 +171,65 @@ clean-windows::
 	@echo Making clean in lib
 	cd ..\..\lib
 	-$(MAKE) -$(MAKEFLAGS) clean
-	@echo Making clean in windows\cns
-	cd ..\windows\cns
+	@echo Making clean in windows
+	cd ..\windows
 	-$(MAKE) -$(MAKEFLAGS) clean
-	cd ..\..
+	cd ..
 	@echo Making clean locally
 	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
+
+#
+# Builds the zip file that distributes Kerberos sources for DOS sites
+# from the source tree on Unix.	Note, it doesn't handle binary files 
+# well, so you MUST do a make clean before hand. 
+#
+ZIPFILES= ./* \
+	config/* include/* include/krb5/* include/krb5/asn.1/* \
+	include/krb5/stock/* include/sys/* lib/* lib/crypto/* \
+	lib/crypto/crc32/* lib/crypto/des/* lib/crypto/md4/* \
+	lib/crypto/md5/* lib/crypto/os/* lib/des425/* lib/gssapi/* \
+	lib/gssapi/generic/* lib/gssapi/krb5/* lib/krb425/* \
+	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
+	lib/krb5/ccache/* lib/krb5/ccache/file/* \
+	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
+	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
+	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
+	windows/cns/*
+
+ZIPBINARYFILES=windows/cns/*.ico
+
+ZIPEXCLUDE= LIB/KRB5.SAB \
+	INCLUDE/KRB5/AUTOCONF.H \
+	WINDOWS/CNS/*.ICO
+
+zip-windows: awk-windows kerbsrc.zip
+	rm -f kerbsrc.zip
+	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
+	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
+#
+# Part of building the PC release has to be done on Unix. This includes
+# anything the requires awk.
+#
+AH  = util/et/et_h.awk
+AC  = util/et/et_c.awk
+INC = include/krb5/
+ET  = lib/krb5/error_tables/
+GG  = lib/gssapi/generic/
+GK  = lib/gssapi/krb5/
+
+awk-windows:
+	gawk -f $(AH) outfile=$(INC)asn1_err.h $(ET)asn1_err.et
+	gawk -f $(AH) outfile=$(INC)kdb5_err.h $(ET)kdb5_err.et
+	gawk -f $(AH) outfile=$(INC)krb5_err.h $(ET)krb5_err.et
+	gawk -f $(AH) outfile=$(INC)kv5m_err.h $(ET)kv5m_err.et
+	gawk -f $(AH) outfile=$(INC)adm_err.h $(ET)adm_err.et
+	gawk -f $(AC) outfile=$(ET)asn1_err.c $(ET)asn1_err.et
+	gawk -f $(AC) outfile=$(ET)kdb5_err.c $(ET)kdb5_err.et
+	gawk -f $(AC) outfile=$(ET)krb5_err.c $(ET)krb5_err.et
+	gawk -f $(AC) outfile=$(ET)kv5m_err.c $(ET)kv5m_err.et
+	gawk -f $(AC) outfile=$(ET)adm_err.c $(ET)adm_err.et
+	gawk -f $(AH) outfile=$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.et
+	gawk -f $(AC) outfile=$(GG)gssapi_err_generic.c $(GG)gssapi_err_generic.et
+	gawk -f $(AH) outfile=$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.et
+	gawk -f $(AC) outfile=$(GK)gssapi_err_krb5.c $(GK)gssapi_err_krb5.et
 

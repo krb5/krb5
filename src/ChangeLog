@@ -1,3 +1,7 @@
+Tue Mar 21 18:38:12 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: more PC stuff including zipping up source commands.
+
 Sun Mar 19 12:45:08 1995  John Gilmore  (gnu at toad.com)
 
 	* aclocal.m4 (CHECK_STDARG):  Remove; we're just using AC_HEADER_CHECK.
