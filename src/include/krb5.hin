@@ -1659,7 +1659,7 @@ krb5_error_code KRB5_CALLCONV krb5_kt_add_entry
 	(krb5_context,
 		krb5_keytab,
 		krb5_keytab_entry * );
-krb5_error_code krb5_principal2salt
+krb5_error_code KRB5_CALLCONV_WRONG krb5_principal2salt
 	(krb5_context,
 		krb5_const_principal, krb5_data *);
 #if KRB5_PRIVATE
