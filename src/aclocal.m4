@@ -193,6 +193,39 @@ if test $krb5_cv_struct_sigjmp_buf = yes; then
 fi
 )])dnl
 dnl
+dnl Check for IPv6 compile-time support.
+dnl
+AC_DEFUN(KRB5_AC_INET6,[
+AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h)
+AC_MSG_CHECKING(for IPv6 compile-time support)
+AC_CACHE_VAL(krb5_cv_inet6,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_MACSOCK_H
+#include <macsock.h>
+#else
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],[
+#if !defined (AF_INET6) || !defined (IN6_IS_ADDR_LINKLOCAL)
+  syntax error;
+#else
+  struct sockaddr_in6 in;
+  IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
+#endif
+],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
+AC_MSG_RESULT($krb5_cv_inet6)
+if test $krb5_cv_inet6 = yes ; then
+  AC_DEFINE(KRB5_USE_INET6)
+fi
+AC_CHECK_FUNCS(inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo)
+])dnl
+dnl
 dnl Generic File existence tests
 dnl 
 dnl K5_AC_CHECK_FILE(FILE, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
