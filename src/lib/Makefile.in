@@ -38,7 +38,7 @@ gssapi.lib:: gssapi.dll
 	implib /nologo gssapi.lib gssapi.dll
 
 gssapi.dll:: $(GLIB) $(LIBS) gssapi.def
-	link /co /seg:400 /noe /nol win_glue, gssapi.dll, gssapi.map, \
+	link /co /seg:400 /noe /nod /nol win_glue, gssapi.dll, gssapi.map, \
 	   $(LIBS) ldllcew libw, gssapi.def
 	rc /nologo /p /k gssapi.dll
 
@@ -46,7 +46,7 @@ libkrb5.lib:: libkrb5.dll
 	implib /nologo libkrb5.lib libkrb5.dll
 
 libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
-	link /co /seg:400 /noe /nol win_glue, libkrb5.dll, libkrb5.map, \
+	link /co /seg:400 /noe /nod /nol win_glue, libkrb5.dll, libkrb5.map, \
 	   $(LIBS) ldllcew libw, libkrb5.def
 	rc /nologo /p /k libkrb5.dll
 

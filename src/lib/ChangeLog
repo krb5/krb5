@@ -1,3 +1,12 @@
+Tue Oct 10 21:45:51 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Added the "/nod" option to the gssapi.dll and
+		libkrb5.dll linker commands.  This prevents the linker
+		from searching the llibcew.lib library for some externals
+		which are already in ldllcew.lib.  This is what we want
+		since we are building a DLL. Without the "/nod" option we
+		get a bunch of duplicate definitions.
+
 Fri Sep 29 14:19:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (CLEANLIBS): Clean up make clean procedures.  The
