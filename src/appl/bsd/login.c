@@ -612,7 +612,6 @@ int try_krb5 (me_p, pass)
 	/* get_name pulls out just the name not the
 	   type */
 	strcpy(ccfile, krb5_cc_get_name(kcontext, ccache));
-	(void) chown(ccfile, pwd->pw_uid, pwd->pw_gid);
 	krbflag = got_v5_tickets = 1;
 	return 1;
     }
@@ -704,7 +703,6 @@ try_convert524 (kcontext, me)
     }
     got_v4_tickets = 1;
     strcpy(tkfile, tkt_string());
-    (void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
     return 1;
 }
 #endif
@@ -726,7 +724,6 @@ try_krb4 (me, user_pwstring)
 	kpass_ok = 1;
 	krbflag = 1;
 	strcpy(tkfile, tkt_string());
-	(void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
 	break;	
 	/* These errors should be silent */
 	/* So the Kerberos database can't be probed */
@@ -877,8 +874,13 @@ int verify_krb_v5_tgt (c)
     krb5_ticket *ticket = NULL;
 
     /* XXX This is to work around a library bug.  I'm not sure if it's
-       been fixed for beta-6, so leave this in for now.  Remove it (and
-       fix the bug if necessary) after beta-6 ships.  */
+       been fixed for beta-7, so leave this in for now.  Remove it (and
+       fix the bug if necessary) after beta-7 ships.
+
+       Whoever wrote that comment didn't mention what the bug is!  Ted
+       says it is something about the starttime of the ticket and
+       "now" being equal.  He thinks it is fixed, but isn't sure.
+       */
     sleep(2);
 
     /* get the server principal for the local host */
@@ -1157,7 +1159,11 @@ int main(argc, argv)
 	int retval;
 #ifdef KRB5_GET_TICKETS
 	krb5_principal me;
-#endif /* KRB5_GET_TICKETS */
+	krb5_creds save_v5creds;
+#endif
+#ifdef KRB4_GET_TICKETS
+	CREDENTIALS save_v4creds;
+#endif
 	char *ccname = 0;   /* name of forwarded cache */
 	char *tz = 0;
 
@@ -1639,6 +1645,70 @@ int main(argc, argv)
 	(void)setgid((gid_t) pwd->pw_gid);
 	(void) initgroups(username, pwd->pw_gid);
 
+	/*
+	 * The V5 ccache and V4 ticket file are both created as root.
+	 * They need to be owned by the user, and chown (a) assumes
+	 * they are stored in a file and (b) allows a race condition
+	 * in which a user can delete the file (if the directory
+	 * sticky bit is not set) and make it a symlink to somewhere
+	 * else; on some platforms, chown() on a symlink actually
+	 * changes the owner of the pointed-to file.  This is Bad.
+	 *
+	 * So, we suck the V5 and V4 krbtgts into memory here, destroy
+	 * the ccache/ticket file, and recreate them later after the
+	 * setuid.
+	 */
+#ifdef KRB5_GET_TICKETS
+	if (got_v5_tickets) {
+	     krb5_creds mcreds;
+
+	     memset(&mcreds, 0, sizeof(mcreds));
+	     memset(&save_v5creds, 0, sizeof(save_v5creds));
+
+	     mcreds.client = me;
+	     retval = krb5_build_principal_ext(kcontext, &mcreds.server,
+				    krb5_princ_realm(kcontext, me)->length,
+				    krb5_princ_realm(kcontext, me)->data,
+				    tgtname.length, tgtname.data,
+				    krb5_princ_realm(kcontext, me)->length,
+				    krb5_princ_realm(kcontext, me)->data,
+				    0);
+	     if (retval) {
+		  syslog(LOG_ERR,
+			 "%s while creating V5 krbtgt principal",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	     mcreds.ticket_flags = TKT_FLG_INITIAL;
+	     
+	     if (retval = krb5_cc_retrieve_cred(kcontext, ccache,
+					   KRB5_TC_MATCH_FLAGS,
+					   &mcreds, &save_v5creds)) {
+		  syslog(LOG_ERR,
+			 "%s while retrieiving V5 initial ticket for copy",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	     krb5_free_principal(kcontext, mcreds.server);
+	}
+#endif /* KRB5_GET_TICKETS */
+#ifdef KRB4_GET_TICKETS
+	if (got_v4_tickets) {
+	     memset(&save_v4creds, 0, sizeof(save_v4creds));
+	     
+	     retval = krb_get_cred("krbtgt", realm, realm, &save_v4creds);
+	     if (retval != KSUCCESS) {
+		  syslog(LOG_ERR,
+			 "%s while retrieving V4 initial ticket for copy",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	}
+#endif /* KRB4_GET_TICKETS */
+#if defined(KRB5_GET_TICKETS) || defined(KRB4_GET_TICKETS)
+	destroy_tickets();
+#endif
+
 #ifdef OQUOTA
 	quota(Q_DOWARN, pwd->pw_uid, (dev_t)-1, 0);
 #endif
@@ -1665,6 +1735,54 @@ int main(argc, argv)
 	     perror("setuid");
 	     sleepexit(1);
 	}
+
+	/*
+	 * We are the user now.  Re-create the destroyed ccache and
+	 * ticket file.
+	 */
+#ifdef KRB5_GET_TICKETS
+	if (got_v5_tickets) {
+	     retval = krb5_cc_initialize (kcontext, ccache, me);
+	     if (retval) {
+		  syslog(LOG_ERR,
+			 "%s while re-initializing V5 ccache as user",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	     if (retval = krb5_cc_store_cred(kcontext, ccache, &save_v5creds)) {
+		  syslog(LOG_ERR,
+			 "%s while re-storing V5 credentials as user",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	     krb5_free_cred_contents(kcontext, &save_v5creds);
+	}
+#endif /* KRB5_GET_TICKETS */
+#ifdef KRB4_GET_TICKETS
+	if (got_v4_tickets) {
+	     retval = in_tkt(save_v4creds.pname, save_v4creds.pinst);
+	     if (retval != KSUCCESS) {
+		  syslog(LOG_ERR,
+			 "%s while re-initializing V4 ticket cache as user",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	     retval = krb_save_credentials(save_v4creds.service,
+					   save_v4creds.instance,
+					   save_v4creds.realm, 
+					   save_v4creds.session,
+					   save_v4creds.lifetime,
+					   save_v4creds.kvno,
+					   &(save_v4creds.ticket_st), 
+					   save_v4creds.issue_date);
+	     if (retval != KSUCCESS) {
+		  syslog(LOG_ERR,
+			 "%s while re-storing V4 tickets as user",
+			 error_message(retval));
+		  sleepexit(1);
+	     }
+	}
+#endif /* KRB4_GET_TICKETS */
 
 	if (*pwd->pw_shell == '\0')
 		pwd->pw_shell = BSHELL;

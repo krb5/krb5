@@ -1,3 +1,10 @@
+Wed Sep 11 17:27:02 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* login.c: fix a security-threating race condition: chown'ing the
+ 	ccache to the user can be bad if the user can delete the file
+ 	first and make it a symlink to something else.  The solution is to
+ 	re-create the ccache after login as setuid() to the user.
+	
 Tue Sep 10 14:03:53 1996  Tom Yu  <tlyu@mit.edu>
 
 	* klogind.M, kshd.M, login.M, rcp.M, rlogin.M, rsh.M: remove ".so
