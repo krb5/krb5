@@ -431,7 +431,8 @@ main(argc, argv, envp)
 
 	if (port != -1) {
 		struct sockaddr_in sin4;
-		int s, ns, sz;
+		int s, ns;
+		socklen_t sz;
 
 		/* Accept an incoming connection on port.  */
 		sin4.sin_family = AF_INET;

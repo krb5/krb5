@@ -1,3 +1,8 @@
+2004-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (main): Use socklen_t for the size of the address from
+	accept.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpcmd.y (getline): Allow "AUTH" as an unprotected command.
