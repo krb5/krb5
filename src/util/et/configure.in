@@ -25,19 +25,5 @@ AC_CHECK_HEADERS(stdarg.h)
 AC_HAVE_HEADERS(stdlib.h)
 CopySrcHeader(com_err.h,$(BUILDTOP)/include)
 V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libcom_err)
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build shared libraries],[
-LinkFileDir([$](TOPLIBD)/libcom_err.[$](SHEXT), libcom_err.[$](SHEXT), ../util/et)
-AppendRule([all -unix:: [$](TOPLIBD)/libcom_err.$(SHEXT)])
-AppendRule([install::	libcom_err.[$](SHEXT)
-	[$](INSTALL_DATA) libcom_err.[$](SHEXT)	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libcom_err.[$](SHEXT)])
-])dnl
-if test -n "$krb5_cv_staticlibs_enabled" ; then
-        AppendRule([install:: libcom_err.[$](STEXT)
-	[$](INSTALL_DATA) libcom_err.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libcom_err.[$](STEXT)])
-        LinkFileDir([$](TOPLIBD)/libcom_err.[$](STEXT),libcom_err.[$](STEXT),../util/et)
-        AppendRule([all:: [$](TOPLIBD)/libcom_err.[$](STEXT)])
-fi
+V5_MAKE_SHARED_LIB(libcom_err,0.1,[$](TOPLIBD), ../util/et)
 V5_AC_OUTPUT_MAKEFILE

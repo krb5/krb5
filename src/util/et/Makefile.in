@@ -111,7 +111,7 @@ DONE:: $(LIBOBJS)
 	 echo $(LIBOBJS) >DONE
 
 clean-unix::
-	$(RM) $(LIBOBJS)
+	$(RM) $(LIBOBJS) DONE
 
 clean-mac::
 	$(RM) libcom_err.a
