@@ -31,6 +31,7 @@ static char rcsid_kerberos_v4_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/config.h>
+#include <krb5/sysincl.h>
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
