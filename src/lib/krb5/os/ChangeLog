@@ -1,3 +1,8 @@
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (start_connection): Close socket if connect() call
+	fails for an unexpected reason.
+
 2004-02-09  Sam Hartman  <hartmans@mit.edu>
 
 	* changepw.c (krb5_locate_kpasswd): Run htons on the default port
