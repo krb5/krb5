@@ -52,7 +52,7 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
 
    /* create the buffer to checksum into */
 
-   len = (sizeof(long)*5+
+   len = (sizeof(krb5_int32)*5+
 	  cb->initiator_address.length+
 	  cb->acceptor_address.length+
 	  cb->application_data.length);

@@ -1,3 +1,8 @@
+Fri Mar  8 21:36:29 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* util_cksum.c (kg_checksum_channel_bindings): Change sizeof(long)
+		to sizeof(krb5_int32).
+
 Sat Mar  2 02:22:30 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5mech.c (krb5_gss_get_context): Initialize the serializers
