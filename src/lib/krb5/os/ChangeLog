@@ -3,6 +3,8 @@
 	* localaddr.c (foreach_localaddr): Be more careful not to walk
 	past the end of the ifreq array.
 	(get_ifreq_array): Return 0 in success case, not errno.
+	(print_addr): If getnameinfo returns EAI_SYSTEM, report what the
+	system error is.
 
 	* localaddr.c (get_ifreq_array): Split out from foreach_localaddr
 	general version.

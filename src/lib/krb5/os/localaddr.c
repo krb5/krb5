@@ -955,10 +955,10 @@ foreach_localaddr (/*@null@*/ void *data,
        The Samba mailing list archives mention that NTP looks for the
        size on these systems: *-fujitsu-uxp* *-ncr-sysv4*
        *-univel-sysv*.  */
-    for (i = 0; i + sizeof(struct ifreq) < n; i+= ifreq_size(*ifr) ) {
+    for (i = 0; i + sizeof(struct ifreq) <= n; i+= ifreq_size(*ifr) ) {
 	ifr = (struct ifreq *)((caddr_t) buf+i);
 	/* In case ifreq_size is more than sizeof().  */
-	if (i + ifreq_size(*ifr) >= n)
+	if (i + ifreq_size(*ifr) > n)
 	  break;
 
 	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
@@ -1022,7 +1022,7 @@ foreach_localaddr (/*@null@*/ void *data,
     /*@=moduncon@*/
 
     if (pass2fn) {
-	for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
+	for (i = 0; i + sizeof(struct ifreq) <= n; i+= ifreq_size(*ifr) ) {
 	    ifr = (struct ifreq *)((caddr_t) buf+i);
 
 	    if (ifr->ifr_name[0] == '\0')
@@ -1074,9 +1074,12 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
     len = socklen (sa);
     err = getnameinfo (sa, len, hostbuf, (socklen_t) sizeof (hostbuf),
 		       (char *) NULL, 0, NI_NUMERICHOST);
-    if (err)
+    if (err) {
+	int e = errno;
 	printf ("<getnameinfo error %d: %s>\n", err, gai_strerror (err));
-    else
+	if (err == EAI_SYSTEM)
+	    printf ("\t\t<errno is %d: %s>\n", e, strerror(e));
+    } else
 	printf ("addr %s\n", hostbuf);
     return 0;
 }
