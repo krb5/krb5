@@ -126,8 +126,8 @@ static int get_port (const char *service, int stream, int defalt)
     return htons (defalt);
 }
 
-static int
-grow_list (struct addrlist *lp, int nmore)
+int
+krb5int_grow_addrlist (struct addrlist *lp, int nmore)
 {
     int i;
     int newspace = lp->space + nmore;
@@ -149,6 +149,7 @@ grow_list (struct addrlist *lp, int nmore)
     lp->space = newspace;
     return 0;
 }
+#define grow_list krb5int_grow_addrlist
 
 /* Free up everything pointed to by the addrlist structure, but don't
    free the structure itself.  */
