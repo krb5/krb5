@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     char *ptr;									/* For parsing the input */
 
     if (argc == 2)                              /* Config directory given */
-        copy_file (argv[1], "\\pre.in");        /* Send out prefix */
+        copy_file (argv[1], "\\windows.in");        /* Send out prefix */
 
     while ((ptr = gets(buf)) != NULL) {         /* Filter stdin */
         if (memcmp ("##DOS", buf, 5) == 0)

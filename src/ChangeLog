@@ -1,5 +1,7 @@
 Fri Oct  6 00:57:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* wconfig.c: Include the file windows.in instead of pre.in
+
 	* Makefile.in (ekrbsrc.mac): Build the list of files *after*
 		building files using awk-windows-mac.
 
