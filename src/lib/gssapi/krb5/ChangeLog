@@ -1,3 +1,17 @@
+2000-09-01  Jeffrey Altman <jaltman@columbia.edu>
+
+        * accept_sec_context.c: krb5_gss_accept_sec_context()
+        It has been determined by Martin Rex that Windows 2000 is incapable
+        of supporting channel bindings.   This caused us to examine the
+        various RFCs affecting FTP GSSAPI to determine whether or not
+        channel bindings were a MUST for implementation of the FTP GSSAPI
+        protocol.  It was determined that the channel binding facility as
+        described in RFC2743 is optional.  Therefore, we cannot assume
+        that all clients or servers will support it.  The code was updated
+        to allow GSS_C_NO_CHANNEL_BINDINGS when specified by either the
+        client or server to indicate that channel bindings will not be
+        used.
+
 2000-06-27  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (get_credentials): Add initial iteration of

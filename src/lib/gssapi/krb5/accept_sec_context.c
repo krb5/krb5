@@ -417,21 +417,52 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        /* at this point, bigend is set according to the initiator's
 	  byte order */
 
-       if ((code = kg_checksum_channel_bindings(context, input_chan_bindings,
-						&reqcksum, bigend))) {
-	   major_status = GSS_S_BAD_BINDINGS;
-	   goto fail;
-       }
 
-       TREAD_STR(ptr, ptr2, reqcksum.length);
-       if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
-	   code = 0;
-	   major_status = GSS_S_BAD_BINDINGS;
-	   goto fail;
-       }
+       /* 
+          The following section of code attempts to implement the
+          optional channel binding facility as described in RFC2743.
 
-       xfree(reqcksum.contents);
-       reqcksum.contents = 0;
+          Since this facility is optional channel binding may or may
+          not have been provided by either the client or the server.
+
+          If the server has specified input_chan_bindings equal to
+          GSS_C_NO_CHANNEL_BINDINGS then we skip the check.  If
+          the server does provide channel bindings then we compute
+          a checksum and compare against those provided by the
+          client.  If the check fails we test the clients checksum
+          to see whether the client specified GSS_C_NO_CHANNEL_BINDINGS.
+          If either test succeeds we continue without error.
+       */
+
+       if (input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS ) {
+           if ((code = kg_checksum_channel_bindings(context, 
+                                                    input_chan_bindings,
+           					    &reqcksum, bigend))) {
+           	   major_status = GSS_S_BAD_BINDINGS;
+           	   goto fail;
+           }
+           
+           
+           TREAD_STR(ptr, ptr2, reqcksum.length);
+           if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
+               xfree(reqcksum.contents);
+               reqcksum.contents = 0;
+               if ((code = kg_checksum_channel_bindings(context, 
+                                                  GSS_C_NO_CHANNEL_BINDINGS,
+                                                  &reqcksum, bigend))) {
+                   major_status = GSS_S_BAD_BINDINGS;
+                   goto fail;
+               }
+               if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
+                   code = 0;
+                   major_status = GSS_S_BAD_BINDINGS;
+                   goto fail;
+               }
+           }
+           
+           xfree(reqcksum.contents);
+           reqcksum.contents = 0;
+       }
 
        TREAD_INT(ptr, gss_flags, bigend);
        gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if
