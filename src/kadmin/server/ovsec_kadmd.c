@@ -44,12 +44,15 @@
 #include    <netdb.h>
 #include    <gssrpc/rpc.h>
 #include    <gssapi/gssapi.h>
+#include    "gssapiP_krb5.h" /* for kg_get_context */
 #include    <gssrpc/auth_gssapi.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    <kadm5/server_acl.h>
 #include    <krb5/adm_proto.h>
+#include    "krb5/kdb_kt.h"	/* for krb5_ktkdb_set_context */
 #include    <string.h>
+#include    "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
 
 #include    "misc.h"
 
@@ -93,12 +96,7 @@ void *global_server_handle;
 #define OVSEC_KADM_ADMIN_SERVICE	"ovsec_adm/admin"
 #define OVSEC_KADM_CHANGEPW_SERVICE	"ovsec_adm/changepw"
 
-/*
- * This enables us to set the keytab that gss_acquire_cred uses, but
- * it also restricts us to linking against the Kv5 GSS-API library.
- * Since this is *k*admind, that shouldn't be a problem.
- */
-extern 	char *krb5_overridekeyname;
+extern krb5_keyblock master_keyblock;
 
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
@@ -187,6 +185,8 @@ static void display_status_1(m, code, type)
 
 /* XXX yuck.  the signal handlers need this */
 static krb5_context context;
+
+static krb5_context gctx, hctx;
 
 int main(int argc, char *argv[])
 {
@@ -485,10 +485,49 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     /* XXX krb5_overridekeyname is an internal library global and should
-        go away.  This is an awful hack. */
-
-     krb5_overridekeyname = params.admin_keytab;
+     /*
+      * Go through some contortions to point gssapi at a kdb keytab.
+      * This prevents kadmind from needing to use an actual file-based
+      * keytab.
+      */
+     ret = kg_get_context(&minor_status, &gctx);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't get krb5_gss internal context.");
+	  goto kterr;
+     }
+     /* XXX extract kadm5's krb5_context */
+     hctx = ((kadm5_server_handle_t)global_server_handle)->context;
+     /* Set ktkdb's internal krb5_context. */
+     ret = krb5_ktkdb_set_context(hctx);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't set kdb keytab's internal context.");
+	  goto kterr;
+     }
+     /* XXX master_keyblock is in guts of lib/kadm5/server_kdb.c */
+     ret = krb5_db_set_mkey(hctx, &master_keyblock);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't set master key for kdb keytab.");
+	  goto kterr;
+     }
+     ret = krb5_kt_register(gctx, &krb5_kt_kdb_ops);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't register kdb keytab.");
+	  goto kterr;
+     }
+     /* Tell gssapi about the kdb keytab. */
+     ret = krb5_gss_register_acceptor_identity("KDB:");
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Can't register acceptor keytab.");
+	  goto kterr;
+     }
+kterr:
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "%s", error_message(ret));
+	  fprintf(stderr, "%s: Can't set up keytab for RPC.\n", whoami);
+	  kadm5_destroy(global_server_handle);
+	  krb5_klog_close(context);
+	  exit(1);
+     }
 
      /*
       * Try to acquire creds for the old OV services as well as the

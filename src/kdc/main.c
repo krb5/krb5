@@ -384,7 +384,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
     }
 
     /* Set up the keytab */
-    if ((kret = krb5_ktkdb_resolve(rdp->realm_context, 
+    if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
 				   &rdp->realm_keytab))) {
 	com_err(progname, kret,
 		"while resolving kdb keytab for realm %s", realm);

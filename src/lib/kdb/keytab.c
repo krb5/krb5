@@ -36,7 +36,7 @@ krb5_error_code krb5_ktkdb_get_entry (krb5_context, krb5_keytab, krb5_const_prin
 krb5_kt_ops krb5_kt_kdb_ops = {
     0,
     "KDB", 	/* Prefix -- this string should not appear anywhere else! */
-    NULL,			/* resolve */
+    krb5_ktkdb_resolve,		/* resolve */
     NULL,			/* get_name */
     krb5_ktkdb_close,		/* close */
     krb5_ktkdb_get_entry,	/* get */
@@ -53,8 +53,9 @@ typedef struct krb5_ktkdb_data {
 } krb5_ktkdb_data;
 
 krb5_error_code
-krb5_ktkdb_resolve(context, id)
+krb5_ktkdb_resolve(context, name, id)
     krb5_context  	  context;
+    const char		* name;
     krb5_keytab		* id;
 {
     if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
@@ -83,21 +84,43 @@ krb5_ktkdb_close(context, kt)
   return 0;
 }
 
+static krb5_context ktkdb_ctx = NULL;
+
+/*
+ * Set a different context for use with ktkdb_get_entry().  This is
+ * primarily useful for kadmind, where the gssapi library context,
+ * which will be used for the keytab, will necessarily have a
+ * different context than that used by the kadm5 library to access the
+ * database for its own purposes.
+ */
 krb5_error_code
-krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
-    krb5_context 	  context;
+krb5_ktkdb_set_context(krb5_context ctx)
+{
+    ktkdb_ctx = ctx;
+    return 0;
+}
+
+krb5_error_code
+krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
+    krb5_context 	  in_context;
     krb5_keytab 	  id;
     krb5_const_principal  principal;
     krb5_kvno 	 	  kvno;
     krb5_enctype 	  enctype;
     krb5_keytab_entry 	* entry;
 {
+    krb5_context	  context;
     krb5_keyblock       * master_key;
     krb5_error_code 	  kerror = 0;
     krb5_key_data 	* key_data;
     krb5_db_entry 	  db_entry;
     krb5_boolean 	  more = 0;
     int 	 	  n = 0;
+
+    if (ktkdb_ctx)
+	context = ktkdb_ctx;
+    else
+	context = in_context;
 
     /* Open database */
     /* krb5_db_init(context); */

@@ -1,3 +1,7 @@
+2003-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Update call to krb5_ktdb_resolve().
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Default to --disable-fakeka.

@@ -1,3 +1,21 @@
+2003-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Check for ktype > 0 rather
+	than ktype >= 0; file keytab uses ktype 0 to indicate "first
+	match", as does acquire_cred.  The kdc uses -1, though.
+
+	* Makefile.in (LIBMAJOR): Bump major version due to change in
+	krb5_ktkdb_resolve's signature.
+
+	* keytab.c (krb5_ktkdb_resolve): Add NAME parameter, which is
+	ignored, so that kdb keytab can be registered.
+	(krb5_ktkdb_set_context): New function; allows caller to set a
+	different context for use with ktkdb_get_entry().  This is
+	primarily useful for kadmind, where the gssapi library context,
+	which will be used for the keytab, will necessarily have a
+	different context than that used by the kadm5 library to access
+	the database for its own purposes.
+
 2003-02-08  Tom Yu  <tlyu@mit.edu>
 
 	* keytab.c (krb5_ktkdb_get_entry): Fix comment; not going to

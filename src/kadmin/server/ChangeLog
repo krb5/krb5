@@ -1,3 +1,11 @@
+2003-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Add gssapi directories in order to
+	get internal includes.
+
+	* ovsec_kadmd.c (main): Go through contortions to set up a kdb
+	keytab for gssapi, so we can avoid needing a file-based keytab.
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ovsec_kadmd.c (do_schpw): Use socklen_t when passing address to
