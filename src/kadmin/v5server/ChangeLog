@@ -1,4 +1,9 @@
 
+Fri Apr 28 16:38:18 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_output.c	- slight cleanup to allow output_lang_supported()
+			  to function correctly.
+
+
 Fri Apr 28 10:13:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Add new library libkadm. 
 	* configure.in	- Check for presence of vsprintf.

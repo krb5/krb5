@@ -224,7 +224,7 @@ mimeify_text(msg)
 /*
  * lang_init_slist()	- Initialize list of supported languages.
  */
-static int
+static krb5_boolean
 lang_init_slist(llist)
     char	*llist;
 {
@@ -268,6 +268,7 @@ lang_init_slist(llist)
     }
     DPRINT(DEBUG_CALLS, output_debug_level,
 	   ("X lang_init_slist() = %d\n", ret));
+    return(ret);
 }
 
 /*
