@@ -36,6 +36,9 @@
 #ifndef ArAddCmd
 #define ArAddCmd ar cruv
 #endif
+#ifndef DesDefines
+#define DesDefines YouMustFigureOutYourDesDefines
+#endif
 
 #ifndef PepyPosyRules
 #define	PepyPosyRules()							@@\
@@ -118,6 +121,7 @@ libdir/lib/**/libname.a:						@@\
              PEPY = PepyCmd
              POSY = PosyCmd
             TOUCH = TouchCmd
+       DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
             OSLIB = $(TOP)/lib/os/libos.a
@@ -127,7 +131,7 @@ libdir/lib/**/libname.a:						@@\
          ISODELIB = $(ISODE)/@sys/lib/libisode.a
 
            DBMLIB = DbmLib
-          DEPKLIB = $(KRB5LIB) $(OSLIB) $(DESLIB) $(CRCLIB)
+          DEPKLIB = $(KRB5LIB) $(DESLIB) $(OSLIB) $(CRCLIB)
              KLIB = $(DEPKLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
            KDBLIB = $(DEPKDBLIB)

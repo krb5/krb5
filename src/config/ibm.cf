@@ -20,3 +20,5 @@
 #define StandardCppDefines -U__STDC__
 #define SaberDefines
 #define StandardDefines -U__STDC__
+
+#define DesDefines -DBITS32 -DBIG -DMSBFIRST -DMUSTALIGN

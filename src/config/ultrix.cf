@@ -23,11 +23,21 @@
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define HasSaberC YES
+#define DesDefines -DBITS32 -DBIG -DLSBFIRST
 #endif
 
 #ifdef MipsArchitecture
 #define HasSaberC YES
 /* #define HasGcc YES */
+#ifdef MIPSEL
+#define DesDefines -DBITS32 -DBIG -DMUSTALIGN -DLSBFIRST
+#else
+#ifdef MIPSEB
+#define DesDefines -DBITS32 -DBIG -DMUSTALIGN -DMSBFIRST
+#else /* not MIPSEB */
+ error: you must figure out what endian your MIPS is!
+#endif /* MIPSEB */
+#endif /* MIPSEL */
 #endif
 
 /**/# platform:  $XConsortium: ultrix.cf,v 1.20 89/12/22 15:56:14 rws Exp $

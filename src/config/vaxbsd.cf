@@ -27,5 +27,6 @@
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
+#define DesDefines -DBITS32 -DBIG -DLSBFIRST
 #endif
 
