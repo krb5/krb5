@@ -509,7 +509,7 @@ Principal *princ;
 
     if (retval = krb5_build_principal(&entry.mod_name, strlen(realm),
 				      realm, princ->mod_name,
-				      princ->mod_instance[0] ? princ->instance : 0,
+				      princ->mod_instance[0] ? princ->mod_instance : 0,
 				      0)) {
 	krb5_free_principal(entry.principal);
 	return retval;

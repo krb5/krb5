@@ -1,3 +1,8 @@
+Tue Nov 15 23:55:56 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kdb5_convert.c (enter_in_v5_db): use the correct instance for
+	the mod_name field.
+
 Mon Oct  3 19:12:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.
