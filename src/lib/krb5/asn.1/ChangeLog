@@ -1,3 +1,12 @@
+Tue Sep 26 19:59:56 1995    <tytso@rsts-11.mit.edu>
+
+	* krb5_decode.c: Systematic rework of all the cleanup code to make
+		the generated object file subtatially (40% on the i386
+		platform) smaller.  The cleanup is now handled with a
+		"goto error_out" statement, which prevents the cleanup
+		statements from being replicated many, many, many times
+		throughout the entire file.
+
 Mon Sep 25 16:56:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
