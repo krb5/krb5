@@ -150,7 +150,7 @@ OLDDECLARG(krb5_pa_data **, padata)
 	arg = &arg2;
     }
     my_keyblock = (krb5_keyblock *)malloc(sizeof(**key));
-    if (!*key) {
+    if (!my_keyblock) {
 	if (f_salt) xfree(salt.data);
 	if (arg != (struct v4_pwd_keyproc_arg *) keyseed) 
 		memset((char *) arg->password.data, 0, arg->password.length);
