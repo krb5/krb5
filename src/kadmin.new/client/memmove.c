@@ -38,8 +38,7 @@
 
 /* based on @(#)bcopy.c	5.11 (Berkeley) 6/21/91 */
 
-#include <krb5/osconf.h>
-#include <krb5/config.h>
+#include "k5-int.h"
 #ifdef USE_STRING_H
 #include <string.h>
 #else

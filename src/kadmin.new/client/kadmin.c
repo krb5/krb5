@@ -22,10 +22,7 @@
  * the OVSecure library
  */
 
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-#include <krb5/kdb.h>
+#include "k5-int.h"
 #include <ovsec_admin/admin.h>
 #include <stdio.h>
 #include <sys/types.h>

@@ -22,7 +22,7 @@
  * ss wrapper for kadmin
  */
 
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include <ss/ss.h>
 #include <stdio.h>
 
