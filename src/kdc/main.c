@@ -44,7 +44,7 @@ static char rcsid_main_c[] =
 
 #include "kdc_util.h"
 #include "extern.h"
-#include "../admin/common.h"
+#include "kdc5_err.h"
 
 #ifdef notdef
 /* need to sort out varargs stuff */
@@ -84,6 +84,7 @@ setup_com_err()
 {
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
+    initialize_kdc5_error_table();
     initialize_isod_error_table();
 
 #ifdef notdef
@@ -280,6 +281,7 @@ int argc;
 char *argv[];
 {
     krb5_error_code retval;
+    int errout = 0;
 
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
@@ -294,14 +296,25 @@ char *argv[];
     syslog(LOG_INFO, "commencing operation");
 
     if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
-	com_err(argv[0], retval, "cannot initialize database");
+	com_err(argv[0], retval, ": cannot initialize database");
 	exit(1);
     }
-    setup_network();			/* XXX */
-    listen_and_process();		/* XXX */
-    closedown_network();		/* XXX */
-
-    closedown_db();
-    exit(0);
+    if (retval = setup_network(argv[0])) {
+	com_err(argv[0], retval, "while initializing network");
+	exit(1);
+    }
+    if (retval = listen_and_process(argv[0])){
+	com_err(argv[0], retval, "while processing network requests");
+	errout++;
+    }
+    if (retval = closedown_network(argv[0])) {
+	com_err(argv[0], retval, "while shutting down network");
+	errout++;
+    }
+    if (retval = closedown_db()) {
+	com_err(argv[0], retval, "while closing database");
+	errout++;
+    }
+    exit(errout);
 }
 
