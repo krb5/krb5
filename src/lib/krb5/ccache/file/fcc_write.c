@@ -73,28 +73,30 @@ krb5_fcc_write(id, buf, len)
  * system errors
  */
 
+/* XXX TODO: write principal type to file XXX */
+
 krb5_error_code
 krb5_fcc_store_principal(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     krb5_error_code ret;
-     krb5_principal temp;
-     krb5_int32 i, length = 0;
+    krb5_error_code ret;
+    krb5_int32 i, length;
 
-     /* Count the number of components */
-     temp = princ;
-     while (*temp++)
-	  length += 1;
+    length = krb5_princ_size(princ);
 
-     ret = krb5_fcc_store_int32(id, &length);
-     CHECK(ret);
-     for (i=0; i < length; i++) {
-	  ret = krb5_fcc_store_data(id, princ[i]);
-	  CHECK(ret);
-     }
+    ret = krb5_fcc_store_int32(id, &length);
+    CHECK(ret);
 
-     return KRB5_OK;
+    ret = krb5_fcc_store_data(id, krb5_princ_realm(princ));
+    CHECK(ret);
+
+    for (i=0; i < length; i++) {
+	ret = krb5_fcc_store_data(id, krb5_princ_component(princ, i));
+	CHECK(ret);
+    }
+
+    return KRB5_OK;
 }
 
 krb5_error_code
