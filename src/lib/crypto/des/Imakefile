@@ -66,6 +66,8 @@ VERIFYOBJ = verify.o
 
 DESTESTOBJ = destest.o
 
+includes:: depend
+
 all::
 depend:: des.c $(SRCS)
 
@@ -73,7 +75,7 @@ SubdirLibraryRule($(OBJS))
 
 DependTarget()
 
-$(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
+$(OBJS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
 clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
