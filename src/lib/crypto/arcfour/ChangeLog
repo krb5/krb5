@@ -1,3 +1,8 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* string_to_key.c (krb5_arcfour_string_to_key): Cleanup variables
+	defined but not used.
+
 2001-10-25  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c: GSSAPI usage translations

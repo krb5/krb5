@@ -18,7 +18,7 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
 	krb5_const krb5_data *salt;
 	krb5_keyblock *key;
 {
-  int len,slen,saltlen,counter;
+  int len,slen;
   unsigned char *copystr;
   krb5_MD4_CTX md4_context;
   
@@ -53,9 +53,12 @@ krb5_arcfour_string_to_key(enc, string, salt, key)
 #if 0  
   /* test the string_to_key function */
   printf("Hash=");
-  for(counter=0;counter<16;counter++)
-    printf("%02x", md4_context.digest[counter]);
-  printf("\n");
+  {
+    int counter;
+    for(counter=0;counter<16;counter++)
+      printf("%02x", md4_context.digest[counter]);
+    printf("\n");
+  }
 #endif /* 0 */
 
   /* Zero out the data behind us */
