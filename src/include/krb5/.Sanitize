@@ -36,25 +36,14 @@ adm.h
 adm_defs.h
 adm_proto.h
 asn.1
-asn1.h
 autoconf.h.in
 configure
 configure.in
 copyright.h
-dbm.h
-ext-proto.h
-k5-config.h
-k5-errors.h
 kdb.h
 kdb_dbm.h
-libos.h
-los-proto.h
 macsock.h
-mit-des.h
-preauth.h
-rsa-md5.h
 stock
-sysincl.h
 winsock.h
 
 Things-to-lose:

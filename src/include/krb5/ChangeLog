@@ -1,4 +1,11 @@
 
+Thu Jul 27 15:06:35 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* {asn1,dbm,ext-proto,k5-{config,errors,sockets},libos,los-proto,
+	   mit-des,preauth,rsa-md5,sysincl}.h - Deleted.
+	* Makefile.in - Remove these headers from KRB5_HEADERS.
+	* configure.in - Change AC_INIT to look for kdb.h.
+
+
 Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
 
         * kdb.h - Define new kdb format.

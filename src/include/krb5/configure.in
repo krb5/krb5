@@ -1,4 +1,4 @@
-AC_INIT(ext-proto.h)
+AC_INIT(kdb.h)
 CONFIG_RULES
 AC_CONFIG_HEADER(autoconf.h)
 AC_PROG_LEX
