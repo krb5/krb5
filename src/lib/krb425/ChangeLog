@@ -1,3 +1,7 @@
+Tue Mar  7 19:58:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_INCLUDE.
+
 Tue Feb 28 00:23:19 1995  John Gilmore  (gnu at toad.com)
 
 	* cksum.c, des.c, des.h, enc_dec.c, pcbc_encrypt.c, quad_cksum.c,

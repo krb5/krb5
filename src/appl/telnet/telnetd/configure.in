@@ -11,7 +11,6 @@ ADD_DEF(-DKRB4)
 K4LIB='$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a',
 K4LIB=)
 AC_SUBST(K4LIB)
-ISODE_INCLUDE
 WITH_NETLIB
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)

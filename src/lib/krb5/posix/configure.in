@@ -4,7 +4,6 @@ AC_SET_BUILDTOP
 CONFIG_RULES
 SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
-ISODE_INCLUDE
 AC_CONST
 AC_HEADER_CHECK(paths.h,AC_DEFINE(HAS_PATHS_H))
 AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon)

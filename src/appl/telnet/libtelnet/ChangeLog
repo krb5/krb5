@@ -1,3 +1,7 @@
+Tue Mar  7 19:52:00 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_DEFS, ISODE_INCLUDE.
+
 Tue Feb 28 01:48:32 1995  John Gilmore  (gnu at toad.com)
 
 	* forward.c, kerberos5.c:  Avoid <krb5/...> includes.

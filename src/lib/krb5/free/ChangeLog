@@ -1,3 +1,7 @@
+Tue Mar  7 19:53:33 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_DEFS, ISODE_INCLUDE.
+
 Wed Mar 1 16:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* f_princ.h: changed int to krb5_int32 for the PC.

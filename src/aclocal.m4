@@ -463,26 +463,6 @@ install:: $1
 AC_DIVERT_POP()dnl
 ])dnl
 dnl
-dnl PepsyTarget(basename)
-dnl
-define(PepsyTarget,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
-.SUFFIXES:	.py
-$1_defs.h $1_pre_defs.h $1-types.h $1_tables.c:: $1-asn.py
-	@echo '***Ignore the warning message "Warning: Can'"'"'t find UNIV.ph failed"'
-	[$](PEPSY) [$](PSYFLAGS) [$](srcdir)/$1-asn.py
-
-AC_DIVERT_POP()dnl
-])dnl
-dnl
-define(UsePepsy,[
-echo "using pepsy"
-PSYFLAGS="-f -h0 -a -s -C"
-PEPSY='$(BUILDTOP)/isode/pepsy/xpepsy'
-AC_SUBST(PEPSY)dnl
-AC_SUBST(PSYFLAGS)dnl
-])dnl
-dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
 dnl
 define(ADD_DEF,[
@@ -493,17 +473,6 @@ dnl local includes are used -- KRB_INCLUDE
 dnl
 define(KRB_INCLUDE,[
 ADD_DEF([-I$(SRCTOP)/include -I$(BUILDTOP)/include -I$(SRCTOP)/include/krb5 -I$(BUILDTOP)/include/krb5])dnl
-])dnl
-dnl
-dnl ISODE/pepsy includes are used -- ISODE_INCLUDE
-dnl
-define(ISODE_INCLUDE,[
-AC_ARG_ENABLE([isode],
-[  --enable-isode          build and use ISODE to generate ASN.1 stubs],
-ISODELIB='[$(TOPLIBD)/libisode.a]'
-ADD_DEF([-DKRB5_USE_ISODE -I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h]),
-ISODELIB=)dnl
-AC_SUBST([ISODELIB])dnl
 ])dnl
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
@@ -542,11 +511,6 @@ then
 fi
 AC_MSG_RESULT(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
-dnl
-dnl
-dnl allow for compilation with isode (yuck!)
-dnl
-define(ISODE_DEFS,)dnl
 dnl
 dnl make this one deeper...
 dnl

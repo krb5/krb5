@@ -1,3 +1,7 @@
+Tue Mar  7 19:55:14 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_DEFS.
+
 Thu Mar 2 11:50:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* ktf_util.c: Changed NEED_WINSOCK_H to NEED_SOCKETS

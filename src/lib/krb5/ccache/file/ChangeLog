@@ -1,3 +1,7 @@
+Tue Mar  7 19:54:48 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_DEFS.
+
 Tue Mar 7 15:58:15 1995 Keith Vetter (keithv@fusion.com)
 
 	* fcc.h: alwas pull in low-level i/o stuff for the PC.

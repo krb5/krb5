@@ -1,7 +1,5 @@
 AC_INIT(auth.c)
 WITH_CCOPTS
-ISODE_DEFS
-ISODE_INCLUDE
 CONFIG_RULES
 AC_SET_BUILDTOP
 AC_PROG_ARCHIVE
@@ -11,7 +9,6 @@ AC_REPLACE_FUNCS([strcasecmp strdup setenv setsid strerror strftime getopt herro
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 LIBOBJS="$LIBOBJS getent.o"
 KRB_INCLUDE
-ISODE_INCLUDE
 WITH_KRB4
 AC_ARG_WITH([krb4],,dnl
 ADD_DEF([-I${KRB4}/include -DKRB4]))

@@ -1,3 +1,10 @@
+Tue Mar  7 19:49:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (UsePepsy, PepsyTarget): removed, not referenced
+	anywhere in the tree.
+	(ISODE_INCLUDE, ISODE_DEFS): removed along with remaining
+	references in the tree. --enable-isode is dead.
+
 Wed Mar  1 16:40:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* acconfig.h: Add HAS_LABS defintiion.

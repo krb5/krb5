@@ -1,3 +1,7 @@
+Tue Mar  7 19:53:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_DEFS.
+
 Tue Mar 7 15:55:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* ccbase.c, ccdefault.c: added window INTERFACE keyword.

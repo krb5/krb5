@@ -1,7 +1,6 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
 CONFIG_RULES
-ISODE_DEFS
 AC_SET_BUILDTOP
 dnl time checks are for timeofday.c (which gets them from osconf.h)
 dnl and gmt_mktime.c (which only gets them from here...)
@@ -10,5 +9,4 @@ AC_HAVE_HEADERS(unistd.h sys/time.h)
 AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
-ISODE_INCLUDE
 V5_AC_OUTPUT_MAKEFILE

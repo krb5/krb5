@@ -1,3 +1,7 @@
+Tue Mar  7 19:57:50 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_INCLUDE.
+
 Tue Mar 7 12:30:45 1995 Keith Vetter (keithv@fusion.com)
 
 	* syslog.c: a disabled stub provided for satisfying the linker

@@ -1,3 +1,7 @@
+Tue Mar  7 19:58:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: take out ISODE_INCLUDE.
+
 Tue Feb 28 02:17:40 1995  John Gilmore  (gnu at toad.com)
 
 	* kadmin.c, memmove.c, ss_wrapper.c:  Avoid <krb5/...> includes.
