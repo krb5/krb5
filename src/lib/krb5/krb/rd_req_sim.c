@@ -62,7 +62,7 @@ krb5_tkt_authent **authdat;
 {
     krb5_error_code retval;
     krb5_ap_req *request;
-    krb5_rcache rcache;
+    krb5_rcache rcache = 0;
 
     if (!krb5_is_ap_req(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -74,15 +74,20 @@ krb5_tkt_authent **authdat;
 	    return(retval);
 	}
     }
-    if (!(retval = krb5_get_server_rcache(krb5_princ_component(server, 1),
-					  &rcache))) {
-	retval = krb5_rd_req_decoded(request, server,
-				     sender_addr, 0,
-				     0, 0, rcache, authdat);
-	krb5_rc_close(rcache);
-    }
-    krb5_free_ap_req(request);
 
+    if (server) {
+	retval = krb5_get_server_rcache(krb5_princ_component(server, 0),
+					&rcache);
+	if (retval)
+	    goto cleanup;
+    }
+
+    retval = krb5_rd_req_decoded(request, server, sender_addr, 0, 0, 0,
+				 rcache, authdat);
+cleanup:
+    if (rcache)
+	krb5_rc_close(rcache);
+    krb5_free_ap_req(request);
     return retval;
 }
 
