@@ -175,7 +175,7 @@ int krb_sendauth P((long , int , KTEXT , char *, char *, char *, u_long , MSG_DA
 int krb_sendsvc P((int , char *));
 
 /* setenv.c */
-int setenv P((char *, char *, int ));
+/* int setenv P((char *, char *, int )); -- is also in telnetd/local-proto.h */
 void unsetenv P((char *));
 char *getenv P((char *));
 char *_findenv P((char *, int *));
