@@ -77,9 +77,9 @@ krb5_error_code krb5_get_in_tkt
 					krb5_keyblock **,
 					krb5_pointer ),
 		   krb5_pointer,
-		   krb5_error_code (* )(krb5_kdc_rep *,
-					krb5_keyblock *,
-					krb5_pointer ),
+		   krb5_error_code (* )(krb5_keyblock *,
+					krb5_pointer,
+					krb5_kdc_rep * ),
 		   krb5_pointer,
 		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt_with_password
