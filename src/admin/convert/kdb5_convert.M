@@ -35,6 +35,9 @@ kdb5_convert \- convert a v4 Kerberos principal database to a v5 database
 .B \-D
 .I v4dbname
 ] [
+.B \-f
+.I v4dumpfile
+] [
 .B \-k
 .I keytype
 ] [
@@ -79,6 +82,12 @@ option specifies the name under which the version 4 principal database
 is to be found.
 .PP
 The
+.B \-f
+.I v4dumpfile
+option specifies that the version 4 database should be loaded from the
+dump file rather than from a principal database.
+.PP
+The
 .B \-k
 .I keytype
 option specifies the key type (as an ascii representation of a decimal
@@ -108,3 +117,7 @@ krb5(3), krb5kdc(8)
 Doesn't have flexibility about expiration times.  Probably doesn't
 handle any v4 inter-realm keys.  Spits out names of all the entries it
 processes.
+.sp
+When the underlying databases are built on the old DBM (not NDBM), the
+conversion must be done from a dump file rather than from a DBM
+database, due to restrictions in the old DBM implementation.
