@@ -30,15 +30,20 @@
 #include "k5-int.h"
 
 extern const krb5_kt_ops krb5_ktf_ops;
+extern const krb5_kt_ops krb5_ktf_writable_ops;
 extern const krb5_kt_ops krb5_kts_ops;
 
 struct krb5_kt_typelist {
     const krb5_kt_ops *ops;
     struct krb5_kt_typelist *next;
 };
+static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
+    &krb5_ktf_writable_ops,
+    0
+};
 static struct krb5_kt_typelist krb5_kt_typelist_file  = {
     &krb5_ktf_ops,
-    0
+    &krb5_kt_typelist_wrfile
 };
 static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
     &krb5_kts_ops,
@@ -93,14 +98,31 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     }
 
     pfxlen = cp - name;
-    resid = name + pfxlen + 1;
-	
-    pfx = malloc (pfxlen+1);
-    if (!pfx)
-	return ENOMEM;
 
-    memcpy (pfx, name, pfxlen);
-    pfx[pfxlen] = '\0';
+#if defined(_WIN32)
+    if ( pfxlen == 1 ) {
+        /* We found a drive letter not a prefix */
+        return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
+    }
+#endif
+
+    if ( pfxlen == 1 && isalpha(name[0]) ) {
+        /* We found a drive letter not a prefix - use FILE: */
+        pfx = strdup("FILE:");
+        if (!pfx)
+            return ENOMEM;
+
+        resid = name;
+    } else {
+        resid = name + pfxlen + 1;
+	
+        pfx = malloc (pfxlen+1);
+        if (!pfx)
+            return ENOMEM;
+
+        memcpy (pfx, name, pfxlen);
+        pfx[pfxlen] = '\0';
+    }
 
     *ktid = (krb5_keytab) 0;
 

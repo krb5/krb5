@@ -1,3 +1,27 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke PRIOCNTL_HACK.
+
+2003-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Don't bother reading in
+	realm_keysalts or realm_num_keysalts, as they're no longer used.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Change default max_life to
+	one day.
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Remove aes256 from the
+	default supported enctypes list for now.
+
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Add aes256 to the default
+	supported enctypes list.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,

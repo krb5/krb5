@@ -4,6 +4,7 @@
  *
  */
 
+#include "prof_int.h"
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
@@ -11,7 +12,6 @@
 #endif
 #include <errno.h>
 #include <limits.h>
-#include "prof_int.h"
 
 /*
  * These functions --- init_list(), end_list(), and add_to_list() are

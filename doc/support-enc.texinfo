@@ -16,6 +16,12 @@ DES cbc mode with RSA-MD5
 triple DES cbc mode with HMAC/sha1
 @item des-hmac-sha1 
 DES with HMAC/sha1
+@item aes256-cts-hmac-sha1-96
+@itemx aes256-cts
+AES-256 CTS mode with 96-bit SHA-1 HMAC
+@item aes128-cts-hmac-sha1-96
+@itemx aes128-cts
+AES-128 CTS mode with 96-bit SHA-1 HMAC
 @item arcfour-hmac 
 @itemx rc4-hmac
 @itemx arcfour-hmac-md5

@@ -120,27 +120,52 @@ static void test_cts()
 					       krb5_data *);
 
     int i;
-    char outbuf[64];
-    krb5_data in, out;
+    char outbuf[64], encivbuf[16], decivbuf[16], outbuf2[64];
+    krb5_data in, out, enciv, deciv, out2;
     krb5_keyblock key;
     krb5_error_code err;
 
     in.data = input;
     out.data = outbuf;
+    out2.data = outbuf2;
+    enciv.length = deciv.length = 16;
+    enciv.data = encivbuf;
+    deciv.data = decivbuf;
     key.contents = aeskey;
     key.length = 16;
 
+    memset(enciv.data, 0, 16);
     printk("AES 128-bit key", &key);
     for (i = 0; i < sizeof(lengths)/sizeof(lengths[0]); i++) {
+    memset(enciv.data, 0, 16);
+    memset(deciv.data, 0, 16);
+
 	printf("\n");
 	in.length = out.length = lengths[i];
-	err = krb5int_aes_encrypt(&key, 0, &in, &out);
+	printd("IV", &enciv);
+	err = krb5int_aes_encrypt(&key, &enciv, &in, &out);
 	if (err) {
 	    printf("error %ld from krb5int_aes_encrypt\n", (long)err);
 	    exit(1);
 	}
 	printd("Input", &in);
 	printd("Output", &out);
+	printd("Next IV", &enciv);
+	out2.length = out.length;
+	err = krb5int_aes_decrypt(&key, &deciv, &out, &out2);
+	if (err) {
+	    printf("error %ld from krb5int_aes_decrypt\n", (long)err);
+	    exit(1);
+	}
+	if (out2.length != in.length
+	    || memcmp(in.data, out2.data, in.length)) {
+	    printd("Decryption result DOESN'T MATCH", &out2);
+	    exit(1);
+	}
+	if (memcmp(enciv.data, deciv.data, 16)) {
+	    printd("Decryption IV result DOESN'T MATCH", &deciv);
+	    exit(1);
+	}
     }
 }
 

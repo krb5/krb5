@@ -350,6 +350,22 @@ types can be set to some combination of the following strings.
 
 @include support-enc.texinfo
 
+While aes128-cts and aes256-cts are supported for all Kerberos
+operations, they are not supported by older versions of our GSSAPI
+implementation (krb5-1.3.1 and earlier).
+
+By default, AES is enabled in this release.  Sites wishing to use AES
+encryption types on their KDCs need to be careful not to give GSSAPI
+services AES keys if the servers have not been updated.  If older
+GSSAPI services are given AES keys, then services may fail when
+clients supporting AES for GSSAPI are used.  Sites may wish to use AES
+for user keys and for the ticket granting ticket key, although doing
+so requires specifying what encryption types are used as each
+principal is created.
+
+If all GSSAPI-based services have been updated before or with the KDC,
+this is not an issue.
+
 @node Salts, krb5.conf, Supported Encryption Types, Configuration Files
 @section Salts
 
@@ -425,9 +441,7 @@ If this is set to 1 (for true), then client machines will compute the
 difference between their time and the time returned by the KDC in the
 timestamps in the tickets and use this value to correct for an
 inaccurate system clock.  This corrective factor is only used by the
-Kerberos library.  The default is @value{DefaultKDCTimesyncMac} for
-Macintosh computers and @value{DefaultKDCTimesync} for all other
-platforms.
+Kerberos library.  The default is @value{DefaultKDCTimesync}.
 
 @itemx kdc_req_checksum_type
 @itemx ap_req_checksum_type
@@ -466,9 +480,7 @@ type of cache to be created by kinit, or when forwarded tickets are
 received.  DCE and Kerberos can share the cache, but some versions of
 DCE do not support the default cache as created by this version of
 Kerberos.  Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
-DCE 1.1 systems.  The default value is @value{DefaultCcacheTypeMac}
-for Macintosh computers and @value{DefaultCcacheType} for other
-platforms.
+DCE 1.1 systems.  The default value is @value{DefaultCcacheType}.
 
 @ignore
 @itemx tkt_lifetime
@@ -610,6 +622,33 @@ The list of specifiable options for each application may be found in
 that application's man pages.  The application defaults specified here
 are overridden by those specified in the [realms] section.
 
+A special application name (afs_krb5) is used by the krb524 service to
+know whether new format AFS tokens based on Kerberos 5 can be used
+rather than the older format which used a converted Kerberos 4 ticket.
+The new format allows for cross-realm authentication without
+introducing a security hole.  It is used by default.  Older AFS
+servers (before OpenAFS 1.2.8) will not support the new format.  If
+servers in your cell do not support the new format, you will need to
+add an @code{afs_krb5} relation to the @code{appdefaults} section.
+The following config file shows how to disable new format AFS tickets
+for the @code{afs.example.com} cell in the @code{EXAMPLE.COM} realm.
+
+@smallexample
+@group
+[appdefaults]
+    afs_krb5 = @{ 
+        EXAMPLE.COM = @{
+            afs/afs.example.com = false
+        @}
+    @}
+
+@end group
+@end smallexample
+
+
+
+
+
 @node login, realms (krb5.conf), appdefaults, krb5.conf
 @subsection [login]
 
@@ -665,6 +704,15 @@ your computer to be able to communicate with the KDC for each realm,
 this tag must be given a value in each realm subsection in the
 configuration file, or there must be DNS SRV records specifying the
 KDCs (see @ref{Using DNS}).
+
+@itemx master_kdc
+Identifies the master KDC(s).  Currently, this tag is used in only one
+case: If an attempt to get credentials fails because of an invalid
+password, the client software will attempt to contact the master KDC,
+in case the user's password has just been changed, and the updated
+database has not been propagated to the slave servers yet.  (We don't
+currently check whether the KDC from which the initial response came
+is on the master KDC list.  That may be fixed in the future.)
 
 @itemx admin_server
 Identifies the host where the administration server is running.
@@ -995,6 +1043,7 @@ Here is an example of a generic @code{krb5.conf} file:
         kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
         kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}:750
         admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
+        master_kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
         default_domain = @value{PRIMARYDOMAIN}
     @}
     @value{SECONDREALM} = @{
@@ -1089,9 +1138,9 @@ uses to determine which principals are allowed which permissions on the
 database.  The default is @code{@value{DefaultAclFile}}.
 
 @itemx admin_keytab
-(String.)  Location of the keytab file that kadmin uses to authenticate
-to the database.  The default is
-@code{@value{DefaultAdminKeytab}}.
+(String.)  Location of the keytab file that the legacy administration
+daemons @code{kadmind4} and @code{v5passwdd} use to authenticate to
+the database.  The default is @code{@value{DefaultAdminKeytab}}.
 
 @itemx database_name
 (String.)  Location of the Kerberos database for this realm.  The
@@ -1222,10 +1271,6 @@ will have keys of these types.  The default value for this tag is
 @value{DefaultSupportedEnctypes}. For lists of possible values, see
 @ref{Supported Encryption Types} and @ref{Salts}.
 
-@itemx kdc_supported_enctypes
-Specifies the permitted key/salt combinations of principals for this
-realm.  The format is the same as @code{supported_enctypes}.
-
 @itemx reject_bad_transit
 A boolean value (@code{true}, @code{false}).  If set to @code{true}, the
 KDC will check the list of transited realms for cross-realm tickets
@@ -1277,7 +1322,6 @@ Here's an example of a @code{kdc.conf} file:
         max_renewable_life = 7d 0h 0m 0s
         master_key_type = des3-hmac-sha1
         supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
-        kdc_supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
     @}
 
 [logging]

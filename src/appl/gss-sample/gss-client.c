@@ -19,6 +19,29 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+/*
+ * Copyright (C) 2003, 2004 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,6 +69,7 @@ static int verbose = 1;
 static void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
+     fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]\n");
      fprintf(stderr, "       [-f] [-q] [-ccount count] [-mcount count]\n");
      fprintf(stderr, "       [-v1] [-na] [-nw] [-nx] [-nm] host service msg\n");
      exit(1);
@@ -106,11 +130,12 @@ static int connect_to_server(host, port)
  *
  * Arguments:
  *
- * 	s		(r) an established TCP connection to the service
- * 	service_name	(r) the ASCII service name of the service
- *	deleg_flag	(r) GSS-API delegation flag (if any)
+ * 	s		    (r) an established TCP connection to the service
+ * 	service_name(r) the ASCII service name of the service
+ *	gss_flags	(r) GSS-API delegation flag (if any)
  *	auth_flag	(r) whether to actually do authentication
- *	oid		(r) OID of the mechanism to use
+ *  v1_format   (r) whether the v1 sample protocol should be used
+ *	oid		    (r) OID of the mechanism to use
  * 	context		(w) the established GSS-API context
  *	ret_flags	(w) the returned flags from init_sec_context
  *
@@ -128,12 +153,12 @@ static int connect_to_server(host, port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-static int client_establish_context(s, service_name, deleg_flag, auth_flag,
+static int client_establish_context(s, service_name, gss_flags, auth_flag,
 				    v1_format, oid, gss_context, ret_flags)
      int s;
      char *service_name;
      gss_OID oid;
-     OM_uint32 deleg_flag;
+     OM_uint32 gss_flags;
      int auth_flag;
      int v1_format;
      gss_ctx_id_t *gss_context;
@@ -191,8 +216,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 				gss_context,
 				target_name,
 				oid,
-				GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
-				deleg_flag,
+				gss_flags,
 				0,
 				NULL,	/* no channel bindings */
 				token_ptr,
@@ -301,7 +325,7 @@ static void read_file(file_name, in_buf)
  * 	host		(r) the host providing the service
  * 	port		(r) the port to connect to on host
  * 	service_name	(r) the GSS-API service name to authenticate to
- *	deleg_flag	(r) GSS-API delegation flag (if any)
+ *	gss_flags	(r) GSS-API delegation flag (if any)
  *	auth_flag	(r) whether to do authentication
  *	wrap_flag	(r) whether to do message wrapping at all
  *	encrypt_flag	(r) whether to do encryption while wrapping
@@ -320,14 +344,14 @@ static void read_file(file_name, in_buf)
  * reads back a GSS-API signature block for msg from the server, and
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
-static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
+static int call_server(host, port, oid, service_name, gss_flags, auth_flag,
 		       wrap_flag, encrypt_flag, mic_flag, v1_format, msg, use_file,
 		       mcount)
      char *host;
      u_short port;
      gss_OID oid;
      char *service_name;
-     OM_uint32 deleg_flag;
+     OM_uint32 gss_flags;
      int auth_flag, wrap_flag, encrypt_flag, mic_flag;
      int v1_format;
      char *msg;
@@ -357,7 +381,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
 	  return -1;
 
      /* Establish context */
-     if (client_establish_context(s, service_name, deleg_flag, auth_flag,
+     if (client_establish_context(s, service_name, gss_flags, auth_flag,
 				  v1_format, oid, &context,
 				  &ret_flags) < 0) {
 	  (void) close(s);
@@ -581,7 +605,8 @@ int main(argc, argv)
      char *mechanism = 0;
      u_short port = 4444;
      int use_file = 0;
-     OM_uint32 deleg_flag = 0, min_stat;
+     OM_uint32 gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
+     OM_uint32 min_stat;
      gss_OID oid = GSS_C_NULL_OID;
      int mcount = 1, ccount = 1;
      int i;
@@ -603,7 +628,13 @@ int main(argc, argv)
 	       if (!argc) usage();
 	       mechanism = *argv;
 	   } else if (strcmp(*argv, "-d") == 0) {
-	       deleg_flag = GSS_C_DELEG_FLAG;
+	       gss_flags |= GSS_C_DELEG_FLAG;
+	   } else if (strcmp(*argv, "-seq") == 0) {
+	       gss_flags |= GSS_C_SEQUENCE_FLAG;
+	   } else if (strcmp(*argv, "-noreplay") == 0) {
+	       gss_flags &= ~GSS_C_REPLAY_FLAG;
+	   } else if (strcmp(*argv, "-nomutual") == 0) {
+	       gss_flags &= ~GSS_C_MUTUAL_FLAG;
 	  } else if (strcmp(*argv, "-f") == 0) {
 	       use_file = 1;
 	  } else if (strcmp(*argv, "-q") == 0) {
@@ -644,7 +675,7 @@ int main(argc, argv)
 
      for (i = 0; i < ccount; i++) {
        if (call_server(server_host, port, oid, service_name,
-		       deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
+		       gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
 		       v1_format, 		       msg, use_file, mcount) < 0)
 	 exit(1);
      }

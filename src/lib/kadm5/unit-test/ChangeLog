@@ -1,3 +1,39 @@
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which
+	is not present in tcl-8.3.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl
+	things to work around Solaris 9 pty-close bug.
+
+	* Makefile.in (unit-test-client-body, unit-test-server-body): Add
+	PRIOCNTL_HACK.
+
+2003-10-16  Tom Yu  <tlyu@mit.edu>
+
+	* api.1/lock.exp: Work around a race condition in the Solaris 9
+	pty implementation: output sent to a pty slave immediately before
+	last close/exit can get lost on the way to the master.  This is
+	Sun bug #4927647.  The workaround consists of changing the tests
+	to always make lock-test wait to read a character prior to
+	exiting, so any output prior to the "wait" directive will not get
+	lost.
+
+2003-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test117): Update lifetime expected for new
+	defaults.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* api.0/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
+	* api.2/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.

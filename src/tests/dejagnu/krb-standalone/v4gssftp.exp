@@ -179,7 +179,11 @@ proc v4ftp_test { } {
     global tmppwd
     global ftp_save_ktname
     global ftp_save_ccname
+    global des3_krbtgt
 
+    if {$des3_krbtgt} {
+	return
+    }
     # Start up the kerberos and kadmind daemons and get a srvtab and a
     # ticket file.
     if {![start_kerberos_daemons 0] \

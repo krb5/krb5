@@ -547,7 +547,9 @@ krb5_error_code get_best_principal(context, plist, client)
 			 krb5_princ_realm(context, temp_client)->length))){
 	    
 	    
-	    if(nelem){ 
+	    if (nelem &&
+		krb5_princ_size(context, *client) > 0 &&
+		krb5_princ_size(context, temp_client) > 0) {
 		krb5_data *p1 =
 		    krb5_princ_component(context, *client, 0);
 		krb5_data *p2 = 

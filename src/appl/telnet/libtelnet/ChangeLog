@@ -1,3 +1,29 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos5.c (kerberos5_send): Rename getlocalsubkey ->
+	getsendsubkey.
+	(kerberos5_is): Rename getremotesubkey -> getrecvsubkey.
+
+2003-04-10  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Use library build framework.
+
+	* configure.in: Add support for library build framework.  Remove
+	old explicit checks for ranlib, etc.
+
+2003-04-09  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos.c (kerberos4_status): Always copy in username if
+	present.  Patch from Nathan Neulinger to make "-a user" work.
+
+	* kerberos5.c (kerberos5_status): Always copy in username if
+	present.  Patch from Nathan Neulinger to make "-a user" work.
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kerberos5.c (kerberos5_is): Check principal name length before
+	examining components.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.orig: Deleted.

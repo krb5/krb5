@@ -59,7 +59,14 @@ krb5_mk_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *out
 
     repl.ctime = auth_context->authentp->ctime;    
     repl.cusec = auth_context->authentp->cusec;    
-    repl.subkey = auth_context->authentp->subkey;    
+    if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_USE_SUBKEY) {
+	retval = krb5int_generate_and_save_subkey (context, auth_context,
+						   auth_context->keyblock);
+	if (retval)
+	    return retval;
+	repl.subkey = auth_context->send_subkey;
+    } else
+	repl.subkey = auth_context->authentp->subkey;
     repl.seq_number = auth_context->local_seq_number;
 
     /* encode it before encrypting */
