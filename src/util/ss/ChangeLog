@@ -1,3 +1,10 @@
+Mon Oct  3 17:26:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in:
+	  configure.in:  Don't try to compile mk_cmds.  Use awk/sed shell
+	  	  script replacement instead.  It's more apt to be
+		  portable, since it doesn't use lex or yacc.  :-(
+
 Tue Aug 30 21:30:18 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* cmd_tbl.lex.l: Add declaration for strdup() if HAS_STRDUP is not

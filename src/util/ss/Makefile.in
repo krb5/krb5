@@ -1,5 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
+SED = /bin/sed
 
 INSTALLLIB=cp
 INSTALLFILE=cp
@@ -34,6 +35,8 @@ SRCS=	invocation.c help.c \
 	data.c  \
 	ss_err.h
 # ss_err.h here, so that make depend catches it.
+
+std_rqs.o:: std_rqs.c ss_err.h
 
 CODE= $(SRCS) $(MKCMDSFILES)
 
@@ -88,7 +91,7 @@ ss_err.h: ss_err.et
 ss_err.c: ss_err.et
 
 clean::
-	$(RM) ss_err.o ss_err.c ss_err.h std_rqs.c
+	$(RM) ss_err.o ss_err.c ss_err.h std_rqs.c ct_c.awk ct_c.sed
 
 depend:: ss_err.h
 
@@ -123,13 +126,23 @@ libss.o:	$(OBJS)
 # program(mk_cmds,$(MKCMDSOBJS), , LEXLIB BSDLIB,$(PROGDIR)) 
 all:: mk_cmds
 
-mk_cmds: $(MKCMDSOBJS)
-	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
+#mk_cmds: $(MKCMDSOBJS)
+#	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
+#
+#mk_cmds.o:	ss_err.h
+#
+#install::
+#	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds
 
-mk_cmds.o:	ss_err.h
+mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script
+	$(srcdir)/config_script $(srcdir)/mk_cmds.sh $(AWK) $(SED) > mk_cmds
+	chmod 755 mk_cmds	
 
-install::
-	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds
+ct_c.awk: $(srcdir)/ct_c.awk
+	$(CP) $(srcdir)/ct_c.awk ct_c.awk
+
+ct_c.sed: $(srcdir)/ct_c.sed
+	$(CP) $(srcdir)/ct_c.sed ct_c.sed
 
 clean::
 	$(RM) mk_cmds $(MKCMDSOBJS)
