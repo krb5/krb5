@@ -1,3 +1,9 @@
+Fri Jun  9 18:59:02 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
+		recurse down subdirectories.
+
 Tue Jun  6 19:46:00 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: fix make install

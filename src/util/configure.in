@@ -1,11 +1,7 @@
 AC_INIT(configure.in)
-WITH_CCOPTS
 CONFIG_RULES
-AC_SET_BUILDTOP
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 CONFIG_DIRS(et ss profile berk_db)
-MAKE_SUBDIRS("making",all)
-MAKE_SUBDIRS("cleaning",clean)
-MAKE_SUBDIRS("installing",install)
+DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE
