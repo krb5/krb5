@@ -24,10 +24,13 @@
 #if !defined(WTMP_FILE) && defined(_PATH_WTMP)
 #define WTMP_FILE _PATH_WTMP
 #endif
-/* Other cases go here as necessary; else use /usr/adm/wtmp*/
-#ifndef PATH_WTMP
-#define PATH_WTMP "/usr/adm/wtmp"
+
+
+/* if it is *still* missing, assume SunOS */
+#ifndef WTMP_FILE
+#define	WTMP_FILE	"/usr/adm/wtmp"
 #endif
+
 
 long ptyint_update_wtmp (ent , host)
     struct utmp *ent;
