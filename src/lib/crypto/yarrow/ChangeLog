@@ -1,3 +1,9 @@
+2002-01-14  Sam Hartman  <hartmans@mit.edu>
+
+	* yarrow.c (krb5int_yarrow_reseed): The MS word of  the integer
+	counter going into v_i will always be zero; don't try
+	right-shifting by 32. 
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* yarrow.c (krb5int_yarrow_stretch): Delare local variable unsigned. 

@@ -668,7 +668,7 @@ int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
 	HASH_Init(&hash);
 	HASH_Update(&hash, v_i, sizeof(v_i));
 	HASH_Update(&hash, v_0, sizeof(v_0));
-	big_endian_int32 = make_big_endian32(i >> 32); /* MS word */
+	big_endian_int32 = make_big_endian32(0); /* MS word */
 	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
 	big_endian_int32 = make_big_endian32(i & 0xFFFFFFFF); /* LS word */
 	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
