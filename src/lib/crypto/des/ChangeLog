@@ -1,3 +1,8 @@
+Mon Mar 11 11:03:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* new_rn_key.c (mit_des_generate_random_block): Add const keywrod
+		to cast for suncc warning.
+
 Thu Feb 22 20:32:08 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* t_random.c: New file which just tests the random number generator.

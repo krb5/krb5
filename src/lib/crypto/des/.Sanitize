@@ -32,6 +32,12 @@ cbc_cksum.c
 configure
 configure.in
 cs_entry.c
+d3_cbc.c
+d3_ecb.c
+d3_kysched.c
+d3_procky.c
+d3_rndky.c
+d3_str2ky.c
 des.h
 des_int.h
 destest.c
@@ -54,7 +60,9 @@ new_rn_key.c
 process_ky.c
 random_key.c
 string2key.c
-verify.c
+t_random.c
+t_verify.c
+u_nfold.c
 weak_key.c
 
 Things-to-lose:
