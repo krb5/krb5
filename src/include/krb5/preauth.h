@@ -63,11 +63,11 @@ krb5_error_code verify_random_padata
 	       krb5_data *data));
 #endif
 
-krb5_error_code get_timestamp_padata
+krb5_error_code get_unixtime_padata
     PROTOTYPE((krb5_principal client, krb5_address **src_addr,
 	       krb5_pa_data *data));
 
-krb5_error_code verify_timestamp_padata
+krb5_error_code verify_unixtime_padata
     PROTOTYPE((krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
