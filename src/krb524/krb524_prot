@@ -1,0 +1,11 @@
+Protocol:
+
+	-> ASN.1 encoded V5 ticket
+	<- int status_code, [int kvno, encode_v4tkt encoded KTEXT_ST]
+
+kvno and V4 ticket are only included if status_code is zero.
+
+The kvno for the converted ticket is sent explicitly because the field
+is ASN.1 encoded in the krb5_creds structure; the client would have to
+decode (but not decrypt) the entire krb5_ticket structure to get it,
+which would be inefficient.

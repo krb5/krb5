@@ -1,0 +1,4 @@
+ignore *.h
+ignore *.c
+ignore .rconf
+link init_ets.c

@@ -1,0 +1,24 @@
+all:
+	cd libtelnet; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) 
+	cd telnet; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) 
+	cd telnetd; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) 
+
+clean::
+	cd libtelnet; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) clean
+	cd telnet; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) clean
+	cd telnetd; make CC="${CC}" TELNET_OPSYS=$(TELNET_OPSYS) clean
+
+install::
+	cd libtelnet; make CC="${CC}" DESTDIR=$(DESTDIR) \
+		TELNET_OPSYS=$(TELNET_OPSYS) install
+	cd telnet; make CC="${CC}" DESTDIR=$(DESTDIR) \
+		TELNET_OPSYS=$(TELNET_OPSYS) install
+	cd telnetd; make CC="${CC}" DESTDIR=$(DESTDIR) \
+		TELNET_OPSYS=$(TELNET_OPSYS) install
+
+SUBDIRS=libtelnet telnet telnetd
+
+MakefileSubdirs($(SUBDIRS))
+
+depend:
+	@echo "We don't calculate dependencies below this point."

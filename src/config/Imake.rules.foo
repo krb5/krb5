@@ -1,0 +1,272 @@
+***************
+*** 1,119 ****
+! /**/# $Source$
+! /**/# $Author$
+! /**/# $Id$
+! /**/#
+! 
+! /**/###########################################################################
+! /**/# Imake rules for building libraries, programs, scripts, and data files
+! /**/# rules:  $XConsortium: Imake.rules,v 1.67 89/12/18 17:14:15 jim Exp $
+  
+  /*
+   *		   MACHINE-INDEPENDENT RULES; DO NOT MODIFY
+   *
+!  * Warning, when defining rules: make sure you don't include both a trailing
+   * backslash and double ampersand backslash or else you will get an extra
+   * backslash in the Makefile.
+   * 
+!  * These macros are defined for the various templates and Imakefiles (for a 
+!  * list of the applicable make variables, see the template files):
+   * 
+!  *      SaberProgramTarget          (program,srclist,objlist,locallibs,syslibs)
+!  *      RemoveTargetProgram                      (program)
+!  *      BuildIncludes                            (srclist,dstdir)
+!  *     	NormalProgramTarget         (program,objects,deplibs,locallibs,syslibs)
+!  *     	SimpleProgramTarget                      (program)
+!  *     	ComplexProgramTarget                     (program)
+!  *     	ComplexProgramTarget_1                   (program,locallib,syslib)
+!  *     	ComplexProgramTarget_2                   (program,locallib,syslib)
+!  *     	ComplexProgramTarget_3                   (program,locallib,syslib)
+!  *     	ServerTarget                     (server,subdirs,objects,libs,syslibs)
+!  *     	InstallLibrary                           (libname,dest)
+!  *     	InstallSharedLibrary                     (libname,rev,dest)
+!  *     	InstallLibraryAlias                      (libname,alias,dest)
+!  *     	InstallLintLibrary                       (libname,dest)
+!  *     	InstallManPageLong                       (file,destdir,dest)
+!  *     	InstallManPage                           (file,dest)
+!  *     	InstallNonExec                           (file,dest)
+!  *     	InstallProgram                           (program,dest)
+!  *      InstallProgramWithFlags                  (program,dest,flags)
+!  *     	InstallScript                            (program,dest)
+!  *      LinkFileList                             (step,list,dir,sub)
+!  *      InstallMultipleDestFlags                 (step,list,dest,flags)
+!  *      InstallMultipleDest                      (step,list,dest)
+!  *     	InstallMultiple                          (list,dest)
+!  *      InstallMultipleFlags                     (list,dest,flags)
+!  *      InstallMultipleMan                       (list,dest)
+!  *     	InstallAppDefaults                       (class)
+!  *      DependDependency                         ()
+!  *     	DependTarget                             ()
+!  *     	CleanTarget                              ()
+!  *     	TagsTarget                               ()
+!  *      ImakeDependency                          (target)
+!  *     	BuildMakefileTarget                      (imakefile,imakeflags)
+!  *      MakefileTarget                           ()
+!  *     	NormalLibraryObjectRule                  ()
+!  *     	ProfiledLibraryObjectRule                ()
+!  *     	DebuggedLibraryObjectRule                ()
+!  *     	DebuggedAndProfiledLibraryObjectRule     ()
+!  *      SharedLibraryObjectRule                  ()
+!  *      SharedAndDebuggedLibraryObjectRule       ()
+!  *      SpecialObjectRule                        (objs,depends,options)
+!  *     	SpecialProfiledObjectRule                (objs,depends,options)
+!  *     	SpecialDebuggedObjectRule                (objs,depends,options)
+!  *     	SpecialDebuggedAndProfiledObjectRule     (objs,depends,options)
+!  *     	NormalLibraryTarget                      (libname,objlist)
+!  *      NormalSharedLibraryTarget                (libname,rev,solist,salist)
+!  *     	NormalLibraryTarget2                     (libname,objlist1,objlist2)
+!  *     	ProfiledLibraryTarget                    (libname,objlist)
+!  *     	DebuggedLibraryTarget                    (libname,objlist)
+!  *     	AliasedLibraryTarget                     (libname,alias)
+!  *     	NormalRelocatableTarget                  (objname,objlist)
+!  *     	ProfiledRelocatableTarget                (objname,objlist)
+!  *     	DebuggedRelocatableTarget                (objname,objlist)
+!  *     	LintLibraryTarget                        (libname,srclist)
+!  *      NormalLintTarget                         (srclist)
+!  *      LintTarget                               ()
+!  *      MakeSubincludesForBuild                  (step,dir,srclist)
+!  *      NamedTargetSubdirs                       (name,dirs,verb,flags,subname)
+!  *      MakeSubdirs                              (dirs)
+!  *      NamedMakeSubdirs                         (name,dirs)
+!  *      DependSubdirs                            (dirs)
+!  *      InstallSubdirs                           (dirs)
+!  *      InstallManSubdirs                        (dirs)
+!  *      NamedIncludesSubdirs                     (name,dirs)
+!  *      IncludesSubdirs                             (dirs)
+!  *      NamedCleanSubdirs                        (name,dirs)
+!  *      CleanSubdirs                             (dirs)
+!  *      NamedTagSubdirs                          (name,dirs)
+!  *      TagSubdirs                               (dirs)
+!  *      MakeLintSubdirs                          (dirs,target,subtarget)
+!  *      LintSubdirs                              (dirs)
+!  *      MakeLintLibSubdirs                       (dirs)
+!  *      MakeMakeSubdirs                          (dirs,target)
+!  *      MakeNsubdirMakefiles                     ()
+!  *      MakefileSubdirs                          (dirs)
+!  *      CppScriptTarget                          (dst,src,defs,deplist)
+!  *      MakeScriptFromCpp                        (name,defs)
+!  *      MakeDirectories                          (step,dirs)
+!  *      MakeFonts                                ()
+!  *      InstallFonts                             (dest)
+!  *      InstallFontAliases                       (dest)
+!  *      FontTarget                               (basename)
+!  *      CompressedFontTarget                     (basename)
+!  *      AllTarget                                (depends)
+!  *	DoRanlib				 (flags,files)
+!  * 
+!  * 
+!  * The general linking for building programs is:
+   * 
+!  *      program-objects programlibs syslibs EXTRA_LIBRARIES systemlibs \
+!  *              EXTRA_LOAD_FLAGS
+   *
+!  * where programlibs is LOCAL_LIBRARIES for ComplexProgramTarget
+!  * and EXTRA comes with syslibs from the LDLIBS
+   */
+  
+  
+  
+  /*
+   * SaberProgramTarget - generate rules to make Saber-C read in sources and
+--- 1,150 ----
+! XCOMM -------------------------------------------------------------------------
+! XCOMM Imake rules for building libraries, programs, scripts, and data files
+! XCOMM rules:  $XConsortium: Imake.rules,v 1.123 91/09/16 20:12:16 rws Exp $
+  
+  /*
+   *		   MACHINE-INDEPENDENT RULES; DO NOT MODIFY
+   *
+!  * Warning, when defining rules: make sure you do not include both a trailing
+   * backslash and double ampersand backslash or else you will get an extra
+   * backslash in the Makefile.
+   * 
+!  * The following macros are defined for the various templates and Imakefiles
+!  * (for a list of the applicable make variables, see the template files):
+   * 
+!  * SaberProgramTarget		(program,srclist,objlist,locallibs,syslibs)
+!  * RemoveTargetProgram		(program)
+!  * MakeDir			(dir)
+!  * BuildIncludes		(srclist,dstsubdir,dstupdir)
+!  * NormalProgramTarget		(program,objects,deplibs,locallibs,syslibs)
+!  * SetUIDProgramTarget		(program,objects,deplibs,locallibs,syslibs)
+!  * SingleProgramTarget		(program,objects,locallibs,syslibs)
+!  * SimpleProgramTarget		(program)
+!  * ComplexProgramTarget		(program)
+!  * ComplexProgramTarget_1	(program,locallib,syslib)
+!  * ComplexProgramTarget_2	(program,locallib,syslib)
+!  * ComplexProgramTarget_3	(program,locallib,syslib)
+!  * ServerTarget			(server,subdirs,objects,libs,syslibs)
+!  * RanLibrary			(args)
+!  * InstallLibrary		(libname,dest)
+!  * MergeIntoInstalledLibrary	(tolib,fromlib)
+!  * InstallLibraryAlias		(libname,alias,dest)
+!  * InstallLintLibrary		(libname,dest)
+!  * InstallManPageLong		(file,destdir,dest)
+!  * InstallManPage		(file,destdir)
+!  * InstallManPageAliases	(file,destdir,aliases)
+!  * InstallNamedNonExec		(srcname,dstname,dest)
+!  * InstallNonExecFile		(file,dest)
+!  * InstallNonExec		(file,dest)
+!  * InstallProgramWithFlags	(program,dest,flags)
+!  * InstallProgram		(program,dest)
+!  * InstallScript		(program,dest)
+!  * InstallNamedProg		(srcname,dstname,dest)
+!  * LinkFileList			(step,list,dir,sub)
+!  * InstallMultipleDestFlags	(step,list,dest,flags)
+!  * InstallMultipleDest		(step,list,dest)
+!  * InstallMultiple		(list,dest)
+!  * InstallMultipleFlags		(list,dest,flags)
+!  * InstallMultipleMan		(list,dest)
+!  * InstallAppDefaults		(class)
+!  * InstallAppDefaultsLong	(file,class)
+!  * DependDependency		()
+!  * DependTarget			()
+!  * DependTarget3		(srcs1,srcs2,srcs3)
+!  * CleanTarget			()
+!  * TagsTarget			()
+!  * ImakeDependency		(target)
+!  * BuildMakefileTarget		(notused,imakeflags)
+!  * MakefileTarget		()
+!  * LibMkdir			(dir)
+!  * LibCleanDir			(dir)
+!  * ObjectCompile		(options)
+!  * NormalLibObjCompile		(options)
+!  * NormalSharedLibObjCompile	(options)
+!  * LibObjCompile		(dir,options)
+!  * DebuggedLibObjCompile	(options)
+!  * ProfiledLibObjCompile	(options)
+!  * SharedLibObjCompile		(options)
+!  * NormalLibraryObjectRule	()
+!  * NormalFortranObjectRule	()
+!  * ObjectFromSpecialSource	(dst,src,flags)
+!  * SpecialObjectRule		(objs,depends,options)
+!  * NormalLibraryTarget		(libname,objlist)
+!  * NormalLibraryTarget2		(libname,objlist1,objlist2)
+!  * NormalLibraryTarget3		(libname,objlist1,objlist2,objlist3)
+!  * NormalDepLibraryTarget	(libname,deplist,objlist)
+!  * SubdirLibraryRule		(objlist)
+!  * ProfiledLibraryTarget	(libname,objlist)
+!  * DebuggedLibraryTarget	(libname,objlist)
+!  * AliasedLibraryTarget		(libname,alias)
+!  * NormalRelocatableTarget	(objname,objlist)
+!  * ProfiledRelocatableTarget	(objname,objlist)
+!  * DebuggedRelocatableTarget	(objname,objlist)
+!  * LintLibraryTarget		(libname,srclist)
+!  * NormalLintTarget		(srclist)
+!  * LintTarget			()
+!  * LinkSourceFile		(src,dir)
+!  * LinkFile			(tofile,fromfile)
+!  * MakeSubincludesForBuild	(step,dir,srclist)
+!  * NamedTargetSubdirs		(name,dirs,verb,flags,subname)
+!  * NamedMakeSubdirs		(name,dirs)
+!  * MakeSubdirs			(dirs)
+!  * DependSubdirs		(dirs)
+!  * ForceSubdirs			(dirs)
+!  * InstallSubdirs		(dirs)
+!  * InstallManSubdirs		(dirs)
+!  * IncludesSubdirs		(dirs)
+!  * NamedCleanSubdirs		(name,dirs)
+!  * CleanSubdirs			(dirs)
+!  * NamedTagSubdirs		(name,dirs)
+!  * TagSubdirs			(dirs)
+!  * MakeLintSubdirs		(dirs,target,subtarget)
+!  * LintSubdirs			(dirs)
+!  * MakeLintLibSubdirs		(dirs)
+!  * MakeMakeSubdirs		(dirs,target)
+!  * MakeNsubdirMakefiles		()
+!  * MakefileSubdirs		(dirs)
+!  * CppScriptTarget		(dst,src,defs,deplist)
+!  * MakeScriptFromCpp		(name,defs)
+!  * CppFileTarget		(dst,src,defs,deplist)
+!  * MakeDirectories		(step,dirs)
+!  * MakeFontsDir			(deplist)
+!  * MakeFonts			()
+!  * InstallFontObjs		(objs,dest)
+!  * InstallFonts			(dest)
+!  * InstallFontAliases		(dest)
+!  * FontSrc			(basename)
+!  * FontBaseObj			(basename)
+!  * InstallFontScale		(dest)
+!  * UncompressedFontTarget	(basename)
+!  * UncompressedFontTarget	(basename)
+!  * CompressedFontTarget		(basename)
+!  * FontTarget			(basename)
+!  * FontObj			(basename)
+!  * AllTarget			(depends)
+!  *
+!  *
+!  * The following are in Imake.tmpl:
+!  *
+!  * Concat			(a,b)
+!  * Concat3			(a,b,c)
+   * 
+!  *
+!  * The following are in specific <os>Lib.rules:
+   *
+!  * SharedLibraryTarget		(libname,rev,solist,down,up)
+!  * SharedLibraryDataTarget	(libname,rev,salist)
+!  * InstallSharedLibrary		(libname,rev,dest)
+!  * InstallSharedLibraryData	(libname,rev,dest)
+!  * 
+   */
+  
++ #define NullParameter
+  
++ /* if [ -d ] or [ ! -d ] causes make to fail, define this as - */
++ #ifndef DirFailPrefix
++ #define DirFailPrefix
++ #endif
+  
+  /*
+   * SaberProgramTarget - generate rules to make Saber-C read in sources and

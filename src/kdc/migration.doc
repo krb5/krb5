@@ -1,0 +1,59 @@
+This document describes the protocols & procedures necessary to allow
+a large krb4 site like MIT to migrate smoothly to krb5.
+
+The problem we have to solve is that v4 clients don't know about the v5
+string-to-key function, which incorporates the user's name, instance, and realm
+into his private key, along with his password.
+It happens that our solution also solves a related problem: the v5 str2key
+function prevents a site from changing its realm-name, as when the company gets
+bought by another.
+
+PROTOCOLS:
+
+The compatibilty kdc will mark v5-style entries with an attribute bit.
+
+the v5 get_in_tkt clients (kinit, login, etc) all will be able to perform
+v4 str2key; this will allow users with v4 passwords to gain v5 tickets.
+When a user's entry contains a v5-style password, and he uses v5 kinit,
+the kinit protocol will have the kdc send a cleartext realm-unique string
+(initially null) along with the (password+realm)-encrypted tgt.
+When such a user runs v4 kinit, he loses.
+
+Mapping the realm-name to a realm-id string happens in a kdc-configuration file,
+possibly in the first line of krb.conf .
+
+These things will not happen until we deploy a kpasswd that can replace
+v4-style passwords with v5-style ones.
+It would be nice to provide a "convert" flag, that allows you to upgrade
+without having to change your password's text.
+
+PROCEDURES:
+
+Initially, administrators should deploy the v5 kdc (with its built-in
+v4 compatibility), a v4 kadmin server, and a v5 kadmin server.
+The v5 kadmin server will at this time continue to use the v4 str2key function,
+so all of the passwords in the database will be v4 compatible.
+
+the compatibility versions of the get_in_tkt clients (kinit, login, etc)
+should be deployed when most of the campus' software can handle v5.
+When a v4 user runs v5 kinit, he gets v5 tickets unawares.
+Vice-versa, the user loses.
+
+The users are then weaned from v4 in three (two?) steps:
+   first, we change kpasswd to convert v4-style passwords to v5-style,
+   once the site converts most of its various clients and daemons to v5 krb.
+   the kdc now needs to be able to send a non-null realm-id string to kinit.
+
+   second, we turn off the v4 kadmin server (simultaneous with 1 or 3?).
+
+   third, but optionally, we turn off the v4-compatibility glue in the kdc.
+
+Every user who runs the converting kpasswd becomes unable to run v4 clients
+thereafter; we assume that a user who converts has continued access to
+other v5 clients. the conversion code can warn him.
+
+We continue to run the v4 kadmin because users of v4 kpasswd may not yet have
+ready access to v5 clients.
+
+Note that the database's conversion commences gradually with the deployment
+of the converting kpasswd, so this deployment doesn't have to be instantaneous.

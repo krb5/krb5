@@ -1,0 +1,22 @@
+Changes up until now:
+
+	* Kerberos database format changed (but in a backwards compatible way).
+		Once you go forward, no going back.
+
+[tytso:19930304.2209EST]
+
+	Removed SERVER_MISMATCH error message.  Fixed bug in
+	validate_tgs_request() to handle forwarded tickets correctly.
+
+[tytso:19930309.2201EST]
+
+	Function prototype for krb5_sname_to_principal changing to
+	include use of name type.  This is an API Change.
+
+[tytso:19930316.0225EST]
+
+	(last week) --- fixed ASN.1 checksuming problem
+
+	Fixed get_cred() so that you don't get new credentials if the
+		second ticket matches.
+

@@ -1,0 +1,7 @@
+[tytso:19920921.1439EDT]
+
+Add debugging code to the free subroutines, such as
+krb5_free_keyblock() to catch cases when NULL is passed to them.  This
+should be a compile-time option, of course...
+
+

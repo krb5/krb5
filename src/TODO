@@ -1,0 +1,119 @@
+integrate new DES implementation		(after beta)
+
+eliminate ISODE dependence			(after beta)
+
+look at sandia changes (contact gmachin@somnet.sandia.gov):
+
+	admin server
+
+	BSD applications
+
+	kdc/v4 changes
+
+specific coding items:
+----------------------
+
+new protocol revision
+
+principal type change (krb5_data ** -> struct)
+
+merge local changes into latest telnet 
+
+telnet client address checking (hard to get hold of the addr?)
+
+generalize walk realm tree, add to API
+
+uuserver adds a ticket to the credentials cache each time it runs,
+even if the client is using the same ticket.
+
+other XXX stuff in code
+
+
+KDC bulletproofing				(after beta)
+
+KDC statistic gathering				(after beta)
+
+admin server					(after beta)
+
+applications
+	nfs
+	discuss (?)
+	X11
+
+realm "quality" code and/or hooks (tytso)	(after beta?)
+
+alloca/tempalloc				(after beta)
+
+test suites					(after beta)
+
+KDC transited field comma quoting
+
+verify that memcpy/memcmp is in use for principal names
+Make sure that all comparisons of principal components (realms, etc.)
+use memcmp instead of strcmp --- principal components can have nulls
+in them!  (Don't blame me, blame OSI!)
+	--> kdc realm transiting
+
+code boiling between scc_ and fcc_		(after beta)
+
+remove 32 bit dependencies (esp. in md4 and md5)	(after beta)
+
+documentation issues:
+--------------------
+
+manual pages (programs, library)
+
+Manual pages for appl/bsd need to be fixed!!!!
+
+what we depend on in the system (kprop, kdc: sockets; etc)
+
+build/installation doc:
+	document expected "warnings", how to build it, configuration options
+	picking up ss, com_err, makedepend, imake separately
+	unifdef: ftp.uu.net:/bsd-sources/pgrm/unifdef/
+
+
+operation doc
+	interrealm gotchas
+
+RFC
+	DES bit ordering
+	ap_rep vs. subsession keys
+	assign "no meaning" #s for others?
+	byte-wise comparison for principal names
+	DER, "Zulu" format timestamps
+
+API doc (tytso maintaining)
+
+bug list
+
+testing issues:
+--------------
+
+mprof/mnemosyne
+
+error paths
+
+DCE interoperability
+
+
+
+
+----------------------------------------------------------------
+
+library name problems: with shared libraries cryptoconf.o can't be
+replaced.  Change docs to require static linking.
+
+
+----------------------------------------------------------------
+
+
+Document new functions:
+
+krb5_free_address
+krb5_append_addresses
+krb5_gc_via_2tgt
+
+--------------------------------------------------------------
+
+Bad comment message in KRB5-aux.h (KRB5-types.c should be KRB5_tables.c)

@@ -1,0 +1,54 @@
+BABYL OPTIONS:
+Version: 5
+Labels:
+Note:   This is the header of an rmail file.
+Note:   If you are seeing it in rmail,
+Note:    it means the file has no messages in it.
+
+1,,
+Received: by E40-PO.MIT.EDU (5.45/4.7) id AA21631; Fri, 31 May 91 18:18:51 EDT
+Received: from uucp-gw-1.pa.dec.com by ATHENA.MIT.EDU with SMTP
+	id AA27178; Fri, 31 May 91 18:16:24 EDT
+Received: by uucp-gw-1.pa.dec.com; id AA17698; Fri, 31 May 91 10:48:08 -0700
+Received: by sejour.lkg.dec.com (5.57/Ultrix4.0)
+	id AA11377; Fri, 31 May 91 13:51:46 -0400
+Message-Id: <9105311751.AA11377@sejour.lkg.dec.com>
+To: tytso@ATHENA.MIT.EDU
+Cc: kannan@sejour.lkg.dec.com
+Subject: Re: testing GSS API 
+In-Reply-To: Your message of Thu, 30 May 91 18:25:28 -0400.
+             <9105302225.AA24140@tsx-11.MIT.EDU> 
+Date: Fri, 31 May 91 13:51:44 EDT
+From: kannan@sejour.lkg.dec.com
+
+*** EOOH ***
+To: tytso@ATHENA.MIT.EDU
+Cc: kannan@sejour.lkg.dec.com
+Subject: Re: testing GSS API 
+In-Reply-To: Your message of Thu, 30 May 91 18:25:28 -0400.
+             <9105302225.AA24140@tsx-11.MIT.EDU> 
+Date: Fri, 31 May 91 13:51:44 EDT
+From: kannan@sejour.lkg.dec.com
+
+Here is the new rlogin code.  BTW, it is also being distributed with
+the SPX v2.1 kit.
+
+I'm sending you the following files:
+
+  Makefile, flogin.c, flogind.c, and login.c
+
+> The real test is whether or not the application runs.
+
+I agree.  Does this mean that you will implement the "unofficial" GSS API
+routines used in the flogin code?
+
+	-kannan
+
+========== Makefile ======================
+
+=====================  flogin.c ========================
+
+===================== flogind.c ================
+
+===================== login.c ======================
+
