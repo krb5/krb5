@@ -1,3 +1,10 @@
+2005-01-12  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c (krb5int_dns_fini): Reorder to make more correct.
+	(krb5int_dns_init): Rework error handling.  Call res_ndestroy() or
+	res_nclose() as appropriate to avoid leaking resources allocated
+	by res_ninit().
+
 2005-01-03  Jeffrey Altman <jaltman@mit.edu>
 
         * thread_safe.c: (new file) krb5_is_thread_safe()

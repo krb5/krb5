@@ -1,3 +1,7 @@
+2005-01-12  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_LIBRARY_NET): Also check for res_ndestroy.
+
 2004-12-16  Ezra Peisach  <epeisach@bu.edu>
 
 	* krb5-config.in: Add krb5support library.
