@@ -3,6 +3,7 @@
  * 	values from the krb5 config file(s).
  */
 
+#include "fake-addrinfo.h"
 #include "k5-int.h"
 
 #include <stdio.h>
@@ -108,7 +109,6 @@ static void test_locate_kdc(ctx, realm)
 	char	*realm;
 {
     	struct addrlist addrs;
-	struct sockaddr_in *s_sin;
 	int	i;
 	int	get_masters=0;
 	krb5_data rlm;
@@ -116,16 +116,42 @@ static void test_locate_kdc(ctx, realm)
 
 	rlm.data = realm;
 	rlm.length = strlen(realm);
-	retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters);
+	retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters, 0);
 	if (retval) {
 		com_err("krb5_locate_kdc", retval, 0);
 		return;
 	}
 	printf("krb_locate_kdc(%s) returned:", realm);
 	for (i=0; i < addrs.naddrs; i++) {
-	    s_sin = (struct sockaddr_in *) addrs.addrs[i];
-	    printf(" %s/%d", inet_ntoa(s_sin->sin_addr), 
-		   ntohs(s_sin->sin_port));
+	    struct addrinfo *ai = addrs.addrs[i];
+	    switch (ai->ai_family) {
+	    case AF_INET:
+	    {
+		struct sockaddr_in *s_sin;
+		s_sin = (struct sockaddr_in *) ai->ai_addr;
+		printf(" inet:%s/%d", inet_ntoa(s_sin->sin_addr), 
+		       ntohs(s_sin->sin_port));
+	    }
+	    break;
+#ifdef KRB5_USE_INET6
+	    case AF_INET6:
+	    {
+		struct sockaddr_in6 *s_sin6;
+		int j;
+		s_sin6 = (struct sockaddr_in6 *) ai->ai_addr;
+		printf(" inet6");
+		for (j = 0; j < 8; j++)
+		    printf(":%x",
+			   (s_sin6->sin6_addr.s6_addr[2*j] * 256
+			    + s_sin6->sin6_addr.s6_addr[2*j+1]));
+		printf("/%d", ntohs(s_sin6->sin6_port));
+		break;
+	    }
+#endif
+	    default:
+		printf(" unknown-af-%d", ai->ai_family);
+		break;
+	    }
 	}
 	krb5int_free_addrlist(&addrs);
 	printf("\n");

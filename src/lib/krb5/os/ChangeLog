@@ -1,5 +1,9 @@
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_std_conf.c: Include fake-addrinfo.h.
+	(test_locate_kdc): Update arg list to locate_kdc.  Print IPv6 as
+	well as IPv4 addresses.
+
 	* t_locate_kdc.c (main): Free storage allocated by library before
 	exiting.
 
