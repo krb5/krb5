@@ -1,5 +1,7 @@
 Tue Jan 10 15:23:31 1995  Richard Basch  (probe@tardis)
 
+	* configure.in: Streams test needs to include sys/types.h
+
 	* krsh.c: Include sys/time.h (linux)
 
 Mon Jan  9 21:48:54 1995  Theodore Y. Ts'o  (tytso@dcl)
