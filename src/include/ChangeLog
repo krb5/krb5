@@ -1,4 +1,9 @@
+Tue Jul 11 13:12:14 1995    <tytso@rsx-11.mit.edu>
 
+	* krb5.hin (krb5_cc_get_type, krb5_kt_get_type): Add the new
+		functions to get the type of the credentials cache and key
+		table.
+	
 Fri Jul 7 15:56:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5.hin - Add checksum verifier dispatch in the checksum entry.
 		This is now the supported method for verifying checksums.  Also

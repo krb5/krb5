@@ -1044,6 +1044,7 @@ typedef struct _krb5_cc_ops {
 #define krb5_cc_remove_cred(context, cache, flags, creds) (*(cache)->ops->remove_cred)(context, cache,flags, creds)
 #define krb5_cc_set_flags(context, cache, flags) (*(cache)->ops->set_flags)(context, cache, flags)
 #define krb5_cc_get_name(context, cache) (*(cache)->ops->get_name)(context, cache)
+#define krb5_cc_get_type(context, cache) (*(cache)->ops->prefix)
 
 extern krb5_cc_ops FAR *krb5_cc_dfl_ops;
 
@@ -1196,6 +1197,7 @@ typedef struct _krb5_kt_ops {
 		  krb5_keytab_entry FAR *));
 } krb5_kt_ops;
 
+#define krb5_kt_get_type(context, keytab) (*(keytab)->ops->prefix)
 #define krb5_kt_get_name(context, keytab, name, namelen) (*(keytab)->ops->get_name)(context, keytab,name,namelen)
 #define krb5_kt_close(context, keytab) (*(keytab)->ops->close)(context, keytab)
 #define krb5_kt_get_entry(context, keytab, principal, vno, keytype, entry) (*(keytab)->ops->get)(context, keytab, principal, vno, keytype, entry)
