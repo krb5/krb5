@@ -1,6 +1,8 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(OVSEC_INC)
+OVSEC_INC=-I/afs/dev.mit.edu/reference/ovsecure/sunos/stage/include
+OVSEC_LIB=-L/afs/dev.mit.edu/reference/ovsecure/sunos/stage/lib -lclient -lcommon -lrpclib -ldyn
 LDFLAGS = -g
-
+LIBOBJS=@LIBOBJS@
 ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 SSLIB=$(BUILDTOP)/util/ss/libss.a
@@ -9,14 +11,14 @@ KDBLIB=$(TOPLIBD)/libkdb5.a
 
 all::
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(TOPLIBD)/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
 
-SRCS = 
+SRCS =
 
-OBJS = getdate.o
+OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o $(LIBOBJS)
 
-all::	getdate
+all:: kadmin
 
 getdate.c getdate.h: getdate.y
 	$(RM) getdate.c getdate.h y.tab.*
@@ -24,9 +26,14 @@ getdate.c getdate.h: getdate.y
 	$(MV) y.tab.c getdate.c
 	$(MV) y.tab.h getdate.h
 
-getdate: getdate.c
-	$(CC) -o getdate $(CFLAGS) -DTEST getdate.c
+kadmin: $(OBJS)
+	$(CC) -o kadmin $(CFLAGS) $(OBJS) $(OVSEC_LIB) $(KLIB) $(LIBS)
+
+# needed until we run makedepend
+kadmin_ct.c: kadmin_ct.ct
+
+kadmin_ct.o: kadmin_ct.c
 
 clean::
-	$(RM) getdate getdate.c getdate.h y.tab.c y.tab.h
+	$(RM) kadmin $(OBJS) kadmin_ct.c getdate.c getdate.h y.tab.c y.tab.h
 

@@ -25,11 +25,14 @@
 #include <krb5/krb5.h>
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
+#include <krb5/kdb.h>
+#include <ovsec_admin/admin.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <math.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <sys/timeb.h>
 
 /* special struct to convert flag names for principals
    to actual krb5_flags for a principal */
@@ -40,7 +43,7 @@ struct pflag {
     int set;			/* 0 means clear, 1 means set (on '-') */
 };
 
-static struct princ_flag flags = {
+static struct pflag flags[] = {
 {"allow_postdated",	15,	KRB5_KDB_DISALLOW_POSTDATED,	1},
 {"allow_forwardable",	17,	KRB5_KDB_DISALLOW_FORWARDABLE,	1},
 {"allow_tgs_req",	13,	KRB5_KDB_DISALLOW_TGT_BASED,	1},
@@ -72,6 +75,7 @@ static char *prflags[] = {
 
 char *getenv();
 struct passwd *getpwuid();
+int exit_status = 0;
 
 void usage()
 {
@@ -85,7 +89,7 @@ char *kadmin_startup(argc, argv)
     char *argv[];
 {
     extern char *optarg;
-    char *realmname = NULL, princstr = NULL, *keytab = NULL, *query = NULL;
+    char *realmname = NULL, *princstr = NULL, *keytab = NULL, *query = NULL;
     char *luser;
     int optchar, freeprinc = 0;
     struct passwd *pw;
@@ -194,7 +198,7 @@ void kadmin_delprinc(argc, argv)
 	}
     }
     if ((argc == 2) && ((i = strlen(argv[1])) == 6) &&
-	strcmp("-force", argv[1]) || (i != 6) {
+	strcmp("-force", argv[1]) || (i != 6)) {
 	fprintf(stderr, "delete_principal: bad arguments\n");
 	return;
     }
@@ -203,7 +207,7 @@ void kadmin_delprinc(argc, argv)
 	com_err("delete_principal", retval, "while parsing principal name");
 	return;
     }
-    reval = ovsec_kadm_delete_principal(princ);
+    retval = ovsec_kadm_delete_principal(princ);
     krb5_free_principal(princ);
     if (retval) {
 	com_err("delete_principal", retval,
@@ -343,12 +347,13 @@ void kadmin_cpw(argc, argv)
 int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
     int argc;
     char *argv[];
-    ovsec_kadm_principal_ent_t *oprinc;
+    ovsec_kadm_principal_ent_t oprinc;
     u_int32 *mask;
-    char **pass
+    char **pass;
 {
-    int i;
+    int i, j;
     struct timeb now;
+    krb5_error_code retval;
     
     *mask = 0;
     *pass = NULL;
@@ -430,7 +435,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 		    break;
 		} else if (flags[j].set && argv[i][0] == '+' ||
 			   !flags[j].set && argv[i][0] == '-') {
-		    oprinc->attributes &= ~flags[j];
+		    oprinc->attributes &= ~flags[j].theflag;
 		    *mask |= OVSEC_KADM_ATTRIBUTES;
 		    break;
 		} else {
