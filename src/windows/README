@@ -1,8 +1,10 @@
 	       Building & Running Kerberos 5 on Windows
 	       ----------------------------------------
 
-Kerberos 5 builds on Windows with MSVC++ 6.0.  It may or may not build
-with other compilers or make utilities.
+Kerberos 5 builds on Windows with MSVC++ 6.0.  You will need the
+November 2001 platform SDK or later; this SDK is required to define
+getaddrinfo.  It may or may not build with other compilers or make
+utilities.
 
 These build instructions assume that you have the standalone source
 distribution of Kerberos 5 rather than the MIT Kerberos for Windows
