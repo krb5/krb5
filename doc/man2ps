@@ -2,41 +2,43 @@
 
 com=`basename $0`
 files=$*
-docdir=`pwd`
-mandir=$docdir/man
 
-cd $mandir
+if [ "$files" = "" ]; then
+    echo "Usage: $com file [file2 ...]"
+    exit 1
+fi
 
 for file in $files
 do
-    troff -C -man -Tps $mandir/man?/$file.? | grops -g > $file.ps
+    filename=`basename $file | awk -F. '{print $1}'`
+    troff -C -man -Tps $filename | grops -g > $filename.ps
 
-    pages=`grep '%%Pages\:' $file.ps | awk '{print $2}'`
+    pages=`grep '%%Pages\:' $filename.ps | awk '{print $2}'`
     pp=$(($pages - 1))
 
-    echo $file': '$pages' pages'
+    echo $filename': '$pages' pages'
 
     if [ -e csplit ]; then
-        csplit -k $file.ps /Page:/ \{$pp\}
+        csplit -k $filename.ps /Page:/ \{$pp\}
 
         counter=0
 
         for number in `ls xx*`
         do
-            cat xx00 > $docdir/$file$counter.ps
-            echo '.7 dup scale' >> $docdir/$file$counter.ps
-            cat $number >> $docdir/$file$counter.ps
+            cat xx00 > $filename$counter.ps
+            echo '.7 dup scale' >> $filename$counter.ps
+            cat $number >> $filename$counter.ps
             if [ $counter != $pages ];
                 then
-                echo '%%Trailer' >> $docdir/$file$counter.ps
-                echo 'end' >> $docdir/$file$counter.ps
-                echo '%%EOF' >> $docdir/$file$counter.ps
+                echo '%%Trailer' >> $filename$counter.ps
+                echo 'end' >> $filename$counter.ps
+                echo '%%EOF' >> $filename$counter.ps
             fi
             counter=$(($counter + 1))
         done
 
-        rm $file.ps $docdir/$file'0.ps' xx*
+        rm $filename.ps $filename'0.ps' xx*
     else
-        echo "Can't find the csplit command.  You'll have to split $file.ps manually."
+        echo "Can't find the csplit command.  You'll have to split $filename.ps manually."
     fi
 done

@@ -1,3 +1,23 @@
+Fri Sep  6 12:59:43 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+
+	* man2ps: shell script to create postscript include files for
+	user's guide.
+
+	* man2ps.M: man page for above shell script
+
+	* build.texinfo: this is now included by cyg-install.texinfo
+	(which should eventually replace install.texi.)
+
+	* definitions.texinfo: added flags "MIT" and "CYGNUS".
+
+	* cyg-install.texinfo: added @ifset and @ifclear sections to
+	separate MIT-specific and Cygnus-specific sections.
+
+	* admin.texinfo: added @ifset and @ifclear sections as with
+	cyg-install.texinfo
+
+	* Makefile: rewrote entire contents of file.
+
 Fri Sep  6 01:22:56 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* build.texinfo: Remove --enable options which are no longer
