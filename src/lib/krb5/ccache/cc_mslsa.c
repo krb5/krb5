@@ -592,7 +592,7 @@ PurgeMSTGT(HANDLE LogonHandle, ULONG  PackageId)
 // (ms calls this refresh).
 
 static BOOL
-GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
+GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
 {
     //
     // INVARIANTS:
@@ -607,7 +607,7 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
     DWORD   Error;
 
     KERB_QUERY_TKT_CACHE_REQUEST CacheRequest;
-    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest;
+    PKERB_RETRIEVE_TKT_REQUEST pTicketRequest = NULL;
     PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
     ULONG RequestSize;
     ULONG ResponseSize;
@@ -616,6 +616,7 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
 #endif /* ENABLE_PURGING */
     int    ignore_cache = 0;
 
+    memset(&CacheRequest, 0, sizeof(KERB_QUERY_TKT_CACHE_REQUEST));
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
     CacheRequest.LogonId.LowPart = 0;
     CacheRequest.LogonId.HighPart = 0;
@@ -698,15 +699,18 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
                 goto cleanup;
         }
     } else {
+        /* We have succeeded in obtaining a credential from the cache. 
+         * Assuming the enctype is one that we support and the ticket
+         * has not expired and is not marked invalid we will use it.
+         * Otherwise, we must create a new ticket request and obtain
+         * a credential we can use. 
+         */
+
 #ifdef PURGE_ALL
         purge_cache = 1;
 #else
-        switch (pTicketResponse->Ticket.SessionKey.KeyType) {
-        case KERB_ETYPE_DES_CBC_CRC:
-        case KERB_ETYPE_DES_CBC_MD4:
-        case KERB_ETYPE_DES_CBC_MD5:
-        case KERB_ETYPE_NULL:
-        case KERB_ETYPE_RC4_HMAC_NT: {
+        /* Check Supported Enctypes */
+        if ( krb5_is_permitted_enctype(context, pTicketResponse->Ticket.SessionKey.KeyType) ) {
             FILETIME Now, MinLife, EndTime, LocalEndTime;
             __int64  temp;
             // FILETIME is in units of 100 nano-seconds
@@ -728,19 +732,14 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
 #else
                 ignore_cache = 1;
 #endif /* ENABLE_PURGING */
-                break;
             }
             if (pTicketResponse->Ticket.TicketFlags & KERB_TICKET_FLAGS_invalid) {
-                ignore_cache = 1;
-                break;      // invalid, need to attempt a TGT request
+                ignore_cache = 1;   // invalid, need to attempt a TGT request
             }
-            goto cleanup;   // all done
-        }
-        case KERB_ETYPE_RC4_MD4:
-        default:
+            goto cleanup;           // we have a valid ticket, all done
+        } else {
             // not supported
             ignore_cache = 1;
-            break;
         }
 #endif /* PURGE_ALL */
 
@@ -809,19 +808,10 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
     // Check to make sure the new tickets we received are of a type we support
     //
 
-    switch (pTicketResponse->Ticket.SessionKey.KeyType) {
-    case KERB_ETYPE_DES_CBC_CRC:
-    case KERB_ETYPE_DES_CBC_MD4:
-    case KERB_ETYPE_DES_CBC_MD5:
-    case KERB_ETYPE_NULL:
-    case KERB_ETYPE_RC4_HMAC_NT:
-        goto cleanup;   // all done
-    case KERB_ETYPE_RC4_MD4:
-    default:
-        // not supported
-        break;
+    /* Check Supported Enctypes */
+    if ( krb5_is_permitted_enctype(context, pTicketResponse->Ticket.SessionKey.KeyType) ) {
+        goto cleanup;       // we have a valid ticket, all done
     }
-
 
     //
     // Try once more but this time specify the Encryption Type
@@ -1173,7 +1163,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     /*
      * we must obtain a tgt from the cache in order to determine the principal
      */
-    if (GetMSTGT(data->LogonHandle, data->PackageId, &msticket)) {
+    if (GetMSTGT(context, data->LogonHandle, data->PackageId, &msticket)) {
         /* convert the ticket */
         krb5_creds creds;
         MSCredToMITCred(msticket, msticket->DomainName, context, &creds);
@@ -1295,7 +1285,7 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     /*
      * obtain a tgt to refresh the ccache in case the ticket is expired
      */
-    if (!GetMSTGT(data->LogonHandle, data->PackageId, &lcursor->mstgt)) {
+    if (!GetMSTGT(context, data->LogonHandle, data->PackageId, &lcursor->mstgt)) {
         free(lcursor);
         *cursor = 0;
         return KRB5_FCC_INTERNAL;
@@ -1431,7 +1421,7 @@ krb5_lcc_get_name (krb5_context context, krb5_ccache id)
 {
 
     if (!IsWindows2000())
-        return KRB5_FCC_NOFILE;
+        return "";
 
     if ( !id )
         return "";
@@ -1514,7 +1504,7 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     }
 
     /* convert the ticket */
-    GetMSTGT(data->LogonHandle, data->PackageId, &mstgt);
+    GetMSTGT(context, data->LogonHandle, data->PackageId, &mstgt);
 
     MSCredToMITCred(msticket, mstgt ? mstgt->DomainName : msticket->DomainName, context, &fetchcreds);
 
