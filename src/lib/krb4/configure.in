@@ -8,6 +8,7 @@ AC_CONST
 CHECK_FCNTL
 KRB5_POSIX_LOCKS
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
+AC_CHECK_HEADERS(sys/select.h time.h)
 dnl Could check for full stdc environment, but will only test
 dnl for stdlib.h
 AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H))

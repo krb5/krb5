@@ -15,6 +15,9 @@
 #include "prot.h"
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #define S_AD_SZ sizeof(struct sockaddr_in)
 

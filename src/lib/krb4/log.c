@@ -15,7 +15,7 @@
 #endif
 
 #include "mit-copyright.h"
-#ifdef NEED_TIME_H
+#ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 #ifndef VMS
