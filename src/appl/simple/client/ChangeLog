@@ -1,3 +1,8 @@
+Thu Nov  9 09:33:38 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* sim_client.c (main): Use krb5_get_server_rcache instead of
+		duplicating code. Remove use of krb5_clockskew variable.
+
 Sun Oct 15 10:49:35 1995    <tytso@rsts-11.mit.edu>
 
 	* sim_client.c (main): Fixed location where usage() wasn't being

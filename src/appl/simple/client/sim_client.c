@@ -89,7 +89,7 @@ main(argc, argv)
     krb5_ccache ccdef;
     krb5_address addr, *portlocal_addr;
     krb5_rcache rcache;
-    extern krb5_deltat krb5_clockskew;
+    krb5_data	rcache_name;
 
     krb5_context 	  context;
     krb5_auth_context 	  auth_context = NULL;
@@ -277,26 +277,12 @@ main(argc, argv)
 	com_err(progname, retval, "while generating replay cache name");
 	exit(1);
     }
-    if (!(rcache = (krb5_rcache)malloc(sizeof(*rcache)))) {
-	com_err(progname, ENOMEM, "while allocating replay cache");
-	exit(1);
-    }
-    if ((retval = krb5_rc_resolve_type(context, &rcache, 
-				       krb5_rc_default_type(context)))) {
-	krb5_xfree(rcache);
-	com_err(progname, retval, "while resolving replay cache type");
-	exit(1);
-    }
-    if ((retval = krb5_rc_resolve(context, rcache, cp))) {
-	krb5_xfree(rcache);
-	com_err(progname, retval, "while resolving replay cache type");
-	exit(1);
-    }
-    if ((retval = krb5_rc_recover(context, rcache)) &&
-	(retval = krb5_rc_initialize(context, rcache, krb5_clockskew))) {
-	com_err(progname, retval, "while initializing replay cache '%s:%s'",
-		rcache->ops->type,
-		krb5_rc_get_name(context, rcache));
+
+    rcache_name.length = strlen(cp);
+    rcache_name.data = cp;
+
+    if ((retval = krb5_get_server_rcache(context, &rcache_name, &rcache))) {
+	com_err(progname, retval, "while getting server rcache");
 	exit(1);
     }
 
