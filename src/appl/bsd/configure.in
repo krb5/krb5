@@ -67,8 +67,7 @@ dnl
 dnl
 AC_MSG_CHECKING([streams interface])
 AC_TRY_COMPILE(
-[#include <sys/tty.h>
-#include <sys/stream.h>
+[#include <sys/stream.h>
 #include <sys/stropts.h>], [],
 [AC_MSG_RESULT(yes)
 AC_DEFINE(HAVE_STREAMS)],
@@ -108,7 +107,7 @@ AC_TRY_COMPILE(
 [#include <unistd.h>],[setpgrp(0,0)],
 [AC_MSG_RESULT(two)
 AC_DEFINE(SETPGRP_TWOARG)],
-AC_MSG_RESULT(one))
+AC_MSG_RESULT(void))
 dnl
 dnl
 ADD_DEF(-DKERBEROS)
