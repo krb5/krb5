@@ -71,3 +71,6 @@ LIBEXT = a
 EXEEXT =
 
 all::
+clean::
+install::
+check::
