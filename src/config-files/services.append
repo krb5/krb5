@@ -11,3 +11,4 @@ kpop		1109/tcp			# Pop with Kerberos
 kshell		544/tcp		cmd		# and remote shell
 eklogin		2105/tcp			# Kerberos encrypted rlogin
 krb_prop	754/tcp				# Kerberos slave propagation
+krb524		4444/tcp			# Kerberos 5 to 4 ticket xlator
