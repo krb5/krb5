@@ -1,3 +1,7 @@
+2002-09-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for sys/filio.h.
+
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (maybe-make-db.h-sys, maybe-make-db.h-k5): New
