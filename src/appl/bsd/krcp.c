@@ -544,7 +544,7 @@ int main(argc, argv)
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
 			      &foreign,
-			      authopts,
+			      &auth_context, authopts,
 			      0, /* Not any port # */
 			      0);
 		if (status) {

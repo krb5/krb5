@@ -1,3 +1,8 @@
+2000-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* defines.h (kcmd): Add prototype.
+	* krcp.c (main): Add extra arg to a kcmd call I missed yesterday.
+
 2000-05-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* krcp.c (main): Fix some conditionalizations to make proper
