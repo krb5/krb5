@@ -261,7 +261,7 @@ struct realm_info *pblock;
 {
     krb5_db_entry entry;
     krb5_error_code retval;
-    krb5_keyblock ekey;
+    krb5_encrypted_keyblock ekey;
     krb5_keyblock *rkey;
     int nentries = 1;
 
