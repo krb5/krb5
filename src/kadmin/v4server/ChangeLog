@@ -1,3 +1,14 @@
+Mon May 26 22:44:21 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (OBJS): Build kadm_funcs.c again.
+
+	* kadm_funcs.c: Re-enable kadm_chg_srvtab() and update it to use
+	the new kadm5 interface.
+
+	* kadm_ser_wrap.c: Re-enable kadm_ser_stab().
+
+	* kadm_server.c: Re-enable kadm_ser_stab().
+
 Tue May 13 20:21:21 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

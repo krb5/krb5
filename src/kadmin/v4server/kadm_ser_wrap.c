@@ -260,11 +260,11 @@ int *dat_len;
 	retval = kadm_ser_ckpw(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			       &retdat, &retlen);
 	break;
+#endif /* KADM5 */
     case CHG_STAB:
 	retval = kadm_ser_stab(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			       &retdat, &retlen);
 	break;
-#endif /* KADM5 */
     default:
 	clr_cli_secrets();
 	errpkt(dat, dat_len, KADM_NO_OPCODE);

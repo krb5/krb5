@@ -7,7 +7,7 @@ LOCALINCLUDE = $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 PROG = kadmind4
 OBJS = kadm_server.o admin_server.o kadm_ser_wrap.o \
-	kadm_stream.o kadm_supp.o acl_files.o kadm_err.o
+	kadm_funcs.o kadm_stream.o kadm_supp.o acl_files.o kadm_err.o
 
 all:: $(PROG)
 

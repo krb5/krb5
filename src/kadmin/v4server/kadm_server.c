@@ -536,6 +536,7 @@ int *outlen;
     }
     return(0);
 }
+#endif /* !KADM5 */
 
 /*
 kadm_ser_stab - the server side of the change_srvtab routine
@@ -570,4 +571,3 @@ int *outlen;
       return status;
   }
 }
-#endif /* !KADM5 */
