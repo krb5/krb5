@@ -1,24 +1,21 @@
 .SUFFIXES: .tex .dvi .ps
 
 STYLES=changebar.sty fixunder.sty functions.sty
-LIBTEX= library.tex krb5.tex ccache.tex rcache.tex keytab.tex libos.tex \
-	kdb.tex encrypt.tex cksum.tex crc-32.tex library.ind
-
-DESTEX= libdes.tex
-
-all: library.ps libdes.ps
+LIBTEX= implement.tex ccache-i.tex rcache-i.tex keytab-i.tex libos-i.tex \
+	kdb-i.tex encrypt-i.tex cksum-i.tex crc-32-i.tex implement.ind
 
 
-libdes.dvi: $(DESTEX) $(STYLES)
+all: implement.ps
 
-library.ps: library.dvi
+
+implement.ps: implement.dvi
 
 # hard to capture two-pass semantics in Makefiles...
-# library.ind: library.dvi
-library.ind: library.idx
-	index library.idx
+# implement.ind: implement.dvi
+implement.ind: implement.idx
+	index implement.idx
 
-library.dvi:  $(LIBTEX) $(STYLES)
+implement.dvi:  $(LIBTEX) $(STYLES)
 
 .tex.dvi:
 	latex $*

@@ -5,12 +5,55 @@ the site-determined validity period of authenticators.
 Each replay cache has a string ``name'' associated with it.  The use of
 this name is dependent on the underlying caching strategy (for
 file-based things, it would be a cache file name).  The
-caching strategy should use non-volatile storage so that replay
+caching strategy uses non-volatile storage so that replay
 integrity can be maintained across system failures.
 
-\subsubsection{Per-type functions}
-The following entry points must be implemented for each type of
-credentials cache.
+\begin{funcdecl}{krb5_rc_resolve_full}{krb5_error_code}{\funcinout}
+\funcarg{krb5_rcache *}{id}
+\funcin
+\funcarg{char *}{string_name}
+\end{funcdecl}
+
+\funcparam{id} is filled in to identify a replay cache which
+corresponds to the name in \funcparam{string_name}.  The cache is not opened.
+Requires that \funcparam{string_name} be of the form ``type:residual''
+and that ``type'' is a type known to the library.
+
+Before the cache can be used \funcname{krb5_rc_initialize} or
+\funcname{krb5_rc_recover} must be called.
+
+Errors: error if cannot resolve name.
+
+\begin{funcdecl}{krb5_rc_register_type}{krb5_error_code}{\funcin}
+\funcarg{krb5_rc_ops *}{ops}
+\end{funcdecl}
+Adds a new replay cache type implemented and identified by
+\funcparam{ops} to the set recognized by
+\funcname{krb5_rc_resolve}.  This function requires that a ticket
+cache of the type named in 
+\funcparam{ops{\ptsto}prefix} has not been previously registered.
+
+
+\begin{funcdecl}{krb5_rc_default_name}{char *}{\funcvoid}
+\end{funcdecl}
+Returns  the name of the default replay cache; this may be equivalent to
+\funcnamenoparens{getenv}({\tt "KRB5RCACHE"}) with an appropriate fallback.
+
+\begin{funcdecl}{krb5_rc_default_type}{char *}{\funcvoid}
+\end{funcdecl}
+
+Returns the type of the default replay cache.
+
+\begin{funcdecl}{krb5_rc_default}{krb5_error_code}{\funcinout}
+\funcarg{krb5_rcache *}{id}
+\end{funcdecl}
+
+This function returns an unopened replay cache of the default type and
+default name (as would be returned by \funcname{krb5_rc_default_type}
+and \funcname{krb5_rc_default_name}).  Before the cache can be used
+\funcname{krb5_rc_initialize} or \funcname{krb5_rc_recover} must be
+called.
+
 
 \begin{funcdecl}{krb5_rc_initialize}{krb5_error_code}{\funcin}
 \funcarg{krb5_rcache}{id}
@@ -106,50 +149,4 @@ Returns:  allocation errors.
 Returns the name (excluding the type) of the rcache \funcparam{id}.
 Requires that \funcparam{id} identifies a valid replay cache.
 
-\subsubsection{Glue functions}
-The following functions are implemented in the base library and serve to
-glue together the various types of replay caches.
 
-\begin{funcdecl}{krb5_rc_resolve_full}{krb5_error_code}{\funcinout}
-\funcarg{krb5_rcache *}{id}
-\funcin
-\funcarg{char *}{string_name}
-\end{funcdecl}
-
-\funcparam{id} is filled in to identify a replay cache which
-corresponds to the name in \funcparam{string_name}.  The cache is not opened.
-Requires that \funcparam{string_name} be of the form ``type:residual''
-and that ``type'' is a type known to the library.
-
-Errors: error if cannot resolve name.
-
-\begin{funcdecl}{krb5_rc_register_type}{krb5_error_code}{\funcin}
-\funcarg{krb5_rc_ops *}{ops}
-\end{funcdecl}
-Adds a new replay cache type implemented and identified by
-\funcparam{ops} to the set recognized by
-\funcname{krb5_rc_resolve}.  Requires that a ticket cache type named
-\funcparam{ops{\ptsto}prefix} is not yet known.
-
-
-\begin{funcdecl}{krb5_rc_default_name}{char *}{\funcvoid}
-\end{funcdecl}
-Returns  the name of the default replay cache; this may be equivalent to
-\funcnamenoparens{getenv}({\tt "KRB5RCACHE"}) with an appropriate fallback.
-
-\begin{funcdecl}{krb5_rc_default_type}{char *}{\funcvoid}
-\end{funcdecl}
-
-Returns the type of the default replay cache.
-
-\begin{funcdecl}{krb5_rc_default}{krb5_error_code}{\funcinout}
-\funcarg{krb5_rcache *}{id}
-\end{funcdecl}
-
-Equivalent to:
-\begin{verbatim}
-krb5_rc_resolve_full(id, 
-                     strcat(strcat(krb5_rc_default_type(),``:''),
-                                   krb5_rc_default_name)) ;
-\end{verbatim}
-Except of course you can't do the strcat's with the return values.

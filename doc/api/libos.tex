@@ -335,8 +335,13 @@ fresh string to represent the address and additional information.  The
 string is suitable for use as a replay cache tag.  This string is
 allocated and should be freed with \funcname{free} when the caller has
 finished using it.  When using IP addresses, the components in
-\funcparam{inaddr\ptsto contents} must be of type
+\funcparam{inaddr{\ptsto}contents} must be of type
 \datatype{ADDRTYPE_INET} and \datatype{ADDRTYPE_PORT}.
+
+% XXX Note that if the bug I sent in entitled ``krb5_gen_replay_name
+% outputs char * when krb5_get_server_rcache expects krb5_data''
+% (OpenVision Cambridge bug number 1582) causes the code of this
+% function to change, the documentation above will have to be updated.
 
 \begin{funcdecl}{krb5_sname_to_principal}{krb5_error_code}{\funcin}
 \funcarg{const char *}{hostname}

@@ -1,8 +1,8 @@
 .SUFFIXES: .tex .dvi .ps
 
 STYLES=changebar.sty fixunder.sty functions.sty
-LIBTEX= library.tex krb5.tex ccache.tex rcache.tex keytab.tex libos.tex \
-	kdb.tex encrypt.tex cksum.tex crc-32.tex library.ind
+LIBTEX= library.tex intro.tex tables.tex errors.tex krb5.tex ccache.tex \
+	rcache.tex keytab.tex libos.tex library.ind
 
 DESTEX= libdes.tex
 

@@ -35,46 +35,58 @@
 \rfoot[{\bf DRAFT---DO NOT REDISTRIBUTE}]{}
 \cfoot{\thepage}
 \else\pagestyle{headings}\fi
+
+%nlg- time to make this a real document
+
+\title{\Huge Kerberos V5 Implementer's Guide}
+\date{\ifdraft \\ {\Large DRAFT---}\fi\today}
+\author{MIT Information Systems}
+
 \begin{document}
-\thispagestyle{empty}
-\begin{center}
-{\Huge Kerberos V5 application programming library}
-\ifdraft \\ {\Large DRAFT---\today}\fi
-\end{center}
-\section{libkrb5.a functions}
-This section describes the functions provided in the \libname{libkrb5.a}
-library.  The library is built from several pieces, mostly for convenience in
-programming, maintenance, and porting.
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+	This document is designed to aide the programmer who plans to
+change MIT's implementation of Kerberos significantly.  It is geared towards
+programmers who are already familiar with Kerberos and how MIT's
+implementation is structured.
+
+	Some of the more basic information needed can be found in the
+API document, although many functions have been repeated where
+additional information has been included for the implementer.  The
+function descriptions included are up to date, even if the description
+of the functions may not be very verbose.
 
 \ifdraft\sloppy\fi
 
-\subsection{Main functions}
-\input{krb5.tex}
+\section{Cache and Key table functions}
 
 \subsection{Credentials cache functions}
-\input{ccache.tex}
+\input{ccache-i.tex}
 
 \subsection{Replay cache functions}
-\input{rcache.tex}
+\input{rcache-i.tex}
 
 \subsection{Key table functions}
-\input{keytab.tex}
+\input{keytab-i.tex}
 
 \section{Operating-system specific functions}
-\input{libos.tex}
+\input{libos-i.tex}
 
 \section{Principal database functions}
 
-\input{kdb.tex}
+\input{kdb-i.tex}
 
 \section{Encryption system interface}
-\input{encrypt.tex}
+\input{encrypt-i.tex}
 
 \section{Checksum interface}
-\input{cksum.tex}
+\input{cksum-i.tex}
 
 \section{CRC-32 checksum functions}
-\input{crc-32.tex}
+\input{crc-32-i.tex}
 
 \appendix
 \cleardoublepage
