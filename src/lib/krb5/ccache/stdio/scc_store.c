@@ -38,7 +38,7 @@ krb5_scc_store(id, creds)
      krb5_error_code ret;
 
      /* Make sure we are writing to the end of the file */
-     MAYBE_OPEN (id, "r+");
+     MAYBE_OPEN (id, SCC_OPEN_RDWR);
 
      ret = fseek(((krb5_scc_data *) id->data)->file, 0, 2);
      if (ret < 0)

@@ -61,7 +61,7 @@ krb5_scc_next_cred(id, cursor, creds)
      Z (addresses);
 #undef Z
 
-     MAYBE_OPEN (id, "r");
+     MAYBE_OPEN (id, SCC_OPEN_RDONLY);
 
      fcursor = (krb5_scc_cursor *) *cursor;
      ret = fseek(((krb5_scc_data *) id->data)->file, fcursor->pos, 0);

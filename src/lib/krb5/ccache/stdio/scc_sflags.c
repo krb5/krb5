@@ -45,7 +45,7 @@ krb5_scc_set_flags(id, flags)
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
 	if (OPENCLOSE(id)) {
-	    ret = krb5_scc_open_file (id, "r+");
+	    ret = krb5_scc_open_file (id, SCC_OPEN_RDWR);
 	}
     }
 

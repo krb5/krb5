@@ -37,7 +37,7 @@ krb5_scc_initialize(id, princ)
 {
      int ret;
 
-     ret = krb5_scc_open_file (id, "w+");
+     ret = krb5_scc_open_file (id, SCC_OPEN_AND_ERASE);
      if (ret < 0)
 	  return krb5_scc_interpret(errno);
 
