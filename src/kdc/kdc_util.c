@@ -161,6 +161,7 @@ OLDDECLARG(krb5_keyblock **, key)
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
     register krb5_keyblock *newkey;
+    krb5_error_code retval;
 
     if (vno != whoisit->dbentry->kvno)
 	return KRB5KRB_AP_ERR_BADKEYVER;
@@ -168,12 +169,8 @@ OLDDECLARG(krb5_keyblock **, key)
 	return KRB5KRB_AP_ERR_NOKEY;
     if (!(newkey = (krb5_keyblock *)malloc(sizeof(*newkey))))
 	return ENOMEM;
-    *newkey = *whoisit->key;
-    if (!(newkey->contents = (krb5_octet *)malloc(newkey->length))) {
-	free((char *)newkey);
-	return ENOMEM;
-    }
-    bcopy((char *)whoisit->key, (char *)newkey->contents, newkey->length);
+    if (retval = krb5_copy_keyblock(whoisit->key, newkey))
+	return retval;
     *key = newkey;
     return 0;
 }
