@@ -15,57 +15,8 @@
  * des_pcbc_encrypt.c - encrypt a string of characters in error propagation mode
  */
 
-/* 
- * copy of include/des.h to avoid collision with local one
- */
-#include "krb5.h"
-
-#ifndef KRB_INT32
-#if (SIZEOF_LONG == 4)
-#define KRB_INT32 long
-#elif (SIZEOF_INT == 4)
-#define KRB_INT32 int
-#elif (SIZEOF_SHORT == 4)
-#define KRB_INT32 short
-#else
-  ?== No 32 bit type available
-#endif
-#endif /* !KRB_INT32 */
-
-	
-#ifndef KRB_UINT32
-#define KRB_UINT32 unsigned KRB_INT32
-#endif
-
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-/* Key schedule */
-typedef struct des_ks_struct { union { KRB_INT32 pad; des_cblock _;} __; } des_key_schedule[16];
-
-#define DES_KEY_SZ 	(sizeof(des_cblock))
-#define DES_ENCRYPT	1
-#define DES_DECRYPT	0
-
-#ifndef NCOMPAT
-#define C_Block des_cblock
-#define Key_schedule des_key_schedule
-#define ENCRYPT DES_ENCRYPT
-#define DECRYPT DES_DECRYPT
-#define KEY_SZ DES_KEY_SZ
-#define string_to_key des_string_to_key
-#define read_pw_string des_read_pw_string
-#define random_key des_random_key
-#define pcbc_encrypt des_pcbc_encrypt
-#define key_sched des_key_sched
-#define cbc_encrypt des_cbc_encrypt
-#define cbc_cksum des_cbc_cksum
-#define C_Block_print des_cblock_print
-#define quad_cksum des_quad_cksum
-typedef struct des_ks_struct bit_64;
-#endif
-
-#define des_cblock_print(x) des_cblock_print_file(x, stdout)
-
-#include "f_tables.h"
+#include "des.h"
+#include <f_tables.h>
 
 /*
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
@@ -79,22 +30,22 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock ivec;
 	int encrypt;
 {
-	register unsigned KRB_INT32 left, right;
-	register unsigned KRB_INT32 temp;
-	register unsigned KRB_INT32 *kp;
+	register unsigned DES_INT32 left, right;
+	register unsigned DES_INT32 temp;
+	register unsigned DES_INT32 *kp;
 	register unsigned char *ip, *op;
 
 	/*
 	 * Copy the key pointer, just once
 	 */
-	kp = (unsigned KRB_INT32 *)schedule;
+	kp = (unsigned DES_INT32 *)schedule;
 
 	/*
 	 * Deal with encryption and decryption separately.
 	 */
 	if (encrypt) {
-		register unsigned KRB_INT32 plainl;
-		register unsigned KRB_INT32 plainr;
+		register unsigned DES_INT32 plainl;
+		register unsigned DES_INT32 plainr;
 
 		/*
 		 * Initialize left and right with the contents of the initial
@@ -176,8 +127,8 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		 * the necessity of remembering a lot more things.
 		 * Should think about this a little more...
 		 */
-		unsigned KRB_INT32 ocipherl, ocipherr;
-		unsigned KRB_INT32 cipherl, cipherr;
+		unsigned DES_INT32 ocipherl, ocipherr;
+		unsigned DES_INT32 cipherl, cipherr;
 
 		if (length <= 0)
 			return 0;

@@ -85,22 +85,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-/* Application include files */
-#include "k5-int.h"
 #include "des.h"
-
-
-#ifndef KRB_INT32
-#if (SIZEOF_LONG == 4)
-#define KRB_INT32 long
-#elif (SIZEOF_INT == 4)
-#define KRB_INT32 int
-#elif (SIZEOF_SHORT == 4)
-#define KRB_INT32 short
-#else
-  ?== No 32 bit type available
-#endif
-#endif /* !KRB_INT32 */
 
 /* Definitions for byte swapping */
 
@@ -124,7 +109,7 @@ KRB5_DLLIMP unsigned long KRB5_CALLCONV
 des_quad_cksum(in,out,length,out_count,c_seed)
     mit_des_cblock FAR *c_seed;		/* secret seed, 8 bytes */
     unsigned char FAR *in;		/* input block */
-    unsigned KRB_INT32 FAR *out;	/* optional longer output */
+    unsigned DES_INT32 FAR *out;	/* optional longer output */
     int out_count;			/* number of iterations */
     long length;			/* original length in bytes */
 {
@@ -136,12 +121,12 @@ des_quad_cksum(in,out,length,out_count,c_seed)
      * checksum is written unto the address pointed to.
      */
 
-    register unsigned KRB_INT32 z;
-    register unsigned KRB_INT32 z2;
-    register unsigned KRB_INT32 x;
-    register unsigned KRB_INT32 x2;
+    register unsigned DES_INT32 z;
+    register unsigned DES_INT32 z2;
+    register unsigned DES_INT32 x;
+    register unsigned DES_INT32 x2;
     register unsigned char *p;
-    register KRB_INT32 len;
+    register DES_INT32 len;
     register int i;
 
     /* use all 8 bytes of seed */
