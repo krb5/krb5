@@ -60,16 +60,17 @@ Major changes in 1.4
 * [841] Merged Athena telnetd changes for creating a new option for
   requiring encryption.
 
-* [1349, 2578, 2601, 2606, 2613, 2743, 2775, 2778] Add implementation
-  of the RPCSEC_GSS authentication flavor to the RPC library.  Thanks
-  to Kevin Coffman and the CITI group at the University of Michigan.
+* [1349, 2578, 2601, 2606, 2613, 2743, 2775, 2778, 2877] Add
+  implementation of the RPCSEC_GSS authentication flavor to the RPC
+  library.  Thanks to Kevin Coffman and the CITI group at the
+  University of Michigan.
 
 * [2061] The kadmind4 backwards-compatibility admin server and the
   v5passwdd backwards-compatibility password-changing server have been
   removed.
 
-* [1303, 2740, 2755, 2781, 2782, 2812, 2858, 2859] Thread safety for
-  krb5 libraries.
+* [1303, 2740, 2755, 2781, 2782, 2812, 2858, 2859, 2874, 2875, 2878,
+  2879, 2884] Thread safety for krb5 libraries.
 
 * [2410] Yarrow code now uses AES.
 
@@ -215,6 +216,8 @@ for a complete list.
 
 * [2661] Handle return of ai_canonname=NULL from getaddrinfo().
 
+* [2665] Fix leak in cc_resolve, reported by Paul Moore.
+
 * [2674] libkadm5 acl_init() API renamed to avoid conflict with MacOS
   X acl API.
 
@@ -313,6 +316,14 @@ for a complete list.
 
 * [2865] New API function krb5_is_thread_safe() to test for thread
   safety.
+
+* [2870, 2881] Fix crash in MSLSA ccache.
+
+* [2871] Handle read() returning -1 in prng.c.
+
+* [2872] Fix memory leak in DNS lookup code.
+
+* [2887] Fix null pointer dereference in krb5_unparse_name().
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
