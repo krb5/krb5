@@ -466,7 +466,7 @@ static void process_client(fd, who)
     /* ugh... clean this up later */
     if (status == KRB5_KDB_DB_INUSE) {
 	/* db locked */
-	krb5_ui_4 retcode = KADM_DB_INUSE;
+	krb5_ui_4 retcode;
 	char *pdat;
 	
 	dat_len = KADM_VERSIZE + sizeof(krb5_ui_4);
@@ -661,8 +661,8 @@ kill_children()
 }
 
 #ifdef KADM5
-krb5_ui_4 convert_kadm5_to_kadm(val)
-   krb5_ui_4 val;
+krb5_int32 convert_kadm5_to_kadm(val)
+   krb5_int32 val;
 {
      switch (val) {
      case KADM5_AUTH_GET:

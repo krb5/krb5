@@ -116,7 +116,7 @@ int acl_initialize(char *, int);
 
 /* admin_server.c */
 #ifdef KADM5
-krb5_ui_4 convert_kadm5_to_kadm(krb5_ui_4);
+krb5_int32 convert_kadm5_to_kadm(krb5_int32);
 #endif
 
 #endif /* KADM_SERVER_DEFS */

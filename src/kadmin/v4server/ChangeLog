@@ -1,3 +1,12 @@
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_server.h: Update prototype for convert_kadm5_to_kadm.
+
+	* admin_server.c (process_client): Do not assign negative value to
+	unsigned variable.
+	(convert_kadm5_to_kadm): Return krb5_int32 instead of krb5_ui_4 to
+	be compatible with error codes.
+
 2001-07-09  Ezra Peisach  <epeisach@mit.edu>
 
 	* admin_server.c: Provide prototype for do_child and declare static.
