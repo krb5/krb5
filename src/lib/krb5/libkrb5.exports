@@ -669,14 +669,12 @@ krb5int_cc_default
 krb5int_cleanup_library
 krb5int_cm_call_select
 krb5int_copy_data_contents
-krb5int_encode_v4tkt
 krb5int_free_addrlist
 krb5int_free_srv_dns_data
 krb5int_generate_and_save_subkey
 krb5int_get_fq_local_hostname
 krb5int_grow_addrlist
 krb5int_initialize_library
-krb5int_krb524_debug
 krb5int_krb_life_to_time
 krb5int_krb_time_to_life
 krb5int_local_addresses
