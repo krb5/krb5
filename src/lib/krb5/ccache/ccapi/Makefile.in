@@ -1,0 +1,21 @@
+thisconfigdir=./../..
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
+CFLAGS = $(CCOPTS) $(DEFS)
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR = ccache\file
+##DOS##OBJFILE = file.lst
+##WIN16##LIBNAME=..\..\krb5.lib
+
+STLIBOBJS 	= \
+	stdcc.o \
+	stdcc_util.o 
+
+OBJS 	= stdcc.${OBJEXT} stdcc_util.${OBJEXT}
+
+SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c 
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
