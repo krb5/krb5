@@ -1,3 +1,7 @@
+Tue Dec 12 19:18:14 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.conf: use host:portnum in example files, not host,portnum.
+
 Fri Jan  5 09:04:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* profile.hin: Add profile_init_path prototype
