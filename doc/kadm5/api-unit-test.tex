@@ -30,7 +30,7 @@
 \newcommand{\Expected}[1]{\item[Expected:] #1}
 \newcommand{\Conditions}[1]{\item[Conditions:] #1}
 \newcommand{\Priority}[1]{\item[Priority:] #1}
-
+\newcommand{\Status}[1]{\item[Status:] #1}
 %\newcommand{\Number}[1]{}
 %\newcommand{\Reason}[1]{}
 \newcommand{\Call}[1]{}
@@ -70,6 +70,11 @@ have taken place did, and that the new, modified data is in effect;
 for get operations, verify that the data retrieved is the data that
 should actually be in the database.
 
+As of now the tests are being re-worked to use database comparision routines
+simular to the GUI tests.  This routines are not completly in place yet. The
+purpose for using these routines is for better detection of incorrect
+database modification.
+
 Similarly, all tests which test for failure should verify that the
 no component of the requested operation took place.  For example: if
 init fails, other operations should not work.  If a modify fails, all
@@ -101,58 +106,69 @@ the init doesn't succeed.
 
 \numtest{1}{
 \Reason{An empty string realm is rejected.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Reason{A realm containing invalid characters is rejected.}
+\Status{Implemented}
 }
 
 \numtest{2.5}{
 \Reason{A non-existent realm is rejected.}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Reason{A bad service name representing an existing principal
 	(different from the client principal) is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Reason{A bad service name representing a non-existent
 		principal is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Reason{A bad service name identical to the (existing) client
 		name is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{A null password causes password prompting.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{An empty-string password is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{An incorrect password which is the password of another
 		user is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Reason{An incorrect password which isn't the password of any
 		user is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Reason{A null client_name is rejected.}
+\Status{Implemented}
 }
 
 % Empty string client name is legal.
@@ -164,123 +180,151 @@ the init doesn't succeed.
 \Reason{A client_name referring to a non-existent principal in
 		the default realm is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Reason{A client_name referring to a non-existent principal
 		with the local realm specified explicitly is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Reason{A client_name referring to a non-existent principal in
 	a nonexistent realm is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Reason{A client_name referring to an existing principal in a
 	nonexistent realm is rejected.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{16}{
 \Reason{Valid invocation.}
+\Status{Implemented}
 }
 
 \numtest{17}{
 \Reason{Valid invocation (explicit client realm).}
+\Status{Implemented}
 }
 
 \numtest{18}{
 \Reason{Valid invocation (CHANGEPW_SERVICE).}
+\Status{Implemented}
 }
 
 \numtest{19}{
 \Reason{Valid invocation (explicit service realm).}
+\Status{Implemented}
 }
 
 \numtest{20}{
 \Reason{Valid invocation (database access allowed after init).}
+\Status{Implemented}
 }
 
 \numtest{21}{
 \Reason{Init fails when called twice in a row.}
+\Status{Implemented}
 }
 
 \numtest{22}{
 \Reason{A null password causes master-key prompting.}
 \Conditions{local}
+\Status{Implemented}
 }
 
 \numtest{23}{
 \Reason{A non-null password causes reading from the kstash.}
 \Conditions{local}
+\Status{Implemented}
+
 }
 
 \numtest{24}{
 \Reason{Null service name is ignored in local invocation.}
 \Conditions{local}
+\Status{Implemented}
 }
 
 \numtest{25}{
 \Reason{Non-null service name is ignored in local invocation.}
 \Conditions{local}
+\Status{Implemented}
 }
 
 \numtest{26}{
 \Reason{Can't do ``get'' operation before calling init.}
+\Status{Implemented}
 }
 
 \numtest{27}{
 \Reason{Can't do ``add'' operation before calling init.}
+\Status{Implemented}
 }
 
 \numtest{28}{
 \Reason{Can't do ``modify'' operation before calling init.}
+\Status{Implemented}
 }
 
 \numtest{29}{
 \Reason{Can't do ``delete'' operation before calling init.}
+\Status{Implemented}
 }
 
 \numtest{30}{
 \Reason{Can init after failed init attempt.}
 \Conditions{local}
+\Status{Implemented}
 }
 
 \section{ovsec_kadm_destroy}
 
 \numtest{1}{
 \Reason{Valid invocation.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Reason{Valid invocation (``get'' not allowed after destroy).}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Reason{Valid invocation (``add'' not allowed after destroy).}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Reason{Valid invocation (``modify'' not allowed after destroy).}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Reason{Valid invocation (``delete'' not allowed after destroy).}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{Fails if database not initialized.}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails if invoked twice in a row.}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Database can be reinitialized after destroy.}
+\Status{Implemented}
 }
 
 \section{ovsec_kadm_create_principal}
@@ -317,102 +361,126 @@ the init doesn't succeed.
 
 \numtest{1}{
 \Reason{Fails if database not initialized.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Reason{Fails on null princ argument.}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Reason{Fails on null password argument.}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Reason{Fails on empty-string password argument.}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Reason{Fails when mask contains undefined bit.}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{Fails when mask contains LAST_PWD_CHANGE bit.}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails when mask contains MOD_TIME bit.}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Fails when mask contains MOD_NAME bit.}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Reason{Fails when mask contains MKVNO bit.}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Reason{Fails when mask contains AUX_ATTRIBUTES bit.}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Reason{Fails when mask contains POLICY_CLR bit.}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Reason{Fails for caller with no access bits.}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Reason{Fails when caller has ``get'' access and not ``add''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Reason{Fails when caller has ``modify'' access and not ``add''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Reason{Fails when caller has ``delete'' access and not ``add''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{16}{
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{17}{
 \Reason{Fails on attempt to create existing principal.}
+\Status{Implemented}
 }
 
 \numtest{18}{
 \Reason{Fails when password is too short.}
+\Status{Implemented}
 }
 
 \numtest{19}{
 \Reason{Fails when password has too few classes.}
+\Status{Implemented}
 }
 
 \numtest{20}{
 \Reason{Fails when password is in dictionary.}
+\Status{Implemented}
 }
 
 \numtest{21}{
 \Reason{Nonexistent policy is rejected.}
+\Status{Implemented}
 }
 
 \numtest{22}{
 \Reason{Fails on invalid principal name.}
+\Status{Implemented}
 }
 
 \numtest{23}{
 \Reason{Valid invocation.}
+\Status{Implemented}
 }
 
 \numtest{24}{
 \Reason{Succeeds when caller has ``add'' access and another one.}
+\Status{Implemented}
 }
 
 %\numtest{25}{
@@ -431,69 +499,82 @@ the init doesn't succeed.
 
 \numtest{28}{
 \Reason{Succeeds when assigning policy.}
+\Status{Implemented}
 }
 
 \numtest{29}{
 \Priority{High}
 \Reason{Allows 0 (never) for princ_expire_time.}
+\Status{Implemented}
 }
 
 \numtest{30}{
 \Reason{Allows 0 (never) for pw_expiration when there's no policy.}
+\Status{Implemented}
 }
 
 \numtest{31}{
 \Reason{Allows 0 (never) for pw_expiration when there's a policy with
 	0 for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{32}{
 \Reason{Accepts 0 (never) for pw_expiration when there's a policy with
 	non-zero pw_max_life, but actually sets pw_expiration to now +
 	pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{33}{
 \Reason{Accepts and sets non-zero pw_expiration when no policy.}
+\Status{Implemented}
 }
 
 \numtest{34}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with zero pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{35}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with pw_max_life later than the specified pw_expiration.}
+\Status{Implemented}	
 }
 
 \numtest{36}{
 \Reason{Accepts non-zero pw_expiration and limits it to now +
 	pw_max_life when it's later than now + non-zero pw_max_life in
 	policy.}
+\Status{Implemented}	
 }
 
 \numtest{37}{
 \Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
+\Status{Implemented}	
 }
 
 \numtest{38}{
 \Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{39}{
 \Priority{High}
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{40}{
 \Priority{High}
 \Reason{Allows 0 (forever) for max_life.}
+\Status{Implemented}
 }
 
 
@@ -502,10 +583,12 @@ the init doesn't succeed.
 
 \numtest{1}{
 \Reason{Fails if database not initialized.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Reason{Fails on null principal.}
+\Status{Implemented}
 }
 
 % Empty string principal is legal.
@@ -521,46 +604,54 @@ the init doesn't succeed.
 \numtest{5}{
 \Priority{High}
 \Reason{Fails on nonexistent principal.}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Priority{High}
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Priority{High}
 \Reason{Fails if caller has ``add'' access and not ``delete''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Priority{High}
 \Reason{Fails if caller has ``modify'' access and not ``delete''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Fails if caller has ``get'' access and not ``delete''.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Priority{High}
 \Reason{Fails if caller has no access bits.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Priority{High}
 \Reason{Valid invocation.}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Valid invocation (on principal with policy).}
+\Status{Implemented}
 }
 
 
@@ -569,200 +660,260 @@ the init doesn't succeed.
 
 \numtest{1}{
 \Reason{Fails if database not initialized.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Priority{High}
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Reason{Fails on mask with undefined bit set.}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Reason{Fails on mask with PRINCIPAL set.}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Priority{High}
 \Reason{Fails on mask with LAST_PWD_CHANGE set.}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{Fails on mask with MOD_TIME set.}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails on mask with MOD_NAME set.}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Fails on mask with MKVNO set.}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Fails on mask with AUX_ATTRIBUTES set.}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Reason{Fails on nonexistent principal.}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Fails for user with ``get'' access.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Fails for user with ``add'' access.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Priority{High}
 \Reason{Fails for user with ``delete'' access.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Priority{High}
 \Reason{Succeeds for user with ``modify'' access.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{16}{
 \Reason{Succeeds for user with ``modify'' and another access.}
 \Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{17}{
 \Priority{High}
 \Reason{Fails when nonexistent policy is specified.}
+\Status{Implemented}
 }
 
 \numtest{18}{
 \Priority{High}
 \Reason{Succeeds when existent policy is specified.}
+\Status{Implemented}
 }
 
 \numtest{19}{
 \Reason{Updates policy count when setting policy from none.}
+\Status{Implemented}
 }
 
 \numtest{20}{
 \Reason{Updates policy count when clearing policy from set.}
+\Status{Implemented}
 }
 
 \numtest{21}{
 \Reason{Updates policy count when setting policy from other policy.}
+\Status{Implemented}
 }
 
 \numtest{22}{
 \Reason{Allows 0 (never) for pw_expiration when there's no policy.}
+\Status{Implemented}
 }
 
 \numtest{23}{
 \Reason{Allows 0 (never) for pw_expiration when there's a policy with
 	0 for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{24}{
 \Reason{Accepts 0 (never) for pw_expiration when there's a policy with
 	non-zero pw_max_life, but actually sets pw_expiration to
 	last_pwd_change + pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{25}{
 \Reason{Accepts and sets non-zero pw_expiration when no policy.}
+\Status{Implemented}
 }
 
 \numtest{26}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with zero pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{27}{
 \Reason{Accepts and sets non-zero pw_expiration when there's a policy
 	with pw_max_life later than the specified pw_expiration.}
+\Status{Implemented}	
 }
 
 \numtest{28}{
 \Reason{Accepts non-zero pw_expiration and limits it to last_pwd_change +
 	pw_max_life when it's later than last_pwd_change + non-zero
 	pw_max_life in policy.}
+\Status{Implemented}	
 }
 
 \numtest{29}{
 \Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if there's no policy and no
 	specified pw_expiration.}
+\Status{Implemented}	
 }
 
 \numtest{30}{
 \Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
 	policy has a 0 (never) pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{31}{
 \Priority{High}
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
 	and the policy has a non-zero pw_max_life.}
+\Status{Implemented}	
 }
 
 \numtest{32}{
 \Priority{High}
 \Reason{Accepts princ_expire_time change.}
+\Status{Implemented}
 }
+
+
 
 \numtest{33}{
 \Priority{High}
 \Reason{Accepts attributes change.}
+\Status{Implemented}
+}
+
+\numtest{33.25}{
+\Priority{High}
+\Reason{Accepts attributes change (KRB5_KDB_REQUIRES_PW_CHANGE).}
+\Status{Implemented}
+}
+
+\numtest{33.5}{
+\Priority{High}
+\Reason{Accepts attributes change (KRB5_DISALLOW_TGT_BASE).}
+\Status{Implemented}
+}
+
+\numtest{33.75}{
+\Priority{High}
+\Reason{Accepts attributes change (KRB5_PW_CHANGE_SERVICE).}
+\Status{Implemented}
 }
 
 \numtest{34}{
 \Priority{High}
 \Reason{Accepts max_life change.}
+\Status{Implemented}
 }
 
 \numtest{35}{
 \Priority{High}
 \Reason{Accepts kvno change.}
+\Status{Implemented}
 }
 
 \numtest{36}{
 \Reason{Behaves correctly when policy is set to the same as it was
 	before.}
+\Status{Implemented}	
 }
 
 \numtest{37}{
 \Reason{Behaves properly when POLICY_CLR is specified and there was no
 	policy before.}
+\Status{Implemented}	
 }
 
 \numtest{38}{
 \Priority{High}
 \Reason{Accepts 0 (never) for princ_expire_time.}
+\Status{Implemented}
 }
 
 \numtest{39}{
 \Priority{High}
 \Reason{Accepts 0 for max_life.}
+\Status{Implemented}
 }
 
 \numtest{40}{
 \Reason{Rejects null principal argument.}
+\Status{Implemented}
 }
 
 
@@ -770,72 +921,99 @@ the init doesn't succeed.
 
 \numtest{1}{
 \Reason{Fails if database not initialized.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Priority{High}
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Reason{Fails for user with ``modify'' access and not ``add'' or
 ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Reason{Fails for user with ``get'' access and not ``add'' or
 ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{Fails for user with ``modify'' and ``add'' but not ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails for user with ``modify'' and ``delete'' but not ``add''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Fails for user with ``get'' and ``add'' but not ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Reason{Fails for user with ``get'' and ``delete'' but not ``add.''}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Reason{Fails for user with ``modify'', ``get'' and ``add'', but not
 	``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Reason{Fails for user with ``modify'', ``get'' and ``delete'', but
 	not ``add''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Fails for user with ``add'' but not ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Fails for user with ``delete'' but not ``add''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Priority{High}
 \Reason{Succeeds for user with ``add'' and ``delete''.}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Priority{High}
 \Reason{Fails if target principal name exists.}
+\Status{Implemented}
 }
 
 
@@ -1193,74 +1371,95 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 
 \numtest{1}{
 \Reason{Fails for null ent.}
+\Status{Implemented}
 }
 
 \numtest{2}{
 \Reason{Fails for non-existent principal.}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Priority{High}
 \Reason{Fails for user with no access bits, retrieving other principal.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{4}{
 \Priority{High}
 \Reason{Fails for user with ``add'' but not ``get'', getting principal
 	other than his own, using ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{5}{
 \Reason{Fails for user with ``modify'' but not ``get'', getting
 	principal other than his own, using ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Reason{Fails for user with ``delete'' but not ``get'', getting
 	principal other than his own, using ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails for user with ``delete'' but not ``get'', getting
 	principal other than his own, using CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Priority{High}
 \Reason{Fails for user with ``get'', getting principal other than his
 	own, using CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Succeeds for user without ``get'', retrieving self, using
 	ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Reason{Succeeds for user without ``get'', retrieving self, using
 	CHANGEPW_SERVICE.}
+\Status{Implemented}	
 }
 
 \numtest{11}{
 \Reason{Succeeds for user with ``get'', retrieving self, using
 	ADMIN_SERVICE.}
+\Status{Implemented}		
 }
 
 \numtest{12}{
 \Reason{Succeeds for user with ``get'', retrieving self, using
 	CHANGEPW_SERVICE.}
+\Status{Implemented}		
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Succeeds for user with ``get'', retrieving other user, using
 	ADMIN_SERVICE.}
+\Status{Implemented}		
 }
 
 \numtest{14}{
 \Reason{Succeeds for user with ``get'' and ``modify'', retrieving
 	other principal, using ADMIN_SERVICE.}
+\Status{Implemented}		
 }
 
 
@@ -1269,143 +1468,176 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 
 \numtest{1}{
 \Reason{Fails for mask with undefined bit set.}
+\Status{Implemented - untested}
 }
 
 \numtest{2}{
 \Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{3}{
 \Reason{Fails for mask without POLICY bit set.}
+\Status{Implemented - untested}
 }
 
 \numtest{4}{
 \Reason{Fails for mask with REF_COUNT bit set.}
+\Status{Implemented - untested}
 }
 
 \numtest{5}{
 \Reason{Fails for invalid policy name.}
+\Status{Implemented - untested}
 }
 
 \numtest{6}{
 \Priority{High}
 \Reason{Fails for existing policy name.}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Reason{Fails for null policy name.}
+\Status{Implemented - untested}
 }
 
 \numtest{8}{
 \Priority{High}
 \Reason{Fails for empty-string policy name.}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Accepts 0 for pw_min_life.}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_min_life.}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Priority{High}
 \Reason{Accepts 0 for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Rejects 0 for pw_min_length.}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_min_length.}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Priority{High}
 \Reason{Rejects 0 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{16}{
 \Priority{High}
 \Reason{Accepts 1 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{17}{
 \Priority{High}
 \Reason{Accepts 4 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{18}{
 \Priority{High}
 \Reason{Rejects 5 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{19}{
 \Priority{High}
 \Reason{Rejects 0 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{20}{
 \Priority{High}
 \Reason{Accepts 1 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{21}{
 \Priority{High}
 \Reason{Accepts 10 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{21.5}{
 \Reason{Rejects 11 for pw_history_num.}
+\Status{Implemented - untested}
 }
 
 \numtest{22}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{23}{
 \Priority{High}
 \Reason{Fails for user with ``get'' but not ``add''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{24}{
 \Reason{Fails for user with ``modify'' but not ``add.''}
+\Conditions{RPC}
+\Status{Implemented - untested}
 }
 
 \numtest{25}{
 \Reason{Fails for user with ``delete'' but not ``add.''}
+\Conditions{RPC}
+\Status{Implemented - untested}
 }
 
 \numtest{26}{
 \Priority{High}
 \Reason{Succeeds for user with ``add.''}
+\Status{Implemented}
 }
 
 \numtest{27}{
 \Reason{Succeeds for user with ``get'' and ``add.''}
+\Status{Implemented - untested}
 }
 
 \numtest{28}{
 \Reason{Rejects null policy argument.}
+\Status{Implemented - untested}
 }
 
 \numtest{29}{
 \Reason{Rejects pw_min_life greater than pw_max_life.}
 }
-
 
 
 \section{ovsec_kadm_delete_policy}
@@ -1417,6 +1649,7 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{2}{
 \Priority{High}
 \Reason{Fails for empty-string policy name.}
+\Status{Implemented}
 }
 
 \numtest{3}{
@@ -1430,29 +1663,38 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{5}{
 \Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{6}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Priority{High}
 \Reason{Fails for user with ``add'' but not ``delete''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Fails for user with ``modify'' but not ``delete''.}
+\Conditions{RPC}
 }
 
 \numtest{9}{
 \Reason{Fails for user with ``get'' but not ``delete.''}
+\Conditions{RPC}
 }
 
 \numtest{10}{
 \Priority{High}
 \Reason{Succeeds for user with only ``delete''.}
+\Status{Implemented}
 }
 
 \numtest{11}{
@@ -1462,6 +1704,7 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{12}{
 \Priority{High}
 \Reason{Fails for policy with non-zero reference count.}
+\Status{Implemented}
 }
 
 
@@ -1470,11 +1713,13 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 
 \numtest{1}{
 \Reason{Fails for mask with undefined bit set.}
+\Conditions{RPC}
 }
 
 \numtest{2}{
 \Priority{High}
 \Reason{Fails if caller connected with CHANGEPW_SERVICE.}
+\Status{Implemented}
 }
 
 \numtest{3}{
@@ -1500,94 +1745,115 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{8}{
 \Priority{High}
 \Reason{Fails for empty-string policy name.}
+\Status{Implemented}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Accepts 0 for pw_min_life.}
+\Status{Implemented}
 }
 
 \numtest{10}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_min_life.}
+\Status{Implemented}
 }
 
 \numtest{11}{
 \Priority{High}
 \Reason{Accepts 0 for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_max_life.}
+\Status{Implemented}
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Accepts 0 for pw_min_length.}
+\Status{Implemented}
 }
 
 \numtest{14}{
 \Priority{High}
 \Reason{Accepts non-zero for pw_min_length.}
+\Status{Implemented}
 }
 
 \numtest{15}{
 \Priority{High}
 \Reason{Rejects 0 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{16}{
 \Priority{High}
 \Reason{Accepts 1 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{17}{
 \Priority{High}
 \Reason{Accepts 4 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{18}{
 \Priority{High}
 \Reason{Rejects 5 for pw_min_classes.}
+\Status{Implemented}
 }
 
 \numtest{19}{
 \Priority{High}
 \Reason{Rejects 0 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{20}{
 \Priority{High}
 \Reason{Accepts 1 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{21}{
 \Priority{High}
 \Reason{Accepts 10 for pw_history_num.}
+\Status{Implemented}
 }
 
 \numtest{22}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{23}{
 \Priority{High}
 \Reason{Fails for user with ``get'' but not ``modify''.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{24}{
 \Reason{Fails for user with ``add'' but not ``modify.''}
+\Conditions{RPC}
 }
 
 \numtest{25}{
 \Reason{Fails for user with ``delete'' but not ``modify.''}
+\Conditions{RPC}
 }
 
 \numtest{26}{
 \Priority{High}
 \Reason{Succeeds for user with ``modify.''}
+\Status{Implemented}
 }
 
 \numtest{27}{
@@ -1616,6 +1882,7 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{3}{
 \Priority{High}
 \Reason{Fails for empty-string policy name.}
+\Status{Implemented}
 }
 
 \numtest{4}{
@@ -1630,39 +1897,48 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \Priority{High}
 \Reason{Fails for user with no access bits trying to get other's
 	policy, using ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{7}{
 \Priority{High}
 \Reason{Fails for user with ``add'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{8}{
 \Reason{Fails for user with ``modify'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
+\Conditions{RPC}	
 }
 
 \numtest{9}{
 \Reason{Fails for user with ``delete'' but not ``get'' trying to get
 	other's policy, using ADMIN_SERVICE.}
+\Conditions{RPC}	
 }
 
 \numtest{10}{
 \Reason{Fails for user with ``delete'' but not ``get'' trying to get
 	other's policy, using CHANGEPW_SERVICE.}
+\Conditions{RPC}	
 }
 
 \numtest{11}{
 \Priority{High}
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using ADMIN_SERVICE.}
+\Status{Implemented}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Succeeds for user with only ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
+\Status{Implemented}	
 }
 
 \numtest{13}{
@@ -1684,18 +1960,22 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \Priority{High}
 \Reason{Succeeds for user without ``get'', trying to get own policy,
 	using CHANGEPW_SERVICE.}
+\Status{Implemented}	
 }
 
 \numtest{17}{
 \Priority{High}
 \Reason{Succeeds for user with ``get'', trying to get other's policy,
 	using ADMIN_SERVICE.}
+\Status{Implemented}	
 }
 
 \numtest{18}{
 \Priority{High}
 \Reason{Fails for user with ``get'', trying to get other's policy,
 	using CHANGEPW_SERVICE.}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 \numtest{19}{
