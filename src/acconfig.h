@@ -6,47 +6,11 @@
 /* Don't use too large a block, because the autoheader processing can't
    handle it on some systems.  */
 
-#undef ANSI_STDIO
-
-#undef NO_YYLINENO
-#undef POSIX_FILE_LOCKS
-#undef POSIX_SIGTYPE
-#undef POSIX_TERMIOS
-#undef USE_DIRENT_H
-#undef WAIT_USES_INT
-#undef krb5_sigtype
-
-#undef HAVE_STDARG_H
-#undef HAVE_VARARGS_H
-#undef HAVE_REGCOMP
-
-/* Define if struct sockaddr and friends (sockaddr_in etc) have the
-   sa_len field.  */
-#undef HAVE_SA_LEN
-/* Define if there is a socklen_t type; if not, size_t is probably
-   what we should use.  */
-#undef HAVE_SOCKLEN_T
 /* Define if "struct sockaddr_storage" is available.  */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
 
-/* Define if MIT Project Athena default configuration should be used */
-#undef KRB5_ATHENA_COMPAT
-
-/* Define if Kerberos V4 backwards compatibility should be supported */
-#undef KRB5_KRB4_COMPAT
-
-/* Define if DNS support for finding realms and KDC locations should
-   be compiled in.  */
-#undef KRB5_DNS_LOOKUP
-#undef KRB5_DNS_LOOKUP_KDC
-#undef KRB5_DNS_LOOKUP_REALM
-
 /* Define to `long' if <sys/types.h> doesn't define. */
 #undef time_t
-
-/* Define if we should compile in IPv6 support (even if we may find we
-   can't use it at run time).  */
-#undef KRB5_USE_INET6
 
 /*
  * The stuff following here is taken from util/db2/acconfig.h
@@ -70,9 +34,3 @@
 #undef int32_t
 #undef u_int32_t
 
-/* kludgey stuff to deal with function replacements */
-
-#undef MEMMOVE
-#undef memmove
-#undef mkstemp
-#undef strerror

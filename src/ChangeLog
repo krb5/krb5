@@ -1,3 +1,20 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4: Require 2.13 of autoconf.
+	(DECLARE_SYS_ERRLIST, CHECK_SIGPROCMASK, CHECK_DIRENT,
+	CHECK_WAIT_TYPE, CHECK_SIGNALS, KRB5_SIGTYPE, KRB5_AC_CHECK_INET6,
+	HAVE_YYLINENO, KRB5_SOCKADDR_SA_LEN, AC_HEADER_STDARG,
+	KRB5_AC_NEED_LIBGEN, KRB5_AC_ENABLE_DNS): Use of AC_DEFINE
+	modified to provide comment for autoheader generated file.
+
+	* acconfig.h: Remove ANSI_STDIO, NO_YYLINENO, POSIX_FILE_LOCKS,
+	POSIX_SIGTYPE, POSIX_TERMIOS, USE_DIRENT_H, WAIT_USES_INT,
+	krb5_sigtype, HAVE_STDARG_H, HAVE_VARARGS_H, HAV_REGCOMP,
+	HAVE_SA_LEN, HAVE_SOCKLEN_T, KRB5_ATHENA_COMPAT, KRB5_KRB4_COMPAT,
+	KRB5_DNS_LOOKUP, KRB5_DNS_LOOKUP_KDC, KRB5_DNS_LOOKUP_REALM,
+	KRB5_USE_INET6, MEMMOVE, memmove, mkstemp and strerror. All
+	replaced by use of third argument to AC_DEFINE.
+
 2001-10-11  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in (HOST_TYPE): Remove SHLIB_TAIL_COMP; it's no longer

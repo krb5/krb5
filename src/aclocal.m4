@@ -1,4 +1,4 @@
-AC_PREREQ(2.12)
+AC_PREREQ(2.13)
 dnl
 dnl Figure out the top of the source and build trees.  We depend on localdir
 dnl being a relative pathname; we could make it general later, but for now 
@@ -100,8 +100,8 @@ AC_DEFUN([DECLARE_SYS_ERRLIST],
 krb5_cv_decl_sys_errlist=yes, krb5_cv_decl_sys_errlist=no)])
 # assume sys_nerr won't be declared w/o being in libc
 if test $krb5_cv_decl_sys_errlist = yes; then
-  AC_DEFINE(SYS_ERRLIST_DECLARED)
-  AC_DEFINE(HAVE_SYS_ERRLIST)
+  AC_DEFINE(SYS_ERRLIST_DECLARED,1,[Define if sys_errlist is defined in errno.h])
+  AC_DEFINE(HAVE_SYS_ERRLIST,1,[Define if sys_errlist in libc])
 else
   # This means that sys_errlist is not declared in errno.h, but may still
   # be in libc.
@@ -109,9 +109,9 @@ else
   [AC_TRY_LINK([extern int sys_nerr;], [if (1+sys_nerr < 0) return 1;],
   krb5_cv_var_sys_errlist=yes, krb5_cv_var_sys_errlist=no;)])
   if test $krb5_cv_var_sys_errlist = yes; then
-    AC_DEFINE(HAVE_SYS_ERRLIST)
+    AC_DEFINE(HAVE_SYS_ERRLIST,1,[Define if sys_errlist in libc])
     # Do this cruft for backwards compatibility for now.
-    AC_DEFINE(NEED_SYS_ERRLIST)
+    AC_DEFINE(NEED_SYS_ERRLIST,1,[Define if need to declare sys_errlist])
   else
     AC_MSG_WARN([sys_errlist is neither in errno.h nor in libc])
   fi
@@ -140,7 +140,7 @@ dnl check for <dirent.h> -- CHECK_DIRENT
 dnl (may need to be more complex later)
 dnl
 define(CHECK_DIRENT,[
-AC_CHECK_HEADER(dirent.h,AC_DEFINE(USE_DIRENT_H))])dnl
+AC_CHECK_HEADER(dirent.h,AC_DEFINE(USE_DIRENT_H,1,[Define if you have dirent.h functionality]))])dnl
 dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
@@ -161,7 +161,7 @@ dnl Else fallback on old stuff
 	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])])
 AC_MSG_RESULT($krb5_cv_struct_wait)
 if test $krb5_cv_struct_wait = no; then
-	AC_DEFINE(WAIT_USES_INT)
+	AC_DEFINE(WAIT_USES_INT,1,[Define if wait takes int as a argument])
 fi
 ])dnl
 dnl
@@ -177,7 +177,7 @@ AC_CACHE_VAL(krb5_cv_type_sigset_t,
 krb5_cv_type_sigset_t=yes, krb5_cv_type_sigset_t=no)])
 AC_MSG_RESULT($krb5_cv_type_sigset_t)
 if test $krb5_cv_type_sigset_t = yes; then
-  AC_DEFINE(POSIX_SIGNALS)
+  AC_DEFINE(POSIX_SIGNALS,1,[Define if POSIX signal handling is used])
 fi
 )])dnl
 dnl
@@ -197,14 +197,17 @@ extern void (*signal ()) ();], [],
 krb5_cv_has_posix_signals=yes, krb5_cv_has_posix_signals=no)])
 AC_MSG_RESULT($krb5_cv_has_posix_signals)
 if test $krb5_cv_has_posix_signals = yes; then
-   AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)
+   stype=void
+   AC_DEFINE(POSIX_SIGTYPE, 1, [Define if POSIX signal handlers are used])
 else
   if test $ac_cv_type_signal = void; then
-     AC_DEFINE(krb5_sigtype, void)
+     stype=void
   else
-     AC_DEFINE(krb5_sigtype, int)
+     stype=int
   fi
-fi])dnl
+fi
+AC_DEFINE_UNQUOTED(krb5_sigtype, $stype, [Define krb5_sigtype to type of signal handler])dnl
+])dnl
 dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
@@ -268,6 +271,8 @@ KRB5_AC_CHECK_TYPE_WITH_HEADERS(struct sockaddr_storage, [
 #endif
 #include <netinet/in.h>
 ])])dnl
+dnl
+dnl
 AC_DEFUN(KRB5_AC_CHECK_INET6,[
 AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])
 AC_MSG_CHECKING(for IPv6 compile-time support)
@@ -296,7 +301,7 @@ AC_TRY_COMPILE([
 fi
 AC_MSG_RESULT($krb5_cv_inet6)
 if test $krb5_cv_inet6 = yes ; then
-  AC_DEFINE(KRB5_USE_INET6)
+  AC_DEFINE(KRB5_USE_INET6,1,[Define if we should compile in IPv6 support (even if we can't use it at run time)])
 fi
 ])dnl
 dnl
@@ -510,7 +515,7 @@ AC_CACHE_VAL(krb5_cv_type_yylineno,
   rm -f conftest.out)
   AC_MSG_RESULT($krb5_cv_type_yylineno)
   if test $krb5_cv_type_yylineno = no; then
-	AC_DEFINE([NO_YYLINENO])
+	AC_DEFINE(NO_YYLINENO, 1, [Define if lex produes code with yylineno])
   fi
 ])dnl
 dnl
@@ -565,7 +570,7 @@ sa.sa_len;],
 krb5_cv_sockaddr_sa_len=yes,krb5_cv_sockaddr_sa_len=no)])
 AC_MSG_RESULT([$]krb5_cv_sockaddr_sa_len)
 if test $krb5_cv_sockaddr_sa_len = yes; then
-   AC_DEFINE_UNQUOTED(HAVE_SA_LEN)
+   AC_DEFINE_UNQUOTED(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
    fi
 ])
 dnl
@@ -657,7 +662,7 @@ AC_CACHE_VAL(ac_cv_header_stdarg_h,
 ],ac_cv_header_stdarg_h=yes,ac_cv_header_stdarg_h=no)])dnl
 AC_MSG_RESULT($ac_cv_header_stdarg_h)
 if test $ac_cv_header_stdarg_h = yes; then
-  AC_DEFINE(HAVE_STDARG_H)
+  AC_DEFINE(HAVE_STDARG_H, 1, [Define if stdarg available and compiles])
 else
 
 AC_MSG_CHECKING([for varargs.h])
@@ -673,7 +678,7 @@ AC_CACHE_VAL(ac_cv_header_varargs_h,
 ],ac_cv_header_varargs_h=yes,ac_cv_header_varargs_h=no)])dnl
 AC_MSG_RESULT($ac_cv_header_varargs_h)
 if test $ac_cv_header_varargs_h = yes; then
-  AC_DEFINE(HAVE_VARARGS_H)
+  AC_DEFINE(HAVE_VARARGS_H, 1, [Define if varargs available and compiles])
 else
   AC_MSG_ERROR(Neither stdarg nor varargs compile?)
 fi
@@ -701,7 +706,7 @@ regex_t x; regmatch_t m;
 int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
 ], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no, AC_ERROR([Cannot test regcomp when cross compiling]))])
 AC_MSG_RESULT($ac_cv_func_regcomp)
-test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP)
+test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP,1,[Define if regcomp exists and functions])
 dnl
 dnl Check for the compile and step functions - only if regcomp is not available
 dnl
@@ -1249,7 +1254,7 @@ AC_MSG_CHECKING(if DNS Kerberos lookup support should be compiled in)
   *) enable_dns_for_kdc=yes ;;
 esac])
   if test "$enable_dns_for_kdc" = yes; then
-    AC_DEFINE(KRB5_DNS_LOOKUP_KDC)
+    AC_DEFINE(KRB5_DNS_LOOKUP_KDC,1,[Define to enable DNS lookups of Kerberos KDCs])
   fi
 
   AC_ARG_ENABLE([dns-for-realm],
@@ -1259,7 +1264,7 @@ esac])
   *) enable_dns_for_realm=no ;;
 esac])
   if test "$enable_dns_for_realm" = yes; then
-    AC_DEFINE(KRB5_DNS_LOOKUP_REALM)
+    AC_DEFINE(KRB5_DNS_LOOKUP_REALM,1,[Define to enable DNS lookups of Kerberos realm names])
   fi
 
   if test "$enable_dns_for_kdc,$enable_dns_for_realm" != no,no
@@ -1271,7 +1276,7 @@ esac])
     enable_dns=yes
   fi
   if test "$enable_dns" = yes ; then
-    AC_DEFINE(KRB5_DNS_LOOKUP)
+    AC_DEFINE(KRB5_DNS_LOOKUP, 1,[Define for DNS support of locating realms and KDCs])
   else
     enable_dns=no
   fi
