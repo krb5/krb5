@@ -380,7 +380,7 @@ static char *bogus_strerror (int xerr)
 
 #include "cm.h"
 
-static const char *state_strings[] = {
+static const char *const state_strings[] = {
     "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
 };
 enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (state_strings): Now const.
+
 2002-12-06  Tom Yu  <tlyu@mit.edu>
 
 	* accessor.c (krb5int_accessor): Add add_host_to_list.
