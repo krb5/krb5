@@ -90,7 +90,10 @@ ptyint_update_wtmpx(struct utmpx *ent)
 #endif /* !(defined(WTMPX_FILE) && defined(HAVE_UPDWTMPX)) */
 }
 
-#else  /* !HAVE_SETUTXENT */
+#endif  /* HAVE_SETUTXENT */
+
+#if !(defined(WTMPX_FILE) && defined(HAVE_UPDWTMPX)) \
+	|| !defined(HAVE_SETUTXENT)
 
 long
 ptyint_update_wtmp(struct utmp *ent)

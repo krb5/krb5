@@ -99,7 +99,9 @@ long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);
 #ifdef HAVE_SETUTXENT
 long ptyint_update_wtmpx(struct utmpx *utx);
-#else
+#endif
+#if !(defined(WTMPX_FILE) && defined(HAVE_UPDWTMPX)) \
+	|| !defined(HAVE_SETUXENT)
 long ptyint_update_wtmp(struct utmp *ut);
 #endif
 void ptyint_vhangup(void);

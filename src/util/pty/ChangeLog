@@ -1,3 +1,16 @@
+2001-04-30  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix some quoting of shell variables when passing
+	to "test".  Reorder some logic in consistency checks to validate
+	cache variables against "yes" to account for possible empty or
+	nonexistent values.
+
+	* pty-int.h: Fix conditional prototype of update_wtmp().
+
+	* update_wtmp.c: Fix conditional compilation of update_wtmp() to
+	cover the case where we have setutxent() but don't have updwtmpx()
+	and WTMPX_FILE, as is the case on some Linux installations.
+
 2001-04-27  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in(K5_CHECK_UT_MEMBER): Fix typo in previous; make
