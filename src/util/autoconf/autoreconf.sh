@@ -111,7 +111,7 @@ while read dir; do
   test ! -f $aclocal && aclocal=
 
   if test $force = no && test -f configure &&
-    ls -lt configure configure.in $aclocal | sed 1q |
+    ls -Llt configure configure.in $aclocal | sed 1q |
       grep 'configure$' > /dev/null
   then
     :
