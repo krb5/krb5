@@ -316,6 +316,7 @@ typedef struct _krb5_scc_data {
      krb5_flags flags;
      char stdio_buffer[BUFSIZ];
      int version;
+     int mode;
 } krb5_scc_data;
 
 /* An off_t can be arbitrarily complex */
@@ -1173,6 +1174,12 @@ krb5_scc_close_file (context, id)
 	(failed) syscall */
      if (ret == EOF && !errno) ret = 0;
 #endif
+     /*
+      * NetBSD returns EBADF on fflush of a read-only file.
+      */
+     if (ret == EOF && errno == EBADF
+	 && data->mode == SCC_OPEN_RDONLY)
+	  ret = 0;
      memset (data->stdio_buffer, 0, sizeof (data->stdio_buffer));
      if (ret == EOF) {
 	  int errsave = errno;
@@ -1253,6 +1260,7 @@ krb5_scc_open_file (context, id, mode)
 #endif    
     if (!f)
 	return krb5_scc_interpret (context, errno);
+    data->mode = mode;
 #ifdef HAVE_SETVBUF
     setvbuf(f, data->stdio_buffer, _IOFBF, sizeof (data->stdio_buffer));
 #else

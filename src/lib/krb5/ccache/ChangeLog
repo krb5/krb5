@@ -1,3 +1,13 @@
+2000-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* cc_stdio.c: Add a "mode" field to krb5_scc_data to keep track of
+	what mode the file was opened in.
+	(krb5_scc_close_file): Ignore EBADF from fflush() if the file was
+	opened for readonly access.  For some reason NetBSD's fflush()
+	exhibits this behavior.
+	(krb5_scc_open_file): Save the mode with which the file was opened
+	in data->mode.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* cc_stdio.c, cc_file.c: Unsigned/signed int cleanup.
