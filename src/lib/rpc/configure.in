@@ -4,14 +4,13 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
-AC_TRY_COMPILE([
-#include <netdb.h>
-	],[
-	struct rpcent e;
-	char c = e.r_name[0];
-	int i = e.r_number;
-	], [rpcent_define='#define STRUCT_RPCENT_ALREADY_PROVIDED'],
-	[rpcent_define='']) dnl
+AC_TRY_COMPILE([#include <netdb.h>],
+[struct rpcent e;
+char c = e.r_name[0];
+int i = e.r_number;],
+[AC_CHECK_HEADER(rpc/netdb.h, rpcent_define='',
+	[rpcent_define='#define STRUCT_RPCENT_ALREADY_PROVIDED'])],
+[rpcent_define=''])
 AC_SUBST(rpcent_define)
 AC_CHECK_SIZEOF(int)
 SIZEOF_INT=$ac_cv_sizeof_int
