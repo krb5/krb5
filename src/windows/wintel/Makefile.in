@@ -12,8 +12,6 @@ KVERSION = 5
 !endif
 KRB 	 = KRB$(KVERSION)
 
-###WIN16##WLIB	 = $(BUILDTOP)\lib\winsock.lib
-
 BUILDTOP =..\..
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
 	   /I$(BUILDTOP)\lib\crypto\des

@@ -12,9 +12,8 @@ KVERSION = 5
 KRB 	 = KRB$(KVERSION)
 
 BUILDTOP =..\..
-
-##WIN16##WLIB	 = $(BUILDTOP)\lib\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+
 ##WIN16##XOBJS    = kpasswd.obj
 ##WIN32##XOBJS    = cnsres5.obj kpasswd.obj
 
