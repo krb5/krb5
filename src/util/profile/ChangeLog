@@ -1,3 +1,9 @@
+1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prof_get.c (profile_free_string): 
+	* profile.hin: Add profile_free_string to free strings allocated
+	by profile_get_string.
+
 1999-08-03 Alexandra Ellwood <lxs@mit.edu>
 
 	* prof_file.c (profile_open_file)
