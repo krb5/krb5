@@ -111,7 +111,7 @@ DEPLIBS=$(TOPLIBD)/libgssapi_krb5.$(SHEXT).$(COMERR_VER) \
 	$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
 	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER)
 
-SHLIB_LIBS=-lkrb5 -lcrypto -lcom_err -ldyn
+SHLIB_LIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 

@@ -1,3 +1,11 @@
+Tue Jul 23 11:24:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* xdr.c: Do not declare malloc().
+
+	* Makefile.in (SHLIB_LIBS): Link with gssapi_krb5 when creating
+		shared library.
+
+
 Mon Jul 22 21:46:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* clnt_perror.c: Include errno.h.
