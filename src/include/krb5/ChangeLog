@@ -1,4 +1,8 @@
 
+Mon Aug 21 17:00:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_proto.h - Add krb5_timestamp_to_sfstring() prototype.
+
+
 Tue Aug 15 14:27:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb.h - Add prototype for krb5_dbe_find_keytype().
 

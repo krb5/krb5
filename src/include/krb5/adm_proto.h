@@ -199,6 +199,11 @@ krb5_flags_to_string KRB5_PROTOTYPE((krb5_flags,
 krb5_error_code
 krb5_timestamp_to_string KRB5_PROTOTYPE((krb5_timestamp, char *, size_t));
 krb5_error_code
+krb5_timestamp_to_sfstring KRB5_PROTOTYPE((krb5_timestamp,
+					   char *,
+					   size_t,
+					   char *));
+krb5_error_code
 krb5_deltat_to_string KRB5_PROTOTYPE((krb5_deltat, char *, size_t));
 
 /* keysalt.c */
