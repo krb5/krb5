@@ -1534,7 +1534,7 @@
 		A12537EB040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb5.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1542,7 +1542,7 @@
 		A12537EE040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = profile.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1566,7 +1566,7 @@
 		A12537F0040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = des.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1574,7 +1574,7 @@
 		A12537F1040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1582,7 +1582,7 @@
 		A12537F2040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_generic.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1590,7 +1590,7 @@
 		A12537F3040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_krb5.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1598,7 +1598,7 @@
 		A12537F4040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1606,7 +1606,7 @@
 		A12537F5040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb5.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1614,7 +1614,7 @@
 		A12537F8040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1622,7 +1622,7 @@
 		A12537F9040C0795003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = profile.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1641,7 +1641,7 @@
 		A12537FB040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1649,7 +1649,7 @@
 		A12537FC040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_generic.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1657,7 +1657,7 @@
 		A12537FD040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_krb5.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1676,7 +1676,7 @@
 		A12537FF040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = des.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1684,7 +1684,7 @@
 		A1253800040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1692,7 +1692,7 @@
 		A1253801040C080B003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1710,7 +1710,7 @@
 		A1253804040C0D3E003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = autoconf.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -1718,7 +1718,7 @@
 		A1253805040C0D3E003D8244 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = osconf.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -3145,6 +3145,48 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A1A6783106C3D47F00EC826E = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "fake-addrinfo.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1A6783206C3D47F00EC826E = {
+			fileRef = A1A6783106C3D47F00EC826E;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1A6784206C3D82500EC826E = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = rc_none.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1A6784306C3D82500EC826E = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "rc-int.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1A6784406C3D82500EC826E = {
+			fileRef = A1A6784206C3D82500EC826E;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1A6784506C3D82500EC826E = {
+			fileRef = A1A6784306C3D82500EC826E;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		A1AB1DEC05DDC40100526345 = {
 			buildPhases = (
 				A1AB1DEE05DDC40100526345,
@@ -4030,6 +4072,7 @@
 				A1AB1EB605DDC47800526345,
 				A1AB1EB705DDC47800526345,
 				A1AB1EB805DDC47800526345,
+				A1A6784506C3D82500EC826E,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4587,6 +4630,8 @@
 				A1AB1FAC05DDC47800526345,
 				A1AB1FAD05DDC47800526345,
 				A1D256F206A713A600A9EC13,
+				A1A6783206C3D47F00EC826E,
+				A1A6784406C3D82500EC826E,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6610,6 +6655,7 @@
 		};
 		A1D256ED06A713A600A9EC13 = {
 			children = (
+				A1A6783106C3D47F00EC826E,
 				A1D256EE06A713A600A9EC13,
 				A1D256F106A713A600A9EC13,
 			);
@@ -13599,6 +13645,8 @@
 				F51735A403F1B65A01120114,
 				F51735A503F1B65A01120114,
 				F51735A603F1B65A01120114,
+				A1A6784206C3D82500EC826E,
+				A1A6784306C3D82500EC826E,
 				F51735A703F1B65A01120114,
 				F51735A803F1B65A01120114,
 				F51735A903F1B65A01120114,
@@ -14006,7 +14054,7 @@
 		F5C2DF140240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = asn1_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14014,7 +14062,7 @@
 		F5C2DF150240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = asn1_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14022,7 +14070,7 @@
 		F5C2DF160240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = asn1_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14030,7 +14078,7 @@
 		F5C2DF170240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = gssapi_err_generic.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14038,7 +14086,7 @@
 		F5C2DF180240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_err_generic.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14046,7 +14094,7 @@
 		F5C2DF190240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = gssapi_err_generic.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14054,7 +14102,7 @@
 		F5C2DF1A0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = gssapi_err_krb5.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14062,7 +14110,7 @@
 		F5C2DF1B0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = gssapi_err_krb5.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14070,7 +14118,7 @@
 		F5C2DF1C0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = gssapi_err_krb5.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14078,7 +14126,7 @@
 		F5C2DF1D0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = kdb5_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14086,7 +14134,7 @@
 		F5C2DF1E0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = kdb5_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14094,7 +14142,7 @@
 		F5C2DF1F0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = kdb5_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14102,7 +14150,7 @@
 		F5C2DF200240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = krb524_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14110,7 +14158,7 @@
 		F5C2DF210240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb524_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14118,7 +14166,7 @@
 		F5C2DF220240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = krb524_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14126,7 +14174,7 @@
 		F5C2DF230240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = krb5_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14134,7 +14182,7 @@
 		F5C2DF240240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb5_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14142,7 +14190,7 @@
 		F5C2DF250240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = krb5_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14150,7 +14198,7 @@
 		F5C2DF260240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = kv5m_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14158,7 +14206,7 @@
 		F5C2DF270240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = kv5m_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14166,7 +14214,7 @@
 		F5C2DF280240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = kv5m_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14174,7 +14222,7 @@
 		F5C2DF290240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = prof_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14182,7 +14230,7 @@
 		F5C2DF2A0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = prof_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14190,7 +14238,7 @@
 		F5C2DF2B0240F9F601650119 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = prof_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14420,7 +14468,7 @@
 		F5E2671F03F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = kadm_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14428,7 +14476,7 @@
 		F5E2672003F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = kadm_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14436,7 +14484,7 @@
 		F5E2672103F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = kadm_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14444,7 +14492,7 @@
 		F5E2672203F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.c;
 			path = krb_err.c;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14452,7 +14500,7 @@
 		F5E2672303F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.c.h;
 			path = krb_err.h;
 			refType = 4;
 			sourceTree = "<group>";
@@ -14460,7 +14508,7 @@
 		F5E2672403F8200601120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = text.plist.strings;
 			path = krb_err.strings;
 			refType = 4;
 			sourceTree = "<group>";
