@@ -1,3 +1,8 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb.h: Add "internal" prototypes cr_err_reply(), create_ciph(),
+	krb_create_ticket(), krb5_cr_tkt_krb5(), krb_set_key_krb5().
+
 2001-05-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* des.h: Do not use "encrypt" as an argument.

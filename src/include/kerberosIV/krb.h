@@ -609,6 +609,32 @@ extern int decomp_ticket
 		   char *sname, char *sinstance, C_Block,
 		   Key_schedule key_s);
 
+
+extern void cr_err_reply(KTEXT pkt, char *pname, char *pinst, char *prealm,
+			 u_long time_ws, u_long e, char *e_string);
+
+extern int create_ciph(KTEXT c, C_Block session, char *service, 
+		       char *instance, char *realm, unsigned long life,
+		       int kvno, KTEXT tkt, unsigned long kdc_time, 
+		       C_Block key);
+
+
+extern int krb_create_ticket(KTEXT tkt, unsigned int flags, char *pname,
+			     char *pinstance, char *prealm, long paddress,
+			     char *session, int life, long time_sec, 
+			     char *sname, char *sinstance, C_Block key);
+
+#ifdef KRB5_GENERAL__
+extern int krb_cr_tkt_krb5(KTEXT tkt, unsigned int flags, char *pname,
+			   char *pinstance, char *prealm, long paddress,
+			   char *session, int life, long time_sec, 
+			   char *sname, char *sinstance,  
+			   krb5_keyblock *k5key);
+
+extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
+
+#endif
+
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);
 unsigned int krb_get_notification_message(void);
