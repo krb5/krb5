@@ -12,7 +12,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_edit_c[] =
+static char rcsid_kdb_mkdums_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -192,11 +192,10 @@ char *argv[];
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
     if (!cur_realm) {
-	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
+	if (retval = krb5_get_default_realm(&cur_realm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
-	cur_realm = defrealm;
     }
     if (retval = set_dbname_help(progname, dbname))
 	exit(retval);
@@ -287,6 +286,9 @@ OLDDECLARG(char *, str_newprinc)
 	return;
     }
     newentry.attributes = mblock.flags;
+    newentry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
+    newentry.salt_length = 0;
+    newentry.salt = 0;
     
     retval = krb5_db_put_principal(&newentry, &one);
     if (retval) {
