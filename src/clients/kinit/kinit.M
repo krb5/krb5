@@ -28,6 +28,9 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .B \-l
 .I lifetime
 ] [
+.B \-s
+.I starttime
+] [
 .B \-p
 ] [
 .B \-f
@@ -50,6 +53,12 @@ option specifies the lifetime to be requested for the ticket;
 if this option is not specified, the default ticket lifetime (configured
 by each site) is used instead.
 .PP
+The
+.B \-s
+option specifies the start time, and causes you to get a postdated ticket. 
+Postdated tickets are issued with the 
+.I invalid
+flag set, and needs to be fed back to the kdc before use.
 The
 .B \-p
 option specifies that the PROXIABLE option should be requested for the

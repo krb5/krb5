@@ -56,11 +56,12 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-	krb5_context kcontext;
+    krb5_context kcontext;
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     char *keytab_name = NULL;		/* -t option */
     krb5_deltat lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
+    krb5_timestamp starttime = 0;
     krb5_deltat rlife = 0;
     int options = KRB5_DEFAULT_OPTIONS;
     int option;
@@ -81,10 +82,15 @@ main(argc, argv)
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
 
+    if ((code = krb5_timeofday(kcontext, &now))) {
+	com_err(argv[0], code, "while getting time of day");
+	exit(1);
+    }
+
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:fpl:c:kt:")) != EOF) {
+    while ((option = getopt(argc, argv, "r:fpl:s:c:kt:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
@@ -127,7 +133,23 @@ main(argc, argv)
 		errflg++;
 	    }
 	    break;
-	case 'c':
+       case 's':
+	    code = krb5_string_to_timestamp(optarg, &starttime);
+	    if (code != 0 || starttime == 0) {
+	      krb5_deltat ktmp;
+	      code = krb5_string_to_deltat(optarg, &ktmp);
+	      if (code == 0 && ktmp != 0) {
+		starttime = now + ktmp;
+		options |= KDC_OPT_POSTDATED;
+	      } else {
+		fprintf(stderr, "Bad postdate start time value %s\n", optarg);
+		errflg++;
+	      }
+	    } else {
+	      options |= KDC_OPT_POSTDATED;
+	    }
+	    break;
+       case 'c':
 	    if (ccache == NULL) {
 		cache_name = optarg;
 		
@@ -233,13 +255,14 @@ main(argc, argv)
 
     my_creds.server = server;
 
-    if ((code = krb5_timeofday(kcontext, &now))) {
-	com_err(argv[0], code, "while getting time of day");
-	exit(1);
-    }
-    my_creds.times.starttime = 0;	/* start timer when request
+    if (options & KDC_OPT_POSTDATED) {
+      my_creds.times.starttime = starttime;
+      my_creds.times.endtime = starttime + lifetime;
+    } else {
+      my_creds.times.starttime = 0;	/* start timer when request
 					   gets to KDC */
-    my_creds.times.endtime = now + lifetime;
+      my_creds.times.endtime = now + lifetime;
+    }
     if (options & KDC_OPT_RENEWABLE) {
 	my_creds.times.renew_till = now + rlife;
     } else

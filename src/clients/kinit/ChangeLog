@@ -1,3 +1,12 @@
+Wed May  1 02:37:17 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kinit.c (main): add -s starttime option. Have it accept a delta
+	time (if the value doesn't parse as a valid timestamp.) Set the
+	postdated option as well. get time of day early enough in main so
+	the options code can use it. Make the end time relative to the
+	start time, if given.
+	* kinit.M: document -s option.
+
 Thu Feb 15 12:31:03 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kinit.c (main): Do not free memory until all done using it.
