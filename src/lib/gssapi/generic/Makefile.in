@@ -45,7 +45,7 @@ gssapi.h: gssapi.hin
 	(echo "/* This is the gssapi.h prologue. */"; \
 	echo "/* It contains some choice pieces of autoconf.h */"; \
 	sed -n "/SIZEOF/s//GSS_&/p" < $(BUILDTOP)/include/krb5/autoconf.h; \
-	echo "${include_xom}"; \
+	echo "$(include_xom)"; \
 	echo "/* End of gssapi.h prologue. */"; \
 	cat $(srcdir)/gssapi.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
