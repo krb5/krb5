@@ -274,6 +274,10 @@ int main(argc, argv)
 #endif
     ref.kdc_options &= ~KDC_OPT_ENC_TKT_IN_SKEY;
     decode_run("kdc_req_body","(optionals NULL except server)","30 59 A0 07 03 05 00 FE DC BA 90 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 03 02 01 2A A8 08 30 06 02 01 00 02 01 01",decode_krb5_kdc_req_body,ktest_equal_kdc_req_body);
+    ref.nktypes = 0;
+    free(ref.ktype);
+    ref.ktype = NULL;
+    decode_run("kdc_req_body","(optionals NULL except server; zero-length etypes)","30 53 A0 07 03 05 00 FE DC BA 90 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 03 02 01 2A A8 02 30 00",decode_krb5_kdc_req_body,ktest_equal_kdc_req_body);
   }
   
   /****************************************************************/
