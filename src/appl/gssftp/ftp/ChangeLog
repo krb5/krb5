@@ -1,3 +1,10 @@
+2001-06-15  Ezra Peisach  <epeisach@mit.edu>
+
+	* cmds.c, domacro.c: Cast arguments to isspace() and isdigit()
+	from char to int.
+
+	* ftp.c: krb5_mk_priv(), krb5_mk_safe() expect C_Block *.
+
 2001-05-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (setpeer): Port number should be unsigned short.  (Patch

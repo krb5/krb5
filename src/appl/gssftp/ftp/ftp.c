@@ -411,9 +411,9 @@ static int secure_command(cmd)
 		    if ((length = clevel == PROT_P ?
 			krb_mk_priv((unsigned char *)cmd, (unsigned char *)out,
 				strlen(cmd), schedule,
-				cred.session, &myctladdr, &hisctladdr)
+				&cred.session, &myctladdr, &hisctladdr)
 		      : krb_mk_safe((unsigned char *)cmd, (unsigned char *)out,
-				strlen(cmd), cred.session,
+				strlen(cmd), &cred.session,
 				&myctladdr, &hisctladdr)) == -1) {
 			fprintf(stderr, "krb_mk_%s failed for KERBEROS_V4\n",
 					clevel == PROT_P ? "priv" : "safe");
@@ -687,12 +687,12 @@ int getreply(expecteof)
 				if ((kerror = safe ?
 				  krb_rd_safe((unsigned char *)ibuf, 
 					      (unsigned int) len,
-					      cred.session,
+					      &cred.session,
 					      &hisctladdr, 
 					      &myctladdr, &msg_data)
 				: krb_rd_priv((unsigned char *)ibuf, 
 					      (unsigned int) len,
-					      schedule, cred.session,
+					      schedule, &cred.session,
 					      &hisctladdr, &myctladdr,
 					      &msg_data))
 				!= KSUCCESS) {
@@ -1990,7 +1990,7 @@ int do_auth()
 				     GSS_C_NO_CREDENTIAL,
 				     &gcontext,
 				     target_name,
-				     *gss_trials[trial].mech_type,
+				     (gss_OID_desc *)*gss_trials[trial].mech_type,
 				     GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
 				       (forward ? GSS_C_DELEG_FLAG : 
 					(unsigned) 0),
@@ -2122,7 +2122,7 @@ int do_auth()
 			fprintf(stderr, "Base 64 decoding failed: %s\n",
 					radix_error(kerror));
 		else if ((kerror = krb_rd_safe(out_buf, (unsigned )i,
-					       cred.session,
+					       &cred.session,
 					       &hisctladdr, &myctladdr, 
 					       &msg_data)))
 			fprintf(stderr, "Kerberos V4 krb_rd_safe failed: %s\n",

@@ -726,14 +726,14 @@ void mput(argc, argv)
 			if (mflag && confirm(argv[0], cp)) {
 				tp = cp;
 				if (mcase) {
-					while (*tp && !islower(*tp)) {
+					while (*tp && !islower((int) (*tp))) {
 						tp++;
 					}
 					if (!*tp) {
 						tp = cp;
 						tp2 = tmpbuf;
 						while ((*tp2 = *tp) != 0) {
-						     if (isupper(*tp2)) {
+						     if (isupper((int) *tp2)) {
 						        *tp2 = 'a' + *tp2 - 'A';
 						     }
 						     tp++;
@@ -865,14 +865,14 @@ usage:
 	if (loc && mcase) {
 		char *tp = argv[1], *tp2, tmpbuf[MAXPATHLEN];
 
-		while (*tp && !islower(*tp)) {
+		while (*tp && !islower((int) *tp)) {
 			tp++;
 		}
 		if (!*tp) {
 			tp = argv[2];
 			tp2 = tmpbuf;
 			while ((*tp2 = *tp) != 0) {
-				if (isupper(*tp2)) {
+				if (isupper((int) *tp2)) {
 					*tp2 = 'a' + *tp2 - 'A';
 				}
 				tp++;
@@ -995,14 +995,14 @@ void mget(argc, argv)
 		if (mflag && confirm(argv[0], cp)) {
 			tp = cp;
 			if (mcase) {
-				while (*tp && !islower(*tp)) {
+				while (*tp && !islower((int) *tp)) {
 					tp++;
 				}
 				if (!*tp) {
 					tp = cp;
 					tp2 = tmpbuf;
 					while ((*tp2 = *tp) != 0) {
-						if (isupper(*tp2)) {
+						if (isupper((int) *tp2)) {
 							*tp2 = 'a' + *tp2 - 'A';
 						}
 						tp++;
@@ -2140,7 +2140,7 @@ domap(name)
 				break;
 			case '[':
 LOOP:
-				if (*++cp2 == '$' && isdigit(*(cp2+1))) { 
+				if (*++cp2 == '$' && isdigit((int) *(cp2+1))) { 
 					if (*++cp2 == '0') {
 						char *cp3 = name;
 
@@ -2165,7 +2165,7 @@ LOOP:
 							cp2++;
 						}
 						else if (*cp2 == '$' &&
-   						        isdigit(*(cp2+1))) {
+   						        isdigit((int) *(cp2+1))) {
 							if (*++cp2 == '0') {
 							   char *cp3 = name;
 
@@ -2217,7 +2217,7 @@ LOOP:
 				}
 				break;
 			case '$':
-				if (isdigit(*(cp2 + 1))) {
+				if (isdigit((int) *(cp2 + 1))) {
 					if (*++cp2 == '0') {
 						char *cp3 = name;
 

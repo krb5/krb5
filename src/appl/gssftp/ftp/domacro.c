@@ -75,7 +75,7 @@ void domacro(argc, argv)
 TOP:
 	cp1 = macros[i].mac_start;
 	while (cp1 != macros[i].mac_end) {
-		while (isspace(*cp1)) {
+		while (isspace((int) *cp1)) {
 			cp1++;
 		}
 		cp2 = line;
@@ -85,9 +85,9 @@ TOP:
 				 *cp2++ = *++cp1;
 				 break;
 			    case '$':
-				 if (isdigit(*(cp1+1))) {
+				 if (isdigit((int) *(cp1+1))) {
 				    j = 0;
-				    while (isdigit(*++cp1)) {
+				    while (isdigit((int) (*++cp1))) {
 					  j = 10*j +  *cp1 - '0';
 				    }
 				    cp1--;
