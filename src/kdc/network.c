@@ -34,7 +34,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#if defined(_AIX) || defined(AIXArchitecture)
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #include <arpa/inet.h>

@@ -1,3 +1,10 @@
+Tue Jun 13 12:44:20 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* network.c: Base inclusion of sys/select.h on whether it exists
+        instead of a specific test for AIX.
+
+	* configure.in: Test for sys/select.h
+
 Mon Jun 12 20:01:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc_util.c (kdc_process_tgs_req): Set the auth_context rcache to
