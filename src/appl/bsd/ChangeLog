@@ -1,3 +1,8 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * krcp.c, krlogin.c, krlogind.c, krsh.c, krshd.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Sun Aug 27 15:35:04 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rlogin.M: Document -f and -F options.

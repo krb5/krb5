@@ -580,7 +580,7 @@ main(argc, argv)
     rem = sock;
     
     /* setup eblock for des_read and write */
-    krb5_use_keytype(bsd_context, &eblock,cred->keyblock.keytype);
+    krb5_use_enctype(bsd_context, &eblock,cred->keyblock.enctype);
     if ( status = krb5_process_key(bsd_context, &eblock,&cred->keyblock)) {
 	fprintf(stderr,
 		"%s: Cannot process session key : %s.\n",

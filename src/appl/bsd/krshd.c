@@ -1688,7 +1688,7 @@ recvauth(netf, peersin)
 	return status;
 
     /* Setup eblock for encrypted sessions. */
-    krb5_use_keytype(bsd_context, &eblock, ticket->enc_part2->session->keytype);
+    krb5_use_enctype(bsd_context, &eblock, ticket->enc_part2->session->enctype);
     if (status = krb5_process_key(bsd_context, &eblock, ticket->enc_part2->session))
 	fatal(netf, "Permission denied");
 

@@ -1324,7 +1324,7 @@ void send_auth()
 		       &session_key);
     krb5_free_creds(bsd_context, out_creds);
     
-    krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
+    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
     if ( status = krb5_process_key(bsd_context, &eblock, 
 				   session_key)){
 	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
@@ -1401,7 +1401,7 @@ void
     krb5_xfree(msg.data);
     
     /* OK process key */
-    krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
+    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
     if (status = krb5_process_key(bsd_context, &eblock, session_key)) 
 	exit(1);
 

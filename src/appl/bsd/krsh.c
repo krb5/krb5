@@ -361,7 +361,7 @@ main(argc, argv0)
     /* Setup for des_read and write */
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;
-    krb5_use_keytype(bsd_context, &eblock,cred->keyblock.keytype);
+    krb5_use_enctype(bsd_context, &eblock,cred->keyblock.enctype);
     if (status = krb5_process_key(bsd_context, &eblock,&cred->keyblock)) {
         fprintf(stderr, "%s: Cannot process session key : %s.\n",
                 argv0, error_message(status));

@@ -41,7 +41,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k enctype]\n\
 \t[-M mkeyname] [-f keyfile]\n",
 	    who);
     exit(status);
@@ -64,7 +64,7 @@ char *argv[];
     krb5_context context;
     krb5_realm_params *rparams;
 
-    int keytypedone = 0;
+    int enctypedone = 0;
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -81,10 +81,10 @@ char *argv[];
 	    realm = optarg;
 	    break;
 	case 'k':
-	    if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
-		keytypedone++;
+	    if (!krb5_string_to_enctype(optarg, &master_keyblock.enctype))
+		enctypedone++;
 	    else
-		com_err(argv[0], 0, "%s is an invalid keytype", optarg);
+		com_err(argv[0], 0, "%s is an invalid enctype", optarg);
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
@@ -117,9 +117,9 @@ char *argv[];
 	    mkey_name = strdup(rparams->realm_mkey_name);
 
 	/* Get the value for the master key type */
-	if (rparams->realm_keytype_valid && !keytypedone) {
-	    master_keyblock.keytype = rparams->realm_keytype;
-	    keytypedone++;
+	if (rparams->realm_enctype_valid && !enctypedone) {
+	    master_keyblock.enctype = rparams->realm_enctype;
+	    enctypedone++;
 	}
 
 	/* Get the value for the stash file */
@@ -132,20 +132,20 @@ char *argv[];
     if (!dbname)
 	dbname = DEFAULT_KDB_FILE;
 
-    if (!keytypedone)
-	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
+    if (!enctypedone)
+	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
-    if (!valid_keytype(master_keyblock.keytype)) {
+    if (!valid_enctype(master_keyblock.enctype)) {
 	char tmp[32];
-	if (krb5_keytype_to_string(master_keyblock.keytype, tmp, sizeof(tmp)))
+	if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
 	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-		    "while setting up keytype %d", master_keyblock.keytype);
+		    "while setting up enctype %d", master_keyblock.enctype);
 	else
 	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
 	exit(1);
     }
 
-    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
 
     if (retval = krb5_db_set_name(context, dbname)) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
