@@ -408,6 +408,9 @@ addAllowTgtKey:
   ReadRegDWORD $R0 HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" "AllowTGTSessionKey" 
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup" $R0
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" "AllowTGTSessionKey" "1"
+  ReadRegDWORD $R0 HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" 
+  WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackupXP" $R0
+  WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" "1"
 skipAllowTgtKey:  
 
 SectionEnd
@@ -986,6 +989,8 @@ StartRemove:
   ; Restore previous value of AllowTGTSessionKey 
   ReadRegDWORD $R0 HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup"
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" "AllowTGTSessionKey" $R0
+  ReadRegDWORD $R0 HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackupXP"
+  WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" $R0
 
   DeleteRegKey HKLM "${KFW_REGKEY_ROOT}\Client\CurrentVersion"
   DeleteRegKey HKLM "${KFW_REGKEY_ROOT}\Client"
