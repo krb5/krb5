@@ -1244,3 +1244,26 @@ dnl AC_MSG_RESULT($enable_dns_for_kdc)
 dnl AC_MSG_CHECKING(if DNS should be used to find realm name by default)
 dnl AC_MSG_RESULT($enable_dns_for_realm)
 ])
+dnl
+dnl
+dnl Check if we need the prototype for a function - we give it a bogus 
+dnl prototype and if it complains - then a valid prototype exists on the 
+dnl system.
+dnl
+dnl KRB5_NEED_PROTO(includes, function)
+dnl
+AC_DEFUN([KRB5_NEED_PROTO], [
+if test "x$ac_cv_func_$2" = xyes; then
+AC_CACHE_CHECK([if $2 needs a prototype provided], krb5_cv_func_$2_noproto,
+AC_TRY_COMPILE([$1],
+[struct k5foo {int foo; } xx;
+extern int $2 (struct k5foo*);
+$2(&xx);
+],
+krb5_cv_func_$2_noproto=yes,krb5_cv_func_$2_noproto=no))
+if test $krb5_cv_func_$2_noproto = yes; then
+	AC_DEFINE([NEED_]translit($2, [a-z], [A-Z])[_PROTO], 1, dnl
+[define if the system header files are missing prototype for $2()])
+fi
+fi
+])

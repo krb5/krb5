@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (KRB5_NEED_PROTO): Determines if the OS provides a
+	prototype for a function - and if not, allows us to define it.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5-config.in (CC_LINK): Use ' vs " to prevent bash expansion of
