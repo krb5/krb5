@@ -1,3 +1,8 @@
+2002-06-20  Sam Hartman  <hartmans@mit.edu>
+
+	* implementor.texinfo (Operating System Notes for Shared Libraries):  Update why we don't use libtool
+	(Solaris  Shared Library Support): Update
+
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* implementor.texinfo: Don't use @smallbook.
