@@ -271,7 +271,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     long	numbuf;
     long	onumbuf;
     OM_uint32	nbytes;
-    int		index;
+    int		idx;
     unsigned char *op;
 
     brace = 0;
@@ -361,12 +361,12 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 		}
 		numbuf = onumbuf;
 		op += nbytes;
-		index = -1;
+		idx = -1;
 		while (numbuf) {
-		    op[index] = (unsigned char) numbuf & 0x7f;
-		    if (index != -1)
-			op[index] |= 0x80;
-		    index--;
+		    op[idx] = (unsigned char) numbuf & 0x7f;
+		    if (idx != -1)
+			op[idx] |= 0x80;
+		    idx--;
 		    numbuf >>= 7;
 		}
 		while (isdigit(*bp))
