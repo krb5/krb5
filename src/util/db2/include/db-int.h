@@ -36,9 +36,10 @@
 #ifndef	_DB_INT_H_
 #define	_DB_INT_H_
 
+#include "config.h"
 #include "db.h"
 
-/* deal with autoconf-based stuff (db.h includes db-config.h) */
+/* deal with autoconf-based stuff */
 
 #define DB_LITTLE_ENDIAN 1234
 #define DB_BIG_ENDIAN 4321
