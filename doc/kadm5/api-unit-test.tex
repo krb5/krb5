@@ -58,17 +58,6 @@ Specifications'' revision 1.27, dated November 17, 1993.
 Since inter-realm functionality is not a requirement for OpenV*Secure
 1.0, it is not tested.
 
-%In these tests: ``usera'' and ``userb'' (abbreviated ``a'' and ``b'') as the
-%non-realm part of a principal represent the names of principals that
-%exist in the current realm; ``nouser'' (abbreviated ``n'') represents a
-%principal that does not exist in the current realm; ``useras-password''
-%(abbreviated ``a's-p'') represents ``usera'''s password; ``userbs-password''
-%(abbreviated ``b's-p'') represents ``userb'''s password; ``no-password''
-%(abbreviated ``no-p'') represents some password string which isn't the
-%password of anyone in the database; ``LOCAL.REALM'' (abbreviated ``L.R'')
-%represents the local realm; and ``BAD.REALM'' (abbreviated ``B.R'')
-%represents a nonexistent realm.
-
 All tests which test for success should verify, using some means other
 than the return value of the function being tested, that the requested
 operation was successfully performed.  For example: for init, test
@@ -88,19 +77,29 @@ Furthermore, tests which test for failure should verify that the
 failure code returned is correct for the specific failure condition
 tested.
 
-\section{ovsec_kadm_init}
+Most of the tests listed below should be run twice -- once locally on
+the server after linking against the server API library, and once
+talking to the server via authenticated Sun RPC after linking against
+the client API library.  Tests which should only be run locally or via
+RPC are labelled with a ``local'' or ``RPC''.
 
-%ADMIN_SERVICE is abbreviated A_S, and CHANGEPW_SERVICE is abbreviated
-%C_S.
+Furthermore, in addition to the tests labelled below, a test should be
+implemented to verify that a client can't perform operations on the
+server through the client API library when it's linked against
+standard Sun RPC instead of OpenV*Secure's authenticated Sun RPC.
+Since the tests below already verify that all of the API functions
+will fail if called before ovsec_kadm_init, this test can consist of
+nothing more than verifying that it's not possible to initialize a
+connection to the server using standard Sun RPC.
+
+\section{ovsec_kadm_init}
 
 \numtest{1}{
 \Reason{An empty string realm is rejected.}
-\Call{ovsec_kadm_init(a, a's-p, A_S, "")}
 }
 
 \numtest{2}{
 \Reason{A realm containing invalid characters is rejected.}
-\Call{ovsec_kadm_init(a, a's-p, A_S, B.R)}
 }
 
 \numtest{2.5}{
@@ -110,152 +109,117 @@ tested.
 \numtest{3}{
 \Reason{A bad service name representing an existing principal
 	(different from the client principal) is rejected.}
-\Call{ovsec_kadm_init(a, a's-p, b, null)}
 \Conditions{RPC}
 }
 
 \numtest{4}{
 \Reason{A bad service name representing a non-existent
 		principal is rejected.}
-\Call{ovsec_kadm_init(a, a's-p, n, null)}
 \Conditions{RPC}
 }
 
 \numtest{5}{
 \Reason{A bad service name identical to the (existing) client
 		name is rejected.}
-\Call{ovsec_kadm_init(a, a's-p, a, null)}
 \Conditions{RPC}
 }
 
 \numtest{6}{
 \Reason{A null password causes password prompting.}
-\Call{ovsec_kadm_init(a, null, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{7}{
 \Reason{An empty-string password is rejected.}
-\Call{ovsec_kadm_init(a, "", A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{8}{
 \Reason{An incorrect password which is the password of another
 		user is rejected.}
-\Call{ovsec_kadm_init(a, b's-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{9}{
 \Reason{An incorrect password which isn't the password of any
 		user is rejected.}
-\Call{ovsec_kadm_init(a, no-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{10}{
 \Reason{A null client_name is rejected.}
-\Call{ovsec_kadm_init(null, no-p, A_S, null)}
 }
 
 % Empty string client name is legal.
 %\numtest{11}{
 %\Reason{An empty-string client_name is rejected.}
-%\Call{ovsec_kadm_init("", no-p, A_S, null)}
 %}
 
 \numtest{12}{
 \Reason{A client_name referring to a non-existent principal in
 		the default realm is rejected.}
-\Call{ovsec_kadm_init(n, no-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{13}{
 \Reason{A client_name referring to a non-existent principal
 		with the local realm specified explicitly is rejected.}
-\Call{ovsec_kadm_init(n@L.R, no-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{14}{
 \Reason{A client_name referring to a non-existent principal in
 	a nonexistent realm is rejected.}
-\Call{ovsec_kadm_init(n@B.R, no-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{15}{
 \Reason{A client_name referring to an existing principal in a
 	nonexistent realm is rejected.}
-\Call{ovsec_kadm_init(a@B.R, a's-p, A_S, null)}
 \Conditions{RPC}
 }
 
 \numtest{16}{
 \Reason{Valid invocation.}
-\Call{ovsec_kadm_init(a, a-s'p, A_S, null);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{17}{
 \Reason{Valid invocation (explicit client realm).}
-\Call{ovsec_kadm_init(a@L.R, a-s'p, A_S, null);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{18}{
 \Reason{Valid invocation (CHANGEPW_SERVICE).}
-\Call{ovsec_kadm_init(a, a-s'p, C_S, null);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{19}{
 \Reason{Valid invocation (explicit service realm).}
-\Call{ovsec_kadm_init(a, a-s'p, A_S, L.R);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{20}{
 \Reason{Valid invocation (database access allowed after init).}
-\Call{ovsec_kadm_init(a, a-s'p, A_S, null);
-		ovsec_kadm_get_principal(a, buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{21}{
 \Reason{Init fails when called twice in a row.}
-\Call{ovsec_kadm_init(a, a-s'p, A_S, null);
-		ovsec_kadm_init(a, a-s'p, A_S, null);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{22}{
 \Reason{A null password causes master-key prompting.}
-\Call{ovsec_kadm_init(a, null, A_S, null);
-		ovsec_kadm_destroy()}
 \Conditions{local}
 }
 
 \numtest{23}{
 \Reason{A non-null password causes reading from the kstash.}
-\Call{ovsec_kadm_init(a, no-p, A_S, null);
-		ovsec_kadm_destroy()}
 \Conditions{local}
 }
 
 \numtest{24}{
 \Reason{Null service name is ignored in local invocation.}
-\Call{ovsec_kadm_init(a, null, null, null);
-		ovsec_kadm_destroy()}
 \Conditions{local}
 }
 
 \numtest{25}{
 \Reason{Non-null service name is ignored in local invocation.}
-\Call{ovsec_kadm_init(a, null, n, null);
-		ovsec_kadm_destroy()}
 \Conditions{local}
 }
 
@@ -279,8 +243,6 @@ tested.
 
 \numtest{1}{
 \Reason{Valid invocation.}
-\Call{ovsec_kadm_init(a, a-s'p, A_S, null);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{2}{
@@ -301,24 +263,14 @@ tested.
 
 \numtest{6}{
 \Reason{Fails if database not initialized.}
-\Call{ovsec_kadm_destroy()}
 }
 
 \numtest{7}{
 \Reason{Fails if invoked twice in a row.}
-\Call{ovsec_kadm_init(a, a's-p, A_S, null);
-		ovsec_kadm_destroy();
-		ovsec_kadm_destroy()}
 }
 
 \numtest{8}{
 \Reason{Database can be reinitialized after destroy.}
-\Call{ovsec_kadm_init(a, a's-p, A_S, null);
-		ovsec_kadm_destroy();
-		ovsec_kadm_init(a, a's-p, A_S, null);
-		ovsec_kadm_get_principal(a, buffer);
-		verify contents of buffer;
-		ovsec_kadm_destroy()}
 }
 
 \section{ovsec_kadm_create_principal}
@@ -359,91 +311,42 @@ tested.
 
 \numtest{2}{
 \Reason{Fails on null princ argument.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(null, PRINCIPAL, "foobar",
-					    true);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{3}{
 \Reason{Fails on null password argument.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL, null,
-					    true);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{4}{
 \Reason{Fails on empty-string password argument.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL, "",
-					    true);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{5}{
 \Reason{Fails when mask contains undefined bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL | 0x002000,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{6}{
 \Reason{Fails when mask contains LAST_PWD_CHANGE bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, 
-					    PRINCIPAL | LAST_PWD_CHANGE,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{7}{
 \Reason{Fails when mask contains MOD_TIME bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MOD_TIME,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{8}{
 \Reason{Fails when mask contains MOD_NAME bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MOD_NAME,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{9}{
 \Reason{Fails when mask contains MKVNO bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL | MKVNO,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{10}{
 \Reason{Fails when mask contains AUX_ATTRIBUTES bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ,
-					    PRINCIPAL | AUX_ATTRIBUTES,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{11}{
 \Reason{Fails when mask contains POLICY_CLR bit.}
-\Call{ovsec_kadm_init(addu, addu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL | POLICY_CLR,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 }
 
 \numtest{12}{
@@ -452,65 +355,26 @@ tested.
 
 \numtest{13}{
 \Reason{Fails when caller has ``get'' access and not ``add''.}
-\Call{ovsec_kadm_init(getu, getu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 \Conditions{RPC}
 }
 
 \numtest{14}{
 \Reason{Fails when caller has ``modify'' access and not ``add''.}
-\Call{ovsec_kadm_init(modifyu, modifyu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 \Conditions{RPC}
 }
 
 \numtest{15}{
 \Reason{Fails when caller has ``delete'' access and not ``add''.}
-\Call{ovsec_kadm_init(deleteu, deleteu's-p, A_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 \Conditions{RPC}
 }
 
 \numtest{16}{
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
-\Call{ovsec_kadm_init(addu, addu's-p, C_S, null);
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
-					    "foobar", true);
-		ovsec_kadm_get_principal("newuser", buffer);
-		ovsec_kadm_destroy()}
 \Conditions{RPC}
 }
 
 \numtest{17}{
 \Reason{Fails on attempt to create existing principal.}
-\Call{ovsec_kadm_init(getu, getu's-p, A_S, null);
-		ovsec_kadm_get_principal("usera", buffer);
-		ovsec_kadm_destroy();
-		ovsec_kadm_init(addu, addu's-p, A_S, null);
-		save new_princ's principal;
-		new_princ.principal = buffer.principal;
-		save new_princ's max_life;
-		new_princ.max_life = buffer.max_life + 1;
-		ovsec_kadm_create_principal(new_princ, PRINCIPAL,
-					    "foobar", true);
-		ovsec_kadm_destroy();
-		ovsec_kadm_init(getu, getu's-p, A_S, null);
-		ovsec_kadm_get_principal("usera", buffer2);
-		ovsec_kadm_destroy()
-		compare buffer to buffer2;
-		restore new_princ's principal;
-		restore new_princ's max_life;
-		ovsec_kadm_free_principle_ent(buffer);
-		ovsec_kadm_free_principal_ent(buffer2)}
 }
 
 \numtest{18}{
