@@ -56,6 +56,20 @@ register const krb5_creds *mcreds, *creds;
 	    krb5_principal_compare(mcreds->server,creds->server));
 }
 
+/* only match the server name portion, not the server realm portion */
+
+static krb5_boolean
+srvname_match(mcreds, creds)
+register const krb5_creds *mcreds, *creds;
+{
+    krb5_boolean retval;
+    retval = krb5_principal_compare(mcreds->client,creds->client);
+    if (retval != TRUE)
+	return retval;
+    return krb5_principal_compare(&(mcreds->server[1]),&(creds->server[1]));
+}
+
+
 static krb5_boolean
 authdata_match(mdata, data)
     krb5_authdata *const *mdata, *const *data;
@@ -123,7 +137,9 @@ krb5_scc_retrieve(id, whichfields, mcreds, creds)
 	  return kret;
 
      while ((kret = krb5_scc_next_cred(id, &cursor, &fetchcreds)) == KRB5_OK) {
-	  if (standard_fields_match(mcreds, &fetchcreds)
+	  if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
+		   srvname_match(mcreds, &fetchcreds)) ||
+	       standard_fields_match(mcreds, &fetchcreds))
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
 	       mcreds->is_skey == fetchcreds.is_skey)
