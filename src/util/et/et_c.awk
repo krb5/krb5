@@ -125,10 +125,14 @@ c2n["_"]=63
 
 	print "#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)" > outfile
 	print "#define P(x) x" > outfile
+	print "#define NOARGS void" > outfile
 	print "#else" > outfile
 	print "#define P(x) ()" > outfile
+	print "#define NOARGS" > outfile
 	print "#define const" > outfile
 	print "#endif" > outfile
+	print "" > outfile
+	print "extern void initialize_" table_name "_error_table (NOARGS);" > outfile
 	print "" > outfile
 	print "static const char FAR * const text[] = {" > outfile
 	table_item_count = 0
