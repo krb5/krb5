@@ -1,6 +1,7 @@
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
-	* cc_file.c (my_fopen): Don't test macintosh.
+	* cc_file.c (my_fopen): Function deleted.
+	(krb5_fcc_open_file): Use fopen, not my_fopen.
 
 2004-06-21  Jeffrey Altman <jaltman@mit.edu>
 

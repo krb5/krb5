@@ -1086,13 +1086,6 @@ krb5_fcc_store_authdatum (krb5_context context, krb5_ccache id, krb5_authdata *a
 }
 #undef CHECK
 
-#ifdef USE_STDIO
-static FILE *my_fopen(char *path, char *mode)
-{
-	return fopen(path, mode);
-}
-#endif
-
 static krb5_error_code
 krb5_fcc_close_file (krb5_context context, krb5_ccache id)
 {
@@ -1207,7 +1200,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 #ifndef USE_STDIO
     f = THREEPARAMOPEN (data->filename, open_flag | O_BINARY, 0600);
 #else
-    f = my_fopen (data->filename, open_flag);
+    f = fopen (data->filename, open_flag);
     if (f)
 	setvbuf(f, data->stdio_buffer, _IOFBF, sizeof (data->stdio_buffer));
 #endif /* USE_STDIO */
