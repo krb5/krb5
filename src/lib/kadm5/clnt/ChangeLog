@@ -1,5 +1,11 @@
 Fri Feb 13 21:30:34 1998  Tom Yu  <tlyu@mit.edu>
 
+	* client_init.c:
+	* client_principal.c:
+	* client_rpc.c:
+	* clnt_policy.c:
+	* clnt_privs.c: Update header locations.
+
 	* Makefile.in (LIBMAJOR): Bump major version to reflect change in
 	rpc library.
 
