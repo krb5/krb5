@@ -140,6 +140,10 @@ int debug = 0;
 int keepalive = 1;
 char *progname;
 
+int maxhostlen = 0;
+int always_ip = 0;
+int stripdomain = 1;
+
 extern void usage P((void));
 
 /*
@@ -149,6 +153,7 @@ extern void usage P((void));
  */
 char valid_opts[] = {
 	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
+	'u', ':', 'i', 'N',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -438,6 +443,15 @@ main(argc, argv)
 			auth_disable_name(optarg);
 			break;
 #endif	/* AUTHENTICATION */
+		case 'u':
+			maxhostlen = atoi(optarg);
+			break;
+		case 'i':
+			always_ip = 1;
+			break;
+		case 'N':
+			stripdomain = 0;
+			break;
 
 		default:
 			fprintf(stderr, "telnetd: %c: unknown option\n", ch);
@@ -887,6 +901,7 @@ terminaltypeok(s)
 char *hostname;
 char host_name[MAXDNAME];
 char remote_host_name[MAXDNAME];
+char *rhost_sane;
 
 #ifndef	convex
 extern void telnet P((int, int));
@@ -932,6 +947,12 @@ pty_init();
 	}
 #endif	/* _SC_CRAY_SECURE_SYS */
 
+	retval = pty_make_sane_hostname(who, maxhostlen,
+					stripdomain, always_ip,
+					&rhost_sane);
+	if (retval) {
+		fatal(net, error_message(retval));
+	}
 	/* get name of connected client */
 	hp = gethostbyaddr((char *)&who->sin_addr, sizeof (struct in_addr),
 		who->sin_family);
@@ -939,24 +960,13 @@ pty_init();
 	if (hp == NULL && registerd_host_only) {
 		fatal(net, "Couldn't resolve your address into a host name.\r\n\
          Please contact your net administrator");
-	} else if (hp ) {
-		host = hp->h_name;
-	} else {
-		host = inet_ntoa(who->sin_addr);
 	}
-	/*
-	 * We must make a copy because Kerberos is probably going
-	 * to also do a gethost* and overwrite the static data...
-	 */
-	strncpy(remote_host_name, host, sizeof(remote_host_name)-1);
-	remote_host_name[sizeof(remote_host_name)-1] = 0;
-	host = remote_host_name;
 
 	(void) gethostname(host_name, sizeof (host_name));
 	hostname = host_name;
 
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
-	auth_encrypt_init(hostname, host, "TELNETD", 1);
+	auth_encrypt_init(hostname, rhost_sane, "TELNETD", 1);
 #endif
 
 	init_env();
@@ -980,7 +990,7 @@ pty_init();
 	 * Start up the login process on the slave side of the terminal
 	 */
 #ifndef	convex
-	startslave(host, level, user_name);
+	startslave(rhost_sane, level, user_name);
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	if (secflag) {
@@ -993,7 +1003,7 @@ pty_init();
 
 	telnet(net, pty);  /* begin server processing */
 #else
-	telnet(net, pty, host);
+	telnet(net, pty, rhost_sane);
 #endif
 	/*NOTREACHED*/
 }  /* end of doit */
