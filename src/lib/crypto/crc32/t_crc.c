@@ -105,8 +105,8 @@ struct crc_trial trials[] = {
 
 #define NTRIALS (sizeof(trials) / sizeof(trials[0]))
 
-void
-timetest(int nblk, int blksiz)
+static void
+timetest(unsigned int nblk, unsigned int blksiz)
 {
     char *block;
     int i;
@@ -148,8 +148,8 @@ timetest(int nblk, int blksiz)
 #endif
 }
 
-void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
-	       size_t buflen)
+static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
+		      size_t buflen)
 {
     size_t inlen;
     char *cp, buf[3];
@@ -167,7 +167,7 @@ void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
     }
 }
 
-void
+static void
 verify(void)
 {
     int i;
