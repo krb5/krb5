@@ -104,6 +104,9 @@ Major Changes:
   trying to write tools to generate MIT-style keytab files) that we
   could not store arbitrary 32-bit version numbers for keys.
 
+* Some issues with multiple enctype support in GSSAPI credential
+  forwarding have been fixed.
+
 Minor Changes:
 
 * A few compilation problems have been fixed.
