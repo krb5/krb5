@@ -9,7 +9,7 @@ resolve: $(OBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o resolve $(OBJS) $(LIBS)
 
 check:: resolve
-	./resolve
+	LD_LIBRARY_PATH=$(TOPLIBD) ./resolve
 
 install::
 

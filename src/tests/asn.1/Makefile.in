@@ -17,11 +17,11 @@ krb5_decode_test: $(DECOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o krb5_decode_test $(DECOBJS) $(LIBS)
 
 check:: krb5_decode_test krb5_encode_test
-	./krb5_decode_test
+	LD_LIBRARY_PATH=$(TOPLIBD) ./krb5_decode_test
 	$(RM) test.out
-	./krb5_encode_test > test.out
+	LD_LIBRARY_PATH=$(TOPLIBD) ./krb5_encode_test > test.out
 	cmp test.out $(srcdir)/reference_encode.out
-	./krb5_encode_test -t > test.out
+	LD_LIBRARY_PATH=$(TOPLIBD) ./krb5_encode_test -t > test.out
 	cmp test.out $(srcdir)/trval_reference.out
 	$(RM) test.out	
 

@@ -1,4 +1,8 @@
 
+Wed Jul 12 12:31:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Remove V5_USE_SHARED_LIB.
+
+
 Fri Jul 7 16:37:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling and LDFLAGS.
 	* configure.in - Add USE_KDB5_LIBRARY and KRB5_LIBRARIES

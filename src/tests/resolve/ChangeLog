@@ -1,4 +1,10 @@
 
+Wed Jul 12 12:32:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add LD_LIBRARY_PATH in case we were linked with shared
+		libraries by default.
+	* configure.in - Remove V5_USE_SHARED_LIB.
+
+
 Fri Jul 7 16:38:47 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS and use DEPLIBS.
 	* configure.in - Add KRB5_LIBRARIES and V5_USE_SHARED_LIB
