@@ -116,7 +116,7 @@ $(HDRS): includes
 clean-unix::
 	$(RM) $(HDRS)
 
-std_rqs.c: std_rqs.ct mk_cmds
+std_rqs.c: std_rqs.ct mk_cmds ct_c.sed ct_c.awk
 
 ss_err.h: ss_err.et
 
