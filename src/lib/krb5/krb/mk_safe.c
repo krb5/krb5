@@ -65,7 +65,8 @@ OLDDECLARG(krb5_data *, outbuf)
     addrs[1] = 0;
 
     safemsg.user_data = *userdata;
-    safemsg.addresses = addrs;
+    safemsg.s_address = sender_addr->address;
+    safemsg.r_address = recv_addr->address;
 
     if (retval = krb5_ms_timeofday(&safemsg.timestamp, &safemsg.msec))
 	return retval;
