@@ -1,3 +1,14 @@
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  Restore the thread safety fixes
+
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, if we see a colon do not assume it means
+      we found a prefix string unless the length of the prefix is 
+      not equal to one.  If it is one, it means we found a drive letter
+      and not a prefix.  
+
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* kt_file.c (krb5_ktfile_get_entry): Check principal name prior to
