@@ -10,11 +10,13 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 
 OBJS=	ccbase.$(OBJEXT) \
 	ccdefault.$(OBJEXT) \
-	ccdefops.$(OBJEXT)
+	ccdefops.$(OBJEXT) \
+	ser_cc.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccdefault.c \
-	$(srcdir)/ccdefops.c
+	$(srcdir)/ccdefops.c \
+	$(srcdir)/ser_cc.c
 
 all:: all-$(WHAT)
 

@@ -1,3 +1,7 @@
+
+Tue Aug 29 13:36:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* fcc_reslv.c - Set magic number in successfully resolved ccache.
+
 Tue Jul 11 19:26:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* fcc-proto.h: Add prototype for krb5_fcc_read. Indicate that

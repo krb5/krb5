@@ -85,6 +85,8 @@ krb5_scc_resolve (context, id, residual)
      /* Set up the filename */
      strcpy(((krb5_scc_data *) lid->data)->filename, residual);
 
+     lid->magic = KV5M_CCACHE;
+
      /* other routines will get errors on open, and callers must expect them,
 	if cache is non-existent/unusable */
      *id = lid;
