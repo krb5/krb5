@@ -1,5 +1,9 @@
 Wed Jan 10 21:31:42 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in (gssapi_err_generic.$(OBJEXT)): Added ##DOS
+		statements after gssapi_err_generic.$(OBJECT) to get it
+		added to library on Windows.  (Patch from Doug Engbert).
+
 	* gssapi.h: Remove #if statement that used sizeof(xxx), since that
 		won't work for most C compilers/C preprocessors!
 
