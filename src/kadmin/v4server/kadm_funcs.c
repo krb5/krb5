@@ -745,9 +745,11 @@ char *rrealm;
 des_cblock newpw;
 char *pwstring;
 {
-	static DBM *pwfile = NULL;
 	int		retval;
+#ifdef notdef
+	static DBM *pwfile = NULL;
 	datum		passwd, entry;
+#endif
 	struct passwd	*ent;
 #ifdef HESIOD
 	extern struct passwd *hes_getpwnam();
@@ -760,6 +762,7 @@ char *pwstring;
 		return(KADM_PW_MISMATCH);
 	if (pwstring && (strlen(pwstring) < 5))
 		return(KADM_INSECURE_PW);
+#ifdef notdef
 	if (!pwfile) {
 		pwfile = dbm_open(PW_CHECK_FILE, O_RDONLY, 0644);
 	}
@@ -770,6 +773,7 @@ char *pwstring;
 		if (entry.dptr)
 			return(KADM_INSECURE_PW);
 	}
+#endif
 	if (check_pw(newpw, rname) || check_pw(newpw, reverse(rname)))
 		return(KADM_INSECURE_PW);
 #ifdef HESIOD

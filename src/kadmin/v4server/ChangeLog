@@ -1,3 +1,8 @@
+Fri Jul 25 15:49:58 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_funcs.c: Remove mention of dbm for now.  It should probably
+	be added back later to deal with dbm-hashed passwd files.
+
 Tue Jul  1 02:38:50 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_funcs.c, kadm_server.c, kadm_ser_wrap.c: Reenable mod and
