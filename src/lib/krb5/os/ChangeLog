@@ -1,3 +1,16 @@
+1999-10-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Make ointrfunc, fd, and
+	errcode volatile.
+	* promptusr.c (krb5_os_get_tty_uio): Make ointrfunc and retval
+	volatile.
+	* read_pwd.c (krb5_read_password): Make ointrfunc volatile.  Fix
+	volatile decl for readin_string (pointer is volatile, doesn't
+	point to volatile).
+
+	* changepw.c (krb5_change_password): Wait only two minutes, not
+	indefinitely, for a response from the kpasswd server.
+
 1999-10-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Don't bother trying to create

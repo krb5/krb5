@@ -188,6 +188,9 @@ krb5_change_password(context, creds, newpw, result_code,
 
     for (i=0; i<naddr_p; i++) 
       {
+		fd_set fdset;
+		struct timeval timeout;
+
 		if (connect(s2, &addr_p[i], sizeof(addr_p[i])) == SOCKET_ERROR) 
 		  {
 		    if ((SOCKET_ERRNO == ECONNREFUSED) || (SOCKET_ERRNO == EHOSTUNREACH))
@@ -288,6 +291,21 @@ krb5_change_password(context, creds, newpw, result_code,
 		chpw_rep.data = (char *) malloc(chpw_rep.length);
 
 		/* XXX need a timeout/retry loop here */
+		FD_ZERO (&fdset);
+		FD_SET (s1, &fdset);
+		timeout.tv_sec = 120;
+		timeout.tv_usec = 0;
+		switch (select (s1 + 1, &fdset, 0, 0, &timeout)) {
+		case -1:
+		    code = SOCKET_ERRNO;
+		    goto cleanup;
+		case 0:
+		    code = ETIMEDOUT;
+		    goto cleanup;
+		default:
+		    /* fall through */
+		    ;
+		}
 
 		/* "recv" would be good enough here... except that Windows/NT
 		   commits the atrocity of returning -1 to indicate failure,

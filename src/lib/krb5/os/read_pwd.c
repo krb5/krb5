@@ -60,10 +60,10 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 {
     /* adapted from Kerberos v4 des/read_password.c */
     /* readin_string is used after a longjmp, so must be volatile */
-    volatile char *readin_string = 0;
+    char *volatile readin_string = 0;
     register char *ptr;
     int scratchchar;
-    krb5_sigtype (*ointrfunc)();
+    krb5_sigtype (*volatile ointrfunc)();
     krb5_error_code errcode;
 #ifndef ECHO_PASSWORD
     struct termios echo_control, save_control;

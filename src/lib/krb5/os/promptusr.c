@@ -41,8 +41,8 @@ krb5_os_get_tty_uio(context, uio)
     krb5_context	context;
     krb5_uio		uio;
 {
-    krb5_error_code 	retval;
-    krb5_sigtype	(*ointrfunc)();
+    volatile krb5_error_code 	retval;
+    krb5_sigtype	(*volatile ointrfunc)();
     krb5_uio		p;
     struct termios 	echo_control, save_control;
     int 		fd;
