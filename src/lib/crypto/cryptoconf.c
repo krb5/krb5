@@ -27,6 +27,13 @@ static char rcsid_cryptoconf_c[] =
 #define CRC32_CKENTRY 0
 #endif
 
+#ifdef PROVIDE_RSA_MD4
+#include <krb5/rsa-md4.h>
+#define MD4_CKENTRY &rsa_md4_cksumtable_entry
+#else
+#define MD4_CKENTRY 0
+#endif
+
 #ifdef PROVIDE_SNEFRU
 #define XEROX_CKENTRY &snefru_cksumtable_entry
 #else
@@ -78,6 +85,7 @@ krb5_checksum_entry *krb5_cksumarray[] = {
     CRC32_CKENTRY,
     XEROX_CKENTRY,
     DES_CBC_CKENTRY,
+    MD4_CKENTRY,
 };
 
 int krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
