@@ -629,7 +629,7 @@ clean : autogenerate-clean glue-clean
 		{krb5-obj-cfm68k} {krb5-obj-ppc} \
 		{kerberos-headers-cfm68k} {kerberos-headers-ppc} \
 		{cfm-gss-obj-cfm68k} {cfm-gss-obj-ppc} \
-		{cfm-krb5-obj-cfm68k} {cfm-krb5-obj-ppc} 
+		{cfm-krb5-obj-cfm68k} {cfm-krb5-obj-ppc} \
 		{krb5-globals-obj-ppc} {krb5-globals-data-obj-ppc}
 
 # This target also punts everything that gets created in other ways during normal
@@ -773,3 +773,7 @@ snapshot : autogenerate-clean
 
 Makefile : /mac/Makefile.tmpl
 	perl /mac/macfile_gen.pl
+
+template :
+	setfile -a l /mac/Makefile.tmpl
+	perl /mac/templatify.pl < /Makefile > /mac/Makefile.tmpl
