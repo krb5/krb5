@@ -41,10 +41,6 @@
 #define NEW_RSA_MD4_DES_CKSUM_LENGTH	24
 #define	RSA_MD4_DES_CONFOUND_LENGTH	8
 
-extern krb5_checksum_entry
-    rsa_md4_cksumtable_entry,
-    rsa_md4_des_cksumtable_entry;
-
 /*
  **********************************************************************
  ** md4.h -- Header file for implementation of MD4                   **

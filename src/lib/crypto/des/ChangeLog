@@ -1,3 +1,10 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* des_int.h (krb5_raw_des_cst_entry, krb5_des_crc_cst_entry,
+	krb5_des_md5_cst_entry, krb5_des3_sha_cst_entry,
+	krb5_des3_raw_cst_entry, krb5_des_cbc_cksumtable_entry): Delete
+	unused declarations.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

@@ -92,14 +92,6 @@ typedef struct mit_des_ran_key_seed {
 
 #define MIT_DES_CBC_CKSUM_LENGTH	(4*sizeof(krb5_octet))
 
-/* cryptosystem entry descriptor for MIT's DES encryption library */
-extern krb5_cs_table_entry krb5_raw_des_cst_entry;
-extern krb5_cs_table_entry krb5_des_crc_cst_entry;
-extern krb5_cs_table_entry krb5_des_md5_cst_entry;
-extern krb5_cs_table_entry krb5_des3_sha_cst_entry;
-extern krb5_cs_table_entry krb5_des3_raw_cst_entry;
-extern krb5_checksum_entry krb5_des_cbc_cksumtable_entry;
-
 /*
  * Check if k5-int.h has been included before us.  If so, then check to see
  * that our view of the DES key size is the same as k5-int.h's.

@@ -1,3 +1,8 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* rsa-md5.h (rsa_md5_cksumtable_entry,
+	rsa_md5_des_cksumtable_entry): Delete unused declarations.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

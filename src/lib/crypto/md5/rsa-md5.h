@@ -57,8 +57,4 @@ extern void krb5_MD5Final(krb5_MD5_CTX *);
 #define	NEW_RSA_MD5_DES_CKSUM_LENGTH	24
 #define	RSA_MD5_DES_CONFOUND_LENGTH	8
 
-extern krb5_checksum_entry
-    rsa_md5_cksumtable_entry,
-    rsa_md5_des_cksumtable_entry;
-
 #endif /* KRB5_RSA_MD5__ */

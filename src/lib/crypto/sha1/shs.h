@@ -42,9 +42,4 @@ krb5_error_code hmac_sha(krb5_octet *text,
 #define NIST_SHA_CKSUM_LENGTH		SHS_DIGESTSIZE
 #define HMAC_SHA_CKSUM_LENGTH		SHS_DIGESTSIZE
 
-
-extern krb5_checksum_entry
-    nist_sha_cksumtable_entry,
-    hmac_sha_cksumtable_entry;
-
 #endif /* _SHS_DEFINED */
