@@ -6,7 +6,7 @@ LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
 AC_PROG_INSTALL
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
-AC_CHECK_FUNCS(fchmod fchown revoke)
+AC_CHECK_FUNCS(fchmod fchown revoke vhangup killpg)
 dnl dbm libs for use of an_to_ln
 LOGINLIBS=
 dnl
