@@ -80,6 +80,21 @@ mips-sni-sysv4)
 	$CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist
 	stat=$?
 	;;
+*-*-sunos*)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
+	done`
+ 
+	optflags=""
+	if test "$HAVE_GCC"x = "x" ; then
+		optflags="-h $library"
+	fi
+
+	echo ld -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
+	ld -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
+	stat=$?
+	;;
 *-*-aix*)
 	FILES=`for i 
 	do
