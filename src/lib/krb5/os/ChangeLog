@@ -7,6 +7,9 @@
 	Ignore errors in the second address lookup.
 	(krb5_locate_srv_conf_1) [TEST]: More debugging code.
 
+	* t_locate_kdc.c (main): Add new argument -m for looking up master
+	KDC addresses.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* accessor.c, an_to_ln.c, c_ustime.c, ccdefname.c, changepw.c,

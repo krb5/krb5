@@ -73,6 +73,7 @@ int main (int argc, char *argv[])
     krb5_data realm;
     krb5_context ctx;
     krb5_error_code err;
+    int master = 0;
 
     p = strrchr (argv[0], '/');
     if (p)
@@ -90,13 +91,15 @@ int main (int argc, char *argv[])
 	    how = LOOKUP_CONF;
 	else if (!strcmp (argv[1], "-d"))
 	    how = LOOKUP_DNS;
+	else if (!strcmp (argv[1], "-m"))
+	    master = 1;
 	else
 	    goto usage;
 	realmname = argv[2];
 	break;
     default:
     usage:
-	fprintf (stderr, "%s: usage: %s [-c | -d] realm\n", prog, prog);
+	fprintf (stderr, "%s: usage: %s [-c | -d | -m] realm\n", prog, prog);
 	return 1;
     }
 
@@ -118,7 +121,7 @@ int main (int argc, char *argv[])
 	break;
 
     case LOOKUP_WHATEVER:
-	err = krb5_locate_kdc (ctx, &realm, &al, 0, 0);
+	err = krb5_locate_kdc (ctx, &realm, &al, master, 0);
 	break;
     }
     if (err) kfatal (err);
