@@ -64,7 +64,7 @@ kill_children()
 
     for (i = 0; i < pidarraysize; i++) {
 	kill(pidarray[i], SIGINT);
-	syslog(LOG_AUTH | LOGINFO, "Killing Admin Child %d", pidarray[i]);
+	syslog(LOG_AUTH | LOG_INFO, "Killing Admin Child %d", pidarray[i]);
     }
 
     sigprocmask(SIG_SETMASK, &old, NULL);
