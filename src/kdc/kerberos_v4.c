@@ -66,6 +66,10 @@
 #include <krb_db.h>
 #include <kdc.h>
 
+#ifdef NEED_SWAB_PROTO
+extern void swab(const void *, void *, size_t );
+#endif
+
 extern int errno;
 
 static int compat_decrypt_key (krb5_key_data *, C_Block,

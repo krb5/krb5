@@ -1,3 +1,13 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c: Include prototypes for mit_des_fixup_key_parity
+	and mit_des_is_weak_key here as no other "public" header file
+	defines it. Needed for return_sam_data() code. 
+
+	* configure.in: Test for unistd.h and existance of swab() prototype.
+
+	* kerberos_v4.c: If swab() prototype needed, provide. 
+
 2001-06-19  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (ktypes2str): New function; construct a string

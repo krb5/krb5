@@ -59,6 +59,15 @@
 #include "adm_proto.h"
 #include <syslog.h>
 
+/* XXX This is ugly and should be in a header file somewhere */
+#ifndef KRB5INT_DES_TYPES_DEFINED
+#define KRB5INT_DES_TYPES_DEFINED
+typedef unsigned char des_cblock[8];	/* crypto-block size */
+#endif
+typedef des_cblock mit_des_cblock;
+extern void mit_des_fixup_key_parity (mit_des_cblock );
+extern int mit_des_is_weak_key (mit_des_cblock );
+
 typedef krb5_error_code (*verify_proc)
     (krb5_context, krb5_db_entry *client,
 		    krb5_kdc_req *request,
