@@ -1,5 +1,8 @@
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
+	* conv_creds.c (krb524_init_ets, krb524_convert_creds_kdc): Add
+	forward declarations to silence gcc warnings.
+
 	* init_ctx.c (init_common): In UNIX case, check the return value
 	from krb5int_initialize_library.
 
