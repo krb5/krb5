@@ -1,0 +1,126 @@
+include "$(SRCROOT)/../../KerberosErrors/Scripts/compile_et.jam" ;
+
+Intermediates = "$(SYMROOT)/Kerberos5.intermediates" ;
+Mkdir "$(Intermediates)" ;
+
+compile_et 	"$(Intermediates)/prof_err.h"
+            "$(Intermediates)/prof_err.c"
+            "$(Intermediates)/prof_err.strings" : 
+            "$(SRCROOT)/../Sources/KerberosProfile/prof_err.et" ;
+
+compile_et 	"$(Intermediates)/krb524_err.h"
+            "$(Intermediates)/krb524_err.c"
+            "$(Intermediates)/krb524_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos524/krb524_err.et" ;
+
+compile_et 	"$(Intermediates)/adm_err.h"
+            "$(Intermediates)/adm_err.c"
+            "$(Intermediates)/adm_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/adm_err.et" ;
+
+compile_et 	"$(Intermediates)/asn1_err.h"
+            "$(Intermediates)/asn1_err.c"
+            "$(Intermediates)/asn1_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/asn1_err.et" ;
+
+compile_et 	"$(Intermediates)/kdb5_err.h"
+            "$(Intermediates)/kdb5_err.c"
+            "$(Intermediates)/kdb5_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/kdb5_err.et" ;
+
+compile_et 	"$(Intermediates)/krb5_err.h"
+            "$(Intermediates)/krb5_err.c"
+            "$(Intermediates)/krb5_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/krb5_err.et" ;
+
+compile_et 	"$(Intermediates)/kv5m_err.h"
+            "$(Intermediates)/kv5m_err.c"
+            "$(Intermediates)/kv5m_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/kv5m_err.et" ;
+
+compile_et 	"$(Intermediates)/gssapi_err_generic.h"
+            "$(Intermediates)/gssapi_err_generic.c"
+            "$(Intermediates)/gssapi_err_generic.strings" : 
+            "$(SRCROOT)/../Sources/GSS/generic/gssapi_err_generic.et" ;
+
+compile_et 	"$(Intermediates)/gssapi_err_krb5.h"
+            "$(Intermediates)/gssapi_err_krb5.c"
+            "$(Intermediates)/gssapi_err_krb5.strings" : 
+            "$(SRCROOT)/../Sources/GSS/krb5/gssapi_err_krb5.et" ;
+
+Clean.Remove clean : 	"$(Intermediates)" ;
+Clean.Remove clean : 	"$(Intermediates)/prof_err.h"
+                        "$(Intermediates)/prof_err.c"
+                        "$(Intermediates)/prof_err.strings"
+                        
+                        "$(Intermediates)/krb524_err.h"
+                        "$(Intermediates)/krb524_err.c"
+                        "$(Intermediates)/krb524_err.strings"
+                        
+                        "$(Intermediates)/adm_err.h"
+                        "$(Intermediates)/adm_err.c"
+                        "$(Intermediates)/adm_err.strings"
+                        
+                        "$(Intermediates)/asn1_err.h"
+                        "$(Intermediates)/asn1_err.c"
+                        "$(Intermediates)/asn1_err.strings"
+                        
+                        "$(Intermediates)/kdb5_err.h"
+                        "$(Intermediates)/kdb5_err.c"
+                        "$(Intermediates)/kdb5_err.strings"
+                        
+                        "$(Intermediates)/krb5_err.h"
+                        "$(Intermediates)/krb5_err.c"
+                        "$(Intermediates)/krb5_err.strings"
+            
+                        "$(Intermediates)/kv5m_err.h"
+                        "$(Intermediates)/kv5m_err.c"
+                        "$(Intermediates)/kv5m_err.strings"
+                        
+                        "$(Intermediates)/gssapi_err_generic.h"
+                        "$(Intermediates)/gssapi_err_generic.c"
+                        "$(Intermediates)/gssapi_err_generic.strings" 
+            
+                        "$(Intermediates)/gssapi_err_krb5.h"
+                        "$(Intermediates)/gssapi_err_krb5.c"
+                        "$(Intermediates)/gssapi_err_krb5.strings" ;
+                        
+DEPENDS all : 			"$(Intermediates)/prof_err.h"
+                        "$(Intermediates)/prof_err.c"
+                        "$(Intermediates)/prof_err.strings"
+                        
+                        "$(Intermediates)/krb524_err.h"
+                        "$(Intermediates)/krb524_err.c"
+                        "$(Intermediates)/krb524_err.strings"
+                        
+                        "$(Intermediates)/adm_err.h"
+                        "$(Intermediates)/adm_err.c"
+                        "$(Intermediates)/adm_err.strings"
+                        
+                        "$(Intermediates)/asn1_err.h"
+                        "$(Intermediates)/asn1_err.c"
+                        "$(Intermediates)/asn1_err.strings"
+                        
+                        "$(Intermediates)/kdb5_err.h"
+                        "$(Intermediates)/kdb5_err.c"
+                        "$(Intermediates)/kdb5_err.strings"
+                        
+                        "$(Intermediates)/krb5_err.h"
+                        "$(Intermediates)/krb5_err.c"
+                        "$(Intermediates)/krb5_err.strings"
+            
+                        "$(Intermediates)/kv5m_err.h"
+                        "$(Intermediates)/kv5m_err.c"
+                        "$(Intermediates)/kv5m_err.strings"
+                        
+                        "$(Intermediates)/gssapi_err_generic.h"
+                        "$(Intermediates)/gssapi_err_generic.c"
+                        "$(Intermediates)/gssapi_err_generic.strings" 
+            
+                        "$(Intermediates)/gssapi_err_krb5.h"
+                        "$(Intermediates)/gssapi_err_krb5.c"
+                        "$(Intermediates)/gssapi_err_krb5.strings" ;
+DEPENDS install : all ;
+
+NOCARE installhdrs ;
+NOTFILE installhdrs ;
