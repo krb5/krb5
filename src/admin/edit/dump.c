@@ -49,6 +49,7 @@ static char ld_vers[] = "kdb5_edit load_dump version 2.0\n";
 krb5_encrypt_block master_encblock;
 extern char *current_dbname;
 extern krb5_boolean dbactive;
+extern int exit_status;
 
 void update_ok_file();
 
@@ -64,11 +65,13 @@ krb5_db_entry *entry;
 
     if (retval = krb5_unparse_name(entry->principal, &name)) {
 	com_err(arg->comerr_name, retval, "while unparsing principal");
+	exit_status++;
 	return retval;
     }
     if (retval = krb5_unparse_name(entry->mod_name, &mod_name)) {
 	free(name);
 	com_err(arg->comerr_name, retval, "while unparsing principal");
+	exit_status++;
 	return retval;
     }
     fprintf(arg->f, "%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t", strlen(name),
@@ -115,10 +118,12 @@ void dump_db(argc, argv)
 	
 	if (argc > 2) {
 		com_err(argv[0], 0, "Usage: %s filename", argv[0]);
+		exit_status++;
 		return;
 	}
 	if (!dbactive) {
 		com_err(argv[0], 0, Err_no_database);
+		exit_status++;
 		return;
 	}
 	if (argc == 2) {
@@ -136,6 +141,7 @@ void dump_db(argc, argv)
 		if (!(f = fopen(argv[1], "w"))) {
 			com_err(argv[0], errno,
 				"While opening file %s for writing", argv[1]);
+			exit_status++;
 			return;
 		}
 	} else {
@@ -164,6 +170,7 @@ void update_ok_file (file_name)
 	    == NULL) {
 		com_err(progname, ENOMEM,
 			"while allocating filename for update_ok_file");
+		exit_status++;
 		return;
 	}
 	strcpy(file_ok, file_name);
@@ -171,6 +178,7 @@ void update_ok_file (file_name)
 	if ((fd = open(file_ok, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
 		com_err(progname, errno, "while creating 'ok' file, '%s'",
 			file_ok);
+		exit_status++;
 		free(file_ok);
 		return;
 	}
@@ -200,10 +208,12 @@ void load_db(argc, argv)
 	
 	if (argc != 3) {
 		com_err(argv[0], 0, "Usage: %s filename dbname", argv[0]);
+		exit_status++;
 		return;
 	}
 	if (!(new_dbname = malloc(strlen(argv[2])+2))) {
 		com_err(argv[0], 0, "No room to allocate new database name!");
+		exit_status++;
 		return;
 	}
 	strcpy(new_dbname, argv[2]);
@@ -211,6 +221,7 @@ void load_db(argc, argv)
 	if (retval = krb5_db_create(new_dbname)) {
 		com_err(argv[0], retval, "while creating database '%s'",
 			new_dbname);
+		exit_status++;
 		return;
 	}
 	if (dbactive) {
@@ -218,6 +229,7 @@ void load_db(argc, argv)
 		    retval != KRB5_KDB_DBNOTINITED) {
 			com_err(argv[0], retval,
 				"while closing previous database");
+			exit_status++;
 			return;
 		}
 	}
@@ -237,6 +249,7 @@ void load_db(argc, argv)
 	if (!(f = fopen(argv[1], "r"))) {
 		com_err(argv[0], errno,
 			"While opening file %s for reading", argv[1]);
+		exit_status++;
 		return;
 	}
 	fgets(buf, sizeof(buf), f);
@@ -446,6 +459,7 @@ error_out:
 	}
 	if (load_error) {
 		printf("Error while loading database, aborting load.\n");
+		exit_status += load_error;
 		if (retval = kdb5_db_destroy(new_dbname)) {
 			com_err(argv[0], retval,
 				"while destroying temporary database '%s'",

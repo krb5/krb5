@@ -60,6 +60,13 @@ static char search_instance[40];
 static int num_instance_tokens;
 static int must_be_first[2];
 
+/*
+ * I can't figure out any way for this not to be global, given how ss
+ * works.
+ */
+
+int exit_status = 0;
+
 static void
 usage(who, status)
 char *who;
@@ -204,6 +211,7 @@ krb5_principal principal;
 
     if (retval = krb5_db_get_principal(principal, &entry, &nprincs, &more)) {
 	com_err(pname, retval, "while attempting to verify principal's existence");
+	exit_status++;
 	return 0;
     }
     if (!nprincs)
@@ -270,6 +278,7 @@ OLDDECLARG(struct saltblock *, salt)
 				  &newentry.key);
     if (retval) {
 	com_err(cmdname, retval, "while encrypting key for '%s'", newprinc);
+	exit_status++;
 	return;
     }
     newentry.principal = (krb5_principal) principal;
@@ -281,6 +290,7 @@ OLDDECLARG(struct saltblock *, salt)
     newentry.mod_name = master_princ;
     if (retval = krb5_timeofday(&newentry.mod_date)) {
 	com_err(cmdname, retval, "while fetching date");
+	exit_status++;
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
 	krb5_xfree(newentry.key.contents);
 	return;
@@ -301,10 +311,13 @@ OLDDECLARG(struct saltblock *, salt)
     krb5_xfree(newentry.key.contents);
     if (retval) {
 	com_err(cmdname, retval, "while storing entry for '%s'\n", newprinc);
+	exit_status++;
 	return;
     }
-    if (one != 1)
+    if (one != 1) {
 	com_err(cmdname, 0, "entry not stored in database (unknown failure)");
+	exit_status++;
+    }
     return;
 }
 
@@ -318,11 +331,13 @@ char *argv[];
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s dbpathname realmname", argv[0]);
+	exit_status++;
 	return;
     }
     if (dbactive) {
 	if ((retval = krb5_db_fini()) && retval != KRB5_KDB_DBNOTINITED) {
 	    com_err(argv[0], retval, "while closing previous database");
+	    exit_status++;
 	    return;
 	}
 	if (valid_master_key) {
@@ -369,10 +384,12 @@ char *dbname;
     if (retval = krb5_db_set_name(current_dbname)) {
 	com_err(pname, retval, "while setting active database to '%s'",
 		dbname);
+	exit_status++;
 	return(1);
     } 
     if (retval = krb5_db_init()) {
 	com_err(pname, retval, "while initializing database");
+	exit_status++;
 	return(1);
     }
 	    
@@ -381,21 +398,25 @@ char *dbname;
     if (retval = krb5_db_setup_mkey_name(mkey_name, cur_realm, 0,
 					 &master_princ)) {
 	com_err(pname, retval, "while setting up master key name");
+	exit_status++;
 	return(1);
     }
     nentries = 1;
     if (retval = krb5_db_get_principal(master_princ, &master_entry, &nentries,
 				       &more)) {
 	com_err(pname, retval, "while retrieving master entry");
+	exit_status++;
 	(void) krb5_db_fini();
 	return(1);
     } else if (more) {
 	com_err(pname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 		"while retrieving master entry");
+	exit_status++;
 	(void) krb5_db_fini();
 	return(1);
     } else if (!nentries) {
 	com_err(pname, KRB5_KDB_NOENTRY, "while retrieving master entry");
+	exit_status++;
 	(void) krb5_db_fini();
 	return(1);
     }
@@ -410,6 +431,7 @@ char *dbname;
 				    manual_mkey, FALSE, 0, &master_keyblock)) {
 	com_err(pname, retval, "while reading master key");
 	com_err(pname, 0, "Warning: proceeding without master key");
+	exit_status++;
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(0);
@@ -418,6 +440,7 @@ char *dbname;
     if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
 					   &master_encblock)) {
 	com_err(pname, retval, "while verifying master key");
+	exit_status++;
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_xfree(master_keyblock.contents);
 	valid_master_key = 0;
@@ -427,6 +450,7 @@ char *dbname;
     if (retval = krb5_process_key(&master_encblock,
 				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
+	exit_status++;
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_xfree(master_keyblock.contents);
 	valid_master_key = 0;
@@ -437,6 +461,7 @@ char *dbname;
 				      &master_keyblock,
 				      &master_random)) {
 	com_err(pname, retval, "while initializing random key generator");
+	exit_status++;
 	(void) krb5_finish_key(&master_encblock);
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	krb5_xfree(master_keyblock.contents);
@@ -457,6 +482,7 @@ void enter_master_key(argc, argv)
 	
 	if (!dbactive) {
 		com_err(pname, 0, Err_no_database);
+		exit_status++;
 		return;
 	}
 	if (valid_master_key) {
@@ -471,22 +497,26 @@ void enter_master_key(argc, argv)
 	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
 					TRUE, FALSE, 0, &master_keyblock)) {
 		com_err(pname, retval, "while reading master key");
+		exit_status++;
 		return;
 	}
 	if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
 					       &master_encblock)) {
 		com_err(pname, retval, "while verifying master key");
+		exit_status++;
 		return;
 	}
 	if (retval = krb5_process_key(&master_encblock,
 				      &master_keyblock)) {
 		com_err(pname, retval, "while processing master key");
+		exit_status++;
 		return;
 	}
 	if (retval = krb5_init_random_key(&master_encblock,
 					  &master_keyblock,
 					  &master_random)) {
 		com_err(pname, retval, "while initializing random key generator");
+		exit_status++;
 		(void) krb5_finish_key(&master_encblock);
 		return;
 	}
@@ -523,14 +553,17 @@ void extract_srvtab(argc, argv)
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
 
@@ -547,6 +580,7 @@ void extract_srvtab(argc, argv)
     strcat(ktname, "-new-srvtab");
     if (retval = krb5_kt_resolve(ktname, &ktid)) {
 	com_err(argv[0], retval, "while resolving keytab name '%s'", ktname);
+	exit_status++;
 	return;
     }
 
@@ -557,6 +591,7 @@ void extract_srvtab(argc, argv)
 	    com_err(argv[0], ENOMEM,
 		    "while preparing to extract key for %s/%s",
 		    argv[i], argv[1]);
+	    exit_status++;
 	    continue;
 	}
 	strcpy(pname, argv[i]);
@@ -569,6 +604,7 @@ void extract_srvtab(argc, argv)
 
 	if (retval = krb5_parse_name(pname, &princ)) {
 	    com_err(argv[0], retval, "while parsing %s", pname);
+	    exit_status++;
 	    free(pname);
 	    continue;
 	}
@@ -576,21 +612,25 @@ void extract_srvtab(argc, argv)
 	if (retval = krb5_db_get_principal(princ, &dbentry, &nentries,
 					   &more)) {
 	    com_err(argv[0], retval, "while retrieving %s", pname);
+	    exit_status++;
 	    goto cleanmost;
 	} else if (more) {
 	    com_err(argv[0], KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 		    "while retrieving %s", pname);
+	    exit_status++;
 	    if (nentries)
 		krb5_db_free_principal(&dbentry, nentries);
 	    goto cleanmost;
 	} else if (!nentries) {
 	    com_err(argv[0], KRB5_KDB_NOENTRY, "while retrieving %s", pname);
+	    exit_status++;
 	    goto cleanmost;
 	}
 	if (retval = krb5_kdb_decrypt_key(&master_encblock,
 					  &dbentry.key,
 					  &newentry.key)) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
+	    exit_status++;
 	    goto cleanall;
 	}
 	newentry.principal = princ;
@@ -598,6 +638,7 @@ void extract_srvtab(argc, argv)
 	if (retval = krb5_kt_add_entry(ktid, &newentry)) {
 	    com_err(argv[0], retval, "while adding key to keytab '%s'",
 		    ktname);
+	    exit_status++;
 	} else
 	    printf("'%s' added to keytab '%s'\n",
 		   pname, ktname);
@@ -609,8 +650,10 @@ void extract_srvtab(argc, argv)
 	    free(pname);
 	    krb5_free_principal(princ);
     }
-    if (retval = krb5_kt_close(ktid))
+    if (retval = krb5_kt_close(ktid)) {
 	com_err(argv[0], retval, "while closing keytab");
+	exit_status++;
+    }
     return;
 }
 
@@ -632,14 +675,17 @@ void extract_v4_srvtab(argc, argv)
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
 
@@ -655,6 +701,7 @@ void extract_v4_srvtab(argc, argv)
     strcat(ktname, "-new-v4-srvtab");
     if ((fout = fopen(ktname, "w")) == NULL) {
 	com_err(argv[0], 0, "Couldn't create file '%s'.\n", ktname);
+	exit_status++;
 	return;
     }
     for (i = 2; i < argc; i++) {
@@ -664,6 +711,7 @@ void extract_v4_srvtab(argc, argv)
 	    com_err(argv[0], ENOMEM,
 		    "while preparing to extract key for %s/%s",
 		    argv[i], argv[1]);
+	    exit_status++;
 	    continue;
 	}
 	strcpy(pname, argv[i]);
@@ -676,6 +724,7 @@ void extract_v4_srvtab(argc, argv)
 
 	if (retval = krb5_parse_name(pname, &princ)) {
 	    com_err(argv[0], retval, "while parsing %s", pname);
+	    exit_status++;
 	    free(pname);
 	    continue;
 	}
@@ -683,25 +732,30 @@ void extract_v4_srvtab(argc, argv)
 	if (retval = krb5_db_get_principal(princ, &dbentry, &nentries,
 					   &more)) {
 	    com_err(argv[0], retval, "while retrieving %s", pname);
+	    exit_status++;
 	    goto cleanmost;
 	} else if (more) {
 	    com_err(argv[0], KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 		    "while retrieving %s", pname);
+	    exit_status++;
 	    if (nentries)
 		krb5_db_free_principal(&dbentry, nentries);
 	    goto cleanmost;
 	} else if (!nentries) {
 	    com_err(argv[0], KRB5_KDB_NOENTRY, "while retrieving %s", pname);
+	    exit_status++;
 	    goto cleanmost;
 	}
 	if (retval = krb5_kdb_decrypt_key(&master_encblock,
 					  &dbentry.key,
 					  &key)) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
+	    exit_status++;
 	    goto cleanall;
 	}
 	if (key.keytype != 1) {
 		com_err(argv[0], 0, "%s does not have a DES key!", pname);
+		exit_status++;
 		memset((char *)key.contents, 0, key.length);
 		krb5_xfree(key.contents);
 		continue;
@@ -773,6 +827,7 @@ krb5_db_entry *entry;
 
     if (retval = krb5_unparse_name(entry->principal, &name)) {
 	com_err(lis->cmdname, retval, "while unparsing principal");
+	exit_status++;
 	return retval;
     }
     if (check_print(entry)) {
@@ -793,11 +848,13 @@ void list_db(argc, argv)
 
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     lis.cmdname = argv[0];
@@ -845,22 +902,27 @@ void delete_entry(argc, argv)
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if (princ_exists(argv[0], newprinc) == NO_PRINC) {
 	com_err(argv[0], 0, "principal '%s' is not in the database", argv[1]);
+	exit_status++;
 	krb5_free_principal(newprinc);
 	return;
     }
@@ -875,8 +937,10 @@ void delete_entry(argc, argv)
     printf("OK, deleting '%s'\n", argv[1]);
     if (retval = krb5_db_delete_principal(newprinc, &one)) {
 	com_err(argv[0], retval, "while deleting '%s'", argv[1]);
+	exit_status++;
     } else if (one != 1) {
 	com_err(argv[0], 0, "no principal deleted? unknown error");
+	exit_status++;
     }
 #ifdef __STDC__
     printf("\a\a\aWARNING:  Be sure to take '%s' off all access control lists\n\tbefore reallocating the name\n", argv[1]);
@@ -907,30 +971,37 @@ enter_rnd_key(argc, argv, change)
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if (retval = krb5_db_get_principal(newprinc, &entry, &nprincs, &more)) {
 	com_err(argv[0], retval, "while trying to get principal's database entry");
+	exit_status++;
 	return;
     }
     if (change && !nprincs) {
 	com_err(argv[0], 0, "No principal '%s' exists", argv[1]);
+	exit_status++;
 	goto errout;
     }
     if (!change && nprincs) {
 	com_err(argv[0], 0, "Principal '%s' already exists.", argv[1]);
+	exit_status++;
 	goto errout;
     }
     
@@ -938,6 +1009,7 @@ enter_rnd_key(argc, argv, change)
 	retval = create_db_entry(newprinc, &entry);
 	if (retval) {
 	    com_err(argv[0], retval, "While creating new db entry.");
+	    exit_status++;
 	    goto errout;
 	}
 	nprincs = 1;
@@ -945,6 +1017,7 @@ enter_rnd_key(argc, argv, change)
     
     if (retval = krb5_random_key(&master_encblock, master_random, &tempkey)) {
 	com_err(argv[0], retval, "while generating random key");
+	exit_status++;
 	return;
     }
 
@@ -977,16 +1050,20 @@ enter_rnd_key(argc, argv, change)
     krb5_free_keyblock(tempkey);
     if (retval) {
 	com_err(argv[0], retval, "while encrypting key for '%s'", argv[1]);
+	exit_status++;
 	goto errout;
     }
 
     if (retval = krb5_db_put_principal(&entry, &nprincs)) {
 	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
+	exit_status++;
 	goto errout;
     }
     
-    if (nprincs != 1)
+    if (nprincs != 1) {
 	com_err(argv[0], 0, "entry not stored in database (unknown failure)");
+	exit_status++;
+    }
 	
 errout:
     krb5_free_principal(newprinc);
@@ -1032,18 +1109,22 @@ void add_new_key(argc, argv)
     if (argc != 2) {
 	com_err(cmdname, 0,
 		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!valid_master_key) {
 	    com_err(cmdname, 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if (princ_exists(cmdname, newprinc) != NO_PRINC) {
 	com_err(cmdname, 0, "principal '%s' already exists", argv[1]);
+	exit_status++;
 	krb5_free_principal(newprinc);
 	return;
     }
@@ -1062,18 +1143,22 @@ void add_v4_key(argc, argv)
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if (princ_exists(argv[0], newprinc) != NO_PRINC) {
 	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
+	exit_status++;
 	krb5_free_principal(newprinc);
 	return;
     }
@@ -1107,22 +1192,27 @@ void change_pwd_key(argc, argv)
     if (argc != 2) {
 	com_err(cmdname, 0,
 		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(cmdname, 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(cmdname, 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
 	com_err(cmdname, 0, "No principal '%s' exists!", argv[1]);
+	exit_status++;
 	krb5_free_principal(newprinc);
 	return;
     }
@@ -1142,22 +1232,27 @@ void change_v4_key(argc, argv)
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
     if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
 	com_err(argv[0], 0, "No principal '%s' exists!", argv[1]);
+	exit_status++;
 	krb5_free_principal(newprinc);
 	return;
     }
@@ -1192,6 +1287,7 @@ OLDDECLARG(int, salttype)
 				    krb5_default_pwd_prompt2,
 				    password, &pwsize)) {
 	com_err(cmdname, retval, "while reading password for '%s'", newprinc);
+	exit_status++;
 	return;
     }
     pwd.data = password;
@@ -1204,6 +1300,7 @@ OLDDECLARG(int, salttype)
 	if (retval = krb5_principal2salt(string_princ, &salt.saltdata)) {
 	    com_err(cmdname, retval,
 		    "while converting principal to salt for '%s'", newprinc);
+	    exit_status++;
 	    return;
 	}
 	break;
@@ -1216,6 +1313,7 @@ OLDDECLARG(int, salttype)
 						 &salt.saltdata)) {
 	    com_err(cmdname, retval,
 		    "while converting principal to salt for '%s'", newprinc);
+	    exit_status++;
 	    return;
 	}
 	break;
@@ -1226,6 +1324,7 @@ OLDDECLARG(int, salttype)
 				    &foo)) {
 	    com_err(cmdname, retval,
 		    "while converting principal to salt for '%s'", newprinc);
+	    exit_status++;
 	    return;
 	}
 	salt.saltdata = *foo;
@@ -1234,6 +1333,7 @@ OLDDECLARG(int, salttype)
     }
     default:
 	com_err(cmdname, 0, "Don't know how to enter salt type %d", salttype);
+	exit_status++;
 	return;
     }
     retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
@@ -1244,6 +1344,7 @@ OLDDECLARG(int, salttype)
     if (retval) {
 	com_err(cmdname, retval, "while converting password to key for '%s'",
 		newprinc);
+	exit_status++;
 	krb5_xfree(salt.saltdata.data);
 	return;
     }
@@ -1273,38 +1374,46 @@ void show_principal(argc, argv)
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+	exit_status++;
 	return;
     }
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
+	    exit_status++;
 	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
+	    exit_status++;
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &princ)) {
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	exit_status++;
 	return;
     }
 
     if (retval = krb5_db_get_principal(princ, &entry, &nprincs, &more)) {
 	com_err(argv[0], retval, "while trying to get principal's database entry");
+	exit_status++;
 	goto errout;
     }
 
     if (!nprincs) {
 	com_err(argv[0], 0, "Principal %s not found.", argv[1]);
+	exit_status++;
 	goto errout;
     }
     
     if (retval = krb5_unparse_name(entry.principal, &pr_name)) {
 	com_err(argv[0], retval, "while unparsing principal");
+	exit_status++;
 	goto errout;
     }
 
     if (retval = krb5_unparse_name(entry.mod_name, &pr_mod)) {
 	com_err(argv[0], retval, "while unparsing 'modified by' principal");
+	exit_status++;
 	goto errout;
     }
 
@@ -1316,6 +1425,7 @@ void show_principal(argc, argv)
     
     if (!nprincs) {
 	com_err(argv[0], 0, "Principal '%s' does not exist", argv[1]);
+	exit_status++;
 	goto errout;
     }
     
@@ -1331,11 +1441,13 @@ void change_working_dir(argc, argv)
 {
 	if (argc != 2) {
 		com_err(argv[0], 0, "Usage: %s directory", argv[0]);
+		exit_status++;
 		return;
 	}
 	if (chdir(argv[1])) {
 		com_err(argv[0], errno,
 			"Couldn't change directory to %s", argv[1]);
+		exit_status++;
 	}
 }
 
@@ -1352,6 +1464,7 @@ void print_working_dir(argc, argv)
 	if (!getwd(buf)) {
 		com_err(argv[0], 0, "Couldn't get working directory: %s",
 			buf);
+		exit_status++;
 		return;
 	}
 	puts(buf);
@@ -1377,6 +1490,7 @@ int quit()
     finished = TRUE;
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
+	exit_status++;
 	return 1;
     }
     return 0;

@@ -1,3 +1,11 @@
+Thu Sep 29 15:52:22 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* tcl_wrapper.c (doquit):
+	  ss_wrapper.c (main):
+	  kdb5_edit.c:
+	  dump.c: Exit with a non-zero exit status if there was an error
+	  	  in a executed command.
+
 Thu Sep 15 11:00:30 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* dump.c (load_db): Fix error string on failed fopen. ("for

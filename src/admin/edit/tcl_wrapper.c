@@ -47,6 +47,7 @@ int *tclDummyMainPtr = (int *) main; /* force ld to suck in main()
 					from libtcl.a */
 extern Tcl_Interp *interp;	/* XXX yes, this is gross,
 				   but we do need it for some things */
+extern int exit_status;
 
 void show_principal PROTOTYPE((int, char **));
 void add_new_key PROTOTYPE((int, char **));
@@ -82,10 +83,7 @@ int doquit(clientData, interp, argc, argv)
 	return TCL_ERROR;
     }
     if (argc == 1) {
-	if (quit())
-	    exit(1);
-	else
-	    exit(0);
+	exit(quit() ? 1 : exit_status);
     }
     if (Tcl_GetInt(interp, argv[1], &value) != TCL_OK) {
 	return TCL_ERROR;
