@@ -10,6 +10,7 @@ AC_HAVE_LIBRARY(nsl)
 AC_HAVE_LIBRARY(BSD)
 AC_HAVE_LIBRARY(ndbm)
 AC_HAVE_LIBRARY(dbm)
+CHECK_WAIT_TYPE
 
 AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
 AC_COMPILE_CHECK([POSIX file locking -- structs and flags],

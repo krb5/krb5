@@ -107,7 +107,7 @@ char        *   buffer;
     if (*buffer == POP_TERMINATE) (void)fputc(POP_TERMINATE,p->output);
 
     /*  Look for a <NL> in the buffer */
-    if (bp = index(buffer,NEWLINE)) *bp = 0;
+    if (bp = strchr(buffer,NEWLINE)) *bp = 0;
 
     /*  Send the line to the client */
     (void)fputs(buffer,p->output);

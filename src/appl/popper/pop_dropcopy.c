@@ -23,7 +23,6 @@ static char SccsId[] = "@(#)pop_dropcopy.c	2.6  4/3/91";
 #else
 #include <string.h>
 #endif
-#include <sys/stat.h>
 #include <sys/file.h>
 #include <pwd.h>
 #include "popper.h"
@@ -46,7 +45,6 @@ struct passwd	*	pwp;
     char                    buffer[BUFSIZ];         /*  Read buffer */
     off_t                   offset;                 /*  Old/New boundary */
     int                     nchar;                  /*  Bytes written/read */
-    struct stat             mybuf;                  /*  For lstat() */
 #ifdef POSIX_FILE_LOCKS
     struct flock            lock_arg;
 #endif
@@ -143,7 +141,7 @@ struct passwd	*	pwp;
 #endif
     
     /* May have grown or shrunk between open and lock! */
-    offset = lseek(dfd,0,SEEK_END);
+    offset = lseek(dfd,(off_t)0,SEEK_END);
 
     /*  Open the user's maildrop, If this fails,  no harm in assuming empty */
     if ((mfd = open(p->drop_name,O_RDWR)) > 0) {

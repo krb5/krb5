@@ -104,7 +104,7 @@ POP     *   p;
 #endif
 
     /* Go to the right places */
-    offset = lseek((int)fileno(p->drop),0,L_XTND) ; 
+    offset = lseek((int)fileno(p->drop),(off_t)0,SEEK_END) ; 
 
     /*  Append any messages that may have arrived during the session 
         to the temporary maildrop */
@@ -125,7 +125,7 @@ POP     *   p;
 
     /* Synch stdio and the kernel for the POP drop */
     rewind(p->drop);
-    (void)lseek((int)fileno(p->drop),0,L_SET);
+    (void)lseek((int)fileno(p->drop),(off_t)0,SEEK_SET);
 
     /*  Transfer messages not flagged for deletion from the temporary 
         maildrop to the new maildrop */
@@ -228,7 +228,7 @@ POP     *   p;
     }
 
     /* Go to start of new mail if any */
-    (void)lseek((int)fileno(p->drop),offset,L_SET);
+    (void)lseek((int)fileno(p->drop),offset,SEEK_SET);
 
     while((nchar=read((int)fileno(p->drop),buffer,BUFSIZ)) > 0)
         if ( nchar != write(mfd,buffer,nchar) ) {

@@ -56,7 +56,6 @@ POP     *   p;
 #ifdef KRB5
     char *lrealm;
     krb5_data *tmpdata;
-    krb5_error_code retval;
 #endif /* KRB5 */
 #else
     register struct passwd  *   pw;
@@ -90,11 +89,15 @@ POP     *   p;
 #endif /* KRB4 */
 #ifdef KRB5
 #ifdef NO_CROSSREALM
+    {
+      krb5_error_code retval;
+
     if (retval = krb5_get_default_realm(&lrealm)) {
         pop_log(p, POP_WARNING, "%s: (%s) %s", p->client, client_name,
 		error_message(retval));
         return(pop_msg(p,POP_FAILURE,
             "Kerberos error:  \"%s\".", error_message(retval)));
+    }
     }
 
     tmpdata = krb5_princ_realm(ext_client);
@@ -219,10 +222,10 @@ our_getpwnam(user)
   if(!(fp = fopen(pwfile, "r")))
     return(NULL);
 
-  bzero(&p, sizeof(p));
+  memset(&p, 0, sizeof(p));
   while(fgets(buf, sizeof(buf), fp))
     {
-      if(!(c = (char *) index(buf, ':')))
+      if(!(c = (char *) strchr(buf, ':')))
 	continue;
 
       *c++ = '\0';
@@ -232,11 +235,11 @@ our_getpwnam(user)
       p.pw_name = strdup(buf);
 
 #ifdef hpux
-      if (!(d = (char *) index(c, ':')))
+      if (!(d = (char *) strchr(c, ':')))
          return(&p);
 #else 
-      if(!((d = (char *) index(c, ':')) && (c = (char *) index(++d, ':')) &&
-	 (d = (char *) index(++c, ':'))))
+      if(!((d = (char *) strchr(c, ':')) && (c = (char *) strchr(++d, ':')) &&
+	 (d = (char *) strchr(++c, ':'))))
 	return(&p);
 #endif
       *d = '\0';

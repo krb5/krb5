@@ -47,7 +47,7 @@ main (argc, argv)
     {
       if(open_drop(argv[i]) < 0)
 	{
-	  lseek(newmail, 0, L_SET);
+	  lseek(newmail, (off_t)0, SEEK_SET);
 	  if(new_message(maildrop, newmail) < 0)
 	    status = 1;
 	  if(close(maildrop) < 0)
@@ -115,7 +115,7 @@ open_drop(name)
       return(-1);
     }
 
-  lseek(maildrop, 0, L_XTND);
+  lseek(maildrop, (off_t)0, SEEK_END);
   return(0);
 }
 
