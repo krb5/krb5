@@ -296,18 +296,12 @@ void dump_v4db(argc, argv)
 
 	  fprintf(f,"K M 255 1 1 0 ");
 	  
-#ifndef	KDB4_DISABLE
-	  kdb_encrypt_key (arg.v4_master_key, v4key, 
-			   arg.v4_master_key, arg.v4_master_key_schedule, 
-			   ENCRYPT);
-#else	/* KDB4_DISABLE */
 	  pcbc_encrypt((C_Block *) arg.v4_master_key,
 		       (C_Block *) v4key,
 		       (long) sizeof(C_Block),
 		       arg.v4_master_key_schedule,
 		       (C_Block *) arg.v4_master_key,
 		       ENCRYPT);
-#endif	/* KDB4_DISABLE */
 
 	  for (i=0; i<8; i++) {
 	    fprintf(f, "%02x", ((unsigned char*)v4key)[i]);
@@ -385,18 +379,12 @@ handle_one_key(arg, v5master, v5key, v4key)
     /* v4v5key.length = sizeof(v4key); */
 
     memcpy(v4key, v5plainkey.contents, sizeof(des_cblock));
-#ifndef	KDB4_DISABLE
-    kdb_encrypt_key (v4key, v4key, 
-		     arg->v4_master_key, arg->v4_master_key_schedule, 
-		     ENCRYPT);
-#else	/* KDB4_DISABLE */
     pcbc_encrypt((C_Block *) v4key,
 		 (C_Block *) v4key,
 		 (long) sizeof(C_Block),
 		 arg->v4_master_key_schedule,
 		 (C_Block *) arg->v4_master_key,
 		 ENCRYPT);
-#endif	/* KDB4_DISABLE */
     return 0;
 }
 

@@ -1,3 +1,10 @@
+Sat Jun  8 09:54:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Remove kdb4 library usage.
+
+	* dumpv4.c (handle_one_key): Remove the temporary --with-kdb4
+		support. 
+
 Thu May  2 22:16:01 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* ss_wrapper.c (main): Make sci_idx a global.  This makes certain
