@@ -1,7 +1,7 @@
 /*
- * kadmin/v5server/kadm5_defs.h
+ * lib/kadm5/srv/server_acl.h
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995-2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -82,20 +82,20 @@ typedef struct _restriction {
     char		*policy;
 } restriction_t;
 
-krb5_error_code acl_init
+krb5_error_code kadm5int_acl_init
 	(krb5_context,
 		   int,
 		   char *);
-void acl_finish
+void kadm5int_acl_finish
 	(krb5_context,
 		   int);
-krb5_boolean acl_check
+krb5_boolean kadm5int_acl_check
 	(krb5_context,
 		   gss_name_t,
 		   krb5_int32,
 		   krb5_principal,
 		   restriction_t **);
-krb5_error_code acl_impose_restrictions
+krb5_error_code kadm5int_acl_impose_restrictions
 	(krb5_context,
 		   kadm5_principal_ent_rec *,
 		   long *,

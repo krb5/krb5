@@ -580,7 +580,7 @@ kterr:
 	 exit(1);
      }
 
-     if ((ret = acl_init(context, 0, params.acl_file))) {
+     if ((ret = kadm5int_acl_init(context, 0, params.acl_file))) {
 	  krb5_klog_syslog(LOG_ERR, "Cannot initialize acl file: %s",
 		 error_message(ret));
 	  fprintf(stderr, "%s: Cannot initialize acl file: %s\n",
@@ -611,7 +611,7 @@ kterr:
      svcauth_gssapi_unset_names();
      kadm5_destroy(global_server_handle);
      close(s);
-     acl_finish(context, 0);
+     kadm5int_acl_finish(context, 0);
      if(gss_changepw_name) {
           (void) gss_release_name(&OMret, &gss_changepw_name);
      }

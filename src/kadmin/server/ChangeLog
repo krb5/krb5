@@ -1,3 +1,8 @@
+2004-08-20  Alexandra Ellwood <lxs@mit.edu>
+
+        * ovsec_kadmd.c (main), server_stubs.c (*): 
+        renamed acl_* functions to kadm5int_acl_*
+
 2004-06-26  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (log_badverf): Fix a missed rpc_u_int32.
