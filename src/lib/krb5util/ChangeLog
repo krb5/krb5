@@ -1,3 +1,9 @@
+Tue Jan  6 16:51:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* seteuid.c (krb5_seteuid): Don't check for _POSIX_SAVED_IDS, as
+ 	4.4BSD derivatives don't define it but do have a reasonable
+ 	seteuid anyway. [krb5-libs/503]
+
 Tue Nov 18 19:55:22 1997  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Use new library build rules.

@@ -31,15 +31,14 @@
 #include <stdlib.h>
 #endif
 
-
 #include <errno.h>
 
 int krb5_seteuid( euid_in)
-  int euid_in;
+    int euid_in;
 {
-  uid_t euid = (uid_t) euid_in;
-#if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
-  return  (seteuid(euid)) ;
+    uid_t euid = (uid_t) euid_in;
+#if defined(HAVE_SETEUID)
+    return  (seteuid(euid)) ;
 #else
 #if defined(HAVE_SETRESUID)
     return (setresuid(getuid(), euid, geteuid())) ;
@@ -49,11 +48,9 @@ int krb5_seteuid( euid_in)
 #else /*HAVE_SETREUID*/
     /* You need to add a case to deal with this operating system.*/
     errno = EPERM;
-  return -1;
+    return -1;
   
 #endif /* HAVE_SETREUID */
 #endif /* HAVE_SETRESUID */
-#endif /* _POSIX_SAVED_IDS */
-
-
+#endif /* HAVE_SETEUID */
 }
