@@ -22,14 +22,19 @@
 # or implied warranty.
 # 
 # 
+ETSRCS=krb_err.c
+ETOBJS=krb_err.o
+ETHDRS=krb_err.h
+EHDRDIR=$(TOP)/include/kerberosIV
 NormalLibraryObjectRule()
+ErrorTableObjectRule()
 
 INCLUDES=-I$(TOP)/include/kerberosIV
 
-OBJS=	425data.o \
+OBJS=	$(ETOBJS) \
+	425data.o \
 	425error.o \
 	des_sched.o \
-	err_txt.o \
 	get_cred.o \
 	get_krbhst.o \
 	get_lrealm.o \
@@ -50,10 +55,10 @@ OBJS=	425data.o \
 	sendauth.o \
 	set_key.o
 
-SRCS=	425data.c \
+SRCS=	$(ETSRCS) \
+	425data.c \
 	425error.c \
 	des_sched.c \
-	err_txt.c \
 	get_cred.c \
 	get_krbhst.c \
 	get_lrealm.c \
@@ -73,5 +78,11 @@ SRCS=	425data.c \
 	recvauth.c \
 	sendauth.c \
 	set_key.c
-
+all:: $(ETSRCS) $(ETHDRS) includes $(OBJS)
+clean::
+	$(RM) $(ETHDRS) $(ETSRCS)
+depend:: $(ETSRCS)
+DependTarget()
+Krb5InstallHeaders($(ETHDRS),$(KRB5_INCDIR)/kerberosIV)
+CopyHeader(krb_err.h,$(EHDRDIR))
 Krb5LibraryTarget(krb425,${OBJS})
