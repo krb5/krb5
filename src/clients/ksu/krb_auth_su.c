@@ -276,7 +276,7 @@ krb5_verify_tkt_def(context, client, server, cred_ses_key,
     krb5_ticket **clear_ticket;
 {
 krb5_keytab keytabid;
-krb5_keytype keytype;
+krb5_enctype enctype;
 krb5_keytab_entry ktentry;
 krb5_keyblock *tkt_key = NULL;
 krb5_ticket * tkt = NULL;
@@ -303,10 +303,10 @@ krb5_keyblock *	tkt_ses_key;
 		return retval;
 	}
 
-	keytype = tkt->enc_part.keytype;
+	enctype = tkt->enc_part.enctype;
 
 	if ((retval = krb5_kt_get_entry(context, keytabid, server,
-					tkt->enc_part.kvno, keytype, &ktentry))){
+					tkt->enc_part.kvno, enctype, &ktentry))){
 		krb5_free_ticket(context, tkt);	
 		return retval;
 	}
@@ -345,7 +345,7 @@ krb5_keyblock *	tkt_ses_key;
 
 	tkt_ses_key = tkt->enc_part2->session;	
 
-	if (cred_ses_key->keytype != tkt_ses_key->keytype ||
+	if (cred_ses_key->enctype != tkt_ses_key->enctype ||
 	    cred_ses_key->length != tkt_ses_key->length ||
        	    memcmp((char *)cred_ses_key->contents,
 		   (char *)tkt_ses_key->contents, cred_ses_key->length)) {
