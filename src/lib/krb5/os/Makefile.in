@@ -22,6 +22,7 @@ OBJS= \
 	genaddrs.$(OBJEXT)	\
 	gen_rname.$(OBJEXT)	\
 	gmt_mktime.$(OBJEXT)	\
+	hostaddr.$(OBJEXT)	\
 	hst_realm.$(OBJEXT)	\
 	init_os_ctx.$(OBJEXT)	\
 	krbfileio.$(OBJEXT)	\
@@ -61,6 +62,7 @@ SRCS= \
 	$(srcdir)/genaddrs.c	\
 	$(srcdir)/gen_rname.c	\
 	$(srcdir)/gmt_mktime.c	\
+	$(srcdir)/hostaddr.c	\
 	$(srcdir)/hst_realm.c	\
 	$(srcdir)/init_os_ctx.c	\
 	$(srcdir)/krbfileio.c	\

@@ -1,3 +1,10 @@
+Thu Jan  4 22:23:04 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* hostaddr.c (krb5_os_hostaddr): New function which takes a
+		hostname and returns a list of krb5 addresses.  (This is
+		basically a glue routine that converts the result of
+		gethostbyname() to krb5 addresses.)
+
 Thu Dec 21 17:51:58 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (t_an_to_ln): Use $(LD) instead of $(CC) to link
