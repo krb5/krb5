@@ -1,3 +1,7 @@
+2001-10-23  Tom Yu  <tlyu@mit.edu>
+
+	* loadv4.c (fixup_database): Don't set SUPPORT_DESMD5 anymore.
+
 2001-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_util.M: Fix some formatting nits and document new flags
