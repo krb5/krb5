@@ -165,7 +165,7 @@ static void get_princs_iter(void *data, krb5_principal princ)
      get_either_iter(data, name);
 }
 
-kadm5_ret_t kadm5_get_either(int princ,
+static kadm5_ret_t kadm5_get_either(int princ,
 				       void *server_handle,
 				       char *exp,
 				       char ***princs,
