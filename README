@@ -5,26 +5,24 @@ THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
+
 Now, with that out of the way, let me point you to a few things:
+
+The file doc/HOW_TO_BUILD gives instructions on how to start build
+Kerberos.  More complete building and installation instructions can be
+found in the doc/install.texi.  (A postscript file is provided for
+your convenience.)
 
 The file doc/TREE-GRAPH is a graphical representation of the source
 directory tree you should receive with this distribution.
 
 The file doc/SOURCE-TREE describes what's in each directory.
 
-The file doc/HOW_TO_BUILD gives instructions on how to start build
-Kerberos.
-
-We used the ISODE release 8.0 ASN.1 compiler for the code we have run
-and tested here at MIT.  If you are using ISODE 6.8, you will need to
-apply the patches found in the file tools/pepsy-diffs to fix some bugs
-in the PEPSY compiler which have caused us problems.  I believe that
-ISODE 8.0 should work without any problems.  However, I have not had a
-chance to try it out.
-
 >>									     <<
 >> Please report any problems/bugs/comments to 'krb5-bugs@athena.mit.edu'    <<
 >>									     <<
+
+
 
 Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
@@ -37,12 +35,12 @@ serving as pre-release testers.
 Thanks to Marc Horowitz, Barry Jaspan, and Jonathan Kamens (and
 others) at Openvision, Inc. for providing us with an GSS-API library,
 for serving as pre-release testers, and for finding and fixing many
-bugs (some of them at the last minute!).
+bugs.
 
 Thanks to Cybersafe for providing patches to fix bugs with inter-realm
 authentication.  
 
-Thanks to Ari Medivnsky and Cliff Neumann for writing a ksu client.
+Thanks to Ari Medivnsky and Cliff Neuman for writing a ksu client.
 
 Thanks to Jim Miller from Suite Software for contributing many detailed
 bug reports, most of them by doing desk checks over the code!
@@ -51,7 +49,7 @@ Thanks to Prasad Upasani from ISI for porting the Berkeley
 rlogin/rsh/rcp suite and for testing out our distribution on the Sun.
 
 Thanks to Glenn Machin and Bill Wrahe from Sandia National Labs for
-contributing the kadmin server, plus lots of bugfixes.
+contributing the old kadmin server, plus lots of bugfixes.
 
 Thanks to Bill Sommerfeld from HP for commenting on early Kerberos
 interface drafts, suggesting improvements in later coding interfaces,
@@ -64,8 +62,8 @@ Thanks to Dan Bernstein, for providing the replay cache code.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Jay Berkenbilt, John Carr, Don Davis, Nancy Gilman,
-Barry Jaspan, John Kohl, Cliff Neuman, Jon Rochlis, Jeff Schiller, Ted
-Ts'o, Tom Yu.
+Barry Jaspan, John Kohl, Cliff Neuman, Paul Park, Chris Provenzano,
+Jon Rochlis, Jeff Schiller, Ted Ts'o, Tom Yu.
 
 
 Note:
