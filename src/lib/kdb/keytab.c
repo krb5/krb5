@@ -139,8 +139,7 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
 
     /*
      * Coerce the enctype of the output keyblock in case we got an
-     * inexact match on the enctype; this behavior will go away when
-     * the key storage architecture gets redesigned for 1.3.
+     * inexact match on the enctype.
      */
     entry->key.enctype = enctype;
 

@@ -1,3 +1,8 @@
+2003-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): Fix comment; not going to
+	redesign key storage architecture for 1.3.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,

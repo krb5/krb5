@@ -1,3 +1,8 @@
+2003-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfile_get_entry): Fix comment; not going to
+	redesign key storage architecture for 1.3.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

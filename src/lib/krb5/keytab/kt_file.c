@@ -275,9 +275,7 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id, krb5_const_principal
 	    }
 	    /*
 	     * Coerce the enctype of the output keyblock in case we
-	     * got an inexact match on the enctype; this behavior will
-	     * go away when the key storage architecture gets
-	     * redesigned for 1.3.
+	     * got an inexact match on the enctype.
 	     */
 	    new_entry.key.enctype = enctype;
 
