@@ -1,5 +1,7 @@
 Thu Jun 23 01:09:33 1994  Tom Yu  (tlyu at dragons-lair)
 
+	* cs_entry.c: oops typo in that last one
+
 	* grrr.... ETYPE_DES_CBC_CRC really should be ETYPE_RAW_DES_CBC,
 	although something like ETYPE_DES_CBC_RAW or ETYPE_DES_CBC_NONE
 	would probably work better (following the convention
