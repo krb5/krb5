@@ -1,84 +1,158 @@
-To Build the Macintosh version of Kerberos 5 and GSS:
+Building the Macintosh version of Kerberos 5 and GSS
+----------------------------------------------------
+
+(Last updated $Date$)
+
+
+To build the Macintosh version of Kerberos 5 and GSS:
 
 --- Installing tools ---
 
-	1) Install CodeWarrior Pro 2 with MPW
+	1) Install CodeWarrior Pro 2, including MPW.
 
 	2) Download MacPerl and MacPerl MPW tool from
-	<ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
+	
+	   <ftp://sunsite.cnlab-switch.ch/software/platform/macos/perl/>
+	   
+	   The MacPerl directory contains several versions of the app and the MPW
+	   tool.  The *_appl and *_tool versions work properly with our scripts, e.g.,
+	   you should download "Mac_Perl_520r4_appl.bin" and "Mac_Perl_520r4_tool.bin".
 
-	3) Install MacPerl and MacPerl MPW tool
+	3) Install MacPerl and MacPerl MPW tool (by following the installation 
+	   instructions provided with them).
 
 --- Preparing Kerberos v5 build tree ---
 
-	4) Launch MPW
+	4) Launch MPW.
 
-	5) Set directory in MPW to the top level of Kerberos 5 distribution ("GSS-Kerberos5-1.0.5")
+	5) Set directory in MPW to the top level of Kerberos 5 distribution
+	   (e.g. "GSS-Kerberos5-1.0.5").
 
-	6) Execute "perl :mac:macfile_gen.pl" in MPW
+	6) Execute "perl :mac:macfile_gen.pl" in MPW.
 
-	7) Build target "create-directories" in MPW
+	7) Build target "create-directories" in MPW.
 	
-	8) Open projects in ":mac:libraries:Metrowerks:CW Pro 2" in your CW Pro 2 IDE (the projects 
-	will not work correctly with CW Pro 3), and build them. You need to build the Runtime libraries
-	before building the C libraries.
-		
+	8) Open the projects in "[kerb5 src]:mac:libraries:Metrowerks:CW Pro 2:"
+	   in your CW Pro 2 IDE (the projects will not work correctly with CW Pro 3),
+	   and build them.
+	
+	   IMPORTANT: You must build the Runtime libraries *before* building
+	   the C libraries.
+	
+	   You will see some link warnings.  These are normal and can be ignored.
+	    
 --- Building libraries ---
 
 	9) Build target "all" in MPW. Wait.
+	
+	   Example build times: 30-40 minutes on a G3 machine, 80 minutes
+	   on a PowerMac 9600/233.
+	   
+	   You may receive some compile warnings about an ignored pragma, and some
+	   link warnings.  These are normal and can be ignored.
+	   
+	   On certain machines we have experienced an MPW crash during the link stage
+	   of the build.  If this happens to you, you should restart MPW and start
+	   the build again.  We are investigating the causes of this. 
 
 --- Building the Cygnus Network Security Application ---
 
-	10) Open the project file :mac:kconfig:kconfig.µ in CodeWarrior Pro 2 IDE
+	10) Open the project file "[kerb5 src]:mac:kconfig:kconfig.prj" in the
+	    CodeWarrior Pro 2 IDE.
+
+	11) Select "Make" from the "Project" menu.
+
+--- Binaries ---
+
+	The following assumes that you have followed the steps above to build
+	the GSS & Kerberos 5 libraries.  What you now have supports both the
+	Kerberos 5 and GSS APIs.  Each is supported as both CFM shared libraries
+	and CodeWarrior static link libraries for both 68k & PowerPC Macs.
+	We strongly recommend you use the CFM shared libraries.
 	
-	11) Select Make from the Project menu
+	The following binary components are provided/built in this release:
+
+       :GSSLib
+       * Fat CFM Shared Library including both GSS and Kerberos 5 libraries.
+       * Not for linking against in your projects; include in distributions to
+         be placed in System Folder:Extensions.
+       
+       :GSSLibrary68K
+       * CFM Shared Library including GSS for 68k Macs.
+       
+       :GSSLibraryPPC
+       * CFM Shared Library including GSS for PowerPC Macs.
+       
+       :K5Library68K
+       * CFM Shared Library including Kerberos 5 for 68k Macs.
+       
+       :K5LibraryPPC
+       * CFM Shared Library including Kerberos 5 for PowerPC Macs.
+       
+       :libgss.68K
+       * Static CodeWarrior library including GSS for 68k Macs
+       
+       :libgss.PPC
+       * Static CodeWarrior library including GSS for PowerPC Macs
+       
+       :libkrb5.68K
+       * Static CodeWarrior library including Kerberos 5 for 68k Macs
+       
+       :libkrb5.PPC
+       * Static CodeWarrior library including Kerberos 5 for PowerPC Macs
+
+	   :mac:kconfig:CNS Config
+	   * Kerberos 5 Ticket Manager (aka Cygnus Network Security Configuration) application
+	    
+	   :mac:krb5.ini
+	   * Sample krb5.ini file using CYGNUS.COM as the default realm
+	     
+	   :include
+	   * An include directory containing the files necessary for development
 
 --- Installation ---
 
-	The following assumes that you have followed the steps above to build
-	the Kerberos libraries.  What you now have supports both the Kerberos
-	and GSS APIs.  Each is supported as both a shared library and a Code 
-	Warrior static link library for 68k Macs.  Following are the binary
-	components provided in this release:
+	 To install the Kerberos 5 system on your Mac:
 
-	   * Code Fragment Manager libraries for 68k Macintosh
-	     (:mac:libraries:GSSLibrary and :mac:libraries:GSSLib)
-	    
-	   * Code Warrior static libraries for 68k Macintosh
-	     (:mac:libraries:libgss and :mac:libraries:libkrb5)
-
-	   * Cygnus Network Security Configuration program
-	     (:mac:kconfig:CNS Config)
-	    
-	   * Sample krb5.ini file using CYGNUS.COM as the default realm
-	     (:mac:krb5.ini)
-	     
-	   * An include directory containing the files necessary
-	     for development (:include)
-
-	   To install the Kerberos system:
-
-	   1) Drop the :mac:krb5.ini file into the "Preferences"
-	   folder contained in the "System Folder".
+	   1) Drop the :mac:krb5.ini file (configured for your site) into
+	      the "Preferences" folder in the "System Folder".
 	   
-	   2) To install the shared libraries (optional), simply copy the 
-	   "GSSLib" file to the "Extensions" folder in the "System Folder".
+	   2) Install the shared libraries by copying the  "GSSLib" file
+	      to the "Extensions" folder in the "System Folder".
+	   
+	   3) Put the "CNS Config" application in a handy location.
+	   
+	   4) Put the krb5.ini file in your preferences folder.
 
 
 --- Getting Started Programming ---
 
-	You may program using either the Kerberos or GSS APIs.  As delivered, the
-	libraries containing the GSS API are complete.  They do not rely on the
-	krb5 library.
+	You can program using either the Kerberos 5 or GSS APIs. (Currently the
+	GSS Library depends on the krb5 library; this means you will have to 
+	link against both if you are using static libraries.)
 
-	To add Kerberos utility to a Code Warrior based application:
+	To add Kerberos functionality to a Code Warrior based application:
 
-	   1) Decide on whether to use CFM or static libraries.
-
-	   2) Decide on whether to use ther Kerberos or GSS APIs.
-
-	   3) Drag the appropriate library into your project
-	     (One of: :mac:libraries:libgss, mac:libraries:libkrb5,
-	     :mac:libraries:GSS Library or :mac:libraries:Kerberos 5 Library).
-
-	   4) Set the project options to 4 byte integers and enums treated as ints.
+	   1) Decide on whether to use CFM or static libraries. We strongly
+	      recommended that you use the CFM libraries so that when updates are
+	      made to Kerberos5/GSS you do not need to recompile your application.
+	      
+	   2) Drag the appropriate libraries into your project.
+	   
+	      If you are using the CFM libraries, include the following:
+	      
+	      	If you are using GSSAPI:
+				GSSLibrary68K
+				GSSLibraryPPC
+    	    If you are using Kerberos v5 API directly:
+				K5Library68K
+				K5LibraryPPC
+          
+          If you are statically linking, include the following:
+          
+            libgss.68K
+            libgss.PPC
+            libkrb5.68K
+            libkrb5.PPC
+            
+	   3) Set the project options to 4 byte integers and enums treated as ints.
