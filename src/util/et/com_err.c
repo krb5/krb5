@@ -156,6 +156,15 @@ KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(ectx, priv, whoami,
 /*
  * The following are the old-style com_err interfaces....
  */
+KRB5_DLLIMP void KRB5_CALLCONV_C com_err_va(whoami, code, fmt, args)
+    const char FAR * whoami;
+    errcode_t code;
+    const char FAR * fmt;
+    va_list args;
+{
+    et_com_err_va(0, 0, whoami, code, fmt, args);
+}
+
 #ifndef ET_VARARGS
 KRB5_DLLIMP void KRB5_CALLCONV_C com_err(const char FAR *whoami,
 					 errcode_t code,
@@ -175,7 +184,7 @@ KRB5_DLLIMP void KRB5_CALLCONV_C et_com_err(whoami, code, fmt, va_alist)
 #else
 	va_start(ap, fmt);
 #endif
-	et_com_err_va(0, 0, whoami, code, fmt, ap);
+	com_err_va(whoami, code, fmt, ap);
 	va_end(ap);
 }
 

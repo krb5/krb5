@@ -61,6 +61,8 @@ typedef void (*et_old_error_hook_func) ET_P((const char FAR *, errcode_t,
 	
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
 	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...));
+KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err_va
+	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, va_list));
 
 KRB5_DLLIMP extern const char FAR * KRB5_CALLCONV error_message
 	ET_P((errcode_t));

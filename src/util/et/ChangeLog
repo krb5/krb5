@@ -1,3 +1,7 @@
+Fri Feb  7 19:03:07 1997  Richard Basch  <basch@lehman.com>
+
+	* com_err.c com_err.h: Added old interface function com_err_va
+
 Tue Feb  4 15:59:01 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in com_err.h error_table.h et_c.awk error_message.c
