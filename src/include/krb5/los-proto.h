@@ -56,5 +56,9 @@ krb5_error_code krb5_get_krbhst
 		   char *** ));
 krb5_error_code krb5_free_krbhst
 	PROTOTYPE((char ** ));
+krb5_error_code krb5_aname_to_localname
+	PROTOTYPE((krb5_principal,
+		   int,
+		   char * ));
 
 #endif /* KRB5_LIBOS_PROTO__ */

@@ -179,10 +179,6 @@ krb5_error_code krb5_parse_name
 krb5_error_code krb5_unparse_name
 	PROTOTYPE((krb5_principal,
 		   char ** ));
-krb5_error_code krb5_aname_to_localname
-	PROTOTYPE((krb5_principal,
-		   int,
-		   char * ));
 krb5_boolean krb5_address_search
 	PROTOTYPE((krb5_address *,
 		   krb5_address **));
