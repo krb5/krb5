@@ -9,8 +9,6 @@
  
 #include <CodeFragments.h>
 
-#include "ShlibTestTrack.h"
- 
 #include "krb5_err.h"
 #include "kv5m_err.h"
 #include "asn1_err.h"
@@ -37,9 +35,6 @@ OSErr __initializeK5(CFragInitBlockPtr ibp)
 	    add_error_table(&et_asn1_error_table);
 	    add_error_table(&et_prof_error_table);
 	    add_error_table(&et_kadm_error_table);
-	    
-	    /* TestTrack the shared library */
-	    err = ShlibTestTrack(ibp);
 	}
 	
 	return err;
