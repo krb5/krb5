@@ -1,3 +1,7 @@
+Tue Mar 18 12:34:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+ [326]	* login.c(doit):  Preserve terminal even without -p.
+
 Thu Feb 27 10:58:07 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* krshd.c: Allow user to login with / as home directory if homedir

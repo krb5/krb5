@@ -1327,6 +1327,12 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	 */
 	if (eflag)
 	    	lgetstr(term, sizeof(term), "Terminal type");
+	else if (!(kflag || Kflag ))  /*Preserve terminal if not read over net */
+	  {
+	    if (getenv("TERM"))
+	      strncpy(term, getenv("TERM"), sizeof(term));
+	  }
+	
 	term_init (rflag || kflag || Kflag || eflag);
 
 	for (cnt = getdtablesize(); cnt > 2; cnt--)
