@@ -76,7 +76,6 @@ OLDDECLARG(krb5_pointer, ivec)
     else
 	iv = (krb5_octet *)ivec;
 
-    /* XXX should check that key sched is valid here? */
     return (mit_des_cbc_encrypt((krb5_octet *)in, 
 			    (krb5_octet *)out,
 			    size, 
@@ -118,7 +117,6 @@ OLDDECLARG(krb5_pointer, ivec)
     else
 	iv = (krb5_octet *)ivec;
 
-    /* XXX should check that key sched is valid here? */
     return (mit_des_cbc_encrypt ((krb5_octet *)in, 
 			     (krb5_octet *)out, 
 			     size, 
