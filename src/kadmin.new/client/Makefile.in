@@ -1,0 +1,32 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+SRCS = 
+
+OBJS = getdate.o
+
+all::	getdate
+
+getdate.c getdate.h: getdate.y
+	$(RM) getdate.c getdate.h y.tab.*
+	$(YACC) -d $(srcdir)/getdate.y
+	$(MV) y.tab.c getdate.c
+	$(MV) y.tab.h getdate.h
+
+getdate: getdate.c
+	$(CC) -o getdate $(CFLAGS) -DTEST getdate.c
+
+clean::
+	$(RM) getdate getdate.c getdate.h y.tab.c y.tab.h
+
