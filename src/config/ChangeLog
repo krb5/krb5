@@ -1,3 +1,9 @@
+2003-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use gcc for linking shared libraries,
+	and -Wl to pass linker flags in, so gcc can supply the necessary
+	support libraries.
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (daemon.c): New rule for copying daemon.c locally from
