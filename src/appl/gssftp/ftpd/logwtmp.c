@@ -59,7 +59,7 @@ static int fd = -1;
  * after first call, for use with ftp (which may chroot
  * after login, but before logout).
  */
-logwtmp(line, name, host)
+void ftp_logwtmp(line, name, host)
 	char *line, *name, *host;
 {
 	struct utmp ut;

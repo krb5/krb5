@@ -25,13 +25,13 @@ long pty_getpty (fd, slave, slavelength)
     int slavelength;
     int *fd; char *slave;
 {
-  char *cp;
+    char *cp;
     char *p;
     int i,ptynum;
     struct stat stb;
-char slavebuf[1024];
+    char slavebuf[1024];
 #ifdef HAVE__GETPTY
-char *slaveret; /*Temporary to hold pointer to slave*/
+    char *slaveret; /*Temporary to hold pointer to slave*/
 #endif /*HAVE__GETPTY*/
 
 #ifdef HAVE_OPENPTY
@@ -39,7 +39,7 @@ char *slaveret; /*Temporary to hold pointer to slave*/
 
     if(openpty(fd, &slavefd, slave, (struct termios *) 0,
          (struct winsize *) 0)) return 1;
-close(slavefd);
+    close(slavefd);
     return 0;
 #else /*HAVE_OPENPTY*/
 #ifdef HAVE__GETPTY
@@ -51,13 +51,13 @@ close(slavefd);
      * paths.
      */
     if ((slaveret = _getpty(fd, O_RDWR|O_NDELAY, 0600, 0)) == 0) {
-      *fd = -1;
-      return PTY_GETPTY_NOPTY;
+	*fd = -1;
+	return PTY_GETPTY_NOPTY;
     }
-    if (strlen(slaveret) > slavelength) {
-      close(*fd);
-      *fd = -1;
-      return PTY_GETPTY_SLAVE_TOOLONG;
+    if (strlen(slaveret) > slavelength - 1) {
+	close(*fd);
+	*fd = -1;
+	return PTY_GETPTY_SLAVE_TOOLONG;
     }
     else strcpy(slave, slaveret);
     return 0;
@@ -86,13 +86,11 @@ close(slavefd);
 #endif
 #endif
 	if (p) {
-	    if ( strlen(p) > slavelength)
-		{
+	    if (strlen(p) > slavelength - 1) {
 		    close (*fd);
 		    *fd = -1;
 		    return PTY_GETPTY_SLAVE_TOOLONG;
-		}
-	    
+	    }
 	    strcpy(slave, p);
 	    return 0;
 	}
@@ -102,21 +100,19 @@ close(slavefd);
 	    return PTY_GETPTY_FSTAT;
 	}
 	ptynum = (int)(stb.st_rdev&0xFF);
-    sprintf(slavebuf, "/dev/ttyp%x", ptynum);
-    if ( strlen(slavebuf) > slavelength) {
-	close(*fd);
-	*fd = -1;
-	return PTY_GETPTY_SLAVE_TOOLONG;
-    }
-    strncpy ( slave, slavebuf, slavelength);
+	sprintf(slavebuf, "/dev/ttyp%x", ptynum);
+	if (strlen(slavebuf) > slavelength - 1) {
+	    close(*fd);
+	    *fd = -1;
+	    return PTY_GETPTY_SLAVE_TOOLONG;
+	}
+	strncpy(slave, slavebuf, slavelength);
 	return 0;
-
     } else {
-    
-	for (cp = "pqrstuvwxyzPQRST";*cp; cp++) {
+    	for (cp = "pqrstuvwxyzPQRST";*cp; cp++) {
 	    sprintf(slavebuf,"/dev/ptyXX");
-	    slavebuf[strlen("/dev/pty")] = *cp;
-	    slavebuf[strlen("/dev/ptyp")] = '0';
+	    slavebuf[sizeof("/dev/pty") - 1] = *cp;
+	    slavebuf[sizeof("/dev/ptyp") - 1] = '0';
 	    if (stat(slavebuf, &stb) < 0)
 		break;
 	    for (i = 0; i < 16; i++) {
@@ -125,14 +121,13 @@ close(slavefd);
 		if (*fd < 0) continue;
 
 		/* got pty */
-		slavebuf[strlen("/dev/")] = 't';
-		if ( strlen(slavebuf) > slavelength ) {
-		    close ( *fd);
+		slavebuf[sizeof("/dev/") - 1] = 't';
+		if (strlen(slavebuf) > slavelength -1) {
+		    close(*fd);
 		    *fd = -1;
-return PTY_GETPTY_SLAVE_TOOLONG;
+		    return PTY_GETPTY_SLAVE_TOOLONG;
 		}
-		strncpy ( slave, slavebuf, slavelength);
-		
+		strncpy(slave, slavebuf, slavelength);
 		return 0;
 	    }
 	}
@@ -141,4 +136,3 @@ return PTY_GETPTY_SLAVE_TOOLONG;
 #endif /*HAVE__GETPTY*/
 #endif /* HAVE_OPENPTY */
 }
-

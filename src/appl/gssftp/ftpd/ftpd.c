@@ -691,7 +691,7 @@ end_login()
 
 	(void) seteuid((uid_t)0);
 	if (logged_in)
-		logwtmp(ttyline, "", "");
+		ftp_logwtmp(ttyline, "", "");
 	pw = NULL;
 	logged_in = 0;
 	guest = 0;
@@ -805,7 +805,7 @@ pass(passwd)
 
 	/* open wtmp before chroot */
 	(void)sprintf(ttyline, "ftp%d", getpid());
-	logwtmp(ttyline, pw->pw_name, remotehost);
+	ftp_logwtmp(ttyline, pw->pw_name, remotehost);
 	logged_in = 1;
 
 	if (guest) {
@@ -1671,7 +1671,7 @@ dologout(status)
 {
 	if (logged_in) {
 		(void) seteuid((uid_t)0);
-		logwtmp(ttyline, "", "");
+		ftp_logwtmp(ttyline, "", "");
 	}
 	/* beware of flushing buffers after a SIGPIPE */
 	_exit(status);

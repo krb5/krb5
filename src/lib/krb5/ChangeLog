@@ -1,3 +1,7 @@
+Mon Nov 18 20:42:39 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Set shared library version to 1.0. [krb5-libs/201]
+
 Wed Oct 23 01:15:40 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in, Makefile.in: Check to see if the -lgen library

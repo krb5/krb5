@@ -44,6 +44,9 @@
 #endif	/* defined(unix) */
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif /* HAVE_ARPA_INET_H */
 #ifdef	CRAY
 #include <fcntl.h>
 #endif	/* CRAY */
@@ -88,6 +91,9 @@
 
 #ifndef MAXDNAME
 #define MAXDNAME 256 /*per the rfc*/
+#endif
+#ifndef INADDR_NONE
+#define INADDR_NONE 0xffffffff
 #endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
@@ -2352,8 +2358,6 @@ ayt_status()
 }
 #endif
 
-unsigned long inet_addr();
-
     int
 tn(argc, argv)
     int argc;
@@ -2443,10 +2447,10 @@ tn(argc, argv)
     } else {
 #endif
 	temp = inet_addr(hostp);
-	if (temp != (unsigned long) -1) {
+	if (temp & 0xffffffff != INADDR_NONE) {
 	    sin.sin_addr.s_addr = temp;
 	    sin.sin_family = AF_INET;
-	    (void) strcpy(_hostname, hostp);
+	    (void) strcpy(_hostname, hostp);  
 	    hostname = _hostname;
 	} else {
 	    host = gethostbyname(hostp);
@@ -2454,9 +2458,10 @@ tn(argc, argv)
 		sin.sin_family = host->h_addrtype;
 #if	defined(h_addr)		/* In 4.3, this is a #define */
 		memcpy((caddr_t)&sin.sin_addr,
-				host->h_addr_list[0], host->h_length);
+		       host->h_addr_list[0], sizeof(sin.sin_addr));
 #else	/* defined(h_addr) */
-		memcpy((caddr_t)&sin.sin_addr, host->h_addr, host->h_length);
+		memcpy((caddr_t)&sin.sin_addr, host->h_addr, 
+		       sizeof(sin.sin_addr)); 
 #endif	/* defined(h_addr) */
 		strncpy(_hostname, host->h_name, sizeof(_hostname));
 		_hostname[sizeof(_hostname)-1] = '\0';
@@ -2546,9 +2551,9 @@ tn(argc, argv)
 		perror((char *)0);
 		host->h_addr_list++;
 		memcpy((caddr_t)&sin.sin_addr, 
-			host->h_addr_list[0], host->h_length);
+			host->h_addr_list[0], sizeof(sin.sin_addr));
 		memcpy((caddr_t)&hostaddr,
-			host->h_addr_list[0], host->h_length);
+		       host->h_addr_list[0], sizeof(sin.sin_addr));
 		(void) NetClose(net);
 		continue;
 	    }
@@ -3055,9 +3060,10 @@ sourceroute(arg, cpp, lenp)
 		} else if (host = gethostbyname(cp)) {
 #if	defined(h_addr)
 			memcpy((caddr_t)&sin_addr,
-				host->h_addr_list[0], host->h_length);
+				host->h_addr_list[0], sizeof(sin_addr));
 #else
-			memcpy((caddr_t)&sin_addr, host->h_addr, host->h_length);
+			memcpy((caddr_t)&sin_addr, host->h_addr, 
+			       sizeof(sin_addr));
 #endif
 		} else {
 			*cpp = cp;

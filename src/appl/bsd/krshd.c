@@ -420,9 +420,6 @@ int main(argc, argv)
 	syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
 
-    if (!checksum_required && !checksum_ignored)
-	checksum_ignored = 1;
-
     if (checksum_required&&checksum_ignored) {
 	syslog(LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
 	fatal(fd, "Configuration error: mutually exclusive options specified");
@@ -1014,11 +1011,11 @@ void doit(f, fromp)
 #endif /*CRAY*/
     
     if (chdir(pwd->pw_dir) < 0) {
-	syslog(LOG_ERR ,
-	       "Principal %s  (%s@%s) for local user %s has no home directory.\n",
-	       kremuser, remuser, hostname, locuser);
-	error("No remote directory.\n");
+      if(chdir("/") < 0) {
+      	error("No remote directory.\n");
 	goto signout_please;
+      }
+	   pwd->pw_dir = "/";
     }
 
 #ifdef KERBEROS
@@ -1722,6 +1719,9 @@ recvauth(netf, peersin, valid_checksum)
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
     krb5_rcache		rcache;
+    struct passwd *pwd;
+    uid_t uid;
+    gid_t gid;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1827,7 +1827,7 @@ recvauth(netf, peersin, valid_checksum)
 						 &authenticator)))
       return status;
     
-    if (authenticator->checksum && checksum_required) {
+    if (authenticator->checksum && !checksum_ignored) {
 	struct sockaddr_in adr;
 	int adr_length = sizeof(adr);
 	char * chksumbuf = (char *) malloc(strlen(cmdbuf)+strlen(locuser)+32);
@@ -1877,10 +1877,22 @@ recvauth(netf, peersin, valid_checksum)
     }
 
     if (inbuf.length) { /* Forwarding being done, read creds */
+	pwd = getpwnam(locuser);
+	if (!pwd) {
+	    error("Login incorrect.\n");
+	    exit(1);
+	}
+	uid = pwd->pw_uid;
+	gid = pwd->pw_gid;
 	if ((status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf,
-					     ticket, locuser, &ccache))) {
+					     ticket, &ccache))) {
 	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
+	    exit(1);
+	}
+	if (chown(krb5_cc_get_name(bsd_context, ccache), uid, gid) == -1) {
+	    error("Can't chown forwarded credentials: %s\n",
+		  error_message(errno));
 	    exit(1);
 	}
     }

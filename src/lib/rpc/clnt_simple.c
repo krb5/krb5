@@ -88,7 +88,8 @@ callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 			return ((int) RPC_UNKNOWNHOST);
 		timeout.tv_usec = 0;
 		timeout.tv_sec = 5;
-		memmove((char *)&server_addr.sin_addr, hp->h_addr, hp->h_length);
+		memmove((char *)&server_addr.sin_addr, hp->h_addr, 
+			sizeof(server_addr.sin_addr));
 		server_addr.sin_family = AF_INET;
 		server_addr.sin_port =  0;
 		if ((crp->client = clntudp_create(&server_addr, (rpc_u_int32)prognum,

@@ -130,7 +130,7 @@ Location of the credentials (ticket) cache.
 /tmp/krb5cc_[uid]
 default credentials cache ([uid] is the decimal UID of the user).
 .TP
-/etc/v5srvtab
+/etc/krb5.keytab
 default location for the local host's
 .B keytab
 file.
