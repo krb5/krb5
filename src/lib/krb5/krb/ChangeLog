@@ -1,3 +1,8 @@
+Mon Dec 23 17:20:03 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (SRCS): Add brand.c to the SRCS line so that the
+		kerbsrc.mac.tar includes brand.c
+
 Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* brand.c: New file, which allows a release engineer to "brand"

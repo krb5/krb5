@@ -87,6 +87,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/auth_con.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
+	$(srcdir)/brand.c	\
 	$(srcdir)/chk_trans.c	\
 	$(srcdir)/conv_princ.c	\
 	$(srcdir)/copy_addrs.c	\
