@@ -1,3 +1,13 @@
+Fri Nov 15 08:33:54 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Handle case where utmp uses
+		ut_exit.e_exit and utmpx uses ut_exit.ut_exit.
+
+	* configure.in (UT_EXIT_STRUCTURE_DIFFER): If utmpx.h exists, and
+		getutmpx does not exist then test if the ut_exit part of
+		the utmp/utmpx structure is a structure and if their types
+		differ. (e_exit vs. ut_exit).
+
 Fri Nov  8 17:45:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Add code which attempts to

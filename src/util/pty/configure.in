@@ -132,6 +132,20 @@ AC_DEFINE(SETPGRP_TWOARG)
 fi
 dnl
 dnl
+if test $ac_cv_header_utmpx_h  = yes -a $ac_cv_func_getutmpx = no; then
+AC_MSG_CHECKING([if utmpx and utmp ut_exit structures differ])
+AC_CACHE_VAL(krb5_cv_utmp_utmpx_diff_exit_struct,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <utmp.h>
+#include <utmpx.h>],[struct utmpx utx; struct utmp ut;
+utx.ut_exit.ut_exit = ut.ut_exit.e_exit],
+krb5_cv_utmp_utmpx_diff_exit_struct=yes, krb5_cv_utmp_utmpx_diff_exit_struct=no)])
+AC_MSG_RESULT($krb5_cv_utmp_utmpx_diff_exit_struct)
+if test $krb5_cv_utmp_utmpx_diff_exit_struct = yes; then
+AC_DEFINE(UT_EXIT_STRUCTURE_DIFFER)
+fi
+fi
 dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
