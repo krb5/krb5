@@ -25,4 +25,11 @@ ec KRB5_KDB_ILL_WILDCARD,	"Illegal use of wildcard"
 ec KRB5_KDB_DB_INUSE,		"Database is locked or in use--try again later"
 
 ec KRB5_KDB_DB_CHANGED,		"Database was modified during read"
+
+ec KRB5_KDB_TRUNCATED_RECORD,	"Database record is incomplete or corrupted"
+ec KRB5_KDB_RECURSIVELOCK,	"Attempt to lock database twice"
+ec KRB5_KDB_NOTLOCKED,		"Attempt to unlock database when not locked"
+ec KRB5_KDB_BADLOCKMODE,	"Invalid kdb lock mode"
+ec KRB5_KDB_DBNOTINITED,	"Database has not been initialized"
+ec KRB5_KDB_DBINITED,		"Database has already been initialized"
 end
