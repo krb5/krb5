@@ -51,6 +51,9 @@ static char rcsid_get_in_tkt_c[] =
  */
 
 
+extern krb5_deltat krb5_clockskew;
+#define in_clock_skew(date) (abs((date)-request.ctime) < krb5_clockskew)
+
 /* some typedef's for the function args to make things look a bit cleaner */
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
@@ -117,9 +120,15 @@ OLDDECLARG(krb5_ccache, ccache)
 	    return retval;		/* some other reply--??? */
 	/* it was an error */
 
-	/* XXX check to make sure the timestamps match, etc. */
+	if ((err_reply->ctime != request.ctime) ||
+	    !krb5_principal_compare(err_reply->server, request.server) ||
+	    !krb5_principal_compare(err_reply->client, request.client))
+	    retval = KRB5_KDCREP_MODIFIED;
+	else
+	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
-	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+	/* XXX somehow make error msg text available to application? */
+
 	krb5_free_error(err_reply);
 	return retval;
     }
@@ -139,8 +148,33 @@ OLDDECLARG(krb5_ccache, ccache)
 	return retval;
     }
 
-    /* XXX check the contents for sanity... */
+    /* check the contents for sanity: */
+    if (!krb5_principal_compare(as_reply->client, request.client)
+	|| !krb5_principal_compare(as_reply->enc_part2->server, request.server)
+	|| !krb5_principal_compare(as_reply->ticket->server, request.server)
+	|| (request.ctime != as_reply->enc_part2->ctime)
+	/* XXX check for extraneous flags */
+	/* XXX || (!krb5_addresses_compare(addrs, as_reply->enc_part2->caddrs)) */
+	|| ((request.from == 0) &&
+	    !in_clock_skew(as_reply->enc_part2->times.starttime))
+	|| ((request.from != 0) &&
+	    (request.from != as_reply->enc_part2->times.starttime))
+	|| ((request.till != 0) &&
+	    (as_reply->enc_part2->times.endtime > request.till))
+	|| ((request.kdc_options & KDC_OPT_RENEWABLE) &&
+	    (request.rtime != 0) &&
+	    (as_reply->enc_part2->times.renew_till > request.rtime))
+	|| ((request.kdc_options & KDC_OPT_RENEWABLE_OK) &&
+	    (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
+	    (request.till != 0) &&
+	    (as_reply->enc_part2->times.renew_till > request.till))
+	) {
+	krb5_free_kdc_rep(as_reply);
+	return KRB5_KDCREP_MODIFIED;
+    }
 
+    /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
+	
     /* fill in the credentials */
     if (retval = krb5_copy_keyblock(as_reply->enc_part2->session,
 				    &creds->keyblock)) {
