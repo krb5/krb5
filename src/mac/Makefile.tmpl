@@ -615,6 +615,7 @@ snapshot : autogenerate-clean
 		end
 	end
 	Duplicate /mac/Makefile.initial {snapshot-root}/Makefile
+	SetFile -a l {snapshot-root}/Makefile
 
 ################################################################################
 ##
