@@ -9,8 +9,9 @@
 .\" is provided ``as is'' without express or implied warranty.
 .\"
 .\" @(#)@(#)popper.8	2.3    2.3    (CCS)   4/2/91     Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n
-.\"
-.TH popper 8 "August 1990"
+.\" "
+.so man1/header.doc
+.TH popper 8 \*h
 .UC 6
 .ad
 .SH NAME
@@ -22,16 +23,16 @@ popper \- pop 3 server
 .SH DESCRIPTION
 .I Popper
 is an implementation of the Post Office Protocol server that runs on a
-variety of Unix computers to manage electronic mail for Macintosh
-and MS-DOS computers.  The server was developed at the University of
+variety of Unix computers to manage electronic mail for Macintosh and
+MS-DOS computers.  The server was developed at the University of
 California at Berkeley and conforms fully to the specifications in RFC
-1081 and RFC 1082.  The Berkeley server also has extensions to
-send electronic mail on behalf of a client.
+1081 and RFC 1082.  The Berkeley server also has extensions to send
+electronic mail on behalf of a client.
 .PP
 The 
 .B \-d
 flag sets the socket to debugging and turns on debugging.  All debugging
-information is saved using syslog(8).  The 
+information is saved using syslog(8).  The
 .B \-t trace\-file
 flag turns on debugging and saves the trace information in
 .I trace\-file
@@ -40,9 +41,8 @@ using fprintf(s).
 .PP
 The POP server is available via anonymous ftp from ftp.CC.Berkeley.EDU
 (128.32.136.9, 128.32.206.12).  It is in two files in the pub directory:
-a compressed
-tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
-called MacPOP.sit.hqx.
+a compressed tar file popper.tar.Z and a Macintosh StuffIt archive in
+BinHex format called MacPOP.sit.hqx.
 .SH THE POP TRANSACTION CYCLE
 .PP
 The Berkeley POP server is a single program (called popper) that is
@@ -60,36 +60,36 @@ if a cannonical name lookup for the client returns the same peer IP
 address, logging a warning message if it does not.  The the server
 enters the authorization state, during which the client must correctly
 identify itself by providing a valid Unix userid and password on the
-server's host machine.  No other exchanges are allowed during this
-state (other than a request to quit.)  If authentication fails, a
-warning message is logged and the session ends.  Once the user is
-identified, popper changes its user and group ids to match that of the
-user and enters the transaction state.  The server makes a temporary
-copy of the user's maildrop (ordinarily in /usr/spool/mail) which is
-used for all subsequent transactions.  These include the bulk of POP
-commands to retrieve mail, delete mail, undelete mail, and so forth.  A
-Berkeley extension also allows the user to submit a mail parcel to the
-server who mails it using the sendmail program (this extension is
-supported in the HyperMail client distributed with the server).  When
-the client quits, the server enters the final update state during which
-the network connection is terminated and the user's maildrop is updated
-with the (possibly) modified temporary maildrop.
+server's host machine.  No other exchanges are allowed during this state
+(other than a request to quit.)  If authentication fails, a warning
+message is logged and the session ends.  Once the user is identified,
+popper changes its user and group ids to match that of the user and
+enters the transaction state.  The server makes a temporary copy of the
+user's maildrop (ordinarily in /usr/spool/mail) which is used for all
+subsequent transactions.  These include the bulk of POP commands to
+retrieve mail, delete mail, undelete mail, and so forth.  A Berkeley
+extension also allows the user to submit a mail parcel to the server who
+mails it using the sendmail program (this extension is supported in the
+HyperMail client distributed with the server).  When the client quits,
+the server enters the final update state during which the network
+connection is terminated and the user's maildrop is updated with the
+(possibly) modified temporary maildrop.
 .SH LOGGING
 .PP
 The POP server uses syslog to keep a record of its activities.  On
 systems with BSD 4.3 syslogging, the server logs (by default) to the
-"local0" facility at priority "notice" for all messages except
-debugging which is logged at priority "debug".  The default log file is
-/usr/spool/mqueue/POPlog.  These can be changed, if desired.  On
-systems with 4.2 syslogging all messages are logged to the local log
-file, usually /usr/spool/mqueue/syslog.
+"local0" facility at priority "notice" for all messages except debugging
+which is logged at priority "debug".  The default log file is
+/usr/spool/mqueue/POPlog.  These can be changed, if desired.  On systems
+with 4.2 syslogging all messages are logged to the local log file,
+usually /usr/spool/mqueue/syslog.
 .SH DEBUGGING
 .PP
 The popper program will log debugging information when the -d parameter
 is specified after its invocation in the inetd.conf file.  Care should
-be exercised in using this option since it generates considerable
-output in the syslog file.  Alternatively, the "-t <file-name>" option
-will place debugging information into file "<file-name>" using fprintf
+be exercised in using this option since it generates considerable output
+in the syslog file.  Alternatively, the "-t <file-name>" option will
+place debugging information into file "<file-name>" using fprintf
 instead of syslog.
 .PP
 For SunOS version 3.5, the popper program is launched by inetd from
@@ -111,35 +111,34 @@ quit
 Connection closed by foreign host.
 .fi
 .SH VERSION 1.7 RELEASE NOTES
-Extensive re-write of the maildrop processing code contributed by 
-Viktor Dukhovni <viktor@math.princeton.edu> that greatly reduces the
+Extensive re-write of the maildrop processing code contributed by Viktor
+Dukhovni <viktor@math.princeton.edu> that greatly reduces the
 possibility that the maildrop can be corrupted as the result of
 simultaneous access by two or more processes.
 .PP
-Added "pop_dropcopy" module to create a temporary maildrop from
-the existing, standard maildrop as root before the setuid and 
-setgid for the user is done.  This allows the temporary maildrop
-to be created in a mail spool area that is not world read-writable.
+Added "pop_dropcopy" module to create a temporary maildrop from the
+existing, standard maildrop as root before the setuid and setgid for the
+user is done.  This allows the temporary maildrop to be created in a
+mail spool area that is not world read-writable.
 .PP
-This version does *not* send the sendmail "From " delimiter line
-in response to a TOP or RETR command.
+This version does *not* send the sendmail "From " delimiter line in
+response to a TOP or RETR command.
 .PP
-Encased all debugging code in #ifdef DEBUG constructs.  This code can
-be included by specifying the DEGUG compiler flag.  Note:  You still
-need to use the -d or -t option to obtain debugging output.
+Encased all debugging code in #ifdef DEBUG constructs.  This code can be
+included by specifying the DEGUG compiler flag.  Note:  You still need
+to use the -d or -t option to obtain debugging output.
 .SH LIMITATIONS
-The POP server copies the user's entire maildrop to /tmp and
-then operates on that copy.  If the maildrop is particularly
-large, or inadequate space is available in /tmp, then the
-server will refuse to continue and terminate the connection.
+The POP server copies the user's entire maildrop to /tmp and then
+operates on that copy.  If the maildrop is particularly large, or
+inadequate space is available in /tmp, then the server will refuse to
+continue and terminate the connection.
 .PP
-Simultaneous modification of a single maildrop can result in 
-confusing results.  For example, manipulating messages in a
-maildrop using the Unix /usr/ucb/mail command while a copy of
-it is being processed by the POP server can cause the changes
-made by one program to be lost when the other terminates.  This
-problem is being worked on and will be fixed in a later
-release.
+Simultaneous modification of a single maildrop can result in confusing
+results.  For example, manipulating messages in a maildrop using the
+Unix /usr/ucb/mail command while a copy of it is being processed by the
+POP server can cause the changes made by one program to be lost when the
+other terminates.  This problem is being worked on and will be fixed in
+a later release.
 .SH FILES
 .nf
 /usr/spool/mail         mail files

@@ -17,9 +17,9 @@
 .\" permission.  M.I.T. makes no representations about the suitability of
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
-.\" 
-.\"
-.TH SSERVER 8 "Kerberos Version 5.0" "MIT Project Athena"
+.\" "
+.so man1/header.doc
+.TH SSERVER 8 \*h
 .SH NAME
 sserver \- sample Kerberos version 5 server
 .SH SYNOPSIS
@@ -42,16 +42,16 @@ principal which was used for the Kerberos authentication.  It makes a
 good test that Kerberos has been successfully installed on a machine.
 .PP
 The service name used by \fIsserver\fP and \fIsclient\fP is
-\fBsample\fP.  Hence, \fIsserver\fP will require that there be a srvtab entry for the service
-"sample/hostname.mit.edu@REALM.NAME".  This srvtab is generated using
-the 
+\fBsample\fP.  Hence, \fIsserver\fP will require that there be a keytab
+entry for the service "sample/hostname.domain.name@REALM.NAME".  This
+keytab is generated using the
 .IR krb5_edit(8)
-program.  The srvtab file is installed in whatever
+program.  The keytab file is installed in whatever
 directory is defined by V5Srvtabdir (usually /etc) as "v5srvtab".
 .PP
 The 
 .B \-S
-option allows for a different srvtab than the default.
+option allows for a different keytab than the default.
 .PP
 \fIsserver\fP is normally invoked out of 
 .IR inetd(8), 
@@ -114,7 +114,7 @@ didn't restart \fIinetd\fP after editing inetd.conf.
 .PP
 This means that the "sample/hostname@LOCAL.REALM" service was not
 defined in the Kerberos database; it should be created using \fIkdb5_edit,\fP
-and a srvtab file needs to be generated to make the key for that service
+and a keytab file needs to be generated to make the key for that service
 principal available for \fIssclient\fP.
 .PP
 5)  \fIsclient\fP returns the error:
@@ -122,7 +122,7 @@ principal available for \fIssclient\fP.
 sendauth rejected, error reply is:
         " No such file or directory"
 .PP
-This probably means \fIsserver\fP couldn't find the srvtab file.  It was
+This probably means \fIsserver\fP couldn't find the keytab file.  It was
 probably not installed in the proper directory.
 .br
 .SH SEE ALSO

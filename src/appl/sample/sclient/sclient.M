@@ -19,7 +19,8 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH SCLIENT 1 "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH SCLIENT 1 \*h
 .SH NAME
 sclient \- sample Kerberos version 5 client
 .SH SYNOPSIS
