@@ -150,6 +150,7 @@ static int server_establish_context(s, server_creds, context, client_name,
        free (recv_tok.value);
        recv_tok.value = NULL;
      }
+
      if (! (token_flags & TOKEN_NOOP)) {
        if (log)
 	 fprintf(log, "Expected NOOP token, got %d token instead\n",
@@ -182,7 +183,10 @@ static int server_establish_context(s, server_creds, context, client_name,
 				  NULL, 	/* ignore time_rec */
 				  NULL); 	/* ignore del_cred_handle */
 
-	 free(recv_tok.value);
+	 if(recv_tok.value) {
+	     free(recv_tok.value);
+	     recv_tok.value = NULL;
+	 }
 
 	 if (send_tok.length != 0) {
 	   if (verbose && log) {
@@ -418,7 +422,10 @@ static int sign_server(s, server_creds, export)
        if (token_flags & TOKEN_NOOP) {
 	 if (log)
 	   fprintf(log, "NOOP token\n");
-	 (void) gss_release_buffer(&min_stat, &xmit_buf);
+	 if(xmit_buf.value) {
+	     free(xmit_buf.value);
+	     xmit_buf.value = 0;
+	 }
 	 break;
        }
 
@@ -432,7 +439,10 @@ static int sign_server(s, server_creds, export)
 	 if (log)
 	   fprintf(log,
 		   "Unauthenticated client requested authenticated services!\n");
-	 free (xmit_buf.value);
+	 if(xmit_buf.value) {
+	     free (xmit_buf.value);
+	     xmit_buf.value = 0;
+	 }
 	 return(-1);
        }
 
@@ -441,13 +451,19 @@ static int sign_server(s, server_creds, export)
 			       &conf_state, (gss_qop_t *) NULL);
 	 if (maj_stat != GSS_S_COMPLETE) {
 	   display_status("unsealing message", maj_stat, min_stat);
-	   free (xmit_buf.value);
+	   if(xmit_buf.value) {
+	       free (xmit_buf.value);
+	       xmit_buf.value = 0;
+	   }
 	   return(-1);
 	 } else if (! conf_state && (token_flags & TOKEN_ENCRYPTED)) {
 	   fprintf(stderr, "Warning!  Message not encrypted.\n");
 	 }
 
-	 free (xmit_buf.value);
+	 if(xmit_buf.value) {
+	     free (xmit_buf.value);
+	     xmit_buf.value = 0;
+	 }
        }
        else {
 	 msg_buf = xmit_buf;
@@ -474,18 +490,26 @@ static int sign_server(s, server_creds, export)
 	   display_status("signing message", maj_stat, min_stat);
 	   return(-1);
 	 }
-if (token_flags & TOKEN_WRAPPED)
-  free (xmit_buf.value);
+
+	 if(msg_buf.value) {
+	     free (msg_buf.value);
+	     msg_buf.value = 0;
+	 }
 
 	 /* Send the signature block to the client */
 	 if (send_token(s, TOKEN_MIC, &xmit_buf) < 0)
 	   return(-1);
 
-	 (void) gss_release_buffer(&min_stat, &xmit_buf);
+	 if(xmit_buf.value) {
+	     free (xmit_buf.value);
+	     xmit_buf.value = 0;
+	 }
        }
        else {
-	 if (token_flags & TOKEN_WRAPPED)
-	   free (xmit_buf.value);
+	 if(msg_buf.value) {
+	     free (msg_buf.value);
+	     msg_buf.value = 0;
+	 }
 	 if (send_token(s, TOKEN_NOOP, empty_token) < 0)
 	   return(-1);
        }

@@ -1,3 +1,8 @@
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* gss-server.c (server_establish_context, sign_server): Ensure
+	that memory blocks are only freed once.
+
 2001-11-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* gss-misc.c (recv_token): Do not attempt to malloc 0 bytes.
