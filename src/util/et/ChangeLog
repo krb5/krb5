@@ -23,7 +23,7 @@
 	remove_error_table return values to void.
 
 	* Makefile.in (clean-unix): Clean up lclint files too.
-	(cleant-lclint): New target.
+	(clean-lclint): New target.
 	(et1.c, et2.c, et1.h, et2.h, test1.c, test1.h, test2.h, test2.c):
 	Show dependencies on awk scripts.
 	(LCLINTOPTS): Remove +boolint, add +mod-uncon, +modinternalstrict,
