@@ -1123,7 +1123,8 @@ main(argc, argv)
     k5_end(&k5);
     k4_end(&k4);
 
-    if ((got_k5 && !authed_k5) || (got_k4 && !authed_k4))
+    if ((got_k5 && !authed_k5) || (got_k4 && !authed_k4) ||
+	(!got_k5 && !got_k4))
 	exit(1);
     return 0;
 }
