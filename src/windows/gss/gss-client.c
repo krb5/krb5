@@ -90,7 +90,7 @@ static int connect_to_server(host, port)
  *
  * 	s		(r) an established TCP connection to the service
  * 	service_name	(r) the ASCII service name of the service
- *	deleg_flag	(r) GSS-API delegation flag (if any)
+ *	gss_flags	(r) GSS-API delegation flag (if any)
  *	auth_flag	(r) whether to actually do authentication
  *	oid		(r) OID of the mechanism to use
  * 	context		(w) the established GSS-API context
@@ -112,7 +112,7 @@ static int connect_to_server(host, port)
  */
 int client_establish_context( int s, 
                               char *service_name,
-                              OM_uint32 deleg_flag, 
+                              OM_uint32 gss_flags, 
                               int auth_flag,
                               int v1_format, 
                               gss_OID oid, 
@@ -171,8 +171,7 @@ int client_establish_context( int s,
                                       gss_context,
                                       target_name,
                                       oid,
-                                      GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
-                                      deleg_flag,
+                                      gss_flags,
                                       0,
                                       NULL,	/* no channel bindings */
                                       token_ptr,
@@ -281,7 +280,7 @@ static void read_file(file_name, in_buf)
  * 	host		(r) the host providing the service
  * 	port		(r) the port to connect to on host
  * 	service_name	(r) the GSS-API service name to authenticate to
- *	deleg_flag	(r) GSS-API delegation flag (if any)
+ *	gss_flags	(r) GSS-API delegation flag (if any)
  *	auth_flag	(r) whether to do authentication
  *	wrap_flag	(r) whether to do message wrapping at all
  *	encrypt_flag	(r) whether to do encryption while wrapping
@@ -301,7 +300,7 @@ static void read_file(file_name, in_buf)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
 int call_server(char *host, u_short port, gss_OID oid, char *service_name, 
-                OM_uint32 deleg_flag, int auth_flag,
+                OM_uint32 gss_flags, int auth_flag,
 		        int wrap_flag, int encrypt_flag, int mic_flag, int v1_format, 
                 char *msg, int use_file, int mcount)
 {
@@ -328,7 +327,7 @@ int call_server(char *host, u_short port, gss_OID oid, char *service_name,
 	  return -1;
 
      /* Establish context */
-     if (client_establish_context(s, service_name, deleg_flag, auth_flag,
+     if (client_establish_context(s, service_name, gss_flags, auth_flag,
 				  v1_format, oid, &context,
 				  &ret_flags) < 0) {
 	  (void) closesocket(s);
@@ -546,11 +545,12 @@ static void parse_oid(char *mechanism, gss_OID *oid)
 
 int
 gss (char *server_host, char *service_name, char *mechanism, char *msg, int port,
-     int verbose, int delegate, int v1_format, int auth_flag, int wrap_flag,
+     int verbose, int delegate, int mutual, int replay, int sequence, 
+     int v1_format, int auth_flag, int wrap_flag,
      int encrypt_flag, int mic_flag, int ccount, int mcount, char *ccache)
 {
     int use_file = 0;
-    OM_uint32 deleg_flag = (delegate ? GSS_C_DELEG_FLAG : 0), min_stat;
+    OM_uint32 gss_flags = 0, min_stat;
     gss_OID oid = GSS_C_NULL_OID;
     OM_uint32     minor_status;
     int i;
@@ -562,6 +562,15 @@ gss (char *server_host, char *service_name, char *mechanism, char *msg, int port
     if (mechanism && mechanism[0])
         parse_oid(mechanism, &oid);
 
+    if ( delegate )
+        gss_flags |= GSS_C_DELEG_FLAG;
+    if ( mutual )
+        gss_flags |= GSS_C_MUTUAL_FLAG;
+    if ( replay )
+        gss_flags |= GSS_C_REPLAY_FLAG;
+    if ( sequence )
+        gss_flags |= GSS_C_SEQUENCE_FLAG;
+
     /* By using this function the independence between the application and
      * the underlying authentication system is broken
      */
@@ -570,7 +579,7 @@ gss (char *server_host, char *service_name, char *mechanism, char *msg, int port
 
     for (i = 0; i < ccount; i++) {
         if (call_server(server_host, port, oid, service_name,
-                         deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
+                         gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
                          v1_format, msg, use_file, mcount) < 0)
             rc = -1;
         break;

@@ -26,7 +26,8 @@ void my_perror (char *msg);
 // gss-client.c
 int
 gss (char *server_host, char *service_name, char *mechanism, char *msg, int port,
-     int verbose, int delegate, int v1_format, int auth_flag, int wrap_flag,
+     int verbose, int delegate, int mutual, int replay, int sequence, 
+     int v1_format, int auth_flag, int wrap_flag,
      int encrypt_flag, int mic_flag, int ccount, int mcount, char * ccache);
 int call_server(char *host, u_short port, gss_OID oid, char *service_name, 
                 OM_uint32 deleg_flag, int auth_flag,
