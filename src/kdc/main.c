@@ -153,7 +153,7 @@ char **argv;
     char *mkey_name = 0;
     char *rcname = 0;
     char *lrealm;
-    krb5_error_code retval;
+    krb5_error_code retval, retval2;
     krb5_enctype etype;
     extern krb5_deltat krb5_clockskew;
 
@@ -209,8 +209,11 @@ char **argv;
 	exit(1);
     }
     if ((retval = krb5_rc_recover(kdc_rcache)) &&
-	(retval = krb5_rc_initialize(kdc_rcache, krb5_clockskew))) {
-	com_err(argv[0], retval, "while initializing replay cache '%s:%s'",
+	(retval2 = krb5_rc_initialize(kdc_rcache, krb5_clockskew))) {
+	com_err(argv[0], retval, "while recovering replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+	com_err(argv[0], retval2, "while initializing replay cache '%s:%s'",
 		kdc_rcache->ops->type,
 		krb5_rc_get_name(kdc_rcache));
 	exit(1);
@@ -238,7 +241,7 @@ error(You gotta figure out what cryptosystem to use in the KDC);
 
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
 				    FALSE, /* only read it once, if at all */
-				    &master_keyblock)) {
+				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
 	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
@@ -262,11 +265,21 @@ void
 finish_args(prog)
 char *prog;
 {
+    char	*rtype, *rname;
     krb5_error_code retval;
-    if (retval = krb5_rc_close(kdc_rcache)) {
-	com_err(prog, retval, "while closing replay cache '%s:%s'",
-		kdc_rcache->ops->type,
-		krb5_rc_get_name(kdc_rcache));
+    
+    if (kdc_rcache) {
+	    if (kdc_rcache->ops && kdc_rcache->ops->type)
+		    rtype = strdup(kdc_rcache->ops->type);
+	    else
+		    rtype = strdup("Unknown_rcache_type");
+	    rname = strdup(krb5_rc_get_name(kdc_rcache));
+	    if (retval = krb5_rc_close(kdc_rcache)) {
+		    com_err(prog, retval, "while closing replay cache '%s:%s'",
+			    rtype, rname);
+	    }
+	    free(rtype);
+	    free(rname);
     }
     return;
 }
@@ -310,9 +323,8 @@ krb5_keyblock *masterkeyblock;
        so we can safely share its substructure */
 
     krb5_princ_set_realm(tgs_server, krb5_princ_realm(masterkeyname));
-    /* tgs_server[1] is init data */
-    *krb5_princ_component(tgs_server, 2) = *krb5_princ_realm(masterkeyname);
-    /* tgs_server[3] is init data (0) */
+    /* tgs_server[0] is init data */
+    *krb5_princ_component(tgs_server, 1) = *krb5_princ_realm(masterkeyname);
 
     nprincs = 1;
     if (retval = krb5_db_get_principal(tgs_server,
