@@ -130,7 +130,7 @@ configure line like the following:
 	configure --prefix=/usr/local --sysconfdir=/usr/local/lib
 
 * kshd has been modified to accept krb4 encrypted rcp connections; for
-this to work, the v4rcp program must be in the sbin directory.
+this to work, the v4rcp program must be in the bin directory.
 
 * The gssrpc library has symbol collisions with the rpc library in
 some of the libcs in certain operating systems without shared
