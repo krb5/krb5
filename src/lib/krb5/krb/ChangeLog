@@ -1,5 +1,8 @@
 2003-05-20  Sam Hartman  <hartmans@mit.edu>
 
+	* get_in_tkt.c: get_in_tkt only supports old (non-etype-info2)
+	enctypes. 
+
 	* Makefile.in (SRCS): Remove in_ktb.c
 
 	* gic_keytab.c (krb5_get_in_tkt_with_keytab): Move from
