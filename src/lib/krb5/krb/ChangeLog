@@ -1,5 +1,8 @@
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Try with no specified enctype if
+	forwarding a specific enctype fails. l
+
 	* get_in_tkt.c (krb5_get_init_creds): Free s2kparams
 
 	* preauth2.c (krb5_do_preauth): Fix memory management
