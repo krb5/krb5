@@ -1,3 +1,7 @@
+Fri Sep 29 16:37:38 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb5_anadd.c (main): Don't use krb5_lname_file; instead, use
+		DEFAULT_LNAME_FILENAME directly.
 
 Fri Jul 7 15:34:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.

@@ -77,8 +77,7 @@ char *argv[];
     extern int optind;
     int del = 0, add = 0;
     char *lname, *pname;
-    extern char *krb5_lname_file;
-    char *andbname = krb5_lname_file;
+    char *andbname = DEFAULT_LNAME_FILENAME;
 
     while ((optchar = getopt(argc, argv, "dan:")) != EOF) {
 	switch(optchar) {
