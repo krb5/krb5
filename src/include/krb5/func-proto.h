@@ -49,9 +49,10 @@ krb5_error_code krb5_send_tgs
 	PROTOTYPE((krb5_flags,
 		   krb5_ticket_times *,
 		   krb5_enctype,
+		   krb5_cksumtype,
 		   krb5_principal,
 		   krb5_address **,
-		   krb5_data *,
+		   krb5_authdata **,
 		   krb5_data *,
 		   krb5_creds *,
 		   krb5_response * ));
