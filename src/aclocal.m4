@@ -789,7 +789,7 @@ db_deplib=''
 db_lib=''
 define(USE_DB_LIBRARY,[
 db_deplib="\[$](TOPLIBD)/libdb.a"
-db_lib=-ldb
+db_lib="\[$](TOPLIBD)/libdb.a"
 ])
 dnl
 dnl This rule generates library lists for programs.
