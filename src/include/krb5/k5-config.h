@@ -38,13 +38,22 @@
 #define SIZEOF_INT      2
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
+#define MAXHOSTNAMELEN  512
 
 #define KRB5_USE_INET
 #define MSDOS_FILESYSTEM
 #define USE_STRING_H 
 #define HAVE_SRAND
 #define HAVE_ERRNO
+#define HAS_STRDUP
 #define NO_USERID
+#define NOFCHMOD
+
+#define HAS_ANSI_CONST                          /* For compiling w/o -Za */
+#define HAS_ANSI_VOLATILE
+#define HAS_VOID_TYPE
+#define KRB5_PROVIDE_PROTOTYPES
+#define STDARG_PROTOTYPES
 
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;
@@ -61,12 +70,13 @@ typedef unsigned char u_char;
 #define INTERFACE   __far __export __pascal
 #define INTERFACE_C __far __export __cdecl
 #endif
-#define FAR _far
 
 /*
  * The following defines are needed to make <windows.h> work
  * in stdc mode (/Za flag). Winsock.h needs <windows.h>.
  */
+#define FAR     _far
+#define NEAR    _near
 #define _far    __far
 #define _near   __near
 #define _pascal __pascal
@@ -77,6 +87,43 @@ typedef unsigned char u_char;
 #include <winsock.h>
 #endif
 
+#ifdef NEED_LOWLEVEL_IO
+/* Ugly. Microsoft, in stdc mode, doesn't support the low-level i/o
+ * routines directly. Rather, they only export the _<function> version.
+ * The following defines works around this problem. 
+ */
+#include <fcntl.h>
+#include <io.h>
+#include <process.h>
+#define O_RDONLY        _O_RDONLY
+#define O_WRONLY        _O_WRONLY
+#define O_RDWR          _O_RDWR
+#define O_APPEND        _O_APPEND
+#define O_CREAT         _O_CREAT
+#define O_TRUNC         _O_TRUNC
+#define O_EXCL          _O_EXCL
+#define O_TEXT          _O_TEXT
+#define O_BINARY        _O_BINARY
+#define O_NOINHERIT     _O_NOINHERIT
+#define S_IREAD         _S_IREAD
+#define S_IWRITE        _S_IWRITE
+#define S_IRUSR         S_IREAD        /* read permission, owner */
+#define S_IWUSR         S_IWRITE       /* write permission, owner */
+#define stat            _stat
+#define unlink          _unlink
+#define lseek           _lseek
+#define write           _write
+#define open            _open
+#define close           _close
+#define read            _read
+#define fstat           _fstat
+#define chmod           _chmod
+#define mktemp          _mktemp
+
+#define getpid          _getpid
+
+#endif
+
 /* XXX these should be parameterized soon... */
 #define PROVIDE_DES_CBC_MD5
 #define PROVIDE_DES_CBC_CRC
@@ -85,6 +132,14 @@ typedef unsigned char u_char;
 #define PROVIDE_DES_CBC_CKSUM
 #define PROVIDE_RSA_MD4
 #define PROVIDE_RSA_MD5
+#define DEFAULT_PWD_STRING1 "Enter password:"
+#define DEFAULT_PWD_STRING2 "Re-enter password for verification:"
+
+/* Functions with slightly different names on the PC
+*/                   
+#define strcasecmp   _stricmp
+#define strdup       _strdup
+#define off_t        _off_t
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 
@@ -145,12 +200,13 @@ typedef unsigned char u_char;
 #define INTERFACE
 #define INTERFACE_C
 #define FAR
+#define NEAR
 
 #ifndef HAS_LABS
 #define labs(x) abs(x)
 #endif
 
-#endif /* __windows__ */
+#endif /* _MSDOS */
 
 #endif /* KRB5_CONFIG__ */
 

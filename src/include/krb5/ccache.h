@@ -39,30 +39,30 @@ typedef struct _krb5_ccache {
 typedef struct _krb5_cc_ops {
     krb5_magic magic;
     char *prefix;
-    char *(*get_name) NPROTOTYPE((krb5_context, krb5_ccache));
-    krb5_error_code (*resolve) NPROTOTYPE((krb5_context, krb5_ccache *, 
+    char *(INTERFACE *get_name) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (INTERFACE *resolve) NPROTOTYPE((krb5_context, krb5_ccache *, 
 					    char *));
-    krb5_error_code (*gen_new) NPROTOTYPE((krb5_context, krb5_ccache *));
-    krb5_error_code (*init) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *gen_new) NPROTOTYPE((krb5_context, krb5_ccache *));
+    krb5_error_code (INTERFACE *init) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_principal));
-    krb5_error_code (*destroy) NPROTOTYPE((krb5_context, krb5_ccache));
-    krb5_error_code (*close) NPROTOTYPE((krb5_context, krb5_ccache));
-    krb5_error_code (*store) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *destroy) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (INTERFACE *close) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (INTERFACE *store) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_creds *));
-    krb5_error_code (*retrieve) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *retrieve) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_flags, krb5_creds *,
 					    krb5_creds *));
-    krb5_error_code (*get_princ) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *get_princ) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_principal *));
-    krb5_error_code (*get_first) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *get_first) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_cc_cursor *));
-    krb5_error_code (*get_next) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *get_next) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_cc_cursor *, krb5_creds *));
-    krb5_error_code (*end_get) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *end_get) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_cc_cursor *));
-    krb5_error_code (*remove_cred) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *remove_cred) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_flags, krb5_creds *));
-    krb5_error_code (*set_flags) NPROTOTYPE((krb5_context, krb5_ccache,
+    krb5_error_code (INTERFACE *set_flags) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_flags));
 } krb5_cc_ops;
 

@@ -19,7 +19,7 @@ all:: all-$(WHAT)
 all-unix:: $(BUILT_HEADERS)
 
 all-windows:
-	echo /* not used in windows */ > osconf.h
+        copy stock\osconf.win osconf.h
 	echo /* not used in windows */ > autoconf.h
  
 includes:: autoconf.h

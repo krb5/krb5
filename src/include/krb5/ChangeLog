@@ -1,3 +1,14 @@
+Tue Mar 7 14:54:02 1995 Keith Vetter (keithv@fusion.com)
+
+	* ccache.h: added windows INTERFACE keyword to all functions.
+        * encryption.h: more segment games for the PC--added NEAR to three
+           external data objects.
+        * wordsize.h: added constants VALID_INT_BTIS and VALID_UINT_BITS for
+           detecting overflow when casting a long to an int.
+        * k5-config.h: numerous PC changes such as adding NEED_LOWLEVEL_IO
+           which enables the read/write level of I/O.
+        * Makefile.in: osconf.h now pulled in from stock/osconf.win.
+
 Thu Mar  2 23:21:46 1995  John Gilmore  (gnu at toad.com)
 
 	Make include files start to work on the Macintosh.

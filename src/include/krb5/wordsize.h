@@ -34,6 +34,8 @@ typedef	unsigned char	krb5_ui_1;
 #if (SIZEOF_INT == 2)
 typedef	int	krb5_int16;
 typedef	unsigned int	krb5_ui_2;
+#define VALID_INT_BITS    0x7fff
+#define VALID_UINT_BITS   0xffff
 #elif (SIZEOF_SHORT == 2)
 typedef	short	krb5_int16;
 typedef	unsigned short	krb5_ui_2;
@@ -44,6 +46,8 @@ typedef	unsigned short	krb5_ui_2;
 #if (SIZEOF_INT == 4)
 typedef	int	krb5_int32;
 typedef	unsigned int	krb5_ui_4;
+#define VALID_INT_BITS    0x7fffffff
+#define VALID_UINT_BITS   0xffffffff
 #elif (SIZEOF_LONG == 4)
 typedef	long	krb5_int32;
 typedef	unsigned long	krb5_ui_4;

@@ -1,3 +1,8 @@
+Tue Mar 7 15:09:44 1995 Keith Vetter (keithv@fusion.com)
+
+	* osconf.win: new file. Windows version of osconf with valid
+           path names.
+
 Mon Feb 20 12:30:42 1995  John Gilmore  (gnu at toad.com)
 
 	* config.h, config.win:  Remove; merge them both into ../config.h.

@@ -156,17 +156,17 @@ typedef struct _krb5_checksum_entry {
      krb5_roundup((length)+(crypto)->pad_minimum, (crypto)->block_length)
 
 /* This array is indexed by encryption type */
-extern krb5_cs_table_entry *krb5_csarray[];
+extern krb5_cs_table_entry * NEAR krb5_csarray[];
 extern int krb5_max_cryptosystem;		/* max entry in array */
 
 /* This array is indexed by key type, and has (should have) pointers to
    the same entries as krb5_csarray */
 /* XXX what if a given keytype works for several etypes? */
-extern krb5_cs_table_entry *krb5_keytype_array[];
+extern krb5_cs_table_entry * NEAR krb5_keytype_array[];
 extern int krb5_max_keytype;		/* max entry in array */
 
 /* This array is indexed by checksum type */
-extern krb5_checksum_entry *krb5_cksumarray[];
+extern krb5_checksum_entry * NEAR krb5_cksumarray[];
 extern int krb5_max_cksum;		/* max entry in array */
 
 #define valid_etype(etype)     ((((int) etype) <= krb5_max_cryptosystem) && (etype > 0) && krb5_csarray[etype])
