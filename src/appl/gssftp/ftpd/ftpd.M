@@ -94,7 +94,7 @@ file to use.  The default value is normally
 Sets the name of the
 .I srvtab
 file to use.  The default value is normally
-.IR /etc/krb-srvtab .
+.IR /etc/krb5.keytab .
 .PP
 The ftp server currently supports the following ftp requests; case is
 not distinguished.
