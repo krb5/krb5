@@ -18,8 +18,8 @@ libkadm.a: ${OBJS}
 	$(RANLIB) $(BUILDTOP)/lib/libkadm.a
 
 install:: libkadm.a
-	$(INSTALL_DATA) libkadm.a $(KRB5_LIBDIR)/libkadm.a
-	$(RANLIB) $(KRB5_LIBDIR)/libkadm.a
+	$(INSTALL_DATA) libkadm.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 
 clean::
 	$(RM) libkadm.a
