@@ -1,3 +1,8 @@
+Sat Feb 24 18:57:56 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* ktdefname.c (krb5_kt_default_name): Under Windows, assume that
+		the keytab file is located in the Windows directory.
+
 Thu Feb 22 13:16:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (check-unix): Set LD_LIBRARY_PATH for kdb5_anadd.

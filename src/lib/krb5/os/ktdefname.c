@@ -24,6 +24,8 @@
  * Return default keytab file name.
  */
 
+#define NEED_WINDOWS
+
 #include "k5-int.h"
 
 extern char *krb5_defkeyname;
@@ -42,9 +44,22 @@ krb5_kt_default_name(context, name, namesize)
 	if (strlen(cp) >= (size_t) namesize)
 	    return KRB5_CONFIG_NOTENUFSPACE;
     } else {
+#if defined (_WINDOWS) || defined(WIN32)
+	{
+	    char    defname[160];
+	    int     len;
+
+	    len= GetWindowsDirectory( defname, sizeof(defname)-2 );
+	    defname[len]= '\0';
+	    if ( (len + strlen(krb5_defkeyname) + 1) > namesize )
+		return KRB5_CONFIG_NOTENUFSPACE;
+	    sprintf(name, krb5_defkeyname, defname);
+	}
+#else
 	strncpy(name, krb5_defkeyname, namesize);
 	if ((size_t) namesize < strlen(krb5_defkeyname))
 	    return KRB5_CONFIG_NOTENUFSPACE;
+#endif
     }
     return 0;
 }
