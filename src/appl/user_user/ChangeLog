@@ -1,3 +1,8 @@
+Tue Oct  4 17:12:52 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* client.c (tgt_keyproc): Add widen.h and narrow.h around
+		declaration so that argument types are widened.
+
 Thu Sep 29 22:48:20 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executable when libraries change

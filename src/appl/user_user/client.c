@@ -37,6 +37,7 @@
 #include <krb5/los-proto.h>
 #include <com_err.h>
 
+#include <krb5/widen.h>
 krb5_error_code
 tgt_keyproc(DECLARG(krb5_pointer, keyprocarg),
 	    DECLARG(krb5_principal, principal),
@@ -46,6 +47,7 @@ OLDDECLARG(krb5_pointer, keyprocarg)
 OLDDECLARG(krb5_principal, principal)
 OLDDECLARG(krb5_kvno, vno)
 OLDDECLARG(krb5_keyblock **, key)
+#include <krb5/narrow.h>
 {
     krb5_creds *creds = (krb5_creds *)keyprocarg;
     
