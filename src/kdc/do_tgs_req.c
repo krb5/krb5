@@ -528,6 +528,14 @@ tgt_again:
     xfree(session_key->contents);
     tkt_cleanup();
     session_key->contents = 0;
+    memset(ticket_reply.enc_part.ciphertext.data, 0,
+	   ticket_reply.enc_part.ciphertext.length);
+    free(ticket_reply.enc_part.ciphertext.data);
+    /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
+       can use them in raw form if needed.  But, we don't... */
+    memset(reply.enc_part.ciphertext.data, 0,
+	   reply.enc_part.ciphertext.length);
+    free(reply.enc_part.ciphertext.data);
     return retval;
 }
 
