@@ -27,6 +27,11 @@
  */
 #include "gssapiP_krb5.h"
 
+#if 0
+/*
+ * Don't compile this, since nothing is actually using it.  The 
+ * mechanism glue layer will just use the internal release function.
+ */
 OM_uint32
 krb5_gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
@@ -52,6 +57,7 @@ krb5_gss_release_oid(minor_status, oid)
 	return(GSS_S_COMPLETE);
     }
 }
+#endif
 
 
 OM_uint32
