@@ -958,7 +958,7 @@ telnet(f, p, host)
 	char	defent[TABBUFSIZ];
 	char	defstrs[TABBUFSIZ];
 #undef	TABBUFSIZ
-	char *HE;
+	char *HEstr;
 	char *HN;
 	char *IM;
 	void netflush();
@@ -1156,7 +1156,7 @@ telnet(f, p, host)
 		char *getstr();
 		char *cp=defstrs;
 
-		HE = getstr("he", &cp);
+		HEstr = getstr("he", &cp);
 		HN = getstr("hn", &cp);
 		IM = getstr("im", &cp);
 		if (HN && *HN)
@@ -1165,9 +1165,9 @@ telnet(f, p, host)
 			IM = "";
 	} else {
 		IM = DEFAULT_IM;
-		HE = 0;
+		HEstr = 0;
 	}
-	edithost(HE, host_name);
+	edithost(HEstr, host_name);
 	if (hostinfo && *IM)
 		putf(IM, ptyibuf2);
 
