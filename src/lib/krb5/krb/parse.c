@@ -80,8 +80,10 @@ krb5_parse_name(name, nprincipal)
 	int		components = 0;
 	const char	*parsed_realm = NULL;
 	int		fcompsize[FCOMPNUM];
+	int		realmsize = 0;
 	static char	*default_realm = NULL;
-	krb5_data	**principal;
+	char		*tmpdata;
+	krb5_principal	principal;
 	krb5_error_code retval;
 	
 	/*
@@ -89,7 +91,7 @@ krb5_parse_name(name, nprincipal)
 	 * and get string sizes for the first FCOMPNUM components.
 	 */
 	size = 0;
-	for (i=1,cp = name; c = *cp; cp++) {
+	for (i=0,cp = name; c = *cp; cp++) {
 		if (c == QUOTECHAR) {
 			cp++;
 			if (!(c = *cp))
@@ -127,29 +129,24 @@ krb5_parse_name(name, nprincipal)
 			size++;
 	}
 	if (parsed_realm)
-		fcompsize[0] = size;
+		realmsize = size;
 	else if (i < FCOMPNUM) 
 		fcompsize[i] = size;
-	components = i;
+	components = i + 1;
 	/*
 	 * Now, we allocate the principal structure and all of its
 	 * component pieces
 	 */
-	principal = (krb5_principal)
-		malloc(sizeof(krb5_data *) * (components+2));
+	principal = (krb5_principal)malloc(sizeof(krb5_principal_data));
 	if (!principal) {
 		return(ENOMEM);
 	}
-	for (i = 0; i <= components; i++) {
-		if (!(principal[i] =
-		      (krb5_data *) malloc(sizeof(krb5_data)))) {
-			for (i--; i >= 0; i--) 
-				xfree(principal[i]);
-			xfree(principal);
-			return (ENOMEM);
-		}
+	principal->data = (krb5_data *) malloc(sizeof(krb5_data) * components);
+	if (!principal->data) {
+	    free((char *)principal);
+	    return ENOMEM;
 	}
-	principal[components+1] = NULL;
+	principal->length = components;
 	/*
 	 * If a realm was not found, then we need to find the defualt
 	 * realm....
@@ -158,7 +155,7 @@ krb5_parse_name(name, nprincipal)
 		if (!default_realm &&
 		    (retval = krb5_get_default_realm(&default_realm)))
 			return(retval);
-		principal[0]->length = fcompsize[0] = strlen(default_realm);
+		krb5_princ_realm(principal)->length = realmsize = strlen(default_realm);
 	}
 	/*
 	 * Pass 2.  Happens only if there were more than FCOMPNUM
@@ -169,26 +166,26 @@ krb5_parse_name(name, nprincipal)
 	if (components >= FCOMPNUM) {
 		size = 0;
 		parsed_realm = NULL;
-		for (i=1,cp = name; c = *cp; cp++) {
+		for (i=0,cp = name; c = *cp; cp++) {
 			if (c == QUOTECHAR) {
 				cp++;
 				size++;
 			} else if (c == COMPONENT_SEP) {
-				principal[i]->length = size;
+				krb5_princ_component(principal, i)->length = size;
 				size = 0;
 				i++;
 			} else if (c == REALM_SEP) {
-				principal[i]->length = size;
+				krb5_princ_component(principal, i)->length = size;
 				size = 0;
 				parsed_realm = cp+1;
 			} else
 				size++;
 		}
 		if (parsed_realm)
-			principal[0]->length = size;
+			krb5_princ_realm(principal)->length = size;
 		else
-			principal[i]->length = size;
-		if (i != components) {
+			krb5_princ_component(principal, i)->length = size;
+		if (i + 1 != components) {
 			fprintf(stderr,
 				"Programming error in krb5_parse_name!");
 			exit(1);
@@ -200,20 +197,30 @@ krb5_parse_name(name, nprincipal)
 		 * principal structure
 		 */
 		for (i=0; i <= components; i++)
-			principal[i]->length = fcompsize[i];
+			krb5_princ_component(principal, i)->length = fcompsize[i];
 	}
 	/*	
 	 * Now, we need to allocate the space for the strings themselves.....
 	 */
+	tmpdata = malloc(realmsize);
+	if (tmpdata == 0) {
+		xfree(principal->data);
+		xfree(principal);
+		return ENOMEM;
+	}
+	krb5_princ_set_realm_data(principal, tmpdata);
 	for (i=0; i <= components; i++) {
-		if (!(principal[i]->data = malloc(principal[i]->length + 1))) {
+		char *tmpdata =
+		  malloc(krb5_princ_component(principal, i)->length + 1);
+		if (!tmpdata) {
 			for (i--; i >= 0; i--)
-				xfree(principal[i]->data);
-			for (i=0; i <= components; i++)
-				xfree(principal[i]);
+				xfree(krb5_princ_component(principal, i)->data);
+			xfree(krb5_princ_realm(principal)->data);
+			xfree(principal->data);
 			xfree(principal);
 			return(ENOMEM);
 		}
+		krb5_princ_component(principal, i)->data = tmpdata;
 	}
 	
 	/*
@@ -221,8 +228,8 @@ krb5_parse_name(name, nprincipal)
 	 * time filling in the krb5_principal structure which we just
 	 * allocated.
 	 */
-	q = principal[1]->data;
-	for (i=1,cp = name; c = *cp; cp++) {
+	q = krb5_princ_component(principal, 0)->data;
+	for (i=0,cp = name; c = *cp; cp++) {
 		if (c == QUOTECHAR) {
 			cp++;
 			switch (c = *cp) {
@@ -245,15 +252,15 @@ krb5_parse_name(name, nprincipal)
 			i++;
 			*q++ = '\0';
 			if (c == COMPONENT_SEP) 
-				q = principal[i]->data;
+				q = krb5_princ_component(principal, i)->data;
 			else
-				q = principal[0]->data;
+				q = krb5_princ_realm(principal)->data;
 		} else
 			*q++ = c;
 	}
 	*q++ = '\0';
 	if (!parsed_realm)
-		strcpy(principal[0]->data, default_realm);
+		strcpy(krb5_princ_realm(principal)->data, default_realm);
 	/*
 	 * Alright, we're done.  Now stuff a pointer to this monstrosity
 	 * into the return variable, and let's get out of here.
