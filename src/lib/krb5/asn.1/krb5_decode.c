@@ -35,7 +35,7 @@
 #define setup_buf_only(cr)\
 asn1_error_code retval;\
 asn1buf buf;\
-int (*error_cleanup)() = cr;\
+void (*error_cleanup)() = cr;\
 \
 retval = asn1buf_wrap_data(&buf,code);\
 if(retval) return retval
@@ -141,7 +141,8 @@ return 0
 
 #define free_field(rep,f) if (rep->f) free(rep->f)
 #define clear_field(rep,f) (*rep)->f = 0
-static clean_krb5_authenticator(rep) 
+
+static void clean_krb5_authenticator(rep) 
      krb5_authenticator *rep;
 {
   free_field(rep,subkey);
@@ -182,7 +183,7 @@ krb5_error_code decode_krb5_authenticator(code, rep)
   cleanup();
 }
 
-static clean_krb5_ticket(rep) 
+static void clean_krb5_ticket(rep) 
      krb5_ticket *rep;
 {
   free_field(rep,server);
@@ -228,7 +229,7 @@ krb5_error_code decode_krb5_encryption_key(code, rep)
   cleanup();
 }
 
-static clean_krb5_enc_tkt_part(rep)
+static void clean_krb5_enc_tkt_part(rep)
      krb5_enc_tkt_part * rep;
 {
   free_field(rep,session);
@@ -320,7 +321,7 @@ krb5_error_code decode_krb5_tgs_rep(code, rep)
   cleanup();
 }
 
-static clean_krb5_ap_req(rep)
+static void clean_krb5_ap_req(rep)
      krb5_ap_req * rep;
 {
   free_field(rep,ticket);
@@ -378,7 +379,7 @@ krb5_error_code decode_krb5_ap_rep(code, rep)
   cleanup();
 }
 
-static clean_krb5_ap_rep_enc_part(rep)
+static void clean_krb5_ap_rep_enc_part(rep)
      krb5_ap_rep_enc_part * rep;
 {
   free_field(rep,subkey);
@@ -452,7 +453,7 @@ krb5_error_code decode_krb5_kdc_req_body(code, rep)
   cleanup();
 }
 
-static clean_krb5_safe(rep)
+static void clean_krb5_safe(rep)
      krb5_safe * rep;
 {
   free_field(rep,checksum);
@@ -510,7 +511,7 @@ krb5_error_code decode_krb5_priv(code, rep)
   cleanup();
 }
 
-static clean_krb5_priv_enc_part(rep)
+static void clean_krb5_priv_enc_part(rep)
      krb5_priv_enc_part * rep;
 {
   free_field(rep,r_address);
@@ -567,7 +568,7 @@ krb5_error_code decode_krb5_cred(code, rep)
   cleanup();
 }
 
-static clean_krb5_cred_enc_part(rep)
+static void clean_krb5_cred_enc_part(rep)
      krb5_cred_enc_part * rep;
 {
   free_field(rep,r_address);
@@ -600,7 +601,7 @@ krb5_error_code decode_krb5_enc_cred_part(code, rep)
 }
 
 
-static clean_krb5_error(rep)
+static void clean_krb5_error(rep)
      krb5_error * rep;
 {
   free_field(rep,server);
