@@ -833,12 +833,12 @@ void doit(f, fromp)
         fatalperror(f, "failed make_sane_hostname");
     if (passwd_req)
         execl(login_program, "login", "-p", "-h", rhost_sane,
-          lusername, 0);
+          lusername, (char *)NULL);
     else
         execl(login_program, "login", "-p", "-h", rhost_sane,
-             "-f", lusername, 0);
+             "-f", lusername, (char *)NULL);
 #else /* USE_LOGIN_F */
-	execl(login_program, "login", "-r", rhost_sane, 0);
+	execl(login_program, "login", "-r", rhost_sane, (char *)NULL);
 #endif /* USE_LOGIN_F */
 	syslog(LOG_ERR, "failed exec of %s: %s",
 	       login_program, error_message(errno));
