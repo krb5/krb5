@@ -6,7 +6,7 @@
 
 #include "ss_internal.h"
 #include "copyright.h"
-
+#include <errno.h>
 
 enum parse_mode { WHITESPACE, TOKEN, QUOTED_STRING };
 

@@ -1,3 +1,7 @@
+2003-01-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* parse.c: Include errno.h for declaration of errno.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_INSTALL, and
