@@ -1,3 +1,7 @@
+Mon May 20 18:02:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb_dbm.c (krb5_dbm_db_create): Remove vestigal ODBM support.
+
 Sat May 18 15:07:09 1996  Ezra Peisach  (epeisach@paris)
 
 	* kdb_dbm.c: Do not provide prototypes for dbm_error or

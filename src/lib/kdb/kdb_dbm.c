@@ -675,48 +675,16 @@ krb5_dbm_db_create(context, db_name)
     char *okname;
     int fd;
     register krb5_error_code retval = 0;
-#ifndef ODBM
     DBM *db;
-#else
-    char *dirname;
-    char *pagname;
-#endif
 
     if ((retval = k5dbm_init_context(context)))
 	return(retval);
     
-#ifndef ODBM
     db = KDBM_OPEN(context->db_context, db_name, O_RDWR|O_CREAT|O_EXCL, 0600);
     if (db == NULL)
 	retval = errno;
     else
 	KDBM_CLOSE(context->db_context, db);
-#else /* OLD DBM */
-    dirname = gen_dbsuffix(db_name, ".dir");
-    if (!dirname)
-	return ENOMEM;
-    pagname = gen_dbsuffix(db_name, ".pag");
-    if (!pagname) {
-	free_dbsuffix(dirname);
-	return ENOMEM;
-    }    
-
-    fd = open(dirname, O_RDWR|O_CREAT|O_EXCL, 0600);
-    if (fd < 0)
-	retval = errno;
-    else {
-	close(fd);
-	fd = open (pagname, O_RDWR|O_CREAT|O_EXCL, 0600);
-	if (fd < 0)
-	    retval = errno;
-	else
-	    close(fd);
-	if (dbminit(db_name) < 0)
-	    retval = errno;
-    }
-    free_dbsuffix(dirname);
-    free_dbsuffix(pagname);
-#endif /* ODBM */
     if (retval == 0) {
 	okname = gen_dbsuffix(db_name, KDBM_LOCK_EXT(context->db_context));
 	if (!okname)
