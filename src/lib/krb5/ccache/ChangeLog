@@ -1,3 +1,13 @@
+2004-03-18  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c:
+     Add missing return statements in krb5_lcc_start_seq_get()
+
+   * cc-int.h:
+     New file - Add prototypes for cc internal functions
+
+   * cc_retr.c - include cc-int.h
+
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* ccbase.c: Include k5-thread.h.

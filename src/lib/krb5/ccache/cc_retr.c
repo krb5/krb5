@@ -27,6 +27,7 @@
  */
 
 #include "k5-int.h"
+#include "cc-int.h"
 
 #define KRB5_OK 0
 
