@@ -1,4 +1,8 @@
 
+Thu May 04 23:53:23 1995  Chris Provenzano (proven@mit.edu)
+
+	* krcp.c (answer_auth()): Don't destroy the credential cache.
+
 Wed May 03 20:10:39 1995  Chris Provenzano (proven@mit.edu)
 
 	* krcp.c (answer_auth()): Set auth_context = NULL before using it.

@@ -1330,36 +1330,29 @@ void
 	exit(1);
     }
     
-    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)){
-	krb5_cc_destroy(bsd_context, cc);
+    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client))
 	exit(1);
-    }
     
-    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server)){
-	krb5_cc_destroy(bsd_context, cc);
+    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server))
 	exit(1);
-    }
+
     krb5_xfree(pname_data.data);
-    
     if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
-				      &creds, &new_creds)){
-	krb5_cc_destroy(bsd_context, cc);
+				      &creds, &new_creds))
 	exit(1);
-    }
 
     if (status = krb5_mk_req_extended(bsd_context, &auth_context,
 			  	      AP_OPTS_USE_SESSION_KEY,
-				      NULL, new_creds, &msg)) {
-	krb5_cc_destroy(bsd_context, cc);
+				      NULL, new_creds, &msg))
 	exit(1);
-    }
-    status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg);
-    krb5_cc_destroy(bsd_context, cc);
-    krb5_xfree(msg.data);
-    if (status){
+
+    if (status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg)) {
+    	krb5_xfree(msg.data);
 	exit(1);
     }
     
+    krb5_xfree(msg.data);
+
     /* setup eblock for des_read and write */
     krb5_copy_keyblock(bsd_context, &new_creds->keyblock,&session_key);
     
