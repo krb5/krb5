@@ -163,11 +163,11 @@ DejaGnu may be found wherever GNU software is archived.
 Most of the tests are setup to run as a non-privledged user. There are
 two series of tests (@samp{rlogind} and @samp{telnetd}) which require
 the ability to @samp{rlogin} as root to the local machine. Admittedly,
-this does require the use of a @file{.rhosts} file or some other
-authenticated means. @footnote{If you are fortunate enough to have a
-previous version of Kerberos V5 or V4 installed, and the Kerberos rlogin
-is first in your path, you can setup @file{.k5login} or @file{.klogin}
-respectively to allow you access.}
+this does require the use of a @file{.rhosts} file or some authenticated
+means. @footnote{If you are fortunate enough to have a previous version
+of Kerberos V5 or V4 installed, and the Kerberos rlogin is first in your
+path, you can setup @file{.k5login} or @file{.klogin} respectively to
+allow you access.}
 
 If you cannot obtain root access to your machine, all the other tests
 will still run. Note however, with DejaGnu 1.2, the "untested testcases"
@@ -239,10 +239,11 @@ builtin Kerberos V4 library.
 
 @item  --with-krb4=KRB4DIR 
 
-This option enables Kerberos V4 backwards compatibility.  The directory
-specified by @code{KRB4DIR} specifies where the V4 header files should
-be found (@file{/KRB4DIR/include}) as well as where the V4 Kerberos
-library should be found (@file{/KRB4DIR/lib}).
+This option enables Kerberos V4 backwards compatibility using a
+pre-existing Kerberos V4 installation.  The directory specified by
+@code{KRB4DIR} specifies where the V4 header files should be found
+(@file{/KRB4DIR/include}) as well as where the V4 Kerberos library
+should be found (@file{/KRB4DIR/lib}).
 
 @item  --without-krb4
 
