@@ -1,7 +1,7 @@
 The main functions deal with the nitty-gritty details: verifying
 tickets, creating authenticators, and the like.
 
-\begin{funcdecl}[krb5_encode_kdc_rep]{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_encode_kdc_rep}{krb5_error_code}{\funcin}
 \funcarg{krb5_msgtype}{type}
 \funcarg{krb5_enc_kdc_rep_part *}{encpart}
 \funcarg{krb5_keyblock *}{client_key}
@@ -21,7 +21,7 @@ non-error return; the caller should free it when finished.
 
 Returns system errors.
 
-\begin{funcdecl}[krb5_decode_kdc_rep]{krb5_error_code}{\funcin}
+\begin{funcdecl}{krb5_decode_kdc_rep}{krb5_error_code}{\funcin}
 \funcarg{krb5_data *}{enc_rep}
 \funcarg{krb5_keyblock *}{key}
 \funcarg{krb5_enctype}{etype}
@@ -40,4 +40,175 @@ If the response isn't a KDC_REP (tgs or as), it returns an error from
 the decoding routines (usually ISODE_50_LOCAL_ERR_BADDECODE).
 
 Returns errors from encryption routines, system errors.
+
+\begin{funcdecl}{krb5_kdc_rep_decrypt_proc}{\funcin}
+\funcarg{krb5_keyblock *}{key}
+\funcarg{krb5_pointer}{decryptarg}
+\funcinout
+\funcarg{krb5_kdc_rep *}{dec_rep}
+\end{funcdecl}
+Decrypt the encrypted portion of \funcparam{dec_rep}, using the
+encryption key \funcparam{key}.
+
+The result is in allocated storage pointed to by
+\funcparam{dec_rep{\ptsto}enc_part2}, unless some error occurs.
+
+\begin{funcdecl}{krb5_encode_ticket}{krb5_error_code}{\funcin}
+\funcarg{krb5_ticket *}{dec_ticket}
+\funcout
+\funcarg{krb5_data **}{enc_ticket}
+\end{funcdecl}
+
+Takes \funcparam{dec_ticket} (with associated encrypted part
+\funcparam{dec_ticket{\ptsto}enc_part}),
+and encodes for transmission, placing result in \funcparam{*enc_ticket}.
+The string \funcparam{*enc_ticket} will be allocated before formatting.
+
+Returns errors from encryption routines, system errors.
+
+\begin{funcdecl}{krb5_decode_ticket}{krb5_error_code}{\funcin}
+\funcarg{krb5_data *}{enc_ticket}
+\funcout
+\funcarg{krb5_ticket **}{dec_ticket}
+\end{funcdecl}
+
+Decodes formatted ticket \funcparam{enc_ticket},
+filling in \funcparam{*dec_ticket} with a pointer to the results.
+\funcparam{*dec_ticket} is set to allocated storage which should be
+freed by the caller (by using \funcname{krb5_free_ticket}) when finished with
+the ticket.
+
+Returns system errors.
+
+
+\begin{funcdecl}{krb5_encrypt_tkt_part}{krb5_error_code}{ \funcin}
+\funcarg{krb5_keyblock *}{srv_key}
+\funcinout
+\funcarg{krb5_ticket *}{dec_ticket}
+\end{funcdecl}
+
+Takes unencrypted \funcparam{dec_ticket} and
+\funcparam{dec_ticket{\ptsto}enc_part2}, encrypts with
+\funcparam{dec_ticket{\ptsto}etype}
+using \funcparam{srv_key}, and places result in
+\funcparam{dec_ticket{\ptsto}enc_part}.
+The string \funcparam{dec_ticket{\ptsto}enc_part} will be allocated
+before formatting.
+
+Returns errors from encryption routines, system errors
+
+\funcparam{enc_part{\ptsto}data} is allocated and filled in with
+encrypted stuff.
+
+\begin{funcdecl}{krb5_decrypt_tkt_part}{krb5_error_code}{\funcin}
+\funcarg{krb5_keyblock *}{srv_key}
+\funcinout
+\funcarg{krb5_ticket *}{dec_ticket}
+\end{funcdecl}
+
+Takes encrypted \funcparam{dec_ticket{\ptsto}enc_part}, encrypts with
+\funcparam{dec_ticket{\ptsto}etype}
+using \funcparam{srv_key}, and places result in
+\funcparam{dec_ticket{\ptsto}enc_part2}.  The storage of
+\funcparam{dec_ticket{\ptsto}enc_part2} will be allocated before return.
+
+Returns errors from encryption routines, system errors
+
+\begin{funcdecl}{krb5_send_tgs}{krb5_error_code}{\funcin}
+\funcarg{krb5_flags}{options}
+\funcarg{krb5_ticket_times *}{timestruct}
+\funcarg{krb5_enctype}{etype}
+\funcarg{krb5_cksumtype}{sumtype}
+\funcarg{krb5_principal}{sname}
+\funcarg{krb5_address **}{addrs}
+\funcarg{krb5_authdata **}{authorization_data}
+\funcarg{krb5_data *}{second_ticket}
+\funcinout
+\funcarg{krb5_creds *}{usecred}
+\funcout
+\funcarg{krb5_response *}{rep}
+\end{funcdecl}
+
+Sends a request to the TGS and waits for a response.
+\funcparam{options} is used for the options in the KRB_TGS_REQ.
+\funcparam{timestruct} values are used for from, till, and rtime in the
+KRB_TGS_REQ.
+\funcparam{etype} is used for etype in the KRB_TGS_REQ.
+\funcparam{sumtype} is used for the checksum in the AP_REQ in the KRB_TGS_REQ
+\funcparam{sname} is used for sname in the KRB_TGS_REQ.
+\funcparam{addrs}, if non-NULL, is used for addresses in the KRB_TGS_REQ.
+\funcparam{authorization_dat}, if non-NULL, is used for authorization_dat in the KRB_TGS_REQ.
+\funcparam{second_ticket}, if required by options, is used for the 2nd
+ticket in the KRB_TGS_REQ.
+\funcparam{usecred} is used for the ticket and session key in the KRB_AP_REQ header in the KRB_TGS_REQ.
+
+The KDC realm is extracted from \funcparam{usecred{\ptsto}server}'s realm.
+
+The response is placed into \funcparam{*rep}.
+\funcparam{rep{\ptsto}response.data} is set to point at allocated storage
+which should be freed by the caller when finished.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_get_cred_from_kdc}{krb5_error_code}{\funcin}
+\funcarg{krb5_ccache}{ccache}
+\funcinout
+\funcarg{krb5_creds *}{creds}
+\funcout			
+\funcparam{krb5_creds ***}{tgts }
+\end{funcdecl}
+
+Retrieve credentials for principal \funcparam{creds{\ptsto}client},
+server \funcparam{creds{\ptsto}server},
+ticket flags \funcparam{creds{\ptsto}ticket_flags}, possibly
+\funcparam{creds{\ptsto}second_ticket} if needed by the ticket flags.
+
+\funcparam{ccache} is used to fetch initial TGT's to start the authentication
+path to the server.
+
+Credentials are requested from the KDC for the server's realm.  Any
+TGT credentials obtained in the process of contacting the KDC are
+returned in an array of credentials; \funcparam{tgts} is filled in to
+point to an array of pointers to credential structures (if no TGT's were
+used, the pointer is zeroed).  TGT's may be returned even if no useful
+end ticket was obtained.
+
+The returned credentials are NOT cached.
+
+If credentials are obtained, \funcparam{creds} is filled in with the results;
+\funcparam{creds{\ptsto}ticket} and
+\funcparam{creds{\ptsto}keyblock{\ptsto}key} are set to allocated storage,
+which should be freed by the caller when finished.
+
+Returns errors, system errors.
+
+
+\begin{funcdecl}{krb5_free_tgt_creds}{void}{\funcin}
+\funcarg{krb5_creds **}{tgts}
+\end{funcdecl}
+
+Frees the TGT credentials \funcparam{tgts} returned by
+\funcname{krb5_get_cred_from_kdc}.
+
+\begin{funcdecl}{krb5_get_credentials}{krb5_error_code}{\funcin}
+\funcarg{krb5_flags}{options}
+\funcarg{krb5_ccache}{ccache}
+\funcinout
+\funcarg{krb5_creds *}{creds}
+\end{funcdecl}
+
+Attempts to use the credentials cache \funcparam{ccache} or a TGS
+exchange to get an additional ticket for the client identified by
+\funcparam{creds{\ptsto}client}, the server identified by
+\funcparam{creds{\ptsto}server}, with options \funcparam{options},
+expiration date specified in \funcparam{creds{\ptsto}times.endtime} (0
+means as long as possible), session key type specified in
+\funcparam{creds{\ptsto}keyblock.keytype} (if non-zero).
+
+Any returned ticket and intermediate ticket-granting tickets are
+stored in \funcparam{ccache}.
+
+Returns errors from encryption routines, system errors.
+
+
 
