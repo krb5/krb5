@@ -1,3 +1,9 @@
+Tue Mar 28 18:46:55 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in (AC_REPLACE_FUNCS):  Add getuid to the list.
+	* getuid.c:  Simple getuid() to fake out single-user systems.
+	* strcasecmp.c:  Remove duplicated <sys/types.h> and u_char.
+
 Fri Mar 17 20:24:51 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Zap duplicate.

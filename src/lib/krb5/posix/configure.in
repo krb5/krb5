@@ -6,7 +6,7 @@ SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
 AC_CONST
 AC_HEADER_CHECK(paths.h,AC_DEFINE(HAS_PATHS_H))
-AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon)
+AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon getuid)
 AC_FUNC_CHECK(vsyslog, ,[LIBOBJS="[$]LIBOBJS syslog.o"])
 AC_FUNC_CHECK(setsid,AC_DEFINE(HAS_SETSID))
 V5_AC_OUTPUT_MAKEFILE

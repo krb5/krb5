@@ -32,7 +32,6 @@
  */
 
 #include "k5-int.h"
-#include <sys/types.h>
 #ifdef USE_STRING_H
 #include <string.h>
 #else
@@ -40,8 +39,6 @@
 #endif
 
 /* based on @(#)strcasecmp.c	5.10 (Berkeley) 1/26/91 */
-
-typedef unsigned char u_char;
 
 /*
  * This array is designed for mapping upper and lower case letter
