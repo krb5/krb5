@@ -29,5 +29,5 @@ OLDDECLARG(krb5_pointer *, seed)
     memset((char *)*seed, 0, sizeof(mit_des_random_key_seed) );
     xfree(*seed);
     *seed = 0;
-    return 0;		/* XXX init_random_key */
+    return 0;
 }

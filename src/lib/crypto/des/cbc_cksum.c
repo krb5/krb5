@@ -63,11 +63,11 @@ OLDDECLARG(krb5_checksum *, cksum)
     switch (mit_des_key_sched ((krb5_octet *)key, schedule)) {
     case -1:
         cleanup();
-        return KRB5DES_BAD_KEYPAR;       /* XXX error code-bad key parity */
+        return KRB5DES_BAD_KEYPAR;
 
     case -2:
         cleanup();
-        return KRB5DES_WEAK_KEY;       /* XXX error code-weak key */
+        return KRB5DES_WEAK_KEY;
 
     default:
         ;

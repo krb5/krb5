@@ -43,7 +43,7 @@ OLDDECLARG(const krb5_keyblock *,keyblock)
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     
     if (keyblock->length != sizeof (mit_des_cblock))
-	return KRB5_BAD_KEYSIZE;	/* XXX error code-bad key size */
+	return KRB5_BAD_KEYSIZE;
 
     if ( !(schedule = (struct mit_des_ks_struct *) malloc(sizeof(mit_des_key_schedule))) )
         return ENOMEM;
@@ -52,11 +52,11 @@ OLDDECLARG(const krb5_keyblock *,keyblock)
     switch (mit_des_key_sched (keyblock->contents, schedule)) {
     case -1:
 	cleanup();
-	return KRB5DES_BAD_KEYPAR;	/* XXX error code-bad key parity */
+	return KRB5DES_BAD_KEYPAR;
 
     case -2:
 	cleanup();
-	return KRB5DES_WEAK_KEY;	/* XXX error code-weak key */
+	return KRB5DES_WEAK_KEY;
 
     default:
 	eblock->key = (krb5_keyblock *) keyblock;

@@ -35,7 +35,7 @@ OLDDECLARG(krb5_pointer *,seed)
 {
     mit_des_random_key_seed * p_seed;
     if (seedblock->keytype != KEYTYPE_DES)
-	return KRB5_BAD_KEYTYPE;	  /* XXX error code bad keytype */
+	return KRB5_BAD_KEYTYPE;
     if ( !(p_seed = (mit_des_random_key_seed *) 
 	   malloc(sizeof(mit_des_random_key_seed))) ) 
 	return ENOMEM;

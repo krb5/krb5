@@ -183,7 +183,7 @@ extern unsigned long rev_swap_bit_pos_0 PROTOTYPE((unsigned long ));
 extern unsigned long swap_byte_bits PROTOTYPE((unsigned long ));
 extern unsigned long swap_long_bytes_bit_number PROTOTYPE((unsigned long ));
 #ifdef FILE
-/* XXX */
+/* XXX depends on FILE being a #define! */
 extern void test_set PROTOTYPE((FILE *, const char *, int, const char *, int));
 #endif
 
