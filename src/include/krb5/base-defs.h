@@ -31,7 +31,7 @@ typedef krb5_octet	krb5_boolean;
 #endif
 
 typedef krb5_int32	krb5_timestamp;
-typedef krb5_ui_2	krb5_confounder;
+typedef krb5_ui_4	krb5_confounder;
 typedef	krb5_octet	krb5_msgtype;
 typedef	krb5_octet	krb5_kvno;
 typedef	krb5_int32	krb5_flags;

@@ -70,6 +70,6 @@ krb5_error_code krb5_free_host_realm
 	PROTOTYPE((char * const * ));
 krb5_boolean krb5_kuserok
 	PROTOTYPE((krb5_principal, const char *));
-krb5_ui_4 krb5_random_confounder PROTOTYPE((void));
+krb5_confounder krb5_random_confounder PROTOTYPE((void));
 
 #endif /* KRB5_LIBOS_PROTO__ */
