@@ -88,25 +88,13 @@ krb5_adm_proto_to_ktent(kcontext, ncomp, complist, ktentp)
 	 ((krb5_int32) ((unsigned char) v[2]) << 8) +
 	 ((krb5_int32) ((unsigned char) v[3])));
 
-    /* Parse the supplied key_keytype */
-    if (complist[KRB5_ADM_KT_KEY_KEYTYPE].length < sizeof(krb5_keytype)) {
+    /* Parse the supplied key_enctype */
+    if (complist[KRB5_ADM_KT_KEY_ENCTYPE].length < sizeof(krb5_enctype)) {
 	kret = EINVAL;
 	goto done;
     }
-    v = complist[KRB5_ADM_KT_KEY_KEYTYPE].data;
-    ktentp->key.keytype = (krb5_keytype)
-	(((krb5_int32) ((unsigned char) v[0]) << 24) +
-	 ((krb5_int32) ((unsigned char) v[1]) << 16) +
-	 ((krb5_int32) ((unsigned char) v[2]) << 8) +
-	 ((krb5_int32) ((unsigned char) v[3])));
-
-    /* Parse the supplied key_etype */
-    if (complist[KRB5_ADM_KT_KEY_ETYPE].length < sizeof(krb5_enctype)) {
-	kret = EINVAL;
-	goto done;
-    }
-    v = complist[KRB5_ADM_KT_KEY_ETYPE].data;
-    ktentp->key.etype = (krb5_enctype)
+    v = complist[KRB5_ADM_KT_KEY_ENCTYPE].data;
+    ktentp->key.enctype = (krb5_enctype)
 	(((krb5_int32) ((unsigned char) v[0]) << 24) +
 	 ((krb5_int32) ((unsigned char) v[1]) << 16) +
 	 ((krb5_int32) ((unsigned char) v[2]) << 8) +

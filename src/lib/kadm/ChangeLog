@@ -1,3 +1,8 @@
+Tue Sep 12 13:18:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_conn.c: For Macintosh hardwire cache name. Various casting
+		fixes. 
+
 Thu Sep  7 17:50:15 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* adm_conn.c (kadm_get_creds): Use KRB5_ADM_SERVICE_INSTANCE for

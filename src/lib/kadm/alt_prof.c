@@ -333,14 +333,6 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 	    /* Get the value for the master key type */
 	    hierarchy[2] = "master_key_type";
 	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		if (!krb5_string_to_keytype(svalue, &rparams->realm_keytype))
-		    rparams->realm_keytype_valid = 1;
-		krb5_xfree(svalue);
-	    }
-	    
-	    /* Get the value for the encryption type */
-	    hierarchy[2] = "encryption_type";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
 		if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
 		    rparams->realm_enctype_valid = 1;
 		krb5_xfree(svalue);
@@ -409,8 +401,8 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 		krb5_xfree(svalue);
 	    }
 
-	    /* Get the value for the supported keytype/salttype matrix */
-	    hierarchy[2] = "supported_keytypes";
+	    /* Get the value for the supported enctype/salttype matrix */
+	    hierarchy[2] = "supported_enctypes";
 	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
 		krb5_string_to_keysalts(svalue,
 					", \t",	/* Tuple separators	*/
