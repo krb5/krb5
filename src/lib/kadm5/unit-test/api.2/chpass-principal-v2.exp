@@ -53,10 +53,10 @@ proc test200 {} {
     }
 
     # XXX Perhaps I should actually check the key type returned.
-    if {$num_keys == 2} {
+    if {$num_keys == 3} {
 	pass "$test"
     } else {
-	fail "$test: $num_keys keys, should be 2"
+	fail "$test: $num_keys keys, should be 3"
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	error "$test: unexpected failure in destroy"

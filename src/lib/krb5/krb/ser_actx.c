@@ -208,6 +208,7 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
     krb5_octet		*bp;
     size_t		remain;
     krb5_int32		obuf;
+    size_t		vecsize;
 
     required = 0;
     bp = *buffer;
@@ -237,11 +238,14 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 	    if (auth_context->i_vector) {
 		kret = krb5_c_block_size(kcontext,
 					 auth_context->keyblock->enctype,
-					 &obuf);
+					 &vecsize);
 	    } else {
-		obuf = 0;
+		vecsize = 0;
 	    }
-		
+	    obuf = vecsize;
+	    if (obuf != vecsize)
+		kret = EINVAL;
+
 	    if (!kret)
 		(void) krb5_ser_pack_int32(obuf, &bp, &remain);
 

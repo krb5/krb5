@@ -83,8 +83,8 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
 				    enctype, &ktent)))
 	return retval;
 
-    if ((retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket)))
-	return retval;
+    retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+    /* Upon error, Free keytab entry first, then return */
 
     (void) krb5_kt_free_entry(context, &ktent);
     return retval;

@@ -14,7 +14,7 @@
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-#include <k5-int.h>
+#include "k5-int.h"
 
 /*
 If NOIOSTUFF is defined at compile time, dfl rcaches will be per-process.

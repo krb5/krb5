@@ -44,6 +44,7 @@ typedef struct _osa_adb_db_ent_t {
      int	magic;
      DB		*db;
      HASHINFO	info;
+     BTREEINFO	btinfo;
      char	*filename;
      osa_adb_lock_t lock;
 } osa_adb_db_ent, *osa_adb_db_t, *osa_adb_princ_t, *osa_adb_policy_t;

@@ -75,7 +75,6 @@ struct stat st_temp;
     cc_def_name = krb5_cc_get_name(context, cc_def);    
     cc_other_name = krb5_cc_get_name(context, *cc_other);    
 
-
     if ( ! stat(cc_def_name, &st_temp)){
 	if((retval = krb5_get_nonexp_tkts(context,cc_def,&cc_def_creds_arr))){
 		return retval;
@@ -86,12 +85,11 @@ struct stat st_temp;
 					   primary_principal);
 
 #ifdef HAVE_LSTAT
-    if (!lstat( cc_other_name, &st_temp)) {
+    if (!lstat( cc_other_name, &st_temp))
 #else /*HAVE_LSTAT*/
-    if (!stat( cc_other_name, &st_temp)) {
+    if (!stat( cc_other_name, &st_temp))
 #endif
       return EINVAL;
-    }
     
       if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
 	return errno;

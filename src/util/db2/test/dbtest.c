@@ -344,13 +344,13 @@ compare(db1, db2)
 	register u_char *p1, *p2;
 
 	if (db1->size != db2->size)
-		printf("compare failed: key->data len %lu != data len %lu\n",
+		err("compare failed: key->data len %lu != data len %lu\n",
 		    db1->size, db2->size);
 
 	len = MIN(db1->size, db2->size);
 	for (p1 = db1->data, p2 = db2->data; len--;)
 		if (*p1++ != *p2++) {
-			printf("compare failed at offset %d\n",
+			err("compare failed at offset %d\n",
 			    p1 - (u_char *)db1->data);
 			break;
 		}
@@ -374,10 +374,11 @@ get(dbp, kp)
 		/* NOTREACHED */
 	case 1:
 #define	NOSUCHKEY	"get failed, no such key\n"
-		if (ofd != STDOUT_FILENO)
+		if (ofd != STDOUT_FILENO) {
 			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
-		else
-			(void)fprintf(stderr, "%d: %.*s: %s",
+			exit (1);
+		} else
+			err(stderr, "%d: %.*s: %s",
 			    lineno, MIN(kp->size, 20), kp->data, NOSUCHKEY);
 #undef	NOSUCHKEY
 		break;
