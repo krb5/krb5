@@ -41,9 +41,6 @@
  * the default local realm name.
  */
 
-extern char *krb5_config_file;		/* extern so can be set at
-					   load/runtime */
-
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_default_realm(context, lrealm)
     krb5_context context;
