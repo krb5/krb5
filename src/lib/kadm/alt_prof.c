@@ -24,11 +24,9 @@
 
 /*
  * alt_prof.c - Implement alternate profile file handling.
- *
- * XXX is this really necessary?
  */
-#include "krb5.h"
-#include "profile.h"
+#include "k5-int.h"
+#include "adm.h"
 #include <stdio.h>
 
 /*
@@ -51,7 +49,6 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_error_code	kret;
     const char		*namelist[2];
     profile_t		profile;
-    extern char		*getenv PROTOTYPE((char *));
     
     namelist[1] = (char *) NULL;
     profile = (profile_t) NULL;
@@ -297,4 +294,170 @@ krb5_aprof_finish(acontext)
     krb5_pointer	acontext;
 {
     profile_release(acontext);
+}
+
+/*
+ * krb5_read_realm_params()	- Read per-realm parameters from KDC
+ *				  alternate profile.
+ */
+krb5_error_code
+krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
+    krb5_context	kcontext;
+    char		*realm;
+    char		*kdcprofile;
+    char		*kdcenv;
+    krb5_realm_params	**rparamp;
+{
+    char		*filename;
+    char		*envname;
+    char		*lrealm;
+    krb5_pointer	aprofile;
+    krb5_realm_params	*rparams;
+    const char		*hierarchy[4];
+    char		*svalue;
+    krb5_int32		ivalue;
+    krb5_deltat		dtvalue;
+
+    krb5_error_code	kret;
+
+    filename = (kdcprofile) ? kdcprofile : DEFAULT_KDC_PROFILE;
+    envname = (kdcenv) ? kdcenv : KDC_PROFILE_ENV;
+    rparams = (krb5_realm_params *) NULL;
+    kret = 0;
+    if (!realm)
+	kret = krb5_get_default_realm(kcontext, &lrealm);
+    else
+	lrealm = strdup(realm);
+    if (!kret && !(kret = krb5_aprof_init(filename, envname, &aprofile))) {
+	if (rparams =
+	    (krb5_realm_params *) malloc(sizeof(krb5_realm_params))) {
+
+	    /* Initialize realm parameters */
+	    memset((char *) rparams, 0, sizeof(krb5_realm_params));
+
+	    /* Get the value of the per-realm profile */
+	    hierarchy[0] = "realms";
+	    hierarchy[1] = lrealm;
+	    hierarchy[2] = "profile";
+	    hierarchy[3] = (char *) NULL;
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		const char *filenames[2];
+
+		/*
+		 * XXX this knows too much about krb5 contexts.
+		 */
+		filenames[0] = svalue;
+		filenames[1] = (char *) NULL;
+		if (kcontext->profile)
+		    profile_release(kcontext->profile);
+		if (!(kret = profile_init(filenames, &kcontext->profile)))
+		    rparams->realm_profile = svalue;
+		else
+		    krb5_xfree(svalue);
+	    }
+
+	    /* Get the value for the database */
+	    hierarchy[2] = "database_name";
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+		rparams->realm_dbname = svalue;
+
+	    /* Get the value for the KDC primary port */
+	    hierarchy[2] = "port";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_kdc_pport = ivalue;
+		rparams->realm_kdc_pport_valid = 1;
+	    }
+	    
+	    /* Get the value for the KDC secondary port */
+	    hierarchy[2] = "secondary_port";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_kdc_sport = ivalue;
+		rparams->realm_kdc_sport_valid = 1;
+	    }
+	    
+	    /* Get the value for the kadmind port */
+	    hierarchy[2] = "kadmind_port";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_kadmind_port = ivalue;
+		rparams->realm_kadmind_port_valid = 1;
+	    }
+	    
+	    /* Get the value for the master key name */
+	    hierarchy[2] = "master_key_name";
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+		rparams->realm_mkey_name = svalue;
+	    
+	    /* Get the value for the master key type */
+	    hierarchy[2] = "master_key_type";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_keytype = ivalue;
+		rparams->realm_keytype_valid = 1;
+	    }
+	    
+	    /* Get the value for the encryption type */
+	    hierarchy[2] = "encryption_type";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_enctype = ivalue;
+		rparams->realm_enctype_valid = 1;
+	    }
+	    
+	    /* Get the value for the stashfile */
+	    hierarchy[2] = "key_stash_file";
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+		rparams->realm_stash_file = svalue;
+	    
+	    /* Get the value for maximum ticket lifetime. */
+	    hierarchy[2] = "max_life";
+	    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
+		rparams->realm_max_life = dtvalue;
+		rparams->realm_max_life_valid = 1;
+	    }
+	    
+	    /* Get the value for maximum renewable ticket lifetime. */
+	    hierarchy[2] = "max_renewable_life";
+	    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
+		rparams->realm_max_rlife = dtvalue;
+		rparams->realm_max_rlife_valid = 1;
+	    }
+	    
+	    /* Get the value for the default principal expiration */
+	    hierarchy[2] = "default_principal_expiration";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_expiration = (krb5_timestamp) ivalue;
+		rparams->realm_expiration_valid = 1;
+	    }
+	    
+	    /* Get the value for the default principal flags */
+	    hierarchy[2] = "default_principal_flags";
+	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+		rparams->realm_flags = (krb5_flags) ivalue;
+		rparams->realm_flags_valid = 1;
+	    }
+	}
+	krb5_aprof_finish(aprofile);
+    }
+    *rparamp = rparams;
+    return(kret);
+}
+
+/*
+ * krb5_free_realm_params()	- Free data allocated by above.
+ */
+krb5_error_code
+krb5_free_realm_params(kcontext, rparams)
+    krb5_context	kcontext;
+    krb5_realm_params	*rparams;
+{
+    if (rparams) {
+	if (rparams->realm_profile)
+	    krb5_xfree(rparams->realm_profile);
+	if (rparams->realm_dbname)
+	    krb5_xfree(rparams->realm_dbname);
+	if (rparams->realm_mkey_name)
+	    krb5_xfree(rparams->realm_mkey_name);
+	if (rparams->realm_stash_file)
+	    krb5_xfree(rparams->realm_stash_file);
+	krb5_xfree(rparams);
+    }
+    return(0);
 }

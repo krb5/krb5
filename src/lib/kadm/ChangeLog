@@ -1,4 +1,9 @@
 
+Mon Jul 17 15:16:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Add krb5_{read,free}_realm_params() to read in per-
+		realm KDC data and to free the allocated structure.
+
+
 Fri Jul 7 16:23:57 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, it's set by configure.  Find com_err
 		library in TOPLIBD now.
