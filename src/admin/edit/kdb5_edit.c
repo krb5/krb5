@@ -60,6 +60,7 @@ static int num_name_tokens;
 static char search_instance[40];
 static int num_instance_tokens;
 static int must_be_first[2];
+static char *mkey_password = 0;
 
 /*
  * I can't figure out any way for this not to be global, given how ss
@@ -117,8 +118,11 @@ char *kdb5_edit_Init(argc, argv)
 
     progname = argv[0];
 
-    while ((optchar = getopt(argc, argv, "d:r:R:k:M:e:m")) != EOF) {
+    while ((optchar = getopt(argc, argv, "P:d:r:R:k:M:e:m")) != EOF) {
 	switch(optchar) {
+        case 'P':		/* Only used for testing!!! */
+	    mkey_password = optarg;
+	    break;
 	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
@@ -374,6 +378,7 @@ char *dbname;
     krb5_error_code retval;
     int nentries;
     krb5_boolean more;
+    krb5_data scratch, pwd;
 
     if (current_dbname)
 	    free(current_dbname);
@@ -428,16 +433,34 @@ char *dbname;
     mblock.mkvno = master_entry.kvno;
 
     krb5_db_free_principal(&master_entry, nentries);
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-				    manual_mkey, FALSE, 0, &master_keyblock)) {
+    if (mkey_password) {
+	pwd.data = mkey_password;
+	pwd.length = strlen(mkey_password);
+	retval = krb5_principal2salt(master_princ, &scratch);
+	if (retval) {
+	    com_err(pname, retval, "while calculated master key salt");
+	    return(1);
+	}
+	retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
+				    &master_keyblock, &pwd, &scratch);
+	if (retval) {
+	    com_err(pname, retval,
+		    "while transforming master key from password");
+	    return(1);
+	}
+	free(scratch.data);
+	mkey_password = 0;
+    } else if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
+					   manual_mkey, FALSE, 0,
+					   &master_keyblock)) {
 	com_err(pname, retval, "while reading master key");
 	com_err(pname, 0, "Warning: proceeding without master key");
 	exit_status++;
 	valid_master_key = 0;
 	dbactive = TRUE;
 	return(0);
-    } else
-	    valid_master_key = 1;
+    }
+    valid_master_key = 1;
     if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
 					   &master_encblock)) {
 	com_err(pname, retval, "while verifying master key");

@@ -38,7 +38,7 @@ int main(argc, argv)
 {
     char *request;
     krb5_error_code retval;
-    int sci_idx, code;
+    int sci_idx, code = 0;
 
     request = kdb5_edit_Init(argc, argv);
     sci_idx = ss_create_invocation("kdb5_edit", "5.0", (char *) NULL,

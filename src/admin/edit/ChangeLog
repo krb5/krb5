@@ -1,3 +1,13 @@
+Fri Oct  7 00:01:40 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ss_wrapper.c (main): Clear code before ss_execute_line, since
+		ss_execute_line doesn't set code to 0 if there are no
+	problems. 
+
+	* kdb5_edit.c (kdb5_edit_Init): Add a new option so that the
+		master key password can be entered on the command line ---
+		for testing only; not documented!!
+
 Mon Oct  3 19:10:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.
