@@ -44,15 +44,16 @@ all-windows:: subdirs $(OBJFILE)
 ##DOS	cd file
 ##DOS	@echo Making in krb5\keytab\file
 ##DOS	$(MAKE) -$(MFLAGS)
-##DOS	cd ..\srvtab
+##DOS	cd ..
+##DOSsrvtab\$(OUTPRE)srvtab.lst::
+##DOS	cd srvtab
 ##DOS	@echo Making in krb5\keytab\srvtab
 ##DOS	$(MAKE) -$(MFLAGS)
 ##DOS	cd ..
 
-##DOS$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst
+##DOS$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst srvtab\$(OUTPRE)srvtab.lst
 ##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj file\$(OUTPRE)*.obj > $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj file\$(OUTPRE)*.obj srvtab\$(OUTPRE)*.obj > $(OBJFILE)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
@@ -60,6 +61,9 @@ clean-unix:: clean-libobjs
 clean-windows::
 	cd file
 	@echo Making clean in krb5\keytab\file
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\srvtab
+	@echo Making clean in krb5\keytab\srvtab
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in krb5\keytab
