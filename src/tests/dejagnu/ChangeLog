@@ -1,3 +1,15 @@
+Sat Aug 26 18:10:44 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* .Sanitize: Add t_inetd.c
+
+        * t_inetd.c: Small program to simulate the use of inetd in running
+		tests. 
+
+	* configure.in: Add programming rules, shared libraries and
+		signal handling
+
+	* Makefile.in: Build/clean t_inetd if dejagnu tests are run.
+
 Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

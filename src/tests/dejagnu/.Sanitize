@@ -30,6 +30,7 @@ configure
 configure.in
 krb-root
 krb-standalone
+t_inetd.c
 Makefile.in
 
 
