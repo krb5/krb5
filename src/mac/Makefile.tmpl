@@ -1,4 +1,75 @@
+#  TEMPLATE BEGINS HERE
+
+SnapshotRoot = "//Snapshot"
+
 INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/
+
+AUTOMACFILES = `perl "/mac/macfile_gen.pl" maclist`
+AUTOMACDIRS = `perl "/mac/macfile_gen.pl" macdirs`
+
+MACFILES = {AUTOMACFILES} /Makefile.in /patchlevel.h \
+	/util/et/et_h.perl /util/et/et_c.perl \
+	/mac/GSS.CFM.c \
+	/mac/GSSLibrary.exp \
+	/mac/GSSLibrary.SAP.exp \
+	/mac/K5.CFM.c \
+	/mac/K5Library.exp \
+	/mac/krb5.ini \
+	/mac/macfile_gen.pl \
+	/mac/Makefile.tmpl \
+	/mac/ReadMe \
+	/mac/version.r \
+	/mac/kconfig/ChangeLog \
+	/mac/kconfig/des_cornell.c \
+	/mac/kconfig/desproto.h \
+	/mac/kconfig/dnr.c \
+	/mac/kconfig/encrypt.h \
+	/mac/kconfig/getpasswd.c \
+	/mac/kconfig/glue.h \
+	/mac/kconfig/k.bw \
+	/mac/kconfig/k.color \
+	/mac/kconfig/kadm.c \
+	/mac/kconfig/kadm.h \
+	/mac/kconfig/kadm.proto.h \
+	/mac/kconfig/kconfig.c \
+	/mac/kconfig/kconfig.h \
+	/mac/kconfig/kconfig.proto.h \
+	/mac/kconfig/kconfig.r \
+	/mac/kconfig/kconfig.rsrc \
+	/mac/kconfig/kconfig.vers \
+	/mac/kconfig/kconfig.prj \
+	/mac/kconfig/kpasswd.c \
+	/mac/kconfig/ldef.c \
+	/mac/kconfig/MakeFile \
+	/mac/kconfig/ReleaseNotes \
+	/mac/kconfig/WindowUtil.c \
+	/mac/kconfig/WindowUtil.h \
+	/mac/kconfig/WindowUtil.proto.h \
+	/mac/libraries/autoconf.h \
+	/mac/libraries/ChangeLog \
+	/mac/libraries/KerberosHeaders.h \
+	/mac/libraries/KerberosHeaders.pch \
+	/mac/libraries/KerberosHeadersCFM.pch \
+	"/mac/libraries/Metrowerks/CW Pro 2/MIT C.CFM68K DLL.prj" \
+	"/mac/libraries/Metrowerks/CW Pro 2/MIT C.PPC DLL.prj" \
+	"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimeCFM68K DLL.prj" \
+	"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimePPC DLL.prj" \
+	/mac/TestTrack/ChangeLog \
+	/mac/TestTrack/GSSforSAP.r \
+	/mac/TestTrack/MITAthenaLib \
+	/mac/TestTrack/ShlibTestTrack.c \
+	/mac/TestTrack/ShlibTestTrack.h \
+	/mac/TestTrack/TestTrackLib.h
+MACDIRS = /config/ /include/ /include/krb5/ /include/krb5/stock/ \
+	/include/sys/ /lib/ /lib/krb5/ /lib/gssapi/ /util/ {AUTOMACDIRS} \
+	/mac/ \
+	/mac/kconfig/ \
+	/mac/libraries/ \
+	/mac/libraries/Metrowerks/ \
+	"/mac/libraries/Metrowerks/CW Pro 2/" \
+	/mac/TestTrack/
+
+
 
 ################################################################################
 ##
@@ -41,6 +112,17 @@ AUTOGEN_OUTPUT = 	/include/asn1_err.h /include/kdb5_err.h /include/krb5_err.h \
 	/include/profile.h /include/krb5/osconf.h /lib/gssapi/generic/gssapi.h \
 	/include/autoconf.h
 
+AUTOGEN_SOURCES = 	/lib/krb5/error_tables/asn1_err.et \
+	/lib/krb5/error_tables/kdb5_err.et \
+	/lib/krb5/error_tables/krb5_err.et \
+	/lib/krb5/error_tables/kv5m_err.et \
+	/lib/krb5/error_tables/adm_err.et \
+	/lib/gssapi/generic/gssapi_err_generic.et \
+	/lib/gssapi/krb5/gssapi_err_krb5.et \
+	/util/profile/prof_err.et \
+	/include/krb5.hin /util/profile/profile.hin \
+	/include/krb5/stock/osconf.h /lib/gssapi/generic/gssapi.hin \
+	/mac/libraries/autoconf.h
 
 autogenerate-files : {AUTOGEN_OUTPUT}
 autogenerate-clean  :
@@ -452,6 +534,23 @@ dist-clean : clean
 		"MSL C.PPC.DLL" "MSL C.CFM68K.DLL" "MSL RuntimePPC.DLL" "MSL RuntimeCFM68K.DLL" \
 		/mac/libraries/KerberosHeaders.pch.68k.o /mac/libraries/KerberosHeaders.pch.ppc.o \
 		Makefile
+		
+snapshot :
+	NewFolder {SnapshotRoot}
+	For SnapshotDir in {MacDirs}
+		NewFolder "{SnapshotRoot}{SnapshotDir}"
+		if "`Exists {TargDir}"{SnapshotDir}Makefile.in"`"
+			Duplicate -y {TargDir}"{SnapshotDir}Makefile.in" {SnapshotRoot}"{SnapshotDir}Makefile.in"
+			SetFile -a l {SnapshotRoot}"{SnapshotDir}Makefile.in"
+		end
+	end
+	For SnapshotFile in {MacFiles} {Autogen_Sources}
+		if "`Exists {TargDir}"{SnapshotFile}"`"
+			Duplicate -y {TargDir}"{SnapshotFile}" {SnapshotRoot}"{SnapshotFile}"
+			SetFile -a l {SnapshotRoot}"{SnapshotFile}"
+		end
+	end
+	
 
 # clean-mit :
 # 	Delete -i {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
