@@ -1394,6 +1394,11 @@ reader(oldmask)
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTTOU, &sa, (struct sigaction *)0);
 
+#ifdef SA_RESTART
+    /* Because SIGURG will be coming in during a read,
+     * we want to restart the syscall afterwards. */
+    sa.sa_flags |= SA_RESTART;
+#endif
     sa.sa_handler = oob;
     (void) sigaction(SIGURG, &sa, (struct sigaction *)0);
 #else    

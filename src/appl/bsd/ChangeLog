@@ -1,3 +1,10 @@
+Wed Nov 16 11:45:01 1994  Richard Basch  (probe@tardis)
+
+	* krlogin.c:
+	If the system includes a SA_RESTART signal flag, use it.
+	We want to be able to resume the read() system call after
+	a SIGURG comes.
+
 Fri Nov 11 00:53:57 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* forward.c (mk_cred, rd_cred): Move mk_cred and rd_cred to
