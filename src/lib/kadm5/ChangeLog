@@ -1,3 +1,8 @@
+2004-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (kadm5_get_admin_service_name): Fix call to
+	kadm5_get_config_params().
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (clean-mac): Target deleted.

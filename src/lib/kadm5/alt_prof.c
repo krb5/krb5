@@ -781,10 +781,17 @@ kadm5_get_admin_service_name(krb5_context ctx,
     memset(&params_in, 0, sizeof(params_in));
     memset(&params_out, 0, sizeof(params_out));
 
-    params_in.mask |= KADM5_CONFIG_ADMIN_SERVER;
-    ret = kadm5_get_config_params(ctx, NULL, NULL, &params_in, &params_out);
+    params_in.mask |= KADM5_CONFIG_REALM;
+    params_in.realm = realm_in;
+    ret = kadm5_get_config_params(ctx, DEFAULT_PROFILE_PATH,
+				  "KRB5_CONFIG", &params_in, &params_out);
     if (ret)
 	return ret;
+
+    if (!(params_out.mask & KADM5_CONFIG_ADMIN_SERVER)) {
+	ret = KADM5_MISSING_KRB5_CONF_PARAMS;
+	goto err_params;
+    }
 
     hp = gethostbyname(params_out.admin_server);
     if (hp == NULL) {
@@ -798,7 +805,7 @@ kadm5_get_admin_service_name(krb5_context ctx,
     sprintf(admin_name, "kadmin/%s", hp->h_name);
 
 err_params:
-    free(params_out.admin_server);
+    kadm5_free_config_params(ctx, &params_out);
     return ret;
 }
 
