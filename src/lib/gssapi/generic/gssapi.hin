@@ -323,7 +323,7 @@ typedef	int		gss_cred_usage_t;
  */
 
 #ifdef __cplusplus
-#extern "C" {
+extern "C" {
 #endif
 
 KRB5_DLLIMP OM_uint32 KRB5_CALLCONV gss_acquire_cred
