@@ -457,6 +457,8 @@ errout:
 		krb5_db_set_name(kdc_active_realm->realm_context,
 				 kdc_active_realm->realm_dbname);
 	    krb5_db_init(kdc_context);
+	    /* Reset master key */
+	    krb5_db_set_mkey(kdc_context, &kdc_active_realm->realm_encblock);
 	}
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);

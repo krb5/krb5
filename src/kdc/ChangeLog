@@ -1,3 +1,9 @@
+Wed Nov 12 14:47:46 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* do_as_req.c (process_as_req): Reset master key after closing and
+ 	 	reopening DB when KDC_UPDATES_KDB compiled
+ 	 	in. [krb5-kdc/495 by Tony Mione]
+
 Mon Nov 10 20:03:14 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kdc_util.c (kdc_process_tgs_req): If not using the reply cache,
