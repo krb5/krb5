@@ -16,7 +16,7 @@
 #include <krb5.h>
 
 static int
-krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags, char *pname, 
+krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags_in, char *pname, 
 			  char *pinstance, char *prealm, long paddress,
 			  char *session, int life, long time_sec, 
 			  char *sname, char *sinstance, C_Block key, 
@@ -123,10 +123,10 @@ krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
 }
 
 static int
-krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
+krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
 	       session, life, time_sec, sname, sinstance, key, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags;        /* Various Kerberos flags */
+    unsigned int flags_in;      /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
@@ -141,6 +141,7 @@ krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
 {
     Key_schedule key_s;
     register char *data;        /* running index into ticket */
+    unsigned char flags = flags_in & 0xFF; /* Must be 1 byte */
 
     tkt->length = 0;            /* Clear previous data  */
 
