@@ -121,6 +121,11 @@ static void krb5int_yarrow_init_Limits(Yarrow_CTX* y)
    PRNG state */
 #ifdef YARROW_DETECT_FORK
 
+static int
+yarrow_input_locked( Yarrow_CTX* y, unsigned source_id,
+		     const void *sample,
+		     size_t size, size_t entropy_bits );
+
 static int Yarrow_detect_fork(Yarrow_CTX *y)
 {
     pid_t newpid;
@@ -135,12 +140,12 @@ static int Yarrow_detect_fork(Yarrow_CTX *y)
 	 * Then we reseed.  This doesn't really increase entropy, but does make the
 	 * streams distinct assuming we already have good entropy*/
 	y->pid = newpid;
-	TRY (krb5int_yarrow_input (y, 0, &newpid,
-				   sizeof (newpid), 0));
-		TRY (krb5int_yarrow_input (y, 0, &newpid,
-				   sizeof (newpid), 0));
-		TRY (krb5int_yarrow_reseed (y, YARROW_FAST_POOL));
-		    }
+	TRY (yarrow_input_locked (y, 0, &newpid,
+				  sizeof (newpid), 0));
+	TRY (yarrow_input_locked (y, 0, &newpid,
+				  sizeof (newpid), 0));
+	TRY (krb5int_yarrow_reseed (y, YARROW_FAST_POOL));
+    }
 
  CATCH:
     EXCEP_RET;
@@ -241,10 +246,11 @@ int krb5int_yarrow_init(Yarrow_CTX* y, const char *filename)
     EXCEP_RET;
 }
 
-YARROW_DLL
-int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id, 
-		  const void* sample, 
-		  size_t size, size_t entropy_bits )
+static
+int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id, 
+				const void* sample, 
+				size_t size, size_t entropy_bits,
+				int do_lock )
 {
     EXCEP_DECL;
     int ret;
@@ -264,8 +270,10 @@ int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
 	THROW( YARROW_BAD_SOURCE );
     }
 
-    TRY( LOCK() );
-    locked = 1;
+    if (do_lock) {
+	    TRY( LOCK() );
+	    locked = 1;
+    }
 
     /* hash in the sample */
 
@@ -328,6 +336,24 @@ int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
  CATCH:
     if ( locked ) { TRY( UNLOCK() ); }
     EXCEP_RET;
+}
+
+YARROW_DLL
+int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id, 
+		  const void* sample, 
+		  size_t size, size_t entropy_bits )
+{
+    return yarrow_input_maybe_locking(y, source_id, sample, size,
+				      entropy_bits, 1);
+}
+
+static int
+yarrow_input_locked( Yarrow_CTX* y, unsigned source_id,
+		     const void *sample,
+		     size_t size, size_t entropy_bits )
+{
+    return yarrow_input_maybe_locking(y, source_id, sample, size,
+				      entropy_bits, 0);
 }
 
 YARROW_DLL

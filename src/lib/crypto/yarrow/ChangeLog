@@ -1,3 +1,12 @@
+2004-11-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* yarrow.c (yarrow_input_maybe_locking): Renamed from
+	yarrow_input_maybe_locking, made static.  New argument indicates
+	whether or not to do locking.
+	(krb5int_yarrow_input): New wrapper function.
+	(yarrow_input_locked): New wrapper function.
+	(Yarrow_detect_fork): Call yarrow_input_locked.
+
 2004-11-15  Sam Hartman  <hartmans@mit.edu>
 
 	* ycipher.h: Use AES256 not 3des
