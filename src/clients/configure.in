@@ -5,6 +5,15 @@ KRB5_BUILD_PROGRAM
 AC_HEADER_STDARG
 AC_CHECK_FUNCS(getusershell lstat )
 AC_CHECK_HEADERS(unistd.h pwd.h)
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID)
+		KSU_LIBS="$KSU_LIBS -lsecurity"
+	)
+	;;
+esac
+AC_SUBST(KSU_LIBS)
 K5_GEN_MAKEFILE(.)
 K5_GEN_MAKEFILE(klist)
 K5_GEN_MAKEFILE(kinit)
