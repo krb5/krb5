@@ -6,7 +6,7 @@ OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o misc.o server_glue_v1.o
 all:: $(PROG)
 
 $(PROG): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)

@@ -1,3 +1,7 @@
+Wed Jul 24 14:28:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (CFLAGS): Use $(LD) instead of $(CC) for linking.
+
 Mon Jul 22 04:16:15 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ovsec_kadmd.c (main): open the socket with SO_REUSEADDR.  The
