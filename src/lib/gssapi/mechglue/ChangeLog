@@ -1,3 +1,8 @@
+Tue Mar 12 23:28:57 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* mechglue.h (gssd_pname_to_uid, gss_initialize): Use PROTOTYPE
+	macro in declarations.
+
 Sun Mar  3 12:49:25 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* g_imp_sec_context.c, g_exp_sec_context.c: Include string.h
