@@ -1,3 +1,12 @@
+Wed Feb 19 14:21:12 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* t_kerb.c (test_set_realm): New function used to test
+	krb5_set_principal_realm().  Called by using the new "set_realm"
+	command to t_kerb.
+
+	* set_realm.c (krb5_set_principal_realm): New function which sets
+		the realm of a principal.
+
 Thu Feb 13 14:17:00 1997  Richard Basch  <basch@lehman.com>
 
 	* get_in_tkt.c (krb5_get_in_tkt): Initialize as_reply; if

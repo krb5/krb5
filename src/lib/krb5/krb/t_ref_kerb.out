@@ -14,3 +14,4 @@ parsed (and unparsed) principal(\/slash/\@atsign/octa\/thorpe@\/slash\@at\/sign)
 425_converted principal(rcmd, uunet, UU.NET): 'host/uunet.uu.net@UU.NET'
 425_converted principal(zephyr, zephyr, ATHENA.MIT.EDU): 'zephyr/zephyr@ATHENA.MIT.EDU'
 425_converted principal(kadmin, ATHENA.MIT.EDU, ATHENA.MIT.EDU): 'kadmin/ATHENA.MIT.EDU@ATHENA.MIT.EDU'
+old principal: marc@MIT.EDU, modified principal: marc@CYGNUS.COM

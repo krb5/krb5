@@ -76,6 +76,7 @@ STLIBOBJS= \
 	ser_key.o	\
 	ser_princ.o	\
 	serialize.o	\
+	set_realm.o	\
 	srv_rcache.o	\
 	str_conv.o	\
 	tgtname.o	\
@@ -150,6 +151,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	ser_key.$(OBJEXT)	\
 	ser_princ.$(OBJEXT)	\
 	serialize.$(OBJEXT)	\
+	set_realm.$(OBJEXT)	\
 	srv_rcache.$(OBJEXT)	\
 	str_conv.$(OBJEXT)	\
 	tgtname.$(OBJEXT)	\
@@ -225,6 +227,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/ser_key.c	\
 	$(srcdir)/ser_princ.c	\
 	$(srcdir)/serialize.c	\
+	$(srcdir)/set_realm.c	\
 	$(srcdir)/srv_rcache.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
@@ -246,7 +249,7 @@ COMERRLIB=$(TOPLIBD)/libcom_err.a
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 	free_rtree.o bld_pr_ext.o 
 
-T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o 
+T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o 
@@ -284,6 +287,7 @@ check-unix:: $(TEST_PROGS)
 		425_conv_principal rcmd uunet UU.NET \
 		425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
 		425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
+		set_realm marc@MIT.EDU CYGNUS.COM \
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
