@@ -1,3 +1,11 @@
+2004-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpasswd.c (get_name_from_passwd_file): Do not cast return from
+	getuid() to int as argument to getpwuid.
+
+	* ksetpwd.c: Include time.h for time() prototype.
+	(main): Return 0 on success.
+
 2004-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* ksetpwd.c (verify_creds, get_init_creds_opt_init,

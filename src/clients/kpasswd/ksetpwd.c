@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <time.h>
 
 #define TKTTIMELEFT     60*10   /* ten minutes */
 
@@ -308,4 +309,5 @@ int main( int argc, char ** argv )
 			}
 		}
 	}
+	return(0);
 }

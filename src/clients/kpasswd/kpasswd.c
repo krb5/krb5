@@ -21,7 +21,7 @@ void get_name_from_passwd_file(program_name, kcontext, me)
 {
     struct passwd *pw;
     krb5_error_code code;
-    if ((pw = getpwuid((int) getuid()))) {
+    if ((pw = getpwuid(getuid()))) {
 	if ((code = krb5_parse_name(kcontext, pw->pw_name, me))) {
 	    com_err (program_name, code, "when parsing name %s", pw->pw_name);
 	    exit(1);
