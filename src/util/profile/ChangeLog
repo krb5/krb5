@@ -2,7 +2,8 @@
 
 	* prof_get.c (profile_free_string): 
 	* profile.hin: Add profile_free_string to free strings allocated
-	by profile_get_string.
+	by profile_get_string. -- And then remove them because
+	profile_release_string already exists for that purpose.	
 
 1999-08-03 Alexandra Ellwood <lxs@mit.edu>
 

@@ -241,14 +241,6 @@ profile_get_string(profile, name, subname, subsubname,
 	return 0;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
-profile_free_string(value)
-	char 	*value;
-{
-	if (value)
-		free(value);
-}
-
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_get_integer(profile, name, subname, subsubname,
 			      def_val, ret_int)
