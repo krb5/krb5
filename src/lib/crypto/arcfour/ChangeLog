@@ -1,3 +1,8 @@
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.h, arcfour.c, string_to_key.c: Use const instead of
+	krb5_const.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* string_to_key.c (krb5_arcfour_string_to_key): Use size_t instead

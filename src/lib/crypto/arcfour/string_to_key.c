@@ -13,9 +13,9 @@ static void asctouni(unsigned char *unicode, unsigned char *ascii, size_t len)
 
 krb5_error_code
 krb5_arcfour_string_to_key(enc, string, salt, key)
-	krb5_const struct krb5_enc_provider *enc;
-	krb5_const krb5_data *string;
-	krb5_const krb5_data *salt;
+	const struct krb5_enc_provider *enc;
+	const krb5_data *string;
+	const krb5_data *salt;
 	krb5_keyblock *key;
 {
   size_t len,slen;

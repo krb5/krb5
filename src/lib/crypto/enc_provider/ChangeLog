@@ -1,3 +1,7 @@
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c: Use const instead of krb5_const.
+
 2001-11-06  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c (k5_arcfour_docrypt): Treat state as an

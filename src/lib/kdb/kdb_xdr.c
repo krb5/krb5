@@ -237,7 +237,7 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 
     /* Mod Princ */
     if ((code = krb5_parse_name(context,
-				(krb5_const char *) (tl_data.tl_data_contents+4),
+				(const char *) (tl_data.tl_data_contents+4),
 				mod_princ)))
 	return(code);
 

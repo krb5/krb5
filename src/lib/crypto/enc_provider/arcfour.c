@@ -26,8 +26,8 @@ static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
 
 /* Interface layer to kerb5 crypto layer */
 static krb5_error_code
-k5_arcfour_docrypt(krb5_const krb5_keyblock *, krb5_const krb5_data *,
-		   krb5_const krb5_data *, krb5_data *);
+k5_arcfour_docrypt(const krb5_keyblock *, const krb5_data *,
+		   const krb5_data *, krb5_data *);
 
 
 /* The blocksize for the enctype */
@@ -38,7 +38,7 @@ static void k5_arcfour_keysize(size_t *, size_t *);
 
 /* from a random bitstrem, construct a key */
 static krb5_error_code
-k5_arcfour_make_key(krb5_const krb5_data *, krb5_keyblock *);
+k5_arcfour_make_key(const krb5_data *, krb5_keyblock *);
 
 static unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
 static unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
@@ -142,8 +142,8 @@ k5_arcfour_keysize(size_t *keybytes, size_t *keylength)
 
 /* The workhorse of the arcfour system, this impliments the cipher */
 static krb5_error_code
-k5_arcfour_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *state,
-	       krb5_const krb5_data *input, krb5_data *output)
+k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
+	       const krb5_data *input, krb5_data *output)
 {
   ArcfourContext *arcfour_ctx;
   ArcFourCipherState *cipher_state;
@@ -185,7 +185,7 @@ k5_arcfour_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *state,
 }
 
 static krb5_error_code
-k5_arcfour_make_key(krb5_const krb5_data *randombits, krb5_keyblock *key)
+k5_arcfour_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
     if (key->length != 16)
 	return(KRB5_BAD_KEYSIZE);
