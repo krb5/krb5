@@ -93,7 +93,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
 
     } else {
 	/* from somewhere else */
-        krb5_octet keytype;
+        krb5_ui_2 keytype;
 	char defkeyfile[MAXPATHLEN+1];
 	krb5_data *realm = krb5_princ_realm(context, mname);
 	FILE *kf;
@@ -113,7 +113,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
 	if (!(kf = fopen(defkeyfile, "r")))
 #endif
 	    return KRB5_KDB_CANTREAD_STORED;
-	if (fread((krb5_pointer) &keytype, 1, 1, kf) != 1) {
+	if (fread((krb5_pointer) &keytype, 2, 1, kf) != 1) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
 	    goto errout;
 	}

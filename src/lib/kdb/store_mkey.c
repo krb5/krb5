@@ -54,7 +54,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 {
     FILE *kf;
     krb5_error_code retval = 0;
-    krb5_octet keytype;
+    krb5_ui_2 keytype;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 #if defined(unix) || defined(__unix__)
@@ -86,7 +86,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
     }
     keytype = key->keytype;
     if ((fwrite((krb5_pointer) &keytype,
-		1, 1, kf) != 1) ||
+		2, 1, kf) != 1) ||
 	(fwrite((krb5_pointer) &key->length,
 		sizeof(key->length), 1, kf) != 1) ||
 	(fwrite((krb5_pointer) key->contents,
