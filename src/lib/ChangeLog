@@ -1,3 +1,7 @@
+2005-02-16  Jeffrey Altman <jaltman@mit.edu>
+
+        * gssapi32.def: export the missing DATA symbols
+
 2005-01-03  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5_32.def: export krb5_is_thread_safe()
