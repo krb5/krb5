@@ -1166,6 +1166,18 @@ alpha-dec-osf*)
 	# $(PROG_RPATH) is here to handle things like a shared tcl library
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
+
+# untested...
+*-*-hpux*)
+	SHLIBEXT=.sl
+	SHLIBVEXT='.sl.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIB_EXPFLAGS='+b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	LDCOMBINE='ld -b'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+b,$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	;;
+
 mips-sgi-irix*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.so.$(LIBMAJOR)'
@@ -1179,29 +1191,64 @@ mips-sgi-irix*)
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
+
+# untested...
+mips-sni-sysv4)
+	if test "$GCC" = yes; then
+		PICFLAGS=-fpic
+		LDCOMBINE='$(CC) -G -Wl,-h -Wl,lib$(LIB)$(SHLIBSEXT)'
+	else
+		PICFLAGS=-Kpic
+		LDCOMBINE='$(CC) -G -h lib$(LIB)$(SHLIBSEXT)'
+	fi
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	SHLIBEXT=.so
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
+
 mips-*-netbsd*)
 	PICFLAGS=-fPIC
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	LDCOMBINE='ld -shared -soname lib$(LIB)$(SHLIBSEXT)'
-	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS)'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	PROFFLAGS=-pg
 	;;
+
 *-*-netbsd*)
 	PICFLAGS=-fpic
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBEXT=.so
 	LDCOMBINE='ld -Bshareable'
-	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS)'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	PROFFLAGS=-pg
 	;;
+
+# untested...
+*-*-freebsd*)
+	PICFLAGS=-fpic
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	LDCOMBINE='ld -Bshareable'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
+
 *-*-solaris*)
 	if test "$GCC" = yes; then
 		PICFLAGS=-fpic
@@ -1220,6 +1267,7 @@ mips-*-netbsd*)
 	CC_LINK_STATIC='$(PURE) $(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
+
 *-*-sunos*)
 	PICFLAGS=-fpic
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
@@ -1250,6 +1298,7 @@ mips-*-netbsd*)
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
+
 *-*-aix*)
 	SHLIBVEXT='.a.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBEXT=.a
@@ -1268,5 +1317,3 @@ mips-*-netbsd*)
 	RUN_ENV='LIBPATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/lib:/usr/local/lib; export LIBPATH; '
 
 esac])
-
-

@@ -1,3 +1,9 @@
+Mon Mar 24 13:49:15 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: (KRB5_LIB_PARAMS): Add support for HP/UX, FreeBSD,
+	and SNI, ported from the old top-level configure.in.  These are
+	not tested yet.
+
 Fri Mar 21 15:12:46 1997  Tom Yu  <chaoself@avalanche-breakdown.mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Add support for mips-dec-netbsd.
