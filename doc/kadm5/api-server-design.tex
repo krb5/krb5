@@ -236,7 +236,7 @@ that case, the function would have to written to take variable
 arguments (i.e. use $<$stdarg.h$>$) and extract them from the stack
 based on the API version.  Alternatively, a separate function for each
 API version could be defined, and $<$kadm5/admin.h$>$ could be written
-to \v{#define} the exported function name based on the value of
+to \v{\#define} the exported function name based on the value of
 USE_KADM5_API_VERSION.
 
 In the current system, it turns out, that isn't necessary, and future
