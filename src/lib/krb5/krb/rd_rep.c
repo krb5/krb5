@@ -56,9 +56,13 @@ krb5_ap_rep_enc_part *repl;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_keytype_array[kblock->keytype]->system;
+    if (!valid_etype(reply->enc_part.etype)) {
+	krb5_free_ap_rep(reply);
+	return KRB5_PROG_ETYPE_NOSUPP;
+    }
+    eblock.crypto_entry = krb5_csarray[reply->enc_part.etype]->system;
 
-    scratch.length = reply->enc_part.length;
+    scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {
 	krb5_free_ap_rep(reply);
 	return(ENOMEM);
@@ -73,7 +77,7 @@ krb5_ap_rep_enc_part *repl;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) reply->enc_part.data,
+    if (retval = krb5_decrypt((krb5_pointer) reply->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
 	(void) krb5_finish_key(&eblock);

@@ -67,22 +67,31 @@ krb5_data *outbuf;
     /* put together an eblock for this encryption */
 
     eblock.crypto_entry = krb5_csarray[etype]->system;
-    reply.enc_part.length = krb5_encrypt_size(scratch->length,
-					      eblock.crypto_entry);
+    reply.enc_part.etype = etype;
+    reply.enc_part.kvno = 0;		/* XXX user set? */
+
+    reply.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,
+							 eblock.crypto_entry);
     /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data, reply.enc_part.length))) {
+    if (!(scratch->data = realloc(scratch->data,
+				  reply.enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
 	xfree(scratch);
 	return ENOMEM;
     }
     bzero(scratch->data + scratch->length,
-	  reply.enc_part.length - scratch->length);
-    if (!(reply.enc_part.data = malloc(reply.enc_part.length))) {
+	  reply.enc_part.ciphertext.length - scratch->length);
+    if (!(reply.enc_part.ciphertext.data =
+	  malloc(reply.enc_part.ciphertext.length))) {
 	retval = ENOMEM;
 	goto clean_scratch;
     }
 
-#define cleanup_encpart() {(void) bzero(reply.enc_part.data, reply.enc_part.length); free(reply.enc_part.data); reply.enc_part.length = 0; reply.enc_part.data = 0;}
+#define cleanup_encpart() {\
+(void) bzero(reply.enc_part.ciphertext.data, \
+	     reply.enc_part.ciphertext.length); \
+free(reply.enc_part.ciphertext.data); \
+reply.enc_part.ciphertext.length = 0; reply.enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, kblock)) {
@@ -93,7 +102,7 @@ krb5_data *outbuf;
 
     /* call the encryption routine */
     if (retval = krb5_encrypt((krb5_pointer) scratch->data,
-			      (krb5_pointer) reply.enc_part.data,
+			      (krb5_pointer) reply.enc_part.ciphertext.data,
 			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }

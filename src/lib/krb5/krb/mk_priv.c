@@ -62,7 +62,8 @@ OLDDECLARG(krb5_data *, outbuf)
 
     if (!valid_etype(etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
-    privmsg.etype = etype; 
+    privmsg.enc_part.etype = etype; 
+    privmsg.enc_part.kvno = 0;	/* XXX allow user-set? */
 
     privmsg_enc_part.user_data = *userdata;
     privmsg_enc_part.s_address = sender_addr->address;
@@ -89,22 +90,28 @@ OLDDECLARG(krb5_data *, outbuf)
     /* put together an eblock for this encryption */
 
     eblock.crypto_entry = krb5_csarray[etype]->system;
-    privmsg.enc_part.length = krb5_encrypt_size(scratch->length,
+    privmsg.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,
 						eblock.crypto_entry);
     /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data, privmsg.enc_part.length))) {
+    if (!(scratch->data = realloc(scratch->data,
+				  privmsg.enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
 	xfree(scratch);
 	return ENOMEM;
     }
     bzero(scratch->data + scratch->length,
-	  privmsg.enc_part.length - scratch->length);
-    if (!(privmsg.enc_part.data = malloc(privmsg.enc_part.length))) {
+	  privmsg.enc_part.ciphertext.length - scratch->length);
+    if (!(privmsg.enc_part.ciphertext.data =
+	  malloc(privmsg.enc_part.ciphertext.length))) {
         retval = ENOMEM;
         goto clean_scratch;
     }
 
-#define cleanup_encpart() {(void) bzero(privmsg.enc_part.data, privmsg.enc_part.length); free(privmsg.enc_part.data); privmsg.enc_part.length = 0; privmsg.enc_part.data = 0;}
+#define cleanup_encpart() {\
+(void) bzero(privmsg.enc_part.ciphertext.data, \
+	     privmsg.enc_part.ciphertext.length); \
+free(privmsg.enc_part.ciphertext.data); \
+privmsg.enc_part.ciphertext.length = 0; privmsg.enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {
@@ -115,7 +122,7 @@ OLDDECLARG(krb5_data *, outbuf)
 
     /* call the encryption routine */
     if (retval = krb5_encrypt((krb5_pointer) scratch->data,
-			      (krb5_pointer) privmsg.enc_part.data,
+			      (krb5_pointer) privmsg.enc_part.ciphertext.data,
 			      scratch->length, &eblock,
 			      i_vector)) {
         goto clean_prockey;
@@ -123,8 +130,9 @@ OLDDECLARG(krb5_data *, outbuf)
 
     /* put last block into the i_vector */
     if (i_vector)
-	bcopy(privmsg.enc_part.data +
-	      (privmsg.enc_part.length - eblock.crypto_entry->block_length),
+	bcopy(privmsg.enc_part.ciphertext.data +
+	      (privmsg.enc_part.ciphertext.length -
+	       eblock.crypto_entry->block_length),
 	      i_vector,
 	      eblock.crypto_entry->block_length);
 	   

@@ -84,7 +84,7 @@ krb5_tkt_authent *tktauthent;
     /* fetch a server key */
     if (keyproc) {
 	retval = (*keyproc)(keyprocarg, req->ticket->server,
-			    req->ticket->skvno, &tkt_key);
+			    req->ticket->enc_part.kvno, &tkt_key);
     } else {
 	krb5_keytab keytabid;
 	krb5_keytab_entry ktentry;
@@ -98,7 +98,7 @@ krb5_tkt_authent *tktauthent;
 	}
 	if (!retval) {
 	    retval = krb5_kt_get_entry(keytabid, req->ticket->server,
-				       req->ticket->skvno, &ktentry);
+				       req->ticket->enc_part.kvno, &ktentry);
 	    (void) krb5_kt_close(keytabid);
 	    if (!retval) {
 		retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
@@ -189,9 +189,12 @@ krb5_authenticator **authpp;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_keytype_array[sesskey->keytype]->system;
+    if (!valid_etype(request->authenticator.etype))
+	return KRB5_PROG_ETYPE_NOSUPP;
 
-    scratch.length = request->authenticator.length;
+    eblock.crypto_entry = krb5_csarray[request->authenticator.etype]->system;
+
+    scratch.length = request->authenticator.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length)))
 	return(ENOMEM);
 
@@ -202,7 +205,7 @@ krb5_authenticator **authpp;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) request->authenticator.data,
+    if (retval = krb5_decrypt((krb5_pointer) request->authenticator.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
 	(void) krb5_finish_key(&eblock);

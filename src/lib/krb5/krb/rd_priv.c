@@ -75,16 +75,16 @@ OLDDECLARG(krb5_data *, outbuf)
 	return retval;
     }
     
-#define cleanup_privmsg() {(void)xfree(privmsg->enc_part.data); (void)xfree(privmsg);}
-    if (!valid_etype(privmsg->etype)) {
+#define cleanup_privmsg() {(void)xfree(privmsg->enc_part.ciphertext.data); (void)xfree(privmsg);}
+    if (!valid_etype(privmsg->enc_part.etype)) {
 	cleanup_privmsg();
 	return KRB5_PROG_ETYPE_NOSUPP; /* XXX */
     }
 			   
     /* put together an eblock for this decryption */
 
-    eblock.crypto_entry = krb5_csarray[privmsg->etype]->system;
-    scratch.length = privmsg->enc_part.length;
+    eblock.crypto_entry = krb5_csarray[privmsg->enc_part.etype]->system;
+    scratch.length = privmsg->enc_part.ciphertext.length;
     
     if (!(scratch.data = malloc(scratch.length))) {
 	cleanup_privmsg();
@@ -103,7 +103,7 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) privmsg->enc_part.data,
+    if (retval = krb5_decrypt((krb5_pointer) privmsg->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock,
 			      i_vector)) {
@@ -117,8 +117,9 @@ OLDDECLARG(krb5_data *, outbuf)
        input */
     /* put last block into the i_vector */
     if (i_vector)
-	bcopy(privmsg->enc_part.data +
-	      (privmsg->enc_part.length - eblock.crypto_entry->block_length),
+	bcopy(privmsg->enc_part.ciphertext.data +
+	      (privmsg->enc_part.ciphertext.length -
+	       eblock.crypto_entry->block_length),
 	      i_vector,
 	      eblock.crypto_entry->block_length);
 
