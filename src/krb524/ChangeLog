@@ -1,3 +1,8 @@
+2002-11-07  Tom Yu  <tlyu@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Check for *addrlen > 0 (not
+	addrlen, which is a pointer).  Patch from Dan Riley.
+
 2002-08-29  Sam Hartman  <hartmans@mit.edu>
 
 	* README: Document  new afs_krb5 configuration information

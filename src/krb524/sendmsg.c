@@ -227,7 +227,7 @@ krb524_sendto_kdc (context, message, realm, reply, local_addr, addrlen)
 
 		/* If the caller wants the local address of this socket
 		   store it here */
-		if ((local_addr != NULL) && (addrlen != NULL) && (addrlen > 0)) {
+		if ((local_addr != NULL) && (addrlen != NULL) && (*addrlen > 0)) {
 		    if (getsockname (socklist[host], local_addr, addrlen) == SOCKET_ERROR) {
 		        /* no address to get... tell the caller we got nothing */
 		        *addrlen = 0;
