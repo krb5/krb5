@@ -58,7 +58,7 @@ AC_CACHE_CHECK([for MAXHOSTNAMELEN in sys/param.h],
   [krb5_cv_header_sys_param_h_maxhostnamelen],
   [AC_TRY_COMPILE([#include <sys/param.h>],
     [int i = MAXHOSTNAMELEN;],
-    [krb5_cv_headersys_param_h_maxhostnamelen=yes],
+    [krb5_cv_header_sys_param_h_maxhostnamelen=yes],
     [krb5_cv_header_sys_param_h_maxhostnamelen=no])])
 AC_CACHE_CHECK([for MAXHOSTNAMELEN in netdb.h],
   [krb5_cv_header_netdb_h_maxhostnamelen],

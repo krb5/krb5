@@ -1,3 +1,8 @@
+2004-06-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Fix typo in setting
+	krb5_cv_header_sys_param_h_maxhostnamelen.
+
 2004-06-18  Tom Yu  <tlyu@mit.edu>
 
 	* auth_gss.h: Add prototype for xdr_rpc_gss_buf.
