@@ -1,3 +1,9 @@
+2002-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Apply fix from Kevin Coffman to
+	avoid leaking padata.
+	[pullup from trunk]
+
 2002-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c: For consistency, check for both DISALLOW_ALL_TIX
