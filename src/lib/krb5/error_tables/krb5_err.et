@@ -334,4 +334,6 @@ error_code KRB5_EAI_SERVICE,	"service name unknown"
 
 error_code KRB5_ERR_NUMERIC_REALM, "Cannot determine realm for numeric host address"
 
+error_code KRB5_ERR_BAD_S2K_PARAMS, "Invalid key generation parameters from KDC"
+
 end
