@@ -55,7 +55,7 @@ krb5_error_code krb5_get_krbhst
 	PROTOTYPE((const krb5_data *,
 		   char *** ));
 krb5_error_code krb5_free_krbhst
-	PROTOTYPE((char ** ));
+	PROTOTYPE((char * const * ));
 krb5_error_code krb5_aname_to_localname
 	PROTOTYPE((const krb5_principal,
 		   const int,
