@@ -1,5 +1,6 @@
 AC_INIT(configure.in)
-CONFIG_DIRS(client kpasswd server v4server)
+AC_WITH([krb4],v4server=v4server,v4server=)
+CONFIG_DIRS(client kpasswd server $v4server)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 CONFIG_RULES
