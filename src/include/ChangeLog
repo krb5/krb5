@@ -1,3 +1,12 @@
+2002-09-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* configure.in: Use AH_TEMPLATE to put undefined definition of
+	HAVE_STRUCT_SOCKADDR_STORAGE in krb5/autoconf.h - allowing for
+	acconfig.h to be removed.
+
+	* Makefile.in (autoconf.stmp): No longer depend on
+	$(SRCTOP)/acconfig.h.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

@@ -18,7 +18,7 @@ all-windows::
 krb5/autoconf.h: $(srcdir)/krb5/autoconf.h.in
 	(cd krb5; $(MAKE) autoconf.h)
 $(srcdir)/krb5/autoconf.h.in: $(srcdir)/krb5/autoconf.stmp
-$(srcdir)/krb5/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/acconfig.h
+$(srcdir)/krb5/autoconf.stmp: $(srcdir)/configure.in 
 	cd $(srcdir) && $(AUTOHEADER) --localdir=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
 	touch $(srcdir)/krb5/autoconf.stmp
 

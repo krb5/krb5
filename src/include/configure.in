@@ -1,5 +1,9 @@
 AC_INIT(configure.in)
 CONFIG_RULES
+dnl
+AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
+[Define if "struct sockaddr_storage" is available.])
+dnl
 AC_CONFIG_HEADER(krb5/autoconf.h)
 AC_PROG_INSTALL
 AC_PROG_AWK
