@@ -1,3 +1,10 @@
+
+Mon Aug 7 13:08:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add check for utmp.h.  Make check for utmpx.h define
+		additional symbol to work with libpty.h.
+	* sys_term.c - Fix syntax error and reinstate #ifdef LINEMODE deleted
+		by last checkin.
+
 Fri Aug  4 20:22:28 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* sys_term.c (getptyslave): Select terminal settings more likely

@@ -494,9 +494,9 @@ char *myline = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
 #endif	/* convex */
 
-static char
-int slavepid = 0;
+static pid_t slavepid = 0;
 
+#ifdef	LINEMODE
 /*
  * tty_flowmode()	Find out if flow control is enabled or disabled.
  * tty_linemode()	Find out if linemode (external processing) is enabled.
