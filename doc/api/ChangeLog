@@ -1,3 +1,8 @@
+2001-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* ccache.tex (krb5_cc_default): Fix "equivalent to" example code.
+	Patch from Michael Gerdts <Michael.Gerdts@usa.alcatel.com>.
+
 2001-06-19  Mitchell Berger  <mitchb@mit.edu>
 
 	* krb5.tex: Silly typo fixed.

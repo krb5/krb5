@@ -63,7 +63,8 @@ Returns the name of the default credentials cache; this may be equivalent to
 \end{funcdecl}
 
 Equivalent to
-\funcnamenoparens{krb5_cc_resolve}(\funcname{krb5_cc_default_name},
+\funcnamenoparens{krb5_cc_resolve}(\funcparam{context},
+\funcname{krb5_cc_default_name},
 \funcparam{ccache}).
 
 \begin{funcdecl}{krb5_cc_initialize}{krb5_error_code}{\funcinout}
