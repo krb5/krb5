@@ -266,3 +266,10 @@ EXPORTS
 	krb5_cc_set_flags
 	krb5_cc_get_type
 	krb5_rc_close		; gssapi
+	krb5_kt_close
+	krb5_kt_get_entry
+	krb5_kt_get_name
+	krb5_kt_get_type
+	krb5_kt_start_seq_get
+	krb5_kt_next_entry
+	krb5_kt_end_seq_get
