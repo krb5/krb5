@@ -132,6 +132,8 @@
 #define KRB5INT_END_DECLS
 #endif
 
+KRB5INT_BEGIN_DECLS
+
 #if TARGET_OS_MAC
     #if defined(__MWERKS__)
         #pragma import on
@@ -1414,7 +1416,8 @@ typedef struct krb5_keytab_entry_st {
     krb5_keyblock key;		/* the secret key */
 } krb5_keytab_entry;
 
-#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS && !KRB5_PRIVATE
+/* Opaque definitions for krb5_kt_* functions */
 struct _krb5_kt;
 typedef struct _krb5_kt FAR *krb5_keytab;
 #else
@@ -1474,7 +1477,7 @@ typedef struct _krb5_kt_ops {
     /* Handle for serializer */
     void * serializer;
 } krb5_kt_ops;
-#endif /* !KRB5_KEYTAB_ACCESSOR_FUNCTIONS */
+#endif /* !KRB5_KEYTAB_ACCESSOR_FUNCTIONS || KRB5_PRIVATE */
 
 #if KRB5_KEYTAB_ACCESSOR_FUNCTIONS
 char * KRB5_CALLCONV

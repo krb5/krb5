@@ -1,3 +1,12 @@
+2002-04-03 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: When KRB5_KEYTAB_ACCESSOR_FUNCTIONS is defined, 
+    we still need actual definitions for krb5_kt_ops, etc defined 
+    because krb5_kt_register uses it as a type.  
+    Updated macros to define krb5_kt_ops when KRB5_PRIVATE is 1.
+    Also added a call to KRB5INT_BEGIN_DECLS so there isn't
+    a dangling }; in krb5.h when compiling C++
+    * k5-int.h: Added krb5_kt_dfl_ops for KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+
 2002-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_c_valid_enctype, krb5_c_valid_cksumtype,

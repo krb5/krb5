@@ -1571,4 +1571,11 @@ struct _krb5_cc_ops {
 extern krb5_cc_ops *krb5_cc_dfl_ops;
 #endif /* KRB5_CCACHE_ACCESSOR_FUNCTIONS */
 
+#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+/* temporary -- this should be under lib/krb5/keytab somewhere */
+/* structures defined in krb5.h when KRB5_PRIVATE is 1 */
+extern krb5_kt_ops krb5_kt_dfl_ops;
+#endif /* KRB5_KEYTAB_ACCESSOR_FUNCTIONS */
+
+
 #endif /* _KRB5_INT_H */
