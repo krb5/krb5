@@ -147,6 +147,7 @@ int *outlen;
     const char *msg_ptr;
     krb5_int32 now;
     time_t until;
+    krb5_keyblock newkb;
 #endif
 
     /* take key off the stream, and change the database */
@@ -211,32 +212,28 @@ int *outlen;
     }
 
 #ifdef KADM5
-    /* we don't use the client-provided key itself */
-    keylow = keyhigh = 0;
-    memset(newkey, 0, sizeof(newkey));
-
-    if (no_pword) {
-      syslog(LOG_ERR, "Old-style change password request from '%s.%s@%s'!",
-		 ad->pname, ad->pinst, ad->prealm);
-	 *outlen = strlen(pw_required)+1;
-	 if (*datout = (u_char *) malloc(*outlen)) {
-	      strcpy(*datout, pw_required);
-	 } else {
-	      *outlen = 0;
-	 }
-	 return KADM_INSECURE_PW;
+    if (no_pword)
+	syslog(LOG_WARNING,
+	       "Old-style change password request from '%s.%s@%s'!",
+	       ad->pname, ad->pinst, ad->prealm);
+    else {
+	/*
+	 * We don't use the client-provided key itself, if there is a
+	 * password provided.
+	 */
+	keylow = keyhigh = 0;
+	memset(newkey, 0, sizeof(newkey));
     }
-		     
+
     syslog(LOG_INFO, "'%s.%s@%s' wants to change its password",
 	   ad->pname, ad->pinst, ad->prealm);
-
-    if (krb5_build_principal(kadm_context, &user_princ,
-			     strlen(ad->prealm),
-			     ad->prealm,
-			     ad->pname,
-			     *ad->pinst ? ad->pinst : 0, 0))
-	 /* this should never happen */
-	 return KADM_NOENTRY;
+    if ((krb5_425_conv_principal(kadm_context, ad->pname,
+				 *ad->pinst ? ad->pinst : 0,
+				 ad->prealm, &user_princ))) {
+	/* this should never happen */
+	memset(newkey, 0, sizeof(newkey));
+	return KADM_NOENTRY;
+    }
 
     *outlen = 0;
 
@@ -297,13 +294,29 @@ int *outlen;
 
     (void) kadm5_free_principal_ent(kadm5_handle, &princ_ent);
 
-    retval = kadm5_chpass_principal_util(kadm5_handle, user_princ,
-					 pword, NULL, msg_ret);
-    msg_ptr = msg_ret;
+    if (no_pword) {
+	newkb.magic = KV5M_KEYBLOCK;
+	if ((newkb.contents = (krb5_octet *)malloc(8)) == NULL) {
+	    retval = KADM_NOMEM;
+	    goto send_response;
+	}
+	newkb.length = 8;
+	newkb.enctype = ENCTYPE_DES_CBC_CRC;
+	memcpy((char *)newkb.contents, newkey, 8);
+	retval = kadm5_setv4key_principal(kadm5_handle, user_princ,
+					  &newkb);
+	memset(newkb.contents, 0, 8);
+	*msg_ret = '\0';
+    } else {
+	retval = kadm5_chpass_principal_util(kadm5_handle, user_princ,
+					     pword, NULL, msg_ret);
+	msg_ptr = msg_ret;
+    }
     (void) krb5_free_principal(kadm_context, user_princ);
 
 send_response:
 
+    memset(newkey, 0, sizeof(newkey));
     retval = convert_kadm5_to_kadm(retval);
 
     if (retval) {

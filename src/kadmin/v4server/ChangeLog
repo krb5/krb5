@@ -1,3 +1,10 @@
+Thu Jul  9 21:52:41 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_server.c (kadm_ser_cpw): Re-enable "old-style" password
+ 	changing.  Yes, it's potentially a problem due to lack of quality
+	checking, but we'll live with that because we can use
+	key-hash-based checks too.
+
 Wed Jul  8 01:32:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kadm_ser_wrap.c (kadm_ser_init): Use krb5_425_conv_principal
