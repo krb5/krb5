@@ -73,6 +73,8 @@ typedef void FAR * gss_ctx_id_t;
 
 #if defined(__STDC__) || defined(_WINDOWS)
 #define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
 #endif
 
 /*
