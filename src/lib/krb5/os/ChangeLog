@@ -1,3 +1,7 @@
+2000-09-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_us_time.c: Fixed Mac code to use the correct epoch
+
 2000-09-23  Miro Jurisic  <meeroh@mit.edu>
 
 	* c_us_time.c: Added modifications to Mac OS Microseconds timing

@@ -545,6 +545,7 @@ krb5-library-libraries-carbon-final = ¶
 
 privatekrb5-library-libraries-macos9-debug = ¶
 	{standard-libraries-macos9-debug} ¶
+	{utilitieslib-macos9-debug} ¶
 	{ccachelib-macos9-debug} ¶
 	{preferenceslib-macos9-debug} ¶
 	{loginlib-macos9-debug} ¶
@@ -556,6 +557,7 @@ privatekrb5-library-libraries-macos9-debug = ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 privatekrb5-library-libraries-macos9-final = ¶
 	{standard-libraries-macos9-final} ¶
+	{utilitieslib-macos9-final} ¶
 	{ccachelib-macos9-final} ¶
 	{preferenceslib-macos9-final} ¶
 	{loginlib-macos9-final} ¶
@@ -567,6 +569,7 @@ privatekrb5-library-libraries-macos9-final = ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 privatekrb5-library-libraries-carbon-debug = ¶
 	{standard-libraries-carbon-debug} ¶
+	{utilitieslib-carbon-debug} ¶
 	{ccachelib-carbon-debug} ¶
 	{preferenceslib-carbon-debug} ¶
 	{loginlib-carbon-debug} ¶
@@ -576,6 +579,7 @@ privatekrb5-library-libraries-carbon-debug = ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-carbon}{library-kind-debug}
 privatekrb5-library-libraries-carbon-final = ¶
 	{standard-libraries-carbon-final} ¶
+	{utilitieslib-carbon-final} ¶
 	{ccachelib-carbon-final} ¶
 	{preferenceslib-carbon-final} ¶
 	{loginlib-carbon-final} ¶
