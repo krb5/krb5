@@ -600,8 +600,19 @@ main(argc, argv)
 #else
 	try_normal(orig_argv);
 #endif
-    } else
+    } else {
+	krb5_boolean similar;
+
 	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 1);
+
+	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					    cred->keyblock.enctype, &similar))
+	    try_normal(orig_argv); /* doesn't return */
+
+	if (!similar)
+	    do_inband = 1;
+    }
+	
     rem = sock;
     
 #else

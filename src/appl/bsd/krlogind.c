@@ -1455,6 +1455,21 @@ recvauth(valid_checksum)
 
     rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 1);
 
+    {
+       krb5_boolean similar;
+
+       if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					   ticket->enc_part2->session->enctype,
+					   &similar))
+	  return(status);
+
+       if (!similar) {
+	  do_inband = 1;
+	  fprintf(stderr, "setting do_inband\n");
+       }
+    }
+
+
     getstr(netf, rusername, sizeof(rusername), "remuser");
 
     if ((status = krb5_unparse_name(bsd_context, client, &krusername)))
