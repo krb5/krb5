@@ -140,7 +140,7 @@ int g_token_size(mech, body_size)
 
 void g_make_token_header(mech, body_size, buf, tok_type)
      gss_OID mech;
-     int body_size;
+     unsigned int body_size;
      unsigned char **buf;
      int tok_type;
 {
@@ -161,17 +161,18 @@ void g_make_token_header(mech, body_size, buf, tok_type)
  * mechanism in the token does not match the mech argument.  buf and
  * *body_size are left unmodified on error.
  */
-gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize)
+gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
      gss_OID mech;
      unsigned int *body_size;
      unsigned char **buf_in;
      int tok_type;
-     int toksize;
+     unsigned int toksize_in;
 {
    unsigned char *buf = *buf_in;
    int seqsize;
    gss_OID_desc toid;
    int ret = 0;
+   int toksize = toksize_in;
 
    if ((toksize-=1) < 0)
       return(G_BAD_TOK_HEADER);

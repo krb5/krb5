@@ -155,11 +155,12 @@ int g_copy_OID_set (const gss_OID_set_desc * const in, gss_OID_set *out);
 
 int g_token_size (gss_OID mech, unsigned int body_size);
 
-void g_make_token_header (gss_OID mech, int body_size,
+void g_make_token_header (gss_OID mech, unsigned int body_size,
 			  unsigned char **buf, int tok_type);
 
 gss_int32 g_verify_token_header (gss_OID mech, unsigned int *body_size,
-			  unsigned char **buf, int tok_type, int toksize);
+			  unsigned char **buf, int tok_type, 
+				 unsigned int toksize_in);
 
 OM_uint32 g_display_major_status (OM_uint32 *minor_status,
 				 OM_uint32 status_value,

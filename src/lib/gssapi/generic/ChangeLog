@@ -1,3 +1,8 @@
+2002-11-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gssapiP_generic.h, util_token.c: Change g_make_token_header and
+	g_verfy_token_header to take an unsigned length in.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in : Add install-headers- support
