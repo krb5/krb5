@@ -1,4 +1,17 @@
 
+Thu Aug 3 11:40:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm5_defs.h - Include adm.h, update prototypes.
+	* admin,passwd.c - Rework database entry merge logic to use new database
+		entry format.  Use new callling sequences to key_{string_to,
+		encrypt,decrypt,random}_keys.
+	* srv_key.c - Rework database handling logic to use new database entry
+		format.  Store all admin keys and use the first one as the
+		admin key for now.  Rework key_{string_to,encrypt,decrypt,
+		random}_keys.
+	* srv_main.c - Handle the key/salt pair list and pass it to key_init.
+	* srv_net.c - Clean up debugging messages.
+
+
 Thu Jul 27 15:08:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c - Remove inclusion of "mit-des.h", it's no longer needed.
 		Use KRB5_MIT_DES_KEYSIZE instead of sizeof(mit_des_cblock).

@@ -1,4 +1,9 @@
 
+Thu Aug 3 11:49:35 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Ensure that padata is null with normal salt.
+	* kerberos_v4.c - Give the compiler something to compile when Kerberos
+		V4 is disabled.
+
 Thu Jul 27 15:10:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-vague-errors and --with-kdc-kdb-update
 		which define KRBCONF_VAGUE_ERRORS and KRBCONF_KDC_MODIFIES_KDB

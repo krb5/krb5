@@ -1,4 +1,12 @@
 
+Thu Aug 3 11:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* encrypt_key.c - Actually copy in the salt data which we allocated
+		space for in krb5_dbekd_encrypt_key_data().
+	* kdb_xdr.c - Correctly generate the tl_data list in krb5_decode_princ_
+		contents().  Also allow for key_data_ver to be KRB5_KDB_V1_DATA_
+		ARRAY.
+
+
 Mon Jul 31 15:55:46 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_xdr.c - Correctly parenthesize realloc() expression in create_key
 		_data().
