@@ -86,5 +86,14 @@ register int *error;
     if (val->optionals & opt_KRB5_Authenticator_seq__number) {
 	retval->seq_number = val->seq__number;
     }
+    if (val->authorization__data) {
+	retval->authorization_data =
+	    KRB5_AuthorizationData2krb5_authdata(val->authorization__data,
+						 error);
+	if (!retval->authorization_data) {
+	    krb5_free_authenticator(retval);
+	    return(0);
+	}
+    }
     return(retval);
 }

@@ -70,6 +70,19 @@ krb5_authenticator **authto;
 	    }
     }
     
+    if (authfrom->authorization_data) {
+		retval = krb5_copy_authdata(authfrom->authorization_data,
+				    &tempto->authorization_data);
+		if (retval) {
+		    xfree(tempto->subkey);
+		    krb5_free_checksum(tempto->checksum);
+		    krb5_free_principal(tempto->client);    
+		    krb5_free_authdata(tempto->authorization_data);
+		    xfree(tempto);
+		    return retval;
+		}
+    }
+
     *authto = tempto;
     return 0;
 }

@@ -95,6 +95,7 @@ typedef struct _krb5_authenticator {
     krb5_timestamp ctime;		/* client sec portion */
     krb5_keyblock *subkey;		/* true session key, optional */
     krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_authdata **authorization_data; /* New add by Ari, auth data */
 } krb5_authenticator;
 
 typedef struct _krb5_tkt_authent {

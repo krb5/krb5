@@ -70,11 +70,6 @@ static char rcsid_mk_req_ext_c[] =
 
  returns system errors
 */
-static krb5_error_code generate_authenticator PROTOTYPE((krb5_authenticator *,
-							 const krb5_creds *,
-							 const krb5_checksum *,
-							 krb5_keyblock *,
-							 krb5_int32 ));
 
 krb5_error_code
 krb5_mk_req_extended(ap_req_options, checksum, kdc_options,
@@ -130,9 +125,9 @@ krb5_data *outbuf;
 	}
     }
 #define cleanup_key() {if (newkey) krb5_free_keyblock(*newkey);}
-    if (retval = generate_authenticator(&authent, creds, checksum,
-					newkey ? *newkey : 0,
-					sequence)) {
+    if (retval = krb5_generate_authenticator(&authent, creds, checksum,
+					     newkey ? *newkey : 0,
+					     sequence, creds->authdata)) {
 	cleanup_key();
 	cleanup_ticket();
 	return retval;
@@ -231,17 +226,19 @@ request.authenticator.ciphertext.data = 0;}
 }
 
 static krb5_error_code
-generate_authenticator(authent, creds, cksum, key, seq_number)
+krb5_generate_authenticator(authent, creds, cksum, key, seq_number, authorization)
 krb5_authenticator *authent;
 const krb5_creds *creds;
 const krb5_checksum *cksum;
 krb5_keyblock *key;
 krb5_int32 seq_number;
+krb5_authdata **authorization;
 {
     authent->client = creds->client;
     authent->checksum = (krb5_checksum *)cksum;
     authent->subkey = key;
     authent->seq_number = seq_number;
+    authent->authorization_data = authorization;
 
     return(krb5_us_timeofday(&authent->ctime, &authent->cusec));
 }
