@@ -1,3 +1,12 @@
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove rule for aix.bincmds; we don't need it
+	anymore.
+
+	* makeshlib.sh: Use the linker flag -berok so that unresolved
+	symbols don't turn into link-time errors for building shared libs
+	on AIX.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* reconf: Rework syntax to detect version numbers of newer
