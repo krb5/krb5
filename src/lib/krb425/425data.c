@@ -18,7 +18,7 @@ static char rcsid_425data_c[] =
 #include <krb5/copyright.h>
 #include "krb425.h"
 
-char 			*krb425_local_realm = 0;
+char 			*_krb425_local_realm = 0;
 krb5_ccache 		_krb425_ccache = 0;
 int			_krb425_error_init = 0;
 
