@@ -121,6 +121,44 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 }
 
 
+#elif defined(WIN32) || defined(_WINDOWS)
+
+   /* Microsoft Windows NT and 95   (32bit)  */
+   /* This one works for WOW (Windows on Windows, ntvdm on Win-NT) */
+
+#include <time.h>
+#include <sys/timeb.h>
+#include <string.h>
+
+krb5_error_code
+krb5_crypto_us_timeofday(seconds, microseconds)
+register krb5_int32 *seconds, *microseconds;
+{
+    struct _timeb timeptr;
+    krb5_int32 sec, usec;
+    static krb5_int32 last_sec = 0;
+    static krb5_int32 last_usec = 0;
+
+    _ftime(&timeptr);                           /* Get the current time */
+    sec  = timeptr.time;
+    usec = timeptr.millitm;
+
+    if (sec == last_sec) {                      /* Same as last time??? */
+        usec = ++last_usec;                     /* Yep, so do microseconds */
+        if (usec >= 1000000) {
+            ++sec;
+            usec = 0;
+        }
+    }
+    last_sec = sec;                             /* Remember for next time */
+    last_usec = usec;
+
+    *seconds = sec;                             /* Return the values */
+    *microseconds = usec;
+
+    return 0;
+}
+
 #elif defined (_MSDOS)
 
 
