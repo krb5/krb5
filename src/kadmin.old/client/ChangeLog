@@ -1,3 +1,11 @@
+Fri Apr 28 21:15:47 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadmin.c (main): Don't free the credentials cache twice in case
+		of an error!
+
+	* Makefile.in (kadmin): Use $(LD) instead of $(CC) so that we can
+		do purify checking.
+
 Thu Apr 20 18:18:48 1995  Mark Eichin  <eichin@cygnus.com>
 
 	Changes from Ian Taylor <ian@cygnus.com> to support testsuite.

@@ -38,7 +38,7 @@ OBJS = \
 all::	kadmin
 
 kadmin: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
+	$(LD) $(CFLAGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kadmin ${DESTDIR}$(CLIENT_BINDIR)/kadmin

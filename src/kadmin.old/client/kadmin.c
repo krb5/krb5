@@ -184,7 +184,6 @@ main(argc,argv)
 	/* Initiate Link to Server */
     if ((retval = adm5_init_link(context, requested_realm, port,
 				 &local_socket))) {
-	(void) krb5_cc_destroy(context, cache);
 	exit(1);
     } 
 
