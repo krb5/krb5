@@ -51,7 +51,7 @@
 #endif
 /* AdminMandir: manual page directory for administrative man pages */
 #ifndef AdminMandir
-#define AdminMandir $(KRB5ROOT)/man/man8
+#define AdminMandir $(KRB5ROOT)/man/man$(ADMIN_MANSUFFIX)
 #endif
 
 /* ServerManSuffix: man page suffix for server programs */
@@ -60,7 +60,7 @@
 #endif
 /* ServerMandir: manual page directory for server man pages */
 #ifndef ServerMandir
-#define ServerMandir $(KRB5ROOT)/man/man8
+#define ServerMandir $(KRB5ROOT)/man/man$(SERVER_MANSUFFIX)
 #endif
 
 /* ClientManSuffix: man page suffix for client programs */
@@ -69,7 +69,16 @@
 #endif
 /* ClientMandir: manual page directory for client man pages */
 #ifndef ClientMandir
-#define ClientMandir $(KRB5ROOT)/man/man1
+#define ClientMandir $(KRB5ROOT)/man/man$(CLIENT_MANSUFFIX)
+#endif
+
+/* FileManSuffix: man page suffix for files */
+#ifndef FileManSuffix
+#define FileManSuffix 5
+#endif
+/* FileMandir: manual page directory for file man pages */
+#ifndef FileMandir
+#define FileMandir $(KRB5ROOT)/man/man$(FILE_MANSUFFIX)
 #endif
 
 /*
@@ -139,17 +148,11 @@
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
 #endif
 
-#if HasNdbm
-#define DbmLib
-#else
-#define DbmLib -ldbm
-#endif
-
 /* If you have the Hesiod software and libraries installed, and want to
    use it in some application programs, then turn these on.  If they're
    not turned on, they are left empty in Project.tmpl */
 #define HesiodDefines -DHESIOD
-#define HesiodLibs -lhesiod
+#define HesiodLibs /usr/athena/lib/libhesiod.a
 
 #if 0
 /* not yet in use, but maybe someday... */
@@ -168,12 +171,12 @@
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
 
-#define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
 #define IsodeDir /mit/isode/isode-7.0
+#define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
 
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
-#define PepsyCmd $(ISODE)/@sys/bin/pepsy
+#define PepsyCmd IsodeDir/@sys/bin/pepsy
 #endif
 
 #define UseImakeInstalled /* -- turn on if you have imake installed */
@@ -190,6 +193,8 @@
    				  to get V4 libraries, define it here
 				  to something else */
 
+#define Krb4LibList /usr/athena/lib/libkrb.a $(KLIBLOC) -l$(DES425LIB)
+#define Krb4KdbList /usr/athena/lib/libkdb.a
 
 /* the following might want to be put into a specific architecture
    definition file */
@@ -204,11 +209,14 @@
    			  (might want to be in the architecture-specific
 			   configuration file) */
 
+#if 0
 /* alternate library search paths, if needed for some system libraries */
 #define LdLibLocations -L/usr/athena/lib
+#endif
 
 /* additional include paths, if needed, such as those needed
-   to get special include files, like <ss/ss.h> or <com_err.h> */
+   to get special include files, like <ss/ss.h> or <com_err.h>,
+   or Kerberos V4 include files */
 #define	StandardIncludes -I/usr/athena/include
 
 #if defined(AIXArchitecture) && OSMajorVersion == 3
@@ -235,13 +243,13 @@
 #endif
 
 #if defined(VaxArchitecture) || defined(RtArchitecture)
-#ifdef HasGCC
+#if HasGcc
 #ifdef SourceTop
 #define	STDCTopIncludes	-I$(SRCTOP)/include/stdc-incl
 #else
 #define	STDCTopIncludes	-I$(TOP)/include/stdc-incl
 #endif
-#endif /* HasGCC */
+#endif /* HasGcc */
 #endif
 
 #ifdef UltrixArchitecture
