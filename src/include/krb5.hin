@@ -965,7 +965,7 @@ typedef struct _krb5_authenticator {
     krb5_int32 cusec;			/* client usec portion */
     krb5_timestamp ctime;		/* client sec portion */
     krb5_keyblock *subkey;		/* true session key, optional */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
     krb5_authdata **authorization_data; /* New add by Ari, auth data */
 } krb5_authenticator;
 
@@ -1091,7 +1091,7 @@ typedef struct _krb5_ap_rep_enc_part {
     krb5_timestamp ctime;		/* client time, seconds portion */
     krb5_int32 cusec;			/* client time, microseconds portion */
     krb5_keyblock *subkey;		/* true session key, optional */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
 } krb5_ap_rep_enc_part;
 
 typedef struct _krb5_response {
@@ -1159,7 +1159,7 @@ typedef struct _krb5_pwd_data {
 typedef struct krb5_replay_data { 
     krb5_timestamp	timestamp; 
     krb5_int32		usec;
-    krb5_int32		seq; 
+    krb5_ui_4		seq; 
 } krb5_replay_data;
 
 /* flags for krb5_auth_con_genaddrs() */
@@ -1635,7 +1635,7 @@ krb5_error_code krb5_generate_subkey
 		const krb5_keyblock *, krb5_keyblock **);
 krb5_error_code krb5_generate_seq_number
 	(krb5_context,
-		const krb5_keyblock *, krb5_int32 *);
+		const krb5_keyblock *, krb5_ui_4 *);
 #endif
 krb5_error_code KRB5_CALLCONV krb5_get_server_rcache
 	(krb5_context,

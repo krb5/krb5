@@ -1,3 +1,8 @@
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* gen_seqnum.c (krb5_generate_seq_number): Fix think-o on sequence
+	number mask.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* gic_pwd.c (krb5int_populate_gic_opt): returns void
@@ -20,6 +25,13 @@
 	krb5_get_in_tkt_password 
 
 	* Makefile.in (SRCS): Delete in_tkt_pwd.c
+
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* auth_con.h: Sequence numbers are now unsigned.
+
+	* gen_seqnum.c (krb5_generate_seq_number): Constrain initial
+	sequence number space to facilitate backwards compatibility.
 
 2003-05-16  Ken Raeburn  <raeburn@mit.edu>
 

@@ -1,3 +1,7 @@
+2003-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: Sequence number of krb5_replay_data should be unsigned.
+
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Default KRB5_DEPRECATED to 0.  Default KRB5_PRIVATE to
@@ -10,6 +14,12 @@
 2003-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Prototype krb5int_populate_gic_opt
+
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Sequence numbers are now unsigned.
+
+	* krb5.hin: Sequence numbers are now unsigned.
 
 2003-05-16  Ken Raeburn  <raeburn@mit.edu>
 

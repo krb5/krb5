@@ -644,7 +644,7 @@ asn1_error_code asn1_encode_krb_safe_body(asn1buf *buf, const krb5_safe *val, un
     asn1_addfield(val->r_address,5,asn1_encode_host_address);
   asn1_addfield(val->s_address,4,asn1_encode_host_address);
   if(val->seq_number)
-    asn1_addfield(val->seq_number,3,asn1_encode_integer);
+    asn1_addfield(val->seq_number,3,asn1_encode_unsigned_integer);
   if(val->timestamp){
     asn1_addfield(val->usec,2,asn1_encode_integer);
     asn1_addfield(val->timestamp,1,asn1_encode_kerberos_time);
