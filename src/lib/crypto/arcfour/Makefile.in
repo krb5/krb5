@@ -1,0 +1,37 @@
+thisconfigdir=./..
+myfulldir=lib/crypto/arcfour
+mydir=arcfour
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=arcfour
+##DOS##OBJFILE=..\$(OUTPRE)arcfour.lst
+##WIN16##LIBNAME=..\crypto.lib
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS=\
+	arcfour.o	\
+	string_to_key.o
+
+OBJS=\
+	$(OUTPRE)arcfour.$(OBJEXT)	\
+	$(OUTPRE)string_to_key.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/arcfour.c	\
+	$(srcdir)/string_to_key.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
