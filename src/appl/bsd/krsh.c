@@ -80,7 +80,10 @@ void	try_normal();
 #ifdef KERBEROS
 #define RLOGIN_PROGRAM KRB5_PATH_RLOGIN
 #else /* KERBEROS */
-#define RLOGIN_PROGRAM "/usr/ucb/rlogin"
+#ifndef UCB_RLOGIN
+#define UCB_RLOGIN "/usr/ucb/rlogin"
+#endif
+#define RLOGIN_PROGRAM UCB_RLOGIN
 #endif  /* KERBEROS */
 #endif /* !RLOGIN_PROGRAM */
      

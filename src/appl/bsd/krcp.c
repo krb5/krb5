@@ -97,7 +97,10 @@ int	des_write(), des_read();
 void	send_auth(), answer_auth();
 int	encryptflag = 0;
 
+#ifndef UCB_RCP
 #define	UCB_RCP	"/bin/rcp"
+#endif
+
 #else /* !KERBEROS */
 #define	des_read	read
 #define	des_write	write

@@ -1,3 +1,13 @@
+Mon Dec 26 13:51:20 1994  Richard Basch  (probe@tardis)
+
+	* Makefile.in
+	* configure.in
+	* krcp.c
+	* krsh.c
+	* krlogin.c
+	Removed the hard-coded paths for the BSD rlogin/rcp/rsh programs.
+	Let "configure" find the programs for us...
+
 Mon Dec 19 15:09:57 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krcp.c (des_write):

@@ -159,7 +159,9 @@ int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
 
-#define      UCB_RLOGIN      "/usr/ucb/rlogin"
+#ifndef UCB_RLOGIN
+#define UCB_RLOGIN      "/usr/ucb/rlogin"
+#endif
 
 #include "rpaths.h"
 #else /* !KERBEROS */
