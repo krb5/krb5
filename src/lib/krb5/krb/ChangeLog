@@ -1,3 +1,9 @@
+2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_ctx.c (init_common), gic_pwd.c (krb5_get_as_key_password,
+	krb5_get_init_creds_password), preauth2.c (pa_sam): Add support
+	for krb5_get_prompt_types().
+
 2000-03-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth2.c (pa_function): Called function now takes new

@@ -229,3 +229,20 @@ krb5_prompter_posix(krb5_context context,
 }
 #endif /* !_WIN32 */
 #endif /* !MSDOS */
+
+void
+krb5int_set_prompt_types(context, types)
+    krb5_context context;
+    krb5_prompt_type *types;
+{
+    context->prompt_types = 0;
+}
+
+KRB5_DLLIMP
+krb5_prompt_type*
+KRB5_CALLCONV
+krb5_get_prompt_types(context)
+    krb5_context context;
+{
+    return context->prompt_types;
+}

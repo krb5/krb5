@@ -247,6 +247,7 @@ krb5_error_code pa_sam(krb5_context context,
     char			prompt[100], response[100];
     krb5_data			response_data;
     krb5_prompt			kprompt;
+    krb5_prompt_type		prompt_type;
     krb5_data			defsalt;
     krb5_sam_challenge		*sam_challenge = 0;
     krb5_sam_response		sam_response;
@@ -287,12 +288,17 @@ krb5_error_code pa_sam(krb5_context context,
     kprompt.prompt = prompt;
     kprompt.hidden = sam_challenge->sam_challenge.length?0:1;
     kprompt.reply = &response_data;
+    prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
 
+    /* PROMPTER_INVOCATION */
+    krb5int_set_prompt_types(context, &prompt_type);
     if (ret = ((*prompter)(context, prompter_data, name,
 			   banner, 1, &kprompt))) {
 	krb5_xfree(sam_challenge);
+	krb5int_set_prompt_types(context, 0);
 	return(ret);
     }
+    krb5int_set_prompt_types(context, 0);
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
     if (sam_challenge->sam_nonce == 0) {

@@ -110,6 +110,7 @@ EXPORTS
 	krb5_parse_name
 	krb5_principal_compare
 	krb5_prompter_posix
+	krb5_get_prompt_types
 	krb5_rd_cred
 	krb5_rd_error
 	krb5_rd_priv

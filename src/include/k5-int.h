@@ -943,7 +943,6 @@ void krb5_free_etype_info
  * End "preauth.h"
  */
 
-
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     KRB5_NPROTOTYPE((krb5_context,
 		     krb5_principal,
@@ -1022,6 +1021,7 @@ struct _krb5_context {
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
 	int		scc_default_format;
+	krb5_prompt_type *prompt_types;
 #ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
 #endif /* KRB5_DNS_LOOKUP */
@@ -1510,6 +1510,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	KRB5_PROTOTYPE((krb5_context, krb5_ccache, krb5_flags,
 			krb5_creds *, krb5_creds *));
+
+void krb5int_set_prompt_types
+	KRB5_PROTOTYPE((krb5_context, krb5_prompt_type *));
 
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset

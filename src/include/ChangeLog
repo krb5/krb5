@@ -1,3 +1,8 @@
+2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin: Add krb5_get_prompt_types() and related defs..
+	* k5-int.h: Add krb5int_set_prompt_types().
+
 2000-03-13  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Update prototype to sync with changes in preauth2.c.

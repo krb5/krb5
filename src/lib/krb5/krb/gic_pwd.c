@@ -19,6 +19,7 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
     char *clientstr;
     char promptstr[1024];
     krb5_prompt prompt;
+    krb5_prompt_type prompt_type;
 
     password = (krb5_data *) gak_data;
 
@@ -53,10 +54,16 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	prompt.prompt = promptstr;
 	prompt.hidden = 1;
 	prompt.reply = password;
+	prompt_type = KRB5_PROMPT_TYPE_PASSWORD;
 
+	/* PROMPTER_INVOCATION */
+	krb5int_set_prompt_types(context, &prompt_type);
 	if (ret = (((*prompter)(context, prompter_data, NULL, NULL,
-				1, &prompt))))
+				1, &prompt)))) {
+	    krb5int_set_prompt_types(context, 0);
 	    return(ret);
+	}
+	krb5int_set_prompt_types(context, 0);
     }
 
     if ((salt->length == -1) && (salt->data == NULL)) {
@@ -98,6 +105,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    krb5_data pw0, pw1;
    char banner[1024], pw0array[1024], pw1array[1024];
    krb5_prompt prompt[2];
+   krb5_prompt_type prompt_types[sizeof(prompt)/sizeof(prompt[0])];
 
    master = 0;
    as_reply = NULL;
@@ -193,10 +201,12 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    prompt[0].prompt = "Enter new password";
    prompt[0].hidden = 1;
    prompt[0].reply = &pw0;
+   prompt_types[0] = KRB5_PROMPT_TYPE_NEW_PASSWORD;
 
    prompt[1].prompt = "Enter it again";
    prompt[1].hidden = 1;
    prompt[1].reply = &pw1;
+   prompt_types[1] = KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN;
 
    strcpy(banner, "Password expired.  You must change it now.");
 
@@ -204,9 +214,13 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
       pw0.length = sizeof(pw0array);
       pw1.length = sizeof(pw1array);
 
+      /* PROMPTER_INVOCATION */
+      krb5int_set_prompt_types(context, prompt_types);
       if (ret = ((*prompter)(context, data, 0, banner,
 			     sizeof(prompt)/sizeof(prompt[0]), prompt)))
 	 goto cleanup;
+      krb5int_set_prompt_types(context, 0);
+
 
       if (strcmp(pw0.data, pw1.data) != 0) {
 	 ret = KRB5_LIBOS_BADPWDMATCH;
@@ -271,6 +285,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 			     &master, &as_reply);
 
 cleanup:
+   krb5int_set_prompt_types(context, 0);
    /* if getting the password was successful, then check to see if the
       password is about to expire, and warn if so */
 
@@ -300,6 +315,7 @@ cleanup:
 		    hours/24);
 
 	 /* ignore an error here */
+         /* PROMPTER_INVOCATION */
 	 (*prompter)(context, data, 0, banner, 0, 0);
       }
    }

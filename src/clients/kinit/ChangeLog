@@ -1,3 +1,7 @@
+2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kinit.c: Add support for krb5_get_prompt_types.
+
 2000-03-07  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.c: Add support for using both -4 and -5.  Default to krb5

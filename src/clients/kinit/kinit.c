@@ -240,9 +240,9 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1, col2)
     fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
     fprintf(stderr, "\t   (Default behavior is to try %s%s%s%s)\n",
 	    default_k5?"Kerberos 5":"",
-            (default_k5 && default_k4)?" and ":"",
+	    (default_k5 && default_k4)?" and ":"",
 	    default_k4?"Kerberos 4":"",
-            (!default_k5 && !default_k4)?"neither":"");
+	    (!default_k5 && !default_k4)?"neither":"");
     ULINE("\t", "-V verbose",                   OPTTYPE_EITHER);
     ULINE("\t", "-l lifetime",                  OPTTYPE_EITHER);
     ULINE("\t", "-s start time",                OPTTYPE_KRB5);
@@ -679,11 +679,40 @@ k4_end(k4)
     memset(k4, 0, sizeof(*k4));
 }
 
+static char stash_password[1024];
+static int got_password = 0;
+
+krb5_error_code
+KRB5_CALLCONV
+kinit_prompter(
+    krb5_context ctx,
+    void *data,
+    const char *name,
+    const char *banner,
+    int num_prompts,
+    krb5_prompt prompts[]
+    )
+{
+    int i;
+    krb5_prompt_type *types;
+    krb5_error_code rc =
+	krb5_prompter_posix(ctx, data, name, banner, num_prompts, prompts);
+    if (!rc && (types = krb5_get_prompt_types(ctx)))
+	for (i = 0; i < num_prompts; i++)
+	    if ((types[i] == KRB5_PROMPT_TYPE_PASSWORD) ||
+		(types[i] == KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN))
+	    {
+		strncpy(stash_password, prompts[i].reply->data,
+			sizeof(stash_password));
+		got_password = 1;
+	    }
+    return rc;
+}
+
 int
-k5_kinit(opts, k5, password)
+k5_kinit(opts, k5)
     struct k_opts* opts;
     struct k5_data* k5;
-    char* password;
 {
     char* progname = progname_v5;
     int notix = 1;
@@ -742,7 +771,7 @@ k5_kinit(opts, k5, password)
     switch (opts->action) {
     case INIT_PW:
 	code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
-					    password, krb5_prompter_posix, 0,
+					    0, kinit_prompter, 0,
 					    opts->starttime, 
 					    opts->service_name,
 					    &options);
@@ -823,10 +852,10 @@ k5_kinit(opts, k5, password)
 }
 
 int
-k4_kinit(opts, k4, password)
+k4_kinit(opts, k4, ctx)
     struct k_opts* opts;
     struct k4_data* k4;
-    char* password;
+    krb5_context ctx;
 {
     char* progname = progname_v4;
     int k_errno = 0;
@@ -852,17 +881,37 @@ k4_kinit(opts, k4, password)
     switch (opts->action)
     {
     case INIT_PW:
+	if (!got_password) {
+	    int pwsize = sizeof(stash_password);
+	    krb5_error_code code;
+
+	    sprintf(prompt, "Password for %s: ", opts.principal_name);
+	    password[0] = 0;
+	    /*
+	      Note: krb5_read_password does not actually look at the
+	      context, so we're ok even if we don't have a context.  If
+	      we cannot dynamically load krb5, we can substitute any
+	      decent read password function instead of the krb5 one.
+	    */
+	    code = krb5_read_password(ctx, prompt, 0, stash_password, &pwsize);
+	    if (code || pwsize == 0)
+	    {
+		fprintf(stderr, "Error while reading password for '%s'\n",
+			opts.principal_name);
+		memset(stash_password, 0, sizeof(stash_password));
+		return 0;
+	    }
+	    got_password = 1;
+	}
 	k_errno = krb_get_pw_in_tkt(k4->aname, k4->inst, k4->realm, "krbtgt", 
-				    k4->realm, k4->lifetime, password);
+				    k4->realm, k4->lifetime, stash_password);
 
 	if (k_errno) {
-#ifndef HAVE_KRB524
 	    fprintf(stderr, "%s: %s\n", progname, 
 		    krb_get_err_text(k_errno));
 	    if (authed_k5)
 		fprintf(stderr, "Maybe your KDC does not support v4.  "
 			"Try the -5 option next time.\n");
-#endif
 	    return 0;
 	}
 	return 1;
@@ -994,7 +1043,6 @@ main(argc, argv)
     struct k_opts opts;
     struct k5_data k5;
     struct k4_data k4;
-    char password[255];
 
     progname = GET_PROGNAME(argv[0]);
     progname_v5 = getvprogname("5");
@@ -1029,38 +1077,14 @@ main(argc, argv)
     got_k5 = k5_begin(&opts, &k5, &k4);
     got_k4 = k4_begin(&opts, &k4);
 
-    if (opts.action == INIT_PW)
-    {
-	char prompt[255];
-	int pwsize = sizeof(password);
-	krb5_error_code code;
-
-	sprintf(prompt, "Password for %s: ", opts.principal_name);
-	password[0] = 0;
-	/*
-	  Note: krb5_read_password does not actually look at the
-	  context, so we're ok even if we don't have a context.  If
-	  we cannot dynamically load krb5, we can substitute any
-	  decent read password function instead of the krb5 one.
-	*/
-	code = krb5_read_password(k5.ctx, prompt, 0, password, &pwsize);
-	if (code || pwsize == 0)
-	{
-	    fprintf(stderr, "Error while reading password for '%s'\n",
-		    opts.principal_name);
-	    memset(password, 0, sizeof(password));
-	    exit(1);
-	}
-    }
-
-    authed_k5 = k5_kinit(&opts, &k5, password);
-    authed_k4 = k4_kinit(&opts, &k4, password);
-    memset(password, 0, sizeof(password));
-
+    authed_k5 = k5_kinit(&opts, &k5);
 #ifdef HAVE_KRB524
-    if (!authed_k4 && authed_k5)
+    if (authed_k5)
 	authed_k4 = try_convert524(&k5);
 #endif
+    if (!authed_k4)
+	authed_k4 = k4_kinit(&opts, &k4, k5.ctx);
+    memset(stash_password, 0, sizeof(stash_password));
 
     if (authed_k5 && opts.verbose)
 	fprintf(stderr, "Authenticated to Kerberos v5\n");
