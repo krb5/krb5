@@ -30,7 +30,7 @@ build_pwfile: build_pwfile.o $(DB_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 		$(KRB4COMPAT_LIBS) $(HESIOD_LIBS)
 
 install::
-	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(SERVER_BINDIR)/$(PROG)
 
 clean::
 	$(RM) $(PROG) $(OBJS) build_pwfile build_pwfile.o
