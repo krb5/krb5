@@ -1,3 +1,7 @@
+Sat Jun 10 19:06:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gss-misc.c (recv_token): Initialize local variable to 0.
+
 Sat Jun 10 00:28:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gss-misc.c (recv_token): Allow for partial reads while reading

@@ -114,7 +114,7 @@ int recv_token(s, tok)
      gss_buffer_t tok;
 {
      int ret;
-     int readsofar;
+     int readsofar = 0;
 
      if (display_file == 0)
 	 display_file = stderr;
