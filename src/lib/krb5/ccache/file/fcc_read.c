@@ -31,6 +31,7 @@ static char rcsid_fcc_read_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
+#include <errno.h>
 #include "fcc.h"
 
 #define CHECK(ret) if (ret != KRB5_OK) goto errout;
@@ -105,11 +106,14 @@ krb5_fcc_read_principal(id, princ)
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;
-    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
-    if (tmpprinc->data == 0) {
-	free((char *)tmpprinc);
-	return KRB5_CC_NOMEM;
-    }
+    if (length) {
+	    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
+	    if (tmpprinc->data == 0) {
+		    free((char *)tmpprinc);
+		    return KRB5_CC_NOMEM;
+	    }
+    } else
+	    tmpprinc->data = 0;
     tmpprinc->length = length;
     tmpprinc->type = type;
 
@@ -186,6 +190,8 @@ krb5_fcc_read_keyblock(id, keyblock)
      CHECK(kret);
      kret = krb5_fcc_read_int(id, &keyblock->length);
      CHECK(kret);
+     if ( keyblock->length == 0 )
+	     return KRB5_OK;
      keyblock->contents = (unsigned char *) malloc(keyblock->length*
 						   sizeof(krb5_octet));
      if (keyblock->contents == NULL)
@@ -265,6 +271,9 @@ krb5_fcc_read_addr(id, addr)
 
      kret = krb5_fcc_read_int(id, &addr->length);
      CHECK(kret);
+
+     if (addr->length == 0)
+	     return KRB5_OK;
 
      addr->contents = (krb5_octet *) malloc(addr->length);
      if (addr->contents == NULL)
@@ -400,6 +409,9 @@ krb5_fcc_read_authdatum(id, a)
     kret = krb5_fcc_read_int(id, &a->length);
     CHECK(kret);
     
+    if (a->length == 0 )
+	    return KRB5_OK;
+
     a->contents = (krb5_octet *) malloc(a->length);
     if (a->contents == NULL)
 	return KRB5_CC_NOMEM;
