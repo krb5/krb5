@@ -748,7 +748,7 @@ void source(argc, argv)
 	    }
 	}
 	(void) sprintf(buf, "C%04o %ld %s\n",
-		       stb.st_mode&07777, stb.st_size, last);
+		       (int) stb.st_mode&07777, (long ) stb.st_size, last);
 	(void) des_write(rem, buf, strlen(buf));
 	if (response() < 0) {
 	    (void) close(f);

@@ -1,3 +1,10 @@
+Sat Aug 10 16:22:34 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krcp.c (source): Cast stb.st_size to a long before printing it.
+  	On NetBSD, it's a quad, so the following pointer is ignored and
+ 	all files look null.  We could special case NetBSD, but casting is
+ 	somewhat cleaner if we aren't dealing with 2g+ files.
+e
 Mon Jun 24 09:48:11 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krsh.c (main): Fix typo so that krsh doesn't exit when using the
