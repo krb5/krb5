@@ -277,8 +277,10 @@ char *prog;
 			error_message(retval));
 	(void) sprintf(retbuf, "kadmind error during recvauth: %s\n", 
 			error_message(retval));
-	exit(1);
+	krb5_free_keyblock(cpw_key.key);
+	goto finish;
     }
+    krb5_free_keyblock(cpw_key.key);
 
     /* Check if ticket was issued using password (and not tgt)
      * within the last 5 minutes
@@ -355,6 +357,7 @@ char *prog;
 			0,
 			0,
 			&msg_data))) {
+	free(inbuf.data);
 	syslog(LOG_ERR, "kadmind error: rd_priv:%s\n", error_message(retval));
 	goto finish;
     }
@@ -427,6 +430,7 @@ char *prog;
         /* Send Final Reply to Client */
     if (retval = krb5_write_message(&client_server_info.client_socket,
 					&msg_data)){
+	free(msg_data.data);
 	syslog(LOG_ERR, "Error Performing Final Write: %s",
 			error_message(retval));
 	retval = 1;

@@ -1,0 +1,15 @@
+Fri Jun 24 20:39:37 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* adm_process.c (process_client): Plug memory leaks
+
+	* adm_adm_func. (adm_inq_old_key): Plug memory leaks, return error
+	  when adm_fmt_prt returns an error
+
+	* adm_adm_func.c (adm_mod_old_key): Plug memory leaks, report error
+	  if put_principal returns an error.
+
+	* adm_adm_func.c (adm_change_pwd_rnd): Fix syslog information
+
+	* adm_adm_func.c (adm_build_key): Plug memory leak
+
+

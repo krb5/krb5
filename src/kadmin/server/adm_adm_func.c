@@ -154,6 +154,7 @@ krb5_db_entry entry;
     
     /* Send private message to Client */
     if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+	free(msg_data.data);
 	com_err("adm_build_key", 0, "Error Performing Password Write");
 	return(5);		/* Protocol Failure */
     }
@@ -280,7 +281,7 @@ krb5_ticket *client_creds;
 
     
     syslog(LOG_AUTH | LOG_INFO, 
-	   "Remote Administrative Addition Request for %s by %s", 
+	   "Remote Administrative Random Password Change Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
     if (retval = krb5_parse_name(customer_name, &newprinc)) {
@@ -523,6 +524,7 @@ krb5_ticket *client_creds;
 	
 	if (!adm_princ_exists("adm_mod_old_key", newprinc,
 			      &entry, &nprincs)) {
+	    krb5_db_free_principal(&entry, nprincs);
 	    com_err("adm_mod_old_key", 0, 
 		    "principal '%s' is not in the database", 
 		    customer_name);
@@ -562,6 +564,7 @@ krb5_ticket *client_creds;
 	free(outbuf.data);
 	
 	if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+	    free(msg_data.data);
 	    krb5_free_principal(newprinc);
 	    krb5_db_free_principal(&entry, nprincs);
 	    com_err("adm_mod_old_key", 0, 
@@ -680,6 +683,12 @@ krb5_ticket *client_creds;
 	}
 	
 	retval = krb5_db_put_principal(&entry, &one);
+	if (retval) {
+	    com_err("adm_mod_old_key", retval, "while storing principal");
+	    krb5_free_principal(newprinc);
+	    krb5_db_free_principal(&entry, nprincs);
+	    return(8);		/* Update failed */
+	}
 	one = 1;
     }	/* for */
     
@@ -746,6 +755,7 @@ krb5_ticket *client_creds;
     
     if (!adm_princ_exists("adm_inq_old_key", newprinc,
 			  &entry, &nprincs)) {
+	krb5_db_free_principal(&entry, nprincs);
 	krb5_free_principal(newprinc);
 	free(fullname);
 	com_err("adm_inq_old_key", 0, "principal '%s' is not in the database", 
@@ -767,6 +777,7 @@ krb5_ticket *client_creds;
 	krb5_free_principal(newprinc);
 	free(fullname);
 	com_err("adm_inq_old_key", 0, "Unable to Format Inquiry Data");
+	return(5);		/* XXX protocol failure --- not right, but.. */
     }
     outbuf.length = strlen(outbuf.data);
     krb5_db_free_principal(&entry, nprincs);
@@ -788,9 +799,11 @@ krb5_ticket *client_creds;
 	free(outbuf.data);
 	return(5);		/* Protocol Failure */
     }
+    free(outbuf.data);
     
     /* Send Inquiry Information */
     if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+	free(msg_data.data);
 	com_err("adm_inq_old_key", 0, "Error Performing Write");
 	return(5);		/* Protocol Failure */
     }
@@ -819,6 +832,8 @@ krb5_ticket *client_creds;
 	free(inbuf.data);
 	return(5);		/* Protocol Failure */
     }
+    
+    /* XXX Decrypt client response.... and we don't use it?!? */
     
     free(msg_data.data);
     free(inbuf.data);
