@@ -4,7 +4,13 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
+EHDRDIR=$(BUILDTOP2)$(S)include$(S)krb5
+
+# The "unixmac" and "includes" rules need to run in Makefile.in,
+# without all the support glop like $(S) and $(BUILDTOP)...so, fake it.
+BUILDTOP2 = ../../..
+SRCTOP2 = $(BUILDTOP2)
+EHDRDIR2=$(BUILDTOP2)/include/krb5
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
@@ -15,11 +21,11 @@ SRCS=$(ETSRCS) init_ets.c
 all:: all-$(WHAT)
 
 all-unix:: $(HDRS) includes $(OBJS)
-all-mac:: $(HDRS) $(OBJS)
+all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
 
-unixmac: $(HDRS) $(SRCS)
+unixmac: $(HDRS) includes $(SRCS)
 
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
@@ -60,5 +66,28 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(HDRS) $(ETSRCS)
-
+clean-mac:
+	$(RM) $(HDRS) $(ETSRCS)
 clean-windows::
+
+
+includes:: $(HDRS)
+	for x in $(HDRS); do \
+	if cmp $$x $(EHDRDIR2)/$$x >/dev/null 2>&1; then :; \
+	else \
+		(set -x; rm -f $(EHDRDIR2)/$$x;	cp $$x $(EHDRDIR2)/$$x) \
+	fi; done
+
+clean::
+	for x in $(HDRS); do \
+		rm -f $(EHDRDIR2)/$$x; \
+	done
+
+.SUFFIXES:  .h .c .et .ct
+
+.et.h:
+	awk -f $(SRCTOP2)/util/et/et_h.awk outfile=$*.h $<
+
+.et.c:
+	awk -f $(SRCTOP2)/util/et/et_c.awk outfile=$*.c $<
+

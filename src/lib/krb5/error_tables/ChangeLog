@@ -1,3 +1,15 @@
+Tue Mar 28 18:29:44 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (BUILDTOP2, etc):  Make it possible
+	to build the error tables on Unix before a Mac build.
+	(all-mac):  Don't build $(HDRS) on Mac.
+	(unixmac):  Build `includes'.
+	(clean-mac):  Add.
+	(includes, clean, .SUFFIXES, .et.h, .et.c):  Add, to make it
+	possible to run `make -f Makefile.in unixmac' successfully.
+	* configure.in (ASN1_{HDRS,OBJS,SRCS, BOGUS):  Remove, unused.
+	(CopyHeader rules):  Remove, they're now in Makefile.in.
+
 Fri Mar 24 14:25:15 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in (install): Add install rule for the error table

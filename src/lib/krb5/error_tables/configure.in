@@ -5,14 +5,5 @@ AC_SET_BUILDTOP
 ET_RULES
 SS_RULES
 KRB_INCLUDE
-AC_SUBST(ASN1_HDRS)
-AC_SUBST(ASN1_OBJS)
-AC_SUBST(ASN1_SRCS)
-AC_SUBST(BOGUS)
 SubdirLibraryRule([${OBJS}])
-CopyHeader(krb5_err.h,[$(EHDRDIR)])
-CopyHeader(kv5m_err.h,[$(EHDRDIR)])
-CopyHeader(kdb5_err.h,[$(EHDRDIR)])
-CopyHeader(adm_err.h,[$(EHDRDIR)])
-CopyHeader(asn1_err.h,[$(EHDRDIR)])
 V5_AC_OUTPUT_MAKEFILE
