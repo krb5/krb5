@@ -453,7 +453,7 @@ struct ttyent *getttyent P((void ));
 struct ttyent *getttynam P((char * ));
 void setttyent P((void ));
 void endttyent P((void ));
-unsigned long inet_network P((char * ));
+unsigned long inet_network P((const char * ));
 int initgroups P((char * , int  ));
 char *malloc P((unsigned ));
 char *calloc P((unsigned , unsigned  ));
@@ -619,8 +619,6 @@ char *tsearch P((char * , char ** , int (* )(char *, char *)));
 char *tfind P((char * , char ** , int (* )(char *, char *)));
 char *tdelete P((char * , char ** , int (* )(char *, char *)));
 void twalk P((char * , void (* )(char *, int, int)));
-int vprintf P((char * , ...  ));
-int vsprintf P((char * , const char * , ...  ));
 int syscall P((int  , int  , int  , int  ));
 long tell P((int  ));
 
