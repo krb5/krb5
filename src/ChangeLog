@@ -1,3 +1,7 @@
+Tue Aug 15 01:37:19 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in: Change some spaces back to tabs
+
 Mon Aug  7 19:26:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* aclocal.m4 (SS_RULES): Add double quotes around "$}{*.ct"
