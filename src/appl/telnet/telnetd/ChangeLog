@@ -1,3 +1,10 @@
+Mon Feb 22 18:27:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.8: Document hostname logging changes.
+
+	* telnetd.c: Add options to control logging of remote hostname to
+	login(1).
+
 Wed Feb  3 22:57:52 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* state.c: Increase size of subbufer so that we don't truncate
