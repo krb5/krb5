@@ -1,5 +1,0 @@
-/* Include prototypes for glue functions */
-#include <profile.h>
-
-/* Hardcode library fragment name here */
-#define kLibraryName "\pMIT Kerberos¥KerberosProfileLib"

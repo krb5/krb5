@@ -1,5 +1,0 @@
-/* Include prototypes for glue functions */
-#include <krb5.h>
-
-/* Hardcode library fragment name here */
-#define kLibraryName "\pMIT Kerberos¥Kerberos5Lib"
