@@ -1,5 +1,7 @@
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
+	* krb5-config.in (lib_flags): Prune out CFLAGS.
+
 	* aclocal.m4: Remove KRB_INCLUDE; it's now in pre.in.  Remove
 	ADD_DEF and uses thereof, thus allowing CPPFLAGS to be a user
 	parameter.
