@@ -34,6 +34,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"
+#include "adm.h"
 #include "adm_proto.h"
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
@@ -49,7 +50,7 @@ krb5_sigtype request_exit PROTOTYPE((int));
 
 void setup_signal_handlers PROTOTYPE((void));
 
-void initialize_realms PROTOTYPE((krb5_context, krb5_pointer, int, char **));
+void initialize_realms PROTOTYPE((krb5_context, int, char **));
 
 void finish_realms PROTOTYPE((char *));
 
@@ -204,18 +205,18 @@ string2intlist(string)
  * Get default portlists.
  */
 static void
-get_default_portlists(aprof, plistp, slistp)
-    krb5_pointer	aprof;
+get_default_portlists(plistp, slistp)
     int			**plistp;
     int			**slistp;
 {
     int		*plist;
     int		*slist;
+    krb5_pointer	aprof;
     const char	*hierarchy[3];
     char	*liststring;
 
     plist = slist = (int *) NULL;
-    if (aprof) {
+    if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
 	hierarchy[0] = "kdcdefaults";
 	hierarchy[1] = "primary_ports";
 	hierarchy[2] = (char *) NULL;
@@ -228,6 +229,7 @@ get_default_portlists(aprof, plistp, slistp)
 	    slist = string2intlist(liststring);
 	    krb5_xfree(liststring);
 	}
+	krb5_aprof_finish(aprof);
     }
     *plistp = plist;
     *slistp = slist;
@@ -338,11 +340,10 @@ finish_realm(rdp)
  * realm data and we should be all set to begin operation for that realm.
  */
 static krb5_error_code
-init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
+init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		 def_keytype, def_port, def_sport, def_enctype, def_manual)
     char		*progname;
     kdc_realm_t		*rdp;
-    krb5_pointer	altp;
     char		*realm;
     char		*def_dbname;
     char		*def_mpname;
@@ -353,7 +354,6 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     krb5_boolean	def_manual;
 {
     krb5_error_code	kret;
-    const char		*hierarchy[4];
     krb5_boolean	manual;
     krb5_db_entry	db_entry;
     int			num2get;
@@ -361,6 +361,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     krb5_boolean	db_inited;
     krb5_int32		ibuf;
     krb5_enctype	etype;
+    krb5_realm_params	*rparams;
 
     kret = EINVAL;
     db_inited = 0;
@@ -368,150 +369,87 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     if (realm) {
 	rdp->realm_name = realm;
 	if (!(kret = krb5_init_context(&rdp->realm_context))) {
-	    hierarchy[0] = "realms";
-	    hierarchy[1] = realm;
-	    hierarchy[2] = "profile";
-	    hierarchy[3] = (char *) NULL;
-	    /*
-	     * Before any more per-realm initialization goes on, get the 
-	     * per-realm profile, if any.
-	     */
-	    if (altp && !(kret = krb5_aprof_get_string(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_profile))) {
-		const char *filenames[2];
 
-		/*
-		 * XXX - this knows too much about contexts.
-		 */
-		filenames[0] = rdp->realm_profile;
-		filenames[1] = (char *) NULL;
-		if (rdp->realm_context->profile)
-		    profile_release(rdp->realm_context->profile);
-		if (kret = profile_init(filenames,
-					&rdp->realm_context->profile)) {
-		    com_err(progname, kret,
-			    "while loading profile %s for realm %s",
-			    rdp->realm_profile, realm);
-		    goto whoops;
-		}
-	    }
+	    (void) krb5_read_realm_params(rdp->realm_context,
+					  rdp->realm_name,
+					  (char *) NULL,
+					  (char *) NULL,
+					  &rparams);
+	    /* Handle profile file name */
+	    if (rparams && rparams->realm_profile)
+		rdp->realm_profile = strdup(rparams->realm_profile);
 
-	    /*
-	     * Attempt to get the real value for the database file.
-	     */
-	    hierarchy[2] = "database_name";
-	    if (!altp || (kret = krb5_aprof_get_string(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_dbname)))
+	    /* Handle database name */
+	    if (rparams && rparams->realm_dbname)
+		rdp->realm_dbname = strdup(rparams->realm_dbname);
+	    else
 		rdp->realm_dbname = (def_dbname) ? strdup(def_dbname) :
 		    strdup(DEFAULT_KDB_FILE);
 
-	    /*
-	     * Attempt to get the real value for the master key name.
-	     */
-	    hierarchy[2] = "master_key_name";
-	    if (!altp || (kret = krb5_aprof_get_string(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_mpname)))
+	    /* Handle master key name */
+	    if (rparams && rparams->realm_mkey_name)
+		rdp->realm_mpname = strdup(rparams->realm_mkey_name);
+	    else
 		rdp->realm_mpname = (def_mpname) ? strdup(def_mpname) :
 		    KRB5_KDB_M_NAME;
 
-	    /*
-	     * Attempt to get the real value for the master key type.
-	     */
-	    hierarchy[2] = "master_key_type";
-	    if (!altp || (kret = krb5_aprof_get_int32(altp,
-						      hierarchy,
-						      TRUE,
-						      &ibuf)))
+	    /* Handle master key type */
+	    if (rparams && rparams->realm_keytype_valid)
+		rdp->realm_mkey.keytype =
+		    (krb5_keytype) rparams->realm_keytype;
+	    else
 		rdp->realm_mkey.keytype = (def_keytype) ? def_keytype :
 		    KEYTYPE_DES;
-	    else
-		rdp->realm_mkey.keytype = (krb5_keytype) ibuf;
 
-	    /*
-	     * Attempt to get the real value for the primary port.
-	     */
-	    hierarchy[2] = "port";
-	    if (!altp || (kret = krb5_aprof_get_int32(altp,
-						      hierarchy,
-						      TRUE,
-						      &rdp->realm_pport))) {
+	    /* Handle KDC port */
+	    if (rparams && rparams->realm_kdc_pport_valid)
+		rdp->realm_pport = rparams->realm_kdc_pport;
+	    else
 		rdp->realm_pport = get_realm_port(rdp->realm_context,
 						  realm,
 						  "kdc",
 						  def_port,
 						  KDC_PORTNAME);
-	    }
-
-	    /*
-	     * Attempt to get the real value for the secondary port.
-	     */
-	    hierarchy[2] = "secondary_port";
-	    if (!altp || (kret = krb5_aprof_get_int32(altp,
-						      hierarchy,
-						      TRUE,
-						      &rdp->realm_sport))) {
+	    /* Handle KDC secondary port */
+	    if (rparams && rparams->realm_kdc_sport_valid)
+		rdp->realm_sport = rparams->realm_kdc_sport;
+	    else
 		rdp->realm_sport = get_realm_port(rdp->realm_context,
 						  realm,
 						  "v4kdc",
 						  def_sport,
 						  KDC_SECONDARY_PORTNAME);
-	    }
 
-	    /*
-	     * Attempt to get the real value for the encryption type.
-	     */
-	    hierarchy[2] = "encryption_type";
-	    if (!altp || (kret = krb5_aprof_get_int32(altp,
-						      hierarchy,
-						      TRUE,
-						      &ibuf)))
-		etype = (def_enctype) ? def_enctype : DEFAULT_KDC_ETYPE;
+	    /* Handle encryption type */
+	    if (rparams && rparams->realm_enctype_valid)
+		etype = rparams->realm_enctype;
 	    else
-		etype = (krb5_enctype) ibuf;
+		etype = (def_enctype) ? def_enctype : DEFAULT_KDC_ETYPE;
 
 	    if (!valid_etype(etype)) {
 		com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
 			"while setting up etype %d", etype);
 		exit(1);
 	    }
-	    /*
-	     * Attempt to get the real value for the stash file.
-	     */
-	    hierarchy[2] = "key_stash_file";
-	    if (!altp || (kret = krb5_aprof_get_string(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_stash)))
-		manual = def_manual;
-	    else
+
+	    /* Handle stash file */
+	    if (rparams && rparams->realm_stash_file) {
+		rdp->realm_stash = strdup(rparams->realm_stash_file);
 		manual = FALSE;
+	    }
+	    else
+		manual = def_manual;
 
-	    /*
-	     * Attempt to get the real value for the maximum ticket life.
-	     */
-	    hierarchy[2] = "max_life";
-	    if (!altp || (kret = krb5_aprof_get_deltat(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_maxlife)))
-		rdp->realm_maxlife = KRB5_KDB_MAX_LIFE;
+	    /* Handle ticket maximum life */
+	    rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
+		rparams->realm_max_life : KRB5_KDB_MAX_LIFE;
 
-	    /*
-	     * Attempt to get the real value for the maximum renewable ticket
-	     * life.
-	     */
-	    hierarchy[2] = "max_renewable_life";
-	    if (!altp || (kret = krb5_aprof_get_deltat(altp,
-						       hierarchy,
-						       TRUE,
-						       &rdp->realm_maxrlife)))
-		rdp->realm_maxrlife = KRB5_KDB_MAX_RLIFE;
+	    /* Handle ticket renewable maximum life */
+	    rdp->realm_maxrlife = (rparams && rparams->realm_max_rlife_valid) ?
+		rparams->realm_max_rlife : KRB5_KDB_MAX_LIFE;
+
+	    if (rparams)
+		krb5_free_realm_params(rdp->realm_context, rparams);
 
 	    /*
 	     * We've got our parameters, now go and setup our realm context.
@@ -540,58 +478,20 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 	    krb5_use_cstype(rdp->realm_context, &rdp->realm_encblock, etype);
 
 	    /*
-	     * If there's a stash file, then we have to go get the key
-	     * manually because krb5_db_fetch_mkey() doesn't let us supply
-	     * where we've stashed the master key.
+	     * Get the master key.
 	     */
-	    if (rdp->realm_stash) {
-		FILE *sfile;
-		krb5_ui_2 keytype;
-
-		if (sfile = fopen(rdp->realm_stash, "r")) {
-		    if ((fread((krb5_pointer) &keytype, 2, 1, sfile) != 1) ||
-			(fread((krb5_pointer) &rdp->realm_mkey.length,
-			       sizeof(rdp->realm_mkey.length),
-			       1,
-			       sfile) != 1) ||
-			(!(rdp->realm_mkey.contents = (krb5_octet *)
-			   malloc(rdp->realm_mkey.length))) ||
-			(fread((krb5_pointer) rdp->realm_mkey.contents,
-			       sizeof(krb5_octet),
-			       rdp->realm_mkey.length, sfile) !=
-			 rdp->realm_mkey.length)) {
-			com_err(progname, KRB5_KDB_CANTREAD_STORED,
-				"while reading stash file %s for realm %s",
-				rdp->realm_stash, realm);
-			fclose(sfile);
-			goto whoops;
-		    }
-		    rdp->realm_mkey.keytype = keytype;
-		    fclose(sfile);
-		}
-		else {
-		    com_err(progname, errno, 
-			    "while opening stash file %s for realm %s",
-			    rdp->realm_stash, realm);
-		    goto whoops;
-		}
-	    }
-	    else {
-		/*
-		 * No stash, fetch it.
-		 */
-		if (kret = krb5_db_fetch_mkey(rdp->realm_context,
-					      rdp->realm_mprinc,
-					      &rdp->realm_encblock,
-					      manual,
-					      FALSE,
-					      0,
-					      &rdp->realm_mkey)) {
-		    com_err(progname, kret, 
-			    "while fetching master key %s for realm %s",
-			    rdp->realm_mpname, realm);
-		    goto whoops;
-		}
+	    if (kret = krb5_db_fetch_mkey(rdp->realm_context,
+					  rdp->realm_mprinc,
+					  &rdp->realm_encblock,
+					  manual,
+					  FALSE,
+					  rdp->realm_stash,
+					  0,
+					  &rdp->realm_mkey)) {
+		com_err(progname, kret, 
+			"while fetching master key %s for realm %s",
+			rdp->realm_mpname, realm);
+		goto whoops;
 	    }
 
 	    /* Set and open the database. */
@@ -781,9 +681,8 @@ char *name;
 }
 
 void
-initialize_realms(kcontext, altp, argc, argv)
+initialize_realms(kcontext, argc, argv)
     krb5_context 	kcontext;
-    krb5_pointer	altp;
     int			argc;
     char		**argv;
 {
@@ -813,7 +712,6 @@ initialize_realms(kcontext, altp, argc, argv)
 		if (rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t))) {
 		    if (retval = init_realm(argv[0],
 					    rdatap,
-					    altp,
 					    optarg,
 					    db_name,
 					    mkey_name,
@@ -878,7 +776,6 @@ initialize_realms(kcontext, altp, argc, argv)
 	if (rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t))) {
 	    if (retval = init_realm(argv[0],
 				    rdatap,
-				    altp,
 				    lrealm,
 				    db_name,
 				    mkey_name,
@@ -952,7 +849,6 @@ char *argv[];
 {
     krb5_error_code	retval;
     krb5_context	kcontext;
-    krb5_pointer	alt_profile;
     int			*primaries, *secondaries;
     int errout = 0;
 
@@ -977,25 +873,17 @@ char *argv[];
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
-    if (retval = krb5_aprof_init(DEFAULT_KDC_PROFILE,
-				 KDC_PROFILE_ENV,
-				 &alt_profile)) {
-	fprintf(stderr, "%s: warning - cannot find kdc profile\n", argv[0]);
-	alt_profile = (krb5_pointer) NULL;
-    }
 
     /*
      * Scan through the argument list
      */
-    initialize_realms(kcontext, alt_profile, argc, argv);
+    initialize_realms(kcontext, argc, argv);
 
     /*
      * Get the default port lists.
      */
-    get_default_portlists(alt_profile, &primaries, &secondaries);
+    get_default_portlists(&primaries, &secondaries);
 
-    if (alt_profile)
-	krb5_aprof_finish(alt_profile);
     setup_signal_handlers();
 
     if ((retval = setup_network(argv[0], primaries, secondaries))) {

@@ -1,3 +1,11 @@
+
+Mon Jul 17 15:13:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Gut KDC profile handling logic and move it to lib/kadm/
+		alt_prof.c because it's now used by admin and kadmin programs.
+		Remove explicit stash file handling logic and supply stash
+		file name to krb5_db_fetch_mkey() since it can now handle a
+		non-default stash file name.
+
 Thu Jul 13 19:51:33 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* main.c: Include netinet/in.h if we're using IP.
