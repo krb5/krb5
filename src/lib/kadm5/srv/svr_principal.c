@@ -1089,8 +1089,7 @@ kadm5_set_use_password_server (void)
  * kadm5_launch_task () runs a program (task_path) to synchronize the 
  * Apple password server with the Kerberos database.  Password server
  * programs can receive arguments on the command line (task_argv)
- * and a block of data via stdin (data_buffer).  On success, they
- * return one of the result codes listed in success_codes.
+ * and a block of data via stdin (data_buffer).
  *
  * Because a failure to communicate with the tool results in the
  * password server falling out of sync with the database,
