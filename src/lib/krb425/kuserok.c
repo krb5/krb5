@@ -50,35 +50,6 @@
  * file entries.  See the file "kparse.c".
  */
 
-#ifdef ATHENA_COMPAT
-
-
-/*
- * The parmtable defines the keywords we will recognize with their
- * default values, and keeps a pointer to the found value.  The found
- * value should be filled in with strsave(), since FreeParameterSet()
- * will release memory for all non-NULL found strings. 
- *
-*** NOTE WELL! *** 
- *
- * The table below is very nice, but we cannot hard-code a default for the
- * realm: we have to get the realm via krb_get_lrealm().  Even though the
- * default shows as "from krb_get_lrealm, below", it gets changed in
- * kuserok to whatever krb_get_lrealm() tells us.  That code assumes that
- * the realm will be the entry number in the table below, so if you
- * change the order of the entries below, you have to change the
- * #definition of REALM_SCRIPT to reflect it. 
- */
-#define REALM_SUBSCRIPT 1
-parmtable kparm[] = {
-
-/* keyword	default 			found value     */
-{"user",	"", 				(char *) NULL},
-{"realm",	"see krb_get_lrealm, below",	(char *) NULL},
-{"instance",	 "",				(char *) NULL},
-};
-#define KPARMS kparm,PARMCOUNT(kparm)
-#endif /* ATHENA_COMPAT */
 
 int
 kuserok(kdata, luser)
@@ -95,9 +66,6 @@ kuserok(kdata, luser)
     char linebuf[BUFSIZ];
     char *newline;
     int gobble;
-#ifdef ATHENA_COMPAT
-    char local_realm[REALM_SZ];
-#endif /* ATHENA_COMPAT */
 
     /* no account => no access */
     if ((pwd = getpwnam(luser)) == NULL) {
@@ -134,41 +102,6 @@ kuserok(kdata, luser)
 	return(NOTOK);
     }
 
-#ifdef ATHENA_COMPAT
-    /* Accept old-style .klogin files */
-
-    /*
-     * change the default realm from the hard-coded value to the
-     * accepted realm that Kerberos specifies. 
-     */
-    rc = krb_get_lrealm(local_realm, 1);
-    if (rc == KSUCCESS)
-	kparm[REALM_SUBSCRIPT].defvalue = local_realm;
-    else
-	return (rc);
-
-    /* check each line */
-    while ((isok != OK) && (rc = fGetParameterSet(fp, KPARMS)) != PS_EOF) {
-	switch (rc) {
-	case PS_BAD_KEYWORD:
-	case PS_SYNTAX:
-	    while (((gobble = fGetChar(fp)) != EOF) && (gobble != '\n'));
-	    break;
-
-	case PS_OKAY:
-	    isok = (ParmCompare(KPARMS, "user", kdata->pname) ||
-		    ParmCompare(KPARMS, "instance", kdata->pinst) ||
-		    ParmCompare(KPARMS, "realm", kdata->prealm));
-	    break;
-
-	default:
-	    break;
-	}
-	FreeParameterSet(kparm, PARMCOUNT(kparm));
-    }
-    /* reset the stream for parsing new-style names, if necessary */
-    rewind(fp);
-#endif /* ATHENA_COMPAT */
 
     /* check each line */
     while ((isok != OK) && (fgets(linebuf, BUFSIZ, fp) != NULL)) {
