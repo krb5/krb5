@@ -1,3 +1,8 @@
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Fix logic error
+	that incorrectly set up s2kparams.data 
+
 2003-05-20  Ezra Peisach  <epeisach@bu.edu>
 
 	* asn1_k_encode.c (asn1_encode_krb_safe_body): Use

@@ -819,9 +819,10 @@ asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry
 	    val->salt = 0;
     }
     if ( tagnum ==2) {
-      krb5_octet *params = (krb5_octet *) val->s2kparams.data;
+      krb5_octet *params ;
       get_lenfield( val->s2kparams.length, params,
 		      2, asn1_decode_octetstring);
+      val->s2kparams.data = ( char *) params;
     } else {
 	val->s2kparams.data = NULL;
 	val->s2kparams.length = 0;
