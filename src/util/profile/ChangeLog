@@ -1,3 +1,7 @@
+2002-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump.
+
 2002-01-23	Alexandra Ellwood <lxs@mit.edu>
 
 	* prof_init.c, prof_tree.c: Fixed calls to profile_update_file_data to handle
