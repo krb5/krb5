@@ -24,7 +24,7 @@ if test ! -d $reldir; then
 fi
 
 echo "Checking out krb5 with tag $reltag into directory $reldir..."
-cvs -q -d $repository export -r$reltag -d$reldir krb5
+(cd $reldir; cvs -q -d $repository export -r$reltag krb5)
 
 echo "Building autoconf..."
 (cd $reldir/src/util/autoconf
@@ -32,10 +32,10 @@ echo "Building autoconf..."
 	make)
 
 echo "Creating configure scripts..."
-(cd $reldir/src;util/reconf)
+(cd $reldir/src; util/reconf)
 
 echo "Cleaning src/util/autoconf..."
-(cd $reldir/src/util/autoconf;make distclean)
+(cd $reldir/src/util/autoconf; make distclean)
 
 echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
@@ -43,7 +43,7 @@ find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	| xargs rm -f
 
 echo "Building doc..."
-(cd $reldir/doc;make)
+(cd $reldir/doc; make)
 
 echo "Generating tarfiles..."
 gtar --exclude $reldir/src/lib/crypto \

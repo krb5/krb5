@@ -1,3 +1,8 @@
+Fri Nov  8 13:17:23 1996  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Fix to work with new modules definitions because cvs
+ 	export -d foo doesn't dtrt.
+
 Sun Nov  3 21:07:35 1996  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Run make in doc so that .info and .ps files get created.
