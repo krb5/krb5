@@ -1,0 +1,172 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * krb_rd_req for krb425
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_rd_req_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+#include <krb5/copyright.h>
+#include "krb425.h"
+
+int
+krb_rd_req(authent, service, instance, from_addr, ad, fn)
+KTEXT authent;
+char *service;
+char *instance;
+u_long from_addr;
+AUTH_DAT *ad;
+char *fn;
+{
+	krb5_address peer;
+	krb5_tkt_authent authd;
+	char addr[4];
+	krb5_data *server[4];
+	krb5_data srvdata[3];
+	krb5_error_code r;
+	krb5_data authe;
+	extern int gethostname();
+
+
+	if (from_addr) {
+		peer.addrtype = ADDRTYPE_INET;
+		peer.length = 4;
+		peer.contents = (krb5_octet *)addr;
+		bcopy((char *)&from_addr + (sizeof(from_addr) - 4), addr, 4);
+	}
+
+	if (!_krb425_local_realm[0])
+		krb5_get_default_realm(REALM_SZ, _krb425_local_realm);
+
+	if (!strcmp(instance, "*")) {
+		static char hostname[64] = { 0 };
+
+		if (!hostname[0]) {
+			struct hostent *h;
+	
+			gethostname(hostname, sizeof(hostname));
+			if (h = gethostbyname(hostname)) {
+				char *p;
+
+				strncpy(hostname, h->h_name, sizeof(hostname));
+				hostname[sizeof(hostname)-1] = 0;
+				p = hostname;
+				do {
+					if (isupper(*p)) *p=tolower(*p);
+				} while (*p++);
+			}
+		}
+		instance = hostname;
+	}
+	set_data5(srvdata[0], _krb425_local_realm);
+	set_data5(srvdata[1], service);
+	set_data5(srvdata[2], instance);
+
+	server[0] = &srvdata[0];
+	server[1] = &srvdata[1];
+	server[2] = &srvdata[2];
+	server[3] = 0;
+
+	
+	authe.length = authent->length;
+	authe.data = (char *)authent->dat;
+	if (!*fn)
+		fn = (char *)0;
+#ifdef  EBUG
+        EPRINT "Calling krb5_rd_req with:\n");
+        EPRINT "        Realm   : "); show5(srvdata[0]); ENEWLINE
+        EPRINT "        Service : "); show5(srvdata[1]); ENEWLINE
+        EPRINT "        Instance: "); show5(srvdata[2]); ENEWLINE
+	EPRINT "Authenenticator : %d bytes\n", authe.length);
+	EPRINT "Filename        : %s\n", fn ? fn : "none given");
+	if (from_addr) {
+		EPRINT "Address type    : %s\n",
+			peer.addrtype == ADDRTYPE_INET ? "inet" :
+			peer.addrtype == ADDRTYPE_CHAOS ? "chaos" :
+			peer.addrtype == ADDRTYPE_XNS ? "xns" :
+			peer.addrtype == ADDRTYPE_ISO ? "iso" :
+			peer.addrtype == ADDRTYPE_DDP ? "ddp" : "unknown type");
+		EPRINT "Address length  : %d\n", peer.length);
+		EPRINT "Address         :");
+		{
+			int x;
+			for (x = 0; x < peer.length && x < 8; ++x)
+				fprintf(stderr, " %d", peer.contents[x]);
+			if (x < peer.length)
+				fprintf(stderr, " (%d)", peer.length);
+			fprintf(stderr, "\n");
+		}
+	}
+#endif
+
+	if (r = krb5_rd_req(&authe,
+			    (krb5_principal)server,
+			    from_addr ? &peer : 0,
+			    fn, 0, 0, 0, &authd)) {
+#ifdef	EBUG
+		ERROR(r)
+#endif
+		return(krb425error(r));
+	}
+
+	ad->k_flags = 0;
+
+#ifdef	EBUG
+	r = 0;
+	while (authd.authenticator->client[r]) {
+		EPRINT "Client[%d]: ", r); show5((*authd.authenticator->client[r])); ENEWLINE
+		++r;
+	}
+	r = 0;
+	while (authd.ticket->server[r]) {
+		EPRINT "Server[%d]: ", r); show5((*authd.ticket->server[r])); ENEWLINE
+		++r;
+	}
+	r = 0;
+#endif
+	set_string(ad->pname, ANAME_SZ, authd.authenticator->client[1]);
+	set_string(ad->pinst, INST_SZ, authd.authenticator->client[2]);
+	set_string(ad->prealm, REALM_SZ, authd.authenticator->client[0]);
+
+	ad->checksum = *(long *)authd.authenticator->checksum->contents;
+
+	if (authd.ticket->enc_part2->session->keytype != KEYTYPE_DES) {
+		r = KFAILURE;
+		goto out;
+	} else
+		bcopy(authd.ticket->enc_part2->session->contents,
+		      (char*)ad->session, sizeof(C_Block));
+
+	ad->life = authd.ticket->enc_part2->times.endtime;
+	ad->time_sec = authd.authenticator->ctime;
+	ad->address = 0;
+
+	if (authd.ticket->enc_part2->caddrs[0]->addrtype != ADDRTYPE_INET) {
+		r = KFAILURE;
+		goto out;
+	} else
+		bcopy(authd.ticket->enc_part2->caddrs[0]->contents, 
+		      (char *)&ad->address + sizeof(ad->address) - 4, 4);
+
+	if (authd.ticket->enc_part2->authorization_data &&
+	    authd.ticket->enc_part2->authorization_data[0]) {
+		ad->reply.length = authd.ticket->enc_part2->authorization_data[0]->length;
+		bcopy(authd.ticket->enc_part2->authorization_data[0]->contents,
+		      ad->reply.dat,
+		      min(ad->reply.length, MAX_KTXT_LEN));
+		ad->reply.mbz = 0;
+	}
+out:
+	krb5_free_ticket(authd.ticket);
+	krb5_free_authenticator(authd.authenticator);
+	return(r);
+}
