@@ -58,13 +58,6 @@ void *global_server_handle;
 #define OVSEC_KADM_ADMIN_SERVICE	"ovsec_adm/admin"
 #define OVSEC_KADM_CHANGEPW_SERVICE	"ovsec_adm/changepw"
 
-/*
- * This enables us to set the keytab that gss_acquire_cred uses, but
- * it also restricts us to linking against the Kv5 GSS-API library.
- * Since this is *k*admind, that shouldn't be a problem.
- */
-extern 	char *krb5_defkeyname;
-
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
 		 struct sockaddr_in *addr, char *data);
@@ -316,7 +309,20 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
-     krb5_defkeyname = params.admin_keytab;
+     /*
+      * This enables us to set the keytab that gss_acquire_cred uses, but
+      * it also restricts us to linking against the Kv5 GSS-API library.
+      * Since this is *k*admind, that shouldn't be a problem.
+      */
+     if ((ret = krb5_kt_set_default_name(context, params.admin_keytab))) {
+         krb5_klog_syslog(LOG_ERR, "Cannot change default keytab name: %s",
+			  error_message(ret));
+         fprintf(stderr, "%s: Cannot change default keytab name.\n",
+		 whoami);
+	 kadm5_destroy(global_server_handle);
+	 krb5_klog_close();
+	 exit(1);
+     }
 
      /*
       * Try to acquire creds for the old OV services as well as the
