@@ -1,3 +1,7 @@
+Mon Jul 22 21:46:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* clnt_perror.c: Include errno.h.
+
 Fri Jul 12 15:33:50 1996  Marc Horowitz  <marc@mit.edu>
 
 	* rpc_dtablesize.c (_rpc_dtablesize): put in a few checks to make
