@@ -272,11 +272,11 @@ typedef struct {
 # define k5_os_nothread_mutex_assert_locked(M)				\
 	(assert((M)->initialized == K5_MUTEX_DEBUG_INITIALIZED),	\
 	 assert((M)->locked != K5_MUTEX_DEBUG_UNLOCKED),		\
-	 assert((M)->locked == K5_MUTEX_DEBUG_LOCKED), 0)
+	 assert((M)->locked == K5_MUTEX_DEBUG_LOCKED))
 # define k5_os_nothread_mutex_assert_unlocked(M)			\
 	(assert((M)->initialized == K5_MUTEX_DEBUG_INITIALIZED),	\
 	 assert((M)->locked != K5_MUTEX_DEBUG_LOCKED),			\
-	 assert((M)->locked == K5_MUTEX_DEBUG_UNLOCKED), 0)
+	 assert((M)->locked == K5_MUTEX_DEBUG_UNLOCKED))
 
 #else /* threads disabled and not debugging */
 
@@ -300,8 +300,8 @@ static inline int k5_os_nothread_mutex_lock(k5_os_nothread_mutex *m) {
 static inline int k5_os_nothread_mutex_unlock(k5_os_nothread_mutex *m) {
     return 0;
 }
-# define k5_os_nothread_mutex_assert_locked(M)		(0)
-# define k5_os_nothread_mutex_assert_unlocked(M)	(0)
+# define k5_os_nothread_mutex_assert_locked(M)		((void)0)
+# define k5_os_nothread_mutex_assert_unlocked(M)	((void(0)
 
 #endif
 
@@ -563,8 +563,8 @@ static inline int k5_os_mutex_lock(k5_os_mutex *m)
 	 (M)->is_locked = 0,				\
 	 ReleaseMutex((M)->h) ? 0 : GetLastError())
 
-# define k5_os_mutex_assert_unlocked(M)	(0)
-# define k5_os_mutex_assert_locked(M)	(0)
+# define k5_os_mutex_assert_unlocked(M)	((void)0)
+# define k5_os_mutex_assert_locked(M)	((void)0)
 
 #else
 

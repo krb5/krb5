@@ -1,3 +1,10 @@
+2004-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_os_nothread_mutex_assert_locked,
+	k5_os_nothread_mutex_assert_unlocked, k5_os_mutex_assert_locked,
+	k5_os_mutex_assert_unlocked): Assertion macros should always have
+	type void.
+
 2004-08-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_os_nothread_mutex_finish_init,
