@@ -55,6 +55,7 @@
 
 #define	ADM_CCACHE  "/tmp/ovsec_adm.XXXXXX"
 
+static int old_auth_gssapi = 0;
 
 enum init_type { INIT_PASS, INIT_SKEY, INIT_CREDS };
 
@@ -221,6 +222,9 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  realm = params_local.realm = (char *) params_in;
 	  if (params_in)
 	       params_local.mask = KADM5_CONFIG_REALM;
+
+	  /* Use old AUTH_GSSAPI for version 1 protocol. */
+	  params_local.mask |= KADM5_CONFIG_OLD_AUTH_GSSAPI;
 	  params_in = &params_local;
      } else {
 	  if (params_in && (params_in->mask & KADM5_CONFIG_REALM))
@@ -485,19 +489,29 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      }
      
 #ifndef INIT_TEST
-     handle->clnt->cl_auth = auth_gssapi_create(handle->clnt,
-						&gssstat,
-						&minor_stat,
-						gss_client_creds,
-						gss_target,
-						(gss_OID) gss_mech_krb5,
-						GSS_C_MUTUAL_FLAG
-						| GSS_C_REPLAY_FLAG,
-						0,
-						NULL,
-						NULL,
-						NULL);
+     if (params_in != NULL &&
+	 (params_in->mask & KADM5_CONFIG_OLD_AUTH_GSSAPI)) {
+	  handle->clnt->cl_auth = auth_gssapi_create(handle->clnt,
+						     &gssstat,
+						     &minor_stat,
+						     gss_client_creds,
+						     gss_target,
+						     (gss_OID) gss_mech_krb5,
+						     GSS_C_MUTUAL_FLAG
+						     | GSS_C_REPLAY_FLAG,
+						     0,
+						     NULL,
+						     NULL,
+						     NULL);
+     } else {
+	  struct rpc_gss_sec sec;
+	  sec.mech = gss_mech_krb5;
+	  sec.qop = GSS_C_QOP_DEFAULT;
+	  sec.svc = RPCSEC_GSS_SVC_PRIVACY;
 
+	  handle->clnt->cl_auth = authgss_create(handle->clnt,
+						 gss_target, &sec);
+     }
      (void) gss_release_name(&minor_stat, &gss_target);
 #endif /* ! INIT_TEST */
 
@@ -524,6 +538,9 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      r = init_1(&handle->api_version, handle->clnt);
      if (r == NULL) {
 	  code = KADM5_RPC_ERROR;
+#ifdef DEBUG
+	  clnt_perror(handle->clnt, "init_1 null resp");
+#endif
 	  goto error;
      }
      if (r->code) {

@@ -1,3 +1,11 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* client_principal.c (eret): Add some debugging messages for some
+	RPC errors.
+
+	* client_init.c (_kadm5_init_any): Add support for RPCSEC_GSS.
+	Default to using AUTH_GSSAPI for ovsec.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* client_init.c (enctypes): Variable deleted.
