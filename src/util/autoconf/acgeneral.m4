@@ -924,20 +924,15 @@ case $ac_top in
   /*) ;; # it's fine as is
   *) ac_top=$srcdir/$ac_top ;;
 esac
-echo "... using ac_top = $ac_top"
   ac_tmpin="${ac_top}config/pre.in"
-echo "testing ac_tmpin=$ac_tmpin"
-pwd; ls -al $ac_tmpin
   if test -r $ac_tmpin; then
      ac_prepend=$ac_tmpin
-     echo "... using ac_prepend=$ac_prepend"
   else
      ac_prepend=
   fi
   ac_tmpin="${ac_top}config/post.in"
   if test -r $ac_tmpin; then
      ac_postpend=$ac_tmpin
-     echo "... using ac_postpend=$ac_postpend"
   else
      ac_postpend=
   fi
