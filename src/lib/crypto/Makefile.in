@@ -18,5 +18,5 @@ libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 	$(RANLIB) $@
 
 install:: libcrypto.a
-	$(INSTALL_DATA) libcrypto.a $(KRB5_LIBDIR)/libcrypto.a
-	$(RANLIB) $(KRB5_LIBDIR)/libcrypto.a
+	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
