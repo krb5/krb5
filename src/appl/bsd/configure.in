@@ -55,7 +55,8 @@ AC_FUNC_CHECK(setlogin,AC_DEFINE(HAVE_SETLOGIN))
 AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h )
 AC_CHECK_HEADERS(sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h )
-AC_CHECK_HEADERS(sys/ptyvar.h utmp.h utmpx.h stdarg.h sys/time.h)
+AC_CHECK_HEADERS(sys/ptyvar.h utmp.h utmpx.h sys/time.h)
+AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 DECLARE_SYS_ERRLIST
 KRB5_SIGTYPE

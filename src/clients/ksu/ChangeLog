@@ -1,3 +1,7 @@
+Wed Mar 13 17:45:11 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG.
+
 Wed Nov  8 17:54:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* ccache.c (krb5_check_exp): Change use of krb5_clockskew to be

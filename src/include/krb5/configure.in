@@ -28,7 +28,7 @@ AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/param.h)
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(macsock.h)
-AC_CHECK_HEADERS(stdarg.h)
+AC_HEADER_STDARG
 AC_CHECK_HEADERS(stddef.h)
 AC_CHECK_HEADERS(xom.h)
 
