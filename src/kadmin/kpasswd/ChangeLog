@@ -1,3 +1,7 @@
+Fri Feb 10 17:48:05 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kpasswd.c: Don't include <krb5/asn.1/encode.h>; use <krb5/asn1.h>.
+
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
         * kpasswd.c Removed krb5_keytype, changed krb5_enctype to 
