@@ -12,6 +12,15 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+EXTRADEPSRCS=\
+	$(srcdir)/t_nfold.c	\
+	$(srcdir)/t_encrypt.c	\
+	$(srcdir)/t_prng.c	\
+	$(srcdir)/t_hmac.c	\
+	$(srcdir)/pbkdf2.c	\
+	$(srcdir)/t_pkcs5.c	\
+	$(srcdir)/vectors.c
+
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)crypto.lib
 ##DOSOBJFILE=$(OUTPRE)crypto.lst
@@ -147,11 +156,13 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_nfold t_encrypt t_prng
+check-unix:: t_nfold t_encrypt t_prng t_hmac t_pkcs5
 	$(RUN_SETUP) ./t_nfold
 	$(RUN_SETUP) ./t_encrypt
 	$(RUN_SETUP) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
+	$(RUN_SETUP) ./t_hmac
+	$(RUN_SETUP) ./t_pkcs5
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
@@ -161,6 +172,16 @@ t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT)
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) 
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err
+
+t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+
+t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) pbkdf2.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) pbkdf2.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB)
+
+vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
 
 
 clean::
@@ -453,4 +474,41 @@ verify_checksum.so verify_checksum.po $(OUTPRE)verify_checksum.$(OBJEXT): verify
   $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
   cksumtypes.h
+t_nfold.so t_nfold.po $(OUTPRE)t_nfold.$(OBJEXT): t_nfold.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
+t_encrypt.so t_encrypt.po $(OUTPRE)t_encrypt.$(OBJEXT): t_encrypt.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h etypes.h
+t_prng.so t_prng.po $(OUTPRE)t_prng.$(OBJEXT): t_prng.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
+t_hmac.so t_hmac.po $(OUTPRE)t_hmac.$(OBJEXT): t_hmac.c $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(srcdir)/hash_provider/hash_provider.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
+pbkdf2.so pbkdf2.po $(OUTPRE)pbkdf2.$(OBJEXT): pbkdf2.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h $(srcdir)/hash_provider/hash_provider.h
+t_pkcs5.so t_pkcs5.po $(OUTPRE)t_pkcs5.$(OBJEXT): t_pkcs5.c $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
+vectors.so vectors.po $(OUTPRE)vectors.$(OBJEXT): vectors.c $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(srcdir)/hash_provider/hash_provider.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 

@@ -1,6 +1,10 @@
 2002-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c, t_hmac.c, t_pkcs5.c: New files.
+	* Makefile.in (EXTRADEPSRCS): New variable.
+	(t_hmac$(EXEEXT), t_pkcs5$(EXEEXT), vectors$(EXEEXT)): New
+	targets.
+	(check-unix): Depend on and run t_hmac and t_pkcs5.
 
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
