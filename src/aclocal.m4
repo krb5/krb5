@@ -236,10 +236,10 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 .SUFFIXES:  .h .c .et .ct
 
 .ct.c:
-	if [ $< != $}{*.ct ]; then \
-		(cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && rm $}{*.ct) || exit 1; \
+	@if [ $< != $}{*.ct ]; then \
+		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && rm $}{*.ct) || exit 1; \
 	else \
-		$(MAKE_COMMANDS) $}{*.ct || exit 1; \
+		(set -x; $(MAKE_COMMANDS) $}{*.ct) || exit 1; \
 	fi
 
 }
@@ -357,11 +357,10 @@ define(CopyHeader,[
 divert(9)dnl
 
 includes:: $1
-	if test -d $2; then :; else mkdir $2; fi
-	if cmp $1 $2/$1 >/dev/null 2>&1; then :; \
+	@if test -d $2; then :; else (set -x; mkdir $2) fi
+	@if cmp $1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
-		[$](RM) $2/$1 ; \
-		[$](CP) $1 $2/$1; \
+		(set -x; [$](RM) $2/$1;	[$](CP) $1 $2/$1) \
 	fi
 
 divert(0)dnl
@@ -373,11 +372,10 @@ define(CopySrcHeader,[
 divert(9)dnl
 
 includes:: $1
-	if test -d $2; then :; else mkdir $2; fi
-	-if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
+	@if test -d $2; then :; else mkdir $2; fi
+	@if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
-		[$](RM) $2/$1 ; \
-		[$](CP) $(srcdir)/$1 $2/$1; \
+		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \
 	fi
 
 divert(0)dnl
