@@ -1,3 +1,9 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-unix): Use @THREAD_SUPPORT@ and helper targets
+	to build programs only if thread support is enabled.
+	(all-unix-0, all-unix-1): New helper targets.
+
 2005-02-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss-misc.c: Include autoconf.h.  If both time.h and sys/time.h
