@@ -94,14 +94,14 @@ void mit_des_init_random_number_generator(key,p_seed)
     } timenow;
     mit_des_cblock new_key;
 
-    krb5_address **addrs;
+    krb5_address **addrs = 0;
 
     /*
      * use a host id in generating the seed to ensure
      * that different servers have different streams:
      */
     memset((char *)seed, 0, sizeof(seed));
-    if (!krb5_os_localaddr(&addrs) && *addrs) {
+    if (!krb5_os_localaddr(&addrs) && addrs && *addrs) {
 	memcpy((char *)seed, (char *)addrs[0]->contents,
 	      min(sizeof(seed), addrs[0]->length));
 	/* XXX may not do all of the seed. */
