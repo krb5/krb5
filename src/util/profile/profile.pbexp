@@ -3,6 +3,8 @@
 #
 # $Header$
 
+___InitializeProfileLib 
+
 _profile_init
 _profile_init_path
 _profile_flush

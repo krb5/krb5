@@ -1,5 +1,9 @@
 2000-10-7  Miro Jurisic  <meeroh@mit.edu>
 
+	* et.pbexp: Added the Mach-O initializer function
+
+2000-10-7  Miro Jurisic  <meeroh@mit.edu>
+
 	* et.pbexp: Added the Mac OS X export file (hopefully temporary,
 	until Apple fixes their tools to use the same format as Mac OS 9)
 
