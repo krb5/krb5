@@ -1,5 +1,8 @@
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
+	* configure.in: If the cache_file is /dev/null (autoconf 2.49),
+	set it to config.cache.
+
 	* aclocal.m4 (V5_SET_TOPDIR): In newer versions of autoconf
 	(2.49), AC_LOCALDIR is not set by the reconfiguration process. If
 	AC_LOCALDIR is not set, try to find the top of the tree by looking

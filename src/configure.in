@@ -1,4 +1,12 @@
 AC_INIT(aclocal.m4)
+dnl
+dnl autoconf 2.49 defaults to a /dev/null cache file, which is what we
+dnl do not want for performance reasons. 
+if test "x$cache_file" = "x/dev/null"; then
+  cache_file=./config.cache
+  AC_CACHE_LOAD
+fi
+dnl
 CONFIG_RULES
 dnl
 dnl
