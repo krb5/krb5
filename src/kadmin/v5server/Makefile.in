@@ -1,0 +1,35 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB) 
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+SRCS = \
+	$(srcdir)/srv_main.c $(srcdir)/srv_key.c  \
+	$(srcdir)/srv_acl.c $(srcdir)/srv_output.c $(srcdir)/srv_net.c \
+	$(srcdir)/proto_serv.c $(srcdir)/passwd.c
+
+OBJS = \
+	srv_main.o srv_key.o srv_acl.o srv_output.o srv_net.o \
+	proto_serv.o passwd.o
+
+
+all::	kadmind5
+
+kadmind5: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
+	$(CC) $(CFLAGS) -o kadmind5 $(OBJS) $(KLIB) $(LIBS)
+
+install::
+	$(INSTALL_PROGRAM) kadmind5 ${DESTDIR}$(CLIENT_BINDIR)/kadmind5
+	$(INSTALL_DATA) $(srcdir)/kadmind5.M ${DESTDIR}$(CLIENT_MANDIR)/kadmind.8
+
+clean::
+	$(RM) kadmind5
+
