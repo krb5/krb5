@@ -36,6 +36,25 @@ static krb5_boolean srvname_match
 static krb5_boolean authdata_match
     PROTOTYPE ((krb5_authdata * const *, krb5_authdata * const *));
 
+
+static krb5_boolean
+data_match(data1, data2)
+register const krb5_data *data1, *data2;
+{
+    if (!data1) {
+	if (!data2)
+	    return TRUE;
+	else
+	    return FALSE;
+    }
+    if (!data2) return FALSE;
+
+    if (data1->length != data2->length)
+	return FALSE;
+    else
+	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
+}
+
 /*
  * Effects:
  * Searches the file cred cache is for a credential matching mcreds,
@@ -95,7 +114,11 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	       times_match(&mcreds->times, &fetchcreds.times))
 	      &&
 	      ( ! set(KRB5_TC_MATCH_AUTHDATA) ||
-	       authdata_match(mcreds->authdata, fetchcreds.authdata)))
+	       authdata_match(mcreds->authdata, fetchcreds.authdata))
+	      &&
+	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
+	       data_match (mcreds->second_ticket, fetchcreds.second_ticket))
+	      )
 	  {
 	       krb5_fcc_end_seq_get(id, &cursor);
 	       *creds = fetchcreds;
