@@ -280,7 +280,7 @@ void dump_profile_to_file(root, level, dstfile)
 		}
 		else /* +xxx+ */
 		{
-			// don't know what comes next, this should get someones attention
+			/* don't know what comes next, this should get someones attention */
 			fprintf(dstfile, "+%s+");
 		}
 	} while (iter != 0);

@@ -1,3 +1,7 @@
+Mon Sep 11 15:30:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_parse.c (dump_profile_to_file): Convert C+ comment to
+		standard C one.
 
 Tue Aug 29 14:23:16 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add checks for size of short, int and long.
