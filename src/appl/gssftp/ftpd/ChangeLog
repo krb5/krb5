@@ -1,3 +1,9 @@
+Thu Dec 11 23:28:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c: Don't include netdb.h or sys/socket.h if krb.h is
+	included; this works around an Ultrix bug where those headers
+	aren't protected against multiple inclusion.
+
 Thu Oct 16 01:23:41 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Change LOCALINCLUDE and the link line to allow for
