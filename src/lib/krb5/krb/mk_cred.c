@@ -72,7 +72,7 @@ krb5_mk_cred(context, dec_rep, etype, key, sender_addr, recv_addr, outbuf)
       malloc(sizeof(*cred_enc_part.ticket_info[0]));
     if (!cred_enc_part.ticket_info[0]) {
 	krb5_free_tickets(context, ret_cred.tickets);
-	krb5_free_cred_enc_part(context, cred_enc_part);
+	krb5_free_cred_enc_part(context, &cred_enc_part);
 	return ENOMEM;
     }
     cred_enc_part.nonce = 0;

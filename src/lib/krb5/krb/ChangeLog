@@ -1,3 +1,8 @@
+Tue Feb 21 23:38:34 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* mk_cred.c (krb5_mk_cred): Fix argument type to
+		krb5_free_cred_enc_part().
+
 Mon Feb 13 20:25:20 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* get_in_tkt.c (krb5_get_in_tkt): Fix memory leak --- the default
