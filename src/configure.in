@@ -33,6 +33,7 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_dirhead="-L"
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
+	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
 	krb5_cv_staticlibs_enabled=yes
@@ -49,6 +50,7 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_dirhead="-R"
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
+	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
 	krb5_cv_staticlibs_enabled=yes
@@ -70,6 +72,7 @@ fi
 	krb5_cv_shlibs_dirhead="-L"
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=no
+	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_staticlibs_enabled=
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
@@ -90,6 +93,7 @@ fi
 	krb5_cv_shlibs_dirhead="-R"
 	krb5_cv_exe_need_dirs=yes
 	krb5_cv_shlibs_use_dirs=yes
+	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_staticlibs_enabled=yes
 	krb5_cv_shlibs_enabled=yes
@@ -106,6 +110,7 @@ alpha-dec-osf*)
 	krb5_cv_shlibs_dirhead="-rpath"
 	krb5_cv_exe_need_dirs=no
 	krb5_cv_shlibs_use_dirs=yes
+	krb5_cv_shlibs_use_colon_dirs=yes
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_staticlibs_enabled=yes
 	krb5_cv_shlibs_enabled=yes

@@ -1,3 +1,12 @@
+Tue Aug 15 16:19:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: For OSF/1 specify that the -rpath directive takes
+		a colon separated path.
+
+	* aclocal.m4 (SHLIB_RPATH_DIRS): Allow for directory path to be
+		colon separated for different directories.
+
+
 Tue Aug 15 01:37:19 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in: Change some spaces back to tabs
