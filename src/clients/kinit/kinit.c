@@ -69,13 +69,10 @@ main(argc, argv)
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "rpul:c:")) != EOF) {
+    while ((option = getopt(argc, argv, "rpl:c:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
-	    break;
-        case 'u':
-	    options |= KDC_OPT_ENC_TKT_IN_SKEY;
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
