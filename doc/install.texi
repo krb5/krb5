@@ -583,7 +583,7 @@ you might use the following procedure:
 @subsection Building Using @samp{lndir}
 
 If you wish to keep separate build directories for each platform, and
-you do cannot use a @samp{make} program which supports @samp{VPATH},
+you do not have access to a @samp{make} program which supports @samp{VPATH},
 all is not lost.  You can use the @samp{lndir} program to create
 symbolic link trees in your build directory.
 
