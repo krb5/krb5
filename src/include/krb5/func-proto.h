@@ -200,6 +200,11 @@ krb5_error_code krb5_copy_principal
 krb5_error_code krb5_copy_addresses
     PROTOTYPE((krb5_address * const *,
 	       krb5_address ***));
+krb5_error_code krb5_copy_ticket
+    PROTOTYPE((const krb5_ticket *, krb5_ticket **));
+krb5_error_code krb5_copy_authdata
+    PROTOTYPE((krb5_authdata * const *,
+	       krb5_authdata ***));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
