@@ -14,7 +14,7 @@ OBJS=	addr_comp.o	\
 	addr_srch.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
-	copy_athctr.o \
+	copy_athctr.o	\
 	copy_checksum.o \
 	copy_creds.o	\
 	copy_data.o	\
@@ -30,6 +30,7 @@ OBJS=	addr_comp.o	\
 	faddr_ordr.o	\
 	gc_frm_kdc.o	\
 	gc_via_tgt.o	\
+	gen_seqnum.o	\
 	get_creds.o	\
 	get_in_tkt.o	\
 	in_tkt_pwd.o	\
@@ -62,7 +63,7 @@ SRCS=	addr_comp.c	\
 	addr_srch.c	\
 	copy_addrs.c	\
 	copy_auth.c	\
-	copy_athctr.c \
+	copy_athctr.c	\
 	copy_checksum.c \
 	copy_creds.c	\
 	copy_data.c	\
@@ -78,6 +79,7 @@ SRCS=	addr_comp.c	\
 	faddr_ordr.c	\
 	gc_frm_kdc.c	\
 	gc_via_tgt.c	\
+	gen_seqnum.c	\
 	get_creds.c	\
 	get_in_tkt.c	\
 	in_tkt_pwd.c	\
