@@ -1,3 +1,8 @@
+Tue Jul  7 17:06:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* conv_princ.c: Add additional commonly seen Kerberos V4 services
+		to the hard-coded list.
+
 Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c: Fix up previous fix; short-circuit out when

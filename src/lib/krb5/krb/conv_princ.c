@@ -67,6 +67,18 @@ static const struct krb_convert sconv_list[] = {
     {"imap",	"imap",		DO_REALM_CONVERSION},
     {"ftp",	"ftp",		DO_REALM_CONVERSION},
     {"ecat",	"ecat",		DO_REALM_CONVERSION},
+    {"news",	"news",		DO_REALM_CONVERSION},
+    {"abs",	"abs",		DO_REALM_CONVERSION},
+    {"nfs",	"nfs",		DO_REALM_CONVERSION},
+    {"tftp",	"tftp",		DO_REALM_CONVERSION},
+    {"zephyr",	"zephyr",	DO_REALM_CONVERSION},
+    {"http",	"http",		DO_REALM_CONVERSION},
+    {"khttp",	"khttp",	DO_REALM_CONVERSION},
+    {"pgpsigner", "pgpsigner",	DO_REALM_CONVERSION},
+    {"irc",	"irc",		DO_REALM_CONVERSION},
+    {"mandarin-agent",	"mandarin-agent",	DO_REALM_CONVERSION},
+    {"write",	"write",	DO_REALM_CONVERSION},
+    {"palladium", "palladium",	DO_REALM_CONVERSION},
     {0,		0,		0},
 };
 
