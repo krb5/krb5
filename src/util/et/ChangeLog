@@ -2,6 +2,7 @@
 
 	* Makefile.in ($(OUTPRE)test_et.exe): New target.
 	(check-windows): Build and run test_et.exe.
+	(SHLIB_EXPLIBS): Add $(LIBS).
 
 	* error_message.c: Include autoconf.h.
 	(HAVE_STRERROR) [_WIN32]: Don't define.
