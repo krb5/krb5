@@ -55,7 +55,7 @@ krb5_error_code krb5_fcc_destroy(id)
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else
-	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
+	  lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_SET);
 
      ret = unlink(((krb5_fcc_data *) id->data)->filename);
      if (ret < 0) {

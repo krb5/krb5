@@ -54,7 +54,7 @@ krb5_fcc_get_principal(id, princ)
 
      MAYBE_OPEN(id, FCC_OPEN_RDONLY);
      /* make sure we're beyond the vno */
-     lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), L_SET);
+     lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), SEEK_SET);
 
      kret = krb5_fcc_read_principal(id, princ);
 

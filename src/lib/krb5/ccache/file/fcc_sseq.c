@@ -65,7 +65,7 @@ krb5_fcc_start_seq_get(id, cursor)
      }
      else
 	  /* seek after the version number */
-	  lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), L_SET);
+	  lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), SEEK_SET);
 
      /* Make sure we start reading right after the primary principal */
 

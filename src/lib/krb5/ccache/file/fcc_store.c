@@ -57,7 +57,7 @@ krb5_fcc_store(id, creds)
      MAYBE_OPEN(id, FCC_OPEN_RDWR);
 
      /* Make sure we are writing to the end of the file */
-     ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, L_XTND);
+     ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_END);
      if (ret < 0) {
 	  MAYBE_CLOSE_IGNORE(id);
 	  return krb5_fcc_interpret(errno);

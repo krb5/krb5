@@ -70,7 +70,7 @@ krb5_fcc_next_cred(id, cursor, creds)
 
      fcursor = (krb5_fcc_cursor *) *cursor;
 
-     ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, L_SET);
+     ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, SEEK_SET);
      if (ret < 0) {
 	 ret = krb5_fcc_interpret(errno);
 	 MAYBE_CLOSE(id, ret);
