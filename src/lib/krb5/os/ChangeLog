@@ -1,3 +1,8 @@
+Fri Feb 19 20:49:18 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ccdefname.c (get_from_os): Add missing close-paren; also replace
+	#elif just in case.
+
 Fri Feb  5 01:05:43 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ccdefname.c (get_from_os): On the Windows platform,

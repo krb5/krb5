@@ -105,14 +105,15 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	return 0;
 }
 
-#elif !(defined(_MSDOS) || defined(_WIN32)
+#else
+#if !(defined(_MSDOS) || defined(_WIN32))
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 	return 0;
 }
 #endif
-
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(context, name)
