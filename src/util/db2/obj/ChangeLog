@@ -1,0 +1,4 @@
+Fri Aug 16 12:16:36 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (TMPDIR): Use . instead of /tmp.
+
