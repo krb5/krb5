@@ -17,6 +17,7 @@ static char rcsid_kdc_rep_dc_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/asn1.h>
 #include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 #include <errno.h>
@@ -29,11 +30,11 @@ static char rcsid_kdc_rep_dc_c [] =
 
 /*ARGSUSED*/
 krb5_error_code
-krb5_kdc_rep_decrypt_proc(DECLARG(krb5_keyblock *, key),
-			  DECLARG(krb5_pointer, decryptarg),
+krb5_kdc_rep_decrypt_proc(DECLARG(const krb5_keyblock *, key),
+			  DECLARG(const krb5_pointer, decryptarg),
 			  DECLARG(krb5_kdc_rep *, dec_rep))
-OLDDECLARG(krb5_keyblock *, key)
-OLDDECLARG(krb5_pointer, decryptarg)
+OLDDECLARG(const krb5_keyblock *, key)
+OLDDECLARG(const krb5_pointer, decryptarg)
 OLDDECLARG(krb5_kdc_rep *, dec_rep)
 {
     krb5_error_code retval;

@@ -27,17 +27,17 @@ static char rcsid_gcvtgt_c[] =
 #include "int-proto.h"
 
 krb5_error_code
-krb5_get_cred_via_tgt (DECLARG(krb5_creds *, tgt),
-		       DECLARG(krb5_flags, kdcoptions),
-		       DECLARG(krb5_enctype, etype),
-		       DECLARG(krb5_cksumtype, sumtype),
-		       DECLARG(krb5_address **, addrs),
+krb5_get_cred_via_tgt (DECLARG(const krb5_creds *, tgt),
+		       DECLARG(const krb5_flags, kdcoptions),
+		       DECLARG(const krb5_enctype, etype),
+		       DECLARG(const krb5_cksumtype, sumtype),
+		       DECLARG(const krb5_address **, addrs),
 		       DECLARG(krb5_creds *, cred))
-OLDDECLARG(krb5_creds *, tgt)
-OLDDECLARG(krb5_flags, kdcoptions)
-OLDDECLARG(krb5_enctype, etype)
-OLDDECLARG(krb5_cksumtype, sumtype)
-OLDDECLARG(krb5_address **, addrs)
+OLDDECLARG(const krb5_creds *, tgt)
+OLDDECLARG(const krb5_flags, kdcoptions)
+OLDDECLARG(const krb5_enctype, etype)
+OLDDECLARG(const krb5_cksumtype, sumtype)
+OLDDECLARG(const krb5_address **, addrs)
 OLDDECLARG(krb5_creds *, cred)
 {
     krb5_error_code retval;
