@@ -729,14 +729,14 @@ proc add_kerberos_key { kkey standalone } {
     }
     expect "kadmin5:"
     send "ank $kkey@KRBTEST.COM\r"
+    expect "Enter password for krbtest/kadmin@KRBTEST.COM:"
+    send "adminpass$KEY\r"
     expect "Enter new password for $kkey@KRBTEST.COM :"
     send "$kkey"
     send "$KEY\r"
     expect "Re-enter new password for $kkey@KRBTEST.COM :"
     send "$kkey"
     send "$KEY\r"
-    expect "Enter password for krbtest/kadmin@KRBTEST.COM:"
-    send "adminpass$KEY\r"
     expect {
 	"principal $kkey@KRBTEST.COM added" { }
 	"Principal $kkey@KRBTEST.COM already exists" { }

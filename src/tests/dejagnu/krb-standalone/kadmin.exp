@@ -47,11 +47,11 @@ proc kadmin_add { pname password } {
 	    return 0
 	}
     }
-    expect "Enter new password for $pname :" { send "$password\r" }
-    expect "Re-enter new password for $pname :" { send "$password\r" }
     expect "Enter password for krbtest/kadmin@KRBTEST.COM:" {
 	send "adminpass$KEY\r"
     }
+    expect "Enter new password for $pname :" { send "$password\r" }
+    expect "Re-enter new password for $pname :" { send "$password\r" }
     expect "principal $pname added" { set good 1 }
     expect_after
     expect eof
@@ -140,11 +140,11 @@ proc kadmin_addv4 { pname password } {
 	    return 0
 	}
     }
-    expect "Enter new password for $pname :" { send "$password\r" }
-    expect "Re-enter new password for $pname :" { send "$password\r" }
     expect "Enter password for krbtest/kadmin@KRBTEST.COM:" {
 	send "adminpass$KEY\r"
     }
+    expect "Enter new password for $pname :" { send "$password\r" }
+    expect "Re-enter new password for $pname :" { send "$password\r" }
     expect "principal $pname added" { set good 1 }
     expect_after
     expect eof
@@ -346,11 +346,11 @@ proc kadmin_cpw { pname password } {
 	    return 0
 	}
     }
-    expect "Enter new password for $pname:" { send "$password\r" }
-    expect "Re-enter new password for $pname:" { send "$password\r" }
     expect "Enter password for krbtest/kadmin@KRBTEST.COM:" {
 	send "adminpass$KEY\r"
     }
+    expect "Enter new password for $pname:" { send "$password\r" }
+    expect "Re-enter new password for $pname:" { send "$password\r" }
     # When in doubt, jam one of these in there.
     expect "\r"
     expect "password changed for $pname"

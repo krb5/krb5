@@ -1,4 +1,8 @@
 
+Mon Jun 5 16:10:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin.exp - Change prompting order for kadmin ank and kadmin cpw.
+
+
 Thu Jun 1 14:50:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin.exp: Change admin instance name to kadmin.
 

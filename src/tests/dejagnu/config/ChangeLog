@@ -1,4 +1,8 @@
 
+Mon Jun 5 16:09:25 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Reverse prompting order for kadmin5.
+
+
 Thu Jun 1 14:48:57 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Change admin instance name to kadmin.
 
