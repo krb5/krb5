@@ -2,7 +2,7 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  Copyright 1993 by the Massachusetts Institute of Technology.
 #  All Rights Reserved.
 # 
 # Export of this software from the United States of America may
@@ -22,14 +22,13 @@
 # or implied warranty.
 # 
 # 
-#define IHaveSubdirs
-#define PassCDebugFlags
 
-SUBDIRS=krb5 kerberosIV
+KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
-MakeSubdirs($(SUBDIRS))
+all::
 
-#ifdef IsodeIncls
-includes::
-	$(LN) IsodeIncls isode
-#endif
+clean::
+
+depend::
+
+Krb5InstallHeaders($(KRB4_HEADERS),$(KRB5_INCDIR)/kerberosIV)
