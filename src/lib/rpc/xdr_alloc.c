@@ -38,7 +38,7 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
-#include <dyn.h>
+#include "dyn.h"
 
 static bool_t	xdralloc_putlong(XDR *, long *);
 static bool_t	xdralloc_putbytes(XDR *, caddr_t, unsigned int);

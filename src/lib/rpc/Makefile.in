@@ -15,9 +15,8 @@ SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
-	$(TOPLIBD)/libcom_err$(SHLIBEXT) \
-	$(TOPLIBD)/libdyn$(SHLIBEXT)
-SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -ldyn
+	$(TOPLIBD)/libcom_err$(SHLIBEXT)
+SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=rpc
@@ -35,6 +34,7 @@ SRCS = $(srcdir)/auth_none.c \
 	$(srcdir)/clnt_simple.c \
 	$(srcdir)/clnt_tcp.c \
 	$(srcdir)/clnt_udp.c \
+	$(srcdir)/dyn.c \
 	$(srcdir)/rpc_dtablesize.c \
 	$(srcdir)/get_myaddress.c \
 	$(srcdir)/getrpcport.c \
@@ -79,6 +79,7 @@ OBJS = auth_none.$(OBJEXT) \
 	clnt_simple.$(OBJEXT) \
 	clnt_tcp.$(OBJEXT) \
 	clnt_udp.$(OBJEXT) \
+	dyn.$(OBJEXT) \
 	rpc_dtablesize.$(OBJEXT) \
 	get_myaddress.$(OBJEXT) \
 	getrpcport.$(OBJEXT) \
@@ -124,6 +125,7 @@ STLIBOBJS = \
 	clnt_simple.o \
 	clnt_tcp.o \
 	clnt_udp.o \
+	dyn.o \
 	rpc_dtablesize.o \
 	get_myaddress.o \
 	getrpcport.o \
@@ -215,6 +217,33 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean-windows::
 
+# stuff picked up from old "dyn" library
+check-unix:: run-dyntest
+run-dyntest: dyntest
+	./dyntest
+dyntest: dyntest.o dyn.o
+	$(CC) -o dyntest dyntest.o dyn.o
+clean-unix:: clean-dyntest
+clean-dyntest:
+	$(RM) dyntest dyntest.o
+
+LCLINT=		lclint
+# +posixlib     gets more complete errno list than ansilib
+# -usedef       turns off bogus warnings from poor dataflow analysis (should be
+#               redundant with gcc warnings anyways)
+# -warnposix
+# +charintliteral
+# +ignoresigns
+# -predboolint
+# -exportlocal
+# -retvalint    allow ignoring of int return values (e.g., fputs)
+LCLINTOPTS=+posixlib \
+        +ignoresigns -predboolint \
+        +mod-uncon +modinternalstrict +modfilesys \
+        -expect 2
+do-dyn-lclint::
+	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) dyn.c dyntest.c
+
 # Should only rebuild types.h here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.
 types.h: types.stamp
@@ -293,6 +322,7 @@ clnt_udp.so clnt_udp.po $(OUTPRE)clnt_udp.$(OBJEXT): clnt_udp.c $(BUILDTOP)/incl
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_clnt.h
+dyn.so dyn.po $(OUTPRE)dyn.$(OBJEXT): dyn.c dynP.h dyn.h
 rpc_dtablesize.so rpc_dtablesize.po $(OUTPRE)rpc_dtablesize.$(OBJEXT): rpc_dtablesize.c \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
@@ -427,5 +457,5 @@ xdr_reference.so xdr_reference.po $(OUTPRE)xdr_reference.$(OBJEXT): xdr_referenc
 xdr_stdio.so xdr_stdio.po $(OUTPRE)xdr_stdio.$(OBJEXT): xdr_stdio.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
 xdr_alloc.so xdr_alloc.po $(OUTPRE)xdr_alloc.$(OBJEXT): xdr_alloc.c $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/dyn.h
+  $(BUILDTOP)/include/gssrpc/xdr.h dyn.h
 

@@ -1,3 +1,22 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* dyn.c: New file, combining contents of old util/dyn library,
+	with unused functions omitted, and memmove assumed.
+	* dyn.h: Moved from util/dyn/dyn.h, symbol renaming macros added.
+	Changed element size to size_t.  Include stdlib.h.
+	* dynP.h: Moved from util/dyn/dynP.h, symbol renaming macros
+	added.
+	* dyntest.c: Moved from util/dyn/test.c.
+	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Omit libdyn
+	references.
+	(SRCS, OBJS, STLIBOBJS): Build dyn.c.
+	(dyntest, run-dyntest, clean-dyntest): New targets.
+	(check-unix): Depend on run-dyntest.
+	(clean-unix): Depend on clean-dyntest.
+	(LCLINT, LCLINTOPTS): Moved from util/dyn/Makefile.in.
+	(do-dyn-lclint): New target, untested.
+	* xdr_alloc.c: Include "dyn.h" instead of <dyn.h>.
+
 2001-12-14  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc_auth_gssapi.c (_gssrpc_svcauth_gssapi): Local return
