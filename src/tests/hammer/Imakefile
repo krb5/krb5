@@ -24,6 +24,7 @@
 # 
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
+SRCS = kdc5_hammer.c
 
 SimpleTestProgramTarget(kdc5_hammer)
 

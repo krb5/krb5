@@ -25,6 +25,7 @@
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
        INCLUDES = -I..
+           SRCS = sim_client.c
 
 SimpleTestProgramTarget(sim_client)
 

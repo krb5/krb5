@@ -31,6 +31,7 @@ LOCAL_LIBRARIES = $(KLIB) $(HESLIBS)
 #ifndef AIXArchitecture
          OSDEFS = -DMAIL_USE_FLOCK -DBSD
 #endif
+           SRCS = movemail.c
 
 SimpleTestProgramTarget(movemail)
 

@@ -24,6 +24,7 @@
 # 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+SRCS= kdb5_verify.c
 
 SimpleTestProgramTarget(kdb5_verify)
 
