@@ -154,5 +154,23 @@ typedef int krb5_sigtype;
 #define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */
 #define	KRB5_KDB_EXPIRATION	2145830400 /* Thu Jan  1 00:00:00 2038 UTC */
 
+/*
+ * For paranoid DOE types that don't want to give helpful error
+ * messages to the client....er, attacker
+ */
+#undef KRBCONF_VAGUE_ERRORS
+
+/*
+ * Define this if you want the KDC to modify the Kerberos database;
+ * this allows the last request information to be updated, as well as
+ * the failure count information.
+ * 
+ * Note that this doesn't work if you're using slave servers!!!  It
+ * also causes the database to be modified (and thus need to be
+ * locked) frequently.
+ */
+#undef KRBCONF_KDC_MODIFIES_KDB
+    
+
 #endif /* KRB5_CONFIG__ */
 
