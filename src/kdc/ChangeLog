@@ -1,4 +1,30 @@
 
+Thu Jun 22 15:24:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Change option parsing logic to support multiple realms.
+		Use alternate profile routines from libkadm to support reading
+		values from it.
+	* dispatch.c - Setup global realm context before calling process_as_
+		req().
+	* do_as_req.c - Change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key call.
+	* do_tgs_req.c - Setup global realm context from our service principal
+		name.
+	* extern.c - Remove per-realm global data.  Replace this with list
+		of per-realm data with a pointer to the active request's realm.
+	* extern.h - Change per-realm global data names to #define's.  This
+		is to avoid having to rewrite everything to pass a pointer to
+		the active realm.
+	* kdc_util.c - Change "kdc_context" to "kcontext" because of #defines
+		in extern.h.  Also add logic after call to rd_req_decoded
+		to see if it failed because of a rcache error.  If so, then
+		reinitialize the replay cache and retry it.
+		Also change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key.
+	* kerberos_v4.c - Remove extraneous definition of master_encblock.
+	* krb5kdc.M - Add definition of -p, add vague reference to kdc.conf
+		manpage and describe multiple realms briefly.
+	* network.c - Change udp_port_fd to a list of fds to support having
+		multiple ports to listen on.
+
+
 Thu Jun 15 17:55:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

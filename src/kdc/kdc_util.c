@@ -117,8 +117,8 @@ krb5_boolean krb5_is_tgs_principal(principal)
  * is provided.
  */
 static krb5_error_code
-comp_cksum(kdc_context, source, ticket, his_cksum)
-    krb5_context	  kdc_context;
+comp_cksum(kcontext, source, ticket, his_cksum)
+    krb5_context	  kcontext;
     krb5_data 		* source;
     krb5_ticket 	* ticket;
     krb5_checksum 	* his_cksum;
@@ -135,11 +135,11 @@ comp_cksum(kdc_context, source, ticket, his_cksum)
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(kdc_context, our_cksum.checksum_type)))) 
+	  malloc(krb5_checksum_size(kcontext, our_cksum.checksum_type)))) 
 	return ENOMEM;
 
     /* compute checksum */
-    if ((retval = krb5_calculate_checksum(kdc_context, our_cksum.checksum_type, 
+    if ((retval = krb5_calculate_checksum(kcontext, our_cksum.checksum_type, 
 					  source->data, source->length, 
 					  ticket->enc_part2->session->contents, 
 					  ticket->enc_part2->session->length,&our_cksum))) {
@@ -242,8 +242,38 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 
     if ((retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
 				      apreq->ticket->server, NULL,
-				      NULL, ticket)))
-	goto cleanup_auth_context;
+				      NULL, ticket))) {
+	/*
+	 * I'm not so sure that this is right, but it's better than nothing
+	 * at all.
+	 *
+	 * If we choke in the rd_req because of the replay cache, then attempt
+	 * to reinitialize the replay cache because somebody could have deleted
+	 * it from underneath us (e.g. a cron job)
+	 */
+	if ((retval == KRB5_RC_IO_IO) ||
+	    (retval == KRB5_RC_IO_UNKNOWN)) {
+	    (void) krb5_rc_close(kdc_context, kdc_rcache);
+	    kdc_rcache = (krb5_rcache) NULL;
+	    if (!(retval = kdc_initialize_rcache(kdc_context,
+						 (char *) NULL))) {
+		if ((retval = krb5_auth_con_setrcache(kdc_context,
+						      auth_context,
+						      kdc_rcache)) ||
+		    (retval = krb5_rd_req_decoded(kdc_context,
+						  &auth_context,
+						  apreq, 
+						  apreq->ticket->server,
+						  NULL,
+						  NULL,
+						  ticket))
+		    )
+		    goto cleanup_auth_context;
+	    }
+	}
+	else
+	    goto cleanup_auth_context;
+    }
 
     if ((retval = krb5_auth_con_getremotesubkey(kdc_context,
 						auth_context, subkey)))
@@ -341,7 +371,8 @@ krb5_kvno *kvno;
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
 	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-	    retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, *key);
+	    retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
+					  &server.key, *key);
 	} else
 	    retval = ENOMEM;
 	*kvno = server.kvno;
