@@ -16,9 +16,9 @@
 #ifndef KRB5_ASN1__
 #define KRB5_ASN1__
 
-#include "../../asn.1/KRB5-types.h"
-#include "../../asn.1/asn1defs.h"
-#include "../../asn.1/KRB5-types-aux.h"
-#include "../../asn.1/encode.h"
+#include "asn.1/KRB5-types.h"
+#include "asn.1/asn1defs.h"
+#include "asn.1/KRB5-types-aux.h"
+#include "asn.1/encode.h"
 
 #endif /* KRB5_ASN1__ */
