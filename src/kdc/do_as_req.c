@@ -84,8 +84,9 @@ check_padata (client, src_addr, padata, pa_id, flags)
    
     retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey);
     if (retval) {
-	syslog( LOG_ERR, "AS_REQ: Unable to Extract Client Key/alt_key\n");
-	return(0);
+	syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
+	       error_message(retval));
+	return retval;
     }
     retval =  krb5_verify_padata(*padata,client->principal,src_addr,
 				 &tmpkey, pa_id, flags);
@@ -97,9 +98,10 @@ check_padata (client, src_addr, padata, pa_id, flags)
 	 */
 	enckey = &(client->alt_key);
 	/* Extract client key/alt_key from master key */
-	if (retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey)){
-	    syslog( LOG_ERR, "AS_REQ: Unable to Extract Client Key/alt_key\n");
-	    return(0);
+	if (retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey)) {
+	    syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
+		   error_message(retval));
+	    return retval;
 	}
 	retval = krb5_verify_padata(*padata,client->principal,src_addr,
 				    &tmpkey, pa_id, flags);
