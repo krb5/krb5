@@ -1,3 +1,7 @@
+2004-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-unix): Install krb524d manpage.
+
 2004-09-07  Alexandra Ellwood  <lxs@mit.edu>
 
 	* krb524d.M: Added a man page for krb524d.

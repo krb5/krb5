@@ -92,6 +92,7 @@ $(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(CLIB) $(BU
 install-unix::
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
 	$(INSTALL_PROGRAM) k524init $(DESTDIR)$(CLIENT_BINDIR)/krb524init
+	$(INSTALL_DATA) $(srcdir)/krb524d.M $(DESTDIR)$(SERVER_MANDIR)/krb524d.8
 
 clean-unix::
 	$(RM) $(OBJS) core *~ *.bak #*
