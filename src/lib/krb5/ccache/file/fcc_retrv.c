@@ -59,30 +59,32 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 
      krb5_cc_cursor cursor;
      krb5_error_code kret;
+     krb5_creds fetchcreds;
 
      kret = krb5_fcc_start_seq_get(id, &cursor);
      if (kret != KRB5_OK)
 	  return kret;
 
-     while ((kret = krb5_fcc_next_cred(id, &cursor, creds)) == KRB5_OK) {
-	  if (standard_fields_match(mcreds, creds)
+     while ((kret = krb5_fcc_next_cred(id, &cursor, &fetchcreds)) == KRB5_OK) {
+	  if (standard_fields_match(mcreds, &fetchcreds)
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
-	       mcreds->is_skey == creds->is_skey)
+	       mcreds->is_skey == fetchcreds.is_skey)
 	      &&
 	      (! set(KRB5_TC_MATCH_FLAGS_EXACT) ||
-	       mcreds->ticket_flags == creds->ticket_flags)
+	       mcreds->ticket_flags == fetchcreds.ticket_flags)
 	      &&
 	      (! set(KRB5_TC_MATCH_FLAGS) ||
-	       flags_match(mcreds->ticket_flags, creds->ticket_flags))
+	       flags_match(mcreds->ticket_flags, fetchcreds.ticket_flags))
 	      &&
 	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
-	       times_match_exact(&mcreds->times, &creds->times))
+	       times_match_exact(&mcreds->times, &fetchcreds.times))
 	      &&
 	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(&mcreds->times, &creds->times)))
+	       times_match(&mcreds->times, &fetchcreds.times)))
 	  {
 	       krb5_fcc_end_seq_get(id, &cursor);
+	       *creds = fetchcreds;
 	       return KRB5_OK;
 	  }
 
