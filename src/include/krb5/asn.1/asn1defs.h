@@ -95,7 +95,7 @@ struct type_KRB5_KDC__REP *krb5_tgs_rep2KRB5_KDC__REP
 		   int * ));
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
 	PROTOTYPE((struct type_KRB5_KDC__REP *,
-		   int *type,
+		   int *,
 		   int * ));
 krb5_kdc_rep *KRB5_KDC__REP2krb5_as_rep
 	PROTOTYPE((struct type_KRB5_KDC__REP *,
