@@ -2,24 +2,6 @@
 #include "enc_provider.h"
 #include "aes.h"
 
-static void
-aes_block_size(size_t *blocksize)
-{
-    *blocksize = 16;
-}
-
-static void
-aes128_keysize(size_t *keybytes, size_t *keylength)
-{
-    *keybytes = *keylength = 16;
-}
-
-static void
-aes256_keysize(size_t *keybytes, size_t *keylength)
-{
-    *keybytes = *keylength = 32;
-}
-
 #if 0
 aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1]);
 aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx[1]);
@@ -199,8 +181,8 @@ krb5int_aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
 }
 
 const struct krb5_enc_provider krb5int_enc_aes128 = {
-    aes_block_size,
-    aes128_keysize,
+    16,
+    16, 16,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
     k5_aes_make_key,
@@ -209,8 +191,8 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
 };
 
 const struct krb5_enc_provider krb5int_enc_aes256 = {
-    aes_block_size,
-    aes256_keysize,
+    16,
+    32, 32,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
     k5_aes_make_key,

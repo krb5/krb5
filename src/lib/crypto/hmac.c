@@ -52,8 +52,8 @@ krb5_hmac(hash, key, icount, input, output)
     krb5_data *hashin, hashout;
     krb5_error_code ret;
 
-    (*(hash->hash_size))(&hashsize);
-    (*(hash->block_size))(&blocksize);
+    hashsize = hash->hashsize;
+    blocksize = hash->blocksize;
 
     if (key->length > blocksize)
 	return(KRB5_CRYPTO_INTERNAL);

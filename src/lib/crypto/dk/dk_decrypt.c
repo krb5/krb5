@@ -88,9 +88,10 @@ krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
 
     /* allocate and set up ciphertext and to-be-derived keys */
 
-    (*(hash->hash_size))(&hashsize);
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    hashsize = hash->hashsize;
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     if (hmacsize == 0)
 	hmacsize = hashsize;
@@ -223,9 +224,10 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 
     /* allocate and set up ciphertext and to-be-derived keys */
 
-    (*(hash->hash_size))(&hashsize);
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    hashsize = hash->hashsize;
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     enclen = input->length - hashsize;
 

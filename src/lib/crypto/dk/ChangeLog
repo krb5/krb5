@@ -1,3 +1,16 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum.c (krb5_dk_make_checksum, krb5_marc_dk_make_checksum):
+	Use new numeric fields for key/bolck sizes instead of calling
+	functions.
+	* derive.c (krb5_derive_key, krb5_derive_random): Likewise.
+	* dk_decrypt.c (krb5_dk_decrypt_maybe_trunc_hmac,
+	krb5_marc_dk_decrypt): Likewise.
+	* dk_encrypt.c (krb5_dk_encrypt_length, krb5_dk_encrypt,
+	krb5int_aes_encrypt_length, trunc_hmac, krb5int_aes_dk_encrypt,
+	krb5_marc_dk_encrypt_length, krb5_mark_dk_encrypt): Likewise.
+	* stringtokey.c (krb5int_dk_string_to_key): Likewise.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.

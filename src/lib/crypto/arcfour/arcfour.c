@@ -19,9 +19,8 @@ krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
 {
   size_t blocksize, hashsize;
 
-  (*(enc->block_size))(&blocksize);
-  (*(hash->hash_size))(&hashsize);
-
+  blocksize = enc->block_size;
+  hashsize = hash->hashsize;
 
   /* checksum + (confounder + inputlen, in even blocksize) */
   *length = hashsize + krb5_roundup(8 + inputlen, blocksize);
@@ -78,9 +77,10 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
   size_t keylength, keybytes, blocksize, hashsize;
   krb5_error_code ret;
 
-  (*(enc->block_size))(&blocksize);
-  (*(enc->keysize))(&keybytes, &keylength);
-  (*(hash->hash_size))(&hashsize);
+  blocksize = enc->block_size;
+  keybytes = enc->keybytes;
+  keylength = enc->keylength;
+  hashsize = hash->hashsize;
   
   d1.length=keybytes;
   d1.data=malloc(d1.length);
@@ -206,9 +206,10 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
   size_t keybytes, keylength, hashsize, blocksize;
   krb5_error_code ret;
 
-  (*(enc->block_size))(&blocksize);
-  (*(enc->keysize))(&keybytes, &keylength);
-  (*(hash->hash_size))(&hashsize);
+  blocksize = enc->block_size;
+  keybytes = enc->keybytes;
+  keylength = enc->keylength;
+  hashsize = hash->hashsize;
 
   d1.length=keybytes;
   d1.data=malloc(d1.length);

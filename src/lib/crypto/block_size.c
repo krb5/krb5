@@ -43,7 +43,7 @@ krb5_c_block_size(context, enctype, blocksize)
     if (i == krb5_enctypes_length)
 	return(KRB5_BAD_ENCTYPE);
 
-    (*(krb5_enctypes_list[i].enc->block_size))(blocksize);
+    *blocksize = krb5_enctypes_list[i].enc->block_size;
 
     return(0);
 }

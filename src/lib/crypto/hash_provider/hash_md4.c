@@ -28,18 +28,6 @@
 #include "rsa-md4.h"
 #include "hash_provider.h"
 
-static void
-k5_md4_hash_size(size_t *output)
-{
-    *output = RSA_MD4_CKSUM_LENGTH;
-}
-
-static void
-k5_md4_block_size(size_t *output)
-{
-    *output = 64;
-}
-
 static krb5_error_code
 k5_md4_hash(unsigned int icount, const krb5_data *input,
 	    krb5_data *output)
@@ -61,7 +49,7 @@ k5_md4_hash(unsigned int icount, const krb5_data *input,
 }
 
 const struct krb5_hash_provider krb5int_hash_md4 = {
-    k5_md4_hash_size,
-    k5_md4_block_size,
+    RSA_MD4_CKSUM_LENGTH,
+    64,
     k5_md4_hash
 };

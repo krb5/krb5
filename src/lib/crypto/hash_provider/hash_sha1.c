@@ -28,18 +28,6 @@
 #include "shs.h"
 #include "hash_provider.h"
 
-static void
-k5_sha1_hash_size(size_t *output)
-{
-    *output = SHS_DIGESTSIZE;
-}
-
-static void
-k5_sha1_block_size(size_t *output)
-{
-    *output = SHS_DATASIZE;
-}
-
 static krb5_error_code
 k5_sha1_hash(unsigned int icount, const krb5_data *input,
 	     krb5_data *output)
@@ -66,7 +54,7 @@ k5_sha1_hash(unsigned int icount, const krb5_data *input,
 }
 
 const struct krb5_hash_provider krb5int_hash_sha1 = {
-    k5_sha1_hash_size,
-    k5_sha1_block_size,
+    SHS_DIGESTSIZE,
+    SHS_DATASIZE,
     k5_sha1_hash
 };

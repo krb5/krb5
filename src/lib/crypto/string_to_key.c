@@ -85,8 +85,8 @@ krb5_c_string_to_key_with_params(context, enctype, string, salt, params, key)
 	}
     }
 
-	
-    (*(enc->keysize))(&keybytes, &keylength);
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     if ((key->contents = (krb5_octet *) malloc(keylength)) == NULL)
 	return(ENOMEM);

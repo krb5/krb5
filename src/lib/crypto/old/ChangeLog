@@ -1,3 +1,10 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* old_decrypt.c (krb5_old_decrypt): Use block_size and hashsize
+	fields instead of calling functions.
+	* old_encrypt.c (krb5_old_encrypt_length, krb5_old_encrypt):
+	Likewise.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.

@@ -59,8 +59,9 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
 
     /* allocate and set to-be-derived keys */
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     /* key->length will be tested in enc->encrypt
        output->length will be tested in krb5_hmac */
@@ -133,8 +134,9 @@ krb5_marc_dk_make_checksum(hash, key, usage, input, output)
 
     /* allocate and set to-be-derived keys */
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     /* key->length will be tested in enc->encrypt
        output->length will be tested in krb5_hmac */

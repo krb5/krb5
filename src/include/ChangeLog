@@ -2,6 +2,9 @@
 
 	* k5-int.h (krb5int_zap_data, zap): New macros; call memset with
 	volatile cast for now.
+	(struct krb5_enc_provider, struct krb5_hash_provider, struct
+	krb5_keyhash_provider): Use numeric values for block size,
+	key size, hash size, etc, instead of function pointers.
 
 2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
 

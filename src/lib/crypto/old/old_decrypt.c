@@ -42,8 +42,8 @@ krb5_old_decrypt(const struct krb5_enc_provider *enc,
     krb5_data output, cksum, crcivec;
     int alloced;
 
-    (*(enc->block_size))(&blocksize);
-    (*(hash->hash_size))(&hashsize);
+    blocksize = enc->block_size;
+    hashsize = hash->hashsize;
 
     plainsize = input->length - blocksize - hashsize;
 

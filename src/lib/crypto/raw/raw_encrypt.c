@@ -36,7 +36,7 @@ krb5_raw_encrypt_length(enc, hash, inputlen, length)
 {
     size_t blocksize;
 
-    (*(enc->block_size))(&blocksize);
+    blocksize = enc->block_size;
 
     *length = krb5_roundup(inputlen, blocksize);
 }

@@ -1,3 +1,15 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* hash_crc32.c (k5_crc32_hash_size, k5_crc32_block_size):
+	Deleted.
+	(krb5int_hash_crc32): Updated.
+	* hash_md4.c (k5_md4_hash_size, k5_md4_block_size): Deleted.
+	(krb5int_hash_md4): Updated.
+	* hash_md5.c (k5_md5_hash_size, k5_md5_block_size): Deleted.
+	(krb5int_hash_md5): Updated.
+	* hash_sha1.c (k5_sha1_hash_size, k5_sha1_block_size): Deleted.
+	(krb5int_hash_sha1): Updated.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.

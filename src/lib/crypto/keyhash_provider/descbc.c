@@ -30,12 +30,6 @@
 
 static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
-static void
-k5_descbc_hash_size(size_t *output)
-{
-    *output = 8;
-}
-
 static krb5_error_code
 k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
@@ -72,7 +66,7 @@ k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
 }
 
 const struct krb5_keyhash_provider krb5int_keyhash_descbc = {
-    k5_descbc_hash_size,
+    8,
     k5_descbc_hash,
     NULL
 };

@@ -35,8 +35,8 @@ krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
 {
     size_t blocksize, hashsize;
 
-    (*(enc->block_size))(&blocksize);
-    (*(hash->hash_size))(&hashsize);
+    blocksize = enc->block_size;
+    hashsize = hash->hashsize;
 
     *length = krb5_roundup(blocksize+hashsize+inputlen, blocksize);
 }
@@ -55,8 +55,8 @@ krb5_old_encrypt(const struct krb5_enc_provider *enc,
     krb5_data datain, crcivec;
     int real_ivec;
 
-    (*(enc->block_size))(&blocksize);
-    (*(hash->hash_size))(&hashsize);
+    blocksize = enc->block_size;
+    hashsize = hash->hashsize;
 
     krb5_old_encrypt_length(enc, hash, input->length, &enclen);
 

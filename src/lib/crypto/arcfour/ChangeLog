@@ -1,3 +1,9 @@
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c (krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+	krb5_arcfour_decrypt): Use new numeric fields for block/hash/key
+	sizes instead of calling functions.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.

@@ -565,11 +565,9 @@ krb5int_locate_server (krb5_context,
 /* new encryption provider api */
 
 struct krb5_enc_provider {
-    void (*block_size) (size_t *output);
-
     /* keybytes is the input size to make_key; 
        keylength is the output size */
-    void (*keysize) (size_t *keybytes, size_t *keylength);
+    size_t block_size, keybytes, keylength;
 
     /* cipher-state == 0 fresh state thrown away at end */
     krb5_error_code (*encrypt) (const krb5_keyblock *key,
@@ -592,9 +590,7 @@ struct krb5_enc_provider {
 };
 
 struct krb5_hash_provider {
-    void (*hash_size) (size_t *output);
-
-    void (*block_size) (size_t *output);
+    size_t hashsize, blocksize;
 
     /* this takes multiple inputs to avoid lots of copying. */
     krb5_error_code (*hash) (unsigned int icount, const krb5_data *input,
@@ -602,7 +598,7 @@ struct krb5_hash_provider {
 };
 
 struct krb5_keyhash_provider {
-    void (*hash_size) (size_t *output);
+    size_t hashsize;
 
     krb5_error_code (*hash) (const krb5_keyblock *key,
 			     krb5_keyusage keyusage,

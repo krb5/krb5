@@ -1,4 +1,17 @@
-2003-07-13  Kenneth Raeburn  <raeburn@mit.edu>
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* block_size.c (krb5_c_block_size): Read new numeric fields for
+	key/block/hash sizes instead of calling functions.
+	* checksum_length.c (krb5_c_checksum_length): Likewise.
+	* combine_keys.c (krb5int_c_combine_keys, dr): Likewise.
+	* hmac.c (krb5_hmac): Likewise.
+	* make_checksum.c (krb5_c_make_checksum): Likewise.
+	* make_random_key.c (krb5_c_make_random_key): Likewise.
+	* pbkdf2.c (hmac1): Likewise.
+	* string_to_key.c (krb5_c_string_to_key_with_params): Likewise.
+	* t_hmac.c (hmac1): Likewise.
+
+2003-07-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c (foo): Never call com_err.
 

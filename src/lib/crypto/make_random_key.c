@@ -50,7 +50,8 @@ krb5_c_make_random_key(context, enctype, random_key)
 
     enc = krb5_enctypes_list[i].enc;
 
-    (*(enc->keysize))(&keybytes, &keylength);
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     if ((bytes = (unsigned char *) malloc(keybytes)) == NULL)
 	return(ENOMEM);

@@ -38,8 +38,9 @@ krb5_derive_key(enc, inkey, outkey, in_constant)
     unsigned char *inblockdata, *outblockdata, *rawkey;
     krb5_data inblock, outblock;
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     if ((inkey->length != keylength) ||
 	(outkey->length != keylength))
@@ -124,8 +125,9 @@ krb5_derive_random(enc, inkey, outrnd, in_constant)
     unsigned char *inblockdata, *outblockdata, *rawkey;
     krb5_data inblock, outblock;
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     if ((inkey->length != keylength) ||
 	(outrnd->length != keybytes))

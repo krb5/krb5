@@ -36,12 +36,6 @@
 #include "rsa-md5.h"
 #include "hash_provider.h"
 
-static void 
-k5_hmac_md5_hash_size (size_t *output) 
-{
-  *output = 16;
-}
-
 static  krb5_error_code
 k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,
 		  const krb5_data *iv,
@@ -95,7 +89,7 @@ k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,
 		 
 
 const struct krb5_keyhash_provider krb5int_keyhash_hmac_md5 = {
-  k5_hmac_md5_hash_size,
+  16,
   k5_hmac_md5_hash,
   NULL /*checksum  again*/
 };

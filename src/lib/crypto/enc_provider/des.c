@@ -30,19 +30,6 @@
 
 static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
-static void
-k5_des_block_size(size_t *blocksize)
-{
-    *blocksize = 8;
-}
-
-static void
-k5_des_keysize(size_t *keybytes, size_t *keylength)
-{
-    *keybytes = 7;
-    *keylength = 8;
-}
-
 static krb5_error_code
 k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output, int enc)
@@ -122,8 +109,8 @@ k5_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
 }
 
 const struct krb5_enc_provider krb5int_enc_des = {
-    k5_des_block_size,
-    k5_des_keysize,
+    8,
+    7, 8,
     k5_des_encrypt,
     k5_des_decrypt,
     k5_des_make_key,

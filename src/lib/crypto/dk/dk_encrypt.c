@@ -45,9 +45,8 @@ krb5_dk_encrypt_length(enc, hash, inputlen, length)
 {
     size_t blocksize, hashsize;
 
-    (*(enc->block_size))(&blocksize);
-    (*(hash->hash_size))(&hashsize);
-
+    blocksize = enc->block_size;
+    hashsize = hash->hashsize;
     *length = krb5_roundup(blocksize+inputlen, blocksize) + hashsize;
 }
 
@@ -70,8 +69,9 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     /* allocate and set up plaintext and to-be-derived keys */
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
     plainlen = krb5_roundup(blocksize+input->length, blocksize);
 
     krb5_dk_encrypt_length(enc, hash, input->length, &enclen);
@@ -188,7 +188,7 @@ krb5int_aes_encrypt_length(enc, hash, inputlen, length)
 {
     size_t blocksize, hashsize;
 
-    (*(enc->block_size))(&blocksize);
+    blocksize = enc->block_size;
     hashsize = 96 / 8;
 
     /* No roundup, since CTS requires no padding once we've hit the
@@ -205,7 +205,7 @@ trunc_hmac (const struct krb5_hash_provider *hash,
     krb5_data tmp;
     krb5_error_code ret;
 
-    (hash->hash_size)(&hashsize);
+    hashsize = hash->hashsize;
     if (hashsize < output->length)
 	return KRB5_CRYPTO_INTERNAL;
     tmp.length = hashsize;
@@ -239,8 +239,9 @@ krb5int_aes_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     /* allocate and set up plaintext and to-be-derived keys */
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
     plainlen = blocksize+input->length;
 
     krb5int_aes_encrypt_length(enc, hash, input->length, &enclen);
@@ -359,9 +360,8 @@ krb5_marc_dk_encrypt_length(enc, hash, inputlen, length)
 {
     size_t blocksize, hashsize;
 
-    (*(enc->block_size))(&blocksize);
-    (*(hash->hash_size))(&hashsize);
-
+    blocksize = enc->block_size;
+    hashsize = hash->hashsize;
     *length = krb5_roundup(blocksize+4+inputlen, blocksize) + hashsize;
 }
 
@@ -384,8 +384,9 @@ krb5_marc_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     /* allocate and set up plaintext and to-be-derived keys */
 
-    (*(enc->block_size))(&blocksize);
-    (*(enc->keysize))(&keybytes, &keylength);
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
     plainlen = krb5_roundup(blocksize+4+input->length, blocksize);
 
     krb5_marc_dk_encrypt_length(enc, hash, input->length, &enclen);

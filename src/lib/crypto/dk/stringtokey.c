@@ -42,7 +42,8 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 
     /* key->length is checked by krb5_derive_key */
 
-    (*(enc->keysize))(&keybytes, &keylength);
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
 
     concatlen = string->length+(salt?salt->length:0);
 

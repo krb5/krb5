@@ -42,7 +42,8 @@ krb5int_yarrow_cipher_init
   const struct krb5_enc_provider *enc = &yarrow_enc_provider;
   krb5_error_code ret;
   krb5_data randombits;
-  enc->keysize (&keybytes, &keylength);
+  keybytes = enc->keybytes;
+  keylength = enc->keylength;
   assert (keybytes == CIPHER_KEY_SIZE);
   if (ctx->key.contents) {
     memset (ctx->key.contents, 0, ctx->key.length);

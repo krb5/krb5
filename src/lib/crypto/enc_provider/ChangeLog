@@ -1,5 +1,15 @@
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
+	* aes.c (aes_block_size, aes128_keysize, aes256_keysize):
+	Deleted.
+	(krb5int_enc_aes128, krb5int_enc_aes256): Updated.
+	* arcfour.c (k5_arcfour_blocksize, k5_arcfour_keysize): Deleted.
+	(krb5int_enc_arcfour): Updated.
+	* des.c (k5_des_block_size, k5_des_keysize): Deleted.
+	(krb5int_enc_des): Updated.
+	* des3.c (k5_des3_block_size, k5_des3_keysize): Deleted.
+	(krb5int_enc_des3): Updated.
+
 	* des3.c (validate_and_schedule): Split out from old
 	k5_des3_docrypt.
 	(k5_des3_encrypt, k5_des3_decrypt): Call it, and

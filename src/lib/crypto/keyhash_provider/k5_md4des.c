@@ -36,12 +36,6 @@
 
 static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
-static void
-k5_md4des_hash_size(size_t *output)
-{
-    *output = CONFLENGTH+RSA_MD4_CKSUM_LENGTH;
-}
-
 /* des-cbc(xorkey, conf | rsa-md4(conf | data)) */
 
 /* this could be done in terms of the md4 and des providers, but
@@ -192,7 +186,7 @@ k5_md4des_verify(const krb5_keyblock *key, krb5_keyusage usage,
 }
 
 const struct krb5_keyhash_provider krb5int_keyhash_md4des = {
-    k5_md4des_hash_size,
+    CONFLENGTH+RSA_MD4_CKSUM_LENGTH,
     k5_md4des_hash,
     k5_md4des_verify
 };

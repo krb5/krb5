@@ -89,7 +89,7 @@ main(argc, argv)
   keyblock.length = sizeof(testkey);
   keyblock.contents = testkey;
 
-  (*(khp.hash_size))(&length);
+  length = khp.hashsize;
 
   newstyle_checksum.length = length;
 
