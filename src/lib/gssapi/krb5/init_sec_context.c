@@ -136,7 +136,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 	goto cleanup;
     if ((code = krb5_copy_principal(context, server, &in_creds.server)))
 	goto cleanup;
-    
+    in_creds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
     in_creds.times.endtime = *endtime;
     
     /*

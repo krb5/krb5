@@ -1,3 +1,8 @@
+Thu Aug 15 20:52:37 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* init_sec_context.c (make_ap_req): Require des-cbc-crc for now;
+        DES3 support is broken.
+
 Fri Aug  2 13:40:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* acquire_cred.c (krb5_gss_acquire_cred): Add const to local
