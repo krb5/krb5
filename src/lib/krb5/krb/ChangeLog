@@ -1,3 +1,8 @@
+2001-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (pa_sam): Return an error if no prompter was
+	provided.
+
 2001-02-15  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_deltat.c (main): Test of overflow and underflow of krb5_int32. 
