@@ -22,8 +22,6 @@
  * 
  */
 
-#define DB_OPENCLOSE
-
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -251,13 +249,7 @@ krb5_dbm_db_init(context)
 	return(retval);
 
     db_ctx = context->db_context;
-#ifdef DB_OPENCLOSE
     db_ctx->db_dbm_ctx = NULL;
-#else
-    if (!(db_ctx->db_dbm_ctx = (DBM *)KDBM_OPEN(db_ctx, db_ctx->db_name, 
-						O_RDWR, 0600)))
-    	return errno;
-#endif
 
     if (!(filename = gen_dbsuffix (db_ctx->db_name, KDBM_LOCK_EXT(db_ctx))))
 	return ENOMEM;
@@ -281,9 +273,6 @@ krb5_dbm_db_init(context)
     return 0;
     
 err_out:
-#ifndef DB_OPENCLOSE
-    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-#endif
     db_ctx->db_dbm_ctx = (DBM *) NULL;
     k5dbm_clear_context(db_ctx);
     return (retval);
@@ -303,17 +292,6 @@ krb5_dbm_db_fini(context)
     db_ctx = (krb5_db_context *) context->db_context;
 
     if (k5dbm_inited(context)) {
-#ifndef DB_OPENCLOSE
-	if (db_ctx->db_dbm_ctx) {
-	    /* dbm_close returns void, but it is possible for there to be an
-	       error in close().  Possible changes to this routine: check errno
-	       on return from dbm_close(), call fsync on the database file
-	       descriptors.  */
-	    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	    db_ctx->db_dbm_ctx = NULL;
-	}
-#endif
-
 	if (close(db_ctx->db_lf_file))
 	    retval = errno;
 	else
@@ -541,7 +519,6 @@ krb5_dbm_db_lock(context, mode)
     if ((retval = krb5_dbm_db_get_age(context, NULL, &mod_time)))
 	goto lock_error;
 
-#ifdef DB_OPENCLOSE
     if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name,
 			mode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
 			0600))) {
@@ -551,18 +528,6 @@ krb5_dbm_db_lock(context, mode)
 	 retval = errno;
 	 goto lock_error;
     }
-#else
-    if (mod_time != db_ctx->db_lf_time) {
-  	KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
-    	    db_ctx->db_lf_time = mod_time;
-	    db_ctx->db_dbm_ctx = db;
-	} else {
-	    retval = errno;
-	    goto lock_error;
-	}
-    }
-#endif
 
     db_ctx->db_lock_mode = mode;
     db_ctx->db_locks_held++;
@@ -589,11 +554,10 @@ krb5_dbm_db_unlock(context)
     if (!db_ctx->db_locks_held)		/* lock already unlocked */
 	return KRB5_KDB_NOTLOCKED;
 
-#ifdef DB_OPENCLOSE
-    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-#endif
-
     if (--(db_ctx->db_locks_held) == 0) {
+    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
+	db_ctx->db_dbm_ctx = NULL;
+
     	retval = krb5_lock_file(context, db_ctx->db_lf_file,
 				KRB5_LOCKMODE_UNLOCK);
 	db_ctx->db_lock_mode = 0;
@@ -808,7 +772,7 @@ krb5_dbm_db_rename(context, from, to)
 	db_ctx = (krb5_db_context *) context->db_context;
 
 	/*
-	 * Create the database if it does not already exists; the
+	 * Create the database if it does not already exist; the
 	 * files must exist because krb5_dbm_db_lock, called below,
 	 * will fail otherwise.
 	 */
@@ -918,12 +882,12 @@ krb5_dbm_db_rename(context, from, to)
 			(void) unlink(fromok);
 		   retval = krb5_dbm_db_end_update(context);
 	      } else {
-		   (void) krb5_dbm_db_end_update(context);
 		   retval = errno;
+		   (void) krb5_dbm_db_end_update(context);
 	      }
 	 } else {
-	      (void) krb5_dbm_db_end_update(context);
 	      retval = errno;
+	      (void) krb5_dbm_db_end_update(context);
 	 }
     }
     
@@ -1073,20 +1037,8 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	    break;
 	}
 	if (KDBM_STORE(db_ctx, db_ctx->db_dbm_ctx, key, contents, DBM_REPLACE))
-	    retval = errno;
-#ifndef DB_OPENCLOSE
-	else {
-	    DBM *db;
+	    retval = errno?errno:KRB5_KDB_DB_CORRUPT;
 
-	    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	    if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
-		db_ctx->db_dbm_ctx = db;
-		retval = 0;
-	    }
-	    else
-		retval = errno;
-	}
-#endif
 	krb5_free_princ_contents(context, &contents);
 	krb5_free_princ_dbmkey(context, &key);
 	if (retval)
@@ -1156,23 +1108,10 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	    goto cleancontents;
 
 	if (KDBM_STORE(db_ctx, db, key, contents2, DBM_REPLACE))
-	    retval = errno;
+	    retval = errno?errno:KRB5_KDB_DB_CORRUPT;
 	else {
 	    if (KDBM_DELETE(db_ctx, db, key))
-		retval = errno;
-#ifndef DB_OPENCLOSE
-	    else {
-		DBM *db;
-
-		KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-		if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
-		    db_ctx->db_dbm_ctx = db;
-		    retval = 0;
-		}
-		else
-		    retval = errno;
-	    }
-#endif
+		retval = errno?errno:KRB5_KDB_DB_CORRUPT;
 	}
 	krb5_free_princ_contents(context, &contents2);
     cleancontents:

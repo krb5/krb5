@@ -1,3 +1,22 @@
+Tue Nov 12 23:41:55 1996  Mark Eichin <eichin@cygnus.com>
+
+	* kdb_dbm.c: Ditch DB_OPENCLOSE conditionals, and fix the real
+ 	problem.  Like the policy db, the main db is now opened on first
+ 	lock and closed on last unlock.  
+	Set db_dbm_ctx to NULL after closing it, to help detect dangling
+	references.
+	(krb5_dbm_db_put_principal, krb5_dbm_db_delete_principal):
+ 	KDBM_STORE can fail (in case of database corruption, for example)
+ 	*without* causing errno to be set.  If errno is zero, use
+ 	KRB5_KDB_DB_CORRUPT instead. (If it is non-zero, it may still be
+ 	wrong, but at least something gets reported. This will be properly
+	fixed by ditching KDBM_* altogether, and using the non-lossy db
+	interfaces, so it's a good enough fix for now.)
+	(krb5_dbm_db_rename): grab errno from rename *before*
+ 	calling krb5_dbm_db_end_update, to avoid "not a typewriter"
+ 	syndrome.
+ 	(krb5_dbm_db_unlock): only close on zero refcount.
+
 Mon Nov 11 20:21:02 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kdb_cpw.c (add_key_pwd): set length to -1 so krb5_string_to_key
