@@ -56,10 +56,11 @@ register int *error;
 	free_KRB5_AP__REQ(retval);
 	return(0);
     }
-    retval->authenticator = krb5_data2qbuf(&(val->authenticator));
+    retval->authenticator =
+	krb5_enc_data2KRB5_EncryptedData(&(val->authenticator),
+					 error);
     if (!retval->authenticator) {
 	free_KRB5_AP__REQ(retval);
-	*error = ENOMEM;
 	return(0);
     }
     return(retval);

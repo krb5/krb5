@@ -34,7 +34,7 @@ const register struct type_KRB5_AP__REQ *val;
 register int *error;
 {
     register krb5_ap_req *retval;
-    krb5_data *temp;
+    krb5_enc_data *temp;
 
     retval = (krb5_ap_req *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -50,7 +50,7 @@ register int *error;
 	krb5_free_ap_req(retval);
 	return(0);
     }
-    temp = qbuf2krb5_data(val->authenticator, error);
+    temp = KRB5_EncryptedData2krb5_enc_data(val->authenticator, error);
     if (temp) {
 	retval->authenticator = *temp;
 	xfree(temp);
