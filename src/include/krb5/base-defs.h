@@ -142,8 +142,4 @@ typedef const krb5_principal_data *krb5_const_principal;
 #define	krb5_princ_name(princ) (princ)->data
 #define	krb5_princ_component(princ,i) ((princ)->data + i)
 
-/* The name of the Kerberos ticket granting service... and its size */
-#define	KRB5_TGS_NAME		"krbtgt"
-#define KRB5_TGS_NAME_SIZE	6
-
 #endif /* KRB5_BASE_DEFS__ */

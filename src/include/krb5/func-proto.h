@@ -438,16 +438,12 @@ krb5_error_code krb5_recvauth PROTOTYPE((krb5_pointer,
 					 krb5_rdreq_key_proc,
 					 krb5_pointer,
 					 char *,
+					 krb5_int32, 
 					 krb5_int32 *,
 					 krb5_principal*,
 					 krb5_ticket **,
 					 krb5_authenticator **));
 
-
-krb5_error_code  
-krb5_generate_authenticator PROTOTYPE(( krb5_authenticator *, krb5_principal,
-				       const krb5_checksum *, krb5_keyblock *,
-				       krb5_int32, krb5_authdata ** ));
 
 #ifdef NARROW_PROTOTYPES
 krb5_error_code krb5_walk_realm_tree

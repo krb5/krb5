@@ -53,9 +53,6 @@ typedef struct _krb5_preauth_ops {
 #define KRB5_PREAUTH_FLAGS_ENCRYPT	0x00000001
 #define KRB5_PREAUTH_FLAGS_HARDWARE	0x00000002
 
-krb5_error_code find_preauthenticator
-    PROTOTYPE((int type, krb5_preauth_ops **Preauth_proc));
-
 #if 0
 krb5_error_code get_random_padata
     PROTOTYPE((krb5_principal client, krb5_address **src_addr,

@@ -285,4 +285,12 @@ typedef struct _krb5_pwd_data {
     passwd_phrase_element **element;
 } krb5_pwd_data;
 
+/* The name of the Kerberos ticket granting service... and its size */
+#define	KRB5_TGS_NAME		"krbtgt"
+#define KRB5_TGS_NAME_SIZE	6
+
+/* flags for recvauth */
+#define KRB5_RECVAUTH_SKIP_VERSION	0x0001
+#define KRB5_RECVAUTH_BADAUTHVERS	0x0002
+
 #endif /* KRB5_GENERAL__ */
