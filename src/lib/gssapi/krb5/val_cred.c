@@ -40,27 +40,34 @@ krb5_gss_validate_cred(minor_status, cred_handle)
     krb5_error_code code;
     krb5_principal princ;
 	
-    if (GSS_ERROR(kg_get_context(minor_status, &context)))
-	return(GSS_S_FAILURE);
+    code = krb5_init_context(&context);
+    if (code) {
+	*minor_status = code;
+	return GSS_S_FAILURE;
+    }
 
     if (!kg_validate_cred_id(cred_handle)) {
 	*minor_status = (OM_uint32) G_VALIDATE_FAILED;
+	krb5_free_context(context);
 	return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
     }
 
     cred = (krb5_gss_cred_id_t) cred_handle;
-	
+
     if (cred->ccache) {
 	if ((code = krb5_cc_get_principal(context, cred->ccache, &princ))) {
 	    *minor_status = code;
+	    krb5_free_context(context);
 	    return(GSS_S_DEFECTIVE_CREDENTIAL);
 	}
 	if (!krb5_principal_compare(context, princ, cred->princ)) {
 	    *minor_status = KG_CCACHE_NOMATCH;
+	    krb5_free_context(context);
 	    return(GSS_S_DEFECTIVE_CREDENTIAL);
 	}
 	(void)krb5_free_principal(context, princ);
     }
+    krb5_free_context(context);
     *minor_status = 0;
     return GSS_S_COMPLETE;
 }

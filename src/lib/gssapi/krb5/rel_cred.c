@@ -31,16 +31,21 @@ krb5_gss_release_cred(minor_status, cred_handle)
    krb5_gss_cred_id_t cred;
    krb5_error_code code1, code2, code3;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   code1 = krb5_init_context(&context);
+   if (code1) {
+       *minor_status = code1;
+       return GSS_S_FAILURE;
+   }
 
    if (*cred_handle == GSS_C_NO_CREDENTIAL) {
       *minor_status = 0;
+      krb5_free_context(context);
       return(GSS_S_COMPLETE);
    }
 
    if (! kg_delete_cred_id(*cred_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      krb5_free_context(context);
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
    }
 
@@ -63,6 +68,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
    if (cred->princ)
       krb5_free_principal(context, cred->princ);
    xfree(cred);
+   krb5_free_context(context);
 
    *cred_handle = NULL;
 

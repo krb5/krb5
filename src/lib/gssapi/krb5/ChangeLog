@@ -1,3 +1,10 @@
+2004-03-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* rel_cred.c (krb5_gss_release_cred): Create and destroy a local
+	krb5 context.
+	* rel_name.c (krb5_gss_release_name): Likewise.
+	* val_cred.c (krb5_gss_validate_cred): Likewise.
+
 2004-03-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* add_cred.c (krb5_gss_add_cred): Create and destroy a local krb5

@@ -28,18 +28,24 @@ krb5_gss_release_name(minor_status, input_name)
      gss_name_t *input_name;
 {
    krb5_context context;
-    
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   krb5_error_code code;
+
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
 
    if (! kg_validate_name(*input_name)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      krb5_free_context(context);
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
    (void)kg_delete_name(*input_name);
 
    krb5_free_principal(context, (krb5_principal) *input_name);
+   krb5_free_context(context);
 
    *input_name = (gss_name_t) NULL;
 
