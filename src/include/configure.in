@@ -9,7 +9,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs getpwnam_r getpwuid_r gmtime_r localtime_r pthread_mutex_lock sched_yield)
+AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs getpwnam_r getpwuid_r gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen)
 AC_CHECK_FUNCS( mkstemp)
 AC_HEADER_STDARG
 AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h)
@@ -141,7 +141,7 @@ AC_CHECK_HEADER(termios.h,dnl
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
 dnl
 KRB5_SIGTYPE
-AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h xom.h sys/uio.h sys/filio.h sys/select.h time.h paths.h)
+AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h)
 AC_HEADER_STDARG
 KRB5_AC_INET6
 dnl
@@ -283,10 +283,16 @@ fi
 AC_SUBST(maybe_kerberosIV)
 dnl
 AC_C_INLINE
+AH_TOP([
+#ifndef KRB5_AUTOCONF_H
+])
 AH_BOTTOM([
 #if defined(__GNUC__) && !defined(inline)
 /* Silence gcc pedantic warnings about ANSI C.  */
 # define inline __inline__
+#endif
+
+#define KRB5_AUTOCONF_H
 #endif
 ])
 dnl

@@ -1,3 +1,9 @@
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Put #ifndef/#define/#endif wrapper into
+	autoconf.h to protect against multiple inclusions.  Don't look for
+	xom.h.  Check for dlopen.
+
 2005-01-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-thread.h (k5_os_mutex_lock): Under Irix, invoke
