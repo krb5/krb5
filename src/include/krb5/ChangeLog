@@ -1,3 +1,7 @@
+Fri Sep 29 14:37:41 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (clean-unix): Remove autoconf.h on make clean
+
 Wed Sep 27 16:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* adm_proto.h: Removed use of prototypes using krb5_db_entry
