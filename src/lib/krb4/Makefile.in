@@ -1,5 +1,6 @@
 WHAT=unix
 CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
+DEFINES=-I$(srcdir)/../../include/kerberosIV
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib

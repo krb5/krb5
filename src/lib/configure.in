@@ -12,7 +12,10 @@ MAKE_SUBDIRS("checking",check)
 LinkFile(libkrb5.a, ./krb5/libkrb5.a)
 LinkFile(libcrypto.a, ./crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, ./gssapi/libgssapi_krb5.a)
+LinkFile(libkrb4.a, ./krb4/libkrb4.a)
+LinkFile(libkdb4.a, ./kdb4/libkdb4.a)
 AppendRule([all-unix:: all-unix-subdirs libkrb5.a libcrypto.a])
 AppendRule([all-unix:: libgssapi_krb5.a])
+AppendRule([all-unix:: libkrb4.a libkdb4.a])
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE
