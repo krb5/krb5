@@ -18,10 +18,9 @@
 #define __KRB5_FILE_CCACHE__
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 #include "fcc-proto.h"
-#include "fcc-os.h"
+#include <krb5/sysincl.h>
 
 /* XXX  A hack because I don't feel like updating every file. */
 #define KRB5_OK 0
