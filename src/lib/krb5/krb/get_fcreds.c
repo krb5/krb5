@@ -1,5 +1,5 @@
 /*
- * lib/krb5/krb/mk_cred.c
+ * lib/krb5/krb/get_fcreds.c
  *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -20,7 +20,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * krb5_mk_cred()
+ * krb5_get_for_creds()
  */
 
 /* XXX This API is going to change; what's here isn't general enough! XXX */
@@ -35,8 +35,6 @@
 #include <netdb.h>
 
 #include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/crc-32.h>
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 

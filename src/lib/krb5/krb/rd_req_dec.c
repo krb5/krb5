@@ -111,8 +111,16 @@ krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
 	    retval = krb5_kt_default(context, &keytabid);
 	}
 	if (!retval) {
+	    /*
+	     * OK we know the encryption type req->ticket->enc_part.etype, 
+	     * and now we need to get the keytype
+	     */
+	    krb5_keytype keytype = krb5_csarray[req->ticket->enc_part.etype]->
+					system->proto_keytype;
+
 	    retval = krb5_kt_get_entry(context, keytabid, req->ticket->server,
-				       req->ticket->enc_part.kvno, &ktentry);
+				       req->ticket->enc_part.kvno, keytype,
+				       &ktentry);
 	    (void) krb5_kt_close(context, keytabid);
 	    if (!retval) {
 		retval = krb5_copy_keyblock(context, &ktentry.key, &tkt_key);

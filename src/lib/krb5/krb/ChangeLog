@@ -1,3 +1,12 @@
+Sat Jan 28 14:45:55 1995 Chris Provenzano (proven@mit.edu)
+
+	* in_tkt_sky.c (skey_keyproc()), rd_req_dec.c (krb5_rd_req_decoded())
+		use new API for krb5_kt_get_entry.
+
+Fri Jan 27 15:45:45 1995 Chris Provenzano (proven@mit.edu)
+
+	* get_fcreds.c Removed #include<krb5/crc-32.h> and #include<krb5/asn1.h>
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
 	* Removed all narrow types and references to wide.h and narrow.h

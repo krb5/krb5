@@ -65,6 +65,7 @@ skey_keyproc(context, type, key, keyseed, padata)
 	    return retval;
 	if (retval = krb5_kt_get_entry(context, kt_id, arg->client,
 				       0, /* don't have vno available */
+				       type,
 				       &kt_ent))
 	    return retval;
     }
