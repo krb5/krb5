@@ -34,10 +34,10 @@ krb5_error_code krb5_fcc_destroy(id)
      int ret, i;
      
      if (OPENCLOSE(id)) {
-	  ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)
-						  ->filename, O_RDWR, 0);
-	  if (((krb5_fcc_data *) id->data)->fd < 0)
+	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR, 0);
+	  if (ret < 0)
 	       return errno;
+	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else
 	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);

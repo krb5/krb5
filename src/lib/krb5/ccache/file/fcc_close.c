@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_resolve_c[] = "$Id$";
+static char fcc_close_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
@@ -30,12 +30,13 @@ krb5_error_code
 krb5_fcc_close(id)
    krb5_ccache id;
 {
-     if (OPENCLOSE(id))
+     if (OPENCLOSE(id)) {
 	 close(((krb5_fcc_data *) id->data)->fd);
-     
-     free(((krb5_fcc_data *) id->data)->filename);
-     free(((krb5_fcc_data *) id->data));
-     free(id);
+	 ((krb5_fcc_data *) id->data)->fd = -1;
+     }
+     xfree(((krb5_fcc_data *) id->data)->filename);
+     xfree(((krb5_fcc_data *) id->data));
+     xfree(id);
 
      return KRB5_OK;
 }
