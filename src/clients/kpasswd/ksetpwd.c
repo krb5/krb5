@@ -5,7 +5,7 @@
 
 #define TKTTIMELEFT     60*10   /* ten minutes */
 
-int verify_creds()
+static int verify_creds()
 {
 	krb5_context	kcontext;
 	krb5_ccache		ccache;
@@ -29,7 +29,7 @@ int verify_creds()
 	return kres;
 }
 
-void get_init_creds_opt_init( krb5_get_init_creds_opt *outOptions )
+static void get_init_creds_opt_init( krb5_get_init_creds_opt *outOptions )
 {
     krb5_preauthtype    preauth[] = { KRB5_PADATA_ENC_TIMESTAMP };
     krb5_enctype        etypes[] = {ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_CRC};
@@ -43,7 +43,7 @@ void get_init_creds_opt_init( krb5_get_init_creds_opt *outOptions )
 typedef void * kbrccache_t;
 #define CCACHE_PREFIX_DEFAULT "MEMORY:C_"
 
-kbrccache_t userinitcontext(
+static kbrccache_t userinitcontext(
 	const char * user, const char * domain, const char * passwd, const char * cachename, int initialize,
 	int * outError )
 {
@@ -186,7 +186,7 @@ return_error:
 	return pCacheName;
 }
 
-int init_creds()
+static int init_creds()
 {
 	char user[512];
 	char * password = NULL;
@@ -229,7 +229,6 @@ int main( int argc, char ** argv )
 	char * new_password = NULL;
 	char * new_password2;
 	krb5_context	kcontext;
-	krb5_ccache		ccache;
 	krb5_error_code	kerr;
 	krb5_principal	target_principal;
 

@@ -1,3 +1,9 @@
+2004-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* ksetpwd.c (verify_creds, get_init_creds_opt_init,
+	userinitcontext, init_creds): Now static.
+	(main): Remove one of two variables named "ccache".
+
 2003-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* ksetpwd.c (init_creds): Let's use C comments for C code, shall
