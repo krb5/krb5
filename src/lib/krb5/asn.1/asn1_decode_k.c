@@ -218,6 +218,7 @@ asn1_error_code asn1_decode_principal_name(DECLARG(asn1buf *, buf),
       end_sequence_of(&subbuf);
     }
     end_structure();
+    (*val)->magic = KV5M_PRINCIPAL;
   }
   cleanup();
 }
@@ -232,6 +233,7 @@ asn1_error_code asn1_decode_checksum(DECLARG(asn1buf *, buf),
     get_field(val->checksum_type,0,asn1_decode_cksumtype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
+    val->magic = KV5M_CHECKSUM;
   }
   cleanup();
 }
@@ -246,6 +248,8 @@ asn1_error_code asn1_decode_encryption_key(DECLARG(asn1buf *, buf),
     get_field(val->keytype,0,asn1_decode_keytype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
+    val->magic = KV5M_KEYBLOCK;
+    val->etype = ETYPE_UNKNOWN;
   }
   cleanup();
 }
@@ -261,6 +265,7 @@ asn1_error_code asn1_decode_encrypted_data(DECLARG(asn1buf *, buf),
     opt_field(val->kvno,1,asn1_decode_kvno,0);
     get_lenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_decode_charstring);
     end_structure();
+    val->magic = KV5M_ENC_DATA;
   }
   cleanup();
 }
@@ -322,6 +327,7 @@ asn1_error_code asn1_decode_transited_encoding(DECLARG(asn1buf *, buf),
     get_field(val->tr_type,0,asn1_decode_octet);
     get_lenfield(val->tr_contents.length,val->tr_contents.data,1,asn1_decode_charstring);
     end_structure();
+    val->magic = KV5M_TRANSITED;
   }
   cleanup();
 }
@@ -348,6 +354,7 @@ asn1_error_code asn1_decode_enc_kdc_rep_part(DECLARG(asn1buf *, buf),
     get_field(val->server,10,asn1_decode_principal_name);
     opt_field(val->caddrs,11,asn1_decode_host_addresses,NULL);
     end_structure();
+    val->magic = KV5M_ENC_KDC_REP_PART;
   }
   cleanup();
 }
@@ -368,6 +375,7 @@ asn1_error_code asn1_decode_ticket(DECLARG(asn1buf *, buf),
     get_field(val->server,2,asn1_decode_principal_name);
     get_field(val->enc_part,3,asn1_decode_encrypted_data);
     end_structure();
+    val->magic = KV5M_TICKET;
   }
   cleanup();
 }
@@ -386,6 +394,7 @@ asn1_error_code asn1_decode_kdc_req(DECLARG(asn1buf *, buf),
     opt_field(val->padata,3,asn1_decode_sequence_of_pa_data,NULL);
     get_field(*val,4,asn1_decode_kdc_req_body);
     end_structure();
+    val->magic = KV5M_KDC_REQ;
   }
   cleanup();
 }
@@ -423,6 +432,7 @@ asn1_error_code asn1_decode_kdc_req_body(DECLARG(asn1buf *, buf),
     }
     opt_field(val->second_ticket,11,asn1_decode_sequence_of_ticket,NULL);
     end_structure();
+    val->magic = KV5M_KDC_REQ;
   }
   cleanup();
 }
@@ -445,6 +455,7 @@ asn1_error_code asn1_decode_krb_safe_body(DECLARG(asn1buf *, buf),
       get_field(*(val->r_address),5,asn1_decode_host_address);
     } else val->r_address = NULL;
     end_structure();
+    val->magic = KV5M_SAFE;
   }
   cleanup();
 }
@@ -459,6 +470,7 @@ asn1_error_code asn1_decode_host_address(DECLARG(asn1buf *, buf),
     get_field(val->addrtype,0,asn1_decode_addrtype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
+    val->magic = KV5M_ADDRESS;
   }
   cleanup();
 }
@@ -482,6 +494,7 @@ asn1_error_code asn1_decode_kdc_rep(DECLARG(asn1buf *, buf),
     get_field(*(val->ticket),5,asn1_decode_ticket);
     get_field(val->enc_part,6,asn1_decode_encrypted_data);
     end_structure();
+    val->magic = KV5M_KDC_REP;
   }
   cleanup();
 }
@@ -536,6 +549,7 @@ asn1_error_code asn1_decode_authdata_elt(DECLARG(asn1buf *, buf),
     get_field(val->ad_type,0,asn1_decode_authdatatype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
+    val->magic = KV5M_AUTHDATA;
   }
   cleanup();
 }
@@ -588,6 +602,7 @@ asn1_error_code asn1_decode_krb_cred_info(DECLARG(asn1buf *, buf),
       opt_field(val->server,9,asn1_decode_principal_name,NULL); }
     opt_field(val->caddrs,10,asn1_decode_host_addresses,NULL);
     end_structure();
+    val->magic = KV5M_CRED_INFO;
   }
   cleanup();
 }
@@ -610,6 +625,7 @@ asn1_error_code asn1_decode_pa_data(DECLARG(asn1buf *, buf),
     get_field(val->pa_type,1,asn1_decode_ui_2);
     get_lenfield(val->length,val->contents,2,asn1_decode_octetstring);
     end_structure();
+    val->magic = KV5M_PA_DATA;
   }
   cleanup();
 }
@@ -632,6 +648,7 @@ asn1_error_code asn1_decode_last_req_entry(DECLARG(asn1buf *, buf),
     get_field(val->lr_type,0,asn1_decode_octet);
     get_field(val->value,1,asn1_decode_kerberos_time);
     end_structure();
+    val->magic = KV5M_LAST_REQ_ENTRY;
   }
   cleanup();
 }

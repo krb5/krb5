@@ -1,3 +1,19 @@
+Thu Nov 10 21:51:55 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_decode_k.c (asn1_decode_principal_name,
+		asn1_decode_checksum, asn1_decode_encrypted_data,
+		asn1_decode_transited_encoding,
+		asn1_decode_enc_kdc_rep_part, asn1_decode_ticket,
+		asn1_decode_kdc_req, asn1_decode_kdc_req_body,
+		asn1_decode_safe_body, asn1_decode_host_address,
+		asn1_decode_kdc_rep, asn1_decode_authdata_elt,
+		asn1_decode_krb_cred_info, asn1_decode_pa_data,
+		asn1_decode_last_req_entry): Initialize magic number field
+		in the relevant structures.
+
+	* asn1_decode_k.c (asn1_decode_encryption_key): Add appropriate
+		magic number and encryption type.
+
 Wed Nov  2 23:10:36 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add WITH_CPPOPTS since we're not using
