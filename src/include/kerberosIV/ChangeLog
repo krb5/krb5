@@ -1,3 +1,7 @@
+2002-12-02  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kadm_err.h): Build here.
+
 2002-11-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (KRB4_HEADERS): Don't install kadm.h anymore.
