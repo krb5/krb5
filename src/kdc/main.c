@@ -242,7 +242,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
 
     /* Handle ticket renewable maximum life */
     rdp->realm_maxrlife = (rparams && rparams->realm_max_rlife_valid) ?
-	rparams->realm_max_rlife : KRB5_KDB_MAX_LIFE;
+	rparams->realm_max_rlife : KRB5_KDB_MAX_RLIFE;
 
     /* Handle key/salt list */
     if (rparams && rparams->realm_num_keysalts) {
