@@ -263,8 +263,10 @@ void freeaddrinfo (struct addrinfo *ai)
     struct addrinfo *next;
     while (ai) {
 	next = ai->ai_next;
-	free (ai->ai_canonname);
-	free (ai->ai_addr);
+	if (ai->ai_canonname)
+	  free (ai->ai_canonname);
+	if (ai->ai_addr)
+	  free (ai->ai_addr);
 	free (ai);
 	ai = next;
     }
