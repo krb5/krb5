@@ -1,3 +1,7 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnet.exp: Skip tests if no DES key types are enabled.
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* rlogin.exp: Fix previous change.

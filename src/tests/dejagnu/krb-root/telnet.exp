@@ -19,6 +19,12 @@ if ![info exists LOGINKRB5] {
     set LOGINKRB5 [findfile $objdir/../../appl/bsd/login.krb5]
 }
 
+if ![regexp des- $supported_enctypes] {
+    # Telnet needs a DES enctype.
+    verbose "Skipping telnet tests for lack of DES support."
+    return
+}
+
 # Remove old wrapper script
     catch "exec rm -f $tmppwd/login.wrap"
 
