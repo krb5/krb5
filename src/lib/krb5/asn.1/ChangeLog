@@ -1,3 +1,23 @@
+Wed Oct 19 10:51:16 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* err2kerr.c (KRB5_KRB__ERROR2krb5_error): The e_data field
+		wasn't being decoded when it should have been.
+
+	* qbuf2data.c (qbuf2krb5_data): Set magic number field to zero.
+
+	* asn1_decode_k.c (asn1_decode_kdc_req_body): If the authorization
+		field is not present, fill in the authorization data
+		fields with all zeros.  Don't set kvno (that's *key*
+		version number, not *Kerberos* version number) to 5.
+
+Tue Oct 18 23:07:20 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* tgrq2ktgrq.c (KRB5_KDC__REQ__BODY2krb5_kdc_req): Allow the
+		service principal to be optional.
+
+	* ktgrq2tgrq.c (krb5_kdc_req2KRB5_KDC__REQ__BODY): Allow the
+		server principal to be optional.
+
 Fri Oct  7 15:05:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.isode.in: Add -DKRB5_USE_ISODE so that include files

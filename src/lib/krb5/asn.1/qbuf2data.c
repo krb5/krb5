@@ -58,6 +58,7 @@ register int *error;
 	retval->data = 0;
 	return retval;
     }
+    retval->magic = 0;
     retval->data = (char *)xmalloc(val->qb_forw->qb_len);
     if (!retval->data) {
 	krb5_xfree(retval);

@@ -65,16 +65,35 @@ register int *error;
 	if (!retval->cname) {
 	    goto errout;
 	}
-    }    
-    retval->realm = krb5_data2qbuf(krb5_princ_realm(val->server));
-    if (!retval->realm) {
-	*error = ENOMEM;
+    }
+    if (val->server) {
+	retval->realm = krb5_data2qbuf(krb5_princ_realm(val->server));
+	if (!retval->realm) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+	retval->sname = krb5_principal2KRB5_PrincipalName(val->server, error);
+	if (!retval->sname) {
+	    goto errout;
+	}
+    } else if (val->client) {
+	retval->realm = krb5_data2qbuf(krb5_princ_realm(val->client));
+	if (!retval->realm) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+    } else if (val->second_ticket && val->second_ticket[0] &&
+	       val->second_ticket[0]->server) {
+	retval->realm = krb5_data2qbuf(krb5_princ_realm(val->second_ticket[0]->server));
+	if (!retval->realm) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+    } else {
+	*error = EINVAL;
 	goto errout;
     }
-    retval->sname = krb5_principal2KRB5_PrincipalName(val->server, error);
-    if (!retval->sname) {
-	goto errout;
-    }
+    
     if (val->from) {
 	retval->from = unix2gentime(val->from, error);
 	if (!retval->from) {

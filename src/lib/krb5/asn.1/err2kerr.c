@@ -97,9 +97,9 @@ register int *error;
 	}
     }
     if (val->e__data) {
-	temp = qbuf2krb5_data(val->e__text, error);
+	temp = qbuf2krb5_data(val->e__data, error);
 	if (temp) {
-	    retval->text = *temp;
+	    retval->e_data = *temp;
 	    krb5_xfree(temp);
 	} else {
 	    goto errout;

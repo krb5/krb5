@@ -415,8 +415,9 @@ asn1_error_code asn1_decode_kdc_req_body(DECLARG(asn1buf *, buf),
     if(tagnum == 10){
       get_field(val->authorization_data,10,asn1_decode_encrypted_data); }
     else{
+      val->authorization_data.magic = 0;
       val->authorization_data.etype = 0;
-      val->authorization_data.kvno = KVNO;
+      val->authorization_data.kvno = 0;
       val->authorization_data.ciphertext.data = NULL;
       val->authorization_data.ciphertext.length = 0;
     }

@@ -62,17 +62,25 @@ register int *error;
 	krb5_free_kdc_req(retval);
 	return(0);
     }
-    if (val->cname)
+    if (val->cname) {
 	retval->client =
 	    KRB5_PrincipalName2krb5_principal(val->cname,
 					      val->realm,
 					      error);
-    retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
-						       val->realm,
-						       error);
-    if (!retval->server) {
-	goto errout;
+	if (*error) {
+	    goto errout;
+	}
     }
+	    
+    if (val->sname) {
+	retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
+							   val->realm,
+							   error);
+	if (*error) {
+	    goto errout;
+	}
+    }
+
     if (val->from) {
 	retval->from = gentime2unix(val->from, error);
 	if (*error) {

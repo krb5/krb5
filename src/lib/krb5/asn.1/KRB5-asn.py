@@ -155,7 +155,7 @@ KDC-REQ-BODY ::=	SEQUENCE {
 	 kdc-options[0]	KDCOptions,
 	 cname[1]	PrincipalName OPTIONAL, -- Used only in AS-REQ
 	 realm[2]	Realm, -- Server's realm  Also client's in AS-REQ
-	 sname[3]	PrincipalName,
+	 sname[3]	PrincipalName OPTIONAL,
 	 from[4]	KerberosTime OPTIONAL,
 	 till[5]	KerberosTime,
 	 rtime[6]	KerberosTime OPTIONAL,
