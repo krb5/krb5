@@ -19,9 +19,6 @@
 #define NO_PASSWORD
 #define HAS_LABS
 #define ANSI_STDIO
-#ifndef _SIZET
-typedef unsigned int size_t;
-#define _SIZET
 
 #include <unix.h>
 #include <ctype.h>

@@ -84,10 +84,6 @@
 
 #endif /* _MSDOS */
 
-#ifndef _SIZE_T_DEFINED
-typedef unsigned int size_t;
-#define _SIZE_T_DEFINED
-#endif /* !_SIZE_T_DEFINED */
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
 #include <sys/types.h>
