@@ -1,3 +1,8 @@
+Mon Jun  3 16:12:59 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in, configure.in: back out previous changes and use
+		Ezra's patches instead.
+
 Sun Jun  2 22:08:17 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in, Makefile.in: only link getdtablesize.o if needed

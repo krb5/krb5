@@ -11,11 +11,6 @@ DECLARE_SYS_ERRLIST
 AC_FUNC_VFORK
 AC_HEADER_STDARG
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
-AC_CHECK_FUNC(getdtablesize,,
-[GETDTABLESIZESRC='$(srcdir)/../bsd/getdtablesize.c'
-GETDTABLESIZEOBJ=getdtablesize.o
-AC_SUBST([GETDTABLESIZESRC])
-AC_SUBST([GETDTABLESIZEOBJ])])
 AC_REPLACE_FUNCS(getdtablesize)
 AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
 AC_CHECK_LIB(crypt,crypt) dnl 

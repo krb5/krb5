@@ -5,16 +5,17 @@ CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
+LIBOBJS=@LIBOBJS@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 SRCS	= ftpd.c ftpcmd.y logwtmp.c popen.c vers.c \
 	  $(srcdir)../ftp/glob.c \
 	  $(srcdir)../ftp/radix.c \
 	  $(srcdir)../ftp/secure.c \
-	  $(GETDTABLESIZESRC) $(SETENVSRC)
+	  $(srcdir)../../bsd/getdtablesize.c $(SETENVSRC)
 
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
-	  secure.o $(GETDTABLESIZEOBJ) $(SETENVOBJ)
+	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
 KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
