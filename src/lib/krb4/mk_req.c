@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#define	DEFINE_SOCKADDR
 #include "krb.h"
 #include "prot.h"
 #include "des.h"

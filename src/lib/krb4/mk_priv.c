@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include "krb.h"
 #include "prot.h"
 #include "des.h"

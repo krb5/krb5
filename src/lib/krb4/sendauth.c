@@ -10,7 +10,6 @@
 
 #include "mit-copyright.h"
 
-#define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include "krb.h"
 #include "krb4int.h"
 #include <errno.h>

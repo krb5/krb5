@@ -15,7 +15,6 @@
 #ifndef RC_INVOKED
 
 #ifdef KRB4
-#define	DEFINE_SOCKADDR
 #include "mit-copyright.h"
 #include "krb.h"
 #include "kadm.h"

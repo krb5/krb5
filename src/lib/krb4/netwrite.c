@@ -9,7 +9,6 @@
 
 #include "mit-copyright.h"
 #include <errno.h>
-#define	DEFINE_SOCKADDR
 #include "krb.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -10,7 +10,6 @@
  */
 
 #include "mit-copyright.h"
-#define	DEFINE_SOCKADDR		/* Request definitions for sockets */
 #include "krb.h"
 #include "des.h"
 #include "krb4int.h"

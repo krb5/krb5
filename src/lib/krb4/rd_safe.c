@@ -37,7 +37,6 @@
 #include <string.h>
 
 /* application include files */
-#define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include "krb.h"
 #include "prot.h"
 #include "des.h"

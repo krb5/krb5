@@ -10,7 +10,6 @@
  */
 
 #include "mit-copyright.h"
-#define	DEFINE_SOCKADDR		/* For struct hostent, <netdb.h>, etc */
 #include "krb.h"
 
 /* Mac Cincludes */

@@ -8,7 +8,6 @@
  * Applications call these routines, which then call the driver to do the work.
  */
 
-#define	DEFINE_SOCKADDR		/* For struct hostent, <netdb.h>, etc */
 #include "krb.h"
 #include "krb_driver.h"	/* Mac driver interface */
 

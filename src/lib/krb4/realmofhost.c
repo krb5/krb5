@@ -10,7 +10,6 @@
  */
 
 #include "mit-copyright.h"
-#define	DEFINE_SOCKADDR		/* Ask for MAXHOSTNAMELEN */
 #include "krb.h"
 
 #include <string.h>

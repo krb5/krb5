@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#define	DEFINE_SOCKADDR		/* For struct hostent, <netdb.h>, etc */
 #include "krb.h"
 
 #include <stdio.h>

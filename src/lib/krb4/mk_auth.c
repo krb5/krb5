@@ -26,7 +26,6 @@
  * Derived from sendauth.c by John Gilmore, 10 October 1994.
  */
 
-#define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include <stdio.h>
 #include "krb.h"
 #include "prot.h"

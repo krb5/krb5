@@ -5,7 +5,6 @@
  */
 
 #include <string.h>
-#define	DEFINE_SOCKADDR
 #include "krb.h"
 #include "port-sockets.h"
 

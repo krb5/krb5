@@ -7,7 +7,6 @@
  * Public Domain.
  */
 
-#define	DEFINE_SOCKADDR
 #include "krb.h"
 
 #include <sys/types.h>
