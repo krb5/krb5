@@ -4073,6 +4073,8 @@
 				A1AB1EB705DDC47800526345,
 				A1AB1EB805DDC47800526345,
 				A1A6784506C3D82500EC826E,
+				A1D62985070C878B0015C908,
+				A1D62992070C8AD70015C908,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4637,6 +4639,7 @@
 				A1CA43BF06E3D0D400F35E9C,
 				A1CA43C006E3D0D400F35E9C,
 				A1CA43C106E3D0D400F35E9C,
+				A1D62991070C8AD70015C908,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -7781,6 +7784,48 @@
 			settings = {
 			};
 		};
+		A1D62984070C878B0015C908 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = patchlevel.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D62985070C878B0015C908 = {
+			fileRef = A1D62984070C878B0015C908;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1D6298F070C8AD70015C908 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = dnsglue.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D62990070C8AD70015C908 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = dnsglue.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1D62991070C8AD70015C908 = {
+			fileRef = A1D6298F070C8AD70015C908;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		A1D62992070C8AD70015C908 = {
+			fileRef = A1D62990070C8AD70015C908;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		A1F1429E067E5BD500A82808 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -7809,7 +7854,6 @@
 //F54
 		F5172F7B03F1B65801120114 = {
 			children = (
-				A1908D5906878C780039CAD8,
 				F5E59C0D03FD95A101120114,
 				F517307F03F1B65801120114,
 				F5E59C0E03FD95A101120114,
@@ -7818,7 +7862,9 @@
 				A12536B3040BEC05003D8244,
 				F517322103F1B65901120114,
 				A198BBE10406D04A00120114,
+				A1D62984070C878B0015C908,
 				F51736C803F1B65B01120114,
+				A1908D5906878C780039CAD8,
 			);
 			isa = PBXGroup;
 			name = Sources;
@@ -14173,6 +14219,8 @@
 				F517355C03F1B65A01120114,
 				F517355D03F1B65A01120114,
 				F517355E03F1B65A01120114,
+				A1D6298F070C8AD70015C908,
+				A1D62990070C8AD70015C908,
 				A12539AD05CF12D5003BD89B,
 				F517355F03F1B65A01120114,
 				F517356003F1B65A01120114,
