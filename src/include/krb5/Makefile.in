@@ -6,6 +6,7 @@ BUILDTOP=$(REL)$(U)$(S)$(U)
 KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 
 ##DOSBUILDTOP = ..\..
+NO_OUTPRE=1
 
 KRB5_HEADERS = adm.h adm_proto.h kdb.h kdb_dbm.h winsock.h
 

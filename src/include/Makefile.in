@@ -4,6 +4,7 @@ mydir=.
 MY_SUBDIRS=krb5 kerberosIV
 BUILDTOP=$(REL)$(U)
 ##DOSBUILDTOP = ..
+NO_OUTPRE=1
 
 all-unix:: krb5.h adm_err.h
 all-mac::
