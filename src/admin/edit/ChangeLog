@@ -1,3 +1,10 @@
+Fri Oct 14 23:31:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* dump.c (load_db): When scanning a database entry, read
+		fail_auth_count into a temporary integer variable, and
+		then copy that into entry.fail_auth_count, which is a
+		char.  
+
 Fri Oct  7 00:01:40 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb5_edit.c (kdb5_edit_Init): Don't let errors in

@@ -257,7 +257,7 @@ void load_db(argc, argv)
 	int	load_error = 0;
 	int	lineno = 0;
 	int	stype;
-	int	tmp1, tmp2;
+	int	tmp1, tmp2, tmp3;
 	char	buf[64];	/* Must be longer than ld_vers */
 	
 	if (argc != 3) {
@@ -407,7 +407,7 @@ void load_db(argc, argv)
 			   &tmp1, &entry.max_life, &entry.max_renewable_life,
 			   &tmp2, &entry.expiration, &entry.pw_expiration,
 			   &entry.last_pwd_change, &entry.last_success,
-			   &entry.last_failed, &entry.fail_auth_count) != 10) {
+			   &entry.last_failed, &tmp3) != 10) {
 			fprintf(stderr, "Couldn't parse line #%d\n",
 				lineno);
 			load_error++;
@@ -427,6 +427,7 @@ void load_db(argc, argv)
 		}
 		entry.kvno = tmp1;
 		entry.mkvno = tmp2;
+		entry.fail_auth_count = tmp3;
 		entry.salt_type = stype;
 		for (i=0; i < salt_len; i++) {
 		    if (fscanf(f, "%02x", &tmp1) != 1) {
