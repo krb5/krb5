@@ -1,3 +1,8 @@
+Fri Jul 14 13:51:42 1995  Sam Hartman  <hartmans@screw-loose.MIT.EDU>
+
+	* configure.in: Implement test for pgno_t that works under NetBSD
+        and Irix 5.3--possibly other systems too.
+
 Sat Jul  1 23:15:59 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* configure.in: Don't check for pgno_t; it's not in sys/types.h on

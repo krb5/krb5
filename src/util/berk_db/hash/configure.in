@@ -12,7 +12,17 @@ AC_CHECK_TYPE(int16_t, short)
 AC_CHECK_TYPE(u_int16_t, unsigned short)
 AC_CHECK_TYPE(int32_t, int)
 AC_CHECK_TYPE(u_int32_t, unsigned int)
-dnl AC_CHECK_TYPE(pgno_t, u_int32_t)
+AC_MSG_CHECKING(Whether pgno_t is defined)
+AC_CACHE_VAL(krb5_cv_pgno_t,[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <ndbm.h>
+],[
+pgno_t t;],
+krb5_cv_pgno_t=yes,krb5_cv_pgno_t=no)])
+AC_MSG_RESULT($krb5_cv_pgno_t)
+if test $krb5_cv_pgno_t = no; then
+   AC_DEFINE_UNQUOTED(pgno_t, u_int32_t)
+   fi
 dnl
 dnl Determine the size of datum and DBT size fields. If they are not the same
 dnl then the elements need to be copied.
