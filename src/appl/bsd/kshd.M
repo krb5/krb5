@@ -2,9 +2,9 @@
 .\" All rights reserved.  The Berkeley software License Agreement
 .\" specifies the terms and conditions for redistribution.
 .\"
-.\"	@(#)rshd.8c	6.3 (Berkeley) 5/24/86
+.\"	@(#)rshd.8	6.3 (Berkeley) 5/24/86
 .\"
-.TH KRSHD 8C
+.TH KRSHD 8
 .SH NAME
 kshd \- kerberized remote shell server
 .SH SYNOPSIS
@@ -17,9 +17,9 @@ kshd \- kerberized remote shell server
 .SH DESCRIPTION
 .I Krshd
 is the server for the 
-.IR rcmd (3X)
+.IR rcmd (3)
 routine and, consequently, for the
-.IR rsh (1C)
+.IR rsh (1)
 program.  The server provides remote execution facilities
 with authentication based on privileged port numbers from trusted hosts or 
 the Kerberos authentication system.
@@ -200,8 +200,8 @@ on the connection associated with the
 .BR stderr ,
 and is not preceded by a flag byte.
 .SH SEE ALSO
-rshd(8C), rsh(1C),
-rcmd(3X)
+rshd(8), rsh(1),
+rcmd(3)
 .SH BUGS
 A facility to allow all data exchanges to be encrypted should be
 present.

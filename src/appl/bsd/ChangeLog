@@ -1,3 +1,9 @@
+2002-08-07  Jen Selby  <jenselby@mit.edu>
+	
+	* klogind.M, kshd.M, login.M: changed manual sections 8c, 1c, and
+	3x to 8, 1, and 3, respectively
+	* rcp.M, rlogin.M, rsh.M: added references to the server manpages
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* v4rcp.c: Include port-sockets.h.

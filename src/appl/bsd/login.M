@@ -1,6 +1,6 @@
 .\"	login.1
 .\"
-.TH LOGIN 8C
+.TH LOGIN 8
 .SH NAME
 login.krb5 \- kerberos enhanced login program
 .SH SYNOPSIS
@@ -91,7 +91,7 @@ associated with
 .BR stderr.
 .PP
 .SH SEE ALSO
-rlogind(8C), rlogin(1C), telnetd(8c)
+rlogind(8), rlogin(1), telnetd(8)
 .SH BUGS
 Should use a config file to select use of V5, V4, and AFS, as well as
 policy for startup.

@@ -17,7 +17,7 @@
 .\"
 .\"	@(#)rsh.1	6.2 (Berkeley) 9/20/88
 .\" "
-.TH RSH
+.TH RSH 1
 .SH NAME
 rsh \- remote shell
 .SH SYNOPSIS
@@ -147,7 +147,7 @@ to
 (on remote host) - file containing Kerberos principals that are allowed
 access.
 .SH SEE ALSO
-rlogin(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3)
+rlogin(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3), kshd(8)
 .SH BUGS
 If you are using
 .IR csh (1)

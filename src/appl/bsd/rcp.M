@@ -145,7 +145,7 @@ rather than the current user name on the remote host.
 (on remote host) - file containing Kerberos principals that are allowed
 access.
 .SH SEE ALSO
-cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3), rcp(1)
+cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3), kshd(8), rcp(1) 
 [UCB version]
 .SH BUGS
 .B Rcp
