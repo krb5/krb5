@@ -112,7 +112,7 @@ OLDDECLARG(krb5_keyblock *,key)
 			   realm->length));
 	(void) strcat(defkeyfile, "");
 	
-#if defined(__STDC__)
+#ifdef ANSI_STDIO
 	if (!(kf = fopen(defkeyfile, "rb")))
 #else
 	if (!(kf = fopen(defkeyfile, "r")))

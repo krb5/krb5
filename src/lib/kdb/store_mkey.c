@@ -73,7 +73,7 @@ krb5_keyblock *key;
 #if defined(unix) || defined(__unix__)
     oumask = umask(077);
 #endif
-#if defined(__STDC__)
+#ifdef ANSI_STDIO
     if (!(kf = fopen(keyfile, "wb")))
 #else
     if (!(kf = fopen(keyfile, "w")))
