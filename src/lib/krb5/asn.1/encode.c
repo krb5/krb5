@@ -11,7 +11,7 @@
  */
 
 #ifndef	lint
-static char rcsid_glue3_c[] =
+static char rcsid_encode_c[] =
 "$Id$";
 #endif	lint
 
@@ -23,8 +23,8 @@ static char rcsid_glue3_c[] =
 #include <krb5/isode_err.h>
 #include <krb5/krb5_err.h>
 #include <krb5/krb5_tc_err.h>
-#include "glue.h"
-#include "gluedefs.h"
+#include "encode.h"
+#include "asn1defs.h"
 
 #include <stdio.h>
 
@@ -36,7 +36,7 @@ typedef char * pointer;
 
 static char encode_buf[BUFSIZ];
 
-krb5_string *
+krb5_data *
 encode_generic(input, error, encoder, translator, free_translation)
 pointer input;
 int *error;
@@ -47,7 +47,7 @@ void (*free_translation)(/* pointer  */);
     pointer isode_out;
     PE pe;
     PS ps;
-    register krb5_string *retval;
+    register krb5_data *retval;
 
     if (!(isode_out = (*translator)(input, error)))
 	return(0);
@@ -67,7 +67,7 @@ void (*free_translation)(/* pointer  */);
 	*error = ENOMEM;
 	goto errout;
     }
-    retval = (krb5_string *)malloc(sizeof(*retval));
+    retval = (krb5_data *)malloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	goto errout;
@@ -75,19 +75,19 @@ void (*free_translation)(/* pointer  */);
     if ((retval->length = ps_get_abs(pe)) > sizeof(encode_buf)) {
 	abort();			/* xxx */
     }
-    retval->string = malloc(ps_get_abs(pe));
-    if (!retval->string) {
+    retval->data = malloc(ps_get_abs(pe));
+    if (!retval->data) {
 	*error = ENOMEM;
 	free(retval);
 	goto errout;
     }
     if (pe2ps(ps, pe) != OK || ps_flush(ps) != OK) {
 	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
-	free(retval->string);
+	free(retval->data);
 	free(retval);
 	goto errout;
     }
-    bcopy(encode_buf, retval->string, retval->length);
+    bcopy(encode_buf, retval->data, retval->length);
     ps_free(ps);
     pe_free(pe);
     free_translation(isode_out);
@@ -96,7 +96,7 @@ void (*free_translation)(/* pointer  */);
 
 pointer
 decode_generic(input, error, decoder, translator, free_translation)
-krb5_string *input;
+krb5_data *input;
 int *error;
 int (*decoder)(/* PE, int, int, char *, pointer */);
 pointer (*translator)(/* pointer, int * */);
@@ -111,7 +111,7 @@ void (*free_translation)(/* pointer  */);
 	*error = ENOMEM;
 	return(0);
     }
-    if (str_setup(ps, input->string, input->length, 1) != OK) {
+    if (str_setup(ps, input->data, input->length, 1) != OK) {
 	*error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
 	ps_free(ps);
 	return(0);
