@@ -35,11 +35,13 @@ register int *error;
 {
     register struct type_KRB5_KDC__REQ__BODY *retval;
     
-    retval = krb5_kdc_req2KRB5_KDC__REQ__BODY(val, error);
+    retval = (struct type_KRB5_KDC__REQ__BODY *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
     }
+
+    xbzero(retval, sizeof(*retval));
 
     retval->kdc__options =
 	krb5_kdcoptions2KRB5_KDCOptions(val->kdc_options,
@@ -108,13 +110,13 @@ register int *error;
 	/* count elements */
 	for (i = 0, temp = val->second_ticket; *temp; temp++,i++);
 
-	adtk = (struct element_KRB5_6 *)xmalloc(sizeof(*retval) +
+	adtk = (struct element_KRB5_6 *)xmalloc(sizeof(*adtk) +
 						max(0,i-1)*sizeof(adtk->Ticket));
 	if (!adtk) {
 	    *error = ENOMEM;
 	    goto errout;
 	}
-	xbzero(adtk, sizeof(adtk));
+	xbzero(adtk, sizeof(*adtk));
 	adtk->nelem = i;
 	for (i = 0; i < adtk->nelem; i++) {
 	    adtk->Ticket[i] = krb5_ticket2KRB5_Ticket(val->second_ticket[i],
@@ -129,7 +131,18 @@ register int *error;
 	    }
 	}
 	retval->additional__tickets = adtk;
+    } else {
+	struct element_KRB5_6 *adtk;
+	adtk = (struct element_KRB5_6 *)xmalloc(sizeof(*adtk));
+	if (!adtk) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+	xbzero(adtk, sizeof(*adtk));
+	adtk->nelem = 0;
+	retval->additional__tickets = adtk;
     }
+	
     return retval;
 }
 
