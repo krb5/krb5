@@ -125,6 +125,7 @@ krb5_rc_default(context, id)
     if ((retval = krb5_rc_resolve(context, *id, 
 				 krb5_rc_default_name(context))))
 	FREE(*id);
+    (*id)->magic = KV5M_RCACHE;
     return retval;
 }
 
@@ -159,6 +160,7 @@ krb5_error_code krb5_rc_resolve_full(context, id, string_name)
     FREE(type);
     if ((retval = krb5_rc_resolve(context, *id,residual + 1)))
 	FREE(*id);
+    (*id)->magic = KV5M_RCACHE;
     return retval;
 }
 

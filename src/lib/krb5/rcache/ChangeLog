@@ -1,4 +1,9 @@
 
+Thu Aug 31 14:13:21 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* rc_base.c - Set magic number in rcache structure after successfully
+		resolving the replay cache.
+
+
 Tue Aug 29 14:19:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_rc.c - Add routines to serialize rcache.
 
