@@ -11,6 +11,8 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+
 #include "dynP.h"
 
 int DynInsert(obj, idx, els_in, num)
