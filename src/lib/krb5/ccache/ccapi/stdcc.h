@@ -24,6 +24,8 @@ typedef struct _stdccCacheData {
 
 /* function protoypes  */
 
+void krb5_stdcc_shutdown(void);
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
@@ -32,9 +34,6 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_destroy
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
-
-KRB5_DLLIMP void KRB5_CALLCONV krb5_stdcc_shutdown 
-        KRB5_PROTOTYPE((void));
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_generate_new 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id ));

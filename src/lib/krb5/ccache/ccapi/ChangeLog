@@ -1,3 +1,8 @@
+2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* stdcc.h: Remove KRB5_DLLIMP, KRB5_CALLCONV from
+	krb5_stdcc_shutdown() prototype (to fix Windows build).
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * stdcc.h: Added prototype for krb5_stdcc_shutdown.
     
