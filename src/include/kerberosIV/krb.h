@@ -374,13 +374,13 @@ extern int errno;
    to the proper types during calls.  */
 
 typedef int (KRB5_CALLCONV *key_proc_type)
-	PROTOTYPE ((char FAR *, char FAR *, char FAR *,
-		    char FAR *, C_Block));
+	(char FAR *, char FAR *, char FAR *,
+		    char FAR *, C_Block);
 #define KEY_PROC_TYPE_DEFINED
 
 typedef int (KRB5_CALLCONV *decrypt_tkt_type)
-	PROTOTYPE ((char FAR *, char FAR *, char FAR *,
-		    char FAR *, key_proc_type, KTEXT FAR *));
+	(char FAR *, char FAR *, char FAR *,
+		    char FAR *, key_proc_type, KTEXT FAR *);
 #define DECRYPT_TKT_TYPE_DEFINED
 
 extern struct _krb5_context FAR * krb5__krb4_context;
@@ -395,221 +395,221 @@ struct sockaddr_in;
 
 /* dest_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV dest_tkt
-	PROTOTYPE((void));
+	(void);
 /* err_txt.c */
 KRB5_DLLIMP const char FAR * KRB5_CALLCONV krb_get_err_text
-	PROTOTYPE((int errnum));
+	(int errnum);
 /* g_ad_tkt.c */
 int get_ad_tkt
-	PROTOTYPE((char *service, char *sinst, char *realm, int lifetime));
+	(char *service, char *sinst, char *realm, int lifetime);
 /* g_admhst.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_admhst
-	PROTOTYPE((char FAR *host, char FAR *realm, int index));
+	(char FAR *host, char FAR *realm, int index);
 /* g_cred.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_cred
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
-		   CREDENTIALS FAR *c));
+	(char FAR *service, char FAR *instance, char FAR *realm,
+		   CREDENTIALS FAR *c);
 /* g_in_tkt.c */
 int krb_get_in_tkt
-	PROTOTYPE((char *user, char *instance, char *realm,
+	(char *user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
-		   key_proc_type, decrypt_tkt_type, char *arg));
+		   key_proc_type, decrypt_tkt_type, char *arg);
 int krb_get_in_tkt_preauth
-	PROTOTYPE((char *user, char *instance, char *realm,
+	(char *user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg,
-		   char *preauth_p, int preauth_len));
+		   char *preauth_p, int preauth_len);
 /* g_krbhst.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_krbhst
-	PROTOTYPE((char FAR *host, char FAR *realm, int index));
+	(char FAR *host, char FAR *realm, int index);
 /* g_krbrlm.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_lrealm
-	PROTOTYPE((char FAR *realm, int index));
+	(char FAR *realm, int index);
 /* g_phost.c */
 KRB5_DLLIMP char FAR * KRB5_CALLCONV krb_get_phost
-	PROTOTYPE((char FAR * alias));
+	(char FAR * alias);
 /* get_pw_tkt */
 KRB5_DLLIMP int KRB5_CALLCONV get_pw_tkt 
-        PROTOTYPE((char *, char *, char *, char *));
+        (char *, char *, char *, char *);
 /* g_pw_in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_pw_in_tkt
-	PROTOTYPE((char FAR *user, char FAR *instance, char FAR *realm,
+	(char FAR *user, char FAR *instance, char FAR *realm,
 		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *password));
+		   int life, char FAR *password);
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_pw_in_tkt_preauth
-	PROTOTYPE((char FAR *user, char FAR *instance, char FAR *realm,
+	(char FAR *user, char FAR *instance, char FAR *realm,
 		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *password));
+		   int life, char FAR *password);
 /* g_svc_in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_svc_in_tkt
-	PROTOTYPE((char FAR *user, char FAR *instance, char FAR *realm,
+	(char FAR *user, char FAR *instance, char FAR *realm,
 		   char FAR *service, char FAR *sinstance,
-		   int life, char FAR *srvtab));
+		   int life, char FAR *srvtab);
 /* g_tf_fname.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_tf_fullname
-	PROTOTYPE((char *ticket_file, char *name, char *inst, char *realm));
+	(char *ticket_file, char *name, char *inst, char *realm);
 /* g_tf_realm.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_tf_realm
-	PROTOTYPE((char *ticket_file, char *realm));
+	(char *ticket_file, char *realm);
 /* g_tkt_svc.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_ticket_for_service
-	PROTOTYPE((char FAR *serviceName,
+	(char FAR *serviceName,
 		   char FAR *buf, unsigned KRB4_32 FAR *buflen,
 		   int checksum, des_cblock, Key_schedule,
-		   char FAR *version, int includeVersion));
+		   char FAR *version, int includeVersion);
 /* in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV in_tkt
-	PROTOTYPE((char *name, char *inst));
+	(char *name, char *inst);
 KRB5_DLLIMP int KRB5_CALLCONV krb_in_tkt
-        PROTOTYPE((char *pname, char *pinst, char *realm));
+        (char *pname, char *pinst, char *realm);
 /* kname_parse.c */
 KRB5_DLLIMP int KRB5_CALLCONV kname_parse
-	PROTOTYPE((char FAR *name, char FAR *inst, char FAR *realm,
-		   char FAR *fullname));
+	(char FAR *name, char FAR *inst, char FAR *realm,
+		   char FAR *fullname);
 /* kuserok.c */
 KRB5_DLLIMP int KRB5_CALLCONV kuserok
-	PROTOTYPE((AUTH_DAT FAR *kdata, char FAR *luser));
+	(AUTH_DAT FAR *kdata, char FAR *luser);
 
 /* lifetime.c */
 KRB5_DLLIMP KRB4_32 KRB5_CALLCONV krb_life_to_time
-	PROTOTYPE((KRB4_32 start, int life));
+	(KRB4_32 start, int life);
 KRB5_DLLIMP int KRB5_CALLCONV krb_time_to_life
-	PROTOTYPE((KRB4_32 start, KRB4_32 end));
+	(KRB4_32 start, KRB4_32 end);
 
 /* mk_auth.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_check_auth
-	PROTOTYPE((KTEXT, unsigned KRB4_32 cksum, MSG_DAT FAR *,
+	(KTEXT, unsigned KRB4_32 cksum, MSG_DAT FAR *,
 		   C_Block, Key_schedule,
 		   struct sockaddr_in FAR * local_addr,
-		   struct sockaddr_in FAR * foreign_addr));
+		   struct sockaddr_in FAR * foreign_addr);
 KRB5_DLLIMP int KRB5_CALLCONV krb_mk_auth
-	PROTOTYPE((long options, KTEXT ticket,
+	(long options, KTEXT ticket,
 		   char FAR *service, char FAR *inst, char FAR *realm,
-		   unsigned KRB4_32 checksum, char FAR *version, KTEXT buf));
+		   unsigned KRB4_32 checksum, char FAR *version, KTEXT buf);
 /* mk_err.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_mk_err
-	PROTOTYPE((u_char FAR *out, KRB4_32 code, char FAR *text));
+	(u_char FAR *out, KRB4_32 code, char FAR *text);
 /* mk_preauth.c */
 int krb_mk_preauth
-	PROTOTYPE((char **preauth_p, int *preauth_len, key_proc_type,
+	(char **preauth_p, int *preauth_len, key_proc_type,
 		   char *name, char *inst, char *realm, char *password,
-		   C_Block));
+		   C_Block);
 void krb_free_preauth
-	PROTOTYPE((char * preauth_p, int len));
+	(char * preauth_p, int len);
 /* mk_priv.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_mk_priv
-	PROTOTYPE((u_char FAR *in, u_char FAR *out,
+	(u_char FAR *in, u_char FAR *out,
 		   unsigned KRB4_32 length,
 		   Key_schedule, C_Block FAR *,
 		   struct sockaddr_in FAR * sender,
-		   struct sockaddr_in FAR * receiver));
+		   struct sockaddr_in FAR * receiver);
 /* mk_req.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_mk_req
-	PROTOTYPE((KTEXT authent,
+	(KTEXT authent,
 		   char FAR *service, char FAR *instance, char FAR *realm,
-		   KRB4_32 checksum));
+		   KRB4_32 checksum);
 /* mk_safe.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_mk_safe
-	PROTOTYPE((u_char FAR *in, u_char FAR *out, unsigned KRB4_32 length,
+	(u_char FAR *in, u_char FAR *out, unsigned KRB4_32 length,
 		   C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
-		   struct sockaddr_in FAR *receiver));
+		   struct sockaddr_in FAR *receiver);
 /* netread.c */
 int krb_net_read
-	PROTOTYPE((int fd, char *buf, int len));
+	(int fd, char *buf, int len);
 /* netwrite.c */
 int krb_net_write
-	PROTOTYPE((int fd, char *buf, int len));
+	(int fd, char *buf, int len);
 /* pkt_clen.c */
 int pkt_clen
-	PROTOTYPE((KTEXT));
+	(KTEXT);
 /* put_svc_key.c */
 KRB5_DLLIMP int KRB5_CALLCONV put_svc_key
-	PROTOTYPE((char FAR *sfile,
+	(char FAR *sfile,
 		   char FAR *name, char FAR *inst, char FAR *realm,
-		   int newvno, char FAR *key));
+		   int newvno, char FAR *key);
 /* rd_err.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_rd_err
-	PROTOTYPE((u_char FAR *in, u_long in_length,
-		   long FAR *code, MSG_DAT FAR *m_data));
+	(u_char FAR *in, u_long in_length,
+		   long FAR *code, MSG_DAT FAR *m_data);
 /* rd_priv.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_rd_priv
-	PROTOTYPE((u_char FAR *in,unsigned KRB4_32 in_length,
+	(u_char FAR *in,unsigned KRB4_32 in_length,
 		   Key_schedule, C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
 		   struct sockaddr_in FAR *receiver,
-		   MSG_DAT FAR *m_data));
+		   MSG_DAT FAR *m_data);
 /* rd_req.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_rd_req
-	PROTOTYPE((KTEXT, char FAR *service, char FAR *inst,
+	(KTEXT, char FAR *service, char FAR *inst,
 		   unsigned KRB4_32 from_addr, AUTH_DAT FAR *,
-		   char FAR *srvtab));
+		   char FAR *srvtab);
 /* rd_safe.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_rd_safe
-	PROTOTYPE((u_char FAR *in, unsigned KRB4_32 in_length,
+	(u_char FAR *in, unsigned KRB4_32 in_length,
 		   C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
 		   struct sockaddr_in FAR *receiver,
-		   MSG_DAT FAR *m_data));
+		   MSG_DAT FAR *m_data);
 /* rd_svc_key.c */
 KRB5_DLLIMP int KRB5_CALLCONV read_service_key
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
-		   int kvno, char FAR *file, char FAR *key));
+	(char FAR *service, char FAR *instance, char FAR *realm,
+		   int kvno, char FAR *file, char FAR *key);
 KRB5_DLLIMP int KRB5_CALLCONV get_service_key
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
-		   int FAR *kvno, char FAR *file, char FAR *key));
+	(char FAR *service, char FAR *instance, char FAR *realm,
+		   int FAR *kvno, char FAR *file, char FAR *key);
 /* realmofhost.c */
 KRB5_DLLIMP char FAR * KRB5_CALLCONV krb_realmofhost
-	PROTOTYPE((char FAR *host));
+	(char FAR *host);
 /* recvauth.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_recvauth
-	PROTOTYPE((long options, int fd, KTEXT ticket,
+	(long options, int fd, KTEXT ticket,
 		   char FAR *service, char FAR *instance,
 		   struct sockaddr_in FAR *foreign_addr,
 		   struct sockaddr_in FAR *local_addr,
 		   AUTH_DAT FAR *kdata, char FAR *srvtab,
-		   Key_schedule schedule, char FAR *version));
+		   Key_schedule schedule, char FAR *version);
 /* save_creds.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_save_credentials
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
+	(char FAR *service, char FAR *instance, char FAR *realm,
 		   C_Block session, int lifetime, int kvno,
-		   KTEXT ticket, long issue_date));
+		   KTEXT ticket, long issue_date);
 /* send_to_kdc.c */
 int send_to_kdc
-	PROTOTYPE((KTEXT pkt, KTEXT rpkt, char *realm));
+	(KTEXT pkt, KTEXT rpkt, char *realm);
 
 /* tkt_string.c */
 char * tkt_string
-	PROTOTYPE((void));
+	(void);
 void krb_set_tkt_string
-	PROTOTYPE((char *));
+	(char *);
 
 /* tf_util.c */
-KRB5_DLLIMP int KRB5_CALLCONV tf_init PROTOTYPE((char *tf_name, int rw));
+KRB5_DLLIMP int KRB5_CALLCONV tf_init (char *tf_name, int rw);
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname PROTOTYPE((char *p));
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname (char *p);
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst PROTOTYPE((char *p));
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst (char *p);
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred PROTOTYPE((CREDENTIALS *c));
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred (CREDENTIALS *c);
 
-KRB5_DLLIMP void KRB5_CALLCONV tf_close PROTOTYPE((void));
+KRB5_DLLIMP void KRB5_CALLCONV tf_close (void);
 
 /* unix_time.c */
 KRB5_DLLIMP unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
-        PROTOTYPE((unsigned KRB4_32 *));
+        (unsigned KRB4_32 *);
 
 /*
  * Internal prototypes
  */
 extern int krb_set_key
-	PROTOTYPE((char *key, int cvt));
+	(char *key, int cvt);
 extern int decomp_ticket
-	PROTOTYPE((KTEXT tkt, unsigned char *flags, char *pname,
+	(KTEXT tkt, unsigned char *flags, char *pname,
 		   char *pinstance, char *prealm, unsigned KRB4_32 *paddress,
 		   C_Block session, int *life, unsigned KRB4_32 *time_sec,
 		   char *sname, char *sinstance, C_Block,
-		   Key_schedule key_s));
+		   Key_schedule key_s);
 
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);

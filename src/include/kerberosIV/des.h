@@ -43,6 +43,7 @@
 #ifdef __STDC__
 #include <limits.h>
 #endif
+#include <stdio.h> /* need FILE for des_cblock_print_file */
 
 /* Windows declarations */
 #ifndef KRB5_CALLCONV
@@ -76,14 +77,6 @@
 #endif /* !defined(__STDC__) */
 #endif /* !defined(SIZEOF_INT) */
 #endif /* !defined(KRB4_32) */
-
-#ifndef PROTOTYPE
-#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
-#define PROTOTYPE(x) x
-#else
-#define PROTOTYPE(x) ()
-#endif
-#endif
 
 typedef unsigned char des_cblock[8];	/* crypto-block size */
 
@@ -124,21 +117,35 @@ typedef struct des_ks_struct bit_64;
  * Function Prototypes
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
-des_key_sched
-	PROTOTYPE((C_Block, Key_schedule));
+KRB5_DLLIMP int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
 
 KRB5_DLLIMP int KRB5_CALLCONV
-des_pcbc_encrypt
-	PROTOTYPE((C_Block FAR *in, C_Block FAR *out, long length,
-		   Key_schedule schedule, C_Block FAR *ivec, int encrypt));
+des_pcbc_encrypt (C_Block FAR *in, C_Block FAR *out, long length,
+		  Key_schedule schedule, C_Block FAR *ivec, int encrypt);
 
 KRB5_DLLIMP unsigned long KRB5_CALLCONV
-des_quad_cksum
-	PROTOTYPE((unsigned char FAR *in, unsigned KRB4_32 FAR *out,
-		   long length, int out_count, C_Block FAR *seed));
+des_quad_cksum (unsigned char FAR *in, unsigned KRB4_32 FAR *out,
+		long length, int out_count, C_Block FAR *seed);
 
-KRB5_DLLIMP int KRB5_CALLCONV
-des_string_to_key
-	PROTOTYPE((char FAR *, C_Block));
+KRB5_DLLIMP int KRB5_CALLCONV des_string_to_key (char FAR *, C_Block);
+
+/* new */
+#ifdef KRB5_GENERAL__
+KRB5_DLLIMP void KRB5_CALLCONV
+des_cbc_cksum(krb5_octet *, krb5_octet *, unsigned long,
+	      des_key_schedule, krb5_octet *);
+int des_cbc_encrypt(krb5_octet *, krb5_octet *, unsigned long,
+		    des_key_schedule, krb5_octet *, int);
+krb5_error_code des_read_password(des_cblock *, char *, int);
+#endif
+KRB5_DLLIMP int KRB5_CALLCONV des_ecb_encrypt(unsigned long *, unsigned long *,
+					      des_key_schedule, int);
+void des_fixup_key_parity(des_cblock);
+int des_check_key_parity(des_cblock);
+KRB5_DLLIMP int KRB5_CALLCONV des_new_random_key(des_cblock);
+void des_init_random_number_generator(des_cblock);
+int des_random_key(des_cblock *);
+int des_is_weak_key(des_cblock);
+void des_cblock_print_file(des_cblock *, FILE *fp);
+
 #endif	/* DES_DEFS */

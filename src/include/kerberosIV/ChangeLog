@@ -1,3 +1,18 @@
+2001-04-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.h: Include stdio.h.
+	(PROTOTYPE): Delete macro.  Make all function prototypes
+	unconditional.
+	(des_ecb_encrypt, des_fixup_key_parity, des_check_key_parity,
+	des_new_random_key, des_init_random_number_generator,
+	des_random_key, des_is_weak_key, des_cblock_print_file): Add
+	prototypes.
+	(des_cbc_cksum, des_cbc_encrypt, des_read_password)
+	[KRB5_GENERAL__]: Add prototypes.
+
+	* krb.h: Make all function prototypes unconditional, don't use
+	PROTOTYPE macro.
+
 2001-01-29  Tom Yu  <tlyu@mit.edu>
 
 	* krb.h: Remove KRB_NEVERDATE.
