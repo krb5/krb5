@@ -32,19 +32,19 @@
 #include <krb.h>
 #include "krb524.h"
 
-static
-int
-krb524int_krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
-			    session, life, time_sec, sname, sinstance, key, k5key);
-
-static
-int
-krb524int_krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
-			  session, life, time_sec, sname, sinstance, k5key);
+static int
+krb524int_krb_create_ticket(KTEXT, unsigned int, char *, char *, char *, long,
+			    char *, int, long, char *, char *, C_Block);
 
 static int
-krb524int_krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
-			 session, life, time_sec, sname, sinstance, key, k5key);
+krb524int_krb_cr_tkt_krb5(KTEXT, unsigned int, char *, char *, char *, long,
+			  char *, int, long, char *, char *,
+			  krb5_keyblock *);
+
+static int
+krb524int_krb_cr_tkt_int(KTEXT, unsigned int, char *, char *, char *, long,
+			 char *, int, long, char *, char *, C_Block,
+			 krb5_keyblock *);
 
 /* rather than copying the cmu code, these values are derived from
    a calculation based on the table and comments found there.
@@ -277,18 +277,17 @@ static const int temp_ONE = 1;
  * <=7 bytes		null		   null pad to 8 byte multiple
  *
  */
-static
-int
+static int
 krb524int_krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
-		  session, life, time_sec, sname, sinstance, key, k5key)
+		  session, life, time_sec, sname, sinstance, key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;		/* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
@@ -299,18 +298,17 @@ krb524int_krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
 				    sinstance, key, NULL);
 }
 
-static
-int
+static int
 krb524int_krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
-		  session, life, time_sec, sname, sinstance, k5key)
+			  session, life, time_sec, sname, sinstance, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;		/* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
@@ -327,13 +325,13 @@ static int
 krb524int_krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
 	       session, life, time_sec, sname, sinstance, key, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned char flags;        /* Various Kerberos flags */
+    unsigned int flags;		/* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
     long    paddress;           /* Net address of requesting entity */
     char    *session;           /* Session key inserted in ticket */
-    short   life;               /* Lifetime of the ticket */
+    int     life;               /* Lifetime of the ticket */
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
