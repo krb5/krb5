@@ -126,7 +126,7 @@ sprintf(cksumbuf, "%u:", ntohs(rport));
 	return (-1);
     }
     
-    if ((host_save = malloc(strlen(hp->h_name) + 1)) == NULL) {
+    if ((host_save = (char *) malloc(strlen(hp->h_name) + 1)) == NULL) {
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }

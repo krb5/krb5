@@ -1,3 +1,7 @@
+Mon Feb 12 22:41:06 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kcmd.c (kcmd): Fix lint flame (added missing cast).
+
 Fri Feb  9 21:43:50 1996  Sam Hartman  <hartmans@hartman.mit.edu>
 
 	* krsh.c (main): Only print secure_message if encrypt_flag set.
