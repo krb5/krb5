@@ -1,3 +1,8 @@
+2002-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogind.c (protocol): Initialize pbp, fbp.  Change left to type
+	size_t.
+
 2002-06-27  Jen Selby <jenselby@mit.edu>
 
 	* rsh.M: added warning that encryption does not encrypt the

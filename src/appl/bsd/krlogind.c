@@ -984,7 +984,7 @@ static int control(pty, cp, n)
 void protocol(f, p)
      int f, p;
 {
-    unsigned char pibuf[BUFSIZ], qpibuf[BUFSIZ*2], fibuf[BUFSIZ], *pbp, *fbp;
+    unsigned char pibuf[BUFSIZ], qpibuf[BUFSIZ*2], fibuf[BUFSIZ], *pbp=0, *fbp=0;
     register int pcc = 0, fcc = 0;
     int cc;
 #ifdef POSIX_SIGNALS
@@ -1052,7 +1052,8 @@ void protocol(f, p)
 		fcc = 0;
 	    } else {
 		register unsigned char *cp;
-		int left, n;
+		int n;
+		size_t left;
 		
 		if (fcc <= 0)
 		    break;
