@@ -46,7 +46,7 @@ struct inq_context {
 
 static krb5_db_entry admin_def_dbent;
 
-static const char *admin_perm_denied_fmt = "\004ACL entry prevents %s operation by %s";
+static const char *admin_perm_denied_fmt = "\004ACL entry prevents %s operation on %s by %s";
 static const char *admin_db_write_err_fmt = "\004database write failed during %s operation by %s";
 static const char *admin_db_success_fmt = "\007%s operation for %s successfully issued by %s";
 static const char *admin_db_read_err_fmt = "\004database read failed during %s operation by %s";
@@ -66,6 +66,8 @@ static const char *admin_inquire_text = "Inquire";
 static const char *admin_extract_key_text = "Extract Key";
 static const char *admin_add_key_text = "Add Keytype";
 static const char *admin_delete_key_text = "Delete Keytype";
+
+static const char *admin_fentry_text = "first entry";
 
 extern char *programname;
 
@@ -559,7 +561,7 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 				       &client_name))) {
 
 	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, operation)) {
+	if (acl_op_permitted(kcontext, client, operation, arglist[0].data)) {
 
 	    /* Parse the specified principal name */
 	    if (!(kret = krb5_parse_name(kcontext,
@@ -836,7 +838,7 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 	else {
 	    /* ACL check failed */
 	    com_err(programname, 0, admin_perm_denied_fmt,
-		    op_msg, client_name);
+		    op_msg, arglist[0].data, client_name);
 	    retval = KRB5_ADM_NOT_AUTHORIZED;
 	}
 
@@ -894,7 +896,7 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 				       &client_name))) {
 
 	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, operation)) {
+	if (acl_op_permitted(kcontext, client, operation, original)) {
 
 	    /* Parse the specified principal name */
 	    if (!(kret = krb5_parse_name(kcontext,
@@ -1051,7 +1053,7 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 	else {
 	    /* ACL check failed */
 	    com_err(programname, 0, admin_perm_denied_fmt,
-		    op_msg, client_name);
+		    op_msg, original, client_name);
 	    retval = KRB5_ADM_NOT_AUTHORIZED;
 	}
 
@@ -1379,7 +1381,7 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 				       &client_name))) {
 
 	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, operation)) {
+	if (acl_op_permitted(kcontext, client, operation, arglist[0].data)) {
 
 	    /* Parse the specified principal name */
 	    if (!(kret = krb5_parse_name(kcontext,
@@ -1492,7 +1494,7 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 	else {
 	    /* ACL check failed */
 	    com_err(programname, 0, admin_perm_denied_fmt,
-		    op_msg, client_name);
+		    op_msg, arglist[0].data, client_name);
 	    retval = KRB5_ADM_NOT_AUTHORIZED;
 	}
 
@@ -1783,7 +1785,7 @@ admin_inquire(kcontext, debug_level, ticket, principal, ncompp, complistp)
 				       &client_name))) {
 
 	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, ACL_INQUIRE)) {
+	if (acl_op_permitted(kcontext, client, ACL_INQUIRE, principal->data)) {
 
 	    /* Parse the specified principal name */
 	    if (!principal->length ||
@@ -1873,7 +1875,9 @@ admin_inquire(kcontext, debug_level, ticket, principal, ncompp, complistp)
 	else {
 	    /* Not authorized to perform this function */
 	    com_err(programname, 0, admin_perm_denied_fmt,
-		    admin_inquire_text, client_name);
+		    admin_inquire_text,
+		    (principal->length) ? principal->data : admin_fentry_text,
+		    client_name);
 	    retval = KRB5_ADM_NOT_AUTHORIZED;
 	}
 
@@ -1929,22 +1933,23 @@ admin_extract_key(kcontext, debug_level, ticket,
 				       &client,
 				       &client_name))) {
 
-	/* See if this client can perform this operation. */
-	if (acl_op_permitted(kcontext, client, ACL_EXTRACT)) {
+	realm = key_master_realm();
+	if (princname = (char *) malloc((size_t) name->length + 1 +
+					instance->length + 1 +
+					strlen(realm) + 1)) {
 
-	    realm = key_master_realm();
-	    if (princname = (char *) malloc((size_t) name->length + 1 +
-					    instance->length + 1 +
-					    strlen(realm) + 1)) {
-
-		/* Formulate the name of our target */
-		sprintf(princname, "%s/%s@%s", name->data,
-			instance->data, realm);
+	    /* Formulate the name of our target */
+	    sprintf(princname, "%s/%s@%s", name->data,
+		    instance->data, realm);
 		
-		/* See if it's a valid name */
-		if (!(kret = krb5_parse_name(kcontext,
-					     princname,
-					     &principal))) {
+	    /* See if it's a valid name */
+	    if (!(kret = krb5_parse_name(kcontext,
+					 princname,
+					 &principal))) {
+
+		/* See if this client can perform this operation. */
+		if (acl_op_permitted(kcontext, client, ACL_EXTRACT,
+				     princname)) {
 
 		    /* Get the database entry */
 		    nentries = 1;
@@ -2030,25 +2035,25 @@ admin_extract_key(kcontext, debug_level, ticket,
 		    krb5_free_principal(kcontext, principal);
 		}
 		else {
-		    /* Name parse failed */
-		    DPRINT(DEBUG_OPERATION, debug_level,
-			   ("> bad principal string \"%s\"\n", princname));
-		    retval = KRB5_ADM_P_DOES_NOT_EXIST;
+		    /* Not authorized to perform this operation */
+		    com_err(programname, 0, admin_perm_denied_fmt,
+			    admin_extract_key_text, princname, client_name);
+		    retval = KRB5_ADM_NOT_AUTHORIZED;
 		}
-		free(princname);
 	    }
 	    else {
-		/* No memory. */
+		/* Name parse failed */
 		DPRINT(DEBUG_OPERATION, debug_level,
-		       ("> no memory for principal name\n"));
-		retval = KRB5_ADM_SYSTEM_ERROR;
+		       ("> bad principal string \"%s\"\n", princname));
+		retval = KRB5_ADM_P_DOES_NOT_EXIST;
 	    }
+	    free(princname);
 	}
 	else {
-	    /* Not authorized to perform this operation */
-	    com_err(programname, 0, admin_perm_denied_fmt,
-		    admin_extract_key_text, client_name);
-	    retval = KRB5_ADM_NOT_AUTHORIZED;
+	    /* No memory. */
+	    DPRINT(DEBUG_OPERATION, debug_level,
+		   ("> no memory for principal name\n"));
+	    retval = KRB5_ADM_SYSTEM_ERROR;
 	}
 
 	/* Clean up */

@@ -460,7 +460,8 @@ passwd_change(kcontext, debug_level, auth_context, ticket,
     /*
      * Check if we're restricted by an ACL from changing our own password.
      */
-    if (!acl_op_permitted(kcontext, client, ACL_CHANGE_OWN_PW)) {
+    if (!acl_op_permitted(kcontext, client, ACL_CHANGE_OWN_PW,
+			  (char *) NULL)) {
 	com_err(programname, 0, pwd_perm_denied, canon_name);
 	pwret = KRB5_ADM_CANT_CHANGE;
 	*supp = KADM_NOT_ALLOWED;
