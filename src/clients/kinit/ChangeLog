@@ -1,3 +1,7 @@
+Tue Sep 26 22:19:32 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kinit.c (KRB5_DEFAULT_LIFE): default life should be 10 hours,
+	not eight, for practical/social reasons.
 
 Mon Aug 21 16:49:06 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kinit.c - Use string_to_deltat to parse lifetime arguments so that
