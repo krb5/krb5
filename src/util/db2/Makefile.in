@@ -29,11 +29,11 @@ $(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
 	$(CP) $(srcdir)/include/db-ndbm.h $@
 
 include/config.h: $(srcdir)/include/config.h.in
-    cd $(thisconfigdir) && $(SHELL) config.status
+	cd $(thisconfigdir) && $(SHELL) config.status
 $(srcdir)/include/config.h.in: @MAINT@ $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
-    cd $(srcdir) && ($(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS) || $(AUTOHEADER) --localdir=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS))
+	cd $(srcdir) && ($(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS) || $(AUTOHEADER) --localdir=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS))
 include/db-config.h: $(srcdir)/include/db-config.h.in
-    cd $(thisconfigdir) && $(SHELL) config.status
+	cd $(thisconfigdir) && $(SHELL) config.status
 
 clean-includes::
 	$(RM) $(HDRS)
