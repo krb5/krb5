@@ -1,8 +1,16 @@
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>
 	    Alec H. Peterson  <ahp@hilander.com>
 
-	* configure.in: Invoke KRB5_SOCKADDR_SA_LEN.
+	* configure.in: Invoke KRB5_AC_INET6.
+	* network.c (max_udp_sockets): New variable.
+	(setup_port): Add IPv6 support.  Reallocate udp_port_fds array as
+	needed here.
+	(add_port): Don't do buggy udp_port_fds allocation here.
+	(setup_network): On failure, exit.
+	(process_packet): Handle inet6 addresses when building
+	krb5_address structure.
 
+	* configure.in: Invoke KRB5_SOCKADDR_SA_LEN.
 	* network.c: Include <sys/ioctl.h>, <syslog.h>, <net/if.h>.
 	(foreach_localaddr): New function, copied from
 	lib/krb5/os/localaddr.c.

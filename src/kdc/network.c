@@ -54,7 +54,7 @@ static int *udp_port_fds = (int *) NULL;
 static u_short *udp_port_nums = (u_short *) NULL;
 static int n_udp_ports = 0;
 static int n_sockets = 0;
-static int max_udp_ports = 0;
+static int max_udp_ports = 0, max_udp_sockets = 0;
 static fd_set select_fds;
 static int select_nfds;
 
@@ -64,7 +64,6 @@ static krb5_error_code add_port(port)
      u_short port;
 {
     int	i;
-    int *new_fds;
     u_short *new_ports;
     int new_max;
 
@@ -75,11 +74,6 @@ static krb5_error_code add_port(port)
     
     if (n_udp_ports >= max_udp_ports) {
 	new_max = max_udp_ports + 10;
-	new_fds = safe_realloc(udp_port_fds, new_max * sizeof(int));
-	if (new_fds == 0)
-	    return ENOMEM;
-	udp_port_fds = new_fds;
-
 	new_ports = safe_realloc(udp_port_nums, new_max * sizeof(u_short));
 	if (new_ports == 0)
 	    return ENOMEM;
@@ -91,7 +85,6 @@ static krb5_error_code add_port(port)
     udp_port_nums[n_udp_ports++] = port;
     return 0;
 }
-#undef safe_realloc
 
 /* Keep in sync with lib/krb5/os/localaddr.c version.  */
 
@@ -232,7 +225,7 @@ static int
 setup_port(void *P_data, struct sockaddr *addr)
 {
     struct socksetup *data = P_data;
-    int sock, i;
+    int sock = -1, i;
 
     switch (addr->sa_family) {
     case AF_INET:
@@ -259,13 +252,70 @@ setup_port(void *P_data, struct sockaddr *addr)
 	    FD_SET (sock, &select_fds);
 	    if (sock > select_nfds)
 		select_nfds = sock;
-	    udp_port_fds[n_sockets++] = sock;
 	    krb5_klog_syslog (LOG_INFO, "listening on fd %d: %s port %d", sock,
 			     inet_ntoa (sin->sin_addr), udp_port_nums[i]);
 	}
     }
+    break;
+#ifdef KRB5_USE_INET6
+    case AF_INET6:
+	/* XXX We really should be using a single AF_INET6 socket and
+	   specify/receive local address info through sendmsg/recvmsg
+	   control data.  */
+    {
+	struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) addr, psin6;
+	for (i = 0; i < n_udp_ports; i++) {
+#ifdef HAVE_INET_NTOP
+	    char abuf[46] = { 0 };
+	    const char *addr_str = 0;
+	    addr_str = inet_ntop (sin6->sin6_family, &sin6->sin6_addr, abuf,
+				  sizeof (abuf));
+#endif
+	    if (addr_str == 0)
+		addr_str = "[some ipv6 address]";
+	    sock = socket (PF_INET6, SOCK_DGRAM, 0);
+	    if (sock == -1) {
+		data->retval = errno;
+		com_err(data->prog, data->retval,
+			"Cannot create server socket for port %d address %s",
+			udp_port_nums[i], addr_str);
+		return 1;
+	    }
+	    psin6 = *sin6;
+	    psin6.sin6_port = htons (udp_port_nums[i]);
+	    if (bind (sock, (struct sockaddr *)&psin6, sizeof (psin6)) == -1) {
+		data->retval = errno;
+		com_err(data->prog, data->retval,
+			"Cannot bind server socket to port %d address %s",
+			udp_port_nums[i], addr_str);
+		return 1;
+	    }
+	    FD_SET (sock, &select_fds);
+	    if (sock > select_nfds)
+		select_nfds = sock;
+	    krb5_klog_syslog (LOG_INFO, "listening on fd %d: %s port %d", sock,
+			      addr_str, udp_port_nums[i]);
+	}
+    }
+    break;
+#endif
     default:
 	break;
+    }
+    if (sock >= 0) {
+	if (n_sockets == max_udp_sockets) {
+	    int *new_fds;
+	    int new_max = max_udp_sockets + n_udp_ports;
+	    new_fds = safe_realloc(udp_port_fds, new_max * sizeof(int));
+	    if (new_fds == 0) {
+		data->retval = errno;
+		com_err(data->prog, data->retval, "cannot save socket info");
+		return 1;
+	    }
+	    udp_port_fds = new_fds;
+	    max_udp_sockets = new_max;
+	}
+	udp_port_fds[n_sockets++] = sock;
     }
     return 0;
 }
@@ -308,7 +358,7 @@ setup_network(prog)
     krb5_klog_syslog (LOG_INFO, "set up %d sockets", n_sockets);
     if (n_sockets == 0) {
 	com_err(prog, 0, "no sockets set up?");
-	return -1;
+	exit (1);
     }
 
     return 0;
@@ -322,7 +372,11 @@ void process_packet(port_fd, prog, portnum)
     int cc, saddr_len;
     krb5_fulladdr faddr;
     krb5_error_code retval;
+#ifdef KRB5_USE_INET6
+    struct sockaddr_storage saddr;
+#else
     struct sockaddr_in saddr;
+#endif
     krb5_address addr;
     krb5_data request;
     krb5_data *response;
@@ -346,10 +400,24 @@ void process_packet(port_fd, prog, portnum)
     request.data = pktbuf;
     faddr.port = ntohs(saddr.sin_port);
     faddr.address = &addr;
-    addr.addrtype = ADDRTYPE_INET;
-    addr.length = 4;
+    switch (((struct sockaddr *)&saddr)->sa_family) {
+    case AF_INET:
+	addr.addrtype = ADDRTYPE_INET;
+	addr.length = 4;
+	addr.contents = (krb5_octet *) &((struct sockaddr_in *)&saddr)->sin_addr;
+	break;
+    case AF_INET6:
+	addr.addrtype = ADDRTYPE_INET6;
+	addr.length = 16;
+	addr.contents = (krb5_octet *) &((struct sockaddr_in6 *)&saddr)->sin6_addr;
+	break;
+    default:
+	addr.addrtype = -1;
+	addr.length = 0;
+	addr.contents = 0;
+	break;
+    }
     /* this address is in net order */
-    addr.contents = (krb5_octet *) &saddr.sin_addr;
     if ((retval = dispatch(&request, &faddr, portnum, &response))) {
 	com_err(prog, retval, "while dispatching");
 	return;
