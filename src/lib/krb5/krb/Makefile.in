@@ -5,7 +5,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb
-##DOS##OBJFILE=..\$(MYNAME).lst
+##DOS##OBJFILE=..\$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
