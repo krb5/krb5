@@ -1,3 +1,8 @@
+2000-08-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Define KRB4_DEJAGNU_TEST depending on if krb4
+	support is enabled.
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
