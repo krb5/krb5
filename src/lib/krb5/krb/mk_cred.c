@@ -120,6 +120,7 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
 {
     krb5_cred_enc_part 	  credenc;
     krb5_error_code	  retval;
+    size_t		  size;
     int			  i;
 
     credenc.magic = KV5M_CRED_ENC_PART;
@@ -134,11 +135,11 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
     credenc.timestamp = replaydata->timestamp;
 
     /* Get memory for creds and initialize it */
-    if ((credenc.ticket_info = (krb5_cred_info **)
-		malloc((size_t) (sizeof(krb5_cred_info *) * (nppcreds + 1)))) == NULL) {
-        return ENOMEM;
-    }
-    memset(credenc.ticket_info, 0, sizeof(krb5_cred_info *) * (nppcreds + 1));
+    size = sizeof(krb5_cred_info *) * (nppcreds + 1);
+    credenc.ticket_info = (krb5_cred_info **) malloc(size);
+    if (credenc.ticket_info == NULL)
+	return ENOMEM;
+    memset(credenc.ticket_info, 0, size);
     
     /*
      * For each credential in the list, initialize a cred info

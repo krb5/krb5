@@ -111,7 +111,7 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	const char *cap_names[4];
 	char *cap_client, *cap_server;
 	char **cap_nodes;
-	int cap_code;
+        krb5_error_code cap_code;
 	if ((cap_client = (char *)malloc(client->length + 1)) == NULL)
 		return ENOMEM;
 	strncpy(cap_client, client->data, client->length);

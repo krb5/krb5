@@ -1,3 +1,13 @@
+Wed Mar 20 23:00:59 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* walk_rtree.c (krb5_walk_realm_tree): Fix 16bit vs. 32bit error.
+		(cap_code should been a krb5_error_code, not an int!)
+
+	* mk_cred.c (krb5_mk_ncred_basic): Fix windows lint flame.
+
+	* get_in_tkt.c (krb5_get_in_tkt): Fix 16bit vs. 32bit error.
+		(do_more should not have been an int!)
+
 Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_RUN_FLAGS

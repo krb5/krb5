@@ -383,7 +383,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_kdc_rep *	as_reply;
     krb5_pa_data  **	preauth_to_use = 0;
     int			loopcount = 0;
-    int			do_more = 0;
+    krb5_int32		do_more = 0;
 
     if (! krb5_realm_compare(context, creds->client, creds->server))
 	return KRB5_IN_TKT_REALM_MISMATCH;
