@@ -58,7 +58,6 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
 {
     krb5_context	context;
     krb5_error_code	kret = 0;
-    OM_uint32		retval;
     size_t		blen;
     krb5_gss_ctx_id_t	ctx;
     krb5_octet		*ibp;
@@ -68,7 +67,6 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
 
     /* Assume a tragic failure */
     ctx = (krb5_gss_ctx_id_t) NULL;
-    retval = GSS_S_FAILURE;
     *minor_status = 0;
 
     /* Internalize the context */

@@ -153,7 +153,6 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
     krb5_octet		**buffer;
     size_t		*lenremain;
 {
-     krb5_error_code	kret;
      krb5_int32 ibuf;
      krb5_octet		*bp;
      size_t		remain;
@@ -162,7 +161,7 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
      remain = *lenremain;
 
      /* Read in and check our magic number */
-     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	return (EINVAL);
 
      if (ibuf != KV5M_GSS_QUEUE)
@@ -171,7 +170,7 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
      g_queue_internalize(argp, &bp, &remain);
 
      /* Read in and check our trailing magic number */
-     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	return (EINVAL);
 
      if (ibuf != KV5M_GSS_QUEUE)

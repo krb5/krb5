@@ -1,3 +1,9 @@
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* import_sec_context.c (krb5_gss_import_sec_context): Get rid of
+	variable set but never used.
+	* ser_sctx.c (kg_queue_internalize): Ditto
+	
 2001-07-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* ser_sctx.c: Declare kg_oid_size and kg_queue_size static.
