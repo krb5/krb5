@@ -19,7 +19,7 @@ LIBS = ../et/libcom_err.a
 all:: includes libprofile.a test_parse test_profile
 
 libprofile.a: $(OBJS)
-	$(ARCHIVE) $@ $(OBJS)
+	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
 test_parse: test_parse.o $(OBJS) $(LIBS)
