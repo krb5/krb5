@@ -1,3 +1,7 @@
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SUBDIROBJLISTS): New variable.
+
 2002-01-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* btree/bt_put.c (__bt_put): Correctly handle writing out the key
