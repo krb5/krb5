@@ -30,4 +30,4 @@ extern int krbONE;
 #define		MSB_FIRST		0	/* 68000, IBM RT/PC */
 #define		LSB_FIRST		1	/* Vax, PC8086 */
 
-#endif KRB_CONF_DEFS
+#endif /* KRB_CONF_DEFS */
