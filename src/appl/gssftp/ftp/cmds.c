@@ -71,8 +71,10 @@ extern	char *home;
 extern	char *remglob();
 extern	char *getenv();
 #define strerror(error) (sys_errlist[error])
+#ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
-extern	int  errno;
+#endif
+
 extern off_t restart_point;
 extern char reply_string[];
 

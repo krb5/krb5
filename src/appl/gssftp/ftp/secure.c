@@ -27,8 +27,10 @@ extern gss_ctx_id_t gcontext;
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
-extern int errno;
+
+#ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 
 extern struct	sockaddr_in hisaddr;
 extern struct	sockaddr_in myaddr;

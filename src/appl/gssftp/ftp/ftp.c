@@ -121,7 +121,10 @@ sig_t	lostpeer();
 off_t	restart_point = 0;
 
 #define strerror(error) (sys_errlist[error])
+#ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
+
 extern int connected, errno;
 
 #define herror()	printf("unknown host\n")

@@ -1,3 +1,11 @@
+Thu Jan 18 18:33:18 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
+
+	* cmds.c: Handle sys_errlist and remove declaration of errno.
+
+	* configure.in: Check to see if we need to declare sys_errlist.
+
+	* ftp.c secure.c: Only define sys_errlist if needed
+
 Thu Jan 18 11:55:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Check for sys/select.h
