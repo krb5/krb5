@@ -1,5 +1,5 @@
 #!/bin/sh
-repository=/afs/athena.mit.edu/astaff/project/krbdev/.cvsroot
+repository=:kserver:cvs.mit.edu:/cvs/krbdev
 dodoc=t
 dosrc=t
 checkout=t
@@ -24,21 +24,40 @@ fi
 reltag=$1
 reldir=$2
 
-case reldir in
+relmajor=0
+relminor=0
+relpatch=0
+reldate=`date +%Y%m%d`
+
+case "$reldir" in
 */*)
 	echo "release-dir may not contain slashes."
 	exit 1
 	;;
+*" "*|*"	"*)
+	echo "release-dir may  not contain whitespace."
+	exit 1
+	;;
+krb5-*.*.*)
+	release=`echo $reldir|sed -e 's/krb5-//'`
+	relmajor=`echo $release|awk -F. '{print $1}'`
+	relminor=`echo $release|awk -F. '{print $2}'`
+	relpatch=`echo $release|awk -F. '{print $3}'`
+	;;
+krb5-*.*)
+	release=`echo $reldir|sed -e 's/krb5-//'`
+	relmajor=`echo $release|awk -F. '{print $1}'`
+	relminor=`echo $release|awk -F. '{print $2}'`
+	;;
+krb5-current)
+	release=current-$reldate
+	;;
 *);;
 esac
 
-if test ! -d $reldir; then
-	mkdir $reldir
-fi
-
-echo "Checking out krb5 with tag $reltag into directory $reldir..."
 if test $checkout = t; then
-	(cd $reldir; cvs -q -d $repository export -r$reltag krb5)
+	echo "Checking out krb5 with tag $reltag into directory $reldir..."
+	cvs -q -d $repository export -r$reltag -d $reldir krb5
 fi
 
 if test $dosrc = t; then
@@ -54,6 +73,25 @@ if test $dosrc = t; then
 	(cd $reldir/src/util/autoconf; make distclean)
 fi
 
+echo "Editing release-specific files..."
+
+(cd $reldir/src/lib/krb5/krb && \
+	sed -e '/static/s%KRB5_BRAND:[^"]*"%'"KRB5_BRAND: $reltag $release $reldate"'"%' \
+		brand.c > brand.c.new && mv brand.c.new brand.c; \
+	rm -f brand.c.new)
+
+(cd $reldir/src/util/send-pr && \
+	sed -e 's%RELEASE=.*%RELEASE='"krb5-$release"'%' Makefile.in \
+		> Makefile.in.new && mv Makefile.in.new Makefile.in)
+
+(cd $reldir/src && \
+	cat > patchlevel.h <<EOF
+#define KRB5_MAJOR_RELEASE $relmajor
+#define KRB5_MINOR_RELEASE $relminor
+#define KRB5_PATCHLEVEL    $relpatch
+EOF
+)
+
 echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	-o -name BADSYMS -o -name .Sanitize \) -print \
@@ -65,6 +103,7 @@ if test $dodoc = t; then
 fi
 
 echo "Generating tarfiles..."
+GZIP=-9; export GZIP
 if test $dosrc = t; then
 	gtar --exclude $reldir/src/lib/crypto \
 		--exclude $reldir/src/lib/des425 \

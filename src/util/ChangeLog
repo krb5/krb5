@@ -1,3 +1,9 @@
+Wed Oct  8 16:19:49 1997  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Allow for edits of relevant files that should be changed
+	each time a release is cut.  Some snapshot support.  Add "-9" flag
+	to gzip.
+
 Mon Nov 25 21:00:24 1996  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Add support for --srconly, --doconly, --nocheckout,
