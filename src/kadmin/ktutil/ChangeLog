@@ -1,3 +1,7 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Cast argument to isxdigit() to int.
+
 Mon Feb 26 14:27:24 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktutil.c, ktutil_funcs.c: Do not shadow system "index" and

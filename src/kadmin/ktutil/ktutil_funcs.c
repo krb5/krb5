@@ -203,7 +203,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
 
 	i = 0;
 	for (cp = buf; *cp; cp += 2) {
-	    if (!isxdigit(cp[0]) || !isxdigit(cp[1])) {
+	    if (!isxdigit((int) cp[0]) || !isxdigit((int) cp[1])) {
 	        fprintf(stderr, "addent: Illegal character in key.\n");
 		retval = 0;
 		goto cleanup;
