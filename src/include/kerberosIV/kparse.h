@@ -95,7 +95,4 @@ extern char ErrorMsg[];		/*
 				 * fGetParameterSet
 				 */
 
-extern char *strsave();		/* defined in this module */
-extern char *strutol();		/* defined in this module */
-
 #endif /* KPARSE_DEFS */

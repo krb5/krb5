@@ -1,3 +1,7 @@
+Fri Apr 28 16:39:47 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kparse.h (strutol, strsave): are only static in this module.
+
 Fri Apr 28 15:05:23 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb4-proto.h: #if 0, not #ifdef 0.
