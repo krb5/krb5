@@ -1,5 +1,32 @@
-/* cc_stdio.c - stdio ccache implementation
- * Copyright 2000 MIT blah blah...
+/*
+ * lib/krb5/ccache/cc_stdio.c
+ *
+ * Copyright 1990,1991,2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Copyright 1995 by Cygnus Support.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ *
+ * implementation of file-based credentials cache, using stdio
  */
 /*
 If OPENCLOSE is defined, ecah of the functions opens and closes the
@@ -54,83 +81,41 @@ error-trapping may be incomplete.  Probably lots of bugs dealing with
 end-of-file versus other errors.
  */
 #include "k5-int.h"
-/* start of former stdio/scc-proto.h */
-/*
- * lib/krb5/ccache/stdio/scc-proto.h
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * Prototypes for File-based credentials cache
- */
 
-
-#ifndef KRB5_SCC_PROTO__
-#define KRB5_SCC_PROTO__
-
-/* scc_close.c */
 krb5_error_code krb5_scc_close 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-/* scc_defnam.c */
 char *krb5_scc_default_name 
 	PROTOTYPE((krb5_context));
 
-/* scc_destry.c */
 krb5_error_code krb5_scc_destroy 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-/* scc_eseq.c */
 krb5_error_code krb5_scc_end_seq_get 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor ));
 
-/* scc_gennew.c */
 krb5_error_code krb5_scc_generate_new 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id ));
 
-/* scc_getnam.c */
 char *krb5_scc_get_name 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-/* scc_gprin.c */
 krb5_error_code krb5_scc_get_principal 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal *princ ));
 
-/* scc_init.c */
 krb5_error_code krb5_scc_initialize 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_principal princ ));
 
-/* scc_maybe.c */
 krb5_error_code krb5_scc_close_file 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache));
@@ -139,14 +124,12 @@ krb5_error_code krb5_scc_open_file
 		   krb5_ccache,
 		   int));
 
-/* scc_nseq.c */
 krb5_error_code krb5_scc_next_cred 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
 		   krb5_creds *creds ));
 
-/* scc_read.c */
 krb5_error_code krb5_scc_read
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
@@ -197,13 +180,11 @@ krb5_error_code krb5_scc_read_authdatum
 		   krb5_ccache, 
 		   krb5_authdata*));
 
-/* scc_reslv.c */
 krb5_error_code krb5_scc_resolve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache *id , 
 		   const char *residual ));
 
-/* scc_retrv.c */
 krb5_error_code krb5_scc_retrieve 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
@@ -211,35 +192,29 @@ krb5_error_code krb5_scc_retrieve
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds ));
 
-/* scc_sseq.c */
 krb5_error_code krb5_scc_start_seq_get 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor ));
 
-/* scc_store.c */
 krb5_error_code krb5_scc_store 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_creds *creds ));
 
-/* scc_skip.c */
 krb5_error_code krb5_scc_skip_header
 	PROTOTYPE((krb5_context, krb5_ccache));
 krb5_error_code krb5_scc_skip_principal 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));
 
-/* scc_sflags.c */
 krb5_error_code krb5_scc_set_flags 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags flags ));
 
-/* scc_ops.c */
 extern krb5_cc_ops krb5_scc_ops;
 
-/* scc_write.c */
 krb5_error_code krb5_scc_write 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
@@ -290,46 +265,9 @@ krb5_error_code krb5_scc_store_authdatum
 		   krb5_ccache, 
 		   krb5_authdata *));
 
-/* scc_errs.c */
 krb5_error_code krb5_scc_interpret 
 	PROTOTYPE((krb5_context, 
 		   int ));
-
-#endif /* KRB5_SCC_PROTO__ */
-/* end of former stdio/scc-proto.h */
-/* start of former stdio/scc.h */
-/*
- * lib/krb5/ccache/stdio/scc.h
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains constant and function declarations used in the
- * file-based credential cache routines.
- */
-
-#ifndef __KRB5_FILE_CCACHE__
-#define __KRB5_FILE_CCACHE__
 
 #include <stdio.h>
 
@@ -395,42 +333,6 @@ typedef struct _krb5_scc_cursor {
     if (OPENCLOSE (ID)) {						\
 	krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID);	\
 	if (!(RET)) RET = maybe_close_ret; } }
-
-/* DO NOT ADD ANYTHING AFTER THIS #endif */
-#endif /* __KRB5_FILE_CCACHE__ */
-/* end of former stdio/scc.h */
-/* start of former stdio/scc_read.c */
-/*
- * lib/krb5/ccache/stdio/scc_read.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for reading variables from a
- * credentials cache.  These are not library-exported functions.
- */
-
-
 
 #define CHECK(ret) if (ret != KRB5_OK) goto errout;
      
@@ -900,38 +802,6 @@ krb5_scc_read_authdatum(context, id, a)
 }
 /* end of former stdio/scc_read.c */
 #undef CHECK
-/* start of former stdio/scc_write.c */
-/*
- * lib/krb5/ccache/stdio/scc_write.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_write_<type>.
- */
-
-
-
 
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
 
@@ -1215,39 +1085,6 @@ krb5_scc_store_authdatum (context, id, a)
     CHECK(ret);
     return krb5_scc_write(context, id, (krb5_pointer) a->contents, a->length);
 }
-/* end of former stdio/scc_write.c */
-/* start of former stdio/scc_maybe.c */
-/*
- * lib/krb5/ccache/stdio/scc_maybe.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Copyright 1995 by Cygnus Support.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for conditional open/close calls.
- */
-
 
 #ifdef macintosh
 /*
@@ -1529,39 +1366,6 @@ done:
 	}
     return retval;
 }
-/* end of former stdio/scc_maybe.c */
-/* start of former stdio/scc_skip.c */
-/*
- * lib/krb5/ccache/stdio/scc_skip.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for reading variables from a
- * credentials cache.  These are not library-exported functions.
- */
-
-
 
 krb5_error_code
 krb5_scc_skip_header(context, id)
@@ -1598,39 +1402,6 @@ krb5_scc_skip_principal(context, id)
      krb5_free_principal(context, princ);
      return KRB5_OK;
 }
-/* end of former stdio/scc_skip.c */
-/* start of former stdio/scc_init.c */
-/*
- * lib/krb5/ccache/stdio/scc_init.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_initialize.
- */
-
-
-
 
 /*
  * Modifies:
@@ -1674,40 +1445,6 @@ krb5_scc_initialize(context, id, princ)
 }
 
 
-/* end of former stdio/scc_init.c */
-/* start of former stdio/scc_close.c */
-/*
- * lib/krb5/ccache/stdio/scc_close.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_close.
- */
-
-
-
-
 /*
  * Modifies:
  * id
@@ -1739,39 +1476,6 @@ krb5_scc_close(context, id)
 
      return closeval;
 }
-/* end of former stdio/scc_close.c */
-/* start of former stdio/scc_destry.c */
-/*
- * lib/krb5/ccache/stdio/scc_destry.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_destroy.
- */
-
-
-
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -1863,41 +1567,6 @@ krb5_error_code krb5_scc_destroy(context, id)
 
      return ret;
 }
-/* end of former stdio/scc_destry.c */
-/* start of former stdio/scc_reslv.c */
-/*
- * lib/krb5/ccache/stdio/scc_reslv.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_resolve.
- */
-
-
-
-
-extern krb5_cc_ops krb5_scc_ops;
 
 /*
  * Requires:
@@ -1961,39 +1630,6 @@ krb5_scc_resolve (context, id, residual)
      *id = lid;
      return KRB5_OK;
 }
-/* end of former stdio/scc_reslv.c */
-/* start of former stdio/scc_sseq.c */
-/*
- * lib/krb5/ccache/stdio/scc_sseq.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_start_seq_get.
- */
-
-
-
 
 /*
  * Effects:
@@ -2036,38 +1672,6 @@ done:
      MAYBE_CLOSE (context, id, ret);
      return(ret);
 }
-/* end of former stdio/scc_sseq.c */
-/* start of former stdio/scc_nseq.c */
-/*
- * lib/krb5/ccache/stdio/scc_nseq.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_next_cred.
- */
-
-
 
 
 /*
@@ -2157,38 +1761,6 @@ lose:
      MAYBE_CLOSE (context, id, kret);
      return kret;
 }
-/* end of former stdio/scc_nseq.c */
-/* start of former stdio/scc_eseq.c */
-/*
- * lib/krb5/ccache/stdio/scc_eseq.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_end_seq_get.
- */
-
-
 
 /*
  * Requires:
@@ -2216,38 +1788,6 @@ krb5_scc_end_seq_get(context, id, cursor)
 
     return ret;
 }
-
-
-/* end of former stdio/scc_eseq.c */
-/* start of former stdio/scc_gennew.c */
-/*
- * lib/krb5/ccache/stdio/scc_gennew.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_generate_new.
- */
 
 
 extern krb5_cc_ops krb5_scc_ops;
@@ -2355,39 +1895,6 @@ err_out:
      krb5_xfree(lid);
      return retcode;
 }
-/* end of former stdio/scc_gennew.c */
-/* start of former stdio/scc_getnam.c */
-/*
- * lib/krb5/ccache/stdio/scc_getnam.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_get_name.
- */
-
-
-
 
 /*
  * Requires:
@@ -2403,38 +1910,6 @@ krb5_scc_get_name (context, id)
 {
      return (char *) ((krb5_scc_data *) id->data)->filename;
 }
-/* end of former stdio/scc_getnam.c */
-/* start of former stdio/scc_gprin.c */
-/*
- * lib/krb5/ccache/stdio/scc_gprin.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_get_principal.
- */
-
-
 
 /*
  * Modifies:
@@ -2468,234 +1943,6 @@ done:
      MAYBE_CLOSE (context, id, kret);
      return kret;
 }
-/* end of former stdio/scc_gprin.c */
-/* start of former stdio/scc_retrv.c */
-/*
- * lib/krb5/ccache/stdio/scc_retrv.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_retrieve.
- */
-
-#if 0
-
-
-#define set(bits) (whichfields & bits)
-#define flags_match(a,b) (((a) & (b)) == (a))
-
-static krb5_boolean
-times_match(t1, t2)
-register const krb5_ticket_times *t1;
-register const krb5_ticket_times *t2;
-{
-    if (t1->renew_till) {
-	if (t1->renew_till > t2->renew_till)
-	    return FALSE;		/* this one expires too late */
-    }
-    if (t1->endtime) {
-	if (t1->endtime > t2->endtime)
-	    return FALSE;		/* this one expires too late */
-    }
-    /* only care about expiration on a times_match */
-    return TRUE;
-}
-
-static krb5_boolean
-times_match_exact (t1, t2)
-    register const krb5_ticket_times *t1, *t2;
-{
-    return (t1->authtime == t2->authtime
-	    && t1->starttime == t2->starttime
-	    && t1->endtime == t2->endtime
-	    && t1->renew_till == t2->renew_till);
-}
-
-static krb5_boolean
-standard_fields_match(context, mcreds, creds)
-   krb5_context context;
-register const krb5_creds *mcreds, *creds;
-{
-    return (krb5_principal_compare(context, mcreds->client,creds->client) &&
-	    krb5_principal_compare(context, mcreds->server,creds->server));
-}
-
-/* only match the server name portion, not the server realm portion */
-
-static krb5_boolean
-srvname_match(context, mcreds, creds)
-   krb5_context context;
-register const krb5_creds *mcreds, *creds;
-{
-    krb5_boolean retval;
-    krb5_principal_data p1, p2;
-    
-    retval = krb5_principal_compare(context, mcreds->client,creds->client);
-    if (retval != TRUE)
-	return retval;
-    /*
-     * Hack to ignore the server realm for the purposes of the compare.
-     */
-    p1 = *mcreds->server;
-    p2 = *creds->server;
-    p1.realm = p2.realm;
-    return krb5_principal_compare(context, &p1, &p2);
-}
-
-
-static krb5_boolean
-authdata_match(mdata, data)
-    krb5_authdata *const *mdata, *const *data;
-{
-    const krb5_authdata *mdatap, *datap;
-
-    if (mdata == data)
-	return TRUE;
-
-    if (mdata == NULL)
-	return *data == NULL;
-
-    if (data == NULL)
-	return *mdata == NULL;
-
-    while ((mdatap = *mdata)
-	   && (datap = *data)
-	   && mdatap->ad_type == datap->ad_type
-	   && mdatap->length == datap->length
-	   && !memcmp ((char *) mdatap->contents, (char *) datap->contents,
-		       datap->length)) {
-	mdata++;
-	data++;
-    }
-
-    return !*mdata && !*data;
-}
-
-static krb5_boolean
-data_match(data1, data2)
-register const krb5_data *data1, *data2;
-{
-    if (!data1) {
-	if (!data2)
-	    return TRUE;
-	else
-	    return FALSE;
-    }
-    if (!data2) return FALSE;
-
-    if (data1->length != data2->length)
-	return FALSE;
-    else
-	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
-}
-
-
-/*
- * Effects:
- * Searches the file cred cache is for a credential matching mcreds,
- * with the fields specified by whichfields.  If one if found, it is
- * returned in creds, which should be freed by the caller with
- * krb5_free_credentials().
- * 
- * The fields are interpreted in the following way (all constants are
- * preceded by KRB5_TC_).  MATCH_IS_SKEY requires the is_skey field to
- * match exactly.  MATCH_TIMES requires the requested lifetime to be
- * at least as great as that specified; MATCH_TIMES_EXACT requires the
- * requested lifetime to be exactly that specified.  MATCH_FLAGS
- * requires only the set bits in mcreds be set in creds;
- * MATCH_FLAGS_EXACT requires all bits to match.
- *
- * Errors:
- * system errors
- * permission errors
- * KRB5_CC_NOMEM
- */
-krb5_error_code
-krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_flags whichfields;
-   krb5_creds *mcreds;
-   krb5_creds *creds;
-{
-     /* This function could be considerably faster if it kept indexing */
-     /* information.. sounds like a "next version" idea to me. :-) */
-
-     krb5_cc_cursor cursor;
-     krb5_error_code kret;
-     krb5_creds fetchcreds;
-
-     kret = krb5_scc_start_seq_get(context, id, &cursor);
-     if (kret != KRB5_OK)
-	  return kret;
-
-     while ((kret = krb5_scc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
-	  if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
-		   srvname_match(context, mcreds, &fetchcreds)) ||
-	       standard_fields_match(context, mcreds, &fetchcreds))
-	      &&
-	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
-	       mcreds->is_skey == fetchcreds.is_skey)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS_EXACT) ||
-	       mcreds->ticket_flags == fetchcreds.ticket_flags)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS) ||
-	       flags_match(mcreds->ticket_flags, fetchcreds.ticket_flags))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
-	       times_match_exact(&mcreds->times, &fetchcreds.times))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(&mcreds->times, &fetchcreds.times))
-	      &&
-	      (! set(KRB5_TC_MATCH_AUTHDATA) ||
-	       authdata_match (mcreds->authdata, fetchcreds.authdata))
-	      &&
-	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
-	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
-	      &&
-	      ((! set(KRB5_TC_MATCH_KTYPE))||
-		  (mcreds->keyblock.enctype == fetchcreds.keyblock.enctype))
-	      )
-	  {
-	       krb5_scc_end_seq_get(context, id, &cursor);
-	       *creds = fetchcreds;
-	       return KRB5_OK;
-	  }
-
-	  /* This one doesn't match */
-	  krb5_free_cred_contents(context, &fetchcreds);
-     }
-
-     /* If we get here, a match wasn't found */
-     krb5_scc_end_seq_get(context, id, &cursor);
-     return KRB5_CC_NOTFOUND;
-}
-
-#else
-
 
 krb5_error_code KRB5_CALLCONV
 krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
@@ -2708,41 +1955,6 @@ krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
     return krb5_cc_retrieve_cred_default (context, id, whichfields,
 					  mcreds, creds);
 }
-
-#endif
-/* end of former stdio/scc_retrv.c */
-/* start of former stdio/scc_store.c */
-/*
- * lib/krb5/ccache/stdio/scc_store.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_store.
- */
-
-
-
 
 /*
  * Modifies:
@@ -2798,39 +2010,6 @@ lose:
      return ret;
 #undef TCHECK
 }
-/* end of former stdio/scc_store.c */
-/* start of former stdio/scc_sflags.c */
-/*
- * lib/krb5/ccache/stdio/scc_sflags.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_scc_set_flags.
- */
-
-
-
 
 /*
  * Requires:
@@ -2867,39 +2046,6 @@ krb5_scc_set_flags(context, id, flags)
     ((krb5_scc_data *) id->data)->flags = flags;
     return ret;
 }
-
-/* end of former stdio/scc_sflags.c */
-/* start of former stdio/scc_errs.c */
-/*
- * lib/krb5/ccache/stdio/scc_errs.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * error code interpretation routine
- */
-
-
 
 
 krb5_error_code
@@ -2953,39 +2099,6 @@ int errnum;
     }
     return retval;
 }
-/* end of former stdio/scc_errs.c */
-/* start of former stdio/scc_ops.c */
-/*
- * lib/krb5/ccache/stdio/scc_ops.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the structure krb5_scc_ops.
- */
-
-
-
 
 krb5_cc_ops krb5_scc_ops = {
      0,
@@ -3006,47 +2119,6 @@ krb5_cc_ops krb5_scc_ops = {
      krb5_scc_set_flags,
 };
 
-
-
-
-     
-
-
-
-/* end of former stdio/scc_ops.c */
-/* start of former stdio/scc_defops.c */
-/*
- * lib/krb5/ccache/stdio/scc_defops.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the structure krb5_cc_dfl_ops.
- */
-
-
-
-
 krb5_cc_ops krb5_cc_stdio_ops = {
      0,
      "STDIO",
@@ -3065,4 +2137,3 @@ krb5_cc_ops krb5_cc_stdio_ops = {
      NULL, /* XXX krb5_scc_remove, */
      krb5_scc_set_flags,
 };
-/* end of former stdio/scc_defops.c */
