@@ -244,9 +244,9 @@ process_args(context, argc, argv)
     /* initialize random key generators */
     for (ktype = 0; ktype <= krb5_max_enctype; ktype++) {
 	if (krb5_enctype_array[ktype]) {
-		if (retval = (*krb5_enctype_array[ktype]->system->
-				init_random_key)(&master_keyblock,
-				&krb5_enctype_array[ktype]->random_sequence)) {
+		if ((retval = (*krb5_enctype_array[ktype]->system->
+			       init_random_key)(&master_keyblock,
+						&krb5_enctype_array[ktype]->random_sequence))) {
 			com_err(argv[0], retval, 
 	"while setting up random key generator for ktype %d--ktype disabled", 
 				ktype);
@@ -354,12 +354,12 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
-    if (retval = krb5_dbe_find_enctype(context,
-				       &server_entry,
-				       ENCTYPE_DES_CBC_MD5,
-				       -1,
-				       -1,
-				       &kdatap)) {
+    if ((retval = krb5_dbe_find_enctype(context,
+					&server_entry,
+					ENCTYPE_DES_CBC_MD5,
+					-1,
+					-1,
+					&kdatap))) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
@@ -409,6 +409,7 @@ kdc_com_err_proc(whoami, code, format, pvar)
 #ifndef __STDC__
     extern int vfprintf();
 #endif
+    char tbuf[1024];
 
     if (whoami) {
 	fputs(whoami, stderr);
@@ -438,10 +439,12 @@ kdc_com_err_proc(whoami, code, format, pvar)
 		strcpy(nfmt, error_message(code));
 		strcat(nfmt, " ");
 		strcat(nfmt, format);
-		vsyslog(LOG_ERR, nfmt, pvar);
+		vsprintf(tbuf, nfmt, pvar);
+		syslog(LOG_ERR, tbuf);
 		free(nfmt);
 	} else {
-		vsyslog(LOG_ERR, format, pvar);
+		vsprintf(tbuf, format, pvar);
+		syslog(LOG_ERR, tbuf);
 	}
     } else {
 	if (code) {

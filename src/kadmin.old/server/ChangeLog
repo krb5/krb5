@@ -1,3 +1,8 @@
+Tue Dec 19 17:24:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm_server.c (kdc_com_err_proc): Don't use vsyslog; use syslog
+		instead.   Fixed lint flames.
+
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
 
         * adm_funcs.c : Remove mkvno for krb5_db_entry
