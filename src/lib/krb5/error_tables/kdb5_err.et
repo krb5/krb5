@@ -1,0 +1,30 @@
+#
+# $Source$
+# $Author$
+#
+# Copyright 1990 by the Massachusetts Institute of Technology.
+#
+# For copying and distribution information, please see the file
+# <krb5/mit-copyright.h>.
+#
+# The Kerberos v5 database library error code table.
+#
+error_table kdb5
+
+ec KRB5_KDB_RCSID,	"$Id$"
+# /* From the server side routines */
+ec KRB5_KDB_INUSE,		"Entry already exists in database"
+ec KRB5_KDB_UK_SERROR,		"Database store error"
+ec KRB5_KDB_UK_RERROR,		"Database read error"
+ec KRB5_KDB_UNAUTH,		"Insufficient access to perform requested operation"
+# KRB5_KDB_DATA isn't really an error, but...
+ec KRB5_KDB_NOENTRY,		"No such entry in the database"
+
+ec KRB5_KDB_ILL_WILDCARD,	"Illegal use of wildcard"
+
+ec KRB5_KDB_DB_INUSE,		"Database is locked or in use--try again later"
+end
+
+end
+
+
