@@ -240,7 +240,6 @@ krb5_context context;
   krb5_cc_dfl_ops = ops_save;
 
 }
-extern krb5_cc_ops krb5_scc_ops;
 extern krb5_cc_ops krb5_mcc_ops;
 extern krb5_cc_ops krb5_fcc_ops;
 
@@ -255,11 +254,6 @@ int main ()
 	    printf("Couldn't initialize krb5 library: %s\n",
 		   error_message(kret));
 	    exit(1);
-    }
-
-    kret = krb5_cc_register(context, &krb5_scc_ops,0);
-    if(kret && kret != KRB5_CC_TYPE_EXISTS) {
-      CHECK(kret, "register_scc");
     }
 
     kret = krb5_cc_register(context, &krb5_mcc_ops,0);
@@ -286,7 +280,6 @@ int main ()
 
     test_misc(context);
     do_test(context, "");
-    do_test(context, "STDIO:");
     do_test(context, "MEMORY:");
     do_test(context, "FILE:");
 

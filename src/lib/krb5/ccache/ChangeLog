@@ -1,3 +1,7 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* t_cc.c: Remove references to STDIO ccache.
+
 2002-08-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c: Merge in cc_stdio.c, under preprocessor test for
