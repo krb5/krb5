@@ -29,6 +29,7 @@
 
 #include "mglueP.h"
 #include <stdio.h>
+#include <errno.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -44,8 +45,11 @@ gss_buffer_t		interprocess_token;
 
 {
     OM_uint32		status;
+    OM_uint32		length;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
+    gss_buffer_desc	token;
+    char		*buf;
     
     gss_initialize();
 
@@ -59,20 +63,42 @@ gss_buffer_t		interprocess_token;
     
     ctx = (gss_union_ctx_id_t) *context_handle;
     mech = __gss_get_mechanism (ctx->mech_type);
-
-    if (mech) {
-
-	if (mech->gss_export_sec_context)
-	    status = mech->gss_export_sec_context(
-						    mech->context,
-						    minor_status,
-						    &ctx->internal_ctx_id,
-						    interprocess_token);
-	else
-	    status = GSS_S_BAD_BINDINGS;
-
-	return(status);
-    }
+    if (!mech)
+	return GSS_S_BAD_MECH;
+    if (!mech->gss_export_sec_context)
+	return GSS_S_BAD_BINDINGS;
     
-    return(GSS_S_NO_CONTEXT);
+    status = mech->gss_export_sec_context(mech->context, minor_status,
+					  &ctx->internal_ctx_id, &token);
+    if (status != GSS_S_COMPLETE)
+	return (status);
+
+    length = token.length + 4 + ctx->mech_type->length;
+    interprocess_token->length = length;
+    interprocess_token->value = malloc(length);
+    if (interprocess_token->value == 0) {
+	(void) gss_release_buffer(minor_status, &token);
+	*minor_status = ENOMEM;
+	return (GSS_S_FAILURE);
+    }
+    buf = interprocess_token->value;
+    length = ctx->mech_type->length;
+    buf[3] = (unsigned char) (length & 0xFF);
+    length >>= 8;
+    buf[2] = (unsigned char) (length & 0xFF);
+    length >>= 8;
+    buf[1] = (unsigned char) (length & 0xFF);
+    length >>= 8;
+    buf[0] = (unsigned char) (length & 0xFF);
+    memcpy(buf+4, ctx->mech_type->elements, ctx->mech_type->length);
+    memcpy(buf+4+ctx->mech_type->length, token.value, token.length);
+
+    (void) gss_release_buffer(minor_status, &token);
+
+    free(ctx->mech_type->elements);
+    free(ctx->mech_type);
+    free(ctx);
+    *context_handle = 0;
+    
+    return(GSS_S_COMPLETE);
 }

@@ -12,6 +12,10 @@
 #include "mechglue.h"
 #include <sys/types.h>
 
+#ifdef _MSDOS
+#include <malloc.h>
+#endif
+
 /*
  * Array of context IDs typed by mechanism OID
  */

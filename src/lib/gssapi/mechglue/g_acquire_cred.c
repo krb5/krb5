@@ -98,6 +98,7 @@ OM_uint32 *		time_rec;
     gss_union_cred_t	creds;
     gss_OID_set_desc	default_OID_set;
     gss_OID_desc	default_OID;
+    gss_OID		specific_mech_type = 0;
     gss_mechanism	mech;
     
     /*
@@ -124,9 +125,6 @@ OM_uint32 *		time_rec;
     if (minor_status)
 	*minor_status = 0;
     
-    if (desired_name == 0)
-	return GSS_S_BAD_NAME;
-
     /* No need to continue if we don't have a place to store the creds */
     if (output_cred_handle == NULL)
 	return GSS_S_COMPLETE;
@@ -134,6 +132,9 @@ OM_uint32 *		time_rec;
     /* get desired_name cast as a union_name type */
     
     union_name = (gss_union_name_t) desired_name;
+
+    if (union_name)
+	    specific_mech_type = union_name->mech_type;
     
     /*
      * if desired_mechs equals GSS_C_NULL_OID_SET, then pick an
@@ -145,7 +146,7 @@ OM_uint32 *		time_rec;
 	 * mechanism; otherwise, we get the mechanism for the
 	 * mechanism-specific name.
 	 */
-	mech = __gss_get_mechanism(union_name->mech_type);
+	mech = __gss_get_mechanism(specific_mech_type);
 	if (mech == NULL)
 	    return (GSS_S_BAD_MECH);
 
@@ -184,14 +185,16 @@ OM_uint32 *		time_rec;
 	 * If this is a mechanism-specific name, then only use the
 	 * mechanism of the name.
 	 */
-	if (union_name->mech_type && !g_OID_equal(union_name->mech_type,
-						  &mech->mech_type))
+	if (specific_mech_type && !g_OID_equal(specific_mech_type,
+					       &mech->mech_type))
 	    continue;
 	/*
 	 * If this is not a mechanism-specific name, then we need to
 	 * do an import the external name in union_name first.
 	 */
-	if (!union_name->mech_type) {
+	if (union_name == 0)
+	    internal_name = (gss_name_t) 0;
+	else if (!union_name->mech_type) {
 	    if (__gss_import_internal_name(&temp_minor_status,
 					   &mech->mech_type,
 					   union_name, &internal_name)) {
@@ -219,11 +222,27 @@ OM_uint32 *		time_rec;
 	    creds_returned[j].available = 1;
 	    creds_acquired++;
 	}
-	
-	if (!union_name->mech_type) {
-	    (void) __gss_release_internal_name(&temp_minor_status,
-					       &mech->mech_type,
-					       &internal_name);
+
+	if (union_name == 0) {
+	    /*
+	     * If desired_name was NULL, then do an inquire
+	     * credentials from the first mechanism that suceeds and
+	     * use that as the union name.
+	     *
+	     * XXX status returns?
+	     */
+	    status = mech->gss_inquire_cred(mech->context, &temp_minor_status,
+					    creds_returned[j].cred,
+					    &internal_name, 0, 0, 0);
+	    status = __gss_convert_name_to_union_name(&temp_minor_status,
+						      mech, internal_name,
+					     (gss_name_t *) &union_name);
+	} else {
+	    if (!union_name->mech_type) {
+		(void) __gss_release_internal_name(&temp_minor_status,
+						   &mech->mech_type,
+						   &internal_name);
+	    }
 	}
     }
     
@@ -307,32 +326,44 @@ OM_uint32 *		time_rec;
      * gss_inquire_name() is called, we must then call gss_import_name()
      * to get the internal name that is required at that point.
      */
-    if (gss_display_name(&temp_minor_status, desired_name,
-			 &creds->auxinfo.name, &creds->auxinfo.name_type)
-	!= GSS_S_COMPLETE) {
-	
-	/* This really shouldn't ever fail, but just in case.... */
-
-	for (k=0; k < creds->count; k++) {
-	    free(creds->mechs_array[k].elements);
-	    if (actual_mechs)
-		free((*actual_mechs)->elements[k].elements);
+    if (desired_name) {
+	status = gss_display_name(&temp_minor_status, desired_name,
+				  &creds->auxinfo.name,
+				  &creds->auxinfo.name_type);
+	if (status) {
+	    status = GSS_S_BAD_NAME;
+	    goto error_out;
 	}
-	
-	if (actual_mechs) {
-		free((*actual_mechs)->elements);
-		free(*actual_mechs);
-		*actual_mechs = GSS_C_NULL_OID_SET;
+    } else {
+	status = gss_display_name(&temp_minor_status, union_name,
+				  &creds->auxinfo.name,
+				  &creds->auxinfo.name_type);
+	if (status) {
+	    status = GSS_S_BAD_NAME;
+	    goto error_out;
 	}
-	free(creds->cred_array);
-	free(creds->mechs_array);
-	free(creds);
-	
-	return(GSS_S_BAD_NAME);
     }
     
     *output_cred_handle = (gss_cred_id_t) creds;
     return(GSS_S_COMPLETE);
+
+error_out:
+    for (k=0; k < creds->count; k++) {
+	free(creds->mechs_array[k].elements);
+	if (actual_mechs)
+	    free((*actual_mechs)->elements[k].elements);
+    }
+	
+    if (actual_mechs) {
+	free((*actual_mechs)->elements);
+	free(*actual_mechs);
+	*actual_mechs = GSS_C_NULL_OID_SET;
+    }
+    free(creds->cred_array);
+    free(creds->mechs_array);
+    free(creds);
+	
+    return(status);
 }
 
 /* V2 interface */

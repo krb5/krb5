@@ -1,3 +1,16 @@
+Wed Feb 28 20:33:47 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mglueP.h: For MS-DOS, add #include of malloc.h
+
+	* g_acquire_cred.c (gss_acquire_cred): Fix so that the call works
+		when desired_name is NULL (meaning use the default
+		credentials).
+
+	* g_imp_sec_context.c (gss_import_sec_context): 
+	* g_exp_sec_context.c (gss_export_sec_context): Fix to 
+		import/export the framing security context (so that this
+		call actually works!).
+
 Tue Feb 27 18:44:51 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* g_initialize.c (gss_initialize): Don't fprintf to stderr on
