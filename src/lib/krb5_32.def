@@ -38,6 +38,8 @@ EXPORTS
 	krb5_free_cred_contents
 	krb5_free_cred_enc_part
 	krb5_free_creds
+	krb5_free_data
+	krb5_free_data_contents
 	krb5_free_enc_kdc_rep_part
 	krb5_free_enc_tkt_part
 	krb5_free_error
