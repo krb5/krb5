@@ -56,9 +56,13 @@ extern krb5_deltat krb5_clockskew;
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
+/* widen this prototype if need be */
+#include <krb5/widen.h>
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
 						   krb5_keyblock **,
 						   krb5_const_pointer ));
+#include <krb5/narrow.h>
+
 typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
