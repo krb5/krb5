@@ -66,8 +66,9 @@ typedef char * krb5_const_pointer;
 
 typedef	krb5_data **	krb5_principal;	/* array of strings */
 					/* CONVENTION: realm is first elem. */
-typedef	const krb5_data ** krb5_const_principal;	/* array of strings */
-					/* CONVENTION: realm is first elem. */
+/* constant version thereof: */
+typedef krb5_data * const *  krb5_const_principal;
+
 #define krb5_princ_realm(princ) ((princ)[0])
 
 #endif /* KRB5_BASE_DEFS__ */
