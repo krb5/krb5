@@ -351,23 +351,20 @@ types can be set to some combination of the following strings.
 @include support-enc.texinfo
 
 While aes128-cts and aes256-cts are supported for all Kerberos
-operations, they are not supported by the GSSAPI.  AES GSSAPI support
-will be added after the necessary standardization work is
-completed.  
+operations, they are not supported by older versions of our GSSAPI
+implementation (krb5-1.3.1 and earlier).
 
-By default, AES is enabled on clients and application servers.
-Because of the lack of support for GSSAPI, AES is disabled in the
-default KDC supported_enctypes @ref{kdc.conf}.  Sites wishing to use
-AES encryption types on their KDCs need to be careful not to give
-GSSAPI services AES keys.  If GSSAPI services are given AES keys, then
-services will start to fail in the future when clients supporting AES
-for GSSAPI are deployed before updated servers that support AES for
-GSSAPI.  Sites may wish to use AES for user keys and for the ticket
-granting ticket key, although doing so requires specifying what
-encryption types are used as each principal is created.  Alternatively
-sites can use the default configuration which will make AES support
-available in clients and servers but not actually use this support
-until a future version of Kerberos adds support to GSSAPI.
+By default, AES is enabled in this release.  Sites wishing to use AES
+encryption types on their KDCs need to be careful not to give GSSAPI
+services AES keys if the servers have not been updated.  If older
+GSSAPI services are given AES keys, then services may fail when
+clients supporting AES for GSSAPI are used.  Sites may wish to use AES
+for user keys and for the ticket granting ticket key, although doing
+so requires specifying what encryption types are used as each
+principal is created.
+
+If all GSSAPI-based services have been updated before or with the KDC,
+this is not an issue.
 
 @node Salts, krb5.conf, Supported Encryption Types, Configuration Files
 @section Salts

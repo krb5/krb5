@@ -1,3 +1,9 @@
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (Supported Encryption Types): Reflect new AES
+	support in GSSAPI, but keep a warning about interoperability with
+	old versions.
+
 2004-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo (Solaris 9): Add section describing workaround for
