@@ -1,3 +1,10 @@
+
+Mon Jul 17 15:27:34 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin.exp - Remove parameters from command lines of admin utilities
+		because they're not needed anymore since we have the KDC
+		profile.  Also remove prompting for the master key since we
+		have full usage of the stash file.
+
 Fri Jun  9 23:45:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kadmin.exp: Use the principal "krbtest/admin@KRBTEST.COM" for

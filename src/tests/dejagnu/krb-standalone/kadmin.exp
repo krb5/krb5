@@ -69,7 +69,7 @@ proc kadmin_add { pname password } {
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	spawn $KDB5_EDIT -r KRBTEST.COM
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin add $pname"
@@ -83,9 +83,6 @@ proc kadmin_add { pname password } {
 	    }
 	}
 	set good 0
-	expect -i $spawn_id "Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
 	expect "kdb5_edit:" { send "show $pname\r" }
 	expect {
 	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
@@ -157,7 +154,7 @@ proc kadmin_addv4 { pname password } {
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 1 (v4).
 	#
-	spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	spawn $KDB5_EDIT -r KRBTEST.COM
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin addv4 $pname"
@@ -171,9 +168,6 @@ proc kadmin_addv4 { pname password } {
 	    }
 	}
 	set good 0
-	expect -i $spawn_id "Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
 	expect "kdb5_edit:" { send "show $pname\r" }
 	expect {
 	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 1.*Alt salt: 1" { 
@@ -243,7 +237,7 @@ proc kadmin_add_rnd { pname } {
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	spawn $KDB5_EDIT -r KRBTEST.COM
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin add_rnd $pname"
@@ -257,9 +251,6 @@ proc kadmin_add_rnd { pname } {
 	    }
 	}
 	set good 0
-	expect -i $spawn_id "Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
 	expect "kdb5_edit:" { send "show $pname\r" }
 	expect {
 	    -re "Name: $pname@KRBTEST.COM\r\nKey version: 1\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
@@ -483,7 +474,7 @@ proc kadmin_rename { pname npname } {
 	# use kdb5_edit to verify that the new principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	spawn $KDB5_EDIT -r KRBTEST.COM
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin renent $pname $npname"
@@ -497,9 +488,6 @@ proc kadmin_rename { pname npname } {
 	    }
 	}
 	set good 0
-	expect -i $spawn_id "Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
 	expect "kdb5_edit:" { send "show $npname\r" }
 	expect {
 	    -re "Name: $npname@KRBTEST.COM\r\n.*Last modified by krbtest/admin@KRBTEST.COM.*Salt: 0.*Alt salt: 0" { 
@@ -517,7 +505,7 @@ proc kadmin_rename { pname npname } {
 	    #
 	    # use kdb5_edit to verify that the old principal is not present.
 	    #
-	    spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	    spawn $KDB5_EDIT -r KRBTEST.COM
 	    expect_after {
 		timeout {
 		    fail "kadmin renent $pname $npname"
@@ -531,7 +519,6 @@ proc kadmin_rename { pname npname } {
 		}
 	    }
 	    set good 0
-	    expect "Enter KDC database master key" { send "masterkey$KEY\r" }
 	    expect "kdb5_edit:" { send "show $pname\r" }
 	    expect "Principal $pname not found" { set good 1 }
 	    expect "kdb5_edit:" { send "q\r" }
@@ -715,7 +702,7 @@ proc kadmin_delete { pname } {
 	#
 	# use kdb5_edit to verify that the old principal is not present.
 	#
-	spawn $KDB5_EDIT -m -d $tmppwd/db -r KRBTEST.COM
+	spawn $KDB5_EDIT -r KRBTEST.COM
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin delent $pname"
@@ -729,9 +716,6 @@ proc kadmin_delete { pname } {
 	    }
 	}
 	set good 0
-	expect -i $spawn_id "Enter KDC database master key" {
-	    send "masterkey$KEY\r"
-	}
 	expect "kdb5_edit:" { send "show $pname\r" }
 	expect "Principal $pname not found" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
