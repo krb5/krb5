@@ -39,7 +39,7 @@ krb5_kt_default_name(context, name, namesize)
     cp = getenv("KRB5_KTNAME");
     if (cp) {
 	strncpy(name, cp, namesize);
-	if (strlen(cp) >= namesize)
+	if (strlen(cp) >= (size_t) namesize)
 	    return KRB5_CONFIG_NOTENUFSPACE;
     } else {
 	strncpy(name, krb5_defkeyname, namesize);

@@ -1,3 +1,7 @@
+Thu May 25 15:37:39 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc_maybe.c: the NEED_SOCKETS has to be before the #include line.
+
 Tue May 23 16:28:07 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_maybe.c: Rearrange #include files so that krb5.h gets

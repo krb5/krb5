@@ -125,4 +125,10 @@ void krb5_os_free_context
 krb5_error_code krb5_find_config_files
         PROTOTYPE(());
 
+krb5_error_code krb5_make_fulladdr
+    PROTOTYPE((krb5_context,
+	       krb5_address *,
+	       krb5_address *,
+	       krb5_address *));
+
 #endif /* KRB5_LIBOS_PROTO__ */

@@ -1,3 +1,7 @@
+Thu May 25 15:39:31 1995 Keith Vetter (keithv@fusion.com)
+
+	* los-proto.h: moved in the prototype for krb5_make_fulladdr.
+
 Tue May 23 15:33:00 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* k5-config.h, k5-sockets.h: Move the sockets specific setup out

@@ -24,9 +24,10 @@
  * This file contains the source code for conditional open/close calls.
  */
 
+#define NEED_SOCKETS    /* Only for ntohs, etc. */
+#define NEED_LOWLEVEL_IO
 #include "k5-int.h"
 
-#define NEED_SOCKETS    /* Only for ntohs, etc. */
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

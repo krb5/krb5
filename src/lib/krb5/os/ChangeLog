@@ -1,3 +1,11 @@
+Thu May 25 15:33:45 1995 Keith Vetter (keithv@fusion.com)
+
+	* os-proto.h: moved prototype for krb5_make_fulladdr to
+	   los-proto.h since it's needed by the krb directory.
+	* ktdefnam.c: fixed signed/unsigned mismatch.
+	* read_pwd.c: pc stub didn't track changes to the real routines
+	   parameter list (const was added).
+
 Tue May 23 16:29:24 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* t_std_conf.c, timeofday.c, unlck_file.c: Rearrange #include
