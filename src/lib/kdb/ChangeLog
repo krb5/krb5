@@ -1,3 +1,8 @@
+Sat Sep  9 14:53:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* decrypt_key.c (krb5_dbekd_decrypt_key_data): Set the encryption
+		type before decrypting.
+
 Fri Sep  8 19:52:34 1995  Ezra Peisach  (epeisach@dcl)
 
 	* decrypt_key.c: Upon error, after freeing contents field, set to
