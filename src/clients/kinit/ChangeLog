@@ -1,3 +1,9 @@
+Fri Apr 28 15:49:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (kinit): Use $(LD) instead of $(CC) when trying to
+	        link.  (So purify works).  Note: to get things to work on
+		the mac, just put LD=$(CC) in the Makefile.
+
 Fri Apr 21 15:24:57 1995  Chris Provenzano (proven@mit.edu)
 
 	* configure.in : Make configure look for pwd.h and define
