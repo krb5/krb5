@@ -185,4 +185,23 @@ error_code KRB5_PROG_SUMTYPE_NOSUPP,	"Program lacks support for checksum type"
 error_code KRB5_REALM_UNKNOWN,		"Cannot find KDC for requested realm"
 error_code KRB5_KDC_UNREACH,		"Cannot contact any KDC for requested realm"
 error_code KRB5_NO_LOCALNAME,		"No local name found for principal name"
+
+# some of these should be combined/supplanted by system codes
+
+error_code KRB5_RC_TYPE_EXISTS,		"Replay cache type is already registered"
+error_code KRB5_RC_MALLOC,		"No more memory to allocate (in replay cache code)"
+error_code KRB5_RC_TYPE_NOTFOUND,	"Replay cache type is unknown"
+error_code KRB5_RC_UNKNOWN,		"Generic unknown RC error"
+error_code KRB5_RC_REPLAY,		"Message is a replay"
+error_code KRB5_RC_IO,			"Replay I/O operation failed XXX"
+error_code KRB5_RC_NOIO,		"Replay cache type does not support non-volatile storage"
+error_code KRB5_RC_PARSE,		"Replay cache name parse/format error"
+
+error_code KRB5_RC_IO_EOF,		"End-of-file on replay cache I/O"
+error_code KRB5_RC_IO_MALLOC,		"No more memory to allocate (in replay cache I/O code)"
+error_code KRB5_RC_IO_PERM,		"Permission denied in replay cache code"
+error_code KRB5_RC_IO_IO,		"I/O error in replay cache i/o code"
+error_code KRB5_RC_IO_UNKNOWN,		"Generic unknown RC/IO error"
+error_code KRB5_RC_IO_SPACE,		"Insufficient system space to store replay information"
+
 end
