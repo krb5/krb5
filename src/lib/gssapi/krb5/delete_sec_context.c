@@ -35,9 +35,6 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    krb5_context context;
    krb5_gss_ctx_id_rec *ctx;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
-
    if (output_token) {
       output_token->length = 0;
       output_token->value = NULL;
@@ -55,6 +52,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
+
+   ctx = (gss_ctx_id_t) *context_handle;
+   context = ctx->k5_context;
 
    /* construct a delete context token if necessary */
 
@@ -74,8 +74,6 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    (void)kg_delete_ctx_id(*context_handle);
 
    /* free all the context state */
-
-   ctx = (gss_ctx_id_t) *context_handle;
 
    if (ctx->seqstate)
       g_order_free(&(ctx->seqstate));
@@ -103,6 +101,9 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    if (ctx->mech_used)
        gss_release_oid(minor_status, &ctx->mech_used);
    
+   if (ctx->k5_context)
+       krb5_free_context(ctx->k5_context);
+
    /* Zero out context */
    memset(ctx, 0, sizeof(*ctx));
    xfree(ctx);

@@ -193,10 +193,10 @@ cleanup:
     if (out_cred)
 	*out_cred = cred; /* return credential */
 
-	if (new_auth_ctx)
-		krb5_auth_con_free(context, new_auth_ctx);
+    if (new_auth_ctx)
+	krb5_auth_con_free(context, new_auth_ctx);
 
-	krb5_auth_con_setflags(context, auth_context, flags_org);
+    krb5_auth_con_setflags(context, auth_context, flags_org);
 
     return retval;
 }
@@ -251,13 +251,16 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5int_access kaccess;
 
    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
-    if (code) {
-        *minor_status = code;
-        return(GSS_S_FAILURE);
-    }
-       
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   if (code) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
+   code = krb5_init_context(&context);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
 
    /* set up returns to be freeable */
 
@@ -892,8 +895,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (ap_rep.data)
        krb5_free_data_contents(context, &ap_rep);
 
-   if (!GSS_ERROR(major_status) && major_status != GSS_S_CONTINUE_NEEDED)
+   if (!GSS_ERROR(major_status) && major_status != GSS_S_CONTINUE_NEEDED) {
+       ctx->k5_context = context;
        return(major_status);
+   }
 
    /* from here on is the real "fail" code */
 
@@ -925,8 +930,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (decode_req_message) {
        krb5_ap_req 	* request;
 	   
-       if (decode_krb5_ap_req(&ap_req, &request))
+       if (decode_krb5_ap_req(&ap_req, &request)) {
+	   krb5_free_context(context);
 	   return (major_status);
+       }
        if (request->ap_options & AP_OPTS_MUTUAL_REQUIRED)
 	   gss_flags |= GSS_C_MUTUAL_FLAG;
        krb5_free_ap_req(context, request);
@@ -954,16 +961,20 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb_error_data.server = cred->princ;
 
        code = krb5_mk_error(context, &krb_error_data, &scratch);
-       if (code)
+       if (code) {
+	   krb5_free_context(context);
 	   return (major_status);
+       }
 
        tmsglen = scratch.length;
        toktype = KG_TOK_CTX_ERROR;
 
        token.length = g_token_size((gss_OID) mech_used, tmsglen);
        token.value = (unsigned char *) xmalloc(token.length);
-       if (!token.value)
+       if (!token.value) {
+	   krb5_free_context(context);
 	   return (major_status);
+       }
 
        ptr = token.value;
        g_make_token_header((gss_OID) mech_used, tmsglen, &ptr, toktype);
@@ -976,5 +987,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (!verifier_cred_handle && cred_handle) {
 	   krb5_gss_release_cred(minor_status, cred_handle);
    }
+   krb5_free_context(context);
    return (major_status);
 }

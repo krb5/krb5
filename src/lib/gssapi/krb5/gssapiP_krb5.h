@@ -180,6 +180,7 @@ typedef struct _krb5_gss_ctx_id_rec {
    gssint_uint64 seq_send;
    gssint_uint64 seq_recv;
    void *seqstate;
+   krb5_context k5_context;
    krb5_auth_context auth_context;
    gss_OID_desc *mech_used;
     /* Protocol spec revision

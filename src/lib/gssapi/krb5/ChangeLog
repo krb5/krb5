@@ -1,5 +1,17 @@
 2004-03-14  Ken Raeburn  <raeburn@mit.edu>
 
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Add a krb5
+	context object.
+	* init_sec_context.c (krb5_gss_init_sec_context): Create a new
+	krb5 context, and store it in the security context if
+	successful.  If there's already a security context, use the krb5
+	context in it.
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Create a
+	new krb5 context, and store it in the security context if
+	successful.
+	* delete_sec_context.c (krb5_gss_delete_sec_context): If the
+	security context has a krb5 context, free it.
+
 	* gssapi_krb5.c (kg_vdb): Change type to g_set and initialize.
 	* gssapiP_krb5.h (kg_vdb): Declaration updated.
 

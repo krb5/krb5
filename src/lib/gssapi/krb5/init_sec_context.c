@@ -829,12 +829,20 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    krb5_context context;
    krb5_gss_cred_id_t cred;
    int err;
+   krb5_error_code kerr;
    int default_mech = 0;
    OM_uint32 major_status;
    OM_uint32 tmp_min_stat;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
+   if (*context_handle == GSS_C_NO_CONTEXT) {
+       kerr = krb5_init_context(&context);
+       if (kerr) {
+	   *minor_status = kerr;
+	   return GSS_S_FAILURE;
+       }
+   } else {
+       context = ((krb5_gss_ctx_id_rec *) context_handle)->k5_context;
+   }
 
    /* set up return values so they can be "freed" successfully */
 
@@ -848,6 +856,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
    if (! kg_validate_name(target_name)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      if (*context_handle == GSS_C_NO_CONTEXT)
+	  krb5_free_context(context);
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
@@ -856,12 +866,17 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
       major_status = kg_get_defcred(minor_status, &cred);
       if (major_status && GSS_ERROR(major_status)) {
+	 if (*context_handle == GSS_C_NO_CONTEXT)
+	    krb5_free_context(context);
 	 return(major_status);
       }
    } else {
       major_status = krb5_gss_validate_cred(minor_status, claimant_cred_handle);
-      if (GSS_ERROR(major_status))
+      if (GSS_ERROR(major_status)) {
+	  if (*context_handle == GSS_C_NO_CONTEXT)
+	      krb5_free_context(context);
 	  return(major_status);
+      }
       cred = (krb5_gss_cred_id_t) claimant_cred_handle;
    }
 
@@ -891,6 +906,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
 	 krb5_gss_release_cred(minor_status, (gss_cred_id_t)cred);
       *minor_status = 0;
+      if (*context_handle == GSS_C_NO_CONTEXT)
+	 krb5_free_context(context);
       return(GSS_S_BAD_MECH);
    }
 
@@ -904,6 +921,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 				    input_token, actual_mech_type,
 				    output_token, ret_flags, time_rec,
 				    context, default_mech);
+      if (*context_handle == GSS_C_NO_CONTEXT)
+	  krb5_free_context(context);
+      else
+	  ((krb5_gss_ctx_id_rec *) *context_handle)->k5_context = context;
    } else {
       major_status = mutual_auth(minor_status, cred, context_handle,
 				 target_name, mech_type, req_flags,
@@ -911,6 +932,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 				 input_token, actual_mech_type,
 				 output_token, ret_flags, time_rec,
 				 context);
+      /* If context_handle is now NO_CONTEXT, mutual_auth called
+	 delete_sec_context, which would've zapped the krb5 context
+	 too.  */
    }
 
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
