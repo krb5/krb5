@@ -9,6 +9,9 @@ fi
 dnl
 CONFIG_RULES
 dnl
+dnl This causes us to *always* set CPP, instead of doing it below only
+dnl when krb5_cv_prog_gcc isn't set.
+AC_REQUIRE_CPP
 dnl
 dnl We cannot use the autoconf form as it is too generic and sets other
 dnl variables. This is only for the purpose of changing the link options.
