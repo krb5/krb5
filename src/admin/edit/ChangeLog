@@ -1,3 +1,7 @@
+Mon Jul 29 23:44:20 1996  Samuel D Hartman  (hartmans@vorlon)
+
+	* configure.in: Use *all* the appropriate libraries.
+
 Thu Jul 25 12:10:20 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* dumpv4.c (v4_print_time): Declare function as returning void
