@@ -40,6 +40,11 @@
 #define	DEFAULT_TRANS_FILENAME	"/etc/athena/krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"/etc/athena/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/athena/v5srvtab"
+#elif defined(_WINDOWS)
+#define	DEFAULT_CONFIG_FILENAME	"krb.conf"
+#define	DEFAULT_TRANS_FILENAME	"krb.realms"
+#define	DEFAULT_LNAME_FILENAME	"/aname"
+#define	DEFAULT_KEYTAB_NAME	"FILE:/v5srvtab"
 #else
 #define	DEFAULT_CONFIG_FILENAME	"@KRB5ROOT/krb.conf"
 #define	DEFAULT_TRANS_FILENAME	"@KRB5ROOT/krb.realms"

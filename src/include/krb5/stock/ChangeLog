@@ -1,3 +1,8 @@
+Tue Mar 28 19:49:56 1995 Keith Vetter (keithv@fusion.com)
+
+	* osconf.h: moved the differing part of osconf.win inside it.
+        * osconf.win: deleted.
+
 Tue Mar 7 15:09:44 1995 Keith Vetter (keithv@fusion.com)
 
 	* osconf.win: new file. Windows version of osconf with valid
