@@ -1,3 +1,9 @@
+Thu Sep 29 15:09:03 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_err.et (KRB5_KDCREP_SKEW, KRB5_IN_TKT_REALM_MISMATCH,
+	  KRB5_SERVICE_UNKNOWN):
+	  	Added two new error codes.
+
 Wed Sep 21 18:00:25 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_err.et (KRB5KRB_AP_ERR_ILL_CR_TKT): Added new error code.

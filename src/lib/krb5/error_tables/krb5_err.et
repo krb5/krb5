@@ -189,6 +189,8 @@ error_code KRB5KRB_AP_ERR_TKT_INVALID,	"Ticket has invalid flag set"
 
 error_code KRB5_PRINC_NOMATCH,		"Requested principal and ticket don't match"
 error_code KRB5_KDCREP_MODIFIED,	"KDC reply did not match expectations"
+error_code KRB5_KDCREP_SKEW,		"Clock skew too great in KDC reply"
+error_code KRB5_IN_TKT_REALM_MISMATCH,	"Client/server realm mismatch in initial ticket request"
 
 error_code KRB5_PROG_ETYPE_NOSUPP,	"Program lacks support for encryption type"
 error_code KRB5_PROG_KEYTYPE_NOSUPP,	"Program lacks support for key type"
@@ -196,6 +198,7 @@ error_code KRB5_WRONG_ETYPE,		"Requested encryption type not used in message"
 error_code KRB5_PROG_SUMTYPE_NOSUPP,	"Program lacks support for checksum type"
 
 error_code KRB5_REALM_UNKNOWN,		"Cannot find KDC for requested realm"
+error_code KRB5_SERVICE_UNKNOWN,	"Kerberos service unknown"
 error_code KRB5_KDC_UNREACH,		"Cannot contact any KDC for requested realm"
 error_code KRB5_NO_LOCALNAME,		"No local name found for principal name"
 
