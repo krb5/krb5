@@ -1,3 +1,9 @@
+Fri Feb 12 10:20:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* login.c (read_env_vars_from_file): Fix so that it uses
+		passed-in filename instead of the hard-coded to
+		/etc/environment.  [krb5-appl/691]
+
 Wed Jan 20 21:42:41 1999  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (main): Call setluid().

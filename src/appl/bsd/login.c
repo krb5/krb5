@@ -1113,7 +1113,7 @@ read_env_vars_from_file (filename)
     char *p, *eq;
     char tbuf[MAXPATHLEN+2];
 
-    if ((fp = fopen("/etc/environment", "r")) != NULL) {
+    if ((fp = fopen(filename, "r")) != NULL) {
 	while (fgets(tbuf, sizeof(tbuf), fp)) {
 	    if (tbuf[0] == '#')
 		continue;
