@@ -764,7 +764,7 @@ krb5_error_code decode_krb5_pa_enc_ts(code, rep)
   { begin_structure();
     get_field((*rep)->patimestamp,0,asn1_decode_kerberos_time);
     if (tagnum == 1) {
-	get_field((*rep)->pausec,1,asn1_decode_int);
+	get_field((*rep)->pausec,1,asn1_decode_int32);
     } else
 	(*rep)->pausec = 0;
     end_structure (); }
