@@ -244,12 +244,6 @@ krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
 
-#ifdef CRAY
-#ifndef BITS64
-#define BITS64
-#endif
-#endif
-
 #define ARGSTR	"rRkKeExXpPD:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rRpPD:?"
@@ -303,6 +297,7 @@ static	int Pfd;
 
 void	fatal(), fatalperror(), doit(), usage(), do_krb_login();
 int	princ_maps_to_lname(), default_realm();
+krb5_sigtype	cleanup();
 
 int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
@@ -481,7 +476,6 @@ main(argc, argv)
 #endif
 
 int	child;
-int	cleanup();
 int	netf;
 char	line[MAXPATHLEN];
 extern	char	*inet_ntoa();
@@ -501,6 +495,9 @@ void doit(f, fromp)
     char c;
     char buferror[255];
     struct passwd *pwd;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
     
     netf = -1;
     alarm(60);
@@ -509,8 +506,15 @@ void doit(f, fromp)
     if (c != 0){
 	exit(1);
     }
-    
+
     alarm(0);
+
+#ifdef POSIX_SIGNALS
+    /* Initialize "sa" structure. */
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+#endif
+
     fromp->sin_port = ntohs((u_short)fromp->sin_port);
     hp = gethostbyaddr(&fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
@@ -571,30 +575,36 @@ void doit(f, fromp)
     
     /* Make sure we can open slave pty, then close it for system 5 so that 
        the process group is set correctly..... */
-#ifdef __alpha
-	/* osf/1 method of losing controlling tty...*/
-	setsid();
-#endif
 #ifdef VHANG_FIRST
     vfd = open(line, O_RDWR);
     if (vfd < 0)
       fatalperror(f, line);
 #ifdef NOFCHMOD
-    if (chmod(vfd,0))
+    if (chmod(line, 0))
+      fatalperror(f, line);
 #else
     if (fchmod(vfd, 0))
-#endif
       fatalperror(f, line);
+#endif
 #ifndef SYSV
     if (f == 0) {  /* if operating standalone, do not reset tty!! */
+#ifdef POSIX_SIGNALS
+	sa.sa_handler = SIG_IGN;
+	(void) sigaction(SIGHUP, &sa, (struct sigaction *)0);
+	vhangup();
+	sa.sa_handler = SIG_DFL;
+	(void) sigaction(SIGHUP, &sa, (struct sigaction *)0);
+#else
 	signal(SIGHUP, SIG_IGN);
 	vhangup();
 	signal(SIGHUP, SIG_DFL);
+#endif
     }
 #endif 
 #endif /* VHANG_FIRST */
-#if defined (sun) || defined (POSIX)
-    setsid();
+
+#ifdef HAVE_SETSID
+    (void) setsid();
 #endif
 
     t = open(line, O_RDWR);
@@ -605,7 +615,7 @@ void doit(f, fromp)
 #endif /* VHANG_FIRST */
     if (t < 0)
       fatalperror(f, line);
-#ifdef __alpha
+#ifdef TIOCSCTTY
     if(ioctl(t, TIOCSCTTY, 0) < 0) /* set controlling tty */
       fatalperror(f, "setting controlling tty");
 #endif
@@ -613,8 +623,14 @@ void doit(f, fromp)
     close(t);
 #endif
 #endif  /* sysvimp */
+#ifdef POSIX_SIGNALS
+    sa.sa_handler = cleanup;
+    (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+    (void) sigaction(SIGTERM, &sa, (struct sigaction *)0);
+#else
     signal(SIGCHLD, cleanup);
     signal(SIGTERM, cleanup);
+#endif
     pid = fork();
     if (pid < 0)
       fatalperror(f, "", errno);
@@ -664,20 +680,17 @@ void doit(f, fromp)
 #else
 	    pid = getpgrp(getpid());
 #endif
-#endif
-#ifdef POSIX_TERMIOS /* solaris */
+#endif /* sysvimp */
+	    
+#ifdef POSIX_TERMIOS
 	    /* we've already done setsid above. Just do tcsetpgrp here. */
 	    tcsetpgrp(0, pid);
 #else
-#ifndef hpux
 	    ioctl(0, TIOCSPGRP, &pid);
-#else
-	    /* we've already done setsid above. Just do tcsetpgrp here. */
-	    tcsetpgrp(0, pid);
-#endif
 #endif /* posix */
 	    pid = 0;			/*reset pid incase exec fails*/
-#endif
+#endif /* !sysv || sysvimp */
+	    
 #ifdef STREAMS
 	    if (line_push(t) < 0)
 	      fatalperror(f, "IPUSH",errno);
@@ -818,7 +831,12 @@ void doit(f, fromp)
 #if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
     ioctl(p, TIOCPKT, &on);
 #endif
+#ifdef POSIX_SIGNALS
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGTSTP, &sa, (struct sigaction *)0);
+#else
     signal(SIGTSTP, SIG_IGN);
+#endif
 #ifdef hpux
     setpgrp2(0, 0);
 #else
@@ -895,13 +913,23 @@ protocol(f, p)
     register pcc = 0, fcc = 0;
     int cc;
     char cntl;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
     
     /*
      * Must ignore SIGTTOU, otherwise we'll stop
      * when we try and set slave pty's window shape
      * (our controlling tty is the master pty).
      */
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGTTOU, &sa, (struct sigaction *)0);
+#else
     signal(SIGTTOU, SIG_IGN);
+#endif
 #ifdef TIOCSWINSZ
     send(f, oobdata, 1, MSG_OOB);	/* indicate new rlogin */
 #endif
@@ -1015,7 +1043,7 @@ protocol(f, p)
 
 
 
-int cleanup()
+krb5_sigtype cleanup()
 {
     char *p;
     
@@ -1058,6 +1086,9 @@ void fatal(f, msg)
 {
     char buf[512];
     int out = 1 ;          /* Output queue of f */
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
     
     buf[0] = '\01';		/* error indicator */
     (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
@@ -1067,7 +1098,14 @@ void fatal(f, msg)
       (void) write(f, buf, strlen(buf));
     syslog(LOG_ERR,"%s\n",msg);
     if (pid > 0) {
+#ifdef POSIX_SIGNALS
+	(void) sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_IGN;
+	(void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
 	signal(SIGCHLD,SIG_IGN);
+#endif
 	kill(pid,SIGKILL);
 #ifdef  TIOCFLUSH
 	(void) ioctl(f, TIOCFLUSH, (char *)&out);
@@ -1223,6 +1261,7 @@ v5_des_read(fd, buf, len)
     int nreturned = 0;
     long net_len,rd_len;
     int cc,retry;
+    unsigned char len_buf[4];
     
     if (!do_encrypt)
       return(read(fd, buf, len));
@@ -1240,19 +1279,14 @@ v5_des_read(fd, buf, len)
 	nstored = 0;
     }
     
-#ifdef BITS64
-    rd_len = 0;
-    if ((cc = krb5_net_read(fd, (char *)&rd_len + 4, 4)) != 4) {
-#else	
-    if ((cc = krb5_net_read(fd, (char *)&rd_len, sizeof(rd_len))) !=
-	sizeof(rd_len)) {
-#endif
+    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	    return(cc);
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
-    rd_len = ntohl(rd_len);
+    rd_len =
+	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
     if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
@@ -1263,8 +1297,7 @@ v5_des_read(fd, buf, len)
     retry = 0;
   datard:
     if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
-	/* XXX can't read enough, pipe
-	   must have closed */
+	/* XXX can't read enough, pipe must have closed */
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 	    retry++;
 	    sleep(1);
@@ -1311,7 +1344,7 @@ v5_des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    long net_len;
+    unsigned char len_buf[4];
     
     if (!do_encrypt)
       return(write(fd, buf, len));
@@ -1330,13 +1363,12 @@ v5_des_write(fd, buf, len)
 	syslog(LOG_ERR,"Write encrypt problem.");
 	return(-1);
     }
-    
-    net_len = htonl(len);	
-#ifdef BITS64
-    (void) write(fd,(char *)&net_len + 4, 4);
-#else
-    (void) write(fd, &net_len, sizeof(net_len));
-#endif
+
+    len_buf[0] = (len & 0xff000000);
+    len_buf[1] = (len & 0xff0000);
+    len_buf[2] = (len & 0xff00);
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
     if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
 	syslog(LOG_ERR,"Could not write out all data.");
 	return(-1);

@@ -45,6 +45,12 @@ char copyright[] =
  * only one of: -r -h -k -K
  */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/param.h>
 #ifdef OQUOTA
@@ -58,9 +64,6 @@ char copyright[] =
 #include <fcntl.h>
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 
 #include <utmp.h>
@@ -98,9 +101,6 @@ char copyright[] =
 #endif /* KRB4 */
 #include "loginpaths.h"
 
-#ifdef POSIX
-#include <stdlib.h>
-#endif
 #ifdef POSIX_TERMIOS
 #include <termios.h>
 #ifdef _AIX
@@ -212,11 +212,8 @@ void dofork();
 char * strsave();
 #endif
 
-#ifdef POSIX
-typedef void sigtype;
-#else
-typedef int sigtype;
-#endif /* POSIX */
+typedef RETSIGTYPE sigtype;
+
 
 #define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag || Fflag ) { \
 				fprintf(stderr, \
@@ -251,11 +248,26 @@ main(argc, argv)
 #ifdef POSIX_TERMIOS
 	struct termios tc;
 #endif
+#ifdef POSIX_SIGNALS
+	struct sigaction sa;
+#endif
 
+#ifdef POSIX_SIGNALS
+	(void)sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = timedout;
+	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
+#else
 	(void)signal(SIGALRM, timedout);
+#endif
 	(void)alarm((u_int)timeout);
+#ifdef POSIX_SIGNALS
+	sa.sa_handler = SIG_IGN;
+	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
+#else
 	(void)signal(SIGQUIT, SIG_IGN);
 	(void)signal(SIGINT, SIG_IGN);
+#endif
 #ifdef HAVE_SETPRIORITY
 	(void)setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 #endif
@@ -946,10 +958,20 @@ bad_login:
 #ifndef OQUOTA
 	if (! access( QUOTAWARN, X_OK)) (void) system(QUOTAWARN);
 #endif
+#ifdef POSIX_SIGNALS
+	sa.sa_handler = SIG_DFL;
+	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
+	(void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+	(void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+
+	sa.sa_handler = SIG_IGN;
+	(void)sigaction(SIGTSTP, &sa, (struct sigaction *)0);
+#else
 	(void)signal(SIGALRM, SIG_DFL);
 	(void)signal(SIGQUIT, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
 	(void)signal(SIGTSTP, SIG_IGN);
+#endif
 
 	tbuf[0] = '-';
 	(void) strcpy(tbuf + 1, (p = strrchr(pwd->pw_shell, '/')) ?
@@ -1008,28 +1030,58 @@ rootterm(tty)
 #endif /* HAVE_TTYENT_H */
 }
 
+#ifdef POSIX_SETJMP
+sigjmp_buf motdinterrupt;
+#else
 jmp_buf motdinterrupt;
+#endif
 
 motd()
 {
 	register int fd, nchars;
-	sigtype (*oldint)(), sigint();
 	char tbuf[8192];
+	sigtype sigint();
+#ifdef POSIX_SIGNALS
+	struct sigaction sa, osa;
+#else
+	sigtype (*oldint)();
+#endif
 
 	if ((fd = open(MOTDFILE, O_RDONLY, 0)) < 0)
 		return;
+#ifdef POSIX_SIGNALS
+	(void)sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigint;
+	(void)sigaction(SIGINT, &sa, &osa);
+#else
 	oldint = signal(SIGINT, sigint);
+#endif
+#ifdef POSIX_SETJMP
+	if (sigsetjmp(motdinterrupt, 1) == 0)
+		while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
+			(void)write(fileno(stdout), tbuf, nchars);
+#else
 	if (setjmp(motdinterrupt) == 0)
 		while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
 			(void)write(fileno(stdout), tbuf, nchars);
+#endif
+#ifdef POSIX_SIGNALS
+	(void)sigaction(SIGINT, &osa, (struct sigaction *)0);
+#else
 	(void)signal(SIGINT, oldint);
+#endif
 	(void)close(fd);
 }
 
 sigtype
 sigint()
 {
+#ifdef POSIX_SETJMP
+	siglongjmp(motdinterrupt, 1);
+#else
 	longjmp(motdinterrupt, 1);
+#endif
 }
 
 checknologin()
@@ -1313,11 +1365,6 @@ sleepexit(eval)
  * It exits only in the child process.
  */
 #include <sys/wait.h>
-#ifdef WAIT_USES_INT
-#define WAIT_TYPE int
-#else
-#define WAIT_TYPE union wait
-#endif
 void
 dofork()
 {
@@ -1333,9 +1380,16 @@ dofork()
     (void) chdir("/");	/* Let's not keep the fs busy... */
     
     /* If we're the parent, watch the child until it dies */
-    while(wait((WAIT_TYPE *)0) != child)
-	    ;
-
+#ifdef HAVE_WAITPID
+    (void)waitpid(child, 0, 0);
+#else
+#ifdef WAIT_USES_INT
+    while(wait((int *)0) != child) /*void*/ ;
+#else
+    while(wait((union wait *)0) != child) /*void*/ ;
+#endif
+#endif
+    
     /* Cleanup stuff */
     /* Run dest_tkt to destroy tickets */
     (void) dest_tkt();		/* If this fails, we lose quietly */

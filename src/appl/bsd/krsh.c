@@ -101,6 +101,7 @@ main(argc, argv0)
     struct servent *sp;
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
+    struct sigaction sa, osa;
 #else
     int omask;
 #endif
@@ -347,19 +348,35 @@ main(argc, argv0)
     sigaddset(&igmask, SIGQUIT);
     sigaddset(&igmask, SIGTERM);
     sigprocmask(SIG_BLOCK, &igmask, &omask);
+
+    (void)sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = sendsig;
+
+    (void)sigaction(SIGINT, (struct sigaction *)0, &osa);
+    if (osa.sa_handler != SIG_IGN)
+	(void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+
+    (void)sigaction(SIGQUIT, (struct sigaction *)0, &osa);
+    if (osa.sa_handler != SIG_IGN)
+	(void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+
+    (void)sigaction(SIGTERM, (struct sigaction *)0, &osa);
+    if (osa.sa_handler != SIG_IGN)
+	(void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
 #else
 #ifdef sgi
     omask = sigignore(mask(SIGINT)|mask(SIGQUIT)|mask(SIGTERM));
 #else
     omask = sigblock(mask(SIGINT)|mask(SIGQUIT)|mask(SIGTERM));
 #endif
-#endif /* POSIX_SIGNALS */
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
       signal(SIGINT, sendsig);
     if (signal(SIGQUIT, SIG_IGN) != SIG_IGN)
       signal(SIGQUIT, sendsig);
     if (signal(SIGTERM, SIG_IGN) != SIG_IGN)
       signal(SIGTERM, sendsig);
+#endif /* POSIX_SIGNALS */
     if (nflag == 0) {
 	pid = fork();
 	if (pid < 0) {
@@ -455,7 +472,6 @@ main(argc, argv0)
 krb5_sigtype sendsig(signo)
      char signo;
 {
-    
     (void) write(rfd2, &signo, 1);
 }
 

@@ -98,13 +98,6 @@ void	send_auth(), answer_auth();
 int	encryptflag = 0;
 
 #define	UCB_RCP	"/bin/rcp"
-
-#ifdef CRAY
-#ifndef BITS64
-#define BITS64
-#endif
-#endif
-
 #else /* !KERBEROS */
 #define	des_read	read
 #define	des_write	write
@@ -146,6 +139,9 @@ main(argc, argv)
     char buf[BUFSIZ], cmd[16];
     struct servent *sp;
     static char curhost[256];
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;	
@@ -155,10 +151,10 @@ main(argc, argv)
     krb5_init_ets();
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;    /* Set up des buffers */
-    
 #else
     sp = getservbyname("shell", "tcp");
 #endif /* KERBEROS */
+    
     if (sp == NULL) {
 #ifdef KERBEROS
 	fprintf(stderr, "rcp: kshell/tcp: unknown service\n");
@@ -245,13 +241,19 @@ main(argc, argv)
 		   encryptflag ? " -x" : "",
 		   targetshouldbedirectory ? " -d" : "");
 #else /* !KERBEROS */
-    
     (void) sprintf(cmd, "rcp%s%s%s",
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
 		   targetshouldbedirectory ? " -d" : "");
 #endif /* KERBEROS */
     
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = lostconn;
+    (void) sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGPIPE, lostconn);
+#endif
     targ = colon(argv[argc - 1]);
     
     /* Check if target machine is the current machine. */
@@ -548,21 +550,46 @@ okname(cp0)
 susystem(s)
      char *s;
 {
-    int status, pid, w;
+    int status;
+    pid_t pid, w;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa, isa, qsa;
+#else
     register krb5_sigtype (*istat)(), (*qstat)();
+#endif
     
     if ((pid = vfork()) == 0) {
 	execl("/bin/sh", "sh", "-c", s, (char *)0);
 	_exit(127);
     }
+
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGINT, &sa, &isa);
+    (void) sigaction(SIGQUIT, &sa, &qsa);
+#else
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
-    while ((w = wait(&status)) != pid && w != -1)
-      ;
-    if (w == -1)
+#endif
+    
+#ifdef HAVE_WAITPID
+    w = waitpid(pid, &status, 0);
+#else
+    while ((w = wait(&status)) != pid && w != -1) /*void*/ ;
+#endif
+    if (w == (pid_t)-1)
       status = -1;
+
+#ifdef POSIX_SIGNALS
+    (void) sigaction(SIGINT, &isa, (struct sigaction *)0);
+    (void) sigaction(SIGQUIT, &qsa, (struct sigaction *)0);
+#else    
     (void) signal(SIGINT, istat);
     (void) signal(SIGQUIT, qstat);
+#endif
+    
     return (status);
 }
 
@@ -787,14 +814,15 @@ sink(argc, argv)
      int argc;
      char **argv;
 {
+    mode_t mode;
+    mode_t mask = umask(0);
     off_t i, j;
     char *targ, *whopp, *cp;
-    int of, mode, wrerr, exists, first, count, amt, size;
+    int of, wrerr, exists, first, count, amt, size;
     struct buffer *bp;
     static struct buffer buffer;
     struct stat stb;
     int targisdir = 0;
-    int mask = umask(0);
     char *myargv[1];
     char cmdbuf[BUFSIZ], nambuf[BUFSIZ];
     int setimes = 0;
@@ -919,12 +947,13 @@ sink(argc, argv)
 	    error("rcp: %s: %s\n", nambuf, sys_errlist[errno]);
 	    continue;
 	}
-	if (exists && pflag)
+	if (exists && pflag) {
 #ifdef NOFCHMOD
-	  (void) chmod(nambuf, mode);
+	    (void) chmod(nambuf, mode);
 #else
-	(void) fchmod(of, mode);
+	    (void) fchmod(of, mode);
 #endif
+	}
 	ga();
 	if ((bp = allocbuf(&buffer, of, BUFSIZ)) == NULLBUF) {
 	    (void) close(of);
@@ -1040,7 +1069,7 @@ usage()
 #ifdef KERBEROS
     fprintf(stderr,
 	    "Usage: \trcp [-p] [-x] [-k realm] f1 f2; or:\n\trcp [-r] [-p] [-x] [-k realm] f1 ... fn d2\n");
-#else /* !KERBEROS */
+#else
     fputs("usage: rcp [-p] f1 f2; or: rcp [-rp] f1 ... fn d2\n", stderr);
 #endif
     exit(1);
@@ -1350,6 +1379,7 @@ int des_read(fd, buf, len)
     long net_len,rd_len;
     int cc;
     krb5_error_code status;
+    unsigned char len_buf[4];
     
     if (!encryptflag)
       return(read(fd, buf, len));
@@ -1367,21 +1397,12 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-#ifdef BITS64
-    /*
-     * XXX Ick; this assumes a big-endian word order....  
-     */
-    rd_len = 0;
-    if ((cc = krb5_net_read(fd, (char *)&rd_len + 4, 4)) != 4) {
-#else
-    if ((cc = krb5_net_read(fd, (char *)&rd_len, sizeof(rd_len))) !=
-	sizeof(rd_len)) {
-#endif
-	/* XXX can't read enough, pipe
-	   must have closed */
+    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
+	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
-    rd_len = ntohl(rd_len);
+    rd_len =
+	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
     if (net_len <= 0 || net_len > sizeof(des_inbuf)) {
 	/* preposterous length; assume out-of-sync; only
@@ -1429,7 +1450,7 @@ int des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    long net_len;
+    unsigned char len_buf[4];
     
     if (!encryptflag)
       return(write(fd, buf, len));
@@ -1446,12 +1467,11 @@ int des_write(fd, buf, len)
 	return(-1);
     }
     
-    net_len = htonl(len);
-#ifdef BITS64
-    (void) write(fd,(char *)&net_len + 4, 4);
-#else
-    (void) write(fd, &net_len, sizeof(net_len));
-#endif
+    len_buf[0] = (len & 0xff000000);
+    len_buf[1] = (len & 0xff0000);
+    len_buf[2] = (len & 0xff00);
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
     if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
 	return(-1);
     }

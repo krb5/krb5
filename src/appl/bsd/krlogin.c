@@ -35,7 +35,15 @@ char copyright[] =
 #ifdef _AIX
 #undef _BSD
 #endif
-	
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
@@ -113,9 +121,6 @@ char copyright[] =
 #include <sys/ioctl_compat.h>
 #endif
 
-struct termios deftty;
-
-
 #ifdef POSIX_TERMIOS
 #ifdef CRAY
 #include <sys/ttold.h>
@@ -156,24 +161,23 @@ struct sockaddr_in local, foreign;
 
 #define      UCB_RLOGIN      "/usr/ucb/rlogin"
 
-#ifdef CRAY
-#ifndef BITS64
-#define BITS64
-#endif
-#endif
-
 #include "rpaths.h"
 #else /* !KERBEROS */
 #define des_read read
 #define des_write write
 #endif /* KERBEROS */
 
-
 # ifndef TIOCPKT_WINDOW
 # define TIOCPKT_WINDOW 0x80
 # endif /* TIOCPKT_WINDOW */
 
+#ifdef POSIX_TERMIOS
+struct termios deftty;
+#endif
+
+krb5_sigtype exit();
 char	*getenv();
+
 char	*name;
 int 	rem = -1;		/* Remote socket fd */
 char	cmdchar = '~';
@@ -201,25 +205,30 @@ char    *speeds[] =
 #endif
 char	term[256] = "network";
 extern	int errno;
-krb5_sigtype	lostpeer();
-int	dosigwinch = 0;
+
 #ifndef POSIX_SIGNALS
 #ifndef sigmask
 #define sigmask(m)    (1 << ((m)-1))
 #endif
 #endif /* POSIX_SIGNALS */
+
 #ifdef NO_WINSIZE
 struct winsize {
     unsigned short ws_row, ws_col;
     unsigned short ws_xpixel, ws_ypixel;
 };
 #endif /* NO_WINSIZE */
+int	dosigwinch = 0;
 struct	winsize winsize;
-krb5_sigtype	sigwinch(), oob();
+
 char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
-
+krb5_sigtype	sigwinch(), oob();
+krb5_sigtype	lostpeer();
+#if __STDC__
+int setsignal(int sig, krb5_sigtype (*act)());
+#endif
 
 /*
  * The following routine provides compatibility (such as it is)
@@ -304,6 +313,7 @@ main(argc, argv)
     struct servent *sp;
     int uid, options = 0;
 #ifdef POSIX_SIGNALS
+    struct sigaction sa;
     sigset_t *oldmask, omask, urgmask;
 #else
     int oldmask;
@@ -315,7 +325,7 @@ main(argc, argv)
     krb5_flags authopts;
     krb5_error_code status;
     int debug_port = 0;
-#endif /* KERBEROS */
+#endif
    
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1;
@@ -485,11 +495,14 @@ main(argc, argv)
 			   not a table index.  */
 			sprintf (term + strlen (term), "%d", ospeed);
 		else {
-#ifdef CBAUD
-/* some "posix" systems don't have cfget... so used CBAUD if it's there */
+			(void) strcat(term, speeds[ospeed]);
+#if 0
+			/* XXX - Not used, since the above code was
+			 * not ifdef'd and it relied on cfget... */
+
+			/* some "posix" systems don't have cfget...
+			 * so used CBAUD if it's there */
 			(void) strcat(term, speeds[ttyb.c_cflag & CBAUD]);
-#else
-			(void) strcat(term, speeds[cfgetospeed(&ttyb)]);
 #endif
 		}
 	}
@@ -509,19 +522,25 @@ main(argc, argv)
     /**** moved before rcmd call so that if get a SIGPIPE in rcmd **/
     /**** we will have the defmodes set already. ***/
     (void)ioctl(fileno(stdin), TIOCGETP, &defmodes);
-    (void)ioctl(fileno(stdin), TIOCGETP,&ixon_state);
+    (void)ioctl(fileno(stdin), TIOCGETP, &ixon_state);
 #endif
 #endif
-    (void) signal(SIGPIPE, lostpeer);
-    
+
+    /* Catch SIGPIPE, as that means we lost the connection */
     /* will use SIGUSR1 for window size hack, so hold it off */
 #ifdef POSIX_SIGNALS
-    sigemptyset(&urgmask);
-    sigaddset(&urgmask, SIGURG);
-    sigaddset(&urgmask, SIGUSR1);
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = lostpeer;
+    (void) sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+    
+    (void) sigemptyset(&urgmask);
+    (void) sigaddset(&urgmask, SIGURG);
+    (void) sigaddset(&urgmask, SIGUSR1);
     oldmask = &omask;
-    sigprocmask(SIG_BLOCK, &urgmask, oldmask);
+    (void) sigprocmask(SIG_BLOCK, &urgmask, oldmask);
 #else
+    (void) signal(SIGPIPE, lostpeer);
 #ifdef sgi
     oldmask = sigignore(sigmask(SIGURG) | sigmask(SIGUSR1));
 #else
@@ -701,18 +720,21 @@ struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
 
 doit(oldmask)
 #ifdef POSIX_SIGNALS
-     sigset_t *oldmask;
+    sigset_t *oldmask;
 #endif
 {
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
+
 #ifdef POSIX_TERMIOS
-	(void) tcgetattr(0, &deftty);
-/* was __svr4__ */
+    (void) tcgetattr(0, &deftty);
 #ifdef VLNEXT
-	/* there's a POSIX way of doing this, but do we need it general? */
-	deftty.c_cc[VLNEXT] = 0;
+    /* there's a POSIX way of doing this, but do we need it general? */
+    deftty.c_cc[VLNEXT] = 0;
 #endif
 #ifdef TIOCGLTC
-	(void) ioctl(0, TIOCGLTC, (char *)&defltc);
+    (void) ioctl(0, TIOCGLTC, (char *)&defltc);
 #endif
 #else
 #ifdef USE_TERMIO
@@ -749,10 +771,19 @@ doit(oldmask)
     notc.t_startc = deftc.t_startc;
     notc.t_stopc = deftc.t_stopc;
     (void) ioctl(0, TIOCGLTC, (char *)&defltc);
-#endif    
+#endif
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGINT, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGINT, SIG_IGN);
+#endif
+
     setsignal(SIGHUP, exit);
-    setsignal(SIGQUIT,exit);
+    setsignal(SIGQUIT, exit);
+
     child = fork();
     if (child == -1) {
 	perror("rlogin: fork");
@@ -775,17 +806,26 @@ doit(oldmask)
      * the reader.  Set a trap that simply copies such signals to
      * the child.
      */
+#ifdef POSIX_SIGNALS
+    /* "sa" has already been initialized above. */
+    sa.sa_handler = copytochild;
+    (void) sigaction(SIGURG, &sa, (struct sigaction *)0);
+
+    sa.sa_handler = writeroob;
+    (void) sigaction(SIGUSR1, &sa, (struct sigaction *)0);
+    
+    sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
+
+    sa.sa_handler = catchild;
+    (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGURG, copytochild);
     (void) signal(SIGUSR1, writeroob);
-
-#ifdef POSIX_SIGNALS
-    sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
-#else
 #ifndef sgi
     (void) sigsetmask(oldmask);
 #endif
-#endif /* POSIX_SIGNALS */
     (void) signal(SIGCHLD, catchild);
+#endif /* POSIX_SIGNALS */
     writer();
     prf("Closed connection.");
     done(0);
@@ -802,6 +842,8 @@ setsignal(sig, act)
 {
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
+    struct sigaction sa;
+    
     sigemptyset(&igmask);
     sigaddset(&igmask, sig);
     sigprocmask(SIG_BLOCK, &igmask, &omask);
@@ -813,11 +855,18 @@ setsignal(sig, act)
 #endif
 #endif /* POSIX_SIGNALS */
     
-    if (signal(sig, act) == SIG_IGN)
-      (void) signal(sig, SIG_IGN);
 #ifdef POSIX_SIGNALS
+    (void) sigaction(sig, (struct sigaction *)0, &sa);
+    if (sa.sa_handler != SIG_IGN) {
+	(void) sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = act;
+	(void) sigaction(sig, &sa, (struct sigaction *)0);
+    }
     sigprocmask(SIG_SETMASK, &omask, (sigset_t*)0);
 #else    
+    if (signal(sig, act) == SIG_IGN)
+	(void) signal(sig, SIG_IGN);
 #ifndef sgi
     (void) sigsetmask(omask);
 #endif
@@ -829,15 +878,33 @@ setsignal(sig, act)
 done(status)
      int status;
 {
-    int w;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
+#ifndef HAVE_WAITPID
+    pid_t w;
+#endif
     
     mode(0);
     if (child > 0) {
 	/* make sure catchild does not snap it up */
+#ifdef POSIX_SIGNALS
+	(void) sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_DFL;
+	(void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
 	(void) signal(SIGCHLD, SIG_DFL);
-	if (kill(child, SIGKILL) >= 0)
-	  while ((w = wait(0)) > 0 && w != child)
-	    /*void*/;
+#endif
+	
+	if (kill(child, SIGKILL) >= 0) {
+#ifdef HAVE_WAITPID
+	    (void) waitpid(child, 0, 0);
+#else
+	    while ((w = wait(0)) > 0 && w != child)
+		/*void*/;
+#endif
+	}
     }
     exit(status);
 }
@@ -850,7 +917,6 @@ done(status)
 krb5_sigtype
   copytochild()
 {
-    
     (void) kill(child, SIGURG);
 }
 
@@ -863,10 +929,20 @@ krb5_sigtype
 krb5_sigtype
   writeroob()
 {
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
     
     if (dosigwinch == 0) {
 	sendwindow();
+#ifdef POSIX_SIGNALS
+	(void) sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigwinch;
+	(void) sigaction(SIGWINCH, &sa, (struct sigaction *)0);
+#else
 	(void) signal(SIGWINCH, sigwinch);
+#endif
     }
     dosigwinch = 1;
 }
@@ -884,10 +960,10 @@ krb5_sigtype
     int pid;
     
   again:
-#ifdef HAVE_WAIT3
-    pid = wait3(&status, WNOHANG|WUNTRACED, (struct rusage *)0);
-#else
+#ifdef HAVE_WAITPID
     pid = waitpid(-1, &status, WNOHANG|WUNTRACED);
+#else
+    pid = wait3(&status, WNOHANG|WUNTRACED, (struct rusage *)0);
 #endif
     if (pid == 0)
       return;
@@ -902,7 +978,7 @@ krb5_sigtype
     /* I think this one is wrong: XXX -- [eichin:19940727.1853EST] */
     if ((pid < 0) || ((pid == child) && (!WIFSTOPPED(status.w_stopval))))
 #else
-    if ((pid < 0) || ((pid == child) && (!WIFSTOPPED( status))))
+    if ((pid < 0) || ((pid == child) && (!WIFSTOPPED(status))))
 #endif
 	done((int)(status.w_termsig | status.w_retcode));
 #endif
@@ -1056,8 +1132,21 @@ echo(c)
 stop(cmdc)
      char cmdc;
 {
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
+    
     mode(0);
+
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGCHLD, SIG_IGN);
+#endif
+    
 #ifdef TIOCGLTC
     (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
 #else
@@ -1065,7 +1154,14 @@ stop(cmdc)
     (void) kill(cmdc == deftty.c_cc[VSUSP] ? 0 : getpid(), SIGTSTP);
 #endif
 #endif
+
+#ifdef POSIX_SIGNALS
+    sa.sa_handler = catchild;
+    (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGCHLD, catchild);
+#endif
+    
     mode(1);
     sigwinch();			/* check for size changes */
 }
@@ -1117,7 +1213,12 @@ char	rcvbuf[8 * 1024];
 int	rcvcnt;
 int	rcvstate;
 int	ppid;
-jmp_buf	rcvtop;
+
+#ifdef POSIX_SETJMP
+sigjmp_buf rcvtop;
+#else
+jmp_buf rcvtop;
+#endif
 
 krb5_sigtype
   oob()
@@ -1240,7 +1341,11 @@ krb5_sigtype
 	 * restart anyway.
 	 */
 	rcvcnt = 0;
+#ifdef POSIX_SETJMP
+	siglongjmp(rcvtop, 1);
+#else
 	longjmp(rcvtop, 1);
+#endif
     }
     
     /*
@@ -1252,8 +1357,13 @@ krb5_sigtype
      * longjmp to the top to restart appropriately.  Don't abort
      * a pending write, however, or we won't know how much was written.
      */
+#ifdef POSIX_SETJMP
     if (rcvd && rcvstate == READING)
-      longjmp(rcvtop, 1);
+	siglongjmp(rcvtop, 1);
+#else
+    if (rcvd && rcvstate == READING)
+	longjmp(rcvtop, 1);
+#endif
 }
 
 
@@ -1275,14 +1385,31 @@ reader(oldmask)
 #endif
     int n, remaining;
     char *bufp = rcvbuf;
-    
+
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGTTOU, &sa, (struct sigaction *)0);
+
+    sa.sa_handler = oob;
+    (void) sigaction(SIGURG, &sa, (struct sigaction *)0);
+#else    
     (void) signal(SIGTTOU, SIG_IGN);
     (void) signal(SIGURG, oob);
+#endif
+    
     ppid = getppid();
 #ifdef HAVE_SETOWN
     (void) fcntl(rem, F_SETOWN, pid);
 #endif
+#ifdef POSIX_SETJMP
+    (void) sigsetjmp(rcvtop, 1);
+#else
     (void) setjmp(rcvtop);
+#endif
 #ifdef POSIX_SIGNALS
     sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
 #else
@@ -1533,6 +1660,7 @@ int des_read(fd, buf, len)
     int nreturned = 0;
     long net_len,rd_len;
     int cc;
+    unsigned char len_buf[4];
     
     if (!encrypt_flag)
       return(read(fd, buf, len));
@@ -1550,23 +1678,14 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-#ifdef BITS64
-    /*
-     * XXX Ick.  This assumes big endian byte order.
-     */
-    rd_len = 0;
-    if ((cc = krb5_net_read(fd, (char *)&rd_len + 4, 4)) != 4) {
-#else
-    if ((cc = krb5_net_read(fd, (char *)&rd_len, sizeof(rd_len))) !=
-	    sizeof(rd_len)) {
-#endif
-		/* XXX can't read enough, pipe
-		   must have closed */
+    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
+	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
-    rd_len = ntohl(rd_len);
+    rd_len =
+	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
-    if (net_len <= 0 || net_len > sizeof(des_inbuf)) {
+    if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
 	/* preposterous length; assume out-of-sync; only
 	   recourse is to close connection, so return 0 */
 	fprintf(stderr,"Read size problem.\n");
@@ -1610,7 +1729,7 @@ int des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    long net_len;
+    unsigned char len_buf[4];
     
     if (!encrypt_flag)
       return(write(fd, buf, len));
@@ -1629,12 +1748,11 @@ int des_write(fd, buf, len)
 	return(-1);
     }
     
-    net_len = htonl(len);
-#ifdef BITS64
-    (void) write(fd,(char *)&net_len + 4, 4);
-#else
-    (void) write(fd, &net_len, sizeof(net_len));
-#endif
+    len_buf[0] = (len & 0xff000000);
+    len_buf[1] = (len & 0xff0000);
+    len_buf[2] = (len & 0xff00);
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
     if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
 	fprintf(stderr,"Could not write out all data.\n");
 	return(-1);
@@ -1661,6 +1779,7 @@ int des_read(fd, buf, len)
     int nreturned = 0;
     long net_len, rd_len;
     int cc;
+    unsigned char len_buf[4];
     
     if (!encrypt_flag)
       return(read(fd, buf, len));
@@ -1677,18 +1796,12 @@ int des_read(fd, buf, len)
 	len -= nstored;
 	nstored = 0;
     }
-#ifdef BITS64
-    net_len = 0;
-    if ((cc = krb5_net_read(fd, (char *)&net_len + 4, 4)) != 4) {
-#else
-    if ((cc = krb5_net_read(fd, &net_len, sizeof(net_len))) !=
-	sizeof(net_len)) {
-#endif
-	/* XXX can't read enough, pipe
-	   must have closed */
+    if ((cc = krb5_net_read(fd, len_buf, 4)) != 4) {
+	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
-    net_len = ntohl(net_len);
+    net_len =
+	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
     if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
 	   act as if pipe closed */
@@ -1741,8 +1854,8 @@ int des_write(fd, buf, len)
      char *buf;
      int len;
 {
-    long net_len;
     static char garbage_buf[8];
+    unsigned char len_buf[4];
     
     if (!encrypt_flag)
       return(write(fd, buf, len));
@@ -1764,12 +1877,11 @@ int des_write(fd, buf, len)
     
     /* tell the other end the real amount, but send an 8-byte padded
        packet */
-    net_len = htonl(len);
-#ifdef BITS64
-    (void) write(fd,(char *)&net_len + 4, 4);
-#else
-    (void) write(fd, &net_len, sizeof(net_len));
-#endif
+    len_buf[0] = (len & 0xff000000);
+    len_buf[1] = (len & 0xff0000);
+    len_buf[2] = (len & 0xff00);
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
 #ifdef NOROUNDUP
     (void) write(fd, des_outbuf, ((((len)+((8)-1))/(8))*(8)));
 #else
@@ -1785,8 +1897,17 @@ int des_write(fd, buf, len)
 
 krb5_sigtype lostpeer()
 {
-    
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+
+    (void) sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+#else
     (void) signal(SIGPIPE, SIG_IGN);
+#endif
+    
     prf("\007Connection closed.");
     done(1);
 }

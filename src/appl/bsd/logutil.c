@@ -15,6 +15,9 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/file.h>
 #include <utmp.h>
@@ -24,9 +27,6 @@
 #include <sys/stat.h>
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
      
 #ifndef UTMP_FILE
@@ -131,7 +131,6 @@ logwtmp(line, name, host, keep_open, logingin)
 {
     struct utmp ut;
     struct stat buf;
-    time_t time();
     
     if (fd < 0 && (fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) < 0)
       return;

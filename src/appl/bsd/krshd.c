@@ -479,13 +479,16 @@ doit(f, fromp)
     char *hostname;
     short port;
     int pv[2], cc;
-    long ready, readfrom;
+    fd_set ready, readfrom;
     char buf[BUFSIZ], sig;
     int one = 1;
     krb5_sigtype     cleanup();
     int fd;
     struct sockaddr_in fromaddr;
     int non_privileged = 0;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
 
 #ifdef IP_TOS
 /* solaris has IP_TOS, but only IPTOS_* values */
@@ -504,9 +507,18 @@ doit(f, fromp)
     
     fromaddr = *fromp;
 
+#ifdef POSIX_SIGNALS
+    (void)sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_DFL;
+    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
+#else
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
     signal(SIGTERM, SIG_DFL);
+#endif
 #ifdef DEBUG
     { int t = open("/dev/tty", 2);
       if (t >= 0) {
@@ -1033,16 +1045,30 @@ doit(f, fromp)
 	    goto signout_please;
 	}
 	if (pid) {
+#ifdef POSIX_SIGNALS
+	    sa.sa_handler = cleanup;
+	    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+	    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+	    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
+	    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+	    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
+
+	    sa.sa_handler = SIG_IGN;
+	    (void)sigaction(SIGCHLD, &sa, (struct sigaction *)0);
+#else
 	    signal(SIGINT, cleanup);
 	    signal(SIGQUIT, cleanup);
 	    signal(SIGTERM, cleanup);
 	    signal(SIGPIPE, cleanup);
 	    signal(SIGHUP, cleanup);
 	    signal(SIGCHLD,SIG_IGN);
+#endif
 	    
 	    (void) close(0); (void) close(1); (void) close(2);
 	    (void) close(f); (void) close(pv[1]);
-	    readfrom = (1L<<s) | (1L<<pv[0]);
+	    FD_ZERO(&readfrom);
+	    FD_SET(s, &readfrom);
+	    FD_SET(pv[0], &readfrom);
 	    ioctl(pv[0], FIONBIO, (char *)&one);
 	    /* should set s nbio! */
 	    do {
@@ -1050,24 +1076,30 @@ doit(f, fromp)
 		if (select(16, &ready, (fd_set *)0,
 			   (fd_set *)0, (struct timeval *)0) < 0)
 		  break;
-		if (ready & (1L<<s)) {
+		if (FD_ISSET(s, &ready)) {
 		    if (read(s, &sig, 1) <= 0)
-		      readfrom &= ~(1L<<s);
+			FD_CLR(s, &readfrom);
 		    else {
+#ifdef POSIX_SIGNALS
+			sa.sa_handler = cleanup;
+			(void)sigaction(sig, &sa, (struct sigaction *)0);
+			kill(-pid, sig);
+#else
 			signal(sig, cleanup);
 			killpg(pid, sig);
+#endif
 		    }
 		}
-		if (ready & (1L<<pv[0])) {
+		if (FD_ISSET(pv[0], &ready)) {
 		    errno = 0;
 		    cc = read(pv[0], buf, sizeof (buf));
 		    if (cc <= 0) {
 			shutdown(s, 1+1);
-			readfrom &= ~(1L<<pv[0]);
+			FD_CLR(pv[0], &readfrom);
 		    } else
-		      (void) write(s, buf, cc);
+			(void) write(s, buf, cc);
 		}
-	    } while (readfrom);
+	    } while (FD_ISSET(s, &readfrom) || FD_ISSET(pv[0], &readfrom));
 #ifdef KERBEROS
 	    syslog(LOG_INFO ,
 		   "Shell process completed.");
@@ -1173,6 +1205,20 @@ getstr(fd, buf, cnt, err)
 krb5_sigtype 
   cleanup()
 {
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+
+    (void)sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGTERM, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
+    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
+
+    (void)kill(-pid, SIGTERM);
+#else
     signal(SIGINT, SIG_IGN);
     signal(SIGQUIT, SIG_IGN);
     signal(SIGTERM, SIG_IGN);
@@ -1180,6 +1226,7 @@ krb5_sigtype
     signal(SIGHUP, SIG_IGN);
     
     killpg(pid, SIGTERM);
+#endif
     wait(0);
     
 #ifdef SYSV
@@ -1354,7 +1401,7 @@ loglogin(host, flag, failures, ue)
     return;
 }
 
-#endif	CRAY
+#endif /* CRAY */
 	
 
 

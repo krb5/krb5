@@ -1,7 +1,63 @@
 Mon Nov  7 21:22:00 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* configure.in: Remove unused check for HAVE_GETDTABLESIZE
+		(especially since we replace it with AC_REPLACE_FUNCS
+		later!)
+
 	* getdtablesize.c:  Use POSIX method of obtaining fd table size,
 		if available. 
+
+Wed Nov 02 22:21:00 1994  Richard Basch  (probe@tardis)
+
+	* configure.in:
+	Moved POSIX signal check to aclocal.m4, and calls it (CHECK_SIGNALS)
+	Added POSIX setjmp check (CHECK_SETJMP).
+	Added checks for waitpid and setsid functions.
+
+	* kcmd.c:
+	Include <signal.h> not <sys/signal.h>.
+	Don't bother declaring sigmask when POSIX_SIGNALS is set.
+	
+	* krcp.c:
+	Replaced the conditionalized BITS64 code with more portable code.
+	Use mode_t instead of int, for file modes.
+	Use waitpid, instead of wait, where available (HAVE_WAITPID).
+	Added POSIX signal handling (POSIX_SIGNALS).
+
+	* krlogin.c:
+	Include <unistd.h> and <stdlib.h> if available
+	Replaced the conditionalized BITS64 code with more portable code.
+	Use cfgetospeed() if POSIX_TERMIOS is defined.  It was already being
+		used, so there is no need to use two methods.
+	Use waitpid, instead of wait, where available (HAVE_WAITPID).
+	Added POSIX setjmp handling (POSIX_SETJMP)
+	Added POSIX signal handling (POSIX_SIGNALS).
+
+	* krlogind.c:
+	Added POSIX signal handling (POSIX_SIGNALS).
+	Corrected an error in the arguments to chmod().
+	Call setsid() if HAVE_SETSID is defined.
+	Try not conditionalizing on __alpha; use other #ifdef's.
+	Replaced the conditionalized BITS64 code with more portable code.
+
+	* krsh.c:
+	Added POSIX signal handling (POSIX_SIGNALS)
+
+	* krshd.c:
+	Declare and manipulate the file descriptor arrays properly,
+		rather than bit shifting and passing them to select as
+		(long *).  Some systems (eg. AIX) declare them to be structs.
+	Added POSIX signal handling (POSIX_SIGNALS)
+
+	* login.c:
+	Include <unistd.h> and <stdlib.h> if available
+	Added POSIX setjmp handling (POSIX_SETJMP)
+	Added POSIX signal handling (POSIX_SIGNALS)
+	Use waitpid, instead of wait, where available (HAVE_WAITPID).
+
+	* logutil.c:
+	Don't redeclare time(); it may conflict with the system header files.
+	Include <unistd.h> first.
 
 Thu Oct 27 20:07:03 1994  Mark Eichin  (eichin@cygnus.com)
 

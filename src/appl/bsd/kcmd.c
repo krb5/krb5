@@ -40,15 +40,16 @@
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif
+#include <signal.h>
 #include <sys/file.h>
-#include <sys/signal.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+
 #ifndef POSIX_SIGNALS
 #ifndef sigmask
 #define sigmask(m)    (1 << ((m)-1))
 #endif
-#endif /* POSIX_SIGNALS */
-#include <sys/socket.h>
-#include <sys/stat.h>
+#endif
      
 #include <netinet/in.h>
 #include <netdb.h>
