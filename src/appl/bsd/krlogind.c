@@ -614,12 +614,12 @@ int syncpipe[2];
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcgetattr(t,&new_termio);
 #if !defined(USE_LOGIN_F)
-	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
+	new_termio.c_lflag &= ~(ICANON|ECHO|ISIG|IEXTEN);
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL);
 #else
 	new_termio.c_lflag |= (ICANON|ECHO|ISIG|IEXTEN);
 	new_termio.c_oflag |= (ONLCR|OPOST);
-	new_termio.c_iflag|= (IXON|IXANY|BRKINT|INLCR|ICRNL);
+	new_termio.c_iflag |= (IXON|IXANY|BRKINT|INLCR|ICRNL);
 #endif /*Do we need binary stream?*/
 	new_termio.c_iflag &= ~(ISTRIP);
 	/* new_termio.c_iflag = 0; */
@@ -775,7 +775,7 @@ int syncpipe[2];
 #endif
 
     
-#if!defined(USE_LOGIN_F)
+#if !defined(USE_LOGIN_F)
     /* Pass down rusername and lusername to login. */
     (void) write(p, rusername, strlen(rusername) +1);
     (void) write(p, lusername, strlen(lusername) +1);

@@ -701,12 +701,10 @@ void doit(f, fromp)
     }
     (void) alarm(0);
     if (port != 0) {
-	int lport;
 	if (anyport) {
-	    lport = 5120; /* arbitrary */
-	    s = getport(&lport);
+	    s = getport(0);
 	} else {
-	    lport = IPPORT_RESERVED - 1;
+	    int lport = IPPORT_RESERVED - 1;
 	    s = rresvport(&lport);
 	}
 	if (s < 0) {
@@ -716,7 +714,7 @@ void doit(f, fromp)
 	}
 #ifdef KERBEROS
 	if ( port >= IPPORT_RESERVED)
-	  non_privileged = 1;
+	    non_privileged = 1;
 #else
 	if (port >= IPPORT_RESERVED) {
 	    syslog(LOG_ERR , "2nd port not reserved\n");

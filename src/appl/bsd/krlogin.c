@@ -362,7 +362,6 @@ main(argc, argv)
 	argv++; argc--;
 	goto another;
     }
-
     if (argc > 0 && !strcmp(*argv, "-d")) {
 	argv++, argc--;
 	options |= SO_DEBUG;
@@ -523,14 +522,6 @@ main(argc, argv)
 			sprintf (term + strlen (term), "%d", ospeed);
 		else {
 			(void) strcat(term, speeds[ospeed]);
-#if 0
-			/* XXX - Not used, since the above code was
-			 * not ifdef'd and it relied on cfget... */
-
-			/* some "posix" systems don't have cfget...
-			 * so used CBAUD if it's there */
-			(void) strcat(term, speeds[ttyb.c_cflag & CBAUD]);
-#endif
 		}
 	}
 #else
@@ -980,7 +971,7 @@ int signo;
  */
 writer()
 {
-    char c;
+    unsigned char c;
     register n;
     register bol = 1;               /* beginning of line */
     register local = 0;
@@ -1220,7 +1211,7 @@ void oob()
 #endif
     mark = 0;
     
-     recv(rem, &mark, 1, MSG_OOB);
+    recv(rem, &mark, 1, MSG_OOB);
     if (mark & TIOCPKT_WINDOW) {
 	/*
 	 * Let server know about window size changes
@@ -1329,7 +1320,7 @@ fd_set readset, excset, writeset;
 #endif
     
     ppid = getppid();
-FD_ZERO(&readset);
+    FD_ZERO(&readset);
     FD_ZERO(&excset);
     FD_ZERO(&writeset);
 #ifdef POSIX_SIGNALS
@@ -1351,32 +1342,33 @@ FD_ZERO(&readset);
 	    
 	bufp = rcvbuf;
 	rcvcnt = 0;
-	 rcvstate = READING;
-FD_SET(rem,&readset);
+	rcvstate = READING;
+	FD_SET(rem,&readset);
 	FD_CLR(1,&writeset);
 	}
 	FD_SET(rem,&excset);
 	if (select(rem+1, &readset, &writeset, &excset, 0) > 0 ) {
 	    if (FD_ISSET(rem, &excset))
-  oob();
+		oob();
 	    if (FD_ISSET(1,&writeset)) {
-    	    n = write(1, bufp, remaining);
-	    if (n < 0) {
-		if (errno != EINTR)
-		  return (-1);
-		continue;
+		n = write(1, bufp, remaining);
+		if (n < 0) {
+		    if (errno != EINTR)
+			return (-1);
+		    continue;
+		}
+		bufp += n;
 	    }
-	    bufp += n;
-}
-if (FD_ISSET(rem, &readset)) {
+	    if (FD_ISSET(rem, &readset)) {
 	  	rcvcnt = des_read(rem, rcvbuf, sizeof (rcvbuf));
-	if (rcvcnt == 0)
-	  return (0);
-	if (rcvcnt < 0)
-	  goto error;
-}
+		if (rcvcnt == 0)
+		    return (0);
+		if (rcvcnt < 0)
+		    goto error;
+	    }
 	} else
-		  error: {
+error:
+	{
 	    if (errno == EINTR)
 	      continue;
 	    perror("read");
@@ -1390,67 +1382,64 @@ if (FD_ISSET(rem, &readset)) {
 mode(f)
 {
 #ifdef POSIX_TERMIOS
-	struct termios newtty;
+    struct termios newtty;
 
-	switch(f) {
-	case 0:
+    switch(f) {
+    case 0:
 #ifdef TIOCGLTC
-#ifndef solaris20
-		(void) ioctl(0, TIOCSLTC, (char *)&defltc);
+#if !defined(sun)
+	(void) ioctl(0, TIOCSLTC, (char *)&defltc);
 #endif
 #endif
-		(void) tcsetattr(0, TCSADRAIN, &deftty);
-		break;
-	case 1:
-		(void) tcgetattr(0, &newtty);
-/* was __svr4__ */
+	(void) tcsetattr(0, TCSADRAIN, &deftty);
+	break;
+    case 1:
+	(void) tcgetattr(0, &newtty);
+	/* was __svr4__ */
 #ifdef VLNEXT
 	/* there's a POSIX way of doing this, but do we need it general? */
-		newtty.c_cc[VLNEXT] = 0;
+	newtty.c_cc[VLNEXT] = 0;
 #endif
 		
-		newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
-		if (!flow)
-		{
-			newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
-			newtty.c_iflag &= ~(BRKINT|INLCR|ICRNL|ISTRIP);
-			/* newtty.c_iflag |=  (IXON|IXANY); */
-			newtty.c_iflag &= ~(IXON|IXANY);
-			newtty.c_oflag &= ~(OPOST);
-		} else {
-			newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
-			newtty.c_iflag &= ~(INLCR|ICRNL);
-			/* newtty.c_iflag |=  (BRKINT|ISTRIP|IXON|IXANY); */
-			newtty.c_iflag &= ~(IXON|IXANY);
-			newtty.c_iflag |=  (BRKINT|ISTRIP);
-			newtty.c_oflag &= ~(ONLCR|ONOCR);
-			newtty.c_oflag |=  (OPOST);
-		}
-#ifdef TABDLY
-		/* preserve tab delays, but turn off XTABS */
-		if ((newtty.c_oflag & TABDLY) == TAB3)
-			newtty.c_oflag &= ~TABDLY;
-#endif
+	newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
+	newtty.c_iflag &= ~(ISTRIP|INLCR|ICRNL);
 
-		if (litout)
-			newtty.c_oflag &= ~OPOST;
-
-		newtty.c_cc[VMIN] = 1;
-		newtty.c_cc[VTIME] = 0;
-		(void) tcsetattr(0, TCSADRAIN, &newtty);
-#ifdef TIOCGLTC
-		/* Do this after the tcsetattr() in case this version
-		 * of termio supports the VSUSP or VDSUSP characters */
-#ifndef solaris20
-		/* this forces ICRNL under Solaris... */
-		(void) ioctl(0, TIOCSLTC, (char *)&noltc);
-#endif
-#endif
-		break;
-	default:
-		return;
-		/* NOTREACHED */
+	if (!flow) {
+	    newtty.c_iflag &= ~(BRKINT|IXON|IXANY);
+	    newtty.c_oflag &= ~(OPOST);
+	} else {
+	    /* XXX - should we set ixon ? */
+	    newtty.c_iflag &= ~(IXON|IXANY);
+	    newtty.c_iflag |=  (BRKINT);
+	    newtty.c_oflag &= ~(ONLCR|ONOCR);
+	    newtty.c_oflag |=  (OPOST);
 	}
+#ifdef TABDLY
+	/* preserve tab delays, but turn off XTABS */
+	if ((newtty.c_oflag & TABDLY) == TAB3)
+	    newtty.c_oflag &= ~TABDLY;
+#endif
+	if (!eight)
+	    newtty.c_iflag |= ISTRIP;
+	if (litout)
+	    newtty.c_oflag &= ~OPOST;
+
+	newtty.c_cc[VMIN] = 1;
+	newtty.c_cc[VTIME] = 0;
+	(void) tcsetattr(0, TCSADRAIN, &newtty);
+#ifdef TIOCGLTC
+	/* Do this after the tcsetattr() in case this version
+	 * of termio supports the VSUSP or VDSUSP characters */
+#if !defined(sun)
+	/* this forces ICRNL under Solaris... */
+	(void) ioctl(0, TIOCSLTC, (char *)&noltc);
+#endif
+#endif
+	break;
+    default:
+	return;
+	/* NOTREACHED */
+    }
 #else
     struct ltchars *ltc;
 #ifdef USE_TERMIO
@@ -1465,17 +1454,17 @@ mode(f)
     (void) ioctl(0, TIOCGETP, (char *)&sb);
     switch (f) {
 	
-      case 0:
+    case 0:
 #ifdef USE_TERMIO
 	/*
-	 **      remember whether IXON was set, so it can be restored
-	 **      when mode(1) is next done
-	 */
+	**      remember whether IXON was set, so it can be restored
+	**      when mode(1) is next done
+	*/
 	(void) ioctl(fileno(stdin), TIOCGETP, &ixon_state);
 	/*
-	 **      copy the initial modes we saved into sb; this is
-	 **      for restoring to the initial state
-	 */
+	**      copy the initial modes we saved into sb; this is
+	**      for restoring to the initial state
+	*/
 	(void)memcpy(&sb, &defmodes, sizeof(defmodes));
 	
 #else
@@ -1489,30 +1478,30 @@ mode(f)
 	ltc = &defltc;
 	break;
 	
-      case 1:
+    case 1:
 #ifdef USE_TERMIO
 	/*
-	 **      turn off output mappings
-	 */
+	**      turn off output mappings
+	*/
 	sb.c_oflag &= ~(ONLCR|OCRNL);
 	/*
-	 **      turn off canonical processing and character echo;
-	 **      also turn off signal checking -- ICANON might be
-	 **      enough to do this, but we're being careful
-	 */
+	**      turn off canonical processing and character echo;
+	**      also turn off signal checking -- ICANON might be
+	**      enough to do this, but we're being careful
+	*/
 	sb.c_lflag &= ~(ECHO|ICANON|ISIG);
 	sb.c_cc[VTIME] = 1;
 	sb.c_cc[VMIN] = 1;
 	if (eight)
-	  sb.c_iflag &= ~(ISTRIP);
+	    sb.c_iflag &= ~(ISTRIP);
 #ifdef TABDLY
 	/* preserve tab delays, but turn off tab-to-space expansion */
 	if ((sb.c_oflag & TABDLY) == TAB3)
-	  sb.c_oflag &= ~TAB3;
+	    sb.c_oflag &= ~TAB3;
 #endif
 	/*
-	 **  restore current flow control state
-	 */
+	**  restore current flow control state
+	*/
 	if ((ixon_state.c_iflag & IXON) && flow ) {
 	    sb.c_iflag |= IXON;
 	} else {
@@ -1523,15 +1512,15 @@ mode(f)
 	sb.sg_flags |= (!flow ? RAW : CBREAK);
 	/* preserve tab delays, but turn off XTABS */
 	if ((sb.sg_flags & TBDELAY) == XTABS)
-	  sb.sg_flags &= ~TBDELAY;
+	    sb.sg_flags &= ~TBDELAY;
 	sb.sg_kill = sb.sg_erase = -1;
 #ifdef LLITOUT
 	if (litout)
-	  lflags |= LLITOUT;
+	    lflags |= LLITOUT;
 #endif
 #ifdef LPASS8
 	if (eight)
-	  lflags |= LPASS8;
+	    lflags |= LPASS8;
 #endif /* LPASS8 */
 	tc = &notc;
 	sb.sg_flags &= ~defflags;
@@ -1540,7 +1529,7 @@ mode(f)
 	ltc = &noltc;
 	break;
 	
-      default:
+    default:
 	return;
     }
     (void) ioctl(0, TIOCSLTC, (char *)ltc);

@@ -92,7 +92,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     struct sockaddr_in sin, from, local_laddr;
     krb5_creds *get_cred, *ret_cred = 0;
     char c;
-    int lport = START_PORT;
+    int lport;
     struct hostent *hp;
     int rc;
     char *host_save;
@@ -167,12 +167,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif /* POSIX_SIGNALS */
     
     for (;;) {
-        s = getport(&lport);
+        s = getport(0);
     	if (s < 0) {
 	    if (errno == EAGAIN)
-	      fprintf(stderr, "socket: All ports in use\n");
+		fprintf(stderr, "socket: All ports in use\n");
 	    else
-	      perror("kcmd: socket");
+		perror("kcmd: socket");
 #ifdef POSIX_SIGNALS
 	    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
@@ -185,12 +185,10 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, sizeof(sin.sin_addr));
     	sin.sin_port = rport;
     	if (connect(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0)
-	  break;
+	    break;
     	(void) close(s);
-    	if (errno == EADDRINUSE) {
-	    lport--;
+    	if (errno == EADDRINUSE)
 	    continue;
-    	}
 
 #if !(defined(tek) || defined(ultrix) || defined(sun) || defined(SYSV))
     	if (hp->h_addr_list[1] != NULL) {
@@ -217,7 +215,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	krb5_free_creds(bsd_context, get_cred);
     	return (-1);
     }
-    lport--;
     if (fd2p == 0) {
     	write(s, "", 1);
     	lport = 0;
@@ -401,28 +398,30 @@ getport(alport)
 {
     struct sockaddr_in sin;
     int s;
+    int len = sizeof(sin);
     
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    if (s < 0)
+	return (-1);
+
     memset((char *) &sin, 0,sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
-    s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0)
-      return (-1);
-    for (;;) {
-	sin.sin_port = htons((u_short)*alport);
-	if (bind(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0)
-	  return (s);
-	if (errno != EADDRINUSE) {
-	    (void) close(s);
-	    return (-1);
+
+    if (bind(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0) {
+	if (alport) {
+	    if (getsockname(s, (struct sockaddr *)&sin, &len) < 0) {
+		(void) close(s);
+		return -1;
+	    } else {
+		*alport = ntohs(sin.sin_port);
+	    }
 	}
-	(*alport)--;
-	if (*alport == IPPORT_RESERVED) {
-	    (void) close(s);
-	    errno = EAGAIN;		/* close */
-	    return (-1);
-	}
+	return s;
     }
+
+    (void) close(s);
+    return -1;
 }
 
 
