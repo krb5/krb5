@@ -76,7 +76,7 @@ fi
 AC_ARG_ENABLE([fakeka],
 [  --enable-fakeka              Enable the build of the Fake KA server
 			       (emulates an AFS (kaserver)
-  --disable-fakeka             Do not build the fakeka server (default)])dnl
+  --disable-fakeka             Do not build the fakeka server (default)], , enableval=no)dnl
 if test "$enableval" = yes; then
 	FAKEKA=fakeka
 else
