@@ -593,7 +593,7 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	close(fd);
     }
     if (tty > 0) {
-	fd = open(UTMP_FILE, OWRONLY);
+	fd = open(UTMP_FILE, O_WRONLY);
 	if (fd == -1)
 	    return 0;
 	if (fstat(fd, &statb)) {
