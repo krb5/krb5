@@ -1,3 +1,8 @@
+Mon Aug 26 16:33:31 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_init.c (_kadm5_init_any): use DEFAULT_PROFILE_PATH
+ 	instead of "/etc/krb5.conf"
+
 Wed Jul 31 17:01:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c: Revert prior change due to netdb.h shuffling.

@@ -222,7 +222,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      }
 			
      if (code = kadm5_get_config_params(handle->context,
-					"/etc/krb5.conf",
+					DEFAULT_PROFILE_PATH,
 					"KRB5_CONFIG",
 					params_in,
 					&handle->params)) {
