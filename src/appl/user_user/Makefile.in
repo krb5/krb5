@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=./..
 myfulldir=appl/user_user
-mydir=.
+mydir=user_user
 MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG

@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=./..
 myfulldir=appl/gss-sample
-mydir=.
+mydir=gss-sample
 MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DUSE_AUTOCONF_H -DGSSAPI_V2
