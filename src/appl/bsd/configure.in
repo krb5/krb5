@@ -42,7 +42,6 @@ AC_REPLACE_FUNCS(getdtablesize)
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
-CHECK_FCNTL
 CHECK_WAIT_TYPE
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
 KRB_INCLUDE
@@ -108,11 +107,12 @@ dnl
 AC_MSG_CHECKING([arguments to getpgrp])
 AC_CACHE_VAL(krb5_cv_getpgrp_args,
 [AC_TRY_COMPILE(
-[#include <unistd.h>], [int pid = getpgrp()],
-krb5_cv_getpgrp_args=void, krb5_cv_getpgrp_args=pid)])
+[#include <unistd.h>
+#include <sys/types.h>], [pid_t pid = getpgrp(getpid())],
+krb5_cv_getpgrp_args=pid, krb5_cv_getpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_getpgrp_args)
-if test $krb5_cv_getpgrp_args = void; then
-AC_DEFINE(GETGRP_ONEARG)
+if test $krb5_cv_getpgrp_args = pid; then
+AC_DEFINE(GETPGRP_ONEARG)
 fi
 dnl
 dnl
