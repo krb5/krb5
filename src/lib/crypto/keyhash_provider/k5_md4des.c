@@ -32,8 +32,6 @@ k5_md4des_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     if (key->length != 8)
 	return(KRB5_BAD_KEYSIZE);
-    if ((input->length%8) != 0)
-	return(KRB5_BAD_MSIZE);
     if (ivec)
 	return(KRB5_CRYPTO_INTERNAL);
     if (output->length != (CONFLENGTH+RSA_MD4_CKSUM_LENGTH))
@@ -48,7 +46,7 @@ k5_md4des_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     /* create and schedule the encryption key */
 
-    memcpy(xorkey, key->contents, sizeof(key->length));
+    memcpy(xorkey, key->contents, sizeof(xorkey));
     for (i=0; i<sizeof(xorkey); i++)
 	xorkey[i] ^= 0xf0;
     
@@ -96,8 +94,6 @@ k5_md4des_verify(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     if (key->length != 8)
 	return(KRB5_BAD_KEYSIZE);
-    if ((input->length%8) != 0)
-	return(KRB5_BAD_MSIZE);
     if (ivec)
 	return(KRB5_CRYPTO_INTERNAL);
     if (hash->length != (CONFLENGTH+RSA_MD4_CKSUM_LENGTH))
@@ -105,7 +101,7 @@ k5_md4des_verify(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     /* create and schedule the encryption key */
 
-    memcpy(xorkey, key->contents, sizeof(key->length));
+    memcpy(xorkey, key->contents, sizeof(xorkey));
     for (i=0; i<sizeof(xorkey); i++)
 	xorkey[i] ^= 0xf0;
     
@@ -118,7 +114,7 @@ k5_md4des_verify(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     /* decrypt it.  this has a return value, but it's always zero.  */
 
-    mit_des_cbc_encrypt((krb5_pointer) input->data,
+    mit_des_cbc_encrypt((krb5_pointer) hash->data,
 			(krb5_pointer) plaintext, sizeof(plaintext),
 			schedule, (char *) mit_des_zeroblock, 0);
 
