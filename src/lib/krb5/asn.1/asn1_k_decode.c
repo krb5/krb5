@@ -353,7 +353,7 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
   f = (f<<8) | ((krb5_flags)o&asn1_pad_mask[pad]);
 
 #ifdef BACKWARD_BITMASK_COMPAT
-  if ((f & 0xFFFF0000 == 0) && (f & 0xFFFF != 0))
+  if (((f & 0xFFFF0000) == 0) && ((f & 0xFFFF) != 0))
 #endif
   f = (asn1_swbits[(f & 0xff)] << 24) | (asn1_swbits[(f >> 8) & 0xff] << 16) |
       (asn1_swbits[(f >> 16) & 0xff] << 8) | asn1_swbits[(f >> 24) & 0xff];
