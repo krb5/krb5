@@ -34,6 +34,7 @@ libdir=@libdir@
 CC_LINK='@CC_LINK@'
 KRB4_LIB=@KRB4_LIB@
 DES425_LIB=@DES425_LIB@
+KDB5_DB_LIB=@KDB5_DB_LIB@
 LDFLAGS='@LDFLAGS@'
 RPATH_FLAG='@RPATH_FLAG@'
 
@@ -179,12 +180,12 @@ if test -n "$do_libs"; then
 	    -e 's#\$(CFLAGS)#'"$CFLAGS"'#'`
 
     if test $library = 'kdb'; then
-	lib_flags="$lib_flags -lkdb5 -ldb"
+	lib_flags="$lib_flags -lkdb5 $KDB5_DB_LIB"
 	library=krb5
     fi
 
     if test $library = 'kadm_server'; then
-	lib_flags="$lib_flags -lkadm5srv -lkdb5 -ldb"
+	lib_flags="$lib_flags -lkadm5srv -lkdb5 $KDB5_DB_LIB"
 	library=kadm_common
     fi
 
