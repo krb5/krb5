@@ -12,7 +12,7 @@ link config
 copy include/isode
 copy include/com_err.h
 copy *Makefile
-ignore only-*
+ignore rconf
 ignore *~
 ignore *RCS
 ignore *Makefile.bak
@@ -44,3 +44,5 @@ ignore MAKEFILES
 ignore STDC-grep
 ignore IMAKEFILES
 ignore config-files
+ignore dtree.out
+ignore RCS.locked
