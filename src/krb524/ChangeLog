@@ -1,3 +1,16 @@
+Thu Dec 11 23:30:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c:
+	* conv_creds.c:
+	* conv_princ.c:
+	* encode.c:
+	* k524init.c:
+	* krb524d.c:
+	* misc.c:
+	* test.c: Don't include netdb.h or sys/socket.h if krb.h is
+	included; this works around an Ultrix bug where those headers
+	aren't protected against multiple inclusion.
+
 Mon Aug 18 13:02:31 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add AC_PROG_INSTALL as we do install here.
