@@ -77,11 +77,21 @@ static int write_all(int fildes, char *buf, unsigned int nbyte)
 
 static int read_all(int fildes, char *buf, unsigned int nbyte)
 {
-     int ret;
-     char *ptr;
+    int ret;
+    char *ptr;
+    fd_set rfds;
+    struct timeval tv;
+
+    FD_ZERO(&rfds);
+    FD_SET(fildes, &rfds);
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+
 
      for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	  ret = recv(fildes, ptr, nbyte, 0);
+      if ( select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0 || !FD_ISSET(fildes, &rfds) )
+          return(ptr-buf);
+      ret = recv(fildes, ptr, nbyte, 0);
 	  if (ret < 0) {
 	       if (errno == EINTR)
 		    continue;
