@@ -120,7 +120,11 @@ request_exit()
 {
     signal_requests_exit = 1;
 
+#ifdef POSIX_SIGTYPE
     return;
+#else
+    return(0);
+#endif
 }
 
 void
