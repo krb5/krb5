@@ -61,8 +61,11 @@ char *return_pwd;
 int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
-
-    char *readin_string = 0;
+#if defined(__STDC__) || defined(mips)
+    /* readin_string is used after a longjmp, so must be volatile */
+    volatile
+#endif
+      char *readin_string = 0;
     register char *ptr;
     int scratchchar;
     krb5_sigtype (*ointrfunc)();
@@ -95,8 +98,8 @@ int *size_return;
     if (setjmp(pwd_jump)) {
 	/* interrupted */
 	if (readin_string) {
-	    (void) memset(readin_string, 0, *size_return);
-	    free(readin_string);
+	    (void) memset((char *)readin_string, 0, *size_return);
+	    free((char *)readin_string);
 	}
 	(void) memset(return_pwd, 0, *size_return);
 	cleanup(KRB5_LIBOS_PWDINTR);
@@ -135,18 +138,18 @@ int *size_return;
 	    (void) memset(return_pwd, 0, *size_return);
 	    cleanup(ENOMEM);
 	}
-	(void) memset(readin_string, 0, *size_return);
-	if (fgets(readin_string, *size_return, stdin) == NULL) {
+	(void) memset((char *)readin_string, 0, *size_return);
+	if (fgets((char *)readin_string, *size_return, stdin) == NULL) {
 	    /* error */
 	    (void) putchar('\n');
-	    (void) memset(readin_string, 0, *size_return);
+	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    free(readin_string);
+	    free((char *)readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
 	(void) putchar('\n');
 
-	if (ptr = strchr(readin_string, '\n'))
+	if (ptr = strchr((char *)readin_string, '\n'))
 	    *ptr = '\0';
         else /* need to flush */
 	    do {
@@ -154,14 +157,14 @@ int *size_return;
 	    } while (scratchchar != EOF && scratchchar != '\n');
 	    
 	/* compare */
-	if (strncmp(return_pwd, readin_string, *size_return)) {
-	    (void) memset(readin_string, 0, *size_return);
+	if (strncmp(return_pwd, (char *)readin_string, *size_return)) {
+	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    free(readin_string);
+	    free((char *)readin_string);
 	    cleanup(KRB5_LIBOS_BADPWDMATCH);
 	}
-	(void) memset(readin_string, 0, *size_return);
-	free(readin_string);
+	(void) memset((char *)readin_string, 0, *size_return);
+	free((char *)readin_string);
     }
     
     /* reset intrfunc */
