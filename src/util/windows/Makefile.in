@@ -1,14 +1,12 @@
 BUILDTOP = ..\..
 
-CFLAGS 	 = $(COPTS) $(INCLUDES)
-
-##WIN16##LFLAGS	 = /nologo /nod /nopackcode
-##WIN32##LFLAGS	 = /nologo /nod
-
-##WIN32##all-windows:: $(OUTPRE)libecho.exe $(OUTPRE)getopt.obj
+all-windows:: $(OUTPRE)libecho.exe $(OUTPRE)getopt.lib
 
 $(OUTPRE)libecho.exe: $(OUTPRE)libecho.obj
 	link -out:$@ $**
+
+$(OUTPRE)getopt.lib: $(OUTPRE)getopt.obj $(OUTPRE)getopt_long.obj
+	lib -out:$@ $**
 
 install-windows::
 

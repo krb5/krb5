@@ -1,3 +1,11 @@
+2000-02-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* getopt.c, getopt_long.c, getopt.h: Update to latest BSD code
+	found (from NetBSD).
+
+	* Makefile.in: Build getopt.lib which includes getopt.obj and
+	getopt_long.obj.
+
 Mon May 10 15:27:34 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
