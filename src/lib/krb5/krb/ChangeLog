@@ -1,3 +1,14 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* t_ser.c (main): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
+1998-05-05  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* get_in_tkt.c (krb5_get_init_creds): If
+		libdefaults/{REALM}/noaddresses is true, then don't put
+		any addresses in the ticket request.
+
 Mon May  4 15:54:07 1998  Tom Yu  <tlyu@mit.edu>
 
 	* get_in_tkt.c: Add prototype for make_preauth_list.

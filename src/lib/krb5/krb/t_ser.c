@@ -641,7 +641,7 @@ main(argc, argv)
     do_ptest = 1;
     do_rtest = 1;
     do_stest = 1;
-    while ((option = getopt(argc, argv, "acekprsxvACEKPRSX")) != EOF) {
+    while ((option = getopt(argc, argv, "acekprsxvACEKPRSX")) != -1) {
 	switch (option) {
 	case 'a':
 	    do_atest = 0;

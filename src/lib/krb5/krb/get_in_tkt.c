@@ -620,7 +620,7 @@ krb5_appdefault_string(context, realm, option, ret_value)
     /*
      * Try number one:
      *
-     * [appdefaults]
+     * [libdefaults]
      *		REALM = {
      *			option = <boolean>
      *		}
@@ -636,7 +636,7 @@ krb5_appdefault_string(context, realm, option, ret_value)
     /*
      * Try number two:
      *
-     * [appdefaults]
+     * [libdefaults]
      *		option = <boolean>
      */
     
@@ -855,11 +855,19 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 	goto cleanup;
     }
 
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST))
+    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST)) {
 	request.addresses = options->address_list;
-    else
+    }
+    /* it would be nice if this parsed out an address list, but
+       that would be work. */
+    else if (((ret = krb5_appdefault_boolean(context, &client->realm,
+					    "noaddresses", &tempint)) == 0)
+	     && tempint) {
+	    ;
+    } else {
 	if ((ret = krb5_os_localaddr(context, &request.addresses)))
 	    goto cleanup;
+    }
 
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
