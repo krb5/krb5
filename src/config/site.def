@@ -244,4 +244,5 @@
 #define DefaultCDebugFlags DebuggableCDebugFlags
 #else
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
+#define ExtraLoadFlags -Z
 #endif
