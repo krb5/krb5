@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -1389,15 +1392,39 @@ select_session_keytype(context, server, nktypes, ktype)
     krb5_enctype	*ktype;
 {
     int		i;
+    krb5_enctype dfl = 0;
     
     for (i = 0; i < nktypes; i++) {
 	if (!valid_enctype(ktype[i]))
 	    continue;
 
-	if (dbentry_supports_enctype(context, server, ktype[i]))
-	    return (ktype[i]);
+	if (dbentry_supports_enctype(context, server, ktype[i])) {
+	    switch (ktype[i]) {
+	    case ENCTYPE_NULL:
+	    case ENCTYPE_DES_CBC_CRC:
+	    case ENCTYPE_DES_CBC_MD4:
+	    case ENCTYPE_DES_CBC_MD5:
+	    case ENCTYPE_DES_CBC_RAW:
+	    case ENCTYPE_DES_HMAC_SHA1:
+		return ktype[i];
+
+	    default:
+		/* For now, too much of our code supports only
+		   single-DES.  For example, the GSSAPI Kerberos
+		   mechanism needs to be modified.  If someone tries
+		   using other key types, force single-DES for the
+		   session key.
+
+		   This weird way of setting it here is so that a
+		   requested single-DES enctype listed after DES3 can
+		   be used, and this fallback enctype will be used
+		   only if *no* single-DES enctypes were requested.  */
+		dfl = ENCTYPE_DES_CBC_CRC;
+		break;
+	    }
+	}
     }
-    return 0;
+    return dfl;
 }
 
 /*

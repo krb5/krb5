@@ -386,6 +386,7 @@ errout:
 	krb5_xfree(rep->client);
     if (rep->server)
 	krb5_xfree(rep->server);
+    rep->client = rep->server = 0;
     return retval;
 }
     

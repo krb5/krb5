@@ -2,7 +2,6 @@ thisconfigdir=./../..
 myfulldir=lib/krb5/keytab/db
 mydir=keytab/db
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..\..
 ##DOSLIBNAME=..\..\krb5.lib

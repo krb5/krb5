@@ -2,7 +2,6 @@ thisconfigdir=./../..
 myfulldir=lib/krb5/ccache/stdio
 mydir=ccache/stdio
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 STLIBOBJS = \
 	scc_close.o scc_destry.o scc_eseq.o \

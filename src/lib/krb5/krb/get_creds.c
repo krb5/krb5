@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -69,7 +72,8 @@ krb5_get_credentials_core(context, options, ccache, in_creds, out_creds,
     mcreds->client = in_creds->client;
     
     *fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
-	| KRB5_TC_MATCH_AUTHDATA ;
+	| KRB5_TC_MATCH_AUTHDATA
+	| KRB5_TC_SUPPORTED_KTYPES;
     if (mcreds->keyblock.enctype)
 	*fields |= KRB5_TC_MATCH_KTYPE;
     if (options & KRB5_GC_USER_USER) {
@@ -120,7 +124,8 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
 	*out_creds = ncreds;
     }
 
-    if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
+    if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
+	|| options & KRB5_GC_CACHED)
 	return retval;
 
     retval = krb5_get_cred_from_kdc(context, ccache, ncreds, out_creds, &tgts);

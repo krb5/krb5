@@ -1,3 +1,10 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
 Tue Jan 12 18:26:04 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Define NDBM_PW_CHECK if enable_athena is set to

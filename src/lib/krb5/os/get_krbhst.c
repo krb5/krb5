@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -64,8 +67,9 @@ krb5_get_krbhst(context, realm, hostlist)
     const char	*realm_kdc_names[4];
     krb5_error_code	retval;
     int	i, count;
+    char **rethosts;
 
-    *hostlist = 0;
+    rethosts = 0;
 
     realm_kdc_names[0] = "realms";
     realm_kdc_names[1] = realm->data;
@@ -99,25 +103,29 @@ krb5_get_krbhst(context, realm, hostlist)
 	    *cp = 0;
     }
     count = cpp - values;
-    *hostlist = malloc(sizeof(char *) * (count + 1));
-    if (!*hostlist) {
+    rethosts = malloc(sizeof(char *) * (count + 1));
+    if (!rethosts) {
         retval = ENOMEM;
         goto cleanup;
     }
     for (i = 0; i < count; i++) {
-        *hostlist[i] = malloc(strlen(values[i]) + 1);
-        if (!*hostlist[i]) {
+	int len = strlen (values[i]) + 1;
+        rethosts[i] = malloc(len);
+        if (!rethosts[i]) {
             retval = ENOMEM;
             goto cleanup;
         }
+	memcpy (rethosts[i], values[i], len);
     }
-    *hostlist[count] = 0;
+    rethosts[count] = 0;
  cleanup:
-    if (retval && *hostlist) {
-        for (cpp = *hostlist; *cpp; cpp++)
+    if (retval && rethosts) {
+        for (cpp = rethosts; *cpp; cpp++)
             free(*cpp);
-        free(*hostlist);
+        free(rethosts);
+	rethosts = 0;
     }
     profile_free_list(values);
+    *hostlist = rethosts;
     return retval;
 }

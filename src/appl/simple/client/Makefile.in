@@ -3,13 +3,12 @@ myfulldir=appl/simple/client
 mydir=simple/client
 MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: sim_client
 
-LOCALINCLUDE= -I.. -I$(srcdir)/..
+LOCALINCLUDES= -I.. -I$(srcdir)/..
 
 sim_client: sim_client.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o sim_client sim_client.o $(KRB5_BASE_LIBS)

@@ -1,0 +1,5 @@
+ComErrLib implements the UNIX com_err API. See the com_err man page on a UNIX
+machine for details about the API. 
+
+Note that you need both ComErrLib:Headers: and Kerberos5Lib:Headers in your
+include path to use com_err.h

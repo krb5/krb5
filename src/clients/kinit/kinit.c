@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -33,6 +36,11 @@
 #else
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#ifdef sun
+/* SunOS4 unistd didn't declare these; okay to make unconditional?  */
+extern int optind;
+extern char *optarg;
+#endif /* sun */
 #else
 extern int optind;
 extern char *optarg;
@@ -101,7 +109,7 @@ main(argc, argv)
     krb5_get_init_creds_opt opts;
     char *service_name = NULL;
     krb5_keytab keytab = NULL;
-    char *cache_name;
+    char *cache_name = NULL;
     krb5_ccache ccache = NULL;
     enum { INIT_PW, INIT_KT, RENEW, VALIDATE} action;
     int errflg = 0, idx, i;

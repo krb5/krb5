@@ -2,7 +2,6 @@ thisconfigdir=.
 myfulldir=lib/krb5util
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) 
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5util.lib

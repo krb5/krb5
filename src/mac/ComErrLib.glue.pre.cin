@@ -1,0 +1,5 @@
+/* Include prototypes for glue functions */
+#include <com_err.h>
+
+/* Hardcode library fragment name here */
+#define kLibraryName "\pMIT Kerberos¥ComErrLib"

@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/gssapi/krb5
 mydir=krb5
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
+LOCALINCLUDES = -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb5

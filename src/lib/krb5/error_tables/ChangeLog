@@ -1,3 +1,22 @@
+1999-12-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_OBSOLETE_FN): New error code.
+
+1999-11-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_CONFIG_ETYPE_NOSUPP): New error code.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_CC_NOT_KTYPE): New error code.
+
 1999-07-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Delete dependency info for isode error table that
