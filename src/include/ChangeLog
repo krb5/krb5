@@ -1,3 +1,7 @@
+2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin: Make krb5_build_principal_va() KRB5_CALLCONV.
+
 2002-04-03 Alexandra Ellwood <lxs@mit.edu>
     * krb5.hin: When KRB5_KEYTAB_ACCESSOR_FUNCTIONS is defined, 
     we still need actual definitions for krb5_kt_ops, etc defined 

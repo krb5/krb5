@@ -1,3 +1,8 @@
+2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* bld_princ.c (krb5_build_principal_va): Make
+	krb5_build_principal_va() KRB5_CALLCONV.
+
 2002-04-02  Sam Hartman  <hartmans@mit.edu>
 
 	* init_keyblock.c: Merge from mainline
