@@ -56,23 +56,7 @@ const krb5_address *sender_addr;
 krb5_tkt_authent **authdat;
 {
     krb5_error_code retval;
-    krb5_ap_req *request;
     krb5_rcache rcache = 0;
-
-    if (!krb5_is_ap_req(inbuf))
-	return KRB5KRB_AP_ERR_MSG_TYPE;
-    if (retval = decode_krb5_ap_req(inbuf, &request)) {
-    	switch (retval) {
-#ifdef KRB5_USE_ISDOE
-	case ISODE_50_LOCAL_ERR_BADMSGTYPE:
-#else
-	case KRB5_BADMSGTYPE:
-#endif
-	    return KRB5KRB_AP_ERR_BADVERSION; 
-	default:
-	    return(retval);
-	}
-    }
 
     if (server) {
 	retval = krb5_get_server_rcache(krb5_princ_component(server, 0),
@@ -81,12 +65,11 @@ krb5_tkt_authent **authdat;
 	    goto cleanup;
     }
 
-    retval = krb5_rd_req_decoded(request, server, sender_addr, 0, 0, 0,
-				 rcache, authdat);
+    retval = krb5_rd_req(inbuf, server, sender_addr, 0, 0, 0,
+			 rcache, authdat);
 cleanup:
     if (rcache)
 	krb5_rc_close(rcache);
-    krb5_free_ap_req(request);
     return retval;
 }
 
