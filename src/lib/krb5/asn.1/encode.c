@@ -30,7 +30,7 @@ static char rcsid_encode_c[] =
 #include <stdio.h>
 
 krb5_error_code
-encode_generic(input, data_out, encoder, translator, free_translation)
+krb5_encode_generic(input, data_out, encoder, translator, free_translation)
 const krb5_pointer input;
 register krb5_data **data_out;
 int (*encoder) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
