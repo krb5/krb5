@@ -36,6 +36,7 @@ do_tgs_req.c
 extern.c
 extern.h
 kdc5_err.et
+kdc_preauth.c
 kdc_util.c
 kdc_util.h
 kerberos_v4.c
