@@ -36,7 +36,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_ktsrvtab_get_entry(context, id, principal, kvno, enctype, entry)
     krb5_context context;
     krb5_keytab id;
-    krb5_principal principal;
+    krb5_const_principal principal;
     krb5_kvno kvno;
     krb5_enctype enctype;
     krb5_keytab_entry * entry;

@@ -80,7 +80,7 @@ krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_close
 krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_get_entry
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
-		   krb5_principal,
+		   krb5_const_principal,
 		   krb5_kvno,
 		   krb5_enctype,
 		   krb5_keytab_entry *));
