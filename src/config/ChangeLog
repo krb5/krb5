@@ -1,3 +1,7 @@
+2001-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (AUTOHEADER, AUTOHEADERFLAGS): New variables.
+
 2001-05-10  Tom Yu  <tlyu@mit.edu>
 
 	* shlib.conf: Fix RUN_ENV for Irix. [pulled up from 1.2.2]
