@@ -1,3 +1,11 @@
+Wed Nov 30 16:18:29 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* osconf.h, config.h: Remove remnants of unifdef support for
+		building osconf.h and config.h, left over from the imake
+		build system. 
+
+	* osconf.h: Add #ifdef for Athena configuration.
+
 Thu Oct 13 16:58:53 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* config.h: Define PROVIDE_DES_CBC_MD5 so that we include this
