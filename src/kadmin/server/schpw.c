@@ -6,13 +6,14 @@
 #include <errno.h>
 
 krb5_error_code
-process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
+process_chpw_request(context, server_handle, realm, s, keytab, sockin, 
+		     req, rep)
      krb5_context context;
      void *server_handle;
      char *realm;
      int s;
      krb5_keytab keytab;
-     struct sockaddr_in *sin;
+     struct sockaddr_in *sockin;
      krb5_data *req;
      krb5_data *rep;
 {
@@ -174,8 +175,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
 	(krb5_octet *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
     
     remote_kaddr.addrtype = ADDRTYPE_INET;
-    remote_kaddr.length = sizeof(sin->sin_addr);
-    remote_kaddr.contents = (krb5_octet *) &sin->sin_addr;
+    remote_kaddr.length = sizeof(sockin->sin_addr);
+    remote_kaddr.contents = (krb5_octet *) &sockin->sin_addr;
     
     /* mk_priv requires that the local address be set.
        getsockname is used for this.  rd_priv requires that the

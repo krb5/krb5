@@ -1,5 +1,13 @@
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
+	* ovsec_kadmd.c: Change prototype for process_chpw_request
+ 	prototype argument from sin to sockin. Get rid of global params
+ 	variable.
+
+	* schpw.c: Change function declaration as well.
+	
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
 	* ovsec_kadmd.c: Add prototype for daemon if needed.
 
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>

@@ -71,7 +71,7 @@ void	request_exit(int);
 void	request_hup(int);
 void	reset_db(void);
 void	sig_pipe(int);
-void	kadm_svc_run(void);
+void	kadm_svc_run(kadm5_config_params *params);
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
@@ -112,10 +112,9 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 	
 int schpw;
 void do_schpw(int s, kadm5_config_params *params);
-kadm5_config_params params;
 krb5_error_code process_chpw_request(krb5_context context, void *server_handle,
 				     char *realm, int s, krb5_keytab keytab,
-				     struct sockaddr_in *sin,
+				     struct sockaddr_in *sockin,
 				     krb5_data *req, krb5_data *rep);
 
 /*
@@ -206,6 +205,7 @@ int main(int argc, char *argv[])
      auth_gssapi_name names[4];
      gss_buffer_desc gssbuf;
      gss_OID nt_krb5_name_oid;
+     kadm5_config_params params;
      
      /* This is OID value the Krb5_Name NameType */
      gssbuf.value = "{1 2 840 113554 1 2 2 1}";
@@ -542,7 +542,7 @@ int main(int argc, char *argv[])
      
      setup_signal_handlers();
      krb5_klog_syslog(LOG_INFO, "starting");
-     kadm_svc_run();
+     kadm_svc_run(&params);
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
      /* Clean up memory, etc */
@@ -616,7 +616,8 @@ void setup_signal_handlers(void) {
  * Modifies:
  */
 
-void kadm_svc_run(void)
+void kadm_svc_run(params)
+kadm5_config_params *params;
 {
      fd_set	rfd;
      int	sz = _gssrpc_rpc_dtablesize();
@@ -657,7 +658,7 @@ void kadm_svc_run(void)
 	       break;
 	  default:
 	      if (FD_ISSET(schpw, &rfd))
-		  do_schpw(schpw, &params);
+		  do_schpw(schpw, params);
 	      else
 		  svc_getreqset(&rfd);
 	  }
