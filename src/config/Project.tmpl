@@ -198,6 +198,23 @@ P_STDLIBH=-DHasStdlibHTrue
 #else
 P_STDLIBH=-UHasStdlibHTrue
 #endif
+/* Override system defaults for <time.h> vs <sys/time.h> */
+#if !defined(UseTimeH) && !defined(UseSysTimeH)
+#ifdef OS_BSD
+#define	UseSysTimeH
+#else
+#define	UseTimeH
+#endif
+#endif
+#ifdef UseTimeH
+#ifdef UseSysTimeH
+P_TIME_DEFS=-DUseTimeH -DUseSysTimeH
+#else
+P_TIME_DEFS=-DUseTimeH -UUseSysTimeH
+#endif
+#else
+P_TIME_DEFS=-DUseSysTimeH -UUseTimeH
+#endif
 
 /*
  * Default Definitions.
@@ -215,7 +232,7 @@ P_STDLIBH=-UHasStdlibHTrue
              POSY = PosyCmd
             TOUCH = TouchCmd
              PERL = PerlCmd
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) -DUnifdefRan
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
