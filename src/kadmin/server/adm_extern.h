@@ -55,6 +55,7 @@ extern krb5_db_entry master_entry;
 
 extern volatile int signal_requests_exit;
 extern char *dbm_db_name;
+extern char *realm;
 
 extern krb5_keyblock tgs_key;
 extern krb5_kvno tgs_kvno;

@@ -117,7 +117,6 @@ process_args(context, argc, argv)
     int c;
     krb5_boolean manual = FALSE;
     int keytypedone = 0;
-    char *db_realm = 0;
     char *mkey_name = 0;
     char *local_realm;
     krb5_enctype etype;
@@ -182,7 +181,7 @@ process_args(context, argc, argv)
 		break;
 
 	    case 'r':
-		db_realm = optarg;
+		realm = optarg;
 		break;
 
 	    case 'D':
@@ -201,14 +200,14 @@ process_args(context, argc, argv)
 
     }
 
-    if (!db_realm) {
+    if (!realm) {
 		/* no realm specified, use default realm */
 	if (retval = krb5_get_default_realm(context, &local_realm)) {
 		com_err(argv[0], retval,
 			"while attempting to retrieve default realm");
 		exit(1);
 	}
-	db_realm = local_realm;
+	realm = local_realm;
     }        
  
     if (!mkey_name) {
@@ -221,7 +220,7 @@ process_args(context, argc, argv)
  
     /* assemble & parse the master key name */
     if (retval = krb5_db_setup_mkey_name(context, mkey_name, 
-					db_realm, 
+					realm, 
 					(char **) 0,
 					&master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");

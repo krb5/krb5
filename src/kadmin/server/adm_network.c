@@ -126,7 +126,6 @@ setup_network(context, prog)
 {
     krb5_error_code retval;
     char server_host_name[MAXHOSTNAMELEN];
-    char *lrealm;
     krb5_sigtype     doexit(), do_child();
     struct servent *service_servent;
     struct hostent *service_hostent;
@@ -146,17 +145,8 @@ setup_network(context, prog)
         return ENOMEM;
     }
 
-   
-    if (retval = krb5_get_default_realm(context, &lrealm)) {
-        free(client_server_info.name_of_service);
-	com_err( "setup_network", 0, 
-		"adm_network: Unable to get Default Realm");
-	return retval;
-    }
-
     (void) sprintf(client_server_info.name_of_service, "%s%s%s%s%s",
-                        CPWNAME, "/", lrealm, "", "");
-    free(lrealm);
+                        CPWNAME, "/", realm, "@", realm);
 
 #ifdef DEBUG
     fprintf(stderr, "client_server_info.name_of_service = %s\n",

@@ -1,3 +1,14 @@
+Fri Apr 21 13:11:00 1995  Mark Eichin  <eichin@cygnus.com>
+
+	From Ian Taylor <ian@cygnus.com>. Makes kadmind use -r for both
+	the database name and the service name, eliminating an
+	installation hassle.
+	* adm_extern.h: declare realm.
+	* adm_server.c: define realm.
+	(process_args): change db_realm to realm.
+	* adm_network.c (setup_network): use the preset realm, not the
+	default realm.
+
 Thu Apr 20 18:05:00 1995  Mark Eichin  <eichin@cygnus.com>
 
 	Changes from Ian Taylor <ian@cygnus.com> to support testsuite.
