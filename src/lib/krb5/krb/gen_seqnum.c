@@ -60,7 +60,7 @@ krb5_generate_seq_number(krb5_context context, const krb5_keyblock *key, krb5_ui
      * for about 2^30 messages to be sent before wrapping into
      * "negative" numbers.
      */
-    *seqno &= 0x3ffffff;
+    *seqno &= 0x3fffffff;
     if (*seqno == 0)
 	*seqno = 1;
     return 0;
