@@ -1,6 +1,8 @@
 Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krshd.c (recvauth): Verify checksum against command line and remote user.
+	(recvauth): Fix accidental memory leak with authenticator and fix
+	include correct username in checksum
 
 	* kcmd.c: Send authenticator with checksum of command line and remote user.
 

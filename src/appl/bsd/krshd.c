@@ -1709,7 +1709,7 @@ krb5_authenticator *authenticator;
     goto error_cleanup;
 
       strcpy(chksumbuf,cmdbuf);
-      strcat(chksumbuf,remuser);
+      strcat(chksumbuf,locuser);
 
       if ( status = krb5_verify_checksum(bsd_context,
 					 authenticator->checksum->checksum_type,
@@ -1720,11 +1720,14 @@ krb5_authenticator *authenticator;
 	goto error_cleanup;
 
  error_cleanup:
-krb5_free_authenticator(bsd_context, authenticator);
 krb5_xfree(chksumbuf);
-if (status)
-  return status;
+      if (status) {
+	krb5_free_authenticator(bsd_context, authenticator);
+	return status;
+      }
 }
+    krb5_free_authenticator(bsd_context, authenticator);
+
     
     /* Setup eblock for encrypted sessions. */
     krb5_use_enctype(bsd_context, &eblock, ticket->enc_part2->session->enctype);
