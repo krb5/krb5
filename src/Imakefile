@@ -28,7 +28,7 @@ SSDIR=ss
 all::
 	make includes
 
-        SUBDIRS = $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
+        SUBDIRS = include $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
   LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
