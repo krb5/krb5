@@ -6,12 +6,29 @@ ALL_DEP_SRCS= $(SRCS) $(EXTRADEPSRCS)
 
 # be sure to check ALL_DEP_SRCS against *what it would be if SRCS and
 # EXTRADEPSRCS are both empty*
-.d: $(ALL_DEP_SRCS)
-	if test "$(srcdir)" = "." ; then \
+depend-verify-srcdir:
+	@if test "$(srcdir)" = "." ; then \
 		echo 1>&2 error: cannot build dependencies with srcdir=. ; \
 		echo 1>&2 "(can't distinguish generated files from source files)" ; \
 		exit 1 ; \
 	fi
+depend-verify-et: depend-verify-et-$(COM_ERR_VERSION)
+depend-verify-et-k5:
+depend-verify-et-sys:
+	@echo 1>&2 error: cannot build dependencies using system et package
+	@exit 1
+depend-verify-ss: depend-verify-ss-$(SS_VERSION)
+depend-verify-ss-k5:
+depend-verify-ss-sys:
+	@echo 1>&2 error: cannot build dependencies using system ss package
+	@exit 1
+depend-verify-db: depend-verify-db-$(DB_VERSION)
+depend-verify-db-k5:
+depend-verify-db-sys:
+	@echo 1>&2 error: cannot build dependencies using system db package
+	@exit 1
+
+.d: $(ALL_DEP_SRCS) depend-verify-srcdir depend-verify-et depend-verify-ss depend-verify-db
 	if test "$(ALL_DEP_SRCS)" != " " ; then \
 		$(CC) -M $(ALL_CFLAGS) $(ALL_DEP_SRCS) > .dtmp || exit 1 ; \
 		mv -f .dtmp .d ; \

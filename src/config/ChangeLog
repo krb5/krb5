@@ -1,5 +1,15 @@
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* post.in (depend-verify-et-sys, depend-verify-et-k5,
+	depend-verify-ss-sys, depend-verify-ss-k5, depend-verify-db-sys,
+	depend-verify-db-k5): New targets.  Report errors in the -sys
+	versions.
+	(depend-verify-et, depend-verify-ss, depend-verify-db): New
+	targets.  Depend on the above based on the _VERSION macro
+	corresponding.
+	(depend-verify-srcdir): New target, split out from .d rules.
+	(.d): Depend on depend-verify-{et,ss,db,srcdir}.
+
 	* pre.in (DB_DEPLIB-k5, DB_DEPLIB-sys, DB_DEPS-sys, DB_DEPS-k5,
 	DB_DEPS-redirect): New variables.
 	(DB_DEPLIB, DB_DEPS): Select from them.
