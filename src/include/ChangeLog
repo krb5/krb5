@@ -1,3 +1,8 @@
+1999-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin: Wrap all declarations in `extern "C"' for C++, not
+	just some.  Move header file inclusions up above extern-C block.
+
 1997-07-26 Miro Jurisic <meeroh@mit.edu>
 	* win-mac.h (size_t): Fixed size_t redefinition on MacOS
 	

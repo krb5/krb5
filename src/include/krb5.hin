@@ -89,6 +89,21 @@
 #include <stdlib.h>
 
 /*
+ * begin "error_def.h"
+ */
+
+#include <profile.h>
+#include <errno.h>
+
+/*
+ * end "error_def.h"
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
  * begin wordsize.h
  */
 
@@ -381,10 +396,6 @@ typedef struct _krb5_enc_data {
 #define krb5_xc(ptr,args) ((*(ptr)) args)
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
     krb5_c_encrypt
     KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_keyblock *key,
@@ -579,10 +590,6 @@ krb5_error_code krb5_decrypt_data
 		krb5_data *enc_data));
 
 #endif /* KRB5_OLD_CRYPTO */
-
-#ifdef __cplusplus
-}
-#endif
 
 /*
  * end "encryption.h"
@@ -817,17 +824,6 @@ krb5_error_code krb5_decrypt_data
 
 /*
  * end "proto.h"
- */
-
-/*
- * begin "error_def.h"
- */
-
-#include <profile.h>
-#include <errno.h>
-
-/*
- * end "error_def.h"
  */
 
 /* Time set */
@@ -1238,10 +1234,6 @@ typedef struct _krb5_rc_ops {
 	KRB5_NPROTOTYPE((krb5_context, krb5_rcache, char FAR *));
 } krb5_rc_ops;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 krb5_error_code krb5_rc_default 
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_rcache FAR *));
@@ -1265,10 +1257,6 @@ krb5_error_code krb5_auth_to_rep
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_tkt_authent FAR *,
 		krb5_donot_replay FAR *));
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #define krb5_rc_initialize(context, id, span) krb5_x((id)->ops->init,(context, id, span))
@@ -1383,10 +1371,6 @@ extern krb5_kt_ops krb5_kt_dfl_ops;
 /*
  * begin "func-proto.h"
  */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_context
 	KRB5_PROTOTYPE((krb5_context FAR *));
@@ -2225,9 +2209,6 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_timestamp_to_sfstring
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_deltat_to_string
 	KRB5_PROTOTYPE((krb5_deltat, char FAR *, size_t));
 
-#ifdef __cplusplus
-}
-#endif
 
 
 /* The name of the Kerberos ticket granting service... and its size */
@@ -2397,9 +2378,6 @@ KRB5_PROTOTYPE((krb5_context context,
 /*
  * The realm iterator functions
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_realm_iterator_create
 	KRB5_PROTOTYPE((krb5_context context, void **iter_p));
