@@ -1,4 +1,7 @@
-2002-04-12  Ken Raeburn  <raeburn@raeburn.org>
+2002-04-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* lock_file.c (krb5_lock_file) [POSIX_FILE_LOCKS]: Make static
+	"zero" variable const.
 
 	* locate_kdc.c (add_addrinfo_to_list) [TEST]: Print out socket
 	type before returning.
