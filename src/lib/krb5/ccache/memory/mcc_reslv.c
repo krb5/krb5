@@ -91,7 +91,9 @@ krb5_mcc_resolve (context, id, residual)
 
      ((krb5_mcc_data *)lid->data)->next = mcc_head;
      mcc_head = (krb5_mcc_data *)lid->data;
+#if 0
      ++krb5_cache_sessions;
+#endif
      }
      *id = lid; 
      return KRB5_OK;

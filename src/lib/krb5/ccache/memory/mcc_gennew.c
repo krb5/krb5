@@ -81,7 +81,9 @@ krb5_mcc_generate_new (context, id)
      strcpy(((krb5_mcc_data *) lid->data)->name, scratch);
 
      *id = lid;
+#if 0
      ++krb5_cache_sessions;
+#endif
      ((krb5_mcc_data *)lid->data)->next = mcc_head;
      mcc_head = (krb5_mcc_data *)lid->data;
 

@@ -74,7 +74,9 @@ krb5_mcc_destroy(context, id)
      krb5_xfree(((krb5_mcc_data *)id->data)->name);
      krb5_xfree(id->data); 
      krb5_xfree(id);
+#if 0
      --krb5_cache_sessions;
+#endif
 
      krb5_change_cache ();
      return KRB5_OK;

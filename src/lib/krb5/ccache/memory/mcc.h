@@ -47,6 +47,8 @@ typedef struct _krb5_mcc_data {
 
 
 extern krb5_mcc_data FAR *mcc_head;
+#if 0
 extern int krb5_cache_sessions;
+#endif
 
 #endif /* __KRB5_MEMORY_CCACHE__ */
