@@ -121,7 +121,7 @@ bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
 	  return FALSE;
      } else if (out_buf.length != sizeof(rpc_u_int32)) {
 	  PRINTF(("gssapi_unseal_seq: unseal gave %d bytes\n",
-		  out_buf.length));
+		  (int) out_buf.length));
 	  gss_release_buffer(&minor_stat, &out_buf);
 	  return FALSE;
      }
@@ -227,7 +227,7 @@ bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
      }
      
      PRINTF(("gssapi_wrap_data: %d bytes data, %d bytes sealed\n",
-	     in_buf.length, out_buf.length));
+	     (int) in_buf.length, (int) out_buf.length));
      
      /* write the token */
      if (! xdr_bytes(out_xdrs, (char **) &out_buf.value, 

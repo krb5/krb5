@@ -394,7 +394,7 @@ next_token:
 		    goto cleanup;
 	       } else if (isn_buf.length != sizeof(rpc_u_int32)) {
 		    PRINTF(("gssapi_create: gss_unseal gave %d bytes\n",
-			    isn_buf.length));
+			    (int) isn_buf.length));
 		    goto cleanup;
 	       }
 	       

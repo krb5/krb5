@@ -169,7 +169,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      XDR_DESTROY(&xdrs);
 
      PRINTF(("svcauth_gssapi: got credentials, version %d, client_handle len %d\n",
-	     creds.version, creds.client_handle.length));
+	     creds.version, (int) creds.client_handle.length));
 
      if (creds.version != 2) {
  	  PRINTF(("svcauth_gssapi: bad credential version\n"));
@@ -222,7 +222,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	  
 	  PRINTF(("svcauth_gssapi: incoming client_handle %d, len %d\n", 
 		  *((rpc_u_int32 *) creds.client_handle.value),
-		  creds.client_handle.length));
+		  (int) creds.client_handle.length));
 
 	  client_data = get_client(&creds.client_handle);
 	  if (client_data == NULL) {
@@ -600,7 +600,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
-		  creds.client_handle.length));
+		  (int) creds.client_handle.length));
 	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
      }
      
@@ -610,7 +610,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 error:
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
-		  creds.client_handle.length));
+		  (int) creds.client_handle.length));
 	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
      }
      

@@ -1,3 +1,12 @@
+2001-07-09  Ezra Peisach  <epeisach@mit.edu>
+
+	* pmap_rmt.c, svc.c, svc_simple.c, svc_udp.c, svc_tcp.c,
+	xdr_array.c, xdr_reference.c : Include string.h for memset and
+	memcmp prototypes.
+
+	* auth_gssapi.c, auth_gssapi_misc.c, svc_auth_gssapi.c: Cast
+	argment to PRINTF to match format.
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc.c (xprt_register): If svc_fdset has not been initilized, 

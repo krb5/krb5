@@ -45,6 +45,7 @@ static char sccsid[] = "@(#)svc.c 1.41 87/10/13 Copyr 1984 Sun Micro";
 #include <gssrpc/rpc.h>
 #include <gssrpc/pmap_clnt.h>
 #include <stdio.h>
+#include <string.h>
 
 extern int errno;
 
