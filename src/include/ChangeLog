@@ -1,5 +1,11 @@
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.hin (struct _krb5_donot_replay, krb5_rc_default)
+	(krb5_rc_resolve_type, krb5_rc_resolve_full, krb5_rc_get_type)
+	(krb5_rc_default_type, krb5_rc_default_name, krb5_auth_to_rep):
+	Private declarations moved...
+	* k5-int.h: ...to here.
+
 	* configure.in: Don't test for labs, memmove or bcopy.
 	* k5-int.h (labs, HAVE_LABS): Never define.
 	* win-mac.h (HAVE_LABS): Don't define.
