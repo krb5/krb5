@@ -1,3 +1,8 @@
+Wed Aug 19 17:27:51 1998  Tom Yu  <tlyu@mit.edu>
+
+	* conv_princ.c: Add some additional entries to sconv_list that
+	were forgotten.
+
 Wed Jul 15 11:46:05 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* gic_pwd.c (krb5_get_init_creds_password): Remove unused argument

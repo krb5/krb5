@@ -27,7 +27,6 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS=cksum.o	\
-	des.o		\
 	enc_dec.o	\
 	key_parity.o	\
 	key_sched.o	\
@@ -44,7 +43,6 @@ STLIBOBJS=cksum.o	\
 
 
 OBJS=	cksum.$(OBJEXT)		\
-	des.$(OBJEXT)		\
 	enc_dec.$(OBJEXT)	\
 	key_parity.$(OBJEXT)	\
 	key_sched.$(OBJEXT)	\
@@ -60,7 +58,6 @@ OBJS=	cksum.$(OBJEXT)		\
 	k4_glue.$(OBJEXT)
 
 SRCS=	$(srcdir)/cksum.c	\
-	$(srcdir)/des.c		\
 	$(srcdir)/enc_dec.c	\
 	$(srcdir)/key_parity.c	\
 	$(srcdir)/key_sched.c	\

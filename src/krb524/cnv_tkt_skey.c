@@ -154,19 +154,39 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	       (long) lifetime);
 
      /* XXX are there V5 flags we should map to V4 equivalents? */
-     ret = krb_create_ticket(v4tkt,
-			     0, /* flags */			     
-			     pname,
-			     pinst,
-			     prealm,
-			     *((unsigned long *)kaddr.contents),
-			     (char *) v5etkt->session->contents,
-			     lifetime,
-			     /* issue_data */
-			     server_time,
-			     sname,
-			     sinst,
-			     v4_skey->contents);
+     if (v4_skey->enctype == ENCTYPE_DES_CBC_CRC) {
+	 ret = krb_create_ticket(v4tkt,
+				 0, /* flags */			     
+				 pname,
+				 pinst,
+				 prealm,
+				 *((unsigned long *)kaddr.contents),
+				 (char *) v5etkt->session->contents,
+				 lifetime,
+				 /* issue_data */
+				 server_time,
+				 sname,
+				 sinst,
+				 v4_skey->contents);
+     } else {
+	 /* Force enctype to be raw if using DES3. */
+	 if (v4_skey->enctype == ENCTYPE_DES3_HMAC_SHA1 ||
+	     v4_skey->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
+	     v4_skey->enctype = ENCTYPE_DES3_CBC_RAW;
+	 ret = krb_cr_tkt_krb5(v4tkt,
+			       0, /* flags */			     
+			       pname,
+			       pinst,
+			       prealm,
+			       *((unsigned long *)kaddr.contents),
+			       (char *) v5etkt->session->contents,
+			       lifetime,
+			       /* issue_data */
+			       server_time,
+			       sname,
+			       sinst,
+			       v4_skey);
+     }
 
      krb5_free_enc_tkt_part(context, v5etkt);
      v5tkt->enc_part2 = NULL;

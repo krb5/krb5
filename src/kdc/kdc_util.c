@@ -335,12 +335,15 @@ cleanup:
 /* XXX This function should no longer be necessary. 
  * The KDC should take the keytab associated with the realm and pass that to 
  * the krb5_rd_req_decode(). --proven
+ *
+ * It's actually still used by do_tgs_req() for u2u auth, and not too
+ * much else. -- tlyu
  */
 krb5_error_code
 kdc_get_server_key(ticket, key, kvno)
     krb5_ticket 	* ticket;
     krb5_keyblock      ** key;
-    krb5_kvno 		* kvno;
+    krb5_kvno 		* kvno;	/* XXX nothing uses this */
 {
     krb5_error_code 	  retval;
     krb5_db_entry 	  server;
@@ -349,64 +352,46 @@ kdc_get_server_key(ticket, key, kvno)
     krb5_key_data	* server_key;
     int			  i;
 
-    if (krb5_principal_compare(kdc_context, tgs_server, ticket->server)) {
-	retval = krb5_copy_keyblock(kdc_context, &tgs_key, key);
-	*kvno = tgs_kvno;
-	return retval;
-    } else {
-	nprincs = 1;
+    nprincs = 1;
 
-	if ((retval = krb5_db_get_principal(kdc_context, ticket->server,
-					    &server, &nprincs,
-					    &more))) {
-	    return(retval);
-	}
-	if (more) {
-	    krb5_db_free_principal(kdc_context, &server, nprincs);
-	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-	} else if (nprincs != 1) {
-	    char *sname;
-
-	    krb5_db_free_principal(kdc_context, &server, nprincs);
-	    if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
-		krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
-		       sname);
-		free(sname);
-	    }
-	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-	}
-	/* 
-	 * Get the latest version of the server key_data and
-	 * convert the key into a real key (it may be encrypted in the database)
-	 *
-	 * Search the key list in the order specified by the key/salt list.
-	 */
-	server_key = (krb5_key_data *) NULL;
-	for (i=0; i<kdc_active_realm->realm_nkstypes; i++) {
-	    krb5_key_salt_tuple *kslist;
-
-	    kslist = (krb5_key_salt_tuple *) kdc_active_realm->realm_kstypes;
-	    if (!krb5_dbe_find_enctype(kdc_context,
-				       &server,
-				       kslist[i].ks_enctype,
-				       -1,
-				       -1,
-				       &server_key))
-		break;
-	}
-	if (!server_key)
-	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-				  
-	*kvno = server_key->key_data_kvno;
-	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-	    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
-					         server_key,
-					         *key, NULL);
-	} else
-	    retval = ENOMEM;
-	krb5_db_free_principal(kdc_context, &server, nprincs);
-	return retval;
+    if ((retval = krb5_db_get_principal(kdc_context, ticket->server,
+					&server, &nprincs,
+					&more))) {
+	return(retval);
     }
+    if (more) {
+	krb5_db_free_principal(kdc_context, &server, nprincs);
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    } else if (nprincs != 1) {
+	char *sname;
+
+	krb5_db_free_principal(kdc_context, &server, nprincs);
+	if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
+	    krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
+			     sname);
+	    free(sname);
+	}
+	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+    }
+    retval = krb5_dbe_find_enctype(kdc_context, &server,
+				   ticket->enc_part.enctype, -1,
+				   ticket->enc_part.kvno, &server_key);
+    if (retval)
+	goto errout;
+    if (!server_key) {
+	retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+	goto errout;
+    }
+    *kvno = server_key->key_data_kvno;
+    if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
+	retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
+					     server_key,
+					     *key, NULL);
+    } else
+	retval = ENOMEM;
+errout:
+    krb5_db_free_principal(kdc_context, &server, nprincs);
+    return retval;
 }
 
 /* This probably wants to be updated if you support last_req stuff */

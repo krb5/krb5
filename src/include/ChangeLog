@@ -1,3 +1,9 @@
+Tue Sep  1 19:32:33 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Add ENCTYPE_LOCAL_DES3_HMAC_SHA1, in order to deal
+	with marc's current des3 cryptosystem until we figure out what
+	we're actually going to use for a standardized cryptosystem.
+
 Wed Jul  1 19:14:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* win-mac.h: Make size_t to be an unsigned long instead of

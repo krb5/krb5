@@ -1,3 +1,15 @@
+Thu Aug 20 16:50:00 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.c (add_random_key): Fixes to deal with absence of "-e"
+	flag.
+
+Wed Aug 19 14:52:40 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.c (add_random_key): New function to create a new
+ 	random key for a principal while retaining the previous kvno's
+ 	keys.  This is only temporary until a reasonable kadm5 interface
+	is made.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdb5_stash.c (argv): 

@@ -132,11 +132,11 @@ typedef	unsigned int krb5_boolean;
 typedef	unsigned int krb5_msgtype;	
 typedef	unsigned int krb5_kvno;	
 
-typedef	unsigned int krb5_addrtype;
-typedef unsigned int krb5_enctype;
-typedef unsigned int krb5_cksumtype;
-typedef unsigned int krb5_authdatatype;
-typedef unsigned int krb5_keyusage;
+typedef	krb5_int32 krb5_addrtype;
+typedef krb5_int32 krb5_enctype;
+typedef krb5_int32 krb5_cksumtype;
+typedef krb5_int32 krb5_authdatatype;
+typedef krb5_int32 krb5_keyusage;
 
 typedef krb5_int32	krb5_preauthtype; /* This may change, later on */
 typedef	krb5_int32	krb5_flags;
@@ -325,6 +325,9 @@ typedef struct _krb5_enc_data {
 #define ENCTYPE_DES3_HMAC_SHA1	0x0007
 #define ENCTYPE_DES_HMAC_SHA1	0x0008
 #define ENCTYPE_UNKNOWN		0x01ff
+/* local crud */
+/* marc's DES-3 with 32-bit length */
+#define ENCTYPE_LOCAL_DES3_HMAC_SHA1 0x7007
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002

@@ -1,3 +1,21 @@
+Mon Sep 14 23:21:17 1998  Tom Yu  <tlyu@mit.edu>
+
+	* old/decrypt.c (krb5_old_decrypt): Fix memory leak.
+
+Tue Sep  1 19:33:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* etypes.c: Add ETYPE_LOCAL_DES3_HMAC_SHA1 to deal with marc's
+	des3 code.  ETYPE_DES3_HMAC_SHA1 remains the same for now.
+
+Mon Aug 17 23:40:11 1998  Tom Yu  <tlyu@mit.edu>
+
+	* keyhash_provider/k5_md4des.c (k5_md4des_verify): Add
+	compatibility for krb5-beta5 checksums.
+
+	* keyhash_provider/k5_md5des.c (k5_md5des_verify): Add
+	compatibility for krb5-beta5 checksums.  Fix typos similar to
+	those corrected in k5_md4des.c.
+
 Wed Apr 15 18:02:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LIB): Rename to k5crypto.

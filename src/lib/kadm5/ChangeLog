@@ -1,3 +1,14 @@
+Thu Aug 13 17:21:06 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Fix to check
+	"supported_enctypes" if "kdc_supported_enctypes" isn't there.
+
+Wed Aug 12 20:19:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Use
+	"kdc_supported_enctypes" instead of "supported_enctypes" so that
+	the KDC and the kadmind will use different enctype lists.
+
 Wed Jul  8 04:48:50 1998  Geoffrey J. King  <gjking@mit.edu>
 
 	* logger.c: Add the function krb5_klog_reopen() which closes

@@ -86,7 +86,7 @@ cleanup:
     }
 
     memset(cksumdata, 0, hashsize);
-
+    free(cksumdata);
     return(ret);
 }
 

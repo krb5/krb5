@@ -1,3 +1,26 @@
+Tue Sep  1 19:35:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Add
+	ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list of enctypes to bash.
+
+	* krb524d.c (do_connection): Add ENCTYPE_LOCAL_DES3_HMAC_SHA1 to
+	the list of enctypes to search.
+
+Wed Aug 19 13:40:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Call krb_cr_tkt_krb5
+	if necessary, depending on th enctype.  Force enctype to be raw
+	DES3 if it's another DES3 type.
+
+	* krb524d.c (kdc_get_server_key): Add integer kvno argument,
+ 	rename previous kvno arg as kvnop, to distinguish returned (found)
+	kvno from the input kvno.
+	(lookup_service_key): Add kvnop argument to allow for returned
+	kvno.
+	(do_connection): Search for DES3 keys as well as DES.  Get the
+	found kvno as well, and use that instead of the kvno of the
+	incoming ticket.
+
 Sat Jul 18 22:10:29 1998  Geoffrey King  <gjking@mit.edu>
 
 	* krb524d.c (main): Remove the variable use_other_realm.

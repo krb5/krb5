@@ -13,6 +13,7 @@
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
+#include <krb5.h>
 
 #ifdef KRB_CRYPT_DEBUG
 extern int krb_debug;
@@ -65,6 +66,57 @@ decomp_ticket(tkt, flags, pname, pinstance, prealm, paddress, session,
                                  * (to decrypt the ticket) */
     Key_schedule key_s;		/* The precomputed key schedule */
 {
+    return
+	dcmp_tkt_int(tkt, flags, pname, pinstance, prealm,
+		     paddress, session, life, time_sec, sname, sinstance,
+		     key, key_s, NULL);
+}
+
+int
+decomp_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress, session,
+              life, time_sec, sname, sinstance, k5key)
+    KTEXT tkt;			/* The ticket to be decoded */
+    unsigned char *flags;       /* Kerberos ticket flags */
+    char *pname;		/* Authentication name */
+    char *pinstance;		/* Principal's instance */
+    char *prealm;		/* Principal's authentication domain */
+    unsigned KRB4_32 *paddress; /* Net address of entity
+                                 * requesting ticket */
+    C_Block session;		/* Session key inserted in ticket */
+    int *life; 		        /* Lifetime of the ticket */
+    unsigned KRB4_32 *time_sec; /* Issue time and date */
+    char *sname;		/* Service name */
+    char *sinstance;		/* Service instance */
+    krb5_keyblock *k5key;	/* krb5 keyblock of service */
+{
+    C_Block key;		/* placeholder; doesn't get used */
+    Key_schedule key_s;		/* placeholder; doesn't get used */
+
+    return
+	dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
+		     life, time_sec, sname, sinstance, key, key_s, k5key);
+}
+
+static int
+dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
+              life, time_sec, sname, sinstance, key, key_s, k5key)
+    KTEXT tkt;			/* The ticket to be decoded */
+    unsigned char *flags;       /* Kerberos ticket flags */
+    char *pname;		/* Authentication name */
+    char *pinstance;		/* Principal's instance */
+    char *prealm;		/* Principal's authentication domain */
+    unsigned KRB4_32 *paddress; /* Net address of entity
+                                 * requesting ticket */
+    C_Block session;		/* Session key inserted in ticket */
+    int *life; 		        /* Lifetime of the ticket */
+    unsigned KRB4_32 *time_sec; /* Issue time and date */
+    char *sname;		/* Service name */
+    char *sinstance;		/* Service instance */
+    C_Block key;		/* Service's secret key
+                                 * (to decrypt the ticket) */
+    Key_schedule key_s;		/* The precomputed key schedule */
+    krb5_keyblock *k5key;	/* krb5 keyblock of service */
+{
     static int tkt_swap_bytes;
     unsigned char *uptr;
     char *ptr = (char *)tkt->dat;
@@ -83,8 +135,37 @@ decomp_ticket(tkt, flags, pname, pinstance, prealm, paddress, session,
 	memset(keybuf, 0, sizeof(keybuf));	/* Clear the buffer */
     }
 #endif
-    pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
-                 (long) tkt->length,key_s,(C_Block *) key,0);
+    if (k5key != NULL) {
+	/* block locals */
+	krb5_enc_data in;
+	krb5_data out;
+	krb5_error_code ret;
+
+	in.enctype = k5key->enctype;
+	in.kvno = 0;
+	in.ciphertext.length = tkt->length;
+	in.ciphertext.data = tkt->dat;
+	out.length = tkt->length;
+	out.data = malloc(tkt->length);
+	if (out.data == NULL)
+	    return KFAILURE;	/* XXX maybe ENOMEM? */
+
+	/* XXX note the following assumes that context arg isn't used  */
+	ret =
+	    krb5_c_decrypt(NULL, k5key,
+			   KRB5_KEYUSAGE_KDC_REP_TICKET, NULL, &in, &out);
+	if (ret) {
+	    free(out.data);
+	    return KFAILURE;
+	} else {
+	    memcpy(tkt->dat, out.data, out.length);
+	    memset(out.data, 0, out.length);
+	    free(out.data);
+	}
+    } else {
+	pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
+		     (long) tkt->length,key_s,(C_Block *) key,0);
+    }
 #endif /* ! NOENCRYPTION */
 #ifdef KRB_CRYPT_DEBUG
     if (krb_debug) {

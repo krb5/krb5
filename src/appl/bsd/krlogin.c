@@ -61,6 +61,11 @@ char copyright[] =
 #include <setjmp.h>
 #include <netdb.h>
      
+#ifdef HAVE_SYS_FILIO_H
+/* Solaris needs <sys/filio.h> for FIONREAD */
+#include <sys/filio.h>
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

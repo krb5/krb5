@@ -1,3 +1,26 @@
+Wed Aug 12 18:32:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_set_key): Nuke the krb5_keyblock if it's set.
+	(krb_set_key_krb5): New function to set a static krb5_keyblock for
+	decryption purposes.
+	(krb_clear_key_krb5): New function to clear the static
+	krb5_keyblock if it's set.
+	(krb_rd_req): Call decomp_ticket or decomp_tkt_krb5 as appropriate
+	to the key type.
+
+	* decomp_tkt.c (decomp_tkt_krb5): New wrapper to call
+	dcmp_tkt_int.
+	(decomp_ticket): Transform into wrapper to call dcmp_tkt_int.
+	(dcmp_tkt_int): New internal function; use a krb5_keyblock to
+	decrypt the ticket if present; else just use plain old C_Block.
+
+	* cr_tkt.c (krb_create_ticket): Transform into a wrapper that
+	calls krb_cr_tkt_int.
+	(krb_cr_tkt_krb5): New wrapper to call krb_cr_tkt_int.
+	(krb_cr_tkt_int): New internal function that potentially uses a
+	krb5_keyblock to encrypt the ticket, or just a C_Block if the
+	krb5_keyblock is not set.
+
 Thu Jul 30 13:13:30 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* tf_util.c (tf_init): s/,/= so getuid() actually gets called

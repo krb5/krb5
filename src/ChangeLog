@@ -1,3 +1,14 @@
+Wed Aug 19 20:14:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): Back out Sam's change to reorder the
+ 	"force_static" logic, as it would cause problems where a
+ 	forced-static library is built in the same directory as a
+	program, due to explicit setting of CC_LINK, etc.
+
+Mon Aug 17 18:10:29 1998  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix Sam's fixes (variable capitalization).
+
 Wed Jul  8 01:10:44 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* aclocal.m4: Allow shared libraries to build properly under Irix

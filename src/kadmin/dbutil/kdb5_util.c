@@ -60,7 +60,8 @@ usage()
 	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tdump_v4	[filename]\n"
-	     "\tload_v4	[-t] [-n] [-v] [-K] [-s stashfile] inputfile\n");
+	     "\tload_v4	[-t] [-n] [-v] [-K] [-s stashfile] inputfile\n"
+	     "\tark	[-e etype_list] principal\n");
      exit(1);
 }
 
@@ -82,6 +83,7 @@ int load_db(int, char **);
 int dump_v4db(int, char **);
 int load_v4db(int, char **);
 int open_db_and_mkey();
+int add_random_key(int, char **);
    
 typedef int (*cmd_func)(int, char **);
 
@@ -97,6 +99,7 @@ struct _cmd_table {
      "load", load_db, 0,
      "dump_v4", dump_v4db, 1,
      "load_v4", load_v4db, 0,
+     "ark", add_random_key, 1,
      NULL, NULL, 0,
 };
 
@@ -411,5 +414,106 @@ quit()
 	exit_status++;
 	return 1;
     }
+    return 0;
+}
+
+int
+add_random_key(argc, argv)
+    int argc;
+    char **argv;
+{
+    krb5_error_code ret;
+    krb5_principal princ;
+    krb5_db_entry dbent;
+    int n, i;
+    krb5_boolean more;
+    krb5_timestamp now;
+
+    krb5_key_salt_tuple *keysalts = NULL;
+    krb5_int32 num_keysalts = 0;
+
+    int free_keysalts;
+    char *me = argv[0];
+    char *ks_str = NULL;
+    char *pr_str;
+
+    if (argc < 2)
+	usage();
+    for (argv++, argc--; *argv; argv++, argc--) {
+	if (!strcmp(*argv, "-e")) {
+	    argv++; argc--;
+	    ks_str = *argv;
+	    continue;
+	} else
+	    break;
+    }
+    if (argc < 1)
+	usage();
+    pr_str = *argv;
+    ret = krb5_parse_name(util_context, pr_str, &princ);
+    if (ret) {
+	com_err(me, ret, "while parsing principal name %s", pr_str);
+	return 1;
+    }
+    n = 1;
+    ret = krb5_db_get_principal(util_context, princ, &dbent,
+				&n, &more);
+    if (ret) {
+	com_err(me, ret, "while fetching principal %s", pr_str);
+	return 1;
+    }
+    if (n != 1) {
+	fprintf(stderr, "principal %s not found\n", pr_str);
+	return 1;
+    }
+    if (more) {
+	fprintf(stderr, "principal %s not unique\n", pr_str);
+	krb5_dbe_free_contents(util_context, &dbent);
+	return 1;
+    }
+    ret = krb5_string_to_keysalts(ks_str,
+				  ", \t", ":.-", 0,
+				  &keysalts,
+				  &num_keysalts);
+    if (ret) {
+	com_err(me, ret, "while parsing keysalts %s", ks_str);
+	return 1;
+    }
+    if (!num_keysalts || keysalts == NULL) {
+	num_keysalts = global_params.num_keysalts;
+	keysalts = global_params.keysalts;
+	free_keysalts = 0;
+    } else
+	free_keysalts = 1;
+    ret = krb5_dbe_ark(util_context, &master_keyblock,
+		       keysalts, num_keysalts,
+		       &dbent);
+    if (free_keysalts)
+	free(keysalts);
+    if (ret) {
+	com_err(me, ret, "while randomizing principal %s", pr_str);
+	krb5_dbe_free_contents(util_context, &dbent);
+	return 1;
+    }
+    dbent.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+    ret = krb5_timeofday(util_context, &now);
+    if (ret) {
+	com_err(me, ret, "while getting time");
+	krb5_dbe_free_contents(util_context, &dbent);
+	return 1;
+    }
+    ret = krb5_dbe_update_last_pwd_change(util_context, &dbent, now);
+    if (ret) {
+	com_err(me, ret, "while setting changetime");
+	krb5_dbe_free_contents(util_context, &dbent);
+	return 1;
+    }
+    ret = krb5_db_put_principal(util_context, &dbent, &n);
+    krb5_dbe_free_contents(util_context, &dbent);
+    if (ret) {
+	com_err(me, ret, "while saving principal %s", pr_str);
+	return 1;
+    }
+    printf("%s changed\n", pr_str);
     return 0;
 }

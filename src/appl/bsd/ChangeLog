@@ -1,3 +1,7 @@
+Tue Aug 18 16:48:02 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krlogin.c: Add <sys/filio.h> for FIONREAD.
+
 Sun Jul 26 23:46:36 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* login.c (main): Allow krb524 conversion for forwarded tickets
