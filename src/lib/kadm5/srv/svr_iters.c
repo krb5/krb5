@@ -59,7 +59,7 @@ struct iter_data {
  * regexp is filled in with allocated memory contained a regular
  * expression to be used with re_comp/compile that matches what the
  * shell-style glob would match.  If glob does not contain an "@"
- * character and realm is not NULL, "@<realm>" is appended to the regexp.
+ * character and realm is not NULL, "@*" is appended to the regexp.
  *
  * Conversion algorithm:
  *
@@ -85,8 +85,7 @@ kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
      /* and trailing null.  If glob has no @, also allocate space for */
      /* the realm. */
      append_realm = (realm != NULL) && (strchr(glob, '@') == NULL);
-     p = (char *) malloc(strlen(glob)*2+ 3 +
-			 (append_realm ? (strlen(realm)+1) : 0));
+     p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 2 : 0));
      if (p == NULL)
 	  return ENOMEM;
      *regexp = p;
@@ -120,8 +119,7 @@ kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
 
      if (append_realm) {
 	  *p++ = '@';
-	  strcpy(p, realm);
-	  p += strlen(realm);
+	  *p++ = '*';
      }
 
      *p++ = '$';

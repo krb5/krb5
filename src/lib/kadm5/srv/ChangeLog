@@ -1,3 +1,8 @@
+Thu Nov  7 16:42:38 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_iters.c (glob_to_regexp): a principal glob with no @
+ 	defaults to @*, not @LOCAL.REAM [krb5-admin/161]
+ 
 Wed Nov  6 10:45:12 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* server_init.c (kadm5_init): Use a more fined grained error
