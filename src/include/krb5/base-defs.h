@@ -36,9 +36,9 @@ typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
 typedef krb5_ui_2	krb5_authdatatype;
 
-typedef struct _krb5_string {
+typedef struct _krb5_data {
     int length;
-    char *string;
-} krb5_string;
+    char *data;
+} krb5_data;
 
 #endif /* __KRB5_BASE_DEFS__ */
