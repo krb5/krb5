@@ -173,7 +173,7 @@ char *argv[];
 			   0,		/* don't need seq # */
 			   0,		/* don't need a subsession key */
 			   &err_ret,
-			   &rep_ret);
+			   &rep_ret, NULL);
 
     krb5_free_principal(context, server);	/* finished using it */
 
