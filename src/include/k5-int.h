@@ -179,6 +179,7 @@ typedef unsigned char	u_char;
 /*
  * After loading the configuration definitions, load the Kerberos definitions.
  */
+#include <errno.h>
 #include "krb5.h"
 
 #ifdef NEED_SOCKETS

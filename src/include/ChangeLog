@@ -1,3 +1,8 @@
+2002-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h: Include errno.h.
+	* krb5.hin: Don't include errno.h.
+
 2002-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h [NEED_FAKE_GETADDRINFO]: Include errno.h.

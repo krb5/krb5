@@ -88,7 +88,6 @@
  */
 
 #include <profile.h>
-#include <errno.h>
 
 /*
  * end "error_def.h"
