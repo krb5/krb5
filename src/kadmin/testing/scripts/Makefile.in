@@ -1,0 +1,20 @@
+# XXX This isn't right!
+PERL	= /usr/athena/bin/perl
+
+GEN_SCRIPTS = compare_dump.pl fixup-conf-files.pl make-host-keytab.pl \
+	simple_dump.pl verify_xrunner_report.pl
+
+all:: $(GEN_SCRIPTS) restore_files.sh
+
+restore_files.sh:
+	ln -s save_files.sh restore_files.sh
+
+%.pl: %.pl.in
+	-rm -f $@.tmp
+	echo "#!$(PERL)" > $@.tmp
+	sed 1d $< >> $@.tmp
+	chmod +x $@.tmp
+	mv $@.tmp $@
+
+clean::
+	-rm -f $(GEN_SCRIPTS) *.tmp

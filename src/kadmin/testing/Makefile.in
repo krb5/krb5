@@ -1,0 +1,4 @@
+CFLAGS = $(CCOPTS)
+
+all::
+
