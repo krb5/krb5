@@ -649,13 +649,13 @@ kerberos5_forward(ap)
 	return;
     }
 
-    if (r = get_for_creds(ETYPE_DES_CBC_CRC,
-			  krb5_kdc_req_sumtype,
-			  RemoteHostName,
-			  local_creds->client,
-			  &local_creds->keyblock,
-			  forward_flags & OPTS_FORWARDABLE_CREDS,
-			  &forw_creds)) {
+    if (r = krb5_get_for_creds(ETYPE_DES_CBC_CRC,
+			       krb5_kdc_req_sumtype,
+			       RemoteHostName,
+			       local_creds->client,
+			       &local_creds->keyblock,
+			       forward_flags & OPTS_FORWARDABLE_CREDS,
+			       &forw_creds)) {
 	if (auth_debug_mode) 
 	  printf("Kerberos V5: error getting forwarded creds - %s\r\n",
 		 error_message(r));
