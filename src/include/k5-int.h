@@ -1539,4 +1539,44 @@ int krb5_seteuid  KRB5_PROTOTYPE((int));
 /* to keep lint happy */
 #define krb5_xfree(val) free((char FAR *)(val))
 
+/* temporary -- this should be under lib/krb5/ccache somewhere */
+
+struct _krb5_ccache {
+    krb5_magic magic;
+    struct _krb5_cc_ops FAR *ops;
+    krb5_pointer data;
+};
+
+struct _krb5_cc_ops {
+    krb5_magic magic;
+    char FAR *prefix;
+    char FAR * (KRB5_CALLCONV *get_name) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *resolve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *,
+					    const char FAR *));
+    krb5_error_code (KRB5_CALLCONV *gen_new) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *));
+    krb5_error_code (KRB5_CALLCONV *init) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal));
+    krb5_error_code (KRB5_CALLCONV *destroy) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *close) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (KRB5_CALLCONV *store) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *retrieve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds FAR *,
+					    krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_princ) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_first) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *));
+    krb5_error_code (KRB5_CALLCONV *get_next) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *, krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *end_get) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor FAR *));
+    krb5_error_code (KRB5_CALLCONV *remove_cred) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds FAR *));
+    krb5_error_code (KRB5_CALLCONV *set_flags) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags));
+};
+
+extern krb5_cc_ops *krb5_cc_dfl_ops;
+
 #endif /* _KRB5_INT_H */

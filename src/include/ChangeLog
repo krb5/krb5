@@ -1,3 +1,11 @@
+2000-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_cc_*): Replace macro definitions with function
+	declarations.
+	(struct _krb5_ccache, struct _krb5_cc_ops): Declare
+	only; move structure definitions...
+	* k5-int.h: To here.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-int.h: Add prototypes for krb5_libdefault_boolean,
