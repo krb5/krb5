@@ -42,11 +42,17 @@ request extract_v4_srvtab, "Extract service key table",
 request list_db, "List database entries",
 	list_db, ldb;
 
-request dump_db, "Dump database entries (not working yet)",
+request dump_db, "Dump database entries to a file",
 	dump_db, ddb;
+
+request load_db, "Load database entries from a file",
+	load_db, lddb;
 
 request set_dbname, "Change database name",
 	set_dbname, sdbn;
+
+request	enter_master_key, "Enter the master key for a database",
+	enter_master_key, emk;
 
 request change_working_dir, "Change working directory",
 	change_working_directory, cwd, cd;
