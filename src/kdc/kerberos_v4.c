@@ -72,7 +72,7 @@
 
 extern int errno;
 
-int compat_decrypt_key PROTOTYPE((krb5_encrypted_keyblock *, C_Block));
+int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block));
 int kerb_get_principal PROTOTYPE((char *, char *, Principal *, unsigned int,
 				  int *));
 int check_princ PROTOTYPE((char *, char *, unsigned, Principal *));
@@ -301,31 +301,29 @@ hang()
  * to a real v4 key.
  * this is ugly, but it saves changing more v4 code.
  */
-int
-compat_decrypt_key (in5, out4)
-     krb5_encrypted_keyblock *in5;
+int compat_decrypt_key (in5, out4)
+     krb5_key_data *in5;
      C_Block out4;
 {
     krb5_keyblock out5;
     int retval = -1;
 
     out5.contents = NULL;
-    if ( krb5_kdb_decrypt_key(kdc_context,  &master_encblock, in5, &out5)) {
+    if (krb5_dbekd_decrypt_key_data(kdc_context,&master_encblock,in5,&out5,NULL)){
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
+	return(retval);
     }
-    if ( ! out5.contents) return( retval);
-    if ( out5.length != KRB5_MIT_DES_KEYSIZE) {
+    if (out5.length != KRB5_MIT_DES_KEYSIZE) {
 	lt = klog( L_DEATH_REQ,"internal keysize error in kdc");
-    }
-    else {
+    } else {
+	memcpy(out4, out5.contents, out5.length);
 	retval = 0;
-	memcpy( out4, out5.contents, out5.length);
     }
-    memset(	out5.contents, 0,    out5.length);
-    krb5_xfree(	out5.contents);
-
-    return( retval);
+    memset(out5.contents, 0, out5.length);
+    krb5_xfree(out5.contents);
+    return(retval);
 }
+
 /* array of name-components + NULL ptr
  */
 #define MIN5 300
@@ -354,6 +352,9 @@ kerb_get_principal(name, inst, principal, maxn, more)
     char* text;
     struct tm *tp;
 
+    int i, max_kvno, ok_key;
+
+    *more = 0;
     if ( maxn > 1) {
 	lt = klog(L_DEATH_REQ, "KDC V4 is requesting too many principals");
 	return( 0);
@@ -370,45 +371,51 @@ kerb_get_principal(name, inst, principal, maxn, more)
      *     in v5, null instance means the null-component doesn't exist.
      */
 
+    if (retval = krb5_425_conv_principal(kdc_context, name, inst, 
+					 local_realm, &search)) 
+	return(0);
 
-    retval = krb5_425_conv_principal(kdc_context, name, inst, local_realm, &search);
-    if (retval) {
-	    *more = 0;
-	    return(0);
-    }
-    retval = krb5_db_get_principal(kdc_context, search, &entries, &nprinc, &more5);
-    krb5_free_principal(kdc_context, search);
-    if (retval) {
-	*more = 0;
+    if (retval = krb5_db_get_principal(kdc_context, search, &entries, 
+				       &nprinc, &more5)) {
+        krb5_free_principal(kdc_context, search);
         return(0);
     }
     principal->key_low = principal->key_high = 0;
+    krb5_free_principal(kdc_context, search);
 
-    if ( nprinc < 1) {
-	goto cleanup;
-    } else if ( entries.key.keytype != KEYTYPE_DES) {
-	lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s has non-DES keytype %d",
-		  name, inst, entries.key.keytype);
-	nprinc = 0;
-	goto cleanup;
-    } else {
- 	/*
-	 * If the primary key's salt type is not V4, use the alternate
-	 * key instead, if it exists.
-	 */
- 	if (entries.salt_type != KRB5_KDB_SALTTYPE_V4 &&
-	    entries.alt_key.length) {
- 	    if (! compat_decrypt_key( &entries.alt_key,k)){
- 		memcpy( &principal->key_low,           k,     LONGLEN);
-             	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
+    if (nprinc < 1) {
+        *more = (int)more5 || (nprinc > maxn);
+        return(nprinc);
+    } 
+
+    /* First find the max kvno */
+    for (max_kvno = i = 0; i < entries.n_key_data; i++) {
+	if (max_kvno < entries.key_data[i].key_data_kvno) {
+	    max_kvno = entries.key_data[i].key_data_kvno;
+	    ok_key = i;
+	}
+    }
+	
+    /* Find a KEYTYPE_DES key with a KRB5_KDB_SALTTYPE_V4 salt */
+    for (i = ok_key; i < entries.n_key_data; i++) {
+	if (max_kvno == entries.key_data[i].key_data_kvno) {
+	    if ((entries.key_data[0].key_data_type[0] == KEYTYPE_DES) &&
+	      (entries.key_data[0].key_data_type[1] == KRB5_KDB_SALTTYPE_V4)) {
+		goto found_one;
 	    }
- 	}
- 	else {
- 	    if (! compat_decrypt_key( &entries.key, k)) {
-             	memcpy( &principal->key_low,           k,     LONGLEN);
-             	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
-	    }
- 	}
+	}
+    }
+	
+
+    lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s isn't V4 compatible",
+	      name, inst);
+    krb5_db_free_principal(kdc_context, &entries, nprinc);
+    return(0);
+
+found_one:;
+    if (! compat_decrypt_key( &entries.key_data[i], k)) {
+ 	memcpy( &principal->key_low,           k,     LONGLEN);
+       	memcpy( &principal->key_high, (KRB4_32 *) k + 1, LONGLEN);
     }
     /* convert v5's entries struct to v4's Principal struct:
      * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
@@ -416,13 +423,12 @@ kerb_get_principal(name, inst, principal, maxn, more)
     v4_time = (entries.max_life + MIN5 - 1) / MIN5;
     principal->max_life = v4_time > HR21 ? HR21 : (unsigned char) v4_time;
     principal->exp_date = (unsigned long) entries.expiration;
-    principal->mod_date = (unsigned long) entries.mod_date;
-    principal->attributes = 0;
+/*    principal->mod_date = (unsigned long) entries.mod_date; */
     principal->kdc_key_ver = entries.mkvno;
-    principal->key_version = entries.kvno;
+    principal->key_version = max_kvno;
+    principal->attributes = 0;
 
-    /* set up v4 format of each date's text:
-     */
+    /* set up v4 format of each date's text: */
     for ( date = &principal->exp_date, text = principal->exp_date_txt;
 	  toggle ^= 1;
 	  date = &principal->mod_date, text = principal->mod_date_txt) {
@@ -431,13 +437,12 @@ kerb_get_principal(name, inst, principal, maxn, more)
 		 tp->tm_year > 1900 ? tp->tm_year : tp->tm_year + 1900,
 		 tp->tm_mon + 1, tp->tm_mday); /* January is 0, not 1 */
     }
-cleanup:
-    /* free the storage held by the v5 entry struct,
+    /*
+     * free the storage held by the v5 entry struct,
      * which was allocated by krb5_db_get_principal().
      * this routine clears the keyblock's contents for us.
      */
-    krb5_db_free_principal(kdc_context,  &entries, nprinc);
-
+    krb5_db_free_principal(kdc_context, &entries, nprinc);
     *more = (int) more5 || (nprinc > maxn);
     return( nprinc);
 }

@@ -246,7 +246,7 @@ krb5_data **response;			/* filled in with a response packet */
 	    ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
 
  	    for (ok_key = 0; ok_key < server.n_key_data; ok_key++) {
-		if ((server.key_data[ok_key].key_data_kvno = max_kvno) &&
+		if ((server.key_data[ok_key].key_data_kvno == max_kvno) &&
 	            (server.key_data[ok_key].key_data_type[0] == ok_keytype)) {
 		    goto got_a_key;
 		}

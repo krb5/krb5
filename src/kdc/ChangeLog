@@ -1,4 +1,9 @@
 
+Thu Aug 03 12:22:34 1995 Chris Provenzano (proven@mit.edu)
+
+	* do_as_req.c : Fix bug from new kdb changes.
+	* kerberos_v4.c : Use new db format.
+
 Thu Aug 3 11:49:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* do_as_req.c - Ensure that padata is null with normal salt.
 	* kerberos_v4.c - Give the compiler something to compile when Kerberos
