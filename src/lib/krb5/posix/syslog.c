@@ -33,6 +33,7 @@
  * Modified to use UNIX domain IPC by Ralph Campbell
  */
 
+#ifndef _MSDOS
 #ifdef __STDC__
 #include <stdarg.h>
 #else
@@ -236,3 +237,14 @@ setlogmask(pmask)
 		LogMask = pmask;
 	return (omask);
 }
+#else /* _MSDOS */
+
+/* Windows doesn't have the concept of a system log, so just
+** do nothing here.
+*/
+void
+syslog(int pri, const char *fmt, ...)
+{
+   return;
+}
+#endif

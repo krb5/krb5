@@ -1,6 +1,14 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\krb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS = @LIBOBJS@
+
+all:: all-$(WHAT)
+
+all-unix:: $(OBJS)
+
+all-windows:: syslog.obj

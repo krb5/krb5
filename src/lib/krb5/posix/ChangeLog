@@ -1,3 +1,9 @@
+Tue Mar 7 12:30:45 1995 Keith Vetter (keithv@fusion.com)
+
+	* syslog.c: a disabled stub provided for satisfying the linker
+           on the pc.
+        * Makefile.in: made to work on the pc but only for syslog.c
+
 Tue Feb 28 01:05:42 1995  John Gilmore  (gnu at toad.com)
 
 	* daemon.c, memmove.c, strcasecmp.c, strdup.c:  Avoid <krb5/...>
