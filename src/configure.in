@@ -125,9 +125,6 @@ dnl for krb524
 AC_TYPE_SIGNAL
 dnl
 dnl
-dnl We don't actually use this yet, but I want to start gathering
-dnl info on which platforms support it.
-AC_CHECK_FUNCS(pthread_rwlock_init)
 dnl Check for thread safety issues.
 dnl (Is there a better place for this?)
 tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
