@@ -1,3 +1,9 @@
+Wed Jan 10 23:16:41 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cns.c (kwin_command): When obtaining tickets, we make them
+		forwardable by default.  XXX This should really a
+		configurable option in the UI.
+
 Sat Jun 10 23:08:57 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* kpasswd.c: krb5_auth_context redefinitions

@@ -2027,11 +2027,17 @@ kwin_command (
                 code = krb5_us_timeofday(k5_context, &sec, &usec);
                 if (code) break;
                 creds.times.starttime = 0;
-    			creds.times.endtime = sec + 60L * lifetime;
-	    		creds.times.renew_till = 0;
-
-		    	code = krb5_get_in_tkt_with_password(k5_context, 0, NULL,
-                    NULL, NULL, password, k5_ccache, &creds, 0);
+		creds.times.endtime = sec + 60L * lifetime;
+		creds.times.renew_till = 0;
+		
+		/*
+		 * XXX whether or not the credentials should be
+		 * forwardable should be a configurable option in the
+		 * UI.
+		 */
+		code = krb5_get_in_tkt_with_password(k5_context,
+			     KDC_OPT_FORWARDABLE, NULL, NULL, NULL,
+			     password, k5_ccache, &creds, 0);
             } while (0);
 
             if (principal)
