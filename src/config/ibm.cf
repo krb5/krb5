@@ -1,0 +1,19 @@
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
+ */
+
+#define OSName            4.3bsd
+#define OSMajorVersion    4
+#define OSMinorVersion    3
+
+#ifdef VaxArchitecture
+#define HasGcc YES
+#endif
+
+#define HasVoidSignalReturn NO
+#define HasSaberC YES
+
+#ifdef VaxArchitecture
+#define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
+#endif
+
