@@ -26,6 +26,23 @@
 #define NEED_WINDOWS
 #include "k5-int.h"
 
+static krb5_error_code
+fixup_os_init_paths_retval(retval)
+    krb5_error_code retval;
+{
+    if (retval == ENOENT)
+        return KRB5_CONFIG_CANTOPEN;
+
+    if ((retval == PROF_SECTION_NOTOP) ||
+        (retval == PROF_SECTION_SYNTAX) ||
+        (retval == PROF_RELATION_SYNTAX) ||
+        (retval == PROF_EXTRA_CBRACE) ||
+        (retval == PROF_MISSING_OBRACE))
+        return KRB5_CONFIG_BADFORMAT;
+
+    return retval;
+}
+
 #ifdef macintosh
 static CInfoPBRec	theCatInfo;
 static	char		*FileBuffer;
@@ -93,7 +110,169 @@ char	pathbuf[255];
 	GetPathname(&krbSpec, &pathbuf);
 	return strdup(pathbuf);
 }
-#endif
+#endif /* macintosh */
+
+#if defined(_MSDOS) || defined(_WIN32)
+
+/*
+ * get_from_registry
+ *
+ * This will find a profile in the registry.  *pbuffer != 0 if we
+ * found something.  Make sure to free(*pbuffer) when done.  It will
+ * return an error code if there is an error the user should know
+ * about.  We maintain the invariant: return value != 0 => 
+ * *pbuffer == 0.
+ */
+
+static krb5_error_code
+get_from_registry(
+    char** pbuffer,
+    HKEY hBaseKey
+    )
+{
+    HKEY hKey = 0;
+    DWORD size = 0;
+    krb5_error_code retval = 0;
+    const char *key_path = "Software\\MIT\\Kerberos5";
+    const char *value_name = "config";
+
+    /* a wannabe assertion */
+    if (!pbuffer)
+    {
+        /*
+         * We have a programming error!  For now, we segfault :)
+         * There is no good mechanism to deal.
+         */
+    }
+    *pbuffer = 0;
+
+    if (RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE, 
+                     &hKey) != ERROR_SUCCESS)
+    {
+        /* not a real error */
+        goto cleanup;
+    }
+    if (RegQueryValueEx(hKey, value_name, 0, 0, 0, &size) != ERROR_MORE_DATA)
+    {
+        /* not a real error */
+        goto cleanup;
+    }
+    *pbuffer = malloc(size);
+    if (!*pbuffer)
+    {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+    if (RegQueryValueEx(hKey, value_name, 0, 0, *pbuffer, &size) != 
+        ERROR_SUCCESS)
+    {
+        /*
+         * Let's not call it a real error in case it disappears, but
+         * we need to free so that we say we did not find anything.
+         */
+        free(*pbuffer);
+        *pbuffer = 0;
+        goto cleanup;
+    }
+ cleanup:
+    if (hKey)
+        RegCloseKey(hKey);
+    if (retval && *pbuffer)
+    {
+        free(*pbuffer);
+        /* Let's say we did not find anything: */
+        *pbuffer = 0;
+    }
+    return retval;
+}
+
+static krb5_error_code
+os_init_paths(ctx, secure)
+	krb5_context ctx;
+	krb5_boolean secure;
+{
+    krb5_error_code retval = 0;
+    char *name = 0;
+
+    ctx->profile_secure = secure;
+
+    if (!secure) name = getenv("KRB5_CONFIG");
+    if (!name && !secure)
+    {
+        /* HKCU */
+        retval = get_from_registry(&name, HKEY_CURRENT_USER);
+        if (retval)
+            goto cleanup;
+    }
+    if (!name)
+    {
+        /* HKLM */
+        retval = get_from_registry(&name, HKEY_LOCAL_MACHINE);
+        if (retval)
+            goto cleanup;
+    }
+    if (!name && !secure)
+    {
+        /* module dir */
+        const DWORD size = 1024; /* fixed buffer */
+        int found = 0;
+        name = malloc(size);
+        if (!name) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+        if (GetModuleFileName(0, name, size))
+        {
+            char *p = name + strlen(name);
+            while ((p >= name) && (*p != '\\') && (*p != '/')) p--;
+            if (p >= name)
+            {
+                struct _stat s;
+                p++;
+                strncpy(p, DEFAULT_PROFILE_FILENAME, size - (p - name));
+                name[size - 1] = 0;
+                found = !_stat(name, &s);
+            }
+        } else {
+            /* Module name too long.  Oh well.  Keep trucking. */
+        }
+        if (!found && name)
+        {
+            free(name);
+            name = 0;
+        }
+    }
+    if (!name)
+    {
+        /* windows dir */
+        UINT size = GetWindowsDirectory(0, 0);
+        name = malloc(size + 1 +
+                      strlen(DEFAULT_PROFILE_FILENAME) + 1);
+        if (name)
+        {
+            GetWindowsDirectory(name, size);
+            strcat(name, "\\");
+            strcat(name, DEFAULT_PROFILE_FILENAME);
+        } else {
+            retval = KRB5_CONFIG_CANTOPEN;
+        }
+    }
+    /* Invariant: name || retval */
+    if (!retval)
+    {
+        const char *filenames[2];
+        filenames[0] = name;
+        filenames[1] = 0;
+        retval = profile_init(filenames, &ctx->profile);
+    }
+ cleanup:
+    if (name)
+        free(name);
+
+    return fixup_os_init_paths_retval(retval);
+}
+
+#else
 
 /* Set the profile paths in the context. If secure is set to TRUE then 
    do not include user paths (from environment variables, etc.)
@@ -108,31 +287,9 @@ os_init_paths(ctx, secure)
 
 #if defined(macintosh)
 	const char *filenames[3];
-#elif defined(_MSDOS) || defined(_WIN32)
-	const char *filenames[2];
 #endif
-
 	ctx->profile_secure = secure;
 
-#if defined(_MSDOS) || defined(_WIN32)
-    {
-        char defname[160];                      /* Default value */
-        char krb5conf[160];                     /* Actual value */
-
-        GetWindowsDirectory(defname, sizeof(defname) - 10);
-        strcat (defname, "\\");
-        strcat (defname, DEFAULT_PROFILE_FILENAME);
-        GetPrivateProfileString(INI_FILES, INI_KRB5_CONF, defname,
-            krb5conf, sizeof(krb5conf), KERBEROS_INI);
-        name = krb5conf;
-
-        filenames[0] = name;
-        filenames[1] = 0;
-    }
-
-	retval = profile_init(filenames, &ctx->profile);
-
-#else /* _MSDOS || _WIN32 */
 #ifdef macintosh
 	filenames[0] = GetMacProfilePathName("\pkrb Configuration");
 	filenames[1] = GetMacProfilePathName("\pkrb5.ini");
@@ -148,23 +305,13 @@ os_init_paths(ctx, secure)
 
 	retval = profile_init_path(name, &ctx->profile);
 #endif /* macintosh */
-#endif /* _MSDOS || _WIN32 */
 
 	if (retval)
 	    ctx->profile = 0;
 
-	if (retval == ENOENT)
-		retval = KRB5_CONFIG_CANTOPEN;
-
-	if ((retval == PROF_SECTION_NOTOP) ||
-	    (retval == PROF_SECTION_SYNTAX) ||
-	    (retval == PROF_RELATION_SYNTAX) ||
-	    (retval == PROF_EXTRA_CBRACE) ||
-	    (retval == PROF_MISSING_OBRACE))
-		return KRB5_CONFIG_BADFORMAT;
-	    
-	return retval;
+        return fixup_os_init_paths_retval(retval);
 }
+#endif /* _MSDOS || _WIN32 */
 
 krb5_error_code
 krb5_os_init_context(ctx)

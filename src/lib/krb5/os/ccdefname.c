@@ -33,7 +33,7 @@
 #endif
 
 #if defined(_WIN32)
-static int get_from_registry(char *name_buf, int name_size)
+static int get_from_registry_indirect(char *name_buf, int name_size)
 {
 	/* If the RegKRB5CCNAME variable is set, it will point to
 	 * the registry key that has the name of the cache to use.
@@ -48,7 +48,6 @@ static int get_from_registry(char *name_buf, int name_size)
 	    
 	LONG name_buf_size;
 	HKEY hkey;
-	DWORD ipType;
 	int found = 0;
 	char *cp;
 
@@ -69,34 +68,108 @@ static int get_from_registry(char *name_buf, int name_size)
 		return 0;
 	
 	name_buf_size = name_size;
-	if (RegQueryValueEx(hkey, cp, 0, &ipType, 
+	if (RegQueryValueEx(hkey, cp, 0, 0, 
 			    name_buf, &name_buf_size) != ERROR_SUCCESS)
-			return 0;
-	
+	{
+		RegCloseKey(hkey);
+		return 0;
+	}
+
+	RegCloseKey(hkey);
 	return 1;
+}
+
+/*
+ * get_from_registry
+ *
+ * This will find the ccname in the registry.  Returns 0 on error, non-zero
+ * on success.
+ */
+
+static int
+get_from_registry(
+    HKEY hBaseKey,
+    char *name_buf, 
+    int name_size
+    )
+{
+    HKEY hKey;
+    DWORD name_buf_size = (DWORD)name_size;
+    const char *key_path = "Software\\MIT\\Kerberos5";
+    const char *value_name = "ccname";
+
+    if (RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE, 
+                     &hKey) != ERROR_SUCCESS)
+        return 0;
+    if (RegQueryValueEx(hKey, value_name, 0, 0, 
+                        name_buf, &name_buf_size) != ERROR_SUCCESS)
+    {
+        RegCloseKey(hKey);
+        return 0;
+    }
+    RegCloseKey(hKey);
+    return 1;
+}
+
+static int
+try_dir(
+    char* dir,
+    char* buffer,
+    int buf_len
+    )
+{
+    struct _stat s;
+    static const char APPEND_KRB5CC[] = "\\krb5cc";
+    if (!dir)
+        return 0;
+    if (_stat(dir, &s))
+        return 0;
+    if (!(s.st_mode & _S_IFDIR))
+        return 0;
+    if (buffer != dir)
+        strncpy(buffer, dir, buf_len);
+    strncat(buffer, APPEND_KRB5CC, buf_len);
+    return 1;
 }
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
-	char defname[160];                  /* Default value */
 	char *prefix = krb5_cc_dfl_ops->prefix;
 	int len;
+        char *p;
 
-	if (get_from_registry(name_buf, name_size) != 0)
+	if (get_from_registry(HKEY_CURRENT_USER,
+                              name_buf, name_size) != 0)
 		return 0;
 
-	if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
-		GetWindowsDirectory (defname, sizeof(defname)-7);
-		strcat (defname, "\\krb5cc");
+	if (get_from_registry(HKEY_LOCAL_MACHINE,
+                              name_buf, name_size) != 0)
+		return 0;
+
+	if (get_from_registry_indirect(name_buf, name_size) != 0)
+		return 0;
+
+        strncpy(name_buf, prefix, name_size);
+        strncat(name_buf, ":", name_size);
+        name_buf[name_size - 1] = 0;
+        len = strlen(name_buf);
+        p = name_buf + len;
+        len = name_size - len;
+	if (!strcmp(prefix, "API")) {
+		strncpy(p, "krb5cc", len);
+	} else if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
+		if (!try_dir(getenv("TEMP"), p, len) &&
+		    !try_dir(getenv("TMP"), p, len))
+		{
+			GetWindowsDirectory(p, len);
+			strncat(p, "\\krb5cc", len);
+		}
 	} else {
-		strcpy (defname, "default_cache_name");
+		strncpy(p, "default_cache_name", len);
 	}
-	sprintf(name_buf, "%s:", prefix);
-	len = strlen(name_buf);
-	GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-				name_buf+len, name_size-len, KERBEROS_INI);
+	name_buf[name_size - 1] = 0;
 	return 0;
 }
 #endif

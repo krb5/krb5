@@ -1,3 +1,14 @@
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_os_ctx.c (os_init_paths): Enhance win32 heuristics to use 
+		environment variable (like Unix) and to use the registry
+		too.  Will try executable's dir before windows dir if 
+		not secure.
+
+	* ccdefname.c (get_from_os): Enhance win32 heuristics to use 
+		registry properly, default to API: properly,
+		and to use temp dirs before the windows dir.
+
 1999-06-11  Miro Jurisic  <meeroh@mit.edu>
 
 	* init_os_ctx.c (os_init_paths): added NRL config file name correctly
