@@ -1,3 +1,10 @@
+Thu Aug  7 17:34:59 1997  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c:
+	* krb524.h:
+	* krb524d.c: Add jik's patches for multihomed hosts.  Fixes
+	krb5-misc/275.
+
 Tue Feb 18 09:53:10 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* k524init.c, test.c, cnv_tkt_skey.c: Remove include of krb4-proto.h

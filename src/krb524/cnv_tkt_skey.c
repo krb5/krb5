@@ -55,17 +55,20 @@ static long cmu_seconds[] =
  * Convert a v5 ticket for server to a v4 ticket, using service key
  * skey for both.
  */
-int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
+int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
+			    saddr)
      krb5_context context;
      krb5_ticket *v5tkt;
      KTEXT_ST *v4tkt;
      krb5_keyblock *v5_skey, *v4_skey;
+     struct sockaddr_in *saddr;
 {
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
      krb5_enc_tkt_part *v5etkt;
      int ret, lifetime, deltatime;
      krb5_timestamp server_time;
+     krb5_address **caddr, *good_addr = 0;
 
      v5tkt->enc_part2 = NULL;
      if ((ret = krb5_decrypt_tkt_part(context, v5_skey, v5tkt))) {
@@ -132,16 +135,25 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
 	    return KRB5KRB_AP_ERR_TKT_NYV;
      }
 
-     /* XXX perhaps we should use the addr of the client host if */
-     /* v5creds contains more than one addr.  Q: Does V4 support */
-     /* non-INET addresses? */
-     if (!v5etkt->caddrs || !v5etkt->caddrs[0] ||
-	 v5etkt->caddrs[0]->addrtype != ADDRTYPE_INET) {
-	  if (krb524_debug)
-	       fprintf(stderr, "Invalid v5creds address information.\n");
-	  krb5_free_enc_tkt_part(context, v5etkt);
-	  v5tkt->enc_part2 = NULL;
-	  return KRB524_BADADDR;
+     for (caddr = v5etkt->caddrs; *caddr; caddr++) {
+       if (v5etkt->caddrs[0]->addrtype == ADDRTYPE_INET) {
+	 if (! memcmp((*caddr)->contents, &saddr->sin_addr,
+		      sizeof(saddr->sin_addr))) {
+	   good_addr = *caddr;
+	   break;
+	 }
+	 else if (! good_addr) {
+	   good_addr = *caddr;
+	 }
+       }
+     }
+	 
+     if (! good_addr) {
+       if (krb524_debug)
+	 fprintf(stderr, "Invalid v5creds address information.\n");
+       krb5_free_enc_tkt_part(context, v5etkt);
+       v5tkt->enc_part2 = NULL;
+       return KRB524_BADADDR;
      }
      
      if (krb524_debug)
@@ -156,7 +168,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
 			     pname,
 			     pinst,
 			     prealm,
-			     *((unsigned long *)v5etkt->caddrs[0]->contents),
+			     *((unsigned long *)good_addr->contents),
 			     (char *) v5etkt->session->contents,
 			     lifetime,
 			     /* issue_data */

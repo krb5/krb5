@@ -292,7 +292,8 @@ krb5_error_code do_connection(s, context)
 	  printf("service key retrieved\n");
 
      ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
-				   &v4_service_key);
+				   &v4_service_key,
+				   (struct sockaddr_in *)&saddr);
      if (ret)
 	  goto error;
 

@@ -32,7 +32,8 @@ extern int krb524_debug;
 
 int krb524_convert_tkt_skey
 	KRB5_PROTOTYPE((krb5_context context, krb5_ticket *v5tkt, KTEXT_ST *v4tkt, 
-		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey));
+		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey,
+			struct sockaddr_in *saddr));
 
 /* conv_princ.c */
 
