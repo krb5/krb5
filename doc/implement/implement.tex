@@ -13,8 +13,8 @@
 \typein{Draft flag? (type /draftfalse<CR> if not draft...)}
 \begin{document}
 \begin{center}
-{\Huge Kerberos V5 application programming library} \\
-{\Large DRAFT}
+{\Huge Kerberos V5 application programming library}
+\ifdraft \\ {\Large DRAFT---\today}\fi
 \end{center}
 \section{libkrb5.a functions}
 This section describes the functions provided in the \libname{libkrb5.a}
