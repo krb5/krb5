@@ -59,13 +59,16 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 {
 	struct stat statbuf;
 
+#ifdef USE_DBM_LNAME
 	if (!stat(krb5_lname_file,&statbuf))
 		return dbm_an_to_ln(context, aname, lnsize, lname);
+#endif
 	if (krb5_lname_username_fallback)
 		return username_an_to_ln(context, aname, lnsize, lname);
 	return KRB5_LNAME_CANTOPEN;
 }
 
+#ifdef USE_DBM_LNAME
 /*
  * Implementation:  This version uses a DBM database, indexed by aname,
  * to generate a lname.
@@ -116,6 +119,7 @@ dbm_an_to_ln(context, aname, lnsize, lname)
     (void) dbm_close(db);
     return retval;
 }
+#endif /* USE_DBM_LNAME */
 #endif /* _MSDOS */
 
 /*

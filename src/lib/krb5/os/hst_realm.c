@@ -148,8 +148,6 @@ krb5_get_host_realm(context, host, realmsp)
     char scanstring[7+2*16];		/* 7 chars + 16 for each decimal
 					   conversion */
 
-    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms))))
-	return ENOMEM;
     if (!host) {
 	if (gethostname(local_host, sizeof(local_host)-1) == -1)
 	    return errno;
@@ -157,6 +155,9 @@ krb5_get_host_realm(context, host, realmsp)
 	host = local_host;
     }
     domain = strchr(host, '.');
+
+    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms))))
+	return ENOMEM;
 
     /* prepare default */
     if (domain) {
@@ -180,9 +181,8 @@ krb5_get_host_realm(context, host, realmsp)
 
     krb5_find_config_files();
     if ((trans_file = fopen(krb5_trans_file, "r")) == (FILE *) 0) {
-	krb5_xfree(retrealms[0]);
-	krb5_xfree(retrealms);
-	return KRB5_TRANS_CANTOPEN;
+	*realmsp = retrealms;
+	return 0;
     }
     (void) sprintf(scanstring, "%%%ds %%%ds",
 		   sizeof(trans_host)-1,sizeof(trans_realm)-1);

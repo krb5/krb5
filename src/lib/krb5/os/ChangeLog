@@ -1,3 +1,16 @@
+Fri Apr 14 22:15:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* an_to_ln.c (dbm_an_to_ln): Don't compile dbm_an_to_ln() if
+	        USE_DBM_LNAME isn't defined.
+
+Fri Apr 14 15:15:48 1995    <tytso@rsx-11.mit.edu>
+
+	* hst_realm.c (krb5_get_host_realm): Eliminate memory leak in the
+		unlikely case that gethostname fails.
+
+		If the krb.realms file isn't available, use the default
+		realm of the host.
+
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
