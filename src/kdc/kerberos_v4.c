@@ -374,7 +374,11 @@ static krb5_data *response;
 void bzero(), bcopy(), com_err(), sleep();
 void kerberos_v4(), kerb_err_reply();
 char *free(), *malloc(), *strcpy();
+#ifdef __STDC__
+extern size_t strlen(const char *);
+#else
 int strlen();
+#endif
 krb5_error_code krb5_timeofday(), krb5_get_default_realm();
  
 krb5_error_code
