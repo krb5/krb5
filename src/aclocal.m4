@@ -81,9 +81,10 @@ if [ -z "${norecursion}" ] ; then
 
 ### The recursion line is here.
 			if [ ! -z "${recprog}" ] ; then
-				if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
-					${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-					${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
+#				if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
+#					${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
+#					${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
+				if eval ${config_shell} ${recprog} "<<<$>>>@" ; then
 					true
 				else
 					echo Configure in `pwd` failed, exiting. 1>&2
@@ -234,6 +235,16 @@ KRB5ROOT=$withval,
 echo "krb5-root defaults to /krb5"
 KRB5ROOT=/krb5)dnl
 AC_SUBST(KRB5ROOT)])dnl
+dnl
+dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
+dnl
+define(WITH_KRB4,[
+AC_WITH([krb4],
+echo "krb4 is $withval"
+KRB4=$withval,
+echo "krb4 defaults to /usr/kerberos"
+KRB4=/usr/kerberos)dnl
+AC_SUBST(KRB4)])dnl
 dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
