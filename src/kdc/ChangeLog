@@ -1,5 +1,7 @@
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
+	* do_tgs_req.c (process_tgs_req): LOG transited check disabled as info not error
+
 	* kdc_util.c (validate_as_request): Only reject options we
 	understand and believe are inappropriate for AS requests. Per
 	spec, unknown options are ignored.
