@@ -1,3 +1,10 @@
+2001-05-04  Tom Yu  <tlyu@mit.edu>
+
+	* pty-int.h: Fix typo; VHANG_first -> VHANG_FIRST.
+
+	* open_slave.c (pty_open_slave): Add workaround for Tru64 v5.0,
+	since its revoke() will fail if the slave isn't open already.
+
 2001-05-03  Ezra Peisach  <epeisach@rna.mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname): Preserve const

@@ -78,9 +78,22 @@ long pty_open_slave ( slave, fd)
       return retval;
     
 #ifdef HAVE_REVOKE
+#if defined(O_NOCTTY) && !defined(OPEN_CTTY_ONLY_ONCE)
+    /*
+     * Some OSes, notably Tru64 v5.0, fail on revoke() if the slave
+     * isn't open.  Since we don't want to acquire it as controlling
+     * tty yet, use O_NOCTTY if available.
+     */
+    vfd = open(slave, O_RDWR | O_NOCTTY);
+    if (vfd < 0)
+	return PTY_OPEN_SLAVE_OPENFAIL;
+#endif
     if (revoke (slave) < 0 ) {
 	return PTY_OPEN_SLAVE_REVOKEFAIL;
     }
+#if defined(O_NOCTTY) && !defined(OPEN_CTTY_ONLY_ONCE)
+    close(vfd);
+#endif
 #endif /*HAVE_REVOKE*/
 
 /* Open the pty for real. */

@@ -85,8 +85,13 @@
 #endif
 #endif
 
-#if defined(HAVE_VHANGUP) && !defined(OPEN_CTTY_ONLY_ONCE) 
-#define VHANG_first /* Breaks under Ultrix and others where you cannot get controlling terminal twice.*/
+#if defined(HAVE_VHANGUP) && !defined(OPEN_CTTY_ONLY_ONCE) \
+	&& !defined(HAVE_REVOKE)
+/*
+ * Breaks under Ultrix and others where you cannot get controlling
+ * terminal twice.
+ */
+#define VHANG_FIRST
 #define VHANG_LAST
 #endif
 
