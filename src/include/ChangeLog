@@ -3,6 +3,16 @@
 	* port-sockets.h (SOCKET_WRITEV) [!_WIN32]: Use TMP after setting
 	it, to silence compiler warnings.
 
+	* configure.in: Rewrite gethostbyname_r and getservbyname_r tests
+	to properly disable the use of these functions if the argument
+	types cannot be determined.
+
+	* fake-addrinfo.h [NEED_FAKE_GETADDRINFO]: Include string.h.
+	(fake_getnameinfo): Cast GET_HOST_BY_ADDR address pointer argument
+	to char * as required by gethostbyaddr prototype.
+	(HAVE_GETADDRINFO, HAVE_GETNAMEINFO): If defining, define them to
+	1.
+
 2002-06-26  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Modify test for in6addr_any definition in C
