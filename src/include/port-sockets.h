@@ -61,8 +61,6 @@ typedef WSABUF sg_buf;
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
 
-int win_socket_initialize();
-
 #else /* not _WIN32 */
 
 /* If this source file requires it, define struct sockaddr_in

@@ -1,3 +1,8 @@
+2002-06-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (win_socket_initialize): Delete declaration,
+	since it's not mentioned elsewhere in the tree.
+
 2002-06-21  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Fix up yet more CALLCONV botches from last merge.
