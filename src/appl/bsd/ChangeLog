@@ -1,3 +1,8 @@
+2003-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* krshd.c (main): Use LOG_AUTH syslog facility, not LOG_DAEMON,
+	for consistency with krlogind.c.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* compat_recv.c: Only include krb.h if KRB5_KRB4_COMPAT.
