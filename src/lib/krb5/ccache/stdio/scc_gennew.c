@@ -82,7 +82,11 @@ krb5_scc_generate_new (id)
      strcpy(((krb5_scc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is useable */
+#if defined(__STDC__)
+     f = fopen (((krb5_scc_data *) lid->data)->filename, "wb+");
+#else
      f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");
+#endif
      if (!f)
 	 return krb5_scc_interpret (errno);
      else {

@@ -84,6 +84,20 @@ krb5_scc_open_file (id, mode)
 	  (void) fclose (data->file);
 	  data->file = 0;
      }
+#if defined(__STDC__)
+     switch(mode) {
+     case SCC_OPEN_AND_ERASE:
+	 open_flag = "wb+";
+	 break;
+     case SCC_OPEN_RDWR:
+	 open_flag = "rb+";
+	 break;
+     case SCC_OPEN_RDONLY:
+     default:
+	 open_flag = "rb";
+	 break;
+     }
+#else
      switch(mode) {
      case SCC_OPEN_AND_ERASE:
 	 open_flag = "w+";
@@ -96,6 +110,7 @@ krb5_scc_open_file (id, mode)
 	 open_flag = "r";
 	 break;
      }
+#endif
 
      f = fopen (data->filename, open_flag);
      if (!f)
