@@ -105,13 +105,7 @@ char ***realmsp;
 	    if (islower(*cp))
 		*cp = toupper(*cp);
     } else {
-	if (!(retrealms[0] = malloc(DEF_REALMNAME_SIZE))) {
-	    xfree(retrealms);
-	    return ENOMEM;
-	}
-	if (retval = krb5_get_default_realm(DEF_REALMNAME_SIZE-1,
-					    retrealms[0])) {
-	    xfree(retrealms[0]);
+	if (retval = krb5_get_default_realm(&retrealms[0])) {
 	    xfree(retrealms);
 	    return retval;
 	}

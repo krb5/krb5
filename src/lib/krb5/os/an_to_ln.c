@@ -119,15 +119,13 @@ char *lname;
     }
 
     realm_length = krb5_princ_realm(aname)->length;
-    if (!(def_realm = malloc(realm_length + 1)))
-	return ENOMEM;
     
-    if (retval = krb5_get_default_realm(realm_length+1,def_realm)) {
-	free(def_realm);
-	return KRB5_LNAME_NOTRANS;
+    if (retval = krb5_get_default_realm(&def_realm)) {
+	return(retval);
     }
 
-    if (strncmp(def_realm, krb5_princ_realm(aname)->data, realm_length)) {
+    if ((realm_length != strlen(def_realm)) ||
+	(memcmp(def_realm, krb5_princ_realm(aname)->data, realm_legth))) {
 	free(def_realm);
 	return KRB5_LNAME_NOTRANS;
     }	
