@@ -1,3 +1,7 @@
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* rtest.c: Provide a prototype for krb5_klog_syslog() dummy handler.
+
 2001-06-29  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add check for ifaddrs.h, which missing.

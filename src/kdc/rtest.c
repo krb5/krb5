@@ -31,6 +31,8 @@
 #include "kdc_util.h"
 #include "extern.h"
 
+void krb5_klog_syslog(void);
+
 static krb5_principal 
 make_princ(ctx, str, prog)
     krb5_context ctx;
