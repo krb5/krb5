@@ -69,7 +69,9 @@ typedef int krb5_sigtype;
 #endif
 
 #ifdef ProvidePrototypes
-#define KRB5_PROVIDE_PROTOTYPES
+#ifndef KRB5_PROVIDE_PROTOTYPES
+#define KRB5_PROVIDE_PROTOTYPES YES
+#endif
 #endif
 
 #ifdef UseNarrowPrototypes
@@ -78,6 +80,10 @@ typedef int krb5_sigtype;
 
 #ifdef UseStdarg
 #define	STDARG_PROTOTYPES
+#endif
+
+#ifdef NoNestedPrototypes
+#define	NO_NESTED_PROTOTYPES
 #endif
 
 #ifdef UseVoid
