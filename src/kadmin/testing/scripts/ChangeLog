@@ -1,3 +1,7 @@
+Wed Sep 11 17:01:06 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* make-host-keytab.pl.in: use kadmin instead of kadm5_keytab
+
 Mon Aug 12 11:36:57 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* init_db: use kdb5_util instead of kdb5_create

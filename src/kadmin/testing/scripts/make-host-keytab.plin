@@ -71,7 +71,7 @@ $SRVTCL = ($ENV{'SRVTCL'} || "$TESTDIR/util/ovsec_kadm_srv_tcl");
 $TCLUTIL = ($ENV{'TCLUTIL'} || "$TESTDIR/tcl/util.t");
 # This'll be wrong sometimes
 $RSH_CMD = ($ENV{'RSH_CMD'} || '/usr/ucb/rsh');
-$EDIT_KEYTAB = ($ENV{'EDIT_KEYTAB'} || "$top/keytab/kadm5_keytab.local");
+$KADMIN = ($ENV{'KADMIN'} || "$top/cli/kadmin.local");
 
 if ($server) {
 # XXX Using /usr/ucb/rsh for now.
@@ -122,14 +122,20 @@ if ($server) {
 else {
     $redirect = "> /dev/null" if (! $verbose);
 
-    $cmd = "$EDIT_KEYTAB -k $ktfile";
-    $cmd .= " -q" if (! $verbose);
-    $cmd .= " -a -c";
+    # We can ignore errors here, because the ktadd below will fail if
+    # this fails for any reason other than "principal exists"
     for (@princs) {
-	if (system "$cmd $_") {
-	    sleep(1);
-	    die "Error in system($cmd $_)\n";
-	}
+	next if (/^kadmin/);
+	$cmd = "$KADMIN -q 'ank -randkey $_' $redirect 2>&1";
+	system($cmd);
+    }
+    
+    $cmd = "$KADMIN -q 'ktadd -k $ktfile ";
+    $cmd .= " -q " if (! $verbose);
+    $cmd .= "@princs' $redirect";
+    if (system "$cmd") {
+	sleep(1);
+	die "Error in system($cmd)\n";
     }
 }
 
