@@ -1,3 +1,14 @@
+Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c: Fix up previous fix; short-circuit out when
+	trans->length == 0.
+
+Wed Jul  1 17:59:26 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Fix use of an
+ 		uninitialized variable; apparently the code was depending
+ 		on the stack garbage being non-zero(!)
+
 1998-05-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* str_conv.c (krb5_timestamp_to_sfstring): Make sure the date
