@@ -3,7 +3,7 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -99,5 +99,9 @@ krb5_error_code krb5_fcc_store_authdatum PROTOTYPE((krb5_ccache , krb5_authdata 
 
 /* fcc_errs.c */
 krb5_error_code krb5_fcc_interpret PROTOTYPE((int ));
+
+/* fcc_maybe.c */
+krb5_error_code krb5_fcc_close_file PROTOTYPE((krb5_ccache));
+krb5_error_code krb5_fcc_open_file PROTOTYPE((krb5_ccache, int));
 
 #endif /* KRB5_FCC_PROTO__ */
