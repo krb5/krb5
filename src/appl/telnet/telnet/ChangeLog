@@ -1,3 +1,8 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_CHECK_HEADER and AC_FUNC_VFORK instead of
+	AC_HEADER_CHECK and AC_VFORK.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* commands.c (makeargv): Don't overflow buffer "saveline".
