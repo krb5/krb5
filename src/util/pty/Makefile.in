@@ -108,6 +108,10 @@ clean-files::
 pty_err.o: pty_err.c
 pty_err.h: pty_err.et
 pty_err.c: pty_err.et
+
+$(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
+	(cd $(BUILDTOP)/include; $(MAKE) krb5/autoconf.h)
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

@@ -1,3 +1,9 @@
+Wed Sep  5 20:08:21 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/krb5/autoconf.h): Add rules to
+ 	build include/krb5/autoconf.h - this file is wiped out during a
+ 	make clean and sane_hostname.c depends on it.
+
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* sane_hostname.c: Include socket-utils.h and fake-addrinfo.c.
