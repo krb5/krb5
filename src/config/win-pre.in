@@ -156,6 +156,6 @@ MFLAGS=$(MAKEFLAGS)
 	$(CC) $(CFLAGS) -Fo$(OUTPRE)\ -c $<
 
 #
-# End of Win32 pre-config lines (config/windows.in)
+# End of Win32 pre-config lines (config/win-pre.in)
 #
 
