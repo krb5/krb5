@@ -237,8 +237,16 @@ krb5_keyblock *key;
 krb5_int32 seq_number;
 krb5_authdata **authorization;
 {
+    krb5_error_code retval;
+    
     authent->client = client;
     authent->checksum = (krb5_checksum *)cksum;
+    if (key) {
+	retval = krb5_copy_keyblock(key, &authent->subkey);
+	if (retval)
+	    return retval;
+    } else
+	authent->subkey = 0;
     authent->subkey = key;
     authent->seq_number = seq_number;
     authent->authorization_data = authorization;
