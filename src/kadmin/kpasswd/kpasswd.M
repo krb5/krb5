@@ -27,11 +27,6 @@ kpasswd \- change a user's Kerberos password
 .SH SYNOPSIS
 .B kpasswd
 [
-.B \-m
-] [
-.B \-l
-language
-] [
 .B \-u
 .IR username[/instance][@realm]
 ]
@@ -41,28 +36,12 @@ The
 command is used to change a Kerberos principal's password.
 
 If the
-.I \-n
+.I \-u
 option is specified, a partially or fully qualified Kerberos principal may
 be supplied.  Otherwise, the principal name is derived from the identity
 of the user invoking the
 .I kpasswd
 command.
-
-The
-.I \-l
-and 
-.I \-m
-flags may be specified to qualify how the administrative server is to issue
-messages.  The
-.I \-l
-flag specifies which
-.I language
-to issue messages in, while the 
-.I \-m
-flag enables MIME-encoded messages.  The support of these flags and the
-interpretation of the
-.I language
-paramter is specific to the administrative server.
 
 .PP
 The

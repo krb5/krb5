@@ -41,12 +41,6 @@ enctype
 .B \-k
 mkeytype
 ] [
-.B \-l
-langlist
-] [
-.B \-m
-1|0
-] [
 .B \-t
 timeout
 ] [
@@ -102,16 +96,6 @@ seconds.
 Enables certain debugging features and messages selected by
 .B debugmask.
 .PP
-.B Protocol Message flags
-.IP \-l
-.B langlist
-specifies the list of supported language names [not implemented].
-.IP \-m
-Enables (
-.B 1
-) or disables (
-.B 0
-) MIME encoding support [not implemented].
 
 .SH ACL FILE
 .PP

@@ -45,7 +45,11 @@
 #define	LOG_AUTH	0
 #endif	/* LOG_AUTH */
 
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-l langlist] [-m bool] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
+#ifdef	LANGUAGES_SUPPORTED
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-l langlist] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
+#else	/* LANGUAGES_SUPPORTED */
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
+#endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
 static const char *extra_params =	"%s extra paramters beginning with %s... \n";
 static const char *no_memory_fmt =	"%s: cannot allocate %d bytes for %s.\n";
@@ -188,15 +192,12 @@ main(argc, argv)
 		error++;
 	    }
 	    break;
+#ifdef	LANGUAGES_SUPPORTED
 	case 'l':
 	    language_list = optarg;
+	    mime_enabled = 1;
 	    break;
-	case 'm':
-	    if (sscanf(optarg, "%d", &mime_enabled) != 1) {
-		fprintf(stderr, fval_not_number, argv[0], optarg, 'm');
-		error++;
-	    }
-	    break;
+#endif	/* LANGUAGES_SUPPORTED */
 	case 'r':
 	    db_realm = optarg;
 	    break;

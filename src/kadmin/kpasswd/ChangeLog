@@ -1,4 +1,8 @@
 
+Fri May 5 11:07:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	#ifdef out language and support.  Remove description from manpage.
+
+
 Fri Apr 28 10:14:12 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Use new library libkadm.  Remove unused reference to libkdb5.
 	* Use size_t instead of int for size calculations.

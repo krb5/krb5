@@ -56,7 +56,11 @@ static const char *kpwd_change_prompt_2 = 	"Re-enter new password: ";
 static const char *kpwd_old_password_prompt =	"   Enter old password: ";
 static const char *kpwd_old_pwd_name_fmt = 	"Enter old password for %s: ";
 
-static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user] [-m] [-l language].\n";
+#ifdef	LANGUAGES_SUPPORTED
+static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user] [-l language]\n";
+#else	/* LANGUAGES_SUPPORTED */
+static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user]\n";
+#endif	/* LANGUAGES_SUPPORTED */
 static const char *kpwd_extra_args =		"extra arguments";
 static const char *kpwd_bad_option_fmt = 	"%s: unrecognized option -%c.\n";
 static const char *kpwd_no_memory_fmt = 	"%s: not enough resources to allocate %d bytes for %s.\n";
@@ -144,6 +148,9 @@ kpwd_print_sreply(progname, ncomps, complist)
     krb5_data	*complist;
 {
     krb5_int32	i;
+    /*
+     * If language/mime suporrt enabled, need to have mime-decoder here.
+     */
     if (ncomps > 0) {
 	fprintf(stderr, "%s - %s: %s\n", progname, kpwd_serror_head,
 		complist[0].data);
@@ -189,7 +196,7 @@ main(argc, argv)
 
     /*
      * Usage is:
-     *	kpasswd [-u user] [-m] [-l language]
+     *	kpasswd [-u user] [-l language]
      */
     while ((option = getopt(argc, argv, "l:mu:")) != EOF) {
 	switch (option) {
@@ -202,11 +209,10 @@ main(argc, argv)
 	    }
 	    strcpy(name, optarg);
 	    break;
-	case 'm':
-	    mflag++;
-	    break;
+#ifdef	LANGUAGES_SUPPORTED
 	case 'l':
 	    lflag++;
+	    mflag++;
 	    if ((language = (char *) malloc(strlen(optarg)+1)) == NULL) {
 		fprintf(stderr, kpwd_no_memory_fmt, argv[0], 
 			strlen(optarg)+1, kpwd_args_text);
@@ -215,6 +221,7 @@ main(argc, argv)
 	    }
 	    strcpy(language, optarg);
 	    break;
+#endif	/* LANGUAGES_SUPPORTED */
 	default:
 	    error++;
 	    break;
@@ -299,6 +306,7 @@ main(argc, argv)
 	free(opwd_prompt);
     send_quit = 1;
 
+#ifdef	LANGUAGES_SUPPORTED
     /*
      * We have the connection - see if we have to send some precursory data.
      */
@@ -393,6 +401,7 @@ main(argc, argv)
 	}
 	krb5_free_adm_data(kcontext, lang_ncomps, lang_reply);
     }
+#endif	/* LANGUAGES_SUPPORTED */
 
     /* Now - Actually change the password. */
     for (npass_tries = 1; npass_tries <= KPWD_MAX_TRIES; npass_tries++) {

@@ -1,4 +1,8 @@
 
+Fri May 5 11:11:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	#ifdef out language flags.  Remove description from manpage.
+
+
 Fri Apr 28 17:58:11 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	* proto_serv.c	- ifdef-out commands which are not fully supported.
