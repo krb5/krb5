@@ -62,7 +62,6 @@
 #define SECURITY_WIN32
 #include <security.h>
 #include <ntsecapi.h>
-#include <ntstatus.h>
 
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
