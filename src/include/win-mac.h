@@ -72,6 +72,8 @@ typedef unsigned char	u_char;
 #define HAVE_STRDUP
 #define NO_USERID
 #define NO_PASSWORD
+#define HAVE_STRERROR
+#define SYS_ERRLIST_DECLARED
 
 #define WM_KERBEROS5_CHANGED "Kerberos5 Changed"
 #ifdef KRB4

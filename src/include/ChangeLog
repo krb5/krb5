@@ -1,3 +1,7 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-mac.h (HAVE_STRERROR, SYS_ERRLIST_DECLARED): Define.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac, clean-mac): Targets deleted.
