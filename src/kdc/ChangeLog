@@ -1,4 +1,16 @@
 
+Thu Jul 27 15:10:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-vague-errors and --with-kdc-kdb-update
+		which define KRBCONF_VAGUE_ERRORS and KRBCONF_KDC_MODIFIES_KDB
+		which replace the definitions that used to be in k5-config.h.
+	* kdc_util.c - Cast argument to fetch_asn1_field which caused a
+		compiler moan.
+	* kerberos_v4.c - Use KRB5_PROTOTYPE for v4_klog which is set correctly
+		for the compiler.  Some compilers (e.g. OSF/1 native) understand
+		prototypes even when not in STDC mode.
+		Also use KRB5_MIT_DES_KEYSIZE instead of MIT_DES_KEYSIZE.
+
+
 Thu Jul 27 02:59:05 1995 Chris Provenzano (proven@mit.edu)
 
         * do_as_req.c do_tgs_req.c kdc_util.c main.c : Use new kdb format.

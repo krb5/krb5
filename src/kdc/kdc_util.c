@@ -294,7 +294,8 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
      * checksum that directly; if that fails, then we try encoding
      * using our local asn.1 library.
      */
-    if (pkt && (fetch_asn1_field(pkt->data, 1, 4, &scratch1) >= 0)) {
+    if (pkt && (fetch_asn1_field((unsigned char *) pkt->data,
+				 1, 4, &scratch1) >= 0)) {
 	if (comp_cksum(kdc_context, &scratch1, *ticket, his_cksum)) {
 	    if (!(retval = encode_krb5_kdc_req_body(request, &scratch))) 
 	        retval = comp_cksum(kdc_context, scratch, *ticket, his_cksum);

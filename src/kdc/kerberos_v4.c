@@ -78,9 +78,9 @@ int kerb_get_principal PROTOTYPE((char *, char *, Principal *, unsigned int,
 int check_princ PROTOTYPE((char *, char *, unsigned, Principal *));
 
 #ifdef HAVE_STDARG_H
-char * v4_klog PROTOTYPE((int, const char *, ...));
+char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
 #else
-char * v4_klog PROTOTYPE((int, char *, va_dcl));
+char * v4_klog KRB5_PROTOTYPE((int, char *, va_dcl));
 #endif
 
 /* take this out when we don't need it anymore */
@@ -314,7 +314,7 @@ compat_decrypt_key (in5, out4)
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
     }
     if ( ! out5.contents) return( retval);
-    if ( out5.length != MIT_DES_KEYSIZE) {
+    if ( out5.length != KRB5_MIT_DES_KEYSIZE) {
 	lt = klog( L_DEATH_REQ,"internal keysize error in kdc");
     }
     else {
