@@ -42,6 +42,7 @@
 	krb5_free_kdc_req
 	krb5_free_keyblock
 	krb5_free_keyblock_contents
+	krb5_free_ktypes
 	krb5_free_last_req
 	krb5_free_pa_data
 	krb5_free_principal
@@ -81,6 +82,7 @@
 	krb5_get_validated_creds
 	krb5_get_renewed_creds
 	krb5_get_notification_message
+	krb5_get_tgs_ktypes
 	krb5_get_time_offsets
 	krb5_init_context
 	krb5_mk_error
