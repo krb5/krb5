@@ -1,3 +1,23 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktest.c (ktest_make_sample_etype_info): Use KRB5_ETYPE_NO_SALT
+	instead of -1.
+
+	* ktest_equal.c (ktest_equal_krb5_etype_info_entry): Test for
+	KRB5_ETYPE_NO_SALT. ktest_equal_array_of_octet() and
+	ktest_equal_array_of_char take unsigned int lengths.
+
+	* ktest_equal.h: Add len_unsigned_array macro for a prototype of a
+	function taking an unsigned int
+	count. ktest_equal_array_of_octet() is one of
+	these. ktest_equal_array_of_char() takes an unsigned int as
+	length.
+
+	* trval.c (trval): Unsigned/signed int fix. 
+
+	* utility.c (asn1_krb5_data_unparse): Better test for krb5_data
+	length being less than zero.
+
 2000-09-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5_decode_test.c (decode_run): If the ASN1 decoder returns an

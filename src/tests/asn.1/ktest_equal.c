@@ -486,7 +486,7 @@ int ktest_equal_krb5_etype_info_entry(ref, var)
 	return FALSE;
     if (ref->length != var->length)
 	return FALSE;
-    if (ref->length > 0)
+    if (ref->length > 0 && ref->length != KRB5_ETYPE_NO_SALT)
     	if (memcmp(ref->salt, var->salt, ref->length) != 0)
 	    return FALSE;
     return TRUE;
@@ -560,7 +560,7 @@ int ktest_equal_array_of_data(length, ref, var)
 }
 
 int ktest_equal_array_of_octet(length, ref, var)
-     const int length;
+     const unsigned int length;
      krb5_octet * ref;
      krb5_octet * var;
 {
@@ -574,7 +574,7 @@ int ktest_equal_array_of_octet(length, ref, var)
 }
 
 int ktest_equal_array_of_char(length, ref, var)
-     const int length;
+     const unsigned int length;
      char * ref;
      char * var;
 {

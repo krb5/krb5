@@ -212,7 +212,7 @@ int trval(fin, fout)
 	FILE	*fout;
 {
 	unsigned char *p;
-	int maxlen;
+	unsigned int maxlen;
 	int len;
 	int cc, cc2, n1, n2;
 	int r;
