@@ -12,26 +12,17 @@
 
 #ifndef __COM_ERR_H
 
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
-
-/* End-user programs may need this -- oh well */
 #ifndef HAVE_STDARG_H
+/* End-user programs may need this -- oh well */
+#if defined(__STDC__) || defined(_WINDOWS) || defined(_MACINTOSH)
 #define HAVE_STDARG_H 1
 #endif
-
-#define ET_P(x) x
-
-#else
-#define ET_P(x) ()
-#endif /* __STDC__ */
+#endif
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#define	ET_STDARG_P(x) x
 #else
 #include <varargs.h>
-#define ET_STDARG_P(x) ()
-#define ET_VARARGS
 #endif
 
 /* This should be part of k5-config.h but many application
@@ -85,63 +76,23 @@
 #define NEAR
 #endif
 
-typedef long errcode_t;
-
-typedef void (*et_old_error_hook_func) ET_P((const char FAR *, errcode_t,
-					     const char FAR *, va_list ap));
-	
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
+/* ANSI C -- use prototypes etc */
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
-	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...));
+	(const char FAR *, long, const char FAR *, ...);
+KRB5_DLLIMP extern const char  FAR * KRB5_CALLCONV error_message (long);
+extern void (*com_err_hook) (const char *, long, const char *, va_list);
+extern void (*set_com_err_hook (void (*) (const char *, long, const char *, va_list)))
+    (const char *, long, const char *, va_list);
+extern void (*reset_com_err_hook ()) (const char *, long, const char *, va_list);
+#else
+/* no prototypes */
+extern void com_err ();
+extern const char * error_message ();
+extern void (*com_err_hook) ();
+extern void (*set_com_err_hook ()) ();
+extern void (*reset_com_err_hook ()) ();
+#endif
 
-KRB5_DLLIMP extern const char FAR * KRB5_CALLCONV error_message
-	ET_P((errcode_t));
-
-KRB5_DLLIMP extern et_old_error_hook_func KRB5_CALLCONV com_err_hook;
-
-KRB5_DLLIMP extern et_old_error_hook_func KRB5_CALLCONV set_com_err_hook
-	ET_P((et_old_error_hook_func));
-
-KRB5_DLLIMP extern et_old_error_hook_func KRB5_CALLCONV reset_com_err_hook
-	ET_P((void));
-
-/*
- * The the new com_err API...
- */
-typedef struct et_context FAR *et_ctx;
-typedef void (* KRB5_CALLCONV et_error_hook_func)
-	ET_P((et_ctx, void FAR *, const char FAR *, errcode_t,
-	      const char FAR *, va_list ap));
-
-struct error_table {
-	char const FAR * const FAR * msgs;
-	long base;
-	int n_msgs;
-};
-
-struct et_hook {
-	et_error_hook_func	func;
-	void			FAR *data;
-};
-
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_init ET_P((et_ctx FAR *));
-KRB5_DLLIMP extern void KRB5_CALLCONV et_shutdown ET_P((et_ctx));
-
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_add_error_table
-	ET_P((et_ctx, struct error_table FAR *));
-
-KRB5_DLLIMP extern const char FAR * KRB5_CALLCONV et_error_message
-	ET_P((et_ctx, errcode_t));
-
-KRB5_DLLIMP extern void KRB5_CALLCONV_C et_com_err
-	ET_STDARG_P((et_ctx, void FAR *, const char FAR *, errcode_t,
-		     const char FAR *, ...));
-
-KRB5_DLLIMP extern void KRB5_CALLCONV_C et_com_err_va
-	ET_STDARG_P((et_ctx, void FAR *, const char FAR *, errcode_t,
-		     const char FAR *, va_list ap));
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV et_set_hook
-	ET_P((et_ctx, struct et_hook FAR *, struct et_hook FAR *));
-			
 #define __COM_ERR_H
 #endif /* ! defined(__COM_ERR_H) */

@@ -1,19 +1,10 @@
 /*
- * Copyright 1997 by Massachusetts Institute of Technology
- * 
- * Copyright 1987, 1988 by MIT Student Information Processing Board
+ * util/et/error_message.c
  *
- * Permission to use, copy, modify, and distribute this software
- * and its documentation for any purpose and without fee is
- * hereby granted, provided that the above copyright notice
- * appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation,
- * and that the names of M.I.T. and the M.I.T. S.I.P.B. not be
- * used in advertising or publicity pertaining to distribution
- * of the software without specific, written prior permission.
- * M.I.T. and the M.I.T. S.I.P.B. make no representations about
- * the suitability of this software for any purpose.  It is
- * provided "as is" without express or implied warranty.
+ * Copyright 1987 by the Student Information Processing Board
+ * of the Massachusetts Institute of Technology
+ *
+ * For copyright info, see "mit-sipb-copyright.h".
  */
 
 #include <stdio.h>
@@ -23,109 +14,94 @@
 #include <string.h>
 #include "com_err.h"
 #include "error_table.h"
+#include "mit-sipb-copyright.h"
+#include "internal.h"
 
 #ifdef _MACINTOSH
 #define sys_nerr 100
 #endif
 
-#ifndef SYS_ERRLIST_DECLARED
-extern char const * const sys_errlist[];
-extern const int sys_nerr;
-#endif
+static const char copyright[] =
+    "Copyright 1986, 1987, 1988 by the Student Information Processing Board\nand the department of Information Systems\nof the Massachusetts Institute of Technology";
 
-static char buffer[ET_EBUFSIZ];
+static char buffer[25];
 
-struct et_list FAR * _et_list = (struct et_list *) NULL;
+struct et_list * _et_list = (struct et_list *) NULL;
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV et_error_message(ectx, code)
-	et_ctx ectx;
-	long code;
+KRB5_DLLIMP const char * KRB5_CALLCONV error_message (code)
+long code;
 {
-	int offset;
-	long l_offset;
-	struct et_list *et;
-	long table_num;
-	int started = 0;
-	char *cp;
+    int offset;
+    long l_offset;
+    struct et_list *et;
+    long table_num;
+    int started = 0;
+    char *cp;
 
 #if defined(_MSDOS) || defined(_WIN32)
 #define HAVE_STRERROR 1
-	/*
-	 * Winsock defines errors in the range 10000-10100. These are
-	 * equivalent to 10000 plus the Berkeley error numbers.
-	 *
-	 * (Does windows strerror() work right here?)
-	 *
-	 * XXX NO.  We need to do our own table lookup for Winsock error
-	 * messages!!!  --- TYT
-	 * 
-	 */
-	if (code >= 10000 && code <= 10100)	/* Is it Winsock error? */
-		code -= 10000;			/* Turn into Berkeley errno */
+/*
+** Winsock defines errors in the range 10000-10100. These are equivalent
+** to 10000 plus the Berkeley error numbers.
+*
+* (Does windows strerror() work right here?)
+*
+* XXX NO.  We need to do our own table lookup for Winsock error
+* messages!!!  --- TYT
+* 
+*/
+    if (code >= 10000 && code <= 10100)		/* Is it Winsock error? */
+	code -= 10000;				/* Turn into Berkeley errno */
 #endif
 
-	l_offset = code & ((1<<ERRCODE_RANGE)-1);
-	offset = (int) l_offset;
-	table_num = code - l_offset;
-	if (!table_num) {
-		if (code == 0)
-			goto oops;
-	
+    l_offset = code & ((1<<ERRCODE_RANGE)-1);
+    offset = (int) l_offset;
+    table_num = code - l_offset;
+    if (!table_num) {
 #ifdef HAVE_STRERROR
-		cp = strerror(offset);
-		if (cp)
-			return cp;
-		goto oops;
+	cp = strerror(offset);
+	if (cp)
+	    return cp;
+	goto oops;
 #else
 #ifdef HAVE_SYS_ERRLIST
-		if (offset < sys_nerr)
-			return(sys_errlist[offset]);
-		else
-			goto oops;
+        if (offset < sys_nerr)
+	    return(sys_errlist[offset]);
+	else
+	    goto oops;
 #else
 		goto oops;
 #endif /* HAVE_SYS_ERRLIST */
 #endif /* HAVE_STRERROR */
+    }
+    for (et = _et_list; et; et = et->next) {
+	/* This is to work around a bug in the compiler on the Alpha 
+	   comparing longs */
+	if (((int) (et->table->base - table_num)) == 0) {
+	    /* This is the right table */
+	    if (et->table->n_msgs <= offset)
+		goto oops;
+	    return(et->table->msgs[offset]);
 	}
-	et = ectx ? ectx->tables : _et_list;
-	while (et) {
-		/* This is to work around a bug in the compiler on the Alpha 
-		    comparing longs */
-		if (((int) (et->table->base - table_num)) == 0) {
-			/* This is the right table */
-			if (et->table->n_msgs <= offset)
-				break;
-			return(et->table->msgs[offset]);
-		}
-		et = et->next;
-	}
+    }
 oops:
-	cp = ectx ? ectx->error_buf : buffer;
-	strcpy(cp, "Unknown code ");
-	cp += sizeof("Unknown code ") - 1;
-	if (table_num) {
-		error_table_name_r(table_num, cp);
-		while (*cp)
-			cp++;
-		*cp++ = ' ';
-	}
-	if (offset >= 100) {
-		*cp++ = '0' + offset / 100;
-		offset %= 100;
-		started++;
-	}
-	if (started || offset >= 10) {
-		*cp++ = '0' + offset / 10;
-		offset %= 10;
-	}
-	*cp++ = '0' + offset;
-	*cp = '\0';
-	return(buffer);
+    strcpy (buffer, "Unknown code ");
+    if (table_num) {
+	strcat (buffer, error_table_name (table_num));
+	strcat (buffer, " ");
+    }
+    for (cp = buffer; *cp; cp++)
+	;
+    if (offset >= 100) {
+	*cp++ = '0' + offset / 100;
+	offset %= 100;
+	started++;
+    }
+    if (started || offset >= 10) {
+	*cp++ = '0' + offset / 10;
+	offset %= 10;
+    }
+    *cp++ = '0' + offset;
+    *cp = '\0';
+    return(buffer);
 }
-
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
-	errcode_t	code;
-{
-	return et_error_message(0, code);
-}
-
