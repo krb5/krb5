@@ -525,7 +525,7 @@ main(argc, argv)
     /* Clear and free password storage */
     if (opassword) {
 	memset(opassword, 0, KRB5_ADM_MAX_PASSWORD_LEN);
-	krb5_xfree(opassword);
+	free(opassword);
     }
     if (npassword) {
 	memset(npassword, 0, KRB5_ADM_MAX_PASSWORD_LEN);
@@ -577,6 +577,6 @@ main(argc, argv)
 
  done:
     krb5_adm_disconnect(kcontext, &conn_socket,	auth_context, ccache);
-    krb5_xfree(kcontext);
+    krb5_free_context(kcontext);
     return(error);
 }

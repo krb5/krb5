@@ -254,9 +254,7 @@ void set_dbname(argc, argv)
 		(void) krb5_finish_key(util_context, &master_encblock);
 		(void) krb5_finish_random_key(util_context, &master_encblock,
 					      &master_random);
-		memset((char *)master_keyblock.contents, 0,
-		       master_keyblock.length);
-		krb5_xfree(master_keyblock.contents);
+		krb5_free_keyblock_contents(util_context, &master_keyblock);
 		master_keyblock.contents = NULL;
 		valid_master_key = 0;
 	}
@@ -389,8 +387,7 @@ int open_db_and_mkey()
 	) {
 	com_err(progname, retval, "while verifying master key");
 	exit_status++;
-	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	krb5_xfree(master_keyblock.contents);
+	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
     if ((retval = krb5_process_key(util_context, &master_encblock,
@@ -398,7 +395,7 @@ int open_db_and_mkey()
 	com_err(progname, retval, "while processing master key");
 	exit_status++;
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	krb5_xfree(master_keyblock.contents);
+	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
     if ((retval = krb5_init_random_key(util_context, &master_encblock,
@@ -408,7 +405,7 @@ int open_db_and_mkey()
 	exit_status++;
 	(void) krb5_finish_key(util_context, &master_encblock);
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-	krb5_xfree(master_keyblock.contents);
+	krb5_free_keyblock_contents(util_context, &master_keyblock);
 	return(1);
     }
 

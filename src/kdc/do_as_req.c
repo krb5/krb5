@@ -468,8 +468,8 @@ errout:
 	       ticket_reply.enc_part.ciphertext.length);
 	free(ticket_reply.enc_part.ciphertext.data);
     }
-    if (e_data.data)
-	krb5_xfree(e_data.data);
+
+    krb5_free_data_contents(kdc_context, &e_data);
     
     return errcode;
 }

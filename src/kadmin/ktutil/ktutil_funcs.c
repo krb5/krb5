@@ -43,12 +43,12 @@ krb5_error_code ktutil_free_kt_list(context, list)
 
     for (lp = list; lp;) {
 	retval = krb5_kt_free_entry(context, lp->entry);
-	krb5_xfree(lp->entry);
+	free((char *)lp->entry);
 	if (retval)
 	    break;
 	prev = lp;
 	lp = lp->next;
-	krb5_xfree(prev);
+	free((char *)prev);
     }
     return retval;
 }
@@ -135,7 +135,7 @@ krb5_error_code ktutil_read_keytab(context, name, list)
 	lp->entry = entry;
     }
     if (entry)
-	krb5_xfree(entry);
+	free((char *)entry);
     if (retval)
 	if (retval == KRB5_KT_END)
 	    retval = 0;
@@ -286,7 +286,7 @@ krb5_error_code ktutil_read_srvtab(context, name, list)
     if (entry) {
 	if (entry->magic == KV5M_KEYTAB_ENTRY)
 	    krb5_kt_free_entry(context, entry);
-	krb5_xfree(entry);
+	free((char *)entry);
     }
     if (retval) {
 	ktutil_free_kt_list(context, tail);
@@ -383,7 +383,7 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
     for (lp = pruned; lp;) {
 	prev = lp;
 	lp = lp->next;
-	krb5_xfree(prev);
+	free((char *)prev);
     }
     return retval;
 }

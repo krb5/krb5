@@ -819,7 +819,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	if (!er_kret)
 	    krb5_write_message(kcontext, (krb5_pointer) &cl_sock, &errout);
 	free(errbuf.text.data);
-	krb5_xfree(errout.data);
+	krb5_free_data_contents(kcontext, &errout);
     }
 
  cleanup:
@@ -839,9 +839,9 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     if (num_args)
 	krb5_free_adm_data(kcontext, num_args, arglist);
     if (in_data.data)
-	krb5_xfree(in_data.data);
+	krb5_free_data_contents(kcontext, &in_data);
     if (out_data.data)
-	krb5_xfree(out_data.data);
+	krb5_free_data_contents(kcontext, &out_data);
     if (local && local->contents)
 	free(local->contents);
     if (remote && remote->contents)
