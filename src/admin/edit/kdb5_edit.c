@@ -80,6 +80,7 @@ static char *progname;
 static char *cur_realm = 0;
 static char *mkey_name = 0;
 static krb5_boolean manual_mkey = FALSE;
+static krb5_boolean dbactive = FALSE;
 
 void
 quit()
@@ -370,13 +371,16 @@ krb5_pointer infop;
 	com_err(argv[0], 0, "Usage: set_dbname dbpathname realmname");
 	return;
     }
-    if ((retval = krb5_db_fini()) && retval != KRB5_KDB_DBNOTINITED) {
-	com_err(argv[0], retval, "while closing previous database");
-	return;
+    if (dbactive) {
+	if ((retval = krb5_db_fini()) && retval != KRB5_KDB_DBNOTINITED) {
+	    com_err(argv[0], retval, "while closing previous database");
+	    return;
+	}
+	(void) (*csentry->finish_key)(&master_encblock);
+	(void) (*csentry->finish_random_key)(&master_random);
+	krb5_free_principal(master_princ);
+	dbactive = FALSE;
     }
-    (void) (*csentry->finish_key)(&master_encblock);
-    (void) (*csentry->finish_random_key)(&master_random);
-    krb5_free_principal(master_princ);
     cur_realm = malloc(strlen(argv[2])+1);
     if (!cur_realm) {
 	com_err(argv[0], 0, "Insufficient memory to proceed");
@@ -466,6 +470,7 @@ char *dbname;
     mblock.mkvno = master_entry.kvno;
 
     krb5_db_free_principal(&master_entry, nentries);
+    dbactive = TRUE;
     return 0;
 }
 
@@ -579,4 +584,31 @@ char *argv[];
     if (retval = krb5_kt_close(ktid))
 	com_err(argv[0], retval, "while closing keytab");
     return;
+}
+
+krb5_error_code
+list_iterator(ptr, entry)
+krb5_pointer ptr;
+krb5_db_entry *entry;
+{
+    krb5_error_code retval;
+    char *comerrname = (char *)ptr;
+    char *name;
+
+    if (retval = krb5_unparse_name(entry->principal, &name)) {
+	com_err(comerrname, retval, "while unparsing principal");
+	return retval;
+    }
+    printf("entry: %s\n", name);
+    free(name);
+    return 0;
+}
+
+/*ARGSUSED*/
+void
+list_db(argc, argv)
+int argc;
+char *argv[];
+{
+    (void) krb5_db_iterate(list_iterator, argv[0]);
 }
