@@ -1,4 +1,9 @@
 
+Tue Aug 15 14:31:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin_server,kadm_funcs,kadm_ser_wrap.c - Replace kadm_find_keytype()
+		with krb5_dbe_find_keytype().
+
+
 Thu Aug 10 14:48:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadm_funcs.c - Add kadm_find_keytype() to find a particular key/salt
 		pair.  Use this to find keys instead of assuming that the

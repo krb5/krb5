@@ -380,7 +380,12 @@ struct sockaddr_in *who;
 	cleanexit(2);
     }
 
-    status = kadm_find_keytype(&sprinc_entries, KEYTYPE_DES, -1, &kdatap);
+    status = krb5_dbe_find_keytype(kadm_context,
+				   &sprinc_entries,
+				   KEYTYPE_DES,
+				   -1,
+				   -1,
+				   &kdatap);
     if (status) {
 	syslog(LOG_ERR, "find keytype failed: %s", error_message(status));
 	cleanexit(1);

@@ -78,7 +78,12 @@ kadm_entry2princ(entry, princ)
   krb5_xfree(mprinc);
 
   /* Find the V4 key */
-  retval = kadm_find_keytype(&entry, KEYTYPE_DES, KRB5_KDB_SALTTYPE_V4, &pkey);
+  retval = krb5_dbe_find_keytype(kadm_context,
+				 &entry,
+				 KEYTYPE_DES,
+				 KRB5_KDB_SALTTYPE_V4,
+				 -1,
+				 &pkey);
   if (retval)
     return retval;
   princ->key_version = pkey->key_data_kvno;
@@ -122,10 +127,12 @@ kadm_princ2entry(princ, entry)
   if (mprinc.mod_princ)
     krb5_free_principal(kadm_context, mprinc.mod_princ);
 
-  if (retval = kadm_find_keytype(entry,
-				 KEYTYPE_DES,
-				 KRB5_KDB_SALTTYPE_V4,
-				 &kdatap)) {
+  if (retval = krb5_dbe_find_keytype(kadm_context,
+				     entry,
+				     KEYTYPE_DES,
+				     KRB5_KDB_SALTTYPE_V4,
+				     -1,
+				     &kdatap)) {
     if (!(retval = krb5_dbe_create_key_data(kadm_context, entry)))
       kdatap = &entry->key_data[entry->n_key_data-1];
   }
@@ -236,10 +243,12 @@ Kadm_vals *valsout;
   if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL)
     failadd(KADM_NOMEM);
 
-  if (retval = kadm_find_keytype(&newentry,
-				 KEYTYPE_DES,
-				 KRB5_KDB_SALTTYPE_V4,
-				 &pkey)) {
+  if (retval = krb5_dbe_find_keytype(kadm_context,
+				     &newentry,
+				     KEYTYPE_DES,
+				     KRB5_KDB_SALTTYPE_V4,
+				     -1,
+				     &pkey)) {
     if (!(retval = krb5_dbe_create_key_data(kadm_context, &newentry)))
       pkey = &newentry.key_data[newentry.n_key_data-1];
   }
@@ -543,10 +552,12 @@ Kadm_vals *valsout;		/* the actual record which is returned */
       temp_key.key_high = ntohl(temp_key.key_high);
       memcpy(newpw.contents, &temp_key.key_low, 4);
       memcpy(newpw.contents + 4, &temp_key.key_high, 4);
-      if (retval = kadm_find_keytype(&newentry,
-				     KEYTYPE_DES,
-				     KRB5_KDB_SALTTYPE_V4,
-				     &pkey)) {
+      if (retval = krb5_dbe_find_keytype(kadm_context,
+					 &newentry,
+					 KEYTYPE_DES,
+					 KRB5_KDB_SALTTYPE_V4,
+					 -1,
+					 &pkey)) {
 	krb5_db_free_principal(kadm_context, &newentry, 1);
 	memset((char *)&temp_key, 0, sizeof (temp_key));
 	failmod(retval);
@@ -678,10 +689,12 @@ des_cblock newpw;
     free(localpw.contents);
     failchange(retval);
   } else if (numfound == 1) {
-    if (retval = kadm_find_keytype(&odata,
-				   KEYTYPE_DES,
-				   KRB5_KDB_SALTTYPE_V4,
-				   &pkey)) {
+    if (retval = krb5_dbe_find_keytype(kadm_context,
+				       &odata,
+				       KEYTYPE_DES,
+				       KRB5_KDB_SALTTYPE_V4,
+				       -1,
+				       &pkey)) {
       failchange(retval);
     }
     pkey->key_data_kvno++;
@@ -958,8 +971,12 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     krb5_free_principal(kadm_context, inprinc);
     failsrvtab(retval);
   } else if (numfound) {
-    retval = kadm_find_keytype(&odata, KEYTYPE_DES, KRB5_KDB_SALTTYPE_V4,
-			       &pkey);
+    retval = krb5_dbe_find_keytype(kadm_context,
+				   &odata,
+				   KEYTYPE_DES,
+				   KRB5_KDB_SALTTYPE_V4,
+				   -1,
+				   &pkey);
     if (retval) {
       krb5_free_principal(kadm_context, inprinc);
       failsrvtab(retval);
@@ -1054,31 +1071,3 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
 }
 
 #undef failsrvtab
-
-krb5_error_code
-kadm_find_keytype(dbentp, keytype, salttype, kentp)
-     krb5_db_entry	*dbentp;
-     krb5_keytype	keytype;
-     krb5_int32		salttype;
-     krb5_key_data	**kentp;
-{
-  int			i;
-  int			maxkvno;
-  krb5_key_data	*datap;
-
-  maxkvno = -1;
-  datap = (krb5_key_data *) NULL;
-  for (i=0; i<dbentp->n_key_data; i++) {
-    if ((dbentp->key_data[i].key_data_type[0] == keytype) &&
-	((dbentp->key_data[i].key_data_type[1] == salttype) ||
-	 (salttype < 0))) {
-      maxkvno = dbentp->key_data[i].key_data_kvno;
-      datap = &dbentp->key_data[i];
-    }
-  }
-  if (maxkvno >= 0) {
-    *kentp = datap;
-    return(0);
-  }
-  return(ENOENT);    
-}

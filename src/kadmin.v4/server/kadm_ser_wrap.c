@@ -108,10 +108,12 @@ kadm_ser_init(inter, realm)
     if (retval || more || !numfound)
 	return KADM_NO_VERI;
 
-    retval = kadm_find_keytype(&master_entry,
-			       KEYTYPE_DES,
-			       -1,
-			       &kdatap);
+    retval = krb5_dbe_find_keytype(kadm_context,
+				   &master_entry,
+				   KEYTYPE_DES,
+				   -1,
+				   -1,
+				   &kdatap);
     if (retval)
         return KRB5_PROG_KEYTYPE_NOSUPP;
     server_parm.max_life = master_entry.max_life;
