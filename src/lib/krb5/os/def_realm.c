@@ -67,6 +67,7 @@ krb5_get_default_realm(context, lrealm)
     else if (saved_realm)
 	    realm = saved_realm;
     else {
+	    krb5_find_config_files();
 	    if (!(config_file = fopen(krb5_config_file, "r")))
 		    /* can't open */
 		    return KRB5_CONFIG_CANTOPEN;

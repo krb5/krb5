@@ -24,6 +24,7 @@
  * Return default cred. cache name.
  */
 
+#define NEED_WINDOWS
 #include "k5-int.h"
 #include <stdio.h>
 
@@ -36,10 +37,18 @@ krb5_cc_default_name(context)
     
     if (name == 0) {
 	if (name_buf == 0)
-	    name_buf = malloc (35);
+	    name_buf = malloc (160);
 	
-#ifdef MSDOS_FILESYSTEM
-        strcpy (name_buf, "FILE:\\krb5cc");
+#ifdef _WINDOWS
+        {
+            char defname[160];                  /* Default value */
+
+            strcpy (defname, "FILE:");
+            GetWindowsDirectory (defname+5, 160-5-7);
+            strcat (defname, "\\krb5cc");
+            GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
+                name_buf, 160, KERBEROS_INI);
+        }
 #else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 #endif

@@ -75,6 +75,7 @@ krb5_get_krbhst(context, realm, hostlist)
                                          * case.
                                          */
 
+    krb5_find_config_files();
     if (!(config_file = fopen(krb5_config_file, "r")))
 	/* can't open */
 	return KRB5_CONFIG_CANTOPEN;

@@ -1,3 +1,12 @@
+Tue Mar 28 19:22:28 1995 Keith Vetter (keithv@fusion.com)
+
+        For Windows, added calls to get the default config, realms and
+        ccache files out of a windows ini file.
+        * ccdefname.c: does this for the credential cache.
+        * osconfig.c: does this for the config and realms files.
+	* get_krbh.c, realm_do.c, hst_real.c, def_real.c: added calls to
+           set the default values.
+
 Tue Mar 28 18:35:20 1995  John Gilmore  (gnu at toad.com)
 
 	* DNR.c:  Add Apple MacTCP source file for domain name resolution.
