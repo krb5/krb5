@@ -1,3 +1,8 @@
+2005-01-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * rc_dfl.c: Move the extraction of the struct dfl_data
+          from the krb5_rcache after obtaining the lock, not before.
+
 2004-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc-int.h (struct _krb5_rc_ops): Add new member,

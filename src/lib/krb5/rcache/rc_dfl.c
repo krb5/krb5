@@ -182,10 +182,10 @@ krb5_rc_dfl_get_span(krb5_context context, krb5_rcache id,
     krb5_error_code err;
     struct dfl_data *t;
 
-    t = (struct dfl_data *) id->data;
     err = k5_mutex_lock(&id->lock);
     if (err)
 	return err;
+    t = (struct dfl_data *) id->data;
     *lifespan = t->lifespan;
     k5_mutex_unlock(&id->lock);
     return 0;
@@ -514,7 +514,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_recover_or_init(krb5_context context, krb5_rcache id,
 			    krb5_deltat lifespan)
 {
-    struct dfl_data *t = (struct dfl_data *)id->data;
     krb5_error_code retval;
 
     retval = k5_mutex_lock(&id->lock);
@@ -561,7 +560,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
 {
     krb5_error_code ret;
-    struct dfl_data *t = (struct dfl_data *)id->data;
+    struct dfl_data *t;
     krb5_int32 now;
 
     ret = krb5_timeofday(context, &now);
@@ -582,6 +581,7 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
     case 0: break;
     default: /* wtf? */ ;
     }
+    t = (struct dfl_data *)id->data;
 #ifndef NOIOSTUFF
     ret = krb5_rc_io_store(context, t, rep);
     if (ret) {
