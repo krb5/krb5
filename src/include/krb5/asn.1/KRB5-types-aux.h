@@ -72,6 +72,8 @@
 #undef encode_KRB5_EncryptionKey
 #undef encode_KRB5_Checksum
 #undef encode_KRB5_METHOD__DATA
+#undef encode_KRB5_PasswdSequence
+#undef encode_KRB5_PasswdData
 #undef decode_KRB5_Realm
 #undef decode_KRB5_PrincipalName
 #undef decode_KRB5_HostAddress
@@ -109,6 +111,8 @@
 #undef decode_KRB5_EncryptionKey
 #undef decode_KRB5_Checksum
 #undef decode_KRB5_METHOD__DATA
+#undef decode_KRB5_PasswdSequence
+#undef decode_KRB5_PasswdData
 #undef free_KRB5_PrincipalName
 #undef free_KRB5_HostAddress
 #undef free_KRB5_HostAddresses
@@ -141,6 +145,8 @@
 #undef free_KRB5_EncryptionKey
 #undef free_KRB5_Checksum
 #undef free_KRB5_METHOD__DATA
+#undef free_KRB5_PasswdSequence
+#undef free_KRB5_PasswdData
 
 /* KRB5-types.c */
 int encode_KRB5_Realm P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Realm *));
@@ -180,6 +186,9 @@ int encode_KRB5_EncryptedData P_TYPE_((PE *, int , integer , char *, struct type
 int encode_KRB5_EncryptionKey P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncryptionKey *));
 int encode_KRB5_Checksum P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Checksum *));
 int encode_KRB5_METHOD__DATA P_TYPE_((PE *, int , integer , char *, struct type_KRB5_METHOD__DATA *));
+int encode_KRB5_PasswdSequence P_TYPE_((PE *, int , integer , char *, struct type_KRB5_PasswdSequence *));
+int encode_KRB5_PasswdData P_TYPE_((PE *, int , integer , char *, struct type_KRB5_PasswdData *));
+
 int decode_KRB5_Realm P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Realm **));
 int decode_KRB5_PrincipalName P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PrincipalName **));
 int decode_KRB5_HostAddress P_TYPE_((PE , int , integer *, char **, struct type_KRB5_HostAddress **));
@@ -217,6 +226,8 @@ int decode_KRB5_EncryptedData P_TYPE_((PE , int , integer *, char **, struct typ
 int decode_KRB5_EncryptionKey P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncryptionKey **));
 int decode_KRB5_Checksum P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Checksum **));
 int decode_KRB5_METHOD__DATA P_TYPE_((PE , int , integer *, char **, struct type_KRB5_METHOD__DATA **));
+int decode_KRB5_PasswdSequence P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PasswdSequence **));
+int decode_KRB5_PasswdData P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PasswdData **));
 
 void free_KRB5_PrincipalName P_TYPE_((struct type_KRB5_PrincipalName *));
 void free_KRB5_HostAddress P_TYPE_((struct type_KRB5_HostAddress *));
@@ -250,5 +261,7 @@ void free_KRB5_EncryptedData P_TYPE_((struct type_KRB5_EncryptedData *));
 void free_KRB5_EncryptionKey P_TYPE_((struct type_KRB5_EncryptionKey *));
 void free_KRB5_Checksum P_TYPE_((struct type_KRB5_Checksum *));
 void free_KRB5_METHOD__DATA P_TYPE_((struct type_KRB5_METHOD__DATA *));
+void free_KRB5_PasswdSequence P_TYPE_((struct type_KRB5_PasswdSequence *));
+void free_KRB5_PasswdData P_TYPE_((struct type_KRB5_PasswdData *));
 
 #undef P_TYPE_
