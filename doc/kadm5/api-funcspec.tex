@@ -582,8 +582,10 @@ machine.  If ovsec_kadm_init is invoked locally its semantics are:
 \item Initializes all the com_err error tables used by the Admin
 system.
 
-\item Initializes direct access to the KDC database.  Assumes the
-master key is in /.k5.REALM-NAME
+\item Initializes direct access to the KDC database.  If pass is NULL,
+reads the master password from /.k5.REALM-NAME (created by kstash).
+Otherwise, the non-NULL password is ignored and the user is prompted
+for it via the tty.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
@@ -1256,8 +1258,17 @@ communicate with the server.
 The command line syntax of the admin server is
 
 \begin{verbatim}
-ovsec_adm_server [-createsalt normal|none] [-modifysalt normal|none|keep]
+ovsec_adm_server [-m] [-r realm] [-createsalt normal|none]
+	[-modifysalt normal|none|keep] 
 \end{verbatim}
+
+The -m argument specifies that the Kerberos master key should be read
+from the keyboard instead of from the stash file.  If the stash file
+does not exist and this argument is not specified, the server will
+not start.
+
+The -r argument specifies the Kerberos realm.  If this argument is not
+specified, the host's default realm is used. 
 
 The -createsalt and -modifysalt arguments control the type of salt
 used when creating and modifying keys in the Kerberos database,
@@ -1320,9 +1331,22 @@ privileges listed in the second field the ACL entry.
 \subsection{Logging}
 
 The Admin server will log various events via the syslog mechanism (see
-the syslog(3) manual page).  The level is LOG_NOTICE, the facility is
-LOG_LOCAL6, and notices are identified with the name
+the syslog(3) manual page).  The level depends on the notice, the
+facility is LOG_LOCAL6, and notices are identified with the name
 ``ovsec_adm_server''.
+
+\subsubsection{Miscellaneous Messages}
+
+When the server starts successfully and is ready to handle requests,
+is logs the message ``starting'' at the LOG_INFO level.  When it exits
+(due to a signal, for example) it logs the message ``finished,
+exiting'' at the LOG_INFO level.
+
+If the dictionary file does not exist, the server logs the mesage
+``WARNING: Cannot find the dictionary file $<$name$>$, continuing
+without one.'' and continues with dictionary checking disabled.
+
+\subsubsection{Request Messages}
 
 In the event descriptions below, IP address refers to the originating
 remote IP address, procedure name refers to the name of the API
@@ -1332,7 +1356,8 @@ section \ref{sec:auth}), primary argument refers to the name of the
 principal or policy affected by the call,\footnote{The first release
 only logs the primary argument, rather than logging the old and new
 values of all fields.} and status refers to the com_err string
-corresponding to the error code generated.
+corresponding to the error code generated.  All of these messages are
+logged at the LOG_NOTICE level.
 
 \begin{itemize}
 \item Unsuccessful authentication attempts (e.g.: failures during
