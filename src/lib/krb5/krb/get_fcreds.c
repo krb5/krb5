@@ -143,10 +143,8 @@ krb5_get_for_creds(context, sumtype, rhost, client, enc_key,
 	goto errout;
 
     /* fetch tgt directly from cache */
-    retval = krb5_cc_retrieve_cred (context, cc,
-				    KRB5_TC_MATCH_SRV_NAMEONLY,
-				    &creds,
-				    &tgt);
+    retval = krb5_cc_retrieve_cred (context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
+				    &creds, &tgt);
     krb5_cc_close(context, cc);
     if (retval)
 	goto errout;
@@ -168,10 +166,7 @@ krb5_get_for_creds(context, sumtype, rhost, client, enc_key,
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
     if (retval = krb5_send_tgs(context, kdcoptions, &creds.times, NULL, 
-			       sumtype,
-			       tgt.server,
-			       addrs,
-			       creds.authdata,
+			       sumtype, tgt.server, addrs, creds.authdata,
 			       0,		/* no padata */
 			       0,		/* no second ticket */
 			       &tgt, &tgsrep))

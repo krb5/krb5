@@ -34,24 +34,23 @@
 #include "int-proto.h"
 
 krb5_error_code
-krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
+krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, in_cred, out_cred)
     krb5_context context;
     krb5_creds * tgt;
     const krb5_flags kdcoptions;
     const krb5_cksumtype sumtype;
-    krb5_creds * cred;
+    krb5_creds * in_cred;
+    krb5_creds ** out_cred;
 {
     krb5_error_code retval;
     krb5_principal tempprinc;
     krb5_data *scratch;
-    krb5_enctype etype;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
 
-    /* tgt->client must be equal to cred->client */
-
-    if (!krb5_principal_compare(context, tgt->client, cred->client))
+    /* tgt->client must be equal to in_cred->client */
+    if (!krb5_principal_compare(context, tgt->client, in_cred->client))
 	return KRB5_PRINC_NOMATCH;
 
     if (!tgt->ticket.length)
@@ -61,43 +60,36 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
     /* tgt->server must be equal to                      */
     /* krbtgt/realmof(cred->server)@realmof(tgt->server) */
 
-    if(retval = krb5_tgtname(context, 
-		     krb5_princ_realm(context, cred->server),
+    if (retval = krb5_tgtname(context, 
+		     krb5_princ_realm(context, in_cred->server),
 		     krb5_princ_realm(context, tgt->server), &tempprinc))
 	return(retval);
+
     if (!krb5_principal_compare(context, tempprinc, tgt->server)) {
-	krb5_free_principal(context, tempprinc);
-	return KRB5_PRINC_NOMATCH;
+	retval = KRB5_PRINC_NOMATCH;
+	goto error_5;
     }
-    krb5_free_principal(context, tempprinc);
 
-
-    if (retval = krb5_send_tgs(context, kdcoptions, &cred->times, NULL, 
-			       sumtype,
-			       cred->server,
-			       tgt->addresses,
-			       cred->authdata,
+    if (retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, NULL, 
+			       sumtype, in_cred->server, tgt->addresses,
+			       in_cred->authdata,
 			       0,		/* no padata */
 			       0,		/* no second ticket */
 			       tgt, &tgsrep))
-	return retval;
-
-#undef cleanup
-#define cleanup() free(tgsrep.response.data)
+	goto error_5;
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
 	break;
     case KRB5_ERROR:
     default:
-	if (!krb5_is_krb_error(&tgsrep.response)) {
-	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
-	} else
+	if (krb5_is_krb_error(&tgsrep.response))
 	    retval = decode_krb5_error(&tgsrep.response, &err_reply);
-	if (retval) {
-	    cleanup();
-	    return retval;		/* neither proper reply nor error! */
-	}
+	else
+	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
+
+	if (retval) 			/* neither proper reply nor error! */
+	    goto error_4;
 
 #if 0
 	/* XXX need access to the actual assembled request...
@@ -111,56 +103,47 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
 	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	krb5_free_error(context, err_reply);
-	cleanup();
-	return retval;
+	goto error_4;
     }
 
-    etype = tgt->keyblock.etype;
-    retval = krb5_decode_kdc_rep(context, &tgsrep.response,
-				 &tgt->keyblock,
-				 etype, /* enctype */
-				 &dec_rep);
-    cleanup();
-    if (retval)
-	return retval;
-#undef cleanup
-#define cleanup() {\
-	memset((char *)dec_rep->enc_part2->session->contents, 0,\
-	      dec_rep->enc_part2->session->length);\
-		  krb5_free_kdc_rep(context, dec_rep); }
+    if (retval = krb5_decode_kdc_rep(context, &tgsrep.response, &tgt->keyblock,
+				     tgt->keyblock.etype, &dec_rep))
+	goto error_4;
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
-	cleanup();
-	return retval;
+	goto error_3;
     }
     
     /* now it's decrypted and ready for prime time */
-
     if (!krb5_principal_compare(context, dec_rep->client, tgt->client)) {
-	cleanup();
-	return KRB5_KDCREP_MODIFIED;
+	retval = KRB5_KDCREP_MODIFIED;
+	goto error_3;
     }
-    /* put pieces into cred-> */
-    if (cred->keyblock.contents) {
-	memset(&cred->keyblock.contents, 0, cred->keyblock.length);
-	krb5_xfree(cred->keyblock.contents);
-    }
-    if (retval = krb5_copy_keyblock_contents(context, dec_rep->enc_part2->session,
-					     &cred->keyblock)) {
-	cleanup();
-	return retval;
-    }
-    cred->keyblock.etype = dec_rep->ticket->enc_part.etype;
-    memset((char *)dec_rep->enc_part2->session->contents, 0,
-	  dec_rep->enc_part2->session->length);
 
-#undef cleanup
-#define cleanup() {\
-	memset((char *)cred->keyblock.contents, 0, cred->keyblock.length);\
-		  krb5_free_kdc_rep(context, dec_rep); }
+    /* get a cred structure */
+    /* The caller is responsible for cleaning up */
+    if (((*out_cred) = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL) {
+	retval = ENOMEM;
+	goto error_2;
+    }
+    memset((*out_cred), 0, sizeof(krb5_creds));
 
-    cred->times = dec_rep->enc_part2->times;
+    /* Copy the client straigt from in_cred */
+    if (retval = krb5_copy_principal(context, in_cred->client, 
+				     &(*out_cred)->client)) {
+    	goto error_2;
+    }
+
+    /* put pieces into out_cred-> */
+    if (retval = krb5_copy_keyblock_contents(context, 
+					     dec_rep->enc_part2->session,
+					     &(*out_cred)->keyblock)) {
+	goto error_2;
+    }
+
+    (*out_cred)->keyblock.etype = dec_rep->ticket->enc_part.etype;
+    (*out_cred)->times = dec_rep->enc_part2->times;
 
 #if 0
     /* XXX probably need access to the request */
@@ -185,56 +168,57 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
 	)
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if ((request.from == 0) &&
-	!in_clock_skew(dec_rep->enc_part2->times.starttime))
+    if (!request.from && !in_clock_skew(dec_rep->enc_part2->times.starttime)) {
 	retval = KRB5_KDCREP_SKEW;
-    
-    if (retval) {
-	cleanup();
-	return retval;
+	goto error_1;
     }
     
 #endif
 
-    cred->ticket_flags = dec_rep->enc_part2->flags;
-    cred->is_skey = FALSE;
-    if (cred->addresses) {
-	krb5_free_addresses(context, cred->addresses);
-    }
+    (*out_cred)->ticket_flags = dec_rep->enc_part2->flags;
+    (*out_cred)->is_skey = FALSE;
     if (dec_rep->enc_part2->caddrs) {
 	if (retval = krb5_copy_addresses(context, dec_rep->enc_part2->caddrs,
-					 &cred->addresses)) {
-	    cleanup();
-	    return retval;
+					 &(*out_cred)->addresses)) {
+	    goto error_1;
 	}
     } else {
 	/* no addresses in the list means we got what we had */
 	if (retval = krb5_copy_addresses(context, tgt->addresses,
-					 &cred->addresses)) {
-	    cleanup();
-	    return retval;
+					 &(*out_cred)->addresses)) {
+	    goto error_1;
 	}
     }
-    /*
-     * Free cred->server before overwriting it.
-     */
-    if (cred->server)
-	krb5_free_principal(context, cred->server);
     if (retval = krb5_copy_principal(context, dec_rep->enc_part2->server,
-				     &cred->server)) {
-	cleanup();
-	return retval;
+				     &(*out_cred)->server)) {
+	goto error_1;
     }
 
     if (retval = encode_krb5_ticket(dec_rep->ticket, &scratch)) {
-	cleanup();
-	krb5_free_addresses(context, cred->addresses);
-	return retval;
+	krb5_free_addresses(context, (*out_cred)->addresses);
+	goto error_1;
     }
 
-    cred->ticket = *scratch;
+    (*out_cred)->ticket = *scratch;
     krb5_xfree(scratch);
 
+error_1:;
+    if (retval)
+	memset((*out_cred)->keyblock.contents, 0, (*out_cred)->keyblock.length);
+
+error_2:;
+    if (retval)
+	krb5_free_creds(context, *out_cred);
+
+error_3:;
+    memset(dec_rep->enc_part2->session->contents, 0,
+	   dec_rep->enc_part2->session->length);
     krb5_free_kdc_rep(context, dec_rep);
+
+error_4:;
+    free(tgsrep.response.data);
+
+error_5:;
+    krb5_free_principal(context, tempprinc);
     return retval;
 }

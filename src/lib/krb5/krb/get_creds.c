@@ -44,26 +44,28 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_get_credentials(context, options, ccache, creds)
+krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
     krb5_ccache ccache;
-    krb5_creds *creds;
+    krb5_creds *in_creds;
+    krb5_creds **out_creds;
 {
     krb5_error_code retval, rv2;
     krb5_creds **tgts;
-    krb5_creds mcreds, ncreds;
+    krb5_creds *ncreds;
+    krb5_creds mcreds;
     krb5_flags fields;
 
-    if (!creds || !creds->server || !creds->client)
-	    return -EINVAL;
+    if (!in_creds || !in_creds->server || !in_creds->client)
+        return -EINVAL;
 
-    memset((char *)&mcreds, 0, sizeof(mcreds));
-    mcreds.server = creds->server;
-    mcreds.client = creds->client;
-    mcreds.times.endtime = creds->times.endtime;
-    mcreds.keyblock = creds->keyblock;
-    mcreds.authdata = creds->authdata;
+    memset((char *)&mcreds, 0, sizeof(krb5_creds));
+    mcreds.times.endtime = in_creds->times.endtime;
+    mcreds.keyblock = in_creds->keyblock;
+    mcreds.authdata = in_creds->authdata;
+    mcreds.server = in_creds->server;
+    mcreds.client = in_creds->client;
     
     fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
 	| KRB5_TC_MATCH_AUTHDATA;
@@ -73,20 +75,28 @@ krb5_get_credentials(context, options, ccache, creds)
 	   session key */
 	fields |= KRB5_TC_MATCH_2ND_TKT|KRB5_TC_MATCH_IS_SKEY;
 	mcreds.is_skey = TRUE;
-	mcreds.second_ticket = creds->second_ticket;
-	if (!creds->second_ticket.length)
+	mcreds.second_ticket = in_creds->second_ticket;
+	if (!in_creds->second_ticket.length)
 	    return KRB5_NO_2ND_TKT;
     }
 
-    retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds, &ncreds);
-    if (retval == 0) {
-	    krb5_free_cred_contents(context, creds);
-	    *creds = ncreds;
+    if ((ncreds = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL)
+	return -ENOMEM;
+
+    memset((char *)ncreds, 0, sizeof(krb5_creds));
+
+    /* The caller is now responsible for cleaning up in_creds */
+    if (retval = krb5_cc_retrieve_cred(context,ccache,fields,&mcreds,ncreds)) {
+	krb5_xfree(ncreds);
+	ncreds = in_creds;
+    } else {
+	*out_creds = ncreds;
     }
+
     if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
 	return retval;
 
-    retval = krb5_get_cred_from_kdc(context, ccache, creds, &tgts);
+    retval = krb5_get_cred_from_kdc(context, ccache, ncreds, out_creds, &tgts);
     if (tgts) {
 	register int i = 0;
 	while (tgts[i]) {
@@ -99,6 +109,6 @@ krb5_get_credentials(context, options, ccache, creds)
 	krb5_free_tgt_creds(context, tgts);
     }
     if (!retval)
-	retval = krb5_cc_store_cred(context, ccache, creds);
+	retval = krb5_cc_store_cred(context, ccache, *out_creds);
     return retval;
 }

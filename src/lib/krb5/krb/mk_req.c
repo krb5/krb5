@@ -60,6 +60,7 @@ krb5_mk_req(context, server, ap_req_options, checksum, ccache, outbuf)
     krb5_data *outbuf;
 {
     krb5_error_code retval;
+    krb5_creds * credsp;
     krb5_creds creds;
 
     /* obtain ticket & session key */
@@ -76,21 +77,18 @@ krb5_mk_req(context, server, ap_req_options, checksum, ccache, outbuf)
 				      preference */
 
     if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
-				      ccache,
-				      &creds))
+				      ccache, &creds, &credsp))
 	goto errout;
 
-    retval = krb5_mk_req_extended(context, ap_req_options,
-				  checksum,
-				  krb5_kdc_default_options,
+    retval = krb5_mk_req_extended(context, ap_req_options, checksum,
 				  0,	/* no sequence number */
 				  0,	/* no sub-key */
-				  ccache,
-				  &creds,
+				  credsp,
 				  0, 	/* We don't need the authenticator */
 				  outbuf);
 
 errout:
     krb5_free_cred_contents(context, &creds);
+    krb5_free_creds(context, credsp);
     return retval;
 }

@@ -47,13 +47,12 @@ static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 krb5_error_code
 krb5_sendauth(context,
 	      /* IN */
-	      fd, appl_version, client, server, ap_req_options,
-	      checksump,
+	      fd, appl_version, client, server, ap_req_options, checksump,
+	      in_creds,
 	      /* IN/OUT */
-	      credsp, ccache,
+	      ccache,
 	      /* OUT */
-	      sequence, newkey,
-	      error, rep_result)
+	      sequence, newkey, error, rep_result, out_creds)
     	krb5_context context;
 	krb5_pointer	fd;
 	char	*appl_version;
@@ -63,14 +62,17 @@ krb5_sendauth(context,
 	krb5_int32	*sequence;
 	krb5_keyblock	**newkey;
 	krb5_checksum	*checksump;
-	krb5_creds	*credsp;
+	krb5_creds	*in_creds;
 	krb5_ccache	ccache;
 	krb5_error	**error;
 	krb5_ap_rep_enc_part	**rep_result;
+	krb5_creds	**out_creds;
 {
 	krb5_flags		kdc_options = krb5_kdc_default_options;
 	krb5_octet		result;
 	krb5_creds 		creds;
+	krb5_creds * 		credsp = NULL;
+	krb5_creds * 		credspout = NULL;
 	krb5_error_code		retval = 0;
 	krb5_authenticator	authent;
 	krb5_data		inbuf, outbuf;
@@ -118,17 +120,18 @@ krb5_sendauth(context,
 	/*
 	 * See if we need to access the credentials cache
 	 */
-	if (!credsp || !credsp->ticket.length) {
+	if (!in_creds || !in_creds->ticket.length) {
 		if (ccache)
 			use_ccache = ccache;
 		else if (retval = krb5_cc_default(context, &use_ccache))
 			goto error_return;
 	}
-	if (!credsp) {
+	if (!in_creds) {
 		if (retval = krb5_copy_principal(context, server, &creds.server))
 			goto error_return;
 		if (client)
-			retval = krb5_copy_principal(context, client, &creds.client);
+			retval = krb5_copy_principal(context, client, 
+						     &creds.client);
 		else
 			retval = krb5_cc_get_principal(context, use_ccache,
 						       &creds.client);
@@ -141,30 +144,31 @@ krb5_sendauth(context,
 		/* creds.keyblock.keytype = 0; -- as well as this.
 					zero means no session keytype
 					preference */
-		credsp = &creds;
+		in_creds = &creds;
 	}
-	if (!credsp->ticket.length) {
-		if (retval = krb5_get_credentials(context, kdc_options,
-						  use_ccache,
-						  credsp))
+	if (!in_creds->ticket.length) {
+	    if (retval = krb5_get_credentials(context, kdc_options, use_ccache,
+					      in_creds, &credsp))
 		    goto error_return;
+	    credspout = credsp;
+	} else {
+	    credsp = in_creds;
 	}
 
 	/*
 	 * Generate a random sequence number
 	 */
 	if (sequence &&
-	    (retval = krb5_generate_seq_number(context, &credsp->keyblock, sequence))) 
+	    (retval = krb5_generate_seq_number(context, &credsp->keyblock,
+					       sequence))) 
 	    goto error_return;
 
 	/*
 	 * OK, get the authentication header!
 	 */
 	if (retval = krb5_mk_req_extended(context, ap_req_options, checksump,
-					  kdc_options,
 					  sequence ? *sequence : 0, newkey,
-					  use_ccache, credsp, &authent,
-					  &outbuf))
+					  credsp, &authent, &outbuf))
 	    goto error_return;
 
 	/*
@@ -227,13 +231,16 @@ krb5_sendauth(context,
 		krb5_free_ap_rep_enc_part(context, repl);
 	}
 	retval = 0;		/* Normal return */
+	if (out_creds) {
+		*out_creds = credsp;
+	}
 error_return:
+	if (credspout)
+		krb5_free_creds(context, credspout); 
 	if (!ccache && use_ccache)
 		krb5_cc_close(context, use_ccache);
-	krb5_free_cred_contents(context, &creds);
 	krb5_free_authenticator_contents(context, &authent);
 	return(retval);
-	
 }
 
 

@@ -73,16 +73,14 @@ krb5_generate_authenticator PROTOTYPE((krb5_context,
 				       krb5_int32, krb5_authdata ** ));
 
 krb5_error_code
-krb5_mk_req_extended(context, ap_req_options, checksum, kdc_options,
-		     sequence, newkey, ccache, creds, authentp, outbuf)
+krb5_mk_req_extended(context, ap_req_options, checksum, sequence, 
+		     newkey, in_creds, authentp, outbuf)
     krb5_context context;
     const krb5_flags ap_req_options;
     const krb5_checksum *checksum;
-    const krb5_flags kdc_options;
     krb5_int32 sequence;
     krb5_keyblock **newkey;
-    krb5_ccache ccache;
-    krb5_creds *creds;
+    krb5_creds *in_creds;
     krb5_authenticator *authentp;
     krb5_data *outbuf;
 {
@@ -102,19 +100,17 @@ krb5_mk_req_extended(context, ap_req_options, checksum, kdc_options,
     scratch = 0;
     
     if ((ap_req_options & AP_OPTS_USE_SESSION_KEY) &&
-	!creds->ticket.length)
+	!in_creds->ticket.length)
 	return(KRB5_NO_TKT_SUPPLIED);
 
-    if (!creds->ticket.length) {
-	/* go get creds */
-	if (retval = krb5_get_credentials(context, kdc_options,
-					  ccache,
-					  creds))
-	    return(retval);
-    }
+    if (!in_creds->ticket.length) 
+	return(KRB5_NO_TKT_SUPPLIED);
+
+/*	if (retval = krb5_get_credentials(context, kdc_options,
+					  ccache, in_creds, out_creds)) */
 
     /* we need a native ticket */
-    if (retval = decode_krb5_ticket(&creds->ticket, &request.ticket))
+    if (retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket))
 	return(retval);
     
     /* verify a valid etype is available */
@@ -127,13 +123,15 @@ krb5_mk_req_extended(context, ap_req_options, checksum, kdc_options,
 
     request.ap_options = ap_req_options;
     if (newkey) {
-	if (retval = krb5_generate_subkey(context, &creds->keyblock, newkey))
+	if (retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
+					  newkey))
 	    goto cleanup;
     }
 
-    if (retval = krb5_generate_authenticator(context, &authent, creds->client, checksum,
-					     newkey ? *newkey : 0,
-					     sequence, creds->authdata))
+    if (retval = krb5_generate_authenticator(context, &authent, 
+					     (in_creds)->client, checksum,
+					     newkey ? *newkey : 0, sequence, 
+					     (in_creds)->authdata))
 	goto cleanup;
 	
     /* encode the authenticator */
@@ -175,7 +173,7 @@ krb5_mk_req_extended(context, ap_req_options, checksum, kdc_options,
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, &creds->keyblock))
+    if (retval = krb5_process_key(context, &eblock, &(in_creds)->keyblock))
 	goto cleanup;
 
     cleanup_key++;

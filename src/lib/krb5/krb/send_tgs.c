@@ -39,8 +39,8 @@
  addrs, if non-NULL, is used for addresses " " "
  authorization_dat, if non-NULL, is used for authorization_dat " " "
  second_ticket, if required by options, is used for the 2nd ticket in the req.
- usecred is used for the ticket & session key in the KRB_AP_REQ header " " "
- (the KDC realm is extracted from usecred->server's realm)
+ in_cred is used for the ticket & session key in the KRB_AP_REQ header " " "
+ (the KDC realm is extracted from in_cred->server's realm)
  
  The response is placed into *rep.
  rep->response.data is set to point at allocated storage which should be
@@ -50,7 +50,7 @@
  */
 krb5_error_code
 krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
-	      authorization_data, padata, second_ticket, usecred, rep)
+	      authorization_data, padata, second_ticket, in_cred, rep)
     krb5_context context;
     const krb5_flags kdcoptions;
     const krb5_ticket_times * timestruct;
@@ -61,7 +61,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     krb5_authdata * const * authorization_data;
     krb5_pa_data * const * padata;
     const krb5_data * second_ticket;
-    krb5_creds * usecred;
+    krb5_creds * in_cred;
     krb5_response * rep;
 {
     krb5_error_code retval;
@@ -74,20 +74,14 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     krb5_pa_data **combined_padata;
     krb5_pa_data ap_req_padata;
 
-    memset((char *)&tgsreq, 0, sizeof(tgsreq));
+    /* 
+     * in_creds MUST be a valid credential NOT just a partially filled in
+     * place holder for us to get credentials for the caller.
+     */
+    if (!in_cred->ticket.length)
+        return(KRB5_NO_TKT_SUPPLIED);
 
-    if (etypes) {
-	/* Check passed etypes and make sure they're valid. */
-   	for (tgsreq.netypes = 0; etypes[tgsreq.netypes]; tgsreq.netypes++) {
-    	    if (!valid_etype(etypes[tgsreq.netypes]))
-		return KRB5_PROG_ETYPE_NOSUPP;
-	}
-    	tgsreq.etype = (krb5_enctype *)etypes;
-    } else {
-        /* Get the default etypes */
-        krb5_get_default_in_tkt_etypes(context, &(tgsreq.etype));
-	for(tgsreq.netypes = 0; tgsreq.etype[tgsreq.netypes]; tgsreq.netypes++);
-    }
+    memset((char *)&tgsreq, 0, sizeof(tgsreq));
 
     tgsreq.kdc_options = kdcoptions;
     tgsreq.server = (krb5_principal) sname;
@@ -104,20 +98,19 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 
     if (authorization_data) {
 	/* need to encrypt it in the request */
-
 	krb5_encrypt_block eblock;
 
 	if (retval = encode_krb5_authdata(authorization_data, &scratch))
 	    return(retval);
-	krb5_use_cstype(context, &eblock, usecred->keyblock.etype);
-	tgsreq.authorization_data.etype = usecred->keyblock.etype;
+	krb5_use_cstype(context, &eblock, in_cred->keyblock.etype);
+	tgsreq.authorization_data.etype = in_cred->keyblock.etype;
 	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
 					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =
 	    krb5_encrypt_size(scratch->length, eblock.crypto_entry);
 	/* add padding area, and zero it */
 	if (!(scratch->data = realloc(scratch->data,
-				      tgsreq.authorization_data.ciphertext.length))) {
+			      tgsreq.authorization_data.ciphertext.length))) {
 	    /* may destroy scratch->data */
 	    krb5_xfree(scratch);
 	    return ENOMEM;
@@ -129,13 +122,13 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	    krb5_free_data(context, scratch);
 	    return ENOMEM;
 	}
-	if (retval = krb5_process_key(context, &eblock, &usecred->keyblock)) {
+	if (retval = krb5_process_key(context, &eblock, &in_cred->keyblock)) {
 	    krb5_free_data(context, scratch);
 	    return retval;
 	}
 	/* call the encryption routine */
 	if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-				  (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
+		  (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
 				  scratch->length, &eblock, 0)) {
 	    (void) krb5_finish_key(context, &eblock);
 	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
@@ -148,62 +141,52 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	    return retval;
 	}
     }
-#define cleanup_authdata() { if (tgsreq.authorization_data.ciphertext.data) {\
-	(void) memset(tgsreq.authorization_data.ciphertext.data, 0,\
-             tgsreq.authorization_data.ciphertext.length); \
-	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);}}
 
-
+    /* Get the encryption types list */
+    if (etypes) {
+	/* Check passed etypes and make sure they're valid. */
+   	for (tgsreq.netypes = 0; etypes[tgsreq.netypes]; tgsreq.netypes++) {
+    	    if (!valid_etype(etypes[tgsreq.netypes]))
+		return KRB5_PROG_ETYPE_NOSUPP;
+	}
+    	tgsreq.etype = (krb5_enctype *)etypes;
+    } else {
+        /* Get the default etypes */
+        krb5_get_default_in_tkt_etypes(context, &(tgsreq.etype));
+	for(tgsreq.netypes = 0; tgsreq.etype[tgsreq.netypes]; tgsreq.netypes++);
+    }
 
     if (second_ticket) {
-	if (retval = decode_krb5_ticket(second_ticket, &sec_ticket)) {
-	    cleanup_authdata();
-	    return retval;
-	}
+	if (retval = decode_krb5_ticket(second_ticket, &sec_ticket))
+	    goto send_tgs_error_1;
 	sec_ticket_arr[0] = sec_ticket;
 	sec_ticket_arr[1] = 0;
 	tgsreq.second_ticket = sec_ticket_arr;
     } else
 	tgsreq.second_ticket = 0;
 
-
     /* encode the body; then checksum it */
-
-    retval = encode_krb5_kdc_req_body(&tgsreq, &scratch);
-    if (retval) {
-	if (sec_ticket)
-	    krb5_free_ticket(context, sec_ticket);
-	cleanup_authdata();
-	return(retval);
-    }
+    if (retval = encode_krb5_kdc_req_body(&tgsreq, &scratch))
+	goto send_tgs_error_2;
 
     if (!(ap_checksum.contents = (krb5_octet *)
 	  malloc(krb5_checksum_size(context, sumtype)))) {
-	if (sec_ticket)
-	    krb5_free_ticket(context, sec_ticket);
 	krb5_free_data(context, scratch);
-	cleanup_authdata();
-	return ENOMEM;
+	retval = ENOMEM;
+	goto send_tgs_error_2;
     }
 
-    if (retval = krb5_calculate_checksum(context, sumtype,
-					 scratch->data,
+    if (retval = krb5_calculate_checksum(context, sumtype, scratch->data,
 					 scratch->length,
-					 (krb5_pointer) usecred->keyblock.contents,
-					 usecred->keyblock.length,
+				 (krb5_pointer) in_cred->keyblock.contents,
+					 in_cred->keyblock.length,
 					 &ap_checksum)) {
-	if (sec_ticket)
-	    krb5_free_ticket(context, sec_ticket);
-	krb5_xfree(ap_checksum.contents);
 	krb5_free_data(context, scratch);
-	cleanup_authdata();
-	return retval;
+	goto send_tgs_error_3;
     }
     /* done with body */
     krb5_free_data(context, scratch);
 
-#define cleanup() {krb5_xfree(ap_checksum.contents);\
-		   if (sec_ticket) krb5_free_ticket(context, sec_ticket);}
     /* attach ap_req to the tgsreq */
 
     /*
@@ -212,16 +195,12 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     if (retval = krb5_mk_req_extended (context,
 			  	       0L /* no ap options */,
 				       &ap_checksum,
-				       0L, /* don't need kdc_options for this */
 				       0, /* no initial sequence */
 				       0, /* no new key */
-				       0, /* no ccache--already have creds */
-				       usecred,
+				       in_cred,
 				       0, /* don't need authenticator */
 				       &scratch2)) {
-	cleanup();
-	cleanup_authdata();
-	return retval;
+	goto send_tgs_error_3;
     }
 
     ap_req_padata.pa_type = KRB5_PADATA_AP_REQ;
@@ -235,10 +214,9 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	for (counter = padata; *counter; counter++, i++);
 	combined_padata = (krb5_pa_data **)malloc(i+2);
 	if (!combined_padata) {
-	    cleanup();
-	    cleanup_authdata();
 	    krb5_xfree(ap_req_padata.contents);
-	    return ENOMEM;
+	    retval = ENOMEM;
+	    goto send_tgs_error_3;
 	}
 	combined_padata[0] = &ap_req_padata;
 	for (i = 1, counter = padata; *counter; counter++, i++)
@@ -247,10 +225,9 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     } else {
 	combined_padata = (krb5_pa_data **)malloc(2*sizeof(*combined_padata));
 	if (!combined_padata) {
-	    cleanup();
-	    cleanup_authdata();
 	    krb5_xfree(ap_req_padata.contents);
-	    return ENOMEM;
+	    retval = ENOMEM;
+	    goto send_tgs_error_3;
 	}
 	combined_padata[0] = &ap_req_padata;
 	combined_padata[1] = 0;
@@ -259,35 +236,42 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 
     /* the TGS_REQ is assembled in tgsreq, so encode it */
     if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
-	cleanup();
-	cleanup_authdata();
-	krb5_xfree(combined_padata);
 	krb5_xfree(ap_req_padata.contents);
-	return(retval);
+	krb5_xfree(combined_padata);
+	goto send_tgs_error_3;
     }
-    if (sec_ticket)
-	krb5_free_ticket(context, sec_ticket);
-    cleanup_authdata();
-    krb5_xfree(combined_padata);
     krb5_xfree(ap_req_padata.contents);
-#undef cleanup_authdata
-#undef cleanup
-#define cleanup() {krb5_xfree(ap_checksum.contents);}
+    krb5_xfree(combined_padata);
 
     /* now send request & get response from KDC */
     retval = krb5_sendto_kdc(context, scratch, 
 			     krb5_princ_realm(context, sname),
 			     &rep->response);
     krb5_free_data(context, scratch);
-    cleanup();
-    if (retval) {
-	return retval;
-    }
-#undef cleanup
 
-    if (krb5_is_tgs_rep(&rep->response))
-	rep->message_type = KRB5_TGS_REP;
-    else /* assume it's an error */
-	rep->message_type = KRB5_ERROR;
-    return 0;
+    if (retval == 0) {
+        if (krb5_is_tgs_rep(&rep->response))
+	    rep->message_type = KRB5_TGS_REP;
+        else /* assume it's an error */
+	    rep->message_type = KRB5_ERROR;
+    }
+
+send_tgs_error_3:;
+    krb5_xfree(ap_checksum.contents);
+
+send_tgs_error_2:;
+    if (sec_ticket) 
+	krb5_free_ticket(context, sec_ticket);
+
+send_tgs_error_1:;
+    if (etypes == NULL)
+	krb5_xfree(tgsreq.etype);
+    if (tgsreq.authorization_data.ciphertext.data) {
+	memset(tgsreq.authorization_data.ciphertext.data, 0,
+               tgsreq.authorization_data.ciphertext.length); 
+	krb5_xfree(tgsreq.authorization_data.ciphertext.data);
+    }
+
+
+    return retval;
 }
