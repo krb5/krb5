@@ -228,7 +228,7 @@ asn1_error_code asn1_encode_encrypted_data(buf, val, retlen)
   asn1_addlenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_encode_charstring);
   if(val->kvno)
     asn1_addfield(val->kvno,1,asn1_encode_integer);
-  asn1_addfield(val->keytype,0,asn1_encode_integer);
+  asn1_addfield(val->enctype,0,asn1_encode_integer);
 
   asn1_makeseq();
 
@@ -431,7 +431,7 @@ asn1_error_code asn1_encode_kdc_req_body(buf, rep, retlen)
 
   /* etype[8]			SEQUENCE OF INTEGER, -- EncryptionType, */
   /* 				-- in preference order */
-  asn1_addlenfield(rep->nktypes,rep->ktype,8,asn1_encode_sequence_of_keytype);
+  asn1_addlenfield(rep->nktypes,rep->ktype,8,asn1_encode_sequence_of_enctype);
 
   /* nonce[7]			INTEGER, */
   asn1_addfield(rep->nonce,7,asn1_encode_integer);
@@ -485,7 +485,7 @@ asn1_error_code asn1_encode_encryption_key(buf, val, retlen)
   if(val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->length,val->contents,1,asn1_encode_octetstring);
-  asn1_addfield(val->keytype,0,asn1_encode_integer);
+  asn1_addfield(val->enctype,0,asn1_encode_integer);
   asn1_makeseq();
 
   asn1_cleanup();
@@ -641,10 +641,10 @@ asn1_error_code asn1_encode_ticket(buf, val, retlen)
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_sequence_of_keytype(buf, len, val, retlen)
+asn1_error_code asn1_encode_sequence_of_enctype(buf, len, val, retlen)
      asn1buf * buf;
      const int len;
-     const krb5_keytype * val;
+     const krb5_enctype * val;
      int * retlen;
 {
   asn1_setup();

@@ -156,7 +156,7 @@ asn1_error_code fname(buf, val)\
 integer_convert(asn1_decode_int,int)
 integer_convert(asn1_decode_int32,krb5_int32)
 integer_convert(asn1_decode_kvno,krb5_kvno)
-integer_convert(asn1_decode_keytype,krb5_keytype)
+integer_convert(asn1_decode_enctype,krb5_enctype)
 integer_convert(asn1_decode_cksumtype,krb5_cksumtype)
 integer_convert(asn1_decode_octet,krb5_octet)
 integer_convert(asn1_decode_addrtype,krb5_addrtype)
@@ -240,7 +240,7 @@ asn1_error_code asn1_decode_encryption_key(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->keytype,0,asn1_decode_keytype);
+    get_field(val->enctype,0,asn1_decode_enctype);
     get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
     end_structure();
     val->magic = KV5M_KEYBLOCK;
@@ -254,7 +254,7 @@ asn1_error_code asn1_decode_encrypted_data(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->keytype,0,asn1_decode_keytype);
+    get_field(val->enctype,0,asn1_decode_enctype);
     opt_field(val->kvno,1,asn1_decode_kvno,0);
     get_lenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_decode_charstring);
     end_structure();
@@ -409,13 +409,13 @@ asn1_error_code asn1_decode_kdc_req_body(buf, val)
     get_field(val->till,5,asn1_decode_kerberos_time);
     opt_field(val->rtime,6,asn1_decode_kerberos_time,0);
     get_field(val->nonce,7,asn1_decode_int32);
-    get_lenfield(val->nktypes,val->ktype,8,asn1_decode_sequence_of_keytype);
+    get_lenfield(val->nktypes,val->ktype,8,asn1_decode_sequence_of_enctype);
     opt_field(val->addresses,9,asn1_decode_host_addresses,0);
     if(tagnum == 10){
       get_field(val->authorization_data,10,asn1_decode_encrypted_data); }
     else{
       val->authorization_data.magic = 0;
-      val->authorization_data.keytype = 0;
+      val->authorization_data.enctype = 0;
       val->authorization_data.kvno = 0;
       val->authorization_data.ciphertext.data = NULL;
       val->authorization_data.ciphertext.length = 0;
@@ -632,21 +632,21 @@ asn1_error_code asn1_decode_last_req_entry(buf, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_sequence_of_keytype(buf, num, val)
+asn1_error_code asn1_decode_sequence_of_enctype(buf, num, val)
      asn1buf * buf;
      int * num;
-     krb5_keytype ** val;
+     krb5_enctype ** val;
 {
   asn1_error_code retval;
   { sequence_of(buf);
     while(asn1buf_remains(&seqbuf) > 0){
       size++;
       if (*val == NULL)
-        *val = (krb5_keytype*)malloc(size*sizeof(krb5_keytype));
+        *val = (krb5_enctype*)malloc(size*sizeof(krb5_enctype));
       else
-        *val = (krb5_keytype*)realloc(*val,size*sizeof(krb5_keytype));
+        *val = (krb5_enctype*)realloc(*val,size*sizeof(krb5_enctype));
       if(*val == NULL) return ENOMEM;
-      retval = asn1_decode_keytype(&seqbuf,&((*val)[size-1]));
+      retval = asn1_decode_enctype(&seqbuf,&((*val)[size-1]));
       if(retval) return retval;
     }
     *num = size;
