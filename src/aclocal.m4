@@ -47,6 +47,8 @@ dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 AC_DEFUN(CONFIG_RULES,[dnl
 AC_REQUIRE([V5_SET_TOPDIR]) dnl
+EXTRA_FILES=""
+AC_SUBST(EXTRA_FILES)
 WITH_CC dnl
 AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi

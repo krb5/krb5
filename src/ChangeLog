@@ -7,6 +7,7 @@
 	support, and test whether shlib.conf indicates support for
 	link-time options.
 	(KRB5_AC_GCC_ATTRS): Implement.
+	(CONFIG_RULES): Substitute EXTRA_FILES into pre.in.
 
 2004-04-26  Ken Raeburn  <raeburn@mit.edu>
 
