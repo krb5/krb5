@@ -24,6 +24,7 @@ bFIRST
 s/$/ /
 s/  */ /g
 
+# delete system-specific or compiler-specific files from list
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 s;/mit/cygnus[^ ]* ;;g
