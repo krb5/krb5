@@ -1,4 +1,10 @@
+2002-07-15  Ezra Peisach  <epeisach@med-dotty.bu.edu>
 
+	* tcl_kadm5.c: Cleanup warnings for variables set but not used.
+	* tcl_ovsec_kadm.c (unparse_err): Likewise.
+
+2002-03-07  Ken Raeburn  <raeburn@mit.edu>
+	
 	* tcl_kadm5.c (unparse_err): Print error message, not just number,
 	to stderr for unrecognized error code.
 	* tcl_ovsec_kadm.c (unparse_err): Likewise.

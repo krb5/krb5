@@ -533,17 +533,17 @@ static int parse_flags(Tcl_Interp *interp, Tcl_HashTable *table,
 		       struct flagval *array, int size, char *str,
 		       krb5_flags *flags)
 {
-     int tcl_ret, tmp, argc, i, retcode = TCL_OK;
+     int tmp, argc, i, retcode = TCL_OK;
      char **argv;
      Tcl_HashEntry *entry;
 
-     if ((tcl_ret = Tcl_GetInt(interp, str, &tmp)) == TCL_OK) {
+     if (Tcl_GetInt(interp, str, &tmp) == TCL_OK) {
 	  *flags = tmp;
 	  return TCL_OK;
      }
      Tcl_ResetResult(interp);
 
-     if ((tcl_ret = Tcl_SplitList(interp, str, &argc, &argv)) != TCL_OK) {
+     if (Tcl_SplitList(interp, str, &argc, &argv) != TCL_OK) {
 	  return TCL_ERROR;
      }
 
@@ -945,7 +945,7 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
 	       goto finished;
 	  }
 	  tl->tl_data_contents = (krb5_octet *) malloc(tmp+1);
-	  strcpy(tl->tl_data_contents, argv1[2]);
+	  strcpy((char *) tl->tl_data_contents, argv1[2]);
 
 	  free(argv1);
 	  argv1 = NULL;
@@ -1875,7 +1875,6 @@ static int tcl_kadm5_chpass_principal(ClientData clientData,
      int override_qual;
 #endif     
      krb5_error_code krb5_ret;
-     int tcl_ret;
      int retcode = TCL_OK;
      kadm5_ret_t ret;
 
@@ -1887,15 +1886,14 @@ static int tcl_kadm5_chpass_principal(ClientData clientData,
 	  return TCL_ERROR;
      }
 
-     if ((tcl_ret = parse_str(interp, argv[1], &pw)) != TCL_OK) {
+     if (parse_str(interp, argv[1], &pw) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing password");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
 
 #ifdef OVERRIDE
-     if ((tcl_ret = Tcl_GetBoolean(interp, argv[2], &override_qual))
-	 != TCL_OK) {
+     if (Tcl_GetBoolean(interp, argv[2], &override_qual) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing override_qual");
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -1935,7 +1933,6 @@ static int tcl_kadm5_chpass_principal_util(ClientData clientData,
      char *pw_ret, *pw_ret_var;
      char msg_ret[1024], *msg_ret_var;
      krb5_error_code krb5_ret;
-     int tcl_ret;
      kadm5_ret_t ret;
      int retcode = TCL_OK;
 
@@ -1947,26 +1944,25 @@ static int tcl_kadm5_chpass_principal_util(ClientData clientData,
 	  return TCL_ERROR;
      }
 
-     if ((tcl_ret = parse_str(interp, argv[1], &new_pw)) != TCL_OK) {
+     if (parse_str(interp, argv[1], &new_pw) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing new password");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
 #ifdef OVERRIDE
-     if ((tcl_ret = Tcl_GetBoolean(interp, argv[2], &override_qual))
-	 != TCL_OK) {
+     if (Tcl_GetBoolean(interp, argv[2], &override_qual) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing override_qual");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
 #endif
-     if ((tcl_ret = parse_str(interp, argv[3], &pw_ret_var)) != TCL_OK) {
+     if (parse_str(interp, argv[3], &pw_ret_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing pw_ret variable name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
 
-     if ((tcl_ret = parse_str(interp, argv[4], &msg_ret_var)) != TCL_OK) {
+     if (parse_str(interp, argv[4], &msg_ret_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing msg_ret variable name");
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -2021,7 +2017,6 @@ static int tcl_kadm5_randkey_principal(ClientData clientData,
      Tcl_DString *keyblock_dstring = 0;
      krb5_error_code krb5_ret;
      kadm5_ret_t ret;
-     int tcl_ret;
      int retcode = TCL_OK;
 
      GET_HANDLE(3, 0);
@@ -2032,12 +2027,12 @@ static int tcl_kadm5_randkey_principal(ClientData clientData,
 	  return TCL_ERROR;
      }
 
-     if ((tcl_ret = parse_str(interp, argv[1], &keyblock_var)) != TCL_OK) {
+     if (parse_str(interp, argv[1], &keyblock_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing keyblock variable name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((tcl_ret = parse_str(interp, argv[2], &num_var)) != TCL_OK) {
+     if (parse_str(interp, argv[2], &num_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing keyblock variable name");
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -2105,7 +2100,7 @@ static int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
 	return tcl_ret;
      if(name != NULL) {
 	if ((krb5_ret = krb5_parse_name(context, name, &princ)) != 0) {
-	    stash_error(interp, ret);
+	    stash_error(interp, krb5_ret);
 	    Tcl_AppendElement(interp, "while parsing principal name");
 	    return TCL_ERROR;
 	}
@@ -2212,11 +2207,10 @@ static int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
 {
      kadm5_ret_t ret;
      char *policy;
-     int tcl_ret;
 
      GET_HANDLE(1, 0);
 
-     if ((tcl_ret = parse_str(interp, argv[0], &policy)) != TCL_OK) {
+     if (parse_str(interp, argv[0], &policy) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing policy name");
 	  return TCL_ERROR;
      }
@@ -2288,18 +2282,17 @@ static int tcl_kadm5_get_policy(ClientData clientData, Tcl_Interp *interp,
      Tcl_DString *ent_dstring = 0;
      char *policy;
      char *ent_var;
-     int tcl_ret;
      kadm5_ret_t ret;
      int retcode = TCL_OK;
 
      GET_HANDLE(2, 1);
 
-     if ((tcl_ret = parse_str(interp, argv[0], &policy)) != TCL_OK) {
+     if (parse_str(interp, argv[0], &policy) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing policy name");
 	  return TCL_ERROR;
      }
      
-     if ((tcl_ret = parse_str(interp, argv[1], &ent_var)) != TCL_OK) {
+     if (parse_str(interp, argv[1], &ent_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing entry variable name");
 	  return TCL_ERROR;
      }
@@ -2346,12 +2339,11 @@ static int tcl_kadm5_free_principal_ent(ClientData clientData,
 {
      char *ent_name;
      kadm5_principal_ent_t ent;
-     int tcl_ret;
      kadm5_ret_t ret;
 
      GET_HANDLE(1, 0);
 
-     if ((tcl_ret = parse_str(interp, argv[0], &ent_name)) != TCL_OK) {
+     if (parse_str(interp, argv[0], &ent_name) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing entry name");
 	  return TCL_ERROR;
      }
@@ -2403,12 +2395,11 @@ static int tcl_kadm5_free_policy_ent(ClientData clientData,
 {
      char *ent_name;
      kadm5_policy_ent_t ent;
-     int tcl_ret;
      kadm5_ret_t ret;
 
      GET_HANDLE(1, 0);
 
-     if ((tcl_ret = parse_str(interp, argv[0], &ent_name)) != TCL_OK) {
+     if (parse_str(interp, argv[0], &ent_name) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing entry name");
 	  return TCL_ERROR;
      }
@@ -2456,7 +2447,6 @@ static int tcl_kadm5_free_policy_ent(ClientData clientData,
 static int tcl_kadm5_get_privs(ClientData clientData, Tcl_Interp *interp,
 			       int argc, char *argv[])
 {
-     int tcl_ret;
      char *set_ret;
      kadm5_ret_t ret;
      char *priv_var;
@@ -2464,7 +2454,7 @@ static int tcl_kadm5_get_privs(ClientData clientData, Tcl_Interp *interp,
 
      GET_HANDLE(1, 0);
 
-     if ((tcl_ret = parse_str(interp, argv[0], &priv_var)) != TCL_OK) {
+     if (parse_str(interp, argv[0], &priv_var) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing privs variable name");
 	  return TCL_ERROR;
      }
