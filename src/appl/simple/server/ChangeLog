@@ -1,3 +1,6 @@
+Wed Jun 28 13:13:34 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sim_server.c: Include <string.h> for memcpy definitions.
 
 Thu Jun 15 17:40:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
