@@ -1,3 +1,8 @@
+2001-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* walk_rtree.c (krb5_walk_realm_tree): Initialize slen to silence
+	compiler warning.
+
 2001-08-08    <epeisach@mit.edu>
 
 	* walk_rtree.c (krb5_walk_realm_tree): Do not try to free const char *.

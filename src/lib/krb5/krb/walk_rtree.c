@@ -106,7 +106,7 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
     register char *prevccp = 0, *prevscp = 0;
     char *com_sdot = 0, *com_cdot = 0;
     register int i, links = 0;
-    int clen, slen;
+    int clen, slen = -1;
     krb5_data tmpcrealm, tmpsrealm;
     int nocommon = 1;
 
