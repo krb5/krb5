@@ -196,7 +196,6 @@ main(argc, argv)
 	  strcat(ctmp, ctmp2);
 	  client = ctmp;
 
-	  if ((counter != 0) && (n != 1)) krb5_free_principal(client_princ);
 	  if (get_tgt (client, &client_princ, ccache)) {
 	    errors++;
 	    n_tried++;
@@ -215,6 +214,7 @@ main(argc, argv)
 	      errors++;
 	    n_tried++;
 	  }
+	  krb5_free_principal(client_princ);
 	}
       }
     }
@@ -398,7 +398,8 @@ int get_tgt (p_client_str, p_client, ccache)
 					 p_client_str,
 					 ccache,
 					 &my_creds);
-    my_creds.server = 0;
+    my_creds.server = my_creds.client = 0;
+    krb5_free_address(my_addresses);
     krb5_free_cred_contents(&my_creds);
     if (code != 0) {
 	com_err (prog, code, "while getting initial credentials");
