@@ -1,8 +1,17 @@
+Fri Mar 24 14:15:51 1995    <tytso@rsx-11.mit.edu>
+
+	* adm_defs.h (ADM5_DEFAULT_PORT): Add definition of default
+		administration port.
+
+	* Makefile.in (install): Delete the destination header files
+		before copying in the new ones.  Also install autoconf.h.
+		Only install header files if the header file has changed.
+
 Wed Mar 22 11:37:24 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: added HAVE_SYS_TYPES_H. Cleaned up the loading
            of sys/types.h which john added earlier. Specifically, we always
-           have it and it's missing some typedefs used by this code.            
+           have it and it's missing some typedefs used by this code.
 
 Tue Mar 21 18:42:23 1995 Keith Vetter (keithv@fusion.com)
 
