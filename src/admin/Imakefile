@@ -1,0 +1,4 @@
+SRCS= kdb_stash.c kdb_create.c kdb_destroy.c common.c
+all::
+	/*placebo*/
+	@echo nothing to build yet.
