@@ -1305,8 +1305,6 @@
 				174475D6FF5EF33612120111,
 				174475DBFF5EF33612120111,
 				174475DCFF5EF33612120111,
-				F529E973019AE0D001120112,
-				F529E975019AE0D001120112,
 				F529E971019AE09101120112,
 				0A53389B00C407D37F000001,
 			);
@@ -8811,35 +8809,6 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
-		};
-		F529E973019AE0D001120112 = {
-			buildActionMask = 2147483647;
-			dstPath = ../Support;
-			dstSubfolderSpec = 7;
-			files = (
-				F529E974019AE0D001120112,
-			);
-			isa = PBXCopyFilesBuildPhase;
-			name = "Copy Files";
-		};
-		F529E974019AE0D001120112 = {
-			fileRef = 00CC63F200975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F529E975019AE0D001120112 = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			generatedFileNames = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			name = "Shell Script";
-			neededFileNames = (
-			);
-			shellPath = /bin/sh;
-			shellScript = "ln -sf Versions/Current/Support \"${SYMROOT}/KerberosComErr.${WRAPPER_EXTENSION}/Support\"";
 		};
 		F529E976019AE3D601120112 = {
 			isa = PBXFileReference;
