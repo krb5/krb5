@@ -48,11 +48,11 @@ esac
 dnl
 AC_SUBST(LOGINLIBS)
 dnl
-AC_CHECK_LIB(util,openpty, AC_DEFINE(HAVE_OPENPTY) LIBS="$LIBS -lutil")
+AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY) LIBS="$LIBS -lutil"])
 AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
-AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
-AC_HAVE_FUNCS(getutent setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty logwtmp getutmpx)
+AC_CHECK_FUNC(strsave,[AC_DEFINE(HAS_STRSAVE)])
+AC_CHECK_FUNCS(getutent setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty logwtmp getutmpx)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h pty.h utmpx.h utmp.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_CHECK_HEADERS(sys/wait.h)
 AC_CHECK_FUNCS(waitpid updwtmpx)
@@ -61,7 +61,7 @@ KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
-AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
 CHECK_UTMP
 dnl
 dnl
@@ -170,7 +170,7 @@ fi
 dnl
 dnl
 ADD_DEF(-DKERBEROS)
-AC_CONST
+AC_C_CONST
 KRB5_BUILD_LIBRARY_WITH_DEPS
 KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

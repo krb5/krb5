@@ -1,3 +1,9 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Quote macro use inside AC_CHECK_LIB. Change
+	AC_FUNC_CHECK to AC_CHECK_FUNC, AC_HAVE_FUNCS to AC_CHECK_FUNCS
+	and AC_HEADER_CHECK to AC_CHECK_HEADER..
+
 2000-06-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* pty-int.h: Add getutmpx() prototype if needed.
