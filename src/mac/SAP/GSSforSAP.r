@@ -46,7 +46,7 @@ resource 'DITL' (136, nonpurgeable) {
 		StaticText {
 			disabled,
 			"This version of the SAP client will expi"
-			"re on January 15, 1997. Please consult: "
+			"re on June 1, 1997. Please consult: "
 			"http://web.mit.edu/reeng/www/saphelp/ fo"
 			"r instructions on obtaining a new versio"
 			"n when it is available."

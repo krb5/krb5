@@ -1,3 +1,8 @@
+Tue Dec 17 13:53:36 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* GSSforSAP.r: Fix expire time in the text resource to be June 1,
+	 	1997.
+
 Fri Dec 13 14:58:20 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* macSAPglue.c (__initializeSAPglue): Change the timebomb date to
