@@ -1,3 +1,8 @@
+1999-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (setup_kerberos_files): Tweak enctypes entered into
+	config files to exercise 3DES a little.
+
 Fri Jan 30 23:48:57 1998  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Add kpasswd_server to krb5.conf.
