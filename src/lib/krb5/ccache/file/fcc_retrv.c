@@ -20,9 +20,13 @@ static char fcc_retrv_c[] = "$Id$";
 
 #define set(bits) (whichfields & bits)
 #define flags_match(a,b) (a & b == a)
-#define times_match_exact(t1,t2) (bcmp((char *)&(t1), (char *)&(t2), sizeof(t1)) == 0)
-#define times_match times_match_exact /* XXX WRONG! XXX */
-     
+#define times_match_exact(t1,t2) (bcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
+
+static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,
+					   const krb5_ticket_times *));
+static krb5_boolean standard_fields_match
+    PROTOTYPE((const krb5_creds *,
+	       const krb5_creds *));
 /*
  * Effects:
  * Searches the file cred cache is for a credential matching mcreds,
@@ -61,7 +65,7 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	  return kret;
 
      while ((kret = krb5_fcc_next_cred(id, &cursor, creds)) == KRB5_OK) {
-	  if (1 /* XXX standard_fields_match(mcreds, creds) */
+	  if (standard_fields_match(mcreds, creds)
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
 	       mcreds->is_skey == creds->is_skey)
@@ -73,10 +77,10 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	       flags_match(mcreds->ticket_flags, creds->ticket_flags))
 	      &&
 	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
-	       times_match_exact(mcreds->times, creds->times))
+	       times_match_exact(&mcreds->times, &creds->times))
 	      &&
 	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(mcreds->times, creds->times)))
+	       times_match(&mcreds->times, &creds->times)))
 	  {
 	       krb5_fcc_end_seq_get(id, &cursor);
 	       return KRB5_OK;
@@ -91,3 +95,27 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
      return KRB5_NOTFOUND;
 }
 
+static krb5_boolean
+times_match(t1, t2)
+register const krb5_ticket_times *t1;
+register const krb5_ticket_times *t2;
+{
+    if (t1->renew_till) {
+	if (t1->renew_till > t2->renew_till)
+	    return FALSE;		/* this one expires too late */
+    }
+    if (t1->endtime) {
+	if (t1->endtime > t2->endtime)
+	    return FALSE;		/* this one expires too late */
+    }
+    /* only care about expiration on a times_match */
+    return TRUE;
+}
+
+static krb5_boolean
+standard_fields_match(mcreds, creds)
+register const krb5_creds *mcreds, *creds;
+{
+    return (krb5_principal_compare(mcreds->client,creds->client) &&
+	    krb5_principal_compare(mcreds->server,creds->server));
+}
