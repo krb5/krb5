@@ -17,10 +17,8 @@ static char rcsid_encode_c[] =
 
 #include <krb5/copyright.h>
 #include <isode/psap.h>
-#include "KRB5-types.h"
 #include <krb5/krb5.h>
-#include "encode.h"
-#include "asn1defs.h"
+#include <krb5/asn1.h>
 
 #include <krb5/ext-proto.h>
 
