@@ -1,3 +1,7 @@
+2003-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (main): Don't zero out terminal window size.
+
 2003-02-03  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (dofork): Don't dissociate from controlling tty in the

@@ -1476,12 +1476,6 @@ int main(argc, argv)
     quietlog = access(HUSHLOGIN, F_OK) == 0;
     dolastlog(hostname, quietlog, tty);
 
-    if (!hflag && !rflag && !kflag && !Kflag && !eflag) {	/* XXX */
-	static struct winsize win = { 0, 0, 0, 0 };
-
-	(void)ioctl(0, TIOCSWINSZ, (char *)&win);
-    }
-
     (void)chown(ttyn, pwd->pw_uid,
 		(gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
 
