@@ -1,5 +1,5 @@
 /*
- * lib/krb5/krb/in_tkt_pwd.c
+ * lib/krb5/krb/in_tkt_ktb.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -21,105 +21,105 @@
  * or implied warranty.
  * 
  *
- * krb5_get_in_tkt_with_password()
+ * krb5_get_in_tkt_with_keytab()
+ *	
  */
-
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
 
-extern char *krb5_default_pwd_prompt1;
+struct keytab_keyproc_arg {
+    krb5_keytab	keytab;
+    krb5_principal client;
+};
 
-/* 
- * key-producing procedure for use by krb5_get_in_tkt_with_password.
+/*
+ * Key-generator for in_tkt_keytab, below.
+ * "keyseed" is actually a krb5_keytab, or NULL if we should fetch
+ * from system area.
  */
-
-static krb5_error_code
-pwd_keyproc(context, type, salt, keyseed, key)
+static keytab_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_keytype type;
     krb5_data * salt;
     krb5_const_pointer keyseed;
     krb5_keyblock ** key;
 {
+    struct keytab_keyproc_arg * arg = (struct keytab_keyproc_arg *)keyseed;
+    krb5_keyblock *realkey;
     krb5_error_code retval;
-    krb5_encrypt_block eblock;
-    const struct pwd_keyproc_arg *arg;
-    char pwdbuf[BUFSIZ];
-    krb5_data * password;
-    int pwsize = sizeof(pwdbuf);
+    krb5_keytab kt_id;
+    krb5_keytab_entry kt_ent;
+
+    kt_id = arg->keytab;
 
     if (!valid_keytype(type))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
-    krb5_use_keytype(context, &eblock, type);
-    
-    password = (krb5_data *)keyseed;
-
-    if (!password->length) {
-	if (retval = krb5_read_password(context, krb5_default_pwd_prompt1, 0,
-					pwdbuf, &pwsize)) {
+    if (kt_id == NULL)
+	/* Fetch from default keytab location */
+	if (retval = krb5_kt_default(context, &kt_id))
 	    return retval;
-	}
-        password->length = pwsize;
-        password->data = pwdbuf;
+
+
+    if (retval = krb5_kt_get_entry(context, kt_id, arg->client,
+				   0, /* don't have vno available */
+				   type, &kt_ent))
+	    return retval;
+
+    if (retval = krb5_copy_keyblock(context, &kt_ent.key, &realkey)) {
+	(void) krb5_kt_free_entry(context, &kt_ent);
+	return retval;
     }
+	
+    if (realkey->keytype != type) {
+	(void) krb5_kt_free_entry(context, &kt_ent);
+	krb5_free_keyblock(context, realkey);
+	return KRB5_PROG_ETYPE_NOSUPP;
+    }	
 
-    if (!(*key = (krb5_keyblock *)malloc(sizeof(**key))))
-	return ENOMEM;
-
-    if (retval = krb5_string_to_key(context,&eblock,type,*key,password,salt))
-	krb5_xfree(*key);
-    return(retval);
+    (void) krb5_kt_free_entry(context, &kt_ent);
+    *key = realkey;
+    return 0;
 }
 
 /*
+ Similar to krb5_get_in_tkt_with_skey.
+
  Attempts to get an initial ticket for creds->client to use server
  creds->server, (realm is taken from creds->client), with options
- options, and using creds->times.starttime, creds->times.endtime,
- creds->times.renew_till as from, till, and rtime.  
+ options, and using creds->times.starttime, creds->times.endtime, 
+ creds->times.renew_till as from, till, and rtime. 
  creds->times.renew_till is ignored unless the RENEWABLE option is requested.
 
  If addrs is non-NULL, it is used for the addresses requested.  If it is
  null, the system standard addresses are used.
 
- If password is non-NULL, it is converted using the cryptosystem entry
- point for a string conversion routine, seeded with the client's name.
- If password is passed as NULL, the password is read from the terminal,
- and then converted into a key.
-
  A succesful call will place the ticket in the credentials cache ccache.
 
  returns system errors, encryption errors
+
  */
 krb5_error_code
-krb5_get_in_tkt_with_password(context, options, addrs, etypes, pre_auth_types, 
-			      password, ccache, creds, ret_as_reply)
+krb5_get_in_tkt_with_keytab(context, options, addrs, etypes, pre_auth_types, 
+			    keytab, ccache, creds, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
     krb5_enctype * etypes;
     krb5_preauthtype * pre_auth_types;
-    const char * password;
+    const krb5_keytab keytab;
     krb5_ccache ccache;
     krb5_creds * creds;
     krb5_kdc_rep ** ret_as_reply;
 {
-    krb5_error_code retval;
-    krb5_data data;
+    struct keytab_keyproc_arg arg;
 
+    arg.keytab = keytab;
+    arg.client = creds->client;
 
-    if (data.data = (char *)password) {
-	data.length = strlen(password);
-    } else {
-	data.length = 0;
-    }
-
-    retval = krb5_get_in_tkt(context, options, addrs, etypes, pre_auth_types, 
-			     pwd_keyproc, (krb5_pointer) &data,
-			     krb5_kdc_rep_decrypt_proc, 0,
-			     creds, ccache, ret_as_reply);
-    return retval;
+    return (krb5_get_in_tkt(context, options, addrs, etypes, pre_auth_types, 
+			    keytab_keyproc, (krb5_pointer)&arg,
+			    krb5_kdc_rep_decrypt_proc, 0, creds,
+			    ccache, ret_as_reply));
 }
-

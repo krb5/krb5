@@ -36,10 +36,9 @@
 
  Attempts to get an initial ticket for creds->client to use server
  creds->server, (realm is taken from creds->client), with options
- options, requesting encryption type etype, and using
- creds->times.starttime,  creds->times.endtime,  creds->times.renew_till
- as from, till, and rtime.  creds->times.renew_till is ignored unless
- the RENEWABLE option is requested.
+ options, and using creds->times.starttime, creds->times.endtime,
+ creds->times.renew_till as from, till, and rtime.  
+ creds->times.renew_till is ignored unless the RENEWABLE option is requested.
 
  key_proc is called to fill in the key to be used for decryption.
  keyseed is passed on to key_proc.
@@ -67,24 +66,22 @@ extern krb5_deltat krb5_clockskew;
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
 						   const krb5_keytype,
-						   krb5_keyblock **,
+						   krb5_data *,
 						   krb5_const_pointer,
-						   krb5_pa_data **));
+						   krb5_keyblock **));
 
 typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
 						       const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
-krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
-		key_proc, keyseed, decrypt_proc, decryptarg, creds,
-		ccache, ret_as_reply)
+krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
+		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;
     const krb5_flags options;
     krb5_address * const * addrs;
-    const krb5_preauthtype pre_auth_type;
-    const krb5_enctype etype;
-    const krb5_keytype keytype;
+    krb5_enctype * etypes;
+    krb5_preauthtype * ptypes;
     git_key_proc key_proc;
     krb5_const_pointer keyseed;
     git_decrypt_proc decrypt_proc;
@@ -93,6 +90,8 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     krb5_ccache ccache;
     krb5_kdc_rep ** ret_as_reply;
 {
+    krb5_keytype keytype;
+    krb5_enctype etype;
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
@@ -100,9 +99,10 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     krb5_data *packet;
     krb5_data reply;
     krb5_keyblock *decrypt_key = 0;
-    krb5_enctype etypes[1];
     krb5_timestamp time_now;
     krb5_pa_data	*padata;
+    int f_salt = 0, use_salt = 0;
+    krb5_data salt;
     char k4_version;		/* same type as *(krb5_data::data) */
 
     if (! krb5_realm_compare(context, creds->client, creds->server))
@@ -119,10 +119,12 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 
     reply.data = 0;
 
-    if (pre_auth_type == KRB5_PADATA_NONE) {
+    if (1) {
 	    decrypt_key = 0;
 	    request.padata = 0;
     } else {
+    	    /* Pre authentication is not yet supported */
+
 	    /*
 	     * First, we get the user's key.  We assume we will need
 	     * it for the pre-authentication.  Actually, this could
@@ -134,7 +136,7 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 	     * default.  But if we're changing salts, because of a
 	     * realm renaming, or some such, this won't work.
 	     */
-	    retval = (*key_proc)(context, keytype, &decrypt_key, keyseed, 0);
+/*    retval = (*key_proc)(context, keytype, &decrypt_key, keyseed, 0); */
 	    if (retval)
 		    return retval;
 	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
@@ -144,12 +146,12 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 		goto cleanup;
 	    }
 	    
-	    retval = krb5_obtain_padata(context, pre_auth_type, creds->client,
+	  /*  retval = krb5_obtain_padata(context, ptypes[0], creds->client,
 					request.addresses, decrypt_key,
-					&padata);
+					&padata); */
 	    if (retval)
 		goto cleanup;
-	    request.padata[0] = padata;
+/*	    request.padata[0] = padata; */
 	    request.padata[1] = 0;
     }
     
@@ -166,13 +168,15 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     /* XXX we know they are the same size... */
     request.nonce = (krb5_int32) time_now;
 
-    etypes[0] = etype;
-    request.etype = etypes;
-    request.netypes = 1;
-    request.second_ticket = 0;
+    if (etypes) 
+	request.etype = etypes;
+    else 
+    	krb5_get_default_in_tkt_etypes(context, &request.etype);
+    for (request.netypes = 0;request.etype[request.netypes];request.netypes++);
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
+    request.second_ticket = 0;
 
     /* encode & send to KDC */
     if (retval = encode_krb5_as_req(&request, &packet))
@@ -238,12 +242,36 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 	goto cleanup;
     }
 
-    /* it was a kdc_rep--decrypt & check */
+    /* Encryption type, keytype, */
+    etype = as_reply->ticket->enc_part.etype;
+    keytype = krb5_csarray[etype]->system->proto_keytype;
 
-     /* Generate the key, if we haven't done so already. */
+    /* and salt */
+    if (as_reply->padata) {
+	krb5_pa_data **ptr;
+
+        for (ptr = as_reply->padata; *ptr; ptr++) {
+            if ((*ptr)->pa_type == KRB5_PADATA_PW_SALT) {
+                /* use KDC-supplied salt, instead of default */
+                salt.data = (char *)(*ptr)->contents;
+                salt.length = (*ptr)->length;
+                use_salt = 1;
+                break;
+            }
+        }
+    } 
+    if (!use_salt) {
+        /* need to use flattened principal */
+        if (retval = krb5_principal2salt(context, creds->client, &salt))
+            return(retval);
+        f_salt = 1;
+    }
+
+    /* it was a kdc_rep--decrypt & check */
+    /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
-	    if (retval = (*key_proc)(context, keytype, &decrypt_key, keyseed,
-				     as_reply->padata))
+	    if (retval = (*key_proc)(context, keytype, & salt, keyseed,
+				     &decrypt_key))
 		goto cleanup;
     }
     
@@ -323,6 +351,8 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     retval = 0;
     
 cleanup:
+    if (f_salt)
+	krb5_xfree(salt.data);
     if (as_reply)
 	krb5_free_kdc_rep(context, as_reply);
     if (reply.data)

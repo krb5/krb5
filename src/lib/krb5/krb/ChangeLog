@@ -1,3 +1,20 @@
+Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
+
+	* get_in_tkt.c (krb5_get_in_tkt())
+	* in_tkt_sky.c (krb5_get_in_tkt_with_skey())
+	* in_tkt_pwd.c (krb5_get_in_tkt_with_password())
+		Removed krb5_keytype, changed krb5_enctype to krb5_enctype *,
+		changed krb5_preauthtype to krb5_preauthtype *.
+
+		Changed the args to the key_proc arg of krb5_get_in_tkt()
+		to be the following (krb5_context, const krb5_keytype, 
+		krb5_data *, krb5_const_pointer, krb5_keyblock **)
+
+	* in_tkt_ktb.c (krb5_get_in_tkt_with_keytab()) Added this routine
+		to replace krb5_get_in_tkt_with_skey() in kinit.
+
+	* Makefile.in Added new source file in_tkt_ktb.c.
+		
 Fri Feb  3 16:41:19 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* get_in_tkt.c (krb5_get_in_tkt): also check for the version

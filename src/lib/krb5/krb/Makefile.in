@@ -37,6 +37,7 @@ OBJS=	addr_comp.o	\
 	get_creds.o	\
 	get_fcreds.o	\
 	get_in_tkt.o	\
+	in_tkt_ktb.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
 	init_ctx.o	\
@@ -101,6 +102,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/get_creds.c	\
 	$(srcdir)/get_fcreds.c \
 	$(srcdir)/get_in_tkt.c	\
+	$(srcdir)/in_tkt_ktb.c	\
 	$(srcdir)/in_tkt_pwd.c	\
 	$(srcdir)/in_tkt_sky.c	\
 	$(srcdir)/init_ctx.c	\
