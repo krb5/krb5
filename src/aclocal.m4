@@ -622,7 +622,7 @@ AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
 [volatile int x();], [],
 krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
 AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
-if test $krb5_cv_has_ansi_volatile = yes; then
-AC_DEFINE(HAS_ANSI_VOLATILE)
+if test $krb5_cv_has_ansi_volatile = no; then
+AC_DEFINE([volatile=])
 fi
 ])dnl
