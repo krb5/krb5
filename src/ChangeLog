@@ -1,3 +1,9 @@
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (CONFIG_RELTOPDIR): Add support for generic file
+		existence tests (used to simplify some configure.in
+		files.)
+
 Sun Mar  1 22:22:50 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4: Remove unused variables BUILDTOP and SRCTOP (now
