@@ -115,7 +115,7 @@ vsyslog(pri, fmt, ap)
 	(void)sprintf(tbuf, "<%d>%.15s ", pri, ctime(&now) + 4);
 	for (p = tbuf; *p; ++p);
 	if (LogTag) {
-		(void)strcpy(p, LogTag);
+		(void)strncpy(p, LogTag, sizeof(tbuf) - 1 - (p - tbuf));
 		for (; *p; ++p);
 	}
 	if (LogStat & LOG_PID) {
@@ -146,6 +146,11 @@ vsyslog(pri, fmt, ap)
 	}
 
 	(void)vsprintf(p, fmt_cpy, ap);
+	/* Bounds checking??  If a system doesn't have syslog, we
+	   probably can't rely on it having vsnprintf either.  Try not
+	   to let a buffer overrun be exploited.  */
+	if (strlen (tbuf) >= sizeof (tbuf))
+	  abort ();
 
 	/* output the message to the local logger */
 	if (send(LogFile, tbuf, cnt = strlen(tbuf), 0) >= 0 ||
@@ -169,7 +174,8 @@ vsyslog(pri, fmt, ap)
 		if ((fd = open(CONSOLE, O_WRONLY, 0)) < 0)
 			return;
 		(void)alarm((u_int)0);
-		(void)strcat(tbuf, "\r");
+		tbuf[sizeof(tbuf) - 1] = '\0';
+		(void)strncat(tbuf, "\r", sizeof(tbuf) - 1 - strlen(tbuf));
 		p = strchr(tbuf, '>') + 1;
 		(void)write(fd, p, cnt + 1 - (p - tbuf));
 		(void)close(fd);

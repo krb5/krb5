@@ -1,3 +1,19 @@
+2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix up DNS build flags to correspond to new DNS
+	build flags.  Add support for not using wshelper.
+
+2000-06-08  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess: Update to 2000-05-30 from FSF.
+
+	* config.sub: Update to 2000-05-30 from FSF.
+
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in, pre.in: Put $(LOCALINCLUDES) after $(CPPFLAGS) since
+	$(CPPFLAGS) should have its includes show up first.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (INSTALL_SHLIB): New variable.

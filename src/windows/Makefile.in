@@ -20,6 +20,9 @@ all-windows::
 	@echo Making in windows\gina
 	cd ..\gina
 	$(MAKE) -$(MFLAGS)
+	@echo Making in windows\ms2mit
+	cd ..\ms2mit
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -37,5 +40,8 @@ clean-windows::
 	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows\gina
 	cd ..\gina
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\ms2mit
+	cd ..\ms2mit
 	$(MAKE) -$(MFLAGS) clean
 	cd ..

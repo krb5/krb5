@@ -13,7 +13,7 @@
 
 #ifdef NEW_SHS
 
-static LONG shsTestResults[][ 5 ] = {
+static SHS_LONG shsTestResults[][ 5 ] = {
     { 0xA9993E36L, 0x4706816AL, 0xBA3E2571L, 0x7850C26CL, 0x9CD0D89DL, },
     { 0x84983E44L, 0x1C3BD26EL, 0xBAAE4AA1L, 0xF95129E5L, 0xE54670F1L, },
     { 0x34AA973CL, 0xD4C4DAA4L, 0xF61EEB2BL, 0xDBAD2731L, 0x6534016FL, }
@@ -21,7 +21,7 @@ static LONG shsTestResults[][ 5 ] = {
 
 #else
 
-static LONG shsTestResults[][ 5 ] = {
+static SHS_LONG shsTestResults[][ 5 ] = {
     { 0x0164B8A9L, 0x14CD2A5EL, 0x74C4F7FFL, 0x082C4D97L, 0xF1EDF880L },
     { 0xD2516EE1L, 0xACFA5BAFL, 0x33DFC1C4L, 0x71E43844L, 0x9EF134C8L },
     { 0x3232AFFAL, 0x48628A26L, 0x653B5AAAL, 0x44541FD9L, 0x0D690603L }
@@ -58,7 +58,7 @@ main()
     SHS_INFO shsInfo;
     unsigned int i;
     time_t secondCount;
-    BYTE data[ 200 ];
+    SHS_BYTE data[ 200 ];
 
     /* Make sure we've got the endianness set right.  If the machine is
        big-endian (up to 64 bits) the following value will be signed,
@@ -69,7 +69,7 @@ main()
     /* Test SHS against values given in SHS standards document */
     printf( "Running SHS test 1 ... " );
     shsInit( &shsInfo );
-    shsUpdate( &shsInfo, ( BYTE * ) "abc", 3 );
+    shsUpdate( &shsInfo, ( SHS_BYTE * ) "abc", 3 );
     shsFinal( &shsInfo );
     if( compareSHSresults( &shsInfo, 0 ) == -1 )
         {
@@ -85,7 +85,7 @@ main()
 
     printf( "Running SHS test 2 ... " );
     shsInit( &shsInfo );
-    shsUpdate( &shsInfo, ( BYTE * ) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56 );
+    shsUpdate( &shsInfo, ( SHS_BYTE * ) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56 );
     shsFinal( &shsInfo );
     if( compareSHSresults( &shsInfo, 1 ) == -1 )
         {
@@ -102,7 +102,7 @@ main()
     printf( "Running SHS test 3 ... " );
     shsInit( &shsInfo );
     for( i = 0; i < 15625; i++ )
-        shsUpdate( &shsInfo, ( BYTE * ) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 64 );
+        shsUpdate( &shsInfo, ( SHS_BYTE * ) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 64 );
     shsFinal( &shsInfo );
     if( compareSHSresults( &shsInfo, 2 ) == -1 )
         {

@@ -74,7 +74,7 @@ Attempt to run aklog. Default value true.
 .IP aklog_path
 Where to find it [not yet implemented.] Default value 
 .I $(prefix)/bin/aklog.
-.IP accept_passwd = 0
+.IP accept_passwd
 Don't accept plaintext passwords [not yet implemented]. Default value false.
 
 .SH DIAGNOSTICS

@@ -1,3 +1,7 @@
+2000-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile (lib1.stamp): Use texindex instead of index.
+
 1999-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* libdes.tex: Don't use ncs style; it's availability is dependent

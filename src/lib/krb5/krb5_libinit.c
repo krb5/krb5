@@ -35,7 +35,7 @@ void krb5int_cleanup_library (void)
 {
 	assert (initialized);
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh) || defined(__MACH__)
 	krb5_stdcc_shutdown();
 #endif
 	

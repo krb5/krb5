@@ -1,3 +1,34 @@
+2001-12-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Beta 4.
+
+2001-11-28  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Beta 3.
+
+2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Beta 2.
+
+2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build ms2mit.
+	* version.rc: 1.2.3 beta 1 (pre-release)
+	* README: Note on building ms2mit.
+
+2000-07-07  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: No longer pre-release.
+
+2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Update documentation with DNS information.  Fix up the
+	language a bit.
+
+2000-04-25  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version to 1.2 beta.
+
 2000-02-06  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Add documentation about debug vs. release builds.

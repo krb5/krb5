@@ -18,6 +18,8 @@ static char *rcsid = "$Header$";
 #include <syslog.h>
 #include "misc.h"
 
+#define xdr_free gssrpc_xdr_free /* XXX kludge */
+
 #define LOG_UNAUTH  "Unauthorized request: %s, %s, client=%s, service=%s, addr=%s"
 #define	LOG_DONE    "Request: %s, %s, %s, client=%s, service=%s, addr=%s"
 

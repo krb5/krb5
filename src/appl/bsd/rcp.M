@@ -24,11 +24,13 @@ rcp \- remote file copy
 .B rcp
 [\fB\-p\fP] [\fB\-x\fP] [\fB\-k\fP \fIrealm\fP ] [\fB\-D\fP \fIport\fP]
 [\fB\-N\fP]
+[\fB\-PN | \-PO\fP]
 .I file1 file2
 .sp
 .B rcp
 [\fB\-p\fB] [\fB\-x\fP] [\fP\-k\fP \fIrealm\fP] [\fB\-r\fP] [\fB\-D\fP
 \fIport\fP] [\fB\-N\fP]
+[\fB\-PN | \-PO\fP]
 .I file ... directory
 .SH DESCRIPTION
 .B Rcp
@@ -92,6 +94,16 @@ instead of the remote host's realm as determined by
 .B \-r
 if any of the source files are directories, copy each subtree rooted at
 that name; in this case the destination must be a directory.
+.TP
+\fB-PN\fP
+.TP
+\fB-PO\fP
+Explicitly request new or old version of the Kerberos ``rcmd''
+protocol.  The new protocol avoids many security problems found in the
+old one, but is not interoperable with older servers.  (An
+"input/output error" and a closed connection is the most likely result
+of attempting this combination.)  If neither option is specified, some
+simple heuristics are used to guess which to try.
 .TP
 \fB\-D\fP \fIport\fP
 connect to port

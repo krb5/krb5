@@ -320,6 +320,12 @@ sets the key of the principal to a random value
 sets the key of the principal to the specified string and does not
 prompt for a password.  Note:  using this option in a shell script can
 be dangerous if unauthorized users gain read access to the script.
+.TP
+\fB\-e\fP \fI"enc:salt ..."\fP
+uses the specified list of enctype\-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
+enctype\-salttype pairs.  This will not function against kadmin
+daemons earlier than krb5\-1.2.
 .nf
 .TP
 EXAMPLE:
@@ -372,8 +378,8 @@ KADM5_UNK_PRINC (principal does not exist)
 modifies the specified principal, changing the fields as specified.  The
 options are as above for
 .BR add_principal ,
-except that password changing is forbidden by this command.  In
-addition, the option
+except that password changing and flags related to password changing
+are forbidden by this command.  In addition, the option
 .B \-clearpolicy
 will clear the current policy of a principal.  This command requires the
 .I modify
@@ -388,42 +394,6 @@ KADM5_AUTH_MODIFY (requires "modify" privilege)
 KADM5_UNK_PRINC (principal does not exist)
 KADM5_UNK_POLICY (policy does not exist)
 KADM5_BAD_MASK (shouldn't happen)
-.RE
-.fi
-.TP
-\fBrename_principal\fP [\fB-force\fP] \fIold new\fP
-rename the principal
-.I old
-to
-.IR new .
-Prompts for confirmation, unless the
-.B \-force
-option is given.  Requires both the
-.I add
-and
-.I delete
-privileges.  Aliased to
-.BR renprinc .
-.sp
-.nf
-.RS
-.TP
-EXAMPLE:
-kadmin: renprinc tlyutest test0
-Are you sure you want to rename the principal
-"tlyutest@BLEEP.COM" to
-"test0@BLEEP.COM"? (yes/no): yes
-Principal "tlyutest@BLEEP.COM" renamed to
-"test0@BLEEP.COM".
-Make sure that you have removed "tlyutest@BLEEP.COM" from
-all ACLs before reusing.
-kadmin:
-.TP
-ERRORS:
-KADM5_AUTH_ADD (requires "add" privilege)
-KADM5_AUTH_DELETE (requires "delete" privilege)
-KADM5_UNK_PRINC (source principal does not exist)
-KADM5_DUP (target principal already exists)
 .RE
 .fi
 .TP
@@ -447,6 +417,18 @@ sets the key of the principal to a random value
 .TP
 \fB\-pw\fP \fIpassword\fP
 set the password to the specified string.  Not recommended.
+.TP
+\fB\-e\fP \fI"enc:salt ..."\fP
+uses the specified list of enctype\-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
+enctype\-salttype pairs.  This will not function against kadmin
+daemons earlier than krb5\-1.2.
+.TP
+\fB\-keepold \fP 
+Keeps the previous kvno's keys around.  There is no
+easy way to delete the old keys, and this flag is usually not
+necessary except perhaps for TGS keys.  Don't use this flag unless you
+know what you're doing.
 .nf
 .TP
 EXAMPLE:
@@ -664,7 +646,10 @@ kadmin:
 .RE
 .fi
 .TP
-\fBktadd\fP [\fB\-k\fP \fIkeytab\fP] [\fB\-q\fP] [\fIprincipal\fP | \fB\-glob\fP \fIprinc-exp\fP] [\fI...\fP]
+\fBktadd\fP [\fB\-k\fP \fIkeytab\fP] [\fB\-q\fP] [\fB\-e\fP \fIkeysaltlist\fP]
+.br
+[\fIprincipal\fP | \fB\-glob\fP \fIprinc-exp\fP] [\fI...\fP]
+.br
 Adds a principal or all principals matching
 .I princ-exp
 to a keytab, randomizing each principal's key in the process.  Requires the
@@ -772,3 +757,9 @@ OpenVision Kerberos administration program.
 .SH BUGS
 .PP
 Command output needs to be cleaned up.
+
+There is no way to delete a key kept around from a "\-keepold" option
+to a password-changing command, other than to do a password change
+without the "\-keepold" option, which will of course cause problems if
+the key is a TGS key.  There will be more powerful key-manipulation
+commands in the future.

@@ -309,7 +309,8 @@ int *outlen;
 	*msg_ret = '\0';
     } else {
 	retval = kadm5_chpass_principal_util(kadm5_handle, user_princ,
-					     pword, NULL, msg_ret);
+					     pword, NULL, msg_ret,
+					     sizeof(msg_ret));
 	msg_ptr = msg_ret;
     }
     (void) krb5_free_principal(kadm_context, user_princ);

@@ -1,7 +1,8 @@
 /*
  * pty_open_slave: open slave side of terminal, clearing for use.
  *
- * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996, 2001 by the Massachusetts Institute of
+ * Technology.
  *
  * 
  * Permission to use, copy, modify, and distribute this software and
@@ -24,76 +25,77 @@
 #include "libpty.h"
 #include "pty-int.h"
 
-
-long pty_open_slave ( slave, fd)
-    const char *slave;
-    int *fd;
+long
+pty_open_slave(const char *slave, int *fd)
 {
-    int vfd, testfd;
+    int tmpfd;
     long retval;
-#ifdef POSIX_SIGNALS
-    struct sigaction sa;
-    /* Initialize "sa" structure. */
-    (void) sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    
-#endif
 
+    /* Sanity check. */
+    if (slave == NULL || *slave == '\0')
+	return PTY_OPEN_SLAVE_TOOSHORT;
 
-    /* First, chmod and chown the slave*/
+    /* First, set up a new session and void old associations. */
+    ptyint_void_association();
+
     /*
-       * If we have vhangup then we really need pty_open_ctty to make sure
-       * Our controlling terminal is the pty we're opening.  However, if we
-       * are using revoke or nothing then we just need  a file descriiptor
-       * for the pty.  Considering some OSes in this category break on
-       * the second call to open_ctty (currently OSF but others may),
-       * we simply use a descriptor if we can.
-       */
-#ifdef VHANG_FIRST
-    if (( retval = pty_open_ctty ( slave, &vfd )) != 0 )
-      return retval;
-        if (vfd < 0)
+     * Make a first attempt at acquiring the ctty under certain
+     * condisions.  This is necessary for several reasons:
+     *
+     * Under Irix, if you open a pty slave and then close it, a
+     * subsequent open of the slave will cause the master to read EOF.
+     * To prevent this, don't close the first fd until we do the real
+     * open following vhangup().
+     *
+     * Under Tru64 v5.0, if there isn't a fd open on the slave,
+     * revoke() fails with ENOTTY, curiously enough.
+     *
+     * Anyway, sshd seems to make a practice of doing this.
+     */
+#if defined(VHANG_FIRST) || defined(REVOKE_NEEDS_OPEN)
+    retval = pty_open_ctty(slave, fd);
+    if (retval)
+	return retval;
+    if (*fd < 0)
 	return PTY_OPEN_SLAVE_OPENFAIL;
-
 #endif
-    
 
-	if (slave == NULL || *slave == '\0')
-	    return PTY_OPEN_SLAVE_TOOSHORT;
-        if (chmod(slave, 0))
-	    return PTY_OPEN_SLAVE_CHMODFAIL;
-	if ( chown(slave, 0, 0 ) == -1 ) 
-	  return PTY_OPEN_SLAVE_CHOWNFAIL;
+    /* chmod and chown the slave. */
+    if (chmod(slave, 0))
+	return PTY_OPEN_SLAVE_CHMODFAIL;
+    if (chown(slave, 0, 0) == -1)
+	return PTY_OPEN_SLAVE_CHOWNFAIL;
 
-#ifdef VHANG_FIRST
-    ptyint_vhangup();
-    (void) close(vfd);
-#endif
-    
-    if ( (retval = ptyint_void_association()) != 0)
-      return retval;
-    
 #ifdef HAVE_REVOKE
-    if (revoke (slave) < 0 ) {
+    if (revoke(slave) < 0) {
 	return PTY_OPEN_SLAVE_REVOKEFAIL;
     }
-#endif /*HAVE_REVOKE*/
+#else /* !HAVE_REVOKE */
+#ifdef VHANG_FIRST
+    ptyint_vhangup();
+#endif
+#endif /* !HAVE_REVOKE */
 
-/* Open the pty for real. */
-    if  (( retval = pty_open_ctty ( slave, fd))  != 0 ) {
+    /* Open the pty for real. */
+    retval = pty_open_ctty(slave, &tmpfd);
+#if defined(VHANG_FIRST) || defined(REVOKE_NEEDS_OPEN)
+    close(*fd);
+#endif
+    if (retval) {
+	*fd = -1;
 	return PTY_OPEN_SLAVE_OPENFAIL;
     }
-    retval =  pty_initialize_slave (*fd);
-
+    *fd = tmpfd;
+    retval = pty_initialize_slave(*fd);
     if (retval)
-      return retval;
-    testfd = open("/dev/tty", O_RDWR|O_NDELAY);
-    if ( testfd < 0 )
-      {
+	return retval;
+    /* Make sure it's really our ctty. */
+    tmpfd = open("/dev/tty", O_RDWR|O_NDELAY);
+    if (tmpfd < 0) {
 	close(*fd);
 	*fd = -1;
 	return PTY_OPEN_SLAVE_NOCTTY;
-      }
-    close(testfd);
+    }
+    close(tmpfd);
     return 0;
 }

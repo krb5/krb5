@@ -1,3 +1,21 @@
+2000-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Change KRB4_DEJAGNU_TEST variable to KRBIV from
+	KRB4; dejagnu-1.3 doesn't like digits in passed-in variables.
+	[pullup from trunk]
+
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_C_CONST and AC_TYPE_SIGNAL instead of
+	AC_RETSIGTYPE and AC_TYPE_SIGNAL.
+	[pullup from trunk]
+
+2000-08-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Define KRB4_DEJAGNU_TEST depending on if krb4
+	support is enabled.
+	[pullup from trunk]
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
