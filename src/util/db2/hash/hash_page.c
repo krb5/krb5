@@ -252,7 +252,7 @@ putpair(p, key, val)
  * Returns the index of the next non-bigkey pair after n on the page.
  * Returns -1 if there are no more non-big things on the page.
  */
-indx_t
+static indx_t
 #ifdef __STDC__
 next_realkey(PAGE16 * pagep, indx_t n)
 #else
@@ -628,7 +628,7 @@ __addel(hashp, item_info, key, val, num_items, expanding)
  * Special __addel used in big splitting; this one just puts the pointer
  * to an already-allocated big page in the appropriate bucket.
  */
-int32_t
+static int32_t
 #ifdef __STDC__
 add_bigptr(HTAB * hashp, ITEM_INFO * item_info, indx_t big_pgno)
 #else
@@ -979,7 +979,7 @@ __get_page(hashp, addr, addr_type)
 	return (pagep);
 }
 
-void
+static void
 swap_page_header_in(pagep)
 	PAGE16 *pagep;
 {
@@ -998,7 +998,7 @@ swap_page_header_in(pagep)
 	}
 }
 
-void
+static void
 swap_page_header_out(pagep)
 	PAGE16 *pagep;
 {

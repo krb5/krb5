@@ -62,7 +62,7 @@ u_int32_t (*__default_hash) __P((const void *, size_t)) = hash4;
 #define PRIME1		37
 #define PRIME2		1048583
 
-u_int32_t
+static u_int32_t
 hash1(key, len)
 	const void *key;
 	size_t len;
@@ -84,7 +84,7 @@ hash1(key, len)
  */
 #define dcharhash(h, c)	((h) = 0x63c63cd9*(h) + 0x9c39c33d + (c))
 
-u_int32_t
+static u_int32_t
 hash2(key, len)
 	const void *key;
 	size_t len;
@@ -112,7 +112,7 @@ hash2(key, len)
  *
  * Ozan Yigit's original sdbm hash.
  */
-u_int32_t
+static u_int32_t
 hash3(key, len)
 	const void *key;
 	size_t len;
@@ -153,7 +153,7 @@ hash3(key, len)
 }
 
 /* Chris Torek's hash function. */
-u_int32_t
+static u_int32_t
 hash4(key, len)
 	const void *key;
 	size_t len;

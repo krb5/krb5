@@ -414,7 +414,7 @@ init_htab(hashp, nelem)
 /*
  * Functions to get/put hash header.  We access the file directly.
  */
-u_int32_t
+static u_int32_t
 hget_header(hashp, page_size)
 	HTAB *hashp;
 	u_int32_t page_size;
@@ -443,7 +443,7 @@ hget_header(hashp, page_size)
 	return (num_copied);
 }
 
-void
+static void
 hput_header(hashp)
 	HTAB *hashp;
 {
@@ -836,7 +836,7 @@ __cursor_creat(dbp)
 	return new_curs;
 }
 
-int32_t
+static int32_t
 cursor_get(dbp, cursorp, key, val, flags)
 	const DB *dbp;
 	CURSOR *cursorp;
@@ -909,7 +909,7 @@ cursor_get(dbp, cursorp, key, val, flags)
 	return (0);
 }
 
-int32_t
+static int32_t
 cursor_delete(dbp, cursor, flags)
 	const DB *dbp;
 	CURSOR *cursor;
