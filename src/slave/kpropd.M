@@ -42,7 +42,6 @@ kpropd \- Kerberos V5 slave KDC update server
 ] [
 .B \-S
 ] 
-.I slave_host
 .br
 .SH DESCRIPTION
 .I kpropd 
@@ -59,6 +58,20 @@ Thus, the master Kerberos server can use
 to propagate its database to the slave slavers.  Upon a successful download 
 of the KDC database file, the slave Kerberos server will have an
 up-to-date KDC database. 
+.PP
+Normally, kpropd is invoked out of 
+.I inetd(8).  
+This is done by adding a
+line to the inetd.conf file which looks like this:
+
+kprop	stream	tcp	nowait	root	/krb5/bin/kpropd	kpropd
+
+However, kpropd can also run as a standalone deamon, if the 
+.B \-S 
+option is
+turned on.  This is done for debugging purposes, or if for some reason
+the system administrator just doesn't want to run it out of 
+.I inetd(8).  
 .PP
 The
 .B \-r
