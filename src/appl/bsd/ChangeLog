@@ -1,3 +1,7 @@
+Thu Apr 27 21:44:17 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* login.c: Remove definition of krb_err_txt. krb.h defines it.
+
 Thu Apr 27 17:41:06 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (krshd, login.krb5, krlogind): KRB4_LIB needs to

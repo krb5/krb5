@@ -185,8 +185,6 @@ extern int errno;
 #define MAXPWSIZE	128		/* Biggest string accepted for KRB4
 					   passsword */
 
-extern char *krb_err_txt[];		/* From libkrb */
-
 AUTH_DAT *kdata = (AUTH_DAT *) NULL;
 KTEXT ticket = (KTEXT) NULL;
 char tkfile[MAXPATHLEN];
