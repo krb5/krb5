@@ -65,6 +65,17 @@ else
 	AC_MSG_RESULT(Adding in krb4 support)
 	FTPD_LIBS="../../../krb524/libkrb524.a"
 fi
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID)
+		FTPD_LIBS="$FTPD_LIBS -lsecurity"
+	)
+	;;
+esac
+dnl
+dnl
+dnl
 AC_SUBST(FTPD_LIBS)
 dnl
 dnl
