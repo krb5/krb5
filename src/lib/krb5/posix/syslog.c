@@ -49,7 +49,7 @@ static char sccsid[] = "@(#)syslog.c	5.20 (Berkeley) 1/19/89";
 #include <sys/syslog.h>
 #include <sys/wait.h>
 #include <netdb.h>
-#include <strings.h>
+#include <string.h>
 #include <stdio.h>
 
 #define	LOGNAME	"/dev/log"
@@ -164,7 +164,7 @@ vsyslog(pri, fmt, ap)
 			return;
 		(void)alarm((u_int)0);
 		(void)strcat(tbuf, "\r");
-		p = index(tbuf, '>') + 1;
+		p = strchr(tbuf, '>') + 1;
 		(void)write(fd, p, cnt + 1 - (p - tbuf));
 		(void)close(fd);
 		_exit(0);
