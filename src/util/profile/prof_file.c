@@ -125,9 +125,14 @@ errcode_t profile_update_file(prf)
 	if (prf->root)
 		return 0;
 #endif
+	errno = 0;
 	f = fopen(prf->filename, "r");
-	if (f == NULL)
-		return errno;
+	if (f == NULL) {
+		retval = errno;
+		if (retval == 0)
+			retval = PROF_FAIL_OPEN;
+		return retval;
+	}
 	prf->upd_serial++;
 	prf->flags = 0;
 	if (rw_access(prf->filename))
@@ -166,9 +171,12 @@ errcode_t profile_flush_file(prf)
 	sprintf(new_name, "%s.$$$", prf->filename);
 	sprintf(old_name, "%s.bak", prf->filename);
 
+	errno = 0;
 	f = fopen(new_name, "w");
 	if (!f) {
 		retval = errno;
+		if (retval == 0)
+			retval = PROF_FAIL_OPEN;
 		goto errout;
 	}
 

@@ -1,3 +1,11 @@
+Wed Mar  3 18:23:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_file.c (profile_flush_file): On the Macintosh, fopen()
+		doesn't set errno when fopen fails to open a file.  Work
+		around this by setting errno to PROF_FAIL_OPEN in this case.
+
+	* prof_err.et: Add new error code PROF_FAIL_OPEN.
+
 Tue Mar  2 18:55:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* test_profile.c: Added ability to test profile set functions, and
