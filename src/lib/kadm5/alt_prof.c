@@ -30,6 +30,23 @@
 #include <stdio.h>
 #include <ctype.h>
 
+
+static krb5_key_salt_tuple *copy_key_salt_tuple(ksalt, len)
+krb5_key_salt_tuple *ksalt;
+krb5_int32 len;
+{
+    int i;
+    krb5_key_salt_tuple *knew;    
+
+    if(len == 0) return 0;
+    if((knew = (krb5_key_salt_tuple *)
+		malloc((len ) * sizeof(krb5_key_salt_tuple)))) {
+         memcpy(knew, ksalt, len * sizeof(krb5_key_salt_tuple));
+	 return knew;
+    }
+    return 0;
+}
+
 /*
  * krb5_aprof_init()	- Initialize alternate profile context.
  *
@@ -590,9 +607,12 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
     /* Get the value for the supported enctype/salttype matrix */
     hierarchy[2] = "supported_enctypes";
     if (params_in->mask & KADM5_CONFIG_ENCTYPES) {
-	 params.mask |= KADM5_CONFIG_ENCTYPES;
-	 params.keysalts = params_in->keysalts;
-	 params.num_keysalts = params_in->num_keysalts;
+	 params.keysalts = copy_key_salt_tuple(params_in->keysalts, 
+					       params_in->num_keysalts);
+	 if(params.keysalts) {
+	     params.mask |= KADM5_CONFIG_ENCTYPES;
+	     params.num_keysalts = params_in->num_keysalts;
+	 }
     } else {
 	 svalue = NULL;
 	 if (aprofile)
@@ -645,6 +665,8 @@ kadm5_free_config_params(context, params)
 	    krb5_xfree(params->stash_file);
 	if (params->keysalts)
 	    krb5_xfree(params->keysalts);
+	if (params->admin_server)
+	     free(params->admin_server);
 	if (params->admin_keytab)
 	     free(params->admin_keytab);
 	if (params->dict_file)
@@ -655,6 +677,9 @@ kadm5_free_config_params(context, params)
 	     free(params->realm);
 	if (params->admin_dbname)
 	     free(params->admin_dbname);
+	if (params->admin_lockfile)
+	     free(params->admin_lockfile);
+
     }
     return(0);
 }

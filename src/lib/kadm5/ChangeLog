@@ -1,3 +1,11 @@
+Mon Oct 13 10:48:24 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): When KADM5_CONFIG_ENCTYPES
+           is set on the input parameters, allocate a new copy of the
+           key_salts for the output parameters.
+	(kadm5_free_config_params): Free the admin_server and admin_lockfile
+	   names. 
+
 Tue Oct  7 07:48:12 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* logger.c: Include ctype.h for isspace definition.
