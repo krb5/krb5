@@ -174,8 +174,6 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
     krb5_timestamp now;
     gss_buffer_desc token;
     int i;
-/* Remove this when server is fixed and this function goes away */
-krb5_error_code krb5_auth_con_setkey (); 
 
    /* set up return values so they can be "freed" successfully */
 
@@ -414,14 +412,41 @@ krb5_error_code krb5_auth_con_setkey ();
       sptr = (char *) ptr;                      /* PC compiler bug */
       TREAD_STR(sptr, ap_rep.data, ap_rep.length);
 
-/* A hack. Don't forget to remove the prototype for it above */
-krb5_auth_con_setkey(context, ctx->auth_context, ctx->subkey);
-      /* decode the ap_rep */
-      if (code = krb5_rd_rep(context,ctx->auth_context,&ap_rep,&ap_rep_data)) {
-	 (void)krb5_gss_delete_sec_context(context, minor_status, 
-					   context_handle, NULL);
-	 *minor_status = code;
-	 return(GSS_S_FAILURE);
+      	/* decode the ap_rep */
+      	if (code = krb5_rd_rep(context,ctx->auth_context,&ap_rep,&ap_rep_data)){
+	    /*
+	     * XXX A hack for backwards compatiblity.
+	     * To be removed in 1999 -- proven 
+	     */
+	    krb5_auth_con_setuseruserkey(context,ctx->auth_context,ctx->subkey);
+	    if (code = krb5_rd_rep(context, ctx->auth_context, &ap_rep,
+				   &ap_rep_data)) {
+	 	(void)krb5_gss_delete_sec_context(context, minor_status, 
+					          context_handle, NULL);
+		*minor_status = code;
+	 	return(GSS_S_FAILURE);
+	    }
+      	}
+
+      /* store away the sequence number */
+      ctx->seq_recv = ap_rep_data->seq_number;
+
+      /* free the ap_rep_data */
+      krb5_free_ap_rep_enc_part(context, ap_rep_data);
+
+      /* set established */
+      ctx->established = 1;
+
+      /* set returns */
+
+      if (time_rec) {
+	 if (code = krb5_timeofday(context, &now)) {
+	    (void)krb5_gss_delete_sec_context(context, minor_status, 
+					      (gss_ctx_id_t) ctx, NULL);
+	    *minor_status = code;
+	    return(GSS_S_FAILURE);
+
+	 }
       }
 
       /* store away the sequence number */
