@@ -27,25 +27,43 @@ klist \- list cached Kerberos tickets
 .B klist
 [
 .B \-c
-.I cachename
 ] [
 .B \-f
 ] [
 .B \-e
+] [
+.B \-s
+] [
+.I cachename
 ]
+
+.B klist \-k
+[
+.B \-t
+] [
+.B \-K 
+] [
+.I keytabname
+]
+
 .br
 .SH DESCRIPTION
 .I klist
-will list the primary principal and Kerberos tickets held in the default
-credentials cache, or in the cache
-.I cachename
-if the
+will list the primary principal and Kerberos tickets held 
+in a credentials cache if the 
 .B \-c
-option is used.
-If the
+option is used, or in the keytab files if the 
+.B \-k
+option is used.  By default, the 
+.B \-c
+option is assumed if neither option is specified on the command line.
+.PP
+The
 .B \-f
-option is specified, then the flags present in the ticket will be
-printed.  The abbreviations below will be printed:
+option causes
+.I klist
+to display the flags present in the credentials.
+The abbreviations below will be printed:
 .nf
 .in +.5i
 F	Forwardable
@@ -59,17 +77,33 @@ I	Initial
 .in -.5i
 .fi
 .PP
-If the
+The
 .B \-e
-option is specified, then the encryption type in the ticket will be
-printed.
+option causes
+.I klist
+to display the encryption types of the sesison key and the ticket 
+for each credential.
 .PP
 The
+.B \-t
+option causes
+.I klist
+to display the time entry timestamps for each keytab entry.
+.PP
+The
+.B \-K
+option causes
+.I klist
+to display the value of the encryption key in each keytab entry.
+.PP
+If
+.I cachename
+is not specified, klist will display the credentials in the default 
+credentials cache.  The
 .IR kinit (1)
 manual page specifies how the default credentials cache is selected.
+Similarly, if 
+.I keytabname
+is not specified, the default keytab file shall be used.
 .SH SEE ALSO
 kinit(1), kdestroy(1), krb5(3)
-.SH BUGS
-Does not display srvtabs yet.
-
-Does not list ticket options or lifetimes.

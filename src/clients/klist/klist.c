@@ -24,7 +24,7 @@
  * List out the contents of your credential cache or keytab.
  */
 
-#include "krb5.h"
+#include "k5-int.h"
 #include "com_err.h"
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +34,7 @@
 extern int optind;
 extern char *optarg;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
+int show_etype = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -56,12 +57,13 @@ void fillit KRB5_PROTOTYPE((FILE *, int, int));
 
 void usage()
 {
-     fprintf(stderr, "Usage: %s [[-c] [-f] [-s]] [-k [-t] [-K]] [name]\n",
+     fprintf(stderr, "Usage: %s [[-c] [-f] [-e] [-s]] [-k [-t] [-K]] [name]\n",
 	     progname); 
      fprintf(stderr, "\t-c specifies credentials cache, -k specifies keytab");
      fprintf(stderr, ", -c is default\n");
      fprintf(stderr, "\toptions for credential caches:\n");
      fprintf(stderr, "\t\t-f shows credentials flags\n");
+     fprintf(stderr, "\t\t-e shows the encryption type\n");
      fprintf(stderr, "\t\t-s sets exit status based on valid tgt existence\n");
      fprintf(stderr, "\toptions for keytabs:\n");
      fprintf(stderr, "\t\t-t shows keytab entry timestamps\n");
@@ -94,6 +96,9 @@ main(argc, argv)
 	} else switch ((*argv)[1]) {
 	case 'f':
 	    show_flags = 1;
+	    break;
+	case 'e':
+	    show_etype = 1;
 	    break;
 	case 't':
 	    show_time = 1;
@@ -335,6 +340,29 @@ void do_ccache(name)
 }
 
 char *
+etype_string(enctype)
+    krb5_enctype enctype;
+{
+    static char buf[12];
+    
+    switch (enctype) {
+    case 1:
+	return "DES-CBC-CRC";
+	break;
+    case 2:
+	return "DES-CBC-MD4";
+	break;
+    case 3:
+	return "DES-CBC-MD5";
+	break;
+    default:
+	sprintf(buf, "etype %d", enctype);
+	return buf;
+	break;
+    }
+}
+
+char *
 flags_string(cred)
     register krb5_creds *cred;
 {
@@ -390,8 +418,9 @@ show_credential(progname, kcontext, cred)
     register krb5_creds * cred;
 {
     krb5_error_code retval;
+    krb5_ticket *tkt;
     char *name, *sname, *flags;
-    int	first = 1;
+    int	extra_field = 0;
 
     retval = krb5_unparse_name(kcontext, cred->client, &name);
     if (retval) {
@@ -416,33 +445,56 @@ show_credential(progname, kcontext, cred)
 
     if (strcmp(name, defname)) {
 	    printf("\tfor client %s", name);
-	    first = 0;
+	    extra_field++;
     }
     
     if (cred->times.renew_till) {
-	if (first)
+	if (!extra_field)
 		fputs("\t",stdout);
 	else
 		fputs(", ",stdout);
 	fputs("renew until ", stdout);
         printtime(cred->times.renew_till);
-	first = 0;
+	extra_field += 2;
+    }
+
+    if (extra_field > 3) {
+	fputs("\n", stdout);
+	extra_field = 0;
     }
 
     if (show_flags) {
 	flags = flags_string(cred);
 	if (flags && *flags) {
-	    if (first)
+	    if (!extra_field)
 		fputs("\t",stdout);
 	    else
 		fputs(", ",stdout);
 	    printf("Flags: %s", flags);
-	    first = 0;
+	    extra_field++;
         }
     }
 
-    /* if any additional info was printed, first is zero */
-    if (!first)
+    if (extra_field > 2) {
+	fputs("\n", stdout);
+	extra_field = 0;
+    }
+
+    if (show_etype) {
+	retval = decode_krb5_ticket(&cred->ticket, &tkt);
+	if (!extra_field)
+	    fputs("\t",stdout);
+	else
+	    fputs(", ",stdout);
+	printf("Etype (skey, tkt): %s, %s ",
+	       etype_string(cred->keyblock.enctype), 
+	       etype_string(tkt->enc_part.enctype));
+	krb5_free_ticket(kcontext, tkt);
+	extra_field++;
+    }
+
+    /* if any additional info was printed, extra_field is non-zero */
+    if (extra_field)
 	putchar('\n');
     free(name);
     free(sname);

@@ -1,3 +1,11 @@
+Fri Sep 15 16:22:45 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* klist.M: Updated the man page to include all of the supported
+	        options.
+
+	* klist.c (main, show_credential): Reimplement the -e option, and
+		display the encryption used by the session key and of the
+		ticket.
 
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
