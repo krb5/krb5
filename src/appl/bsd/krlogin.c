@@ -567,7 +567,8 @@ main(argc, argv)
 		  0,		/* No need for sequence number */
 		  0,		/* No need for server seq # */
 		  &local, &foreign,
-		  authopts);
+		  authopts,
+		  0);		/* Not any port # */
     if (status) {
 	/* should check for KDC_PR_UNKNOWN, NO_TKT_FILE here -- XXX */
 	fprintf(stderr,

@@ -67,7 +67,7 @@ extern krb5_cksumtype krb5_kdc_req_sumtype;
 extern krb5_context bsd_context;
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
-     cred, seqno, server_seqno, laddr, faddr, authopts)
+     cred, seqno, server_seqno, laddr, faddr, authopts, anyport)
      int *sock;
      char **ahost;
      u_short rport;
@@ -80,6 +80,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      krb5_int32 *server_seqno;
      struct sockaddr_in *laddr, *faddr;
      krb5_flags authopts;
+     int anyport;
 {
     int i, s, timo = 1, pid;
 #ifdef POSIX_SIGNALS
@@ -251,8 +252,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     	}
     	*fd2p = s3;
     	from.sin_port = ntohs((u_short)from.sin_port);
-    	if (from.sin_family != AF_INET ||
-    	    from.sin_port >= IPPORT_RESERVED) {
+    	if (! anyport &&
+	    (from.sin_family != AF_INET ||
+    	     from.sin_port >= IPPORT_RESERVED)) {
 	    fprintf(stderr,
     		    "socket: protocol failure in circuit setup.\n");
 	    goto bad2;

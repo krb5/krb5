@@ -34,7 +34,9 @@ username
 .B \-d
 ] [
 .B \-k
-realm ] command
+realm ] [
+.B \-A
+] command
 .br
 host
 [
@@ -46,7 +48,9 @@ username
 .B \-d
 ] [
 .B \-k
-realm ] command
+realm ] [
+.B \-A
+] command
 .SH DESCRIPTION
 .I Rsh
 connects to the specified
@@ -95,6 +99,12 @@ The
 option redirects input from the special device
 .I /dev/null
 (see the BUGS section below).
+.PP
+The
+.B \-A
+option accepts any port number for the stderr stream.  Normally
+.I rsh
+requires a reserved port number.  This option is used for debugging.
 .PP
 If you omit
 .I command,

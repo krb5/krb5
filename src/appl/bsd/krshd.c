@@ -158,7 +158,7 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"rRxXeEkKD:?"
+#define ARGSTR	"rRxXeEkKD:S:M:A?"
 
 #define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
 
@@ -174,6 +174,8 @@ krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_context bsd_context;
+char *srvtab = NULL;
+extern char *krb5_override_default_realm;
 
 void fatal();
 int v5_des_read();
@@ -183,6 +185,7 @@ int (*des_read)() = v5_des_read;
 int (*des_write)() = v5_des_write;
 
 int do_encrypt = 0;
+int anyport = 0;
 int netf;
 
 #else /* !KERBEROS */
@@ -312,6 +315,18 @@ main(argc, argv)
         case 'E':
 	  do_encrypt = 1;
 	  break;
+
+	case 'S':
+	  srvtab = optarg;
+	  break;
+
+	case 'M':
+	  krb5_override_default_realm = optarg;
+	  break;
+
+	case 'A':
+	  anyport = 1;
+	  break;
 #endif
 	case 'D':
 	  debug_port = atoi(optarg);
@@ -347,6 +362,9 @@ main(argc, argv)
 	sin.sin_port = htons(debug_port);
 	sin.sin_addr.s_addr = INADDR_ANY;
 	
+	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			  (char *)&on, sizeof(on));
+
 	if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
 	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
 	    exit(2);
@@ -615,8 +633,14 @@ doit(f, fromp)
     }
     (void) alarm(0);
     if (port != 0) {
-	int lport = IPPORT_RESERVED - 1;
-	s = rresvport(&lport);
+	int lport;
+	if (anyport) {
+	    lport = 5120; /* arbitrary */
+	    s = getport(&lport);
+	} else {
+	    lport = IPPORT_RESERVED - 1;
+	    s = rresvport(&lport);
+	}
 	if (s < 0) {
 	    syslog(LOG_ERR ,
 		   "can't get stderr port: %m");
@@ -1182,7 +1206,13 @@ doit(f, fromp)
     (void) close(f);
     (void) setgid((gid_t)pwd->pw_gid);
 #ifndef sgi
-    initgroups(pwd->pw_name, pwd->pw_gid);
+    if (getuid() == 0 || getuid() != pwd->pw_uid) {
+        /* For testing purposes, we don't call initgroups if we
+           already have the right uid, and it is not root.  This is
+           because on some systems initgroups outputs an error message
+           if not called by root.  */
+        initgroups(pwd->pw_name, pwd->pw_gid);
+    }
 #endif
     (void) setuid((uid_t)pwd->pw_uid);
     environ = envinit;
@@ -1554,7 +1584,7 @@ recvauth(netf, peersin, peeraddr)
 				  server, /* Specify daemon principal */
 				  0, 		/* default rc_type */
 				  0, 		/* no flags */
-				  NULL,		/* default keytab */
+				  srvtab, /* normally NULL to use v5srvtab */
 				  0, 		/* v4_opts */
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */

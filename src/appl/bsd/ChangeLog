@@ -1,3 +1,27 @@
+Fri Apr 21 14:07:15 1995  Mark Eichin  <eichin@cygnus.com>
+
+	Added Ian's changes with minor tweaks. These are used by the testsuite.
+
+> Thu Mar 23 18:18:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* krshd.c (ARGSTR): Add S:M:A to KERBEROS version.
+	(srvtab): New global variable.
+	(krb5_override_default_realm): Declare.
+	(main): Handle -S, -M and -A arguments.  Call SO_REUSEADDR on
+	socket if debug_port set.
+	(doit): If -A used, allocate a random port for the stderr stream,
+	rather than allocating a reserved port.  Don't call initgroups if
+	not changing the uid.
+	(recvauth): Pass srvtab to krb5_compat_recvauth.
+	* krshd.M: Document -S, -M, and -A.
+	* krsh.c (main): Accept -A, and pass it to kcmd.
+	* rsh.M: Document -A.
+	* kcmd.c (kcmd): Add new argument anyport.  If it is set, permit
+	any port for the stderr stream, rather than requiring a reserved
+	port.  Initialize ret_cred to NULL.
+	* krcp.c (main): Pass 0 for anyport to kcmd.
+	* krlogin.c (main): Pass 0 for anyport to kcmd.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * krcp.c (send_auth()): Use new calling convention for krb5_rd_req().

@@ -346,7 +346,8 @@ main(argc, argv)
 				  0,  /* No server seq # */
 				  (struct sockaddr_in *) 0,
 				  &foreign,
-				  authopts);
+				  authopts,
+				  0); /* Not any port # */
 		    if (status) {
 			fprintf(stderr,
 				"%s: kcmd to host %s failed - %s\n",
@@ -434,7 +435,8 @@ main(argc, argv)
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
 			      &foreign,
-			      authopts);
+			      authopts,
+			      0); /* Not any port # */
 		if (status) {
 		    fprintf(stderr,
 			    "%s: kcmd to host %s failed - %s\n",
