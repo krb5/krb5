@@ -555,8 +555,8 @@ krb5_error_code krb5_locate_srv_conf
 			const krb5_data *,
 			const char *,
 			struct sockaddr **,
-			int,
-                        int));
+			int*,
+            int));
 
 /* no context? */
 krb5_error_code krb5_locate_srv_dns
@@ -564,7 +564,7 @@ krb5_error_code krb5_locate_srv_dns
 			const char *,
 			const char *,
 			struct sockaddr **,
-			int));
+			int*));
 
 #endif /* KRB5_LIBOS_PROTO__ */
 

@@ -1,3 +1,7 @@
+2000-03-25  Miro Jurisic  <meeroh@mit.edu>
+
+	* k5-int.h: Fixed protos for krb5_locate_srv_* (naddrs is int*)
+
 2000-03-20  Miro Jurisic  <meeroh@mit.edu>
 
 	* krb5.hin: Add krb5_free_default_realm
