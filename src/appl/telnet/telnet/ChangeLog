@@ -1,3 +1,8 @@
+Thu Apr 27 13:56:12 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (telnet): use KRB4_LIB directly.
+	* configure.in: use WITH_KRB4 as-is.
+
 Fri Apr 21 12:45:40 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* main.c (main): Handle -k if KRB5 is defined. (from ian@cygnus.com)
