@@ -1,0 +1,13 @@
+Thu Sep 15 10:47:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile, README, RELEASE_NOTES, conv_creds.c, conv_princ.c,
+	conv_tkt.c, conv_tkt.c, conv_tkt_skey.c, encode.c, getcred.c,
+	globals.c, k524init.c, krb524.h, krb524_err.et, krb524d.c, misc.c,
+	test.c: Applied new copyright notice (1993, Geer Zolat Associates
+		--> 1994, OpenVision Technologies, Inc.)
+
+
+	
+
+
+
