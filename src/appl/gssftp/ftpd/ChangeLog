@@ -1,5 +1,8 @@
 Tue Aug 22 11:37:35 2000  Ezra Peisach  <epeisach@mit.edu>
 
+	* secure.h (myaddr): For secure data stream, pass the port number
+ 	of the data stream and not the control stream to krb_mk_priv.
+
 	* ftpd.c (auth_data): Iterate over all krb4 services instead of
  	trying to examine the srvtab file for a particular key (which
  	failes when falling back on the v5 keytab for des3 services).

@@ -2,7 +2,7 @@
 
 #define CRED_DECL	extern CREDENTIALS cred;
 #define SESSION		cred.session
-#define myaddr		myctladdr
+#define myaddr		data_addr
 #define hisaddr		hisdataaddr
 
 #if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)

@@ -1,3 +1,8 @@
+Tue Aug 22 17:10:39 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* secure.h (myaddr): For secure data stream, pass the port number
+ 	of the data stream and not the control stream to krb_mk_priv.
+
 2000-08-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* domacro.c: Compiler warning cleanups and fix the overflow fix to
