@@ -52,7 +52,7 @@ krb5_principal master_princ;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 
-char *dbm_db_name = DEFAULT_DBM_FILE;
+char *dbm_db_name = DEFAULT_KDB_FILE;
 
 krb5_keyblock tgs_key;
 krb5_kvno tgs_kvno;
