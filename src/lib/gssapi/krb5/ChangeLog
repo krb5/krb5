@@ -1,3 +1,7 @@
+2004-03-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* gssapiP_krb5.h: Add prototype for gss_krb5int_unseal_token_v3.
+
 2004-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* disp_status.c (krb5_gss_display_status): Don't call
