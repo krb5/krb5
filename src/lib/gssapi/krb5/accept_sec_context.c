@@ -68,12 +68,20 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_error_code retval;
     krb5_ccache ccache;
     krb5_gss_cred_id_t cred = NULL;
+    extern krb5_cc_ops krb5_mcc_ops;
 
     if ((retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL))) 
 	return(retval);
 
-    if ((retval = krb5_cc_default(context, &ccache)))
-       goto cleanup;
+    /* Lots of kludging going on here... Some day the ccache interface
+       will be rewritten though */
+
+    krb5_cc_register(context, &krb5_mcc_ops, 0);
+    if ((retval = krb5_cc_resolve(context, "MEMORY:GSSAPI", &ccache)))
+        goto cleanup;
+
+    if ((retval = krb5_cc_gen_new(context, &ccache)))
+        goto cleanup;
     
     if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
 	goto cleanup;
@@ -414,7 +422,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 		    krb5_auth_con_setflags(context, auth_context_cred, 0);
 
-		    /* store the delegated credential in the user's cache */
+		    /* store the delegated credential */
 
 		    rd_and_store_for_creds(context, auth_context_cred,
 					   &option,

@@ -1,3 +1,14 @@
+Thu Jan 29 20:08:02 1998  Dan Winship  <danw@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Don't mess with
+	krb5_cc_default--use a new mem-based ccache.
+
+	* Makefile.in: 
+	* gssapi_krb5.h: 
+	* copy_ccache.c (gss_krb5_copy_ccache): Routine to copy a
+	gss_cred_id_t (such as a forwarded creds) into an existing
+	krb5_ccache.
+
 Fri Jun 27 08:37:11 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Will now

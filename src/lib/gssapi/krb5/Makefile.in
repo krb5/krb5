@@ -19,6 +19,7 @@ SRCS = \
 	$(srcdir)/canon_name.c \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
+	$(srcdir)/copy_ccache.c \
 	$(srcdir)/delete_sec_context.c \
 	$(srcdir)/disp_name.c \
 	$(srcdir)/disp_status.c \
@@ -63,6 +64,7 @@ OBJS = \
 	canon_name.$(OBJEXT) \
 	compare_name.$(OBJEXT) \
 	context_time.$(OBJEXT) \
+	copy_ccache.$(OBJEXT) \
 	delete_sec_context.$(OBJEXT) \
 	disp_name.$(OBJEXT) \
 	disp_status.$(OBJEXT) \

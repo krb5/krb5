@@ -51,6 +51,10 @@ OM_uint32 gss_krb5_get_tkt_flags
 		   gss_ctx_id_t context_handle,
 		   krb5_flags *ticket_flags));
 
+OM_uint32 gss_krb5_copy_ccache
+	PROTOTYPE((OM_uint32 *minor_status,
+		   gss_cred_id_t cred_handle,
+		   krb5_ccache out_ccache));
 
 /* this is for backward compatibility only.  It is declared here for
    completeness, but should not be used */
