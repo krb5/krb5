@@ -50,6 +50,9 @@
 /*
  * If you want to use GCC, set HasGcc in the appropriate .cf files.
  */
+#ifndef HasGcc
+#define HasGcc NO
+#endif
 
 #ifdef UltrixArchitecture
 #define DefaultCDebugFlags DebuggableCDebugFlags
