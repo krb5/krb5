@@ -1,5 +1,43 @@
-
+##WIN32##WIN32=1
 WHAT=windows
+
+!ifdef WIN32
+
+!ifndef NO_OUTPRE
+all:: output-prefix-dir
+!endif
+
+# Figure out the CPU
+!if !defined(CPU) || "$(CPU)" == ""
+CPU=$(PROCESSOR_ARCHITECTURE)
+!endif # CPU
+
+!if "$(CPU)" == ""
+CPU=i386
+!endif
+
+# Change x86 or X86 to i386
+!if ( "$(CPU)" == "X86" ) || ( "$(CPU)" == "x86" )
+CPU=i386
+!endif # CPU == X86
+
+!if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" )
+!error Must specify CPU environment variable ( CPU=i386, CPU=ALPHA)
+!endif
+
+# The OUTPRE lines below cannot end in a backslash. To remedy that, 
+# we add a space after the backslash.  That works wonderfully, 
+# but be we have to watch out for Emacs makefile-mode, which
+# will silently strip out such spaces!
+!ifdef NODEBUG
+OUTPRE=obj\$(CPU)\rel^\
+!else
+OUTPRE=obj\$(CPU)\dbg^\
+!endif
+
+PDB_OPTS=-Fd$(OUTPRE)\ -FD
+
+!endif # WIN32
 
 all:: all-$(WHAT)
 clean:: clean-$(WHAT)
@@ -16,15 +54,15 @@ all-windows:: Makefile
 # Directory syntax:
 #
 # begin absolute path
-ABS=\\
+ABS=^\
 # begin relative path
 REL=
 # up-directory
 U=..
 # path separator
-S=\\
+S=^\
 # this is magic... should only be used for preceding a program invocation
-C=.\\
+C=.^\
 
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)
@@ -35,16 +73,40 @@ CL=
 #
 # CCOPTS for DLL functions
 #
-##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) $(DLL_FILE_DEF)
-##WIN32##CCOPTS=/Os /Zi /Od /W3 /MD $(XTRA) $(DLL_FILE_DEF)
+!ifndef WIN32 # WIN16
+CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) $(DLL_FILE_DEF)
+!else # WIN32
+!ifdef NODEBUG
+CCOPTS=/Os /W3 /MD $(PDB_OPTS) $(XTRA) $(DLL_FILE_DEF)
+!else
+CCOPTS=/Os /Zi /Od /W3 /MD $(PDB_OPTS) $(XTRA) $(DLL_FILE_DEF)
+!endif
+!endif # WIN32
+
 #
 # CCOPTS for non-DLL compiles
 #
-##WIN16##CCOPTS2=/AL /Zp /GA /G2s  /Os /Zi /Od /W3 $(XTRA)
-##WIN32##CCOPTS2=/Os /Zi /Od /W3 $(XTRA)
+!ifndef WIN32 # WIN16
+CCOPTS2=/AL /Zp /GA /G2s  /Os /Zi /Od /W3 $(XTRA)
+!else # WIN32
+!ifdef NODEBUG
+CCOPTS2=/Os /W3 $(PDB_OPTS) $(XTRA)
+!else
+CCOPTS2=/Os /Zi /Od /W3 $(PDB_OPTS) $(XTRA)
+!endif
+!endif # WIN32
 CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
+
+#
+# LOPTS
+#
+!ifdef NODEBUG
+LOPTS=
+!else
+LOPTS=/debug
+!endif
 
 # /Zi gives debug info in each object file.
 # /Zp packs structures: Required for Windows API (but is not default!!!)
@@ -65,7 +127,7 @@ DBG_LIB=/nologo /Zp /ALw /GD /Gs /Os /G2 /Zi /Od
 DBG=/nologo /Zp /AL /Os /Mq /Zi /Od
 
 RM=$(BUILDTOP)\config\rm.bat
-LIBECHO=$(BUILDTOP)\util\windows\libecho
+LIBECHO=$(BUILDTOP)\util\windows\$(OUTPRE)libecho
 CP=copy
 MV=ren
 LN=copy
@@ -75,18 +137,25 @@ AWK=rem
 RC = rc
 CVTRES = cvtres
 
-##WIN16##CLIB=$(BUILDTOP)\lib\comerr16.lib
-##WIN32##CLIB=$(BUILDTOP)\lib\comerr32.lib
-##WIN16##PLIB=$(BUILDTOP)\lib\xpprof16.lib
-##WIN32##PLIB=$(BUILDTOP)\lib\xpprof32.lib
-##WIN16##KLIB=$(BUILDTOP)\lib\krb5_16.lib
-##WIN32##KLIB=$(BUILDTOP)\lib\krb5_32.lib
-##WIN16##GLIB=$(BUILDTOP)\lib\gssapi.lib
-##WIN32##GLIB=$(BUILDTOP)\lib\gssapi32.lib
-##WIN16##K4LIB=$(BUILDTOP)\lib\krb4_16.lib
-##WIN32##K4LIB=$(BUILDTOP)\lib\krb4_32.lib
-##WIN16##WLIB=$(BUILDTOP)\lib\winsock.lib
-##WIN32##WLIB=
+!ifndef WIN32 # WIN16
+WINBITS=16
+!else # WIN32
+WINBITS=32
+!endif # WIN32
+
+CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr$(WINBITS).lib
+PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof$(WINBITS).lib
+KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_$(WINBITS).lib
+K4LIB=$(BUILDTOP)\lib\krb4_16.lib
+K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_$(WINBITS).lib
+
+!ifndef WIN32 # WIN16
+GLIB=$(BUILDTOP)\lib\gssapi.lib
+WLIB=$(BUILDTOP)\lib\winsock.lib
+!else # WIN32
+GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
+WLIB=
+!endif # WIN32
 
 ARADD=rem
 RANLIB=rem
@@ -97,6 +166,34 @@ OBJEXT=obj
 EXEEXT=.exe
 
 MFLAGS=$(MAKEFLAGS)
+
+
+!ifdef WIN32
+output-prefix-dir:: $(OUTPRE)
+
+$(OUTPRE):
+	-if not exist $(OUTPRE) mkdir $(OUTPRE)
+
+{}.rc{$(OUTPRE)}.res:
+	$(RC) $(RCFLAGS) -fo $@ -r $<
+
+{}.c{$(OUTPRE)}.obj:
+	$(CC) $(CFLAGS) -Fo$(OUTPRE)\ -c $<
+
+{}.cxx{$(OUTPRE)}.obj:
+	$(CXX) $(CXXFLAGS) -Fo$(OUTPRE)\ -c $<
+
+{}.cpp{$(OUTPRE)}.obj:
+	$(CPP) $(CPPFLAGS) -Fo$(OUTPRE)\ -c $<
+
+#{}.c{$(OUTPRE)}.sbr:
+#	$(C_RULE)
+#{}.cxx{$(OUTPRE)}.sbr:
+#	$(CXX_RULE)
+#{}.cpp{$(OUTPRE)}.sbr:
+#	$(CXX_RULE)
+!endif # WIN32
+
 
 #
 # End of Microsoft Windows config lines

@@ -1,4 +1,4 @@
-# config/post.in
+# config/win-post.in
 # put all:: first just in case no other rules occur here
 #
 all::
@@ -24,19 +24,24 @@ Makefile: Makefile.in $(BUILDTOP)\config\windows.in $(BUILDTOP)\config\win-post.
 .c.obj:
 	$(CC) $(CFLAGS) /c $*.c
 !if defined(LIBNAME)
-##WIN16##	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
+!ifndef WIN32 # WIN16
+	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
 
-##WIN32##!if !defined(OBJFILELIST)
-##WIN32##OBJFILELIST=@$(OBJFILE)
-##WIN32##!endif
-##WIN32##!if !defined(OBJFILEDEP)
-##WIN32##OBJFILEDEP=$(OBJFILE)
-##WIN32##!endif
+!else # WIN32
 
-##WIN32##all-windows:: $(LIBNAME)
-##WIN32##$(LIBNAME): $(OBJFILEDEP)
-##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $(OBJFILELIST)
+!if !defined(OBJFILELIST)
+OBJFILELIST=@$(OBJFILE)
 !endif
+!if !defined(OBJFILEDEP)
+OBJFILEDEP=$(OBJFILE)
+!endif
+
+all-windows:: $(LIBNAME)
+$(LIBNAME): $(OBJFILEDEP)
+	$(LIBCMD) /out:$(LIBNAME) /nologo $(OBJFILELIST)
+
+!endif # WIN32
+!endif # LIBNAME
 
 
 !if defined(OBJFILE)
@@ -44,16 +49,19 @@ all-windows:: $(OBJFILE)
 clean-windows::
 	$(RM) $(OBJFILE)
 !if defined(LIBOBJS)
-##DOS$(OBJFILE): $(LIBOBJS)
-##DOS	$(RM) $(OBJFILE)
-##WIN16##	$(CP) nul: $(OBJFILE)
+$(OBJFILE): $(LIBOBJS)
+	$(RM) $(OBJFILE)
+!ifndef WIN32 # WIN16
+	$(CP) nul: $(OBJFILE)
+!else # WIN32
 !if defined(PREFIXDIR)
-##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $** > $(OBJFILE)
+	$(LIBECHO) -p $(PREFIXDIR)\ $** > $(OBJFILE)
 !else
-##WIN32##	$(LIBECHO) $** > $(OBJFILE)
-!endif
-!endif
-!endif
+	$(LIBECHO) $** > $(OBJFILE)
+!endif # !PREFIXDIR
+!endif # WIN32
+!endif # LIBOBJS
+!endif # OBJFILE
 
 
 check::
@@ -86,8 +94,8 @@ clean-unix::
 	$(RM) .depend
 
 clean-windows::
-	$(RM) *.$(OBJEXT)
-	$(RM) msvc.pdb *.err *.exe *.bak
+	$(RM) $(OUTPRE)*.$(OBJEXT)
+	$(RM) $(OUTPRE)msvc.pdb *.err $(OUTPRE)*.exe *.bak
 
 !if defined(LIBNAME)
 clean-windows::
