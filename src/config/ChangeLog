@@ -1,3 +1,8 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* move-if-changed: New script.
+	* post.in (depend-postrecurse): Use it.
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf: For Linux, always add "-lc" at the end of the link

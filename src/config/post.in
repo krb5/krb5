@@ -41,8 +41,7 @@ depend-postrecurse:: .depend
 		sed -e '/^# +++ Dependency line eater +++/,$$d' \
 			< $(srcdir)/Makefile.in | cat - .depend \
 			> $(srcdir)/Makefile.in.new; \
-	$(MV) $(srcdir)/Makefile.in $(srcdir)/Makefile.in.old; \
-	$(MV) $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in; \
+	$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in ; \
 	else :; fi
 
 depend:: depend-prerecurse depend-recurse depend-postrecurse
