@@ -24,6 +24,9 @@ static char rcsid_lock_file_c [] =
 #include <stdio.h>
 #include <sys/file.h>
 
+#include <sys/types.h>
+#include <krb5/ext-proto.h>
+
 extern int errno;
 
 krb5_error_code
