@@ -7,17 +7,14 @@ all-unix::
 
 all-mac::
 
+CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a \
+	libkrb425.a libkadm.a libkrb4.a libkdb4.a libcom_err.a libpty.a \
+	libss.a \
+	libkrb5.so libcrypto.so libkrb4.so libdes425.so
+
 clean-mac:: clean-unix
 clean-unix::
-	$(RM) libkrb5.a libkdb5.a libcrypto.a 
-	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
-	$(RM) libkadm.a libkrb4.a libkdb4.a
-	$(RM) libkrb5.so libcrypto.so libkrb4.so libdes425.so
-
-clean-mac::
-	$(RM) libkrb5.a libkdb5.a libcrypto.a 
-	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
-	$(RM) libkadm.a
+	$(RM) $(CLEANLIBS)
 
 clean-windows::
 	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak libkrb5.map winsock.lib
