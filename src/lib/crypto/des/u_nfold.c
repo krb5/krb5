@@ -73,10 +73,11 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 	    /* Rotate input */
 	    k = ((bytes/inlen) * ROTATE_VALUE) % (inlen*8);
 	    
-	    for (j = (k+7)/8; j < inlen + (k/7)/8; j++)
+	    for (j = (k+7)/8; j < inlen + (k+7)/8; j++)
 		tempbuf[j % inlen] =
-		    (inbuf[((8*j-k)/8)%inlen] & (((1<<(8-(k&7)))-1) <<(k&7))) +
-		    (inbuf[((8*j-k)/8 + 1)%inlen] >> (8-(k&7)));
+		    ((inbuf[((8*j-k)/8)%inlen] << ((8-(k&7))&7)) +
+		     ((k&7) ? (inbuf[((8*j-k)/8 +1)%inlen] >> (k&7)) : 0))
+		    & 0xff;
 	}
 
 
@@ -85,7 +86,7 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 	j = i;
 	k = 0;
 	while (j--) {
-	    k = outbuf[(bytes+j) % outlen] + tempbuf[(bytes+j) % inlen] + k;
+	    k += outbuf[(bytes+j) % outlen] + tempbuf[(bytes+j) % inlen];
 	    outbuf[(bytes+j) % outlen] = k & 0xff;
 	    k >>= 8;
 	}
@@ -98,7 +99,7 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 	}
 	
 	bytes += i;
-    } while (((bytes % inlen) == 0) && ((bytes % outlen) == 0));
+    } while (((bytes % inlen) != 0) || ((bytes % outlen) != 0));
     
     return 0;
 }
