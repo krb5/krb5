@@ -1,3 +1,9 @@
+2000-02-21  Bear Giles  <bgiles@coyotesong.com>
+
+	* alt_prof.c (krb5_read_realm_params): Permit realm supported
+	enctypes to be unspecified, letting the KDC produce defaults.
+	Don't look up enctypes at all if an error is to be returned.
+
 2000-02-18  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_xdr.c (xdr_chpass3_arg): 
