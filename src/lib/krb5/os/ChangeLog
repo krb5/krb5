@@ -1,3 +1,8 @@
+Wed Apr 19 13:50:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* def_realm.c: (krb5_get_default_realm) - remove global default realm.
+		Moved into the context. (krb5_set_default_realm) added.
+
 Fri Apr 14 22:15:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* an_to_ln.c (dbm_an_to_ln): Don't compile dbm_an_to_ln() if

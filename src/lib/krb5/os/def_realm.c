@@ -32,7 +32,7 @@
  *  available.  [e.g. to interpret a user-typed principal name with the
  *  realm omitted for convenience]
  * 
- *  returns system errors, NOT_ENOUGH_SPACE
+ *  returns system errors, NOT_ENOUGH_SPACE, KV5M_CONTEXT
 */
 
 /*
@@ -44,13 +44,6 @@
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 
-/*
- * In case the program wants to override this.
- */
-extern char *krb5_override_default_realm;
-
-char *krb5_override_default_realm = 0;
-
 krb5_error_code INTERFACE
 krb5_get_default_realm(context, lrealm)
     krb5_context context;
@@ -58,15 +51,13 @@ krb5_get_default_realm(context, lrealm)
 {
     FILE *config_file;
     char realmbuf[BUFSIZ];
-    static char *saved_realm = 0;
     char *realm;
     char *cp;
 
-    if (krb5_override_default_realm)
-	    realm = krb5_override_default_realm;
-    else if (saved_realm)
-	    realm = saved_realm;
-    else {
+    if (!context || (context->magic != KV5M_CONTEXT)) 
+	    return KV5M_CONTEXT;
+
+    if (!context->default_realm) {
 	    krb5_find_config_files();
 	    if (!(config_file = fopen(krb5_config_file, "r")))
 		    /* can't open */
@@ -86,17 +77,44 @@ krb5_get_default_realm(context, lrealm)
 	    if (cp)
 		    *cp = '\0';
 
-	    saved_realm = malloc(strlen (realmbuf) + 1);
-	    if (!saved_realm)
+	    context->default_realm = malloc(strlen (realmbuf) + 1);
+	    if (!context->default_realm)
 		    return ENOMEM;
 
-	    strcpy(saved_realm, realmbuf);
-
-	    realm = saved_realm;
+	    strcpy(context->default_realm, realmbuf);
     }
     
+    realm = context->default_realm;
+
     if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
 	    return ENOMEM;
     strcpy(cp, realm);
     return(0);
+}
+
+krb5_error_code INTERFACE
+krb5_set_default_realm(context, lrealm)
+    krb5_context context;
+    const char *lrealm;
+{
+    if (!context || (context->magic != KV5M_CONTEXT)) 
+	    return KV5M_CONTEXT;
+
+    if (context->default_realm) {
+	    free(context->default_realm);
+	    context->default_realm = 0;
+    }
+
+    /* Allow the user to clear the default realm setting by passing in 
+       NULL */
+    if (!lrealm) return 0;
+
+    context->default_realm = malloc(strlen (lrealm) + 1);
+
+    if (!context->default_realm)
+	    return ENOMEM;
+
+    strcpy(context->default_realm, lrealm);
+    return(0);
+
 }
