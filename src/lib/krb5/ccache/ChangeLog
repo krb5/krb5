@@ -1,3 +1,8 @@
+2000-09-12	Alexandra Ellwood <lxs@mit.edu>
+
+        * ccdefops.c: created #define for USE_CCAPI now that both Mac OS 9 and
+        Mac OS 10 use ccapi.
+
 2000-5-31	Alexandra Ellwood <lxs@mit.edu>
 
 	* ccdefault.c: Changed kerberosPrincipal_V5 to kerberosVersion_V5 to reflect 
