@@ -49,7 +49,7 @@ krb5_make_fulladdr(context, kaddr, kport, raddr)
 	return EINVAL;
 
     raddr->length = kaddr->length + kport->length + (4 * sizeof(krb5_int32));
-    if (!(raddr->contents = (krb5_octet *)malloc(kaddr->length)))
+    if (!(raddr->contents = (krb5_octet *)malloc(raddr->length)))
 	return ENOMEM;
 
     raddr->addrtype = ADDRTYPE_ADDRPORT;

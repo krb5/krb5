@@ -1,5 +1,8 @@
 Mon May  8 22:19:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* mk_faddr.c (krb5_make_fulladdr): Allocate enough memory for
+		raddr contents.
+
 	* read_pwd.c (krb5_read_password): Make arguments prompt and
 		prompt2 const char * for convenience to callers.
 
