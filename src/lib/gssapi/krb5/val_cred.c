@@ -56,6 +56,7 @@ krb5_gss_validate_cred(minor_status, cred_handle)
 	    *minor_status = KG_CCACHE_NOMATCH;
 	    return(GSS_S_DEFECTIVE_CREDENTIAL);
 	}
+	(void)krb5_free_principal(context, princ);
     }
     *minor_status = 0;
     return GSS_S_COMPLETE;
