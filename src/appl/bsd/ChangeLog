@@ -1,3 +1,9 @@
+Sat Aug 15 00:01:15 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krcp.c (error): Don't call rcmd_stream_write if iamremote is not
+ 	set, because it expects a valid file descriptor [krb5-appl/359].
+  	Also, remove mistakenly duplicated comment above the function.
+
 Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
 
 	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
