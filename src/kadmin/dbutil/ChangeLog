@@ -5,7 +5,7 @@ Tue Oct  8 13:35:56 1996  Barry Jaspan  <bjaspan@mit.edu>
  	specify admin_dbname specifically (which is no longer supported by
  	the libraries), uses osa_adb_rename_policy instead of doing it
  	directly, and will create a policy db if one does not already
- 	exist.  Automated testing is needed.
+ 	exist.  Automated testing is needed. [krb5-admin/62]
 
 Thu Oct  3 18:17:36 1996  Barry Jaspan  <bjaspan@mit.edu>
 
