@@ -177,6 +177,7 @@ krb5_checksum *outcksum;
 
 
 krb5_checksum_entry crc32_cksumtable_entry = {
+    0,
     crc32_sum_func,
     CRC32_CKSUM_LENGTH, /* CRC-32 is 4 octets */
     0,					/* not collision proof */

@@ -1,0 +1,4 @@
+Tue Oct  4 14:53:54 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* crc.c: Added placeholder for magic number
+
