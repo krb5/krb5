@@ -53,7 +53,6 @@ char *argv[];
     char *mkey_fullname;
     char *keyfile = 0;
     krb5_context context;
-    krb5_realm_params *rparams;
 
     int enctypedone = 0;
 

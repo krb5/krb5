@@ -1,3 +1,7 @@
+Sat Aug 24 21:14:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* loadv4.c, kdb5_stash.c: Removed unused variable rparams.
+
 Fri Aug 16 12:00:56 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Link with the GSSAPI library, since it's needed

@@ -140,7 +140,6 @@ char *argv[];
     char *tempdbname;
     krb5_context context;
     char *stash_file = (char *) NULL;
-    krb5_realm_params *rparams;
     int	persist, op_ind;
     kadm5_config_params newparams;
     extern kadm5_config_params global_params;
