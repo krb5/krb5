@@ -926,7 +926,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   krb5_free_principal(context, deleg_cred->princ);
        xfree(deleg_cred);
    }
-   if (ap_req.data)
+   if (ap_req.data && gsskrb5_vers == 2000)
        xfree(ap_req.data);
    if (ap_rep.data)
        xfree(ap_rep.data);
