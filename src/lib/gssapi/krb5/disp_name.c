@@ -45,7 +45,8 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
-   if (code = krb5_unparse_name(context, (krb5_principal) input_name, &str)) {
+   if ((code = krb5_unparse_name(context,
+				 (krb5_principal) input_name, &str))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

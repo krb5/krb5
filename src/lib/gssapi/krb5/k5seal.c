@@ -114,7 +114,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	    return(ENOMEM);
 	 }
 
-	 if (code = kg_make_confounder(enc_ed, plain)) {
+	 if ((code = kg_make_confounder(enc_ed, plain))) {
 	    xfree(plain);
 	    xfree(md5cksum.contents);
 	    xfree(t);
@@ -133,8 +133,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       }
 
       if (encrypt) {
-	 if (code = kg_encrypt(context, enc_ed, NULL, (krb5_pointer) plain,
-			       (krb5_pointer) (ptr+cksum_size+14), tmsglen)) {
+	 if ((code = kg_encrypt(context, enc_ed, NULL, (krb5_pointer) plain,
+				(krb5_pointer) (ptr+cksum_size+14),
+				tmsglen))) {
 	    if (plain)
 	       xfree(plain);
 	    xfree(md5cksum.contents);
@@ -234,10 +235,10 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
        xfree(cksum.contents);
 #else
-       if (code = kg_encrypt(context, seq_ed,
-			     (g_OID_equal(oid, gss_mech_krb5_old) ?
-			      seq_ed->key->contents : NULL),
-			     md5cksum.contents, md5cksum.contents, 16)) {
+       if ((code = kg_encrypt(context, seq_ed,
+			      (g_OID_equal(oid, gss_mech_krb5_old) ?
+			       seq_ed->key->contents : NULL),
+			      md5cksum.contents, md5cksum.contents, 16))) {
 	  xfree(md5cksum.contents);
 	  xfree(t);
 	  return code;
@@ -256,8 +257,8 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* create the seq_num */
 
-   if (code = kg_make_seq_num(context, seq_ed, direction?0:0xff, *seqnum,
-			      ptr+14, ptr+6)) {
+   if ((code = kg_make_seq_num(context, seq_ed, direction?0:0xff, *seqnum,
+			       ptr+14, ptr+6))) {
       xfree(t);
       return(code);
    }

@@ -67,7 +67,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
    init = NULL;
    accept = NULL;
 
-   if (code = krb5_timeofday(context, &now)) {
+   if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -76,9 +76,9 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
       lifetime = 0;
 
    if (initiator_name) {
-      if (code = krb5_copy_principal(context, 
-				     ctx->initiate?ctx->here:ctx->there,
-				     &init)) {
+      if ((code = krb5_copy_principal(context, 
+				      ctx->initiate?ctx->here:ctx->there,
+				      &init))) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -90,9 +90,9 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
    }
 
    if (acceptor_name) {
-      if (code = krb5_copy_principal(context, 
-				     ctx->initiate?ctx->there:ctx->here,
-				     &accept)) {
+      if ((code = krb5_copy_principal(context, 
+				      ctx->initiate?ctx->there:ctx->here,
+				      &accept))) {
 	 if (init) krb5_free_principal(context, init);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);

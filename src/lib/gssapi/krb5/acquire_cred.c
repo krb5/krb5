@@ -56,7 +56,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default keytab */
 
-   if (code = krb5_kt_default(context, &kt)) {
+   if ((code = krb5_kt_default(context, &kt))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
@@ -65,8 +65,8 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       requested, use the default sn2princ output */
 
    if (desired_name == (gss_name_t) NULL) {
-      if (code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
-					 &princ)) {
+      if ((code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
+					  &princ))) {
 	 (void) krb5_kt_close(context, kt);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -76,7 +76,7 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       princ = (krb5_principal) desired_name;
    }
 
-   if (code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry)) {
+   if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
 	(void) krb5_kt_close(context, kt);
 	if (code == KRB5_KT_NOTFOUND)
 	     *minor_status = KG_KEYTAB_NOMATCH;
@@ -128,7 +128,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default credential cache */
 
-   if (code = krb5_cc_default(context, &ccache)) {
+   if ((code = krb5_cc_default(context, &ccache))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
@@ -136,14 +136,14 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    /* turn off OPENCLOSE mode while extensive frobbing is going on */
 
    flags = 0;		/* turns off OPENCLOSE mode */
-   if (code = krb5_cc_set_flags(context, ccache, flags)) {
+   if ((code = krb5_cc_set_flags(context, ccache, flags))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
 
    /* get out the principal name and see if it matches */
 
-   if (code = krb5_cc_get_principal(context, ccache, &princ)) {
+   if ((code = krb5_cc_get_principal(context, ccache, &princ))) {
       (void)krb5_cc_close(context, ccache);
       *minor_status = code;
       return(GSS_S_FAILURE);
@@ -164,7 +164,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* iterate over the ccache, find the tgt */
 
-   if (code = krb5_cc_start_seq_get(context, ccache, &cur)) {
+   if ((code = krb5_cc_start_seq_get(context, ccache, &cur))) {
       (void)krb5_cc_close(context, ccache);
       *minor_status = code;
       return(GSS_S_FAILURE);
@@ -210,13 +210,13 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
       return(GSS_S_FAILURE);
    } else {
       /* this means that we found an endtime to use. */
-      if (code = krb5_cc_end_seq_get(context, ccache, &cur)) {
+      if ((code = krb5_cc_end_seq_get(context, ccache, &cur))) {
 	 (void)krb5_cc_close(context, ccache);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
       flags = KRB5_TC_OPENCLOSE;	/* turns on OPENCLOSE mode */
-      if (code = krb5_cc_set_flags(context, ccache, flags)) {
+      if ((code = krb5_cc_set_flags(context, ccache, flags))) {
 	 (void)krb5_cc_close(context, ccache);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -367,8 +367,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    /* if the princ wasn't filled in already, fill it in now */
 
    if (!cred->princ)
-      if (code = krb5_copy_principal(context, (krb5_principal) desired_name,
-				     &(cred->princ))) {
+      if ((code = krb5_copy_principal(context, (krb5_principal) desired_name,
+				      &(cred->princ)))) {
 	 if (cred->ccache)
 	    (void)krb5_cc_close(context, cred->ccache);
 	 if (cred->keytab)
@@ -388,7 +388,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    } else {
       krb5_timestamp now;
 
-      if (code = krb5_timeofday(context, &now)) {
+      if ((code = krb5_timeofday(context, &now))) {
 	 if (cred->ccache)
 	    (void)krb5_cc_close(context, cred->ccache);
 	 if (cred->keytab)

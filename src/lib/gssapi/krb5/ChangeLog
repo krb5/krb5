@@ -1,3 +1,16 @@
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* inq_cred.c (krb5_gss_inquire_cred): 
+	* inq_context.c (krb5_gss_inquire_context): 
+	* import_name.c (krb5_gss_import_name): 
+	* export_name.c (krb5_gss_export_name): 
+	* disp_name.c (krb5_gss_display_name): 
+	* context_time.c (krb5_gss_context_time): 
+	* acquire_cred.c (krb5_gss_acquire_cred): Clean up -Wall flames.
+
+	* indicate_mechs.c (krb5_gss_indicate_mechs): Return a dynamic OID
+		set.
+
 Fri Feb 27 18:41:08 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* export_name.c (krb5_gss_export_name): Fix bug in

@@ -85,7 +85,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
       tmp[input_name_buffer->length] = 0;
 
       service = tmp;
-      if (host = strchr(tmp, '@')) {
+      if ((host = strchr(tmp, '@'))) {
 	 *host = '\0';
 	 host++;
       }
