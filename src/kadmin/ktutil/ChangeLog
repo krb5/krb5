@@ -1,5 +1,7 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* ktutil_ct.ct: Add final "end" statement.
+
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
 
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
