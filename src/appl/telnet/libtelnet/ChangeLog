@@ -1,3 +1,14 @@
+Mon Oct  9 23:03:48 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kerberos5.c: make session_key a pointer, and use
+        krb5_copy_keyblock not krb5_copy_keyblock_contents; there was no
+        reason to violate this abstraction.
+
+Sun Sep 24 12:33:03 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kerberos5.c: Initialize session key from the subsession key we get from krb5_mk_req_extended, using ticket key as a fallback.
+	(kerberos5_send): Use appropriate enctypes when encryption defined.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * encrypt.h, kerberos5.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g

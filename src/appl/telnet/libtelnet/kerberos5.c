@@ -31,7 +31,7 @@
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN I<F ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
 
@@ -124,7 +124,7 @@ static	krb5_ticket * ticket = NULL;
 
 #define Voidptr krb5_pointer
 
-krb5_keyblock	session_key;
+krb5_keyblock	*session_key = 0;
 char *		telnet_srvtab = NULL;
 char *		telnet_krb5_realm = NULL;
 
@@ -173,8 +173,6 @@ kerberos5_init(ap, server)
 		str_data[3] = TELQUAL_REPLY;
 	else
 		str_data[3] = TELQUAL_IS;
-	memset(&session_key, 0, sizeof(session_key));
-	session_key.magic = KV5M_KEYBLOCK;
 	if (telnet_context == 0)
 	    krb5_init_context(&telnet_context);
         krb5_init_ets(telnet_context);
@@ -275,25 +273,25 @@ kerberos5_send(ap)
 
 #ifdef	ENCRYPTION
 	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, &newkey);
-	if (session_key.contents)
-	    free(session_key.contents);
-	/*
-	 * keep the key in our private storage, but don't use it yet
-	 * ---see kerberos5_reply() below 
-	 */
-	if (newkey) {
-	    if (new_creds->keyblock.enctype == ENCTYPE_DES)
-		/* use the session key in credentials instead */
-		krb5_copy_keyblock_contents(telnet_context, 
-					    &new_creds->keyblock,
-					    &session_key);
-	    else
-	        /* XXX ? */;
-	} else {
-	    krb5_copy_keyblock_contents(telnet_context, newkey, &session_key);
+	if (session_key) {
+krb5_free_keyblock(telnet_context, session_key);
+session_key = 0;
 	}
-	if (newkey)
+
+	if (newkey) {
+	    /* keep the key in our private storage, but don't use it
+	       yet---see kerberos5_reply() below */
+	    if ((newkey->enctype != ENCTYPE_DES_CBC_CRC) && (newkey-> enctype != ENCTYPE_DES_CBC_MD5)) {
+		if ((new_creds->keyblock.enctype == ENCTYPE_DES_CBC_CRC)||( new_creds->keyblock.enctype == ENCTYPE_DES_CBC_MD5))
+		    /* use the session key in credentials instead */
+		    krb5_copy_keyblock(telnet_context,&new_creds->keyblock, &session_key);
+		else
+		    /* XXX ? */;
+	    } else {
+		krb5_copy_keyblock(telnet_context, newkey, &session_key);
+	    }
 	    krb5_free_keyblock(telnet_context, newkey);
+	}
 #endif	/* ENCRYPTION */
 	krb5_free_cred_contents(telnet_context, &creds);
 	krb5_free_creds(telnet_context, new_creds);
@@ -403,15 +401,20 @@ kerberos5_is(ap, data, cnt)
 		krb5_auth_con_getremotesubkey(telnet_context, auth_context,
 					      &newkey);
 	    	if (newkey) {
-		    if (session_key.contents)
-			free(session_key.contents);
-		    krb5_copy_keyblock_contents(telnet_context, newkey,
+		    if (session_key) {
+			krb5_free_keyblock(telnet_context, session_key);
+			session_key = 0;
+		    }
+
+		    krb5_copy_keyblock(telnet_context, newkey,
 					    	&session_key);
 		    krb5_free_keyblock(telnet_context, newkey);
 		} else {
-		    if (session_key.contents)
-		        free(session_key.contents);
-		    krb5_copy_keyblock_contents(telnet_context, 
+		    if (session_key){
+			krb5_free_keyblock(telnet_context, session_key);
+session_key = 0;
+		    }
+		    krb5_copy_keyblock(telnet_context, 
 					   ticket->enc_part2->session,
 					   &session_key);
 		}
@@ -419,7 +422,7 @@ kerberos5_is(ap, data, cnt)
 #ifdef ENCRYPTION
 		skey.type = SK_DES;
 		skey.length = 8;
-		skey.data = session_key.contents;
+		skey.data = session_key->contents;
 		encrypt_session_key(&skey, 1);
 #endif
 		break;
@@ -512,10 +515,10 @@ kerberos5_reply(ap, data, cnt)
 		    }
 		    krb5_free_ap_rep_enc_part(telnet_context, reply);
 #ifdef	ENCRYPTION
-		    if (!session_key.contents) {
+		    if (session_key) {
 			skey.type = SK_DES;
 			skey.length = 8;
-			skey.data = session_key.contents;
+			skey.data = session_key->contents;
 			encrypt_session_key(&skey, 0);
 		      }
 #endif	/* ENCRYPTION */
