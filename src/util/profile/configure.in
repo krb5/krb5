@@ -5,7 +5,7 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_HEADERS(unistd.h stdlib.h pwd.h)
-AC_CHECK_FUNCS(stat access strdup getpwuid_r)
+AC_CHECK_FUNCS(stat access strdup)
 AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,struct stat.st_mtim.tv_nsec],,,[#include <sys/types.h>
 #include <sys/stat.h>])
 AC_PROG_AWK
