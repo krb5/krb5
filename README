@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.5
+		  Kerberos Version 5, Release 1.2.6
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.5.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.6.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.5.tar.gz
+	gtar zxpf krb5-1.2.6.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.5.tar.gz | tar xpf -
+	gzcat krb5-1.2.6.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.5/src
-and the documentation into DIST/krb5-1.2.5/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.6/src
+and the documentation into DIST/krb5-1.2.6/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,46 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.6
+----------------------------------------------
+
+Notes:
+
+* This release includes a significant security patch.  If you are
+  running an earlier release, you are highly encouraged to update, as
+  it is theoretically possible for an intruder to compromise your
+  KDC.
+
+Major Changes:
+
+* The security vulnerability in xdr_array() [MITKRB5-SA-2002-001] has
+  been patched.  Thanks to Jeffrey Hutzelman and Nikolai Zeldovich.
+
+* A NULL pointer dereference in kadmind has been fixed
+  [krb5-admin/1140].  Thanks to Mark Levinson.
+
+* There was a botched buffer overflow patch in kadmind4 that caused
+  problems with kadmind4 acl handling.  It has been fixed.  Thanks to
+  Mark Silis.
+
+* Correct ETYPE_INFO padata are now generated.  Thanks to Lubos
+  Kejzlar.
+
+* A bug in AFS salt handling has been worked
+  around. [krb5-clients/1146] Thanks to Wolfgang Friebel.
+
+* The KDC, in handling both krb5 and krb4 TGS_REQs, now honors the
+  DISALLOW_ALL_TIX and DISALLOW_SVR attributes on the server
+  principal.  This also now happens with krb524d.
+
+* The dump command in kdb5_util now handles master key conversion
+  without crashing.
+
+Known Bugs:
+
+* Most of the other known bugs noted in earlier 1.2.x releases (other
+  than those listed as fixed above) are still present.
 
 Notes, Major Changes, and Known Bugs for 1.2.5
 ----------------------------------------------
