@@ -28,7 +28,7 @@ kpasswd: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 
 install::
 	$(INSTALL_PROGRAM) kpasswd ${DESTDIR}$(CLIENT_BINDIR)/kpasswd
-	$(INSTALL_DATA) kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.1
+	$(INSTALL_DATA) $(srcdir)/kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.1
 
 clean::
 	$(RM) kpasswd

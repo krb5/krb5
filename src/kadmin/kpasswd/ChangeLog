@@ -1,3 +1,7 @@
+Wed Oct 19 12:18:26 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Look for man page in the source directory.
+
 Fri Sep 30 22:30:21 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kpasswd.c: Add placeholders for magic numbers
