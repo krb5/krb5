@@ -1,3 +1,9 @@
+1999-07-22 Jeffrey Altman <jaltman@columbia.edu>
+
+        * prof_init.c (prof_init)
+          Change behavior so that a NULL filespec means allocate
+          a profile without a backing store.
+
 1999-07-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h (profile_t): Delete typedef, since Miro changed

@@ -1,3 +1,8 @@
+1999-07-22  Jeffrey Altman <jaltman@columbia.edu>
+
+        get_in_tkt.c:  rename conf_boolean to krb5_conf_boolean so that
+        it may be used in additional modules.
+
 1999-06-28  Tom Yu  <tlyu@mit.edu>
 
 	* enc_helper.c (krb5_encrypt_helper): NULL out the pointer to the
