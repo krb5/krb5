@@ -75,6 +75,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	ser_princ.$(OBJEXT)	\
 	serialize.$(OBJEXT)	\
 	srv_rcache.$(OBJEXT)	\
+	str_conv.$(OBJEXT)	\
 	tgtname.$(OBJEXT)	\
 	unparse.$(OBJEXT)	\
 	walk_rtree.$(OBJEXT)
@@ -147,6 +148,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/ser_princ.c	\
 	$(srcdir)/serialize.c	\
 	$(srcdir)/srv_rcache.c	\
+	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
