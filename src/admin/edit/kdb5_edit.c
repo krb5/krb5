@@ -620,7 +620,7 @@ void extract_srvtab(argc, argv)
     return;
 }
 
-int extract_v4_srvtab(argc, argv)
+void extract_v4_srvtab(argc, argv)
     int argc;
     char *argv[];
 {
@@ -794,10 +794,8 @@ void list_db(argc, argv)
     char *argv[];
 {
     struct list_iterator_struct lis;
-    char *start;
     char *argbuf;
     char *p;
-    int i;
 
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
@@ -841,7 +839,7 @@ void list_db(argc, argv)
     (void) krb5_db_iterate(list_iterator, argv[0]);
 }
 
-int delete_entry(argc, argv)
+void delete_entry(argc, argv)
     int argc;
     char *argv[];
 {
@@ -911,7 +909,6 @@ enter_rnd_key(argc, argv, change)
     int nprincs = 1;
     krb5_db_entry entry;
     krb5_boolean more;
-    krb5_kvno vno;
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -1320,6 +1317,7 @@ void show_principal(argc, argv)
     printf("Name: %s\n", pr_name);
     printf("Salt: %d\n", entry.salt_type);
     printf("Alt salt: %d\n", entry.salt_type);
+/* XXX - mod_date is a krb5_timestamp which is krb5_int32, but should be time_t! */
     printf("Last modified by %s on %s\n", pr_mod, ctime(&entry.mod_date));
     
     if (!nprincs) {

@@ -200,7 +200,7 @@ void load_db(argc, argv)
 	int	ch;
 	int	load_error = 0;
 	int	lineno = 0;
-	int	stype, slength;
+	int	stype;
 	int	tmp1, tmp2;
 	char	buf[64];	/* Must be longer than ld_vers */
 	
