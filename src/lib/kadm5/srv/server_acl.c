@@ -197,7 +197,7 @@ acl_parse_line(lp)
 	    for (op=acle_ops; *op; op++) {
 		char rop;
 
-		rop = (isupper(*op)) ? tolower(*op) : *op;
+		rop = (isupper((int) *op)) ? tolower((int) *op) : *op;
 		found = 0;
 		for (t=0; acl_op_table[t].ao_op; t++) {
 		    if (rop == acl_op_table[t].ao_op) {
@@ -240,7 +240,7 @@ acl_parse_line(lp)
 		char	*trailing;
 
 		trailing = &acle_restrictions[strlen(acle_restrictions)-1];
-		while ( isspace(*trailing) )
+		while ( isspace((int) *trailing) )
 		    trailing--;
 		trailing[1] = '\0';
 		acle->ae_restriction_string = strdup(acle_restrictions);

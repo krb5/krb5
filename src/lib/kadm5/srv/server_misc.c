@@ -139,17 +139,17 @@ passwd_check(kadm5_server_handle_t handle,
 	    return KADM5_PASS_Q_TOOSHORT;
 	s = password;
 	while ((c = *s++)) {
-	    if (islower(c)) {
+	    if (islower((int) c)) {
 		nlower = 1;
 		continue;
 	    }
-	    else if (isupper(c)) {
+	    else if (isupper((int) c)) {
 		nupper = 1;
 		continue;
-	    } else if (isdigit(c)) {
+	    } else if (isdigit((int) c)) {
 		ndigit = 1;
 		continue;
-	    } else if (ispunct(c)) {
+	    } else if (ispunct((int) c)) {
 		npunct = 1;
 		continue;
 	    } else {
