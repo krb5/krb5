@@ -1,3 +1,11 @@
+Mon Aug 10 13:05:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Changed location of glue generation output
+
+Mon Aug 10 13:05:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* ReadMe: Changed instructions to refer to 68K glue
+
 Mon Aug 10 12:58:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.tmpl: Added glue files to clean targets

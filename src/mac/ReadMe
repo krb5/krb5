@@ -138,30 +138,21 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	link against both if you are using static libraries.)
 
 	To add Kerberos functionality to a Code Warrior based application:
+	
+	   1) PPC application: use shared libraries:
+	   		For GSSAPI, add GSSLibraryPPC to your project
+	   		For Kerberos v5 API, add K5LibraryPPC to your project
+			Set the project options to 4 byte integers and enums treated as ints.
 
-	   1) Decide on whether to use CFM or static libraries. We strongly
-	      recommended that you use the CFM libraries so that when updates are
-	      made to Kerberos5/GSS you do not need to recompile your application.
-	      
-	   2) Drag the appropriate libraries into your project.
-	   
-	      If you are using the CFM libraries, include the following:
-	      
-	      	If you are using GSSAPI:
-				GSSLibrary68K
-				GSSLibraryPPC
-    	    If you are using Kerberos v5 API directly:
-				K5Library68K
-				K5LibraryPPC
-          
-          If you are statically linking, include the following:
-          
-            libgss.68K
-            libgss.PPC
-            libkrb5.68K
-            libkrb5.PPC
-            
-	   3) Set the project options to 4 byte integers and enums treated as ints.
+	   2) CFM-68K application: use shared libraries
+	   		For GSSAPI, add GSSLibrary68K to your project
+	   		For Kerberos v5 API, add K5Library68K to your project
+			Set the project options to 4 byte integers and enums treated as ints.
+
+	   3) Classic 68K application: use glue for shared libraries
+	   		For GSSAPI, add GSS.CFMglue.c to your project
+	   		For Kerberos v5 API, add K5.CFMglue.c to your project
+			Set the project options to 4 byte integers and enums treated as ints.
 
     A PDF document describing the Kerberos 5 API is located at:
     
