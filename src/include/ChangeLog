@@ -1,3 +1,7 @@
+1999-05-26  Miro Jurisic  <meeroh@.mit.edu>
+
+	* k5-int.h: Remove #define ENOMEM under #ifdef macintosh
+
 Wed May 19 11:33:15 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove copying of header files for Win32.  These

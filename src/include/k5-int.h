@@ -113,7 +113,7 @@
 #define HAVE_SRAND
 #define NO_PASSWORD
 #define HAVE_LABS
-#define ENOMEM -1
+/*#define ENOMEM -1*/
 #define ANSI_STDIO
 #ifndef _SIZET
 typedef unsigned int size_t;
