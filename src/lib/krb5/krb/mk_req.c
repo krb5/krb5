@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "auth_con.h"
 
 /*
  Formats a KRB_AP_REQ message into outbuf.
@@ -48,44 +49,56 @@
 extern krb5_flags krb5_kdc_default_options;
 
 krb5_error_code INTERFACE
-krb5_mk_req(context, server, ap_req_options, checksum, ccache, outbuf)
-    krb5_context context;
-    krb5_const_principal server;
-    const krb5_flags ap_req_options;
-    const krb5_checksum *checksum;
-    krb5_ccache ccache;
-    krb5_data *outbuf;
+krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
+	      ccache, outbuf)
+    krb5_context          context;
+    krb5_auth_context  ** auth_context;
+    const krb5_flags      ap_req_options;
+    char		* service;
+    char		* hostname;
+    krb5_data           * in_data;
+    krb5_ccache 	  ccache;
+    krb5_data 		* outbuf;
 {
-    krb5_error_code retval;
-    krb5_creds * credsp;
-    krb5_creds creds;
+    krb5_error_code 	  retval;
+    krb5_principal	  server;
+    krb5_creds 		* credsp;
+    krb5_creds 		  creds;
+    char	       ** realm;
 
+    /* get realm */
+    if (retval = krb5_get_host_realm(context, hostname, &realm)) 
+	return retval;
+
+    /* build principal */
+    if (retval = krb5_build_principal(context, &server, strlen(realm[0]),
+				      realm[0], service, hostname, NULL))
+	goto cleanup_realm;
+				      
     /* obtain ticket & session key */
-
     memset((char *)&creds, 0, sizeof(creds));
     if (retval = krb5_copy_principal(context, server, &creds.server))
-	goto errout;
+	goto cleanup_princ;
+
     if (retval = krb5_cc_get_principal(context, ccache, &creds.client))
-	goto errout;
-    /* creds.times.endtime = 0; -- memset 0 takes care of this
-     				   zero means "as long as possible" */
-    /* creds.keyblock.keytype = 0; -- as well as this.
-       				      zero means no session keytype
-				      preference */
+	goto cleanup_creds;
 
     if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
 				      ccache, &creds, &credsp))
-	goto errout;
+	goto cleanup_creds;
 
-    retval = krb5_mk_req_extended(context, ap_req_options, checksum,
-				  0,	/* no sequence number */
-				  0,	/* no sub-key */
-				  credsp,
-				  0, 	/* We don't need the authenticator */
-				  outbuf);
+    retval = krb5_mk_req_extended(context, auth_context, ap_req_options, 
+				  in_data, credsp, outbuf);
 
-errout:
-    krb5_free_cred_contents(context, &creds);
     krb5_free_creds(context, credsp);
+
+cleanup_creds:
+    krb5_free_cred_contents(context, &creds);
+
+cleanup_princ:
+    krb5_free_principal(context, server);
+
+cleanup_realm:
+    krb5_free_host_realm(context, realm);
     return retval;
 }

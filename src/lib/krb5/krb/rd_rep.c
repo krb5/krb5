@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "auth_con.h"
 
 /*
  *  Parses a KRB_AP_REP message, returning its contents.
@@ -38,10 +39,10 @@
  */
 
 krb5_error_code INTERFACE
-krb5_rd_rep(context, inbuf, kblock, repl)
-    krb5_context context;
-    const krb5_data *inbuf;
-    const krb5_keyblock *kblock;
+krb5_rd_rep(context, auth_context, inbuf, repl)
+    krb5_context 	  context;
+    krb5_auth_context	* auth_context;
+    const krb5_data 	* inbuf;
     krb5_ap_rep_enc_part **repl;
 {
     krb5_error_code retval;
@@ -52,9 +53,6 @@ krb5_rd_rep(context, inbuf, kblock, repl)
     if (!krb5_is_ap_rep(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    if (!valid_keytype(kblock->keytype))
-	return KRB5_PROG_KEYTYPE_NOSUPP;
-    
     /* decode it */
 
     if (retval = decode_krb5_ap_rep(inbuf, &reply))
@@ -75,33 +73,46 @@ krb5_rd_rep(context, inbuf, kblock, repl)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, kblock)) {
-    errout:
-	free(scratch.data);
-	krb5_free_ap_rep(context, reply);
-	return(retval);
+    if (retval = krb5_process_key(context, &eblock, auth_context->keyblock)) {
+	goto errout;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt(context, (krb5_pointer) reply->enc_part.ciphertext.data,
+    if (retval = krb5_decrypt(context, 
+			      (krb5_pointer) reply->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
 	(void) krb5_finish_key(context, &eblock);
 	goto errout;
     }
-#define clean_scratch() {memset(scratch.data, 0, scratch.length); \
-free(scratch.data);}
-    /* finished with the top-level encoding of the ap_rep */
-    krb5_free_ap_rep(context, reply);
-    if (retval = krb5_finish_key(context, &eblock)) {
 
-	clean_scratch();
-	return retval;
-    }
-    /*  now decode the decrypted stuff */
+    /* finished with the top-level encoding of the ap_rep */
+    if (retval = krb5_finish_key(context, &eblock)) 
+	goto clean_scratch;
+
+    /* now decode the decrypted stuff */
     retval = decode_krb5_ap_rep_enc_part(&scratch, repl);
-    clean_scratch();
-    if ((*repl)->subkey)
+
+    /* Check reply fields */
+    if (((*repl)->ctime != auth_context->authentp->ctime) ||
+      ((*repl)->cusec != auth_context->authentp->cusec)) {
+	retval = KRB5_SENDAUTH_MUTUAL_FAILED;
+	goto clean_scratch;
+    }
+
+    /* Set auth subkey */
+    if ((*repl)->subkey) {
 	(*repl)->subkey->etype = reply->enc_part.etype;
+	auth_context->remote_subkey = (*repl)->subkey;
+    }
+
+    /* Get remote sequence number */
+    auth_context->remote_seq_number = (*repl)->seq_number;
+
+clean_scratch:
+    memset(scratch.data, 0, scratch.length); 
+errout:
+    krb5_free_ap_rep(context, reply);
+    free(scratch.data);
     return retval;
 }

@@ -24,7 +24,9 @@
  * krb5_mk_req_extended()
  */
 
+
 #include "k5-int.h"
+#include "auth_con.h"
 
 /*
  Formats a KRB_AP_REQ message into outbuf, with more complete options than
@@ -66,87 +68,123 @@ krb5_generate_authenticator PROTOTYPE((krb5_context,
 				       krb5_int32, krb5_authdata ** ));
 
 krb5_error_code INTERFACE
-krb5_mk_req_extended(context, ap_req_options, checksum, sequence, 
-		     newkey, in_creds, authentp, outbuf)
-    krb5_context context;
-    const krb5_flags ap_req_options;
-    const krb5_checksum *checksum;
-    krb5_int32 sequence;
-    krb5_keyblock **newkey;
-    krb5_creds *in_creds;
-    krb5_authenticator *authentp;
-    krb5_data *outbuf;
+krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
+		     outbuf)
+    krb5_context 	  context;
+    krb5_auth_context	**auth_context;
+    const krb5_flags 	  ap_req_options;
+    krb5_data		* in_data;
+    krb5_creds 		* in_creds;
+    krb5_data 		* outbuf;
 {
-    krb5_error_code retval;
+    krb5_error_code 	  retval;
+    krb5_checksum	  checksum;
+    krb5_auth_context	* new_auth_context;
+
     krb5_ap_req request;
-    krb5_authenticator authent;
-    krb5_data *scratch;
-    krb5_enctype etype;
+    krb5_data *scratch = 0;
     krb5_encrypt_block eblock;
     krb5_data *toutbuf;
-    int cleanup_key = 0;
 
-    request.ticket = 0;
     request.authenticator.ciphertext.data = 0;
-    if (newkey)
-	*newkey = 0;
-    scratch = 0;
+    request.ap_options = ap_req_options;
+    request.ticket = 0;
     
-    if ((ap_req_options & AP_OPTS_USE_SESSION_KEY) &&
-	!in_creds->ticket.length)
-	return(KRB5_NO_TKT_SUPPLIED);
-
     if (!in_creds->ticket.length) 
 	return(KRB5_NO_TKT_SUPPLIED);
-
-/*	if (retval = krb5_get_credentials(context, kdc_options,
-					  ccache, in_creds, out_creds)) */
 
     /* we need a native ticket */
     if (retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket))
 	return(retval);
     
     /* verify a valid etype is available */
-    etype = request.ticket->enc_part.etype;
-
-    if (!valid_etype(etype)) {
+    if (!valid_etype(request.ticket->enc_part.etype)) {
 	retval = KRB5_PROG_ETYPE_NOSUPP;
 	goto cleanup;
     }
 
-    request.ap_options = ap_req_options;
-    if (newkey) {
-	if (retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
-					  newkey))
+    /* generate auth_context if needed */
+    if (*auth_context == NULL) {
+	if (retval = krb5_auth_con_init(context, &new_auth_context))
 	    goto cleanup;
+	*auth_context = new_auth_context;
     }
 
-    if (retval = krb5_generate_authenticator(context, &authent, 
-					     (in_creds)->client, checksum,
-					     newkey ? *newkey : 0, sequence, 
-					     (in_creds)->authdata))
+    /* set auth context keyblock */
+    if (retval = krb5_copy_keyblock(context, &in_creds->keyblock, 
+				    &((*auth_context)->keyblock))) 
 	goto cleanup;
+
+    /* generate seq number if needed */
+    if ((((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE)
+     || ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE))
+      && ((*auth_context)->local_seq_number == 0)) 
+	if (retval = krb5_generate_seq_number(context, &in_creds->keyblock,
+				     &(*auth_context)->local_seq_number))
+	    goto cleanup;
+	
+
+    /* generate subkey if needed */
+    if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->local_subkey))
+	if (retval = krb5_generate_subkey(context, &(in_creds)->keyblock, 
+				          &(*auth_context)->local_subkey))
+	    goto cleanup;
+
+
+    /* Generate checksum, XXX What should the seed be? */
+    if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(
+      					  context, CKSUMTYPE_CRC32))) == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
+
+    if (in_data == NULL) {
+    	if (retval = krb5_calculate_checksum(context, 
+					     (*auth_context)->cksumtype, 
+					     0, 0, 0, 0, &checksum))
+	    goto cleanup_cksum;
+    } else 
+        if ((*auth_context)->cksumtype == 0x8003) {
+    	    /* XXX Special hack for GSSAPI */
+	    checksum.checksum_type = 0x8003;
+	    checksum.length = in_data->length;
+	    checksum.contents = in_data->data;
+        } else 
+    	    if (retval = krb5_calculate_checksum(context, 
+					         (*auth_context)->cksumtype, 
+					         in_data->data, in_data->length,
+					         0, 0, &checksum))
+	        goto cleanup_cksum;
+
+    /* Generate authenticator */
+    if (((*auth_context)->authentp = (krb5_authenticator *)malloc(sizeof(
+					krb5_authenticator))) == NULL) {
+	retval = ENOMEM;
+	goto cleanup_cksum;
+    }
+
+    if (retval = krb5_generate_authenticator(context, (*auth_context)->authentp,
+					     (in_creds)->client, &checksum,
+					     (*auth_context)->local_subkey,
+					     (*auth_context)->local_seq_number,
+					     (in_creds)->authdata))
+	goto cleanup_cksum;
 	
     /* encode the authenticator */
-    retval = encode_krb5_authenticator(&authent, &scratch);
-    if (retval)
-	goto cleanup;
+    if (retval = encode_krb5_authenticator((*auth_context)->authentp, &scratch))
+	goto cleanup_cksum;
     
     /* Null out these fields, to prevent pointer sharing problems;
      * they were supplied by the caller
      */
-    authent.client = NULL;
-    authent.checksum = NULL;
-    authent.authorization_data = NULL;
-    if (authentp)
-	    *authentp = authent;
-    else
-	    krb5_free_authenticator_contents(context, &authent);
+    (*auth_context)->authentp->client = NULL;
+    (*auth_context)->authentp->checksum = NULL;
+    (*auth_context)->authentp->authorization_data = NULL;
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(context, &eblock, etype);
-    request.authenticator.etype = etype;
+    krb5_use_cstype(context, &eblock, request.ticket->enc_part.etype);
+    request.authenticator.etype = request.ticket->enc_part.etype;
     request.authenticator.kvno = 0;
     request.authenticator.ciphertext.length =
 	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
@@ -155,38 +193,39 @@ krb5_mk_req_extended(context, ap_req_options, checksum, sequence,
 				  request.authenticator.ciphertext.length))) {
 	/* may destroy scratch->data */
 	retval = ENOMEM;
-	goto cleanup;
+	goto cleanup_cksum;
     }
     memset(scratch->data + scratch->length, 0,
 	  request.authenticator.ciphertext.length - scratch->length);
     if (!(request.authenticator.ciphertext.data =
 	  malloc(request.authenticator.ciphertext.length))) {
 	retval = ENOMEM;
-	goto cleanup;
+	goto cleanup_cksum;
     }
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(context, &eblock, &(in_creds)->keyblock))
 	goto cleanup;
 
-    cleanup_key++;
-
     /* call the encryption routine */
     if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 			      (krb5_pointer) request.authenticator.ciphertext.data,
-			      scratch->length, &eblock, 0))
-	goto cleanup;
+			      scratch->length, &eblock, 0)) {
+        krb5_finish_key(context, &eblock);
+	goto cleanup_cksum;
+    }
 
     if (retval = krb5_finish_key(context, &eblock))
-	goto cleanup;
-    cleanup_key = 0;
+	goto cleanup_cksum;
     
-    retval = encode_krb5_ap_req(&request, &toutbuf);
-    if (retval)
-	goto cleanup;
+    if (retval = encode_krb5_ap_req(&request, &toutbuf))
+	goto cleanup_cksum;
     
     *outbuf = *toutbuf;
     krb5_xfree(toutbuf);
+
+cleanup_cksum:
+    free(checksum.contents);
 
 cleanup:
     if (request.ticket)
@@ -196,16 +235,11 @@ cleanup:
 		      request.authenticator.ciphertext.length);
 	free(request.authenticator.ciphertext.data);
     }
-    if (retval && newkey && *newkey)
-	krb5_free_keyblock(context, *newkey);
     if (scratch) {
 	memset(scratch->data, 0, scratch->length);
         krb5_xfree(scratch->data);
 	krb5_xfree(scratch);
     }
-    if (cleanup_key)
-	krb5_finish_key(context, &eblock);
-
     return retval;
 }
 

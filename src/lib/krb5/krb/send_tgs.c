@@ -45,6 +45,124 @@
 
  returns system errors
  */
+
+static krb5_error_code 
+krb5_send_tgs_basic(context, in_data, sumtype, in_cred, outbuf)
+    krb5_context          context;
+    krb5_data           * in_data;
+    const krb5_cksumtype  sumtype;
+    krb5_creds          * in_cred;
+    krb5_data           * outbuf;
+{   
+    krb5_error_code       retval;
+    krb5_checksum         checksum;
+    krb5_authenticator 	  authent;
+    krb5_ap_req 	  request;
+    krb5_encrypt_block 	  eblock;
+    krb5_data		* scratch;
+    krb5_data           * toutbuf;
+
+    /* Generate checksum */
+    if ((checksum.contents = 
+      (krb5_octet *)malloc(krb5_checksum_size(context, sumtype))) == NULL) 
+        return(ENOMEM);
+
+    if (retval = krb5_calculate_checksum(context, sumtype,
+                                      in_data->data, in_data->length,
+				      (krb5_pointer) in_cred->keyblock.contents,
+				      in_cred->keyblock.length, &checksum)) {
+        free(checksum.contents);
+	return(retval);
+    }
+
+    /* gen authenticator */
+    authent.subkey = 0;
+    authent.seq_number = 0;
+    authent.checksum = &checksum;
+    authent.client = in_cred->client;
+    authent.authorization_data = in_cred->authdata;
+    if (retval = krb5_us_timeofday(context, &authent.ctime, &authent.cusec)) {
+        free(checksum.contents);
+	return(retval);
+    }
+
+    /* encode the authenticator */
+    if (retval = encode_krb5_authenticator(&authent, &scratch)) {
+        free(checksum.contents);
+	return(retval);
+    }
+
+    free(checksum.contents);
+
+    request.authenticator.ciphertext.data = 0;
+    request.authenticator.kvno = 0;
+    request.ap_options = 0;
+    request.ticket = 0;
+
+    if (retval = decode_krb5_ticket(&(in_cred)->ticket, &request.ticket))
+	/* Cleanup scratch and scratch data */
+        goto cleanup_data;
+
+    /* put together an eblock for this encryption */
+    krb5_use_cstype(context, &eblock, request.ticket->enc_part.etype);
+    request.authenticator.etype = request.ticket->enc_part.etype;
+    request.authenticator.ciphertext.length =
+        krb5_encrypt_size(scratch->length, eblock.crypto_entry);
+
+    /* add padding area, and zero it */
+    if (!(scratch->data = realloc(scratch->data,
+                                  request.authenticator.ciphertext.length))) {
+        /* may destroy scratch->data */ 
+        krb5_free_ticket(context, request.ticket);
+        retval = ENOMEM;
+        goto cleanup_scratch;
+    }
+    memset(scratch->data + scratch->length, 0,
+          request.authenticator.ciphertext.length - scratch->length);
+
+    if (!(request.authenticator.ciphertext.data =
+          malloc(request.authenticator.ciphertext.length))) {
+        retval = ENOMEM;
+        goto cleanup_ticket;
+    }
+
+    /* do any necessary key pre-processing */
+    if (retval = krb5_process_key(context, &eblock, &(in_cred)->keyblock))
+        goto cleanup;
+
+    /* call the encryption routine */ 
+    if (retval=krb5_encrypt(context, (krb5_pointer) scratch->data,
+                            (krb5_pointer)request.authenticator.ciphertext.data,
+                            scratch->length, &eblock, 0)) {
+        krb5_finish_key(context, &eblock);
+        goto cleanup;
+    }
+    
+    if (retval = krb5_finish_key(context, &eblock))
+        goto cleanup;
+
+    retval = encode_krb5_ap_req(&request, &toutbuf);
+    *outbuf = *toutbuf;
+    krb5_xfree(toutbuf);
+
+cleanup:
+    memset(request.authenticator.ciphertext.data, 0,
+           request.authenticator.ciphertext.length);
+    free(request.authenticator.ciphertext.data);
+
+cleanup_ticket:
+    krb5_free_ticket(context, request.ticket);
+
+cleanup_data:
+    memset(scratch->data, 0, scratch->length);
+    free(scratch->data);
+
+cleanup_scratch:
+    free(scratch);
+
+    return retval;
+}
+
 krb5_error_code INTERFACE
 krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	      authorization_data, padata, second_ticket, in_cred, rep)
@@ -63,7 +181,6 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
-    krb5_checksum ap_checksum;
     krb5_data *scratch, scratch2;
     krb5_ticket *sec_ticket = 0;
     krb5_ticket *sec_ticket_arr[2];
@@ -167,39 +284,15 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     if (retval = encode_krb5_kdc_req_body(&tgsreq, &scratch))
 	goto send_tgs_error_2;
 
-    if (!(ap_checksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(context, sumtype)))) {
-	krb5_free_data(context, scratch);
-	retval = ENOMEM;
-	goto send_tgs_error_2;
-    }
-
-    if (retval = krb5_calculate_checksum(context, sumtype, scratch->data,
-					 scratch->length,
-				 (krb5_pointer) in_cred->keyblock.contents,
-					 in_cred->keyblock.length,
-					 &ap_checksum)) {
-	krb5_free_data(context, scratch);
-	goto send_tgs_error_3;
-    }
-    /* done with body */
-    krb5_free_data(context, scratch);
-
-    /* attach ap_req to the tgsreq */
-
     /*
      * Get an ap_req.
      */
-    if (retval = krb5_mk_req_extended (context,
-			  	       0L /* no ap options */,
-				       &ap_checksum,
-				       0, /* no initial sequence */
-				       0, /* no new key */
-				       in_cred,
-				       0, /* don't need authenticator */
-				       &scratch2)) {
-	goto send_tgs_error_3;
+    if (retval = krb5_send_tgs_basic(context, scratch, sumtype,
+				     in_cred, &scratch2)) {
+        krb5_free_data(context, scratch);
+	goto send_tgs_error_2;
     }
+    krb5_free_data(context, scratch);
 
     ap_req_padata.pa_type = KRB5_PADATA_AP_REQ;
     ap_req_padata.length = scratch2.length;
@@ -214,7 +307,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	if (!combined_padata) {
 	    krb5_xfree(ap_req_padata.contents);
 	    retval = ENOMEM;
-	    goto send_tgs_error_3;
+	    goto send_tgs_error_2;
 	}
 	combined_padata[0] = &ap_req_padata;
 	for (i = 1, counter = padata; *counter; counter++, i++)
@@ -225,7 +318,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	if (!combined_padata) {
 	    krb5_xfree(ap_req_padata.contents);
 	    retval = ENOMEM;
-	    goto send_tgs_error_3;
+	    goto send_tgs_error_2;
 	}
 	combined_padata[0] = &ap_req_padata;
 	combined_padata[1] = 0;
@@ -236,7 +329,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
 	krb5_xfree(ap_req_padata.contents);
 	krb5_xfree(combined_padata);
-	goto send_tgs_error_3;
+	goto send_tgs_error_2;
     }
     krb5_xfree(ap_req_padata.contents);
     krb5_xfree(combined_padata);
@@ -253,9 +346,6 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
         else /* assume it's an error */
 	    rep->message_type = KRB5_ERROR;
     }
-
-send_tgs_error_3:;
-    krb5_xfree(ap_checksum.contents);
 
 send_tgs_error_2:;
     if (sec_ticket) 

@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "auth_con.h"
 
 /*
  Formats a KRB_SAFE message into outbuf.
@@ -41,25 +42,23 @@
 
  returns system errors
 */
-krb5_error_code INTERFACE
-krb5_mk_safe(context, userdata, sumtype, key, sender_addr, recv_addr,
-	     seq_number, safe_flags, rcache, outbuf)
-    krb5_context context;
-    const krb5_data * userdata;
-    const krb5_cksumtype sumtype;
-    const krb5_keyblock * key;
-    const krb5_address * sender_addr;
-    const krb5_address * recv_addr;
-    krb5_int32 seq_number;
-    krb5_int32 safe_flags;
-    krb5_rcache rcache;
-    krb5_data * outbuf;
+static krb5_error_code
+krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
+		   remote_addr, sumtype, outbuf)
+    krb5_context 	  context;
+    const krb5_data 	* userdata;
+    const krb5_keyblock * keyblock;
+    krb5_replay_data    * replaydata;
+    const krb5_address 	* local_addr;
+    const krb5_address 	* remote_addr;
+    const krb5_cksumtype  sumtype;
+    krb5_data 		* outbuf;
 {
     krb5_error_code retval;
     krb5_safe safemsg;
     krb5_octet zero_octet = 0;
     krb5_checksum safe_checksum;
-    krb5_data *scratch;
+    krb5_data *scratch1, *scratch2;
 
     if (!valid_cksumtype(sumtype))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
@@ -67,86 +66,128 @@ krb5_mk_safe(context, userdata, sumtype, key, sender_addr, recv_addr,
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     safemsg.user_data = *userdata;
-    safemsg.s_address = (krb5_address *)sender_addr;
-    if (recv_addr)
-	safemsg.r_address = (krb5_address *)recv_addr;
-    else
-	safemsg.r_address = 0;
+    safemsg.s_address = local_addr;
+    safemsg.r_address = remote_addr;
 
-    if (!(safe_flags & KRB5_SAFE_NOTIME)) {
-	if (!rcache)
-	    /* gotta provide an rcache in this case... */
-	    return KRB5_RC_REQUIRED;
-	if (retval = krb5_us_timeofday(context, &safemsg.timestamp, &safemsg.usec))
-	    return retval;
-    } else
-	safemsg.timestamp = 0, safemsg.usec = 0;
-    if (safe_flags & KRB5_SAFE_DOSEQUENCE) {
-	safemsg.seq_number = seq_number;
-     } else
-	 safemsg.seq_number = 0;
-    
-    /* to do the checksum stuff, we need to encode the message with a
-       zero-length zero-type checksum, then checksum the encoding, then
-       re-encode with the 
-       checksum. */
+    /* We should check too make sure one exists. */
+    safemsg.timestamp  = replaydata->timestamp;
+    safemsg.usec       = replaydata->usec;
+    safemsg.seq_number = replaydata->seq;
 
-    safe_checksum.checksum_type = 0;
+    /* 
+     * To do the checksum stuff, we need to encode the message with a
+     * zero-length zero-type checksum, then checksum the encoding, then
+     * re-encode with the checksum. 
+     */
+
     safe_checksum.length = 0;
+    safe_checksum.checksum_type = 0;
     safe_checksum.contents = &zero_octet;
 
     safemsg.checksum = &safe_checksum;
 
-    if (retval = encode_krb5_safe(&safemsg, &scratch))
+    if (retval = encode_krb5_safe(&safemsg, &scratch1))
 	return retval;
 
-#define clean_scratch() {(void) memset((char *)scratch->data, 0,\
-				       scratch->length); \
-			  krb5_free_data(context, scratch);}
-			 
     if (!(safe_checksum.contents =
 	  (krb5_octet *) malloc(krb5_checksum_size(context, sumtype)))) {
-	clean_scratch();
-	return ENOMEM;
+	retval = ENOMEM;
+	goto cleanup_scratch;
     }
-    if (retval = krb5_calculate_checksum(context, sumtype, scratch->data,
-					 scratch->length,
-					 (krb5_pointer) key->contents,
-					 key->length, &safe_checksum)) {
-	krb5_xfree(safe_checksum.contents);
-	clean_scratch();
-	return retval;
+    if (retval = krb5_calculate_checksum(context, sumtype, scratch1->data,
+					 scratch1->length,
+					 (krb5_pointer) keyblock->contents,
+					 keyblock->length, &safe_checksum)) {
+	goto cleanup_checksum;
     }
     safemsg.checksum = &safe_checksum;
-    clean_scratch();
-    if (retval = encode_krb5_safe(&safemsg, &scratch)) {
-	krb5_xfree(safe_checksum.contents);
-	return retval;
+    if (retval = encode_krb5_safe(&safemsg, &scratch2)) {
+	goto cleanup_checksum;
     }
+    *outbuf = *scratch2;
+    krb5_xfree(scratch2);
+    retval = 0;
+
+cleanup_checksum:
     krb5_xfree(safe_checksum.contents);
-    if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+
+cleanup_scratch:
+    memset((char *)scratch1->data, 0, scratch1->length); 
+    krb5_free_data(context, scratch1);
+    return retval;
+}
+
+krb5_error_code INTERFACE
+krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
+    krb5_context 	context;
+    krb5_auth_context *	auth_context;
+    const krb5_data   * userdata;
+    krb5_data         *	outbuf;
+    krb5_replay_data  * outdata;
+{
+    krb5_replay_data    replaydata;
+    krb5_error_code 	retval;
+
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
+      (auth_context->rcache == NULL))
+	return KRB5_RC_REQUIRED;
+
+    if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
+      (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
+      (outdata == NULL))
+	/* Need a better error */
+	return KRB5_RC_REQUIRED;
+
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) ||
+	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME)) {
+	if (retval = krb5_us_timeofday(context, &replaydata.timestamp,
+				       &replaydata.usec))
+	    return retval;
+	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) {
+    	    outdata->timestamp = replaydata.timestamp;
+    	    outdata->usec = replaydata.usec;
+	}
+    }
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
+	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
+	replaydata.seq = auth_context->local_seq_number++;
+	if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE) {
+    	    outdata->seq = replaydata.seq;
+	}
+    } 
+
+    if (retval = krb5_mk_safe_basic(context, userdata, auth_context->keyblock,
+      &replaydata, auth_context->local_addr, auth_context->remote_addr,
+      auth_context->cksumtype, outbuf)) 
+	goto error;
+
+    if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
 	krb5_donot_replay replay;
 
-	if (retval = krb5_gen_replay_name(context, sender_addr, "_safe",
-					  &replay.client)) {
-	    clean_scratch();
-	    return retval;
+	if (retval = krb5_gen_replay_name(context, auth_context->local_addr, 
+					  "_safe", &replay.client)) {
+    	    krb5_xfree(outbuf);
+	    goto error;
 	}
 
 	replay.server = "";		/* XXX */
-	replay.cusec = safemsg.usec;
-	replay.ctime = safemsg.timestamp;
-	if (retval = krb5_rc_store(context, rcache, &replay)) {
+	replay.cusec = replaydata.usec;
+	replay.ctime = replaydata.timestamp;
+	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
 	    /* should we really error out here? XXX */
-	    clean_scratch();
-	    krb5_xfree(replay.client);
-	    return retval;
+    	    krb5_xfree(outbuf);
+	    goto error;
 	}
 	krb5_xfree(replay.client);
     }
-    *outbuf = *scratch;
-    krb5_xfree(scratch);
 
     return 0;
+
+error:
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
+      (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) 
+	auth_context->local_seq_number--;
+
+    return retval;
 }
 

@@ -25,8 +25,10 @@
  */
 
 #define NEED_SOCKETS
+
 #include "k5-int.h"
 #include "com_err.h"
+#include "auth_con.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,28 +40,27 @@ extern krb5_flags	krb5_kdc_default_options;
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code INTERFACE
-krb5_sendauth(context,
+krb5_sendauth(context, auth_context,
 	      /* IN */
-	      fd, appl_version, client, server, ap_req_options, checksump,
+	      fd, appl_version, client, server, ap_req_options, in_data,
 	      in_creds,
 	      /* IN/OUT */
 	      ccache,
 	      /* OUT */
-	      sequence, newkey, error, rep_result, out_creds)
-    	krb5_context context;
-	krb5_pointer	fd;
-	char	*appl_version;
-	krb5_principal	client;
-	krb5_principal	server;
-	krb5_flags	ap_req_options;
-	krb5_int32	*sequence;
-	krb5_keyblock	**newkey;
-	krb5_checksum	*checksump;
-	krb5_creds	*in_creds;
-	krb5_ccache	ccache;
-	krb5_error	**error;
-	krb5_ap_rep_enc_part	**rep_result;
-	krb5_creds	**out_creds;
+	      error, rep_result, out_creds)
+    	krb5_context 		  context;
+    	krb5_auth_context      ** auth_context;
+	krb5_pointer		  fd;
+	char			* appl_version;
+	krb5_principal		  client;
+	krb5_principal		  server;
+	krb5_flags		  ap_req_options;
+	krb5_data		* in_data;
+	krb5_creds		* in_creds;
+	krb5_ccache	  	  ccache;
+	krb5_error             ** error;
+	krb5_ap_rep_enc_part   ** rep_result;
+	krb5_creds	       ** out_creds;
 {
 	krb5_flags		kdc_options = krb5_kdc_default_options;
 	krb5_octet		result;
@@ -67,7 +68,6 @@ krb5_sendauth(context,
 	krb5_creds * 		credsp = NULL;
 	krb5_creds * 		credspout = NULL;
 	krb5_error_code		retval = 0;
-	krb5_authenticator	authent;
 	krb5_data		inbuf, outbuf;
 	int			len;
 	krb5_ccache		use_ccache = 0;
@@ -90,14 +90,14 @@ krb5_sendauth(context,
 	 * Now, read back a byte: 0 means no error, 1 means bad sendauth
 	 * version, 2 means bad application version
 	 */
-	if ((len = krb5_net_read(context, *((int *) fd), (char *)&result, 1)) != 1)
-		return((len < 0) ? errno : ECONNABORTED);
-	if (result == 1)
-		return(KRB5_SENDAUTH_BADAUTHVERS);
-	else if (result == 2)
-		return(KRB5_SENDAUTH_BADAPPLVERS);
-	else if (result != 0)
-		return(KRB5_SENDAUTH_BADRESPONSE);
+    if ((len = krb5_net_read(context, *((int *) fd), (char *)&result, 1)) != 1)
+	return((len < 0) ? errno : ECONNABORTED);
+    if (result == 1)
+	return(KRB5_SENDAUTH_BADAUTHVERS);
+    else if (result == 2)
+	return(KRB5_SENDAUTH_BADAPPLVERS);
+    else if (result != 0)
+	return(KRB5_SENDAUTH_BADRESPONSE);
 	/*
 	 * We're finished with the initial negotiations; let's get and
 	 * send over the authentication header.  (The AP_REQ message)
@@ -108,7 +108,6 @@ krb5_sendauth(context,
 	 * credentials cache.
 	 */
 	memset((char *)&creds, 0, sizeof(creds));
-	memset((char *)&authent, 0, sizeof(authent));
 
 	/*
 	 * See if we need to access the credentials cache
@@ -148,21 +147,9 @@ krb5_sendauth(context,
 	    credsp = in_creds;
 	}
 
-	/*
-	 * Generate a random sequence number
-	 */
-	if (sequence &&
-	    (retval = krb5_generate_seq_number(context, &credsp->keyblock,
-					       sequence))) 
-	    goto error_return;
-
-	/*
-	 * OK, get the authentication header!
-	 */
-	if (retval = krb5_mk_req_extended(context, ap_req_options, checksump,
-					  sequence ? *sequence : 0, newkey,
-					  credsp, &authent, &outbuf))
-	    goto error_return;
+    if (retval = krb5_mk_req_extended(context, auth_context, ap_req_options,
+				      in_data, credsp, &outbuf))
+	goto error_return;
 
 	/*
 	 * First write the length of the AP_REQ message, then write
@@ -189,8 +176,8 @@ krb5_sendauth(context,
 			goto error_return;
 		    }
 		}
-		krb5_xfree(inbuf.data);
 		retval = KRB5_SENDAUTH_REJECTED;
+		krb5_xfree(inbuf.data);
 		goto error_return;
 	}
 	
@@ -204,16 +191,14 @@ krb5_sendauth(context,
 	    if (retval = krb5_read_message(context, fd, &inbuf))
 		goto error_return;
 
-	    retval = krb5_rd_rep(context, &inbuf, &credsp->keyblock, &repl);
-	    krb5_xfree(inbuf.data);
-	    if (retval || ((repl->ctime != authent.ctime) ||
-			   (repl->cusec != authent.cusec)))
-		retval = KRB5_SENDAUTH_MUTUAL_FAILED;
-	    if (retval) {
+	    if (retval = krb5_rd_rep(context, *auth_context, &inbuf, &repl)) {
 		if (repl)
 		    krb5_free_ap_rep_enc_part(context, repl);
+	        krb5_xfree(inbuf.data);
 		goto error_return;
 	    }
+
+	    krb5_xfree(inbuf.data);
 	    /*
 	     * If the user wants to look at the AP_REP message,
 	     * copy it for him
@@ -227,13 +212,13 @@ krb5_sendauth(context,
 	if (out_creds) {
 		*out_creds = credsp;
 	}
+
 error_return:
-	if (credspout)
-		krb5_free_creds(context, credspout); 
-	if (!ccache && use_ccache)
-		krb5_cc_close(context, use_ccache);
-	krb5_free_authenticator_contents(context, &authent);
-	return(retval);
+    if (credspout)
+	krb5_free_creds(context, credspout); 
+    if (!ccache && use_ccache)
+	krb5_cc_close(context, use_ccache);
+    return(retval);
 }
 
 

@@ -8,6 +8,7 @@ LDFLAGS = -g
 OBJS=	addr_comp.$(OBJEXT)	\
 	addr_order.$(OBJEXT)	\
 	addr_srch.$(OBJEXT)	\
+	auth_con.$(OBJEXT)	\
 	bld_pr_ext.$(OBJEXT)	\
 	bld_princ.$(OBJEXT)	\
 	chk_trans.$(OBJEXT)	\
@@ -73,6 +74,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_order.c	\
 	$(srcdir)/addr_srch.c	\
+	$(srcdir)/auth_con.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
 	$(srcdir)/chk_trans.c	\

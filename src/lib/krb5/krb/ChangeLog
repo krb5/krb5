@@ -1,3 +1,24 @@
+
+Fri Mar 10 10:58:59 1995  Chris Provenzano (proven@mit.edu)
+
+	* auth_con.h auth_con.c Added for krb5_auth_con definition and
+		support routines.
+
+	* mk_req.c (krb5_mk_req())
+	* mk_req_ext.c (krb5_mk_req_extended())
+	* rd_rep.c (krb5_rd_rep())
+	* sendauth.c (krb5_sendauth())
+	* mk_priv.c (krb5_mk_priv())
+	* mk_safe.c (krb5_mk_safe())
+	* rd_priv.c (krb5_rd_priv())
+	* rd_safe.c (krb5_rd_safe())
+		Added a krb5_auth_context argument and eliminated many of 
+		the other arguments because they are included in the
+		krb5_auth_context structure.
+
+	* send_tgs.c (krb5_send_tgs()) Eliminate call to krb5_mk_req_extended(),
+		which does far more than krb5_send_tgs() needs.
+
 Tue Mar  7 19:57:34 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_INCLUDE.
