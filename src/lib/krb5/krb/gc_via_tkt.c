@@ -111,7 +111,7 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
-krb5_enctype *enctypes = 0;
+    krb5_enctype *enctypes = 0;
 
     /* tkt->client must be equal to in_cred->client */
     if (!krb5_principal_compare(context, tkt->client, in_cred->client))
@@ -152,12 +152,15 @@ krb5_enctype *enctypes = 0;
 	enctypes[1] = 0;
     }
     
-    if ((retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
-				in_cred->server, address, in_cred->authdata,
-				0,		/* no padata */
-				(kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
-				&in_cred->second_ticket : NULL,
-				tkt, &tgsrep)))
+    retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, enctypes, 
+			   in_cred->server, address, in_cred->authdata,
+			   0,		/* no padata */
+			   (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
+			   &in_cred->second_ticket : NULL,
+			   tkt, &tgsrep);
+    if (enctypes)
+	free(enctypes);
+    if (retval)
 	return retval;
 
     switch (tgsrep.message_type) {

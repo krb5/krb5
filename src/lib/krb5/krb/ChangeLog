@@ -1,3 +1,8 @@
+Sat Feb 24 16:27:54 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gc_via_tkt.c (krb5_get_cred_via_tkt): Fix memory leak; free
+		enctypes after use.
+
 Thu Jan 25 01:35:52 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Remove outdated
