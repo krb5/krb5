@@ -15,8 +15,6 @@ static char rcsid_main_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
-
 #include <stdio.h>
 #include <syslog.h>
 #include <signal.h>
