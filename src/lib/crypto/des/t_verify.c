@@ -273,12 +273,12 @@ main(argc,argv)
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
     in_length =  strlen((char *)input);
-    if (retval = mit_des_cbc_encrypt((const mit_des_cblock *) input,
-				     (mit_des_cblock *) cipher_text,
-				     (size_t) in_length, 
-				     sched,
-				     ivec,
-				     MIT_DES_ENCRYPT)) {
+    if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) input,
+				      (mit_des_cblock *) cipher_text,
+				      (size_t) in_length, 
+				      sched,
+				      ivec,
+				      MIT_DES_ENCRYPT))) {
 	com_err("des verify", retval, "can't encrypt");
 	exit(-1);
     }
@@ -290,12 +290,12 @@ main(argc,argv)
 	}
 	printf("\n");
     }
-    if (retval = mit_des_cbc_encrypt((const mit_des_cblock *) cipher_text,
-				     (mit_des_cblock *) clear_text,
-				     (size_t) in_length, 
-				     sched,
-				     ivec,
-				     MIT_DES_DECRYPT)) {
+    if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) cipher_text,
+				      (mit_des_cblock *) clear_text,
+				      (size_t) in_length, 
+				      sched,
+				      ivec,
+				      MIT_DES_DECRYPT))) {
 	com_err("des verify", retval, "can't decrypt");
 	exit(-1);
     }

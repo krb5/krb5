@@ -1,3 +1,10 @@
+2001-06-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* destest.c: main returns int instead of void.  Add "const" to
+	casts in calls to mit_des_cbc_encrypt().
+
+	* t_verify.c (main): Add parenthesis aroud assignment in conditional. 
+
 2001-05-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* f_cbc.c (mit_des_cbc_encrypt): Do not use a variable named "encrypt".
