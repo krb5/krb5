@@ -19,10 +19,16 @@ static char rcsid_klist_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
+#include <krb5/isode_err.h>
+#include <krb5/ext-proto.h>
+
+#include <com_err.h>
 
 extern int optind;
 extern char *optarg;
 
+void
 main(argc, argv)
     int argc;
     char **argv;
@@ -34,7 +40,11 @@ main(argc, argv)
     int errflg=0;
     
     initialize_krb5_error_table();
-    
+    initialize_isod_error_table();
+
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
+
     while ((c = getopt(argc, argv, "c:")) != EOF) {
 	switch (c) {
 	case 'c':
