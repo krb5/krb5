@@ -1,3 +1,8 @@
+2002-01-14  Sam Hartman  <hartmans@mit.edu>
+
+	* t_prng.expected: Update to be correct for 0 MSW in v_i calculation.
+	
+
 2002-01-08  Sam Hartman  <hartmans@tir-na-nogth.mit.edu>
 
 	* prng.c (krb5_c_random_os_entropy):  Implement.
