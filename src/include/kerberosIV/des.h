@@ -27,6 +27,46 @@
 #ifndef DES_DEFS
 #define DES_DEFS
 
+#if defined(_WIN32) && !defined(_WINDOWS)
+#define _WINDOWS
+#endif
+
+#if defined(_WINDOWS)
+#ifndef KRB4
+#define KRB4 1
+#endif
+#include <win-mac.h>
+#endif
+
+/* Windows declarations */
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
+#define KRB5_EXPORTVAR
+#endif
+#ifndef FAR
+#define FAR
+#define NEAR
+#endif
+
+#ifndef __alpha
+#define KRB4_32	long
+#else
+#define KRB4_32	int
+#endif
+
+
+#ifndef PROTOTYPE
+#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+#endif
+
+
+
 typedef unsigned char des_cblock[8];	/* crypto-block size */
 /* Key schedule */
 typedef struct des_ks_struct { des_cblock _; } des_key_schedule[16];
@@ -55,4 +95,19 @@ typedef struct des_ks_struct bit_64;
 
 #define des_cblock_print(x) des_cblock_print_file(x, stdout)
 
+
+/*
+ * Function Prototypes
+ */
+
+KRB5_DLLIMP int KRB5_CALLCONV des_key_sched
+	PROTOTYPE((C_Block, Key_schedule));
+KRB5_DLLIMP int KRB5_CALLCONV des_pcbc_encrypt
+	PROTOTYPE((C_Block FAR *in, C_Block FAR *out, long length,
+		   Key_schedule, C_Block FAR *ivec, int encrypt));
+KRB5_DLLIMP unsigned long KRB5_CALLCONV des_quad_cksum
+	PROTOTYPE((C_Block FAR *seed, unsigned char FAR *in,
+		   unsigned KRB4_32 FAR *out, int out_count, long length));
+KRB5_DLLIMP int KRB5_CALLCONV des_string_to_key
+	PROTOTYPE((char FAR *, C_Block));
 #endif	/* DES_DEFS */
