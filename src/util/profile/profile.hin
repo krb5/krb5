@@ -49,6 +49,10 @@ long KRB5_CALLCONV profile_flush
 	(profile_t profile);
 long KRB5_CALLCONV profile_flush_to_file
 	(profile_t profile, const_profile_filespec_t outfile);
+long KRB5_CALLCONV profile_flush_to_buffer
+	(profile_t profile, char **bufp);
+void KRB5_CALLCONV profile_free_buffer
+	(profile_t profile, char *buf);
 
 void KRB5_CALLCONV profile_abandon
 	(profile_t profile);

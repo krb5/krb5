@@ -51,3 +51,5 @@ profile_update_relation
 profile_verify_node
 profile_write_tree_file
 profile_flush_to_file
+profile_flush_to_buffer
+profile_free_buffer

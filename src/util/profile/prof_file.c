@@ -452,6 +452,17 @@ errout:
 	return retval;
 }
 
+errcode_t profile_flush_file_data_to_buffer (prf_data_t data, char **bufp)
+{
+	errcode_t	retval;
+	retval = k5_mutex_lock(&data->lock);
+	if (retval)
+		return retval;
+	retval = profile_write_tree_to_buffer(data->root, bufp);
+	k5_mutex_unlock(&data->lock);
+	return retval;
+}
+
 errcode_t profile_flush_file_data(prf_data_t data)
 {
 	errcode_t	retval = 0;

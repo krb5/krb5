@@ -145,6 +145,18 @@ profile_flush_to_file(profile_t profile, const_profile_filespec_t outfile)
 	return 0;
 }
 
+errcode_t KRB5_CALLCONV
+profile_flush_to_buffer(profile_t profile, char **buf)
+{
+    return profile_flush_file_data_to_buffer(profile->first_file->data, buf);
+}
+
+void KRB5_CALLCONV
+profile_free_buffer(profile_t profile, char *buf)
+{
+    free(buf);
+}
+
 void KRB5_CALLCONV
 profile_abandon(profile_t profile)
 {

@@ -99,6 +99,9 @@ errcode_t profile_parse_file
 errcode_t profile_write_tree_file
 	(struct profile_node *root, FILE *dstfile);
 
+errcode_t profile_write_tree_to_buffer
+	(struct profile_node *root, char **buf);
+
 
 /* prof_tree.c */
 
@@ -192,6 +195,9 @@ errcode_t profile_flush_file_data
 #define profile_flush_file_to_file(P,F) (((P) && (P)->magic == PROF_MAGIC_FILE) ? profile_flush_file_data_to_file((P)->data, (F)) : PROF_MAGIC_FILE)
 errcode_t profile_flush_file_data_to_file
 	(prf_data_t data, const char *outfile);
+
+errcode_t profile_flush_file_data_to_buffer
+	(prf_data_t data, char **bufp);
 
 void profile_free_file
 	(prf_file_t profile);

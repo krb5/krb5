@@ -2011,6 +2011,54 @@ _wrap_profile_add_relation(ClientData clientData, Tcl_Interp *interp, int objc, 
 }
 
 
+static int
+_wrap_profile_flush_to_buffer(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+    profile_t arg1 = (profile_t) 0 ;
+    char **arg2 = (char **) 0 ;
+    errcode_t result;
+    char *tmp2 ;
+    
+    {
+        /* in char **OUTPUT */
+        tmp2 = NULL;
+        arg2 = &tmp2;
+    }
+    if (SWIG_GetArgs(interp, objc, objv,"o:profile_flush_to_buffer p ",0) == TCL_ERROR) SWIG_fail;
+    if ((SWIG_ConvertPtr(objv[1], (void **) &arg1, SWIGTYPE_profile_t,SWIG_POINTER_EXCEPTION | 0) != TCL_OK)) SWIG_fail;
+    result = (errcode_t)profile_flush_to_buffer(arg1,arg2);
+    
+    {
+        /* out errcode_t result */
+        if (result) {
+            /* There could be a memory leak here in the SWIG-Tcl layer,
+            	   I'm not sure.  Not going to worry about it though.  */
+            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            SWIG_fail;
+        }
+    }
+    {
+        /* argout char **OUTPUT */
+        /*    Tcl_SetResult(interp, *arg2, TCL_DYNAMIC); */
+        char *s = (arg2 && *arg2) ? *arg2 : "";
+        Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
+        Tcl_NewStringObj(s, strlen(s)));
+    }
+    {
+        /* There may be a memory leak here.  Investigate later, if anyone
+               cares.  */
+        /*    profile_release_string(*arg2); */
+    }
+    return TCL_OK;
+    fail:
+    {
+        /* There may be a memory leak here.  Investigate later, if anyone
+               cares.  */
+        /*    profile_release_string(*arg2); */
+    }
+    return TCL_ERROR;
+}
+
+
 
 static swig_command_info swig_commands[] = {
     { SWIG_prefix "profile_init_path", (swig_wrapper_func) _wrap_profile_init_path, NULL},
@@ -2032,6 +2080,7 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "profile_clear_relation", (swig_wrapper_func) _wrap_profile_clear_relation, NULL},
     { SWIG_prefix "profile_rename_section", (swig_wrapper_func) _wrap_profile_rename_section, NULL},
     { SWIG_prefix "profile_add_relation", (swig_wrapper_func) _wrap_profile_add_relation, NULL},
+    { SWIG_prefix "profile_flush_to_buffer", (swig_wrapper_func) _wrap_profile_flush_to_buffer, NULL},
     {0, 0, 0}
 };
 

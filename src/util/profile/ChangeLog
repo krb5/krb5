@@ -1,3 +1,27 @@
+2004-10-26  Ken Raeburn  <raeburn@mit.edu>
+
+	Permit exporting profile file data into a buffer.
+	* prof_file.c (profile_flush_file_data_to_buffer): New function.
+	* profi_init.c (profile_flush_to_buffer, profile_free_buffer): New
+	functions.
+	* prof_parse.c (output_quoted_string): Use a callback instead of
+	stdio calls.
+	(dump_profile): Renamed from dump_profile_to_file.  Use a callback
+	instead of stdio calls.
+	(dump_profile_to_file_cb): New function.
+	(profile_write_tree_file): Updated to new internal interface.
+	(struct prof_buf): New type.
+	(add_data_to_buffer, dump_profile_to_buffer_cb,
+	profile_write_tree_to_buffer): New functions.
+	* prof_int.h (profile_write_tree_to_buffer,
+	profile_flush_file_data_to_buffer): Declare.
+	* profile.hin (profile_flush_to_buffer, profile_free_buffer):
+	Declare.
+	* libprofile.exports: Export profile_flush_to_buffer and
+	profile_free_buffer.
+	* profile.swg (profile_flush_to_buffer): Declare.
+	* profile_tcl.c: Regenerated.
+
 2004-10-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_update_file_data): When resetting flags,

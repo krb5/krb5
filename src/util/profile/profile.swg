@@ -250,6 +250,8 @@ errcode_t profile_rename_section(profile_t p, const char **nullterm,
 				 const char *new_name = NULL);
 errcode_t profile_add_relation(profile_t p, const char **nullterm,
 			       const char *new_val = NULL);
+/* XXX Should be using profile_free_buffer blah.  */
+errcode_t profile_flush_to_buffer(profile_t p, char **OUTPUT);
 
 #ifdef SWIGTCL
 %include "tclsh.i"

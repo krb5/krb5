@@ -319,35 +319,42 @@ static int need_double_quotes(char *str)
  * Output a string with double quotes, doing appropriate backquoting
  * of characters as necessary.
  */
-static void output_quoted_string(char *str, FILE *f)
+static void output_quoted_string(char *str, void (*cb)(const char *,void *),
+				 void *data)
 {
 	char	ch;
-	
-	fputc('"', f);
+	char buf[2];
+
+	cb("\"", data);
 	if (!str) {
-		fputc('"', f);
+		cb("\"", data);
 		return;
 	}
+	buf[1] = 0;
 	while ((ch = *str++)) {
 		switch (ch) {
 		case '\\':
-			fputs("\\\\", f);
+			cb("\\\\", data);
 			break;
 		case '\n':
-			fputs("\\n", f);
+			cb("\\n", data);
 			break;
 		case '\t':
-			fputs("\\t", f);
+			cb("\\t", data);
 			break;
 		case '\b':
-			fputs("\\b", f);
+			cb("\\b", data);
 			break;
 		default:
-			fputc(ch, f);
+			/* This would be a lot faster if we scanned
+			   forward for the next "interesting"
+			   character.  */
+			buf[0] = ch;
+			cb(buf, data);
 			break;
 		}
 	}
-	fputc('"', f);
+	cb("\"", data);
 }
 
 
@@ -360,8 +367,9 @@ static void output_quoted_string(char *str, FILE *f)
 #define EOL "\n"
 #endif
 
-static void dump_profile_to_file(struct profile_node *root, int level,
-				 FILE *dstfile)
+/* Errors should be returned, not ignored!  */
+static void dump_profile(struct profile_node *root, int level,
+			 void (*cb)(const char *, void *), void *data)
 {
 	int i;
 	struct profile_node *p;
@@ -376,14 +384,18 @@ static void dump_profile_to_file(struct profile_node *root, int level,
 		if (retval)
 			break;
 		for (i=0; i < level; i++)
-			fprintf(dstfile, "\t");
+			cb("\t", data);
 		if (need_double_quotes(value)) {
-			fputs(name, dstfile);
-			fputs(" = ", dstfile);
-			output_quoted_string(value, dstfile);
-			fputs(EOL, dstfile);
-		} else
-			fprintf(dstfile, "%s = %s%s", name, value, EOL);
+			cb(name, data);
+			cb(" = ", data);
+			output_quoted_string(value, cb, data);
+			cb(EOL, data);
+		} else {
+			cb(name, data);
+			cb(" = ", data);
+			cb(value, data);
+			cb(EOL, data);
+		}
 	} while (iter != 0);
 
 	iter = 0;
@@ -393,27 +405,88 @@ static void dump_profile_to_file(struct profile_node *root, int level,
 		if (retval)
 			break;
 		if (level == 0)	{ /* [xxx] */
-			for (i=0; i < level; i++)
-				fprintf(dstfile, "\t");
-			fprintf(dstfile, "[%s]%s%s", name,
-				profile_is_node_final(p) ? "*" : "", EOL);
-			dump_profile_to_file(p, level+1, dstfile);
-			fprintf(dstfile, EOL);
+			cb("[", data);
+			cb(name, data);
+			cb("]", data);
+			cb(profile_is_node_final(p) ? "*" : "", data);
+			cb(EOL, data);
+			dump_profile(p, level+1, cb, data);
+			cb(EOL, data);
 		} else { 	/* xxx = { ... } */
 			for (i=0; i < level; i++)
-				fprintf(dstfile, "\t");
-			fprintf(dstfile, "%s = {%s", name, EOL);
-			dump_profile_to_file(p, level+1, dstfile);
+				cb("\t", data);
+			cb(name, data);
+			cb(" = {", data);
+			cb(EOL, data);
+			dump_profile(p, level+1, cb, data);
 			for (i=0; i < level; i++)
-				fprintf(dstfile, "\t");
-			fprintf(dstfile, "}%s%s",
-				profile_is_node_final(p) ? "*" : "", EOL);
+				cb("\t", data);
+			cb("}", data);
+			cb(profile_is_node_final(p) ? "*" : "", data);
+			cb(EOL, data);
 		}
 	} while (iter != 0);
 }
 
+static void dump_profile_to_file_cb(const char *str, void *data)
+{
+	fputs(str, data);
+}
+
 errcode_t profile_write_tree_file(struct profile_node *root, FILE *dstfile)
 {
-	dump_profile_to_file(root, 0, dstfile);
+	dump_profile(root, 0, dump_profile_to_file_cb, dstfile);
+	return 0;
+}
+
+struct prof_buf {
+	char *base;
+	size_t cur, max;
+	int err;
+};
+
+static void add_data_to_buffer(struct prof_buf *b, const void *d, size_t len)
+{
+	if (b->err)
+		return;
+	if (b->max - b->cur < len) {
+		size_t newsize;
+		char *newptr;
+
+		newsize = b->max + (b->max >> 1) + len + 1024;
+		newptr = realloc(b->base, newsize);
+		if (newptr == NULL) {
+			b->err = 1;
+			return;
+		}
+		b->base = newptr;
+		b->max = newsize;
+	}
+	memcpy(b->base + b->cur, d, len);
+	b->cur += len; 		/* ignore overflow */
+}
+
+static void dump_profile_to_buffer_cb(const char *str, void *data)
+{
+	add_data_to_buffer((struct prof_buf *)data, str, strlen(str));
+}
+
+errcode_t profile_write_tree_to_buffer(struct profile_node *root,
+				       char **buf)
+{
+	struct prof_buf prof_buf = { 0, 0, 0, 0 };
+
+	dump_profile(root, 0, dump_profile_to_buffer_cb, &prof_buf);
+	if (prof_buf.err) {
+		*buf = NULL;
+		return ENOMEM;
+	}
+	add_data_to_buffer(&prof_buf, "", 1); /* append nul */
+	if (prof_buf.max - prof_buf.cur > (prof_buf.max >> 3)) {
+		char *newptr = realloc(prof_buf.base, prof_buf.cur);
+		if (newptr)
+			prof_buf.base = newptr;
+	}
+	*buf = prof_buf.base;
 	return 0;
 }
