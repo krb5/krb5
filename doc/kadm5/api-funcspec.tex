@@ -1333,7 +1333,13 @@ privileges listed in the second field the ACL entry.
 The Admin server will log various events via the syslog mechanism (see
 the syslog(3) manual page).  The level depends on the notice, the
 facility is LOG_LOCAL6, and notices are identified with the name
-``ovsec_adm_server''.
+``ovsec_adm_server''.  Each syslog message described below begins with
+a prefix including the time the message was logged, the host name of
+the logging machine, and the pid of the logging process:
+
+\begin{verbatim}
+Nov 11 12:37:26 suan-la-chow-show ovsec_adm_server[9229]: <message>
+\end{verbatim}
 
 \subsubsection{Miscellaneous Messages}
 
@@ -1366,14 +1372,14 @@ GSS-API context establishment).  This error occurs inside the RPC; the
 admin server is notified via a callback.
 
 \begin{verbatim}
-Authentication Failed: <IP address>, <GSS-API error strings>
+Authentication attempt failed: <IP address>, <GSS-API error strings>
 \end{verbatim}
 
 Example:  A buggy client attempts to authenticate to the admin server
 as the existing but invalid service name ``mailserver@REALM.COM'':
 
 \begin{verbatim}
-Authentication Failed: 192.231.148.11, Miscellaneous error, Wrong
+Authentication attempt failed: 192.231.148.11, Miscellaneous error, Wrong
 principal in request
 \end{verbatim}
 
@@ -1384,7 +1390,7 @@ decoded by the admin server.  It can be the result of a a garbled
 attack, or a header/argument splicing attack.
 
 \begin{verbatim}
-Authentication failure: <procedure name>, claimed client = <client
+WARNING! Forged/garbled request: <procedure name>, claimed client = <client
 name>, service = <service name>, addr = <IP address>
 \end{verbatim}
 
@@ -1392,7 +1398,7 @@ Example: An attacker attempts to replay a previously valid ``create
 principal'' message from jon/admin@REALM.COM:
 
 \begin{verbatim}
-Authentication failure: ovsec_kadm_create_principal, claimed client =
+WARNING! Forged/garbled request: ovsec_kadm_create_principal, claimed client =
 jon/admin@REALM.COM, service = admin@REALM.COM, addr = 192.231.148.12
 \end{verbatim}
 
