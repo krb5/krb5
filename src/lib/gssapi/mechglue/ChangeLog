@@ -1,3 +1,11 @@
+Sun Feb 25 15:39:08 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* g_acquire_cred.c, g_delete_sec_context.c, g_dsp_name.c,
+	g_dsp_status.c, g_exp_sec_context.c, g_glue.c, g_imp_name.c,
+	g_imp_sec_context.c, g_indicate_mechs.c, g_init_sec_context.c,
+	g_inq_cred.c, g_rel_buffer.c, g_rel_cred.c, g_rel_name.c,
+	g_rel_oid_set.c: include stdio.h to actually get NULL.
+
 Sat Feb 24 16:19:30 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in, g_inquire_cred.c, g_inquire_names.c,
