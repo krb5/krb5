@@ -1,3 +1,7 @@
+Fri Apr 28 11:17:16 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: switch to WITH_KRB4 since it suffices in this case.
+
 Thu Apr 27 17:08:16 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use AC_CONST since we need it for v4.
