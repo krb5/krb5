@@ -1,3 +1,8 @@
+Fri Mar 24 23:49:22 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sclient.c (main): Initialize auth_context to NULL before calling
+	        sendauth().
+
 Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
 
         * sclient.c Use new calling convention for krb5_sendauth().
