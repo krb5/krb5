@@ -1,3 +1,9 @@
+2000-05-16  Tom Yu  <tlyu@mit.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Make a copy of the krb5
+	realm that is nul-terminated to avoid falling off the end of the
+	krb5 realm, which is not necessarily nul-terminated.
+
 2000-05-16  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kfree.c (krb5_free_keyblock_contents): Set contents pointer to

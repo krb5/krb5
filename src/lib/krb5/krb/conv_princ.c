@@ -137,8 +137,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 {
      const struct krb_convert *p;
      krb5_data *compo;
-     char *c,*tmp_realm;
-     int tmp_realm_len,retval; 
+     char *c, *tmp_realm, *tmp_prealm;
+     int tmp_realm_len, retval; 
 
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {
@@ -189,14 +189,21 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 
      compo = krb5_princ_realm(context, princ);
 
+     tmp_prealm = malloc(compo->length + 1);
+     if (tmp_prealm == NULL)
+	 return ENOMEM;
+     strncpy(tmp_prealm, compo->data, compo->length);
+     tmp_prealm[compo->length] = '\0';
+
      /* Ask for v4_realm corresponding to 
 	krb5 principal realm from krb5.conf realms stanza */
 
      if (context->profile == 0)
        return KRB5_CONFIG_CANTOPEN;
      retval = profile_get_string(context->profile, "realms",
-				 compo->data, "v4_realm", 0,
+				 tmp_prealm, "v4_realm", 0,
 				 &tmp_realm);
+     free(tmp_prealm);
      if (retval) { 
 	 return retval;
      } else {
