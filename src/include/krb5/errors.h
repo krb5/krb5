@@ -36,6 +36,7 @@
 #define	KDC_ERR_NEVER_VALID		11 /* Requested starttime > endtime */
 #define	KDC_ERR_POLICY			12 /* KDC policy rejects request */
 #define	KDC_ERR_BADOPTION		13 /* KDC can't do requested opt. */
+#define	KDC_ERR_ETYPE_NOSUPP		14 /* No support for encryption type */
 
 /* Application errors */
 #define	KRB_AP_ERR_BAD_INTEGRITY 31	/* Decrypt integrity check failed */
@@ -52,8 +53,7 @@
 #define	KRB_AP_ERR_BADORDER	42	/* Message out of order */
 #define	KRB_AP_ERR_BADKEYVER	44	/* Key version is not available */
 #define	KRB_AP_ERR_NOKEY	45	/* Service key not available */
-#define	KRB_AP_ERR_ETYPE_NOSUPP	46	/* No support for encryption type */
-#define	KRB_AP_ERR_MUT_FAIL	47	/* Mutual authentication failed */
+#define	KRB_AP_ERR_MUT_FAIL	46	/* Mutual authentication failed */
 
 /* other errors */
 #define	KRB_ERR_FIELD_TOOLONG	50	/* Field is too long for impl. */
