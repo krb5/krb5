@@ -378,7 +378,12 @@ typedef struct msg_dat MSG_DAT;
 #define	KOPT_DO_OLDSTYLE 0x00000008 /* use the old-style protocol */
 #endif /* ATHENA_COMPAT */
 
-#ifdef unix
+
+#ifdef _WINDOWS
+#define	TIME_GMT_UNIXSEC	win_time_gmt_unixsec((unsigned KRB4_32 *)0)
+#define	TIME_GMT_UNIXSEC_US(us)	win_time_gmt_unixsec((us))
+#define	CONVERT_TIME_EPOCH	win_time_get_epoch()
+#else
 /* until we do V4 compat under DOS, just turn this off */
 #define	_fmemcpy	memcpy
 #define	_fstrncpy	strncpy
@@ -387,13 +392,8 @@ typedef struct msg_dat MSG_DAT;
 #define	TIME_GMT_UNIXSEC	unix_time_gmt_unixsec((unsigned KRB4_32 *)0)
 #define	TIME_GMT_UNIXSEC_US(us)	unix_time_gmt_unixsec((us))
 #define	CONVERT_TIME_EPOCH	((long)0)	/* Unix epoch is Krb epoch */
-#endif
+#endif /*_WINDOWS*/
 
-#ifdef _WINDOWS
-#define	TIME_GMT_UNIXSEC	win_time_gmt_unixsec((unsigned KRB4_32 *)0)
-#define	TIME_GMT_UNIXSEC_US(us)	win_time_gmt_unixsec((us))
-#define	CONVERT_TIME_EPOCH	win_time_get_epoch()
-#endif
 
 /* Define u_char, u_short, u_int, and u_long. */
 #include <sys/types.h>

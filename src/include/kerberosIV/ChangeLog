@@ -1,3 +1,8 @@
+Sat Feb 22 00:49:37 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb.h: Do not depend on unix being defined on Unix systems;
+        treat as the default case except when _WINDOWS defined
+
 Thu Feb 20 17:38:23 1997  Richard Basch  <basch@lehman.com>
 
 	* configure.in: awk is required by the Makefile
