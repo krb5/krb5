@@ -43,6 +43,7 @@ lint:		l-libcompat
 ################################################################
 # libcompat
 ################################################################
+LIBOBJS = @LIBOBJS@
 
 CFILES	=	general.c logger.c select.c signals.c \
 		asprintf.c explode.c implode.c isofiles.c isohost.c sel2str.c \
@@ -64,7 +65,7 @@ OFILES =	general.o logger.o select.o signals.o \
 			tailor.o \
 		baduser.o chkpassword.o getpassword.o putenv.o \
 		chrcnv.o cmd_srch.o lexequ.o lexnequ.o log_tai.o nochrcnv.o \
-			rcmd_srch.o smalloc.o sstr2arg.o strdup.o \
+			rcmd_srch.o smalloc.o sstr2arg.o $(LIBOBJS) \
 		isoservent.o servbyname.o servbyport.o servbysel.o \
 		isoaddrs.o str2saddr.o str2taddr.o saddr2str.o taddr2str.o \
 			na2norm.o norm2na.o na2str.o pa2str.o \
@@ -145,7 +146,6 @@ nochrcnv.o:	$(HFILES)
 rcmd_srch.o:	$(HFILES) $(HDIR)cmd_srch.h
 smalloc.o:	$(HFILES) $(HDIR)tailor.h
 sstr2arg.o:	$(HFILES)
-strdup.o:	$(HFILES)
 isoservent.o:	$(HFILES) $(HDIR)isoservent.h $(HDIR)tailor.h $(HDIR)logger.h
 servbyname.o:	$(HFILES) $(HDIR)isoservent.h $(HDIR)tailor.h $(HDIR)logger.h
 servbyport.o:	$(HFILES) $(HDIR)isoservent.h $(HDIR)tailor.h $(HDIR)logger.h
