@@ -15,6 +15,9 @@ typedef struct _profile_t *profile_t;
 extern long profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
+extern long profile_init_path
+	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
+
 extern void profile_release
 	PROTOTYPE ((profile_t profile));
 

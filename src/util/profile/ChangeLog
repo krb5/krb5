@@ -1,3 +1,7 @@
+Fri Jan  5 09:04:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* profile.hin: Add profile_init_path prototype
+
 Thu Dec 21 18:20:46 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Check for the stat call, since profile_update_file
