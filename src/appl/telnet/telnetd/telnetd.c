@@ -1027,7 +1027,7 @@ pty_init();
 	setenv("TERM", *terminaltype ? terminaltype : "network", 1);
 
 #if defined (AUTHENTICATION)
-	if (user_name[0] == '\0') {
+	if (level < 0 && auth_level > 0) {
 		fatal (net, "No authentication provided");
 		exit (-1);
 	}
