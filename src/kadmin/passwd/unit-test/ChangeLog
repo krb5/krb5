@@ -1,3 +1,9 @@
+2000-02-23  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.0/changing.exp: Add a sleep to avoid a race with the
+	setup script.  If this isn't here, it is possible that the initial
+	change of pol2's password may happen too soon.
+
 2000-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* lib/helpers.exp: Fix to call kinit and kdestroy with the -5 flag

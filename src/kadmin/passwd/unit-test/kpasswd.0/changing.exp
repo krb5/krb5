@@ -89,6 +89,9 @@ test_win {pol1} {successful change} pol1 polAAAAAA polBBBBBB
 test_win {pol1} {successful change} pol1 polBBBBBB polCCCCCC
 test_win {pol1} {successful change} pol1 polCCCCCC pol111111
 
+verbose "(sleeping 30 seconds)"
+catch "exec sleep 30"
+
 test_win {pol2} {successful change} pol2 pol222222 polbbbbbb
 
 test_3pass {pol2} {D.15: too soon to change password} pol2 \
