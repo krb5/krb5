@@ -68,14 +68,14 @@ krb5_recvauth(/* IN */
 	krb5_ticket	**ticket;
 	krb5_authenticator	**authent;
 {
-	krb5_error_code	retval, problem;
-	krb5_data	inbuf;
+	krb5_error_code		retval, problem;
+	krb5_data		inbuf;
 	krb5_tkt_authent	*authdat;
 	krb5_data		outbuf;
-	krb5_rcache rcache;
+	krb5_rcache 		rcache;
 	krb5_octet		response;
-	krb5_data	*server_name;
-	char *cachename;
+	krb5_data		*server_name, null_server;
+	char			*cachename;
 	extern krb5_deltat krb5_clockskew;
 	static char		*rc_base = "rc_";
 	
@@ -154,14 +154,21 @@ krb5_recvauth(/* IN */
 		problem = krb5_rc_resolve_type(&rcache,
 					       rc_type ? rc_type : "dfl");
 	cachename = NULL;
-	server_name = krb5_princ_component(server, 0);
+	if (server) {
+	    server_name = krb5_princ_component(server, 0);
+	} else {
+	    null_server.data = "default";
+	    null_server.length = 7;
+	    server_name = &null_server;
+	}
+	
 	if (!problem && !(cachename = malloc(server_name->length+1+strlen(rc_base))))
-		problem = ENOMEM;
+	    problem = ENOMEM;
 	if (!problem) {
-		strcpy(cachename, rc_base ? rc_base : "rc_");
-		strncat(cachename, server_name->data, server_name->length);
-		cachename[server_name->length+strlen(rc_base)] = '\0';
-		problem = krb5_rc_resolve(rcache, cachename);
+	    strcpy(cachename, rc_base ? rc_base : "rc_");
+	    strncat(cachename, server_name->data, server_name->length);
+	    cachename[server_name->length+strlen(rc_base)] = '\0';
+	    problem = krb5_rc_resolve(rcache, cachename);
 	}
 	if (!problem) {
 		if (krb5_rc_recover(rcache))
