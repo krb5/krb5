@@ -15,7 +15,8 @@
  * des_pcbc_encrypt.c - encrypt a string of characters in error propagation mode
  */
 
-#include "des425.h"
+#include "des_int.h"
+#include "des.h"
 #include <f_tables.h>
 
 /*
@@ -44,8 +45,13 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	 * Deal with encryption and decryption separately.
 	 */
 	if (encrypt) {
-		register unsigned DES_INT32 plainl;
-		register unsigned DES_INT32 plainr;
+		/* Initialization isn't really needed here, but gcc
+		   complains because it doesn't understand that the
+		   only case where these can be used uninitialized is
+		   to compute values that'll in turn be ignored
+		   because we won't go around the loop again.  */
+		register unsigned DES_INT32 plainl = 42;
+		register unsigned DES_INT32 plainr = 17;
 
 		/*
 		 * Initialize left and right with the contents of the initial

@@ -1,5 +1,8 @@
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* pcbc_encrypt.c (des_pcbc_encrypt): Initialize plainl and plainr
+	to keep compiler happy.
+
 	* des.h: Deleted to avoid confusion with the other des.h in the
 	tree.  All files changed to include des_int.h and
 	(the other) des.h instead.
