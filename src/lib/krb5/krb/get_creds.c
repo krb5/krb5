@@ -72,5 +72,8 @@ krb5_creds *creds;
 	}
 	krb5_free_tgt_creds(tgts);
     }
+    if (!retval)
+	retval = krb5_cc_store_cred(ccache, creds);
     return retval;
+
 }
