@@ -1746,7 +1746,7 @@ telrcv()
 {
     register int c;
     register int scc;
-    register unsigned char *sbp;
+    register unsigned char *sbp = NULL;
     int count;
     int returnValue = 0;
 
