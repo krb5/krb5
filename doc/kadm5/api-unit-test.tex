@@ -602,6 +602,14 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 \Status{Implemented}
 }
 
+\numtest{154}{
+\Version{KADM5_API_VERSION_2}
+\Reason{If the KRB5_KDC_PROFILE environment variable is set to a filename
+that does not exist, init fails with ENOENT.}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
 \section{ovsec_kadm_destroy}
 
 \numtest{1}{
