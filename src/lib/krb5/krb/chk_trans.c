@@ -28,84 +28,84 @@
 krb5_error_code
 krb5_check_transited_list(context, trans, realm1, realm2)
     krb5_context context;
-krb5_data      *trans;
-krb5_data      *realm1;
-krb5_data      *realm2;
+    krb5_data      *trans;
+    krb5_data      *realm1;
+    krb5_data      *realm2;
 {
-  char            prev[MAX_REALM_LN+1];
-  char            next[MAX_REALM_LN+1];
-  char            *nextp;
-  int             i, j;
-  int             trans_length;
-  krb5_error_code retval = 0;
-  krb5_principal  *tgs_list;
+    char            prev[MAX_REALM_LN+1];
+    char            next[MAX_REALM_LN+1];
+    char            *nextp;
+    int             i, j;
+    int             trans_length;
+    krb5_error_code retval = 0;
+    krb5_principal  *tgs_list;
 
-  if (trans == NULL || trans->data == NULL || trans->length == 0)
-    return(0);
-  trans_length = trans->data[trans->length-1] ?
-    trans->length : trans->length - 1;
+    if (trans == NULL || trans->data == NULL || trans->length == 0)
+	return(0);
+    trans_length = trans->data[trans->length-1] ?
+	trans->length : trans->length - 1;
 
-  for (i = 0; i < trans_length; i++)
-    if (trans->data[i] == '\0') {
-      /* Realms may not contain ASCII NUL character. */
-      return(KRB5KRB_AP_ERR_ILL_CR_TKT);
+    for (i = 0; i < trans_length; i++)
+	if (trans->data[i] == '\0') {
+	    /* Realms may not contain ASCII NUL character. */
+	    return(KRB5KRB_AP_ERR_ILL_CR_TKT);
+	}
+
+    if ((retval = krb5_walk_realm_tree(context, realm1, realm2, &tgs_list,
+				       KRB5_REALM_BRANCH_CHAR))) {
+	return(retval);
     }
 
-  if ((retval = krb5_walk_realm_tree(context, realm1, realm2, &tgs_list,
-                                    KRB5_REALM_BRANCH_CHAR))) {
-    return(retval);
-  }
-
-  memset(prev, 0, sizeof(prev));
-  memset(next, 0, sizeof(next)), nextp = next;
-  for (i = 0; i < trans_length; i++) {
-    if (i < trans_length-1 && trans->data[i] == '\\') {
-      i++;
-      *nextp++ = trans->data[i];
-      if (nextp - next >= sizeof(next)) {
-	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
-	goto finish;
-      }
-      continue;
+    memset(prev, 0, sizeof(prev));
+    memset(next, 0, sizeof(next)), nextp = next;
+    for (i = 0; i < trans_length; i++) {
+	if (i < trans_length-1 && trans->data[i] == '\\') {
+	    i++;
+	    *nextp++ = trans->data[i];
+	    if (nextp - next >= sizeof(next)) {
+		retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+		goto finish;
+	    }
+	    continue;
+	}
+	if (i < trans_length && trans->data[i] != ',') {
+	    *nextp++ = trans->data[i];
+	    if (nextp - next >= sizeof(next)) {
+		retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+		goto finish;
+	    }
+	    continue;
+	}
+	next[sizeof(next) - 1] = '\0';
+	if (strlen(next) > 0) {
+	    if (next[0] != '/') {
+		if (*(nextp-1) == '.' && strlen(next) + strlen(prev) <= MAX_REALM_LN)
+		    strncat(next, prev, sizeof(next) - 1 - strlen(next));
+		retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+		for (j = 0; tgs_list[j]; j++) {
+		    if (strlen(next) == (size_t) krb5_princ_realm(context, tgs_list[j])->length &&
+			!memcmp(next, krb5_princ_realm(context, tgs_list[j])->data,
+				strlen(next))) {
+			retval = 0;
+			break; 
+		    }
+		}
+		if (retval)  goto finish;
+	    }
+	    if (i+1 < trans_length && trans->data[i+1] == ' ') {
+		i++;
+		memset(next, 0, sizeof(next)), nextp = next;
+		continue;
+	    }
+	    if (i+1 < trans_length && trans->data[i+1] != '/') {
+		strncpy(prev, next, sizeof(prev) - 1);
+		memset(next, 0, sizeof(next)), nextp = next;
+		continue;
+	    }
+	}
     }
-    if (i < trans_length && trans->data[i] != ',') {
-      *nextp++ = trans->data[i];
-      if (nextp - next >= sizeof(next)) {
-	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
-	goto finish;
-      }
-      continue;
-    }
-    next[sizeof(next) - 1] = '\0';
-    if (strlen(next) > 0) {
-      if (next[0] != '/') {
-        if (*(nextp-1) == '.' && strlen(next) + strlen(prev) <= MAX_REALM_LN)
-	  strncat(next, prev, sizeof(next) - 1 - strlen(next));
-        retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
-        for (j = 0; tgs_list[j]; j++) {
-          if (strlen(next) == (size_t) krb5_princ_realm(context, tgs_list[j])->length &&
-              !memcmp(next, krb5_princ_realm(context, tgs_list[j])->data,
-                      strlen(next))) {
-            retval = 0;
-            break; 
-          }
-        }
-        if (retval)  goto finish;
-      }
-      if (i+1 < trans_length && trans->data[i+1] == ' ') {
-        i++;
-        memset(next, 0, sizeof(next)), nextp = next;
-        continue;
-      }
-      if (i+1 < trans_length && trans->data[i+1] != '/') {
-        strncpy(prev, next, sizeof(prev) - 1);
-        memset(next, 0, sizeof(next)), nextp = next;
-        continue;
-      }
-    }
-  }
 
 finish:
-  krb5_free_realm_tree(context, tgs_list);
-  return(retval);
+    krb5_free_realm_tree(context, tgs_list);
+    return(retval);
 }
