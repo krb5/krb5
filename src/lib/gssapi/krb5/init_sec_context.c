@@ -480,7 +480,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    krb5_context context;
    krb5_gss_cred_id_t cred;
    krb5_creds *k_cred = 0;
-   krb5_enctype enctype = 0;
+   krb5_enctype enctype = ENCTYPE_DES_CBC_CRC;
    krb5_error_code code; 
    krb5_gss_ctx_id_rec *ctx, *ctx_free;
    krb5_timestamp now;
