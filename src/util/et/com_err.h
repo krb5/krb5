@@ -25,19 +25,19 @@
 
 #ifdef __STDC__
 /* ANSI C -- use prototypes etc */
-void com_err (const char *, long, const char *, ...);
-char const *error_message (long);
-void (*com_err_hook) (const char *, long, const char *, va_list);
-void (*set_com_err_hook (void (*) (const char *, long, const char *, va_list)))
+extern void com_err (const char *, long, const char *, ...);
+extern char const *error_message (long);
+extern void (*com_err_hook) (const char *, long, const char *, va_list);
+extern void (*set_com_err_hook (void (*) (const char *, long, const char *, va_list)))
     (const char *, long, const char *, va_list);
-void (*reset_com_err_hook ()) (const char *, long, const char *, va_list);
+extern void (*reset_com_err_hook ()) (const char *, long, const char *, va_list);
 #else
 /* no prototypes */
-void com_err ();
-char *error_message ();
-void (*com_err_hook) ();
-void (*set_com_err_hook ()) ();
-void (*reset_com_err_hook ()) ();
+extern void com_err ();
+extern char *error_message ();
+extern void (*com_err_hook) ();
+extern void (*set_com_err_hook ()) ();
+extern void (*reset_com_err_hook ()) ();
 #endif
 
 #define __COM_ERR_H

@@ -1,3 +1,9 @@
+Fri Feb  3 08:11:26 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* com_err.h: All routines defined in the com_err library should
+		have extern before the prototypes.   (Required for SGI
+		platform).
+
 Wed Jan 25 20:48:50 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
 	* Makefile.in (SRCS): add com_err.c explicit dependency to work
