@@ -1,3 +1,7 @@
+Sat Feb 10 18:38:43 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* g_glue.c: grab stdlib.h to get NULL
+
 Wed Feb  7 14:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* g_initialize.c: Need to include stdio.h, errno.h all the time.

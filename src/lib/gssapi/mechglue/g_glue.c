@@ -24,6 +24,9 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 extern gss_mechanism *__gss_mechs_array;
 
 /*
