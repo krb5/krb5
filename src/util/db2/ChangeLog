@@ -1,3 +1,7 @@
+2001-07-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* hash/hash_log2.c: Include hash.h, page.h and extern.h for prototype.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* test/dbtest.c: Cast argument to isspace() to int. Do not shadow
