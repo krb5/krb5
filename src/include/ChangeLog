@@ -1,3 +1,12 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-util.h: Add prototypes for krb5_compat_recvauth_version() and
+	krb5_compat_recvauth().
+
+	* krb5.hin: Move krb5_read_message() and krb5_write_message()
+	prototypes here.
+	k5-int.h: From here.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Get rid of extraneous krb5_const before integer

@@ -538,9 +538,6 @@ krb5_error_code krb5_create_secure_file (krb5_context, const char * pathname);
 krb5_error_code krb5_sync_disk_file (krb5_context, FILE *fp);
 
 
-krb5_error_code krb5_read_message (krb5_context, krb5_pointer, krb5_data *);
-krb5_error_code krb5_write_message (krb5_context, krb5_pointer, krb5_data *);
-
 krb5_error_code krb5_os_init_context (krb5_context);
 
 void krb5_os_free_context (krb5_context);

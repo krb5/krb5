@@ -47,3 +47,23 @@
 int krb5_seteuid(int);
 int krb5_setedid(int);
 int krb5_setegid(int);
+
+#if defined(KRB_DEFS) && defined(SOCK_DGRAM)
+krb5_error_code krb5_compat_recvauth(krb5_context, krb5_auth_context *,
+				     krb5_pointer, char *, krb5_principal, 
+				     krb5_int32, krb5_keytab,
+				     krb5_int32, char *, char *,
+				     struct sockaddr_in *, 
+				     struct sockaddr_in *, char *,
+				     krb5_ticket **, krb5_int32 *, 
+				     AUTH_DAT **, Key_schedule, char *);
+
+krb5_error_code
+krb5_compat_recvauth_version(krb5_context, krb5_auth_context *,
+			     krb5_pointer, krb5_principal, krb5_int32, 
+			     krb5_keytab, krb5_int32, char *, char *,
+			     struct sockaddr_in *, struct sockaddr_in *,
+			     char *, krb5_ticket **, krb5_int32*, 
+			     AUTH_DAT **,  Key_schedule, krb5_data *);
+
+#endif
