@@ -31,7 +31,7 @@ krb5_error_code krb5_fcc_destroy(id)
      struct stat buf;
      unsigned long size;
      char zeros[BUFSIZ];
-     int ret;
+     int ret, i;
      
 #ifdef OPENCLOSE
      ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
@@ -60,4 +60,6 @@ krb5_error_code krb5_fcc_destroy(id)
 #ifdef OPENCLOSE
      close(((krb5_fcc_data *) id->data)->fd);
 #endif
+
+     return KRB5_OK;
 }

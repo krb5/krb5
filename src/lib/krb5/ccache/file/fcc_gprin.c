@@ -35,6 +35,7 @@ krb5_fcc_get_principal(id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
+     krb5_error_code kret;
 #ifdef OPENCLOSE
      ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)->
 					     filename, O_RDONLY, 0);
@@ -44,7 +45,13 @@ krb5_fcc_get_principal(id, princ)
      lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 #endif
 
-     return (krb5_fcc_read_principal(princ));
+     kret = krb5_fcc_read_principal(id, princ);
+
+#ifdef OPENCLOSE
+     close(((krb5_fcc_data *) id->data)->fd);
+#endif
+
+     return kret;
 }
 
      
