@@ -65,7 +65,6 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     realm_kdc_names[3] = 0;
 
     code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
-    krb5_xfree(host);
 
     if (code == PROF_NO_SECTION)
 	return KRB5_REALM_UNKNOWN;
@@ -98,6 +97,8 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 #endif
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
+    if (addr_p == NULL)
+	return ENOMEM;
 
     for (i=0, out=0; hostlist[i]; i++) {
 	host = hostlist[i];

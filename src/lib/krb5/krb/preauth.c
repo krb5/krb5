@@ -470,10 +470,14 @@ char *handle_sam_labels(sc)
     p = prompt1 = malloc(label_len + strlen(sep1) +
 			 challenge_len + strlen(sep2) +
 			 prompt_len+ strlen(sep3) + 1);
-    strncpy(p, label, label_len); p += label_len;
-    strcpy(p, sep1); p += strlen(sep1);
-    strncpy(p, challenge, challenge_len); p += challenge_len;
-    strcpy(p, sep2); p += strlen(sep2);
+    if (p == NULL)
+	return NULL;
+    if (challenge_len) {
+	strncpy(p, label, label_len); p += label_len;
+	strcpy(p, sep1); p += strlen(sep1);
+	strncpy(p, challenge, challenge_len); p += challenge_len;
+	strcpy(p, sep2); p += strlen(sep2);
+    }
     strncpy(p, prompt, prompt_len); p += prompt_len;
     strcpy(p, sep3); /* p += strlen(sep3); */
     return prompt1;
@@ -518,11 +522,25 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
     }
 
     enc_sam_response_enc.sam_nonce = sam_challenge->sam_nonce;
+    if (!sam_challenge->sam_nonce) {
+      retval = krb5_us_timeofday(context,
+                                 &enc_sam_response_enc.sam_timestamp,
+                                 &enc_sam_response_enc.sam_usec);
+      sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
+    }
+    if (retval)
+      return retval;
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
       /* encrypt passcode in key by stuffing it here */
       int pcsize = 256;
       char *passcode = malloc(pcsize+1);
+      if (passcode == NULL)
+	return ENOMEM;
       prompt = handle_sam_labels(sam_challenge);
+      if (prompt == NULL) {
+	free(passcode);
+	return ENOMEM;
+      }
       retval = krb5_read_password(context, prompt, 0, passcode, &pcsize);
       free(prompt);
 
@@ -533,17 +551,9 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
       enc_sam_response_enc.sam_passcode.data = passcode;
       enc_sam_response_enc.sam_passcode.length = pcsize;
     } else if (sam_challenge->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
-      if (sam_challenge->sam_nonce) {
-	/* use nonce in the next AS request? */
-      } else {
-	retval = krb5_us_timeofday(context, 
-				   &enc_sam_response_enc.sam_timestamp,
-				   &enc_sam_response_enc.sam_usec);
-	sam_response.sam_patimestamp = enc_sam_response_enc.sam_timestamp;
-      }
-      if (retval)
-	return retval;      
       prompt = handle_sam_labels(sam_challenge);
+      if (prompt == NULL)
+	return ENOMEM;
       retval = sam_get_pass_from_user(context, etype_info, key_proc, 
 				      key_seed, request, &sam_use_key,
 				      prompt);

@@ -77,8 +77,8 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 	goto errout;
     
     if ((retval = krb5_build_principal_ext(context, &creds.server,
-					   server->realm.length,
-					   server->realm.data,
+					   client->realm.length,
+					   client->realm.data,
 					   KRB5_TGS_NAME_SIZE,
 					   KRB5_TGS_NAME,
 					   client->realm.length,
@@ -93,8 +93,7 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
     }
 
     /* fetch tgt directly from cache */
-    retval = krb5_cc_retrieve_cred (context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
-				    &creds, &tgt);
+    retval = krb5_cc_retrieve_cred (context, cc, 0, &creds, &tgt);
     if (retval)
 	goto errout;
 

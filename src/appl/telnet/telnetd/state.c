@@ -1140,7 +1140,7 @@ suboption()
     }  /* end of case TELOPT_TSPEED */
 
     case TELOPT_TTYPE: {		/* Yaaaay! */
-	static char terminalname[41];
+	char *tt;
 
 	if (his_state_is_wont(TELOPT_TTYPE))	/* Ignore if option disabled */
 		break;
@@ -1151,20 +1151,18 @@ suboption()
 	    return;		/* ??? XXX but, this is the most robust */
 	}
 
-	terminaltype = terminalname;
+	tt = terminaltype;
 
-	while ((terminaltype < (terminalname + sizeof terminalname-1)) &&
-								    !SB_EOF()) {
+	while ((tt < (terminaltype + sizeof(terminaltype) - 1)) && !SB_EOF()) {
 	    register int c;
 
 	    c = SB_GET();
 	    if (isupper(c)) {
 		c = tolower(c);
 	    }
-	    *terminaltype++ = c;    /* accumulate name */
+	    *tt++ = c;    /* accumulate name */
 	}
-	*terminaltype = 0;
-	terminaltype = terminalname;
+	*tt = 0;
 	break;
     }  /* end of case TELOPT_TTYPE */
 
@@ -1645,6 +1643,10 @@ static int envvarok(varp)
 	char *varp;
 {
 	if (!strchr(varp, '=') &&
+	    strcmp(varp, "TERMCAP") && /* to prevent a security hole  */
+	    strcmp(varp, "TERMINFO") &&	/* with tgetent */
+	    strcmp(varp, "TERMPATH") &&
+	    strcmp(varp, "HOME") && /* to prevent the tegetent bug  */
 	    strncmp(varp, "LD_", strlen("LD_")) && /* most systems */
 	    strncmp(varp, "_RLD_", strlen("_RLD_")) && /* irix */
 	    strncmp(varp, "KRB5", strlen("KRB5")) && /* v5 */

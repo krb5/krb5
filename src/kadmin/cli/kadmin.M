@@ -676,7 +676,7 @@ is added, ignoring multiple keys with the same encryption type but
 different salt types.  If the
 .B \-k
 argument is not specified, the default keytab
-.I /etc/v5srvtab
+.I /etc/krb5.keytab
 is used.  If the
 .B \-q
 option is specified, less verbose status information is displayed.
@@ -695,13 +695,10 @@ command.
 .RS
 .TP
 EXAMPLE:
-kadmin: ktadd -k /krb5/kadmind.keytab kadmin/admin kadmin/changepw
-Entry for principal kadmin/admin@ATHENA.MIT.EDU with
+kadmin: ktadd -k /tmp/foo-new-keytab host/foo.mit.edu
+Entry for principal host/foo.mit.edu@ATHENA.MIT.EDU with
 	kvno 3, encryption type DES-CBC-CRC added to keytab
-	WRFILE:/krb5/kadmind.keytab.
-Entry for principal kadmin/changepw@ATHENA.MIT.EDU
-	with kvno 3, encryption type DES-CBC-CRC added to keytab
-	WRFILE:/krb5/kadmind.keytab.
+	WRFILE:/tmp/foo-new-keytab
 kadmin:
 .RE
 .fi
@@ -716,7 +713,7 @@ parsed as an integer, and all entries whose kvno match that integer are
 removed.  If the
 .B \-k
 argument is not specifeid, the default keytab
-.I /etc/v5srvtab
+.I /etc/krb5.keytab
 is used.  If the
 .B \-q
 option is specified, less verbose status information is displayed.
@@ -725,9 +722,9 @@ option is specified, less verbose status information is displayed.
 .RS
 .TP
 EXAMPLE:
-kadmin: ktremove -k /krb5/kadmind.keytab kadmin/admin
+kadmin: ktremove -k /usr/local/var/krb5kdc/kadmind.keytab kadmin/admin
 Entry for principal kadmin/admin with kvno 3 removed
-	from keytab WRFILE:/krb5/kadmind.keytab.
+	from keytab WRFILE:/usr/local/var/krb5kdc/kadmind.keytab.
 kadmin:
 .RE
 .fi

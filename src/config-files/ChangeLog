@@ -1,3 +1,8 @@
+Tue Nov 26 19:24:34 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc.conf: Fixed paths to use the GNU standard conventions.  
+		[PR#246]
+
 Thu Nov 14 23:08:37 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.conf.M: Note change in default_keytab_name.

@@ -324,7 +324,7 @@ open_connection(host, fd, Errmsg)
 		return(0);
 	}
 	sin.sin_family = hp->h_addrtype;
-	memcpy((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
+	memcpy((char *)&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
 	if(!port) {
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == 0) {

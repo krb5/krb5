@@ -1,3 +1,47 @@
+Wed Jan 14 20:58:52 1998  Tom Yu  <tlyu@mit.edu>
+
+	* preauth.c (handle_sam_labels): Check return value of
+	malloc. [krb5-libs/518]
+
+Wed Oct 22 00:29:33 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* send_tgs.c (krb5_send_tgs): Don't send a zero endtime; if the
+		requested endtime is zero, set it equal to the TGT endtime.
+
+Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* brand.c: New file, which allows a release engineer to "brand"
+ 		the krb5 library or a binary application program
+ 		statically linked against the krb5 library.  This file is
+		statically included by init_ctx.c, to force it be in a
+		binary library or application program.
+
+Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp
+ 		and sam-usec fields, which should always be set if the
+		nonce is not available, not just SAM_USE_SAD_AS_KEY is
+		being used.  [krb5-libs/325]
+
+Wed Feb 12 20:47:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Use the client's realm rather
+	than the server's realm for constructing the tgs principal.
+	Remove TC_MATCH_SRV_NAMEONLY from call to retrieve_cred() because
+	we want to get an exact match.
+
+Tue Apr  8 10:31:30 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sendauth.c (krb5_sendauth): Don't free credspout if it is to be
+		returned in out_creds (#PR 357)
+
+Thu Nov 21 13:54:01 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* recvauth.c (krb5_recvauth): If there is an error, and the server
+		argument to krb5_recvauth is NULL, create a dummy server
+		entry for the krb5_error structure so that krb5_mk_error
+		will not die with missing required fields. [krb5-libs/209]
+
 Wed Nov 13 14:30:47 1996  Tom Yu  <tlyu@mit.edu>
 
 	* init_ctx.c: Revert previous kt_default_name changes.
