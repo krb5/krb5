@@ -8,6 +8,10 @@
 ARADD="@ARADD@"
 ARCHIVE="@ARCHIVE@"
 
+library=$1
+oblist=$2
+dir=$3
+
 force=
 rmcmd=
 arcmd="$ARADD"
@@ -18,10 +22,6 @@ then
 	rmcmd="rm -f $library"
 	shift
 fi
-
-library=$1
-oblist=$2
-dir=$3
 
 stamp=`echo $library | sed -e 's/.a$/.stamp/'`
 

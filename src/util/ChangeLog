@@ -1,3 +1,8 @@
+Sat May 18 02:05:39 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* libupdate.sh: Define $library from the positional arguments
+		before --force uses $library.
+
 Tue Apr 16 22:26:36 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Wed Mar  6 05:02:36 1996  Mark Eichin  <eichin@cygnus.com>
