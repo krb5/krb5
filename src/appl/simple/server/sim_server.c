@@ -59,9 +59,11 @@ char *argv[];
     krb5_tkt_authent *ad;
 
     if (argc != 2) {
-	fprintf(stderr, "usage: %s <hostname>\n",PROGNAME);
+	fprintf(stderr, "usage: %s <servername>\n",PROGNAME);
 	exit(1);
     }
+
+    krb5_init_ets();
 
     if (retval = krb5_parse_name(SNAME, &sprinc)) {
 	com_err(PROGNAME, retval, "while parsing server name %s", SNAME);
@@ -108,18 +110,26 @@ char *argv[];
 
     /* GET KRB_AP_REQ MESSAGE */
 
-    i = read(sock, (char *)pktbuf, sizeof(pktbuf));
+    /* use "recvfrom" so we know client's address */
+    i = sizeof(c_sock);
+    i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
+		 (struct sockaddr *)&c_sock, &i);
     if (i < 0) {
 	perror("receiving datagram");
 	exit(1);
     }
+
     printf("Received %d bytes\n", i);
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
 
+    foreign_addr.addrtype = c_sock.sin_family;
+    foreign_addr.length = sizeof(c_sock.sin_addr);
+    foreign_addr.contents = (krb5_octet *)&c_sock.sin_addr;
+
     /* Check authentication info */
     if (retval = krb5_rd_req_simple(&packet, sprinc,
-				    0, /* ignore sender address for now */
+				    &foreign_addr,
 				    &ad)) {
 	com_err(PROGNAME, retval, "while reading request");
 	exit(1);
