@@ -1,5 +1,10 @@
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* changepw.c (ECONNABORTED, ECONNREFUSED, EHOSTUNREACH,
+	ETIMEDOUT): Don't define here now that they're defined in
+	port-sockets.h.
+	* read_msg.c (ECONNABORTED): Ditto.
+
 	* sendto_kdc.c: Include sys/timeb.h on Windows.
 	(ENABLE_TCP): Macro deleted, always enable code.
 	(krb5_sendto_kdc): Don't try UDP if outgoing message is 1500

@@ -34,22 +34,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-/* Win32 defines. */
-#if defined(_WIN16) || (defined(_WIN32) && !defined(__CYGWIN32__))
-#ifndef ECONNABORTED
-#define ECONNABORTED WSAECONNABORTED
-#endif
-#ifndef ECONNREFUSED
-#define ECONNREFUSED WSAECONNREFUSED
-#endif
-#ifndef EHOSTUNREACH
-#define EHOSTUNREACH WSAEHOSTUNREACH
-#endif
-#ifndef ETIMEDOUT
-#define ETIMEDOUT WSAETIMEDOUT
-#endif
-#endif /* _WIN32 && !__CYGWIN32__ */
-
 #ifndef GETSOCKNAME_ARG3_TYPE
 #define GETSOCKNAME_ARG3_TYPE int
 #endif
