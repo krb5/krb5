@@ -1,3 +1,18 @@
+2000-4-26	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: Added version number to internal Kerberos Login Library 
+	routine.
+
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: Added Kerberos Login library support (with ifdefs to control 
+	whether or not it is on.  Also added support to store a krb5_principal in the
+	os_context along with the default ccache name (if known, this principal is 
+	the same as the last time we looked at the ccache.
+	* ccdefname.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
