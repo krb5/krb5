@@ -65,9 +65,15 @@ krb5_error_code e;
 	case KRB5KDC_ERR_POLICY:	/* KDC policy rejects request */
 	case KRB5KDC_ERR_BADOPTION:	/* KDC can't do requested opt. */
 	case KRB5KDC_ERR_ETYPE_NOSUPP:	/* No support for encryption type */
+	case KRB5_KDCREP_MODIFIED:	/* KDC reply did not match expectations */
 		return(KDC_GEN_ERR);
+	case KRB5_KDC_UNREACH:		/* Cannot contact any KDC for requested realm */
+	case KRB5_REALM_UNKNOWN:	/* Cannot find KDC for requested realm */
+		return(SKDC_CANT);
 
-	case KRB5KRB_AP_ERR_BAD_INTEGRITY:/* Decrypt integrity check failed */
+	case KRB5KRB_AP_ERR_BAD_INTEGRITY: /* Decrypt integrity check failed */
+	case KRB5KRB_AP_ERR_TKT_INVALID: /* Ticket has invalid flag set */
+
 		return(RD_AP_UNDEC);
 
 	case KRB5KRB_AP_ERR_TKT_EXPIRED:/* Ticket expired */
@@ -95,6 +101,7 @@ krb5_error_code e;
 		return(RD_AP_VERSION);
 
 	case KRB5KRB_AP_ERR_MSG_TYPE:	/* Invalid message type */
+	case KRB5_BADMSGTYPE:		/* Invalid message type specified for encoding */
 		return(RD_AP_MSG_TYPE);
 
 	case KRB5KRB_AP_ERR_MODIFIED:	/* Message stream modified */
@@ -102,6 +109,7 @@ krb5_error_code e;
 
 	case KRB5KRB_AP_ERR_BADORDER:	/* Message out of order */
 	case KRB5KRB_AP_ERR_BADSEQ:	/* Message out of order */
+	case KRB5KRB_AP_ERR_BADDIRECTION: /* Incorrect message direction */
 		return(RD_AP_ORDER);
 
 	case KRB5KRB_AP_ERR_BADKEYVER:	/* Key version is not available */
@@ -109,6 +117,19 @@ krb5_error_code e;
 	case KRB5KRB_AP_ERR_MUT_FAIL:	/* Mutual authentication failed */
 		return(RD_AP_INCON);
 
+	case KRB5_CC_BADNAME:		/* Credential cache name malformed */
+	case KRB5_CC_UNKNOWN_TYPE:	/* Unknown credential cache type */
+	case KRB5_CC_TYPE_EXISTS:	/* Credentials cache type is already registered */
+	case KRB5_CC_IO:		/* Credentials cache I/O operation failedXXX */
+	case KRB5_CC_NOMEM:		/* No more memory to allocate (in credentials cache code) */
+		return(TKT_FIL_ACC);
+	case KRB5_CC_END:		/* End of credential cache reached */
+		return(RET_NOTKT);
+	case KRB5_CC_NOTFOUND:		/* Matching credential not found */
+		return(NO_TKT_FIL);
+
+	case KRB5_NO_TKT_IN_RLM:	/* Cannot find ticket for requested realm */
+		return(AD_NOTGT);
 	case KRB5KRB_ERR_FIELD_TOOLONG:	/* Field is too long for impl. */
 	default:
 		return(KFAILURE);
