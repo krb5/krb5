@@ -4,12 +4,13 @@
 
 srcdir = @srcdir@
 VPATH = @srcdir@
+DEFS = @DEFS@
 
 BUILDTOP = ../../
 TOPDIR = $(BUILDTOP)
 
-OPTIONS	=	-I. -I$(HDIR) $(PEPYPATH) $(KRBOPT)
-CFLAGS  =       $(OPTIONS) $(LOPTIONS) 
+OPTIONS	=	-I. -I$(HDIR) -I$(TOPDIR)include $(PEPYPATH) $(KRBOPT)
+CFLAGS  =       $(OPTIONS) $(LOPTIONS) $(DEFS)
 
 HDIR	=	$(TOPDIR)isode/h/
 UTILDIR	=	$(TOPDIR)isode/util/
@@ -19,8 +20,8 @@ PEPSYDIRM=	$(INCDIR)pepsy
 PEPSYDIR=	$(PEPSYDIRM)/
 PSAPDIRM=	$(TOPDIR)isode/psap
 PSAPDIR=	$(PSAPDIRM)/
-LIBISODE=	$(TOPDIR)libisode.a
-LIBDSAP	=	$(TOPDIR)libdsap.a
+LIBISODE=	$(TOPDIR)lib/libisode.a
+LIBDSAP	=	$(TOPDIR)lib/libdsap.a
 
 KRBINC	=	$(TOPDIR)include/
 ISODEINCM=	$(KRBINC)isode
@@ -50,8 +51,8 @@ PEPYPATH=	-DPEPYPATH -DPEPSYPATH=\".:$(PEPSYDIRM)\"
 PEPSYLIBES=	$(PSAPDIR)/sprintoid.o $(PSAPDIR)/pl_tables.o \
 		$(PSAPDIR)/oid_cmp.o $(PSAPDIR)/oid_cpy.o \
 		$(PSAPDIR)/oid_free.o ../compat/libcompat.a
-LIBES   =	$(TOPDIR)libpsap.a $(TOPDIR)libcompat.a
-LLIBS   =	$(TOPDIR)llib-lpsap $(TOPDIR)llib-lcompat
+LIBES   =	$(TOPDIR)lib/libpsap.a $(TOPDIR)lib/libcompat.a
+LLIBS   =	$(TOPDIR)lib/llib-lpsap $(TOPDIR)lib/llib-lcompat
 HFILES	=	$(HDIR)psap.h \
 		$(HDIR)manifest.h $(HDIR)general.h $(HDIR)config.h
 
@@ -95,14 +96,16 @@ PEPSY-O	= pepsy.o pepsy-yacc.o pepsy_misc.o pass2.o etabs.o dtabs.o ptabs.o \
 
 inst-pepsy:	$(BINDIR)pepsy
 
-$(BINDIR)pepsy:	xpepsy
-		-cp $@ zxpepsy
-		-rm -f $@
-		cp xpepsy $@
-		-@ls -gls $@
-		-@echo ""
+#$(BINDIR)pepsy:	xpepsy
+#		-cp $@ zxpepsy
+#		-rm -f $@
+#		cp xpepsy $@
+#		-@ls -gls $@
+#		-@echo ""
 
 pepsy:		xpepsy
+		-mv pepsy pepsy.old
+		$(LN) xpepsy pepsy
 		-@echo ""
 
 xpepsy:		pepsyvrsn.o $(PEPSYLIBES)
@@ -176,8 +179,8 @@ libpepsy:	libpepsy.a true
 libpepsy.a:     $(LIBFILES)
 	        -rm -f $@
 	        @$(UTILDIR)make-lib.sh $(SYSTEM) $@ $(LIBFILES)
-	        -@rm -f $(TOPDIR)libpepsy.a
-	        -@$(LN) libpepsy.a $(TOPDIR)libpepsy.a || cp libpepsy.a $(TOPDIR)libpepsy.a
+	        -@rm -f $(TOPDIR)lib/libpepsy.a
+	        -@$(LN) libpepsy.a $(TOPDIR)lib/libpepsy.a || cp libpepsy.a $(TOPDIR)lib/libpepsy.a
 	        -@ls -l $@
 	        -@echo "PEPSY library built normally"
 
