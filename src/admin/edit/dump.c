@@ -996,13 +996,32 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 		error++;
 	    }
 	    pkey->key_data_type[0] = tmpint1;
-	    /* Read the key */
+	    /* Read the old format key */
 	    if (!error && read_octet_string(filep,
 					    pkey->key_data_contents[0],
 					    pkey->key_data_length[0])) {
 		try2read = read_key_data;
 		error++;
 	    }
+	    /* convert to a new format key */
+	    /* the encrypted version is stored as the unencrypted key length
+	       (4 bytes, MSB first) followed by the encrypted key. */
+	    if ((pkey->key_data_length[0] > 4)
+		&& (pkey->key_data_contents[0][0] == 0)
+		&& (pkey->key_data_contents[0][1] == 0)) {
+	      /* this really does look like an old key, so drop and swap */
+	      /* the *new* length is 2 bytes, LSB first, sigh. */
+	      size_t shortlen = pkey->key_data_length[0]-4+2;
+	      char *shortcopy = (krb5_octet *) malloc(shortlen);
+	      char *origdata = pkey->key_data_contents[0];
+	      shortcopy[0] = origdata[3];
+	      shortcopy[1] = origdata[2];
+	      memcpy(shortcopy+2,origdata+4,shortlen-2);
+	      free(origdata);
+	      pkey->key_data_length[0] = shortlen;
+	      pkey->key_data_contents[0] = shortcopy;
+	    }
+	      
 	    /* Read principal attributes */
 	    if (!error && (fscanf(filep,
 				  "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t",
@@ -1053,6 +1072,26 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 		try2read = read_akey_data;
 		error++;
 	    }
+
+	    /* convert to a new format key */
+	    /* the encrypted version is stored as the unencrypted key length
+	       (4 bytes, MSB first) followed by the encrypted key. */
+	    if ((akey->key_data_length[0] > 4)
+		&& (akey->key_data_contents[0][0] == 0)
+		&& (akey->key_data_contents[0][1] == 0)) {
+	      /* this really does look like an old key, so drop and swap */
+	      /* the *new* length is 2 bytes, LSB first, sigh. */
+	      size_t shortlen = akey->key_data_length[0]-4+2;
+	      char *shortcopy = (krb5_octet *) malloc(shortlen);
+	      char *origdata = akey->key_data_contents[0];
+	      shortcopy[0] = origdata[3];
+	      shortcopy[1] = origdata[2];
+	      memcpy(shortcopy+2,origdata+4,shortlen-2);
+	      free(origdata);
+	      akey->key_data_length[0] = shortlen;
+	      akey->key_data_contents[0] = shortcopy;
+	    }
+	      
 	    /* Read alternate salt type */
 	    if (!error && (fscanf(filep, "\t%u\t", &tmpint1) != 1)) {
 		try2read = read_asalt_type;

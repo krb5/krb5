@@ -1,3 +1,9 @@
+Sat Feb 24 04:02:18 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* dump.c (process_k5beta_record): encrypted keys used to have 4
+	byte lengths in MSB order, need to convert to 2 byte LSB order
+	lengths before storing. Handle primary key and alternate key.
+
 Fri Feb 23 18:44:10 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kdb5_edit.c (kdb5_edit_Init): set manual_mkey for testing with -P
