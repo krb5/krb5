@@ -1,4 +1,8 @@
 
+Thu Jul 27 15:22:42 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* rsa-md5.h - Add this file, relocated from include/krb5.
+
+
 Fri Jul 7 16:20:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add t_cksum under unix only.
 	* configure.in - Define MD5_K5BETA_COMPAT to select compatability for
