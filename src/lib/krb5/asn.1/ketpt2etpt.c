@@ -32,15 +32,10 @@ static char rcsid_ketpt2etpt_c[] =
 
 #include <krb5/krb5.h>
 
-/*#include <time.h> */
-#include <isode/psap.h>
 #include <krb5/asn1.h>
 #include "asn1glue.h"
 
 #include <krb5/ext-proto.h>
-
-/* ISODE defines max(a,b) */
-
 
 struct type_KRB5_EncTicketPart *
 krb5_enc_tkt_part2KRB5_EncTicketPart(val, error)
