@@ -171,7 +171,7 @@ krb5_dbe_update_mod_princ_data(context, entry, mod_date, mod_princ)
     krb5_context	  context;
     krb5_db_entry	* entry;
     krb5_timestamp	  mod_date;
-    krb5_principal	  mod_princ;
+    krb5_const_principal  mod_princ;
 {
     krb5_tl_data          tl_data;
 
@@ -246,7 +246,7 @@ krb5_error_code
 krb5_encode_princ_dbkey(context, key, principal)
     krb5_context context;
     krb5_data  *key;
-    krb5_principal principal;
+    krb5_const_principal principal;
 {
     char *princ_name;
     krb5_error_code retval;

@@ -27,7 +27,7 @@
 
 krb5_error_code krb5_ktkdb_close KRB5_PROTOTYPE((krb5_context, krb5_keytab));
 
-krb5_error_code krb5_ktkdb_get_entry KRB5_PROTOTYPE((krb5_context, krb5_keytab, krb5_principal,
+krb5_error_code krb5_ktkdb_get_entry KRB5_PROTOTYPE((krb5_context, krb5_keytab, krb5_const_principal,
 		   krb5_kvno, krb5_enctype, krb5_keytab_entry *));
 
 krb5_kt_ops krb5_kt_kdb_ops = {
@@ -84,7 +84,7 @@ krb5_error_code
 krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
     krb5_context 	  context;
     krb5_keytab 	  id;
-    krb5_principal 	  principal;
+    krb5_const_principal  principal;
     krb5_kvno 	 	  kvno;
     krb5_enctype 	  enctype;
     krb5_keytab_entry 	* entry;

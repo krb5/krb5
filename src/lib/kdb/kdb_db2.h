@@ -89,7 +89,7 @@ krb5_error_code krb5_db2_db_rename
 		   char * ));
 krb5_error_code krb5_db2_db_get_principal 
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
+		   krb5_const_principal,
 		   krb5_db_entry *,
 		   int *,
 		   krb5_boolean * ));

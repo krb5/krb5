@@ -930,7 +930,7 @@ errout:
 krb5_error_code
 krb5_dbm_db_get_principal(context, searchfor, entries, nentries, more)
     krb5_context context;
-krb5_principal searchfor;
+krb5_const_principal searchfor;
 krb5_db_entry *entries;		/* filled in */
 int *nentries;				/* how much room/how many found */
 krb5_boolean *more;			/* are there more? */
@@ -1060,7 +1060,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 krb5_error_code
 krb5_dbm_db_delete_principal(context, searchfor, nentries)
     krb5_context 	  context;
-    krb5_principal 	  searchfor;
+    krb5_const_principal  searchfor;
     int 		* nentries;	/* how many found & deleted */
 {
     krb5_error_code 	  retval;
