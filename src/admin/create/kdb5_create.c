@@ -284,6 +284,7 @@ struct realm_info *pblock;
 
     switch (op) {
     case MASTER_KEY:
+	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 	if (retval = krb5_kdb_encrypt_key(pblock->eblock,
 					  &master_keyblock,
 					  &ekey))
