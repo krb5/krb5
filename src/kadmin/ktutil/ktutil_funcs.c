@@ -61,16 +61,16 @@ krb5_error_code ktutil_free_kt_list(context, list)
  * Delete a numbered entry in a kt_list.  Takes a pointer to a kt_list
  * in case head gets deleted.
  */
-krb5_error_code ktutil_delete(context, list, index)
+krb5_error_code ktutil_delete(context, list, idx)
     krb5_context context;
     krb5_kt_list *list;
-    int index;
+    int idx;
 {
     krb5_kt_list lp, prev;
     int i;
 
     for (lp = *list, i = 1; lp; prev = lp, lp = lp->next, i++) {
-	if (i == index) {
+	if (i == idx) {
 	    if (i == 1)
 		*list = lp->next;
 	    else
@@ -109,7 +109,8 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     char promptstr[1024];
 
     char *cp;
-    int i, tmp, pwsize = BUFSIZ;
+    int i, tmp;
+    unsigned int pwsize = BUFSIZ;
 
     retval = krb5_parse_name(context, princ_str, &princ);
     if (retval)
@@ -344,7 +345,7 @@ krb5_error_code ktutil_write_keytab(context, list, name)
  * including the null terminator.
  */
 
-int getstr(fp, s, n)
+static int getstr(fp, s, n)
     FILE *fp;
     register char *s;
     int n;

@@ -1,3 +1,10 @@
+Mon Feb 26 14:27:24 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktutil.c, ktutil_funcs.c: Do not shadow system "index" and
+ 	"stime" variables.
+
+	* ktutil.h: Add prototypes for SS callback functions.
+
 2000-12-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktutil.c (ktutil_list): Provide a real usage message.

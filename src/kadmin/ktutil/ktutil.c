@@ -219,7 +219,7 @@ void ktutil_list(argc, argv)
 {
     krb5_error_code retval;
     krb5_kt_list lp;
-    struct tm *stime;
+    struct tm *sltime;
     int show_time = 0, show_keys = 0, show_enctype = 0;
     int i, j;
     char *pname;
@@ -259,7 +259,7 @@ void ktutil_list(argc, argv)
 	    char fmtbuf[18];
 	    char fill;
 
-	    stime = localtime((time_t *)&lp->entry->timestamp);
+	    sltime = localtime((time_t *)&lp->entry->timestamp);
 	    fill = ' ';
 	    if (!krb5_timestamp_to_sfstring((krb5_timestamp)lp->entry->
 					    	timestamp,

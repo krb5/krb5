@@ -67,3 +67,35 @@ krb5_error_code ktutil_write_srvtab
 			krb5_kt_list,
 			char *));
 #endif
+
+void ktutil_add_entry
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_clear_list
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_read_v5
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_read_v4
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_write_v5
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_write_v4
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_delete_entry
+	KRB5_PROTOTYPE((int,
+			char *[]));
+
+void ktutil_list
+	KRB5_PROTOTYPE((int,
+			char *[]));
