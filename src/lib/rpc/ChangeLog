@@ -1,3 +1,11 @@
+2001-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for strerror.
+	* clnt_perror.c (strerror, sys_nerr) [!HAVE_STRERROR]: Define.
+	(sys_nerr) [HAVE_STRERROR]: Declare at top level instead of in
+	clnt_spcreateerror.
+	(clnt_sperror, clnt_spcreateerror): Use strerror always.
+
 Sun Feb 18 17:48:35 2001  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* xdr.h: Flush out prototypes for xdrmem_create(),
