@@ -1,4 +1,8 @@
 
+Thu Aug 3 11:56:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Generate kdc.conf with new symbolic values.
+
+
 Mon Jul 17 15:25:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Add handling of kdc.conf which has the KDC profile.
 		Remove parameters from command lines of admin utilities because

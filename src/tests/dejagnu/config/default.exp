@@ -265,8 +265,6 @@ proc setup_kerberos_files { } {
     }
 
     # Create a kdc.conf file.
-    # The magic principal expiration number is supposed to be 31/12/99 23:59:59
-    # the flags are disallow_postated, disallow_renewable.
     if ![file exists tmpdir/kdc.conf] {
 	set conffile [open tmpdir/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
@@ -278,14 +276,16 @@ proc setup_kerberos_files { } {
 	puts $conffile "		profile = $tmppwd/krb5.conf"
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		encryption_type = 3"
+	puts $conffile "		master_key_type = des"
+	puts $conffile "		encryption_type = des-cbc-md5"
 	puts $conffile "		port = 3088"
 	puts $conffile "		kadmind_port = 3750"
 	puts $conffile "		key_stash_file = $tmppwd/stash"
-	puts $conffile "		max_life = 1:0:0"
-	puts $conffile "		max_renewable_life = 3:0:0"
-	puts $conffile "		default_principal_expiration = 946699199"
-	puts $conffile "		default_principal_flags = 9"
+	puts $conffile "		max_life = 1:00:00"
+	puts $conffile "		max_renewable_life = 3:00:00"
+	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
+	puts $conffile "		default_principal_flags = -postdateable -forwardable"
+	puts $conffile "		supported_keytypes = des:normal des:v4 des:norealm des:onlyrealm"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile
