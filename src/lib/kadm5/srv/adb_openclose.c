@@ -65,6 +65,11 @@ osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
      osa_adb_db_t fromdb, todb;
      osa_adb_ret_t ret;
 
+     /* make sure todb exists */
+     if ((ret = osa_adb_create_db(fileto, lockto, magic)) &&
+	 ret != EEXIST)
+	  return ret;
+
      if (ret = osa_adb_init_db(&fromdb, filefrom, lockfrom, magic))
 	  return ret;
      if (ret = osa_adb_init_db(&todb, fileto, lockto, magic)) {
