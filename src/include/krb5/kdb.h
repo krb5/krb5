@@ -16,6 +16,16 @@
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
 
+/* this is the same structure as krb5_keyblock, but with a different name to
+   enable compile-time catching of programmer confusion between encrypted &
+   decrypted keys in the database */
+
+typedef struct _krb5_encrypted_keyblock {
+    krb5_keytype keytype;
+    int length;
+    krb5_octet *contents;
+} krb5_encrypted_keyblock;
+
 typedef struct _krb5_db_entry {
     krb5_principal principal;
     krb5_encrypted_keyblock key;
@@ -36,16 +46,6 @@ typedef struct _krb5_db_entry {
 #define	KRB5_KDB_DISALLOW_PROXIABLE	0x00000010
 #define	KRB5_KDB_DISALLOW_DUP_SKEY	0x00000020
 #define	KRB5_KDB_DISALLOW_ALL_TIX	0x00000040
-
-/* this is the same structure as krb5_keyblock, but with a different name to
-   enable compile-time catching of programmer confusion between encrypted &
-   decrypted keys in the database */
-
-typedef struct _krb5_encrypted_keyblock {
-    krb5_keytype keytype;
-    int length;
-    krb5_octet *contents;
-} krb5_encrypted_keyblock;
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
