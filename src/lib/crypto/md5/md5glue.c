@@ -2,7 +2,7 @@
 #include "rsa-md5.h"
 
 krb5_error_code
-md5_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
+md5_sum_func KRB5_NPROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
 krb5_error_code

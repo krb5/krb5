@@ -144,7 +144,7 @@ static u_long const crc_table[256] = {
     };
 
 krb5_error_code
-crc32_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
+crc32_sum_func KRB5_NPROTOTYPE((krb5_pointer in, size_t in_length,
     krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
 
 krb5_error_code

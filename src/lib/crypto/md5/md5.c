@@ -56,7 +56,7 @@
  */
 
 /* forward declaration */
-static void Transform PROTOTYPE((krb5_ui_4 FAR *buf, krb5_ui_4 FAR *in));
+static void Transform KRB5_PROTOTYPE((krb5_ui_4 FAR *buf, krb5_ui_4 FAR *in));
 
 static unsigned char PADDING[64] = {
   0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

@@ -41,13 +41,13 @@ krb5_int32 now;
 
 krb5_context kcontext;
 
-void show_credential PROTOTYPE((char *,
+void show_credential KRB5_PROTOTYPE((char *,
 				krb5_context,
 				krb5_creds *));
 	
-void do_ccache PROTOTYPE((char *));
-void do_keytab PROTOTYPE((char *));
-void printtime PROTOTYPE((time_t));
+void do_ccache KRB5_PROTOTYPE((char *));
+void do_keytab KRB5_PROTOTYPE((char *));
+void printtime KRB5_PROTOTYPE((time_t));
 	
 #define DEFAULT 0
 #define CCACHE 1

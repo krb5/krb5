@@ -46,7 +46,7 @@ extern char *malloc(), *calloc(), *realloc();
 #endif
 
 static krb5_error_code get_first_ticket 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_ccache, 
 		   krb5_principal,
 		   krb5_creds *));
@@ -56,7 +56,7 @@ struct sockaddr_in local_sin, remote_sin;
 char cache_name[255] = "";
 
 static void get_def_princ
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
      		   krb5_principal * ));
 
 void decode_kadmind_reply();

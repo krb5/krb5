@@ -10,10 +10,10 @@
 	    Returns false (zero) if ref and var differ. */
 
 #define generic(funcname,type)\
-int funcname PROTOTYPE((type *ref, type *var))
+int funcname KRB5_PROTOTYPE((type *ref, type *var))
 
 #define len_array(funcname,type)\
-int funcname PROTOTYPE((const int length, type *ref, type *var))
+int funcname KRB5_PROTOTYPE((const int length, type *ref, type *var))
 
 generic(ktest_equal_authenticator,krb5_authenticator);
 generic(ktest_equal_principal_data,krb5_principal_data);
@@ -54,25 +54,25 @@ generic(ktest_equal_passwd_phrase_element,passwd_phrase_element);
 generic(ktest_equal_krb5_pwd_data,krb5_pwd_data);
 
 int ktest_equal_last_req
-	PROTOTYPE((krb5_last_req_entry **ref, krb5_last_req_entry **var));
+	KRB5_PROTOTYPE((krb5_last_req_entry **ref, krb5_last_req_entry **var));
 int ktest_equal_sequence_of_ticket
-	PROTOTYPE((krb5_ticket **ref, krb5_ticket **var));
+	KRB5_PROTOTYPE((krb5_ticket **ref, krb5_ticket **var));
 int ktest_equal_sequence_of_pa_data
-	PROTOTYPE((krb5_pa_data **ref, krb5_pa_data **var));
+	KRB5_PROTOTYPE((krb5_pa_data **ref, krb5_pa_data **var));
 int ktest_equal_sequence_of_cred_info
-	PROTOTYPE((krb5_cred_info **ref, krb5_cred_info **var));
+	KRB5_PROTOTYPE((krb5_cred_info **ref, krb5_cred_info **var));
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
 len_array(ktest_equal_array_of_octet,krb5_octet);
 
 int ktest_equal_array_of_passwd_phrase_element
-	PROTOTYPE((passwd_phrase_element **ref, passwd_phrase_element **var));
+	KRB5_PROTOTYPE((passwd_phrase_element **ref, passwd_phrase_element **var));
 int ktest_equal_authorization_data
-	PROTOTYPE((krb5_authdata **ref, krb5_authdata **var));
+	KRB5_PROTOTYPE((krb5_authdata **ref, krb5_authdata **var));
 int ktest_equal_addresses
-	PROTOTYPE((krb5_address **ref, krb5_address **var));
+	KRB5_PROTOTYPE((krb5_address **ref, krb5_address **var));
 int ktest_equal_array_of_char
-	PROTOTYPE((const int length, char *ref, char *var));
+	KRB5_PROTOTYPE((const int length, char *ref, char *var));
 
 #endif

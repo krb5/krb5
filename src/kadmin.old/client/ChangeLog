@@ -1,3 +1,7 @@
+Wed Jun 21 10:49:32 1995    <tytso@rsx-11.mit.edu>
+
+	* kadmin.c: Change PROTOTYPE -> KRB5_PROTOTYPE
+
 Tue Jun 20 19:00:32 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: switch obsolete AC_HAVE_HEADER to AC_CHECK_HEADERS.

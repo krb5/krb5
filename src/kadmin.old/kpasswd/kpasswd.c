@@ -53,18 +53,18 @@ extern char *malloc(), *calloc(), *realloc();
 #endif
 
 static krb5_error_code adm5_init_link
-	PROTOTYPE((krb5_context, 
+	KRB5_PROTOTYPE((krb5_context, 
     		   krb5_data *,
     		   int *));
 
 static krb5_error_code get_first_ticket 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_ccache, 
 		   krb5_principal,
 		   krb5_creds *));
 
 krb5_error_code print_and_choose_password 
-	PROTOTYPE((char *, krb5_data *));
+	KRB5_PROTOTYPE((char *, krb5_data *));
 
 struct sockaddr_in local_sin, remote_sin;
 
