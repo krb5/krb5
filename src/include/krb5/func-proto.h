@@ -138,6 +138,12 @@ krb5_error_code krb5_copy_ticket
 krb5_error_code krb5_copy_authdata
     PROTOTYPE((krb5_authdata * const *,
 	       krb5_authdata ***));
+krb5_error_code krb5_copy_authenticator
+    PROTOTYPE((const krb5_authenticator *,
+	       krb5_authenticator **));
+krb5_error_code krb5_copy_checksum
+    PROTOTYPE((const krb5_checksum *,
+	       krb5_checksum **));
 void krb5_init_ets PROTOTYPE((void));
 
 /* libkt.spec */
