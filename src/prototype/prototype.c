@@ -1,7 +1,7 @@
 /*
  * prototype/prototype.c
  *
- * Copyright (C) 2001 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2002 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
