@@ -1,3 +1,9 @@
+Wed Nov  2 21:04:18 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in: Add support for a new --with-cppopts" value where you
+		can put -DXXXXX such that they are found by autoconf tests
+		that use run the preprocessor over header files.
+
 Tue Nov  1 14:11:57 1994    (tytso@rsx-11)
 
 	* post.in (clean): Also clean up config.log, pre.out, post.out and
