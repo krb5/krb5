@@ -1,3 +1,9 @@
+2002-05-13  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour.c: Microsoft indicates that they have changed some key
+	usage numbers to be closer to the Kerberos spec; reflect those
+	changes.  This is OK because currently no one actually sends any
+	authorization data in that space.
 2002-02-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* arcfour.h, arcfour.c, string_to_key.c: Use const instead of

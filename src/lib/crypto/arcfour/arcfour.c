@@ -38,9 +38,9 @@ krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
   case 3:			/* as-rep encrypted part */
     return 8;
   case 4:			/* tgs-req authz data */
-    return 16; /*vague possibility to change to 4 in the future --sdh*/
+    return 4;
   case 5:			/* tgs-req authz data in subkey */
-    return 16; /* vague possibility to become 5 in future --sdh*/
+    return 5;
   case 6:			/* tgs-req authenticator cksum */
     return 6;			
 case 7:				/* tgs-req authenticator */
