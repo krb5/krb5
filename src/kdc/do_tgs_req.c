@@ -533,7 +533,6 @@ tgt_again:
 	ticket_reply.enc_part.kvno = 0;
 	ticket_reply.enc_part.enctype =
 		request->second_ticket[st_idx]->enc_part2->session->enctype;
-	krb5_use_enctype(kdc_context, &eblock, ticket_reply.enc_part.enctype);
 	if ((errcode = krb5_encrypt_tkt_part(kdc_context, 
 					    request->second_ticket[st_idx]->enc_part2->session,
 					    &ticket_reply))) {
@@ -610,12 +609,10 @@ tgt_again:
 
     reply.enc_part.enctype = subkey ? subkey->enctype :
 		    header_ticket->enc_part2->session->enctype;
-    krb5_use_enctype(kdc_context, &eblock, reply.enc_part.enctype);
-
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
-				 &eblock, subkey ? subkey :
-				 header_ticket->enc_part2->session,
-				 &reply, response);
+				  subkey ? subkey :
+				  header_ticket->enc_part2->session,
+				  &reply, response);
     if (errcode) {
 	status = "ENCODE_KDC_REP";
     } else {

@@ -1,3 +1,8 @@
+Wed Nov 29 13:31:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): Removed extra eblock argument
+		from call to krb5_encode_kdc_rep.
+
 Fri Nov 17 22:41:37 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* do_as_req.c (process_as_req): Removed extra eblock argument from
