@@ -58,6 +58,7 @@ krb5_recvauth(context, auth_context,
     krb5_octet		  response;
     krb5_data		  null_server;
     int                   need_error_free = 0;
+    int			  local_rcache = 0, local_authcon = 0;
 	
 	/*
 	 * Zero out problem variable.  If problem is set at the end of
@@ -141,8 +142,10 @@ krb5_recvauth(context, auth_context,
     if (*auth_context == NULL) {
 	problem = krb5_auth_con_init(context, &new_auth_context);
 	*auth_context = new_auth_context;
+	local_authcon = 1;
     }
-    if ((!problem) && ((*auth_context)->rcache == NULL)) {
+    krb5_auth_con_getrcache(context, *auth_context, &rcache);
+    if ((!problem) && rcache == NULL) {
         /*
          * Setup the replay cache.
          */
@@ -156,6 +159,7 @@ krb5_recvauth(context, auth_context,
         }
         if (!problem) 
 	    problem = krb5_auth_con_setrcache(context, *auth_context, rcache);
+	local_rcache = 1;
     }
     if (!problem) {
 	problem = krb5_rd_req(context, auth_context, &inbuf, server,
@@ -227,9 +231,12 @@ krb5_recvauth(context, auth_context,
 
 cleanup:;
     if (retval) {
-	if (rcache)
+	if (local_authcon) {
+	    krb5_auth_con_free(context, *auth_context);
+	} else if (local_rcache && rcache != NULL) {
 	    krb5_rc_close(context, rcache);
-	krb5_auth_con_free(context, *auth_context);
+	    krb5_auth_con_setrcache(context, *auth_context, NULL);
+	}
     }
     return retval;
 }

@@ -1,3 +1,9 @@
+Fri Jan 29 22:46:37 1999  Tom Yu  <tlyu@mit.edu>
+
+	* recvauth.c (krb5_recvauth): Add some bookkeeping flags so we
+	know how much stuff to free upon cleanup.  Fix the up cleanup
+	code.
+
 Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c: Fix up previous fix; short-circuit out when
