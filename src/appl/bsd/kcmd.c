@@ -188,27 +188,55 @@ restore_sigs (masktype *oldmask)
 #endif /* POSIX_SIGNALS */
 }
 
+#include "fake-addrinfo.c"
+
 static int
 kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	      char *hname, char **host_save, unsigned int rport, int *lportp)
 {
-    int s;
+    int s, aierr;
     struct sockaddr_in sockin;
-    struct hostent *hp;
+    struct addrinfo *ap, *ap2, aihints;
+    char rport_buf[10];
 
-    hp = gethostbyname(hname);
-    if (hp == 0) {
-	fprintf(stderr, "%s: unknown host\n", hname);
-	return (-1);
+    sprintf(rport_buf, "%d", ntohs(rport));
+    memset(&aihints, 0, sizeof(aihints));
+    aihints.ai_socktype = SOCK_STREAM;
+    aihints.ai_flags = AI_CANONNAME;
+    aihints.ai_family = AF_INET;
+    aierr = getaddrinfo(hname, rport_buf, &aihints, &ap);
+    if (aierr) {
+	const char *msg;
+	/* We want to customize some messages.  */
+	switch (aierr) {
+	case EAI_NONAME:
+	    msg = "host unknown";
+	    break;
+	default:
+	    fprintf(stderr, "foo\n");
+	    msg = gai_strerror(aierr);
+	    break;
+	}
+	fprintf(stderr, "%s: %s\n", hname, msg);
+	return -1;
     }
-    *host_save = malloc(strlen(hp->h_name) + 1);
+    if (ap == 0) {
+	fprintf(stderr, "%s: no addresses?\n", hname);
+	return -1;
+    }
+    fixup_addrinfo(ap);		/* XXX */
+
+    *host_save = malloc(strlen(ap->ai_canonname) + 1);
     if (*host_save == NULL) {
 	fprintf(stderr, "kcmd: no memory\n");
 	return -1;
     }
-    strcpy(*host_save, hp->h_name);
+    strcpy(*host_save, ap->ai_canonname);
 
-    for (;;) {
+    for (ap2 = ap; ap; ap = ap->ai_next) {
+	char hostbuf[NI_MAXHOST];
+	int oerrno;
+
         s = getport(lportp, addrfamilyp);
     	if (s < 0) {
 	    if (errno == EAGAIN)
@@ -217,12 +245,11 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 		perror("kcmd: socket");
 	    return -1;
     	}
-    	sockin.sin_family = hp->h_addrtype;
-    	memcpy((caddr_t)&sockin.sin_addr, hp->h_addr,
-	       sizeof(sockin.sin_addr));
-    	sockin.sin_port = rport;
-    	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
-	    break;
+	if (connect(s, ap->ai_addr, ap->ai_addrlen) >= 0) {
+	    *sp = s;
+	    *sockinp = sockin;
+	    return 0;
+	}
     	(void) close(s);
     	if (errno == EADDRINUSE) {
 	    if (lportp)
@@ -230,28 +257,20 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	    continue;
 	}
 
-#if !(defined(tek) || defined(ultrix) || defined(sun) || defined(SYSV))
-    	if (hp->h_addr_list[1] != NULL) {
-	    int oerrno = errno;
+	aierr = getnameinfo(ap->ai_addr, ap->ai_addrlen,
+			    hostbuf, sizeof(hostbuf), 0, 0, NI_NUMERICHOST);
+	if (aierr)
+	    fprintf(stderr, "connect to <error formatting address: %s>: ",
+		    gai_strerror (aierr));
+	else
+	    fprintf(stderr, "connect to address %s: ", hostbuf);
+	errno = oerrno;
+	perror(0);
 
-	    fprintf(stderr,
-		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
-	    errno = oerrno;
-	    perror(0);
-	    hp->h_addr_list++;
-	    memcpy((caddr_t)&sockin.sin_addr,hp->h_addr_list[0],
-		   sizeof(sockin.sin_addr));
-	    fprintf(stderr, "Trying %s...\n",
-		    inet_ntoa(sockin.sin_addr));
-	    continue;
-    	}
-#endif /* !(defined(ultrix) || defined(sun)) */
-    	perror(hp->h_name);
-    	return -1;
+	if (ap->ai_next)
+	    fprintf(stderr, "Trying next address...\n");
     }
-    *sp = s;
-    *sockinp = sockin;
-    return 0;
+    return -1;
 }
 
 static int
@@ -704,6 +723,25 @@ reread:
 #endif /* KRB5_KRB4_COMPAT */
 
 
+static int
+setup_socket (struct sockaddr *sa, GETSOCKNAME_ARG3_TYPE len)
+{
+    int s;
+
+    s = socket(sa->sa_family, SOCK_STREAM, 0);
+    if (s < 0)
+	return -1;
+
+    if (bind(s, sa, len) < 0)
+	return -1;
+    if (getsockname(s, sa, &len) < 0) {
+	close(s);
+	return -1;
+    }
+    return s;
+}
+
+
 int
 getport(alport, family)
     int *alport, *family;
@@ -718,8 +756,6 @@ getport(alport, family)
 	    return s;
 #endif
 	*family = AF_INET;
-	s = getport (alport, family);
-	return s;
     }
 
 #ifdef KRB5_USE_INET6
@@ -727,28 +763,14 @@ getport(alport, family)
 	struct sockaddr_in6 sockin6;
 	GETSOCKNAME_ARG3_TYPE len = sizeof(sockin6);
 
-	s = socket(AF_INET6, SOCK_STREAM, 0);
-	if (s < 0)
-	    return (-1);
-
-	memset((char *) &sockin6, 0,sizeof(sockin6));
+	memset(&sockin6, 0, sizeof(sockin6));
 	sockin6.sin6_family = AF_INET6;
 	sockin6.sin6_addr = in6addr_any;
 
-	if (bind(s, (struct sockaddr *)&sockin6, sizeof (sockin6)) >= 0) {
-	    if (alport) {
-		if (getsockname(s, (struct sockaddr *)&sockin6, &len) < 0) {
-		    (void) close(s);
-		    return -1;
-		} else {
-		    *alport = ntohs(sockin6.sin6_port);
-		}
-	    }
-	    return s;
-	}
-
-	(void) close(s);
-	return -1;
+	s = setup_socket((struct sockaddr *)&sockin6, sizeof (sockin6));
+	if (s >= 0 && alport)
+	    *alport = ntohs(sockin6.sin6_port);
+	return s;
     }
 #endif
 
@@ -756,28 +778,14 @@ getport(alport, family)
 	struct sockaddr_in sockin;
 	GETSOCKNAME_ARG3_TYPE len = sizeof(sockin);
 
-	s = socket(AF_INET, SOCK_STREAM, 0);
-	if (s < 0)
-	    return (-1);
-
-	memset((char *) &sockin, 0,sizeof(sockin));
+	memset(&sockin, 0, sizeof(sockin));
 	sockin.sin_family = AF_INET;
 	sockin.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0) {
-	    if (alport) {
-		if (getsockname(s, (struct sockaddr *)&sockin, &len) < 0) {
-		    (void) close(s);
-		    return -1;
-		} else {
-		    *alport = ntohs(sockin.sin_port);
-		}
-	    }
-	    return s;
-	}
-
-	(void) close(s);
-	return -1;
+	s = setup_socket((struct sockaddr *)&sockin, sizeof (sockin));
+	if (s >= 0 && alport)
+	    *alport = ntohs(sockin.sin_port);
+	return s;
     }
 
     return -1;
