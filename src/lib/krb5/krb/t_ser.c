@@ -167,8 +167,10 @@ ser_data(verbose, msg, ctx, dtype)
 		    krb5_encrypt_block *eblock;
 
 		    eblock = (krb5_encrypt_block *) nctx;
+#if 0
 		    if (eblock->priv && eblock->priv_size)
 			krb5_xfree(eblock->priv);
+#endif
 		    if (eblock->key)
 			krb5_free_keyblock(ser_ctx, eblock->key);
 		    krb5_xfree(eblock);
@@ -525,8 +527,10 @@ ser_eblock_test(kcontext, verbose)
     krb5_use_enctype(kcontext, &eblock, DEFAULT_KDC_ENCTYPE);
     if (!(kret = ser_data(verbose, "> NULL eblock",
 			  (krb5_pointer) &eblock, KV5M_ENCRYPT_BLOCK))) {
+#if 0
 	eblock.priv = (krb5_pointer) stuff;
 	eblock.priv_size = 8;
+#endif
 	if (!(kret = ser_data(verbose, "> eblock with private data",
 			      (krb5_pointer) &eblock,
 			      KV5M_ENCRYPT_BLOCK))) {
@@ -676,9 +680,11 @@ main(argc, argv)
 	case 'C':
 	    do_ctest = 1;
 	    break;
+#if 0
 	case 'E':
 	    do_etest = 1;
 	    break;
+#endif
 	case 'K':
 	    do_ktest = 1;
 	    break;
@@ -737,12 +743,14 @@ main(argc, argv)
 	    if (kret)
 		    goto fail;
     }
+#if 0 /* code to be tested is currently disabled */
     if (do_etest) {
 	    ch_err = 'e';
 	    kret = ser_eblock_test(kcontext, verbose);
 	    if (kret)
 		    goto fail;
     }
+#endif
     if (do_ptest) {
 	    ch_err = 'p';
 	    kret = ser_princ_test(kcontext, verbose);

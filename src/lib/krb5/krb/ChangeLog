@@ -1,5 +1,8 @@
 1999-08-17  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_ser.c (main): Disable eblock serialization test, since the
+	code it tests was disabled nearly a year ago.
+
 	* str_conv.c (krb5_timestamp_to_sfstring): Don't pass extra
 	argument to sprintf.
 
