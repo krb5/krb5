@@ -299,8 +299,6 @@ if test $withval = no; then
 	AC_MSG_RESULT(no krb4 support)
 	KRB4_LIB=
 	KRB4_DEPLIB=
-	DES425_LIB=
-	DES425_DEPLIB=
 	KRB4_INCLUDES=
 	KRB4_LIBPATH=
 	KRB524_DEPLIB=
@@ -309,8 +307,6 @@ if test $withval = no; then
 	krb5_cv_krb4_libdir=
 else 
  ADD_DEF(-DKRB5_KRB4_COMPAT)
- DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
- DES425_LIB=-ldes425
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
 	KRB4_DEPLIB='$(TOPLIBD)/libkrb4$(DEPLIBEXT)'
@@ -337,6 +333,9 @@ AC_SUBST(KRB4_LIB)
 AC_SUBST(KRB4_DEPLIB)
 AC_SUBST(KRB524_DEPLIB)
 AC_SUBST(KRB524_LIB)
+dnl We always compile the des425 library
+DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
+DES425_LIB=-ldes425
 AC_SUBST(DES425_DEPLIB)
 AC_SUBST(DES425_LIB)
 ])dnl

@@ -1,3 +1,9 @@
+2000-02-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4: Define DES425_LIB and DES425_DEPLIB all the time. We
+	build the des425 library all the time and these need to be define
+	for "make check."
+
 2000-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Kludge in the old test for tcl so that we have some
