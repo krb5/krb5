@@ -1,20 +1,25 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libcrypto.$(LIBEXT)
+##DOS!include $(BUILDTOP)\config\windows.in
 
-
-
-OBJS=	crc.o
+OBJS=	crc.$(OBJEXT)
 
 SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 
-crctest: crctest.o $(OBJS)
-	$(RM) crctest
-	$(CC) -o $@ crctest.o $(CCFLAGS) $(OBJS)
+all:: $(OBJS)
 
-check:: crctest
-	./crctest < $(srcdir)/crc-test
+crctest-unix: crctest.$(OBJEXT) $(OBJS)
+	$(RM) crctest
+	$(CC) -o crctest crctest.$(OBJEXT) $(CCFLAGS) $(OBJS)
+
+crctest-windows:
+	$(CC) -o crctest.exe $(CFLAGS2) $(SRCS)
+	$(RM) $(OBJS)
+
+check:: crctest-$(WHAT)
+	$(C)crctest$(EXEEXT) < $(srcdir)$(S)crc-test
 
 clean::
-	$(RM) crctest crctest.o
-
+	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)

@@ -1,3 +1,16 @@
+Mon Feb 6 19:24:13 1995 Keith Vetter (keithv@fusion.com)
+
+        * Makefile.in: made to work under Windows
+           - added windows only make preamble 
+           - moved the all target after the objects it depends on
+           - used $(OBJEXT) and $(EXEEXT) where needed
+           - split crctest into unix rules and windows rules
+           - changed file separatars into macros where needed
+        * crctest.c: changed int to long to work on 16 bit machines
+        * crc.c: added Windows calling convention to the function
+           and casted the assignment of the function.
+
+
 Wed Jan 25 20:01:33 1995  John Gilmore  (gnu at toad.com)
 
 	* crc-32.h:  New file, moved from include/krb5/crc-32.h.

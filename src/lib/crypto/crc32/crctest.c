@@ -38,7 +38,7 @@ main()
     char input[16], expected_crc[16];
     unsigned char inbytes[4], outbytes[4];
     int in_length;
-    unsigned int expect;
+    unsigned long expect;
 
     int bad = 0;
 
