@@ -45,6 +45,7 @@ OBJS	= \
 	$(OUTPRE)gethostname.$(OBJEXT) \
 	$(OUTPRE)getst.$(OBJEXT) \
 	$(OUTPRE)kname_parse.$(OBJEXT) \
+	$(OUTPRE)lifetime.$(OBJEXT) \
 	$(OUTPRE)mk_auth.$(OBJEXT) \
 	$(OUTPRE)mk_err.$(OBJEXT) \
 	$(OUTPRE)mk_priv.$(OBJEXT) \
@@ -79,6 +80,7 @@ SRCS = \
 	$(srcdir)/gethostname.c \
 	$(srcdir)/kname_parse.c \
 	$(srcdir)/err_txt.c \
+	$(srcdir)/lifetime.c \
 	$(srcdir)/g_in_tkt.c \
 	$(srcdir)/mk_auth.c \
 	$(srcdir)/mk_err.c \
