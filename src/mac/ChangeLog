@@ -10,6 +10,20 @@ Wed Jul  1 17:56:04 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 	* Makefile.tmpl: Commit sarac's changes which make the Mac
 		dependencies more sane.
 
+Tue Oct 14 12:39:37 1997 Marshall Vale <mjv@mit.edu> (Added 7/1/98)
+
+	* Makefile.tmpl: Added -init and -term linker args to the
+		shared libraries for CWPro 1. Earlier versions did not
+		require it.
+		
+	* Makefile.tmpl: Added -weaklink of TestTrackLib for SAP
+		version serving compatibility.
+
+Wed Sep 24 12:10:29 1997 Marshall Vale <mjv@mit.edu> (Added 7/1/98)
+
+	* Makefile.tmpl (GSSRTLCFM68K & GSSRTLCFMPPC): Changed from
+		ANSI to MSL runtime libraries.
+		
 Mon Mar 17 15:03:36 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.tmpl (GSSRTLCFMPPC): Add double quotes to prevent Mac
