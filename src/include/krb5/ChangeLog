@@ -1,3 +1,7 @@
+Sun May 19 14:32:19 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Check for uid_t.
+
 Tue Apr 30 17:15:57 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Invoke AC_C_CROSS before AC_TRY_RUN to pretty up
