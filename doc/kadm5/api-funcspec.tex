@@ -428,13 +428,23 @@ information.  There is no default.
 
 \item[admin_dbname] Variable: admin_database_name.  ADBNAME.  Server.
 The administration database name to use; the administration database
-stores policy information.  The default is the value of dbname
-followed by ``.kadm5'', if dbname is set.
+stores policy information.  If DBNAME is specified in the input
+parameters and ADBNAME is not, the admin_database_name variable is
+overridden and the field is set to the value of dbname followed by
+``.kadm5''.  The default, if DBNAME is not set and the variable is not
+defined, is also the value of dbname followed by ``.kadm5'', if dbname
+is set.
 
 \item[admin_lockfile] Variable: admin_database_lockfile.
 ADB_LOCKFILE.  Server.  The administration database lock file name,
-used to lock the administration database.  The default is admin_dbname
-followed by ``.lock'', if admin_dbname is set.
+used to lock the administration database.  If ADBNAME or DBNAME is
+specified in the input parameters and ADB_LOCKFILE is not, the
+admin_database_lockfile variable is overridden and the field is set to
+the value of admin_dbname followed by ``.lock'' (this depends on
+admin_dbname already being set based on DBNAME as described above).
+The default, if neither DBNAME nor ADBNAME is set in the input
+parameters and the variable is not defined, is admin_dbname followed
+by ``.lock'', if admin_dbname is set.
 
 \item[acl_file] Variable: acl_file.  ACL_FILE.  Server.  The admin
 server's ACL file.  No default.
