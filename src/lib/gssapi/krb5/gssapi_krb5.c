@@ -125,7 +125,6 @@ const gss_OID_set_desc * const gss_mech_set_krb5_old = oidsets+1;
 const gss_OID_set_desc * const gss_mech_set_krb5_both = oidsets+2;
 
 g_set kg_vdb = G_SET_INIT;
-static char *kg_ccache_name = NULL;
 
 /** default credential support */
 
@@ -164,8 +163,9 @@ kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status)
      */
     
     if (!err) {
-        /* kg_ccache_name == NULL resets the context default ccache */
-        err = krb5_cc_set_default_name(context, kg_ccache_name);
+        /* if NULL, resets the context default ccache */
+        err = krb5_cc_set_default_name(context,
+				       (char *) k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME));
     }
     
     *minor_status = err;
@@ -177,6 +177,9 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 {
     const char *name = NULL;
     OM_uint32 err = 0;
+    char *kg_ccache_name;
+
+    kg_ccache_name = k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME);
     
     if (kg_ccache_name != NULL) {
 	name = strdup(kg_ccache_name);
@@ -217,6 +220,8 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
 {
     char *new_name = NULL;
     char *swap = NULL;
+    char *kg_ccache_name;
+    krb5_error_code kerr;
 
     if (name) {
 	new_name = malloc(strlen(name) + 1);
@@ -227,9 +232,18 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
 	strcpy(new_name, name);
     }
 
+    kg_ccache_name = k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME);
     swap = kg_ccache_name;
     kg_ccache_name = new_name;
     new_name = swap;
+    kerr = k5_setspecific(K5_KEY_GSS_KRB5_CCACHE_NAME, kg_ccache_name);
+    if (kerr != 0) {
+	/* Can't store, so free up the storage.  */
+	free(kg_ccache_name);
+	/* ??? free(new_name); */
+	*minor_status = kerr;
+	return GSS_S_FAILURE;
+    }
 
     free (new_name);
     *minor_status = 0;

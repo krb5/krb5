@@ -1,3 +1,9 @@
+2004-07-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi_krb5.c (kg_ccache_name): Variable deleted.
+	(kg_sync_ccache_name, kg_get_ccache_name, kg_set_ccache_name): Get
+	and set thread-specific values instead.
+
 2004-07-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h (struct _krb5_gss_cred_id_rec): Add a mutex.
