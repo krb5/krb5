@@ -131,9 +131,10 @@ instead of the remote host's realm as determined by
 .IR krb_realmofhost (3).
 .TP
 \fB\-x\fP
-turn on DES encryption for all data passed via the rlogin session.  This
-significantly reduces response time and significantly increases CPU
-utilization.
+turn on DES encryption for data passed via the rlogin session.  This
+applies only to input and output streams, so the username is sent
+unencrypted.  This significantly reduces response time and
+significantly increases CPU utilization.
 .TP
 \fB-PN\fP
 .TP
