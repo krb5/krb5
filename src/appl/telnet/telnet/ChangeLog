@@ -1,3 +1,17 @@
+2001-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* commands.c: Include netdb.h and fake-addrinfo.c.
+	(FAI_PREFIX): Define.
+	(hostaddr): Deleted.
+	(hostaddrstring): New static variable.
+	(status): Use hostaddrstring instead of hostaddr.
+	(tn): Use get{addr,name}info instead of gethostby{name,addr}, and
+	attempt to connect to both IPv6 and IPv4 sockets.  Add workarounds
+	for GNU libc bugs.  Fill in hostaddrstring with printable form of
+	each net address.  Source routing is still IPv4-only.
+
+	* configure.in: Run KRB5_AC_INET6.
+
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnet.c (setupterm): Now static.

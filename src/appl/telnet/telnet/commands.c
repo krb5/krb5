@@ -105,6 +105,7 @@
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
+#include <netdb.h>
 
 #ifndef MAXDNAME
 #define MAXDNAME 256 /*per the rfc*/
@@ -118,9 +119,12 @@ int tos = -1;
 static	unsigned long sourceroute(char *, char **, int *);
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 
+#define FAI_PREFIX telnet
+#include "fake-addrinfo.c"
+
 char	*hostname;
 static char _hostname[MAXDNAME];
-struct in_addr hostaddr;
+static char hostaddrstring[NI_MAXHOST];
 
 extern char *getenv();
 
@@ -2314,7 +2318,7 @@ status(argc, argv)
     char *argv[];
 {
     if (connected) {
-	printf("Connected to %s (%s).\r\n", hostname, inet_ntoa(hostaddr));
+	printf("Connected to %s (%s).\r\n", hostname, hostaddrstring);
 	if ((argc < 2) || strcmp(argv[1], "notmuch")) {
 	    int mode = getconnmode();
 
@@ -2402,18 +2406,14 @@ tn(argc, argv)
     int argc;
     char *argv[];
 {
-    register struct hostent *host = 0;
-    struct sockaddr_in sin4;
-    struct servent *sp = 0;
-    unsigned long temp;
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     char *srp = 0;
     int srlen;
 #endif
     char *cmd, *hostp = 0, *portp = 0, *volatile user = 0;
-
-    /* clear the socket address prior to use */
-    memset((char *)&sin4, 0, sizeof(sin4));
+    struct addrinfo *addrs = 0, *addrp;
+    struct addrinfo hints;
+    int error;
 
     if (connected) {
 	printf("?Already connected to %s\r\n", hostname);
@@ -2462,8 +2462,22 @@ tn(argc, argv)
     if (hostp == 0)
 	goto usage;
 
+    if (portp) {
+	if (*portp == '-') {
+	    portp++;
+	    telnetport = 1;
+	} else
+	    telnetport = 0;
+    } else {
+	portp = "telnet";
+	telnetport = 1;
+    }
+
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     if (hostp[0] == '@' || hostp[0] == '!') {
+	static struct sockaddr_in sr_sin4;
+	static struct addrinfo sr_addr;
+	unsigned long temp;
 	if ((hostname = strrchr(hostp, ':')) == NULL)
 	    hostname = strrchr(hostp, '@');
 	hostname++;
@@ -2476,83 +2490,110 @@ tn(argc, argv)
 	    printf("Bad source route option: %s\r\n", hostp);
 	    return 0;
 	} else {
-	    sin4.sin_addr.s_addr = temp;
-	    sin4.sin_family = AF_INET;
+	    sr_sin4.sin_addr.s_addr = temp;
+	    sr_sin4.sin_family = AF_INET;
+#ifdef HAVE_SA_LEN
+	    sr_sin4.sin_len = sizeof (sr_sin4);
+#endif
+	    sr_addr.ai_family = AF_INET;
+	    sr_addr.ai_addrlen = sizeof (sr_sin4);
+	    sr_addr.ai_addr = (struct sockaddr *) &sr_sin4;
+	    sr_addr.ai_next = 0;
+	    sr_addr.ai_canonname = hostname;
+	    addrs = &sr_addr;
 	}
     } else {
 #endif
-	temp = inet_addr(hostp);
-	if ((temp & 0xffffffff) != INADDR_NONE) {
-	    sin4.sin_addr.s_addr = temp;
-	    sin4.sin_family = AF_INET;
-	    (void) strncpy(_hostname, hostp, sizeof(_hostname) - 1);  
-	    _hostname[sizeof(_hostname) - 1] = '\0';
-	    hostname = _hostname;
-	} else {
-	    host = gethostbyname(hostp);
-	    if (host) {
-		sin4.sin_family = host->h_addrtype;
-#if	defined(h_addr)		/* In 4.3, this is a #define */
-		memcpy((caddr_t)&sin4.sin_addr,
-		       host->h_addr_list[0], sizeof(sin4.sin_addr));
-#else	/* defined(h_addr) */
-		memcpy((caddr_t)&sin4.sin_addr, host->h_addr, 
-		       sizeof(sin4.sin_addr)); 
-#endif	/* defined(h_addr) */
-		strncpy(_hostname, host->h_name, sizeof(_hostname));
-		_hostname[sizeof(_hostname)-1] = '\0';
+	memset (&hints, 0, sizeof (hints));
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_family = PF_UNSPEC;
+
+
+	/* The GNU Libc (Red Hat Linux 6.1, on x86, which MIT is using
+	   at this time) implementation seems to completely ignore
+	   AI_NUMERICHOST, and contacts DNS anyways.  But other
+	   versions will not, and we do want to treat the two cases a
+	   little differently.  */
+#ifdef AF_INET6
+#define IS_NUMERIC_ADDR(P) \
+	('\0' == (P)[strspn((P), (strchr((P),':') ? "abcdefABCDEF:0123456789." : "0123456789."))])
+#else
+#define IS_NUMERIC_ADDR(P) \
+	('\0' == (P)[strspn((P), "0123456789.")])
+#endif
+	if (! IS_NUMERIC_ADDR (hostp))
+	    goto not_numeric;
+
+
+	hints.ai_flags = AI_NUMERICHOST;
+	error = getaddrinfo (hostp, portp, &hints, &addrs);
+	if (error == 0) {
+	    if (getnameinfo (addrs->ai_addr, addrs->ai_addrlen,
+			     _hostname, sizeof(_hostname), 0, 0, NI_NAMEREQD) == 0)
 		hostname = _hostname;
-	    } else {
-		herror(hostp);
-		return 0;
-	    }
-	}
-#if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
-    }
-#endif
-    hostaddr.s_addr = sin4.sin_addr.s_addr;
-    if (portp) {
-	if (*portp == '-') {
-	    portp++;
-	    telnetport = 1;
-	} else
-	    telnetport = 0;
-	sin4.sin_port = atoi(portp);
-	if (sin4.sin_port == 0) {
-	    sp = getservbyname(portp, "tcp");
-	    if (sp)
-		sin4.sin_port = sp->s_port;
-	    else {
-		printf("%s: bad port number\r\n", portp);
-		return 0;
-	    }
 	} else {
-	    sin4.sin_port = htons(sin4.sin_port);
-	}
-    } else {
-	if (sp == 0) {
-	    sp = getservbyname("telnet", "tcp");
-	    if (sp == 0) {
-		fprintf(stderr, "telnet: tcp/telnet: unknown service\n");
-		return 0;
+	not_numeric:
+	    hints.ai_flags = AI_CANONNAME;
+	    error = getaddrinfo (hostp, portp, &hints, &addrs);
+	    if (error == 0) {
+
+		/* Stupid glibc lossage again.  */
+		if (! IS_NUMERIC_ADDR (addrs->ai_canonname)) {
+		    strncpy(_hostname, addrs->ai_canonname, sizeof(_hostname));
+		} else {
+		    fprintf (stderr,
+			     "telnet: system library bug? getaddrinfo returns numeric address\n"
+			     "\tas canonical name of %s\n",
+			     hostp);
+		    strncpy(_hostname, hostp, sizeof (_hostname));
+		}
+
+	    } else {
+		strncpy(_hostname, hostp, sizeof (_hostname));
 	    }
-	    sin4.sin_port = sp->s_port;
+	    hostname = _hostname;
 	}
-	telnetport = 1;
-    }
-    printf("Trying %s...\r\n", inet_ntoa(sin4.sin_addr));
-    do {
-	net = socket(AF_INET, SOCK_STREAM, 0);
-	if (net < 0) {
-	    perror("telnet: socket");
+	if (error) {
+	    fprintf (stderr, "%s/%s: %s\n", hostp, portp, gai_strerror (error));
 	    return 0;
 	}
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
-	if (srp && setsockopt(net, IPPROTO_IP, IP_OPTIONS, (char *)srp, srlen) < 0)
+    }
+#endif
+    for (addrp = addrs; addrp && !connected; addrp = addrp->ai_next) {
+	error = getnameinfo (addrp->ai_addr, addrp->ai_addrlen,
+			     hostaddrstring, sizeof (hostaddrstring),
+			     (char *) NULL, 0, NI_NUMERICHOST);
+	if (error) {
+	    fprintf (stderr, "getnameinfo() error printing address: %s\n",
+		     gai_strerror (error));
+	    strcpy (hostaddrstring, "[address unprintable]");
+	}
+	printf("Trying %s...\r\n", hostaddrstring);
+#if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
+	if (srp && addrp->ai_family != AF_INET) {
+	    printf ("source routing not supported (yet) for address family,"
+		    " trying another address\n");
+	    continue;
+	}
+#endif
+	net = socket(addrp->ai_family, SOCK_STREAM, 0);
+	if (net < 0) {
+	    perror("telnet: socket");
+	    continue;
+	}
+#if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
+	if (srp) {
+	    if (addrp->ai_family != AF_INET)
+		printf ("source routing not supported (yet)"
+			" for address family\n");
+	    else if (setsockopt(net, IPPROTO_IP, IP_OPTIONS,
+				(char *)srp, srlen) < 0)
 		perror("setsockopt (IP_OPTIONS)");
+	}
 #endif
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
-	{
+	if (addrp->ai_family == AF_INET) {
 # if	defined(HAVE_GETTOSBYNAME)
 	    struct tosent *tp;
 	    if (tos < 0 && (tp = gettosbyname("telnet", "tcp")))
@@ -2572,40 +2613,24 @@ tn(argc, argv)
 		perror("setsockopt (SO_DEBUG)");
 	}
 
-	if (connect(net, (struct sockaddr *)&sin4, sizeof (sin4)) < 0) {
-#if	defined(h_addr)		/* In 4.3, this is a #define */
-	    if (host && host->h_addr_list[1]) {
-		int oerrno = errno;
-
-		fprintf(stderr, "telnet: connect to address %s: ",
-						inet_ntoa(sin4.sin_addr));
-		errno = oerrno;
-		perror((char *)0);
-		host->h_addr_list++;
-		memcpy((caddr_t)&sin4.sin_addr, 
-			host->h_addr_list[0], sizeof(sin4.sin_addr));
-		memcpy((caddr_t)&hostaddr,
-		       host->h_addr_list[0], sizeof(sin4.sin_addr));
+	if (connect(net, addrp->ai_addr, addrp->ai_addrlen) < 0) {
+	    if (hostaddrstring[0]) {
+		fprintf(stderr, "telnet: connect to address %s: %s\n",
+			hostaddrstring, strerror (errno));
 		(void) NetClose(net);
 		continue;
 	    }
-#endif	/* defined(h_addr) */
-	    perror("telnet: Unable to connect to remote host");
-	    return 0;
 	}
 	connected++;
-	host = gethostbyaddr((char *) &sin4.sin_addr, sizeof(struct in_addr),
-			     sin4.sin_family);
-	    if (host) {
-	      strncpy(_hostname, host->h_name, sizeof(_hostname));
-		_hostname[sizeof(_hostname)-1] = '\0';
-		hostname = _hostname;
-	    } 
 
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 	auth_encrypt_connect(connected);
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
-    } while (connected == 0);
+    }
+    if (!connected) {
+	perror("telnet: Unable to connect to remote host");
+	return 0;
+    }
     if (user)
       user = strdup(user);
     if (hostp)

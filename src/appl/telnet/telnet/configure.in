@@ -9,6 +9,7 @@ LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
   AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
 ))
+KRB5_AC_INET6
 AC_CHECK_FUNCS(gettosbyname setupterm)
 AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
