@@ -18,13 +18,20 @@ static char rcsid_extern_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <sys/limits.h>
 
 /* real declarations of KDC's externs */
 krb5_rcache kdc_rcache;
 
 krb5_data empty_string = {0, ""};
-krb5_timestamp infinity = LONG_MAX;		/* XXX */
+krb5_timestamp infinity = KRB5_INT32_MAX; /* XXX */
 
 krb5_deltat max_life_for_realm;		/* XXX parameter per-realm? */
 krb5_deltat max_renewable_life_for_realm; /* XXX param per-realm? */
+
+krb5_keyblock master_keyblock;
+krb5_principal master_princ;
+
+char *krb5_mkey_pwd_prompt1 = "Enter KDC database master key:";
+char *krb5_mkey_pwd_prompt2 = "Re-enter KDC database master key to verify:";
+
+
