@@ -11,7 +11,15 @@ case $krb5_cv_host in
 	fi
 	;;
 esac
-AC_CHECK_HEADERS(string.h arpa/nameser.h unistd.h sys/select.h stdlib.h arpa/inet.h sys/filio.h curses.h term.h)
+AC_CHECK_HEADERS(string.h arpa/nameser.h unistd.h sys/select.h stdlib.h arpa/inet.h sys/filio.h curses.h)
+dnl
+dnl On some systems, term.h requires curses.h inclusion
+AC_CHECK_HEADERS(term.h,,,dnl
+[#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+])
+dnl
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
