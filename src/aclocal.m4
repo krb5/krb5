@@ -921,24 +921,24 @@ if test "$TCL_WITH" != no ; then
 	   AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
 	fi
 
-	if test $tcl_header=yes; then
+	if test $tcl_header = yes ; then
 		tcl_lib=no
 		AC_CHECK_LIB(tcl7.6, Tcl_CreateCommand, 
 			TCL_LIBS="$TCL_LIBS -ltcl7.6 -lm $DL_LIB" 
 			tcl_lib=yes,,-lm $DL_LIB)
-		if test $tcl_lib=no; then
+		if test $tcl_lib = no; then
 			AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
 				TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB"
 				tcl_lib=yes,,-lm $DL_LIB)
 
 		fi
-		if test $tcl_lib=no; then
+		if test $tcl_lib = no ; then
 			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
 				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB"
 				tcl_lib=yes,,-lm $DL_LIB)
 
 		fi
-		if test $tcl_lib=no; then		
+		if test $tcl_lib = no ; then		
 			AC_MSG_WARN("tcl.h found but not library")
 		fi
 	else
