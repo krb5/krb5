@@ -101,25 +101,12 @@
    "krb5/encryption.h"
  */
 
-krb5_cs_table_entry * NEAR krb5_csarray[] = {
-    0,				/* ETYPE_NULL */
-    DES_CBC_CRC_CSENTRY,	/* ETYPE_DES_CBC_CRC */
-    0,				/* ETYPE_DES_CBC_MD4 */
-    DES_CBC_MD5_CSENTRY,	/* ETYPE_DES_CBC_MD5 */
-    RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
-};
-
-int krb5_max_cryptosystem = sizeof(krb5_csarray)/sizeof(krb5_csarray[0]) - 1;
-
 krb5_cs_table_entry * NEAR krb5_keytype_array[] = {
     0,				/* KEYTYPE_NULL */
-#if	defined(PROVIDE_DES_CBC_MD5)
-    DES_CBC_MD5_CSENTRY		/* KEYTYPE_DES */
-#elif	defined(PROVIDE_DES_CBC_CRC)
-    DES_CBC_CRC_CSENTRY		/* KEYTYPE_DES */
-#else	/* !PROVIDE_DES_CBC_MD5 && !PROVIDE_DES_CBC_CRC */
-    0
-#endif	/* !PROVIDE_DES_CBC_MD5 && !PROVIDE_DES_CBC_CRC */
+    DES_CBC_CRC_CSENTRY,	/* KEYTYPE_DES_CBC_CRC */
+    0,				/* KEYTYPE_DES_CBC_MD4 */
+    DES_CBC_MD5_CSENTRY,	/* KEYTYPE_DES_CBC_MD5 */
+    RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
 };
 
 int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]) - 1;
