@@ -93,7 +93,7 @@ test_win {pol2} {successful change} pol2 pol222222 polbbbbbb
 
 test_3pass {pol2} {D.15: too soon to change password} pol2 \
 	polbbbbbb pol222222 pol222222 \
-	4 {Password cannot be changed because it was changed too recently.  Please wait until .*199[0-9] before you change it.  If you need to change your password before then, contact your system security administrator.}
+	4 {Password cannot be changed because it was changed too recently.  Please wait until .*[12][0-9][0-9][0-9] before you change it.  If you need to change your password before then, contact your system security administrator.}
 
 verbose "(sleeping 30 seconds)"
 catch "exec sleep 30"

@@ -1,3 +1,7 @@
+2000-01-24  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.0/changing.exp: Fix y2k bug.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
