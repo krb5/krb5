@@ -1,3 +1,7 @@
+2004-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* xdr_rec.c (LAST_FRAG): Use 1L in case int is small.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* libgssrpc.exports: Export svc_maxfd.
