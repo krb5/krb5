@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#ifndef _MACINTOSH
+#ifndef macintosh
 #include <gssapi/gssapi_generic.h>
 #else
 #include <gssapi_generic.h>

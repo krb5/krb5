@@ -27,15 +27,15 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 /* Macintoh CFM-68K magic incantation */
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
 #endif
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 #endif
 
@@ -2227,7 +2227,7 @@ KRB5_PROTOTYPE((krb5_context context,
 		char *in_tkt_service));
 
 /* Macintoh CFM-68K magic incantation */
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
 #endif
 

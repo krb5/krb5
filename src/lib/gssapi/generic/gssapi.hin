@@ -27,11 +27,11 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 
 /* Macintoh CFM-68K magic incantation */
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
 #endif
@@ -72,7 +72,7 @@
 /*
  * POSIX says that sys/types.h is where size_t is defined.
  */
-#ifndef _MACINTOSH
+#ifndef macintosh
 #include <sys/types.h>
 #endif
 
@@ -704,7 +704,7 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
 
 /* Macintoh CFM-68K magic incantation */
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
 #endif
 

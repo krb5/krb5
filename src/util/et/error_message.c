@@ -28,13 +28,13 @@
 #define HAVE_STRERROR
 #endif
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define sys_nerr 100
 #endif
 
 #if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
 extern char const * const sys_errlist[];
-#ifndef _MACINTOSH
+#ifndef macintosh
 extern const int sys_nerr;
 #endif
 #endif

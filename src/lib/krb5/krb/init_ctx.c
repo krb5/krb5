@@ -103,7 +103,7 @@ krb5_init_context(context)
 			    "kdc_default_options", 0,
 			    KDC_OPT_RENEWABLE_OK, &tmp);
 	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define DEFAULT_KDC_TIMESYNC 1
 #else
 #define DEFAULT_KDC_TIMESYNC 0
@@ -121,7 +121,7 @@ krb5_init_context(context)
 	 * Note: DCE 1.0.3a only supports a cache type of 1
 	 * 	DCE 1.1 supports a cache type of 2.
 	 */
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define DEFAULT_CCACHE_TYPE 4
 #else
 #define DEFAULT_CCACHE_TYPE 3

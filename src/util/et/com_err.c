@@ -25,7 +25,7 @@
 #if defined(_MSDOS) || defined(_WIN32)
 #include <io.h>
 #endif
-#ifdef _MACINTOSH
+#ifdef macintosh
 #include "icons.h"
 static void MacMessageBox(char *errbuf);
 #endif
@@ -42,7 +42,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	const char FAR *fmt;
 	va_list ap;
 {
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 
 	char errbuf[1024] = "";
 
@@ -57,7 +57,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	if (fmt)
 		vsprintf (errbuf + strlen (errbuf), fmt, ap);
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 	MacMessageBox(errbuf);
 #else
 #ifdef _WIN32
@@ -69,9 +69,9 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	} else
 #endif /* _WIN32 */
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
-#endif /* _MACINTOSH */
+#endif /* macintosh */
 
-#else /* !_MSDOS && !_WIN32 && !_MACINTOSH */
+#else /* !_MSDOS && !_WIN32 && !macintosh */
     
 	if (whoami) {
 		fputs(whoami, stderr);
@@ -147,7 +147,7 @@ et_old_error_hook_func reset_com_err_hook ()
 }
 #endif
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 static void MacMessageBox(errbuf)
 	char *errbuf;
 {

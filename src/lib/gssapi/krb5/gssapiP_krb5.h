@@ -38,7 +38,7 @@
 #undef minor
 #endif
 
-#ifndef _MACINTOSH
+#ifndef macintosh
 #include "../generic/gssapiP_generic.h"
 #else
 #include "gssapiP_generic.h"

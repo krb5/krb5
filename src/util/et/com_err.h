@@ -20,13 +20,9 @@
 #define unix
 #endif
 
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
-#define _MACINTOSH
-#endif
-
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
 #endif
@@ -43,7 +39,7 @@
 #define NEAR
 #endif
 
-#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 
 /* End-user programs may need this -- oh well */
 #ifndef HAVE_STDARG_H
@@ -108,7 +104,7 @@ extern et_old_error_hook_func reset_com_err_hook
 }
 #endif
 
-#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
 #endif
 

@@ -26,7 +26,7 @@
 
 #include "fcc.h"
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define register
 #endif
 

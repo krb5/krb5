@@ -62,7 +62,7 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_adm_disconnect
 		   krb5_auth_context,
 		   krb5_ccache));
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
 	KRB5_PROTOTYPE((krb5_context,

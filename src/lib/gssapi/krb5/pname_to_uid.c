@@ -25,14 +25,14 @@
  */
 
 #include "gssapiP_krb5.h"
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <string.h>
 #include <pwd.h>
 #include <sys/types.h>
-#endif	/* !_MSDOS && !_MACINTOSH */
+#endif	/* !_MSDOS && !macintosh */
 
 /* 
  * This function will probably get replaced with the gsscred stuff...
@@ -46,7 +46,7 @@ gss_OID name_type;
 gss_OID mech_type;
 uid_t * uid;
 {
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 	return (0);		/* failure */
 #else
 

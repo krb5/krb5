@@ -183,7 +183,7 @@ asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
   return 0;
 }
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define EPOCH ((70 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + (getTimeZoneOffset() * 60 * 60))
 #else
 #define EPOCH (0)

@@ -216,7 +216,7 @@ HINSTANCE get_lib_instance(void);
 
 #endif /* _MSDOS || _WIN32 */
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
@@ -290,9 +290,9 @@ int fstat(int fildes, struct stat *buf);
 #define _MACSOCKAPI_
 
 #define THREEPARAMOPEN(x,y,z) open(x,y)
-#else /* _MACINTOSH */
+#else /* macintosh */
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
-#endif /* _MACINTOSH */
+#endif /* macintosh */
 
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV

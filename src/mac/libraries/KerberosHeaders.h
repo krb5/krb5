@@ -11,7 +11,7 @@
  */
 #define KRB5 1
 
-#define _MACINTOSH
+#define macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define ENOMEM -1

@@ -295,7 +295,7 @@ static void output_quoted_string(str, f)
 #define EOL "\r\n"
 #endif
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 #define EOL "\r"
 #endif
 

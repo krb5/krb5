@@ -98,7 +98,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     const int lnsize;
     char *lname;
 {
-#if	(!defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH))
+#if	(!defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh))
     DBM *db;
     krb5_error_code retval;
     datum key, contents;

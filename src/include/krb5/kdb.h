@@ -56,7 +56,7 @@
 #define KRB5_KDB_CREATE_BTREE		0x00000001
 #define KRB5_KDB_CREATE_HASH		0x00000002
 
-#if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
+#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
 
 /*
  * Note --- these structures cannot be modified without changing the
@@ -448,5 +448,5 @@ krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
 #endif	/* KDB5_DISPATCH */
 #endif /* notdef */
-#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) &&!defined(_WIN32) */
+#endif /* !defined(macintosh) && !defined(_MSDOS) &&!defined(_WIN32) */
 #endif /* KRB5_KDB5__ */
