@@ -1,3 +1,14 @@
+
+Tue Dec 12 00:59:17 1995  Chris Provenzano (proven@mit.edu)
+
+	* adm.h: Added principal flag keywords KRB5_ADM_KW_SETFLAGS and
+		KRB5_ADM_KW_UNSETFLAGS because relative flag modification 
+		is just a good idea.
+	* kdb.h: typedef kdb5_dispatch_table so prototypes that need it
+		compile even if KDB5_DISPATCH isn't defined.
+	* kdb_dbc.h: The start of the database context, which should be
+		removed from the krb5_context.
+
 Sun Dec 10 11:02:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* adm_proto.h: Add prototype for krb5_input_flag_to_string.

@@ -422,6 +422,8 @@ typedef struct _kdb5_dispatch_table {
 
 krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 						  kdb5_dispatch_table *));
+#else
+typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
 #endif	/* KDB5_DISPATCH */
 #endif /* !defined(_MACINTOSH) && !defined(_MSDOS) */
 #endif /* KRB5_KDB5__ */
