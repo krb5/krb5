@@ -1,3 +1,8 @@
+Wed Jan 21 11:39:11 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Added kpasswd_port variable to kdc.conf creation.
+	(proven@cygnus.com)
+
 Mon Nov 25 14:23:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* defualt.exp: Ezra's fix so that the dejagnu tests don't bomb out

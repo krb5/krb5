@@ -344,6 +344,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		key_stash_file = $tmppwd/stash"
 	puts $conffile "		acl_file = $tmppwd/acl"
 	puts $conffile "		kadmind_port = 3750"
+	puts $conffile "		kpasswd_port = 3751"
 	puts $conffile "		max_life = 1:00:00"
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		master_key_type = des-cbc-md5"
