@@ -1,0 +1,729 @@
+/*
+ * generic imake template
+ */
+
+/**/###########################################################################
+/**/# Makefile generated from IMAKE_TEMPLATE and INCLUDE_IMAKEFILE
+/**/# $XConsortium: Imake.tmpl,v 1.77 89/12/18 17:01:37 jim Exp $
+/**/#
+/**/# Platform-specific parameters may be set in the appropriate .cf
+/**/# configuration files.  Site-wide parameters may be set in the file
+/**/# site.def.  Full rebuilds are recommended if any parameters are changed.
+/**/#
+/**/# If your C preprocessor doesn't define any unique symbols, you'll need
+/**/# to set BOOTSTRAPCFLAGS when rebuilding imake (usually when doing
+/**/# "make Makefile", "make Makefiles", or "make World").
+/**/#
+/**/# If you absolutely can't get imake to work, you'll need to set the 
+/**/# variables at the top of each Makefile as well as the dependencies at the
+/**/# bottom (makedepend will do this automatically).
+/**/#
+
+
+#define	YES	1
+#define NO	0
+
+
+/*
+ * To add support for another platform:
+ * 
+ *     1.  Identify a machine-specific cpp symbol.  If your preprocessor 
+ *         doesn't have any built in, you'll need to add the symbol to the
+ *         cpp_argv table in util/imake/imake.c and rebuild imake with the
+ *         BOOTSTRAPCFLAGS variable set (see the macII for an example).
+ *
+ *     2.  Add all machine-specific cpp symbols (either defined by you or by
+ *         the preprocessor or compiler) to the predefs table in 
+ *         util/makedepend/main.c.
+ *
+ *     3.  But a new #ifdef block below that defines MacroIncludeFile and
+ *         MacroFile for your new platform and then #undefs the machine-
+ *         specific preprocessor symbols (to avoid problems with file names).
+ *
+ *     4.  Create a .cf file with the name given by MacroFile.
+ */
+
+#ifdef ultrix
+#define MacroIncludeFile <ultrix.cf>
+#define MacroFile ultrix.cf
+#ifdef vax
+#undef vax
+#define VaxArchitecture
+#endif
+#ifdef mips
+#undef mips
+#define MipsArchitecture
+#endif
+#undef ultrix
+#define UltrixArchitecture
+#endif
+
+#if defined(vax) && !defined(UltrixArchitecture)
+#define MacroIncludeFile <bsd.cf>
+#define MacroFile bsd.cf
+#undef vax
+#define VaxArchitecture
+#endif
+
+#ifdef sun
+#define MacroIncludeFile <sun.cf>
+#define MacroFile sun.cf
+#undef sun
+#define SunArchitecture
+#endif /* sun */
+
+#ifdef hpux
+#define MacroIncludeFile <hp.cf>
+#define MacroFile hp.cf
+#undef hpux
+#define HPArchitecture
+#endif /* hpux */
+
+#ifdef att
+#define MacroIncludeFile <att.cf>
+#define MacroFile att.cf
+#undef att
+#define ATTArchitecture
+#endif /* att */
+
+#ifdef apollo
+#define MacroIncludeFile <apollo.cf>
+#define MacroFile apollo.cf
+#undef apollo
+#define ApolloArchitecture
+#endif /* apollo */
+
+#ifdef sony
+#define MacroIncludeFile <sony.cf>
+#define MacroFile sony.cf
+#undef sony
+#define SonyArchitecture
+#endif /* sony */
+
+#ifdef M4310
+#define MacroIncludeFile <pegasus.cf>
+#define MacroFile pegasus.cf
+#undef M4310
+#define PegasusArchitecture
+#endif /* M4310 */
+
+#ifdef M4330
+#define MacroIncludeFile <m4330.cf>
+#define MacroFile m4330.cf
+#undef  M4330
+#define M4330Architecture
+#endif /* M4330 */
+
+#ifdef macII
+/* A/UX cpp has no unique symbol:  build imake with BOOTSTRAPCFLAGS=-DmacII */
+#define MacroIncludeFile <macII.cf>
+#define MacroFile macII.cf
+#undef  macII
+#define MacIIArchitecture
+#endif /* macII */
+
+#ifdef CRAY
+#define MacroIncludeFile <cray.cf>
+#define MacroFile cray.cf
+#undef cray
+#undef CRAY
+#define CrayArchitecture
+#endif /* CRAY */
+
+#ifdef sgi
+#define MacroIncludeFile <sgi.cf>
+#define MacroFile sgi.cf
+#undef sgi
+#define SGIArchitecture
+#undef mips
+#define MipsArchitecture
+#endif
+
+#ifdef stellar
+#define MacroIncludeFile <stellar.cf>
+#define MacroFile stellar.cf
+#undef stellar
+#define StellarArchitecture
+#endif
+
+
+/*
+ * A convenience for people running on rt's since they define ibm032, and for
+ * people running AIX (note that AOS will no longer be supported by IBM).
+ */
+#if defined(ibm032) && !defined(ibm)
+#define ibm
+#endif
+
+#if defined(aix) && !defined(ibm)
+#define ibm
+#endif
+
+#if defined(ibm)
+#define MacroIncludeFile <ibm.cf>
+#define MacroFile ibm.cf
+#undef ibm
+#define IBMArchitecture
+#ifdef i386
+#undef i386
+#define PS2Architecture
+#endif
+#ifdef ibm032
+#undef ibm032
+#define RtArchitecture
+#endif
+#ifdef aix
+#undef aix
+#define AIXArchitecture
+#endif
+#endif /* ibm */
+
+
+
+#ifndef MacroIncludeFile
+/**/# WARNING:  Imake.tmpl not configured; guessing at definitions!!!
+/**/# This might mean that BOOTSTRAPCFLAGS wasn't set when building imake.
+#define MacroIncludeFile <generic.cf>
+#define MacroFile generic.cf
+#endif
+
+/*****************************************************************************
+ *                                                                           *
+ *                       DO NOT MODIFY BELOW THIS LINE                       *
+ *                                                                           *
+ *****************************************************************************/
+
+
+/**/###########################################################################
+/**/# platform-specific configuration parameters - edit MacroFile to change
+#include MacroIncludeFile
+
+/**/###########################################################################
+/**/# site-specific configuration parameters - edit site.def to change
+#include <site.def>
+
+/*
+ * defaults for various generic parameters; set in site.def if needed
+ */
+
+#ifndef SystemV
+#ifdef SYSV
+#define SystemV			YES	/* need system 5 style */
+#else
+#define SystemV			NO	/* bsd */
+#endif
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion          0
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          0
+#endif
+#ifndef UnalignedReferencesAllowed
+#define UnalignedReferencesAllowed NO	/* if arbitrary deref is okay */
+#endif
+#ifndef ExecableScripts
+#ifdef SYSV
+#define ExecableScripts		NO
+#else
+#define ExecableScripts		YES	/* kernel exec() can handle #! */
+#endif
+#endif
+
+#ifndef BourneShell			/* to force shell in makefile */
+#define BourneShell		/bin/sh
+#endif
+#ifndef ConstructMFLAGS
+#if SystemV
+#define ConstructMFLAGS		YES	/* build MFLAGS from MAKEFLAGS */
+#else
+#define ConstructMFLAGS		NO	/* build MFLAGS from MAKEFLAGS */
+#endif
+#endif
+
+#ifndef HasLargeTmp
+#define HasLargeTmp		NO	/* be paranoid */
+#endif
+#ifndef HasSockets
+#if SystemV
+#define HasSockets		NO	/* not yet... */
+#else
+#define HasSockets		YES	/* bsd does have them */
+#endif
+#endif
+#ifndef HasVFork
+#if SystemV
+#define HasVFork		NO	/* not yet... */
+#else
+#define HasVFork		YES
+#endif
+#endif
+#ifndef HasPutenv
+#define HasPutenv		NO	/* assume not */
+#endif
+#ifndef HasVoidSignalReturn
+#if SystemV
+#define HasVoidSignalReturn	YES
+#else
+#define HasVoidSignalReturn	NO	/* may or may not be true */
+#endif
+#endif
+#ifndef HasBsearch
+#if SystemV
+#define HasBsearch		YES
+#else
+#define HasBsearch		NO	/* stupid systems */
+#endif
+#endif
+#ifndef HasSaberC
+#define HasSaberC		NO	/* for people unclear on the concept */
+#endif
+#ifndef HasFortran
+#define HasFortran		NO
+#endif
+#ifndef HasNdbm
+#define HasNdbm			NO
+#endif
+#ifndef HasDESLibrary
+#define HasDESLibrary		NO	/* if you have any DES library */
+#endif
+#ifndef NeedFunctionPrototypes
+#define NeedFunctionPrototypes NO
+#endif
+#ifndef NeedWidePrototypes
+#define NeedWidePrototypes	YES	/* mix and match ANSI-C, non-ANSI */
+#endif
+
+#ifndef HasSunOSSharedLibraries
+#define HasSunOSSharedLibraries NO
+#endif
+
+#ifndef SharedCodeDef
+#if HasSunOSSharedLibraries
+#define SharedCodeDef -DSHAREDCODE
+#else
+#define SharedCodeDef /**/
+#endif
+#endif
+#ifndef SharedLibraryDef
+#if HasSunOSSharedLibraries
+#define SharedLibraryDef -DSUNSHLIB	/* eventually will be SVR4SHLIB... */
+#ifndef HasSharedLibraries
+#define HasSharedLibraries YES
+#endif
+#else
+#define SharedLibraryDef /**/
+#ifndef HasSharedLibraries
+#define HasSharedLibraries NO
+#endif
+#endif
+#else
+#ifndef HasSharedLibraries
+#define HasSharedLibraries NO
+#endif
+#endif
+
+#ifndef StripInstalledPrograms
+#define StripInstalledPrograms NO	/* leave symbol table just in case */
+#endif
+
+#ifndef DestDir
+#define DestDir /* as nothing */
+#endif
+#ifndef UsrLibDir			/* if changed under SunOS with shared */
+#define UsrLibDir $(DESTDIR)/usr/lib	/* libs, then need to run ldconfig */
+#endif					/* as root */
+#ifndef IncRoot
+#define IncRoot $(DESTDIR)/usr/include
+#endif
+#ifndef UNCOMPRESSPATH
+#define UNCOMPRESSPATH /usr/ucb/uncompress
+#endif
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags -O
+#endif
+#ifndef DebuggableCDebugFlags
+#define DebuggableCDebugFlags -g
+#endif
+#ifndef NoOpCDebugFlags
+#define NoOpCDebugFlags /* as nothing */
+#endif
+#ifndef DefaultCDebugFlags
+#define DefaultCDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef LibraryCDebugFlags
+#define LibraryCDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef DefaultCCOptions
+#define DefaultCCOptions /* as nothing: this is for floating point, etc. */
+#endif
+#ifndef LibraryCCOptions
+#define LibraryCCOptions DefaultCCOptions
+#endif
+#ifndef ServerCCOptions
+#define ServerCCOptions DefaultCCOptions
+#endif
+#ifndef PexCDebugFlags
+#define PexCDebugFlags -g
+#endif
+#ifndef InstPgmFlags
+#define InstPgmFlags -s
+#endif
+#ifndef InstBinFlags
+#define InstBinFlags -m 0755
+#endif
+#ifndef InstUidFlags
+#define InstUidFlags -m 4755
+#endif
+#ifndef InstLibFlags
+#define InstLibFlags -m 0664
+#endif
+#ifndef InstIncFlags
+#define InstIncFlags -m 0444
+#endif
+#ifndef InstManFlags
+#define InstManFlags -m 0444
+#endif
+#ifndef InstDatFlags
+#define InstDatFlags -m 0444
+#endif
+#ifndef InstKmemFlags
+#define InstKmemFlags InstUidFlags    /* put -g kmem -m 2755 in site.def... */
+#endif
+#ifndef ArCmd
+#if HasLargeTmp
+#define ArCmd ar cq	/* use /tmp for temp files */
+#else
+#define ArCmd ar clq	/* use local dir for temp files */
+#endif
+#endif
+#ifndef BootstrapCFlags
+#define BootstrapCFlags /**/
+#endif
+#ifndef CcCmd
+#define CcCmd cc
+#endif
+#ifndef HasGcc
+#define HasGcc NO
+#endif
+#ifndef ServerCcCmd
+#define ServerCcCmd CcCmd
+#endif
+#ifndef LibraryCcCmd
+#define LibraryCcCmd CcCmd
+#endif
+#if HasFortran
+#ifndef FortranCmd			/* for xgks */
+#define FortranCmd f77
+#endif
+#ifndef FortranFlags
+#define FortranFlags /**/
+#endif
+#ifndef FortranDebugFlags
+#define FortranDebugFlags /**/		/* for -O or -g */
+#endif
+#endif
+#ifndef AsCmd
+#define AsCmd as
+#endif
+#ifndef CompressCmd
+#define CompressCmd compress
+#endif
+#ifndef CppCmd
+#define CppCmd /lib/cpp
+#endif
+#ifndef PreProcessCmd
+#define PreProcessCmd CcCmd -E
+#endif
+#ifndef InstallCmd
+#if SystemV
+#define InstallCmd $(SCRIPTSRC)/bsdinst.sh	/* hack should be in project */
+#else
+#define InstallCmd install
+#endif
+#endif
+#ifndef LdCmd
+#define LdCmd ld
+#endif
+#ifndef LintCmd
+#define LintCmd lint
+#endif
+#ifndef LintLibFlag
+#if SystemV
+#define LintLibFlag -o
+#else
+#define LintLibFlag -C
+#endif
+#endif
+#ifndef LintOpts
+#if SystemV
+#define LintOpts -ax
+#else
+#define LintOpts -axz
+#endif
+#endif
+#ifndef CpCmd
+#define CpCmd cp
+#endif
+#ifndef LnCmd
+#if SystemV
+#define LnCmd ln /* or even cp */
+#else
+#define LnCmd ln -s
+#endif
+#endif
+#ifndef MakeCmd
+#define MakeCmd make
+#endif
+#ifndef MvCmd
+#define MvCmd mv
+#endif
+#ifndef RanlibCmd
+#if SystemV
+#define RanlibCmd /bin/true
+#else
+#define RanlibCmd ranlib
+#endif
+#endif
+#ifndef RanlibInstFlags
+#define RanlibInstFlags /**/
+#endif
+#ifndef RmCmd
+#define RmCmd rm -f
+#endif
+#ifndef StandardCppDefines
+#if SystemV
+#define StandardCppDefines -DSYSV
+#else
+#define StandardCppDefines /**/
+#endif
+#endif
+#ifndef StandardIncludes
+#define StandardIncludes /**/			/* for platform-specifics */
+#endif
+#ifndef StandardDefines
+#if SystemV
+#define StandardDefines -DSYSV
+#else
+#define StandardDefines /**/
+#endif
+#endif
+#ifndef NdbmDefines
+#if HasNdbm
+#define NdbmDefines -DNDBM
+#else
+#define NdbmDefines /**/
+#endif
+#endif
+#ifndef ExtraLibraries
+#define ExtraLibraries /**/
+#endif
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags /**/
+#endif
+#ifndef LdCombineFlags
+#define LdCombineFlags -X -r
+#endif
+#ifndef CompatibilityFlags
+#define CompatibilityFlags /**/
+#endif
+#ifndef TagsCmd
+#define TagsCmd ctags
+#endif
+#ifndef LoaderLibPrefix
+#define LoaderLibPrefix /**/			/* cray does -l libX11.a */
+#endif
+#ifndef TOPDIR
+#define TOPDIR .
+#endif
+#ifndef CURDIR
+#define CURDIR .
+#endif
+#ifndef FilesToClean
+#define FilesToClean *.CKP *.ln *.BAK *.bak *.o core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut 
+#endif
+
+            SHELL = BourneShell
+
+              TOP = TOPDIR
+      CURRENT_DIR = CURDIR
+
+               AR = ArCmd
+  BOOTSTRAPCFLAGS = BootstrapCFlags	/* set if cpp doesn't have uniq sym */
+               CC = CcCmd
+#if HasFortran
+               FC = FortranCmd
+      FDEBUGFLAGS = FortranDebugFlags
+          FCFLAGS = FortranFlags $(FDEBUGFLAGS)
+#endif
+         COMPRESS = CompressCmd
+              CPP = CppCmd $(STD_CPP_DEFINES)		/* simple filters */
+    PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)	/* prefered; mdep */
+          INSTALL = InstallCmd
+               LD = LdCmd
+             LINT = LintCmd
+      LINTLIBFLAG = LintLibFlag
+         LINTOPTS = LintOpts
+               LN = LnCmd
+             MAKE = MakeCmd
+               MV = MvCmd
+               CP = CpCmd
+           RANLIB = RanlibCmd
+  RANLIBINSTFLAGS = RanlibInstFlags
+               RM = RmCmd
+     STD_INCLUDES = StandardIncludes
+  STD_CPP_DEFINES = StandardCppDefines
+      STD_DEFINES = StandardDefines
+ EXTRA_LOAD_FLAGS = ExtraLoadFlags
+  EXTRA_LIBRARIES = ExtraLibraries
+             TAGS = TagsCmd
+#if ConstructMFLAGS
+           MFLAGS = -$(MAKEFLAGS)
+#endif
+#if HasSharedLibraries
+    SHAREDCODEDEF = SharedCodeDef
+         SHLIBDEF = SharedLibraryDef
+#endif
+#if !HasVoidSignalReturn
+   SIGNAL_DEFINES = -DSIGNALRETURNSINT
+#endif
+/*
+ * The following crap is necessary to support forcing of function prototypes
+ */
+#if NeedFunctionPrototypes
+#define _funcprotodef -DFUNCPROTO
+#else
+#define _funcprotodef /**/
+#endif
+#if NeedWidePrototypes
+#define _wideprotodef /**/
+#else
+#define _wideprotodef -DNARROWPROTO
+#endif
+    PROTO_DEFINES = _funcprotodef _wideprotodef 
+#undef _funcprotodef
+#undef _wideprotodef
+
+#if StripInstalledPrograms
+     INSTPGMFLAGS = InstPgmFlags	/* install flags for stripping */
+#else
+     INSTPGMFLAGS = 
+#endif
+     INSTBINFLAGS = InstBinFlags	/* install flags for programs */
+     INSTUIDFLAGS = InstUidFlags	/* install flags for setuid programs */
+     INSTLIBFLAGS = InstLibFlags	/* install flags for libraries */
+     INSTINCFLAGS = InstIncFlags	/* install flags for headers */
+     INSTMANFLAGS = InstManFlags	/* install flags for man pages */
+     INSTDATFLAGS = InstDatFlags	/* install flags for data files */
+    INSTKMEMFLAGS = InstKmemFlags	/* install flags for /dev/kmem progs */
+
+          DESTDIR = DestDir		/* root of install */
+#ifdef UseInstalled
+     TOP_INCLUDES = -I$(INCROOT)	/* def: for alternative /usr/include */
+#else
+     TOP_INCLUDES = -I$(TOP)		/* def: for builds within tree */
+#endif
+      CDEBUGFLAGS = DefaultCDebugFlags
+        CCOPTIONS = DefaultCCOptions	/* to distinguish from param flags */
+      COMPATFLAGS = CompatibilityFlags
+/*
+ * STD_INCLUDES contains system-specific includes
+ * TOP_INCLUDES specifies how to get to /usr/include or its build substitute
+ * EXTRA_INCLUDES contains project-specific includes set in project incfiles
+ * INCLUDES contains client-specific includes set in Imakefile
+ */
+      ALLINCLUDES = $(STD_INCLUDES) $(TOP_INCLUDES) $(INCLUDES) $(EXTRA_INCLUDES) 
+       ALLDEFINES = $(ALLINCLUDES) $(STD_DEFINES) $(PROTO_DEFINES) $(DEFINES) $(COMPATFLAGS)
+           CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(ALLDEFINES)
+        LINTFLAGS = $(LINTOPTS) -DLINT $(ALLDEFINES)
+           LDLIBS = $(SYS_LIBRARIES) $(EXTRA_LIBRARIES)
+        LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS) 
+   LDCOMBINEFLAGS = LdCombineFlags
+
+        MACROFILE = MacroFile
+           RM_CMD = $(RM) FilesToClean
+
+    IMAKE_DEFINES = /* leave blank, for command line use only */
+#ifdef UseInstalled
+         IRULESRC = $(CONFIGDIR)	/* used in rules file */
+        IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(IRULESRC) $(IMAKE_DEFINES)
+#else
+         IRULESRC = $(CONFIGSRC)
+        IMAKE_CMD = $(NEWTOP)$(IMAKE) -I$(NEWTOP)$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+     ICONFIGFILES = $(IRULESRC)/Imake.tmpl $(IRULESRC)/Imake.rules \
+			$(IRULESRC)/Project.tmpl $(IRULESRC)/site.def \
+			$(IRULESRC)/$(MACROFILE) $(EXTRA_ICONFIGFILES)
+
+
+/*
+ * get project-specific configuration and rules
+ */
+
+#include <Project.tmpl>
+
+
+
+#include <Imake.rules>
+
+/**/###########################################################################
+/**/# start of Imakefile
+#include INCLUDE_IMAKEFILE
+
+/**/###########################################################################
+/**/# common rules for all Makefiles - do not edit
+/*
+ * These need to be here so that rules in Imakefile occur first;  the blank
+ * all is to make sure that an empty Imakefile doesn't default to make clean.
+ */
+emptyrule::
+
+CleanTarget()
+
+#ifndef IHaveSpecialMakefileTarget
+MakefileTarget()
+#endif
+
+TagsTarget()
+#ifdef MakefileAdditions
+MakefileAdditions()
+#endif
+
+#if HasSaberC
+saber:
+	/**/#load $(ALLDEFINES) $(SRCS)
+
+osaber:
+	/**/#load $(ALLDEFINES) $(OBJS)
+#endif
+
+
+#ifdef IHaveSubdirs
+/**/###########################################################################
+/**/# rules for building in SUBDIRS - do not edit
+
+InstallSubdirs($(SUBDIRS))
+InstallManSubdirs($(SUBDIRS))
+CleanSubdirs($(SUBDIRS))
+TagSubdirs($(SUBDIRS))
+MakefileSubdirs($(SUBDIRS))
+IncludesSubdirs($(SUBDIRS))
+
+#else
+/**/###########################################################################
+/**/# empty rules for directories that do not have SUBDIRS - do not edit
+
+install::
+	@echo "install in $(CURRENT_DIR) done"
+
+install.man::
+	@echo "install.man in $(CURRENT_DIR) done"
+
+Makefiles::
+
+includes::
+
+#endif /* if subdirectory rules are needed */
+
+/**/###########################################################################
+/**/# dependencies generated by makedepend

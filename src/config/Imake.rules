@@ -1,0 +1,1411 @@
+/**/###########################################################################
+/**/# Imake rules for building libraries, programs, scripts, and data files
+/**/# rules:  $XConsortium: Imake.rules,v 1.67 89/12/18 17:14:15 jim Exp $
+
+/*
+ *		   MACHINE-INDEPENDENT RULES; DO NOT MODIFY
+ *
+ * Warning, when defining rules: make sure you don't include both a trailing
+ * backslash and double ampersand backslash or else you will get an extra
+ * backslash in the Makefile.
+ * 
+ * These macros are defined for the various templates and Imakefiles (for a 
+ * list of the applicable make variables, see the template files):
+ * 
+ *      SaberProgramTarget          (program,srclist,objlist,locallibs,syslibs)
+ *      RemoveTargetProgram                      (program)
+ *      BuildIncludes                            (srclist,dstdir)
+ *     	NormalProgramTarget         (program,objects,deplibs,locallibs,syslibs)
+ *     	SimpleProgramTarget                      (program)
+ *     	ComplexProgramTarget                     (program)
+ *     	ComplexProgramTarget_1                   (program,locallib,syslib)
+ *     	ComplexProgramTarget_2                   (program,locallib,syslib)
+ *     	ComplexProgramTarget_3                   (program,locallib,syslib)
+ *     	ServerTarget                     (server,subdirs,objects,libs,syslibs)
+ *     	InstallLibrary                           (libname,dest)
+ *     	InstallSharedLibrary                     (libname,rev,dest)
+ *     	InstallLibraryAlias                      (libname,alias,dest)
+ *     	InstallLintLibrary                       (libname,dest)
+ *     	InstallManPageLong                       (file,destdir,dest)
+ *     	InstallManPage                           (file,dest)
+ *     	InstallNonExec                           (file,dest)
+ *     	InstallProgram                           (program,dest)
+ *      InstallProgramWithFlags                  (program,dest,flags)
+ *     	InstallScript                            (program,dest)
+ *      LinkFileList                             (step,list,dir,sub)
+ *      InstallMultipleDestFlags                 (step,list,dest,flags)
+ *      InstallMultipleDest                      (step,list,dest)
+ *     	InstallMultiple                          (list,dest)
+ *      InstallMultipleFlags                     (list,dest,flags)
+ *      InstallMultipleMan                       (list,dest)
+ *     	InstallAppDefaults                       (class)
+ *      DependDependency                         ()
+ *     	DependTarget                             ()
+ *     	CleanTarget                              ()
+ *     	TagsTarget                               ()
+ *      ImakeDependency                          (target)
+ *     	BuildMakefileTarget                      (imakefile,imakeflags)
+ *      MakefileTarget                           ()
+ *     	NormalLibraryObjectRule                  ()
+ *     	ProfiledLibraryObjectRule                ()
+ *     	DebuggedLibraryObjectRule                ()
+ *     	DebuggedAndProfiledLibraryObjectRule     ()
+ *      SharedLibraryObjectRule                  ()
+ *      SharedAndDebuggedLibraryObjectRule       ()
+ *      SpecialObjectRule                        (objs,depends,options)
+ *     	SpecialProfiledObjectRule                (objs,depends,options)
+ *     	SpecialDebuggedObjectRule                (objs,depends,options)
+ *     	SpecialDebuggedAndProfiledObjectRule     (objs,depends,options)
+ *     	NormalLibraryTarget                      (libname,objlist)
+ *      NormalSharedLibraryTarget                (libname,rev,solist,salist)
+ *     	NormalLibraryTarget2                     (libname,objlist1,objlist2)
+ *     	ProfiledLibraryTarget                    (libname,objlist)
+ *     	DebuggedLibraryTarget                    (libname,objlist)
+ *     	AliasedLibraryTarget                     (libname,alias)
+ *     	NormalRelocatableTarget                  (objname,objlist)
+ *     	ProfiledRelocatableTarget                (objname,objlist)
+ *     	DebuggedRelocatableTarget                (objname,objlist)
+ *     	LintLibraryTarget                        (libname,srclist)
+ *      NormalLintTarget                         (srclist)
+ *      LintTarget                               ()
+ *      MakeSubincludesForBuild                  (step,dir,srclist)
+ *      NamedTargetSubdirs                       (name,dirs,verb,flags,subname)
+ *      MakeSubdirs                              (dirs)
+ *      NamedMakeSubdirs                         (name,dirs)
+ *      DependSubdirs                            (dirs)
+ *      InstallSubdirs                           (dirs)
+ *      InstallManSubdirs                        (dirs)
+ *      NamedIncludesSubdirs                     (name,dirs)
+ *      IncludesSubdirs                             (dirs)
+ *      NamedCleanSubdirs                        (name,dirs)
+ *      CleanSubdirs                             (dirs)
+ *      NamedTagSubdirs                          (name,dirs)
+ *      TagSubdirs                               (dirs)
+ *      MakeLintSubdirs                          (dirs,target,subtarget)
+ *      LintSubdirs                              (dirs)
+ *      MakeLintLibSubdirs                       (dirs)
+ *      MakeMakeSubdirs                          (dirs,target)
+ *      MakeNsubdirMakefiles                     ()
+ *      MakefileSubdirs                          (dirs)
+ *      CppScriptTarget                          (dst,src,defs,deplist)
+ *      MakeScriptFromCpp                        (name,defs)
+ *      MakeDirectories                          (step,dirs)
+ *      MakeFonts                                ()
+ *      InstallFonts                             (dest)
+ *      InstallFontAliases                       (dest)
+ *      FontTarget                               (basename)
+ *      CompressedFontTarget                     (basename)
+ *      AllTarget                                (depends)
+ * 
+ * 
+ * The general linking for building programs is:
+ * 
+ *      program-objects programlibs syslibs EXTRA_LIBRARIES systemlibs \
+ *              EXTRA_LOAD_FLAGS
+ *
+ * where programlibs is LOCAL_LIBRARIES for ComplexProgramTarget
+ * and EXTRA comes with syslibs from the LDLIBS
+ */
+
+
+
+/*
+ * SaberProgramTarget - generate rules to make Saber-C read in sources and
+ * objects.
+ */
+#ifndef SaberProgramTarget
+#if HasSaberC
+#define SaberProgramTarget(program,srclist,objlist,locallibs,syslibs)	@@\
+saber_/**/program:							@@\
+	#load $(ALLDEFINES) srclist locallibs $(SYS_LIBRARIES) $(EXTRA_LIBRARIES) syslibs @@\
+									@@\
+osaber_/**/program:							@@\
+	#load $(ALLDEFINES) objlist locallibs $(SYS_LIBRARIES) $(EXTRA_LIBRARIES) syslibs
+
+#else
+#define SaberProgramTarget(program,srclist,objlist,locallibs,syslibs) /**/
+#endif
+#endif
+
+#ifndef RemoveTargetProgram
+#if RemoveTargetProgramByMoving
+#define RemoveTargetProgram(program) \
+$(RM) program; if [ -f program ]; then $(MV) program program/**/~; fi
+#else
+#define RemoveTargetProgram(program) $(RM) program
+#endif
+#endif
+
+#ifndef BuildIncludes
+#define BuildIncludes(srclist,dstsubdir,dstupdir)			@@\
+includes::								@@\
+	$(MKDIRHIER) $(BUILDINCDIR)/dstsubdir				@@\
+	@(set -x; cd $(BUILDINCDIR)/dstsubdir; for i in srclist; do \	@@\
+		$(RM) $$i; \						@@\
+		$(LN) $(BUILDINCTOP)/dstupdir/$(CURRENT_DIR)/$$i .; \	@@\
+	done)
+#endif /* BuildIncludes */
+
+/*
+ * NormalProgramTarget - generate rules to compile and link the indicated 
+ * program; since it does not use any default object files, it may be used for
+ * multiple programs in the same Imakefile.
+ */
+#ifndef NormalProgramTarget
+#define	NormalProgramTarget(program,objects,deplibs,locallibs,syslibs)	@@\
+program: objects deplibs						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ objects $(LDOPTIONS) locallibs $(LDLIBS) syslibs $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+clean::									@@\
+	$(RM) program
+#endif /* NormalProgramTarget */
+
+
+/*
+ * SingleProgramTarget - obsolete version of NormalProgramTarget that doesn't have
+ * deplibs.
+ */
+#ifndef SingleProgramTarget
+#define	SingleProgramTarget(program,objects,locallibs,syslibs)		@@\
+NormalProgramTarget(program,objects, /**/,locallibs,syslibs)
+#endif /* SingleProgramTarget */
+
+/*
+ * SimpleProgramTarget - generate rules for compiling and linking programs
+ * that only have one C source file.  It should only be used in Imakefiles 
+ * that describe a single program.
+ */
+#ifndef SimpleProgramTarget
+#define	SimpleProgramTarget(program)					@@\
+           OBJS = program.o						@@\
+           SRCS = program.c						@@\
+									@@\
+ComplexProgramTarget(program)
+#endif /* SimpleProgramTarget */
+
+
+
+/*
+ * ComplexProgramTarget - generate rules for compiling and linking the 
+ * program specified by $(OBJS) and $(SRCS), installing the program and its
+ * man page, and generating dependencies.  It should only be used in 
+ * Imakefiles that describe a single program.
+ */
+#ifndef ComplexProgramTarget
+#define	ComplexProgramTarget(program)					@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(OBJS) $(LDOPTIONS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+SaberProgramTarget(program,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES), /**/)	@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))					@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAM)
+#endif /* ComplexProgramTarget */
+
+
+/*
+ * ComplexProgramTarget_1 - generate rules for compiling and linking the
+ * program specified by $(OBJS1) and $(SRCS1), installing the program and its
+ * man page, and generating dependencies for it and any programs described
+ * by $(SRCS2) and $(SRCS3).  It should be used to build the primary 
+ * program in Imakefiles that describe multiple programs.
+ */
+#ifndef ComplexProgramTarget_1
+#define	ComplexProgramTarget_1(program,locallib,syslib)			@@\
+            OBJS = $(OBJS1) $(OBJS2) $(OBJS3)				@@\
+            SRCS = $(SRCS1) $(SRCS2) $(SRCS3)				@@\
+									@@\
+AllTarget($(PROGRAMS))							@@\
+									@@\
+program: $(OBJS1) $(DEPLIBS1)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS1) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))					@@\
+									@@\
+SaberProgramTarget(program,$(SRCS1),$(OBJS1),locallib,syslib)		@@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAMS)
+#endif /* ComplexProgramTarget_1 */
+
+
+/*
+ * ComplexProgramTarget_2 - generate rules for compiling and linking the
+ * program specified by $(OBJS2) and $(SRCS2) and installing the program and
+ * man page.  It should be used to build the second program in Imakefiles 
+ * describing more than one program.
+ */
+#ifndef ComplexProgramTarget_2
+#define	ComplexProgramTarget_2(program,locallib,syslib)			@@\
+program: $(OBJS2) $(DEPLIBS2)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS2) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+SaberProgramTarget(program,$(SRCS2),$(OBJS2),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))
+#endif /* ComplexProgramTarget_2 */
+
+
+/*
+ * ComplexProgramTarget_3 - generate rules for compiling and linking the
+ * program specified by $(OBJS3) and $(SRCS3) and installing the program and
+ * man page.  It should be used to build the third program in Imakefiles 
+ * describing more than one program.
+ */
+#ifndef ComplexProgramTarget_3
+#define	ComplexProgramTarget_3(program,locallib,syslib)			@@\
+program: $(OBJS3) $(DEPLIBS3)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS3) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+SaberProgramTarget(program,$(SRCS3),$(OBJS3),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))
+#endif /* ComplexProgramTarget_3 */
+
+
+
+/*
+ * ServerTarget - generate rules to compile, link, and relink an X server.
+ */
+#ifndef ServerTarget
+#define	ServerTarget(server,subdirs,objects,libs,syslibs)		@@\
+server: subdirs objects libs						@@\
+	-@if [ -f server ]; then echo "	$(MV) server server.bak"; \	@@\
+		$(MV) server server.bak; else exit 0; fi		@@\
+	$(CC) $(CDEBUGFLAGS) $(CCOPTIONS) -o server objects libs $(EXTRA_LIBRARIES) syslibs $(EXTRA_LOAD_FLAGS) @@\
+									@@\
+load/**/server:								@@\
+	-@if [ -f server ]; then echo "	$(MV) server server.bak"; \	@@\
+		$(MV) server server.bak; else exit 0; fi		@@\
+	$(CC) $(CDEBUGFLAGS) $(CCOPTIONS) -o server objects libs $(EXTRA_LIBRARIES) syslibs $(EXTRA_LOAD_FLAGS)
+#endif /* ServerTarget */
+
+
+
+
+/*
+ * InstallLibrary - generate rules to install the indicated library.
+ */
+#ifndef InstallLibrary
+#define	InstallLibrary(libname,dest)					@@\
+install:: lib/**/libname.a						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) lib/**/libname.a dest		@@\
+	$(RANLIB) $(RANLIBINSTFLAGS) dest/lib/**/libname.a
+#endif /* InstallLibrary */
+
+/*
+ * MergeIntoInstalledLibrary - generate rules to merge one library into another
+ */
+#ifndef MergeIntoInstalledLibrary
+#define MergeIntoInstalledLibrary(tolib,fromlib)			@@\
+install::  fromlib							@@\
+	$(SCRIPTSRC)/mergelib tolib fromlib
+#endif /* MergeIntoInstalledLibrary */
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: lib/**/libname.so.rev 					@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) lib/**/libname.so.rev dest	@@\
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)			@@\
+install:: lib/**/libname.sa.rev						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) lib/**/libname.sa.rev dest
+
+#endif /* InstallSharedLibraryData */
+
+
+/*
+ * InstallLibraryAlias - generate rules to create a link from one library name
+ * to another for the purposes of aliasing.
+ */
+#ifndef InstallLibraryAlias
+#define	InstallLibraryAlias(libname,alias,dest)				@@\
+install::								@@\
+	-(cd dest; $(LN) lib/**/libname.a lib/**/alias.a)
+#endif /* InstallLibraryAlias */
+
+
+/*
+ * InstallLintLibrary - generate rules to install the indicated lint library.
+ */
+#ifndef InstallLintLibrary
+#define	InstallLintLibrary(libname,dest)				@@\
+install.ln:: llib-l/**/libname.ln					@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) llib-l/**/libname.ln dest
+#endif /* InstallLintLibrary */
+
+
+/*
+ * InstallManPageLong - generate rules to install the indicated manual page,
+ * giving it an alternate name.  This is used for installing man pages whose
+ * base name without the .man suffix would normally be longer than 8 characters
+ * (the limit for using source code control systems on files systems with 
+ * short file names).
+ */
+#ifndef InstallManPageLong
+#define	InstallManPageLong(file,destdir,dest)				@@\
+install.man:: file.man							@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.man destdir/dest.ManSuffix
+#endif /* InstallManPageLong */
+
+
+/*
+ * InstallManPage - generate rules to install the indicated manual page.
+ */
+#ifndef InstallManPage
+#define	InstallManPage(file,dest)					@@\
+InstallManPageLong(file,dest,file)
+#endif /* InstallManPage */
+
+
+/*
+ * InstallNonExec - generate rules to install a data file using any special
+ * install flags
+ */
+#ifndef InstallNonExec
+#define	InstallNonExec(file,dest)					@@\
+install:: file								@@\
+	$(INSTALL) -c $(INSTDATFLAGS) file dest
+#endif /* InstallNonExec */
+
+
+/*
+ * InstallProgramWithFlags - generate rules to install an executable program
+ * using given install flags.
+ */
+#ifndef InstallProgramWithFlags
+#define InstallProgramWithFlags(program,dest,flags)			@@\
+install:: program							@@\
+	$(INSTALL) -c $(INSTPGMFLAGS) flags program dest
+#endif /* InstallProgramWithFlags */
+
+
+/*
+ * InstallProgram - generate rules to install an executable program using any
+ * special install flags set in $(INSTALLFLAGS).
+ */
+#ifndef InstallProgram
+#define	InstallProgram(program,dest)					@@\
+InstallProgramWithFlags(program,dest, /**/)
+#endif /* InstallProgram */
+
+
+
+/*
+ * InstallScript - install a shell script using special install flags set in 
+ * $(INSTALLFLAGS).  This macro has been superceeded by CppScriptTarget.
+ */
+#ifndef InstallScript
+#define	InstallScript(program,dest)					@@\
+install:: program.script						@@\
+	$(INSTALL) -c $(INSTPGMFLAGS) program.script dest/program
+#endif /* InstallScript */
+
+
+/*
+ * LinkFileList - link a list of list of files from one place to another
+ */
+#ifndef LinkFileList
+#define LinkFileList(step,list,dir,sub)					@@\
+step:: list								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	echo "	cd" dir; cd dir; for i in list; do (set -x; $(LN) sub/$$i .); done
+#endif
+
+
+/*
+ * InstallMultipleDestFlags - generate rules to install multiple files at
+ * once during a particular step in the build using a specific set of install 
+ * flags.
+ */
+#ifndef InstallMultipleDestFlags
+#define InstallMultipleDestFlags(step,list,dest,flags)			@@\
+step:: list								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \						@@\
+		(set -x; $(INSTALL) -c flags $$i dest); \		@@\
+	done
+#endif /* InstallMultipleDestFlags */
+
+
+/*
+ * InstallMultipleDest - generate rules to install multiple files at once
+ * during a particular step in the build using any install flags set in 
+ * $(INSTALLFLAGS).
+ */
+#ifndef InstallMultipleDest
+#define InstallMultipleDest(step,list,dest)				@@\
+InstallMultipleDestFlags(step,list,dest,$(INSTALLFLAGS))
+#endif /* InstallMultipleDest */
+
+/*
+ * InstallMultiple - generate rules to install multiple files at once 
+ * during the install step of the build using any install flags set in 
+ * $(INSTALLFLAGS).
+ */
+#ifndef InstallMultiple
+#define	InstallMultiple(list,dest)					@@\
+InstallMultipleDest(install,list,dest)
+#endif /* InstallMultiple */
+
+
+/*
+ * InstallMultipleFlags - generate rules to install multiple files at once
+ * during the install step of the build using the given install flags.
+ */
+#ifndef InstallMultipleFlags
+#define InstallMultipleFlags(list,dest,flags)				@@\
+InstallMultipleDestFlags(install,list,dest,flags)
+#endif /* InstallMultipleFlags */
+
+
+/*
+ * InstallMultipleMan - generate rules to install a variety of manual pages
+ * during the install.man step of the build.
+ */
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)					@@\
+InstallMultipleDest(install.man,list,dest)
+#endif /* InstallMultipleMan */
+
+
+/*
+ * InstallAppDefaults - generate rules to install appliation default files 
+ * if the InstallAppDefFiles configuration parameter is set.
+ */
+#ifndef InstallAppDefaults
+#if InstallAppDefFiles
+#define	InstallAppDefaults(class)					@@\
+install:: class.ad							@@\
+	$(INSTALL) -c $(INSTAPPFLAGS) class.ad $(XAPPLOADDIR)/class
+#else
+#define	InstallAppDefaults(class)
+#endif /* InstallAppDefFiles */
+#endif /* InstallAppDefaults */
+
+
+
+
+/*
+ * DependDependency - generate rules to build the makedepend program if 
+ * this Imakefile is within the source tree.
+ */
+#ifndef DependDependency
+#ifdef UseInstalled
+#define DependDependency() /**/
+#else
+#define DependDependency() 						@@\
+depend:: $(DEPEND)							@@\
+									@@\
+$(DEPEND):								@@\
+	@echo "checking $@ over in $(DEPENDSRC) first..."; \		@@\
+	cd $(DEPENDSRC); $(MAKE); \					@@\
+	echo "okay, continuing in $(CURRENT_DIR)"
+
+#endif /* UseInstalled */
+#endif /* DependDependency */
+
+
+/*
+ * DependTarget - generate rules to compute dependencies for all files listed
+ * in $(SRCS).
+ */
+#ifndef DependTarget
+#define	DependTarget()							@@\
+DependDependency()							@@\
+									@@\
+depend::								@@\
+	$(DEPEND) -s "# DO NOT DELETE" -- $(ALLDEFINES) -- $(SRCS)
+#endif /* DependTarget */
+
+
+/*
+ * CleanTarget - generate rules to remove any garbage files; the #* is here
+ * instead of in the definition of RM_CMD because System V will treat the 
+ * pound sign in the RM_CMD variable as a comment.
+ */
+#ifndef CleanTarget
+#define	CleanTarget()							@@\
+clean::									@@\
+	$(RM_CMD) \#*
+#endif /* CleanTarget */
+
+
+/*
+ * TagsTarget - generate rules to compute tags files for C source code.
+ */
+#ifndef TagsTarget
+#define	TagsTarget()							@@\
+tags::									@@\
+	$(TAGS) -w *.[ch]						@@\
+	$(TAGS) -xw *.[ch] > TAGS
+#endif /* TagsTarget */
+
+
+/*
+ * ImakeDependency - generate rules to compile imake if this Imakefile is
+ * within the source tree.
+ */
+#ifndef ImakeDependency
+#ifdef UseInstalled
+#define ImakeDependency(target) /**/
+#else
+#define ImakeDependency(target)						@@\
+target:: $(IMAKE)							@@\
+									@@\
+$(IMAKE):								@@\
+	@(cd $(IMAKESRC); if [ -f Makefile ]; then \			@@\
+	echo "checking $@ in $(IMAKESRC) first..."; $(MAKE) all; else \	@@\
+	echo "bootstrapping $@ from Makefile.ini in $(IMAKESRC) first..."; \	@@\
+	$(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS=$(BOOTSTRAPCFLAGS); fi; \	@@\
+	echo "okay, continuing in $(CURRENT_DIR)")
+#endif /* UseInstalled */
+#endif /* ImakeDependency */
+
+
+/*
+ * BuildMakefileTarget - generate rules to build a Makefile from an Imakefile
+ * and any special imake flags.  This is generally done automatically by the
+ * template or by any special Imakefiles.
+ */
+#ifndef BuildMakefileTarget
+#define	BuildMakefileTarget(imakefile,imakeflags)			@@\
+ImakeDependency(Makefile)						@@\
+									@@\
+Makefile:: 								@@\
+	-@if [ -f Makefile ]; then \					@@\
+		echo "	$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \ @@\
+		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \	@@\
+	else exit 0; fi							@@\
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags
+
+#endif /* BuildMakefileTarget */
+
+
+/*
+ * MakefileTarget - generate rules to build a normal Makefile.
+ */
+#ifndef MakefileTarget
+#define MakefileTarget()						@@\
+BuildMakefileTarget(Imakefile, /**/)
+#endif /* MakefileTarget */
+
+
+/*
+ * NormalLibraryObjectRule - generate make rules to build "normal" objects.
+ */
+#ifndef NormalLibraryObjectRule
+#define	NormalLibraryObjectRule()					@@\
+.c.o:									@@\
+	$(RM) $@							@@\
+	$(CC) -c $(CFLAGS) $*.c
+#endif /* NormalLibraryObjectRule */
+
+#ifndef NormalFortranObjectRule
+#define NormalFortranObjectRule()					@@\
+.f.o:									@@\
+	$(RM) $@							@@\
+	$(FC) -c $(FCFLAGS) $*.f
+#endif
+
+
+/*
+ * ProfiledLibraryObjectRule - generate make rules to build both profiled
+ * and "normal" objects.
+ */
+#ifndef ProfiledLibraryObjectRule
+#define	ProfiledLibraryObjectRule()					@@\
+all::									@@\
+	@if [ ! -d profiled ]; then mkdir profiled; else exit 0; fi	@@\
+									@@\
+.c.o:									@@\
+	$(RM) $@ profiled/$@						@@\
+	$(CC) -pg -c $(CFLAGS) $*.c					@@\
+	$(MV) $*.o profiled/$*.o					@@\
+	$(CC) -c $(CFLAGS) $*.c						@@\
+									@@\
+clean::									@@\
+	-@if [ -d profiled ]; then echo "	$(RM) profiled/?*.o"; \	@@\
+		$(RM) profiled/?*.o; else exit 0; fi			@@\
+
+#endif /* ProfiledLibraryObjectRule */
+
+
+/*
+ * DebuggedLibraryObjectRule - generate make rules to build both debuggable
+ * and "normal" objects.
+ */
+#ifndef DebuggedLibraryObjectRule
+#define	DebuggedLibraryObjectRule()					@@\
+all::									@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+.c.o:									@@\
+	$(RM) $@ debugger/$@						@@\
+	$(CC) -g -c $(CFLAGS) $*.c					@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(CFLAGS) $*.c						@@\
+									@@\
+clean::									@@\
+	-@if [ -d debugger ]; then echo "	$(RM) debugger/?*.o"; \ @@\
+		$(RM) debugger/?*.o; else exit 0; fi			@@\
+
+#endif /* DebuggedLibraryObjectRule */
+
+
+/*
+ * DebuggedAndProfiledLibraryOjbectRule - generate make rules to build
+ * debuggable, profiled, and "normal" objects.
+ */
+#ifndef DebuggedAndProfiledLibraryObjectRule
+#define	DebuggedAndProfiledLibraryObjectRule()				@@\
+all::									@@\
+	@if [ ! -d profiled ]; then mkdir profiled; else exit 0; fi	@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+.c.o:									@@\
+	$(RM) $@ profiled/$@ debugger/$@				@@\
+	$(CC) -pg -c $(CFLAGS) $*.c					@@\
+	$(MV) $*.o profiled/$*.o					@@\
+	$(CC) -g -c $(CFLAGS) $*.c					@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(CFLAGS) $*.c						@@\
+									@@\
+clean::									@@\
+	-@if [ -d profiled ]; then echo "	$(RM) profiled/?*.o"; \ @@\
+		$(RM) profiled/?*.o; else exit 0; fi			@@\
+	-@if [ -d debugger ]; then echo "	$(RM) debugger/?*.o"; \ @@\
+		$(RM) debugger/?*.o; else exit 0; fi			@@\
+
+#endif /* DebuggedAndProfiledLibraryObjectRule */
+
+
+/*
+ * SharedLibraryObjectRule - generate make rules to build shared and "normal"
+ * object files.
+ */
+#ifndef SharedLibraryObjectRule
+#define SharedLibraryObjectRule()					@@\
+all::									@@\
+	@if [ ! -d shared ]; then mkdir shared; else exit 0; fi		@@\
+									@@\
+.c.o:									@@\
+	$(RM) $@ shared/$@						@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $*.c	@@\
+	$(MV) $*.o shared/$*.o						@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+									@@\
+clean::									@@\
+	-@if [ -d shared ]; then echo "	$(RM) shared/?*.o"; \		@@\
+		$(RM) shared/?*.o; else exit 0; fi			@@\
+
+#endif /* SharedLibraryObjectRule */
+
+/*
+ * SharedAndDebuggedLibraryObjectRule - generate make rules to build shared,
+ * debuggable, and "normal" object files.
+ */
+#ifndef SharedAndDebuggedLibraryObjectRule
+#define SharedAndDebuggedLibraryObjectRule()				@@\
+all::									@@\
+	@if [ ! -d shared ]; then mkdir shared; else exit 0; fi		@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+.c.o:									@@\
+	$(RM) $@ shared/$@ debugger/$@					@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) $*.c	@@\
+	$(MV) $*.o shared/$*.o						@@\
+	$(CC) -g -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) $*.c				@@\
+									@@\
+clean::									@@\
+	-@if [ -d shared ]; then echo "	$(RM) shared/?*.o"; \	@@\
+		$(RM) shared/?*.o; else exit 0; fi			@@\
+	-@if [ -d debugger ]; then echo "	$(RM) debugger/?*.o"; \ @@\
+		$(RM) debugger/?*.o; else exit 0; fi			@@\
+
+#endif /* SharedAndDebuggedLibraryObjectRule */
+
+/*
+ * SpecialSharedAndDebuggedObjectRule - generate rules to compile a file 
+ * with special flags and to make shared and debuggable versions.
+ */
+#ifndef SpecialSharedAndDebuggedObjectRule
+#define	SpecialSharedAndDebuggedObjectRule(objs,depends,options)	@@\
+all::									@@\
+	@if [ ! -d shared ]; then mkdir shared; else exit 0; fi		@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+objs:	depends								@@\
+	$(RM) $@ shared/$@ debugger/$@					@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) options $*.c @@\
+	$(MV) $*.o shared/$*.o						@@\
+	$(CC) -g -c $(SHLIBDEF) $(CFLAGS) options $*.c			@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) options $*.c
+#endif /* SpecialDebuggedAndProfiledObjectRule */
+
+/*
+ * SpecialSharedObjectRule - generate rules to compile a file 
+ * with special flags and to make shared and debuggable versions.
+ */
+#ifndef SpecialSharedObjectRule
+#define	SpecialSharedObjectRule(objs,depends,options)			@@\
+all::									@@\
+	@if [ ! -d shared ]; then mkdir shared; else exit 0; fi		@@\
+									@@\
+objs:	depends								@@\
+	$(RM) $@ shared/$@ 						@@\
+	$(CC) -pic -c $(SHAREDCODEDEF) $(SHLIBDEF) $(CFLAGS) options $*.c @@\
+	$(MV) $*.o shared/$*.o						@@\
+	$(CC) -c $(SHLIBDEF) $(CFLAGS) options $*.c
+#endif /* SpecialDebuggedAndProfiledObjectRule */
+
+
+
+/*
+ * SpecialObjectRule - generate rules to compile a file with special flags.
+ */
+#ifndef SpecialObjectRule
+#define SpecialObjectRule(objs,depends,options)				@@\
+objs:	depends								@@\
+	$(RM) $@							@@\
+	$(CC) -c $(CFLAGS) options $*.c
+#endif /* SpecialObjectRule */
+
+
+/*
+ * SpecialProfiledObjectRule - generate rules to compile a file with special
+ * flags and to make a profiled version.
+ */
+#ifndef SpecialProfiledObjectRule
+#define	SpecialProfiledObjectRule(objs,depends,options)			@@\
+all::									@@\
+	@if [ ! -d profiled ]; then mkdir profiled; else exit 0; fi	@@\
+									@@\
+objs:	depends								@@\
+	$(RM) $@ profiled/$@						@@\
+	$(CC) -pg -c $(CFLAGS) options $*.c				@@\
+	$(MV) $*.o profiled/$*.o					@@\
+	$(CC) -c $(CFLAGS) options $*.c
+#endif /* SpecialProfiledObjectRule */
+
+
+/*
+ * SpecialDebuggedObjectRule - generate rules to compile a file with special
+ * flags and to make a debuggable version.
+ */
+#ifndef SpecialDebuggedObjectRule
+#define	SpecialDebuggedObjectRule(objs,depends,options)			@@\
+all::									@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+objs:	depends								@@\
+	$(RM) $@ debugger/$@						@@\
+	$(CC) -g -c $(CFLAGS) options $*.c				@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(CFLAGS) options $*.c
+#endif /* SpecialDebuggedObjectRule */
+
+
+/*
+ * SpecialDebuggedAndProfiledObjectRule - generate rules to compile a file 
+ * with special flags and to make debuggable and profiled versions.
+ */
+#ifndef SpecialDebuggedAndProfiledObjectRule
+#define	SpecialDebuggedAndProfiledObjectRule(objs,depends,options)	@@\
+all::									@@\
+	@if [ ! -d profiled ]; then mkdir profiled; else exit 0; fi	@@\
+	@if [ ! -d debugger ]; then mkdir debugger; else exit 0; fi	@@\
+									@@\
+objs:	depends								@@\
+	$(RM) $@ profiled/$@ debugger/$@				@@\
+	$(CC) -pg -c $(CFLAGS) options $*.c				@@\
+	$(MV) $*.o profiled/$*.o					@@\
+	$(CC) -g -c $(CFLAGS) options $*.c				@@\
+	$(MV) $*.o debugger/$*.o					@@\
+	$(CC) -c $(CFLAGS) options $*.c
+#endif /* SpecialDebuggedAndProfiledObjectRule */
+
+
+/*
+ * NormalLibraryTarget - generate rules to create a library.
+ */
+#ifndef NormalLibraryTarget
+#define	NormalLibraryTarget(libname,objlist)				@@\
+AllTarget(lib/**/libname.a)						@@\
+									@@\
+lib/**/libname.a: objlist						@@\
+	$(RM) $@							@@\
+	$(AR) $@ objlist						@@\
+	$(RANLIB) $@
+#endif /* NormalLibraryTarget */
+
+
+/*
+ * NormalSharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that the we don't hose people by having
+ * the library gone for long periods.
+ */
+#ifndef NormalSharedLibraryTarget
+#define NormalSharedLibraryTarget(libname,rev,solist)			@@\
+AllTarget(lib/**/libname.so.rev)					@@\
+									@@\
+lib/**/libname.so.rev:  solist						@@\
+	$(RM) $@~							@@\
+	(cd shared; $(LD) -o ../$@~ -assert pure-text solist)		@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+									@@\
+clean::									@@\
+	$(RM) lib/**/libname.so.rev
+
+#endif
+
+/*
+ * NormalSharedLibraryDataTarget - generate rules to create shlib data file;
+ * build it into a different name so that the we don't hose people by having
+ * the library gone for long periods.
+ */
+#ifndef NormalSharedLibraryDataTarget
+#define NormalSharedLibraryDataTarget(libname,rev,salist)		@@\
+AllTarget(lib/**/libname.sa.rev)					@@\
+									@@\
+lib/**/libname.sa.rev:  salist						@@\
+	$(RM) $@							@@\
+	$(AR) $@ salist							@@\
+	$(RANLIB) $@							@@\
+									@@\
+clean::									@@\
+	$(RM) lib/**/libname.sa.rev
+
+#endif /* NormalSharedLibraryTarget */
+
+
+
+
+
+/*
+ * NormalLibraryTarget2 - generate rules to create a library in two steps.
+ * This is used to create libraries with large numbers of files.
+ */
+#ifndef NormalLibraryTarget2
+#define	NormalLibraryTarget2(libname,objlist1,objlist2)			@@\
+AllTarget(lib/**/libname.a)						@@\
+									@@\
+lib/**/libname.a: objlist1 objlist2					@@\
+	$(RM) $@							@@\
+	$(AR) $@ objlist1						@@\
+	$(AR) $@ objlist2						@@\
+	$(RANLIB) $@
+#endif /* NormalLibraryTarget2 */
+
+
+/*
+ * ProfiledLibraryTarget - generate rules to create a profiled library.
+ */
+#ifndef ProfiledLibraryTarget
+#define	ProfiledLibraryTarget(libname,objlist)				@@\
+AllTarget(lib/**/libname/**/_p.a)					@@\
+									@@\
+lib/**/libname/**/_p.a: objlist						@@\
+	$(RM) $@							@@\
+	cd profiled; $(AR) ../$@ objlist				@@\
+	$(RANLIB) $@
+
+#endif /* ProfiledLibraryTarget */
+
+
+/*
+ * DebuggedLibraryTarget - generate rules to create a debuggable library.
+ */
+#ifndef DebuggedLibraryTarget
+#define	DebuggedLibraryTarget(libname,objlist)				@@\
+AllTarget(lib/**/libname/**/_d.a)					@@\
+									@@\
+lib/**/libname/**/_d.a: objlist						@@\
+	$(RM) $@							@@\
+	cd debugger; $(AR) ../$@ objlist				@@\
+	$(RANLIB) $@
+
+#endif /* DebuggedLibraryTarget */
+
+
+/*
+ * AliasedLibraryTarget - generate rules to link one library to another.
+ */
+#ifndef AliasedLibraryTarget
+#define	AliasedLibraryTarget(libname,alias)				@@\
+AllTarget(lib/**/alias.a)						@@\
+									@@\
+lib/**/alias.a: lib/**/libname.a					@@\
+	$(RM) $@							@@\
+	$(LN) lib/**/libname.a $@
+#endif /* AliasedLibraryTarget */
+
+
+/*
+ * NormalRelocatableTarget - generate rules to produce a relocatable object
+ * file instead of a library.  
+ */
+#ifndef NormalRelocatableTarget
+#define	NormalRelocatableTarget(objname,objlist)			@@\
+AllTarget(objname.o)							@@\
+									@@\
+objname.o: objlist							@@\
+	$(RM) $@							@@\
+	$(LD) $(LDCOMBINEFLAGS) objlist -o $@
+#endif /* NormalRelocatableTarget */
+
+
+/*
+ * ProfiledRelocatableTarget - generate rules to produce a profiled relocatable
+ * object file instead of a library.
+ */
+#ifndef ProfiledRelocatableTarget
+#define	ProfiledRelocatableTarget(objname,objlist)			@@\
+AllTarget(objname/**/_p.o)						@@\
+									@@\
+objname/**/_p.o: objlist						@@\
+	$(RM) $@							@@\
+	$(LD) -X -r objlist -o $@
+
+#endif /* ProfiledRelocatableTarget */
+
+
+/*
+ * DebuggedRelocatableTarget - generate rules to produce a debuggable 
+ * relocatable object file instead of a library.
+ */
+#ifndef DebuggedRelocatableTarget
+#define	DebuggedRelocatableTarget(objname,objlist)			@@\
+AllTarget(objname/**/_d.o)						@@\
+									@@\
+objname/**/_d.o: objlist						@@\
+	$(RM) $@							@@\
+	$(LD) -X -r objlist -o $@
+
+#endif /* DebuggedRelocatableTarget */
+
+
+/*
+ * LintLibraryTarget - generate rules to create a lint library.  Note that the
+ * lint library is always forced to be newer than the library itself.
+ */
+#ifndef LintLibraryTarget
+#define	LintLibraryTarget(libname,srclist)				@@\
+lintlib:: llib-l/**/libname.ln						@@\
+									@@\
+llib-l/**/libname.ln: srclist						@@\
+	$(RM) $@							@@\
+	$(LINT) $(LINTLIBFLAG)/**/libname $(LINTFLAGS) srclist
+#endif /* LintLibraryTarget */
+
+
+/*
+ * NormalLintTarget - generate rules to lint a set of sources.
+ */
+#ifndef NormalLintTarget
+#define NormalLintTarget(srclist)					@@\
+lint:									@@\
+	$(LINT) $(LINTFLAGS) srclist $(LINTLIBS)			@@\
+lint1:									@@\
+	$(LINT) $(LINTFLAGS) $(FILE) $(LINTLIBS)
+#endif /* NormalLintTarget */
+
+
+/*
+ * LintTarget - generate rules to lint $(SRCS)
+ */
+#ifndef LintTarget
+#define LintTarget()							@@\
+NormalLintTarget($(SRCS))
+#endif
+
+
+/*
+ * LinkSourceFile - snag source file from some other directory
+ */
+#ifndef LinkSourceFile
+#define LinkSourceFile(src,dir)						@@\
+src:  dir/src								@@\
+	$(RM) $@							@@\
+	$(LN) $? $@							@@\
+
+#endif
+
+
+
+#ifndef MakeSubincludesForBuild
+#define MakeSubincludesForBuild(step,dir,srclist)			@@\
+step::  dir srclist							@@\
+	@-(list=`echo srclist | sed -e 's/[^ ]*\///g'`; \		@@\
+		set -x; cd dir; $(RM) $$list)				@@\
+	@for i in srclist; do \						@@\
+		(set -x; cd dir; $(LN) ../$$i .); \			@@\
+	done								@@\
+									@@\
+MakeDirectories(dir,dir)						@@\
+									@@\
+clean::									@@\
+	@-(if [ -d dir ]; then \					@@\
+		list=`echo srclist | sed -e 's/[^ ]*\///g'`; \		@@\
+		set -x; cd dir; $(RM) $$list; else exit 0; fi)
+#endif
+
+
+/*
+ * NamedTargetSubdirs - recursively make a series of steps
+ */
+#ifndef NamedTargetSubdirs
+#define NamedTargetSubdirs(name,dirs,verb,flags,subname)		@@\
+name::									@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	for i in dirs ;\						@@\
+	do \								@@\
+		(cd $$i ; echo verb "in $(CURRENT_DIR)/$$i..."; \	@@\
+			$(MAKE) $(MFLAGS) flags subname); \		@@\
+	done
+#endif
+
+
+/*
+ * NamedMakeSubdirs - generate rules to do makes in the given subdirectories.
+ * If you want CDEBUGFLAGS passed along to subdirectories, provide a line like
+ * the following in the appropriate Imakefile
+ * 
+ *         #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
+ */
+#ifndef NamedMakeSubdirs
+#define NamedMakeSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"making" name,PassCDebugFlags,all)
+#endif /* NamedMakeSubdirs */
+
+#ifndef MakeSubdirs
+#define MakeSubdirs(dirs)						@@\
+NamedMakeSubdirs(all,dirs)
+#endif /* MakeSubdirs */
+
+
+/*
+ * DependSubdirs - generate rules to recursively compute dependencies as
+ * part of the make depend step.
+ */
+#ifndef DependSubdirs
+#define DependSubdirs(dirs) \
+NamedTargetSubdirs(depend,dirs,"depending", /**/,depend)
+#endif /* DependSubdirs */
+
+
+/*
+ * InstallSubdirs - generate rules to recursively install programs and files.
+ */
+#ifndef InstallSubdirs
+#define InstallSubdirs(dirs) \
+NamedTargetSubdirs(install,dirs,"installing",DESTDIR='$(DESTDIR)',install)
+#endif /* InstallSubdirs */
+
+
+/*
+ * InstallManSubdirs - generate rules to recursively install manual pages.
+ */
+#ifndef InstallManSubdirs
+#define InstallManSubdirs(dirs) \
+NamedTargetSubdirs(install.man,dirs,"installing man pages",DESTDIR='$(DESTDIR)',install.man)
+#endif /* InstallManSubdirs */
+
+
+/*
+ * IncludesSubdirs - generate rules to recursively put include files in build
+ */
+#ifndef IncludesSubdirs
+#define IncludesSubdirs(dirs) \
+NamedTargetSubdirs(includes,dirs,including, /**/,includes)
+#endif
+
+
+/*
+ * CleanSubdirs - generate rules to recursively clean out garbage files.
+ */
+#ifndef NamedCleanSubdirs
+#define NamedCleanSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"cleaning",RM_CMD='$(RM_CMD)',clean)
+#endif /* NamedCleanSubdirs */
+
+#ifndef CleanSubdirs
+#define CleanSubdirs(dirs) \
+NamedCleanSubdirs(clean,dirs)
+#endif
+
+
+/*
+ * TagSubdirs - generate rules to recursively create tags files.
+ */
+#ifndef NamedTagSubdirs
+#define NamedTagSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"tagging",TAGS='$(TAGS)',tags)
+#endif /* TagSubdirs */
+
+#ifndef TagSubdirs
+#define TagSubdirs(dirs) \
+NamedTagSubdirs(tags,dirs)
+#endif
+
+/*
+ * MakeLintSubdirs - generate rules to recursively lint directories as part 
+ * of the named step.
+ */
+#ifndef MakeLintSubdirs
+#define MakeLintSubdirs(dirs,target,subtarget) \
+NamedTargetSubdirs(target,dirs,"linting" for target and subtarget,DESTDIR='$(DESTDIR)' LINTOPTS='$(LINTOPTS)',subtarget)
+#endif /* MakeLintSubdirs */
+
+
+/*
+ * LintSubdirs - generate rules to recursively lint directories as part of 
+ * the make lint step.
+ */
+#ifndef LintSubdirs
+#define LintSubdirs(dirs)						@@\
+MakeLintSubdirs(dirs,lint,lint)
+#endif /* LintSubdirs */
+
+
+/*
+ * MakeLintLibSubdirs - generate rules to recursively create lint libraries.
+ */
+#ifndef MakeLintLibSubdirs
+#define MakeLintLibSubdirs(dirs)					@@\
+MakeLintSubdirs(dirs,lintlib,lintlib)
+#endif /* MakeLintLibSubdirs */
+
+
+/*
+ * MakeMakeSubdirs - generate rules to recursively recreate Makefiles as part
+ * of the specified step in the build.  If $(TOP) is set to an absolute path, 
+ * don't prepend the ../ prefix.  This makes running things outside of the 
+ * source tree to be much easier.
+ */
+#ifndef MakeMakeSubdirs
+#define MakeMakeSubdirs(dirs,target)					@@\
+target::								@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	for i in dirs ;\						@@\
+	do \								@@\
+		echo "making Makefiles in $(CURRENT_DIR)/$$i..."; \	@@\
+		case "$$i" in \						@@\
+		./?*/?*/?*/?*) newtop=../../../../ sub=subsubsubsub;; \	@@\
+		./?*/?*/?*) newtop=../../../ sub=subsubsub;; \		@@\
+		./?*/?*)    newtop=../../ sub=subsub;; \		@@\
+		./?*)       newtop=../ sub=sub;; \			@@\
+		*/?*/?*/?*)    newtop=../../../../ sub=subsubsubsub;; \	@@\
+		*/?*/?*)    newtop=../../../ sub=subsubsub;; \		@@\
+		*/?*)       newtop=../../ sub=subsub;; \		@@\
+		*)	    newtop=../ sub=sub;; \			@@\
+		esac; \							@@\
+		case "$(TOP)" in \					@@\
+		/?*) newtop=  upprefix=  ;; \				@@\
+		*) upprefix=../ ;; \					@@\
+		esac; \							@@\
+		$(MAKE) $${sub}dirMakefiles UPPREFIX=$$upprefix NEWTOP=$$newtop \		@@\
+		MAKEFILE_SUBDIR=$$i NEW_CURRENT_DIR=$(CURRENT_DIR)/$$i;\ @@\
+	done
+#endif /* MakeMakeSubdirs */
+
+
+/*
+ * MakeNsubdirMakefiles - generate rules to create sub Makefiles.
+ */
+#ifndef MakeNsubdirMakefiles
+#define MakeNsubdirMakefiles()						@@\
+subdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
+	$(MAKE) $(MFLAGS) Makefiles 					@@\
+									@@\
+subsubdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
+	$(MAKE) $(MFLAGS) Makefiles 					@@\
+									@@\
+subsubsubdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi @@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
+	$(MAKE) $(MFLAGS) Makefiles 					@@\
+									@@\
+subsubsubsubdirMakefiles:						@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi 						@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
+	$(MAKE) $(MFLAGS) Makefiles
+#endif /* MakeNsubdirMakefiles */
+
+
+/*
+ * MakefileSubdirs - generate rules to create Makefiles.
+ */
+#ifndef MakefileSubdirs
+#define MakefileSubdirs(dirs)						@@\
+MakeMakeSubdirs(dirs,Makefiles)						@@\
+									@@\
+MakeNsubdirMakefiles()
+#endif /* MakefileSubdirs */
+
+
+/*
+ * CppScriptTarget - generate rules to create a shell script by running the
+ * input through cpp.  If the ExecableScripts configuration parameter is not
+ * set, then make sure that the first line begins with a colon.
+ */
+#ifndef CppScriptTarget
+#if ExecableScripts		/* can use #! instead of colon */
+#define CppScriptTarget(dst,src,defs,deplist)				@@\
+dst::  src deplist							@@\
+	$(RM) $@							@@\
+	$(CPP) defs <src | \						@@\
+		sed -e '/^#  *[0-9][0-9]*  *.*$$/d' >$@			@@\
+	chmod a+x $@
+#else
+#define CppScriptTarget(dst,src,defs,deplist)				@@\
+dst::  src deplist							@@\
+	$(RM) $@							@@\
+	echo \: >$@							@@\
+	sed '1d' src | $(CPP) defs  | \					@@\
+		sed -e '/^#  *[0-9][0-9]*  *.*$$/d' >>$@		@@\
+	chmod a+x $@
+#endif /* ExecableScripts */
+#endif /* CppScriptTarget */
+
+
+/*
+ * MakeScriptFromCpp - generate rules to create a script from a file with a
+ * .cpp suffix.
+ */
+#ifndef MakeScriptFromCpp
+#define MakeScriptFromCpp(name,defs)					@@\
+CppScriptTarget(name,name.cpp,defs, /**/)
+#endif /* MakeScriptFromCpp */
+
+
+/*
+ * MakeDirectories - generate rules to create a hierarchy of directories.
+ */
+#ifndef MakeDirectories
+#define MakeDirectories(step,dirs)					@@\
+step::									@@\
+	$(MKDIRHIER) dirs
+#endif /* MakeDirectories */
+
+
+/*
+ * MakeFonts - generate rules to build font databases.
+ */
+#ifndef MakeFonts
+#define MakeFonts()							@@\
+all::  $(OBJS) fonts.dir						@@\
+									@@\
+fonts.dir:  $(OBJS)							@@\
+	$(MKFONTDIR) .							@@\
+									@@\
+clean::									@@\
+	$(RM) *.snf fonts.dir
+#endif /* MakeFonts */
+
+
+/*
+ * InstallFonts - generate rules to install font files
+ */
+#ifndef InstallFonts
+#define InstallFonts(dest)						@@\
+InstallMultipleFlags($(OBJS),dest,$(INSTDATFLAGS))			@@\
+									@@\
+install::  fonts.dir							@@\
+	$(INSTALL) -c $(INSTDATFLAGS) fonts.dir dest
+#endif /* InstallFonts */
+
+
+/*
+ * InstallFontAliases - generate rules to install font aliases databases. 
+ */
+#ifndef InstallFontAliases
+#define InstallFontAliases(dest)					@@\
+install::  fonts.alias							@@\
+	$(INSTALL) -c $(INSTDATFLAGS) fonts.alias dest
+#endif /* InstallFontAliases */
+
+
+/*
+ * FontTarget - generate rules to convert a .bdf file into a .snf file.
+ */
+#ifndef FontTarget
+#define FontTarget(basename)						@@\
+basename.snf:  basename.bdf						@@\
+	$(FONTC) $(FONTCFLAGS) $? >$@
+#endif /* FontTarget */
+
+
+/*
+ * CompressedFontTarget - generate rules to convert a .bdf file into a 
+ * compressed .snf file.
+ */
+#ifndef CompressedFontTarget
+#define CompressedFontTarget(basename)					@@\
+basename.snf.Z:  basename.bdf						@@\
+	$(FONTC) $(FONTCFLAGS) $? >basename.snf				@@\
+	$(COMPRESS) basename.snf					@@\
+	rm -f basename.snf
+#endif /* CompressedFontTarget */
+
+
+/*
+ * AllTarget - generate rules to build necessary things during make all.
+ */
+#ifndef AllTarget
+#define AllTarget(depends)						@@\
+all:: depends
+#endif /* AllTarget */
