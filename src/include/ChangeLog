@@ -1,7 +1,41 @@
-Sat Nov 23 00:16:46 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+Tue Feb  4 15:57:18 1997  Richard Basch  <basch@lehman.com>
 
-	* k5-int.h: Remove DES3 and SHA support, since what's there isn't
-		fully correct.  [PR#231]
+	* krb5.hin: Do not bother to define INTERFACE or INTERFACE_C
+
+Sun Feb  2 20:58:40 1997  Richard Basch  <basch@lehman.com>
+
+	* k5-int.h:
+		All pointers to KRB5_DLLIMP functions must be declared FAR.
+
+Fri Jan 31 23:10:09 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5.hin:
+		Fixed improper declaration of krb5_eblock_enctype;
+		it returns a krb5_enctype, not a krb5_error_code.
+
+Thu Jan 30 21:22:28 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5.hin
+		Functionalized remaining cryptosystem entrypoints
+		Made the cryptosystem structures private
+	* k5-int.h
+		Made the cryptosystem structures private
+	* win-mac.h
+		Win32 - compile with /MD to link with the runtime C library
+	* Makefile.in
+		Remove profile.h in clean-windows
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+	* krb5.hin: Moved windows/mac stuff to win-mac.h
+		Really, we should have krb5_os.h and utilize that file
+		  even when we don't include krb5.h, such as with the building
+		  of the crypto or util libs.
+		Declared various functions as DLL exports (win16/win32)
+		Major whitespace adjustment for consistency...
+	* k5-int.h: Re-structured accordingly to accomodate win-mac.h
+	* win-mac.h: New file containing the Windows/Mac definitions
 
 Wed Nov 13 14:28:08 1996  Tom Yu  <tlyu@mit.edu>
 

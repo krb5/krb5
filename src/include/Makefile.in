@@ -59,14 +59,14 @@ clean-unix::
 clean-mac::
 
 clean-windows::
-	$(RM) com_err.h
-	$(RM) gssapi\gssapi.h gssapi\gssapi_generic.h
+	$(RM) com_err.h profile.h
+	$(RM) gssapi\gssapi.h gssapi\gssapi_generic.h gssapi\gssapi_krb5.h
 	if exist gssapi\nul rmdir gssapi
 	cd krb5
 	@echo Making clean in include\krb5
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-	@echo Making clean locally
+	@echo Making clean in include
 
 install:: krb5.h
 	$(INSTALL_DATA) $(C)krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h

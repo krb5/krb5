@@ -1,4 +1,4 @@
-#ifdef _MSDOS
+#if defined(_MSDOS) || defined(_WIN32)
 
 #include <winsock.h>
 
@@ -16,7 +16,7 @@
 
 int win_socket_initialize();
 
-#else /* not _MSDOS */
+#else /* not _MSDOS and not _WIN32 */
 
 /* If this source file requires it, define struct sockaddr_in
    (and possibly other things related to network I/O).  */
