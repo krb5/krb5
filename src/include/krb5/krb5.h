@@ -90,6 +90,7 @@ typedef struct _krb5_creds {
     krb5_boolean is_skey;		/* true if ticket is encrypted in
 					   another ticket's skey */
     krb5_flags ticket_flags;		/* flags in ticket */
+    krb5_address **addresses;		/* addrs in ticket */
     krb5_data ticket;			/* ticket string itself */
     krb5_data second_ticket;		/* second ticket, if related to
 					   ticket (via DUPLICATE-SKEY or
