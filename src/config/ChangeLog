@@ -1,5 +1,14 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* pre.in (COM_ERR_DEPLIB-sys, COM_ERR_DEPLIB-k5, SS_DEPLIB-k5,
+	SS_DEPLIB-sys, COM_ERR_DEPS-sys, COM_ERR_DEPS-k5, SS_DEPS-sys,
+	SS_DEPS-k5, SS_LIB-sys, SS_LIB-k5, COMPILE_ET-sys, COMPILE_ET-k5,
+	MAKE_COMMANDS-sys, MAKE_COMMANDS-k5): New variables.
+	(COM_ERR_DEPLIB, SS_DEPLIB, COM_ERR_DEPS, SS_DEPS, SS_LIB,
+	COMPILE_ET, MAKE_COMMANDS): Use them, selecting using new
+	configure substitutions.
+	(COM_ERR_LIB): Always define as -lcom_err.
+
 	* shlib.conf: Use $(LDFLAGS) in CC_LINK_SHARED and CC_LINK_STATIC,
 	after other options.
 

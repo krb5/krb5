@@ -210,11 +210,15 @@ KRB4_DEPLIB	= @KRB4_DEPLIB@		# $(TOPLIBD)/libkrb4$(DEPLIBEXT)
 DES425_DEPLIB	= @DES425_DEPLIB@	# $(TOPLIBD)/libdes425$(DEPLIBEXT)
 KRB5_DEPLIB	= $(TOPLIBD)/libkrb5$(DEPLIBEXT)
 CRYPTO_DEPLIB	= $(TOPLIBD)/libk5crypto$(DEPLIBEXT)
-COM_ERR_DEPLIB	= $(TOPLIBD)/libcom_err$(DEPLIBEXT)
+COM_ERR_DEPLIB	= $(COM_ERR_DEPLIB-@COM_ERR_VERSION@)
+COM_ERR_DEPLIB-sys = # empty
+COM_ERR_DEPLIB-k5 = $(TOPLIBD)/libcom_err$(DEPLIBEXT)
 
 # These are forced to use ".a" as an extension because they're never
 # built shared.
-SS_DEPLIB	= $(TOPLIBD)/libss.a
+SS_DEPLIB	= $(SS_DEPLIB-@SS_VERSION@)
+SS_DEPLIB-k5	= $(TOPLIBD)/libss.a
+SS_DEPLIB-sys	=
 KRB524_DEPLIB	= @KRB524_DEPLIB@
 PTY_DEPLIB	= $(TOPLIBD)/libpty.a
 
@@ -229,15 +233,21 @@ KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
 
 # Header file dependencies we might override someday.
 # See util/depfix.sed.
-COM_ERR_DEPS  	= $(BUILDTOP)/include/com_err.h
-SS_DEPS		= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
+COM_ERR_DEPS	= $(COM_ERR_DEPS-@COM_ERR_VERSION@)
+COM_ERR_DEPS-sys = # empty
+COM_ERR_DEPS-k5	= $(BUILDTOP)/include/com_err.h
+SS_DEPS		= $(SS_DEPS-@SS_VERSION@)
+SS_DEPS-sys	=
+SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
 # GEN_LIB is -lgen if needed for regexp
 GEN_LIB		= @GEN_LIB@
 
-SS_LIB		= $(TOPLIBD)/libss.a
+SS_LIB		= $(SS_LIB-@SS_VERSION@)
+SS_LIB-sys	= -lss
+SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
 DB_LIB		= -ldb
 
@@ -249,9 +259,7 @@ K5CRYPTO_LIB			= $(K5CRYPTO_LIB_@LIB_LINK_OPT@)
 K5CRYPTO_LIB_libopt		= -lk5crypto
 K5CRYPTO_LIB_frameworkopt	= -framework Kerberos5Crypto
 
-COM_ERR_LIB			= $(COM_ERR_LIB_@LIB_LINK_OPT@)
-COM_ERR_LIB_libopt		= -lcom_err
-COM_ERR_LIB_frameworkopt	= -framework FooComErr
+COM_ERR_LIB			= -lcom_err
 
 GSS_KRB5_LIB			= $(GSS_KRB5_LIB_@LIB_LINK_OPT@)
 GSS_KRB5_LIB_libopt		= -lgssapi_krb5
@@ -301,7 +309,9 @@ TCL_INCLUDES	= @TCL_INCLUDES@
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
-COMPILE_ET= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
+COMPILE_ET= $(COMPILE_ET-@COM_ERR_VERSION@)
+COMPILE_ET-sys= compile_et
+COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 
 .SUFFIXES:  .h .c .et .ct
 
@@ -319,7 +329,9 @@ COMPILE_ET= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 
 # ss command table rules
 #
-MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
+MAKE_COMMANDS= $(MAKE_COMMANDS-@SS_VERSION@)
+MAKE_COMMANDS-sys= mk_cmds
+MAKE_COMMANDS-k5= $(BUILDTOP)/util/ss/mk_cmds
 
 .ct.c:
 	$(MAKE_COMMANDS) $<
