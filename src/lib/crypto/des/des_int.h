@@ -112,8 +112,7 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 
 /* afsstring2key.c */
 extern krb5_error_code mit_afs_string_to_key
-	PROTOTYPE((const krb5_encrypt_block FAR *eblock,
-		   krb5_keyblock FAR *keyblock,
+	PROTOTYPE((krb5_keyblock FAR *keyblock,
 		   const krb5_data FAR *data,
 		   const krb5_data FAR *salt));
 
