@@ -334,6 +334,13 @@ typedef struct msg_dat MSG_DAT;
  x = (unsigned short) _krb_swap_sh_tmp; \
                             }
 
+/*
+ * New byte swapping routines, much cleaner
+ */
+#define krb4_swab16(val)	(((val) >> 8) | ((val) << 8))
+#define krb4_swab32(val)	(((val)>>24) | (((val)>>8)&0xFF00) | \
+				  (((val)<<8)&0xFF0000) | ((val)<<24))
+
 /* Kerberos ticket flag field bit definitions */
 #define K_FLAG_ORDER    0       /* bit 0 --> lsb */
 #define K_FLAG_1                /* reserved */
@@ -630,6 +637,18 @@ char * tkt_string
 	PROTOTYPE((void));
 void krb_set_tkt_string
 	PROTOTYPE((char *));
+
+/*
+ * Internal prototypes
+ */
+extern int krb_set_key
+	PROTOTYPE((char *key, int cvt));
+extern int decomp_ticket
+	PROTOTYPE((KTEXT tkt, unsigned char *flags, char *pname,
+		   char *pinstance, char *prealm, unsigned KRB4_32 *paddress,
+		   C_Block session, int *life, unsigned KRB4_32 *time_sec,
+		   char *sname, char *sinstance, C_Block,
+		   Key_schedule key_s));
 
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);
