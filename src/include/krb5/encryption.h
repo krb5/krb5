@@ -39,25 +39,34 @@ typedef struct _krb5_encrypt_block {
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
-    int (*encrypt_func) PROTOTYPE((krb5_pointer in, krb5_pointer out,
-				   size_t length,
-				   krb5_encrypt_block *block));
-    int (*decrypt_func) PROTOTYPE((krb5_pointer in, krb5_pointer out,
-				   size_t length,
-				   krb5_encrypt_block *block));
-    int (*process_key) PROTOTYPE((krb5_encrypt_block *block,
-				  krb5_keyblock *key));
-    int (*finish_key) PROTOTYPE((krb5_encrypt_block *block));
-    int (*string_to_key) PROTOTYPE((krb5_keytype keytype, krb5_keyblock *key,
-				    char *string, krb5_principal *client));
-    int (*random_key) PROTOTYPE((krb5_pointer sequence));
-    krb5_pointer  (*init_random_key) PROTOTYPE((krb5_keyblock *key));
+    krb5_error_code (*encrypt_func) PROTOTYPE((krb5_pointer /* in */,
+					       krb5_pointer /* out */,
+					       size_t,
+					       krb5_encrypt_block *));
+    krb5_error_code (*decrypt_func) PROTOTYPE((krb5_pointer /* in */,
+					       krb5_pointer /* out */,
+					       size_t,
+					       krb5_encrypt_block *));
+    krb5_error_code (*process_key) PROTOTYPE((krb5_encrypt_block *,
+					      krb5_keyblock *));
+    krb5_error_code (*finish_key) PROTOTYPE((krb5_encrypt_block *));
+    krb5_error_code (*string_to_key) PROTOTYPE((krb5_keytype, krb5_keyblock *,
+						char *, krb5_principal *));
+    krb5_error_code (*random_key) PROTOTYPE((krb5_pointer,
+					     krb5_keyblock **));
+    krb5_error_code  (*init_random_key) PROTOTYPE((krb5_keyblock *,
+						   krb5_pointer *));
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
     krb5_enctype proto_enctype;		/* encryption type,
 					   (assigned protocol number) */
 } krb5_cryptosystem_entry;
+
+typedef struct _krb5_cs_table_entry {
+    krb5_cryptosystem_entry *system;
+    krb5_pointer random_sequence;	/* from init_random_key() */
+} krb5_cs_table_entry;
 
 /* could be used in a table to find a sumtype */
 typedef struct _krb5_checksum_entry {
