@@ -1525,15 +1525,15 @@ krb5_boolean KRB5_CALLCONV_WRONG krb5_address_search
 	(krb5_context,
 		const krb5_address *,
 		krb5_address * const *);
-krb5_boolean KRB5_CALLCONV_WRONG krb5_address_compare
+krb5_boolean KRB5_CALLCONV krb5_address_compare
 	(krb5_context,
 		const krb5_address *,
 		const krb5_address *);
-int krb5_address_order
+int KRB5_CALLCONV krb5_address_order
 	(krb5_context,
 		const krb5_address *,
 		const krb5_address *);
-krb5_boolean krb5_realm_compare
+krb5_boolean KRB5_CALLCONV krb5_realm_compare
 	(krb5_context,
 		krb5_const_principal,
 		krb5_const_principal);
@@ -2096,13 +2096,13 @@ krb5_error_code KRB5_CALLCONV_WRONG krb5_auth_con_setaddrs
 		krb5_address *,
 		krb5_address *);
 
-krb5_error_code krb5_auth_con_getaddrs
+krb5_error_code KRB5_CALLCONV krb5_auth_con_getaddrs
 	(krb5_context,
 		krb5_auth_context,
 		krb5_address **,
 		krb5_address **);
 
-krb5_error_code krb5_auth_con_setports
+krb5_error_code KRB5_CALLCONV krb5_auth_con_setports
 	(krb5_context,
 		krb5_auth_context,
 		krb5_address *,
@@ -2146,7 +2146,7 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_getremoteseqnumber
 		krb5_int32 *);
 
 #if KRB5_DEPRECATED
-krb5_error_code krb5_auth_con_initivector
+krb5_error_code KRB5_CALLCONV krb5_auth_con_initivector
 	(krb5_context,
 		krb5_auth_context);
 #endif
@@ -2267,7 +2267,7 @@ krb5_error_code krb5_set_debugging_time
 krb5_error_code krb5_use_natural_time
 	(krb5_context);
 #endif
-krb5_error_code krb5_get_time_offsets
+krb5_error_code KRB5_CALLCONV krb5_get_time_offsets
 	(krb5_context, krb5_int32 *, krb5_int32 *);
 #if KRB5_PRIVATE
 krb5_error_code krb5_set_time_offsets
