@@ -392,7 +392,6 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     opt_info *options;
     krb5_boolean *zero_password;
 {
-    krb5_address **my_addresses;
     krb5_error_code code;
     krb5_creds my_creds;
     krb5_timestamp now;
@@ -419,13 +418,6 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 	return (FALSE);	
     }	
 
-    code = krb5_os_localaddr(context, &my_addresses);
-
-    if (code != 0) {
-	com_err (prog_name, code, "when getting my address");
-	return (FALSE);	
-    }
-
     if ((code = krb5_timeofday(context, &now))) {
 	com_err(prog_name, code, "while getting time of day");
 	return (FALSE);	
@@ -450,7 +442,6 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 	      com_err(prog_name, code, "while reading password for '%s'\n",
 		      client_name);
 	      memset(password, 0, sizeof(password));
-	      krb5_free_addresses(context, my_addresses);
 	      return (FALSE); 
 	 }
 
@@ -458,17 +449,14 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 	      fprintf(stderr, "No password given\n");
     	      *zero_password = TRUE;
 	      memset(password, 0, sizeof(password));
-	      krb5_free_addresses(context, my_addresses);
 	      return (FALSE); 
 	 }
 
 	 code = krb5_get_in_tkt_with_password(context, options->opt, 
-					      my_addresses, NULL, preauth_ptr,
+					      0, NULL, preauth_ptr,
 					      password, *ccache, &my_creds, 0);
 	 memset(password, 0, sizeof(password));
 
-    
-    krb5_free_addresses(context, my_addresses);
     
     if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
