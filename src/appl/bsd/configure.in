@@ -15,6 +15,11 @@ AC_FUNC_CHECK(killpg,AC_DEFINE(HAVE_KILLPG))
 AC_FUNC_CHECK(getdtablesize,AC_DEFINE(HAVE_GETDTABLESIZE))
 AC_FUNC_CHECK(initgroups,AC_DEFINE(HAVE_INITGROUPS))
 AC_FUNC_CHECK(setpriority,AC_DEFINE(HAVE_SETPRIORITY))
+AC_FUNC_CHECK(sigprocmask,
+AC_COMPILE_CHECK([sigset_t],
+[#include <signal.h>],
+[sigset_t x],
+AC_DEFINE(POSIX_SIGNALS)))
 AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h sys/ptyvar.h lastlog.h)
 AC_REPLACE_FUNCS(getdtablesize)
 CHECK_DIRENT

@@ -207,9 +207,11 @@ char	term[256] = "network";
 extern	int errno;
 krb5_sigtype	lostpeer();
 int	dosigwinch = 0;
+#ifndef POSIX_SIGNALS
 #ifndef sigmask
-#define sigmask(m)	(1 << ((m)-1))
+#define sigmask(m)    (1 << ((m)-1))
 #endif
+#endif /* POSIX_SIGNALS */
 #ifdef NO_WINSIZE
 struct winsize {
     unsigned short ws_row, ws_col;
@@ -304,7 +306,12 @@ main(argc, argv)
 #endif
     struct passwd *pwd;
     struct servent *sp;
-    int uid, options = 0, oldmask;
+    int uid, options = 0;
+#ifdef POSIX_SIGNALS
+    sigset_t *oldmask, omask, urgmask;
+#else
+    int oldmask;
+#endif
     int on = 1;
 #ifdef KERBEROS
     char **orig_argv = argv;
@@ -512,11 +519,19 @@ main(argc, argv)
     (void) signal(SIGPIPE, lostpeer);
     
     /* will use SIGUSR1 for window size hack, so hold it off */
+#ifdef POSIX_SIGNALS
+    sigemptyset(&urgmask);
+    sigaddset(&urgmask, SIGURG);
+    sigaddset(&urgmask, SIGUSR1);
+    oldmask = &omask;
+    sigprocmask(SIG_BLOCK, &urgmask, oldmask);
+#else
 #ifdef sgi
     oldmask = sigignore(sigmask(SIGURG) | sigmask(SIGUSR1));
 #else
     oldmask = sigblock(sigmask(SIGURG) | sigmask(SIGUSR1));
 #endif
+#endif /* POSIX_SIGNALS */
     
     if (debug_port)
       sp->s_port = htons(debug_port);
@@ -689,6 +704,9 @@ struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
 #endif
 
 doit(oldmask)
+#ifdef POSIX_SIGNALS
+     sigset_t *oldmask;
+#endif
 {
 #ifdef POSIX_TERMIOS
 	(void) tcgetattr(0, &deftty);
@@ -762,9 +780,14 @@ doit(oldmask)
      */
     (void) signal(SIGURG, copytochild);
     (void) signal(SIGUSR1, writeroob);
+
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
+#else
 #ifndef sgi
     (void) sigsetmask(oldmask);
 #endif
+#endif /* POSIX_SIGNALS */
     (void) signal(SIGCHLD, catchild);
     writer();
     prf("Closed connection.");
@@ -1228,9 +1251,13 @@ krb5_sigtype
  * reader: read from remote: line -> 1
  */
 reader(oldmask)
+#ifdef POSIX_SIGNALS
+     sigset_t *oldmask;
+#else
      int oldmask;
+#endif
 {
-#if (defined(BSD) && BSD >= 43) || defined(ultrix)
+#if (defined(BSD) && BSD+0 >= 43) || defined(ultrix)
     int pid = getpid();
 #else
     int pid = -getpid();
@@ -1245,9 +1272,13 @@ reader(oldmask)
     (void) fcntl(rem, F_SETOWN, pid);
 #endif
     (void) setjmp(rcvtop);
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
+#else
 #ifndef sgi
     (void) sigsetmask(oldmask);
 #endif
+#endif /* POSIX_SIGNALS */
     for (;;) {
 	while ((remaining = rcvcnt - (bufp - rcvbuf)) > 0) {
 	    rcvstate = WRITING;

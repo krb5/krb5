@@ -1,3 +1,8 @@
+Fri Aug  5 18:47:00 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: test for sigprocmask and sigset_t to set POSIX_SIGNALS.
+	* krlogin.c, kcmd.c: use POSIX_SIGNALS.
+
 Fri Aug  5 15:35:54 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in, logutil.c: check for NO_UT_PID, use it.
