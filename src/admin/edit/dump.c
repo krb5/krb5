@@ -1644,7 +1644,7 @@ load_db(argc, argv)
      * Open the dumpfile
      */
     if (dumpfile) {
-	if ((f = fopen(dumpfile, "r"))) {
+	if ((f = fopen(dumpfile, "r+"))) {
 	    kret = krb5_lock_file(kcontext, fileno(f), KRB5_LOCKMODE_SHARED);
 	}
     }
