@@ -1,3 +1,8 @@
+Mon Aug 19 23:22:55 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c (envvarok): Don't allow the environment variable
+	 	RESOLV_HOST_CONF to be set for Linux's sake.
+
 Thu Jun 13 17:05:17 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* telnetd.8: Remove documentation of  desupported -u options.

@@ -1659,6 +1659,7 @@ static int envvarok(varp)
 	    strcmp(varp, "KRB_CONF") &&	   /* cns v4 */
 	    strcmp(varp, "KRB_REALMS") &&  /* cns v4 */
 	    strcmp(varp, "LIBPATH") &&     /* AIX */
+	    strcmp(varp, "RESOLV_HOST_CONF") && /* linux */
 	    strcmp(varp, "IFS")) {
 		return 1;
 	} else {
