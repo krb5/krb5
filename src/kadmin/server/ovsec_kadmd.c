@@ -307,9 +307,10 @@ int main(int argc, char *argv[])
 				      params.realm); 
      if (names[0].name == NULL || names[1].name == NULL ||
 	 names[2].name == NULL || names[3].name == NULL) {
-	  krb5_klog_syslog(LOG_ERR, "Cannot initialize GSS-API authentication, "
-		 "failing.");
-	  fprintf(stderr, "%s: Cannot initialize GSS-API authentication.\n",
+	  krb5_klog_syslog(LOG_ERR,
+			   "Cannot build GSS-API authentication names, "
+			   "failing.");
+	  fprintf(stderr, "%s: Cannot build GSS-API authentication names.\n",
 		  whoami);
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();	  
@@ -327,9 +328,10 @@ int main(int argc, char *argv[])
      if (_svcauth_gssapi_set_names(names, 4) == TRUE)
 	  oldnames++;
      if (!oldnames && _svcauth_gssapi_set_names(names, 2) == FALSE) {
-	  krb5_klog_syslog(LOG_ERR, "Cannot initialize GSS-API authentication, "
-		 "failing.");
-	  fprintf(stderr, "%s: Cannot initialize GSS-API authentication.\n",
+	  krb5_klog_syslog(LOG_ERR,
+			   "Cannot set GSS-API authentication names, "
+			   "failing.");
+	  fprintf(stderr, "%s: Cannot set GSS-API authentication names.\n",
 		  whoami);
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();	  

@@ -1,3 +1,8 @@
+Wed Dec  4 15:29:30 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* ovsec_kadmd.c (main): fix duplicated error strings
+ 	[krb5-admin/234]
+
 Wed Nov 13 14:29:34 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (main): Note that krb5_defkeyname is an internal
