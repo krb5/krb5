@@ -29,6 +29,8 @@ static char rcsid_do_as_req_c[] =
 #include <sys/types.h>
 #include <krb5/ext-proto.h>
 
+#include <syslog.h>
+
 #include "kdc_util.h"
 #include "policy.h"
 #include "extern.h"
@@ -64,6 +66,17 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_keyblock encrypting_key;
 
     krb5_timestamp until, rtime;
+    char *cname = 0, *sname = 0;
+
+    if (retval = krb5_unparse_name(request->client, &cname))
+	return(retval);
+    if (retval = krb5_unparse_name(request->server, &sname)) {
+	free(cname);
+	return(retval);
+    }
+    syslog(LOG_INFO, "AS_REQ: %s for %s", cname, sname);
+    free(cname);
+    free(sname);
 
     nprincs = 1;
     if (retval = krb5_db_get_principal(request->client, &client, &nprincs,
