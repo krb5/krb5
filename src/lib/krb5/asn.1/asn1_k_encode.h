@@ -170,7 +170,7 @@ asn1_error_code INTERFACE asn1_encode_last_req
 	PROTOTYPE((asn1buf *buf, const krb5_last_req_entry **val,
 		   int *retlen));
 
-asn1_error_code asn1_encode_sequence_of_pa_data
+asn1_error_code INTERFACE asn1_encode_sequence_of_pa_data
 	PROTOTYPE((asn1buf *buf, const krb5_pa_data **val, int *retlen));
 
 asn1_error_code INTERFACE asn1_encode_sequence_of_ticket

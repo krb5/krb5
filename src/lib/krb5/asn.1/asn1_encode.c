@@ -38,7 +38,7 @@ asn1_error_code INTERFACE asn1_encode_integer(buf, val, retlen)
   
   valcopy = val;
   do {
-    digit = valcopy&0xFF;
+    digit = (int) (valcopy&0xFF);
     retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
     if(retval) return retval;
     length++;
@@ -75,7 +75,7 @@ asn1_error_code INTERFACE asn1_encode_unsigned_integer(buf, val, retlen)
   
   valcopy = val;
   do {
-    digit = valcopy&0xFF;
+    digit = (int) (valcopy&0xFF);
     retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
     if(retval) return retval;
     length++;

@@ -22,6 +22,8 @@
  */
 
 #include "asn1_misc.h"
+#include <malloc.h>
+#include <memory.h>
 
 asn1_error_code INTERFACE asn1_krb5_realm_copy(target, source)
      krb5_principal target;

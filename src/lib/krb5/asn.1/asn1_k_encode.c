@@ -149,7 +149,7 @@ asn1_error_code INTERFACE asn1_encode_principal_name(buf, val, retlen)
 
   if(val == NULL || val->data == NULL) return ASN1_MISSING_FIELD;
 
-  for(n = (val->length)-1; n >= 0; n--){
+  for(n = (int) ((val->length)-1); n >= 0; n--){
     if(val->data[n].data == NULL) return ASN1_MISSING_FIELD;
     retval = asn1_encode_generalstring(buf,
 				       (val->data)[n].length,
