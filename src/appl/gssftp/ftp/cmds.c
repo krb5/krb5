@@ -182,12 +182,16 @@ setpeer(argc, argv)
 				(void) login(argv[1]);
 		}
 
-#ifndef unix
+#ifndef unix			/* XXX */
 #ifdef _AIX
 #define unix
 #endif
 
 #ifdef __hpux
+#define unix
+#endif
+
+#ifdef BSD
 #define unix
 #endif
 #endif
