@@ -1,3 +1,6 @@
+Thu Aug 17 22:44:13 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* configure.in: Build ktutil now.
 
 Fri Jul 7 15:59:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS.
