@@ -38,10 +38,12 @@ krb5_scc_write(id, buf, len)
 {
      int ret;
 
+     errno = 0;
      ret = fwrite((char *) buf, 1, len, ((krb5_scc_data *)id->data)->file);
-     if (ret == 0) {
+     if ((ret == 0) && errno) {
 	  return krb5_scc_interpret (errno);
-     }
+     } else if (ret != len)
+	 return KRB5_CC_END;
      return KRB5_OK;
 }
 
@@ -118,10 +120,11 @@ krb5_scc_store_keyblock(id, keyblock)
      CHECK(ret);
      ret = krb5_scc_store_int(id, &keyblock->length);
      CHECK(ret);
+     errno = 0;
      ret = fwrite((char *)keyblock->contents, 1,
 		  (keyblock->length)*sizeof(krb5_octet),
 		  ((krb5_scc_data *) id->data)->file);
-     if (ret == 0)
+     if ((ret == 0) && errno)
 	  return krb5_scc_interpret(errno);
      if (ret != (keyblock->length)*sizeof(krb5_octet))
 	 return KRB5_CC_END;
@@ -140,10 +143,11 @@ krb5_scc_store_addr(id, addr)
      CHECK(ret);
      ret = krb5_scc_store_int(id, &addr->length);
      CHECK(ret);
+     errno = 0;
      ret = fwrite((char *)addr->contents, 1,
 		  (addr->length)*sizeof(krb5_octet),
 		  ((krb5_scc_data *) id->data)->file);
-     if (ret == 0)
+     if ((ret == 0) && errno)
 	  return krb5_scc_interpret(errno);
      if (ret != (addr->length)*sizeof(krb5_octet))
 	 return KRB5_CC_END;
@@ -160,11 +164,13 @@ krb5_scc_store_data(id, data)
 
      ret = krb5_scc_store_int32(id, &data->length);
      CHECK(ret);
+     errno = 0;
      ret = fwrite(data->data, 1, data->length,
 		  ((krb5_scc_data *) id->data)->file);
-     if (ret == 0)
+     if ((ret == 0) && errno)
 	  return krb5_scc_interpret(errno);
-
+     else if (ret != data->length)
+	 return KRB5_CC_END;
      return KRB5_OK;
 }
 
@@ -257,5 +263,5 @@ krb5_scc_store_authdatum (id, a)
     CHECK(ret);
     ret = krb5_scc_store_int32(id, &a->length);
     CHECK(ret);
-    return krb5_scc_write(id, a->contents, a->length);
+    return krb5_scc_write(id, (krb5_pointer) a->contents, a->length);
 }

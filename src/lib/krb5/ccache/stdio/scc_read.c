@@ -36,8 +36,9 @@ krb5_scc_read(id, buf, len)
 {
      int ret;
 
+     errno = 0;
      ret = fread((char *) buf, 1, len, ((krb5_scc_data *) id->data)->file);
-     if (ret == 0)
+     if ((ret == 0) && errno)
 	  return krb5_scc_interpret(errno);
      else if (ret != len)
 	  return KRB5_CC_END;
@@ -166,11 +167,12 @@ krb5_scc_read_keyblock(id, keyblock)
      if (keyblock->contents == NULL)
 	  return KRB5_CC_NOMEM;
      
+     errno = 0;
      ret = fread((char *)keyblock->contents, 1,
 		 (keyblock->length)*sizeof(krb5_octet),
 		 ((krb5_scc_data *) id->data)->file);
 
-     if (ret == 0) {
+     if ((ret == 0) && errno) {
 	 xfree(keyblock->contents);
 	 return krb5_scc_interpret(errno);
      }
@@ -203,9 +205,10 @@ krb5_scc_read_data(id, data)
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
+     errno = 0;
      ret = fread((char *)data->data, 1,
 		 data->length, ((krb5_scc_data *) id->data)->file);
-     if (ret == -1) {
+     if ((ret == 0) && errno) {
 	 xfree(data->data);
 	 return krb5_scc_interpret(errno);
      }
@@ -240,9 +243,10 @@ krb5_scc_read_addr(id, addr)
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
+     errno = 0;
      ret = fread((char *)addr->contents, 1, (addr->length)*sizeof(krb5_octet),
 		 ((krb5_scc_data *) id->data)->file);
-     if (ret == -1) {
+     if ((ret == 0) && errno) {
 	  xfree(addr->contents);
 	  return krb5_scc_interpret(errno);
      }
@@ -373,10 +377,11 @@ krb5_scc_read_authdatum(id, a)
     a->contents = (krb5_octet *) malloc(a->length);
     if (a->contents == NULL)
         return KRB5_CC_NOMEM;
+    errno = 0;
     ret = fread ((char *)a->contents, 1,
 		 (a->length)*sizeof(krb5_octet),
 		 ((krb5_scc_data *) id->data)->file);
-    if (ret == 0) {
+    if ((ret == 0) && errno) {
 	xfree(a->contents);
 	return krb5_scc_interpret(errno);
     }
