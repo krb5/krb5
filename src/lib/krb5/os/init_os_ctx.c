@@ -150,6 +150,16 @@ os_init_paths(ctx, secure)
 	if (retval)
 	    ctx->profile = 0;
 
+	if (retval == ENOENT)
+		retval = KRB5_CONFIG_CANTOPEN;
+
+	if ((retval == PROF_SECTION_NOTOP) ||
+	    (retval == PROF_SECTION_SYNTAX) ||
+	    (retval == PROF_RELATION_SYNTAX) ||
+	    (retval == PROF_EXTRA_CBRACE) ||
+	    (retval == PROF_MISSING_OBRACE))
+		return KRB5_CONFIG_BADFORMAT;
+	    
 	return retval;
 }
 
@@ -178,12 +188,11 @@ krb5_os_init_context(ctx)
 	retval = os_init_paths(ctx, FALSE);
 
 	/*
-	 * We ignore errors if the profile can not be initialized,
-	 * since there must be a way to get a context even if the
-	 * default krb5.conf file doesn't exist.
+	 * If there's an error in the profile, return an error.  Just
+	 * ignoring the error is a Bad Thing (tm).
 	 */
 
-	return 0;
+	return retval;
 }
 
 krb5_error_code INTERFACE
