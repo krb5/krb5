@@ -97,7 +97,6 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_CALLCONV_WRONG
 #define KRB5_DLLIMP
 #define GSS_DLLIMP
 #define KRB5_EXPORTVAR
@@ -105,6 +104,10 @@
 #define NEAR
 #endif /* !KRB5_CALLCONV */
 #endif /* !KRB5_CONFIG__ */
+
+#ifndef KRB5_CALLCONV_WRONG
+#define KRB5_CALLCONV_WRONG
+#endif
 
 #ifndef THREEPARAMOPEN
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)

@@ -1,3 +1,8 @@
+2002-04-05 Alexandra Ellwood <lxs@mit.edu>
+    * krb5.hin: Conditionalize KRB5_CALLCONV_WRONG separately
+    because gssapi.h defines KRB5_CALLCONV but doesn't need
+    KRB5_CALLCONV_WRONG
+
 2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-mac.h: Add KRB5_CALLCONV_WRONG.
