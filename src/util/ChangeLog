@@ -1,3 +1,8 @@
+2003-05-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: Put print command on separate lines from
+	substitution commands, instead of using s///p form.
+
 2003-05-15  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Remote autom4te.cache files.
