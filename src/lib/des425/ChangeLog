@@ -1,3 +1,9 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* pcbc_encrypt.c (des_pcbc_encrypt): Don't pass a temporary
+	variable to DES_DO_ENCRYPT and _DECRYPT.  Drop the temporary
+	variable.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c (mit_des_cbc_encrypt): Undef before use.

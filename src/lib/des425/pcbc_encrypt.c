@@ -32,7 +32,6 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 	int enc;
 {
 	register unsigned DES_INT32 left, right;
-	register unsigned DES_INT32 temp;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
@@ -114,7 +113,7 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 			/*
 			 * Encrypt what we have
 			 */
-			DES_DO_ENCRYPT(left, right, temp, kp);
+			DES_DO_ENCRYPT(left, right, kp);
 
 			/*
 			 * Copy the results out
@@ -165,7 +164,7 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 			/*
 			 * Decrypt this.
 			 */
-			DES_DO_DECRYPT(left, right, temp, kp);
+			DES_DO_DECRYPT(left, right, kp);
 
 			/*
 			 * Xor with the old cipher to get plain
