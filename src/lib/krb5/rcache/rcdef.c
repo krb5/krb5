@@ -16,6 +16,7 @@ static char rcsid_rcdef_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
+#include <krb5/krb5.h>
 #include "rc_dfl.h"
 
 krb5_rc_ops krb5_rc_dfl_ops =
