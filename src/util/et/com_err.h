@@ -13,7 +13,7 @@
 #ifndef __COM_ERR_H
 
 #if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
+#include <Kerberos5/win-mac.h>
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
