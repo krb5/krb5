@@ -32,11 +32,10 @@
 #include "adm_defs.h"
 
 krb5_error_code
-kadm_done(context, auth_context, my_creds, local_socket, seqno)
+kadm_done(context, auth_context, my_creds, local_socket)
     krb5_context context;
     krb5_auth_context *auth_context;
     int *local_socket;
-    krb5_int32 *seqno;
 {
     krb5_replay_data replaydata;
     krb5_data msg_data, inbuf;

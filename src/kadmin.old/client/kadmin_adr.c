@@ -38,11 +38,10 @@ int print_status_message();
 
 krb5_error_code
 kadm_add_user_rnd(context, auth_context, my_creds, 
-		  local_socket, seqno, principal)
+		  local_socket, principal)
     krb5_context context;
     krb5_auth_context *auth_context;
     int *local_socket;
-    krb5_int32 *seqno;
     char *principal;
 {
     krb5_data msg_data, inbuf;
