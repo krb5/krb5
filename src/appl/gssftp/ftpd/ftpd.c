@@ -1983,8 +1983,8 @@ char *data;
 							    NULL, 	/* ignore time_rec */
 							    NULL   /* ignore del_cred_handle */
 							    );
-			if (accept_maj!=GSS_S_COMPLETE && accept_maj!=GSS_S_CONTINUE_NEEDED)
-				continue;
+			if (accept_maj==GSS_S_COMPLETE||accept_maj==GSS_S_CONTINUE_NEEDED)
+				break;
 		}
 
 		if (found) {

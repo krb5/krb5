@@ -1,3 +1,8 @@
+Thu Oct 17 23:55:32 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (auth_data): actually exit the for loop if the ftp key
+	was ok.
+
 Mon Oct 14 07:54:17 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ftpd.c (secure_fprintf): Use STDARG routines if
