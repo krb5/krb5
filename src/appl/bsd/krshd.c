@@ -157,7 +157,6 @@ char copyright[] =
 
 #define ARGSTR	"rek54cD:S:M:AP:?"
 
-#define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
 
 #define RSHD_BUFSIZ 5120
 
@@ -1091,8 +1090,8 @@ if (require_encrypt&&(!do_encrypt)) {
     
     (void) write(2, "", 1);
     
-    if (port) {
-	if (pipe(pv) < 0) {
+    if (port||do_encrypt) {
+	if (port&&(pipe(pv) < 0)) {
 	    error("Can't make pipe.\n");
 	    goto signout_please;
 	}
@@ -1130,22 +1129,23 @@ if (require_encrypt&&(!do_encrypt)) {
 #endif
 	    
 	    (void) close(0); (void) close(1); (void) close(2);
-	    (void) close(pv[1]);
+if(port)
+    (void) close(pv[1]);
 	    (void) close(pw[1]);
 	    (void) close(px[0]);
 	    
-	    ioctl(pv[0], FIONBIO, (char *)&one);
+if(port)
+    ioctl(pv[0], FIONBIO, (char *)&one);
 	    ioctl(pw[0], FIONBIO, (char *)&one);
 	    /* should set s nbio! */
 
-	    if (do_encrypt)
-		if (((*des_write)(s, SECURE_MESSAGE, sizeof(SECURE_MESSAGE))) < 0)
-		    fatal(pw[0], "Cannot encrypt-write network.");
 	    
 	    FD_ZERO(&readfrom);
 	    FD_SET(f, &readfrom);
-	    FD_SET(s, &readfrom);
-	    FD_SET(pv[0], &readfrom);
+if(port)
+    FD_SET(s, &readfrom);
+if(port)
+    FD_SET(pv[0], &readfrom);
 	    FD_SET(pw[0], &readfrom);
 	    
 	    do {
@@ -1157,7 +1157,7 @@ if (require_encrypt&&(!do_encrypt)) {
 		    else
 			break;
 		}
-		if (FD_ISSET(s, &ready)) {
+		if (port&&FD_ISSET(s, &ready)) {
 		    if ((*des_read)(s, &sig, 1) <= 0)
 			FD_CLR(s, &readfrom);
 		    else {
@@ -1180,7 +1180,7 @@ if (require_encrypt&&(!do_encrypt)) {
 		    } else
 			(void) write(px[1], buf, cc);
 		}
-		if (FD_ISSET(pv[0], &ready)) {
+		if (port&&FD_ISSET(pv[0], &ready)) {
 		    errno = 0;
 		    cc = read(pv[0], buf, sizeof (buf));
 		    if (cc <= 0) {
@@ -1198,9 +1198,9 @@ if (require_encrypt&&(!do_encrypt)) {
 		    } else
 			(void) (*des_write)(f, buf, cc);
 		}
-	    } while (FD_ISSET(s, &readfrom) ||
+	    } while ((port&&FD_ISSET(s, &readfrom)) ||
 		     FD_ISSET(f, &readfrom) ||
-		     FD_ISSET(pv[0], &readfrom) ||
+		     (port&&FD_ISSET(pv[0], &readfrom) )||
 		     FD_ISSET(pw[0], &readfrom));
 #ifdef KERBEROS
 	    syslog(LOG_INFO ,
@@ -1222,16 +1222,20 @@ if (ccache)
 	(void) close(s);
 	(void) close(f);
 	(void) close(pw[0]);
-	(void) close(pv[0]);
+	if (port)
+	    (void) close(pv[0]);
 	(void) close(px[1]);
 
 	(void) dup2(px[0], 0);
 	(void) dup2(pw[1], 1);
-	(void) dup2(pv[1], 2);
+	if(port)
+	    (void) dup2(pv[1], 2);
+	else dup2(pw[1], 2);
 
 	(void) close(px[0]);
 	(void) close(pw[1]);
-	(void) close(pv[1]);
+	if(port)
+	    (void) close(pv[1]);
     }
     
     /*      We are simply execing a program over rshd : log entry into wtmp, 

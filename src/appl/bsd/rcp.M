@@ -100,7 +100,7 @@ Kerberos principal name of the form
 .IR principal/instance@realm .
 If there is a ~/.k5login file, then access is granted to the account if
 and only if the originater user is authenticated to one of the
-princiapls named in the ~/.k5login file.  Otherwise, the originating
+principals named in the ~/.k5login file.  Otherwise, the originating
 user will be granted access to the account if and only if the
 authenticated principal name of the user can be mapped to the local
 account name using the aname -> lname mapping rules (see \fIkrb5_anadd(8)\fP

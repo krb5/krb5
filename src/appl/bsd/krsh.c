@@ -70,6 +70,7 @@ char copyright[] =
 /*
  * rsh - remote shell
  */
+#define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
 
 int	error();
      
@@ -372,6 +373,12 @@ main(argc, argv0)
                 argv0, error_message(status));
         exit(1);
     }
+#ifdef HAVE_ISATTY
+    if(isatty(2)) {
+	write(2,SECURE_MESSAGE, strlen(SECURE_MESSAGE));
+    }
+#endif
+    
 #else /* !KERBEROS */
     rem = rcmd(&host, debug_port, pwd->pw_name,
 	       user ? user : pwd->pw_name, args, &rfd2);

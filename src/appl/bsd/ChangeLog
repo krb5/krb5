@@ -1,6 +1,29 @@
+Thu Feb  1 00:09:13 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* rcp.M: Fix typo.
+
+	* krcp.c (des_write): If rcp tries to write to stdin, redirect it
+        to stdout.  That way it works with pipes; the right thing is for
+        rcp to not try and do this, but introducing remread and remwrite
+        as variables is significantly more work for only slightly better
+        code.
+	(main):  Use rsh encryption; not user-to-user. Note that we still
+	support the answer_auth mechanism for incoming connections
+	so older clients work, but this is depricated.
+	(send_auth): expunged with pleasure; answer_auth should go in a
+	a version or two.
+
 Wed Jan 31 16:24:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* krlogind.c (recvauth): Psas ccache to rd_and_store_for_creds
+	* krsh.c (main): Print SECURE_MESSAGE when appropriate.
+
+	* krshd.c (doit): Fork and handle pipes either if stderr signal
+        processing is enabled *or* encryption is enabled.  Rsh always
+        enables stderr, but rcp won't.
+	(SECURE_MESSAGE): Moving to client where it belongs, so the stderr
+	lchannel doesn't get corrupted for rcp.  Besides, the client can determine if it is talking to a tty and only print this message to a tty.
+
+	* krlogind.c (recvauth): Pas ccache to rd_and_store_for_creds
 
 	* krshd.c (recvauth): Pass address of ccache to rd_and_store_for_creds
 	(ccache): new global variable.
@@ -18,16 +41,6 @@ Tue Jan 30 17:56:49 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 	handled differently that other variables, because TZ may or may not
 	beset, so our position cannot be fixed.
 
-
-
-
-
-	      done
-
-
-
-
-	      Auto-saving...Use execle because AIX doesn't use envron for the initial environment.
 
 Sat Jan 27 18:40:31 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 

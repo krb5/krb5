@@ -97,7 +97,7 @@ char	**save_argv();
 char	*strsave();
 #endif
 int	des_write(), des_read();
-void	send_auth(), answer_auth();
+void answer_auth();
 int	encryptflag = 0;
 
 #ifndef UCB_RCP
@@ -161,7 +161,7 @@ main(argc, argv)
     krb5_error_code status;	
     int euid;
     char **orig_argv = save_argv(argc, argv);
-    
+
     krb5_init_context(&bsd_context);
     krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
@@ -243,16 +243,18 @@ main(argc, argv)
 	    if (encryptflag)
 	      answer_auth(krb_config, krb_cache);
 #endif /* KERBEROS */
+
 	    (void) response();
 	    source(--argc, ++argv);
 	    exit(errs);
 	    
 	  case 't':		/* "to" */
 	    iamremote = 1;
-#if defined(KERBEROS) 
+#if defined(KERBEROS)
 	    if (encryptflag)
 	      answer_auth(krb_config, krb_cache);
 #endif /* KERBEROS */
+
 	    sink(--argc, ++argv);
 	    exit(errs);
 	    
@@ -300,9 +302,10 @@ main(argc, argv)
 	fprintf(stderr, "rcp: Cannot malloc.\n");
 	exit(1);
     }
-    (void) sprintf(cmd, "rcp%s%s%s%s%s%s%s%s%s%s",
+    (void) sprintf(cmd, "%srcp %s%s%s%s%s%s%s%s%s",
+		   encryptflag ? "-x " : "",
+
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
-		   encryptflag ? " -x" : "",
 		   targetshouldbedirectory ? " -d" : "",
 		   krb_realm != NULL ? " -k " : "",
 		   krb_realm != NULL ? krb_realm : "",
@@ -399,6 +402,7 @@ main(argc, argv)
 				   thost, targ);
 		(void) susystem(buf);
 	    } else {		/* local to remote */
+krb5_creds *cred;
 		if (rem == -1) {
 		    (void) sprintf(buf, "%s -t %s",
 				   cmd, targ);
@@ -414,7 +418,7 @@ main(argc, argv)
 				  0,
 				  "host",
 				  krb_realm,
-				  0,  /* No return cred */
+				  &cred,  
 				  0,  /* No seq # */
 				  0,  /* No server seq # */
 				  (struct sockaddr_in *) 0,
@@ -430,8 +434,15 @@ main(argc, argv)
 		    }
 		    else {
 			rem = sock; 
-			if (encryptflag)
-			  send_auth();
+			session_key = &cred->keyblock;
+				   
+    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
+    if ( status = krb5_process_key(bsd_context, &eblock, 
+				   session_key)){
+	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
+		error_message(status));
+	exit(1);
+    }
 		    }
 #else
 		    rem = rcmd(&host, port, pwd->pw_name,
@@ -478,6 +489,7 @@ main(argc, argv)
 			       argv[i], argv[argc - 1]);
 		(void) susystem(buf);
 	    } else {		/* remote to local */
+		krb5_creds *cred;
 		*src++ = 0;
 		if (*src == 0)
 		  src = ".";
@@ -503,7 +515,7 @@ main(argc, argv)
 			      0,
 			      "host",
 			      krb_realm,
-			      0,  /* No return cred */
+			      &cred,  
 			      0,  /* No seq # */
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
@@ -519,8 +531,16 @@ main(argc, argv)
 		    
 		} else {
 		    rem = sock; 
-		    if (encryptflag)
-		      send_auth();
+			session_key = &cred->keyblock;
+				   
+    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
+    if ( status = krb5_process_key(bsd_context, &eblock, 
+				   session_key)){
+	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
+		error_message(status));
+	exit(1);
+    }
+
 		}
 		euid = geteuid();
 #ifdef HAVE_SETREUID
@@ -1238,132 +1258,8 @@ char **save_argv(argc, argv)
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-void send_auth()
-{
-    int sin_len;
-    char *princ;          /* principal in credentials cache */
-    krb5_ccache cc;
-    krb5_creds in_creds, *out_creds;
-    krb5_data reply, princ_data;
-    krb5_error_code status;
-    krb5_address faddr;
-    krb5_ticket * ticket = NULL;
-    krb5_auth_context auth_context = NULL;
-    
-    
-    if (status = krb5_cc_default(bsd_context, &cc)){
-	fprintf(stderr,"rcp: send_auth failed krb5_cc_default : %s\n",
-		error_message(status));
-	exit(1);
-    }
-    
-    memset ((char*)&in_creds, 0, sizeof(krb5_creds));
-    
-    if (status = krb5_cc_get_principal(bsd_context, cc, &in_creds.client)){
-	fprintf(stderr,
-		"rcp: send_auth failed krb5_cc_get_principal : %s\n",
-		error_message(status));
-	krb5_cc_close(bsd_context, cc);
-	exit(1);
-    }
-    
-    if (status = krb5_unparse_name(bsd_context, in_creds.client, &princ)){
-	fprintf(stderr,"rcp: send_auth failed krb5_parse_name : %s\n",
-		error_message(status));
-	krb5_cc_close(bsd_context, cc);
-	exit(1);
-    }
-    if (status = krb5_build_principal_ext(bsd_context, &in_creds.server,
-			  krb5_princ_realm(bsd_context,in_creds.client)->length,
-			  krb5_princ_realm(bsd_context,in_creds.client)->data,
-					  6, "krbtgt",
-			  krb5_princ_realm(bsd_context,in_creds.client)->length,
-			  krb5_princ_realm(bsd_context,in_creds.client)->data,
-					  0)){
-	fprintf(stderr,
-		"rcp: send_auth failed krb5_build_principal_ext : %s\n",
-		error_message(status));
-	krb5_cc_close(bsd_context, cc);
-	exit(1);
-    }
-    
-    /* Get TGT from credentials cache */
-    if (status = krb5_get_credentials(bsd_context, KRB5_GC_CACHED, cc, 
-				      &in_creds, &out_creds)){
-	fprintf(stderr,
-                "rcp: send_auth failed krb5_get_credentials: %s\n",
-		error_message(status));
-	krb5_cc_close(bsd_context, cc);
-	exit(1);
-    }
-    krb5_cc_close(bsd_context, cc);
-    
-    princ_data.data = princ;
-    princ_data.length = strlen(princ_data.data) + 1; /* include null 
-							terminator for
-							server's convenience */
-    status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &princ_data);
-    if (status){
-	fprintf(stderr,
-                "rcp: send_auth failed krb5_write_message: %s\n",
-		error_message(status));
-	exit(1);
-    }
-    krb5_xfree(princ);
-    status = krb5_write_message(bsd_context, (krb5_pointer)&rem, 
-				&out_creds->ticket);
-    if (status){
-	fprintf(stderr,
-                "rcp: send_auth failed krb5_write_message: %s\n",
-		error_message(status));
-	exit(1);
-    }
-    
-    if (status = krb5_read_message(bsd_context, (krb5_pointer) &rem, &reply)) {
-	fprintf(stderr, "rcp: send_auth failed krb5_read_message: %s\n",
-		error_message(status));
-	exit(1);
-    }
-    
-    sin_len = SIZEOF_INADDR;
-    faddr.addrtype = foreign.sin_family;
-    faddr.length = SIZEOF_INADDR;
-    faddr.contents = (krb5_octet *) &foreign.sin_addr;
 
-    if (krb5_auth_con_init(bsd_context, &auth_context))
-	exit(1);
 
-    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &faddr);
-    
-    if (krb5_auth_con_setuseruserkey(bsd_context, auth_context,
-				     &out_creds->keyblock))
-	exit(1);
-    
-    /* read the ap_req to get the session key */
-    status = krb5_rd_req(bsd_context, &auth_context, &reply,
-			 0,               /* don't know server's name... */
-			 NULL,		  /* default keytab */
-			 NULL, & ticket);
-    krb5_xfree(reply.data);
-    if (status) {
-	fprintf(stderr, "rcp: send_auth failed krb5_rd_req: %s\n",
-		error_message(status));
-	exit(1);
-    }
-    
-    krb5_copy_keyblock(bsd_context, ticket->enc_part2->session,
-		       &session_key);
-    krb5_free_creds(bsd_context, out_creds);
-    
-    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock, 
-				   session_key)){
-	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
-		error_message(status));
-	exit(1);
-    }
-    
-}
 
 void
   answer_auth(config_file, ccache_file)
@@ -1526,7 +1422,14 @@ int des_write(fd, buf, len)
      int len;
 {
     unsigned char len_buf[4];
+/* Note that rcp depends on the same
+ * file descriptor being both input and output to the remote
+ * side.  This is bogus, especially when rcp
+ * is being run by a rsh that pipes. Fix it here because
+ * it would require significantly more work in other places. --hartmans 1/96*/
     
+    if (fd == 0)
+	fd = 1;
     if (!encryptflag)
       return(write(fd, buf, len));
     
