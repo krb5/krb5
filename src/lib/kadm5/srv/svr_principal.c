@@ -861,10 +861,11 @@ check_pw_reuse(krb5_context context,
     krb5_error_code ret;
 
     for (x = 0; x < n_new_key_data; x++) {
-	 if (ret = krb5_dbekd_decrypt_key_data(context,
-					       &master_keyblock,
-					       &(new_key_data[x]),
-					       &newkey, NULL))
+	ret = krb5_dbekd_decrypt_key_data(context,
+					  &master_keyblock,
+					  &(new_key_data[x]),
+					  &newkey, NULL);
+	if (ret)
 	    return(ret);
 	for (y = 0; y < n_pw_hist_data; y++) {
 	     for (z = 0; z < pw_hist_data[y].n_key_data; z++) {

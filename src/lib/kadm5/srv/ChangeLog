@@ -1,3 +1,7 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* svr_principal.c (check_pw_reuse): Cleanup assignment in conditional.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* svr_principal.c: Cleanup assignments in conditionals.
