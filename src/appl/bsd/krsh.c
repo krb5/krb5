@@ -44,6 +44,7 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
      
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 #include <signal.h>
 #include <pwd.h>
 #include <netdb.h>
@@ -67,7 +68,6 @@ int	error();
 struct	passwd *getpwuid();
 #endif
 
-int	errno;
 int	options;
 int	rfd2;
 int	nflag;
@@ -109,8 +109,8 @@ void	try_normal();
     int debug_port = 0;
 #endif  /* KERBEROS */
    
-    if (rindex(argv[0], '/'))
-      argv[0] = rindex(argv[0], '/')+1; 
+    if (strrchr(argv[0], '/'))
+      argv[0] = strrchr(argv[0], '/')+1; 
 
     if ( argc < 2 ) goto usage;
     argc--;
@@ -254,7 +254,7 @@ void	try_normal();
     cc = 0;
     for (ap = argv; *ap; ap++)
       cc += strlen(*ap) + 1;
-    cp = args = malloc(cc);
+    cp = args = (char *) malloc(cc);
     for (ap = argv; *ap; ap++) {
 	(void) strcpy(cp, *ap);
 	while (*cp)
@@ -445,7 +445,7 @@ void try_normal(argv)
      * We always want to call the Berkeley rsh as 'host mumble'
      */
     
-    host = rindex(argv[0], '/');
+    host = strrchr(argv[0], '/');
     if (host)
       host++;
     else

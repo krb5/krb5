@@ -32,6 +32,7 @@ static char sccsid[] = "derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88";
      
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <pwd.h>
 #include <sys/param.h>
 #ifndef _TYPES_
@@ -129,7 +130,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sin_len = strlen(host_save) + strlen(service)
       + (realm ? strlen(realm): 0) + 3;
     if ( sin_len < 20 ) sin_len = 20;
-    tmpstr = malloc(sin_len);
+    tmpstr = (char *) malloc(sin_len);
     if ( tmpstr == (char *) 0){
 	fprintf(stderr,"kcmd: no memory\n");
 	return(-1);
@@ -594,7 +595,7 @@ _checkhost(rhost, lhost, len)
 	    return(0);
 	}
 	ldomain[MAXHOSTNAMELEN] = NULL;
-	if ((domainp = index(ldomain, '.')) == (char *)NULL) {
+	if ((domainp = strchr(ldomain, '.')) == (char *)NULL) {
 	    nodomain = 1;
 	    return(0);
 	}
@@ -630,7 +631,7 @@ char *sp;
 {
     register char *ret;
     
-    if((ret = malloc((unsigned) strlen(sp)+1)) == NULL) {
+    if((ret = (char *) malloc((unsigned) strlen(sp)+1)) == NULL) {
 	fprintf(stderr, "no memory for saving args\n");
 	exit(1);
     }

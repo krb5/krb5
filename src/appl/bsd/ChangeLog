@@ -1,3 +1,9 @@
+Sat Jul 16 02:24:31 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kcmd.c:
+	* krsh.c: index->strchr, rindex->strrchr, add (char *) cast to
+	malloc,	have proper include for the string functions.
+
 Fri Jul 15 15:03:11 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* krcp.c: add utimes() emulation for systems that only have the
