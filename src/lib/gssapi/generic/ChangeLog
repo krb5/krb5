@@ -1,3 +1,8 @@
+Tue Apr  2 15:31:25 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Inlined list of source files for SRCS and
+		OBJS (for Macintosh build).
+
 Thu Feb 29 19:39:23 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* util_token.c (der_length_size, der_write_size): Fix to work on

@@ -37,11 +37,11 @@ gssapi_err_generic.c: gssapi_err_generic.et
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c
 # UTIL_VALIDATE_OBJ= util_validate.$(OBJEXT)
 #else
-UTIL_VALIDATE_SRC= $(srcdir)/utl_nohash_validate.c
-UTIL_VALIDATE_OBJ= utl_nohash_validate.$(OBJEXT)
+#UTIL_VALIDATE_SRC= $(srcdir)/utl_nohash_validate.c
+#UTIL_VALIDATE_OBJ= utl_nohash_validate.$(OBJEXT)
 #endif
 
-CCSRCS = \
+SRCS = \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/util_buffer.c \
@@ -49,9 +49,10 @@ CCSRCS = \
 	$(srcdir)/util_dup.c \
 	$(srcdir)/util_oid.c \
 	$(srcdir)/util_token.c \
-	$(UTIL_VALIDATE_SRC)
+	$(srcdir)/utl_nohash_validate.c \
+	gssapi_err_generic.c
 
-CCOBJS = \
+OBJS = \
 	disp_major_status.$(OBJEXT) \
 	disp_com_err_status.$(OBJEXT) \
 	util_buffer.$(OBJEXT) \
@@ -59,14 +60,12 @@ CCOBJS = \
 	util_dup.$(OBJEXT) \
 	util_oid.$(OBJEXT) \
 	util_token.$(OBJEXT) \
-	$(UTIL_VALIDATE_OBJ)
-
+	utl_nohash_validate.$(OBJEXT) \
+	gssapi_err_generic.$(OBJEXT)
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
-SRCS= $(ETSRCS) $(CCSRCS)
-OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
 all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
