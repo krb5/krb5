@@ -1,5 +1,28 @@
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* compat_recv.c: New file, moved from lib/krb5util.
+	* Makefile.in (SRCS, OBJS): Include it.
+	(rcp, kshd, klogind): Link against it instead of krb5util
+	library.
+	* defines.h (krb5_compat_recvauth, krb5_compat_recvauth_version):
+	Move declarations here from include/k5-util.h.
+	(princ_maps_to_lname): Declare.
+
+	* kcmd.c (kcmd_connect): Use strdup when copying hostname.
+	(princ_maps_to_lname, default_realm): Move functions here...
+	* krlogind.c (princ_maps_to_lname, default_realm): ...from here.
+	(recvauth): Use sockaddr_storage to hold addresses.
+	* krshd.c (default_realm, princ_maps_to_lname): Deleted.
+	(recvauth): Take sockaddr pointer argument instead of
+	sockaddr_in.  Use getnameinfo to extract port number string.
+	(remote_addr, remote_port, local_addr, local_port): Make buffers
+	bigger.
+	(doit): Use sockaddr_storage for local address.  Get rid of all
+	settings of non_privileged, since it's never used.  Don't copy
+	remote address to local variable.  Use getnameinfo instead of
+	inet_ntoa to format addresses and port numbers for environment
+	variables.
+
 	* krsh.c (SECURE_MESSAGE): Only indicate that input/output data
 	are being encrypted, and don't automatically say it's with DES.
 

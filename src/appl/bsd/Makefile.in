@@ -16,10 +16,10 @@ V4RCPO=@V4RCPO@
 KRSHDLIBS=@KRSHDLIBS@
 
 SRCS= $(srcdir)/krcp.c $(srcdir)/krlogin.c $(srcdir)/krsh.c $(srcdir)/kcmd.c \
-	$(srcdir)/forward.c \
+	$(srcdir)/forward.c $(srcdir)/compat_recv.c \
 	$(srcdir)/login.c $(srcdir)/krshd.c $(srcdir)/krlogind.c \
 	$(srcdir)/v4rcp.c
-OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o  $(SETENVOBJ) \
+OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) \
 	login.o krshd.o krlogind.o $(V4RCPO) $(LIBOBJS)
 
 UCB_RLOGIN = @UCB_RLOGIN@
@@ -42,8 +42,8 @@ clean::
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
-rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_DEPLIB) $(KRB4COMATP_DEPLIBS)
-	$(CC_LINK) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMATP_DEPLIBS)
+	$(CC_LINK) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
 v4rcp: v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o v4rcp v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
@@ -66,11 +66,11 @@ install::
 		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	fi
 
-kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+kshd: krshd.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o kshd krshd.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
-klogind: krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+klogind: krlogind.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
 install::
 	for f in kshd klogind; do \
@@ -101,9 +101,9 @@ kcmd.o krcp.o krlogin.o krlogind.o krsh.o krshd.o forward.o: defines.h
 # the Makefile.in file
 #
 $(OUTPRE)krcp.$(OBJEXT): krcp.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/socket-utils.h
 $(OUTPRE)krlogin.$(OBJEXT): krlogin.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
@@ -115,16 +115,22 @@ $(OUTPRE)krsh.$(OBJEXT): krsh.c $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/socket-utils.h
-$(OUTPRE)kcmd.$(OBJEXT): kcmd.c $(BUILDTOP)/include/krb5.h \
+$(OUTPRE)kcmd.$(OBJEXT): kcmd.c $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/socket-utils.h
+  $(SRCTOP)/include/kerberosIV/des.h defines.h
 $(OUTPRE)forward.$(OBJEXT): forward.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h
+$(OUTPRE)compat_recv.$(OBJEXT): compat_recv.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h
 $(OUTPRE)login.$(OBJEXT): login.c $(BUILDTOP)/include/libpty.h \
   $(SRCTOP)/include/syslog.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
@@ -140,14 +146,14 @@ $(OUTPRE)krshd.$(OBJEXT): krshd.c $(BUILDTOP)/include/libpty.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-util.h \
   defines.h $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/socket-utils.h
 $(OUTPRE)krlogind.$(OBJEXT): krlogind.c $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/libpty.h \
-  $(SRCTOP)/include/k5-util.h defines.h $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/socket-utils.h
+  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/libpty.h \
+  $(SRCTOP)/include/k5-util.h defines.h
 $(OUTPRE)v4rcp.$(OBJEXT): v4rcp.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/krbports.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krbports.h \
   rpaths.h
 

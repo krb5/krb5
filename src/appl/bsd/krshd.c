@@ -200,10 +200,6 @@ krb5_context bsd_context;
 char *srvtab = NULL;
 krb5_keytab keytab = NULL;
 krb5_ccache ccache = NULL;
-int default_realm(krb5_principal principal);
-#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
-static int princ_maps_to_lname(krb5_principal principal, char *luser);
-#endif
 
 void fatal(int, const char *);
 
@@ -216,7 +212,7 @@ int maxhostlen = 0;
 int stripdomain = 1;
 int always_ip = 0;
 
-static krb5_error_code recvauth(int netfd, struct sockaddr_in peersin,
+static krb5_error_code recvauth(int netfd, struct sockaddr *peersin,
 				int *valid_checksum);
 
 #else /* !KERBEROS */
@@ -264,7 +260,7 @@ void 	error (char *fmt, ...)
      ;
 
 void usage(void), getstr(int, char *, int, char *), 
-    doit(int, struct sockaddr_in *);
+    doit(int, struct sockaddr *);
 
 #ifndef HAVE_INITGROUPS
 int initgroups(char* name, gid_t basegid) {
@@ -492,7 +488,7 @@ int main(argc, argv)
 	fatal(fd, "Configuration error: mutually exclusive options specified");
     }
 
-    doit(dup(fd), &from);
+    doit(dup(fd), (struct sockaddr *) &from);
     return 0;
 }
 
@@ -509,10 +505,10 @@ char	shell[64] = "SHELL=";
 char    term[64] = "TERM=network";
 char	path_rest[] = RPATH;
 
-char	remote_addr[64];	/* = "KRB5REMOTEADDR=" */
-char	remote_port[64];	/* = "KRB5REMOTEPORT=" */
-char	local_addr[64];		/* = "KRB5LOCALADDR=" */
-char	local_port[64];		/* = "KRB5LOCALPORT=" */
+char	remote_addr[64+NI_MAXHOST]; /* = "KRB5REMOTEADDR=" */
+char	remote_port[64+NI_MAXSERV]; /* = "KRB5REMOTEPORT=" */
+char	local_addr[64+NI_MAXHOST]; /* = "KRB5LOCALADDR=" */
+char	local_port[64+NI_MAXSERV]; /* = "KRB5LOCALPORT=" */
 #define ADDRPAD 0,0,0,0
 #define KRBPAD 0		/* KRB5CCNAME, optional */
 
@@ -609,7 +605,7 @@ cleanup(signumber)
 
 void doit(f, fromp)
      int f;
-     struct sockaddr_in *fromp;
+     struct sockaddr *fromp;
 {
     char *cp;
 #ifdef KERBEROS
@@ -648,9 +644,7 @@ void doit(f, fromp)
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
     char buf[RCMD_BUFSIZ], sig;
-    struct sockaddr_in fromaddr;
-    struct sockaddr_in localaddr;
-    int non_privileged = 0;
+    struct sockaddr_storage localaddr;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
@@ -671,13 +665,12 @@ void doit(f, fromp)
 #endif /* IP_TOS */
     
     { 
-      int sin_len = sizeof (struct sockaddr_in);
+      int sin_len = sizeof (localaddr);
       if (getsockname(f, (struct sockaddr*)&localaddr, &sin_len) < 0) {
 	perror("getsockname");
 	exit(1);
       }
     }
-    fromaddr = *fromp;
 
 #ifdef POSIX_SIGNALS
     (void)sigemptyset(&sa.sa_mask);
@@ -706,9 +699,6 @@ void doit(f, fromp)
     }
 #ifdef KERBEROS
     netf = f;
-    if ( (fromp->sin_port >= IPPORT_RESERVED ||
-	    fromp->sin_port < IPPORT_RESERVED/2))
-      non_privileged = 1;
 #else
     if (fromp->sin_port >= IPPORT_RESERVED ||
 	    fromp->sin_port < IPPORT_RESERVED/2) {
@@ -779,10 +769,7 @@ void doit(f, fromp)
 		   "can't get stderr port: %m");
 	    exit(1);
 	}
-#ifdef KERBEROS
-	if ( port >= IPPORT_RESERVED)
-	    non_privileged = 1;
-#else
+#ifndef KERBEROS
 	if (port >= IPPORT_RESERVED) {
 	    syslog(LOG_ERR , "2nd port not reserved\n");
 	    exit(1);
@@ -817,7 +804,7 @@ void doit(f, fromp)
 	exit(1);
     }
 
-    if ((status = recvauth(f, fromaddr,&valid_checksum))) {
+    if ((status = recvauth(f, fromp, &valid_checksum))) {
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
     }
@@ -1438,21 +1425,37 @@ if(port)
     {
       int i;
       /* these four are covered by ADDRPAD */
-      sprintf(local_addr,  "KRB5LOCALADDR=%s", inet_ntoa(localaddr.sin_addr));
+      int aierr;
+      char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+
       for (i = 0; envinit[i]; i++);
-      envinit[i] =local_addr;
 
-      sprintf(local_port,  "KRB5LOCALPORT=%d", ntohs(localaddr.sin_port));
-      for (; envinit[i]; i++);
-      envinit[i] =local_port;
+      aierr = getnameinfo((struct sockaddr *)&localaddr,
+			  socklen((struct sockaddr *)&localaddr),
+			  hbuf, sizeof(hbuf), sbuf, sizeof(sbuf),
+			  NI_NUMERICHOST | NI_NUMERICSERV);
+      if (aierr)
+	  goto skip_localaddr_env;
+      sprintf(local_addr,  "KRB5LOCALADDR=%s", hbuf);
+      envinit[i++] =local_addr;
 
-      sprintf(remote_addr, "KRB5REMOTEADDR=%s", inet_ntoa(fromp->sin_addr));
-      for (; envinit[i]; i++);
-      envinit[i] =remote_addr;
+      sprintf(local_port,  "KRB5LOCALPORT=%s", sbuf);
+      envinit[i++] =local_port;
+    skip_localaddr_env:
 
-      sprintf(remote_port, "KRB5REMOTEPORT=%d", ntohs(fromp->sin_port));
-      for (; envinit[i]; i++);
-      envinit[i] =remote_port;
+      aierr = getnameinfo(fromp, socklen(fromp),
+			  hbuf, sizeof(hbuf), sbuf, sizeof(sbuf),
+			  NI_NUMERICHOST | NI_NUMERICSERV);
+      if (aierr)
+	  goto skip_remoteaddr_env;
+      sprintf(remote_addr, "KRB5REMOTEADDR=%s", hbuf);
+      envinit[i++] =remote_addr;
+
+      sprintf(remote_port, "KRB5REMOTEPORT=%s", sbuf);
+      envinit[i++] =remote_port;
+
+    skip_remoteaddr_env:
+      ;
     }
 
     /* If we do anything else, make sure there is space in the array. */
@@ -1760,46 +1763,6 @@ void usage()
 }
 
 
-
-#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
-static int princ_maps_to_lname(principal, luser)	
-     krb5_principal principal;
-     char *luser;
-{
-    char kuser[10];
-    if (!(krb5_aname_to_localname(bsd_context, principal,
-				  sizeof(kuser), kuser))
-	&& (strcmp(kuser, luser) == 0)) {
-	return 1;
-    }
-    return 0;
-}
-#endif
-
-
-int default_realm(principal)
-     krb5_principal principal;
-{
-    char *def_realm;
-    unsigned int realm_length;
-    int retval;
-    
-    realm_length = krb5_princ_realm(bsd_context, principal)->length;
-    
-    if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
-	return 0;
-    }
-    
-    if ((realm_length != strlen(def_realm)) ||
-	(memcmp(def_realm, krb5_princ_realm(bsd_context, principal)->data, 
-		realm_length))) {
-	free(def_realm);
-	return 0;
-    }	
-    free(def_realm);
-    return 1;
-}
-
 #ifdef KERBEROS
 
 #ifndef KRB_SENDAUTH_VLEN
@@ -1812,7 +1775,7 @@ int default_realm(principal)
 static krb5_error_code
 recvauth(netfd, peersin, valid_checksum)
      int netfd;
-     struct sockaddr_in peersin;
+     struct sockaddr *peersin;
      int *valid_checksum;
 {
     krb5_auth_context auth_context = NULL;
@@ -1885,7 +1848,7 @@ recvauth(netfd, peersin, valid_checksum)
 				  0, 		/* v4_opts */
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */
-				  &peersin, 	/* foreign address */
+				  peersin, 	/* foreign address */
 				  &laddr, 	/* our local address */
 				  "", 		/* use default srvtab */
 
@@ -1962,16 +1925,28 @@ recvauth(netfd, peersin, valid_checksum)
       return status;
     
     if (authenticator->checksum && !checksum_ignored) {
-	struct sockaddr_in adr;
-	int adr_length = sizeof(adr);
-	char * chksumbuf = (char *) malloc(strlen(cmdbuf)+strlen(locuser)+32);
+	struct sockaddr_storage adr;
+	unsigned int adr_length = sizeof(adr);
+	int e;
+	unsigned int buflen = strlen(cmdbuf)+strlen(locuser)+32;
+	char * chksumbuf = (char *) malloc(buflen);
 
 	if (chksumbuf == 0)
 	    goto error_cleanup;
 	if (getsockname(netfd, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 
-	sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
+	e = getnameinfo((struct sockaddr *)&adr, adr_length, 0, 0,
+			chksumbuf, buflen, NI_NUMERICSERV);
+	if (e) {
+	    free(chksumbuf);
+	    fatal(netfd, "local error: can't examine port number");
+	}
+	if (strlen(chksumbuf) > 30) {
+	    free(chksumbuf);
+	    fatal(netfd, "wacky local port number?!");
+	}
+	strcat(chksumbuf, ":");
 	strcat(chksumbuf,cmdbuf);
 	strcat(chksumbuf,locuser);
 

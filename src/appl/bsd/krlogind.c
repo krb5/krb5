@@ -1338,41 +1338,6 @@ void usage()
 
 
 #ifdef KERBEROS
-int princ_maps_to_lname(principal, luser)	
-     krb5_principal principal;
-     char *luser;
-{
-    char kuser[10];
-    if (!(krb5_aname_to_localname(bsd_context, principal,
-				  sizeof(kuser), kuser))
-	&& (strcmp(kuser, luser) == 0)) {
-	return 1;
-    }
-    return 0;
-}
-
-int default_realm(principal)
-     krb5_principal principal;
-{
-    char *def_realm;
-    unsigned int realm_length;
-    int retval;
-    
-    realm_length = krb5_princ_realm(bsd_context, principal)->length;
-    
-    if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
-	return 0;
-    }
-    
-    if ((realm_length != strlen(def_realm)) ||
-	(memcmp(def_realm, krb5_princ_realm(bsd_context, principal)->data, realm_length))) {
-	free(def_realm);
-	return 0;
-    }	
-    free(def_realm);
-    return 1;
-}
-
 
 #ifndef KRB_SENDAUTH_VLEN
 #define	KRB_SENDAUTH_VLEN 8	    /* length for version strings */
@@ -1387,7 +1352,7 @@ recvauth(valid_checksum)
 {
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
-    struct sockaddr_in peersin, laddr;
+    struct sockaddr_storage peersin, laddr;
     int len;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
@@ -1448,8 +1413,8 @@ recvauth(valid_checksum)
 				  do_encrypt ? KOPT_DO_MUTUAL : 0, /*v4_opts*/
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */
-				  &peersin, 	/* foriegn address */
-				  &laddr, 	/* our local address */
+				  ss2sin(&peersin), /* foriegn address */
+				  ss2sin(&laddr), /* our local address */
 				  "", 		/* use default srvtab */
 
 				  &ticket, 	/* return ticket */

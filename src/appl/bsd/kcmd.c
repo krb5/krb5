@@ -84,7 +84,7 @@
 
 #include <netinet/in.h>
 #include <netdb.h>
-     
+
 #include <errno.h>
 #include <krb5.h>
 #ifdef KRB5_KRB4_COMPAT
@@ -224,13 +224,7 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	return -1;
     }
 
-    *host_save = malloc(strlen(ap->ai_canonname) + 1);
-    if (*host_save == NULL) {
-	fprintf(stderr, "kcmd: no memory\n");
-	freeaddrinfo(ap);
-	return -1;
-    }
-    strcpy(*host_save, ap->ai_canonname);
+    *host_save = strdup(ap->ai_canonname ? ap->ai_canonname : hname);
 
     for (ap2 = ap; ap; ap = ap->ai_next) {
 	char hostbuf[NI_MAXHOST];
@@ -1272,5 +1266,43 @@ strsave(sp)
     (void) strcpy(ret,sp);
     return(ret);
 }
-
 #endif
+
+/* Server side authentication, etc */
+
+int princ_maps_to_lname(principal, luser)	
+     krb5_principal principal;
+     char *luser;
+{
+    char kuser[10];
+    if (!(krb5_aname_to_localname(bsd_context, principal,
+				  sizeof(kuser), kuser))
+	&& (strcmp(kuser, luser) == 0)) {
+	return 1;
+    }
+    return 0;
+}
+
+int default_realm(principal)
+     krb5_principal principal;
+{
+    char *def_realm;
+    unsigned int realm_length;
+    int retval;
+    
+    realm_length = krb5_princ_realm(bsd_context, principal)->length;
+    
+    if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
+	return 0;
+    }
+    
+    if ((realm_length != strlen(def_realm)) ||
+	(memcmp(def_realm, krb5_princ_realm(bsd_context, principal)->data, 
+		realm_length))) {
+	free(def_realm);
+	return 0;
+    }	
+    free(def_realm);
+    return 1;
+}
+

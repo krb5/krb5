@@ -65,8 +65,30 @@ krb5_error_code rd_and_store_for_creds(krb5_context context,
 				       krb5_data *inbuf, krb5_ticket *ticket,
 				       krb5_ccache *ccache);
 
+
+int princ_maps_to_lname(krb5_principal principal, char *luser);
+
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
 #endif
 
 #include "fake-addrinfo.h"
+
+#ifdef KRB_DEFS
+krb5_error_code krb5_compat_recvauth(krb5_context, krb5_auth_context *,
+				     krb5_pointer, char *, krb5_principal, 
+				     krb5_int32, krb5_keytab,
+				     krb5_int32, char *, char *,
+				     struct sockaddr_in *, 
+				     struct sockaddr_in *, char *,
+				     krb5_ticket **, krb5_int32 *, 
+				     AUTH_DAT **, Key_schedule, char *);
+
+krb5_error_code
+krb5_compat_recvauth_version(krb5_context, krb5_auth_context *,
+			     krb5_pointer, krb5_principal, krb5_int32, 
+			     krb5_keytab, krb5_int32, char *, char *,
+			     struct sockaddr_in *, struct sockaddr_in *,
+			     char *, krb5_ticket **, krb5_int32*, 
+			     AUTH_DAT **,  Key_schedule, krb5_data *);
+#endif
