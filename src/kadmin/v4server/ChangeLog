@@ -1,3 +1,25 @@
+2000-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin_server.c (main, case 'r'): Reject realm name that's too
+	long.
+
+	* acl_files.c (acl_load): Return error if name too long.
+
+	* kadm_err.et (KADM_REALM_TOO_LONG): New error code.
+	* kadm_ser_wrap.c (kadm_ser_init): Return it instead of truncating
+	a too-long realm name.
+
+2000-05-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* acl_files.c (acl_canonicalize_principal): If the principal name
+	would be too long, return a zero-length string to mark it as invalid.
+	(acl_load): Don't add the principal to the hash if it's invalid.
+	(acl_add): Don't check the principal if it's invalid.
+	(acl_delete): Don't try to delete the principal if it's invalid.
+
+	* kadm_ser_wrap.c (kadm_ser_init): Truncate "server_parm.krbrlm"
+	if "realm" is too long.
+
 2000-05-23  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_server.c (kadm_ser_cpw): Add new arg to call to

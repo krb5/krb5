@@ -47,7 +47,7 @@ kadm_ser_init(inter, realm, params)
 kadm_ser_init(inter, realm)
     int inter;			/* interactive or from file */
     char realm[];
-#endif   
+#endif
 {
     struct servent *sep;
     struct hostent *hp;
@@ -64,7 +64,11 @@ kadm_ser_init(inter, realm)
     
     (void) strcpy(server_parm.sname, PWSERV_NAME);
     (void) strcpy(server_parm.sinst, KRB_MASTER);
-    (void) strcpy(server_parm.krbrlm, realm);
+    if (strlen (realm) > REALM_SZ)
+	return KADM_REALM_TOO_LONG;
+    (void) strncpy(server_parm.krbrlm, realm, sizeof(server_parm.krbrlm)-1);
+    server_parm.krbrlm[sizeof(server_parm.krbrlm) - 1] = '\0';
+
     if (krb5_425_conv_principal(kadm_context, server_parm.sname,
 				server_parm.sinst, server_parm.krbrlm,
 				&server_parm.sprinc))

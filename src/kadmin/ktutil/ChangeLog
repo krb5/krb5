@@ -1,3 +1,8 @@
+2000-05-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_keytab): Reject a filename that's
+	too long.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
