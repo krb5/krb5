@@ -1498,10 +1498,6 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @special{psfile=telnet9.ps voffset=-700 hoffset=-40}
 @centerline{Reference Manual for @code{telnet}}
 @page
-
-@special{psfile=telnet10.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{telnet}}
-@page
 @end iftex
 @ifinfo
 Type @kbd{M-x manual-entry telnet} to read this manual page.
@@ -1584,10 +1580,6 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 
 @iftex
 @special{psfile=rcp1.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{rcp}}
-@page
-
-@special{psfile=rcp2.ps voffset=-700 hoffset=-40}
 @centerline{Reference Manual for @code{rcp}}
 @page
 @end iftex

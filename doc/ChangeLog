@@ -1,3 +1,8 @@
+Tue Sep 10 20:47:41 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* user-guide.texinfo: The telnet man page only has 9 pages; the
+		rcp man page only has 1 page.
+
 Mon Sep  9 19:35:37 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* build.texinfo: Updated to reflect latest OS inconsistencies;
