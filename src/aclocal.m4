@@ -255,8 +255,8 @@ define(WITH_KRB4,[
 AC_WITH([krb4],
 echo "krb4 is $withval"
 KRB4=$withval,
-echo "krb4 defaults to /usr/kerberos"
-KRB4=/usr/kerberos)dnl
+echo "no krb4 support; use --with-krb4=krb4dir"
+KRB4=)dnl
 AC_SUBST(KRB4)])dnl
 dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
