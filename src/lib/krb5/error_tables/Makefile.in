@@ -30,7 +30,7 @@ SRCS=$(ETSRCS) init_ets.c
 
 all:: all-$(WHAT)
 
-all-unix:: $(HDRS) includes shared $(OBJS)
+all-unix:: $(HDRS) shared $(OBJS)
 all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
@@ -38,7 +38,7 @@ all-windows:: $(OBJS)
 shared:
 	mkdir shared
 
-unixmac: $(HDRS) includes $(SRCS)
+unixmac: $(HDRS) $(SRCS)
 
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
@@ -69,27 +69,15 @@ kv5m_err.$(OBJEXT): kv5m_err.c
 
 clean:: clean-$(WHAT)
 
-clean-unix:: clean-hdrs
+clean-unix::
 	$(RM) $(HDRS) $(ETSRCS) shared/*
-clean-mac:: clean-hdrs
+clean-mac::
 	$(RM) $(HDRS) $(ETSRCS)
 clean-windows::
 
 init_ets.o: $(srcdir)/init_ets.c
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
-
-includes:: $(HDRS)
-	for x in $(HDRS); do \
-	if cmp $$x $(EHDRDIR)/$$x >/dev/null 2>&1; then :; \
-	else \
-		(set -x; rm -f $(EHDRDIR)/$$x;	cp $$x $(EHDRDIR)/$$x) \
-	fi; done
-
-clean-hdrs::
-	for x in $(HDRS); do \
-		rm -f $(EHDRDIR)/$$x; \
-	done
 
 # 
 # This stuff is already dropped in by the autoconf generated configure scripts.
