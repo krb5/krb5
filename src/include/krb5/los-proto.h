@@ -26,9 +26,11 @@ krb5_error_code krb5_read_password
 		   int size_return ));
 krb5_error_code krb5_lock_file
 	PROTOTYPE((FILE *filep,
+		   char *,
 		   int mode ));
 krb5_error_code krb5_unlock_file
-	PROTOTYPE((FILE *filep ));
+	PROTOTYPE((FILE *filep,
+		   char * ));
 krb5_error_code krb5_timeofday
 	PROTOTYPE((krb5_int32 *timeret ));
 krb5_error_code krb5_ms_timeofday

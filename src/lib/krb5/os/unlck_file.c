@@ -23,8 +23,9 @@ static char rcsid_unlock_file_c [] =
 #include <krb5/libos-proto.h>
 
 krb5_error_code
-krb5_unlock_file(filep)
+krb5_unlock_file(filep, pathname)
 FILE *filep;
+char *pathname;
 {
-    return krb5_lock_file(filep, KRB5_LOCKMODE_UNLOCK);
+    return krb5_lock_file(filep, pathname, KRB5_LOCKMODE_UNLOCK);
 }
