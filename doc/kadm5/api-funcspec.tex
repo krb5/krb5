@@ -1356,6 +1356,11 @@ If the dictionary file does not exist, the server logs the message
 without one.'' at the LOG_ERR level and continues with dictionary
 checking disabled.
 
+If the server cannot register itself as an RPC server via the portmap
+daemon, it logs the message ``Cannot register RPC service, failing.''
+at the LOG_ERR level and exits with non-zero status.  This error can
+happen if the portmapper is not running.
+
 If the GSS-API authentication system cannot be initialized, the server
 logs the message ``Cannot initialize GSS-API authentication,
 failing.'' at the LOG_ERR level and exits with non-zero status.  This
