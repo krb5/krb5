@@ -137,10 +137,6 @@
 
    More to be added, perhaps.  */
 
-#ifndef HAVE_PTHREAD_H
-# undef ENABLE_THREADS
-#endif
-
 #define DEBUG_THREADS
 #define DEBUG_THREADS_LOC
 #undef DEBUG_THREADS_STATS
@@ -464,7 +460,46 @@ typedef struct {
 
 #elif defined _WIN32
 
-# error "Windows thread support not implemented yet"
+typedef struct {
+    HANDLE h;
+    int is_locked;
+} k5_os_mutex;
+
+# define K5_OS_MUTEX_PARTIAL_INITIALIZER { INVALID_HANDLE_VALUE, 0 }
+
+# define k5_os_mutex_finish_init(M)					 \
+	(assert((M)->h == INVALID_HANDLE_VALUE),			 \
+	 ((M)->h = CreateMutex(NULL, FALSE, NULL)) ? 0 : GetLastError())
+# define k5_os_mutex_init(M)						 \
+	((M)->is_locked = 0,						 \
+	 ((M)->h = CreateMutex(NULL, FALSE, NULL)) ? 0 : GetLastError())
+# define k5_os_mutex_destroy(M)		\
+	(CloseHandle((M)->h) ? ((M)->h = 0, 0) : GetLastError())
+
+static inline int k5_os_mutex_lock(k5_os_mutex *m)
+{
+    DWORD res;
+    res = WaitForSingleObject(m->h, INFINITE);
+    if (res == WAIT_FAILED)
+	return GetLastError();
+    /* Eventually these should be turned into some reasonable error
+       code.  */
+    assert(res != WAIT_TIMEOUT);
+    assert(res != WAIT_ABANDONED);
+    assert(res == WAIT_OBJECT_0);
+    /* Avoid locking twice.  */
+    assert(m->is_locked == 0);
+    m->is_locked = 1;
+    return 0;
+}
+
+# define k5_os_mutex_unlock(M)				\
+	(assert((M)->is_locked == 1),			\
+	 (M)->is_locked = 0,				\
+	 ReleaseMutex((M)->h) ? 0 : GetLastError())
+
+# define k5_os_mutex_assert_unlocked(M)	(0)
+# define k5_os_mutex_assert_locked(M)	(0)
 
 #else
 
