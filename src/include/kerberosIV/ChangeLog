@@ -1,3 +1,9 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb.h: Add prototype for krb__get_srvtabname() which is invoked
+	in place of KEYFILE.
+	Add prototypes for krb_kntoln(), k_isinst(), k_isname(), k_isrealm().
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: Add prototype for krb_sendauth().

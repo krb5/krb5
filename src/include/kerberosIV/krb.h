@@ -464,6 +464,14 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_in_tkt
 KRB5_DLLIMP int KRB5_CALLCONV kname_parse
 	(char FAR *name, char FAR *inst, char FAR *realm,
 		   char FAR *fullname);
+KRB5_DLLIMP int KRB5_CALLCONV k_isname
+        (char FAR *);
+KRB5_DLLIMP int KRB5_CALLCONV k_isinst
+        (char FAR *);
+KRB5_DLLIMP int KRB5_CALLCONV k_isrealm
+        (char FAR *);
+
+
 /* kuserok.c */
 KRB5_DLLIMP int KRB5_CALLCONV kuserok
 	(AUTH_DAT FAR *kdata, char FAR *luser);
@@ -632,6 +640,10 @@ extern int krb_create_ticket(KTEXT tkt, unsigned int flags, char *pname,
 			     char *pinstance, char *prealm, long paddress,
 			     char *session, int life, long time_sec, 
 			     char *sname, char *sinstance, C_Block key);
+
+extern char * krb__get_srvtabname(const char *);
+
+extern int krb_kntoln(AUTH_DAT *, char *);
 
 #ifdef KRB5_GENERAL__
 extern int krb_cr_tkt_krb5(KTEXT tkt, unsigned int flags, char *pname,
