@@ -19,7 +19,6 @@ Sat Mar 23 01:33:09 1996  Sam Hartman  <hartmans@tertius.mit.edu>
         (terminaltype): Declare explicitly "extern".
         * telnetd.c (auth_level, require_SecurID): Don't initialize here.
 
-	
 Mon Mar 18 20:29:05 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Added flags which turn on the encryption option.
@@ -27,6 +26,15 @@ Mon Mar 18 20:29:05 1996  Theodore Y. Ts'o  <tytso@dcl>
 	* telnetd.c (getterminaltype): If the authentication option which
 		was negotiated requires that encryption be turned on, then
 		enforce this here.
+
+Sun Mar  3 14:43:04 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* configure.in: if we don't have termcap, check for curses lib.
+
+Wed Feb 28 21:07:42 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* telnetd.c (telnet): rename HE to HEstr to avoid conflict with
+	HP/UX 10.01 "Fields within IO_STATUS register" values in cpu.h.
 
 Mon Feb 26 03:33:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
