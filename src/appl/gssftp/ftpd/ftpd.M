@@ -30,306 +30,430 @@
 .\" SUCH DAMAGE.
 .\"
 .\"     @(#)ftpd.8	6.9 (Berkeley) 3/16/91
-.\"
-.so man1/tmac.doc
-.Dd March 16, 1991
-.Dt FTPD 8
-.Os BSD 4.2
-.Sh NAME
-.Nm ftpd
-.Nd
-.Tn DARPA
+.\" "
+.so man1/header.doc
+.TH FTPD 8 \*h
+.SH NAME
+.B ftpd
+\-
+.SM DARPA
 Internet File Transfer Protocol server
-.Sh SYNOPSIS
-.Nm ftpd
-.Op Fl d
-.Op Fl l
-.Op Fl t Ar timeout
-.Op Fl T Ar maxtimeout
-.Op Fl p Ar port
-.Op Fl r Ar realm-file
-.Op Fl s Ar srvtab
-.Sh DESCRIPTION
-.Nm Ftpd
+.SH SYNOPSIS
+.B ftpd
+[\fB\-d\fP] [\fB\-l\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-T\fP
+\fImaxtimeout\fP] [\fB\-p\fP \fIport\fP] [\fB\-r\fP \fIrealm-file\fP]
+[\fB\-s\fP \fIsrvtab\fP]
+.SH DESCRIPTION
+.B Ftpd
 is the
-.Tn DARPA
-Internet File Transfer Protocol
-server process.  The server uses the
-.Tn TCP
-protocol
-and listens at the port specified in the
-.Dq ftp
-service specification; see
-.Xr services 5 .
-.Pp
+.SM DARPA
+Internet File Transfer Protocol server process.  The server uses the
+.SM TCP
+protocol and listens at the port specified in the ``ftp'' service
+specification; see
+.IR services (5).
+.PP
 Available options:
-.Bl -tag -width Ds
-.It Fl d
+.TP
+.B \-d
 Debugging information is written to the syslog.
-.It Fl l
+.TP
+.B \-l
 Each
-.Xr ftp 1
+.IR ftp (1)
 session is logged in the syslog.
-.It Fl t
+.TP
+.B \-t
 The inactivity timeout period is set to
-.Ar timeout
+.I timeout
 seconds (the default is 15 minutes).
-.It Fl T
-A client may also request a different timeout period;
-the maximum period allowed may be set to
-.Ar timeout
+.TP
+.B \-T
+A client may also request a different timeout period; the maximum period
+allowed may be set to
+.I timeout
 seconds with the
-.Fl T
-option.
-The default limit is 2 hours.
-.It Fl a
+.B \-T
+option.  The default limit is 2 hours.
+.TP
+.B \-a
 Only permit Kerberos authenticated or anonymous logins.
-.It Fl p Ar port
+.TP
+\fB\-p\fP \fIport\fP
 Run as a server and accept a connection on
-.Ar port.
+.IR port .
 Normally the ftp server is invoked by
-.Xr inetd 8 .
-.It Fl r Ar realm-file
+.IR inetd (8).
+.TP
+\fB\-r\fP \fIrealm-file\fP
 Sets the name of the
-.Pa krb.conf
+.I krb.conf
 file to use.  The default value is normally
-.Pa /usr/kerberos/lib/krb.conf.
-.It Fl s Ar srvtab
+.IR /usr/kerberos/lib/krb.conf .
+.TP
+\fB\-s\fP \fIsrvtab\fP
 Sets the name of the
-.Pa srvtab
+.I srvtab
 file to use.  The default value is normally
-.Pa /etc/krb-srvtab.
-.El
-.Pp
-The ftp server currently supports the following ftp
-requests; case is not distinguished.
-.Bl -column "Request" -offset indent
-.It Request Ta "Description"
-.It ABOR Ta "abort previous command"
-.It ACCT Ta "specify account (ignored)"
-.It ADAT Ta "send an authentication protocol message"
-.It ALLO Ta "allocate storage (vacuously)"
-.It APPE Ta "append to a file"
-.It AUTH Ta "specify an authentication protocol to be performed"
-.It CDUP Ta "change to parent of current working directory"
-.It CWD Ta "change working directory"
-.It DELE Ta "delete a file"
-.It ENC Ta "send a privacy and integrity protected command (given in argument)"
-.It HELP Ta "give help information"
-.It LIST Ta "give list files in a directory" Pq Dq Li "ls -lgA"
-.It MIC Ta "send an integrity protected command (given in argument)"
-.It MKD Ta "make a directory"
-.It MDTM Ta "show last modification time of file"
-.It MODE Ta "specify data transfer" Em mode
-.It NLST Ta "give name list of files in directory"
-.It NOOP Ta "do nothing"
-.It PASS Ta "specify password"
-.It PASV Ta "prepare for server-to-server transfer"
-.It PBSZ Ta "specify a protection buffer size"
-.It PORT Ta "specify data connection port"
-.It PROT Ta "specify a protection level under which to protect data transfers"
-.It PWD Ta "print the current working directory"
-.It QUIT Ta "terminate session"
-.It REST Ta "restart incomplete transfer"
-.It RETR Ta "retrieve a file"
-.It RMD Ta "remove a directory"
-.It RNFR Ta "specify rename-from file name"
-.It RNTO Ta "specify rename-to file name"
-.It SITE Ta "non-standard commands (see next section)"
-.It SIZE Ta "return size of file"
-.It STAT Ta "return status of server"
-.It STOR Ta "store a file"
-.It STOU Ta "store a file with a unique name"
-.It STRU Ta "specify data transfer" Em structure
-.It SYST Ta "show operating system type of server system"
-.It TYPE Ta "specify data transfer" Em type
-.It USER Ta "specify user name"
-.It XCUP Ta "change to parent of current working directory (deprecated)"
-.It XCWD Ta "change working directory (deprecated)"
-.It XMKD Ta "make a directory (deprecated)"
-.It XPWD Ta "print the current working directory (deprecated)"
-.It XRMD Ta "remove a directory (deprecated)"
-.El
-.Pp
-The following non-standard or
-.Tn UNIX
-specific commands are supported
-by the
-SITE request.
-.Pp
-.Bl -column Request -offset indent
-.It Sy Request Ta Sy Description
-.It UMASK Ta change umask. Em E.g. SITE UMASK 002
-.It IDLE Ta set idle-timer. Em E.g. SITE IDLE 60
-.It CHMOD Ta change mode of a file. Em E.g.
-SITE CHMOD 755 filename
-.It HELP Ta give help information. Em E.g. SITE HELP
-.El
-.Pp
-The remaining ftp requests specified in Internet
-.%T "RFC 959"
-are
-recognized, but not implemented.
-MDTM and SIZE are not specified in
-.%T "RFC 959" ,
-but will appear in the next updated FTP RFC.
-.Pp
-The ftp server will abort an active file transfer only when the
+.IR /etc/krb-srvtab .
+.PP
+The ftp server currently supports the following ftp requests; case is
+not distinguished.
+.TP "\w'Request\ \ 'u"
+.B Request
+.B Description
+.sp -1
+.TP
 ABOR
-command is preceded by a Telnet "Interrupt Process" (IP)
-signal and a Telnet "Synch" signal in the command Telnet stream,
-as described in Internet
-.%T "RFC 959" .
-If a
+abort previous command
+.sp -1
+.TP
+ACCT
+specify account (ignored)
+.sp -1
+.TP
+ADAT
+send an authentication protocol message
+.sp -1
+.TP
+ALLO
+allocate storage (vacuously)
+.sp -1
+.TP
+APPE
+append to a file
+.sp -1
+.TP
+AUTH
+specify an authentication protocol to be performed
+.sp -1
+.TP
+CDUP
+change to parent of current working directory
+.sp -1
+.TP
+CWD
+change working directory
+.sp -1
+.TP
+DELE
+delete a file
+.sp -1
+.TP
+ENC
+send a privacy and integrity protected command (given in argument)
+.sp -1
+.TP
+HELP
+give help information
+.sp -1
+.TP
+LIST
+give list files in a directory (``ls -lgA'')
+.sp -1
+.TP
+MIC
+send an integrity protected command (given in argument)
+.sp -1
+.TP
+MKD
+make a directory
+.sp -1
+.TP
+MDTM
+show last modification time of file
+.sp -1
+.TP
+MODE
+specify data transfer
+.I mode
+.sp -1
+.TP
+NLST
+give name list of files in directory
+.sp -1
+.TP
+NOOP
+do nothing
+.sp -1
+.TP
+PASS
+specify password
+.sp -1
+.TP
+PASV
+prepare for server-to-server transfer
+.sp -1
+.TP
+PBSZ
+specify a protection buffer size
+.sp -1
+.TP
+PORT
+specify data connection port
+.sp -1
+.TP
+PROT
+specify a protection level under which to protect data transfers
+.sp -1
+.TP
+PWD
+print the current working directory
+.sp -1
+.TP
+QUIT
+terminate session
+.sp -1
+.TP
+REST
+restart incomplete transfer
+.sp -1
+.TP
+RETR
+retrieve a file
+.sp -1
+.TP
+RMD
+remove a directory
+.sp -1
+.TP
+RNFR
+specify rename-from file name
+.sp -1
+.TP
+RNTO
+specify rename-to file name
+.sp -1
+.TP
+SITE
+non-standard commands (see next section)
+.sp -1
+.TP
+SIZE
+return size of file
+.sp -1
+.TP
 STAT
-command is received during a data transfer, preceded by a Telnet IP
-and Synch, transfer status will be returned.
-.Pp
-.Nm Ftpd
+return status of server
+.sp -1
+.TP
+STOR
+store a file
+.sp -1
+.TP
+STOU
+store a file with a unique name
+.sp -1
+.TP
+STRU
+specify data transfer
+.I structure
+.sp -1
+.TP
+SYST
+show operating system type of server system
+.sp -1
+.TP
+TYPE
+specify data transfer
+.I type
+.sp -1
+.TP
+USER
+specify user name
+.sp -1
+.TP
+XCUP
+change to parent of current working directory (deprecated)
+.sp -1
+.TP
+XCWD
+change working directory (deprecated)
+.sp -1
+.TP
+XMKD
+make a directory (deprecated)
+.sp -1
+.TP
+XPWD
+print the current working directory (deprecated)
+.sp -1
+.TP
+XRMD
+remove a directory (deprecated)
+.PP
+The following non-standard or
+.SM UNIX
+specific commands are supported by the SITE request.
+.TP "\w'Request\ \ 'u"
+.B Request
+.B Description
+.sp -1
+.TP
+UMASK
+change umask. 
+.IR E.g. ,
+SITE UMASK 002
+.sp -1
+.TP
+IDLE
+set idle-timer. 
+.IR E.g. ,
+SITE IDLE 60
+.sp -1
+.TP
+CHMOD
+change mode of a file. 
+.IR E.g. ,
+SITE CHMOD 755 filename
+.sp -1
+.TP
+HELP
+give help information.
+.IR E.g. ,
+SITE HELP
+.PP
+The remaining ftp requests specified in Internet
+.I RFC 959
+are recognized, but not implemented.  MDTM and SIZE are not specified in
+.I RFC
+.IR 959 ,
+but will appear in the next updated FTP RFC.
+.PP
+The ftp server will abort an active file transfer only when the ABOR
+command is preceded by a Telnet "Interrupt Process" (IP) signal and a
+Telnet "Synch" signal in the command Telnet stream, as described in
+Internet
+.I RFC
+.IR 959 .
+If a STAT command is received during a data transfer, preceded by a
+Telnet IP and Synch, transfer status will be returned.
+.PP
+.B Ftpd
 interprets file names according to the
-.Dq globbing
+``globbing''
 conventions used by
-.Xr csh 1 .
-This allows users to utilize the metacharacters
-.Dq Li \&*?[]{}~ .
-.Pp
-.Nm Ftpd
-authenticates users according to the following rules: 
-.Pp
-.Bl -enum -offset indent
-.It
+.IR csh (1).
+This allows users to utilize the metacharacters ``\&*?[]{}~''.
+.PP
+.B Ftpd
+authenticates users according to the following rules:
+.sp
+.TP
+  1.
 The user name must be in the password data base,
-.Pa /etc/passwd .
-.It
+.IR /etc/passwd .
+.TP
+  2.
 An
-.Dv AUTH
-command must be accepted, the ensuing authentication protocol
-(conducted via
-.Dv ADAT
-commands and replies)
-must successfully complete, and the authenticated user must permitted
-access.  Otherwise, a valid password which is not null
-must be provided by the client.
-.It
+.SM AUTH
+command must be accepted, the ensuing authentication protocol (conducted
+via
+.SM ADAT
+commands and replies) must successfully complete, and the authenticated
+user must permitted access.  Otherwise, a valid password which is not
+null must be provided by the client.
+.TP
+  3.
 The user name must not appear in the file
-.Pa /etc/ftpusers .
-.It
+.IR /etc/ftpusers .
+.TP
+  4.
 The user must have a standard shell returned by 
-.Xr getusershell 3 .
-.It
-If the user name is
-.Dq anonymous
-or
-.Dq ftp ,
-an
-anonymous ftp account must be present in the password
-file (user
-.Dq ftp ) .
-In this case the user is allowed
-to log in by specifying any password (by convention this
+.IR getusershell (3).
+.TP
+  5.
+If the user name is ``anonymous'' or ``ftp'', an anonymous ftp account
+must be present in the password file (user ``ftp'').  In this case the
+user is allowed to log in by specifying any password (by convention this
 is given as the client host's name).
-.El
-.Pp
-In the last case, 
-.Nm ftpd
-takes special measures to restrict the client's access privileges.
-The server performs a 
-.Xr chroot 2
-command to the home directory of the
-.Dq ftp
-user.
-In order that system security is not breached, it is recommended
-that the
-.Dq ftp
-subtree be constructed with care;  the following
-rules are recommended.
-.Bl -tag -width "~ftp/pub" -offset indent
-.It Pa ~ftp
-Make the home directory owned by
-.Dq ftp
-and unwritable by anyone.
-.It Pa ~ftp/bin
-Make this directory owned by the super-user and unwritable by
-anyone.  The program
-.Xr ls 1
-must be present to support the list command.  This
-program should have mode 111.
-.It Pa ~ftp/etc
-Make this directory owned by the super-user and unwritable by
-anyone.  The files
-.Xr passwd 5
+.PP
+In the last case,
+.B ftpd
+takes special measures to restrict the client's access privileges.  The
+server performs a
+.IR chroot (2)
+command to the home directory of the ``ftp'' user.  In order that system
+security is not breached, it is recommended that the ``ftp'' subtree be
+constructed with care; the following rules are recommended.
+.TP
+.I ~ftp
+Make the home directory owned by ``ftp'' and unwritable by anyone.
+.TP
+.I ~ftp/bin
+Make this directory owned by the super-user and unwritable by anyone.
+The program
+.IR ls (1)
+must be present to support the list command.  This program should have
+mode 111.
+.TP
+.I ~ftp/etc
+Make this directory owned by the super-user and unwritable by anyone.
+The files
+.IR passwd (5)
 and
-.Xr group 5
-must be present for the 
-.Xr ls
-command to be able to produce owner names rather than numbers.
-The password field in
-.Xr passwd
-is not used, and should not contain real encrypted passwords.
-These files should be mode 444.
-.It Pa ~ftp/pub
-Make this directory mode 777 and owned by
-.Dq ftp .
-Users
-should then place files which are to be accessible via the
-anonymous account in this directory.
-.El
-.Pp
+.IR group (5)
+must be present for the
+.I ls
+command to be able to produce owner names rather than numbers.  The
+password field in
+.I passwd
+is not used, and should not contain real encrypted passwords.  These
+files should be mode 444.
+.TP
+.I ~ftp/pub
+Make this directory mode 777 and owned by ``ftp''.  Users should then
+place files which are to be accessible via the anonymous account in this
+directory.
+.PP
 If an
-.Dv ADAT
-command succeeds, the control channel must be either
-integrity or privacy protected.
-In this case, the
-.Dv MIC
+.SM ADAT
+command succeeds, the control channel must be either integrity or
+privacy protected.  In this case, the
+.SM MIC
 and
-.Dv ENC
-commands are the only commands allowed over the control channel.
-The argument to the
-.Dv MIC
-command is a base 64 encoded string which, when decoded, is an
-ftp command integrity protected with a cryptographic checksum.
-The argument to the
-.Dv ENC
-command is a base 64 encoded string which, when decoded, is an
-ftp command privacy and integrity protected with encryption.
-.Pp
+.SM ENC
+commands are the only commands allowed over the control channel.  The
+argument to the
+.SM MIC
+command is a base 64 encoded string which, when decoded, is an ftp
+command integrity protected with a cryptographic checksum.  The argument
+to the
+.SM ENC
+command is a base 64 encoded string which, when decoded, is an ftp
+command privacy and integrity protected with encryption.
+.PP
 If an
-.Dv ADAT
-command succeeds,
-ftp replies will also be either integrity or privacy protected.
-.Pp
+.SM ADAT
+command succeeds, ftp replies will also be either integrity or privacy
+protected.
+.PP
 If an
-.Dv ADAT
-command succeeds, the data channel can also be integrity or privacy protected.
-The
-.Dv PROT
-command accepts S for integrity and P for privacy protection.
-Unless an
-.Dv ADAT
+.SM ADAT
+command succeeds, the data channel can also be integrity or privacy
+protected.  The
+.SM PROT
+command accepts S for integrity and P for privacy protection.  Unless an
+.SM ADAT
 command succeeds, the only protection level accepted by the
-.Dv PROT
+.SM PROT
 command is C (clear).
-.Sh SEE ALSO
-.Xr ftp 1 ,
-.Xr getusershell 3 ,
-.Xr syslogd 8
-.Pp
-Lunt, S. J.,
-FTP Security Extensions,
-Internet Draft,
-November 1993.
-.Sh BUGS
-The anonymous account is inherently dangerous and should
-avoided when possible.
-.Pp
-The server must run as the super-user
-to create sockets with privileged port numbers.  It maintains
-an effective user id of the logged in user, reverting to
-the super-user only when binding addresses to sockets.  The
-possible security holes have been extensively
-scrutinized, but are possibly incomplete.
-.Sh HISTORY
+.SH SEE ALSO
+.IR ftp (1),
+.IR getusershell (3),
+.IR syslogd (8)
+.PP
+Lunt, S. J., FTP Security Extensions, Internet Draft, November 1993.
+.SH BUGS
+The anonymous account is inherently dangerous and should avoided when
+possible.
+.PP
+The server must run as the super-user to create sockets with privileged
+port numbers.  It maintains an effective user id of the logged in user,
+reverting to the super-user only when binding addresses to sockets.  The
+possible security holes have been extensively scrutinized, but are
+possibly incomplete.
+.SH HISTORY
 The
-.Nm
-command appeared in
-.Bx 4.2 .
+.B ftpd
+command appeared in 4.2BSD.
