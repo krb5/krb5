@@ -1,3 +1,9 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Update to get RELTAIL from patchlevel.h as well.
+
+	* patchlevel.h: Update to make this the master version stamp file.
+
 2004-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): If the config info set by

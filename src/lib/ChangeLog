@@ -1,3 +1,7 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (RCFLAGS): Add -I$(SRCTOP) to get patchlevel.h.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SLIBS, SDEF, S_GLUE, COMERR_GLUE, PROF_GLUE,

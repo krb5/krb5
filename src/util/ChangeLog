@@ -1,3 +1,8 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Rework somewhat to handle patchlevel.h being the new
+	master version stamp file.
+
 2004-09-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* reconf: Export ACLOCAL=true to environment.

@@ -1,3 +1,8 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (RELEASE): Set from KRB5_VERSION, which comes from
+	patchlevel.h.
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MY_SUBDIRS): Deleted.

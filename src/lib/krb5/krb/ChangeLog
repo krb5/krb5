@@ -1,3 +1,9 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Include SRCTOP to get patchlevel.h.
+
+	* brand.c: Use patchlevel.h as master version stamp file.
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* rd_cred.c (decrypt_credencdata): Clear and free ppart to avoid

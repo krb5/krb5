@@ -1,17 +1,31 @@
 #include <windows.h>
 #include <winver.h>
+#include "patchlevel.h"
 
 /*
  * BEGIN COMMON VERSION INFO for GSS and Kerberos version resources
  */
 
-#define PRE_RELEASE
+#define XSTR(x) #x
+#define STR(x) XSTR(x)
 
-#ifdef PRE_RELEASE
-#define BETA_STR  " beta"
+#define MAJOR_MINOR STR(KRB5_MAJOR_RELEASE) "." STR(KRB5_MINOR_RELEASE)
+
+#if KRB5_PATCH_LEVEL != 0
+#define MAYBE_PATCH "." STR(KRB5_PATCHLEVEL)
+#else
+#define MAYBE_PATCH ""
+#endif
+
+#ifdef KRB5_RELTAIL
+#define RELTAIL "-" KRB5_RELTAIL
+#else
+#define RELTAIL ""
+#endif
+
+#ifdef BETA
 #define BETA_FLAG VS_FF_PRERELEASE
 #else
-#define BETA_STR  ""
 #define BETA_FLAG 0
 #endif
 
@@ -23,10 +37,10 @@
 
 /* we're going to stamp all the DLLs with the same version number */
 
-#define K5_PRODUCT_VERSION_STRING "1.3 (TEST)" BETA_STR "\0"
-#define K5_PRODUCT_VERSION        1, 3, 0, 0
+#define K5_PRODUCT_VERSION_STRING MAJOR_MINOR MAYBE_PATCH RELTAIL "\0"
+#define K5_PRODUCT_VERSION        KRB5_MAJOR_RELEASE, KRB5_MINOR_RELEASE, KRB5_PATCHLEVEL, 0
 
-#define K5_COPYRIGHT "Copyright (C) 1997-2000 by the Massachusetts Institute of Technology\0"
+#define K5_COPYRIGHT "Copyright (C) 1997-2004 by the Massachusetts Institute of Technology\0"
 #define K5_COMPANY_NAME "Massachusetts Institute of Technology.\0"
 
 /* 

@@ -11,8 +11,14 @@ dnl
 CONFIG_RULES
 dnl
 dnl Determine version from patchlevel.h
-eval `sed 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/' < $srcdir/patchlevel.h`
-KRB5_VERSION="$KRB5_MAJOR_RELEASE.$KRB5_MINOR_RELEASE.$KRB5_PATCHLEVEL"
+eval `sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p' < $srcdir/patchlevel.h`
+KRB5_VERSION="$KRB5_MAJOR_RELEASE.$KRB5_MINOR_RELEASE"
+if test "$KRB5_PATCHLEVEL" = 0; then :; else
+  KRB5_VERSION="$KRB5_VERSION.$KRB5_PATCHLEVEL"
+fi
+if test -n "$KRB5_RELTAIL"; then
+  KRB5_VERSION="$KRB5_VERSION-$KRB5_RELTAIL"
+fi
 AC_SUBST(KRB5_VERSION)
 dnl
 AC_REQUIRE_CPP

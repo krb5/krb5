@@ -1,3 +1,7 @@
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Use patchlevel.h to generate version stamp info.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* version.rc: Add info for support library.
