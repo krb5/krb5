@@ -1,3 +1,10 @@
+2001-04-04  Tom Yu  <tlyu@mit.edu>
+
+	* mk_safe.c (krb5_mk_safe): Only use safe_cksumtype from the
+	auth_context (derived from the config file or hardcoded default)
+	if it's suitable for the enctype of the key we're going to
+	use. [pullup from krb5-1-2-2-branch]
+
 2001-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): New macro.  Old etype list,

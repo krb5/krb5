@@ -168,6 +168,7 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
     krb5_address * plocal_fulladdr = NULL;
     krb5_address remote_fulladdr;
     krb5_address local_fulladdr;
+    krb5_cksumtype sumtype;
 
     CLEANUP_INIT(2);
 
@@ -203,9 +204,33 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
         }
     }
 
+    {
+	unsigned int nsumtypes;
+	unsigned int i;
+	krb5_cksumtype *sumtypes;
+	retval = krb5_c_keyed_checksum_types (context, keyblock->enctype,
+					      &nsumtypes, &sumtypes);
+	if (retval) {
+	    CLEANUP_DONE ();
+	    goto error;
+	}
+	if (nsumtypes == 0) {
+		retval = KRB5_BAD_ENCTYPE;
+		krb5_free_cksumtypes (context, sumtypes);
+		CLEANUP_DONE ();
+		goto error;
+	}
+	for (i = 0; i < nsumtypes; i++)
+		if (auth_context->safe_cksumtype == sumtypes[i])
+			break;
+	if (i == nsumtypes)
+		i = 0;
+	sumtype = sumtypes[i];
+	krb5_free_cksumtypes (context, sumtypes);
+    }
     if ((retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
 				     plocal_fulladdr, premote_fulladdr,
-				     auth_context->safe_cksumtype, outbuf))) {
+				     sumtype, outbuf))) {
 	CLEANUP_DONE();
 	goto error;
     }
