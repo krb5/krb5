@@ -46,9 +46,11 @@
 #include "rsa-md5.h"
 #define MD5_CKENTRY &rsa_md5_cksumtable_entry
 #define MD5_DES_CKENTRY &rsa_md5_des_cksumtable_entry
+#define MD5_DES3_CKENTRY MD5_DES_CKENTRY
 #else
 #define MD5_CKENTRY 0
 #define MD5_DES_CKENTRY 0
+#define MD5_DES3_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_SNEFRU
@@ -85,14 +87,14 @@
 #define DES_CBC_MD5_CSENTRY 0
 #endif
     
-#ifdef PROVIDE_RAW_DES_CBC
+#ifdef PROVIDE_DES_CBC_RAW
 #ifndef _DES_DONE__
 #include "des_int.h"
 #define _DES_DONE__
 #endif
-#define RAW_DES_CBC_CSENTRY &krb5_raw_des_cst_entry
+#define DES_CBC_RAW_CSENTRY &krb5_raw_des_cst_entry
 #else
-#define RAW_DES_CBC_CSENTRY 0
+#define DES_CBC_RAW_CSENTRY 0
 #endif
 
 #ifdef PROVIDE_DES3_CBC_MD5
@@ -103,6 +105,16 @@
 #define DES3_CBC_MD5_CSENTRY &krb5_des3_md5_cst_entry
 #else
 #define DES3_CBC_MD5_CSENTRY 0
+#endif
+
+#ifdef PROVIDE_DES3_CBC_RAW
+#ifndef _DES_DONE__
+#include "des_int.h"
+#define _DES_DONE__
+#endif
+#define DES3_CBC_RAW_CSENTRY &krb5_des3_raw_cst_entry
+#else
+#define DES3_CBC_RAW_CSENTRY 0
 #endif
 
 
@@ -116,8 +128,9 @@ krb5_cs_table_entry * NEAR krb5_enctype_array[] = {
     DES_CBC_CRC_CSENTRY,	/* ENCTYPE_DES_CBC_CRC */
     0,				/* ENCTYPE_DES_CBC_MD4 */
     DES_CBC_MD5_CSENTRY,	/* ENCTYPE_DES_CBC_MD5 */
-    RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
+    DES_CBC_RAW_CSENTRY,	/* ENCTYPE_DES_CBC_RAW */
     DES3_CBC_MD5_CSENTRY,	/* ENCTYPE_DES3_CBC_MD5 */
+    DES3_CBC_RAW_CSENTRY	/* ENCTYPE_DES3_CBC_RAW */
 };
 
 krb5_enctype krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_array[0]) - 1;
@@ -131,7 +144,8 @@ krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     0,				/* des-mac */
     0,				/* des-mac-k */
     MD5_CKENTRY,		/* CKSUMTYPE_RSA_MD5 */
-    MD5_DES_CKENTRY		/* CKSUMTYPE_RSA_MD5_DES */
+    MD5_DES_CKENTRY,		/* CKSUMTYPE_RSA_MD5_DES */
+    MD5_DES3_CKENTRY		/* CKSUMTYPE_RSA_MD5_DES3 */
 };
 
 krb5_cksumtype krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);

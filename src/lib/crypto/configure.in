@@ -41,16 +41,27 @@ if test "$enableval" = yes; then
 else
 	AC_MSG_RESULT(Disabling DES_CBC_CRC)
 fi
-AC_ARG_WITH([raw-des-cbc],
-[ --enable-raw-des-cbc		enable RAW_DES_CBC (DEFAULT).
- --disable-raw-des-cbc		disable RAW_DES_CBC.],
+AC_ARG_WITH([des-cbc-raw],
+[ --enable-des-cbc-raw		enable DES_CBC_RAW (DEFAULT).
+ --disable-des-cbc-raw		disable DES_CBC_RAW.],
 ,
 enableval=yes)dnl
 if test "$enableval" = yes; then
-	AC_MSG_RESULT(Enabling RAW_DES_CBC)
-	AC_DEFINE(PROVIDE_RAW_DES_CBC)
+	AC_MSG_RESULT(Enabling DES_CBC_RAW)
+	AC_DEFINE(PROVIDE_DES_CBC_RAW)
 else
-	AC_MSG_RESULT(Disabling RAW_DES_CBC)
+	AC_MSG_RESULT(Disabling DES_CBC_RAW)
+fi
+AC_ARG_WITH([des3-cbc-raw],
+[ --enable-des3-cbc-raw		enable DES3_CBC_RAW (DEFAULT).
+ --disable-des3-cbc-raw		disable DES3_CBC_RAW.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling DES3_CBC_RAW)
+	AC_DEFINE(PROVIDE_DES3_CBC_RAW)
+else
+	AC_MSG_RESULT(Disabling DES3_CBC_RAW)
 fi
 AC_ARG_WITH([des-cbc-cksum],
 [ --enable-des-cbc-cksum		enable DES_CBC_CKSUM (DEFAULT).
