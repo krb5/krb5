@@ -17,6 +17,8 @@
 	(MAC_SUBDIRS): Remove file, stdio, memory.
 	(##DOS## stuff, clean-windows): Delete file and memory parts.
 
+	* cc_memory.c (mcc_head): Now static.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* ccdefault.c: Add newline at end of file (compiler warning)
