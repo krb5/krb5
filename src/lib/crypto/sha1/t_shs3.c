@@ -5,13 +5,22 @@
 #include <time.h>
 #include "shs.h"
 
+static void process(void);
+static void test1(void);
+static void test2(void);
+static void test3(void);
+static void test4(void);
+static void test5(void);
+static void test6(void);
+static void test7(void);
+
 /* When run on a little-endian CPU we need to perform byte reversal on an
    array of longwords.  It is possible to make the code endianness-
    independant by fiddling around with data at the byte level, but this
    makes for very slow code, so we rely on the user to sort out endianness
    at compile time */
 
-void longReverse( SHS_LONG *buffer, int byteCount )
+static void longReverse( SHS_LONG *buffer, int byteCount )
 {
     SHS_LONG value;
     static int init = 0;
@@ -44,10 +53,10 @@ int rc;
 int mode;
 int Dflag;
 
+int
 main(argc,argv)
 	char **argv;
 {
-	int f = 0;
 	char *argp;
 
 	while (--argc > 0) if (*(argp = *++argv)=='-')
@@ -82,7 +91,7 @@ main(argc,argv)
 	exit(rc);
 }
 
-process()
+static void process(void)
 {
 	switch(mode)
 	{
@@ -119,7 +128,7 @@ process()
 }
 
 #ifndef shsDigest
-unsigned char *
+static unsigned char *
 shsDigest(si)
 	SHS_INFO *si;
 {
@@ -132,7 +141,7 @@ unsigned char results1[SHS_DIGESTSIZE] = {
 0xa9,0x99,0x3e,0x36,0x47,0x06,0x81,0x6a,0xba,0x3e,
 0x25,0x71,0x78,0x50,0xc2,0x6c,0x9c,0xd0,0xd8,0x9d};
 
-test1()
+static void test1(void)
 {
 	SHS_INFO si[1];
 	unsigned char digest[SHS_DIGESTSIZE];
@@ -141,10 +150,10 @@ test1()
 
 	printf("Running SHS test 1 ...\n");
 	shsInit(si);
-	shsUpdate(si, "abc", 3);
+	shsUpdate(si, (SHS_BYTE *) "abc", 3);
 	shsFinal(si);
 	memcpy(digest, shsDigest(si), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results1, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results1, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 1 failed!\n");
 		rc = 1;
@@ -165,7 +174,7 @@ unsigned char results2[SHS_DIGESTSIZE] = {
 0x84,0x98,0x3e,0x44,0x1c,0x3b,0xd2,0x6e,0xba,0xae,
 0x4a,0xa1,0xf9,0x51,0x29,0xe5,0xe5,0x46,0x70,0xf1};
 
-test2()
+static void test2(void)
 {
 	SHS_INFO si[1];
 	unsigned char digest[SHS_DIGESTSIZE];
@@ -175,11 +184,11 @@ test2()
 	printf("Running SHS test 2 ...\n");
 	shsInit(si);
 	shsUpdate(si,
-"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+	(SHS_BYTE *) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 		56);
 	shsFinal(si);
 	memcpy(digest, shsDigest(si), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results2, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results2, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 2 failed!\n");
 		rc = 1;
@@ -200,7 +209,7 @@ unsigned char results3[SHS_DIGESTSIZE] = {
 0x34,0xaa,0x97,0x3c,0xd4,0xc4,0xda,0xa4,0xf6,0x1e,
 0xeb,0x2b,0xdb,0xad,0x27,0x31,0x65,0x34,0x01,0x6f};
 
-test3()
+static void test3(void)
 {
 	SHS_INFO si[1];
 	unsigned char digest[SHS_DIGESTSIZE];
@@ -211,11 +220,11 @@ test3()
 	shsInit(si);
 	for (i = 0; i < 15625; ++i)
 		shsUpdate(si,
-"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+(SHS_BYTE *) "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 			64);
 	shsFinal(si);
 	memcpy(digest, shsDigest(si), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results3, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results3, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 3 failed!\n");
 		rc = 1;
@@ -270,19 +279,19 @@ unsigned char results4[SHS_DIGESTSIZE] = {
 0x13,0x62,0xfc,0x87,0x68,0x33,0xd5,0x1d,0x2f,0x0c,
 0x73,0xe3,0xfb,0x87,0x6a,0x6b,0xc3,0x25,0x54,0xfc};
 
-test4()
+static void test4(void)
 {
 	SHS_INFO si[1];
 	unsigned char digest[SHS_DIGESTSIZE];
 	int failed;
-	int i, j, k;
+	int i;
 
 	printf("Running SHS test 4 ...\n");
 	shsInit(si);
 	shsUpdate(si, randdata, 19);
 	shsFinal(si);
 	memcpy(digest, shsDigest(si), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results4, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results4, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 4 failed!\n");
 		rc = 1;
@@ -303,12 +312,12 @@ unsigned char results5[SHS_DIGESTSIZE] = {
 0x19,0x4d,0xf6,0xeb,0x8e,0x02,0x6d,0x37,0x58,0x64,
 0xe5,0x95,0x19,0x2a,0xdd,0x1c,0xc4,0x3c,0x24,0x86};
 
-test5()
+static void test5(void)
 {
 	SHS_INFO si[1];
 	unsigned char digest[SHS_DIGESTSIZE];
 	int failed;
-	int i, j, k;
+	int i;
 
 	printf("Running SHS test 5 ...\n");
 	shsInit(si);
@@ -316,7 +325,7 @@ test5()
 	shsUpdate(si, randdata+32, 15);
 	shsFinal(si);
 	memcpy(digest, shsDigest(si), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results5, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results5, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 5 failed!\n");
 		rc = 1;
@@ -337,7 +346,7 @@ unsigned char results6[SHS_DIGESTSIZE] = {
 0x4e,0x16,0x57,0x9d,0x4b,0x48,0xa9,0x1c,0x88,0x72,
 0x83,0xdb,0x88,0xd1,0xea,0x3a,0x45,0xdf,0xa1,0x10};
 
-test6()
+static void test6(void)
 {
 	struct {
 		long pad1;
@@ -348,7 +357,7 @@ test6()
 	} sdata;
 	unsigned char digest[SHS_DIGESTSIZE];
 	int failed;
-	int i, j, k;
+	int i, j;
 
 	printf("Running SHS test 6 ...\n");
 	sdata.pad1 = 0x12345678;
@@ -422,11 +431,11 @@ sdata.pad3 = 0x78563412;
 		if (Dflag & 2)
 			printf ("%d: %08lx%08lx%08lx%08lx%08lx\n",
 				i,
-				sdata.si2.digest[0],
-				sdata.si2.digest[1],
-				sdata.si2.digest[2],
-				sdata.si2.digest[3],
-				sdata.si2.digest[4]);
+				(unsigned long) sdata.si2.digest[0],
+				(unsigned long) sdata.si2.digest[1],
+				(unsigned long) sdata.si2.digest[2],
+				(unsigned long) sdata.si2.digest[3],
+				(unsigned long) sdata.si2.digest[4]);
 	}
 	shsFinal((&sdata.si2));
 if (sdata.pad2 != 0x87654321) {
@@ -440,7 +449,7 @@ sdata.pad3);
 sdata.pad3 = 0x78563412;
 }
 	memcpy(digest, shsDigest((&sdata.si2)), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results6, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results6, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 6 failed!\n");
 		rc = 1;
@@ -468,7 +477,7 @@ int jfsize[] = {0,1,31,32,
 	119,120,123,127};
 int kfsize[] = {0,1,31,32,33,55,56,63};
 
-test7()
+static void test7(void)
 {
 	struct {
 		long pad1;
@@ -557,15 +566,15 @@ sdata.pad3 = 0x78563412;
 		if (Dflag & 2)
 			printf ("%d,%d,%d: %08lx%08lx%08lx%08lx%08lx\n",
 				i,j,k,
-				sdata.si2.digest[0],
-				sdata.si2.digest[1],
-				sdata.si2.digest[2],
-				sdata.si2.digest[3],
-				sdata.si2.digest[4]);
+				(unsigned long) sdata.si2.digest[0],
+				(unsigned long) sdata.si2.digest[1],
+				(unsigned long) sdata.si2.digest[2],
+				(unsigned long) sdata.si2.digest[3],
+				(unsigned long) sdata.si2.digest[4]);
 	}
 	shsFinal((&sdata.si2));
 	memcpy(digest, shsDigest((&sdata.si2)), SHS_DIGESTSIZE);
-	if (failed = memcmp(digest, results7, SHS_DIGESTSIZE))
+	if ((failed = memcmp(digest, results7, SHS_DIGESTSIZE)) != 0)
 	{
 		fprintf(stderr,"SHS test 7 failed!\n");
 		rc = 1;

@@ -62,6 +62,9 @@
 #include <stdio.h>
 #include "com_err.h"
 
+static void do_encrypt(unsigned char *, unsigned char *);
+static void do_decrypt(unsigned char *, unsigned char *);
+
 char *progname;
 int nflag = 2;
 int vflag;
@@ -129,9 +132,8 @@ main(argc,argv)
     char *argv[];
 {
     /* Local Declarations */
-    int	 in_length, retval;
-    void do_encrypt();
-    void do_decrypt();
+    size_t  in_length;
+    int  retval;
     int i, j;
 
 #ifdef WINDOWS
@@ -314,7 +316,7 @@ main(argc,argv)
     printf("\tchecksum\t58 d2 e7 7e 86 06 27 33, ");
     printf("or some part thereof\n");
     input = clear_text2;
-    mit_des_cbc_cksum(input,cipher_text,(long) strlen((char *)input),
+    mit_des_cbc_cksum(input,cipher_text, strlen((char *)input),
 		      sched,ivec);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
@@ -331,6 +333,7 @@ main(argc,argv)
     exit(0);
 }
 
+#if 0
 void
 flip(array)
     char *array;
@@ -352,11 +355,12 @@ flip(array)
 	array++;
     }
 }
+#endif
 
-void
+static void
 do_encrypt(in,out)
-    char *in;
-    char *out;
+    unsigned char *in;
+    unsigned char *out;
 {
     int i, j;
     for (i =1; i<=nflag; i++) {
@@ -377,10 +381,10 @@ do_encrypt(in,out)
     }
 }
 
-void
+static void
 do_decrypt(in,out)
-    char *out;
-    char *in;
+    unsigned char *out;
+    unsigned char *in;
     /* try to invert it */
 {
     int i, j;

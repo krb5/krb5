@@ -38,20 +38,22 @@
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 
-void printhex (size_t len, const char *p)
+static void printhex (size_t len, const unsigned char *p)
 {
     while (len--)
 	printf ("%02x", 0xff & *p++);
 }
 
-void printstringhex (const char *p) { printhex (strlen (p), p); }
+static void printstringhex (const unsigned char *p) {
+    printhex (strlen ((const char *) p), p);
+}
 
-void rfc_tests ()
+static void rfc_tests ()
 {
     int i;
     struct {
 	char *input;
-	int n;
+	unsigned int n;
 	unsigned char exp[192/8];
     } tests[] = {
 	{ "012345", 64,
@@ -78,9 +80,9 @@ void rfc_tests ()
 
     printf ("RFC tests:\n");
     for (i = 0; i < ASIZE (tests); i++) {
-	char *p = tests[i].input;
+	unsigned char *p = (unsigned char *) tests[i].input;
 	assert (tests[i].n / 8 <= sizeof (outbuf));
-	krb5_nfold (8 * strlen (p), p, tests[i].n, outbuf);
+	krb5_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
 	printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
 	printf ("%d-fold(", tests[i].n);
 	printstringhex (p);
@@ -96,10 +98,10 @@ void rfc_tests ()
 }
 
 unsigned char *nfold_in[] = {
-    "basch",
-    "eichin",
-    "sommerfeld",
-    "MASSACHVSETTS INSTITVTE OF TECHNOLOGY" };
+    (unsigned char *) "basch",
+    (unsigned char *) "eichin",
+    (unsigned char *) "sommerfeld",
+    (unsigned char *) "MASSACHVSETTS INSTITVTE OF TECHNOLOGY" };
 
 unsigned char nfold_192[4][24] = {
     { 0x1a, 0xab, 0x6b, 0x42, 0x96, 0x4b, 0x98, 0xb2, 0x1f, 0x8c, 0xde, 0x2d,
@@ -122,9 +124,11 @@ main(argc, argv)
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", (int) strlen(nfold_in[i]), nfold_in[i]);
+	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]), 
+	       nfold_in[i]);
 	printf("\t192-Fold:\t");
-	krb5_nfold(strlen(nfold_in[i])*8, nfold_in[i], 24*8, cipher_text);
+	krb5_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8, 
+		   cipher_text);
 	for (j=0; j<24; j++)
 	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
 	printf("\n");

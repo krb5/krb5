@@ -56,7 +56,7 @@ if( retval) { \
 int
 main ()
 {
-  krb5_context context ;
+  krb5_context context = 0;
   krb5_data  in, out, check, state;
   int i;
   size_t len;

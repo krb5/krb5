@@ -1,3 +1,9 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* pbkdf2.c, t_encrypt.c, t_hmac.c, t_nfold.c: Cleanup unused
+	variables. Signed vs unsigned cleanup. Ensure variables set before
+	use.
+
 2002-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* old_api_glue.c (krb5_encrypt, krb5_decrypt,

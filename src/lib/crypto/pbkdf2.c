@@ -75,7 +75,7 @@ static void printd (const char *descr, krb5_data *d) {
 }
 static void printk(const char *descr, krb5_keyblock *k) {
     krb5_data d;
-    d.data = k->contents;
+    d.data = (char *) k->contents;
     d.length = k->length;
     printd(descr, &d);
 }
@@ -226,7 +226,7 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
 	abort();
     if (key->length > blocksize) {
 	krb5_data d, d2;
-	d.data = key->contents;
+	d.data = (char *) key->contents;
 	d.length = key->length;
 	d2.data = tmp;
 	d2.length = hashsize;
@@ -234,7 +234,7 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
 	if (err)
 	    return err;
 	key->length = d2.length;
-	key->contents = d2.data;
+	key->contents = (krb5_octet *) d2.data;
 	if (debug_hmac)
 	    printk(" pre-hashed key", key);
     }

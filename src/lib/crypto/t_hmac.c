@@ -40,22 +40,12 @@
 
 const char *whoami;
 
-static void printhex (size_t len, const char *p) {
-    while (len--)
-	printf ("%02x", 0xff & *p++);
-}
-
-static void printstringhex (const char *p) { printhex (strlen (p), p); }
-
-static void printdata (krb5_data *d) { printhex (d->length, d->data); }
-
-static void printkey (krb5_keyblock *k) { printhex (k->length, k->contents); }
-
 static void keyToData (krb5_keyblock *k, krb5_data *d) {
     d->length = k->length;
-    d->data = k->contents;
+    d->data = (char *) k->contents;
 }
 
+#if 0
 static void check_error (int r, int line) {
     if (r != 0) {
 	fprintf (stderr, "%s:%d: %s\n", __FILE__, line,
@@ -64,6 +54,7 @@ static void check_error (int r, int line) {
     }
 }
 #define CHECK check_error(r, __LINE__)
+#endif
 
 static void printd (const char *descr, krb5_data *d) {
     int i, j;
@@ -101,7 +92,8 @@ struct hmac_test {
     const char *hexdigest;
 };
 
-static krb5_error_code hmac1(struct krb5_hash_provider *h, krb5_keyblock *key,
+static krb5_error_code hmac1(const struct krb5_hash_provider *h, 
+			     krb5_keyblock *key,
 			     krb5_data *in, krb5_data *out)
 {
     char tmp[40];
@@ -115,7 +107,7 @@ static krb5_error_code hmac1(struct krb5_hash_provider *h, krb5_keyblock *key,
 	abort();
     if (key->length > blocksize) {
 	krb5_data d, d2;
-	d.data = key->contents;
+	d.data = (char *) key->contents;
 	d.length = key->length;
 	d2.data = tmp;
 	d2.length = hashsize;
@@ -125,7 +117,7 @@ static krb5_error_code hmac1(struct krb5_hash_provider *h, krb5_keyblock *key,
 	    exit(1);
 	}
 	key->length = d2.length;
-	key->contents = d2.data;
+	key->contents = (krb5_octet *) d2.data;
 	printk(" pre-hashed key", key);
     }
     printd(" hmac input", in);
@@ -232,77 +224,6 @@ static void test_hmac()
 	    "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data",
 	    "0x6f630fad67cda0ee1fb1f562db3aa53e"
 	},
-    }, sha1tests[] = {
-	{
-/*
-test_case =     1
-key =           0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
-key_len =       20
-data =          "Hi There"
-data_len =      8
-digest =        0xb617318655057264e28bc0b6fb378c8ef146be00
-
-test_case =     2
-key =           "Jefe"
-key_len =       4
-data =          "what do ya want for nothing?"
-data_len =      28
-digest =        0xeffcdf6ae5eb2fa2d27416d5f184df9c259a7c79
-
-test_case =     3
-key =           0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-key_len =       20
-data =          0xdd repeated 50 times
-data_len =      50
-digest =        0x125d7342b9ac11cd91a39af48aa17b4f63f175d3
-
-test_case =     4
-key =           0x0102030405060708090a0b0c0d0e0f10111213141516171819
-key_len =       25
-data =          0xcd repeated 50 times
-data_len =      50
-digest =        0x4c9007f4026250c6bc8414f9bf50c86c2d7235da
-
-test_case =     5
-key =           0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c
-key_len =       20
-data =          "Test With Truncation"
-data_len =      20
-digest =        0x4c1a03424b55e07fe7f27be1d58bb9324a9a5a04
-
-test_case =     6
-key =           0xaa repeated 80 times
-key_len =       80
-data =          "Test Using Larger Than Block-Size Key - Hash Key First"
-data_len =      54
-digest =        0xaa4ae5e15272d00e95705637ce8a3b55ed402112
-
-test_case =     7
-key =           0xaa repeated 80 times
-key_len =       80
-data =          "Test Using Larger Than Block-Size Key and Larger
-                Than One Block-Size Data"
-data_len =      73
-digest =        0xe8e99d0f45237d786d6bbaa7965c7808bbff1a91
-data_len =      20
-digest =        0x4c1a03424b55e07fe7f27be1d58bb9324a9a5a04
-
-test_case =     6
-key =           0xaa repeated 80 times
-key_len =       80
-data =          "Test Using Larger Than Block-Size Key - Hash Key First"
-data_len =      54
-digest =        0xaa4ae5e15272d00e95705637ce8a3b55ed402112
-
-test_case =     7
-key =           0xaa repeated 80 times
-key_len =       80
-data =          "Test Using Larger Than Block-Size Key and Larger "
-                "Than One Block-Size Data"
-data_len =      73
-digest =        0xe8e99d0f45237d786d6bbaa7965c7808bbff1a91
-*/
-	0 },
     };
 
     for (i = 0; i < sizeof(md5tests)/sizeof(md5tests[0]); i++) {
