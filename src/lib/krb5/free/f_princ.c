@@ -37,10 +37,10 @@ void
 krb5_free_principal(val)
 krb5_principal val;
 {
-    register krb5_data **temp;
+    register int i = krb5_princ_size(val);
 
-    for (temp = val; *temp; temp++)
-	krb5_free_data(*temp);
+    while(--i >= 0)
+	free(krb5_princ_component(val, i)->data);
     xfree(val);
     return;
 }

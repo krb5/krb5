@@ -76,7 +76,7 @@ CREDENTIALS *c;
 		i = 0;
 		if (creds.server)
 			while (creds.server[i]) {
-				EPRINT "server: %d: ``%.*s''\n", i,
+				EPRINT("server: %d: ``%.*s''\n", i,
 					creds.server[i]->length,
 					creds.server[i]->data
 						? creds.server[i]->data : "");
@@ -85,7 +85,7 @@ CREDENTIALS *c;
 		i = 0;
 		if (creds.client)
 			while (creds.client[i]) {
-				EPRINT "client: %d: ``%.*s''\n", i,
+				EPRINT("client: %d: ``%.*s''\n", i,
 					creds.client[i]->length,
 					creds.client[i]->data
 						? creds.client[i]->data : "");
@@ -93,12 +93,12 @@ CREDENTIALS *c;
 			}
 	}
 #endif
-	set_string(c->pname, ANAME_SZ, creds.client[1]);
-	set_string(c->pinst, INST_SZ, creds.client[2]);
-	
-	set_string(c->realm, REALM_SZ, creds.server[0]);
-	set_string(c->service, REALM_SZ, creds.server[1]);
-	set_string(c->instance, REALM_SZ, creds.server[2]);
+	set_string(c->pname, ANAME_SZ, krb5_princ_component(creds.client, 1));
+	set_string(c->pinst, INST_SZ, krb5_princ_component(creds.client, 2));
+
+	set_string(c->realm, REALM_SZ, krb5_princ_realm(creds.server));
+	set_string(c->service, REALM_SZ, krb5_princ_component(creds.server, 1));
+	set_string(c->instance, REALM_SZ, krb5_princ_component(creds.server, 2));
 
 	c->ticket_st.length = creds.ticket.length;
 	memcpy((char *)c->ticket_st.dat,

@@ -239,14 +239,15 @@ krb5_tkt_authent **ret_authdat;
     /* now rearrange output from rd_req_decoded */
 
     /* make sure the client is of proper lineage (see above) */
-    if (!local_client &&
-	(ticket_enc->client[0]->length == tgs_server[0]->length) &&
-	!memcmp(ticket_enc->client[0]->data,
-		tgs_server[0]->data,
-		tgs_server[0]->length)) {
-	/* someone in a foreign realm claiming to be local */
-	krb5_free_ap_req(apreq);
-	return KRB5KDC_ERR_POLICY;
+    if (!local_client) {
+	krb5_data *tkt_realm = krb5_princ_realm(ticket_enc->client);
+	krb5_data *tgs_realm = krb5_princ_realm(tgs_server);
+	if (tkt_realm->length != tgs_realm->length ||
+	    memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
+	    /* someone in a foreign realm claiming to be local */
+	    krb5_free_ap_req(apreq);
+	    return KRB5KDC_ERR_POLICY;
+	}
     }
     our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {

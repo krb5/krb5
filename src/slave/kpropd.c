@@ -558,6 +558,7 @@ authorized_principal(p)
 	static char	*localrealm = NULL;
 	char	*default_realm;
 	krb5_error_code	retval;
+	krb5_data *tmpdata;
 
 	if (!localrealm) {
 		if (realm)
@@ -574,14 +575,16 @@ authorized_principal(p)
 	/*
 	 * The other side must be coming from the local realm!
 	 */
-	if (!p[0] || (p[0]->length != strlen(localrealm))
-	    || memcmp(p[0]->data, localrealm, p[0]->length))
+	tmpdata = krb5_princ_realm(p);
+	if (tmpdata->length != strlen(localrealm)
+	    || memcmp(tmpdata->data, localrealm, tmpdata->length))
 		return(FALSE);
 	/*
 	 * The client's service must be KPROP_SERVICE_NAME
 	 */
-	if (!p[1] || (p[1]->length != strlen(KPROP_SERVICE_NAME))
-	    || memcmp(p[1]->data, KPROP_SERVICE_NAME, p[1]->length))
+	tmpdata = krb5_princ_component(p, 0);
+	if (!tmpdata || (tmpdata->length != strlen(KPROP_SERVICE_NAME))
+	    || memcmp(tmpdata->data, KPROP_SERVICE_NAME, tmpdata->length))
 		return(FALSE);
 	/*
 	 * For now, it can come from any hostname.  We this needs to

@@ -174,9 +174,12 @@ char *fn;
 	}
 	r = 0;
 #endif
-	set_string(ad->pname, ANAME_SZ, authdat->authenticator->client[1]);
-	set_string(ad->pinst, INST_SZ, authdat->authenticator->client[2]);
-	set_string(ad->prealm, REALM_SZ, authdat->authenticator->client[0]);
+	set_string(ad->pname, ANAME_SZ,
+		   krb5_princ_component(authdat->authenticator->client, 1));
+	set_string(ad->pinst, INST_SZ,
+		   krb5_princ_component(authdat->authenticator->client, 2));
+	set_string(ad->prealm, REALM_SZ,
+		   krb5_princ_component(authdat->authenticator->client, 0));
 
 	ad->checksum = *(long *)authdat->authenticator->checksum->contents;
 

@@ -157,14 +157,18 @@ tgt_again:
 				 fromstring,
 				 response));
     } else if (nprincs != 1) {
+	/* XXX Is it possible for a principal to have length 1 so that
+	   the following statement is undefined?  Only length 3 is valid
+	   here, but can a length 1 ticket pass through all prior tests?  */
+
+	krb5_data *server_1 = krb5_princ_component(request->server, 1);
+	krb5_data *tgs_1 = krb5_princ_component(tgs_server, 1);
+
 	/* might be a request for a TGT for some other realm; we should
 	   do our best to find such a TGS in this db */
-	if (firstpass && request->server[1] &&
-	    request->server[1]->length == tgs_server[1]->length &&
-	    !memcmp(request->server[1]->data, tgs_server[1]->data,
-		    tgs_server[1]->length) &&
-	    /* also must be proper form for tgs request */
-	    request->server[2] && !request->server[3]) {
+	if (firstpass && krb5_princ_size(request->server) == 3 &&
+	    server_1->length == tgs_1->length &&
+	    !memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
 	    krb5_db_free_principal(&server, nprincs);
 	    find_alternate_tgs(request, &server, &more, &nprincs);
 	    firstpass = 0;
@@ -650,8 +654,6 @@ krb5_data **response;
     return retval;
 }
 
-#include "../lib/krb/int-proto.h"
-
 /*
  * The request seems to be for a ticket-granting service somewhere else,
  * but we don't have a ticket for the final TGS.  Try to give the requestor
@@ -671,22 +673,23 @@ int *nprincs;
     *nprincs = 0;
     *more = FALSE;
 
-    if (retval = krb5_walk_realm_tree(request->server[0],
-				      request->server[2],
-				      &plist))
+    if (retval = krb5_walk_realm_tree(krb5_princ_component(request->server, 0),
+				      krb5_princ_component(request->server, 2),
+				      &plist, KRB5_REALM_BRANCH_CHAR))
 	return;
 
     /* move to the end */
+    /* SUPPRESS 530 */
     for (pl2 = plist; *pl2; pl2++);
 
     /* the first entry in this array is for krbtgt/local@local, so we
        ignore it */
     while (--pl2 > plist) {
 	*nprincs = 1;
-	tmp = (*pl2)[0];
-	(*pl2)[0] = tgs_server[0];
+	tmp = krb5_princ_realm(*pl2);
+	krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
 	retval = krb5_db_get_principal(*pl2, server, nprincs, more);
-	(*pl2)[0] = tmp;
+	krb5_princ_set_realm(*pl2, tmp);
 	if (retval) {
 	    *nprincs = 0;
 	    *more = FALSE;
@@ -701,14 +704,14 @@ int *nprincs;
 	    krb5_principal tmpprinc;
 	    char *sname;
 
-	    tmp = (*pl2)[0];
-	    (*pl2)[0] = tgs_server[0];
+	    tmp = krb5_princ_realm(*pl2);
+	    krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
 	    if (retval = krb5_copy_principal(*pl2, &tmpprinc)) {
 		krb5_db_free_principal(server, *nprincs);
-		(*pl2)[0] = tmp;
+		krb5_princ_set_realm(*pl2, tmp);
 		continue;
 	    }
-	    (*pl2)[0] = tmp;
+	    krb5_princ_set_realm(*pl2, tmp);
 
 	    krb5_free_principal(request->server);
 	    request->server = tmpprinc;

@@ -48,6 +48,7 @@ extern char *dbm_db_name;
 
 extern krb5_keyblock tgs_key;
 extern krb5_kvno tgs_kvno;
-extern krb5_data *tgs_server[4];
+extern krb5_principal_data tgs_server_struct;
+#define	tgs_server (&tgs_server_struct)
 
 #endif /* __KRB5_KDC_EXTERN__ */
