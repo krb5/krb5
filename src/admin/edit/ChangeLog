@@ -1,3 +1,8 @@
+Sun May 21 14:20:32 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* dumpv4.c: Include k5-int.h before krb.h so that PROTOTYPE is not
+		redefined. 
+
 Sun May  7 13:46:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add AC_HEADER_STDC to define STDC_HEADERS for

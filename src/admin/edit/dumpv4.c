@@ -26,14 +26,15 @@
 
 #ifdef KRB4
 
+#include "k5-int.h"
+#include "com_err.h"
+
 #include <des.h>
 #include <krb.h>
 #include <krb_db.h>
 /* MKEYFILE is now defined in kdc.h */
 #include <kdc.h>
 
-#include "k5-int.h"
-#include "com_err.h"
 #include <stdio.h>
 #include "kdb5_edit.h"
 
