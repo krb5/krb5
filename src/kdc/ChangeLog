@@ -1,3 +1,8 @@
+2002-10-05  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Apply fix from Kevin Coffman to
+	avoid leaking padata.
+
 2002-09-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (struct connection): New field start_time.

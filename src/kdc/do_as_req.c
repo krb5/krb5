@@ -447,7 +447,10 @@ errout:
 				   status);
     }
 
-    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+    if (encrypting_key.contents)
+	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+    if (reply.padata)
+	krb5_free_pa_data(kdc_context, reply.padata);
 
     if (cname)
 	    free(cname);
