@@ -1,3 +1,10 @@
+2002-11-07  Tom Yu  <tlyu@mit.edu>
+
+	* rpc_test.0/expire.exp (overlap): Add another call to
+	flush_server to make a race condition a little less likely.  There
+	really should be better synchronization, as this test suite is
+	just full of race conditions waiting to happen.
+
 2002-09-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib/helpers.exp (setup_database): Use "!=" instead of "ne" for
