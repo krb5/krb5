@@ -25,23 +25,25 @@ typedef struct _krb5_ccache {
 
 typedef struct _krb5_cc_ops {
 	char *prefix;
-	krb5_ccache (*resolve) PROTOTYPE((char *residual));
-	krb5_ccache (*gen_new) PROTOTYPE((void));
 	char *(*get_name) PROTOTYPE((krb5_ccache));
-	int (*init) PROTOTYPE((krb5_ccache, krb5_principal));
-	int (*destroy) PROTOTYPE((krb5_ccache));
-	int (*close) PROTOTYPE((krb5_ccache));
-	int (*store) PROTOTYPE((krb5_ccache, krb5_creds *));
-	int (*retrieve) PROTOTYPE((krb5_ccache, krb5_flags,
+	krb5_error_code (*resolve) PROTOTYPE((krb5_ccache, char *));
+	krb5_error_code (*gen_new) PROTOTYPE((krb5_ccache));
+	krb5_error_code (*init) PROTOTYPE((krb5_ccache, krb5_principal));
+	krb5_error_code (*destroy) PROTOTYPE((krb5_ccache));
+	krb5_error_code (*close) PROTOTYPE((krb5_ccache));
+	krb5_error_code (*store) PROTOTYPE((krb5_ccache, krb5_creds *));
+	krb5_error_code (*retrieve) PROTOTYPE((krb5_ccache, krb5_flags,
 				   krb5_creds *, krb5_creds *));
-	int (*get_princ) PROTOTYPE((krb5_ccache, krb5_principal *));
-	int (*get_first) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
-	int (*get_next) PROTOTYPE((krb5_ccache, krb5_cc_cursor *,
+	krb5_error_code (*get_princ) PROTOTYPE((krb5_ccache,
+						krb5_principal *));
+	krb5_error_code (*get_first) PROTOTYPE((krb5_ccache,
+						krb5_cc_cursor *));
+	krb5_error_code (*get_next) PROTOTYPE((krb5_ccache, krb5_cc_cursor *,
 				   krb5_creds *));
-	int (*end_get) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
-	int (*remove_cred) PROTOTYPE((krb5_ccache, krb5_flags,
+	krb5_error_code (*end_get) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
+	krb5_error_code (*remove_cred) PROTOTYPE((krb5_ccache, krb5_flags,
 				      krb5_creds *));
-	int (*set_flags) PROTOTYPE((krb5_ccache, krb5_flags));
+	krb5_error_code (*set_flags) PROTOTYPE((krb5_ccache, krb5_flags));
 } krb5_cc_ops;
 
 /* for retrieve_cred */
