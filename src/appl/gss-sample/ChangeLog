@@ -1,4 +1,9 @@
 
+Fri Jul 7 15:41:47 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling.
+	* configure.in - Add KRB5_LIBRARIES.
+
+
 Thu Jun 15 17:35:08 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

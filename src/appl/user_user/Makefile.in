@@ -1,15 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
 
-KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
-
-uuclient: client.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o uuclient client.o $(KLIB) $(LIBS)
+uuclient: client.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o uuclient client.o $(LIBS)
 
 client.o:	$(srcdir)/client.c
 
@@ -19,8 +13,8 @@ all:: uuclient
 clean::
 	$(RM) client.o uuclient
 
-uuserver: server.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o uuserver server.o $(KLIB) $(LIBS)
+uuserver: server.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o uuserver server.o $(LIBS)
 
 server.o:	$(srcdir)/server.c
 

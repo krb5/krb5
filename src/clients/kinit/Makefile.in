@@ -1,14 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-
 all::
 
-KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
-
-kinit: kinit.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) $(LDFLAGS) -o kinit kinit.o $(KLIB) $(LIBS)
+kinit: kinit.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) $(LDFLAGS) -o kinit kinit.o $(LIBS)
 
 kinit.o:	$(srcdir)/kinit.c
 

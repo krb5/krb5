@@ -1,4 +1,9 @@
 
+Fri Jul 7 15:34:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add KRB5_LIBRARIES.
+
+
 Fri Jun 30 14:28:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_anadd.c - Add ability to select between Berkeley and DBM format
 		at compile time.

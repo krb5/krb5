@@ -2,10 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DEFINES)
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
-KLIB = -lkadm -lkrb5 $(KRB4_LIB) -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 LOGINLIBS = @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
@@ -31,36 +27,36 @@ all:: rsh rcp rlogin krshd krlogind login.krb5
 clean:: 
 	$(RM) rsh rcp rlogin krshd krlogind login.krb5
 
-rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
 	$(INSTALL_DATA) $(srcdir)/rsh.M ${DESTDIR}$(CLIENT_MANDIR)/rsh.1
 
-rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
 	$(INSTALL_DATA) $(srcdir)/rcp.M ${DESTDIR}$(CLIENT_MANDIR)/rcp.1
 
-rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
 	$(INSTALL_DATA) $(srcdir)/rlogin.M ${DESTDIR}$(CLIENT_MANDIR)/rlogin.1
 
-krshd: krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+krshd: krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
 	$(INSTALL_DATA) $(srcdir)/krshd.M ${DESTDIR}$(SERVER_MANDIR)/krshd.8
 
-krlogind: krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o krlogind krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+krlogind: krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o krlogind krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
@@ -70,8 +66,8 @@ install::
 # We load the libraries twice here since des425 has a dependency on 
 # krb5_read_passwrd in krb5.a.  Sigh, circular references.
 #
-login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(KLIB) $(LIBS) $(LOGINLIBS)
+login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(LIBS) $(LOGINLIBS)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5

@@ -1,28 +1,13 @@
-KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
-KDB4_LIB = @KDB4_LIB@
-
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
-KDBLIB=-lkdb5
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a
 
 all::
 
-KLIB = -lkrb5 $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KDB4_LIB) $(KLIB) 
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
 all:: kdb5_convert
 
 kdb5_convert: kdb5_convert.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_convert kdb5_convert.o $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_convert kdb5_convert.o $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert

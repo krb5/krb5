@@ -1,3 +1,8 @@
+
+Fri Jul 7 15:44:13 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - add KRB5_LIBRARIES.
+
 Tue Jun 20 13:09:51 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* movemail.c: USE_STRING_H -> HAVE_STRING_H; fix HAVE_STLIB_H to

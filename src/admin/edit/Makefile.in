@@ -1,21 +1,7 @@
-KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
-KDB4_LIB = @KDB4_LIB@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-SSLIB=$(BUILDTOP)/util/ss/libss.a
-DBMLIB=
-KDBLIB=-lkdb5 
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
 all::
 
-KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(SSLIB) $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KDB4_LIB) $(KLIB)
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
 OBJS= kdb5_edit.o \
@@ -38,7 +24,7 @@ SRCS= $(srcdir)/kdb5_edit.c \
 all:: kdb5_edit
 
 kdb5_edit: kdb5_edit.o $(DEPLIBS) $(OBJS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_edit $(OBJS) $(LIBS)
 
 getdate.c getdate.h: getdate.y
 	$(RM) getdate.c getdate.h y.tab.*

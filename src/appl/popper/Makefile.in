@@ -9,12 +9,7 @@ CFLAGS = $(CCOPTS) -DMAILDIR=\"/usr/spool/pop\" -DKERBEROS -DKRB5 -DDEBUG $(DEFS
 
 SERVER_MANSUFFIX = 8
 
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-
 all::
-
-KLIB = -lkadm -lkrb5 -lcrypto $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 OBJS		=	pop_dele.o pop_dropcopy.o pop_dropinfo.o \
 			pop_get_command.o pop_get_subcommand.o pop_init.o \
@@ -23,8 +18,8 @@ OBJS		=	pop_dele.o pop_dropcopy.o pop_dropinfo.o \
 			pop_rset.o pop_send.o pop_stat.o pop_updt.o \
 			pop_user.o pop_xtnd.o pop_xmit.o popper.o
 
-popper: $(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o popper $(OBJS) $(KLIB) $(LIBS)
+popper: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o popper $(OBJS) $(LIBS)
 
 all:: popper
 

@@ -1,3 +1,8 @@
+
+Fri Jul 7 15:43:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling.
+	* configure.in - Add KRB5_LIBRARIES.
+
 Tue Jun 20 14:29:23 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* poplib.c: HAS_STDLIB_H -> HAVE_STDLIB_H

@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:00:34 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
 Fri Jun 30 14:33:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.c - Add usage of compile(3) regular expression interfaces
 		if present.  Also call regfree if using regcomp.

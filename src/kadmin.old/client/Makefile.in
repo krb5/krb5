@@ -1,14 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-SSLIB=$(BUILDTOP)/util/ss/libss.a
-KDBLIB=-lkdb5 
 
 all::
-
-KLIB = -lkrb5 -lcrypto $(SSLIB) $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) 
 
 SRCS = \
 	$(srcdir)/kadmin.c \
@@ -36,8 +28,8 @@ OBJS = \
 
 all::	kadmin
 
-kadmin: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
+kadmin: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kadmin $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(C)kadmin ${DESTDIR}$(CLIENT_BINDIR)$(S)kadmin_old

@@ -1,3 +1,8 @@
+
+Fri Jul 7 15:48:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add KRB5_LIBRARIES and USE_KADM_LIBRARY.
+
 Wed Jun 28 13:13:34 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sim_server.c: Include <string.h> for memcpy definitions.

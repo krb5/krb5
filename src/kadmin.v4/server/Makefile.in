@@ -1,16 +1,4 @@
-KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
-KDBLIB=-lkdb5
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a
-
-KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 
 LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV -I.
 
@@ -42,7 +30,7 @@ kadm_err.c: kadm_err.et
 kadm_err.h: kadm_err.et
 
 v4kadmind: $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o v4kadmind $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o v4kadmind $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) v4kadmind ${DESTDIR}$(SERVER_BINDIR)/v4kadmind

@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:05:11 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
 Tue Jun 27 16:05:27 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* acl_files.c - Change check for return value from fputs(3) from NULL
 		to EOF.  That's what's returned on error.

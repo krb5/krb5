@@ -1,3 +1,8 @@
+
+Fri Jul 7 15:48:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add KRB5_LIBRARIES.
+
 Wed Jun 28 13:27:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sim_client.c: Include stdlib.h or declare malloc.

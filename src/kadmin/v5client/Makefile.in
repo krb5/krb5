@@ -1,21 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = 
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-SSLIB=$(BUILDTOP)/util/ss/libss.a
-KDBLIB=-lkdb5
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
-KADMLIB=-lkadm
-DEPKADMLIB=$(TOPLIBD)/libkadm.a
 
 all::
 
-KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(SSLIB) $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB)
-
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB) $(DEPKADMLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KADMLIB) $(KLIB)
 LOCALINCLUDE=
 
 OBJS= kadmin5.o \
@@ -32,7 +18,7 @@ SRCS= $(srcdir)/kadmin5.c \
 all:: kadmin5
 
 kadmin5: kadmin5.o $(DEPLIBS) $(OBJS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kadmin5 $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kadmin5 $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kadmin5 ${DESTDIR}$(ADMIN_BINDIR)/kadmin5

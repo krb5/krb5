@@ -1,13 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-SSLIB=$(BUILDTOP)/util/ss/libss.a
 
 all::
-
-KLIB = -lkadm -lkrb5 -lcrypto $(SSLIB) $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) 
 
 SRCS = \
 	$(srcdir)/kpasswd.c
@@ -18,8 +11,8 @@ OBJS = \
 
 all::	kpasswd
 
-kpasswd: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kpasswd $(OBJS) $(KLIB) $(LIBS)
+kpasswd: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kpasswd $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kpasswd ${DESTDIR}$(CLIENT_BINDIR)/kpasswd

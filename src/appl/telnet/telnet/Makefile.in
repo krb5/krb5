@@ -25,10 +25,6 @@ OTHERDEFS=-DLINEMODE -DKLUDGELINEMODE -DDIAGNOSTICS -DENV_HACK -DOLD_ENVIRON
 LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-KRB4_LIB = @KRB4_LIB@ @KRB4_CRYPTO_LIB@
-KLIB = -lkrb5 $(KRB4_LIB) -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 SRCS=	commands.c main.c network.c ring.c \
 	sys_bsd.c telnet.c terminal.c \
@@ -42,8 +38,8 @@ OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
 
 all:: telnet
 
-telnet:	$(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
-	$(LD) -o $@ $(LDFLAGS) $(LDARGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(LIBS)
+telnet:	$(OBJS) $(DEPLIBS) ../libtelnet/libtelnet.a
+	$(LD) -o $@ $(LDFLAGS) $(LDARGS) $(OBJS) ../libtelnet/libtelnet.a $(LIBS)
 
 clean::
 	$(RM) telnet

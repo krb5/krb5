@@ -40,5 +40,8 @@ AC_MSG_RESULT($krb5_cv_sys_setpgrp_two)
 if test $krb5_cv_sys_setpgrp_two = yes; then
   AC_DEFINE(SETPGRP_TWOARG)
 fi
+USE_KADM_LIBRARY
+USE_KRB4_LIBRARY
+KRB5_LIBRARIES
 V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

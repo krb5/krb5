@@ -1,18 +1,15 @@
 CFLAGS = $(CCOPTS) -DKERBEROS -DKRB5 -DMAIL_USE_POP $(DEFS) $(LOCALINCLUDE)
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-LDFLAGS = -g
 
 OBJS = movemail.o movemail-mmdf.o
 
 all::
 
-KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
-
 HESIODLIB = 
+LOCAL_LIBRARIES = $(HESIODLIB)
+DEPLOCAL_LIBRARIES = $(HESIODLIB)
 
-movemail: movemail.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o movemail movemail.o $(KLIB) $(HESIODLIB) $(LIBS)
+movemail: movemail.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o movemail movemail.o $(LIBS)
 
 all:: movemail
 

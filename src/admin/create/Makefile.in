@@ -1,23 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-KDBLIB=-lkdb5 
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
-
-all::
-
-KLIB = -lkrb5 -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
 all:: kdb5_create
 
 kdb5_create: kdb5_create.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_create kdb5_create.o $(LOCAL_LIBRARIES) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_create kdb5_create.o $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_create $(DESTDIR)$(ADMIN_BINDIR)/kdb5_create

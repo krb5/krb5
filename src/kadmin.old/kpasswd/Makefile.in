@@ -1,14 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-SSLIB=$(BUILDTOP)/util/ss/libss.a
-KDBLIB=-lkdb5 
 
 all::
-
-KLIB = -lkrb5 -lcrypto $(SSLIB) $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) 
 
 SRCS = \
 	$(srcdir)/networked.c \
@@ -21,8 +13,8 @@ OBJS = \
 
 all::	kpasswd
 
-kpasswd: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kpasswd $(OBJS) $(KLIB) $(LIBS)
+kpasswd: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kpasswd $(OBJS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(C)kpasswd ${DESTDIR}$(CLIENT_BINDIR)$(S)kpasswd_old

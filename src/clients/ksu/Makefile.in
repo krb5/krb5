@@ -1,8 +1,5 @@
 DEFINES = -DLOCAL_REALM='"."' -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
@@ -19,11 +16,8 @@ OBJS = \
 
 all:: ksu
 
-KLIB = -lkadm -lkrb5 -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-
-ksu: $(OBJS) $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(KLIB) $(LIBS)
+ksu: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(LIBS)
 
 clean::
 	$(RM) ksu

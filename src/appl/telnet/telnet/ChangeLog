@@ -1,3 +1,8 @@
+
+Fri Jul 7 15:49:55 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling.
+	* configure.in - Add USE_KRB4_LIBRARY and KRB5_LIBRARIES.
+
 Sun Jul  2 04:19:48 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* commands.c: rename setmode() and clearmode() to tel_setmode()

@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:01:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
 Fri Jun 30 14:35:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_main.c - Instead of moving up the initialization and calls to
 		key_init() before the call to daemon(), have daemon() not

@@ -1,16 +1,13 @@
 CFLAGS = $(CCOPTS) -DKPOP -DKRB5 $(DEFS) $(LOCALINCLUDE)
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
 
-KLIB = -lkrb5 -lcrypto $(COMERRLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
-
 HESIODLIB =
+LOCAL_LIBRARIES = $(HESIODLIB)
+DEPLOCAL_LIBRARIES = $(HESIODLIB)
 
-mailquery: mailquery.o poplib.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o mailquery mailquery.o poplib.o $(KLIB) \
-		$(HESIODLIB) $(LIBS)
+mailquery: mailquery.o poplib.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o mailquery mailquery.o poplib.o $(LIBS)
 
 mailquery.o:	$(srcdir)/mailquery.c
 poplib.o:	$(srcdir)/poplib.c

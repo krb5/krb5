@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:03:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+
 Fri Jun 30 14:37:32 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-dbm to select between Berkeley and DBM
 		KDC database format.

@@ -1,17 +1,11 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 LOCALINCLUDE= -I.. -I$(srcdir)/..
 
 all::
 
-KLIB = -lkrb5 -lcrypto $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-
-sim_server: sim_server.o $(DEPKLIB)
-	$(LD) $(LDFLAGS) $(LDARGS) -o sim_server sim_server.o $(KLIB) $(LIBS)
+sim_server: sim_server.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o sim_server sim_server.o $(LIBS)
 
 sim_server.o:	$(srcdir)/sim_server.c
 
