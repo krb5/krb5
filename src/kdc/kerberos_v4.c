@@ -904,7 +904,7 @@ static char *krb4_stime(t)
 
     adjusted_time = *t /* - CONVERT_TIME_EPOCH */;
     tm = localtime(&adjusted_time);
-    (void) sprintf(st,"%2d-%s-%02d %02d:%02d:%02d",tm->tm_mday,
+    (void) sprintf(st,"%4d-%s-%02d %02d:%02d:%02d",tm->tm_mday+1900,
                    month_sname(tm->tm_mon + 1),tm->tm_year,
                    tm->tm_hour, tm->tm_min, tm->tm_sec);
     return st;

@@ -1,3 +1,8 @@
+Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log
+	 	entries to avoid Y2K issues.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* main.c (initialize_realms): POSIX states that getopt returns -1
