@@ -1,3 +1,8 @@
+Wed Jan 21 19:12:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump minor version due to internal
+	structure change.
+
 Sat Feb 22 01:21:06 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): s/so/$(SHLIBEXT)
