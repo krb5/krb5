@@ -1,4 +1,8 @@
 
+Thu Jun 1 14:50:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin.exp: Change admin instance name to kadmin.
+
+
 Mon May 22 15:44:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapi.exp	- Add dejagnu test for GSS-API client and server.
 

@@ -1,4 +1,8 @@
 
+Thu Jun 1 14:48:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Change admin instance name to kadmin.
+
+
 Fri May 26 17:55:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - fix typo for restoring setting of KRB5_CONFIG on exit.
 
