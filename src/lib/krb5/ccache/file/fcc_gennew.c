@@ -18,7 +18,13 @@ static char rcsid_fcc_resolve_c[] =
 
 #include "fcc.h"
 
-#include <netinet/in.h>			/* XXX ip only? */
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#else
+ #error find some way to use net-byte-order file version numbers.
+#endif
 
 extern krb5_cc_ops krb5_fcc_ops;
 
