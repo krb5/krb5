@@ -1,3 +1,10 @@
+Sat Jan 27 01:31:12 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb524d.c (kdc_get_server_key): If an enctype is given, then use
+        iit even after falling back from trying a v4salt.  If we don't, we
+        have a good chance fo getting the DES3 TGT service key, and that
+        just doesn't do what we want.
+
 Thu Jan 25 02:07:46 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Take both a v5 and v4

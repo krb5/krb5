@@ -441,7 +441,7 @@ krb5_error_code kdc_get_server_key(context, service, key, kvno, ktype)
     krb5_principal service;
     krb5_keyblock *key;
     krb5_kvno *kvno;
-krb5_enctype ktype;
+    krb5_enctype ktype;
 {
     krb5_error_code ret;
     int nprincs;
@@ -476,7 +476,7 @@ krb5_enctype ktype;
 			      &pkey) &&
 	krb5_dbe_find_enctype(context,
 			      &server,
-			      -1,
+			      ktype,
 			      -1,
 			      -1,
 			      &pkey))
