@@ -110,7 +110,7 @@ void test_locate_kdc(ctx, realm)
     	struct sockaddr *addrs;
 	struct sockaddr_in *sin;
 	int	i, naddrs;
-	int	get_masters;
+	int	get_masters=0;
 	krb5_data rlm;
 	krb5_error_code	retval;
 
