@@ -43,8 +43,7 @@
 #include <ctype.h>
 
 #if defined(TEST) || defined(DEBUG)
-# define FAI_PREFIX krb5int
-# include "fake-addrinfo.c"
+# include "fake-addrinfo.h"
 #endif
 
 #include "foreachaddr.c"

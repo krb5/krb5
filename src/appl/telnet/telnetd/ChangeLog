@@ -1,3 +1,8 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c: Include fake-addrinfo.h, not fake-addrinfo.c.
+	(FAI_PREFIX): Delete.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* defs.h, state.c, sys_term.c, telnetd-ktd.c, telnetd.c: Make

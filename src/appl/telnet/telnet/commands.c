@@ -119,8 +119,7 @@ int tos = -1;
 static	unsigned long sourceroute(char *, char **, int *);
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 
-#define FAI_PREFIX telnet
-#include "fake-addrinfo.c"
+#include "fake-addrinfo.h"
 
 char	*hostname;
 static char _hostname[MAXDNAME];

@@ -69,5 +69,4 @@ krb5_error_code rd_and_store_for_creds(krb5_context context,
 extern int setenv(char *, char *, int);
 #endif
 
-#define FAI_PREFIX bsd
 #include "fake-addrinfo.h"

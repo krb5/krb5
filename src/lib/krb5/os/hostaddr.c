@@ -30,7 +30,6 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
-#define FAI_PREFIX krb5int
 #include "fake-addrinfo.h"
 
 krb5_error_code

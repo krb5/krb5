@@ -27,8 +27,7 @@
 #include <arpa/inet.h>
 
 #include "socket-utils.h"
-#define FAI_PREFIX krb5int_pty
-#include "fake-addrinfo.c"
+#include "fake-addrinfo.h"
 
 static void
 downcase (char *s)

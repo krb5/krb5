@@ -657,8 +657,7 @@ show_credential(cred)
 
 #include "port-sockets.h"
 #include "socket-utils.h" /* for ss2sin etc */
-#define FAI_PREFIX klist
-#include "fake-addrinfo.c"
+#include "fake-addrinfo.h"
 
 void one_addr(a)
     krb5_address *a;

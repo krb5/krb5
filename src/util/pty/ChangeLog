@@ -1,3 +1,8 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* sane_hostname.c: Include fake-addrinfo.h, not fake-addrinfo.c.
+	(FAI_PREFIX): Delete.
+
 2002-02-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBMINOR): Bump due to change in internals.  (Tom's

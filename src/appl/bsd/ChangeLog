@@ -1,3 +1,8 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* defines.h (FAI_PREFIX): Don't define.
+	* kcmd.c (kcmd_connect): Don't include fake-addrinfo.c.
+
 2002-03-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Remove dependencies on krb524_err.h for login.o. If

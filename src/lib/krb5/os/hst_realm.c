@@ -90,7 +90,6 @@
 #endif /* WSHELPER */
 #endif /* KRB5_DNS_LOOKUP */ 
 
-#define FAI_PREFIX krb5int
 #include "fake-addrinfo.h"
 
 /* for old Unixes and friends ... */

@@ -1,3 +1,8 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* klist.c: Include fake-addrinfo.h, not fake-addrinfo.c.
+	(FAI_PREFIX): Delete.
+
 2002-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* klist.c: Include port-sockets.h and socket-utils.h instead of

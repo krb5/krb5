@@ -1,3 +1,11 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Incorporate all of fake-addrinfo.c.  Make all
+	defined functions static, and inline if gcc is used.  Drop
+	FAI_PREFIX renaming hacks.  Fix some bugs in the separation of
+	getnameinfo from getaddrinfo/freeaddrinfo for wrapping purposes.
+	* fake-addrinfo.c: Delete.
+
 2002-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (fixup_addrinfo): Deleted.

@@ -1,3 +1,13 @@
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* hostaddr.c (FAI_PREFIX): Delete.
+	* hst_realm.c (FAI_PREFIX): Delete.
+	* localaddr.c [TEST || DEBUG]: Include fake-addrinfo.h, not
+	fake-addrinfo.c.
+	(FAI_PREFIX) [TEST || DEBUG]: Delete.
+	* locate_kdc.c: Include fake-addrinfo.h, not fake-addrinfo.c.
+	(FAI_PREFIX): Delete.
+
 2002-02-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c: Include foreachaddr.c.

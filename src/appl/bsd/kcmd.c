@@ -188,8 +188,6 @@ restore_sigs (masktype *oldmask)
 #endif /* POSIX_SIGNALS */
 }
 
-#include "fake-addrinfo.c"
-
 static int
 kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 	      char *hname, char **host_save, unsigned int rport, int *lportp,

@@ -77,8 +77,7 @@ struct	socket_security ss;
 # endif /* SO_SEC_MULTI */
 #endif	/* _SC_CRAY_SECURE_SYS */
 
-#define FAI_PREFIX telnetd
-#include "fake-addrinfo.c"
+#include "fake-addrinfo.h"
 
 #ifdef KRB5
 #include "krb5.h"
