@@ -27,11 +27,13 @@
 #define BITS32
 #define BIG
 #define MSBFIRST
+#define MUSTALIGN
 #endif
 
 #if defined(mips) || defined(__mips__)
 #define BITS32
 #define BIG
+#define MUSTALIGN
 #ifdef MIPSEL
 #define LSBFIRST
 #else
