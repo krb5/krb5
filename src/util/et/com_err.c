@@ -103,6 +103,7 @@ void KRB5_CALLCONV com_err_va(const char *whoami,
     p = com_err_hook ? com_err_hook : default_com_err_proc;
     (*p)(whoami, code, fmt, ap);
     k5_mutex_unlock(&com_err_hook_lock);
+    return;
 
 best_try:
     /* Yikes.  Our library initialization failed or we couldn't lock
