@@ -74,6 +74,7 @@ typedef struct _krb5_cc_ops {
 #define KRB5_TC_OPENCLOSE		0x00000001
 
 #define krb5_cc_initialize(cache, principal) (*(cache)->ops->init)(cache, principal)
+#define krb5_cc_gen_new(cache) (*(cache)->ops->gen_new)(cache)
 #define krb5_cc_destroy(cache) (*(cache)->ops->destroy)(cache)
 #define krb5_cc_close(cache) (*(cache)->ops->close)(cache)
 #define krb5_cc_store_cred(cache, creds) (*(cache)->ops->store)(cache, creds)
