@@ -411,7 +411,7 @@ Returns system errors.
 \begin{funcdecl}{krb5_rd_req_simple}{krb5_error_code}{\funcin}
 \funcarg{const krb5_data *}{inbuf}
 \funcarg{const krb5_principal}{server}
-\funcarg{constkrb5_address *}{sender_addr}
+\funcarg{const krb5_address *}{sender_addr}
 \funcout
 \funcarg{krb5_tkt_authent *}{authdat}
 \end{funcdecl}
@@ -678,6 +678,13 @@ If the two principals are the same, return TRUE, else return FALSE.
 Return an ordering on the two full addresses:  0 if the same,
 $< 0$ if first is less than 2nd, $> 0$ if first is greater than 2nd.
 
+\begin{funcdecl}{krb5_address_order}{int}{\funcin}
+\funcarg{const krb5_address *}{addr1}
+\funcarg{const krb5_address *}{addr2}
+\end{funcdecl}
+
+Return an ordering on the two addresses:  0 if the same,
+$< 0$ if first is less than 2nd, $> 0$ if first is greater than 2nd.
 
 \begin{funcdecl}{krb5_copy_keyblock}{krb5_error_code}{\funcin}
 \funcarg{krb5_keyblock *}{from}
