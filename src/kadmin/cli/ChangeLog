@@ -1,3 +1,7 @@
+Tue Dec 17 17:08:04 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadmin.c (kadmin_startup): Do not compare an int to NULL.
+
 Tue Dec  3 15:39:11 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c (kadmin_addprinc): print warning/notice about no policy

@@ -284,7 +284,7 @@ char *kadmin_startup(argc, argv)
 	     }
 	     krb5_free_principal(context, princ);
 	     freeprinc++;
-	} else if (use_keytab != NULL) {
+	} else if (use_keytab != 0) {
 	     if (retval = krb5_sname_to_principal(context, NULL,
 						  "host",
 						  KRB5_NT_SRV_HST,
