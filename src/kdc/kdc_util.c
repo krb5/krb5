@@ -40,15 +40,18 @@ krb5_authdata ***output;
     register krb5_authdata **ptr, **retdata;
 
     /* count up the entries */
-    for (i = 0, ptr = first; *ptr; ptr++,i++);
-    for (ptr = second; *ptr; ptr++,i++);
+    i = 0;
+    if (first)
+	for (ptr = first; *ptr; ptr++,i++);
+    if (second)
+	for (ptr = second; *ptr; ptr++,i++);
     
     retdata = (krb5_authdata **)malloc((i+1)*sizeof(*retdata));
     if (!retdata)
 	return ENOMEM;
     retdata[i] = 0;			/* null-terminated array */
     for (i = 0, j = 0, ptr = first; j < 2 ; ptr = second, j++)
-	while (*ptr) {
+	while (ptr && *ptr) {
 	    /* now walk & copy */
 	    retdata[i] = (krb5_authdata *)malloc(sizeof(*retdata[i]));
 	    if (!retdata[i]) {
