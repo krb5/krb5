@@ -304,7 +304,8 @@ authenticate(p, addr)
 
     krb5_init_ets();
 
-    if (retval = krb5_sname_to_principal(p->myhost, "pop", TRUE, &server)) {
+    if (retval = krb5_sname_to_principal(p->myhost, "pop", KRB5_NT_SRV_HOST,
+					 &server)) {
 	pop_msg(p, POP_FAILURE,
 		"server mis-configured, can't get principal--%s",
 		error_message(retval));

@@ -588,10 +588,7 @@ char *host;
 	    *cp = tolower(*cp);
 
     if (retval = krb5_sname_to_principal(hp->h_name, POP_SERVICE,
-					 FALSE, /* FALSE means don't
-						   canonicalize hostname
-						   (we already have...) */
-					 &server)) {
+					 KRB5_NT_SRV_HST, &server)) {
 	goto krb5error;
     }
 
