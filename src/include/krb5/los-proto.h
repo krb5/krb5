@@ -80,6 +80,9 @@ krb5_error_code krb5_get_host_realm
 		   char *** ));
 krb5_error_code krb5_free_host_realm
 	PROTOTYPE((char * const * ));
+krb5_error_code krb5_get_realm_domain
+	PROTOTYPE((const char *,
+		   char ** ));
 krb5_boolean krb5_kuserok
 	PROTOTYPE((krb5_principal, const char *));
 krb5_error_code krb5_random_confounder
