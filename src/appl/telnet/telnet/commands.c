@@ -90,7 +90,7 @@
 #define MAXDNAME 256 /*per the rfc*/
 #endif
 #ifndef INADDR_NONE
-#define INADDR_NONE 0xffffffff
+#define INADDR_NONE -1
 #endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)

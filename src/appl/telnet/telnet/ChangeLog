@@ -2,8 +2,11 @@ Sat Nov 23 00:33:58 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* commands.c (tn): Patch from mycroft@mit.edu for Alpha NetBSD.
   	Comparing to -1 is not 64-bit clean.
- [233]
-Fri Nov 22 15:48:57 1996  unknown  <bjaspan@mit.edu>
+ 	[233]
+	(INADDR_NONE): Mycroft suggests using -1 not 0xffffffff if I have
+ 	to define it ourselves. [233]
+
+	Fri Nov 22 15:48:57 1996  unknown  <bjaspan@mit.edu>
 
 	* commands.c (sourceroute): use sizeof instead of h_length to
  	determine number of bytes of addr to copy from DNS response
