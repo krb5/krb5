@@ -193,12 +193,6 @@ $(RECURSE_TARGETS):
 	fi;\
 	exit $$status
 
-# Some servers need "daemon", but we're not providing it directly
-# through a library.  We used to provide it through the krb5 library,
-# and the source is still there.
-daemon.c: $(SRCTOP)/lib/krb5/posix/daemon.c
-	$(CP) $(SRCTOP)/lib/krb5/posix/daemon.c daemon.c
-
 ##
 ## end of post.in
 ############################################################

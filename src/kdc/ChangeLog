@@ -1,3 +1,8 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJS, krb5kdc, fakeka): Link against apputils lib
+	instead of using LIBOBJ.
+
 2004-02-19  Ken Hornstein  <kenh@mit.edu>
 
 	* fakeka.c (main): Bug from David Thompson <thomas@cs.wisc.edu>.

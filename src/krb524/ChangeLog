@@ -1,3 +1,8 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SERVER_OBJS, krb524d): Link against apputils lib
+	instead of using LIBOBJS.
+
 2003-12-15  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean-unix): Clean up more files now that STLIBOBS

@@ -1,0 +1,6 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory.
+	* Makefile.in, configure.in, dummy.c: New files.
+	* daemon.c: Moved here from lib/krb5/posix.
+

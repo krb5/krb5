@@ -1,3 +1,8 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (APPUTILS_DEPLIB, APPUTILS_LIB): New vars.
+	* post.in (daemon.c): Delete rule for copying source file.
+
 2004-02-18  Tom Yu  <tlyu@mit.edu>
 
 	* shlib.conf (alpha-*-dec-osf*, mips-sgi-irix*): Use $(CC) instead

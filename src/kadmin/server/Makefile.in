@@ -10,12 +10,12 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 PROG = kadmind
-OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o schpw.o misc.o server_glue_v1.o @LIBOBJS@
+OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o schpw.o misc.o server_glue_v1.o
 
 all:: $(PROG)
 
-$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(SERVER_BINDIR)/$(PROG)

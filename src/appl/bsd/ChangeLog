@@ -1,3 +1,7 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (kshd, klogind): Link against apputils lib.
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking

@@ -1,3 +1,7 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Build in apputils dir.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-recurse): Remove exitsleep.

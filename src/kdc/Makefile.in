@@ -46,8 +46,7 @@ OBJS= \
 	policy.o \
 	extern.o \
 	replay.o \
-	kerberos_v4.o \
-	@LIBOBJS@
+	kerberos_v4.o
 
 RT_OBJS= rtest.o \
 	kdc_util.o \
@@ -68,14 +67,14 @@ kdc5_err.h: kdc5_err.et
 
 kdc5_err.o: kdc5_err.h
 
-krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS)
+krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
 
 rtest: $(RT_OBJS) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o rtest $(RT_OBJS) $(KDB5_LIBS) $(KADM_COMM_LIBS) $(KRB5_BASE_LIBS)
 
-fakeka: fakeka.o $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) @LIBOBJS@
-	$(CC_LINK) -o fakeka fakeka.o $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) @LIBOBJS@
+fakeka: fakeka.o $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o fakeka fakeka.o $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
 
 check-unix:: rtest
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;\

@@ -1,3 +1,7 @@
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* daemon.c: Moved to util/apputils.
+
 2003-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (STLIBOBJS, OBJS): Empty.

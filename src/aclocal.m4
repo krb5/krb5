@@ -657,7 +657,6 @@ AC_HELP_STRING([--with-netlib=LIBS], use user defined resolver library),
 dnl
 dnl
 AC_DEFUN(KRB5_AC_NEED_DAEMON, [
-AC_REPLACE_FUNCS(daemon)
 KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif],daemon,1)])dnl

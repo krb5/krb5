@@ -296,6 +296,7 @@ SS_DEPLIB	= $(SS_DEPLIB-@SS_VERSION@)
 SS_DEPLIB-k5	= $(TOPLIBD)/libss.a
 SS_DEPLIB-sys	=
 PTY_DEPLIB	= $(TOPLIBD)/libpty.a
+APPUTILS_DEPLIB	= $(TOPLIBD)/libapputils.a
 
 KRB5_BASE_DEPLIBS	= $(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(COM_ERR_DEPLIB)
 KRB4COMPAT_DEPLIBS	= $(KRB4_DEPLIB) $(DES425_DEPLIB) $(KRB5_BASE_DEPLIBS)
@@ -370,6 +371,10 @@ KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
 
 # need fixing if ever used on Mac OS X!
 PTY_LIB		= -lpty
+
+# Misc stuff for linking server programs (and maybe some others,
+# eventually) but which we don't want to install.
+APPUTILS_LIB	= -lapputils
 
 #
 # some more stuff for --with-krb4
