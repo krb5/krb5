@@ -236,7 +236,7 @@ proc rlogin_test { } {
     }
 
     set testname "encrypted rlogin"
-    expect "using DES encryption for all data transmissions"
+    expect "encrypting .* transmissions"
     expect {
 	-re "$SHELL_PROMPT" {
 	    pass $testname

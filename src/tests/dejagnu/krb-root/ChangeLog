@@ -1,3 +1,8 @@
+2002-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* rlogin.exp: Update expected "encrypting" message for encrypted
+	rlogin.
+
 Thu Aug 10 09:54:52 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* rlogin.exp: Change RLOGIN to KRLOGIN so we do not use the
