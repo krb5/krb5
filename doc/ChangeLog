@@ -1,3 +1,10 @@
+2002-06-21  Ezra Eeisach  <epeisach@bu.edu>
+
+	* implementor.texinfo (IPv6 Support): Update fact that IRIX 6.5.16
+	has enough support for configure to believe IPv6 support works,
+	but the libraries fail to provide a definition of in6addr_any
+	(although netinet/in.h implies it foes).
+
 2002-06-20  Sam Hartman  <hartmans@mit.edu>
 
 	* implementor.texinfo (Operating System Notes for Shared Libraries):  Update why we don't use libtool

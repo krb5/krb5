@@ -148,6 +148,14 @@ this is the only one without built-in IPv6 support.  In another year
 or so we probably won't be using those systems any more, and we may
 consider dropping support for systems without IPv6 support.
 
+Somewhere between IRIX 6.5.14 and 6.5.16, partial IPv6 support was
+introduced to the extent that the configuration system detects the
+IPv6 support and attempts to use it. Code compiles, but then upon
+linking, one discovers that ``in6addr_any'' is not defined in any
+system library. A work around the header file @code{fake-addrinfo.h}
+is provided by providing a static copy. This run time IPv6 code has
+still not been tested.
+
 Some utility functions or macros are also provided to give a
 convenient shorthand for some operations, and to retain compile-time
 type checking when possible (generally using inline functions but only
