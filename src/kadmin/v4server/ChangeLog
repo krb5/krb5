@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_supp.c (prin_vals): Pass time_t * to localtime instead of
+	long *.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_funcs.c: Cast argument to isalnum()/isdigit() to int.

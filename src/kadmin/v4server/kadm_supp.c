@@ -38,9 +38,10 @@ prin_vals:
 void prin_vals(vals)
 Kadm_vals *vals;
 {
+   time_t t = vals->exp_date;
    printf("Info in Database for %s.%s:\n", vals->name, vals->instance);
    printf("   Max Life: %d   Exp Date: %s\n",vals->max_life, 
-	  asctime(localtime((long *)&vals->exp_date)));
+	  asctime(localtime(&t)));
    printf("   Attribs: %.2x  key: %ld %ld\n",vals->attributes,
 	  vals->key_low, vals->key_high);
 }
