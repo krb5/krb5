@@ -1,3 +1,8 @@
+Wed May 12 00:27:37 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi32.def: Add krb5-specific extensions so they are exported
+		from the DLL.
+
 Mon May 10 15:14:34 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

@@ -64,6 +64,12 @@ EXPORTS
 	gss_export_name
 	gss_duplicate_name
 ;
+; Krb5 specific function extensions
+;
+	gss_krb5_get_tkt_flags 
+	gss_krb5_copy_ccache
+	gss_krb5_ccache_name
+;
 ; GSS-API variables
 ;
 	gss_nt_user_name
