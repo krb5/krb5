@@ -22,6 +22,8 @@
 #ifndef KRB_CONF_DEFS
 #define KRB_CONF_DEFS
 
+#include <mit-copyright.h>
+
 /* Byte ordering */
 extern int krbONE;
 #define		HOST_BYTE_ORDER	(* (char *) &krbONE)
