@@ -1,3 +1,9 @@
+Mon Aug  7 19:08:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* inq_cred.c (krb5_gss_inquire_cred): Use
+		generic_gss_release_oid_set() instead of gss_release_oid_set()
+		so that the krb5-specific mechanism can be linked in
+		without pulling in krb5_gss_glue.c
 
 Thu Jul 27 15:26:27 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add -I$(srcdir)/../../crypto/md5 to get rsa-md5.h.

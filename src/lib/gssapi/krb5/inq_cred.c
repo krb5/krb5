@@ -89,7 +89,7 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
 
    if (name) {
       if (! kg_save_name((gss_name_t) ret_name)) {
-	 (void)gss_release_oid_set(minor_status, &mechs);
+	 (void) generic_gss_release_oid_set(minor_status, &mechs);
 	 krb5_free_principal(context, ret_name);
 	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
