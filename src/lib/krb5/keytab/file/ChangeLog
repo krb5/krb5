@@ -1,3 +1,8 @@
+Tue Oct 28 10:53:10 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ktf_wreslv.c, ktf_resolv.c:Initialize version element of
+	        krb5_ktfile_data structure.
+
 Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktfile.h, ktf_g_ent.c (krb5_ktfile_get_entry): Incoming principal
