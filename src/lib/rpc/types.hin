@@ -76,10 +76,12 @@ typedef unsigned long rpc_u_int32;
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <sys/param.h>
+#if 0
 #include <netdb.h> /* XXX This should not have to be here.
 		    * I got sick of seeing the warnings for MAXHOSTNAMELEN
 		    * and the two values were different. -- shanzer 
 		    */
+#endif
 
 #ifndef INADDR_LOOPBACK
 #define       INADDR_LOOPBACK         (rpc_u_int32)0x7F000001
