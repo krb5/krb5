@@ -49,6 +49,7 @@ main(int argc, char **argv)
      int c, prot;
      auth_gssapi_name names[2];
      register SVCXPRT *transp;
+     extern int optind;
 
      names[0].name = SERVICE_NAME;
      names[0].type = (gss_OID) gss_nt_service_name;
