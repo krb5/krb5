@@ -41,9 +41,8 @@
  */
 
 krb5_error_code
-mit_des_string_to_key (eblock, enctype, keyblock, data, salt)
+mit_des_string_to_key (eblock, keyblock, data, salt)
 const krb5_encrypt_block FAR * eblock;
-const krb5_enctype enctype;
 krb5_keyblock FAR * keyblock;
 const krb5_data FAR * data;
 const krb5_data FAR * salt;
@@ -60,6 +59,7 @@ const krb5_data FAR * salt;
     register char *p_char;
     char k_char[64];
     mit_des_key_schedule key_sked;
+    krb5_enctype enctype = eblock->crypto_entry->proto_enctype;
 
 #ifndef min
 #define min(A, B) ((A) < (B) ? (A): (B))

@@ -153,7 +153,7 @@ extern krb5_error_code mit_des_random_key
 
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    PROTOTYPE(( const krb5_encrypt_block FAR *, const krb5_enctype,
+    PROTOTYPE(( const krb5_encrypt_block FAR *, 
 	       krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *));
 
 /* weak_key.c */
