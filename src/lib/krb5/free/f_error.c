@@ -29,6 +29,8 @@ register krb5_error *val;
 	krb5_free_principal(val->server);
     if (val->text.data)
 	xfree(val->text.data);
+    if (val->e_data.data)
+	xfree(val->e_data.data);
     xfree(val);
     return;
 }
