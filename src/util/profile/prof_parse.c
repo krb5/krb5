@@ -89,6 +89,7 @@ static errcode_t parse_std_line(line, state)
 	char	*cp, ch, *tag, *value;
 	char	*p;
 	errcode_t retval;
+	struct profile_node	*node;
 	int do_subsection = 0;
 	void *iter = 0;
 	
@@ -125,6 +126,10 @@ static errcode_t parse_std_line(line, state)
 		 * Finish off the rest of the line.
 		 */
 		cp = p+1;
+		if (*cp == '*') {
+			profile_make_node_final(state->current_section);
+			cp++;
+		}
 		if (*cp)
 			return PROF_SECTION_SYNTAX;
 		return 0;
@@ -132,6 +137,8 @@ static errcode_t parse_std_line(line, state)
 	if (ch == '}') {
 		if (state->group_level == 0)
 			return PROF_EXTRA_CBRACE;
+		if (*(cp+1) == '*')
+			profile_make_node_final(state->current_section);
 		retval = profile_get_node_parent(state->current_section,
 						 &state->current_section);
 		if (retval)
@@ -170,15 +177,24 @@ static errcode_t parse_std_line(line, state)
 			*cp-- = 0;
 	}
 	if (do_subsection) {
+		p = strchr(tag, '*');
+		if (p)
+			*p = '\0';
 		retval = profile_add_node(state->current_section,
 					  tag, 0, &state->current_section);
 		if (retval)
 			return retval;
-
+		if (p)
+			profile_make_node_final(state->current_section);
 		state->group_level++;
 		return 0;
 	}
-	profile_add_node(state->current_section, tag, value, 0);
+	p = strchr(tag, '*');
+	if (p)
+		*p = '\0';
+	profile_add_node(state->current_section, tag, value, &node);
+	if (p)
+		profile_make_node_final(node);
 	return 0;
 }
 
@@ -384,7 +400,8 @@ void dump_profile_to_file(root, level, dstfile)
 		if (level == 0)	{ /* [xxx] */
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
-			fprintf(dstfile, "[%s]%s", name, EOL);
+			fprintf(dstfile, "[%s]%s%s", name,
+				profile_is_node_final(p) ? "*" : "", EOL);
 			dump_profile_to_file(p, level+1, dstfile);
 			fprintf(dstfile, EOL);
 		} else { 	/* xxx = { ... } */
@@ -394,7 +411,8 @@ void dump_profile_to_file(root, level, dstfile)
 			dump_profile_to_file(p, level+1, dstfile);
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
-			fprintf(dstfile, "}%s", EOL);
+			fprintf(dstfile, "}%s%s",
+				profile_is_node_final(p) ? "*" : "", EOL);
 		}
 	} while (iter != 0);
 }

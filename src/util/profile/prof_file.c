@@ -86,6 +86,7 @@ errcode_t profile_update_file(prf)
 	f = fopen(prf->filename, "r");
 	if (f == NULL)
 		return errno;
+	prf->upd_serial++;
 	retval = profile_parse_file(f, &prf->root);
 	fclose(f);
 	if (retval)

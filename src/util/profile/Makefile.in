@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=util/profile
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

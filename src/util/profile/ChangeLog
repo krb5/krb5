@@ -1,3 +1,48 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in: Build the test script prtest for doing regression
+		test suites of the profile library.
+
+	* prof_err.et (PROF_MAGIC_ITERATOR): Add a new error code for the
+		magic number for the iterator structure.
+
+	* prof_file.c (profile_update_file): Increment the update serial
+		number when the profile file is re-read.
+
+	* prof_tree.c (profile_make_node_final, profile_is_node_final):
+		Add a new attribute for a node, which is whether or not
+		the node is "final".  This controls whether or not the
+		next profile file should be searched when looking up a key
+		which matches the section named by the node.
+		(profile_node_iterator_create, profile_node_iterator_free,
+		profile_node_iterator): New functions which take a
+		profile_t and returns all of the names or values for a
+		particular search key.  This iterator follows the rules of
+		doing multiple profile file lookups using the "final node"
+		marker to stop searching subsequent profile files.
+	
+	* prof_parse.c (parse_std_line): Add support for marking top level
+		sections, subsections, and individual nodes as final,
+		using the '*' character.
+		(dump_profile_to_file): Print finalized sections with the '*'
+		character.
+
+	* prof_get.c: Update routines to use the iterators provided by
+		prof_tree.c.
+
+	* prof_int.c: Add upd_serial member to the prf_file_t structure.
+		Define the symbolic flags used by the profile node
+		iterator.  Add function declarations for
+		profile_make_node_final, profile_is_node_final,
+		profile_node_iterator_create, profile_node_iterator_free,
+		profile_node_iterator, and profile_get_value.
+
+	* test_profile.c: Add the query1 command which tests
+		profile_get_value. 
+
 1998-11-05  Geoffrey King  <gjking@mit.edu>
 
 	* prof_init.c (profile_init): Fix a problem whereby if the last

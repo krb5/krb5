@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #endif
 
-#include "profile.h"
+#include "prof_int.h"
 #ifndef _MSDOS
 #include "com_err.h"
 #else
@@ -29,8 +29,10 @@ int main(argc, argv)
     profile_t	profile;
     long	retval;
     char	**values, **cpp;
+    const char	*value;
     const char	**names;
     char	*cmd;
+    int		print_value = 0;
     
     if (argc < 3) {
 	    fprintf(stderr, "Usage: %s filename cmd argset\n", program_name);
@@ -48,6 +50,9 @@ int main(argc, argv)
     names = (const char **) argv+3;
     if (!strcmp(cmd, "query")) {
 	    retval = profile_get_values(profile, names, &values);
+    } else if (!strcmp(cmd, "query1")) {
+	    retval = profile_get_value(profile, names, &value);
+	    print_value++;
     } else if (!strcmp(cmd, "list_sections")) {
 	    retval = profile_get_subsection_names(profile, names, &values);
     } else if (!strcmp(cmd, "list_relations")) {
@@ -60,11 +65,13 @@ int main(argc, argv)
 	    com_err(argv[0], retval, "while getting values");
 	    exit(1);
     }
-    for (cpp = values; *cpp; cpp++) {
-	printf("%s\n", *cpp);
-	free(*cpp);
+    if (print_value) {
+	    printf("%s\n", value);
+    } else {
+	    for (cpp = values; *cpp; cpp++)
+		    printf("%s\n", *cpp);
+	    profile_free_list(values);
     }
-    free(values);
     profile_release(profile);
 
     return 0;

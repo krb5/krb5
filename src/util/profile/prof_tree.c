@@ -32,6 +32,7 @@ struct profile_node {
 	char *name;
 	char *value;
 	int group_level;
+	int final:1;		/* Indicate don't search next file */
 	struct profile_node *first_child;
 	struct profile_node *parent;
 	struct profile_node *next, *prev;
@@ -172,6 +173,27 @@ errcode_t profile_add_node(section, name, value, ret_node)
 	if (ret_node)
 		*ret_node = new;
 	return 0;
+}
+
+/*
+ * Set the final flag on a particular node.
+ */
+errcode_t profile_make_node_final(node)
+	struct profile_node *node;
+{
+	CHECK_MAGIC(node);
+
+	node->final = 1;
+	return 0;
+}
+
+/*
+ * Check the final flag on a node
+ */
+int profile_is_node_final(node)
+	struct profile_node *node;
+{
+	return (node->final != 0);
 }
 
 /*
@@ -340,3 +362,174 @@ errcode_t profile_get_node_parent(section, parent)
 	*parent = section->parent;
 	return 0;
 }
+
+/*
+ * This is a general-purpose iterator for returning all nodes that
+ * match the specified name array.  
+ */
+struct profile_iterator {
+	prf_magic_t		magic;
+	profile_t		profile;
+	int			flags;
+	const char 		**names;
+	const char		*name;
+	prf_file_t		file;
+	int			file_serial;
+	int			done_idx;
+	struct profile_node 	*node;
+	int			num;
+};
+
+errcode_t profile_node_iterator_create(profile, names, flags, ret_iter)
+	profile_t	profile;
+	const char	**names;
+	int		flags;
+	void		**ret_iter;
+{
+	struct profile_iterator *iter;
+	int	done_idx = 0;
+
+	if (profile == 0)
+		return PROF_NO_PROFILE;
+	if (profile->magic != PROF_MAGIC_PROFILE)
+		return PROF_MAGIC_PROFILE;
+	if (!names)
+		return PROF_BAD_NAMESET;
+	if (!(flags & PROFILE_ITER_LIST_SECTION)) {
+		if (!names[0])
+			return PROF_BAD_NAMESET;
+		done_idx = 1;
+	}
+
+	if ((iter = malloc(sizeof(struct profile_iterator))) == NULL)
+		return ENOMEM;
+
+	iter->magic = PROF_MAGIC_ITERATOR;
+	iter->profile = profile;
+	iter->names = names;
+	iter->flags = flags;
+	iter->file = profile->first_file;
+	iter->done_idx = done_idx;
+	iter->node = 0;
+	iter->num = 0;
+	*ret_iter = iter;
+	return 0;
+}
+
+void profile_node_iterator_free(iter_p)
+	void	**iter_p;
+{
+	struct profile_iterator *iter;
+
+	if (!iter_p)
+		return;
+	iter = *iter_p;
+	if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
+		return;
+	free(iter);
+	*iter_p = 0;
+}
+
+errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
+	void	**iter_p;
+	struct profile_node	**ret_node;
+	char **ret_name, **ret_value;
+{
+	struct profile_iterator 	*iter = *iter_p;
+	struct profile_node 		*section, *p;
+	const char			**cpp;
+	errcode_t			retval;
+	int				skip_num = 0;
+
+	if (iter->magic != PROF_MAGIC_ITERATOR)
+		return PROF_MAGIC_ITERATOR;
+	/*
+	 * If the file has changed, then the node pointer is invalid,
+	 * so we'll have search the file again looking for it.
+	 */
+	if (iter->node && (iter->file->upd_serial != iter->file_serial)) {
+		iter->flags &= ~PROFILE_ITER_FINAL_SEEN;
+		skip_num = iter->num;
+		iter->node = 0;
+	}
+get_new_file:
+	while (iter->node == 0) {
+		if (iter->file == 0 ||
+		    (iter->flags & PROFILE_ITER_FINAL_SEEN)) {
+			profile_node_iterator_free(iter_p);
+			if (ret_node)
+				*ret_node = 0;
+			if (ret_name)
+				*ret_name = 0;
+			if (ret_value)
+				*ret_value =0;
+			return 0;
+		}
+		if ((retval = profile_update_file(iter->file))) {
+			profile_node_iterator_free(iter_p);
+			return retval;
+		}
+		iter->file_serial = iter->file->upd_serial;
+		/*
+		 * Find the section to list if we are a LIST_SECTION,
+		 * or find the containing section if not.
+		 */
+		section = iter->file->root;
+		for (cpp = iter->names; cpp[iter->done_idx]; cpp++) {
+			for (p=section->first_child; p; p = p->next)
+				if (!strcmp(p->name, *cpp) && !p->value)
+					break;
+			if (!p) {
+				section = 0;
+				break;
+			}
+			section = p;
+			if (p->final)
+				iter->flags |= PROFILE_ITER_FINAL_SEEN;
+		}
+		if (!section) {
+			iter->file = iter->file->next;
+			skip_num = 0;
+			continue;
+		}
+		iter->name = *cpp;
+		iter->node = section->first_child;
+	}
+	/*
+	 * OK, now we know iter->node is set up correctly.  Let's do
+	 * the search.
+	 */
+	for (p = iter->node; p; p = p->next) {
+		if (iter->name && strcmp(p->name, iter->name))
+			continue;
+		if ((iter->flags & PROFILE_ITER_SECTIONS_ONLY) &&
+		    p->value)
+			continue;
+		if ((iter->flags & PROFILE_ITER_RELATIONS_ONLY) &&
+		    !p->value)
+			continue;
+		if (skip_num > 0) {
+			skip_num--;
+			continue;
+		}
+		break;
+	}
+	iter->num++;
+	if (!p) {
+		iter->file = iter->file->next;
+		iter->node = 0;
+		skip_num = 0;
+		goto get_new_file;
+	}
+	if ((iter->node = p->next) == NULL)
+		iter->file = iter->file->next;
+	if (ret_node)
+		*ret_node = p;
+	if (ret_name)
+		*ret_name = p->name;
+	if (ret_value)
+		*ret_value = p->value;
+	return 0;
+};
+
+

@@ -43,6 +43,7 @@ struct _prf_file_t {
 	struct profile_node *root;
 	time_t		timestamp;
 	int		flags;
+	int		upd_serial;
 	struct _prf_file_t *next;
 };
 
@@ -59,6 +60,16 @@ struct _profile_t {
 };
 
 typedef struct _profile_t *profile_t;
+
+/*
+ * Used by the profile node iterator in prof_tre.c
+ */
+#define PROFILE_ITER_LIST_SECTION	0x0001
+#define PROFILE_ITER_SECTIONS_ONLY	0x0002
+#define PROFILE_ITER_RELATIONS_ONLY	0x0004
+
+#define PROFILE_ITER_FINAL_SEEN		0x0100
+
 
 /* profile_parse.c */
 
@@ -82,6 +93,12 @@ errcode_t profile_add_node
 		    const char *name, const char *value,
 		    struct profile_node **ret_node));
 
+errcode_t profile_make_node_final
+	PROTOTYPE((struct profile_node *node));
+	
+int profile_is_node_final
+	PROTOTYPE((struct profile_node *node));
+	
 errcode_t profile_find_node_relation
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, void **state,
@@ -102,6 +119,17 @@ errcode_t profile_delete_node_relation
 errcode_t profile_find_node_name
 	PROTOTYPE ((struct profile_node *section, void **state,
 		    char **ret_name));
+
+errcode_t profile_node_iterator_create
+	PROTOTYPE((profile_t profile, const char **names,
+		   int flags, void **ret_iter));
+
+void profile_node_iterator_free
+	PROTOTYPE((void	**iter_p));
+
+errcode_t profile_node_iterator
+	PROTOTYPE((void	**iter_p, struct profile_node **ret_node,
+		   char **ret_name, char **ret_value));
 
 /* prof_file.c */
 
@@ -134,6 +162,10 @@ KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_values
 	PROTOTYPE ((profile_t profile, const char **names,
 		    char ***ret_values));
 
+errcode_t profile_get_value
+	PROTOTYPE ((profile_t profile, const char **names,
+		    const char	**ret_value));
+	
 errcode_t profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
