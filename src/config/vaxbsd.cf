@@ -6,29 +6,14 @@
 #define OSMajorVersion    4
 #define OSMinorVersion    3
 
-/* #define HasGcc YES */	/* very useful for the server */
-
 #ifdef VaxArchitecture
-#define XqvssServer Xqvss
-/* #define XqdssServer Xqdss */
-#define HasSaberC YES
+#define HasGcc YES
 #endif
 
 #define HasVoidSignalReturn NO
-
-/**/# platform:  $XConsortium: bsd.cf,v 1.8 89/12/23 14:19:17 jim Exp $
-/**/# operating system:  OSName
-
-/*****************************************************************************
- *			  Platform-specfic parameters                        *
- *****************************************************************************/
+#define HasSaberC YES
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #endif
 
-#if OSMajorVersion >= 4 && OSMinorVersion >= 3
-#define SetTtyGroup YES
-#endif
-
-#define HasBsearch NO
