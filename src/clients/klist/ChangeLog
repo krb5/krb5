@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * klist.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Mon Aug 21 16:50:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* klist.c - Add logic to figure out width of time string and then use
 		this width to format the timestamp output.  Remove English-

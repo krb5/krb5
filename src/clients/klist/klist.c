@@ -34,7 +34,6 @@
 extern int optind;
 extern char *optarg;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
-int show_etype = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -93,9 +92,6 @@ main(argc, argv)
 	    if (name) usage();
 	    name = *argv;
 	} else switch ((*argv)[1]) {
-	case 'e':
-	    show_etype = 1;
-	    break;
 	case 'f':
 	    show_flags = 1;
 	    break;
@@ -431,26 +427,6 @@ show_credential(progname, kcontext, cred)
 	fputs("renew until ", stdout);
         printtime(cred->times.renew_till);
 	first = 0;
-    }
-
-    if (show_etype) {
-	krb5_enctype etype = cred->keyblock.etype;
-	char etype_string[BUFSIZ];
-
-	if (!first) 
-	    putchar('\n');
-
-	printf("\tEncryption type: ");
-	if (etype != ETYPE_UNKNOWN) {
-	    if (!krb5_enctype_to_string(etype, etype_string,
-					sizeof(etype_string))) {
-		printf("%s", etype_string);
-	    } else {
-		printf("UNRECOGNIZED");
-	    }
-	} else {
-	    printf("ETYPE_UNKNOWN");
-	}
     }
 
     if (show_flags) {
