@@ -63,7 +63,7 @@ krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
 void	PRS
-	PROTOTYPE((krb5_context, char **));
+	PROTOTYPE((int, char **));
 void	get_tickets
 	PROTOTYPE((krb5_context));
 static void usage 
@@ -104,8 +104,9 @@ main(argc, argv)
 	krb5_auth_context auth_context;
 	char	Errmsg[256];
 	
-	PRS(context, argv);
 	krb5_init_context(&context);
+	krb5_init_ets(context);
+	PRS(argc, argv);
 	get_tickets(context);
 
 	database_fd = open_database(context, file, &database_size);
@@ -130,16 +131,14 @@ main(argc, argv)
 	exit(0);
 }
 
-void PRS(context, argv)
-	krb5_context context;
+void PRS(argc, argv)
+	int	argc;
 	char	**argv;
 {
 	register char	*word, ch;
 	
-	krb5_init_context(&context);
-	krb5_init_ets(context);
 	progname = *argv++;
-	while (word = *argv++) {
+	while (--argc && (word = *argv++)) {
 		if (*word == '-') {
 			word++;
 			while (word && (ch = *word++)) {
@@ -287,6 +286,10 @@ void get_tickets(context)
 		(void) krb5_cc_destroy(context, ccache);
 		exit(1);
 	}
+
+	if (keytab)
+	    (void) krb5_kt_close(context, keytab);
+	
 	/*
 	 * Now destroy the cache right away --- the credentials we
 	 * need will be in my_creds.

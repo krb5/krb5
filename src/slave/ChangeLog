@@ -1,3 +1,8 @@
+Fri Mar 15 14:33:06 1996  Richard Basch  <basch@lehman.com>
+
+	* kprop.c: Corrected various memory leaks and unreferenced 
+	memory access conditions.
+
 Tue Mar 12 14:01:32 1996  Richard Basch  <basch@lehman.com>
 
 	* kprop.c: Write a byte to the last-prop file to ensure the file
