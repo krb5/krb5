@@ -1,4 +1,4 @@
-AC_INIT(config.h)
+AC_INIT(acconfig.h)
 AC_CONFIG_HEADER(autoconf.h)
 HAVE_YYLINENO
 AC_FUNC_CHECK(strdup,AC_DEFINE(HAS_STRDUP))
