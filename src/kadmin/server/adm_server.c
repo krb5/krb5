@@ -190,7 +190,7 @@ process_args(context, argc, argv)
 		break;
 
 	    case 'p':
-		admin_port = atoi(optarg);
+		admin_port = htons(atoi(optarg));
 		break;
 
 	    case 'h':			/* get help on using adm_server */
