@@ -1,3 +1,13 @@
+
+Tue Dec 12 01:20:02 1995  Chris Provenzano (proven@mit.edu)
+
+	* kdb_dbm.c : Move the krb5_db_context to include/krb5/kdb_dbc.h.
+	* kdb_dbm.c krb5_dbm_db_set_mkey(), krb5_dbm_db_get_mkey():
+		Functions for associating a master key (krb5_encrypt_block *)
+		to a krb5_db_context. Currently it associates it to the
+		krb5_context and will be fixed once the krb5_db_context
+		is better defined (Post 1.0).
+
 Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
 
         * fetch_mkey.c, kdb_cpw.c, t_kdb.c : 

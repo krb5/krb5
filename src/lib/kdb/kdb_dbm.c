@@ -29,6 +29,7 @@
 /* Obtain dispatch table definitions from kdb.h */
 #define	KDB5_DISPATCH
 #include "k5-int.h"
+#include "kdb_dbc.h"
 #include <stdio.h>
 #include <errno.h>
 #include <utime.h>
@@ -40,22 +41,6 @@
 #endif
 
 #define KRB5_DBM_MAX_RETRY 5
-
-/*
- * Per-database context.  One of these is attached to a Kerberos context.
- */
-typedef struct __krb5_db_context {
-    krb5_boolean	db_inited;	/* Context initialized		*/
-    char *		db_name;	/* Name of database		*/
-    DBM *		db_dbm_ctx;	/* DBM context for database	*/
-    char *		db_lf_name;	/* Name of lock file		*/
-    int  		db_lf_file;	/* File descriptor of lock file	*/
-    time_t 		db_lf_time;	/* Time last updated 		*/
-    int			db_locks_held;	/* Number of times locked	*/
-    int			db_lock_mode;	/* Last lock mode, e.g. greatest*/
-    krb5_boolean	db_nb_locks;	/* [Non]Blocking lock modes	*/
-    kdb5_dispatch_table	*db_dispatch;	/* Dispatch table		*/
-} db_context_t;
 
 #ifdef DEBUG
 extern int debug;
@@ -170,55 +155,55 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
 /*
  * These macros dispatch via the dispatch table.
  */
-#define	KDBM_OPEN(dbc, db, fl, mo)	((*(((db_context_t *)dbc)->	\
+#define	KDBM_OPEN(dbc, db, fl, mo)	((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_open)) \
 					 (db, fl, mo))
-#define	KDBM_CLOSE(dbc, db)		((*(((db_context_t *)dbc)->	\
+#define	KDBM_CLOSE(dbc, db)		((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_close))(db))
-#define	KDBM_FETCH(dbc, db, key)	((*(((db_context_t *)dbc)->	\
+#define	KDBM_FETCH(dbc, db, key)	((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_fetch)) \
 					 (db, key))
-#define	KDBM_FIRSTKEY(dbc, db)		((*(((db_context_t *)dbc)->	\
+#define	KDBM_FIRSTKEY(dbc, db)		((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_firstkey)) \
 					 (db))
-#define	KDBM_NEXTKEY(dbc, db)		((*(((db_context_t *)dbc)->	\
+#define	KDBM_NEXTKEY(dbc, db)		((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_nextkey)) \
 					 (db))
-#define	KDBM_DELETE(dbc, db, key)	((*(((db_context_t *)dbc)->	\
+#define	KDBM_DELETE(dbc, db, key)	((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_delete)) \
 					 (db, key))
-#define	KDBM_STORE(dbc, db, key, c, f)	((*(((db_context_t *)dbc)->	\
+#define	KDBM_STORE(dbc, db, key, c, f)	((*(((krb5_db_context *)dbc)->	\
 					    db_dispatch->kdb5_dbm_store)) \
 					 (db, key, c, f))
-#define	KDBM_ERROR(dbc, db)		((((db_context_t *)dbc)->	 \
+#define	KDBM_ERROR(dbc, db)		((((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_dbm_error) ? \
-					 ((*(((db_context_t *)dbc)->	 \
+					 ((*(((krb5_db_context *)dbc)->	 \
 					     db_dispatch->kdb5_dbm_error)) \
 					  (db)) :			 \
 					 dbm_error(db))
-#define	KDBM_CLEARERR(dbc, db)		((((db_context_t *)dbc)->	 \
+#define	KDBM_CLEARERR(dbc, db)		((((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_dbm_clearerr) ? \
-					 ((*(((db_context_t *)dbc)->	 \
+					 ((*(((krb5_db_context *)dbc)->	 \
 					     db_dispatch->kdb5_dbm_clearerr)) \
 					  (db)) :			 \
 					 dbm_clearerr(db))
-#define	KDBM_DIRFNO(dbc, db)		((((db_context_t *)dbc)->	 \
+#define	KDBM_DIRFNO(dbc, db)		((((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_dbm_dirfno) ? \
-					 ((*(((db_context_t *)dbc)->	 \
+					 ((*(((krb5_db_context *)dbc)->	 \
 					     db_dispatch->kdb5_dbm_dirfno)) \
 					  (db)) :			 \
 					 dbm_dirfno(db))
-#define	KDBM_PAGFNO(dbc, db)		((((db_context_t *)dbc)->	 \
+#define	KDBM_PAGFNO(dbc, db)		((((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_dbm_pagfno) ? \
-					 ((*(((db_context_t *)dbc)->	 \
+					 ((*(((krb5_db_context *)dbc)->	 \
 					     db_dispatch->kdb5_dbm_pagfno)) \
 					  (db)) :			 \
 					 dbm_pagfno(db))
-#define	KDBM_INDEX_EXT(dbc)		(((db_context_t *)dbc)->	 \
+#define	KDBM_INDEX_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_db_index_ext)
-#define	KDBM_DATA_EXT(dbc)		(((db_context_t *)dbc)->	 \
+#define	KDBM_DATA_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_db_data_ext)
-#define	KDBM_LOCK_EXT(dbc)		(((db_context_t *)dbc)->	 \
+#define	KDBM_LOCK_EXT(dbc)		(((krb5_db_context *)dbc)->	 \
 					  db_dispatch->kdb5_db_lock_ext)
 
 /*
@@ -271,14 +256,14 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
  * Routines to deal with context.
  */
 #define	k5dbm_inited(c)	(c && c->db_context &&	\
-			 ((db_context_t *) c->db_context)->db_inited)
+			 ((krb5_db_context *) c->db_context)->db_inited)
 
 /*
  * Restore the default context.
  */
 static void
 k5dbm_clear_context(dbctx)
-    db_context_t	*dbctx;
+    krb5_db_context *	dbctx;
 {
     /*
      * Free any dynamically allocated memory.  File descriptors and locks
@@ -291,7 +276,7 @@ k5dbm_clear_context(dbctx)
     /*
      * Clear the structure and reset the defaults.
      */
-    memset((char *) dbctx, 0, sizeof(db_context_t));
+    memset((char *) dbctx, 0, sizeof(krb5_db_context));
     dbctx->db_name = default_db_name;
     dbctx->db_nb_locks = FALSE;
     dbctx->db_dispatch = &kdb5_default_dispatch;
@@ -301,15 +286,15 @@ static krb5_error_code
 k5dbm_init_context(context)
     krb5_context	context;
 {
-    db_context_t *	db_ctx;
+    krb5_db_context *	db_ctx;
 
-    if (!context->db_context) {
-	db_ctx = (db_context_t *) malloc(sizeof(db_context_t));
-	if (!db_ctx)
+    if (context->db_context == NULL) {
+	if (db_ctx = (krb5_db_context *) malloc(sizeof(krb5_db_context))) {
+	    memset((char *) db_ctx, 0, sizeof(krb5_db_context));
+	    k5dbm_clear_context((krb5_db_context *)db_ctx);
+	    context->db_context = (void *) db_ctx;
+	} else 
 	    return(ENOMEM);
-	context->db_context = (void *) db_ctx;
-	memset((char *) db_ctx, 0, sizeof(db_context_t));
-	k5dbm_clear_context((db_context_t *) context->db_context);
     }
     return(0);
 }
@@ -345,7 +330,7 @@ krb5_dbm_db_init(context)
     krb5_context 	  context;
 {
     char 		* filename = NULL;
-    db_context_t	* db_ctx;
+    krb5_db_context	* db_ctx;
     krb5_error_code	  retval;
 
     if (k5dbm_inited(context))
@@ -397,9 +382,9 @@ krb5_dbm_db_fini(context)
     krb5_context context;
 {
     krb5_error_code retval = 0;
-    db_context_t	*db_ctx;
+    krb5_db_context	*db_ctx;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
 
     if (k5dbm_inited(context)) {
 	if (db_ctx->db_dbm_ctx) {
@@ -443,6 +428,45 @@ krb5_dbm_db_close_database(context)
 }
 
 /*
+ * Set/Get the master key associated with the database
+ *
+ * These only exist because the db_context is part of the kcontext
+ * The should really reference the db_context
+ */
+krb5_error_code
+krb5_dbm_db_set_mkey(context, db_context, eblock)
+    krb5_context 	  context;
+    krb5_db_context 	* db_context;
+    krb5_encrypt_block  * eblock;
+{
+    krb5_db_context *db_ctx;
+
+    if (!k5dbm_inited(context))
+	return(KRB5_KDB_DBNOTINITED);
+
+    db_ctx = context->db_context;
+    db_ctx->db_master_key = eblock;
+    return 0;
+}
+
+krb5_error_code
+krb5_dbm_db_get_mkey(context, db_context, eblock)
+    krb5_context 	  context;
+    krb5_db_context 	* db_context;
+    krb5_encrypt_block  **eblock;
+{
+    krb5_db_context *db_ctx;
+
+    if (!k5dbm_inited(context))
+	return(KRB5_KDB_DBNOTINITED);
+
+    db_ctx = context->db_context;
+    *eblock = db_ctx->db_master_key;
+    return 0;
+
+}
+
+/*
  * Set the "name" of the current database to some alternate value.
  *
  * Passing a null pointer as "name" will set back to the default.
@@ -455,7 +479,7 @@ krb5_dbm_db_set_name(context, name)
     char *name;
 {
     DBM *db;
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
     krb5_error_code kret;
 
     if (k5dbm_inited(context))
@@ -489,12 +513,12 @@ krb5_dbm_db_get_age(context, db_name, age)
     char *db_name;
     time_t *age;
 {
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
     struct stat st;
     
     if (!k5dbm_inited(context))
 	return(KRB5_KDB_DBNOTINITED);
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if (fstat (db_ctx->db_lf_file, &st) < 0)
 	*age = -1;
     else
@@ -522,7 +546,7 @@ krb5_dbm_db_end_update(context)
     krb5_context context;
 {
     krb5_error_code retval;
-    db_context_t *db_ctx = context->db_context;
+    krb5_db_context *db_ctx = context->db_context;
     struct stat st;
     time_t now;
     struct utimbuf utbuf;
@@ -563,13 +587,13 @@ krb5_dbm_db_lock(context, mode)
     int 		  krb5_lock_mode;
     krb5_error_code	  retval;
     time_t		  mod_time;
-    db_context_t	* db_ctx;
+    krb5_db_context	* db_ctx;
     DBM    		* db;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if (db_ctx->db_locks_held && (db_ctx->db_lock_mode >= mode)) {
 	/* No need to upgrade lock, just return */
 	db_ctx->db_locks_held++;
@@ -621,13 +645,13 @@ krb5_error_code
 krb5_dbm_db_unlock(context)
     krb5_context context;
 {
-    db_context_t	* db_ctx;
+    krb5_db_context	* db_ctx;
     krb5_error_code	  retval;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if (!db_ctx->db_locks_held)		/* lock already unlocked */
 	return KRB5_KDB_NOTLOCKED;
 
@@ -825,7 +849,7 @@ krb5_dbm_db_destroy(context, dbname)
 					 KDBM_LOCK_EXT(context->db_context))))
 		return(retval);
 	if (tmpcontext) {
-	    k5dbm_clear_context((db_context_t *) context->db_context);
+	    k5dbm_clear_context((krb5_db_context *) context->db_context);
 	    free(context->db_context);
 	    context->db_context = (void *) NULL;
 	}
@@ -856,7 +880,7 @@ krb5_dbm_db_rename(context, from, to)
     char *fromok = 0;
     char *took = 0;
     krb5_error_code retval;
-    db_context_t *s_context, *db_ctx;
+    krb5_db_context *s_context, *db_ctx;
 
     s_context = context->db_context;
     context->db_context = (void *) NULL;
@@ -867,7 +891,7 @@ krb5_dbm_db_rename(context, from, to)
 	 * operations to the right lock file.
 	 */
 	retval = krb5_dbm_db_set_name(context, from);
-	db_ctx = (db_context_t *) context->db_context;
+	db_ctx = (krb5_db_context *) context->db_context;
 	if ((db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name,
 					       KDBM_LOCK_EXT(db_ctx)))) {
 	    if ((db_ctx->db_lf_file = open(db_ctx->db_lf_name,
@@ -953,7 +977,7 @@ errout:
 	    krb5_dbm_db_unlock(context);
 	    close(db_ctx->db_lf_file);
 	}
-	k5dbm_clear_context((db_context_t *) context->db_context);
+	k5dbm_clear_context((krb5_db_context *) context->db_context);
 	free (context->db_context);
     }
     context->db_context = s_context;
@@ -978,7 +1002,7 @@ krb5_boolean *more;			/* are there more? */
 {
     krb5_error_code retval;
     datum   key, contents;
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
     int try;
 
     *more = FALSE;
@@ -987,7 +1011,7 @@ krb5_boolean *more;			/* are there more? */
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     for (try = 0; try < KRB5_DBM_MAX_RETRY; try++) {
 	if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_SHARED))) {
 	    if (db_ctx->db_nb_locks) 
@@ -1050,14 +1074,14 @@ krb5_dbm_db_put_principal(context, entries, nentries)
     int i, n;
     datum   key, contents;
     krb5_error_code retval;
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
 
     n = *nentries;
     *nentries = 0;
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
 	return retval;
 
@@ -1116,7 +1140,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 {
     krb5_error_code 	  retval;
     krb5_db_entry 	  entry;
-    db_context_t 	* db_ctx;
+    krb5_db_context 	* db_ctx;
     datum   		  key, contents, contents2;
     DBM    		* db;
     int			  i;
@@ -1124,7 +1148,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
 	return(retval);
 
@@ -1198,12 +1222,12 @@ krb5_dbm_db_iterate (context, func, func_arg)
     krb5_db_entry entries;
     krb5_error_code retval;
     DBM *db;
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
     
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = (db_context_t *) context->db_context;
+    db_ctx = (krb5_db_context *) context->db_context;
     if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_SHARED)))
 	return retval;
 
@@ -1229,10 +1253,10 @@ krb5_dbm_db_set_lockmode(context, mode)
     krb5_boolean mode;
 {
     krb5_boolean old;
-    db_context_t *db_ctx;
+    krb5_db_context *db_ctx;
 
     old = mode;
-    if ((db_ctx = (db_context_t *) context->db_context)) {
+    if ((db_ctx = (krb5_db_context *) context->db_context)) {
 	old = db_ctx->db_nb_locks;
 	db_ctx->db_nb_locks = mode;
     }
@@ -1248,12 +1272,12 @@ kdb5_db_set_dbops(context, new)
     kdb5_dispatch_table	*new;
 {
     krb5_error_code	kret;
-    db_context_t	*db_ctx;
+    krb5_db_context	*db_ctx;
 
     kret = KRB5_KDB_DBINITED;
     if (!k5dbm_inited(context)) {
 	if (!(kret = k5dbm_init_context(context))) {
-	    db_ctx = (db_context_t *) context->db_context;
+	    db_ctx = (krb5_db_context *) context->db_context;
 	    db_ctx->db_dispatch = (new) ? new : &kdb5_default_dispatch;
 	}
     }
@@ -1275,7 +1299,7 @@ kdb5_context_size(kcontext, arg, sizep)
 {
     krb5_error_code	kret;
     size_t		required;
-    db_context_t	*dbctx;
+    krb5_db_context	*dbctx;
 
     /*
      * The database context requires at minimum:
@@ -1288,7 +1312,7 @@ kdb5_context_size(kcontext, arg, sizep)
      *	krb5_int32	for KV5M_DB_CONTEXT
      */
     kret = EINVAL;
-    if ((dbctx = (db_context_t *) arg)) {
+    if ((dbctx = (krb5_db_context *) arg)) {
 	required = (sizeof(krb5_int32) * 7);
 	if (dbctx->db_inited && dbctx->db_dispatch && dbctx->db_name)
 	    required += strlen(dbctx->db_name);
@@ -1309,7 +1333,7 @@ kdb5_context_externalize(kcontext, arg, buffer, lenremain)
     size_t		*lenremain;
 {
     krb5_error_code	kret;
-    db_context_t	*dbctx;
+    krb5_db_context	*dbctx;
     size_t		required;
     krb5_octet		*bp;
     size_t		remain;
@@ -1318,7 +1342,7 @@ kdb5_context_externalize(kcontext, arg, buffer, lenremain)
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
-    if ((dbctx = (db_context_t *) arg)) {
+    if ((dbctx = (krb5_db_context *) arg)) {
 	kret = ENOMEM;
 	if (!kdb5_context_size(kcontext, arg, &required) &&
 	    (required <= remain)) {
@@ -1376,7 +1400,7 @@ kdb5_context_internalize(kcontext, argp, buffer, lenremain)
 {
     krb5_error_code	kret;
     krb5_context	tmpctx;
-    db_context_t	*dbctx;
+    krb5_db_context	*dbctx;
     krb5_int32		ibuf;
     krb5_octet		*bp;
     size_t		remain;
@@ -1390,7 +1414,7 @@ kdb5_context_internalize(kcontext, argp, buffer, lenremain)
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
-    dbctx = (db_context_t *) NULL;
+    dbctx = (krb5_db_context *) NULL;
     /* Read our magic number */
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	ibuf = 0;
@@ -1416,7 +1440,7 @@ kdb5_context_internalize(kcontext, argp, buffer, lenremain)
 		if (!kret &&
 		    (!dbname || !(kret = krb5_db_set_name(tmpctx, dbname))) &&
 		    !(kret = krb5_db_init(tmpctx))) {
-		    dbctx = (db_context_t *) tmpctx->db_context;
+		    dbctx = (krb5_db_context *) tmpctx->db_context;
 		    (void) krb5_dbm_db_set_lockmode(tmpctx, 0);
 		    if (lockmode)
 			kret = krb5_db_lock(tmpctx, lockmode);
