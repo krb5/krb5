@@ -38,6 +38,7 @@ static char rcsid_main_c[] =
 
 #include "kdc_util.h"
 #include "extern.h"
+#include "../admin/common.h"
 
 #ifdef notdef
 /* need to sort out varargs stuff */
@@ -121,7 +122,6 @@ char **argv;
     int keytypedone = 0;
     char *db_realm = 0;
     char *mkey_name = 0;
-    char *mkey_fullname;
     char lrealm[BUFSIZ];
     krb5_error_code retval;
 
@@ -169,22 +169,11 @@ char **argv;
 
     /* assemble & parse the master key name */
 
-    /* +2 for @ and null term */
-    if (!(mkey_fullname = malloc(strlen(mkey_name) + strlen(db_realm) + 2))) {
-	com_err(argv[0], ENOMEM,
-		"while allocating storage for master key name");
+    if (retval = setup_mkey_name(mkey_name, db_realm, 0, &master_princ)) {
+	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
     }
-    (void) strcpy(mkey_fullname, mkey_name);
-    (void) strcat(mkey_fullname, "@");
-    (void) strcat(mkey_fullname, db_realm);
 
-    if (retval = krb5_parse_name(mkey_fullname, &master_princ)) {
-	com_err(argv[0], retval,
-		": parse of \"%s\" failed", mkey_fullname);
-	exit(1);
-    }
-    
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
