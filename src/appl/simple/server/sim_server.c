@@ -226,6 +226,9 @@ char *argv[];
     }
     printf("Received %d bytes\n", i);
 
+    packet.length = i;
+    packet.data = (krb5_pointer) pktbuf;
+    
     if (retval = krb5_gen_portaddr(&foreign_addr,
 				   (krb5_pointer) &c_sock.sin_port,
 				   &portforeign_addr)) {
