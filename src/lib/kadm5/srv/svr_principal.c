@@ -1131,11 +1131,14 @@ kadm5_launch_task (krb5_context context,
             _exit (1); /* Fail if execv fails */
         } else {
             /* The parent: */
-            
+            int status;
+                       
             if (data_buffer != NULL) {
                 /* Write out the buffer to the child */
                 if (krb5_net_write (context, data_pipe[1],
                                     data_buffer, strlen (data_buffer)) < 0) {
+                    /* kill the child to make sure waitpid() won't hang later */
+                    kill (pid, SIGKILL);
                     ret = errno;
                 }
             }
@@ -1143,27 +1146,18 @@ kadm5_launch_task (krb5_context context,
             close (data_buffer[0]);
             close (data_buffer[1]);
 
+            waitpid (pid, &status, 0);
+
             if (!ret) {
-                int status = 0;
-
-                waitpid (pid, &status, 0);
-
-                /* fprintf (stderr, "Call \"%s\" returned status %d\n", argv[2],
-                    WEXITSTATUS(status)); */
-
                 if (WIFEXITED (status)) {
-                    /* task finished.  Check return value */
+                    /* child read password and exited.  Check the return value. */
                     if ((WEXITSTATUS (status) != 0) && (WEXITSTATUS (status) != 252)) {
                        ret = KRB5KDC_ERR_POLICY; /* password change rejected */
                     }
                 } else {
-                    /* task crashed or was killed */
+                    /* child read password but crashed or was killed */
                     ret = KRB5KRB_ERR_GENERIC; /* FIXME: better error */
                 }
-            } else {
-                /* since the password write failed, just try and kill the child
-                 * process in order to clean up (it may already be gone). */
-                kill (pid, SIGKILL);
             }
         }
     }
