@@ -14,6 +14,8 @@ OBJS=	decode_kdc.o	\
 	in_tkt_sky.o	\
 	kdc_rep_dc.o	\
 	mk_error.o	\
+	mk_req.o	\
+	mk_req_ext.o	\
 	parse.o		\
 	princ_comp.o	\
 	rd_error.o	\
@@ -33,6 +35,8 @@ SRCS=	decode_kdc.c	\
 	in_tkt_sky.c	\
 	kdc_rep_dc.c	\
 	mk_error.c	\
+	mk_req.c	\
+	mk_req_ext.c	\
 	parse.c		\
 	princ_comp.c	\
 	rd_error.c	\
