@@ -1,3 +1,12 @@
+2003-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp (v4ftp_test): Return early if $des3_krbtgt set.
+
+	* v4krb524d.exp (doit): Return early if $des3_krbtgt set.
+
+	* v4standalone.exp (check_and_destroy_v4_tix): Return early if
+	$des3_krbtgt set.
+
 2002-11-03  Tom Yu  <tlyu@mit.edu>
 
 	* rsh.exp (rsh_test): Explicitly call stop_rsh_daemon upon pass

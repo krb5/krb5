@@ -2026,6 +2026,7 @@ proc v4kinit { name pass standalone } {
     global REALMNAME
     global KINIT
     global spawn_id
+    global des3_krbtgt
 
     # Use kinit to get a ticket.
 	#
@@ -2049,10 +2050,20 @@ proc v4kinit { name pass standalone } {
     }
     send "$pass\r"
     expect eof
-    if ![check_exit_status kinit] {
-	return 0
-    }
-
+    if {$des3_krbtgt == 0} {
+	if ![check_exit_status v4kinit] {
+	    return 0
+	}
+    } else {
+	# Fail if kinit is successful with a des3 TGT.
+	set status_list [wait -i $spawn_id]
+	set testname v4kinit
+	verbose "wait -i $spawn_id returned $status_list ($testname)"
+	if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 1 } {
+	    verbose -log "exit status: $status_list"
+	    fail "$testname (exit status)"
+	}
+     }
     if {$standalone} {
 	pass "v4kinit"
     }

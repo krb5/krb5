@@ -78,7 +78,11 @@ proc doit { } {
     global KDESTROY
     global tmppwd
     global REALMNAME
+    global des3_krbtgt
 
+    if {$des3_krbtgt} {
+	return
+    }
     # Start up the kerberos and kadmind daemons.
     if ![start_kerberos_daemons 1] {
 	return
