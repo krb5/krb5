@@ -1,3 +1,8 @@
+Sat Jul 18 22:10:29 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Remove the variable use_other_realm.
+	It is not actually necessary for the new -r realm code.
+
 Fri Jul 17 04:11:47 1998  Geoffrey King  <gjking@mit.edu>
 
 	* krb524d.c (main): Accept a -r command line option to specify

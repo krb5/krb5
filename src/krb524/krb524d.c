@@ -47,7 +47,7 @@ int signalled = 0;
 static int debug = 0;
 void *handle;
 
-int use_keytab, use_master, use_other_realm;
+int use_keytab, use_master;
 char *keytab = NULL;
 krb5_keytab kt;
 
@@ -101,7 +101,7 @@ int main(argc, argv)
      whoami = ((whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0]);
 
      argv++; argc--;
-     use_master = use_keytab = use_other_realm = 0;
+     use_master = use_keytab = 0;
      config_params.mask = 0;
      
      while (argc) {
@@ -110,7 +110,6 @@ int main(argc, argv)
 	  else if (strncmp(*argv, "-m", 2) == 0)
 	       use_master = 1;
 	  else if (strcmp(*argv, "-r") == 0) {
-	       use_other_realm = 1;
 	       argv++; argc--;
 	       if (argc == 0 || !use_master)
 		    usage(context);
@@ -122,9 +121,8 @@ int main(argc, argv)
 	  argv++; argc--;
      }
      if (argc || use_keytab + use_master > 1 ||
-	 use_keytab + use_other_realm > 1 ||
 	 use_keytab + use_master == 0) {
-	  use_keytab = use_master = use_other_realm = 0;
+	  use_keytab = use_master = 0;
 	  usage(context);
      }
      
