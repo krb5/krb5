@@ -36,6 +36,9 @@ typedef struct _krb5_db_entry krb5_db_entry;
 #ifndef	KRB5_ADM_H__
 struct ___krb5_realm_params;
 typedef struct ___krb5_realm_params krb5_realm_params;
+
+struct ___krb5_key_salt_tuple;
+typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
 #endif	/* KRB5_ADM_H__ */
 
 /*
@@ -197,4 +200,28 @@ krb5_error_code
 krb5_timestamp_to_string KRB5_PROTOTYPE((krb5_timestamp, char *, size_t));
 krb5_error_code
 krb5_deltat_to_string KRB5_PROTOTYPE((krb5_deltat, char *, size_t));
+
+/* keysalt.c */
+krb5_boolean
+krb5_keysalt_is_present KRB5_PROTOTYPE((krb5_key_salt_tuple *,
+					krb5_int32,
+					krb5_keytype,
+					krb5_int32));
+krb5_error_code
+krb5_keysalt_iterate
+	KRB5_PROTOTYPE((krb5_key_salt_tuple *,
+			krb5_int32,
+			krb5_boolean,
+			krb5_error_code (*)
+				KRB5_NPROTOTYPE((krb5_key_salt_tuple *,
+						 krb5_pointer)),
+			krb5_pointer));
+				     
+krb5_error_code
+krb5_string_to_keysalts KRB5_PROTOTYPE((char *,
+					const char *,
+					const char *,
+					krb5_boolean,
+					krb5_key_salt_tuple **,
+					krb5_int32 *));
 #endif	/* KRB5_ADM_PROTO_H__ */
