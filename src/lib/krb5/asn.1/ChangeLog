@@ -1,3 +1,8 @@
+Tue Aug  2 07:22:57 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* asn1_decode_k.c (asn1_decode_sequence_of_enctype): more fixing
+	of realloc(NULL) returning NULL
+
 Sat Jul 23 08:48:18 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* asn1buf.h: include ext-proto.h now to avoid type warnings
