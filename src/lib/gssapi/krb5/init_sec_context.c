@@ -324,7 +324,11 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       /* fill in the ctx */
       memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-      ctx->mech_used = mech_type;
+      if (generic_gss_copy_oid(minor_status, mech_type, &ctx->mech_used)
+	  != GSS_S_COMPLETE) {
+	      free(ctx);
+	      return (GSS_S_FAILURE);
+      }
       ctx->auth_context = NULL;
       ctx->initiate = 1;
       ctx->gss_flags = KG_IMPLFLAGS(req_flags);
