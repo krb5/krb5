@@ -60,6 +60,7 @@ const krb5_fulladdr *from;		/* who sent it ? */
 int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
 {
+    krb5_keyblock * subkey;
     krb5_encrypt_block eblock;
     krb5_keytype second_ticket_etype = ETYPE_UNKNOWN;
     krb5_kdc_req *request = 0;
@@ -67,7 +68,6 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply, *header_ticket = 0;
-    krb5_tkt_authent *req_authdat = 0;
     int st_idx = 0;
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_transited enc_tkt_transited;
@@ -111,12 +111,12 @@ krb5_data **response;			/* filled in with a response packet */
 	goto cleanup;
     }
 
-    errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat);
-    if (req_authdat)
-	header_ticket = req_authdat->ticket;
+   /* errcode = kdc_process_tgs_req(request, from, pkt, &req_authdat); */
+    errcode = kdc_process_tgs_req(request, from, pkt, &header_ticket, &subkey);
 
     if (header_ticket && header_ticket->enc_part2 &&
-	(errcode2 = krb5_unparse_name(kdc_context, header_ticket->enc_part2->client,
+	(errcode2 = krb5_unparse_name(kdc_context, 
+				      header_ticket->enc_part2->client,
 				      &cname))) {
 	status = "UNPARSING CLIENT";
 	errcode = errcode2;
@@ -592,14 +592,12 @@ tgt_again:
     /* use the session key in the ticket, unless there's a subsession key
        in the AP_REQ */
 
-    reply.enc_part.etype = req_authdat->authenticator->subkey ?
-	    req_authdat->authenticator->subkey->etype :
+    reply.enc_part.etype = subkey ? subkey->etype :
 		    header_ticket->enc_part2->session->etype;
     krb5_use_cstype(kdc_context, &eblock, reply.enc_part.etype);
 
-    retval = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, &eblock,
-				 req_authdat->authenticator->subkey ?
-				 req_authdat->authenticator->subkey :
+    retval = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, 
+				 &eblock, subkey ? subkey :
 				 header_ticket->enc_part2->session,
 				 &reply, response);
     if (retval) {
@@ -636,8 +634,6 @@ cleanup:
     
     if (request)
 	krb5_free_kdc_req(kdc_context, request);
-    if (req_authdat)
-	krb5_free_tkt_authent(kdc_context, req_authdat);
     if (cname)
 	free(cname);
     if (sname)

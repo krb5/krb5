@@ -46,10 +46,12 @@ krb5_error_code fetch_last_req_info PROTOTYPE((krb5_db_entry *,
 krb5_error_code kdc_convert_key PROTOTYPE((krb5_keyblock *,
 					   krb5_keyblock *,
 					   int));
-krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_kdc_req *,
-					       const krb5_fulladdr *,
-					       krb5_data *,
-					       krb5_tkt_authent **));
+krb5_error_code kdc_process_tgs_req 
+	PROTOTYPE((krb5_kdc_req *,
+	           const krb5_fulladdr *,
+	           krb5_data *,
+	           krb5_ticket **,
+	           krb5_keyblock **));
 
 krb5_error_code kdc_get_server_key PROTOTYPE((krb5_ticket *,
 					      krb5_keyblock **,

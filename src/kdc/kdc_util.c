@@ -95,40 +95,6 @@ realm_compare(princ1, princ2)
          !memcmp(realm1->data, realm2->data, realm1->length));
 }
 
-struct kparg {
-    krb5_keyblock *key;
-    krb5_kvno kvno;
-};
-
-/*
- * Since we do the checking of the server name before passing into
- * krb5_rd_req_decoded, there's no reason to do it here, so we ignore the
- * "principal" argument.
- */
-static krb5_error_code
-kdc_rdreq_keyproc(context, keyprocarg, principal, vno, keytype, key)
-    krb5_context context;
-    krb5_pointer keyprocarg;
-    krb5_principal principal;
-    krb5_kvno vno;
-    krb5_keytype keytype;
-    krb5_keyblock ** key;
-{
-    register struct kparg *whoisit = (struct kparg *)keyprocarg;
-    char	*sname;
-
-    if (vno != whoisit->kvno) {
-	if (!krb5_unparse_name(context, principal, &sname)) {
-	    syslog(LOG_ERR,
-		   "TGS_REQ: BAD KEY VNO: server='%s', expecting %d, got %d",
-		   sname, vno, whoisit->kvno);
-	    free(sname);
-	}
-	return KRB5KRB_AP_ERR_BADKEYVER;
-    }
-    return(krb5_copy_keyblock(context, whoisit->key, key));
-}
-
 /*
  * Returns TRUE if the kerberos principal is the name of a Kerberos ticket
  * service.
@@ -150,50 +116,67 @@ krb5_boolean krb5_is_tgs_principal(principal)
  * is provided.
  */
 static krb5_error_code
-comp_cksum(type, source, authdat, dest)
-krb5_cksumtype type;
-krb5_data *source;
-krb5_tkt_authent *authdat;
-krb5_checksum *dest;
+comp_cksum(kdc_context, source, ticket, his_cksum)
+    krb5_context	  kdc_context;
+    krb5_data 		* source;
+    krb5_ticket 	* ticket;
+    krb5_checksum 	* his_cksum;
 {
-	krb5_error_code retval;
+    krb5_error_code 	  retval;
+    krb5_checksum	  our_cksum;
 
-	/* first compute checksum */
-	if (retval = krb5_calculate_checksum(kdc_context, type, 
- 					     source->data, 
- 					     source->length,
-					     authdat->ticket->enc_part2->session->contents, /* seed */
-					     authdat->ticket->enc_part2->session->length,   /* seed length */
-					     dest)) {
-		return retval;
-	}
-        if (dest->length != authdat->authenticator->checksum->length ||
-	    memcmp((char *)dest->contents,
-	           (char *)authdat->authenticator->checksum->contents,
-	           dest->length)) {
-	    return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    our_cksum.checksum_type = his_cksum->checksum_type;
+    if (!valid_cksumtype(our_cksum.checksum_type)) 
+	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
+
+    /* must be collision proof */
+    if (!is_coll_proof_cksum(our_cksum.checksum_type))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
+    if (!(our_cksum.contents = (krb5_octet *)
+	  malloc(krb5_checksum_size(kdc_context, our_cksum.checksum_type)))) 
+	return ENOMEM;
+
+    /* compute checksum */
+    if (retval = krb5_calculate_checksum(kdc_context, our_cksum.checksum_type, 
+		     		source->data, source->length, 
+				ticket->enc_part2->session->contents, 
+		     		ticket->enc_part2->session->length,&our_cksum)){
+	goto comp_cksum_cleanup;
     }
-    return 0;	
+
+    if ((our_cksum.length != his_cksum->length) || 
+	(memcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
+	       our_cksum.length))) {
+	retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	goto comp_cksum_cleanup;
+    }
+    retval = 0;
+
+comp_cksum_cleanup:
+    free(our_cksum.contents);
+    return retval;
 }
 
 krb5_error_code 
-kdc_process_tgs_req(request, from, pkt, ret_authdat)
-krb5_kdc_req *request;
-const krb5_fulladdr *from;
-krb5_data *pkt;
-krb5_tkt_authent **ret_authdat;
+kdc_process_tgs_req(request, from, pkt, ticket, subkey)
+    krb5_kdc_req 	* request;
+    const krb5_fulladdr * from;
+    krb5_data 		* pkt;
+    krb5_ticket        ** ticket;
+    krb5_keyblock      ** subkey;
 {
-    krb5_ap_req *apreq = 0;
-    krb5_tkt_authent *authdat, *nauthdat;
-    struct kparg who;
-    krb5_error_code retval = 0;
-    krb5_checksum our_cksum;
-    krb5_data *scratch = 0, scratch1, scratch2;
-    krb5_pa_data **tmppa;
-    krb5_boolean foreign_server = FALSE;
-    krb5_enc_tkt_part *ticket_enc;
-
-    our_cksum.contents = 0;
+    krb5_pa_data       ** tmppa;
+    krb5_ap_req 	* apreq;
+    krb5_error_code 	  retval;
+    krb5_data		  scratch1;
+    krb5_data 		* scratch = NULL;
+    krb5_boolean 	  foreign_server = FALSE;
+    krb5_auth_context 	* auth_context = NULL;
+    krb5_authenticator	* authenticator = NULL;
+    krb5_checksum 	* his_cksum = NULL;
+    krb5_keyblock 	* key = NULL;
+    krb5_kvno 		  kvno = 0;
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -204,31 +187,15 @@ krb5_tkt_authent **ret_authdat;
     if (!*tmppa)			/* cannot find any AP_REQ */
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
 
-    scratch2.length = (*tmppa)->length;
-    scratch2.data = (char *)(*tmppa)->contents;
-
-    if (retval = decode_krb5_ap_req(&scratch2, &apreq))
+    scratch1.length = (*tmppa)->length;
+    scratch1.data = (char *)(*tmppa)->contents;
+    if (retval = decode_krb5_ap_req(&scratch1, &apreq))
 	return retval;
     
-    if (!(authdat = (krb5_tkt_authent *)malloc(sizeof(*authdat)))) {
-	retval = ENOMEM;
-	goto cleanup;
-    }
-    memset((char *)authdat, 0, sizeof(*authdat));
-    authdat->ticket = apreq->ticket;
-    *ret_authdat = authdat;
-
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
 	syslog(LOG_INFO, "TGS_REQ: SESSION KEY or MUTUAL");
 	retval = KRB5KDC_ERR_POLICY;
-	apreq->ticket = 0;		/* Caller will free the ticket */
-	goto cleanup;
-    }
-
-    if (retval = kdc_get_server_key(authdat->ticket, &who.key,
-				    &who.kvno)) {
-	apreq->ticket = 0;		/* Caller will free the ticket */
 	goto cleanup;
     }
 
@@ -249,63 +216,57 @@ krb5_tkt_authent **ret_authdat;
 	       krb5_princ_realm(kdc_context, tgs_server)->length))
 	foreign_server = TRUE;
 
-    retval = krb5_rd_req_decoded(kdc_context, apreq, apreq->ticket->server,
-				 from->address,
-				 0,	/* no fetchfrom */
-				 kdc_rdreq_keyproc,
-				 (krb5_pointer)&who,
-				 kdc_rcache,
-				 &nauthdat);
-    krb5_free_keyblock(kdc_context, who.key);
-
-    if (retval) {
-	apreq->ticket = 0;		/* Caller will free the ticket */
+    if (retval = krb5_auth_con_init(kdc_context, &auth_context))
 	goto cleanup;
-    }
+
+    if (retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
+					from->address)) 
+	goto cleanup_auth_context;
+
+    if (retval = krb5_auth_con_setrcache(kdc_context, auth_context, kdc_rcache))
+	goto cleanup_auth_context;
+
+    if (retval = kdc_get_server_key(apreq->ticket, &key, &kvno))
+	goto cleanup_auth_context;
 
     /*
-     * no longer need to protect the ticket in apreq, since
-     * authdat is about to get nuked --- it's going to get reassigned.
+     * XXX This is currently wrong but to fix it will require making a 
+     * new keytab for groveling over the kdb.
      */
-    krb5_xfree(authdat);
+    retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
+    krb5_free_keyblock(kdc_context, key);
+    if (retval) 
+	goto cleanup_auth_context;
 
-    authdat = nauthdat;
-    *ret_authdat = authdat;
-    ticket_enc = authdat->ticket->enc_part2;
+    if (retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
+				     apreq->ticket->server, NULL, NULL, ticket))
+	goto cleanup_auth_context;
 
-    /* now rearrange output from rd_req_decoded */
+    if (retval = krb5_auth_con_getremotesubkey(kdc_context,auth_context,subkey))
+	goto cleanup_auth_context;
+
+    if (retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
+						&authenticator))
+	goto cleanup_auth_context;
+
+    /* Check for a checksum */
+    if (!(his_cksum = authenticator->checksum)) {
+	retval = KRB5KRB_AP_ERR_INAPP_CKSUM; 
+	goto cleanup_authenticator;
+    }
 
     /* make sure the client is of proper lineage (see above) */
     if (foreign_server) {
-	krb5_data *tkt_realm = krb5_princ_realm(kdc_context, ticket_enc->client);
+	krb5_data *tkt_realm = krb5_princ_realm(kdc_context, 
+						(*ticket)->enc_part2->client);
 	krb5_data *tgs_realm = krb5_princ_realm(kdc_context, tgs_server);
 	if (tkt_realm->length == tgs_realm->length &&
 	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
 	    syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
 	    retval = KRB5KDC_ERR_POLICY;
-	    goto cleanup;
+	    goto cleanup_authenticator;
 	}
-    }
-    if (!authdat->authenticator->checksum) {
-	    retval = KRB5KRB_AP_ERR_INAPP_CKSUM; 
-	    goto cleanup;
-    }
-    our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
-    if (!valid_cksumtype(our_cksum.checksum_type)) {
-	retval = KRB5KDC_ERR_SUMTYPE_NOSUPP;
-	goto cleanup;
-    }	
-    /* must be collision proof */
-    if (!is_coll_proof_cksum(our_cksum.checksum_type)) {
-	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
-	goto cleanup;
-    }
-
-    if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(kdc_context, our_cksum.checksum_type)))) {
-	retval = ENOMEM;
-	goto cleanup;
     }
 
     /*
@@ -316,25 +277,23 @@ krb5_tkt_authent **ret_authdat;
      * checksum that directly; if that fails, then we try encoding
      * using our local asn.1 library.
      */
-    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
     if (pkt && (fetch_asn1_field(pkt->data, 1, 4, &scratch1) >= 0)) {
-	retval = comp_cksum(our_cksum.checksum_type, &scratch1, authdat,
-			    &our_cksum);
+	if (comp_cksum(kdc_context, &scratch1, *ticket, his_cksum)) {
+	    if (!(retval = encode_krb5_kdc_req_body(request, &scratch))) 
+	        retval = comp_cksum(kdc_context, scratch, *ticket, his_cksum);
+	    krb5_free_data(kdc_context, scratch);
+	}
     }
-    if (retval) {
-	if (retval = encode_krb5_kdc_req_body(request, &scratch)) 
-	    goto cleanup;	 /* XXX retval should be in kdc range */
-	retval = comp_cksum(our_cksum.checksum_type, scratch, authdat,
-			    &our_cksum);
-    }
-    
-    krb5_xfree(our_cksum.contents);
-    
+
+cleanup_authenticator:
+    krb5_free_authenticator(kdc_context, authenticator);
+
+cleanup_auth_context:
+    krb5_auth_con_free(kdc_context, auth_context);
+
 cleanup:
-    if (apreq)
-	krb5_free_ap_req(kdc_context, apreq);
-    if (scratch)
-	krb5_free_data(kdc_context, scratch);
+    apreq->ticket = 0;		/* Caller will free the ticket */
+    krb5_free_ap_req(kdc_context, apreq);
     return retval;
 }
 
