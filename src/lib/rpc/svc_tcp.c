@@ -313,7 +313,7 @@ readtcp(xprtptr, buf, len)
 	caddr_t buf;
 	register int len;
 {
-	register SVCXPRT *xprt = (SVCXPRT *) xprtptr;
+	register SVCXPRT *xprt = (SVCXPRT *)(void *)xprtptr;
 	register int sock = xprt->xp_sock;
 #ifdef FD_SETSIZE
 	fd_set mask;
@@ -357,7 +357,7 @@ writetcp(xprtptr, buf, len)
 	caddr_t buf;
 	int len;
 {
-	register SVCXPRT *xprt = (SVCXPRT *) xprtptr;
+	register SVCXPRT *xprt = (SVCXPRT *)(void *) xprtptr;
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {

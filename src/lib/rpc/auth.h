@@ -114,7 +114,7 @@ typedef struct __rpc_auth {
   	        int	(*ah_unwrap)(struct __rpc_auth *, XDR *, 
 				     xdrproc_t, caddr_t);	
 	} *ah_ops;
-	caddr_t ah_private;
+	void *ah_private;
 } AUTH;
 
 

@@ -1,3 +1,21 @@
+2001-07-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* auth.h: AUTH ah_private structure element changed to void *. 
+
+	* clnt.h: CLIENT cl_private structure element changed to type void *. 
+
+	* svc.h: SVCXRPT elements xp_p1 and xp_p2 changed to void * from
+	caddr_t.
+
+	* svc_udp.c: su_cache element of svcudp_data from caddr_t to void *.
+
+	* clnt_tcp.c, svc_tcp.c (writetcp, readtcp): Cleanup alignment
+	warning in casts.
+
+	* types.hin (mem_alloc): Do not cast type of malloc to char *.
+
+	* xdr.h: Change type of x_private of XDR from caddr_t to void *.
+
 2001-07-09  Ezra Peisach  <epeisach@mit.edu>
 
 	* pmap_rmt.c, svc.c, svc_simple.c, svc_udp.c, svc_tcp.c,
@@ -32,7 +50,7 @@
 	OTW transfer of gids.
 
 	* clnt_tcp.c, svc_tcp.c: Change writetcp and readtcp to take char
-	* as first argument to be compatible with xdrrec_create.
+	as first argument to be compatible with xdrrec_create.
 
 	* xdr.c (xdr_opaque): Cast argument in call to XDR_GETBYTES.
 

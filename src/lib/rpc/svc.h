@@ -92,8 +92,8 @@ typedef struct __rpc_svcxprt {
 	struct sockaddr_in xp_raddr;	 /* remote address */
 	struct opaque_auth xp_verf;	 /* raw response verifier */
 	SVCAUTH		*xp_auth;	 /* auth flavor of current req */
-	caddr_t		xp_p1;		 /* private */
-	caddr_t		xp_p2;		 /* private */
+	void		*xp_p1;		 /* private */
+	void		*xp_p2;		 /* private */
 	int		xp_laddrlen;	 /* lenght of local address */
 	struct sockaddr_in xp_laddr;	 /* local address */
 } SVCXPRT;

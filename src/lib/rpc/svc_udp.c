@@ -84,7 +84,7 @@ struct svcudp_data {
 	rpc_u_int32	su_xid;		/* transaction id */
 	XDR	su_xdrs;	/* XDR handle */
 	char	su_verfbody[MAX_AUTH_BYTES];	/* verifier body */
-	char * 	su_cache;	/* cached data, NULL if no cache */
+	void * 	su_cache;	/* cached data, NULL if no cache */
 };
 #define	su_data(xprt)	((struct svcudp_data *)(xprt->xp_p2))
 

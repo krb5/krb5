@@ -46,7 +46,7 @@ typedef struct __rpc_svc_auth {
 	  int	(*svc_ah_unwrap)(struct __rpc_svc_auth *, XDR *, xdrproc_t, 
 				 caddr_t);
      } *svc_ah_ops;
-     caddr_t svc_ah_private;
+     void * svc_ah_private;
 } SVCAUTH;
 
 extern SVCAUTH svc_auth_any;

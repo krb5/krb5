@@ -147,7 +147,7 @@ typedef struct __xdr_s {
 	    void	(*x_destroy)(struct __xdr_s *);	
 	} *x_ops;
 	caddr_t 	x_public;	/* users' data */
-	caddr_t		x_private;	/* pointer to private data */
+	void *		x_private;	/* pointer to private data */
 	caddr_t 	x_base;		/* private used for position info */
 	int		x_handy;	/* extra private word */
 } XDR;

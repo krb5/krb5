@@ -132,7 +132,7 @@ typedef struct __rpc_client {
 		bool_t          (*cl_control)(struct __rpc_client *, int,
 					      void *);
 	} *cl_ops;
-	caddr_t			cl_private;	/* private stuff */
+	void			*cl_private;	/* private stuff */
 } CLIENT;
 
 

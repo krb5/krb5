@@ -421,7 +421,7 @@ readtcp(ctptr, buf, len)
 	caddr_t buf;
 	register int len;
 {
-  register struct ct_data *ct = (struct ct_data *)ctptr;
+  register struct ct_data *ct = (struct ct_data *)(void *)ctptr;
 #ifdef FD_SETSIZE
 	fd_set mask;
 	fd_set readfds;
@@ -478,7 +478,7 @@ writetcp(ctptr, buf, len)
 	caddr_t buf;
 	int len;
 {
-	struct ct_data *ct = (struct ct_data *)ctptr;
+	struct ct_data *ct = (struct ct_data *)(void *)ctptr;
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {
