@@ -1,5 +1,5 @@
 .so man1/header.doc
-.TH KDB5_UTIL(8 \*h
+.TH KDB5_UTIL 8 \*h
 .SH NAME
 kdb5_util \- Kerberos database maintainance utility
 .SH SYNOPSIS
