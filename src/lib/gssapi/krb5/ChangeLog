@@ -1,3 +1,13 @@
+2003-12-19  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c: Include k5-int.h for accessor.
+
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+   * accept_sec_context.c, init_sec_context.c, ser_sctx.c:
+     Implement use of krb5int_accessor() for krb5int_c_mandatory_cksumtype,
+     krb5_ser_pack_int64, and krb5_ser_unpack_int64
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 	    Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 

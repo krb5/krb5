@@ -304,6 +304,11 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
     krb5_octet		*bp;
     size_t		remain;
     int			i;
+    krb5int_access kaccess;
+
+    kret = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+    if (kret) 
+        return(kret);
 
     required = 0;
     bp = *buffer;
@@ -336,9 +341,9 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int64((krb5_int64) ctx->seq_send,
+	    (void) (*kaccess.krb5_ser_pack_int64)((krb5_int64) ctx->seq_send,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int64((krb5_int64) ctx->seq_recv,
+	    (void) (*kaccess.krb5_ser_pack_int64)((krb5_int64) ctx->seq_recv,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->established,
 				       &bp, &remain);
@@ -418,6 +423,11 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
     krb5_octet		*bp;
     size_t		remain;
     int			i;
+    krb5int_access kaccess;
+
+    kret = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+    if (kret)
+        return(kret);
 
     bp = *buffer;
     remain = *lenremain;
@@ -454,8 +464,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    ctx->endtime = (krb5_timestamp) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->krb_flags = (krb5_flags) ibuf;
-	    (void) krb5_ser_unpack_int64(&ctx->seq_send, &bp, &remain);
-	    (void) krb5_ser_unpack_int64(&ctx->seq_recv, &bp, &remain);
+	    (void) (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_send, &bp, &remain);
+	    (void) (*kaccess.krb5_ser_unpack_int64)(&ctx->seq_recv, &bp, &remain);
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->established = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);

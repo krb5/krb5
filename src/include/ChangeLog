@@ -1,3 +1,7 @@
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * k5-int.h: add new functions to krb5int_access for use by gssapi
+
 2003-12-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (SIZE_MAX): Provide default definition if stdint.h

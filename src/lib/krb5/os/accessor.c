@@ -58,6 +58,9 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
     internals_temp.krb_time_to_life = 0;
     internals_temp.krb524_encode_v4tkt = 0;
 #endif
+    internals_temp.krb5int_c_mandatory_cksumtype = krb5int_c_mandatory_cksumtype;
+    internals_temp.krb5_ser_pack_int64 = krb5_ser_pack_int64;
+    internals_temp.krb5_ser_unpack_int64 = krb5_ser_unpack_int64;
     *internals = internals_temp;
     return 0;
   }

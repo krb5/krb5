@@ -279,8 +279,4 @@ krb5_set_password_using_ccache
 	krb5_rc_close				; PRIVATE GSSAPI krb5.hin
 	krb5_free_enc_tkt_part			; PRIVATE GSSAPI krb5.hin
 	krb5_decrypt_tkt_part			; PRIVATE GSSAPI krb5.hin
-    krb5int_c_mandatory_cksumtype   ; PRIVATE GSSAPI k5-int.h
-    krb5_ser_pack_int64             ; PRIVATE GSSAPI k5-int.h
-    krb5_ser_unpack_int64           ; PRIVATE GSSAPI k5-int.h
-
     

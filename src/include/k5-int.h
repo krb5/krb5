@@ -1678,7 +1678,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 7
+#define KRB5INT_ACCESS_STRUCT_VERSION 8
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
@@ -1715,6 +1715,12 @@ typedef struct _krb5int_access {
     krb5_int32 (*krb_life_to_time)(krb5_int32, int);
     int (*krb_time_to_life)(krb5_int32, krb5_int32);
     int (*krb524_encode_v4tkt)(struct ktext *, char *, unsigned int *);
+    krb5_error_code (*krb5int_c_mandatory_cksumtype)
+        (krb5_context, krb5_enctype, krb5_cksumtype *);
+    krb5_error_code (KRB5_CALLCONV *krb5_ser_pack_int64)
+        (krb5_int64, krb5_octet **, size_t *);
+    krb5_error_code (KRB5_CALLCONV *krb5_ser_unpack_int64)
+        (krb5_int64 *, krb5_octet **, size_t *);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

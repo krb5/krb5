@@ -70,6 +70,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
@@ -333,6 +334,11 @@ setup_enc(
 {
    krb5_error_code code;
    int i;
+   krb5int_access kaccess;
+
+   code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+   if (code)
+       goto fail;
 
    ctx->have_acceptor_subkey = 0;
    ctx->proto = 0;
@@ -390,7 +396,7 @@ setup_enc(
        ctx->sealalg = -10;
 
        ctx->proto = 1;
-       code = krb5int_c_mandatory_cksumtype(context, ctx->subkey->enctype,
+       code = (*kaccess.krb5int_c_mandatory_cksumtype)(context, ctx->subkey->enctype,
 					    &ctx->cksumtype);
        if (code)
 	   goto fail;
@@ -430,7 +436,6 @@ new_connection(
 {
    OM_uint32 major_status;
    krb5_error_code code;
-   krb5_enctype *requested_enctypes;
    krb5_creds *k_cred;
    krb5_gss_ctx_id_rec *ctx, *ctx_free;
    krb5_timestamp now;
@@ -681,6 +686,11 @@ mutual_auth(
    krb5_gss_ctx_id_rec *ctx;
    krb5_error *krb_error;
    krb5_error_code code;
+   krb5int_access kaccess;
+
+   code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+   if (code)
+       goto fail;
 
    major_status = GSS_S_FAILURE;
 
@@ -782,7 +792,7 @@ mutual_auth(
 				 &ctx->acceptor_subkey);
        if (code)
 	   goto fail;
-       code = krb5int_c_mandatory_cksumtype(context,
+       code = (*kaccess.krb5int_c_mandatory_cksumtype)(context,
 					    ctx->acceptor_subkey->enctype,
 					    &ctx->acceptor_subkey_cksumtype);
        if (code)

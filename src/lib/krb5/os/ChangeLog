@@ -1,3 +1,7 @@
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * accessor.c: Add new functions for use by gssapi
+
 2003-10-27  Jeffrey Altman <jaltman@mit.edu>
 
     * sendto_kdc.c: sockets must be closed with closesocket() and 
