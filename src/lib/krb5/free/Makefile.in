@@ -38,7 +38,8 @@ STLIBOBJS= \
 	f_tgt_cred.o	\
 	f_tkt_auth.o	\
 	f_pwd_data.o	\
-	f_pwd_seq.o
+	f_pwd_seq.o	\
+	f_unparse.o
 
 OBJS=	\
 	f_addr.$(OBJEXT)	\
@@ -73,7 +74,8 @@ OBJS=	\
 	f_tgt_cred.$(OBJEXT)	\
 	f_tkt_auth.$(OBJEXT)	\
 	f_pwd_data.$(OBJEXT)	\
-	f_pwd_seq.$(OBJEXT)
+	f_pwd_seq.$(OBJEXT)	\
+	f_unparse.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/f_addr.c	\
@@ -108,7 +110,8 @@ SRCS=	\
 	$(srcdir)/f_tgt_cred.c	\
 	$(srcdir)/f_tkt_auth.c	\
 	$(srcdir)/f_pwd_data.c	\
-	$(srcdir)/f_pwd_seq.c
+	$(srcdir)/f_pwd_seq.c	\
+	$(srcdir)/f_unparse.c
 
 all-windows:: $(OBJFILE)
 

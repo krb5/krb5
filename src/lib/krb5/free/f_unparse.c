@@ -1,5 +1,5 @@
 /*
- * lib/krb5/free/f_data.c
+ * lib/krb5/free/f_unparse.c
  *
  * Copyright 1997 by the Massachusetts Institute of Technology.
  *
@@ -20,29 +20,17 @@
  * or implied warranty.
  * 
  *
- * krb5_free_data()
- * krb5_free_data_contents()
+ * krb5_free_unparsed_name()
  */
 
 #include "k5-int.h"
 
 KRB5_DLLIMP void KRB5_CALLCONV
-krb5_free_data(context, val)
+krb5_free_unparsed_name(context, val)
     krb5_context context;
-    krb5_data FAR * val;
+    char FAR * val;
 {
-    if (val->data)
-	krb5_xfree(val->data);
-    krb5_xfree(val);
-    return;
-}
-
-KRB5_DLLIMP void KRB5_CALLCONV
-krb5_free_data_contents(context, val)
-    krb5_context context;
-    krb5_data FAR * val;
-{
-    if (val->data)
-	krb5_xfree(val->data);
+    if (val)
+	krb5_xfree(val);
     return;
 }
