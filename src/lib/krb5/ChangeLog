@@ -1,3 +1,7 @@
+2000-09-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Add AC_TYPE_OFF_T for off_t declaraion.
+
 2000-08-29  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Don't generate keytab/db/Makefile, since it isn't
