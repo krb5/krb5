@@ -1,3 +1,7 @@
+Sun Aug 17 14:39:56 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(srcdir) as needed.
+
 Wed Feb  5 22:52:41 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Remove the target ct_c.awk before copying over it.

@@ -28,10 +28,11 @@ OBJS=	ss_err.o \
 	request_tbl.o list_rqs.o pager.o requests.o \
 	data.o
 
-SRCS=	invocation.c help.c \
-	execute_cmd.c listen.c parse.c error.c prompt.c \
-	request_tbl.c list_rqs.c pager.c requests.c \
-	data.c  \
+SRCS=	$(srcdir)/invocation.c $(srcdir)/help.c \
+	$(srcdir)/execute_cmd.c $(srcdir)/listen.c $(srcdir)/parse.c \
+	$(srcdir)/error.c $(srcdir)/prompt.c \
+	$(srcdir)/request_tbl.c $(srcdir)/list_rqs.c $(srcdir)/pager.c \
+	$(srcdir)/requests.c $(srcdir)/data.c \
 	ss_err.h
 # ss_err.h here, so that make depend catches it.
 
