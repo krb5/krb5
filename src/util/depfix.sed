@@ -48,6 +48,7 @@ s;\$(srcdir)/\([^ /]* \);\1;g
 # allow override of some util dependencies in case local tools are used
 s;\$(BUILDTOP)/include/com_err.h ;$(COM_ERR_DEPS) ;g
 s;\$(BUILDTOP)/include/ss/ss.h \$(BUILDTOP)/include/ss/ss_err.h ;$(SS_DEPS) ;g
+s;\$(BUILDTOP)/include/db.h \$(BUILDTOP)/include/db-config.h ;$(DB_DEPS) ;g
 
 # now delete trailing whitespace
 s; *$;;g
