@@ -767,20 +767,25 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 
     switch(xdrs->x_op) {
     case XDR_ENCODE:
-	if((ret = krb5_unparse_name(context, *objp, &p)) != 0) 
-	    return FALSE;
+	if (*objp) {
+	     if((ret = krb5_unparse_name(context, *objp, &p)) != 0) 
+		  return FALSE;
+	}
 	if(!xdr_nullstring(xdrs, &p))
 	    return FALSE;
-	free(p);
+	if (p) free(p);
 	break;
     case XDR_DECODE:
 	if(!xdr_nullstring(xdrs, &p))
 	    return FALSE;
-	ret = krb5_parse_name(context, p, &pr);
-	if(ret != 0) 
-	    return FALSE;
-	*objp = pr;
-	free(p);
+	if (p) {
+	     ret = krb5_parse_name(context, p, &pr);
+	     if(ret != 0) 
+		  return FALSE;
+	     *objp = pr;
+	     free(p);
+	} else
+	     *objp = NULL;
 	break;
     case XDR_FREE:
 	if(*objp != NULL) 

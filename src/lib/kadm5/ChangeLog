@@ -1,3 +1,10 @@
+Wed Nov  6 17:45:43 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_principal): handle a NULL principal
+ 	pointer (this can happen when get_principal is passed a mask
+ 	without KADM5_PRINCIPAL in it, and will cause a beta 7 kadmind to
+ 	coredump)
+
 Fri Nov  1 13:16:16 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadm_err.et: update for new tl_data semantics [krb5-admin/140]
