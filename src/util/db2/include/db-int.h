@@ -61,6 +61,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+/* Tru64 5.1: int8_t is defined here, and stdint.h doesn't exist.  */
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>

@@ -1,3 +1,7 @@
+2002-09-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for stdint.h and inttypes.h.
+
 2002-09-03  Ezra Peisach  <epeisach@bu.edu>
 
 	* acconfig.h: Remove file. All handled by configure.in now.

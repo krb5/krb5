@@ -29,7 +29,7 @@ AC_SUBST(FCTSH)
 
 dnl checks for libraries
 dnl checks for header files
-AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(unistd.h stdint.h inttypes.h)
 dnl checks for typedefs
 AC_TYPE_SIZE_T
 
