@@ -1,3 +1,9 @@
+Fri Sep 22 19:42:47 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* k5-int.h: (from Keith Vetter's windows changes); define
+		THREEPARAMOPEN and prototype for sscanf.  Also add #define
+		for strncasecmp() to the microsoft's strnicmp() function.
+
 Tue Sep 12 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* k5-int.h: Removed KRB5_REALM_CANT RESOLVE,

@@ -137,6 +137,7 @@ typedef unsigned char	u_char;
 #include <fcntl.h>
 #include <io.h>
 #include <process.h>
+#define THREEPARAMOPEN(x,y,z) open(x,y,z)
 #define O_RDONLY        _O_RDONLY
 #define O_WRONLY        _O_WRONLY
 #define O_RDWR          _O_RDWR
@@ -173,8 +174,10 @@ typedef unsigned char	u_char;
 /* Functions with slightly different names on the PC
 */                   
 #define strcasecmp   _stricmp
+#define strncasecmp  _strnicmp
 #define strdup       _strdup
 #define off_t        _off_t
+int sscanf(const char *str, char const *fmt0, ...);
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 
