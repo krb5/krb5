@@ -240,7 +240,6 @@ EXPORTS
 	decode_krb5_ap_req			; PRIVATE GSSAPI k5-int.h KRB5_CALLCONV_WRONG
 	krb5_externalize_opaque			; PRIVATE GSSAPI k5-int.h
 	krb5_internalize_opaque			; PRIVATE GSSAPI k5-int.h
-	krb5_mcc_ops			DATA	; PRIVATE GSSAPI k5-int.h
 	krb5_ser_auth_context_init		; PRIVATE GSSAPI k5-int.h
 	krb5_ser_ccache_init			; PRIVATE GSSAPI k5-int.h
 	krb5_ser_context_init			; PRIVATE GSSAPI k5-int.h
@@ -257,5 +256,4 @@ EXPORTS
 	krb5_free_ktypes			; PRIVATE GSSAPI krb5.hin
 	krb5_get_tgs_ktypes			; PRIVATE GSSAPI krb5.hin
 	krb5_auth_con_set_req_cksumtype		; PRIVATE GSSAPI krb5.hin
-	krb5_cc_register			; PRIVATE GSSAPI krb5.hin
 	krb5_kt_free_entry			; PRIVATE GSSAPI krb5.hin
