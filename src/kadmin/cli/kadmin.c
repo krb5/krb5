@@ -708,6 +708,16 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 		continue;
 	    }
 	}
+	if (strlen(argv[i]) == 13 &&
+	    !strcmp("-maxrenewlife", argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+	    else {
+		oprinc->max_renewable_life = get_date(argv[i], NULL) - now;
+		*mask |= KADM5_MAX_RLIFE;
+		continue;
+	    }
+	}
 	if (strlen(argv[i]) == 5 &&
 	    !strcmp("-kvno", argv[i])) {
 	    if (++i > argc - 2)
@@ -789,7 +799,7 @@ void kadmin_addmodprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t[{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "\t\tallow_tgs_req, allow_tix, needchange, password_changing_service\n");
 }
@@ -1005,6 +1015,7 @@ void kadmin_getprinc(argc, argv)
 	       dprinc.pw_expiration ?
 	       strdate(dprinc.pw_expiration) : "[none]");
 	printf("Maximum ticket life: %s\n", strdur(dprinc.max_life));
+	printf("Maximum renewable life: %s\n", strdur(dprinc.max_renewable_life));
 	printf("Last modified: by %s\n\ton %s\n",
 	       modcanon, strdate(dprinc.mod_date));
 	printf("Last successful authentication: %s\n",

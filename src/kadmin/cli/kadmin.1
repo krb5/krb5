@@ -127,6 +127,9 @@ add_principal [options] _newprinc_
 	-maxlife _maxlife_
 		maximum ticket life of the principal
 
+	-maxrenewlife _maxrenewlife_
+		maximum renewable ticket lifetime of the principal
+
 	-kvno _kvno_
 		explicity set the key version number.  This is not
 		recommended.
@@ -226,29 +229,6 @@ modify_principal [options] _principal_
 	KADM5_UNK_PRINC (principal does not exist)
 	KADM5_UNK_POLICY (policy does not exist)
 	KADM5_BAD_MASK (shouldn't happen)
-
-rename_principal [-force] _old_ _new_
-	rename the principal _old_ to _new_.  Prompts for
-	confirmation, unless the "-force" option is given.  Requires
-	both the "add" and "delete" privileges.  Aliased to
-	"renprinc".
-
-	EXAMPLE
-	kadmin: renprinc tlyutest test0
-	Are you sure you want to rename the principal
-	"tlyutest@ATHENA.MIT.EDU" to
-	"test0@ATHENA.MIT.EDU"? (yes/no): yes
-	Principal "tlyutest@ATHENA.MIT.EDU" renamed to
-	"test0@ATHENA.MIT.EDU".
-	Make sure that you have removed "tlyutest@ATHENA.MIT.EDU" from
-	all ACLs before reusing.
-	kadmin:
-
-	ERRORS
-	KADM5_AUTH_ADD (requires "add" privilege)
-	KADM5_AUTH_DELETE (requires "delete" privilege)
-	KADM5_UNK_PRINC (source principal does not exist)
-	KADM5_DUP (target principal already exists)
 
 change_password [options] _principal_
 	changes the password of _principal_.  Prompts for a new

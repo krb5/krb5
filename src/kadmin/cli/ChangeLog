@@ -1,3 +1,12 @@
+Mon Aug 12 20:20:11 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadmin.1: Remove rename_principal. Add -maxrenewlife.
+
+	* kadmin.c (kadmin_getprinc): Display the maximum renewable life
+			field. 
+		(kadmin_parse_princ_args): Add -maxrenwlife as a settable
+			field. 
+
 Mon Aug 12 11:47:31 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin_ct.ct: fix typo in add_principal
