@@ -414,7 +414,7 @@ K5Library68K K5Library68K.MAP :: {AUTOGEN_OUTPUT} /mac/K5Library.exp {K5RTLCFM68
 		-model cfmflat -@export "/mac/K5Library.exp" -sym fullpath \
 		-map K5Library68K.MAP -o K5Library68K \
 		-init "__initializeK5" -term "__terminateK5" \
-		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib68K" \
+		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
 		{K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
 K5Library68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o K5Library68K
