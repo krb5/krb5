@@ -1,3 +1,10 @@
+1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
+
+	* changepw.c (krb5_change_password):
+		Reorganized code so that krb5_change_password actually frees
+		everything it allocated on error.  Also fixed some memory 
+		leaks which happened even without an error occurring.
+
 1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c (krb5_prompter_posix): Provide Win32 implementation
