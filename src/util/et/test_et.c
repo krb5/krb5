@@ -6,7 +6,10 @@
 
 extern int sys_nerr, errno;
 
-main()
+/* XXX Not part of official public API.  */
+extern const char *error_table_name (errcode_t);
+
+int main()
 {
 	printf("Before initiating error table:\n\n");
 	printf("Table name '%s'\n", error_table_name(KRB_MK_AP_TGTEXP));
@@ -21,7 +24,7 @@ main()
 	printf("With 0: tgt-expired -> %s\n", error_message(KRB_MK_AP_TGTEXP));
 
 	initialize_krb_error_table();
-	printf("KRB error table initialized:  base %d (%s), name %s\n",
+	printf("KRB error table initialized:  base %ld (%s), name %s\n",
 	       ERROR_TABLE_BASE_krb, error_message(ERROR_TABLE_BASE_krb),
 	       error_table_name(ERROR_TABLE_BASE_krb));
 	initialize_krb_error_table();
@@ -29,7 +32,7 @@ main()
 	       error_message(KRB_MK_AP_TGTEXP));
 
 	initialize_quux_error_table();
-	printf("QUUX error table initialized: base %d (%s), name %s\n",
+	printf("QUUX error table initialized: base %ld (%s), name %s\n",
 	       ERROR_TABLE_BASE_quux, error_message(ERROR_TABLE_BASE_quux),
 	       error_table_name(ERROR_TABLE_BASE_quux));
 
@@ -45,4 +48,5 @@ main()
 	com_err("whoami", FOO_ERR, " -- message goes %s", "here");
 	com_err("whoami", 0, (char *)0);
 	com_err("whoami", 0, "error number %d\n", 0);
+	return 0;
 }

@@ -1,3 +1,11 @@
+2000-11-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (check-unix): Depend on, and run, t_com_err and
+	test_et.
+	* test_et.c (main): Return type is int; return 0 at end.  Use %ld
+	format for error code values.
+	(error_table_name): Declare.
+
 2000-11-08  Ken Raeburn  <raeburn@mit.edu>
 
 	Test out lclint and its4 on com_err library, fixing reported
