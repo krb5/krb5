@@ -36,12 +36,11 @@
 
 #if !defined(lint) && !defined(SABER)
 static char rcsid_des_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
-#include <mit-copyright.h>
+#include <krb5/copyright.h>
 
-#include <stdio.h>
 #include <krb5/krb5.h>
 #include "des_int.h"
 #include "s_table.h"
@@ -123,9 +122,9 @@ mit_des_ecb_encrypt(clear, cipher, schedule, encrypt)
 #endif
     {
 	if (clear) L1 = *clear++;
-	else L1 = NULL;
+	else L1 = 0;
 	if (clear) R1 = *clear;
-	else R1 = NULL;
+	else R1 = 0;
     }
 
 #ifdef DEBUG
