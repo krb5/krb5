@@ -53,7 +53,7 @@
 #define KG_TOK_SIGN_MSG		0x0101
 #define KG_TOK_SEAL_MSG		0x0201
 #define	KG_TOK_MIC_MSG		0x0101
-#define	KG_TOK_WRAP_MSG		0x0202
+#define	KG_TOK_WRAP_MSG		0x0201
 #define KG_TOK_DEL_CTX		0x0102
 
 /** internal types **/

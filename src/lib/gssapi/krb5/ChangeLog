@@ -1,5 +1,9 @@
 Fri Dec  1 17:11:43 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* gssapiP_krb5.h (KG_TOK_WRAP_MSG): Changed token ID for
+		KG_TOK_WRAP_MSG to match KG_TOK_SEAL_MSG both should be
+		0x0201.
+
 	* krb5_gss_glue.c (gss_inquire_names_for_mech): Added new context
 		argument to the call of krb5_gss_inquire_names_for_mech().
 
