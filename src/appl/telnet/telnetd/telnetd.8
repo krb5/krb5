@@ -299,22 +299,6 @@ validated logins are allowed, and is
 usually useful for controlling remote logins
 from outside of a firewall.
 .It Fl S Ar tos
-.It Fl u Ar len
-This option is used to specify the size of the field
-in the
-.Dv utmp
-structure that holds the remote host name.
-If the resolved host name is longer than
-.Ar len ,
-the dotted decimal value will be used instead.
-This allows hosts with very long host names that
-overflow this field to still be uniquely identified.
-Specifying
-.Fl u0
-indicates that only dotted decimal addresses
-should be put into the
-.Pa utmp
-file.
 .It Fl U
 This option causes
 .Nm telnetd

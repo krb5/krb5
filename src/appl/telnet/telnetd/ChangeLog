@@ -1,3 +1,14 @@
+Thu Jun 13 17:05:17 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* telnetd.8: Remove documentation of  desupported -u options.
+
+	* sys_term.c: Remove last fragments of PARENT_DOES_UTMP, and
+ 	remove dependence on utmp.h and utmpx.h
+
+	* telnetd.c: Remove support for -u option as that type of utmp
+ 	mucking is below the libpty abstraction and I do not see it as
+ 	useful enough to export outside libpty.
+
 Tue Jun  4 00:27:09 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Ezra's changes to allow compiling w/o krb4

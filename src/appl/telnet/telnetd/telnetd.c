@@ -87,7 +87,6 @@ struct	socket_security ss;
 #include <libtelnet/enc-proto.h>
 #endif
 
-extern	int utmp_len;
 int	registerd_host_only = 0;
 
 #ifdef	STREAMSPTY
@@ -149,7 +148,7 @@ extern void usage P((void));
  * passed off to getopt().
  */
 char valid_opts[] = {
-	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'u', ':', 'U',
+	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -397,9 +396,6 @@ main(argc, argv)
 		    }
 #endif	/* KRB5 */
 
-		case 'u':
-			utmp_len = atoi(optarg);
-			break;
 
 		case 'U':
 			registerd_host_only = 1;
@@ -911,8 +907,7 @@ pty_init();
 	if (hp == NULL && registerd_host_only) {
 		fatal(net, "Couldn't resolve your address into a host name.\r\n\
          Please contact your net administrator");
-	} else if (hp &&
-	    (strlen(hp->h_name) <= ((utmp_len < 0) ? -utmp_len : utmp_len))) {
+	} else if (hp ) {
 		host = hp->h_name;
 	} else {
 		host = inet_ntoa(who->sin_addr);

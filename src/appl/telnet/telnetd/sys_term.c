@@ -52,29 +52,13 @@
 
 char *login_program = LOGIN_PROGRAM;
 
-#if defined(CRAY) || defined(__hpux)
-# define PARENT_DOES_UTMP
-#endif
-
 #ifdef	NEWINIT
 #include <initreq.h>
 int	utmp_len = MAXHOSTNAMELEN;	/* sizeof(init_request.host) */
 #else	/* NEWINIT*/
-# ifdef	UTMPX
-# include <utmpx.h>
-struct	utmpx wtmp;
-# else
-#include<utmp.h>
-struct	utmp wtmp;
-#endif /*UTMPX*/
 
-int	utmp_len = sizeof(wtmp.ut_host);
-# ifndef PARENT_DOES_UTMP
 char	wtmpf[]	= "/usr/adm/wtmp";
 char	utmpf[] = "/etc/utmp";
-# else /* PARENT_DOES_UTMP */
-char	wtmpf[]	= "/etc/wtmp";
-# endif /* PARENT_DOES_UTMP */
 
 # ifdef CRAY
 #include <tmpdir.h>
@@ -896,30 +880,8 @@ tty_isnewmap()
 }
 #endif
 
-#ifdef PARENT_DOES_UTMP
-# ifndef NEWINIT
-extern	struct utmp wtmp;
-extern char wtmpf[];
-# else	/* NEWINIT */
-int	gotalarm;
-
-	/* ARGSUSED */
-	void
-nologinproc(sig)
-	int sig;
-{
-	gotalarm++;
-}
-# endif	/* NEWINIT */
-#endif /* PARENT_DOES_UTMP */
 
 #ifndef	NEWINIT
-# ifdef PARENT_DOES_UTMP
-extern void utmp_sig_init P((void));
-extern void utmp_sig_reset P((void));
-extern void utmp_sig_wait P((void));
-extern void utmp_sig_notify P((int));
-# endif /* PARENT_DOES_UTMP */
 #endif
 
 /*
@@ -1478,189 +1440,7 @@ cleanup(sig)
 	exit(1);
 }
 
-#if defined(PARENT_DOES_UTMP) && !defined(NEWINIT)
-/*
- * _utmp_sig_rcv
- * utmp_sig_init
- * utmp_sig_wait
- *	These three functions are used to coordinate the handling of
- *	the utmp file between the server and the soon-to-be-login shell.
- *	The server actually creates the utmp structure, the child calls
- *	utmp_sig_wait(), until the server calls utmp_sig_notify() and
- *	signals the future-login shell to proceed.
- */
-static int caught=0;		/* NZ when signal intercepted */
-static void (*func)();		/* address of previous handler */
-
-	void
-_utmp_sig_rcv(sig)
-	int sig;
-{
-	caught = 1;
-	(void) signal(SIGUSR1, func);
-}
-
-	void
-utmp_sig_init()
-{
-	/*
-	 * register signal handler for UTMP creation
-	 */
-	if ((int)(func = signal(SIGUSR1, _utmp_sig_rcv)) == -1)
-		fatalperror(net, "telnetd/signal");
-}
-
-	void
-utmp_sig_reset()
-{
-	(void) signal(SIGUSR1, func);	/* reset handler to default */
-}
-
-# ifdef __hpux
-# define sigoff() /* do nothing */
-# define sigon() /* do nothing */
-# endif
-
-	void
-utmp_sig_wait()
-{
-	/*
-	 * Wait for parent to write our utmp entry.
-	 */
-	sigoff();
-	while (caught == 0) {
-		pause();	/* wait until we get a signal (sigon) */
-		sigoff();	/* turn off signals while we check caught */
-	}
-	sigon();		/* turn on signals again */
-}
-
-	void
-utmp_sig_notify(pid)
-{
-	kill(pid, SIGUSR1);
-}
-
-# ifdef CRAY
-static int gotsigjob = 0;
-
-	/*ARGSUSED*/
-	void
-sigjob(sig)
-	int sig;
-{
-	register int jid;
-	register struct jobtemp *jp;
-
-	while ((jid = waitjob(NULL)) != -1) {
-		if (jid == 0) {
-			return;
-		}
-		gotsigjob++;
-		jobend(jid, NULL, NULL);
-	}
-}
-
-/*
- * Clean up the TMPDIR that login created.
- * The first time this is called we pick up the info
- * from the utmp.  If the job has already gone away,
- * then we'll clean up and be done.  If not, then
- * when this is called the second time it will wait
- * for the signal that the job is done.
- */
-	int
-cleantmp(wtp)
-	register struct utmp *wtp;
-{
-	struct utmp *utp;
-	static int first = 1;
-	register int mask, omask, ret;
-	extern struct utmp *getutid P((const struct utmp *_Id));
 
 
-	mask = sigmask(WJSIGNAL);
-
-	if (first == 0) {
-		omask = sigblock(mask);
-		while (gotsigjob == 0)
-			sigpause(omask);
-		return(1);
-	}
-	first = 0;
-	setutent();	/* just to make sure */
-
-	utp = getutid(wtp);
-	if (utp == 0) {
-		syslog(LOG_ERR, "Can't get /etc/utmp entry to clean TMPDIR");
-		return(-1);
-	}
-	/*
-	 * Nothing to clean up if the user shell was never started.
-	 */
-	if (utp->ut_type != USER_PROCESS || utp->ut_jid == 0)
-		return(1);
-
-	/*
-	 * Block the WJSIGNAL while we are in jobend().
-	 */
-	omask = sigblock(mask);
-	ret = jobend(utp->ut_jid, utp->ut_tpath, utp->ut_user);
-	sigsetmask(omask);
-	return(ret);
-}
-
-	int
-jobend(jid, path, user)
-	register int jid;
-	register char *path;
-	register char *user;
-{
-	static int saved_jid = 0;
-	static char saved_path[sizeof(wtmp.ut_tpath)+1];
-	static char saved_user[sizeof(wtmp.ut_user)+1];
-
-	if (path) {
-		strncpy(saved_path, path, sizeof(wtmp.ut_tpath));
-		strncpy(saved_user, user, sizeof(wtmp.ut_user));
-		saved_path[sizeof(saved_path)] = '\0';
-		saved_user[sizeof(saved_user)] = '\0';
-	}
-	if (saved_jid == 0) {
-		saved_jid = jid;
-		return(0);
-	}
-	cleantmpdir(jid, saved_path, saved_user);
-	return(1);
-}
-
-/*
- * Fork a child process to clean up the TMPDIR
- */
-cleantmpdir(jid, tpath, user)
-	register int jid;
-	register char *tpath;
-	register char *user;
-{
-	switch(fork()) {
-	case -1:
-		syslog(LOG_ERR, "TMPDIR cleanup(%s): fork() failed: %m",
-							tpath);
-		break;
-	case 0:
-		execl(CLEANTMPCMD, CLEANTMPCMD, user, tpath, 0);
-		syslog(LOG_ERR, "TMPDIR cleanup(%s): execl(%s) failed: %m",
-							tpath, CLEANTMPCMD);
-		exit(1);
-	default:
-		/*
-		 * Forget about child.  We will exit, and
-		 * /etc/init will pick it up.
-		 */
-		break;
-	}
-}
-# endif /* CRAY */
-#endif	/* defined(PARENT_DOES_UTMP) && !defined(NEWINIT) */
 
 
