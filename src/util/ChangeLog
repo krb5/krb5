@@ -1,3 +1,8 @@
+Fri Feb 21 15:58:19 1997  Sam Hartman  <hartmans@mit.edu>
+
+	* makeshlib.sh : Remove non AIX stuff; rewrite AIX stuff to work
+ 	with new build system.
+
 Fri Dec  6 10:59:32 1996  Tom Yu  <tlyu@mit.edu>
 
 	* getsyms: Don't echo filename if there are no bad symbols.
