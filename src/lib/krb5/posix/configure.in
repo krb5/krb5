@@ -6,6 +6,7 @@ SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
 ISODE_INCLUDE
 AC_CONST
-AC_REPLACE_FUNCS(vfprintf vsprintf strdup strerror memmove)
+AC_HEADER_CHECK(paths.h,AC_DEFINE(HAS_PATHS_H))
+AC_REPLACE_FUNCS(vfprintf vsprintf strdup strerror memmove daemon)
 AC_FUNC_CHECK(vsyslog, ,[LIBOBJS="[$]LIBOBJS syslog.o"])
 AC_OUTPUT(Makefile,[EXTRA_RULES])
