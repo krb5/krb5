@@ -248,4 +248,11 @@ error_code KRB5_SENDAUTH_BADAPPLVERS,	"Bad application version was sent (via sen
 error_code KRB5_SENDAUTH_BADRESPONSE,	"Bad response (during sendauth exchange)"
 error_code KRB5_SENDAUTH_REJECTED,	"Server rejected authentication (during sendauth exchange)"
 error_code KRB5_SENDAUTH_MUTUAL_FAILED,	"Mutual authentication failed (during sendauth exchange)"
+
+# version number errors
+
+error_code KRB5_RCACHE_BADVNO,	"Unsupported replay cache format version number"
+error_code KRB5_CCACHE_BADVNO,	"Unsupported credentials cache format version number"
+error_code KRB5_KEYTAB_BADVNO,	"Unsupported key table format version number"
+
 end
