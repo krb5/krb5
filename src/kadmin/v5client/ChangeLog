@@ -1,3 +1,8 @@
+Fri Sep 29 14:44:24 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin5.c (kadmin_startup): initialize action before strcat'ing
+	on to it.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * kadmin5.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g

@@ -1726,6 +1726,7 @@ kadmin_startup(argc, argv)
 
 	n2alloc++;
 	if (action = (char *) malloc(n2alloc)) {
+	    action[0] = 0;
 	    for (i=optind; i<argc; i++) {
 		strcat(action, argv[i]);
 		strcat(action, " ");
