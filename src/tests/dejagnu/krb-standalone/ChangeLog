@@ -1,3 +1,8 @@
+Sun Nov  9 10:07:07 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* gssftp.exp: Replace "else if" with "elseif" as expect 5.25
+ 	requires it. [krb5-misc/487]
+
 Mon Nov 11 20:54:37 1996  Mark Eichin  <eichin@cygnus.com>
 	Tue Sep 17 19:19:56 1996  Ken Raeburn  <raeburn@cygnus.com>
 

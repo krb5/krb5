@@ -205,6 +205,10 @@ static const char * krb_get_err_text(kerror)
 #endif
 #endif
 
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
+
 #include "loginpaths.h"
 
 #ifdef POSIX_TERMIOS
@@ -232,12 +236,33 @@ static const char * krb_get_err_text(kerror)
 
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
 
+#if defined(_PATH_MAILDIR)
+#define MAILDIR		_PATH_MAILDIR
+#else
+#define MAILDIR		"/usr/spool/mail"
+#endif
+#if defined(_PATH_NOLOGIN)
+#define NOLOGIN		_PATH_NOLOGIN
+#else
+#define NOLOGIN		"/etc/nologin"
+#endif
+#if defined(_PATH_LASTLOG)
+#define LASTLOG		_PATH_LASTLOG
+#else
+#define LASTLOG		"/usr/adm/lastlog"
+#endif
+#if defined(_PATH_BSHELL)
+#define BSHELL		_PATH_BSHELL
+#else
+#define BSHELL		"/bin/sh"
+#endif
+
+#if (defined(BSD) && (BSD >= 199103))	/* no /usr/ucb */
+#define QUOTAWARN	"/usr/bin/quota"
+#endif
+
 #define	MOTDFILE	"/etc/motd"
-#define	MAILDIR		"/usr/spool/mail"
-#define	NOLOGIN		"/etc/nologin"
 #define	HUSHLOGIN	".hushlogin"
-#define	LASTLOG		"/usr/adm/lastlog"
-#define	BSHELL		"/bin/sh"
 
 #if !defined(OQUOTA) && !defined(QUOTAWARN)
 #define QUOTAWARN	"/usr/ucb/quota" /* warn user about quotas */
@@ -439,7 +464,7 @@ int unix_passwd_okay (pass)
 
     /* copy the first 8 chars of the password for unix crypt */
     strncpy(user_pwcopy, pass, sizeof(user_pwcopy));
-    user_pwcopy[8]='\0';
+    user_pwcopy[sizeof(user_pwcopy) - 1]='\0';
     namep = crypt(user_pwcopy, salt);
     memset (user_pwcopy, 0, sizeof(user_pwcopy));
     /* ... and wipe the copy now that we have the string */
@@ -487,16 +512,19 @@ void k_init (ttyn)
 	unlink(ccfile+strlen("FILE:"));
     } else {
 	/* note it correctly */
-	strcpy(ccfile, getenv(KRB5_ENV_CCNAME));
+	strncpy(ccfile, getenv(KRB5_ENV_CCNAME), sizeof(ccfile));
+	ccfile[sizeof(ccfile) - 1] = '\0';
     }
 
 #ifdef KRB4_GET_TICKETS
     if (krb_get_lrealm(realm, 1) != KSUCCESS) {
 	strncpy(realm, KRB_REALM, sizeof(realm));
+	realm[sizeof(realm) - 1] = '\0';
     }
     if (login_krb4_get_tickets || login_krb4_convert) {
 	/* Set up the ticket file environment variable */
 	strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
+	tkfile[sizeof(tkfile) - 1] = '\0';
 	strncat(tkfile, strrchr(ttyn, '/')+1,
 		sizeof(tkfile) - strlen(tkfile));
 	(void) unlink (tkfile);
@@ -617,7 +645,8 @@ int try_krb5 (me_p, pass)
     } else {
 	/* get_name pulls out just the name not the
 	   type */
-	strcpy(ccfile, krb5_cc_get_name(kcontext, ccache));
+	strncpy(ccfile, krb5_cc_get_name(kcontext, ccache), sizeof(ccfile));
+	ccfile[sizeof(ccfile) - 1] = '\0';
 	krbflag = got_v5_tickets = 1;
 	return 1;
     }
@@ -708,7 +737,8 @@ try_convert524 (kcontext, me)
 	return 0;
     }
     got_v4_tickets = 1;
-    strcpy(tkfile, tkt_string());
+    strncpy(tkfile, tkt_string(), sizeof(tkfile));
+    tkfile[sizeof(tkfile) - 1] = '\0';
     return 1;
 }
 #endif
@@ -729,7 +759,8 @@ try_krb4 (me, user_pwstring)
     case INTK_OK:
 	kpass_ok = 1;
 	krbflag = 1;
-	strcpy(tkfile, tkt_string());
+	strncpy(tkfile, tkt_string(), sizeof(tkfile));
+	tkfile[sizeof(tkfile) - 1] = '\0';
 	break;	
 	/* These errors should be silent */
 	/* So the Kerberos database can't be probed */
@@ -899,7 +930,8 @@ int verify_krb_v5_tgt (c)
 
     /* since krb5_sname_to_principal has done the work for us, just
        extract the name directly */
-    strncpy(phost, krb5_princ_component(c, princ, 1)->data, BUFSIZ);
+    strncpy(phost, krb5_princ_component(c, princ, 1)->data, sizeof(phost));
+    phost[sizeof(phost) - 1] = '\0';
 
     /* Do we have host/<host> keys? */
     /* (use default keytab, kvno IGNORE_VNO to get the first match,
@@ -1023,7 +1055,8 @@ static sigtype sigsys ()
     siglongjmp(setpag_buf, 1);
 }
 
-static int try_afscall ()
+static int try_afscall (scall)
+	int (*scall)();
 {
     handler sa, osa;
     volatile int retval = 0;
@@ -1032,7 +1065,7 @@ static int try_afscall ()
     handler_init (sa, sigsys);
     handler_swap (SIGSYS, sa, osa);
     if (sigsetjmp(setpag_buf, 1) == 0) {
-	setpag ();
+	(*scall)();
 	retval = 1;
     }
     handler_set (SIGSYS, osa);
@@ -1105,7 +1138,7 @@ read_env_vars_from_file (filename)
     char *p, *eq;
     char tbuf[MAXPATHLEN+2];
 
-    if ((fp = fopen("/etc/environment", "r")) != NULL) {
+    if ((fp = fopen(filename, "r")) != NULL) {
 	while (fgets(tbuf, sizeof(tbuf), fp)) {
 	    if (tbuf[0] == '#')
 		continue;
@@ -1326,6 +1359,14 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	 */
 	if (eflag)
 	    	lgetstr(term, sizeof(term), "Terminal type");
+	else if (!(kflag || Kflag ))  /*Preserve terminal if not read over net */
+	  {
+	    if (getenv("TERM")) {
+	      strncpy(term, getenv("TERM"), sizeof(term));
+	      term[sizeof(term) - 1] = '\0';
+	    }
+	  }
+	
 	term_init (rflag || kflag || Kflag || eflag);
 
 	for (cnt = getdtablesize(); cnt > 2; cnt--)
@@ -1380,7 +1421,6 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		/* if user not super-user, check for disabled logins */
 		if (pwd == NULL || pwd->pw_uid)
 			checknologin();
-
 
 		/*
 		 * Allows automatic login by root.
@@ -1724,11 +1764,12 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 #ifdef	HAVE_SETLUID
 	/*
 	 * If we're on a system which keeps track of login uids, then
-	 * attempt to set the login uid, but don't get too unhappy when/if
-	 * it doesn't succeed.
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
 	 */
-	if ((uid_t) getluid() < (uid_t) 0) {
-	    setluid((uid_t) pwd->pw_uid);
+ 	if (setluid((uid_t) pwd->pw_uid) < 0) {
+	    perror("setuid");
+	    sleepexit(1);
 	}
 #endif	/* HAVE_SETLUID */
 #ifdef _IBMR2
@@ -1828,19 +1869,21 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	read_env_vars_from_file ("/etc/TIMEZONE");
 #else
 	if (tz)
-	    setenv ("TZ", tz, 0);
+	    setenv ("TZ", tz, 1);
 #endif
 
 	if (ccname)
-		setenv("KRB5CCNAME", ccname, 0);
+		setenv("KRB5CCNAME", ccname, 1);
 
-	setenv("HOME", pwd->pw_dir, 0);
-	setenv("PATH", LPATH, 0);
-	setenv("USER", pwd->pw_name, 0);
-	setenv("SHELL", pwd->pw_shell, 0);
+	setenv("HOME", pwd->pw_dir, 1);
+	setenv("PATH", LPATH, 1);
+	setenv("USER", pwd->pw_name, 1);
+	setenv("SHELL", pwd->pw_shell, 1);
 
-	if (term[0] == '\0')
+	if (term[0] == '\0') {
 		(void) strncpy(term, stypeof(tty), sizeof(term));
+		term[sizeof(term) - 1] = '\0';
+	}
 	if (term[0])
 		(void)setenv("TERM", term, 0);
 #ifdef KRB4_GET_TICKETS
@@ -1922,8 +1965,9 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	handler_set (SIGTSTP, sa);
 
 	tbuf[0] = '-';
-	(void) strcpy(tbuf + 1, (p = strrchr(pwd->pw_shell, '/')) ?
-	    p + 1 : pwd->pw_shell);
+	(void) strncpy(tbuf + 1, (p = strrchr(pwd->pw_shell, '/')) ?
+	    p + 1 : pwd->pw_shell, sizeof(tbuf) - 1);
+	tbuf[sizeof(tbuf) - 1] = '\0';
 	execlp(pwd->pw_shell, tbuf, 0);
 	fprintf(stderr, "login: no shell: ");
 	perror(pwd->pw_shell);
@@ -2180,7 +2224,7 @@ void dolastlog(quiet, tty)
 	int quiet;
 	char *tty;
 {
-#ifdef HAVE_LASTLOG_H
+#if defined(HAVE_LASTLOG_H) || (defined(BSD) && (BSD >= 199103))
 	struct lastlog ll;
 	int fd;
 
@@ -2202,9 +2246,11 @@ void dolastlog(quiet, tty)
 		}
 		(void)time(&ll.ll_time);
 		(void) strncpy(ll.ll_line, tty, sizeof(ll.ll_line));
-		if (hostname)
+		ll.ll_line[sizeof(ll.ll_line) - 1] = '\0';
+		if (hostname) {
 		    (void) strncpy(ll.ll_host, hostname, sizeof(ll.ll_host));
-		else
+		    ll.ll_host[sizeof(ll.ll_host) - 1] = '\0';
+		} else
 		    (void) memset(ll.ll_host, 0, sizeof(ll.ll_host));
 		(void)write(fd, (char *)&ll, sizeof(ll));
 		(void)close(fd);

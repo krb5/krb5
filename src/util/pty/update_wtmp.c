@@ -25,6 +25,9 @@
 #define WTMP_FILE _PATH_WTMP
 #endif
 
+#if !defined(WTMPX_FILE) && defined(_PATH_WTMPX) && defined(HAVE_UPDWTMPX)
+#define WTMPX_FILE _PATH_WTMPX
+#endif
 
 /* if it is *still* missing, assume SunOS */
 #ifndef WTMP_FILE
@@ -40,6 +43,7 @@ long ptyint_update_wtmp (ent , host, user)
     struct utmp ut;
     struct stat statb;
     int fd;
+    time_t uttime;
 #ifdef HAVE_UPDWTMPX
     struct utmpx utx;
 
@@ -71,7 +75,8 @@ long ptyint_update_wtmp (ent , host, user)
 #ifndef NO_UT_HOST
 	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
 #endif
-	  (void)time(&ut.ut_time);
+	  (void)time(&uttime);
+	  ut.ut_time = uttime;
 #if defined(HAVE_GETUTENT) && defined(USER_PROCESS)
 	  if (ent->ut_name) {
 	    if (!ut.ut_pid)

@@ -7,13 +7,15 @@ KRB5_SIGTYPE
 CHECK_UTMP
 CHECK_SIGPROCMASK
 CHECK_WAIT_TYPE
+CHECK_SETJMP
+CHECK_SIGNALS
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 DECLARE_SYS_ERRLIST
 AC_FUNC_VFORK
 AC_HEADER_STDARG
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/sockio.h)
 AC_REPLACE_FUNCS(getdtablesize)
 AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
 AC_CHECK_LIB(crypt,crypt) dnl 
@@ -45,6 +47,14 @@ AC_DEFINE(HAVE_SHADOW)
 fi
 dnl
 dnl
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID)
+		LIBS="$LIBS -lsecurity"
+	)
+	;;
+esac
 USE_ANAME
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB

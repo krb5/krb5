@@ -51,7 +51,11 @@ krb_get_lrealm(r,n)
 	    return(KFAILURE);
     }
 
-    if (fscanf(cnffile,"%s",r) != 1) {
+    /*
+     * XXX This assumes REALM_SZ == 40,
+     * and that r is 40 characters long.
+     */
+    if (fscanf(cnffile,"%39s",r) != 1) {
         (void) fclose(cnffile);
         return(KFAILURE);
     }

@@ -37,7 +37,9 @@ long pty_cleanup (slave, pid, update_utmp)
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);
 #ifdef HAVE_REVOKE
+#ifndef _AIX
     revoke(slave);
+#endif
     /*
      * Revoke isn't guaranteed to send a SIGHUP to the processes it
      * dissociates from the terminal.  The best solution without a Posix

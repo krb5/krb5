@@ -25,7 +25,7 @@ oblist=$2
 shift
 shift
 for dir do
-	oblists="$oblists${oblists+ }$dir/$oblist"
+	oblists="$oblists${oblists+ }$dir/$oblist";
 done
 
 stamp=`echo $library | sed -e 's/.a$/.stamp/'`
@@ -41,4 +41,4 @@ echo "Updating library $library from $oblists"
 
 $rmcmd
 $arcmd $library `for dir do (cd $dir; cat $oblist | \
-		sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g") done`
+	sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g"); done`

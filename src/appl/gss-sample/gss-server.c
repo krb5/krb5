@@ -494,6 +494,7 @@ main(argc, argv)
 		     /* this return value is not checked, because there's
 			not really anything to do if it fails */
 		     sign_server(s, server_creds);
+		     close(s);
 		 }
 	     } while (!once);
 	 }

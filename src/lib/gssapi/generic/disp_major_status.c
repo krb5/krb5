@@ -22,6 +22,7 @@
 
 #include "gssapiP_generic.h"
 #include <string.h>
+#include <stdio.h>
 
 /*
  * $Id$
@@ -120,7 +121,7 @@ int display_unknown(kind, value, buffer)
 
    sprintf(str, unknown_error, kind, value);
 
-   buffer->length = len;
+   buffer->length = strlen(str);
    buffer->value = str;
 
    return(1);
@@ -135,7 +136,7 @@ static OM_uint32 display_calling(minor_status, code, status_string)
 {
    const char *str;
 
-   if (str = GSS_CALLING_ERROR_STR(code)) {
+   if ((str = GSS_CALLING_ERROR_STR(code))) {
       if (! g_make_string_buffer(str, status_string)) {
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
@@ -160,7 +161,7 @@ static OM_uint32 display_routine(minor_status, code, status_string)
 {
    const char *str;
 
-   if (str = GSS_ROUTINE_ERROR_STR(code)) {
+   if ((str = GSS_ROUTINE_ERROR_STR(code))) {
       if (! g_make_string_buffer(str, status_string)) {
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
@@ -185,7 +186,7 @@ static OM_uint32 display_bit(minor_status, code, status_string)
 {
    const char *str;
 
-   if (str = GSS_SINFO_STR(code)) {
+   if ((str = GSS_SINFO_STR(code))) {
       if (! g_make_string_buffer(str, status_string)) {
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
@@ -234,14 +235,14 @@ OM_uint32 g_display_major_status(minor_status, status_value,
    /*** do routine error */
 
    if (*message_context == 0) {
-      if (tmp = GSS_ROUTINE_ERROR(status_value)) {
+      if ((tmp = GSS_ROUTINE_ERROR(status_value))) {
 	 status_value -= tmp;
-	 if (ret = display_routine(minor_status, tmp, status_string))
+	 if ((ret = display_routine(minor_status, tmp, status_string)))
 	    return(ret);
 	 *minor_status = 0;
 	 if (status_value) {
 	    (*message_context)++;
-	    return(GSS_S_CONTINUE_NEEDED);
+	    return(GSS_S_COMPLETE);
 	 } else {
 	    *message_context = 0;
 	    return(GSS_S_COMPLETE);
@@ -256,14 +257,14 @@ OM_uint32 g_display_major_status(minor_status, status_value,
    /*** do calling error */
 
    if (*message_context == 1) {
-      if (tmp = GSS_CALLING_ERROR(status_value)) {
+      if ((tmp = GSS_CALLING_ERROR(status_value))) {
 	 status_value -= tmp;
-	 if (ret = display_calling(minor_status, tmp, status_string))
+	 if ((ret = display_calling(minor_status, tmp, status_string)))
 	    return(ret);
 	 *minor_status = 0;
 	 if (status_value) {
 	    (*message_context)++;
-	    return(GSS_S_CONTINUE_NEEDED);
+	    return(GSS_S_COMPLETE);
 	 } else {
 	    *message_context = 0;
 	    return(GSS_S_COMPLETE);
@@ -295,7 +296,7 @@ OM_uint32 g_display_major_status(minor_status, status_value,
    for (bit=0; (((OM_uint32) 1)<<bit) != LSBGET(tmp); bit++) ;
 
    /* print it */
-   if (ret = display_bit(minor_status, bit, status_string))
+   if ((ret = display_bit(minor_status, bit, status_string)))
       return(ret);
 
    /* compute the new status_value/message_context */
@@ -303,7 +304,7 @@ OM_uint32 g_display_major_status(minor_status, status_value,
 
    if (status_value) {
       *message_context = bit+3;
-      return(GSS_S_CONTINUE_NEEDED);
+      return(GSS_S_COMPLETE);
    } else {
       *message_context = 0;
       return(GSS_S_COMPLETE);

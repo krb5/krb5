@@ -1,3 +1,102 @@
+Tue Mar 30 22:30:40 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (KLIB): -lcom_err, not $(COMERRLIB)
+
+Thu Mar 25 23:13:56 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (login): Check that the luid is not the uid we want to
+	change to prior to calling setluid() so that we can run as
+	non-root.
+
+Wed Mar 24 17:11:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sys/sockio.h.
+
+	* ftpcmd.y (urgsafe_getc): New function; like getc() except it
+	retries once if SIOCATMARK returns TRUE.
+	(getline): Use urgsafe_getc() rather than getc() to avoid problems
+	with certain Mac clients that cause the urgent pointer to end up
+	in a location that results in EOF from getc().
+
+Mon Mar  8 23:47:51 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.M: Resync with reality.
+
+	* Makefile.in (ftpd): Add libpty to link line.  Remove mention of
+	logwtmp files.
+
+	* ftpd.c: Fix up hostname logging to use
+	pty_make_sane_hostname().
+
+Thu Feb 25 23:31:37 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (reply): Don't call secure_gss_error() or secure_error()
+	from within reply() to avoid setting up an infinite
+	loop. [krb5-appl/684]
+
+Thu Feb 18 18:34:23 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add check for setluid() in libsecurity.
+
+	* ftpd.c (login): Add call to setluid() if necessary.
+
+Fri Feb 12 21:16:26 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c: strcat -> strncat
+
+Fri Oct 23 18:18:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpcmd.y (cmd): Don't allow the PORT command to accept a port
+		number lower than 1024; this prevents some nasty ftp
+		"bounce attacks" to SMTP ports, etc.
+
+Fri May  8 18:06:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpcmd.y (cmd): Fix Y2K problem in the MDTM command.
+
+Tue Apr 21 19:59:45 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SIGNALS and CHECK_SETJMP to help with
+	changes in ftpd.c.
+
+Fri Apr 10 20:06:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (receive_data):
+	(send_data): Add support for sigsetjmp().
+	(main): Use sigaction() if we can to avoid SysV lossage.
+	(send_file_list): Oops missed a sigsetjmp() call.
+	(send_data): Add call to secure_flush() to send a zero length
+	buffer when aborting.
+	(send_file_list): Add call to secure_flush() to send a zero length
+	buffer when aborting.
+
+	* ftpcmd.y (PBSZ): Remove restriction on shrinking buffer size.
+
+Thu Mar  5 13:59:47 1998  Dan Winship  <danw@mit.edu>
+
+	* ftpcmd.y (getline): Don't syslog passwords! (or newlines)
+
+Tue Feb 24 21:34:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Add production "nonguest" to catch things that
+	anonymous users aren't supposed to do.  Replace "check_login" with
+	"nonguest" in a few places to prevent w4r3z d00dz from being
+	lame with world-writable incoming directories.
+
+Fri Feb  6 13:25:28 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* popen.c (ftpd_popen): Make sure you can't overrun the argv[] and
+		gargv[] arrays.  (Patch submitted by dima@best.net).
+
+Sun Dec 21 18:17:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* logwtmp.c (ftp_logwtmp): Rename logwtmp to ftp_logwtmp to avoid
+	collision with native logwtmp.  Also, return void rather than
+	int.
+
+	* ftpd.c: Rename logwtmp to ftp_logwtmp to avoid collision with
+	native logwtmp.
+
 Tue Nov 12 00:04:00 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (ftpd_userok): Don't undconditionally return -1.

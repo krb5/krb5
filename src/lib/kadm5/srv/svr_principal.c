@@ -964,9 +964,14 @@ static kadm5_ret_t add_to_history(krb5_context context,
 
      /* resize the adb->old_keys array if necessary */
      if (adb->old_key_len < pol->pw_history_num-1) {
-	  adb->old_keys = (osa_pw_hist_ent *)
-	       realloc(adb->old_keys,
-		       (adb->old_key_len+1)*sizeof(osa_pw_hist_ent));
+	  if (adb->old_keys == NULL) {
+	       adb->old_keys = (osa_pw_hist_ent *)
+		    malloc((adb->old_key_len + 1) * sizeof (osa_pw_hist_ent));
+	  } else {
+	       adb->old_keys = (osa_pw_hist_ent *)
+		    realloc(adb->old_keys,
+			    (adb->old_key_len + 1) * sizeof (osa_pw_hist_ent));
+	  }
 	  if (adb->old_keys == NULL)
 	       return(ENOMEM);
 	  

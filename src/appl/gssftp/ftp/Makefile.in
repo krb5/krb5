@@ -12,7 +12,7 @@ SRCS	= cmds.c cmdtab.c domacro.c ftp.c getpass.c glob.c main.c pclose.c \
 OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o pclose.o \
 	  radix.o ruserpass.o secure.o
 
-KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
+KLIB = -lgssapi_krb5 -lkrb5 -lcrypto -lcom_err
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
 		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
 

@@ -94,3 +94,18 @@
 #define RPATH "/usr/bin:/bin"
 #endif
 #endif
+
+#ifdef _PATH_DEFPATH
+#define LPATH _PATH_DEFPATH
+#define RPATH _PATH_DEFPATH
+#endif
+
+/* catch-all entries for operating systems we haven't looked up
+   hardcoded paths for */
+#ifndef LPATH
+#define LPATH "/usr/bin:/bin"
+#endif
+
+#ifndef RPATH
+#define RPATH "/usr/bin:/bin"
+#endif

@@ -863,7 +863,7 @@ AC_SUBST(LD_SHLIBDIR_PREFIX)
 SHLIB_RPATH_DIRS=
 if test $krb5_cv_shlibs_use_dirs = yes ; then
 	if test $krb5_cv_shlibs_use_colon_dirs = yes ; then
-		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}$(KRB5_SHLIBDIR)"
+		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
 	else
 		SHLIB_RPATH_DIRS="${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
 	fi

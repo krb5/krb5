@@ -184,12 +184,14 @@ int tf_init(tf_name, rw)
 {
     int     wflag;
     uid_t   me, getuid();
-    struct stat stat_buf;
+    struct stat stat_buf, stat_buffd;
 #ifdef TKT_SHMEM
     char shmidname[MAXPATHLEN]; 
     FILE *sfp;
     int shmid;
 #endif
+
+    me = getuid();
 
     switch (rw) {
     case R_TKT_FIL:
@@ -207,25 +209,9 @@ int tf_init(tf_name, rw)
     if (tf_name == 0)
 	tf_name = tkt_string();
 
-    if (lstat(tf_name, &stat_buf) < 0)
-	switch (errno) {
-	case ENOENT:
-	    return NO_TKT_FIL;
-	default:
-	    return TKT_FIL_ACC;
-	}
-    me = getuid();
-    if ((stat_buf.st_uid != me && me != 0) ||
-	((stat_buf.st_mode & S_IFMT) != S_IFREG))
-	return TKT_FIL_ACC;
 #ifdef TKT_SHMEM
     (void) strcpy(shmidname, tf_name);
     (void) strcat(shmidname, ".shm");
-    if (stat(shmidname,&stat_buf) < 0)
-	return(TKT_FIL_ACC);
-    if ((stat_buf.st_uid != me && me != 0) ||
-	((stat_buf.st_mode & S_IFMT) != S_IFREG))
-	return TKT_FIL_ACC;
 #endif /* TKT_SHMEM */
 
     /*
@@ -240,15 +226,51 @@ int tf_init(tf_name, rw)
 #ifdef TKT_SHMEM
     sfp = fopen(shmidname, "r");	/* only need read/write on the
 					   actual tickets */
-    if (sfp == 0)
-    	return TKT_FIL_ACC;
+    if (sfp == 0) {
+        switch(errno) {
+        case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+
+    /* lstat() and fstat() the file to check that the file we opened is the *
+     * one we think it is, and to check ownership.                          */
+    if ((fstat(sfp->_file, &stat_buffd) < 0) || 
+	(lstat(shmidname, &stat_buf) < 0)) {
+        (void) close(fd);
+	fd = -1;
+	switch(errno) {
+	case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+    /* Check that it's the right file */
+    if ((stat_buf.st_ino != stat_buffd.st_ino) ||
+	(stat_buf.st_dev != stat_buffd.st_dev)) {
+        (void) close(fd);
+	fd = -1;
+	return TKT_FIL_ACC;
+    }
+    /* Check ownership */
+    if ((stat_buffd.st_uid != me && me != 0) ||
+	((stat_buffd.st_mode & S_IFMT) != S_IFREG)) {
+        (void) close(fd);
+	fd = -1;
+	return TKT_FIL_ACC;
+    }
+
+
+
     shmid = -1;
     {
 	char buf[BUFSIZ];
 	int val;			/* useful for debugging fscanf */
 	/* We provide our own buffer here since some STDIO libraries
 	   barf on unbuffered input with fscanf() */
-
 	setbuf(sfp, buf);
 	if ((val = fscanf(sfp,"%d",&shmid)) != 1) {
 	    (void) fclose(sfp);
@@ -280,6 +302,38 @@ int tf_init(tf_name, rw)
     if (wflag) {
 	fd = open(tf_name, O_RDWR, 0600);
 	if (fd < 0) {
+	    switch(errno) {
+	    case ENOENT:
+	        return NO_TKT_FIL;
+	    default:
+	        return TKT_FIL_ACC;
+	  }
+	}
+	/* lstat() and fstat() the file to check that the file we opened is the *
+	 * one we think it is, and to check ownership.                          */
+	if ((fstat(fd, &stat_buffd) < 0) || 
+	    (lstat(tf_name, &stat_buf) < 0)) {
+	    (void) close(fd);
+	    fd = -1;
+	    switch(errno) {
+	    case ENOENT:
+	        return NO_TKT_FIL;
+	    default:
+	        return TKT_FIL_ACC;
+	    }
+	}
+	/* Check that it's the right file */
+	if ((stat_buf.st_ino != stat_buffd.st_ino) ||
+	    (stat_buf.st_dev != stat_buffd.st_dev)) {
+	    (void) close(fd);
+	    fd = -1;
+	    return TKT_FIL_ACC;
+	}
+	/* Check ownership */
+	if ((stat_buffd.st_uid != me && me != 0) ||
+	    ((stat_buffd.st_mode & S_IFMT) != S_IFREG)) {
+	    (void) close(fd);
+	    fd = -1;
 	    return TKT_FIL_ACC;
 	}
 	if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
@@ -299,6 +353,38 @@ int tf_init(tf_name, rw)
 
     fd = open(tf_name, O_RDONLY, 0600);
     if (fd < 0) {
+        switch(errno) {
+	case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+    /* lstat() and fstat() the file to check that the file we opened is the *
+     * one we think it is, and to check ownership.                          */
+    if ((fstat(fd, &stat_buffd) < 0) || 
+	(lstat(tf_name, &stat_buf) < 0)) {
+        (void) close(fd);
+	fd = -1;
+	switch(errno) {
+	case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+    /* Check that it's the right file */
+    if ((stat_buf.st_ino != stat_buffd.st_ino) ||
+	(stat_buf.st_dev != stat_buffd.st_dev)) {
+        (void) close(fd);
+	fd = -1;
+	return TKT_FIL_ACC;
+    }
+    /* Check ownership */
+    if ((stat_buffd.st_uid != me && me != 0) ||
+	((stat_buffd.st_mode & S_IFMT) != S_IFREG)) {
+        (void) close(fd);
+	fd = -1;
 	return TKT_FIL_ACC;
     }
     if (flock(fd, LOCK_SH | LOCK_NB) < 0) {
