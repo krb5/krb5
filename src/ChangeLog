@@ -1,3 +1,16 @@
+
+Fri Jul 7 15:29:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* aclocal.m4 - Add ability to set LDFLAGS from --with-ldopts (I know,
+		configure option doesn't coincide with make variable, but it
+		corresponds to --with-ccopts).
+		- Add ability to select libraries to link with from configure
+		script.  This prevents us from having to change every makefile
+		each time there's a library reorganization.  These macros are
+		USE_{KADM,KDB5,KDB4,KRB4}_LIBRARIES and KRB5_LIBRARIES.
+		Makefiles now only need to reference $(LIBS) for the list of
+		libraries to link with and $(DEPLIBS) for the list of
+		library dependencies.
+
 Wed Jul  5 12:00:00 1995 James Mattly <mattly@fusion.com> 
 
 	* Makefile.in: Added kerbsrc.mac target to facilitate easy 

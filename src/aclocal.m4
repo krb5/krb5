@@ -90,6 +90,7 @@ $2::<<<
 	for i in $(SUBDIRS) ; do \
 		if (cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
+			LDFLAGS="$(LDFLAGS)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
 		else $$e; fi; \
 	done>>>
@@ -143,6 +144,7 @@ INSTALL_VARIABLE_HACK dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
 WITH_LINKER dnl
+WITH_LDOPTS dnl
 WITH_CPPOPTS dnl
 WITH_KRB4 dnl
 AC_CONST dnl
@@ -363,11 +365,11 @@ else
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
 	KRB4_LIB='-lkrb4'
-	DEPKRB4_LIB='\$(TOPLIBD)/libkrb4.a'
+	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
 	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='\$(TOPLIBD)/libdes425.a'
+	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
 	KDB4_LIB='-lkdb4'
-	DEPKDB4_LIB='\$(TOPLIBD)/libkdb4.a'
+	DEPKDB4_LIB='$(TOPLIBD)/libkdb4.a'
 	LDARGS=
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
@@ -376,7 +378,7 @@ else
 	KRB4_LIB="-lkrb"
 	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='\$(TOPLIBD)/libdes425.a'
+	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
 	KDB4_LIB="-lkdb"
 	DEPKDB4_LIB="$withval/lib/libkdb.a"
 	LDARGS="-L$withval/lib"
@@ -424,6 +426,16 @@ CCOPTS=$withval
 CFLAGS="$CFLAGS $withval",
 CCOPTS=)dnl
 AC_SUBST(CCOPTS)])dnl
+dnl
+dnl set $(LDFLAGS) from --with-ldopts=value
+dnl
+define(WITH_LDOPTS,[
+AC_ARG_WITH([ldopts],
+[  --with-ldopts=LDOPTS    select linker command line options],
+AC_MSG_RESULT(LDFLAGS is $withval)
+LDFLAGS=$withval,
+LDFLAGS=)dnl
+AC_SUBST(LDFLAGS)])dnl
 dnl
 dnl set $(CPPOPTS) from --with-cppopts=value
 dnl
@@ -718,6 +730,54 @@ if test $krb5_cv_has_ansi_volatile = no; then
 ADD_DEF(-Dvolatile=)
 fi
 ])dnl
+dnl
+dnl This rule tells KRB5_LIBRARIES to use the kadm librarh.
+dnl
+kadm_deplib=''
+kadm_lib=''
+define(USE_KADM_LIBRARY,[
+kadm_deplib="[$](TOPLIBD)/libkadm.a"
+kadm_lib=-lkadm])
+dnl
+dnl This rule tells KRB5_LIBRARIES to include the kdb5 library.
+dnl
+kdb5_deplib=''
+kdb5_lib=''
+define(USE_KDB5_LIBRARY,[
+kdb5_deplib="[$](TOPLIBD)/libkdb5.a"
+kdb5_lib=-lkdb5])
+dnl
+dnl This rule tells KRB5_LIBRARIES to include the kdb4 library.
+dnl
+kdb4_deplib=''
+kdb4_lib=''
+define(USE_KDB4_LIBRARY,[
+kdb4_deplib=$DEPKRB4_LIB
+kdb4_lib=$KDB4_LIB])
+dnl
+dnl This rule tells KRB5_LIBRARIES to include the krb4 libraries.
+dnl
+krb4_deplib=''
+krb5_lib=''
+define(USE_KRB4_LIBRARY,[
+krb4_deplib="$DEPKRB4_LIB $DEPKRB4_CRYPTO_LIB"
+krb4_lib="$KRB4_LIB $KRB4_CRYPTO_LIB"])
+dnl
+dnl This rule tells KRB5_LIBRARIES to include the ss library.
+dnl
+ss_deplib=''
+ss_lib=''
+define(USE_SS_LIBRARY,[
+ss_deplib="[$](TOPLIBD)/libss.a"
+ss_lib=-lss
+])
+dnl
+dnl This rule generates library lists for programs.
+dnl
+define(KRB5_LIBRARIES,[
+DEPLIBS="[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib [$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib [$](TOPLIBD)/libcrypto.a $ss_deplib [$](TOPLIBD)/libcom_err.a"
+LIBS="[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib -lkrb5 $kdb4_lib $krb4_lib -lcrypto $ss_lib -lcom_err $LIBS"
+AC_SUBST(DEPLIBS)])
 dnl
 dnl This rule supports the generation of the shared library object files
 dnl
