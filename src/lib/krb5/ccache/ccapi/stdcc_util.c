@@ -214,7 +214,7 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest)
     memcpy(dest->keyblock.contents, src->keyblock.data, dest->keyblock.length);
 
     /* copy times */
-#ifdef macintosh
+#if defined(macintosh) || defined(__MACH__)
     err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
     if (err) return;
 #endif
@@ -309,7 +309,7 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 	c->keyblock.data = NULL;
     }
 
-#ifdef macintosh
+#if defined(macintosh) || defined(__MACH__)
     err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
     if (err) return;
 #endif
