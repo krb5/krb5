@@ -87,7 +87,7 @@ typedef struct _krb5_gss_cred_id_rec {
    /* name/type of credential */
    gss_cred_usage_t usage;
    krb5_principal princ;	/* this is not interned as a gss_name_t */
-   int prerfc_mech;		/* these are a cache of the set above */
+   int prerfc_mech;
    int rfc_mech;
    int rfcv2_mech;
 
