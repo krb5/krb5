@@ -2,10 +2,17 @@ load_lib "helpers.exp"
 
 set timeout 10
 
-exp_prog "setup" $ovsec_edit_keytab \
-	"-k /krb5/ovsec_adm.srvtab -a -c -p admin changepw/kerberos" \
-	0 {
-	"Enter password:" { send "admin\n" }
+exp_prog "setup" $kadmin_local "" 0 {
+    "kadmin.local:" { send "ank -randkey changepw/kerberos\n" }
 } {
-	-re "Entry for principal changepw/kerberos .* added to keytab" {}
+    "created" {}
+    "already exists" {}
+} {
+    "kadmin.local:" { 
+	send "ktadd -k /krb5/ovsec_adm.srvtab changepw/kerberos\n"
+    }
+} {
+    -re "Entry for principal changepw/kerberos .* added to keytab" {
+	send "quit\n"
+    }
 }
