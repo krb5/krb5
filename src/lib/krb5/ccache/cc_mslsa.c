@@ -2568,8 +2568,6 @@ krb5_lcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
 {
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
 
-    if (flags == NULL)
-
     if (!is_windows_2000())
         return KRB5_FCC_NOFILE;
 
