@@ -420,7 +420,7 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 			  &slent->sl_local_addr,
 			  &slent->sl_remote_addr);
 	sl1 = net_find_slave(slent->sl_id);
-	if (!sl1)
+	if (sl1)
 	    net_free_slave_entry(sl1);
 	DPRINT(DEBUG_SPROC, net_debug_level,
 	       ("| (%d) returned with %d\n", getpid(), kret));
@@ -683,8 +683,10 @@ net_finish(kcontext, debug_level)
     int			debug_level;
 {
     DPRINT(DEBUG_CALLS, net_debug_level, ("* net_finish()\n"));
-    if (net_max_slaves)
+    if (net_max_slaves) {
+	net_max_slaves = 0;
 	free(net_slave_table);
+    }
     if (net_listen_socket >= 0)
 	close(net_listen_socket);
     if (net_service_princ_init)
