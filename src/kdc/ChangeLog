@@ -1,3 +1,8 @@
+2004-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Apply patch from Will Fiveash to use
+	correct TCP listening ports.
+
 2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* kdc_util.c:  Ignore unknown TGS options
