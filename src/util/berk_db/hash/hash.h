@@ -291,3 +291,7 @@ typedef struct htab	 {		/* Memory resident data structure */
 #define MAGIC		hdr.magic
 #define NEXT_FREE	hdr.next_free
 #define H_CHARKEY	hdr.h_charkey
+
+#ifndef HAVE_MEMMOVE
+#define memmove(dst,src,len) bcopy(src,dst,len)
+#endif

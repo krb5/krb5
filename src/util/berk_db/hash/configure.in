@@ -50,7 +50,7 @@ main()
 AC_MSG_RESULT($ac_cv_sizeof_dbt_size)
 AC_DEFINE_UNQUOTED(SIZEOF_DBT_SIZE, $ac_cv_sizeof_dbt_size)
 
-AC_HAVE_FUNCS(mktemp mkstemp)
+AC_CHECK_FUNCS(mktemp mkstemp memmove)
 CHECK_SIGNALS
 dnl
 dnl Check for sys/cdefs.h.
