@@ -241,24 +241,29 @@ main(argc, argv)
 	return(error);
     }
 
+    /*
+     * Initialize Kerberos
+     */
+    kret = krb5_init_context(&kcontext);
+    if (kret) {
+	com_err(argv[0], kret, "while initializing krb5");
+	exit(1);
+    }
+
     /* Get space for passwords */
     if (
 	((npassword = (char *) malloc(KRB5_ADM_MAX_PASSWORD_LEN)) 
 	== (char *) NULL) ||
 	((opassword = (char *) malloc(KRB5_ADM_MAX_PASSWORD_LEN)) 
-	== (char *) NULL)) {
+	== (char *) NULL))
+    {
 	fprintf(stderr, kpwd_no_memory_fmt, argv[0], KRB5_ADM_MAX_PASSWORD_LEN,
 		kpwd_password_text);
 	if (npassword)
 	    free(npassword);
+	krb5_free_context(kcontext);
 	return(ENOMEM);
     }
-
-    /*
-     * Initialize Kerberos
-     */
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
 
     /* From now on, all error legs via 'goto cleanup' */
 
