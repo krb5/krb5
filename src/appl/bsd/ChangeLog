@@ -1,3 +1,9 @@
+Mon Mar  8 19:21:23 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kshd.M: Resync manpage.
+
+	* krshd.c: Rework hostname logging.
+
 Wed Feb 24 20:05:40 1999  Tom Yu  <tlyu@mit.edu>
 
 	* klogind.M: Resync manpage.

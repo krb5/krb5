@@ -150,8 +150,15 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"ek54ciD:S:M:AP:?L:"
+#if HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
 
+#ifndef MAXDNAME
+#define MAXDNAME 256 /*per the rfc*/
+#endif
+
+#define ARGSTR	"ek54ciD:S:M:AP:?L:w:"
 
 #define RSHD_BUFSIZ 5120
 
@@ -176,6 +183,9 @@ int do_encrypt = 0;
 int anyport = 0;
 char *kprogdir = KPROGDIR;
 int netf;
+int maxhostlen = 0;
+int stripdomain = 1;
+int always_ip = 0;
 
 #else /* !KERBEROS */
 
@@ -349,8 +359,30 @@ int main(argc, argv)
 	case 'D':
 	  debug_port = atoi(optarg);
 	  break;
-	case '?':
-	default:
+      case 'w':
+	  if (!strcmp(optarg, "ip"))
+	      always_ip = 1;
+	  else {
+	      char *cp;
+	      cp = strchr(optarg, ',');
+	      if (cp == NULL)
+		  maxhostlen = atoi(optarg);
+	      else if (*(++cp)) {
+		  if (!strcmp(cp, "striplocal"))
+		      stripdomain = 1;
+		  else if (!strcmp(cp, "nostriplocal"))
+		      stripdomain = 0;
+		  else {
+		      usage();
+		      exit(1);
+		  }
+		  *(--cp) = '\0';
+		  maxhostlen = atoi(optarg);
+	      }
+	  }
+	  break;
+      case '?':
+      default:
 	  usage();
 	  exit(1);
 	  break;
@@ -574,7 +606,9 @@ void doit(f, fromp)
     
     int s;
     struct hostent *hp;
-    char *hostname;
+    char hostname[MAXDNAME];
+    char *sane_host;
+    char hostaddra[16];
     short port;
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
@@ -734,16 +768,23 @@ void doit(f, fromp)
     dup2(f, 2);
     hp = gethostbyaddr((char *)&fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
-    if (hp){
-	hostname = malloc(strlen(hp->h_name) + 1);
-	strcpy(hostname,hp->h_name);
+    strncpy(hostaddra, inet_ntoa(fromp->sin_addr), sizeof (hostaddra));
+    hostaddra[sizeof (hostaddra) - 1] = '\0';
+    if (hp != NULL){
+	strncpy(hostname, hp->h_name, sizeof (hostname));
+	hostname[sizeof (hostname) - 1] = '\0';
     }
-    else {
-	hostname = malloc(strlen((char *)inet_ntoa(fromp->sin_addr)) + 1);
-	strcpy(hostname,(char *)inet_ntoa(fromp->sin_addr));
-    }
+    else
+	hostname[0] = '\0';
 
 #ifdef KERBEROS
+    status = pty_make_sane_hostname(fromp, maxhostlen,
+				    stripdomain, always_ip, &sane_host);
+    if (status) {
+	error("failed make_sane_hostname: %s\n", error_message(status));
+	exit(1);
+    }
+
     if ((status = recvauth(f, fromaddr,&valid_checksum))) {
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
@@ -775,8 +816,9 @@ void doit(f, fromp)
     pwd = getpwnam(locuser);
     if (pwd == (struct passwd *) 0 ) {
 	syslog(LOG_ERR ,
-	       "Principal %s (%s@%s) for local user %s has no account.\n",
-	       kremuser, remuser, hostname, locuser); /* xxx sprintf buffer in syslog*/
+	       "Principal %s (%s@%s (%s)) for local user %s has no account.\n",
+	       kremuser, remuser, hostaddra, hostname,
+	       locuser); /* xxx sprintf buffer in syslog*/
 	error("Login incorrect.\n");
 	exit(1);
     }
@@ -827,18 +869,18 @@ void doit(f, fromp)
     endudb();
     if (secflag) {
 	if(getsysv(&sysv, sizeof(struct sysv)) != 0) {
-	    loglogin(hostname, SLG_LLERR, 0, ue);
+	    loglogin(sane_host, SLG_LLERR, 0, ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
 	if ((packet_level != ue->ue_deflvl) ||
 	    ((packet_compart & ue->ue_comparts) != packet_compart )){
-	    loglogin(hostname, SLG_LLERR, 0, ue);
+	    loglogin(sane_host, SLG_LLERR, 0, ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
 	if (ue->ue_disabled != 0) {
-	    loglogin(hostname,SLG_LOCK,ue->ue_logfails,ue);
+	    loglogin(sane_host,SLG_LOCK,ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
@@ -872,13 +914,13 @@ void doit(f, fromp)
     if (port) {
 	/* Place entry into wtmp */
 	sprintf(ttyn,"krsh%1d",getpid());
-	pty_logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,sane_host);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-	pty_logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,sane_host);
     }
     
 #ifdef CRAY
@@ -891,7 +933,7 @@ void doit(f, fromp)
 	if (getusrv(&usrv)){
 	    syslog(LOG_ERR,"Cannot getusrv");
 	    error("Permission denied.\n");
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    goto signout_please;
 	}
 	/*
@@ -900,12 +942,12 @@ void doit(f, fromp)
 	if((ue->ue_valcat & TFM_TRUSTED) ||
 	   (sysv.sy_oldtfm &&
 	    ((ue->ue_comparts & TRUSTED_SUBJECT) == TRUSTED_SUBJECT))) {
-	    loglogin(hostname, SLG_TRSUB, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_TRSUB, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
 	
-	loglogin(hostname, SLG_OKLOG, ue->ue_logfails,ue);
+	loglogin(sane_host, SLG_OKLOG, ue->ue_logfails,ue);
 	
 	/*	Setup usrv structure with user udb info and 
 		packet_level and packet_compart. */
@@ -990,7 +1032,7 @@ void doit(f, fromp)
 	    }
 	}
 	if (nal_error) {
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
@@ -1000,7 +1042,7 @@ void doit(f, fromp)
 	sethost(paddr);
 	
 	if (setusrv(&usrv) == -1) {
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
@@ -1027,8 +1069,8 @@ void doit(f, fromp)
 	    /* kuserok returns 0 if OK */
 	    if (kuserok(v4_kdata, locuser)){
 		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s) for local user %s failed kuserok.\n",
-		       kremuser, remuser, hostname, locuser);
+		       "Principal %s (%s@%s (%s)) for local user %s failed kuserok.\n",
+		       kremuser, remuser, hostaddra, hostname, locuser);
 		}
 	    else auth_sent |= AUTH_KRB4;
 	} else
@@ -1037,8 +1079,8 @@ void doit(f, fromp)
 	    /* krb5_kuserok returns 1 if OK */
 	    if (!krb5_kuserok(bsd_context, client, locuser)){
 		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
-		       kremuser, remuser, hostname, locuser);
+		       "Principal %s (%s@%s (%s)) for local user %s failed krb5_kuserok.\n",
+		       kremuser, remuser, hostaddra, hostname, locuser);
 	    }
 	    else
 		auth_sent |=
@@ -1048,7 +1090,8 @@ void doit(f, fromp)
 	
 #else
     if (pwd->pw_passwd != 0 && *pwd->pw_passwd != '\0' &&
-	ruserok(hostname, pwd->pw_uid == 0, remuser, locuser) < 0) {
+	ruserok(hostname[0] ? hostname : hostaddra,
+		pwd->pw_uid == 0, remuser, locuser) < 0) {
 	error("Permission denied.\n");
 	goto signout_please;
     }
@@ -1086,11 +1129,11 @@ void doit(f, fromp)
     pwd = (struct passwd *) getpwnam(locuser);
     if (pwd && (pwd->pw_uid == 0)) {
 #ifdef LOG_CMD
-	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s) as ROOT", 
-	       cmdbuf, kremuser, remuser, hostname);
+	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as ROOT", 
+	       cmdbuf, kremuser, remuser, hostaddra, hostname);
 #else
-	syslog(LOG_NOTICE ,"Access as ROOT by principal %s (%s@%s)",
-	       kremuser, remuser, hostname);
+	syslog(LOG_NOTICE ,"Access as ROOT by principal %s (%s@%s (%s))",
+	       kremuser, remuser, hostaddra, hostname);
 #endif
     }
 #if defined(KERBEROS) && defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
@@ -1110,11 +1153,11 @@ void doit(f, fromp)
 #if defined(LOG_REMOTE_REALM) || defined(LOG_OTHER_USERS) || defined(LOG_ALL_LOGINS)
       {
 #ifdef LOG_CMD
-	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s) as local user %s", 
-		 cmdbuf, kremuser, remuser, hostname, locuser);
+	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as local user %s", 
+		 cmdbuf, kremuser, remuser, hostaddra, hostname, locuser);
 #else
-	  syslog(LOG_NOTICE ,"Access as %s by principal %s (%s@%s)",
-		 locuser, kremuser, remuser, hostname);
+	  syslog(LOG_NOTICE ,"Access as %s by principal %s (%s@%s (%s))",
+		 locuser, kremuser, remuser, hostaddra, hostname);
 #endif
       }
 #endif
