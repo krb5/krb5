@@ -10,6 +10,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\test}[1]{\begin{description}
+\setlength{\itemsep}{0pt}
 #1
 \end{description}
 
@@ -1682,12 +1683,11 @@ Handled by memory-leak testing handled elsewhere.
 
 \section{ovsec_kadm_get_privs}
 
-
-This test should be run with \test{
+\test{
 \Reason{Fails for null pointer argument.}
 }
 
-the 16 possible combinations of access
+This test should be run with the 16 possible combinations of access
 bits (since there are 4 access bits, there are $2^4 = 16$ popsible
 combinations of them):
 
