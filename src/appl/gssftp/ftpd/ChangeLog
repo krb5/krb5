@@ -1,3 +1,13 @@
+Mon Mar  8 23:47:51 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.M: Resync with reality.
+
+	* Makefile.in (ftpd): Add libpty to link line.  Remove mention of
+	logwtmp files.
+
+	* ftpd.c: Fix up hostname logging to use
+	pty_make_sane_hostname().
+
 Thu Feb 25 23:31:37 1999  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (reply): Don't call secure_gss_error() or secure_error()
