@@ -16,3 +16,5 @@ all::
 
 clean::
 	$(RM) config.h osconf.h
+
+depend::
