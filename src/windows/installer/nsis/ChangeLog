@@ -1,3 +1,8 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi
+    Add kcpytkt.exe, kdeltkt.exe, k5sprt32.dll, mit2ms.exe
+
 2004-09-17  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi:
