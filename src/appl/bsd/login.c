@@ -1015,6 +1015,10 @@ destroy_tickets()
 
 int pagflag = 0;			/* true if setpag() has been called */
 
+/* This doesn't seem to be declared in the AFS header files.  */
+extern ktc_ForgetAllTokens (), setpag ();
+
+#ifdef SIGSYS
 static sigjmp_buf setpag_buf;
 
 static sigtype sigsys ()
@@ -1039,11 +1043,12 @@ static int try_afscall (scall)
     return retval;
 }
 
-/* This doesn't seem to be declared in the AFS header files.  */
-extern ktc_ForgetAllTokens (), setpag ();
-
 #define try_setpag()	try_afscall(setpag)
 #define try_unlog()	try_afscall(ktc_ForgetAllTokens)
+#else
+#define try_setpag()	(setpag() == 0)
+#define try_unlog()	(ktc_ForgetAllTokens() == 0)
+#endif /* SIGSYS */
 #endif /* SETPAG */
 
 void

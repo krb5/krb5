@@ -1,3 +1,8 @@
+Fri Dec 19 18:19:42 1997  Dan Winship  <danw@mit.edu>
+
+	* login.c (try_afscall): try_afscall doesn't work / isn't needed
+	on systems without SIGSYS
+
 Thu Dec 11 23:20:20 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c:
