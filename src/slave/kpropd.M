@@ -35,7 +35,7 @@ kpropd \- Kerberos V5 slave KDC update server
 .I principal_database
 ] [
 .B \-p
-.I kdb5_edit_prog
+.I kdb5_util_prog
 ] [
 .B \-d
 ] [
@@ -52,7 +52,7 @@ is the server which accepts connections from the
 program.  
 .I kpropd 
 accepts the dumped KDC database and places it in a file, and then runs 
-.IR kdb5_edit (8)
+.IR kdb5_util (8)
 to load the dumped database into the active database which is used by 
 .IR krb5kdc (8).
 Thus, the master Kerberos server can use 
@@ -66,7 +66,7 @@ Normally, kpropd is invoked out of
 This is done by adding a line to the inetd.conf file which looks like
 this:
 
-kprop	stream	tcp	nowait	root	/krb5/bin/kpropd	kpropd
+kprop	stream	tcp	nowait	root	/usr/local/sbin/kpropd	kpropd
 
 However, kpropd can also run as a standalone deamon, if the
 .B \-S
@@ -84,13 +84,13 @@ is used.
 \fB\-f\fP \fIfile\fP
 specifies the filename where the dumped principal database file is to be
 stored; by default the dumped database file is KPROPD_DEFAULT_FILE
-(normally /krb5/from_master).
+(normally /usr/local/var/krb5kdc/from_master).
 .TP
 .B \-p
 allows the user to specify the pathname to the
-.IR kdb5_edit (8)
-program; by default the pathname used is KPROPD_DEFAULT_KDB5_EDIT
-(normally /krb5/bin/kdb5_edit).
+.IR kdb5_util (8)
+program; by default the pathname used is KPROPD_DEFAULT_KDB5_UTIL
+(normally /usr/local/sbin/kdb5_util).
 .TP
 .B \-S
 turn on standalone mode.  Normally, kpropd is invoked out of
@@ -124,4 +124,4 @@ Access file for
 Each entry is a line containing the principal of a host from which the
 local machine will allow Kerberos database propagation via kprop.
 .SH SEE ALSO
-kprop(8), kdb5_edit(8), krb5kdc(8), inetd(8)
+kprop(8), kdb5_util(8), krb5kdc(8), inetd(8)

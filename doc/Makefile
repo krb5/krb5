@@ -9,11 +9,11 @@ GZIP=gzip -9
 MANPS=./man2ps
 
 ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	glossary.texinfo
+	glossary.texinfo send-pr.texinfo
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
 INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	build.texinfo bug-report.texinfo
+	build.texinfo bug-report.texinfo send-pr.texinfo
 INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo

@@ -82,7 +82,7 @@ kadm_ser_init(inter, realm)
     if ((hp = gethostbyname(hostname)) == NULL)
 	return KADM_NO_HOSTNAME;
     memcpy((char *) &server_parm.admin_addr.sin_addr.s_addr, hp->h_addr,
-	   hp->h_length);
+	   sizeof(server_parm.admin_addr.sin_addr.s_addr));
     server_parm.admin_addr.sin_port = sep->s_port;
     /* setting up the database */
     mkey_name = KRB5_KDB_M_NAME;

@@ -1,3 +1,107 @@
+Wed Dec  4 23:47:28 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb425.texinfo (Upgrading Application Servers): v5srvtab ->
+	krb5.keytab
+
+Mon Dec  2 13:00:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* build.texinfo (The DejaGnu Tests): info about .k5login for
+ 	krb-root tests [krb5-doc/261]
+
+	* install.texinfo (Add Administrators to the Kerberos Database):
+ 	note relationship between acl file and admin principals
+ 	[krb5-doc/251]
+	(Edit the Configuration Files): mention the logging stanza here,
+ 	too, and tell people to check it when they start the daemons
+ 	[krb5-doc/253]
+
+	* build.texinfo (The KADM5 Tests): add section for the kadm5 tests
+ 	[krb5-doc/247]
+
+Fri Nov 29 19:47:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (Unpacking the Sources): Mention that ./krb5-1.0
+	is the default directory that the tarballs will unpack into.
+	Also, "/u1/krb5" -> "/u1/krb5-1.0".
+	(osconf.h): Remove reference to DEFAULT_LNAME_FILENAME, as we're
+	no longer using the aname database code.
+	(Options to Configure): Add mention of --localstatedir
+	(Shared Library Support): It's Solaris 2.4/SunOS 5.4, not Solaris
+	5.4.
+	(Solaris 2.X): Shared libs work with gcc.
+
+	* install.texinfo (Mapping Hostnames onto Kerberos Realms): Fix
+	spacing error.
+
+	* admin.texinfo: Fix up old references to "/krb5".
+
+	* send-pr.texinfo: krb5-send-pr is in PREFIX/sbin, not PREFIX/bin.
+
+	* admin.texinfo: "/lib/krb5kdc" -> "/var/krb5kdc"
+
+	* krb425.texinfo (Upgrading Application Servers): Change flag
+	"cygnus" to "CYGNUS".
+
+	* install.texinfo (Please Read the Documentation): Change flag
+	"cygnus" to "CYGNUS".
+
+	* admin.texinfo (domain_realm): Change flag "cygnus" to "CYGNUS".
+
+	* definitions.texinfo: Change /usr/@value{LCPRODUCT} to /usr/local
+	to sync with default paths.
+
+	* admin.texinfo (domain_realm): Conditionalize "COM" vs "EDU" in
+	example.
+
+	* install.texinfo (Create Host Keys for the Slave KDCs): Change
+	-randpass to -randkey. [244]
+
+Thu Nov 28 18:54:02 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb425.texinfo: Change to use "@chapternewpage odd", also frob
+	copyright page as per other docs.  Also, remove footnote claiming
+	that "Kerberos V5 is based on the MIT beta7 release".
+
+	* admin.texinfo (capaths): Fix unquoted braces.
+	(appdefaults): Fix unquoted braces.
+
+Wed Nov 27 18:27:18 1996  Jeffrey C. G. Bigler  <jcb@viola.cygnus.com>
+
+	* Makefile: Added send-pr.texinfo to ADMIN_INCLUDES and
+	INSTALL_INCLUDES.
+
+	* admin.texinfo: Added chapter on config files.  Changed bug
+	reporting section to include send-pr file.
+
+	* install.texinfo: Changed bug reporting section to include
+	send-pr file.  Added reference to Sysadmin Guide chapter on config
+	files.
+
+	* send-pr.texinfo: Fixed this up to match our version of
+	krb5-send-pr.
+
+Tue Nov 26 18:34:11 1996  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo: Fix a couple of references to "@value{COMPANY}"
+	so they don't commit MIT to doing user support; also fixed some
+	punctuation errors.
+
+Mon Nov 25 23:39:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* copyright.texinfo: Change lib/kadm to lib/kadm5, and add the
+ 		kadmin/passwd to the list of directories containing OV
+ 		code.
+
+Sun Nov 24 23:55:52 1996  Ezra Peisach  (epeisach@mit.edu)
+
+	* build.texinfo: Remove --with-kdb-db section as it does not
+	exist. Add --with-tcl info.
+
+Tue Nov 19 13:42:00 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* install.texinfo, build.texinfo: misc suggestions from jhawk
+ 	[krb5-doc/55]
+
 Fri Nov 15 17:52:39 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 
 	* Makefile (krb425-guide): added section to make krb425 guide.

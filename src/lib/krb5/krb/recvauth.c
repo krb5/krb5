@@ -57,6 +57,7 @@ krb5_recvauth(context, auth_context,
     krb5_rcache 	  rcache = 0;
     krb5_octet		  response;
     krb5_data		  null_server;
+    int                   need_error_free = 0;
 	
 	/*
 	 * Zero out problem variable.  If problem is set at the end of
@@ -173,7 +174,14 @@ krb5_recvauth(context, auth_context,
 
 	memset((char *)&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.stime, &error.susec);
-	error.server = server;
+	if(server) 
+		error.server = server;
+	else {
+		/* If this fails - ie. ENOMEM we are hosed
+		   we cannot even send the error if we wanted to... */
+		(void) krb5_parse_name(context, "????", &error.server);
+		need_error_free = 1;
+	}
 
 	error.error = problem - ERROR_TABLE_BASE_krb5;
 	if (error.error > 127)
@@ -190,6 +198,9 @@ krb5_recvauth(context, auth_context,
 	    goto cleanup;
 	}
 	free(error.text.data);
+	if(need_error_free) 
+		krb5_free_principal(context, error.server);
+
     } else {
 	outbuf.length = 0;
 	outbuf.data = 0;

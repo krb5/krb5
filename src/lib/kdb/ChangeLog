@@ -1,3 +1,7 @@
+Mon Nov 18 20:40:12 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Set shared library version to 1.0. [krb5-libs/201]
+
 Tue Nov 12 23:41:55 1996  Mark Eichin <eichin@cygnus.com>
 
 	* kdb_dbm.c: Ditch DB_OPENCLOSE conditionals, and fix the real

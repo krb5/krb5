@@ -203,8 +203,15 @@ void get_preauth_hint_list(request, client, server, e_data)
 	memset(*pa, 0, sizeof(krb5_pa_data));
 	(*pa)->magic = KV5M_PA_DATA;
 	(*pa)->pa_type = ap->type;
-	if (ap->get_edata)
-	    (ap->get_edata)(kdc_context, request, client, server, *pa);
+	if (ap->get_edata) {
+	  retval = (ap->get_edata)(kdc_context, request, client, server, *pa);
+	  if (retval) {
+	    /* just failed on this type, continue */
+	    free(*pa);
+	    *pa = 0;
+	    continue;
+	  }
+	}
 	pa++;
     }
     retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
@@ -433,7 +440,7 @@ get_etype_info(context, request, client, server, pa_data)
 
     salt.data = 0;
 
-    entry = malloc((client->n_key_data * 2) * sizeof(krb5_etype_info_entry *));
+    entry = malloc((client->n_key_data * 2 + 1) * sizeof(krb5_etype_info_entry *));
     if (entry == NULL)
 	return ENOMEM;
     entry[0] = NULL;

@@ -5,9 +5,9 @@
 @c guide
 @setfilename Kerberos-V4-to-V5.info
 @settitle Upgrading to Kerberos V5 from Kerberos V4
-@c @setchapternewpage odd                  @c chapter begins on next odd page
-@setchapternewpage on                   @c chapter begins on next page
-@smallbook                              @c Format for 7" X 9.25" paper
+@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
 @c %**end of header
 
 @paragraphindent 0
@@ -34,15 +34,13 @@
 @include copyright.texinfo
 @end titlepage
 
-@node Top, Introduction, (dir), (dir)
+@node Top, Copyright, (dir), (dir)
 
 @ifinfo
 This document describes how to convert to @value{PRODUCT} from Kerberos V4.
 
-@include copyright.texinfo
-@end ifinfo
-
 @menu
+* Copyright::                   
 * Introduction::                
 * Configuration Files::         
 * Upgrading KDCs::              
@@ -51,7 +49,13 @@ This document describes how to convert to @value{PRODUCT} from Kerberos V4.
 * Firewall Considerations::     
 @end menu
 
-@node Introduction, Configuration Files, Top, Top
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+@include copyright.texinfo
+
+@end ifinfo
+
+@node Introduction, Configuration Files, Copyright, Top
 @chapter Introduction
 
 As with most software upgrades, @value{PRODUCT} is generally backward
@@ -266,6 +270,7 @@ telnet  stream  tcp  nowait  root
 @end group
 @end smallexample
 
+@ifset CYGNUS
 @strong{N.B.}:  As noted in the @value{PRODUCT} Installation Guide, if
 you have some clients running older versions of Kerberos V5 (beta
 6@footnote{@value{PRODUCT} is based on the MIT beta 7 release.} or
@@ -273,6 +278,15 @@ earlier), checksums were done differently in those versions, which will
 cause authentication to fail.  To get around this problem, have the
 @code{klogind} and @code{kshd} daemons ignore checksums, by replacing
 each @code{-c} flag above with @code{-i}.
+@end ifset
+@ifclear CYGNUS
+@strong{N.B.}: As noted in the @value{PRODUCT} Installation Guide, if
+you have some clients running older versions of Kerberos V5 (beta 6 or
+earlier), checksums were done differently in those versions, which will
+cause authentication to fail.  To get around this problem, have the
+@code{klogind} and @code{kshd} daemons ignore checksums, by replacing
+each @code{-c} flag above with @code{-i}.
+@end ifclear
 
 For an @emph{insecure} server, make the changes described in the
 @value{PRODUCT} Installation Guide.
@@ -288,7 +302,7 @@ follows:
 @group
 @b{#} @value{ROOTDIR}/sbin/ktutil
 @b{ktutil:}  rst /etc/krb-srvtab
-@b{ktutil:}  wkt /etc/v5srvtab
+@b{ktutil:}  wkt /etc/krb5.keytab
 @b{ktutil:}  q
 @b{#}
 @end group
