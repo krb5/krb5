@@ -98,7 +98,6 @@ krb5_address	receiver_addr;
 void	PRS();
 void	do_standalone();
 void	doit();
-void	detach_process();
 void	kerberos_authenticate();
 krb5_boolean authorized_principal();
 void	recv_database();
@@ -155,7 +154,7 @@ void do_standalone()
 		exit(1);
 	}
 	if (!debug)
-		detach_process();
+		daemon(1, 0);	    
 #ifdef PID_FILE
 	if ((pidfile = fopen(PID_FILE, "w")) != NULL) {
 		fprintf(pidfile, "%d\n", getpid());
@@ -440,43 +439,6 @@ void PRS(argv)
 	}
 	strcpy(temp_file_name, file);
 	strcat(temp_file_name, tmp);
-}
-
-void
-detach_process()
-{
-	int	n;
-	
-#if defined(BSD) && BSD >= 199006 
-	daemon(1, 0);
-#else
-	if (fork() > 0)
-		exit(0);
-	n = open("/dev/null", O_RDONLY);
-	(void) dup2(n, 0);
-	(void) dup2(n, 1);
-	(void) dup2(n, 2);
-	if (n > 2)
-		(void) close(n);
-#ifdef SYSV
-	setpgrp();
-#else
-	{
-		/*
-		 * The open below may hang on pseudo ttys if the person
-		 * who starts named logs out before this point.  Thus,
-		 * the need for the timer.
-		 */
-		alarm(120);
-		n = open("/dev/tty", O_RDWR);
-		alarm(0);
-		if (n > 0) {
-			(void) ioctl(n, TIOCNOTTY, (char *)NULL);
-			(void) close(n);
-		}
-	}
-#endif /* SYSV */
-#endif /* BSD > 199006 */
 }
 
 /*

@@ -1,0 +1,7 @@
+Sat Jul 16 00:01:41 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kpropd.c (do_standalone): Replace detach_process() with call to
+	  daemon(), which we can now guarantee will be in libc or in the
+	  Kerberos library.
+
+
