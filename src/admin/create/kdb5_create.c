@@ -173,13 +173,12 @@ char *argv[];
     if (!dbname)
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
-    if (retval = krb5_db_create(dbname)) {
-	com_err(argv[0], retval, "while creating database '%s'",
-		dbname);
-	exit(1);
-    }
-    if (retval = krb5_db_set_name(dbname)) {
-	com_err(argv[0], retval, "while setting active database to '%s'",
+    retval = krb5_db_set_name(dbname);
+    if (!retval) retval = EEXIST;
+
+    if (retval == EEXIST || retval == EACCES || retval == EPERM) {
+	/* it exists ! */
+	com_err(argv[0], 0, "The database '%s' appears to already exist",
 		dbname);
 	exit(1);
     }
@@ -227,6 +226,20 @@ master key name '%s'\n",
 	com_err(argv[0], retval, "while initializing random key generator");
 	(void) krb5_finish_key(&master_encblock);
 	exit(1);
+    }
+    if (retval = krb5_db_create(dbname)) {
+	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
+	com_err(argv[0], retval, "while creating database '%s'",
+		dbname);
+	exit(1);
+    }
+    if (retval = krb5_db_set_name(dbname)) {
+	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
+        com_err(argv[0], retval, "while setting active database to '%s'",
+                dbname);
+        exit(1);
     }
     if (retval = krb5_db_init()) {
 	(void) krb5_finish_key(&master_encblock);
