@@ -18,9 +18,8 @@
 /* 
  * copy of include/des.h to avoid collision with local one
  */
-#include <krb5/copyright.h>
-#include <krb5/config.h>
-#include <krb5/osconf.h>
+#include "k5-config.h"
+#include "osconf.h"
 
 #ifndef KRB_INT32
 #if (SIZEOF_LONG == 4)

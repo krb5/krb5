@@ -1,7 +1,7 @@
 #ifndef __KTEST_H__
 #define __KTEST_H__
 
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 #define SAMPLE_USEC 123456
 #define SAMPLE_TIME 771228197  /* Fri Jun 10  6:03:17 GMT 1994 */

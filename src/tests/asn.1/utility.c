@@ -1,4 +1,4 @@
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include "utility.h"
 #include <stdlib.h>
 #include <stdio.h>

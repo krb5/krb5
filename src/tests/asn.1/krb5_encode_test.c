@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "asn1.h"
+#include "com_err.h"
 #include "utility.h"
 
 #include "ktest.h"

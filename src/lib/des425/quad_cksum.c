@@ -86,8 +86,7 @@
 #include <errno.h>
 
 /* Application include files */
-#include <krb5/krb5.h>
-#include <krb5/mit-des.h>
+#include "k5-int.h"
 #include "des.h"
 /* Definitions for byte swapping */
 

@@ -1,3 +1,7 @@
+Tue Feb 28 01:33:52 1995  John Gilmore  (gnu at toad.com)
+
+	* glue4.c:  Avoid <krb5/...> includes.
+
 Thu Oct  6 20:06:06 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add recursive "make check" target.

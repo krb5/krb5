@@ -27,10 +27,6 @@
  * echoing.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-
 #include "des.h"
 
 static krb5_context krb4_global_context = 0;

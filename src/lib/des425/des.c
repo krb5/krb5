@@ -50,7 +50,6 @@
 
 
 #include "des.h"
-#include <krb5/ext-proto.h>
 
 int INTERFACE
 des_ecb_encrypt(clear, cipher, schedule, encrypt)

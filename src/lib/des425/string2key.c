@@ -26,8 +26,6 @@
 
 
 #include "des.h"
-#include <krb5/ext-proto.h>
-
 #include "des_int.h"
 
 #ifdef DEBUG

@@ -1,3 +1,8 @@
+Tue Feb 28 01:30:11 1995  John Gilmore  (gnu at toad.com)
+
+	* cksum.c, des.c, des.h, enc_dec.c, pcbc_encrypt.c, quad_cksum.c,
+	read_passwd.c, string2key.c, weak_key.c:  Avoid <krb5/...> includes.
+
 Tue Feb 21 17:42:44 1995 Keith Vetter (keithv@fusion.com)
 
         * Makefile.in: made to work on the PC

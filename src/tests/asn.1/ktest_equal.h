@@ -1,7 +1,7 @@
 #ifndef __KTEST_EQUAL_H__
 #define __KTEST_EQUAL_H__
 
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 /* int ktest_equal_structure(krb5_structure *ref, *var) */
 /* effects  Returns true (non-zero) if ref and var are

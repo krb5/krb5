@@ -37,7 +37,6 @@
 
 
 #include "des.h"
-#include <krb5/ext-proto.h>
 
 /*
  * This routine performs DES cipher-block-chaining operation, either

@@ -25,8 +25,7 @@
  */
 
 #include <stdio.h>
-
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 void dump_data (data)
     krb5_data *data;

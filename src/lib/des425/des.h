@@ -31,8 +31,7 @@
 #ifndef DES_DEFS
 #define DES_DEFS
 
-#include <krb5/krb5.h>
-#include <krb5/mit-des.h>
+#include "k5-int.h"
 
 typedef mit_des_cblock des_cblock;	/* crypto-block size */
 

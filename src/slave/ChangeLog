@@ -1,3 +1,7 @@
+Tue Feb 28 01:21:52 1995  John Gilmore  (gnu at toad.com)
+
+	* kprop.c, kpropd.c:  Avoid <krb5/...> includes.
+
 Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
 
         * kprop.c Call krb5_sendauth() with new calling convention.

@@ -1,3 +1,7 @@
+Tue Feb 28 01:23:18 1995  John Gilmore  (gnu at toad.com)
+
+	* dump.c, test1.c:  Avoid <krb5/...> includes.
+
 Sun Oct 23 01:47:14 1994    (tytso@rsx-11)
 
 	* Makefile.in (check): Do checks for depth = 5

@@ -31,7 +31,6 @@
 
 
 #include "des.h"
-#include <krb5/ext-proto.h>
 
 /*
  * mit_des_is_weak_key: returns true iff key is a [semi-]weak des key.

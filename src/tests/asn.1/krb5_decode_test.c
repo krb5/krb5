@@ -1,10 +1,10 @@
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include "ktest.h"
-#include <com_err.h>
+#include "com_err.h"
 #include "utility.h"
 #include "ktest_equal.h"
 
-#include <krb5/asn1.h>
+#include "asn1.h"
 #include "debug.h"
 #include <string.h>
 

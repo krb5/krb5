@@ -1,3 +1,7 @@
+Tue Feb 28 01:25:13 1995  John Gilmore  (gnu at toad.com)
+
+	* kdc5_hammer.c, pp.c:  Avoid <krb5/...> includes.
+
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
         * kdc5_hammer.c Removed krb5_keytype, changed krb5_enctype to
