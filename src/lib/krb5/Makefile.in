@@ -2,8 +2,8 @@ thisconfigdir=.
 myfulldir=lib/krb5
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-LOCAL_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
-	ccache/memory keytab keytab/file keytab/srvtab krb os rcache posix
+LOCAL_SUBDIRS= error_tables asn.1 ccache keytab keytab/file keytab/srvtab krb \
+	os rcache posix
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)krb5.lib
@@ -14,12 +14,12 @@ TST=if test -n "`cat DONE`" ; then
 
 MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache os posix 
 
-LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file ccache/memory \
+LIB_SUBDIRS= error_tables asn.1 ccache \
 	keytab keytab/file keytab/srvtab krb rcache os posix \
         $(BUILDTOP)/util/profile
 LIBUPDATE= $(BUILDTOP)/util/libupdate
-LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
-		ccache/file/DONE ccache/memory/DONE keytab/DONE \
+LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE \
+		keytab/DONE \
 		keytab/file/DONE keytab/srvtab/DONE krb/DONE rcache/DONE \
 		os/DONE posix/DONE $(BUILDTOP)/util/profile/DONE
 
@@ -39,8 +39,7 @@ STOBJLISTS= \
 	OBJS.ST \
 	error_tables/OBJS.ST \
 	asn.1/OBJS.ST \
-	ccache/OBJS.ST ccache/stdio/OBJS.ST ccache/file/OBJS.ST \
-	ccache/memory/OBJS.ST \
+	ccache/OBJS.ST \
 	keytab/OBJS.ST keytab/file/OBJS.ST keytab/srvtab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \

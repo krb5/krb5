@@ -2,10 +2,9 @@ thisconfigdir=./..
 myfulldir=lib/krb5/ccache
 mydir=ccache
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-LOCAL_SUBDIRS = stdio file memory
+LOCAL_SUBDIRS =
 
-LOCALINCLUDES = -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio \
-		-I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
+LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 
 ##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
 
@@ -14,7 +13,7 @@ LOCALINCLUDES = -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio \
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-MAC_SUBDIRS = file stdio memory ccapi
+MAC_SUBDIRS = ccapi
 
 STLIBOBJS= \
 	ccbase.o \
@@ -22,6 +21,8 @@ STLIBOBJS= \
 	ccdefault.o \
 	ccdefops.o \
 	cc_retr.o \
+	cc_file.o cc_stdio.o cc_memory.o \
+	ccfns.o \
 	ser_cc.o
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
@@ -29,6 +30,10 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
+	$(OUTPRE)cc_file.$(OBJEXT) \
+	$(OUTPRE)cc_stdio.$(OBJEXT) \
+	$(OUTPRE)cc_memory.$(OBJEXT) \
+	$(OUTPRE)ccfns.$(OBJEXT) \
 	$(OUTPRE)ser_cc.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
@@ -36,25 +41,17 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
 	$(srcdir)/cc_retr.c \
+	$(srcdir)/cc_file.c \
+	$(srcdir)/cc_stdio.c \
+	$(srcdir)/cc_memory.c \
+	$(srcdir)/ccfns.c \
 	$(srcdir)/ser_cc.c
 
 all-unix:: all-libobjs
 
 all-windows:: subdirs $(OBJFILE) 
 
-##DOS##subdirs:: file\$(OUTPRE)file.lst memory\$(OUTPRE)file.lst ccapi\$(OUTPRE)file.lst
-##DOS##
-##DOS##file\$(OUTPRE)file.lst::
-##DOS##	cd file
-##DOS##	@echo Making in krb5\ccache\file
-##DOS##	$(MAKE) -$(MFLAGS)
-##DOS##	cd ..
-
-##DOS##memory\$(OUTPRE)file.lst::
-##DOS##	cd memory
-##DOS##	@echo Making in krb5\ccache\memory
-##DOS##	$(MAKE) -$(MFLAGS)
-##DOS##	cd ..
+##DOS##subdirs:: ccapi\$(OUTPRE)file.lst
 
 ##DOS##ccapi\$(OUTPRE)file.lst::
 ##DOS##	cd ccapi
@@ -62,23 +59,17 @@ all-windows:: subdirs $(OBJFILE)
 ##DOS##	$(MAKE) -$(MFLAGS)
 ##DOS##	cd ..
 
-##DOS##$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst memory\$(OUTPRE)file.lst ccapi\$(OUTPRE)file.lst
+##DOS##$(OBJFILE): $(OBJS) ccapi\$(OUTPRE)file.lst
 ##DOS##	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj file\$(OUTPRE)*.obj memory\$(OUTPRE)*.obj \
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj \
 ##WIN32##		ccapi\$(OUTPRE)*.obj > $(OBJFILE)
 
 
 clean-unix:: clean-libobjs
 
 clean-windows::
-	cd file
-	@echo Making clean in krb5\ccache\file
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\memory
-	@echo Making clean in krb5\ccache\memory
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\ccapi
+	cd ccapi
 	@echo Making clean in krb5\ccache\ccapi
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
