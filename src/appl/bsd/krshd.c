@@ -1559,18 +1559,18 @@ recvauth(netf, peersin, peeraddr)
 				  0, /* default rc_type */
 				  0, /* no flags */
 
-				  0, /*v4_opts*/
-				  "rcmd", /* v4_service */
-				  v4_instance, /* v4_instance */
-				  &peersin, /* foriegn address */
-				  &laddr, /* our local address */
-				  "", /* use default srvtab */
+				  0, 		/* v4_opts */
+				  "rcmd", 	/* v4_service */
+				  v4_instance, 	/* v4_instance */
+				  &peersin, 	/* foreign address */
+				  &laddr, 	/* our local address */
+				  "", 		/* use default srvtab */
 
 				  &auth_sys, /* which authentication system */
-				  0, /* no seq number */
-				  &client, /* return client */
-				  &ticket, /* return ticket */
-				  &kdata, /* return authenticator */
+				  0, 		/* no seq number */
+				  &client, 	/* return client */
+				  &ticket, 	/* return ticket */
+				  &kdata, 	/* return authenticator */
 				  
 				  &v4_kdata, 0, v4_version);
 
