@@ -109,6 +109,37 @@ static void free_decode_princ_dbmkey
 	PROTOTYPE((krb5_principal ));
 #endif
 
+
+#ifdef	BERK_DB_DBM
+/*
+ * This module contains all of the code which directly interfaces to
+ * the underlying representation of the Kerberos database; this
+ * implementation uses a Berkeley hashed database file to store the
+ * relations, plus a third file as a semaphore to allow the database
+ * to be replaced out from underneath the KDC server.
+ */
+extern DBM	*db_dbm_open PROTOTYPE((char *, int, int));
+extern void     db_dbm_close PROTOTYPE((DBM *));
+extern datum    db_dbm_fetch PROTOTYPE((DBM *, datum));
+extern datum    db_dbm_firstkey PROTOTYPE((DBM *));
+extern datum    db_dbm_nextkey PROTOTYPE((DBM *));
+extern int      db_dbm_delete PROTOTYPE((DBM *, datum));
+extern int      db_dbm_store PROTOTYPE((DBM *, datum, datum, int));
+extern int	db_dbm_error PROTOTYPE((DBM *));
+extern int	db_dbm_clearerr PROTOTYPE((DBM *));
+extern int	db_dbm_dirfno PROTOTYPE((DBM *));
+
+#define	KDBM_OPEN(db, fl, mo)	db_dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		db_dbm_close(db)
+#define	KDBM_FETCH(db, key)	db_dbm_fetch(db, key)
+#define	KDBM_FIRSTKEY(db)	db_dbm_firstkey(db)
+#define	KDBM_NEXTKEY(db)	db_dbm_nextkey(db)
+#define	KDBM_DELETE(db, key)	db_dbm_delete(db, key)
+#define	KDBM_STORE(db,key,c,f)	db_dbm_store(db, key, c, f)
+#define	KDBM_ERROR(db)		db_dbm_error(db)
+#define	KDBM_CLEARERR(db)	db_dbm_clearerr(db)
+#define	KDBM_DIRFNO(db)		db_dbm_dirfno(db)
+#else	/* BERK_DB_DBM */
 /*
  * This module contains all of the code which directly interfaces to
  * the underlying representation of the Kerberos database; this
@@ -117,6 +148,17 @@ static void free_decode_princ_dbmkey
  * third file as a semaphore to allow the database to be replaced out
  * from underneath the KDC server.
  */
+#define	KDBM_OPEN(db, fl, mo)	dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		dbm_close(db)
+#define	KDBM_FETCH(db, key)	dbm_fetch(db, key)
+#define	KDBM_FIRSTKEY(db)	dbm_firstkey(db)
+#define	KDBM_NEXTKEY(db)	dbm_nextkey(db)
+#define	KDBM_DELETE(db, key)	dbm_delete(db, key)
+#define	KDBM_STORE(db,key,c,f)	dbm_store(db, key, c, f)
+#define	KDBM_ERROR(db)		dbm_error(db)
+#define	KDBM_CLEARERR(db)	dbm_clearerr(db)
+#define	KDBM_DIRFNO(db)		dbm_dirfno(db)
+#endif	/* BERK_DB_DBM */
 
 /*
  * Locking:
@@ -242,7 +284,7 @@ krb5_dbm_db_fini(context)
 	   error in close().  Possible changes to this routine: check errno
 	   on return from dbm_close(), call fsync on the database file
 	   descriptors.  */
-	dbm_close(current_db_ptr);
+	KDBM_CLOSE(current_db_ptr);
 	current_db_ptr = 0;
     }
 
@@ -268,7 +310,7 @@ krb5_dbm_db_open_database(context)
   if (!inited)
     return KRB5_KDB_DBNOTINITED;
 
-  if (!(current_db_ptr = (DBM *)dbm_open(current_db_name, O_RDWR, 0600)))
+  if (!(current_db_ptr = (DBM *)KDBM_OPEN(current_db_name, O_RDWR, 0600)))
     return errno;
 
   /* It is safe to ignore errors here because all function which write
@@ -282,7 +324,7 @@ krb5_error_code
 krb5_dbm_db_close_database(context)
     krb5_context context;
 {
-  dbm_close(current_db_ptr);
+  KDBM_CLOSE(current_db_ptr);
   current_db_ptr = 0;
   (void) krb5_dbm_db_unlock(context);
   return 0;
@@ -306,10 +348,10 @@ krb5_dbm_db_set_name(context, name)
 	return KRB5_KDB_DBINITED;
     if (name == NULL)
 	name = default_db_name;
-    db = dbm_open(name, O_RDONLY, 0);
+    db = KDBM_OPEN(name, O_RDONLY, 0);
     if (db == NULL)
 	return errno;
-    dbm_close(db);
+    KDBM_CLOSE(db);
     current_db_name = name;
     return 0;
 }
@@ -917,11 +959,11 @@ krb5_dbm_db_create(context, db_name)
 #ifndef ODBM
     DBM *db;
 
-    db = dbm_open(db_name, O_RDWR|O_CREAT|O_EXCL, 0600);
+    db = KDBM_OPEN(db_name, O_RDWR|O_CREAT|O_EXCL, 0600);
     if (db == NULL)
 	retval = errno;
     else
-	dbm_close(db);
+	KDBM_CLOSE(db);
 #else /* OLD DBM */
     char *dirname;
     char *pagname;
@@ -1030,10 +1072,15 @@ krb5_dbm_db_destroy(context, dbname)
 {
 	krb5_error_code	retval;
 
+#ifndef	BERK_DB_DBM
 	if (retval = destroy_file_suffix(dbname, ".pag"))
 		return(retval);
 	if (retval = destroy_file_suffix(dbname, ".dir"))
 		return(retval);
+#else	/* BERK_DB_DBM */
+	if (retval = destroy_file_suffix(dbname, ".db"))
+		return(retval);
+#endif	/* BERK_DB_DBM */
 	if (retval = destroy_file_suffix(dbname, ".ok"))
 		return(retval);
 	return(0);
@@ -1061,6 +1108,7 @@ krb5_dbm_db_rename(context, from, to)
     time_t trans;
     krb5_error_code retval;
 
+#ifndef	BERK_DB_DBM
     fromdir = gen_dbsuffix (from, ".dir");
     if (!fromdir)
 	return ENOMEM;
@@ -1079,6 +1127,16 @@ krb5_dbm_db_rename(context, from, to)
 	retval = ENOMEM;
 	goto errout;
     }
+#else	/* BERK_DB_DBM */
+    fromdir = gen_dbsuffix (from, ".db");
+    if (!fromdir)
+	return ENOMEM;
+    todir = gen_dbsuffix (to, ".db");
+    if (!todir) {
+	retval = ENOMEM;
+	goto errout;
+    }
+#endif	/* BERK_DB_DBM */
     fromok = gen_dbsuffix(from, ".ok");
     if (!fromok) {
 	retval = ENOMEM;
@@ -1089,7 +1147,10 @@ krb5_dbm_db_rename(context, from, to)
 	goto errout;
     
     if ((rename (fromdir, todir) == 0)
-	&& (rename (frompag, topag) == 0)) {
+#ifndef	BERK_DB_DBM
+	&& (rename (frompag, topag) == 0)
+#endif	/* BERK_DB_DBM */
+	) {
 	(void) unlink (fromok);
 	retval = 0;
     } else
@@ -1098,10 +1159,12 @@ krb5_dbm_db_rename(context, from, to)
 errout:
     if (fromok)
 	free_dbsuffix (fromok);
+#ifndef	BERK_DB_DBM
     if (topag)
 	free_dbsuffix (topag);
     if (frompag)
 	free_dbsuffix (frompag);
+#endif	/* BERK_DB_DBM */
     if (todir)
 	free_dbsuffix (todir);
     if (fromdir)
@@ -1147,7 +1210,7 @@ krb5_boolean *more;			/* are there more? */
 	if (current_db_ptr)
 	    db = current_db_ptr;
 	else {
-	    db = dbm_open(current_db_name, O_RDONLY, 0600);
+	    db = KDBM_OPEN(current_db_name, O_RDONLY, 0600);
 	    if (db == NULL) {
 		retval = errno;
 		(void) krb5_dbm_db_unlock(context);
@@ -1161,7 +1224,7 @@ krb5_boolean *more;			/* are there more? */
 	if (retval = encode_princ_dbmkey(context, &key, searchfor))
 	    goto cleanup;
 
-	contents = dbm_fetch(db, key);
+	contents = KDBM_FETCH(db, key);
 	free_encode_princ_dbmkey(context, &key);
 
 	if (contents.dptr == NULL)
@@ -1171,7 +1234,7 @@ krb5_boolean *more;			/* are there more? */
 	else found = 1;
 
 	if (current_db_ptr == 0)
-	    dbm_close(db);
+	    KDBM_CLOSE(db);
 	(void) krb5_dbm_db_unlock(context);	/* unlock read lock */
 	if (krb5_dbm_db_end_read(context, transaction) == 0)
 	    break;
@@ -1188,7 +1251,7 @@ krb5_boolean *more;			/* are there more? */
 
  cleanup:
     if (current_db_ptr == 0)
-	dbm_close(db);
+	KDBM_CLOSE(db);
     (void) krb5_dbm_db_unlock(context);	/* unlock read lock */
     return retval;
 }
@@ -1242,7 +1305,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
     if (current_db_ptr)
 	db = current_db_ptr;
     else {
-	db = dbm_open(current_db_name, O_RDWR, 0600);
+	db = KDBM_OPEN(current_db_name, O_RDWR, 0600);
 	if (db == NULL) {
 	    retval = errno;
 	    (void) krb5_dbm_db_unlock(context);
@@ -1262,7 +1325,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	    free_encode_princ_contents(&contents);
 	    break;
 	}
-	if (dbm_store(db, key, contents, DBM_REPLACE))
+	if (KDBM_STORE(db, key, contents, DBM_REPLACE))
 	    retval = errno;
 	else
 	    retval = 0;
@@ -1274,7 +1337,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
     }
 
     if (current_db_ptr == 0)
-	dbm_close(db);
+	KDBM_CLOSE(db);
     (void) krb5_dbm_db_unlock(context);		/* unlock database */
     *nentries = i;
     return (retval);
@@ -1306,7 +1369,7 @@ int *nentries;				/* how many found & deleted */
     if (current_db_ptr)
 	db = current_db_ptr;
     else {
-	db = dbm_open(current_db_name, O_RDWR, 0600);
+	db = KDBM_OPEN(current_db_name, O_RDWR, 0600);
 	if (db == NULL) {
 	    retval = errno;
 	    (void) krb5_dbm_db_unlock(context);
@@ -1317,7 +1380,7 @@ int *nentries;				/* how many found & deleted */
     if (retval = encode_princ_dbmkey(context, &key, searchfor))
 	goto cleanup;
 
-    contents = dbm_fetch(db, key);
+    contents = KDBM_FETCH(db, key);
     if (contents.dptr == NULL) {
 	found = 0;
 	retval = KRB5_KDB_NOENTRY;
@@ -1329,10 +1392,10 @@ int *nentries;				/* how many found & deleted */
 	if (retval = encode_princ_contents(context, &contents2, &entry))
 	    goto cleancontents;
 
-	if (dbm_store(db, key, contents2, DBM_REPLACE))
+	if (KDBM_STORE(db, key, contents2, DBM_REPLACE))
 	    retval = errno;
 	else {
-	    if (dbm_delete(db, key))
+	    if (KDBM_DELETE(db, key))
 		retval = errno;
 	    else
 		retval = 0;
@@ -1346,7 +1409,7 @@ int *nentries;				/* how many found & deleted */
 
  cleanup:
     if (current_db_ptr == 0)
-	dbm_close(db);
+	KDBM_CLOSE(db);
     (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
     *nentries = found;
     return retval;
@@ -1372,7 +1435,7 @@ krb5_dbm_db_iterate (context, func, func_arg)
     if (current_db_ptr)
 	db = current_db_ptr;
     else {
-	db = dbm_open(current_db_name, O_RDONLY, 0600);
+	db = KDBM_OPEN(current_db_name, O_RDONLY, 0600);
 	if (db == NULL) {
 	    retval = errno;
 	    (void) krb5_dbm_db_unlock(context);
@@ -1380,8 +1443,8 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	}
     }
 
-    for (key = dbm_firstkey (db); key.dptr != NULL; key = dbm_next(db, key)) {
-	contents = dbm_fetch (db, key);
+    for (key = KDBM_FIRSTKEY (db); key.dptr != NULL; key = KDBM_NEXTKEY(db)) {
+	contents = KDBM_FETCH (db, key);
 	if (retval = decode_princ_contents(context, &contents, &entries))
 	    break;
 	retval = (*func)(func_arg, &entries);
@@ -1390,7 +1453,7 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	    break;
     }
     if (current_db_ptr == 0)
-	dbm_close(db);
+	KDBM_CLOSE(db);
     (void) krb5_dbm_db_unlock(context);
     return retval;
 }

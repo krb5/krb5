@@ -1,5 +1,8 @@
-CFLAGS = $(CCOPTS) $(DEFS)
+CFLAGS = $(CCOPTS) $(DEFS) -DBERK_DB_DBM
 LDFLAGS = -g
+
+LIB_SUBDIRS= $(BUILDTOP)/util/berk_db/hash
+LIBUPDATE=$(BUILDTOP)/util/libupdate
 
 all:: $(OBJS)
 
@@ -22,10 +25,21 @@ OBJS= \
 	setup_mkey.o \
 	store_mkey.o
 
-libkdb5.a: $(OBJS)
+libkdb5.a: $(OBJS) $(BUILDTOP)/util/berk_db/hash/DONE
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
+	if test -f $@ ; then \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+		done ; \
+	else \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) $@ --force $$i/DONE $$i ; \
+		done ; \
+	fi
 	$(RM) $(TOPLIBD)/libkdb5.a
 	$(CP) libkdb5.a $(BUILDTOP)/lib/libkdb5.a
 	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
@@ -36,3 +50,16 @@ install:: libkdb5.a
 
 clean::
 	$(RM) libkdb5.a
+
+COMERRLIB =	$(BUILDTOP)/util/et/libcom_err.a
+KDB5LIB =	libkdb5.a
+KRB5LIB =	$(TOPLIBD)/libkrb5.a
+CRYPTOLIB =	$(TOPLIBD)/libcrypto.a
+KLIBS =		$(KDB5LIB) $(KRB5LIB) $(CRYPTOLIB) $(COMERRLIB)
+
+t_kdb:	t_kdb.o $(KLIBS)
+	$(LD) -o t_kdb t_kdb.o $(KLIBS) $(LIBS)
+
+check::	t_kdb
+	./t_kdb
+

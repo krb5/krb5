@@ -1,3 +1,13 @@
+
+Fri May 26 17:52:03 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Change usage of dbm package or Berkeley db package
+		based on setting of BERK_DB_DBM.  Also, conditionalize
+		implicit knowledge of dbm/Berkeley db filename extensions.
+	* Makefile.in - Set BERK_DB_DBM when compiling.  Update from Berkeley
+		db build directory.
+	* configure.in - Check for random number generators.
+	* t_kdb.c - New tester for kdb code.
+
 Fri Mar 24 21:59:34 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* store_mkey.c (krb5_db_store_mkey): 
