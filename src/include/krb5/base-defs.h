@@ -18,10 +18,10 @@
 
 #include <krb5/wordsize.h>
 
-typedef krb5_octet	krb5_ui_1;
-typedef krb5_int16	krb5_ui_2;
-typedef krb5_int32	krb5_ui_4;
-typedef krb5_octet	krb5_boolean;
+typedef unsigned krb5_octet	krb5_ui_1;
+typedef unsigned krb5_int16	krb5_ui_2;
+typedef unsigned krb5_int32	krb5_ui_4;
+typedef unsigned krb5_octet	krb5_boolean;
 
 #ifndef FALSE
 #define	FALSE	0
