@@ -40,7 +40,7 @@ krb5_fcc_get_principal(id, princ)
      if (OPENCLOSE(id)) {
 	  kret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
 	  if (kret < 0)
-	       return errno;
+	       return krb5_fcc_interpret(errno);
 	  ((krb5_fcc_data *) id->data)->fd = kret;
      }
      else
