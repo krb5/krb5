@@ -548,9 +548,23 @@ krb5_data **response;
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch;
+    char *cname = 0, *sname = 0;
 
-    syslog(LOG_INFO, "AS_REQ: %s while processing request",
-	   error_message(error+KRB5KDC_ERR_NONE));
+    if (retval = krb5_unparse_name(request->client, &cname))
+       syslog(LOG_INFO, "AS_REQ: %s while unparsing client name for error",
+              error_message(retval));
+    if (retval = krb5_unparse_name(request->server, &sname))
+       syslog(LOG_INFO, "AS_REQ: %s while unparsing server name for error",
+              error_message(retval));
+
+    syslog(LOG_INFO, "AS_REQ: %s while processing request from %s for %s",
+	   error_message(error+KRB5KDC_ERR_NONE),
+	   cname ? cname : "UNKNOWN CLIENT", sname ? sname : "UNKNOWN SERVER");
+
+    if (cname)
+	    free(cname);
+    if (sname)
+	    free(sname);
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
