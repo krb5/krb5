@@ -194,7 +194,7 @@ Installation on any Machine
 
 * Picking a Realm Name::        
 * Configuration files::         
-* Required Programs::           
+* Recommended Programs::        
 
 Configuration files
 
@@ -234,7 +234,7 @@ Installing Kerberos Applications
 BSD Utilities
 
 * Checksums::                   Checksum facility for dealing with active attacks.
-* BSD Utility Configuration Example::  Sample @samp{inetd.conf} entries for BSD utilities.
+* BSD Utility Configuration Example::  Sample @file{inetd.conf} entries for BSD utilities.
 @end menu
 
 @node Introduction, How Kerberos Works, Top, Top
@@ -245,9 +245,7 @@ from the source distribution, and then to install it at a particular
 site.  The reader is assumed to be familiar with C/UNIX development
 tools. 
 
-In any complex software, there will be bugs.  In addition, you may
-find portability problems when you try to build Kerberos V5 on a
-platform on which the developers have not used.  Please send bug reports
+In any complex software, there will be bugs. Please send bug reports
 or other problems you may uncover to the e-mail address
 @b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos
 V5 distribution you are using, and whether you have made any private
@@ -465,8 +463,8 @@ the @samp{laughter} @samp{rlogind} service program.  The service program
 checks the ticket by using its own service key.  If the ticket is valid,
 it now knows your identity.  If the ticket is valid and you are allowed
 to login to @samp{laughter} (because the your name matches one in
-/etc/passwd, or you are in the appropriate @file{.klogin} or
-@file{.k5login} file), will let you login.
+/etc/passwd, or you are in the @file{.k5login} file), you will find
+yourself logged into the machine.
 
 @end enumerate
 @end enumerate
@@ -563,7 +561,7 @@ That's it!
 
 If you wish to keep separate build directories for each platform, you
 can do so using the following procedure.  (Note, this requires that your
-@samp{make} program support @samp{VPATH}.  GNU's gmake will provide this
+@samp{make} program support @samp{VPATH}.  GNU's make will provide this
 functionality, for example.)  If your @samp{make} program does not
 support this, see the next section.
 
@@ -606,14 +604,16 @@ you might use the following procedure:
 @end enumerate
 
 You must give an absolute pathname to @samp{lndir} because it has a bug that
-makes it fail for relative pathnames.
+makes it fail for relative pathnames. Note that this version differs
+from the latest version as distributed and installed by the XConsortium
+with X11R6. Either version should be acceptable.
 
 @node Testing the Build, Options to Configure, Doing the Build, Building Kerberos
 @section Testing the Build
 
 The Kerberos V5 distribution comes with built-in regression tests.  To
 run them, simply type the following command while in the top-level build
-directory (i.e., the directory where you typed @samp{make} to start
+directory (i.e., the directory where you sent typed @samp{make} to start
 building Kerberos; see @ref{Doing the Build}.): 
 
 @example
@@ -635,13 +635,13 @@ client/server activities.
 DejaGnu may be found wherever GNU software is archived. 
 
 Most of the tests are setup to run as a non-privledged user. There are
-two series of tests (@samp{rlogind} and @samp{telnetd}) which require the ability to
-@samp{rlogin} as root to the local machine. Admittedly, this does
-require the use of a @file{.rhosts} file or some other authenticated
-means. @footnote{If you are fortunate enough to have a previous version
-of Kerberos V5 or V4 installed, and the Kerberos rlogin is first in your
-path, you can setup @file{.k5login} or @file{.klogin} as appropriate to
-allow you access.}
+two series of tests (@samp{rlogind} and @samp{telnetd}) which require
+the ability to @samp{rlogin} as root to the local machine. Admittedly,
+this does require the use of a @file{.rhosts} file or some other
+authenticated means. @footnote{If you are fortunate enough to have a
+previous version of Kerberos V5 or V4 installed, and the Kerberos rlogin
+is first in your path, you can setup @file{.k5login} or @file{.klogin}
+respectively to allow you access.}
 
 If you cannot obtain root access to your machine, all the other tests
 will still run. Note however, with DejaGnu 1.2, the "untested testcases"
@@ -660,6 +660,11 @@ lists the most commonly used options to Kerberos V5's @samp{configure}
 program.
 
 @table @code
+
+@item --help
+
+Provides help to configure. This will list the set of commonly used
+options for building Kerberos.
 
 @item --prefix=DIR
 
@@ -734,12 +739,6 @@ This option will turn on the building and use of shared library objects
 in the Kerberos build. This option is only supported on certain
 platforms. 
 
-@item --enable-athena
-
-Was used to setup configuration files in such a way as to be compatible
-with the Athena environment at MIT. It currently does not appear to do
-anything useful.
-
 @item --with-vague-errors
 
 If enabled, gives vague and unhelpful error messages to the client... er,
@@ -752,7 +751,25 @@ Set this option if you want to allow the KDC to modify the Kerberos
 database; this allows the last request information to be updated, as
 well as the failure count information.  Note that this doesn't work if
 you're using slave servers!!!  It also causes the database to be
-modified (and thus needing to be locked) frequently.
+modified (and thus needing to be locked) frequently. Please note that
+the implementors do not regularly test this feature.
+
+@item --with-kdb-db=database 
+
+The configuration process will try to determine a working set of
+libraries required to implement the Kerberos database. Configure will
+look for interfaces that use or emulate a @samp{ndbm} or @samp{dbm}
+library. Failing that, a build in copy of the Berkeley DB code will be
+used. You may decide to compile a different interface than the default
+by specifying one of "ndbm", "dbm", or "db". 
+
+An important note on platforms where the @samp{ndbm} implementation is
+based on @sc{GDBM} (such as the Linux Slackware distribution). @sc{GDBM}
+has its own built in file locking which prevents simultaneous access to
+the database from two separate processes in which one wants to modify
+the database while the otherone only wants to read. (i.e. the KDC and
+administrative servers). In this case, you will need to specify the use
+of the Berkeley DB.
 
 @end table
 
@@ -761,7 +778,7 @@ the @samp{suncc} with the optimizer turned on, run the configure
 script with the following options:
 
 @example
-% configure --with-cc=suncc --with-ccopts=-O
+% ./configure --with-cc=suncc --with-ccopts=-O
 @end example
 
 @node osconf.h, Shared Library Support, Options to Configure, Building Kerberos
@@ -822,7 +839,7 @@ Shared library support is provided for a few operating systems. There
 are restrictions as to which compiler to use when using shared
 libraries. In all cases, executables linked with the shared libraries in
 this build process will have built in the location of the libraries,
-therefore obliterating the need for special LD_LIBRARY_PATH environment
+therefore obliterating the need for special LD_LIBRARY_PATH, et al environment
 variables when using the programs. Except where noted, multiple versions
 of the libraries may be installed on the same system and continue to
 work.
@@ -964,7 +981,7 @@ send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 @node Ultrix 4.2/3, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
 @subsection Ultrix 4.2/3
 
-On the MIPS platform, using the native compiler, @file{md4.c} and
+On the DEC MIPS platform, using the native compiler, @file{md4.c} and
 @file{md5.c} can not be compiled with the optimizer set at level 1.
 That is, you must specify either @samp{--with-ccopts=-O} and
 @samp{--with-ccopts=-g} to configure.  If you don't specify either, the
@@ -976,32 +993,27 @@ steps takes 9 seconds; compiling 8 steps takes 27 seconds, and so on.
 Calculations estimate it will finish in approximately 3,469 billion
 years....
 
-Using GCC version 2.5 instead of the native compiler will also work fine,
-both with or without optimization.
+Using GCC instead of the native compiler will also work fine, both with
+or without optimization.
 
 @node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0++, Ultrix 4.2/3, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
 
-There is a bug in OSF/1's fgrep which causes the @samp{configure}
-script to fail.
-
 Using the native compiler, compiling with the @samp{-O} compiler flag
 causes the @code{asn.1} library to be compiled incorrectly.  
 
-Using GCC version 2.6.3 instead of the native compiler will also work
+Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
 @node Alpha OSF/1 V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0++
 
-There formerly used to be a bug when using the native compiler in
-compiling @file{md4.c} when compiled without either the @samp{-O} or
-@samp{-g} compiler options.  (This could possibly be the same sort of
-bug as found in @ref{Ultrix 4.2/3}, but that seems rather remarkable.)
-We have changed the code and there is no problem under V2.1, but we do
-not have access to V2.0 to test and see if the problem would exist
-there. (We welcome feedback on this issue). There was never a problem in
-using GCC version 2.6.3.
+There used to be a bug when using the native compiler in compiling
+@file{md4.c} when compiled without either the @samp{-O} or @samp{-g}
+compiler options.  We have changed the code and there is no problem
+under V2.1, but we do not have access to V2.0 to test and see if the
+problem would exist there. (We welcome feedback on this issue). There
+was never a problem in using GCC version 2.6.3.
 
 In version 3.2 and beyond of the operating system, we have not seen any
 problems with the native compiler. 
@@ -1030,13 +1042,14 @@ Workarounds:
 @enumerate
 
 @item
-   Supply your own resolver library.
+   Supply your own resolver library. (such as bind-4.9.3pl1 availavle
+from ftp.vix.com)
 
 @item
    Upgrade to Solaris 2.4
 
 @item
-   Make sure your /etc/nsswitch.conf has the line:
+   Make sure your /etc/nsswitch.conf has `files' before `dns' like:
 
 @example
 hosts:      files dns
@@ -1049,6 +1062,9 @@ name first.  Example:
 @example
 18.172.1.4      dcl.mit.edu dcl
 @end example
+
+Note that making this change may cause other programs in your
+environment to break or behave differently.
 
 @end enumerate
 
@@ -1190,7 +1206,7 @@ in this section.
 @menu
 * Picking a Realm Name::        
 * Configuration files::         
-* Required Programs::           
+* Recommended Programs::        
 @end menu
 
 @node Picking a Realm Name, Configuration files, Installation on any Machine, Installation on any Machine
@@ -1203,9 +1219,10 @@ name, in capital letters.  (Kerberos realm names are case-sensitive, so
 it's important that your realm name be in all upper case.)  For example,
 if your internet domain is @code{cygnus.com} (so that you have hostnames
 such as @code{ftp.cygnus.com} and @code{tweedledum.cygnus.com}), then
-your Kerberos realm should be @code{CYGNUS.COM}.
+your Kerberos realm should be @code{CYGNUS.COM}. Please note that
+changing realm names is hard. Get it right the first time.
 
-@node Configuration files, Required Programs, Picking a Realm Name, Installation on any Machine
+@node Configuration files, Recommended Programs, Picking a Realm Name, Installation on any Machine
 @comment  node-name,  next,  previous,  up@section 
 @subsection Configuration files
 
@@ -1279,7 +1296,7 @@ and all letters capitalized.  For example, @code{ftp.cygnus.com} is
 traditionally in the realm @code{CYGNUS.COM}.
 If this is not the case, you will need to establish a translation from
 host name or domain name to realm name.  This is accomplished with the
-@samp{[domain_realm]} stanza
+@samp{[domain_realm]} stanza.
 
 Each line of the translation file specifies either a host name or domain
 name, and its associated realm:
@@ -1290,7 +1307,7 @@ name, and its associated realm:
         <host.name> = KERBEROS.REALM2
 @end example
 
-For example, to map all hosts in the domain LSC.MIT.EDU to LCS.MIT.EDU
+For example, to map all hosts in the domain LSC.MIT.EDU to LSC.MIT.EDU
 but the host FILMS.LSC.MIT.EDU to MIT.EDU your file would read:
 @example
 [domain_realm]
@@ -1310,7 +1327,7 @@ name) and how to designate servers for remote realms.
 @subsubsection Conversion of V4 configuration files
 
 Kerberos V4's @file{krb.conf} and @file{krb.realms} files formats are no
-longer used by the V5 library. A Perl script has been provided to allow
+longer used by the V5 library. A @sc{PERL} script has been provided to allow
 for "easy" generation of an initial @file{krb5.conf}. It is located in 
 @file{[SOURCE_DIR]/config-files/convert-config-files}. The produced file
 should be checked for errors.
@@ -1326,15 +1343,18 @@ files @file{krb.conf} and @file{krb.realms}.
 All hosts which will use Kerberos will need to have certain ports
 defined in the system's @file{/etc/services} file.  The file
 @file{[SOURCEDIR]/config-files/services.append} contains the entries
-which should be appended to the @file{/etc/services} file.
+which should be appended to the @file{/etc/services} file. Please note
+that not all of the entries are required as several of the programs have
+defaults built into the programs. This will be documented sometime in
+the future.
 
 If you are using the Network Information Services (NIS) or Yellow
 Pages (YP), you will need to add the services in the
 @file{services.append} file to the services exported in the NIS or YP
 server.
 
-@node Required Programs,  , Configuration files, Installation on any Machine
-@subsection Required Programs
+@node Recommended Programs,  , Configuration files, Installation on any Machine
+@subsection Recommended Programs
 
 The following files should be installed on all machines which are
 running Kerberos, either as a client, a KDC, or an application server:
@@ -1349,7 +1369,7 @@ by Kerberos V5 giving system defaults as well as locations of Kerberos
 servers. 
 @item @file{[K_USER]/kinit} --- This program allows you to obtain
 Kerberos credentials.
-@item @file{[K_USER]/bin/kdestroy} --- This program allows you to destroy
+@item @file{[K_USER]/kdestroy} --- This program allows you to destroy
 Kerberos credentials which are no longer needed.
 @item @file{[K_USER]/klist} ---- This program allows you to list the
 credentials found in your credentials cache.
@@ -1409,6 +1429,8 @@ It asks you to the database's master password.
 Do not forget this password.
 If you do, the database becomes useless.
 (Your realm name should be substituted for [REALMNAME] below.)
+@xref{Storing the Master Password} for an alternative way of dealing
+with this master password.
 
 Because the install process does not create [DB_DIR] you need to do so
 yourself. 
@@ -1453,7 +1475,7 @@ Enter KDC database master key:    @b{<-- [Enter the master password.]}
 
 WARNING: If your Kerberos database master key is compromised and the
 database is obtained, the security of your entire authentication system
-is compromised.  (If this happens you all of your user's passwords must
+is compromised.  (If this happens to you, all of your user's passwords must
 be set to new values manually --- i.e., not using Kerberos.)  The master
 key must be a carefully kept secret.  If you keep backups, you must
 guard all the master keys you use, in case someone has stolen an old
@@ -1464,8 +1486,10 @@ it on disk.
 @node Adding Users to the Database, Starting the Kerberos Server, Storing the Master Password, Installing the KDC
 @subsection Adding Users to the Database
 
-The @samp{kdb5_edit} program is used to add new users and services to
-the master database, and to modify existing database information.
+The @samp{kdb5_edit} program may be used to add new users and services to
+the master database, and to modify existing database
+information. @xref{The Administration Server} for an alternative method
+once the Kerberos environment is up and running.
 
 For example, to add yourself to the newly created database: (replace
 @samp{[USERNAME]} with your username with.
@@ -1515,7 +1539,9 @@ even when the Master server is not available.  Users will not be able to
 change their passwords --- changes can only be made to database on the
 Master server; however, users will be able to authenticate to
 application servers, which is critically important in a distributed
-client-server environment.
+client-server environment. The current implementation of the client code
+does not provide load sharing in that the order of servers contacted is
+the same as those listed in the @file{krb5.conf} file.
 
 @menu
 * Kerberos Slave Database Propagation::  
@@ -1533,7 +1559,7 @@ The master server will then run @samp{kprop} to propagate the dumped
 database file to each slave server.  
 
 On the slave server, the @samp{kpropd} program is invoked out of
-@samp{/etc/inetd} server.  After @samp{kprop} and @samp{kpropd} have
+@samp{inetd} server.  After @samp{kprop} and @samp{kpropd} have
 mutually authenticated with one another, and @samp{kpropd} is satisfied
 with the identity of the Master server, then the dumped ASCII database
 is transferred to the slave server in an encrypted fashion.  After the
@@ -1576,7 +1602,7 @@ commands directory as [K_USER].
 Use @samp{kinit} as follows:
 
 @example
-# @b{[K_USER]/kinit [USERNAME]}
+% @b{[K_USER]/kinit [USERNAME]}
 Password for [USERNAME]@@[REALMNAME]:        @b{<-- enter your password}
 @end example
 
@@ -1584,7 +1610,7 @@ Password for [USERNAME]@@[REALMNAME]:        @b{<-- enter your password}
 Use the @samp{klist} program to list the contents of your ticket file.
 
 @example
-# @b{[K_USER]/klist}
+% @b{[K_USER]/klist}
 Ticket cache: /tmp/krb5cc_15806
 Default principal: [USERNAME]@@[REALMNAME]
 
@@ -1603,7 +1629,8 @@ there was some sort of error.
 @node Migrating from V4 to V5 Kerberos, A Sample Application, Installing the KDC, Installation
 @section Migrating from V4 to V5 Kerberos
 
-@b{To be written.}
+@b{To be written.} A rough idea of the procedure that one may follow is
+in @file{[SOURCE_DIR]/kdc/migration.doc}.
 
 @node A Sample Application, Installing Kerberos Applications, Migrating from V4 to V5 Kerberos, Installation
 @section A Sample Application
@@ -1872,7 +1899,7 @@ compatible with Kerberos and host-based services.
 Unencrypted Kerberos V4 services suffer from all the problems of
 unencrypted Kerberos V5 services: lack of confidentiality and
 susceptibility to active attack.  In addition, the lack of a replay cache
-in Kerberos V4makes these active attacks much easier.  Also, design bugs
+in Kerberos V4 makes these active attacks much easier.  Also, design bugs
 in the Kerberos V4 BSD utilities such as @samp{rlogin}, @samp{rsh} and
 @samp{rcp} cause the availability of an unencrypted service to
 significantly decrease the security of a system, even if only the
@@ -1885,13 +1912,13 @@ ever connect to the encrypted service.
 try to avoid running unencrypted Kerberos V4 services wherever possible.
 In particular, only enable encrypted @samp{rlogin} if at all possible.
 Naturally, some environments will require additional Kerberos V4
-functionality, like @samp{rsh}. The Kerberos V5 versions of these services
-with Kerberos V4 interoperability enabled are not any weaker than their
-Kerberos V4 counterparts.  So, if the existing Kerberos4 security policy
+functionality, like @samp{rsh}. The Kerberos V5 versions of these services,
+with Kerberos V4 interoperability enabled, are not any weaker than their
+Kerberos V4 counterparts.  So, if the existing Kerberos V4 security policy
 allows these services, then enabling them under the Kerberos V5 security
 policy should not be a problem.
 
-        Finally, the issue of compatibility with older Kerberos V5
+        In addition, the issue of compatibility with older Kerberos V5
 clients must be considered.  For the most part, this compatibility is
 automatic, and has few security implications. The major exception to
 this is the BSD utilities.  Until Kerberos V5 Beta6, these utilities
@@ -2018,7 +2045,7 @@ Try using the Kerberos applications to connect to the host.
 @subsection BSD Utilities
 
         This section describes installing servers for the BSD utilities:
-@samp{kshd} and @samp{klogind}. The @samp{klogind} server implementsthe
+@samp{kshd} and @samp{klogind}. The @samp{klogind} server implements the
 protocol used by the Kerberized @samp{rlogin} client.  The @samp{kshd}
 server implements the protocol used by the @samp{rsh} and @samp{rcp}
 clients.
@@ -2188,8 +2215,8 @@ applications.
 @table @code
 
 @item host
-Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, @samp{ftp} and other
-services which generally give login access to the host. 
+Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, @samp{ftp}
+and other services which generally give login access to the host. 
 
 @item pop
 Used by the Post Office Protocol.
