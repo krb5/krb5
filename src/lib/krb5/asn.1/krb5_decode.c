@@ -206,11 +206,10 @@ krb5_error_code decode_krb5_encryption_key(code, rep)
   alloc_field(*rep,krb5_keyblock);
 
   { begin_structure();
-    get_field((*rep)->keytype,0,asn1_decode_keytype);
+    get_field((*rep)->enctype,0,asn1_decode_enctype);
     get_lenfield((*rep)->length,(*rep)->contents,1,asn1_decode_octetstring);
     end_structure();
     (*rep)->magic = KV5M_KEYBLOCK;
-    (*rep)->etype = ETYPE_UNKNOWN;
   }
   cleanup();
 }

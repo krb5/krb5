@@ -70,14 +70,12 @@ asn1_error_code asn1_decode_int32
 	PROTOTYPE((asn1buf *buf, krb5_int32 *val));
 asn1_error_code asn1_decode_kvno
 	PROTOTYPE((asn1buf *buf, krb5_kvno *val));
-asn1_error_code asn1_decode_keytype
-	PROTOTYPE((asn1buf *buf, krb5_keytype *val));
+asn1_error_code asn1_decode_enctype
+	PROTOTYPE((asn1buf *buf, krb5_enctype *val));
 asn1_error_code asn1_decode_msgtype
 	PROTOTYPE((asn1buf *buf, krb5_msgtype *val));
 asn1_error_code asn1_decode_cksumtype
 	PROTOTYPE((asn1buf *buf, krb5_cksumtype *val));
-asn1_error_code asn1_decode_enctype
-	PROTOTYPE((asn1buf *buf, krb5_enctype *val));
 asn1_error_code asn1_decode_octet
 	PROTOTYPE((asn1buf *buf, krb5_octet *val));
 asn1_error_code asn1_decode_addrtype
