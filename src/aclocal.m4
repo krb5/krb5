@@ -1063,8 +1063,18 @@ AC_ARG_ENABLE([shared],
 			AC_MSG_RESULT([Forcing static libraries.])
 			# avoid duplicate rules generation for AIX and such
 			SHLIBEXT=.so-nobuild
+			SHLIBVEXT=.so.v-nobuild
+			SHLIBSEXT=.so.s-nobuild
 		else
 			AC_MSG_RESULT([Enabling shared libraries.])
+			# Clear some stuff in case of AIX, etc.
+			if test "$STLIBEXT" = "$SHLIBEXT" ; then
+				STLIBEXT=.a-nobuild
+				LIBLIST=
+				LIBLINKS=
+				OBJLISTS=
+				LIBINSTLIST=
+			fi
 			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
 			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
 			case "$SHLIBSEXT" in
@@ -1080,10 +1090,6 @@ AC_ARG_ENABLE([shared],
 			OBJLISTS="$OBJLISTS OBJS.SH"
 		fi
 		CC_LINK="$CC_LINK_SHARED"
-		if test "$STLIBEXT" = "$SHLIBEXT" ; then
-		  STLIBEXT=".a-no-build"
-		  LIBINSTLIST="install-shared" #don't install static
-		fi
 		;;
 	esac
 else
@@ -1095,6 +1101,9 @@ else
 fi],
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
+	SHLIBEXT=.so-nobuild
+	SHLIBVEXT=.so.v-nobuild
+	SHLIBSEXT=.so.s-nobuild
 )dnl
 
 if test -n "$EXTRA_LIB_TARGETS"; then

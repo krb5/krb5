@@ -1,3 +1,9 @@
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): Smash some shared lib file extensions
+	so that AIX doesn't break, since static and shared libs are
+	mutually exclusive on AIX.
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* acconfig.h (HAVE_SA_LEN): Undef.
