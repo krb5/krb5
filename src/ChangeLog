@@ -1,3 +1,15 @@
+Mon Aug 11 21:16:50 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_STATIC): Fix up some things so
+	that this macro actually works; it's still necessary to precede a
+	call to KRB5_BUILD_LIBOBJS with a call to
+	KRB5_BUILD_LIBRARY_STATIC, though.  Basically if you AC_DEFUN
+	something that produces shell code and then calls a macro that
+	AC_REQUIREs something else, then all the AC_REQUIREd stuff ends up
+	coming *before* the shell code in the first macro.  I'm not sure
+	there's a reasonable workaround, or whether this can even be
+	considered to be a bug.
+
 Wed Aug  6 20:25:49 1997  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Add support for --with-hesiod (and add it to

@@ -989,7 +989,8 @@ dnl KRB5_BUILD_LIBRARY_STATIC
 dnl
 dnl Force static library build.
 
-AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
+define(KRB5_BUILD_LIBRARY_STATIC,
+dnl Use define rather than AC_DEFUN to avoid ordering problems.
 [krb5_force_static=yes
 KRB5_BUILD_LIBRARY])
 
@@ -1084,7 +1085,7 @@ fi
 # Check whether to build shared libraries.
 AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],
-[if test "$enableval" = yes && test "$krb5_force_static" != yes; then
+[if test "$enableval" = yes; then
 	case "$SHLIBEXT" in
 	.so-nobuild)
 		AC_MSG_WARN([shared libraries not supported on this architecture])
@@ -1092,20 +1093,24 @@ AC_ARG_ENABLE([shared],
 		CC_LINK="$CC_LINK_STATIC"
 		;;
 	*)
-		AC_MSG_RESULT([Enabling shared libraries.])
-		LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
-		case "$SHLIBSEXT" in
-		.so.s-nobuild)
-			LIBINSTLIST="$LIBINSTLIST install-shared"
-			;;
-		*)
-			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBSEXT)'
-			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)'
-			LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
-			;;
-		esac
-		OBJLISTS="$OBJLISTS OBJS.SH"
+		if test "$krb5_force_static" = "yes"; then
+			AC_MSG_RESULT([Forcing static libraries.])
+		else
+			AC_MSG_RESULT([Enabling shared libraries.])
+			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
+			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
+			case "$SHLIBSEXT" in
+			.so.s-nobuild)
+				LIBINSTLIST="$LIBINSTLIST install-shared"
+				;;
+			*)
+				LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBSEXT)'
+				LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)'
+				LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
+				;;
+			esac
+			OBJLISTS="$OBJLISTS OBJS.SH"
+		fi
 		DEPLIBEXT=$SHLIBEXT
 		CC_LINK="$CC_LINK_SHARED"
 		if test "$STLIBEXT" = "$SHLIBEXT" ; then
