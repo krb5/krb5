@@ -40,6 +40,7 @@ s/\n */ /
 bFIRST
 }
 s/, */, /g
+/^$/d
 #
 # Now we take care of some syntatic sugar.....
 #

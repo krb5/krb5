@@ -1,3 +1,8 @@
+Fri Oct  7 15:37:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ct_c.sed: Add extra check to make sure blank lines get squeezed
+		out.  Needed for AIX's sed, for some reason.
+
 Thu Oct  6 19:40:09 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* mk_cmds.sh -- replace basename with sed -- more portable
