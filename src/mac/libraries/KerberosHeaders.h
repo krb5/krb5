@@ -17,7 +17,7 @@
 #define ENOMEM -1
 #define HAVE_SRAND
 #define NO_PASSWORD
-#define HAS_LABS
+#define HAVE_LABS
 #define ANSI_STDIO
 
 #include <unix.h>

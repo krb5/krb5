@@ -65,7 +65,7 @@
 
 #include <windows.h>   /* always include this here, to get correct FAR and NEAR */
 
-#define HAS_LABS
+#define HAVE_LABS
 
 #ifndef KRB5_CALLCONV
 #ifdef _MSC_VER
@@ -98,10 +98,10 @@ typedef unsigned char	u_char;
 
 #define KRB5_USE_INET
 #define MSDOS_FILESYSTEM
-#define USE_STRING_H 
+#define HAVE_STRING_H 
 #define HAVE_SRAND
 #define HAVE_ERRNO
-#define HAS_STRDUP
+#define HAVE_STRDUP
 #define NO_USERID
 #define NO_PASSWORD
 
@@ -233,7 +233,7 @@ HINSTANCE get_lib_instance(void);
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
 #define NO_PASSWORD
-#define HAS_LABS
+#define HAVE_LABS
 #define ENOMEM -1
 #define ANSI_STDIO
 #ifndef _SIZET

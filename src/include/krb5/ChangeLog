@@ -1,3 +1,7 @@
+Thu Sep 18 20:42:03 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Replace USE_STRING_H, HAS_STRDUP, HAS_LABS
+
 Mon Sep 15 15:01:49 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_dbm.h: Add const to argument of krb5_dbm_db_get_principal.

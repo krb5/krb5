@@ -1,3 +1,7 @@
+Thu Sep 18 17:51:39 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acconfig.h: Remove USE_STRING_H, HAS_STRDUP, HAS_LABS
+
 Mon Aug 18 11:28:25 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): For the alpha, RUN_ENV needs to

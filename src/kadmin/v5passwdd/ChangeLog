@@ -1,3 +1,7 @@
+Thu Sep 18 17:54:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.c: Replace USE_STRING_H with something more sane.
+
 Thu Feb  6 00:28:54 1997  Richard Basch  <basch@lehman.com>
 
 	* adm_conn.c adm_rw.c:

@@ -123,7 +123,7 @@ char *quote(string)
 	return(result);
 }
 
-#ifndef HAS_STRDUP
+#ifndef HAVE_STRDUP
 /* make duplicate of string and return pointer */
 char *strdup(s)
 	register char *s;

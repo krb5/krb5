@@ -9,8 +9,6 @@
 #undef ANSI_STDIO
 #undef HAS_SETVBUF
 #undef HAS_STDLIB_H
-#undef HAS_STRDUP
-#undef HAS_LABS
 #undef HAS_VOID_TYPE
 #undef KRB5_NO_PROTOTYPES
 #undef KRB5_PROVIDE_PROTOTYPES
@@ -23,7 +21,6 @@
 #undef POSIX_TERMIOS
 #undef POSIX_TYPES
 #undef USE_DIRENT_H
-#undef USE_STRING_H
 #undef WAIT_USES_INT
 #undef krb5_sigtype
 #undef HAS_UNISTD_H

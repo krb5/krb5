@@ -42,7 +42,7 @@
 #ifdef HAS_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef USE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>

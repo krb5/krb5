@@ -9,7 +9,7 @@
 #define NO_YYLINENO 1
 #define POSIX_TYPES 1
 #define USE_DIRENT_H 1
-#define USE_STRING_H 1
+#define HAVE_STRING_H 1
 #define WAIT_USES_INT 1
 #define krb5_sigtype void
 #define KRB5_USE_INET 1

@@ -1,3 +1,9 @@
+Thu Sep 18 17:55:09 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acquire_cred.c: Replace USE_STRING_H with something more sane.
+
+	* import_name.c: Replace USE_STRING_H with something more sane.
+
 Tue Jul 29 22:56:04 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* inq_names.c (krb5_gss_inquire_names_for_mech): Add the 

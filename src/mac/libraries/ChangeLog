@@ -1,3 +1,7 @@
+Thu Sep 18 17:59:05 1997  Tom Yu  <tlyu@mit.edu>
+
+	* autoconf.h: Replace USE_STRING_H with something more sane.
+
 Tue Jul 15 12:36:05 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* KerberosHeaders.h: Remove (probably unneeded) size_t definition.

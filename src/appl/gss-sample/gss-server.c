@@ -38,7 +38,7 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"
 
-#ifdef USE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>

@@ -1,3 +1,10 @@
+Thu Sep 18 17:52:59 1997  Tom Yu  <tlyu@mit.edu>
+
+	* win-mac.h: Replace USE_STRING_H with something more sane.
+
+	* k5-int.h: Replace USE_STRING_H, HAS_STRDUP, HAS_LABS with
+ 	something more sane.
+
 Mon Sep 15 14:54:55 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Add const to prototypes for krb5_cc_resolve,
