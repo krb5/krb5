@@ -305,7 +305,8 @@ krb5_gss_init_sec_context(ct, minor_status, claimant_cred_handle,
       memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
       ctx->auth_context = NULL;
       ctx->initiate = 1;
-      ctx->mutual = req_flags & GSS_C_MUTUAL_FLAG;
+      ctx->gss_flags = ((req_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG)) |
+			GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG);
       ctx->flags = req_flags & GSS_C_DELEG_FLAG;
       ctx->seed_init = 0;
       ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
@@ -337,7 +338,8 @@ krb5_gss_init_sec_context(ct, minor_status, claimant_cred_handle,
 
       if ((code = make_ap_req(context, &(ctx->auth_context), cred, 
 			      ctx->there, &ctx->endtime, input_chan_bindings, 
-			      ctx->mutual, &ctx->flags, &token))) {
+			      ctx->gss_flags & GSS_C_MUTUAL_FLAG, &ctx->flags,
+			      &token))) {
 	 krb5_free_principal(context, ctx->here);
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
@@ -403,13 +405,12 @@ krb5_gss_init_sec_context(ct, minor_status, claimant_cred_handle,
       *output_token = token;
 
       if (ret_flags)
-	 *ret_flags = ((req_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG)) | 
-		       GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG);
+	 *ret_flags = ctx->gss_flags;
 
       /* return successfully */
 
       *minor_status = 0;
-      if (ctx->mutual) {
+      if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
 	 ctx->established = 0;
 	 return(GSS_S_CONTINUE_NEEDED);
       } else {

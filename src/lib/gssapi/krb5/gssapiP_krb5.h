@@ -83,7 +83,7 @@ typedef struct _krb5_gss_enc_desc {
 
 typedef struct _krb5_gss_ctx_id_rec {
    int initiate;	/* nonzero if initiating, zero if accepting */
-   OM_uint32 mutual;
+   OM_uint32 gss_flags;
    int seed_init;
    unsigned char seed[16];
    krb5_principal here;

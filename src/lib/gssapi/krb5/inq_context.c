@@ -119,7 +119,7 @@ krb5_gss_inquire_context(ct, minor_status, context_handle, initiator_name,
       *mech_type = (gss_OID) gss_mech_krb5;
 
    if (ret_flags)
-      *ret_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | ctx->mutual;
+      *ret_flags = ctx->gss_flags;
 
    if (locally_initiated)
       *locally_initiated = ctx->initiate;

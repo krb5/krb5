@@ -315,7 +315,8 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
-   ctx->mutual = gss_flags & GSS_C_MUTUAL_FLAG;
+   ctx->gss_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
+	(gss_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG));
    ctx->seed_init = 0;
    ctx->big_endian = bigend;
 
@@ -370,7 +371,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
    /* generate an AP_REP if necessary */
 
-   if (ctx->mutual) {
+   if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
       krb5_data ap_rep;
       unsigned char * ptr;
       if ((code = krb5_mk_rep(context, auth_context, &ap_rep))) {
@@ -433,7 +434,7 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    }
 
    if (ret_flags)
-      *ret_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | ctx->mutual;
+      *ret_flags = ctx->gss_flags;
 
    ctx->established = 1;
 

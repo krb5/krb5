@@ -578,7 +578,7 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 	    /* Now static data */
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->initiate,
 				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->mutual,
+	    (void) krb5_ser_pack_int32((krb5_int32) ctx->gss_flags,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->seed_init,
 				       &bp, &remain);
@@ -683,7 +683,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->initiate = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    ctx->mutual = (int) ibuf;
+	    ctx->gss_flags = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->seed_init = (int) ibuf;
 	    (void) krb5_ser_unpack_bytes((krb5_octet *) ctx->seed,
