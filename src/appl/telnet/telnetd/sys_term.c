@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)sys_term.c	5.19 (Berkeley) 1/19/93";
 #endif /* not lint */
 
 #include "telnetd.h"
-#include "pathnames.h"
+#include <krb5/osconf.h>
 
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
@@ -1003,7 +1003,7 @@ getptyslave()
 	 * that we are the session (process group) leader.
 	 */
 # ifdef	TIOCNOTTY
-	t = open(_PATH_TTY, O_RDWR);
+	t = open(KRB5_PATH_TTY, O_RDWR);
 	if (t >= 0) {
 		(void) ioctl(t, TIOCNOTTY, (char *)0);
 		(void) close(t);
@@ -1519,10 +1519,10 @@ start_login(host, autologin, name)
 		unsetenv("USER");
 	}
 	closelog();
-	execv(_PATH_LOGIN, argv);
+	execv(KRB5_PATH_LOGIN, argv);
 
-	syslog(LOG_ERR, "%s: %m\n", _PATH_LOGIN);
-	fatalperror(net, _PATH_LOGIN);
+	syslog(LOG_ERR, "%s: %m\n", KRB5_PATH_LOGIN);
+	fatalperror(net, KRB5_PATH_LOGIN);
 	/*NOTREACHED*/
 }
 

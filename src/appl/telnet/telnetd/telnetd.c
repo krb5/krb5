@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)telnetd.c	5.51 (Berkeley) 1/21/93";
 #endif /* not lint */
 
 #include "telnetd.h"
-#include "pathnames.h"
+#include <krb5/osconf.h>
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 #include <sys/sysv.h>
@@ -975,7 +975,7 @@ telnet(f, p, host)
 #ifdef  TIOCNOTTY
 	{
 		register int t;
-		t = open(_PATH_TTY, O_RDWR);
+		t = open(KRB5_PATH_TTY, O_RDWR);
 		if (t >= 0) {
 			(void) ioctl(t, TIOCNOTTY, (char *)0);
 			(void) close(t);
