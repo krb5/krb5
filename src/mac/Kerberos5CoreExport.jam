@@ -1,3 +1,5 @@
+include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
+
 rule Kerberos5Core.pbexp
 {
     DEPENDS "$(1)" : "$(2)" ;
@@ -16,3 +18,4 @@ Kerberos5Core.pbexp 		"$(GSSKRB5_TEMP_DIR)/Kerberos5Core.pbexp" :
 
 DEPENDS install 	: all ;
 DEPENDS	all			: "$(GSSKRB5_TEMP_DIR)/Kerberos5Core.pbexp" ;
+Clean.Remove clean	: "$(GSSKRB5_TEMP_DIR)/Kerberos5Core.pbexp" ;
