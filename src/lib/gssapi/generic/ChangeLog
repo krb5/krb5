@@ -1,3 +1,7 @@
+Tue Feb 28 00:25:58 1995  John Gilmore  (gnu at toad.com)
+
+	* gssapi.h:  Avoid <krb5/...> includes.
+
 Mon Feb 20 18:50:33 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work on the PC

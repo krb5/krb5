@@ -2,8 +2,7 @@
 #ifndef __ASN1BUF_H__
 #define __ASN1BUF_H__
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "krbasn1.h"
 
 typedef struct code_buffer_rep {

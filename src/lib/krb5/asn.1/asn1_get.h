@@ -26,7 +26,7 @@
 
 /* ASN.1 substructure decoding procedures */
 
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include "krbasn1.h"
 #include "asn1buf.h"
 

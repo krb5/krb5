@@ -1,3 +1,9 @@
+Tue Feb 28 00:32:48 1995  John Gilmore  (gnu at toad.com)
+
+	* asn1_decode.h, asn1_encode.h, asn1_get.h, asn1_k_decode.h,
+	asn1_k_encode.h, asn1_make.h asn1_misc.h, asn1_buf.h, glue2.c,
+	krb5_decode.c, krb5_encode.c, krbasn1.h:  Avoid <krb5/...> includes.
+
 Tue Feb 21 12:00:00 1995  Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work for the PC

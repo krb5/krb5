@@ -1,3 +1,7 @@
+Tue Feb 28 00:27:44 1995  John Gilmore  (gnu at toad.com)
+
+	* gssapi_krb5.h, gssapiP_krb5.h: Avoid <krb5/...> includes.
+
 Mon Feb 20 19:53:9 1995 Keith Vetter (keithv@fusion.com)
 
 	* accept_s.c: needed temp to avoid sign/unsigned mismatch on the PC.

@@ -23,7 +23,7 @@
 #ifndef _GSSAPIP_KRB5_H_
 #define _GSSAPIP_KRB5_H_
 
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include <memory.h>
 
 /* work around sunos braindamage */
@@ -34,7 +34,7 @@
 #undef minor
 #endif
 
-/* this must be after <krb5/krb5.h>, since krb5 #defines xfree(), too */
+/* this must be after "krb5.h", since krb5 #defines xfree(), too */
 #include "../generic/gssapiP_generic.h"
 #include "gssapi_krb5.h"
 #include "gssapi_err_krb5.h"

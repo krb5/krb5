@@ -1,3 +1,8 @@
+Tue Feb 28 00:30:10 1995  John Gilmore  (gnu at toad.com)
+
+	* decrypt_key.c, encrypt_key.c, fetch_mkey.c, kdb_dbm.c,
+	setup_mkey.c, store-mkey.c, verify_mky.c:  Avoid <krb5/...> includes.
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
     * Added krb5_context to all krb5_routines

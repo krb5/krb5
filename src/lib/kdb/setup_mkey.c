@@ -24,10 +24,7 @@
  * krb5_kdb_setup_mkey()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Given a key name and a realm name, construct a principal which can be used

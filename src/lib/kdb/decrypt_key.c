@@ -24,11 +24,7 @@
  * krb5_kdb_encrypt_key(), krb5_kdb_decrypt_key functions
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/kdb.h>
-
+#include "k5-int.h"
 
 /*
  * Decrypt a key from storage in the database.  "eblock" is used

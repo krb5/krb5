@@ -24,10 +24,7 @@
  * krb5_db_verify_master_key();
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Verify that the master key in *mkey matches the database entry

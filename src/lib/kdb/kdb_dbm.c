@@ -26,18 +26,11 @@
 #include <unistd.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/dbm.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/ext-proto.h>
-#include <krb5/sysincl.h>
-#include <krb5/libos.h>
+#include "k5-int.h"
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <utime.h>
-#include <krb5/config.h>
 
 #define OLD_COMPAT_VERSION_1
 

@@ -1,4 +1,4 @@
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 krb5_data string_list[3] = {
 {14, "ATHENA.MIT.EDU"},

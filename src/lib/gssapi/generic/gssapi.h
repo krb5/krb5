@@ -24,10 +24,10 @@
 #define _GSSAPI_H_
 
 /* for general config: */
-#include <krb5/config.h>
-#include <krb5/osconf.h>
+#include "k5-config.h"
+#include "osconf.h"
 /* for prototype-related config: */
-#include <krb5/base-defs.h>
+#include "base-defs.h"
 #ifndef NO_STDLIB_H
 #include <stdlib.h>
 #endif

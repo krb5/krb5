@@ -1,7 +1,7 @@
 #ifndef __KRBASN1_H__
 #define __KRBASN1_H__
 
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include <stdio.h>
 #include <errno.h>
 #include <limits.h>

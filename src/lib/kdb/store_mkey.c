@@ -27,12 +27,8 @@
 
 
 #include <errno.h>
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "kdbint.h"
-#include <krb5/sysincl.h>		/* for MAXPATHLEN */
 
 /* Just in case sysincl.h didn't get it */
 

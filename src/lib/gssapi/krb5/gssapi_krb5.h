@@ -24,7 +24,7 @@
 #define _GSSAPI_KRB5_H_
 
 #include <gssapi/gssapi_generic.h>
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 extern const gss_OID_desc * const gss_mech_krb5;
 extern const gss_OID_set_desc * const gss_mech_set_krb5;
