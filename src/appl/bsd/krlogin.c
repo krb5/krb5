@@ -1238,14 +1238,14 @@ int read_wrapper(fd,buf,size,got_esc)
       bol = (c == defltc.t_suspc);
 #endif
 	
-#else / * !POSIX_TERMIOS * /
+#else /* !POSIX_TERMIOS */
     bol = c == defkill || c == deftc.t_eofc ||
       c == deftc.t_intrc || c == defltc.t_suspc ||
       c == '\r' || c == '\n';
 #endif
   }
    
-  memcpy(buf,tbuf, return_length);
+  memcpy(buf, data_start, return_length);
   data_start = data_start + return_length;
   return return_length;
 }
