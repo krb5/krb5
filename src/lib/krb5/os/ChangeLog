@@ -1,3 +1,7 @@
+2003-06-03  Alexandra Ellwood  <lxs@mit.edu>
+
+        * init_os_ctx.c: Included header to get __KLAllowHomeDirectoryAccess().
+
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* send524.c (krb5int_524_sendto_kdc): Enable support on Windows
