@@ -1,3 +1,16 @@
+Fri Mar 17 19:19:07 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Remove, duplicates config/pre.in.
+	(CFLAGS):  Add -I options for file and stdio, to avoid paths in
+	#include statements.
+	(all-mac, clean-mac):  Add.
+	* ccdefops.c:  Avoid includes with pathnames, since they don't work
+	on the Mac.  Configure the default cache based on whether the
+	system has <sys/types.h> (which defines types for low-level file
+	operations, among other things).
+	* configure.in (CONFIG_DIRS):  Build stdio before file, for Mac
+	convenience (where file doesn't build).
+
 Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: cleaned up for the PC

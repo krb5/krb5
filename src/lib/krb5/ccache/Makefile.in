@@ -1,5 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
+CFLAGS = $(CCOPTS) $(DEFS) -I$(C)file -I$(C)stdio
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -16,7 +15,7 @@ SRCS=	$(srcdir)/ccbase.c \
 all:: $(OBJS) all-$(WHAT)
 
 all-unix::
-
+all-mac::
 all-windows::
 	cd FILE
 	@echo Making in ccache\file
@@ -26,11 +25,10 @@ all-windows::
 clean:: clean-$(WHAT)
 
 clean-unix::
-
+clean-mac:
 clean-windows::
 	cd FILE
 	@echo Making clean in ccache\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally
-
