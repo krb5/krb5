@@ -28,11 +28,13 @@ static char rcsid_kkdcr2kdcr_c[] =
 
 /* ISODE defines max(a,b) */
 
-static struct type_KRB5_KDC__REP *
-krb5_kdc_rep2KRB5_KDC__REP(val, type, error)
-const register krb5_kdc_rep *val;
-const krb5_msgtype type;
-register int *error;
+struct type_KRB5_KDC__REP *
+krb5_kdc_rep2KRB5_KDC__REP(DECLARG(const register krb5_kdc_rep *,val),
+			   DECLARG(const krb5_msgtype, type),
+			   DECLARG(register int *,error))
+OLDDECLARG(const register krb5_kdc_rep *,val)
+OLDDECLARG(const krb5_msgtype, type)
+OLDDECLARG(register int *,error)
 {
     register struct type_KRB5_KDC__REP *retval;
 
