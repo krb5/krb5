@@ -35,6 +35,9 @@ if ![info exists BINSH] {
 if ![info exists KEY] {
     catch {exec $BINSH -c "echo $$"} KEY
     verbose "KEY is $KEY"
+    set keyfile [open tmpdir/KEY w]
+    puts $keyfile "$KEY"
+    close $keyfile
 }
 
 # Clear away any files left over from a previous run.
@@ -288,7 +291,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable -forwardable"
-	puts $conffile "		supported_enctypes = des-cbc-crc:normal desdes:normal des:v4 des:norealm des:onlyrealm"
+	puts $conffile "		supported_enctypes = des-cbc-crc:normal des:normal des:v4 des:norealm des:onlyrealm"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile
@@ -381,6 +384,30 @@ proc setup_kerberos_env { } {
     # Set our kdc config file.
     set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf
     verbose "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+
+    # Create an environment setup script.  (For convenience)
+    if ![file exists tmpdir/env.sh] {
+	set envfile [open tmpdir/env.sh w]
+	puts $envfile "KRB5_CONFIG=$env(KRB5_CONFIG)"
+	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
+	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
+	puts $envfile "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
+	puts $envfile "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
+	puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
+	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
+	puts $envfile "export KERBEROS_SERVER LD_LIBRARY_PATH KRB5_KDC_PROFILE"
+	close $envfile
+    }
+    if ![file exists tmpdir/env.csh] {
+	set envfile [open tmpdir/env.csh w]
+	puts $envfile "setenv KRB5_CONFIG $env(KRB5_CONFIG)"
+	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
+	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
+	puts $envfile "setenv KERBEROS_SERVER $env(KERBEROS_SERVER)"
+	puts $envfile "setenv LD_LIBRARY_PATH $env(LD_LIBRARY_PATH)"
+	puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
+	close $envfile
+    }
     return 1
 }
 

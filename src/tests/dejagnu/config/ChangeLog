@@ -1,3 +1,10 @@
+Wed Sep 13 14:02:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* default.exp: Save the key used to generate the database files.
+		Also generate a set of environment setup scripts.
+		These are the convenience of someone who wishes to run some
+		of the tests by hand, when tests are bombing.
+
 Sun Sep 10 10:09:41 1995  Ezra Peisach  (epeisach@dcl)
 
 	* default.exp: Add des-cbc-crc to supported_enctypes as krb5_edit
