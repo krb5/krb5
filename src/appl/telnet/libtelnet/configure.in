@@ -14,4 +14,5 @@ else
 	AC_MSG_RESULT(Kerberos 4 authentication enabled)
 	AC_DEFINE(KRB4)
 fi
+USE_KRB4_LIBRARY
 V5_AC_OUTPUT_MAKEFILE
