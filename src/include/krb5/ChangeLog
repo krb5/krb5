@@ -1,3 +1,7 @@
+Fri Apr 28 11:11:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: correct use of --with-krb4 to match top level.
+
 Thu Apr 27 17:39:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: Added MAXPATHLEN constant.

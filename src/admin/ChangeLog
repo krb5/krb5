@@ -1,3 +1,7 @@
+Fri Apr 28 11:15:56 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: correct use of --with-krb4 to match top level.
+
 Sat Jul 16 09:18:49 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in (in all relevant subdirs): another try at making
