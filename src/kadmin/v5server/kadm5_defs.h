@@ -29,6 +29,8 @@
 #ifndef	KADM5_DEFS_H__
 #define	KADM5_DEFS_H__
 
+#include "adm.h"
+
 /*
  * Debug definitions.
  */
@@ -89,55 +91,57 @@
 /* srv_key.c */
 krb5_error_code key_init
 	KRB5_PROTOTYPE((krb5_context,
-		   int,
-		   int,
-		   int,
-		   char *,
-		   int,
-		   char *,
-		   char *,
-		   char *,
-		   char *));
+			int,
+			int,
+			int,
+			char *,
+			int,
+			char *,
+			char *,
+			char *,
+			char *,
+			krb5_int32,
+			krb5_key_salt_tuple *));
 void key_finish
 	KRB5_PROTOTYPE((krb5_context,
-		   int));
+			int));
 krb5_error_code key_string_to_keys
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
-		   krb5_data *,
-		   krb5_int32,
-		   krb5_int32,
-		   krb5_keyblock *,
-		   krb5_keyblock *,
-		   krb5_data *,
-		   krb5_data *));
+			krb5_db_entry *,
+			krb5_data *,
+			krb5_int32 *,
+			krb5_key_data **));
 krb5_error_code key_random_key
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_keyblock *));
+			krb5_db_entry *,
+			krb5_int32 *,
+			krb5_key_data **));
 krb5_error_code key_encrypt_keys
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
-		   krb5_keyblock *,
-		   krb5_keyblock *,
-		   krb5_encrypted_keyblock *,
-		   krb5_encrypted_keyblock *));
+			krb5_db_entry *,
+			krb5_int32 *,
+			krb5_key_data *,
+			krb5_key_data **));
 krb5_error_code key_decrypt_keys
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
-		   krb5_encrypted_keyblock *,
-		   krb5_encrypted_keyblock *,
-		   krb5_keyblock *,
-		   krb5_keyblock *));
+			krb5_db_entry *,
+			krb5_int32 *,
+			krb5_key_data *,
+			krb5_key_data **));
 krb5_boolean key_pwd_is_weak
 	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal,
-		   krb5_data *,
-		   krb5_int32,
-		   krb5_int32));
+			krb5_db_entry *,
+			krb5_data *));
 krb5_db_entry *key_master_entry();
 char *key_master_realm();
 krb5_keytab key_keytab_id();
 krb5_keyblock *key_admin_key();
+void key_free_key_data KRB5_PROTOTYPE((krb5_key_data *,
+				       krb5_int32));
+krb5_error_code key_name_to_data KRB5_PROTOTYPE((krb5_db_entry *,
+						 krb5_key_salt_tuple *,
+						 krb5_int32,
+						 krb5_key_data **));
 
 /* srv_acl.c */
 krb5_error_code acl_init
