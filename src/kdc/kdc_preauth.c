@@ -499,6 +499,7 @@ get_etype_info(context, request, client, server, pa_data)
 	goto cleanup;
     pa_data->contents = scratch->data;
     pa_data->length = scratch->length;
+    free(scratch);
 
     retval = 0;
 
@@ -672,6 +673,13 @@ get_sam_edata(context, request, client, server, pa_data)
 	  break;
 	}
       }
+
+      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
+      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
+      krb5_princ_size(context, newp)--;
+
+      krb5_free_principal(kdc_context, newp);
+
       /* if sc.sam_type is set, it worked */
       if (sc.sam_type) {
 	/* so use assoc to get the key out! */
@@ -684,9 +692,10 @@ get_sam_edata(context, request, client, server, pa_data)
 					 &assoc_key);
 	  if (retval) {
 	    char *sname;
-	    krb5_unparse_name(kdc_context, newp, &sname);
+	    krb5_unparse_name(kdc_context, request->client, &sname);
 	    com_err("krb5kdc", retval, 
 		    "snk4 finding the enctype and key <%s>", sname);
+	    free(sname);
 	    return retval;
 	  }
 	  /* convert server.key into a real key */
@@ -701,14 +710,10 @@ get_sam_edata(context, request, client, server, pa_data)
 	  }
 	  /* now we can use encrypting_key... */
 	}
-      } else
+      } else {
 	/* SAM is not an option - so don't return as hint */
 	return KRB5_PREAUTH_BAD_TYPE;
-
-      krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
-      krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
-      krb5_princ_size(context, newp)--;
-      krb5_free_principal(kdc_context, newp);
+      }
     }
     sc.magic = KV5M_SAM_CHALLENGE;
     sc.sam_flags = KRB5_SAM_USE_SAD_AS_KEY;

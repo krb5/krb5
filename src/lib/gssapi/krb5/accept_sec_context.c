@@ -214,6 +214,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    mic.data = 0;
    ap_req.data = 0;
    ap_rep.data = 0;
+   cksumdata.data = 0;
    
    if (mech_type)
       *mech_type = GSS_C_NULL_OID;
@@ -652,6 +653,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   goto fail;
        }
 
+       free(cksumdata.data);
+       cksumdata.data = 0;
+
        if (!valid) {
 	   code = 0;
 	   major_status = GSS_S_BAD_SIG;
@@ -830,6 +834,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 	   ptr += (2+mic.length);
 
+	   free(cksumdata.data);
+	   cksumdata.data = 0;
+
 	   /* gss krb5 v2 */
        } else {
 	   /* gss krb5 v1 */
@@ -902,25 +909,31 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* finally! */
 
-   if (authdat)
-       krb5_free_authenticator(context, authdat);
    *minor_status = 0;
-   return(GSS_S_COMPLETE);
+   major_status = GSS_S_COMPLETE;
 
  fail:
+   if (ctypes)
+       free(ctypes);
    if (authdat)
        krb5_free_authenticator(context, authdat);
+   if (reqcksum.contents)
+       xfree(reqcksum.contents);
+   if (ap_rep.data)
+       xfree(ap_rep.data);
+   if (mic.data)
+       xfree(mic.data);
+   if (cksumdata.data)
+       xfree(cksumdata.data);
+
+   if (!GSS_ERROR(major_status))
+       return(major_status);
+
+   /* from here on is the real "fail" code */
+
    if (ctx)
        (void) krb5_gss_delete_sec_context(minor_status, 
 					  (gss_ctx_id_t *) &ctx, NULL);
-   if (token.value)
-       xfree(token.value);
-   if (name) {
-       (void) kg_delete_name((gss_name_t) name);
-       krb5_free_principal(context, name);
-   }
-   if (reqcksum.contents)
-       xfree(reqcksum.contents);
    if (deleg_cred) { /* free memory associated with the deleg credential */
        if (deleg_cred->ccache)
 	   (void)krb5_cc_close(context, deleg_cred->ccache);
@@ -928,12 +941,12 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   krb5_free_principal(context, deleg_cred->princ);
        xfree(deleg_cred);
    }
-   if (ap_req.data && gsskrb5_vers == 2000)
-       xfree(ap_req.data);
-   if (ap_rep.data)
-       xfree(ap_rep.data);
-   if (mic.data)
-       xfree(mic.data);
+   if (token.value)
+       xfree(token.value);
+   if (name) {
+       (void) kg_delete_name((gss_name_t) name);
+       krb5_free_principal(context, name);
+   }
 
    *minor_status = code;
 

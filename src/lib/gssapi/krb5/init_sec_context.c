@@ -855,11 +855,14 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 			kg2_parse_token(minor_status, ptr, token_length,
 					&resp_flags, &nctypes, &ctypes,
 					0, NULL, &ap_rep, &mic))) {
+	      free(ctypes);
 	      (void)krb5_gss_delete_sec_context(&dummy, context_handle, NULL);
 	      return(major_status);
 	  }
 
 	  kg2_intersect_ctypes(&ctx->nctypes, ctx->ctypes, nctypes, ctypes);
+
+	  free(ctypes);
 
 	  if (ctx->nctypes == 0) {
 	      code = KG_NO_CTYPES;
