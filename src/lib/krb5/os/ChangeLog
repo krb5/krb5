@@ -1,3 +1,9 @@
+2001-05-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* locate_kdc.c (add_host_to_list): Initialize stack variable err
+	which would otherwise get returned without being set in certain
+	circumstances.
+
 2001-05-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (add_sockaddr_to_list) [TEST]: If getnameinfo is

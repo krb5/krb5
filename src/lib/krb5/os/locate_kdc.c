@@ -286,7 +286,9 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 #else
     struct hostent *hp;
 #endif
-    int err;
+    /* Must set err to 0 for the case we return err without ever
+       setting it -- !HAVE_GETADDRINFO and !hp */
+    int err = 0;
 
 #ifdef TEST
     fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
