@@ -139,5 +139,6 @@ krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): krb5_libinit.c 
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(srcdir)/keytab/kt-int.h $(srcdir)/rcache/rc-int.h
+  $(srcdir)/keytab/kt-int.h $(srcdir)/rcache/rc-int.h \
+  $(srcdir)/os/os-proto.h
 
