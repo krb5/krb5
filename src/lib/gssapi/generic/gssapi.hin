@@ -44,6 +44,9 @@ extern "C" {
 
 #if defined(_MSDOS) || defined(_WIN32)
 #include <win-mac.h>
+#define GSS_SIZEOF_SHORT SIZEOF_SHORT
+#define GSS_SIZEOF_LONG  SIZEOF_LONG
+#define GSS_SIZEOF_INT   SIZEOF_INT
 #endif
 
 #ifndef KRB5_CALLCONV

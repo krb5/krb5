@@ -7,7 +7,7 @@
 	* gssapi.hin: Always include stddef.h unconditionally.  Don't
 	conditionally include xom.h here.
 	(GSS_SIZEOF_INT, GSS_SIZEOF_LONG, GSS_SIZEOF_SHORT): Don't
-	define.
+	define, except on Windows.
 
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
