@@ -1,6 +1,8 @@
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftpd.c: If NEED_SETENV defined, prototype for setenv.
+	(auth_data): radix_encode expects a int * and not a size_t *. Use
+	temporary variable to pass data in and out.
 
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 

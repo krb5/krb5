@@ -2400,6 +2400,7 @@ char *data;
 		gss_cred_id_t server_creds, deleg_creds;
 		gss_name_t client;
 		int ret_flags;
+		int rad_len;
 		struct gss_channel_bindings_struct chan;
 		gss_buffer_desc name_buf;
 		gss_name_t server_name;
@@ -2526,8 +2527,11 @@ char *data;
 								&deleg_creds);
 				return(0);
 			}
+
+			rad_len = out_tok.length;
 			kerror = radix_encode(out_tok.value, gbuf, 
-					      &out_tok.length, 0);
+					      &rad_len, 0);
+			out_tok.length = rad_len;
 			if (kerror) {
 				secure_error("Couldn't encode ADAT reply (%s)",
 					     radix_error(kerror));
