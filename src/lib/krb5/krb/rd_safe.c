@@ -84,7 +84,7 @@ krb5_data *outbuf;
     if (safe_flags & KRB5_SAFE_DOSEQUENCE)
 	if (message->seq_number != seq_number) {
 	    cleanup();
-	    return KRB5KRB_AP_ERR_BADSEQ;
+	    return KRB5KRB_AP_ERR_BADORDER;
 	}
 
     if (message->r_address) {

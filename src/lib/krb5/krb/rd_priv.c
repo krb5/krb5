@@ -163,7 +163,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	if (privmsg_enc_part->seq_number != seq_number) {
 	    cleanup_data();
 	    cleanup_mesg();
-	    return KRB5KRB_AP_ERR_BADSEQ;
+	    return KRB5KRB_AP_ERR_BADORDER;
 	}
 
     if (privmsg_enc_part->r_address) {
