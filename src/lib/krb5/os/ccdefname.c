@@ -19,7 +19,7 @@ static char rcsid_defname_c[] =
 #include <krb5/krb5.h>
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <krb5/ext-proto.h>
 
 char *krb5_cc_default_name()
 {
