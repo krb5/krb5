@@ -53,8 +53,8 @@ krb5_principal	my_principal;		/* The Kerberos principal we'll be */
 				/* get_tickets() */
 krb5_ccache	ccache;		/* Credentials cache which we'll be using */
 krb5_creds 	my_creds;	/* My credentials */
-int		my_seq_num;	/* Sequence number to use for connection */
-int		his_seq_num;	/* Remote sequence number */
+krb5_int32	my_seq_num;	/* Sequence number to use for connection */
+krb5_int32	his_seq_num;	/* Remote sequence number */
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
@@ -350,15 +350,8 @@ void kerberos_authenticate(fd, me)
 	krb5_ap_rep_enc_part	*rep_result;
 	struct timeval	mytime;
 
-	/*
-	 * Generate a random key to use as a sequence number
-	 */
-	gettimeofday(&mytime, NULL);
-	srandom(mytime.tv_usec ^ mytime.tv_sec ^ (9 * getpid()));
-	my_seq_num = random();
-	
 	if (retval = krb5_sendauth(fd, kprop_version, me, my_creds.server,
-				    AP_OPTS_MUTUAL_REQUIRED, my_seq_num, NULL,
+				    AP_OPTS_MUTUAL_REQUIRED, &my_seq_num, NULL,
 				    NULL, &my_creds, NULL, &error,
 				    &rep_result)) {
 		com_err(progname, retval, "while authenticating to server");

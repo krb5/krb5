@@ -70,8 +70,8 @@ char	*kdb5_edit = KPROPD_DEFAULT_KDB5_EDIT;
 char	*kerb_database = KPROPD_DEFAULT_KRB_DB;
 
 int		database_fd;
-int		my_seq_num;	/* Sequence number */
-int		his_seq_num;	/* The remote's sequence number */
+krb5_int32	my_seq_num;	/* Sequence number */
+krb5_int32	his_seq_num;	/* The remote's sequence number */
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
@@ -204,12 +204,7 @@ void doit(fd)
 		if (debug)
 			printf("Connection from %s\n", hp->h_name);
 	}
-	/*
-	 * Create a random number for my sequence number.
-	 */
-	gettimeofday(&my_time, NULL);
-	srandom(my_time.tv_usec ^ my_time.tv_sec ^ (9 * getpid()));
-	my_seq_num = random();
+
 	/*
 	 * Now do the authentication
 	 */
@@ -500,7 +495,7 @@ kerberos_authenticate(fd, clientp, sin)
 	       sizeof(r_sin.sin_addr));
 	
 	if (retval = krb5_recvauth(fd, kprop_version, server, &sender_addr,
-				   kerb_keytab, NULL, NULL, my_seq_num,
+				   kerb_keytab, NULL, NULL, &my_seq_num,
 				   "dfl", clientp, &ticket, &authent)) {
 		syslog(LOG_ERR, "Error in krb5_recvauth: %s",
 		       error_message(retval));
