@@ -1,0 +1,369 @@
+Wed Jul 26 19:25:10 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* quad_cksum.c: Include string.h for memcpy declaration.
+	* random_key.c: Ditto.
+
+Wed Feb 1 12:00:00 1995  John Rivlin  <jrivlin@cygnus.com>
+
+	* Makefile.in: Create install-windows target
+
+Tue Nov 22 10:53:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* random_key.c (des_random_key): Don't assume that the argument is
+	aligned on an integer boundary.
+
+Mon Oct 31 19:40:21 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Makefile.in (CODE): Remove Imakefile.
+
+Fri Oct 28 15:21:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* read_password.c (old_sigfunc): Use sigtype in declaration,
+	rather than guessing based on POSIX define.
+
+Mon Oct 10 19:18:48 1994  Julia Menapace  (jcm at toad.com)
+
+	* mac_time.c:  Include des.h and AddressXlation.h.  Put
+	gettimeofdaynet wrapper on gettimeofday_no_offset so it can be
+	returned as a DES pointer with the expected calling sequence.
+
+	* new_rnd_key.c: Make forward declarations and function
+	definitions match the function prototypes that were added as
+	new external declarations to des.h: des_set_sequence_number, 
+	des_generate_random_block, des_new_random_key,
+	des_init_random_number_generator. des_set_random_generator_seed
+
+	(des_init_random_number_generator): Changes to port routine
+	to the Mac.  Initialize	the seed using RANDOM_KRB_INT32_1
+	and RANDOM_KRB_INT32_2 instead of gethostid and getpid.  Use a
+	KRB_INT32 instead of a timeval and set it using TIME_GMT_UNIXSEC
+	instead of gettimeofday.
+
+Tue Aug 9 12:00:00 John Rivlin (jrivlin@fusion.com)
+
+	* win_time.c: Removed copy of time structure as stack
+	is now set up properly.
+
+	* Makefile.In: Broke up clean target to not do useless
+	deletes on unix.
+
+Mon Aug 29 10:12:42 1994  Mark Eichin  (eichin@perdiem)
+
+	* key_sched.c (des_key_sched): even if we return an error, build
+	the key schedule anyway. This helps with testing, and avoids
+	garbage encryptions in cases where the error isn't checked.
+
+Fri Jul 29 17:18:55 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* random_key.c (des_random_key): use KRB_INT32 for half-key
+	manipulation, so the upper half really gets set.
+
+Tue Jul 19 20:06:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* random_key.c (des_random_key): Don't initialize static local
+	variable n.  Fiddled with whitespace in srandom call.
+
+Fri Jul 15 17:35:30 1994  John Rivlin (jrivlin@fusion.com)
+
+	* ren.msg: updated to handle all files (changelogs, makefiles etc)
+
+	* Makefile.in: added "-" on clean: to avoid stupid messages
+
+Fri Jul 8 02:40:54 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* makefile.in: Updated file with portable directory syntax for PC.
+	Changed .o and .a references to portable syntax
+	Removed all response files which needed to be generated under unix
+	to simplify configure process so that it may be run on the PC.
+	Placed objects in .lib file so that DLL construction can take place
+	without a response file.  This solves a problem with running out of
+	memory on the PC during builds.
+	Updated clean: target to place rm commands on seperate lines for
+	compatibility with PC DEL command.
+
+Tue Jul  5 11:31:59 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* string_to_key.c (des_string_to_key): Deleted static and (some)
+	register decls.
+	* quad_cksum.c (four_bytes_vax_to_nets): Ditto.
+	* util.c (des_cblock_print_file): Ditto.
+
+	* weak_key.c (weak): Now const.
+	(des_is_weak_key): Compensate.
+
+Fri Jul  1 03:12:31 1994  John Gilmore  (gnu@cygnus.com)
+
+	Make Kerberos build using Think C on Macintosh.
+
+	* mac_time.c:  Use GetDateTime, not time.
+	* quad_cksum.c:  Avoid using printf().
+	* %DesLib-project:  New Think C project file for building
+	the DES library as an ordinary library.  (Unfortunately this
+	is a binary file -- there are no textual makefiles in Think C).
+	This makes it semi-possible to debug the code.
+	* %DesLib-project-A4:  Ditto, for building as a library to go
+	into a device driver.
+
+Thu Jun 30 23:11:11 1994  John Gilmore  (gnu@tweedledumb.cygnus.com)
+
+	* *.c:  Remove remaining RCS ID strings.  Strings used as `char *'
+	initializers upset Think C when building device drivers, since it
+	doesn't have a good way to relocate the pointers when the driver
+	is loaded.
+
+	* f_parity.c:  Clarify public domain ownership.
+
+	* *.c:  Use #include "..." rather than #include <...> for
+	our own local include files, because Think C can't find them
+	when enclosed in <...>.
+
+Wed Jun 22 18:29:48 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* new_rnd_key.c, string_to_key.c: Include <string.h>.
+
+Tue Jun 21 00:15:31 1994  John Gilmore  (gnu@cygnus.com)
+
+	* new_rnd_key.c:  Lint.
+
+Sat Jun 18 09:05:30 1994  John Gilmore  (gnu@cygnus.com)
+
+	Make DES library independent of krb library again.
+
+	* Makefile.in (SRCS, OBJS):  Use DES_TIME_SRCS and DES_TIME_OBJS.
+	* unix_time.c, mac_time.c, win_time.c:  New files implement
+	TIME_GMT_UNIXSEC for the various hosts.  Code moved from *_glue.c
+	in lib/krb.
+
+Fri Jun 17 05:01:03 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (DESSRCS):  Move read_password.c to SERVER_DES_SRCS,
+	since we don't use it on micro clients.  Clarify comments.
+	(Links of test routines):  Add $(LDFLAGS) to the line so that
+	mac-mf.sed can find these and modify them to run "Link".
+
+Thu Jun 16 17:08:58 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (unixmac):  New target.
+
+Fri Jun 10 23:03:08 1994  John Gilmore  (gnu@cygnus.com)
+
+	* f_tables.h:  Add comments on the DEB macro.
+	* new_rnd_key.c:  Remove RCS crud, update export notice.
+	* random_key.c:  Clean out obsolete config crud.  
+	Use TIME_GMT_UNIXSEC_US rather than gettimeofday.  Use
+	RANDOM_KRB_INT32_1 and RANDOM_KRB_INT32_2 rather than
+	getpid() and gethostid().  Remove RCS crud, update export notice.
+	* string_to_key.c (des_string_to_key):  Int functions return results.
+	* testit.c:  Print usage message if no args.
+	* verify.c, testit.c: Declare des_debug extern, not common.
+
+Wed Jun  8 13:09:14 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (DBG):  Move to where it will actually work.
+	* testit.c, verify.c:  Include <krb.h>.  Remove raw extern
+	declarations.  Pull RCS crud.
+	* verify.c:  In Windows, set screen buffer to keep all output.
+
+	* string_to_key.c (des_string_to_key):  Fix argument type to match
+	correct prototype.  Pull RCS crud.
+
+Fri May 27 16:55:33 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (DBG):  Override with library-building flags.
+
+	* des_internal.h:  Include krb.h when compiling the DES
+	routines, since it describes some of the DES routines when
+	documenting the external interface of Kerberos.
+	* f_cbc.c, f_ecb.c, f_parity.c, f_pcbc.c, key_sched.c,
+	quad_cksum.c, string_to_key.c, weak_key.c:  Add INTERFACE to
+	definitions of functions visible in the programmer interface.
+	* string_to_key.c:  Remove some error printf's for environments
+	that don't have printf; put them under #ifdef DEBUG.
+
+Tue May 24 06:10:57 1994  John Gilmore  (gnu@cygnus.com)
+
+	* enc.c: Pull RCS crud.
+	* f_pcbc.c (des_pcbc_encryption):  Lint ivec.
+	* key_test.c:  Toss the ridiculous doubled IBMPC/BSDUNIX printf's,
+	use a simple portable printf.  Typo in msg.  Pull RCS crud.
+	* new_rnd_key.c, quad_cksum.c, string_to_key.c:  Lint.
+	* quad_cksum.c:  Pull RCS crud.
+
+Sat May 21 03:37:01 1994  John Gilmore  (gnu@cygnus.com)
+
+	Microsoft Windows port.
+
+	* Makefile.in (c-libdes.${LIBEXT)):  Typo; and fix .o to .obj.
+	* des_internal.h:  Remove pre-Fergusen stuff, leaving one #define.
+	* f_tables.h (FF_UINT32):  Add this, which makes a KRB_UINT32 out
+	of a constant that might otherwise only be int or less.
+	* f_cbc.c, f_cksum.c, f_pcbc.c:  Use it.  Line up code neatly.
+	* key_sched.c:  Lint, pull RCS crud.
+	* ren.msg:  Insert column of entries for MIT PC release.
+
+Thu May 19 22:18:24 1994  John Gilmore  (gnu@cygnus.com)
+
+	More MS-Windows and Mac support.
+
+	* cbc_noop.c, epc_encrypt.c:  Delete two more unused remnants.
+	* ren.msg, Makefile.in:  Remove references to remnants.
+
+	* Makefile.in (OTHERSRCS, OTHEROBJS):  Rename to FERG_* for clarity.
+	(SERVER_DES_{SRCS,OBJS}):  Split out routines used only on servers.
+	(####):  Move host-configuration insertion point so that the
+	per-host Makefile fragments can override the above.
+	(LIBEXT):  Use it everywhere rather than ".a".
+	(libdes.$(LIBEXT)):  Avoid making a .bak file.  Add and 
+	use $(ARCHIVEARGS) to allow making the incredible MSC LIB
+	command work.
+	(c-libdes.$(LIBEXT)):  Add rule to build control file for MSC LIB.
+	This rule must run on Unix (FIXME) since it uses sed and tr.  I
+	didn't know the equivalent DOS commands...
+	
+	* f_tables.h (DES_IP_RIGHT_BITS, DES_FP_RIGHT_BITS): Insert a cast
+	to unsigned, to circumvent a bug in the Macintosh MPW 3.2 C
+	compiler which loses the unsignedness and then does an arithmetic
+	shift rather than a logical shift.
+	(DEB):  Add debug macro for very nested macro defns.
+	(DES_DO_ENCRYPT):  Insert DEB calls to make it possible to
+	debug when DES fails.
+
+Fri May 13 01:59:09 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Change {} to () for Microsoft NMAKE.
+	* Makefile:  Remove remnant of old config scheme.
+	* ren.msg:  Specify short and long names for DOS file systems.
+	* key_test.c, quad_cksum.c, testit.c, verify.c:  Pull unused
+	errmsg, errno.
+
+Sun May  8 17:21:50 1994  John Gilmore  (gnu@cygnus.com)
+
+	* read_password.c:  Remove `sigtype', use typedef from osconf.h.
+
+Sat May  7 17:32:43 1994  John Gilmore  (gnu@tweedledumb.cygnus.com)
+
+	* Makefile.in:  Don't build verify, key_test, and testit every
+	time we build the library.
+
+	* Makefile.in:  Update CODE for the removal.
+
+	* cbc_encrypt.c, cksum.c, dbg_prt.c, des.c, desglue.c, destest.c,
+	key_parity.c, make_e.c, make_fp.c, make_ip.c, make_key_perm.c,
+	make_key_sched.c, make_odd.c, make_p.c, make_p_table.c, make_s.c,
+	make_s_table.c, misc.c, noop.c, pcbc_encrypt.c, s_table.h.ibm,
+	tables.h:  Remove remnants of non-Fergusen DES code.  These are all
+	unused, have long, non-DOSlike names, and confuse people (me
+	anyway) into thining that they're live code.
+
+Fri May  6 02:04:48 1994  John Gilmore  (gnu@cygnus.com)
+
+	* desglue.c (quad_cksum):  Put argument declarations in order.
+	* pcbc_encrypt.c (des_pcbc_encrypt):  Ditto.
+	* quad_cksum.c (des_quad_cksum):  Ditto.
+
+Tue Oct 26 12:21:05 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* f_tables.h: Define const if not already defined and not
+	__STDC__.
+
+Sun Oct 17 13:47:28 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* f_*.c, f_tables.h, quad_cksum.c, testit.c, verify.c: Use
+	KRB_INT32 instead of long for 4-byte type.
+
+	* f_tables.c: Include des.h.
+
+	* string_to_key.c (des_string_to_key): Mask values to 32 bits
+	before printing.
+
+	* testit.c (nflag): Set to 1; running 1000 identical iterations
+	was silly.
+
+	* verify.c (print8): New routine.
+	(main): Clean up output formatting.
+
+Thu Feb 11 13:05:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* testit.c (main): Fix usage message.
+
+	* Imakefile: Delete references to assembly code.
+	* key_sched.c: Ditto.  Get rid of useless BIT macro.
+
+Wed Feb 10 14:17:31 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* des.c (des_ecb_encrypt): Fix pointer type lossage, and NULL/0
+	confusion.  Discard VAX-specific stuff.  Add a couple of minor
+	optimizations, including some based on DES_SHIFT_SHIFT
+	conditional.
+
+	* key_sched.c (make_key_sched): Fix inconsistent fwd declaration.
+
+Fri Jun 19 13:37:35 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
+
+	* Imakefile (library_ro_object): punt the read-only object linker
+	mangling as it interferes with debugging.
+
+Tue Nov  8 12:12:32 1988  William Sommerfeld  (wesommer at binkley)
+
+	* (util) Remove \ before { and } characters (causes RT 
+	compiler warning)
+
+	* (read_password) Print a newline after saying "try again".
+
+	* (read_password) Merge in changes by Jim Bloom to do a clearerr
+	after a read fails, and protect against an RTM attack by
+	changing gets to fgets.
+
+Fri Sep 16 16:26:55 1988  Bill Sommerfeld  (wesommer at ra)
+
+	* (read_password) fix dependancies for BSDUNIX.
+
+Mon Sep 12 14:55:23 1988  Bill Sommerfeld  (wesommer at ra)
+
+	* (*) debug->des_debug
+
+	* (*) debug_print() -> des_debug_print()
+
+	* (Makefile) add dbg_prt.o to list of files included in build.
+
+	* (des.c) remove debug_print; it's in dbg_prt.c
+
+        * (des_internal.h) contains definitions of AUTH_DES_ITER, 
+	s-box structures, which aren't part of the encryption interface.
+
+	* (*) #include "conf.h" -> #include "des_internal.h"
+
+	* (*) C_Block -> des_cblock
+
+	* (*) Key_schedule -> des_key_schedule
+
+	* (noop.c) remove #includes for unused include files.
+
+	* (des.c, random_key.c, string_to_key.c) add #include of "des_conf.h"
+
+Fri Sep  9 15:46:13 1988  Bill Sommerfeld  (wesommer at ra)
+
+	* (*) string_to_key() -> des_string_to_key()
+
+	* (*) read_pw_string() -> des_read_pw_string()
+
+	* (*) random_key() -> des_random_key()
+
+	* (*) pcbc_encrypt() -> des_pcbc_encrypt()
+
+	* (*) key_sched() -> des_key_sched()
+
+	* (*) cbc_encrypt() -> des_cbc_encrypt()
+
+	* (*) cbc_cksum() -> des_cbc_cksum()
+
+	* (quad_cksum.c) make {four,two}_bytes_vax_to_nets be static to
+	avoid namespace pollution.
+
+	* (*.c) Rename C_Block_print() to des_cblock_print(). 
+
+	* (make_key_perm.c) Make "key_perm" be static to avoid namespace
+	pollution. 
+
+	* (quad_cksum.c) Make "short_conv" and "long_conv" local
+	variables, to avoid namespace pollution.
