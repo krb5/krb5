@@ -1,17 +1,4 @@
-\documentstyle[12pt,fullpage,changebar]{article}
-
-% $Id$
-
-\setlength{\parskip}{.7\baselineskip}
-\setlength{\parindent}{0pt}
-
-\def\secure{OV*Secure}
-\def\v#1{\verb+#1+}
-\def\k#1{K$_#1$}
-
-\title{OV*Secure Admin Server \\ Implementation Design}
-\author{Barry Jaspan}
-\date{DRAFT --- \today}
+\documentstyle[12pt,fullpage,changebar,rcsid]{article}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make _ actually generate an _, and allow line-breaking after it.
@@ -20,8 +7,21 @@
 \def_{\underscore\penalty75\relax}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\rcs$Id$
+
+\setlength{\parskip}{.7\baselineskip}
+\setlength{\parindent}{0pt}
+
+\def\secure{OV*Secure}
+\def\v#1{\verb+#1+}
+\def\k#1{K$_#1$}
+
+\title{OV*Secure Admin Server \\ Implementation Design\thanks{\rcsId}}
+\author{Barry Jaspan}
+
 \begin{document}
 
+\sloppy
 \maketitle
 
 {\setlength{\parskip}{0pt}\tableofcontents}
@@ -39,7 +39,6 @@ wire.  The RPC mechanism does, however, allow the server to access the
 underlying authentication credentials for authorization purposes.
 
 The admin server accesses a total of three databases.
-
 \begin{itemize}
 \item The master Kerberos database is used to store all the
 information that the Kerberos server understands, thus allowing the
@@ -54,12 +53,14 @@ information.
 The per-principal information stored in the admin principal database
 consists of the principal's policy name and an array of the
 principal's previous keys.  The old keys are stored encrypted in the
-key of the special principal ``kadmin/history'' that is created by
-ovsec_kadm_create.  Since a change in kadmin/history's key renders
+key of the special principal ``ovsec_adm/history'' that is created by
+ovsec_adm_create.  Since a change in ovsec_adm/history's key renders
 every principal's key history array useless, it can only be changed
-using the ovsec_kadm_edit utility; that program will reencrypt every
-principal's key history in the new key.  The admin server refuses all
-requests to change kdamin/history's key.
+using the ovsec_adm_edit utility; that program will reencrypt every
+principal's key history in the new key.\footnote{ovsec_adm_edit has
+not yet been implemented, and there are currently no plans to
+implement it.}  The admin server refuses all requests to change
+ovsec_adm/history's key.
 
 \section{Main}
 
