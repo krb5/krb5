@@ -1,3 +1,8 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* k5-int.h (krb5_os_context) 
+        Removed default_ccprincipal field from krb5_context
+
 2004-01-04 Jeffrey Altman <jaltman@mit.edu>
 
     * win-mac.h: conditionally define strcasecmp/strncasecmp macros 

@@ -1,3 +1,8 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* CCache-glue.c (krb_get_cred) 
+        Removed default principal tracking.
+
 2003-08-15  Alexandra Ellwood  <lxs@mit.edu>
 
         * mk_auth.c: krb_check_auth clears the return value for the 
