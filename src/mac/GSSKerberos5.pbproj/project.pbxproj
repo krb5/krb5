@@ -694,7 +694,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libkrb5_LoadKerberosFramework";
+				OTHER_LDFLAGS = "-init ___libkrb5_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libkrb5.dylib;
@@ -784,7 +784,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___libk5crypto_LoadKerberosFramework";
+				OTHER_LDFLAGS = "-init ___libk5crypto_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libk5crypto.dylib;
@@ -854,7 +854,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libcom_err_LoadKerberosFramework";
+				OTHER_LDFLAGS = "-init ___libcom_err_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libcom_err.dylib;
@@ -924,7 +924,7 @@
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libgssapi_krb5_LoadKerberosFramework";
+				OTHER_LDFLAGS = "-init ___libgssapi_krb5_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libgssapi_krb5.dylib;
@@ -1338,7 +1338,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-umbrella Kerberos";
+				OTHER_LDFLAGS = "-umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -1502,7 +1502,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___InitializeProfileLib -umbrella Kerberos";
+				OTHER_LDFLAGS = "-init ___InitializeProfileLib -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -1821,7 +1821,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___initializeK5 -umbrella Kerberos";
+				OTHER_LDFLAGS = "-init ___initializeK5 -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -6460,7 +6460,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___initializeGSS -umbrella Kerberos";
+				OTHER_LDFLAGS = "-init ___initializeGSS -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -8544,7 +8544,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___Kerberos5_LoadKerberosFramework -umbrella Kerberos";
+				OTHER_LDFLAGS = "-init ___Kerberos5_LoadKerberosFramework -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -8916,7 +8916,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___Kerberos5Private_LoadKerberosFramework -umbrella Kerberos";
+				OTHER_LDFLAGS = "-init ___Kerberos5Private_LoadKerberosFramework -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
