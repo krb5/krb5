@@ -1,3 +1,7 @@
+Wed Nov 13 10:00:05 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean): Remove test programs and objects.
+
 Tue Nov 12 16:27:51 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* lib/helpers.exp, client.c, server.c, config/unix.exp,

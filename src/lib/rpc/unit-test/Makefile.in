@@ -1,5 +1,7 @@
 CFLAGS	= $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I.
 
+OBJS= client.o rpc_test_clnt.o rpc_test_svc.o server.o
+
 all:: client server
 
 client: client.o rpc_test_clnt.o $(DEPLIBS)
@@ -55,3 +57,8 @@ unit-test-setup::
 unit-test-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS)
 	-rm -f /tmp/rpc_test_v5srvtab /tmp/krb5cc_rpc_test_fullrun
+
+clean::
+	$(RM) server client
+	$(RM) dbg.log rpc_test.log rpc_test.sum
+
