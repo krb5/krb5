@@ -94,7 +94,7 @@ all-windows:: $(OBJS)
 shared:
 	mkdir shared
 
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+COMERRLIB=$(TOPLIBD)/libcom_err.a
 
 TEST_PROGS= t_std_conf t_an_to_ln
 

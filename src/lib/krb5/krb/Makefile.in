@@ -141,7 +141,7 @@ all-windows::
 shared:
 	mkdir shared
 
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+COMERRLIB=$(TOPLIBD)/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 	free_rtree.o bld_pr_ext.o \
