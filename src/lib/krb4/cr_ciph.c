@@ -25,6 +25,7 @@
  */
 
 #include "krb.h"
+#include "prot.h"
 #include "des.h"
 #include <string.h>
 
@@ -117,7 +118,7 @@ create_ciph(c, session, service, instance, realm, life, kvno, tkt,
     memcpy(ptr, tkt->dat, (size_t)tkt->length);
     ptr += tkt->length;
 
-    KRB4_PUT32(ptr, kdc_time);
+    KRB4_PUT32BE(ptr, kdc_time);
 
     /* guarantee null padded encrypted data to multiple of 8 bytes */
     memset(ptr, 0, 7);
