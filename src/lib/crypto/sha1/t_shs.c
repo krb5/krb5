@@ -41,11 +41,11 @@ int shsTestLevel;
     if (fail) {
 	printf("\nExpected: ");
 	for (i = 0; i < 5; i++) {
-	    printf("%8.8lx ", shsTestResults[shsTestLevel][i]);
+	    printf("%8.8lx ", (unsigned long) shsTestResults[shsTestLevel][i]);
 	}
 	printf("\nGot:      ");
 	for (i = 0; i < 5; i++) {
-	    printf("%8.8lx ", shsInfo->digest[i]);
+	    printf("%8.8lx ", (unsigned long) shsInfo->digest[i]);
 	}
 	printf("\n");
 	return( -1 );
@@ -53,12 +53,15 @@ int shsTestLevel;
     return( 0 );
 }
 
+int
 main()
 {
     SHS_INFO shsInfo;
     unsigned int i;
+#if 0
     time_t secondCount;
     BYTE data[ 200 ];
+#endif
 
     /* Make sure we've got the endianness set right.  If the machine is
        big-endian (up to 64 bits) the following value will be signed,

@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_shs.c: Cast arguments to match printf format. Declare main as
+	returning int. Comment out unused variables.
+
 2001-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* shs.h: Stop using KRB5_PROTOTYPE.
