@@ -11,10 +11,16 @@
 # Usage: env-setup.sh <command line>
 #
 
-TOP=@BUILDTOP@/kadmin
+TOP=@RBUILD@/kadmin
 STOP=@SRCTOP@/kadmin
 export TOP
 export STOP
+
+# The shared library run time setup
+TOPLIBD=@RBUILD@/lib
+# This converts $(TOPLIBD) to $TOPLIBD
+foo=`echo "@KRB5_RUN_ENV@" | sed -e 's/(//' -e 's/)//'` 
+eval $foo
 
 TESTDIR=$TOP/testing; export TESTDIR
 STESTDIR=$STOP/testing; export STESTDIR

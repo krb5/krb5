@@ -2,7 +2,9 @@ AC_INIT(init_db)
 CONFIG_RULES
 AC_PATH_PROG(PERL,perl)
 AC_PATH_PROG(EXPECT,expect)
+KRB5_RUN_FLAGS
+RBUILD=`pwd`/../../..
+AC_SUBST(RBUILD)
 dnl The following are substituted into env-setup.sh
-AC_SUBST(BUILDTOP)
 AC_SUBST(SRCTOP)
 V5_AC_OUTPUT_MAKEFILE( ,env-setup.sh:env-setup.shin)

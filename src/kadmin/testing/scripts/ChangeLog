@@ -1,3 +1,10 @@
+Tue Oct 15 18:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin: Support for build tree shared library
+		environment setup. [krb5-admin/80]
+
+	* configure.in (RBUILD): Pass in proper top of build tree (not
+		.. path) as this is build tree independent.
 Tue Oct 15 16:22:52 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* env-setup.shin: set $QUALNAME to the right path
