@@ -1,3 +1,10 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.conf: Test with a space after ']' and '{'
+
+	* prof_parse.c (parse_std_line): Spaces after '{' or ']' should
+	not be a fatal error. This is a common lossage in krb5.conf files.
+
 2000-07-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* prof_init.c: Cleanup internal type warnings in calls to profile_init.
