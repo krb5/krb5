@@ -1,3 +1,8 @@
+Mon Mar 30 16:46:20 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_verify.c: Declare main() as int instead of void.
+	Add parentheses around assignements in conditionals.
+
 Wed Feb 18 16:30:59 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
