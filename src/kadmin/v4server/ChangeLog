@@ -1,3 +1,15 @@
+2001-07-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_server.h: Add prototypes for missing acl_ functions.
+
+	* admin_server.c, kadm_func.c: Declare functions static that are
+ 	local to file.
+
+	* acl_files.c: Include kadm_server.h for prototypes. Flush out
+	static prototype for acl_abort.
+
+	* kadm_supp.c: Include kadm_server.h for prototypes.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_supp.c (prin_vals): Pass time_t * to localtime instead of

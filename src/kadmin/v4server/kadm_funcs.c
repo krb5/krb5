@@ -64,7 +64,7 @@ static char *dummypw()
  * Convert a kadm5_principal_ent_t to a Principal.  Assumes that princ
  * is already allocated.
  */
-krb5_error_code
+static krb5_error_code
 kadm_entry2princ(entry, princ)
     kadm5_principal_ent_t entry;
     Principal *princ;
@@ -108,7 +108,7 @@ kadm_entry2princ(entry, princ)
     return 0;
 }
 
-int check_access(pname, pinst, prealm, acltype)
+static int check_access(pname, pinst, prealm, acltype)
     char *pname;
     char *pinst;
     char *prealm;
@@ -140,7 +140,7 @@ int check_access(pname, pinst, prealm, acltype)
     return(acl_check(filename, checkname));
 }
 
-int wildcard(str)
+static int wildcard(str)
 char *str;
 {
     if (!strcmp(str, WILDCARD_STR))
@@ -624,7 +624,7 @@ des_cblock newpw;
 #undef failchange
 #endif /* !KADM5 */
 
-int
+static int
 check_pw(newpw, checkstr)
 	des_cblock	newpw;
 	char		*checkstr;
@@ -639,7 +639,7 @@ check_pw(newpw, checkstr)
 #endif /* NOENCRYPTION */
 }
 
-char *reverse(str)
+static char *reverse(str)
 	char	*str;
 {
 	static char newstr[80];
@@ -658,7 +658,7 @@ char *reverse(str)
 	return(newstr);
 }
 
-int lower(str)
+static int lower(str)
 	char	*str;
 {
 	register char	*cp;
@@ -673,7 +673,7 @@ int lower(str)
 	return(effect);
 }
 
-int
+static int
 des_check_gecos(gecos, newpw)
 	char	*gecos;
 	des_cblock newpw;
@@ -713,7 +713,7 @@ des_check_gecos(gecos, newpw)
 	return(0);
 }
 
-int
+static int
 str_check_gecos(gecos, pwstr)
 	char	*gecos;
 	char	*pwstr;
@@ -810,7 +810,7 @@ char *pwstring;
  * (relatively) reasonable assumption that both the name and the
  * instance will  not contain '.' or '@'. 
  */
-int kadm_check_srvtab(name, instance)
+static int kadm_check_srvtab(name, instance)
 	char	*name;
 	char	*instance;
 {

@@ -73,15 +73,17 @@ int debug;
 
 static void cleanexit(int);
 static int kadm_listen(void);
+static void process_client(int, struct sockaddr_in *);
+static void kill_children(void);
 
 
 /* close the system log file */
-void close_syslog()
+static void close_syslog()
 {
    syslog(LOG_INFO, "Shutting down V4 admin server");
 }
 
-void byebye()			/* say goodnight gracie */
+static void byebye()			/* say goodnight gracie */
 {
    printf("Admin Server (kadm server) has completed operation.\n");
 }
@@ -262,7 +264,7 @@ static void clear_secrets()
 
 static int exit_now = 0;
 
-krb5_sigtype
+static krb5_sigtype
 doexit(sig)
 	int sig;
 {
@@ -288,7 +290,6 @@ kadm_listen()
     fd_set mask, readfds;
     struct sockaddr_in peer;
     int addrlen;
-    void process_client(), kill_children();
     int pid;
     krb5_sigtype do_child();
 #ifdef POSIX_SIGNALS
@@ -392,7 +393,7 @@ kadm_listen()
     /*NOTREACHED*/
 }
 
-void process_client(fd, who)
+static void process_client(fd, who)
    int fd;
    struct sockaddr_in *who;
 {
@@ -629,7 +630,7 @@ void cleanexit(val)
     exit(val);
 }
 
-void
+static void
 kill_children()
 {
     register int i;

@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include "krb.h"
+#include "kadm_server.h"
 
 #ifndef KRB_REALM
 #define KRB_REALM	"ATHENA.MIT.EDU"
@@ -58,7 +59,7 @@ extern char *malloc(), *calloc();
 
 extern time_t time();
 
-static int acl_abort();
+static int acl_abort(char *, FILE *);
 
 /* Canonicalize a principal name */
 /* If instance is missing, it becomes "" */
@@ -584,4 +585,3 @@ char *principal;
     }
     return(acl_commit(acl, new));
 }
-

@@ -30,6 +30,7 @@
 
 #include "kadm.h"
 #include "krb_db.h"
+#include "kadm_server.h"
     
 /*
 prin_vals:

@@ -107,7 +107,12 @@ int vts_long(krb5_ui_4, u_char **, int);
 int vts_char(u_char, u_char **, int);
 
 /* acl_files.c */
+int acl_add(char *, char *);
+int acl_delete(char *, char *);
 int acl_check(char *, char *);
+void acl_canonicalize_principal(char *, char *);
+int acl_exact_match(char *, char *);
+int acl_initialize(char *, int);
 
 /* admin_server.c */
 #ifdef KADM5
