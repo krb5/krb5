@@ -18,6 +18,7 @@
 	OM_uint32 and krb5_error_code.
 	* k5unseal.c (kg_unseal_v1): Move a variable declaration and
 	assignment to fix gcc "possibly uninitialized" warning.
+	* init_sec_context.c (get_credentials): Delete unused variable.
 
 2002-03-03  Sam Hartman  <hartmans@mit.edu>
 

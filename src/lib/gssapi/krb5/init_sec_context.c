@@ -101,8 +101,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 {
     krb5_error_code	code;
     krb5_creds 		in_creds;
-    int i;
-    
+
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
 
     if ((code = krb5_copy_principal(context, cred->princ, &in_creds.client)))
