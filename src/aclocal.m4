@@ -59,8 +59,6 @@ KRB5_AC_CHOOSE_SS dnl
 KRB5_AC_CHOOSE_DB dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
 ADD_DEF([-DKRB5_PRIVATE=1]) dnl
-ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
-dnl AC_PROG_CC_STDC
 AC_C_CONST dnl
 WITH_NETLIB dnl
 WITH_HESIOD dnl
@@ -439,11 +437,13 @@ AC_BEFORE([$0],[AC_PROG_CC])
 krb5_ac_cflags_set=${CFLAGS+set}
 ])
 dnl
-AC_DEFUN(WITH_CC,[
-AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])
+AC_DEFUN(WITH_CC_DEPRECATED_ARG,[dnl
 AC_ARG_WITH([cc],AC_HELP_STRING(--with-cc=COMPILER,deprecated; use CC=...),
-	    AC_MSG_ERROR(option --with-cc is deprecated; use CC=...))
-AC_PROG_CC
+	    AC_MSG_ERROR(option --with-cc is deprecated; use CC=...))])
+AC_DEFUN(WITH_CC,[dnl
+AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])dnl
+AC_REQUIRE([WITH_CC_DEPRECATED_ARG])dnl
+AC_REQUIRE([AC_PROG_CC])dnl
 krb5_cv_prog_gcc=$ac_cv_c_compiler_gnu
 if test $ac_cv_c_compiler_gnu = yes ; then
      HAVE_GCC=yes

@@ -2,6 +2,8 @@
 
 	* aclocal.m4 (CONFIG_RULES): Comment out code looking for the
 	in-tree version of autoconf that we deleted.
+	(WITH_CC_DEPRECATED_ARG): New macro.
+	(WITH_CC): Require it, and AC_PROG_CC.
 
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
