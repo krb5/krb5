@@ -33,7 +33,7 @@ OBJS=	addr_comp.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
 	copy_athctr.o	\
-	copy_checksum.o \
+	copy_cksum.o    \
 	copy_creds.o	\
 	copy_data.o	\
 	copy_key.o	\
@@ -91,7 +91,7 @@ SRCS=	$(SRCDIR)addr_comp.c	\
 	$(SRCDIR)copy_addrs.c	\
 	$(SRCDIR)copy_auth.c	\
 	$(SRCDIR)copy_athctr.c	\
-	$(SRCDIR)copy_checksum.c \
+	$(SRCDIR)copy_cksum.c   \
 	$(SRCDIR)copy_creds.c	\
 	$(SRCDIR)copy_data.c	\
 	$(SRCDIR)copy_key.c	\
