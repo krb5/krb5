@@ -34,7 +34,7 @@
 extern int optind;
 extern char *optarg;
 
-char *prog;
+static char *prog;
 
 static void xusage()
 {
@@ -136,7 +136,7 @@ static void do_v4_kvno (int count, char *names[])
 	    printf("%s: kvno = %d\n", names[i], creds.kvno);
     }
 #else
-    xusage(prog);
+    xusage();
 #endif
 }
 

@@ -1,3 +1,8 @@
+2002-07-30  Ezra Peisach  <epeisach@bu.edu>
+
+	* kvno.c (do_v4_kvno): If not compiling with v4 support, xusage
+	does not take any arguments.
+
 2002-07-29  Jen Selby   <jenselby@mit.edu>
 
 	* kvno.M: added documentation of the "-q" and "-h" options.
