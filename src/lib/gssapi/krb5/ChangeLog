@@ -1,3 +1,8 @@
+2003-02-25  Tom Yu  <tlyu@mit.edu>
+
+	* set_ccache.c (gss_krb5_ccache_name): Don't return a pointer to
+	freed memory.
+
 2003-02-24  Tom Yu  <tlyu@mit.edu>
 
 	* gssapi_krb5.c (kg_get_defcred): Revert previous; it's probably
