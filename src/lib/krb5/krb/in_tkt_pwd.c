@@ -48,9 +48,8 @@ pwd_keyproc(context, type, salt, keyseed, key)
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
-    char pwdbuf[BUFSIZ];
     krb5_data * password;
-    int pwsize = sizeof(pwdbuf);
+    int pwsize;
 
     if (!valid_enctype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
@@ -60,12 +59,15 @@ pwd_keyproc(context, type, salt, keyseed, key)
     password = (krb5_data *)keyseed;
 
     if (!password->length) {
+	pwsize = BUFSIZ;
+	if ((password->data = malloc(password->length)) == NULL)
+	    return ENOMEM;
+	
 	if ((retval = krb5_read_password(context, krb5_default_pwd_prompt1, 0,
-					 pwdbuf, &pwsize))) {
+					 password->data, &pwsize))) {
 	    return retval;
 	}
-        password->length = pwsize;
-        password->data = pwdbuf;
+	password->length = pwsize;
     }
 
     if (!(*key = (krb5_keyblock *)malloc(sizeof(**key))))
@@ -122,6 +124,12 @@ krb5_get_in_tkt_with_password(context, options, addrs, ktypes, pre_auth_types,
 			     pwd_keyproc, (krb5_pointer) &data,
 			     krb5_kdc_rep_decrypt_proc, 0,
 			     creds, ccache, ret_as_reply);
+
+    if ((password == NULL) && (data.data)) {
+	memset(data.data, 0, strlen(data.data));
+	free(data.data);
+    }
+
     return retval;
 }
 
