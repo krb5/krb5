@@ -135,15 +135,22 @@ clean_scratch:
 
 krb5_error_code
 krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
-    krb5_context 	context;
-    krb5_auth_context *	auth_context;
-    const krb5_data   * userdata;
-    krb5_data         *	outbuf;
-    krb5_replay_data  * outdata;
+    krb5_context 	  context;
+    krb5_auth_context 	* auth_context;
+    const krb5_data   	* userdata;
+    krb5_data         	* outbuf;
+    krb5_replay_data  	* outdata;
 {
-    krb5_replay_data    replaydata;
-    krb5_error_code 	retval;
+    krb5_error_code 	  retval;
+    krb5_keyblock       * keyblock;
+    krb5_replay_data      replaydata;
 
+    /* Get keyblock */
+    if ((keyblock = auth_context->local_subkey) == NULL)
+        if ((keyblock = auth_context->remote_subkey) == NULL)
+            keyblock = auth_context->keyblock;
+
+    /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
       (auth_context->rcache == NULL))
 	return KRB5_RC_REQUIRED;
@@ -174,9 +181,10 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 	}
     } 
 
-    if (retval = krb5_mk_priv_basic(context, userdata, auth_context->keyblock,
-      &replaydata, auth_context->local_addr, auth_context->remote_addr,
-      auth_context->i_vector, outbuf)) 
+    if (retval = krb5_mk_priv_basic(context, userdata, keyblock, &replaydata, 
+			            auth_context->local_addr, 
+				    auth_context->remote_addr,
+      				    auth_context->i_vector, outbuf)) 
 	goto error;
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
@@ -193,7 +201,7 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
 	replay.ctime = replaydata.timestamp;
 	if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
 	    /* should we really error out here? XXX */
-    	    krb5_xfree(outbuf);
+    	    krb5_xfree(replay.client);
 	    goto error;
 	}
 	krb5_xfree(replay.client);

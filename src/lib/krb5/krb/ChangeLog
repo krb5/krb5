@@ -1,3 +1,15 @@
+Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
+
+	* Makefile.in : Added gc_via_tkt.c and removed get_fcreds.c
+	* auth_con.c (krb5_auth_con_setaddrs()) : Fixed so it allocates 
+		space and copies addresses, not just pointer.
+	* mk_cred.c: Completely rewritten from sources donated by asriniva.
+	* rd_cred.c: Completely rewritten from sources donated by asriniva.
+	* mk_priv.c (krb5_mk_priv()), mk_safe.c (krb5_mk_safe()), 
+	  rd_priv.c (krb5_rd_priv()), and rd_safe (krb5_rd_safe()) : 
+		Try using a subkey before using the session key for encryption.
+	* recvauth.c (krb5_recvauth()): Don't close the rcache on success.
+
 Mon Apr 24 23:12:21 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in, configure.in (t_walk_rtree): Add WITH_NETLIBS and

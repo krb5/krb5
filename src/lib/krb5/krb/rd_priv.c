@@ -136,7 +136,8 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 	    if (retval = krb5_os_localaddr(&our_addrs)) {
 		goto cleanup_data;
 	    }
-	    if (!krb5_address_search(context, privmsg_enc_part->r_address, our_addrs)) {
+	    if (!krb5_address_search(context, privmsg_enc_part->r_address, 
+				     our_addrs)) {
 		krb5_free_addresses(context, our_addrs);
 		retval =  KRB5KRB_AP_ERR_BADADDR;
 		goto cleanup_data;
@@ -174,14 +175,20 @@ cleanup_privmsg:;
 
 krb5_error_code
 krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
-    krb5_context 	context;
-    krb5_auth_context * auth_context;
-    const krb5_data   * inbuf;
-    krb5_data 	      * outbuf;
-    krb5_replay_data  * outdata;
+    krb5_context 	  context;
+    krb5_auth_context 	* auth_context;
+    const krb5_data   	* inbuf;
+    krb5_data 	      	* outbuf;
+    krb5_replay_data  	* outdata;
 {
-    krb5_error_code 	retval;
-    krb5_replay_data	replaydata;
+    krb5_error_code 	  retval;
+    krb5_keyblock       * keyblock;
+    krb5_replay_data	  replaydata;
+
+    /* Get keyblock */
+    if ((keyblock = auth_context->local_subkey) == NULL)
+        if ((keyblock = auth_context->remote_subkey) == NULL)
+            keyblock = auth_context->keyblock;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
       (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
@@ -193,7 +200,7 @@ krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
       (auth_context->rcache == NULL))
 	return KRB5_RC_REQUIRED;
 
-    if (retval = krb5_rd_priv_basic(context, inbuf, auth_context->keyblock,
+    if (retval = krb5_rd_priv_basic(context, inbuf, keyblock,
       auth_context->local_addr, auth_context->remote_addr,
       auth_context->i_vector, &replaydata, outbuf))
 	return retval;

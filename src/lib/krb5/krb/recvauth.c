@@ -52,6 +52,7 @@ krb5_recvauth(context, auth_context,
     krb5_keytab		  keytab;
     krb5_ticket	       ** ticket;
 {
+    krb5_auth_context	* new_auth_context;
     krb5_flags		  ap_option;
     krb5_error_code	  retval, problem;
     krb5_data		  inbuf;
@@ -131,17 +132,19 @@ krb5_recvauth(context, auth_context,
 	}
 	if (problem)
 		return(problem);
-	/*
-	 * Setup the replay cache.
-	 */
-	if (server) {
-	    problem = krb5_get_server_rcache(context, 
+
+/* Were clear here */
+    /*
+     * Setup the replay cache.
+     */
+    if (server) {
+        problem = krb5_get_server_rcache(context, 
 			krb5_princ_component(context, server, 0), &rcache);
-	} else {
-	    null_server.length = 7;
-	    null_server.data = "default";
-	    problem = krb5_get_server_rcache(context, &null_server, &rcache);
-	}
+    } else {
+    	null_server.length = 7;
+    	null_server.data = "default";
+    	problem = krb5_get_server_rcache(context, &null_server, &rcache);
+    }
 
     if (!problem) {
 	if (krb5_rc_recover(context, rcache)) {
@@ -149,78 +152,80 @@ krb5_recvauth(context, auth_context,
 	     * If the rc_recover() didn't work, then try
 	     * initializing the replay cache.
 	     */
-	    if (krb5_rc_initialize(context, rcache, krb5_clockskew)) {
+	    if (problem = krb5_rc_initialize(context, rcache, krb5_clockskew)) {
 	        krb5_rc_close(context, rcache);
 		rcache = NULL;
 	    }
 	}
     }
 
-	/*
-	 * Now, let's read the AP_REQ message and decode it
-	 */
-	if (retval = krb5_read_message(context, fd, &inbuf)) {
-		if (rcache)
-		(void) krb5_rc_close(context, rcache);
-		return(retval);
+    /*
+     * Now, let's read the AP_REQ message and decode it
+     */
+    if (retval = krb5_read_message(context, fd, &inbuf)) {
+	if (problem) /* Return top level problem */
+	    retval = problem; 
+	goto cleanup;
+    }
+
+    if (!problem) {
+    	if (*auth_context == NULL) {
+	    problem = krb5_auth_con_init(context, &new_auth_context);
+	    *auth_context = new_auth_context;
 	}
-
-	if (*auth_context == NULL) {
-		if (retval = krb5_auth_con_init(context, auth_context))
-			return(retval);
-	}
-
-	krb5_auth_con_setrcache(context, *auth_context, rcache);
-
-	if (!problem)
-		problem = krb5_rd_req(context, auth_context, &inbuf, server,
+    }
+    if (!problem) {
+	problem = krb5_auth_con_setrcache(context, *auth_context, rcache);
+    }
+    if (!problem) {
+	problem = krb5_rd_req(context, auth_context, &inbuf, server,
 				      keytab, &ap_option, ticket);
 	krb5_xfree(inbuf.data);
-	if (rcache)
-	    retval = krb5_rc_close(context, rcache);
-	if (!problem && retval)
-		problem = retval;
+    }
 	
-	/*
-	 * If there was a problem, send back a krb5_error message,
-	 * preceeded by the length of the krb5_error message.  If
-	 * everything's ok, send back 0 for the length.
-	 */
-	if (problem) {
-		krb5_error	error;
-		const	char *message;
+    /*
+     * If there was a problem, send back a krb5_error message,
+     * preceeded by the length of the krb5_error message.  If
+     * everything's ok, send back 0 for the length.
+     */
+    if (problem) {
+	krb5_error	error;
+	const	char *message;
 
-		memset((char *)&error, 0, sizeof(error));
-		krb5_us_timeofday(context, &error.stime, &error.susec);
-		error.server = server;
-		error.error = problem - ERROR_TABLE_BASE_krb5;
-		if (error.error > 127)
-			error.error = KRB_ERR_GENERIC;
-		message = error_message(problem);
-		error.text.length  = strlen(message) + 1;
-		if (!(error.text.data = malloc(error.text.length)))
-			return(ENOMEM);
-		strcpy(error.text.data, message);
-		if (retval = krb5_mk_error(context, &error, &outbuf)) {
-			free(error.text.data);
-			return(retval);
-		}
-		free(error.text.data);
-	} else {
-		outbuf.length = 0;
-		outbuf.data = 0;
+	memset((char *)&error, 0, sizeof(error));
+	krb5_us_timeofday(context, &error.stime, &error.susec);
+	error.server = server;
+	error.error = problem - ERROR_TABLE_BASE_krb5;
+	if (error.error > 127)
+		error.error = KRB_ERR_GENERIC;
+	message = error_message(problem);
+	error.text.length  = strlen(message) + 1;
+	if (!(error.text.data = malloc(error.text.length))) {
+	    retval = ENOMEM;
+	    goto cleanup;
 	}
-	if (retval = krb5_write_message(context, fd, &outbuf)) {
-		if (outbuf.data)
-			krb5_xfree(outbuf.data);
-		return(retval);
+	strcpy(error.text.data, message);
+	if (retval = krb5_mk_error(context, &error, &outbuf)) {
+	    free(error.text.data);
+	    goto cleanup;
 	}
-	if (problem) {
-		/*
-		 * We sent back an error, we need to return
-		 */
-		return(problem);
-	}
+	free(error.text.data);
+    } else {
+	outbuf.length = 0;
+	outbuf.data = 0;
+    }
+
+    if (!problem) {
+    	retval = krb5_write_message(context, fd, &outbuf);
+    	if (outbuf.data)
+	    krb5_xfree(outbuf.data);
+    	if (retval)
+	    goto cleanup;
+    } else {
+    	/* We sent back an error, we need cleanup then return */
+    	retval = problem;
+    	goto cleanup;
+    }
 
     /* Here lies the mutual authentication stuff... */
     if ((ap_option & AP_OPTS_MUTUAL_REQUIRED)) {
@@ -229,6 +234,12 @@ krb5_recvauth(context, auth_context,
 	}
 	retval = krb5_write_message(context, fd, &outbuf);
 	krb5_xfree(outbuf.data);
+    }
+
+cleanup:;
+    if (retval) {
+	if (rcache)
+	    krb5_rc_close(context, rcache);
     }
     return retval;
 }

@@ -45,8 +45,43 @@ krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
     krb5_address      	* local_addr;
     krb5_address      	* remote_addr;
 {
-    auth_context->remote_addr = remote_addr;
-    auth_context->local_addr = local_addr;
+    /* Free old addresses */
+    if (auth_context->local_addr) 
+	free(auth_context->local_addr);
+    if (auth_context->remote_addr) 
+	free(auth_context->remote_addr);
+
+    if (local_addr) {
+	if ((auth_context->local_addr = (krb5_address *)
+		malloc(sizeof(krb5_address) + local_addr->length)) == NULL) {
+	    return ENOMEM;
+	}
+	auth_context->local_addr->addrtype = local_addr->addrtype;
+	auth_context->local_addr->length = local_addr->length;
+	auth_context->local_addr->contents = (krb5_octet *)
+	  auth_context->local_addr + sizeof(krb5_address);
+	memcpy(auth_context->local_addr->contents,
+	       local_addr->contents, local_addr->length);
+    } else {
+	auth_context->local_addr = NULL;
+    }
+
+    if (remote_addr) {
+	if ((auth_context->remote_addr = (krb5_address *)
+		malloc(sizeof(krb5_address) + remote_addr->length)) == NULL) {
+	    if (auth_context->local_addr)
+		free(auth_context->local_addr);
+	    return ENOMEM;
+	}
+	auth_context->remote_addr->addrtype = remote_addr->addrtype;
+	auth_context->remote_addr->length = remote_addr->length;
+	auth_context->remote_addr->contents = (krb5_octet *)
+	  auth_context->remote_addr + sizeof(krb5_address);
+	memcpy(auth_context->remote_addr->contents,
+	       remote_addr->contents, remote_addr->length);
+    } else {
+	auth_context->remote_addr = NULL;
+    }
     return 0;
 }
 
