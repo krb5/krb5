@@ -1,3 +1,7 @@
+2004-11-18  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-headers-mkdirs): Create KRB5_INCDIR/gssrpc.
+
 2004-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (INSTALLMKDIRS): Add EXAMPLEDIR.
