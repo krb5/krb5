@@ -3,8 +3,15 @@ LDFLAGS = -g
 
 TST=if test -n "`cat DONE`" ; then
 
-OBJS=	cryptoconf.o
-SRCS=	$(srcdir)/cryptoconf.c
+OBJS=	cryptoconf.o \
+	des-crc.o \
+	des-md5.o \
+	raw-des.o
+
+SRCS=	$(srcdir)/cryptoconf.c \
+	$(srcdir)/des-crc.c \
+	$(srcdir)/des-md5.c \
+	$(srcdir)/raw-des.c 
 
 all::
 
@@ -20,3 +27,6 @@ libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 install:: libcrypto.a
 	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
+
+clean::
+	$(RM) libcrypto.a

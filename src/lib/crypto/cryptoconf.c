@@ -73,11 +73,21 @@
 #include <krb5/mit-des.h>
 #define _DES_DONE__
 #endif
-#define DES_CBC_CRC_CSENTRY &krb5_des_cst_entry
+#define DES_CBC_CRC_CSENTRY &krb5_des_crc_cst_entry
 #else
 #define DES_CBC_CRC_CSENTRY 0
 #endif
 
+#ifdef PROVIDE_DES_CBC_MD5
+#ifndef _DES_DONE__
+#include <krb5/mit-des.h>
+#define _DES_DONE__
+#endif
+#define DES_CBC_MD5_CSENTRY &krb5_des_md5_cst_entry
+#else
+#define DES_CBC_MD5_CSENTRY 0
+#endif
+    
 #ifdef PROVIDE_RAW_DES_CBC
 #ifndef _DES_DONE__
 #include <krb5/mit-des.h>
@@ -98,7 +108,7 @@ krb5_cs_table_entry *krb5_csarray[] = {
     0,				/* ETYPE_NULL */
     DES_CBC_CRC_CSENTRY,	/* ETYPE_DES_CBC_CRC */
     0,				/* ETYPE_DES_CBC_MD4 */
-    0,				/* ETYPE_DES_CBC_MD5 */
+    DES_CBC_MD5_CSENTRY,	/* ETYPE_DES_CBC_MD5 */
     RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
 };
 

@@ -1,3 +1,10 @@
+Fri Oct 14 00:37:08 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+    	* cryptoconf.c: Add support for the new cryptosystem DES/MD5.
+
+	* Makefile.in: Add support for new files des-crc.c, des-md5.c, and
+		raw-des.c
+
 Thu Oct  6 20:07:41 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add recursive "make check" target.
