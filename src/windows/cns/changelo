@@ -1,5 +1,8 @@
 Wed Jan 10 23:16:41 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* cns.rc: Add an #ifdef for enabling lower case realm (for use
+		with DCE).
+
 	* cns.c (kwin_command): When obtaining tickets, we make them
 		forwardable by default.  XXX This should really a
 		configurable option in the UI.
