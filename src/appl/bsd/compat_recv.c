@@ -46,6 +46,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "defines.h"
+
 static int krb_v4_recvauth(long options, int fd, KTEXT ticket,
 			   char *service, char *instance, 
 			   struct sockaddr_in *faddr,
@@ -172,7 +174,7 @@ krb5_compat_recvauth(context, auth_context,
 	if (len < 0 || len > 255)
 		return KRB5_SENDAUTH_BADAUTHVERS;
 
-	buf = malloc(len);
+	buf = malloc((unsigned) len);
 	if (!buf)
 		return ENOMEM;
 	
@@ -317,7 +319,7 @@ krb5_compat_recvauth_version(context, auth_context,
 	if (len < 0 || len > 255)
 		return KRB5_SENDAUTH_BADAUTHVERS;
 
-	buf = malloc(len);
+	buf = malloc((unsigned) len);
 	if (!buf)
 		return ENOMEM;
 	

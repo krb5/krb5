@@ -1,3 +1,7 @@
+2002-08-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* compat_recv.c: Include defines.h for prototypes.
+
 2002-08-07  Jen Selby  <jenselby@mit.edu>
 	
 	* klogind.M, kshd.M, login.M: changed manual sections 8c, 1c, and
