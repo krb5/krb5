@@ -1,3 +1,8 @@
+2002-04-04  Sam Hartman  <hartmans@mit.edu>
+
+	* radix.c (decode;):  Patch from Mark Eichin for one char buffer overflow [635]
+	
+
 2002-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (unix): Define if BSD is defined.

@@ -23,18 +23,18 @@ int *len, decode;
 		    D = p - radixN;
 		    switch (i&3) {
 			case 0:
-			    outbuf[j] = D<<2;
+			    c = D<<2;
 			    break;
 			case 1:
-			    outbuf[j++] |= D>>4;
-			    outbuf[j] = (D&15)<<4;
+			    outbuf[j++] = c | D>>4;
+			    c = (D&15)<<4;
 			    break;
 			case 2:
-			    outbuf[j++] |= D>>2;
-			    outbuf[j] = (D&3)<<6;
+			    outbuf[j++] = c | D>>2;
+			    c = (D&3)<<6;
 			    break;
 			case 3:
-			    outbuf[j++] |= D;
+			    outbuf[j++] = c | D;
 		    }
 		}
 		switch (i&3) {
