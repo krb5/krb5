@@ -30,7 +30,7 @@ void display_intro_message(fmt_string, arg_string)
 long read_old_password(context, password, pwsize)
      krb5_context context;
      char *password;
-     int *pwsize;
+     unsigned int *pwsize;
 {
   long code = krb5_read_password(context,
 			 (char *)string_text(KPW_STR_OLD_PASSWORD_PROMPT),  
