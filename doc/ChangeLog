@@ -1,3 +1,8 @@
+2004-09-07  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo (Propagate the Database to Each Slave KDC):
+	Remove spurious "-R" flag from kdb5_util invocation.
+
 2004-09-02  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo: Fix some typos.

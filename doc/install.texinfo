@@ -809,7 +809,7 @@ the name of the directory in which you installed @value{PRODUCT}.)
 
 kdclist = "@value{KDCSLAVE1}.@value{PRIMARYDOMAIN} @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}"
 
-@value{ROOTDIR}/sbin/kdb5_util -R "dump
+@value{ROOTDIR}/sbin/kdb5_util "dump
 @result{} @value{ROOTDIR}/var/krb5kdc/slave_datatrans"
 
 for kdc in $kdclist
