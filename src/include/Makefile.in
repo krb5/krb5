@@ -37,13 +37,14 @@ krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
 # Build the error table include files:
 # adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h
 
-adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h: force
+adm_err.h asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h: rebuild-error-tables
+rebuild-error-tables:
 	(cd ../lib/krb5/error_tables && $(MAKE) includes)
 krb_err.h: kerberosIV/krb_err.h
 	$(RM) krb_err.h ; $(CP) kerberosIV/krb_err.h krb_err.h
 kerberosIV/krb_err.h: all-recurse
 
-.PHONY: force
+.PHONY: force rebuild-error-tables
 force:
 
 adm_err.h: $(SRCTOP)/lib/krb5/error_tables/adm_err.et

@@ -4,6 +4,9 @@
 	doesn't change the target file if the contents wouldn't be
 	altered, touch an auxiliary timestamp file to avoid re-running
 	autoheader all the time.
+	(rebuild-error-tables): New intermediate target, avoids running
+	make in error_tables directory once for each generated header file
+	we care about.
 
 	* fake-addrinfo.c (getnameinfo): Cast address argument to
 	gethostbyaddr.
