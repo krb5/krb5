@@ -25,11 +25,6 @@
  * One end of the user-user client-server pair.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_server_c[] =
-"$Id$";
-#endif
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -25,27 +25,18 @@
  * Other end of user-user client/server pair.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_client_c[] =
-"$Id$";
-#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
 #include <com_err.h>
-
-#ifdef __STDC__
-extern char *strdup(const char *);
-#else
-extern char *strdup();
-#endif
 
 krb5_error_code
 tgt_keyproc(DECLARG(krb5_pointer, keyprocarg),
