@@ -30,6 +30,8 @@ static char rcsid_kdb_edit_c[] =
 #include <ss/ss.h>
 #include <stdio.h>
 
+extern char *progname;
+
 
 #define REALM_SEP	'@'
 #define REALM_SEP_STR	"@"
