@@ -61,9 +61,7 @@ typedef unsigned long rpc_u_int32;
 #	define NULL 0
 #endif
 
-#if defined(__osf__)
-#include <stdlib.h>
-#endif
+@STDLIB_INCLUDE@
 #define mem_alloc(bsize)	(char *) malloc(bsize)
 #define mem_free(ptr, bsize)	free(ptr)
 

@@ -3,6 +3,10 @@ Mon Dec  9 15:57:55 1996  Barry Jaspan  <bjaspan@mit.edu>
 	* api.0/init.exp, api.2/init.exp: use spawn/expect instead of exec
  	so tests don't fail when kadmin.local produces output
 	
+Wed Nov 20 15:59:34 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in (check-): warn more loudly about unrun tests
+
 Mon Nov 11 20:51:27 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.

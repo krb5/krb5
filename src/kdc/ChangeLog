@@ -9,6 +9,13 @@ Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
 	return status and don't pass back hint if it failed.
 	(get_etype_info): malloc one more word in entry for end marker.
 
+Wed Nov 20 11:25:05 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* main.c (initialize_realms): krb5_aprof_init can succeed while
+ 	leaving aprof == NULL, but krb5_aprof_finish will fail.  This is
+ 	just more grossness that needs to be redone when the kdc.conf
+ 	interface is reworked.
+
 Thu Nov  7 12:27:21 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdc_preauth.c (check_padata): Fixed error handling; in order for

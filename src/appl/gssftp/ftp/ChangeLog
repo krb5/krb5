@@ -1,3 +1,8 @@
+Fri Nov 22 15:48:19 1996  unknown  <bjaspan@mit.edu>
+
+	* ftp.c (hookup): use sizeof instead of h_length to determine
+ 	number of bytes of addr to copy from DNS response [krb5-misc/211]
+
 Fri Sep 27 16:05:09 1996  Tom Yu  <tlyu@mit.edu>
 
 	* cmds.c (setpeer): Apply jik's fix so "-n" actually works as

@@ -1,4 +1,4 @@
-#
+#l
 # Makefile for building a standalone send-pr.
 #
 RELEASE=1.0
@@ -24,19 +24,19 @@ install-sid: install-sid.sh
 	sed -e 's,@ADMIN_BINDIR@,$(ADMIN_BINDIR),g' $(srcdir)/install-sid.sh > install-sid
 
 install:: all
-	if [ -d $(prefix) ]; then true ; else mkdir $(prefix) ; fi
-	if [ -d $(ADMIN_BINDIR) ]; then true ; else mkdir $(ADMIN_BINDIR) ; fi
-	cp send-pr $(ADMIN_BINDIR)/$(sendprname)
-	chmod 755 $(ADMIN_BINDIR)/$(sendprname)
-	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
-	if [ -d $(datadir)/gnats ] ; then true ; else mkdir $(datadir)/gnats ; fi
-	cp $(srcdir)/categories $(datadir)/gnats/mit
-	chmod 644 $(datadir)/gnats/mit
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $(DESTDIR)$(prefix) ]; then true ; else mkdir $(DESTDIR)$(prefix) ; fi
+	if [ -d $(DESTDIR)$(ADMIN_BINDIR) ]; then true ; else mkdir $(DESTDIR)$(ADMIN_BINDIR) ; fi
+	cp send-pr $(DESTDIR)$(ADMIN_BINDIR)/$(sendprname)
+	chmod 755 $(DESTDIR)$(ADMIN_BINDIR)/$(sendprname)
+	if [ -d $(DESTDIR)$(datadir) ] ; then true ; else mkdir $(DESTDIR)$(datadir) ; fi
+	if [ -d $(DESTDIR)$(datadir)/gnats ] ; then true ; else mkdir $(DESTDIR)$(datadir)/gnats ; fi
+	cp $(srcdir)/categories $(DESTDIR)$(datadir)/gnats/mit
+	chmod 644 $(DESTDIR)$(datadir)/gnats/mit
+	-parent=`echo $(DESTDIR)$(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	cp $(srcdir)/send-pr.1 $(man1dir)/$(sendprname).1
-	chmod 644 $(man1dir)/$(sendprname).1
+	if [ -d $(DESTDIR)$(man1dir) ] ; then true ; else mkdir $(DESTDIR)$(man1dir) ; fi
+	cp $(srcdir)/send-pr.1 $(DESTDIR)$(man1dir)/$(sendprname).1
+	chmod 644 $(DESTDIR)$(man1dir)/$(sendprname).1
 
 clean::
 	rm -f install-sid send-pr send-pr.el*

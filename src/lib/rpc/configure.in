@@ -6,7 +6,11 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
-
+dnl Arrange for types.hin to include stdlib.h
+AC_CHECK_HEADER(stdlib.h, [
+     STDLIB_INCLUDE="#include <stdlib.h>"],
+     [STDLIB_INCLUDE=""])
+AC_SUBST(STDLIB_INCLUDE) dnl
 ### Check where struct rpcent is declared.
 #
 # This is necessary to determine:

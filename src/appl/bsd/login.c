@@ -1023,7 +1023,8 @@ static sigtype sigsys ()
     siglongjmp(setpag_buf, 1);
 }
 
-static int try_afscall ()
+static int try_afscall (scall)
+	int (*scall)();
 {
     handler sa, osa;
     volatile int retval = 0;
@@ -1032,7 +1033,7 @@ static int try_afscall ()
     handler_init (sa, sigsys);
     handler_swap (SIGSYS, sa, osa);
     if (sigsetjmp(setpag_buf, 1) == 0) {
-	setpag ();
+	(*scall)();
 	retval = 1;
     }
     handler_set (SIGSYS, osa);

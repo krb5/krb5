@@ -37,6 +37,7 @@ gssapi.h: gssapi.hin
 	echo "/* It contains some choice pieces of autoconf.h */" >> $@
 	grep SIZEOF $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	grep 'HAVE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
+	grep 'USE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	echo "/* End of gssapi.h prologue. */"
 	cat $(srcdir)/gssapi.hin >> $@
 
@@ -84,7 +85,8 @@ OBJS = \
 
 $(OBJS): $(HDRS) $(ETHDRS)
 
-EXPORTED_HEADERS= gssapi.h gssapi_generic.h
+EXPORTED_HEADERS= gssapi_generic.h
+EXPORTED_BUILT_HEADERS= gssapi.h
 
 all-unix:: shared $(SRCS) $(ETHDRS) $(OBJS)
 
@@ -114,6 +116,10 @@ clean-windows::
 install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
+	done
+	@set -x; for f in $(EXPORTED_BUILT_HEADERS) ; \
+	do $(INSTALL_DATA) $$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 

@@ -428,7 +428,7 @@ char *kadmin_startup(argc, argv)
 	 exit(1);
     }
     {
-#define DEFAULT_KEYTAB "WRFILE:/etc/v5srvtab"
+#define DEFAULT_KEYTAB "WRFILE:/etc/krb5.keytab"
 	 /* XXX krb5_defkeyname is an internal library global and
             should go away */
 	 extern char *krb5_defkeyname;

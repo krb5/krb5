@@ -3,6 +3,16 @@ Tue Dec  3 15:39:11 1996  Barry Jaspan  <bjaspan@mit.edu>
 	* kadmin.c (kadmin_addprinc): print warning/notice about no policy
  	and default policy [krb5-admin/252]
 
+Thu Dec  5 19:30:22 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.M: Missed a ref to /krb5. [279]
+	
+	* kadmin.M: Change example to no longer use /krb5. [PR 279]
+
+	* kadmin.M: v5srvtab -> krb5.keytab [PR 279]
+
+	* kadmin.c (DEFAULT_KEYTAB): v5srvtab -> krb5.keytab [PR 278]
+
 Wed Nov 13 14:29:02 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (clean-unix): Remove getdate.c and kadmin_ct.c.
