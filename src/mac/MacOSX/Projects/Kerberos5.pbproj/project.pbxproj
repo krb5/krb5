@@ -599,7 +599,6 @@
 				DYLIB_CURRENT_VERSION = 1;
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SYMROOT)/Kerberos5.intermediates\"";
 				LIBRARY_STYLE = STATIC;
-				OTHER_CPLUSPLUSFLAGS = "-fno-inline";
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libGSS.a;
 				REZ_EXECUTABLE = YES;
@@ -4108,7 +4107,6 @@
 				DYLIB_CURRENT_VERSION = 1;
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../MoreFiles/Headers\"";
 				LIBRARY_STYLE = STATIC;
-				OTHER_CPLUSPLUSFLAGS = "-fno-inline";
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libKerberosProfile.a;
 				REZ_EXECUTABLE = YES;
@@ -4419,7 +4417,6 @@
 				DYLIB_CURRENT_VERSION = 1;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SYMROOT)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\" \"$(SRCROOT)/../../CredentialsCache/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
 				LIBRARY_STYLE = STATIC;
-				OTHER_CPLUSPLUSFLAGS = "-fno-inline";
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libKerberos5.a;
 				REZ_EXECUTABLE = YES;
