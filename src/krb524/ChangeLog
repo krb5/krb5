@@ -1,3 +1,8 @@
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't invoke macros for library build support.
+	Don't look for awk.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SERVER_OBJS, krb524d): Link against apputils lib
