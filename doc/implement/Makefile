@@ -9,17 +9,16 @@ DESTEX= libdes.tex
 all: library.ps libdes.ps
 
 
-libdes.ps: libdes.dvi
-libdes.tex: $(DESTEX) $(STYLES)
+libdes.dvi: $(DESTEX) $(STYLES)
 
 library.ps: library.dvi
 
 # hard to capture two-pass semantics in Makefiles...
 # library.ind: library.dvi
-library.ind:
+library.ind: library.idx
 	index library.idx
 
-library.tex: $(LIBTEX) $(STYLES)
+library.dvi:  $(LIBTEX) $(STYLES)
 
 .tex.dvi:
 	latex $*
