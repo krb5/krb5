@@ -988,15 +988,25 @@ alpha-dec-osf*)
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
 
-# untested...
+# HPUX untested...
+# 
+# Note: "-Wl,+s" when building executables enables the use of the
+# SHLIB_PATH environment variable for finding shared libraries 
+# in non-standard directories.  If a non-standard search-path for
+#  shared libraries is compiled into the executable (using 
+# -Wl,+b,$KRB5_SHLIBDIR), then the order of "-Wl,+b,..." and "-Wl,+s" 
+# on the commandline of the linker will determine which path
+# (compiled-in or SHLIB_PATH) will be searched first.
+#
 *-*-hpux*)
+	PICFLAGS=+z
 	SHLIBEXT=.sl
 	SHLIBVEXT='.sl.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIB_EXPFLAGS='+b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	LDCOMBINE='ld -b'
-	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+b,$(PROG_RPATH)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+s -Wl,+b,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
-	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	RUN_ENV='SHLIB_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export SHLIB_PATH;'
 	;;
 
 mips-sgi-irix*)
