@@ -1,3 +1,23 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.exp (doit): Run server with additional options to export
+	and re-import the GSSAPI context, and log info to a file in
+	tmpdir.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp: Be slightly more lenient about matching password
+	prompts.
+
+2003-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp (v4ftp_test): Return early if $des3_krbtgt set.
+
+	* v4krb524d.exp (doit): Return early if $des3_krbtgt set.
+
+	* v4standalone.exp (check_and_destroy_v4_tix): Return early if
+	$des3_krbtgt set.
+
 2003-01-01  Ezra Peisach  <epeisach@bu.edu>
 
 	* standalone.exp: Only run the keytab to srvtab tests if kerberos 4

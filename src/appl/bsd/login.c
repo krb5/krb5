@@ -181,10 +181,6 @@ typedef sigtype (*handler)();
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
 
-#ifdef KRB4_CONVERT
-#include <krb524.h>
-#endif
-
 /* Hacks to maintain compatability with Athena libkrb*/
 #ifndef HAVE_KRB_SAVE_CREDENTIALS
 #define krb_save_credentials save_credentials
@@ -653,9 +649,6 @@ try_convert524(kctx, me, use_ccache)
     krb5_creds increds, *v5creds;
     CREDENTIALS v4creds;
 
-
-    /* or do this directly with krb524_convert_creds_kdc */
-    krb524_init_ets(kctx);
 
     /* If we have forwarded v5 tickets, retrieve the credentials from
      * the cache; otherwise, the v5 credentials are in my_creds.

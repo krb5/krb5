@@ -27,7 +27,6 @@
 #include "k5-int.h"
 #include "etypes.h"
 
-/* Eventually this declaration should move to krb5.h.  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key_with_params(krb5_context context,
 				 krb5_enctype enctype,
@@ -72,7 +71,21 @@ krb5_c_string_to_key_with_params(context, enctype, string, salt, params, key)
 	return(KRB5_BAD_ENCTYPE);
 
     enc = krb5_enctypes_list[i].enc;
+/* xxx AFS string2key function is indicated by a special length  in
+ * the salt in much of the code.  However only the DES enctypes can
+ * deal with this.  Using s2kparams would be a much better solution.*/
+    if (salt && salt->length == SALT_TYPE_AFS_LENGTH) {
+	switch (enctype) {
+	case ENCTYPE_DES_CBC_CRC:
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_MD5:
+	    break;
+	default:
+	    return (KRB5_CRYPTO_INTERNAL);
+	}
+    }
 
+	
     (*(enc->keysize))(&keybytes, &keylength);
 
     if ((key->contents = (krb5_octet *) malloc(keylength)) == NULL)

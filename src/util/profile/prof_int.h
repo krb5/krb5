@@ -4,11 +4,17 @@
 
 #include <time.h>
 #include <stdio.h>
+
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 #include <TargetConditionals.h>
 #define USE_PTHREADS
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #define SHARE_TREE_DATA
+#endif
+
+#if defined(USE_PTHREADS)
+#include <sys/types.h>
+#include <pthread.h>
 #endif
 
 #include "com_err.h"

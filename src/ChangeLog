@@ -1,3 +1,66 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Set PRIOCNTL_HACK=1 on
+	Solaris 9.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KRBHDEP): Add krb524_err header.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (WITH_KRB4): Don't set or substitute KRB524_DEPLIB,
+	KRB524_LIB, KRB524_H_DEP, or KRB524_ERR_H_DEP.
+	* Makefile.in (ETOUT): Update location of krb524_err files.
+	(krb524/krb524_err.h, krb524/krb524_err.c): Delete.
+	($(INC)krb524_err.h, $(ET)krb524_err.c): New targets.
+
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Add -DKRB5_DEPRECATED=1 so stuff in tree builds.
+
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Require autoconf 2.52 only.
+
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Require autoconf 2.53.
+	(CONFIG_RULES): Always set AUTOCONFINCFLAGS to --include.
+
+2003-04-10  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Revert requrement of autoconf-2.53, since MacOS X
+	doesn't have it.
+
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_CHOOSE_DB): Set new variable KDB5_DB_LIB to
+	empty if using in-tree db.  It is now used to pass -ldb to link
+	commands, if needed, when linking programs with libkdb5.  DB_LIB
+	is now only used for programs that explicitly need the actual
+	libdb independently of libkdb5.
+
+	* krb5-config.in: Use $KDB5_DB_LIB instead of "-ldb" for kdb
+	libraries.
+
+2003-03-31  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Require autoconf-2.53, since 2.52 generates
+	configure scripts that NetBSD /bin/sh doesn't like.
+
+2003-03-18  Alexandra Ellwood  <lxs@mit.edu>
+
+    * aclocal.m4: Define KRB5_AC_NEED_BIND_8_COMPAT to check for bind 9
+    and higher.  When bind 9 is present, BIND_8_COMPAT needs to be defined to
+    get bind 8 types.
+
+2003-03-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (AWK): Default to awk, not gawk.  User can override
+	on make's command line if necessary.  Still, only really useful
+	for building kerbsrc.zip, etc.
+
 2003-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (WINMAKEFILES): Add lib\crypto\aes\Makefile.

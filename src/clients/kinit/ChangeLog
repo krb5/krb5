@@ -1,3 +1,18 @@
+2003-08-01  Tom Yu  <tlyu@mit.edu>
+
+	* kinit.c (main): Apply patch from Stephen Grau to correctly
+	return non-zero for certain error conditions.
+
+2003-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c (KRB4_BACKUP_DEFAULT_LIFE_SECS): Update to one day.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (kinit): Don't use krb524 library.
+	* kinit.c: Don't include krb524.h.
+	(try_convert524): Don't call krb524_init_ets.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* kinit.c (k4_kinit): Remove trailing colon, as new implementation

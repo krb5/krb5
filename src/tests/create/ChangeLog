@@ -1,3 +1,8 @@
+2003-05-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c (main): When attempting to register writable
+	keytab, do not fail if error is KRB5_KT_TYPE_EXISTS.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
