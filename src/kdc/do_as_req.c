@@ -125,21 +125,25 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_error_code retval;
     int	errcode;
-    int nprincs;
+    int c_nprincs = 0, s_nprincs = 0;
     char cpw_service[255];
     int pwreq, pa_id, pa_flags;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime;
-    krb5_keyblock *session_key;
+    krb5_keyblock *session_key = 0;
     krb5_keyblock encrypting_key;
     krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
+    krb5_data salt_data;
     char *status;
 
     register int i;
 
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0, *fromstring = 0;
+
+    ticket_reply.enc_part.ciphertext.data = 0;
+    salt_data.data = 0;
 
     if (!request->client)
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
@@ -176,55 +180,46 @@ krb5_data **response;			/* filled in with a response packet */
 	    krb5_princ_realm(request->server)->data);
     if (strcmp(sname, cpw_service) == 0) pwreq++;
 
-#define cleanup() { free(cname); free(sname); }
-
-    nprincs = 1;
-    if (retval = krb5_db_get_principal(request->client, &client, &nprincs,
-				       &more))
-	return(retval);
+    c_nprincs = 1;
+    if (retval = krb5_db_get_principal(request->client, &client, &c_nprincs,
+				       &more)) {
+	c_nprincs = 0;
+	goto errout;
+    }
     if (more) {
-	krb5_db_free_principal(&client, nprincs);
-	cleanup();
-	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
-    } else if (nprincs != 1) {
-	krb5_db_free_principal(&client, nprincs);
-	cleanup();
+	retval = prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
+				  response);
+	goto errout;
+    } else if (c_nprincs != 1) {
 #ifdef KRBCONF_VAGUE_ERRORS
-	return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+	retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
 #else
-	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN, response));
+	retval = prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
+				  response);
 #endif
+	goto errout;
     }
     
-#undef cleanup
-#define cleanup() { krb5_db_free_principal(&client, 1); \
-		    free(sname); free(cname);}
-	
-    nprincs = 1;
-    if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
-				       &more))
-	return(retval);
-    if (more) {
-	cleanup();
-	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE, response));
-    } else if (nprincs != 1) {
-	cleanup();
-	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN, response));
+    s_nprincs = 1;
+    if (retval = krb5_db_get_principal(request->server, &server, &s_nprincs,
+				       &more)) {
+	s_nprincs = 0;
+	goto errout;
     }
-
-#undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); \
-		   krb5_db_free_principal(&server, 1); \
-		   free(cname); free(sname);  \
-	       }
+    if (more) {
+	retval = prepare_error_as(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
+				  response);
+	goto errout;
+    } else if (s_nprincs != 1) {
+	retval = prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
+				  response);
+	goto errout;
+    }
 
     if (retval = krb5_timeofday(&kdc_time)) {
 	syslog(LOG_INFO, "AS_REQ: TIME_OF_DAY: host %s, %s for %s", 
                   fromstring, cname, sname);
-	cleanup();
-	return(retval);
+	goto errout;
     }
 
     status = "UNKNOWN REASON";
@@ -232,8 +227,8 @@ krb5_data **response;			/* filled in with a response packet */
 				     kdc_time, &status)) {
 	syslog(LOG_INFO, "AS_REQ: %s: host %s, %s for %s", status,
                   fromstring, cname, sname);
-	cleanup();
-	return(prepare_error_as(request, retval, response));
+	retval = prepare_error_as(request, retval, response);
+	goto errout;
     }
       
     for (i = 0; i < request->netypes; i++)
@@ -244,8 +239,8 @@ krb5_data **response;			/* filled in with a response packet */
 	    
 	syslog(LOG_INFO, "AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
                   fromstring, cname, sname);
-	cleanup();
-	return(prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response));
+	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
+	goto errout;
     }
     useetype = request->etype[i];
 
@@ -253,15 +248,8 @@ krb5_data **response;			/* filled in with a response packet */
 	/* random key failed */
 	syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
                   fromstring, cname, sname);
-	cleanup();
-	return(retval);
+	goto errout;
     }
-
-#undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); \
-		   krb5_db_free_principal(&server, 1); \
-		   free(cname); free(sname); \
-		   krb5_free_keyblock(session_key); }
 
     ticket_reply.server = request->server;
     ticket_reply.enc_part.etype = useetype;
@@ -297,7 +285,6 @@ krb5_data **response;			/* filled in with a response packet */
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
     
-
     until = (request->till == 0) ? kdc_infinity : request->till;
 
     enc_tkt_reply.times.endtime =
@@ -362,15 +349,15 @@ krb5_data **response;			/* filled in with a response packet */
 #endif
             syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
 		   fromstring, cname, sname, error_message(retval));
-            cleanup();
 #ifdef KRBCONF_VAGUE_ERRORS
-            return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+            retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
 #else
 	    retval -= ERROR_TABLE_BASE_krb5;
 	    if ((retval < 0) || (retval > 127))
 		    retval = KDC_PREAUTH_FAILED;
-            return(prepare_error_as(request, retval, response));
+            retval = prepare_error_as(request, retval, response);
 #endif
+	    goto errout;
 	} 
 
 	setflag(enc_tkt_reply.flags, TKT_FLG_PRE_AUTH);
@@ -397,36 +384,22 @@ krb5_data **response;			/* filled in with a response packet */
 	  if (!pwreq || !(enc_tkt_reply.flags & TKT_FLG_PRE_AUTH)){
               syslog(LOG_INFO, "AS_REQ: Needed HW preauth: host %s, %s for %s",
 		     fromstring, cname, sname);
-              cleanup();
-              return(prepare_error_as(request, KRB_ERR_GENERIC, response));
+              retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
+	      goto errout;
 	  }
       }
 
-ticket_reply.enc_part2 = &enc_tkt_reply;
+    ticket_reply.enc_part2 = &enc_tkt_reply;
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
-	cleanup();
-	return retval;
-    }
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key))
+	goto errout;
     retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
-    if (retval) {
-	cleanup();
-	return retval;
-    }
-
-    krb5_db_free_principal(&server, 1);
-
-#undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); \
-		   krb5_free_keyblock(session_key); \
-		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
-			 ticket_reply.enc_part.ciphertext.length); \
-		   free(cname); free(sname); \
-		   free(ticket_reply.enc_part.ciphertext.data);}
+    if (retval)
+	goto errout;
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
@@ -442,7 +415,7 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 	   since nothing below will "pull out the rug" */
 
 	switch (client.salt_type) {
-	    krb5_data *data_foo, data_bar;
+	    krb5_data *data_foo;
 	case KRB5_KDB_SALTTYPE_V4:
 	    /* send an empty (V4) salt */
 	    padat_tmp[0]->contents = 0;
@@ -450,12 +423,10 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 	    break;
 	case KRB5_KDB_SALTTYPE_NOREALM:
 	    if (retval = krb5_principal2salt_norealm(request->client,
-						     &data_bar)) {
-		cleanup();
-		return retval;
-	    }
-	    padat_tmp[0]->length = data_bar.length;
-	    padat_tmp[0]->contents = (krb5_octet *)data_bar.data;
+						     &salt_data))
+		goto errout;
+	    padat_tmp[0]->length = salt_data.length;
+	    padat_tmp[0]->contents = (krb5_octet *)salt_data.data;
 	    break;
 	case KRB5_KDB_SALTTYPE_ONLYREALM:
 	    data_foo = krb5_princ_realm(request->client);
@@ -470,16 +441,6 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 	reply.padata = padat_tmp;
     }
 
-#undef cleanup
-#define cleanup() {krb5_db_free_principal(&client, 1); \
-		   krb5_free_keyblock(session_key); \
-		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
-			 ticket_reply.enc_part.ciphertext.length); \
-		   free(ticket_reply.enc_part.ciphertext.data); \
-		   free(cname); free(sname); \
-		   if (client.salt_type == KRB5_KDB_SALTTYPE_NOREALM) \
-		       krb5_xfree(padat_tmp[0]->contents);}
-
     reply.client = request->client;
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
     reply.enc_part.etype = useetype;
@@ -487,10 +448,8 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
-    if (retval = fetch_last_req_info(&client, &reply_encpart.last_req)) {
-	cleanup();
-	return retval;
-    }
+    if (retval = fetch_last_req_info(&client, &reply_encpart.last_req))
+	goto errout;
 
     reply_encpart.nonce = request->nonce;
     reply_encpart.key_exp = client.expiration;
@@ -508,36 +467,52 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 
     /* convert client.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key)) {
-	cleanup();
-	return retval;
-    }
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key))
+	goto errout;
+
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart,
 				 &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
-    cleanup();
+
+    if (retval) {
+	syslog(LOG_INFO, "AS_REQ: ENCODE_KDC_REP: host %s, %s for %s (%s)",
+	       fromstring, cname, sname, error_message(retval));
+	goto errout;
+    }
+    
     /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
        can use them in raw form if needed.  But, we don't... */
     memset(reply.enc_part.ciphertext.data, 0,
 	   reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    if (retval) {
-	syslog(LOG_INFO, "AS_REQ; ENCODE_KDC_REP: host %s, %s for %s",
-	       fromstring, cname, sname);
-    } else {
-	if (is_secondary)
-	    syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
-		   authtime, fromstring, cname, sname);
-	else
-	    syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
-		   authtime, fromstring, cname, sname);
+    if (is_secondary)
+	syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
+	       authtime, fromstring, cname, sname);
+    else
+	syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
+	       authtime, fromstring, cname, sname);
+
+errout:
+    if (cname)
+	    free(cname);
+    if (sname)
+	    free(sname);
+    if (c_nprincs)
+	krb5_db_free_principal(&client, c_nprincs);
+    if (s_nprincs)
+	krb5_db_free_principal(&server, s_nprincs);
+    if (session_key)
+	krb5_free_keyblock(session_key);
+    if (ticket_reply.enc_part.ciphertext.data) {
+	memset(ticket_reply.enc_part.ciphertext.data , 0,
+	       ticket_reply.enc_part.ciphertext.length);
+	free(ticket_reply.enc_part.ciphertext.data);
     }
-
-    free(cname);
-    free(sname);
-
+    if (salt_data.data)
+	krb5_xfree(salt_data.data);
+    
     return retval;
 }
 
