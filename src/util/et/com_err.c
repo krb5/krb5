@@ -70,6 +70,9 @@ static void
     MessageBox (NULL, errbuf, "Kerboros", MB_ICONEXCLAMATION);
 #else
     fputs (errbuf, stderr);
+    /* should do this only on a tty in raw mode */
+    putc('\r', stderr);
+    putc('\n', stderr);
     fflush(stderr);
 #endif
 }

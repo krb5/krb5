@@ -1,3 +1,9 @@
+Thu Mar 23 19:00:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* com_err.c (default_com_err_proc): Fixed breakage introduced by
+		windows port.  com_err() is supposed to print a newline at
+		after printing the error message!
+
 Wed Mar 22 11:34:09 1995 Keith Vetter (keithv@fusion.com)
 
 	* com_err.c: added _WINDOWS equivalent condition to HAVE_STDARG_H
