@@ -61,6 +61,7 @@ static krb5_encrypt_block master_encblock;
 static krb5_keyblock master_keyblock;
 extern krb5_boolean dbactive;
 extern int exit_status;
+extern krb5_context edit_context;
 
 void update_ok_file();
 
@@ -110,12 +111,12 @@ krb5_db_entry *entry;
 
     principal = &v4princ;
 
-    if (retval = krb5_unparse_name(entry->principal, &name)) {
+    if (retval = krb5_unparse_name(edit_context, entry->principal, &name)) {
 	com_err(arg->comerr_name, retval, "while unparsing principal");
 	exit_status++;
 	return retval;
     }
-    if (retval = krb5_unparse_name(entry->mod_name, &mod_name)) {
+    if (retval = krb5_unparse_name(edit_context, entry->mod_name, &mod_name)) {
 	free(name);
 	com_err(arg->comerr_name, retval, "while unparsing principal");
 	exit_status++;
@@ -129,7 +130,7 @@ krb5_db_entry *entry;
 	return 0;
     }
 
-    if (strcmp(krb5_princ_realm(entry->principal)->data,
+    if (strcmp(krb5_princ_realm(edit_context, entry->principal)->data,
 		arg->realm)) {
         free(name);
 	free(mod_name);
@@ -140,7 +141,7 @@ krb5_db_entry *entry;
 
 
     strncpy(principal->name,
-	    krb5_princ_component(entry->principal, 0)->data, 
+	    krb5_princ_component(edit_context, entry->principal, 0)->data, 
 	    ANAME_SZ);
     if (!principal->name[0]) {
       strcpy(principal->name, "*");
@@ -152,7 +153,7 @@ krb5_db_entry *entry;
     if (entry->principal->length > 1) {
       char *inst;
       strncpy(principal->instance,
-	      krb5_princ_component(entry->principal, 1)->data, 
+	      krb5_princ_component(edit_context, entry->principal, 1)->data, 
 	      INST_SZ);
       inst = strchr(principal->instance, '.');
       if (inst && strcmp(principal->name, "krbtgt")) {
@@ -166,7 +167,7 @@ krb5_db_entry *entry;
     }
 
     strncpy(principal->mod_name,
-	    krb5_princ_component(entry->mod_name, 0)->data, 
+	    krb5_princ_component(edit_context, entry->mod_name, 0)->data, 
 	    ANAME_SZ);
     if (!principal->mod_name[0]) {
       strcpy(principal->mod_name, "*");
@@ -174,7 +175,7 @@ krb5_db_entry *entry;
 
     if (entry->mod_name->length > 1) {
       strncpy(principal->mod_instance, 
-	      krb5_princ_component(entry->mod_name, 1)->data, 
+	      krb5_princ_component(edit_context, entry->mod_name, 1)->data, 
 	      INST_SZ);
     }
     else {
@@ -285,7 +286,8 @@ void dump_v4db(argc, argv)
 	  fprintf(f," 200001010459 197001020000 db_creation *\n");
 	}
 
-	(void) krb5_db_iterate(dump_v4_iterator, (krb5_pointer) &arg);
+	(void) krb5_db_iterate(edit_context, dump_v4_iterator, 
+			       (krb5_pointer) &arg);
 	if (argc == 2)
 		fclose(f);
 	if (argv[1])
@@ -301,7 +303,7 @@ int handle_keys(arg)
     char *mkey_fullname;
     krb5_principal master_princ;
 
-    if (retval = krb5_get_default_realm(&defrealm)) {
+    if (retval = krb5_get_default_realm(edit_context, &defrealm)) {
       com_err(arg->comerr_name, retval, 
 	      "while retrieving default realm name");
       exit(1);
@@ -310,20 +312,22 @@ int handle_keys(arg)
 
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(mkey_name, arg->realm, &mkey_fullname,
-					 &master_princ)) {
+    if (retval = krb5_db_setup_mkey_name(edit_context, mkey_name, arg->realm, 
+					 &mkey_fullname, &master_princ)) {
 	com_err(arg->comerr_name, retval, "while setting up master key name");
 	exit(1);
     }
 
-    krb5_use_cstype(&master_encblock, DEFAULT_KDC_ETYPE);
+    krb5_use_cstype(edit_context, &master_encblock, DEFAULT_KDC_ETYPE);
     master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, 0,
+    if (retval = krb5_db_fetch_mkey(edit_context, master_princ, 
+				    &master_encblock, 0,
 				    0, 0, &master_keyblock)) {
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }
-    if (retval = krb5_process_key(&master_encblock, &master_keyblock)) {
+    if (retval = krb5_process_key(edit_context, &master_encblock, 
+				    &master_keyblock)) {
 	com_err(arg->comerr_name, retval, "while processing master key");
 	exit(1);
     }
@@ -350,7 +354,7 @@ handle_one_key(arg, v5master, v5key, v4key)
     krb5_keyblock v5plainkey;
     /* v4key is the actual v4 key from the file. */
 
-    retval = krb5_kdb_decrypt_key(v5master, v5key, &v5plainkey);
+    retval = krb5_kdb_decrypt_key(edit_context, v5master, v5key, &v5plainkey);
     if (retval) {
 	return retval;
     }
