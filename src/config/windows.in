@@ -16,15 +16,15 @@ all-windows:: Makefile
 # Directory syntax:
 #
 # begin absolute path
-ABS=\
+ABS=\\
 # begin relative path
 REL=
 # up-directory
 U=..
 # path separator
-S=\
+S=\\
 # this is magic... should only be used for preceding a program invocation
-C=.\
+C=.\\
 
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)
