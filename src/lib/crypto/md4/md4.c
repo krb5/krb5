@@ -38,6 +38,12 @@
 #include <krb5/krb5.h>
 #include <krb5/rsa-md4.h>
 
+#ifdef __STDC__
+#define UL(x) x##UL
+#else
+#define UL(x) ((krb5_ui_4) x)
+#endif    
+
 /* forward declaration */
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
 static void Transform (krb5_ui_4 *, krb5_ui_4 *);
@@ -70,10 +76,10 @@ static unsigned char PADDING[64] = {
   {(a) += F ((b), (c), (d)) + (x); \
    (a) = ROTATE_LEFT ((a), (s));}
 #define GG(a, b, c, d, x, s) \
-  {(a) += G ((b), (c), (d)) + (x) + (krb5_ui_4)013240474631; \
+  {(a) += G ((b), (c), (d)) + (x) + UL(013240474631); \
    (a) = ROTATE_LEFT ((a), (s));}
 #define HH(a, b, c, d, x, s) \
-  {(a) += H ((b), (c), (d)) + (x) + (krb5_ui_4)015666365641; \
+  {(a) += H ((b), (c), (d)) + (x) + UL(015666365641); \
    (a) = ROTATE_LEFT ((a), (s));}
 
 void MD4Init (mdContext)
@@ -83,10 +89,10 @@ MD4_CTX *mdContext;
 
   /* Load magic initialization constants.
    */
-  mdContext->buf[0] = (krb5_ui_4)0x67452301;
-  mdContext->buf[1] = (krb5_ui_4)0xefcdab89;
-  mdContext->buf[2] = (krb5_ui_4)0x98badcfe;
-  mdContext->buf[3] = (krb5_ui_4)0x10325476;
+  mdContext->buf[0] = UL(0x67452301);
+  mdContext->buf[1] = UL(0xefcdab89);
+  mdContext->buf[2] = UL(0x98badcfe);
+  mdContext->buf[3] = UL(0x10325476);
 }
 
 void MD4Update (mdContext, inBuf, inLen)

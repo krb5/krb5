@@ -1,3 +1,10 @@
+Thu Oct 13 17:48:21 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* md4.c (UL): Add the UL macro to control how unsigned long
+		constants are compiled.  If we have an ANSI C environment,
+		use the UL suffix to keep the compiler from warning about
+		numbers that would overflow a signed long.
+
 Tue Oct  4 14:54:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* md4crypto.c:
