@@ -1,3 +1,8 @@
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_int.h Added prototypes for profile_lock_global()
+        and profile_unlock_global().
+
 2004-10-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_init.c (profile_init): Don't add error table here.
