@@ -1363,7 +1363,7 @@ AC_REQUIRE([KRB5_AC_NEED_BIND_8_COMPAT])
     AC_CHECK_LIB(resolv, main)
     AC_CHECK_DECL(res_nsearch, 
 	AC_DEFINE(HAVE_RES_NSEARCH,,[Have the RES_NSEARCH function]),
-	[AC_CHECK_DECL(res_search, 
+	[AC_CHECK_FUNC(res_search, 
 	    AC_DEFINE(HAVE_RES_SEARCH,,[Have the res_search function]), 
 	    AC_MSG_ERROR(Failed to find resolver search routine),
 	    [#include <sys/types.h>
