@@ -1,3 +1,7 @@
+Sun Nov 12 04:53:17 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* main.c: initialize line (to avoid splitting up forward.c.)
+
 Mon Aug  7 19:39:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Add authenc.c to the SRCS list; authenc.o is

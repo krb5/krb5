@@ -107,6 +107,8 @@ usage()
  * main.  Parse arguments, invoke the protocol or command parser.
  */
 
+/* see forward.c -- indicate that we're in telnet, not telnetd. */
+char *line = 0;
 
 main(argc, argv)
 	int argc;
