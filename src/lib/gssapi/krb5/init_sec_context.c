@@ -925,7 +925,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    if (err) {
       k5_mutex_unlock(&cred->lock);
       if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
-	 krb5_gss_release_cred(minor_status, (gss_cred_id_t)cred);
+	 krb5_gss_release_cred(minor_status, (gss_cred_id_t)&cred);
       *minor_status = 0;
       if (*context_handle == GSS_C_NO_CONTEXT)
 	 krb5_free_context(context);
@@ -962,7 +962,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    }
 
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
-      krb5_gss_release_cred(&tmp_min_stat, (gss_cred_id_t)cred);
+      krb5_gss_release_cred(&tmp_min_stat, (gss_cred_id_t)&cred);
 
    return(major_status);
 }

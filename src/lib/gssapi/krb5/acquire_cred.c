@@ -444,7 +444,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if ((cred_usage != GSS_C_INITIATE) &&
        (cred_usage != GSS_C_ACCEPT) &&
        (cred_usage != GSS_C_BOTH)) {
-      xfree(cred);
+       krb5_gss_release_cred(minor_status, &cred);
       *minor_status = (OM_uint32) G_BAD_USAGE;
       krb5_free_context(context);
       return(GSS_S_FAILURE);
@@ -458,10 +458,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       if ((ret = acquire_accept_cred(context, minor_status, desired_name,
 				     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {
-	 if (cred->princ)
-	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
-	 /* minor_status set by acquire_accept_cred() */
+          krb5_gss_release_cred(minor_status, &cred);
+          /* minor_status set by acquire_accept_cred() */
 	 krb5_free_context(context);
 	 return(ret);
       }
@@ -477,12 +475,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 			     cred->princ?(gss_name_t)cred->princ:desired_name,
 			     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {
-	 if (cred->keytab)
-	    krb5_kt_close(context, cred->keytab);
-	 if (cred->princ)
-	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
-	 /* minor_status set by acquire_init_cred() */
+          krb5_gss_release_cred(minor_status, &cred);
+          /* minor_status set by acquire_init_cred() */
 	 krb5_free_context(context);
 	 return(ret);
       }
@@ -492,12 +486,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if (!cred->princ && (desired_name != GSS_C_NO_CREDENTIAL))
       if ((code = krb5_copy_principal(context, (krb5_principal) desired_name,
 				      &(cred->princ)))) {
-	 if (cred->ccache)
-	    (void)krb5_cc_close(context, cred->ccache);
-	 if (cred->keytab)
-	    (void)krb5_kt_close(context, cred->keytab);
-	 xfree(cred);
-	 *minor_status = code;
+          krb5_gss_release_cred(minor_status, &cred);
+          *minor_status = code;
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
@@ -513,14 +503,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       krb5_timestamp now;
 
       if ((code = krb5_timeofday(context, &now))) {
-	 if (cred->ccache)
-	    (void)krb5_cc_close(context, cred->ccache);
-	 if (cred->keytab)
-	    (void)krb5_kt_close(context, cred->keytab);
-	 if (cred->princ)
-	    krb5_free_principal(context, cred->princ);
-	 xfree(cred);
-	 *minor_status = code;
+          krb5_gss_release_cred(minor_status, &cred);
+          *minor_status = code;
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
@@ -542,13 +526,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
 							   (gss_OID) gss_mech_krb5,
 							   &ret_mechs)))) {
-	   if (cred->ccache)
-	       (void)krb5_cc_close(context, cred->ccache);
-	   if (cred->keytab)
-	       (void)krb5_kt_close(context, cred->keytab);
-	   if (cred->princ)
-	       krb5_free_principal(context, cred->princ);
-	   xfree(cred);
+           krb5_gss_release_cred(minor_status, &cred);
 	   /* *minor_status set above */
 	   krb5_free_context(context);
 	   return(ret);
@@ -560,13 +538,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if (! kg_save_cred_id((gss_cred_id_t) cred)) {
       free(ret_mechs->elements);
       free(ret_mechs);
-      if (cred->ccache)
-	 (void)krb5_cc_close(context, cred->ccache);
-      if (cred->keytab)
-	 (void)krb5_kt_close(context, cred->keytab);
-      if (cred->princ)
-	 krb5_free_principal(context, cred->princ);
-      xfree(cred);
+       krb5_gss_release_cred(minor_status, &cred);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       krb5_free_context(context);
       return(GSS_S_FAILURE);
