@@ -16,6 +16,7 @@ typedef WSABUF sg_buf;
 	 : ((SG)->buf += (N), (SG)->len -= (N), 0))
 
 #define SG_LEN(SG)		((SG)->len + 0)
+#define SG_BUF(SG)		((SG)->buf + 0)
 #define SG_SET(SG, B, N)	((SG)->buf = (char *)(B),(SG)->len = (N))
 
 #define SOCKET_INITIALIZE()     0
@@ -102,6 +103,7 @@ typedef struct iovec sg_buf;
 	    (SG)->iov_len -= (N), 0))
 
 #define SG_LEN(SG)		((SG)->iov_len + 0)
+#define SG_BUF(SG)		((char*)(SG)->iov_base + 0)
 #define SG_SET(SG, B, L)	((SG)->iov_base = (char*)(B), (SG)->iov_len = (L))
 
 /* Some of our own infrastructure where the WinSock stuff was too hairy
