@@ -217,7 +217,7 @@ void SHSTransform(digest, data)
 
 void shsUpdate(shsInfo, buffer, count)
     SHS_INFO *shsInfo;
-    SHS_BYTE *buffer;
+    const SHS_BYTE *buffer;
     int count;
 {
     SHS_LONG tmp;
