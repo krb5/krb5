@@ -97,6 +97,7 @@ int print_skip_tagnum = 0;
 int print_context_shortcut = 0;
 #ifdef KRB5
 int print_krb5_types = 0;
+int print_skip_krb5_tagnum = 0;
 #endif
 
 
@@ -345,7 +346,7 @@ print_tag_type(fp, eid, lev)
 		break;
 	case CLASS_APPL:
 #ifdef KRB5
-		if (print_krb5_types && print_skip_tagnum)
+		if (print_krb5_types && print_skip_krb5_tagnum)
 			do_space = 0;
 		else
 #endif

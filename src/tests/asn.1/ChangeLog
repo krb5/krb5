@@ -1,5 +1,9 @@
 Tue Nov  1 20:25:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* trval.c: Include the tag numbers for the krb5 application tags,
+		since that's something we're going to want to check to
+		make sure they're actually correct.
+
 	* krb5_encode_test.c: 
 	* Makefile.in: 
 	* trval.c: Add the "-t option to krb5_encode_test, which causes it

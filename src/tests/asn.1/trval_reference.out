@@ -1,6 +1,6 @@
 encode_krb5_authenticator:
 
-[Krb5 Autenticator] 
+[APPL 2 Krb5 Autenticator] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -46,7 +46,7 @@ encode_krb5_authenticator:
 
 encode_krb5_authenticator(optionals empty):
 
-[Krb5 Autenticator] 
+[APPL 2 Krb5 Autenticator] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -69,7 +69,7 @@ encode_krb5_authenticator(optionals empty):
 
 encode_krb5_authenticator(optionals NULL):
 
-[Krb5 Autenticator] 
+[APPL 2 Krb5 Autenticator] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -92,7 +92,7 @@ encode_krb5_authenticator(optionals NULL):
 
 encode_krb5_ticket:
 
-[Krb5 Ticket] 
+[APPL 1 Krb5 Ticket] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -127,7 +127,7 @@ encode_krb5_keyblock:
 
 encode_krb5_enc_tkt_part:
 
-[Krb5 Encrypted ticket part] 
+[APPL 3 Krb5 Encrypted ticket part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Bit String] <5>
          00 fe dc ba 98              .....
@@ -193,7 +193,7 @@ encode_krb5_enc_tkt_part:
 
 encode_krb5_enc_tkt_part(optionals NULL):
 
-[Krb5 Encrypted ticket part] 
+[APPL 3 Krb5 Encrypted ticket part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Bit String] <5>
          00 fe dc ba 98              .....
@@ -231,7 +231,7 @@ encode_krb5_enc_tkt_part(optionals NULL):
 
 encode_krb5_enc_kdc_rep_part:
 
-[Krb5 Encrypted TGS-REQ part] 
+[APPL 26 Krb5 Encrypted TGS-REQ part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Sequence/Sequence Of] 
 .  .  .  [0] [Integer] <1>
@@ -295,7 +295,7 @@ encode_krb5_enc_kdc_rep_part:
 
 encode_krb5_enc_kdc_rep_part(optionals NULL):
 
-[Krb5 Encrypted TGS-REQ part] 
+[APPL 26 Krb5 Encrypted TGS-REQ part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Sequence/Sequence Of] 
 .  .  .  [0] [Integer] <1>
@@ -339,7 +339,7 @@ encode_krb5_enc_kdc_rep_part(optionals NULL):
 
 encode_krb5_as_rep:
 
-[Krb5 AS-REP packet] 
+[APPL 11 Krb5 AS-REP packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -367,7 +367,7 @@ encode_krb5_as_rep:
                68 66 74 73 61 69           hftsai
 .  .  .  .  [General string] <5>
                65 78 74 72 61              extra
-.  .  [5] [Krb5 Ticket] 
+.  .  [5] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -403,7 +403,7 @@ encode_krb5_as_rep:
 
 encode_krb5_as_rep(optionals NULL):
 
-[Krb5 AS-REP packet] 
+[APPL 11 Krb5 AS-REP packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -420,7 +420,7 @@ encode_krb5_as_rep(optionals NULL):
                68 66 74 73 61 69           hftsai
 .  .  .  .  [General string] <5>
                65 78 74 72 61              extra
-.  .  [5] [Krb5 Ticket] 
+.  .  [5] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -456,7 +456,7 @@ encode_krb5_as_rep(optionals NULL):
 
 encode_krb5_tgs_rep:
 
-[Krb5 TGS-REP packet] 
+[APPL 13 Krb5 TGS-REP packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -484,7 +484,7 @@ encode_krb5_tgs_rep:
                68 66 74 73 61 69           hftsai
 .  .  .  .  [General string] <5>
                65 78 74 72 61              extra
-.  .  [5] [Krb5 Ticket] 
+.  .  [5] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -520,7 +520,7 @@ encode_krb5_tgs_rep:
 
 encode_krb5_tgs_rep(optionals NULL):
 
-[Krb5 TGS-REP packet] 
+[APPL 13 Krb5 TGS-REP packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -537,7 +537,7 @@ encode_krb5_tgs_rep(optionals NULL):
                68 66 74 73 61 69           hftsai
 .  .  .  .  [General string] <5>
                65 78 74 72 61              extra
-.  .  [5] [Krb5 Ticket] 
+.  .  [5] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -573,7 +573,7 @@ encode_krb5_tgs_rep(optionals NULL):
 
 encode_krb5_ap_req:
 
-[Krb5 AP-REQ packet] 
+[APPL 14 Krb5 AP-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -581,7 +581,7 @@ encode_krb5_ap_req:
          0e                          .
 .  .  [2] [Bit String] <5>
          00 fe dc ba 98              .....
-.  .  [3] [Krb5 Ticket] 
+.  .  [3] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -617,7 +617,7 @@ encode_krb5_ap_req:
 
 encode_krb5_ap_rep:
 
-[Krb5 AP-REP packet] 
+[APPL 15 Krb5 AP-REP packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -635,7 +635,7 @@ encode_krb5_ap_rep:
 
 encode_krb5_ap_rep_enc_part:
 
-[Krb5 Encrypted AP-REP part] 
+[APPL 27 Krb5 Encrypted AP-REP part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Generalized Time] <15>
          31 39 39 34 30 36 31 30     19940610
@@ -652,7 +652,7 @@ encode_krb5_ap_rep_enc_part:
 
 encode_krb5_ap_rep_enc_part(optionals NULL):
 
-[Krb5 Encrypted AP-REP part] 
+[APPL 27 Krb5 Encrypted AP-REP part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Generalized Time] <15>
          31 39 39 34 30 36 31 30     19940610
@@ -662,7 +662,7 @@ encode_krb5_ap_rep_enc_part(optionals NULL):
 
 encode_krb5_as_req:
 
-[Krb5 AS-REQ packet] 
+[APPL 10 Krb5 AS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -738,7 +738,7 @@ encode_krb5_as_req:
                20 74 65 73 74 20 6d 65      test me
                73 73 61 67 65              ssage
 .  .  .  [11] [Sequence/Sequence Of] 
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -762,7 +762,7 @@ encode_krb5_as_req:
                         6b 72 62 41 53 4e 2e 31     krbASN.1
                         20 74 65 73 74 20 6d 65      test me
                         73 73 61 67 65              ssage
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -789,7 +789,7 @@ encode_krb5_as_req:
 
 encode_krb5_as_req(optionals NULL except second_ticket):
 
-[Krb5 AS-REQ packet] 
+[APPL 10 Krb5 AS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -812,7 +812,7 @@ encode_krb5_as_req(optionals NULL except second_ticket):
 .  .  .  .  [Integer] <1>
                01                          .
 .  .  .  [11] [Sequence/Sequence Of] 
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -836,7 +836,7 @@ encode_krb5_as_req(optionals NULL except second_ticket):
                         6b 72 62 41 53 4e 2e 31     krbASN.1
                         20 74 65 73 74 20 6d 65      test me
                         73 73 61 67 65              ssage
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -863,7 +863,7 @@ encode_krb5_as_req(optionals NULL except second_ticket):
 
 encode_krb5_as_req(optionals NULL except server):
 
-[Krb5 AS-REQ packet] 
+[APPL 10 Krb5 AS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -896,7 +896,7 @@ encode_krb5_as_req(optionals NULL except server):
 
 encode_krb5_tgs_req:
 
-[Krb5 TGS-REQ packet] 
+[APPL 12 Krb5 TGS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -972,7 +972,7 @@ encode_krb5_tgs_req:
                20 74 65 73 74 20 6d 65      test me
                73 73 61 67 65              ssage
 .  .  .  [11] [Sequence/Sequence Of] 
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -996,7 +996,7 @@ encode_krb5_tgs_req:
                         6b 72 62 41 53 4e 2e 31     krbASN.1
                         20 74 65 73 74 20 6d 65      test me
                         73 73 61 67 65              ssage
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -1023,7 +1023,7 @@ encode_krb5_tgs_req:
 
 encode_krb5_tgs_req(optionals NULL except second_ticket):
 
-[Krb5 TGS-REQ packet] 
+[APPL 12 Krb5 TGS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -1046,7 +1046,7 @@ encode_krb5_tgs_req(optionals NULL except second_ticket):
 .  .  .  .  [Integer] <1>
                01                          .
 .  .  .  [11] [Sequence/Sequence Of] 
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -1070,7 +1070,7 @@ encode_krb5_tgs_req(optionals NULL except second_ticket):
                         6b 72 62 41 53 4e 2e 31     krbASN.1
                         20 74 65 73 74 20 6d 65      test me
                         73 73 61 67 65              ssage
-.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  .  [0] [Integer] <1>
                      05                          .
@@ -1097,7 +1097,7 @@ encode_krb5_tgs_req(optionals NULL except second_ticket):
 
 encode_krb5_tgs_req(optionals NULL except server):
 
-[Krb5 TGS-REQ packet] 
+[APPL 12 Krb5 TGS-REQ packet] 
 .  [Sequence/Sequence Of] 
 .  .  [1] [Integer] <1>
          05                          .
@@ -1189,7 +1189,7 @@ encode_krb5_kdc_req_body:
          20 74 65 73 74 20 6d 65      test me
          73 73 61 67 65              ssage
 .  [11] [Sequence/Sequence Of] 
-.  .  [Krb5 Ticket] 
+.  .  [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -1213,7 +1213,7 @@ encode_krb5_kdc_req_body:
                   6b 72 62 41 53 4e 2e 31     krbASN.1
                   20 74 65 73 74 20 6d 65      test me
                   73 73 61 67 65              ssage
-.  .  [Krb5 Ticket] 
+.  .  [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -1257,7 +1257,7 @@ encode_krb5_kdc_req_body(optionals NULL except second_ticket):
 .  .  [Integer] <1>
          01                          .
 .  [11] [Sequence/Sequence Of] 
-.  .  [Krb5 Ticket] 
+.  .  [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -1281,7 +1281,7 @@ encode_krb5_kdc_req_body(optionals NULL except second_ticket):
                   6b 72 62 41 53 4e 2e 31     krbASN.1
                   20 74 65 73 74 20 6d 65      test me
                   73 73 61 67 65              ssage
-.  .  [Krb5 Ticket] 
+.  .  [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                05                          .
@@ -1335,7 +1335,7 @@ encode_krb5_kdc_req_body(optionals NULL except server):
 
 encode_krb5_safe:
 
-[Krb5 SAFE packet] 
+[APPL 20 Krb5 SAFE packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -1369,7 +1369,7 @@ encode_krb5_safe:
 
 encode_krb5_safe(optionals NULL):
 
-[Krb5 SAFE packet] 
+[APPL 20 Krb5 SAFE packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -1391,7 +1391,7 @@ encode_krb5_safe(optionals NULL):
 
 encode_krb5_priv:
 
-[Krb5 PRIV packet] 
+[APPL 21 Krb5 PRIV packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -1409,7 +1409,7 @@ encode_krb5_priv:
 
 encode_krb5_enc_priv_part:
 
-[Krb5 Encrypted PRIV part] 
+[APPL 28 Krb5 Encrypted PRIV part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Octet String] <8>
          6b 72 62 35 64 61 74 61     krb5data
@@ -1433,7 +1433,7 @@ encode_krb5_enc_priv_part:
 
 encode_krb5_enc_priv_part(optionals NULL):
 
-[Krb5 Encrypted PRIV part] 
+[APPL 28 Krb5 Encrypted PRIV part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Octet String] <8>
          6b 72 62 35 64 61 74 61     krb5data
@@ -1445,14 +1445,14 @@ encode_krb5_enc_priv_part(optionals NULL):
 
 encode_krb5_cred:
 
-[Krb5 CRED packet] 
+[APPL 22 Krb5 CRED packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
 .  .  [1] [Integer] <1>
          16                          .
 .  .  [2] [Sequence/Sequence Of] 
-.  .  .  [Krb5 Ticket] 
+.  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  [0] [Integer] <1>
                   05                          .
@@ -1476,7 +1476,7 @@ encode_krb5_cred:
                      6b 72 62 41 53 4e 2e 31     krbASN.1
                      20 74 65 73 74 20 6d 65      test me
                      73 73 61 67 65              ssage
-.  .  .  [Krb5 Ticket] 
+.  .  .  [APPL 1 Krb5 Ticket] 
 .  .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  .  [0] [Integer] <1>
                   05                          .
@@ -1512,7 +1512,7 @@ encode_krb5_cred:
 
 encode_krb5_enc_cred_part:
 
-[Krb5 Encrypted CRED part] 
+[APPL 29 Krb5 Encrypted CRED part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Sequence/Sequence Of] 
 .  .  .  [Sequence/Sequence Of] 
@@ -1641,7 +1641,7 @@ encode_krb5_enc_cred_part:
 
 encode_krb5_enc_cred_part(optionals NULL):
 
-[Krb5 Encrypted CRED part] 
+[APPL 29 Krb5 Encrypted CRED part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Sequence/Sequence Of] 
 .  .  .  [Sequence/Sequence Of] 
@@ -1706,7 +1706,7 @@ encode_krb5_enc_cred_part(optionals NULL):
 
 encode_krb5_error:
 
-[Krb5 ERROR packet] 
+[APPL 30 Krb5 ERROR packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
@@ -1753,7 +1753,7 @@ encode_krb5_error:
 
 encode_krb5_error(optionals NULL):
 
-[Krb5 ERROR packet] 
+[APPL 30 Krb5 ERROR packet] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          05                          .
