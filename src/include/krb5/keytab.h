@@ -30,7 +30,7 @@ typedef struct krb5_keytab_entry_st {
 
 
 typedef struct _krb5_kt {
-	struct krb5_kt_ops *ops;
+	struct _krb5_kt_ops *ops;
 	krb5_pointer data;
 } *krb5_keytab;
 
@@ -43,7 +43,7 @@ typedef struct _krb5_kt_ops {
 	krb5_error_code (*get_name) PROTOTYPE((krb5_keytab,
 					       char *,
 					       int));
-	krb5_error_code (*close) PROTOTYPE((krb5_keytab *));
+	krb5_error_code (*close) PROTOTYPE((krb5_keytab));
 	krb5_error_code (*get) PROTOTYPE((krb5_keytab,
 					  krb5_principal,
 					  krb5_kvno,
