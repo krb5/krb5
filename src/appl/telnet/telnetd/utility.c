@@ -550,7 +550,7 @@ printsub(direction, pointer, length)
     unsigned char	*pointer;	/* where suboption data sits */
     int			length;		/* length of suboption data */
 {
-    register int i;
+    register int i = 0;
     char buf[512];
 
         if (!(diagnostic & TD_OPTIONS))
