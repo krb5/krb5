@@ -369,7 +369,7 @@ typedef struct _krb5_db_entry {
     krb5_int32 expansion[8];
 } krb5_db_entry_OLD;
 
-#endif	/* OLD_AND_KRUFTY */
+#endif	/* KRB5_OLD_AND_KRUFTY */
 
 /* This is now a structure that is private to the database backend. */
 #ifdef notdef

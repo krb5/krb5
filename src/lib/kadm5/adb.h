@@ -1,6 +1,6 @@
 /*
- * Data Types for policys, and principal information that
- * exist in the respective databases.
+ * Data Types for policy and principal information that
+ * exists in the respective databases.
  *
  * $Header$
  *

@@ -78,7 +78,7 @@ osa_adb_ret_t osa_adb_close_policy(osa_adb_princ_t db)
  *
  * Arguments:
  *	entry		(input) pointer to the entry to be added
- * 	<return value>	OSA_ADB_OK on sucsess, else error code.
+ * 	<return value>	OSA_ADB_OK on success, else error code.
  *
  * Requires:
  *	entry have a valid name.
@@ -153,7 +153,7 @@ error:
  * Arguments:
  *	db		(input) database handle
  *	name		(input) name of policy
- * 	<return value>	OSA_ADB_OK on sucsess, or error code.
+ * 	<return value>	OSA_ADB_OK on success, or error code.
  *
  * Requires:
  *	db being valid.
@@ -211,7 +211,7 @@ error:
  *	db		(input) db handle
  *	name		(input) name of policy
  *	entry		(output) policy entry
- * 	<return value>	0 on sucsess, error code on failure.
+ * 	<return value>	0 on success, error code on failure.
  *
  * Requires:
  * Effects:
@@ -277,7 +277,7 @@ error:
  * Arguments:
  *	db		(input) db handle
  *	entry		(input) policy entry
- * 	<return value>	0 on sucsess error code on failure.
+ * 	<return value>	0 on success error code on failure.
  *
  * Requires:
  *	[requires]
@@ -350,7 +350,7 @@ error:
  *	db		(input) db handle
  *	func		(input) fucntion pointer to call
  *	data		opaque data type
- * 	<return value>	0 on sucsess error code on failure
+ * 	<return value>	0 on success error code on failure
  *
  * Requires:
  * Effects:

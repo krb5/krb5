@@ -29,7 +29,7 @@ static char *rcsid = "$Header$";
  *	entry	(input) The policy entry to be written out to the DB.
  *	mask	(input)	Specifies which fields in entry are to ge written out
  *			and which get default values.
- *	<return value> 0 if sucsessfull otherwise an error code is returned.
+ *	<return value> 0 if successful otherwise an error code is returned.
  *
  * Requires:
  *	Entry must be a valid principal entry, and mask have a valid value.
@@ -62,14 +62,14 @@ kadm5_create_policy(void *server_handle,
  *	entry	(input) The policy entry to be written out to the DB.
  *	mask	(input)	Specifies which fields in entry are to ge written out
  *			and which get default values.
- *	<return value> 0 if sucsessfull otherwise an error code is returned.
+ *	<return value> 0 if successful otherwise an error code is returned.
  *
  * Requires:
  *	Entry must be a valid principal entry, and mask have a valid value.
  * 
  * Effects:
  *	Writes the data to the database, and does a database sync if
- *	sucsessfull.
+ *	successful.
  *
  */
 

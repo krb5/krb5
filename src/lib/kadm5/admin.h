@@ -34,7 +34,7 @@ typedef long		kadm5_ret_t;
 	(error_message(CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT))
 
 /*
- * Succsessfull return code
+ * Successful return code
  */
 #define KADM5_OK	0
 
@@ -476,7 +476,7 @@ enum	ovsec_kadm_saltmod  { OVSEC_KADM_MOD_KEEP, OVSEC_KADM_MOD_V4, OVSEC_KADM_MO
 	((char *) error_message(CHPASS_UTIL_NEW_PASSWORD_AGAIN_PROMPT))
 
 /*
- * Succsessfull return code
+ * Successful return code
  */
 #define OVSEC_KADM_OK	0
  

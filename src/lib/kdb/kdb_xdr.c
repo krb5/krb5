@@ -338,7 +338,7 @@ krb5_encode_princ_contents(context, content, entry)
 
     /* 
      * Now we go through entry again, this time copying data 
-     * These first entries are always saved regaurdless of version
+     * These first entries are always saved regardless of version
      */
     nextloc = content->data;
 
