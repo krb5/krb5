@@ -826,7 +826,11 @@ int try_convert524(k5)
     if (!got_k4 || !got_k5)
 	return 0;
 
-    increds.client = 0;
+    memset((char *) &increds, 0, sizeof(increds));
+    /*
+      From this point on, we can goto cleanup because increds is
+      initialized.
+    */
 
     /* or do this directly with krb524_convert_creds_kdc */
     krb524_init_ets(k5->ctx);
@@ -843,7 +847,6 @@ int try_convert524(k5)
 	goto cleanup;
     }
 
-    memset((char *) &increds, 0, sizeof(increds));
     increds.client = k5->me;
     increds.server = kpcserver;
     increds.times.endtime = 0;
@@ -887,10 +890,12 @@ int try_convert524(k5)
 
  cleanup:
     memset(&v4creds, 0, sizeof(v4creds));
-    krb5_free_creds(k5->ctx, v5creds);
+    if (v5creds)
+        krb5_free_creds(k5->ctx, v5creds);
     increds.client = 0;
     krb5_free_cred_contents(k5->ctx, &increds);
-    krb5_free_principal(k5->ctx, kpcserver);
+    if (kpcserver)
+        krb5_free_principal(k5->ctx, kpcserver);
     return !(code || icode);
 }
 #endif /* HAVE_KRB524 */
