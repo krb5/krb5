@@ -78,6 +78,7 @@ int reserved;
     krb5_principal client = NULL, server = NULL;
     krb5_error *err_ret = NULL;
     register char *cp;
+    krb5_auth_context * auth_context;
 #endif
 #endif
 
@@ -185,16 +186,14 @@ int reserved;
 	goto krb5error;
     }
 
-    retval = krb5_sendauth(context, (krb5_pointer) &s, "KPOPV1.0", 
-			   client, server,
+    retval = krb5_sendauth(context, &auth_context, (krb5_pointer) &s, 
+			   "KPOPV1.0", client, server,
 			   AP_OPTS_MUTUAL_REQUIRED,
-			   0,		/* no checksum */
+			   NULL,	/* no data to checksum */
 			   0,		/* no creds, use ccache instead */
 			   ccdef,
-			   0,		/* don't need seq # */
-			   0,		/* don't need a subsession key */
-			   &err_ret,
-			   0, NULL);	/* don't need reply */
+			   &err_ret, 0,
+			   NULL);	/* don't need reply */
     krb5_free_principal(context, server);
     if (retval) {
 	if (err_ret && err_ret->text.length) {
@@ -487,7 +486,7 @@ void *
 xmalloc (size)
      int size;
 {
-  void *result = malloc (size);
+  void *result = (void *)malloc (size);
   if (!result)
     fatal ("virtual memory exhausted", 0);
   return result;
