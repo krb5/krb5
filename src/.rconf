@@ -38,11 +38,9 @@ ignore *.old
 ignore CFILES
 ignore mdebug
 ignore API.CHANGES
-ignore util
 ignore *fookrb5
 ignore MAKEFILES
 ignore STDC-grep
 ignore IMAKEFILES
-ignore config-files
 ignore dtree.out
 ignore RCS.locked
