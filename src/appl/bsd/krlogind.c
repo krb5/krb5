@@ -168,6 +168,10 @@ struct winsize {
 };
 #endif /* NO_WINSIZE */
      
+#ifndef roundup
+#define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
+#endif
+
 #ifdef KERBEROS
      
 #include <krb5/krb5.h>

@@ -1,5 +1,7 @@
 Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
+	* krlogind.c, krlogin.c, krcp.c: define roundup if needed.
+
 	* Makefile.in: add LIBOBJS, dependency for getdtablesize.o.
 	* getdtablesize.c: new file.
 	* configure.in: build getdtablesize.c if needed.

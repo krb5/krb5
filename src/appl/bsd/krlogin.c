@@ -89,6 +89,10 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 #include <netdb.h>
 #include <string.h>
      
+#ifndef roundup
+#define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
+#endif
+
 #ifdef KERBEROS
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>

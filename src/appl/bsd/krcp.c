@@ -60,6 +60,10 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <errno.h>
 #include <string.h>
      
+#ifndef roundup
+#define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
+#endif
+
 #ifdef KERBEROS
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
