@@ -358,6 +358,9 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
 		paddr(addr));
 	return -1;
     }
+    if (setreuseaddr(sock, 1) < 0)
+	com_err(data->prog, errno,
+		"Cannot enable SO_REUSEADDR on fd %d", sock);
     if (bind(sock, addr, socklen(addr)) == -1) {
 	com_err(data->prog, errno,
 		"Cannot bind TCP server socket on %s", paddr(addr));
@@ -434,15 +437,11 @@ setup_tcp_listener_ports(struct socksetup *data)
 #ifdef IPV6_V6ONLY
 	    if (setv6only(s6, 0))
 		com_err(data->prog, errno, "setsockopt(IPV6_V6ONLY,0) failed");
+	    else
+		com_err(data->prog, 0, "setsockopt(IPV6_V6ONLY,0) worked");
+#else
+	    krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
 #endif
-
-	    if (setreuseaddr(s6, 0) < 0) {
-		com_err(data->prog, errno,
-			"disabling SO_REUSEADDR on IPv6 TCP socket for port %d",
-			port);
-		close(s6);
-		return -1;
-	    }
 
 	    s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
 #endif /* KRB5_USE_INET6 */
@@ -803,6 +802,10 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 	    strcpy(p, tmpbuf);
 	}
     }
+#if 0
+    krb5_klog_syslog(LOG_INFO, "accepted TCP connection on socket %d from %s",
+		     s, newconn->u.tcp.addrbuf);
+#endif
 
     newconn->u.tcp.addr_s = addr_s;
     newconn->u.tcp.addrlen = addrlen;

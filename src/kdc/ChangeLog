@@ -1,3 +1,10 @@
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_a_tcp_listener): Call setreuseaddr before
+	calling bind.
+	(setup_tcp_listener_ports): Don't call setreuseaddr.  Log info
+	about socket option IPV6_V6ONLY in unsupported and success cases.
+
 2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* kerberos_v4.c (compat_decrypt_key): As below.
