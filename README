@@ -122,6 +122,12 @@ Notes, Major Changes, and Known Bugs
   The IPv6 support at this time mostly consists of including the
   addresses in credentials.
 
+* A protocol change has been made to the "rcmd" suite (rlogin, rsh,
+  rcp) to address several security problems described in Kris
+  Hildrum's paper presented at NDSS 2000.  New command-line options
+  have been added to control the selection of protocol, since the
+  revised protocol is not compatible with the old one.
+
 * A security problem in login.krb5 has been fixed.  This problem was
   only present if the krb4 compatibility code was not compiled in.
 

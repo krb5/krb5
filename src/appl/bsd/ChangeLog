@@ -1,3 +1,8 @@
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* rcp.M, rsh.M, rlogin.M: Add description of new -PO, -PN
+	options.
+
 2000-06-19  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c (recvauth): Call krb5_recvauth_version() rather than
