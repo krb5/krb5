@@ -1,3 +1,7 @@
+Sat Oct  7 08:02:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sample.exp: Make changes to deal with NetBSD expect. Similar to
+		the AIX fix in gssapi.exp
 
 Thu Aug 31 12:02:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gssapi.exp - Repeat tests with -v2 switch.

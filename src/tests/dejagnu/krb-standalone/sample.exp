@@ -120,12 +120,17 @@ proc test_sclient { msg } {
      }
 
     expect {
-	"You are krbtest/admin@KRBTEST.COM" {
+	"You are krbtest/admin@KRBTEST.COM\r" {
 		verbose "received valid sample message"}
 	eof {
 		fail $msg 
 		return 0
 	    }
+    }
+    # This last expect seems useless, but without it the test hangs on
+    # NETBSD.
+    expect {
+        "\r" { }
     }
 
     if ![check_exit_status "ssample"] {
