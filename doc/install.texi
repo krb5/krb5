@@ -20,7 +20,7 @@
 This file documents how to build and install the Kerberos V5
 distribution.
 
-Copyright (C) 1995 Massachusetts Institute of Technology.
+Copyright (C) 1995, 1996 Massachusetts Institute of Technology.
 
 All Rights Reserved.
 
@@ -166,7 +166,7 @@ Shared Library Support
 
 * Shared Library Theory::       
 * NetBSD Shared Library Support::  
-* AIX 3.2.5 Shared Library Support::  
+* AIX Shared Library Support::  
 * Solaris 5.3 Shared Library Support::  
 * Alpha OSF/1 Shared Library Support::  
 
@@ -187,6 +187,7 @@ Installation
 * Installing the KDC::          
 * Migrating from V4 to V5 Kerberos::  
 * A Sample Application::        
+* Installing Kerberos Applications::  
 * Common Kerberos Service Names::  
 
 Installation on any Machine
@@ -222,6 +223,18 @@ A Sample Application
 
 * Installing the Sample Application::  
 * Testing the Sample Server::   
+
+Installing Kerberos Applications
+
+* Levels of Security::          
+* Preparing a Workstation for Kerberos Application Servers::  
+* BSD Utilities::               
+* Telnet and FTP::              
+
+BSD Utilities
+
+* Checksums::                   Checksum facility for dealing with active attacks.
+* BSD Utility Configuration Example::  Sample @samp{inetd.conf} entries for BSD utilities.
 @end menu
 
 @node Introduction, How Kerberos Works, Top, Top
@@ -814,8 +827,8 @@ variables when using the programs. Except where noted, multiple versions
 of the libraries may be installed on the same system and continue to
 work.
 
-Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, Solaris
-5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
+Solaris 5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -827,7 +840,7 @@ one in the tree or you will be missing references.
 @menu
 * Shared Library Theory::       
 * NetBSD Shared Library Support::  
-* AIX 3.2.5 Shared Library Support::  
+* AIX Shared Library Support::  
 * Solaris 5.3 Shared Library Support::  
 * Alpha OSF/1 Shared Library Support::  
 @end menu
@@ -848,9 +861,16 @@ shared library (i.e. libfoo.so.0.1). At link time, one would reference
 libfoo.so, but when one executes the program, the shared library loader
 would then look for the shared library with the alternate name.  Hence
 multiple versions of shared libraries may be supported relatively
-easily. @footnote{Under AIX 3.2.5 for the RS/6000 it is not possible to
-append the version number of the shared library to use and only version is
-allowed at this time.}
+easily. @footnote{Under AIX for the RISC/6000, multiple versions of
+shared libraries are supported by combining two or more versions of the
+shared library into one file.  The Kerberos build procedure produces
+shared libraries with version numbers in the internal module names, so
+that the shared libraries are compatible with this scheme.
+Unfortunately, combining two shared libraries requires internal
+knowledge of the AIX shared library system beyond the scope of this
+document.  Practicallyspeaking, only one version of AIX shared libraries
+can be supported on a system, unless the multi-version library is
+constructed by a programmer familiar with the AIX internals.}
 
 All operating systems (that we have seen) provide a means for programs
 to specify the location of shared libraries. On different operating
@@ -860,7 +880,7 @@ libraries are dependent on other shared libraries} The build process
 will hardwire a path to the installed destination.
 
 
-@node NetBSD Shared Library Support, AIX 3.2.5 Shared Library Support, Shared Library Theory, Shared Library Support
+@node NetBSD Shared Library Support, AIX Shared Library Support, Shared Library Theory, Shared Library Support
 @subsection NetBSD Shared Library Support
 
 Shared library support has been tested under NetBSD 1.0A using 
@@ -870,16 +890,30 @@ linking with them. Unless the library is placed in a standard location
 to search for libraries, this may make it difficult for developers to
 work with the shared libraries.
 
-@node AIX 3.2.5 Shared Library Support, Solaris 5.3 Shared Library Support, NetBSD Shared Library Support, Shared Library Support
-@subsection AIX 3.2.5 Shared Library Support
+@node AIX Shared Library Support, Solaris 5.3 Shared Library Support, NetBSD Shared Library Support, Shared Library Support
+@subsection AIX  Shared Library Support
 
-AIX 3.2.5 does not have a very good mechanism for dealing with version
-numbering in the shared libraries. About all it can detect is if the
-version number is different but we cannot currently specify 
-a shared library name which is version specific. This means that one
-might have to have different install paths with different releases.
+        AIX specifies shared library versions by combining multiple
+versions into a single file.  Because of the complexity of this process,
+no automatic procedure for building multi-versioned shared libraries is
+provided.Therefore, supporting multiple versions of the Kerberos shared
+libraries under AIX will require significant work on the part of a
+programmer famiiliar with AIX internals.  
 
-@node Solaris 5.3 Shared Library Support, Alpha OSF/1 Shared Library Support, AIX 3.2.5 Shared Library Support, Shared Library Support
+        AIX allows a single library to be used both as a static library
+and as a shared library.  For this reason, the @samp{--enable-shared}
+switch to configure builds only shared libraries.  On other operating
+systems, both shared and static libraries are built when this switch is
+specified.  As with all other operating systems, only non-shared static
+libraries are built when @samp{--enable-shared} is not specified.
+
+        The AIX 3.2.5 linker dumps core trying to build a shared
+@samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
+compiler works fine.  In addition, the AIX 4.1 linker is able to build a
+shared @samp{libkrb5.a} when GNU C is used.
+
+
+@node Solaris 5.3 Shared Library Support, Alpha OSF/1 Shared Library Support, AIX Shared Library Support, Shared Library Support
 @subsection Solaris 5.3 Shared Library Support
 
 Shared library support only works when using the Sunsoft C compiler. We
@@ -1120,6 +1154,7 @@ client machines, and one or more application machines.
 * Installing the KDC::          
 * Migrating from V4 to V5 Kerberos::  
 * A Sample Application::        
+* Installing Kerberos Applications::  
 * Common Kerberos Service Names::  
 @end menu
 
@@ -1570,7 +1605,7 @@ there was some sort of error.
 
 @b{To be written.}
 
-@node A Sample Application, Common Kerberos Service Names, Migrating from V4 to V5 Kerberos, Installation
+@node A Sample Application, Installing Kerberos Applications, Migrating from V4 to V5 Kerberos, Installation
 @section A Sample Application
 
 This release of Kerberos comes with a sample application server and a
@@ -1753,7 +1788,396 @@ reply len 29, contents:
 You are [USERNAME]@@[REALMNAME]
 @end example
 
-@node Common Kerberos Service Names,  , A Sample Application, Installation
+@node  Installing Kerberos Applications, Common Kerberos Service Names, A Sample Application, Installation
+@section Installing Kerberos Applications
+
+        In addition to the sample application, Kerberos comes with
+several servers that can be installed on workstations to provide secure
+network services such as FTP, Telnet, and Rlogin.  This section
+describes these services and how to install them.  First, a general
+procedure is outlined for configuring a workstation to run Kerberos
+application servers.  Then, details of the particular configuration
+options required by each server are presented.
+
+
+@menu
+* Levels of Security::          
+* Preparing a Workstation for Kerberos Application Servers::  
+* BSD Utilities::               
+* Telnet and FTP::              
+@end menu
+
+@node Levels of Security, Preparing a Workstation for Kerberos Application Servers, Installing Kerberos Applications, Installing Kerberos Applications
+@subsection Levels of Security
+
+        Before installing Kerberized servers, it is a good idea to
+decide on a security policy for your workstation.  While developing a
+comprehensive security policy is beyond the scope of these instructions,
+there are several interactions between Kerberos servers and non-Kerberos
+servers, as well as different modes in which Kerberos servers can run
+that should be considered.  In general, there are three levels of
+connections:
+
+@enumerate
+
+@item
+Encrypted Kerberos connections are the most secure services provided by
+the Kerberos environment.  Only encrypted services provide
+confidentiality---encryption is required to make sure a passive
+eavesdropper does not collect sensitive data, such as passwords, typed
+over connections.  Besides providing confidentiality, encryption
+provides protection against active attacks.  Without encryption or some
+other form of integrity, an attacker may be able to insert commands or
+change data in an authenticated session.l
+
+
+@item
+The next level of security is Kerberos-authenticated services without
+encryption.  Without encryption, there is no confidentiality, and some
+active attacks are possible.  However, unencrypted services are faster
+and are available commercially outside the United States.  In addition,
+the window of exposure to attack is generally limited to the lifetime of
+a session---it is difficult to start a new session if a Kerberos
+authentication exchange must take place at the beginning of every
+session.
+
+@item
+Passworded services provide the next lower level of security.
+Unfortunately, it is all-to-easy for a passive attacker to use software
+such as a packet sniffer to find passwords traveling over a network.
+Additionally, once an attacker knows a password, they can start
+additional sessions at future times until the password is changed from a
+secure location.  Despite the disadvantages of password-based network
+services, there are some common reasons for enabling them.  First, most
+clients only support password-based services; not everyone has Kerberos
+or other cryptographically-secure network services.  Second, in some
+environments, where the network is secure, passwords may be a reasonable
+solution.  Also, particularly on public-access systems, it is common to
+enable password-based services for normal users, while using more-secure
+services such as Kerberos for root logins by administrators.
+
+@item
+The least secure common category of services are trust or host-based
+services.These services use an IP address or client-supplied assertion
+to provide authentication.  Examples of host-based services include
+@samp{rlogin}, @samp{rsh}, and the @samp{on} or @samp{rexd} service.  It
+is generally sufficient to know that a user exists on a target system,
+and to know that a host-based or trust-based service is enabled in order
+to exploit the service.  Whenever possible, these services should be
+disabled; there are few situations in which an a security policy is both
+compatible with Kerberos and host-based services.
+@end enumerate
+
+        Next, decide whether Kerberos4 compatibility is necessary.
+Unencrypted Kerberos4 services suffer from all the problems of
+unencrypted Kerberos V5 services: lack of confidentiality and
+susceptibility to active attack.  In addition, the lack of a replay cache
+in Kerberos4makes these active attacks much easier.  Also, design bugs
+in the Kerberos4 BSD utilities such as @samp{rlogin}, @samp{rsh} and
+@samp{rcp} cause the availability of an unencrypted service to
+significantly decrease the security of a system, even if only the
+encrypted service is ever used.  For example, a system that runs both
+encrypted and unencrypted Kerberos4 @samp{rlogin} servers is less secure
+than a system only running the encrypted service, even if users only
+ever connect to the encrypted service.
+
+        Therefore, if Kerberos4 interoperability is desired or required,
+try to avoid running unencrypted Kerberos4 services wherever possible.
+In particular, only enable encrypted @samp{rlogin} if at all possible.
+Naturally, some environments will require additional Kerberos4
+functionality, like @samp{rsh}.The Kerberos V5 versions of these services,
+with Kerberos4 interoperability enabled are not any weaker than their
+Kerberos4 counterparts.  So, if the existing Kerberos4 security policy
+allows these services, then enabling them under the Kerberos V5 security
+policy should not be a problem.
+
+        Finally, the issue of compatibility with older Kerberos V5 clients
+must be considered.  For the most part, this compatibility is automatic,
+and has few security implications. The major exception to this is the
+BSD utilities.  Until Kerberos V5 Beta6, these utilities inherited a few
+design defects from the Kerberos V4 BSD utilities.  In particular, the
+presence of an unencrypted service that was never used adversely effected
+the security of an encrypted service.  The solution that was adopted
+preserves compatibility with Kerberos V5 Beta5 clients.  Unfortunately,
+older clients are incompatible with this scheme.  If interoperability
+with older clients is necessary, then the new scheme for checksums can
+be disabled on the server.  This results in slightly less secure
+operation, but allows for compatibility with the older clients.
+Alternatively, sites wishing to enable all security features may wish to
+disable compatibility with Kerberos V5 Beta5 BSD utilities.
+@xref{Checksums}, for full details.
+
+        In conclusion, as you prepare to install Kerberos clients, you should have answers to  the following questions:
+
+@enumerate
+
+@item
+What levels of services are appropriate for your security policy:
+encrypted services, authenticated but not encrypted services,
+password-based services, or host-based services?
+
+@item
+Do you wish to enable Kerberos V4 compatibility?  If so, do you need to
+enable unencrypted services?
+
+@item
+Do you need compatibility with Kerberos V5 clients before Beta5
+(released in May, 1995)?  Do you wish to disable compatibility with
+Beta5 clients for slightly enhanced security?
+@end enumerate
+
+
+
+@node Preparing a Workstation for Kerberos Application Servers, BSD Utilities, Levels of Security, Installing Kerberos Applications
+@subsection Preparing a Workstation for Kerberos Application Servers
+
+
+        The following procedure is very similar to the installation
+procedure for the sample Kerberos server.  @xref{Installing
+the Sample Application}.  However, instead of using the sample service,
+this configuration is designed to set up host-based services.
+
+The following description assumes that you are installing @samp{sserver}
+on the machine @samp{jimi.mit.edu}.  Repeat these steps for each
+workstation that will be running host-based servers.  Note that it is
+not necessary to run these procedures on client machines--machines used
+only to connect to secure network services, but that do not run any
+servers of their own.  Here's the process, step by step:
+
+@enumerate
+
+@item 
+ Login as root or @samp{su} to root on the Kerberos server machine.
+Use the @samp{kdb5_edit} program to create a service entry for
+@code{host} in the Kerberos database:
+
+@example
+# @b{[ADMIN_DIR]/kdb5_edit}
+kdb5_edit: @b{add_random_key host/jimi.mit.edu}         
+kdb5_edit: @b{quit}
+@end example
+
+(Note: @samp{add_random_key} may be abbreviated as @samp{ark}.)
+
+@item
+ Use @samp{kdb5_edit} to create a @file{srvtab} file
+for @samp{sserver}'s host machine:
+
+@example
+# @b{[ADMIN_DIR]/kdb5_edit}
+kdb5_edit: @b{extract_srvtab jimi.mit.edu host}
+'host/jimi.mit.edu@@ATHENA.MIT.EDU' added to keytab 'WRFILE:jimi.mit.edu-new-srvtab'
+kdb5_edit: @b{quit}
+@end example
+
+(Note: @samp{extract_srvtab} may be abbreviated as @samp{xst}.  Also,
+additional services can be listed after @samp{host} on the
+@samp{extract_srvtab} line; for example if the host jimi also runs the
+sample server, the @samp{sample} service might have been listed after
+host.)
+
+Transfer the @file{jimi.mit.edu-new-srvtab} file to @samp{jimi.mit.edu}
+and install it as @file{/etc/v5srvtab}.
+
+@b{WARNING}: Note that this file is equivalent to the service's password and
+should be treated with care.  For example, it could be transferred by
+removable media, but should not be sent over an open network in the
+clear.  This file should be installed such that only the root user can read
+it.
+
+@item
+Make sure that the @samp{/etc/services} file has been updated to include
+Kerberos services.  In particular, look for @samp{klogin},
+@samp{eklogin}, and @samp{kshell}.
+
+@item
+For each server you plan to run, add a line to @file{/etc/inetd.conf}.
+The following sections will give details on what this line should look
+like for each Kerberos application service.
+
+@item
+Consider removing non-Kerberized services like @samp{rlogin},
+@samp{rsh}, @samp{rexd}, and others, in accordance with the security policy you decided on in the last section.
+
+@item
+ Restart @samp{inetd}.  On most systems, this is done by sending the current @samp{inetd} process
+a hangup signal:
+
+@example
+# @b{kill -HUP} @i{process_id_number}
+@end example
+
+@item
+Try using the Kerberos applications to connect to the host.
+
+@end enumerate
+
+@node BSD Utilities, Telnet and FTP, Preparing a Workstation for Kerberos Application Servers, Installing Kerberos Applications
+@subsection BSD Utilities
+
+        This section describes installing servers for the BSD utilities:
+@samp{kshd} and @samp{klogind}.The @samp{klogind} server implementsthe
+protocol used by the Kerberized @samp{rlogin} client.  The @samp{kshd}
+server implements the protocol used by the @samp{rsh} and @samp{rcp}
+clients.
+
+        These daemons take a common set of options to enable support for
+different versions of Kerberos.  The @samp{-5} option enables Kerberos
+V5 support, and the @samp{-4} option enables Kerberos V4 support.  At
+least one of these options must be supplied or the server will refuse
+all connections.  Both options can be supplied if compatibility with
+both versions of Kerberos is desired.
+
+        Both the @samp{klogind} and @samp{kshd} take an @samp{-e} option
+to control encryption; because of the design of the servers, it works
+slightly differently.  The Kerberos login service listens on two
+different ports, one for encrypted connections, and one for unencrypted
+connections.  Because @samp{klogind} is started by @samp{inetd}, it
+needs to know whether it is servicing an encrypted or unencrypted
+connection.  Thus, the @samp{-e} option tells @samp{klogind} that it is
+listening to the encrypted port.  Typically, systems that allow both
+encrypted and unencrypted logins have two lines in @file{inetd.conf},
+one for the @samp{klogin} service and one for the @samp{eklogin}
+service.  The line for the @samp{eklogin} service uses the @samp{-e}
+option, while the line for the @samp{klogin} service does not. Systems
+only supporting encrypted logins simply have the @samp{eklogin} line.
+
+        On the other hand, @samp{kshd} listens to encrypted and
+unencrypted requests on the same port; information from the client
+identifies the connection's encryption status.  So, @samp{kshd}
+interprets the @samp{-e} option to mean that encryption is required.  If
+this option is specified, unencrypted connections are dropped.  Thus,
+specifying @samp{-e} to @samp{kshd} is like only having a line for
+@samp{eklogin}.
+
+@menu
+* Checksums::                   Checksum facility for dealing with active attacks.
+* BSD Utility Configuration Example::  Sample @file{inetd.conf} entries for BSD utilities.
+@end menu
+
+@node Checksums, BSD Utility Configuration Example, BSD Utilities, BSD Utilities
+@subsubsection Checksums
+
+  Under previous versions of Kerberos, it was possible for an active
+attacker to change certain information in the initial authentication
+exchange without this change being detected.  Starting with Kerberos V5,
+Beta6, this information is protected by a checksum passed in the
+Kerberos authenticator.  Ideally, the server could detect the presence
+of this checksum and use it if it were present.  This way,
+administrators could be sure to use new clients that produced the
+checksum, while users who were not as concerned about security could use
+a wider range of clients.
+
+        This is how the checksum feature works by default.
+Unfortunately, clients previous to Kerberos V5, Beta5 used the checksum
+field to incorporate semi-random data into the Kerberos authentication
+exchange.  It is impossible to distinguish these bogus checksums from
+checksums that have been produced by modern clients, but modified by an
+active attacker.  Thus, the checksum feature is incompatible with
+previous releases of Kerberos V5. Three modes of operation are provided
+to meet the configuration needs of different sites:
+
+@enumerate
+
+@item
+The @samp{-c} option to both @samp{kshd} and @samp{klogind} requires
+that checksums be present and valid.  This only works with clients more
+recent than Kerberos V5, Beta6.  An error will be given when an older
+client tries to connect.  This option is incompatible with Kerberos V4,
+Kerberos V4 clients do not include a checksum.  If this option is used
+in conjunction with the @samp{-4} option for Kerberos V4 compatibility,
+a warning about the configuration error will be logged on each
+connection.
+
+@item
+If no checksum-related option is specified, then checksums will be
+validated if they are present, but not required.This is compatible with
+Kerberos V4 and Kerberos V5 clients as early as Kerberos V5, Beta5.
+
+@item
+If the @samp{-i} option is provided, then checksums are ignored, even if
+present.  This option is required to maintain compatibility with clients
+older than Kerberos V5 Beta5.  Site should upgrade to newer clients so
+this option is not required.
+
+@end enumerate
+
+@node BSD Utility Configuration Example,  , Checksums, BSD Utilities
+@subsubsection BSD Utility Configuration Example
+
+        This section includes sample entries for @file{/etc/inetd.conf}.
+Sample configuration are presented for three systems.  Note that while
+the examples stretch over multiple lines, an entry for a single service
+should be placed on only one line in @file{inetd.conf}.  Also, not all
+systems have all of the columns shown in the example.  @xref{Installing
+the Sample Application}, for details on adding services to
+@file{inetd.conf}.
+
+        The first system enables all security features.  Only Kerberos
+V5 encrypted connections are enabled, and checksums are required.
+@example
+eklogin         stream   tcp   nowait     root
+    [K_SERVER]/klogind klogind -5 -e -c
+kshell          stream  tcp     nowait  root
+    [K_SERVER]/kshd kshd -5 -e -c
+@end example
+
+
+        The second system enables encrypted services for both Kerberos
+V5 and Kerberos V4.  Checksums are not required, but since no V5 clients
+earlier than Beta5 are used, they are not ignored.
+
+@example
+eklogin         stream   tcp   nowait     root
+    [K_SERVER]/klogind klogind -5 -4 -e 
+kshell          stream  tcp     nowait  root
+    [K_SERVER]/kshd kshd -5 -4 -e 
+@end example
+
+
+        The final example has both encrypted and unencrypted services
+enabled for both Kerberos V5 and Kerberos V4.  Checksums are disabled to
+preserve compatability with older V5 clients.
+
+@example
+eklogin         stream   tcp   nowait     root
+    [K_SERVER]/klogind klogind -5 -4  -i -e
+klogin         stream   tcp   nowait     root
+    [K_SERVER]/klogind klogind -5 -4  -i 
+kshell          stream  tcp     nowait  root
+    [K_SERVER]/kshd kshd -5 -4 -i
+@end example
+
+@node Telnet and FTP,  , BSD Utilities, Installing Kerberos Applications
+@subsection Telnet and FTP
+
+        The following are example entries for @file{inetd.conf} for the
+@samp{telnetd} and @samp{ftpd} servers.  @xref{Installing the Sample
+Application}, for details on adding services to @file{inetd.conf}.  Note
+that unlike other @file{inetd.conf} examples in this document, these
+line should replace existing lines for password-based services of the
+same name.
+
+        The first example only allows encrypted or authenticated connections.
+
+@example
+telnet          stream  tcp     nowait  root
+    [K_SERVER]/telnetd telnetd -a user
+ftp             stream  tcp     nowait  root
+    [K_server]/ftpd ftpd -a
+@end example
+
+        The second example also allows password-based connections to be
+made.
+
+@example
+telnet          stream  tcp     nowait  root
+    [K_SERVER]/telnetd telnetd 
+ftp             stream  tcp     nowait  root
+    [K_server]/ftpd ftpd 
+@end example
+
+@node Common Kerberos Service Names,  , Installing Kerberos Applications, Installation
 @section Common Kerberos Service Names
 
 The following service names are used by Kerberos client/server
@@ -1762,7 +2186,7 @@ applications.
 @table @code
 
 @item host
-Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, and other
+Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, @samp{ftp}and other
 services which generally give login access to the host. 
 
 @item pop

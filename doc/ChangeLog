@@ -1,3 +1,13 @@
+Sat Apr 20 03:27:27 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* install.texi (Top): Remade master menu.
+	(Installing Kerberos Applications): New section.
+
+Fri Apr 19 22:55:36 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* install.texi (Shared Library Support): Update to better reflect
+ 	reality on AIX.
+
 Tue Mar 19 10:34:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile (clean): Remove *.info-? now.
