@@ -393,21 +393,22 @@ Macfile: macfile.list
 	grep '\.c$$' macfile.maclist > macsrcsgss
 	grep -v ':gssapi:' macsrcsgss > macsrcsk5
 	echo SRCS = `cat macsrcsgss` >> Macfile
+	echo SRCDIRS = `sed -n -e 's/\(.*:\)[^:]*\.c$$/ \1/p' macfile.maclist | sort -u` >> Macfile
 	echo GSSOBJS68K = `sed -e 's/$$/.68K.o/' -e 's/.*://' \
 		-e 's/^/:bin:68K:/' macsrcsgss` >> Macfile
-	echo GSSOBJS68KCFM = `sed -e 's/$$/.68K.o/' -e 's/.*://' \
+	echo GSSOBJS68KCFM = `sed -e 's/$$/.CFM68.o/' -e 's/.*://' \
 		-e 's/^/:bin:CFM-68K:/' macsrcsgss` >> Macfile
 	echo GSSOBJSPPC = `sed -e 's/$$/.PPC.o/' -e 's/.*://' \
 		-e 's/^/:bin:PPC:/' macsrcsgss` >> Macfile
 	echo K5OBJS68K = `sed -e 's/$$/.68K.o/' -e 's/.*://' \
 		-e 's/^/:bin:68K:/' macsrcsk5` >> Macfile
-	echo K5OBJS68KCFM = `sed -e 's/$$/.68K.o/' -e 's/.*://' \
+	echo K5OBJS68KCFM = `sed -e 's/$$/.CFM68.o/' -e 's/.*://' \
 		-e 's/^/:bin:CFM-68K:/' macsrcsk5` >> Macfile
 	echo K5OBJSPPC = `sed -e 's/$$/.PPC.o/' -e 's/.*://' \
 		-e 's/^/:bin:PPC:/' macsrcsk5` >> Macfile
 	echo INCLUDES = `sed -n -e 's/\(.*:\)[^:]*\.h$$/-i \1/p' macfile.maclist | sort -u` >> Macfile
 	echo "" >> Macfile
-	tr '%/:\\' '/:\304\266'< mac/Makefile.tmpl >> Macfile
+	tr '@/:\\' '\245:\304\266'< mac/Makefile.tmpl >> Macfile
 
 mac-bin-dirs:
 	rm -rf bin
