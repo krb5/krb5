@@ -1,3 +1,8 @@
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* RealmsConfig-glue.c (get_krbhst_default): Deleted.
+	(krb_get_krbhst): Don't call it.
+
 2003-06-03  Sam Hartman  <hartmans@mit.edu>
 
 	* g_pw_in_tkt.c (passwd_to_key): Fix password prompt
