@@ -1,5 +1,11 @@
 2000-05-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb.h (krb4_swab32): Mask high byte of input value after
+	shifting, to avoid "time out of bounds" error when source IP is
+	greater than destination IP in lsb order and byte orders are
+	different and low byte of timestamp has its high bit set and the
+	timestamp is stored as a signed value.
+
 	* krb.h (krb_get_err_text): Don't use "errno" as an argument
 	name.
 
