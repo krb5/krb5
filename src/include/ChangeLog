@@ -1,3 +1,8 @@
+2005-01-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h [HAVE_PTHREAD && HAVE_PRAGMA_WEAK_REF]: Mark
+	pthread_self and pthread_equal as weak references.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_os_mutex) [pthread case]: Add new field "owner"

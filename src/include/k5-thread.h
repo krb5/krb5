@@ -405,6 +405,8 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # pragma weak pthread_mutex_unlock
 # pragma weak pthread_mutex_destroy
 # pragma weak pthread_mutex_init
+# pragma weak pthread_self
+# pragma weak pthread_equal
 # ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
 #  pragma weak pthread_mutexattr_setrobust_np
 # endif
