@@ -29,6 +29,13 @@
 #else /* OLD DBM */
 typedef char DBM;
 
+/* Macros to convert ndbm names to dbm names.
+ * Note that dbm_nextkey() cannot be simply converted using a macro, since
+ * it is invoked giving the database, and nextkey() needs the previous key.
+ *
+ * Instead, all routines call "dbm_next" instead.
+ */
+
 #define dbm_open(file, flags, mode) ((dbminit(file) == 0)?"":((char *)0))
 #define dbm_fetch(db, key) fetch(key)
 #define dbm_store(db, key, content, flag) store(key, content)
