@@ -1,3 +1,7 @@
+
+Thu Jul 27 15:02:03 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krshd.c - Check for interrupted select.  Should fix bug #1555.
+
 Thu Jul 13 17:49:54 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in : Short circuit the streams test for AIX to false

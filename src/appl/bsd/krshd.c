@@ -1129,8 +1129,12 @@ doit(f, fromp)
 	    do {
 		ready = readfrom;
 		if (select(8*sizeof(ready), &ready, (fd_set *)0,
-			   (fd_set *)0, (struct timeval *)0) < 0)
-		  break;
+			   (fd_set *)0, (struct timeval *)0) < 0) {
+		    if (errno == EINTR)
+			continue;
+		    else
+			break;
+		}
 		if (FD_ISSET(s, &ready)) {
 		    if ((*des_read)(s, &sig, 1) <= 0)
 			FD_CLR(s, &readfrom);
