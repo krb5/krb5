@@ -8,8 +8,9 @@
 	Deleted.
 	* string_to_key.c (krb5_c_string_to_key_with_params): Renamed from
 	krb5_c_string_to_key, takes new params argument and passes it
-	through.
+	through.  Declare before use.
 	(krb5_c_string_to_key): New function, passes null params.
+
 	* t_pkcs5.c (test_pbkdf2_rfc3211): Update calls to
 	krb5int_pbkdf2_hmac_sha1 for new API.
 	* vectors.c (test_mit_des_s2k): Update krb5_des_string_to_key call
