@@ -125,9 +125,9 @@ main(argc, argv)
     while (
 #ifdef GETOPT_LONG
 	   (i = getopt_long(argc, argv, "r:fpAl:s:c:kt:RS:v",
-			    long_options, &idx)) != EOF
+			    long_options, &idx)) != -1
 #else
-	   (i = getopt(argc, argv, "r:fpAl:s:c:kt:RS:v")) != EOF
+	   (i = getopt(argc, argv, "r:fpAl:s:c:kt:RS:v")) != -1
 #endif
 	   ) {
 	switch (i) {
