@@ -926,7 +926,7 @@ static void print_key_data(FILE *f, krb5_key_data *key_data)
 static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 {
     char *princstr;
-    int	x, y, foundcrc, ret;
+    int	x, y, foundcrc;
     struct dump_args *arg;
     krb5_tl_data tl_data;
     osa_princ_ent_rec adb;
@@ -944,7 +944,7 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
      * comment in server_kdb.c to help decide.
      */
     tl_data.tl_data_type = KRB5_TL_KADM_DATA;
-    if ((ret = krb5_dbe_lookup_tl_data(arg->kcontext, kdb, &tl_data))
+    if (krb5_dbe_lookup_tl_data(arg->kcontext, kdb, &tl_data)
 	|| (tl_data.tl_data_length == 0))
 	 return 0;
 
@@ -1006,7 +1006,6 @@ dump_db(argc, argv)
 {
     FILE		*f;
     struct dump_args	arglist;
-    int			error;
     char		*programname;
     char		*ofile;
     krb5_error_code	kret, retval;
@@ -1023,7 +1022,6 @@ dump_db(argc, argv)
     if (strrchr(programname, (int) '/'))
 	programname = strrchr(argv[0], (int) '/') + 1;
     ofile = (char *) NULL;
-    error = 0;
     dump = &r1_3_version;
     arglist.verbose = 0;
     new_mkey_file = 0;
