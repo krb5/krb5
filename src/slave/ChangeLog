@@ -1,3 +1,8 @@
+Thu Sep 15 12:48:21 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kpropd.c (PRS): Only report errors to syslog if the debug flag
+	is not set.  (Otherwise, send them to stderr).
+
 Thu Aug  4 15:15:00 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in:

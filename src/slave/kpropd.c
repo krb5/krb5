@@ -389,8 +389,10 @@ void PRS(argv)
 	/*
 	 * If not in debug mode, switch com_err reporting to syslog
 	 */
-	openlog("kpropd", LOG_PID | LOG_ODELAY, SYSLOG_CLASS);
-	set_com_err_hook(kpropd_com_err_proc);
+	if (! debug) {
+	    openlog("kpropd", LOG_PID | LOG_ODELAY, SYSLOG_CLASS);
+	    set_com_err_hook(kpropd_com_err_proc);
+	}
 	/*
 	 * Get my hostname, so we can construct my service name
 	 */
