@@ -49,9 +49,7 @@
 #define GET_PROGNAME(x) max(max(strrchr((x), '/'), strrchr((x), '\\')) + 1,(x))
 #endif
 
-#ifdef _WIN32
-#include <winsock.h>
-#else
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
