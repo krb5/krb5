@@ -64,7 +64,7 @@ int default_k4 = 0;
 #endif
 
 
-void usage()
+static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
@@ -184,7 +184,8 @@ main(argc, argv)
 		exit(1);
 	    }
 	} else {
-	    if (code = krb5_cc_default(kcontext, &cache)) {
+	    code = krb5_cc_default(kcontext, &cache);
+	    if (code) {
 		com_err(progname, code, "while getting default ccache");
 		exit(1);
 	    }

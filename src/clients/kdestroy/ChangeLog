@@ -1,3 +1,7 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdestroy.c (main): Clean up compiler warnings.
+
 2000-03-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdestroy.c: Do not define variables if v4 compatilibilty is not
