@@ -83,6 +83,9 @@ tested.
 %ADMIN_SERVICE is abbreviated A_S, and CHANGEPW_SERVICE is abbreviated
 %C_S.
 
+XXX needs to be updated to take into account new server behavior with
+respect to reading master key vs. getting it from stash.
+
 \test{
 \Reason{An empty string realm is rejected.}
 \Call{ovsec_kadm_init(a, a's-p, A_S, "")}
@@ -1117,6 +1120,8 @@ These tests should be run with override_qual false.
 
 \section{ovsec_kadm_chpass_principal_util}
 
+XXX Needs to be modified to take into account the new argument.
+
 Rerun all the tests listed for ovsec_kadm_chpass_principal above in
 Section \ref{ovseckadmchpassprincipal}.  Verify that they succeed
 and fail in the same circumstances.  Also verify that in each failure
@@ -1673,12 +1678,14 @@ yes & no & CHANGEPW & true & RPC: fail; local: {\em pass}
 
 Handled by memory-leak testing handled elsewhere.
 
+XXX This isn't sufficient.
 
 
 \section{ovsec_kadm_free_policy_ent}
 
 Handled by memory-leak testing handled elsewhere.
 
+XXX This isn't sufficient.
 
 
 \section{ovsec_kadm_get_privs}
