@@ -22,7 +22,8 @@ static char rcsid_unparse_c[] =
 #ifdef __STDC__
 #include <stdlib.h>
 #else
-extern char *malloc(), *index(), *calloc();
+extern char *malloc();
+#include <string.h>
 #endif /* __STDC__ */
 
 #include <errno.h>
