@@ -1,4 +1,8 @@
 
+Tue May 30 12:31:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in: ranlib the library again after doing $(LIBUPDATE).
+		Some archivers don't do this.
+
 Fri May 26 17:52:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Change usage of dbm package or Berkeley db package
 		based on setting of BERK_DB_DBM.  Also, conditionalize

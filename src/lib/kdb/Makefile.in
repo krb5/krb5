@@ -40,6 +40,7 @@ libkdb5.a: $(OBJS) $(BUILDTOP)/util/berk_db/hash/DONE
 			$(LIBUPDATE) $@ --force $$i/DONE $$i ; \
 		done ; \
 	fi
+	$(RANLIB) $@
 	$(RM) $(TOPLIBD)/libkdb5.a
 	$(CP) libkdb5.a $(BUILDTOP)/lib/libkdb5.a
 	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
