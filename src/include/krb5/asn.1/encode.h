@@ -225,14 +225,30 @@ krb5_error_code decode_generic
  */
 /* allow either constructed or primitive encoding, so check for bit 6
    set or reset */
-#define krb5_is_as_req(data) ((data)[0] == 0x60 || (data)[0] == 0x20)
-#define krb5_is_kdc_rep(data) ((data)[0] == 0x61 || (data)[0] == 0x21)
-#define krb5_is_krb_error(data) ((data)[0] == 0x62 || (data)[0] == 0x22)
-#define krb5_is_ap_req(data) ((data)[0] == 0x63 || (data)[0] == 0x23)
-#define krb5_is_ap_rep(data) ((data)[0] == 0x64 || (data)[0] == 0x24)
-#define krb5_is_tgs_req(data) ((data)[0] == 0x65 || (data)[0] == 0x25)
-#define krb5_is_krb_safe(data) ((data)[0] == 0x66 || (data)[0] == 0x26)
-#define krb5_is_krb_priv(data) ((data)[0] == 0x67 || (data)[0] == 0x27)
+#define krb5_is_as_req(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x60 ||\
+				    (dat)->data[0] == 0x20))
+#define krb5_is_kdc_rep(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x61 ||\
+				    (dat)->data[0] == 0x21))
+#define krb5_is_krb_error(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x62 ||\
+				    (dat)->data[0] == 0x22))
+#define krb5_is_ap_req(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x63 ||\
+				    (dat)->data[0] == 0x23))
+#define krb5_is_ap_rep(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x64 ||\
+				    (dat)->data[0] == 0x24))
+#define krb5_is_tgs_req(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x65 ||\
+				    (dat)->data[0] == 0x25))
+#define krb5_is_krb_safe(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x66 ||\
+				    (dat)->data[0] == 0x26))
+#define krb5_is_krb_priv(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x67 ||\
+				    (dat)->data[0] == 0x27))
 
 
 #endif /* KRB5_ENCODE_DEFS__ */
