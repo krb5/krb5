@@ -27,7 +27,7 @@
 
 #include "k5-int.h"
 
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -454,7 +454,7 @@ int type_2_v5err[] = { 0,	/* 		0  No error		      */
     KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages  */
 };
 #define klog v4_klog
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
 #else
 char * v4_klog( type, format, va_alist)
@@ -465,7 +465,7 @@ char * v4_klog( type, format, va_alist)
 {
     int logpri = LOG_INFO;
     va_list pvar;
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
     va_start(pvar, format);
 #else
     va_start(pvar);
