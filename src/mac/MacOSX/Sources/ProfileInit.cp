@@ -16,10 +16,10 @@
  * without express or implied warranty.
  */
  
-#include "profile.h"
-#include "prof_err.h"
 #include <CoreServices/CoreServices.h>
 #include <Kerberos/com_err.h>
+#include "profile.h"
+#include "prof_err.h"
 
 extern "C" {
 void KerberosProfileInit (CFStringRef inBundleID);
