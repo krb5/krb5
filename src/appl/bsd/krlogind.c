@@ -602,6 +602,17 @@ void doit(f, fromp)
     }
 #endif /* VHANG_FIRST */
 
+#ifdef TIOCNOTTY
+      {
+        int con_fd;
+        /* Void tty association first */
+        if ((con_fd = open("/dev/tty", O_RDWR)) >= 0) {
+          ioctl(con_fd, TIOCNOTTY, 0);
+          close(con_fd);
+        }
+      }
+#endif
+
 #ifdef HAVE_SETSID
     (void) setsid();
 #endif

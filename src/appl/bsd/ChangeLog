@@ -1,4 +1,9 @@
 
+Wed Apr 26 07:19:18 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krlogind.c (doit()) : If TIOCOTTY is defined unset the 
+		controlling tty before setting it to another tty.
+
 Tue Apr 25 21:23:28 1995  Chris Provenzano  (proven@mit.edu)
 
 	* forward.c (rd_and_store_for_creds()) : Rewritten to use
