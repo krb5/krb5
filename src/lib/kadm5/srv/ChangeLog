@@ -1,3 +1,15 @@
+2001-10-16  Mitchell Berger  <mitchb@mit.edu>
+	    Matt Crawford  <crawdad@fnal.gov>
+
+	* svr_principal.c (add_to_history): If the policy a principal uses has
+	been changed to hold a lesser number of history entries than it did
+	before, extract the correct number and value of old keys from the
+	history array into a newly allocated array of the proper size.  Failing
+	to do this made kadmind vulnerable to a crash upon changing such a
+	principal's password.  Original patch written by Matt Crawford, with
+	a few changes.
+	[pullup from trunk]
+
 2001-09-07  Tom Yu  <tlyu@mit.edu>
 
 	* adb_openclose.c (osa_adb_create_db): Default to btree.
