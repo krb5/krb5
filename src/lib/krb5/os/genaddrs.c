@@ -120,7 +120,7 @@ krb5_auth_con_genaddrs(krb5_context context, krb5_auth_context auth_context, int
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
         if ((retval = getpeername(fd, (GETPEERNAME_ARG2_TYPE *) &rsaddr, 
 				  &ssize)))
-	    return retval;
+	    return errno;
 
 	if (cvtaddr (&rsaddr, &raddrs)) {
 	    raddr = &raddrs.addr;
