@@ -1,4 +1,4 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=lib/gssapi/mechglue
 mydir=.
 BUILDTOP=$(REL)..$(S)..$(S)..
@@ -84,8 +84,6 @@ OBJS	= $(OUTPRE)g_acquire_cred.$(OBJEXT) \
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
-
-@SHARED_RULE@
 
 all:: all-$(WHAT) 
 

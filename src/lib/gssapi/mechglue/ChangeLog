@@ -1,3 +1,8 @@
+2004-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Delete @SHARED_RULE@ line.
+	(thisconfigdir): Fix.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* g_initialize.c, oid_ops.c: Don't test macintosh.
