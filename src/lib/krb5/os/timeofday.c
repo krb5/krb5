@@ -24,7 +24,7 @@ static char rcsid_timeofday_c[] =
 #include <krb5/krb5.h>
 #include <krb5/libos-proto.h>
 
-#ifdef POSIX
+#ifdef POSIX_TYPES
 #define timetype time_t
 #else
 #define timetype long

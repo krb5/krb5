@@ -25,18 +25,17 @@ static char rcsid_read_pwd_c[] =
 #include <setjmp.h>
 
 #include <krb5/ext-proto.h>
+#include <krb5/posix-conf.h>
 
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 #include <termios.h>
-#define sigtype void
 #else
 #include <sys/ioctl.h>
-#define sigtype int
-#endif /* POSIX */
+#endif /* POSIX_TERMIOS */
 
 extern int errno;
 
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(0, TCSANOW, &save_control); return errcode;
 #else
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(0, TIOCSETP, (char *)&tty_savestate); return errcode;
@@ -45,7 +44,7 @@ extern int errno;
 static jmp_buf pwd_jump;
 
 
-static sigtype
+static krb5_sigtype
 intr_routine()
 {
     longjmp(pwd_jump, 1);
@@ -64,8 +63,8 @@ int *size_return;
     char *readin_string = 0;
     register char *ptr;
     int scratchchar;
-    sigtype (*ointrfunc)();
-#ifdef POSIX
+    krb5_sigtype (*ointrfunc)();
+#ifdef POSIX_TERMIOS
     struct termios echo_control, save_control;
 
     if (tcgetattr(0, &echo_control) == -1)
@@ -166,7 +165,7 @@ int *size_return;
     /* reset intrfunc */
     (void) signal(SIGINT, ointrfunc);
 
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
     if (tcsetattr(0, TCSANOW, &save_control) == -1)
 	return errno;
 #else

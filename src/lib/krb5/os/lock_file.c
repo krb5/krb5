@@ -21,7 +21,10 @@ static char rcsid_lock_file_c [] =
 #include <krb5/libos.h>
 
 #include <stdio.h>
-#ifdef POSIX
+
+#include <krb5/posix-conf.h>
+
+#ifdef POSIX_FILE_LOCKS
 #include <errno.h>
 #include <fcntl.h>
 #define SHARED_LOCK	F_RDLCK
@@ -46,7 +49,7 @@ FILE *filep;
 char *pathname;
 int mode;
 {
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
     struct flock lock_arg;
 #define lock_flag lock_arg.l_type
@@ -71,14 +74,14 @@ int mode;
 	return(KRB5_LIBOS_BADLOCKFLAG);
 
     if (mode & KRB5_LOCKMODE_DONTBLOCK) {
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
 	lock_cmd = F_SETLK;
 #else
 	lock_flag |= LOCK_NB;
 #endif
     }
 
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     lock_arg.l_whence = 0;
     lock_arg.l_start = 0;
     lock_arg.l_len = 0;
