@@ -180,8 +180,7 @@ typedef struct __krb5_realm_params {
     char *		realm_dbname;
     char *		realm_mkey_name;
     char *		realm_stash_file;
-    krb5_int32		realm_kdc_pport;
-    krb5_int32		realm_kdc_sport;
+    char *		realm_kdc_ports;
     krb5_int32		realm_kadmind_port;
     krb5_enctype	realm_enctype;
     krb5_deltat		realm_max_life;
@@ -189,8 +188,6 @@ typedef struct __krb5_realm_params {
     krb5_timestamp	realm_expiration;
     krb5_flags		realm_flags;
     krb5_key_salt_tuple	*realm_keysalts;
-    unsigned int	realm_kdc_pport_valid:1;
-    unsigned int	realm_kdc_sport_valid:1;
     unsigned int	realm_kadmind_port_valid:1;
     unsigned int	realm_enctype_valid:1;
     unsigned int	realm_max_life_valid:1;

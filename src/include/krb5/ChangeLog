@@ -1,3 +1,9 @@
+Thu Oct  5 21:33:27 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm.h: Remove pport and sport from the krb5_realm_params file,
+		and replace it with ports, which is a char * list of all
+		of the ports which should be listed to for this realm.
+
 Fri Sep 29 14:37:41 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (clean-unix): Remove autoconf.h on make clean
