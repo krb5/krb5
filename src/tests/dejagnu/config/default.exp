@@ -2237,9 +2237,7 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    return 0
 	}
-	"usage: rlogin" -
-	"illegal option -- x" -
-	"invalid option -- x" {
+	-re "usage: rlogin|illegal option -- x|invalid option -- x" {
 	    note "$testname: rlogin doesn't like command-line flags"
 	    unsupported "$testname"
 	    set timeout $old_timeout
