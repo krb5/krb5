@@ -107,8 +107,7 @@ dnl Maintainer mode, akin to what automake provides, 'cept we don't
 dnl want to use automake right now.
 AC_DEFUN([KRB5_AC_MAINTAINER_MODE],
 [AC_ARG_ENABLE([maintainer-mode],
-[  --enable-maintainer-mode
-                          enable rebuilding of source files etc],
+AC_HELP_STRING([--enable-maintainer-mode],[enable rebuilding of source files, Makefiles, etc]),
 USE_MAINTAINER_MODE=$enableval,
 USE_MAINTAINER_MODE=no)
 if test "$USE_MAINTAINER_MODE" = yes; then
@@ -128,7 +127,7 @@ AC_SUBST(MAINT)
 dnl Hack for now.
 AC_DEFUN([KRB5_AC_ENABLE_THREADS],[
 AC_ARG_ENABLE([thread-support],
-AC_HELP_STRING([--enable-thread-support],use PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support),
+AC_HELP_STRING([--enable-thread-support],use PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support @<:@disabled@:>@),
 [  if test "$withval" = yes ; then
     AC_MSG_NOTICE(enabling PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support)
     AC_DEFINE(ENABLE_THREADS,1,[Define if thread support enabled])
@@ -298,9 +297,8 @@ fi
 dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])dnl
 AC_ARG_ENABLE([ipv6],
-[  --enable-ipv6           enable IPv6 support
-  --disable-ipv6          disable IPv6 support
-                            (default: enable if available)], ,enableval=try)dnl
+AC_HELP_STRING([--enable-ipv6],[turn on IPv6 support])
+AC_HELP_STRING([--disable-ipv6],[turn off IPv6 support @<:@enabled if available@:>@]), ,enableval=try)dnl
 case "$enableval" in
   yes | try)
 	KRB5_AC_CHECK_INET6
@@ -986,7 +984,7 @@ dnl
 dnl WITH_HESIOD
 dnl
 AC_DEFUN(WITH_HESIOD,
-[AC_ARG_WITH(hesiod, AC_HELP_STRING(--with-hesiod[=path], compile with hesiod support),
+[AC_ARG_WITH(hesiod, AC_HELP_STRING(--with-hesiod[=path], compile with hesiod support @<:@omitted@:>@),
 	hesiod=$with_hesiod, with_hesiod=no)
 if test "$with_hesiod" != "no"; then
 	HESIOD_DEFS=-DHESIOD
@@ -1185,7 +1183,7 @@ fi
 
 # Check whether to build profiled libraries.
 AC_ARG_ENABLE([profiled],
-[  --enable-profiled       build profiled libraries],
+[  --enable-profiled       build profiled libraries @<:@disabled@:>@],
 [if test "$enableval" = yes; then
 	case $PFLIBEXT in
 	.po-nobuild)
@@ -1420,8 +1418,8 @@ AC_SUBST(COM_ERR_VERSION)
 ])
 AC_DEFUN([KRB5_AC_CHOOSE_SS],[
 AC_ARG_WITH(system-ss,
-	    AC_HELP_STRING(--with-system-ss,use system -lss and mk_cmds @<:@default: use a private version@:>@))
-AC_ARG_VAR(SS_LIB,[system libraries for 'ss' package, if --with-system-ss was specified [-lss]])
+	    AC_HELP_STRING(--with-system-ss,use system -lss and mk_cmds @<:@private version@:>@))
+AC_ARG_VAR(SS_LIB,[system libraries for 'ss' package [-lss]])
 AC_MSG_CHECKING(which version of subsystem package to use)
 if test "x$with_system_ss" = xyes ; then
   SS_VERSION=sys
@@ -1454,9 +1452,9 @@ AC_SUBST(SS_VERSION)
 dnl
 AC_DEFUN([KRB5_AC_CHOOSE_DB],[
 AC_ARG_WITH(system-db,
-	    AC_HELP_STRING(--with-system-db,use system Berkeley db library @<:@default: use a private version@:>@))
-AC_ARG_VAR(DB_HEADER,[header file to include for Berkeley db package, if --with-system-db was specified [db.h]])
-AC_ARG_VAR(DB_LIB,[system library for Berkeley db package, if --with-system-db was specified [-ldb]])
+	    AC_HELP_STRING(--with-system-db,use system Berkeley db @<:@private version@:>@))
+AC_ARG_VAR(DB_HEADER,[header file for system Berkeley db package [db.h]])
+AC_ARG_VAR(DB_LIB,[library for system Berkeley db package [-ldb]])
 if test "x$with_system_db" = xyes ; then
   DB_VERSION=sys
   # TODO: Do we have specific routines we should check for?

@@ -1,3 +1,13 @@
+2004-03-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_MAINTAINER_MODE, KRB5_AC_ENABLE_THREADS,
+	KRB5_AC_INET6, WITH_HESIOD, KRB5_LIB_AUX, KRB5_AC_CHOOSE_SS,
+	KRB5_AC_CHOOSE_DB): Express defaults more consistently with other
+	configure output.  Use AC_HELP_STRING.  Shorten up some messages,
+	drop some options that are defaults and obvious counterparts to
+	other documented options.
+	* configure.in: Likewise.
+
 2004-03-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4: Include acx_pthread.m4.
