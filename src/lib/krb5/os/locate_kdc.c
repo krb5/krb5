@@ -31,7 +31,9 @@ static char rcsid_locate_kdc_c[] =
 #include <netdb.h>
 #include "os-proto.h"
 
+#ifdef KRB5_USE_INET
 extern char *krb5_kdc_udp_portname;
+#endif
 
 /*
  * returns count of number of addresses found

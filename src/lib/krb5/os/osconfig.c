@@ -20,5 +20,7 @@ static char rcsid_config_fn_c [] =
 
 
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
-char *krb5_kdc_udp_portname = KDC_PORTNAME;
 
+#ifdef KRB5_USE_INET
+char *krb5_kdc_udp_portname = KDC_PORTNAME;
+#endif
