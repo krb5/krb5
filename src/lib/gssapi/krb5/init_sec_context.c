@@ -141,7 +141,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 	goto cleanup;
     
     in_creds.times.endtime = *endtime;
-
+    in_creds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
     /*
      * Get the credential..., I don't know in 0 is a good value for the
      * kdcoptions
