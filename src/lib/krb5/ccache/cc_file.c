@@ -95,121 +95,113 @@ fcc_nseq.c and fcc_read don't check return values a lot.
 #endif
 
 static krb5_error_code KRB5_CALLCONV krb5_fcc_close
-        (krb5_context, krb5_ccache id );
+        (krb5_context, krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_destroy 
-        (krb5_context, krb5_ccache id );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_destroy
+        (krb5_context, krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get 
-        (krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get
+        (krb5_context, krb5_ccache id, krb5_cc_cursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new 
-        (krb5_context, krb5_ccache *id );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new
+        (krb5_context, krb5_ccache *id);
 
-static const char * KRB5_CALLCONV krb5_fcc_get_name 
-        (krb5_context, krb5_ccache id );
+static const char * KRB5_CALLCONV krb5_fcc_get_name
+        (krb5_context, krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal 
-        (krb5_context, krb5_ccache id , krb5_principal *princ );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal
+        (krb5_context, krb5_ccache id, krb5_principal *princ);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_initialize 
-        (krb5_context, krb5_ccache id , krb5_principal princ );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_initialize
+        (krb5_context, krb5_ccache id, krb5_principal princ);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred 
-        (krb5_context, 
-		   krb5_ccache id , 
-		   krb5_cc_cursor *cursor , 
-		   krb5_creds *creds );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred
+        (krb5_context, krb5_ccache id, krb5_cc_cursor *cursor,
+	 krb5_creds *creds);
 
 static krb5_error_code krb5_fcc_read
-        (krb5_context, 
-		   krb5_ccache id , 
-		   krb5_pointer buf,
-		   unsigned int len);
-static krb5_error_code krb5_fcc_read_principal 
-        (krb5_context, krb5_ccache id , krb5_principal *princ );
-static krb5_error_code krb5_fcc_read_keyblock 
-        (krb5_context, krb5_ccache id , krb5_keyblock *keyblock );
-static krb5_error_code krb5_fcc_read_data 
-        (krb5_context, krb5_ccache id , krb5_data *data );
-static krb5_error_code krb5_fcc_read_int32 
-        (krb5_context, krb5_ccache id , krb5_int32 *i );
-static krb5_error_code krb5_fcc_read_ui_2 
-        (krb5_context, krb5_ccache id , krb5_ui_2 *i );
-static krb5_error_code krb5_fcc_read_octet 
-        (krb5_context, krb5_ccache id , krb5_octet *i );
-static krb5_error_code krb5_fcc_read_times 
-        (krb5_context, krb5_ccache id , krb5_ticket_times *t );
-static krb5_error_code krb5_fcc_read_addrs 
+        (krb5_context, krb5_ccache id, krb5_pointer buf, unsigned int len);
+static krb5_error_code krb5_fcc_read_principal
+        (krb5_context, krb5_ccache id, krb5_principal *princ);
+static krb5_error_code krb5_fcc_read_keyblock
+        (krb5_context, krb5_ccache id, krb5_keyblock *keyblock);
+static krb5_error_code krb5_fcc_read_data
+        (krb5_context, krb5_ccache id, krb5_data *data);
+static krb5_error_code krb5_fcc_read_int32
+        (krb5_context, krb5_ccache id, krb5_int32 *i);
+static krb5_error_code krb5_fcc_read_ui_2
+        (krb5_context, krb5_ccache id, krb5_ui_2 *i);
+static krb5_error_code krb5_fcc_read_octet
+        (krb5_context, krb5_ccache id, krb5_octet *i);
+static krb5_error_code krb5_fcc_read_times
+        (krb5_context, krb5_ccache id, krb5_ticket_times *t);
+static krb5_error_code krb5_fcc_read_addrs
         (krb5_context, krb5_ccache, krb5_address ***);
-static krb5_error_code krb5_fcc_read_addr 
+static krb5_error_code krb5_fcc_read_addr
         (krb5_context, krb5_ccache, krb5_address *);
-static krb5_error_code krb5_fcc_read_authdata 
-        (krb5_context, krb5_ccache , krb5_authdata ***);
-static krb5_error_code krb5_fcc_read_authdatum 
-        (krb5_context, krb5_ccache , krb5_authdata *);
+static krb5_error_code krb5_fcc_read_authdata
+        (krb5_context, krb5_ccache, krb5_authdata ***);
+static krb5_error_code krb5_fcc_read_authdatum
+        (krb5_context, krb5_ccache, krb5_authdata *);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
-        (krb5_context, krb5_ccache *id , const char *residual );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_resolve
+        (krb5_context, krb5_ccache *id, const char *residual);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
-        (krb5_context, 
-		   krb5_ccache id , 
-		   krb5_flags whichfields , 
-		   krb5_creds *mcreds , 
-		   krb5_creds *creds );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve
+        (krb5_context, krb5_ccache id, krb5_flags whichfields,
+	 krb5_creds *mcreds, krb5_creds *creds);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get 
-        (krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get
+        (krb5_context, krb5_ccache id, krb5_cc_cursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_store 
-        (krb5_context, krb5_ccache id , krb5_creds *creds );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_store
+        (krb5_context, krb5_ccache id, krb5_creds *creds);
 
 static krb5_error_code krb5_fcc_skip_header
         (krb5_context, krb5_ccache);
-static krb5_error_code krb5_fcc_skip_principal 
-        (krb5_context, krb5_ccache id );
+static krb5_error_code krb5_fcc_skip_principal
+        (krb5_context, krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags 
-        (krb5_context, krb5_ccache id , krb5_flags flags );
+static krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags
+        (krb5_context, krb5_ccache id, krb5_flags flags);
 
 extern krb5_cc_ops krb5_cc_file_ops;
 krb5_error_code krb5_change_cache
    (void);
 
-static krb5_error_code krb5_fcc_write 
-        (krb5_context, krb5_ccache id , krb5_pointer buf , unsigned int len );
-static krb5_error_code krb5_fcc_store_principal 
-        (krb5_context, krb5_ccache id , krb5_principal princ );
-static krb5_error_code krb5_fcc_store_keyblock 
-        (krb5_context, krb5_ccache id , krb5_keyblock *keyblock );
-static krb5_error_code krb5_fcc_store_data 
-        (krb5_context, krb5_ccache id , krb5_data *data );
-static krb5_error_code krb5_fcc_store_int32 
-        (krb5_context, krb5_ccache id , krb5_int32 i );
+static krb5_error_code krb5_fcc_write
+        (krb5_context, krb5_ccache id, krb5_pointer buf, unsigned int len);
+static krb5_error_code krb5_fcc_store_principal
+        (krb5_context, krb5_ccache id, krb5_principal princ);
+static krb5_error_code krb5_fcc_store_keyblock
+        (krb5_context, krb5_ccache id, krb5_keyblock *keyblock);
+static krb5_error_code krb5_fcc_store_data
+        (krb5_context, krb5_ccache id, krb5_data *data);
+static krb5_error_code krb5_fcc_store_int32
+        (krb5_context, krb5_ccache id, krb5_int32 i);
 static krb5_error_code krb5_fcc_store_ui_4
-        (krb5_context, krb5_ccache id , krb5_ui_4 i );
-static krb5_error_code krb5_fcc_store_ui_2 
-        (krb5_context, krb5_ccache id , krb5_int32 i );
-static krb5_error_code krb5_fcc_store_octet 
-        (krb5_context, krb5_ccache id , krb5_int32 i );
-static krb5_error_code krb5_fcc_store_times 
-        (krb5_context, krb5_ccache id , krb5_ticket_times *t );
-static krb5_error_code krb5_fcc_store_addrs 
-        (krb5_context, krb5_ccache , krb5_address ** );
-static krb5_error_code krb5_fcc_store_addr 
-        (krb5_context, krb5_ccache , krb5_address * );
-static krb5_error_code krb5_fcc_store_authdata 
-        (krb5_context, krb5_ccache , krb5_authdata **);
-static krb5_error_code krb5_fcc_store_authdatum 
-        (krb5_context, krb5_ccache , krb5_authdata *);
+        (krb5_context, krb5_ccache id, krb5_ui_4 i);
+static krb5_error_code krb5_fcc_store_ui_2
+        (krb5_context, krb5_ccache id, krb5_int32 i);
+static krb5_error_code krb5_fcc_store_octet
+        (krb5_context, krb5_ccache id, krb5_int32 i);
+static krb5_error_code krb5_fcc_store_times
+        (krb5_context, krb5_ccache id, krb5_ticket_times *t);
+static krb5_error_code krb5_fcc_store_addrs
+        (krb5_context, krb5_ccache, krb5_address **);
+static krb5_error_code krb5_fcc_store_addr
+        (krb5_context, krb5_ccache, krb5_address *);
+static krb5_error_code krb5_fcc_store_authdata
+        (krb5_context, krb5_ccache, krb5_authdata **);
+static krb5_error_code krb5_fcc_store_authdatum
+        (krb5_context, krb5_ccache, krb5_authdata *);
 
-static krb5_error_code krb5_fcc_interpret 
-        (krb5_context, int );
+static krb5_error_code krb5_fcc_interpret
+        (krb5_context, int);
 
-static krb5_error_code krb5_fcc_close_file 
+static krb5_error_code krb5_fcc_close_file
         (krb5_context, krb5_ccache);
-static krb5_error_code krb5_fcc_open_file 
+static krb5_error_code krb5_fcc_open_file
         (krb5_context, krb5_ccache, int);
 
 
