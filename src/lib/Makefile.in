@@ -48,6 +48,8 @@ K4LIBS = krb4\krb4.lib
 ##WIN16##K4DEF = krb4_16.def
 ##WIN32##K4DEF = krb4_32.def
 
+##DOS##VERSIONRC = $(BUILDTOP)\windows\version.rc
+
 ##WIN16##WINLIBS = $(WLIB) ldllcew libw oldnames
 ##WIN32##WINLIBS = kernel32.lib wsock32.lib \
 ##WIN32##	user32.lib shell32.lib oldnames.lib
@@ -60,39 +62,47 @@ K4LIBS = krb4\krb4.lib
 $(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   no_glue, $*.dll, $*.map, $(CLIBS) $(WINLIBS), $(CDEF)
-##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	copy $(VERSIONRC) version.rc
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DCE_LIB -D_MSDOS_ -DRES_ONLY version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc  $(CPPFLAGS) -DCE_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
-##WIN32##	   no_glue.obj $(CLIBS) $(WINLIBS)
+##WIN32##	   no_glue.obj version.res $(CLIBS) $(WINLIBS)
 
 $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
-##WIN16##	rc /nologo /p /k $(CPPFLAGS) -D_MSDOS -DRES_ONLY \
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DKRB5_LIB -D_MSDOS -DRES_ONLY \
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc $(CPPFLAGS) -DKRB5_LIB -D_WIN32 -D_MSDOS -DRES_ONLY \
+##WIN32##	   -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   k5_glue.obj $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
+##WIN32##	   k5_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
 ##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
-##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	copy $(VERSIONRC) version.rc
+##WIN16##	rc /nologo /p /k -DGSSAPI_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc  -D_WIN32 -DGSSAPI_LIB -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   gss_glue.obj version.res $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k4_glue, $*.dll, $*.map, \
 ##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS) llibcew, $(K4DEF)
-##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	copy $(VERSIONRC) version.rc
+##WIN16##	rc /nologo /p /k -DKRB4_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc   -D_WIN32 -DKRB4_LIB -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
-##WIN32##	   k4_glue.obj $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   k4_glue.obj version.res $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 #
 # The following kludge is for MIT's SAP/Version server hack
@@ -115,21 +125,25 @@ $(SKLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) sap_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   sap_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(SKDEF)
-##WIN16##	rc /nologo /p /k $(CPPFLAGS) -D_MSDOS -DRES_ONLY \
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DSAPKRB_LIB -D_MSDOS -DRES_ONLY \
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc  $(CPPFLAGS) -DSAPKRB_LIB -D_WIN32 -D_MSDOS -DRES_ONLY \
+##WIN32##	   -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(SKDEF) /out:$*.dll \
-##WIN32##	   sap_glue.obj $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
+##WIN32##	   sap_glue.obj version.res $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
 ##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
 $(SGLIB): $(GLIBS) $(SKLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
 ##WIN16##	   $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS), $(SGDEF)
-##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	copy $(VERSIONRC) version.rc
+##WIN16##	rc /nologo /p /k -DSAPGSS_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	rc  -D_WIN32 -DSAPGSS_LIB -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(SGDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   gss_glue.obj version.res $(MITLIBS) $(GLIBS) $(SKLIB) $(CLIB) $(WINLIBS)
 
 ##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
 
@@ -143,7 +157,7 @@ no_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /Fo$@ $**
 
 ##WIN32##.rc.obj:
-##WIN32##	$(RC) $(CPPFLAGS) /r $**
+##WIN32##	$(RC) $(CPPFLAGS) -DKRB5 /r $**
 ##WIN32##	$(CVTRES) /nologo /out:$@ $*.res
 
 ##WIN16##$(WLIB):  winsock.def
@@ -202,4 +216,3 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib
 	cd ..
-
