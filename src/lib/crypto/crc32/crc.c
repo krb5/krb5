@@ -19,7 +19,6 @@ static char rcsid_crc_c[] =
 #include <krb5/krb5.h>
 #include <krb5/crc-32.h>
 #include <krb5/ext-proto.h>
-#include <errno.h>
 
 static u_long const crc_table[256] = {
     0x00000000, 0x01080082, 0x02100104, 0x03180186,
@@ -128,5 +127,5 @@ krb5_checksum *outcksum;
 
 krb5_checksum_entry crc32_cksumtable_entry = {
     crc32_sum_func,
-    4,					/* CRC-32 is 4 octets */
+    CRC32_CKSUM_LENGTH, /* CRC-32 is 4 octets */
 };
