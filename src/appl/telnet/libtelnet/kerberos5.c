@@ -66,8 +66,16 @@
 #include <netdb.h>
 #include <ctype.h>
 
-/* kerberos 5 include files (ext-proto.h) will get an appropriate stdlib.h
-   and string.h/strings.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
+#ifdef	NO_STRING_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
  
 #include "encrypt.h"
 #include "auth.h"
@@ -181,7 +189,7 @@ kerberos5_send(ap)
 	krb5_error_code r;
 	krb5_ccache ccache;
 	krb5_creds creds;		/* telnet gets session key from here */
-	krb5_creds * new_creds;
+	krb5_creds * new_creds = 0;
 	extern krb5_flags krb5_kdc_default_options;
 	int ap_opts;
 
@@ -233,7 +241,7 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-	if (r = krb5_get_credentials(telnet_context, krb5_kdc_default_options,
+	if (r = krb5_get_credentials(telnet_context, 0,
 				     ccache, &creds, &new_creds)) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on credentials(%s)\r\n",
@@ -273,7 +281,7 @@ kerberos5_send(ap)
 	/*
 	 * keep the key in our private storage, but don't use it yet
 	 * ---see kerberos5_reply() below 
-	 * /
+	 */
 	if (newkey && (newkey->keytype != KEYTYPE_DES)) {
 	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
 		/* use the session key in credentials instead */
