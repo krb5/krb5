@@ -3,6 +3,16 @@
 	* gen_seqnum.c (krb5_generate_seq_number): Fix think-o on sequence
 	number mask.
 
+	* auth_con.c (krb5int_auth_con_chkseqnum): New function; implement
+	heuristic for broken Heimdal sequence number encoding.
+	(chk_heimdal_seqnum): Auxiliary function for above.
+
+	* auth_con.h: Add flags for sequence number heuristic.
+
+	* rd_priv.c: Use krb5int_auth_con_chkseqnum.
+
+	* rd_safe.c: Use krb5int_auth_con_chkseqnum.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* gic_pwd.c (krb5int_populate_gic_opt): returns void
