@@ -535,6 +535,9 @@
 #ifndef LdCombineFlags
 #define LdCombineFlags -X -r
 #endif
+#ifndef LdLibLocations
+#define LdLibLocations /**/
+#endif
 #ifndef CompatibilityFlags
 #define CompatibilityFlags /**/
 #endif
@@ -578,6 +581,7 @@
     PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)	/* prefered; mdep */
           INSTALL = InstallCmd
                LD = LdCmd
+      LDLOCATIONS = LdLibLocations
              LINT = LintCmd
       LINTLIBFLAG = LintLibFlag
          LINTOPTS = LintOpts
@@ -659,7 +663,7 @@ STDC_TOP_INCLUDES = STDCTopIncludes
            CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(ALLDEFINES)
         LINTFLAGS = $(LINTOPTS) -DLINT $(ALLDEFINES)
            LDLIBS = $(SYS_LIBRARIES) $(EXTRA_LIBRARIES)
-        LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS) 
+        LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS) $(LDLOCATIONS)
    LDCOMBINEFLAGS = LdCombineFlags
 
         MACROFILE = MacroFile
