@@ -226,6 +226,7 @@ asn1_error_code asn12krb5_buf(buf, code)
   int i;
   *code = (krb5_data*)calloc(1,sizeof(krb5_data));
   if(*code == NULL) return ENOMEM;
+  (*code)->magic = KV5M_DATA;
   (*code)->data = NULL;
   (*code)->length = 0;
   (*code)->length = asn1buf_len(buf);
@@ -350,7 +351,8 @@ asn1_error_code asn1buf_expand(buf, inc)
 					    inc : STANDARD_INCREMENT))
 			* sizeof(asn1_octet));
   if(buf->base == NULL) return ENOMEM;
-  buf->bound = (buf->base) + bound_offset + inc;
+  buf->bound = (buf->base) + bound_offset + (inc > STANDARD_INCREMENT ?
+					   inc : STANDARD_INCREMENT);
   buf->next = (buf->base) + next_offset;
   return 0;
 }
