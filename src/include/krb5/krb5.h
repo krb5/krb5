@@ -18,11 +18,11 @@
 
 #include <sys/types.h>
 
-#ifdef vax
+#if defined(vax) || defined(__vax__)
 #define BITS32
 #endif
 
-#ifdef ibm032
+#if defined(ibm032) || defined(__ibm032__)
 #define BITS32
 #endif
 
