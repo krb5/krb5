@@ -44,6 +44,10 @@ bdotdot
 
 # rely on VPATH for $(srcdir) files
 s;\$(srcdir)/\([^ /]* \);\1;g
+
+# allow override of some util dependencies in case local tools are used
+s;\$(BUILDTOP)/include/com_err.h ;$(COM_ERR_DEPS) ;g
+
 # now delete trailing whitespace
 s; *$;;g
 

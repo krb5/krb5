@@ -1,6 +1,8 @@
 2002-06-15  Ken Raeburn  <raeburn@mit.edu>
 
-	* depfix.sed: Ignore header files under /mit/gnu/.
+	* depfix.sed: Ignore header files under /mit/gnu/.  Replace
+	$(BUILDTOP)/include/com_err.h with $(COM_ERR_DEPS), now defined
+	via pre.in.
 
 2002-04-25  Ezra Peisach  <epeisach@bu.edu>
 
