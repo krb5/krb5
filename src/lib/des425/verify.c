@@ -71,6 +71,30 @@ unsigned char *ivec;
 unsigned char zero_key[8] = {1,1,1,1,1,1,1,1}; /* just parity bits */
 int i,j;
 
+unsigned char cipher1[8] = {
+    0x25,0xdd,0xac,0x3e,0x96,0x17,0x64,0x67
+};
+unsigned char cipher2[8] = {
+    0x3f,0xa4,0x0e,0x8a,0x98,0x4d,0x48,0x15
+};
+unsigned char cipher3[64] = {
+    0xe5,0xc7,0xcd,0xde,0x87,0x2b,0xf2,0x7c,
+    0x43,0xe9,0x34,0x00,0x8c,0x38,0x9c,0x0f,
+    0x68,0x37,0x88,0x49,0x9a,0x7c,0x05,0xf6
+};
+unsigned char checksum[8] = {
+    0x58,0xd2,0xe7,0x7e,0x86,0x06,0x27,0x33
+};
+
+unsigned char zresult[8] = {
+    0x8c, 0xa6, 0x4d, 0xe9, 0xc1, 0xb1, 0x23, 0xa7
+};
+
+unsigned char mresult[8] = {
+    0xa3, 0x80, 0xe0, 0x2a, 0x6b, 0xe5, 0x46, 0x96
+};
+
+    
 /*
  * Can also add :
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
@@ -84,12 +108,6 @@ main(argc,argv)
     long in_length;
 
     progname=argv[0];		/* salt away invoking program */
-
-    /* Assume a long is four bytes */
-    if (sizeof(long) != 4) {
-	printf("\nERROR,  size of long is %d",sizeof(long));
-	exit(-1);
-    }
 
     while (--argc > 0 && (*++argv)[0] == '-')
 	for (i=1; argv[0][i] != '\0'; i++) {
@@ -133,7 +151,11 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	return(0);
+	if ( memcmp((char *)cipher_text, (char *)zresult, 8) ) {
+	    printf("verify: error in zero key test\n");
+	    exit(-1);
+	}
+	exit(0);
     }
 
     if (mflag) {
@@ -148,7 +170,11 @@ main(argc,argv)
 	}
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	return(0);
+	if ( memcmp((char *)cipher_text, (char *)mresult, 8) ) {
+	    printf("verify: error in msb test\n");
+	    exit(-1);
+	}
+	exit(0);
     }
 
     /* ECB mode Davies and Price */
@@ -170,6 +196,12 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
+	if ( memcmp((char *)cipher_text, (char *)cipher1, 8) ) {
+	    printf("verify: error in ECB encryption\n");
+	    exit(-1);
+	}
+	else 
+	    printf("verify: ECB encription is correct\n\n");
     }
 
     /* ECB mode */
@@ -188,6 +220,12 @@ main(argc,argv)
 	}
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
+	if ( memcmp((char *)cipher_text, (char *)cipher2, 8) ) {
+	    printf("verify: error in ECB encryption\n");
+	    exit(-1);
+	}
+	else 
+	    printf("verify: ECB encription is correct\n\n");
     }
 
     /* CBC mode */
@@ -212,6 +250,13 @@ main(argc,argv)
     des_cbc_encrypt(cipher_text,clear_text,(long) in_length,KS,ivec,0);
     printf("\tdecrypted clear_text = \"%s\"\n",clear_text);
 
+    if ( memcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
+	printf("verify: error in CBC encryption\n");
+	exit(-1);
+    }
+    else 
+	printf("verify: CBC encription is correct\n\n");
+
     printf("EXAMPLE CBC checksum");
     printf("\tkey =  0123456789abcdef\tiv =  1234567890abcdef\n");
     printf("\tclear =\t\t\"7654321 Now is the time for \"\n");
@@ -224,6 +269,12 @@ main(argc,argv)
     for (j = 0; j<=7; j++)
 	printf("%02x ",cipher_text[j]);
     printf("\n\n");
+    if ( memcmp((char *)cipher_text, (char *)checksum, 8) ) {
+	printf("verify: error in CBC cheksum\n");
+	exit(-1);
+    }
+    else 
+	printf("verify: CBC checksum is correct\n\n");
     exit(0);
 }
 

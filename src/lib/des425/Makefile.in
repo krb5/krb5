@@ -30,11 +30,16 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/weak_key.c	
 
 
-EXT_LIB= $(TOPDIR)/lib/cryptoconf.o $(TOPDIR)/lib/crypto/libcrypto.a libdes425.a $(COMERRLIB)
+EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
+DEPKLIB= $(TOPLIBD)/libcrypto.a
 
-verify: verify.o libdes425.o
-	$(RM) verify.o
+verify: verify.o libdes425.a $(DEPKLIB)
 	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
+
+check:: verify
+	./verify -z
+	./verify -m
+	./verify
 
 clean::
 	$(RM) verify
