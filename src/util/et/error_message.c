@@ -39,7 +39,7 @@ long code;
     char *cp;
 
 #if defined(_MSDOS) || defined(_WIN32)
-#define HAS_STRERROR 1
+#define HAVE_STRERROR 1
 /*
 ** Winsock defines errors in the range 10000-10100. These are equivalent
 ** to 10000 plus the Berkeley error numbers.
@@ -58,21 +58,21 @@ long code;
     offset = (int) l_offset;
     table_num = code - l_offset;
     if (!table_num) {
-#ifdef HAS_STRERROR
+#ifdef HAVE_STRERROR
 	cp = strerror(offset);
 	if (cp)
 	    return cp;
 	goto oops;
 #else
-#ifdef HAS_SYSERRLIST
+#ifdef HAVE_SYS_ERRLIST
         if (offset < sys_nerr)
 	    return(sys_errlist[offset]);
 	else
 	    goto oops;
 #else
 		goto oops;
-#endif /* HAS_SYSERRLIST */
-#endif /* HAS_STRERROR */
+#endif /* HAVE_SYS_ERRLIST */
+#endif /* HAVE_STRERROR */
     }
     for (et = _et_list; et; et = et->next) {
 	if (et->table->base == table_num) {

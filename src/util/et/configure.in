@@ -20,7 +20,7 @@ if test $krb5_cv_decl_perror = yes; then
 	AC_DEFINE(HDR_HAS_PERROR)
 fi
 dnl
-AC_FUNC_CHECK(strerror,AC_DEFINE(HAS_STRERROR))
+AC_CHECK_FUNCS(strerror)
 AC_HEADER_STDARG
 AC_HAVE_HEADERS(stdlib.h)
 CopySrcHeader(com_err.h,$(BUILDTOP)/include)
