@@ -373,7 +373,7 @@ static krb5_error_code retval;
 static krb5_data *response;
 void bzero(), bcopy(), com_err(), sleep();
 void kerberos_v4(), kerb_err_reply();
-char *free(), *malloc(), *strcpy(), *vklog();
+char *free(), *malloc(), *strcpy();
 int strlen();
 krb5_error_code krb5_timeofday(), krb5_get_default_realm();
  
@@ -453,37 +453,29 @@ char * v4_klog( type, format, va_alist)
     va_dcl
 #endif
 {
-    char *r;
     va_list pvar;
 #ifdef __STDC__
     va_start(pvar, format);
 #else
     va_start(pvar);
 #endif
-    r = vklog( type, format, pvar);
+
+    switch (type) {
+    case L_INI_REQ:
+    case L_NTGT_INTK:
+    case L_TKT_REQ:
+    case L_ERR_SEXP:
+    case L_ERR_NKY:
+    case L_ERR_NUN:
+    case L_ERR_UNK:
+    case L_APPL_REQ:
+	strcpy(log_text, "PROCESS_V4:");
+	vsprintf(log_text+strlen(log_text), format, pvar);
+	com_err(0, 0, log_text);
+    /* ignore the other types... */
+    }
     va_end(pvar);
-    return( r);
-}
-char * vklog( type, format, ap)
-    int type;
-    char *format;
-    va_list ap;
-{
-    long now;
-    char *month_sname();
-    struct tm *tm;
-
-    time(&now);
-    tm = localtime(&now);
-
-    sprintf(log_text,"%2d-%s-%02d %02d:%02d:%02d ",tm->tm_mday,
-		    month_sname(tm->tm_mon + 1),tm->tm_year,
-		    tm->tm_hour, tm->tm_min, tm->tm_sec);
-    com_err("PROCESS_V4", 0, log_text);
-    vsprintf( log_text, format, ap);
-    com_err("PROCESS_V4", 0, log_text);
-    retval = type_2_v5err[ type];
-    return( log_text);
+    return(log_text);
 }
 
 static
