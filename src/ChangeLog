@@ -1,5 +1,9 @@
 Sun May 24 22:09:12 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* Makefile.in: Remove lib/kadm and lib/krb5/free from the list of
+ 		directories supported by windows (since they have since
+ 		gone away).
+
 	* aclocal.m4: Added suggested changes to improve HP-UX's support
 	 	for shared libraries.
 

@@ -136,12 +136,12 @@ config-windows:: makefile-windows
 ##DOS##		lib\crypto\os\makefile lib\des425\makefile \
 ##DOS##		lib\gssapi\makefile lib\gssapi\generic\makefile \
 ##DOS##		lib\gssapi\krb5\makefile lib\gssapi\mechglue\makefile \
-##DOS##		lib\kadm\makefile lib\krb4\makefile lib\krb5\makefile \
+##DOS##		lib\krb4\makefile lib\krb5\makefile \
 ##DOS##		lib\krb5\asn.1\makefile lib\krb5\ccache\makefile \
 ##DOS##		lib\krb5\ccache\file\makefile \
 ##DOS##		lib\krb5\ccache\stdio\makefile \
 ##DOS##		lib\krb5\error_tables\makefile \
-##DOS##		lib\krb5\free\makefile lib\krb5\keytab\makefile \
+##DOS##		lib\krb5\keytab\makefile \
 ##DOS##		lib\krb5\keytab\file\makefile lib\krb5\krb\makefile \
 ##DOS##		lib\krb5\os\makefile lib\krb5\posix\makefile \
 ##DOS##		lib\krb5\rcache\makefile \
@@ -192,8 +192,6 @@ config-windows:: makefile-windows
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\makefile: lib\gssapi\krb5\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\kadm\makefile: lib\kadm\makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb4\makefile: lib\krb4\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\makefile: lib\krb5\makefile.in $(MKFDEP)
@@ -207,8 +205,6 @@ config-windows:: makefile-windows
 ##DOS##lib\krb5\ccache\stdio\makefile: lib\krb5\ccache\stdio\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\error_tables\makefile: lib\krb5\error_tables\makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\free\makefile: lib\krb5\free\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\keytab\makefile: lib\krb5\keytab\makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -281,11 +277,11 @@ FILES= ./* \
 	lib/crypto/* lib/crypto/crc32/* lib/crypto/des/* \
 	lib/crypto/sha/* lib/crypto/md4/* lib/crypto/md5/* lib/crypto/os/* \
 	lib/des425/* lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
-	lib/gssapi/mechglue/* lib/kadm/* lib/krb4/* \
+	lib/gssapi/mechglue/* lib/krb4/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
-	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
+	lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
 	util/et/* util/profile/*
 
