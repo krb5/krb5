@@ -80,18 +80,18 @@ OLDDECLARG(krb5_pointer, keyseed)
  returns system errors, encryption errors
  */
 krb5_error_code
-krb5_get_in_tkt_with_password(DECLARG(krb5_flags, options),
-			      DECLARG(krb5_address **, addrs),
-			      DECLARG(krb5_enctype, etype),
-			      DECLARG(krb5_keytype, keytype),
-			      DECLARG(char *, password),
+krb5_get_in_tkt_with_password(DECLARG(const krb5_flags, options),
+			      DECLARG(const krb5_address **, addrs),
+			      DECLARG(const krb5_enctype, etype),
+			      DECLARG(const krb5_keytype, keytype),
+			      DECLARG(const char *, password),
 			      DECLARG(krb5_ccache, ccache),
 			      DECLARG(krb5_creds *, creds))
-OLDDECLARG(krb5_flags, options)
-OLDDECLARG(krb5_address **, addrs)
-OLDDECLARG(krb5_enctype, etype)
-OLDDECLARG(krb5_keytype, keytype)
-OLDDECLARG(char *, password)
+OLDDECLARG(const krb5_flags, options)
+OLDDECLARG(const krb5_address **, addrs)
+OLDDECLARG(const krb5_enctype, etype)
+OLDDECLARG(const krb5_keytype, keytype)
+OLDDECLARG(const char *, password)
 OLDDECLARG(krb5_ccache, ccache)
 OLDDECLARG(krb5_creds *, creds)
 {
@@ -99,7 +99,7 @@ OLDDECLARG(krb5_creds *, creds)
     struct pwd_keyproc_arg keyseed;
 
 
-    keyseed.password.data = password;
+    keyseed.password.data = (char *)password;
     keyseed.password.length = strlen(password);
     keyseed.who = creds->client;
 

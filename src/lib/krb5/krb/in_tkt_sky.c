@@ -115,16 +115,16 @@ OLDDECLARG(krb5_pointer, keyseed)
 
  */
 krb5_error_code
-krb5_get_in_tkt_with_skey(DECLARG(krb5_flags, options),
-			  DECLARG(krb5_address **, addrs),
-			  DECLARG(krb5_enctype, etype),
-			  DECLARG(krb5_keyblock *,key),
+krb5_get_in_tkt_with_skey(DECLARG(const krb5_flags, options),
+			  DECLARG(const krb5_address **, addrs),
+			  DECLARG(const krb5_enctype, etype),
+			  DECLARG(const krb5_keyblock *,key),
 			  DECLARG(krb5_ccache, ccache),
 			  DECLARG(krb5_creds *,creds))
-OLDDECLARG(krb5_flags, options)
-OLDDECLARG(krb5_address **, addrs)
-OLDDECLARG(krb5_enctype, etype)
-OLDDECLARG(krb5_keyblock *,key)
+OLDDECLARG(const krb5_flags, options)
+OLDDECLARG(const krb5_address **, addrs)
+OLDDECLARG(const krb5_enctype, etype)
+OLDDECLARG(const krb5_keyblock *,key)
 OLDDECLARG(krb5_ccache, ccache)
 OLDDECLARG(krb5_creds *, creds)
 {
@@ -132,7 +132,7 @@ OLDDECLARG(krb5_creds *, creds)
     krb5_keytype keytype;
 
     if (key) {
-	arg.key = key;
+	arg.key = (krb5_keyblock *)key;
 	arg.server = 0;
 	keytype = key->keytype;
     } else {
@@ -145,6 +145,8 @@ OLDDECLARG(krb5_creds *, creds)
     }
     return (krb5_get_in_tkt(options, addrs, etype, keytype, skey_keyproc,
 			    (krb5_pointer) &arg,
-			    krb5_kdc_rep_decrypt_proc, 0,
-			    creds, ccache));
+			    krb5_kdc_rep_decrypt_proc,
+			    0,
+			    creds,
+			    ccache));
 }
