@@ -124,8 +124,10 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
 	realm = krb_realm;
     }
 
-    if (!(options & KOPT_DONT_CANON))
-	(void) strncpy(inst, krb_get_phost(inst), INST_SZ);
+    if (!(options & KOPT_DONT_CANON)) {
+	(void) strncpy(inst, krb_get_phost(inst), INST_SZ - 1);
+	inst[INST_SZ-1] = 0;
+    }
 
     /* get the ticket if desired */
     if (!(options & KOPT_DONT_MK_REQ)) {

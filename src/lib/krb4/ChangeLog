@@ -1,3 +1,12 @@
+2000-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* decomp_tkt.c (dcmp_tkt_int): Add a couple more length checks.
+	Reject names that are exactly ANAME_SZ (etc) bytes long without
+	the trailing nul, because krb.h says the *_SZ macros are "maximum
+	sizes ... +1".
+	* mk_auth.c (krb_mk_auth): Force nul termination of inst.
+	* sendauth.c (krb_sendauth): Force nul termination of srv_inst.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* Password.c (GetUserInfo): Truncate user name if it's too long
