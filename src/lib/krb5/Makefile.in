@@ -12,19 +12,11 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		posix/DONE $(BUILDTOP)/util/profile/DONE \
 		$(BUILDTOP)/util/berk_db/hash/DONE
 #
-# Depends on KRB4_LIB, KRB4_CRYPTO_LIB and libcrypto, expect two unresolved
-# symbols:
-#	_et_list (from krb4)
-#	error_message
-#
-KRB4_LIBS=@KRB4_LIB@
-KRB4_CRYPTO_LIBS=@KRB4_CRYPTO_LIB@
-DEPKRB4_LIBS=@DEPKRB4_LIB@ @DEPKRB4_CRYPTO_LIB@
 CRYPTO_VER=@CRYPTO_SH_VERS@
 COMERR_VER=@COMERR_SH_VERS@
 DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
 	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER)
-SHLIB_LIBS=$(KRB4_LIBS) $(KRB4_CRYPTO_LIBS) -lcrypto -lcom_err
+SHLIB_LIBS=-lcrypto -lcom_err
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@

@@ -1,3 +1,8 @@
+Tue Dec  5 20:57:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Removed dependency on krb4 library in building
+		shared library. 
+
 Fri Nov  3 21:31:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Added the ccache/memory subdirectory.
