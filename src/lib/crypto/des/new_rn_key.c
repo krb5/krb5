@@ -22,9 +22,14 @@ static char new_rnd_key_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
-
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+#include <krb5/libos-proto.h>
 #include "des_int.h"
+
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /*
  * mit_des_new_random_key: create a random des key
@@ -63,39 +68,47 @@ mit_des_new_random_key(key, p_seed)
  *
  * Note: this routine calls mit_des_set_random_generator_seed.
  */
-#ifndef BSDUNIX
-  you lose...   (aka, you get to implement an analog of this for your
-		 system...)
-#else
-
-#include <sys/time.h>
-#include <krb5/ext-proto.h>
-extern long gethostid(); /* XXX */
 
 void mit_des_init_random_number_generator(key,p_seed)
     mit_des_cblock key;
     mit_des_random_key_seed	*p_seed;
 {
-    struct { /* This must be 64 bits exactly */
-	long process_id;
-	long host_id;
-    } seed;
-    struct timeval time; /* this must also be 64 bits exactly */
+    mit_des_cblock seed; /* This must be 64 bits exactly */
+    struct tval {
+	krb5_int32 seconds;
+	krb5_int32 microseconds;
+    } timenow;
+    krb5_int16 msec;
     mit_des_cblock new_key;
 
-    /*
-     * use a host id and process id in generating the seed to ensure
-     * that different servers have different streams:
-     */
-    seed.host_id = gethostid();
-    seed.process_id = (long) getpid();
+    krb5_address **addrs;
 
     /*
-     * Generate a tempory value that depends on the key, host_id, and
-     * process_id such that it gives no useful information about the key:
+     * use a host id in generating the seed to ensure
+     * that different servers have different streams:
+     */
+    bzero((char *)seed, sizeof(seed));
+    if (!krb5_os_localaddr(&addrs) && *addrs) {
+	bcopy((char *)addrs[0]->contents, (char *)seed,
+	      min(sizeof(seed), addrs[0]->length));
+	/* XXX may not do all of the seed. */
+    }
+    if (addrs) {
+	/* can't use krb5_free_address due to circular dependencies in
+	   libraries */
+	register krb5_address **addr2;
+	for (addr2 = addrs; *addr2; addr2++) {
+	    xfree((*addr2)->contents);
+	    xfree(*addr2);
+	}
+	xfree(addrs);
+    }
+    /*
+     * Generate a tempory value that depends on the key and host_id
+     * such that it gives no useful information about the key:
      */
     mit_des_set_random_generator_seed(key, p_seed);
-    mit_des_set_sequence_number((unsigned char *)&seed, p_seed);
+    mit_des_set_sequence_number(seed, p_seed);
     mit_des_new_random_key(new_key, p_seed);
 
     /*
@@ -107,8 +120,9 @@ void mit_des_init_random_number_generator(key,p_seed)
      * use a time stamp to ensure that a server started later does not reuse
      * an old stream:
      */
-    gettimeofday(&time, (struct timezone *)0);
-    mit_des_set_sequence_number((unsigned char *)&time, p_seed);
+    (void) krb5_ms_timeofday(&timenow.seconds, &msec); /* XXX return value */
+    timenow.microseconds = msec * 1000;
+    mit_des_set_sequence_number((unsigned char *)&timenow, p_seed);
 
     /*
      * use the time stamp finally to select the final seed using the
@@ -117,8 +131,6 @@ void mit_des_init_random_number_generator(key,p_seed)
     mit_des_new_random_key(new_key, p_seed);
     mit_des_set_random_generator_seed(new_key, p_seed);
 }
-
-#endif /* ifdef BSDUNIX */
 
 /*
  * This module implements a random number generator faculty such that the next
