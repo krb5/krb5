@@ -404,7 +404,7 @@ int get_ad_tkt
 	(char *service, char *sinst, char *realm, int lifetime);
 /* g_admhst.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_admhst
-	(char FAR *host, char FAR *realm, int index);
+	(char FAR *host, char FAR *realm, int idx);
 /* g_cred.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_cred
 	(char FAR *service, char FAR *instance, char FAR *realm,
@@ -421,10 +421,10 @@ int krb_get_in_tkt_preauth
 		   char *preauth_p, int preauth_len);
 /* g_krbhst.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_krbhst
-	(char FAR *host, char FAR *realm, int index);
+	(char FAR *host, char FAR *realm, int idx);
 /* g_krbrlm.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_lrealm
-	(char FAR *realm, int index);
+	(char FAR *realm, int idx);
 /* g_phost.c */
 KRB5_DLLIMP char FAR * KRB5_CALLCONV krb_get_phost
 	(char FAR * alias);

@@ -1,5 +1,8 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb.h (krb_get_admhst, krb_get_krbhst, krb_get_lrealm): Don't
+	use "index" as argument name.
+
 	* kparse.h: Don't use PROTOTYPE macro.
 
 	* des.h (des_cblock, des_key_schedule): Separate definitions into
