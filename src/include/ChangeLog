@@ -1,3 +1,9 @@
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_get_default_config_files, krb5_free_config_files): 
+		Add function to get default config files with corresponding 
+		free function.
+
 1999-05-26  Miro Jurisic  <meeroh@.mit.edu>
 
 	* k5-int.h: Remove #define ENOMEM under #ifdef macintosh
