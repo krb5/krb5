@@ -1,3 +1,12 @@
+Wed May 24 10:00:38 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ring.c: Include string.h or strings.h
+
+	* configure.in: Check for stdlib.h
+
+	* externs.h: Include sys/param.h before redefining BSD
+	            Include stdlib.h or define malloc, realloc, calloc
+
 Fri Apr 28 18:07:03 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.

@@ -60,6 +60,12 @@
 #include	"ring.h"
 #include	"general.h"
 
+#ifndef	NO_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 /* Internal macros */
 
 #if	!defined(MIN)

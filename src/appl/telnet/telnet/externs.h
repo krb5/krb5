@@ -33,6 +33,8 @@
  *	@(#)externs.h	8.1 (Berkeley) 6/6/93
  */
 
+#include <sys/param.h>
+
 #ifndef	BSD
 # define BSD 43
 #endif
@@ -81,6 +83,13 @@ typedef char cc_t;
 # else
 typedef unsigned char cc_t;
 # endif
+#endif
+
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
 #endif
 
 #ifndef	NO_STRING_H
