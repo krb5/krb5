@@ -78,7 +78,7 @@ void mit_des_init_random_number_generator(key,p_seed)
 	krb5_int32 seconds;
 	krb5_int32 microseconds;
     } timenow;
-    krb5_int16 msec;
+    krb5_ui_2 msec;
     mit_des_cblock new_key;
 
     krb5_address **addrs;
