@@ -227,7 +227,9 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
  */
 
 krb5_error_code
-krb5_sendto_kdc (krb5_context context, const krb5_data *message, const krb5_data *realm, krb5_data *reply, int use_master, int tcp_only)
+krb5_sendto_kdc (krb5_context context, const krb5_data *message,
+		 const krb5_data *realm, krb5_data *reply,
+		 int use_master, int tcp_only)
 {
     krb5_error_code retval;
     struct addrlist addrs;
