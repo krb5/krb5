@@ -1,3 +1,9 @@
+Mon May 17 14:23:13 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove win16 stuff.  Fix resource dependencies.
+		Link resource file directly instead of explicitly
+		converting it to an object file.
+
 1999-04-17    <tytso@rsts-11.mit.edu>
 
 	* screen.c (DeleteTopLine): Free the top line before when we allow

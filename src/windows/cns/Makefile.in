@@ -15,18 +15,17 @@ KRB 	 = KRB$(KVERSION)
 BUILDTOP = ..
 LIBDIR 	 = $(BUILDTOP)\lib\krb
 KLIB 	 = $(LIBDIR)\kerberos.lib 
-##WIN16##WLIB 	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include
-##WIN16##XOBJS    = 
-##WIN32##XOBJS    = cnsres4.obj
+RESFILE  = $(OUTPRE)cnsres4.res
+XOBJS    = $(RESFILE)
 !endif
 
 !if $(KVERSION) == 5
 BUILDTOP =..\..
 LIBDIR	 = $(BUILDTOP)\lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN16##XOBJS    = kpasswd.obj
-##WIN32##XOBJS    = $(OUTPRE)cnsres5.obj $(OUTPRE)kpasswd.obj $(OUTPRE)cns_reg.obj
+RESFILE  = $(OUTPRE)cnsres5.res
+XOBJS    = $(RESFILE) $(OUTPRE)kpasswd.obj $(OUTPRE)cns_reg.obj
 !endif
 
 ##### C Compiler
@@ -38,9 +37,9 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 /DDEBUG
 !endif
 
 ##### RC Compiler
-RC 	 = rc
-##WIN16##RFLAGS 	 = /nologo /D$(KRB)=1 $(INCLUDES)
-##WIN32##RFLAGS 	 = /D$(KRB)=1 $(INCLUDES)
+#RC 	 = rc
+RFLAGS 	 = /D$(KRB)=1 $(INCLUDES)
+RCFLAGS  = $(RFLAGS) -DKRB5_APP
 
 ##### CVSRES -- .res -> .obj converter
 CVTRES = cvtres
@@ -48,31 +47,14 @@ CVTRES = cvtres
 ##### Linker
 LINK 	 = link
 LIBS 	 = $(KLIB) $(CLIB) $(WLIB) ../lib/$(OUTPRE)libwin.lib
-##WIN16##SYSLIBS  = libw llibcew
-##WIN32##SYSLIBS = kernel32.lib wsock32.lib user32.lib gdi32.lib advapi32.lib
-!ifdef NODEBUG
-##WIN16##LFLAGS = /nologo /nod /nopackcode
-!else
-##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
-!endif
-##WIN32##LFLAGS = /nologo $(LOPTS)
+SYSLIBS = kernel32.lib wsock32.lib user32.lib gdi32.lib advapi32.lib
+LFLAGS = /nologo $(LOPTS)
 
-all:: makefile $(OUTPRE)$(NAME).exe
+all:: Makefile $(OUTPRE)$(NAME).exe
 
 $(OUTPRE)$(NAME).exe: $(NAME).def $(OBJS) $(XOBJS) $(LIBS)
-##WIN16##	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
-##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
-##WIN16##	$(RC) $(RFLAGS) -DKRB5_APP /k cnsres4.res $@
-##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
-##WIN32##	  $(LIBS) $(SYSLIBS)
-
-##WIN32##.rc.obj:
-##WIN32##	$(RC) $(RFLAGS) -DKRB5_APP /r $*.rc
-##WIN32##	$(CVTRES) /nologo /out:$*.obj $*.res
-
-##WIN32##{}.rc{$(OUTPRE)}.obj:
-##WIN32##	$(RC) $(RFLAGS) -DKRB5_APP -fo $*.res /r $<
-##WIN32##	$(CVTRES) /nologo /out:$*.obj $*.res
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
+	  $(LIBS) $(SYSLIBS)
 
 install::
 	$(CP) $(OUTPRE)$(NAME).exe $(DESTDIR)
@@ -85,9 +67,9 @@ clean::
 
 $(OBJS): cns.h tktlist.h
 
-$(OUTPRE)cns.res: cns.h
+$(RESFILE): cns.h
 
-$(OUTPRE)cns.res: clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
+$(RESFILE): clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
 	 clock25.ico clock30.ico clock35.ico clock40.ico clock45.ico \
 	 clock50.ico clock55.ico clock60.ico clockexp.ico clocktkt.ico \
 	 cns.ico

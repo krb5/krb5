@@ -1,50 +1,35 @@
 # makefile: Constructs the Kerberos for Windows ticket manager
 # Works for both k4 and k5 releases.
 #
-OBJS 	 = $(OUTPRE)gss.obj $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj
-##WIN32##XOBJS	= $(OUTPRE)resource.obj
+OBJS	= $(OUTPRE)gss.obj $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj
+RESFILE = $(OUTPRE)gss.res
+XOBJS	= $(RESFILE)
 
 ##### Options
 # Set NODEBUG if building release instead of debug
-BUILDTOP =..\..
-INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+BUILDTOP=..\..
+INCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 
 ##### C Compiler
-CFLAGS 	 = $(CCOPTS2) $(INCLUDES)
+CFLAGS	= $(CCOPTS2) $(INCLUDES)
 
 ##### RC Compiler
-##WIN16##RFLAGS 	 = /nologo $(INCLUDES)
-##WIN32##RFLAGS 	 = $(INCLUDES)
-
+RFLAGS	= $(INCLUDES)
+RCFLAGS	= $(RFLAGS) -D_WIN32 -DGSS_APP
 
 ##### Linker
-LINK 	 = link
-LIBS 	 = $(GLIB) $(CLIB) $(WLIB)
-##WIN16##SYSLIBS  = libw llibcew
-##WIN32##SYSLIBS  = kernel32.lib wsock32.lib user32.lib gdi32.lib comdlg32.lib
-!ifdef NODEBUG
-##WIN16##LFLAGS = /nologo /nod /nopackcode
-!else
-##WIN16##LFLAGS = /co /nologo /nod /nopackcode /map:full
-!endif
-##WIN32##LFLAGS = /nologo $(LOPTS)
+LINK	= link
+LIBS	= $(GLIB) $(CLIB) $(WLIB)
+SYSLIBS	= kernel32.lib wsock32.lib user32.lib gdi32.lib comdlg32.lib
+LFLAGS	= /nologo $(LOPTS)
 
-all:: makefile $(OUTPRE)gss.exe
+all:: Makefile $(OUTPRE)gss.exe
 
 $(OUTPRE)gss.exe: gss.def $(OBJS) $(XOBJS) $(LIBS)
-##WIN16##	$(LINK) $(LFLAGS) $(OBJS), $@, $*.map, \
-##WIN16##	  $(LIBS) $(SYSLIBS), gss.def
-##WIN16##	$(RC) $(RFLAGS) /k -DGSS_APP $*.rc $@
-##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
-##WIN32##	  $(LIBS) $(SYSLIBS)
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
+	  $(LIBS) $(SYSLIBS)
 
-##WIN32##$(OUTPRE)gss.res: gss.rc
-##WIN32##	$(RC) $(RFLAGS) -D_WIN32 -DGSS_APP -fo $@ /r gss.rc
-
-##WIN32##$(OUTPRE)resource.obj: $(OUTPRE)gss.res
-##WIN32##	$(CVTRES) /nologo /out:$@ $(OUTPRE)gss.res
-
-$(OBJS) $(OUTPRE)gss.res: gss.h
+$(OBJS) $(XOBJS): gss.h
 
 install::
 	copy $(OUTPRE)gss.exe ..\floppy
@@ -57,4 +42,3 @@ clean::
 	if exist $(OUTPRE)*.map del $(OUTPRE)*.map
 	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
 	if exist *.err del *.err
-

@@ -1,3 +1,9 @@
+Mon May 17 14:21:42 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove win16 stuff.  Fix resource dependencies.
+		Link resource file directly instead of explicitly
+		converting it to an object file.
+
 Mon May 10 15:28:27 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
