@@ -1,3 +1,10 @@
+1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* str_conv.c (krb5_string_to_timestamp, strptime): Fix routines to
+		be able to properly parse Y2K dates.  
+
+	* t_kerb.c: Add ability to test krb5_string_to_timestamp
+
 Mon May  4 15:54:07 1998  Tom Yu  <tlyu@mit.edu>
 
 	* get_in_tkt.c: Add prototype for make_preauth_list.
