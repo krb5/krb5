@@ -14,7 +14,7 @@
  * decodes it, and writes back the results (in ASCII) to the client.
  *
  * Usage:
- * sample_server servername [keytabname]
+ * sample_server servername
  *
  * file descriptor 0 (zero) should be a socket connected to the requesting
  * client (this will be correct if this server is started by inetd).
@@ -44,8 +44,6 @@ static char rcsid_sserver_c [] =
 
 #include "sample.h"
 
-#define RCSAMPLE "dfl:sserver_rcache"
-
 extern krb5_deltat krb5_clockskew;
 
 void
@@ -59,9 +57,7 @@ char *argv[];
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
-    krb5_rcache rcsample;
     krb5_tkt_authent authd;
-    krb5_pointer keyfile = 0;
     krb5_principal server;
     char repbuf[BUFSIZ];
     char *cname;
@@ -71,14 +67,15 @@ char *argv[];
 
     openlog("sserver", 0, LOG_DAEMON);
 
+    if (argc < 2) {
+	syslog(LOG_ERR, "needs server argument");
+	exit(1);
+    }
     if (retval = krb5_parse_name(argv[1], &server)) {
 	syslog(LOG_ERR, "parse server name %s: %s", argv[1],
 	       error_message(retval));
 	exit(1);
     }
-
-    if (argc > 2)
-	keyfile = (krb5_pointer) argv[2];
 
 #ifdef DEBUG
 {
@@ -127,20 +124,6 @@ char *argv[];
     bcopy((char *)&peername.sin_addr, (char *)peeraddr.contents,
 	  peeraddr.length);
 
-    if (retval = krb5_rc_resolve_full(&rcsample, RCSAMPLE)) {
-	syslog(LOG_ERR, "%s while resolving replay cache '%s'",
-	       error_message(retval), RCSAMPLE);
-	exit(1);
-    }
-
-    if ((retval = krb5_rc_recover(rcsample)) &&
-	(retval = krb5_rc_initialize(rcsample, krb5_clockskew))) {
-	syslog(LOG_ERR, "%s while initializing replay cache '%s:%s'",
-	       error_message(retval),
-	       rcsample->ops->type,
-	       krb5_rc_get_name(rcsample));
-	exit(1);
-    }
     if ((retval = krb5_net_read(0, (char *)&xmitlen, sizeof(xmitlen))) <= 0) {
 	if (retval == 0)
 	    errno = ECONNRESET;		/* XXX */
@@ -159,8 +142,7 @@ char *argv[];
 	syslog(LOG_ERR, "read contents: %m");
 	exit(1);
     }
-    if (retval = krb5_rd_req(&recv_data, server, &peeraddr, keyfile, 0, 0,
-			     rcsample, &authd)) {
+    if (retval = krb5_rd_req_simple(&recv_data, server, &peeraddr, &authd)) {
 	syslog(LOG_ERR, "rd_req failed: %s", error_message(retval));
 	sprintf(repbuf, "RD_REQ failed: %s\n", error_message(retval));
 	goto sendreply;
