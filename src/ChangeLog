@@ -1,8 +1,11 @@
+Sat Feb 22 20:50:49 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (CC_LINK_STATIC): Added RUN_ENV line for Linux
+
 Fri Feb 21 15:58:55 1997  Sam Hartman  <hartmans@mit.edu>
 
 	* aclocal.m4 (CC_LINK_STATIC): Define appropriate flags to build
  	shared libs on AIX.
-
 
 Fri Feb 21 12:00:53 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 

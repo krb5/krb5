@@ -1220,6 +1220,7 @@ mips-sgi-irix*)
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
 *-*-aix*)
 	SHLIBVEXT='.a.$(LIBMAJOR).$(LIBMINOR)'
