@@ -724,13 +724,13 @@ rd_req.so rd_req.po $(OUTPRE)rd_req.$(OBJEXT): rd_req.c $(SRCTOP)/include/k5-int
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h auth_con.h $(SRCTOP)/include/syslog.h
+  $(SRCTOP)/include/krb5/kdb.h auth_con.h
 rd_req_dec.so rd_req_dec.po $(OUTPRE)rd_req_dec.$(OBJEXT): rd_req_dec.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h auth_con.h $(SRCTOP)/include/syslog.h
+  $(SRCTOP)/include/krb5/kdb.h auth_con.h
 rd_safe.so rd_safe.po $(OUTPRE)rd_safe.$(OBJEXT): rd_safe.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
