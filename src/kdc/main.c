@@ -133,7 +133,7 @@ char **argv;
 
     extern char *optarg;
 
-    while (c = getopt(argc, argv, "r:d:mM:k:")) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -179,9 +179,16 @@ char **argv;
 	exit(1);
     }
 
+#ifdef PROVIDE_DES_CBC_CRC
+    master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
+#else
+#error You gotta figure out what cryptosystem to use in the KDC.
+#endif
+
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
+	exit(1);
     }
     return;
 }
@@ -203,12 +210,6 @@ krb5_keyblock *masterkeyblock;
     if (retval = krb5_db_init())
 	return(retval);
 
-#ifdef PROVIDE_DES_CBC_CRC
-    master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
-#else
-#error You gotta figure out what cryptosystem to use in the KDC.
-#endif
-    
     if (retval = krb5_db_verify_master_key(masterkeyname, masterkeyblock,
 					   &master_encblock)) {
 	master_encblock.crypto_entry = 0;
@@ -278,6 +279,9 @@ int argc;
 char *argv[];
 {
     krb5_error_code retval;
+
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
 
     setup_com_err();
 
