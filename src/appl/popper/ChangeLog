@@ -1,3 +1,8 @@
+Mon Mar 27 16:52:48 1995    <tytso@rsx-11.mit.edu>
+
+	* pop_init.c (pop_init): Put in a type cast to shut up the
+		compiler.  Popper is still using gethostbyname()'s static
+		data wrong; this should be fixed eventually.
 
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 

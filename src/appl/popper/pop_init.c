@@ -179,7 +179,7 @@ char    **      argmessage;
     else {
 
 #ifndef BIND43
-        p->client = ch->h_name;
+        p->client = (char *) ch->h_name;
 #else
 #       include <arpa/nameser.h>
 #       include <resolv.h>
