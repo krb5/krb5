@@ -11,11 +11,11 @@
 
 #define	TEST_NUM    25
 
-main()
+int main()
 {
      ovsec_kadm_ret_t ret;
      char   *cp;
-     int    x, i;
+     int    x;
      void *server_handle;
      kadm5_server_handle_t handle;
 

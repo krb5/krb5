@@ -9,7 +9,7 @@
 #include <kadm5/client_internal.h>
 
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
      ovsec_kadm_ret_t ret;
      void *server_handle;
@@ -20,7 +20,6 @@ main(int argc, char *argv[])
      krb5_keyblock	*key;
      krb5_principal	tprinc;
      krb5_context	context;
-     int		*p;
 
 
     krb5_init_context(&context);

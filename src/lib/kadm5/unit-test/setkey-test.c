@@ -19,28 +19,30 @@ need a random number generator
 #endif	/* no random */
 
 krb5_keyblock test1[] = {
-     0, ENCTYPE_DES_CBC_CRC, 0, 0,
-     -1,
+    {0, ENCTYPE_DES_CBC_CRC, 0, 0},
+    {-1},
 };
 krb5_keyblock test2[] = {
-     0, ENCTYPE_DES_CBC_RAW, 0, 0,
-     -1,
+     {0, ENCTYPE_DES_CBC_RAW, 0, 0},
+     {-1},
 };
 krb5_keyblock test3[] = {
-     0, ENCTYPE_DES_CBC_MD5, 0, 0,
-     -1,
+     {0, ENCTYPE_DES_CBC_MD5, 0, 0},
+     {-1},
 };
 
 krb5_keyblock *tests[] = { 
   test1, test2, test3, NULL
 };
 
+#if 0
 int keyblocks_equal(krb5_keyblock *kb1, krb5_keyblock *kb2)
 {
   return (kb1->enctype == kb2->enctype &&
 	  kb1->length == kb2->length &&
 	  memcmp(kb1->contents, kb2->contents, kb1->length) == 0);
 }
+#endif
 
 krb5_data tgtname = {
     0,
@@ -48,10 +50,11 @@ krb5_data tgtname = {
     KRB5_TGS_NAME
 };
 
-unsigned int ktypes[] = { 0, 0 };
+krb5_enctype ktypes[] = { 0, 0 };
 
 extern krb5_kt_ops krb5_ktf_writable_ops;
 
+int
 main(int argc, char **argv)
 {
   krb5_context context;
@@ -102,7 +105,8 @@ main(int argc, char **argv)
   }
 
   /* register the WRFILE keytab type  */
-  if (ret = krb5_kt_register(context, &krb5_ktf_writable_ops)) {
+  ret = krb5_kt_register(context, &krb5_ktf_writable_ops);
+  if (ret) {
        com_err(whoami, ret,
 	       "while registering writable key table functions");
        exit(1);
@@ -146,8 +150,9 @@ main(int argc, char **argv)
 		 pw[i] = (RAND() % 26) + '0'; /* XXX */
 
 	    krb5_use_enctype(context, &eblock, testp[encnum].enctype);
-	    if (ret = krb5_string_to_key(context, &eblock, &testp[encnum],
-					 &pwdata, NULL)) {
+	    ret = krb5_string_to_key(context, &eblock, &testp[encnum],
+				     &pwdata, NULL);
+	    if (ret) {
 		 com_err(whoami, ret, "while converting string to key");
 		 exit(1);
 	    }

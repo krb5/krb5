@@ -1,3 +1,8 @@
+#if USE_KADM5_API_VERSION == 1
+#undef USE_KADM5_API_VERSION
+#define USE_KADM5_API_VERSION 2
+#endif
+
 #include <stdio.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
@@ -5,7 +10,7 @@
 
 char *whoami;
 
-void usage()
+static void usage()
 {
      fprintf(stderr,
 	     "Usage: %s {shared|exclusive|permanent|release|"
@@ -13,7 +18,7 @@ void usage()
      exit(1);
 }
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
      osa_adb_ret_t ret;
      osa_adb_policy_t policy_db;
@@ -35,8 +40,9 @@ main(int argc, char **argv)
      initialize_ovku_error_table();
 
      params.mask = 0;
-     if (ret = kadm5_get_config_params(context, NULL, NULL, &params,
-				       &params)) {
+     ret = kadm5_get_config_params(context, NULL, NULL, &params,
+				   &params);
+     if (ret) {
 	  com_err(whoami, ret, "while retrieving configuration parameters");
 	  exit(1);
      }

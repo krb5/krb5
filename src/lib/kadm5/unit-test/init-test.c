@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <krb5.h>
 
-main()
+int main()
 {
      ovsec_kadm_ret_t ret;
      void *server_handle;

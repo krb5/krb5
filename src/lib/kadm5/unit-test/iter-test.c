@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <kadm5/admin.h>
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
      ovsec_kadm_ret_t ret;
      void *server_handle;

@@ -1,3 +1,16 @@
+2000-10-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* lock-test.c (main): Cleanup assignments in conditionals. If
+	USE_KADM5_API_VERSION is 1, set to 2. This program uses the V2 api
+	(kadm5_get_config_params).
+	
+	* setkey-test.c: Declare main() as int. Enclose initialization of
+	elements of arrays in '{', '}'. Use krb5_enctype type instead of
+	unsigned int. Break out assignments in conditionals.
+
+	* destroy-test.c, handle-test.c, init-test.c, iter-test.c,
+	randkey-test.c: Declare main() as int.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* iter-test.c (main): Code was using ovsec_kadm_ret_t in place of

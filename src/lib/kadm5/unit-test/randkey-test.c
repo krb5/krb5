@@ -7,7 +7,7 @@
 
 #define	TEST_NUM    1000
 
-main()
+int main()
 {
      ovsec_kadm_ret_t ret;
      krb5_keyblock  *keys[TEST_NUM];
