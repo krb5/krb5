@@ -19,10 +19,11 @@ possible to have Kerberos realm names that are not DNS-style names, but
 we don't recommend it for Internet use, and our code does not support it
 well.)  Several different Kerberos-related service names are used:
 
-@table @code
-@item _kerberos._udp
-This is for contacting any KDC.  This entry will be used the most often.
-Normally you should list ports 88 and 750 on each of your KDCs.
+@table @code 
+@item _kerberos._udp 
+This is for contacting any KDC.  This entry will be used the most
+often.  Normally you should list ports @value{DefaultKdcPorts} on each
+of your KDCs.
 
 @item _kerberos-master._udp
 This entry should refer to those KDCs, if any, that will immediately see
@@ -38,14 +39,15 @@ KDC that would get database changes faster than the others, you do not
 need to define this entry.
 
 @item _kerberos-adm._tcp
-This should list port 749 on your master KDC.  Support for it is not
-complete at this time, but it will eventually be used by the
-@code{kadmin} program and related utilities.  For now, you will also
-need the @code{admin_server} entry in @code{krb5.conf}.
+This should list port @value{DefaultKadmindPort} on your master KDC.
+Support for it is not complete at this time, but it will eventually be
+used by the @code{kadmin} program and related utilities.  For now, you
+will also need the @code{admin_server} entry in @code{krb5.conf}.
+(@xref{krb5.conf}.)
 
 @item _kpasswd._udp
-This should list port 464 on your master KDC.  It is used when a user
-changes her password.
+This should list port @value{DefaultKpasswdPort} on your master KDC.
+It is used when a user changes her password.
 
 @end table
 

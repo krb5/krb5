@@ -28,7 +28,6 @@
 @page
 @vskip 0pt plus 1filll
 
-@include copyright.texinfo
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
@@ -136,9 +135,17 @@ you don't have to perform the transactions yourself.
 @section What is a Kerberos Principal?
 
 A Kerberos @dfn{principal} is a unique identity to which Kerberos can
-assign tickets.  By convention, a principal is divided into three parts:
-the @dfn{primary}, the @dfn{instance}, and the @dfn{realm}.  The format
-of a typical Kerberos V5 principal is @code{primary/instance@@REALM}.
+assign tickets.  Principals can have an arbitrary number of
+components.  Each component is separated by a component separator,
+generally `/'.  The last component is the realm, separated from the
+rest of the principal by the realm separator, generally `@@'.  If there
+is no realm component in the principal, then it will be assumed that
+the principal is in the default realm for the context in which it is
+being used.
+
+Traditionally, a principal is divided into three parts:  the
+@dfn{primary}, the @dfn{instance}, and the @dfn{realm}.  The format of
+a typical Kerberos V5 principal is @code{primary/instance@@REALM}.
 
 @itemize @bullet
 @item The @dfn{primary} is the first part of the principal.  In the case
@@ -159,8 +166,8 @@ is the fully qualified hostname, e.g.,
 
 @item The @dfn{realm} is your Kerberos realm.  In most cases, your
 Kerberos realm is your domain name, in upper-case letters.  For example,
-the machine @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}} would be in
-the realm @code{@value{PRIMARYREALM}}.
+the machine @code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} would be in
+the realm @code{@value{SECONDREALM}}.
 @end itemize
 
 @node Kerberos V5 Tutorial, Kerberos V5 Reference, Introduction, Top
@@ -235,6 +242,7 @@ or use a screensaver that locks the screen.
 @node Kerberos Ticket Properties, Obtaining Tickets with kinit, Ticket Management, Ticket Management
 @subsection Kerberos Ticket Properties
 
+@noindent
 There are various properties that Kerberos tickets can have:
 
 If a ticket is @dfn{forwardable}, then the KDC can issue a new ticket with
@@ -258,19 +266,18 @@ issued based on a ticket that is proxiable but not forwardable.
 
 A @dfn{proxy} ticket is one that was issued based on a proxiable ticket.
 
-If a tickets is @dfn{postdated}, this means that it will become valid at a
-specific time in the future.  Postdated tickets can be issued for the
-time at which a job is going to start so that the time that valid
-tickets exist unused on a machine is minimized.
+A @dfn{postdated} ticket is issued with the @i{invalid} flag set.
+After the starting time listed on the ticket, it can be presented to
+the KDC to obtain valid tickets.  
 
 Tickets with the @dfn{postdateable} flag set can be used to issue postdated
 tickets.
 
-@dfn{Renewable} tickets can be used to obtain new session keys without the
-user entering a new password.  A renewable ticket has two expiration
-times.  The first is the time at which this particular ticket expires.
-The second is the latest possible expiration time for any ticket issued
-based on this renewable ticket.
+@dfn{Renewable} tickets can be used to obtain new session keys without
+the user entering their password again.  A renewable ticket has two
+expiration times.  The first is the time at which this particular
+ticket expires.  The second is the latest possible expiration time for
+any ticket issued based on this renewable ticket.
 
 A ticket with the @dfn{initial} flag set was issued based on the
 authentication protocol, and not on a ticket-granting ticket.   Clients
@@ -278,18 +285,19 @@ that wish to ensure that the user's key has been recently presented for
 verification could specify that this flag must be set to accept the
 ticket.
 
-An @dfn{initial} ticket must be rejected by application servers.  Postdated
+An @dfn{invalid} ticket must be rejected by application servers.  Postdated
 tickets are usually issued with this flag set, and must be validated by
 the KDC before they can be used.
 
 A @dfn{preauthenticated} ticket is one that was only issued after the
 client requesting the ticket had authenticated itself to the KDC.
 
-The @dfn{hardware authentication} flag is set on a ticket which required
-the use of hardware expected to be possessed soley by the requesting
-client for authentication.
+The @dfn{hardware authentication} flag is set on a ticket which
+required the use of hardware for authentication.  The hardware is
+expected to be possessed only by the client which requested the
+tickets.
 
-If a ticket has the @dfn{transit policy checked} flag set, the the KDC that
+If a ticket has the @dfn{transit policy checked} flag set, then the KDC that
 issued this ticket implements the transited-realm check policy and
 checked the transited-realms list on the ticket.  The transited-realms
 list contains a list of all intermediate realms between the realm of the
@@ -297,13 +305,11 @@ KDC that issued the first ticket and that of the one that issued the
 current ticket.  If this flag is not set, then the application server
 must check the transited realms itself or else reject the ticket.
 
-The @dfn{okay as delegate} flag indicates that the server specified in the
-ticket is suitable as a delegate as determined by the policy of that
-realm.  A server that is acting as a delegate has been granted a proxy
-or a forwarded TGT.  The client can use this flag in its decision of
-whether or not to use this server as a delgate.  This flag is a new
-addition to the @value{PRODUCT} protocol and is not yet implemented on MIT
-servers.
+The @dfn{okay as delegate} flag indicates that the server specified in
+the ticket is suitable as a delegate as determined by the policy of
+that realm.  A server that is acting as a delegate has been granted a
+proxy or a forwarded TGT.  This flag is a new addition to the
+@value{PRODUCT} protocol and is not yet implemented on MIT servers.
 
 An @dfn{anonymous}  ticket is one in which the named principal is a generic
 principal for that realm; it does not actually specify the individual
@@ -428,7 +434,7 @@ Ticket cache: /tmp/krb5cc_ttypa
 Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
 
 Valid starting     Expires            Service principal
-06/07/96 19:49:21  06/08/96 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
 @b{shell%}
 @end group
 @end smallexample
@@ -456,8 +462,8 @@ Ticket cache: /tmp/krb5cc_ttypa
 Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
 
 Valid starting     Expires            Service principal
-06/07/96 19:49:21  06/08/96 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
-06/07/96 20:22:30  06/08/96 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+06/07/04 20:22:30  06/08/04 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
 @b{shell%}
 @end group
 @end smallexample
@@ -488,10 +494,10 @@ Ticket cache: /tmp/krb5cc_ttypa
 Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
 
 Valid starting     Expires            Service principal
-06/07/96 19:49:21  06/08/96 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
-06/07/96 20:22:30  06/08/96 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
-06/07/96 20:24:18  06/08/96 05:49:19  krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
-06/07/96 20:24:18  06/08/96 05:49:19  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{PRIMARYREALM}
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+06/07/04 20:22:30  06/08/04 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+06/07/04 20:24:18  06/08/04 05:49:19  krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
+06/07/04 20:24:18  06/08/04 05:49:19  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{PRIMARYREALM}
 @b{shell%}
 @end group
 @end smallexample
@@ -519,7 +525,7 @@ post@b{d}ated
 @itemx i
 @b{i}nvalid
 @itemx H
-@b{H}ardeware authenticated
+@b{H}ardware authenticated
 @itemx A
 pre@b{A}uthenticated
 @itemx T
@@ -543,7 +549,7 @@ obtained her initial tickets (@samp{I}), which are forwardable
 Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
 
 Valid starting      Expires             Service principal
-31 Jul 96 19:06:25  31 Jul 96 19:16:25  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+31/07/05 19:06:25  31/07/05 19:16:25  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
         Flags: FdiI
 shell%}
 @end group
@@ -561,9 +567,9 @@ reforwardable (@samp{F}).
 Default principal: @value{RANDOMUSER2}@@@value{SECONDREALM}
 
 Valid starting     Expires            Service principal
-07/31/96 11:52:29  07/31/96 21:11:23  krbtgt/@value{SECONDREALM}@@@value{SECONDREALM}
+07/31/05 11:52:29  07/31/05 21:11:23  krbtgt/@value{SECONDREALM}@@@value{SECONDREALM}
         Flags: Ff
-07/31/96 12:03:48  07/31/96 21:11:23  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{SECONDREALM}
+07/31/05 12:03:48  07/31/05 21:11:23  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{SECONDREALM}
         Flags: Ff
 shell%}
 @end group
@@ -596,7 +602,6 @@ tickets to destroy, it will give the following message:
 @group
 @b{shell%} kdestroy
 @b{kdestroy: No credentials cache file found while destroying cache
-Ticket cache NOT destroyed!
 shell%}
 @end group
 @end smallexample
@@ -637,9 +642,9 @@ user @code{@value{RANDOMUSER2}} would do the following:
 @smallexample
 @group
 @b{shell%} kpasswd
-@b{Old password for @value{RANDOMUSER2}:}    @i{<- Type your old password.}
-@b{New Password for @value{RANDOMUSER2}:}    @i{<- Type your new password.}
-@b{Verifying, please re-enter New Password for @value{RANDOMUSER2}:}  @i{<- Type the new password again.}
+@b{Password for @value{RANDOMUSER2}:}    @i{<- Type your old password.}
+@b{Enter new password:}    @i{<- Type your new password.}
+@b{Enter it again:}  @i{<- Type the new password again.}
 @b{Password changed.}
 @b{shell%}
 @end group
@@ -652,8 +657,8 @@ the following message:
 @smallexample
 @group
 @b{shell%} kpasswd
-@b{Old password for @value{RANDOMUSER2}:}  @i{<- Type the incorrect old password.}
-@b{Incorrect old password.
+@b{Password for @value{RANDOMUSER2}:}  @i{<- Type the incorrect old password.}
+@b{kpasswd: Password incorrect while getting initial ticket
 shell%}
 @end group
 @end smallexample
@@ -665,13 +670,10 @@ twice, @code{kpasswd} will ask you to try again:
 @smallexample
 @group
 @b{shell%} kpasswd
-@b{Old password for @value{RANDOMUSER2}:}  @i{<- Type the old password.}
-@b{New Password for @value{RANDOMUSER2}:}  @i{<- Type the new password.}
-@b{Verifying, please re-enter New Password for @value{RANDOMUSER2}:} @i{<- Type a different new password.}
-@b{Mismatch - try again
-New Password for @value{RANDOMUSER2}:}  @i{<- Type the new password.}
-@b{Verifying, please re-enter New Password for @value{RANDOMUSER2}:} @i{<- Type the same new password.}
-@b{Password changed.
+@b{Password for @value{RANDOMUSER2}:}  @i{<- Type the old password.}
+@b{Enter new password:}  @i{<- Type the new password.}
+@b{Enter it again:} @i{<- Type a different new password.}
+@b{kpasswd: Password mismatch while reading password
 shell%}
 @end group
 @end smallexample
@@ -716,26 +718,31 @@ listed in this manual include:
 only meant to show you how to make up a good password.  Passwords that
 appear in a manual are the first ones intruders will try.
 
-@need 3800
+@need 3800 
 @value{PRODUCT} allows your system administrators to automatically
-reject bad passwords, based on whatever criteria they choose.  For
-example, if the user @code{@value{RANDOMUSER1}} chose a bad password,
-Kerberos would give an error message like the following:
+reject bad passwords, based on certain criteria, such as a password
+dictionary or a minimum length.  For example, if the user
+@code{@value{RANDOMUSER1}}, who had a policy "strict" that required a
+minimum of 8 characaters, chose a password that was less than 8
+characters, Kerberos would give an error message like the following:
 
 @smallexample
 @group
 @b{shell%} kpasswd
-@b{Old password for @value{RANDOMUSER1}:}  @i{<- Type your old password here.}
-@b{New Password for @value{RANDOMUSER1}:}  @i{<- Type an insecure new password.}
-@b{Verifying, please re-enter New Password for @value{RANDOMUSER1}:}  @i{<- Type it again.}
+@b{Password for @value{RANDOMUSER1}:}  @i{<- Type your old password here.}
 
-ERROR: Insecure password not accepted.  Please choose another.
+@value{RANDOMUSER1}'s password is controlled by the policy strict, which
+requires a minimum of 8 characters from at least 3 classes (the five classes
+are lowercase, uppercase, numbers, punctuation, and all other characters).
 
-kpasswd: Insecure password rejected while attempting to change password.
+@b{Enter new password:}  @i{<- Type an insecure new password.}
+@b{Enter it again:}  @i{<- Type it again.}
+
+kpasswd: Password is too short while attempting to change password.
 Please choose another password.
 
-@b{New Password for @value{RANDOMUSER1}:}  @i{<- Type a good password here.}
-@b{Verifying, please re-enter New Password for @value{RANDOMUSER2}:}  @i{<- Type it again.}
+@b{Enter new password:}  @i{<- Type a good password here.}
+@b{Enter it again:}  @i{<- Type it again.}
 @b{Password changed.
 shell%}
 @end group
@@ -851,21 +858,12 @@ The @value{PRODUCT} @code{telnet} command works exactly like the
 standard UNIX telnet program, with the following Kerberos options added:
 
 @table @kbd
-@itemx -f, --forward
+@itemx -f
 forwards a copy of your tickets to the remote host.
 
-@itemx --noforward
-turns off forwarding of tickets to the remote host.  (This option
-overrides any forwarding specified in your machine's configuration
-files.)
-
-@itemx -F, --forwardable
+@itemx -F
 forwards a copy of your tickets to the remote host, and marks them
 re-forwardable from the remote host.
-
-@itemx --noforwardable
-makes any forwarded tickets nonforwardable.  (This option overrides any
-forwardability specified in your machine's configuration files.)
 
 @itemx -k @i{realm}
 requests tickets for the remote host in the specified realm, instead of
@@ -879,11 +877,9 @@ you in.
 attempt automatic login using your tickets.  @code{telnet} will assume
 the same username unless you explicitly specify another.
 
-@itemx -x, --encrypt
+@itemx -x
 turns on encryption.
 
-@itemx --noencrypt
-turns off encryption.
 @end table
 
 @need 4000
@@ -893,16 +889,16 @@ UNIX telnet to connect to the machine
 
 @smallexample
 @group
-@b{shell%} telnet @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}
+@b{shell%} telnet @value{RANDOMHOST1}.@value{SECONDDOMAIN}
 @b{Trying 128.0.0.5 ...
-Connected to @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}.
+Connected to @value{RANDOMHOST1}.@value{SECONDDOMAIN}.
 Escape character is '^]'.
 
-NetBSD/i386 (@value{RANDOMHOST1}) (ttyp3)
+NetBSD/i386 (daffodil) (ttyp3)
 
 login:} @value{RANDOMUSER2}
 @b{Password:}    @i{<- @value{RANDOMUSER2} types his password here}
-@b{Last login: Fri Jun 21 17:13:11 from @value{RANDOMHOST2}.@value{SECONDDOMAIN}
+@b{Last login: Fri Jun 21 17:13:11 from @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}
 Copyright (c) 1980, 1983, 1986, 1988, 1990, 1991, 1993, 1994
         The Regents of the University of California.   All rights reserved.
 
@@ -914,7 +910,7 @@ shell%}
 @end smallexample
 
 @noindent Note that the machine
-@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}} asked for
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} asked for
 @code{@value{RANDOMUSER2}}'s password.  When he typed it, his password
 was sent over the network unencrypted.  If an intruder were watching
 network traffic at the time, that intruder would know
@@ -923,27 +919,28 @@ network traffic at the time, that intruder would know
 @need 4000
 If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use the
 @value{PRODUCT} telnet to connect to the machine
-@code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}}, she could forward a
+@code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}}, she could forward a
 copy of her tickets, request an encrypted session, and log on as herself
 as follows:
 
 @smallexample
 @group
-@b{shell%} telnet -a -f -x @value{RANDOMHOST2}.@value{SECONDDOMAIN}
+@b{shell%} telnet -a -f -x @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}
 @b{Trying 128.0.0.5...
-Connected to @value{RANDOMHOST2}.@value{SECONDDOMAIN}.
+Connected to @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}.
 Escape character is '^]'.
-[ Kerberos V5 accepts you as ``@value{RANDOMUSER1}@@@value{SECONDDOMAIN}'' ]
+[ Kerberos V5 accepts you as ``@value{RANDOMUSER1}@@@value{PRIMARYDOMAIN}'' ]
 [ Kerberos V5 accepted forwarded credentials ]
-NetBSD 1.1: Tue May 21 00:31:42 EDT 1996
+What you type is protected by encryption.
+Last login: Tue Jul 30 18:47:44 from @value{RANDOMHOST}.@value{SECONDDOMAIN}
+Athena Server (sun4) Version 9.1.11 Tue Jul 30 14:40:08 EDT 2002
 
-Welcome to NetBSD!
 shell%}
 @end group
 @end smallexample
 
 @noindent Note that @code{@value{RANDOMUSER1}}'s machine used Kerberos
-to authenticate her to @code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}},
+to authenticate her to @code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}},
 and logged her in automatically as herself.  She had an encrypted
 session, a copy of her tickets already waiting for her, and she never
 typed her password.
@@ -962,41 +959,30 @@ The @value{PRODUCT} @code{rlogin} command works exactly like the
 standard UNIX rlogin program, with the following Kerberos options added:
 
 @table @kbd
-@itemx -f, --forward
+@itemx -f
 forwards a copy of your tickets to the remote host.
 
-@itemx --noforward
-turns off forwarding of tickets to the remote host.  (This option
-overrides any forwarding specified in your machine's configuration
-files.)
-
-@itemx -F, --forwardable
+@itemx -F
 forwards a copy of your tickets to the remote host, and marks them
 re-forwardable from the remote host.
-
-@itemx --noforwardable
-makes any forwarded tickets nonforwardable.  (This option overrides any
-forwardability specified in your machine's configuration files.)
 
 @itemx -k @i{realm}
 requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
-@itemx -x, --encrypt
-encrypts the input and output data streams (the command line is not encrypted)
+@itemx -x
+encrypts the input and output data streams (the username is sent unencrypted)
 
-@itemx --noencrypt
-turns off encryption.
 @end table
 
 @need 3000
 For example, if @code{@value{RANDOMUSER2}} wanted to use the standard
 UNIX rlogin to connect to the machine
-@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, he would type:
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}}, he would type:
 
 @smallexample
 @group
-@b{shell%} rlogin @value{RANDOMHOST1}.@value{PRIMARYDOMAIN} -l @value{RANDOMUSER2}
+@b{shell%} rlogin @value{RANDOMHOST1}.@value{SECONDDOMAIN} -l @value{RANDOMUSER2}
 @b{Password:}  @i{<- @value{RANDOMUSER2} types his password here}
 @b{Last login: Fri Jun 21 10:36:32 from :0.0
 Copyright (c) 1980, 1983, 1986, 1988, 1990, 1991, 1993, 1994
@@ -1010,7 +996,7 @@ shell%}
 @end smallexample
 
 @noindent Note that the machine
-@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}} asked for
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} asked for
 @code{@value{RANDOMUSER2}}'s password.  When he typed it, his password
 was sent over the network unencrypted.  If an intruder were watching
 network traffic at the time, that intruder would know
@@ -1019,23 +1005,22 @@ network traffic at the time, that intruder would know
 @need 4000
 If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use
 @value{PRODUCT} rlogin to connect to the machine
-@code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}}, she could forward a
+@code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}}, she could forward a
 copy of her tickets, mark them as not forwardable from the remote host,
 and request an encrypted session as follows:
 
 @smallexample
 @group
-@b{shell%} rlogin @value{RANDOMHOST2}.@value{SECONDDOMAIN} -f -x
-@b{This rlogin session is encrypting all data transmissions.
+@b{shell%} rlogin @value{RANDOMHOST2}.@value{PRIMARYDOMAIN} -f -x
+@b{This rlogin session is using DES encryption for all data transmissions.
 Last login: Thu Jun 20 16:20:50 from @value{RANDOMHOST1}
-SunOS Release 4.1.4 (GENERIC) #2: Tue Nov 14 18:09:31 EST 1995
-Not checking quotas. Try quota.real if you need them.
+Athena Server (sun4) Version 9.1.11 Tue Jul 30 14:40:08 EDT 2002
 shell%}
 @end group
 @end smallexample
 
 @noindent Note that @code{@value{RANDOMUSER1}}'s machine used Kerberos
-to authenticate her to @code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}},
+to authenticate her to @code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}},
 and logged her in automatically as herself.  She had an encrypted
 session, a copy of her tickets were waiting for her, and she never typed
 her password.
@@ -1057,9 +1042,9 @@ UNIX FTP program, with the following Kerberos features added:
 requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
-@itemx -forward
+@itemx -f
 requests that your tickets be forwarded to the remote host.  The
-@kbd{-forward} argument must be the last argument on the command line.
+@kbd{-f} argument must be the last argument on the command line.
 
 @itemx protect @i{level}
 (issued at the @code{ftp>} prompt) sets the protection level.  ``Clear''
@@ -1083,6 +1068,7 @@ Connected to @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}.
 334 Using authentication type GSSAPI; ADAT must follow
 GSSAPI accepted as authentication type
 GSSAPI authentication succeeded
+200 Data channel protection level set to private.
 Name (@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}:@value{RANDOMUSER1}): 
 232 GSSAPI user @value{RANDOMUSER1}@@@value{PRIMARYREALM} is authorized as @value{RANDOMUSER1}
 230 User @value{RANDOMUSER1} logged in.
@@ -1112,31 +1098,20 @@ The @value{PRODUCT} @code{rsh} program works exactly like the standard
 UNIX rlogin program, with the following Kerberos features added:
 
 @table @kbd
-@itemx -f, --forward
+@itemx -f
 forwards a copy of your tickets to the remote host.
 
-@itemx --noforward
-turns off forwarding of tickets to the remote host.  (This option
-overrides any forwarding specified in your machine's configuration
-files.)
-
-@itemx -F, --forwardable
+@itemx -F
 forwards a copy of your tickets to the remote host, and marks them
 re-forwardable from the remote host.
-
-@itemx --noforwardable
-makes any forwarded tickets nonforwardable.  (This option overrides any
-forwardability specified in your machine's configuration files.)
 
 @itemx -k @i{realm}
 requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
-@itemx -x, --encrypt
+@itemx -x
 encrypts the input and output data streams (the command line is not encrypted)
 
-@itemx --noencrypt
-turns off encryption.
 @end table
 
 @need 1800
@@ -1147,8 +1122,8 @@ run the @samp{date} program as follows:
 @smallexample
 @group
 @b{shell%} rsh @value{RANDOMHOST2}.@value{SECONDDOMAIN} -l root -x date
-@b{This rsh session is encrypting input/output data transmissions.
-Fri Jun 21 17:06:12 EDT 1996
+@b{This rsh session is using DES encryption for all data transmissions.
+Tue Jul 30 19:34:21 EDT 2002
 shell%}
 @end group
 @end smallexample
@@ -1170,7 +1145,7 @@ UNIX rcp program, with the following Kerberos features added:
 requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
-@itemx -x, --encrypt
+@itemx -x
 turns on encryption.
 @end table
 
@@ -1235,8 +1210,8 @@ with @samp{.1} appended to it:
 Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
 
 Valid starting      Expires             Service principal
-31 Jul 96 21:53:01  01 Aug 96 07:52:53  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
-31 Jul 96 21:53:39  01 Aug 96 07:52:53  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+07/31/04 21:53:01  08/01/04 07:52:53  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+07/31/04 21:53:39  08/01/04 07:52:53  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
 @value{RANDOMUSER2}%}
 @end group
 @end smallexample
@@ -1331,10 +1306,6 @@ specifies which Kerberos principal you want to use for @code{ksu}.
 @itemx -c
 specifies the location of your Kerberos credentials cache (ticket file).
 
-@itemx -C
-specifies the location you want the Kerberos credentials cache (ticket
-file) to be for the target user ID.
-
 @itemx -k
 tells @code{ksu} not to destroy your Kerberos tickets when @code{ksu} is
 finished.
@@ -1416,14 +1387,14 @@ M-x manual-entry @emph{command}
 @menu
 * kinit Reference::             
 * klist Reference::             
+* ksu Reference::               
 * kdestroy Reference::          
 * kpasswd Reference::           
 * telnet Reference::            
-* rlogin Reference::            
 * FTP Reference::               
+* rlogin Reference::            
 * rsh Reference::               
 * rcp Reference::               
-* ksu Reference::               
 @end menu
 
 @node kinit Reference, klist Reference, Kerberos V5 Reference, Kerberos V5 Reference
@@ -1438,6 +1409,7 @@ M-x manual-entry @emph{command}
 @centerline{Reference Manual for @code{kinit}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry kinit} to read this manual page.
 @end ifinfo
@@ -1448,7 +1420,7 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @end html
 @end ifhtml
 
-@node klist Reference, kdestroy Reference, kinit Reference, Kerberos V5 Reference
+@node klist Reference, ksu Reference, kinit Reference, Kerberos V5 Reference
 @section klist Reference
 
 @iftex
@@ -1462,6 +1434,7 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @centerline{Reference Manual for @code{klist}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry klist} to read this manual page.
 @end ifinfo
@@ -1472,7 +1445,42 @@ Type @kbd{M-x manual-entry klist} to read this manual page.
 @end html
 @end ifhtml
 
-@node kdestroy Reference, kpasswd Reference, klist Reference, Kerberos V5 Reference
+@node ksu Reference, kdestroy Reference, klist Reference, Kerberos V5 Reference
+@section ksu Reference
+
+@iftex
+@special{psfile=ksu1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu3.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu4.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu5.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry ksu} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="ksu.html"> ksu manpage</a>
+@end html
+@end ifhtml
+
+@node kdestroy Reference, kpasswd Reference, ksu Reference, Kerberos V5 Reference
 @section kdestroy Reference
 
 @iftex
@@ -1480,6 +1488,7 @@ Type @kbd{M-x manual-entry klist} to read this manual page.
 @centerline{Reference Manual for @code{kdestroy}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @end ifinfo
@@ -1498,6 +1507,7 @@ Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @centerline{Reference Manual for @code{kpasswd}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @end ifinfo
@@ -1508,7 +1518,7 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @end html
 @end ifhtml
 
-@node telnet Reference, rlogin Reference, kpasswd Reference, Kerberos V5 Reference
+@node telnet Reference, FTP Reference, kpasswd Reference, Kerberos V5 Reference
 @section telnet Reference
 
 @iftex
@@ -1548,6 +1558,7 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @centerline{Reference Manual for @code{telnet}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry telnet} to read this manual page.
 @end ifinfo
@@ -1558,29 +1569,7 @@ Type @kbd{M-x manual-entry telnet} to read this manual page.
 @end html
 @end ifhtml
 
-@node rlogin Reference, FTP Reference, telnet Reference, Kerberos V5 Reference
-@section rlogin Reference
-
-@iftex
-@special{psfile=rlogin1.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{rlogin}}
-@page
-
-@special{psfile=rlogin2.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{rlogin}}
-@page
-@end iftex
-@ifinfo
-Type @kbd{M-x manual-entry rlogin} to read this manual page.
-@end ifinfo
-
-@ifhtml
-@html
-<a href="rlogin.html"> rlogin manpage</a>
-@end html
-@end ifhtml
-
-@node FTP Reference, rsh Reference, rlogin Reference, Kerberos V5 Reference
+@node FTP Reference, rlogin Reference, telnet Reference, Kerberos V5 Reference
 @section FTP Reference
 
 @iftex
@@ -1620,6 +1609,7 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @centerline{Reference Manual for @code{FTP}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry FTP} to read this manual page.
 @end ifinfo
@@ -1630,7 +1620,30 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 @end html
 @end ifhtml
 
-@node rsh Reference, rcp Reference, FTP Reference, Kerberos V5 Reference
+@node rlogin Reference, rsh Reference, FTP Reference, Kerberos V5 Reference
+@section rlogin Reference
+
+@iftex
+@special{psfile=rlogin1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rlogin}}
+@page
+
+@special{psfile=rlogin2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rlogin}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry rlogin} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="rlogin.html"> rlogin manpage</a>
+@end html
+@end ifhtml
+
+@node rsh Reference, rcp Reference, rlogin Reference, Kerberos V5 Reference
 @section rsh Reference
 
 @iftex
@@ -1642,6 +1655,7 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 @centerline{Reference Manual for @code{rsh}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry rsh} to read this manual page.
 @end ifinfo
@@ -1652,7 +1666,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @end html
 @end ifhtml
 
-@node rcp Reference, ksu Reference, rsh Reference, Kerberos V5 Reference
+@node rcp Reference, , rsh Reference, Kerberos V5 Reference
 @section rcp Reference
 
 @iftex
@@ -1666,6 +1680,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @centerline{Reference Manual for @code{rcp}}
 @page
 @end iftex
+
 @ifinfo
 Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end ifinfo
@@ -1673,40 +1688,6 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @ifhtml
 @html
 <a href="rcp.html"> rcp manpage</a>
-@end html
-@end ifhtml
-
-@node ksu Reference,  , rcp Reference, Kerberos V5 Reference
-@section ksu Reference
-
-@iftex
-@special{psfile=ksu1.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{ksu}}
-@page
-
-@special{psfile=ksu2.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{ksu}}
-@page
-
-@special{psfile=ksu3.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{ksu}}
-@page
-
-@special{psfile=ksu4.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{ksu}}
-@page
-
-@special{psfile=ksu5.ps voffset=-700 hoffset=-40}
-@centerline{Reference Manual for @code{ksu}}
-@page
-@end iftex
-@ifinfo
-Type @kbd{M-x manual-entry ksu} to read this manual page.
-@end ifinfo
-
-@ifhtml
-@html
-<a href="ksu.html"> ksu manpage</a>
 @end html
 @end ifhtml
 

@@ -1,6 +1,7 @@
 In any complex software, there will be bugs.  If you have successfully
-built and installed @value{PRODUCT}, please use the
-@code{krb5-send-pr} program to fill out a Problem Report.
+built and installed @value{PRODUCT}, please use the @code{krb5-send-pr}
+program to fill out a Problem Report should you encounter any errors in
+our software.
 
 Bug reports that include proposed fixes are especially welcome.  If you
 do include fixes, please send them using either context diffs or unified

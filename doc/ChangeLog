@@ -1,3 +1,44 @@
+2002-09-20  Jen Selby  <jenselby@mit.edu>
+
+	* Makefile: made the list of manpages a variable
+	* admin.texinfo: took out second inclusion of copyright notice,
+	changed some section names, updated initial synopsis of file,
+	added explanation of encryption types and the [login] section of
+	krb5.conf, added documentation on various tags in the configuration
+	files, added some more examples, fixed some typos, updated usage
+	statements for various kadmin and kdb5_util commands, updated the 
+	sample output from the commands, updated the infotex for use with 
+	makeinfo --html, added a section about getting shared-realm keys,
+	updated the error codes
+	* build.texinfo: added a section describing the structure of the
+	source code tree, updated documentation of options to configure
+	script, added information about defaults for various variable
+	settings, updated information about shared library support, 
+	added discussion of valid kerberos principals 
+	* definitions.texinfo: added some new default variables,
+	corrected some pathnames of default values
+	* dnssrv.texinfo: made the information about default port numbers
+	reference a variable
+	* glossary.texinfo: updated definition of principal
+	* install.texinfo: fixed typos and formatting errors, removed old 
+	sample config files from appendix (samples are in the sections about 
+	the config files), added information about supporting RC4 keys
+	* kadm5.acl: new file.  describes the kadm5.acl file.  included by
+	both admin.texinfo and install.texinfo.  text is made up mostly of
+	text that was split between those two documents.  documentation
+	of backreferences was added
+	* kdcconf.texinfo: made defaults reference variables 
+	* krb425.texinfo: deleted second inclusion of copyright info,
+	made defaults reference variable, fixed typos, took out redundant
+	part about editing inetd.conf and replaced it with reference to
+	install guide
+	* krb5conf.texinfo: documented the "final variable" feature, 
+	added mention of the [login] section, 
+	* send-pr.texinfo: minor change in wording for clarity
+	* user-guide.texinfo: made various minor wording changes, updated 
+	some of the sample output, updated documention of command options
+
+
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* build.texinfo (Options to Configure): Update for new options

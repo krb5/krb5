@@ -1,4 +1,4 @@
-\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
+x\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
                                 % this line must come *before* \input texinfo
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
@@ -30,7 +30,6 @@
 @page
 @vskip 0pt plus 1filll
 
-@include copyright.texinfo
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
@@ -62,7 +61,7 @@ installation.
 * How Kerberos Works::          
 * Configuration Files::         
 * Using DNS::                   
-* Administrating Kerberos Database Entries::  
+* Administrating the Kerberos Database::  
 * Application Servers::         
 * Backups of Secure Hosts::     
 * Bug Reporting::               
@@ -107,17 +106,18 @@ The next chapter describes how Kerberos works.
 Chapter three describes administration of the principals in the Kerberos
 database.
 
-Chapter four describes administrative programs for manipulating the
+Chapter four describes how you can use DNS in configuring your Kerberos realm.
+
+Chapter five describes administrative programs for manipulating the
 Kerberos database as a whole.
 
-Chapter five describes issues to consider when adding an application
+Chapter six describes issues to consider when adding an application
 server to the database.
 
-Chapter six describes our problem reporting system.
+Chapter seven describes our problem reporting system.
 
-The appendices include sample configuration files, the list of Kerberos
-error messages, and a complete list of the time zones understood by
-@code{kadmin}.
+The appendices include the list of Kerberos error messages, and a
+complete list of the time zones understood by @code{kadmin}.
 
 @node How Kerberos Works, Configuration Files, Introduction, Top
 @chapter How Kerberos Works
@@ -131,7 +131,7 @@ of details; for more information, see @i{Kerberos: An Authentication
 Service for Open Network Systems}, a paper presented at Winter USENIX
 1988, in Dallas, Texas.  This paper can be retreived by FTP from
 @code{athena-dist.mit.edu}, in the location:
-@code{/pub/ATHENA/kerberos/doc/USENIX.ps}.
+@code{/pub/ATHENA/kerberos/doc/usenix.PS}.
 
 @menu
 * Network Services and Their Client Programs::  
@@ -345,6 +345,9 @@ Following are definitions of some of the Kerberos terminology.
 @node Supported Encryption Types, Salts, Configuration Files, Configuration Files
 @section Supported Encryption Types
 
+Any tag in the configuration files which requires a list of encryption
+types can be set to some combination of the following strings.
+
 @include support-enc.texinfo
 
 @node Salts, krb5.conf, Supported Encryption Types, Configuration Files
@@ -365,6 +368,7 @@ salt.  The supported values for salts are as follows.
 @menu
 * libdefaults::                 
 * appdefaults::                 
+* login::                       
 * realms (krb5.conf)::          
 * domain_realm::                
 * logging::                     
@@ -379,6 +383,11 @@ The @code{libdefaults} section may contain any of the following
 relations:
 
 @table @b
+@itemx default_keytab_name
+This relation specifies the default keytab name to be used by
+application servers such as telnetd and rlogind.  The default is
+@value{DefaultDefaultKeytabName}.
+
 @itemx default_realm
 Identifies the default Kerberos realm for the client.  Set its value to
 your Kerberos realm.  If this is not specified and the TXT record
@@ -398,13 +407,27 @@ value is @value{DefaultDefaultTgsEnctypes}.
 @itemx default_tkt_enctypes
 Identifies the supported list of session key encryption types that
 should be requested by the client.  The format is the same as for
-@emph{default_tkt_enctypes}.  The default value for this tag is
+@emph{default_tgs_enctypes}.  The default value for this tag is
 @value{DefaultDefaultTktEnctypes}.
+
+@itemx permitted_enctypes 
+Identifies all encryption types that are permitted for use in session
+key encryption.  The default value for this tag is
+@value{DefaultPermittedEnctypes}.
 
 @itemx clockskew
 Sets the maximum allowable amount of clockskew in seconds that the
 library  will tolerate before assuming that a Kerberos message is
 invalid.  The default value is @value{DefaultClockskew}.
+
+@itemx kdc_timesync
+If this is set to 1 (for true), then client machines will compute the
+difference between their time and the time returned by the KDC in the
+timestamps in the tickets and use this value to correct for an
+inaccurate system clock.  This corrective factor is only used by the
+Kerberos library.  The default is @value{DefaultKDCTimesyncMac} for
+Macintosh computers and @value{DefaultKDCTimesync} for all other
+platforms.
 
 @itemx kdc_req_checksum_type
 @itemx ap_req_checksum_type
@@ -454,11 +477,17 @@ The default lifetime of a ticket.  The default is
 code.
 @end ignore
 
-@itemx kdc_timesync
-If this is set to 1 (for true), then client machines will attempt
-to sync their time with the KDC using the timestamps in the tickets.
-The default is @value{DefaultKDCTimesyncMac} for Macintosh computers
-and @value{DefaultKDCTimesync} for all other platforms.
+@itemx krb4_srvtab 
+Specifies the location of the Kerberos V4 srvtab file.  Default is
+@value{DefaultKrb4Srvtab}.
+
+@itemx krb4_config
+Specifies the location of hte Kerberos V4 configuration file.  Default
+is @value{DefaultKrb4Config}.
+
+@itemx krb4_realms
+Specifies the location of the Kerberos V4 domain/realm translation
+file.  Default is @value{DefaultKrb4Realms}.
 
 @itemx dns_lookup_kdc
 Indicate whether DNS SRV records should be used to locate the KDCs and
@@ -503,42 +532,102 @@ has no effect.
 General flag controlling the use of DNS for Kerberos information.  If
 both of the preceding options are specified, this option has no effect.
 
+@itemx extra_addresses
+This allows a computer to use multiple local addresses, in order to
+allow Kerberos to work in a network that uses NATs.  The addresses
+should be in a comma-separated list.
+
+@itemx udp_preference_limit
+When sending a message to the KDC, the library will try using TCP before
+UDP if the size of the message is above @code{udp_preference_list}.
+If the message is smaller than @code{udp_preference_list}, then UDP
+will be tried before TCP.  Regardless of the size, both protocols will
+be tried if the first attempt fails.
+
 @end table
 
-@node appdefaults, realms (krb5.conf), libdefaults, krb5.conf
+@node appdefaults, login, libdefaults, krb5.conf
 @subsection [appdefaults]
 
-Each tag in the [appdefaults] section names a Kerberos V5 application.
-The value of the tag is a subsection with relations that define the
-default behaviors for that application.  
+Each tag in the [appdefaults] section names a Kerberos V5 application
+or an option that is used by some Kerberos V5 application[s].  The
+value of the tag defines the default behaviors for that application.
 
 For example:
 
 @smallexample
 @group
 [appdefaults]
-    kinit = @{
-        forwardable = true
-    @}
-    telnet = @{
-        forward = true
-        encrypt = true
-        autologin = true
-    @}
     telnet = @{
         @value{PRIMARYREALM} = @{
-             forward = false
+             option1 = false
         @}
     @}
+    telnet = @{
+        option1 = true
+        option2 = true
+    @}
+    @value{PRIMARYREALM} = @{
+        option2 = false
+    @}
+    option2 = true
 
 @end group
 @end smallexample
+
+The above four ways of specifying the value of an option are shown
+in order of decreasing precedence.   In this example, if telnet is
+running in the realm @value{SECONDREALM}, it should, by default, have
+option1 and option2 set to true.  However, a telnet program in the realm
+@value{PRIMARYREALM} should have option1 set to false and option2 set
+to true.  Any other programs in @value{PRIMARYREALM} should have option2
+set to false by default.  Any programs running in other realms should
+have option2 set to true.
 
 The list of specifiable options for each application may be found in
 that application's man pages.  The application defaults specified here
 are overridden by those specified in the [realms] section.
 
-@node realms (krb5.conf), domain_realm, appdefaults, krb5.conf
+@node login, realms (krb5.conf), appdefaults, krb5.conf
+@subsection [login]
+
+Each tag in the [login] section of the file is an option for
+login.krb5.  This section may contain any of the following relations:
+
+@table @b
+@itemx krb5_get_tickets
+Indicate whether or not to use a user's password to get V5 tickets.
+The default value is @value{DefaultKrb5GetTickets}.
+
+@itemx krb4_get_tickets
+Indicate whether or not to user a user's password to get V4 tickets.
+The default value is @value{DefaultKrb4GetTickets}.
+
+@itemx krb4_convert
+Indicate whether or not to use the Kerberos conversion daemon to get V4
+tickets.  The default value is @value{DefaultKrb4Convert}.  If this is
+set to false and krb4_get_tickets is true, then login will get the V5
+tickets directly using the Kerberos V4 protocol directly.  This does
+not currently work with non-MIT-V4 salt types (such as the AFS3 salt
+type).  Note that if this is set to true and krb524d is not running,
+login will hang for approximately a minute under Solaris, due to a
+Solaris socket emulation bug.
+
+@itemx krb_run_aklog
+Indicate whether or not to run aklog.  The default value is
+@value{DefaultKrbRunAklog}.
+
+@itemx aklog_path
+Indicate where to find aklog.  The default value is
+@value{DefaultAklogPath}.
+
+@itemx accept_passwd
+A true value will cause login not to accept plaintext passwords.  The
+default value is @value{DefaultAcceptPasswd}.  This is not yet
+implemented.
+@end table
+
+@node realms (krb5.conf), domain_realm, login, krb5.conf
 @subsection [realms]
 
 Each tag in the [realms] section of the file is the name of a Kerberos
@@ -560,16 +649,98 @@ Identifies the host where the administration server is running.
 Typically, this is the master Kerberos server.  This tag must be given
 a value in order to communicate with the kadmin server for the realm.
 
+@ignore
+this doesn't seem to be used in the code
 @itemx application defaults
 Application defaults that are specific to a particular realm may be
 specified within that realm's tag.  Realm-specific application defaults
 override the global defaults specified in the [appdefaults] section.
+@end ignore
 
 @itemx default_domain
 This tag is used for Kerberos 4 compatibility.  Kerberos 4 does not
 require the entire hostname of a server to be in its principal like
 Kerberos 5 does.  This tag provides the domain name needed to produce a
-full hostname.
+full hostname when translating V4 principal names into V5 principal
+names.  All servers in this realm are assumed to be in the domain given
+as the value of this tag
+
+@itemx v4_instance_convert
+This subsection allows the administrator to configure exceptions to the
+default_domain mapping rule.  It contains V4 instances (the tag name)
+which should be translated to some specific hostname (the tag value) as
+the second component in a Kerberos V5 principal name.
+
+@itemx v4_realm
+This relation is used by the krb524 library routines when converting a
+V5 principal name to a V4 principal name.  It is used when the V4 realm
+name and the V5 realm name are not the same, but still share the same
+principal names and passwords.  The tag value is the Kerberos V4 realm
+name.
+
+@itemx auth_to_local_names
+This subsection allows you to set explicit mappings from principal
+names to local user names.  The tag is the mapping name, and the value
+is the corresponding local user name.
+
+@itemx auth_to_local
+This tag allows you to set a general rule for mapping principal names
+to local user names.  It will be used if there is not an explicit
+mapping for the principal name that is being translated.  The possible
+values are:
+
+@table @b
+
+@item DB:@i{filename}
+The principal will be looked up in the database @i{filename}.  Support
+for this is not currently compiled in by default.
+
+@item RULE:@i{exp}
+The local name will be formulated from @i{exp}.
+
+The format for @i{exp} is
+@code{[@i{n}:$@i{d}..@i{string}](@i{regexp})s/@i{pattern}/@i{replacement}/g}.
+The integer @i{n} indicates how many components the target principal
+should have.  If this matches, then a string will be formed by putting
+together the components of the principal in the order indicated by each
+integer @i{d}, and the arbitrary string @i{string} (i.e. if the
+principal was @value{RANDOMUSER}/admin then [2:$2$1foo] would result in
+the string "admin@value{RANDOMUSER}foo".  If this string matches
+@i{regexp}, then the @code{s//[g]} substitution command will be run over the
+string.  The optional g will cause the substitution to be global over
+the string, instead of replacing only the first match in the string.
+
+@item DEFAULT
+The principal name will be used as the local user name.  If the
+principal has more than one component or is not in the default realm,
+this rule is not applicable and the conversion will fail.
+
+@end table
+
+For example:
+
+@smallexample
+@group
+[realms]
+    @value{PRIMARYREALM} = @{
+        auth_to_local = @{
+            RULE:[2:$1](@value{RANDOMUSER})s/^.*$/guest/
+            RULE:[2:$1;$2](^.*;admin$)s/;admin$//
+            RULE:[2:$2](^.*;root)s/^.*$/root/
+            DEFAULT
+            @}
+        @}
+@end group
+@end smallexample
+
+would result in any principal without @code{root} or @code{admin} as
+the second component to be translated with the default rule.  A
+principal with a second component of @code{admin} will become its first
+component.  @code{root} will be used as the local name for any
+principal with a second component of @code{root}.  The exception to
+these two rules are any principals @value{RANDOMUSER}/*, which will
+always get the local name @code{guest}.
+
 @end table
 
 @node domain_realm, logging, realms (krb5.conf), krb5.conf
@@ -698,7 +869,7 @@ paths between the realms.  This section defines that database.
 
 A client will use this section to find the authentication path between
 its realm and the realm of the server.  The server will use this section
-to verify the authentication path used be the client, by checking the
+to verify the authentication path used by the client, by checking the
 transited field of the received ticket.
 
 There is a tag for each participating realm, and each tag has subtags
@@ -716,7 +887,7 @@ tag for each realm of the clients it will serve.
 
 For example, ANL.GOV, PNL.GOV, and NERSC.GOV all wish to use the ES.NET
 realm as an intermediate realm.  ANL has a sub realm of TEST.ANL.GOV
-which will authenticate with NERSC.GOV but not PNL.GOV.  The [capath]
+which will authenticate with NERSC.GOV but not PNL.GOV.  The [capaths]
 section for ANL.GOV systems would look like this:
 
 @smallexample
@@ -743,7 +914,7 @@ section for ANL.GOV systems would look like this:
 @end group
 @end smallexample
 
-The [capath] section of the configuration file used on NERSC.GOV systems
+The [capaths] section of the configuration file used on NERSC.GOV systems
 would look like this:
 
 @smallexample
@@ -774,7 +945,7 @@ would look like this:
 
 In the above examples, the ordering is not important, except when the
 same subtag name is used more then once.  The client will use this to
-determing the path.  (It is not important to the server, since the
+determine the path.  (It is not important to the server, since the
 transited field is not sorted.)
 
 This feature is not currently supported by DCE.  DCE security servers
@@ -816,6 +987,18 @@ Here is an example of a generic @code{krb5.conf} file:
 @end ifset
     @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
 
+[capaths]
+    @value{PRIMARYREALM} = @{
+    	@value{SECONDREALM} = .
+    @}
+    @value{SECONDREALM} = @{
+    	@value{PRIMARYREALM} = .
+    @}
+
+[logging]
+    kdc = SYSLOG:INFO
+    admin_server = FILE=/var/kadm5.log
+
 @end group
 @end smallexample
 
@@ -846,6 +1029,12 @@ listen by default.  This list is a comma separated list of integers.
 If this relation is not specified, the compiled-in default is
 @value{DefaultKdcPorts}, the first being the assigned Kerberos port
 and the second which was used by Kerberos V4.
+
+@itemx v4_mode
+This string specifies how the KDC should respond to Kerberos 4
+packets.  The possible values are none, disable, full, and nopreauth.
+The default value is @value{DefaultV4Mode}.
+@comment these values found in krb5/src/kdc/kerberos_v4.c in v4mode_table
 @end table
 
 @node realms (kdc.conf), Sample kdc.conf File, kdcdefaults, kdc.conf
@@ -878,20 +1067,83 @@ default is @* @code{@value{DefaultDatabaseName}}.
 principals created in this realm.  The default value for this tag is
 @value{DefaultDefaultPrincipalExpiration}.
 
-@itemx default_principal_flags
+@itemx default_principal_flags 
 (Flag string.)  Specifies the default attributes of principals created
-in this realm.  The default value for this tag is
+in this realm.  The format for this string is a comma-separated list of
+flags, with '+' before each flag that should be enabled and '-' before
+each flag that should be disabled.   The default is
 @value{DefaultDefaultPrincipalFlags}.
+
+There are a number of possible flags:
+
+@table @b
+@itemx postdateable
+Enabling this flag allows the principal to obtain postdateable tickets.
+
+@itemx forwardable
+Enabling this flag allows the principal to obtain forwardable tickets.
+
+@itemx tgt-based
+Enabling this flag allows a principal to obtain tickets based on a
+ticket-granting-ticket, rather than repeating the authentication
+process that was used to obtain the TGT.
+
+@itemx renewable
+Enabling this flag allows the principal to obtain renewable tickets.
+
+@itemx proxiable
+Enabling this flag allows the principal to obtain proxy tickets.
+
+@itemx dup-skey
+Enabling this flag allows the principal to obtain a session key for
+another user, permitting user-to-user authentication for this principal.
+
+@itemx allow-tickets
+Enabling this flag means that the KDC will issue tickets for this
+principal.  Disabling this flag essentially deactivates the principal
+within this realm.
+
+@itemx preauth
+If this flag is enabled on a client principal, then that principal is
+required to preauthenticate to the KDC before receiving any tickets.
+On a service principal, enabling this flag means that service tickets
+for this principal will only be issued to clients with a TGT that has
+the preauthenticated ticket set.
+
+@itemx hwauth
+If this flag is enabled, then the principal is required to
+preauthenticate using a hardware device before receiving any tickets.
+
+@itemx pwchange
+Enabling this flag forces a password change for this principal.
+
+@itemx service
+Enabling this flag allows the the KDC to issue service tickets for this
+principal.
+
+@itemx pwservice
+If this flag is enabled, it marks this principal as a password change
+service.  This should only be used in special cases, for example, if a
+user's password has expired, then the user has to get tickets for that
+principal without going through the normal password authentication in
+order to be able to change the password.
+
+@end table
 
 @itemx dict_file
 (String.)  Location of the dictionary file containing strings that are
-not allowed as passwords.  If none is specified, no dictionary checks
-of passwords will be performed.
+not allowed as passwords.  If none is specified or if there is no
+policy assigned to the principal, no dictionary checks of passwords
+will be performed.
 
 @itemx kadmind_port
-(Port number.)  Specifies the port that the kadmind daemon is to listen
-for this realm.  The assigned port for kadmind is
+(Port number.)  Specifies the port on which the kadmind daemon is to
+listen for this realm.  The assigned port for kadmind is
 @value{DefaultKadmindPort}.
+
+@itemx kpasswd_port
+(Port number.)  Specifies the port on which the kpasswd daemon is to
+listen for this realm.  The default is @value{DefaultKpasswdPort}.
 
 @itemx key_stash_file
 (String.)  Specifies the location where the master key has been stored
@@ -905,8 +1157,8 @@ this realm.  By default, the value of kdc_ports as specified in the
 [kdcdefaults] section is used.
 
 @itemx master_key_name
-(String.)  Specifies the name of the master key.  The default is
-@value{DefaultMasterKeyName}.
+(String.)  Specifies the name of the principal associated with the
+master key.  The default is @value{DefaultMasterKeyName}.
 
 @itemx master_key_type
 (Key type string.)  Specifies the master key's key type.  The default
@@ -924,14 +1176,15 @@ valid ticket may be renewed in this realm.  The default value is
 @value{DefaultMaxRenewableLife}.
 
 @itemx supported_enctypes
-List of key:salt strings.  Specifies the default key/salt combinations
-of principals for this realm.  Any principals created through
-@code{kadmin} will have keys of these types.  For lists of possible
-values, see @ref{Supported Encryption Types} and @ref{Salts}. 
+List of key:salt strings.  Specifies the default key/salt combinations of
+principals for this realm.  Any principals created through @code{kadmin}
+will have keys of these types.  The default value for this tag is
+@value{DefaultSupportedEnctypes}. For lists of possible values, see
+@ref{Supported Encryption Types} and @ref{Salts}.
 
 @itemx kdc_supported_enctypes
 Specifies the permitted key/salt combinations of principals for this
-realm.  The format is the same as @code{supported_enctypes}
+realm.  The format is the same as @code{supported_enctypes}.
 
 @itemx reject_bad_transit
 A boolean value (@code{true}, @code{false}).  If set to @code{true}, the
@@ -980,7 +1233,7 @@ Here's an example of a @code{kdc.conf} file:
 [realms]
     @value{PRIMARYREALM} = @{
         kadmind_port = 749
-        max_life = 10h 0m 0s
+        max_life = 12h 0m 0s
         max_renewable_life = 7d 0h 0m 0s
         master_key_type = des3-hmac-sha1
         supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
@@ -994,7 +1247,7 @@ Here's an example of a @code{kdc.conf} file:
 @end group
 @end smallexample
 
-@node Using DNS, Administrating Kerberos Database Entries, Configuration Files, Top
+@node Using DNS, Administrating the Kerberos Database, Configuration Files, Top
 @chapter Using DNS
 
 @menu
@@ -1012,7 +1265,7 @@ Here's an example of a @code{kdc.conf} file:
 
 @include dnssrv.texinfo
 
-@node Administrating Kerberos Database Entries, Application Servers, Using DNS, Top
+@node Administrating the Kerberos Database, Application Servers, Using DNS, Top
 @chapter Administrating the Kerberos Database
 
 Your Kerberos database contains all of your realm's Kerberos principals,
@@ -1057,16 +1310,15 @@ authenticate to KADM5.
 * Date Format::                 
 * Principals::                  
 * Policies::                    
-* Dumping a Kerberos Database to a File::  
-* Restoring a Kerberos Database from a Dump File::  
-* Creating a Stash File::       
-* Creating and Destroying a Kerberos Database::  
+* Global Operations on the Kerberos Database::  
+* Cross-realm Authentication::  
 @end menu
 
-@node Kadmin Options, Date Format, Administrating Kerberos Database Entries, Administrating Kerberos Database Entries
+@node Kadmin Options, Date Format, Administrating the Kerberos Database, Administrating the Kerberos Database
 @section Kadmin Options
 
-You can invoke @code{kadmin} with any of the following options:
+You can invoke @code{kadmin} or @code{kadmin.local} with any of the
+following options:
 
 @table @b
 @item @b{-r} @i{REALM}
@@ -1078,10 +1330,18 @@ If this option is not given, @code{kadmin} will append @code{admin} to
 either the primary principal name, the environment variable USER, or to
 the username obtained from @code{getpwuid}, in order of preference.
 
-@item @b{-k} @i{keytab}
+@item @b{-q} @i{query}
+Pass @i{query} directly to @code{kadmin}.  This is useful for writing
+scripts that pass specific queries to @code{kadmin}.
+
+@noindent
+You can invoke @code{kadmin} with any of the following options:
+
+@item @b{-k} [@b{-t} @i{keytab}]
 Use the keytab @i{keytab} to decrypt the KDC response instead of
 prompting for a password on the TTY.  In this case, the principal will
-be @samp{host/@i{hostname}}.
+be @samp{host/@i{hostname}}.  If @b{-t} is not used to specify a keytab,
+then the default keytab will be used.
 
 @item @b{-c} @i{credentials cache}
 Use @i{credentials_cache} as the credentials cache.  The credentials
@@ -1096,18 +1356,27 @@ TTY.  Note:  placing the password for a Kerberos principal with
 administration access into a shell script can be dangerous if
 unauthorized users gain read access to the script.
 
-@item @b{-q} @i{query}
-Pass @i{query} directly to @code{kadmin}.  This is useful for writing
-scripts that pass specific queries to @code{kadmin}.
+@item @b{-s} @i{admin_server[:port]}
+Specifies the admin server that kadmin should contact.
+
+@noindent
+You can invoke @code{kadmin.local} with an of the follwing options:
+
+@item @b{-d_ @i{dbname}}
+Specifies the name of the Kerberos database.
 
 @item @b{-e} @i{"enctypes ..."}
-@b{(For @code{kadmin.local} only.)} Sets the list of cryptosystem and
-salt types to be used for any new keys created.  See @ref{Supported
-Encryption Types} and @ref{Salts} for available types.
+Sets the list of cryptosystem and salt types to be used for any new
+keys created.  See @ref{Supported Encryption Types} and @ref{Salts} for
+available types.
+
+@item @b{-m}
+Do not authenticate using a keytab.  This option will cause kadmin to
+prompt for the master database password.
 
 @end table
 
-@node Date Format, Principals, Kadmin Options, Administrating Kerberos Database Entries
+@node Date Format, Principals, Kadmin Options, Administrating the Kerberos Database
 @section Date Format
 
 Many of the @code{kadmin} commands take a duration or time as an
@@ -1134,9 +1403,6 @@ fortnight
 @end group
 @end smallexample
 
-Two-digit years are allowed in places, but the use of this form is not
-recommended.
-
 Note that if the date specification contains spaces, you must enclose it
 in double quotes.  Note also that you cannot use a number without a
 unit.  (I.e., ``"60 seconds"'' is correct, but ``60'' is incorrect.)
@@ -1146,7 +1412,7 @@ the allowable keywords.
 @table @b
 @item Months
 january, jan, february, feb, march, mar, april, apr, may, june, jun,
-july, jul, august, aug, september, sept, sep, october, oct, november,
+july, jul, august, aug, september, sep, sept, october, oct, november,
 nov, december, dec
 
 @item Days
@@ -1156,9 +1422,10 @@ thursday, thurs, thur, thu, friday, fri, saturday, sat
 @item Units
 year, month, fortnight, week, day, hour, minute, min, second, sec
 
-@item Relative
-tomorrow, yesterday, today, now, last, this, next, first, third, fourth,
-fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, ago
+@item Relative 
+tomorrow, yesterday, today, now, last, this, next, first, second,
+third, fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh,
+twelfth, ago
 
 @item Time Zones
 @code{kadmin} recognizes abbreviations for most of the world's time
@@ -1168,7 +1435,7 @@ zones.  A complete listing appears in @ref{kadmin Time Zones}.
 am, pm
 @end table
 
-@node Principals, Policies, Date Format, Administrating Kerberos Database Entries
+@node Principals, Policies, Date Format, Administrating the Kerberos Database
 @section Principals
 
 Each entry in the Kerberos database contains a Kerberos principal
@@ -1181,7 +1448,6 @@ that principal.
 * Adding or Modifying Principals::  
 * Deleting Principals::         
 * Changing Passwords::          
-* Renaming Principals::         
 @end menu
 
 @node Retrieving Information About a Principal, Privileges, Principals, Principals
@@ -1203,29 +1469,32 @@ requires the ``inquire'' administrative privilege.  The syntax is:
 @b{get_principal} @i{principal}
 @end smallexample
 
-@noindent The @code{get_principal} command has the alias @code{getprinc}.
+@noindent 
+The @code{get_principal} command has the alias @code{getprinc}.
 
-For example, suppose you wanted to view the attributes of the principals
-@* @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}} and
-@code{systest@@@value{PRIMARYREALM}}.  You would type:
+For example, suppose you wanted to view the attributes of the
+principal @* @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}}.
+  You would type:
 
 @smallexample
 @group
 @b{shell%} kadmin
 @b{kadmin:} getprinc @value{RANDOMUSER1}/root
 @b{Principal: @value{RANDOMUSER1}/root@@@value{PRIMARYREALM}
-Key version: 3
-Maximum life: 1 day 00:00:00
+Expiration date: [never]
+Last password change: Mon Jan 31 02:06:40 EDT 2002
+Password Expiration date: [none]
+Maximum ticket life: 0 days 10:00:00
 Maximum renewable life: 7 days 00:00:00
-Master key version: 1
-Expires: Mon Jan 18 22:14:07 EDT 2038
-Password expires: Mon Sep 19 14:40:00 EDT 2004
-Password last changed: Mon Jan 31 02:06:40 EDT 2004
-Last modified: by @value{ADMINUSER}/admin@@@value{PRIMARYREALM}
-	on Wed Jul 13 18:27:08 EDT 2004
-Attributes: DISALLOW_FORWARDABLE, DISALLOW_PROXIABLE,
-	REQUIRES_HW_AUTH
-Salt type: DEFAULT
+Last modified: Wed Jul 24 14:46:25 EDT 2002 (@value{ADMINUSER}/admin@@@value{PRIMARYREALM})
+Last successful authentication: Mon Jul 29 18:20:17 EDT 2002
+Last failed authentication: Mon Jul 29 18:18:54 EDT 2002
+Failed password attempts: 3
+Number of keys: 2
+Key: vno 2, Triple DES cbc mode with HMAC/sha1, no salt
+Key: vno 2, DES cbc mode with CRC-32, no salt
+Attributes: DISALLOW_FORWARDABLE, DISALLOW_PROXIABLE
+Policy: [none]
 kadmin:}
 @end group
 @end smallexample
@@ -1235,11 +1504,12 @@ the fields as a quoted, tab-separated string.  For example:
 
 @smallexample
 @group
-@b{kadmin:} getprinc -terse systest
-@b{systest@@@value{PRIMARYREALM}	3	86400	604800	1
-785926535	753241234	785900000
-@value{ADMINUSER}/admin@@@value{PRIMARYREALM}	786100034	0
-0
+@b{kadmin:} getprinc -terse @value{RANDOMUSER1}/root
+@b{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}	0	1027458564
+0	36000	 (@value{ADMINUSER}/admin@@@value{PRIMARYREALM}
+1027536385	18	2	0	[none]	604800	1027980137
+1027980054	3	2	1	2	16	0	1
+2	1	0
 kadmin:}
 @end group
 @end smallexample
@@ -1255,103 +1525,42 @@ The syntax is:
 @b{list_principals} [@i{expression}]
 @end smallexample
 
-@noindent where @i{expression} is a shell-style glob expression that can
-contain the characters @samp{*}, @samp{?}, @samp{[}, and @samp{]}.  All
-policy names matching the expression are displayed.  The
-@code{list_principals} command has the alias @code{listprincs}.  For
-example:
+@noindent where @i{expression} is a shell-style glob expression that
+can contain the characters @samp{*}, @samp{?}, @samp{[}, and @samp{]}.
+All policy names matching the expression are displayed.  The
+@code{list_principals} command has the aliases @code{listprincs},
+@code{get_principals}, and @code{getprincs}.  For example:
 
 @smallexample
 @group
 @b{kadmin:} listprincs test*
-@b{test3@@@value{PRIMARYDOMAIN}
-test2@@@value{PRIMARYDOMAIN}
-test1@@@value{PRIMARYDOMAIN}
-testuser@@@value{PRIMARYDOMAIN}
+@b{test3@@@value{PRIMARYREALM}
+test2@@@value{PRIMARYREALM}
+test1@@@value{PRIMARYREALM}
+testuser@@@value{PRIMARYREALM}
 kadmin:}
 @end group
 @end smallexample
 
-@noindent If no expression is provided, all principals are printed.
+@noindent 
+If no expression is provided, all principals are printed.
 
 @node Privileges, Adding or Modifying Principals, Retrieving Information About a Principal, Principals
 @subsection Privileges
 
 Administrative privileges for the Kerberos database are stored in the
-file @code{kadm5.acl}.  Each line of the file contains a principal, the
-privileges that principal has, and optionally the target to which those
-permissions apply.  The privileges are represented by single letters;
-UPPER-CASE letters represent negative permissions.  The permissions are:
+file @code{kadm5.acl}.  
 
-@table @b
-@itemx a
-allows the addition of principals or policies in the database.
-@itemx A
-disallows the addition of principals or policies in the database.
-@itemx d
-allows the deletion of principals or policies in the database.
-@itemx D
-disallows the deletion of principals or policies in the database.
-@itemx m    
-allows the modification of principals or policies in the database.
-@itemx M
-disallows the modification of principals or policies in the database.
-@itemx c
-allows the changing of passwords for principals in the database.
-@itemx C
-disallows the changing of passwords for principals in the database.
-@itemx i
-allows inquiries to the database.
-@itemx I
-disallows inquiries to the database.
-@itemx l
-allows the listing of principals or policies in the database.
-@itemx L
-disallows the listing of principals or policies in the database.
-@itemx *
-All privileges (admcil).
-@itemx x
-All privileges (admcil); identical to ``*''.
-@end table
-
-Principals in this file can include the @b{*} wildcard.  Here is an
-example of a @code{kadm5.acl} file.  Note that order is important;
-permissions are determined by the first matching entry.
-
-@smallexample
-@group
-*/admin@@@value{PRIMARYREALM}  *
-@value{ADMINUSER}@@@value{PRIMARYREALM}  ADMCIL
-@value{ADMINUSER}/*@@@value{PRIMARYREALM}  il
-@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}  cil  */root@@@value{PRIMARYREALM}
-*/*@@@value{PRIMARYREALM}  i
-@end group
-@end smallexample
-
-@noindent In the above file, any principal with an @code{admin} instance
-has all administrative privileges.  The user @code{@value{ADMINUSER}}
-has all permissions with his @code{admin} instance,
-@code{@value{ADMINUSER}/admin@@@value{PRIMARYREALM}} (matches the first
-line).  He has no permissions at all with his @code{null} instance,
-@code{@value{ADMINUSER}@@@value{PRIMARYREALM}} (matches the second
-line).  He has @i{inquire} and @i{list} permissions with any other
-instance (matches the third line).  When @code{@value{RANDOMUSER1}} is
-using her @code{root}
-instance, @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}}, she has
-@i{change password}, @i{inquire}, and @i{list} privileges for any other
-principal that has the instance @code{root}.  Finally, any principal in
-the realm @code{@value{PRIMARYREALM}} (except for
-@code{@value{ADMINUSER}@@@value{PRIMARYREALM}}, as mentioned above)
-has @i{inquire} privileges.
+@include kadm5acl.texinfo
 
 @node Adding or Modifying Principals, Deleting Principals, Privileges, Principals
 @subsection Adding or Modifying Principals
 
 To add a principal to the database, use the kadmin @code{add_principal}
 command, which requires the ``add'' administrative privilege.  This
-function creates the new principal and, if neither the -policy nor
--clearpolicy options are specified and the policy ``default'' exists,
-assigns it that policy.  The syntax is:
+function creates the new principal, prompting twice for a password, and,
+if neither the -policy nor -clearpolicy options are specified and the
+policy ``default'' exists, assigns it that policy.  The syntax is:
 
 @smallexample
 @b{kadmin:} add_principal [@i{options}] @i{principal}
@@ -1368,22 +1577,13 @@ administrative privilege.  The syntax is:
 @noindent
 @code{add_principal} has the aliases @code{addprinc} and
 @code{ank}@footnote{@code{ank} was the short form of the equivalent
-command using the deprecated @code{kadmin5} database administrative
-tool.  It has been kept}.  @code{modify_principal} has the alias @code{modprinc}.
+command using the deprecated @code{kadmin5} database administrative tool.
+It has been kept}.  @code{modify_principal} has the alias @code{modprinc}.
 
 The @code{add_principal} and @code{modify_principal} commands take the
 following switches:
 
 @table @b
-@item -salt @i{salttype}
-Uses the specified salt for generating the key.  For valid salt types,
-see @ref{Salts}.
-
-@item -clearpolicy
-For @code{modify_principal}, removes the current policy from a
-principal.  For @code{add_principal}, suppresses the automatic
-assignment of the policy ``default''.
-
 @item -expire @i{date}
 Sets the expiration date of the principal to @i{date}.
 
@@ -1392,6 +1592,10 @@ Sets the expiration date of the password to @i{date}.
 
 @item -maxlife @i{maxlife}
 Sets the maximum ticket life of the principal to @i{maxlife}.
+
+@item -maxrenewlife @i{maxrenewlife}
+Sets the maximum renewable life of tickets for the principal to
+@i{maxrenewlife}.
 
 @item -kvno @i{number}
 Explicity sets the key version number to @i{number}.  @value{COMPANY}
@@ -1404,6 +1608,11 @@ set or changed.  With @code{add_principal}, if this option is not
 supplied, the -clearpolicy is not specified, and the policy ``default''
 exists, that policy is assigned.  If a principal is created with no
 policy, @code{kadmin} will print a warning message.
+
+@item -clearpolicy
+For @code{modify_principal}, removes the current policy from a
+principal.  For @code{add_principal}, suppresses the automatic
+assignment of the policy ``default''.
 
 @item @{-|+@}allow_postdated
 The ``-allow_postdated'' option prohibits this principal from obtaining
@@ -1484,10 +1693,6 @@ will probably never need to use this option.)
 ``+password_changing_service'' option sets the KRB5_KDB_PWCHANGE_SERVICE
 flag on the principal in the database.
 
-@item -clearpolicy @i{policyname}
-Removes the policy @i{policyname} from the principal
-(@code{modify_principal} only).
-
 @item -randkey
 Sets the key for the principal to a random value (@code{add_principal}
 only).  @value{COMPANY} recommends using this option for host keys.
@@ -1520,6 +1725,10 @@ defaulting to no policy.}
 @b{Enter password for principal @value{RANDOMUSER1}@@@value{PRIMARYREALM}:}  @i{<= Type the password.}
 @b{Re-enter password for principal @value{RANDOMUSER1}@@@value{PRIMARYREALM}:}  @i{<=Type it again.}
 @end ifinfo
+@ifhtml
+@b{Enter password for principal @value{RANDOMUSER1}@@@value{PRIMARYREALM}:}  @i{<= Type the password.}
+@b{Re-enter password for principal @value{RANDOMUSER1}@@@value{PRIMARYREALM}:}  @i{<=Type it again.}
+@end ifhtml
 @b{Principal "@value{RANDOMUSER1}@@@value{PRIMARYREALM}" created.
 kadmin:}
 @end group
@@ -1546,6 +1755,11 @@ continuation of the previous line.)
 @b{Re-enter password for principal
 @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type it again.}
 @end ifinfo
+@ifhtml
+@b{Enter password for principal @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type the password.}
+@b{Re-enter password for principal
+@value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type it again.}
+@end ifhtml
 @b{Principal "@value{RANDOMUSER2}@@@value{PRIMARYREALM}" created.
 kadmin:}
 
@@ -1553,14 +1767,15 @@ kadmin:}
 @end smallexample
 
 If you will need cross-realm authentication, you need to add principals
-for the other realm's TGT to each realm.  For example, if you need to do
-cross-realm authentication between the realms @value{PRIMARYREALM} and
-@value{SECONDREALM}, you would need to add the principals @*
+for the other realm's TGT to each realm.  For example, if you need to
+do cross-realm authentication between the realms @value{PRIMARYREALM}
+and @value{SECONDREALM}, you would need to add the principals @*
 @samp{krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}} and
 @samp{krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}} to both
 databases.  You need to be sure the passwords and the key version
 numbers (kvno) are the same in both databases.  This may require
-explicitly setting the kvno with the @samp{-kvno} option.
+explicitly setting the kvno with the @samp{-kvno} option.  See
+@ref{Cross-realm Authentication} for more details.
 
 @node Deleting Principals, Changing Passwords, Adding or Modifying Principals, Principals
 @subsection Deleting Principals
@@ -1588,7 +1803,7 @@ kadmin:}
 @end group
 @end smallexample
 
-@node Changing Passwords, Renaming Principals, Deleting Principals, Principals
+@node Changing Passwords,  , Deleting Principals, Principals
 @subsection Changing Passwords
 
 To change a principal's password use the kadmin @code{change_password}
@@ -1603,11 +1818,6 @@ the principal is changing his/her own password).  The syntax is:
 @code{change_password} takes the following options:
 
 @table @b
-@item @b{-salt} @i{salttype}
-Uses the specified salt for generating the key.  Salt types are the same
-as for the @code{add_principal} command (@pxref{Adding or Modifying
-Principals}).
-
 @item -randkey
 Sets the key of the principal to a random value.
 
@@ -1621,6 +1831,12 @@ of the principal.  The quotes are necessary if there are multiple
 enctype-salttype pairs.  This will not function against kadmin daemons
 earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
 @ref{Salts} for possible values.
+
+@item @b{-keepold}
+Keeps the previous kvno's keys around.  There is no easy way to delete
+the old keys, and this flag is usually not necessary except perhaps for
+TGS keys.  Don't use this flag unless you know what you're doing.
+
 @end table
 
 For example:
@@ -1636,6 +1852,10 @@ For example:
 @b{Enter password for principal @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type the new password.}
 @b{Re-enter password for principal @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type it again.}
 @end ifinfo
+@ifhtml
+@b{Enter password for principal @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type the new password.}
+@b{Re-enter password for principal @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<= Type it again.}
+@end ifhtml
 @b{Password for @value{RANDOMUSER2}@@@value{PRIMARYREALM} changed.
 kadmin:}
 @end group
@@ -1644,36 +1864,7 @@ kadmin:}
 Note that @code{change_password} will not let you change the password to
 one that is in the principal's password history.
 
-@node Renaming Principals,  , Changing Passwords, Principals
-@subsection Renaming Principals
-
-To rename a principal, use the kadmin @code{rename_principal} command,
-which requires both the ``add'' and ``delete'' administrative
-privileges.  The syntax is:
-
-@smallexample
-@b{rename_principal} [@b{-force}] @i{old_principal} @i{new_principal}
-@end smallexample
-
-@noindent The @code{rename_principal} command has the alias @code{renprinc}.
-
-For example:
-
-@smallexample
-@group
-@b{kadmin:} renprinc test test0
-@b{Are you sure you want to rename the principal
-"test@@@value{PRIMARYREALM}" to
-"test0@@@value{PRIMARYREALM}"? (yes/no):} yes
-@b{Principal "test@@@value{PRIMARYREALM}" renamed to
-"test0@@@value{PRIMARYREALM}".
-Make sure that you have removed "test@@@value{PRIMARYREALM}" from
-all ACLs before reusing.
-kadmin:}
-@end group
-@end smallexample
-
-@node Policies, Dumping a Kerberos Database to a File, Principals, Administrating Kerberos Database Entries
+@node Policies, Global Operations on the Kerberos Database, Principals, Administrating the Kerberos Database
 @section Policies
 
 A policy is a set of rules governing passwords.  Policies can dictate
@@ -1741,8 +1932,8 @@ syntax is:
 
 @noindent where @i{expression} is a shell-style glob expression that can
 contain the characters *, ?, and [].  All policy names matching the
-expression are displayed.  The @code{list_policies} command has the alias
-@code{listpols}.  For example:
+expression are displayed.  The @code{list_policies} command has the aliases
+@code{listpols}, @code{get_policies}, and @code{getpols}.  For example:
 
 @smallexample
 @group
@@ -1809,7 +2000,7 @@ To delete a policy, use the @code{kadmin} @code{delete_policy} command,
 which requires the ``delete'' administrative privilege.  The syntax is:
 
 @smallexample
-@b{delete_policy} @i{policy_name}
+@b{delete_policy [-force]} @i{policy_name}
 @end smallexample
 
 @noindent The @code{delete_policy} command has the alias @code{delpol}.
@@ -1821,8 +2012,7 @@ For example:
 @b{kadmin:} delete_policy guests
 @b{Are you sure you want to delete the policy "guests"?
 (yes/no):} yes
-@b{Policy "guests" deleted.
-kadmin:}
+@b{kadmin:}
 @end group
 @end smallexample
 
@@ -1830,14 +2020,61 @@ Note that you must cancel the policy from all principals before deleting
 it.  The @code{delete_policy} command will fail if it is in use by any
 principals.
 
-@node Dumping a Kerberos Database to a File, Restoring a Kerberos Database from a Dump File, Policies, Administrating Kerberos Database Entries
-@section Dumping a Kerberos Database to a File
+@node Global Operations on the Kerberos Database, Cross-realm Authentication, Policies, Administrating the Kerberos Database
+@section Global Operations on the Kerberos Database
+
+@menu
+* Dumping a Kerberos Database to a File::  
+* Restoring a Kerberos Database from a Dump File::  
+* Creating a Stash File::       
+* Creating and Destroying a Kerberos Database::  
+@end menu
+
+The @code{kdb5_util} command is the primary tool for administrating the
+Kerberos database.  The syntax is:
+
+@smallexample
+@b{kdb5_util} @i{command} [@i{kdb5_util_options}] [@i{command_options}]
+@end smallexample
+
+The @code{kdb5_util} command takes the following options, which override
+the defaults specified in the configuration files:
+
+@table @b
+@itemx -r @i{realm}
+specifies the the Kerberos realm of the database.
+
+@itemx -d @i{database_name}
+specifies the name under which the principal database is stored.  
+
+@itemx -k @i{master_key_type}
+specifies the key type of the master key in the database.
+
+@itemx -M @i{master_key_name}
+specifies the principal name of the master key in the database.
+
+@itemx -m
+indicates that the master database password should be read from the TTY
+rather than fetched from a file on disk.
+
+@itemx -sf @i{stash_file}
+specifies the stash file of the master database password
+
+@itemx -P @i{password}
+specifies the master database password.  @value{COMPANY} does not
+recommend using this option.
+
+@end table
+
+@node Dumping a Kerberos Database to a File, Restoring a Kerberos Database from a Dump File, Global Operations on the Kerberos Database, Global Operations on the Kerberos Database
+@subsection Dumping a Kerberos Database to a File
 
 To dump a Kerberos database into a file, use the @code{kdb5_util}
 @code{dump} command on one of the KDCs.  The syntax is:
 
 @smallexample
-@b{kdb5_util dump} [@b{-old}] [@b{-b6}] [@b{-ov}] [@b{-verbose}] [@i{filename}
+@b{kdb5_util dump} [@b{-old}] [@b{-b6}] [@b{-b7}] [@b{-ov}] 
+[@b{-verbose}] [-mkey_convert] [-new_mkey_file] [@i{filename} 
 [@i{principals...}]]
 @end smallexample
 
@@ -1850,6 +2087,9 @@ causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 @itemx -b6
 causes the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
+@itemx -b7
+causes the dump to be in the Kerberos 5 Beta 7 format (``kdbt_edit
+load_dump version 4'').
 @itemx -ov
 causes the dump to be in ovsec_adm_export format.  Currently, the only
 way to preserve per-principal policy information is to use this in
@@ -1857,6 +2097,12 @@ conjunction with a normal dump.
 @itemx -verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
+@itemx -mkey_convert
+prompts for a new master password, and then dumps the database with
+all keys reencrypted in this new master key
+@itemx -new_mkey_file
+reads a new key from the default keytab and then dumps the database
+with all keys reencrypted in this new master key
 @end table
 
 For example:
@@ -1916,16 +2162,16 @@ contained in the Kerberos database, you must perform a normal dump (with
 no option flags) and an additional dump using the ``-ov'' flag to a
 different file.
 
-@node Restoring a Kerberos Database from a Dump File, Creating a Stash File, Dumping a Kerberos Database to a File, Administrating Kerberos Database Entries
-@section Restoring a Kerberos Database from a Dump File
+@node Restoring a Kerberos Database from a Dump File, Creating a Stash File, Dumping a Kerberos Database to a File, Global Operations on the Kerberos Database
+@subsection Restoring a Kerberos Database from a Dump File
 
 To restore a Kerberos database dump from a file, use the
 @code{kdb5_util} @code{load} command on one of the KDCs.  The syntax
 is:
 
 @smallexample
-@b{kdb5_util load} [@b{-old}] [@b{-b6}] [@b{-ov}] [@b{-verbose}] [@b{-update}]
-@i{dumpfilename} @i{dbname} [@i{admin_dbname}]
+@b{kdb5_util load} [@b{-old}] [@b{-b6}] [@b{-b7}] [@b{-ov}] [@b{-verbose}]
+[@b{-update}] [@b{-hash}] @i{dumpfilename} @i{dbname} [@i{admin_dbname}]
 @end smallexample
 
 The @code{kdb5_util load} command takes the following options:
@@ -1937,6 +2183,9 @@ requires the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 @itemx -b6
 requires the dump to be in the Kerberos 5 Beta 6 format (``kdb5_edit
 load_dump version 3.0'').
+@itemx -b7
+requires the dump to be in the Kerberos 5 Beta 7 format (``kdb5_edit
+load_dump version 4'').
 @itemx -ov
 requires the dump to be in ovsec_adm_export format.
 @itemx -verbose
@@ -1948,6 +2197,8 @@ existing database.  This is useful in conjunction with an
 ovsec_adm_export format dump if you want to preserve per-principal
 policy information, since the current default format does not contain
 this data.
+@itemx -hash
+causes the database to be stored as a hash rather than a binary tree.
 @end table
 
 For example:
@@ -1970,8 +2221,8 @@ For example:
 If the database file exists, and the @b{-update} flag was not given,
 @code{kdb5_util} will overwrite the existing database.
 
-@node Creating a Stash File, Creating and Destroying a Kerberos Database, Restoring a Kerberos Database from a Dump File, Administrating Kerberos Database Entries
-@section Creating a Stash File
+@node Creating a Stash File, Creating and Destroying a Kerberos Database, Restoring a Kerberos Database from a Dump File, Global Operations on the Kerberos Database
+@subsection Creating a Stash File
 
 A stash file allows a KDC to authenticate itself to the database
 utilities, such as @code{kadmin}, @code{kadmind}, @code{krb5kdc}, and
@@ -1997,6 +2248,9 @@ kdb5_util: Warning: proceeding without master key}
 @ifinfo
 @b{Enter KDC database master key:}  @i{<= Type the KDC database master password.}
 @end ifinfo
+@ifhtml
+@b{Enter KDC database master key:}  @i{<= Type the KDC database master password.}
+@end ifhtml
 @b{shell%}
 @end group
 @end smallexample
@@ -2005,8 +2259,8 @@ kdb5_util: Warning: proceeding without master key}
 If you do not specify a stash file, @code{kdb5_util} will stash the key
 in the file specified in your @code{kdc.conf} file.
 
-@node Creating and Destroying a Kerberos Database,  , Creating a Stash File, Administrating Kerberos Database Entries
-@section Creating and Destroying a Kerberos Database
+@node Creating and Destroying a Kerberos Database,  , Creating a Stash File, Global Operations on the Kerberos Database
+@subsection Creating and Destroying a Kerberos Database
 
 If you need to create a new Kerberos database, use the @code{kdb5_util}
 @code{create} command.  The syntax is:
@@ -2037,6 +2291,10 @@ It is important that you NOT FORGET this password.}
 @b{Enter KDC database master key:}  @i{<= Type the master password.}
 @b{Re-enter KDC database master key to verify:}  @i{<= Type it again.}
 @end ifinfo
+@ifhtml
+@b{Enter KDC database master key:}  @i{<= Type the master password.}
+@b{Re-enter KDC database master key to verify:}  @i{<= Type it again.}
+@end ifhtml
 @b{shell%}
 @end group
 @end smallexample
@@ -2064,6 +2322,10 @@ confirmation before destroying the database.
 @b{kdb5_util: Deleting KDC database stored in @value{DefaultDatabaseName}, are you sure 
 (type yes to confirm)?} @i{<== yes}
 @end ifinfo
+@ifhtml
+@b{kdb5_util: Deleting KDC database stored in @value{DefaultDatabaseName}, are you sure
+(type yes to confirm)?} @i{<== yes}
+@end ifhtml
 @b{OK, deleting database '@value{DefaultDatabaseName}'...}
 
 @b{shell%}
@@ -2071,13 +2333,48 @@ confirmation before destroying the database.
 @end smallexample
 
 @ignore
-@c @node The KDC Logs,  , Creating and Destroying a Kerberos Database, Administrating Kerberos Database Entries
+@c @node The KDC Logs,  , Creating and Destroying a Kerberos Database, Administrating the Kerberos Database
 @c @section The KDC Logs
 
 This will have to wait until the next release.  *sigh*
 @end ignore
 
-@node Application Servers, Backups of Secure Hosts, Administrating Kerberos Database Entries, Top
+@node Cross-realm Authentication,  , Global Operations on the Kerberos Database, Administrating the Kerberos Database
+@section Cross-realm Authentication
+
+In order for a KDC in one realm to authenticate Kerberos users in a
+different realm, it must share a key with the KDC in the other realm.
+In both databases, there must be krbtgt service principals for realms.
+These principals should all have the same passwords, key version
+numbers, and encryption types.  For example, if the administrators of
+@value{PRIMARYREALM} and @value{SECONDREALM} wanted to authenticate
+across the realms, they would run the following commands on the KDCs in
+@i{both} realms:
+
+@smallexample
+@group
+@b{shell%:} kadmin.local -e "des3-hmac-sha1:normal des-cbc-crc:v4"
+@b{kadmin:} add_princ -requires_preauth krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}
+@b{Enter password for principal krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}:} 
+@b{Re-enter password for principal krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}:}
+@b{kadmin:} add_princ -requires_preauth krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
+@b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}:}
+@b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALML}:}
+@b{kadmin:}
+@end group
+@end smallexample
+
+Even if most principals in a realm are generally created with the
+requires_preauth flag enabled, this flag is not desirable on
+cross-realm authentication keys because doing so makes it impossible to
+disable preauthentication on a service-by-service basis.  Disabling it
+as in the example above is recommended.
+
+It is also very important that these principals have good passwords.
+@value{COMPANY} recommends that TGT principal passwords be at least 26
+characters of random ASCII text.
+
+@node Application Servers, Backups of Secure Hosts, Administrating the Kerberos Database, Top
 @chapter Application Servers
 
 If you need to install the @value{PRODUCT} programs on an application
@@ -2123,15 +2420,17 @@ the @code{ktadd} command from @code{kadmin}, which requires the
 privilege.)  The syntax is:
 
 @smallexample
-@b{ktadd} [@b{-k} @i{keytab}] [@b{-q}] [@i{principal} | @b{-glob} @i{princ_exp}] [@i{@dots{}}]
+@b{ktadd} [@b{-k[eytab]} @i{keytab}] [@b{-q}] [@b{-e}
+@i{key:salt_list}] [@i{principal} | @b{-glob} @i{princ_exp}]
+[@i{@dots{}}]
 @end smallexample
 
 The @code{ktadd} command takes the following switches:
 
 @table @b
-@item -k @i{keytab}
+@item -k[eytab] @i{keytab}
 use @i{keytab} as the keytab file.  Otherwise, @code{ktadd} will use the
-default keytab file (@code{/etc/krb5.keytab}).
+default keytab file (@code{@value{DefaultDefaultKeytabName}}).
 
 @item @b{-e} @i{"enc:salt..."} 
 Uses the specified list of enctype-salttype pairs for setting the key
@@ -2183,13 +2482,13 @@ To remove a principal from an existing keytab, use the kadmin
 @code{ktremove} command.  The syntax is:
 
 @smallexample
-@b{ktremove} [@b{-k} @i{keytab}] [@b{-q}] @i{principal} [@i{kvno} | @b{all} | @b{old}]
+@b{ktremove} [@b{-k[eytab]} @i{keytab}] [@b{-q}] @i{principal} [@i{kvno} | @b{all} | @b{old}]
 @end smallexample
 
 The @code{ktremove} command takes the following switches:
 
 @table @b
-@item -k @i{keytab}
+@item -k[eytab] @i{keytab}
 use @i{keytab} as the keytab file.  Otherwise, @code{ktremove} will use
 the default keytab file (@code{/etc/krb5.keytab}).
 
@@ -2233,7 +2532,7 @@ specified maximum clock skew of the KDC (as specified in the
 @code{kdc.conf} file).  Similarly, hosts are configured to reject
 responses from any KDC whose clock is not within the specified maximum
 clock skew of the host (as specified in the @code{krb5.conf} file).  The
-default value for maximum clock skew is 300 seconds (five minutes).
+default value for maximum clock skew is @value{DefaultClockskew}.
 
 @value{COMPANY} suggests that you add a line to client machines'
 @code{/etc/rc} files to synchronize the machine's clock to your KDC at
@@ -2306,23 +2605,26 @@ If you need off-site users to be able to get Kerberos tickets in your
 realm, they must be able to get to your KDC.  This requires either that
 you have a slave KDC outside your firewall, or you configure your
 firewall to allow UDP requests into at least one of your KDCs, on
-whichever port the KDC is running.  (The default is port 88; other ports
-may be specified in the KDC's kdc.conf file.)  Similarly, if you need
-off-site users to be able to change their passwords in your realm, they
-must be able to get to your Kerberos admin server.  The default port for
-the admin server is 749.
+whichever port the KDC is running.  (The default is port
+@value{DefaultPort}; other ports may be specified in the KDC's kdc.conf
+file.)  Similarly, if you need off-site users to be able to change
+their passwords in your realm, they must be able to get to your
+Kerberos admin server.  The default port for the admin server is
+@value{DefaultKadmindPort}.
 
 If your on-site users inside your firewall will need to get to KDCs in
 other realms, you will also need to configure your firewall to allow
-outgoing TCP and UDP requests to port 88.  Additionally, if they will
-need to get to any Kerberos V4 KDCs, you may also need to allow TCP and
-UDP requests to port 750.  If your on-site users inside your firewall
+outgoing TCP and UDP requests to port @value{DefaultPort}.
+Additionally, if they will need to get to any Kerberos V4 KDCs, you may
+also need to allow TCP and UDP requests to port
+@value{DefaultSecondPort}.  If your on-site users inside your firewall
 will need to get to Kerberos admin servers in other realms, you will
-also need to allow outgoing TCP and UDP requests to port 749.
+also need to allow outgoing TCP and UDP requests to port
+@value{DefaultKadmindPort}.
 
 If any of your KDCs are outside your firewall, you will need to allow
 @code{kprop} requests to get through to the remote KDC.  @code{Kprop}
-uses the krb5_prop service on port 754 (tcp).
+uses the krb5_prop service on port @value{DefaultKrbPropPort} (tcp).
 
 If you need your off-site users to have access to machines inside your
 firewall, you need to allow TCP connections from their off-site hosts on
@@ -2332,18 +2634,18 @@ for the @value{PRODUCT} programs:
 
 @smallexample
 @group
-ftp           21/tcp           # Kerberos ftp and telnet use the
-telnet        23/tcp           # default ports
-kerberos      88/udp    kdc    # Kerberos V5 KDC
-kerberos      88/tcp    kdc    # Kerberos V5 KDC
-klogin        543/tcp          # Kerberos authenticated rlogin
-kshell        544/tcp   cmd    # and remote shell
-kerberos-adm  749/tcp          # Kerberos 5 admin/changepw
-kerberos-adm  749/udp          # Kerberos 5 admin/changepw
-krb5_prop     754/tcp          # Kerberos slave propagation
+ftp           @value{DefaultFTPPort}/tcp           # Kerberos ftp and telnet use the
+telnet        @value{DefaultTelnetPort}/tcp           # default ports
+kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
+klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
+kshell        @value{DefaultKshellPort}/tcp   cmd    # and remote shell
+kerberos-adm  @value{DefaultKadmindPort}/tcp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changepw
+krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
 @c kpop          1109/tcp         # Pop with Kerberos
-eklogin       2105/tcp         # Kerberos auth. & encrypted rlogin
-krb524        4444/tcp         # Kerberos 5 to 4 ticket translator
+eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin
+krb524        @value{DefaultKrb524Port}/tcp         # Kerberos 5 to 4 ticket translator
 @end group
 @end smallexample
 
@@ -2358,28 +2660,28 @@ these programs to non-default port numbers and allow ftp and telnet
 connections on those ports to get through.
 
 @value{PRODUCT} @code{rlogin} uses the @code{klogin} service, which by
-default uses port 543.  Encrypted @value{PRODUCT} rlogin uses the
-@code{eklogin} service, which by default uses port 2105.
+default uses port @value{DefaultKloginPort}.  Encrypted @value{PRODUCT}
+rlogin uses the @code{eklogin} service, which by default uses port
+@value{DefaultEkloginPort}.
 
 @value{PRODUCT} @code{rsh} uses the @code{kshell} service, which by
-default uses port 544.  However, the server must be able to make a TCP
-connection from the kshell port to an arbitrary port on the client, so
-if your users are to be able to use @code{rsh} from outside your
-firewall, the server they connect to must be able to send outgoing
-packets to arbitrary port numbers.  Similarly, if your users need to run
-@code{rsh} from inside your firewall to hosts outside your firewall, the
-outside server needs to be able to connect to an arbitrary port on the
-machine inside your firewall.  Because @value{PRODUCT} @code{rcp} uses
-@code{rsh}, the same issues apply.  If you need to use @code{rsh} (or
-@code{rcp}) through your firewall and are concerned with the security
-implications of allowing connections to arbitrary ports, @value{COMPANY}
-suggests that you have rules that specifically name these applications
-and, if possible, list the allowed hosts.
+default uses port @value{DefaultKshellPort}.  However, the server must
+be able to make a TCP connection from the kshell port to an arbitrary
+port on the client, so if your users are to be able to use @code{rsh}
+from outside your firewall, the server they connect to must be able to
+send outgoing packets to arbitrary port numbers.  Similarly, if your
+users need to run @code{rsh} from inside your firewall to hosts outside
+your firewall, the outside server needs to be able to connect to an
+arbitrary port on the machine inside your firewall.  Because
+@value{PRODUCT} @code{rcp} uses @code{rsh}, the same issues apply.  If
+you need to use @code{rsh} (or @code{rcp}) through your firewall and
+are concerned with the security implications of allowing connections to
+arbitrary ports, @value{COMPANY} suggests that you have rules that
+specifically name these applications and, if possible, list the allowed
+hosts.
 
-A reasonably good cookbook for configuring firewalls is available by FTP
-from @* @code{ftp.livingston.com}, in the location:
-@code{/pub/firewall/firewall-1.1.ps.Z}.  The book @cite{UNIX System
-Security}, by David Curry, is also a good starting point.
+The book @cite{UNIX System Security}, by David Curry, is a good
+starting point for learning to configure firewalls.
 
 @ignore
 @c @node Enabling Users to Connect from Off-Site,  , Configuring Your Firewall to Work With @value{PRODUCT}, Application Servers
@@ -2512,12 +2814,7 @@ KRB5KDC_ERR_KEY_EXP:  Password has expired
 @item
 KRB5KDC_ERR_PREAUTH_FAILED:  Preauthentication failed
 @item
-@iftex
 KRB5KDC_ERR_PREAUTH_REQUIRED:  Additional pre-auth@-en@-ti@-ca@-tion required
-@end iftex
-@ifinfo
-KRB5KDC_ERR_PREAUTH_REQUIRED:  Additional preauthentication required
-@end ifinfo
 @item
 KRB5KDC_ERR_SERVER_NOMATCH:  Requested server and ticket don't match
 @item
@@ -2569,9 +2866,9 @@ KRB5KRB_AP_ERR_BADSEQ:  Incorrect sequence number in message
 @item
 KRB5KRB_AP_ERR_INAPP_CKSUM:  Inappropriate type of checksum in message
 @item
-KRB5PLACEHOLD_51:  KRB5 error code 51
+KRB5KRB_AP_PATH_NOT_ACCEPTED: Policy rejects transited path
 @item
-KRB5PLACEHOLD_52:  KRB5 error code 52
+KRB5KRB_ERR_RESPONSE_TOO_BIG: Response too big for UDP, retry with TCP
 @item
 KRB5PLACEHOLD_53:  KRB5 error code 53
 @item
@@ -2737,9 +3034,9 @@ KRB5_PARSE_ILLCHAR:  Illegal character in component name
 @item
 KRB5_PARSE_MALFORMED:  Malformed representation of principal
 @item
-KRB5_CONFIG_CANTOPEN:  Can't open/find configuration file
+KRB5_CONFIG_CANTOPEN:  Can't open/find Kerberos configuration file
 @item
-KRB5_CONFIG_BADFORMAT:  Improper format of configuration file
+KRB5_CONFIG_BADFORMAT:  Improper format of Kerberos configuration file
 @item
 KRB5_CONFIG_NOTENUFSPACE:  Insufficient space to return complete
 information
@@ -2860,11 +3157,11 @@ KRB5_CC_IO:  Credentials cache I/O operation failed XXX
 @item
 KRB5_FCC_PERM:  Credentials cache file permissions incorrect
 @item
-KRB5_FCC_NOFILE:  No credentials cache file found
+KRB5_FCC_NOFILE:  No credentials cache found
 @item
-KRB5_FCC_INTERNAL:  Internal file credentials cache error
+KRB5_FCC_INTERNAL:  Internal credentials cache error
 @item
-KRB5_CC_WRITE:  Error writing to credentials cache file
+KRB5_CC_WRITE:  Error writing to credentials cache
 @item
 KRB5_CC_NOMEM:  No more memory to allocate (in credentials cache code)
 @item
@@ -2924,10 +3221,39 @@ credentials
 @item
 KRB5_GET_IN_TKT_LOOP:  Looping detected inside krb5_get_in_tkt
 @item
-KRB5_CONFIG_NODEFREALM:  Configuration file does not specify default
-realm
+KRB5_CONFIG_NODEFREALM:  Configuration file does not specify default realm
 @item
 KRB5_SAM_UNSUPPORTED:  Bad SAM flags in obtain_sam_padata
+@item
+KRB5_KT_NAME_TOOLONG: Keytab name too long
+@item
+KRB5_KT_KVNONOTFOUND: Key version number for principal in key table is incorrect
+@item
+KRB5_APPL_EXPIRED: This application has expired
+@item
+KRB5_LIB_EXPIRED: This Krb5 library has expired
+@item
+KRB5_CHPW_PWDNULL: New password cannot be zero length
+@item
+KRB5_CHPW_FAIL: Password change failed
+@item
+KRB5_KT_FORMAT: Bad format in keytab
+@item
+KRB5_NOPERM_ETYPE: Encryption type not permitted
+@item
+KRB5_CONFIG_ETYPE_NOSUPP: No supported encryption types (config file error?)
+@item
+KRB5_OBSOLETE_FN: Program called an obsolete, deleted function
+@item
+KRB5_EAI_FAIL: unknown getaddrinfo failure
+@item
+KRB5_EAI_NODATA: no data available for host/domain name
+@item
+KRB5_EAI_NONAME: host/domain name not found
+@item
+KRB5_EAI_SERVICE: service name unknown
+@item
+KRB5_ERR_NUMERIC_REALM: Cannot determine realm for numeric host address
 @end enumerate
 
 @node Kerberos V5 Database Library Error Codes, Kerberos V5 Magic Numbers Error Codes, Kerberos V5 Library Error Codes, Errors
@@ -2989,6 +3315,12 @@ KRB5_KDB_BAD_VERSION:  Unsupported version in database entry
 KRB5_KDB_BAD_SALTTYPE:  Unsupported salt type
 @item
 KRB5_KDB_BAD_ENCTYPE:  Unsupported encryption type
+@item
+KRB5_KDB_BAD_CREATEFLAGS: Bad database creation flags
+@item
+KRB5_KDB_NO_PERMITTED_KEY: No matching key in entry having a permitted enc type
+@item
+KRB5_KDB_NO_MATCHING_KEY: No matching key in entry
 @end enumerate
 
 @node Kerberos V5 Magic Numbers Error Codes, ASN.1 Error Codes, Kerberos V5 Database Library Error Codes, Errors
@@ -3013,23 +3345,12 @@ KV5M_ENCRYPT_BLOCK:  Bad magic number for krb5_encrypt_block structure
 @item
 KV5M_ENC_DATA:  Bad magic number for krb5_enc_data structure
 @item
-@iftex
 KV5M_CRYPTOSYSTEM_ENTRY:  Bad magic number for krb5_cryp@-to@-sys@-tem_entry
 structure
-@end iftex
-@ifinfo
-KV5M_CRYPTOSYSTEM_ENTRY:  Bad magic number for krb5_cryptosystem_entry
-structure
-@end ifinfo
 @item
 KV5M_CS_TABLE_ENTRY:  Bad magic number for krb5_cs_table_entry structure
 @item
-@iftex
 KV5M_CHECKSUM_ENTRY:  Bad magic number for krb5_check@-sum_en@-try structure
-@end iftex
-@ifinfo
-KV5M_CHECKSUM_ENTRY:  Bad magic number for krb5_checksum_entry structure
-@end ifinfo
 @item
 KV5M_AUTHDATA:  Bad magic number for krb5_authdata structure
 @item
@@ -3119,6 +3440,10 @@ KV5M_PREDICTED_SAM_RESPONSE:  Bad magic number for
 krb5_predicted_sam_response
 @item
 KV5M_PASSWD_PHRASE_ELEMENT:  Bad magic number for passwd_phrase_element
+@item
+KV5M_GSS_OID: Bad magic number for GSSAPI OID
+@item
+KV5M_GSS_QUEUE: Bad magic number for GSSAPI QUEUE
 @end enumerate
 
 @node ASN.1 Error Codes, GSSAPI Error Codes, Kerberos V5 Magic Numbers Error Codes, Errors
@@ -3146,6 +3471,12 @@ ASN1_BAD_LENGTH:  ASN.1 length doesn't match expected value
 ASN1_BAD_FORMAT:  ASN.1 badly-formatted encoding
 @item
 ASN1_PARSE_ERROR:  ASN.1 parse error
+@item
+ASN1_BAD_GMTIME: ASN.1 bad return from gmtime
+@item
+ASN1_MISMATCH_INDEF: ASN.1 non-constructed indefinite encoding
+@item
+ASN1_MISSING_EOC: ASN.1 missing expected EOC
 @end enumerate
 
 @node GSSAPI Error Codes,  , ASN.1 Error Codes, Errors
@@ -3176,6 +3507,18 @@ G_UNKNOWN_QOP:  Unknown quality of protection specified
 @item
 G_BAD_HOSTNAME:  Hostname in SERVICE-NAME string could not be
 canonicalized
+@item
+G_WRONG_MECH: Mechanism is incorrect
+@item
+G_BAD_TOK_HEADER: Token header is malformed or corrupt
+@item
+G_BAD_DIRECTION: Packet was replayed in wrong direction
+@item
+G_TOK_TRUNC: Token is missing data
+@item
+G_REFLECT: Token was reflected
+@item
+G_WRONG_TOKID: Received token ID does not match expected token ID
 @end enumerate
 
 Kerberos 5 GSSAPI Errors:
@@ -3205,6 +3548,12 @@ KG_CONTEXT:  Bad magic number for krb5_gss_ctx_id_t
 KG_CRED:  Bad magic number for krb5_gss_cred_id_t
 @item
 KG_ENC_DESC:  Bad magic number for krb5_gss_enc_desc
+@item
+KG_BAD_SEQ: Sequence number in token is corrupt
+@item
+KG_EMPTY_CCACHE: Credential cache is empty
+@item
+KG_NO_CTYPES: Acceptor and Initiator share no checksum types
 @end enumerate
 
 @node kadmin Time Zones,  , Errors, Appendix
@@ -3346,3 +3695,4 @@ International Date Line East.  (12 hours ahead of GMT.)
 
 @contents
 @bye
+

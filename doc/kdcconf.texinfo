@@ -9,15 +9,15 @@ The @code{kdc.conf} file is set up in the same format as the
 may contain any or all of the following three sections:
 
 @table @b
-@itemx kdcdefaults
+@item kdcdefaults
 Contains default values for overall behavior of the KDC.
 
-@itemx realms
+@item realms
 Contains subsections keyed by Kerberos realm names.  Each subsection
 describes realm-specific information, including where to find the
 Kerberos servers for that realm.
 
-@itemx logging
+@item logging
 Contains relations which determine how Kerberos programs are to perform
 logging.
 @end table

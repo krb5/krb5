@@ -21,7 +21,8 @@ password.
 
 @item principal
 a string that names a specific entity to which a set of credentials may
-be assigned.  It generally has three parts:
+be assigned.  It can have an arbitrary number of components, but
+generally has three:
 
 @table @b
 @item primary

@@ -5,7 +5,7 @@
 @c guide
 @setfilename krb425.info
 @settitle Upgrading to Kerberos V5 from Kerberos V4
-@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @c @smallbook                              @c Format for 7" X 9.25" paper
 @c %**end of header
@@ -31,7 +31,6 @@
 @page
 @vskip 0pt plus 1filll
 
-@include copyright.texinfo
 @end titlepage
 
 @node Top, Copyright, (dir), (dir)
@@ -65,7 +64,7 @@ suggests the following strategy for performing the upgrade:
 
 @enumerate
 @item
-@strong{Upgrade your KDCs.}  This is must be done first, so that
+@strong{Upgrade your KDCs.}  This must be done first, so that
 interactions with the Kerberos database, whether by Kerberos V5 clients
 or by Kerberos V4 clients, will succeed.
 
@@ -112,15 +111,15 @@ In the [libdefaults] section, the following additional tags may be used:
 @table @b
 @item krb4_srvtab
 Specifies the location of the Kerberos V4 srvtab file.  Default is
-@code{/etc/srvtab}.
+@value{DefaultKrb4Srvtab}.
 
 @item krb4_config
 Specifies the location of the Kerberos V4 configuration file.  Default
-is @code{/etc/krb.conf}.
+is @value{DefaultKrb4Config}.
 
 @item krb4_realms
 Specifies the location of the Kerberos V4 domain/realm translation
-file.  Default is @code{/etc/krb.realms}.
+file.  Default is @value{DefaultKrb4Realms}.
 @end table
 
 @node realms (krb5.conf),  , libdefaults, krb5.conf
@@ -235,8 +234,8 @@ in place of:
 
 @smallexample
 @group
-kerberos      88/udp    kdc    # Kerberos V5 KDC
-kerberos      88/tcp    kdc    # Kerberos V5 KDC
+kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
 @end group
 @end smallexample
 
@@ -245,61 +244,10 @@ add instead:
 
 @smallexample
 @group
-kerberos-sec  88/udp    kdc    # Kerberos V5 KDC
-kerberos-sec  88/tcp    kdc    # Kerberos V5 KDC
+kerberos-sec  @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos-sec  @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
 @end group
 @end smallexample
-
-@item
-In the file @code{/etc/inetd.conf}, for a @emph{secure} server, instead
-of making the changes described in the @value{PRODUCT} Installation
-Guide, do the following:
-
-Find and comment out any lines for the services @code{ftp},
-@code{telnet}, @code{shell}, @code{login}, and @code{exec}.
-
-@need 1800
-Add the following lines.  (Note:  each line beginning with @result{} is
-a continuation of the previous line.)
-
-@smallexample
-@group
-klogin  stream  tcp  nowait  root
-@result{}    @value{ROOTDIR}/sbin/klogind  klogind -k -c
-eklogin stream  tcp  nowait  root
-n@result{}   @value{ROOTDIR}/sbin/klogind  klogind -k -c -e
-kshell  stream  tcp  nowait  root
-@result{}    @value{ROOTDIR}/sbin/kshd  kshd -k -c -A
-ftp     stream  tcp  nowait  root
-@result{}    @value{ROOTDIR}/sbin/ftpd  ftpd -a
-telnet  stream  tcp  nowait  root
-@result{}    @value{ROOTDIR}/sbin/telnetd  telnetd -a valid
-@end group
-@end smallexample
-
-@ifset CYGNUS
-@strong{N.B.}:  As noted in the @value{PRODUCT} Installation Guide, if
-you have some clients running older versions of Kerberos V5 (beta
-6@footnote{@value{PRODUCT} is based on the MIT beta 7 release.} or
-earlier), checksums were done differently in those versions, which will
-cause authentication to fail.  To get around this problem, have the
-@code{klogind} and @code{kshd} daemons ignore checksums, by replacing
-each @code{-c} flag above with @code{-i}.
-@end ifset
-@ifclear CYGNUS
-@strong{N.B.}: As noted in the @value{PRODUCT} Installation Guide, if
-you have some clients running older versions of Kerberos V5 (beta 6 or
-earlier), checksums were done differently in those versions, which will
-cause authentication to fail.  To get around this problem, have the
-@code{klogind} and @code{kshd} daemons ignore checksums, by replacing
-each @code{-c} flag above with @code{-i}.
-@end ifclear
-
-For an @emph{insecure} server, make the changes described in the
-@value{PRODUCT} Installation Guide.
-
-When you make changes to @code{inetd.conf}, remember to @code{kill -HUP}
-the @code{inetd} process to cause the changes to take effect.
 
 @item
 Convert your Kerberos V4 srvtab file to Kerberos V5 keytab file as
@@ -336,12 +284,13 @@ V5 application servers.)  Users can use either the Kerberos V4 or
 @node Firewall Considerations,  , Upgrading Client machines, Top
 @chapter Firewall Considerations
 
-@value{PRODUCT} uses port 88, which is the port assigned by the IETF,
-for KDC requests.  Kerberos V4 used port 750.  If your users will need
-to get to any KDCs outside your firewall, you will need to allow TCP and
-UDP requests on port 88 for your users to get to off-site Kerberos V5
-KDCs, and on port 750 for your users to get to off-site Kerberos V4
-KDCs.
+@value{PRODUCT} uses port @value{DefaultPort}, which is the port
+assigned by the IETF, for KDC requests.  Kerberos V4 used port
+@value{DefaultSecondPort}.  If your users will need to get to any KDCs
+outside your firewall, you will need to allow TCP and UDP requests on
+port @value{DefaultPort} for your users to get to off-site Kerberos V5
+KDCs, and on port @value{DefaultSecondPort} for your users to get to
+off-site Kerberos V4 KDCs.
 
 @contents
 @c second page break makes sure right-left page alignment works right
