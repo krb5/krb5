@@ -27,29 +27,18 @@
 #include "com_err.h"
 #include "error_table.h"
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-#    include <KerberosSupport/KerberosSupport.h>
-#    include <KerberosSupport/ErrorLib.h>
-#endif
-
 #if defined(_WIN32)
 #define HAVE_STRERROR
 #endif
 
-#ifdef macintosh
-#define sys_nerr 100   /* XXX - What is this? */
-#endif
-
 #if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
 extern char const * const sys_errlist[];
-#ifndef macintosh
 extern const int sys_nerr;
-#endif
 #endif
 
 static char buffer[ET_EBUFSIZ];
 
-#if (defined(_WIN32) || defined(macintosh)  || (defined(__MACH__) && defined(__APPLE__)))
+#if (defined(_WIN32) || TARGET_OS_MAC
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
@@ -202,17 +191,9 @@ oops:
 
 #if TARGET_OS_MAC
 	{
-		/* This may be a Mac OS Toolbox error or an MIT Support Library Error.  Ask ErrorLib */
-		if (GetErrorLongString(code, buffer, ET_EBUFSIZ - 1) == noErr) {
-			return buffer;
-		}
-
-#if TARGET_API_MAC_OSX
-		/* ComErr and ErrorLib don't know about this error, ask the system */
+		/* ComErr doesn't know about this error, ask the system */
 		/* Of course there's no way to tell if it knew what error it got */
 		return (strerror (code));
-#endif
-
 	}
 #endif
 	

@@ -28,17 +28,13 @@
 #if defined(_WIN32)
 #include <io.h>
 #endif
-#ifdef macintosh
-#include "icons.h"
-static void MacMessageBox(char *errbuf);
-#endif
 
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 
 static void default_com_err_proc (const char *whoami, errcode_t code,
 				  const char *fmt, va_list ap)
 {
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32)
 
 	char errbuf[1024] = "";
 
@@ -57,9 +53,6 @@ static void default_com_err_proc (const char *whoami, errcode_t code,
 	    vsprintf (errbuf + strlen (errbuf), fmt, ap);
 	errbuf[sizeof(errbuf) - 1] = '\0';
 
-#ifdef macintosh
-	MacMessageBox(errbuf);
-#else
 #ifdef _WIN32
 	if (_isatty(_fileno(stderr))) {
 	    fputs(errbuf, stderr);
@@ -69,9 +62,8 @@ static void default_com_err_proc (const char *whoami, errcode_t code,
 	} else
 #endif /* _WIN32 */
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
-#endif /* macintosh */
 
-#else /* !_WIN32 && !macintosh */
+#else /* !_WIN32 */
     
 	if (whoami) {
 		fputs(whoami, stderr);
@@ -130,90 +122,5 @@ et_old_error_hook_func reset_com_err_hook ()
     
 	com_err_hook = NULL;
 	return x;
-}
-#endif
-
-#ifdef macintosh
-static void MacMessageBox(errbuf)
-	char *errbuf;
-{
-	WindowPtr	errWindow;
-	ControlHandle	errOkButton;
-	Rect		errOkButtonRect = { 120, 220, 140, 280 };
-	Rect		errRect = { 0, 0, 150, 300 };
-	GDHandle	mainDevice = GetMainDevice();
-	Rect		mainRect = (**mainDevice).gdRect;
-	Rect		tmpRect;
-	Rect		errTextRect = { 10, 70, 110, 290 };
-	Rect		errIconRect = { 10, 10, 10 + 32, 10 + 32 };
-	EventRecord	theEvent;
-	Point		localPt;
-	Boolean		done;
-	long		gestaltResult;
-	OSErr		theError;
-
-	/* Find Centered rect for window */
-	tmpRect.top	= ((mainRect.bottom + mainRect.top)/2 -
-			   (errRect.bottom + errRect.top)/2);
-	tmpRect.bottom = tmpRect.top + (errRect.bottom - errRect.top);
-	tmpRect.left = ((mainRect.right + mainRect.left)/2 -
-			(errRect.right + errRect.left)/2);
-	tmpRect.right = tmpRect.left + (errRect.right - errRect.left);
-
-	/* Create the error window - as a dialog window */
-	/* First check if we have color QuickDraw */
-	/* (we can assume we have Gestalt because we are on system 7) */
-	theError = Gestalt (gestaltQuickdrawFeatures, &gestaltResult);
-	if ((theError == noErr) && (gestaltResult & (1 << gestaltHasColor) != 0))
-		errWindow = NewCWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
-	else
-		errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
-
-	SetPort(errWindow);
-	TextFont(systemFont);
-	TextSize(12);
-
-	errOkButton = NewControl(errWindow, &errOkButtonRect,
-				 "\pOk", TRUE, 0, 0, 1, pushButProc, 0L);
-      DrawControls(errWindow);
-	InsetRect(&errOkButtonRect, -4, -4);
-	PenSize(3,3);
-	FrameRoundRect(&errOkButtonRect, 15,15);
-	PenSize(1,1);
-	InsetRect(&errOkButtonRect, 4, 4);
-
-	/* Draw the error text */
-	TETextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
-
-	/* Draw the Stop icon */
-	PlotIcon(&errIconRect, GetResource('ICON', 0));
-
-	/* mini event loop here */
-	done = FALSE;
-	while(!done) {
-		WaitNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent, 15, nil);
-		if (theEvent.what == mouseDown) {
-			localPt = theEvent.where;
-			GlobalToLocal(&localPt);
-			if (TestControl(errOkButton, localPt) &&
-			    TrackControl(errOkButton, localPt, NULL)) {
-				done = TRUE;
-			}
-		} else if (theEvent.what == keyDown &&
-			   (theEvent.message & 0xff) == 0x0d ||	/* CR */
-			   (theEvent.message & 0xff) == 0x03 ||	/* Enter */
-			   (theEvent.message & 0xff) == 0x1b) {	/* Escape */
-			long t;
-			/* Hilite the button for a bit */
-			HiliteControl(errOkButton, 1);	
-			Delay(5, &t);
-			/* Dehilite the button */
-			HiliteControl(errOkButton, 0);
-			done = TRUE;
-		}
-	}
-
-	/* Dispose of the Window, disposes of controls */
-	DisposeWindow(errWindow);
 }
 #endif

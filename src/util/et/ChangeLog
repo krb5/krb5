@@ -1,3 +1,9 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+    * com_err.c, com_err.h, error_message.c, et_c.awk, et_h.awk: 
+      Removed Mac OS 9-specific code.
+    * et_h.awk: define compat macro for init_foo_err_table
+      so that it gets defined to nothing on the Mac.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_INSTALL,

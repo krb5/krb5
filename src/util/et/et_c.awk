@@ -187,11 +187,7 @@ END {
 	print "    0" > outfile
 	print "};" > outfile
 	print "" > outfile
-        print "#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))" > outfile
-        print "#include <KerberosComErr/KerberosComErr.h>" > outfile
-        print "#else" > outfile
 	print "#include <com_err.h>" > outfile
-        print "#endif" > outfile
 	print "" > outfile
 	if (tab_base_high == 0) {
 	    print "const struct error_table et_" table_name "_error_table = { text, " \
