@@ -27,4 +27,4 @@ else
 fi
 AC_SUBST(KRB4_DEJAGNU_TEST)
 KRB5_AC_PRIOCNTL_HACK
-V5_AC_OUTPUT_MAKEFILE(. resolve asn.1 create hammer verify gssapi dejagnu threads shlib gss-threads)
+V5_AC_OUTPUT_MAKEFILE(. resolve asn.1 create hammer verify gssapi dejagnu threads shlib gss-threads misc)

@@ -1,3 +1,8 @@
+2005-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Create makefile in misc.
+	* Makefile.in (LOCAL_SUBDIRS): Add misc.
+
 2005-02-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss-threads: New subdirectory.
