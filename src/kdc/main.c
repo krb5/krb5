@@ -19,20 +19,28 @@ static char rcsid_main_c[] =
 
 #include <stdio.h>
 #include <syslog.h>
+#ifdef notdef
 #include <varargs.h>			/* XXX ansi? */
+#endif
+#include <signal.h>
+#include <errno.h>
+
 #include <com_err.h>
 
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/krb5_err.h>
 #include <krb5/isode_err.h>
 #include <krb5/kdb5_err.h>
+#include <krb5/ext-proto.h>
+
 #include "kdc_util.h"
 #include "extern.h"
 
-char *dbm_db_name = DEFAULT_DBM_FILE;
-
+#ifdef notdef
+/* need to sort out varargs stuff */
 static void
 kdc_com_err_proc(whoami, code, format, va_alist)
 char *whoami;
@@ -62,6 +70,7 @@ va_dcl
 
     return;
 }
+#endif
 
 void
 setup_com_err()
@@ -70,17 +79,172 @@ setup_com_err()
     initialize_kdb5_error_table();
     initialize_isod_error_table();
 
+#ifdef notdef
     (void) set_com_err_hook(kdc_com_err_proc);
+#endif
+    return;
+}
+
+sigtype
+request_exit()
+{
+    signal_requests_exit = 1;
+
     return;
 }
 
 void
 setup_signal_handlers()
 {
+    signal(SIGINT, request_exit);
+    signal(SIGHUP, request_exit);
+    signal(SIGTERM, request_exit);
 
     return;
 }
 
+void
+usage(name)
+char *name;
+{
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-m] [-k masterkeytype] [-M masterkeyname]\n", name);
+    return;
+}
+
+void
+process_args(argc, argv)
+int argc;
+char **argv;
+{
+    int c;
+    krb5_boolean manual = FALSE;
+    int keytypedone = 0;
+    char *db_realm = 0;
+    char *mkey_name = 0;
+    char *mkey_fullname;
+    char lrealm[BUFSIZ];
+    krb5_error_code retval;
+
+    extern int optind;
+    extern char *optarg;
+
+    while (c = getopt(argc, argv, "r:d:mM:k:")) {
+	switch(c) {
+	case 'r':			/* realm name for db */
+	    db_realm = optarg;
+	    break;
+	case 'd':			/* pathname for db */
+	    dbm_db_name = optarg;
+	    break;
+	case 'm':			/* manual type-in of master key */
+	    manual = TRUE;
+	    break;
+	case 'M':			/* master key name in DB */
+	    mkey_name = optarg;
+	    break;
+	case 'k':			/* keytype for master key */
+	    master_keyblock.keytype = atoi(optarg);
+	    keytypedone++;
+	    break;
+	case '?':
+	default:
+	    usage(argv[0]);
+	    exit(1);
+	}
+    }
+    if (!db_realm) {
+	/* no realm specified, use default realm */
+	if (retval = krb5_get_default_realm(sizeof(lrealm), lrealm)) {
+	    com_err(argv[0], retval,
+		    "while attempting to retrieve default realm");
+	    exit(1);
+	}
+	db_realm = lrealm;
+    }
+    if (!mkey_name)
+	mkey_name = KRB5_KDB_M_NAME;
+
+    if (!keytypedone)
+	master_keyblock.keytype = KEYTYPE_DES;
+
+    /* assemble & parse the master key name */
+
+    /* +2 for @ and null term */
+    if (!(mkey_fullname = malloc(strlen(mkey_name) + strlen(db_realm) + 2))) {
+	com_err(argv[0], ENOMEM,
+		"while allocating storage for master key name");
+	exit(1);
+    }
+    (void) strcpy(mkey_fullname, mkey_name);
+    (void) strcat(mkey_fullname, "@");
+    (void) strcat(mkey_fullname, db_realm);
+
+    if (retval = krb5_parse_name(mkey_fullname, &master_princ)) {
+	com_err(argv[0], retval,
+		": parse of \"%s\" failed", mkey_fullname);
+	exit(1);
+    }
+    
+    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
+				    &master_keyblock)) {
+	com_err(argv[0], retval, "while fetching master key");
+    }
+    return;
+}
+
+
+krb5_error_code
+init_db(dbname, masterkeyname, masterkeyblock)
+char *dbname;
+krb5_principal masterkeyname;
+krb5_keyblock *masterkeyblock;
+{
+    krb5_error_code retval;
+
+    /* set db name if appropriate */
+    if (dbname && (retval = krb5_db_set_name(dbname)))
+	return(retval);
+
+    /* initialize database */
+    if (retval = krb5_db_init())
+	return(retval);
+
+    master_encblock.crypto_entry = &krb5_des_cs_entry; /* XXX */
+
+    if (retval = krb5_db_verify_master_key(masterkeyname, masterkeyblock,
+					   &master_encblock)) {
+	master_encblock.crypto_entry = 0;
+	return(retval);
+    }
+
+    /* do any necessary key pre-processing */
+    if (retval = (*master_encblock.crypto_entry->
+		  process_key)(&master_encblock, masterkeyblock)) {
+	master_encblock.crypto_entry = 0;
+	(void) krb5_db_fini();
+	return(retval);
+    }
+
+    return 0;
+}
+
+krb5_error_code
+closedown_db()
+{
+    krb5_error_code retval;
+
+    /* clean up master key stuff */
+    retval = (*master_encblock.crypto_entry->finish_key)(&master_encblock);
+
+    bzero((char *)&master_encblock, sizeof(master_encblock));
+
+    /* close database */
+    if (retval) {
+	(void) krb5_db_fini();
+	return retval;
+    } else
+	return (krb5_db_fini());
+}
 
 /*
  outline:
@@ -114,16 +278,16 @@ char **argv;
 {
     krb5_error_code retval;
 
-    process_args(argc, argv);		/* includes reading master key */
-
     setup_com_err();
+
+    process_args(argc, argv);		/* includes reading master key */
 
     setup_signal_handlers();
 
     openlog(argv[0], LOG_CONS|LOG_NDELAY, LOG_LOCAL0); /* XXX */
     syslog(LOG_INFO, "commencing operation");
 
-    if (retval = init_db(dbm_db_name, master_princ, master_keyblock)) {
+    if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
 	com_err(argv[0], retval, "cannot initialize database");
 	exit(1);
     }
@@ -135,53 +299,3 @@ char **argv;
     exit(0);
 }
 
-krb5_error_code
-init_db(dbname, masterkeyname, masterkeyblock)
-char *dbname;
-krb5_principal masterkeyname;
-krb5_keyblock *masterkeyblock;
-{
-    krb5_error_code retval;
-
-    /* set db name if appropriate */
-    if (dbname && (retval = krb5_db_set_name(dbname)))
-	return(retval);
-
-    /* initialize database */
-    if (retval = krb5_db_init())
-	return(retval);
-
-    master_encblock.crypto_entry = &krb5_des_cs_entry; /* XXX */
-
-    if (retval = krb5_db_verify_master_key(masterkeyname, masterkeyblock,
-					   &master_encblock)) {
-	master_encblock.crypto_entry = 0;
-	return(retval);
-    }
-
-    /* do any necessary key pre-processing */
-    if (retval = (*master_encblock.crypto_entry->
-		  process_key)(&master_encblock, masterkeyblock)) {
-	master_encblock.crypto_entry = 0;
-	return(retval);
-    }
-
-    return 0;
-}
-
-krb5_error_code
-closedown_db()
-{
-    krb5_error_code retval;
-
-    /* clean up master key stuff */
-    if (retval = (*master_encblock.crypto_entry->finish_key)(&master_encblock))
-	return retval;
-    bzero(&master_encblock, sizeof(master_encblock));
-
-    /* close database */
-    if (retval = krb5_db_fini())
-	return(retval);
-
-    return 0;
-}
