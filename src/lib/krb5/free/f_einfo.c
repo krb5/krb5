@@ -32,8 +32,11 @@ void krb5_free_etype_info(context, info)
 {
   int i;
 
-  for(i=0; info[i] != NULL; i++)
-      ktest_destroy_etype_info_entry(info[i]);
+  for(i=0; info[i] != NULL; i++) {
+      if (info[i]->salt)
+	  free(info[i]->salt);
+      free(info[i]);
+  }
   free(info);
 }
     
