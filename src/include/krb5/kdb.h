@@ -186,7 +186,7 @@ krb5_error_code	krb5_db_fetch_mkey
 #include <krb5/narrow.h>
 
 
-#define KRB5_KDB_DEF_FLAGS	(KRB5_KDB_DISALLOW_DUP_SKEY)
+#define KRB5_KDB_DEF_FLAGS	0
 
 /* XXX THIS REALLY BELONGS ELSEWHERE */
 #define	TGTNAME	"krbtgt"
