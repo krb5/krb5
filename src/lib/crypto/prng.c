@@ -63,7 +63,7 @@ krb5_c_random_seed(krb5_context context, krb5_data *data)
 
     krb5_nfold((data->length+STATESIZE)*8, fold_input,
 	       STATESIZE*8, STATE);
-
+    free(fold_input);
     return(0);
 }
 

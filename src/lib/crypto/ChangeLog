@@ -1,3 +1,7 @@
+Mon Sep 21 15:23:19 1998  Tom Yu  <tlyu@mit.edu>
+
+	* prng.c (krb5_c_random_seed): Fix memory leak.
+
 Mon Sep 14 23:21:17 1998  Tom Yu  <tlyu@mit.edu>
 
 	* old/decrypt.c (krb5_old_decrypt): Fix memory leak.
