@@ -147,6 +147,7 @@ deltat:
 	| wsnum '-' NUM ':' NUM ':' NUM	{ DO ($1, $3, $5, $7); }
 	| wsnum ':' NUM ':' NUM		{ DO ( 0, $1, $3, $5); }
 	| wsnum ':' NUM			{ DO ( 0, $1, $3,  0); }
+	| wsnum 			{ DO ( 0,  0,  0, $1); } /* default to 's' */
 	;
 
 opt_hms:
@@ -222,7 +223,7 @@ krb5_string_to_deltat(char *string, krb5_deltat *deltatp)
     p.delta = 0;
     p.p = string;
     if (yyparse (&p))
-	return EINVAL;
+	return KRB5_DELTAT_BADFORMAT;
     *deltatp = p.delta;
     return 0;
 }

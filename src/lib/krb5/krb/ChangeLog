@@ -1,3 +1,7 @@
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
+	* deltat.c, x-deltat.y: Default to seconds if no unit is provided.
+
 2004-09-24  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Include SRCTOP to get patchlevel.h.

@@ -340,4 +340,6 @@ error_code KRB5_ERR_NO_SERVICE,	"service not available"
 
 error_code KRB5_CC_READONLY,    "Ccache function not supported: read-only ccache type"
 error_code KRB5_CC_NOSUPP,      "Ccache function not supported: not implemented"
+
+error_code KRB5_DELTAT_BADFORMAT,	"Invalid format of Kerberos lifetime or clock skew string"
 end

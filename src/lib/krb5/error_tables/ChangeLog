@@ -1,3 +1,8 @@
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb5_err.et: added KRB5_DELTAT_BADFORMAT for 
+	krb5_string_to_deltat.
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Drop init_ets code.
