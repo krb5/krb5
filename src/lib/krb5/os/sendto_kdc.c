@@ -169,8 +169,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		   socket will time out, so use connect, send, recv instead of
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
-		if (connect(socklist[host],
-			    addrs.addrs[host]->ai_addr, addrs.addrs[host]->ai_addrlen) == SOCKET_ERROR) {
+		if (connect(socklist[host], addrs.addrs[host]->ai_addr,
+			    addrs.addrs[host]->ai_addrlen) == SOCKET_ERROR) {
 #ifdef DEBUG
 		    perror ("connect");
 #endif
