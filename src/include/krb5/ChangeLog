@@ -9,6 +9,11 @@ Tue Mar 28 18:02:41 1995  John Gilmore  (gnu at toad.com)
 	* macsock.h:  Support connect(), recv(), send(), getmyipaddr().
 	(WSAGetLastError):  Fix typo -- there's no argument to this macro.
 
+	* k5-errors.h:  Rename errors.h (which duplicated a standard Mac
+	header name, causing a problem).
+	* AddressXlation.h, GetMyIPAddr.h, MacTCPCommonTypes.h, TCPPB.h, 
+	UDPPB.h:  Add MacTCP header files.
+
 Mon Mar 27 09:33:10 1995  Chris Provenzano (proven@mit.edu)
 
         * func-proto.h (krb5_rd_req(), krb5_rd_req_decode(), krb5_mk_rep(),
