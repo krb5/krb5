@@ -1,3 +1,9 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in (AC_COMPILE_TYPE): Declare with AC_DEFUN() instead
+	of define() as newer versions of autoconf check for AC_REQUIRE use
+	outside of AC_DEFUN.
+
 Thu Aug 10 23:21:01 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add AC_PROG_INSTALL for installation of library.
