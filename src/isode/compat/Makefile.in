@@ -8,8 +8,12 @@ VPATH = @srcdir@
 BUILDTOP = ../../
 TOPDIR = $(BUILDTOP)
 
-OPTIONS	=	-I. -I$(HDIR) $(PEPYPATH) $(KRBOPT)
+OPTIONS	=	-I. -I$(HDIR) -I$(ISODEINC) $(PEPYPATH) $(KRBOPT)
 CFLAGS  =       $(OPTIONS) $(LOPTIONS) 
+
+KRBINC	=	$(TOPDIR)include/
+ISODEINCM=	$(KRBINC)isode
+ISODEINC=	$(ISODEINCM)/
 
 HDIR	=	$(TOPDIR)isode/h/
 UTILDIR	=	$(TOPDIR)isode/util/

@@ -65,7 +65,7 @@ FHEADERS=	fpkt.h ftam.h
 ##################################################################
 
 all:;	-mkdir $(ISODEINCM)
-	@for h in $(HEADERS); do cp $$h $(ISODEINC)/$$h; done
+	@for h in $(HEADERS); do cp $(srcdir)/$$h $(ISODEINC)/$$h; done
 	-@echo copied $(HEADERS)
 
 inst-all:;	-mkdir $(INCDIRM)
