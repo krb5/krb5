@@ -1,3 +1,8 @@
+Fri Jun 21 18:02:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.h: Fix Win-16 build #defines for KRB5_CALLCONV and
+	 	KRB5_DLLIMP.
+
 Thu Jun 13 22:11:08 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES

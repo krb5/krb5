@@ -41,11 +41,11 @@
 #endif
 
 #ifndef KRB5_CALLCONV
-#define KRB5_CALLCONV __pascall
-#define KRB5_CALLCONV_C __cdecl
-#define KRB5_DLLIMP __far __export
-#define INTERFACE   KRB5_DLLIMP KRB5_CALLCONV
-#define INTERFACE_C KRB5_DLLIMP KRB5_CALLCONV_C
+#define KRB5_CALLCONV __far __export __pascal
+#define KRB5_CALLCONV_C __far __export __cdecl
+#define KRB5_DLLIMP
+#define INTERFACE   KRB5_CALLCONV
+#define INTERFACE_C KRB5_CALLCONV_C
 #endif /* !KRB5_CALLCONV */
 	
 #else
