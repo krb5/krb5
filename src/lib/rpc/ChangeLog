@@ -1,5 +1,7 @@
 Wed Jul 24 07:58:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* pmap_rmt.c (clnt_broadcast): Use memset insetad of bzero.
+
 	* Makefile.in (DEPLIBS): Use correct version number for
 		gssapi_krb5 dependency. 
 
