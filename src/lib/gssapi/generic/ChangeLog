@@ -1,3 +1,11 @@
+Thu Oct 10 15:03:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove calls to CopySrcHeader.
+
+	* Makefile.in: More fixups; punt usage of CopySrcHeader and use
+ 	explicit dependencies instead, thus avoiding abuse of double-colon
+ 	rules.
+
 Wed Oct  9 14:12:27 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-unix): Fix up last change; depending on a phony

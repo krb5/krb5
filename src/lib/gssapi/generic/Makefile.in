@@ -16,6 +16,18 @@ ETSRCS= gssapi_err_generic.c
 ETOBJS= gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h
 
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
+$(EHDRDIR):
+	mkdir $(EHDRDIR)
+
+HDRS=	$(EHDRDIR)/gssapi.h \
+	$(EHDRDIR)/gssapi_generic.h
+
+$(EHDRDIR)/gssapi.h: $(EHDRDIR) $(srcdir)/gssapi.h
+	$(CP) $(srcdir)/gssapi.h $@
+$(EHDRDIR)/gssapi_generic.h: $(EHDRDIR) $(srcdir)/gssapi_generic.h
+	$(CP) $(srcdir)/gssapi_generic.h $@
+
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 	$(CC) $(CFLAGS) -c $*.c
 @SHARED_RULE_LOCAL@
@@ -68,18 +80,15 @@ OBJS = \
 	util_validate.$(OBJEXT) \
 	gssapi_err_generic.$(OBJEXT)
 
-EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
+$(OBJS): $(HDRS) $(ETHDRS)
+
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
-HDRS= $(ETHDRS)
+all-unix:: shared $(SRCS) $(EHDRDIR) $(ETHDRS) $(OBJS)
 
-all-unix:: shared $(SRCS) $(HDRS) includes
-all-unix:: $(OBJS)
+all-mac:: $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
 
-all-mac:: $(SRCS) $(HDRS) includes
-all-max:: $(OBJS)
-
-all-windows:: $(SRCS) $(HDRS) win-include
+all-windows:: $(SRCS) $(ETHDRS) win-include
 all-windows:: $(OBJS)
 
 win-include::
@@ -87,13 +96,13 @@ win-include::
 	copy gssapi.h $(EHDRDIR)
 	copy gssapi_generic.h $(EHDRDIR)
 
-unixmac: $(SRCS) $(HDRS) includes
+unixmac: $(SRCS) $(ETHDRS)
 
 clean-unix::
-	$(RM) $(ETHDRS) $(ETSRCS) shared/*
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
 
 clean-mac::
-	$(RM) $(ETHDRS) $(ETSRCS) shared/*
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
 
 clean-windows::
 	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
@@ -107,5 +116,3 @@ install::
 	done
 
 depend:: $(ETSRCS)
-
-includes::
