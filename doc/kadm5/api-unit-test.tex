@@ -887,6 +887,9 @@ tested.
 \Reason{Accepts 0 for max_life.}
 }
 
+\numtest{40}{
+\Reason{Rejects null principal argument.}
+}
 
 
 \section{ovsec_kadm_rename_principal}
@@ -1439,6 +1442,9 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Succeeds for user with ``get'' and ``add.''}
 }
 
+\numtest{28}{
+\Reason{Rejects null policy argument.}
+}
 
 
 \section{ovsec_kadm_delete_policy}
@@ -1603,6 +1609,9 @@ Number & Modify access? & Own key? & Service & override_qual & Pass/Fail \\ \hli
 \Reason{Succeeds for user with ``get'' and ``modify.''}
 }
 
+\numtest{28}{
+\Reason{Rejects null policy argument.}
+}
 
 
 \section{ovsec_kadm_get_policy}
