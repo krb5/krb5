@@ -1,3 +1,7 @@
+Fri Feb 27 23:15:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Replace @SHLIB_GEN@ with @GEN_LIB@
+
 Fri Feb 27 18:00:15 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Move the regular expression function tests into
