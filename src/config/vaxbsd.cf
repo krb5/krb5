@@ -24,6 +24,7 @@
 #define HasVoidSignalReturn NO
 #define HasPosixTermios NO
 #define HasPosixFileLocks NO
+#define HasPosixTypes NO
 #define HasStringH YES
 #define HasStdlibH NO
 #define Bitsize32
