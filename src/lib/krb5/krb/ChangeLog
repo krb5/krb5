@@ -1,3 +1,9 @@
+2002-08-12  Tom Yu  <tlyu@mit.edu>
+
+	* unparse.c (krb5_unparse_name_ext): Error out if passed a NULL
+	pointer.  Patch from Mark Levinson; fixes [krb5-admin/1140].
+	[pullup from trunk]
+
 2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* princ_comp.c (krb5_realm_compare), auth_con.c
