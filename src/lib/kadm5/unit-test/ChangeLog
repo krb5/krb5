@@ -1,3 +1,8 @@
+Wed Oct 23 13:32:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* api.2/get-principal-v2.exp: Fix for test 100 where {} is not
+		equivalent to "{}" for empty tl_data field.
+
 Mon Oct 21 16:27:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.2/mod-principal-v2.exp: create this file, implement tests

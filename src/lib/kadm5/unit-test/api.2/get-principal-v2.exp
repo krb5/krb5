@@ -84,7 +84,7 @@ proc test100 {} {
 	fail "$test: key_data $key_data should be {}"
 	set failed 1
     }
-    if {$tl_data != "{}"} {
+    if {$tl_data != {}} {
 	fail "$test: tl_data $tl_data should be {}"
 	set failed 1
     }
