@@ -31,6 +31,7 @@ EXPORTS
 	krb5_free_authenticator
 	krb5_free_authenticator_contents
 	krb5_free_checksum
+	krb5_free_config_files
 	krb5_free_context
 	krb5_free_cred
 	krb5_free_cred_contents
@@ -64,6 +65,7 @@ EXPORTS
 	krb5_get_credentials
 	krb5_get_credentials_renew
 	krb5_get_credentials_validate
+	krb5_get_default_config_files
 	krb5_get_default_realm
 	krb5_get_host_realm
 	krb5_get_realm_domain

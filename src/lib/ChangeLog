@@ -1,3 +1,8 @@
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Add krb5_get_default_config_files and 
+		krb5_free_config_files.
+
 1999-06-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win_glue.c (krb5_vercheck): Only do version checking once per
