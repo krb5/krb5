@@ -212,6 +212,8 @@ krb5_error_code decode_krb5_encryption_key(DECLARG(const krb5_data *, code),
     get_field((*rep)->keytype,0,asn1_decode_keytype);
     get_lenfield((*rep)->length,(*rep)->contents,1,asn1_decode_octetstring);
     end_structure();
+    (*rep)->magic = KV5M_KEYBLOCK;
+    (*rep)->etype = ETYPE_UNKNOWN;
   }
   cleanup();
 }
