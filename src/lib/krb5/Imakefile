@@ -11,7 +11,8 @@
 #define PassCDebugFlags
 NormalLibraryObjectRule()
 
-        SUBDIRS = error_tables asn.1 ccache keytab krb rcache free os kdb des crc-32 krb425 rsa-md4
+SUBDIRS = error_tables asn.1 ccache keytab krb rcache free os kdb des \
+	des425 crc-32 krb425 rsa-md4
 #ifdef HasVfprintf
 VPOBJS=
 VPSRCS=
