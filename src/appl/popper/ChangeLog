@@ -1,0 +1,5 @@
+Tue Aug  9 16:50:08 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in:
+	* configure.in: fix $(ISODELIB), also fix make install
+
