@@ -1,3 +1,10 @@
+ 2001-11-24  Sam Hartman  <hartmans@mit.edu>
+ 
+ 	* fwd_tgt.c (krb5_fwd_tgt_creds): Get a session key for the
+ 	forwarded tgt that is the same as the  session key for  the
+ 	auth_context.  This  is an enctype we know the remote side
+ 	supports.  
+ 
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
 	* rd_safe.c, rd_priv.c, rd_cred.c, preauth.c, mk_safe.c,
