@@ -1,3 +1,10 @@
+Thu Sep  5 21:31:07 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* et_c.awk: Change continuation processing so that it doesn't
+ 		depend on ANSI C string concatenation.  (No need for it,
+ 		since the .c file isn't designed for human consumption
+ 		anyway.)
+
 Fri Aug 30 22:55:14 1996  Tom Yu  <tlyu@mit.edu>
 
 	* internal.h: #ifdef NEED_SYS_ERRLIST -> #ifdef

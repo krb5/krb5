@@ -122,11 +122,13 @@ c2n["_"]=63
 
 (continuation == 1) && ($0 ~ /\\[ \t]*$/) {
 	text=substr($0,1,length($0)-1);
-	printf "\t\t\"%s\"\n", text > outfile
+#	printf "\t\t\"%s\"\n", text > outfile
+	cont_buf=cont_buf text;
 }
 
 (continuation == 1) && ($0 ~ /"[ \t]*$/) {
-	printf "\t\t\"%s,\n", $0 > outfile
+#	printf "\t\t\"%s,\n", $0 > outfile
+	printf "\t%s,\n", cont_buf $0 > outfile
 	continuation = 0;
 }
 
@@ -152,14 +154,16 @@ c2n["_"]=63
 	    text = text FS $i
 	}
 	text=substr(text,2,length(text)-2);
-	printf "\t%s\"\n", text > outfile
+#	printf "\t%s\"\n", text > outfile
+	cont_buf=text
 	continuation++;
 }
 
 /^[ \t]*".*\\[ \t]*$/ {
 	if (skipone) {
 	    text=substr($0,1,length($0)-1);
-	    printf "\t%s\"\n", text > outfile
+#	    printf "\t%s\"\n", text > outfile
+	    cont_buf=text
 	    continuation++;
 	}
 	skipone=0
