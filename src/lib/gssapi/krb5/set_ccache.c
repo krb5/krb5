@@ -39,7 +39,6 @@ gss_krb5_ccache_name(minor_status, name, out_name)
     char *old_name = NULL;
     OM_uint32 err = 0;
     OM_uint32 minor = 0;
-
     char *gss_out_name;
 
     err = gssint_initialize_library();
@@ -54,46 +53,27 @@ gss_krb5_ccache_name(minor_status, name, out_name)
         const char *tmp_name = NULL;
 
         if (!err) {
-            if (GSS_ERROR(kg_get_ccache_name (&minor, &tmp_name))) {
-                err = minor;
-            }
+            kg_get_ccache_name (&err, &tmp_name);
         }
-        
         if (!err) {
-            old_name = malloc(strlen(tmp_name) + 1);
-            if (old_name == NULL) {
-                err = ENOMEM;
-            } else {
-                strcpy(old_name, tmp_name);
-            }
-        }
-        
-        if (!err) {
-	    char *swap = NULL;
-
-            swap = gss_out_name;
-            gss_out_name = old_name;
-            old_name = swap;
+            old_name = gss_out_name;
+            gss_out_name = tmp_name;
         }            
     }
-    
-    if (!err) {
-        if (GSS_ERROR(kg_set_ccache_name (&minor, name))) {
-            err = minor;
-        }
-    }
+    /* If out_name was NULL, we keep the same gss_out_name value, and
+       don't free up any storage (leave old_name NULL).  */
+
+    if (!err)
+        kg_set_ccache_name (&err, name);
 
     minor = k5_setspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, gss_out_name);
     if (minor) {
 	/* Um.  Now what?  */
 	if (err == 0) {
 	    err = minor;
-	    if (out_name != NULL) {
-		*out_name = NULL;
-		out_name = NULL;
-	    }
 	}
 	free(gss_out_name);
+	gss_out_name = NULL;
     }
 
     if (!err) {
