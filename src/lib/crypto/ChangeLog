@@ -1,3 +1,11 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* coll_proof_cksum.c (krb5_c_is_coll_proof_cksum): Rename function
+	from is_coll_proof_cksum, keeping old name as a wrapper function.
+	* keyed_cksum.c (krb5_c_is_keyed_cksum): Likewise.
+	* valid_cksumtype.c (krb5_c_valid_cksumtype): Likewise.
+	* valid_enctype.c (krb5_c_valid_enctype): Likewise.
+
 2002-03-28  Sam Hartman  <hartmans@mit.edu>
 
 	* t_encrypt.c (main): Test krb5_init_keyblock
