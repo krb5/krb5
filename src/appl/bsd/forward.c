@@ -21,7 +21,6 @@
 
 #if defined(KERBEROS) || defined(KRB5)
 #include <stdio.h>
-#include <pwd.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -30,22 +29,18 @@
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
-rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername, ccache)
+rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
     krb5_context context;
     krb5_auth_context auth_context;
     krb5_data *inbuf;
     krb5_ticket *ticket;
-    char *lusername;
     krb5_ccache *ccache;
 {
     krb5_creds ** creds;
     krb5_error_code retval;
     char ccname[35];
-    struct passwd *pwd;
 
     *ccache  = NULL;
-    if (!(pwd = (struct passwd *) getpwnam(lusername)))
-	return ENOENT;
 
     if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
 	return(retval);
@@ -67,19 +62,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername, ccache)
     if (retval = krb5_cc_store_cred(context, *ccache, *creds)) 
 	goto cleanup;
 
-    if (retval = chown(ccname+5, pwd->pw_uid, -1)) {
-	/* 
-	 * If the file owner is the same as the user id then return ok.
-	 * This is for testing only --proven
-	 */
-	struct stat statbuf;
-
-	if (stat(ccname + 5, & statbuf) == 0) {
-	    if (statbuf.st_uid == pwd->pw_uid)
-		retval = 0;
-	}
-    }
-    
 cleanup:
     krb5_free_creds(context, *creds);
     return retval;

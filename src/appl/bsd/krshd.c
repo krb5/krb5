@@ -1720,6 +1720,9 @@ recvauth(netf, peersin, valid_checksum)
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
     krb5_rcache		rcache;
+    struct passwd *pwd;
+    uid_t uid;
+    gid_t gid;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1875,10 +1878,22 @@ recvauth(netf, peersin, valid_checksum)
     }
 
     if (inbuf.length) { /* Forwarding being done, read creds */
+	pwd = getpwnam(locuser);
+	if (!pwd) {
+	    error("Login incorrect.\n");
+	    exit(1);
+	}
+	uid = pwd->pw_uid;
+	gid = pwd->pw_gid;
 	if ((status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf,
-					     ticket, locuser, &ccache))) {
+					     ticket, &ccache))) {
 	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
+	    exit(1);
+	}
+	if (chown(krb5_cc_get_name(bsd_context, ccache), uid, gid) == -1) {
+	    error("Can't chown forwarded credentials: %s\n",
+		  error_message(errno));
 	    exit(1);
 	}
     }
