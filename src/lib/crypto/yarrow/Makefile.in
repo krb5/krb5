@@ -19,7 +19,7 @@ STLIBOBJS=\
 	ycipher.o
 OBJS=\
 	$(OUTPRE)yarrow.$(OBJEXT) \
-	$(OUTP)ycipher.$(OBJEXT)
+	$(OUTPRE)ycipher.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/yarrow.c \

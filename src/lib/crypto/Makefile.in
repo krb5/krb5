@@ -15,7 +15,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)crypto.lib
 ##DOSOBJFILE=$(OUTPRE)crypto.lst
-##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst
+##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst @$(OUTPRE)yarrow.lst
 ##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst
 
 MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
@@ -197,6 +197,9 @@ all-windows::
 	cd ..\arcfour
 	@echo Making in crypto\arcfour
 	$(MAKE) -$(MFLAGS)
+	cd ..\yarrow
+	@echo Making in crypto\yarrow
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -236,6 +239,9 @@ clean-windows::
 	cd ..\arcfour
 	@echo Making clean in crypto\arcfour
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\yarrow
+	@echo Making clean in crypto\yarrow
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
 check-windows::
@@ -274,6 +280,9 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\arcfour
 	@echo Making check in crypto\arcfour
+	$(MAKE) -$(MFLAGS) check
+	cd ..\yarrow
+	@echo Making check in crypto\yarrow
 	$(MAKE) -$(MFLAGS) check
 	cd ..
 

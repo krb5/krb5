@@ -1,3 +1,7 @@
+2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix typo OUTP -> OUTPRE.
+
 2001-11-14  Sam Hartman  <hartmans@mit.edu>
 
 	* ycipher.c (krb5int_yarrow_cipher_init):  Use free not free_keyblock_contents

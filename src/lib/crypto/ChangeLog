@@ -1,3 +1,7 @@
+2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do yarrow subdir on Windows.
+	
 2001-11-19  Sam Hartman  <hartmans@mit.edu>
 
 	* t_prng.c (main): Fix seeding bug in t_prng

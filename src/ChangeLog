@@ -1,3 +1,7 @@
+2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix up lib/crypto/yarrow for Windows.
+
 2001-11-16  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (FILES): Add lib/crypto/yarrow
