@@ -1308,10 +1308,14 @@ AC_DEFUN(AC_LIBRARY_NET, [
     AC_CHECK_LIB(socket, socket, LIBS="-lsocket -lnsl $LIBS", , -lnsl)))
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
-    AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
-	LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
-	AC_MSG_ERROR(Cannot find resolver support routine res_search in -lresolv.)
-    ))
+    AC_CHECK_FUNC(res_nsearch, , [AC_CHECK_LIB(resolv, res_nsearch,
+	[LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv
+	 AC_DEFINE(HAVE_RES_NSEARCH,1,[Define if BIND 8 routine res_nsearch is available])
+	],
+	[AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
+	    LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
+	    AC_MSG_ERROR(Cannot find resolver support routine res_search in -lresolv.)
+	))])])
   fi
   AC_SUBST(RESOLV_LIB)
   ])
