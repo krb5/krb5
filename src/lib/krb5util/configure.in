@@ -1,12 +1,8 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-AC_PROG_ARCHIVE
-AC_PROG_ARCHIVE_ADD
-AC_PROG_RANLIB
-AC_PROG_INSTALL
 AC_CHECK_HEADERS(unistd.h stdlib.h sys/types.h)
 AC_CHECK_FUNCS(seteuid setresuid setreuid)
-LinkFileDir(../libkrb5util.a, libkrb5util.a, ./krb5util)
-AppendRule([all-unix:: ../libkrb5util.a])
 dnl AppendRule([all:: all-$(WHAT)])
+KRB5_BUILD_LIBRARY_STATIC
+KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

@@ -3,39 +3,25 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5util.lib
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-
 OBJS=	compat_recv.$(OBJEXT)	 seteuid.$(OBJEXT)
+
+STLIBOBJS=compat_recv.o seteuid.o
 
 SRCS=	$(srcdir)/compat_recv.c $(srcdir)/seteuid.c	
 
-LIB_SUBDIRS= .
-LIBDONE= DONE
+LIB=krb5util
+LIBMAJOR=1
+LIBMINOR=0
+STOBJLISTS=OBJS.ST
+RELDIR=krb5util
 
 LIBNAME=libkrb5util.
 
-all:: 
-
-all-unix:: libkrb5util.$(LIBEXT)
+all-unix:: all-liblinks
 all-mac:: 
 all-windows:: 
 
-libkrb5util.a: $(OBJS) 
-	$(RM) $@
-	$(ARADD) $@ $(OBJS) 
-	$(RANLIB) $@
-
-install:: libkrb5util.a
-	$(INSTALL_DATA) libkrb5util.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5util.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5util.a
-
-check-unix::
-check-mac::
-check-windows::
-
-clean-unix:: 
-	$(RM) libkrb5util.$(LIBEXT)
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 clean-mac::
 clean-windows::
 	$(RM) krb5util.lib krb5util.bak

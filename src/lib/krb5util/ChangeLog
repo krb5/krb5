@@ -1,3 +1,9 @@
+Tue Nov 18 19:55:22 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Use new library build rules.
+
+	* Makefile.in: Use new library build rules.
+
 Tue Feb 18 09:47:34 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* compat_recv.c: Remove include of kerberosIV/krb4-proto.h
