@@ -18,7 +18,7 @@
 
 #ifdef SOCK_DGRAM			/* XXX hack... */
 krb5_error_code krb5_locate_kdc
-    PROTOTYPE((krb5_data *,
+    PROTOTYPE((const krb5_data *,
 	       struct sockaddr **,
 	       int *));
 #endif
