@@ -31,12 +31,18 @@
 #include <stdio.h>
 #include <string.h>
 
-#if TARGET_OS_MAC && defined(__FILES__)
+#include <Kerberos/FSpUtils.h>
+/* 
+ * These functions are compiled in for ABI compatibility with older versions of KfM.
+ * They are deprecated so they do not appear in the KfM headers anymore.
+ * 
+ * Do not change their ABIs!
+ */
+int KRB5_CALLCONV FSp_krb_get_svc_in_tkt (char *, char *, char *, char *, char *, int, const FSSpec *);
+int KRB5_CALLCONV FSp_put_svc_key (const FSSpec *, char *, char *, char *, int, char *);
+int KRB5_CALLCONV FSp_read_service_key (char *, char *, char *, int, const FSSpec*, char *);
 
-#include <CoreServices/CoreServices.h>
-
-static int FSp_srvtab_to_key(char *, char *, char *, char *, C_Block);
-static OSStatus FSSpec2Path (FSSpec *spec, char **path, int pathLen);
+static int FSp_srvtab_to_key (char *, char *, char *, char *, C_Block);
 
 int KRB5_CALLCONV
 FSp_read_service_key(
@@ -50,7 +56,7 @@ FSp_read_service_key(
     int retval = KFAILURE;
     char file [MAXPATHLEN];
     if (filespec != NULL) {
-        if (FSSpec2Path (filespec, &file, sizeof(file)) != noErr) {
+        if (FSSpecToPOSIXPath (filespec, file, sizeof(file)) != noErr) {
             return retval;
         }
     }
@@ -74,7 +80,7 @@ FSp_put_svc_key(
     char sfile[MAXPATHLEN];
 
     if (sfilespec != NULL) {
-        if (FSSpec2Path (sfilespec, &sfile, sizeof(sfile)) != noErr) {
+        if (FSSpecToPOSIXPath (sfilespec, sfile, sizeof(sfile)) != noErr) {
             return retval;
         }
     }
@@ -104,32 +110,3 @@ static int FSp_srvtab_to_key(char *user, char *instance, char *realm,
     return FSp_read_service_key(user, instance, realm, 0,
 				(FSSpec *)srvtab, (char *)key);
 }
-
-static OSStatus FSSpec2Path (FSSpec *spec, char **path, int pathLen)
-{
-    OSStatus err = noErr;
-    FSRef ref;
-    
-    /* check parameters */
-    if (path == NULL) err = paramErr;
-    
-    /* convert the FSSpec to an FSRef */
-    if (err == noErr) {
-        FSRefParam pb;
-        
-        pb.ioVRefNum = spec->vRefNum;
-        pb.ioDirID = spec->parID;
-        pb.ioNamePtr = (StringPtr) spec->name;
-        pb.newRef = &ref;
-        err = PBMakeFSRefSync(&pb);
-    }
-    
-    /* and then convert the FSRef to a path */
-    if (err == noErr) {
-        err = FSRefMakePath (&ref, path, pathLen);
-    }
-    
-    return err;
-}
-
-#endif

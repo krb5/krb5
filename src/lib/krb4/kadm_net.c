@@ -54,7 +54,7 @@
 static void clear_secrets(des_cblock sess_key, Key_schedule sess_sched);
 /* XXX FIXME! */
 #ifdef SIGPIPE
-static sigtype (*opipe)();
+static krb5_sigtype (*opipe)();
 #endif
 
 /*

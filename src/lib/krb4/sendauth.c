@@ -135,7 +135,7 @@ krb_net_rd_sendauth (fd, reply, raw_len)
 
     /* get the length of the reply */
   reread:
-    got = krb_net_read(fd, raw_len, sizeof(KRB4_32));
+    got = krb_net_read(fd, (char *)raw_len, sizeof(KRB4_32));
     if (got != sizeof(KRB4_32))
 	return KFAILURE;
 
@@ -240,7 +240,7 @@ krb_sendauth(options, fd, ticket, service, inst, realm, checksum,
 	    return(cc);
 
 	/* Get the reply out of the socket.  */
-	cc = krb_net_rd_sendauth (fd, packet, (char *)&raw_tkt_len);
+	cc = krb_net_rd_sendauth (fd, packet, &raw_tkt_len);
 	if (cc != KSUCCESS)
 	    return cc;
 

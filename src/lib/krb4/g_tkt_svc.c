@@ -142,7 +142,7 @@ krb_get_ticket_for_service (serviceName, buf, buflen, checksum, sessionKey,
  	   FIXME gnu - I think this is a bug.  We should allow direct
  	   authentication to the desired realm, regardless of what the "local"
  	   realm is.   I fixed it.   FIXME -- not quite right.   */
- 	err = krb_get_cred ("krbtgt", realm, lrealm, &cr);
+ 	err = krb_get_cred (KRB_TICKET_GRANTING_TICKET, realm, lrealm, &cr);
  	if (err) 
  		return err;
 

@@ -48,8 +48,7 @@ typedef int (*decrypt_tkt_type) (char *, char *, char *, char *,
 
 static int decrypt_tkt(char *, char *, char *, char *, key_proc_type, KTEXT *);
 static int krb_mk_in_tkt_preauth(char *, char *, char *, char *, char *,
-				 int, char *, int, KTEXT, int *,
-				 struct sockaddr_in *);
+				 int, char *, int, KTEXT, int *, struct sockaddr_in *);			
 static int krb_parse_in_tkt_creds(char *, char *, char *, char *, char *,
 				  int, KTEXT, int, CREDENTIALS *);
 
@@ -434,8 +433,10 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
                     service, sinstance, life, cip, byteorder, creds);
     } while ((keyprocs [++i] != NULL) && (kerror == INTK_BADPW));
 
-    if (laddrp != NULL)
-	*laddrp = local_addr.sin_addr.s_addr;
+    /* Fill in the local address if the caller wants it */
+    if (laddrp != NULL) {
+        *laddrp = local_addr.sin_addr.s_addr;
+    }
 
     /* stomp stomp stomp */
     memset(cip->dat, 0, (size_t)cip->length);
@@ -456,17 +457,16 @@ krb_get_in_tkt_creds(user, instance, realm, service, sinstance, life,
     char *arg;
     CREDENTIALS *creds;
 {
-#if TARGET_OS_MAC /* XXX */
-    return krb_get_in_tkt_preauth_creds(user, instance, realm,
-					service, sinstance, life,
-					key_proc, decrypt_proc, arg,
-					NULL, 0, creds, &creds.address);
+#if TARGET_OS_MAC
+    KRB_UINT32 *laddrp = &creds->address;
 #else
+    KRB_UINT32 *laddrp = NULL; /* Only the Mac stores the address */
+#endif
+    
     return krb_get_in_tkt_preauth_creds(user, instance, realm,
 					service, sinstance, life,
 					key_proc, decrypt_proc, arg,
-					NULL, 0, creds, NULL);
-#endif
+					NULL, 0, creds, laddrp);
 }
 
 int KRB5_CALLCONV

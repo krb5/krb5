@@ -131,7 +131,7 @@ krb_svc_init(user,instance,realm,lifetime,srvtab_file,tkt_file)
 	krb_set_tkt_string(tkt_file);
 
     return krb_get_svc_in_tkt(user,instance,realm,
-			      "krbtgt",realm,lifetime,srvtab_file);
+			      KRB_TICKET_GRANTING_TICKET,realm,lifetime,srvtab_file);
 }
 
 
@@ -148,5 +148,5 @@ krb_svc_init_preauth(user,instance,realm,lifetime,srvtab_file,tkt_file)
         krb_set_tkt_string(tkt_file);
  
     return krb_get_svc_in_tkt_preauth(user,instance,realm,
-                              	      "krbtgt",realm,lifetime,srvtab_file);
+                              	      KRB_TICKET_GRANTING_TICKET,realm,lifetime,srvtab_file);
 }

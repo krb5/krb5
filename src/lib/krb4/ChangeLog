@@ -1,3 +1,37 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * CCache-glue.c: Added prototypes for deprecated functions.
+    Made internal functions static.  Removed unused CoreServices
+    include.  Changed TICKET_GRANTING_TICKET to new macro:
+    KRB_TICKET_GRANTING_TICKET.
+    
+    * change_password.c: Added check of inputs to krb_change_password
+    so we don't crash on bad inputs.  Call des_string_to_key not
+    mit_password_to_key on all platforms because we don't want to 
+    prompt for a password.
+    
+    * FSp-glue.c: Added prototypes for deprecated functions.  Changed to
+    use KfM's FSSpecToPOSIXPath which correctly handles FSSpecs where
+    the file does not exist.
+    
+    * g_in_tkt.c: Added explanatory comments.  Made TARGET_OS_MAC sections
+    a little smaller and easier to read.
+    
+    * g_pw_in_tkt.c: Only prompt when we are not using the login library.
+    This is so that Darwin builds do prompt but KfM builds don't.
+    
+    * g_svc_in_tkt.c, g_tkt_svc.c: Changed to use KRB_TICKET_GRANTING_TICKET.
+    
+    * kadm_net.c:  Use autoconf variable krb5_sigtype instead of sigtype, 
+    which doesn't seem to be defined on Mac OS X.
+
+    * krb4int.h, RealmsConfig-glue.c: Removed krb_get_stk().
+    
+    * rd_req.c: Added #ifdef KRB4_USE_KEYTAB to avoid unused variable warning
+    when KRB4_USE_KEYTAB is not defined.
+    
+    * sendauth.c: Fixed warnings with casts. 
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* password_to_key.c (mit_passwd_to_key, afs_passwd_to_key):

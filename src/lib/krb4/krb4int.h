@@ -56,8 +56,7 @@ int k_gethostname(char *, int);
 int krb_get_in_tkt_preauth_creds(char *, char *, char *,
 				 char *, char *, int,
 				 key_proc_type, decrypt_tkt_type,
-				 char *, char *, int, CREDENTIALS *,
-				 KRB_UINT32 *);
+				 char *, char *, int, CREDENTIALS *, KRB_UINT32 *);
 
 /* klog.c */
 void kset_logfile(char *);
@@ -107,7 +106,6 @@ int krb_set_default_user (char *);
 
 /* RealmConfig-glue.c */
 int krb_get_kpasswdhst(char *, char *, int);
-int krb_get_stk(KRB_UINT32 *type, char *realm);
 
 /* err_txt.c */
 void krb4int_et_init(void);

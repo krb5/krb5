@@ -116,7 +116,7 @@ krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
     int life;
     char *password;
 {
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || (defined(USE_LOGIN_LIBRARY) && USE_LOGIN_LIBRARY)
     /* In spite of the comments above, we don't allow that path here,
        to simplify coding the non-UNIX clients. The only code that now
        depends on this behavior is the preauth support, which has a
@@ -173,7 +173,7 @@ krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
     key_proc_type *keyprocs = krb_get_keyprocs (NULL);
     int            i = 0;
     
-#if defined(_WIN32) || USE_LOGIN_LIBRARY
+#if defined(_WIN32) || (defined(USE_LOGIN_LIBRARY) && USE_LOGIN_LIBRARY)
    /* On non-Unix systems, we can't handle a null password, because
       passwd_to_key can't handle prompting for the password.  */
     if (password == 0)

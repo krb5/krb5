@@ -8,10 +8,8 @@
  */
 
 
-#include <CoreServices/CoreServices.h>
 #include "krb.h"
 #include "krb4int.h"
-#include "prot.h"
 
 #if !defined (USE_CCAPI) || !USE_CCAPI
 #error "Cannot use CCache glue without the CCAPI!"
@@ -25,8 +23,19 @@
 #include <string.h>
 #include <stdlib.h>
  
-void
-UpdateDefaultCache (void);
+/*
+ * The following functions are part of the KfM ABI.  
+ * They are deprecated, so they only appear here, not in krb.h.
+ *
+ * Do not change the ABI of these functions!
+ */
+int KRB5_CALLCONV krb_get_num_cred(void);
+int KRB5_CALLCONV krb_get_nth_cred(char *, char *, char *, int);
+int KRB5_CALLCONV krb_delete_cred(char *, char *,char *);
+int KRB5_CALLCONV dest_all_tkts(void);
+ 
+/* Internal functions */
+static void UpdateDefaultCache (void);
 
 /* 
  * The way Kerberos v4 normally works is that at any given point in time there is a
@@ -317,7 +326,7 @@ krb_get_cred (
 		
 #ifdef USE_LOGIN_LIBRARY
 	// If we are requesting a tgt, prompt for it
-	if (strncmp (service, TICKET_GRANTING_TICKET, ANAME_SZ) == 0) {
+	if (strncmp (service, KRB_TICKET_GRANTING_TICKET, ANAME_SZ) == 0) {
 		OSStatus	err;
 		char		*cacheName;
 		KLPrincipal	defaultPrincipal = nil;
@@ -450,7 +459,7 @@ tkt_string (void)
  * Synchronize default cache for this process with system default cache
  */
  
-void
+static void
 UpdateDefaultCache (void)
 {
 	cc_string_t 	name;

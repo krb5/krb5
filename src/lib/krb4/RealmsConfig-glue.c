@@ -33,18 +33,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
-#if TARGET_OS_MAC
-#include <CoreServices/CoreServices.h>
-#endif
 
 #include "profile.h"
 #include "krb.h"
 #include "krb4int.h"
 #include "port-sockets.h"
-
-#ifdef USE_CCAPI
-#include <CredentialsCache.h>
-#endif
 
 #define KRB5_PRIVATE 1
 /* For krb5_get_default_config_files and krb5_free_config_files */
@@ -477,75 +470,6 @@ krb_get_krbhst(
 	result = get_krbhst_default(host, realm, n);
     return result;
 }
-
-#ifdef USE_CCAPI
-/*
- * Realm -> string_to_key mapping
- */
-int
-krb_get_stk(
-    KRB_UINT32	*type,
-    char	*realm)
-{
-    long	profErr = 0;
-    const char	*names[] = {REALMS_V4_PROF_REALMS_SECTION, NULL,
-			    REALMS_V4_PROF_STK, NULL};
-    profile_t	profile = NULL;
-    void	*iter = NULL;
-    char	*name = NULL;
-    char	*value = NULL;
-    int		found = 0;
-
-    names[1] = realm;
-
-    profErr = krb_get_profile(&profile);
-    if (profErr) {
-	goto cleanup;
-    }
-
-    profErr = profile_iterator_create(profile, names,
-				      PROFILE_ITER_RELATIONS_ONLY, &iter);
-    if (profErr) {
-	goto cleanup;
-    }
-
-    profErr = profile_iterator(&iter, &name, &value);
-    if (profErr) {
-	goto cleanup;
-    }
-
-    if (name != NULL) {
-	if (!strncmp(value, REALMS_V4_MIT_STK, strlen(REALMS_V4_MIT_STK))) {
-	    *type = cc_v4_stk_des;
-	    found = 1;
-	} else if (!strncmp(value, REALMS_V4_AFS_STK,
-			    strlen(REALMS_V4_AFS_STK))) {
-	    *type = cc_v4_stk_afs;
-	    found = 1;
-	} else if (!strncmp(value, REALMS_V4_COLUMBIA_STK,
-			    strlen(REALMS_V4_COLUMBIA_STK))) {
-	    *type = cc_v4_stk_columbia_special;
-	    found = 1;
-	}
-    }
-
-cleanup:
-    if (name != NULL)
-	profile_release_string(name);
-    if (value != NULL)
-	profile_release_string(value);
-    if (iter != NULL)
-	profile_iterator_free(&iter);
-    if (profile != NULL)
-	profile_abandon(profile);
-
-    /* If this fails, we just rely on autodetecting the realm */
-    if (!found) {
-	*type = cc_v4_stk_unknown;
-    }
-    return KSUCCESS;
-}
-#endif /* USE_CCAPI */
 
 /*
  * Hostname -> realm name mapping

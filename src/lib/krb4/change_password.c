@@ -54,6 +54,13 @@ krb_change_password(char *principal, char *instance, char *realm,
     u_char	*p;
 
     err = 0;
+    
+    /* Check inputs: */
+    if (principal == NULL || instance == NULL || realm == NULL ||
+        oldPassword == NULL || newPassword == NULL) {
+        return KFAILURE;
+    }
+    
     /*
      * Get tickets to change the old password and shove them in the
      * client_parm
@@ -64,12 +71,10 @@ krb_change_password(char *principal, char *instance, char *realm,
     if (err != KSUCCESS)
 	goto cleanup;
 
-#if TARGET_OS_MAC
     /* Now create the key to send to the server */
-    mit_passwd_to_key(principal, instance, realm, newPassword, key);
-#else
-    des_string_to_key(newPassword, key); /* XXX check this! */
-#endif
+    /* Use this and not mit_password_to_key so that we don't prompt */
+    des_string_to_key(newPassword, key);
+
     /* Create the link to the server */
     err = kadm_init_link(PWSERV_NAME, KRB_MASTER, realm, &client_parm, 1);
     if (err != KADM_SUCCESS)

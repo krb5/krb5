@@ -466,7 +466,9 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
     unsigned char s_kvno;
     char realm[REALM_SZ];
     unsigned char skey[KKEY_SZ];
+#ifdef KRB4_USE_KEYTAB
     krb5_keyblock keyblock;
+#endif
     int len;
     int status;
 
