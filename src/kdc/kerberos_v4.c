@@ -212,6 +212,7 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
     struct sockaddr_in client_sockaddr;
     krb5_address *addr = client_fulladdr->address;
     krb5_error_code retval;
+    krb5_timestamp now;
     KTEXT_ST v4_pkt;
     char *lrealm;
 
@@ -221,8 +222,10 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
 	return KRB5KDC_ERR_BAD_PVNO;
     }
 
-    if ((retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec)))
+    
+    if ((retval = krb5_timeofday(kdc_context, &now)))
         return(retval);
+    kerb_time.tv_sec = now;
 
     if (!*local_realm) {		/* local-realm name already set up */
 	lrealm = master_princ->realm.data;

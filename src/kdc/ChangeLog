@@ -1,3 +1,8 @@
+2002-12-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c (process_v4): Use a temporary variable for the
+	current time instead of an incorrect pointer cast.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (kerberos_v4): Use krb_get_err_text() instead of
