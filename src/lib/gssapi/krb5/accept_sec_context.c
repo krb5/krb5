@@ -89,7 +89,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_error_code retval;
     krb5_ccache ccache = NULL;
     krb5_gss_cred_id_t cred = NULL;
-    extern krb5_cc_ops krb5_mcc_ops;
     krb5_auth_context new_auth_ctx = NULL;
 	krb5_int32 flags_org;
 

@@ -1,7 +1,7 @@
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* accept_sec_context.c (rd_and_store_for_creds): Remove
-	registration of memory ccache type.
+	registration of memory ccache type.  Don't declare krb5_mcc_ops.
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Instead of
 	asking for the enctypes supported by the GSS code, use that set as
