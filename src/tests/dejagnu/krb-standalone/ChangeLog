@@ -1,3 +1,7 @@
+Mon Oct 14 08:05:11 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssftp.exp: Test ls and nlist commands. [krb5-appl/108]
+
 Wed Aug 14 20:27:36 1996  Tom Yu  <tlyu@mit.edu>
 
 	* gssftp.exp: Do case insensitive match in case hostname doesn't
