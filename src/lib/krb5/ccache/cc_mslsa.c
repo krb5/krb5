@@ -491,10 +491,10 @@ IsKerberosLogon(VOID)
     return Success;
 }
 
-static NTSTATUS
+static DWORD
 ConstructTicketRequest(UNICODE_STRING DomainName, PKERB_RETRIEVE_TKT_REQUEST * outRequest, ULONG * outSize)
 {
-    NTSTATUS Status;
+    DWORD Error;
     UNICODE_STRING TargetPrefix;
     USHORT TargetSize;
     ULONG RequestSize;
@@ -546,12 +546,12 @@ ConstructTicketRequest(UNICODE_STRING DomainName, PKERB_RETRIEVE_TKT_REQUEST * o
     pTicketRequest->TargetName.Length = 0;
     pTicketRequest->TargetName.MaximumLength = TargetSize;
     pTicketRequest->TargetName.Buffer = (PWSTR) (pTicketRequest + 1);
-    Status = ConcatenateUnicodeStrings(&(pTicketRequest->TargetName),
+    Error = ConcatenateUnicodeStrings(&(pTicketRequest->TargetName),
                                         TargetPrefix,
                                         DomainName);
     *outRequest = pTicketRequest;
     *outSize    = RequestSize;
-    return Status;
+    return Error;
 }
 
 static BOOL
@@ -604,6 +604,7 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
     BOOL bIsLsaError = FALSE;
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
+    DWORD   Error;
 
     KERB_QUERY_TKT_CACHE_REQUEST CacheRequest;
     PKERB_RETRIEVE_TKT_REQUEST pTicketRequest;
@@ -662,16 +663,16 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
         // the required fields are not supported on Windows 2000.  :(
         if ( supported && GetSecurityLogonSessionData(&pSessionData) ) {
             if ( pSessionData->DnsDomainName.Buffer ) {
-                Status = ConstructTicketRequest(pSessionData->DnsDomainName,
+                Error = ConstructTicketRequest(pSessionData->DnsDomainName,
                                                 &pTicketRequest, &RequestSize);
-                if ( FAILED(Status) ) {
+                LsaFreeReturnBuffer(pSessionData);
+                if ( Error )
                     goto cleanup;
-                }
             } else {
+                LsaFreeReturnBuffer(pSessionData);
                 bIsLsaError = TRUE;
                 goto cleanup;
             }
-            LsaFreeReturnBuffer(pSessionData);
         } else {
             CHAR  UserDnsDomain[256];
             WCHAR UnicodeUserDnsDomain[256];
@@ -691,11 +692,10 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
             wrapper.Length = wcslen(UnicodeUserDnsDomain) * sizeof(WCHAR);
             wrapper.MaximumLength = 256;
 
-            Status = ConstructTicketRequest(wrapper,
+            Error = ConstructTicketRequest(wrapper,
                                              &pTicketRequest, &RequestSize);
-            if ( FAILED(Status) ) {
+            if ( Error )
                 goto cleanup;
-            }
         }
     } else {
 #ifdef PURGE_ALL
@@ -744,9 +744,9 @@ GetMSTGT(HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
         }
 #endif /* PURGE_ALL */
 
-        Status = ConstructTicketRequest(pTicketResponse->Ticket.TargetDomainName,
+        Error = ConstructTicketRequest(pTicketResponse->Ticket.TargetDomainName,
                                         &pTicketRequest, &RequestSize);
-        if ( FAILED(Status) ) {
+        if ( Error ) {
             goto cleanup;
         }
 
