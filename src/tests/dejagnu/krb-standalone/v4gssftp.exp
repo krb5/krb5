@@ -118,11 +118,18 @@ proc check_file { filename } {
 proc ftp_restore_env { } {
     global env
     global ftp_save_ktname
+    global ftp_save_ccname
 
     catch "unset env(KRB5_KTNAME)"
     if [info exists ftp_save_ktname] {
 	set env(KRB5_KTNAME) $ftp_save_ktname
 	unset ftp_save_ktname
+    }
+
+    catch "unset env(KRB5CCNAME)"
+    if [info exists ftp_save_ccname] {
+	set env(KRB5CCNAME) $ftp_save_ccname
+	unset ftp_save_ccname
     }
 }
 
@@ -141,6 +148,7 @@ proc v4ftp_test { } {
     global spawn_id
     global tmppwd
     global ftp_save_ktname
+    global ftp_save_ccname
 
     # Start up the kerberos and kadmind daemons and get a srvtab and a
     # ticket file.
@@ -164,6 +172,22 @@ proc v4ftp_test { } {
     #
     set env(KRB5_KTNAME) FILE:$tmppwd/srvtab
     verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
+
+    #
+    # Save settings of KRB5CCNAME
+    # These tests fail if the krb5 cache happens to have a valid credential
+    # which can result from running the gssftp.exp test immediately
+    # preceeding these tests.
+    #
+    if [info exists env(KRB5CCNAME)] {
+	set ftp_save_ccname $env(KRB5CCNAME)
+    }
+
+    #
+    # set KRB5_KTNAME
+    #
+    set env(KRB5CCNAME) FILE:$tmppwd/non-existant-cache
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
 
     # Start the ftp daemon.
     start_ftp_daemon

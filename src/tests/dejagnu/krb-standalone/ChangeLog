@@ -1,3 +1,10 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* v4gssftp.exp: During test, set KRB5CCNAME to a non-existant
+	cache. Restore at end to previous setting. This prevents failures
+	caused when the krb5 cache contains valid information - as in the
+	case of this test being run immediately after the gssftp.exp test.
+
 2001-06-08  Mitchell Berger  <mitchb@mit.edu>
 
 	* gssftp.exp: Invocation of ftpd changed to use -U /dev/null and
