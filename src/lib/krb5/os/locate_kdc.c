@@ -346,7 +346,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
         HEADER hdr;
     } answer;
     unsigned char *p=NULL;
-    char host[MAX_DNS_NAMELEN];
+    char host[MAX_DNS_NAMELEN], *h;
     struct sockaddr *addr = NULL;
     struct sockaddr_in *sin = NULL;
     struct hostent *hp = NULL;
@@ -359,7 +359,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
 	int priority;
 	int weight;
 	unsigned short port;
-	char *host, *h;
+	char *host;
     };
 
     struct srv_dns_entry *head = NULL;
