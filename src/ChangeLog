@@ -1,3 +1,13 @@
+Fri Nov 22 23:51:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: All changes for the Macintosh port.  Translate '%'
+ 		characters in Macfile.tmpl to '/' characters.  Include the
+ 		mac/SAP directory in the kerbsrc.mac.tar tarball.  Rename
+ 		the kerbsrc.tar tarball to kerbsrc.mac.tar, so that the
+ 		target name in the Makefile matches the taget which is
+ 		actually generated.  Use mac/mkbindirs.sh to build the
+ 		binary hierarchy for the Macintosh build process.
+
 Wed Nov 20 13:28:00 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (awk-windows-mac): Copy gssapi.hin to gssapi.h to

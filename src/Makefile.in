@@ -220,7 +220,7 @@ FILES= ./* \
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
 MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
-	mac/gss-sample/* config/* include/* include/krb5/* \
+	mac/gss-sample/* mac/SAP/* config/* include/* include/krb5/* \
 	include/krb5/asn.1/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
@@ -300,13 +300,22 @@ Macfile: macfile.list Makefile.sav
 		-e 's/^/:bin:PPC:/' macsrcsk5` >> Macfile
 	echo INCLUDES = `sed -n -e 's/\(.*:\)[^:]*\.h$$/-i \1/p' macfile.maclist | sort -u` >> Macfile
 	echo "" >> Macfile
-	tr '/:\\' ':\304\266'< mac/Makefile.tmpl >> Macfile
+	tr '%/:\\' '/:\304\266'< mac/Makefile.tmpl >> Macfile
 
-kerbsrc.mac: awk-windows-mac macfile.list Macfile
+mac-bin-dirs:
+	rm -rf bin
+	mkdir bin bin/68K bin/CFM-68K bin/PPC
+	sh mac/mkbindirs.sh bin/68K $(MAC_SUBDIRS)
+	sh mac/mkbindirs.sh bin/CFM-68K $(MAC_SUBDIRS)
+	sh mac/mkbindirs.sh bin/PPC $(MAC_SUBDIRS)
+
+kerbsrc.mac.tar: awk-windows-mac macfile.list Macfile
 	cp mac/libraries/autoconf.h include/autoconf.h
 	mv Macfile Makefile
-	tar cvf kerbsrc.tar Makefile include/autoconf.h `cat macfile.list`
+	tar cvf kerbsrc.mac.tar Makefile include/autoconf.h bin \
+		`cat macfile.list`
 	rm -f $(CLEANUP)
+	rm -rf bin
 	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
 	mv Makefile.sav Makefile
 
