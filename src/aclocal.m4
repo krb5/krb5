@@ -100,7 +100,7 @@ else
   # This means that sys_errlist is not declared in errno.h, but may still
   # be in libc.
   AC_CACHE_CHECK([for sys_errlist in libc], krb5_cv_var_sys_errlist,
-  [AC_TRY_LINK([extern int sys_nerr;], [1+sys_nerr;],
+  [AC_TRY_LINK([extern int sys_nerr;], [if (1+sys_nerr < 0) return 1;],
   krb5_cv_var_sys_errlist=yes, krb5_cv_var_sys_errlist=no;)])
   if test $krb5_cv_var_sys_errlist = yes; then
     AC_DEFINE(HAVE_SYS_ERRLIST)
@@ -368,7 +368,10 @@ AC_SUBST(DES425_LIB)
 dnl
 dnl set $(CC) from --with-cc=value
 dnl
+AC_DEFUN(KRB5_INIT_CCOPTS,[CCOPTS=
+])
 define(WITH_CC,[
+AC_REQUIRE([KRB5_INIT_CCOPTS])
 AC_ARG_WITH([cc],
 [  --with-cc=COMPILER      select compiler to use])
 AC_MSG_CHECKING(for C compiler)
@@ -391,11 +394,12 @@ AC_CACHE_VAL(krb5_cv_prog_cc,[dnl
   krb5_cv_prog_cc="$CC"
 ])
 # maybe add -Waggregate-return, or can we assume that actually works by now?
+# -Wno-comment is for SunOS system header <sys/stream.h>
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
- -Wcast-align -Wconversion -Wshadow -pedantic"
+ -Wcast-align -Wconversion -Wshadow -Wno-comment -pedantic"
 if test "$GCC" = yes ; then
   AC_MSG_RESULT(adding extra warning flags for gcc)
-  CC="$CC $extra_gcc_warn_opts"
+  CCOPTS="$CCOPTS $extra_gcc_warn_opts"
 fi
 ])dnl
 dnl
@@ -413,12 +417,13 @@ dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 define(WITH_CCOPTS,[
+AC_REQUIRE([KRB5_INIT_CCOPTS])
 AC_ARG_WITH([ccopts],
 [  --with-ccopts=CCOPTS    select compiler command line options],
 AC_MSG_RESULT(CCOPTS is $withval)
-CCOPTS=$withval
-CFLAGS="$CFLAGS $withval",
-CCOPTS=)dnl
+dnl WITH_CC may have already put something in CCOPTS
+CCOPTS="$CCOPTS $withval"
+CFLAGS="$CFLAGS $withval")dnl
 AC_SUBST(CCOPTS)])dnl
 dnl
 dnl set $(LDFLAGS) from --with-ldopts=value

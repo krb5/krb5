@@ -1,3 +1,14 @@
+2001-04-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (DECLARE_SYS_ERRLIST): Check for sys_nerr with an
+	expression that can't be optimized away.
+	(KRB5_INIT_CCOPTS): New macro.
+	(WITH_CC): Add gcc warning flags to CCOPTS instead of CC.  Add
+	option -Wno-comment to stop gcc from complaining about SunOS
+	system header files.  Call AC_REQUIRE on KRB5_INIT_CCOPTS.
+	(WITH_CCOPTS): Add to CCOPTS instead of simply assigning to it.
+	Call AC_REQUIRE on KRB5_INIT_CCOPTS.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* acconfig.h (KRB5_NO_PROTOTYPES, KRB5_PROVIDE_PROTOTYPES,
