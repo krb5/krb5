@@ -31,8 +31,6 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all:: all-$(WHAT)
-
 all-unix:: shared
 
 shared: 
@@ -61,15 +59,11 @@ libcrypto.$(STEXT): $(LIBDONE)
 libcrypto.lib:
 	libdir crypto.lib
 
-clean:: clean-$(WHAT)
-
 clean-unix::
 	$(RM) libcrypto.a libcrypto.stamp shared/*
 
 clean-windows::
 	$(RM) crypto.lib crypto.bak
-
-check:: check-$(WHAT)
 
 check-unix::
 

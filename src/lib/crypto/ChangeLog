@@ -1,3 +1,12 @@
+Mon Sep 25 16:26:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+	* configure.in: Don't include "all:: all-$(WHAT)" at the end of
+		the Makefile.  That's now included at the very beginning
+		by pre.in
+
 Wed Sep 13 10:26:37 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: moved shared rule to all-unix:: target.

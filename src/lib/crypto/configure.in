@@ -106,5 +106,4 @@ if test -n "$krb5_cv_staticlibs_enabled" ; then
 	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a])
 fi
-        AppendRule([all:: all-$(WHAT)])
 V5_AC_OUTPUT_MAKEFILE
