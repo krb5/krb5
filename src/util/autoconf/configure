@@ -1,29 +1,5 @@
 #! /bin/sh
 
-
-kadm_deplib=''
-kadm_lib=''
-
-kutil_deplib=''
-kutil_lib=''
-
-kdb5_deplib=''
-kdb5_lib=''
-
-kdb4_deplib=''
-kdb4_lib=''
-
-krb4_deplib=''
-krb5_lib=''
-
-ss_deplib=''
-ss_lib=''
-
-
-
-
-
-
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.4 
 # Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
