@@ -1,5 +1,11 @@
 2003-07-11  Alexandra Ellwood  <lxs@mit.edu>
 
+        * RealmsConfig-glue.c: Check for NULL realm argument and n
+        not equal to 1.  Fill in realm with an empty string on error 
+        in case the caller doesn't check the return value.
+
+2003-07-11  Alexandra Ellwood  <lxs@mit.edu>
+
         * RealmsConfig-glue.c: Don't fail when krb5.conf is valid
         and krb.conf isn't.  Also, don't assert v4 realm is in profile
         unless that realm is a valid v4 realm.

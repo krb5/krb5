@@ -199,6 +199,14 @@ krb_get_lrealm(
     char        krbConfLocalRealm[REALM_SZ];
     int         krbConfHasLocalRealm = 0;
 
+    if ((realm == NULL) || (n != 1)) { result = KFAILURE; }
+
+    if (result == KSUCCESS) {
+        /* Some callers don't check the return value so we initialize
+         * to an empty string in case it never gets filled in. */
+        realm [0] = '\0';  
+    }
+    
     if (result == KSUCCESS) {
         int profileErr = krb_get_profile (&profile);
 
