@@ -23,18 +23,7 @@ void
 krb5_free_creds(val)
 krb5_creds *val;
 {
-    if (val->client)
-	krb5_free_principal(val->client);
-    if (val->server)
-	krb5_free_principal(val->server);
-    if (val->keyblock.contents)
-	xfree(val->keyblock.contents);
-    if (val->ticket.data)
-	xfree(val->ticket.data);
-    if (val->second_ticket.data)
-	xfree(val->second_ticket.data);
-    if (val->addresses)
-	krb5_free_address(val->addresses);
+    krb5_free_cred_contents(val);
     xfree(val);
     return;
 }
