@@ -37,7 +37,8 @@ krb5_encrypt_block *eblock;
 {
     krb5_error_code retval;
     krb5_db_entry master_entry;
-    int nprinc, more;
+    int nprinc;
+    krb5_boolean more;
     krb5_keyblock tempkey;
 
     nprinc = 1;
@@ -61,7 +62,8 @@ krb5_encrypt_block *eblock;
 	(void) (*eblock->crypto_entry->finish_key)(eblock);
 	return retval;
     }
-    if (!bcmp(mkey->contents, tempkey.contents, mkey->length)) {
+    if (!bcmp((char *)mkey->contents, (char *)tempkey.contents,
+	      mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
 	(void) (*eblock->crypto_entry->finish_key)(eblock);
     } else
