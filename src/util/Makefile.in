@@ -25,7 +25,11 @@ all-unix::
 	ln -s ../util/db2/obj/db.h ../include
 	ln -s ../util/db2/obj/db-config.h ../include
 	ln -s ../util/db2/obj/libdb.a ../lib
-	ln -s $(srcdir)/db2/include/db-ndbm.h ../include
+	if test '$(srcdir)' = . ; then \
+		ln -s ../util/db2/include/db-ndbm.h ../include; \
+	else \
+		ln -s $(srcdir)/db2/include/db-ndbm.h ../include; \
+	fi
 
 unixmac: libupdate
 

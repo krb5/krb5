@@ -1,3 +1,9 @@
+Thu Sep  5 18:48:46 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix): Fix symlinking so building in a link
+ 		farm or in source directory won't result in dangling
+ 		db-ndbm.h symlink.
+
 Sat Aug 31 01:34:41 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* makeshlib.sh (*-*-aix*): Echo more stuff before running it.
