@@ -15,8 +15,8 @@ CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a \
 	libkrb5.so libcrypto.so libkrb4.so libdes425.so
 
 clean-mac:: clean-unix
-clean-unix::
 	$(RM) $(CLEANLIBS)
+clean-unix::
 
 clean-windows::
 	$(RM) *.dll *.lib *.exp *.map *.bak
