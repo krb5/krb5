@@ -103,7 +103,7 @@ main(argc, argv)
     int depth;
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
     krb5_principal client_princ;
-    errcode_t retval;
+    krb5_error_code retval;
 
     krb5_init_ets();
 
