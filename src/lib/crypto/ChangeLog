@@ -1,5 +1,7 @@
 Fri Jun  9 18:52:19 1995    <tytso@rsx-11.mit.edu>
 
+	* des_crc.c, des_md5.c: Fix -Wall nits.
+
 	* configure.in: Remove standardized set of autoconf macros, which
 		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
 		recurse down subdirectories.

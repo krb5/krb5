@@ -92,7 +92,7 @@ mit_des_md5_encrypt_func(in, out, size, key, ivec)
     memset((char *)out, 0, sumsize);
 
     /* put in the confounder */
-    if (retval = krb5_random_confounder(sizeof(mit_des_cblock), out))
+    if ((retval = krb5_random_confounder(sizeof(mit_des_cblock), out)))
 	return retval;
 
     memcpy((char *)out+sizeof(mit_des_cblock)+RSA_MD5_CKSUM_LENGTH, (char *)in,
@@ -103,11 +103,11 @@ mit_des_md5_encrypt_func(in, out, size, key, ivec)
     /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_MD5,...)
        but avoids use of the cryptosystem config table which can not be
        referenced here if this object is to be included in a shared library.  */
-    if (retval = rsa_md5_cksumtable_entry.sum_func((krb5_pointer) out,
-						 sumsize,
-						 (krb5_pointer)key->key->contents,
-						 sizeof(mit_des_cblock),
-						 &cksum))
+    if ((retval = rsa_md5_cksumtable_entry.sum_func((krb5_pointer) out,
+						    sumsize,
+						    (krb5_pointer)key->key->contents,
+						    sizeof(mit_des_cblock),
+						    &cksum)))
 	return retval;
 
     memcpy((char *)out+sizeof(mit_des_cblock), (char *)contents,
@@ -155,10 +155,10 @@ mit_des_md5_decrypt_func(in, out, size, key, ivec)
     memcpy((char *)contents_get, p, RSA_MD5_CKSUM_LENGTH);
     memset(p, 0, RSA_MD5_CKSUM_LENGTH);
 
-    if (retval = rsa_md5_cksumtable_entry.sum_func(out, size,
-						 (krb5_pointer)key->key->contents,
-						 sizeof(mit_des_cblock),
-						 &cksum))
+    if ((retval = rsa_md5_cksumtable_entry.sum_func(out, size,
+						    (krb5_pointer)key->key->contents,
+						    sizeof(mit_des_cblock),
+						    &cksum)))
 	return retval;
 
     if (memcmp((char *)contents_get, (char *)contents_prd, RSA_MD5_CKSUM_LENGTH) )
