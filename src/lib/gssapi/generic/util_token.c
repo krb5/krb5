@@ -168,12 +168,6 @@ void g_make_token_header(mech, body_size, buf, tok_type)
  * mechanism in the token does not match the mech argument.  buf and
  * *body_size are left unmodified on error.
  */
-static gss_int32 g_bad_tok_header = G_BAD_TOK_HEADER;
-#undef G_BAD_TOK_HEADER
-#define G_BAD_TOK_HEADER (_log("%s:%d: returning G_BAD_TOK_HEADER\n", SFILE, __LINE__), g_bad_tok_header)
-static gss_int32 g_wrong_mech = G_WRONG_MECH;
-#undef G_WRONG_MECH
-#define G_WRONG_MECH (_log("%s:%d: returning G_WRONG_MECH\n", SFILE, __LINE__), g_wrong_mech)
 
 gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in,
 				wrapper_required)
@@ -189,7 +183,6 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in,
    gss_OID_desc toid;
    int toksize = toksize_in;
 
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
    _log("%s:%d: %s(tok_type=0x%x, toksize=%d, wrapper_required=%d)\n",
 	SFILE, __LINE__, __func__, tok_type, toksize, wrapper_required);
    _log_block2("input token", buf, toksize);

@@ -242,11 +242,13 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 
 /* debugging */
 
+#ifdef EXCESSIVE_LOGGING
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
 #define LOGPATH "/tmp/gsslog"
-void _log(const char *fmt, ...) {
+void _log(const char *fmt, ...)
+{
 #if 0
     static FILE *logf;
     va_list x;
@@ -281,8 +283,4 @@ void _log(const char *fmt, ...) {
     va_end(x);
 #endif
 }
-
-int defective(const char *f,int l) {
-    _log("%s:%d: reporting defective token\n", f, l);
-    return -1;
-}
+#endif
