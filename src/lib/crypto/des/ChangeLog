@@ -1,3 +1,8 @@
+2000-06-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* afsstring2key.c: Initialization of S[8][64] - each 64 elements 
+	enclosed in brackets. 
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* afsstring2key.c: "register x" -> "register int x".
