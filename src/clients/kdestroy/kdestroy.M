@@ -17,44 +17,62 @@
 .\" permission.  M.I.T. makes no representations about the suitability of
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
-.\" 
-.\"
-.TH KDESTROY 1 "Kerberos Version 5.0" "MIT Project Athena"
+.\" "
+.so man1/header.doc
+.TH KDESTROY 1 \*h
 .SH NAME
 kdestroy \- destroy Kerberos tickets
 .SH SYNOPSIS
 .B kdestroy
-[
-.B \-c
-.I cachename
-]
+[\fB\-q\fP] [\fB\-c\fP \fIcache_name]
+.br
 .SH DESCRIPTION
 The
 .I kdestroy
-utility destroys the user's active
-Kerberos authorization tickets by writing zeros to the specified
-credentials cache that contains them.  If the credentials cache is not
-specified, the default credentials cache is destroyed.
+utility destroys the user's active Kerberos authorization tickets by
+writing zeros to the specified credentials cache that contains them.  If
+the credentials cache is not specified, the default credentials cache is
+destroyed.
+.SH OPTIONS
+.TP
+.B \-q
+Run quietly.  Normally
+.B kdestroy
+beeps if it fails to destroy the user's tickets.  The
+.B \-q
+flag suppresses this behavior.
+.TP
+\fB\-c\fP \fIcache_name\fP
+use
+.I cache_name
+as the credentials (ticket) cache name and location; if this option is
+not used, the default cache name and location are used.
+.sp
+The default credentials cache may vary between systems.  If the
+.SM KRB5CCNAME
+environment variable is set, its value is used to name the default
+ticket cache.
 .PP
-In the Athena workstation environment, the
-.I login 
-or 
-.I Xlogin
-program automatically destroys your tickets when you
-end a workstation session.
-If your site does not provide a similar ticket-destroying mechanism,
-you can place the
+Most installations recommend that you place the
 .I kdestroy
 command in your
 .I .logout
-file so that your tickets are destroyed automatically
-when you logout.
-.PP
+file, so that your tickets are destroyed automatically when you log out.
+.SH ENVIRONMENT
+.B Kdestroy
+uses the following environment variable:
+.TP "\w'.SM KRB5CCNAME\ \ 'u"
+.SM KRB5CCNAME
+Location of the credentials (ticket) cache.
+.SH FILES
+.TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
+/tmp/krb5cc_[uid]
+default credentials cache ([uid] is the decimal UID of the user).
 .SH SEE ALSO
-kerberos(1), kinit(1), klist(1)
+kinit(1), klist(1)
 .SH BUGS
 .PP
-Only the tickets in the user's current ticket file are destroyed.
-Separate ticket files are used to hold root instance and password
-changing tickets.  These files should probably be destroyed too, or
-all of a user's tickets kept in a single ticket file.
+Only the tickets in the specified credentials cache are destroyed.
+Separate ticket caches are used to hold root instance and password
+changing tickets.  These should probably be destroyed too, or all of a
+user's tickets kept in a single credentials cache.

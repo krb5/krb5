@@ -17,92 +17,100 @@
 .\" permission.  M.I.T. makes no representations about the suitability of
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
-.\" 
-.\"
-.TH KLIST 1 "Kerberos Version 5.0" "MIT Project Athena"
+.\" "
+.so man1/header.doc
+.TH KLIST 1 \*h
 .SH NAME
 klist \- list cached Kerberos tickets
 .SH SYNOPSIS
-.B klist
-[
-.B \-c
-] [
-.B \-f
-] [
-.B \-e
-] [
-.B \-s
-] [
-.I cachename
-]
-
-.B klist \-k
-[
-.B \-t
-] [
-.B \-K 
-] [
-.I keytabname
-]
-
+\fBklist\fP [\fB\-e\fP] [[\fB\-c\fP] [\fB\-f\fP] [\fB\-s\fP]
+[\fIcache_name\fP]] [\fB\-k\fP [\fB\-t\fP] [\fB\-K\fP]
+[\fIkeytab_name\fP]]
 .br
 .SH DESCRIPTION
-.I klist
-will list the primary principal and Kerberos tickets held 
-in a credentials cache if the 
+.I Klist
+lists the Kerberos principal and Kerberos tickets held in a credentials
+cache, or the keys held in a
+.B keytab
+file.
+.SH OPTIONS
+.TP
+.B \-e
+displays the encryption types of the session key and the ticket for each
+credential in the credential cache, or each key in the keytab file.
+.TP
 .B \-c
-option is used, or in the keytab files if the 
+List tickets held in a credentials cache.  This is the default if
+neither
+.B \-c
+nor
 .B \-k
-option is used.  By default, the 
-.B \-c
-option is assumed if neither option is specified on the command line.
-.PP
-The
+is specified.
+.TP
 .B \-f
-option causes
-.I klist
-to display the flags present in the credentials.
-The abbreviations below will be printed:
+shows the flags present in the credentials, using the following
+abbreviations:
+.sp
 .nf
 .in +.5i
-F	Forwardable
-f	Forwarded
-P	Proxiable
-p	Proxy
-D	May-post\fBD\fPate
-d	Post\fBD\fPated
-R	Renewable
-I	Initial
+F	\fBF\fPorwardable
+f	\fBf\fPorwarded
+P	\fBP\fProxiable
+p	\fBp\fProxy
+D	post\fBD\fPateable
+d	post\fBd\fPated
+R	\fBR\fPenewable
+I	\fBI\fPnitial
+i	\fBi\fPnvalid
 .in -.5i
 .fi
-.PP
-The
-.B \-e
-option causes
-.I klist
-to display the encryption types of the sesison key and the ticket 
-for each credential.
-.PP
-The
+.TP
+.B \-s
+causes
+.B klist
+to run silently (produce no output), but to still set the exit status
+according to whether it finds the credentials cache.  The exit status is
+`0' if
+.B klist
+finds a credentials cache, and `1' if it does not.
+.TP
+\fB\-k\fP
+List keys held in a
+.B keytab
+file.  
+.TP
 .B \-t
-option causes
-.I klist
-to display the time entry timestamps for each keytab entry.
-.PP
-The
+display the time entry timestamps for each keytab entry in the keytab
+file.
+.TP
 .B \-K
-option causes
-.I klist
-to display the value of the encryption key in each keytab entry.
+display the value of the encryption key in each keytab entry in the
+keytab file.
 .PP
 If
-.I cachename
-is not specified, klist will display the credentials in the default 
-credentials cache.  The
-.IR kinit (1)
-manual page specifies how the default credentials cache is selected.
-Similarly, if 
-.I keytabname
-is not specified, the default keytab file shall be used.
+.I cache_name
+or
+.I keytab_name
+is not specified, klist will display the credentials in the default
+credentials cache or keytab file as appropriate.  If the
+.B KRB5CCNAME
+environment variable is set, its value is used to name the default
+ticket cache.
+.SH ENVIRONMENT
+.B Klist
+uses the following environment variable:
+.TP "\w'.SM KRB5CCNAME\ \ 'u"
+.SM KRB5CCNAME
+Location of the credentials (ticket) cache.
+.SH FILES
+.TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
+/tmp/krb5cc_[uid]
+default location of the credentials cache ([uid] is the decimal UID of
+the user).
+.TP
+/etc/v5srvtab
+default location of the
+.B keytab
+file.
 .SH SEE ALSO
 kinit(1), kdestroy(1), krb5(3)
