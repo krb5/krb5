@@ -568,8 +568,9 @@ int ktest_equal_array_of_enctype(DECLARG(const int , length),
 #define array_compare(comparator)\
 int i,p=TRUE;\
 if(ref==var) return TRUE;\
-if(ref==NULL || ref[0]==NULL)\
-  if(var==NULL || var[0]==NULL) return TRUE;\
+if(!ref || !ref[0])\
+  return (!var || !var[0]);\
+if(!var || !var[0]) return FALSE;\
 for(i=0; ref[i] != NULL && var[i] != NULL; i++)\
   p = p && comparator(ref[i],var[i]);\
 if(ref[i] == NULL && var[i] == NULL) return p;\

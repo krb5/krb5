@@ -4,6 +4,7 @@
 #include "utility.h"
 #include "ktest_equal.h"
 
+#include <krb5/asn1.h>
 #include "debug.h"
 #include <string.h>
 
@@ -15,8 +16,7 @@ void main()
   krb5_data code;
   krb5_error_code retval;
   
-  initialize_asn1_error_table();
-  initialize_krb5_error_table();
+  krb5_init_ets();
   
 #define setup(type,typestring,constructor)\
   type ref, *var;\

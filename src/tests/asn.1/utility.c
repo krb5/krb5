@@ -74,12 +74,19 @@ krb5_error_code krb5_data_hex_parse(DECLARG(krb5_data *, d),
   if(d->data == NULL) return ENOMEM;
   d->length = (strlen(s)+1)/3;
   for(i=0,pos=(char*)s; i<d->length; i++,pos+=3){
-    if(!sscanf(pos,"%x",&digit)) return ASN1_PARSE_ERROR;
+    if(!sscanf(pos,"%x",&digit)) {
+#ifdef KRB5_USE_ISODE
+	    return EINVAL;
+#else
+	    return ASN1_PARSE_ERROR;
+#endif
+    }
     d->data[i] = (char)digit;
   }
   return 0;
 }
 
+#if 0
 void asn1buf_print(DECLARG(const asn1buf *, buf))
      OLDDECLARG(const asn1buf *, buf)
 {
@@ -104,3 +111,4 @@ void asn1buf_print(DECLARG(const asn1buf *, buf))
   printf("%s\n",s);
   free(s);
 }
+#endif

@@ -1,3 +1,22 @@
+Wed Oct 19 00:11:43 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* Makefile.in: "make check" depends on krb5_decode_test and
+		krb5_encode_test being up to date.
+
+Tue Oct 18 22:46:17 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* ktest_equal.c (array_compare): Don't segfault if one of the
+		arguments is NULL and the other is not.
+
+	* krb5_decode_test.c (main): Use krb5_init_ets() instead of
+		explicitly naming the error tables to initialize.
+
+	* utility.c (asn1buf_print): Remove unneeded routine.
+
+	* utility.c (krb5_data_hex_parse): Return EINVAL instead of
+		ASN1_PARSE_ERROR if KRB5_USE_ISODE is defined, since the 
+		ASN1 error codes aren't defined in that case.
+
 Fri Oct 14 15:00:41 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Clean up the test.out file.
