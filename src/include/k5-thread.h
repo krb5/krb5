@@ -31,6 +31,12 @@
 #define K5_THREAD_H
 
 #include "autoconf.h"
+#ifndef KRB5_CALLCONV
+# define KRB5_CALLCONV
+#endif
+#ifndef KRB5_CALLCONV_C
+# define KRB5_CALLCONV_C
+#endif
 
 /* Interface (tentative):
 
@@ -148,13 +154,13 @@
 #ifdef DEBUG_THREADS_LOC
 typedef struct {
     const char *filename;
-    short lineno;
+    int lineno;
 } k5_debug_loc;
 #define K5_DEBUG_LOC_INIT	{ __FILE__, __LINE__ }
 #if __GNUC__ >= 2
 #define K5_DEBUG_LOC		(__extension__ (k5_debug_loc)K5_DEBUG_LOC_INIT)
 #else
-static inline k5_debug_loc k5_debug_make_loc(const char *file, short line)
+static inline k5_debug_loc k5_debug_make_loc(const char *file, int line)
 {
     k5_debug_loc l;
     l.filename = file;
@@ -243,6 +249,14 @@ typedef int k5_mutex_stats_tmp;
 #define k5_mutex_stats_start()		(0)
 #define k5_mutex_lock_update_stats(M,S)	(S)
 #define k5_mutex_unlock_update_stats(M)	(*(M) = 's')
+
+/* If statistics tracking isn't enabled, these functions don't actually
+   do anything.  Declare anyways so we can do type checking etc.  */
+void KRB5_CALLCONV krb5int_mutex_lock_update_stats(k5_debug_mutex_stats *m,
+                                                  k5_mutex_stats_tmp start);
+void KRB5_CALLCONV krb5int_mutex_unlock_update_stats(k5_debug_mutex_stats *m);
+void KRB5_CALLCONV krb5int_mutex_report_stats(/* k5_mutex_t *m */);
+
 #define krb5int_mutex_report_stats(M)	((M)->stats = 'd')
 
 #endif

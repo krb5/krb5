@@ -1,3 +1,13 @@
+2005-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (KRB5_CALLCONV, KRB5_CALLCONV_C): Define if not
+	defined.
+	(krb5int_mutx_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[!DEBUG_THREADS_STATS]: Declare, with KRB5_CALLCONV.
+	(k5_debug_make_loc): Change "lineno" to type int.
+	(k5_debug_make_loc): Likewise for argument "line".
+
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5.hin: add prototype for krb5_is_thread_safe
