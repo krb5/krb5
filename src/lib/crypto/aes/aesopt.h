@@ -180,7 +180,9 @@
 #  define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
 #elif defined(_MIPSEL)
 #  define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
-#elif !defined(WIN32)
+#elif defined(_WIN32)
+#  define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
+#elif !defined(_WIN32)
 #  include <stdlib.h>
 #  if defined(HAVE_ENDIAN_H)
 #    include <endian.h>
@@ -236,17 +238,10 @@
 #define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #elif 0     /* **** EDIT HERE IF NECESSARY **** */
 #define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
-#else
-# error "barf"
-/*#elif (('1234' >> 24) == '1')
-#  define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
-#elif (('4321' >> 24) == '1')
-#  define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN*/
+#elif 1
+#define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
+#define UNKNOWN_BYTE_ORDER	/* we're guessing */
 #endif
-#endif
-
-#if !defined(PLATFORM_BYTE_ORDER)
-#  error Please set undetermined byte order (lines 229 or 231 of aesopt.h).
 #endif
 
 /*  3. ASSEMBLER SUPPORT
@@ -350,6 +345,15 @@
 */
 #if 1
 #define SAFE_IO
+#endif
+
+/*
+ * If PLATFORM_BYTE_ORDER does not match the actual machine byte
+ * order, the fast word-access code will cause incorrect results.
+ * Therefore, SAFE_IO is required when the byte order is unknown.
+ */
+#if !defined(SAFE_IO) && defined(UNKNOWN_BYTE_ORDER)
+#  error "SAFE_IO must be defined if machine byte order is unknown."
 #endif
 
 /*  7. LOOP UNROLLING

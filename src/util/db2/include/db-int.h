@@ -51,6 +51,9 @@
 #ifdef HAVE_MACHINE_ENDIAN_H
 # include <machine/endian.h>
 #endif
+#ifdef HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
 /* Handle both BIG and LITTLE defined and BYTE_ORDER matches one, or
    just one defined; both with and without leading underscores.
 
