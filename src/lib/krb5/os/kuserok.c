@@ -38,7 +38,7 @@
 #define getpwnam(user) getpwnam((char *)user)
 #endif
 
-#define MAX_USERNAME 10
+#define MAX_USERNAME 65
 
 /*
  * Given a Kerberos principal "principal", and a local username "luser",

@@ -1,3 +1,10 @@
+2001-03-05  Sam Hartman  <hartmans@mit.edu>
+
+	* kuserok.c: Set max_username to 65 not 10.  65 should be enough
+	for a null terminated string from most current Unixes usernames.
+	The previous limit of 10 was too low.  I don't know how the
+	previous limit was chosen nor why this is not a dynamic buffer.
+
 2001-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* init_os_ctx.c: Get sys/ioctl.h for Solaris to get FIONBIO.
