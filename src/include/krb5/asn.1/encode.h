@@ -37,7 +37,7 @@ krb5_error_code krb5_decode_generic
 
 /* decode_arp.c */
 krb5_error_code decode_krb5_as_rep
-	PROTOTYPE((const krb5_data *,
+	PROTOTYPE((krb5_data *,
 		   krb5_kdc_rep **));
 
 /* decode_arq.c */
