@@ -1,3 +1,8 @@
+1999-08-27  Ken Raeburn  <raeburn@raeburn.org>
+
+	* default.exp: Set default principal expiration a bit further into
+	the future.
+
 1999-08-26  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (setup_kerberos_files): Tweak enctypes entered into
