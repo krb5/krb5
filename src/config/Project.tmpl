@@ -118,7 +118,9 @@ foo/**/libname: objlist							@@\
 	$(RANLIB) lib/**/libname.a					@@\
 lib/**/libname.a: objlist						@@\
 	$(ARADD) $@ objlist						@@\
-	$(RANLIB) $@
+	$(RANLIB) $@							@@\
+clean::									@@\
+	$(RM_CMD) foo/**/libname
 #endif /* AdditiveLibraryTarget */
 
 /*
