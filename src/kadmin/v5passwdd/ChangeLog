@@ -1,3 +1,8 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* adm_conn.c (kadm_get_ccache): Cast return from getpid() to int
+	to match format.
+
 2001-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_conn.c, kpasswd.c, srv_net.c: Changed various char string

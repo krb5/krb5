@@ -138,7 +138,7 @@ kadm_get_ccache(kcontext, user, ccname, ccache, client)
 #ifdef _MACINTOSH
 	(void) sprintf(new_cache, "STDIO:admcc");
 #else
-	(void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
+	(void) sprintf(new_cache, kadm_cache_name_fmt, (int) getpid());
 #endif /* _MACINTOSH */
 #endif /* _MSDOS || _WIN32 */
     }
