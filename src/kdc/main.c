@@ -292,7 +292,7 @@ char *argv[];
 
     setup_signal_handlers();
 
-    openlog(argv[0], LOG_CONS|LOG_NDELAY, LOG_LOCAL0); /* XXX */
+    openlog(argv[0], LOG_CONS|LOG_NDELAY, LOG_LOCAL6); /* XXX */
     syslog(LOG_INFO, "commencing operation");
 
     if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
@@ -315,6 +315,7 @@ char *argv[];
 	com_err(argv[0], retval, "while closing database");
 	errout++;
     }
+    syslog(LOG_INFO, "shutting down");
     exit(errout);
 }
 
