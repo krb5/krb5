@@ -1,3 +1,8 @@
+
+Tue Aug 29 13:34:23 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Add routines to support serialization of the database
+		context.  Clean up gcc -Wall complaints.
+
 Thu Aug 24 18:54:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

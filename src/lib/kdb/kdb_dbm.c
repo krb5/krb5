@@ -65,8 +65,6 @@ extern char *progname;
 
 static char default_db_name[] = DEFAULT_KDB_FILE;
 
-static krb5_boolean non_blocking = FALSE;
-
 static char *gen_dbsuffix 
 	PROTOTYPE((char *, char * ));
 static krb5_error_code krb5_dbm_db_start_update 
@@ -512,8 +510,6 @@ krb5_dbm_db_get_age(context, db_name, age)
  * the server (for example, during slave updates).
  */
 
-static char * update_string = "write in progress\n";
-
 static krb5_error_code
 krb5_dbm_db_start_update(context)
     krb5_context context;
@@ -603,7 +599,7 @@ krb5_dbm_db_lock(context, mode)
 
     if (mod_time != db_ctx->db_lf_time) {
   	KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	if (db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600)) {
+	if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
     	    db_ctx->db_lf_time = mod_time;
 	    db_ctx->db_dbm_ctx = db;
 	} else {
@@ -788,7 +784,6 @@ destroy_file_suffix(dbname, suffix)
 	close(fd);
 
 	if (unlink(filename)) {
-		int retval = errno;
 		free(filename);
 		return(errno);
 	}
@@ -1088,7 +1083,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	    DBM *db;
 
 	    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	    if (db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600)) {
+	    if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
 		db_ctx->db_dbm_ctx = db;
 		retval = 0;
 	    }
@@ -1172,7 +1167,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 		DBM *db;
 
 		KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-		if (db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600)) {
+		if ((db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600))) {
 		    db_ctx->db_dbm_ctx = db;
 		    retval = 0;
 		}
@@ -1263,4 +1258,211 @@ kdb5_db_set_dbops(context, new)
 	}
     }
     return(kret);
+}
+
+/*
+ * Context serialization operations.
+ */
+
+/*
+ * kdb5_context_size()	- Determine size required to serialize.
+ */
+static krb5_error_code
+kdb5_context_size(kcontext, arg, sizep)
+    krb5_context	kcontext;
+    krb5_pointer	arg;
+    size_t		*sizep;
+{
+    krb5_error_code	kret;
+    size_t		required;
+    db_context_t	*dbctx;
+
+    /*
+     * The database context requires at minimum:
+     *	krb5_int32	for KV5M_DB_CONTEXT
+     *	krb5_int32	for db_inited
+     *	krb5_int32	for database lockfile non-blocking flag
+     *	krb5_int32	for database lockfile lock count
+     *	krb5_int32	for database lockfile lock mode
+     *	krb5_int32	for length of database name.
+     *	krb5_int32	for KV5M_DB_CONTEXT
+     */
+    kret = EINVAL;
+    if ((dbctx = (db_context_t *) arg)) {
+	required = (sizeof(krb5_int32) * 7);
+	if (dbctx->db_inited && dbctx->db_dispatch && dbctx->db_name)
+	    required += strlen(dbctx->db_name);
+	kret = 0;
+	*sizep += required;
+    }
+    return(kret);
+}
+
+/*
+ * kdb5_context_externalize()	- Externalize the database context.
+ */
+static krb5_error_code
+kdb5_context_externalize(kcontext, arg, buffer, lenremain)
+    krb5_context	kcontext;
+    krb5_pointer	arg;
+    krb5_octet		**buffer;
+    size_t		*lenremain;
+{
+    krb5_error_code	kret;
+    db_context_t	*dbctx;
+    size_t		required;
+    krb5_octet		*bp;
+    size_t		remain;
+
+    required = 0;
+    bp = *buffer;
+    remain = *lenremain;
+    kret = EINVAL;
+    if ((dbctx = (db_context_t *) arg)) {
+	kret = ENOMEM;
+	if (!kdb5_context_size(kcontext, arg, &required) &&
+	    (required <= remain)) {
+	    /* Write magic number */
+	    (void) krb5_ser_pack_int32(KV5M_DB_CONTEXT, &bp, &remain);
+
+	    /* Write inited flag */
+	    (void) krb5_ser_pack_int32((krb5_int32) dbctx->db_inited,
+				       &bp, &remain);
+
+	    /* Write blocking lock lockmode */
+	    (void) krb5_ser_pack_int32((krb5_int32) dbctx->db_nb_locks,
+				       &bp, &remain);
+
+	    /* Write lock count */
+	    (void) krb5_ser_pack_int32((krb5_int32)
+				       (dbctx->db_inited) ?
+				       dbctx->db_locks_held : 0,
+				       &bp, &remain);
+
+	    /* Write lock mode */
+	    (void) krb5_ser_pack_int32((krb5_int32)
+				       (dbctx->db_inited) ?
+				       dbctx->db_lock_mode : 0,
+				       &bp, &remain);
+
+	    /* Write length of database name */
+	    (void) krb5_ser_pack_int32((dbctx->db_inited && dbctx->db_name) ?
+				       (krb5_int32) strlen(dbctx->db_name) : 0,
+				       &bp, &remain);
+	    if (dbctx->db_inited && dbctx->db_name)
+		(void) krb5_ser_pack_bytes((krb5_octet *) dbctx->db_name,
+					   strlen(dbctx->db_name),
+					   &bp, &remain);
+
+	    /* Write trailer */
+	    (void) krb5_ser_pack_int32(KV5M_DB_CONTEXT, &bp, &remain);
+	    kret = 0;
+	    *buffer = bp;
+	    *lenremain = remain;
+	}
+    }
+    return(kret);
+}
+
+/*
+ * kdb5_context_internalize()	- Internalize the database context.
+ */
+static krb5_error_code
+kdb5_context_internalize(kcontext, argp, buffer, lenremain)
+    krb5_context	kcontext;
+    krb5_pointer	*argp;
+    krb5_octet		**buffer;
+    size_t		*lenremain;
+{
+    krb5_error_code	kret;
+    krb5_context	tmpctx;
+    db_context_t	*dbctx;
+    krb5_int32		ibuf;
+    krb5_octet		*bp;
+    size_t		remain;
+    krb5_int32		iflag;
+    krb5_int32		nb_lockmode;
+    krb5_int32		lockcount;
+    krb5_int32		lockmode;
+    krb5_int32		dbnamelen;
+    char		*dbname;
+
+    bp = *buffer;
+    remain = *lenremain;
+    kret = EINVAL;
+    dbctx = (db_context_t *) NULL;
+    /* Read our magic number */
+    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
+	ibuf = 0;
+    if (ibuf == KV5M_DB_CONTEXT) {
+	kret = ENOMEM;
+
+	if (!(kret = krb5_ser_unpack_int32(&iflag, &bp, &remain)) &&
+	    !(kret = krb5_ser_unpack_int32(&nb_lockmode, &bp, &remain)) &&
+	    !(kret = krb5_ser_unpack_int32(&lockcount, &bp, &remain)) &&
+	    !(kret = krb5_ser_unpack_int32(&lockmode, &bp, &remain)) &&
+	    !(kret = krb5_ser_unpack_int32(&dbnamelen, &bp, &remain)) &&
+	    !(kret = krb5_init_context(&tmpctx))) {
+	    if (iflag) {
+		dbname = (char *) NULL;
+		if (dbnamelen &&
+		    (dbname = (char *) malloc((size_t) (dbnamelen+1)))) {
+		    kret = krb5_ser_unpack_bytes((krb5_octet *) dbname,
+						 (size_t) dbnamelen,
+						 &bp, &remain);
+		    if (!kret)
+			dbname[dbnamelen] = '\0';
+		}
+		if (!kret &&
+		    (!dbname || !(kret = krb5_db_set_name(tmpctx, dbname))) &&
+		    !(kret = krb5_db_init(tmpctx))) {
+		    dbctx = (db_context_t *) tmpctx->db_context;
+		    (void) krb5_dbm_db_set_lockmode(tmpctx, 0);
+		    if (lockmode)
+			kret = krb5_db_lock(tmpctx, lockmode);
+		    if (!kret && lockmode)
+			dbctx->db_locks_held = lockcount;
+		    (void) krb5_dbm_db_set_lockmode(tmpctx, nb_lockmode);
+		}
+		if (dbname)
+		    krb5_xfree(dbname);
+	    }
+	    if (!kret)
+		kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+	    if (kret || (ibuf != KV5M_DB_CONTEXT))
+		kret = EINVAL;
+
+	    if (kret) {
+		if (dbctx)
+		    krb5_db_fini(tmpctx);
+	    }
+	    else
+		tmpctx->db_context = (void *) NULL;
+	    krb5_free_context(tmpctx);
+	}
+    }
+    if (!kret) {
+	*buffer = bp;
+	*lenremain = remain;
+	*argp = (krb5_pointer) dbctx;
+    }
+    return(kret);
+}
+
+/* Dispatch entry */
+static const krb5_ser_entry kdb5_context_ser_entry = {
+    KV5M_DB_CONTEXT,			/* Type			*/
+    kdb5_context_size,			/* Sizer routine	*/
+    kdb5_context_externalize,		/* Externalize routine	*/
+    kdb5_context_internalize		/* Externalize routine	*/
+};
+
+/*
+ * Register serializer.
+ */
+krb5_error_code
+krb5_ser_db_context_init(kcontext)
+    krb5_context	kcontext;
+{
+    return(krb5_register_serializer(kcontext, &kdb5_context_ser_entry));
 }
