@@ -1,3 +1,14 @@
+2001-06-21  Mitchell Berger  <mitchb@mit.edu>
+
+	* server_kdb.c (kdb_put_entry): Modified to perform the generation
+	number update conditional upon success of kdb_put_entry_internal.
+	(kdb_put_entry_internal): No longer takes incgen argument or updates
+	generation number.
+	(kdb_update_generation_number): Changed from using
+	krb5_dbe_update_generation_number_general to using
+	krb5_dbe_increment_generation_number_general.  Also uses new calling
+	sequence for kdb_put_entry_internal.
+
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* Makefile.in: Include svr_generation.[co] in the build.

@@ -324,12 +324,23 @@ krb5_error_code
 kdb_put_entry(kadm5_server_handle_t handle,
 	      krb5_db_entry *kdb, osa_princ_ent_rec *adb)
 {
-    return kdb_put_entry_internal(handle, kdb, adb, 1, 1);
+    krb5_error_code ret;
+
+    ret = kdb_put_entry_internal(handle, kdb, adb, 1);
+    if (ret)
+        return(ret);
+
+    /* The update succeeded, so we should update the generation number. */
+    ret = kdb_update_generation_number(handle);
+    if (ret)
+        return(ret);
+
+    return(0);
 }
 
 krb5_error_code
 kdb_put_entry_internal(kadm5_server_handle_t handle,
-	               krb5_db_entry *kdb, osa_princ_ent_rec *adb, int incgen,
+	               krb5_db_entry *kdb, osa_princ_ent_rec *adb,
 		       int updatemod)
 {
     krb5_error_code ret;
@@ -370,13 +381,6 @@ kdb_put_entry_internal(kadm5_server_handle_t handle,
     ret = krb5_db_put_principal(handle->context, kdb, &one);
     if (ret)
 	return(ret);
-
-    if (incgen) {
-        /* The update succeeded, so we should change the generation number */
-        ret = kdb_update_generation_number(handle);
-        if (ret)
-            return(ret);
-    }
 
     return(0);
 }
@@ -442,15 +446,17 @@ kdb_update_generation_number(kadm5_server_handle_t handle)
     if (ret)
         return(ret);
 
-    ret = krb5_dbe_update_generation_number_general(handle->context,
-                                                    &master_kdb, NULL);
+    ret = krb5_dbe_increment_generation_number_general(handle->context,
+                                                       &master_kdb);
     if (ret)
         return(ret);
 
     /* Updating the generation number, while a change to the database,
        is not one that should result in updating the generation number
-       again to avoid an infinite loop. */
-    ret = kdb_put_entry_internal(handle, &master_kdb, &master_adb, 0, 0);
+       again to avoid an infinite loop.  Also, though it is changing
+       data associated with the master principal, we don't want to update
+       the master principal's modprinc data because that would be misleading. */
+    ret = kdb_put_entry_internal(handle, &master_kdb, &master_adb, 0);
     if (ret)
         return(ret);
 
