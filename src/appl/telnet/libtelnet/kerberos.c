@@ -337,7 +337,7 @@ kerberos4_is(ap, data, cnt)
 		 * increment by one, re-encrypt it and send it back.
 		 */
 		des_ecb_encrypt(datablock, challenge, sched, 0);
-		for (r = 7; r >= 0; r++) {
+		for (r = 7; r >= 0; r--) {
 			register int t;
 			t = (unsigned int)challenge[r] + 1;
 			challenge[r] = t;	/* ignore overflow */

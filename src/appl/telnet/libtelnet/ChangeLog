@@ -1,5 +1,9 @@
 Tue Nov  8 01:39:50 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kerberos.c (kerberos4_is): Fix bug in logic of incrementing the
+		received challenge.  A ++/-- mixup means there's a 1 in
+		256 chance the server will get it wrong.
+
 	* kerberos.c: Use des_init_random_number_genator(), since that
 		will result in different subsession keys on successive
 		runs of telnet.
