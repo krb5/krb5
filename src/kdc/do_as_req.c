@@ -153,11 +153,7 @@ krb5_data **response;			/* filled in with a response packet */
 #undef cleanup
 #define cleanup() {krb5_db_free_principal(&client, 1); \
 		   krb5_db_free_principal(&server, 1); \
-		   memset((char *)session_key->contents, 0, \
-			  session_key->length); \
-		   xfree(session_key->contents); \
-		   session_key->contents = 0; }
-
+		   krb5_free_keyblock(session_key); }
 
     ticket_reply.server = request->server;
     ticket_reply.enc_part.etype = useetype;
@@ -261,10 +257,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 #undef cleanup
 #define cleanup() {krb5_db_free_principal(&client, 1); \
-		   memset((char *)session_key->contents, 0, \
-			  session_key->length); \
-		   xfree(session_key->contents); \
-		   session_key->contents = 0; \
+		   krb5_free_keyblock(session_key); \
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
 		   free(ticket_reply.enc_part.ciphertext.data);}
@@ -312,10 +305,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 #undef cleanup
 #define cleanup() {krb5_db_free_principal(&client, 1); \
-		   memset((char *)session_key->contents, 0, \
-			  session_key->length); \
-		   xfree(session_key->contents); \
-		   session_key->contents = 0; \
+		   krb5_free_keyblock(session_key); \
 		   memset(ticket_reply.enc_part.ciphertext.data, 0, \
 			 ticket_reply.enc_part.ciphertext.length); \
 		   free(ticket_reply.enc_part.ciphertext.data); \

@@ -182,10 +182,7 @@ tgt_again:
 
 #undef cleanup
 #define cleanup() { krb5_db_free_principal(&server, 1); \
-		   memset((char *)session_key->contents, 0, \
-			  session_key->length); \
-		   xfree(session_key->contents); \
-		   session_key->contents = 0; }
+		   krb5_free_keyblock(session_key);}
 
     ticket_reply.server = request->server; /* XXX careful for realm... */
     ticket_reply.enc_part.etype = useetype;
@@ -448,10 +445,7 @@ tgt_again:
     }
 #undef cleanup
 #define cleanup() { krb5_db_free_principal(&server, 1); \
-		   memset((char *)session_key->contents, 0, \
-			  session_key->length); \
-		   xfree(session_key->contents); \
-		   session_key->contents = 0; \
+		   krb5_free_keyblock(session_key); \
 		   if (newtransited) free(enc_tkt_reply.transited.tr_contents.data);}
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
@@ -524,10 +518,8 @@ tgt_again:
     retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
 				 header_ticket->enc_part2->session,
 				 &reply, response);
-    memset((char *)session_key->contents, 0, session_key->length);
-    xfree(session_key->contents);
+    krb5_free_keyblock(session_key);
     tkt_cleanup();
-    session_key->contents = 0;
     memset(ticket_reply.enc_part.ciphertext.data, 0,
 	   ticket_reply.enc_part.ciphertext.length);
     free(ticket_reply.enc_part.ciphertext.data);
