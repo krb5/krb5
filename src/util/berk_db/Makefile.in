@@ -3,20 +3,20 @@
 TST=if test -n "`cat DONE`" ; then
 
 LIB_SUBDIRS= hash
+LIBDONE= hash/DONE
 
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 DEPLIBS=
 SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
-STEXT=a
 
 all-unix::
 
 all-windows::
 
 
-libdb.$(STEXT): hash/DONE
+libdb.$(STEXT): $(LIBDONE)
 	@if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
