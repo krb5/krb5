@@ -367,7 +367,12 @@ krb5_oscontext_size(kcontext, arg, sizep)
     krb5_pointer	arg;
     size_t		*sizep;
 {
-    *sizep += sizeof(krb5_int32);
+    /*
+     * We need five 32-bit integers:
+     *	two for header and trailer
+     *	one each for time_offset, usec_offset and os_flags
+     */
+    *sizep += (5*sizeof(krb5_int32));
     return(0);
 }
 
@@ -395,6 +400,10 @@ krb5_oscontext_externalize(kcontext, arg, buffer, lenremain)
 	kret = ENOMEM;
 	if (!krb5_oscontext_size(kcontext, arg, &required) &&
 	    (required <= remain)) {
+	    (void) krb5_ser_pack_int32(KV5M_OS_CONTEXT, &bp, &remain);
+	    (void) krb5_ser_pack_int32(os_ctx->time_offset, &bp, &remain);
+	    (void) krb5_ser_pack_int32(os_ctx->usec_offset, &bp, &remain);
+	    (void) krb5_ser_pack_int32(os_ctx->os_flags, &bp, &remain);
 	    (void) krb5_ser_pack_int32(KV5M_OS_CONTEXT, &bp, &remain);
 
 	    /* Handle any other OS context here */
@@ -427,6 +436,7 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
+    os_ctx = (krb5_os_context) NULL;
     /* Read our magic number */
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
 	ibuf = 0;
@@ -435,19 +445,33 @@ krb5_oscontext_internalize(kcontext, argp, buffer, lenremain)
 
 	/* Get memory for the context */
 	if ((os_ctx = (krb5_os_context) 
-	     malloc(sizeof(struct _krb5_os_context)))) {
+	     malloc(sizeof(struct _krb5_os_context))) &&
+	    (remain >= 4*sizeof(krb5_int32))) {
 	    memset(os_ctx, 0, sizeof(struct _krb5_os_context));
-	    os_ctx->magic = KV5M_OS_CONTEXT;
 
-	    /* Handle any more OS context here */
+	    /* Read out our context */
+	    (void) krb5_ser_unpack_int32(&os_ctx->time_offset, &bp, &remain);
+	    (void) krb5_ser_unpack_int32(&os_ctx->usec_offset, &bp, &remain);
+	    (void) krb5_ser_unpack_int32(&os_ctx->os_flags, &bp, &remain);
+	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 
-	    kret = 0;
-	    *buffer = bp;
-	    *lenremain = remain;
+	    if (ibuf == KV5M_OS_CONTEXT) {
+		os_ctx->magic = KV5M_OS_CONTEXT;
+		kret = 0;
+		*buffer = bp;
+		*lenremain = remain;
+	    }
+	    else
+		kret = EINVAL;
 	}
     }
-    if (!kret)
+    if (!kret) {
 	*argp = (krb5_pointer) os_ctx;
+    }
+    else {
+	if (os_ctx)
+	    free(os_ctx);
+    }
     return(kret);
 }
 

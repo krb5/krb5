@@ -1,4 +1,8 @@
 
+Fri Sep 1 11:16:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* ser_ctx.c - Add handling of new time offset fields in the os_context.
+
+
 Tue Aug 29 14:14:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_{actx,adata,addr,auth,cksum,ctx,eblk,key,
 		princ}.c, serialize.c, t_ser.c - Add serialization operations
