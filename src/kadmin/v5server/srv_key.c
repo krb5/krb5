@@ -672,8 +672,11 @@ key_string2key_keysalt(ksent, ptr)
 	 */
 	if (!salted) {
 	    switch (kdata->key_data_type[1]) {
-	    case KRB5_KDB_SALTTYPE_NORMAL:
 	    case KRB5_KDB_SALTTYPE_V4:
+		salt.length = 0;
+		salt.data = (char *) NULL;
+		break;
+	    case KRB5_KDB_SALTTYPE_NORMAL:
 		/* Normal salt */
 		if (kret = krb5_principal2salt(argp->context,
 					       argp->dbentry->princ,
@@ -964,14 +967,15 @@ key_encrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
 		else
 		    break;
 	    }
+	    else
+		salt.data.data = (char *) NULL;
+
 	    if (kret = krb5_dbekd_encrypt_key_data(kcontext,
 						   &master_encblock,
 						   &tmpkey,
-						   (salt.data.length) ?
-						   	&salt :
-						   	(krb5_keysalt *) NULL,
+						   &salt,
 						   (int) inkeys[i].
-						   	key_data_kvno,
+						       key_data_kvno,
 						   &loser.key_data[i]))
 		break;
 	    else
