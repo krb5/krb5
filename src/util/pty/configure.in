@@ -30,7 +30,7 @@ ac_cv_func_setsid=no # setsid doesn't do the right thing under Ultrix even thoug
 # Moreover, strops.h trashes sys/ioctl.h
 krb5_cv_has_streams=no
 ;;
-alpha-dec-osf*)
+alpha*-dec-osf*)
 	AC_CHECK_LIB(security,main,
 		AC_DEFINE(HAVE_SETLUID)
 		LOGINLIBS="$LOGINLIBS -lsecurity"

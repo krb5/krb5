@@ -1,3 +1,44 @@
+2001-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): Sync with lib/krb5/os/localaddr.c
+	version.
+
+2000-05-17  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.
+	(kerberos_v4): Fix handling of APPL_REQUEST messages to deal with
+	ridiculously long realms, etc.  Fix up some calls to
+	kerb_err_reply() to be more useful.  Set req_*_ptr before any
+	possible calls to kerb_err_reply().
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+        data in buffers so as not to overrun "prev", "current", and "exp".
+	* kerberos_v4.c (process_v4): Don't assume that the realm is null-
+	terminated.
+	(set_tgtkey): Truncate realm name if it's too long.
+
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+	data in buffers.  Fix some limit checks.
+	* kerberos_v4.c (kerb_err_reply): Use strncat so as not to overrun
+	error buffer.
+
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.
+
+2000-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): If called functions fail, drop
+	out of loop and return nonzero.
+
 2000-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* sock2p.c: New file.

@@ -226,6 +226,10 @@ HINSTANCE get_lib_instance(void);
 
 #ifdef macintosh
 
+#include <KerberosConditionalMacros.h>
+
+#define USE_LOGIN_LIBRARY
+
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
@@ -246,9 +250,9 @@ HINSTANCE get_lib_instance(void);
 #include <unix.h>
 #include <ctype.h>
 
-#ifdef NEED_LOWLEVEL_IO
+/*#ifdef NEED_LOWLEVEL_IO*/
 #include <fcntl.h>
-#endif
+/*#endif*/
 
 /*
  * Which encryption routines libcrypto will provide is controlled by

@@ -80,8 +80,9 @@ krb5_kuserok(context, principal, luser)
     if ((pwd = getpwnam(luser)) == NULL) {
 	return(FALSE);
     }
-    (void) strcpy(pbuf, pwd->pw_dir);
-    (void) strcat(pbuf, "/.k5login");
+    (void) strncpy(pbuf, pwd->pw_dir, sizeof(pbuf) - 1);
+    pbuf[sizeof(pbuf) - 1] = '\0';
+    (void) strncat(pbuf, "/.k5login", sizeof(pbuf) - 1 - strlen(pbuf));
 
     if (access(pbuf, F_OK)) {	 /* not accessible */
 	/*

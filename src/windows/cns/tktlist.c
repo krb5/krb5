@@ -122,11 +122,12 @@ ticket_init_list (HWND hwnd)
     krb_get_nth_cred(service, instance, realm, i);
     krb_get_cred(service, instance, realm, &c);
     strcpy(buf, " ");
-    strcat(buf, short_date(c.issue_date - kwin_get_epoch()));
+    strncat(buf, short_date(c.issue_date - kwin_get_epoch()),
+            sizeof(buf) - 1 - strlen(buf));
     expiration = c.issue_date - kwin_get_epoch() + (long) c.lifetime * 5L * 60L;
-    strcat (buf, "      ");
-    strcat(buf, short_date(expiration));
-    strcat (buf, "      ");
+    strncat(buf, "      ", sizeof(buf) - 1 - strlen(buf));
+    strncat(buf, short_date(expiration), sizeof(buf) - 1 - strlen(buf));
+    strncat(buf, "      ", sizeof(buf) - 1 - strlen(buf));
     l = strlen(buf);
     sprintf(&buf[l], "%s%s%s%s%s (%d)",
 	    c.service, (c.instance[0] ? "." : ""), c.instance,
@@ -172,10 +173,12 @@ ticket_init_list (HWND hwnd)
       
       ncred++;
       strcpy (buf, "  ");
-      strcat (buf, short_date (c.times.starttime - kwin_get_epoch()));
-      strcat (buf, "      ");
-      strcat (buf, short_date (c.times.endtime - kwin_get_epoch()));
-      strcat (buf, "      ");
+      strncat(buf, short_date (c.times.starttime - kwin_get_epoch()),
+	      sizeof(buf) - 1 - strlen(buf));
+      strncat(buf, "      ", sizeof(buf) - 1 - strlen(buf));
+      strncat(buf, short_date (c.times.endtime - kwin_get_epoch()),
+	      sizeof(buf) - 1 - strlen(buf));
+      strncat(buf, "      ", sizeof(buf) - 1 - strlen(buf));
       
       /* Add ticket service name and realm */
       code = krb5_unparse_name (k5_context, c.server, &sname);
@@ -183,9 +186,9 @@ ticket_init_list (HWND hwnd)
 	com_err (NULL, code, "while unparsing server name");
 	break;
       }
-      strcat (buf, sname);
+      strncat (buf, sname, sizeof(buf) - 1 - strlen(buf));
 
-      strcat (buf, flags_string (&c)); /* Add flag info */
+      strncat (buf, flags_string (&c), sizeof(buf) - 1 - strlen(buf)); /* Add flag info */
       
       l = strlen(buf);
       lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);

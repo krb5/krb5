@@ -29,6 +29,10 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
+#ifdef macintosh
+#include <Utilities.h>
+#endif
+
 asn1_error_code asn1_encode_integer(buf, val, retlen)
      asn1buf * buf;
      const long val;
@@ -186,12 +190,6 @@ asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
   return 0;
 }
 
-#ifdef macintosh
-#define EPOCH ((70 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + (getTimeZoneOffset() * 60 * 60))
-#else
-#define EPOCH (0)
-#endif
-
 asn1_error_code asn1_encode_generaltime(buf, val, retlen)
      asn1buf * buf;
      const time_t val;
@@ -201,9 +199,11 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
   struct tm *gtime;
   char s[16];
   int length, sum=0;
-  time_t gmt_time;
+  time_t gmt_time = val;
 
-  gmt_time = val + EPOCH;
+#ifdef macintosh
+  unix_time_to_msl_time (&gmt_time);
+#endif
   gtime = gmtime(&gmt_time);
 
   /*

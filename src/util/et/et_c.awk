@@ -209,14 +209,14 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)" > outfile
+	print "#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh) && !defined(__MACH__)" > outfile
 	print "struct et_list {" > outfile
 	print "	   struct et_list *next;" > outfile
 	print "	   const struct error_table * table;" > outfile
 	print "};" > outfile
 	print "extern struct et_list *_et_list;" > outfile
 	print "static struct et_list link = { 0, 0 };" > outfile
-	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
+	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile    
 	print "	   if (!link.table) {" > outfile
 	print "	       link.next = _et_list;" > outfile
 	print "	       link.table = &et_" table_name "_error_table;" > outfile
