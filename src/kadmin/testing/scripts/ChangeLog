@@ -1,3 +1,7 @@
+Fri Oct 18 16:15:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (env-setup.stamp): Add dependency upon Makefile.
+
 Thu Oct 17 18:28:36 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* qualname.plin: Downcase the FQDN for keytab use. [krb5-libs/116]

@@ -10,7 +10,7 @@ all:: env-setup.sh $(GEN_SCRIPTS) restore_files.sh
 # Should only rebuild env_setup.sh here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.
 env-setup.sh: env-setup.stamp
-env-setup.stamp: $(srcdir)/env-setup.shin config.status
+env-setup.stamp: $(srcdir)/env-setup.shin config.status Makefile 
 	$(SHELL) config.status
 	chmod +x env-setup.sh
 	touch env-setup.stamp
