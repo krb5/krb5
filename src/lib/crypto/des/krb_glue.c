@@ -184,12 +184,14 @@ OLDDECLARG(krb5_pointer, ivec)
 
     cksum.contents = contents; 
 
-    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
-					 (krb5_pointer) out,
-					 sumsize,
-					 (krb5_pointer)key->key->contents,
-					 sizeof(mit_des_cblock),
-					 &cksum)) 
+    /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_CRC32,...)
+       but avoids use of the cryptosystem config table which can not be
+       referenced here if this object is to be included in a shared library.  */
+    if (retval = crc32_cksumtable_entry.sum_func((krb5_pointer) out,
+						 sumsize,
+						 (krb5_pointer)key->key->contents,
+						 sizeof(mit_des_cblock),
+						 &cksum))
 	return retval;
 
     memcpy((char *)out+sizeof(mit_des_cblock), (char *)contents,
@@ -228,19 +230,17 @@ OLDDECLARG(krb5_pointer, ivec)
     memcpy((char *)contents_get, p, CRC32_CKSUM_LENGTH);
     memset(p, 0, CRC32_CKSUM_LENGTH);
 
-    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
-					 out,
-					 size,
-					 (krb5_pointer)key->key->contents,
-					 sizeof(mit_des_cblock),
-					 &cksum)) 
+    if (retval = crc32_cksumtable_entry.sum_func(out, size,
+						 (krb5_pointer)key->key->contents,
+						 sizeof(mit_des_cblock),
+						 &cksum))
 	return retval;
 
     if (memcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
     memcpy((char *)out, (char *)out +
 	   sizeof(mit_des_cblock) + CRC32_CKSUM_LENGTH,
-	   size - sizeof(mit_des_cblock) + CRC32_CKSUM_LENGTH);
+	   size - sizeof(mit_des_cblock) - CRC32_CKSUM_LENGTH);
     return 0;
 }
 
