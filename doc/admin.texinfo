@@ -444,9 +444,7 @@ If this is set to 1 (for true), then client machines will compute the
 difference between their time and the time returned by the KDC in the
 timestamps in the tickets and use this value to correct for an
 inaccurate system clock.  This corrective factor is only used by the
-Kerberos library.  The default is @value{DefaultKDCTimesyncMac} for
-Macintosh computers and @value{DefaultKDCTimesync} for all other
-platforms.
+Kerberos library.  The default is @value{DefaultKDCTimesync}.
 
 @itemx kdc_req_checksum_type
 @itemx ap_req_checksum_type
@@ -485,9 +483,7 @@ type of cache to be created by kinit, or when forwarded tickets are
 received.  DCE and Kerberos can share the cache, but some versions of
 DCE do not support the default cache as created by this version of
 Kerberos.  Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
-DCE 1.1 systems.  The default value is @value{DefaultCcacheTypeMac}
-for Macintosh computers and @value{DefaultCcacheType} for other
-platforms.
+DCE 1.1 systems.  The default value is @value{DefaultCcacheType}.
 
 @ignore
 @itemx tkt_lifetime

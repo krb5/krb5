@@ -1,8 +1,7 @@
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* definitions.texinfo (DefaultCcacheType, DefaultKDCTimesync,
-	DefaultTktLifetime, DefaultMasterKeyType): Updated for code
-	changes.
+	DefaultMasterKeyType): Updated for code changes.
 	(DefaultCcacheTypeMac, DefaultKDCTimesyncMac): Deleted.
 
 	* admin.texinfo (libdefaults): Update kdc_timesync and ccache_type
