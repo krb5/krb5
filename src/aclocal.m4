@@ -470,7 +470,7 @@ dnl
 dnl allow for compilation with isode (yuck!)
 dnl
 define(ISODE_DEFS,
-[AC_ENABLE([isode],[ADD_DEF(KRB5_USE_ISODE)],)])dnl
+[AC_ENABLE([isode],[ADD_DEF(-DKRB5_USE_ISODE)],)])dnl
 undefine([AC_PROG_INSTALL])dnl
 define(AC_PROG_INSTALL,
 [# Make sure to not get the incompatible SysV /etc/install and

@@ -1,3 +1,8 @@
+Fri Oct  7 16:38:11 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* aclocal.m4: If using isode we need to add -DKRB5_USE_ISODE to
+		$DEFS, not KRB5_USE_ISODE!
+
 Thu Oct  6 20:05:07 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add recursive "make check" target.
