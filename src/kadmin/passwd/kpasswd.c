@@ -182,7 +182,7 @@ kpasswd(context, argc, argv)
   strncat(admin_realm, krb5_princ_realm(context, princ)->data, 
 	  krb5_princ_realm(context, princ)->length);
 
-  code = ovsec_kadm_init(princ_str, password, OVSEC_KADM_CHANGEPW_SERVICE,
+  code = ovsec_kadm_init(princ_str, password, KADM5_CHANGEPW_SERVICE,
 			 admin_realm /* we probably should take a -r */
 			             /* someday */,
 			 OVSEC_KADM_STRUCT_VERSION,

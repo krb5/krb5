@@ -1,3 +1,9 @@
+Tue Aug  6 11:35:45 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* kpasswd.c (kpasswd): call ovsec_kadm_init with
+		KADM5_CHANGEPW_SERVICE so that ovsec principals don't need
+		to exist in the db.
+
 Mon Jul 22 04:07:02 1996  Marc Horowitz  <marc@mit.edu>
 
 	* tty_kpasswd.c: main returns int, not void
