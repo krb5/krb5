@@ -93,19 +93,17 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
 
     /* After key comes the salt in necessary */
     if (keysalt) {
-	key_data->key_data_type[1] = keysalt->type;
-	if (key_data->key_data_type[1] >= 0) {
+	if (keysalt->type > 0) {
 	    key_data->key_data_ver++;
-	    key_data->key_data_length[1] = keysalt->data.length;
-	    if (keysalt && keysalt->data.length) {
+	    key_data->key_data_type[1] = keysalt->type;
+	    if (key_data->key_data_length[1] = keysalt->data.length) {
 		key_data->key_data_contents[1] =
 		    (krb5_octet *)malloc(keysalt->data.length);
 		if (key_data->key_data_contents[1] == NULL) {
 		    krb5_xfree(key_data->key_data_contents[0]);
 		    return ENOMEM;
 		}
-		memcpy(key_data->key_data_contents[1],
-		       keysalt->data.data,
+		memcpy(key_data->key_data_contents[1], keysalt->data.data,
 		       (size_t) keysalt->data.length);
 	    }
 	}

@@ -42,10 +42,6 @@
 
 #define KRB5_DBM_MAX_RETRY 5
 
-/* exclusive or shared lock flags */
-#define	KRB5_DBM_SHARED		0
-#define	KRB5_DBM_EXCLUSIVE	1
-
 /*
  * Per-database context.  One of these is attached to a Kerberos context.
  */
@@ -54,7 +50,8 @@ typedef struct __krb5_db_context {
     char *		db_name;	/* Name of database		*/
     DBM *		db_dbm_ctx;	/* DBM context for database	*/
     char *		db_lf_name;	/* Name of lock file		*/
-    FILE *		db_lf_file;	/* File descriptor of lock file	*/
+    int  		db_lf_file;	/* File descriptor of lock file	*/
+    time_t 		db_lf_time;	/* Time last updated 		*/
     int			db_locks_held;	/* Number of times locked	*/
     int			db_lock_mode;	/* Last lock mode, e.g. greatest*/
     krb5_boolean	db_nb_locks;	/* [Non]Blocking lock modes	*/
@@ -74,20 +71,10 @@ static krb5_boolean non_blocking = FALSE;
 static char *gen_dbsuffix 
 	PROTOTYPE((char *, char * ));
 static krb5_error_code krb5_dbm_db_start_update 
-	PROTOTYPE((krb5_context,
-		   char *,
-		   time_t * ));
+	PROTOTYPE((krb5_context));
 static krb5_error_code krb5_dbm_db_end_update 
 	PROTOTYPE((krb5_context,
-		   char *,
-		   time_t ));
-static krb5_error_code krb5_dbm_db_start_read 
-	PROTOTYPE((krb5_context,
-		   time_t * ));
-static krb5_error_code krb5_dbm_db_end_read 
-	PROTOTYPE((krb5_context,
-		   time_t  ));
-
+		   char *));
 
 #ifdef	BERK_DB_DBM
 /*
@@ -358,46 +345,51 @@ char *sfx;
 
 krb5_error_code
 krb5_dbm_db_init(context)
-    krb5_context context;
+    krb5_context 	  context;
 {
-    char *filename = 0;
-    db_context_t	*db_ctx;
-    krb5_error_code	kret;
+    char 		* filename = NULL;
+    db_context_t	* db_ctx;
+    krb5_error_code	  retval;
 
     if (k5dbm_inited(context))
 	return 0;
 
-    /*
-     * Check for presence of our context, if not present, allocate one.
-     */
-    if ((kret = k5dbm_init_context(context)))
-	return(kret);
-    db_ctx = context->db_context;
+    /* Check for presence of our context, if not present, allocate one. */
+    if ((retval = k5dbm_init_context(context)))
+	return(retval);
 
-    filename = gen_dbsuffix (db_ctx->db_name, KDBM_LOCK_EXT(db_ctx));
-    if (!filename)
+    db_ctx = context->db_context;
+    if (!(db_ctx->db_dbm_ctx = (DBM *)KDBM_OPEN(db_ctx, db_ctx->db_name, 
+						O_RDWR, 0600)))
+    	return errno;
+
+    if (!(filename = gen_dbsuffix (db_ctx->db_name, KDBM_LOCK_EXT(db_ctx))))
 	return ENOMEM;
+
     /*
-     * should be open read/write so that write locking can work with
+     * should be opened read/write so that write locking can work with
      * POSIX systems
      */
-    db_ctx->db_lf_file = fopen(filename, "r+");
-    if ((db_ctx->db_lf_file = fopen(filename, "r+")) == NULL) {
-	if (errno == EACCES) {
-	    if ((db_ctx->db_lf_file = fopen(filename, "r")) == 0)
-		goto err_out;
-	} else
+    if ((db_ctx->db_lf_file = open(filename, O_RDWR)) < 0) {
+	if ((db_ctx->db_lf_file = open(filename, O_RDONLY)) < 0) {
+	    retval = errno;
 	    goto err_out;
+	}
     }
-    db_ctx->db_inited++;
+
+    if ((retval = krb5_dbm_db_get_age(context, NULL, &db_ctx->db_lf_time))) 
+	goto err_out;
+
     db_ctx->db_lf_name = filename;
-    errno = 0;
+    db_ctx->db_inited++;
     return 0;
     
 err_out:
-    free(filename);
-    k5dbm_clear_context((db_context_t *) context->db_context);
-    return (errno);
+    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
+    db_ctx->db_dbm_ctx = (DBM *) NULL;
+    k5dbm_clear_context(db_ctx);
+    free (filename);
+    return (retval);
 }
 
 /*
@@ -408,11 +400,11 @@ krb5_error_code
 krb5_dbm_db_fini(context)
     krb5_context context;
 {
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     db_context_t	*db_ctx;
 
     db_ctx = (db_context_t *) context->db_context;
-    retval = 0;
+
     if (k5dbm_inited(context)) {
 	if (db_ctx->db_dbm_ctx) {
 	    /* dbm_close returns void, but it is possible for there to be an
@@ -420,61 +412,38 @@ krb5_dbm_db_fini(context)
 	       on return from dbm_close(), call fsync on the database file
 	       descriptors.  */
 	    KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-	    db_ctx->db_dbm_ctx = (DBM *) NULL;
+	    db_ctx->db_dbm_ctx = NULL;
 	}
 
-	if (fclose(db_ctx->db_lf_file) == EOF)
+	if (close(db_ctx->db_lf_file))
 	    retval = errno;
 	else
 	    retval = 0;
     }
     if (db_ctx) {
 	k5dbm_clear_context(db_ctx);
-	free(context->db_context);
-	context->db_context = (void *) NULL;
+	free (context->db_context);
+	context->db_context = NULL;
     }
     return retval;
 }
 
-
-/*
- * Open the database for update.
- */
 krb5_error_code
 krb5_dbm_db_open_database(context)
     krb5_context context;
 {
-  db_context_t *db_ctx;
-
-  if (!k5dbm_inited(context))
-    return KRB5_KDB_DBNOTINITED;
-
-  db_ctx = (db_context_t *) context->db_context;
-  if (!(db_ctx->db_dbm_ctx = (DBM *)KDBM_OPEN(db_ctx,
-					      db_ctx->db_name, O_RDWR, 0600)))
-    return errno;
-
-  /* It is safe to ignore errors here because all function which write
-     to the database try again to lock.  */
-  (void) krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE);
-
-  return 0;
+    if (!k5dbm_inited(context))
+    	return KRB5_KDB_DBNOTINITED;
+    return 0;
 }
 
 krb5_error_code
 krb5_dbm_db_close_database(context)
     krb5_context context;
 {
-  db_context_t *db_ctx;
-
-  if (!k5dbm_inited(context))
-    return KRB5_KDB_DBNOTINITED;
-
-  db_ctx = (db_context_t *) context->db_context;
-  KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
-  db_ctx->db_dbm_ctx = (DBM *) NULL;
-  (void) krb5_dbm_db_unlock(context);
-  return 0;
+    if (!k5dbm_inited(context))
+    	return KRB5_KDB_DBNOTINITED;
+    return 0;
 }
 
 /*
@@ -495,24 +464,27 @@ krb5_dbm_db_set_name(context, name)
 
     if (k5dbm_inited(context))
 	return KRB5_KDB_DBINITED;
-    /*
-     * Check for presence of our context, if not present, allocate one.
-     */
+
+    /* Check for presence of our context, if not present, allocate one. */
     if ((kret = k5dbm_init_context(context)))
 	return(kret);
-    db_ctx = context->db_context;
+
     if (name == NULL)
 	name = default_db_name;
-    db = KDBM_OPEN(db_ctx, name, O_RDONLY, 0);
-    if (db == NULL)
+
+    db_ctx = context->db_context;
+    if ((db = KDBM_OPEN(db_ctx, name, O_RDONLY, 0)) == NULL)
 	return errno;
-    KDBM_CLOSE(db_ctx, db);
+
     db_ctx->db_name = strdup(name);
+    KDBM_CLOSE(db_ctx, db);
     return 0;
 }
 
 /*
  * Return the last modification time of the database.
+ *
+ * Think about using fstat.
  */
 
 krb5_error_code
@@ -521,20 +493,20 @@ krb5_dbm_db_get_age(context, db_name, age)
     char *db_name;
     time_t *age;
 {
+    db_context_t *db_ctx;
     struct stat st;
     char *okname;
     char *ctxname;
     
     ctxname = default_db_name;
-    if (context && context->db_context &&
-	((db_context_t *) context->db_context)->db_name)
-	ctxname = ((db_context_t *) context->db_context)->db_name;
-    okname = gen_dbsuffix(db_name ? db_name : ctxname,
-			  KDBM_LOCK_EXT(context->db_context));
+    if (context && (db_ctx = context->db_context) && db_ctx->db_name) 
+	ctxname = db_ctx->db_name;
+
+    okname = gen_dbsuffix(db_name ? db_name : ctxname, KDBM_LOCK_EXT(db_ctx));
 
     if (!okname)
 	return ENOMEM;
-    if (stat (okname, &st) < 0)
+    if (fstat (db_ctx->db_lf_file, &st) < 0)
 	*age = -1;
     else
 	*age = st.st_mtime;
@@ -542,10 +514,6 @@ krb5_dbm_db_get_age(context, db_name, age)
     free_dbsuffix (okname);
     return 0;
 }
-
-/* start_update() and end_update() are used to bracket a database replacement
-   operation
- */
 
 /*
  * Remove the semaphore file; indicates that database is currently
@@ -555,164 +523,108 @@ krb5_dbm_db_get_age(context, db_name, age)
  * the server (for example, during slave updates).
  */
 
-static krb5_error_code
-krb5_dbm_db_start_update(context, db_name, age)
-    krb5_context context;
-    char *db_name;
-    time_t *age;
-{
-    char *okname;
-    krb5_error_code retval;
-
-    okname = gen_dbsuffix(db_name, KDBM_LOCK_EXT(context->db_context));
-    if (!okname)
-	return ENOMEM;
-
-    retval = krb5_dbm_db_get_age(context, db_name, age);
-    if (!retval && unlink(okname) < 0) {
-	if (errno != ENOENT)
-	    retval = errno;
-    }
-    free_dbsuffix (okname);
-    return retval;
-}
+static char * update_string = "write in progress\n";
 
 static krb5_error_code
-krb5_dbm_db_end_update(context, db_name, age)
+krb5_dbm_db_start_update(context)
     krb5_context context;
-    char *db_name;
-    time_t age;
 {
-    int fd;
-    krb5_error_code retval = 0;
-    char *new_okname;
-    char *okname;
-    char okpound[BUFSIZ];
-
-    /* strategy:
-       create a new "ok" file, set its modify time to "age",
-       and move it on top of the old "ok" file.
-     */
-    sprintf(okpound, "%s#", KDBM_LOCK_EXT(context->db_context));
-    new_okname = gen_dbsuffix(db_name, okpound);
-    if (!new_okname)
-	return ENOMEM;
-    okname = gen_dbsuffix(db_name, KDBM_LOCK_EXT(context->db_context));
-    if (!okname) {
-	free_dbsuffix(new_okname);
-	return ENOMEM;
-    }    
-
-    fd = open (new_okname, O_CREAT|O_RDWR|O_TRUNC, 0600);
-    if (fd < 0)
-	retval = errno;
-    else {
-	struct stat st;
-	struct utimbuf times;
-	/* only set the time if the new file is "newer" than
-	   "age" */
-	if ((fstat (fd, &st) == 0) && (st.st_mtime <= age)) {
-	    times.actime = st.st_atime;
-	    times.modtime = age;
-	    /* set the mod timetimes.. */
-	    utime(new_okname, &times);
-#ifndef NOFSYNC
-	    fsync(fd);
-#endif
-	}
-	close(fd);
-	if (rename (new_okname, okname) < 0)
-	    retval = errno;
-    }
-
-    free_dbsuffix (new_okname);
-    free_dbsuffix (okname);
-
-    return retval;
-}
-
-/* Database readers call start_read(), do the reading, and then call
-   end_read() with the value from start_read().
-
-   If the value of krb5_dbm_db_get_age(context, NULL, age) changes while 
-   this is going on, then the reader has encountered a modified database 
-   and should retry.
-*/
-
-static krb5_error_code
-krb5_dbm_db_start_read(context, age)
-    krb5_context context;
-    time_t *age;
-{
-    return (krb5_dbm_db_get_age(context, NULL, age));
-}
-
-static krb5_error_code
-krb5_dbm_db_end_read(context, age)
-    krb5_context context;
-    time_t age;
-{
-    time_t age2;
-    krb5_error_code retval;
-
-    if ((retval = krb5_dbm_db_get_age(context, NULL, &age2)))
-	return retval;
-    if (age2 != age || age == -1) {
-	return KRB5_KDB_DB_CHANGED;
-    }
     return 0;
+}
+
+static krb5_error_code
+krb5_dbm_db_end_update(context, db_name)
+    krb5_context context;
+    char * db_name;
+{
+    db_context_t *db_ctx = context->db_context;
+    char * okname;
+    struct stat st;
+
+    if ((okname = gen_dbsuffix(db_name ? db_name : default_db_name, 
+			       KDBM_LOCK_EXT(db_ctx))) == NULL)
+	return(ENOMEM);
+
+    if (utime(okname, NULL) == 0) {
+        if (fstat(db_ctx->db_lf_file, &st) == 0) {
+	    db_ctx->db_lf_time = st.st_mtime;
+	    errno = 0;
+	}
+    }
+    free_dbsuffix(okname);
+    return errno;
 }
 
 krb5_error_code
 krb5_dbm_db_lock(context, mode)
-    krb5_context context;
-    int mode;
+    krb5_context 	  context;
+    int 	 	  mode;
 {
-    int krb5_lock_mode;
-    int error;
-    db_context_t	*db_ctx;
+    int 		  krb5_lock_mode;
+    krb5_error_code	  retval;
+    struct stat 	  st;
+    db_context_t	* db_ctx;
+    DBM    		* db;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
     if (db_ctx->db_locks_held && (db_ctx->db_lock_mode >= mode)) {
-	    /* No need to upgrade lock, just return */
-	    db_ctx->db_locks_held++;
-	    return(0);
+	/* No need to upgrade lock, just return */
+	db_ctx->db_locks_held++;
+	return(0);
     }
 
-    switch (mode) {
-    case KRB5_DBM_EXCLUSIVE:
-	krb5_lock_mode = KRB5_LOCKMODE_EXCLUSIVE;
-	break;
-    case KRB5_DBM_SHARED:
-	krb5_lock_mode = KRB5_LOCKMODE_SHARED;
-	break;
-    default:
+    if ((mode != KRB5_LOCKMODE_SHARED) && (mode != KRB5_LOCKMODE_EXCLUSIVE)) 
 	return KRB5_KDB_BADLOCKMODE;
-    }
+
     if (db_ctx->db_nb_locks)
-	krb5_lock_mode |= KRB5_LOCKMODE_DONTBLOCK;
+	krb5_lock_mode = mode | KRB5_LOCKMODE_DONTBLOCK;
+    else
+	krb5_lock_mode = mode;
 
-    error = krb5_lock_file(context,
-			   db_ctx->db_lf_file,
-			   db_ctx->db_lf_name,
-			   krb5_lock_mode);
+    switch (retval = krb5_lock_file(context,db_ctx->db_lf_file,krb5_lock_mode)){
+    case EBADF:
+	if (mode == KRB5_LOCKMODE_EXCLUSIVE)
+	    return KRB5_KDB_CANTLOCK_DB;
+    default:
+	return retval;
+    case 0:
+	break;
+    }
 
-    if (error == EBADF && mode == KRB5_DBM_EXCLUSIVE)
-	return KRB5_KDB_CANTLOCK_DB;
-    if (error)
-	return error;
+    if (fstat (db_ctx->db_lf_file, &st) < 0) {
+	retval = errno;
+	goto lock_error;
+    }
+
+    if (st.st_mtime != db_ctx->db_lf_time) {
+  	KDBM_CLOSE(db_ctx, db_ctx->db_dbm_ctx);
+	if (db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600)) {
+    	    db_ctx->db_lf_time = st.st_mtime;
+	    db_ctx->db_dbm_ctx = db;
+	} else {
+	    retval = errno;
+	    goto lock_error;
+	}
+    }
+
+    db_ctx->db_lock_mode = mode;
     db_ctx->db_locks_held++;
     return 0;
+
+lock_error:;
+    (void) krb5_dbm_db_unlock(context);
+    return retval;
 }
 
 krb5_error_code
 krb5_dbm_db_unlock(context)
     krb5_context context;
 {
-    db_context_t	*db_ctx;
+    db_context_t	* db_ctx;
+    krb5_error_code	  retval;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
@@ -722,10 +634,10 @@ krb5_dbm_db_unlock(context)
 	return KRB5_KDB_NOTLOCKED;
 
     if (--(db_ctx->db_locks_held) == 0) {
-      return krb5_lock_file(context,
-			    db_ctx->db_lf_file,
-			    db_ctx->db_lf_name,
-			    KRB5_LOCKMODE_UNLOCK);
+    	retval = krb5_lock_file(context, db_ctx->db_lf_file,
+				KRB5_LOCKMODE_UNLOCK);
+	db_ctx->db_lock_mode = 0;
+	return(retval);
     }
     return 0;
 }
@@ -733,7 +645,6 @@ krb5_dbm_db_unlock(context)
 /*
  * Create the database, assuming it's not there.
  */
-
 krb5_error_code
 krb5_dbm_db_create(context, db_name)
     krb5_context context;
@@ -748,7 +659,6 @@ krb5_dbm_db_create(context, db_name)
     char *dirname;
     char *pagname;
 #endif
-
 
     if ((retval = k5dbm_init_context(context)))
 	return(retval);
@@ -947,7 +857,6 @@ krb5_dbm_db_rename(context, from, to)
     char *frompag = 0;
     char *topag = 0;
     char *fromok = 0;
-    time_t trans;
     krb5_error_code retval;
     krb5_boolean tmpcontext;
 
@@ -980,7 +889,10 @@ krb5_dbm_db_rename(context, from, to)
 	goto errout;
     }
 
-    if ((retval = krb5_dbm_db_start_update(context, to, &trans)))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
+	goto errout;
+
+    if ((retval = krb5_dbm_db_start_update(context)))
 	goto errout;
     
     if (((!fromdir && !todir) ||
@@ -1004,14 +916,16 @@ errout:
     if (fromdir)
 	free_dbsuffix (fromdir);
 
-    if (retval == 0)
-	return krb5_dbm_db_end_update(context, to, trans);
-
-    if (tmpcontext) {
-	k5dbm_clear_context((db_context_t *) context->db_context);
-	free(context->db_context);
-	context->db_context = (void *) NULL;
+    if (retval == 0) {
+	retval = krb5_dbm_db_end_update(context, NULL);
+    } else {
+        if (tmpcontext) {
+	    k5dbm_clear_context((db_context_t *) context->db_context);
+	    free (context->db_context);
+	    context->db_context = NULL;
+        }
     }
+    (void) krb5_dbm_db_unlock(context);		/* unlock database */
     return retval;
 }
 
@@ -1029,72 +943,43 @@ krb5_db_entry *entries;		/* filled in */
 int *nentries;				/* how much room/how many found */
 krb5_boolean *more;			/* are there more? */
 {
-    int     found = 0;
-    datum   key, contents;
-    time_t	transaction;
-    int try;
-    DBM    *db;
     krb5_error_code retval;
+    datum   key, contents;
     db_context_t *db_ctx;
+    int try;
+
+    *more = FALSE;
+    *nentries = 0;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
     for (try = 0; try < KRB5_DBM_MAX_RETRY; try++) {
-	if ((retval = krb5_dbm_db_start_read(context, &transaction)))
-	    return(retval);
-
-	if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED)))
-	    return(retval);
-
-	if (db_ctx->db_dbm_ctx)
-	    db = db_ctx->db_dbm_ctx;
-	else {
-	    db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDONLY, 0600);
-	    if (db == NULL) {
-		retval = errno;
-		(void) krb5_dbm_db_unlock(context);
-		return retval;
-	    }
-	}
-
-	*more = FALSE;
-
-	/* XXX deal with wildcard lookups */
-	if ((retval = krb5_encode_princ_dbmkey(context, &key, searchfor)))
-	    goto cleanup;
-
-	contents = KDBM_FETCH(db_ctx, db, key);
-	krb5_free_princ_dbmkey(context, &key);
-
-	if (contents.dptr == NULL)
-	    found = 0;
-	else if ((retval = krb5_decode_princ_contents(context,
-						      &contents,entries)))
-	    goto cleanup;
-	else found = 1;
-
-	if (db_ctx->db_dbm_ctx == 0)
-	    KDBM_CLOSE(db_ctx, db);
-	(void) krb5_dbm_db_unlock(context);	/* unlock read lock */
-	if (krb5_dbm_db_end_read(context, transaction) == 0)
-	    break;
-	found = -1;
-	if (!db_ctx->db_nb_locks)
+	if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_SHARED))) {
+	    if (db_ctx->db_nb_locks) 
+	    	return(retval);
 	    sleep(1);
+	    continue;
+	}
+	break;
     }
-    if (found == -1) {
-	*nentries = 0;
+    if (try == KRB5_DBM_MAX_RETRY) 
 	return KRB5_KDB_DB_INUSE;
-    }
-    *nentries = found;
-    return(0);
 
- cleanup:
-    if (db_ctx->db_dbm_ctx == 0)
-	KDBM_CLOSE(db_ctx, db);
-    (void) krb5_dbm_db_unlock(context);	/* unlock read lock */
+    /* XXX deal with wildcard lookups */
+    if ((retval = krb5_encode_princ_dbmkey(context, &key, searchfor)))
+        goto cleanup;
+
+    contents = KDBM_FETCH(db_ctx, db_ctx->db_dbm_ctx, key);
+    krb5_free_princ_dbmkey(context, &key);
+
+    if (contents.dptr) 
+    	if (!(retval = krb5_decode_princ_contents(context, &contents,entries)))
+	    *nentries = 1;
+
+cleanup:
+    (void) krb5_dbm_db_unlock(context);		/* unlock read lock */
     return retval;
 }
 
@@ -1127,41 +1012,29 @@ krb5_error_code
 krb5_dbm_db_put_principal(context, entries, nentries)
     krb5_context context;
     krb5_db_entry *entries;
-    register int *nentries;			/* number of entry structs to
-					 * update */
-
+    register int *nentries;		/* number of entry structs to update */
 {
-    register int i;
+    int i, n;
     datum   key, contents;
-    DBM    *db;
     krb5_error_code retval;
     db_context_t *db_ctx;
 
-#define errout(code) { *nentries = 0; return code; }
-
+    n = *nentries;
+    *nentries = 0;
     if (!k5dbm_inited(context))
-	errout(KRB5_KDB_DBNOTINITED);
+	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
-    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE)))
-	errout(retval);
+    if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
+	return retval;
 
-    if (db_ctx->db_dbm_ctx)
-	db = db_ctx->db_dbm_ctx;
-    else {
-	db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600);
-	if (db == NULL) {
-	    retval = errno;
-	    (void) krb5_dbm_db_unlock(context);
-	    *nentries = 0;
-	    return retval;
-	}
+    if ((retval = krb5_dbm_db_start_update(context))) {
+        (void)krb5_dbm_db_unlock(context);		
+	return retval;
     }
 
-#undef errout
-
     /* for each one, stuff temps, and do replace/append */
-    for (i = 0; i < *nentries; i++) {
+    for (i = 0; i < n; i++) {
 	if ((retval = krb5_encode_princ_contents(context, &contents,
 						 entries)))
 	    break;
@@ -1171,7 +1044,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	    krb5_free_princ_contents(context, &contents);
 	    break;
 	}
-	if (KDBM_STORE(db_ctx, db, key, contents, DBM_REPLACE))
+	if (KDBM_STORE(db_ctx, db_ctx->db_dbm_ctx, key, contents, DBM_REPLACE))
 	    retval = errno;
 	else
 	    retval = 0;
@@ -1182,11 +1055,10 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	entries++;			/* bump to next struct */
     }
 
-    if (db_ctx->db_dbm_ctx == 0)
-	KDBM_CLOSE(db_ctx, db);
-    (void) krb5_dbm_db_unlock(context);		/* unlock database */
+    (void)krb5_dbm_db_end_update(context, NULL);
+    (void)krb5_dbm_db_unlock(context);		/* unlock database */
     *nentries = i;
-    return (retval);
+    return(retval);
 }
 
 /*
@@ -1211,23 +1083,18 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
-    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE)))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
 	return(retval);
 
-    if (db_ctx->db_dbm_ctx)
-	db = db_ctx->db_dbm_ctx;
-    else {
-	db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDWR, 0600);
-	if (db == NULL) {
-	    retval = errno;
-	    (void) krb5_dbm_db_unlock(context);
-	    return retval;
-	}
+    if ((retval = krb5_dbm_db_start_update(context))) {
+        (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
+	return(retval);
     }
 
     if ((retval = krb5_encode_princ_dbmkey(context, &key, searchfor)))
 	goto cleanup;
 
+    db = db_ctx->db_dbm_ctx;
     contents = KDBM_FETCH(db_ctx, db, key);
     if (contents.dptr == NULL) {
 	retval = KRB5_KDB_NOENTRY;
@@ -1264,9 +1131,8 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	krb5_free_princ_dbmkey(context, &key);
     }
 
- cleanup:
-    if (db_ctx->db_dbm_ctx == 0)
-	KDBM_CLOSE(db_ctx, db);
+cleanup:
+    (void)krb5_dbm_db_end_update(context, NULL);
     (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
     return retval;
 }
@@ -1287,20 +1153,10 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
-    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED)))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_LOCKMODE_SHARED)))
 	return retval;
 
-    if (db_ctx->db_dbm_ctx)
-	db = db_ctx->db_dbm_ctx;
-    else {
-	db = KDBM_OPEN(db_ctx, db_ctx->db_name, O_RDONLY, 0600);
-	if (db == NULL) {
-	    retval = errno;
-	    (void) krb5_dbm_db_unlock(context);
-	    return retval;
-	}
-    }
-
+    db = db_ctx->db_dbm_ctx;
     for (key = KDBM_FIRSTKEY (db_ctx, db);
 	 key.dptr != NULL; key = KDBM_NEXTKEY(db_ctx, db)) {
 	contents = KDBM_FETCH (db_ctx, db, key);
@@ -1312,8 +1168,6 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	if (retval)
 	    break;
     }
-    if (db_ctx->db_dbm_ctx == 0)
-	KDBM_CLOSE(db_ctx, db);
     (void) krb5_dbm_db_unlock(context);
     return retval;
 }
