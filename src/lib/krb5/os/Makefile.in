@@ -13,6 +13,7 @@ OBJS= \
 	get_krbhst.o	\
 	gen_port.o	\
 	gen_rname.o	\
+	gmt_mktime.o	\
 	hst_realm.o	\
 	krbfileio.o	\
 	ktdefname.o	\
@@ -44,6 +45,7 @@ SRCS= \
 	$(srcdir)/get_krbhst.c	\
 	$(srcdir)/gen_port.c	\
 	$(srcdir)/gen_rname.c	\
+	$(srcdir)/gmt_mktime.c	\
 	$(srcdir)/hst_realm.c	\
 	$(srcdir)/krbfileio.c	\
 	$(srcdir)/ktdefname.c	\
