@@ -6,7 +6,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <mit-copyright.h>
