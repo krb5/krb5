@@ -28,23 +28,20 @@ set kdc_supported_enctypes "des-cbc-crc:normal"
 # dependency of various bugs on configuration file settings,
 # particularly with regards to encryption types.
 
-# The des.md5-tgt pass will fail if enctype similarity is inconsisent;
-# between 1.0.x and 1.1, the decrypt functions became more strict
-# about matching enctypes, while the KDB retrieval functions didn't
-# coerce the enctype to match what was requested.  It works by setting
-# SUPPORT_DESMD5 on the TGT principal, forcing an enctype of
-# des-cbc-md5 on the TGT key.  Since the database only contains a
-# des-cbc-crc key, the decrypt will fail if enctypes are not coerced.
-
 # The des.no-kdc-md5 pass will fail if the KDC does not constrain
 # session key enctypes to those in its permitted_enctypes list.  It
 # works by assuming enctype similarity, thus allowing the client to
 # request a des-cbc-md4 session key.  Since only des-cbc-crc is in the
 # KDC's permitted_enctypes list, the TGT will be unusable.
 
+# The des.des3-tgt.no-kdc-des3 pass will fail if the KDC doesn't
+# constrain ticket key enctypes to those in permitted_enctypes.  It
+# does this by not putting des3 in the permitted_enctypes, while
+# creating a TGT princpal that has a des3 key as well as a des key.
+
 # XXX -- master_key_type is fragile w.r.t. permitted_enctypes; it is
 # possible to configure things such that you have a master_key_type
-# that is not permitted, and the error message is cryptic.
+# that is not permitted, and the error message used to be cryptic.
 
 set passes {
     {
@@ -80,16 +77,6 @@ set passes {
 	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
     }
     {
-	des.md5-tgt
-	des3_krbtgt=0
-	tgt_support_desmd5=1
-	supported_enctypes=des-cbc-crc:normal
-	kdc_supported_enctypes=des-cbc-crc:normal
-	{permitted_enctypes(kdc)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{permitted_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{dummy=[verbose -log "DES TGT, SUPPORTS_DESMD5"]}
-    }
-    {
 	des.no-kdc-md5
 	des3_krbtgt=0
 	tgt_support_desmd5=0
@@ -101,19 +88,6 @@ set passes {
 	{master_key_type=des-cbc-crc}
 	{dummy=[verbose -log \
 		"DES TGT, KDC permitting only des-cbc-crc"]}
-    }
-    {
-	des.md5-tgt.no-kdc-md5
-	des3_krbtgt=0
-	tgt_support_desmd5=1
-	{permitted_enctypes(kdc)=des-cbc-crc}
-	{default_tgs_enctypes(client)=des-cbc-crc}
-	{default_tkt_enctypes(client)=des-cbc-crc}
-	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des-cbc-crc:normal}
-	{master_key_type=des-cbc-crc}
-	{dummy=[verbose -log \
-		"DES TGT, SUPPORTS_DESMD5, KDC permitting only des-cbc-crc"]}
     }
     {
 	des.des3-tgt.no-kdc-des3
@@ -129,6 +103,22 @@ set passes {
     }
 }
 
+# des.md5-tgt is set as unused, since it won't trigger the error case
+# if SUPPORT_DESMD5 isn't honored.
+
+# The des.md5-tgt pass will fail if enctype similarity is inconsisent;
+# between 1.0.x and 1.1, the decrypt functions became more strict
+# about matching enctypes, while the KDB retrieval functions didn't
+# coerce the enctype to match what was requested.  It works by setting
+# SUPPORT_DESMD5 on the TGT principal, forcing an enctype of
+# des-cbc-md5 on the TGT key.  Since the database only contains a
+# des-cbc-crc key, the decrypt will fail if enctypes are not coerced.
+
+# des.no-kdc-md5.client-md4-skey is retained in unsed_passes, even
+# though des.no-kdc-md5 is roughly equivalent, since the associated
+# comment needs additional investigation at some point re the kadmin
+# client.
+
 # The des.no-kdc-md5.client-md4-skey will fail on TGS requests due to
 # the KDC issuing session keys that it won't accept.  It will also
 # fail for a kadmin client, but for different reasons, since the kadm5
@@ -138,6 +128,29 @@ set passes {
 # in the config file!
 
 set unused_passes {
+    {
+	des.md5-tgt
+	des3_krbtgt=0
+	tgt_support_desmd5=1
+	supported_enctypes=des-cbc-crc:normal
+	kdc_supported_enctypes=des-cbc-crc:normal
+	{permitted_enctypes(kdc)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
+	{permitted_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
+	{dummy=[verbose -log "DES TGT, SUPPORTS_DESMD5"]}
+    }
+    {
+	des.md5-tgt.no-kdc-md5
+	des3_krbtgt=0
+	tgt_support_desmd5=1
+	{permitted_enctypes(kdc)=des-cbc-crc}
+	{default_tgs_enctypes(client)=des-cbc-crc}
+	{default_tkt_enctypes(client)=des-cbc-crc}
+	{supported_enctypes=des-cbc-crc:normal}
+	{kdc_supported_enctypes=des-cbc-crc:normal}
+	{master_key_type=des-cbc-crc}
+	{dummy=[verbose -log \
+		"DES TGT, SUPPORTS_DESMD5, KDC permitting only des-cbc-crc"]}
+    }
     {
 	des.no-kdc-md5.client-md4-skey
 	des3_krbtgt=0

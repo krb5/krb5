@@ -1,3 +1,9 @@
+2001-10-27  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Mark as unused the test passes that won't
+	accomplish anything due to disabling of SUPPORT_DESMD5 in the
+	code.
+
 2001-10-24  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Add support for setting SUPPORT_DESMD5 flag on the
