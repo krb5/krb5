@@ -47,7 +47,6 @@ krb5_encrypt_block *eblock;
 const krb5_encrypted_keyblock *in;
 krb5_keyblock *out;
 {
-    int length;
     krb5_error_code retval;
 
     /* the encrypted version is stored as the unencrypted key length
