@@ -466,7 +466,7 @@ KRB5_DLLIMP int KRB5_CALLCONV dest_tkt
 	PROTOTYPE((void));
 /* err_txt.c */
 KRB5_DLLIMP const char FAR * KRB5_CALLCONV krb_get_err_text
-	PROTOTYPE((int errno));
+	PROTOTYPE((int errnum));
 /* g_ad_tkt.c */
 int get_ad_tkt
 	PROTOTYPE((char *service, char *sinst, char *realm, int lifetime));

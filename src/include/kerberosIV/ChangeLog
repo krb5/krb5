@@ -1,3 +1,8 @@
+2000-05-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb.h (krb_get_err_text): Don't use "errno" as an argument
+	name.
+
 Mon Mar 15 15:58:34 1999  Tom Yu  <tlyu@mit.edu>
 
 	* des.h: Fix GSS_DLLIMP.
