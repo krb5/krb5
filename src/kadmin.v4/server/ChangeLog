@@ -1,3 +1,10 @@
+Sat May 20 22:33:58 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadm_stream.c: Based on presence of stdlib.h, include or declare
+		malloc. 
+
+	* configure.in: Check for stdlib.h
+
 Sun May  7 13:49:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* admin_server.c: Avoid warning of redeclaring POSIX_SIGNALS if

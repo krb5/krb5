@@ -12,6 +12,13 @@
 
 #include <mit-copyright.h>
 #include <string.h>
+
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 /*
   kadm_stream.c
   this holds the stream support routines for the kerberos administration server

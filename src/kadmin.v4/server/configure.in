@@ -7,6 +7,9 @@ WITH_NETLIB
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
 AC_HAVE_HEADERS(unistd.h)
+dnl Could check for full stdc environment, but will only test
+dnl for stdlib.h
+AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H))
 CHECK_WAIT_TYPE
 CHECK_FCNTL
 CHECK_SIGNALS
