@@ -1125,6 +1125,114 @@ kadmin_extract_v4(argc, argv)
 }
 
 /*
+ * kadmin_extract_snk4()	- Extract snk4 entry.
+ */
+void
+kadmin_extract_snk4(argc, argv)
+    int 	argc;
+    char	*argv[];
+{
+  int			i;
+  krb5_error_code	kret;
+  krb5_int32		proto_stat;
+  krb5_int32		ncomps;
+  krb5_data		*complist;
+  char		*instance;
+  krb5_boolean	force, doit;
+  krb5_keytab_entry	keytab_entry;
+
+  requestname = argv[0];
+  force = 0;
+  if (argc < 2) {
+    com_err(argv[0], 0, "usage is %s principal", argv[0]);
+    return;
+
+  }
+  instance = "SNK4";
+  argc -= 1;
+  argv += 1;
+
+  memset((char *) &keytab_entry, 0, sizeof(krb5_keytab_entry));
+
+  for (i=0; i<argc; i++) {
+    if (!(kret = net_do_proto(KRB5_ADM_EXT_KEY_CMD,
+			      instance,
+			      argv[i],
+			      0,
+			      (krb5_data *) NULL,
+			      &proto_stat,
+			      &ncomps,
+			      &complist,
+			      0))) {
+      if (proto_stat == KRB5_ADM_SUCCESS) {
+	if (!(kret = krb5_adm_proto_to_ktent(kcontext,
+					     ncomps,
+					     complist,
+					     &keytab_entry))) {
+	  if (keytab_entry.key.enctype != 1) {
+	    com_err(requestname, 0, xst_nodeskey_fmt, argv[i]);
+	    break;
+	  }
+	  if (keytab_entry.key.length != 8) {
+	    com_err(requestname, 0, "%s not an 8 byte key", argv[i]);
+	    break;
+	  }
+	  printf("device key:\n");
+	  { 
+	    int i;
+	    for (i = 0; i<8; i++) {
+	      printf("%03o ", keytab_entry.key.contents[i]);
+	    }
+	    printf("\n");
+	  }
+	  /* now compute rawdes(key,0) and print the first 3 bytes */
+	  {
+	    krb5_encrypt_block eblock;
+	    char zblock[8];
+	    unsigned char outputblock[8];
+	    memset(zblock,0,8);
+
+	    krb5_use_enctype(kcontext, &eblock, ENCTYPE_DES_CBC_RAW);
+	    keytab_entry.key.enctype = ENCTYPE_DES_CBC_RAW;
+	    kret = krb5_process_key(kcontext, &eblock,
+				      &keytab_entry.key);
+	    if (kret) {
+	      com_err(requestname, 0, "snk4 process key failed for %s", 
+		      argv[i]);
+	      break;
+	    }
+	    kret = krb5_encrypt(kcontext, zblock, outputblock, 8,
+				  &eblock, zblock /* ivec */);
+	    if (kret) {
+	      com_err(requestname, 0, "snk4 checksum generation %s", 
+		      argv[i]);
+	      break;
+	    }
+	    printf("Checksum on screen: %02x%02x%02x\n",
+		   outputblock[0], outputblock[1], outputblock[2]);
+
+	  }
+
+
+	  com_err(requestname, 0, "done extracting entry %s", 
+		  argv[i]);
+	  if (keytab_entry.key.contents) {
+	    memset((char *) keytab_entry.key.contents, 0,
+		   (size_t) keytab_entry.key.length);
+	    krb5_xfree(keytab_entry.key.contents);
+	  }
+	}
+	else {
+	  com_err(requestname, kret, xst_proto_fmt);
+	}
+	memset((char *) &keytab_entry, 0, sizeof(krb5_keytab_entry));
+	krb5_free_adm_data(kcontext, ncomps, complist);
+      }
+    }
+  }
+}
+
+/*
  * kadmin_modify()	- Modify principal.
  */
 void

@@ -55,6 +55,9 @@ request kadmin_extract, "Extract service key table entry/entries.",
 request kadmin_extract_v4, "Extract service key table entry/entries in V4 format.",
 	extract_v4_srvtab, xst4;
 
+request kadmin_extract_snk4, "Extract programming codes for SNK4 device.",
+	extract_snk4, xsnk4;
+
 request kadmin_modify, "Modify database entry.",
 	modify_entry, modent;
 
