@@ -1,3 +1,12 @@
+
+Thu Jul 27 15:15:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --enable-{des-cbc-md5,des-cbc-crc,raw-des-cbc,
+		des-cbc-cksum,crc32,rsa-md4,rsa-md5} which set the appropriate
+		preprocessor flags which used to be set in k5-config.h.
+	* cryptoconf.c - Set the KEYTYPE_DES entry to the DES-CBC-MD5 entry
+		if enabled, then the DES-CBC-CRC entry, if enabled, then to
+		null.
+
 Fri Jun 23 12:16:52 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: krb5_cv_staticlibs_enabled, not
