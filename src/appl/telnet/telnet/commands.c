@@ -2345,9 +2345,6 @@ tn(argc, argv)
 		return 0;
 	    }
 	} else {
-#if	!defined(htons)
-	    u_short htons P((unsigned short));
-#endif	/* !defined(htons) */
 	    sin.sin_port = htons(sin.sin_port);
 	}
     } else {
