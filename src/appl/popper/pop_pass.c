@@ -18,6 +18,7 @@ static char SccsId[] = "@(#)pop_pass.c  1.7 7/13/90";
 #include <sys/types.h>
 #include <strings.h>
 #include <pwd.h>
+#include <netinet/in.h>
 #include "popper.h"
 
 #ifdef KERBEROS
@@ -85,20 +86,6 @@ POP     *   p;
 	      kdata.pname, kdata.pinst));
     }
 
-    /*
-     * be careful! we are assuming that the instance and realm have been
-     * checked already! I used to simply copy the pname into p->user
-     * but this causes too much confusion and assumes p->user will never
-     * change. This makes me feel more comfortable.
-     */
-    if(strcmp(p->user, kdata.pname))
-      {
-	pop_log(p, POP_WARNING, "%s: auth failed: %s.%s@%s vs %s", 
-		 p->client, kdata.pname, kdata.pinst, kdata.prealm, p->user);
-        return(pop_msg(p,POP_FAILURE,
-	      "Wrong username supplied (%s vs. %s).\n", kdata.pname, 
-		       p->user));
-      }
 #endif /* KRB4 */
 #ifdef KRB5
     if (retval = krb5_get_default_realm(&lrealm)) {
@@ -172,9 +159,11 @@ POP     *   p;
     /*  Make a temporary copy of the user's maildrop */
     if (pop_dropcopy(p) != POP_SUCCESS) return (POP_FAILURE);
 
+#ifndef KERBEROS_PASSWD_HACK
     /*  Set the group and user id */
     (void)setgid(pw->pw_gid);
     (void)setuid(pw->pw_uid);
+#endif /* KERBEROS_PASSWD_HACK */
 
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"uid = %d, gid = %d",getuid(),getgid());
@@ -238,8 +227,6 @@ POP     *   p;
     else {
       if(verify_passwd_hack_hack_hack(p) != POP_SUCCESS)
 	return(POP_FAILURE);
-
-      pop_log(p, POP_WARNING, "hack successful");
     }
 
     /*  Build the name of the user's maildrop */
@@ -248,9 +235,12 @@ POP     *   p;
     /*  Make a temporary copy of the user's maildrop */
     if (pop_dropcopy(p) != POP_SUCCESS) return (POP_FAILURE);
 
+    
+#ifndef KERBEROS_PASSWD_HACK
     /*  Set the group and user id */
     (void)setgid(pw->pw_gid);
     (void)setuid(pw->pw_uid);
+#endif /* KERBEROS_PASSWD_HACK */
 
 #ifdef DEBUG
     if(p->debug)pop_log(p,POP_DEBUG,"uid = %d, gid = %d",getuid(),getgid());
@@ -261,7 +251,7 @@ POP     *   p;
       pop_log(p, POP_PRIORITY, "dropinfo failure");
       return(POP_FAILURE);
     }
-    pop_log(p, POP_WARNING, "DRP successful");
+
     /*  Initialize the last-message-accessed number */
     p->last_msg = 0;
 
@@ -291,9 +281,11 @@ int verify_passwd_hack_hack_hack(p)
     AUTH_DAT kdata;
     char savehost[MAXHOSTNAMELEN];
     char tkt_file_name[MAXPATHLEN];
-    unsigned long faddr;
-    struct hostent *hp;
+    struct sockaddr_in sin;
+    int len;
+
     extern int errno;
+    extern int sp;
 
     /* Be sure ticket file is correct and exists */
 
@@ -303,8 +295,10 @@ int verify_passwd_hack_hack_hack(p)
 
     if ((fd = open(tkt_file_name, O_RDWR|O_CREAT, 0600)) == -1) {
       close(fd);
-      return(pop_msg(p,POP_FAILURE, "Could not create ticket file, \"%s\": %s",
-		     tkt_file_name, sys_errlist[errno]));
+	pop_log(p, POP_ERROR, "%s: could not create ticket file, \"%s\": %s",
+		p->user, tkt_file_name, sys_errlist[errno]);
+	return(pop_msg(p,POP_FAILURE,"POP server error: %s while creating %s.",
+		       sys_errlist[errno], tkt_file_name));
     }
     close(fd);
 
@@ -314,51 +308,59 @@ int verify_passwd_hack_hack_hack(p)
      * on eagle. We can cut over to real Kerberos POP clients at any point. 
      */
 
-    if ((status = krb_get_lrealm(lrealm,1)) == KFAILURE) 
-        return(pop_msg(p,POP_FAILURE, "Kerberos error:  \"%s\".", 
+    if ((status = krb_get_lrealm(lrealm,1)) == KFAILURE) {
+        pop_log(p,POP_ERROR, "%s (%s):  error getting local realm:  \"%s\".", 
+		p->user, p->client, krb_err_txt[status]);
+	return(pop_msg(p,POP_FAILURE, "POP server error:  \"%s\".", 
 		       krb_err_txt[status]));
+    }
+    
     status = krb_get_pw_in_tkt(p->user, "", lrealm, "krbtgt", lrealm,
 				2 /* 10 minute lifetime */, p->pop_parm[1]);
-
-    if (status != KSUCCESS) 
+    if (status != KSUCCESS) {
+        pop_log(p,POP_WARNING, "%s (%s): error getting tgt: %s", 
+		p->user, p->client, krb_err_txt[status]);
       return(pop_msg(p,POP_FAILURE,
-		     "Kerberos error:  \"%s\".", krb_err_txt[status]));
+		       "Kerberos authentication error:  \"%s\".", 
+		       krb_err_txt[status]));
+    }
     
     /*
      * Now use the ticket for something useful, to make sure
      * it is valid.
      */
 
-    if ((hp = gethostbyname(p->myhost)) == (struct hostent *) NULL) {
-          dest_tkt();
-          return(pop_msg(p, POP_FAILURE,
-                         "Unable to get address of \"%s\": %s",
-                         p->myhost, sys_errlist[errno]));
-    }
-    bcopy((char *)hp->h_addr, (char *) &faddr, sizeof(faddr));
-
     (void) strncpy(savehost, krb_get_phost(p->myhost), sizeof(savehost));
     savehost[sizeof(savehost)-1] = 0;
 
     status = krb_mk_req(&ticket, "pop", savehost, lrealm, 0);
     if (status == KDC_PR_UNKNOWN) {
+          pop_log(p, POP_ERROR, "%s (%s): %s", p->user, p->client, 
+		  krb_err_txt[status]);
           return(pop_msg(p,POP_FAILURE,
-		     "POP Server configuration error:  \"%s\".", 
+		     "POP server configuration error:  \"%s\".", 
 		     krb_err_txt[status]));
     } 
       
     if (status != KSUCCESS) {
 	  dest_tkt();
+	  pop_log(p, POP_ERROR, "%s (%s): krb_mk_req error: %s", p->user, 
+		  p->client, krb_err_txt[status]);
 	  return(pop_msg(p,POP_FAILURE,
-			 "Kerberos error (getting mk_req): \"%s\".",
+	        "Kerberos authentication error (while getting ticket) \"%s\".",
 			 krb_err_txt[status]));
     }  
 
-    if ((status = krb_rd_req(&ticket, "pop", savehost, faddr, &kdata, ""))
+    len = sizeof(sin);
+    getsockname(sp, &sin, &len); 
+    if ((status = krb_rd_req(&ticket, "pop", savehost, sin.sin_addr.s_addr, 
+			     &kdata, ""))
 	!= KSUCCESS) {
          dest_tkt();
+	 pop_log(p, POP_WARNING, "%s (%s): krb_rd_req error: %s", p->user, 
+		 p->client, krb_err_txt[status]);
 	 return(pop_msg(p,POP_FAILURE,
-			"Could not use ticket.  Bad password? \"%s\".", 
+			"Kerberos authentication error:  \"%s\".", 
 			krb_err_txt[status]));
     }
     dest_tkt();
