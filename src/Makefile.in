@@ -198,7 +198,9 @@ FILES= ./* \
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
 MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
-	mac/gss-sample/*
+	mac/gss-sample/* config/* include/* include/krb5/* \
+	include/krb5/asn.1/* include/krb5/stock/* include/sys/* \
+	./patchlevel.h
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
@@ -219,9 +221,11 @@ winfile.list:
 	echo $(FILES) $(WINFILES) | tr ' ' \\012 | \
 		sed -f config/winexclude.sed > winfile.list
 
+MAC_SUBDIRS = lib util
 macfile.list:
-	 find $(FILES) $(MACFILES) -prune -type f -print | \
-		sed -f config/winexclude.sed > macfile.list
+	mac/macfiles.sh $(MAC_SUBDIRS) > macfile.list
+	find $(MACFILES) -prune -type f -print | \
+		sed -f config/winexclude.sed >> macfile.list
 
 Makefile.sav:
 	rm -f Makefile.sav
@@ -252,11 +256,27 @@ dos-zipfiles: Makefile.sav awk-windows-mac winfile.list
 	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
-kerbsrc.mac: awk-windows-mac macfile.list 
+Macfile: macfile.list Makefile.sav
+	rm -f Macfile
+	sed -e 's|/|:|g' -e 's/^/:/' -e '/:.:/d' -e '/:mac:/d' macfile.list > macfile.maclist
+	grep '\.c$$' macfile.maclist > macsrcsgss
+	grep -v ':gssapi:' macsrcsgss > macsrcsk5
+	echo SRCS = `cat macsrcsgss` >> Macfile
+	echo GSSOBJS68K = `sed 's/$$/.68K.o/' macsrcsgss` >> Macfile
+	echo GSSOBJSPPC = `sed 's/$$/.PPC.o/' macsrcsgss` >> Macfile
+	echo K5OBJS68K = `sed 's/$$/.68K.o/' macsrcsk5` >> Macfile
+	echo K5OBJSPPC = `sed 's/$$/.PPC.o/' macsrcsk5` >> Macfile
+	echo INCLUDES = `sed -n -e 's/\(.*:\)[^:]*\.h$$/-i \1/p' macfile.maclist | sort -u` >> Macfile
+	echo "" >> Macfile
+	tr '/:\\' ':\304\266'< mac/Makefile.tmpl >> Macfile
+
+kerbsrc.mac: awk-windows-mac macfile.list Macfile
 	cp mac/libraries/autoconf.h include/autoconf.h
-	tar cvf kerbsrc.tar include/autoconf.h `cat macfile.list`
+	mv Macfile Makefile
+	tar cvf kerbsrc.tar Makefile include/autoconf.h `cat macfile.list`
 	rm -f $(CLEANUP)
-	rm -f include/autoconf.h
+	rm -f include/autoconf.h Makefile macsrc* macfile.maclist
+	mv Makefile.sav Makefile
 
 #
 # Part of building the PC release has to be done on Unix. This includes

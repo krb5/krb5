@@ -7,6 +7,8 @@ CFLAGS = $(CCOPTS) $(DEFS)
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
+MACSRCS = getuid.c strcasecmp.c strdup.c
+
 OBJS = setenv.$(OBJEXT)	@LIBOBJS@
 
 all-unix:: shared $(OBJS)

@@ -1,3 +1,9 @@
+Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Folded in danw's changes to allow
+		building Makefiles for the Macintosh.  We now can build
+		MPW makefiles which are interpreted by CodeWarrior.
+
 Mon Nov 13 11:30:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* encrypt_data.c (krb5_encrypt_data): New file.  A generic routine

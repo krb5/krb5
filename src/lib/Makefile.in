@@ -3,6 +3,8 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+MAC_SUBDIRS = crypto krb5 gssapi kadm
+
 all-unix::
 
 all-mac::

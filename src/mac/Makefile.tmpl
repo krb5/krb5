@@ -1,0 +1,35 @@
+KH = /mac/libraries/
+KH68K = {KH}KerberosHeaders68K
+KHPPC = {KH}KerberosHeadersPPC
+
+OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
+	-mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000
+
+all : build link
+
+libs : {KH68K} {KHPPC} {GSSOBJS68K} {GSSOBJSPPC} link
+
+build : {KH68K} {KHPPC}
+	MWC68K {OPTIONS} -prefix {KH68K} -model far {SRCS}
+	MWCPPC {OPTIONS} -prefix {KHPPC} {SRCS}
+
+.c.68K.o : .c
+	MWC68K {DepDir}{Default}.c {OPTIONS} -prefix {KH68K} -model far
+
+.c.PPC.o : .c
+	MWCPPC {DepDir}{Default}.c {OPTIONS} -prefix {KHPPC}
+
+{KH}68K : {KH}.pch
+	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
+
+{KH}PPC : {KH}.pch
+	MWCPPC {KH}KerberosHeaders.pch -precompile {KH}PPC {OPTIONS} -i {KH}
+
+link :
+	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}
+	MWLinkPPC -library -model far -o libkrb5.PPC {K5OBJSPPC}
+	MWLink68K -library -model far -o libgss.68K {GSSOBJS68K}
+	MWLinkPPC -library -model far -o libgss.PPC {GSSOBJSPPC}
+
+clean :
+	Delete -i {GSSOBJS68K} {GSSOBJSPPC}

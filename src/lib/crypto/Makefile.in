@@ -3,6 +3,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=crypto.lib
 
+MAC_SUBDIRS = des md4 md5 crc32 os
+
 TST=if test -n "`cat DONE`" ; then
 
 .c.o:

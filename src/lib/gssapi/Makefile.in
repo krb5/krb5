@@ -2,6 +2,8 @@ TST=if test -n "`cat DONE`" ; then
 
 ##DOSBUILDTOP = ..\..
 
+MAC_SUBDIRS = generic krb5 mechglue
+
 CRYPTO_VER=@CRYPTO_SH_VERS@
 COMERR_VER=@COMERR_SH_VERS@
 KRB5_VER=@KRB5_SH_VERS@

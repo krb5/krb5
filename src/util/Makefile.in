@@ -1,5 +1,7 @@
 CFLAGS = $(CCOPTS)
 
+MAC_SUBDIRS = profile et
+
 editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
 HOST_TYPE=@HOST_TYPE@
 HAVE_GCC=@HAVE_GCC@

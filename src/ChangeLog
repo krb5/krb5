@@ -1,3 +1,9 @@
+Wed Feb  7 00:22:26 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (krbsrc.mac): Folded in danw's changes to allow
+		building Makefiles for the Macintosh.  We now can build
+		MPW makefiles which are interpreted by CodeWarrior.
+
 Mon Jan 22 07:55:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (KRB5_CHECK_PROTOS): Move prototype checking code

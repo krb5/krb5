@@ -3,6 +3,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
 
+MAC_SUBDIRS = file stdio
+
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@

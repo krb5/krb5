@@ -12,7 +12,7 @@ EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 SRCS= \
 	$(srcdir)asn1_decode.c\
 	$(srcdir)asn1_k_decode.c\
-	$(srcdir)asn1_ncode.c\
+	$(srcdir)asn1_encode.c\
 	$(srcdir)asn1_get.c\
 	$(srcdir)asn1_make.c\
 	$(srcdir)asn1buf.c\

@@ -5,6 +5,8 @@ ANAME_DBLIB=@ANAME_DBLIB@
 
 TST=if test -n "`cat DONE`" ; then
 
+MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache free os posix 
+
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file ccache/memory \
 	keytab keytab/file krb rcache free os posix \
         $(BUILDTOP)/util/profile

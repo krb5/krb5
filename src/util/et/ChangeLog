@@ -1,3 +1,9 @@
+Wed Feb  7 00:19:17 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (CCFILES): Checked in danw's changes to support
+		building Makefiles for the Macintosh; use standard SRCS
+		macro for the source files.
+
 Fri Oct  6 22:06:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
