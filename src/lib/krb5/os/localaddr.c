@@ -29,6 +29,8 @@
 
 #include "k5-int.h"
 
+#ifndef _MSDOS
+
 /* needed for solaris, harmless elsewhere... */
 #define BSD_COMP
 #include <sys/ioctl.h>
@@ -86,7 +88,8 @@ extern int errno;
  * This uses the SIOCGIFCONF, SIOCGIFFLAGS, and SIOCGIFADDR ioctl's.
  */
 
-krb5_error_code krb5_os_localaddr(addr)
+krb5_error_code INTERFACE
+krb5_os_localaddr(addr)
     krb5_address ***addr;
 {
     struct ifreq *ifr;
@@ -217,3 +220,55 @@ krb5_error_code krb5_os_localaddr(addr)
     (*addr)[n_found] = 0;
     return 0;
 }
+
+#else /* DOS version */
+
+/* No ioctls in winsock so we just assume there is only one networking 
+ * card per machine, so gethostent is good enough. 
+ */
+#include <krb5/winsock.h>
+#include <errno.h>
+
+krb5_error_code INTERFACE
+krb5_os_localaddr (krb5_address ***addr) {
+    char host[64];                              /* Name of local machine */
+    struct hostent *hostrec;
+    int err;
+
+    *addr = calloc (2, sizeof (krb5_address *));
+    if (*addr == NULL)
+        return ENOMEM;
+
+    if (gethostname (host, sizeof(host))) {
+        err = WSAGetLastError();
+        return err;
+    }
+        
+
+    hostrec = gethostbyname (host);
+    if (hostrec == NULL) {
+        err = WSAGetLastError();
+        return err;
+    }
+
+    (*addr)[0] = calloc (1, sizeof(krb5_address));
+    if ((*addr)[0] == NULL) {
+        free (*addr);
+        return ENOMEM;
+    }
+    (*addr)[0]->addrtype = ADDRTYPE_INET;
+    (*addr)[0]->length = sizeof(struct in_addr);
+    (*addr)[0]->contents = (unsigned char *)malloc((*addr)[0]->length);
+    if (!(*addr)[0]->contents) {
+        free((*addr)[0]);
+        free(*addr);
+        return ENOMEM;
+    } else {
+        memcpy ((char *)(*addr)[0]->contents,
+                (char *)hostrec->h_addr,
+                (*addr)[0]->length);
+    }
+
+    return(0);
+}
+#endif

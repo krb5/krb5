@@ -1,40 +1,42 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS= \
-	an_to_ln.o	\
-	def_realm.o	\
-	ccdefname.o	\
-	free_krbhs.o	\
-	free_hstrl.o	\
-	full_ipadr.o	\
-	get_krbhst.o	\
-	gen_port.o	\
-	gen_rname.o	\
-	gmt_mktime.o	\
-	hst_realm.o	\
-	init_os_ctx.o	\
-	krbfileio.o	\
-	ktdefname.o	\
-	kuserok.o	\
-	localaddr.o	\
-	locate_kdc.o	\
-	lock_file.o	\
-	net_read.o	\
-	net_write.o	\
-	osconfig.o	\
-	port2ip.o	\
-	read_msg.o	\
-	read_pwd.o	\
-	realm_dom.o	\
-	sendto_kdc.o	\
-	sn2princ.o	\
-	timeofday.o	\
-	unlck_file.o	\
-	ustime.o	\
-	write_msg.o
+	an_to_ln.$(OBJEXT)	\
+	def_realm.$(OBJEXT)	\
+	ccdefname.$(OBJEXT)	\
+	free_krbhs.$(OBJEXT)	\
+	free_hstrl.$(OBJEXT)	\
+	full_ipadr.$(OBJEXT)	\
+	get_krbhst.$(OBJEXT)	\
+	gen_port.$(OBJEXT)	\
+	gen_rname.$(OBJEXT)	\
+	gmt_mktime.$(OBJEXT)	\
+	hst_realm.$(OBJEXT)	\
+	init_os_ctx.$(OBJEXT)	\
+	krbfileio.$(OBJEXT)	\
+	ktdefname.$(OBJEXT)	\
+	kuserok.$(OBJEXT)	\
+	localaddr.$(OBJEXT)	\
+	locate_kdc.$(OBJEXT)	\
+	lock_file.$(OBJEXT)	\
+	net_read.$(OBJEXT)	\
+	net_write.$(OBJEXT)	\
+	osconfig.$(OBJEXT)	\
+	port2ip.$(OBJEXT)	\
+	read_msg.$(OBJEXT)	\
+	read_pwd.$(OBJEXT)	\
+	realm_dom.$(OBJEXT)	\
+	sendto_kdc.$(OBJEXT)	\
+	sn2princ.$(OBJEXT)	\
+	timeofday.$(OBJEXT)	\
+	unlck_file.$(OBJEXT)	\
+	ustime.$(OBJEXT)	\
+	write_msg.$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/an_to_ln.c	\
@@ -68,3 +70,5 @@ SRCS= \
 	$(srcdir)/unlck_file.c	\
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
+
+all:: $(OBJS)

@@ -1,3 +1,12 @@
+Wed Mar 1 17:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+	* ustime.c: added section for time on the PC
+	* localaddr.c: added section for the PC--returns local IP address
+	N.B. not sure how we're going to handle different machine dependent
+	code changes. For now it's just added to the end of the file. Later,
+	we have to decide on a solution for all.
+
 Tue Feb 28 01:07:37 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.
