@@ -52,12 +52,12 @@ Errors: permission errors
 
 \begin{funcdecl}{krb5_rc_store}{krb5_error_code}{\funcin}
 \funcarg{krb5_rcache}{id}
-\funcarg{krb5_tkt_authent *}{tkt_auth}
+\funcarg{krb5_dont_replay *}{rep}
 \end{funcdecl}
-Stores \funcparam{tkt_auth} in the replay cache \funcparam{id}.
+Stores \funcparam{rep} in the replay cache \funcparam{id}.
 Requires that \funcparam{id} identifies a valid replay cache.
 
-Returns KRB5KRB_AP_ERR_REPEAT if \funcparam{tkt_auth} is already in the
+Returns KRB5KRB_AP_ERR_REPEAT if \funcparam{rep} is already in the
 cache.  May also return permission errors, storage failure errors.
 
 \begin{funcdecl}{krb5_rc_expunge}{krb5_error_code}{\funcin}

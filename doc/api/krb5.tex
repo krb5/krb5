@@ -750,3 +750,12 @@ Copy a principal structure, filling in \funcparam{*outprinc} to point to
 the newly allocated copy, which should be freed with
 \funcname{krb5_free_principal}.
 
+\begin{funcdecl}{krb5_auth_to_rep}{krb5_error_code}{\funcin}
+\funcarg{krb5_tkt_authent *}{auth}
+\funcout
+\funcarg{krb5_donot_replay *}{rep}
+\end{funcdecl}
+Extract the relevant parts of \funcparam{auth} and fill them into the
+structure pointed to by \funcparam{rep}.  \funcparam{rep{\ptsto}client}
+and \funcparam{rep{\ptsto}server} are set to allocated storage and
+should be freed when \funcparam{*rep} is no longer needed.
