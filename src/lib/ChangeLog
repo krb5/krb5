@@ -1,3 +1,9 @@
+Fri Mar 31 16:15:59 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in, configure.in: Move the dependency which causes
+		all-$(WHAT) to be built so that it occurs after the "make
+		all" subdirectories rule.
+
 Thu Mar 30 15:46:23 1995 Keith Vetter (keithv@fusion.com)
 
 	* libkrb5.def: removed the masses of exported files, leaving just

@@ -14,5 +14,6 @@ LinkFile(libcrypto.a, ./crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, ./gssapi/libgssapi_krb5.a)
 AppendRule([all-unix:: libkrb5.a libcrypto.a])
 AppendRule([all-unix:: libgssapi_krb5.a])
+AppendRule([all:: all-$(WHAT)])
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE

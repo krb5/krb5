@@ -3,7 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-all:: all-$(WHAT)
+all:: 
 
 all-unix::
 
