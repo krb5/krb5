@@ -1,3 +1,8 @@
+
+Wed May 03 02:25:32 1995  Chris Provenzano  (proven@mit.edu)
+
+	* Imakefile : Removed.
+
 Wed Apr 26 17:26:19 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: Added dejagnu subdirectory for Ian's tests.
