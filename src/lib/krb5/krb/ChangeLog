@@ -1,5 +1,8 @@
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
+	* gen_seqnum.c (krb5_generate_seq_number): Fix think-o on sequence
+	number mask.
+
 	* auth_con.c (krb5int_auth_con_chkseqnum): New function; implement
 	heuristic for broken Heimdal sequence number encoding.
 	(chk_heimdal_seqnum): Auxiliary function for above.
