@@ -98,7 +98,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-K] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] -f inputfile\n",
 	    who);
     fprintf(stderr, "\t(You must supply a v4 database dump file for this version of %s\n",who);
@@ -110,7 +110,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-K] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] [-D v4dbpathname | -f inputfile]\n",
 	    who);
     exit(status);
@@ -150,7 +150,10 @@ char *argv[];
     int optchar;
     
     krb5_error_code retval;
-    char *dbname = 0;
+    /* The kdb library will default to this, but it is convenient to
+       make it explicit (error reporting and temporary filename generation
+       use it).  */
+    char *dbname = DEFAULT_DBM_FILE;
     char *v4dbname = 0;
     char *v4dumpfile = 0;
     char *realm = 0;
@@ -160,6 +163,8 @@ char *argv[];
     int keytypedone = 0;
     int v4manual = 0;
     int read_mkey = 0;
+    int tempdb = 0;
+    char *tempdbname;
 
     krb5_enctype etype = 0xffff;
 
@@ -168,10 +173,13 @@ char *argv[];
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:D:r:Kvk:M:e:nf:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:tD:r:Kvk:M:e:nf:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
+	    break;
+	case 't':
+	    tempdb = 1;
 	    break;
 	case 'D':			/* set db name */
 #ifdef ODBM
@@ -241,18 +249,29 @@ char *argv[];
     }
     krb5_use_cstype(&master_encblock, etype);
 
-    if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
-
-    retval = krb5_db_set_name(dbname);
-    if (!retval) retval = EEXIST;
-
-    if (retval == EEXIST || retval == EACCES || retval == EPERM) {
-	/* it exists ! */
-	com_err(PROGNAME, 0, "The database '%s' appears to already exist",
-		dbname);
-	exit(1);
+    /* If the user has not requested locking, don't modify an existing database. */
+    if (! tempdb) {
+	retval = krb5_db_set_name(dbname);
+	if (retval != ENOENT) {
+	    fprintf(stderr,
+		    "%s: The v5 database appears to already exist.\n",
+		    PROGNAME);
+	    exit(1);
+	}
+	tempdbname = dbname;
+    } else {
+	int dbnamelen = strlen(dbname);
+	tempdbname = malloc(dbnamelen + 2);
+	if (tempdbname == 0) {
+	    com_err(PROGNAME, ENOMEM, "allocating temporary filename");
+	    exit(1);
+	}
+	strcpy(tempdbname, dbname);
+	tempdbname[dbnamelen] = '~';
+	tempdbname[dbnamelen+1] = 0;
     }
+	
+
     if (!realm) {
 	if (retval = krb5_get_default_realm(&defrealm)) {
 	    com_err(PROGNAME, retval, "while retrieving default realm name");
@@ -299,18 +318,18 @@ master key name '%s'\n",
 	(void) krb5_finish_key(&master_encblock);
 	exit(1);
     }
-    if (retval = krb5_db_create(dbname)) {
+    if (retval = krb5_db_create(tempdbname)) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
-	com_err(PROGNAME, retval, "while creating database '%s'",
-		dbname);
+	com_err(PROGNAME, retval, "while creating %sdatabase '%s'",
+		tempdb ? "temporary " : "", tempdbname);
 	exit(1);
     }
-    if (retval = krb5_db_set_name(dbname)) {
+    if (retval = krb5_db_set_name(tempdbname)) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
         com_err(PROGNAME, retval, "while setting active database to '%s'",
-                dbname);
+                tempdbname);
         exit(1);
     }
     if (v4init(PROGNAME, v4dbname, v4manual, v4dumpfile)) {
@@ -318,12 +337,12 @@ master key name '%s'\n",
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	exit(1);
     }
-    if ((retval = krb5_db_init()) || (retval = krb5_dbm_open_database())) {
+    if ((retval = krb5_db_init()) || (retval = krb5_dbm_db_open_database())) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	v4fini();
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
-		dbname);
+		tempdbname);
 	exit(1);
     }
 
@@ -343,8 +362,18 @@ master key name '%s'\n",
     putchar('\n');
     if (retval)
 	com_err(PROGNAME, retval, "while translating entries to the database");
-    /* clean up */
-    (void) krb5_db_fini();
+
+    /* clean up; rename temporary database if there were no errors */
+    if (retval == 0) {
+	if (retval = krb5_db_fini ())
+	    com_err(PROGNAME, retval, "while shutting down database");
+	else if (tempdb && (retval = krb5_dbm_db_rename(tempdbname, dbname)))
+	    com_err(PROGNAME, retval, "while renaming temporary database");
+    } else {
+	(void) krb5_db_fini ();
+	if (tempdb)
+		(void) krb5_dbm_db_destroy (tempdbname);
+    }
     (void) krb5_finish_key(&master_encblock);
     (void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
