@@ -1,5 +1,11 @@
 2004-04-13  Jeffrey Altman <jaltman@mit.edu>
 
+    * ktbase.c:
+      Since we have to reserve all the single letter
+      prefixes make them apply to all platforms
+
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
     * ktbase.c:  On Windows, improve the treat drive letter
       prefix string as a FILE: keytab change to work if the
       default keytab type was changed to not be of type FILE:

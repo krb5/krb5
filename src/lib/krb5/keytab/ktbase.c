@@ -113,7 +113,6 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
     pfxlen = cp - name;
 
-#if defined(_WIN32)
     if ( pfxlen == 1 && isalpha(name[0]) ) {
         /* We found a drive letter not a prefix - use FILE: */
         pfx = strdup("FILE:");
@@ -122,7 +121,6 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
         resid = name;
     } else {
-#endif
         resid = name + pfxlen + 1;
 	
         pfx = malloc (pfxlen+1);
@@ -131,9 +129,7 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
         memcpy (pfx, name, pfxlen);
         pfx[pfxlen] = '\0';
-#if defined(_WIN32)
     }
-#endif
 
     *ktid = (krb5_keytab) 0;
 
