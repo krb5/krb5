@@ -1,5 +1,9 @@
 1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
 
+	* kuserok.c (krb5_kuserok): Fix improper negation in
+	non-Unix localname check.  Also fix calling convention
+	before this function is exported by the Windows DLL.
+
 	* localaddr.c (krb5_os_localaddr): Fix memset to clear
 	right address list.  (Thanks to jaltman@columbia.edu).
 
