@@ -250,7 +250,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	    local_kaddr.length =
 	      sizeof(((struct sockaddr_in *) &local_addr)->sin_addr);
 	    local_kaddr.contents = 
-	      (char *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
+	      (krb5_octet *) &(((struct sockaddr_in *) &local_addr)->sin_addr);
 	} else {
 	    krb5_address **addrs;
 
@@ -281,7 +281,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	remote_kaddr.length =
 	    sizeof(((struct sockaddr_in *) &remote_addr)->sin_addr);
 	remote_kaddr.contents = 
-	    (char *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
+	    (krb5_octet *) &(((struct sockaddr_in *) &remote_addr)->sin_addr);
 
 	/* mk_priv requires that the local address be set.
 	  getsockname is used for this.  rd_priv requires that the

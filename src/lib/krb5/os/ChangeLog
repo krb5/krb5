@@ -1,3 +1,8 @@
+Thu Jul 16 09:59:34 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* changepw.c (krb5_change_password): Changes casts from char * to
+         	krb5_octet * to match krb5_address structure elements.
+
 Wed Jul  1 17:54:56 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* macsock.c(inet_ntoa): Fix obvious bug where we were returning a
