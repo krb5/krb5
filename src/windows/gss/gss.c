@@ -8,6 +8,7 @@
 ***************************************************************************/
 #include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "gss.h"
 
 #define GSS_CONNECT_NAME            102

@@ -19,10 +19,11 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
 #include "gss.h"
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 
 /*+
  * Function: send_token
@@ -161,7 +162,7 @@ static void
 display_status_1(char *m, OM_uint32 code, int type) {
     OM_uint32 maj_stat, min_stat;
     gss_buffer_desc msg;
-    int msg_ctx;
+    OM_uint32 msg_ctx;
      
     msg_ctx = 0;
     while (1) {
