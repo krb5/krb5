@@ -1,3 +1,8 @@
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_mslsa.c (MSCredToMITCred): Don't create an empty array for
+	addresses, just use a null pointer now.
+
 2004-11-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_retr.c (krb5_cc_retrieve_cred_seq): Temporarily clear the

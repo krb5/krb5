@@ -400,12 +400,7 @@ MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING ClientRealm,
     creds->times.starttime=FileTimeToUnixTime(&msticket->StartTime);
     creds->times.endtime=FileTimeToUnixTime(&msticket->EndTime);
     creds->times.renew_till=FileTimeToUnixTime(&msticket->RenewUntil);
-
-    /* MS Tickets are addressless.  MIT requires an empty address
-     * not a NULL list of addresses.
-     */
-    creds->addresses = (krb5_address **)malloc(sizeof(krb5_address *));
-    memset(creds->addresses, 0, sizeof(krb5_address *));
+    creds->addresses = NULL;
 
     MSTicketToMITTicket(msticket, context, &creds->ticket);
 }
