@@ -30,8 +30,8 @@
 #include "k5-int.h"
 
 #ifdef TARGET_OS_MAC
-#include <PreferencesLib.h>
-#endif /* macintosh */
+#include <KerberosPreferences/KerberosPreferences.h>
+#endif /* TARGET_OS_MAC */
 
 #if defined(_MSDOS) || defined(_WIN32)
 

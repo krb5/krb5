@@ -51,7 +51,7 @@
 #include <DriverServices.h> /* Nanosecond timing */
 #include <CodeFragments.h>	/* Check for presence of UpTime */
 #include <Math64.h>			/* 64-bit integer math */
-#include <Utilities.h>		/* Mac time -> UNIX time conversion */
+#include <KerberosSupport/Utilities.h>		/* Mac time -> UNIX time conversion */
 #include <Power.h>			/* Sleep queue */
 
 /* Mac Cincludes */
@@ -319,24 +319,41 @@ void MicrosecondsToSecsMicrosecs (
    *residualMicroseconds = eventMicroseconds - *eventSeconds * 1000000;
 }
 
+static int SleepQPresent (void)
+{
+	SInt32 pmgrAttributes;
+	Boolean sleepQPresent = 0;
+
+	if (Gestalt (gestaltPowerMgrAttr, &pmgrAttributes) == noErr) {
+		if ((pmgrAttributes & (1 << gestaltPMgrDispatchExists)) != 0) {
+			sleepQPresent = 1;
+		}
+	}
+	return sleepQPresent;
+}
+
 void InstallSleepNotification ()
 {
-	gSleepQUPP = NewSleepQProc (SleepNotification);
-	gSleepQRecord.sleepQLink = nil;
-	gSleepQRecord.sleepQType = slpQType;
-	gSleepQRecord.sleepQProc = gSleepQUPP;
-	gSleepQRecord.sleepQFlags = 0;
-	SleepQInstall (&gSleepQRecord);
+	if (SleepQPresent ()) {
+		gSleepQUPP = NewSleepQProc (SleepNotification);
+		gSleepQRecord.sleepQLink = nil;
+		gSleepQRecord.sleepQType = slpQType;
+		gSleepQRecord.sleepQProc = gSleepQUPP;
+		gSleepQRecord.sleepQFlags = 0;
+		SleepQInstall (&gSleepQRecord);
+	}
 }
 
 void RemoveSleepNotification ()
 {
-	SleepQRemove (&gSleepQRecord);
+	if (SleepQPresent ()) {
+		SleepQRemove (&gSleepQRecord);
 #if TARGET_API_MAC_CARBON
-	DisposeSleepQUPP (gSleepQUPP);
+		DisposeSleepQUPP (gSleepQUPP);
 #else
-	DisposeRoutineDescriptor (gSleepQUPP);
+		DisposeRoutineDescriptor (gSleepQUPP);
 #endif
+	}
 }
 
 pascal long SleepNotification (

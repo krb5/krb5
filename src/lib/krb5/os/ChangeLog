@@ -1,3 +1,16 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* localaddr.c: Fixed typo.
+	* localaddr.c: Added a special krb5_os_localaddr for Mac OS 9
+	which looks up the addresses without querying DNS synchronously
+	* prompter.c, promptusr.c, read_pwd.c: We now export 
+	krb5_prompter_posix and krb5_read_password on Mac OS X
+	* c_us_time.c: Updated Utilities.h #include
+	* c_us_time.c: Fix the sleep queue notification code to
+		only run on machines with power management
+	* ccdefname.c, init_os_ctx.c: Updated Mac OS #defines and #includes 
+	for new header layout and Mac OS X frameworks
+
 2001-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* prompter.c (krb5_prompter_posix): Fix up terminal modes if we're
