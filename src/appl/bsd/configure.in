@@ -67,48 +67,77 @@ AC_SUBST(K4LIB)
 dnl
 dnl
 AC_MSG_CHECKING([streams interface])
-AC_TRY_COMPILE(
+AC_CACHE_VAL(krb5_cv_has_streams,
+[AC_TRY_COMPILE(
 [#include <sys/stream.h>
 #include <sys/stropts.h>], [],
-[AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_STREAMS)],
-AC_MSG_RESULT(no))
+krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
+AC_MSG_RESULT($krb5_cv_has_streams)
+if test $krb5_cv_has_streams = yes; then
+AC_DEFINE(HAVE_STREAMS)
+fi
 dnl
 dnl
 AC_MSG_CHECKING([F_SETOWN])
-AC_TRY_COMPILE(
+AC_CACHE_VAL(krb5_cv_f_setown,
+[AC_TRY_COMPILE(
 [#include <sys/types.h>
 #include <fcntl.h>], [1+F_SETOWN;],
-[AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_SETOWN)],
-AC_MSG_RESULT(no))
+krb5_cv_f_setown=yes,krb5_cv_f_setown=no)])
+AC_MSG_RESULT($krb5_cv_f_setown)
+if test $krb5_cv_f_setown = yes; then
+AC_DEFINE(HAVE_SETOWN)
+fi
 dnl
 dnl
 AC_MSG_CHECKING([setenv])
-AC_TRY_LINK(
+AC_CACHE_VAL(krb5_cv_setenv,
+[AC_TRY_LINK(
 [],[setenv("PATH","/bin",0);],
-AC_MSG_RESULT(yes),
-[AC_MSG_RESULT(no)
+krb5_cv_setenv=yes,krb5_cv_setenv=no)])
+AC_MSG_RESULT($krb5_cv_setenv)
+if test $krb5_cv_setenv = no; then
 SETENVSRC=setenv.c
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
-AC_SUBST([SETENVOBJ])])
+AC_SUBST([SETENVOBJ])
+fi
 dnl
 dnl
 AC_MSG_CHECKING([arguments to getpgrp])
-AC_TRY_COMPILE(
+AC_CACHE_VAL(krb5_cv_getpgrp_args,
+[AC_TRY_COMPILE(
 [#include <unistd.h>], [int pid = getpgrp()],
-[AC_MSG_RESULT(void)
-AC_DEFINE(GETGRP_ONEARG)],
-AC_MSG_RESULT(pid))
+krb5_cv_getpgrp_args=void, krb5_cv_getpgrp_args=pid)])
+AC_MSG_RESULT($krb5_cv_getpgrp_args)
+if test $krb5_cv_getpgrp_args = void; then
+AC_DEFINE(GETGRP_ONEARG)
+fi
 dnl
 dnl
 AC_MSG_CHECKING([number of arguments to setpgrp])
-AC_TRY_COMPILE(
+AC_CACHE_VAL(krb5_cv_setpgrp_args,
+[AC_TRY_COMPILE(
 [#include <unistd.h>],[setpgrp(0,0)],
-[AC_MSG_RESULT(two)
+krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
+AC_MSG_RESULT($krb5_cv_setpgrp_args)
+if test $krb5_cv_setpgrp_args = two; then
 AC_DEFINE(SETPGRP_TWOARG)],
-AC_MSG_RESULT(void))
+fi
+dnl
+dnl
+AC_MSG_CHECKING([shadow password support])
+AC_CACHE_VAL(krb5_cv_shadow_pwd,
+[AC_TRY_LINK(
+[#include <sys/types.h>
+#include <pwd.h>
+#include <shadow.h>],
+[struct spwd *sp = getspnam("root")],
+krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
+AC_MSG_RESULT($krb5_cv_shadow_pwd)
+if test $krb5_cv_shadow_pwd = yes; then
+AC_DEFINE(HAS_SHADOW)
+fi
 dnl
 dnl
 ADD_DEF(-DKERBEROS)
