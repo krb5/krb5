@@ -4,7 +4,7 @@ Here are the steps for making the Windows version of Kerberos 5.
 
 On the Unix side
 1) cd xxx/src                          # Go to where the source lives
-2) make -f Makefile.in zip-windows     # Does some Unix-side configuring
+2) make -f Makefile.in kerbsrc.zip     # Does some Unix-side configuring
                                        # ...and creates kerbsrc.zip
 3) <transfer kerbsrc.zip to the PC>
 
