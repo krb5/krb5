@@ -125,6 +125,28 @@ dnl for krb524
 AC_TYPE_SIGNAL
 dnl
 dnl
+dnl Check for thread safety issues.
+dnl (Is there a better place for this?)
+tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
+AC_CHECK_FUNCS($tsfuncs)
+if test "$enable_thread_support" = yes; then
+  tsmissing=""
+  for ts in $tsfuncs; do
+    if eval "test \"\${ac_cv_func_$ts}\" != yes"; then
+      tsmissing="$tsmissing $ts"
+    fi
+  done
+  if test "$tsmissing" != ""; then
+    AC_MSG_WARN([Some functions that are needed for library thread])
+    AC_MSG_WARN([safety appear to be missing.])
+    for ts in $tsmissing; do
+      AC_MSG_WARN([  missing thread-safe function: $ts])
+    done
+    AC_MSG_WARN([Without these functions, the installed libraries])
+    AC_MSG_WARN([may not be thread-safe.])
+  fi # tsmissing not empty
+fi # enable_thread_support
+dnl
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
 dnl

@@ -1,3 +1,9 @@
+2004-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for various _r functions needed for thread
+	safety.  If enable-thread-support is specified, complain about
+	any that aren't found.
+
 2004-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_GCC_ATTRS): On AIX 4, mark the destructor
