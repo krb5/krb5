@@ -90,6 +90,8 @@ CatHeader "$(IntermediateHeaders)/gssapi.h" : 		"_GSSAPI_H_"
                                                     "$(IntermediateErrorTables)/gssapi_err_generic.h"
                                                     "$(IntermediateErrorTables)/gssapi_err_krb5.h" ;
 OSConf "$(IntermediatePrivateHeaders)/osconf.h" :	"$(SRCROOT)/../Headers/Kerberos5/krb5/stock/osconf.h" ;
+CopyHeader "$(IntermediateHeaders)/gssapi_generic.h" :		"$(SRCROOT)/../Sources/GSS/generic/gssapi_generic.h" ;
+CopyHeader "$(IntermediateHeaders)/gssapi_krb5.h" :			"$(SRCROOT)/../Sources/GSS/krb5/gssapi_krb5.h" ;
 CopyHeader "$(IntermediatePrivateHeaders)/autoconf.h" : 	"$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h" ;
 CopyHeader "$(IntermediateHeaders)/KerberosProfileInit.h" :	"$(SRCROOT)/../Headers/MacOSX/KerberosProfileInit.h" ;
 CopyHeader "$(IntermediateHeaders)/Kerberos5Init.h" :		"$(SRCROOT)/../Headers/MacOSX/Kerberos5Init.h" ;
@@ -99,6 +101,8 @@ DEPENDS all :	"$(IntermediateHeaders)/profile.h"
                 "$(IntermediateHeaders)/krb5.h"
                 "$(IntermediateHeaders)/krb524.h"
                 "$(IntermediateHeaders)/gssapi.h"
+                "$(IntermediateHeaders)/gssapi_generic.h"
+                "$(IntermediateHeaders)/gssapi_krb5.h"
                 "$(IntermediatePrivateHeaders)/osconf.h"
                 "$(IntermediatePrivateHeaders)/autoconf.h" 
                 "$(IntermediateHeaders)/KerberosProfileInit.h"
