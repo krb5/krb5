@@ -183,8 +183,10 @@ proc telnet_test { } {
 
     set testname "telnet status"
     send "status\r"
+    # use -nocase because telnet may output the fqdn in upper-case;
+    # however, -nocase requires the whole pattern to be in lower case
     expect {
-	-re "Connected to $localhostname.*Operating in single character mode.*Catching signals locally.*Remote character echo.*flow control.*Escape character is '.\]'" {
+	-nocase -re "connected to $localhostname.*operating in single character mode.*catching signals locally.*remote character echo.*flow control.*escape character is '.\]'" {
 	    pass $testname
 	}
     }
