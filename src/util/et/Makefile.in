@@ -76,16 +76,13 @@ clean-mac:: clean-unix
 depend:: 
 
 install:: com_err.h 
-	$(INSTALLFILE) $(srcdir)/com_err.h  $(DESTDIR)$(INCLDIR)/com_err.h
+	$(INSTALL_DATA) $(srcdir)/com_err.h  $(DESTDIR)$(KRB5_INCDIR)/com_err.h
 
 install:: mit-sipb-copyright.h
-	$(INSTALLFILE) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(INCLDIR)/mit-sipb-copyright.h
-
-install:: com_err.3
-	$(INSTALLFILE) $(srcdir)/com_err.3 $(DESTDIR)$(MANDIR)/man3/com_err.3
+	$(INSTALL_DATA) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(KRB5_INCDIR)/mit-sipb-copyright.h
 
 install:: compile_et.1
-	$(INSTALLFILE) $(srcdir)/compile_et.1 $(DESTDIR)$(MANDIR)/man1/compile_et.1
+	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/man1/compile_et.1
 
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
@@ -106,10 +103,8 @@ clean-mac::
 	$(RM) $(LIBOBJS)
 
 install::
-	$(INSTALLLIB) libcom_err.a $(DESTDIR)$(LIBDIR)/libcom_err.a
-	$(CHMOD) 644 $(DESTDIR)$(LIBDIR)/libcom_err.a
-	$(RANLIB)    $(DESTDIR)$(LIBDIR)/libcom_err.a
-	$(CHMOD) 444 $(DESTDIR)$(LIBDIR)/libcom_err.a
+	$(INSTALL_DATA) libcom_err.a $(DESTDIR)$(KRB5_LIBDIR)/libcom_err.a
+	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/libcom_err.a
 ## 
 
 clean-unix:: clean-files
