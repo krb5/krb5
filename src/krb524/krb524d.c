@@ -227,8 +227,7 @@ void init_master(context)
           free(realm);
      }
 
-     master_keyblock.enctype = ENCTYPE_DES_CBC_MD5;
-     krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
+     master_keyblock.enctype = NULL;	/* Look up the stashed enctype */
      if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
 				  FALSE, /* non-manual type-in */
 				  FALSE, /* irrelevant, given prev. arg */
