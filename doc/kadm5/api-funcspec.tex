@@ -364,6 +364,7 @@ location definitions:
 \item[admin history key] HIST_PRINCIPAL (``ovsec_kadm/history'')
 \item[change password principal] CHANGEPW_PRINCIPAL (``ovsec_kadm/changepw'')
 \item[server acl file path] ACLFILE (``/krb5/ovsec_admin.acl'')
+\item[dictionary] WORDFILE (``/krb5/ovsec_adm_dict'')
 \end{description}
 
 OVSEC_KADM errors are described in $<$ovsec_admin/kadm_err.h$>$.
@@ -573,11 +574,24 @@ the tty) for a password.
 using the just-acquired Kerberos ticket.
 \end{enumerate}
 
-For local clients, the semantics are:
+Local clients, running on the KDC, may be useful. For now this is will
+most likely be used for testing, but could in the future be the basis
+for a command-line system that works both remotely and on the KDC
+machine.  If ovsec_kadm_init is invoked locally its semantics are:
 
 \begin{enumerate}
 \item Initializes all the com_err error tables used by the Admin
 system.
+
+\item Initializes direct access to the KDC database.  Assumes the
+master key is in /.k5.REALM-NAME
+
+\item Initializes the dictionary (if present) for dictionary checks.
+
+\item Initializes the modified-by principal to be the client_name.
+This should usually be the name of the program.
+
+\item Only the client_name and realm arguments are used.
 \end{enumerate}
 
 RETURN CODES: 
