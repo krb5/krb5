@@ -70,17 +70,6 @@ typedef struct gss_union_cred_t {
 /* define one of these and provide a function to return */
 /* it to initialize the GSSAPI library                  */
 
-/* ultrix cc doesn't understand prototypes in structures.
-   we could autoconf test for this --marc */
-
-#ifndef NPROTOTYPE
-#if defined(__ultrix) && !defined (__GNUC__)
-#define NPROTOTYPE(x) ()
-#else
-#define NPROTOTYPE(x) PROTOTYPE(x)
-#endif
-#endif
-
 /*
  * This is the definition of the mechs_array struct, which is used to
  * define the mechs array table. This table is used to indirectly
@@ -96,7 +85,7 @@ typedef struct gss_config {
     gss_OID_desc    mech_type;
     void *	    context;
     OM_uint32       (*gss_acquire_cred)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* desired_name */
@@ -106,15 +95,15 @@ typedef struct gss_config {
 		    gss_cred_id_t*,	/* output_cred_handle */
 		    gss_OID_set*,	/* actual_mechs */
 		    OM_uint32*		/* time_rec */
-		    ));
+		    );
     OM_uint32       (*gss_release_cred)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */		       
 		    OM_uint32*,		/* minor_status */
 		    gss_cred_id_t*	/* cred_handle */
-		    ));
+		    );
     OM_uint32       (*gss_init_sec_context)
-	NPROTOTYPE((
+	(
 		    void*,			/* context */
 		    OM_uint32*,			/* minor_status */
 		    gss_cred_id_t,		/* claimant_cred_handle */
@@ -129,9 +118,9 @@ typedef struct gss_config {
 		    gss_buffer_t,		/* output_token */
 		    OM_uint32*,			/* ret_flags */
 		    OM_uint32*			/* time_rec */
-		    ));
+		    );
     OM_uint32       (*gss_accept_sec_context)
-	NPROTOTYPE((
+	(
 		    void*,			/* context */
 		    OM_uint32*,			/* minor_status */
 		    gss_ctx_id_t*,		/* context_handle */
@@ -144,48 +133,48 @@ typedef struct gss_config {
 		    OM_uint32*,			/* ret_flags */
 		    OM_uint32*,			/* time_rec */
 		    gss_cred_id_t*		/* delegated_cred_handle */
-		    ));
+		    );
     OM_uint32       (*gss_process_context_token)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t	/* token_buffer */
-		    ));
+		    );
     OM_uint32       (*gss_delete_sec_context)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t*,	/* context_handle */
 		    gss_buffer_t	/* output_token */
-		    ));
+		    );
     OM_uint32       (*gss_context_time)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    OM_uint32*		/* time_rec */
-		    ));
+		    );
     OM_uint32       (*gss_sign)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    int,		/* qop_req */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t	/* message_token */
-		    ));
+		    );
     OM_uint32       (*gss_verify)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
 		    gss_buffer_t,	/* message_buffer */
 		    gss_buffer_t,	/* token_buffer */
 		    int*		/* qop_state */
-		    ));
+		    );
     OM_uint32       (*gss_seal)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
@@ -194,9 +183,9 @@ typedef struct gss_config {
 		    gss_buffer_t,	/* input_message_buffer */
 		    int*,		/* conf_state */
 		    gss_buffer_t	/* output_message_buffer */
-		    ));
+		    );
     OM_uint32       (*gss_unseal)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
@@ -204,9 +193,9 @@ typedef struct gss_config {
 		    gss_buffer_t,	/* output_message_buffer */
 		    int*,		/* conf_state */
 		    int*		/* qop_state */
-		    ));
+		    );
     OM_uint32       (*gss_display_status)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    OM_uint32,		/* status_value */
@@ -214,45 +203,45 @@ typedef struct gss_config {
 		    gss_OID,		/* mech_type */
 		    OM_uint32*,		/* message_context */
 		    gss_buffer_t	/* status_string */
-		    ));
+		    );
     OM_uint32       (*gss_indicate_mechs)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_OID_set*	/* mech_set */
-		    ));
+		    );
     OM_uint32       (*gss_compare_name)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* name1 */
 		    gss_name_t,		/* name2 */
 		    int*		/* name_equal */
-		    ));
+		    );
     OM_uint32       (*gss_display_name)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t,		/* input_name */
 		    gss_buffer_t,	/* output_name_buffer */
 		    gss_OID*		/* output_name_type */
-		    ));
+		    );
     OM_uint32       (*gss_import_name)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_buffer_t,	/* input_name_buffer */
 		    gss_OID,		/* input_name_type */
 		    gss_name_t*		/* output_name */
-		    ));
+		    );
     OM_uint32       (*gss_release_name)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32*,		/* minor_status */
 		    gss_name_t*		/* input_name */
-		    ));
+		    );
     OM_uint32       (*gss_inquire_cred)
-	NPROTOTYPE((
+	(
 		    void*,			/* context */
 		    OM_uint32 *,		/* minor_status */
 		    gss_cred_id_t,		/* cred_handle */
@@ -260,9 +249,9 @@ typedef struct gss_config {
 		    OM_uint32 *,		/* lifetime */
 		    int *,			/* cred_usage */
 		    gss_OID_set *		/* mechanisms */
-		    ));
+		    );
     OM_uint32	    (*gss_add_cred)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_cred_id_t,	/* input_cred_handle */
@@ -275,23 +264,23 @@ typedef struct gss_config {
 		    gss_OID_set *,	/* actual_mechs */
 		    OM_uint32 *,	/* initiator_time_rec */
 		    OM_uint32 *		/* acceptor_time_rec */
-		    ));
+		    );
     OM_uint32	    (*gss_export_sec_context)
-	NPROTOTYPE((
+	(
 		    void*,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t *,	/* context_handle */
 		    gss_buffer_t	/* interprocess_token */
-		    ));
+		    );
     OM_uint32	    (*gss_import_sec_context)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_buffer_t,	/* interprocess_token */
 		    gss_ctx_id_t *	/* context_handle */
-		    ));
+		    );
     OM_uint32 	    (*gss_inquire_cred_by_mech)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_cred_id_t,	/* cred_handle */
@@ -300,16 +289,16 @@ typedef struct gss_config {
 		    OM_uint32 *,	/* initiator_lifetime */
 		    OM_uint32 *,	/* acceptor_lifetime */
 		    gss_cred_usage_t *	/* cred_usage */
-		    ));
+		    );
     OM_uint32	    (*gss_inquire_names_for_mech)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_OID,		/* mechanism */
 		    gss_OID_set *	/* name_types */
-		    ));
+		    );
     OM_uint32	(*gss_inquire_context)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
@@ -320,15 +309,15 @@ typedef struct gss_config {
 		    OM_uint32 *,	/* ctx_flags */
 		    int *,           	/* locally_initiated */
 		    int *		/* open */
-		    ));
+		    );
     OM_uint32	    (*gss_internal_release_oid)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_OID *		/* OID */
-	 ));
+	 );
     OM_uint32	     (*gss_wrap_size_limit)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    gss_ctx_id_t,	/* context_handle */
@@ -336,95 +325,88 @@ typedef struct gss_config {
 		    gss_qop_t,		/* qop_req */
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
-	 ));
+	 );
     int		     (*pname_to_uid)
-	NPROTOTYPE((
+	(
 		    void *,		/* context */
 		    char *,		/* pname */
 		    gss_OID,		/* name type */
 		    gss_OID,		/* mech type */
 		    uid_t *		/* uid */
-		    ));
+		    );
 
 } *gss_mechanism;
 
 /********************************************************/
 /* Internal mechglue routines */
 
-gss_mechanism __gss_get_mechanism
-PROTOTYPE((gss_OID));
-OM_uint32 __gss_get_mech_type
-PROTOTYPE((gss_OID, gss_buffer_t));
-OM_uint32 __gss_import_internal_name
-PROTOTYPE((OM_uint32 *, gss_OID, gss_union_name_t,
-	   gss_name_t *));
-OM_uint32 __gss_display_internal_name
-PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t,
-	   gss_buffer_t, gss_OID *));
-OM_uint32 __gss_release_internal_name
-PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t *));
+gss_mechanism __gss_get_mechanism (gss_OID);
+OM_uint32 __gss_get_mech_type (gss_OID, gss_buffer_t);
+OM_uint32 __gss_import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,
+				      gss_name_t *);
+OM_uint32 __gss_display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
+				       gss_buffer_t, gss_OID *);
+OM_uint32 __gss_release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
 
 OM_uint32 __gss_convert_name_to_union_name
-PROTOTYPE((OM_uint32 *,		/* minor_status */
+	  (OM_uint32 *,		/* minor_status */
 	   gss_mechanism,	/* mech */
 	   gss_name_t,		/* internal_name */
 	   gss_name_t *		/* external_name */
-	   ));
+	   );
 gss_cred_id_t __gss_get_mechanism_cred
-PROTOTYPE((gss_union_cred_t,	/* union_cred */
+	  (gss_union_cred_t,	/* union_cred */
 	   gss_OID		/* mech_type */
-	   ));
+	   );
 
 OM_uint32 generic_gss_release_oid
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_OID *		/* oid */
-	   ));
+	   );
 
 OM_uint32 generic_gss_copy_oid
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_OID,		/* oid */
 	    gss_OID *		/* new_oid */
-	    ));
+	    );
 
 OM_uint32 generic_gss_create_empty_oid_set
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_OID_set *	/* oid_set */
-	   ));
+	   );
 
 OM_uint32 generic_gss_add_oid_set_member
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_OID,		/* member_oid */
 	    gss_OID_set *	/* oid_set */
-	   ));
+	   );
 
 OM_uint32 generic_gss_test_oid_set_member
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_OID,		/* member */
 	    gss_OID_set,	/* set */
 	    int *		/* present */
-	   ));
+	   );
 
 OM_uint32 generic_gss_oid_to_str
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+ (OM_uint32 *,	/* minor_status */
 	    gss_OID,		/* oid */
 	    gss_buffer_t	/* oid_str */
-	   ));
+	   );
 
 OM_uint32 generic_gss_str_to_oid
-PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	   (OM_uint32 *,	/* minor_status */
 	    gss_buffer_t,	/* oid_str */
 	    gss_OID *		/* oid */
-	   ));
+	   );
 
 
-gss_OID gss_find_mechanism_from_name_type
-PROTOTYPE ( (gss_OID		/* name_type */
-	     ));
+gss_OID gss_find_mechanism_from_name_type (gss_OID); /* name_type */
 
 OM_uint32 gss_add_mech_name_type
-PROTOTYPE ( (OM_uint32 *,	/* minor_status */
-	     gss_OID,		/* name_type */
-	     gss_OID		/* mech */
-	     ));
+	   (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* name_type */
+	    gss_OID		/* mech */
+	       );
 
 #endif /* _GSS_MECHGLUEP_H */

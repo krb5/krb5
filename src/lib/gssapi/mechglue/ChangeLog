@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* mglueP.h: Make all prototypes unconditional.
+	(NPROTOTYPE): Macro deleted.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* g_initialize.c, mglueP.h: Drop _MSDOS support.
