@@ -105,7 +105,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
      * protected by encryption.  If it came in the checksum field of
      * an init_sec_context message, skip over this check.
      */
-    if (pkeyblock != NULL) {
+    if (remote_addr && encpart.s_address && pkeyblock != NULL) {
 	if (!krb5_address_compare(context, remote_addr, encpart.s_address)) {
 	    retval = KRB5KRB_AP_ERR_BADADDR;
 	    goto cleanup_cred;

@@ -1,3 +1,9 @@
+Fri Aug  8 17:04:54 1997  Tom Yu  <tlyu@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred_basic): Check remote_addr and
+	encpart.s_address before calling krb5_address_compare.  Fixes
+	krb5-libs/456.
+
 Fri Jul 25 15:25:32 1997  Tom Yu  <tlyu@mit.edu>
 
 	* t_ser.c: Add support for changed kdb API.
