@@ -1,3 +1,22 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sockaddr_in.sin_len and
+	sockaddr.sa_len.  Check for sys/param.h in case we need NBBY
+	somewhere.
+
+	* auth.h, svc_auth.h: Namespace cleanup.
+
+	* svc.h, rpc_commondata.c: New global svc_maxfd.
+
+	* svc.c (svc_getreqset): Break inner part of loop out into
+	local function svc_do_xprt().  Don't use rpc_dtablesize();
+	instead, use svc_maxfd.
+
+	* svc_run.c: Don't use rpc_dtablesize().
+
+	* clnt_generic.c, clnt_simple.c, getrpcport.c:
+	* svc_tcp.c, svc_udp.c: Set sockaddr_in.sin_len when available.
+
 2004-09-17  Tom Yu  <tlyu@mit.edu>
 
 	* libgssrpc.exports: Don't export internals.

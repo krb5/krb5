@@ -54,7 +54,11 @@ gssrpc_getrpcport(
 
 	if ((hp = gethostbyname(host)) == NULL)
 		return (0);
+	memset(&addr, 0, sizeof(addr));
 	memmove((char *) &addr.sin_addr, hp->h_addr, sizeof(addr.sin_addr));
+#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+	addr.sin_len = sizeof(addr);
+#endif
 	addr.sin_family = AF_INET;
 	addr.sin_port =  0;
 	return (pmap_getport(&addr, prognum, versnum, proto));

@@ -1,3 +1,7 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (kadm_svc_run): Don't use rpc_dtablesize().
+
 2004-08-20  Alexandra Ellwood <lxs@mit.edu>
 
         * ovsec_kadmd.c (main), server_stubs.c (*): 

@@ -682,7 +682,6 @@ void kadm_svc_run(params)
 kadm5_config_params *params;
 {
      fd_set	rfd;
-     int	sz = gssrpc__rpc_dtablesize();
      struct	timeval	    timeout;
      
      while(signal_request_exit == 0) {
@@ -709,7 +708,9 @@ kadm5_config_params *params;
 	  timeout.tv_usec = 0;
 	  rfd = svc_fdset;
 	  FD_SET(schpw, &rfd);
-	  switch(select(sz, (fd_set *) &rfd, NULL, NULL, &timeout)) {
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+	  switch(select(max(schpw, svc_maxfd) + 1,
+			(fd_set *) &rfd, NULL, NULL, &timeout)) {
 	  case -1:
 	       if(errno == EINTR)
 		    continue;

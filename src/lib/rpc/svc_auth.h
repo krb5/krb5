@@ -59,6 +59,8 @@ typedef struct SVCAUTH {
 	void * svc_ah_private;
 } SVCAUTH;
 
+#ifdef GSSRPC__IMPL
+
 extern SVCAUTH svc_auth_none;
 
 extern struct svc_auth_ops svc_auth_none_ops;
@@ -78,17 +80,6 @@ extern enum auth_stat gssrpc__authenticate(struct svc_req *rqst,
      ((*((auth)->svc_ah_ops->svc_ah_unwrap))(auth, xdrs, xfunc, xwhere))
 #define SVCAUTH_DESTROY(auth) \
      ((*((auth)->svc_ah_ops->svc_ah_destroy))(auth))
-      
-/*
- * Approved way of getting principal of caller
- */
-char *svcauth_gss_get_principal(SVCAUTH *auth);
-/*
- * Approved way of setting server principal
- */
-bool_t svcauth_gss_set_svc_name(gss_name_t name);
-
-#ifdef GSSRPC__IMPL
 
 /* no authentication */
 /* RENAMED: should be _svcauth_none. */
@@ -111,6 +102,15 @@ enum auth_stat gssrpc__svcauth_gss(struct svc_req *,
 	struct rpc_msg *, bool_t *);
 
 #endif /* defined(GSSRPC__IMPL) */
+
+/*
+ * Approved way of getting principal of caller
+ */
+char *svcauth_gss_get_principal(SVCAUTH *auth);
+/*
+ * Approved way of setting server principal
+ */
+bool_t svcauth_gss_set_svc_name(gss_name_t name);
 
 GSSRPC__END_DECLS
 

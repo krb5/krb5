@@ -145,6 +145,9 @@ svctcp_create(
 		madesock = TRUE;
 	}
 	memset((char *)&addr, 0, sizeof (addr));
+#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+	addr.sin_len = sizeof(addr);
+#endif
 	addr.sin_family = AF_INET;
 	if (bindresvport(sock, &addr)) {
 		addr.sin_port = 0;
@@ -338,7 +341,7 @@ readtcp(
 	do {
 		readfds = mask;
 		tout = wait_per_try;
-		if (select(gssrpc__rpc_dtablesize(), &readfds, (fd_set*)NULL,
+		if (select(sock + 1, &readfds, (fd_set*)NULL,
 			   (fd_set*)NULL, &tout) <= 0) {
 			if (errno == EINTR) {
 				continue;

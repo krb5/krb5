@@ -44,3 +44,4 @@ int gssrpc_svc_fdset_init = 0;
 int svc_fds = 0;
 #endif /* def FD_SETSIZE */
 struct rpc_createerr rpc_createerr = {RPC_SUCCESS};
+int svc_maxfd = -1;

@@ -172,9 +172,10 @@ typedef struct AUTH {
 		((*((auth)->ah_ops->ah_destroy))(auth))
 
 
+#ifdef GSSRPC__IMPL
 /* RENAMED: should be _null_auth if we can use reserved namespace. */
 extern struct opaque_auth gssrpc__null_auth;
-
+#endif
 
 /*
  * These are the various implementations of client side authenticators.

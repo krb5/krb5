@@ -1,7 +1,7 @@
 AC_INIT(auth_gssapi.c)
 CONFIG_RULES
 AC_CONFIG_SUBDIRS(unit-test)
-AC_CHECK_HEADERS(sys/uio.h)
+AC_CHECK_HEADERS(sys/uio.h sys/param.h)
 AC_TYPE_GETGROUPS
 ### Check where struct rpcent is declared.
 #
@@ -137,6 +137,15 @@ fi
 AC_SUBST(GSSRPC__BSD_TYPEALIASES)
 
 AC_CHECK_FUNCS(strerror)
+#
+# sockaddr length field checks
+#
+AC_CHECK_MEMBERS([struct sockaddr_in.sin_len], , ,
+  [#include <sys/types.h>
+@%:@include <netinet/in.h>])
+AC_CHECK_MEMBERS([struct sockaddr.sa_len], , ,
+  [#include <sys/types.h>
+@%:@include <sys/socket.h>])
 
 AC_MSG_CHECKING([return type of setrpcent])
 AC_CACHE_VAL(k5_cv_type_setrpcent,

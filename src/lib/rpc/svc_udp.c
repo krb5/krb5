@@ -120,6 +120,9 @@ svcudp_bufcreate(
 		madesock = TRUE;
 	}
 	memset((char *)&addr, 0, sizeof (addr));
+#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+	addr.sin_len = sizeof(addr);
+#endif
 	addr.sin_family = AF_INET;
 	if (bindresvport(sock, &addr)) {
 		addr.sin_port = 0;

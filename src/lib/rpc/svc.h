@@ -281,6 +281,7 @@ extern fd_set svc_fdset;
 #else
 extern int svc_fds;
 #endif /* def FD_SETSIZE */
+extern int svc_maxfd;
 
 /*
  * a small program implemented by the svc_rpc implementation itself;
