@@ -80,9 +80,6 @@ libdes425.a: $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
-	$(RM) $(TOPLIBD)/libdes425.a
-	$(CP) libdes425.a $(BUILDTOP)/lib/libdes425.a
-	$(RANLIB) $(BUILDTOP)/lib/libdes425.a
 
 install:: libdes425.a
 	$(INSTALL_DATA) libdes425.a $(DESTDIR)$(KRB5_LIBDIR)/libdes425.a

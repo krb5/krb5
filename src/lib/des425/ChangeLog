@@ -1,3 +1,8 @@
+Wed Jun 14 07:37:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (libdes425.a): Don't copy library up a level. Let
+		above Makefile symlink to it.
+
 Fri Jun  9 19:18:59 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
