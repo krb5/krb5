@@ -650,6 +650,52 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KADM_BAD_ARGS;
 		    }
 		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_ADD_KEY_CMD)) {
+		    /*
+		     * ADD KEY command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:ADD KEY command\n", my_id));
+		    /* Must have at least three arguments */
+		    if (num_args > 3) {
+			cmd_error = admin_add_key(kcontext,
+						  proto_debug_level,
+						  ticket,
+						  num_args-1,
+						  &arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:ADD KEY command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
+		else if (!strcasecmp(arglist[0].data,
+				     KRB5_ADM_DEL_KEY_CMD)) {
+		    /*
+		     * DELETE KEY command handling here.
+		     */
+		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			   ("> %d:DELETE KEY command\n", my_id));
+		    /* At least three arguments */
+		    if (num_args > 3) {
+			cmd_error = admin_delete_key(kcontext,
+						     proto_debug_level,
+						     ticket,
+						     num_args-1,
+						     &arglist[1]);
+		    }
+		    else {
+			DPRINT(DEBUG_REQUESTS, proto_debug_level,
+			       ("> %d:DELETE KEY command syntax BAD\n",
+				my_id));
+			cmd_error = KRB5_ADM_CMD_UNKNOWN;
+			err_aux = KADM_BAD_ARGS;
+		    }
+		}
 		else {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:UNKNOWN command %s\n", my_id,
@@ -737,7 +783,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	errbuf.server = net_server_princ();
 	errbuf.error = kret - ERROR_TABLE_BASE_krb5;
 	if (errbuf.error > 127)
-	    errbuf.error = KRB_ERR_GENERIC;
+	    errbuf.error = KRB5KRB_ERR_GENERIC;
 	/* Format the error message in our language */
 	errmsg = output_krb5_errmsg(curr_lang, mime_setting, kret);
 	errbuf.text.length = strlen(errmsg);

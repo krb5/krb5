@@ -52,6 +52,7 @@ static const char *admin_db_success_fmt = "\007%s operation for %s successfully 
 static const char *admin_db_read_err_fmt = "\004database read failed during %s operation by %s";
 static const char *admin_no_cl_ident_fmt = "\004cannot get client identity from ticket for %s operation";
 static const char *admin_db_rename_fmt = "\007%s operation from %s to %s successfully issued by %s";
+static const char *admin_db_key_op_fmt = "\007%s operation for %s successfully issued by %s";
 static const char *admin_db_del_err_fmt = "\004database delete entry(%s) failed during %s operation by %s";
 static const char *admin_key_dec_err_fmt = "\004key decode failed for %s's key during %s operation by %s";
 
@@ -63,6 +64,8 @@ static const char *admin_change_pwd_text = "Change Password";
 static const char *admin_change_rpwd_text = "Change Random Password";
 static const char *admin_inquire_text = "Inquire";
 static const char *admin_extract_key_text = "Extract Key";
+static const char *admin_add_key_text = "Add Keytype";
+static const char *admin_delete_key_text = "Delete Keytype";
 
 extern char *programname;
 
@@ -121,6 +124,167 @@ admin_client_identity(kcontext, debug_level, ticket, clientp, clnamep)
 }
 
 /*
+ * admin_merge_keys()	- Merge two keylists.
+ *
+ * Fold "in1" into "in2" and put the results in "outp"
+ */
+static krb5_error_code
+admin_merge_keys(kcontext, dbentp, unique,
+		 nkeys1, in1, nkeys2, in2, nkeysout, outp)
+    krb5_context	kcontext;
+    krb5_db_entry	*dbentp;
+    krb5_boolean	unique;
+    krb5_int32		nkeys1;
+    krb5_key_data	*in1;
+    krb5_int32		nkeys2;
+    krb5_key_data	*in2;
+    krb5_int32		*nkeysout;
+    krb5_key_data	**outp;
+{
+    krb5_error_code	kret;
+    int			i;
+    krb5_int32		numout;
+    krb5_key_salt_tuple	*kslist;
+    krb5_int32		nksents;
+    krb5_key_data	*keylist;
+    krb5_db_entry	xxx1,xxx2;
+    krb5_key_data	*kp1, *kp2;
+
+    keylist = (krb5_key_data *) NULL;
+    if ((keylist = (krb5_key_data *) malloc(sizeof(krb5_key_data) *
+					    (nkeys1+nkeys2)))) {
+	memset(keylist, 0, sizeof(krb5_key_data) * (nkeys1+nkeys2));
+	numout = 0;
+	if (!unique) {
+	    /* The easy case */
+	    /*
+	     * Start with "in1" - it's newer.
+	     */
+	    for (i=0; i<nkeys1; i++) {
+		if ((keylist[numout].key_data_contents[0] = 
+		     (krb5_octet *) malloc(in1[i].key_data_length[0])) &&
+		     (!in1[i].key_data_length[1] ||
+		      (keylist[numout].key_data_contents[1] = 
+		       (krb5_octet *) malloc(in1[i].key_data_length[1])))) {
+		    keylist[numout].key_data_ver = in1[i].key_data_ver;
+		    keylist[numout].key_data_kvno = in1[i].key_data_kvno;
+		    keylist[numout].key_data_type[0] = in1[i].key_data_type[0];
+		    keylist[numout].key_data_type[1] = in1[i].key_data_type[1];
+		    if (keylist[numout].key_data_length[0] =
+			in1[i].key_data_length[0])
+			memcpy(keylist[numout].key_data_contents[0],
+			       in1[i].key_data_contents[0],
+			       in1[i].key_data_length[0]);
+		    if (keylist[numout].key_data_length[1] =
+			in1[i].key_data_length[1])
+			memcpy(keylist[numout].key_data_contents[1],
+			       in1[i].key_data_contents[1],
+			       in1[i].key_data_length[1]);
+		    numout++;
+		}
+	    }
+	    /*
+	     * Now put "in2"
+	     */
+	    for (i=0; i<nkeys2; i++) {
+		if ((keylist[numout].key_data_contents[0] = 
+		     (krb5_octet *) malloc(in2[i].key_data_length[0])) &&
+		     (!in2[i].key_data_length[1] ||
+		      (keylist[numout].key_data_contents[1] = 
+		       (krb5_octet *) malloc(in2[i].key_data_length[1])))) {
+		    keylist[numout].key_data_ver = in2[i].key_data_ver;
+		    keylist[numout].key_data_kvno = in2[i].key_data_kvno;
+		    keylist[numout].key_data_type[0] = in2[i].key_data_type[0];
+		    keylist[numout].key_data_type[1] = in2[i].key_data_type[1];
+		    if (keylist[numout].key_data_length[0] =
+			in2[i].key_data_length[0])
+			memcpy(keylist[numout].key_data_contents[0],
+			       in2[i].key_data_contents[0],
+			       in2[i].key_data_length[0]);
+		    if (keylist[numout].key_data_length[1] =
+			in2[i].key_data_length[1])
+			memcpy(keylist[numout].key_data_contents[1],
+			       in2[i].key_data_contents[1],
+			       in2[i].key_data_length[1]);
+		    numout++;
+		}
+	    }
+	}
+	else {
+	    /* Generate a unique list */
+	    memset(&xxx1, 0, sizeof(krb5_db_entry));
+	    memcpy(keylist, in2, sizeof(krb5_key_data) * nkeys2);
+	    memcpy(&keylist[nkeys2], in1, sizeof(krb5_key_data) * nkeys1);
+	    xxx1.n_key_data = (krb5_int16) (nkeys1+nkeys2);
+	    xxx1.key_data = keylist;
+	    numout = 0;
+	    if (!key_dbent_to_keysalts(&xxx1, &nksents, &kslist)) {
+		memset(&xxx1, 0, sizeof(krb5_db_entry));
+		memset(&xxx2, 0, sizeof(krb5_db_entry));
+		memset(keylist, 0, sizeof(krb5_key_data) * (nkeys1+nkeys2));
+		xxx1.n_key_data = nkeys1;
+		xxx1.key_data = in1;
+		xxx2.n_key_data = nkeys2;
+		xxx2.key_data = in2;
+		for (i=0; i<nksents; i++) {
+		    (void) key_name_to_data(&xxx1, &kslist[i], -1, &kp1);
+		    (void) key_name_to_data(&xxx2, &kslist[i], -1, &kp2);
+		    if (kp1 && kp2) {
+			if (kp2->key_data_kvno > kp1->key_data_kvno)
+			    kp1 = kp2;
+		    }
+		    else {
+			if (!kp1)
+			    kp1 = kp2;
+			if (!kp1) {
+			    kret = KRB5KRB_ERR_GENERIC;
+			    break;
+			}
+		    }
+		    if ((keylist[numout].key_data_contents[0] = 
+			 (krb5_octet *) malloc(kp1->key_data_length[0])) &&
+			(!kp1->key_data_length[1] ||
+			 (keylist[numout].key_data_contents[1] = 
+			  (krb5_octet *) malloc(kp1->key_data_length[1])))) {
+			keylist[numout].key_data_ver = kp1->key_data_ver;
+			keylist[numout].key_data_kvno = kp1->key_data_kvno;
+			keylist[numout].key_data_type[0] =
+			    kp1->key_data_type[0];
+			keylist[numout].key_data_type[1] =
+			    kp1->key_data_type[1];
+			if (keylist[numout].key_data_length[0] =
+			    kp1->key_data_length[0])
+			    memcpy(keylist[numout].key_data_contents[0],
+				   kp1->key_data_contents[0],
+				   kp1->key_data_length[0]);
+			if (keylist[numout].key_data_length[1] =
+			    kp1->key_data_length[1])
+			    memcpy(keylist[numout].key_data_contents[1],
+				   kp1->key_data_contents[1],
+				   kp1->key_data_length[1]);
+			numout++;
+		    }
+		}
+		krb5_xfree(kslist);
+	    }
+	}
+    }
+    else
+	kret = ENOMEM;
+
+    if (!kret) {
+	if (*outp && *nkeysout)
+	    key_free_key_data(*outp, *nkeysout);
+	*outp = keylist;
+	*nkeysout = numout;
+    }
+    else {
+	free(keylist);
+    }
+    return(kret);
+}
+
+/*
  * admin_merge_dbentries()	- Merge two database entries and a password.
  */
 static krb5_error_code
@@ -140,8 +304,9 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
     krb5_tl_data	*pwchg, *def_pwchg;
     krb5_tl_data	*new, *def;
     krb5_tl_mod_princ	modent;
-    krb5_int32		num_keys;
+    krb5_int32		num_keys, num_ekeys, num_rkeys;
     krb5_key_data	*key_list;
+    krb5_key_data	*ekey_list;
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_merge_dbentries()\n"));
 
     /*
@@ -150,8 +315,9 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
      * 	and that we don't have a password and the random-password option.
      */
     kret = EINVAL;
-    num_keys = 0;
+    num_keys = num_ekeys = num_rkeys = 0;
     key_list = (krb5_key_data *) NULL;
+    ekey_list = (krb5_key_data *) NULL;
     if (dbentp->princ &&
 	!(kret = krb5_timeofday(kcontext, &now)) &&
 	(!password || ((valid & KRB5_ADM_M_RANDOMKEY) == 0))) {
@@ -219,13 +385,7 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 	     * If we're changing the password, the time is now.
 	     */
 	    if (password || is_pwchange || !def_pwchg) {
-		pwchg->tl_data_contents[0] =
-		    (unsigned char) ((now >> 24) & 0xff);
-		pwchg->tl_data_contents[1] =
-		    (unsigned char) ((now >> 16) & 0xff);
-		pwchg->tl_data_contents[2] =
-		    (unsigned char) ((now >> 8) & 0xff);
-		pwchg->tl_data_contents[3] = (unsigned char) (now & 0xff);
+		krb5_kdb_encode_int32(now, pwchg->tl_data_contents);
 	    }
 	    else {
 		/*
@@ -265,17 +425,32 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		if (!(kret = key_string_to_keys(kcontext,
 						dbentp,
 						&pwdata,
+						0,
+						(krb5_key_salt_tuple *) NULL,
 						&num_keys,
 						&key_list))) {
 		    /* Encrypt the keys */
 		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+		    num_ekeys = num_keys;
 		    kret = key_encrypt_keys(kcontext,
 					    dbentp,
-					    &num_keys,
+					    &num_ekeys,
 					    key_list,
-					    &dbentp->key_data);
-		    if (!kret)
-			dbentp->n_key_data = (krb5_int16) num_keys;
+					    &ekey_list);
+		    if (!kret) {
+			num_rkeys = (krb5_int32) dbentp->n_key_data;
+			kret = admin_merge_keys(kcontext,
+						dbentp,
+						1,
+						num_ekeys,
+						ekey_list,
+						(krb5_int32)
+						dbentp->n_key_data,
+						dbentp->key_data,
+						&num_rkeys,
+						&dbentp->key_data);
+			dbentp->n_key_data = (krb5_int16) num_rkeys;
+		    }
 		}
 	    }
 	    else {
@@ -288,13 +463,26 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		    
 		    /* Encrypt the keys */
 		    DPRINT(DEBUG_OPERATION, debug_level, ("> encode\n"));
+		    num_ekeys = num_keys;
 		    kret = key_encrypt_keys(kcontext,
 					    dbentp,
-					    &num_keys,
+					    &num_ekeys,
 					    key_list,
-					    &dbentp->key_data);
-		    if (!kret)
-			dbentp->n_key_data = (krb5_int16) num_keys;
+					    &ekey_list);
+		    if (!kret) {
+			num_rkeys = (krb5_int32) dbentp->n_key_data;
+			kret = admin_merge_keys(kcontext,
+						dbentp,
+						0,
+						num_ekeys,
+						ekey_list,
+						(krb5_int32)
+						dbentp->n_key_data,
+						dbentp->key_data,
+						&num_rkeys,
+						&dbentp->key_data);
+			dbentp->n_key_data = (krb5_int16) num_rkeys;
+		    }
 		}
 	    }
 	}
@@ -302,6 +490,8 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 
     if (key_list)
 	key_free_key_data(key_list, num_keys);
+    if (ekey_list)
+	key_free_key_data(ekey_list, num_ekeys);
     DPRINT(DEBUG_CALLS, debug_level, ("X admin_merge_dbentries()=%d\n", kret));
     return(kret);
 }
@@ -482,15 +672,6 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 							       pwd_supplied)
 				  )) {
 				int nument = 1;
-
-#ifdef	xxx
-				/*
-				 * Update the key version number if we're
-				 * changing it.
-				 */
-				if (should_exist && pwd_supplied)
-				    new_dbentry.kvno++;
-#endif	/* xxx */
 
 				/* Write the entry. */
 				kret = krb5_db_put_principal(kcontext,
@@ -843,6 +1024,446 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
     }
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X admin_delete_rename() = %d\n", retval));
+    return(retval);
+}
+
+/*
+ * admin_keysalt_parse()	- Parse a list of <key>:<salt>[:<kvno>].
+ */
+static krb5_int32
+admin_keysalt_parse(kcontext, debug_level, nents, entries, dups,
+		    nksp, kslistp, kvnolistp)
+    krb5_context	kcontext;
+    int			debug_level;
+    krb5_int32		nents;
+    krb5_data		*entries;
+    krb5_boolean	dups;
+    krb5_int32		*nksp;
+    krb5_key_salt_tuple	**kslistp;
+    krb5_int32		**kvnolistp;
+{
+    krb5_int32		retval;
+    krb5_key_salt_tuple	*keysalts;
+    krb5_int32		*kvnolist;
+    krb5_int32		ndone;
+    int			i,j;
+    char		*kvnop;
+    int			ncolon;
+    krb5_int32		nparsed;
+
+    DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_parse()\n"));
+    retval = 0;
+    ndone = 0;
+    keysalts = (krb5_key_salt_tuple *) NULL;
+    if (kvnolist = (krb5_int32 *) malloc(nents * sizeof(krb5_int32))) {
+	for (i=0; i<nents; i++)
+	    kvnolist[i] = -1;
+
+	for (i=0; i<nents; i++) {
+	    /*
+	     * Count the number of colon separators.  If there is one, then
+	     * there is only key:salt.  If there are two, then it is key:salt:
+	     * kvno.  Otherwise there's surely something wrong.
+	     */
+	    ncolon = 0;
+	    for (j=0; j<entries[i].length; j++) {
+		if (entries[i].data[j] == ':') {
+		    ncolon++;
+		    kvnop = &entries[i].data[j];
+		}
+	    }
+	    if (ncolon == 1) {
+		kvnop = (char *) NULL;
+	    }
+	    else if (ncolon == 2) {
+		/* Separate it */
+		*kvnop = '\0';
+		kvnop++;
+	    }
+	    else {
+		retval = KRB5_ADM_BAD_OPTION;
+		break;
+	    }
+
+	    /*
+	     * Parse the string.  Don't allow more than one pair per entry,
+	     * but allow duplicate entries if we're told so.
+	     */
+	    if (!krb5_string_to_keysalts(entries[i].data,
+					 "",
+					 ":",
+					 dups,
+					 &keysalts,
+					 &nparsed)) {
+		if (nparsed == 1) {
+		    if (kvnop) {
+			if (sscanf(kvnop,"%d", &kvnolist[ndone]) != 1) {
+			    retval = KRB5_ADM_BAD_OPTION;
+			    break;
+			}
+		    }
+		    ndone++;
+		}
+		else {
+		    retval = KRB5_ADM_BAD_OPTION;
+		    break;
+		}
+	    }
+	    else {
+		retval = KRB5_ADM_BAD_OPTION;
+		break;
+	    }
+	}
+	if (retval) {
+	    ndone = 0;
+	    krb5_xfree(keysalts);
+	    keysalts = (krb5_key_salt_tuple *) NULL;
+	    krb5_xfree(kvnolist);
+	    kvnolist = (krb5_int32 *) NULL;
+	}
+    }
+    else
+	retval = KRB5_ADM_SYSTEM_ERROR;
+    *nksp = ndone;
+    *kslistp = keysalts;
+    *kvnolistp = kvnolist;
+    DPRINT(DEBUG_CALLS, debug_level, ("X admin_keysalt_parse() = %d\n",
+				     retval));
+    return(retval);
+}
+
+/*
+ * admin_keysalt_verify()	- Verify the disposition of the key/salts
+ */
+static krb5_int32
+admin_keysalt_verify(kcontext, debug_level, dbentp, should_be_there,
+		     nksents, kslist, kvnolist)
+    krb5_context	kcontext;
+    int			debug_level;
+    krb5_db_entry	*dbentp;
+    krb5_boolean	should_be_there;
+    krb5_int32		nksents;
+    krb5_key_salt_tuple	*kslist;
+    krb5_int32		*kvnolist;
+{
+    krb5_int32		retval = 0;
+    int			i;
+    krb5_key_data	*kdata;
+
+    DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_verify()\n"));
+    for (i=0; i<nksents; i++) {
+	(void) key_name_to_data(dbentp, &kslist[i], kvnolist[i], &kdata);
+	if (should_be_there && !kdata) {
+	    retval = KRB5_ADM_KEY_DOES_NOT_EXIST;
+	    break;
+	}
+	else if (!should_be_there && kdata) {
+	    retval = KRB5_ADM_KEY_ALREADY_EXISTS;
+	    break;
+	}
+    }
+    DPRINT(DEBUG_CALLS, debug_level, ("X admin_keysalt_verify() = %d\n",
+				     retval));
+    return(retval);
+}
+
+/*
+ * admin_keysalt_operate()	- Perform keysalt surgery
+ */
+static krb5_int32
+admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
+		      nksents, kslist, kvnolist)
+    krb5_context	kcontext;
+    int			debug_level;
+    krb5_db_entry	*dbentp;
+    krb5_data		*password;
+    krb5_boolean	keyectomy;
+    krb5_int32		nksents;
+    krb5_key_salt_tuple	*kslist;
+    krb5_int32		*kvnolist;
+{
+    krb5_int32		retval = 0;
+    int			i, j;
+    krb5_key_data	*kdata, *ekdata;
+    krb5_int32		num_keys, num_ekeys;
+    krb5_int16		count;
+
+    DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_operate()\n"));
+    if (keyectomy) {
+	count = dbentp->n_key_data;
+	for (i=0; i<nksents; i++) {
+	    if (!key_name_to_data(dbentp, &kslist[i], kvnolist[i], &kdata)) {
+		if (kdata->key_data_contents[0])
+		    krb5_xfree(kdata->key_data_contents[0]);
+		if (kdata->key_data_contents[1])
+		    krb5_xfree(kdata->key_data_contents[1]);
+		memset(kdata, 0, sizeof(krb5_key_data));
+		count--;
+	    }
+	    else {
+		retval = KRB5_ADM_SYSTEM_ERROR;
+		break;
+	    }
+	}
+	kdata = dbentp->key_data;
+	if (dbentp->key_data = (krb5_key_data *) malloc(count *
+							sizeof(krb5_key_data))
+	    ) {
+	    j = 0;
+	    for (i = 0; i<dbentp->n_key_data; i++) {
+		if (kdata[i].key_data_ver ||
+		    kdata[i].key_data_kvno ||
+		    kdata[i].key_data_type[0] ||
+		    kdata[i].key_data_type[1] ||
+		    kdata[i].key_data_length[0] ||
+		    kdata[i].key_data_length[1] ||
+		    kdata[i].key_data_contents[0] ||
+		    kdata[i].key_data_contents[1]) {
+		    memcpy(&dbentp->key_data[j],
+			   &kdata[i],
+			   sizeof(krb5_key_data));
+		    j++;
+		}
+	    }
+	    krb5_xfree(kdata);
+	    dbentp->n_key_data = count;
+	}
+	else {
+	    dbentp->key_data = kdata;
+	    retval = KRB5_ADM_SYSTEM_ERROR;
+	}
+    }
+    else {
+	/* Convert the string to key for the new key types */
+	kdata = ekdata = (krb5_key_data *) NULL;
+	if (!key_string_to_keys(kcontext,
+				dbentp,
+				password,
+				nksents,
+				kslist,
+				&num_keys,
+				&kdata) &&
+	    !key_encrypt_keys(kcontext,
+			      dbentp,
+			      &num_keys,
+			      kdata,
+			      &ekdata)) {
+	    num_ekeys = (krb5_int32) dbentp->n_key_data;
+	    if (admin_merge_keys(kcontext,
+				 dbentp,
+				 0,
+				 num_keys,
+				 ekdata,
+				 (krb5_int32) dbentp->n_key_data,
+				 dbentp->key_data,
+				 &num_ekeys,
+				 &dbentp->key_data)) {
+		retval = KRB5_ADM_SYSTEM_ERROR;
+	    }
+	    else
+		dbentp->n_key_data = (krb5_int16) num_ekeys;
+	}
+	if (kdata && num_keys)
+	    key_free_key_data(kdata, num_keys);
+	if (ekdata && num_keys)
+	    key_free_key_data(ekdata, num_keys);
+    }
+    DPRINT(DEBUG_CALLS, debug_level, ("X admin_keysalt_operate() = %d\n",
+				     retval));
+    return(retval);
+}
+
+/*
+ * admin_key_op()	- Handle an add_key or delete_key request.
+ */
+static krb5_int32
+admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
+    krb5_context	kcontext;
+    int			debug_level;
+    krb5_ticket		*ticket;
+    krb5_int32		nargs;
+    krb5_data		*arglist;
+    krb5_boolean	is_delete;
+{
+    krb5_int32		retval = 0;
+    krb5_error_code	kret;
+    krb5_principal	client;
+    char		*client_name;
+    krb5_db_entry	entry;
+    krb5_principal	principal;
+    krb5_int32		operation;
+    const char *	op_msg;
+    krb5_tl_mod_princ	*mprinc;
+    krb5_int32		nkeysalts;
+    krb5_key_salt_tuple	*keysalt_list;
+    krb5_int32		*kvno_list;
+    krb5_timestamp	now;
+    int			n_howmany;
+
+    DPRINT(DEBUG_CALLS, debug_level,
+	   ("* admin_key_op(%s,%d)\n", arglist[0].data, is_delete));
+
+    /* Initialize */
+    client = (krb5_principal) NULL;
+    client_name = (char *) NULL;
+    memset((char *) &entry, 0, sizeof(entry));
+    principal = (krb5_principal) NULL;
+    operation = ACL_MODIFY_PRINCIPAL;
+    op_msg = (is_delete) ? admin_delete_key_text : admin_add_key_text;
+    keysalt_list = (krb5_key_salt_tuple *) NULL;
+    kvno_list = (krb5_int32 *) NULL;
+
+    /* Get the identity of our client */
+    if (!(kret = admin_client_identity(kcontext,
+				       debug_level,
+				       ticket,
+				       &client,
+				       &client_name))) {
+
+	/* See if this client can perform this operation. */
+	if (acl_op_permitted(kcontext, client, operation)) {
+
+	    /* Parse the specified principal name */
+	    if (!(kret = krb5_parse_name(kcontext,
+					 arglist[0].data,
+					 &principal))) {
+		int		how_many;
+		krb5_boolean	more;
+
+		how_many = 1;
+
+		/* Try to get the entry */
+		if (!(kret = krb5_db_get_principal(kcontext,
+						   principal,
+						   &entry,
+						   &how_many,
+						   &more))
+		    && how_many) {
+
+		    /* See if the supplied old password is good */
+		    if (passwd_check_opass_ok(kcontext,
+					      debug_level,
+					      principal,
+					      &entry,
+					      &arglist[1])) {
+
+			if (
+			    /* Parse the keysalt arguments */
+			    !(retval = admin_keysalt_parse(kcontext,
+							   debug_level,
+							   nargs-2,
+							   &arglist[2],
+							   is_delete,
+							   &nkeysalts,
+							   &keysalt_list,
+							   &kvno_list)) &&
+			    /* Verify the disposition */
+			    !(retval = admin_keysalt_verify(kcontext,
+							    debug_level,
+							    &entry,
+							    is_delete,
+							    nkeysalts,
+							    keysalt_list,
+							    kvno_list)) &&
+			    /* Perform the surgery */
+			    !(retval = admin_keysalt_operate(kcontext,
+							     debug_level,
+							     &entry,
+							     arglist[1],
+							     is_delete,
+							     nkeysalts,
+							     keysalt_list,
+							     kvno_list)) &&
+			    /* Get the time of day */
+			    !(kret = krb5_timeofday(kcontext, &now))) {
+				/* Update our stats */
+			    if (!krb5_dbe_decode_mod_princ_data(kcontext,
+								&entry,
+								&mprinc)) {
+				krb5_free_principal(kcontext,
+						    mprinc->mod_princ);
+				krb5_copy_principal(kcontext,
+						    client,
+						    &mprinc->mod_princ);
+				mprinc->mod_date = now;
+				krb5_dbe_encode_mod_princ_data(kcontext,
+							       mprinc,
+							       &entry);
+				krb5_free_principal(kcontext,
+						    mprinc->mod_princ);
+				krb5_xfree(mprinc);
+			    }
+			    
+			    n_howmany = 1;
+			    if ((kret = krb5_db_put_principal(kcontext,
+							      &entry,
+							      &n_howmany))
+				|| (n_howmany != 1)) {
+				retval = KRB5_ADM_SYSTEM_ERROR;
+			    }
+			    else {
+				com_err(programname, 0,
+					admin_db_key_op_fmt,
+					op_msg, arglist[0].data,
+					client_name);
+			    }
+			}
+			else {
+			    if (kret)
+				retval = KRB5_ADM_SYSTEM_ERROR;
+			}
+			if (keysalt_list)
+			    krb5_xfree(keysalt_list);
+			if (kvno_list)
+			    free(kvno_list);
+		    }
+		    else
+			retval = KRB5_ADM_BAD_PW;
+		    krb5_db_free_principal(kcontext, &entry, 1);
+		}
+		else {
+		    /* Database lookup failed or returned unexpected result */
+		    if (kret) {
+			com_err(programname, kret,
+				admin_db_read_err_fmt, op_msg, client_name);
+			retval = KRB5_ADM_SYSTEM_ERROR;
+		    }
+		    else {
+			DPRINT(DEBUG_OPERATION, debug_level,
+			       ("> principal %s not in database\n",
+				original));
+			retval = KRB5_ADM_P_DOES_NOT_EXIST;
+		    }
+		}
+
+		/* Clean up from krb5_parse_name */
+		krb5_free_principal(kcontext, principal);
+	    }
+	    else {
+		/* Principal name parse failed */
+		DPRINT(DEBUG_OPERATION, debug_level,
+		       ("> bad principal string \"%s\"\n", original));
+		retval = KRB5_ADM_P_DOES_NOT_EXIST;
+	    }
+	}
+	else {
+	    /* ACL check failed */
+	    com_err(programname, 0, admin_perm_denied_fmt,
+		    op_msg, client_name);
+	    retval = KRB5_ADM_NOT_AUTHORIZED;
+	}
+
+	/* Clean up admin_client_identity droppings */
+	krb5_xfree(client_name);
+	krb5_free_principal(kcontext, client);
+    }
+    else {
+	/* We really choked here. */
+	com_err(programname, kret, admin_no_cl_ident_fmt, op_msg);
+	retval = KRB5_ADM_SYSTEM_ERROR;
+    }
+    DPRINT(DEBUG_CALLS, debug_level,
+	   ("X admin_key_op() = %d\n", retval));
     return(retval);
 }
 
@@ -1401,7 +2022,57 @@ admin_extract_key(kcontext, debug_level, ticket,
 	   ("X admin_extract_key() = %d\n", retval));
     return(retval);
 }
+
+/*
+ * admin_add_key()	- Add new keytypes for the given principal.
+ */
+krb5_int32
+admin_add_key(kcontext, debug_level, ticket, nargs, arglist)
+    krb5_context	kcontext;	/* Kerberos context	*/ /* In */
+    int			debug_level;	/* Debug level		*/ /* In */
+    krb5_ticket		*ticket;	/* Kerberos ticket	*/ /* In */
+    krb5_int32		nargs;		/* # rem. arguments	*/ /* In */
+    krb5_data		*arglist;	/* Remaining arguments	*/ /* In */
+{
+    krb5_int32	retval;
 
+    DPRINT(DEBUG_CALLS, debug_level,
+	   ("* admin_add_key(%s)\n", arglist[0].data));
+    retval = admin_key_op(kcontext,
+			  debug_level,
+			  ticket,
+			  nargs,
+			  arglist,
+			  0);
+    DPRINT(DEBUG_CALLS, debug_level, ("X admin_add_key() = %d\n", retval));
+    return(retval);
+}
+
+/*
+ * admin_delete_key()	- Delete keytypes for the given principal.
+ */
+krb5_int32
+admin_delete_key(kcontext, debug_level, ticket, nargs, arglist)
+    krb5_context	kcontext;	/* Kerberos context	*/ /* In */
+    int			debug_level;	/* Debug level		*/ /* In */
+    krb5_ticket		*ticket;	/* Kerberos ticket	*/ /* In */
+    krb5_int32		nargs;		/* # rem. arguments	*/ /* In */
+    krb5_data		*arglist;	/* Remaining arguments	*/ /* In */
+{
+    krb5_int32	retval;
+
+    DPRINT(DEBUG_CALLS, debug_level,
+	   ("* admin_delete_key(%s)\n", arglist[0].data));
+    retval = admin_key_op(kcontext,
+			  debug_level,
+			  ticket,
+			  nargs,
+			  arglist,
+			  1);
+    DPRINT(DEBUG_CALLS, debug_level, ("X admin_delete_key() = %d\n", retval));
+    return(retval);
+}
+
 void
 admin_init(max_life, max_renew_life, e_valid, e, f_valid, f)
     krb5_deltat		max_life;
