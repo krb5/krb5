@@ -220,6 +220,10 @@ from 1.1.1 needs including
 * New keytab entries' key values can now be specified manually with a
   new command in the ktutil program.
 
+* A longstanding bug where certain krb4 exchanges using the
+  compatibility library between systems with different byte orders
+  would fail half the time has been fixed.
+
 * Many bug reports are still outstanding in our database.  We are
   continuing to work on this backlog.
 
