@@ -84,6 +84,9 @@ typedef WSABUF sg_buf;
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>		/* For struct iovec, for sg_buf */
 #endif
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>		/* For FIONBIO on Solaris.  */
+#endif
 
 /*
  * Compatability with WinSock calls on MS-Windows...
