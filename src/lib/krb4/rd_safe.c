@@ -52,7 +52,7 @@ KRB5_DLLIMP long KRB5_CALLCONV
 krb_rd_safe(in,in_length,key,sender,receiver,m_data)
     u_char FAR *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length;		/* length of "in" msg */
-    C_Block FAR key;			/* encryption key for seed and ivec */
+    C_Block FAR *key;			/* encryption key for seed and ivec */
     struct sockaddr_in FAR *sender;	/* sender's address */
     struct sockaddr_in FAR *receiver;	/* receiver's address -- me */
     MSG_DAT FAR *m_data;		/* where to put message information */
@@ -180,7 +180,7 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
 #else /* Do encryption */
     /* calculate the checksum of the length, timestamps, and
      * input data, on the sending byte order !! */
-    quad_cksum(q,calc_cksum,p-q,2,(C_Block *)key);
+    quad_cksum(q,calc_cksum,p-q,2,key);
 #endif /* NOENCRYPTION */
 
     DEB (("\n0: calc %l big %lx\n1: calc %lx big %lx\n2: calc %lx big %lx\n3: calc %lx big %lx\n",

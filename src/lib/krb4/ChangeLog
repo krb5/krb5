@@ -1,3 +1,20 @@
+2000-10-23  Tom Yu  <tlyu@mit.edu>
+
+	* mk_auth.c (krb_check_auth): Modify call to rd_priv() by kludging
+	a cast of session key to C_Block *, since CNS is inconsistent in
+	this area as well.
+
+	* mk_priv.c (krb_mk_priv): Align with CNS by taking C_Block *.
+
+	* mk_safe.c (krb_mk_safe): Align with CNS by taking C_Block *.
+
+	* rd_priv.c (krb_rd_priv): Align with CNS by taking C_Block *.
+
+	* rd_safe.c (krb_rd_safe): Align with CNS by taking C_Block *.
+
+	* recvauth.c (krb_recvauth): Update call to mk_priv() to have the
+	correct type.
+
 Tue Oct 10 05:03:50 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* kparse.c: Provide prototype for static struol(). Do not define

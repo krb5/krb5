@@ -87,7 +87,7 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
 				 * (header stuff) overlap */
     unsigned KRB4_32 length;	/* of in data */
     Key_schedule schedule;	/* precomputed key schedule */
-    C_Block key;		/* encryption key for seed and ivec */
+    C_Block FAR *key;		/* encryption key for seed and ivec */
     struct sockaddr_in FAR *sender;   /* sender address */
     struct sockaddr_in FAR *receiver; /* receiver address */
 {
@@ -198,7 +198,7 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
 #ifndef NOENCRYPTION
     /* pcbc encrypt, pad as needed, use key as ivec */
     pcbc_encrypt((C_Block *) q,(C_Block *) q, (long) (p-q), schedule,
-                 (C_Block *)key, ENCRYPT);
+                 key, ENCRYPT);
 #endif /* NOENCRYPTION */
 
     return (q - out + c_length);        /* resulting size */

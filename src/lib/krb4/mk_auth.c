@@ -205,7 +205,7 @@ krb_check_auth (buf, checksum, msg_data, session, schedule, laddr, faddr)
     key_sched(session, schedule);
 #endif /* !NOENCRYPTION */
     if (cc = krb_rd_priv(buf->dat, buf->length, schedule,
-			 session, faddr, laddr, msg_data))
+			 (C_Block *)session, faddr, laddr, msg_data))
 	return(cc);
 
     /* fetch the (incremented) checksum that we supplied in the request */

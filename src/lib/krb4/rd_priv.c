@@ -70,7 +70,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length; /* length of "in" msg */
     Key_schedule schedule;	/* precomputed key schedule */
-    C_Block key;		/* encryption key for seed and ivec */
+    C_Block FAR *key;		/* encryption key for seed and ivec */
     struct sockaddr_in *sender;
     struct sockaddr_in *receiver;
     MSG_DAT *m_data;		/*various input/output data from msg */
@@ -114,7 +114,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
 #ifndef NOENCRYPTION
     /* pcbc decrypt, use key as ivec */
     pcbc_encrypt((C_Block *)q, (C_Block *)q, (long)c_length,
-                 schedule, (C_Block *)key, DECRYPT);
+                 schedule, key, DECRYPT);
 #endif
 
     /* safely get application data length */
