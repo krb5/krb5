@@ -98,7 +98,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     krb5_context context;
     char *dbname;
     krb5_const_principal aname;
-    const int lnsize;
+    const unsigned int lnsize;
     char *lname;
 {
 #if	(!defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh))
@@ -467,7 +467,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
     krb5_context		context;
     char *			rule;
     krb5_const_principal	aname;
-    const int			lnsize;
+    const unsigned int		lnsize;
     char *			lname;
 {
     krb5_error_code	kret;
@@ -515,7 +515,7 @@ rule_an_to_ln(context, rule, aname, lnsize, lname)
 				    ) {
 				    strncpy(cout,
 					    datap->data,
-					    datap->length);
+					    (unsigned) datap->length);
 				    cout += datap->length;
 				    *cout = '\0';
 				    current++;
@@ -597,12 +597,12 @@ static krb5_error_code
 default_an_to_ln(context, aname, lnsize, lname)
     krb5_context context;
     krb5_const_principal aname;
-    const int lnsize;
+    const unsigned int lnsize;
     char *lname;
 {
     krb5_error_code retval;
     char *def_realm;
-    int realm_length;
+    unsigned int realm_length;
 
     realm_length = krb5_princ_realm(context, aname)->length;
     
@@ -654,10 +654,10 @@ default_an_to_ln(context, aname, lnsize, lname)
 */
 
 krb5_error_code
-krb5_aname_to_localname(context, aname, lnsize, lname)
+krb5_aname_to_localname(context, aname, lnsize_in, lname)
     krb5_context context;
     krb5_const_principal aname;
-    const int lnsize;
+    const int lnsize_in;
     char *lname;
 {
     krb5_error_code	kret;
@@ -669,6 +669,12 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
     int			i, nvalid;
     char		*cp;
     char		*typep, *argp;
+    unsigned int        lnsize;
+
+    if (lnsize_in < 0)
+      return KRB5_CONFIG_NOTENUFSPACE;
+
+    lnsize = lnsize_in; /* Unsigned */
 
     /*
      * First get the default realm.

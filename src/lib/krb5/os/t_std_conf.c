@@ -16,7 +16,7 @@
 
 #include "os-proto.h"
 
-void test_get_default_realm(ctx)
+static void test_get_default_realm(ctx)
 	krb5_context ctx;
 {
 	char	*realm;
@@ -31,7 +31,7 @@ void test_get_default_realm(ctx)
 	free(realm);
 }
 
-void test_set_default_realm(ctx, realm)
+static void test_set_default_realm(ctx, realm)
     krb5_context ctx;
     char	*realm;
 {
@@ -45,7 +45,7 @@ void test_set_default_realm(ctx, realm)
 	printf("krb5_set_default_realm(%s)\n", realm);
 }
 
-void test_get_default_ccname(ctx)
+static void test_get_default_ccname(ctx)
 	krb5_context ctx;
 {
 	const char	*ccname;
@@ -57,7 +57,7 @@ void test_get_default_ccname(ctx)
 		printf("krb5_cc_default_name() returned NULL\n");
 }
 
-void test_set_default_ccname(ctx, ccname)
+static void test_set_default_ccname(ctx, ccname)
     krb5_context ctx;
     char	*ccname;
 {
@@ -71,7 +71,7 @@ void test_set_default_ccname(ctx, ccname)
 	printf("krb5_set_default_ccname(%s)\n", ccname);
 }
 
-void test_get_krbhst(ctx, realm)
+static void test_get_krbhst(ctx, realm)
 	krb5_context ctx;
 	char	*realm;
 {
@@ -103,12 +103,12 @@ void test_get_krbhst(ctx, realm)
 	printf("\n");
 }
 
-void test_locate_kdc(ctx, realm)
+static void test_locate_kdc(ctx, realm)
 	krb5_context ctx;
 	char	*realm;
 {
     	struct sockaddr *addrs;
-	struct sockaddr_in *sin;
+	struct sockaddr_in *s_sin;
 	int	i, naddrs;
 	int	get_masters=0;
 	krb5_data rlm;
@@ -124,15 +124,15 @@ void test_locate_kdc(ctx, realm)
 	}
 	printf("krb_get_krbhst(%s) returned:", realm);
 	for (i=0; i < naddrs; i++) {
-	    sin = (struct sockaddr_in *) &addrs[i];
-	    printf(" %s/%d", inet_ntoa(sin->sin_addr), 
-		   ntohs(sin->sin_port));
+	    s_sin = (struct sockaddr_in *) &addrs[i];
+	    printf(" %s/%d", inet_ntoa(s_sin->sin_addr), 
+		   ntohs(s_sin->sin_port));
 	}
 	free(addrs);
 	printf("\n");
 }
 
-void test_get_host_realm(ctx, host)
+static void test_get_host_realm(ctx, host)
 	krb5_context ctx;
 	char	*host;
 {
@@ -162,7 +162,7 @@ void test_get_host_realm(ctx, host)
 	printf("\n");
 }
 
-void test_get_realm_domain(ctx, realm)
+static void test_get_realm_domain(ctx, realm)
 	krb5_context ctx;
 	char	*realm;
 {
@@ -178,7 +178,7 @@ void test_get_realm_domain(ctx, realm)
 	free(domain);
 }
 
-void usage(progname)
+static void usage(progname)
 	char	*progname;
 {
 	fprintf(stderr, "%s: Usage: %s [-dc] [-k realm] [-r host] [-C ccname] [-D realm]\n",

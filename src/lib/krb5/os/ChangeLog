@@ -1,3 +1,10 @@
+2000-09-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* an_to_ln.c: Unsigned vs signed int fixes.
+
+	* t_std_conf.c: Declare local functions static, do not shadow
+	sin() with local variable.
+
 2000-08-31  Jeffrey Altman <jaltman@columbia.edu>
 
         * locate_kdc.c: krb5_locate_srv_dns() 
