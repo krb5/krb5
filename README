@@ -72,7 +72,7 @@ Major Changes:
 
 * The KDC dump format has been updated to include per-principal policy
   information.  This will require updating your slave KDCs before your
-  master if you want things to still work. [XXX add to admin doc]
+  master if you want things to still work.
 
 * A library bug that prevented kprop from working properly with DES3
   keys has been fixed.
@@ -119,6 +119,9 @@ Known Bugs:
 
   in /etc/sysconfigtab.  It is not known whether this workaround will
   cause other problems.
+
+* BSD/OS 4.x may have some problems compiling.  These are being
+  investigated.
 
 Notes, Major Changes, and Known Bugs for 1.2.1 and 1.2
 ------------------------------------------------------
@@ -286,7 +289,7 @@ Minor changes
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-2000 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2001 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
