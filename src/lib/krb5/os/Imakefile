@@ -12,7 +12,7 @@ NormalLibraryObjectRule()
 OBJS= \
 	an_to_ln.o	\
 	def_realm.o	\
-	defname.o	\
+	ccdefname.o	\
 	free_krbhs.o	\
 	free_hstrl.o	\
 	get_krbhst.o	\
@@ -35,7 +35,7 @@ OBJS= \
 SRCS= \
 	an_to_ln.c	\
 	def_realm.c	\
-	defname.c	\
+	ccdefname.c	\
 	free_krbhs.c	\
 	free_hstrl.c	\
 	get_krbhst.c	\
