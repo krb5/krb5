@@ -1,3 +1,8 @@
+Fri May 10 11:19:53 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* shs.c (longReverse): Remove extraneous \.
+		(expand): Start #define in first column.
+
 Fri May 10 01:19:18 1996  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in configure.in t_shs.c sha_glue.c sha_crypto.c shs.c shs.h:
