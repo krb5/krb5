@@ -99,11 +99,10 @@ dnl
 define(CHECK_SIGPROCMASK,[
 AC_MSG_CHECKING([for use of sigprocmask])
 AC_CACHE_VAL(krb5_cv_func_sigprocmask_use,
-[AC_TRY_LINK(
-[#include <signal.h>], [sigmask(1);], 
- krb5_cv_func_sigprocmask_use=no,
-AC_TRY_LINK([#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
- krb5_cv_func_sigprocmask_use=yes, krb5_cv_func_sigprocmask_use=no))])
+[AC_TRY_LINK([#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
+ krb5_cv_func_sigprocmask_use=yes,
+AC_TRY_LINK([#include <signal.h>], [sigmask(1);], 
+ krb5_cv_func_sigprocmask_use=no, krb5_cv_func_sigprocmask_use=yes))])
 AC_MSG_RESULT($krb5_cv_func_sigprocmask_use)
 if test $krb5_cv_func_sigprocmask_use = yes; then
  AC_DEFINE(USE_SIGPROCMASK)
