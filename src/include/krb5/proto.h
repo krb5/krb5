@@ -64,8 +64,10 @@
 #define	KRB5_PADATA_TGS_REQ		KRB5_PADATA_AP_REQ
 #define KRB5_PADATA_ENC_TIMESTAMPS	2
 #define	KRB5_PADATA_PW_SALT		3
+#if 0				/* Not used */
 #define KRB5_PADATA_ENC_ENCKEY          4  /* Key encrypted within itself */
-#define KRB5_PADATA_ENC_RANDOM          5  /* random data */
+#endif
+#define KRB5_PADATA_ENC_TIMESTAMP       5  /* timestamp encrypted in key */
 #define KRB5_PADATA_ENC_SECURID         6  /* SecurId passcode */
 
 /* Reserved for SPX pre-authentication. */
