@@ -203,7 +203,6 @@ OLDDECLARG(krb5_response *,rep)
      */
     if (retval = krb5_mk_req_extended (0L /* no ap options */,
 				       &ap_checksum,
-				       0, /* don't need times */
 				       0L, /* don't need kdc_options for this */
 				       0, /* no initial sequence */
 				       0, /* no new key */
