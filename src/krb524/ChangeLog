@@ -1,3 +1,8 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (kdc_get_server_key): Check for DISALLOW_ALL_TIX and
+	DISALLOW_SVR when looking up server key.
+
 2002-07-24  Ezra Peisach  <epeisach@bu.edu>
 
 	* krb524.h: Need to include port-sockets.h before socket-utils.h

@@ -452,8 +452,14 @@ krb5_error_code kdc_get_server_key(context, service, key, kvnop, ktype, kvno)
     kadm5_principal_ent_rec server;
     
     if ((ret = kadm5_get_principal(handle, service, &server,
-				   KADM5_KEY_DATA)))
+				   KADM5_KEY_DATA|KADM5_ATTRIBUTES)))
 	 return ret;
+
+    if (server.attributes & KRB5_KDB_DISALLOW_ALL_TIX
+	|| server.attributes & KRB5_KDB_DISALLOW_SVR) {
+	kadm5_free_principal_ent(handle, &server);
+	return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+    }
 
     /*
      * We try kadm5_decrypt_key twice because in the case of a
