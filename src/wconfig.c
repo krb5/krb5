@@ -1,7 +1,7 @@
 /*
  * wconfig.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995,1996 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -39,29 +39,34 @@
 #include <stdio.h>
 #include <string.h>
 
-static char buf [1024];							/* Holds line from a file */
 static int copy_file (char *path, char *fname);
 
-int main(int argc, char *argv[]) {
-    char *ptr;									/* For parsing the input */
+int main(int argc, char *argv[])
+{
 
     if (argc == 2)                              /* Config directory given */
         copy_file (argv[1], "\\windows.in");        /* Send out prefix */
 
-    while ((ptr = gets(buf)) != NULL) {         /* Filter stdin */
-        if (memcmp ("##DOS", buf, 5) == 0)
-            ptr += 5;
-		else if (*ptr == '@')					/* Lines starting w/ '@'... */
-			*ptr = '\0';						/* ...turn into blank lines */
-
-        puts (ptr);
-    }
-
+    copy_file("", "-");
+    
     if (argc == 2)                              /* Config directory given */
         copy_file (argv[1], "\\win-post.in");       /* Send out postfix */
 
     return 0;
 }
+
+char *ignore_list[] = {
+	"DOS##",
+	"DOS",
+#ifdef _MSDOS
+	"WIN16##",
+#endif
+#ifdef _WIN32
+	"WIN32##",
+#endif
+	0
+	};
+		
 /*
  * 
  * Copy_file
@@ -70,18 +75,42 @@ int main(int argc, char *argv[]) {
  * 
  */
 static int
-copy_file (char *path, char *fname) {
+copy_file (char *path, char *fname)
+{
     FILE *fin;
+    char buf[1024];
+    char **cpp, *ptr;
+    int len;
 
-    strcpy (buf, path);                         /* Build up name to open */
-    strcat (buf, fname);
-
-    fin = fopen (buf, "r");                     /* File to read */
-    if (fin == NULL)
-        return 1;
+    if (strcmp(fname, "-") == 0) {
+	    fin = stdin;
+    } else {
+	    strcpy (buf, path);              /* Build up name to open */
+	    strcat (buf, fname);
+	    fin = fopen (buf, "r");                     /* File to read */
+	    if (fin == NULL)
+		    return 1;
+    }
+    
 
     while (fgets (buf, sizeof(buf), fin) != NULL) { /* Copy file over */
-        fputs (buf, stdout);
+	    if (buf[0] == '@') {
+		    fputs("\n", stdout);
+		    continue;
+	    }
+	    if (buf[0] != '#' || buf[1] != '#') {
+		    fputs(buf, stdout);
+		    continue;
+	    }
+	    ptr = buf;
+	    for (cpp = ignore_list; *cpp; cpp++) {
+		    len = strlen(*cpp);
+		    if (memcmp (*cpp, buf+2, len) == 0) {
+			    ptr += 2+len;
+			    break;
+		    }
+	    }
+	    fputs(ptr, stdout);
     }
 
     fclose (fin);

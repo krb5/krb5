@@ -1,3 +1,12 @@
+Mon Jun 10 17:11:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* wconfig.c: Revamp program to make it more extensible.  Now will
+ 	 	uncomment lines that begin "##DOS##" as well as
+ 	 	"##WIN16##" or "##WIN32##", depending on whether we are
+	 	compiling on a Windows 16 or Windows 32 environment.
+		Also, we now perform this transformation on the windows.in
+	 	and win-post.in files as well.
+
 Sat Jun  8 10:01:11 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4: Remove WITH_KDB4 and USE_KDB4_LIBRARY support
