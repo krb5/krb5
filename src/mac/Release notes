@@ -137,7 +137,7 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_2_5b2
  cleaned up glue for all libraries
  
-2.5fc1
- from tag Mac_GSSKerberos5_2_5fc1
+2.5
+ from tag Mac_GSSKerberos5_2_5
  added documentation and fixed makefile so that documentation,
  headers, and cfrm glue are always built correctly
