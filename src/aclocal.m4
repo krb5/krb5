@@ -342,7 +342,7 @@ else
  else
 	AC_MSG_RESULT(preinstalled krb4 in $withval)
 	KRB4_LIB="$withval/lib/libkrb.a"' $(TOPLIBD)/libdes425.a'
-	KDB4_LIB="$withval/libkdb.a"
+	KDB4_LIB="$withval/lib/libkdb.a"
  fi
 fi
 AC_SUBST(KRB4_LIB)

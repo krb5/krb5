@@ -1,3 +1,8 @@
+
+Fri Apr 28 15:27:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* aclocal.m4 (WITH_KRB4): fix KDB4_LIB location when --with-krb4
+		has a value.
+
 Fri Apr 28 11:38:09 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: new windows gss app added to the zip target.
