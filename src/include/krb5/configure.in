@@ -91,7 +91,7 @@ dnl
 AC_MSG_CHECKING([for replay cache directory])
 AC_CACHE_VAL(krb5_cv_sys_rcdir,
 [
-for t_dir in /usr/tmp /var/usr/tmp /var/tmp /tmp ; do
+for t_dir in /var/tmp /usr/tmp /var/usr/tmp /tmp ; do
 	test -d $t_dir || continue
 	krb5_cv_sys_rcdir=$t_dir
 	break

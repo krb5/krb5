@@ -1,3 +1,8 @@
+Thu Apr 16 23:50:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Search for /var/tmp first when determining rcache
+	directory.
+
 Wed Feb 18 15:52:36 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
