@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* externs.h: Don't declare errno.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.orig: Deleted.

@@ -35,7 +35,6 @@ kdb_check: kdc.conf
 	$(RUN_SETUP) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
-	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -old $(TEST_DB).odump
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump 
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump 
@@ -48,14 +47,6 @@ kdb_check: kdc.conf
 	sort $(TEST_DB).ovdump2 > $(TEST_DB).ovsort2
 	cmp $(TEST_DB).sort $(TEST_DB).sort2
 	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
-	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
-	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -s
-	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -old $(TEST_DB).odump 
-	$(RUN_SETUP) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
-	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -old $(TEST_DB).odump2
-	sort $(TEST_DB).odump > $(TEST_DB).osort
-	sort $(TEST_DB).odump2 > $(TEST_DB).osort2
-	cmp $(TEST_DB).osort $(TEST_DB).osort2
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 

@@ -11,14 +11,14 @@
  *
  */
 
+#include "prof_int.h"
+
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <errno.h>
-
-#include "prof_int.h"
 
 static errcode_t rw_setup(profile)
 	profile_t	profile;
