@@ -672,6 +672,9 @@ XCOMM the platform-specific parameters - edit site.def to change
 #ifndef ExtraLoadFlags
 #define ExtraLoadFlags /**/
 #endif
+#ifndef Osuf
+#define Osuf o
+#endif
 #ifndef LdCombineFlags
 #if SystemV4
 #define LdCombineFlags -r
