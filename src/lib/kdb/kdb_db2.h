@@ -32,7 +32,7 @@
 #define krb5_db2_db_fini		krb5_db_fini
 #define krb5_db2_db_get_age		krb5_db_get_age
 #define krb5_db2_db_create		krb5_db_create
-#define krb5_db2_db_destroy		kdb5_db_destroy
+#define krb5_db2_db_destroy		krb5_db_destroy
 #define krb5_db2_db_rename		krb5_db_rename
 #define krb5_db2_db_get_principal	krb5_db_get_principal
 #define krb5_db2_db_free_principal	krb5_db_free_principal

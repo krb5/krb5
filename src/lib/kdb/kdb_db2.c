@@ -180,7 +180,7 @@ k5db2_dbopen(dbc, fname, flags, mode)
 
     bti.flags = 0;
     bti.cachesize = 0;
-    bti.psize = 1024;		/* ??? */
+    bti.psize = 4096;
     bti.lorder = 0;
     bti.minkeypage = 0;
     bti.compare = NULL;
@@ -1180,10 +1180,8 @@ kdb5_context_size(kcontext, arg, sizep)
     kret = EINVAL;
     if ((dbctx = (krb5_db2_context *) arg)) {
 	required = (sizeof(krb5_int32) * 7);
-#ifdef notdef
-	if (dbctx->db_inited && dbctx->db_dispatch && dbctx->db_name)
+	if (dbctx->db_inited && dbctx->db_name)
 	    required += strlen(dbctx->db_name);
-#endif
 	kret = 0;
 	*sizep += required;
     }

@@ -1,5 +1,10 @@
 Fri Jul 25 15:29:03 1997  Tom Yu  <tlyu@mit.edu>
 
+	* kdb_db2.c: Fix typo; also, tweak page size in attempt to speed
+	things up.
+
+	* kdb_db2.h: Fix typo.
+
 	* t_kdb.c: Reflect changes in the API, mostly db_create.
 
 	* Makefile.in: Bump version due to major reworking.
