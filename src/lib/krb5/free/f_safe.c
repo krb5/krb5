@@ -25,8 +25,10 @@ register krb5_safe *val;
 {
     if (val->user_data.data)
 	xfree(val->user_data.data);
-    if (val->addresses)
-	krb5_free_address(val->addresses);
+    if (val->r_address)
+	krb5_free_addr(val->r_address);
+    if (val->s_address)
+	krb5_free_addr(val->s_address);
     if (val->checksum)
 	krb5_free_checksum(val->checksum);
     xfree(val);
