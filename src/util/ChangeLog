@@ -1,3 +1,8 @@
+Mon Oct  3 23:36:12 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Don't build unifdef directory --- we don't need it
+			anymore.
+
 Fri Sep 30 20:22:53 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* kbuild: log arguments to THISCONF, RECONF files.
