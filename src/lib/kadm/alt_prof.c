@@ -432,8 +432,9 @@ cleanup:
     if (kret) {
 	if (rparams)
 	    krb5_free_realm_params(kcontext, rparams);
-    } else
-	*rparamp = rparams;
+	rparams = 0;
+    }
+    *rparamp = rparams;
     return(kret);
 }
 

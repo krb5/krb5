@@ -1,3 +1,8 @@
+Tue Sep 26 16:24:00 1995    <tytso@rsts-11.mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): On an error, initialize the
+		returned rparams pointer to NULL.
+
 Mon Sep 25 16:54:18 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
