@@ -1,3 +1,7 @@
+Sun Oct 23 01:47:14 1994    (tytso@rsx-11)
+
+	* Makefile.in (check): Do checks for depth = 5
+
 Fri Oct  7 01:26:42 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in (check): Add general admin/kdb confidence check.
