@@ -1,3 +1,12 @@
+Wed Apr 12 14:40:30 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in, configure.in: Move dependency for all-$WHAT back
+		into Makefile.in so that the Windows port can pick up the
+		line (since it doesn't use configure).  Instead, change
+		the name of target which causes the subdirectories to be
+		built under Unix, and make that a dependency for all-unix.
+		Gross, but this should fix things for both DOS and Windows.
+
 Thu Apr 13 16:56:50 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in, libkrb5.def, gssapi.def (new): 

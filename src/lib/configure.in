@@ -5,15 +5,14 @@ AC_SET_BUILDTOP
 CONFIG_DIRS(krb5 kdb des425 crypto gssapi)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
-MAKE_SUBDIRS("making",all)
+_MAKE_SUBDIRS("making",all-unix-subdirs,all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 MAKE_SUBDIRS("checking",check)
 LinkFile(libkrb5.a, ./krb5/libkrb5.a)
 LinkFile(libcrypto.a, ./crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, ./gssapi/libgssapi_krb5.a)
-AppendRule([all-unix:: libkrb5.a libcrypto.a])
+AppendRule([all-unix:: all-unix-subdirs libkrb5.a libcrypto.a])
 AppendRule([all-unix:: libgssapi_krb5.a])
-AppendRule([all:: all-$(WHAT)])
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE
