@@ -1,3 +1,7 @@
+Tue Jul 23 23:40:05 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kadmin.exp: removed, since it was for the old admin server.
+
 Mon Jul 22 04:19:46 1996  Marc Horowitz  <marc@mit.edu>
 
 	* gssftp.exp (ftp_test): check for the banner with -nocase, since
