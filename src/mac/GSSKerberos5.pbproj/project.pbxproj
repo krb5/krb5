@@ -140,7 +140,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks/;
+				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks/ /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "";
@@ -185,7 +185,7 @@
 		00F24296FFB75B2612120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				00F24298FFB75CAB12120156,
+				1C82B3250062A0257F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -197,12 +197,6 @@
 			isa = PBXRezBuildPhase;
 			name = "ResourceManager Resources";
 		};
-		00F24298FFB75CAB12120156 = {
-			fileRef = 012574A7FF7A9C8212120111;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		00F24299FFB75CD112120156 = {
 			children = (
 				00F24292FFB75B2612120156,
@@ -210,6 +204,7 @@
 				00F242A4FFB75FA712120156,
 				00F242ACFFB760BC12120156,
 				00F2429AFFB75D5D12120156,
+				1C82B3220062A0257F000001,
 			);
 			isa = PBXGroup;
 			name = Dylibs;
@@ -243,7 +238,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "";
@@ -293,6 +288,7 @@
 		00F242A2FFB75F1512120156 = {
 			buildActionMask = 2147483647;
 			files = (
+				1C82B3230062A0257F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -320,7 +316,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "";
@@ -371,16 +367,10 @@
 		00F242A9FFB75FA712120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				00F242AAFFB75FA712120156,
+				1C82B3240062A0257F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
-		};
-		00F242AAFFB75FA712120156 = {
-			fileRef = 012574A5FF7A9C8212120111;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		00F242ABFFB75FA712120156 = {
 			buildActionMask = 2147483647;
@@ -405,7 +395,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "";
@@ -458,16 +448,10 @@
 		00F242B1FFB760BC12120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				00F242B2FFB760BC12120156,
+				1C82B3260062A0257F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
-		};
-		00F242B2FFB760BC12120156 = {
-			fileRef = 012574A8FF7A9C8212120111;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		00F242B3FFB760BC12120156 = {
 			buildActionMask = 2147483647;
@@ -6023,6 +6007,35 @@
 			settings = {
 				ATTRIBUTES = (
 				);
+			};
+		};
+		1C82B3220062A0257F000001 = {
+			isa = PBXFrameworkReference;
+			path = Kerberos.framework;
+			refType = 3;
+		};
+		1C82B3230062A0257F000001 = {
+			fileRef = 1C82B3220062A0257F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		1C82B3240062A0257F000001 = {
+			fileRef = 1C82B3220062A0257F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		1C82B3250062A0257F000001 = {
+			fileRef = 1C82B3220062A0257F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		1C82B3260062A0257F000001 = {
+			fileRef = 1C82B3220062A0257F000001;
+			isa = PBXBuildFile;
+			settings = {
 			};
 		};
 		25C77492FF52D03A12120111 = {
