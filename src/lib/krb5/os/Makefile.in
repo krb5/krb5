@@ -171,6 +171,12 @@ t_mktime: gmt_mktime.c
 
 t_localaddr: localaddr.c
 	$(CC) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c
+
+t_locate_kdc: t_locate_kdc.o
+	$(CC) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \
+		-static -L../.. -lkrb5 -lk5crypto -lcom_err @GEN_LIB@ $(LIBS)
+t_locate_kdc.o: t_locate_kdc.c locate_kdc.c
+
 LCLINT=lclint
 LCLINTOPTS= -warnposix \
 	-usedef +charintliteral +ignoresigns -predboolint +boolint \

@@ -1,5 +1,8 @@
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_locate_kdc.c: New file.
+	* Makefile.in (t_locate_kdc.o, t_locate_kdc): New targets.
+
 	* locate_kdc.c: Include fake-addrinfo.h.
 	(FAI_PREFIX, FAI_IMPLEMENTATION): Define macros.
 	(get_port, add_sockaddr_to_list, add_host_to_list): Drop
