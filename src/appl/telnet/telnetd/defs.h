@@ -161,6 +161,10 @@ typedef unsigned char cc_t;
 #include <sys/ptyio.h>
 #endif
 
+#if defined(__alpha) && defined(STREAMSPTY)
+#undef STREAMSPTY
+#endif
+
 #if	!defined(TIOCSCTTY) && defined(TCSETCTTY)
 # define	TIOCSCTTY TCSETCTTY
 #endif

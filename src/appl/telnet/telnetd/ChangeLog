@@ -1,3 +1,8 @@
+Mon May  1 11:33:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* defs.h: Temporary hack for the alpha. Undefine STREAMSPTY if
+		defined. This will be removed in a later release.
+
 Fri Apr 28 18:07:34 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
