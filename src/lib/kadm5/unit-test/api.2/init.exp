@@ -534,7 +534,7 @@ proc test30 {} {
 		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		    server_handle
 	}]} {
-		error_and_restart "$test: unexpected succsess"
+		error_and_restart "$test: unexpected success"
 		return
 	}
 	one_line_succeed_test {
