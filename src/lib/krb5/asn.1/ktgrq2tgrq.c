@@ -81,21 +81,38 @@ register int *error;
 	}
     }
     retval->nonce = val->nonce;
+#if 0
+    /* XXX !@#*)@# busted ASN.1 compiler, -h2 doesn't generate compilable
+       code */
     retval->etype = (struct element_KRB5_8 *)malloc(sizeof(*retval->etype)+
 						    max(0,val->netypes-1)*sizeof(integer));
-    if (!retval->etype)
+    if (!retval->etype) {
+	*error = ENOMEM;
 	goto errout;
-    
-#if 0
+    }    
     for (i = 0; i < val->netypes; i++) {
 	retval->etype->element_KRB5_9[i] = val->etype[i];
     }
     retval->etype->nelem = val->netypes;
-#else
-    /* XXX !@#*)@# busted ASN.1 compiler */
-    retval->etype->element_KRB5_9 = val->etype[0];
-    retval->etype->nelem = 1;
 #endif
+    {
+	register struct element_KRB5_8 *rv1 = 0, *rv2;
+	register int i;
+
+	for (i = 0; i < val->netypes; i++, rv1 = rv2) {
+	    rv2 = (struct element_KRB5_8 *) xmalloc(sizeof(*rv2));
+	    if (!rv2) {
+		*error = ENOMEM;
+		goto errout;
+	    }
+	    if (rv1)
+		rv1->next = rv2;
+	    xbzero((char *)rv2, sizeof (*rv2));
+	    if (!retval->etype)
+		retval->etype = rv2;
+	    rv2->element_KRB5_9 = val->etype[i];
+	}
+    }
  
     if (val->addresses) {
 	retval->addresses =
@@ -112,6 +129,9 @@ register int *error;
 	    goto errout;
     }
     if (val->second_ticket) {
+#if 0
+	/* code for -h2 structures, which generate bogus code from pepsy */
+
 	struct element_KRB5_10 *adtk;
 	krb5_ticket * const *temp;
 	register int i;
@@ -140,7 +160,43 @@ register int *error;
 	    }
 	}
 	retval->additional__tickets = adtk;
+#endif
+	register struct element_KRB5_10 *adtk = 0, *rv1 = 0, *rv2;
+	krb5_ticket * const *temp;
+	register int i;
+
+	/* count elements */
+	for (i = 0, temp = val->second_ticket; *temp; temp++,i++, rv1 = rv2) {
+
+	    rv2 = (struct element_KRB5_10 *)xmalloc(sizeof(*rv2));
+	    if (!rv2) {
+		*error = ENOMEM;
+		goto errout;
+	    }
+	    xbzero(adtk, sizeof(*adtk));
+	    if (rv1)
+		rv1->next = rv2;
+	    xbzero((char *)rv2, sizeof (*rv2));
+	    if (!adtk)
+		adtk = rv2;
+
+	    rv2->Ticket = krb5_ticket2KRB5_Ticket(val->second_ticket[i],
+						   error);
+	    if (!rv2->Ticket) {
+		for (rv1 = adtk; rv1; rv1 = rv2) {
+		    if (rv1->Ticket)
+			free_KRB5_Ticket(rv1->Ticket);
+		    rv2 = rv1->next;
+		    xfree(rv1);
+		}
+		goto errout;
+	    }
+	}
+	retval->additional__tickets = adtk;
     } else {
+#if 0
+	/* this was once necessary to get around faulty optional processing */
+
 	struct element_KRB5_10 *adtk;
 	adtk = (struct element_KRB5_10 *)xmalloc(sizeof(*adtk));
 	if (!adtk) {
@@ -150,6 +206,8 @@ register int *error;
 	xbzero(adtk, sizeof(*adtk));
 	adtk->nelem = 0;
 	retval->additional__tickets = adtk;
+#endif
+	retval->additional__tickets = 0;
     }
 	
     return retval;

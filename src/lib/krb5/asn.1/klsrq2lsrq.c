@@ -32,6 +32,10 @@ krb5_last_req2KRB5_LastReq(val, error)
 register krb5_last_req_entry * const *val;
 register int *error;
 {
+#if 0
+    /* this code is for -h2 style ISODE structures.  However, pepsy
+       generates horribly broken when given -h2. */
+
     register struct type_KRB5_LastReq *retval;
     register krb5_last_req_entry * const *temp;
     register int i;
@@ -61,6 +65,44 @@ register int *error;
 	retval->element_KRB5_4[i]->lr__value = unix2gentime(val[i]->value,
 							    error);
 	if (!retval->element_KRB5_4[i]->lr__value) {
+	    goto errout;
+	}
+    }
+    return(retval);
+#endif
+    register struct type_KRB5_LastReq *retval = 0, *rv1 = 0, *rv2;
+    register krb5_last_req_entry * const *temp;
+    register int i;
+
+    /* count elements */
+    for (i = 0, temp = val; *temp; temp++,i++, rv1 = rv2) {
+
+	rv2 = (struct type_KRB5_LastReq *) xmalloc(sizeof(*rv2));
+	if (!rv2) {
+	    if (retval)
+		free_KRB5_LastReq(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	if (rv1)
+	    rv1->next = rv2;
+	xbzero((char *)rv2, sizeof (*rv2));
+	if (!retval)
+	    retval = rv2;
+
+	rv2->element_KRB5_4 = (struct element_KRB5_5 *)
+	    xmalloc(sizeof(*(retval->element_KRB5_4)));
+	if (!rv2->element_KRB5_4) {
+	errout:
+	    *error = ENOMEM;
+	    if (retval)
+		free_KRB5_LastReq(retval);
+	    return(0);
+	}	    
+	rv2->element_KRB5_4->lr__type = val[i]->lr_type;
+	rv2->element_KRB5_4->lr__value = unix2gentime(val[i]->value,
+						      error);
+	if (!retval->element_KRB5_4->lr__value) {
 	    goto errout;
 	}
     }

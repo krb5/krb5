@@ -33,6 +33,10 @@ const struct type_KRB5_PrincipalName *val;
 const struct type_KRB5_Realm *realm;
 register int *error;
 {
+#if 0
+    /* this code is for -h2 style ISODE structures.  However, pepsy
+       generates horribly broken when given -h2. */
+
     register krb5_principal retval;
     register int i;
 
@@ -57,5 +61,36 @@ register int *error;
 	}
     }
     retval[i+1] = 0;
+    return(retval);
+#endif
+
+    register krb5_principal retval;
+    register int i;
+    register struct type_KRB5_PrincipalName *rv;
+
+    for (i = 1, rv = val; rv->next; i++, rv = rv->next)
+	;
+
+    /* plus one for the realm, plus one for null term */
+    retval = (krb5_principal) xcalloc(i + 2, sizeof(krb5_data *));
+					     
+    if (!retval) {
+	*error = ENOMEM;
+	return(0);
+    }
+
+    retval[0] = qbuf2krb5_data(realm, error);
+    if (!retval[0]) {
+	xfree(retval);
+	return(0);
+    }
+    for (i = 1, rv = val; rv; rv = rv->next, i++) {
+	retval[i] = qbuf2krb5_data(rv->GeneralString, error);
+	if (!retval[i]) {
+	    krb5_free_principal(retval);
+	    return(0);
+	}
+    }
+    retval[i] = 0;
     return(retval);
 }

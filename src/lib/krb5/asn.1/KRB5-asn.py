@@ -13,6 +13,11 @@
 KRB5 DEFINITIONS ::=
 BEGIN
 
+-- needed to do the Right Thing with pepsy; this isn't a valid ASN.1
+-- token, however.
+
+SECTIONS encode decode none
+
 -- the order of stuff in this file matches the order in the draft RFC
 
 Realm ::= GeneralString

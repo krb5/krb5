@@ -30,17 +30,12 @@
 #ifndef ComErrLib
 #define ComErrLib -lcom_err
 #endif
-#ifndef PosyFlags
-#define PosyFlags -f -h2 -a -s
+#ifndef PepsyFlags
+#define PepsyFlags -f -h0 -a -s
+/* -h2 breaks pepsy, ARRGH! */
 #endif
-#ifndef PepyFlags
-#define PepyFlags -a PY_advise -P -s -r
-#endif
-#ifndef PepyCmd
-#define PepyCmd pepy
-#endif
-#ifndef PosyCmd
-#define PosyCmd posy
+#ifndef PepsyCmd
+#define PepsyCmd pepsy
 #endif
 #ifndef ArAddCmd
 #define ArAddCmd ar cruv
@@ -59,12 +54,14 @@
 #define DesDefines YouMustFigureOutYourDesDefines
 #endif
 
-#ifndef PepyPosyRules
-#define	PepyPosyRules()							@@\
+#ifndef PepsyTarget
+#define	PepsyTarget(basename)						@@\
 .SUFFIXES:	.py							@@\
-.py.c:									@@\
-	$(PEPY) $(PYFLAGS) $<
-#endif /* PepyPosyRules */
+basename/**/_tables.c: basename-asn.py					@@\
+	@echo '***Ignore the warning message "Warning: Can'\''t find UNIV.ph failed"' @@\
+	$(PEPSY) $(PSYFLAGS) basename-asn.py				@@\
+basename-types.h: basename/**/_tables.c
+#endif /* PepsyTarget */
 
 #ifndef ErrorTableObjectRule
 
@@ -255,10 +252,8 @@ P_PROTOS=-UUseNarrowPrototypes
      TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
         CONFIGSRC = $(TOP)/config
             ISODE = IsodeDir
-          POFLAGS = PosyFlags
-          PYFLAGS = PepyFlags
-             PEPY = PepyCmd
-             POSY = PosyCmd
+         PSYFLAGS = PepsyFlags
+            PEPSY = PepsyCmd
             TOUCH = TouchCmd
             IMAKE = ImakeCmd
            DEPEND = DependCmd

@@ -78,15 +78,12 @@
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
 
-#define IsodeLib -L/mit/isode/isode-6.0/@sys/lib -lisode
-#define IsodeDir /mit/isode/isode-6.0
+#define IsodeLib -L/mit/isode/isode-6.8/@sys/lib -lisode
+#define IsodeDir /mit/isode/isode-6.8
 
-/* Re-define PepyCmd and PosyCmd if pepy & posy aren't in your search
-   path. */
+/* Re-define PepsyCmd if pepsy isn't in your search path. */
 
-#define PepyCmd $(ISODE)/@sys/bin/pepy
-#define PosyCmd $(ISODE)/@sys/bin/posy
-
+#define PepsyCmd $(ISODE)/@sys/bin/pepsy
 
 #define UseImakeInstalled /* -- turn on if you have imake installed */
 #define UseMakedependInstalled /* -- turn on if you have makedepend installed */

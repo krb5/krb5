@@ -80,20 +80,34 @@ register int *error;
     }
     retval->nonce = val->nonce;
 
-    retval->etype = (krb5_enctype *) xmalloc(sizeof(*(retval->etype))*min(1,val->etype->nelem));
-    if (!retval->etype)
-	goto errout;
 #if 0
+    retval->etype = (krb5_enctype *) xmalloc(sizeof(*(retval->etype))*min(1,val->etype->nelem));
+    if (!retval->etype) {
+	*error = ENOMEM;
+	goto errout;
+    }
+    /* XXX @#$#@ broken ASN.1 compiler, -h2 generates unusable code,
+       but the structures would be handle like so: */
     for (i = 0; i < val->etype->nelem; i++) {
 	retval->etype[i] = val->etype->element_KRB5_9[i];
     }
-    val->netypes = val->etype->nelem;
-#else
-    /* XXX @#$#@ broken ASN.1 compiler */
-    retval->etype[0] = val->etype->element_KRB5_9;
-    retval->netypes = 1;
+    retval->netypes = val->etype->nelem;
 #endif
-
+    {
+	register int i;
+	register struct element_KRB5_8 *rv;
+	for (i = 0, rv = val->etype; rv; i++, rv = rv->next)
+	    ;
+	retval->netypes = i;
+	retval->etype = (krb5_enctype *) xcalloc(i+1,sizeof(*retval->etype));
+	if (!retval->etype) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+	for (i = 0, rv = val->etype; rv; rv = rv->next, i++)
+	    retval->etype[i] = rv->element_KRB5_9;
+    }
+	
     if (val->addresses) {
 	retval->addresses =
 	    KRB5_HostAddresses2krb5_address(val->addresses, error);
@@ -111,6 +125,9 @@ register int *error;
 	    goto errout;
     }
     if (val->additional__tickets) {
+#if 0
+	/* code for -h2 style, which pepsy can't do right */
+
 	register krb5_ticket **aticks;
         register struct element_KRB5_10 *tptr;
 	register int i;
@@ -119,6 +136,10 @@ register int *error;
 	/* plus one for null terminator */
 	aticks = (krb5_ticket **) xcalloc(tptr->nelem + 1,
 					  sizeof(*aticks));
+	if (!aticks) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
 	for (i = 0; (i < tptr->nelem) && tptr->Ticket[i]; i++) {
 	    aticks[i] = KRB5_Ticket2krb5_ticket(tptr->Ticket[i], error);
 	    if (!aticks[i]) {
@@ -126,6 +147,35 @@ register int *error;
 		    krb5_free_ticket(aticks[i]);
 		    i--;
 		}
+		xfree(aticks);
+		goto errout;
+	    }
+	}
+	retval->second_ticket = aticks;
+#endif
+	register krb5_ticket **aticks;
+        register struct element_KRB5_10 *tptr, *rv;
+	register int i;
+
+	tptr = val->additional__tickets;
+	for (i = 0, rv = tptr; rv; i++, rv = rv->next)
+	    ;
+
+	/* plus one for null terminator */
+	aticks = (krb5_ticket **) xcalloc(i + 1, sizeof(*aticks));
+	if (!aticks) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+	    
+	for (i = 0, rv = tptr; rv; rv = rv->next, i++) {
+	    aticks[i] = KRB5_Ticket2krb5_ticket(rv->Ticket, error);
+	    if (!aticks[i]) {
+		while (i >= 0) {
+		    krb5_free_ticket(aticks[i]);
+		    i--;
+		}
+		xfree(aticks);
 		goto errout;
 	    }
 	}
