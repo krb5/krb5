@@ -1,3 +1,7 @@
+Fri May  7 18:04:48 1999  Danilo D Almeida  <dalmeida@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Fixed typo.
+
 Fri May  7 14:39:08 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Return KRB5_REALM_UNKNOWN if

@@ -73,11 +73,11 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
     code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
 
     if (code) {
-	if (code == PROF_NO_SECTION || code == PROF_NO_RELATION) {
-		    code = KRB5_REALM_UNKNOWN;
- 	krb5_xfree(host);
-  	return code;
-     }
+	if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
+	    code = KRB5_REALM_UNKNOWN;
+	krb5_xfree(host);
+	return code;
+    }
 
 #ifdef HAVE_NETINET_IN_H
     if ((sp = getservbyname(KDC_PORTNAME, "udp")))
