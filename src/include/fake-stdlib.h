@@ -336,7 +336,7 @@ int ioctl P((int  , int  , char * ));
 #endif
 int kill P((int  , int  ));
 int link P((char * , char * ));
-long lseek P((int  , long  , int ));
+off_t lseek P((int  , long  , int ));
 #ifdef SYSTEM_FIVE
 int madvise P((char * , int , int ));
 int mmap P((char * , int  , int , int , int , off_t ));
