@@ -42,12 +42,16 @@
 #endif
 #endif
 
-typedef krb5_octet mit_des_cblock[8];	/* crypto-block size */
+typedef krb5_octet mit_des_cblock[8];		/* crypto-block size */
 
 /* Key schedule--used internally by DES routines to gain some speed */
 typedef struct mit_des_ks_struct {
     mit_des_cblock _;
 } mit_des_key_schedule[16];
+
+/* Triple-DES structures */
+typedef mit_des_cblock		mit_des3_cblock[3];
+typedef mit_des_key_schedule	mit_des3_key_schedule[3];
 
 #define MIT_DES_ENCRYPT	1
 #define MIT_DES_DECRYPT	0
@@ -70,6 +74,7 @@ typedef struct mit_des_ran_key_seed {
 extern krb5_cs_table_entry krb5_raw_des_cst_entry;
 extern krb5_cs_table_entry krb5_des_crc_cst_entry;
 extern krb5_cs_table_entry krb5_des_md5_cst_entry;
+extern krb5_cs_table_entry krb5_des3_md5_cst_entry;
 extern krb5_checksum_entry	krb5_des_cbc_cksumtable_entry;
 
 /*
@@ -186,5 +191,55 @@ extern unsigned long swap_long_bytes_bit_number PROTOTYPE((unsigned long ));
 /* XXX depends on FILE being a #define! */
 extern void test_set PROTOTYPE((FILE *, const char *, int, const char *, int));
 #endif
+
+/* d3_ecb.c */
+extern int mit_des3_ecb_encrypt
+	PROTOTYPE((const mit_des_cblock FAR *in,
+		   mit_des_cblock FAR *out,
+		   mit_des_key_schedule sched1,
+		   mit_des_key_schedule sched2,
+		   mit_des_key_schedule sched3,
+		   int encrypt));
+
+/* d3_cbc.c */
+extern int mit_des3_cbc_encrypt
+	PROTOTYPE((const mit_des_cblock FAR *in,
+		   mit_des_cblock FAR *out,
+		   long length,
+		   mit_des_key_schedule ks1,
+		   mit_des_key_schedule ks2,
+		   mit_des_key_schedule ks3,
+		   mit_des_cblock ivec,
+		   int encrypt));
+
+/* d3_procky.c */
+extern krb5_error_code mit_des3_process_key
+	PROTOTYPE((krb5_encrypt_block * eblock,
+		   const krb5_keyblock * keyblock));
+
+/* d3_rndkey.c */
+extern krb5_error_code mit_des3_random_key
+	PROTOTYPE((const krb5_encrypt_block * eblock,
+		   krb5_pointer seed,
+		   krb5_keyblock ** keyblock));
+
+/* d3_kysched.c */
+extern int mit_des3_key_sched
+	PROTOTYPE((mit_des3_cblock key,
+		   mit_des3_key_schedule schedule));
+
+/* d3_str2ky.c */
+extern int mit_des3_string_to_key
+	PROTOTYPE((const krb5_encrypt_block FAR * eblock,
+		   krb5_keyblock FAR * keyblock,
+		   const krb5_data FAR * data,
+		   const krb5_data FAR * salt));
+
+/* u_nfold.c */
+extern krb5_error_code mit_des_n_fold
+	PROTOTYPE((const krb5_octet * input,
+		   const size_t in_len,
+		   const krb5_octet * output,
+		   const size_t out_len));
 
 #endif	/*DES_INTERNAL_DEFS*/
