@@ -1,5 +1,13 @@
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
+	* krb5.hin: Get rid of extraneous krb5_const before integer
+	arguments in prototypes for valid_enctype(), valid_cksumtype(),
+	is_coll_proof_cksum(), is_keyed_cksum(), krb5_encrypt_size(),
+	krb5_checksum_size(), krb5_verify_checksum() so they match the
+	existing code.
+
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
 	* k5-int.h: Remove AS_REP_105_SAM_COMPAT definition. Not used in
 	tree.  Remove SYSV redefinition of random() to rand() and
 	srandom() to srand(). Two locations in tree that might matter

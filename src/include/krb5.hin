@@ -472,13 +472,13 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 
 
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_enctype
-	(krb5_const krb5_enctype ktype);
+	(krb5_enctype ktype);
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV valid_cksumtype
-	(krb5_const krb5_cksumtype ctype);
+	(krb5_cksumtype ctype);
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
-	(krb5_const krb5_cksumtype ctype);
+	(krb5_cksumtype ctype);
 KRB5_DLLIMP krb5_boolean KRB5_CALLCONV is_keyed_cksum
-	(krb5_const krb5_cksumtype ctype);
+	(krb5_cksumtype ctype);
 
 #ifdef KRB5_OLD_CRYPTO
 /*
@@ -534,11 +534,11 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_use_enctype
 		krb5_encrypt_block FAR * eblock,
 		krb5_const krb5_enctype enctype);
 KRB5_DLLIMP size_t KRB5_CALLCONV krb5_encrypt_size
-	(krb5_const size_t length,
+	(size_t length,
 		krb5_enctype crypto);
 KRB5_DLLIMP size_t KRB5_CALLCONV krb5_checksum_size
 	(krb5_context context,
-		krb5_const krb5_cksumtype ctype);
+		krb5_cksumtype ctype);
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_calculate_checksum
 	(krb5_context context,
 		krb5_const krb5_cksumtype ctype,
@@ -547,7 +547,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_calculate_checksum
 		krb5_checksum FAR * outcksum);
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 	(krb5_context context,
-		krb5_const krb5_cksumtype ctype,
+		krb5_cksumtype ctype,
 		krb5_const krb5_checksum FAR * cksum,
 		krb5_const krb5_pointer in, krb5_const size_t in_length,
 		krb5_const krb5_pointer seed, krb5_const size_t seed_length);
