@@ -188,6 +188,11 @@ krb5_recvauth(context, auth_context,
 	memset((char *)&error, 0, sizeof(error));
 	krb5_us_timeofday(context, &error.stime, &error.susec);
 	error.server = server;
+
+
+
+
+
 	error.error = problem - ERROR_TABLE_BASE_krb5;
 	if (error.error > 127)
 		error.error = KRB_ERR_GENERIC;
@@ -208,17 +213,15 @@ krb5_recvauth(context, auth_context,
 	outbuf.data = 0;
     }
 
-    if (!problem) {
-    	retval = krb5_write_message(context, fd, &outbuf);
-    	if (outbuf.data)
-	    krb5_xfree(outbuf.data);
-    	if (retval)
-	    goto cleanup;
-    } else {
+    retval = krb5_write_message(context, fd, &outbuf);
+    if (outbuf.data) {
+	krb5_xfree(outbuf.data);
     	/* We sent back an error, we need cleanup then return */
     	retval = problem;
     	goto cleanup;
     }
+    if (retval)
+	goto cleanup;
 
     /* Here lies the mutual authentication stuff... */
     if ((ap_option & AP_OPTS_MUTUAL_REQUIRED)) {
