@@ -56,7 +56,8 @@ void
 usage(name)
     char *name;
 {
-	fprintf(stderr, "usage: %s [-p port] [-S keytab]\n");
+	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n",
+		name);
 }	
 
 void
@@ -77,12 +78,14 @@ main(argc, argv)
     krb5_principal server, client;
     char repbuf[BUFSIZ];
     char *cname;
+    char *service = SAMPLE_SERVICE;
     short port = 0;		/* If user specifies port */
     extern int opterr, optind;
     extern char * optarg;
     int ch;
     krb5_keytab keytab = NULL;	/* Allow specification on command line */
     char *progname;
+    int on = 1;
 
     progname = *argv;
 
@@ -92,37 +95,33 @@ main(argc, argv)
     /* open a log connection */
     openlog("sserver", 0, LOG_DAEMON);
 
-    if (retval = krb5_sname_to_principal(context, NULL, SAMPLE_SERVICE, 
-					 KRB5_NT_SRV_HST, &server)) {
-	syslog(LOG_ERR, "while generating service name (%s): %s",
-	       SAMPLE_SERVICE, error_message(retval));
-	exit(1);
-    }
-    
     /*
      * Parse command line arguments
      *  
      */
     opterr = 0;
-    while ((ch = getopt(argc, argv, "p:S:")) != EOF)
-      switch (ch) {
-      case 'p':
-	      port = atoi(optarg);
-	      break;
-	case 'S':
-	      if (retval = krb5_kt_resolve(context, optarg, &keytab)) {
-		      com_err(progname, retval,
-			      "while resolving keytab file %s", optarg);
-		      exit(2);
-	      }
-	  break;
+    while ((ch = getopt(argc, argv, "p:S:s:")) != EOF)
+    switch (ch) {
+    case 'p':
+	port = atoi(optarg);
+	break;
+    case 's':
+	service = optarg;
+	break;
+    case 'S':
+	if (retval = krb5_kt_resolve(context, optarg, &keytab)) {
+	    com_err(progname, retval,
+		    "while resolving keytab file %s", optarg);
+	    exit(2);
+	}
+	break;
 
       case '?':
-      default:
-	      usage(progname);
-	      exit(1);
-	      break;
-      }
+    default:
+	usage(progname);
+	exit(1);
+	break;
+    }
 
     argc -= optind;
     argv += optind;
@@ -132,6 +131,13 @@ main(argc, argv)
 	    port = atoi(argv[1]);
     }
 
+    if (retval = krb5_sname_to_principal(context, NULL, service, 
+					 KRB5_NT_SRV_HST, &server)) {
+	syslog(LOG_ERR, "while generating service name (%s): %s",
+	       service, error_message(retval));
+	exit(1);
+    }
+    
     /*
      * If user specified a port, then listen on that port; otherwise,
      * assume we've been started out of inetd. 
@@ -145,6 +151,9 @@ main(argc, argv)
 	    syslog(LOG_ERR, "socket: %m");
 	    exit(3);
 	}
+	/* Let the socket be reused right away */
+	(void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
+			  sizeof(on));
 
 	sin.sin_family = AF_INET;
 	sin.sin_addr.s_addr = 0;
@@ -192,7 +201,7 @@ main(argc, argv)
     /* Get client name */
     if (retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname)){
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
-        sprintf(repbuf, "You are <unparse error>\n", cname);
+        sprintf(repbuf, "You are <unparse error>\n");
     } else {
         sprintf(repbuf, "You are %s\n", cname);
 	free(cname);
@@ -210,5 +219,7 @@ main(argc, argv)
 	syslog(LOG_ERR, "%m: while writing data to client");
 	exit(1);
     }
+    krb5_auth_con_free(context, auth_context);
+    krb5_free_context(context);
     exit(0);
 }

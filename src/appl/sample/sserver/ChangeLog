@@ -1,3 +1,10 @@
+Sat Sep 16 00:21:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sserver.c (main): Allow the user to specify the service instance
+		using the -s option.  Use SO_REUSEEADDR so that the port
+		can be immediately reused.  Free the context and
+		auth_context before exiting.
+
 Sat Jul 29 04:39:02 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* configure.in: Don't link with -lkadm.
