@@ -1,3 +1,10 @@
+2004-03-26  Sam Hartman  <hartmans@mit.edu>
+
+	* fcc.h: Remove all but the definition of krb5_cc_file_ops because
+	the rest is static in cc_file.c 
+
+	* Makefile.in (T_file):  Remove (no longer builds, no longer used)
+
 2004-03-25  Sam Hartman  <hartmans@mit.edu>
 
 	* cc_file.c (krb5_fcc_generate_new): Use mkstemp not mktemp when possible

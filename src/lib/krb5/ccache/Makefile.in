@@ -81,11 +81,6 @@ clean-windows::
 	@echo Making clean in krb5\ccache
 	$(RM) $(OBJFILE)
 
-T_FILE_OBJS=t_file.o
-
-t_file: $(T_FILE_OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_file $(T_FILE_OBJS) $(KRB5_BASE_LIBS)
-
 T_CC_OBJS=t_cc.o
 
 t_cc: $(T_CC_OBJS) $(KRB5_BASE_DEPLIBS)
