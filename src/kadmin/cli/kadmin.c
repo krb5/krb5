@@ -183,7 +183,6 @@ char *kadmin_startup(argc, argv)
     krb5_ccache cc;
     krb5_principal princ;
     kadm5_config_params params;
-    char svcnamebuf[MAXHOSTNAMELEN + 8];
     char *svcname;
 
     memset((char *) &params, 0, sizeof(params));
@@ -263,16 +262,10 @@ char *kadmin_startup(argc, argv)
     params.mask |= KADM5_CONFIG_REALM;
     params.realm = def_realm;
 
-    retval = kadm5_get_admin_service_name(context, def_realm, svcnamebuf,
-					  sizeof(svcnamebuf));
-    if (retval) {
-	fprintf(stderr, "%s: failed to get admin service name", whoami);
-	exit(1);
-    }
     if (params.mask & KADM5_CONFIG_OLD_AUTH_GSSAPI)
 	svcname = KADM5_ADMIN_SERVICE;
     else
-	svcname = svcnamebuf;
+	svcname = NULL;
 
     /*
      * Set cc to an open credentials cache, either specified by the -c

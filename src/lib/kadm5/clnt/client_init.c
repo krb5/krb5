@@ -165,6 +165,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      int code = 0;
      generic_ret *r;
+     char svcname[MAXHOSTNAMELEN + 8];
 
      initialize_ovk_error_table();
      initialize_adb_error_table();
@@ -195,7 +196,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 
      krb5_init_context(&handle->context);
 
-     if(service_name == NULL || client_name == NULL) {
+     if(client_name == NULL) {
 	free(handle);
 	return EINVAL;
      }
@@ -268,7 +269,19 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  free(handle);
 	  return KADM5_MISSING_KRB5_CONF_PARAMS;
      }
-     
+
+     /* NULL service_name means use host-based. */
+     if (service_name == NULL) {
+	  code = kadm5_get_admin_service_name(handle->context,
+					      handle->params.realm,
+					      svcname, sizeof(svcname));
+	  if (code) {
+	       krb5_free_context(handle->context);
+	       free(handle);
+	       return KADM5_MISSING_KRB5_CONF_PARAMS;
+	  }
+	  service_name = svcname;
+     }
      /*
       * Acquire a service ticket for service_name@realm in the name of
       * client_name, using password pass (which could be NULL), and

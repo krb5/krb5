@@ -2,6 +2,8 @@
 
 	* client_init.c (_kadm5_init_any)[DEBUG]: Print error from
 	clnttcp_create().
+	(_kadm5_init_any): Use kadm5_get_admin_service_name() if null
+	pointer passed in for service_name.
 
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 
