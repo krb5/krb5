@@ -46,7 +46,7 @@
 char *whoami;
 int signalled = 0;
 static int debug = 0;
-void *handle;
+void *handle = NULL;
 
 int use_keytab, use_master;
 char *keytab = NULL;
@@ -148,6 +148,8 @@ int main(argc, argv)
      signal(SIGHUP, SIG_IGN);
      signal(SIGTERM, request_exit);
 
+     krb5_klog_init(context, "krb524d", whoami, !nofork);
+
      if (use_keytab)
 	  init_keytab(context);
      if (use_master)
@@ -180,10 +182,6 @@ int main(argc, argv)
 	 com_err(whoami, errno, "while detaching from tty");
 	 cleanup_and_exit(1, context);
      }
-#if 0
-     if (!nofork)
-	 krb5_klog_init(context, "krb524d", argv[0], !nofork);
-#endif
 
      while (1) {
 	  FD_ZERO(&rfds);
@@ -222,7 +220,7 @@ void cleanup_and_exit(ret, context)
      int ret;
      krb5_context context;
 {
-     if (use_master) {
+     if (use_master && handle) {
 	  (void) kadm5_destroy(handle);
      }
      if (use_keytab) krb5_kt_close(context, kt);
@@ -391,7 +389,7 @@ write_msg:
 	       ret = errno;
      if (debug)
 	  printf("reply written\n");
-/* If we have keys to clean up, do so.*/
+     /* If we have keys to clean up, do so.*/
      if (v5_service_key.contents)
        krb5_free_keyblock_contents(context, &v5_service_key);
      if (v4_service_key.contents)

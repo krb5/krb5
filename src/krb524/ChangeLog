@@ -1,3 +1,10 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* krb524d.c: Call krb5_klog_init before the first point where the
+	klog facility may be used, delete ifdef'd out code to make that
+	call from later in the file, conditionalize kadm5_destroy on the
+	handle being non-null, and correct an indentation error.
+
 2001-06-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendmsg.c (krb524_sendto_kdc): Use new locate_server interface.
