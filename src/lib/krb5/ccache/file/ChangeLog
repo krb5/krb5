@@ -1,3 +1,7 @@
+Fri Mar 17 19:23:09 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.
+
 Wed Mar 15 12:07:28 1995 Keith Vetter (keithv@fusion.com)
 
 	* fcc_eseq.c, fcc_init.c, fcc_maybe.c, fcc_dest.c:
