@@ -31,7 +31,7 @@ typedef struct _krb5_rc_ops {
     krb5_error_code (*expunge)PROTOTYPE((krb5_rcache));
     krb5_error_code (*get_span)PROTOTYPE((krb5_rcache,krb5_deltat *));
     char *(*get_name)PROTOTYPE((krb5_rcache));
-    krb5_error_code (*resolve)PROTOTYPE((krb5_rcache *,char *));
+    krb5_error_code (*resolve)PROTOTYPE((krb5_rcache, char *));
 } krb5_rc_ops;
 
 krb5_error_code krb5_rc_default PROTOTYPE((krb5_rcache *));
