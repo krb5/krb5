@@ -216,11 +216,11 @@ HINSTANCE get_lib_instance(void);
 
 #endif /* _MSDOS || _WIN32 */
 
-#ifndef KRB5_CALLCONV
+#ifdef macintosh
+
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
-#endif
 #ifndef FAR
 #define FAR
 #endif
@@ -228,7 +228,6 @@ HINSTANCE get_lib_instance(void);
 #define NEAR
 #endif
 
-#ifdef _MACINTOSH
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -237,7 +236,7 @@ HINSTANCE get_lib_instance(void);
 #define ENOMEM -1
 #define ANSI_STDIO
 #ifndef _SIZET
-typedef unsigned int size_t;
+typedef unsigned long size_t;
 #define _SIZET
 #endif
 #include <unix.h>
@@ -291,8 +290,20 @@ int fstat(int fildes, struct stat *buf);
 #define _MACSOCKAPI_
 
 #define THREEPARAMOPEN(x,y,z) open(x,y)
-#else /* _MACINTOSH */
+#else /* macintosh */
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
-#endif /* _MACINTOSH */
+#endif /* macintosh */
+
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
+#endif
+#ifndef FAR
+#define FAR
+#endif
+#ifndef NEAR
+#define NEAR
+#endif
 
 #endif /* _KRB5_WIN_MAC_H */

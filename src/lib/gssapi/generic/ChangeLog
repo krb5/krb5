@@ -1,3 +1,23 @@
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* oid_ops.c (generic_gss_release_oid): Recognize our own "self"
+		oids so that we don't free static oid's.  (exported_name
+		and nt_service_name_v2).
+
+Sun May 24 22:01:29 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_buffer.c (g_make_string_buffer): Don't include the trailing
+		NULL of the string in the gss buffer's length.
+
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* util_ordering.c (g_order_free): 
+	* rel_oid_set.c (generic_gss_release_oid_set): 
+	* disp_major_status.c: General lint cleanup.
+
+	* util_oid.c (g_copy_OID_set): Copy the OID set with entirely
+		dynamic memory (don't alias the contents of the OID set).
+
 Wed Apr  1 16:33:27 1998  Tom Yu  <tlyu@mit.edu>
 
 	* disp_major_status.c (g_display_major_status): Fix a typo in

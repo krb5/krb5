@@ -206,6 +206,10 @@ static const char *krb_get_err_text(kerror)
 #endif
 #endif
 
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
+
 #include "loginpaths.h"
 
 #ifdef POSIX_TERMIOS
@@ -233,12 +237,33 @@ static const char *krb_get_err_text(kerror)
 
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
 
+#if defined(_PATH_MAILDIR)
+#define MAILDIR		_PATH_MAILDIR
+#else
+#define MAILDIR		"/usr/spool/mail"
+#endif
+#if defined(_PATH_NOLOGIN)
+#define NOLOGIN		_PATH_NOLOGIN
+#else
+#define NOLOGIN		"/etc/nologin"
+#endif
+#if defined(_PATH_LASTLOG)
+#define LASTLOG		_PATH_LASTLOG
+#else
+#define LASTLOG		"/usr/adm/lastlog"
+#endif
+#if defined(_PATH_BSHELL)
+#define BSHELL		_PATH_BSHELL
+#else
+#define BSHELL		"/bin/sh"
+#endif
+
+#if (defined(BSD) && (BSD >= 199103))	/* no /usr/ucb */
+#define QUOTAWARN	"/usr/bin/quota"
+#endif
+
 #define	MOTDFILE	"/etc/motd"
-#define	MAILDIR		"/usr/spool/mail"
-#define	NOLOGIN		"/etc/nologin"
 #define	HUSHLOGIN	".hushlogin"
-#define	LASTLOG		"/usr/adm/lastlog"
-#define	BSHELL		"/bin/sh"
 
 #if !defined(OQUOTA) && !defined(QUOTAWARN)
 #define QUOTAWARN	"/usr/ucb/quota" /* warn user about quotas */
@@ -443,7 +468,7 @@ int unix_passwd_okay (pass)
 
     /* copy the first 8 chars of the password for unix crypt */
     strncpy(user_pwcopy, pass, sizeof(user_pwcopy));
-    user_pwcopy[8]='\0';
+    user_pwcopy[sizeof(user_pwcopy) - 1]='\0';
     namep = crypt(user_pwcopy, salt);
     memset (user_pwcopy, 0, sizeof(user_pwcopy));
     /* ... and wipe the copy now that we have the string */
@@ -496,17 +521,20 @@ void k_init (ttyn)
 	unlink(ccfile+strlen("FILE:"));
     } else {
 	/* note it correctly */
-	strcpy(ccfile, getenv(KRB5_ENV_CCNAME));
+	strncpy(ccfile, getenv(KRB5_ENV_CCNAME), sizeof(ccfile));
+	ccfile[sizeof(ccfile) - 1] = '\0';
     }
 #endif
 
 #ifdef KRB4_GET_TICKETS
     if (krb_get_lrealm(realm, 1) != KSUCCESS) {
 	strncpy(realm, KRB_REALM, sizeof(realm));
+	realm[sizeof(realm) - 1] = '\0';
     }
     if (login_krb4_get_tickets || login_krb4_convert) {
 	/* Set up the ticket file environment variable */
 	strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
+	tkfile[sizeof(tkfile) - 1] = '\0';
 	strncat(tkfile, strrchr(ttyn, '/')+1,
 		sizeof(tkfile) - strlen(tkfile));
 	(void) unlink (tkfile);
@@ -663,7 +691,8 @@ try_convert524 (kcontext, me)
 	return 0;
     }
     got_v4_tickets = 1;
-    strcpy(tkfile, tkt_string());
+    strncpy(tkfile, tkt_string(), sizeof(tkfile));
+    tkfile[sizeof(tkfile) - 1] = '\0';
     return 1;
 }
 #endif
@@ -684,7 +713,8 @@ try_krb4 (me, user_pwstring)
     case INTK_OK:
 	kpass_ok = 1;
 	krbflag = 1;
-	strcpy(tkfile, tkt_string());
+	strncpy(tkfile, tkt_string(), sizeof(tkfile));
+	tkfile[sizeof(tkfile) - 1] = '\0';
 	break;	
 	/* These errors should be silent */
 	/* So the Kerberos database can't be probed */
@@ -1147,8 +1177,10 @@ int main(argc, argv)
     if (eflag) {
 	lgetstr(term, sizeof(term), "Terminal type");
     } else if (!(kflag || Kflag)) {/* Preserve terminal if not read over net */
-	if (getenv("TERM"))
+	if (getenv("TERM")) {
 	    strncpy(term, getenv("TERM"), sizeof(term));
+	    term[sizeof(term) - 1] = '\0';
+	}
     }
 	
     term_init (rflag || kflag || Kflag || eflag);
@@ -1202,7 +1234,6 @@ int main(argc, argv)
 	/* if user not super-user, check for disabled logins */
 	if (pwd == NULL || pwd->pw_uid)
 	    checknologin();
-
 
 	/*
 	 * Allows automatic login by root.
@@ -1703,8 +1734,10 @@ int main(argc, argv)
     setenv("USER", pwd->pw_name, 1);
     setenv("SHELL", pwd->pw_shell, 1);
 
-    if (term[0] == '\0')
+    if (term[0] == '\0') {
 	(void) strncpy(term, stypeof(tty), sizeof(term));
+	term[sizeof(term) - 1] = '\0';
+    }
     if (term[0])
 	(void)setenv("TERM", term, 0);
 
@@ -1776,7 +1809,8 @@ int main(argc, argv)
     }
 
 #ifndef OQUOTA
-    if (! access( QUOTAWARN, X_OK)) (void) system(QUOTAWARN);
+    if (! access( QUOTAWARN, X_OK))
+	(void) system(QUOTAWARN);
 #endif
 
     handler_init (sa, SIG_DFL);
@@ -1788,7 +1822,9 @@ int main(argc, argv)
 
     tbuf[0] = '-';
     p = strrchr(pwd->pw_shell, '/');
-    (void) strcpy(tbuf + 1, p ? (p+1) : pwd->pw_shell);
+    (void) strncpy(tbuf+1, p?(p+1):pwd->pw_shell, sizeof(tbuf-1));
+    tbuf[sizeof(tbuf) - 1] = '\0';
+
     execlp(pwd->pw_shell, tbuf, 0);
     fprintf(stderr, "login: no shell: ");
     perror(pwd->pw_shell);
@@ -2051,32 +2087,37 @@ void dolastlog(quiet, tty)
      int quiet;
      char *tty;
 {
-#ifdef HAVE_LASTLOG_H
+#if defined(HAVE_LASTLOG_H) || (defined(BSD) && (BSD >= 199103))
     struct lastlog ll;
     int fd;
 
     if ((fd = open(LASTLOG, O_RDWR, 0)) >= 0) {
 	(void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 	if (!quiet) {
-	    if (read(fd, (char *)&ll, sizeof(ll)) == sizeof(ll) &&
-		ll.ll_time != 0) {
-		printf("Last login: %.*s ",
-		       24-5, (char *)ctime(&ll.ll_time));
+	    if ((read(fd, (char *)&ll, sizeof(ll)) == sizeof(ll)) &&
+		(ll.ll_time != 0)) {
+
+		printf("Last login: %.*s ", 24-5, (char *)ctime(&ll.ll_time));
+
 		if (*ll.ll_host != '\0')
-		    printf("from %.*s\n",
-			   sizeof(ll.ll_host), ll.ll_host);
+		    printf("from %.*s\n", sizeof(ll.ll_host), ll.ll_host);
 		else
-		    printf("on %.*s\n",
-			   sizeof(ll.ll_line), ll.ll_line);
+		    printf("on %.*s\n", sizeof(ll.ll_line), ll.ll_line);
 	    }
 	    (void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 	}
-	(void)time(&ll.ll_time);
+	(void) time(&ll.ll_time);
+
 	(void) strncpy(ll.ll_line, tty, sizeof(ll.ll_line));
-	if (hostname)
+	ll.ll_line[sizeof(ll.ll_line) - 1] = '\0';
+
+	if (hostname) {
 	    (void) strncpy(ll.ll_host, hostname, sizeof(ll.ll_host));
-	else
+	    ll.ll_host[sizeof(ll.ll_host) - 1] = '\0';
+	} else {
 	    (void) memset(ll.ll_host, 0, sizeof(ll.ll_host));
+	}
+
 	(void)write(fd, (char *)&ll, sizeof(ll));
 	(void)close(fd);
     }

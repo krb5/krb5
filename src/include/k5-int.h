@@ -58,8 +58,11 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include "win-mac.h"
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import on
+#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -72,9 +75,9 @@
 #endif
 
 
-#ifndef _MACINTOSH
+#ifndef macintosh
 #if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
-#define _MACINTOSH
+#define macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -1408,6 +1411,10 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *));
+
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
+#endif
 
 /*
  * Convenience function for structure magic number

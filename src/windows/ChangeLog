@@ -1,3 +1,12 @@
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* mkbin.bat: Added convenience batch file which copies all of the
+		appropriate files out of the build tree into a single kbin
+		directory
+
+	* Makefile.in: Add the windows/lib directory to the list of
+		directories to be built (and cleaned).
+
 Tue Aug  5 18:40:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* version.rc: New file containing the version resource information

@@ -4,7 +4,7 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_REPLACE_FUNCS([strcasecmp strdup setenv setsid strerror strftime getopt herror parsetos])
-AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
+AC_CHECK_FUNCS(gettosbyname cgetent)
 AC_CHECK_HEADERS(stdlib.h string.h)
 LIBOBJS="$LIBOBJS getent.o"
 AC_CONST

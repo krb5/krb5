@@ -28,7 +28,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 static CInfoPBRec	theCatInfo;
 static	char		*FileBuffer;
 static	int			indexCount;

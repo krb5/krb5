@@ -856,6 +856,8 @@ static int v5_des_read(fd, buf, len)
 	nstored = 0;
     }
 
+    printf("nreturned = %d\n", nreturned);
+
     return(nreturned);
 }
 

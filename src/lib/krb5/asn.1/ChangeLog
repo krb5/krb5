@@ -1,3 +1,9 @@
+Thu Jul  2 15:30:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* asn1_encode.c: Make the magic Macintosh EPOCH offset be 70 years
+ 		instead of 66 years, since CodeWarrior Pro 2 now bases
+ 		everything off of 1900.
+
 Thu Apr 16 17:01:27 1998  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_encode.c (asn1_encode_generaltime): Sanity check the return

@@ -1,3 +1,7 @@
+Mon May 18 17:09:22 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_err.et: Clarify error for REALM_CANT_RESOLVE.
+
 Thu Apr 16 20:51:40 1998  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_err.et (ASN1_BAD_GMTIME): Add code for case where bad

@@ -1,3 +1,31 @@
+Thu Jul  9 21:52:41 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_server.c (kadm_ser_cpw): Re-enable "old-style" password
+ 	changing.  Yes, it's potentially a problem due to lack of quality
+	checking, but we'll live with that because we can use
+	key-hash-based checks too.
+
+Wed Jul  8 01:32:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kadm_ser_wrap.c (kadm_ser_init): Use krb5_425_conv_principal
+		instead of krb5_build_principal to create the changepw
+		sprinc principal.
+
+Fri Jul  3 18:17:48 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (build_pwfile): Add rule to build the build_pwfile
+		program.   
+
+	* kadm_server.c (kadm_ser_cpw): Put the call to the
+		kadm_approve_pw in the common code, so it's executed even
+		if KADM5 is defined.  Add appropriate syslogs to the
+		change password processing.
+
+	* kadm_funcs.c (pwstring;): If NDBM_PW_CHECK is defined, then do
+		the NDBM-based dictionary check.   Build kadmind4 using
+		the make option PW_CHECK=-DNDBM_PW_CHECK if this feature
+		is desired.
+
 1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kadm_server.c (krb_log): Print the year using 4 digit to avoid

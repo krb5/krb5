@@ -1,6 +1,5 @@
 //Microsoft Developer Studio generated resource script.
 //
-// XXX Since modified by hand!
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -89,7 +88,7 @@ END
 ID_KWIN DIALOG PRELOAD DISCARDABLE  0, 0, 336, 115
 STYLE WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 #ifdef CYGNUS
-CAPTION "Kerb*Net"
+CAPTION "KerbNet"
 #else
 CAPTION "Kerberos"
 #endif
@@ -106,10 +105,11 @@ BEGIN
     LTEXT           "&Password",IDD_LOGIN_PASSWORD_TITLE,125,69,42,8
     LTEXT           "&Realm",IDD_LOGIN_REALM_TITLE,239,69,26,8
     EDITTEXT        IDD_LOGIN_NAME,6,79,84,12,ES_AUTOHSCROLL
-    EDITTEXT        IDD_LOGIN_PASSWORD,126,78,84,12,ES_PASSWORD|ES_AUTOHSCROLL
+    EDITTEXT        IDD_LOGIN_PASSWORD,126,78,84,12,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
     EDITTEXT        IDD_LOGIN_REALM,239,79,84,12,ES_AUTOHSCROLL
     PUSHBUTTON      "&Change Password...",IDD_CHANGE_PASSWORD,6,96,84,14
-    PUSHBUTTON      "&Destroy Credentials",IDD_TICKET_DELETE,126,96,84,14
+    PUSHBUTTON      "&Delete",IDD_TICKET_DELETE,141,96,52,14
     DEFPUSHBUTTON   "&Login",IDD_LOGIN,271,96,52,14
     PUSHBUTTON      "",IDD_PASSWORD_CR2,5000,5000,6,6,NOT WS_TABSTOP
 END
@@ -140,7 +140,7 @@ END
 ID_OPTS DIALOG DISCARDABLE  97, 52, 169, 138
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 #ifdef CYGNUS
-CAPTION "Kerb*Net Options"
+CAPTION "KerbNet Options"
 #else
 CAPTION "Kerberos Options"
 #endif

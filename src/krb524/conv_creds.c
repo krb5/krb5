@@ -119,7 +119,9 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
      krb5_creds *v5creds;
      CREDENTIALS *v4creds;
 {
+#if 0
      krb5_ui_4 addr;
+#endif
      int ret;
      krb5_timestamp lifetime;
      
@@ -151,6 +153,7 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
 	  ((lifetime > 0xff) ? 0xff : lifetime);
      v4creds->issue_date = v5creds->times.starttime;
 
+#if 0
      /* XXX perhaps we should use the addr of the client host if */
      /* v5creds contains more than one addr.  Q: Does V4 support */
      /* non-INET addresses? */
@@ -163,6 +166,6 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
      } else
 	  memcpy((char *) &addr, v5creds->addresses[0]->contents,
 		 sizeof(addr));
-
+#endif
      return 0;
 }

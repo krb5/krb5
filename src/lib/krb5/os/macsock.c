@@ -526,7 +526,7 @@ char*
 inet_ntoa(struct in_addr ina) {
 	OSErr err;
 #define	max_addr_str 16
-	char addrStr[max_addr_str];
+	static char addrStr[max_addr_str];
 
 	err = AddrToStr(ina.s_addr, addrStr);
 	return addrStr;

@@ -28,7 +28,7 @@
 #ifndef KRB5_KDB5_DBM__
 #define KRB5_KDB5_DBM__
 
-#if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
+#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
 	
 /* exclusive or shared lock flags */
 #define	KRB5_DBM_SHARED		0
@@ -115,5 +115,5 @@ krb5_error_code krb5_dbm_db_open_database
 krb5_error_code krb5_dbm_db_close_database 
 	KRB5_PROTOTYPE((krb5_context));
 
-#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(WIN32) */
+#endif /* !defined(macintosh) && !defined(_MSDOS) && !defined(WIN32) */
 #endif /* KRB5_KDB5_DBM__ */

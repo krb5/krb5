@@ -2,6 +2,8 @@
  * getpasswd.c
  * ripped from krb4
  */
+ 
+ #include <string.h>
 
 #define cKrbUserCancelled	2
 #define kLoginDLOGID		-4081
@@ -32,6 +34,10 @@ typedef union {								// used to convert ProcPtr to Handle
 	ProcPtr		P;
 } Proc2Hand;
 
+/* Prototypes 	- meeroh */
+static int OKIsEnabled( DialogPtr dlog );
+static int SetOKEnable( DialogPtr dlog );
+OSErr GetUserInfo( char *UserName, char *password );
 
 	//  IH 05.03.96: PPC port, we have to use UPP instead of Procedure Ptrs
 static ModalFilterUPP 	gTwoItemFilterUPP = NULL;
@@ -44,7 +50,7 @@ static pascal void FrameOKbtn( WindowPtr myWindow, short itemNo )
 	Handle		tempHandle;
 	Rect		itemRect;
 
-	GetDItem( (DialogPtr) myWindow, itemNo, &tempType, &tempHandle, &itemRect );
+	GetDialogItem( (DialogPtr) myWindow, itemNo, &tempType, &tempHandle, &itemRect );
 	PenSize( 3, 3 );
 	FrameRoundRect( &itemRect, 16, 16 );		// make it an OK button suitable for framing
 }
@@ -72,7 +78,7 @@ static pascal Boolean TwoItemFilter( DialogPtr dlog, EventRecord *event, short *
 			return false;
 		}
 		
-		GetDItem( dlog, kLoginOKItem, &tempType, &okBtnHandle, &tempRect );
+		GetDialogItem( dlog, kLoginOKItem, &tempType, &okBtnHandle, &tempRect );
 		HiliteControl( (ControlHandle) okBtnHandle, 1 );	// hilite the OK button
 		Delay( 10, &tempTicks );	// wait a little while
 		HiliteControl( (ControlHandle) okBtnHandle, 0 );
@@ -96,10 +102,10 @@ static pascal Boolean TwoItemFilter( DialogPtr dlog, EventRecord *event, short *
 			selStart = (**((DialogPeek) dlog)->textH).selStart;	// Get the selection in the visible item
 			selEnd = (**((DialogPeek) dlog)->textH).selEnd;
 
-			SelIText( dlog, kLoginIvisPwItem, selStart, selEnd );	// Select text in invisible item
+			SelectDialogItemText( dlog, kLoginIvisPwItem, selStart, selEnd );	// Select text in invisible item
 			DialogSelect( event,&evtDlog, itemHit );			// Input key
 
-			SelIText( dlog, kLoginVisPwItem, selStart, selEnd );	// Select same area in visible item
+			SelectDialogItemText( dlog, kLoginVisPwItem, selStart, selEnd );	// Select same area in visible item
 			if( ( event->message & charCodeMask ) != bs )		// If it's not a backspace (backspace is the only key that can affect both the text and the selection- thus we need to process it in both fields, but not change it for the hidden field.
 				event->message = '¥';							// Replace with character to use
 		}
@@ -125,11 +131,11 @@ static int SetOKEnable( DialogPtr dlog )
 	Str255		tpswd,tuser;
 	ControlHandle okButton;
 
-	GetDItem( dlog, kLoginNameItem, &itemType, &itemHandle, &itemRect );
-	GetIText( itemHandle, tuser );
-	GetDItem( dlog, kLoginVisPwItem, &itemType, &itemHandle, &itemRect );
-	GetIText( itemHandle, tpswd );
-	GetDItem( dlog, kLoginOKItem, &itemType, (Handle *) &okButton, &itemRect );
+	GetDialogItem( dlog, kLoginNameItem, &itemType, &itemHandle, &itemRect );
+	GetDialogItemText( itemHandle, tuser );
+	GetDialogItem( dlog, kLoginVisPwItem, &itemType, &itemHandle, &itemRect );
+	GetDialogItemText( itemHandle, tpswd );
+	GetDialogItem( dlog, kLoginOKItem, &itemType, (Handle *) &okButton, &itemRect );
 	state = (tuser[0] && tpswd[0]) ? 0 : 255;
 	HiliteControl(okButton,state);
 }
@@ -140,7 +146,7 @@ static int OKIsEnabled( DialogPtr dlog )
 	Rect		itemRect;
 	ControlHandle okButton;
 
-	GetDItem( dlog, kLoginOKItem, &itemType, (Handle *) &okButton, &itemRect );
+	GetDialogItem( dlog, kLoginOKItem, &itemType, (Handle *) &okButton, &itemRect );
 	return ((**okButton).contrlHilite != 255);
 }
 
@@ -178,11 +184,11 @@ OSErr GetUserInfo( char *UserName, char *password )
 	if (*UserName) {
 		tempStr[0] = strlen(UserName);
 		memcpy( &(tempStr[1]), UserName, tempStr[0]);
-		GetDItem( myDLOG, kLoginNameItem, &itemType, &itemHandle, &itemRect );
-		SetIText( itemHandle, tempStr );
-		SelIText( myDLOG, kLoginVisPwItem,0,0 );
+		GetDialogItem( myDLOG, kLoginNameItem, &itemType, &itemHandle, &itemRect );
+		SetDialogItemText( itemHandle, tempStr );
+		SelectDialogItemText( myDLOG, kLoginVisPwItem,0,0 );
 	}
-	else SelIText( myDLOG, kLoginNameItem,0,0 );
+	else SelectDialogItemText( myDLOG, kLoginNameItem,0,0 );
 	
 		//  IH 05.03.96: Create the Universal Proc Pointers here
 	if (gTwoItemFilterUPP == NULL)
@@ -191,11 +197,11 @@ OSErr GetUserInfo( char *UserName, char *password )
 		gFrameOKbtnUPP = NewUserItemProc(FrameOKbtn);
 			
 	// Establish a user item around the OK button to draw the default button frame in
-	GetDItem( myDLOG, kLoginOKItem, &itemType, &itemHandle, &itemRect );
+	GetDialogItem( myDLOG, kLoginOKItem, &itemType, &itemHandle, &itemRect );
 	InsetRect( &itemRect, -4, -4 );				// position user item around OK button
 	procConv.P = (ProcPtr) FrameOKbtn;			// convert ProcPtr to a Handle
 		//  IH 05.03.96: PPC Port - Use UPP instead of Procedure Ptrs
-	SetDItem( myDLOG, kLoginFrameItem, userItem, (Handle) gFrameOKbtnUPP, &itemRect );
+	SetDialogItem( myDLOG, kLoginFrameItem, userItem, (Handle) gFrameOKbtnUPP, &itemRect );
 	
 	InitCursor();
 	do {
@@ -206,15 +212,15 @@ OSErr GetUserInfo( char *UserName, char *password )
 		} while( itemHit != kLoginOKItem && itemHit != kLoginCnclItem );
 		
 		if( itemHit == kLoginOKItem ) {				// OK button pressed?			
-			GetDItem( myDLOG, kLoginNameItem, &itemType, &itemHandle, &itemRect );
-			GetIText( itemHandle, tempStr );
+			GetDialogItem( myDLOG, kLoginNameItem, &itemType, &itemHandle, &itemRect );
+			GetDialogItemText( itemHandle, tempStr );
 		
 			tempStr[0] = ( tempStr[0] < MAX_K_NAME_SZ ) ? tempStr[0] : MAX_K_NAME_SZ-1 ;
 			memcpy ((void*) UserName, (void*) &(tempStr[1]), tempStr[0]);
 			UserName[tempStr[0]] = 0;
 			
-			GetDItem( myDLOG, kLoginIvisPwItem, &itemType, &itemHandle, &itemRect );
-			GetIText( itemHandle, tempStr );
+			GetDialogItem( myDLOG, kLoginIvisPwItem, &itemType, &itemHandle, &itemRect );
+			GetDialogItemText( itemHandle, tempStr );
 		
 			tempStr[0] = ( tempStr[0] < ANAME_SZ ) ? tempStr[0] : ANAME_SZ-1 ;
 			memcpy( (void*) password, (void*) &(tempStr[1]), tempStr[0]);
@@ -225,6 +231,6 @@ OSErr GetUserInfo( char *UserName, char *password )
 		else rc = cKrbUserCancelled;						// pressed the Cancel button
 	} while( rc == DialogNotDone );
 
-	DisposDialog( myDLOG );
+	DisposeDialog( myDLOG );
 	return rc;
 }

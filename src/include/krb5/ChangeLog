@@ -1,3 +1,7 @@
+Wed Jul  8 04:30:22 1998  Geoffrey King  <gjking@mit.edu>
+
+	* adm_proto.h: Added prototype for new function krb5_klog_reopen()
+
 Thu Apr 16 23:50:08 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Search for /var/tmp first when determining rcache

@@ -1,3 +1,20 @@
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in: Remove -DLEHMAN, which doesn't do anything.  (A grep
+		through the whole source tree shows no instances of #ifdef
+		LEHMAN)
+
+Sun May 24 21:39:49 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* windows.in (ABS,S,C): Use double backslashes for the path
+		separators to workaround Microsoft NMAKE brain damaging.
+		Sometimes backslashes are treated as a quoting characters,
+		and sometimes not, with no rhyme or reason that I can
+		determine.  Fortunatelly double backslashes in pathanmes
+		don't seem to hurt (for the times when the backslash isn't
+		treated as a quoating character).  Whoever decided Windows
+		should use backslash as a path separator should be shot.
+
 Wed Apr 15 18:01:39 1998  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (CRYPTO_DEPLIB):

@@ -20,8 +20,11 @@
 #define unix
 #endif
 
-#if defined(_MSDOS) || defined (_WIN32)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import on
+#endif
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -36,7 +39,7 @@
 #define NEAR
 #endif
 
-#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 
 /* End-user programs may need this -- oh well */
 #ifndef HAVE_STDARG_H
@@ -99,6 +102,10 @@ extern et_old_error_hook_func reset_com_err_hook
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
 #endif
 
 #define __COM_ERR_H

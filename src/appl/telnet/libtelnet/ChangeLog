@@ -1,3 +1,12 @@
+Tue Mar  3 14:43:30 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Change test for cgetent to use HAVE_ instead
+		of HAS_, and add a test for gettosbyname().
+
+	* getent.c: Use HAVE_CGETENT instead of HAS_CGETENT
+
+	* parsetos.c: Use HAVE_GETTOSBYNAME instead of HAS_GETTOS
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* getopt.c (getopt): POSIX states that getopt returns -1 when it

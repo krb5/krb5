@@ -24,6 +24,7 @@
 #else
 #include <time.h>
 #endif
+#include <syslog.h>
 
 #ifdef KADM5
 #include <com_err.h>
@@ -146,6 +147,7 @@ int *outlen;
     const char *msg_ptr;
     krb5_int32 now;
     time_t until;
+    krb5_keyblock newkb;
 #endif
 
     /* take key off the stream, and change the database */
@@ -167,30 +169,71 @@ int *outlen;
     memcpy((char *)(((krb5_int32 *)newkey) + 1), (char *)&keyhigh, 4);
     memcpy((char *)newkey, (char *)&keylow, 4);
 
-#ifdef KADM5
-    /* we don't use the client-provided key itself */
-    keylow = keyhigh = 0;
-    memset(newkey, 0, sizeof(newkey));
-
-    if (no_pword) {
-	 krb_log("Old-style change password request from '%s.%s@%s'!",
-		 ad->pname, ad->pinst, ad->prealm);
-	 *outlen = strlen(pw_required)+1;
-	 if (*datout = (u_char *) malloc(*outlen)) {
-	      strcpy(*datout, pw_required);
-	 } else {
-	      *outlen = 0;
-	 }
-	 return KADM_INSECURE_PW;
+    if (retval = kadm_approve_pw(ad->pname, ad->pinst, ad->prealm,
+			newkey, no_pword ? 0 : pword)) {
+	    if (retval == KADM_PW_MISMATCH) {
+		    /*
+		     * Very strange!!!  This means that the cleartext
+		     * password which was sent and the DES cblock
+		     * didn't match!
+		     */
+		    syslog(LOG_ERR, "'%s.%s@%s' sent a password string which didn't match with the DES key?!?",
+				   ad->pname, ad->pinst, ad->prealm);
+		    return(retval);
+	    }
+	    if (fascist_cpw) {
+		    *outlen = strlen(bad_pw_err)+strlen(pw_blurb)+1;
+		    if (*datout = (u_char *) malloc(*outlen)) {
+			    strcpy((char *) *datout, bad_pw_err);
+			    strcat((char *) *datout, pw_blurb);
+		    } else
+			    *outlen = 0;
+		    syslog(LOG_ERR, "'%s.%s@%s' tried to use an insecure password in changepw",
+				   ad->pname, ad->pinst, ad->prealm);
+#ifdef notdef
+		    /* For debugging only, probably a bad idea */
+		    if (!no_pword)
+			    (void) krb_log("The password was %s\n", pword);
+#endif
+		    return(retval);
+	    } else {
+		    *outlen = strlen(bad_pw_warn) + strlen(pw_blurb)+1;
+		    if (*datout = (u_char *) malloc(*outlen)) {
+			    strcpy((char *) *datout, bad_pw_warn);
+			    strcat((char *) *datout, pw_blurb);
+		    } else
+			    *outlen = 0;
+		    syslog(LOG_ERR, "'%s.%s@%s' used an insecure password in changepw",
+				   ad->pname, ad->pinst, ad->prealm);
+	    }
+    } else {
+	    *datout = 0;
+	    *outlen = 0;
     }
-		     
-    if (krb5_build_principal(kadm_context, &user_princ,
-			     strlen(ad->prealm),
-			     ad->prealm,
-			     ad->pname,
-			     *ad->pinst ? ad->pinst : 0, 0))
-	 /* this should never happen */
-	 return KADM_NOENTRY;
+
+#ifdef KADM5
+    if (no_pword)
+	syslog(LOG_WARNING,
+	       "Old-style change password request from '%s.%s@%s'!",
+	       ad->pname, ad->pinst, ad->prealm);
+    else {
+	/*
+	 * We don't use the client-provided key itself, if there is a
+	 * password provided.
+	 */
+	keylow = keyhigh = 0;
+	memset(newkey, 0, sizeof(newkey));
+    }
+
+    syslog(LOG_INFO, "'%s.%s@%s' wants to change its password",
+	   ad->pname, ad->pinst, ad->prealm);
+    if ((krb5_425_conv_principal(kadm_context, ad->pname,
+				 *ad->pinst ? ad->pinst : 0,
+				 ad->prealm, &user_princ))) {
+	/* this should never happen */
+	memset(newkey, 0, sizeof(newkey));
+	return KADM_NOENTRY;
+    }
 
     *outlen = 0;
 
@@ -251,13 +294,29 @@ int *outlen;
 
     (void) kadm5_free_principal_ent(kadm5_handle, &princ_ent);
 
-    retval = kadm5_chpass_principal_util(kadm5_handle, user_princ,
-					 pword, NULL, msg_ret);
-    msg_ptr = msg_ret;
+    if (no_pword) {
+	newkb.magic = KV5M_KEYBLOCK;
+	if ((newkb.contents = (krb5_octet *)malloc(8)) == NULL) {
+	    retval = KADM_NOMEM;
+	    goto send_response;
+	}
+	newkb.length = 8;
+	newkb.enctype = ENCTYPE_DES_CBC_CRC;
+	memcpy((char *)newkb.contents, newkey, 8);
+	retval = kadm5_setv4key_principal(kadm5_handle, user_princ,
+					  &newkb);
+	memset(newkb.contents, 0, 8);
+	*msg_ret = '\0';
+    } else {
+	retval = kadm5_chpass_principal_util(kadm5_handle, user_princ,
+					     pword, NULL, msg_ret);
+	msg_ptr = msg_ret;
+    }
     (void) krb5_free_principal(kadm_context, user_princ);
 
 send_response:
 
+    memset(newkey, 0, sizeof(newkey));
     retval = convert_kadm5_to_kadm(retval);
 
     if (retval) {
@@ -269,54 +328,17 @@ send_response:
 	      strcat(*datout, "\n");
 	 } else
 	      *outlen = 0;
+    } else {
+         syslog(LOG_INFO,
+		"'%s.%s@%s' password changed.", 
+		ad->pname, ad->pinst, ad->prealm);
     }
     if (retval == KADM_INSECURE_PW) {
-	 krb_log("'%s.%s@%s' tried to use an insecure password in changepw",
+          syslog(LOG_ERR, 
+		 "'%s.%s@%s' tried to use an insecure password in changepw",
 		 ad->pname, ad->pinst, ad->prealm);
     }
 #else /* KADM5 */
-    if (retval = kadm_approve_pw(ad->pname, ad->pinst, ad->prealm,
-			newkey, no_pword ? 0 : pword)) {
-	    if (retval == KADM_PW_MISMATCH) {
-		    /*
-		     * Very strange!!!  This means that the cleartext
-		     * password which was sent and the DES cblock
-		     * didn't match!
-		     */
-		    (void) krb_log("'%s.%s@%s' sent a password string which didn't match with the DES key?!?",
-				   ad->pname, ad->pinst, ad->prealm);
-		    return(retval);
-	    }
-	    if (fascist_cpw) {
-		    *outlen = strlen(bad_pw_err)+strlen(pw_blurb)+1;
-		    if (*datout = (u_char *) malloc(*outlen)) {
-			    strcpy((char *) *datout, bad_pw_err);
-			    strcat((char *) *datout, pw_blurb);
-		    } else
-			    *outlen = 0;
-		    (void) krb_log("'%s.%s@%s' tried to use an insecure password in changepw",
-				   ad->pname, ad->pinst, ad->prealm);
-#ifdef notdef
-		    /* For debugging only, probably a bad idea */
-		    if (!no_pword)
-			    (void) krb_log("The password was %s\n", pword);
-#endif
-		    return(retval);
-	    } else {
-		    *outlen = strlen(bad_pw_warn) + strlen(pw_blurb)+1;
-		    if (*datout = (u_char *) malloc(*outlen)) {
-			    strcpy((char *) *datout, bad_pw_warn);
-			    strcat((char *) *datout, pw_blurb);
-		    } else
-			    *outlen = 0;
-		    (void) krb_log("'%s.%s@%s' used an insecure password in changepw",
-				   ad->pname, ad->pinst, ad->prealm);
-	    }
-    } else {
-	    *datout = 0;
-	    *outlen = 0;
-    }
-
     retval = kadm_change(ad->pname, ad->pinst, ad->prealm, newkey);
     keylow = keyhigh = 0;
     memset(newkey, 0, sizeof(newkey));

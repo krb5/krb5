@@ -26,7 +26,7 @@
 #define NEED_WINDOWS
 #include "k5-int.h"
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 static CInfoPBRec	theCatInfo;
 static	char		*FileBuffer;
 static	int			indexCount;
@@ -106,7 +106,7 @@ os_init_paths(ctx, secure)
 	krb5_error_code	retval = 0;
 	char *name = 0;
 
-#if defined(_MACINTOSH) || defined(_MSDOS) || defined(_WIN32)
+#if defined(macintosh) || defined(_MSDOS) || defined(_WIN32)
 	const char *filenames[2];
 #endif
 
@@ -131,7 +131,7 @@ os_init_paths(ctx, secure)
 	retval = profile_init(filenames, &ctx->profile);
 
 #else /* _MSDOS || _WIN32 */
-#ifdef _MACINTOSH
+#ifdef macintosh
 	filenames[0] = GetMacProfilePathName();
 	filenames[1] = 0;
 	retval = profile_init(filenames, &ctx->profile);
@@ -144,7 +144,7 @@ os_init_paths(ctx, secure)
 	if(!name) name = DEFAULT_PROFILE_PATH;
 
 	retval = profile_init_path(name, &ctx->profile);
-#endif /* _MACINTOSH */
+#endif /* macintosh */
 #endif /* _MSDOS || _WIN32 */
 
 	if (retval)

@@ -1,3 +1,38 @@
+Wed Jul 15 11:46:05 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Remove unused argument
+	 	to sprintf().
+
+	* t_ref_kerb.out: Fix test case for zephyr principal to reflect
+	 	addition to conv_princ.c
+
+Tue Jul  7 17:06:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* conv_princ.c: Add additional commonly seen Kerberos V4 services
+		to the hard-coded list.
+
+Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c: Fix up previous fix; short-circuit out when
+	trans->length == 0.
+
+Wed Jul  1 17:59:26 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Fix use of an
+ 		uninitialized variable; apparently the code was depending
+ 		on the stack garbage being non-zero(!)
+
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): 
+	* auth_con.c (krb5_auth_con_setrcache): Export this function in
+		Windows DLL.
+
+1998-05-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Make sure the date
+		string printed uses 4 digit years.
+
 1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* str_conv.c (krb5_string_to_timestamp, strptime): Fix routines to

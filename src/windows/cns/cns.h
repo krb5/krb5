@@ -8,6 +8,10 @@
 #ifndef	KWIN_DEFS
 #define KWIN_DEFS
 
+#if !defined(KRB4) && !defined(KRB5)
+#define KRB5
+#endif
+
 #ifndef RC_INVOKED
 
 #ifdef KRB4
@@ -21,6 +25,7 @@
 #ifdef KRB5
 #include "winsock.h"
 #include "krb5.h"
+#include "krbini.h"
 #include "com_err.h"
 
 #define DEFAULT_TKT_LIFE    120             /* In 5 minute units */
@@ -32,7 +37,7 @@
 /* include space for '.' and '@' */
 #define	MAX_K_NAME_SZ	    (ANAME_SZ + INST_SZ + REALM_SZ + 2)
 #ifdef CYGNUS
-#define ORGANIZATION        "Cygnus Support - (415) 903-1400"
+#define ORGANIZATION        "Cygnus Solutions\n(800)CYGNUS-1\nhttp://www.cygnus.com\ninfo@cygnus.com"
 #endif
 #define CREDENTIALS         char
 #endif
@@ -69,12 +74,8 @@
  * Dialog and dialog item ids
  */
 #define KWIN_DIALOG_CLASS "KERBEROS"	/* class for kerberos dialog */
-#ifdef CYGNUS
-#define KWIN_DIALOG_NAME "KerbNet"	/* name for kerberos dialog */
-#else
 #define KWIN_DIALOG_NAME "Krb5"		/* name for kerberos dialog */
-#endif
-	
+
 #define ID_KWIN 100			/* the main kerberos dialog */
 #define IDD_KWIN_FIRST 101
 #define   IDD_TICKET_LIST_TITLE 101
@@ -146,6 +147,12 @@
 #define   IDD_FORWARDABLE 321
 
 /*
+ * the entire range (400 through 499) is reserved for the blasted variable
+ * dialog box thingie.
+ */
+#define ID_VARDLG    400
+
+/*
  * Dialog dimensions
  */
 #define KWIN_MIN_WIDTH 180
@@ -186,12 +193,12 @@ extern HINSTANCE hinstance;
 extern BOOL alert;
 extern BOOL beep;
 
-extern char confname[];
+extern char confname[FILENAME_MAX];
 
 #ifdef KRB5
 extern krb5_context k5_context;
 extern krb5_ccache k5_ccache;
-extern char ccname[];
+extern char ccname[FILENAME_MAX];
 extern BOOL forwardable;
 #endif
 
@@ -224,11 +231,17 @@ int k5_get_num_cred(int);
 int k5_kname_parse(char *, char *, char *);
 krb5_error_code k5_init_ccache(krb5_ccache *);
 int k5_name_from_ccache(krb5_ccache);
-krb5_error_code k5_change_password(krb5_context, char *, char *, char *,
+krb5_error_code k5_change_password(HWND, krb5_context, char *, char *, char *,
 				   char *, char **);
-#endif
+
+#endif /* KRB5 */
 
 HICON kwin_get_icon(time_t);
+void trim(char *);
+void start_blocking_hook(int);
+void end_blocking_hook(void);
+void center_dialog(HWND);
+void set_dialog_font(HWND, HFONT);
 
 #endif /* RC_INVOKED */
 

@@ -33,7 +33,7 @@
  * Modified to use UNIX domain IPC by Ralph Campbell
  */
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 
 #if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #include <stdarg.h>

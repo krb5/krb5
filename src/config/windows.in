@@ -16,15 +16,15 @@ all-windows:: Makefile
 # Directory syntax:
 #
 # begin absolute path
-ABS=\
+ABS=\\
 # begin relative path
 REL=
 # up-directory
 U=..
 # path separator
-S=\
+S=\\
 # this is magic... should only be used for preceding a program invocation
-C=.\
+C=.\\
 
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)
@@ -42,7 +42,7 @@ CL=
 #
 ##WIN16##CCOPTS2=/AL /Zp /GA /G2s  /Os /Zi /Od /W3 $(XTRA)
 ##WIN32##CCOPTS2=/Os /Zi /Od /W3 $(XTRA)
-CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 -DLEHMAN
+CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
 

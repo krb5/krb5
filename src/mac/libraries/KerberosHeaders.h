@@ -11,7 +11,7 @@
  */
 #define KRB5 1
 
-#define _MACINTOSH
+#define macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define ENOMEM -1
@@ -22,8 +22,6 @@
 
 #include <unix.h>
 #include <ctype.h>
-
-#endif
 
 #define PROVIDE_RSA_MD4
 #define PROVIDE_RSA_MD5

@@ -1,3 +1,13 @@
+Thu Jul 16 10:20:20 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_kadm5.c (parse_tl_data): Change cast from char * to
+	        krb5_octet *.
+	(tcl_kadm5_free_principal_ent, tcl_kadm5_free_policy_ent): Add
+ 	        cast to value returned by Tcl_GetHashValue.
+
+	* tcl_ovsec_kadm.c (tcl_ovsec_kadm_free_principal_ent): Cast
+    	        return of Tcl_GetHashValue.
+
 Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Changed thisconfigdir to point at the kadmin

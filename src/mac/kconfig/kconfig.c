@@ -19,6 +19,7 @@
 /* #define SAPTIMEBOMB 1 */
 
 #include <stdio.h>
+#include <Sound.h>
 #ifndef __MWERKS__
 #include <Controls.h>
 #include <Desk.h>
@@ -110,6 +111,7 @@ static UserItemUPP			gdopictUPP = NULL;
 static UserItemUPP			gdrawRealmUPP = NULL;
 static UserItemUPP			gdolistUPP = NULL;
 
+OSErr GetUserInfo( char *UserName, char *password );
 
 /*
  * Globals
@@ -140,6 +142,7 @@ struct listfilter lf;					/* lf for maind */
 /* Add the 'new' handle so we can disable the control for the SAP release */
 Handle dnewHandle, ddeleteHandle, deditHandle;
 Handle snewHandle, sdeleteHandle, seditHandle;
+Handle passwordHandle;
 preferences prefs;						/* preferences */
 
 #ifdef KRB4
@@ -304,7 +307,7 @@ int main (void)
 			InsertMenu(menuhandle, -1);
 		menus[i] = menuhandle;
 	}
-	AddResMenu (menus[APPL_MENU], 'DRVR');
+	AppendResMenu (menus[APPL_MENU], 'DRVR');
 	DrawMenuBar();
 
 #ifdef KRB4
@@ -710,18 +713,18 @@ handapple (accitem)
 		about ();
 		return;
 	}
-	GetItem (menus[APPL_MENU], accitem, accname); /* get the pascal name */
+	GetMenuItemText (menus[APPL_MENU], accitem, accname); /* get the pascal name */
 	SetResLoad (FALSE);					/* don't load into memory */
 
 	/* figure out acc size + heap */
-	accsize = SizeResource (GetNamedResource ((ResType) 'DRVR', accname));
+	accsize = GetResourceSizeOnDisk (GetNamedResource ((ResType) 'DRVR', accname));
 	acchdl = NewHandle (accsize);		/* try for a block this size */
 	SetResLoad (TRUE);					/* reset flag for rsrc mgr */
 	if (!acchdl) {						/* if not able to get a chunk */
 		SysBeep(3);
 		return;
 	}
-	DisposHandle (acchdl);				/* get rid of this handle */
+	DisposeHandle (acchdl);				/* get rid of this handle */
 	GetPort (&savePort);				/* save the current port */
 	OpenDeskAcc (accname);				/* run desk accessory */
 	SetPort (savePort);					/* and put back our port */
@@ -748,12 +751,12 @@ void about ()
 	/*
 	 * Set the draw procedure for the user items.
 	 */
-	GetDItem(dialog, ABOUT_OUT, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, ABOUT_OUT, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, ABOUT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
-	GetDItem(dialog, ABOUT_PICT, &itemType, &itemHandle, &itemRect);
+	SetDialogItem(dialog, ABOUT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
+	GetDialogItem(dialog, ABOUT_PICT, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, ABOUT_PICT, itemType, (Handle)gdopictUPP, &itemRect);
+	SetDialogItem(dialog, ABOUT_PICT, itemType, (Handle)gdopictUPP, &itemRect);
 
 	ok = 0;
 	do {
@@ -769,7 +772,7 @@ void about ()
 		} /* switch */
 	} while (ok == 0);
 
-	DisposDialog(dialog);
+	DisposeDialog(dialog);
 	SetPort(savePort);
 }
 
@@ -797,7 +800,7 @@ void drawpict (DialogPtr dialog, int id)
 	GetPort(&savePort);
 	SetPort(dialog);
 
-	GetDItem(dialog, ABOUT_PICT, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, ABOUT_PICT, &itemType, &itemHandle, &itemRect);
 	if (h = Get1Resource('PICT', id)) {
 		LoadResource(h);
 		if (!ResError()) {
@@ -840,7 +843,7 @@ pascal void dooutline (DialogPtr dialog, short itemNo)
 	Handle		itemHandle;
 	Rect		itemRect;
 	
-	GetDItem(dialog, itemNo, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, itemNo, &itemType, &itemHandle, &itemRect);
 	/* 
 	 * outline the default button (see IM I-407).  in this case it 
 	 * is the OK button. this lets the user know that pressing 
@@ -903,7 +906,7 @@ char *ptr;
 #endif
 
 	if (strcmp(scratch, oldrealm)) {
-		GetDItem(maind, MAIN_REALM, &itemType, &itemHandle, &itemRect);
+		GetDialogItem(maind, MAIN_REALM, &itemType, &itemHandle, &itemRect);
 		savemode = maind->txMode;
 		MoveTo(itemRect.left+4, itemRect.bottom-4);
 		strcpy(oldrealm, scratch);
@@ -965,8 +968,8 @@ void setText (DialogPtr dialog, int item, char *text)
 	Handle itemHandle;
 	Rect itemRect;
 
-	GetDItem(dialog, item, &itemType, &itemHandle, &itemRect);
-	SetIText(itemHandle, text);
+	GetDialogItem(dialog, item, &itemType, &itemHandle, &itemRect);
+	SetDialogItemText(itemHandle, text);
 }
 
 
@@ -981,8 +984,8 @@ void buildmain ()
 	int ndomains, nservers;
 	int listwidth;
 	short itemNo;				/* the item in the dialog selected */
-	short itemType;				/* dummy parameter for call to GetDItem */
-	Handle itemHandle;			/* dummy parameter for call to GetDItem */
+	short itemType;				/* dummy parameter for call to GetDialogItem */
+	Handle itemHandle;			/* dummy parameter for call to GetDialogItem */
 	Rect itemRect;				/* the location of the list in the dialog */
 	Rect dataBounds;			/* the dimensions of the data in the list */
 	Point cellSize;				/* width and height of a cells rectangle */
@@ -1034,29 +1037,29 @@ void buildmain ()
 	 * to be drawn by the Dialog Manger.
      * Also, set the correct list heights.
 	 */
-	GetDItem(dialog, MAIN_REALM, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_REALM, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, MAIN_REALM, itemType, (Handle)gdrawRealmUPP, &itemRect);
+	SetDialogItem(dialog, MAIN_REALM, itemType, (Handle)gdrawRealmUPP, &itemRect);
 	
-	GetDItem(dialog, MAIN_DMAP, &itemType, &itemHandle, &dRect);
+	GetDialogItem(dialog, MAIN_DMAP, &itemType, &itemHandle, &dRect);
 	h = (((dRect.bottom - dRect.top) / CELLH) * CELLH);
 	dRect.bottom = dRect.top + h;
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, MAIN_DMAP, itemType, (Handle) gdolistUPP, &dRect);
+	SetDialogItem(dialog, MAIN_DMAP, itemType, (Handle) gdolistUPP, &dRect);
 
-	GetDItem(dialog, MAIN_SERVERS, &itemType, &itemHandle, &sRect);
+	GetDialogItem(dialog, MAIN_SERVERS, &itemType, &itemHandle, &sRect);
 	h = (((sRect.bottom - sRect.top) / CELLH) * CELLH);
 	sRect.bottom = sRect.top + h;
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, MAIN_SERVERS, itemType, (Handle) gdolistUPP, &sRect);
+	SetDialogItem(dialog, MAIN_SERVERS, itemType, (Handle) gdolistUPP, &sRect);
 
 	/* Add for 'new' SAP release */
-	GetDItem(dialog, MAIN_DNEW, &itemType, &dnewHandle, &itemRect);
-	GetDItem(dialog, MAIN_SNEW, &itemType, &snewHandle, &itemRect);
-	GetDItem(dialog, MAIN_DDELETE, &itemType, &ddeleteHandle, &itemRect);
-	GetDItem(dialog, MAIN_SDELETE, &itemType, &sdeleteHandle, &itemRect);
-	GetDItem(dialog, MAIN_DEDIT, &itemType, &deditHandle, &itemRect);
-	GetDItem(dialog, MAIN_SEDIT, &itemType, &seditHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_DNEW, &itemType, &dnewHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_SNEW, &itemType, &snewHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_DDELETE, &itemType, &ddeleteHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_SDELETE, &itemType, &sdeleteHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_DEDIT, &itemType, &deditHandle, &itemRect);
+	GetDialogItem(dialog, MAIN_SEDIT, &itemType, &seditHandle, &itemRect);
 
 	listwidth = dRect.right - dRect.left;
 
@@ -1135,8 +1138,13 @@ void buildmain ()
 	 * this will avoid watching the delay between the LSetCells 
 	 * calls and is faster.
 	 */
-	LDoDraw(true, dlist);
-	LDoDraw(true, slist);
+	LSetDrawingMode(true, dlist);
+	LSetDrawingMode(true, slist);
+	
+	/* Disable password button because it doesn't work */
+	GetDialogItem(dialog, MAIN_PASSWORD, &itemType, &passwordHandle, &itemRect);
+	HiliteControl((ControlHandle) passwordHandle, 255);
+	
 		
 	DrawMenuBar();
 	SetPort (savePort);					/* and put back our port */
@@ -1286,7 +1294,7 @@ char *ptr;
 }
 #endif
 
-	GetDItem(dialog, item, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, item, &itemType, &itemHandle, &itemRect);
 	EraseRect(&itemRect);
 	doshadow(&itemRect);
 	dotriangle(&itemRect);
@@ -1330,7 +1338,7 @@ pascal void dolist (DialogPtr dialog, short itemNo)
 		return;
 		
 	list = lf->list[i];
-	GetDItem(dialog, itemNo,  &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, itemNo,  &itemType, &itemHandle, &itemRect);
 	
 	/* 
 	 *let the List Manager draw the list
@@ -1358,8 +1366,8 @@ void mainhit (EventRecord *event, DialogPtr dlg, int item)
 	int s, i, n;
 	int admin;
 	int listwidth;
-	short itemType;				/* dummy parameter for call to GetDItem */
-	Handle itemHandle;			/* dummy parameter for call to GetDItem */
+	short itemType;				/* dummy parameter for call to GetDialogItem */
+	Handle itemHandle;			/* dummy parameter for call to GetDialogItem */
 	Rect itemRect;				/* the location of the list in the dialog */
 	Point where;
 	Point cell;
@@ -1594,7 +1602,7 @@ void mainhit (EventRecord *event, DialogPtr dlg, int item)
 		break;
 		
 	case MAIN_REALM:
-		GetDItem(dlg, MAIN_REALM, &itemType, &itemHandle, &itemRect);
+		GetDialogItem(dlg, MAIN_REALM, &itemType, &itemHandle, &itemRect);
 		if (popRealms(&itemRect, &string)) {
 			trimstring(string);
 #ifdef KRB4
@@ -1639,8 +1647,8 @@ void klist_dialog ()
 	int i, ncredentials, listwidth;
 	DialogPtr dialog;			/* the dialog */
 	short itemNo;				/* the item in the dialog selected */
-	short itemType;				/* dummy parameter for call to GetDItem */
-	Handle itemHandle;			/* dummy parameter for call to GetDItem */
+	short itemType;				/* dummy parameter for call to GetDialogItem */
+	Handle itemHandle;			/* dummy parameter for call to GetDialogItem */
 	Rect itemRect;				/* the location of the list in the dialog */
 	Handle deleteHandle;		/* handle of delete button */
 	ListHandle list;			/* the list constructed in the dialog */
@@ -1666,11 +1674,11 @@ void klist_dialog ()
 	GetPort(&savePort);
 	SetPort((GrafPtr) dialog);
 
-	GetDItem(dialog, KLIST_DELETE, &itemType, &deleteHandle, &itemRect);
+	GetDialogItem(dialog, KLIST_DELETE, &itemType, &deleteHandle, &itemRect);
 
 #ifdef KRB5
 /* use logout to delete credentials */
-	HideDItem(dialog, KLIST_DELETE);
+	HideDialogItem(dialog, KLIST_DELETE);
 #endif
 
 	/* 
@@ -1683,13 +1691,13 @@ void klist_dialog ()
 	 * this will allow he default button to be outlined and the list 
 	 * to be drawn by the Dialog Manger.
 	 */
-	GetDItem(dialog, KLIST_OUT, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, KLIST_OUT, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, KLIST_OUT, itemType, (Handle) gdooutlineUPP, &itemRect);
+	SetDialogItem(dialog, KLIST_OUT, itemType, (Handle) gdooutlineUPP, &itemRect);
 		
-	GetDItem(dialog, KLIST_LIST, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, KLIST_LIST, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, KLIST_LIST, itemType, (Handle) gdolistUPP, &itemRect);
+	SetDialogItem(dialog, KLIST_LIST, itemType, (Handle) gdolistUPP, &itemRect);
 	/* note item rect used later */
 
 	ShowWindow(dialog);
@@ -1739,7 +1747,7 @@ void klist_dialog ()
 	 * this will avoid watching the delay between the LSetCells 
 	 * calls and is faster.
 	 */
-	LDoDraw(true, list);
+	LSetDrawingMode(true, list);
 		
 	do {
 		/*
@@ -1811,7 +1819,7 @@ void klist_dialog ()
 	 */
 	SetPort(savePort);
 	LDispose(list);
-	DisposDialog(dialog);
+	DisposeDialog(dialog);
 }
 
 
@@ -1842,7 +1850,7 @@ pascal Boolean klistFilter (DialogPtr dialog, EventRecord *event, short *itemHit
 		 */
 	case mouseDown :
 		for (i = 0; i < lf->nlists; i++) {
-			GetDItem(dialog, lf->listitem[i], &itemType, &itemHandle, &itemRect);
+			GetDialogItem(dialog, lf->listitem[i], &itemType, &itemHandle, &itemRect);
 			where = event->where;
 			GlobalToLocal(&where);
 		
@@ -1932,27 +1940,27 @@ Boolean editlist (int dlog, char *e1, char *e2, int *admin)
 	/*
 	 * Set the draw procedure for the user items.
 	 */
-	GetDItem(dialog, EDIT_OUT, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, EDIT_OUT, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, EDIT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
+	SetDialogItem(dialog, EDIT_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
 
-	GetDItem(dialog, EDIT_E1, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, EDIT_E1, &itemType, &itemHandle, &itemRect);
 	c2pstr(e1);
-	SetIText(itemHandle, e1);
+	SetDialogItemText(itemHandle, e1);
 	p2cstr(e1);
 
-	GetDItem(dialog, EDIT_E2, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, EDIT_E2, &itemType, &itemHandle, &itemRect);
 	c2pstr(e2);
-	SetIText(itemHandle, e2);
+	SetDialogItemText(itemHandle, e2);
 	p2cstr(e2);
 
 	if (admin) {
 		astate = *admin;
-		GetDItem(dialog, EDIT_ADMIN, &itemType, &itemHandle, &itemRect);
-		SetCtlValue((ControlHandle)itemHandle, astate);
+		GetDialogItem(dialog, EDIT_ADMIN, &itemType, &itemHandle, &itemRect);
+		SetControlValue((ControlHandle)itemHandle, astate);
 	}
 
-	SelIText(dialog, EDIT_E1, 0, 32767);				/* select E1 */
+	SelectDialogItemText(dialog, EDIT_E1, 0, 32767);				/* select E1 */
 
 	ok = 0;
 	do {
@@ -1972,19 +1980,19 @@ Boolean editlist (int dlog, char *e1, char *e2, int *admin)
 
 		case EDIT_ADMIN:
 			astate ^= 1;
-			GetDItem(dialog, EDIT_ADMIN, &itemType, &itemHandle, &itemRect);
-			SetCtlValue((ControlHandle)itemHandle, astate);
+			GetDialogItem(dialog, EDIT_ADMIN, &itemType, &itemHandle, &itemRect);
+			SetControlValue((ControlHandle)itemHandle, astate);
 			break;
 		}
 	} while (ok == 0);
 	
 	if (ok == 1) {
-		GetDItem(dialog, EDIT_E1, &itemType, &itemHandle, &itemRect);
-		GetIText(itemHandle, s1);
+		GetDialogItem(dialog, EDIT_E1, &itemType, &itemHandle, &itemRect);
+		GetDialogItemText(itemHandle, s1);
 		p2cstr(s1);
 
-		GetDItem(dialog, EDIT_E2, &itemType, &itemHandle, &itemRect);
-		GetIText(itemHandle, s2);
+		GetDialogItem(dialog, EDIT_E2, &itemType, &itemHandle, &itemRect);
+		GetDialogItemText(itemHandle, s2);
 		p2cstr(s2);
 
 		if (admin) {
@@ -2001,7 +2009,7 @@ Boolean editlist (int dlog, char *e1, char *e2, int *admin)
 	}
 	
 xit:
-	DisposDialog(dialog);
+	DisposeDialog(dialog);
 	SetPort(savePort);
 	return ret;
 }
@@ -2100,7 +2108,7 @@ char *ptr;
 	theChoice = theChoice & 0xffff;
     
 	if (theChoice) {
-		GetItem(theMenu, theChoice, retstring);		
+		GetMenuItemText(theMenu, theChoice, retstring);		
 		p2cstr(retstring);
 	}
 
@@ -2981,12 +2989,12 @@ void fixmenuwidth (MenuHandle themenu, int minwidth)
 	Str255 scratch;
 	
 	minwidth -= 27;
-	GetItem(themenu, 1, scratch);
+	GetMenuItemText(themenu, 1, scratch);
 	if (StringWidth(scratch) >= minwidth)
 		return;
 	while (StringWidth(scratch) < minwidth)
 		scratch[scratch[0]++ + 1] = ' ';
-	SetItem(themenu, 1, scratch);
+	SetMenuItemText(themenu, 1, scratch);
 }
 
 
@@ -3097,9 +3105,9 @@ void kpass_dialog ()
 	/*
 	 * Set the draw procedure for the user items.
 	 */
-	GetDItem(dialog, KPASS_OUT, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, KPASS_OUT, &itemType, &itemHandle, &itemRect);
 		//  IH 05.03.96: PPC Port - Replace Procedure Pointer by UPP
-	SetDItem(dialog, KPASS_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
+	SetDialogItem(dialog, KPASS_OUT, itemType, (Handle)gdooutlineUPP, &itemRect);
 
 	/* preset dialog ... */
 	SetWRefCon(dialog, (long)&valcruft);	/* Stash the cruft's address */
@@ -3110,9 +3118,9 @@ void kpass_dialog ()
 	khipb.user = scratch;
 	if (!(s = hicall(cKrbGetUserName))) {
 		c2pstr(scratch);
-		GetDItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
-		SetIText(itemHandle, scratch);
-		SelIText(dialog, KPASS_PASS, 0, 32767);
+		GetDialogItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
+		SetDialogItemText(itemHandle, scratch);
+		SelectDialogItemText(dialog, KPASS_PASS, 0, 32767);
 	}
 
 	/* get local realm */
@@ -3124,9 +3132,9 @@ void kpass_dialog ()
 #ifdef KRB5
 {
 char *ptr;
-	GetDItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
-	SetIText(itemHandle, "\p");
-	SelIText(dialog, KPASS_PASS, 0, 32767);
+	GetDialogItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
+	SetDialogItemText(itemHandle, "\p");
+	SelectDialogItemText(dialog, KPASS_PASS, 0, 32767);
 
 // Get default realm
 	if (krb5_get_default_realm(kcontext, &ptr) == 0)
@@ -3158,22 +3166,22 @@ char *ptr;
 			break;
 
 		case KPASS_JPW:					/* jump to password */
-			SelIText(dialog, KPASS_PASS, 0, 32767);			
+			SelectDialogItemText(dialog, KPASS_PASS, 0, 32767);			
 			break;
 
 		case KPASS_JNEW:				/* jump to new */
-			SelIText(dialog, KPASS_NEW, 0, 32767);			
+			SelectDialogItemText(dialog, KPASS_NEW, 0, 32767);			
 			break;
 
 		case KPASS_JNEW2:
-			SelIText(dialog, KPASS_NEW2, 0, 32767);
+			SelectDialogItemText(dialog, KPASS_NEW2, 0, 32767);
 			break;
 		}
 	} while (ok == 0);
 	
 	if (ok == 1) {
-		GetDItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
-		GetIText(itemHandle, username);
+		GetDialogItem(dialog, KPASS_USER, &itemType, &itemHandle, &itemRect);
+		GetDialogItemText(itemHandle, username);
 		p2cstr(username);
 
 #ifndef KRB5
@@ -3210,7 +3218,8 @@ char *ptr;
 		{
 			char *text;
 			// Change the password from old to new
-			s = k5_change_password(kcontext, username, realm, valcruft.buffer1, valcruft.buffer2, &text);
+/* Comment this out because it's broken, and we desperately need to build kconfig */
+//			s = k5_change_password(kcontext, username, realm, valcruft.buffer1, valcruft.buffer2, &text);
 			if (s)
 			{
 				SysBeep(10);	// change password failed
@@ -3221,7 +3230,7 @@ char *ptr;
 
 		if (s) {
 			kerror(reason, s);
-			SelIText(dialog, KPASS_PASS, 0, 32767);		/* hilite password */
+			SelectDialogItemText(dialog, KPASS_PASS, 0, 32767);		/* hilite password */
 			c2pstr(valcruft.buffer1);				/* password */
 			c2pstr(valcruft.buffer2);				/* new */
 			c2pstr(valcruft.buffer3);				/* new2 */
@@ -3229,7 +3238,7 @@ char *ptr;
 		}
 	}
 	
-	DisposDialog(dialog);
+	DisposeDialog(dialog);
 	SetPort (savePort);
 }
 
@@ -3315,12 +3324,12 @@ pascal Boolean internalBufferFilter (DialogPtr dlog, EventRecord *event, short *
 				for (i = 0; i < len; i++)
 					InsertChar(buffer, start+i, cp[i]);
 			}
-			DisposHandle(h);
+			DisposeHandle(h);
 			buffer[(*buffer) + 1] = '\0';		/* terminate string */
 			strcpy(scratch, &buffer[1]);
 			hidestring(scratch);
 			setctltxt(dlog, KPASS_PASS, scratch);	/* update display */
-			SelIText(dlog, KPASS_PASS, start+i, start+i);
+			SelectDialogItemText(dlog, KPASS_PASS, start+i, start+i);
 			break;
 			
 		case EV_COPY:
@@ -3423,7 +3432,7 @@ pascal Boolean internalBufferFilter (DialogPtr dlog, EventRecord *event, short *
 			return true;					/* eat event */
 		}
 		InsertChar(buffer,start,key);		// Insert the real key into the buffer
-		event->message = '€';			// Character to use in field
+		event->message = '¥';			// Character to use in field
 	}
 	
 	return false; 							// Let ModalDialog insert the fake char
@@ -3480,9 +3489,9 @@ void setctltxt (DialogPtr dialog, int ctl, unsigned char *text)
 	Handle itemHandle;
 	Rect itemRect;
 
-	GetDItem(dialog, ctl, &itemType, &itemHandle, &itemRect);
+	GetDialogItem(dialog, ctl, &itemType, &itemHandle, &itemRect);
 	c2pstr(text);
-	SetIText(itemHandle, (StringPtr)text);
+	SetDialogItemText(itemHandle, (StringPtr)text);
 	p2cstr(text);
 }
 

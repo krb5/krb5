@@ -1,7 +1,27 @@
+Thu Jul 16 09:59:34 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* changepw.c (krb5_change_password): Changes casts from char * to
+         	krb5_octet * to match krb5_address structure elements.
+
+Wed Jul  1 17:54:56 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* macsock.c(inet_ntoa): Fix obvious bug where we were returning a
+ 		pointer to an automatic variable which should have been a
+ 		static.  Fortunately nothing in the Mac tree was using
+ 		inet_ntoa()....
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* t_std_conf.c (main): POSIX states that getopt returns -1
 		when it is done parsing options, not EOF.
+
+Wed Sep 24 12:10:29 1997 Marshall Vale <mjv@mit.edu> (Checked in 1/13/98)
+
+	* init_os_ctx.c: Changed all PBGetCatInfo to PBGetCatInfoSync for new
+		Universal Headers.
+		
+	* ccdefname.c: Changed all PBGetCatInfo to PBGetCatInfoSync for new
+		Universal Headers.
 
 Fri Feb 27 18:03:33 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 

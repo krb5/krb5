@@ -146,7 +146,7 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
     utx.ut_exit.__e_termination = ent.ut_exit.e_termination;
     utx.ut_exit.__e_exit = ent.ut_exit.e_exit;
 #else
-    utx.ut_exit = ent.ut_exit;
+    /*xxx do nothing for now; we don't even know the structure member exists*/
 #endif
 #endif
     utx.ut_tv.tv_sec = ent.ut_time;

@@ -2,8 +2,11 @@ thisconfigdir=./../..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
-##DOSBUILDTOP = ..\..\..\..
-##DOSLIBNAME=..\..\krb5.lib
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR = ccache\memory
+##DOS##OBJFILE = file.lst
+##WIN16##LIBNAME=..\..\krb5.lib
+
 
 STLIBOBJS = \
 	mcc_close.o mcc_destry.o mcc_eseq.o \
@@ -26,6 +29,8 @@ SRCS    = $(srcdir)/mcc_close.c $(srcdir)/mcc_destry.c $(srcdir)/mcc_eseq.c \
 	$(srcdir)/mcc_reslv.c $(srcdir)/mcc_retrv.c $(srcdir)/mcc_sseq.c    \
 	$(srcdir)/mcc_store.c $(srcdir)/mcc_ops.c \
 	$(srcdir)/mcc_sflags.c
+
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 all-windows:: $(OBJS)

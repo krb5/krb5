@@ -1,6 +1,6 @@
 thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) \
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(PW_CHECK) \
 	-DKADM5 -DNEED_SOCKETS @HESIOD_DEFS@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -21,11 +21,16 @@ kadm_err.c kadm_err.h: kadm_err.et
 $(OBJS): kadm_err.h
 
 $(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(DB_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(DB_LIB) $(KRB4COMPAT_LIBS) $(HESIOD_LIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(DB_LIB) \
+		$(KRB4COMPAT_LIBS) $(HESIOD_LIBS)
+
+build_pwfile: build_pwfile.o $(DB_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o build_pwfile build_pwfile.o $(DB_LIB) \
+		$(KRB4COMPAT_LIBS) $(HESIOD_LIBS)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 
 clean::
-	$(RM) $(PROG) $(OBJS)
+	$(RM) $(PROG) $(OBJS) build_pwfile build_pwfile.o
 	$(RM) kadm_err.h kadm_err.c

@@ -25,7 +25,7 @@
 #define SIZEOF_LONG     4
 #endif
 
-#if defined(_MACINTOSH)
+#if defined(macintosh)
 #define NO_SYS_TYPES_H
 #define NO_SYS_STAT_H
 #endif

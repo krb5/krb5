@@ -32,6 +32,12 @@ krb5_gss_indicate_mechs(minor_status, mech_set)
      gss_OID_set *mech_set;
 {
    *minor_status = 0;
-   *mech_set = (gss_OID_set) gss_mech_set_krb5;
+
+   if (! g_copy_OID_set(gss_mech_set_krb5, mech_set)) {
+         *mech_set     = GSS_C_NO_OID_SET;
+         *minor_status = ENOMEM;
+         return(GSS_S_FAILURE);
+   }
+
    return(GSS_S_COMPLETE);
 }

@@ -1,3 +1,35 @@
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sys_term.c: #include utmp.h if present, and use _PATH_WTMP and
+		_PATH_UTMP if defined to determine location of the wtmp
+		and utmp files.
+
+	* configure.in: Add check for utmp.h
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* telnetd.c (main): 
+	* telnetd-ktd.c (main): POSIX states that getopt returns -1 when it
+		is done parsing options, not EOF.
+
+Tue Mar  3 14:26:04 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Rename HAS_* to HAVE_* for the following tests:
+ 		sac.h, sys/ptyvar.h, sys/filio.h, sys/stream.h,
+ 		gettosbyname(), and make appropriate adjustments in the
+ 		rest of the .c files.  Remove tests which aren't being
+ 		used anymore: vhangup, utmpx.h, utmp.h, etc.
+
+	* defs.h: Use HAVE_SYS_FILIO_H instead of FILIO_H
+
+	* sys_term.c: Use HAVE_SAC_H and HAVE_SYS_STREAM_H instead of
+		HAS_SAC and STREAMS.
+
+	* telnetd.c, telnetd-ktd.c: Use HAVE_GETTOSBYNAME instead of
+		HAS_GETTOS
+
+	* telnetd.c: Use HAVE_SYS_PTYVAR_H instead of HAS_PTYVAR.
+
 Mon Feb 23 22:58:22 1998  Tom Yu  <tlyu@mit.edu>
 
 	* utility.c (ptyflush, netflush): Explicitly reset SIGCHLD handler

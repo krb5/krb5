@@ -54,7 +54,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
       return(GSS_S_NO_CONTEXT);
    }
 
-   if (code = krb5_timeofday(context, &now)) {
+   if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

@@ -1,3 +1,34 @@
+Wed Jul 15 18:32:07 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SIGNALS so that POSIX_SIGNALS gets
+	defined.
+
+	* main.c (request_hup): Remove call to signal, as this isn't
+	needed on BSD-ish systems and for sysV-ish systems we use
+	sigaction anyway.
+	(setup_signal_handlers): Fix typo.
+
+Sat Jul 11 01:38:05 1998  Geoffrey King  <gjking@mit.edu>
+
+	* main.c: Added a call to signal() in request_hup()
+	        so that the signal handler gets reset after
+	        each SIGHUP, since this does not happen
+	        automatically in System V's signal handling
+	        system.
+
+Wed Jul  8 04:36:28 1998  Geoffrey King  <gjking@mit.edu>
+
+	* extern.h: Added declaration for new variable
+	        signal_requests_hup, which is set when the KDC
+	        is sent a SIGHUP
+	
+	* extern.c: Added definition for signal_requests_hup
+
+	* main.c: Added new signal handling code for SIGHUP, including
+	        the new function request_hup()
+
+	* network.c: Check signal_requests_hup in the main KDC loop
+
 Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log

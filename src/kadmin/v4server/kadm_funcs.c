@@ -19,7 +19,9 @@ the actual database manipulation code
 #include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
-/* #include <ndbm.h> Gotten by kadmin_server.h */
+#ifdef NDBM_PW_CHECK
+#include <ndbm.h>
+#endif
 #include <ctype.h>
 #include <pwd.h>
 #include <sys/file.h>
@@ -746,7 +748,7 @@ des_cblock newpw;
 char *pwstring;
 {
 	int		retval;
-#ifdef notdef
+#if NDBM_PW_CHECK
 	static DBM *pwfile = NULL;
 	datum		passwd, entry;
 #endif
@@ -762,7 +764,7 @@ char *pwstring;
 		return(KADM_PW_MISMATCH);
 	if (pwstring && (strlen(pwstring) < 5))
 		return(KADM_INSECURE_PW);
-#ifdef notdef
+#if NDBM_PW_CHECK
 	if (!pwfile) {
 		pwfile = dbm_open(PW_CHECK_FILE, O_RDONLY, 0644);
 	}

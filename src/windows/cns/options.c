@@ -21,9 +21,8 @@
 #include <time.h>
 
 #include "cns.h"
-
-char confname[FILENAME_MAX];
-char ccname[FILENAME_MAX];
+#include "tktlist.h"
+#include "cns_reg.h"
 
 /*
  * Function: Process WM_INITDIALOG messages for the options dialog.
@@ -35,74 +34,45 @@ char ccname[FILENAME_MAX];
 BOOL
 opts_initdialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
-  char wdir[FILENAME_MAX];
-  char defname[FILENAME_MAX];
-  char newname[FILENAME_MAX];
-  UINT rc;
-  int lifetime;
-
   center_dialog(hwnd);
   set_dialog_font(hwnd, hfontdialog);
-  rc = GetWindowsDirectory(wdir, sizeof(wdir));
-  assert(rc > 0);
-  strcat(wdir, "\\");
 
   /* krb.conf file */
-  strcpy(defname, wdir);
-  strcat(defname, DEF_KRB_CONF);
-  GetPrivateProfileString(INI_FILES, INI_KRB_CONF, defname,
-			  confname, sizeof(confname), KERBEROS_INI);
+  strcpy(confname, cns_res.confname);
 #ifndef _WIN32
   _strupr(confname);
 #endif
   SetDlgItemText(hwnd, IDD_CONF, confname);
-	
-#ifdef KRB4
-  /* krb.realms file */
-  strcpy(defname, wdir);
-  strcat(defname, DEF_KRB_REALMS);
-  GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
-			  newname, sizeof(newname), KERBEROS_INI);
-#ifndef _WIN32
-  _strupr(newname);
-#endif
-  SetDlgItemText(hwnd, IDD_REALMS, newname);
-#endif /* KRB4 */
 
-#ifdef KRB5
+  if (cns_res.conf_override == 0)
+      EnableWindow(GetDlgItem(hwnd, IDD_CONF), 0);
+  else
+      EnableWindow(GetDlgItem(hwnd, IDD_CONF), 1);
+
   /* Credential cache file */
-  strcpy(defname, wdir);
-  strcat(defname, INI_KRB_CCACHE);
-  GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-			  ccname, sizeof(ccname), KERBEROS_INI);
+  strcpy(ccname, cns_res.ccname);
 #ifndef _WIN32
   _strupr(ccname);
 #endif
   SetDlgItemText(hwnd, IDD_CCACHE, ccname);
-#endif /* KRB5 */
+
+  if (cns_res.cc_override == 0)
+      EnableWindow(GetDlgItem(hwnd, IDD_CCACHE), 0);
+  else
+      EnableWindow(GetDlgItem(hwnd, IDD_CCACHE), 1);
 
   /* Ticket duration */
-  lifetime = GetPrivateProfileInt(INI_OPTIONS, INI_DURATION,
-				  DEFAULT_TKT_LIFE * 5, KERBEROS_INI);
-  SetDlgItemInt(hwnd, IDD_LIFETIME, lifetime, FALSE);
+  SetDlgItemInt(hwnd, IDD_LIFETIME, cns_res.lifetime, FALSE);
 
   /* Expiration action */
-  GetPrivateProfileString(INI_EXPIRATION, INI_ALERT, "No",
-			  defname, sizeof(defname), KERBEROS_INI);
-  alert = _stricmp(defname, "Yes") == 0;
+  alert = cns_res.alert;
   SendDlgItemMessage(hwnd, IDD_ALERT, BM_SETCHECK, alert, 0);
 
-  GetPrivateProfileString(INI_EXPIRATION, INI_BEEP, "No",
-			  defname, sizeof(defname), KERBEROS_INI);
-  beep = _stricmp(defname, "Yes") == 0;
+  beep = cns_res.beep;
   SendDlgItemMessage(hwnd, IDD_BEEP, BM_SETCHECK, beep, 0);
 
-#ifdef KRB5
-  GetPrivateProfileString(INI_TICKETOPTS, INI_FORWARDABLE, "No",
-			  defname, sizeof(defname), KERBEROS_INI);
-  forwardable = _stricmp(defname, "Yes") == 0;
+  forwardable = cns_res.forwardable;
   SendDlgItemMessage(hwnd, IDD_FORWARDABLE, BM_SETCHECK, forwardable, 0);
-#endif
 
   return TRUE;
 }
@@ -114,19 +84,12 @@ opts_initdialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 void
 opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 {
-  char wdir[FILENAME_MAX];
-  char defname[FILENAME_MAX];
   char newname[FILENAME_MAX];
-  char *p;
   BOOL b;
   int lifetime;
-  int rc;
 
   switch (cid) {
   case IDOK:
-    rc = GetWindowsDirectory(wdir, sizeof(wdir));
-    assert(rc > 0);
-    strcat(wdir, "\\");
 
     /* Ticket duration */
     lifetime = GetDlgItemInt(hwnd, IDD_LIFETIME, &b, FALSE);
@@ -137,51 +100,31 @@ opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
       return; /* TRUE */
     }
 
-    _itoa(lifetime, defname, 10);
-    b = WritePrivateProfileString(INI_OPTIONS, INI_DURATION,
-				  defname, KERBEROS_INI);
-    assert(b);
+    cns_res.lifetime = lifetime;
 
-    /* krb.conf file */
-    GetDlgItemText(hwnd, IDD_CONF, newname, sizeof(newname));
-    trim(newname);
-    if (_stricmp(newname, confname)) {  /* file name changed */
-      MessageBox(NULL,
-		 "Change to configuration file location requires a restart"
-		 "of KerbNet.\n"
-		 "Please exit this application and restart this application",
-		 "", MB_OK | MB_ICONEXCLAMATION);
+    if (cns_res.conf_override) {
+	    /* krb.conf file */
+	    GetDlgItemText(hwnd, IDD_CONF, newname, sizeof(newname));
+	    trim(newname);
+	    if (newname[0] == '\0')
+		    strcpy(newname, cns_res.def_confname);
+	    if (_stricmp(newname, confname)) {  /* file name changed */
+	      MessageBox(NULL,
+			 "Change to configuration file location requires a restart"
+			 "of KerbNet.\n"
+			 "Please exit this application and restart it for the change to take"
+			 "effect",
+			 "", MB_OK | MB_ICONEXCLAMATION);
+	    }
+	    strcpy(confname, newname);
     }
-    strcpy(defname, wdir);
-    strcat(defname, DEF_KRB_CONF);
-    p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
-    if (p)
-      strcpy(confname, p);
-    b = WritePrivateProfileString(INI_FILES, INI_KRB_CONF, p, KERBEROS_INI);
-    assert(b);
-    
-    /* krb.realms file */
-#ifdef KRB4
-    GetDlgItemText(hwnd, IDD_REALMS, newname, sizeof(newname));
-    trim(newname);
-    strcpy(defname, wdir);
-    strcat(defname, DEF_KRB_REALMS);
-    p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
-    b = WritePrivateProfileString(INI_FILES, INI_KRB_REALMS, p, KERBEROS_INI);
-    assert(b);
-#endif /* KRB4 */
 
     /* Credential cache file */
-#ifdef KRB5
     GetDlgItemText(hwnd, IDD_CCACHE, newname, sizeof(newname));
     trim(newname);
-    strcpy(defname, wdir);
-    strcat(defname, "krb5cc");
-    if (*newname == '\0')		/* For detecting name change */
-      strcpy(newname, defname);
-    p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
-    b = WritePrivateProfileString(INI_FILES, INI_KRB_CCACHE, p, KERBEROS_INI);
-    assert(b);
+
+    if (newname[0] == '\0')
+	    strcpy(newname, cns_res.def_ccname);
 
     if (_stricmp(ccname, newname)) {     /* Did we change ccache file? */
       krb5_error_code code;
@@ -191,9 +134,10 @@ opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
       if (code) {                     /* Problem opening new one? */
 	com_err(NULL, code, 
 		"while changing ccache.\r\nRestoring old ccache.");
-	b = WritePrivateProfileString(INI_FILES, INI_KRB_CCACHE,
-				      ccname, KERBEROS_INI);
       } else {
+        strcpy(ccname, newname);
+        strcpy(cns_res.ccname, newname);
+
 	code = krb5_cc_close(k5_context, k5_ccache);
 	k5_ccache = cctemp;         /* Copy new into old */
 	if (k5_name_from_ccache(k5_ccache)) {
@@ -204,27 +148,18 @@ opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 				     IDD_TICKET_LIST));
       }
     }
-#endif /* KRB5 */
 
-    /* Expiration action */
-    alert = (BOOL)SendDlgItemMessage(hwnd, IDD_ALERT, BM_GETCHECK, 0, 0);
-    p = (alert) ? "Yes" : "No";
-    b = WritePrivateProfileString(INI_EXPIRATION, INI_ALERT, p, KERBEROS_INI);
-    assert(b);
+    /*
+     * get values for the clickboxes
+     */
+    alert = SendDlgItemMessage(hwnd, IDD_ALERT, BM_GETCHECK, 0, 0);
+    cns_res.alert = alert;
 
-    beep = (BOOL)SendDlgItemMessage(hwnd, IDD_BEEP, BM_GETCHECK, 0, 0);
-    p = (beep) ? "Yes" : "No";
-    b = WritePrivateProfileString(INI_EXPIRATION, INI_BEEP, p, KERBEROS_INI);
-    assert(b);
+    beep = SendDlgItemMessage(hwnd, IDD_BEEP, BM_GETCHECK, 0, 0);
+    cns_res.beep = beep;
 
-#ifdef KRB5
-    forwardable = (BOOL)SendDlgItemMessage(hwnd, IDD_FORWARDABLE,
-					   BM_GETCHECK, 0, 0);
-    p = (forwardable) ? "Yes" : "No";
-    b = WritePrivateProfileString(INI_TICKETOPTS, INI_FORWARDABLE,
-				  p, KERBEROS_INI);
-    assert(b);
-#endif
+    forwardable = SendDlgItemMessage(hwnd, IDD_FORWARDABLE, BM_GETCHECK, 0, 0);
+    cns_res.forwardable = forwardable;
 
     EndDialog(hwnd, IDOK);
 

@@ -1,3 +1,13 @@
+1998-07-11    <hartmans@fundsxpress.com>
+
+	* ftpd.c (data;): do not declare h_errno; breaks on AIX and
+	possibly with other multithreaded systems.
+
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* logwtmp.c: Include paths.h if present, and use _PATH_WTMP to
+		determine WTMPFILE.
+
 Fri May  8 18:06:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ftpcmd.y (cmd): Fix Y2K problem in the MDTM command.

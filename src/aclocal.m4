@@ -915,6 +915,9 @@ AC_ARG_ENABLE([shared],
 else
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
+	SHLIBEXT=.so-nobuild
+	SHLIBVEXT=.so.v-nobuild
+	SHLIBSEXT=.so.s-nobuild
 fi],
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
@@ -988,13 +991,42 @@ alpha-dec-osf*)
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
 
-# untested...
+# HPUX untested...
+# 
+# Note: "-Wl,+s" when building executables enables the use of the
+# SHLIB_PATH environment variable for finding shared libraries 
+# in non-standard directories.  If a non-standard search-path for
+#  shared libraries is compiled into the executable (using 
+# -Wl,+b,$KRB5_SHLIBDIR), then the order of "-Wl,+b,..." and "-Wl,+s" 
+# on the commandline of the linker will determine which path
+# (compiled-in or SHLIB_PATH) will be searched first.
+#
 *-*-hpux*)
+	PICFLAGS=+z
 	SHLIBEXT=.sl
 	SHLIBVEXT='.sl.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIB_EXPFLAGS='+b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	LDCOMBINE='ld -b'
-	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+b,$(PROG_RPATH)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+s -Wl,+b,$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='SHLIB_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export SHLIB_PATH;'
+	;;
+
+mips-sgi-irix6.3)	# This is a Kludge; see below
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.so.$(LIBMAJOR)'
+	SHLIBEXT=.so
+	SHOBJEXT=.o
+	# Kludge follows: (gcc makes n32 object files but ld expects o32, so we reeducate ld)
+	if test "$GCC" = yes; then
+		LDCOMBINE='ld -n32 -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
+	else
+		LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
+	fi
+	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	# no gprof for Irix...
+	PROFFLAGS=-p
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	;;
@@ -1057,8 +1089,19 @@ mips-*-netbsd*)
 	PROFFLAGS=-pg
 	;;
 
-# untested...
 *-*-freebsd*)
+	PICFLAGS=-fpic
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	LDCOMBINE='ld -Bshareable'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
+
+*-*-openbsd*)
 	PICFLAGS=-fpic
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBEXT=.so

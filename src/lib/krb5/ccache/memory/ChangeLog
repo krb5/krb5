@@ -1,3 +1,8 @@
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Update Makefile so that it can be built under
+		Windows
+
 Fri Feb 27 18:03:33 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Changed thisconfigdir to point at the lib/krb5

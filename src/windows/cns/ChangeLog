@@ -1,48 +1,39 @@
-Tue Aug  5 18:44:45 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
-	* Makefile.in, cnsres5.rc: Add a version resource to the
-		executable.
+	* Folded in enhancements from Cygnus's Kerbnet-1.2 (plus our
+		changes made since Cygnus's last snapshot).  See
+		ChangeLog from Cygnus (included below) for more details.
 
-Mon Jul 28 23:33:11 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+---------------------- Begin of ChangeLog from Cygnus
 
-	* Makefile.in: Take out the /nod option, and remove libc.lib from
- 		the list of libraries to be linked.
+Fri Mar 28 15:12:28 1997  Michael Graff  <explorer@cygnus.com>
 
-Mon Feb 17 13:58:06 1997  Richard Basch  <basch@lehman.com>
+	* Makefile.in, cns.c, options.c: use the registry now, not an ini file.
 
-	* Makefile.in: Winsock library is still required for win16
-	* cns.h: Don't include krb5ini.h (obsolete file)
+	* cns_reg.c, cns_reg.h: registry functions.
 
-Sat Feb 15 12:21:51 1997  Richard Basch  <basch@lehman.com>
+Wed Mar 12 17:32:59 1997  Michael Graff  <explorer@cygnus.com>
 
-	* Makefile.in: Link in ComErr library $(CLIB)
-	* cns.c: Winsock initialization/teardown is handled by krb5 lib
+	* cns.h, passwd.c, kpasswd.c: use krb5_change_password() rather
+	than rolling our own.
 
-Mon Feb 10 23:19:26 1997  Richard Basch  <basch@lehman.com>
+	* cnsres5.rc: remove forced uppercase realm name
 
-	* Makefile.in: Use WLIB definition in config/windows.in
+Wed Mar  5 19:13:31 1997  Michael Graff  <explorer@cygnus.com>
 
-Fri Feb  7 08:08:39 1997  Richard Basch  <basch@lehman.com>
+	* cns.c: Start to use init creds stuff.
 
-	* cns.c (blocking_hook_proc): Additional logic is required to
-		prevent instantaneous timeouts when GetTickCount()
-		wraps every 49.7 days.  Declared function with old
-		__export convention so that it works properly in Win16.
+Mon Nov  4 21:46:52 1996  Michael Graff  <explorer@cygnus.com>
 
-Sun Feb  2 11:22:57 1997  Richard Basch  <basch@lehman.com>
+	* cns.c: update name from Kerb*Net to KerbNet
 
-	* cns.c (k5_name_from_ccache):
-		Declare variable as (char FAR *) to match
-		krb5_unparse_name prototype
+	* cns.h: add length to extern character array to give the compiler
+	more of a hint.
 
-	* Makefile.in: Build using CCOPTS2, not COPTS (win16)
+	* kpasswd.c: remove two unused variables.
 
-Fri Dec 20 10:28:59 1996  Theodore Y. Ts'o  <tytso@mit.edu>
-
-	* krb5.def: New file, modelled after krbnet.def
-
-	* cns.h, cns.c, krbini.h, cnsres5.c, Makefile: remove
-		Cygnus/KerbNet(tm) name from MIT distribution
+	* tktlist.c: Pull definition of MAX_K_NAME_SZ from cns.h rather
+	than having a local definition.
 
 Fri Aug  9 03:41:52 1996  Michael Graff  <explorer@cygnus.com>
 
@@ -50,7 +41,7 @@ Fri Aug  9 03:41:52 1996  Michael Graff  <explorer@cygnus.com>
 
 	* cns.def: rename to kerbnet.def
 
-Wed Aug  7 14:25:34 1996  Michael Graff  <explorer@lenin.cygnus.com>
+Wed Aug  7 14:25:34 1996  Michael Graff  <explorer@cygnus.com>
 
 	* Makefile.in: Build kerbnet, not cns.exe
 	
@@ -71,7 +62,7 @@ Sat Aug 3 13:58:20 1996  Jeff Bigler  <jcb@cygnus.com>
 	* Makefile.in:  added line to install section to install help
 	file.
 
-Thu Jul 25 13:52:04 1996    <explorer@lenin.cygnus.com>
+Thu Jul 25 13:52:04 1996    <explorer@cygnus.com>
 
 	* options.c (opts_command): Display a warning message when changing
 	the location of the krb.conf file, since the KRB5 libraries
@@ -84,7 +75,7 @@ Wed Aug  7 18:03:16 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 	* kerbnet.doc:  help file (Microsoft Word document)
 	* kerbnet.hlp:  new help file (Windows help file)
 
-Wed Jul 24 06:12:24 1996  Michael Graff  <explorer@lenin.cygnus.com>
+Wed Jul 24 06:12:24 1996  Michael Graff  <explorer@cygnus.com>
 
 	* Makefile.in: Build cnsres[45].rc into executable, depending on
 	if we're compiling for V4 or V5.
@@ -99,7 +90,7 @@ Wed Jul 24 06:12:24 1996  Michael Graff  <explorer@lenin.cygnus.com>
 	* cnsres5.rc:
 	* krbini.h:  Add forwardable option to options menu
 
-Tue Jul 16 12:42:48 1996  Michael Graff  <explorer@lenin.cygnus.com>
+Tue Jul 16 12:42:48 1996  Michael Graff  <explorer@cygnus.com>
 
 	* options.c:
 	* password.c:  Split parts of cns.c into these files.  Each deals
@@ -108,7 +99,7 @@ Tue Jul 16 12:42:48 1996  Michael Graff  <explorer@lenin.cygnus.com>
 	* debug.c:
 	* heap.c:  Added to aid in debugging.
 
-Wed Jul 10 18:01:03 1996  Michael Graff  <explorer@kechara.flame.org>
+Wed Jul 10 18:01:03 1996  Michael Graff  <explorer@cygnus.com>
 
 	* cns.c: Remove the quick hacks mentioned below.
 
@@ -119,7 +110,7 @@ Thu Jul 25 13:52:04 1996    <explorer@lenin.cygnus.com>
 	will have opened it and tucked it away in krb5_context->profile,
 	which we as a client don't have access to.
 
-Fri Jun 28 19:29:14 1996  Michael Graff  <explorer@zhaneel.flame.org>
+Fri Jun 28 19:29:14 1996  Michael Graff  <explorer@cygnus.com>
 
 	* cns.c: Really quick hacks to disable some features that just
 	plain don't work correctly.  The "cns" client has some flavor of
@@ -128,7 +119,7 @@ Fri Jun 28 19:29:14 1996  Michael Graff  <explorer@zhaneel.flame.org>
 	* cnsres5.rc: reload this using a dialog editor.  Add clickbox
 	for "ticket options" of "forwardable"
 
-Wed Jun 26 14:58:23 1996  Michael Graff  <explorer@zhaneel.flame.org>
+Wed Jun 26 14:58:23 1996  Michael Graff  <explorer@cygnus.com>
 
 	* cns.h kpasswd.c:  formatting change, including changing
  	// to /* */
@@ -141,19 +132,13 @@ Wed Jun 26 14:58:23 1996  Michael Graff  <explorer@zhaneel.flame.org>
  	of the details of 16- vs 32-bit hidden to the code.  (Disgusting
 	magic happens in <windowsx.h>)
 
-Tue Jun 25 13:57:59 1996  Michael Graff  <explorer@zhaneel.flame.org>
+Tue Jun 25 13:57:59 1996  Michael Graff  <explorer@cygnus.com>
 
 	* Makefile.in: Fix to work for WIN32 native compiles.  Many
 	changes; some should be put into common files (win-post.in or
 	windows.in?)
 
-Wed Jun 12 00:20:08 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
-
-	* makefile: Renamed to Makefile.in, so that we can do WIN16/WIN32
- 		specializations.  Remove /nologo option for Win32 RFLAGS,
- 		since RC apparently doesn't support it.
-
-	* changelo: Renamed to ChangeLog, to make life easier.
+---------------------- End of ChangeLog from Cygnus
 
 Wed Jan 10 23:16:41 1996  Theodore Y. Ts'o  <tytso@dcl>
 

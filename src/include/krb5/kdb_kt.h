@@ -28,12 +28,12 @@
 #ifndef KRB5_KDB5_KT_H
 #define KRB5_KDB5_KT_H
 
-#if !defined(_MACINTOSH) && !defined(_MSDOS)
+#if !defined(macintosh) && !defined(_MSDOS)
 
 #include "kdb.h"
 
 krb5_error_code krb5_ktkdb_resolve
         KRB5_PROTOTYPE((krb5_context, krb5_keytab *));
 
-#endif /* !defined(_MACINTOSH) && !defined(_MSDOS) */
+#endif /* !defined(macintosh) && !defined(_MSDOS) */
 #endif /* KRB5_KDB5_DBM__ */

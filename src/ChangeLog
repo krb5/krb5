@@ -1,3 +1,46 @@
+Wed Jul  8 01:10:44 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* aclocal.m4: Allow shared libraries to build properly under Irix
+ 	6.x with gcc. (This is actually a fix of a previous fix that
+ 	didn't make it into ChangeLog.)
+
+Thu Jul  2 20:41:02 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Update commands to build the Macintosh MPW Makefile
+
+1998-07-05    <hartmans@fundsxpress.com>
+
+	* aclocal.m4 (enable_shared): If we aren't building shared, then
+	make sure that SHLIBEXT and friends are not set so that we don't
+	break on AIX and anything else where STLIBEXT == SHLIBEXT
+
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Don't depend on $(RM) macro being defined when
+		building kerbsrc-nt.zip
+
+	* Makefile.in: include krb5/ccache/memory and windows/lib in
+		the list of directories built by the Windows build.
+		When building kerbsrc-nt.zip, put a copy of mkbin.bat
+		in the top-level build directory.  Fix bug in
+		kerbsrc-nt.zip building where it wasn't creating the
+		initial Makefile (although the dos-zipfiles target did
+		the right thing).
+
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Remove "untested" comment from
+		freebsd.  Add section for openbsd.
+
+Sun May 24 22:09:12 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Remove lib/kadm and lib/krb5/free from the list of
+ 		directories supported by windows (since they have since
+ 		gone away).
+
+	* aclocal.m4: Added suggested changes to improve HP-UX's support
+	 	for shared libraries.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4 (CONFIG_RELTOPDIR): Add support for generic file

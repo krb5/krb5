@@ -47,7 +47,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    krb5_error_code code;
    int bodysize;
    int tmsglen;
-   int conflen;
+   int conflen = 0;
    int signalg;
    int sealalg;
    gss_buffer_desc token;
@@ -58,7 +58,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    char *data_ptr;
    krb5_timestamp now;
    unsigned char *plain;
-   int cksum_len;
+   int cksum_len = 0;
    int plainlen;
    int err;
    int direction;
@@ -89,9 +89,9 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    ptr = (unsigned char *) input_token_buffer->value;
 
-   if (err = g_verify_token_header((gss_OID) ctx->mech_used, &bodysize,
-				   &ptr, toktype,
-				   input_token_buffer->length)) {
+   if ((err = g_verify_token_header((gss_OID) ctx->mech_used, &bodysize,
+				    &ptr, toktype,
+				    input_token_buffer->length))) {
       *minor_status = err;
       return(GSS_S_DEFECTIVE_TOKEN);
    }
@@ -159,8 +159,8 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 	    return(GSS_S_FAILURE);
 	 }
 
-	 if (code = kg_decrypt(context, &ctx->enc, NULL,
-			       ptr+14+cksum_len, plain, tmsglen)) {
+	 if ((code = kg_decrypt(context, &ctx->enc, NULL,
+				ptr+14+cksum_len, plain, tmsglen))) {
 	    xfree(plain);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
@@ -185,11 +185,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 	    *minor_status = ENOMEM;
 	    return(GSS_S_FAILURE);
 	 }
-
-	 if ((sealalg == 0xffff) && ctx->big_endian)
-	    memcpy(token.value, plain, token.length);
-	 else
-	    memcpy(token.value, plain+conflen, token.length);
+	 memcpy(token.value, plain+conflen, token.length);
       }
    } else if (toktype == KG_TOK_SIGN_MSG) {
       token = *message_buffer;
@@ -285,10 +281,10 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
       xfree(cksum.contents);
 #else
-      if (code = kg_encrypt(context, &ctx->seq,
-			    (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-			     ctx->seq.key->contents : NULL),
-			    md5cksum.contents, md5cksum.contents, 16)) {
+      if ((code = kg_encrypt(context, &ctx->seq,
+			     (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
+			      ctx->seq.key->contents : NULL),
+			     md5cksum.contents, md5cksum.contents, 16))) {
 	 xfree(md5cksum.contents);
 	 if (toktype == KG_TOK_SEAL_MSG)
 	    xfree(token.value);
@@ -386,7 +382,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    if (qop_state)
       *qop_state = GSS_C_QOP_DEFAULT;
 
-   if (code = krb5_timeofday(context, &now)) {
+   if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -398,8 +394,8 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    /* do sequencing checks */
 
-   if (code = kg_get_seq_num(context, &(ctx->seq), ptr+14, ptr+6, &direction,
-			     &seqnum)) {
+   if ((code = kg_get_seq_num(context, &(ctx->seq), ptr+14, ptr+6, &direction,
+			      &seqnum))) {
       if (toktype == KG_TOK_SEAL_MSG)
 	 xfree(token.value);
       *minor_status = code;

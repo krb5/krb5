@@ -1,3 +1,47 @@
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k5unseal.c (kg_unseal):  Clean up lint warnings.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't return
+		an error token if we can't provide the server name to the
+		KRB5 error structure (because cred isn't initialized).
+
+	* gssapi_krb5.c, gssapi_krb5.h: Export the oid of static
+		arrays as krb5_gss_oid_array since it's needed by
+		gss_import_sec_context.
+
+	* import_sec_context.c: Fix up the OID of the mechanism in the
+		imported security context so that we use the static
+		OID if at all possible.  This is needed since
+		gss_inquire_context() must return a static OID.
+
+Sun May 24 21:57:03 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* import_name.c (krb5_gss_import_name): Fix typo which caused
+ 		import_name to incorrectly import names produced by
+ 		gss_export_name().
+
+1998-05-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* copy_ccache.c (gss_krb5_copy_ccache): Fix bugs in copy_ccache.c,
+		which never compiled cleanly (since it wasn't added to the
+		Makefile correctly originally).
+
+	* k5seal.c (make_seal_token): Clean up -Wall flames
+
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* inq_cred.c (krb5_gss_inquire_cred): 
+	* inq_context.c (krb5_gss_inquire_context): 
+	* import_name.c (krb5_gss_import_name): 
+	* export_name.c (krb5_gss_export_name): 
+	* disp_name.c (krb5_gss_display_name): 
+	* context_time.c (krb5_gss_context_time): 
+	* acquire_cred.c (krb5_gss_acquire_cred): Clean up -Wall flames.
+
+	* indicate_mechs.c (krb5_gss_indicate_mechs): Return a dynamic OID
+		set.
+
 Fri Feb 27 18:41:08 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* export_name.c (krb5_gss_export_name): Fix bug in

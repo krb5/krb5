@@ -159,7 +159,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    char *sptr;
    long tmp;
    int bigend;
-   krb5_gss_cred_id_t cred;
+   krb5_gss_cred_id_t cred = 0;
    krb5_data ap_req;
    int i;
    krb5_error_code code;
@@ -679,7 +679,7 @@ fail:
 	   krb5_free_ap_req(context, request);
    }
 
-   if (gss_flags & GSS_C_MUTUAL_FLAG) {
+   if (cred && (gss_flags & GSS_C_MUTUAL_FLAG)) {
 	   /*
 	    * The client is expecting a response, so we can send an
 	    * error token back

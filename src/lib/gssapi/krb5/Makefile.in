@@ -111,6 +111,7 @@ STLIBOBJS = \
 	canon_name.o \
 	compare_name.o \
 	context_time.o \
+	copy_ccache.o \
 	delete_sec_context.o \
 	disp_name.o \
 	disp_status.o \

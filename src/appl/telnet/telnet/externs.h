@@ -57,7 +57,7 @@
 #if defined(CRAY) && !defined(NO_BSD_SETJMP)
 #include <bsdsetjmp.h>
 #endif
-#ifndef	FILIO_H
+#ifndef	HAVE_SYS_FILIO_H
 #include <sys/ioctl.h>
 #else
 #include <sys/filio.h>

@@ -57,7 +57,7 @@ krb5_error_code do_connection(), lookup_service_key(), kdc_get_server_key();
 void usage(context)
      krb5_context context;
 {
-     fprintf(stderr, "Usage: %s [-m[aster]] [-k[eytab]]\n", whoami);
+     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]]\n", whoami);
      cleanup_and_exit(1, context);
 }
 
@@ -90,6 +90,7 @@ int main(argc, argv)
      fd_set rfds;
      krb5_context context;
      krb5_error_code retval;
+     kadm5_config_params config_params;
 
      retval = krb5_init_context(&context);
      if (retval) {
@@ -101,11 +102,20 @@ int main(argc, argv)
 
      argv++; argc--;
      use_master = use_keytab = 0;
+     config_params.mask = 0;
+     
      while (argc) {
 	  if (strncmp(*argv, "-k", 2) == 0)
 	       use_keytab = 1;
 	  else if (strncmp(*argv, "-m", 2) == 0)
 	       use_master = 1;
+	  else if (strcmp(*argv, "-r") == 0) {
+	       argv++; argc--;
+	       if (argc == 0 || !use_master)
+		    usage(context);
+	       config_params.mask |= KADM5_CONFIG_REALM;
+	       config_params.realm = *argv;
+	  }
 	  else
 	       break;
 	  argv++; argc--;
@@ -123,8 +133,7 @@ int main(argc, argv)
      if (use_keytab)
 	  init_keytab(context);
      if (use_master)
-	  /* someday maybe there will be some config param options */
-	  init_master(context, NULL);
+	  init_master(context, &config_params);
 
      memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
      saddr.sin_family = AF_INET;

@@ -1,5 +1,4 @@
 #ifdef DEBUG
-#define _DEBUG
 
 #include <stdio.h>
 #include <string.h>

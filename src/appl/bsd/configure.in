@@ -64,7 +64,7 @@ dnl
 AC_VFORK
 AC_TYPE_MODE_T
 AC_CHECK_FUNCS(isatty inet_aton gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h sys/ioctl_compat.h paths.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 KRB5_SIGTYPE

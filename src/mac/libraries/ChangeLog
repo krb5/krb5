@@ -1,3 +1,8 @@
+Wed Jul  1 19:13:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* KerberosHeaders.h: Removed #endif with no matching initial #if
+		statement.  (How did this compile before?)
+
 Tue Sep 30 19:04:20 1997  Tom Yu  <tlyu@mit.edu>
 
 	* autoconf.h: Replace HAS_STDLIB_H with something more sane.  Punt

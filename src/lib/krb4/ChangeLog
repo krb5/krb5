@@ -1,3 +1,29 @@
+Thu Jul  9 19:35:01 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* tf_util.c (tf_init): Fixed a potential race condition in the opening 
+	of v4 ticket files. tf_init() was calling lstat() followed by fopen().
+	Now it calls fopen() and then calls lstat() and fstat() to check file 
+	ownership and to check that it opened the file it thought it did. I 
+	patched the shared memory code similarly, but since nothing uses it I
+	don't have a good way to test it properly.
+	
+Wed Jun 24 03:09:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* mk_priv.c (krb_mk_priv): Fix up call to pcbc_encrypt().  By
+ 	taking the address of key, the 5th arg to pcbc_encrypt() was
+ 	actually a (char **) cast to a (C_Block *).  The reason for this
+ 	is that a C_Block (actually a des_cblock) is typedef'ed from a
+ 	char[8], which by being in the parameters of the definition of
+ 	krb_mk_priv() becomes of type (char *).  This means that using the
+ 	address operator on key resulted in a pointer to a pointer to a
+ 	char rather than a pointer to a des_cblock, which would have been
+ 	innocuous in this case because pcbc_encrypt() actually takes a
+	(des_cblock *) as the 5th (ivec) argument.  The moral is to never
+ 	pass around naked arrays as function arguments; instead, pass
+ 	around pointers to arrays to avoid spontaneous conversions to
+ 	pointers sneaking up.  Note that CNS actually uses a (C_Block *)
+	everywhere, and maybe we should as well.  *whew*
+
 1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* stime.c (krb_stime): 

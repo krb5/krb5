@@ -25,7 +25,7 @@
 #if defined(_MSDOS) || defined(_WIN32)
 #include <io.h>
 #endif
-#ifdef _MACINTOSH
+#ifdef macintosh
 #include "icons.h"
 static void MacMessageBox(char *errbuf);
 #endif
@@ -42,7 +42,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	const char FAR *fmt;
 	va_list ap;
 {
-#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 
 	char errbuf[1024] = "";
 
@@ -57,7 +57,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	if (fmt)
 		vsprintf (errbuf + strlen (errbuf), fmt, ap);
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 	MacMessageBox(errbuf);
 #else
 #ifdef _WIN32
@@ -69,9 +69,9 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	} else
 #endif /* _WIN32 */
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
-#endif /* _MACINTOSH */
+#endif /* macintosh */
 
-#else /* !_MSDOS && !_WIN32 && !_MACINTOSH */
+#else /* !_MSDOS && !_WIN32 && !macintosh */
     
 	if (whoami) {
 		fputs(whoami, stderr);
@@ -147,7 +147,7 @@ et_old_error_hook_func reset_com_err_hook ()
 }
 #endif
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 static void MacMessageBox(errbuf)
 	char *errbuf;
 {
@@ -163,6 +163,8 @@ static void MacMessageBox(errbuf)
 	EventRecord	theEvent;
 	Point		localPt;
 	Boolean		done;
+	long		gestaltResult;
+	OSErr		theError;
 
 	/* Find Centered rect for window */
 	tmpRect.top	= ((mainRect.bottom + mainRect.top)/2 -
@@ -173,8 +175,13 @@ static void MacMessageBox(errbuf)
 	tmpRect.right = tmpRect.left + (errRect.right - errRect.left);
 
 	/* Create the error window - as a dialog window */
-	errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE,
-			      dBoxProc, (WindowPtr) -1, FALSE, 0L);
+	/* First check if we have color QuickDraw */
+	/* (we can assume we have Gestalt because we are on system 7) */
+	theError = Gestalt (gestaltQuickdrawFeatures, &gestaltResult);
+	if ((theError == noErr) && (gestaltResult & (1 << gestaltHasColor) != 0))
+		errWindow = NewCWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
+	else
+		errWindow = NewWindow(NULL, &tmpRect, "\p", TRUE, dBoxProc, (WindowPtr) -1, FALSE, 0L);
 
 	SetPort(errWindow);
 	TextFont(systemFont);
@@ -190,7 +197,7 @@ static void MacMessageBox(errbuf)
 	InsetRect(&errOkButtonRect, 4, 4);
 
 	/* Draw the error text */
-	TextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
+	TETextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
 
 	/* Draw the Stop icon */
 	PlotIcon(&errIconRect, GetResource('ICON', 0));
@@ -198,7 +205,7 @@ static void MacMessageBox(errbuf)
 	/* mini event loop here */
 	done = FALSE;
 	while(!done) {
-		GetNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent);
+		WaitNextEvent(mDownMask | mUpMask | keyDownMask, &theEvent, 15, nil);
 		if (theEvent.what == mouseDown) {
 			localPt = theEvent.where;
 			GlobalToLocal(&localPt);

@@ -208,6 +208,10 @@ const char *prog;
 	return KDC5_NONET;
     
     while (!signal_requests_exit) {
+	if (signal_requests_hup) {
+	    krb5_klog_reopen();
+	    signal_requests_hup = 0;
+	}
 	readfds = select_fds;
 	nfound = select(select_nfds, &readfds, 0, 0, 0);
 	if (nfound == -1) {

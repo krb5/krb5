@@ -29,7 +29,7 @@
 #include "scc.h"
 #include "k5-int.h"
 
-#ifdef _MACINTOSH
+#ifdef macintosh
 /*
  * Kludge for the Macintosh, since fopen doesn't set errno, but open
  * does...
@@ -162,7 +162,7 @@ krb5_scc_open_file (context, id, mode)
     }
 #endif
 
-#ifdef _MACINTOSH
+#ifdef macintosh
     f = my_fopen (data->filename, open_flag);
 #else
     f = fopen (data->filename, open_flag);
