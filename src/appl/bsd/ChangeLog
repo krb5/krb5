@@ -1,3 +1,9 @@
+Wed Oct 26 00:04:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krsh.c (main):
+	* krlogind.c (protocol, v5_des_read): Check for both EAGAIN in
+		addition to EWOULDBLOCK.
+
 Mon Oct 24 14:46:07 1994    (tytso@rsx-11)
 
 	* Makefile.in: The Kerberos V4 libraries must be linked in after

@@ -118,7 +118,7 @@ main(argc, argv0)
     if ( argc < 2 ) goto usage;
     argc--;
     argv++;
-
+    
   another:
     if (argc > 0 && host == 0 && strncmp(*argv, "-", 1)) {
 	host = *argv;
@@ -391,7 +391,7 @@ main(argc, argv0)
 	  goto rewrite;
 	wc = write(rem, bp, cc);
 	if (wc < 0) {
-	    if (errno == EWOULDBLOCK)
+	    if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
 	      goto rewrite;
 	    goto done;
 	}
@@ -424,7 +424,7 @@ main(argc, argv0)
 	    errno = 0;
 	    cc = read(rfd2, buf, sizeof buf);
 	    if (cc <= 0) {
-		if (errno != EWOULDBLOCK)
+		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		  readfrom &= ~(1<<rfd2);
 	    } else
 	      (void) write(2, buf, cc);
@@ -433,7 +433,7 @@ main(argc, argv0)
 	    errno = 0;
 	    cc = read(rem, buf, sizeof buf);
 	    if (cc <= 0) {
-		if (errno != EWOULDBLOCK)
+		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		  readfrom &= ~(1<<rem);
 	    } else
 	      (void) write(1, buf, cc);

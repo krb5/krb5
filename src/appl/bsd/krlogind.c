@@ -944,7 +944,7 @@ protocol(f, p)
 	}
 	if (ibits & (1<<f)) {
 	    fcc = (*des_read)(f, fibuf, sizeof (fibuf));
-	    if (fcc < 0 && errno == EWOULDBLOCK)
+	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	      fcc = 0;
 	    else {
 		register unsigned char *cp;
@@ -984,7 +984,7 @@ protocol(f, p)
 	if (ibits & (1<<p)) {
 	    pcc = read(p, pibuf, sizeof (pibuf));
 	    pbp = pibuf;
-	    if (pcc < 0 && errno == EWOULDBLOCK)
+	    if (pcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	      pcc = 0;
 	    else if (pcc <= 0)
 	      break;
@@ -1000,7 +1000,7 @@ protocol(f, p)
 	}
 	if ((obits & (1<<f)) && pcc > 0) {
 	    cc = (*des_write)(f, pbp, pcc);
-	    if (cc < 0 && errno == EWOULDBLOCK) {
+	    if (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 		/* also shouldn't happen */
 		sleep(5);
 		continue;
@@ -1247,9 +1247,9 @@ v5_des_read(fd, buf, len)
     if ((cc = krb5_net_read(fd, (char *)&rd_len, sizeof(rd_len))) !=
 	sizeof(rd_len)) {
 #endif
-	if ((cc < 0)  && (errno == EWOULDBLOCK)) return(cc);
-	/* XXX can't read enough, pipe
-	   must have closed */
+	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
+	    return(cc);
+	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
     rd_len = ntohl(rd_len);
@@ -1265,7 +1265,7 @@ v5_des_read(fd, buf, len)
     if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
 	/* XXX can't read enough, pipe
 	   must have closed */
-	if ((cc < 0)  && (errno == EWOULDBLOCK)) {
+	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 	    retry++;
 	    sleep(1);
 	    if (retry > MAXRETRIES){
