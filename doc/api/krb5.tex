@@ -246,14 +246,13 @@ Returns errors from encryption routines, system errors.
 \begin{funcdecl}{krb5_get_in_tkt}{krb5_error_code}{\funcin}
 \funcarg{const krb5_flags}{options}
 \funcarg{krb5_address * const *}{addrs}
-\funcarg{const krb5_preauthtype}{pre_auth_type}
-\funcarg{const krb5_enctype}{etype}
-\funcarg{const krb5_keytype}{keytype}
+\funcarg{const krb5_enctype *}{etypes}
+\funcarg{const krb5_preauthtype *}{pre_auth_types}
 \funcfuncarg{krb5_error_code}{(*key_proc)}
 	\funcarg{const krb5_keytype}{type}
-	\funcarg{krb5_keyblock **}{key}
+	\funcarg{krb5_pa_data *}{salt}
 	\funcarg{krb5_const_pointer}{keyseed}
-	\funcarg{krb5_pa_data **}{padata}
+	\funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_const_pointer}{keyseed}
 \funcfuncarg{krb5_error_code}{(*decrypt_proc)}
@@ -270,6 +269,7 @@ Returns errors from encryption routines, system errors.
 
 All-purpose initial ticket routine, usually called via
 \funcname{krb5_get_in_tkt_with_password} or
+\funcname{krb5_get_in_tkt_with_keytab} or
 \funcname{krb5_get_in_tkt_with_skey}.
 
 
@@ -340,9 +340,8 @@ Returns system errors, preauthentication errors, encryption errors.
 \begin{funcdecl}{krb5_get_in_tkt_with_password}{krb5_error_code}{\funcin}
 \funcarg{const krb5_flags}{options}
 \funcarg{krb5_address * const *}{addrs}
-\funcarg{const krb5_preauthtype}{pre_auth_type}
-\funcarg{const krb5_enctype}{etype}
-\funcarg{const krb5_keytype}{keytype}
+\funcarg{const krb5_enctype *}{etypes}
+\funcarg{const krb5_preauthtype *}{pre_auth_types}
 \funcarg{const char *}{password}
 \funcarg{krb5_ccache}{ccache}
 \funcinout
@@ -366,11 +365,34 @@ See \funcname{krb5_get_in_tkt} for documentation of the
 
 Returns system errors, preauthentication errors, encryption errors.
 
+\begin{funcdecl}{krb5_get_in_tkt_with_keytab}{krb5_error_code}{\funcin}
+\funcarg{const krb5_flags}{options}
+\funcarg{krb5_address * const *}{addrs}
+\funcarg{const krb5_enctype *}{etypes}
+\funcarg{const krb5_preauthtype *}{pre_auth_types}
+\funcarg{const krb5_keytab *}{keytab}
+\funcarg{krb5_ccache}{ccache}
+\funcinout
+\funcarg{krb5_creds *}{creds}
+\funcarg{krb5_kdc_rep **}{ret_as_reply}
+\end{funcdecl}
+
+Attempts to get an initial ticket using \funcparam{keytab}.  If
+\funcparam{keytab} is NULL, the default keytab is used 
+(e.g., \filename{/etc/v5srvtab}).
+
+See \funcname{krb5_get_in_tkt} for documentation of the
+\funcparam{options}, \funcparam{addrs}, \funcparam{pre_auth_type},
+\funcparam{etype}, \funcparam{ccache}, \funcparam{creds} and
+\funcparam{ret_as_reply} arguments.
+
+Returns system errors, preauthentication errors, encryption errors.
+
 \begin{funcdecl}{krb5_get_in_tkt_with_skey}{krb5_error_code}{\funcin}
 \funcarg{const krb5_flags}{options}
 \funcarg{krb5_address * const *}{addrs}
-\funcarg{const krb5_preauthtype}{pre_auth_type}
-\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_enctype *}{etypes}
+\funcarg{const krb5_preauthtype *}{pre_auth_types}
 \funcarg{const krb5_keyblock *}{key}
 \funcarg{krb5_ccache}{ccache}
 \funcinout
