@@ -1,3 +1,11 @@
+Tue May 23 16:28:42 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* gc_frm_kdc.c, preauth.c, t_kerb.c, t_walk_rtree.c, unparse.c:
+		Rearrange #include files so that krb5.h gets included
+		first, so that the debugging information can be more
+		efficiently collapsed since the type numbers will be the
+		same.
+
 Sat May 20 14:01:16 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rd_safe.c (krb5_rd_safe): Increment remote_seq_number if

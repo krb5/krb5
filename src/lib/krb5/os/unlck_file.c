@@ -24,8 +24,8 @@
  * libos: krb5_lock_file routine
  */
 
-#include <stdio.h>
 #include "k5-int.h"
+#include <stdio.h>
 
 krb5_error_code
 krb5_unlock_file(context, filep, pathname)

@@ -31,6 +31,7 @@
  * SUCH DAMAGE.
  */
 
+#include "k5-int.h"
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/file.h>
@@ -38,7 +39,6 @@
 #ifdef HAS_PATHS_H
 #include <paths.h>
 #endif
-#include "k5-int.h"
 
 #ifndef _PATH_DEVNULL
 #define _PATH_DEVNULL "/dev/null"

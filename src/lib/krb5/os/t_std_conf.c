@@ -3,6 +3,8 @@
  * 	values from the krb5 config file(s).
  */
 
+#include "krb5.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,8 +12,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#include "krb5.h"
 
 void test_get_default_realm(ctx)
 	krb5_context ctx;

@@ -1,3 +1,13 @@
+Tue May 23 16:22:57 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_decode.c: Rearrange #include files so that krb5.h gets
+		included first, so that the debugging information can be
+		more efficiently collapsed since the type numbers will be
+		the same.
+
+	* asn1_encode.h: Rearrange the #include files so that the type
+		numbers are the same.
+
 Thu Apr 13 20:13:38 1995 Keith Vetter (keithv@fusion.com)
 
 	* asn1_k_decode.c: fixed up 'unreferenced local variable' problems.

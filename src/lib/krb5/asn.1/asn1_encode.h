@@ -25,9 +25,9 @@
 #define __ASN1_ENCODE_H__
 
 #include "k5-int.h"
-#include <time.h>
 #include "krbasn1.h"
 #include "asn1buf.h"
+#include <time.h>
 
 /*
    Overview

@@ -1,3 +1,10 @@
+Tue May 23 16:29:24 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* t_std_conf.c, timeofday.c, unlck_file.c: Rearrange #include
+		files so that krb5.h gets included first, so that the
+		debugging information can be more efficiently collapsed
+		since the type numbers will be the same.
+
 Tue May 16 10:33:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gmt_mktime.c	- Use the actual year instead of the number of years
 			  since 1900 when determining if a year has a leapday.

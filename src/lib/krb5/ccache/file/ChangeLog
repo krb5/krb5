@@ -1,3 +1,10 @@
+Tue May 23 16:28:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fcc_maybe.c: Rearrange #include files so that krb5.h gets
+		included first, so that the debugging information can be
+		more efficiently collapsed since the type numbers will be
+		the same.
+
 Tue May  9 16:23:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* fcc_close.c (krb5_fcc_close): Remove <malloc.h> as not all

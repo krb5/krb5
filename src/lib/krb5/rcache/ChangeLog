@@ -1,3 +1,10 @@
+Tue May 23 16:30:29 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rc_io.c: Rearrange #include files so that krb5.h gets included
+		first, so that the debugging information can be more
+		efficiently collapsed since the type numbers will be the
+		same.
+
 Mon May  1 23:10:26 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rc_dfl.c (krb5_rc_dfl_recover): Fix memory leaks in this

@@ -2,8 +2,8 @@
  * t_walk_rtree.c --- test krb5_walk_realm_tree
  */
 
-#include <stdio.h>
 #include "k5-int.h"
+#include <stdio.h>
 #include "com_err.h"
 
 main(argc, argv)

@@ -20,8 +20,8 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
 #include "k5-int.h"
+#include <stdio.h>
 
 #define MAX_REALM_LN 500
 

@@ -25,10 +25,9 @@
  */
 
 
-#include <time.h>
-#include <stdio.h>			/* needed for libos-proto.h */
-
 #include "k5-int.h"
+
+#include <time.h>
 
 #ifdef POSIX_TYPES
 #define timetype time_t

@@ -3,6 +3,7 @@
  * routines.
  */
 
+#include "krb5.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,7 +13,6 @@
 #include <arpa/inet.h>
 
 #include "com_err.h"
-#include "krb5.h"
 
 
 void test_425_conv_principal(ctx, name, inst, realm)

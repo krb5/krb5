@@ -37,9 +37,9 @@
  * into different files.... [tytso:19920903.1618EDT]
  */
 
+#include "k5-int.h"
 #include <stdio.h>
 #include <time.h>
-#include "k5-int.h"
 #include <syslog.h>
 #ifdef _MSDOS
 #define getpid _getpid

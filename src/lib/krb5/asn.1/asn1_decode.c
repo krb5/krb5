@@ -21,10 +21,10 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
 /* ASN.1 primitive decoders */
 #include "asn1_decode.h"
 #include "asn1_get.h"
+#include <stdio.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME

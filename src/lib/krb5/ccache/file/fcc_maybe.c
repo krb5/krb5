@@ -24,14 +24,14 @@
  * This file contains the source code for conditional open/close calls.
  */
 
+#include "k5-int.h"
+
 #define NEED_SOCKETS    /* Only for ntohs, etc. */
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
           
 #include "fcc.h"
-#include <errno.h>
-#include "k5-int.h"
 
 int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 
