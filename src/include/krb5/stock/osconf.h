@@ -47,6 +47,7 @@
 
 #define DEFAULT_KDB_FILE        "@PREFIX/lib/krb5kdc/principal"
 #define KRB5_DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/krb5_adm.acl"
+#define	DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/kadm_old.acl"
 
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
