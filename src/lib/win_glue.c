@@ -50,5 +50,6 @@ int CALLBACK __export
 WEP(nParam)
 	int nParam;
 {
+    WSACleanup();
     return 1;
 }
