@@ -25,11 +25,11 @@ To Build the Macintosh version of Kerberos 5 and GSS:
 
 	8) Execute "perl :mac:macfile_get.pl" in MPW
 
-	9) Execute "make create-directories" in MPW
+	9) Build target "create-directories" in MPW
 	
 --- Building libraries ---
 
-	10) Execute "make all" in MPW. Wait.
+	10) Build target "all" in MPW. Wait.
 
 --- Building the Cygnus Network Security Application ---
 
