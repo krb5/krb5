@@ -28,7 +28,7 @@
 #define HasStringH YES
 #define HasStdlibH NO
 #define HasInet YES
-#define	NeedNarrowPrototypes YES		/* for the moment ... */
+#define	NeedNarrowPrototypes NO
 #define Bitsize32
 
 #define HasSaberC YES
