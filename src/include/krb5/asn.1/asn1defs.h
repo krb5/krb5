@@ -216,5 +216,10 @@ krb5_ticket *KRB5_Ticket2krb5_ticket
 struct type_UNIV_GeneralizedTime *unix2gentime
 	PROTOTYPE((const int , int *));
 
-#undef P
+/* cvt_flags.c */
+struct type_KRB5_TicketFlags *krb5_flags2KRB5_TicketFlags
+	PROTOTYPE((const krb5_flags ,int *));
+krb5_flags KRB5_TicketFlags2krb5_flags
+	PROTOTYPE((const struct type_KRB5_TicketFlags *,int *));
+
 #endif /* KRB5_ASN1DEFS__ */
