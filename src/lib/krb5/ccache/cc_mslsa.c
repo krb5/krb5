@@ -231,25 +231,78 @@ MSTicketToMITTicket(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_d
     tmpdata.magic=KV5M_DATA;
     tmpdata.length=msticket->EncodedTicketSize;
     tmpdata.data=msticket->EncodedTicket;
-    // todo: fix this up a little. this is ugly and will break krb_free_data()
+
+    // TODO: fix this up a little. this is ugly and will break krb5_free_data()
     krb5_copy_data(context, &tmpdata, &newdata);
     memcpy(ticket, newdata, sizeof(krb5_data));
 }
 
-static void
-MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_creds *creds)
+/*
+ * PreserveInitialTicketIdentity()
+ *
+ * This will find the "PreserveInitialTicketIdentity" key in the registry.  
+ * Returns 1 to preserve and 0 to not.
+ */
+
+static DWORD
+PreserveInitialTicketIdentity(void)
 {
-    WCHAR wtmp[128];
+    HKEY hKey;
+    DWORD size = sizeof(DWORD);
+    const char *key_path = "Software\\MIT\\Kerberos5";
+    const char *value_name = "PreserveInitialTicketIdentity";
+    DWORD retval = 1;     /* default to Preserve */
+
+  userkey:
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+        goto syskey;
+    if (RegQueryValueEx(hKey, value_name, 0, REG_DWORD, &retval, &size) != ERROR_SUCCESS)
+    {
+        RegCloseKey(hKey);
+        goto syskey;
+    }
+    RegCloseKey(hKey);
+    goto done;
+
+  syskey:
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+        goto done;
+    if (RegQueryValueEx(hKey, value_name, 0, REG_DWORD, &retval, &size) != ERROR_SUCCESS)
+    {
+        RegCloseKey(hKey);
+        goto done;
+    }
+    RegCloseKey(hKey);
+
+  done:
+    return retval;
+}
+
+
+static void
+MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING InitialTicketDomain, 
+                krb5_context context, krb5_creds *creds)
+{
+    WCHAR wrealm[128];
     ZeroMemory(creds, sizeof(krb5_creds));
     creds->magic=KV5M_CREDS;
-    wcsncpy(wtmp, msticket->TargetDomainName.Buffer,
-            msticket->TargetDomainName.Length/sizeof(WCHAR));
-    wtmp[msticket->TargetDomainName.Length/sizeof(WCHAR)]=0;
-    MSPrincToMITPrinc(msticket->ClientName, wtmp, context, &creds->client);
-    wcsncpy(wtmp, msticket->DomainName.Buffer,
+
+    // construct Client Principal
+    if ( PreserveInitialTicketIdentity ) {
+        wcsncpy(wrealm, InitialTicketDomain.Buffer, InitialTicketDomain.Length/sizeof(WCHAR));
+        wrealm[InitialTicketDomain.Length/sizeof(WCHAR)]=0;
+    } else {
+        wcsncpy(wrealm, msticket->DomainName.Buffer, msticket->DomainName.Length/sizeof(WCHAR));
+        wrealm[msticket->DomainName.Length/sizeof(WCHAR)]=0;
+    }
+    MSPrincToMITPrinc(msticket->ClientName, wrealm, context, &creds->client);
+
+    // construct Service Principal
+    wcsncpy(wrealm, msticket->DomainName.Buffer,
             msticket->DomainName.Length/sizeof(WCHAR));
-    wtmp[msticket->DomainName.Length/sizeof(WCHAR)]=0;
-    MSPrincToMITPrinc(msticket->ServiceName, wtmp, context, &creds->server);
+    wrealm[msticket->DomainName.Length/sizeof(WCHAR)]=0;
+    MSPrincToMITPrinc(msticket->ServiceName, wrealm, context, &creds->server);
+
     MSSessionKeyToMITKeyblock(&msticket->SessionKey, context, 
                               &creds->keyblock);
     MSFlagsToMITFlags(msticket->TicketFlags, &creds->ticket_flags);
@@ -1015,8 +1068,8 @@ typedef struct _krb5_lcc_cursor {
  * id
  * 
  * Effects:
- * creates a file-based cred cache that will reside in the file
- * residual.  The cache is not opened, but the filename is reserved.
+ * Acccess the MS Kerberos LSA cache in the current logon session
+ * Ignore the residual.
  * 
  * Returns:
  * A filled in krb5_ccache structure "id".
@@ -1077,7 +1130,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     if (GetMSTGT(data->LogonHandle, data->PackageId, &msticket)) {
         /* convert the ticket */
         krb5_creds creds;
-        MSCredToMITCred(msticket, context, &creds);
+        MSCredToMITCred(msticket, msticket->DomainName, context, &creds);
         LsaFreeReturnBuffer(msticket);
 
         krb5_copy_principal(context, creds.client, &data->princ);
@@ -1205,7 +1258,7 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
-    KERB_EXTERNAL_TICKET *msticket;
+    KERB_EXTERNAL_TICKET *msticket, * mstgt;
 
     if ( lcursor->index >= lcursor->response->CountOfTickets )
         return KRB5_CC_END;
@@ -1215,10 +1268,15 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
         return KRB5_FCC_INTERNAL;
 
     /* convert the ticket */
-    MSCredToMITCred(msticket, context, creds);
-
-    LsaFreeReturnBuffer(msticket);
-    return KRB5_OK;
+    if (GetMSTGT(data->LogonHandle, data->PackageId, &mstgt)) {
+        MSCredToMITCred(msticket, mstgt->DomainName, context, creds);
+        LsaFreeReturnBuffer(mstgt);
+        LsaFreeReturnBuffer(msticket);
+        return KRB5_OK;
+    } else {
+        LsaFreeReturnBuffer(msticket);
+        return KRB5_FCC_INTERNAL;
+    }
 }
 
 /*
@@ -1297,7 +1355,7 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
 {
     krb5_error_code kret = KRB5_OK;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
-    KERB_EXTERNAL_TICKET *msticket = 0;
+    KERB_EXTERNAL_TICKET *msticket = 0, *mstgt = 0;
     krb5_creds * mcreds_noflags;
     krb5_creds   fetchcreds;
 
@@ -1337,7 +1395,9 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     }
 
     /* convert the ticket */
-    MSCredToMITCred(msticket, context, &fetchcreds);
+    GetMSTGT(data->LogonHandle, data->PackageId, &mstgt);
+
+    MSCredToMITCred(msticket, mstgt ? mstgt->DomainName : msticket->DomainName, context, &fetchcreds);
 
     /* check to see if this ticket matches the request using logic from
      * krb5_cc_retrieve_cred_default()
@@ -1350,6 +1410,8 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     }
 
   cleanup:
+    if ( mstgt )
+        LsaFreeReturnBuffer(mstgt);
     if ( msticket )
         LsaFreeReturnBuffer(msticket);
     if ( mcreds_noflags )
