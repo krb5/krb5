@@ -78,6 +78,7 @@ krb5_error_code krb5_fcc_skip_principal PROTOTYPE((krb5_ccache id ));
 krb5_error_code krb5_fcc_set_flags PROTOTYPE((krb5_ccache id , krb5_flags flags ));
 
 /* fcc_ops.c */
+extern krb5_cc_ops krb5_cc_file_ops;
 
 /* fcc_write.c */
 krb5_error_code krb5_fcc_write PROTOTYPE((krb5_ccache id , krb5_pointer buf , int len ));
