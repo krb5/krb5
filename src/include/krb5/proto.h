@@ -31,11 +31,24 @@
 #define	KRB5_PRIV	((krb5_msgtype)21) /* Private application message */
 #define	KRB5_ERROR	((krb5_msgtype)30) /* Error response */
 
+/* LastReq types */
+#define KRB5_LRQ_NONE			0
+#define KRB5_LRQ_ALL_LAST_TGT		1
+#define KRB5_LRQ_ONE_LAST_TGT		(-1)
+#define KRB5_LRQ_ALL_LAST_INITIAL	2
+#define KRB5_LRQ_ONE_LAST_INITIAL	(-2)
+#define KRB5_LRQ_ALL_LAST_TGT_ISSUED	3
+#define KRB5_LRQ_ONE_LAST_TGT_ISSUED	(-3)
+#define KRB5_LRQ_ALL_LAST_RENEWAL	4
+#define KRB5_LRQ_ONE_LAST_RENEWAL	(-4)
+#define KRB5_LRQ_ALL_LAST_REQ		5
+#define KRB5_LRQ_ONE_LAST_REQ		(-5)
+
 /* PADATA types */
-#define	KRB5_PADATA_AP_REQ	1
-#define	KRB5_PADATA_TGS_REQ	KRB5_PADATA_AP_REQ
+#define	KRB5_PADATA_AP_REQ		1
+#define	KRB5_PADATA_TGS_REQ		KRB5_PADATA_AP_REQ
 #define KRB5_PADATA_ENC_TIMESTAMPS	2
-#define	KRB5_PADATA_PW_SALT	3
+#define	KRB5_PADATA_PW_SALT		3
 
 /* Transited encoding types */
 #define	KRB5_DOMAIN_X500_COMPRESS	1
