@@ -57,7 +57,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_create [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-D depth] [-k keytype] [-M mkeyname]\n");
 
     exit(status);
 }
@@ -102,7 +102,6 @@ char *argv[];
     krb5_error_code retval;
     char *dbname = 0;
     int keytypedone = 0;
-    krb5_enctype etype = 0xffff;
     register krb5_cryptosystem_entry *csentry;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     int num_to_create;
@@ -150,9 +149,6 @@ char *argv[];
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
 	    break;
-	case 'e':
-	    etype = atoi(optarg);
-	    break;
 	case 'm':
 	    manual_mkey = TRUE;
 	    break;
@@ -181,16 +177,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == 0xffff)
-	etype = krb5_keytype_array[master_keyblock.keytype]->
-	    system->proto_enctype;
-
-    if (!valid_etype(etype)) {
-	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", etype);
-	exit(1);
-    }
-    krb5_use_cstype(test_context, &master_encblock, etype);
+    krb5_use_keytype(test_context, &master_encblock, master_keyblock.keytype);
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)

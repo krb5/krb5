@@ -1,3 +1,7 @@
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb5_mkdums.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
 
 Thu Jul 27 15:30:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_mkdums.c - Restore old logic to find the etype now that crypto-
