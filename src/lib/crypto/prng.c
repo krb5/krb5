@@ -192,7 +192,7 @@ read_entropy_from_device (krb5_context context, const char *device)
     return 0;
   }
   for (left = sizeof (buf); left > 0;) {
-    size_t count;
+    ssize_t count;
     count = read (fd, &buf, (unsigned) left);
     if (count <= 0) {
       close(fd);
