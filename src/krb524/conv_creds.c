@@ -26,12 +26,11 @@
 #include <sys/types.h>
 #include "port-sockets.h"
 #include "socket-utils.h"
-#if TARGET_OS_MAC
-#include <Kerberos/krb.h>
-#include <Kerberos/krb524.h>
-#else
 #include <krb.h>
 #include "krb524.h"
+
+#ifdef USE_CCAPI
+#include <CredentialsCache.h>
 #endif
 
 krb5_error_code krb524_convert_creds_plain
@@ -61,7 +60,10 @@ krb524_convert_creds_kdc(context, v5creds, v4creds)
      if (ret)
 	 return ret;
 
-#ifdef TARGET_OS_MAC
+#if TARGET_OS_MAC
+#ifdef USE_CCAPI
+     v4creds->stk_type = cc_v4_stk_des;
+#endif
      if (slen == sizeof(struct sockaddr_in)
 	 && ss2sa(&ss)->sa_family == AF_INET) {
 	 v4creds->address = ss2sin(&ss)->sin_addr.s_addr;

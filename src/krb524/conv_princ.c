@@ -21,13 +21,8 @@
  */
 
 #include "krb5.h"
-#if TARGET_OS_MAC
-#include <Kerberos/krb.h>
-#include <Kerberos/krb524.h>
-#else
 #include <krb.h>
 #include "krb524.h"
-#endif
 
 int krb524_convert_princs(context, client, server, pname, pinst, prealm, 
 			  sname, sinst, srealm)

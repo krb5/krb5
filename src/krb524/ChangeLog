@@ -1,3 +1,17 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+    * cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c, sendmsg.c: 
+      Removed Mac-specific includes.
+    
+    * conv_creds.c: If we are on the Mac and using the CCAPI, set
+      the string_to_key type to MIT.
+      
+    * krb524.h: Removed enumsalwaysint because there are no enums in this 
+      header.  Also include krb524_err with <> because on Mac OS X both
+      are public headers and should not be included with "".
+      
+    * Makefile.in: set KRB524_PRIVATE while building so that Darwin builds
+      see these prototypes.  Otherwise the Darwin build will fail.
+
 2003-01-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (clean-windows): Remove $(GENS).

@@ -30,14 +30,8 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #endif
-#if TARGET_OS_MAC
-#include <Kerberos/krb.h>
-#include <Kerberos/krb524.h>
-#include "cr_tkt.h"
-#else
 #include <krb.h>
 #include "krb524.h"
-#endif
 
 static int
 krb524int_krb_create_ticket(KTEXT, unsigned int, char *, char *, char *, long,

@@ -34,13 +34,8 @@
 #include <netinet/in.h>
 #endif
 
-#if TARGET_OS_MAC
-#include <Kerberos/krb.h>
-#include <Kerberos/krb524.h>
-#else
 #include <krb.h>
 #include "krb524.h"
-#endif
 
 /*
  * I'm sure that this is reinventing the wheel, but I don't know where

@@ -32,11 +32,12 @@
 #		define KRB524_PRIVATE 0
 #	endif
 #else
-#    include "krb524_err.h"
 #	ifndef KRB524_PRIVATE
 #		define KRB524_PRIVATE 1
 #	endif
 #endif	
+
+#include <krb524_err.h>
 
 #ifndef KRB524INT_BEGIN_DECLS
 #ifdef __cplusplus
@@ -51,7 +52,6 @@
 #if TARGET_OS_MAC
 #    if defined(__MWERKS__)
 #	pragma import on
-#	pragma enumsalwaysint on
 #    endif
 #    pragma options align=mac68k
 #endif
@@ -120,7 +120,6 @@ int krb524_sendto_kdc
 
 #if TARGET_OS_MAC
 #    if defined(__MWERKS__)
-#	pragma enumsalwaysint reset
 #	pragma import reset
 #    endif
 #	pragma options align=reset
