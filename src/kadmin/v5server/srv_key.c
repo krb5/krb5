@@ -98,7 +98,7 @@ static int		key_num_ktents = 0;
 static krb5_key_salt_tuple *key_ktents = (krb5_key_salt_tuple *) NULL;
 static int		key_ktents_inited = 0;
 static krb5_key_salt_tuple default_ktent = {
-    KEYTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_NORMAL
+    ENCTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_NORMAL
 };
 
 static char		*key_db_name = (char *) NULL;
@@ -316,16 +316,16 @@ key_get_admin_entry(kcontext)
 	 */
 	xxx.n_key_data = (krb5_int16) madmin_num_keys;
 	xxx.key_data = madmin_keys;
-	if (krb5_dbe_find_keytype(kcontext,
+	if (krb5_dbe_find_enctype(kcontext,
 				  &xxx,
-				  KEYTYPE_DES_CBC_MD5,
+				  ENCTYPE_DES_CBC_MD5,
 				  -1,
 				  -1,
 				  &kdata))
 	    kdata = &madmin_keys[0];
 
 	memset(&madmin_key, 0, sizeof(krb5_keyblock));
-	madmin_key.keytype = KEYTYPE_DES_CBC_MD5;
+	madmin_key.enctype = ENCTYPE_DES_CBC_MD5;
 	madmin_key.length = kdata->key_data_length[0];
 	madmin_key.contents = kdata->key_data_contents[0];
     }
@@ -372,7 +372,7 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
     /*
      * Figure out arguments.
      */
-    master_keyblock.keytype=((key_type == -1) ? KEYTYPE_DES_CBC_MD5 : key_type);
+    master_keyblock.enctype=((key_type == -1) ? ENCTYPE_DES_CBC_MD5 : key_type);
     mkey_name = ((!master_key_name) ? KRB5_KDB_M_NAME : master_key_name);
 
     /*
@@ -471,7 +471,7 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
     }
     ment_init = 1;
 
-    krb5_use_keytype(kcontext, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(kcontext, &master_encblock, master_keyblock.enctype);
 
     /* Go get the master key */
     kret = krb5_db_fetch_mkey(kcontext,
@@ -653,10 +653,10 @@ key_string2key_keysalt(ksent, ptr)
      * Determine if this key/salt pair is salted.
      */
     salted = 0;
-    krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
-    if (!krb5_dbe_find_keytype(argp->context,
+    krb5_use_enctype(argp->context, &master_encblock, ksent->ks_enctype);
+    if (!krb5_dbe_find_enctype(argp->context,
 			       argp->dbentry,
-			       ksent->ks_keytype,
+			       ksent->ks_enctype,
 			       ksent->ks_salttype,
 			       -1,
 			       &kdata)) {
@@ -670,7 +670,7 @@ key_string2key_keysalt(ksent, ptr)
 	 */
 	if (!(kret = krb5_dbe_create_key_data(argp->context, argp->dbentry))) {
 	    kdata = &argp->dbentry->key_data[argp->dbentry->n_key_data-1];
-	    kdata->key_data_type[0] = (krb5_int16) ksent->ks_keytype;
+	    kdata->key_data_type[0] = (krb5_int16) ksent->ks_enctype;
 	    kdata->key_data_type[1] = (krb5_int16) ksent->ks_salttype;
 	}
     }
@@ -843,10 +843,10 @@ key_randomkey_keysalt(ksent, ptr)
     argp = (struct keysalt_iterate_args *) ptr;
     kret = 0;
 
-    krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
-    if (krb5_dbe_find_keytype(argp->context,
+    krb5_use_enctype(argp->context, &master_encblock, ksent->ks_enctype);
+    if (krb5_dbe_find_enctype(argp->context,
 			      argp->dbentry,
-			      ksent->ks_keytype,
+			      ksent->ks_enctype,
 			      ksent->ks_salttype,
 			      -1,
 			      &kdata)) {
@@ -856,7 +856,7 @@ key_randomkey_keysalt(ksent, ptr)
 	 */
 	if (!(kret = krb5_dbe_create_key_data(argp->context, argp->dbentry))) {
 	    kdata = &argp->dbentry->key_data[argp->dbentry->n_key_data-1];
-	    kdata->key_data_type[0] = (krb5_int16) ksent->ks_keytype;
+	    kdata->key_data_type[0] = (krb5_int16) ksent->ks_enctype;
 	    kdata->key_data_type[1] = (krb5_int16) 0;
 	}
     }
@@ -969,11 +969,11 @@ key_encrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     ndone = 0;
     nkeys = *nkeysp;
     for (i=0; i<nkeys; i++) {
-	krb5_use_keytype(kcontext,
+	krb5_use_enctype(kcontext,
 			 &master_encblock,
-			 (krb5_keytype) inkeys[i].key_data_type[0]);
+			 (krb5_enctype) inkeys[i].key_data_type[0]);
 	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
-	    tmpkey.keytype = inkeys[i].key_data_type[0];
+	    tmpkey.enctype = inkeys[i].key_data_type[0];
 	    tmpkey.length = inkeys[i].key_data_length[0];
 	    if (tmpkey.contents = (krb5_octet *) malloc((size_t)tmpkey.length))
 		memcpy(tmpkey.contents,
@@ -1045,9 +1045,9 @@ key_decrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     ndone = 0;
     nkeys = *nkeysp;
     for (i=0; i<nkeys; i++) {
-	krb5_use_keytype(kcontext,
+	krb5_use_enctype(kcontext,
 			 &master_encblock,
-			 (krb5_keytype) inkeys[i].key_data_type[0]);
+			 (krb5_enctype) inkeys[i].key_data_type[0]);
 	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
 	    if (kret = krb5_dbekd_decrypt_key_data(kcontext,
 						   &master_encblock,
@@ -1056,7 +1056,7 @@ key_decrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
 						   &salt))
 		break;
 	    loser.key_data[i].key_data_ver = KRB5_KDB_V1_KEY_DATA_ARRAY;
-	    loser.key_data[i].key_data_type[0] = tmpkey.keytype;
+	    loser.key_data[i].key_data_type[0] = tmpkey.enctype;
 	    loser.key_data[i].key_data_length[0] = (krb5_int16) tmpkey.length;
 	    loser.key_data[i].key_data_contents[0] = tmpkey.contents;
 	    loser.key_data[i].key_data_kvno = inkeys[i].key_data_kvno;
@@ -1110,7 +1110,7 @@ key_pwd_is_weak(kcontext, dbentp, string)
 			      &key_list);
     if (!kret) {
 	for (i=0; i<num_keys; i++) {
-	    if ((key_list[i].key_data_type[0] == KEYTYPE_DES_CBC_MD5) &&
+	    if ((key_list[i].key_data_type[0] == ENCTYPE_DES_CBC_MD5) &&
 		(key_list[i].key_data_length[0] == KRB5_MIT_DES_KEYSIZE) &&
 		mit_des_is_weak_key(key_list[i].key_data_contents[0])) {
 		weakness = 1;
@@ -1228,7 +1228,7 @@ key_dbent_to_keysalts(dbentp, nentsp, ksentsp)
 					    dbentp->key_data[i].
 					    	key_data_type[1]))
 		    continue;
-		ksp[num].ks_keytype = dbentp->key_data[i].key_data_type[0];
+		ksp[num].ks_enctype = dbentp->key_data[i].key_data_type[0];
 		ksp[num].ks_salttype = dbentp->key_data[i].key_data_type[1];
 		num++;
 	    }

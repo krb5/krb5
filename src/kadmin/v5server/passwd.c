@@ -160,9 +160,9 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     dbentp->key_data = dkey_list;
     dbentp->n_key_data = num_dkeys;
     for (i=0; i<num_keys; i++) {
-	if (!krb5_dbe_find_keytype(kcontext,
+	if (!krb5_dbe_find_enctype(kcontext,
 				   dbentp,
-				   (krb5_keytype) key_list[i].key_data_type[0],
+				   (krb5_enctype) key_list[i].key_data_type[0],
 				   (krb5_int32) key_list[i].key_data_type[1],
 				   -1,
 				   &kent)) {

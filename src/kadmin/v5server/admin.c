@@ -230,15 +230,15 @@ admin_merge_keys(kcontext, dbentp, unique,
 		xxx2.n_key_data = nkeys2;
 		xxx2.key_data = in2;
 		for (i=0; i<nksents; i++) {
-		    (void) krb5_dbe_find_keytype(kcontext,
+		    (void) krb5_dbe_find_enctype(kcontext,
 						 &xxx1,
-						 kslist[i].ks_keytype,
+						 kslist[i].ks_enctype,
 						 kslist[i].ks_salttype,
 						 -1,
 						 &kp1);
-		    (void) krb5_dbe_find_keytype(kcontext,
+		    (void) krb5_dbe_find_enctype(kcontext,
 						 &xxx2,
-						 kslist[i].ks_keytype,
+						 kslist[i].ks_enctype,
 						 kslist[i].ks_salttype,
 						 -1,
 						 &kp2);
@@ -1199,9 +1199,9 @@ admin_keysalt_verify(kcontext, debug_level, dbentp, should_be_there,
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_verify()\n"));
     for (i=0; i<nksents; i++) {
 	kdata = (krb5_key_data *) NULL;
-	(void) krb5_dbe_find_keytype(kcontext,
+	(void) krb5_dbe_find_enctype(kcontext,
 				     dbentp,
-				     kslist[i].ks_keytype,
+				     kslist[i].ks_enctype,
 				     kslist[i].ks_salttype,
 				     kvnolist[i],
 				     &kdata);
@@ -1247,9 +1247,9 @@ admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
     if (keyectomy) {
 	count = dbentp->n_key_data;
 	for (i=0; i<nksents; i++) {
-	    if (!krb5_dbe_find_keytype(kcontext,
+	    if (!krb5_dbe_find_enctype(kcontext,
 				       dbentp,
-				       kslist[i].ks_keytype,
+				       kslist[i].ks_enctype,
 				       kslist[i].ks_salttype,
 				       kvnolist[i],
 				       &kdata)) {
@@ -1970,7 +1970,7 @@ admin_extract_key(kcontext, debug_level, ticket,
 						      &dkey_list))) {
 			    ktabentry.principal = principal;
 			    ktabentry.vno = dkey_list[0].key_data_kvno;
-			    ktabentry.key.keytype =
+			    ktabentry.key.enctype =
 				dkey_list[0].key_data_type[0];
 			    ktabentry.key.length = 
 				dkey_list[0].key_data_length[0];
@@ -2071,7 +2071,7 @@ admin_extract_key(kcontext, debug_level, ticket,
 }
 
 /*
- * admin_add_key()	- Add new keytypes for the given principal.
+ * admin_add_key()	- Add new enctypes for the given principal.
  */
 krb5_int32
 admin_add_key(kcontext, debug_level, ticket, nargs, arglist)
@@ -2096,7 +2096,7 @@ admin_add_key(kcontext, debug_level, ticket, nargs, arglist)
 }
 
 /*
- * admin_delete_key()	- Delete keytypes for the given principal.
+ * admin_delete_key()	- Delete enctypes for the given principal.
  */
 krb5_int32
 admin_delete_key(kcontext, debug_level, ticket, nargs, arglist)

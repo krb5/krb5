@@ -38,10 +38,10 @@
 #include "kadm5_defs.h"
 
 #ifdef	LANGUAGES_SUPPORTED
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k menctype] [-l langlist] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:l:mnp:r:t:D:M:T:";
 #else	/* LANGUAGES_SUPPORTED */
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-m]\n\t[-k menctype] [-p portnum] [-r realm] [-s stash] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
 static const char *getopt_string =	"a:d:e:k:mnp:r:t:D:M:T:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
@@ -136,7 +136,7 @@ main(argc, argv)
      *	kadmind5	[-a aclfile]		<acl file>
      *			[-d database]		<database file>
      *			[-e enctype]		<encryption type>
-     *			[-k masterkeytype]	<master key type>
+     *			[-k masterenctype]	<master key type>
      *			[-l languagelist]	<language list>
      *			[-m]			<manual master key entry>
      *			[-n]			<do not fork/disassociate>
@@ -268,8 +268,8 @@ main(argc, argv)
 	    master_key_name = strdup(rparams->realm_mkey_name);
 
 	/* Get the value for the master key type */
-	if (rparams->realm_keytype_valid)
-	    key_type = rparams->realm_keytype;
+	if (rparams->realm_enctype_valid)
+	    key_type = rparams->realm_enctype;
 
 	/* Get the value for the port */
 	if (rparams->realm_kadmind_port_valid)
