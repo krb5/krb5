@@ -1,3 +1,20 @@
+2002-09-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c: Include cm.h.
+	(struct select_state, SSF_READ, SSF_WRITE, SSF_EXCEPTION): Moved
+	to cm.h.
+	(DEBUG): Define.
+	(krb5int_debug_sendto_kdc): Initialize to zero.
+	(default_debug_handler, put, putstr): New functions.
+	(krb5int_sendtokdc_debug_handler): New variable.
+	(krb5int_debug_fprint): Don't write to stderr; instead, pass
+	strings to the debug output handlers above.
+	(struct incoming_krb5_message): Broken out from struct
+	conn_state.
+	(krb5int_cm_call_select): Renamed from call_select; callers
+	updated.  Now extern.  Display max fd number in debugging call,
+	not nfds.
+
 2002-09-17  Sam Hartman  <hartmans@mit.edu>
 
 	* genaddrs.c (krb5_auth_con_genaddrs): Return errno if getpeername fails

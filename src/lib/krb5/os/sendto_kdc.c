@@ -59,19 +59,35 @@
 #define DEFAULT_UDP_PREF_LIMIT	 1465
 #define HARD_UDP_LIMIT		32700 /* could probably do 64K-epsilon ? */
 
-/* #define DEBUG */
+#define DEBUG
 
 #ifdef DEBUG
-int krb5int_debug_sendto_kdc = 1;
+int krb5int_debug_sendto_kdc = 0;
 #define debug krb5int_debug_sendto_kdc
 #endif
+
+static void default_debug_handler (const void *data, size_t len)
+{
+    fwrite(data, 1, len, stderr);
+    /* stderr is unbuffered */
+}
+
+void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = default_debug_handler;
+
+static void put(const void *ptr, size_t len)
+{
+    (*krb5int_sendtokdc_debug_handler)(ptr, len);
+}
+static void putstr(const char *str)
+{
+    put(str, strlen(str));
+}
 
 #define dprint krb5int_debug_fprint
 static void
 krb5int_debug_fprint (const char *fmt, ...)
 {
 #ifdef DEBUG
-    FILE *out;
     va_list args;
 
     /* Temporaries for variable arguments, etc.  */
@@ -84,18 +100,21 @@ krb5int_debug_fprint (const char *fmt, ...)
     struct addrinfo *ai;
     const krb5_data *d;
     char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV];
+    const char *p;
+    char tmpbuf[NI_MAXHOST + NI_MAXSERV + 30];
 
     if (!krb5int_debug_sendto_kdc)
 	return;
 
     va_start(args, fmt);
-    out = stderr;
+
+#define putf(FMT,X)	(sprintf(tmpbuf,FMT,X),putstr(tmpbuf))
 
     for (; *fmt; fmt++) {
 	if (*fmt != '%') {
 	    /* Possible optimization: Look for % and print all chars
 	       up to it in one call.  */
-	    fputc(*fmt, out);
+	    put(fmt, 1);
 	    continue;
 	}
 	/* After this, always processing a '%' sequence.  */
@@ -107,14 +126,19 @@ krb5int_debug_fprint (const char *fmt, ...)
 	case 'E':
 	    /* %E => krb5_error_code */
 	    kerr = va_arg(args, krb5_error_code);
-	    fprintf(out, "%lu/%s", (unsigned long) kerr, error_message(kerr));
+	    sprintf(tmpbuf, "%lu/", (unsigned long) kerr);
+	    putstr(tmpbuf);
+	    p = error_message(kerr);
+	    putstr(p);
 	    break;
 	case 'm':
 	    /* %m => errno value (int) */
 	    /* Like syslog's %m except the errno value is passed in
 	       rather than the current value.  */
 	    err = va_arg(args, int);
-	    fprintf(out, "%d/%s", err, strerror(err));
+	    putf("%d/", err);
+	    p = strerror(err);
+	    putstr(p);
 	    break;
 	case 'F':
 	    /* %F => fd_set *, fd_set *, fd_set *, int */
@@ -128,33 +152,36 @@ krb5int_debug_fprint (const char *fmt, ...)
 		int w = wfds && FD_ISSET(i, wfds);
 		int x = xfds && FD_ISSET(i, xfds);
 		if (r || w || x) {
-		    fprintf(out, " %d", i);
+		    putf(" %d", i);
 		    if (r)
-			fprintf(out, "r");
+			putstr("r");
 		    if (w)
-			fprintf(out, "w");
+			putstr("w");
 		    if (x)
-			fprintf(out, "x");
+			putstr("x");
 		}
 	    }
-	    fprintf(out, " ");
+	    putstr(" ");
 	    break;
 	case 's':
 	    /* %s => char * */
-	    fprintf(out, "%s", va_arg(args, const char *));
+	    p = va_arg(args, const char *);
+	    putstr(p);
 	    break;
 	case 't':
 	    /* %t => struct timeval * */
 	    tv = va_arg(args, struct timeval *);
-	    fprintf(out, "%ld.%06ld", (long) tv->tv_sec, (long) tv->tv_usec);
+	    sprintf(tmpbuf, "%ld.%06ld",
+		    (long) tv->tv_sec, (long) tv->tv_usec);
+	    putstr(tmpbuf);
 	    break;
 	case 'd':
 	    /* %d => int */
-	    fprintf(out, "%d", va_arg(args, int));
+	    putf("%d", va_arg(args, int));
 	    break;
 	case 'p':
 	    /* %p => pointer */
-	    fprintf(out, "%p", va_arg(args, void*));
+	    putf("%p", va_arg(args, void*));
 	    break;
 	case 'A':
 	    /* %A => addrinfo */
@@ -164,24 +191,24 @@ krb5int_debug_fprint (const char *fmt, ...)
 				  portbuf, sizeof (portbuf),
 				  NI_NUMERICHOST | NI_NUMERICSERV))
 		strcpy (addrbuf, "??"), strcpy (portbuf, "??");
-	    fprintf (out, "%s %s.%s",
-		     (ai->ai_socktype == SOCK_DGRAM
-		      ? "udp"
-		      : ai->ai_socktype == SOCK_STREAM
-		      ? "tcp"
-		      : "???"),
-		     addrbuf, portbuf);
+	    sprintf(tmpbuf, "%s %s.%s",
+		    (ai->ai_socktype == SOCK_DGRAM
+		     ? "udp"
+		     : ai->ai_socktype == SOCK_STREAM
+		     ? "tcp"
+		     : "???"),
+		    addrbuf, portbuf);
+	    putstr(tmpbuf);
 	    break;
 	case 'D':
 	    /* %D => krb5_data * */
 	    d = va_arg(args, krb5_data *);
 	    /* may not be nul-terminated */
-	    fwrite(d->data, 1, d->length, out);
+	    put(d->data, d->length);
 	    break;
 	}
     }
     va_end(args);
-    fflush(out);
 #endif
 }
 
@@ -344,18 +371,24 @@ static char *bogus_strerror (int xerr)
  * - TCP NOPUSH/CORK socket options?
  * - error codes that don't suck
  * - getsockopt(SO_ERROR) to check connect status
+ * - handle error RESPONSE_TOO_BIG from UDP server and use TCP
+ *   connections already in progress
  */
 
-struct select_state {
-    int max, nfds;
-    fd_set rfds, wfds, xfds;
-    struct timeval end_time;
-};
+#include "cm.h"
 
 static const char *state_strings[] = {
     "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
 };
 enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };
+struct incoming_krb5_message {
+    size_t bufsizebytes_read;
+    size_t bufsize;
+    char *buf;
+    char *pos;
+    unsigned char bufsizebytes[4];
+    size_t n_left;
+};
 struct conn_state {
     SOCKET fd;
     krb5_error_code err;
@@ -369,14 +402,7 @@ struct conn_state {
 	    sg_buf *sgp;
 	    int sg_count;
 	} out;
-	struct {
-	    size_t bufsizebytes_read;
-	    size_t bufsize;
-	    char *buf;
-	    char *pos;
-	    unsigned char bufsizebytes[4];
-	    size_t n_left;
-	} in;
+	struct incoming_krb5_message in;
     } x;
 };
 
@@ -404,8 +430,9 @@ static int getcurtime (struct timeval *tvp)
  * Output: select return value (-1 or num fds ready) and fd_sets
  * Return: 0 (for i/o available or timeout) or error code.
  */
-static krb5_error_code
-call_select (struct select_state *in, struct select_state *out, int *sret)
+krb5_error_code
+krb5int_cm_call_select (const struct select_state *in,
+			struct select_state *out, int *sret)
 {
     struct timeval now;
     krb5_error_code e;
@@ -424,8 +451,8 @@ call_select (struct select_state *in, struct select_state *out, int *sret)
 	*sret = 0;
 	return 0;
     }
-    dprint("selecting on %d sockets [%F] timeout %t\n",
-	   out->nfds,
+    dprint("selecting on max=%d sockets [%F] timeout %t\n",
+	   out->max,
 	   &out->rfds, &out->wfds, &out->xfds, out->max,
 	   &out->end_time);
     *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds,
@@ -643,11 +670,6 @@ kill_conn(struct conn_state *conn, struct select_state *selstate, int err)
     selstate->nfds--;
 }
 
-/* Select state flags.  */
-#define SSF_READ	0x01
-#define SSF_WRITE	0x02
-#define SSF_EXCEPTION	0x04
-
 /* Return nonzero only if we're finished and the caller should exit
    its loop.  This happens in two cases: We have a complete message,
    or the socket has closed and no others are open.  */
@@ -858,7 +880,7 @@ service_fds (struct select_state *selstate,
 
     e = 0;
     while (selstate->nfds > 0
-	   && (e = call_select(selstate, &sel_results, &selret)) == 0) {
+	   && (e = krb5int_cm_call_select(selstate, &sel_results, &selret)) == 0) {
 	int i;
 
 	dprint("service_fds examining results, selret=%d\n", selret);
