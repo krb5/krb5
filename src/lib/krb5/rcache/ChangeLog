@@ -1,3 +1,8 @@
+Mon Nov 18 15:25:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rc_dfl.c: Apply jik's fix to allow the expunging of the replay
+		cache to happen correctly. [174,132]
+
 Mon Jun 10 21:52:38 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* rc_io.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.

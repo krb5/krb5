@@ -54,7 +54,11 @@ krb5_donot_replays encountered incidentally in searching exceeds the number
 of live krb5_donot_replays by EXCESSREPS. With the defaults here, a typical
 cache might build up some 10K of expired krb5_donot_replays before an automatic
 expunge, with the waste basically independent of the number of stores per
-minute. */
+minute.
+
+The rcache will also automatically be expunged when it encounters more
+than EXCESSREPS expired entries when recovering a cache in
+dfl_recover. */
 
 static int hash(rep, hsize)
 krb5_donot_replay *rep;
@@ -110,6 +114,7 @@ struct dfl_data
 #ifndef NOIOSTUFF
   krb5_rc_iostuff d;
 #endif
+  char recovering;
  }
 ;
 
@@ -281,6 +286,7 @@ krb5_error_code krb5_rc_dfl_resolve(context, id, name)
 #ifndef NOIOSTUFF
     t->d.fd = -1;
 #endif
+    t->recovering = 0;
     return 0;
     
 cleanup:
@@ -388,12 +394,15 @@ krb5_rcache id;
 #else
 
     struct dfl_data *t = (struct dfl_data *)id->data;
-    krb5_donot_replay *rep;
+    krb5_donot_replay *rep = 0;
     krb5_error_code retval;
     long max_size;
+    int expired_entries = 0;
 
     if ((retval = krb5_rc_io_open(context, &t->d, t->name)))
 	return retval;
+
+    t->recovering = 1;
  
     max_size = krb5_rc_io_size(context, &t->d);
  
@@ -429,6 +438,8 @@ krb5_rcache id;
 	    if (rc_store(context, id, rep) == CMP_MALLOC) {
 		retval = KRB5_RC_MALLOC; goto io_fail;
 	    } 
+	} else {
+	    expired_entries++;
 	}
 	/*
 	 *  free fields allocated by rc_io_fetch
@@ -448,6 +459,9 @@ io_fail:
     krb5_rc_free_entry(context, &rep);
     if (retval)
 	krb5_rc_io_close(context, &t->d);
+    else if (expired_entries > EXCESSREPS)
+	retval = krb5_rc_dfl_expunge(context, id);
+    t->recovering = 0;
     return retval;
     
 #endif
@@ -461,7 +475,7 @@ krb5_rc_io_store (context, t, rep)
 {
     int clientlen, serverlen, len;
     char *buf, *ptr;
-    unsigned long ret;
+    krb5_error_code ret;
 
     clientlen = strlen (rep->client) + 1;
     serverlen = strlen (rep->server) + 1;
@@ -488,7 +502,7 @@ krb5_error_code krb5_rc_dfl_store(context, id, rep)
 krb5_rcache id;
 krb5_donot_replay *rep;
 {
-    unsigned long ret;
+    krb5_error_code ret;
     struct dfl_data *t = (struct dfl_data *)id->data;
 
     switch(rc_store(context, id,rep)) {
@@ -556,17 +570,20 @@ krb5_rcache id;
     krb5_rcache tmp;
     krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
 
-    name = t->name;
-    t->name = 0;		/* Clear name so it isn't freed */
-    (void) krb5_rc_dfl_close_no_free(context, id);
-    retval = krb5_rc_dfl_resolve(context, id, name);
-    free(name);
-    if (retval)
-	return retval;
-    retval = krb5_rc_dfl_recover(context, id);
-    if (retval)
-	return retval;
-    t = (struct dfl_data *)id->data; /* point to recovered cache */
+    if (! t->recovering) {
+	name = t->name;
+	t->name = 0;		/* Clear name so it isn't freed */
+        (void) krb5_rc_dfl_close_no_free(context, id);
+        retval = krb5_rc_dfl_resolve(context, id, name);
+	free(name);
+	if (retval)
+	    return retval;
+	retval = krb5_rc_dfl_recover(context, id);
+	if (retval)
+	    return retval;
+	t = (struct dfl_data *)id->data; /* point to recovered cache */
+    }
+
     tmp = (krb5_rcache) malloc(sizeof(*tmp));
     if (!tmp)
 	return ENOMEM;
