@@ -24,7 +24,7 @@
 
 #define	Bitsize32
 
-#define HasVoidSignalReturn	NO
+#define HasVoidSignalReturn	YES
 #define HasSaberC		YES
 #undef HasNdbm
 #define HasNdbm			YES
