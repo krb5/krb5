@@ -1,3 +1,9 @@
+2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Add krb5_free_ap_req() as private for GSSAPI.  Add
+	krb5_get_host_realm() and krb5_free_host_realm() as public
+	functions.  Reformat to make it easier to read and compare.
+
 2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Hopefully final cut at consistent exports between
