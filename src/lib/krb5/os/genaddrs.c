@@ -35,19 +35,6 @@
 #include <netinet/in.h>
 #endif
 
-#ifndef GETPEERNAME_ARG2_TYPE
-#define GETPEERNAME_ARG2_TYPE struct sockaddr
-#endif
-#ifndef GETPEERNAME_ARG3_TYPE
-#define GETPEERNAME_ARG3_TYPE size_t
-#endif
-#ifndef GETSOCKNAME_ARG2_TYPE
-#define GETSOCKNAME_ARG2_TYPE struct sockaddr
-#endif
-#ifndef GETSOCKNAME_ARG3_TYPE
-#define GETSOCKNAME_ARG3_TYPE size_t
-#endif
-
 struct addrpair {
     krb5_address addr, port;
 };

@@ -1,3 +1,8 @@
+2004-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendauth.c: Don't specify defaults for
+	GET{PEER,SOCK}NAME_ARG{2,3}_TYPE macros.
+
 2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): Include aes128-cts

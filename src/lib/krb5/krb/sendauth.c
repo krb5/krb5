@@ -36,19 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef GETPEERNAME_ARG2_TYPE
-#define GETPEERNAME_ARG2_TYPE struct sockaddr
-#endif
-#ifndef GETPEERNAME_ARG3_TYPE
-#define GETPEERNAME_ARG3_TYPE size_t
-#endif
-#ifndef GETSOCKNAME_ARG2_TYPE
-#define GETSOCKNAME_ARG2_TYPE struct sockaddr
-#endif
-#ifndef GETSOCKNAME_ARG3_TYPE
-#define GETSOCKNAME_ARG3_TYPE size_t
-#endif
-
 static const char sendauth_version[] = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code KRB5_CALLCONV
