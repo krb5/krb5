@@ -1,3 +1,8 @@
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* replay.c, kdb_util.h (kdc_check_lookaside): Make second argument
+	const to maintain const chain from dispatch.c.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* main.c: Move kdc_initialize_rcache() to kdc_util.c

@@ -73,7 +73,7 @@ static int num_entries = 0;
 krb5_boolean
 kdc_check_lookaside(inpkt, from, outpkt)
     register krb5_data *inpkt;
-    register krb5_fulladdr *from;
+    register const krb5_fulladdr *from;
     register krb5_data **outpkt;
 {
     krb5_int32 timenow;
