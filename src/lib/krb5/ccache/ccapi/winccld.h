@@ -85,7 +85,9 @@ DECL_FUNC_PTR(cc_get_name);
 DECL_FUNC_PTR(cc_set_principal);
 DECL_FUNC_PTR(cc_get_principal);
 DECL_FUNC_PTR(cc_get_cred_version);
+#if 0 /* Not used */
 DECL_FUNC_PTR(cc_lock_request);
+#endif
 DECL_FUNC_PTR(cc_store);
 DECL_FUNC_PTR(cc_remove_cred);
 #ifdef CC_API_VER2
@@ -117,7 +119,9 @@ FUNC_INFO krbcc_fi[] = {
     MAKE_FUNC_INFO(cc_set_principal),
     MAKE_FUNC_INFO(cc_get_principal),
     MAKE_FUNC_INFO(cc_get_cred_version),
+#if 0 /* Not used */
     MAKE_FUNC_INFO(cc_lock_request),
+#endif
     MAKE_FUNC_INFO(cc_store),
     MAKE_FUNC_INFO(cc_remove_cred),
 #ifdef CC_API_VER2
@@ -158,7 +162,9 @@ FUNC_INFO krbcc_fi[] = {
 #define cc_set_principal pcc_set_principal
 #define cc_get_principal pcc_get_principal
 #define cc_get_cred_version pcc_get_cred_version
+#if 0 /* Not used */
 #define cc_lock_request pcc_lock_request
+#endif
 #define cc_store pcc_store
 #define cc_remove_cred pcc_remove_cred
 #ifdef CC_API_VER2
