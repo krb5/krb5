@@ -66,8 +66,8 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     safemsg.user_data = *userdata;
-    safemsg.s_address = local_addr;
-    safemsg.r_address = remote_addr;
+    safemsg.s_address = (krb5_address *) local_addr;
+    safemsg.r_address = (krb5_address *) remote_addr;
 
     /* We should check too make sure one exists. */
     safemsg.timestamp  = replaydata->timestamp;

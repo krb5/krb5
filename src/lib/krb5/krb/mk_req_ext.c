@@ -148,7 +148,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     	    /* XXX Special hack for GSSAPI */
 	    checksum.checksum_type = 0x8003;
 	    checksum.length = in_data->length;
-	    checksum.contents = in_data->data;
+	    checksum.contents = (krb5_octet *) in_data->data;
         } else 
     	    if (retval = krb5_calculate_checksum(context, 
 					         (*auth_context)->cksumtype, 
