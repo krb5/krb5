@@ -15,11 +15,7 @@ static char rcsid_krb_dbm_c[] =
 
 #include <krb5/copyright.h>
 
-#ifndef ODBM
-#include <ndbm.h>
-#else /*ODBM*/
-#include <dbm.h>
-#endif /*ODBM*/
+#include <krb5/dbm.h>
 
 #include <stdio.h>
 
@@ -149,18 +145,6 @@ static void free_decode_princ_dbmkey PROTOTYPE((krb5_principal ));
  * Instead, all routines call "dbm_next" instead.
  */
 
-#ifndef ODBM
-#define dbm_next(db,key) dbm_nextkey(db)
-#else /* OLD DBM */
-typedef char DBM;
-
-#define dbm_open(file, flags, mode) ((dbminit(file) == 0)?"":((char *)0))
-#define dbm_fetch(db, key) fetch(key)
-#define dbm_store(db, key, content, flag) store(key, content)
-#define dbm_firstkey(db) firstkey()
-#define dbm_next(db,key) nextkey(key)
-#define dbm_close(db) dbmclose()
-#endif /* OLD DBM */
 
 #define free_dbsuffix(name) free(name)
 
