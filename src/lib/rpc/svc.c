@@ -51,6 +51,7 @@ extern int errno;
 #ifdef FD_SETSIZE
 static SVCXPRT **xports;
 static int max_xport = 0;
+extern int gssrpc_svc_fdset_init;
 #else
 #define NOFILE 32
 
@@ -88,6 +89,10 @@ xprt_register(xprt)
 	register int sock = xprt->xp_sock;
 
 #ifdef FD_SETSIZE
+	if (gssrpc_svc_fdset_init == 0) {
+	    FD_ZERO(&svc_fdset);
+	    gssrpc_svc_fdset_init++;
+	}
 	if (xports == NULL) {
 		xports = (SVCXPRT **)
 			mem_alloc(FD_SETSIZE * sizeof(SVCXPRT *));

@@ -1,3 +1,12 @@
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc.c (xprt_register): If svc_fdset has not been initilized, 
+	FD_ZERO it.
+	
+	* rpc_commondata.c: Do not assume what the structure of an fd_set
+	looks like. Add variable gssrpc_svc_fdset_init to determine if
+	initialized. 
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* auth_unix.c: In case GETGROUPS_T is not defined, default to int.

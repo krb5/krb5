@@ -37,7 +37,8 @@
  */
 struct opaque_auth _null_auth = {0};
 #ifdef FD_SETSIZE
-fd_set svc_fdset = {0};
+fd_set svc_fdset; /* Will be zeroed in data segment */
+int gssrpc_svc_fdset_init = 0;
 #else
 int svc_fds = 0;
 #endif /* def FD_SETSIZE */
