@@ -149,3 +149,8 @@ Changes in 1.1a3:
 3.0d2
  from tag Mac_GSSKerberos5_3_0d2
  no changes on the Mac side
+
+3.0d3
+ from tag Mac_GSSKerberos5_3_0d3
+ no changes on the Mac side
+ fixed crash in get_init_creds when no network
