@@ -1,11 +1,11 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
 AC_SET_BUILDTOP
-AC_WITH([krb4],convert=convert,convert=)
+AC_ARG_WITH([krb4],[include Kerberos V4 support],convert=convert,convert=)
 CONFIG_DIRS(create destroy edit stash aname $convert)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 CONFIG_RULES
 WITH_KRB5ROOT
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

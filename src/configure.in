@@ -3,10 +3,11 @@ WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
 WITH_KRB5ROOT
-AC_ENABLE([isode],isode=isode,)
+AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs], isode=isode,)
 CONFIG_DIRS(util include $isode lib kdc admin kadmin slave clients appl tests)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 MAKE_SUBDIRS("checking",check)
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+dnl dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

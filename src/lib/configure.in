@@ -15,4 +15,4 @@ LinkFile(libgssapi_krb5.a, gssapi/libgssapi_krb5.a)
 AppendRule([all:: libkrb5.a libcrypto.a])
 AppendRule([all:: libgssapi_krb5.a])
 WITH_KRB5ROOT
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

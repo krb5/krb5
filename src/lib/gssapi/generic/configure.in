@@ -8,4 +8,4 @@ KRB_INCLUDE
 AC_SIZE_T
 CopySrcHeader(gssapi.h,[$(EHDRDIR)])
 CopySrcHeader(gssapi_generic.h,[$(EHDRDIR)])
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

@@ -5,7 +5,8 @@ BUILDTOP = @BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-DEFS = @DEFS@
+CPPFLAGS = @CPPFLAGS@
+DEFS = @DEFS@ $(CPPFLAGS)
 CC = @CC@
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
@@ -46,7 +47,7 @@ LEXLIB = @LEXLIB@
 YACC = @YACC@
 
 SRCTOP = $(srcdir)/$(BUILDTOP)
-SUBDIRS = @SUBDIRS@
+SUBDIRS = @subdirs@
 
 TOPLIBD = $(BUILDTOP)/lib
 

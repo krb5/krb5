@@ -4,7 +4,7 @@ WITH_CC dnl since we're not doing CONFIG_RULES
 dnl CONFIG_RULES
 AC_SET_BUILDTOP
 SubdirLibraryRule([${OBJS}])
-AC_ENABLE([isode],[
+AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],[
 UsePepsy
 PepsyTarget(KRB5)
 ISODEMAKEFILE=Makefile.isode],[
@@ -29,4 +29,7 @@ Krb5InstallHeaders(krb5_encode.h krb5_decode.h, [$(KRB5_INCDIR)/krb5/asn.1])
 KRB_INCLUDE
 ISODE_INCLUDE
 WITH_KRB5ROOT
-AC_OUTPUT(Makefile Makefile.isode Makefile.sane,[EXTRA_RULES_IN($ISODEMAKEFILE)])
+EXTRA_RULES_OUT(includes.out)
+AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend Makefile.isode.out:Makefile.isode.in Makefile.sane.out:Makefile.sane.in,
+	,
+	[cat pre.out Makefile.out post.out > Makefile; cat pre.out [$]{ISODEMAKEFILE}.out post.out includes.out > [$]{ISODEMAKEFILE}])

@@ -8,11 +8,11 @@ AC_SET_BUILDTOP
 AC_PROG_INSTALL
 KRB_INCLUDE
 ISODE_INCLUDE
-AC_HAVE_LIBRARY(ndbm)
-AC_HAVE_LIBRARY(socket)
-AC_HAVE_LIBRARY(nsl)
-AC_HAVE_LIBRARY(dbm)
-AC_HAVE_LIBRARY(termcap,AC_DEFINE(TERMCAP)
+AC_CHECK_LIB(ndbm,main)
+AC_CHECK_LIB(socket,main)
+AC_CHECK_LIB(nsl,main)
+AC_CHECK_LIB(dbm,main)
+AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap")
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
@@ -32,4 +32,4 @@ AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_COMPILE_CHECK([number of arguments to setpgrp],
 [#include <unistd.h>],[setpgrp(0,0)],
 AC_DEFINE(SETPGRP_TWOARG))
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

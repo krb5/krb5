@@ -13,4 +13,4 @@ MAKE_SUBDIRS("checking",check)
 AppendRule([all:: libcrypto.a])
 KRB_INCLUDE
 WITH_KRB5ROOT
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

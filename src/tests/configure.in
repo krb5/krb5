@@ -7,4 +7,4 @@ MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 MAKE_SUBDIRS("checking",check)
 CONFIG_RULES
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

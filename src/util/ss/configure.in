@@ -22,4 +22,4 @@ CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(copyright.h,$(BUILDTOP)/include/ss)
 CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(ss_internal.h,$(BUILDTOP)/include/ss)
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

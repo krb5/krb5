@@ -11,4 +11,4 @@ MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 SubdirLibraryRule([$(OBJS)])
 KRB_INCLUDE
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+V5_AC_OUTPUT_MAKEFILE

@@ -1,20 +1,76 @@
 dnl
 dnl
+dnl arrange to stuff file in substitution
+dnl
+dnl AC_STUFF_FILE_PRE()
+define(AC_STUFF_FILE_PRE,
+[AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
+1r $1
+AC_DIVERT_POP()dnl
+])
+dnl AC_STUFF_FILE_POST()
+define(AC_STUFF_FILE_POST,
+[AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
+[$]r $1
+AC_DIVERT_POP()dnl
+])
+dnl
+dnl look for the top of the tree
+dnl
+AC_DEFUN(AC_CONFIG_FRAGMENTS_DEFAULT,
+[AC_CONFIG_FRAGMENTS(. .. ../.. ../../.. ../../../.. ../../../../.. ../../../../../..)])dnl
+dnl
+dnl search them looking for the directory named config.
+dnl Crude, but it works.
+dnl
+AC_DEFUN(AC_CONFIG_FRAGMENTS,
+[ac_config_fragdir=
+for ac_dir in $1; do
+  if test -d $srcdir/$ac_dir/config; then
+    ac_reltopdir=$ac_dir
+    ac_topdir=$srcdir/$ac_reltopdir
+    ac_config_fragdir=$ac_reltopdir/config
+    break
+  fi
+done
+if test -z "$ac_config_fragdir"; then
+  AC_MSG_ERROR([can not find config/ directory in $1])
+else
+  AC_CONFIG_AUX_DIR($ac_config_fragdir)
+fi
+  ac_tmpin="$srcdir/${ac_config_fragdir}/pre.in"
+  if test -r $ac_tmpin; then
+     ac_prepend=$ac_config_fragdir/pre.in
+  else
+     ac_prepend=
+  fi
+  ac_tmpin="$srcdir/${ac_config_fragdir}/post.in"
+  if test -r $ac_tmpin; then
+     ac_postpend=$ac_config_fragdir/post.in
+  else
+     ac_postpend=
+  fi
+AC_PROVIDE([AC_CONFIG_FRAGMENTS_DEFAULT])dnl
+])
+dnl
+dnl
+dnl set up buildtop stuff
+dnl
+define(AC_BUILDTOP,[.])dnl
+define(AC_SET_BUILDTOP,
+[AC_CONFIG_FRAGMENTS_DEFAULT()dnl
+AC_SUBST(BUILDTOP)dnl
+BUILDTOP=[$]ac_reltopdir
+])dnl
+dnl
+dnl
+dnl
+dnl
 dnl How do we find other scripts needed for configuration?
 dnl Scripts like Cygnus configure, config.sub, config.guess are stored
 dnl together in one directory.  For now, have the configure.in file
 dnl specify it explicitly with AC_CONFIG_AUX.  We'll provide a half-way
 dnl acceptable default of ${srcdir}.
-dnl
-define(AC_CONFIG_AUX,[
-  if test -f $1/config.sub ; then
-    config_aux=$1
-  else
-    config_aux=${srcdir}/$1
-  fi
-  config_sub=${config_aux}/config.sub
-  config_guess=${config_aux}/config.guess
-])dnl
 dnl
 define(AC__CONFIG_AUX,[
   if test "z${config_sub}" = "z" ; then
@@ -26,112 +82,19 @@ define(AC__CONFIG_AUX,[
 AC_PROVIDE([$0])dnl
 ])dnl
 dnl
-dnl set up buildtop stuff
-dnl
-define(AC_BUILDTOP,[.])dnl
-define(AC_SET_BUILDTOP,
-[BUILDTOP=AC_TOPDIR
-AC_SUBST(BUILDTOP)dnl
-])dnl
-dnl
-dnl
 dnl Does configure need to be run in immediate subdirectories of this
 dnl directory?
 dnl
-define(CONFIG_DIRS,[
-AC_REQUIRE([AC__CONFIG_AUX])dnl
-changequote(<<<,>>>)dnl
-SUBDIRS="$1"
-if [ -z "${norecursion}" ] ; then
-	recurse_args=
-	recur_state=
-# ok this stuff really belongs in ac_general.m4, but we'll live :-)
-	for arg in $configure_args; do
-		if test -z "$recur_state" ; then
-			eval unquoted_arg="$arg"
-			case "$unquoted_arg" in
-				-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-				recur_state="skip"
-				continue
-				;;
-				-srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-				;;
-				*)
-				recurse_args="$recurse_args $arg"
-				;;
-			esac
-		else
-			recur_state=
-		fi
-	done
-	for configdir in $1 ; do
-
-		if [ -d ${srcdir}/${configdir} ] ; then
-			eval echo Configuring ${configdir}... ${redirect}
-			case "${srcdir}" in
-			".") ;;
-			*)
-				if [ ! -d ./${configdir} ] ; then
-					if mkdir ./${configdir} ; then
-						true
-					else
-						echo '***' "${progname}: could not make `pwd`/${configdir}" 1>&2
-						exit 1
-					fi
-				fi
-				;;
-			esac
-
-			POPDIR=`pwd`
-			cd ${configdir}
-
-### figure out what to do with srcdir
-			case "${srcdir}" in
-			".") newsrcdir=${srcdir} ;; # no -srcdir option.  We're building in place.
-			/*) # absolute path
-				newsrcdir=${srcdir}/${configdir}
-				srcdiroption="--srcdir=${newsrcdir}"
-				;;
-			*) # otherwise relative
-				newsrcdir=../${srcdir}/${configdir}
-				srcdiroption="--srcdir=${newsrcdir}"
-				;;
-			esac
-
-### check for guested configure, otherwise get Cygnus style configure
-### script from ${config_aux}
-			if [ -f ${newsrcdir}/configure ] ; then
-				recprog=${newsrcdir}/configure
-			elif [ -f ${newsrcdir}/configure.in ] ; then
-				recprog=${config_aux}/configure
-			else
-				eval echo No configuration information in ${configdir} ${redirect}
-				recprog=
-			fi
-
-### The recursion line is here.
-			if [ ! -z "${recprog}" ] ; then
-				if eval ${config_shell} ${recprog} $recurse_args ${srcdiroption}; then
-					true
-				else
-					echo Configure in `pwd` failed, exiting. 1>&2
-					exit 1
-				fi
-			fi
-
-			cd ${POPDIR}
-		fi
-	done
-fi
-changequote([,])dnl
-AC_SUBST(SUBDIRS)dnl
-])dnl
+define(CONFIG_DIRS,[AC_CONFIG_SUBDIRS($1)])dnl
+dnl
 dnl
 dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
+define(AC_DIVERSION_MAKEFILE,9)dnl   things that get pushed on the makefile
+dnl
 define(MAKE_SUBDIRS,[
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote(<<<,>>>)dnl
-divert(9)dnl
 
 $2::<<<
 	@case '${MFLAGS}' in *[ik]*) set +e ;; esac; \
@@ -141,23 +104,34 @@ $2::<<<
 			$(MAKE) $(MFLAGS) CCOPTS="$(CCOPTS)" CC="$(CC)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
 	done>>>
-divert(0)dnl
 changequote([,])dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
-dnl take saved makefile stuff and put it in the Makeile
+dnl take saved makefile stuff and put it in the Makefile
 dnl
 define(EXTRA_RULES,[
 cat >> Makefile <<"SUBDIREOF"
-undivert(9)
+# [DIVERSION_MAKEFILE] contents
+undivert(AC_DIVERSION_MAKEFILE)
 SUBDIREOF
 ])dnl
 dnl
-dnl take saved makefile stuff and put it in the Makeile
+dnl take saved makefile stuff and put it in the argument
 dnl
 define(EXTRA_RULES_IN,[
 cat >> $1 <<"SUBDIREOF"
-undivert(9)
+# [DIVERSION_MAKEFILE] contents
+undivert(AC_DIVERSION_MAKEFILE)
+SUBDIREOF
+])dnl
+dnl
+dnl take saved makefile stuff and put it in the argument
+dnl
+define(EXTRA_RULES_OUT,[
+cat > $1 <<"SUBDIREOF"
+# [DIVERSION_MAKEFILE] contents
+undivert(AC_DIVERSION_MAKEFILE)
 SUBDIREOF
 ])dnl
 dnl
@@ -165,7 +139,7 @@ dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
 WITH_CC dnl
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 SHELL=/bin/sh
 
@@ -176,7 +150,7 @@ config.status: $(srcdir)/configure
 configure: $(srcdir)/configure.in
 	cd $(srcdir); autoconf
 ]
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
@@ -208,7 +182,7 @@ dnl drop in rules for building error tables -- ET_RULES
 dnl
 define(ET_RULES,[
 AC_PROG_AWK dnl
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 
 SRCTOP=$(srcdir)/$(BUILDTOP)
@@ -224,13 +198,13 @@ COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$][*.c $<
 
 ]
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl drop in rules for building command tables -- SS_RULES
 dnl
 define(SS_RULES,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote({,})dnl
 {
 
@@ -246,7 +220,7 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 
 }
 changequote([,])dnl
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
@@ -278,7 +252,7 @@ dnl
 dnl set $(KRB5ROOT) from --with-krb5-root=value -- WITH_KRB5ROOT
 dnl
 define(WITH_KRB5ROOT,[
-AC_WITH([krb5-root],
+AC_ARG_WITH([krb5-root],[set path for Kerberos V5 config files],
 echo "krb5-root is $withval"
 KRB5ROOT=$withval,
 echo "krb5-root defaults to /krb5"
@@ -288,7 +262,7 @@ dnl
 dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
-AC_WITH([krb4],
+AC_ARG_WITH([krb4],[include Kerberos V4 support],
 echo "krb4 is $withval"
 KRB4=$withval,
 echo "no krb4 support; use --with-krb4=krb4dir"
@@ -298,7 +272,7 @@ dnl
 dnl set $(CC) from --with-cc=value
 dnl
 define(WITH_CC,[
-AC_WITH([cc],
+AC_ARG_WITH([cc],[select compiler to use],
 echo CC=$withval
 CC=$withval,
 if test -z "$CC" ; then CC=cc; fi
@@ -308,7 +282,7 @@ dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 define(WITH_CCOPTS,[
-AC_WITH([ccopts],
+AC_ARG_WITH([ccopts],[select compiler command line options],
 echo "CCOPTS is $withval"
 CCOPTS=$withval
 CFLAGS="$CFLAGS $withval",
@@ -319,30 +293,31 @@ dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
 define(LinkFile,[
 AC_LN_S
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote({,})dnl
-divert(9)dnl
 
 $1:: $2{
 	$(RM) $}{@
 	$(LN) $}{? $}{@
 
-}divert(0)dnl
+}
 changequote([,])dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl explicit append text (for non-general things) -- AppendRule(txt)
 dnl
 define(AppendRule,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 
 $1
 
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl create DONE file for lib/krb5 -- SubdirLibraryRule(list)
 define(SubdirLibraryRule,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 
 all:: DONE
 
@@ -351,13 +326,13 @@ DONE:: $1
 
 clean::
 	$(RM) DONE
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl copy header file into include dir -- CopyHeader(hfile,hdir)
 dnl
 define(CopyHeader,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 
 includes:: $1
 	@if test -d $2; then :; else (set -x; mkdir $2) fi
@@ -369,13 +344,13 @@ includes:: $1
 clean::
 	$(RM) $2/$1
 
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl copy source header file into include dir -- CopySrcHeader(hfile,hdir)
 dnl
 define(CopySrcHeader,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 
 includes:: $1
 	@if test -d $2; then :; else mkdir $2; fi
@@ -384,29 +359,29 @@ includes:: $1
 		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \
 	fi
 
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl Krb5InstallHeaders(headers,destdir)
 define(Krb5InstallHeaders,[
-divert(9)dnl
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 install:: $1
 	@set -x; for f in $1 ; \
 	do [$](INSTALL_DATA) [$$]f $2/[$$]f ; \
 	done
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 dnl PepsyTarget(basename)
 dnl
 define(PepsyTarget,[
-divert(9)
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 .SUFFIXES:	.py
 $1_defs.h $1_pre_defs.h $1-types.h $1_tables.c:: $1-asn.py
 	@echo '***Ignore the warning message "Warning: Can'"'"'t find UNIV.ph failed"'
 	[$](PEPSY) [$](PSYFLAGS) [$](srcdir)/$1-asn.py
 
-divert(0)dnl
+AC_DIVERT_POP()dnl
 ])dnl
 dnl
 define(UsePepsy,[
@@ -420,7 +395,7 @@ dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
 dnl
 define(ADD_DEF,[
-DEFS="[$]DEFS "'$1'
+CPPFLAGS="[$]CPPFLAGS "'$1'
 ])dnl
 dnl
 dnl local includes are used -- KRB_INCLUDE
@@ -432,7 +407,7 @@ dnl
 dnl ISODE/pepsy includes are used -- ISODE_INCLUDE
 dnl
 define(ISODE_INCLUDE,[
-AC_ENABLE([isode],
+AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],
 ISODELIB='[$(TOPLIBD)/libisode.a]'
 ADD_DEF([-I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h]),ISODELIB=)dnl
 AC_SUBST([ISODELIB])dnl
@@ -463,84 +438,30 @@ AC_PROGRAM_CHECK(LEX, flex, flex, lex)dnl
 if test -z "$LEXLIB"
 then
    case "$LEX" in
-   flex*) AC_HAVE_LIBRARY(fl, LEXLIB="-lfl") ;;
-   *) AC_HAVE_LIBRARY(l, LEXLIB="-ll") ;;
+   flex*) AC_CHECK_LIB(fl,main, LEXLIB="-lfl") ;;
+   *) AC_CHECK_LIB(l,main, LEXLIB="-ll") ;;
    esac
 fi
-AC_VERBOSE(setting LEXLIB to $LEXLIB)
+AC_MSG_RESULT(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
 dnl
 dnl
 dnl allow for compilation with isode (yuck!)
 dnl
 define(ISODE_DEFS,
-[AC_ENABLE([isode],[ADD_DEF(-DKRB5_USE_ISODE)],)])dnl
-undefine([AC_PROG_INSTALL])dnl
-define(AC_PROG_INSTALL,
-[# Make sure to not get the incompatible SysV /etc/install and
-# /usr/sbin/install, which might be in PATH before a BSD-like install,
-# or the SunOS /usr/etc/install directory, or the AIX /bin/install,
-# or the AFS install, which mishandles nonexistent args, or
-# /usr/ucb/install on SVR4, which tries to use the nonexistent group
-# `staff', or /sbin/install on IRIX which has incompatible command-line
-# syntax.  Sigh.
-#
-#     On most BSDish systems install is in /usr/bin, not /usr/ucb
-#     anyway.
-# This turns out not to be true, so the mere pathname isn't an indication
-# of whether the program works.  What we really need is a set of tests for
-# the install program to see if it actually works in all the required ways.
-#
-# Avoid using ./install, which might have been erroneously created
-# by make from ./install.sh.
-if test -z "${INSTALL}"; then
-  AC_CHECKING(for a BSD compatible install)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
-  for ac_dir in $PATH; do
-    case "$ac_dir" in
-    ''|.|/etc|/sbin|/usr/sbin|/usr/etc|/usr/afsws/bin|/usr/ucb) ;;
-    *)
-      # OSF1 and SCO ODT 3.0 have their own names for install.
-      for ac_prog in installbsd scoinst install; do
-        if test -f $ac_dir/$ac_prog; then
-	  if test $ac_prog = install &&
-            grep dspmsg $ac_dir/$ac_prog >/dev/null 2>&1; then
-	    # AIX install.  It has an incompatible calling convention.
-	    # OSF/1 installbsd also uses dspmsg, but is usable.
-	    :
-	  else
-	    INSTALL="$ac_dir/$ac_prog -c"
-	    break 2
-	  fi
-	fi
-      done
-      ;;
-    esac
-  done
-  IFS="$ac_save_ifs"
-fi
+[AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],
+[ADD_DEF(-DKRB5_USE_ISODE)],)])dnl
+dnl
+dnl make this one deeper...
+dnl
+dnl The default is `$srcdir' or `$srcdir/..' or `$srcdir/../..'.
+dnl There's no need to call this macro explicitly; just AC_REQUIRE it.
+AC_DEFUN(AC_CONFIG_AUX_DIR_DEFAULT,
+[AC_CONFIG_AUX_DIRS($srcdir $srcdir/.. $srcdir/../.. $srcdir/../../.. $srcdir/../../../.. $srcdir/../../../../..)])
+dnl
+dnl V5_OUTPUT_MAKEFILE
+dnl
+define(V5_AC_OUTPUT_MAKEFILE,
+[AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile)])dnl
+dnl
 
-if test -z "$INSTALL"; then
-  # As a last resort, use the slow shell script.
-  for ac_dir in ${srcdir} ${srcdir}/.. ${srcdir}/../.. ${srcdir}/AC_TOPDIR/util/autoconf; do
-    if test -f $ac_dir/install.sh; then
-      INSTALL="$ac_dir/install.sh -c"; break
-    fi
-  done
-fi
-if test -z "$INSTALL"; then
-  AC_ERROR([can not find install.sh in ${srcdir} or ${srcdir}/.. or ${srcdir}/../.. ${srcdir}/AC_TOPDIR/util/autoconf])
-fi
-AC_SUBST(INSTALL)dnl
-AC_VERBOSE(setting INSTALL to $INSTALL)
-
-# Use test -z because SunOS4 sh mishandles ${INSTALL_PROGRAM-'${INSTALL}'}.
-# It thinks the first close brace ends the variable substitution.
-test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
-AC_SUBST(INSTALL_PROGRAM)dnl
-AC_VERBOSE(setting INSTALL_PROGRAM to $INSTALL_PROGRAM)
-
-test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
-AC_SUBST(INSTALL_DATA)dnl
-AC_VERBOSE(setting INSTALL_DATA to $INSTALL_DATA)
-])dnl
