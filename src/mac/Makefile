@@ -1104,6 +1104,7 @@ clean Ä
 gss-headers-output-folder							= {root-folder}:GSSLib:Headers:
 krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:
 krb5-globals-headers-output-folder					= {root-folder}:Kerberos5GlobalsLib:Headers:
+profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:
 
 gss-headers-output = ¶
 	"{gss-headers-output-folder}gssapi.h" ¶
@@ -1118,7 +1119,10 @@ krb5-headers-output = ¶
 krb5-globals-headers-output = ¶
 	"{krb5-globals-headers-output-folder}Kerberos5Globals.h"
 	
-headers-output = {gss-headers-output} {krb5-headers-output} {krb5-globals-headers-output}
+profile-headers-output = ¶
+	"{profile-headers-output-folder}profile.h"
+	
+headers-output = {gss-headers-output} {krb5-headers-output} {krb5-globals-headers-output} {profile-headers-output}
 
 headers Ä {headers-output}
 
@@ -1176,4 +1180,12 @@ headers Ä {headers-output}
 		SetFile -a l "{Targ}"
 	End
 	Duplicate -y "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{profile-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}util:profile:profile.h" "{Targ}"
 	SetFile -a l "{Targ}"
