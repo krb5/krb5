@@ -11,7 +11,7 @@ is a bourne shell script that turns a man page into a set of PostScript
 files, for inclusion in a document.
 .B man2ps
 converts the man page to a PostScript file using
-.IR troff (1), 
+.IR groff (1), 
 and then uses the
 .IR csplit (1)
 command to split the file into individual pages.
@@ -20,12 +20,12 @@ inserts the PostScript command:
 .sp
 .nf
 .in +.5i
-\&.7 dup scale
+\&0.85 dup scale
 .in -.5i
 .fi
 .sp
-at the beginning of each page, so that the pages will fit onto a page in
-a standard size reference manual (7"x9.25").
+at the beginning of each page, so that the pages will fit onto an
+8.5"x11" page.
 .PP
 The files created by
 .B man2ps
@@ -38,7 +38,13 @@ on the file "kinit.M" would produce the PostScript files "kinit1.ps",
 troff(1), csplit(1)
 .SH BUGS
 .B man2ps
-fails if the
+requires the user to have
+.I groff
+and either
 .I csplit
-command is not in the user's path.
-
+or
+.I gcsplit
+in her path.
+.SH AUTHORS
+.B man2ps
+was written by Jeff Bigler at Cygnus Support and Theodore Ts'o at MIT.
