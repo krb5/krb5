@@ -1,3 +1,12 @@
+2005-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* x-deltat.y (tok_WS): Renamed terminal from "WS", which conflicts
+	with HP-UX 10 header files.  Updated all productions.
+	(mylex): Updated.
+	* Makefile.in ($(srcdir)/deltat.c): Enable dependencies in
+	maintainer mode.
+	* deltat.c: Updated.
+
 2005-02-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (init_common): Delete redundant library
