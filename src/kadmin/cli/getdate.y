@@ -652,16 +652,17 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
 	Year += 1900;
     DaysInMonth[1] = Year % 4 == 0 && (Year % 100 != 0 || Year % 400 == 0)
 		    ? 29 : 28;
-    if (Year < EPOCH || Year > 1999
-     || Month < 1 || Month > 12
-     /* Lint fluff:  "conversion from long may lose accuracy" */
-     || Day < 1 || Day > DaysInMonth[(int)--Month])
-	return -1;
+    if (Year < EPOCH /* XXX DANGER! || Year > 1999 */
+	|| Month < 1 || Month > 12
+	/* Lint fluff:  "conversion from long may lose accuracy" */
+	|| Day < 1 || Day > DaysInMonth[(int)--Month])
+	 return -1;
 
     for (Julian = Day - 1, i = 0; i < Month; i++)
 	Julian += DaysInMonth[i];
     for (i = EPOCH; i < Year; i++)
-	Julian += 365 + (i % 4 == 0);
+	 Julian += 365 + ((i % 4 == 0) && ((Year % 100 != 0) ||
+					   (Year % 400 == 0)));
     Julian *= SECSPERDAY;
     Julian += yyTimezone * 60L;
     if ((tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0)

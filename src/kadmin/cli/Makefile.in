@@ -19,3 +19,7 @@ install::
 
 clean::
 	$(RM) $(PROG).local $(PROG) $(OBJS)
+
+# for testing getdate.y
+datetest: getdate.c
+	$(CC) -o datetest $(CFLAGS) $(LDFLAGS) $(LDARGS) -DTEST getdate.c

@@ -1,3 +1,9 @@
+Mon Aug 19 12:11:27 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in: add target for datetest
+
+	* getdate.y: accept dates after 1999
+
 Fri Aug 16 13:46:31 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c: update addprinc and modprinc usage
