@@ -91,6 +91,8 @@ Minor changes in 1.3.4
 * [2562] The Windows installer works around cases where DLLs cannot be
   unloaded.
 
+* [2585] Documentation correctly describes AES support in GSSAPI.
+
 Major changes in 1.3.3
 ----------------------
 
