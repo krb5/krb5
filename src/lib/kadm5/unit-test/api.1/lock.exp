@@ -12,7 +12,7 @@ if { $RPC } {
 }
 
 set locktest $LOCKTEST
-set lockfile "/krb5/ovsec_adm.lock"
+set lockfile "/krb5/kdb5.kadm5.lock"
 
 # The lock tests use the program lock-test in the unit test
 # directory.  The basic idea is that lock-test can be told to acquire
