@@ -1,5 +1,18 @@
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-int.h (krb5int_locate_server): New prototype.
+	(krb5_locate_srv_conf, krb5_locate_srv_dns): Deleted.
+	(KRB5INT_ACCESS_STRUCT_VERSION): Update to 2.
+	(struct _krb5int_access): Update signature for locate_kdc, add
+	pointer for locate_server.
+	(struct krb5int_sockaddr_storage) [!KRB5_USE_INET6]: Declare dummy
+	type with space and alignment for an IPv4 address.
+	(sockaddr_storage) [!KRB5_USE_INET6]: Define to
+	krb5int_sockaddr_storage, so "struct sockaddr_storage" will do
+	something reasonable even without IPv6 support.
+	(sa2sin, sa2sin6, ss2sa, ss2sin): Define as macros or inline
+	functions, for safety in type conversion.
+
 	* win-mac.h (HAS_ANSI_VOLATILE, KRB5_PROVIDE_PROTOTYPES): Don't
 	define.
 

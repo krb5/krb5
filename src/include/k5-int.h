@@ -211,6 +211,42 @@ typedef unsigned char	u_char;
 typedef int socklen_t;
 #endif
 
+#ifndef KRB5_USE_INET6 /* XXX should only be done if sockaddr_storage not found */
+struct krb5int_sockaddr_storage { struct sockaddr_in s; };
+#define sockaddr_storage krb5int_sockaddr_storage
+#endif
+
+#if defined (__GNUC__)
+/* There's a lot of confusion between pointers to different sockaddr
+   types, and pointers with different degrees of indirection, as in
+   the locate_kdc type functions.  Use these function to ensure we
+   don't do something silly like cast a "sockaddr **" to a
+   "sockaddr_in *".  */
+static __inline__ struct sockaddr_in *sa2sin (struct sockaddr *sa)
+{
+    return (struct sockaddr_in *) sa;
+}
+#ifdef KRB5_USE_INET6xxNotUsed
+static __inline__ struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
+{
+    return (struct sockaddr_in6 *) sa;
+}
+#endif
+static __inline__ struct sockaddr *ss2sa (struct sockaddr_storage *ss)
+{
+    return (struct sockaddr *) ss;
+}
+static __inline__ struct sockaddr_in *ss2sin (struct sockaddr_storage *ss)
+{
+    return (struct sockaddr_in *) ss;
+}
+#else
+#define sa2sin(S)	((struct sockaddr_in *)(S))
+#define sa2sin6(S)	((struct sockaddr_in6 *)(S))
+#define ss2sa(S)	((struct sockaddr *)(S))
+#define ss2sin(S)	((struct sockaddr_in *)(S))
+#endif
+
 #if !defined (socklen)
 /* size_t socklen (struct sockaddr *) */
 /* Should this return socklen_t instead? */
@@ -526,19 +562,27 @@ void krb5_os_free_context (krb5_context);
 
 krb5_error_code krb5_find_config_files (void);
 
-krb5_error_code krb5_locate_srv_conf (krb5_context,
-				      const krb5_data *,
-				      const char *,
-				      struct sockaddr **,
-				      int*,
-				      int);
-
-/* no context? */
-krb5_error_code krb5_locate_srv_dns (const krb5_data *,
-				     const char *,
-				     const char *,
-				     struct sockaddr **,
-				     int*);
+krb5_error_code
+krb5int_locate_server (krb5_context,
+		       const krb5_data *realm,
+		       /* Thing pointed to will be filled in with a
+			  pointer to a block of sockaddr pointers,
+			  with each sockaddr allocated separately
+			  (wasteful, oh well).  */
+		       struct sockaddr ***addrs, int *naddrs,
+		       /* Only meaningful for kdc, really...  */
+		       int want_masters,
+		       /* look up [realms]->$realm->$name in krb5.conf */
+		       const char *profilename,
+		       /* SRV record lookup */
+		       const char *dnsname,
+		       int is_stream_service,
+		       /* Port numbers, in network order!  For profile
+			  version only, DNS code gets port numbers
+			  itself.  Use 0 for dflport2 if there's no
+			  secondary port (most common, except kdc
+			  case).  */
+		       int dflport1, int dflport2);
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
@@ -1542,14 +1586,16 @@ int krb5_seteuid  (int);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 1
+#define KRB5INT_ACCESS_STRUCT_VERSION 2
 
 typedef struct _krb5int_access {
-    krb5_error_code (*krb5_locate_kdc) (krb5_context,
-					const krb5_data *,
-					struct sockaddr **,
-					int *,
-					int);
+    krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
+					struct sockaddr ***, int *, int);
+    krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
+					   struct sockaddr ***, int *,
+					   int,
+					   const char *, const char *,
+					   int, int, int);
     unsigned int krb5_max_skdc_timeout;
     unsigned int krb5_skdc_timeout_shift;
     unsigned int krb5_skdc_timeout_1;
