@@ -16,7 +16,6 @@ static char rcsid_md4glue_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/rsa-md4.h>
