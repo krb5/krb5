@@ -125,42 +125,50 @@ config-windows:: Makefile-windows
 	-$(MAKE) -$(MAKEFLAGS)
 	cd ..
 
-##DOS##MKFDEP= wconfig.exe config\pre.in config\post.in \
-##DOS##	config\windows.in config\win-post.in
-##DOS##WCONFIG= .\wconfig $(WCONFIG_FLAGS)
+##DOS##WCONFIG_EXE=.\$(OUTPRE)wconfig.exe
+##DOS##WCONFIG_OBJ=$(OUTPRE)wconfig.obj
 
-##DOS##Makefile-windows:: $(MKFDEP) Makefile \
-##DOS##		clients\Makefile clients\kdestroy\Makefile \
-##DOS##		clients\kinit\Makefile clients\klist\Makefile \
-##DOS##		include\Makefile include\krb5\Makefile \
-##DOS##		lib\Makefile lib\crypto\Makefile \
-##DOS##		lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
-##DOS##		lib\crypto\dk\Makefile lib\crypto\enc_provider\Makefile \
-##DOS##		lib\crypto\hash_provider\Makefile \
-##DOS##		lib\crypto\keyhash_provider\Makefile \
-##DOS##		lib\crypto\raw\Makefile lib\crypto\old\Makefile \
-##DOS##		lib\crypto\sha1\Makefile \
-##DOS##		lib\crypto\md4\Makefile lib\crypto\md5\Makefile \
-##DOS##		lib\des425\Makefile \
-##DOS##		lib\gssapi\Makefile lib\gssapi\generic\Makefile \
-##DOS##		lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
-##DOS##		lib\krb4\Makefile lib\krb5\Makefile \
-##DOS##		lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
-##DOS##		lib\krb5\ccache\file\Makefile \
-##DOS##		lib\krb5\ccache\stdio\Makefile \
-##DOS##		lib\krb5\ccache\memory\Makefile \
-##DOS##		lib\krb5\ccache\ccapi\Makefile \
-##DOS##		lib\krb5\error_tables\Makefile \
-##DOS##		lib\krb5\keytab\Makefile \
-##DOS##		lib\krb5\keytab\file\Makefile lib\krb5\krb\Makefile \
-##DOS##		lib\krb5\os\Makefile lib\krb5\posix\Makefile \
-##DOS##		lib\krb5\rcache\Makefile \
-##DOS##		util\et\Makefile util\profile\Makefile \
-##DOS##		util\windows\Makefile \
-##DOS##		windows\Makefile windows\lib\Makefile \
-##DOS##		windows\cns\Makefile windows\gina\Makefile \
-##DOS##		windows\gss\Makefile windows\wintel\Makefile
-##DOS##	config\rm.bat wconfig.obj msvc.pdb
+##DOS##$(WCONFIG_EXE): $(OUTPRE) wconfig.c
+##DOS##	$(CC) -Fe$@ -Fo$*.obj wconfig.c
+
+##DOS##MKFDEP= $(WCONFIG_EXE) config\pre.in config\post.in \
+##DOS##	config\windows.in config\win-post.in
+##DOS##WCONFIG= $(WCONFIG_EXE) $(WCONFIG_FLAGS)
+
+WINMAKEFILES=Makefile \
+	clients\Makefile clients\kdestroy\Makefile \
+	clients\kinit\Makefile clients\klist\Makefile \
+	include\Makefile include\krb5\Makefile \
+	lib\Makefile lib\crypto\Makefile \
+	lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
+	lib\crypto\dk\Makefile lib\crypto\enc_provider\Makefile \
+	lib\crypto\hash_provider\Makefile \
+	lib\crypto\keyhash_provider\Makefile \
+	lib\crypto\raw\Makefile lib\crypto\old\Makefile \
+	lib\crypto\sha1\Makefile \
+	lib\crypto\md4\Makefile lib\crypto\md5\Makefile \
+	lib\des425\Makefile \
+	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
+	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
+	lib\krb4\Makefile lib\krb5\Makefile \
+	lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
+	lib\krb5\ccache\file\Makefile \
+	lib\krb5\ccache\stdio\Makefile \
+	lib\krb5\ccache\memory\Makefile \
+	lib\krb5\ccache\ccapi\Makefile \
+	lib\krb5\error_tables\Makefile \
+	lib\krb5\keytab\Makefile \
+	lib\krb5\keytab\file\Makefile lib\krb5\krb\Makefile \
+	lib\krb5\os\Makefile lib\krb5\posix\Makefile \
+	lib\krb5\rcache\Makefile \
+	util\et\Makefile util\profile\Makefile \
+	util\windows\Makefile \
+	windows\Makefile windows\lib\Makefile \
+	windows\cns\Makefile windows\gina\Makefile \
+	windows\gss\Makefile windows\wintel\Makefile
+
+##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
+##DOS##	config\rm.bat $(WCONFIG_OBJ)
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -261,13 +269,12 @@ config-windows:: Makefile-windows
 ##DOS##windows\wintel\Makefile:  windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
-##DOS##wconfig.exe: wconfig.c
-##DOS##	SET CL=/nologo
-##DOS##	$(CC) /AL wconfig.c
-
-clean-windows::
+clean-windows:: Makefile-windows
+	@echo Making clean in util\windows
+	cd util\windows
+	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in include
-	cd include
+	cd ..\..\include
 	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in util\et
 	cd ..\util\et
@@ -281,9 +288,12 @@ clean-windows::
 	@echo Making clean in windows
 	cd ..\windows
 	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in clients
+	cd ..\clients
+	-$(MAKE) -$(MAKEFLAGS) clean
 	cd ..
 	@echo Making clean in root
-	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
+	config\rm.bat $(WCONFIG_OBJ) $(WCONFIG_EXE)
 
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.
@@ -354,7 +364,7 @@ HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
 	include/profile.h include/krb5/osconf.h \
-	winfile.list macfile.list mkbin.bat
+	winfile.list macfile.list
 
 
 kerbsrc.win: kerbsrc.zip
@@ -376,7 +386,6 @@ macfile.list:
 dos-Makefile:
 	cat config/windows.in Makefile.in config/win-post.in | \
 		sed -e "s/^##DOS##//" -e "s/^##DOS//" > Makefile
-	cp windows/mkbin.bat .
 
 prep-windows: dos-Makefile awk-windows-mac
 
@@ -386,7 +395,7 @@ krbsrc83.zip: dos-Makefile awk-windows-mac winfile.list
 	$(ZIP) -@Dlk krbsrc83.zip < winfile.list
 	$(ZIP) -Dk krbsrc83.zip $(WINBINARYFILES)
 	if test -d mit ; then \
-		$(ZIP) -Dk krbsrc83.zip $(MITWINBINARYFILES) ; \
+		$(ZIP) -rDk krbsrc83.zip $(MITWINBINARYFILES) ; \
 	fi
 	rm -f $(CLEANUP)
 
@@ -395,7 +404,7 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	$(ZIP) -@Dl kerbsrc.zip < winfile.list
 	$(ZIP) -D kerbsrc.zip $(WINBINARYFILES)
 	if test -d mit ; then \
-		$(ZIP) -D kerbsrc.zip $(MITWINBINARYFILES) ; \
+		$(ZIP) -rD kerbsrc.zip $(MITWINBINARYFILES) ; \
 	fi
 	rm -f $(CLEANUP)
 
@@ -501,3 +510,21 @@ awk-windows-mac: $(ETOUT) $(HOUT)
 
 clean-windows-mac:
 	rm -f $(CLEANUP)
+
+KBINDIR=kbin
+
+distclean-windows:
+	rm -f $(CLEANUP)
+	rm -f $(WINMAKEFILES)
+	rm -f $(KBINDIR)\*
+	@if exist $(KBINDIR)\nul rmdir $(KBINDIR)
+
+mkbin:
+	@if not exist $(KBINDIR)\nul mkdir $(KBINDIR)
+	-$(CP) lib\$(OUTPRE)*.dll $(KBINDIR)\.
+	-$(CP) windows\cns\$(OUTPRE)krb5.exe $(KBINDIR)\.
+	-$(CP) windows\telnet\$(OUTPRE)telnet.exe $(KBINDIR)\.
+	-$(CP) windows\gss\$(OUTPRE)gss.exe $(KBINDIR)\.
+	-$(CP) clients\klist\$(OUTPRE)klist.exe $(KBINDIR)\.
+	-$(CP) clients\kinit\$(OUTPRE)kinit.exe $(KBINDIR)\.
+	-$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe $(KBINDIR)\.
