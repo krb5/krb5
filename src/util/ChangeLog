@@ -1,3 +1,7 @@
+Thu May 25 21:39:02 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* makeshlib: Added shell script for creating shared libraries
+
 Tue May  2 21:32:23 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: remove spurious whitespace from blank line

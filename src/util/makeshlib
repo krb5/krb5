@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# makeshlib: Make a shared library.....
+#
+# Usage: makeshlib <host> <CC> <library> <directories>
+#
+
+host=$1 ; shift
+CC=$1 ; shift
+library=$1 ; shift
+
+case $host in
+*-*-solaris*)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
+	done`
+
+	echo $CC -G -o $library $FILES
+	$CC -G -o $library $FILES
+	;;
+*)
+	echo "Host type $host not supported!"
+	exit 1
+esac
