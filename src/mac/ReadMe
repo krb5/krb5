@@ -35,12 +35,8 @@ To build the Macintosh version of Kerberos 5 and GSS:
 
 	7) Build target "create-directories" in MPW.
 	
-	8) Open the projects in "[krb5 src]:mac:libraries:Metrowerks:CW Pro 2:"
-	   in your CW Pro 2 IDE (the projects will not work correctly with CW Pro 3),
-	   and build them.
-	
-	   IMPORTANT: You must build the Runtime libraries *before* building
-	   the C libraries.
+	8) Open the project "[krb5 src]:mac:libraries:BeforeBuild.prj"
+	   in your CW Pro 2 IDE and build it.
 	
 	   You will see some link warnings.  These are normal and can be ignored.
 	    

@@ -543,7 +543,7 @@ dist-clean : clean
 mac-files = `perl "/mac/macfile_gen.pl" maclist`
 mac-folders = `perl "/mac/macfile_gen.pl" macdirs`
 
-all-mac-files = {mac-files} {glue-input} {autogeneration-sources} /Makefile.in /patchlevel.h \
+all-mac-files = {mac-files} {classic-glue-input} {autogeneration-sources} /Makefile.in /patchlevel.h \
 	/util/et/et_h.perl /util/et/et_c.perl \
 	/mac/GSS.CFM.c \
 	/mac/GSSLibrary.exp \
@@ -560,6 +560,7 @@ all-mac-files = {mac-files} {glue-input} {autogeneration-sources} /Makefile.in /
 	/mac/libraries/KerberosHeaders.h \
 	/mac/libraries/KerberosHeaders.pch \
 	/mac/libraries/KerberosHeadersCFM.pch \
+	"/mac/libraries/BeforeBuild.prj" \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT C.CFM68K DLL.prj" \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT C.PPC DLL.prj" \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimeCFM68K DLL.prj" \
