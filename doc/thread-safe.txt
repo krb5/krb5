@@ -1,0 +1,167 @@
+In general, it's assumed that the library initialization function (if
+initialization isn't delayed) and the library finalization function
+are run in some thread-safe fashion, with no other parts of the
+library in question in use.  (If dlopen or dlsym in one thread starts
+running the initializer, and then dlopen/dlsym in another thread
+returns and lets you start accessing functions or data in the library
+before the initializer is finished, that really seems like a
+dlopen/dlsym bug.)
+
+It's also assumed that if library A depends on library B, then library
+B's initializer runs first, and its finalizer last, whether loading
+dynamically at run time or at process startup/exit.  (It appears that
+AIX 4.3.3 may violate this, at least when we use gcc's
+constructor/destructor attributes in shared libraries.)
+
+Support for freeing the heap storage allocated by a library has NOT,
+in general, been written.  There are hooks, but often they ignore some
+of the library's local storage, mutexes, etc.
+
+If shared library finalization code doesn't get run at all at dlclose
+time, then you'll get memory leaks.  Deal with it.
+
+Several debugging variables that are not part of our official API are
+not protected by mutexes.  In general, the only way to set them is by
+changing the sources and recompiling, which obviously has no run-time
+thread safety issues, or by stopping the process under a debugger,
+which we blithely assert is "safe enough".
+
+Various libraries may call assert() and abort().  This should only be
+for "can't happen" cases, and indicate programming errors.  In some
+cases, the compiler may be able to infer that the "can't happen" cases
+really can't happen, and drop the calls, but in many cases, this is
+not possible.
+
+There are cases (e.g., in the com_err library) where errors arising
+when dealing with other errors are handled by calling abort, for lack
+of anything better.  We should probably clean those up someday.
+
+Various libraries call getenv().  This is perfectly safe, as long as
+nothing is calling setenv or putenv or what have you.  Of course, that
+severely curtails the ability to control our libraries through that
+"interface".
+
+----------------
+
+libcom_err
+
+Issues:
+
+The callback hook support (set_com_err_hook, reset_com_err_hook, and
+calls to com_err and com_err_va) uses a mutex to protect the handle on
+the hook function.  As a side effect of this, if a callback function
+is registered which pops up a window and waits for the users'
+acknowledgement, then other errors cannot be reported by other threads
+until after the acknowledgement.  This could be fixed with
+multiple-reader-one-writer type locks, but that's a bit more
+complicated.
+
+The Windows thread safety support is unfinished.
+
+The string returned by error_message may be per-thread storage.  It
+can be passed off between threads, but it shouldn't be in use by any
+thread by the time the originating thread calls error_message again.
+
+Error tables must no longer be in use (including pointers returned by
+error_message) when the library containing them is unloaded.
+
+----------------
+
+libprofile (and its use in libkrb5)
+
+Does no checks to see if it's opened multiple instances of the same
+file under different names.  Does not guard against trying to open a
+file while another thread or process is in the process of replacing
+it, or two threads trying to update a file at the same time.  The
+former should be pretty safe on UNIX with atomic rename, but on
+Windows there's a race condition; there's a window (so to speak) where
+the filename does not correspond to an actual file.
+
+----------------
+
+libk5crypto
+
+Uses of the Yarrow code from the krb5 crypto interface are protected
+by a single mutex.  Initialization of the Yarrow state will be done
+once, the first time these routines are called.  Calls directly to the
+Yarrow functions are not protected.
+
+Uses ctype macros; what happens if the locale is changed in a
+multi-threaded program?
+
+Debug var in pbkdf2.c.
+
+----------------
+
+libkrb5
+
+(TBD)
+
+Uses: ctype macros
+
+Uses: res_search, dn_expand, getaddrinfo, getservbyname, getnameinfo
+
+According to current specifications, getaddrinfo should be
+thread-safe; some implementations are not, and we're not attempting to
+figure out which ones.
+
+Uses: getpwname, getpwuid -- should use _r versions if available
+
+Uses: gmtime, localtime -- should use _r versions
+
+Uses: mkstemp, mktemp -- Are these, or our uses of them, likely to be
+thread-safe?
+
+Uses: regcomp, regexec
+
+Uses: sigaction
+
+The use of sigaction is in the code prompting for a password; we try
+to catch the keyboard interrupt character being used and turn it into
+an error return from that function.
+
+----------------
+
+libgssapi_krb5
+
+(TBD)
+
+Uses: ctype macros
+
+Uses: getpwuid
+
+Some static data.
+
+----------------
+
+libkrb4
+libdes425
+
+I don't think we're likely to bother with these.
+
+Part of the krb4 API requires keeping some internal storage across
+calls.
+
+----------------
+
+libgssrpc
+
+Skip this.  We're replacing it anyways.
+
+----------------
+
+libkadm5*
+libkdb5
+
+Skip these for now.  We may want the KDC libraries to be thread-safe
+eventually, so the KDC can take better advantage of hyperthreaded or
+multiprocessor systems.
+
+----------------
+
+libapputils
+libpty
+libss
+
+Used by single-threaded programs only (but see above re KDC).  Don't
+bother for now.
