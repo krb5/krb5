@@ -225,7 +225,7 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
     return 0;
 }
 
-int
+int KRB5_CALLCONV
 get_ad_tkt(service, sinstance, realm, lifetime)
     char    *service;
     char    *sinstance;

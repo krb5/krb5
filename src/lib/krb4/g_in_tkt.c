@@ -463,7 +463,7 @@ krb_get_in_tkt_creds(user, instance, realm, service, sinstance, life,
 					NULL, 0, creds);
 }
 
-int
+int KRB5_CALLCONV
 krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 		       key_proc, decrypt_proc,
 		       arg, preauth_p, preauth_len)
@@ -511,7 +511,7 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     return retval;
 }
 
-int
+int KRB5_CALLCONV
 krb_get_in_tkt(user, instance, realm, service, sinstance, life,
                key_proc, decrypt_proc, arg)
     char *user;

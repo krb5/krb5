@@ -529,6 +529,8 @@ struct addrlist {
 #define ADDRLIST_INIT { 0, 0, 0 }
 extern void krb5int_free_addrlist (struct addrlist *);
 extern int krb5int_grow_addrlist (struct addrlist *, int);
+extern int krb5int_add_host_to_list (struct addrlist *, const char *,
+				     int, int, int, int);
 
 krb5_error_code
 krb5int_locate_server (krb5_context,
@@ -546,7 +548,8 @@ krb5int_locate_server (krb5_context,
 			  itself.  Use 0 for dflport2 if there's no
 			  secondary port (most common, except kdc
 			  case).  */
-		       int dflport1, int dflport2);
+		       int dflport1, int dflport2,
+		       int family);
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
@@ -1637,15 +1640,15 @@ void krb5int_set_prompt_types
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 5
+#define KRB5INT_ACCESS_STRUCT_VERSION 6
 
 typedef struct _krb5int_access {
     krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
-					struct addrlist *, int, int);
+					struct addrlist *, int, int, int);
     krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
 					   struct addrlist *, int,
 					   const char *, const char *,
-					   int, int, int);
+					   int, int, int, int);
     void (*free_addrlist) (struct addrlist *);
     unsigned int krb5_max_skdc_timeout;
     unsigned int krb5_skdc_timeout_shift;
@@ -1660,6 +1663,10 @@ typedef struct _krb5int_access {
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, krb5_data *reply,
 				   struct sockaddr *, socklen_t *);
+    krb5_error_code (*add_host_to_list)(struct addrlist *lp,
+					const char *hostname,
+					int port, int secport,
+					int socktype, int family);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

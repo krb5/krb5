@@ -1,3 +1,27 @@
+2002-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* accessor.c (krb5int_accessor): Add add_host_to_list.
+
+	* changepw.c (krb5_locate_kpasswd): Update calls to
+	krb5_locate_kdc().
+
+	* locate_kdc.c (add_host_to_list): Renamed to
+	krb5int_add_host_to_list(), with macro to deal with existing
+	callers in this file.  Now takes an argument to indicate protocol
+	family.  Callers updated accordingly to also take protocol family
+	arguments.
+
+	* os-proto.h: Update prototype of krb5_locate_kdc().
+
+	* sendto_kdc.c (krb5_sendto_kdc): Update calls to
+	krb5_locate_kdc().
+	(krb5int_sendto): UDP reply length is in.pos-in.buf, not
+	in.bufsize.
+
+	* t_locate_kdc.c (main): Update call to krb5_locate_kdc().
+
+	* t_std_conf.c (test_locate_kdc): Update call to krb5_locate_kdc().
+
 2002-11-14  Tom Yu  <tlyu@mit.edu>
 
 	* changepw.c: Remove reference to adm_err.h.

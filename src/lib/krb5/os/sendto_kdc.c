@@ -308,12 +308,12 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     else
 	socktype1 = SOCK_STREAM, socktype2 = SOCK_DGRAM;
 
-    retval = krb5_locate_kdc(context, realm, &addrs, use_master, socktype1);
+    retval = krb5_locate_kdc(context, realm, &addrs, use_master, socktype1, 0);
     if (socktype2) {
 	struct addrlist addrs2;
 
 	retval = krb5_locate_kdc(context, realm, &addrs2, use_master,
-				 socktype2);
+				 socktype2, 0);
 	if (retval == 0) {
 	    (void) merge_addrlists(&addrs, &addrs2);
 	    krb5int_free_addrlist(&addrs2);
@@ -1061,7 +1061,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     }
     /* Success!  */
     reply->data = conns[winning_conn].x.in.buf;
-    reply->length = conns[winning_conn].x.in.bufsize;
+    reply->length = (conns[winning_conn].x.in.pos
+		     - conns[winning_conn].x.in.buf);
     dprint("returning %d bytes in buffer %p\n",
 	   (int) reply->length, reply->data);
     retval = 0;

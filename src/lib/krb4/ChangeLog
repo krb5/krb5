@@ -1,3 +1,13 @@
+2002-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* g_ad_tkt.c (get_ad_tkt): Add KRB5_CALLCONV.
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): Add KRB5_CALLCONV.
+	(krb_get_in_tkt): Add KRB5_CALLCONV.
+
+	* send_to_kdc.c (krb4int_send_to_kdc_addr): New function; does
+	what send_to_kdc() used to do but can also return local address.
+
 2002-12-05  Tom Yu  <tlyu@mit.edu>
 
 	* kname_parse.c (kname_unparse): Add new function ported from

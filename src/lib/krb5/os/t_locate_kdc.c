@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
 	break;
 
     case LOOKUP_WHATEVER:
-	err = krb5_locate_kdc (ctx, &realm, &al, master, 0);
+	err = krb5_locate_kdc (ctx, &realm, &al, master, 0, 0);
 	break;
     }
     if (err) kfatal (err);

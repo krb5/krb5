@@ -49,11 +49,11 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 
     code = krb5int_locate_server (context, realm, addrlist, 0,
 				  "kpasswd_server", "_kpasswd", 0,
-				  DEFAULT_KPASSWD_PORT, 0);
+				  DEFAULT_KPASSWD_PORT, 0, 0);
     if (code) {
 	code = krb5int_locate_server (context, realm, addrlist, 0,
 				      "admin_server", "_kerberos-adm", 1,
-				      DEFAULT_KPASSWD_PORT, 0);
+				      DEFAULT_KPASSWD_PORT, 0, 0);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
 	       port number to use DEFAULT_KPASSWD_PORT.  */

@@ -32,7 +32,7 @@
 
 struct addrlist;
 krb5_error_code krb5_locate_kdc
-    (krb5_context, const krb5_data *, struct addrlist *, int, int);
+    (krb5_context, const krb5_data *, struct addrlist *, int, int, int);
 
 #ifdef HAVE_NETINET_IN_H
 krb5_error_code krb5_unpack_full_ipaddr

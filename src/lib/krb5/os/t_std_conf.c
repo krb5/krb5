@@ -106,7 +106,7 @@ static void test_locate_kdc(krb5_context ctx, char *realm)
 
 	rlm.data = realm;
 	rlm.length = strlen(realm);
-	retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters, 0);
+	retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters, 0, 0);
 	if (retval) {
 		com_err("krb5_locate_kdc", retval, 0);
 		return;

@@ -1,3 +1,10 @@
+2002-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Update prototype of krb5int_locate_server() to take
+	protocol family argument.  Update krb5int_access to current call
+	signatures of locate_kdc() and locate_server(), as well as to add
+	add_host_to_list() for use by krb4 library.
+
 2002-11-26  Tom Yu  <tlyu@mit.edu>
 
 	* port-sockets.h: Add SOCKET_CONNECT, SOCKET_GETSOCKNAME, and
