@@ -10,6 +10,14 @@ AC_HAVE_LIBRARY(nsl)
 dnl dbm libs for use of an_to_ln
 AC_HAVE_LIBRARY(-lndbm)
 AC_HAVE_LIBRARY(-ldbm)
+dnl
+dnl AIX has them all; SCO might too
+AC_HAVE_LIBRARY(-lodm,
+  AC_HAVE_LIBRARY(-ls,
+    AC_HAVE_LIBRARY(-lcfg, 
+      LOGINLIBS="-lodm -ls -lcfg" 
+      AC_SUBST(LOGINLIBS))))
+dnl
 AC_VFORK
 AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
 AC_FUNC_CHECK(utimes,AC_DEFINE(HAS_UTIMES))
@@ -27,7 +35,7 @@ AC_COMPILE_CHECK([sigset_t],
 [#include <signal.h>],
 [sigset_t x],
 AC_DEFINE(POSIX_SIGNALS)))
-AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h sys/ptyvar.h lastlog.h)
+AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h sys/ptyvar.h lastlog.h sys/select.h)
 AC_REPLACE_FUNCS(getdtablesize)
 CHECK_DIRENT
 CHECK_FCNTL

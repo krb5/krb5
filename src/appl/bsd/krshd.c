@@ -92,6 +92,10 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #include <sys/socket.h>
 #include <sys/file.h>
 #include <sys/time.h>
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
      
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>

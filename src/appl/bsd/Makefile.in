@@ -6,6 +6,7 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 K4LIB = $(KRB4)/lib/libkrb.a
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 
+LOGINLIBS = @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
 
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
@@ -52,7 +53,7 @@ install::
 	$(INSTALL_PROGRAM) krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
 
 login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS)
-	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS) $(LOGINLIBS)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5

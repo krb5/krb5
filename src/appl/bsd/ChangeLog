@@ -1,7 +1,14 @@
+Tue Aug 16 22:36:29 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: set LOGINLIBS to -lodm -ls -lcfg if the system has
+	all three (and is probably an AIX system.)
+	* Makefile.in: use LOGINLIBS for login.krb5.
+	* krshd.c: use HAVE_SYS_SELECT_H.
+
 Tue Aug 16 17:58:09 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krcp.c: check HAVE_VFORK_H
-	configure.in: use AC_VFORK (runtime test -- consider just using
+	* configure.in: use AC_VFORK (runtime test -- consider just using
 	fork instead.)
 
 Sat Aug 13 02:04:37 1994  Mark Eichin  (eichin@perdiem)
