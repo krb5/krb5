@@ -63,7 +63,7 @@
 #define DEFAULT_KDB_FILE        "@KDB5DIR/principal"
 #define DEFAULT_ADMIN_ACL	"@KDB5DIR/admin_acl_file"
 
-#define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_MD5
+#define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
 
