@@ -221,3 +221,13 @@ TAGS:	et_name.c error_message.c compile_et.c error_table.c \
 
 depend::  et_lex.lex.c
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+error_message.o: error_message.c com_err.h error_table.h
+et_name.o: et_name.c com_err.h error_table.h
+init_et.o: init_et.c com_err.h error_table.h
+com_err.o: com_err.c com_err.h error_table.h
+

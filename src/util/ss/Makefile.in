@@ -166,3 +166,33 @@ clean::
 		ss.ar ss.tar \
 		TAGS test_ss
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+invocation.o: invocation.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+help.o: help.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+execute_cmd.o: execute_cmd.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+listen.o: listen.c copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h
+parse.o: parse.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+error.o: error.c copyright.h $(BUILDTOP)/include/com_err.h \
+  ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h
+prompt.o: prompt.c copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h
+request_tbl.o: request_tbl.c copyright.h ss_internal.h \
+  ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
+list_rqs.o: list_rqs.c copyright.h ss_internal.h ss.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
+pager.o: pager.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+requests.o: requests.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h
+data.o: data.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(BUILDTOP)/include/com_err.h copyright.h
+
