@@ -1226,6 +1226,14 @@ krb5_error_code krb5_encrypt_tkt_part
 		   krb5_ticket * ));
 
 
+krb5_error_code krb5_encode_kdc_rep
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_const krb5_msgtype,
+		   krb5_const krb5_enc_kdc_rep_part *,
+		   krb5_const krb5_keyblock *,
+		   krb5_kdc_rep *,
+		   krb5_data ** ));
+
 /*
  * [De]Serialization Handle and operations.
  */

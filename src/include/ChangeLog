@@ -1,3 +1,8 @@
+Fri Nov 17 22:29:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin, k5-int.h: Moved prototype for encode_kdc_rep to
+		k5-int.h, and remove the eblock argument.
+
 Mon Nov 13 11:49:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Added typedef for krb5_preauth_proces_proc, and
