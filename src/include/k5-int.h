@@ -912,8 +912,10 @@ void krb5_free_etype_info
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype  FAR *ktypes;
-	int		ktype_count;
+	krb5_enctype  FAR *in_tkt_ktypes;
+	int		in_tkt_ktype_count;
+	krb5_enctype  FAR *tgs_ktypes;
+	int		tgs_ktype_count;
 	void	      FAR *os_context;
 	char	      FAR *default_realm;
 	profile_t     profile;
