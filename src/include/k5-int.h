@@ -960,7 +960,7 @@ krb5_get_init_creds
 		void *prompter_data,
 		krb5_deltat start_time,
 		char *in_tkt_service,
-		krb5_get_init_creds_opt *options,
+		krb5_get_init_creds_opt *gic_options,
 		krb5_gic_get_as_key_fct gak,
 		void *gak_data,
 		int master,

@@ -397,7 +397,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
     krb5_c_make_random_key
     (krb5_context context, krb5_enctype enctype,
-		    krb5_keyblock *random_key);
+		    krb5_keyblock *k5_random_key);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
     krb5_c_random_make_octets
@@ -2280,7 +2280,7 @@ krb5_get_init_creds_password
 		void *data,
 		krb5_deltat start_time,
 		char *in_tkt_service,
-		krb5_get_init_creds_opt *options);
+		krb5_get_init_creds_opt *k5_gic_options);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab
@@ -2290,7 +2290,7 @@ krb5_get_init_creds_keytab
 		krb5_keytab arg_keytab,
 		krb5_deltat start_time,
 		char *in_tkt_service,
-		krb5_get_init_creds_opt *options);
+		krb5_get_init_creds_opt *k5_gic_options);
 
 typedef struct _krb5_verify_init_creds_opt {
     krb5_flags flags;
@@ -2301,10 +2301,10 @@ typedef struct _krb5_verify_init_creds_opt {
 
 KRB5_DLLIMP void KRB5_CALLCONV
 krb5_verify_init_creds_opt_init
-(krb5_verify_init_creds_opt *options);
+(krb5_verify_init_creds_opt *k5_vic_options);
 KRB5_DLLIMP void KRB5_CALLCONV
 krb5_verify_init_creds_opt_set_ap_req_nofail
-(krb5_verify_init_creds_opt *options,
+(krb5_verify_init_creds_opt *k5_vic_options,
 		int ap_req_nofail);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
@@ -2314,7 +2314,7 @@ krb5_verify_init_creds
 		krb5_principal ap_req_server,
 		krb5_keytab ap_req_keytab,
 		krb5_ccache *ccache,
-		krb5_verify_init_creds_opt *options);
+		krb5_verify_init_creds_opt *k5_vic_options);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds

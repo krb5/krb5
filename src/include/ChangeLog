@@ -1,3 +1,11 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: Do not use "random_key" as argument name. When krb.h
+	included, it gets redefined. Do not use "options" either.
+
+	* k5-int.h (krb5_get_init_creds): Do not use "options" as argument
+	name.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Move prototypes for krb5_net_read() and
