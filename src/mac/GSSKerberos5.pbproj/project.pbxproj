@@ -8,233 +8,155 @@
 		00CC63ED00975A877F000001 = {
 			isa = PBXFileReference;
 			name = adm_err.c;
-			path = /tmp/autogeneration/adm_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/adm_err.c;
+			refType = 3;
 		};
 		00CC63EE00975A877F000001 = {
 			isa = PBXFileReference;
 			name = adm_err.h;
-			path = /tmp/autogeneration/adm_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/adm_err.h;
+			refType = 3;
 		};
 		00CC63EF00975A877F000001 = {
 			isa = PBXFileReference;
 			name = asn1_err.c;
-			path = /tmp/autogeneration/asn1_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/asn1_err.c;
+			refType = 3;
 		};
 		00CC63F000975A877F000001 = {
 			isa = PBXFileReference;
 			name = asn1_err.h;
-			path = /tmp/autogeneration/asn1_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/asn1_err.h;
+			refType = 3;
 		};
 		00CC63F100975A877F000001 = {
 			isa = PBXFileReference;
 			name = autoconf.h;
-			path = /tmp/autogeneration/autoconf.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/autoconf.h;
 			refType = 0;
 		};
 		00CC63F200975A877F000001 = {
 			isa = PBXExecutableFileReference;
 			name = compile_et;
-			path = autogeneration/compile_et;
+			path = GSSKerberos5.intermediates/compile_et;
 			refType = 3;
 		};
 		00CC63F300975A877F000001 = {
 			isa = PBXFileReference;
 			name = GSS.h;
-			path = /tmp/autogeneration/GSS.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/GSS.h;
 			refType = 0;
 		};
 		00CC63F400975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_generic.c;
-			path = /tmp/autogeneration/gssapi_err_generic.c;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi_err_generic.c;
 			refType = 0;
 		};
 		00CC63F500975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_generic.h;
-			path = /tmp/autogeneration/gssapi_err_generic.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi_err_generic.h;
 			refType = 0;
 		};
 		00CC63F600975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_krb5.c;
-			path = /tmp/autogeneration/gssapi_err_krb5.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/gssapi_err_krb5.c;
+			refType = 3;
 		};
 		00CC63F700975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi_err_krb5.h;
-			path = /tmp/autogeneration/gssapi_err_krb5.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/gssapi_err_krb5.h;
+			refType = 3;
 		};
 		00CC63F800975A877F000001 = {
 			isa = PBXFileReference;
 			name = gssapi.h;
-			path = /tmp/autogeneration/gssapi.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/gssapi.h;
 			refType = 0;
 		};
 		00CC63F900975A877F000001 = {
 			isa = PBXFileReference;
 			name = kdb5_err.c;
-			path = /tmp/autogeneration/kdb5_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/kdb5_err.c;
+			refType = 3;
 		};
 		00CC63FA00975A877F000001 = {
 			isa = PBXFileReference;
 			name = kdb5_err.h;
-			path = /tmp/autogeneration/kdb5_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/kdb5_err.h;
+			refType = 3;
 		};
 		00CC63FB00975A877F000001 = {
 			isa = PBXFileReference;
 			name = Kerberos5.h;
-			path = /tmp/autogeneration/Kerberos5.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/Kerberos5.h;
 			refType = 0;
 		};
 		00CC63FD00975A877F000001 = {
 			isa = PBXFileReference;
 			name = KerberosProfile.h;
-			path = /tmp/autogeneration/KerberosProfile.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/KerberosProfile.h;
+			refType = 3;
 		};
 		00CC63FE00975A877F000001 = {
 			isa = PBXFileReference;
 			name = krb5_err.c;
-			path = /tmp/autogeneration/krb5_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/krb5_err.c;
+			refType = 3;
 		};
 		00CC63FF00975A877F000001 = {
 			isa = PBXFileReference;
 			name = krb5_err.h;
-			path = /tmp/autogeneration/krb5_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/krb5_err.h;
+			refType = 3;
 		};
 		00CC640000975A877F000001 = {
 			isa = PBXFileReference;
 			name = krb5.h;
-			path = /tmp/autogeneration/krb5.h;
+			path = /Users/meeroh/Builds/GSSKerberos5.intermediates/krb5.h;
 			refType = 0;
 		};
 		00CC640100975A877F000001 = {
 			isa = PBXFileReference;
 			name = kv5m_err.c;
-			path = /tmp/autogeneration/kv5m_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/kv5m_err.c;
+			refType = 3;
 		};
 		00CC640200975A877F000001 = {
 			isa = PBXFileReference;
 			name = kv5m_err.h;
-			path = /tmp/autogeneration/kv5m_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/kv5m_err.h;
+			refType = 3;
 		};
 		00CC640300975A877F000001 = {
 			isa = PBXFileReference;
 			name = prof_err.c;
-			path = /tmp/autogeneration/prof_err.c;
-			refType = 0;
+			path = GSSKerberos5.intermediates/prof_err.c;
+			refType = 3;
 		};
 		00CC640400975A877F000001 = {
 			isa = PBXFileReference;
 			name = prof_err.h;
-			path = /tmp/autogeneration/prof_err.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/prof_err.h;
+			refType = 3;
 		};
 		00CC640500975A877F000001 = {
 			isa = PBXFileReference;
 			name = profile.h;
-			path = /tmp/autogeneration/profile.h;
-			refType = 0;
+			path = GSSKerberos5.intermediates/profile.h;
+			refType = 3;
 		};
 		00CC641F00975C167F000001 = {
 			isa = PBXFileReference;
 			name = autoconf.h;
-			path = /tmp/autogeneration/autoconf.h;
-			refType = 0;
-		};
-		00CC642000975C167F000001 = {
-			fileRef = 00CC640400975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642100975C167F000001 = {
-			fileRef = 00CC640500975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		00CC642200975C167F000001 = {
-			fileRef = 00CC63FD00975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
+			path = GSSKerberos5.intermediates/autoconf.h;
+			refType = 3;
 		};
 		00CC642300975C167F000001 = {
 			fileRef = 00CC640300975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642400975C167F000001 = {
-			fileRef = 00CC63FA00975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642500975C167F000001 = {
-			fileRef = 00CC63FF00975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642600975C167F000001 = {
-			fileRef = 00CC640200975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642700975C167F000001 = {
-			fileRef = 00CC63EE00975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642800975C167F000001 = {
-			fileRef = 00CC63F000975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC642900975C167F000001 = {
-			fileRef = 00CC640000975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		00CC642A00975C167F000001 = {
-			fileRef = 00CC63FB00975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		00CC642B00975C167F000001 = {
-			fileRef = 00CC641F00975C167F000001;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -269,42 +191,6 @@
 			settings = {
 			};
 		};
-		00CC643100975C167F000001 = {
-			fileRef = 00CC63F700975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC643200975C167F000001 = {
-			fileRef = 00CC63F500975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00CC643300975C167F000001 = {
-			fileRef = 00CC63F800975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		00CC643400975C167F000001 = {
-			fileRef = 00CC63F300975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
-		};
-		00CC643500975C167F000001 = {
-			fileRef = 00CC641F00975C167F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		00CC643600975C167F000001 = {
 			fileRef = 00CC63F600975A877F000001;
 			isa = PBXBuildFile;
@@ -320,17 +206,8 @@
 		00CC643800975EFF7F000001 = {
 			isa = PBXFileReference;
 			name = KerberosComErr.h;
-			path = /tmp/autogeneration/KerberosComErr.h;
-			refType = 0;
-		};
-		00CC643900975EFF7F000001 = {
-			fileRef = 00CC643800975EFF7F000001;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
+			path = GSSKerberos5.intermediates/KerberosComErr.h;
+			refType = 3;
 		};
 		00CC643C009767DA7F000001 = {
 			fileRef = 00CC640000975A877F000001;
@@ -1333,6 +1210,58 @@
 			isa = PBXBuildStyle;
 			name = Deployment;
 		};
+		0A53389B00C407D37F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			name = "Shell Script";
+			neededFileNames = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/KerberosComErr.h\" \"${SYMROOT}/KerberosComErr.${WRAPPER_EXTENSION}/Headers/KerberosComErr.h\"";
+		};
+		0A53389C00C414E17F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			name = "Shell Script";
+			neededFileNames = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "ln -s \"Versions/Current/Headers\" \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}\"\nmkdir \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}/Versions/Current/Headers\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/KerberosProfile.h\" \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}/Headers/KerberosProfile.h\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/profile.h\" \"${SYMROOT}/KerberosProfile.${WRAPPER_EXTENSION}/Headers/profile.h\"";
+		};
+		0A53389D00C4152A7F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			name = "Shell Script";
+			neededFileNames = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "ln -s \"Versions/Current/Headers\" \"${SYMROOT}/Kerberos5.${WRAPPER_EXTENSION}\"\nmkdir \"${SYMROOT}/Kerberos5.${WRAPPER_EXTENSION}/Versions/Current/Headers\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/Kerberos5.h\" \"${SYMROOT}/Kerberos5.${WRAPPER_EXTENSION}/Headers/Kerberos5.h\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/krb5.h\" \"${SYMROOT}/Kerberos5.${WRAPPER_EXTENSION}/Headers/krb5.h\"";
+		};
+		0A53389E00C415677F000001 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			name = "Shell Script";
+			neededFileNames = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/GSS.h\" \"${SYMROOT}/GSS.${WRAPPER_EXTENSION}/Headers/GSS.h\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/gssapi.h\" \"${SYMROOT}/GSS.${WRAPPER_EXTENSION}/Headers/gssapi.h\"";
+		};
 		0F80148EFF9A7E33126500C7 = {
 			isa = PBXFrameworkReference;
 			name = CoreServices.framework;
@@ -1442,6 +1371,7 @@
 				174475D6FF5EF33612120111,
 				174475DBFF5EF33612120111,
 				174475DCFF5EF33612120111,
+				0A53389B00C407D37F000001,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1449,7 +1379,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/../util/et/et.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
@@ -1488,15 +1418,15 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>edu.mit.Kerberos.KerberosComErr</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string></string>
+	<string>Kerberos ComErr Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string></string>
+	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -1514,7 +1444,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				174475DEFF5EF35112120111,
-				00CC643900975EFF7F000001,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
@@ -1605,6 +1534,7 @@
 				174475E5FF5EF80312120111,
 				174475E6FF5EF80312120111,
 				174475E7FF5EF80312120111,
+				0A53389C00C414E17F000001,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1612,7 +1542,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/../util/profile/profile.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/autogeneration\"";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
@@ -1652,15 +1582,15 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>edu.mit.Kerberos.KerberosProfile</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string></string>
+	<string>Kerberos Profile Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string></string>
+	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -1675,9 +1605,6 @@
 			files = (
 				174475F9FF5EF9C012120111,
 				17447608FF5F046812120111,
-				00CC642000975C167F000001,
-				00CC642100975C167F000001,
-				00CC642200975C167F000001,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
@@ -1936,6 +1863,7 @@
 				17447613FF5FF8DB12120111,
 				17447614FF5FF8DB12120111,
 				17447615FF5FF8DB12120111,
+				0A53389D00C4152A7F000001,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1943,7 +1871,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
@@ -1984,15 +1912,15 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>edu.mit.Kerberos.Kerberos5</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string></string>
+	<string>Kerberos v5 Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string></string>
+	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -2068,14 +1996,6 @@
 				00CFB46CFF6D81A212120111,
 				00CFB477FF6EA33F12120111,
 				00CFB478FF6EA33F12120111,
-				00CC642400975C167F000001,
-				00CC642500975C167F000001,
-				00CC642600975C167F000001,
-				00CC642700975C167F000001,
-				00CC642800975C167F000001,
-				00CC642900975C167F000001,
-				00CC642A00975C167F000001,
-				00CC642B00975C167F000001,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
@@ -6591,6 +6511,7 @@
 				5C1372F0FF6546C412120111,
 				5C1372F1FF6546C412120111,
 				5C1372F3FF6546C412120111,
+				0A53389E00C415677F000001,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -6598,7 +6519,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
@@ -6640,15 +6561,15 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>edi.mit.Kerberos.GSS</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string></string>
+	<string>Kerberos General Security Services Framework</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string></string>
+	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -6674,11 +6595,6 @@
 				00CFB471FF6D8BB412120111,
 				41D6B54B0029FA1112120111,
 				00F516F600692E197F000001,
-				00CC643100975C167F000001,
-				00CC643200975C167F000001,
-				00CC643300975C167F000001,
-				00CC643400975C167F000001,
-				00CC643500975C167F000001,
 				00CC643C009767DA7F000001,
 			);
 			isa = PBXHeadersBuildPhase;
