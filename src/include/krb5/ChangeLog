@@ -1,3 +1,11 @@
+Sun May 21 15:25:45 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (PROCESS_REPLACE): Replace the RCTMPDIR in stock.h
+		with a configuration determined directory
+
+	* configure.in: Determine which directory to use for the replay
+		cache. (/usr/tmp does not exist on netbsd).
+
 Wed May 10 13:20:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (install): Install ET_HEADERS...

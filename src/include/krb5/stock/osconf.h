@@ -80,7 +80,7 @@
 #define SKDC_TIMEOUT_SHIFT 2		/* left shift of timeout for backoff */
 #define SKDC_TIMEOUT_1 1		/* seconds for first timeout */
 
-#define RCTMPDIR	"/usr/tmp"	/* directory to store replay caches */
+#define RCTMPDIR	"@KRB5RCTMPDIR"	/* directory to store replay caches */
 
 #define KRB5_PATH_TTY	"/dev/tty"
 #define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb5"
