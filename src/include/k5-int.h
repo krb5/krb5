@@ -203,6 +203,10 @@ typedef unsigned char	u_char;
 
 #ifdef NEED_SOCKETS
 #include "port-sockets.h"
+#else
+#ifndef SOCK_DGRAM
+struct sockaddr;
+#endif
 #endif
 
 /* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
@@ -541,6 +545,23 @@ void krb5_os_free_context
 krb5_error_code krb5_find_config_files
         KRB5_PROTOTYPE(());
 
+krb5_error_code krb5_locate_srv_conf
+	KRB5_PROTOTYPE((krb5_context,
+			const krb5_data *,
+			const char *,
+			struct sockaddr **,
+			int *,
+			int *,
+			int *));
+
+/* no context? */
+krb5_error_code krb5_locate_srv_dns
+	KRB5_PROTOTYPE((const krb5_data *,
+			const char *,
+			const char *,
+			struct sockaddr **,
+			int *));
+
 #endif /* KRB5_LIBOS_PROTO__ */
 
 /* new encryption provider api */
@@ -613,8 +634,8 @@ struct krb5_keytypes {
     krb5_enctype etype;
     char *in_string;
     char *out_string;
-    struct krb5_enc_provider *enc;
-    struct krb5_hash_provider *hash;
+    const struct krb5_enc_provider *enc;
+    const struct krb5_hash_provider *hash;
     krb5_encrypt_length_func encrypt_len;
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
@@ -636,8 +657,8 @@ struct krb5_cksumtypes {
        then HMAC/hash with derived keys is used if the relevant flag
        is set.  Otherwise, a non-keyed hash is computed.  This is all
        kind of messy, but so is the krb5 api. */
-    struct krb5_keyhash_provider *keyhash;
-    struct krb5_hash_provider *hash;
+    const struct krb5_keyhash_provider *keyhash;
+    const struct krb5_hash_provider *hash;
 };
 
 #define KRB5_CKSUMFLAG_DERIVE		0x0001

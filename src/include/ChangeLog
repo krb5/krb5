@@ -1,3 +1,11 @@
+2000-01-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h [!NEED_SOCKETS]: Declare (but do not define) struct
+	sockaddr if SOCK_DGRAM hasn't been defined yet.
+	(krb5_locate_srv_conf, krb5_locate_srv_dns): Declare.
+	(struct krb5_keytypes, struct krb5_cksumtypes): enc, hash, and
+	keyhash provider structures pointed to are now const.
+
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_secure_config_files): Delete declaration.
