@@ -87,7 +87,7 @@ OLDDECLARG(krb5_data *, outbuf)
     if (retval =
         (*eblock.crypto_entry->decrypt_func)((krb5_pointer) privmsg->enc_part.data,
                                              (krb5_pointer) scratch.data,
-                                             scratch.length, &eblock)) {
+                                             scratch.length, &eblock, 0)) {
 	cleanup_privmsg();
 	cleanup_scratch();
         cleanup_prockey();

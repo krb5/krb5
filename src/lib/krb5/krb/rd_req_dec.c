@@ -205,7 +205,7 @@ krb5_authenticator **authpp;
     if (retval =
 	(*eblock.crypto_entry->decrypt_func)((krb5_pointer) request->authenticator.data,
 					     (krb5_pointer) scratch.data,
-					     scratch.length, &eblock)) {
+					     scratch.length, &eblock, 0)) {
 	(void) (*eblock.crypto_entry->finish_key)(&eblock);
 	free(scratch.data);
 	return retval;
