@@ -144,12 +144,12 @@ AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 SHELL=/bin/sh
 
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile: $(srcdir)/Makefile.in config.status $(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
 	$(SHELL) config.status
 config.status: $(srcdir)/configure
 	$(SHELL) config.status --recheck
-configure: $(srcdir)/configure.in
-	cd $(srcdir); autoconf
+$(srcdir)/configure: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
+	cd $(srcdir); autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
 ]
 AC_DIVERT_POP()dnl
 ])dnl
@@ -157,18 +157,33 @@ dnl
 dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
 dnl
 define(DECLARE_SYS_ERRLIST,[
-AC_COMPILE_CHECK([sys_errlist declaration],
+AC_MSG_CHECKING([for sys_errlist declaration])
+AC_CACHE_VAL(krb5_cv_decl_errlist,
+[AC_TRY_LINK(
 [#include <stdio.h>
-#include <errno.h>], [sys_nerr;], , AC_DEFINE(NEED_SYS_ERRLIST))])dnl
+#include <errno.h>], [sys_nerr;],dnl
+ krb5_cv_decl_errlist=yes, krb5_cv_decl_errlist=no)])
+AC_MSG_RESULT($krb5_cv_decl_errlist)
+if test $krb5_cv_decl_errlist = no; then
+	AC_DEFINE(NEED_SYS_ERRLIST)
+fi
+])
 dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
 define(CHECK_SIGPROCMASK,[
-AC_COMPILE_CHECK([sigmask],
-[#include <signal.h>], [sigmask(1);], ,
- AC_COMPILE_CHECK([sigprocmask],
- [#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
- AC_DEFINE(USE_SIGPROCMASK),))])dnl
+AC_MSG_CHECKING([for use of sigprocmask])
+AC_CACHE_VAL(krb5_cv_func_sigprocmask_use,
+[AC_TRY_LINK(
+[#include <signal.h>], [sigmask(1);], 
+ krb5_cv_func_sigprocmask_use=no,
+AC_TRY_LINK([#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
+ krb5_cv_func_sigprocmask_use=yes, krb5_cv_func_sigprocmask_use=no))])
+AC_MSG_RESULT($krb5_cv_func_sigprocmask_use)
+if test $krb5_cv_func_sigprocmask_use = yes; then
+ AC_DEFINE(USE_SIGPROCMASK)
+fi
+])dnl
 dnl
 dnl check for <stdarg.h> -- CHECK_STDARG
 dnl (name used for consistency with krb5/config.h)
@@ -186,7 +201,6 @@ AC_PROG_AWK dnl
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 
-SRCTOP=$(srcdir)/$(BUILDTOP)
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
 COMPILE_ET_H= $(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$@
 COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
@@ -233,48 +247,77 @@ dnl
 dnl check if sys/fcntl.h is needed for O_* -- CHECK_FCNTL
 dnl
 define(CHECK_FCNTL,[
-AC_COMPILE_CHECK([O_RDONLY from sys/file.h],
+AC_MSG_CHECKING([if O_RDONLY is needed from sys/fcntl.h])
+AC_CACHE_VAL(krb5_cv_decl_fcntl_ordonly,
+[AC_TRY_LINK(
 [#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/file.h>],
-[O_RDONLY;], ,AC_COMPILE_CHECK([O_RDONLY from sys/fcntl.h],
-[#include <sys/param.h>
+[O_RDONLY;], krb5_cv_decl_fcntl_ordonly=no,
+AC_TRY_LINK([#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/fcntl.h>],
-[O_RDONLY;],AC_DEFINE(NEED_SYS_FCNTL_H)))])dnl
+[O_RDONLY;],krb5_cv_decl_fcntl_ordonly=yes,krb5_cv_decl_fcntl_ordonly=no))])
+AC_MSG_RESULT($krb5_cv_decl_fcntl_ordonly)
+if test $krb5_cv_decl_fcntl_ordonly = yes; then
+  AC_DEFINE(NEED_SYS_FCNTL_H)
+fi
+])dnl
 dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
 define(CHECK_WAIT_TYPE,[
-AC_COMPILE_CHECK([union wait],
-[#include <sys/wait.h>], [union wait i;], , AC_DEFINE(WAIT_USES_INT))])dnl
+AC_MSG_CHECKING([for union wait])
+AC_CACHE_VAL(krb5_cv_struct_wait,
+[AC_TRY_LINK(
+[#include <sys/wait.h>], [union wait i;], 
+	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])
+AC_MSG_RESULT($krb5_cv_struct_wait)
+if test $krb5_cv_struct_wait = no; then
+	AC_DEFINE(WAIT_USES_INT)
+fi
+])
 dnl
 dnl check for POSIX signal handling -- CHECK_SIGNALS
 dnl
 define(CHECK_SIGNALS,[
 AC_FUNC_CHECK(sigprocmask,
-AC_COMPILE_CHECK([sigset_t],
+AC_MSG_CHECKING(for sigset_t and POSIX_SIGNALS)
+AC_CACHE_VAL(krb5_cv_type_sigset_t,
+[AC_TRY_LINK(
 [#include <signal.h>],
 [sigset_t x],
-AC_DEFINE(POSIX_SIGNALS)))])dnl
+krb5_cv_type_sigset_t=yes, krb5_cv_type_sigset_t=no)])
+AC_MSG_RESULT($krb5_cv_type_sigset_t)
+if test $krb5_cv_type_sigset_t = yes; then
+  AC_DEFINE(POSIX_SIGNALS)
+fi
+)])dnl
 dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
 define(CHECK_SETJMP,[
 AC_FUNC_CHECK(sigsetjmp,
-AC_COMPILE_CHECK([sigjmp_buf],
+AC_MSG_CHECKING(for sigjmp_buf)
+AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
+[AC_TRY_LINK(
 [#include <setjmp.h>],
 [sigjmp_buf x],
-AC_DEFINE(POSIX_SETJMP)))])dnl
+krb5_cv_struct_sigjmp_buf=yes,krb5_cv_struct_sigjmp_buf=no)])
+AC_MSG_RESULT($krb5_cv_struct_sigjmp_buf)
+if test $krb5_cv_struct_sigjmp_buf = yes; then
+  AC_DEFINE(POSIX_SETJMP)
+fi
+)])dnl
 dnl
 dnl set $(KRB5ROOT) from --with-krb5-root=value -- WITH_KRB5ROOT
 dnl
 define(WITH_KRB5ROOT,[
 AC_ARG_WITH([krb5-root],[set path for Kerberos V5 config files],
-echo "krb5-root is $withval"
+AC_MSG_RESULT(krb5-root is $withval)
 KRB5ROOT=$withval,
-echo "krb5-root defaults to /krb5"
+AC_MSG_RESULT(krb5-root defaults to /krb5)
 KRB5ROOT=/krb5)dnl
 AC_SUBST(KRB5ROOT)])dnl
 dnl
@@ -282,9 +325,9 @@ dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
 AC_ARG_WITH([krb4],[include Kerberos V4 support],
-echo "krb4 is $withval"
+AC_MSG_RESULT(krb4 is $withval)
 KRB4=$withval,
-echo "no krb4 support; use --with-krb4=krb4dir"
+AC_MSG_RESULT(no krb4 support; use --with-krb4=krb4dir)
 KRB4=)dnl
 AC_SUBST(KRB4)])dnl
 dnl
@@ -292,17 +335,17 @@ dnl set $(CC) from --with-cc=value
 dnl
 define(WITH_CC,[
 AC_ARG_WITH([cc],[select compiler to use],
-echo CC=$withval
+AC_MSG_RESULT(CC=$withval)
 CC=$withval,
 if test -z "$CC" ; then CC=cc; fi
-echo CC defaults to $CC)dnl
+[AC_MSG_RESULT(CC defaults to $CC)])dnl
 AC_SUBST([CC])])dnl
 dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 define(WITH_CCOPTS,[
 AC_ARG_WITH([ccopts],[select compiler command line options],
-echo "CCOPTS is $withval"
+AC_MSG_RESULT(CCOPTS is $withval)
 CCOPTS=$withval
 CFLAGS="$CFLAGS $withval",
 CCOPTS=)dnl
@@ -312,10 +355,10 @@ dnl set $(CPPOPTS) from --with-cppopts=value
 dnl
 define(WITH_CPPOPTS,[
 AC_ARG_WITH([cppopts],[select compiler preprocessor command line options],
-echo CPPOPTS=$withval
+AC_MSG_RESULT(CPPOPTS=$withval)
 CPPOPTS=$withval
 CPPFLAGS="$CPPFLAGS $withval",
-echo CPPOPTS defaults to $CPPOPTS)dnl
+[AC_MSG_RESULT(CPPOPTS defaults to $CPPOPTS)])dnl
 AC_SUBST(CPPOPTS)])dnl
 dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
@@ -388,6 +431,9 @@ includes:: $1
 		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \
 	fi
 
+clean::
+	$(RM) $2/$1
+
 AC_DIVERT_POP()dnl
 ])dnl
 dnl
@@ -446,16 +492,21 @@ dnl check for yylineno -- HAVE_YYLINENO
 dnl
 define(HAVE_YYLINENO,[dnl
 AC_REQUIRE_CPP()AC_REQUIRE([AC_PROG_LEX])dnl
-AC_CHECKING(for yylineno declaration)
+AC_MSG_CHECKING([for yylineno declaration])
+AC_CACHE_VAL(krb5_cv_type_yylineno,
 # some systems have yylineno, others don't...
   echo '%%
 %%' | ${LEX} -t > conftest.out
   if egrep yylineno conftest.out >/dev/null 2>&1; then
-	:
+	krb5_cv_type_yylineno=yes
   else
+	krb5_cv_type_yylineno=no
+  fi
+  rm -f conftest.out)
+  AC_MSG_RESULT($krb5_cv_type_yylineno)
+  if test $krb5_cv_type_yylineno = no; then
 	AC_DEFINE([NO_YYLINENO])
   fi
-  rm -f conftest.out
 ])dnl
 dnl
 dnl fix AC_PROG_LEX
@@ -493,4 +544,83 @@ dnl
 define(V5_AC_OUTPUT_MAKEFILE,
 [AC_OUTPUT(pre.out:[$]ac_prepend Makefile.out:Makefile.in post.out:[$]ac_postpend,[EXTRA_RULES], cat pre.out Makefile.out post.out > Makefile)])dnl
 dnl
-
+dnl
+dnl utmp structure checks (used by appl/bsd and kadmin/kpasswd)
+dnl
+dnl check for ut_pid in struct utmp
+define(KRB5_UTPID,[
+AC_MSG_CHECKING([ut_pid in struct utmp])
+AC_CACHE_VAL(krb5_cv_struct_ut_pid,
+[AC_TRY_LINK(
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_pid;],
+krb5_cv_struct_ut_pid=yes, krb5_cv_struct_ut_pid=no)])
+AC_MSG_RESULT($krb5_cv_struct_ut_pid)
+if test $krb5_cv_struct_ut_pid = no; then
+  AC_DEFINE(NO_UT_PID)
+fi
+])dnl
+dnl
+dnl check for ut_type in struct utmp
+dnl
+define(KRB5_UTTYPE,[
+AC_MSG_CHECKING([ut_type in struct utmp])
+AC_CACHE_VAL(krb5_cv_struct_ut_type,
+[AC_TRY_LINK(
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_type;],
+krb5_cv_struct_ut_type=yes, krb5_cv_struct_ut_type=no)])
+AC_MSG_RESULT($krb5_cv_struct_ut_type)
+if test $krb5_cv_struct_ut_type = no; then
+  AC_DEFINE(NO_UT_TYPE)
+fi
+])dnl
+dnl
+dnl check for ut_host in struct utmp
+dnl
+define(KRB5_UTHOST,[
+AC_MSG_CHECKING([ut_host in struct utmp])
+AC_CACHE_VAL(krb5_cv_struct_ut_host,
+[AC_TRY_LINK(
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_host;],
+krb5_cv_struct_ut_host=yes, krb5_cv_struct_ut_host=no)])
+AC_MSG_RESULT($krb5_cv_struct_ut_host)
+if test $krb5_cv_struct_ut_host = no; then
+  AC_DEFINE(NO_UT_HOST)
+fi
+])dnl
+dnl
+dnl
+dnl check for ut_exit in struct utmp
+dnl
+define(KRB5_UTEXIT,[
+AC_MSG_CHECKING([ut_exit in struct utmp])
+AC_CACHE_VAL(krb5_cv_struct_ut_exit,
+[AC_TRY_LINK(
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_exit;],
+krb5_cv_struct_ut_exit=yes, krb5_cv_struct_ut_exit=no)])
+AC_MSG_RESULT($krb5_cv_struct_ut_exit)
+if test $krb5_cv_struct_ut_exit = no; then
+  AC_DEFINE(NO_UT_EXIT)
+fi
+])dnl
+dnl
+dnl
+dnl Check for POSIX_FILE_LOCKS - used be include/krb5 and appl/popper
+dnl
+AC_DEFUN([KRB5_POSIX_LOCKS],[dnl
+AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
+  [AC_MSG_CHECKING([POSIX file locking -- structs and flags])
+  AC_CACHE_VAL(krb5_cv_struct_flock,
+[AC_TRY_LINK(dnl
+[#include <sys/types.h>
+#include <fcntl.h>],
+[struct flock f; 1+F_SETLK;], 
+  krb5_cv_struct_flock=yes, krb5_cv_struct_flock=no)])
+  AC_MSG_RESULT($krb5_cv_struct_flock)
+  if test $krb5_cv_struct_flock = yes; then
+    AC_DEFINE(POSIX_FILE_LOCKS)
+  fi
+])])dnl

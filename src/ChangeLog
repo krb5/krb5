@@ -1,3 +1,27 @@
+Fri Nov 18 00:31:43 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (ET_RULES): don't define SRCTOP, pre.in already takes
+	care of it.
+	(DECLARE_SYS_ERRLIST, CHECK_SIGPROCMASK, CHECK_FCNTL,
+	CHECK_WAIT_TYPE, CHECK_SIGNALS, CHECK_SETJMP, HAVE_YYLINENO): add
+	caching.
+	(WITH_KRB5ROOT, WITH_KRB4, WITH_CC, WITH_CCOPTS, WITH_CPPOPTS):
+	use AC_MSG_RESULT instead of echo.
+	(KRB5_UTPID, KRB5_UTTYPE, KRB5_UTHOST, KRB5_UTEXT): new functions
+	for appl/bsd and kpasswd common utmp code.
+	(KRB5_POSIX_LOCKS): new functions for include/krb5 and appl/popper
+	common code.
+	(from epeisach.)
+
+Fri Nov 18 00:30:19 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (CONFIG_RULES): handle pre.in, post.in, and pass the
+	rest of the arguments that autoconf needs. (from epeisach.)
+
+Fri Nov 18 00:22:18 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (CopySrcHeader): add clean rule (from epeisach)
+
 Mon Nov  7 21:27:45 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* aclocal.m4 (CHECK_SETJMP, CHECK_SIGNALS): Added checks for POSIX
