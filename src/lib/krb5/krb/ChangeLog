@@ -1,3 +1,8 @@
+2003-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* rd_rep.c (krb5_rd_rep): Free subkeys before replacing them, if
+	needed.  This avoids a memory leak.
+
 2003-06-11  Tom Yu  <tlyu@mit.edu>
 
 	* srv_rcache.c (krb5_get_server_rcache): Octal escapes begin with
