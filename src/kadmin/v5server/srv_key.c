@@ -766,6 +766,7 @@ key_string_to_keys(kcontext, dbentp, string, nksalt, ksaltp, nkeysp, keysp)
     krb5_int32		nkeysalts;
     krb5_key_data	*keys;
     struct keysalt_iterate_args ksargs;
+    krb5_boolean	did_alloc;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_string_to_keys()\n"));
 
@@ -775,8 +776,11 @@ key_string_to_keys(kcontext, dbentp, string, nksalt, ksaltp, nkeysp, keysp)
      */
     keysalts = ksaltp;
     nkeysalts = nksalt;
-    if (!keysalts || !nkeysalts)
+    did_alloc = 0;
+    if (!keysalts || !nkeysalts) {
 	kret = key_dbent_to_keysalts(dbentp, &nkeysalts, &keysalts);
+	did_alloc = 1;
+    }
     if (keysalts && nkeysalts) {
 	if (keys = (krb5_key_data *)
 	    malloc((size_t) (nkeysalts * sizeof(krb5_key_data)))) {
@@ -794,7 +798,8 @@ key_string_to_keys(kcontext, dbentp, string, nksalt, ksaltp, nkeysp, keysp)
 	}
 	else
 	    kret = ENOMEM;
-	krb5_xfree(keysalts);
+	if (did_alloc) 
+	    krb5_xfree(keysalts);
     }
  done:
     if (!kret) {
