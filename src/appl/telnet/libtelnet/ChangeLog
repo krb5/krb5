@@ -1,3 +1,8 @@
+2002-03-29  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos.c, kerberos5.c (Data): Reindent to 8 columns. (yes,
+	this is original BSD style)
+
 2002-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos.c: Include errno.h.
