@@ -1,3 +1,8 @@
+Wed Mar 24 14:00:00 1995  Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed zip-windows target to kerbsrc.zip, and also
+	   had the windows makefile config clean up any debugging files.
+
 Tue Mar 22 12:00:00 1995  Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added all-mac target.

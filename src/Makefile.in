@@ -161,7 +161,7 @@ makefile-windows:: wconfig.c config\pre.in config\post.in makefile.in \
 	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
 	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
 	.\wconfig config <util\et\makefile.in >util\et\makefile
-	config\rm.bat wconfig.obj wconfig.exe
+	config\rm.bat wconfig.obj wconfig.exe msvc.pdb
 
 clean-windows::
 	@echo Making clean in include
@@ -204,7 +204,7 @@ ZIPEXCLUDE= LIB/KRB5.SAB \
 	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
 	WINDOWS/CNS/*.ICO *.O *.A
 
-zip-windows: awk-windows
+kerbsrc.zip: awk-windows
 	rm -f kerbsrc.zip
 	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
 	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
