@@ -1,3 +1,7 @@
+2001-11-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* sserver.c (main): Use GETPEERNAME_ARG3_TYPE instead of int.
+
 2000-07-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* sserver.c (main): Include unistd.h if present (for close

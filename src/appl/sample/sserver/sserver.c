@@ -57,6 +57,10 @@
 
 extern krb5_deltat krb5_clockskew;
 
+#ifndef GETPEERNAME_ARG3_TYPE
+#define GETPEERNAME_ARG3_TYPE int
+#endif
+
 #define DEBUG
 
 static void
@@ -76,7 +80,7 @@ main(argc, argv)
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket;
     struct sockaddr_in peername;
-    int namelen = sizeof(peername);
+    GETPEERNAME_ARG3_TYPE  namelen = sizeof(peername);
     int sock = -1;			/* incoming connection fd */
     krb5_data recv_data;
     short xmitlen;
