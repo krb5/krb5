@@ -115,15 +115,6 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <sys/id.h>
 #endif
 
-#ifndef HAVE_GETDTABLESIZE
-#include <sys/resource.h>
-int getdtablesize() {
-  struct rlimit rl;
-  getrlimit(RLIMIT_NOFILE, &rl);
-  return rl.rlim_cur;
-}
-#endif
-
 #if defined(_AIX)
 #define PRIO_OFFSET 20
 #else
@@ -1342,6 +1333,27 @@ dofork()
 }
 #endif /* KRB4 */
 
+
+#ifndef HAVE_STRSAVE
+/* Strsave was a routine in the version 4 krb library: we put it here
+   for compatablilty with version 5 krb library, since kcmd.o is linked
+   into all programs. */
+
+char *
+  strsave(sp)
+char *sp;
+{
+    register char *ret;
+    
+    if((ret = (char *) malloc((unsigned) strlen(sp)+1)) == NULL) {
+	fprintf(stderr, "no memory for saving args\n");
+	exit(1);
+    }
+    (void) strcpy(ret,sp);
+    return(ret);
+}
+
+#endif
 
 #ifdef _IBMR2
 update_ref_count(int adj)

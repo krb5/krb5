@@ -1,11 +1,6 @@
 /*
- *	$Source$
- *	$Header$
+ *	appl/bsd/krcp.c
  */
-
-#ifndef lint
-static char *rcsid_rcp_c = "$Header$";
-#endif /* lint */
 
 /*
  * Copyright (c) 1983 The Regents of the University of California.
@@ -60,6 +55,11 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <errno.h>
 #include <string.h>
      
+#ifdef HAVE_SETRESUID
+#ifndef HAVE_SETREUID
+#define setreuid(r,e) setresuid(r,e,-1)
+#endif
+#endif
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
@@ -88,7 +88,10 @@ krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_keyblock *session_key;	   /* static key for session */
 
 void	try_normal();
-char	**save_argv(), *strsave();
+char	**save_argv();
+#ifndef HAVE_STRSAVE
+char	*strsave();
+#endif
 int	des_write(), des_read();
 void	send_auth(), answer_auth();
 int	encryptflag = 0;
@@ -446,17 +449,39 @@ main(argc, argv)
 		    if (encryptflag)
 		      send_auth();
 		}
+#ifdef HAVE_SETREUID
 		(void) setreuid(0, userid);
 		sink(1, argv+argc-1);
 		(void) setreuid(userid, 0);
+#else
+		(void) setuid(0);
+		if(seteuid(userid)) {
+		  perror("rcp seteuid user"); errs++; exit(errs);
+		}
+		sink(1, argv+argc-1);
+		if(seteuid(0)) {
+		  perror("rcp seteuid 0"); errs++; exit(errs);
+		}
+#endif
 #else
 		rem = rcmd(&host, port, pwd->pw_name, suser,
 			   buf, 0);
 		if (rem < 0)
 		  continue;
+#ifdef HAVE_SETREUID
 		(void) setreuid(0, userid);
 		sink(1, argv+argc-1);
 		(void) setreuid(userid, 0);
+#else
+		(void) setuid(0);
+		if(seteuid(userid)) {
+		  perror("rcp seteuid user"); errs++; exit(errs);
+		}
+		sink(1, argv+argc-1);
+		if(seteuid(0)) {
+		  perror("rcp seteuid 0"); errs++; exit(errs);
+		}
+#endif
 #endif /* KERBEROS */
 		(void) close(rem);
 		rem = -1;

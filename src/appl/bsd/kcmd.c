@@ -241,7 +241,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif /* !(defined(ultrix) || defined(sun)) */
     	perror(hp->h_name);
 #ifdef POSIX_SIGNALS
-	    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
+	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
 #ifndef sgi
     	sigsetmask(oldmask);
@@ -654,6 +654,7 @@ int setreuid(real,eff)
 
 
 
+#ifndef HAVE_STRSAVE
 /* Strsave was a routine in the version 4 krb library: we put it here
    for compatablilty with version 5 krb library, since kcmd.o is linked
    into all programs. */
@@ -672,7 +673,7 @@ char *sp;
     return(ret);
 }
 
-
+#endif
 
 #ifdef SYSV
 

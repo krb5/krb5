@@ -87,7 +87,9 @@ void	try_normal();
 #endif  /* KERBEROS */
 #endif /* !RLOGIN_PROGRAM */
      
+#ifndef POSIX_SIGNALS
 #define	mask(s)	(1 << ((s) - 1))
+#endif /* POSIX_SIGNALS */
      
 main(argc, argv0)
      int argc;
@@ -101,7 +103,11 @@ main(argc, argv0)
     int readfrom, ready;
     int one = 1;
     struct servent *sp;
+#ifdef POSIX_SIGNALS
+    sigset_t omask, igmask;
+#else
     int omask;
+#endif
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;
@@ -339,11 +345,19 @@ main(argc, argv0)
 	  perror("setsockopt (stderr)");
     }
     (void) setuid(getuid());
+#ifdef POSIX_SIGNALS
+    sigemptyset(&igmask);
+    sigaddset(&igmask, SIGINT);
+    sigaddset(&igmask, SIGQUIT);
+    sigaddset(&igmask, SIGTERM);
+    sigprocmask(SIG_BLOCK, &igmask, &omask);
+#else
 #ifdef sgi
     omask = sigignore(mask(SIGINT)|mask(SIGQUIT)|mask(SIGTERM));
 #else
     omask = sigblock(mask(SIGINT)|mask(SIGQUIT)|mask(SIGTERM));
 #endif
+#endif /* POSIX_SIGNALS */
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
       signal(SIGINT, sendsig);
     if (signal(SIGQUIT, SIG_IGN) != SIG_IGN)
@@ -393,9 +407,13 @@ main(argc, argv0)
 	(void) shutdown(rem, 1);
 	exit(0);
     }
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, &omask, (sigset_t*)0);
+#else
 #ifndef sgi
     sigsetmask(omask);
 #endif
+#endif /* POSIX_SIGNALS */
     readfrom = (1<<rfd2) | (1<<rem);
     do {
 	ready = readfrom;

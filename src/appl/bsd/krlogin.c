@@ -803,16 +803,27 @@ setsignal(sig, act)
      int sig;
      krb5_sigtype (*act)();
 {
+#ifdef POSIX_SIGNALS
+    sigset_t omask, igmask;
+    sigemptyset(&igmask);
+    sigaddset(&igmask, sig);
+    sigprocmask(SIG_BLOCK, &igmask, &omask);
+#else
 #ifdef sgi
     int omask = sigignore(sigmask(sig));
 #else
     int omask = sigblock(sigmask(sig));
 #endif
+#endif /* POSIX_SIGNALS */
     
     if (signal(sig, act) == SIG_IGN)
       (void) signal(sig, SIG_IGN);
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, &omask, (sigset_t*)0);
+#else    
 #ifndef sgi
     (void) sigsetmask(omask);
+#endif
 #endif
 }
 
