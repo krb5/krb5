@@ -1,3 +1,14 @@
+2002-06-25 Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5_libinit.c: Added an include for com_err.h since
+	it is not included by error table headers on Mac OS X.  Also
+	fixed busted check for Mac OS
+
+	* krb5_libinit.c: added #define for Mac OS X so
+	that krb5int_cleanup_library calls krb5_stdcc_shutdown.
+
+	[pullups from 1-2-2-branch]
+
 2002-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't set up keytab/file or keytab/srvtab

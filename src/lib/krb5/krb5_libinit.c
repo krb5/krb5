@@ -1,5 +1,9 @@
 #include <assert.h>
 
+#if TARGET_OS_MAC
+    #include <Kerberos/com_err.h>
+#endif
+
 #include "krb5.h"
 #include "krb5_err.h"
 #include "kv5m_err.h"
@@ -36,7 +40,7 @@ void krb5int_cleanup_library (void)
 {
 	assert (initialized);
 
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || TARGET_OS_MAC
 	krb5_stdcc_shutdown();
 #endif
 	
