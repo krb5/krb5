@@ -18,6 +18,7 @@ static char rcsid_decrypt_key_c [] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/kdb.h>
 
 
 /*

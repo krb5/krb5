@@ -18,6 +18,7 @@ static char rcsid_encrypt_key_c [] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/kdb.h>
 
 /*
  * Encrypt a key for storage in the database.  "eblock" is used
