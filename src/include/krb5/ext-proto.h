@@ -21,6 +21,7 @@
 #else
 
 extern char *malloc(), *index(), *calloc();
+extern char *getenv();
 
 #include <string.h>
 
