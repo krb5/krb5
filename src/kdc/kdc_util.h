@@ -18,6 +18,11 @@
 
 krb5_error_code check_hot_list PROTOTYPE((krb5_ticket *));
 krb5_boolean realm_compare PROTOTYPE((krb5_data *, krb5_principal));
+krb5_error_code add_to_transited PROTOTYPE((krb5_data *,
+					    krb5_data *,
+					    krb5_principal,
+					    krb5_principal,
+					    krb5_principal));
 krb5_error_code compress_transited PROTOTYPE((krb5_data *,
 					      krb5_principal,
 					      krb5_data *));
