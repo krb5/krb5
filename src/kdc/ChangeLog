@@ -1,3 +1,9 @@
+1999-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (dispatch): Make message in lookaside case less
+	suggestive of replay attacks, since it can result from normal
+	packet loss causing retransmissions.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

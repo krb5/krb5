@@ -49,7 +49,7 @@ dispatch(pkt, from, portnum, response)
     /* try the replay lookaside buffer */
     if (kdc_check_lookaside(pkt, from, response)) {
 	/* a hit! */
-	krb5_klog_syslog(LOG_INFO, "DISPATCH: replay found and re-transmitted");
+	krb5_klog_syslog(LOG_INFO, "DISPATCH: repeated (retransmitted?) request, resending response");
 	return 0;
     }
 #endif
