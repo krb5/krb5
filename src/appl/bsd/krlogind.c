@@ -160,7 +160,6 @@ char copyright[] =
 #include <syslog.h>
 #include <string.h>
 #include <sys/param.h>
-#include <utmp.h>
 
 #ifdef HAVE_STREAMS
 /* krlogin doesn't test sys/tty... */

@@ -1,3 +1,7 @@
+Fri Aug  4 00:50:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* krlogind.c: don't include utmp.h, since libty.h grabs it.
+
 Wed Aug  2 13:06:02 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogind.c (main): call pty_init()call pty_init()
