@@ -30,7 +30,7 @@
 static void MacMessageBox(errbuf);
 #endif
 
- et_old_error_hook_func com_err_hook = 0;
+static et_old_error_hook_func com_err_hook = 0;
 
 static void default_com_err_proc
 ET_P((const char FAR *whoami, errcode_t code,
@@ -98,11 +98,10 @@ KRB5_DLLIMP void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
 	const char FAR *fmt;
 	va_list ap;
 {
-  et_old_error_hook_func cef = com_err_hook;
-	if (!cef)
+	if (!com_err_hook)
 		default_com_err_proc(whoami, code, fmt, ap);
 	else
-	  (cef)(whoami, code, fmt, ap);
+	  (com_err_hook)(whoami, code, fmt, ap);
 }
 
 

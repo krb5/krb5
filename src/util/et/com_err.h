@@ -86,7 +86,7 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
  * may cause inappropriate display procedures to be called between
  * applications under non-Unix environments.
  */
-extern et_old_error_hook_func com_err_hook;
+
 extern et_old_error_hook_func set_com_err_hook
 	ET_P((et_old_error_hook_func));
 extern et_old_error_hook_func reset_com_err_hook

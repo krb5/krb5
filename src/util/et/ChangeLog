@@ -1,6 +1,8 @@
 Sat Mar  1 11:54:02 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
-	* com_err.c: Make com_err_hook global instead of static to work around either NetBSD or Gcc bug.[383]
+	* com_err.h: Do not declare com_err_hook extern if you want it
+ 	static in the source file. [383]
+	
 
 Sat Feb 22 12:18:47 1997  Richard Basch  <basch@lehman.com>
 
