@@ -975,7 +975,15 @@ GetMSCacheTicketFromCacheInfo( HANDLE LogonHandle, ULONG PackageId,
     memcpy(pTicketRequest->TargetName.Buffer,tktinfo->ServerName.Buffer, tktinfo->ServerName.Length);
     pTicketRequest->CacheOptions = 0;
     pTicketRequest->EncryptionType = tktinfo->EncryptionType;
-    pTicketRequest->TicketFlags = tktinfo->TicketFlags;
+    pTicketRequest->TicketFlags = 0;
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_forwardable )
+        pTicketRequest->TicketFlags |= KDC_OPT_FORWARDABLE;
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_forwarded )
+        pTicketRequest->TicketFlags |= KDC_OPT_FORWARDED;
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_proxiable )
+        pTicketRequest->TicketFlags |= KDC_OPT_PROXIABLE;
+    if ( tktinfo->TicketFlags & KERB_TICKET_FLAGS_renewable )
+        pTicketRequest->TicketFlags |= KDC_OPT_RENEWABLE;
 
     Status = LsaCallAuthenticationPackage(
         LogonHandle,
