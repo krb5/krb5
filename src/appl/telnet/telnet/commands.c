@@ -96,6 +96,7 @@ int tos = -1;
 
 char	*hostname;
 static char _hostname[MAXDNAME];
+struct in_addr hostaddr;
 
 extern char *getenv();
 
@@ -2278,7 +2279,7 @@ status(argc, argv)
     char *argv[];
 {
     if (connected) {
-	printf("Connected to %s.\r\n", hostname);
+	printf("Connected to %s (%s).\r\n", hostname, inet_ntoa(hostaddr));
 	if ((argc < 2) || strcmp(argv[1], "notmuch")) {
 	    int mode = getconnmode();
 
@@ -2362,7 +2363,6 @@ tn(argc, argv)
     struct sockaddr_in sin;
     struct servent *sp = 0;
     unsigned long temp;
-    extern char *inet_ntoa();
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     char *srp = 0;
     unsigned long sourceroute(), srlen;
@@ -2470,6 +2470,7 @@ tn(argc, argv)
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     }
 #endif
+    hostaddr.s_addr = sin.sin_addr.s_addr;
     if (portp) {
 	if (*portp == '-') {
 	    portp++;
@@ -2545,6 +2546,8 @@ tn(argc, argv)
 		perror((char *)0);
 		host->h_addr_list++;
 		memcpy((caddr_t)&sin.sin_addr, 
+			host->h_addr_list[0], host->h_length);
+		memcpy((caddr_t)&hostaddr,
 			host->h_addr_list[0], host->h_length);
 		(void) NetClose(net);
 		continue;

@@ -2,6 +2,7 @@ Sun Nov 10 17:34:40 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* commands.c (tn): Reverse resolve address to deal with dialup
  	pools [krb5-libs/170]
+	(tn): Store IP and print in status; patch from jhawk. [113]
 
 Fri Nov  1 00:49:21 1996  Sam Hartman  <hartmans@mit.edu>
 
