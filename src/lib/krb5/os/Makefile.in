@@ -36,6 +36,7 @@ OBJS= \
 	net_write.$(OBJEXT)	\
 	osconfig.$(OBJEXT)	\
 	port2ip.$(OBJEXT)	\
+	promptusr.$(OBJEXT)	\
 	read_msg.$(OBJEXT)	\
 	read_pwd.$(OBJEXT)	\
 	realm_dom.$(OBJEXT)	\
@@ -73,6 +74,7 @@ SRCS= \
 	$(srcdir)/net_read.c	\
 	$(srcdir)/net_write.c	\
 	$(srcdir)/osconfig.c	\
+	$(srcdir)/promptusr.c	\
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\
 	$(srcdir)/realm_dom.c	\
