@@ -214,7 +214,7 @@ krb4encpwd_is(ap, data, cnt)
 		return;
 	switch (*data++) {
 	case KRB4_ENCPWD_AUTH:
-		bcopy((void *)data, (void *)auth.dat, auth.length = cnt);
+		memcpy((void *)auth.dat, (void *)data, auth.length = cnt);
 
 		gethostname(lhostname, sizeof(lhostname));
 		if ((cp = index(lhostname, '.')) != 0)  *cp = '\0';
@@ -234,7 +234,7 @@ krb4encpwd_is(ap, data, cnt)
 		  return;
 		}
 
-		bcopy((void *)adat.session, (void *)session_key, sizeof(Block));
+		memcpy((void *)session_key,(void *)adat.session,sizeof(Block));
 		Data(ap, KRB4_ENCPWD_ACCEPT, (void *)0, 0);
 		auth_finished(ap, AUTH_USER);
 		break;
@@ -244,7 +244,7 @@ krb4encpwd_is(ap, data, cnt)
 		 *  Take the received random challenge text and save
 		 *  for future authentication.
 		 */
-		bcopy((void *)data, (void *)challenge, sizeof(Block));
+		memcpy((void *)challenge, (void *)data, sizeof(Block));
 		break;
 
 
@@ -310,7 +310,7 @@ krb4encpwd_reply(ap, data, cnt)
 
 		gethostname(hostname, sizeof(hostname));
 		realm = krb_realmofhost(hostname);
-		bcopy((void *)data, (void *)challenge, cnt);
+		memcpy((void *)challenge, (void *)data, cnt);
 		memset(user_passwd, 0, sizeof(user_passwd));
 		local_des_read_pw_string(user_passwd, sizeof(user_passwd)-1, "Password: ", 0);
 		UserPassword = user_passwd;

@@ -422,7 +422,7 @@ fb64_session(key, server, fbp)
 				key ? key->type : -1, SK_DES);
 		return;
 	}
-	bcopy((void *)key->data, (void *)fbp->krbdes_key, sizeof(Block));
+	memcpy((void *)fbp->krbdes_key, (void *)key->data, sizeof(Block));
 
 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_ENCRYPT-1]);
 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_DECRYPT-1]);
@@ -549,8 +549,8 @@ fb64_stream_iv(seed, stp)
 	register struct stinfo *stp;
 {
 
-	bcopy((void *)seed, (void *)stp->str_iv, sizeof(Block));
-	bcopy((void *)seed, (void *)stp->str_output, sizeof(Block));
+	memcpy((void *)stp->str_iv,     (void *)seed, sizeof(Block));
+	memcpy((void *)stp->str_output, (void *)seed, sizeof(Block));
 
 	des_key_sched(stp->str_ikey, stp->str_sched);
 
@@ -562,10 +562,10 @@ fb64_stream_key(key, stp)
 	Block key;
 	register struct stinfo *stp;
 {
-	bcopy((void *)key, (void *)stp->str_ikey, sizeof(Block));
+	memcpy((void *)stp->str_ikey, (void *)key, sizeof(Block));
 	des_key_sched(key, stp->str_sched);
 
-	bcopy((void *)stp->str_iv, (void *)stp->str_output, sizeof(Block));
+	memcpy((void *)stp->str_output, (void *)stp->str_iv, sizeof(Block));
 
 	stp->str_index = sizeof(Block);
 }
@@ -605,7 +605,7 @@ cfb64_encrypt(s, c)
 		if (index == sizeof(Block)) {
 			Block b;
 			des_ecb_encrypt(stp->str_output, b, stp->str_sched, 1);
-			bcopy((void *)b, (void *)stp->str_feed, sizeof(Block));
+			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
 			index = 0;
 		}
 
@@ -639,7 +639,7 @@ cfb64_decrypt(data)
 	if (index == sizeof(Block)) {
 		Block b;
 		des_ecb_encrypt(stp->str_output, b, stp->str_sched, 1);
-		bcopy((void *)b, (void *)stp->str_feed, sizeof(Block));
+		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		index = 0;		/* But now use 0 */ 
 	}
@@ -681,7 +681,7 @@ ofb64_encrypt(s, c)
 		if (index == sizeof(Block)) {
 			Block b;
 			des_ecb_encrypt(stp->str_feed, b, stp->str_sched, 1);
-			bcopy((void *)b, (void *)stp->str_feed, sizeof(Block));
+			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
 			index = 0;
 		}
 		*s++ ^= stp->str_feed[index];
@@ -712,7 +712,7 @@ ofb64_decrypt(data)
 	if (index == sizeof(Block)) {
 		Block b;
 		des_ecb_encrypt(stp->str_feed, b, stp->str_sched, 1);
-		bcopy((void *)b, (void *)stp->str_feed, sizeof(Block));
+		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		index = 0;		/* But now use 0 */ 
 	}

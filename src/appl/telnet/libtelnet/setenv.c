@@ -90,7 +90,7 @@ setenv(name, value, rewrite)
 			p = (char **)malloc((size_t)(sizeof(char *) * (cnt + 2)));
 			if (!p)
 				return (-1);
-			bcopy(environ, p, cnt * sizeof(char *));
+			memcpy(p, environ, cnt * sizeof(char *));
 			environ = p;
 		}
 		environ[cnt + 1] = NULL;

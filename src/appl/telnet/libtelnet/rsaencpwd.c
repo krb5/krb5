@@ -210,7 +210,7 @@ rsaencpwd_is(ap, data, cnt)
 	cnt--;
 	switch (*data++) {
 	case RSA_ENCPWD_AUTH:
-		bcopy((void *)data, (void *)auth.dat, auth.length = cnt);
+		memcpy((void *)auth.dat, (void *)data, auth.length = cnt);
 
 		if ((fp=fopen(key_file, "r"))==NULL) {
 		  Data(ap, RSA_ENCPWD_REJECT, (void *)"Auth failed", -1);
@@ -294,12 +294,12 @@ rsaencpwd_is(ap, data, cnt)
 		  ptr +=NumEncodeLengthOctets(chalkey_len);
 		  *ptr++ = 0x04;  /* OCTET STRING */
 		  *ptr++ = challenge_len;
-		  bcopy(challenge, ptr, challenge_len);
+		  memcpy(ptr, challenge, challenge_len);
 		  ptr += challenge_len;
 		  *ptr++ = 0x04;  /* OCTET STRING */
 		  EncodeLength(ptr, i);
 		  ptr += NumEncodeLengthOctets(i);
-		  bcopy(key, ptr, i);
+		  memcpy(ptr, key, i);
 		  chalkey_len = 1+NumEncodeLengthOctets(chalkey_len)+chalkey_len;
 		  Data(ap, RSA_ENCPWD_CHALLENGEKEY, (void *)chalkey, chalkey_len);
 		}
@@ -345,7 +345,7 @@ rsaencpwd_reply(ap, data, cnt)
 		 * Verify that the response to the challenge is correct.
 		 */
 
-		bcopy((void *)data, (void *)chalkey, cnt);
+		memcpy((void *)chalkey, (void *)data, cnt);
 		ptr = (char *) &chalkey[0];
 		ptr += DecodeHeaderLength(chalkey);
 		if (*ptr != 0x04) {
@@ -354,7 +354,7 @@ rsaencpwd_reply(ap, data, cnt)
 		*ptr++;
 		challenge_len = DecodeValueLength(ptr);
 		ptr += NumEncodeLengthOctets(challenge_len);
-		bcopy(ptr, challenge, challenge_len);
+		memcpy(challenge, ptr, challenge_len);
 		ptr += challenge_len;
 		if (*ptr != 0x04) {
                   return;
@@ -362,7 +362,7 @@ rsaencpwd_reply(ap, data, cnt)
                 *ptr++;
 		pubkey_len = DecodeValueLength(ptr);
 		ptr += NumEncodeLengthOctets(pubkey_len);
-		bcopy(ptr, pubkey, pubkey_len);
+		memcpy(pubkey, ptr, pubkey_len);
 		memset(user_passwd, 0, sizeof(user_passwd));
 		local_des_read_pw_string(user_passwd, sizeof(user_passwd)-1, "Password: ", 0);
 		UserPassword = user_passwd;

@@ -401,12 +401,15 @@ auth_send(data, cnt)
 	 * Save the data, if it is new, so that we can continue looking
 	 * at it if the authorization we try doesn't work
 	 */
+	/* ANSI X3.159-1989 section 3.3.6 indicates that this entire 
+	   conditional is undefined. It will probably work on flat address
+	   space UNIX systems though. --eichin@mit.edu */
 	if (data < _auth_send_data ||
 	    data > _auth_send_data + sizeof(_auth_send_data)) {
 		auth_send_cnt = cnt > sizeof(_auth_send_data)
 					? sizeof(_auth_send_data)
 					: cnt;
-		bcopy((void *)data, (void *)_auth_send_data, auth_send_cnt);
+		memcpy((void *)_auth_send_data, (void *)data, auth_send_cnt);
 		auth_send_data = _auth_send_data;
 	} else {
 		/*
@@ -532,7 +535,7 @@ auth_name(data, cnt)
 					Name, cnt, sizeof(savename)-1);
 		return;
 	}
-	bcopy((void *)data, (void *)savename, cnt);
+	memcpy((void *)savename, (void *)data, cnt);
 	savename[cnt] = '\0';	/* Null terminate */
 	if (auth_debug_mode)
 		printf(">>>%s: Got NAME [%s]\r\n", Name, savename);

@@ -86,7 +86,7 @@ local_des_read_pw_string(s,max,prompt,verify)
     }
 
     /* XXX assume jmp_buf is typedef'ed to an array */
-    bcopy((char *)old_env, (char *)env, sizeof(env));
+    memcpy((char *)env, (char *)old_env, sizeof(env));
     if (setjmp(env))
 	goto lose;
 
@@ -136,7 +136,7 @@ lose:
 /*
     pop_signals();
 */
-    bcopy((char *)env, (char *)old_env, sizeof(env));
+    memcpy((char *)old_env, (char *)env, sizeof(env));
     if (verify)
 	memset(key_string, 0, sizeof (key_string));
     s[max-1] = 0;		/* force termination */
