@@ -1,7 +1,9 @@
 Wed Feb  5 22:22:24 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Fixed win16 linking of telnet.exe
-	* encrypt.c: 
+	* encrypt.c: Do not use printf; use MessageBox and OutputDebugString
+	* encrypt.h: Fixed des425 library prototypes (win16)
+	* telnet.c: Removed ^M at end of every line
 
 Wed Jun 12 00:22:02 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
