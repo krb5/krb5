@@ -1,3 +1,8 @@
+2004-03-09  Ken Hornstein <kenh@cmf.nrl.navy.mil>
+
+	* gic_keytab.c (krb5_get_in_tkt_with_keytab): Fix a case I missed
+	originally.
+
 2004-02-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* gic_pwd.c (krb5_get_in_tkt_with_password): Fix a case Jeff

@@ -154,6 +154,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     char * server = NULL;
     krb5_keytab keytab;
     krb5_principal client_princ, server_princ;
+    int use_master = 0;
     
     krb5int_populate_gic_opt(context, &opt,
 			     options, addrs, ktypes,
@@ -175,7 +176,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
 				  krb5_prompter_posix,  NULL,
 				  0, server, &opt,
 				  krb5_get_as_key_keytab, (void *)keytab,
-				  0, ret_as_reply);
+				  &use_master, ret_as_reply);
     krb5_free_unparsed_name( context, server);
     if (retval) {
 	goto cleanup;
