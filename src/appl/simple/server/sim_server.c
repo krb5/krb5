@@ -31,6 +31,8 @@
 #include "krb5.h"
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -46,7 +48,13 @@
 #endif
 
 #define PROGNAME argv[0]
-#define SNAME argv[1]
+
+void
+usage(name)
+    char *name;
+{
+	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n", name);
+}	
 
 void
 main(argc, argv)
@@ -55,12 +63,20 @@ char *argv[];
 {
     int sock, i;
     int flags = 0;			/* for recvfrom() */
+    int on = 1;
     struct servent *serv;
     struct hostent *host;
     struct sockaddr_in s_sock;		/* server's address */
     struct sockaddr_in c_sock;		/* client's address */
     char full_hname[MAXHOSTNAMELEN];
     char *cp;
+    extern int opterr, optind;
+    extern char * optarg;
+    int	ch;
+
+    short port = 0;		/* If user specifies port */
+    krb5_keytab keytab = NULL;	/* Allow specification on command line */
+    char *service = SIMPLE_SERVICE;
 
     krb5_error_code retval;
     krb5_data packet, message;
@@ -71,16 +87,40 @@ char *argv[];
     krb5_address addr;
     krb5_ticket *ticket = NULL;
 
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s <servername>\n",PROGNAME);
-	exit(1);
-    }
-
     krb5_init_context(&context);
     krb5_init_ets(context);
 
-    if (retval = krb5_parse_name(context, SNAME, &sprinc)) {
-	com_err(PROGNAME, retval, "while parsing server name %s", SNAME);
+    /*
+     * Parse command line arguments
+     *  
+     */
+    opterr = 0;
+    while ((ch = getopt(argc, argv, "p:s:S:")) != EOF)
+    switch (ch) {
+    case 'p':
+	port = atoi(optarg);
+	break;
+    case 's':
+	service = optarg;
+	break;
+    case 'S':
+	if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
+	    com_err(PROGNAME, retval,
+		    "while resolving keytab file %s", optarg);
+	    exit(2);
+	}
+	break;
+
+    case '?':
+    default:
+	usage(PROGNAME);
+	exit(1);
+	break;
+    }
+
+    if ((retval = krb5_sname_to_principal(context, NULL, service, 
+					  KRB5_NT_SRV_HST, &sprinc))) {
+	com_err(PROGNAME, retval, "while generating service name %s", service);
 	exit(1);
     }
 
@@ -88,13 +128,17 @@ char *argv[];
     memset((char *)&s_sock, 0, sizeof(s_sock));
     s_sock.sin_family = AF_INET;
 
-    /* Look up service */
-    if ((serv = getservbyname(SERVICE, "udp")) == NULL) {
-	fprintf(stderr, "service unknown: %s/udp\n", SERVICE);
-	exit(1);
+    if (port == 0) {
+	/* Look up service */
+	if ((serv = getservbyname(SIMPLE_PORT, "udp")) == NULL) {
+	    fprintf(stderr, "service unknown: %s/udp\n", SIMPLE_PORT);
+	    exit(1);
+	}
+	s_sock.sin_port = serv->s_port;
+    } else {
+	s_sock.sin_port = htons(port);
     }
-    s_sock.sin_port = serv->s_port;
-
+    
     if (gethostname(full_hname, sizeof(full_hname)) < 0) {
 	perror("gethostname");
 	exit(1);
@@ -111,6 +155,10 @@ char *argv[];
 	perror("opening datagram socket");
 	exit(1);
     }
+
+     /* Let the socket be reused right away */
+     (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
+		       sizeof(on));
 
     /* Bind the socket */
     if (bind(sock, (struct sockaddr *)&s_sock, sizeof(s_sock))) {
@@ -137,12 +185,13 @@ char *argv[];
     packet.data = (krb5_pointer) pktbuf;
 
     /* Check authentication info */
-    if (retval = krb5_rd_req(context, &auth_context, &packet, 
-			     sprinc, NULL, NULL, &ticket)) {
+    if ((retval = krb5_rd_req(context, &auth_context, &packet, 
+			      sprinc, keytab, NULL, &ticket))) {
 	com_err(PROGNAME, retval, "while reading request");
 	exit(1);
     }
-    if (retval = krb5_unparse_name(context, ticket->enc_part2->client, &cp)) {
+    if ((retval = krb5_unparse_name(context, ticket->enc_part2->client,
+				    &cp))) {
 	com_err(PROGNAME, retval, "while unparsing client name");
 	exit(1);
     }
@@ -153,7 +202,8 @@ char *argv[];
     addr.addrtype = ADDRTYPE_INET;
     addr.length = sizeof(c_sock.sin_addr);
     addr.contents = (krb5_octet *)&c_sock.sin_addr;
-    if (retval = krb5_auth_con_setaddrs(context, auth_context, NULL, &addr)) {
+    if ((retval = krb5_auth_con_setaddrs(context, auth_context,
+					 NULL, &addr))) {
 	com_err(PROGNAME, retval, "while setting foreign addr");
         exit(1);
     }
@@ -161,7 +211,8 @@ char *argv[];
     addr.addrtype = ADDRTYPE_IPPORT;
     addr.length = sizeof(c_sock.sin_port);
     addr.contents = (krb5_octet *)&c_sock.sin_port;
-    if (retval = krb5_auth_con_setports(context, auth_context, NULL, &addr)) {
+    if ((retval = krb5_auth_con_setports(context, auth_context,
+					 NULL, &addr))) {
 	com_err(PROGNAME, retval, "while setting foreign port");
         exit(1);
     }
@@ -183,7 +234,8 @@ char *argv[];
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
 
-    if (retval = krb5_rd_safe(context, auth_context, &packet, &message, NULL)) {
+    if ((retval = krb5_rd_safe(context, auth_context, &packet,
+			       &message, NULL))) {
 	com_err(PROGNAME, retval, "while verifying SAFE message");
 	exit(1);
     }
@@ -205,7 +257,8 @@ char *argv[];
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
     
-    if (retval = krb5_rd_priv(context, auth_context, &packet, &message, NULL)) {
+    if ((retval = krb5_rd_priv(context, auth_context, &packet,
+			       &message, NULL))) {
 	com_err(PROGNAME, retval, "while verifying PRIV message");
 	exit(1);
     }

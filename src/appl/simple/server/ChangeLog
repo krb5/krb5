@@ -1,3 +1,10 @@
+Fri Sep 15 14:31:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sim_server.c: Improved (and changed) input argument handling, to
+		make sim_server more flexible.  This should make it
+		possible to run sim_server from a DejaGnu test suite.
+		Fixed -Wall nits.
+
 Sat Jul 29 04:39:39 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* configure.in: don't link with -lkadm.
