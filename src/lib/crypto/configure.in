@@ -17,7 +17,7 @@ AppendRule([install::	libcrypto.[$](SHEXT)
 	[$](INSTALL_DATA) libcrypto.[$](SHEXT)	\
 		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libcrypto.[$](SHEXT)])
 ])dnl
-if test -n "$krb5_cv_enable_staticlibs" ; then
+if test -n "$krb5_cv_staticlibs_enabled" ; then
         AppendRule([all-unix:: libcrypto.a])
         LinkFileDir(../libcrypto.a, libcrypto.a, ./crypto)
         AppendRule([all-unix:: ../libcrypto.a])

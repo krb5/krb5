@@ -1,3 +1,8 @@
+Fri Jun 23 12:16:52 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: krb5_cv_staticlibs_enabled, not
+        krb5_cv_enable_staticlibs
+
 Thu Jun 22 18:34:26 1995  Sam Hartman  (hartmans@tardis)
 
 	* configure.in: Changed to new scheme for static libs.
