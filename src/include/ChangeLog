@@ -1,5 +1,7 @@
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for some C99 headers and types.
+
 	* fake-addrinfo.h (inline): Supported by Sun Forte Developer 7
 	compiler.
 
