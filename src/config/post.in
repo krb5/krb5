@@ -89,7 +89,7 @@ Makefiles-prerecurse:: Makefile
 
 Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
 		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
-	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/Makefile
+	cd $(thisconfigdir) && $(SHELL) config.status
 $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 	cd $(thisconfigdir) && $(SHELL) config.status --recheck
 $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \

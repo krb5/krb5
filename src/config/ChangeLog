@@ -1,5 +1,9 @@
 2002-09-19  Ezra Peisach  <epeisach@bu.edu>
 
+	* post.in (Makefile): Revert change until aclocal.m4 fixed.
+
+2002-09-19  Ezra Peisach  <epeisach@bu.edu>
+
 	* post.in (Makefile): Run config.status to generate only the
 	specific makefile that changed.
 

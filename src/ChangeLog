@@ -1,5 +1,10 @@
 2002-09-19  Ezra Peisach  <epeisach@bu.edu>
 
+	* aclocal.m4: Put V5_OUTPUT_MAKEFILE back - still in use. Needs to
+	be rewritten.
+
+2002-09-19  Ezra Peisach  <epeisach@bu.edu>
+
 	* aclocal.m4 (K5_AC_OUTPUT, K5_GEN_MAKEFILE, K5_GEN_FILE): Rewrite
 	to use AC_CONFIG_FILES. Remove unused V5_OUTPUT_MAKEFILE.
 

@@ -560,6 +560,16 @@ AC_CONFIG_COMMANDS([krb5_config_prefix], [], dnl
  krb5_post_in=$krb5_post_in])
 AC_OUTPUT])dnl
 dnl
+dnl V5_AC_OUTPUT_MAKEFILE
+dnl
+define(V5_AC_OUTPUT_MAKEFILE,
+[ifelse($1, , ac_v5_makefile_dirs=., ac_v5_makefile_dirs="$1")
+ifelse($2, , filelist="", filelist="$2")
+for x in $ac_v5_makefile_dirs; do
+  filelist="$filelist $x/Makefile:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
+done
+AC_OUTPUT($filelist)])dnl
+dnl
 dnl
 dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
