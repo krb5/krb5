@@ -1,3 +1,8 @@
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * dnssrv.c:  wrap within #ifdef KRB5_DNS_LOOKUP to prevent references
+      to resolver functions when DNS support is not being compiled 
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
     * accessor.c: Add new functions for use by gssapi
@@ -7,6 +12,12 @@
     * sendto_kdc.c: sockets must be closed with closesocket() and 
       and not close() in order to ensure portability among different
       operating systems.
+
+2003-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnssrv.c: New file; split out DNS SRV RR query support...
+	* locate_kdc.c: ...from here.  Always compile in the calls.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add it.
 
 2003-07-25  Ken Raeburn  <raeburn@mit.edu>
 
