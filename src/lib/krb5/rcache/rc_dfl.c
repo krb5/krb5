@@ -14,7 +14,6 @@
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-#include <krb5/los-proto.h>
 
 /*
 If NOIOSTUFF is defined at compile time, dfl rcaches will be per-process.

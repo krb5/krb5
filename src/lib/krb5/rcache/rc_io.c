@@ -19,8 +19,6 @@
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-#include <krb5/sysincl.h>
-#include <krb5/osconf.h>
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>

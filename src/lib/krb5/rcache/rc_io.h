@@ -12,7 +12,6 @@
 
 #ifndef KRB5_RC_IO_H
 #define KRB5_RC_IO_H
-#include <krb5/osconf.h>
 
 typedef struct krb5_rc_iostuff
  {
