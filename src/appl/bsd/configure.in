@@ -1,5 +1,14 @@
 AC_INIT(krlogind.c)
 CONFIG_RULES
+LOGINLIBS=
+AC_ARG_WITH([afs],
+[  --without-afs        don't have afs libraries to build against (default)
+  --with-afs=AFSDIR    use preinstalled AFS library tree],
+,with_afs=no)dnl
+if test $with_afs != no; then
+	AC_DEFINE(SETPAG)
+	LOGINLIBS="$LOGINLIBS -L$with_afs/lib -L$with_afs/lib/afs -lauth -lsys -lrx -llwp"
+fi
 AC_PROG_INSTALL
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(util,main)
@@ -7,11 +16,10 @@ USE_ANAME
 AC_CHECK_LIB(crypt,crypt)
 dnl
 dnl AIX has them all; SCO might too
-LOGINLIBS=
 AC_CHECK_LIB(odm,main,
   AC_CHECK_LIB(s,main,
     AC_CHECK_LIB(cfg,main, 
-      LOGINLIBS="-lodm -ls -lcfg" 
+      LOGINLIBS="$LOGINLIBS -lodm -ls -lcfg" 
       )))
 dnl
 dnl Make our operating system-specific security checks and definitions for
@@ -53,6 +61,9 @@ AC_FUNC_CHECK(grantpt,AC_DEFINE(HAVE_GRANTPT))
 AC_FUNC_CHECK(openpty,AC_DEFINE(HAVE_OPENPTY))
 AC_FUNC_CHECK(setlogin,AC_DEFINE(HAVE_SETLOGIN))
 AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
+AC_FUNC_CHECK(tcgetpgrp,AC_DEFINE(HAVE_TCGETPGRP))
+AC_FUNC_CHECK(tcsetpgrp,AC_DEFINE(HAVE_TCSETPGRP))
+AC_FUNC_CHECK(setpgid,AC_DEFINE(HAVE_SETPGID))
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h )
 AC_CHECK_HEADERS(sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h )
 AC_CHECK_HEADERS(sys/ptyvar.h utmp.h utmpx.h sys/time.h)
@@ -160,6 +171,47 @@ AC_MSG_RESULT($krb5_cv_shadow_pwd)
 if test $krb5_cv_shadow_pwd = yes; then
 AC_DEFINE(HAVE_SHADOW)
 fi
+dnl
+dnl
+AC_MSG_CHECKING([/etc/environment])
+AC_CACHE_VAL(krb5_cv_etc_environment,
+[AC_C_CROSS
+if test $ac_cv_c_cross = yes; then
+errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
+)dnl
+AC_MSG_ERROR(Cannot check for file existence when cross compiling)
+else
+if test -r /etc/environment; then
+krb5_cv_etc_environment=yes
+else
+krb5_cv_etc_environment=no
+fi
+fi])
+AC_MSG_RESULT($krb5_cv_etc_environment)
+if test $krb5_cv_etc_environment = yes; then
+AC_DEFINE(HAVE_ETC_ENVIRONMENT)
+fi
+dnl
+dnl
+AC_MSG_CHECKING([/etc/TIMEZONE])
+AC_CACHE_VAL(krb5_cv_etc_timezone,
+[AC_C_CROSS
+if test $ac_cv_c_cross = yes; then
+errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
+)dnl
+AC_MSG_ERROR(Cannot check for file existence when cross compiling)
+else
+if test -r /etc/TIMEZONE; then
+krb5_cv_etc_timezone=yes
+else
+krb5_cv_etc_timezone=no
+fi
+fi])
+AC_MSG_RESULT($krb5_cv_etc_timezone)
+if test $krb5_cv_etc_timezone = yes; then
+AC_DEFINE(HAVE_ETC_TIMEZONE)
+fi
+dnl
 dnl
 KRB5_CHECK_PROTOS
 dnl

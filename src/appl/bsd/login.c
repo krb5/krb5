@@ -27,19 +27,51 @@ char copyright[] =
 
 /* based on @(#)login.c	5.25 (Berkeley) 1/6/89 */
 
+/* While the code may be compiled with some of these options turned off,
+   the default will be to turn them *all* on if v4 compatibility is
+   available, and allow them to be configured via krb5.conf. */
+/* The configuration is of the form
+   [login]
+   # login stanza
+   krb5_get_tickets = 1
+   # use password to get v5 tickets
+   krb4_get_tickets = 1
+   # use password to get v4 tickets
+   krb4_convert = 1
+   # use kerberos conversion daemon to get v4 tickets
+   krb_run_aklog = 1
+   # attempt to run aklog
+   aklog_path = $(prefix)/bin/aklog
+   # where to find it [not yet implemented]
+   accept_passwd = 0
+   # don't accept plaintext passwords [not yet implemented]
+*/
+#define KRB5_GET_TICKETS
+int login_krb5_get_tickets = 1;
+#ifdef KRB5_KRB4_COMPAT
+#define KRB4_GET_TICKETS
+int login_krb4_get_tickets = 1;
+#define KRB4_CONVERT
+int login_krb4_convert = 1;
+#define KRB_RUN_AKLOG
+int login_krb_run_aklog = 1;
+#endif /* KRB5_KRB4_COMPAT */
+int login_accept_passwd = 0;
+
 /*
  * login [ name ]
  * login -r hostname	(for rlogind)
  * login -h hostname	(for telnetd, etc.)
- * login -f name	(for pre-authenticated login: datakit, xterm, etc.)
+ * login -f name	(for pre-authenticated login: datakit, xterm, etc.,
+ *			 does not allow preauthenticated login as root)
  * login -F name	(for pre-authenticated login: datakit, xterm, etc.,
  *			 allows preauthenticated login as root)
  * login -e name	(for pre-authenticated encrypted, must do term
  *			 negotiation)
- * ifdef KRB4
+ * ifdef KRB4_KLOGIN
  * login -k hostname (for Kerberos V4 rlogind with password access)
  * login -K hostname (for Kerberos V4 rlogind with restricted access)
- * endif KRB4 
+ * endif KRB4_KLOGIN
  *
  * only one of: -r -f -e -k -K -F
  * only one of: -r -h -k -K
@@ -68,6 +100,8 @@ char copyright[] =
 #include <utmp.h>
 #include <signal.h>
 
+#include <assert.h>
+
 #ifdef HAVE_LASTLOG_H
 #include <lastlog.h>
 #endif
@@ -87,11 +121,52 @@ char copyright[] =
 #include <stdio.h>
 #include <grp.h>
 #include <pwd.h>
-#include <setjmp.h>
 #include <string.h>
+
+#include <setjmp.h>
+#ifndef POSIX_SETJMP
+#undef sigjmp_buf
+#undef sigsetjmp
+#undef siglongjmp
+#define sigjmp_buf	jmp_buf
+#define sigsetjmp(j,s)	setjmp(j)
+#define siglongjmp	longjmp
+#endif
+
+#ifdef POSIX_SIGNALS
+typedef struct sigaction handler;
+#define handler_init(H,F)		(sigemptyset(&(H).sa_mask), \
+					 (H).sa_flags=0, \
+					 (H).sa_handler=(F))
+#define handler_swap(S,NEW,OLD)		sigaction(S, &NEW, &OLD)
+#define handler_set(S,OLD)		sigaction(S, &OLD, NULL)
+#else
+typedef sigtype (*handler)();
+#define handler_init(H,F)		((H) = (F))
+#define handler_swap(S,NEW,OLD)		((OLD) = signal ((S), (NEW)))
+#define handler_set(S,OLD)		(signal ((S), (OLD)))
+#endif
+
 
 #ifdef HAVE_SHADOW
 #include <shadow.h>
+#endif
+
+#ifdef KRB5_GET_TICKETS
+/* #include "krb5.h" */
+/* need k5-int.h to get ->profile from krb5_context */
+#include "k5-int.h"
+#include "osconf.h"
+#endif /* KRB5_GET_TICKETS */
+
+#ifdef KRB4_KLOGIN
+/* support for running under v4 klogind, -k -K flags */
+#define KRB4
+#endif
+
+#ifdef KRB4_GET_TICKETS
+/* support for prompting for v4 initial tickets */
+#define KRB4
 #endif
 
 #ifdef KRB4
@@ -105,6 +180,12 @@ char copyright[] =
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
 #endif /* KRB4 */
+
+#ifndef __STDC__
+#ifndef volatile
+#define volatile
+#endif
+#endif
 
 #include "loginpaths.h"
 
@@ -144,15 +225,6 @@ char copyright[] =
 #define QUOTAWARN	"/usr/ucb/quota" /* warn user about quotas */
 #endif
 
-#define PROTOTYPE_DIR	"/usr/athena/lib/prototype_tmpuser"
-#define TEMP_DIR_PERM	0711
-
-#define NOATTACH	"/etc/noattach"
-#define NOCREATE	"/etc/nocreate"
-#define NOREMOTE	"/etc/noremote"
-#define REGISTER	"/usr/etc/go_register"
-#define GET_MOTD	"/bin/athena/get_message"
-
 #ifndef NO_UT_HOST
 #ifndef UT_HOSTSIZE
 /* linux defines it directly in <utmp.h> */
@@ -164,6 +236,11 @@ char copyright[] =
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
 #endif
 
+#ifndef HAVE_SETPRIORITY
+/* if we don't have it, punt it cleanly */
+#define setpriority(which,who,prio)
+#endif /* HAVE_SETPRIORITY */
+
 #define MAXENVIRON	32
 
 /*
@@ -172,44 +249,23 @@ char copyright[] =
  */
 int	timeout = 300;
 
-struct passwd *pwd;
-#ifdef HAVE_SHADOW
-struct spwd *spwd;
-#endif
-
 char term[64], *hostname, *username;
 
-#ifndef POSIX_TERMIOS
-struct sgttyb sgttyb;
-struct tchars tc = {
-	CINTR, CQUIT, CSTART, CSTOP, CEOT, CBRK
-};
-struct ltchars ltc = {
-	CSUSP, CDSUSP, CRPRNT, CFLUSH, CWERASE, CLNEXT
-};
-#endif
+extern int errno;
 
-#ifdef KRB4
+#ifdef KRB4_GET_TICKETS
 #define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */
 #define KRB_TK_DIR	"/tmp/tkt_"	/* Where to put the ticket */
 #define MAXPWSIZE	128		/* Biggest string accepted for KRB4
 					   passsword */
-
-AUTH_DAT *kdata = (AUTH_DAT *) NULL;
-KTEXT ticket = (KTEXT) NULL;
-char tkfile[MAXPATHLEN];
-int krbflag = 0;			/* set if tickets have been obtained */
-#ifdef SETPAG
-int pagflag = 0;			/* true if setpag() has been called */
-#endif /* SETPAG */
-#endif /* KRB4 */
+#endif /* KRB4_GET_TICKETS */
 
 char *getenv();
 void dofork();
 
 int doremotelogin(), do_krb_login(), rootterm();
-void lgetstr(), doremoteterm(), getloginname(), checknologin(), sleepexit();
-void dolastlog(), motd();
+void lgetstr(), getloginname(), checknologin(), sleepexit();
+void dolastlog(), motd(), check_mail();
 
 #ifndef HAVE_STRSAVE
 char * strsave();
@@ -218,6 +274,783 @@ char * strsave();
 typedef krb5_sigtype sigtype;
 
 
+#ifndef HAVE_INITGROUPS
+static int initgroups(char* name, gid_t basegid) {
+  gid_t others[NGROUPS_MAX+1];
+  int ngrps;
+
+  others[0] = basegid;
+  ngrps = getgroups(NGROUPS_MAX, others+1);
+  return setgroups(ngrps+1, others);
+}
+#endif
+
+#ifdef KRB5_GET_TICKETS
+static struct login_confs {
+	char *flagname;
+	int *flag;
+} login_conf_set[] = {
+	"krb5_get_tickets", &login_krb5_get_tickets,
+#ifdef KRB5_KRB4_COMPAT
+	"krb4_get_tickets", &login_krb4_get_tickets,
+	"krb4_convert", &login_krb4_convert,
+	"krb4_run_aklog", &login_krb_run_aklog,
+#endif /* KRB5_KRB4_COMPAT */
+};
+static char *conf_yes[] = {
+	"y", "yes", "true", "t", "1", "on",
+	0
+};
+static char *conf_no[] = {
+	"n", "no", "false", "nil", "0", "off",
+	0
+};
+/* 1 = true, 0 = false, -1 = ambiguous */
+static int conf_affirmative(s)
+	char *s;
+{
+	char **p;
+	for(p=conf_yes; *p; p++) {
+		if (!strcasecmp(*p,s))
+			return 1;
+	}
+	for(p=conf_no; *p; p++) {
+		if (!strcasecmp(*p,s))
+			return 0;
+	}
+	/* ambiguous */
+	return -1;
+}
+#endif /* KRB5_GET_TICKETS */
+
+#ifdef KRB5_GET_TICKETS
+krb5_data tgtname = {
+    0,
+    KRB5_TGS_NAME_SIZE,
+    KRB5_TGS_NAME
+};
+#endif
+
+#ifdef KRB5_GET_TICKETS
+/* get flags (listed above) from the profile */
+void login_get_kconf(k)
+	krb5_context k;
+{
+	int i, max_i;
+	const char* kconf_names[3];
+	char **kconf_val;
+	int retval;
+
+	max_i = sizeof(login_conf_set)/sizeof(struct login_confs);
+	for (i = 0; i<max_i; i++) {
+		kconf_names[0] = "login";
+		kconf_names[1] = login_conf_set[i].flagname;
+		kconf_names[2] = 0;
+		retval = profile_get_values(k->profile, 
+					    kconf_names, &kconf_val);
+		if (retval) {
+		  /* ignore most (all?) errors */
+		} else if (kconf_val) {
+			switch(conf_affirmative(*kconf_val)) {
+			case 1:
+				*login_conf_set[i].flag = 1;
+				break;
+			case 0:
+				*login_conf_set[i].flag = 0;
+				break;
+			default:
+			case -1:
+				com_err("login/kconf", 0,
+					"invalid flag value %s for flag %s",
+					*kconf_val, kconf_names[1]);
+				break;
+			}
+		}
+	}
+}
+#endif /* KRB5_GET_TICKETS */
+
+
+/* UNIX password support */
+
+struct passwd *pwd;
+static char *salt;
+
+#ifdef HAVE_SHADOW
+struct spwd *spwd;
+#endif
+
+void lookup_user (name)
+    char *name;
+{
+    pwd = getpwnam (name);
+    salt = pwd ? pwd->pw_passwd : "xx";
+#ifdef HAVE_SHADOW
+    spwd = getspnam (name);
+    if (spwd)
+	salt = spwd->sp_pwdp;
+#endif
+}
+
+int unix_needs_passwd ()
+{
+#ifdef HAVE_SHADOW
+    if (spwd)
+	return spwd->sp_pwdp[0] != 0;
+#endif
+    if (pwd)
+	return pwd->pw_passwd[0] != 0;
+    return 1;
+}
+
+int unix_passwd_okay (pass)
+    char *pass;
+{
+    char user_pwcopy[9], *namep;
+    char *crypt ();
+
+    assert (pwd != 0);
+
+    /* copy the first 8 chars of the password for unix crypt */
+    strncpy(user_pwcopy, pass, sizeof(user_pwcopy));
+    user_pwcopy[8]='\0';
+    namep = crypt(user_pwcopy, salt);
+    memset (user_pwcopy, 0, sizeof(user_pwcopy));
+    /* ... and wipe the copy now that we have the string */
+
+    /* verify the local password string */
+#ifdef HAVE_SHADOW
+    if (spwd)
+	return !strcmp(namep, spwd->sp_pwdp);
+#endif
+    return !strcmp (namep, pwd->pw_passwd);
+}
+
+/* Kerberos support */
+#ifdef KRB5_GET_TICKETS
+krb5_context kcontext;
+krb5_ccache ccache;
+static int got_v5_tickets, got_v4_tickets;
+char ccfile[MAXPATHLEN+6];	/* FILE:path+\0 */
+int krbflag;			/* set if tickets have been obtained */
+
+#ifdef KRB4_GET_TICKETS
+AUTH_DAT *kdata = (AUTH_DAT *) NULL;
+KTEXT ticket = (KTEXT) NULL;
+char tkfile[MAXPATHLEN];
+char realm[REALM_SZ];
+#endif
+
+void k_init (ttyn)
+    char *ttyn;
+{
+    krb5_init_context(&kcontext);
+    krb5_init_ets(kcontext);
+    login_get_kconf(kcontext);
+
+    /* Set up the credential cache environment variable */
+    if (!getenv(KRB5_ENV_CCNAME)) {
+	sprintf(ccfile, "FILE:/tmp/krb5cc_%s", strrchr(ttyn, '/')+1);
+	setenv(KRB5_ENV_CCNAME, ccfile, 1);
+	unlink(ccfile+strlen("FILE:"));
+    } else {
+	/* note it correctly */
+	strcpy(ccfile, getenv(KRB5_ENV_CCNAME));
+    }
+
+#ifdef KRB4_GET_TICKETS
+    if (krb_get_lrealm(realm, 1) != KSUCCESS) {
+	strncpy(realm, KRB_REALM, sizeof(realm));
+    }
+    if (login_krb4_get_tickets) {
+	/* Set up the ticket file environment variable */
+	strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
+	strncat(tkfile, strrchr(ttyn, '/')+1,
+		sizeof(tkfile) - strlen(tkfile));
+	(void) unlink (tkfile);
+	setenv(KRB_ENVIRON, tkfile, 1);
+    }
+#endif
+
+#ifdef BIND_HACK
+    /* Set name server timeout to be reasonable,
+       so that people don't take 5 minutes to
+       log in.  Can you say abstraction violation? */
+    _res.retrans = 1;
+#endif /* BIND_HACK */
+}
+
+int k5_get_password (user_pwstring, pwsize)
+    char *user_pwstring;
+{
+    krb5_error_code code;
+    char prompt[255];			
+    sprintf(prompt,"Password for %s: ", username);
+
+    /* reduce opportunities to be swapped out */
+    code = krb5_read_password(kcontext, prompt, 0, user_pwstring, &pwsize);
+    if (code || pwsize == 0) {
+	fprintf(stderr, "Error while reading password for '%s'\n", username);
+	/* reading password failed... */
+	return 0;
+    }
+    if (pwsize == 0) {
+	fprintf(stderr, "No password read\n");
+	/* reading password failed... */
+	return 0;
+    }
+    return 1;
+}
+
+#define KRB5_DEFAULT_LIFE 60*60*10 /* 10 hours */
+int krb5_options = 0;
+krb5_deltat krb5_ticket_lifetime = KRB5_DEFAULT_LIFE;
+
+int try_krb5 (me_p, pass)
+    krb5_principal *me_p;
+    char *pass;
+{
+    krb5_error_code code;
+    krb5_principal server, me;
+    krb5_creds my_creds;
+    krb5_timestamp now;
+    krb5_deltat lifetime = krb5_ticket_lifetime;
+
+    /* set up credential cache -- obeying KRB5_ENV_CCNAME 
+       set earlier */
+    /* (KRB5_ENV_CCNAME == "KRB5CCNAME" via osconf.h) */
+    if (code = krb5_cc_default(kcontext, &ccache)) {
+	com_err("login", code, "while getting default ccache");
+	return 0;
+    }
+    /* setup code from v5 kinit */
+    memset((char *)&my_creds, 0, sizeof(my_creds));
+
+    code = krb5_parse_name (kcontext, username, &me);
+    if (code) {
+	com_err ("login", code, "when parsing name %s",username);
+	return 0;
+    }
+    *me_p = my_creds.client = me;
+
+    code = krb5_cc_initialize (kcontext, ccache, me);
+    if (code) {
+	com_err ("login", code, 
+		 "when initializing cache");
+	return 0;
+    }
+
+    code = krb5_build_principal_ext(kcontext, &server,
+				    krb5_princ_realm(kcontext, me)->length,
+				    krb5_princ_realm(kcontext, me)->data,
+				    tgtname.length, tgtname.data,
+				    krb5_princ_realm(kcontext, me)->length,
+				    krb5_princ_realm(kcontext, me)->data,
+				    0);
+    if (code) {
+	com_err("login", code,
+		"while building server name");
+	goto nuke_ccache;
+    }
+
+    my_creds.server = server;
+    code = krb5_timeofday(kcontext, &now);
+    if (code) {
+	com_err("login", code,
+		"while getting time of day");
+	goto nuke_ccache;
+    }
+    my_creds.times.starttime = 0; /* start timer when 
+				     request gets to KDC */
+    my_creds.times.endtime = now + lifetime;
+    my_creds.times.renew_till = 0;
+
+    code = krb5_get_in_tkt_with_password(kcontext, krb5_options,
+					 0, NULL, 0 /*preauth*/,
+					 pass,
+					 ccache,
+					 &my_creds, 0);
+
+    if (code) {
+	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+	    fprintf (stderr,
+		     "%s: Kerberos password incorrect\n", 
+		     username);
+	else
+	    com_err ("login", code,
+		     "while getting initial credentials");
+    nuke_ccache:
+	krb5_cc_destroy (kcontext, ccache);
+	return 0;
+    } else {
+	/* get_name pulls out just the name not the
+	   type */
+	strcpy(ccfile, krb5_cc_get_name(kcontext, ccache));
+	(void) chown(ccfile, pwd->pw_uid, pwd->pw_gid);
+	krbflag = got_v5_tickets = 1;
+	return 1;
+    }
+}
+
+int have_v5_tickets (me)
+    krb5_principal *me;
+{
+    if (krb5_cc_default (kcontext, &ccache))
+	return 0;
+    if (krb5_cc_get_principal (kcontext, ccache, me)) {
+	krb5_cc_close (kcontext, ccache);
+	return 0;
+    }
+    krbflag = 1;
+    return 1;
+}
+
+#ifdef KRB4_CONVERT
+try_convert524 (kcontext, me)
+     krb5_context kcontext;
+     krb5_principal me;
+{
+    krb5_principal kpcserver;
+    krb5_error_code kpccode;
+    int kpcval;
+    krb5_creds increds, *v5creds;
+    CREDENTIALS v4creds;
+
+    if (!got_v5_tickets)
+	return 0;
+
+    /* or do this directly with krb524_convert_creds_kdc */
+    krb524_init_ets(kcontext);
+    /* cc->ccache, already set up */
+    /* client->me, already set up */
+    if ((kpccode = krb5_build_principal(kcontext,
+				        &kpcserver, 
+				        krb5_princ_realm(kcontext, me)->length,
+				        krb5_princ_realm(kcontext, me)->data,
+				        "krbtgt",
+				        krb5_princ_realm(kcontext, me)->data,
+					NULL))) {
+      com_err("login/v4", kpccode,
+	      "while creating service principal name");
+      return 0;
+    }
+
+    memset((char *) &increds, 0, sizeof(increds));
+    increds.client = me;
+    increds.server = kpcserver;
+    increds.times.endtime = 0;
+    increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+    if ((kpccode = krb5_get_credentials(kcontext, 0, 
+					ccache,
+					&increds, 
+					&v5creds))) {
+	com_err("login/v4", kpccode,
+		"getting V5 credentials");
+	return 0;
+    }
+    if ((kpccode = krb524_convert_creds_kdc(kcontext, 
+					    v5creds,
+					    &v4creds))) {
+	com_err("login/v4", kpccode, 
+		"converting to V4 credentials");
+	return 0;
+    }
+    /* this is stolen from the v4 kinit */
+    /* initialize ticket cache */
+    if ((kpcval = in_tkt(v4creds.pname,v4creds.pinst)
+	 != KSUCCESS)) {
+	com_err("login/v4", kpcval,
+		"trying to create the V4 ticket file");
+	return 0;
+    }
+    /* stash ticket, session key, etc. for future use */
+    if ((kpcval = krb_save_credentials(v4creds.service,
+				       v4creds.instance,
+				       v4creds.realm, 
+				       v4creds.session,
+				       v4creds.lifetime,
+				       v4creds.kvno,
+				       &(v4creds.ticket_st), 
+				       v4creds.issue_date))) {
+	com_err("login/v4", kpcval,
+		"trying to save the V4 ticket");
+	return 0;
+    }
+    got_v4_tickets = 1;
+    strcpy(tkfile, tkt_string());
+    (void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
+    return 1;
+}
+#endif
+
+#ifdef KRB4_GET_TICKETS
+try_krb4 (me, user_pwstring)
+    krb5_principal me;
+    char *user_pwstring;
+{
+    int krbval, kpass_ok = 0;
+
+    krbval = krb_get_pw_in_tkt(username, "", realm,
+			       "krbtgt", realm, 
+			       DEFAULT_TKT_LIFE,
+			       user_pwstring);
+
+    switch (krbval) {
+    case INTK_OK:
+	kpass_ok = 1;
+	krbflag = 1;
+	strcpy(tkfile, tkt_string());
+	(void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
+	break;	
+	/* These errors should be silent */
+	/* So the Kerberos database can't be probed */
+    case KDC_NULL_KEY:
+    case KDC_PR_UNKNOWN:
+    case INTK_BADPW:
+    case KDC_PR_N_UNIQUE:
+    case -1:
+	break;
+#if 0 /* I want to see where INTK_W_NOTALL comes from before letting
+	 kpass_ok be set in that case.  KR  */
+	/* These should be printed but are not fatal */
+    case INTK_W_NOTALL:
+	krbflag = 1;
+	kpass_ok = 1;
+	fprintf(stderr, "Kerberos error: %s\n",
+		krb_get_err_text(krbval));
+	break;
+#endif
+    default:
+	fprintf(stderr, "Kerberos error: %s\n",
+		krb_get_err_text(krbval));
+	break;
+    }
+    got_v4_tickets = kpass_ok;
+    return kpass_ok;
+}
+#endif /* KRB4_GET_TICKETS */
+
+/* Kerberos ticket-handling routines */
+
+#ifdef KRB4_GET_TICKETS
+/* call already conditionalized on login_krb4_get_tickets */
+/*
+ * Verify the Kerberos ticket-granting ticket just retrieved for the
+ * user.  If the Kerberos server doesn't respond, assume the user is
+ * trying to fake us out (since we DID just get a TGT from what is
+ * supposedly our KDC).  If the rcmd.<host> service is unknown (i.e.,
+ * the local srvtab doesn't have it), let her in.
+ *
+ * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
+ */
+int verify_krb_v4_tgt (realm)
+    char *realm;
+{
+    char hostname[MAXHOSTNAMELEN], phost[BUFSIZ];
+    struct hostent *hp;
+    KTEXT_ST ticket;
+    AUTH_DAT authdata;
+    unsigned long addr;
+    static /*const*/ char rcmd[] = "rcmd";
+    char key[8];
+    int krbval, retval, have_keys;
+
+    if (gethostname(hostname, sizeof(hostname)) == -1) {
+	perror ("cannot retrieve local hostname");
+	return -1;
+    }
+    strncpy (phost, krb_get_phost (hostname), sizeof (phost));
+    phost[sizeof(phost)-1] = 0;
+    hp = gethostbyname (hostname);
+    if (!hp) {
+	perror ("cannot retrieve local host address");
+	return -1;
+    }
+    memcpy ((char *) &addr, (char *)hp->h_addr, sizeof (addr));
+    /* Do we have rcmd.<host> keys? */
+#if 0 /* Be paranoid.  If srvtab exists, assume it must contain the
+	 right key.  */
+    have_keys = read_service_key (rcmd, phost, realm, 0, KEYFILE, key)
+	? 0 : 1;
+    memset (key, 0, sizeof (key));
+#else
+    have_keys = 0 == access (KEYFILE, F_OK);
+#endif
+    krbval = krb_mk_req (&ticket, rcmd, phost, realm, 0);
+    if (krbval == KDC_PR_UNKNOWN) {
+	/*
+	 * Our rcmd.<host> principal isn't known -- just assume valid
+	 * for now?  This is one case that the user _could_ fake out.
+	 */
+	if (have_keys)
+	    return -1;
+	else
+	    return 0;
+    }
+    else if (krbval != KSUCCESS) {
+	printf ("Unable to verify Kerberos TGT: %s\n", 
+		krb_get_err_text(krbval));
+#ifndef SYSLOG42
+	syslog (LOG_NOTICE|LOG_AUTH, "Kerberos TGT bad: %s",
+		krb_get_err_text(krbval));
+#endif
+	return -1;
+    }
+    /* got ticket, try to use it */
+    krbval = krb_rd_req (&ticket, rcmd, phost, addr, &authdata, "");
+    if (krbval != KSUCCESS) {
+	if (krbval == RD_AP_UNDEC && !have_keys)
+	    retval = 0;
+	else {
+	    retval = -1;
+	    printf ("Unable to verify `rcmd' ticket: %s\n",
+		    krb_get_err_text(krbval));
+	}
+#ifndef SYSLOG42
+	syslog (LOG_NOTICE|LOG_AUTH, "can't verify rcmd ticket: %s;%s\n",
+		krb_get_err_text(krbval),
+		retval
+		? "srvtab found, assuming failure"
+		: "no srvtab found, assuming success");
+#endif
+	goto EGRESS;
+    }
+    /*
+     * The rcmd.<host> ticket has been received _and_ verified.
+     */
+    retval = 1;
+    /* do cleanup and return */
+EGRESS:
+    memset (&ticket, 0, sizeof (ticket));
+    memset (&authdata, 0, sizeof (authdata));
+    return retval;
+}
+#endif /* KRB4_GET_TICKETS */
+
+/* call already conditionalized on login_krb5_get_tickets */
+/*
+ * Verify the Kerberos ticket-granting ticket just retrieved for the
+ * user.  If the Kerberos server doesn't respond, assume the user is
+ * trying to fake us out (since we DID just get a TGT from what is
+ * supposedly our KDC).  If the host/<host> service is unknown (i.e.,
+ * the local keytab doesn't have it), let her in.
+ *
+ * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
+ */
+int verify_krb_v5_tgt (c, realm)
+    krb5_context c;
+    char *realm;
+{
+    char phost[BUFSIZ];
+    krb5_ccache ccdef;
+    int retval, have_keys;
+    krb5_principal princ;
+    krb5_keyblock *kb = 0;
+    krb5_error_code krbval;
+    krb5_data packet;
+    krb5_auth_context auth_context = NULL;
+    krb5_ticket *ticket = NULL;
+
+    /* XXX This is to work around a library bug.  I'm not sure if it's
+       been fixed for beta-6, so leave this in for now.  Remove it (and
+       fix the bug if necessary) after beta-6 ships.  */
+    sleep(2);
+
+    /* get the server principal for the local host */
+    /* (use defaults of "host" and canonicalized local name) */
+    krbval = krb5_sname_to_principal(c, 0, 0, KRB5_NT_SRV_HST, &princ);
+    if (krbval) {
+	    com_err ("login", krbval, "constructing local service name");
+	    return -1;
+    }
+
+    /* since krb5_sname_to_principal has done the work for us, just
+       extract the name directly */
+    strncpy(phost, krb5_princ_component(c, princ, 1)->data, BUFSIZ);
+
+    /* Do we have host/<host> keys? */
+    /* (use default keytab, kvno IGNORE_VNO to get the first match,
+       and enctype is currently ignored anyhow.) */
+    krbval = krb5_kt_read_service_key (c, NULL, princ, 0, ENCTYPE_DES_CBC_CRC, &kb);
+    if (kb)
+	krb5_free_keyblock (c, kb);
+    /* any failure means we don't have keys at all. */
+    have_keys = krbval ? 0 : 1;
+
+    /* set up credential cache -- obeying KRB5_ENV_CCNAME set earlier */
+    /* (KRB5_ENV_CCNAME == "KRB5CCNAME" via osconf.h) */
+    if (krbval = krb5_cc_default(c, &ccdef)) {
+	com_err("login", krbval, "while getting default ccache");
+	return -1;
+    }
+    /* talk to the kdc and construct the ticket */
+    krbval = krb5_mk_req(c, &auth_context, 0, "host", phost,
+			 0, ccdef, &packet);
+    /* wipe the auth context for mk_req */
+    if (auth_context) {
+	krb5_auth_con_free(c, auth_context);
+	auth_context = NULL;
+    }
+    if (krbval == KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN) {
+	    /* we have a service key, so something should be 
+	       in the database, therefore this error packet could
+	       have come from an attacker. */
+	    if (have_keys) { retval = -1; goto EGRESS; }
+	    /* but if it is unknown and we've got no key, we don't
+	       have any security anyhow, so it is ok. */
+	    else { retval = 0; goto EGRESS; }
+    }
+    else if (krbval) {
+	    com_err("login", krbval, 
+		    "Unable to verify Kerberos V5 TGT: %s", phost);
+#ifndef SYSLOG42
+	    syslog (LOG_NOTICE|LOG_AUTH, "Kerberos V5 TGT bad: %s", 
+		    error_message(krbval));
+#endif
+	    retval = -1;
+	    goto EGRESS;
+    }
+    /* got ticket, try to use it */
+    krbval = krb5_rd_req(c, &auth_context, &packet, 
+			 princ, NULL, NULL, &ticket);
+    if (krbval) {
+	if (!have_keys)
+	    /* The krb5 errors aren't specified well, but I think
+	       these values cover the cases we expect.  */
+	    switch (krbval) {
+		/* no keytab */
+	    case ENOENT:
+		/* keytab found, missing entry */
+#if 0 /* Don't depend on the nameserver for security.  Assume that if
+	 we have a keytab, it must contain the right host/FQDN key.  */
+	    case KRB5_KT_NOTFOUND:
+#endif
+		retval = 0;
+		break;
+	    default:
+		/* unexpected error: fail */
+		retval = -1;
+		break;
+	    }
+	else
+	    /* Any error here is bad.  */
+	    retval = -1;
+	com_err("login", krbval, "Unable to verify host ticket");
+#ifndef SYSLOG42
+	syslog (LOG_NOTICE|LOG_AUTH, "can't verify v5 ticket: %s; %s\n",
+		error_message(krbval),
+		retval
+		? "keytab found, assuming failure"
+		: "no keytab found, assuming success");
+#endif
+	goto EGRESS;
+    }
+    /*
+     * The host/<host> ticket has been received _and_ verified.
+     */
+    retval = 1;
+    /* do cleanup and return */
+EGRESS:
+    if (auth_context) krb5_auth_con_free(c, auth_context);
+    krb5_free_principal(c, princ);
+    /* possibly ticket and packet need freeing here as well */
+    /* memset (&ticket, 0, sizeof (ticket)); */
+    return retval;
+}
+
+destroy_tickets()
+{
+	krb5_context c;
+	krb5_ccache cache;
+
+	if (login_krb5_get_tickets) {
+	krb5_init_context(&c);
+	
+	if(!krb5_cc_default(c, &cache))
+		krb5_cc_destroy (c, cache);
+	}
+#ifdef KRB4_GET_TICKETS
+	if (login_krb4_get_tickets)
+	dest_tkt();
+#endif /* KRB4_GET_TICKETS */
+}
+
+#endif /* KRB5_GET_TICKETS */
+
+/* AFS support routines */
+#ifdef SETPAG
+
+int pagflag = 0;			/* true if setpag() has been called */
+
+static sigjmp_buf setpag_buf;
+
+static sigtype sigsys ()
+{
+    siglongjmp(setpag_buf, 1);
+}
+
+static int try_afscall ()
+{
+    handler sa, osa;
+    volatile int retval = 0;
+
+    (void) &retval;
+    handler_init (sa, sigsys);
+    handler_swap (SIGSYS, sa, osa);
+    if (sigsetjmp(setpag_buf, 1) == 0) {
+	setpag ();
+	retval = 1;
+    }
+    handler_set (SIGSYS, osa);
+    return retval;
+}
+
+/* This doesn't seem to be declared in the AFS header files.  */
+extern ktc_ForgetAllTokens (), setpag ();
+
+#define try_setpag()	try_afscall(setpag)
+#define try_unlog()	try_afscall(ktc_ForgetAllTokens)
+#endif /* SETPAG */
+
+void
+afs_login ()
+{
+#ifdef KRB4_GET_TICKETS
+#ifdef SETPAG
+    if (login_krb4_get_tickets && pwd->pw_uid) {
+	/* Only reset the pag for non-root users. */
+	/* This allows root to become anything. */
+	pagflag = try_setpag ();
+    }
+#endif
+#endif /* KRB4_GET_TICKETS */
+#ifdef KRB_RUN_AKLOG
+    if (got_v4_tickets && login_krb_run_aklog) {
+	/* KPROGDIR is $(prefix)/bin */
+	char aklog_path[MAXPATHLEN];
+	struct stat st;
+	/* construct the name */
+	/* get this from profile later */
+	strcpy (aklog_path, KPROGDIR);
+	strcat (aklog_path, "/aklog");
+	/* only run it if we can find it */
+	if (stat (aklog_path, &st) == 0) {
+	    system(aklog_path);
+	}
+    }
+#endif /* KRB_RUN_AKLOG */
+}
+
+void
+afs_cleanup ()
+{
+#ifdef SETPAG
+    if (pagflag)
+      try_unlog ();
+#endif
+}
+
+/* Main routines */
 #define EXCL_AUTH_TEST if (rflag || kflag || Kflag || eflag || fflag || Fflag ) { \
 				fprintf(stderr, \
 				    "login: only one of -r, -k, -K, -e, -F, and -f allowed.\n"); \
@@ -230,16 +1063,54 @@ typedef krb5_sigtype sigtype;
 				exit(1);\
 			}
 
-#ifndef HAVE_INITGROUPS
-int initgroups(char* name, gid_t basegid) {
-  gid_t others[NGROUPS_MAX+1];
-  int ngrps;
+static void
+read_env_vars_from_file (filename)
+    char *filename;
+{
+    FILE *fp;
+    char *p, *eq;
+    char tbuf[MAXPATHLEN+2];
 
-  others[0] = basegid;
-  ngrps = getgroups(NGROUPS_MAX, others+1);
-  return setgroups(ngrps+1, others);
+    if ((fp = fopen("/etc/environment", "r")) != NULL) {
+	while (fgets(tbuf, sizeof(tbuf), fp)) {
+	    if (tbuf[0] == '#')
+		continue;
+	    eq = strchr(tbuf, '=');
+	    if (eq == 0)
+		continue;
+	    p = strchr (tbuf, '\n');
+	    if (p)
+		*p = 0;
+	    *eq++ = 0;
+	    /* Don't override, in case -p was used.  */
+	    setenv (tbuf, eq, 0);
+	}
+	fclose(fp);
+    }
 }
+
+static void
+log_repeated_failures (tty, hostname)
+    char *tty, *hostname;
+{
+    if (hostname) {
+#ifdef UT_HOSTSIZE
+	syslog(LOG_ERR,
+	       "REPEATED LOGIN FAILURES ON %s FROM %.*s, %.*s",
+	       tty, UT_HOSTSIZE, hostname, UT_NAMESIZE,
+	       username);
+#else
+	syslog(LOG_ERR,
+	       "REPEATED LOGIN FAILURES ON %s FROM %s, %.*s",
+	       tty, hostname, UT_NAMESIZE,
+	       username);
 #endif
+    }
+    else
+	syslog(LOG_ERR,
+	       "REPEATED LOGIN FAILURES ON %s, %.*s",
+	       tty, UT_NAMESIZE, username);
+}
 
 int main(argc, argv)
 	int argc;
@@ -248,46 +1119,34 @@ int main(argc, argv)
 	extern int optind;
 	extern char *optarg, **environ;
 	struct group *gr;
-	register int ch, i;
-	register char *p;
+	int ch;
+	char *p;
 	int fflag, hflag, pflag, rflag, Fflag, cnt;
 	int kflag, Kflag, eflag;
 	int quietlog, passwd_req, ioctlval;
 	sigtype timedout();
-	char *domain, *salt, **envinit, *ttyn, *tty;
+	char *domain, **envinit, *ttyn, *tty;
 	char tbuf[MAXPATHLEN + 2];
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
 	time_t login_time;
+	int retval;
+#ifdef KRB5_GET_TICKETS
+	krb5_principal me;
+#endif /* KRB5_GET_TICKETS */
 	char *ccname = 0;   /* name of forwarded cache */
-int retval;
-	
-	off_t lseek();
-#ifdef POSIX_TERMIOS
-	struct termios tc;
-#endif
-#ifdef POSIX_SIGNALS
-	struct sigaction sa;
-#endif
+	char *tz = 0;
 
-#ifdef POSIX_SIGNALS
-	(void)sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = timedout;
-	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
-#else
-	(void)signal(SIGALRM, timedout);
-#endif
+	off_t lseek();
+	handler sa;
+
+	handler_init (sa, timedout);
+	handler_set (SIGALRM, sa);
 	(void)alarm((u_int)timeout);
-#ifdef POSIX_SIGNALS
-	sa.sa_handler = SIG_IGN;
-	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
-#else
-	(void)signal(SIGQUIT, SIG_IGN);
-	(void)signal(SIGINT, SIG_IGN);
-#endif
-#ifdef HAVE_SETPRIORITY
-	(void)setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
-#endif
+
+	handler_init (sa, SIG_IGN);
+	handler_set (SIGQUIT, sa);
+	handler_set (SIGINT, sa);
+	setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 #ifdef OQUOTA
 	(void)quota(Q_SETUID, 0, 0, 0);
 #endif
@@ -356,7 +1215,7 @@ int retval;
 				*p = '\0';
 			hostname = optarg;
 			break;
-#ifdef KRB4
+#ifdef KRB4_KLOGIN
 		case 'k':
 		case 'K':
 			EXCL_AUTH_TEST;
@@ -382,7 +1241,7 @@ int retval;
 				*p = '\0';
 			hostname = optarg;
 			break;
-#endif /* KRB4 */
+#endif /* KRB4_KLOGIN */
 		case 'e':
 			EXCL_AUTH_TEST;
 			if (getuid()) {
@@ -422,85 +1281,14 @@ int retval;
 #endif
 	(void)fcntl(0, F_SETFL, ioctlval);
 
-#ifdef POSIX_TERMIOS
-	(void)tcgetattr(0, &tc);
-#else
-	(void)ioctl(0, TIOCGETP, (char *)&sgttyb);
-#endif
-
 	/*
 	 * If talking to an rlogin process, propagate the terminal type and
 	 * baud rate across the network.
 	 */
 	if (eflag)
 	    	lgetstr(term, sizeof(term), "Terminal type");
-#ifdef POSIX_TERMIOS
-	if (rflag || kflag || Kflag || eflag)
-		doremoteterm(&tc);
-	tc.c_cc[VMIN] = 1;
-	tc.c_cc[VTIME] = 0;
-#ifndef NO_INIT_CC
-	tc.c_cc[VERASE] = CERASE;
-	tc.c_cc[VKILL] = CKILL;
-	tc.c_cc[VEOF] = CEOF;
-	tc.c_cc[VINTR] = CINTR;
-	tc.c_cc[VQUIT] = CQUIT;
-	tc.c_cc[VSTART] = CSTART;
-	tc.c_cc[VSTOP] = CSTOP;
-#ifndef CNUL
-#define CNUL CEOL
-#endif
-	tc.c_cc[VEOL] = CNUL;
-	/* The following are common extensions to POSIX */
-#ifdef VEOL2
-	tc.c_cc[VEOL2] = CNUL;
-#endif
-#ifdef VSUSP
-#if !defined(CSUSP) && defined(CSWTCH)
-#define CSUSP CSWTCH
-#endif
-	tc.c_cc[VSUSP] = CSUSP;
-#endif
-#ifdef VDSUSP
-	tc.c_cc[VDSUSP] = CDSUSP;
-#endif
-#ifdef VLNEXT
-	tc.c_cc[VLNEXT] = CLNEXT;
-#endif
-#ifdef VREPRINT
-	tc.c_cc[VREPRINT] = CRPRNT;
-#endif
-#ifdef VDISCRD
-	tc.c_cc[VDISCRD] = CFLUSH;
-#endif
-#ifdef VDISCARD
-#ifndef CDISCARD
-#define CDISCARD CFLUSH
-#endif
-        tc.c_cc[VDISCARD] = CDISCARD;
-#endif
-#ifdef VWERSE
-	tc.c_cc[VWERSE] = CWERASE;
-#endif
-#ifdef VWERASE
-        tc.c_cc[VWERASE] = CWERASE;
-#endif
-#ifdef VSTATUS
-#ifdef CSTATUS
-        tc.c_cc[VSTATUS] = CSTATUS;
-#endif /* CSTATUS */
-#endif /* VSTATUS */
-#endif /* NO_INIT_CC */
-	tcsetattr(0, TCSANOW, &tc);
-#else
-	if (rflag || kflag || Kflag || eflag)
-		doremoteterm(&sgttyb);
-	sgttyb.sg_erase = CERASE;
-	sgttyb.sg_kill = CKILL;
-	(void)ioctl(0, TIOCSLTC, (char *)&ltc);
-	(void)ioctl(0, TIOCSETC, (char *)&tc);
-	(void)ioctl(0, TIOCSETP, (char *)&sgttyb);
-#endif
+	term_init (rflag || kflag || Kflag || eflag);
+
 	for (cnt = getdtablesize(); cnt > 2; cnt--)
 		(void) close(cnt);
 
@@ -520,36 +1308,35 @@ int retval;
 	openlog("login", LOG_ODELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
 
+/******* begin askpw *******/
+	/* overall:
+	   ask for username if we don't have it already
+	   look it up in local pw or shadow file (to get crypt string)
+	   ask for password
+	   try and get v4, v5 tickets with it
+	   try and use the tickets against the local srvtab
+	   if the password matches, always let them in
+	   if the ticket decrypts, let them in.
+	   v5 needs to work, does v4?
+	   */
+
+#ifdef KRB5_GET_TICKETS
+	k_init (ttyn);
+#endif
+
 	for (cnt = 0;; username = NULL) {
-#ifdef KRB4
-		char pp[9], pp2[MAXPWSIZE], *namep;
-		int krbval;
-		char realm[REALM_SZ];
+#ifdef KRB5_GET_TICKETS
 		int kpass_ok,lpass_ok;
-#ifdef NOENCRYPTION
-#define read_long_pw_string placebo_read_pw_string
-#else
-#define read_long_pw_string des_read_pw_string
-#endif
-		int read_long_pw_string();
-#endif /* KRB4 */
-#if defined(TIOCSETD)&&(!defined(POSIX_TERMIOS))
-		ioctlval = 0;
-		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
-#endif
+		char user_pwstring[MAXPWSIZE];
+		/* variables from v5 kinit */
+#endif /* KRB5_GET_TICKETS */
+
 		if (username == NULL) {
 			fflag = Fflag = 0;
 			getloginname();
 		}
 
-		if ((pwd = getpwnam(username)))
-			salt = pwd->pw_passwd;
-		else
-			salt = "xx";
-#ifdef HAVE_SHADOW
-		if (spwd = getspnam(username))
-		    salt = spwd->sp_pwdp;
-#endif
+		lookup_user (username);	/* sets pwd */
 
 		/* if user not super-user, check for disabled logins */
 		if (pwd == NULL || pwd->pw_uid)
@@ -580,96 +1367,56 @@ int retval;
 		 * If no remote login authentication and a password exists
 		 * for this user, prompt for one and verify it.
 		 */
-		if (!passwd_req) break;
-#ifdef HAVE_SHADOW
-		if (spwd) {
-		    if (!*(spwd->sp_pwdp)) break;
-		} else
-#endif
-		    if (pwd && !*(pwd->pw_passwd))
-			break;
+		if (!passwd_req)
+		    break;
 
-#ifdef KRB4
+		if (! unix_needs_passwd ())
+		    break;
+
+		/* we have several sets of code:
+		   1) get v5 tickets alone -DKRB5_GET_TICKETS
+		   2) get v4 tickets alone [** don't! only get them *with* v5 **]
+		   3) get both tickets -DKRB5_GET_TICKETS -DKRB4_GET_TICKETS
+		   3a) use krb524 calls to get the v4 tickets -DKRB4_CONVERT plus (3).
+		   4) get no tickets and use the password file (none of thes defined.)
+		   
+		   Likewise we need to (optionally?) test these tickets against local srvtabs.
+		   */
+#ifdef KRB5_GET_TICKETS
+		if (login_krb5_get_tickets) {
+		/* rename these to something more verbose */
 		kpass_ok = 0;
 		lpass_ok = 0;
 
-#ifdef HAVE_SETPRIORITY
-		(void) setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
-#endif
-		if (read_long_pw_string(pp2, sizeof(pp2)-1, "Password: ", 0)) {
-		    /* reading password failed... */
-#ifdef HAVE_SETPRIORITY
-		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
-#endif
+		setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
+		if (! k5_get_password (user_pwstring, sizeof (user_pwstring))) {
 		    goto bad_login;
 		}
-		if (!pwd)		/* avoid doing useless work */
-		    goto bad_login;
 
-		/* Modifications for Kerberos authentication -- asp */
-		(void) strncpy(pp, pp2, sizeof(pp));
-		pp[8]='\0';
-		namep = crypt(pp, salt);
-		memset (pp, 0, sizeof(pp));	/* To the best of my recollection, Senator... */
+		/* now that we have the password, we've obscured things
+		   sufficiently, and can avoid trying tickets */
+		if (!pwd)
+			goto bad_login;
 
-#ifdef HAVE_SHADOW
-		if (spwd)
-		    lpass_ok = !strcmp(namep, spwd->sp_pwdp);
-		else
-#endif
-		    lpass_ok = !strcmp (namep, pwd->pw_passwd);
-		
+		lpass_ok = unix_passwd_okay (user_pwstring);
+
 		if (pwd->pw_uid != 0) { /* Don't get tickets for root */
+			try_krb5 (&me, user_pwstring);
 
-		    if (krb_get_lrealm(realm, 1) != KSUCCESS) {
-			(void) strncpy(realm, KRB_REALM, sizeof(realm));
-		    }
-#ifdef BIND_HACK
-		    /* Set name server timeout to be reasonable,
-		       so that people don't take 5 minutes to
-		       log in.  Can you say abstraction violation? */
-		    _res.retrans = 1;
-#endif /* BIND_HACK */
-
-		    krbval = krb_get_pw_in_tkt(username, "", realm, "krbtgt",
-					       realm, DEFAULT_TKT_LIFE, pp2);
-		    memset (pp2, 0, sizeof(pp2));
-#ifdef HAVE_SETPRIORITY
-		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#ifdef KRB4_GET_TICKETS
+			if (login_krb4_get_tickets
+			    && (!got_v5_tickets
+				|| !login_krb4_convert))
+			    try_krb4 (me, user_pwstring);
 #endif
-		    switch (krbval) {
-		    case INTK_OK:
-			kpass_ok = 1;
-			krbflag = 1;
-			strcpy(tkfile, tkt_string());
-			(void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
-			break;	
+			krbflag = got_v5_tickets || got_v4_tickets;
+			memset (user_pwstring, 0, sizeof(user_pwstring));
+			/* password wiped, so we can relax */
+			setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 
-		    /* These errors should be silent */
-		    /* So the Kerberos database can't be probed */
-		    case KDC_NULL_KEY:
-		    case KDC_PR_UNKNOWN:
-		    case INTK_BADPW:
-		    case KDC_PR_N_UNIQUE:
-		    case -1:
-			break;
-		    /* These should be printed but are not fatal */
-		    case INTK_W_NOTALL:
-			krbflag = 1;
-			kpass_ok = 1;
-			fprintf(stderr, "Kerberos error: %s\n",
-				krb_err_txt[krbval]);
-			break;
-		    default:
-			fprintf(stderr, "Kerberos error: %s\n",
-				krb_err_txt[krbval]);
-			break;
-		    }
 		} else {
-		    (void) memset (pp2, 0, sizeof(pp2));
-#ifdef HAVE_SETPRIORITY
-		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
-#endif
+			memset (user_pwstring, 0, sizeof(user_pwstring));
+			setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 		}
 
 		/* Policy: If local password is good, user is good.
@@ -682,52 +1429,41 @@ int retval;
 		   if (kpass_ok)
 		   */
 		if (lpass_ok)
-		    break;
-bad_login:
-		if (krbflag)
-		    dest_tkt();		/* clean up tickets if login fails */
-#else /* !KRB4 */
-#ifdef HAVE_SETPRIORITY
-		(void) setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
-#endif
-		p = crypt(getpass("Password:"), salt);
-#ifdef HAVE_SETPRIORITY
-		(void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
-#endif
-#ifdef HAVE_SHADOW
-		if (spwd && !strcmp(p, spwd->sp_pwdp))
-		    break;
-		else
-#endif
-		    if (pwd && !strcmp(p, pwd->pw_passwd))
 			break;
-#endif /* KRB4 */
+		if (got_v5_tickets
+		    && verify_krb_v5_tgt(kcontext, realm) != -1)
+			break;	/* we're ok */
+#ifdef KRB4_GET_TICKETS
+		if (login_krb4_get_tickets) {
+		    if (got_v4_tickets
+			&& ! got_v5_tickets
+			&& verify_krb_v4_tgt(realm) != -1)
+			break;	/* we're ok */
+		}
+#endif /* KRB4_GET_TICKETS */
+	bad_login:
+		setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+		if (krbflag)
+			destroy_tickets(); /* clean up tickets if login fails */
 
+		}
+#endif /* KRB5_GET_TICKETS */
+#ifdef OLD_PASSWD
+		p = getpass ("Password:");
+		/* conventional password only */
+		if (unix_passwd_okay (p))
+		    break;
+#endif /* OLD_PASSWD */
 		printf("Login incorrect\n");
 		if (++cnt >= 5) {
-			if (hostname)
-#ifdef UT_HOSTSIZE
-			    syslog(LOG_ERR,
-				"REPEATED LOGIN FAILURES ON %s FROM %.*s, %.*s",
-				tty, UT_HOSTSIZE, hostname, UT_NAMESIZE,
-				username);
-#else
-			    syslog(LOG_ERR,
-				"REPEATED LOGIN FAILURES ON %s FROM %s, %.*s",
-				tty, hostname, UT_NAMESIZE,
-				username);
-#endif
-			else
-			    syslog(LOG_ERR,
-				"REPEATED LOGIN FAILURES ON %s, %.*s",
-				tty, UT_NAMESIZE, username);
+			log_repeated_failures (tty, hostname);
 /* irix has no tichpcl */
 #ifdef TIOCHPCL
 			(void)ioctl(0, TIOCHPCL, (char *)0);
 #endif
 			sleepexit(1);
 		}
-	}
+	} /* end of password retry loop */
 
 	/* committed to login -- turn off timeout */
 	(void)alarm((u_int)0);
@@ -770,7 +1506,6 @@ bad_login:
 		sleepexit(0);
 	}
 #endif
-
 	if (chdir(pwd->pw_dir) < 0) {
 		printf("No directory %s!\n", pwd->pw_dir);
 		if (chdir("/"))
@@ -801,17 +1536,26 @@ bad_login:
 	    (gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
 
 	(void)chmod(ttyn, 0620);
-#ifdef KRB4
-#ifdef SETPAG
-	if (pwd->pw_uid) {
-	    /* Only reset the pag for non-root users. */
-	    /* This allows root to become anything. */
-	    pagflag = 1;
-	    setpag();
+
+#ifdef KRB4_GET_TICKETS
+	if (login_krb4_get_tickets && login_krb4_convert && !got_v4_tickets) {
+
+	    /* Maybe telnetd got tickets for us?  */
+	    if (!got_v5_tickets && have_v5_tickets (&me))
+		got_v5_tickets = 1;
+
+	    if (got_v5_tickets)
+		try_convert524 (kcontext, me);
+
 	}
 #endif
-	/* Fork so that we can call kdestroy */
-	dofork();
+
+#ifdef KRB5_GET_TICKETS
+	if (login_krb4_get_tickets || login_krb5_get_tickets) {
+	    /* Fork so that we can call kdestroy */
+	    dofork();
+	}
+#endif /* KRB4_GET_TICKETS */
 
 /* If the user's shell does not do job control we should put it in a
    different process group than than us, and set the tty process group
@@ -819,25 +1563,48 @@ bad_login:
    telnetd or rlogind if they don't properly detach from their
    controlling tty, which is the case (under SunOS at least.) */
 
-	{ int p = getpid(); 
-          if (setpgrp(p,p) < 0) perror("login.krb5: setpgrp");
-	  if (ioctl(0, TIOCSPGRP, &p) < 0) perror("login.krb5: tiocspgrp");
-        }
+	{
+	   int p = getpid(); 
+	   struct sigaction sa, osa;
 
-/* SunOS has an ioctl which can set the controlling tty and make sure
-   that no other process also has it.  That's exactly what we want to
-   do for the shell we are about to exec, since it is the documented
-   way to avoid the problem noted just above. */
-
-#ifdef sun
-#ifdef TIOCSCTTY
-	{ if (setsid() < 0) perror("login.krb5: setsid");
-	  if (ioctl(0, TIOCSCTTY, 1) < 0) perror("login.krb5: tiocsctty");
-        }
+	   /* this will set the PGID to the PID. */
+#ifdef HAVE_SETPGID
+	   if (setpgid(p,p) < 0) perror("login.krb5: setpgid");
+#else
+#ifdef SETPGRP_TWOARG
+	   if (setpgrp(p,p) < 0) perror("login.krb5: setpgrp");
+#else
+	   if (setpgrp() < 0) perror("login.krb5: setpgrp");
 #endif
 #endif
 
-#endif /* KRB4 */
+	   /* This will cause SIGTTOU to be ignored for the duration
+	      of the TIOCSPGRP.  If this is not done, and the parent's
+	      process group is the foreground pgrp of the tty, then
+	      this will suspend the child, which is bad. */
+
+	   sa.sa_flags = 0;
+	   sa.sa_handler = SIG_IGN;
+	   sigemptyset(&(sa.sa_mask));
+
+	   if (sigaction(SIGTTOU, &sa, &osa))
+	      perror("login.krb5: sigaction(SIGTTOU, SIG_IGN)");
+
+	   /* This will set the foreground process group of the
+	      controlling terminal to this process group (containing
+	      only this process). */
+#ifdef HAVE_TCSETPGRP
+	   if (tcsetpgrp(0, p) < 0) perror("login.krb5: tcsetpgrp");
+#else
+	   if (ioctl(0, TIOCSPGRP, &p) < 0) perror("login.krb5: tiocspgrp");
+#endif
+
+	   /* This will reset the SIGTTOU handler */
+
+	   if (sigaction(SIGTTOU, &osa, NULL))
+	      perror("login.krb5: sigaction(SIGTTOU, [old handler])");
+        }
+
 	(void)setgid((gid_t) pwd->pw_gid);
 	(void) initgroups(username, pwd->pw_gid);
 
@@ -872,69 +1639,41 @@ bad_login:
 		pwd->pw_shell = BSHELL;
 #if defined(NTTYDISC) && defined(TIOCSETD)
 	/* turn on new line discipline for the csh */
-	else if (!strcmp(pwd->pw_shell, "/bin/csh")) {
+	if (!strcmp(pwd->pw_shell, "/bin/csh")) {
 		ioctlval = NTTYDISC;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
 	}
 #endif
 
 	ccname = getenv("KRB5CCNAME");  /* save cache */
+	tz = getenv("TZ");	/* and time zone */
 
 	/* destroy environment unless user has requested preservation */
-	envinit = (char **)malloc(MAXENVIRON * sizeof(char *));
-	if (envinit == 0) {
+	if (!pflag) {
+	    envinit = (char **)malloc(MAXENVIRON * sizeof(char *));
+	    if (envinit == 0) {
 		fprintf(stderr, "Can't malloc empty environment.\n");
 		sleepexit(1);
-	}
-	if (!pflag)
-		environ = envinit;
-
-	i = 0;
-
-#ifdef _IBMR2
-	{
-	    FILE *fp;
-	    if ((fp = fopen("/etc/environment", "r")) != NULL) {
-		while(fgets(tbuf, sizeof(tbuf), fp)) {
-		    if ((tbuf[0] == '#') || (strchr(tbuf, '=') == 0))
-			continue;
-		    for (p = tbuf; *p; p++)
-			if (*p == '\n') {
-			    *p = '\0';
-			    break;
-			}
-		    envinit[i++] = strsave(tbuf);
-		}
-		fclose(fp);
 	    }
+	    envinit[0] = NULL;
+	    environ = envinit;
 	}
-#endif
-/* Set login timezone for date information (PDG) */
-#ifdef __sgi__
-    {
-        FILE *fp;
-        if ((fp = fopen("/etc/TIMEZONE", "r")) != NULL) {
-        while(fgets(tbuf, sizeof(tbuf), fp)) {
-            if ((tbuf[0] == '#') || (strchr(tbuf, '=') == 0))
-            continue;
-            for (p = tbuf; *p; p++)
-            if (*p == '\n') {
-                *p = '\0';
-                break;
-            }
-            envinit[i++] = strsave(tbuf);
-        }
-        fclose(fp);
-        }
-    }
+
+	setenv ("LOGNAME", pwd->pw_name, 1);
+	setenv ("LOGIN", pwd->pw_name, 1);
+
+	/* read the /etc/environment file on AIX */
+#ifdef HAVE_ETC_ENVIRONMENT
+	read_env_vars_from_file ("/etc/environment");
 #endif
 
-	sprintf(tbuf,"LOGNAME=%s",pwd->pw_name);
-	envinit[i++] = strsave(tbuf);
-	sprintf(tbuf,"LOGIN=%s",pwd->pw_name);
-	envinit[i++] = strsave(tbuf);
-
-	envinit[i++] = NULL;
+	/* Set login timezone for date information (sgi PDG) */
+#ifdef HAVE_ETC_TIMEZONE
+	read_env_vars_from_file ("/etc/TIMEZONE");
+#else
+	if (tz)
+	    setenv ("TZ", tz, 0);
+#endif
 
 	if (ccname)
 		setenv("KRB5CCNAME", ccname, 0);
@@ -946,24 +1685,24 @@ bad_login:
 
 	if (term[0] == '\0')
 		(void) strncpy(term, stypeof(tty), sizeof(term));
-	(void)setenv("TERM", term, 0);
-#ifdef KRB4
+	if (term[0])
+		(void)setenv("TERM", term, 0);
+#ifdef KRB4_GET_TICKETS
 	/* tkfile[0] is only set if we got tickets above */
-	if (tkfile[0])
+	if (login_krb4_get_tickets && tkfile[0])
 	    (void) setenv(KRB_ENVIRON, tkfile, 1);
-#endif /* KRB4 */
-
-#if 0
-	strcpy(wgfile, "/tmp/wg.XXXXXX");
-	mktemp(wgfile);
-	setenv("WGFILE", wgfile, 0);
-#endif
+#endif /* KRB4_GET_TICKETS */
+#ifdef KRB5_GET_TICKETS
+	/* ccfile[0] is only set if we got tickets above */
+	if (login_krb5_get_tickets && ccfile[0])
+	    (void) setenv(KRB5_ENV_CCNAME, ccfile, 1);
+#endif /* KRB5_GET_TICKETS */
 
 	if (tty[sizeof("tty")-1] == 'd')
 		syslog(LOG_INFO, "DIALUP %s, %s", tty, pwd->pw_name);
 	if (pwd->pw_uid == 0)
 		if (hostname)
-#ifdef KRB4
+#ifdef KRB4_KLOGIN
 			if (kdata) {
 			    /* @*$&@#*($)#@$ syslog doesn't handle very
 			       many arguments */
@@ -983,7 +1722,7 @@ bad_login:
 #endif
 			    syslog(LOG_NOTICE, "%s", buf);
 		        } else {
-#endif /* KRB4 */
+#endif /* KRB4_KLOGIN */
 #ifdef UT_HOSTSIZE
 			syslog(LOG_NOTICE, "ROOT LOGIN %s FROM %.*s",
 			    tty, UT_HOSTSIZE, hostname);
@@ -991,7 +1730,7 @@ bad_login:
 			syslog(LOG_NOTICE, "ROOT LOGIN %s FROM %s",
 			    tty, hostname);
 #endif
-#ifdef KRB4
+#ifdef KRB4_KLOGIN
 			}
   		else 
 			if (kdata) {
@@ -1001,43 +1740,30 @@ bad_login:
 				   kdata->pname, kdata->pinst,
 				   kdata->prealm);
 			} 
-#endif /* KRB4 */
+#endif /* KRB4_KLOGIN */
 		else
 			syslog(LOG_NOTICE, "ROOT LOGIN %s", tty);
 
-	if (!quietlog) {
-		struct stat st;
+	afs_login ();
 
-#ifdef KRB4
+	if (!quietlog) {
+#ifdef KRB4_KLOGIN
 		if (!krbflag && !fflag && !Fflag && !eflag )
 		    printf("\nWarning: No Kerberos tickets obtained.\n\n");
-#endif /* KRB4 */
-#ifndef NO_MOTD
-		motd();
-#endif
-		(void)sprintf(tbuf, "%s/%s", MAILDIR, pwd->pw_name);
-		if (stat(tbuf, &st) == 0 && st.st_size != 0)
-			printf("You have %smail.\n",
-			    (st.st_mtime > st.st_atime) ? "new " : "");
+#endif /* KRB4_KLOGIN */
+		motd ();
+		check_mail ();
 	}
 
 #ifndef OQUOTA
 	if (! access( QUOTAWARN, X_OK)) (void) system(QUOTAWARN);
 #endif
-#ifdef POSIX_SIGNALS
-	sa.sa_handler = SIG_DFL;
-	(void)sigaction(SIGALRM, &sa, (struct sigaction *)0);
-	(void)sigaction(SIGQUIT, &sa, (struct sigaction *)0);
-	(void)sigaction(SIGINT, &sa, (struct sigaction *)0);
-
-	sa.sa_handler = SIG_IGN;
-	(void)sigaction(SIGTSTP, &sa, (struct sigaction *)0);
-#else
-	(void)signal(SIGALRM, SIG_DFL);
-	(void)signal(SIGQUIT, SIG_DFL);
-	(void)signal(SIGINT, SIG_DFL);
-	(void)signal(SIGTSTP, SIG_IGN);
-#endif
+	handler_init (sa, SIG_DFL);
+	handler_set (SIGALRM, sa);
+	handler_set (SIGQUIT, sa);
+	handler_set (SIGINT, sa);
+	handler_init (sa, SIG_IGN);
+	handler_set (SIGTSTP, sa);
 
 	tbuf[0] = '-';
 	(void) strcpy(tbuf + 1, (p = strrchr(pwd->pw_shell, '/')) ?
@@ -1046,6 +1772,150 @@ bad_login:
 	fprintf(stderr, "login: no shell: ");
 	perror(pwd->pw_shell);
 	exit(0);
+}
+
+char *speeds[] = {
+	"0", "50", "75", "110", "134", "150", "200", "300", "600",
+	"1200", "1800", "2400", "4800", "9600", "19200", "38400",
+};
+#define	NSPEEDS	(sizeof(speeds) / sizeof(speeds[0]))
+
+#ifdef POSIX_TERMIOS
+/* this must be in sync with the list above */
+speed_t b_speeds[] = {
+	B0, B50, B75, B110, B134, B150, B200, B300, B600,
+	B1200, B1800, B2400, B4800, B9600, B19200, B38400,
+};
+#endif
+
+term_init (do_rlogin)
+{
+	int line_speed = -1;
+
+	if (do_rlogin) {
+	    register char *cp = strchr(term, '/'), **cpp;
+	    char *speed;
+
+	    if (cp) {
+		*cp++ = '\0';
+		speed = cp;
+		cp = strchr(speed, '/');
+		if (cp)
+		    *cp++ = '\0';
+		for (cpp = speeds; cpp < &speeds[NSPEEDS]; cpp++)
+		    if (strcmp(*cpp, speed) == 0) {
+			line_speed = cpp-speeds;
+			break;
+		    }
+	    }
+	}
+#ifdef POSIX_TERMIOS
+	{
+	    struct termios tc;
+
+	    (void)tcgetattr(0, &tc);
+	    if (line_speed != -1) {
+		cfsetispeed(&tc, b_speeds[line_speed]);
+		cfsetospeed(&tc, b_speeds[line_speed]);
+	    }
+	    tc.c_cc[VMIN] = 1;
+	    tc.c_cc[VTIME] = 0;
+#ifndef NO_INIT_CC
+	    tc.c_cc[VERASE] = CERASE;
+	    tc.c_cc[VKILL] = CKILL;
+	    tc.c_cc[VEOF] = CEOF;
+	    tc.c_cc[VINTR] = CINTR;
+	    tc.c_cc[VQUIT] = CQUIT;
+	    tc.c_cc[VSTART] = CSTART;
+	    tc.c_cc[VSTOP] = CSTOP;
+#ifndef CNUL
+#define CNUL CEOL
+#endif
+	    tc.c_cc[VEOL] = CNUL;
+	    /* The following are common extensions to POSIX */
+#ifdef VEOL2
+	    tc.c_cc[VEOL2] = CNUL;
+#endif
+#ifdef VSUSP
+#if !defined(CSUSP) && defined(CSWTCH)
+#define CSUSP CSWTCH
+#endif
+	    tc.c_cc[VSUSP] = CSUSP;
+#endif
+#ifdef VDSUSP
+	    tc.c_cc[VDSUSP] = CDSUSP;
+#endif
+#ifdef VLNEXT
+	    tc.c_cc[VLNEXT] = CLNEXT;
+#endif
+#ifdef VREPRINT
+	    tc.c_cc[VREPRINT] = CRPRNT;
+#endif
+#ifdef VDISCRD
+	    tc.c_cc[VDISCRD] = CFLUSH;
+#endif
+#ifdef VDISCARD
+#ifndef CDISCARD
+#define CDISCARD CFLUSH
+#endif
+	    tc.c_cc[VDISCARD] = CDISCARD;
+#endif
+#ifdef VWERSE
+	    tc.c_cc[VWERSE] = CWERASE;
+#endif
+#ifdef VWERASE
+	    tc.c_cc[VWERASE] = CWERASE;
+#endif
+#if defined (VSTATUS) && defined (CSTATUS)
+	    tc.c_cc[VSTATUS] = CSTATUS;
+#endif /* VSTATUS && CSTATUS */
+#endif /* NO_INIT_CC */
+	    /* set all standard echo, edit, and job control options */
+	    /* but leave any extensions */
+	    tc.c_lflag |= ECHO|ECHOE|ECHOK|ICANON|ISIG|IEXTEN;
+	    tc.c_lflag &= ~(NOFLSH|TOSTOP);
+#ifdef ECHOCTL
+	    /* Not POSIX, but if we have it, we probably want it */
+	    tc.c_lflag |= ECHOCTL;
+#endif
+#ifdef ECHOKE
+	    /* Not POSIX, but if we have it, we probably want it */
+	    tc.c_lflag |= ECHOKE;
+#endif
+	    tc.c_iflag |= ICRNL|BRKINT;
+	    tc.c_oflag |= ONLCR|OPOST|TAB3;
+	    tcsetattr(0, TCSANOW, &tc);
+	}
+
+#else /* not POSIX_TERMIOS */
+
+	{
+	    struct sgttyb sgttyb;
+	    static struct tchars tc = {
+		CINTR, CQUIT, CSTART, CSTOP, CEOT, CBRK
+	    };
+	    static struct ltchars ltc = {
+		CSUSP, CDSUSP, CRPRNT, CFLUSH, CWERASE, CLNEXT
+	    };
+
+	    (void) ioctl(0, TIOCGETP, (char *)&sgttyb);
+	    if (line_speed != -1)
+		sgttyb.sg_ispeed = sgttyb.sg_ospeed = line_speed;
+	    sgttyb.sg_flags = ECHO|CRMOD|ANYP|XTABS;
+	    sgttyb.sg_erase = CERASE;
+	    sgttyb.sg_kill = CKILL;
+	    (void)ioctl(0, TIOCSLTC, (char *)&ltc);
+	    (void)ioctl(0, TIOCSETC, (char *)&tc);
+	    (void)ioctl(0, TIOCSETP, (char *)&sgttyb);
+#if defined(TIOCSETD)
+	    {
+		int ioctlval;
+		ioctlval = 0;
+		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
+	    }
+#endif
+	}
+#endif
 }
 
 void getloginname()
@@ -1096,58 +1966,42 @@ int rootterm(tty)
 #endif /* HAVE_TTYENT_H */
 }
 
-#ifdef POSIX_SETJMP
+#ifndef NO_MOTD
 sigjmp_buf motdinterrupt;
-#else
-jmp_buf motdinterrupt;
-#endif
+sigtype
+sigint()
+{
+	siglongjmp(motdinterrupt, 1);
+}
 
 void motd()
 {
 	register int fd, nchars;
 	char tbuf[8192];
-	sigtype sigint();
-#ifdef POSIX_SIGNALS
-	struct sigaction sa, osa;
-#else
-	sigtype (*oldint)();
-#endif
+	handler sa, osa;
 
 	if ((fd = open(MOTDFILE, O_RDONLY, 0)) < 0)
 		return;
-#ifdef POSIX_SIGNALS
-	(void)sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = sigint;
-	(void)sigaction(SIGINT, &sa, &osa);
-#else
-	oldint = signal(SIGINT, sigint);
-#endif
-#ifdef POSIX_SETJMP
+	handler_init (sa, sigint);
+	handler_swap (SIGINT, sa, osa);
 	if (sigsetjmp(motdinterrupt, 1) == 0)
 		while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
 			(void)write(fileno(stdout), tbuf, nchars);
-#else
-	if (setjmp(motdinterrupt) == 0)
-		while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
-			(void)write(fileno(stdout), tbuf, nchars);
-#endif
-#ifdef POSIX_SIGNALS
-	(void)sigaction(SIGINT, &osa, (struct sigaction *)0);
-#else
-	(void)signal(SIGINT, oldint);
-#endif
+	handler_set (SIGINT, osa);
 	(void)close(fd);
 }
-
-sigtype
-sigint()
-{
-#ifdef POSIX_SETJMP
-	siglongjmp(motdinterrupt, 1);
 #else
-	longjmp(motdinterrupt, 1);
+void motd () { }
 #endif
+
+void check_mail ()
+{
+    char tbuf[MAXPATHLEN+2];
+    struct stat st;
+    (void)sprintf(tbuf, "%s/%s", MAILDIR, pwd->pw_name);
+    if (stat(tbuf, &st) == 0 && st.st_size != 0)
+	printf("You have %smail.\n",
+	       (st.st_mtime > st.st_atime) ? "new " : "");
 }
 
 void checknologin()
@@ -1199,7 +2053,11 @@ void dolastlog(quiet, tty)
 }
 
 #undef	UNKNOWN
+#ifdef __hpux
+#define UNKNOWN 0
+#else
 #define	UNKNOWN	"su"
+#endif
 
 char *
 stypeof(ttyid)
@@ -1230,7 +2088,7 @@ int doremotelogin(host)
 	return(ruserok(host, (pwd->pw_uid == 0), rusername, username));
 }
 
-#ifdef KRB4
+#ifdef KRB4_KLOGIN
 int do_krb_login(host, strict)
 	char *host;
 	int strict;
@@ -1276,7 +2134,7 @@ int do_krb_login(host, strict)
 			    instance, &sin,
 			    (struct sockaddr_in *)0,
 			    kdata, "", (bit_64 *) 0, version))) {
-		printf("Kerberos rlogin failed: %s\r\n",krb_err_txt[rc]);
+		printf("Kerberos rlogin failed: %s\r\n",krb_get_err_text(rc));
 		if (strict) {
 paranoid:
 			/*
@@ -1322,7 +2180,7 @@ paranoid:
 	}
 	return(0);
 }
-#endif /* KRB4 */
+#endif /* KRB4_KLOGIN */
 
 void lgetstr(buf, cnt, err)
 	char *buf, *err;
@@ -1344,79 +2202,19 @@ void lgetstr(buf, cnt, err)
 	} while (ch);
 }
 
-char *speeds[] = {
-	"0", "50", "75", "110", "134", "150", "200", "300", "600",
-	"1200", "1800", "2400", "4800", "9600", "19200", "38400",
-};
-#define	NSPEEDS	(sizeof(speeds) / sizeof(speeds[0]))
-
-#ifdef POSIX_TERMIOS
-/* this must be in sync with the list above */
-speed_t b_speeds[] = {
-	B0, B50, B75, B110, B134, B150, B200, B300, B600,
-	B1200, B1800, B2400, B4800, B9600, B19200, B38400,
-};
-#endif
-
-void doremoteterm(tp)
-#ifdef POSIX_TERMIOS
-	struct termios *tp;
-#else
-	struct sgttyb *tp;
-#endif
-{
-	register char *cp = strchr(term, '/'), **cpp;
-	char *speed;
-
-	if (cp) {
-		*cp++ = '\0';
-		speed = cp;
-		cp = strchr(speed, '/');
-		if (cp)
-			*cp++ = '\0';
-		for (cpp = speeds; cpp < &speeds[NSPEEDS]; cpp++)
-			if (strcmp(*cpp, speed) == 0) {
-#ifdef POSIX_TERMIOS
-				cfsetispeed(tp, b_speeds[cpp-speeds]);
-				cfsetospeed(tp, b_speeds[cpp-speeds]);
-#else
-				tp->sg_ispeed = tp->sg_ospeed = cpp-speeds;
-#endif
-				break;
-			}
-	}
-#ifdef POSIX_TERMIOS
- 	/* set all standard echo, edit, and job control options */
-	/* but leave any extensions */
- 	tp->c_lflag |= ECHO|ECHOE|ECHOK|ICANON|ISIG|IEXTEN;
-	tp->c_lflag &= ~(NOFLSH|TOSTOP);
-#ifdef ECHOCTL
-	/* Not POSIX, but if we have it, we probably want it */
- 	tp->c_lflag |= ECHOCTL;
-#endif
-#ifdef ECHOKE
-	/* Not POSIX, but if we have it, we probably want it */
- 	tp->c_lflag |= ECHOKE;
-#endif
- 	tp->c_iflag |= ICRNL|BRKINT;
- 	tp->c_oflag |= ONLCR|OPOST|TAB3;
-#else /* !POSIX_TERMIOS */
-	tp->sg_flags = ECHO|CRMOD|ANYP|XTABS;
-#endif
-}
-
 void sleepexit(eval)
 	int eval;
 {
-#ifdef KRB4
-	if (krbflag)
-	    (void) dest_tkt();
-#endif /* KRB4 */
+#ifdef KRB4_GET_TICKETS
+	if (login_krb4_get_tickets && krbflag)
+	    (void) destroy_tickets();
+#endif /* KRB4_GET_TICKETS */
 	sleep((u_int)5);
 	exit(eval);
 }
 
-#ifdef KRB4
+#ifdef KRB4_GET_TICKETS
+/* call already conditionalized on login_krb4_get_tickets */
 /*
  * This routine handles cleanup stuff, and the like.
  * It exits only in the child process.
@@ -1431,10 +2229,15 @@ dofork()
     update_ref_count(1);
 #endif
     if(!(child=fork()))
-	    return; /* Child process */
+	    return; /* Child process returns */
+
+    /* The parent continues here */
 
     { /* Try and get rid of our controlling tty.  On SunOS, this may or may
        not work depending on if our parent did a setsid before exec-ing us. */
+#ifndef __linux__
+      /* On linux, TIOCNOTTY causes us to die on a
+	SIGHUP, so don't even try it. */
 #ifdef TIOCNOTTY
       { int fd;
         if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
@@ -1443,10 +2246,15 @@ dofork()
         }
       }
 #endif
+#endif /* __linux__ */
 #ifdef HAVE_SETSID
       (void)setsid();
 #endif
+#ifdef SETPGRP_TWOARG
       (void)setpgrp(0, 0);
+#else
+      (void)setpgrp();
+#endif
     } 
 
     /* Setup stuff?  This would be things we could do in parallel with login */
@@ -1464,12 +2272,9 @@ dofork()
 #endif
     
     /* Cleanup stuff */
-    /* Run dest_tkt to destroy tickets */
-    (void) dest_tkt();		/* If this fails, we lose quietly */
-#ifdef SETPAG
-    if (pagflag)
-	ktc_ForgetAllTokens();
-#endif
+    /* Run destroy_tickets to destroy tickets */
+    (void) destroy_tickets();		/* If this fails, we lose quietly */
+    afs_cleanup ();
 #ifdef _IBMR2
     update_ref_count(-1);
 #endif
@@ -1477,7 +2282,7 @@ dofork()
     /* Leave */
     exit(0);
 }
-#endif /* KRB4 */
+#endif /* KRB4_GET_TICKETS */
 
 
 #ifndef HAVE_STRSAVE

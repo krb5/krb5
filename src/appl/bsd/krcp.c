@@ -381,7 +381,7 @@ int main(argc, argv)
 		      suser = pwd->pw_name;
 		    else if (!okname(suser))
 		      continue;
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 		    (void) sprintf(buf, "remsh %s -l %s -n %s %s '%s%s%s:%s'",
 #else
 		    (void) sprintf(buf, "rsh %s -l %s -n %s %s '%s%s%s:%s'",
@@ -391,7 +391,7 @@ int main(argc, argv)
 				   tuser ? "@" : "",
 				   thost, targ);
 	       } else
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 		   (void) sprintf(buf, "remsh %s -n %s %s '%s%s%s:%s'",
 #else
 		    (void) sprintf(buf, "rsh %s -n %s %s '%s%s%s:%s'",
@@ -1125,7 +1125,7 @@ struct buffer *allocbuf(bp, fd, blksize)
     size = roundup(stb.st_blksize, blksize);
 #endif
 
-      size = blksize;
+    size = blksize;
     if (bp->cnt < size) {
 	if (bp->buf != 0)
 	  free(bp->buf);
@@ -1413,33 +1413,41 @@ int des_read(fd, buf, len)
 }
 
 
-
 int des_write(fd, buf, len)
      int fd;
      char *buf;
      int len;
 {
+    static krb5_data des_write_buf;
+    static int des_write_maxsize;
     unsigned char len_buf[4];
-/* Note that rcp depends on the same
- * file descriptor being both input and output to the remote
- * side.  This is bogus, especially when rcp
- * is being run by a rsh that pipes. Fix it here because
- * it would require significantly more work in other places. --hartmans 1/96*/
+
+    /* 
+     * Note that rcp depends on the same file descriptor being both 
+     * input and output to the remote side.  This is bogus, especially 
+     * when rcp is being run by a rsh that pipes. Fix it here because it 
+     * would require significantly more work in other places. --hartmans 1/96
+     */
     
     if (fd == 0)
 	fd = 1;
     if (!encryptflag)
       return(krb5_net_write(bsd_context, fd, buf, len));
     
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > (int) sizeof(des_outbuf)){
-	return(-1);
+    des_write_buf.length = krb5_encrypt_size(len,eblock.crypto_entry);
+
+    if (des_write_buf.length > des_write_maxsize) {
+	if (des_write_buf.data) 
+	    free(des_write_buf.data);
+	des_write_maxsize = des_write_buf.length;
+	if ((des_write_buf.data = malloc(des_write_maxsize)) == NULL) {
+	    des_write_maxsize = 0;
+	    return(-1);
+	}
     }
-    if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		       desoutbuf.data,
-		       len,
-		       &eblock,
-		       0))){
+
+    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf, des_write_buf.data, 
+		      len, &eblock, 0))) {
 	return(-1);
     }
     
@@ -1447,11 +1455,11 @@ int des_write(fd, buf, len)
     len_buf[1] = (len & 0xff0000) >> 16;
     len_buf[2] = (len & 0xff00) >> 8;
     len_buf[3] = (len & 0xff);
-    (void) write(fd, len_buf, 4);
-    if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
+    if ((write(fd, len_buf, 4) != 4) || (write(fd, des_write_buf.data, 
+	des_write_buf.length) != des_write_buf.length)) {
 	return(-1);
     }
-    else return(len);
+    return(len);
 }
 
 #endif /* KERBEROS */

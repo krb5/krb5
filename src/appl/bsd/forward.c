@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <pwd.h>
 #include <netdb.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "k5-int.h"
 
@@ -65,7 +67,18 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername, ccache)
     if (retval = krb5_cc_store_cred(context, *ccache, *creds)) 
 	goto cleanup;
 
-    retval = chown(ccname+5, pwd->pw_uid, -1);
+    if (retval = chown(ccname+5, pwd->pw_uid, -1)) {
+	/* 
+	 * If the file owner is the same as the user id then return ok.
+	 * This is for testing only --proven
+	 */
+	struct stat statbuf;
+
+	if (stat(ccname + 5, & statbuf) == 0) {
+	    if (statbuf.st_uid == pwd->pw_uid)
+		retval = 0;
+	}
+    }
     
 cleanup:
     krb5_free_creds(context, *creds);

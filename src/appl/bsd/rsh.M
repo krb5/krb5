@@ -33,20 +33,10 @@ username
 ] [
 .B \-k
 realm ] [
-.B \-A
-] command
-.br
-host
-[
-.B \-l
-username
+.B \-f | \-F
 ] [
-.B \-n
+.B \-x
 ] [
-.B \-d
-] [
-.B \-k
-realm ] [
 .B \-A
 ] command
 .SH DESCRIPTION
@@ -77,6 +67,21 @@ user will be granted access to the account if and only if the
 authenticated principal name of the user can be mapped to the local
 account name using the aname -> lname mapping rules (see \fIkrb5_anadd(8)\fP
 for more details).
+.PP
+The
+.B \-x
+option causes the network session traffic to be encrypted.
+.PP
+The
+.B \-f
+and
+.B \-F
+options cause Kerberos credentials to be forwarded to the remote machine for
+use by the specified \fIcommand\fR.  They will be removed when \fIcommand\fR
+finishes.  If
+.B \-F
+is used, the forwarded credentials are themselves forwardable to other
+machines.
 .PP
 The
 .B \-k
@@ -129,17 +134,9 @@ appends
 .I remotefile
 to
 .I otherremotefile.
-.PP
-The host names for local machines are also commands in the directory
-/usr/hosts; if you put this directory in your search path
-then the
-.B rsh
-on the command line can be omitted.
 .SH FILES
 .ta 2i
 /etc/hosts
-.br
-/usr/hosts/*
 .br
 \&.k5login		in the user's home directory
 .DT

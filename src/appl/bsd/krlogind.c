@@ -129,7 +129,7 @@ char copyright[] =
      
 #include <signal.h>
 
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #include <sys/ptyio.h>
 #endif
 #ifdef sysvimp
@@ -181,9 +181,13 @@ char copyright[] =
 #include <sys/filio.h>
 #endif
 
-
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
+#endif
+
+#ifdef HAVE_PTSNAME
+/* HP/UX 9.04 has but does not declare ptsname.  */
+extern char *ptsname ();
 #endif
 
 #ifdef NO_WINSIZE
@@ -325,7 +329,7 @@ int main(argc, argv)
     
     progname = *argv;
     
-pty_init();
+    pty_init();
     
 #ifndef LOG_NDELAY
 #define LOG_NDELAY 0
@@ -341,7 +345,6 @@ pty_init();
 #else
     openlog(progname, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
-    
     
     /* Analyse parameters. */
     opterr = 0;
@@ -619,7 +622,7 @@ int syncpipe[2];
 	new_termio.c_lflag |= (ICANON|ECHO|ISIG|IEXTEN);
 	new_termio.c_iflag|= (IXON|IXANY|BRKINT|INLCR|ICRNL);
 #endif /*Do we need binary stream?*/
-new_termio.c_iflag &= ~(ISTRIP);
+	new_termio.c_iflag &= ~(ISTRIP);
 	/* new_termio.c_iflag = 0; */
 	/* new_termio.c_oflag = 0; */
 	new_termio.c_cc[VMIN] = 1;
@@ -821,7 +824,7 @@ int control(pty, cp, n)
      int n;
 {
     struct winsize w;
-    int pgrp;
+    int pgrp, got_pgrp;
     
     if (n < (int) 4+sizeof (w) || cp[2] != 's' || cp[3] != 's')
       return (0);
@@ -833,7 +836,13 @@ int control(pty, cp, n)
     w.ws_xpixel = ntohs(w.ws_xpixel);
     w.ws_ypixel = ntohs(w.ws_ypixel);
     (void)ioctl(pty, TIOCSWINSZ, &w);
-    if (ioctl(pty, TIOCGPGRP, &pgrp) >= 0)
+#ifdef HAVE_TCGETPGRP
+    pgrp = tcgetpgrp (pty);
+    got_pgrp = pgrp != -1;
+#else
+    got_pgrp = ioctl(pty, TIOCGPGRP, &pgrp) >= 0;
+#endif
+    if (got_pgrp)
       (void) killpg(pgrp, SIGWINCH);
 #endif
     return (4+sizeof (w));
@@ -855,14 +864,14 @@ void protocol(f, p)
     struct sigaction sa;
 #endif
 #ifdef TIOCPKT
-	register tiocpkt_on = 0;
-	int on = 1;
+    register tiocpkt_on = 0;
+    int on = 1;
 #endif
     
 #if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
-	/* if system has TIOCPKT, try to turn it on. Some drivers
+    /* if system has TIOCPKT, try to turn it on. Some drivers
      * may not support it. Save flag for later. 
-	 */
+     */
    if ( ioctl(p, TIOCPKT, &on) < 0)
 	tiocpkt_on = 0;
    else tiocpkt_on = 1;
@@ -964,7 +973,7 @@ void protocol(f, p)
 	    else if (pcc <= 0)
 	      break;
 #ifdef TIOCPKT
-		else if (tiocpkt_on) {
+	    else if (tiocpkt_on) {
 	      if (pibuf[0] == 0)
 	        pbp++, pcc--;
 	      else {
@@ -974,7 +983,7 @@ void protocol(f, p)
 		  }
 		  pcc = 0;
 	      }
-		}
+	    }
 #endif
 	}
 	if (FD_ISSET(f, &obits) && pcc > 0) {
@@ -1444,7 +1453,7 @@ recvauth(valid_checksum)
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, v4_schedule, v4_version))) {
 
-      if (auth_sys == KRB5_RECVAUTH_V5) {
+	if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
 	     * clean up before exiting
 	     */

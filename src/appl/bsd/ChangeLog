@@ -1,13 +1,80 @@
 Mon Apr 29 17:02:44 1996  Ken Raeburn  <raeburn@cygnus.com>
 
+	Merge with Cygnus sources, changes from Mark Eichin, Marc
+	Horowitz, Chris Provenzano and me:
+
 	* Makefile.in (install): Install correct set of man pages, and
 	check for failures.
 	* kshd.M, klogind.M: Renamed from kr*.M versions.
-
-	Wed Sep 13 23:19:17 1995  Mark Eichin  <eichin@cygnus.com>
-
 	* login.M: New file. Man page for login with some description of
 	new features.
+
+	* rlogin.M: Remove references to using program with target
+	hostname as argv[0].
+	* rsh.M: Ditto.  Also document -f, -F, -x options.
+
+	* login.c: Massive changes.  Split much functionality out of main
+	and into separate file sections: terminal flag settings, Kerberos
+	4 and 5 support, UNIX password support, mail check, signal handler
+	handling, some other support routines.  Revamp controlling tty and
+	process group handling.  For AFS configuration, use setpag and run
+	aklog.  Try validating password using krb5.  Always set tty flags,
+	not just for rlogin session.  When validating tickets, treat an
+	existing key file that doesn't contain the key we think we want
+	(possibly because DNS was spoofed) as an error condition.
+	* Makefile.in (LOGINLIBS): List libkrb524.a here.
+	(LIBOBJS): Not here.
+	(login.krb5): Reverse the order of LIBOBJS and LOGINLIBS.
+	* configure.in: Check for --with-afs.  Add AFS libs and define
+	SETPAG if supplied.
+
+	* login.c (KRB5_GET_TICKETS, KRB4_GET_TICKETS, KRB_RUN_AKLOG): new
+	macros selecting single signon options.  krb5.conf profile support
+	for control over authentication options, above the compile time
+	selection.
+	(conf_affirmative): new function, recognize yes/no in profile
+	value.
+	(login_get_kconf): new function, look for all [login] flags and
+	set them in appropriate globals (via login_conf_set array.)
+	(main, sleepexit, destroy_tickets): Check the new login_* flags.
+	(main): rename KRB4_USE_524 to KRB4_CONVERT.
+
+	* configure.in: Added checks for tcsetpgrp, tcgetpgrp, setpgid.
+	* krlogind.c (control): Use tcgetpgrp if it's available.
+
+	* loginpaths.h (RPATH, LPATH, LPATH_root): Define HP/UX 9.04
+	versions, conditionalized on __hpux and !hpux.
+
+	* login.c and configure.in: instead of checking _IBMR2 and
+ 	__sgi__, write configure tests to check for the existence of
+ 	/etc/environment and /etc/TIMEZONE files, respectively.
+
+	* forward.c (rd_and_store_for_creds) : If chown fails then only
+	pass failure back if owner is different than intended owner. This
+	is to make rsh.exp test work without requiring root privlidges.
+
+	* login.c (main): Don't set TERM to an empty value.
+	(stypeof) [__hpux]: Return null if unknown.
+
+	* krlogin.c (catchild): remove hp/ux kludge because of aclocal.m4 fix.
+	(speeds): test __hpux for hpux speed list.
+	(main): test __hpux for use of FIOSSAIOSTAT and FIOSSAIOOWN
+	(USE_TERMIO): test __hpux for bsdtty/ptyio headers.
+	* krlogind.c: test __hpux for bsdtty/ptyio headers.
+	(doit): test __hpux for use of setpgrp2.
+	* krcp.c (main): test __hpux as well for remsh vs. rsh.
+
+	* krcp.c (des_write): Make sure the buffer for the encrypted data
+	is large enough. Only return an error in malloc fails.
+
+	* krsh.c (main): Always turn on anyport -A option.
+
+	* krlogind.c (ptsname): Declare if it's going to be used.
+
+	* krshd.c (main): Use basename of argv[0] for progname.
+
+	* login.c (dofork): On linux, TIOCNOTTY causes us to die on a
+	SIGHUP, so don't even try it.
 
 Sun Apr 21 12:52:35 1996  Richard Basch  <basch@lehman.com>
 
@@ -294,13 +361,14 @@ Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 	(recvauth): Fix accidental memory leak with authenticator and fix
 	include correct username in checksum
 
-	* kcmd.c: Send authenticator with checksum of command line and remote user.
+	* kcmd.c: Send authenticator with checksum of command line and
+	remote user.
 
 	* krlogin.c (des_read): Return 0 or -1 on close/error respectively.
 
 Wed Jan 17 15:14:33 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* krlogin.c ((reader): Use select to find out-of-band data, not signals.
+	* krlogin.c (reader): Use select to find out-of-band data, not signals.
 	(oob): No longer a signal handler; just a function.
 	(writer): get rid of copytochild setup as sigurg no longer needed
 	(main): Don't block SIGURG

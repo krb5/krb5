@@ -142,7 +142,7 @@ main(argc, argv0)
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;
-    int fflag = 0, Fflag = 0, Aflag = 0;
+    int fflag = 0, Fflag = 0;
 #endif  /* KERBEROS */
     int debug_port = 0;
 
@@ -226,7 +226,6 @@ main(argc, argv0)
 	goto another;
     }
     if (argc > 0 && !strncmp(*argv, "-A", 2)) {
-        Aflag++;
 	argv++, argc--;
 	goto another;
     }
@@ -355,7 +354,7 @@ main(argc, argv0)
 		  (struct sockaddr_in *) 0,
 		  (struct sockaddr_in *) 0,
 		  authopts,
-		  Aflag);	/* Any port #? */
+		  1);	/* Always set anyport, there is no need not to. --proven */
     if (status) {
         /* check NO_TKT_FILE or equivalent... */
 	fprintf(stderr,

@@ -20,6 +20,12 @@
 /* hpux 8, both hppa and s300 */
 #define LPATH "/bin:/usr/bin:/usr/contrib/bin:/usr/local/bin"
 #define RPATH "/bin:/usr/bin:/usr/contrib/bin:/usr/local/bin"
+#else
+#ifdef __hpux /* 9.04 */
+#define LPATH_root ":/bin:/usr/bin:/etc"
+#define LPATH "/bin:/usr/bin"
+#define RPATH "/bin:/usr/bin:/usr/contrib/bin:/usr/local/bin"
+#endif
 #endif
 
 #ifdef NeXT

@@ -263,7 +263,8 @@ int main(argc, argv)
     secflag = sysconf(_SC_CRAY_SECURE_SYS);
 #endif
     
-    progname = *argv;
+    progname = strrchr (*argv, '/');
+    progname = progname ? progname + 1 : *argv;
     
 #ifndef LOG_ODELAY /* 4.2 syslog */
     openlog(progname, LOG_PID);
@@ -415,8 +416,7 @@ int main(argc, argv)
     
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
-	syslog(LOG_WARNING,
-	     "setsockopt (SO_KEEPALIVE): %m");
+	syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
 #if defined(BSD) && BSD+0 >= 43
     linger.l_onoff = 1;
     linger.l_linger = 60;			/* XXX */
@@ -1288,12 +1288,12 @@ if(port)
 	int i;
 	char *buf = (char *)malloc(strlen(getenv("KRB5CCNAME"))
 					  +strlen("KRB5CCNAME=")+1);
-					  if (buf) {
-						  sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+	if (buf) {
+	  sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
 
-						  for (i = 0; envinit[i]; i++);
-						  envinit[i] =buf;
-					  }
+	  for (i = 0; envinit[i]; i++);
+	  envinit[i] =buf;
+	}
     }
 
     /* If we do anything else, make sure there is space in the array. */

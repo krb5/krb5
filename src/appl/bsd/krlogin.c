@@ -192,7 +192,7 @@ int	flowcontrol;			/* Since emacs can alter the
 					   the original characteristics */
 int	confirm = 0;			/* ask if ~. is given before dying. */
 int	litout;
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 char	*speeds[] =
 { "0", "50", "75", "110", "134", "150", "200", "300", "600",
     "900", "1200", "1800", "2400", "3600", "4800", "7200", "9600",
@@ -674,7 +674,7 @@ char	deferase, defkill;
 
 #ifdef USE_TERMIO
 char defvtim, defvmin;
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #include <sys/bsdtty.h>
 #include <sys/ptyio.h>
 #endif
@@ -952,12 +952,7 @@ int signo;
     if (pid < 0 || (pid == child && !WIFSTOPPED(status)))
       done(status);
 #else
-#if defined(hpux)
-    /* I think this one is wrong: XXX -- [eichin:19940727.1853EST] */
-    if ((pid < 0) || ((pid == child) && (!WIFSTOPPED(status.w_stopval))))
-#else
     if ((pid < 0) || ((pid == child) && (!WIFSTOPPED(status))))
-#endif
 	done((int)(status.w_termsig | status.w_retcode));
 #endif
     goto again;

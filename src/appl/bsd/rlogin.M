@@ -54,38 +54,6 @@ realm ] [
 .B \-l
 username ]
 .PP
-.br
-rhost [
-\fB\-e\fR\fIc\fR
-] [
-.B \-8
-] [
-.B \-c
-] [
-.B \-a
-] [
-.B \-f
-] [
-.B \-F
-] [
-.B \-t
-termtype ] [
-.B \-n
-] [
-.B \-7
-] [
-.B \-d
-] [
-.B \-k
-realm ] [
-.B \-x
-] [
-.B \-noflow
-] [
-.B \-L
-] [
-.B \-l
-username ]
 .SH DESCRIPTION
 .I Rlogin
 connects your terminal on the current local host system
@@ -213,8 +181,6 @@ significantly increases CPU utilization.
 rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3),
 rlogin(1) [UCB version]
 .SH FILES
-/usr/hosts/*		for \fIrhost\fP version of the command
-.br
 \&.k5login		in the user's home directory
 .SH BUGS
 More of the environment should be propagated.

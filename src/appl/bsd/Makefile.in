@@ -3,7 +3,7 @@ LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 
-LOGINLIBS = @LOGINLIBS@
+LOGINLIBS = ../../krb524/libkrb524.a @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
 
 LOCAL_LIBRARIES=-lpty
@@ -71,7 +71,7 @@ install::
 # referenced by klogind.
 #
 login.krb5: login.o  $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LIBS) $(LOGINLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
