@@ -20,8 +20,7 @@
 typedef struct _krb5_address {
     krb5_addrtype addrtype;
     int length;
-    krb5_octet contents[1];		/* actually can be more, depending
-					   on length */
+    krb5_octet *contents;
 } krb5_address;
 
 /* per Kerberos v5 protocol spec */

@@ -19,15 +19,13 @@
 typedef struct _krb5_keyblock {
     krb5_keytype keytype;
     int length;
-    krb5_octet contents[1];		/* actually can be more, depending
-					   on length */
+    krb5_octet *contents;
 } krb5_keyblock;
 
 typedef struct _krb5_checksum {
     krb5_cksumtype checksum_type;	/* checksum type */
     int length;
-    krb5_octet contents[1];		/* actually can be more, depending
-					   on length */
+    krb5_octet *contents;
 } krb5_checksum;
 
 typedef struct _krb5_encrypt_block {
