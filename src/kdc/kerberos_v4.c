@@ -23,9 +23,11 @@
  * 
  */
 
-#ifdef KRB4
+#ifdef KRB5_KRB4_COMPAT
+#define BACKWARD_COMPAT
 
 #include "k5-int.h"
+#include "kdc_util.h"
 #include "adm_proto.h"
 
 #ifdef HAVE_STDARG_H
@@ -61,6 +63,7 @@
 /* v4 include files:
  */
 #include <krb.h>
+#include <krb4-proto.h>
 #include <des.h>
 #include <klog.h>
 #include <prot.h>
@@ -406,7 +409,7 @@ krb5_data **resp;
     KTEXT_ST v4_pkt;
     char *lrealm;
 
-    if (retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec))
+    if ((retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec)))
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
@@ -779,8 +782,8 @@ kerberos_v4(client, pkt)
 	    "Initial ticket request Host: %s User: \"%s\" \"%s\"",
 	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
 
-	    if (i = check_princ(req_name_ptr, req_inst_ptr, 0,
-		&a_name_data)) {
+	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
+				 &a_name_data))) {
 		kerb_err_reply(client, pkt, i, lt);
 		a_name_data.key_low = a_name_data.key_high = 0;
 		return;
@@ -791,8 +794,8 @@ kerberos_v4(client, pkt)
 		    "INITIAL request from %s.%s for %s.%s", req_name_ptr,
 		    req_inst_ptr, service, instance, 0);
 	    /* this does all the checking */
-	    if (i = check_princ(service, instance, lifetime,
-		&s_name_data)) {
+	    if ((i = check_princ(service, instance, lifetime,
+				 &s_name_data))) {
 		kerb_err_reply(client, pkt, i, lt);
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
@@ -1223,4 +1226,4 @@ hang()
     }
 }
 #endif /* BACKWARD_COMPAT */
-#endif /* KRB4 */
+#endif /* KRB5_KRB4_COMPAT */

@@ -139,10 +139,10 @@ comp_cksum(kdc_context, source, ticket, his_cksum)
 	return ENOMEM;
 
     /* compute checksum */
-    if (retval = krb5_calculate_checksum(kdc_context, our_cksum.checksum_type, 
-		     		source->data, source->length, 
-				ticket->enc_part2->session->contents, 
-		     		ticket->enc_part2->session->length,&our_cksum)){
+    if ((retval = krb5_calculate_checksum(kdc_context, our_cksum.checksum_type, 
+					  source->data, source->length, 
+					  ticket->enc_part2->session->contents, 
+					  ticket->enc_part2->session->length,&our_cksum))) {
 	goto comp_cksum_cleanup;
     }
 
@@ -190,7 +190,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 
     scratch1.length = (*tmppa)->length;
     scratch1.data = (char *)(*tmppa)->contents;
-    if (retval = decode_krb5_ap_req(&scratch1, &apreq))
+    if ((retval = decode_krb5_ap_req(&scratch1, &apreq)))
 	return retval;
     
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
@@ -217,17 +217,18 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	       krb5_princ_realm(kdc_context, tgs_server)->length))
 	foreign_server = TRUE;
 
-    if (retval = krb5_auth_con_init(kdc_context, &auth_context))
+    if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
 	goto cleanup;
 
-    if (retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
-					from->address)) 
+    if ((retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
+					 from->address)) )
 	goto cleanup_auth_context;
 
-    if (retval = krb5_auth_con_setrcache(kdc_context, auth_context, kdc_rcache))
+    if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
+					  kdc_rcache)))
 	goto cleanup_auth_context;
 
-    if (retval = kdc_get_server_key(apreq->ticket, &key, &kvno))
+    if ((retval = kdc_get_server_key(apreq->ticket, &key, &kvno)))
 	goto cleanup_auth_context;
 
     /*
@@ -239,15 +240,17 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     if (retval) 
 	goto cleanup_auth_context;
 
-    if (retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
-				     apreq->ticket->server, NULL, NULL, ticket))
+    if ((retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
+				      apreq->ticket->server, NULL,
+				      NULL, ticket)))
 	goto cleanup_auth_context;
 
-    if (retval = krb5_auth_con_getremotesubkey(kdc_context,auth_context,subkey))
+    if ((retval = krb5_auth_con_getremotesubkey(kdc_context,
+						auth_context, subkey)))
 	goto cleanup_auth_context;
 
-    if (retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
-						&authenticator))
+    if ((retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
+						 &authenticator)))
 	goto cleanup_auth_context;
 
     /* Check for a checksum */
@@ -314,9 +317,9 @@ krb5_kvno *kvno;
     } else {
 	nprincs = 1;
 
-	if (retval = krb5_db_get_principal(kdc_context, ticket->server,
-					   &server, &nprincs,
-					   &more)) {
+	if ((retval = krb5_db_get_principal(kdc_context, ticket->server,
+					    &server, &nprincs,
+					    &more))) {
 	    return(retval);
 	}
 	if (more) {
@@ -335,7 +338,7 @@ krb5_kvno *kvno;
 	}
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
-	if (*key = (krb5_keyblock *)malloc(sizeof **key)) {
+	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
 	    retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, *key);
 	} else
 	    retval = ENOMEM;
@@ -604,10 +607,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       /* previous realm, it would have been added earlier, and  */
       /* we would not reach this step this time around.         */
 
-      else if (pl = subrealm(realm, exp)) {
+      else if ((pl = subrealm(realm, exp))) {
         added      = TRUE;
         current[0] = '\0';
-        if (pl1 = subrealm(prev,realm)) {
+        if ((pl1 = subrealm(prev,realm))) {
           if (pl1 > 0) {
             strncat(current, realm, pl1);
           }

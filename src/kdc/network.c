@@ -148,7 +148,7 @@ void process_packet(port_fd, prog, is_secondary)
     addr.length = 4;
     /* this address is in net order */
     addr.contents = (krb5_octet *) &saddr.sin_addr;
-    if (retval = dispatch(&request, &faddr, is_secondary, &response)) {
+    if ((retval = dispatch(&request, &faddr, is_secondary, &response))) {
 	com_err(prog, retval, "while dispatching");
 	return;
     }

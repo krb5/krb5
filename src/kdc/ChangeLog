@@ -1,3 +1,16 @@
+Fri Jun  9 19:13:08 1995    <tytso@rsx-11.mit.edu>
+
+	* dispatch.c, kdc_util.h, kerberos_v4.c: Use KRB5_KRB4_COMPAT
+		instead of KRB4 for determining whether to compile in
+		Kerberos V4 backwards compatibility
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Thu Jun  8 23:35:27 1995    <tytso@rsx-11.mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_util.c, kerberos_v4.c, main.c,
+		network.c: Fix -Wall nits.
 
 Thu Jun 8 14:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add libkadm.

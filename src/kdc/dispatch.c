@@ -58,7 +58,7 @@ dispatch(pkt, from, is_secondary, response)
 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }
-#ifdef KRB4
+#ifdef KRB5_KRB4_COMPAT
     else if (pkt->data[0] == 4)		/* old version */
 	retval = process_v4(pkt, from, is_secondary, response);
 #endif

@@ -26,6 +26,11 @@
 #ifndef __KRB5_KDC_UTIL__
 #define __KRB5_KDC_UTIL__
 
+typedef struct _krb5_fulladdr {
+    krb5_address *	address;
+    krb5_ui_4		port;
+} krb5_fulladdr;
+
 krb5_error_code check_hot_list PROTOTYPE((krb5_ticket *));
 krb5_boolean realm_compare PROTOTYPE((krb5_principal, krb5_principal));
 krb5_boolean krb5_is_tgs_principal PROTOTYPE((krb5_principal));
@@ -91,7 +96,7 @@ void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));
 #define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
-#ifdef KRB4
+#ifdef KRB5_KRB4_COMPAT
 krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 				      const krb5_fulladdr *,
 				      int is_secondary,

@@ -124,7 +124,7 @@ char **argv;
     }
     if (!db_realm) {
 	/* no realm specified, use default realm */
-	if (retval = krb5_get_default_realm(kdc_context, &lrealm)) {
+	if ((retval = krb5_get_default_realm(kdc_context, &lrealm))) {
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    exit(1);
@@ -140,7 +140,7 @@ char **argv;
 
     if (!rcname)
 	rcname = KDCRCACHE;
-    if (retval = krb5_rc_resolve_full(kdc_context, &kdc_rcache, rcname)) {
+    if ((retval = krb5_rc_resolve_full(kdc_context, &kdc_rcache, rcname))) {
 	com_err(argv[0], retval, "while resolving replay cache '%s'", rcname);
 	exit(1);
     }
@@ -162,8 +162,9 @@ char **argv;
     }
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(kdc_context, mkey_name, db_realm, (char **) 0,
-					 &master_princ)) {
+    if ((retval = krb5_db_setup_mkey_name(kdc_context, mkey_name,
+					  db_realm, (char **) 0,
+					  &master_princ))) {
 	com_err(argv[0], retval, "while setting up master key name");
 	(void) krb5_rc_close(kdc_context, kdc_rcache);
 	exit(1);
@@ -176,9 +177,10 @@ char **argv;
     }
     krb5_use_cstype(kdc_context, &master_encblock, kdc_etype);
 
-    if (retval = krb5_db_fetch_mkey(kdc_context, master_princ, &master_encblock, manual,
-				    FALSE, /* only read it once, if at all */
-				    0, &master_keyblock)) {
+    if ((retval = krb5_db_fetch_mkey(kdc_context, master_princ,
+				     &master_encblock, manual,
+				     FALSE, /* only read it once, if at all */
+				     0, &master_keyblock))) {
 	com_err(argv[0], retval, "while fetching master key");
 	(void) krb5_rc_close(kdc_context, kdc_rcache);
 	exit(1);
@@ -186,9 +188,9 @@ char **argv;
     /* initialize random key generators */
     for (etype = 0; etype <= krb5_max_cryptosystem; etype++) {
 	if (krb5_csarray[etype]) {
-	    if (retval = (*krb5_csarray[etype]->system->
+	    if ((retval = (*krb5_csarray[etype]->system->
 			  init_random_key)(&master_keyblock,
-					   &krb5_csarray[etype]->random_sequence)) {
+					   &krb5_csarray[etype]->random_sequence))) {
 		com_err(argv[0], retval, "while setting up random key generator for etype %d--etype disabled", etype);
 		krb5_csarray[etype] = 0;
 	    }
@@ -211,7 +213,7 @@ char *prog;
 	    else
 		    rtype = strdup("Unknown_rcache_type");
 	    rname = strdup(krb5_rc_get_name(kdc_context, kdc_rcache));
-	    if (retval = krb5_rc_close(kdc_context, kdc_rcache)) {
+	    if ((retval = krb5_rc_close(kdc_context, kdc_rcache))) {
 		    com_err(prog, retval, "while closing replay cache '%s:%s'",
 			    rtype, rname);
 	    }
@@ -232,7 +234,7 @@ krb5_keyblock *masterkeyblock;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
-#ifdef KRB4
+#ifdef KRB5_KRB4_COMPAT
     extern unsigned char master_key_version;
 #endif
 
@@ -241,21 +243,21 @@ krb5_keyblock *masterkeyblock;
 	return(retval);
 
     /* initialize database */
-    if (retval = krb5_db_init(kdc_context))
+    if ((retval = krb5_db_init(kdc_context)))
 	return(retval);
 
-    if (retval = krb5_db_verify_master_key(kdc_context, masterkeyname, 
-					   masterkeyblock, &master_encblock)) {
+    if ((retval = krb5_db_verify_master_key(kdc_context, masterkeyname, 
+					    masterkeyblock,
+					    &master_encblock))) {
 	master_encblock.crypto_entry = 0;
 	return(retval);
     }
 
-#ifdef KRB4    
+#ifdef KRB5_KRB4_COMPAT
     /* get the master key, to extract the master key version number */
     nprincs = 1;
-    if (retval = krb5_db_get_principal(kdc_context, masterkeyname,
-				       &server, &nprincs,
-				       &more)) {
+    if ((retval = krb5_db_get_principal(kdc_context, masterkeyname,
+					&server, &nprincs, &more))) {
 	return(retval);
     }
     if (nprincs != 1) {
@@ -271,7 +273,8 @@ krb5_keyblock *masterkeyblock;
 #endif
     
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(kdc_context, &master_encblock, masterkeyblock)) {
+    if ((retval = krb5_process_key(kdc_context, &master_encblock,
+				   masterkeyblock))) {
 	master_encblock.crypto_entry = 0;
 	(void) krb5_db_fini(kdc_context);
 	return(retval);
@@ -289,9 +292,8 @@ krb5_keyblock *masterkeyblock;
 		*krb5_princ_realm(kdc_context, masterkeyname);
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(kdc_context, tgs_server,
-				       &server, &nprincs,
-				       &more)) {
+    if ((retval = krb5_db_get_principal(kdc_context, tgs_server,
+					&server, &nprincs, &more))) {
 	return(retval);
     }
     if (more) {
@@ -309,7 +311,8 @@ krb5_keyblock *masterkeyblock;
     }
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, &tgs_key)) {
+    if ((retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key,
+					   &tgs_key))) {
 	krb5_db_free_principal(kdc_context, &server, nprincs);
 	(void) krb5_finish_key(kdc_context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
@@ -369,7 +372,7 @@ closedown_db()
 
 krb5_context kdc_context;
 
-main(argc, argv)
+int main(argc, argv)
 int argc;
 char *argv[];
 {
@@ -387,12 +390,12 @@ char *argv[];
 
     setup_signal_handlers();
 
-    if (retval = init_db(dbm_db_name, master_princ, &master_keyblock)) {
+    if ((retval = init_db(dbm_db_name, master_princ, &master_keyblock))) {
 	com_err(argv[0], retval, "while initializing database");
 	finish_args(argv[0]);
 	return 1;
     }
-    if (retval = setup_network(argv[0])) {
+    if ((retval = setup_network(argv[0]))) {
 	com_err(argv[0], retval, "while initializing network");
 	finish_args(argv[0]);
 	return 1;
@@ -403,15 +406,15 @@ char *argv[];
 	return 1;
     }
     krb5_klog_syslog(LOG_INFO, "commencing operation");
-    if (retval = listen_and_process(argv[0])){
+    if ((retval = listen_and_process(argv[0]))) {
 	com_err(argv[0], retval, "while processing network requests");
 	errout++;
     }
-    if (retval = closedown_network(argv[0])) {
+    if ((retval = closedown_network(argv[0]))) {
 	com_err(argv[0], retval, "while shutting down network");
 	errout++;
     }
-    if (retval = closedown_db()) {
+    if ((retval = closedown_db())) {
 	com_err(argv[0], retval, "while closing database");
 	errout++;
     }

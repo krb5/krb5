@@ -17,8 +17,6 @@ KRB4INCLUDES=-I$(SRCTOP)/include/kerberosIV
 
 all::
 
-DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
-
 LOCALINCLUDE = $(KRB4INCLUDES) -I.
 SRCS= \
 	kdc5_err.c \
