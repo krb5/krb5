@@ -1,3 +1,8 @@
+Tue Mar 28 20:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: more of nmake's strange behavior. Problem goes
+	   away with the addition of a nop line.
+
 Wed Mar 22 11:28:08 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: put back '##DOSLIBNAME' since it makes the .c.obj rule

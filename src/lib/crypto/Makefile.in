@@ -65,6 +65,7 @@ all-windows::
 	cd ..\os
 	@echo Making in crypto\os
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	rem BUG WITH NMAKE
 	cd ..\md5
 	@echo Making in crypto\md5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
