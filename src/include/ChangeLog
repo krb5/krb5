@@ -1,3 +1,8 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-int.h: Add prototypes for krb5_libdefault_boolean,
+	_krb5_use_dns_realm, _krb5_use_dns_kdc, _krb5_conf_boolean.
+
 2000-06-23  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
