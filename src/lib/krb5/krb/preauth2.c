@@ -493,6 +493,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    krb5_boolean valid_cksum = 0;
    krb5_enc_sam_response_enc_2 enc_sam_response_enc_2;
    krb5_sam_response_2 sr2;
+   size_t ciph_len;
    krb5_pa_data *sam_padata;
 
    if (prompter == NULL)
@@ -737,12 +738,13 @@ krb5_error_code pa_sam_2(krb5_context context,
    /* enc_sam_response_enc_2 from above */
 
    retval = krb5_c_encrypt_length(context, as_key->enctype, scratch->length,
-		(size_t *) &sr2.sam_enc_nonce_or_sad.ciphertext.length);
+				  &ciph_len);
    if (retval) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
 	return(retval);
    }
+   sr2.sam_enc_nonce_or_sad.ciphertext.length = ciph_len;
 
    sr2.sam_enc_nonce_or_sad.ciphertext.data =
 	(char *)malloc(sr2.sam_enc_nonce_or_sad.ciphertext.length);

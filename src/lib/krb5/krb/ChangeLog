@@ -1,3 +1,8 @@
+2003-03-06  Tom Yu  <tlyu@mit.edu>
+
+	* preauth2.c (pa_sam_2): Add intermediate size_t variable to hold
+	output of krb5_c_encrypt_length().
+
 2003-03-06  Alexandra Ellwood <lxs@mit.edu>
 
     * appdefault.c: Fix constness to avoid warning.
