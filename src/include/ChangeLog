@@ -1,3 +1,8 @@
+
+Fri Jun 9 12:02:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in(all-unix) : Add adm_err.h build target since it's not 
+		built in lib/krb5/error_tables any more.  kadmin.old needs it.
+
 Tue Jun  6 12:25:38 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.hin: Add prototype for krb5_524_conv_principal()
