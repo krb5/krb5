@@ -198,7 +198,7 @@ depend:: krb_err.h
 depend:: $(CODE) 
 
 includes:: krb_err.h
-	if cmp /krb_err.h $(EHDRDIR)/krb_err.h >/dev/null 2>&1; then :; \
+	if cmp krb_err.h $(EHDRDIR)/krb_err.h >/dev/null 2>&1; then :; \
 	else \
 		(set -x; $(RM) $(EHDRDIR)/krb_err.h; \
 		 $(CP) krb_err.h $(EHDRDIR)/krb_err.h) ; \
