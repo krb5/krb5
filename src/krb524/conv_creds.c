@@ -25,6 +25,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include "port-sockets.h"
+#include "socket-utils.h"
 #if TARGET_OS_MAC
 #include <Kerberos/krb.h>
 #include <Kerberos/krb524.h>
@@ -46,6 +47,8 @@ krb524_convert_creds_kdc(context, v5creds, v4creds)
      krb5_error_code ret;
      krb5_data reply;
      char *p;
+     struct sockaddr_storage ss;
+     socklen_t slen = sizeof(ss);
 
      ret = krb524_convert_creds_plain(context, v5creds, v4creds);
      if (ret)
@@ -53,9 +56,18 @@ krb524_convert_creds_kdc(context, v5creds, v4creds)
 
      reply.data = NULL;
      ret = krb524_sendto_kdc(context, &v5creds->ticket,
-			     &v5creds->server->realm, &reply);
+			     &v5creds->server->realm, &reply,
+			     ss2sa(&ss), &slen);
      if (ret)
 	 return ret;
+
+#ifdef TARGET_OS_MAC
+     if (slen == sizeof(struct sockaddr_in)
+	 && ss2sa(&ss)->sa_family == AF_INET) {
+	 v4creds->address = ss2sin(&ss)->sin_addr.s_addr;
+     }
+     /* Otherwise, leave it set to all-zero.  */
+#endif
 
      p = reply.data;
      ret = ntohl(*((krb5_error_code *) p));

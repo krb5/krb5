@@ -1,3 +1,21 @@
+2002-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Accept new arguments for local
+	address; pass them through to sendto_udp.
+	* krb524.h: Include port-sockets.h.
+	(krb524_sendto_kdc): Update declaration.
+	* conv_creds.c: Include socket-utils.h.
+	(krb524_convert_creds_kdc): Get local-address info from
+	krb524_sendto_kdc.  On Mac, store the IPv4 address in the v4
+	credentials.
+
+2002-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Accept new args for local address
+	return, pass them through to sendto_udp.
+	* conv_creds.c: Include socket-utils.h.
+	(krb524_convert_creds_kdc): 
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c: Include port-sockets.h instead of winsock.h or

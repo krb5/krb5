@@ -110,9 +110,11 @@ void krb524_init_ets
 
 /* sendmsg.c */
 
+#include "port-sockets.h" /* for socklen_t */
 int krb524_sendto_kdc
         (krb5_context context, const krb5_data * message, 
-	 const krb5_data * realm, krb5_data * reply);
+	 const krb5_data * realm, krb5_data * reply,
+	 struct sockaddr *, socklen_t *);
 #endif /* KRB524_PRIVATE */
 
 #if TARGET_OS_MAC

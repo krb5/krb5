@@ -63,11 +63,13 @@
  */
 
 krb5_error_code
-krb524_sendto_kdc (context, message, realm, reply)
+krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     krb5_context context;
     const krb5_data * message;
     const krb5_data * realm;
     krb5_data * reply;
+    struct sockaddr *addr;
+    socklen_t *addrlen;
 {
     int i;
     struct addrlist al = ADDRLIST_INIT;
@@ -108,7 +110,8 @@ krb524_sendto_kdc (context, message, realm, reply)
     if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    retval = internals.sendto_udp (context, message, &al, reply, 0, 0);
+    retval = internals.sendto_udp (context, message, &al, reply, addr,
+				   addrlen);
     internals.free_addrlist (&al);
     return retval;
 }
