@@ -1,3 +1,7 @@
+Wed Sep 18 12:37:46 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdc.conf.proto: remove max_life spec, use default
+
 Mon Jul 15 17:11:35 1996  Marc Horowitz  <marc@mit.edu>
 
 	* krb5.conf.proto: specify a default_keytab_name in /krb5
