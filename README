@@ -66,7 +66,7 @@ Notes, Major Changes, and Known Bugs for 1.2.4
 Notes:
 
 * Like the 1.2.3 release, this is a patch release.  One critical login
-  problem is fixed, and an problem with interoperability with
+  problem is fixed, and a problem with interoperability with
   Microsoft software is worked around.
 
 Major Changes:
@@ -76,8 +76,8 @@ Major Changes:
   has been fixed.
 
 * The handling of key version numbers has been modified in places.
-  The current formats for keytab and srvtab files, and parts of the
-  remote kadmin protocol, handle key version numbers as 8-bit
+  The current formats of the keytab and srvtab files, as well as parts
+  of the remote kadmin protocol, handle key version numbers as 8-bit
   quantities, when in fact they are 32-bit quantities.
 
   * In the keytab and srvtab support for krb5, searching for the
@@ -129,7 +129,7 @@ Known Bugs:
     file without acquiring krb5 tickets at the same time (i.e., the
     old krb4 "ksrvtgt" program).
 
-* Most other bugs from 1.2.3.
+* most of the other known bugs from 1.2.3
 
 Notes, Major Changes, and Known Bugs for 1.2.3
 ----------------------------------------------
