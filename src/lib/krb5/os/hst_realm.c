@@ -123,12 +123,14 @@ krb5_get_host_realm(context, host, realmsp)
 	}
     }
 
-    retval = profile_get_string(context->profile, "domain_realm", domain,
-				0, default_realm, &realm);
-    free(default_realm);
-    if (retval)
-	return retval;
-    default_realm = realm;
+    if (domain) {
+	retval = profile_get_string(context->profile, "domain_realm",
+				    domain, 0, default_realm, &realm);
+	free(default_realm);
+	if (retval)
+	    return retval;
+	default_realm = realm;
+    }
 
     retval = profile_get_string(context->profile, "domain_realm", local_host,
 				0, default_realm, &realm);

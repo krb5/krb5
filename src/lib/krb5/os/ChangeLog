@@ -1,5 +1,13 @@
 Fri Sep  1 00:47:27 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in (check-unix): Add a test case to make sure
+		krb5_get_host_realm does something sane when passed in a
+		hostname which doesn't have a default domain.
+
+	* hst_realm.c (krb5_get_host_realm): If an hostname does not have
+		a domain, don't try to get a domain default (which
+		results in a strange error being returned).
+
 	* toffset.c: Added new file which implements the abstract
 		interfaces for manipulating the time offset fields in the
 		os context.

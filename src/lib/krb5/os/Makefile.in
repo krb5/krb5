@@ -121,7 +121,7 @@ check-unix:: $(TEST_PROGS)
 		-k IGGY.ORG -k DEFAULT_REALM.TST \
 		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
 		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
-		-r pgp.good.idea > test.out
+		-r pgp.good.idea -r no_domain > test.out
 	cmp test.out $(srcdir)/ref_std_conf.out
 	$(RM) test.out
 
