@@ -5,8 +5,8 @@
  *
  *
  * $Log$
- * Revision 1.2  1994/06/15 21:14:53  eichin
- * step 2: bcmp->memcmp
+ * Revision 1.3  1994/06/15 23:16:25  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
  *
  * Revision 1.1  1994/06/10 03:29:36  eichin
  * autoconfed isode for kerberos work
@@ -97,7 +97,7 @@ typedef u_char	  byte, *PElementData;
 			memcmp ((char *) (b1), (char *) (b2), (int) (length))
 
 #define	PEDcpy(b1, b2, length)	\
-			bcopy ((char *) (b1), (char *) (b2), (int) (length))
+			memcpy ((char *) (b2), (char *) (b1), (int) (length))
 
 /*  */
 

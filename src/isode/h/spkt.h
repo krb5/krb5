@@ -5,6 +5,9 @@
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:16:31  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:29:52  eichin
  * autoconfed isode for kerberos work
  *
@@ -347,7 +350,7 @@
 { \
     register int i = len; \
     if ((d -> d/* */_cc = min (i, sizeof d -> d/* */_data)) > 0) \
-	bcopy (base, d -> d/* */_data, d -> d/* */_cc); \
+	memcpy (d -> d/* */_data, base, d -> d/* */_cc); \
 }
 
 #define	copySPKTdata(s,d) \
@@ -360,7 +363,7 @@
 { \
     register int i = len; \
     if ((d -> d##_cc = min (i, sizeof d -> d##_data)) > 0) \
-	bcopy (base, d -> d##_data, d -> d##_cc); \
+	memcpy (d -> d##_data, base, d -> d##_cc); \
 }
 
 #define	copySPKTdata(s, d) \
@@ -370,9 +373,9 @@
 }
 #endif
 #else
-#define	copySSAPdata(base,len,d)	bcopy (base, (char *) d, len)
+#define	copySSAPdata(base,len,d)	memcpy ((char *) d, base, len)
 
-#define	copySPKTdata(s,d)	bcopy (s -> s_udata, (char *) d, s -> s_ulen)
+#define	copySPKTdata(s,d)	memcpy ((char *) d, s -> s_udata, s -> s_ulen)
 #endif
 
 

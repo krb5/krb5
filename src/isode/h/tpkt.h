@@ -5,6 +5,9 @@
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:16:33  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:30:07  eichin
  * autoconfed isode for kerberos work
  *
@@ -90,18 +93,18 @@
 { \
     register int i = len; \
     if ((d -> d/* */_cc = min (i, sizeof d -> d/* */_data)) > 0) \
-	bcopy (base, d -> d/* */_data, d -> d/* */_cc); \
+	memcpy (d -> d/* */_data, base, d -> d/* */_cc); \
 }
 #else
 #define	copyTSAPdata(base,len,d) \
 { \
     register int i = len; \
     if ((d -> d##_cc = min (i, sizeof d -> d##_data)) > 0) \
-	bcopy (base, d -> d##_data, d -> d##_cc); \
+	memcpy (d -> d##_data, base, d -> d##_cc); \
 }
 #endif
 #else
-#define	copyTSAPdata(base,len,d)	bcopy (base, (char *) d, len)
+#define	copyTSAPdata(base,len,d)	memcpy ((char *) d, base, len)
 #endif
 
 

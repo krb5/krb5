@@ -4,19 +4,6 @@
  * $Header$
  *
  *
- * $Log$
- * Revision 1.1  1994/06/10 03:28:59  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:23  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:37:41  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:41  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -130,18 +117,18 @@
 { \
     register int i = len; \
     if ((d -> d/* */_cc = min (i, sizeof d -> d/* */_data)) > 0) \
-	bcopy (base, d -> d/* */_data, d -> d/* */_cc); \
+	memcpy (d -> d/* */_data, base, d -> d/* */_cc); \
 }
 #else
 #define	copyAcSAPdata(base,len,d) \
 { \
     register int i = len; \
     if ((d -> d##_cc = min (i, sizeof d -> d##_data)) > 0) \
-	bcopy (base, d -> d##_data, d -> d##_cc); \
+	memcpy (d -> d##_data, base, d -> d##_cc); \
 }
 #endif
 #else
-#define	copyAcSAPdata(base,len,d)	bcopy (base, (char *) d, len)
+#define	copyAcSAPdata(base,len,d)	memcpy ((char *) d, base, len)
 #endif
 
 

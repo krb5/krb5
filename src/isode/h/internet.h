@@ -5,6 +5,9 @@
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 23:16:23  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:29:19  eichin
  * autoconfed isode for kerberos work
  *
@@ -139,7 +142,7 @@ int	start_udp_server ();
 #endif
 
 #define	inaddr_copy(hp,sin) \
-    bcopy ((hp) -> h_addr, (char *) &((sin) -> sin_addr), (hp) -> h_length)
+    memcpy ((char *) &((sin) -> sin_addr), (hp) -> h_addr, (hp) -> h_length)
 
 
 #ifdef	EXOS
