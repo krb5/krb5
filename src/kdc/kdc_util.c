@@ -925,7 +925,7 @@ krb5_data *data;
 {
     unsigned char *estream;	/* end of stream */
     int classes;		/* # classes seen so far this level */
-    int levels = 0;		/* levels seen so far */
+    unsigned int levels = 0;		/* levels seen so far */
     int lastlevel = 1000;       /* last level seen */
     int length;			/* various lengths */
     int tag;			/* tag number */
@@ -1388,8 +1388,23 @@ get_salt_from_key(context, client, client_key, salt)
     return 0;
 }
 
+/*
+ * Limit strings to a "reasonable" length to prevent crowding out of
+ * other useful information in the log entry
+ */
+#define NAME_LENGTH_LIMIT 128
 
-    
-   
-    
-    
+void limit_string(char *name)
+{
+	int	i;
+
+	if (strlen(name) < NAME_LENGTH_LIMIT)
+		return;
+
+	i = NAME_LENGTH_LIMIT-4;
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i] = '\0';
+	return;
+}

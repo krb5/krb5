@@ -4,6 +4,15 @@ Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
         new memory allocated, allocate buffers to max size
         needed. [based on krb5-kdc/461 by Ken Hornstein].
 
+Thu May 29 21:08:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_as_req.c (process_as_req), do_tgs_req (process_tgs_req): Use
+		limit_string() to make sure the length of cname and sname
+		are reasonable.
+
+	* kdc_util.c (limit_string): New function which limits the strings
+		that will end up in log files to "reasonable" lengths.
+
 Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc_preauth.c (get_sam_edata): Use proper interface to
