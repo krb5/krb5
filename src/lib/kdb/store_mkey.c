@@ -31,12 +31,19 @@ static char rcsid_store_mkey_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
+#include <errno.h>
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 #include "kdbint.h"
 #include <krb5/sysincl.h>		/* for MAXPATHLEN */
+
+/* Just in case sysincl.h didn't get it */
+
+#ifndef MAXPATHLEN
+#define MAXPATHLEN 1024
+#endif
 
 /*
  * Put the KDC database master key into a file.  If keyfile is NULL,
