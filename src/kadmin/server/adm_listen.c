@@ -25,7 +25,12 @@ static char rcsid_adm_listen[] =
   adm_listen.c
 */
 
-#include <sys/types.h>
+#include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
+#include <krb5/adm_defs.h>
+#include <krb5/sysincl.h>
+
 #include <syslog.h>
 #include <signal.h>
 #include <com_err.h>
@@ -40,10 +45,6 @@ static char rcsid_adm_listen[] =
 #include <arpa/inet.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/adm_defs.h>
 #include "adm_extern.h"
 
 void
