@@ -1095,8 +1095,13 @@ getline(s, n, iop)
 	}
 #endif /* KERBEROS */
 
-	if (debug)
-		syslog(LOG_DEBUG, "command: <%s>(%d)", s, strlen(s));
+	if (debug) {
+		if (!strncmp(s, "PASS ", 5) && !guest)
+			syslog(LOG_DEBUG, "command: <PASS XXX>");
+		else
+			syslog(LOG_DEBUG, "command: <%.*s>(%d)",
+			       strlen(s) - 2, s, strlen(s));
+	}
 	return (s);
 }
 
