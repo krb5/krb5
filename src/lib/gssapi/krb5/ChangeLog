@@ -1,3 +1,12 @@
+2003-12-11  Alexandra Ellwood <lxs@mit.edu>
+
+	* acquire_cred.c, gssapi_krb5.c, gssapiP_krb5.h, set_ccache.c:
+        Added kg_sync_ccache_name(), kg_get_ccache_name, and 
+        kg_set_ccache_name() and rewrote gss_krb5_ccache_name() and
+        added a call to kg_sync_ccache_name() to acquire_init_cred()
+        to fix a bug where on systems with multiple ccaches that GSSAPI
+        gets stuck on the ccache that was default when it launched.
+
 2003-07-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* acquire_cred.c (krb5_gss_register_acceptor_identity): Allocate
