@@ -58,11 +58,8 @@ krb5_data tgtname = {
 /*
  * Try no preauthentication first; then try the encrypted timestamp
  */
-int preauth_search_list[] = {
-	0,			
-	KRB5_PADATA_ENC_UNIX_TIME,
-	-1
-	};
+krb5_preauthtype * preauth = NULL;
+krb5_preauthtype preauth_list[2] = { 0, -1 };
 
 void
 main(argc, argv)
@@ -85,14 +82,13 @@ main(argc, argv)
     krb5_creds my_creds;
     krb5_timestamp now;
     int use_keytab = 0;			/* -k option */
-    int preauth_type = -1;
     krb5_keytab keytab = NULL;
-    krb5_keytab_entry kt_ent;
     struct passwd *pw = 0;
     int pwsize;
     int	i;
     char password[255], *client_name, prompt[255];
 
+    krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
 
     if (strrchr(argv[0], '/'))
@@ -190,7 +186,7 @@ main(argc, argv)
 		   /* Else search passwd file for client */
 		   pw = getpwuid((int) getuid());
 		   if (pw) {
-			if (code = krb5_parse_name (kcontext, pw->pw_name, &me)) {
+			if (code = krb5_parse_name(kcontext,pw->pw_name,&me)) {
 			     com_err (argv[0], code, "when parsing name %s",
 				      pw->pw_name);
 			     exit(1);
@@ -268,71 +264,14 @@ main(argc, argv)
 	      exit(1);
 	 }
 
-	 if (preauth_type > 0) {
-	     code = krb5_get_in_tkt_with_password(kcontext, options, 
-						  my_addresses,
-						  preauth_type,
-						  ETYPE_DES_CBC_CRC,
-						  KEYTYPE_DES,
-						  password,
-						  ccache,
-						  &my_creds, 0);
-	 } else {
-	     for (i=0; preauth_search_list[i] >= 0; i++) {
-		 code = krb5_get_in_tkt_with_password(kcontext, options, 
-						      my_addresses,
-						      preauth_search_list[i],
-						      ETYPE_DES_CBC_CRC,
-						      KEYTYPE_DES,
-						      password,
-						      ccache,
-						      &my_creds, 0);
-	     if (code != KRB5KDC_ERR_PREAUTH_FAILED &&
-		 code != KRB5KRB_ERR_GENERIC)
-		 break;
-	     }
-	 }
+	 code = krb5_get_in_tkt_with_password(kcontext, options, my_addresses,
+					      NULL, preauth, password, ccache,
+					      &my_creds, 0);
 	 memset(password, 0, sizeof(password));
     } else {
-	/*
-	 * krb5_get_in_tkt_with_skey is getting a face lift so for now
-	 * I just put 0 as the default keytype for krb5_kt_get_entry()
-	 * --- proven
-	 */
-	if (keytab != NULL) {
-	      code = krb5_kt_get_entry(kcontext, keytab, my_creds.client, 0,
-				       0, /* keytype arg, default for now */
-				       &kt_ent);
-	      if (code) {
-		   com_err(argv[0], code, "reading keytab entry %s",
-			   client_name);
-		   exit(1);
-	      }
-	 }
-
-	 if (preauth_type > 0) {
-	     code = krb5_get_in_tkt_with_skey(kcontext, options, 
-					      my_addresses,
-					      preauth_type, 
-					      ETYPE_DES_CBC_CRC,
-					      keytab ? &kt_ent.key : NULL,
-					      ccache, &my_creds, 0);
-	 } else {
-	     for (i=0; preauth_search_list[i] >= 0; i++) {
-		 code = krb5_get_in_tkt_with_skey(kcontext, options, 
-						  my_addresses,
-						  preauth_search_list[i], 
-						  ETYPE_DES_CBC_CRC,
-						  keytab ? &kt_ent.key : NULL,
-						  ccache, &my_creds, 0);
-		 if (code != KRB5KDC_ERR_PREAUTH_FAILED &&
-		     code != KRB5KRB_ERR_GENERIC)
-		     break;
-	     }
-	 }
-			 
-	 if (keytab != NULL)
-	      krb5_kt_free_entry(kcontext, &kt_ent);
+	 code = krb5_get_in_tkt_with_keytab(kcontext, options, my_addresses,
+					    NULL, preauth, keytab, ccache,
+					    &my_creds, 0);
     }
     
     krb5_free_principal(kcontext, server);

@@ -1,6 +1,18 @@
+Thu Feb 02 22:43:38 1995  Chris Provenzano (proven@mit.edu)
+
+	* kinit.c (main()) Removed krb5_keytype, changed krb5_enctype to
+                krb5_enctype *, changed krb5_preauthtype to krb5_preauthtype *
+                for krb5_get_in_tkt_with_password() rotuine.
+
+	* kinit.c (main()) use new API for krb5_get_in_tkt(), and replace 
+		krb5_get_in_tkt_with_skey() with krb5_get_in_tkt_with_keytab()
+		and remove all unnecessary cruft.
+
+	* kinit.c Do a krb5_init_context() before using a krb5_context.
+
 Sat Jan 28 14:45:55 1995  Chris Provenzano (proven@mit.edu)
 
-        * kinit.c (main()) use new API for krb5_kt_get_entry.
+        * kinit.c (main()) use new API for krb5_kt_get_entry().
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
