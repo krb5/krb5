@@ -37,6 +37,10 @@ krb5_error_code krb5_get_cred_from_kdc
 		   krb5_creds *** ));
 void krb5_free_tgt_creds
 	PROTOTYPE((krb5_creds ** ));	/* XXX too hard to do with const */
+
+#define	KRB5_GC_USER_USER	1	/* want user-user ticket */
+#define	KRB5_GC_CACHED		2	/* want cached ticket only */
+
 krb5_error_code krb5_get_credentials
 	PROTOTYPE((const krb5_flags,
 		   krb5_ccache,
@@ -155,6 +159,15 @@ krb5_error_code krb5_generate_seq_number
     PROTOTYPE((const krb5_keyblock *, krb5_int32 *));
 krb5_error_code krb5_get_server_rcache
     PROTOTYPE((const char *, krb5_rcache *));
+krb5_error_code krb5_build_principal_ext
+    PROTOTYPE((krb5_principal *, int, const char *, ...));
+krb5_error_code krb5_build_principal
+    PROTOTYPE((krb5_principal *, int, const char *, ...));
+#ifdef va_start
+/* XXX depending on varargs include file defining va_start... */
+krb5_error_code krb5_build_principal_va
+    PROTOTYPE((krb5_principal *, int, const char *, va_list));
+#endif
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
@@ -200,9 +213,9 @@ void krb5_free_principal
 	PROTOTYPE((krb5_principal ));
 void krb5_free_authenticator
 	PROTOTYPE((krb5_authenticator * ));
-void krb5_free_address
+void krb5_free_addresses
 	PROTOTYPE((krb5_address ** ));
-void krb5_free_addr
+void krb5_free_address
 	PROTOTYPE((krb5_address * ));
 void krb5_free_authdata
 	PROTOTYPE((krb5_authdata ** ));
@@ -248,7 +261,6 @@ void krb5_free_ap_rep_enc_part
 	PROTOTYPE((krb5_ap_rep_enc_part *));
 void krb5_free_tkt_authent
 	PROTOTYPE((krb5_tkt_authent *));
-
 #include <krb5/widen.h>
 
 /* Only put things which don't have pointers to the narrow types in this
