@@ -114,8 +114,8 @@ SRCS=	addr_comp.c	\
 	rd_req_sim.c	\
 	rd_req_dec.c	\
 	rd_safe.c	\
-	recvauth.o	\
-	sendauth.o	\
+	recvauth.c	\
+	sendauth.c	\
 	send_tgs.c	\
 	srv_rcache.c	\
 	tgtname.c	\
