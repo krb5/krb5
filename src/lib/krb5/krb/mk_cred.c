@@ -31,12 +31,23 @@ encrypt_credencpart(context, pcredpart, pkeyblock, pencdata)
     krb5_encrypt_block 	  eblock;
     krb5_data 		* scratch;
 
-    if (!valid_enctype(pkeyblock->enctype))
+    if (pkeyblock && !valid_enctype(pkeyblock->enctype))
     	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* start by encoding to-be-encrypted part of the message */
     if ((retval = encode_krb5_enc_cred_part(pcredpart, &scratch)))
     	return retval;
+
+    /*
+     * If the keyblock is NULL, just copy the data from the encoded
+     * data to the ciphertext area.
+     */
+    if (pkeyblock == NULL) {
+	    pencdata->ciphertext.data = scratch->data;
+	    pencdata->ciphertext.length = scratch->length;
+	    krb5_xfree(scratch);
+	    return 0;
+    }
 
     /* put together an eblock for this encryption */
 
@@ -169,7 +180,9 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
     credenc.ticket_info[i] = NULL;
     pcred->tickets[i] = NULL;
 
-    retval = encrypt_credencpart(context, &credenc, keyblock, &pcred->enc_part);
+    /* encrypt the credential encrypted part */
+    retval = encrypt_credencpart(context, &credenc, keyblock,
+				 &pcred->enc_part);
 
 cleanup_info_ptrs:
     free(tmp);

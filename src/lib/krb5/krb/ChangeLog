@@ -1,3 +1,19 @@
+Wed Jan  3 21:32:59 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_cred.c (krb5_rd_cred_basic): When the keyblock is NULL,
+		assume we're being called from the gssapi code, which
+		doesn't have access to the sender or receive address
+		information, don't check the sender address, since it
+		won't be available.
+
+	* rd_cred.c (decrypt_credencdata): When calling krb5_rd_credd(),
+		if the keyblock is null, just copy the encoded structure
+		from the "ciphertext" part of the structure and decode it.
+
+	* mk_cred.c (encrypt_credencpart):  When calling krb5_mk_cred(), if
+		the keyblock is NULL, don't encrypt it; just encode it and
+		leave it in the ciphertext area of the structure.
+
 Thu Dec 21 18:47:54 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_rep.c (krb5_rd_rep): Change use of

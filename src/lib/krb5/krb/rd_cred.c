@@ -23,31 +23,37 @@ decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
     krb5_error_code 	  retval;
     krb5_data 		  scratch;
 
-    if (!valid_enctype(pcred->enc_part.enctype))
-    	return KRB5_PROG_ETYPE_NOSUPP;
-
-    /* put together an eblock for this decryption */
-    krb5_use_enctype(context, &eblock, pcred->enc_part.enctype);
     scratch.length = pcred->enc_part.ciphertext.length;
-    
     if (!(scratch.data = (char *)malloc(scratch.length))) 
-        return ENOMEM;
+	return ENOMEM;
 
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, pkeyblock)))
-    	goto cleanup;
+    if (pkeyblock != NULL) {
+	if (!valid_enctype(pcred->enc_part.enctype)) {
+	    free(scratch.data);
+	    return KRB5_PROG_ETYPE_NOSUPP;
+	}
+
+	/* put together an eblock for this decryption */
+	krb5_use_enctype(context, &eblock, pcred->enc_part.enctype);
     
-    /* call the decryption routine */
-    if ((retval = krb5_decrypt(context, 
-			       (krb5_pointer) pcred->enc_part.ciphertext.data,
-			       (krb5_pointer) scratch.data,
-			       scratch.length, &eblock, 0))) {
-      	(void)krb5_finish_key(context, &eblock);
-      	goto cleanup;
-    }
+	/* do any necessary key pre-processing */
+	if ((retval = krb5_process_key(context, &eblock, pkeyblock)))
+	    goto cleanup;
+    
+	/* call the decryption routine */
+	if ((retval = krb5_decrypt(context, 
+			   (krb5_pointer) pcred->enc_part.ciphertext.data,
+			   (krb5_pointer) scratch.data,
+			   scratch.length, &eblock, 0))) {
+	    (void)krb5_finish_key(context, &eblock);
+	    goto cleanup;
+	}
 
-    if ((retval = krb5_finish_key(context, &eblock)))
-    	goto cleanup;
+	if ((retval = krb5_finish_key(context, &eblock)))
+	    goto cleanup;
+    } else {
+	memcpy(scratch.data, pcred->enc_part.ciphertext.data, scratch.length);
+    }
 
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_cred_part(&scratch, &ppart)))
@@ -92,9 +98,16 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
     if ((retval = decrypt_credencdata(context, pcred, pkeyblock, &encpart)))
 	goto cleanup_cred;
 
-    if (!krb5_address_compare(context, remote_addr, encpart.s_address)) {
-        retval = KRB5KRB_AP_ERR_BADADDR;
-        goto cleanup_cred;
+    /*
+     * Only check the remote address if the KRB_CRED message was
+     * protected by encryption.  If it came in the checksum field of
+     * an init_sec_context message, skip over this check.
+     */
+    if (pkeyblock != NULL) {
+	if (!krb5_address_compare(context, remote_addr, encpart.s_address)) {
+	    retval = KRB5KRB_AP_ERR_BADADDR;
+	    goto cleanup_cred;
+	}
     }
 
     if (encpart.r_address) {
