@@ -26,7 +26,7 @@ LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-K4LIB = @K4LIB@
+KRB4_LIB = @KRB4_LIB@
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
@@ -52,7 +52,7 @@ OBJS=	telnetd.o \
 all:: telnetd
 
 telnetd: $(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
-	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(K4LIB) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(KRB4_LIB) $(LIBS)
 
 clean::
 	$(RM) telnetd
