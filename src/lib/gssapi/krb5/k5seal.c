@@ -166,7 +166,8 @@ make_seal_token_v1 (krb5_context context,
 	abort ();
     }
 
-    if (code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen))
+    code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
+    if (code)
 	return(code);
     md5cksum.length = sumlen;
 

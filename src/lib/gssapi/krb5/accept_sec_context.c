@@ -363,8 +363,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        /* gss krb5 v1 */
 
        /* stash this now, for later. */
-       if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5,
-					 &md5len)) {
+       code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &md5len);
+       if (code) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
        }
@@ -494,9 +494,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 		   /* store the delegated credential */
 
-		   if (code = rd_and_store_for_creds(context, &option,
-						     (delegated_cred_handle) ?
-						     &deleg_cred : NULL)) {
+		   code = rd_and_store_for_creds(context, &option,
+						 (delegated_cred_handle) ?
+						 &deleg_cred : NULL);
+		   if (code) {
 		       major_status = GSS_S_FAILURE;
 		       goto fail;
 		   }
