@@ -161,7 +161,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey)
 			     (char *) v5etkt->session->contents,
 			     lifetime,
 			     /* issue_data */
-			     v5etkt->times.starttime,
+			     server_time,
 			     sname,
 			     sinst,
 			     v4_skey->contents);

@@ -1,3 +1,14 @@
+Thu Dec  5 23:27:00 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (main): Ignore SIGHUP for now. [27]
+
+Thu Dec  5 23:12:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Change the issue time
+		of the V4 ticket to be the current time (since the
+		lifetime of the V4 ticket was calculated assuming that the
+		issue time would be the current time).  [PR#283,PR#22]
+
 Mon Nov 11 16:23:32 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb524d.c (do_connection): only free v4/v5 keyblock contents and

@@ -199,7 +199,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     tgsreq.server = (krb5_principal) sname;
 
     tgsreq.from = timestruct->starttime;
-    tgsreq.till = timestruct->endtime;
+    tgsreq.till = timestruct->endtime ? timestruct->endtime :
+	    in_cred->times.endtime;
     tgsreq.rtime = timestruct->renew_till;
     if ((retval = krb5_timeofday(context, &time_now)))
 	return(retval);

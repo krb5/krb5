@@ -137,7 +137,7 @@ kpasswd(context, argc, argv)
 
     /* if either krb5_cc failed check the passwd file */
     if (code != 0) {
-      pw = getpwuid((int) getuid());
+      pw = getpwuid( getuid());
       if (pw == NULL) {
 	com_err(whoami, 0, string_text(KPW_STR_NOT_IN_PASSWD_FILE));
 	return(MISC_EXIT_STATUS);

@@ -547,7 +547,10 @@ int syncpipe[2];
     }
     
     /* Save hostent information.... */
-    else strcpy(rhost_name,hp->h_name);
+    else {
+	strncpy(rhost_name,hp->h_name,sizeof (rhost_name));
+	rhost_name[sizeof (rhost_name) - 1] = '\0';
+    }
     
     if (fromp->sin_family != AF_INET)
       fatal(f, "Permission denied - Malformed from address\n");
@@ -1558,7 +1561,7 @@ recvauth(valid_checksum)
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
 	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
-					  ticket, lusername, &ccache))) {
+					  ticket, &ccache))) {
          fatal(netf, "Can't get forwarded credentials");
     }
     return 0;

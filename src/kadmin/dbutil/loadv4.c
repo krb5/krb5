@@ -192,7 +192,8 @@ char *argv[];
     dbname = global_params.dbname;
     mkey_name = global_params.mkey_name;
     master_keyblock.enctype = global_params.enctype;
-    stash_file = strdup(global_params.stash_file);
+    if (global_params.stash_file)
+	    stash_file = strdup(global_params.stash_file);
     rblock.max_life = global_params.max_life;
     rblock.max_rlife = global_params.max_rlife;
     rblock.expiration = global_params.expiration;

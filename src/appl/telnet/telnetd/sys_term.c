@@ -1289,7 +1289,7 @@ start_login(host, autologin, name)
 
 		if (pty > 2) {
 			register char *cp;
-			char speed[128];
+			char speed[1024];
 			int isecho, israw, xpty, len;
 			extern int def_rspeed;
 #  ifndef LOGIN_HOST
@@ -1326,7 +1326,13 @@ start_login(host, autologin, name)
 			len = strlen(name)+1;
 			write(xpty, name, len);
 			write(xpty, name, len);
-			sprintf(speed, "%s/%d", (cp = getenv("TERM")) ? cp : "",
+			memset(speed, 0, sizeof(speed));
+			strncpy(speed,
+				(cp = getenv("TERM")) ? cp : "",
+				sizeof(speed)-1-(10*sizeof(def_rspeed)/4)-1);
+			/* 1 for /, () for the number, 1 for trailing 0. */
+			sprintf(speed + strlen(speed),
+				"/%d",
 				(def_rspeed > 0) ? def_rspeed : 9600);
 			len = strlen(speed)+1;
 			write(xpty, speed, len);

@@ -7,7 +7,10 @@ all install::
 check:: check-$(HAVE_RUNTEST)
 
 check-::
-	@echo "Dejagnu is not installed on this system. No tests run."
+	@echo "+++"
+	@echo "+++ WARNING: tests/dejagnu tests not run."
+	@echo "+++ runtest is unavailable."
+	@echo "+++"
 
 check-runtest:: t_inetd site.exp
 	$(HAVE_RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
