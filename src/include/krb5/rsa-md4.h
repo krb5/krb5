@@ -3,7 +3,8 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,9 +16,12 @@
  * md4.h from RFC1186
  *
  * $Log$
- * Revision 5.3  1991/01/03 16:54:49  jtkohl
- * add encrypted version entries
+ * Revision 5.4  1991/02/13 15:58:08  jtkohl
+ * change lengths to include the count
  *
+ * Revision 5.3  91/01/03  16:54:49  jtkohl
+ * add encrypted version entries
+ * 
  * Revision 5.2  90/11/20  10:23:54  jtkohl
  * don't need types defined here, see <encryption.h>
  * 
@@ -36,8 +40,9 @@
 #ifndef KRB5_RSA_MD4__
 #define KRB5_RSA_MD4__
 
-#define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32))
-#define RSA_MD4_DES_CKSUM_LENGTH	(4*sizeof(krb5_int32))
+/* 4 words of buffer, plus 8 bytes of count */
+#define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
+#define RSA_MD4_DES_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
 
 extern krb5_checksum_entry
     rsa_md4_cksumtable_entry,
