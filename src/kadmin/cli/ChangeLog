@@ -1,3 +1,8 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* strftime.c: Replace with a copy of the one from libkrb5, which
+	isn't under GPL.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.c (kadmin_cpw): Initialize ks_tuple to NULL.
