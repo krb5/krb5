@@ -161,7 +161,10 @@ unless modified by the
 option.
 .TP
 \fB\-x\fP
-Turn on encryption of the data stream.
+Turn on encryption of the data stream.  When this option is turned on,
+.B telnet
+will exit with an error if authentication cannot be negotiated or if
+encryption cannot be turned on.
 .TP
 .I host
 Indicates the name, alias, or Internet address of the remote host.

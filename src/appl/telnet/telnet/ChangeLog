@@ -1,6 +1,8 @@
 Tue Sep 10 14:09:49 1996  Tom Yu  <tlyu@mit.edu>
 
 	* telnet.1: remove ".so man1/header.doc"
+	* telnet.1: Update -x flag usage to reflect our behavior of
+		dropping connection if encryption cannot be negotiated.
 
 Sat Jul 27 21:34:22 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
