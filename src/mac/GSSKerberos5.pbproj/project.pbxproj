@@ -1350,7 +1350,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
-				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
@@ -1372,7 +1372,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = KerberosComErr;
-			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 			productName = ComErr;
 			productReference = 012574A5FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -1514,7 +1514,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
-				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -1537,7 +1537,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = KerberosProfile;
-			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 			productName = Profile;
 			productReference = 012574A6FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -1844,7 +1844,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
-				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -1868,7 +1868,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = Kerberos5;
-			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 			productName = Kerberos5;
 			productReference = 012574A7FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -6497,7 +6497,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
-				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -6522,7 +6522,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = GSS;
-			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+			productInstallPath = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 			productName = GSS;
 			productReference = 012574A8FF7A9C8212120111;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
