@@ -90,13 +90,12 @@ int krb5_gss_dbg_client_expcreds = 0;
  * ccache.
  */
 static krb5_error_code get_credentials(context, cred, server, now,
-				       endtime, enctypes, out_creds)
+				       endtime, out_creds)
     krb5_context context;
     krb5_gss_cred_id_t cred;
     krb5_principal server;
     krb5_timestamp now;
     krb5_timestamp endtime;
-    const krb5_enctype *enctypes;
     krb5_creds **out_creds;
 {
     krb5_error_code	code;
@@ -112,10 +111,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     in_creds.keyblock.enctype = 0;
 
-    code = krb5_set_default_tgs_enctypes (context, enctypes);
-    if (code)
-      goto cleanup;
-        code = krb5_get_credentials(context, 0, cred->ccache,
+    code = krb5_get_credentials(context, 0, cred->ccache,
 				&in_creds, out_creds);
     if (code)
 	goto cleanup;
@@ -325,85 +321,6 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 }
 
 /*
- * get_requested_enctypes
- *
- * Filter the krb5 library's default enctype list with the set of
- * enctypes we support for GSSAPI.
- */
-static krb5_error_code
-get_requested_enctypes(
-   krb5_context context,
-   krb5_enctype **ret_enctypes)
-{
-   krb5_error_code code;
-   int i, j, k;
-   int is_duplicate_enctype;
-   int is_wanted_enctype;
-   static const krb5_enctype wanted_enctypes[] = {
-     ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-     ENCTYPE_DES3_CBC_SHA1,
-     ENCTYPE_ARCFOUR_HMAC,
-     ENCTYPE_DES_CBC_CRC,
-     ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
-   };
-#define N_WANTED_ENCTYPES (sizeof(wanted_enctypes)/sizeof(wanted_enctypes[0]))
-   krb5_enctype *default_enctypes = 0;
-   krb5_enctype *requested_enctypes;
-
-   *ret_enctypes = malloc((N_WANTED_ENCTYPES + 1) * sizeof(krb5_enctype));
-   if (*ret_enctypes == NULL)
-      return ENOMEM;
-
-   code = krb5_get_tgs_ktypes (context, 0, &default_enctypes);
-   if (code) {
-      free(*ret_enctypes);
-      *ret_enctypes = NULL;
-      return code;
-   }
-   requested_enctypes = *ret_enctypes;
-
-   /* "i" denotes *next* slot to fill.  Don't forget to save room
-      for a trailing zero.  */
-   i = 0;
-   for (j = 0;
-	(default_enctypes[j] != 0
-	 /* This part should be redundant, but let's be paranoid.  */
-	 && i < N_WANTED_ENCTYPES);
-	j++) {
-
-      krb5_enctype e = default_enctypes[j];
-
-      /* Is this enctype one of the ones we want for GSSAPI?  */
-      is_wanted_enctype = 0;
-      for (k = 0; k < N_WANTED_ENCTYPES; k++) {
-	 if (wanted_enctypes[k] == e) {
-	    is_wanted_enctype = 1;
-	    break;
-	 }
-      }
-      /* If unwanted, go to the next one. */
-      if (!is_wanted_enctype)
-	 continue;
-
-      /* Is this enctype already in the list of enctypes to
-	 request?  (Is it a duplicate?)  */
-      is_duplicate_enctype = 0;
-      for (k = 0; k < i; k++) {
-	 if (requested_enctypes[k] == e) {
-	    is_duplicate_enctype = 1;
-	    break;
-	 }
-      }
-      /* If it is not a duplicate, add it. */
-      if (!is_duplicate_enctype)
-	 requested_enctypes[i++] = e;
-   }
-   krb5_free_ktypes(context, default_enctypes);
-   requested_enctypes[i++] = 0;
-   return GSS_S_COMPLETE;
-}
-
-/*
  * setup_enc
  *
  * Fill in the encryption descriptors.  Called after AP-REQ is made.
@@ -493,6 +410,7 @@ fail:
  *
  * Do the grunt work of setting up a new context.
  */
+#include <stdio.h>
 static OM_uint32
 new_connection(
    OM_uint32 *minor_status,
@@ -534,8 +452,17 @@ new_connection(
    /* complain if the input token is non-null */
 
    if (input_token != GSS_C_NO_BUFFER && input_token->length != 0) {
-      *minor_status = 0;
-      return(GSS_S_DEFECTIVE_TOKEN);
+#ifdef CFX_EXERCISE
+       if (*context_handle != GSS_C_NO_CONTEXT
+	   && ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid) {
+	   /* XXX Should check for a KRB_ERROR message that we can
+	      parse, and which contains the expected error code.  */
+	   ctx = (krb5_gss_ctx_id_t)*context_handle;
+	   goto resume_after_testing;
+       }
+#endif
+       *minor_status = 0;
+       return(GSS_S_DEFECTIVE_TOKEN);
    }
 
    /* create the ctx */
@@ -575,13 +502,8 @@ new_connection(
 				   &ctx->there)))
       goto fail;
 
-   code = get_requested_enctypes(context, &requested_enctypes);
-   if (code)
-      goto fail;
-
    code = get_credentials(context, cred, ctx->there, now,
-			  ctx->endtime, requested_enctypes, &k_cred);
-   free(requested_enctypes);
+			  ctx->endtime, &k_cred);
    if (code)
       goto fail;
 
@@ -637,6 +559,46 @@ new_connection(
    }
    *context_handle = (gss_ctx_id_t) ctx;
    ctx_free = 0;
+
+#ifdef CFX_EXERCISE
+   if (ctx->proto == 1
+       && (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
+       && (rand() & 3)) {
+       /* Create a bogus token and return it, with status
+	  GSS_S_CONTINUE_NEEDED.  Save enough data that we can resume
+	  on the next call.  */
+       static const unsigned char hack_token[20] = {
+	   0x60, 0x12, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+	   0xf7, 0x12, 0x01, 0x02, 0x02, 0x12, 0x34, 0x68,
+	   0x65, 0x6c, 0x6c, 0x6f
+       };
+       ctx->testing_unknown_tokid = 1;
+       ctx->init_token = token;
+       token.value = malloc(20);
+       token.length = 20;
+       if (token.value == NULL) {
+	   /* Skip testing.  We'll probably die soon enough, but let's
+	      not do it because we couldn't exercise this code
+	      path.  */
+	   goto resume_after_testing;
+       }
+       memcpy(token.value, hack_token, sizeof(hack_token));
+       _log("%s:%d: sending bogus token to test unknown-TOK_ID handling\n",
+	    SFILE, __LINE__);
+       /* Can just fall through into the normal return path, because
+	  it'll always return GSS_S_CONTINUE_NEEDED because we're
+	  doing mutual authentication.  */
+   }
+   if (0) {
+   resume_after_testing:
+       _log("%s:%d: resuming after bogus-token test\n", SFILE, __LINE__);
+       token = ctx->init_token;
+       ctx->init_token.value = 0;
+       ctx->init_token.length = 0;
+       ctx->testing_unknown_tokid = 0;
+       ctx_free = 0;
+   }
+#endif
 
    /* compute time_rec */
    if (time_rec) {
@@ -888,6 +850,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    OM_uint32 major_status;
    OM_uint32 tmp_min_stat;
 
+   _log("%s:%d: %s input_token len %d\n", SFILE, __LINE__, __func__,
+	input_token == GSS_C_NO_BUFFER ? -1 : input_token->length);
+
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
 
@@ -952,7 +917,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    /* is this a new connection or not? */
 
    /*SUPPRESS 29*/
-   if (*context_handle == GSS_C_NO_CONTEXT) {
+   if (*context_handle == GSS_C_NO_CONTEXT
+       || ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid) {
       major_status = new_connection(minor_status, cred, context_handle,
 				    target_name, mech_type, req_flags,
 				    time_req, input_chan_bindings,

@@ -103,6 +103,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     _log("%s:%d: wrap input token: %d @%p toktype=0x%x\n", SFILE, __LINE__,
 	 message->length, message->value, toktype);
 
+#ifdef CFX_EXERCISE
     {
 	static int initialized = 0;
 	if (!initialized) {
@@ -110,6 +111,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	    initialized = 1;
 	}
     }
+#endif
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	krb5_data plain;
