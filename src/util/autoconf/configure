@@ -18,7 +18,17 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # Save the original args to write them into config.status later.
-configure_args="$*"
+# Do argument quoting in a sane fashion so things don't break while recursing.
+configure_args=
+for arg do
+  case $arg in
+    *\"*|*\\*|*\$*|*\`*)
+      arg=`echo $arg|sed -e 's/\\\\/\\\\\\\\/g;s/"/\\\\"/g;s/\\$/\\\\$/g;s/\`/\\\\\`/g'`
+      ;;
+  esac
+  configure_args="$configure_args \"$arg\""
+done
+# configure_args="[$]*"
 
 # Only options that might do something get documented.
 ac_usage="Usage: configure [options] [host]
@@ -266,7 +276,8 @@ ac_configure_temp="${configure_args-$*}"
 # Strip out --no-create and --norecursion so they don't pile up.
 configure_args=
 for ac_arg in $ac_configure_temp; do
-  case "$ac_arg" in
+  eval ac_unquoted="$ac_arg"
+  case "$ac_unquoted" in
   -no-create | --no-create | --no-creat | --no-crea | --no-cre \
   | --no-cr | --no-c) ;;
   -norecursion | --norecursion | --norecursio | --norecursi \
@@ -383,14 +394,14 @@ fi
 
 if test -z "$INSTALL"; then
   # As a last resort, use the slow shell script.
-  for ac_dir in ${srcdir} ${srcdir}/.. ${srcdir}/../..; do
+  for ac_dir in ${srcdir} ${srcdir}/.. ${srcdir}/../.. ${srcdir}/../../util/autoconf; do
     if test -f $ac_dir/install.sh; then
       INSTALL="$ac_dir/install.sh -c"; break
     fi
   done
 fi
 if test -z "$INSTALL"; then
-  echo "configure: can not find install.sh in ${srcdir} or ${srcdir}/.. or ${srcdir}/../.." >&2; exit 1
+  echo "configure: can not find install.sh in ${srcdir} or ${srcdir}/.. or ${srcdir}/../.. ${srcdir}/../../util/autoconf" >&2; exit 1
 fi
 test -n "$verbose" && echo "	setting INSTALL to $INSTALL"
 
@@ -402,6 +413,24 @@ test -n "$verbose" && echo "	setting INSTALL_PROGRAM to $INSTALL_PROGRAM"
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 test -n "$verbose" && echo "	setting INSTALL_DATA to $INSTALL_DATA"
 
+
+ac_top=../../
+case $ac_top in
+  /*) ;; # it's fine as is
+  *) ac_top=$srcdir/$ac_top ;;
+esac
+  ac_tmpin="${ac_top}config/pre.in"
+  if test -r $ac_tmpin; then
+     ac_prepend=$ac_tmpin
+  else
+     ac_prepend=
+  fi
+  ac_tmpin="${ac_top}config/post.in"
+  if test -r $ac_tmpin; then
+     ac_postpend=$ac_tmpin
+  else
+     ac_postpend=
+  fi
 
 # The preferred way to propogate these variables is regular @ substitutions.
 if test -n "$prefix"; then
@@ -474,6 +503,8 @@ DEFS='$DEFS'
 ac_prsub='$ac_prsub'
 ac_vpsub='$ac_vpsub'
 extrasub='$extrasub'
+ac_prepend='$ac_prepend'
+ac_postpend='$ac_postpend'
 EOF
 cat >> config.status <<\EOF
 
@@ -524,7 +555,7 @@ s%@top_srcdir@%$top_srcdir%g
 s%@prefix@%$prefix%g
 s%@exec_prefix@%$exec_prefix%g
 s%@DEFS@%$DEFS%
-" $ac_given_srcdir/${ac_file}.in >> $ac_file
+" $ac_prepend $ac_given_srcdir/${ac_file}.in $ac_postpend >> $ac_file
 fi; done
 
 
