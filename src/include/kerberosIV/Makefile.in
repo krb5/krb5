@@ -5,7 +5,7 @@ MY_SUBDIRS=.
 BUILDTOP=$(REL)..$(S)..
 KRB4_HEADERS=krb.h des.h mit-copyright.h
 
-all-unix:: krb_err.h
+all-unix:: krb_err.h kadm_err.h
 
 krb_err.h: krb_err.et
 krb_err.et: $(SRCTOP)/lib/krb4/krb_err.et
@@ -20,10 +20,9 @@ kadm_err.et: $(SRCTOP)/lib/krb4/kadm_err.et
 clean-unix::
 	$(RM) krb_err.et kadm_err.et krb_err.h kadm_err.h
 
-install-headers-unix install:: krb_err.h
+install-headers-unix install:: krb_err.h kadm_err.h
 	@set -x; for f in $(KRB4_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/$$f ; \
 	done
-
-install:: krb_err.h
 	$(INSTALL_DATA) krb_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)krb_err.h
+	$(INSTALL_DATA) kadm_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kerberosIV$(S)kadm_err.h
