@@ -1,3 +1,11 @@
+2001-08-03  Mitchell Berger  <mitchb@mit.edu>
+
+	* ftpd.c (main): Convert to do option parsing with getopt() rather
+	than the whitespace-sensitive voodoo we've used in the past.  This
+	fixes a bug where use of -u to set a default umask silently failed and
+	granted more permission on files than desired if the -u and the mode
+	were separated by a space, and likely many other such bugs.
+
 2001-07-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftpd.c: Provide prototypes for myoob and lostconn. 

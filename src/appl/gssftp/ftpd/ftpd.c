@@ -288,8 +288,14 @@ main(argc, argv, envp)
 	char *argv[];
 	char **envp;
 {
-	int addrlen, on = 1, tos, port = -1;
-	char *cp;
+	int addrlen, c, on = 1, tos, port = -1;
+	extern char *optarg;
+	extern int optopt;
+#ifdef KRB5_KRB4_COMPAT
+	char *option_string = "AaCcdlp:r:s:T:t:U:u:vw:";
+#else /* !KRB5_KRB4_COMPAT */
+	char *option_string = "AaCcdlp:r:T:t:U:u:vw:";
+#endif /* KRB5_KRB4_COMPAT */
 	ftpusers = _PATH_FTPUSERS_DEFAULT;
 
 #ifdef KRB5_KRB4_COMPAT
@@ -313,9 +319,8 @@ main(argc, argv, envp)
 #endif
 #endif
 
-	argc--, argv++;
-	while (argc > 0 && *argv[0] == '-') {
-		for (cp = &argv[0][1]; *cp; cp++) switch (*cp) {
+	while ((c = getopt(argc, argv, option_string)) != -1) {
+		switch (c) {
 
 		case 'v':
 			debug = 1;
@@ -346,89 +351,55 @@ main(argc, argv, envp)
 			break;
 
 		case 'p':
-			if (*++cp != '\0')
-				port = atoi(cp);
-			else if (argc > 1) {
-				argc--, argv++;
-				port = atoi(*argv);
-			}
-			else
-				fprintf(stderr, "ftpd: -p expects argument\n");
-			goto nextopt;
+			port = atoi(optarg);
+			break;
 
 		case 'r':
-			if (*++cp != '\0')
-				setenv("KRB_CONF", cp, 1);
-			else if (argc > 1) {
-				argc--, argv++;
-				setenv("KRB_CONF", *argv, 1);
-			}
-			else
-				fprintf(stderr, "ftpd: -r expects argument\n");
-			goto nextopt;
+			setenv("KRB_CONF", optarg, 1);
+			break;
 
 #ifdef KRB5_KRB4_COMPAT
 		case 's':
-			if (*++cp != '\0')
-				keyfile = cp;
-			else if (argc > 1) {
-				argc--, argv++;
-				keyfile = *argv;
-			}
-			else
-				fprintf(stderr, "ftpd: -s expects argument\n");
-			goto nextopt;
-
+			keyfile = optarg;
+			break;
 #endif /* KRB5_KRB4_COMPAT */
+
 		case 't':
-			timeout = atoi(++cp);
+			timeout = atoi(optarg);
 			if (maxtimeout < timeout)
 				maxtimeout = timeout;
-			goto nextopt;
+			break;
 
 		case 'T':
-			maxtimeout = atoi(++cp);
+			maxtimeout = atoi(optarg);
 			if (timeout > maxtimeout)
 				timeout = maxtimeout;
-			goto nextopt;
+			break;
 
 		case 'u':
-		    {
-			int val = 0;
+			{
+			    int val = 0;
+			    char *umask_val = optarg;
 
-			while (*++cp && *cp >= '0' && *cp <= '9')
-				val = val*8 + *cp - '0';
-			if (*cp)
-				fprintf(stderr, "ftpd: Bad value for -u\n");
-			else
-				defumask = val;
-			goto nextopt;
-		    }
+			    while (*umask_val >= '0' && *umask_val <= '9') {
+				    val = val*8 + *umask_val - '0';
+				    umask_val++;
+			    }
+			    if (*umask_val != ' ' && *umask_val != '\0')
+				    fprintf(stderr, "ftpd: Bad value for -u\n");
+			    else
+				    defumask = val;
+			    break;
+			}
 
 		case 'U':
-		    if (*++cp != '\0')
-			ftpusers = cp;
-		    else if (argc > 1) {
-			argc--, argv++;
-			ftpusers = *argv;
-		    }
-		    else
-			fprintf(stderr, "ftpd: -U expects argument\n");
-		    goto nextopt;
+			ftpusers = optarg;
+			break;
 
 		case 'w':
 		{
 			char *foptarg;
-			if (*++cp != '\0')
-				foptarg = cp;
-			else if (argc > 1) {
-				argc--;
-				argv++;
-				foptarg = *argv;
-			} else {
-				fprintf(stderr, "ftpd: -w expects arg\n");
-				exit(1);
-			}
+			foptarg = optarg;
 
 			if (!strcmp(foptarg, "ip"))
 				always_ip = 1;
@@ -451,15 +422,13 @@ main(argc, argv, envp)
 					maxhostlen = atoi(foptarg);
 				}
 			}
-			goto nextopt;
+			break;
 		}
 		default:
 			fprintf(stderr, "ftpd: Unknown flag -%c ignored.\n",
-			     *cp);
+			     (char)optopt);
 			break;
 		}
-nextopt:
-		argc--, argv++;
 	}
 
 	if (port != -1) {
