@@ -1,6 +1,50 @@
 /* cc_file.c - file ccache implementation
  * Copyright 2000 MIT blah blah...
  */
+/*
+If OPENCLOSE is defined, ecah of the functions opens and closes the
+file whenever it needs to access it.  Otherwise, the file is opened
+once in initialize and closed once is close.
+
+This library depends on UNIX-like file descriptors, and UNIX-like
+behavior from the functions: open, close, read, write, lseek.
+
+The quasi-BNF grammar for a credentials cache:
+
+file ::= 
+	principal list-of-credentials
+
+credential ::=
+	client (principal)
+	server (principal)
+	keyblock (keyblock)
+	times (ticket_times)
+	is_skey (boolean)
+	ticket_flags (flags)
+	ticket (data)
+	second_ticket (data)
+
+principal ::= 
+	number of components (int32)
+	component 1 (data)
+	component 2 (data)
+	...
+	
+data ::=
+	length (int32)
+	string of length bytes
+
+etc.
+ */
+/* todo:
+Make sure that each time a function returns KRB5_NOMEM, everything
+allocated earlier in the function and stack tree is freed.
+
+File locking
+
+fcc_nseq.c and fcc_read don't check return values a lot.
+
+ */
 #include "k5-int.h"
 
 #define NEED_SOCKETS    /* Only for ntohs, etc. */

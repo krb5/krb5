@@ -1,9 +1,0 @@
-Make sure that each time a function returns KRB5_NOMEM, everything
-allocated earlier in the function and stack tree is freed.
-
-Overwrite cache file with nulls before removing it.
-
-Check return values and sanity-check parameters more thoroughly.  This
-code was derived from UNIX file I/O code, and the conversion of
-error-trapping may be incomplete.  Probably lots of bugs dealing with
-end-of-file versus other errors.

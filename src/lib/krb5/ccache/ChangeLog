@@ -1,5 +1,11 @@
 2000-07-14  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_stdio.c, t_file.c, t_memory.c: Test cases copied from old
+	subdirectories.  Currently unused.
+	* Makefile.in (t_stdio): New target, basically same as 'test' in
+	old stdio/Makefile.in.
+	* file, memory, stdio: Subdirectories deleted.
+
 	* cc_file.c, cc_stdio.c, cc_memory.c: New files, built from source
 	files of appropriate subdirectories.
 	* fcc.h: New file, copied from file/fcc.h; temporary.

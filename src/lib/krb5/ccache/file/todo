@@ -1,7 +1,0 @@
-Make sure that each time a function returns KRB5_NOMEM, everything
-allocated earlier in the function and stack tree is freed.
-
-File locking
-
-fcc_nseq.c and fcc_read don't check return values a lot.
-

@@ -1,6 +1,58 @@
 /* cc_stdio.c - stdio ccache implementation
  * Copyright 2000 MIT blah blah...
  */
+/*
+If OPENCLOSE is defined, ecah of the functions opens and closes the
+file whenever it needs to access it.  Otherwise, the file is opened
+once in initialize and closed once is close.
+
+This library depends on ANSI C library routines for file handling.  It
+may also have some implicit assumptions about UNIX, but we'll get
+those out as much as possible.
+
+If you are running a UNIX system, you probably want to use the
+UNIX-based "file" cache package instead of this.
+
+The quasi-BNF grammar for a credentials cache:
+
+file ::= 
+	format-vno principal list-of-credentials
+
+credential ::=
+	client (principal)
+	server (principal)
+	keyblock (keyblock)
+	times (ticket_times)
+	is_skey (boolean)
+	ticket_flags (flags)
+	ticket (data)
+	second_ticket (data)
+
+principal ::= 
+	number of components (int32)
+	component 1 (data)
+	component 2 (data)
+	...
+	
+data ::=
+	length (int32)
+	string of length bytes
+
+format-vno ::= <int16>
+
+etc.
+ */
+/*todo:
+Make sure that each time a function returns KRB5_NOMEM, everything
+allocated earlier in the function and stack tree is freed.
+
+Overwrite cache file with nulls before removing it.
+
+Check return values and sanity-check parameters more thoroughly.  This
+code was derived from UNIX file I/O code, and the conversion of
+error-trapping may be incomplete.  Probably lots of bugs dealing with
+end-of-file versus other errors.
+ */
 #include "k5-int.h"
 /* start of former stdio/scc-proto.h */
 /*
