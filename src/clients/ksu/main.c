@@ -138,6 +138,11 @@ char * dir_of_cc_source;
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
     prog_name = argv[0];
+    if (strlen (prog_name) > 50) {
+	/* this many chars *after* last / ?? */
+	com_err(prog_name, 0, "program name too long - quitting to avoid triggering system logging bugs");
+	exit (1);
+    }
 
 
 #ifndef LOG_NDELAY

@@ -1,3 +1,11 @@
+2000-05-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* ccache.c (krb5_ccache_copy): Modify conditionalized code block
+	slightly to make automatic indentation work better.
+
+	* main.c (main): Complain and quit if prog_name is longer than 50
+	characters.
+
 2000-04-26  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 
