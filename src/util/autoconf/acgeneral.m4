@@ -881,9 +881,7 @@ fi
 
 dnl AC_CACHE_SAVE()
 define(AC_CACHE_SAVE,
-[if test -w $cache_file; then
-echo "updating cache $cache_file"
-cat > $cache_file <<\EOF
+[cat > $cache_file.$$ <<\EOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
 # scripts and configure runs.  It is not useful on other systems.
@@ -906,11 +904,20 @@ dnl Allow a site initialization script to override cache values.
 # with their high bit set.
 (set) 2>&1 | tr '\201-\377' '\001-\177' |
   sed -n "s/^\([a-zA-Z0-9_]*_cv_[a-zA-Z0-9_]*\)=\(.*\)/: \${\1='\2'}/p" \
-  >> $cache_file
+  >> $cache_file.$$
 changequote([, ])dnl
+if cmp -s $cache_file $cache_file.$$; then
+  true
 else
-echo "not updating unwritable cache $cache_file"
+  if test -w $cache_file; then
+    echo "updating cache $cache_file"
+    cat $cache_file.$$ > $cache_file
+  else
+    echo "not updating unwritable cache $cache_file"
+    diff $cache_file $cache_file.$$
+  fi
 fi
+rm -f $cache_file.$$
 ])
 
 dnl The name of shell var CACHE-ID must contain `_cv_' in order to get saved.
