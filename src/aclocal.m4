@@ -67,30 +67,6 @@ WITH_HESIOD dnl
 KRB5_AC_MAINTAINER_MODE dnl
 AC_ARG_PROGRAM dnl
 dnl
-dnl This selects the correct autoconf file; either the one in our source tree,
-dnl or the one found in the user's path.  $srcdir may be relative, and if so,
-dnl it's relative to the directory of the configure script.  Since the 
-dnl automatic makefile rules to rerun autoconf cd into that directory, the
-dnl right thing happens.
-dnl
-dnl if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
-dnl	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
-dnl	AUTOCONFFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
-dnl	AUTOHEADER=$ac_reltopdir/util/autoconf/autoheader
-dnl	AUTOHEADERFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
-dnl else
-	AUTOCONF=autoconf
-	AUTOCONFFLAGS=
-	AUTOHEADER=autoheader
-	AUTOHEADERFLAGS=
-	AUTOCONFINCFLAGS="--include"
-dnl fi
-AC_SUBST(AUTOCONF)
-AC_SUBST(AUTOCONFFLAGS)
-AC_SUBST(AUTOCONFINCFLAGS)
-AC_SUBST(AUTOHEADER)
-AC_SUBST(AUTOHEADERFLAGS)
-dnl
 dnl This identifies the top of the source tree relative to the directory 
 dnl in which the configure file lives.
 dnl
