@@ -420,10 +420,18 @@ svc_getreqset(readfds)
 	register SVCXPRT *xprt;
 	register int sock;
         bool_t no_dispatch;
+	caddr_t rawcred, rawverf, cookedcred;
 
-	msg.rm_call.cb_cred.oa_base = mem_alloc(MAX_AUTH_BYTES);
-	msg.rm_call.cb_verf.oa_base = mem_alloc(MAX_AUTH_BYTES);
-	r.rq_clntcred = mem_alloc(RQCRED_SIZE);
+	rawcred = mem_alloc(MAX_AUTH_BYTES);
+	rawverf = mem_alloc(MAX_AUTH_BYTES);
+	cookedcred = mem_alloc(RQCRED_SIZE);
+
+	if (rawcred == NULL || rawverf == NULL || cookedcred == NULL)
+		return;
+
+	msg.rm_call.cb_cred.oa_base = rawcred;
+	msg.rm_call.cb_verf.oa_base = rawverf;
+	r.rq_clntcred = cookedcred;
 
 #ifdef FD_SETSIZE
 	for (sock = 0; sock <= max_xport; sock++) {
@@ -497,7 +505,7 @@ svc_getreqset(readfds)
 		} while (stat == XPRT_MOREREQS);
 	    }
 	}
-	mem_free(msg.rm_call.cb_cred.oa_base, MAX_AUTH_BYTES);
-	mem_free(msg.rm_call.cb_verf.oa_base, MAX_AUTH_BYTES);
-	mem_free(r.rq_clntcred, RQCRED_SIZE);
+	mem_free(rawcred, MAX_AUTH_BYTES);
+	mem_free(rawverf, MAX_AUTH_BYTES);
+	mem_free(cookedcred, RQCRED_SIZE);
 }
