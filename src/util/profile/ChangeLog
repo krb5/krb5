@@ -1,3 +1,10 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_free_file_data): Destroy mutex before
+	freeing containing structure.
+	(profile_open_file): If mutex creation fails, free storage
+	directly instead of calling profile_close_file.
+
 2004-12-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_tree.c (profile_node_iterator): When the iterator has a

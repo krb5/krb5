@@ -117,6 +117,8 @@ static void krb5int_yarrow_init_Limits(Yarrow_CTX* y)
     }
 }
 
+static int yarrow_reseed_locked( Yarrow_CTX* y, int pool );
+
 /* if the program was forked, the child must not operate on the same
    PRNG state */
 #ifdef YARROW_DETECT_FORK
@@ -144,7 +146,7 @@ static int Yarrow_detect_fork(Yarrow_CTX *y)
 				  sizeof (newpid), 0));
 	TRY (yarrow_input_locked (y, 0, &newpid,
 				  sizeof (newpid), 0));
-	TRY (krb5int_yarrow_reseed (y, YARROW_FAST_POOL));
+	TRY (yarrow_reseed_locked (y, YARROW_FAST_POOL));
     }
 
  CATCH:
@@ -302,7 +304,7 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
 	{
 	    if (source->entropy[YARROW_FAST_POOL] >= y->fast_thresh)
 	    {
-		ret = krb5int_yarrow_reseed(y, YARROW_FAST_POOL);
+		ret = yarrow_reseed_locked(y, YARROW_FAST_POOL);
 		if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
 		{
 		    THROW( ret );
@@ -319,7 +321,7 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
 		if (y->slow_k_of_n >= y->slow_k_of_n_thresh)
 		{
 		    y->slow_k_of_n = 0;
-		    ret = krb5int_yarrow_reseed(y, YARROW_SLOW_POOL);
+		    ret = yarrow_reseed_locked(y, YARROW_SLOW_POOL);
 		    if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
 		    {
 			THROW( ret );
@@ -433,7 +435,7 @@ static int krb5int_yarrow_output_Block( Yarrow_CTX* y, void* out )
 	    
 	    TRACE( printf( "OUTPUT LIMIT REACHED," ); );
 
-	    TRY( krb5int_yarrow_reseed( y, YARROW_SLOW_POOL ) );
+	    TRY( yarrow_reseed_locked( y, YARROW_SLOW_POOL ) );
 	}
     }
   
@@ -665,7 +667,7 @@ static int Yarrow_Save_State( Yarrow_CTX *y )
 
 #endif
 
-int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
+static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 {
     EXCEP_DECL;
     HASH_CTX* fast_pool = &y->pool[YARROW_FAST_POOL];
@@ -812,6 +814,14 @@ int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
 
     EXCEP_RET;
 }
+int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
+{
+	int r;
+	LOCK();
+	r = yarrow_reseed_locked(y, pool);
+	UNLOCK();
+	return r;
+}
 
 int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_size)
 {
@@ -905,9 +915,9 @@ int krb5int_yarrow_final(Yarrow_CTX* y)
 #endif
 
  CATCH:
-    if ( locked ) { TRY( UNLOCK() ); }
     krb5int_yarrow_cipher_final(&y->cipher);
     mem_zero( y, sizeof(Yarrow_CTX) );
+    if ( locked ) { TRY( UNLOCK() ); }
     EXCEP_RET;
 }
 

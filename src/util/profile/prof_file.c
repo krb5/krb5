@@ -272,7 +272,8 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 
 	retval = k5_mutex_init(&data->lock);
 	if (retval) {
-	    profile_close_file(prf);
+	    free(data);
+	    free(prf);
 	    return retval;
 	}
 
