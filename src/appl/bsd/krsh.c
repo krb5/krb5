@@ -130,7 +130,7 @@ main(argc, argv0)
     fd_set readfrom, ready;
     int one = 1;
     struct servent *sp;
-	struct servent defaultservent = {0,0,0,0};
+    struct servent defaultservent;
 
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
@@ -144,7 +144,8 @@ main(argc, argv0)
     int fflag = 0, Fflag = 0, Aflag = 0;
 #endif  /* KERBEROS */
     int debug_port = 0;
-   
+
+    memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1; 
 

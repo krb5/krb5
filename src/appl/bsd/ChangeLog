@@ -1,3 +1,8 @@
+Thu Jan 11 12:40:08 1996  Ezra Peisach  (epeisach@paris)
+
+	* krsh.c, krlogin.c: (main): Ultrix cc does not support automatic
+		aggregate initiailzation of structures. 
+
 Thu Jan 11 11:27:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krcp.c (error): Convert to use varargs.

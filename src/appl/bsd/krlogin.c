@@ -309,7 +309,7 @@ main(argc, argv)
 #endif
     struct passwd *pwd;
     struct servent *sp;
-	struct servent defaultservent = {0,0,0,0};
+    struct servent defaultservent;
     int uid, options = 0;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -326,6 +326,7 @@ main(argc, argv)
 #endif
     int debug_port = 0;
    
+    memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1;
 
