@@ -1,3 +1,8 @@
+
+Tue Aug 29 13:37:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kv5m_err.et - Add magic numbers for DB_CONTEXT, AUTH_CONTEXT, KEYTAB
+		RCACHE and CCACHE.
+
 Mon Aug 28 12:53:01 1995    <tytso@rsts-11.mit.edu>
 
 	* kv5m_err.et: Added new error codes KV5M_ALT_METHOD and
