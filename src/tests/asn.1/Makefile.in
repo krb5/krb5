@@ -1,13 +1,12 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 LDFLAGS = -g
 
-ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 
 all:: krb5_encode_test krb5_decode_test
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1

@@ -2,7 +2,6 @@ DEFINES = -DLOCAL_REALM='"."' -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH
 CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 SRCS = \
@@ -20,8 +19,8 @@ OBJS = \
 
 all:: ksu
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 ksu: $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o ksu $(OBJS) $(KLIB) $(LIBS)

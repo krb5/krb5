@@ -1,3 +1,7 @@
+Thu Mar  2 12:32:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
 Wed Mar  1 16:26:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Replace check for -lsocket and -lnsl with
