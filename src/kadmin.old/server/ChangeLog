@@ -1,4 +1,13 @@
 
+Thu Aug 3 11:46:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_{adm_func,fmt_inq,funcs,process,server}.c - In order to get
+		things to compile, replace "salt_type" with "key_data[0].
+		key_data_type[1]", "kvno" with "key_data[0].key_data_kvno"
+		blindly.  Also #ifdef out anything having to do with mod_name
+		mod_date and last_pwd_change.  Change "principal" to "princ"
+		and remove or replace references to "key" and "alt_key".
+
+
 Mon Jul 17 15:11:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_server.c - Add NULL stash file argument to krb5_db_fetch_mkey().
 

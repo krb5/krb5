@@ -107,7 +107,7 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     outbuf.length = 3;
     
     if (oper_type == CHGOPER || oper_type == CH4OPER) {
-	outbuf.data[3] = entry.salt_type;
+	outbuf.data[3] = entry.key_data[0].key_data_type[1];
 	outbuf.length = 4;
     }
     
@@ -222,7 +222,7 @@ adm_change_pwd(context, auth_context, prog, customer_name, salttype)
     
     retval = krb5_unparse_name(context, newprinc, &composite_name);
 
-    entry.salt_type = (krb5_int32) salttype;
+    entry.key_data[0].key_data_type[1] = (krb5_int16) salttype;
 
     if (retval = adm_enter_pwd_key(context, "adm_change_pwd",              
 				   composite_name,
@@ -583,7 +583,7 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 	if (msg_data.data[3] == KMODVNO) {
 	    (void) memcpy(tempstr, (char *) msg_data.data + 4,
 			  msg_data.length - 4);
-	    entry.kvno = atoi(tempstr);
+	    entry.key_data[0].key_data_kvno = atoi(tempstr);
 	}
 	
 	if (msg_data.data[3] == KMODATTR) {
@@ -636,6 +636,7 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
         }
 	
 	free(msg_data.data);
+#ifdef	notdef
 	entry.mod_name = client_server_info.client;
 	if (retval = krb5_timeofday(context, &entry.mod_date)) {
 	    com_err("adm_mod_old_key", retval, "while fetching date");
@@ -643,6 +644,7 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(5);		/* Protocol Failure */
 	}
+#endif	/* notdef */
 	
 	retval = krb5_db_put_principal(context, &entry, &one);
 	if (retval) {

@@ -162,12 +162,14 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
     sprintf(thisline, "Maximum Renewal Lifetime (MRL) = %d (seconds)\n", 
 			entry->max_renewable_life);
     strcat(my_data, thisline);
-    sprintf(thisline, "Principal Key Version (PKV) = %d\n", entry->kvno);
+    sprintf(thisline, "Principal Key Version (PKV) = %d\n",
+	    entry->key_data[0].key_data_kvno);
     strcat(my_data, thisline);
     if (retval = adm_print_exp_time(context, my_data, &entry->expiration)) {
 	free(my_data);
 	return retval;
     }
+#ifdef	notdef
     mod_time = localtime((time_t *) &entry->mod_date);
     sprintf(thisline, 
 	"Last Modification Date (LMD): %02d%02d/%02d/%02d:%02d:%02d:%02d\n",
@@ -179,11 +181,12 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
            mod_time->tm_min,
            mod_time->tm_sec);
     strcat(my_data, thisline);
+#endif	/* notdef */
     if (retval = adm_print_attributes(my_data, entry->attributes)) {
 	free(my_data);
 	return retval;
     }
-    switch (entry->salt_type & 0xff) {
+    switch (entry->key_data[0].key_data_type[1] & 0xff) {
            case 0 : strcat(my_data,
 			"Principal Salt Type (PST) = Version 5 Normal\n");
 		    break;

@@ -115,30 +115,35 @@ adm_modify_kdb(context, cmdname, newprinc, principal, key, alt_key, req_type,
 
     if (!req_type) { /* New entry - initialize */
 	memset((char *) entry, 0, sizeof(krb5_db_entry));
-	retval = krb5_copy_principal(context, principal, &entry->principal);
+	retval = krb5_copy_principal(context, principal, &entry->princ);
 	if (retval)
 		return retval;
-        entry->kvno = KDB5_VERSION_NUM;
         entry->max_life = master_entry.max_life;
         entry->max_renewable_life = master_entry.max_renewable_life;
-        entry->mkvno = master_entry.mkvno;
         entry->expiration = master_entry.expiration;
+#ifdef	notdef
+        entry->kvno = KDB5_VERSION_NUM;
+        entry->mkvno = master_entry.mkvno;
 	retval = krb5_copy_principal(context, master_princ, &entry->mod_name);
 	if (retval) {
 	    krb5_free_principal(context, entry->principal);
 	    entry->principal = 0;
 	    return retval;
 	}
+#endif	/* notdef */
     } else { /* Modify existing entry */
-	entry->kvno++;
 #ifdef SANDIA
 	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 #endif
+#ifdef	notdef
+	entry->kvno++;
 	retval = krb5_copy_principal(context, principal, &entry->mod_name);
 	if (retval)
 		return retval;
+#endif	/* notdef */
     }
 
+#ifdef	notdef
     if (key && key->length) {
 	retval = krb5_kdb_encrypt_key(context, &master_encblock,
 				      key,
@@ -235,20 +240,9 @@ adm_modify_kdb(context, cmdname, newprinc, principal, key, alt_key, req_type,
 	    return(5);
 	}
     }
+#endif	/* notdef */
 
     retval = krb5_db_put_principal(context, entry, &one);
-
-    if (entry->key.contents) {
-	memset((char *) entry->key.contents, 0, entry->key.length);
-	krb5_xfree(entry->key.contents);
-	entry->key.contents = 0;
-    }
-
-    if (entry->alt_key.contents) {
-	memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
-	krb5_xfree(entry->alt_key.contents);
-	entry->alt_key.contents = 0;
-    }
 
     if (retval) {
 	com_err("adm_modify_kdb", retval, 
@@ -439,11 +433,13 @@ adm5_change(context, auth_context, prog, newprinc)
 	return retval;
     }
 
+#ifdef	notdef
     if (entry.salt_type == KRB5_KDB_SALTTYPE_V4) {
 	entry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
 	entry.alt_salt_type = KRB5_KDB_SALTTYPE_V4;
 	com_err("adm5_change", 0, "Converting v4user to v5user");
     }
+#endif	/* notdef */
  
     retval = adm_enter_pwd_key(context, "adm5_change",              
                                 composite_name,
@@ -515,8 +511,10 @@ adm_enter_rnd_pwd_key(context, cmdname, change_princ, req_type, entry)
     struct saltblock salt;
     char	*principal_name; 
      
+#ifdef	notdef
     salt.salttype = salttype;
     entry->salt_type = salttype;
+#endif	/* notdef */
 
     if (retval = krb5_init_random_key(context, &master_encblock,
                                       &master_keyblock,

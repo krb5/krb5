@@ -48,6 +48,7 @@ cpw_keyproc(context, keyblock)
     krb5_keyblock *realkey;
     krb5_boolean more;
     int nprincs = 1;
+    krb5_keysalt salt;
 
     if (*keyblock == NULL) {
 	if (retval = krb5_parse_name(context, 
@@ -78,10 +79,11 @@ cpw_keyproc(context, keyblock)
 	}
 
 	/* Extract the real kadmin/<realm> keyblock */
-	if (retval = krb5_kdb_decrypt_key(context, 
+	if (retval = krb5_dbekd_decrypt_key_data(context, 
 				&master_encblock,
-				&cpw_entry.key,
-				realkey)) {
+				&cpw_entry.key_data[0],
+				realkey,
+				&salt)) {
 	    krb5_db_free_principal(context, &cpw_entry, nprincs);
 	    free(realkey);
 	    syslog(LOG_ERR, 
@@ -127,6 +129,7 @@ process_client(context, prog)
     krb5_data outbuf;
     krb5_data inbuf, msg_data;
     extern int errno;
+    krb5_keysalt salt;
     
     krb5_timestamp adm_time;
 
@@ -190,10 +193,11 @@ process_client(context, prog)
     }
 
     /* Extract the real kadmin/<realm> keyblock */
-    if (retval = krb5_kdb_decrypt_key(context, 
+    if (retval = krb5_dbekd_decrypt_key_data(context, 
 				      &master_encblock,
-				      &server_entry.key,
-				      cpw_keyblock)) {
+				      &server_entry.key_data[0],
+				      cpw_keyblock,
+				      &salt)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	free(cpw_keyblock);
 	syslog(LOG_ERR,  
