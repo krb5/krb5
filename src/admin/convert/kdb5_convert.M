@@ -75,6 +75,13 @@ option specifies the name under which the version 5 principal database is to be
 created; by default the database is in DEFAULT_DBM_FILE (normally
 /krb5/principal).
 .PP
+If the
+.B \-t
+option is used \fIkdb5_convert\fR will create a temporary database and
+rename it into place after it is loaded so that a server using the database
+can continue running.  It is an error for the target database to exist
+if this option is not used.
+.PP
 The
 .B \-D
 .I v4dbname
@@ -111,12 +118,20 @@ The
 .B \-n
 option specifies that the master key for the v4 database should be
 entered manually rather than fetched from the normal v4 master key file.
+The
+.B \-K
+option specifies that the master key for the v5 (new) database should
+be entered manually rather than fetched from the normal v4 master key file.
+When the
+.B \-v
+option is used, \fIkdb5_convert\fR prints the name of each principal it
+encounters in the old database and whether the principal is being copied
+to the new database or ignored.
 .SH SEE ALSO
 krb5(3), krb5kdc(8)
 .SH BUGS
 Doesn't have flexibility about expiration times.  Probably doesn't
-handle any v4 inter-realm keys.  Spits out names of all the entries it
-processes.
+handle any v4 inter-realm keys.
 .sp
 When the underlying databases are built on the old DBM (not NDBM), the
 conversion must be done from a dump file rather than from a DBM
