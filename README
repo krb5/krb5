@@ -74,7 +74,8 @@ Notes, Major Changes, and Known Bugs for 1.3
 ------------------------------------
 
 * We now install the compile_et program, so other packages can use the
-  installed com_err library with their own error tables.
+  installed com_err library with their own error tables.  (If you use
+  our com_err code, that is; see below.)
 
 * The header files we install now assume ANSI/ISO C ('89, not '99).
   We have stopped testing on SunOS 4, even with gcc.  Some of our code
@@ -95,14 +96,15 @@ Notes, Major Changes, and Known Bugs for 1.3
   may be necessary when talking to Microsoft KDCs (domain controllers),
   if they issue you tickets with lots of PAC data.
 
-* If you have versions of the com_err or ss packages installed
-  locally, you can use the --with-system-et and --with-system-ss
-  configure options to use them rather than using the versions
-  supplied here.  Note that the interfaces are assumed to be similar
-  to those we supply; in particular, some older, divergent versions of
-  the com_err library may not work with the krb5 sources.  The
-  CPPFLAGS, LDFLAGS, and SS_LIB variables can be used to help the
-  compiler and linker find the installed packages.
+* If you have versions of the com_err, ss, or Berkeley DB packages
+  installed locally, you can use the --with-system-et,
+  --with-system-ss, and --with-system-db configure options to use them
+  rather than using the versions supplied here.  Note that the
+  interfaces are assumed to be similar to those we supply; in
+  particular, some older, divergent versions of the com_err library
+  may not work with the krb5 sources.  Many configure-time variables
+  can be used to help the compiler and linker find the installed
+  packages; see the build documentation for details.
 
 Notes, Major Changes, and Known Bugs for 1.2, delete before shipping 1.3
 ------------------------------------
