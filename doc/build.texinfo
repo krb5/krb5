@@ -10,15 +10,15 @@ porting Kerberos V5 to a new platform.
 * Unpacking the Sources::       Preparing the source tree.
 * Doing the Build::             Compiling Kerberos.
 * Testing the Build::           Making sure Kerberos built correctly.
-* Options to Configure::        
-* osconf.h::                    
-* Shared Library Support::      
+* Options to Configure::        Command-line options to Configure
+* osconf.h::                    Header file-specific configurations
+* Shared Library Support::      Building Shared Libraries for Kerberos V5
 * OS Incompatibilities::        Special cases to watch for.
 * Using Autoconf::              Modifying Kerberos V5's 
                                             configuration scripts.
 @end menu
 
-@node Build Requirements, Unpacking the Sources, , Building Kerberos V5
+@node Build Requirements, Unpacking the Sources, Building Kerberos V5, Building Kerberos V5
 @section Build Requirements
 
 In order to build Kerberos V5, you will need approximately 60-70
@@ -376,115 +376,15 @@ Solaris 5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
 
+@ifset notdef
+
+XXX What does this mean?
+
 One special note is that if the Kerberos V4 compatibility is compiled
 in, you @b{must not} specify an alternate Kerberos V4 library from the
 one in the tree or you will be missing references.
 
-@menu
-* Shared Library Theory::       
-* NetBSD Shared Library Support::  
-* AIX Shared Library Support::  
-* Solaris 5.3 Shared Library Support::  
-* Alpha OSF/1 Shared Library Support::  
-@end menu
-
-@node Shared Library Theory, NetBSD Shared Library Support, Shared Library Support, Shared Library Support
-@subsection Theory of How Shared Libraries are Used
-
-An explanation of how shared libraries are implemented on a given
-platform is too broad a topic for this manual. Instead this will touch
-on some of the issues that the Kerberos V5 tree uses to support version
-numbering and alternate install locations.
-
-Normally when one builds a shared library and then links with it, the
-name of the shared library is stored in the object
-(i.e. libfoo.so). Most operating systems allows one to change name that
-is referenced and we have done so, placing the version number into the
-shared library (i.e. libfoo.so.0.1). At link time, one would reference
-libfoo.so, but when one executes the program, the shared library loader
-would then look for the shared library with the alternate name.  Hence
-multiple versions of shared libraries may be supported relatively
-easily. @footnote{Under AIX for the RISC/6000, multiple versions of
-shared libraries are supported by combining two or more versions of the
-shared library into one file.  The Kerberos build procedure produces
-shared libraries with version numbers in the internal module names, so
-that the shared libraries are compatible with this scheme.
-Unfortunately, combining two shared libraries requires internal
-knowledge of the AIX shared library system beyond the scope of this
-document.  Practicallyspeaking, only one version of AIX shared libraries
-can be supported on a system, unless the multi-version library is
-constructed by a programmer familiar with the AIX internals.}
-
-All operating systems (that we have seen) provide a means for programs
-to specify the location of shared libraries. On different operating
-systems, this is either specified when creating the shared library, and
-link time, or both.@footnote{Both are necessary sometimes as the shared
-libraries are dependent on other shared libraries} The build process
-will hardwire a path to the installed destination.
-
-
-@node NetBSD Shared Library Support, AIX Shared Library Support, Shared Library Theory, Shared Library Support
-@subsection NetBSD Shared Library Support
-
-Shared library support has been tested under NetBSD 1.0A using 
-GCC 2.4.5. Due to the vagaries of the loader in the operating system,
-the library load path needs to be specified in building libraries and in
-linking with them. Unless the library is placed in a standard location
-to search for libraries, this may make it difficult for developers to
-work with the shared libraries.
-
-@node AIX Shared Library Support, Solaris 5.3 Shared Library Support, NetBSD Shared Library Support, Shared Library Support
-@subsection AIX Shared Library Support
-
-        AIX specifies shared library versions by combining multiple
-versions into a single file.  Because of the complexity of this process,
-no automatic procedure for building multi-versioned shared libraries is
-provided. Therefore, supporting multiple versions of the Kerberos shared
-libraries under AIX will require significant work on the part of a
-programmer famiiliar with AIX internals.  
-
-        AIX allows a single library to be used both as a static library
-and as a shared library.  For this reason, the @samp{--enable-shared}
-switch to configure builds only shared libraries.  On other operating
-systems, both shared and static libraries are built when this switch is
-specified.  As with all other operating systems, only non-shared static
-libraries are built when @samp{--enable-shared} is not specified.
-
-        The AIX 3.2.5 linker dumps core trying to build a shared
-@samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
-compiler works fine.  In addition, the AIX 4.1 linker is able to build a
-shared @samp{libkrb5.a} when GNU C is used.
-
-
-@node Solaris 5.3 Shared Library Support, Alpha OSF/1 Shared Library Support, AIX Shared Library Support, Shared Library Support
-@subsection Solaris 5.3 Shared Library Support
-
-Shared library support only works when using the Sunsoft C compiler. We
-are currently using version 3.0.1. 
-
-The path to the shared library must be specified at link time as well as
-when creating libraries. 
-
-@node Alpha OSF/1 Shared Library Support,  , Solaris 5.3 Shared Library Support, Shared Library Support
-@subsection Alpha OSF/1 Shared Library Support
-
-Shared library support has been tested with V2.1 and higher of the
-operating system. Shared libraries may be compiled both with GCC and the
-native compiler.
-
-One of the nice features on this platform is that the paths to the
-shared libraries is specified in the library itself without requiring
-that one specify the same at link time. 
-
-We are using the @samp{-rpath} option to @samp{ld} to place the library
-load path into the executables. The one disadvantage of this is during
-testing where we want to make sure that we are using the build tree
-instead of a possibly installed library. The loader uses the contents of
-@samp{-rpath} before LD_LIBRARY_PATH so we must specify a dummy _RLD_ROOT
-and complete LD_LIBRARY_PATH in our tests.
-
-The one disadvantage with the
-method we are using 
+@end ifset
 
 @node OS Incompatibilities, Using Autoconf, Shared Library Support, Building Kerberos V5
 @section Operating System Incompatibilities
@@ -495,34 +395,25 @@ incompatibilities, and/or discover work arounds to such problems, please
 send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 
 @menu
-* Ultrix 4.2/3::                
+* AIX::                         
 * Alpha OSF/1 V1.3::            
-* Alpha OSF/1 V2.0++::          
+* Alpha OSF/1 (Digital Unix) V2.0++::  
 * BSDI::                        
+* HPUX::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
 * SGI Irix 5.X::                
+* Ultrix 4.2/3::                
 @end menu
 
-@node Ultrix 4.2/3, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
-@subsection Ultrix 4.2/3
+@node AIX, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
+@subsection AIX
 
-On the DEC MIPS platform, using the native compiler, @file{md4.c} and
-@file{md5.c} can not be compiled with the optimizer set at level 1.
-That is, you must specify either @samp{--with-ccopts=-O} and
-@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
-compile will never complete.
+The AIX 3.2.5 linker dumps core trying to build a shared
+@samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
+compiler works fine.  This problem is fixed using the AIX 4.1 linker.
 
-The optimizer isn't hung; it just takes an exponentially long time.
-Compiling 6 out of the 48 algorithmic steps takes 3 seconds; compiling 7
-steps takes 9 seconds; compiling 8 steps takes 27 seconds, and so on.
-Calculations estimate it will finish in approximately 3,469 billion
-years....
-
-Using GCC instead of the native compiler will also work fine, both with
-or without optimization.
-
-@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0++, Ultrix 4.2/3, OS Incompatibilities
+@node Alpha OSF/1 V1.3, Alpha OSF/1 (Digital Unix) V2.0++, AIX, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
 
 Using the native compiler, compiling with the @samp{-O} compiler flag
@@ -531,7 +422,7 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
+@node Alpha OSF/1 (Digital Unix) V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0++
 
 There used to be a bug when using the native compiler in compiling
@@ -544,7 +435,7 @@ was never a problem in using GCC version 2.6.3.
 In version 3.2 and beyond of the operating system, we have not seen any
 problems with the native compiler. 
 
-@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0++, OS Incompatibilities
+@node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
@@ -553,7 +444,16 @@ to use a @samp{sed} from somewhere else, such as GNU.  (This may be
 true for some versions of other systems derived from BSD 4.4, such as
 NetBSD and FreeBSD.)
 
-@node Solaris versions 2.0 through 2.3, Solaris 2.X, BSDI, OS Incompatibilities
+@node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
+@subsection HPUX
+
+The native compiler for HPUX currently will not work, because it is not
+a full ANSI C compiler.  The optional compiler (c89) should work as long
+as you give it the @samp{+Olibcalls -D_HPUX_SOURCE} (this has only been
+tested for HPUX 9.0).  At this point, using GCC is probably your best
+bet.
+
+@node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
 
 The @code{gethostbyname()} routine is broken; it does not return a fully
@@ -603,7 +503,11 @@ LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
 @code{--with-ccopts=-i} option to @samp{configure}.
 
-@node SGI Irix 5.X,  , Solaris 2.X, OS Incompatibilities
+Shared library support only works when using the Sunsoft C compiler. We
+are currently using version 3.0.1.   (The latest GCC may work; this
+needs to be tested.)
+
+@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
 @subsection SGI Irix 5.X
 
 If you are building in a tree separate from the source tree, the vendors
@@ -618,6 +522,32 @@ simply specify @code{--with-netlib} option to @samp{configure}.
 
 In 5.3, @code{gethostbyname()} is no longer present in @code{-lsocket} and
 is no longer an issue. 
+
+@node Ultrix 4.2/3,  , SGI Irix 5.X, OS Incompatibilities
+@subsection Ultrix 4.2/3
+
+The DEC MIPS platform currently will not support the native compiler,
+since the Ultrix compiler is not a full ANSI C compiler.  You should use
+GCC instead.
+
+@ifset notdef
+
+On the DEC MIPS platform, using the native compiler, @file{md4.c} and
+@file{md5.c} can not be compiled with the optimizer set at level 1.
+That is, you must specify either @samp{--with-ccopts=-O} and
+@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
+compile will never complete.
+
+The optimizer isn't hung; it just takes an exponentially long time.
+Compiling 6 out of the 48 algorithmic steps takes 3 seconds; compiling 7
+steps takes 9 seconds; compiling 8 steps takes 27 seconds, and so on.
+Calculations estimate it will finish in approximately 3,469 billion
+years....
+
+Using GCC instead of the native compiler will also work fine, both with
+or without optimization.
+
+@end ifset
 
 @node Using Autoconf,  , OS Incompatibilities, Building Kerberos V5
 @section Using @samp{Autoconf}
@@ -675,3 +605,4 @@ To install the binaries into a binary tree, do:
 % make all
 % make install DESTDIR=somewhere-else
 @end example
+

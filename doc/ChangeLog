@@ -1,3 +1,10 @@
+Mon Sep  9 19:35:37 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* build.texinfo: Updated to reflect latest OS inconsistencies;
+ 		removed shared library theory section to a new file,
+ 		implementor.texinfo, which will have information that only
+ 		developers will care about.
+
 Mon Sep  9 13:25:06 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 
 	* texinfo-suppl.tex: extracted @doubleleftarrow{} hack into
