@@ -43,7 +43,7 @@ krb5_fcc_store(id, creds)
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename,
 		     O_RDWR | O_APPEND, 0);
-	  if (((krb5_fcc_data *) id->data)->fd < 0)
+	  if (ret < 0)
 	       return errno;
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
