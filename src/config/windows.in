@@ -33,15 +33,6 @@ SRCTOP = $(srcdir)\$(BUILDTOP)
 CC=cl /nologo
 CL=
 #
-# Set the #define to indicate that we are compiling a DLL.  We default to 
-# compiling the Kerberos library
-#
-!if defined(DLL_EXP_TYPE)
-DLL_FILE_DEF=/D$(DLL_EXP_TYPE)_DLL_FILE
-!else
-DLL_FILE_DEF=/DKRB5_DLL_FILE
-!endif
-#
 # CCOPTS for DLL functions
 #
 ##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) $(DLL_FILE_DEF)

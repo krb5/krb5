@@ -3,6 +3,16 @@
 #
 all::
 
+#
+# Set the #define to indicate that we are compiling a DLL.  We default to 
+# compiling the Kerberos library
+#
+!if defined(DLL_EXP_TYPE)
+DLL_FILE_DEF=/D$(DLL_EXP_TYPE)_DLL_FILE
+!else
+DLL_FILE_DEF=/DKRB5_DLL_FILE
+!endif
+
 # Build the Makefile unless we are in the top-level
 #(where there is already an explicit rule).
 !if !defined(ZIP) && !defined(WINFILES)
