@@ -124,23 +124,21 @@ OBJS= \
 	trep2ktrep.o	\
 	u2gen.o
 
+#if HavePerl
 #ifdef TypesObjs
 #include "KRB5-oflist"
 #include "KRB5-cflist"
 #endif
 
 all:: KRB5-oflist Makefile
+#else /* no perl */
+TYPESOBJS= KRB5-types.o
+TYPESSRCS= KRB5-types.c
+#endif
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
-
-#$(TOP)/lib/libkrb5.a:: KRB5-oflist KRB5-pt0.o
-#	$(ARADD) $@ `cat KRB5-oflist`
-#	$(TOUCH) fookrb5
-
-#KRB5-pt0.o:	KRB5-pt0.c KRB5-cflist
-#	$(CC) -c $(CFLAGS) `cat KRB5-cflist`
-
+#if HavePerl
 #define IHaveSpecialMakefileTarget
 
 ImakeDependency(Makefile)
@@ -158,6 +156,7 @@ noop::
 
 KRB5-pt0.c KRB5-cflist KRB5-oflist:	KRB5-types.c process.perl
 	$(PERL) process.perl KRB5-types.c KRB5-pt KRB5-cflist KRB5-oflist
+#endif
 
 KRB5-types.c: KRB5-types.py
 
