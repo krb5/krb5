@@ -1,4 +1,14 @@
 /*
+ *	$Source$
+ *	$Author$
+ *	$Id$
+ */
+
+#ifndef lint
+static char rcsid_md4_c[] = "$Id$";
+#endif lint
+
+/*
  **********************************************************************
  ** md4.c                                                            **
  ** RSA Data Security, Inc. MD4 Message Digest Algorithm             **
@@ -31,10 +41,15 @@
  **********************************************************************
  */
 
-#include "md4.h"
+#include <krb5/krb5.h>
+#include <krb5/rsa-md4.h>
 
 /* forward declaration */
+#ifdef __STDC__
+static void Transform (UINT4 *, UINT4 *);
+#else
 static void Transform ();
+#endif
 
 static unsigned char PADDING[64] = {
   0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

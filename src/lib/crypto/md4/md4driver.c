@@ -1,4 +1,14 @@
 /*
+ *	$Source$
+ *	$Author$
+ *	$Id$
+ */
+
+#ifndef lint
+static char rcsid_md4driver_c[] = "$Id$";
+#endif lint
+
+/*
  **********************************************************************
  ** md4driver.c -- sample routines to test                           **
  ** RSA Data Security, Inc. MD4 message digest algorithm.            **
@@ -25,7 +35,8 @@
 #include <sys/types.h>
 #include <time.h>
 #include <string.h>
-#include "md4.h"
+#include <krb5/krb5.h>
+#include <krb5/rsa-md4.h>
 
 /* Prints message digest buffer in mdContext as 32 hexadecimal digits.
    Order is from low-order byte to high-order byte of digest.
@@ -108,7 +119,11 @@ char *inString;
 static void MDFile (filename)
 char *filename;
 {
+#ifdef __STDC__
   FILE *inFile = fopen (filename, "rb");
+#else
+  FILE *inFile = fopen (filename, "r");
+#endif
   MD4_CTX mdContext;
   int bytes;
   unsigned char data[1024];
