@@ -28,21 +28,22 @@
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
-rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
+rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername, ccache)
     krb5_context context;
     krb5_auth_context auth_context;
     krb5_data *inbuf;
     krb5_ticket *ticket;
     char *lusername;
+    krb5_ccache *ccache;
 {
     krb5_creds ** creds;
     krb5_error_code retval;
     char ccname[35];
-    krb5_ccache ccache = NULL;
     struct passwd *pwd;
 
+    *ccache  = NULL;
     if (!(pwd = (struct passwd *) getpwnam(lusername)))
-	return -1;
+	return ENOENT;
 
     if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
 	return(retval);
@@ -55,17 +56,17 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
     sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
     setenv("KRB5CCNAME", ccname, 0);
   
-    if (retval = krb5_cc_resolve(context, ccname, &ccache)) 
+    if (retval = krb5_cc_resolve(context, ccname, ccache)) 
 	goto cleanup;
 
-    if (retval = krb5_cc_initialize(context, ccache, ticket->enc_part2->client))
+    if (retval = krb5_cc_initialize(context, *ccache, ticket->enc_part2->client))
 	goto cleanup;
 
-    if (retval = krb5_cc_store_cred(context, ccache, *creds)) 
+    if (retval = krb5_cc_store_cred(context, *ccache, *creds)) 
 	goto cleanup;
 
     retval = chown(ccname+5, pwd->pw_uid, -1);
-
+    
 cleanup:
     krb5_free_creds(context, *creds);
     return retval;

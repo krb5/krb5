@@ -238,6 +238,7 @@ krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
 krb5_context bsd_context;
+krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
@@ -1464,7 +1465,7 @@ int default_realm(principal)
 
 krb5_error_code
 recvauth(valid_checksum)
-int *valid_checksum;
+    int *valid_checksum;
 {
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
@@ -1623,7 +1624,7 @@ krb5_xfree(chksumbuf);
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
 	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
-					  ticket, lusername))) {
+					  ticket, lusername, &ccache))) {
          fatal(netf, "Can't get forwarded credentials");
     }
     return 0;

@@ -170,7 +170,7 @@ krb5_data desinbuf,desoutbuf;
 krb5_context bsd_context;
 char *srvtab = NULL;
 krb5_keytab keytab = NULL;
-
+krb5_ccache ccache = NULL;
 void fatal();
 int v5_des_read();
 int v5_des_write();
@@ -445,14 +445,14 @@ char	path_rest[] = RPATH;
 
 #ifdef CRAY
 char    *envinit[] =
-{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0};
+{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0,0};
 #define TZENV   4
 #define TMPDIRENV 5
 char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
 char    *envinit[] =
-{homedir, shell, 0, username, term, 0, 0};
+{homedir, shell, 0, username, term, 0, 0, 0};
 #define TZENV 5
 #else /* KERBEROS */
 char	*envinit[] =
@@ -1208,6 +1208,10 @@ if (require_encrypt&&(!do_encrypt)) {
 #endif
 	    /* Finish session in wmtp */
 	    pty_logwtmp(ttyn,"","");
+if (ccache)
+    krb5_cc_destroy(bsd_context, ccache);
+	    ccache = NULL;
+	    
 	    exit(0);
 	}
 #ifdef SETPGRP_TWOARG
@@ -1262,7 +1266,6 @@ if (require_encrypt&&(!do_encrypt)) {
 	findtz++;
       }
     }
-    environ = envinit;
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
@@ -1273,12 +1276,31 @@ if (require_encrypt&&(!do_encrypt)) {
     }
     sprintf(path, "PATH=%s:%s", kprogdir, path_rest);
     envinit[PATHENV] = path;
+/* If we have KRB5CCNAME set, then copy into the
+ * child's environment.  This can't really have
+ * a fixed position because tz may or may not be set.
+ */
+    if (getenv("KRB5CCNAME")) {
+	int i;
+	char *buf = (char *)malloc(strlen(getenv("KRB5CCNAME"))
+					  +strlen("KRB5CCNAME=")+1);
+					  if (buf) {
+sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+
+for (i = 0; envinit[i]; i++);
+envinit[i] =buf;
+					  }
+	/* If we do anything else, make sure there is space in the array.
+	 */
+    }
+    environ = envinit;
+    
     cp = strrchr(pwd->pw_shell, '/');
     if (cp)
       cp++;
     else
       cp = pwd->pw_shell;
-
+    
 #ifdef KERBEROS
     /* To make Kerberos rcp work correctly, we must ensure that we
        invoke Kerberos rcp on this end, not normal rcp, even if the
@@ -1321,6 +1343,9 @@ if (require_encrypt&&(!do_encrypt)) {
     exit(1);
     
   signout_please:
+if (ccache)
+    krb5_cc_destroy(bsd_context, ccache);
+    ccache = NULL;
     pty_logwtmp(ttyn,"","");
     exit(1);
 }
@@ -1392,6 +1417,8 @@ krb5_sigtype
     
     pty_logwtmp(ttyn,"","");
     syslog(LOG_INFO ,"Shell process completed.");
+if (ccache)
+    krb5_cc_destroy(bsd_context, ccache);
     exit(0);
 }
 
@@ -1621,7 +1648,7 @@ krb5_error_code
 recvauth(netf, peersin, valid_checksum)
      int netf;
      struct sockaddr_in peersin;
-int *valid_checksum;
+     int *valid_checksum;
 {
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
@@ -1773,7 +1800,7 @@ krb5_xfree(chksumbuf);
 
     if (inbuf.length) { /* Forwarding being done, read creds */
 	if (status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf,
-					    ticket, locuser)) {
+					    ticket, locuser, &ccache)) {
 	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
 	    exit(1);

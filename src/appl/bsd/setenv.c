@@ -73,7 +73,7 @@ setenv(name, value, rewrite)
 	if (!(environ[offset] =			/* name + `=' + value */
 	    malloc((u_int)((int)(C - name) + l_value + 2))))
 		return(-1);
-	for (C = environ[offset]; (*C = *name++) && *C != '='; ++C);
+	for (C = environ[offset]; (*C = *name++) &&( *C != '='); ++C);
 	for (*C++ = '='; *C++ = *value++;);
 	return(0);
 }
