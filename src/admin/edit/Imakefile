@@ -2,7 +2,7 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  Copyright 1992 by the Massachusetts Institute of Technology.
 #  All Rights Reserved.
 # 
 # Export of this software from the United States of America is assumed
@@ -24,8 +24,8 @@
 # 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
-OBJS= kdb5_edit.o kdb5_ed_ct.o dump.o
-SRCS= kdb5_edit.c kdb5_ed_ct.c dump.c
+OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o
+SRCS= kdb5_edit.c kdb5_ed_ct.c util.o dump.c
 
 all:: kdb5_edit
 
