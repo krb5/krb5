@@ -1027,7 +1027,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "-init ___InitializeProfileLib -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -1389,7 +1389,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "-init ___initializeK5 -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -6186,7 +6186,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "-init ___initializeGSS -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
