@@ -1815,8 +1815,8 @@ void try_normal(argv)
       nhost++;
     else
       nhost = argv[0];
-    if (!strcmp(nhost, "rlogin"))
-      argv++;
+    if (!strcmp(nhost, "rlogin") || !strcmp(nhost, "rsh"))
+      argv[0] = UCB_RLOGIN;
     
 #ifdef POSIX_SIGNALS
     sigemptyset(&mask);

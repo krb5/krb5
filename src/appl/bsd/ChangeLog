@@ -1,3 +1,10 @@
+2001-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (try_normal): Permit "rsh" as well as "rlogin" as the
+	program name, for detecting when argv[0] is not the hostname.
+	If argv[0] isn't the hostname, always replace it with the system
+	rlogin pathname.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir).
