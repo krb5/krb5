@@ -1,3 +1,8 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * stdcc.h, stdcc_util.h, stdcc_util.c: Updated Mac OS X headers to new 
+    framework layout
+    * stdcc.c: Removed unused variables and fixed macros to reduce warnings
+    
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
 	* stdcc.c: Replaced cc_* macros with functions

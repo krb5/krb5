@@ -4,7 +4,7 @@
  */
 
 #if TARGET_OS_MAC
-#include <CredentialsCache/CredentialsCache2.h>
+#include <Kerberos/CredentialsCache2.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
