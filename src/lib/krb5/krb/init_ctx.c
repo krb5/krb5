@@ -284,7 +284,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list, desonly)
 
 	code = profile_get_string(context->profile, "libdefaults", profstr,
 				  NULL,
-				  "des3-hmac-sha1 des-cbc-md5 des-cbc-crc",
+				  "des3-cbc-sha1 des-cbc-md5 des-cbc-crc",
 				  &retval);
 	if (code)
 	    return code;
