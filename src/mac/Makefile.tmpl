@@ -1,7 +1,5 @@
 #  TEMPLATE BEGINS HERE
 
-#  TEMPLATE BEGINS HERE
-
 SnapshotRoot = //GSS-Kerberos5-1.0.5
 
 INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/
@@ -542,7 +540,7 @@ dist-clean : clean
 		/mac/libraries/KerberosHeaders.pch.68k.o /mac/libraries/KerberosHeaders.pch.ppc.o \
 		Makefile
 		
-snapshot :
+snapshot : autogenerate-clean
 	NewFolder {SnapshotRoot}
 	For SnapshotDir in {MacDirs}
 		NewFolder "{SnapshotRoot}{SnapshotDir}"
