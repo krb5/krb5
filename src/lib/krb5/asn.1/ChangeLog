@@ -1,3 +1,8 @@
+1999-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_decode.c (asn1_decode_integer): Initialize "n", to keep gcc
+	happy.
+
 Sat Jul 10 10:21:40 1999  Tom Yu  <chaoself@mit.edu>
 
 	* asn1_decode.c (asn1_decode_integer): Fix to deal with overflows
