@@ -222,11 +222,14 @@ main(argc, argv)
   }
 
        
-krb5_error_code get_server_key(keyprocarg, princ, vno, key)
-     krb5_pointer keyprocarg;
-     krb5_principal princ;
-     krb5_kvno vno;
-     krb5_keyblock **key;
+krb5_error_code get_server_key(DECLARG(krb5_pointer,keyprocarg),
+			       DECLARG(krb5_principal,princ),
+			       DECLARG(krb5_kvno,vno),
+			       DECLARG(krb5_keyblock **,key))
+OLDDECLARG(krb5_pointer,keyprocarg)
+OLDDECLARG(krb5_principal,princ)
+OLDDECLARG(krb5_kvno,vno)
+OLDDECLARG(krb5_keyblock **,key)
 {
   krb5_data pwd, salt;
   char *princ_str, *at;
@@ -242,7 +245,7 @@ krb5_error_code get_server_key(keyprocarg, princ, vno, key)
   /* The kdb5_create does not include realm names in the password ... 
      this is ugly */
   at = index(princ_str, '@');
-  if (at) *at = NULL;
+  if (at) *at = '\0';
 
   pwd.data = princ_str;
   pwd.length = strlen(princ_str);
