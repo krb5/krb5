@@ -119,7 +119,7 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\makefile.in lib\crypto\makefile.in \
 		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
 		lib\crypto\md4\makefile.in lib\crypto\md5\makefile.in \
-		lib\crypto\os\makefile.in lib\des425\makefile.in \
+		lib\crypto\os\makefile.in \
 		lib\gssapi\makefile.in lib\gssapi\generic\makefile.in \
 		lib\kadm\makefile.in \
 		lib\gssapi\krb5\makefile.in lib\krb5\makefile.in \
@@ -142,7 +142,6 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\crypto\md4\makefile.in >lib\crypto\md4\makefile
 	.\wconfig config <lib\crypto\md5\makefile.in >lib\crypto\md5\makefile
 	.\wconfig config <lib\crypto\os\makefile.in >lib\crypto\os\makefile
-	.\wconfig config <lib\des425\makefile.in >lib\des425\makefile
 	.\wconfig config <lib\gssapi\makefile.in >lib\gssapi\makefile
 	.\wconfig config <lib\gssapi\generic\makefile.in >lib\gssapi\generic\makefile
 	.\wconfig config <lib\gssapi\krb5\makefile.in >lib\gssapi\krb5\makefile
@@ -203,7 +202,7 @@ ZIPFILES= ./* \
 	config/* include/* include/krb5/* include/krb5/asn.1/* \
 	include/krb5/stock/* include/sys/* lib/* lib/crypto/* \
 	lib/crypto/crc32/* lib/crypto/des/* lib/crypto/md4/* \
-	lib/crypto/md5/* lib/crypto/os/* lib/des425/* lib/gssapi/* \
+	lib/crypto/md5/* lib/crypto/os/* lib/gssapi/* \
 	lib/gssapi/generic/* lib/gssapi/krb5/* lib/kadm/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \

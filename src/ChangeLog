@@ -1,3 +1,7 @@
+Tue May 30 18:53:56 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: removed des425 stuff for Windows.
+
 Fri May 26 21:45:50 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Export $(CC) for the benefit of config.guess
