@@ -41,6 +41,12 @@ static const char *out_adm_bad_pw = "Password incorrect.";
 static const char *out_adm_not_in_tkt = "Not an initial ticket.";
 static const char *out_adm_cant_change = "Cannot change password.";
 static const char *out_adm_lang_unsupp = "Language %s unsupported.";
+static const char *out_adm_p_exists = "Principal %s already exists.";
+static const char *out_adm_p_not_exist = "Principal %s does not exist.";
+static const char *out_adm_not_auth = "Not authorized for this operation.";
+static const char *out_adm_bad_option = "Bad option supplied.";
+static const char *out_adm_value_req = "Value required for option.";
+static const char *out_adm_sys_error = "Unspecified system error.";
 static const char *out_adm_bad_args = "Bad argument list format for %s command.";
 static const char *out_adm_bad_cmd = "Command %s not supported.";
 static const char *out_adm_no_cmd = "No command in message.";
@@ -64,7 +70,7 @@ lang_error_message(lang, kval)
     char	*ret;
     char	*ermsg;
 
-    ermsg = error_message(kval);
+    ermsg = (char *) error_message(kval);
     if (lang && output_lang_supported(lang)) {
 	/*
 	 * Just for demonstration purposes.
@@ -105,15 +111,15 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
 	ermsg = out_adm_success; break;
     case KRB5_ADM_CMD_UNKNOWN:
 	switch (aux) {
-	case KRB5_ADM_BAD_ARGS:
+	case KADM_BAD_ARGS:
 	    ermsg = out_adm_bad_args;
 	    erarg = ((nargs >= 1) ? alist[0].data : (char *) NULL);
 	    break;
-	case KRB5_ADM_BAD_CMD:
+	case KADM_BAD_CMD:
 	    ermsg = out_adm_bad_cmd;
 	    erarg = ((nargs >= 1) ? alist[0].data : (char *) NULL);
 	    break;
-	case KRB5_ADM_NO_CMD:
+	case KADM_NO_CMD:
 	    ermsg = out_adm_no_cmd;
 	    break;
 	default:
@@ -124,13 +130,13 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
 	break;
     case KRB5_ADM_PW_UNACCEPT:
 	switch (aux) {
-	case KRB5_ADM_BAD_PRINC:
+	case KADM_BAD_PRINC:
 	    ermsg = out_adm_bad_princ;
 	    break;
-	case KRB5_ADM_PWD_TOO_SHORT:
+	case KADM_PWD_TOO_SHORT:
 	    ermsg = out_adm_pwd_too_short;
 	    break;
-	case KRB5_ADM_PWD_WEAK:
+	case KADM_PWD_WEAK:
 	    ermsg = out_adm_pwd_weak;
 	    break;
 	default:
@@ -144,16 +150,16 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
 	ermsg = out_adm_not_in_tkt; break;
     case KRB5_ADM_CANT_CHANGE:
 	switch (aux) {
-	case KRB5_ADM_BAD_PRINC:
+	case KADM_BAD_PRINC:
 	    ermsg = out_adm_bad_princ;
 	    break;
-	case KRB5_ADM_PWD_TOO_SHORT:
+	case KADM_PWD_TOO_SHORT:
 	    ermsg = out_adm_pwd_too_short;
 	    break;
-	case KRB5_ADM_PWD_WEAK:
+	case KADM_PWD_WEAK:
 	    ermsg = out_adm_pwd_weak;
 	    break;
-	case KRB5_ADM_NOT_ALLOWED:
+	case KADM_NOT_ALLOWED:
 	    ermsg = out_adm_not_allowed;
 	    break;
 	default:
@@ -164,6 +170,26 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
     case KRB5_ADM_LANG_NOT_SUPPORTED:
 	ermsg = out_adm_lang_unsupp;
 	erarg = ((nargs >= 2) ? alist[1].data : (char *) NULL);
+	break;
+    case KRB5_ADM_P_ALREADY_EXISTS:
+	ermsg = out_adm_p_exists;
+	erarg = ((nargs >= 2) ? alist[1].data : (char *) NULL);
+	break;
+    case KRB5_ADM_P_DOES_NOT_EXIST:
+	ermsg = out_adm_p_not_exist;
+	erarg = ((nargs >= 2) ? alist[1].data : (char *) NULL);
+	break;
+    case KRB5_ADM_NOT_AUTHORIZED:
+	ermsg = out_adm_not_auth;
+	break;
+    case KRB5_ADM_BAD_OPTION:
+	ermsg = out_adm_bad_option;
+	break;
+    case KRB5_ADM_VALUE_REQUIRED:
+	ermsg = out_adm_value_req;
+	break;
+    case KRB5_ADM_SYSTEM_ERROR:
+	ermsg = out_adm_sys_error;
 	break;
     default:
 	ermsg = out_adm_no_err; break;
