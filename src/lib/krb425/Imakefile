@@ -1,0 +1,64 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990 by the Massachusetts Institute of Technology.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+NormalLibraryObjectRule()
+
+INCLUDES=-I./include -I$(TOP)
+
+OBJS=	425data.o \
+	425error.o \
+	des_sched.o \
+	err_txt.o \
+	get_cred.o \
+	get_krbhst.o \
+	get_lrealm.o \
+	get_phost.o \
+	kn_parse.o \
+	kntoln.o \
+	kparse.o \
+	kuserok.o \
+	mk_priv.o \
+	mk_req.o \
+	mk_safe.o \
+	net_read.o \
+	net_write.o \
+	rd_priv.o \
+	rd_req.o \
+	rd_safe.o \
+	realmhost.o \
+	recvauth.o \
+	sendauth.o \
+	set_key.o
+
+SRCS=	425data.c \
+	425error.c \
+	des_sched.c \
+	err_txt.c \
+	get_cred.c \
+	get_krbhst.c \
+	get_lrealm.c \
+	get_phost.c \
+	kn_parse.c \
+	kntoln.c \
+	kparse.c \
+	kuserok.c \
+	mk_priv.c \
+	mk_req.c \
+	mk_safe.c \
+	net_read.c \
+	net_write.c \
+	rd_priv.c \
+	rd_req.c \
+	rd_safe.c \
+	realmhost.c \
+	recvauth.c \
+	sendauth.c \
+	set_key.c
+
+NormalLibraryTarget(krb425,${OBJS})
