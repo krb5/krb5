@@ -91,6 +91,11 @@ char *mkey_name = 0;
 krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
+/*
+ * XXX Memory leak for cur_realm, which is assigned both allocated
+ * values (in set_dbname) and unallocated values (from argv()).
+ */
+
 void
 quit()
 {
@@ -116,7 +121,7 @@ char *argv[];
 
     krb5_error_code retval;
     char *dbname = 0;
-    char defrealm[BUFSIZ];
+    char *defrealm;
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
     int sci_idx, code;
@@ -198,7 +203,7 @@ char *argv[];
     }
 
     if (!cur_realm) {
-	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
+	if (retval = krb5_get_default_realm(&defrealm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
