@@ -175,10 +175,19 @@ OLDDECLARG(krb5_creds *, cred)
 
     cred->ticket_flags = dec_rep->enc_part2->flags;
     cred->is_skey = FALSE;
-    if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
-				     &cred->addresses)) {
-	cleanup();
-	return retval;
+    if (dec_rep->enc_part2->caddrs) {
+	if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
+					 &cred->addresses)) {
+	    cleanup();
+	    return retval;
+	}
+    } else {
+	/* no addresses in the list means we got what we had */
+	if (retval = krb5_copy_addresses(tgt->addresses,
+					 &cred->addresses)) {
+	    cleanup();
+	    return retval;
+	}
     }
     if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
 				     &cred->server)) {
