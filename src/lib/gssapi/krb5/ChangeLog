@@ -1,3 +1,8 @@
+2003-07-14  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Call
+	TREAD_STR with correct arguments.  Patch from Emily Ratliff.
+
 2003-07-10  Tom Yu  <tlyu@mit.edu>
 
 	* acquire_cred.c (acquire_init_cred): Close the ccache if
