@@ -1,3 +1,9 @@
+2001-11-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Ensure space present after
+	arcfour-hmac-md5 entry for when ANSI strings concatenated the
+	des-cbc-crc entry was dropped.
+
 2001-11-07  Sam Hartman  <hartmans@mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): Add arcfour-hmac-md5; it really
