@@ -4,6 +4,7 @@
 	(gssint_krb5_keytab_lock): New mutex.
 	(krb5_gss_register_acceptor_identity, acquire_accept_cred): Lock
 	the mutex while manipulating krb5_gss_keytab.
+	* gssapiP_krb5.h (gssint_krb5_keytab_lock): Declare.
 
 2004-07-08  Ken Raeburn  <raeburn@mit.edu>
 

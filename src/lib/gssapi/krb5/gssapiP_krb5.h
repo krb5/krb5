@@ -197,6 +197,8 @@ typedef struct _krb5_gss_ctx_id_rec {
 
 extern g_set kg_vdb;
 
+extern k5_mutex_t gssint_krb5_keytab_lock;
+
 /* helper macros */
 
 #define kg_save_name(name)		g_save_name(&kg_vdb,name)
