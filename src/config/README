@@ -1,0 +1,322 @@
+
+				X Window System
+			   Imake Configuration Guide
+
+				   Release 4
+
+
+
+				   Abstract
+
+This document describes the various parameters that are used to configure this
+release of the X Window System.  It should be read by anyone who is porting X
+to a new platform or attempting to change the default installation.
+
+
+
+
+0.  Overview
+
+Sources for a paper giving an overview of the build system may be found in
+./doc/config/usenixws/paper.ms.
+
+
+
+1.  Introduction
+
+Because Makefiles are inherently unportable, this release uses a tool called
+Imake to generate platform-specific Makefiles from machine-independent
+descriptions called Imakefiles.  It makes very heavy use of the C preprocessor
+both for constants and macro functions and can be somewhat tricky to master.
+However, it is invaluable for making the release easy to configure on a wide
+variety of machines.
+
+Imakefiles usually contain definitions of make variables plus one or more
+invocations of macro functions to build the desired parts of the Makefile.
+Imake reads a template file containing definitions that are common to all
+Makefiles, which includes a machine-specific file containing definitions for
+the various commonly used commands and flags for enabling certain build
+options.  It then includes a rules file in which all of the various macro
+functions are defined followed by the Imakefile being processed.  Finally,
+it appends a set of common rules to the bottom.
+
+
+
+
+2.  The template file
+
+All of the common configuration parameters and make rules are located in
+the file Imake.tmpl.  The top of the file defines some useful constants
+and then has a series of conditional blocks for setting the platform type.
+
+This requires that there be a unique preprocessor symbol that can be used to
+identify which configuration block to use.  Systems whose cpp does not define
+such a symbol must add one to the cpp_argv table in config/imakemdep.h and 
+build with BOOTSTRAPCFLAGS set to the appropriate name.  Any additional flags
+(such as -DSYSV or -DUSG) that are needed to compile imake.c should be added 
+to the file ccflags.c.
+
+Each block defines several symbol names representing the type of system
+being configured:
+
+	#define MacroIncludeFile	"PLATFORM.cf"
+	#define MacroFile		PLATFORM.cf
+	#define PLATFORMArchitecture
+
+where PLATFORM is the type of the system being configured.  The redundant
+versions are needed because one is used by cpp to include the file and the
+other is used in generating filenames.  The Architecture variable may be
+used in Imakefiles to obtain platform-specific rules or values.  The unique
+symbols that were used to select the configuration block are then undefined
+to prevent Imakefiles from using system-dependent rules as opposed to
+platform-dependent (some platforms run on multiple systems).
+
+The rest of the template file should not be edited.  Server-specific changes
+can be made in the appropriate .cf file and site-specific changes can be
+made in site.def.  Any parameter that is not set will be given a default value
+in the appropriate .tmpl file.  THESE DEFAULTS SHOULD NOT BE CHANGED.
+
+
+
+
+3.  Server-specific .cf file
+
+Differences between operating systems are handled by setting various
+configuration parameters in the .cf files.  The easiest way to create
+a new one is to:
+
+     o  find a configuration similar to yours or start with generic.cf.
+     o  set the SystemV variable if your OS is based on SVR2.
+     o  set the OSName, OSMajorVersion, and OSMinorVersion variables.
+     o  set BuildServer to NO if you are doing a client-only build.
+     o  look at the other .cf files, Imake.tmpl, and Project.tmpl to see 
+	    if there are any variables you'd like to set; common ones include:
+
+		HasSockets, HasVFork, HasVoidSignalReturn, HasBsearch,
+		HasPutenv, NeedBerklibInXlib, ConnectionFlags, CcCmd, LnCmd,
+		setTtyGroup, UnalignedReferencesAllowed
+
+
+Imake.tmpl provides defaults for the following variables:
+
+	ArCmd			command used to create libraries
+	AsCmd			command used to run assembler
+	BootstrapCFlags		missing cpp symbols needed to get started
+	BourneShell		command used to run Bourne Shell
+	CURDIR			current directory relative to top of sources
+	CcCmd			command to run C compiler
+	CompatibilityFlags	flags turn on backwards compatibility
+	CompressCmd		command to run compress program
+	ConstructMFLAGS		System V option to set MFLAGS make variable
+	CpCmd			command to copy one file to another
+	CppCmd			command to run C preprocessor
+	DebuggableCDebugFlags	C compiler -I's and -D's to turn on debug info
+	DefaultCCOptions	default special C compiler options
+	DefaultCDebugFlags	debug/optimize flags for programs
+	DestDir			prefix to root directory when installed
+	ExecableScripts		boolean for systems that can exec() #!/bin/sh
+	ExtraLibraries		system-specific libraries need to link
+	ExtraLoadFlags		system-specific loader flags
+	FilesToClean		files to delete in make clean
+	FortranCmd		command to run Fortran compiler
+	FortranDebugFlags	flags for Fortran debug info
+	FortranFlags		Fortran compiler flags
+	HasBsearch		boolean for libc has bsearch()
+	HasDESLibrary		boolean for system has DES library
+	HasFortran		boolean for system has Fortran compiler
+	HasGcc			boolean for system has GNU C compiler
+	HasLargeTmp		boolean for system has /tmp space
+	HasNdbm			boolean for system has ndbm routines
+	HasPutenv		boolean for libc has putenv()
+	HasSaberC		boolean for system has Saber C
+	HasSharedLibraries	boolean for system has shared libraries
+	HasSockets		boolean for system has BSD sockets
+	HasSunOSSharedLibraries	boolean for system has SunOS shared libs
+	HasVFork		boolean for system has vfork()
+	HasVoidSignalReturn	boolean for POSIX signal() procs
+	IncRoot			parent of X11 include directory
+	InstDatFlags		install flags for data files
+	InstIncFlags		install flags for header files
+	InstKmemFlags		install flags for xload to get at /dev/kmem
+	InstLibFlags		install flags for libraries
+	InstManFlags		install flags for manual pages
+	InstPgmFlags		install flags for normal programs
+	InstUidFlags		install flags for xterm to chown /dev/ptys
+	InstallCmd		command to install files
+	LdCmd			command to run loader
+	LdCombineFlags		flags for incremental loading
+	LibraryCCOptions	special C compiler options for libraries
+	LibraryCDebugFlags	library debug/optimize flags to override defs
+	LibraryCcCmd		command to run C compiler in libraries
+	LintCmd			command to run lint
+	LintLibFlag		flags to generate lint libraries
+	LintOpts		lint options to control strictness
+	LnCmd			command to link two files
+	LoaderLibPrefix		loader flags before libraries
+	MacroFile		name of machine-dependent config params file
+	MacroIncludeFile	<MacroFile>
+	MakeCmd			command to run make
+	MvCmd			command to rename a file
+	NdbmDefines		-D's to turn on use of ndbm routines
+	NeedFunctionPrototypes	whether or not to force function prototypes
+	NeedWidePrototypes	whether or not to widen function prototypes
+	NoOpCDebugFlags		C compiler flags to not debug or optimize
+	OSMajorVersion		major version number of operating system
+	OSMinorVersion		minor version number of operating system
+	OptimizedCDebugFlags	C compiler flags to turn on optimization
+	PexCDebugFlags		special -D's for PEX
+	PreProcessCmd		command to run /lib/cpp on scripts
+	RanlibCmd		command to clean up libraries
+	RanlibInstFlags		flags to ranlib after copying
+	RmCmd			command to delete files
+	ServerCCOptions		server C compiler options to override defaults
+	ServerCcCmd		command to run C compiler in server
+	SharedCodeDef		-D's to turn on sharable code in libraries
+	SharedLibraryDef	-D's to turn on use of shared libraries
+	StandardCppDefines	-D's for running cpp
+	StandardDefines		-D's for running C compiler
+	StandardIncludes	-I's for running C compiler
+	StripInstalledPrograms	boolean for sites that want to install -s
+	SystemV			boolean for systems that are at least SVR2
+	TOPDIR			relative path to top of sources
+	TagsCmd			command to run tags
+	UNCOMPRESSPATH		command to run uncompress
+	UnalignedReferencesAllowed	boolean for unaligned copies ok
+	UsrLibDir		directory in which to install libraries
+
+
+Project.tmpl provides defaults for the following variables:
+
+	AdmDir			directory containing system log files
+	AllocateLocalDefines	-D's to turn on alloca()
+	AwmDir			directory containing awm config files
+	BDFTOSNFFILT		command to run bdftosnf
+	BandAidLibraryNeeded	boolean for systems that need extra Xlib stuff
+	BandAidLibraryObjects	Xlib object files to merge in
+	BandAidLibrarySources	Xlib source files to merge in
+	BinDir			directory in which to install programs
+	BuildExamples		boolean controlling make of examples stuff
+	BuildIncRoot		relative path to location of headers in build
+	BuildIncTop		path from build includes directory to top
+	BuildServer		boolean controlling make of server stuff
+	BuildXawBC		boolean controlling R3 compatibility in Xaw
+	ConfigDir		install directory for config files
+	ConnectionFlags		-D's for supported transports
+	ContribDir		location of user-contributed sources
+	DebugLibX		boolean for compiling extra Xlib -g
+	DebugLibXArchive	boolean for building extra libX11_g.a
+	DebugLibXaw		boolean for compiling/building) libXaw_g
+	DebugLibXext		boolean for compiling/building) libXext_g
+	DebugLibXmu		boolean for compiling/building) libXmu_g
+	DebugLibXt		boolean for compiling/building) libXt_g
+	DebugOldLibX		boolean for compiling/building) liboldX_g
+	DefaultFontPath		default server font path
+	DefaultRGBDatabase	default server rgb color database
+	DefaultSystemPath	default system xdm PATH environment variable
+	DefaultSystemShell	default /bin/sh
+	DefaultUserPath		default user xdm PATH environment variable
+	DependCmd		command to run makedepend
+	DependDir		build directory containing makedepend program
+	DoInstallExtensionsIntoXlib	merge -lXext into -lX11
+	ExtensionDefines	-D's for extensions
+	FontCompilerFlags	flags for bdftosnf
+	FontDefines		-D's to turn on font options
+	FontDir			directory in which to install fonts
+	FontFilters		-D's to specify font conversion filters
+	GwmDir			directory in which to install gwm config stuff
+	HasInputExtension	boolean for systems that want XInput extension
+	IncRoot			parent directory of installed header files
+	InstallAppDefFiles	boolean for installing new app defaults files
+	InstallOldHeaderFiles	boolean for installing R3-compatible headers
+	InstallXdmConfig	boolean for installing xdm config files
+	InstallXinitConfig	boolean for installing xinit files
+	LibDir			directory in which to install X11 data files
+	LibManSuffix		man suffix for library pages
+	LibmanDir		directory in which to install library man pages
+	LibraryDefines		-D's for libraries
+	LintlibDir		directory in which to install lint libs
+	ManDir			directory in which to install program man pages
+	ManDirectoryRoot	parent of man directories relative to root
+	ManPath			full path of parent directory
+	ManSourcePath		common prefix of man page directories
+	ManSuffix		man suffix for programs
+	NeedBerklibInXlib	boolean for systems that need BSD emulation
+	NeedDefaultDepLibs	boolean for enabling default DEPLIBS
+	PrimaryScreenResolution	resolution of default server screen
+	ProfileLibX		boolean for compiling -p Xlib
+	ProfileLibXArchive	boolean for building libX11_p
+	ProfileLibXaw		boolean for compiling/building libXaw_p
+	ProfileLibXext		boolean for compiling/building libXext_p
+	ProfileLibXmu		boolean for compiling/building libXmu_p
+	ProfileLibXt		boolean for compiling/building libXt_p
+	ProfileOldLibX		boolean for compiling/building liboldX_p
+	ProjectX		boolean indicating this is the X Window System
+	RemoveTargetProgramByMoving	boolean for rm -f that doesn't
+	SHELLPATH		-D for /bin/sh
+	ServerCDebugFlags	server debug/opt compiler flags
+	ServerDefines		-D's for server
+	SharedLibX		boolean for making sharable libX11
+	SharedLibXaw		boolean for making sharable libXaw
+	SharedLibXext		boolean for making sharable libXext
+	SharedLibXmu		boolean for making sharable libXmu
+	SharedLibXt		boolean for making sharable libXt
+	SharedOldLibX		boolean for making sharable liboldX
+	SharedOldXRev		version number for shared libX11
+	SharedXawRev		version number for shared libXaw
+	SharedXextRev		version number for shared libXext
+	SharedXlibRev		version number for shared libXmu
+	SharedXmuRev		version number for shared libXt
+	SharedXtRev		version number for shared liboldX
+	TwmDir			directory in which to install twm config files
+	UNCOMPRESSFILT		-D of command to run uncompress
+	UseCCMakeDepend		boolean for using alternate makedepend script
+	XAppLoadDir		directory in which to install app defaults
+	XawClientDepLibs	DEPLIBS for clients that use Xaw
+	XawClientLibs		LOCAL_LIBRARIES for clients that use Xaw
+	XdmConfigurationSubdirectory	name of default xdm configuration
+	XdmDir			directory in which to install xdm files
+	XinitDir		directory in which to install xinit files
+	ZBDFTOSNFFILT		-D to run uncompress and bdftosnf
+
+
+4.  Site-specific site.def file
+
+The site.def file is used to set configuration parameters that apply to all all
+servers in a given site.  It should use #ifndef so that servers may still
+override it.  The second use for site.def is to define installation directories
+and flags.  The following additional build parameters are defined:
+
+	HasXcuWidgets		include Xcu make variables in Makefiles
+	HasXwWidgets		include Xw make variables in Makefiles
+
+
+
+5.  Imakefiles
+
+Individual Imakefiles may use any of the macros defined in Imake.rules.  Many
+of these rules use auxillary make variables:
+
+    FILE		used by lint1 phase
+    INSTALLFLAGS	used by default installs
+    LINTLIBS		used by NormalLintTarget
+    LOCAL_LIBRARIES	used by ComplexProgramTarget
+    MAKEFILE_SUBDIR	used by MakeMakeSubdirs
+    OBJS		used by ComplexProgramTarget
+    OBJS1		used by ComplexProgramTarget_1
+    OBJS2		used by ComplexProgramTarget_2
+    OBJS3		used by ComplexProgramTarget_3
+    PROGRAM		used by ComplexProgramTarget
+    PROGRAMS		used by ComplexProgramTarget_1
+    SRCS		used by DependTarget
+    SRCS1		used by DependTarget
+    SRCS2		used by DependTarget
+    SRCS3		used by DependTarget
+
+The easiest way to write an Imakefile is to find another one that does the
+same thing and modify it.
+
+The most important guidelines are that the X Libraries be refered to by their
+make variables names (e.g. $(XLIB)) rather than -llib, and should go in
+LOCAL_LIBRARIES rather than SYSTEM_LIBRARIES (which is only for things like
+-lm).
+
