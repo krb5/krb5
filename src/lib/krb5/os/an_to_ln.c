@@ -42,24 +42,12 @@
 #define	min(a,b)	((a>b) ? b : a)
 #endif	/* min */
 #ifdef ANAME_DB
-#ifdef	BERK_DB_DBM
-/*
- * Use Berkeley Hashed Database code.
- */
-extern DBM	*db_dbm_open KRB5_PROTOTYPE((char *, int, int));
-extern void	db_dbm_close KRB5_PROTOTYPE((DBM *));
-extern datum	db_dbm_fetch KRB5_PROTOTYPE((DBM *, datum));
-#define	KDBM_OPEN(db, fl, mo)	db_dbm_open(db, fl, mo)
-#define	KDBM_CLOSE(db)		db_dbm_close(db)
-#define	KDBM_FETCH(db, key)	db_dbm_fetch(db, key)
-#else	/* BERK_DB_DBM */
 /*
  * Use standard DBM code.
  */
 #define	KDBM_OPEN(db, fl, mo)	dbm_open(db, fl, mo)
 #define	KDBM_CLOSE(db)		dbm_close(db)
 #define	KDBM_FETCH(db, key)	dbm_fetch(db, key)
-#endif	/* BERK_DB_DBM */
 #endif /*ANAME_DB*/
 
 /*
@@ -104,7 +92,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     const int lnsize;
     char *lname;
 {
-#if	defined(BERK_DB_DBM) || (!defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH))
+#if	(!defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH))
     DBM *db;
     krb5_error_code retval;
     datum key, contents;
@@ -140,13 +128,13 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     /* can't close until we copy the contents. */
     (void) KDBM_CLOSE(db);
     return retval;
-#else	/* BERK_DB_DBM && !_MSDOS && !_WIN32 && !MACINTOSH */
+#else	/* !_MSDOS && !_WIN32 && !MACINTOSH */
     /*
      * If we don't have support for a database mechanism, then we can't
      * translate this now, can we?
      */
     return KRB5_LNAME_NOTRANS;
-#endif	/* BERK_DB_DBM && !_MSDOS && !_WIN32 && !MACINTOSH */
+#endif	/* !_MSDOS && !_WIN32 && !MACINTOSH */
 }
 #endif /*ANAME_DB*/
 

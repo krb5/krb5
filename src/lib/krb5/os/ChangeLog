@@ -1,3 +1,8 @@
+Thu Aug 22 15:19:47 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* an_to_ln.c (db_an_to_ln): Remove references to dead BERK_DB_DBM
+	 	code.
+
 Tue Jul 30 19:15:55 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (check-unix): Comment out an_2_ln tests that use
