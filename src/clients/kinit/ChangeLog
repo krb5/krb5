@@ -1,3 +1,7 @@
+2000-10-09  Tom Yu  <tlyu@mit.edu>
+
+	* kinit.c (k4_kinit): Call time_to_life().
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* kinit.c: Include krb524.h if suport desired. Clean up

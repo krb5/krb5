@@ -895,11 +895,7 @@ k4_kinit(opts, k4, ctx)
     if (!k4->lifetime)
 	k4->lifetime = KRB4_BACKUP_DEFAULT_LIFE_SECS;
 
-    k4->lifetime /= (5 * 60);
-    if (k4->lifetime < 1)
-	k4->lifetime = 1;
-    if (k4->lifetime > 255)
-	k4->lifetime = 255;
+    k4->lifetime = krb_time_to_life(0, k4->lifetime);
 
     switch (opts->action)
     {
