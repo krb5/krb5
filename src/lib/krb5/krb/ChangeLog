@@ -1,3 +1,8 @@
+Tue Nov  8 17:09:48 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* in_tkt_pwd.c (pwd_keyproc): Use the documented interface for
+		calling krb5_string_to_key().
+
 Tue Oct 25 23:34:57 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* srv_rcache.c (krb5_get_server_rcache): Added missing continue so

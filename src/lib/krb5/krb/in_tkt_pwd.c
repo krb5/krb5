@@ -54,6 +54,7 @@ OLDDECLARG(krb5_pa_data **,padata)
 {
     krb5_data salt;
     krb5_error_code retval;
+    krb5_encrypt_block eblock;
     const struct pwd_keyproc_arg *arg;
     struct pwd_keyproc_arg arg2;
     char pwdbuf[BUFSIZ];
@@ -63,6 +64,8 @@ OLDDECLARG(krb5_pa_data **,padata)
     if (!valid_keytype(type))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
+    krb5_use_keytype(&eblock, type);
+    
     if (padata) {
         krb5_pa_data **ptr;
 
@@ -102,12 +105,9 @@ OLDDECLARG(krb5_pa_data **,padata)
     if (!*key) {
 	if (f_salt) krb5_xfree(salt.data);
 	return ENOMEM;
-    }    
-    if (retval = (*krb5_keytype_array[type]->system->
-		  string_to_key)(type,
-				 *key,
-				 &arg->password,
-                                 &salt)) {
+    }
+    retval = krb5_string_to_key(&eblock, type, *key, &arg->password, &salt);
+    if (retval) {
 	krb5_xfree(*key);
 	if (f_salt) krb5_xfree(salt.data);
 	return(retval);
