@@ -1,3 +1,7 @@
+2002-10-30  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* KRB5-asn.py: Fix definition for sam-pk-for-sad element.
+
 2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
 
 	* KRB5-asn.py, asn1_k_decode.c, asn1_k_decode.h, asn1_k_encode.c,

@@ -1,3 +1,8 @@
+2002-10-30  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* krb5.hin: Change definitions of new SAM preauth types to
+	match kerberos-clarifications.
+
 2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
 
 	* k5-int.h, krb5.hin: Add new protocols, definitions, and

@@ -363,7 +363,7 @@ PA-SAM-CHALLENGE ::= SEQUENCE {
     sam-challenge-label[4]      GeneralString OPTIONAL,
     sam-challenge[5]            GeneralString OPTIONAL,
     sam-response-prompt[6]      GeneralString OPTIONAL,
-    sam-pk-for-sad[7]           EncryptionKey OPTIONAL,
+    sam-pk-for-sad[7]           OCTET STRING OPTIONAL,
     sam-nonce[8]                INTEGER OPTIONAL,
     sam-cksum[9]                Checksum OPTIONAL
 }

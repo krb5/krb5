@@ -866,8 +866,11 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_PADATA_ETYPE_INFO		11 /* Etype info for preauth */
 #define KRB5_PADATA_SAM_CHALLENGE	12 /* draft challenge system */
 #define KRB5_PADATA_SAM_RESPONSE	13 /* draft challenge system response */
-#define KRB5_PADATA_SAM_CHALLENGE_2	14 /* draft challenge system, updated */
-#define KRB5_PADATA_SAM_RESPONSE_2	15 /* draft challenge system, updated */
+#define KRB5_PADATA_PK_AS_REQ		14 /* PKINIT */
+#define KRB5_PADATA_PK_AS_REP		15 /* PKINIT */
+
+#define KRB5_PADATA_SAM_CHALLENGE_2	30 /* draft challenge system, updated */
+#define KRB5_PADATA_SAM_RESPONSE_2	31 /* draft challenge system, updated */
     
 #define	KRB5_SAM_USE_SAD_AS_KEY		0x80000000
 #define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
