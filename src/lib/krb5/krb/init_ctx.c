@@ -27,7 +27,7 @@
 #include <ctype.h>
 
 #if (defined(_MSDOS) || defined(_WIN32))
-extern void krb5_win_do_init();
+extern krb5_error_code krb5_vercheck();
 #endif
 
 krb5_error_code INTERFACE
@@ -38,12 +38,17 @@ krb5_init_context(context)
 	krb5_error_code retval;
 	int tmp;
 
+	/* Initialize error tables */
+	krb5_init_ets(ctx);
+
 #if (defined(_MSDOS) || defined(_WIN32))
 	/*
-	 * krb5_win_do_init() is defined in win_glue.c, and this is
+	 * krb5_vercheck() is defined in win_glue.c, and this is
 	 * where we handle the timebomb and version server checks.
 	 */
-	krb5_win_do_init();
+	retval = krb5_vercheck();
+	if (retval)
+		return retval;
 #endif
 
 	*context = 0;
@@ -53,9 +58,6 @@ krb5_init_context(context)
 		return ENOMEM;
 	memset(ctx, 0, sizeof(struct _krb5_context));
 	ctx->magic = KV5M_CONTEXT;
-
-	/* Initialize error tables */
-	krb5_init_ets(ctx);
 
 	/* Set the default encryption types, possible defined in krb5/conf */
 	if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))

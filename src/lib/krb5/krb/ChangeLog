@@ -1,3 +1,10 @@
+Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_ctx.c (krb5_init_context): Use new call krb5_vercheck() for
+ 		Windows timebomb checking; this call returns an error
+		code, which is returned to the user if the timebomb should
+		be activated.
+
 Thu Nov 21 13:54:01 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* recvauth.c (krb5_recvauth): If there is an error, and the server
