@@ -206,6 +206,13 @@ krb_err.c: krb_err.et
 kadm_err.h: kadm_err.et
 kadm_err.c: kadm_err.et
 
+GEN_ERRTXT=$(AWK) -f $(srcdir)$(S)et_errtxt.awk outfile=$@
+
+krb_err_txt.c: krb_err.et $(srcdir)$(S)et_errtxt.awk
+	$(GEN_ERRTXT) $(srcdir)/krb_err.et
+
+err_txt.so err_txt.po $(OUTPRE)err_txt.$(OBJEXT): err_txt.c krb_err_txt.c
+
 depend-dependencies: krb_err.h $(EHDRDIR)$(S)krb_err.h \
 	kadm_err.h $(EHDRDIR)$(S)kadm_err.h \
 	krb_err.c

@@ -1,3 +1,8 @@
+2003-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add rules for generating lib/krb4/krb_err_txt.c for
+	Windows.
+
 2003-01-14  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (check-unix): Invoke t_krbconf instead of struggling

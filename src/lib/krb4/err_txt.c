@@ -29,8 +29,10 @@
 
 /*
  * This is gross.  We want krb_err_txt to match the contents of the
- * com_err error table, but the text is static in krb_err.c.  To avoid
- * multiple registrations of the error table, we also want to override
+ * com_err error table, but the text is static in krb_err.c.  We can't
+ * alias it by making a pointer to it, either, so we have to suck in
+ * another copy of it that is named differently.  Also, to avoid
+ * multiple registrations of the error table, we want to override
  * initialize_krb_error_table() in case someone decides to call it.
  */
 #undef initialize_krb_error_table
@@ -38,11 +40,9 @@
 void krb4int_init_krb_err_tbl(void);
 #include "krb_err.c"
 #undef initialize_krb_error_table
+#include "krb_err_txt.c"
 
 void initialize_krb_error_table(void);
-
-/* YUCK -- depends on naming of the static table. */
-const char * const * const krb_err_txt = text;
 
 static int inited = 0;
 

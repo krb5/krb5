@@ -74,7 +74,13 @@ KRBINT_BEGIN_DECLS
 #define KRB_UINT32	DES_UINT32
 
 #define		MAX_KRB_ERRORS	256
+
+#if TARGET_OS_MAC
+/* ABI divergence on Mac for backwards compatibility. */
 extern const char * const * const krb_err_txt;
+#else
+extern const char * const krb_err_txt[MAX_KRB_ERRORS];
+#endif
 
 /* General definitions */
 #define		KSUCCESS	0
@@ -655,6 +661,7 @@ int send_to_kdc
 /* Used to return pointer to non-const char */
 const char * KRB5_CALLCONV tkt_string
 	(void);
+/* Previously not KRB5_CALLCONV */
 void KRB5_CALLCONV krb_set_tkt_string
 	(char *);
 
