@@ -140,5 +140,6 @@ char *argv[];
 	exit_status++; return; 
     }
 
+    exit_status = 0;
     return; 
 }
