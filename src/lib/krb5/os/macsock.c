@@ -68,6 +68,9 @@ Cygnus Support (email info@cygnus.com).",
    for Kerberos, which is all that we care about right now.  */
 static struct timeval last_timeout;
 
+/* IH 04.03.96: Need UPP for PPC port */
+static ResultUPP gDNRresultupp = NULL;
+
 
 /* Forward declarations of static functions */
 
@@ -555,7 +558,11 @@ gethostbyname (char *hostname)
 		
 	if (err = OpenResolver(NULL))
 		return(0);	// make sure resolver is open
-	err = StrToAddr(hostname, &host, DNRresultproc, &done);
+	
+	//  IH 04.03.96: Need UPP when running on PPC
+	if (gDNRresultupp == NULL)
+		gDNRresultupp = NewResultProc(DNRresultproc);
+	err = StrToAddr(hostname, &host, gDNRresultupp, &done);
 	
 	if (err == cacheFault) {
 		while(!done) ;			/* LOOP UNTIL CALLBACK IS RUN */
@@ -608,7 +615,10 @@ gethostbyaddr (char *addr, int len, int type)
 		
 	if (err = OpenResolver(NULL))
 		return 0;	// make sure resolver is open
-	err = AddrToName(macaddr, &host, DNRresultproc, &done);
+	//  IH 04.03.96: Need UPP when running on PPC
+	if (gDNRresultupp == NULL)
+		gDNRresultupp = NewResultProc(DNRresultproc);
+	err = AddrToName(macaddr, &host, gDNRresultupp, &done);
 	
 	if (err == cacheFault) {
 		while(!done) ;			/* LOOP UNTIL CALLBACK IS RUN */
