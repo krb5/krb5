@@ -39,15 +39,15 @@
 
 #define setup()\
 asn1_error_code retval;\
-asn1_class class;\
+asn1_class asn1class;\
 asn1_construction construction;\
 asn1_tagnum tagnum;\
 unsigned int length
 
 #define tag(type)\
-retval = asn1_get_tag(buf,&class,&construction,&tagnum,&length);\
+retval = asn1_get_tag(buf,&asn1class,&construction,&tagnum,&length);\
 if(retval) return retval;\
-if(class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
+if(asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
   return ASN1_BAD_ID
   
 #define cleanup()\
@@ -55,9 +55,7 @@ return 0
 
 time_t gmt_mktime (struct tm *);
 
-asn1_error_code asn1_decode_integer(buf, val)
-     asn1buf * buf;
-     long * val;
+asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
 {
   setup();
   asn1_octet o;
@@ -82,9 +80,7 @@ asn1_error_code asn1_decode_integer(buf, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_unsigned_integer(buf, val)
-     asn1buf * buf;
-     unsigned long * val;
+asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *val)
 {
   setup();
   asn1_octet o;
@@ -108,10 +104,7 @@ asn1_error_code asn1_decode_unsigned_integer(buf, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_octetstring(buf, retlen, val)
-     asn1buf * buf;
-     unsigned int * retlen;
-     asn1_octet ** val;
+asn1_error_code asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
 {
   setup();
   tag(ASN1_OCTETSTRING);
@@ -121,10 +114,7 @@ asn1_error_code asn1_decode_octetstring(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_charstring(buf, retlen, val)
-     asn1buf * buf;
-     unsigned int * retlen;
-     char ** val;
+asn1_error_code asn1_decode_charstring(asn1buf *buf, unsigned int *retlen, char **val)
 {
   setup();
   tag(ASN1_OCTETSTRING);
@@ -135,10 +125,7 @@ asn1_error_code asn1_decode_charstring(buf, retlen, val)
 }
 
 
-asn1_error_code asn1_decode_generalstring(buf, retlen, val)
-     asn1buf * buf;
-     unsigned int * retlen;
-     char ** val;
+asn1_error_code asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen, char **val)
 {
   setup();
   tag(ASN1_GENERALSTRING);
@@ -149,8 +136,7 @@ asn1_error_code asn1_decode_generalstring(buf, retlen, val)
 }
 
 
-asn1_error_code asn1_decode_null(buf)
-     asn1buf * buf;
+asn1_error_code asn1_decode_null(asn1buf *buf)
 {
   setup();
   tag(ASN1_NULL);
@@ -158,10 +144,7 @@ asn1_error_code asn1_decode_null(buf)
   cleanup();
 }
 
-asn1_error_code asn1_decode_printablestring(buf, retlen, val)
-     asn1buf * buf;
-     int * retlen;
-     char ** val;
+asn1_error_code asn1_decode_printablestring(asn1buf *buf, int *retlen, char **val)
 {
   setup();
   tag(ASN1_PRINTABLESTRING);
@@ -171,10 +154,7 @@ asn1_error_code asn1_decode_printablestring(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_ia5string(buf, retlen, val)
-     asn1buf * buf;
-     int * retlen;
-     char ** val;
+asn1_error_code asn1_decode_ia5string(asn1buf *buf, int *retlen, char **val)
 {
   setup();
   tag(ASN1_IA5STRING);
@@ -184,9 +164,7 @@ asn1_error_code asn1_decode_ia5string(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_generaltime(buf, val)
-     asn1buf * buf;
-     time_t * val;
+asn1_error_code asn1_decode_generaltime(asn1buf *buf, time_t *val)
 {
   setup();
   char *s;

@@ -1,3 +1,10 @@
+2002-09-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_decode.c, asn1_encode.c, asn1_get.c, asn1_get.h,
+	asn1_k_decode.c, asn1_k_encode.c, asn1_make.c, asn1_make.h,
+	asn1buf,c. asn1buf.h, krb5_decode.c, krb5_encode.c: Use prototype
+	style definitions for functions.  Avoid variable name "class".
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

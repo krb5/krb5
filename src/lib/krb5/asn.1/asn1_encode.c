@@ -29,10 +29,8 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-asn1_error_code asn1_encode_integer(buf, val, retlen)
-     asn1buf * buf;
-     const long val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_integer(asn1buf *buf, long val,
+				    unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length = 0;
@@ -67,10 +65,8 @@ asn1_error_code asn1_encode_integer(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_unsigned_integer(buf, val, retlen)
-     asn1buf * buf;
-     const unsigned long val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, unsigned long val,
+					     unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length = 0;
@@ -101,11 +97,9 @@ asn1_error_code asn1_encode_unsigned_integer(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_octetstring(buf, len, val, retlen)
-     asn1buf * buf;
-     const unsigned int len;
-     const asn1_octet * val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
+					const asn1_octet *val,
+					unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length;
@@ -119,11 +113,8 @@ asn1_error_code asn1_encode_octetstring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_charstring(buf, len, val, retlen)
-     asn1buf * buf;
-     const unsigned int len;
-     const char * val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_charstring(asn1buf *buf, unsigned int len,
+				       const char *val, unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length;
@@ -137,9 +128,7 @@ asn1_error_code asn1_encode_charstring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_null(buf, retlen)
-     asn1buf * buf;
-     int * retlen;
+asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen)
 {
   asn1_error_code retval;
   
@@ -152,11 +141,8 @@ asn1_error_code asn1_encode_null(buf, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_printablestring(buf, len, val, retlen)
-     asn1buf * buf;
-     const unsigned int len;
-     const char * val;
-     int * retlen;
+asn1_error_code asn1_encode_printablestring(asn1buf *buf, unsigned int len,
+					    const char *val, int *retlen)
 {
   asn1_error_code retval;
   unsigned int length;
@@ -170,11 +156,8 @@ asn1_error_code asn1_encode_printablestring(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
-     asn1buf * buf;
-     const unsigned int len;
-     const char * val;
-     int * retlen;
+asn1_error_code asn1_encode_ia5string(asn1buf *buf, unsigned int len,
+				      const char *val, int *retlen)
 {
   asn1_error_code retval;
   unsigned int length;
@@ -188,10 +171,8 @@ asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_generaltime(buf, val, retlen)
-     asn1buf * buf;
-     const time_t val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
+					unsigned int *retlen)
 {
   asn1_error_code retval;
   struct tm *gtime;
@@ -228,11 +209,9 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
   return 0;
 }
 
-asn1_error_code asn1_encode_generalstring(buf, len, val, retlen)
-     asn1buf * buf;
-     const unsigned int len;
-     const char * val;
-     unsigned int * retlen;
+asn1_error_code asn1_encode_generalstring(asn1buf *buf, unsigned int len,
+					  const char *val,
+					  unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length;

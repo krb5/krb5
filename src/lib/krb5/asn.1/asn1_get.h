@@ -35,19 +35,19 @@
 
 asn1_error_code asn1_get_tag_indef
 	(asn1buf *buf,
-		   asn1_class *class,
+		   asn1_class *Class,
 		   asn1_construction *construction,
 		   asn1_tagnum *tagnum,
 		   unsigned int *retlen, int *indef);
 asn1_error_code asn1_get_tag
 	(asn1buf *buf,
-		   asn1_class *class,
+		   asn1_class *Class,
 		   asn1_construction *construction,
 		   asn1_tagnum *tagnum,
 		   unsigned int *retlen);
 /* requires  *buf is allocated
    effects   Decodes the tag in *buf.  If class != NULL, returns
-              the class in *class.  Similarly, the construction,
+              the class in *Class.  Similarly, the construction,
 	      tag number, and length are returned in *construction,
 	      *tagnum, and *retlen, respectively.
 	     If *buf is empty to begin with,
@@ -66,13 +66,13 @@ asn1_error_code asn1_get_sequence
 
 asn1_error_code asn1_get_id
 	(asn1buf *buf,
-		   asn1_class *class,
+		   asn1_class *Class,
 		   asn1_construction *construction,
 		   asn1_tagnum *tagnum);
 /* requires  *buf is allocated
    effects   Decodes the group of identifier octets at *buf's
               current position.  If class != NULL, returns the class
-              in *class.  Similarly, the construction and tag number
+              in *Class.  Similarly, the construction and tag number
               are returned in *construction and *tagnum, respectively.
 	     Returns ASN1_OVERRUN if *buf is exhausted. */
 

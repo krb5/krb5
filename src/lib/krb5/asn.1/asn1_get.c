@@ -27,13 +27,9 @@
 #include "asn1_get.h"
 
 asn1_error_code
-asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
-     asn1buf * buf;
-     asn1_class * class;
-     asn1_construction * construction;
-     asn1_tagnum * tagnum;
-     unsigned int * retlen;
-     int * indef;
+asn1_get_tag_indef(asn1buf *buf, asn1_class *asn1class,
+		   asn1_construction *construction, asn1_tagnum *tagnum,
+		   unsigned int *retlen, int *indef)
 {
   asn1_error_code retval;
   
@@ -42,7 +38,7 @@ asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
       *tagnum = ASN1_TAGNUM_CEILING;
       return 0;
   }
-  retval = asn1_get_id(buf,class,construction,tagnum);
+  retval = asn1_get_id(buf,asn1class,construction,tagnum);
   if(retval) return retval;
   retval = asn1_get_length(buf,retlen,indef);
   if(retval) return retval;
@@ -53,32 +49,27 @@ asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
 }
 
 asn1_error_code
-asn1_get_tag(buf, class, construction, tagnum, retlen)
-     asn1buf *buf;
-     asn1_class *class;
-     asn1_construction *construction;
-     asn1_tagnum *tagnum;
-     unsigned int *retlen;
+asn1_get_tag(asn1buf *buf, asn1_class *asn1class,
+	     asn1_construction *construction, asn1_tagnum *tagnum,
+	     unsigned int *retlen)
 {
   int indef;
 
-  return asn1_get_tag_indef(buf, class, construction, tagnum, retlen, &indef);
+  return asn1_get_tag_indef(buf, asn1class, construction, tagnum, retlen,
+			    &indef);
 }
 
-asn1_error_code asn1_get_sequence(buf, retlen, indef)
-     asn1buf * buf;
-     unsigned int * retlen;
-     int * indef;
+asn1_error_code asn1_get_sequence(asn1buf *buf, unsigned int *retlen, int *indef)
 {
   asn1_error_code retval;
-  asn1_class class;
+  asn1_class asn1class;
   asn1_construction construction;
   asn1_tagnum tagnum;
 
-  retval = asn1_get_tag_indef(buf,&class,&construction,&tagnum,retlen,indef);
+  retval = asn1_get_tag_indef(buf,&asn1class,&construction,&tagnum,retlen,indef);
   if(retval) return retval;
   if(retval) return (krb5_error_code)retval;
-  if(class != UNIVERSAL || construction != CONSTRUCTED ||
+  if(asn1class != UNIVERSAL || construction != CONSTRUCTED ||
      tagnum != ASN1_SEQUENCE) return ASN1_BAD_ID;
   return 0;
 }
@@ -86,11 +77,9 @@ asn1_error_code asn1_get_sequence(buf, retlen, indef)
 /****************************************************************/
 /* Private Procedures */
 
-asn1_error_code asn1_get_id(buf, class, construction, tagnum)
-     asn1buf * buf;
-     asn1_class * class;
-     asn1_construction * construction;
-     asn1_tagnum * tagnum;
+asn1_error_code asn1_get_id(asn1buf *buf, asn1_class *asn1class,
+			    asn1_construction *construction,
+			    asn1_tagnum *tagnum)
 {
   asn1_error_code retval;
   asn1_tagnum tn=0;
@@ -103,8 +92,8 @@ asn1_error_code asn1_get_id(buf, class, construction, tagnum)
   retval = asn1buf_remove_octet(buf,&o);
   if(retval) return retval;
 
-  if(class != NULL)
-    *class = (asn1_class)(o&ASN1_CLASS_MASK);
+  if(asn1class != NULL)
+    *asn1class = (asn1_class)(o&ASN1_CLASS_MASK);
   if(construction != NULL)
     *construction = (asn1_construction)(o&ASN1_CONSTRUCTION_MASK);
   if((o&ASN1_TAG_NUMBER_MASK) != ASN1_TAG_NUMBER_MASK){
@@ -122,10 +111,7 @@ asn1_error_code asn1_get_id(buf, class, construction, tagnum)
   return 0;
 }
 
-asn1_error_code asn1_get_length(buf, retlen, indef)
-     asn1buf * buf;
-     unsigned int * retlen;
-     int * indef;
+asn1_error_code asn1_get_length(asn1buf *buf, unsigned int *retlen, int *indef)
 {
   asn1_error_code retval;
   asn1_octet o;

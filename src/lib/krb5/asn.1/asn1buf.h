@@ -122,7 +122,7 @@ asn1_error_code asn1buf_imbed
 	      position starts at the beginning of *subbuf. */
 
 asn1_error_code asn1buf_sync
-	(asn1buf *buf, asn1buf *subbuf, const asn1_class class, 
+	(asn1buf *buf, asn1buf *subbuf, const asn1_class Class, 
 		   const asn1_tagnum lasttag,
 		   const unsigned int length, const int indef,
 		   const int seqindef);
@@ -147,9 +147,7 @@ asn1_error_code asn1buf_insert_octet
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */
 #if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS))
-extern __inline__ asn1_error_code asn1buf_insert_octet(buf, o)
-     asn1buf * buf;
-     const int o;
+extern __inline__ asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o)
 {
   asn1_error_code retval;
 
