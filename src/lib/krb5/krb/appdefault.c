@@ -5,17 +5,17 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <k5-int.h>
+#include "k5-int.h"
 
 
 
  /*xxx Duplicating this is annoying; try to work on a better way.*/
-static char *conf_yes[] = {
+static const char *conf_yes[] = {
 	"y", "yes", "true", "t", "1", "on",
 	0,
 };
 
-static char *conf_no[] = {
+static const char *conf_no[] = {
 	"n", "no", "false", "nil", "0", "off",
 	0,
 };

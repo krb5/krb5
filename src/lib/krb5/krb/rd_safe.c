@@ -27,7 +27,7 @@
  * krb5_rd_safe()
  */
 
-#include <k5-int.h>
+#include "k5-int.h"
 #include "cleanup.h"
 #include "auth_con.h"
 

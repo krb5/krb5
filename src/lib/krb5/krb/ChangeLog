@@ -1,3 +1,19 @@
+2002-06-25  Alexandra Ellwood <lxs@mit.edu>
+
+	* appdefault.c, get_in_tkt.c: made conf_yes and conf_no const to 
+	improve load time on Mach-O
+
+	* init_ctx: fixed Mac OS macros
+
+	[pullups from 1-2-2-branch]
+
+2001-06-25  Miro Jurisic  <meeroh@mit.edu>
+
+	* rd_safe.c, rd_priv.c, rd_cred.c, preauth.c, mk_safe.c,
+	mk_cred.c, appdefault.c: use "" includes for krb5.h, k5-int.h and
+	syslog.h
+	[pullup from 1-2-2-branch]
+
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendauth.c (ECONNABORTED): Don't define here now that it's
