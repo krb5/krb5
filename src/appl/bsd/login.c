@@ -1157,7 +1157,7 @@ int main(argc, argv)
     argv += optind;
     /* Throw away too-long names, they can't be usernames.  */
     if (*argv) {
-	if (strlen (*argv) < UT_NAMESIZE)
+	if (strlen (*argv) <= UT_NAMESIZE)
 	    username = *argv;
 	else
 	    fprintf (stderr, "login name '%s' too long\n", *argv);
