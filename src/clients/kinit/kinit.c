@@ -63,7 +63,8 @@ main(argc, argv)
     krb5_principal me;
     krb5_data *server[4];
     krb5_creds my_creds;
-    
+    krb5_timestamp now;
+
     krb5_init_ets();
 
     if (rindex(argv[0], '/'))
@@ -142,11 +143,13 @@ main(argc, argv)
 	com_err (argv[0], code, "when getting my address");
 	exit(1);
     }
-    if (code = krb5_timeofday(&my_creds.times.starttime)) {
+    if (code = krb5_timeofday(&now)) {
 	com_err(argv[0], code, "while getting time of day");
 	exit(1);
     }
-    my_creds.times.endtime = my_creds.times.starttime + lifetime;
+    my_creds.times.starttime = 0;	/* start timer when request
+					   gets to KDC */
+    my_creds.times.endtime = now + lifetime;
     if (options & KDC_OPT_RENEWABLE) {
 	my_creds.times.renew_till = my_creds.times.starttime +
 	    KRB5_RENEWABLE_LIFE;
