@@ -58,19 +58,17 @@ static krb5_preauth_ops preauth_systems[] = {
     },
 #endif
     {
-	KRB5_PADATA_ENC_TIMESTAMP,
-	KRB5_PREAUTH_FLAGS_ENCRYPT,
-	get_timestamp_padata,
-	verify_timestamp_padata,
+        KRB5_PADATA_ENC_TIMESTAMP,
+        KRB5_PREAUTH_FLAGS_ENCRYPT,
+        get_timestamp_padata,
+        verify_timestamp_padata,
     },
-#ifdef KRBCONF_SECUREID
     {
 	KRB5_PADATA_ENC_SECURID,
 	KRB5_PREAUTH_FLAGS_ENCRYPT | KRB5_PREAUTH_FLAGS_HARDWARE,
 	get_securid_padata,
 	verify_securid_padata,
     },
-#endif
     { -1,}
 };
 				
@@ -306,10 +304,12 @@ find_preauthenticator(type, preauth)
 } 
 
 /*
- * Format is: 	8 bytes of random confounder,
- * 		1 byte version number (currently 0),
- * 		4 bytes: number of seconds since Jan 1, 1970, in MSB order.
+ * Format is:   8 bytes of random confounder,
+ *              1 byte version number (currently 0),
+ *              4 bytes: number of seconds since Jan 1, 1970, in MSB order.
  */
+int seeded = 0 ; /* Used by srand below */
+
 krb5_error_code
 get_timestamp_padata(client, src_addr, pa_data)
     krb5_principal client;
@@ -317,22 +317,25 @@ get_timestamp_padata(client, src_addr, pa_data)
     krb5_pa_data *pa_data;
 {
     unsigned char *tmp;
-    krb5_error_code	retval;
+    krb5_error_code     retval;
     krb5_timestamp kdc_time;
-    int		i;
+    int         i;
 
     pa_data->length = 13;
     tmp = pa_data->contents = (unsigned char *) malloc(pa_data->length);
     if (!tmp) 
-	return(ENOMEM);
+        return(ENOMEM);
 
     retval = krb5_timeofday(&kdc_time);
     if (retval)
-	return retval;
-    srand(kdc_time);		/* XXX NOT GOOD ENOUGH!!!! */
+        return retval;
+    if ( !seeded) {
+	seeded = kdc_time + getpid();
+	srand(seeded);
+    }
 
     for (i=0; i < 8; i++)
-	*tmp++ = rand() & 255;
+        *tmp++ = rand() & 255;
 
     *tmp++ = 0;
     *tmp++ = (kdc_time >> 24) & 255;
@@ -349,26 +352,26 @@ verify_timestamp_padata(client, src_addr, data)
     krb5_address **src_addr;
     krb5_data *data;
 {
-    unsigned char	*tmp;
-    krb5_error_code	retval;
-    krb5_timestamp	currenttime, patime;
-    extern krb5_deltat	krb5_clockskew;
+    unsigned char       *tmp;
+    krb5_error_code     retval;
+    krb5_timestamp      currenttime, patime;
+    extern krb5_deltat  krb5_clockskew;
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
 
     tmp = (unsigned char *) data->data;
     if (tmp[8] != 0)
-	return KRB5_PREAUTH_FAILED;
-    patime = tmp[9] << 24;
-    patime += tmp[10] << 16;
-    patime += tmp[11] << 8;
+        return KRB5_PREAUTH_FAILED;
+    patime = (int) tmp[9] << 24;
+    patime += (int) tmp[10] << 16;
+    patime += (int) tmp[11] << 8;
     patime += tmp[12];
 
     retval = krb5_timeofday(&currenttime);
     if (retval)
-	return retval;
+        return retval;
 
     if (!in_clock_skew(patime))
-	return KRB5_PREAUTH_FAILED;
+        return KRB5_PREAUTH_FAILED;
 
     return 0;
 }
@@ -405,36 +408,85 @@ verify_random_padata(client, src_addr, data)
 }
 #endif
 
-#ifdef SECUREID
+#ifdef KRBCONF_SECUREID
 #include "sdcli.h"
 #include "sdconf.c"
 
-int verify_securid_padata(preauth_data)
-PreAuthenticator *preauth_data;
+krb5_error_code
+verify_securid_padata(client, src_addr, data)
+    krb5_principal client;
+    krb5_address **src_addr;
+    krb5_data *data;
 {
-   char username[255];
-   struct SD_CLIENT sd;
+   extern perform_hw;
+
+   if (perform_hw) {
+        krb5_error_code	retval;
+        char username[255];
+        struct SD_CLIENT sd;
 
 	memset((char *)&sd,0, sizeof (sd));
    	memset((char *) username, 0, sizeof(username));
-        memcpy((char *) username, (char *) preauth_data->client[1]->data,
-              				   preauth_data->client[1]->length);
+        memcpy((char *) username, krb5_princ_component(client,0)->data,
+                        	  krb5_princ_component(client,0)->length);
         /* If Instance then Append */
-        if (preauth_data->client[2] != '\0') {
-            memcpy((char *) username + preauth_data->client[1]->length, 
-						(char *) "/", 1);
-            memcpy((char *) username + preauth_data->client[1]->length + 1,
-                          (char *)  preauth_data->client[2]->data,
-                           preauth_data->client[2]->length);
-        }
-        if (sd_check( preauth_data->data,username,&sd) != ACM_OK) return(1);
+ 	if (krb5_princ_size(client) > 1 ) {
+	    if (strncmp(krb5_princ_realm(client)->data,
+			krb5_princ_component(client,1)->data,
+			krb5_princ_component(client,1)->length) ||
+		        krb5_princ_realm(client)->length != 
+			krb5_princ_component(client,1)->length) {
+		strncat(username,"/",1);
+		strncat(username,krb5_princ_component(client,1)->data,
+				 krb5_princ_component(client,1)->length);
+	    }
+	}
+        if (retval = sd_check(data->data,username,&sd) != ACM_OK) {
+		syslog(LOG_INFO, 
+		    "%s - Invalid Securid Authentication Data sd_check Code %d",
+			username, retval);
+		return(KRB5_PREAUTH_FAILED);
+	}
 	return(0);
+    } else {
+        char *username = 0;
+
+	krb5_unparse_name(client,&username);
+	syslog(LOG_INFO, 
+	    "%s Provided Securid but this KDC does not support Securid",
+		username);
+	free(username);
+	return(KRB5_PREAUTH_FAILED);
+    }
 }
+#else
+krb5_error_code
+verify_securid_padata(client, src_addr, data)
+    krb5_principal client;
+    krb5_address **src_addr;
+    krb5_data *data;
+{
+ char *username = 0;
+	krb5_unparse_name(client,&username);
+	syslog(LOG_INFO, 
+	    "%s Provided Securid but this KDC does not support Securid",
+		username);
+	free(username);
+	return(KRB5_PREAUTH_FAILED);
+}
+#endif
 
+
+/*
 static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended with Your PIN\n (or a \'#\'if Your PIN is entered on the card keypad)\n or Type return <CR> if You Do NOT Use a SecurId Card: ";
+ */
+static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended with Your PIN\n (or a \'#\'if Your PIN is entered on the card keypad): ";
 
-int get_securid_padata(preauth_data)
-PreAuthenticator *preauth_data;
+krb5_error_code
+get_securid_padata(client,src_addr,pa_data)
+    krb5_principal client;
+    krb5_address **src_addr;
+    krb5_pa_data *pa_data;
 {
 
  char temp[MAX_PREAUTH_SIZE];   
@@ -443,18 +495,18 @@ PreAuthenticator *preauth_data;
 
     tempsize = sizeof(temp) - 1;
     if (krb5_read_password(krb5_SecureId_prompt, 0, temp, &tempsize))
-	return(1);
+        return(KRB5_PARSE_ILLCHAR);
     temp[tempsize] = '\0';
 
-    if (temp[0] == '\0') return(1);
-    preauth_data->datalen = strlen(temp) + 1;
-    preauth_data->data = (char *) calloc(1,preauth_data->datalen);
-    if (preauth_data->data) {
-        memcpy(preauth_data->data,temp,preauth_data->datalen);
+    if (temp[0] == '\0') 
+	return(KRB5_PARSE_ILLCHAR);
+    pa_data->length = strlen(temp) + 1;
+    pa_data->contents = (krb5_octet *) calloc(1,pa_data->length);
+    if (pa_data->contents) {
+        memcpy(pa_data->contents,temp,pa_data->length);
 	retval = 0;
     }
-    else retval = 1;
-    memset(temp,0,preauth_data->datalen);
+    else retval = ENOMEM;
+    memset(temp,0,pa_data->length);
     return(retval);
 }
-#endif
