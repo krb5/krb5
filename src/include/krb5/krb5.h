@@ -18,13 +18,7 @@
 
 #include <sys/types.h>
 
-#if defined(vax) || defined(__vax__)
-#define BITS32
-#endif
-
-#if defined(ibm032) || defined(__ibm032__)
-#define BITS32
-#endif
+#include <krb5/config.h>
 
 #include <krb5/base-defs.h>
 #include <krb5/hostaddr.h>
