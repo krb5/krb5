@@ -1,3 +1,7 @@
+2003-03-04  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Do not expect sequence number in incoming krb_cred message.
+
 2003-03-02  Sam Hartman  <hartmans@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Deal with

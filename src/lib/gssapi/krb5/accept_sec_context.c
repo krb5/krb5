@@ -95,7 +95,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	if ((retval = krb5_auth_con_getflags(context, auth_context, &flags_org)))
 		return retval;
 	krb5_auth_con_setflags(context, auth_context,
-			       KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+			       0);
 
 	/*
 	 * By the time krb5_rd_cred is called here (after krb5_rd_req has been
