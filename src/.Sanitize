@@ -25,11 +25,9 @@ Things-to-keep:
 
 .cvsignore
 .rconf
-CHANGES
 ChangeLog
 Makefile
 Makefile.in
-TODO
 acconfig.h
 aclocal.m4
 admin
@@ -48,7 +46,6 @@ kadmin.old
 kdc
 krb524
 lib
-mac
 patchlevel.h
 prototype
 slave
@@ -62,6 +59,8 @@ Things-to-lose:
 kadmin.new
 autotools
 isode
+TODO
+mac
 
 Do-last:
 
