@@ -1,3 +1,8 @@
+Sat Feb 28 19:37:23 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix up somewhat (SRCTOP -> SRCTOPDIR) and also get
+	directory correct.  (`pwd`/..)
+
 Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Move tests from all of kadmin's subdirectories into
