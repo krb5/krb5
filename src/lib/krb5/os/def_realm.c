@@ -21,11 +21,7 @@ static char rcsid_def_realm_c[] =
 #include <krb5/krb5_err.h>
 
 #include <stdio.h>
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc(), *index(), *calloc();
-#endif /* __STDC__ */
+#include <krb5/ext-proto.h>
 
 /*
  Retrieves the default realm to be used if no user-specified realm is

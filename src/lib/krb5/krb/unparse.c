@@ -19,12 +19,7 @@ static char rcsid_unparse_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc();
-#include <string.h>
-#endif /* __STDC__ */
+#include <krb5/ext-proto.h>
 
 #include <errno.h>
 

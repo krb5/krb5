@@ -18,11 +18,7 @@ static char rcsid_parse_c [] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-extern char *malloc(), *index(), *calloc();
-#endif /* __STDC__ */
+#include <krb5/ext-proto.h>
 
 #include <errno.h>
 
