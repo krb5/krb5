@@ -1475,7 +1475,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		size_t FAR *));
 
 
-krb5_error_code krb5_cc_retrieve_cred_default
+krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	KRB5_PROTOTYPE((krb5_context, krb5_ccache, krb5_flags,
 			krb5_creds *, krb5_creds *));
 

@@ -1,3 +1,8 @@
+1999-08-25  Danilo Almeida  <dalmeida@mit.edu>
+
+	* k5-int.h (krb5_cc_retrieve_cred_default): Fix calling convention
+	to make it consistent with actual calling convention.
+
 1999-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (KRB5_TC_SUPPORTED_KTYPES): New flag.
