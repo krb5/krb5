@@ -398,7 +398,7 @@ krb5_fcc_read(context, id, buf, len)
 
 #define ALLOC(NUM,TYPE) \
     (((NUM) <= (((size_t)0-1)/ sizeof(TYPE)))		\
-     ? (TYPE *) malloc((NUM) * sizeof(TYPE))		\
+     ? (TYPE *) calloc((NUM), sizeof(TYPE))		\
      : (errno = ENOMEM,(TYPE *) 0))
 
 static krb5_error_code
@@ -433,12 +433,19 @@ krb5_fcc_read_principal(context, id, princ)
      */
     if (data->version == KRB5_FCC_FVNO_1)
 	length--;
+    if (length < 0)
+	return KRB5_CC_NOMEM;
 
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;
     if (length) {
-	tmpprinc->data = ALLOC (length, krb5_data);
+	size_t msize = length;
+	if (msize != length) {
+	    free(tmpprinc);
+	    return KRB5_CC_NOMEM;
+	}
+	tmpprinc->data = ALLOC (msize, krb5_data);
 	if (tmpprinc->data == 0) {
 	    free((char *)tmpprinc);
 	    return KRB5_CC_NOMEM;

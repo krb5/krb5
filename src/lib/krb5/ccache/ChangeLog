@@ -1,3 +1,9 @@
+2002-08-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (ALLOC): Use calloc, not malloc.
+	(krb5_fcc_read_principal): Check bounds on number of components
+	before calling ALLOC.
+
 2002-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* t_cc.c: Remove references to STDIO ccache.
