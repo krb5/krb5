@@ -46,7 +46,7 @@ time_t gmt_mktime(t)
   assert_time(t->tm_year<=138);
   assert_time(t->tm_mon>=0);
   assert_time(t->tm_mon<=11);
-  assert_time(t->tm_mday>=0);
+  assert_time(t->tm_mday>=1);
   assert_time(t->tm_mday<=31);
   assert_time(t->tm_hour>=0);
   assert_time(t->tm_hour<=23);
