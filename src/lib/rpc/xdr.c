@@ -409,10 +409,9 @@ xdr_bytes(
 	if (! xdr_u_int(xdrs, sizep)) {
 		return (FALSE);
 	}
-	if ((xdrs->x_op != XDR_FREE) && (*sizep > maxsize)) {
+	nodesize = *sizep;
+	if ((nodesize > maxsize) && (xdrs->x_op != XDR_FREE)) {
 		return (FALSE);
-	} else {
-		nodesize = *sizep;
 	}
 
 	/*

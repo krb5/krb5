@@ -1,9 +1,13 @@
 2005-01-14  Tom Yu  <tlyu@mit.edu>
 
+	* xdr.c (xdr_bytes): Revert previous; the problem was actually in
+	xdr_rpc_gss_buf.
+
 	* authgss_prot.c (xdr_rpc_gss_wrap_data): Use xdr_alloc to avoid
 	size limit issues.  Use (unsigned int)-1 instead of MAX_NETOBJ_SZ.
 	(xdr_rpc_gss_unwrap_data): Use (unsigned int)-1 instead of
 	MAX_NETOBJ_SZ.
+	(xdr_rpc_gss_buf): Set tmplen even if doing XDR_FREE.
 
 	* xdr.c (xdr_bytes): Don't assign from *sizep if XDR_FREE, since
 	it'll be uninitialized then.  Shuts up Purify.

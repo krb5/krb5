@@ -1,3 +1,10 @@
+2005-01-14  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp (kadmin_list): Check for communication failure.
+	(kadmin_test): Create a large number of principals, then attempt
+	to list, in order to check for fixed-size buffer problems in
+	RPCSEC_GSS.
+
 2005-01-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssftp.exp (start_ftp_daemon): Use built-in sleep command.
