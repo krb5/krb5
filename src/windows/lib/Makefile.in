@@ -1,0 +1,19 @@
+CFLAGS = $(CCOPTS2) $(DEFS)
+
+##DOSBUILDTOP = ..\..
+
+lib-windows: libwin.lib
+
+SRCS=	vardlg.c gic.c registry.c
+
+OBJS=	vardlg.obj gic.obj registry.obj
+
+libwin.lib: $(OBJS)
+       lib /nologo /out:$*.lib $(OBJS)
+
+all-windows:: lib-windows
+
+clean-windows::
+	$(RM) *.dll *.exp *.map *.lib *.obj
+
+install-windows::
