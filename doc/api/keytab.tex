@@ -60,6 +60,7 @@ Fills in \funcparam{id} with  a handle identifying the default keytab.
 \funcarg{krb5_pointer}{keyprocarg}
 \funcarg{krb5_principal}{principal}
 \funcarg{krb5_kvno}{vno}
+\funcarg{krb5_keytype}{keytype}
 \funcout
 \funcarg{krb5_keyblock **}{key}
 \end{funcdecl}
@@ -71,7 +72,8 @@ If \funcname{keyprocarg} is not NULL, it is taken to be a
 \datatype{char *} denoting the name of a keytab.  Otherwise, the default
 keytab will be used.
 The keytab is opened and searched for the entry identified by
-\funcparam{principal} and \funcparam{vno}, returning the resulting key
+\funcparam{principal}, \funcparam{keytype}, and \funcparam{vno}, 
+returning the resulting key
 in \funcparam{*key} or returning an error code if it is not found. 
 
 \funcname{krb5_free_keyblock} should be called on \funcparam{*key} when
@@ -124,12 +126,14 @@ Requires that \funcparam{id} identifies a valid credentials cache.
 \funcarg{krb5_keytab}{id}
 \funcarg{krb5_principal}{principal}
 \funcarg{krb5_kvno}{vno}
+\funcarg{krb5_keytype}{keytype}
 \funcout
 \funcarg{krb5_keytab_entry *}{entry}
 \end{funcdecl}
 
 Searches the keytab identified by \funcparam{id} for an entry whose
-principal matches \funcparam{principal} and
+principal matches \funcparam{principal}, whose keytype matches 
+\funcparam{keytype}, and
 whose key version number matches \funcparam{vno}.  If \funcparam{vno} is
 zero, the first entry whose principal matches is returned.
 
