@@ -1,0 +1,197 @@
+
+
+
+		    A Proposal for a Standardized
+		 Kerberos Password Changing Protocol
+
+		   **DRAFT**  **DRAFT**  **DRAFT**
+
+			   by Theodore Ts'o
+			  Februrary 15, 1994
+
+Rationale
+=========
+
+Currently, the Kerberos administration server which is being shipped
+with the Beta Kerberos V5 distributions from MIT has not been
+functional and of sufficient quality for vendors to ship it in their
+products.  Hence, many vendors are creating and deploying proprietary
+administration servers.  In general, this is not a big problem ---
+relatively few users are Kerberos administrators and thus the Kerberos
+administration clients are used by relatively few users.
+
+There is a big exception to this, however, which is the functionality of
+a user being able to change his or her own password.  Application
+programs may want to include this functionality in their programs; it
+would be desireable for there to be a standardized protocol for doing
+this.  Standardized Kerberos desktop management programs (such as
+Cornell's Authman) would also benefit from a standardized protocol; this
+way, they will do not need to implement many vendor-specific Kerberos
+administration protocols.  Similarily, at least one terminal server
+vendor has come to expressing their concern that there was not a
+standardized password changing protocol, since they wanted their product
+to offer this functionality.
+
+This protocol is designed to address these concerns.
+
+
+Protocol Description
+====================
+
+The protocol used by the password changing protocol is intentionally
+very simple.  This is to encourage its widespread implementation, even
+in cases where there are size constraints (i.e., in a terminal server).
+
+The protocol will use a TCP stream connection, using port XXX.
+
+The following encoding standards are used throughout.
+
+Integers are sent as 4 byte objects, where the most significant byte
+is sent first, and the least signifcant byte is sent last.  (i.e.,
+standard Internet network byte order.)
+
+Protocol data units are sent across using the following encoding.
+First, the size is sent as a 4 byte integer, followed by the PDU.  The
+PDU is either a Kerberos V5 KRB_AP_REQ, KRB_AP_REP, or KRB_PRIV
+message.  The initial exchange use the KRB_AP_REQ and KRB_AP_REP
+message; all successive PDU's will be KRB_PRIV messages.  
+
+The KRB_PRIV messages must include the sequence number field --- the
+client and server must fill in each successive PDU that it sends with a
+monotonically increasing sequence number.  The initial sequence number
+in each direction are negotiated in the KRB_AP_REQ and KRB_AP_REP
+messages.
+
+
+The "command request" PDU
+-------------------------
+
+A common PDU used in the protocol is the "command request" PDU.  A
+command request PDU uses the following structure: First, the number of
+arguments, sent across as an integer.  The number of arguments MUST be
+greater than zero.  It is then followed by the arguments themselves,
+which are encoded as an integer length followed by the value of the
+argument.  
+
+The first argument is "command name", and it must be a NETASCII string
+which may not contain an ASCII null.  Command names are case
+insentive.  The other arguments (if any) are dependent on the command
+specified by the first argument.
+
+In other words:
+
+	Number of Arguments (integer, must be greater than zero)
+		Arg size 1 (integer)
+		Arg data 1 (octet string, command name)
+		...
+		Arg size N (integer)
+		Arg data N (octet string)
+
+This structure is then encrypted inside the Kerberos V5 KRB_PRIV
+message.
+
+The "command reply" PDU
+-----------------------
+
+Another common PDU used in the protocol is the "command reply" PDU.
+It is sent in reply to a "command request" PDU.  The first portion of
+the "command reply" PDU is common to all commands, and is required.
+The rest of it is command specific.
+
+It uses the following structure:
+
+	Error code (integer)
+	Number of reply components (integer, may be zero)
+		Arg size 1 (integer)
+		Arg data 1 (octet string)
+		...
+		Arg size N (integer)
+		Arg data N (octet string)
+
+This structure is then encrypted inside the Kerberos V5 KRB_PRIV
+message.
+
+The error code may be one of the following values:
+
+# Symbolic name			Meaning
+
+0 NO_ERROR		No error
+1 PW_UNACCEPT		The password chosen by the user is unnacceptable.
+2 BAD_PW		The old password furnished by the user is not correct.
+
+The error codes below 127, and above 256 are reserved for future
+expansion.  Local extensions of this protocol should use error codes
+between 128 and 255.
+
+The user text in the reply message is generally some sort of
+explanatory text, which should be displayed to the user.
+
+
+Connection Establishment
+========================
+
+When a connection is made the password changing client exchanges the
+following PDU's:
+
+Client				Server
+------				------
+
+KRB_AP_REQ      ------->
+
+		<-------        KRB_AP_REP
+
+		<-------	MOTD
+
+KRB_AP_REQ and KRB_AP_REP are the respective Kerberos V5 messages.
+
+MOTD is an KRB_PRIV message which is sent by the server to the client.
+It contains NETASCII text which is intended to be displayed to the
+user.  The message may be zero length (in which case nothing should be
+displayed); the message may be user specific, or a general message, at
+the descretion of the server.
+
+
+Protocol Commands
+==================
+
+After the connection is established, the client may then send any
+number of "command request" PDUs; after each command request PDU is
+sent, the client should wait for a "command reply" PDU from the
+server.
+
+There are three commands defined in this standard: "QUIT", "CHECKPW",
+and "CHANGEPW".
+
+The quit command
+----------------
+
+The name of this command is "QUIT", and it takes no arguments.  The
+response to this command must be the error code "NO_ERROR".  There may
+be an optional reply component, which will consist of user text which
+should be displayed to the user.  After processing this command, the
+server will terminate the connection.
+
+
+The check password command
+---------------------------
+
+The name of this command is "CHECKPW", and it takes one argument,
+which is a proposed password.  The server will evaluate this password
+according to its criteria and return either an NO_ERROR or PW_UNACCEPT
+error code.  
+
+There may be an optional reply component which consists of user text
+which should be displayed to the user.  It will typically explain why
+the password was unacceptable.
+
+The change password command
+---------------------------
+
+The name of this command is "CHANGEPW", and it takes two arguments.  The
+first argument is the old password, and the second password is the new
+password.  The response from this command will generally be one of the
+following error codes: NO_ERROR, PW_UNACCEPT, BAD_PW.
+
+There may be an optional reply component which consists of user text
+which should be displayed to the user.  It will typically explain why
+the password was unacceptable.
