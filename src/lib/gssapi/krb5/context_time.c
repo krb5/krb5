@@ -23,12 +23,13 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_context_time(context, minor_status, context_handle, time_rec)
-     krb5_context context;
+krb5_gss_context_time(ct, minor_status, context_handle, time_rec)
+     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      OM_uint32 *time_rec;
 {
+   krb5_context context = ct;
    krb5_error_code code;
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;

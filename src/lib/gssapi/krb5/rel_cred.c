@@ -23,11 +23,12 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 
-krb5_gss_release_cred(context, minor_status, cred_handle)
-     krb5_context context;
+krb5_gss_release_cred(ctx, minor_status, cred_handle)
+     void *ctx;
      OM_uint32 *minor_status;
      gss_cred_id_t *cred_handle;
 {
+   krb5_context context = ctx;
    krb5_gss_cred_id_t cred;
    krb5_error_code code1, code2;
 

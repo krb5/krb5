@@ -57,12 +57,12 @@ cleanup:
 }
 
 OM_uint32
-krb5_gss_accept_sec_context(context, minor_status, context_handle, 
+krb5_gss_accept_sec_context(ct, minor_status, context_handle, 
 			    verifier_cred_handle, input_token,
 			    input_chan_bindings, src_name, mech_type,
 			    output_token, ret_flags, time_rec,
 			    delegated_cred_handle)
-     krb5_context context;
+     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
      gss_cred_id_t verifier_cred_handle;
@@ -75,6 +75,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
      OM_uint32 *time_rec;
      gss_cred_id_t *delegated_cred_handle;
 {
+   krb5_context context = ct;
    unsigned char *ptr, *ptr2;
    char *sptr;
    long tmp;

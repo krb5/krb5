@@ -39,14 +39,15 @@
  */
 
 OM_uint32
-krb5_gss_import_name(context, minor_status, input_name_buffer, 
+krb5_gss_import_name(ctx, minor_status, input_name_buffer, 
 		     input_name_type, output_name)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
      gss_OID input_name_type;
      gss_name_t *output_name;
 {
+   krb5_context context = ctx;
    krb5_principal princ;
    krb5_error_code code;
    char *stringrep, *tmp;

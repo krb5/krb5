@@ -23,14 +23,15 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_display_name(context, minor_status, input_name, output_name_buffer, 
+krb5_gss_display_name(ctx, minor_status, input_name, output_name_buffer, 
 		      output_name_type)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      gss_name_t input_name;
      gss_buffer_t output_name_buffer;
      gss_OID *output_name_type;
 {
+   krb5_context context = ctx;
    krb5_error_code code;
    char *str;
 

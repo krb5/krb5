@@ -1,3 +1,13 @@
+Sat Feb 24 00:06:37 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_krb5.h: Changed most krb5 gssapi functions to take a
+		void * as their first argument, instead of a krb5_context.
+		Makes for a cleaner interface to the mechanism glue layer.
+
+	* k5mech.c (krb5_gss_initialize): Call name-type/mechanism
+	        registration function so that mechanism glue layer knows
+		whether or not a name needs to be lazy evaluated or not.
+
 Tue Feb  6 23:55:45 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* pname_to_uid.c (krb5_pname_to_uid): Instead of using specialized

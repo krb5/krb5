@@ -23,16 +23,17 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_verify(context, minor_status, context_handle,
+krb5_gss_verify(ctx, minor_status, context_handle,
 		message_buffer, token_buffer,
 		qop_state)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t message_buffer;
      gss_buffer_t token_buffer;
      int *qop_state;
 {
+     krb5_context context = ctx;
    return(kg_unseal(context, minor_status, context_handle,
 		    token_buffer, message_buffer,
 		    NULL, qop_state, KG_TOK_SIGN_MSG));
@@ -40,16 +41,17 @@ krb5_gss_verify(context, minor_status, context_handle,
 
 /* V2 interface */
 OM_uint32
-krb5_gss_verify_mic(context, minor_status, context_handle,
+krb5_gss_verify_mic(ctx, minor_status, context_handle,
 		    message_buffer, token_buffer,
 		    qop_state)
-    krb5_context	context;
+    void		*ctx;
     OM_uint32		*minor_status;
     gss_ctx_id_t	context_handle;
     gss_buffer_t	message_buffer;
     gss_buffer_t	token_buffer;
     gss_qop_t		*qop_state;
 {
+    krb5_context	context = ctx;
     OM_uint32		rstat;
     int			qstate;
 

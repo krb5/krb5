@@ -32,9 +32,9 @@ static int init_et = 0;
 /**/
 
 OM_uint32
-krb5_gss_display_status(context, minor_status, status_value, status_type,
+krb5_gss_display_status(ctx, minor_status, status_value, status_type,
 			mech_type, message_context, status_string)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      OM_uint32 status_value;
      int status_type;
@@ -42,6 +42,7 @@ krb5_gss_display_status(context, minor_status, status_value, status_type,
      OM_uint32 *message_context;
      gss_buffer_t status_string;
 {
+   krb5_context context = ctx;
    status_string->length = 0;
    status_string->value = NULL;
 

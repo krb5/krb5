@@ -49,11 +49,13 @@ static const gss_OID_desc oids[] = {
    {5, "\053\005\001\005\002"},
    {10, "\052\206\110\206\367\022\001\002\002\001"},
    {10, "\052\206\110\206\367\022\001\002\002\002"},
+   {9, "\052\206\110\206\367\022\001\002\002"},
 };
 
 const gss_OID_desc * const gss_mech_krb5 = oids+0;
 const gss_OID_desc * const gss_nt_krb5_name = oids+1;
 const gss_OID_desc * const gss_nt_krb5_principal = oids+2;
+const gss_OID_desc * const gss_new_mech_krb5 = oids+3;
 
 static const gss_OID_set_desc oidsets[] = {
    {1, (gss_OID) oids},

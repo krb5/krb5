@@ -25,9 +25,9 @@
 #include "k5-int.h"
 
 static krb5_error_code
-make_ap_req(context, auth_context, cred, server, endtime, chan_bindings, 
+make_ap_req(ctx, auth_context, cred, server, endtime, chan_bindings, 
 	    do_mutual, flags, token)
-    krb5_context context;
+    void *ctx;
     krb5_auth_context * auth_context;
     krb5_gss_cred_id_t cred;
     krb5_principal server;
@@ -37,6 +37,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     krb5_flags *flags;
     gss_buffer_t token;
 {
+    krb5_context context = ctx;
     krb5_flags mk_req_flags = 0;
     krb5_error_code code;
     krb5_data checksum_data;
@@ -205,12 +206,12 @@ cleanup:
 }
 
 OM_uint32
-krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
+krb5_gss_init_sec_context(ct, minor_status, claimant_cred_handle,
 			context_handle, target_name, mech_type,
 			req_flags, time_req, input_chan_bindings,
 			input_token, actual_mech_type, output_token,
 			ret_flags, time_rec)
-    krb5_context context;
+    void *ct;
     OM_uint32 *minor_status;
     gss_cred_id_t claimant_cred_handle;
     gss_ctx_id_t *context_handle;
@@ -225,6 +226,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
     OM_uint32 *ret_flags;
     OM_uint32 *time_rec;
 {
+    krb5_context context = ct;
     krb5_gss_cred_id_t 	  cred;
     krb5_error_code 	  code; 
     krb5_gss_ctx_id_rec *ctx;

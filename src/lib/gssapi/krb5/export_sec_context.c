@@ -28,13 +28,14 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_export_sec_context(context,
+krb5_gss_export_sec_context(ct,
 			    minor_status, context_handle, interprocess_token)
-    krb5_context	context;
+    void		*ct;
     OM_uint32		*minor_status;
     gss_ctx_id_t	*context_handle;
     gss_buffer_t	interprocess_token;
 {
+    krb5_context	context = ct;
     krb5_error_code	kret;
     OM_uint32		retval;
     krb5_context	ser_ctx;

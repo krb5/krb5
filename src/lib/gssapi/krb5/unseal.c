@@ -23,10 +23,10 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_unseal(context, minor_status, context_handle,
+krb5_gss_unseal(ctx, minor_status, context_handle,
 		input_message_buffer, output_message_buffer,
 		conf_state, qop_state)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t input_message_buffer;
@@ -34,6 +34,7 @@ krb5_gss_unseal(context, minor_status, context_handle,
      int *conf_state;
      int *qop_state;
 {
+   krb5_context context = ctx;
    return(kg_unseal(context, minor_status, context_handle,
 		    input_message_buffer, output_message_buffer,
 		    conf_state, qop_state, KG_TOK_SEAL_MSG));
@@ -41,10 +42,10 @@ krb5_gss_unseal(context, minor_status, context_handle,
 
 /* V2 interface */
 OM_uint32
-krb5_gss_unwrap(context, minor_status, context_handle,
+krb5_gss_unwrap(ctx, minor_status, context_handle,
 		input_message_buffer, output_message_buffer,
 		conf_state, qop_state)
-    krb5_context	context;
+    void 		*ctx;
     OM_uint32		*minor_status;
     gss_ctx_id_t	context_handle;
     gss_buffer_t	input_message_buffer;
@@ -52,6 +53,7 @@ krb5_gss_unwrap(context, minor_status, context_handle,
     int			*conf_state;
     gss_qop_t		*qop_state;
 {
+    krb5_context	context = ctx;
     OM_uint32		rstat;
     int			qstate;
 

@@ -35,13 +35,14 @@
    */
 
 static OM_uint32 
-acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
-     krb5_context context;
+acquire_accept_cred(ctx, minor_status, desired_name, output_princ, cred)
+     void *ctx;
      OM_uint32 *minor_status;
      gss_name_t desired_name;
      krb5_principal *output_princ;
      krb5_gss_cred_id_rec *cred;
 {
+   krb5_context context = ctx;
    krb5_error_code code;
    krb5_principal princ;
    krb5_keytab kt;
@@ -238,10 +239,10 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    
 /*ARGSUSED*/
 OM_uint32
-krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
+krb5_gss_acquire_cred(ctx, minor_status, desired_name, time_req,
 		      desired_mechs, cred_usage, output_cred_handle,
 		      actual_mechs, time_rec)
-     krb5_context context;
+     void *ctx;
      OM_uint32 *minor_status;
      gss_name_t desired_name;
      OM_uint32 time_req;
@@ -251,6 +252,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
      gss_OID_set *actual_mechs;
      OM_uint32 *time_rec;
 {
+   krb5_context context = ctx;
    size_t i;
    krb5_gss_cred_id_t cred;
    gss_OID_set mechs;
@@ -429,12 +431,12 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
 
 /* V2 interface */
 OM_uint32
-krb5_gss_add_cred(context, minor_status, input_cred_handle,
+krb5_gss_add_cred(ctx, minor_status, input_cred_handle,
 		  desired_name, desired_mech, cred_usage,
 		  initiator_time_req, acceptor_time_req,
 		  output_cred_handle, actual_mechs, 
 		  initiator_time_rec, acceptor_time_rec)
-    krb5_context	context;
+    void		*ctx;
     OM_uint32		*minor_status;
     gss_cred_id_t	input_cred_handle;
     gss_name_t		desired_name;
@@ -447,6 +449,7 @@ krb5_gss_add_cred(context, minor_status, input_cred_handle,
     OM_uint32		*initiator_time_rec;
     OM_uint32		*acceptor_time_rec;
 {
+    krb5_context	context = ctx;
     /*
      * This does not apply to our single-mechanism implementation.  Until we
      * come up with a better error code, return failure.

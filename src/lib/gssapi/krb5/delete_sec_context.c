@@ -23,12 +23,13 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_delete_sec_context(context, minor_status, context_handle, output_token)
-     krb5_context context;
+krb5_gss_delete_sec_context(ct, minor_status, context_handle, output_token)
+     void *ct;
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
      gss_buffer_t output_token;
 {
+   krb5_context context = ct;
    krb5_gss_ctx_id_rec *ctx;
 
    if (output_token) {
