@@ -1,3 +1,11 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* adb_openclose.c (osa_adb_create_db): Open lock files using O_EXCL
+	and fdopen() the descriptor instead of using fopen().
+	* svr_chpass_util.c (kadm5_chpass_principal_util): Adjust for new
+	length parameter in both kadm5_chpass_principal_util() and in
+	_kadm5_chpass_principal_util().
+
 2000-03-16  Ken Raeburn  <raeburn@mit.edu>
 	    Matt Crawford  <crawdad@fnal.gov>
 

@@ -411,7 +411,8 @@ kadm5_ret_t    kadm5_chpass_principal_util(void *server_handle,
 					   krb5_principal princ,
 					   char *new_pw, 
 					   char **ret_pw,
-					   char *msg_ret);
+					   char *msg_ret,
+					   int msg_len);
 
 kadm5_ret_t    kadm5_free_principal_ent(void *server_handle,
 					kadm5_principal_ent_t

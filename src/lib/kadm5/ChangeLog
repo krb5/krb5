@@ -1,3 +1,18 @@
+2000-05-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Use 1024 for
+	hard-coded length, to match existing callers.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* admin.h: Add a length parameter to kadm5_chpass_principal_util().
+	* admin_internal.h: Add a length parameter to
+	_kadm5_chpass_principal_util().
+	* chpass_util.c (_kadm5_chpass_principal_util): Add a length parameter,
+	and use it to avoid overflowing "msg_ret".
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Adjust for new
+	parameter in kadm5_chpass_principal_util().
+
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* logger.c (klog_com_err_proc): Don't overflow buffer "outbuf".
