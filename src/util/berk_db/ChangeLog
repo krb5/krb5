@@ -1,3 +1,12 @@
+Tue Jul 18 18:04:21 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (install): Combine the ranlib in with the rest of
+        the rule.  This cleans up the $(STEXT) rule.
+
+Thu Jul 13 16:24:07 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (clean-unix): Use libdb.$(STEXT) so that it works
+        under AIX.
 
 Fri Jul 7 16:41:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add DEPLIBS, needed by shared library rule.

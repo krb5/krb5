@@ -18,11 +18,8 @@ all-unix::
 
 all-windows::
 
-libdb_ranlib: libdb.a
-	$(RANLIB) libdb.a
-	touch $@
 
-libdb.a: hash/DONE
+libdb.$(STEXT): hash/DONE
 	@if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
@@ -34,6 +31,7 @@ libdb.a: hash/DONE
 			(set -x; $(LIBUPDATE) --force $@ $$i/DONE $$i) \
 		done ; \
 	fi
+	$(RANLIB) $@
 	touch libdb.stamp
 
 install:: libdb_ranlib
