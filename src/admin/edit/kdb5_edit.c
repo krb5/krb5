@@ -198,6 +198,7 @@ char *kdb5_edit_Init(argc, argv)
 	(void) strcpy(cur_realm, defrealm);
     }
     (void) set_dbname_help(progname, dbname);
+    exit_status = 0;	/* It's OK if we get errors in set_dbname_help */
     return request;
 }
 

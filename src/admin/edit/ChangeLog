@@ -1,5 +1,10 @@
 Fri Oct  7 00:01:40 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kdb5_edit.c (kdb5_edit_Init): Don't let errors in
+		set_dbname_help initially cause the exit status to be set.
+		Commands like load_db don't need a valid database to be
+		opened.
+
 	* ss_wrapper.c (main): Clear code before ss_execute_line, since
 		ss_execute_line doesn't set code to 0 if there are no
 	problems. 
