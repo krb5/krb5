@@ -134,7 +134,9 @@ asn1_error_code asn1_encode_realm(buf, val, retlen)
      const krb5_principal val;
      int * retlen;
 {
-  if(val == NULL || val->realm.data == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL ||
+      (val->realm.length && val->realm.data == NULL))
+	  return ASN1_MISSING_FIELD;
   return asn1_encode_generalstring(buf,val->realm.length,val->realm.data,
 				   retlen);
 }
@@ -147,10 +149,12 @@ asn1_error_code asn1_encode_principal_name(buf, val, retlen)
   asn1_setup();
   int n;
 
-  if(val == NULL || val->data == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL || val->data == NULL) return ASN1_MISSING_FIELD;
 
   for(n = (int) ((val->length)-1); n >= 0; n--){
-    if(val->data[n].data == NULL) return ASN1_MISSING_FIELD;
+    if (val->data[n].length &&
+	val->data[n].data == NULL)
+	    return ASN1_MISSING_FIELD;
     retval = asn1_encode_generalstring(buf,
 				       (val->data)[n].length,
 				       (val->data)[n].data,
@@ -186,7 +190,7 @@ asn1_error_code asn1_encode_host_address(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->length,val->contents,1,asn1_encode_octetstring);
   asn1_addfield(val->addrtype,0,asn1_encode_integer);
@@ -223,7 +227,9 @@ asn1_error_code asn1_encode_encrypted_data(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || val->ciphertext.data == NULL) return ASN1_MISSING_FIELD;
+  if(val == NULL ||
+     (val->ciphertext.length && val->ciphertext.data == NULL))
+	  return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->ciphertext.length,val->ciphertext.data,2,asn1_encode_charstring);
   if(val->kvno)
@@ -314,7 +320,9 @@ asn1_error_code asn1_encode_krb5_authdata_elt(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL ||
+     (val->length && val->contents == NULL))
+	  return ASN1_MISSING_FIELD;
 
   /* ad-data[1]		OCTET STRING */
   asn1_addlenfield(val->length,val->contents,1,asn1_encode_octetstring);
@@ -482,7 +490,9 @@ asn1_error_code asn1_encode_encryption_key(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL ||
+      (val->length && val->contents == NULL))
+	  return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->length,val->contents,1,asn1_encode_octetstring);
   asn1_addfield(val->enctype,0,asn1_encode_integer);
@@ -498,7 +508,9 @@ asn1_error_code asn1_encode_checksum(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || val->contents == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL ||
+     (val->length && val->contents == NULL))
+	  return ASN1_MISSING_FIELD;
 
   asn1_addlenfield(val->length,val->contents,1,asn1_encode_octetstring);
   asn1_addfield(val->checksum_type,0,asn1_encode_integer);
@@ -702,7 +714,8 @@ asn1_error_code asn1_encode_krb_safe_body(buf, val, retlen)
     asn1_addfield(val->usec,2,asn1_encode_integer);
     asn1_addfield(val->timestamp,1,asn1_encode_kerberos_time);
   }
-  if(val->user_data.data == NULL) return ASN1_MISSING_FIELD;
+  if (val->user_data.length && val->user_data.data == NULL)
+	  return ASN1_MISSING_FIELD;
   asn1_addlenfield(val->user_data.length,val->user_data.data,0,asn1_encode_charstring)
 ;
 
