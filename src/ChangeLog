@@ -1,3 +1,8 @@
+2000-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_CHECK_INET6): Require "struct
+	sockaddr_storage" for IPv6 support.
+
 2000-08-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (CHECK_SIGPROCMASK): Check for posix sigprocmask

@@ -231,6 +231,7 @@ AC_TRY_COMPILE([
   syntax error;
 #else
   struct sockaddr_in6 in;
+  struct sockaddr_storage x;
   IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
 #endif
 ],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
