@@ -2,7 +2,8 @@
 /* draft-ietf-krb-wg-gssapi-cfx-02 plus discussed changes */
 
 #include <assert.h>
-#include "k5-platform.h"
+#include "k5-platform.h" 	/* for 64-bit support */
+#include "k5-int.h"		/* for zap() */
 #include "gssapiP_krb5.h"
 #include <stdarg.h>
 
@@ -34,20 +35,6 @@ rotate_left (void *ptr, size_t bufsiz, size_t rc)
     return 1;
 }
 
-static void
-copy_with_right_rotate (void *dest, void *src, size_t bufsiz, size_t rc)
-{
-    if (bufsiz == 0)
-	return;
-    rc %= bufsiz;
-    if (rc == 0) {
-	memcpy(dest, src, bufsiz);
-	return;
-    }
-    memcpy(dest, (char*)src + bufsiz - rc, rc);
-    memcpy((char*)dest + rc, src, bufsiz - rc);
-}
-
 krb5_error_code
 gss_krb5int_make_seal_token_v3 (krb5_context context,
 				krb5_gss_ctx_id_rec *ctx,
@@ -58,18 +45,21 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     size_t bufsize = 16, cksumsize;
     unsigned char *outbuf = 0, *tmpbuf = 0;
     krb5_error_code err;
-    int sign_usage, seal_usage;
+    int key_usage;
     unsigned char acceptor_flag;
-    gss_buffer_desc message2 = *message;
+    gss_buffer_desc *message2 = message;
     size_t rrc, ec;
     unsigned short tok_id;
+
+    static const gss_buffer_desc empty_message = { 0, 0 };
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
 
     acceptor_flag = ctx->initiate ? 0 : 0x80;
-    sign_usage = ctx->initiate ? KG_USAGE_INITIATOR_SIGN : KG_USAGE_ACCEPTOR_SIGN;
-    seal_usage = ctx->initiate ? KG_USAGE_INITIATOR_SEAL : KG_USAGE_ACCEPTOR_SEAL;
+    key_usage = (toktype == KG_TOK_WRAP_MSG
+		 ? (ctx->initiate ? KG_USAGE_INITIATOR_SIGN : KG_USAGE_ACCEPTOR_SIGN)
+		 : (ctx->initiate ? KG_USAGE_INITIATOR_SEAL : KG_USAGE_ACCEPTOR_SEAL));
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
 	krb5_data plain;
@@ -118,7 +108,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	cipher.ciphertext.data = outbuf + 16;
 	cipher.ciphertext.length = bufsize - 16;
 	cipher.enctype = ctx->enc->enctype;
-	err = krb5_c_encrypt(context, ctx->enc, seal_usage, 0,
+	err = krb5_c_encrypt(context, ctx->enc, key_usage, 0,
 			     &plain, &cipher);
 	zap(plain.data, plain.length);
 	free(plain.data);
@@ -144,6 +134,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
 	tok_id = 0x0504;
 
+    wrap_with_checksum:
 	plain.length = message->length + 16;
 	plain.data = malloc(message->length + 16);
 	if (plain.data == NULL)
@@ -158,7 +149,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	if (cksumsize > 0xffff)
 	    abort();
 
-	bufsize = 16 + message2.length + cksumsize;
+	bufsize = 16 + message2->length + cksumsize;
 	outbuf = malloc(bufsize);
 	if (outbuf == NULL) {
 	    free(plain.data);
@@ -182,17 +173,27 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	    /* RRC */
 	    store_16_be(0, outbuf+6);
 	} else {
-	    /* MIC and DEL store 0xFF.  */
+	    /* MIC and DEL store 0xFF in EC and RRC.  */
 	    store_16_be(0xffff, outbuf+4);
-	    /* RRC */
 	    store_16_be(0xffff, outbuf+6);
 	}
 	store_64_be(ctx->seq_send, outbuf+8);
 
-	memcpy(plain.data, outbuf, 16);
-	memcpy(plain.data + 16, message->data, message->length);
+	/* For DEL_CTX, the message is empty, so it doesn't matter
+	   which path we use.  The MIC path will probably change, for
+	   security reasons.  */
+	if (toktype != KG_TOK_MIC_MSG) {
+	    memcpy(plain.data, outbuf, 16);
+	    memcpy(plain.data + 16, message->value, message->length);
+	} else {
+	    memcpy(plain.data, message->value, message->length);
+	    memcpy(plain.data+message->length, outbuf, 16);
+	}
 	sum.length = cksumsize;
 	sum.contents = outbuf + 16;
+
+	err = krb5_c_make_checksum(context, ctx->cksumtype, ctx->enc,
+				   key_usage, &plain, &sum);
 
 	ctx->seq_send++;
 
@@ -206,93 +207,17 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	if (toktype == KG_TOK_WRAP_MSG)
 	    store_16_be(cksumsize, outbuf+4);
     } else if (toktype == KG_TOK_MIC_MSG) {
-	tok_id = ...;
-	message2 ...;
-    mic_del_common:
-	;
+	tok_id = 0x0404;
+	message2 = &empty_message;
+	goto wrap_with_checksum;
     } else if (toktype == KG_TOK_DEL_CTX) {
 	tok_id = 0x0405;
-	message2.length = 0;
-	message2.data = NULL;
-	goto mic_del_common;
+	message = message2 = &empty_message;
+	goto wrap_with_checksum;
     } else
 	abort();
-    } else {
-	/* Just adding a checksum.  */
-	bufsize += cksumsize = krb5_checksum_size (context, ctx->cksumtype);
-	assert(bufsize > 16);
-	if (toktype == KG_TOK_WRAP_MSG) {
-	    bufsize += message->length;
-	    assert(bufsize > message->length);
-	}
-	ec = 0;
-    }
-    outbuf = malloc(bufsize);
-    if (outbuf == NULL)
-	return ENOMEM;
 
-    switch (toktype) {
-    case KG_TOK_WRAP_MSG:
-	/* TOK_ID */
-	store_16_be(0x0504, outbuf);
-	/* flags */
-	/* no acceptor subkey stuff yet */
-	outbuf[2] = acceptor_flag | (conf_req_flag ? 0x80 : 0);
-	/* filler */
-	outbuf[3] = 0xff;
-	/* EC */
-	store_16_be(0, outbuf+4);
-	/* RRC */
-	store_16_be(0, outbuf+6);
-	store_64_be(ctx->seq_send, outbuf+8);
-	ctx->seq_send++; /* XXX What if an error occurs?  */
-	if (conf_req_flag) {
-	    krb5_data plain;
-	    krb5_enc_data cipher;
-
-	    memcpy(outbuf+16, message->value, message->length);
-	    memcpy(outbuf+16+message->length, outbuf, 16);
-	    plain.data = outbuf+16;
-	    plain.length = message->length + 16;
-	    cipher.enctype = ctx->enc->enctype;
-	    cipher.ciphertext.data = outbuf+16;
-	    cipher.ciphertext.length = bufsize - 16;
-	    err = krb5_c_encrypt (context, ctx->enc, seal_usage, 0,
-				  &plain, &cipher);
-	    if (err)
-		goto error;
-	} else {
-	    krb5_data plain;
-	    krb5_checksum sum;
-
-	    tmpbuf = malloc(16 + message->length);
-	    if (tmpbuf == NULL) {
-		err = ENOMEM;
-		goto error;
-	    }
-	    memcpy(tmpbuf, message->value, message->length);
-	    memcpy(tmpbuf + message->length, outbuf, 16);
-	    memcpy(outbuf+16, message->value, message->length);
-	    plain.data = tmpbuf;
-	    plain.length = 16 + message->length;
-	    sum.length = cksumsize;
-	    sum.contents = outbuf + plain.length;
-	    err = krb5_c_make_checksum(context, ctx->cksumtype, ctx->enc,
-				       /* Despite only making a
-					  checksum, the spec says the
-					  seal usage value is
-					  used.  */
-				       seal_usage,
-				       &plain, &sum);
-	    if (err)
-		goto error;
-	}
-
-	rrc = rand() & 0xffff;
-	if (rotate_left(foo+16, foo-16, (foo-16) - (rrc % (foo - 16))))
-	    store_16_be(0, outbuf+6);
-	/* If the rotate fails, don't worry about it.  */
-	break;
+#if 0
     case KG_TOK_MIC_MSG:
 	store_16_be(0x0404, outbuf);
     mic_del_common:
@@ -305,7 +230,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	    store_64_be(ctx->seq, outbuf + 8);
 	    sum.length = cksumsize;
 	    sum.contents = outbuf + 16;
-	    plain.length = 16 + message2.length;
+	    plain.length = 16 + message2->length;
 	    tmpbuf = malloc(plain.length);
 	    if (tmpbuf == NULL) {
 		err = ENOMEM;
@@ -313,17 +238,14 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	    }
 	    plain.data = tmpbuf;
 	    memcpy(plain.data, outbuf, 16);
-	    memcpy(plain.data + 16, message2.value, message2.length);
+	    memcpy(plain.data + 16, message2->value, message2->length);
 	    err = krb5_c_make_checksum(context, ctx->cksumtype, ctx->enc,
 				       sign_usage, &plain, &sum);
 	    if (err)
 		goto error;
 	}
 	break;
-    case KG_TOK_DEL_CTX:
-    default:
-	abort();
-    }
+#endif
 
     free(tmpbuf);
     token->value = outbuf;
@@ -333,5 +255,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 error:
     free(tmpbuf);
     free(outbuf);
+    token->value = NULL;
+    token->length = 0;
     return err;
 }
