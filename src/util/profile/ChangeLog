@@ -1,5 +1,22 @@
 Tue Mar  2 18:55:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* test_profile.c: Added ability to test profile set functions, and
+		in a batch mode.
+	
+	* prof_init.c (profile_flush): Add new public function for
+		flushing changes made to the profile.
+
+	* prof_parse.c (profile_write_tree_file): Add official internal
+		function for flushing out a profile tree to a FILE *.
+	
+	* configure.in, prof_file.c (rw_access): Add new function which
+		checks to see whether we have read/write access, and
+		emulate this for losing non-POSIX OS's.
+
+	* prof_file.c (profile_flush_file): Add support for writing
+ 	 	modified profile file's.  Call profile_flush_file from
+ 	 	profile_close_file().
+
 	* prof_tree.c: Add new functions profile_get_node_name,
  		profile_get_node_value, profile_find_node,
  		profile_remove_node, profile_set_relation_value,

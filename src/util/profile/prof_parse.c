@@ -319,51 +319,7 @@ static void output_quoted_string(str, f)
 #define EOL "\n"
 #endif
 
-#if !defined(_MSDOS) && !defined(_WIN32)
-
-void dump_profile(root, level)
-	struct profile_node *root;
-	int level;
-{
-	int i;
-	struct profile_node *p;
-	void *iter;
-	long retval;
-	char *name, *value;
-	
-	iter = 0;
-	do {
-		retval = profile_find_node_relation(root, 0, &iter,
-						    &name, &value);
-		if (retval)
-			break;
-		for (i=0; i < level; i++)
-			printf("   ");
-		if (need_double_quotes(value)) {
-			fputs(name, stdout);
-			fputs(" = ", stdout);
-			output_quoted_string(value, stdout);
-			fputs(EOL, stdout);
-		} else
-			printf("%s = '%s'%s", name, value, EOL);
-	} while (iter != 0);
-
-	iter = 0;
-	do {
-		retval = profile_find_node_subsection(root, 0, &iter,
-						      &name, &p);
-		if (retval)
-			break;
-		for (i=0; i < level; i++)
-			printf("   ");
-		printf("[%s]%s", name, EOL);
-		dump_profile(p, level+1);
-	} while (iter != 0);
-}
-#endif /* !_MSDOS && !_WIN32 */
-
-
-void dump_profile_to_file(root, level, dstfile)
+static void dump_profile_to_file(root, level, dstfile)
 	struct profile_node *root;
 	int level;
 	FILE *dstfile;
@@ -415,4 +371,12 @@ void dump_profile_to_file(root, level, dstfile)
 				profile_is_node_final(p) ? "*" : "", EOL);
 		}
 	} while (iter != 0);
+}
+
+errcode_t profile_write_tree_file(root, dstfile)
+	struct profile_node *root;
+	FILE		*dstfile;
+{
+	dump_profile_to_file(root, 0, dstfile);
+	return 0;
 }

@@ -38,12 +38,8 @@ int main(argc, argv)
 	fclose(f);
 	
 	printf("\n\nDebugging dump.\n");
-#if 0
-	dump_profile(root, 0);
-#else
-	dump_profile_to_file(root, 0, stdout);
-#endif
-
+	profile_write_tree_file(root, stdout);
+	
 	retval = profile_verify_node(root);
 	if (retval) {
 		printf("profile_verify_node reported an error: %s\n",

@@ -594,7 +594,7 @@ errcode_t profile_set_relation_value(node, new_value)
 	
 	CHECK_MAGIC(node);
 
-	if (node->value)
+	if (!node->value)
 		return PROF_SET_SECTION_VALUE;
 
 	cp = malloc(strlen(new_value)+1);
@@ -644,25 +644,31 @@ errcode_t profile_rename_node(node, new_name)
 	}
 
 	/*
-	 * OK, let's detach the node
+	 * If we need to move the node, do it now.
 	 */
-	if (node->prev)
-		node->prev->next = node->next;
-	else
-		node->parent->first_child = node->next;
+	if ((p != node) && (last != node)) {
+		/*
+		 * OK, let's detach the node
+		 */
+		if (node->prev)
+			node->prev->next = node->next;
+		else
+			node->parent->first_child = node->next;
+		if (node->next)
+			node->next->prev = node->prev;
 
-	if (node->next)
-		node->next->prev = node->prev;
-
-	/*
-	 * Now let's reattach it in the right place.
-	 */
-	if (p)
-		p->prev = node;
-	if (last)
-		last->next = node;
-	else
-		node->parent->first_child = node;
+		/*
+		 * Now let's reattach it in the right place.
+		 */
+		if (p)
+			p->prev = node;
+		if (last)
+			last->next = node;
+		else
+			node->parent->first_child = node;
+		node->next = p;
+		node->prev = last;
+	}
 
 	free(node->name);
 	node->name = new_string;

@@ -81,6 +81,10 @@ typedef struct _profile_t *profile_t;
 errcode_t profile_parse_file
 	PROTOTYPE((FILE *f, struct profile_node **root));
 
+errcode_t profile_write_tree_file
+	PROTOTYPE((struct profile_node *root, FILE *dstfile));
+
+
 /* prof_tree.c */
 
 void profile_free_node
@@ -163,6 +167,9 @@ errcode_t profile_open_file
 	PROTOTYPE ((const char *filename, prf_file_t *ret_prof));
 
 errcode_t profile_update_file
+	PROTOTYPE ((prf_file_t profile));
+
+errcode_t profile_flush_file
 	PROTOTYPE ((prf_file_t profile));
 
 errcode_t profile_close_file

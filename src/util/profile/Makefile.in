@@ -78,8 +78,9 @@ awk-windows:
 test_parse: test_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
 	$(CC_LINK) -o test_parse test_parse.$(OBJEXT) $(OBJS) $(MLIBS)
 
-test_profile: test_profile.$(OBJEXT) $(OBJS) $(DEPLIBS)
-	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) $(OBJS) $(MLIBS)
+test_profile: test_profile.$(OBJEXT) argv_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) \
+		argv_parse.$(OBJEXT) $(OBJS) $(MLIBS)
 
 test_parse.exe: 
 	$(CC) $(CFLAGS2) -o test_parse.exe test_parse.c \

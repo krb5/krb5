@@ -119,6 +119,19 @@ profile_init_path(filepath, ret_profile)
 	return retval;
 }
 
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_flush(profile)
+	profile_t	profile;
+{
+	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+		return PROF_MAGIC_PROFILE;
+
+	if (profile->first_file)
+		return profile_flush_file(profile->first_file);
+
+	return 0;
+}
+
 
 KRB5_DLLIMP void KRB5_CALLCONV
 profile_release(profile)

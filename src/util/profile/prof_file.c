@@ -6,6 +6,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <string.h>
 
 #include "prof_int.h"
@@ -20,8 +23,35 @@
 
 
 #if defined(_MSDOS) || defined(_WIN32)
+#include <io.h>
+#define HAVE_STAT	
 #define stat _stat
 #endif
+
+static int rw_access(filename)
+	const char *filename;
+{
+#ifdef HAVE_ACCESS
+	if (access(filename, W_OK) == 0)
+		return 1;
+	else
+		return 0;
+#else
+	/*
+	 * We're on a substandard OS that doesn't support access.  So
+	 * we kludge a test using stdio routines, and hope fopen
+	 * checks the r/w permissions.
+	 */
+	FILE	*f;
+
+	f = fopen(filename, "r+");
+	if (f) {
+		fclose(f);
+		return 1;
+	}
+	return 0;
+#endif
+}
 
 errcode_t profile_open_file(filename, ret_prof)
 	const char *filename;
@@ -99,6 +129,9 @@ errcode_t profile_update_file(prf)
 	if (f == NULL)
 		return errno;
 	prf->upd_serial++;
+	prf->flags = 0;
+	if (rw_access(prf->filename))
+		prf->flags |= PROFILE_FILE_RW;
 	retval = profile_parse_file(f, &prf->root);
 	fclose(f);
 	if (retval)
@@ -109,9 +142,75 @@ errcode_t profile_update_file(prf)
 	return 0;
 }
 
+errcode_t profile_flush_file(prf)
+	prf_file_t prf;
+{
+	FILE		*f;
+	char		*new_name = 0, *old_name = 0;
+	errcode_t	retval = 0;
+	
+	if (!prf || prf->magic != PROF_MAGIC_FILE)
+		return PROF_MAGIC_FILE;
+	
+	if ((prf->flags & PROFILE_FILE_DIRTY) == 0)
+		return 0;
+
+	retval = ENOMEM;
+	new_name = malloc(strlen(prf->filename) + 5);
+	if (!new_name)
+		goto errout;
+	old_name = malloc(strlen(prf->filename) + 5);
+	if (!old_name)
+		goto errout;
+
+	sprintf(new_name, "%s.$$$", prf->filename);
+	sprintf(old_name, "%s.bak", prf->filename);
+
+	f = fopen(new_name, "w");
+	if (!f) {
+		retval = errno;
+		goto errout;
+	}
+
+	profile_write_tree_file(prf->root, f);
+	if (fclose(f) != 0) {
+		retval = errno;
+		goto errout;
+	}
+
+	unlink(old_name);
+	if (rename(prf->filename, old_name)) {
+		retval = errno;
+		goto errout;
+	}
+	if (rename(new_name, prf->filename)) {
+		retval = errno;
+		rename(old_name, prf->filename); /* back out... */
+		goto errout;
+	}
+
+	prf->flags = 0;
+	if (rw_access(prf->filename))
+		prf->flags |= PROFILE_FILE_RW;
+	retval = 0;
+	
+errout:
+	if (new_name)
+		free(new_name);
+	if (old_name)
+		free(old_name);
+	return retval;
+}
+
+
 errcode_t profile_close_file(prf)
 	prf_file_t prf;
 {
+	errcode_t	retval;
+	
+	retval = profile_flush_file(prf);
+	if (retval)
+		return retval;
 	if (prf->filename)
 		free(prf->filename);
 	if (prf->root)
