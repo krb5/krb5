@@ -227,7 +227,7 @@ char **argv;
 	exit(1);
     }
 
-    master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
+    master_encblock.crypto_entry = krb5_des_cst_entry.system;
  
     if (retval = krb5_db_fetch_mkey(
 		master_princ, 

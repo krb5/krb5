@@ -234,7 +234,7 @@ char **argv;
     }
 
 #ifdef PROVIDE_DES_CBC_CRC
-    master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
+    master_encblock.crypto_entry = krb5_des_cst_entry.system;
 #else
 error(You gotta figure out what cryptosystem to use in the KDC);
 #endif
