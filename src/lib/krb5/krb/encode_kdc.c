@@ -76,7 +76,8 @@ OLDDECLARG(krb5_data **, enc_rep)
 	return KRB5_BADMSGTYPE;
     }
 
-    if (retval = encode_krb5_enc_kdc_rep_part(encpart, &scratch)) {
+    retval = encode_krb5_enc_kdc_rep_part(encpart, &scratch);
+    if (retval) {
 	return retval;
     }
 
@@ -110,22 +111,25 @@ free(dec_rep->enc_part.ciphertext.data); \
 dec_rep->enc_part.ciphertext.length = 0; \
 dec_rep->enc_part.ciphertext.data = 0;}
 
-    if (retval = krb5_process_key(&eblock, client_key)) {
+    retval = krb5_process_key(&eblock, client_key);
+    if (retval) {
 	goto clean_encpart;
     }
 
 #define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
-    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+    retval = krb5_encrypt((krb5_pointer) scratch->data,
 			      (krb5_pointer) dec_rep->enc_part.ciphertext.data,
-			      scratch->length, &eblock, 0)) {
+			      scratch->length, &eblock, 0);
+    if (retval) {
 	goto clean_prockey;
     }
 
     /* do some cleanup */
     cleanup_scratch();
 
-    if (retval = krb5_finish_key(&eblock)) {
+    retval = krb5_finish_key(&eblock);
+    if (retval) {
 	cleanup_encpart();
 	return retval;
     }
@@ -153,3 +157,5 @@ dec_rep->enc_part.ciphertext.data = 0;}
 
     return retval;
 }
+
+

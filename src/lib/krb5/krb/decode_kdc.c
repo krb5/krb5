@@ -76,7 +76,8 @@ OLDDECLARG(krb5_kdc_rep **, dec_rep)
 	krb5_free_kdc_rep(local_dec_rep);
 	return KRB5_WRONG_ETYPE;
     }
-    if (retval = krb5_kdc_rep_decrypt_proc(key, 0, local_dec_rep)) {
+    retval = krb5_kdc_rep_decrypt_proc(key, 0, local_dec_rep);
+    if (retval) {
 	krb5_free_kdc_rep(local_dec_rep);
 	return(retval);
     }
