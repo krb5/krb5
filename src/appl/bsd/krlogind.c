@@ -478,7 +478,7 @@ int main(argc, argv)
     if (debug_port || do_fork) {
 	int s;
 	struct servent *ent;
-	struct sockaddr_in sin;
+	struct sockaddr_in sock_in;
 
 	if (!debug_port) {
 	    if (do_encrypt) {
@@ -499,16 +499,16 @@ int main(argc, argv)
 	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
 	    exit(2);
 	}
-	memset((char *) &sin, 0,sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(debug_port);
-	sin.sin_addr.s_addr = INADDR_ANY;
+	memset((char *) &sock_in, 0,sizeof(sock_in));
+	sock_in.sin_family = AF_INET;
+	sock_in.sin_port = htons(debug_port);
+	sock_in.sin_addr.s_addr = INADDR_ANY;
 
 	if (!do_fork)
 	    (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 			      (char *)&on, sizeof(on));
 
-	if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
+	if ((bind(s, (struct sockaddr *) &sock_in, sizeof(sock_in))) < 0) {
 	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
 	    exit(2);
 	}

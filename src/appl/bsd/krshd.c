@@ -427,22 +427,22 @@ int main(argc, argv)
 
     if (debug_port) {
 	int s;
-	struct sockaddr_in sin;
+	struct sockaddr_in sock_in;
 	
 	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
 	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
 	    exit(2);
 	}
 	
-	memset((char *) &sin, 0,sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(debug_port);
-	sin.sin_addr.s_addr = INADDR_ANY;
+	memset((char *) &sock_in, 0,sizeof(sock_in));
+	sock_in.sin_family = AF_INET;
+	sock_in.sin_port = htons(debug_port);
+	sock_in.sin_addr.s_addr = INADDR_ANY;
 	
 	(void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
 			  (char *)&on, sizeof(on));
 
-	if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
+	if ((bind(s, (struct sockaddr *) &sock_in, sizeof(sock_in))) < 0) {
 	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
 	    exit(2);
 	}
@@ -1416,13 +1416,13 @@ if(port)
      */
     if (getenv("KRB5CCNAME")) {
 	int i;
-	char *buf = (char *)malloc(strlen(getenv("KRB5CCNAME"))
-					  +strlen("KRB5CCNAME=")+1);
-	if (buf) {
-	  sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+	char *buf2 = (char *)malloc(strlen(getenv("KRB5CCNAME"))
+			 		   +strlen("KRB5CCNAME=")+1);
+	if (buf2) {
+	  sprintf(buf2, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
 
 	  for (i = 0; envinit[i]; i++);
-	  envinit[i] =buf;
+	  envinit[i] = buf2;
 	}
     }
 
@@ -1450,16 +1450,16 @@ if(port)
 
     for(cnt=0; cnt < num_env; cnt++) {
 	    int i;
-	    char *buf;
+	    char *buf2;
 
 	    if(getenv(save_env[cnt])) {
-		    buf = (char *)malloc(strlen(getenv(save_env[cnt]))
+		    buf2 = (char *)malloc(strlen(getenv(save_env[cnt]))
 					 +strlen(save_env[cnt]+2));
-		    if (buf) {
-			    sprintf(buf, "%s=%s", save_env[cnt], 
+		    if (buf2) {
+			    sprintf(buf2, "%s=%s", save_env[cnt], 
 				    getenv(save_env[cnt]));
 			    for (i = 0; envinit[i]; i++);
-			    envinit[i] =buf;
+			    envinit[i] = buf2;
 		    }
 	    }
     }
@@ -1475,7 +1475,7 @@ if(port)
     if (!strncmp(cmdbuf, "rcp ", 4) ||
 	(do_encrypt && !strncmp(cmdbuf, "-x rcp ", 7))) {
         char *copy;
-	struct stat s;
+	struct stat s2;
 	int offst = 0;
 
 	copy = malloc(strlen(cmdbuf) + 1);
@@ -1497,7 +1497,7 @@ if(port)
 	} else {
 	  strncat(cmdbuf, "/rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	}
-	if (stat((char *)cmdbuf + offst, &s) >= 0)
+	if (stat((char *)cmdbuf + offst, &s2) >= 0)
 	  strncat(cmdbuf, cp, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	else
 	  strncpy(cmdbuf, copy, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
