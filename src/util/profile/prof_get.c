@@ -206,7 +206,8 @@ cleanup:
 	return retval;
 }
 
-errcode_t profile_get_string(profile, name, subname, subsubname,
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_get_string(profile, name, subname, subsubname,
 			     def_val, ret_string)
 	profile_t	profile;
 	const char	*name, *subname, *subsubname;
@@ -240,7 +241,8 @@ errcode_t profile_get_string(profile, name, subname, subsubname,
 	return 0;
 }
 
-errcode_t profile_get_integer(profile, name, subname, subsubname,
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_get_integer(profile, name, subname, subsubname,
 			      def_val, ret_int)
 	profile_t	profile;
 	const char	*name, *subname, *subsubname;
@@ -275,7 +277,8 @@ errcode_t profile_get_integer(profile, name, subname, subsubname,
  * This function will return the list of the names of subections in the
  * under the specified section name.
  */
-errcode_t profile_get_subsection_names(profile, names, ret_names)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_get_subsection_names(profile, names, ret_names)
 	profile_t	profile;
 	const char	**names;
 	char		***ret_names;
@@ -312,7 +315,8 @@ cleanup:
  * This function will return the list of the names of relations in the
  * under the specified section name.
  */
-errcode_t profile_get_relation_names(profile, names, ret_names)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_get_relation_names(profile, names, ret_names)
 	profile_t	profile;
 	const char	**names;
 	char		***ret_names;
@@ -345,7 +349,8 @@ cleanup:
 	return retval;
 }
 
-errcode_t profile_iterator_create(profile, names, flags, ret_iter)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_iterator_create(profile, names, flags, ret_iter)
 	profile_t	profile;
 	const char	**names;
 	int		flags;
@@ -354,13 +359,15 @@ errcode_t profile_iterator_create(profile, names, flags, ret_iter)
 	return profile_node_iterator_create(profile, names, flags, ret_iter);
 }
 
-void profile_iterator_free(iter_p)
+KRB5_DLLIMP void KRB5_CALLCONV
+profile_iterator_free(iter_p)
 	void	**iter_p;
 {
 	profile_node_iterator_free(iter_p);
 }
 
-errcode_t profile_iterator(iter_p, ret_name, ret_value)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_iterator(iter_p, ret_name, ret_value)
 	void	**iter_p;
 	char **ret_name, **ret_value;
 {
@@ -397,7 +404,8 @@ errcode_t profile_iterator(iter_p, ret_name, ret_value)
 	return 0;
 }
 
-void profile_release_string(str)
+KRB5_DLLIMP void KRB5_CALLCONV
+profile_release_string(str)
 	char *str;
 {
 	free(str);

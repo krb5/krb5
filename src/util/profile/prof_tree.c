@@ -200,6 +200,105 @@ int profile_is_node_final(node)
 }
 
 /*
+ * Return the name of a node.  (Note: this is for internal functions
+ * only; if the name needs to be returned from an exported function,
+ * strdup it first!)
+ */
+const char *profile_get_node_name(node)
+	struct profile_node *node;
+{
+	return node->name;
+}
+
+/*
+ * Return the value of a node.  (Note: this is for internal functions
+ * only; if the name needs to be returned from an exported function,
+ * strdup it first!)
+ */
+const char *profile_get_node_value(node)
+	struct profile_node *node;
+{
+	return node->value;
+}
+
+/*
+ * Iterate through the section, returning the nodes which match
+ * the given name.  If name is NULL, then interate through all the
+ * nodes in the section.  If section_flag is non-zero, only return the
+ * section which matches the name; don't return relations.  If value
+ * is non-NULL, then only return relations which match the requested
+ * value.  (The value argument is ignored if section_flag is non-zero.)
+ * 
+ * The first time this routine is called, the state pointer must be
+ * null.  When this profile_find_node_relation() returns, if the state
+ * pointer is non-NULL, then this routine should be called again.
+ * (This won't happen if section_flag is non-zero, obviously.)
+ *
+ */
+errcode_t profile_find_node(section, name, value, section_flag, state, node)
+	struct profile_node *section;
+	const char *name;
+	const char *value;
+	int section_flag;
+	void **state;
+	struct profile_node **node;
+{
+	struct profile_node *p;
+
+	CHECK_MAGIC(section);
+	p = *state;
+	if (p) {
+		CHECK_MAGIC(p);
+	} else
+		p = section->first_child;
+	
+	for (; p; p = p->next) {
+		if (name && (strcmp(p->name, name)))
+			continue;
+		if (section_flag) {
+			if (p->value)
+				continue;
+		} else {
+			if (!p->value)
+				continue;
+			if (value && (strcmp(p->value, value)))
+				continue;
+		}
+		/* A match! */
+		if (node)
+			*node = p;
+		break;
+	}
+	if (p == 0) {
+		*state = 0;
+		return section_flag ? PROF_NO_SECTION : PROF_NO_RELATION;
+	}
+	/*
+	 * OK, we've found one match; now let's try to find another
+	 * one.  This way, if we return a non-zero state pointer,
+	 * there's guaranteed to be another match that's returned.
+	 */
+	for (p = p->next; p; p = p->next) {
+		if (name && (strcmp(p->name, name)))
+			continue;
+		if (section_flag) {
+			if (p->value)
+				continue;
+		} else {
+			if (!p->value)
+				continue;
+			if (value && (strcmp(p->value, value)))
+				continue;
+		}
+		/* A match! */
+		break;
+	}
+	*state = p;
+	return 0;
+}
+
+
+/*
  * Iterate through the section, returning the relations which match
  * the given name.  If name is NULL, then interate through all the
  * relations in the section.  The first time this routine is called,
@@ -219,42 +318,18 @@ errcode_t profile_find_node_relation(section, name, state, ret_name, value)
 	char **ret_name, **value;
 {
 	struct profile_node *p;
+	errcode_t	retval;
 
-	CHECK_MAGIC(section);
-	p = *state;
+	retval = profile_find_node(section, name, 0, 0, state, &p);
+	if (retval)
+		return retval;
+
 	if (p) {
-		CHECK_MAGIC(p);
-	} else
-		p = section->first_child;
-	
-	while (p) {
-		if (((name == 0) || (strcmp(p->name, name) == 0)) &&
-		    p->value) {
-			if (value)
-				*value = p->value;
-			if (ret_name)
-				*ret_name = p->name;
-			break;
-		}
-		p = p->next;
+		if (value)
+			*value = p->value;
+		if (ret_name)
+			*ret_name = p->name;
 	}
-	if (p == 0) {
-		*state = 0;
-		return PROF_NO_RELATION;
-	}
-	/*
-	 * OK, we've found one match; now let's try to find another
-	 * one.  This way, if we return a non-zero state pointer,
-	 * there's guaranteed to be another match that's returned.
-	 */
-	p = p->next;
-	while (p) {
-		if (((name == 0) || (strcmp(p->name, name) == 0)) &&
-		    p->value)
-			break;
-		p = p->next;
-	}
-	*state = p;
 	return 0;
 }
 
@@ -265,6 +340,10 @@ errcode_t profile_find_node_relation(section, name, state, ret_name, value)
  * the state pointer must be null.  When this profile_find_node_subsection()
  * returns, if the state pointer is non-NULL, then this routine should
  * be called again.
+ *
+ * This is (plus accessor functions for the name and value given a
+ * profile node) makes this function mostly syntactic sugar for
+ * profile_find_node. 
  */
 errcode_t profile_find_node_subsection(section, name, state, ret_name,
 				       subsection)
@@ -275,83 +354,17 @@ errcode_t profile_find_node_subsection(section, name, state, ret_name,
 	struct profile_node **subsection;
 {
 	struct profile_node *p;
+	errcode_t	retval;
 
-	CHECK_MAGIC(section);
-	p = *state;
+	retval = profile_find_node(section, name, 0, 1, state, &p);
+	if (retval)
+		return retval;
+
 	if (p) {
-		CHECK_MAGIC(p);
-	} else
-		p = section->first_child;
-	
-	while (p) {
-		if (((name == 0) || (strcmp(p->name, name) == 0)) &&
-		    (p->value == 0)) {
-			if (subsection)
-				*subsection = p;
-			if (ret_name)
-				*ret_name = p->name;
-			break;
-		}
-		p = p->next;
-	}
-	if (p == 0) {
-		*state = 0;
-		return PROF_NO_SECTION;
-	}
-	/*
-	 * OK, we've found one match; now let's try to find another
-	 * one.  This way, if we return a non-zero state pointer,
-	 * there's guaranteed to be another match that's returned.
-	 */
-	p = p->next;
-	while (p) {
-		if (((name == 0) || (strcmp(p->name, name) == 0))
-		    && (p->value == 0))
-			break;
-		p = p->next;
-	}
-	*state = p;
-	return 0;
-}
-
-/*
- * This function deletes a subsection or relation from a section,
- * depending whether on the section flag is non-zero or not.
- */
-errcode_t profile_remove_node(section, name, section_flag)
-	struct profile_node *section;
-	const char *name;
-	int section_flag;
-{
-	struct profile_node *p, *next;
-	
-	for (p = section->first_child; p; p = p->next) {
-		if ((strcmp(p->name, name) == 0) && p->value)
-			break;
-	}
-	if (p == 0)
-		return PROF_NO_RELATION;
-	/*
-	 * Now we start deleting the relations or subsection.
-	 */
-	while (p && (strcmp(p->name, name) == 0)) {
-		/*
-		 * Skip if it is not the correct type.
-		 */
-		if ((section_flag && p->value) ||
-		    (!section_flag && !p->value)) {
-			p = p->next;
-			continue;
-		}
-		if (p->prev)
-			p->prev->next = p->next;
-		else
-			section->first_child = p->next;
-		next = p->next;
-		if (p->next)
-			p->next->prev = p->prev;
-		profile_free_node(p);
-		p = next;
+		if (subsection)
+			*subsection = p;
+		if (ret_name)
+			*ret_name = p->name;
 	}
 	return 0;
 }
@@ -541,3 +554,117 @@ get_new_file:
 		*ret_value = p->value;
 	return 0;
 };
+
+/* 
+ * Remove a particular node.
+ * 
+ * TYT, 2/25/99
+ */
+errcode_t profile_remove_node(node)
+	struct profile_node *node;
+{
+	CHECK_MAGIC(node);
+
+	if (node->parent == 0)
+		return PROF_EINVAL; /* Can't remove the root! */
+	
+	if (node->prev)
+		node->prev->next = node->next;
+	else
+		node->parent->first_child = node->next;
+
+	if (node->next)
+		node->next->prev = node->prev;
+
+	profile_free_node(node);
+
+	return 0;
+}
+
+/*
+ * Set the value of a specific node containing a relation.
+ *
+ * TYT, 2/25/99
+ */
+errcode_t profile_set_relation_value(node, new_value)
+	struct profile_node *node;
+	const char *new_value;
+{
+	char	*cp;
+	
+	CHECK_MAGIC(node);
+
+	if (node->value)
+		return PROF_SET_SECTION_VALUE;
+
+	cp = malloc(strlen(new_value)+1);
+	if (!cp)
+		return ENOMEM;
+
+	strcpy(cp, new_value);
+	free(node->value);
+	node->value = cp;
+
+	return 0;
+}
+
+/*
+ * Rename a specific node
+ *
+ * TYT 2/25/99
+ */
+errcode_t profile_rename_node(node, new_name)
+	struct profile_node	*node;
+	const char		*new_name;
+{
+	char			*new_string;
+	struct profile_node 	*p, *last;
+
+	CHECK_MAGIC(node);
+
+	if (strcmp(new_name, node->name) == 0)
+		return 0;	/* It's the same name, return */
+
+	/*
+	 * Make sure we can allocate memory for the new name, first!
+	 */
+	new_string = malloc(strlen(new_name)+1);
+	if (!new_string)
+		return ENOMEM;
+	strcpy(new_string, new_name);
+
+	/*
+	 * Find the place to where the new node should go.  We look
+	 * for the place *after* the last match of the node name,
+	 * since order matters.
+	 */
+	for (p=node->parent->first_child, last = 0; p; last = p, p = p->next) {
+		if (strcmp(p->name, new_name) > 0)
+			break;
+	}
+
+	/*
+	 * OK, let's detach the node
+	 */
+	if (node->prev)
+		node->prev->next = node->next;
+	else
+		node->parent->first_child = node->next;
+
+	if (node->next)
+		node->next->prev = node->prev;
+
+	/*
+	 * Now let's reattach it in the right place.
+	 */
+	if (p)
+		p->prev = node;
+	if (last)
+		last->next = node;
+	else
+		node->parent->first_child = node;
+
+	free(node->name);
+	node->name = new_string;
+	return 0;
+}

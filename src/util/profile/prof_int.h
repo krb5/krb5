@@ -50,6 +50,12 @@ struct _prf_file_t {
 typedef struct _prf_file_t *prf_file_t;
 
 /*
+ * The profile flags
+ */
+#define PROFILE_FILE_RW		0x0001
+#define PROFILE_FILE_DIRTY	0x0002
+
+/*
  * This structure defines the high-level, user visible profile_t
  * object, which is used as a handle by users who need to query some
  * configuration file(s)
@@ -97,7 +103,19 @@ errcode_t profile_make_node_final
 	
 int profile_is_node_final
 	PROTOTYPE((struct profile_node *node));
-	
+
+const char *profile_get_node_name
+	PROTOTYPE((struct profile_node *node));
+
+const char *profile_get_node_value
+	PROTOTYPE((struct profile_node *node));
+
+errcode_t profile_find_node
+	PROTOTYPE ((struct profile_node *section,
+		    const char *name, const char *value,
+		    int section_flag, void **state,
+		    struct profile_node **node));
+
 errcode_t profile_find_node_relation
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, void **state,
@@ -130,6 +148,15 @@ errcode_t profile_node_iterator
 	PROTOTYPE((void	**iter_p, struct profile_node **ret_node,
 		   char **ret_name, char **ret_value));
 
+errcode_t profile_remove_node
+	PROTOTYPE((struct profile_node *node));
+
+errcode_t profile_set_relation_value
+	PROTOTYPE((struct profile_node *node, const char *new_value));
+
+errcode_t profile_rename_node
+	PROTOTYPE((struct profile_node *node, const char *new_name));
+
 /* prof_file.c */
 
 errcode_t profile_open_file
@@ -143,13 +170,13 @@ errcode_t profile_close_file
 
 /* prof_init.c */
 
-errcode_t profile_init
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
-errcode_t profile_init_path
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_init_path
 	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
 
-void profile_release
+KRB5_DLLIMP void KRB5_CALLCONV profile_release
 	PROTOTYPE ((profile_t profile));
 
 /* prof_get.c */
@@ -165,28 +192,48 @@ errcode_t profile_get_value
 	PROTOTYPE ((profile_t profile, const char **names,
 		    const char	**ret_value));
 	
-errcode_t profile_get_string
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
 			char **ret_string));
-errcode_t profile_get_integer
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));
 
-errcode_t profile_get_relation_names
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_relation_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
-errcode_t profile_get_subsection_names
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_subsection_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
-errcode_t profile_iterator_create
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_iterator_create
 	PROTOTYPE((profile_t profile, const char **names,
 		   int flags, void **ret_iter));
 
-void profile_iterator_free PROTOTYPE((void **iter_p));
+KRB5_DLLIMP void KRB5_CALLCONV profile_iterator_free
+	PROTOTYPE((void **iter_p));
 	
-errcode_t profile_iterator
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_iterator
 	PROTOTYPE((void **iter_p, char **ret_name, char **ret_value));
 
-void profile_release_string PROTOTYPE((char *str));
+KRB5_DLLIMP void KRB5_CALLCONV profile_release_string PROTOTYPE((char *str));
+
+
+/* prof_set.c */
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_update_relation
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *old_value, const char *new_value));
+
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_clear_relation
+	PROTOTYPE((profile_t profile, const char **names));
+
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_rename_section
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *new_name));
+
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_add_relation
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *new_value));
+
+	

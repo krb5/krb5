@@ -1,3 +1,25 @@
+Tue Mar  2 18:55:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_tree.c: Add new functions profile_get_node_name,
+ 		profile_get_node_value, profile_find_node,
+ 		profile_remove_node, profile_set_relation_value,
+ 		profile_rename_node.  Rewrite profile_find_node_relation
+ 		and profile_find_node_subsection in terms of
+ 		profile_find_node.
+	
+	* prof_set.c, Makefile.in: Add a new file which exports the public
+		interfaces for setting profile entries.
+
+	* prof_get.c, prof_init.c, prof_int.h: Add the KRB5_DLLIMP and
+ 		KRB5_CALLCONV to all of the various profile routines so
+ 		they can be properly exported via a Windows DLL.
+
+	* prof_int.h: Add definition for the flags in the profile
+		structure.
+	
+	* prof_err.et: Add new error codes PROF_SET_SECTION_VALUE,
+		PROF_EINVAL, PROF_READ_ONLY, and PROF_EXISTS.
+
 Fri Feb 19 00:49:10 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* test_parse.c (main): Add a call to profile_verify_node so we can

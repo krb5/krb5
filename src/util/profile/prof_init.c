@@ -23,7 +23,8 @@ typedef	int	prof_int32;
 error(do not have a 4-byte integer type)
 #endif	/* SIZEOF_LONG == 4 */
 
-errcode_t profile_init(filenames, ret_profile)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_init(filenames, ret_profile)
 	const char **filenames;
 	profile_t *ret_profile;
 {
@@ -68,7 +69,8 @@ errcode_t profile_init(filenames, ret_profile)
 	return 0;
 }
 
-errcode_t profile_init_path(filepath, ret_profile)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_init_path(filepath, ret_profile)
 	const char *filepath;
 	profile_t *ret_profile;
 {
@@ -118,7 +120,8 @@ errcode_t profile_init_path(filepath, ret_profile)
 }
 
 
-void profile_release(profile)
+KRB5_DLLIMP void KRB5_CALLCONV
+profile_release(profile)
 	profile_t	profile;
 {
 	prf_file_t	p, next;

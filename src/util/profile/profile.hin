@@ -35,13 +35,13 @@ typedef struct _profile_t *profile_t;
 #define PROFILE_ITER_SECTIONS_ONLY	0x0002
 #define PROFILE_ITER_RELATIONS_ONLY	0x0004
 
-long profile_init
+KRB5_DLLIMP long KRB5_CALLCONV profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
-long profile_init_path
+KRB5_DLLIMP long KRB5_CALLCONV profile_init_path
 	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
 
-void profile_release
+KRB5_DLLIMP void KRB5_CALLCONV profile_release
 	PROTOTYPE ((profile_t profile));
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_get_values
@@ -50,30 +50,46 @@ KRB5_DLLIMP long KRB5_CALLCONV profile_get_values
 KRB5_DLLIMP void KRB5_CALLCONV profile_free_list
 	PROTOTYPE ((char **list));
 
-long profile_get_string
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
 			char **ret_string));
-long profile_get_integer
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));
 
-long profile_get_relation_names
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_relation_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
-long profile_get_subsection_names
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_subsection_names
 	PROTOTYPE((profile_t profile, const char **names, char ***ret_names));
 
-long profile_iterator_create
+KRB5_DLLIMP long KRB5_CALLCONV profile_iterator_create
 	PROTOTYPE((profile_t profile, const char **names,
 		   int flags, void **ret_iter));
 
-void profile_iterator_free PROTOTYPE((void **iter_p));
+KRB5_DLLIMP void KRB5_CALLCONV profile_iterator_free
+	PROTOTYPE((void **iter_p));
 	
-long profile_iterator
+KRB5_DLLIMP long KRB5_CALLCONV profile_iterator
 	PROTOTYPE((void	**iter_p, char **ret_name, char **ret_value));
 
-void profile_release_string PROTOTYPE((char *str));
+KRB5_DLLIMP void KRB5_CALLCONV profile_release_string PROTOTYPE((char *str));
+
+KRB5_DLLIMP long KRB5_CALLCONV profile_update_relation
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *old_value, const char *new_value));
+
+KRB5_DLLIMP long KRB5_CALLCONV profile_clear_relation
+	PROTOTYPE((profile_t profile, const char **names));
+
+KRB5_DLLIMP long KRB5_CALLCONV profile_rename_section
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *new_name));
+
+KRB5_DLLIMP long KRB5_CALLCONV profile_add_relation
+	PROTOTYPE((profile_t profile, const char **names, 
+		   const char *new_value));
 
 #endif /* _KRB5_PROFILE_H */
