@@ -180,19 +180,16 @@ krb5_authenticator **authpp;
     krb5_error_code retval;
     krb5_encrypt_block eblock;
     krb5_data scratch;
-    krb5_enctype etype;
     krb5_keyblock *sesskey;
 
     sesskey = request->ticket->enc_part2->session;
 
-    etype = keytype_to_etype(sesskey->keytype);
-
-    if (!valid_etype(etype))
-	return KRB5_PROG_ETYPE_NOSUPP;
+    if (!valid_keytype(sesskey->keytype))
+	return KRB5_PROG_KEYTYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[etype]->system;
+    eblock.crypto_entry = krb5_keytype_array[sesskey->keytype]->system;
 
     scratch.length = request->authenticator.length;
     if (!(scratch.data = malloc(scratch.length)))
