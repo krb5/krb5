@@ -68,12 +68,18 @@ dnl
 if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
 	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
 	AUTOCONFFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
+	AUTOHEADER=$ac_reltopdir/util/autoconf/autoheader
+	AUTOHEADERFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
 else
 	AUTOCONF=autoconf
 	AUTOCONFFLAGS=
+	AUTOHEADER=autoheader
+	AUTOHEADERFLAGS=
 fi
 AC_SUBST(AUTOCONF)
 AC_SUBST(AUTOCONFFLAGS)
+AC_SUBST(AUTOHEADER)
+AC_SUBST(AUTOHEADERFLAGS)
 dnl
 dnl This identifies the top of the source tree relative to the directory 
 dnl in which the configure file lives.

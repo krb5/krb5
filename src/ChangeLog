@@ -1,3 +1,8 @@
+2001-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Set and substitute AUTOHEADER and
+	AUTOHEADERFLAGS.
+
 2001-05-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5-config.in: New script for providing linker and compiler
