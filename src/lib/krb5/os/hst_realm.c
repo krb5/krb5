@@ -81,6 +81,7 @@ char ***realmsp;
     char *domain;
     FILE *trans_file;
     char trans_host[MAXHOSTNAMELEN+1];
+    char local_host[MAXHOSTNAMELEN+1];
     char trans_realm[DEF_REALMNAME_SIZE];
     krb5_error_code retval;
     int scanval;
@@ -89,6 +90,12 @@ char ***realmsp;
 
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms))))
 	return ENOMEM;
+    if (!host) {
+	if (gethostname(local_host, sizeof(local_host)-1) == -1)
+	    return errno;
+	local_host[sizeof(local_host)-1] = '\0';
+	host = local_host;
+    }
     domain = strchr(host, '.');
 
     /* prepare default */
