@@ -27,7 +27,7 @@
 
 #include <krb5/krb5.h>
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_kt_remove_entry (context, id, entry)
     krb5_context context;
     krb5_keytab id;

@@ -1,3 +1,10 @@
+Wed Feb 22 01:27:05 1995 Keith Vetter (keithv@fusion.com)
+
+        * Makefile.in: made to work on the PC
+        * *.c, ktfile.h: added windows INTERFACE keyword
+	* ktf_util.c: removed include of <netinet/in.h>
+           cast some 32bit ints to size_t ints
+
 Fri Feb  3 01:53:44 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files for DOS 8.3 uniqueness:

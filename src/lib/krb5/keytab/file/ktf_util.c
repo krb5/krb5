@@ -75,7 +75,6 @@
 #include <krb5/libos.h>
 #include <krb5/los-proto.h>
 #include <krb5/osconf.h>
-#include <netinet/in.h>
 #include <stdio.h>
 
 #include "ktfile.h"
@@ -100,7 +99,9 @@ static char *fopen_mode_rbplus= "r+";
 static char *fopen_mode_rb = "r";
 #endif
 
+#ifndef HAVE_ERRNO
 extern int errno;
+#endif
 
 static krb5_error_code
 krb5_ktfileint_open(context, id, mode)
@@ -164,7 +165,7 @@ int mode;
     return 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_openr(context, id)
     krb5_context context;
 krb5_keytab id;
@@ -172,7 +173,7 @@ krb5_keytab id;
     return krb5_ktfileint_open(context, id, KRB5_LOCKMODE_SHARED);
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_openw(context, id)
     krb5_context context;
 krb5_keytab id;
@@ -180,7 +181,7 @@ krb5_keytab id;
     return krb5_ktfileint_open(context, id, KRB5_LOCKMODE_EXCLUSIVE);
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_close(context, id)
     krb5_context context;
 krb5_keytab id;
@@ -195,7 +196,7 @@ krb5_keytab id;
     return kerror;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_delete_entry(context, id, delete_point)
     krb5_context context;
 krb5_keytab id;
@@ -233,9 +234,9 @@ krb5_int32 delete_point;
             len = BUFSIZ;
         }
 
-        memset(iobuf, 0, len);
+        memset(iobuf, 0, (size_t) len);
         while (size > 0) {
-            xfwrite(iobuf, 1, len, KTFILEP(id));
+            xfwrite(iobuf, 1, (size_t) len, KTFILEP(id));
             size -= len;
             if (size < len) {
                 len = size;
@@ -248,7 +249,7 @@ krb5_int32 delete_point;
     return 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_internal_read_entry(context, id, ret_entry, delete_point)
     krb5_context context;
 krb5_keytab id;
@@ -456,7 +457,7 @@ fail:
     return error;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_read_entry(context, id, entryp)
     krb5_context context;
 krb5_keytab id;
@@ -467,7 +468,7 @@ krb5_keytab_entry *entryp;
     return krb5_ktfileint_internal_read_entry(context, id, entryp, &delete_point);
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_write_entry(context, id, entry)
     krb5_context context;
 krb5_keytab id;
@@ -613,7 +614,7 @@ krb5_keytab_entry *entry;
  * Determine the size needed for a file entry for the given
  * keytab entry.
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_size_entry(context, entry, size_needed)
     krb5_context context;
 krb5_keytab_entry *entry;
@@ -655,7 +656,7 @@ krb5_int32 *size_needed;
  * to commit the write, but that this field must indicate the size of the
  * block in the file rather than the size of the actual entry)  
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfileint_find_slot(context, id, size_needed, commit_point)
     krb5_context context;
 krb5_keytab id;
@@ -754,8 +755,8 @@ krb5_int32 *commit_point;
                         return errno;
                     }
 
-                    memset(iobuf, 0, size);
-                    xfwrite(iobuf, 1, size, KTFILEP(id));
+                    memset(iobuf, 0, (size_t) size);
+                    xfwrite(iobuf, 1, (size_t) size, KTFILEP(id));
                     if (feof(KTFILEP(id))) {
                         break;
                     }

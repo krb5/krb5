@@ -54,44 +54,44 @@ typedef struct _krb5_kt_ops {
     krb5_magic magic;
     char *prefix;
     /* routines always present */
-    krb5_error_code (*resolve) 
+    krb5_error_code (INTERFACE *resolve) 
 	NPROTOTYPE((krb5_context,
 		    const char *,
 		    krb5_keytab *));
-    krb5_error_code (*get_name) 
+    krb5_error_code (INTERFACE *get_name) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    char *,
 		    int));
-    krb5_error_code (*close) 
+    krb5_error_code (INTERFACE *close) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab));
-    krb5_error_code (*get) 
+    krb5_error_code (INTERFACE *get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_principal,
 		    krb5_kvno,
 		    krb5_keytype,
 		    krb5_keytab_entry *));
-    krb5_error_code (*start_seq_get) 
+    krb5_error_code (INTERFACE *start_seq_get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_kt_cursor *));	
-    krb5_error_code (*get_next) 
+    krb5_error_code (INTERFACE *get_next) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_keytab_entry *,
 		    krb5_kt_cursor *));
-    krb5_error_code (*end_get) 
+    krb5_error_code (INTERFACE *end_get) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_kt_cursor *));
     /* routines to be included on extended version (write routines) */
-    krb5_error_code (*add) 
+    krb5_error_code (INTERFACE *add) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		    krb5_keytab_entry *));
-    krb5_error_code (*remove) 
+    krb5_error_code (INTERFACE *remove) 
 	NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		  krb5_keytab_entry *));

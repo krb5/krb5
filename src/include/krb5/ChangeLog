@@ -1,3 +1,7 @@
+Wed Feb 22 01:45:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* keytab.h: added windows INTERFACE keyword to prototypes
+
 Tue Feb 21 17:31:06 1995 Keith Vetter (keithv@fusion.com)
 
 	* config.h: added HAVE_ERRNO for the windows section

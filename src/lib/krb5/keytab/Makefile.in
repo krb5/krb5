@@ -1,17 +1,17 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
-
-
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS=	\
-	ktadd.o		\
-	ktbase.o	\
-	ktdefault.o	\
-	ktfr_entry.o	\
-	ktremove.o	\
-	read_servi.o
+	ktadd.$(OBJEXT)		\
+	ktbase.$(OBJEXT)	\
+	ktdefault.$(OBJEXT)	\
+	ktfr_entry.$(OBJEXT)	\
+	ktremove.$(OBJEXT)	\
+	read_servi.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/ktadd.c	\
@@ -20,3 +20,23 @@ SRCS=	\
 	$(srcdir)/ktfr_entry.c	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
+
+all:: $(OBJS) all-$(WHAT)
+
+all-unix::
+
+all-windows::
+	cd file
+	@echo Making in ..\file
+	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	cd ..
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+
+clean-windows::
+	cd file
+	@echo Making clean in ..\file
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..

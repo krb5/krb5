@@ -30,7 +30,7 @@
 
 #include "ktfile.h"
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfile_start_seq_get(context, id, cursorp)
     krb5_context context;
 krb5_keytab id;

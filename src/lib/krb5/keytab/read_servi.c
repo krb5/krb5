@@ -43,7 +43,7 @@
  * returns: Either KSUCCESS or error code.
  * errors: error code if not found or keyprocarg is invalid.
  */
-krb5_error_code 
+krb5_error_code INTERFACE
 krb5_kt_read_service_key(context, keyprocarg, principal, vno, keytype, key)
     krb5_context context;
     krb5_pointer keyprocarg;

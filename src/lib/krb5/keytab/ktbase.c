@@ -41,7 +41,7 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_dfl;
  * don't replace if it already exists; return an error instead.
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_kt_register(context, ops)
     krb5_context context;
     krb5_kt_ops *ops;
@@ -70,7 +70,8 @@ krb5_kt_register(context, ops)
  * particular keytab type.
  */
 
-krb5_error_code krb5_kt_resolve (context, name, ktid)
+krb5_error_code INTERFACE
+krb5_kt_resolve (context, name, ktid)
     krb5_context context;
     const char *name;
     krb5_keytab *ktid;

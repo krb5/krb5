@@ -31,7 +31,7 @@
 
 #include "ktfile.h"
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_ktfile_resolve(context, name, id)
     krb5_context context;
   const char *name;

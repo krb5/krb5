@@ -28,7 +28,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_kt_free_entry (context, entry)
     krb5_context context;
     krb5_keytab_entry *entry;

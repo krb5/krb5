@@ -1,7 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..\..
+##DOSLIBNAME=..\..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 SRCS= \
 	$(srcdir)/ktf_add.c \
@@ -20,18 +22,19 @@ SRCS= \
 	$(srcdir)/ktf_util.c
 
 OBJS = \
-	ktf_add.o	\
-	ktf_close.o	\
-	ktf_endget.o	\
-	ktf_g_ent.o	\
-	ktf_g_name.o	\
-	ktf_next.o	\
-	ktf_resolv.o	\
-	ktf_remove.o	\
-	ktf_ssget.o	\
-	ktf_util.o	\
-	ktf_ops.o	\
-	ktf_wops.o	\
-	ktf_wreslv.o	\
-	ktf_defops.o
+	ktf_add.$(OBJEXT)	\
+	ktf_close.$(OBJEXT)	\
+	ktf_endget.$(OBJEXT)	\
+	ktf_g_ent.$(OBJEXT)	\
+	ktf_g_name.$(OBJEXT)	\
+	ktf_next.$(OBJEXT)	\
+	ktf_resolv.$(OBJEXT)	\
+	ktf_remove.$(OBJEXT)	\
+	ktf_ssget.$(OBJEXT)	\
+	ktf_util.$(OBJEXT)	\
+	ktf_ops.$(OBJEXT)	\
+	ktf_wops.$(OBJEXT)	\
+	ktf_wreslv.$(OBJEXT)	\
+	ktf_defops.$(OBJEXT)
 
+all:: $(OBJS)

@@ -28,7 +28,8 @@
 #include <krb5/krb5.h>
 #include <stdio.h>
 
-krb5_error_code krb5_kt_default(context, id)
+krb5_error_code INTERFACE
+krb5_kt_default(context, id)
     krb5_context context;
     krb5_keytab *id;
 {

@@ -31,7 +31,7 @@
 
 #include "ktfile.h"
 
-krb5_error_code 
+krb5_error_code INTERFACE
 krb5_ktfile_close(context, id)
     krb5_context context;
   krb5_keytab id;
