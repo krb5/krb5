@@ -26,9 +26,9 @@ extern gss_name_t			gss_oldchangepw_name;
 extern void *				global_server_handle;
 
 #define CHANGEPW_SERVICE(rqstp) \
-	(cmp_gss_names(acceptor_name(rqstp->rq_svccred), gss_changepw_name) |\
+	(cmp_gss_names_rel_1(acceptor_name(rqstp->rq_svccred), gss_changepw_name) |\
 	 (gss_oldchangepw_name && \
-	  cmp_gss_names(acceptor_name(rqstp->rq_svccred), \
+	  cmp_gss_names_rel_1(acceptor_name(rqstp->rq_svccred), \
 			gss_oldchangepw_name)))
 
 int cmp_gss_names(gss_name_t n1, gss_name_t n2)
@@ -40,6 +40,18 @@ int cmp_gss_names(gss_name_t n1, gss_name_t n2)
       return(0);
 
    return(equal);
+}
+
+/* Does a comparison of the names and then releases the first entity */
+/* For use above in CHANGEPW_SERVICE */
+int cmp_gss_names_rel_1(gss_name_t n1, gss_name_t n2)
+{
+   OM_uint32 min_stat;
+   int ret;
+
+   ret = cmp_gss_names(n1, n2);
+   if (n1) (void) gss_release_name(&min_stat, &n1);
+   return ret;
 }
 
 /*
@@ -152,12 +164,15 @@ int setup_gss_names(struct svc_req *rqstp,
 				    NULL, NULL);
      if (maj_stat != GSS_S_COMPLETE) {
 	  gss_release_buffer(&min_stat, client_name);
+          gss_release_name(&min_stat, &server_gss_name);
 	  return -1;
      }
      if (gss_name_to_string(server_gss_name, server_name) != 0) {
 	  gss_release_buffer(&min_stat, client_name);
+          gss_release_name(&min_stat, &server_gss_name);
 	  return -1;
      }
+     gss_release_name(&min_stat, &server_gss_name);
      return 0;
 }
 
@@ -750,6 +765,7 @@ chrand_principal_1(chrand_arg *arg, struct svc_req *rqstp)
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
+	 free_server_handle(handle);
 	 return &ret;
     }
     krb5_unparse_name(handle->context, arg->princ, &prime_arg);

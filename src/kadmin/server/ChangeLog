@@ -1,3 +1,14 @@
+Tue Oct 14 21:06:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_stubs.c (CHANGEPW_SERVICE): Modify to free allocated
+ 	        memory in request.
+		(setup_gss_names): Free memory in case of failure.
+		(chrand_principal_1): Call free_server_handle for failure
+		   cleanup.
+	
+	* ovsec_kadmd.c (main): Cleanup memory by calling acl_finish,
+	 	gss_release_name, and krb5_free_context
+
 Tue Jul  1 02:36:55 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_svc.c, server_stubs.c: Add support for setv4key.

@@ -387,9 +387,25 @@ int main(int argc, char *argv[])
 
      kadm_svc_run();
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
+
+     /* Clean up memory, etc */
      kadm5_destroy(global_server_handle);
      close(s);
+     acl_finish(context, 0);
+     if(gss_changepw_name) {
+          (void) gss_release_name(&OMret, &gss_changepw_name);
+     }
+     if(gss_oldchangepw_name) {
+          (void) gss_release_name(&OMret, &gss_oldchangepw_name);
+     }
+     for(s = 0 ; s < 4; s++) {
+          if (names[s].name) {
+	        free(names[s].name);
+	  }
+     }
+
      krb5_klog_close();
+     krb5_free_context(context);
      exit(2);
 }
 
@@ -740,7 +756,7 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc msg;
-     int msg_ctx;
+     OM_uint32 msg_ctx;
 
      msg_ctx = 0;
      while (1) {
