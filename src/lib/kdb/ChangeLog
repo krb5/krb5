@@ -1,3 +1,9 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* kdb_xdr.c: Added new functions
+	krb5_dbe_update_generation_number_general and
+	krb5_dbe_lookup_generation_number_general
+
 2001-04-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_dbm.c (destroy_file_suffix): Declare as static.
