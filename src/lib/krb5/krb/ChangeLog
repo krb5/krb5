@@ -1,3 +1,17 @@
+2002-06-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* princ_comp.c (krb5_realm_compare), auth_con.c
+	(krb5_auth_con_setports, krb5_auth_con_getaddrs,
+	krb5_auth_con_initivector), addr_order.c (krb5_address_order),
+	addr_comp.c (krb5_address_compare): Make KRB5_CALLCONV.
+	[pullup from 1-2-2-branch]
+
+2002-06-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* bld_princ.c (krb5_build_principal_va): Make
+	krb5_build_principal_va() KRB5_CALLCONV.
+	[pullup from 1-2-2-branch]
+
 2002-06-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth.c: Don't include syslog.h.

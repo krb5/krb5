@@ -109,7 +109,7 @@ krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
     return retval;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -132,7 +132,7 @@ krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
     return retval;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setports(context, auth_context, local_port, remote_port)
     krb5_context      	  context;
     krb5_auth_context     auth_context;
@@ -270,7 +270,7 @@ krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
     return 0;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_initivector(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;

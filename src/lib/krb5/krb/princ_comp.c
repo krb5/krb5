@@ -30,7 +30,7 @@
 
 #include "k5-int.h"
 
-krb5_boolean
+krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(context, princ1, princ2)
     krb5_context context;
     krb5_const_principal princ1;
