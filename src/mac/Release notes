@@ -154,3 +154,16 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_3_0d3
  no changes on the Mac side
  fixed crash in get_init_creds when no network
+ 
+3.0d4
+ from tag Mac_GSSKerberos5_3_0d4
+ no changes on the Mac side
+ 
+3.0d5
+ from tag Mac_GSSKerberos5_3_0d5
+ no changes on the Mac side
+
+3.0d6
+ from tag Mac_GSSKerberos5_3_0d6
+ login lib support
+ fixed to ccache v5 creds copying code
