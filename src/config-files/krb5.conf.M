@@ -136,15 +136,18 @@ earlier.
 This allows you to set the checksum type used in the authenticator of
 KRB_AP_REQ messages.  The default value for this type is
 CKSUMTYPE_RSA_MD5.  For compatibility with applications linked against
-DCE Kerberos libraries, use a value of 2 to use the CKSUMTYPE_RSA_MD4
-instead. This applies to DCE 1.1 and earlier.
+DCE version 1.1 or earlier Kerberos libraries, use a value of 2 to use
+the CKSUMTYPE_RSA_MD4
+instead.
 
 .IP safe_checksum_type 
-This allows you to set the keyed-checksum type used in KRB_SAFE
+This allows you to set the preferred keyed-checksum type for use in KRB_SAFE
 messages.  The default value for this type is CKSUMTYPE_RSA_MD5_DES.
-For compatibility with applications linked against DCE Kerberos
+For compatibility with applications linked against DCE version 1.1 or
+earlier Kerberos
 libraries, use a value of 3 to use the CKSUMTYPE_RSA_MD4_DES
-instead. This applies to DCE 1.1 and earlier.
+instead.  This field is ignored when its value is incompatible with
+the session key type.
 
 .IP ccache_type
 User this parameter on systems which are DCE clients, to specify the
