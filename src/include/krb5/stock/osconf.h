@@ -36,6 +36,9 @@
 #define SKDC_TIMEOUT_SHIFT 2		/* left shift of timeout for backoff */
 #define SKDC_TIMEOUT_1 1		/* seconds for first timeout */
 
+#define RCTMPDIR	"/usr/tmp"	/* directory to store replay caches */
+#define KDCRCACHE	"dfl:krb5kdc_rcache"
+
 #ifdef POSIX_SIGTYPE
 #define sigtype void
 #else
