@@ -226,7 +226,10 @@ proc ftp_test { } {
     set testname "ls missing"
     send "ls $tmppwd/ftp-testmiss\r"
     expect -re "Opening ASCII mode data connection for .*ls."
-    expect -re "$tmppwd/ftp-testmiss not found"
+    expect {
+	-re "$tmppwd/ftp-testmiss not found" {}
+	-re "$tmppwd/ftp-testmiss: No such file or directory"
+    }
     expect "ftp> " {
 	pass $testname
     } 
