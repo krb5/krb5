@@ -380,7 +380,6 @@ edithost(pat, host)
 	register char *host;
 {
 	register char *res = editedhost;
-	char *strncpy();
 
 	if (!pat)
 		pat = "";
