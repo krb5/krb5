@@ -1,3 +1,7 @@
+2004-09-07  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb524d.M: Added a man page for krb524d.
+
 2004-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* krb524d.c: Fix double-free vulnerabilities.
