@@ -1004,18 +1004,6 @@
 			isa = PBXRezBuildPhase;
 			name = "ResourceManager Resources";
 		};
-		00F242B4FFB7612912120156 = {
-			isa = PBXTargetDependency;
-			target = 1744760CFF5FF8DB12120111;
-		};
-		00F242B5FFB7612912120156 = {
-			isa = PBXTargetDependency;
-			target = 174475D2FF5EF33612120111;
-		};
-		00F242B6FFB7612912120156 = {
-			isa = PBXTargetDependency;
-			target = 5C1372EBFF6546C412120111;
-		};
 		00F242C2FFB7706712120156 = {
 			fileRef = 5C13731AFF654A8C12120111;
 			isa = PBXBuildFile;
@@ -1159,6 +1147,24 @@
 		};
 		017B1C7C00F26FAD7F000001 = {
 			fileRef = 0F801490FF9A7E5D126500C7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		017F047100FA63557F000001 = {
+			isa = PBXFrameworkReference;
+			name = CoreServices.framework;
+			path = /System/Library/Frameworks/CoreServices.framework;
+			refType = 0;
+		};
+		017F047200FA63557F000001 = {
+			fileRef = 017F047100FA63557F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		017F047300FA63557F000001 = {
+			fileRef = 017F047100FA63557F000001;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -1804,6 +1810,7 @@
 				0F801492FF9A8D33126500C7,
 				41D6B5480029FA1112120111,
 				0106E99A003C767A7F000001,
+				017F047100FA63557F000001,
 				61622FDAFF85346F12120111,
 				61622FD1FF82A36412120111,
 				174476B8FF5FFFA512120111,
@@ -2291,6 +2298,7 @@
 				0F801493FF9A8D33126500C7,
 				41D6B54A0029FA1112120111,
 				0106E99B003C767A7F000001,
+				017F047200FA63557F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -6657,6 +6665,7 @@
 				0106E99F003C7A057F000001,
 				0106E9A0003C7A057F000001,
 				0106E9A2003C7A5A7F000001,
+				017F047300FA63557F000001,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
