@@ -1,0 +1,28 @@
+thisconfigdir=./..
+myfulldir=clients/kvno
+mydir=kvno
+BUILDTOP=$(REL)..$(S)..
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all-unix:: kvno
+all-windows:: $(OUTPRE)kvno.exe
+all-mac::
+
+kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ kvno.o $(KRB4COMPAT_LIBS)
+
+$(OUTPRE)kvno.exe: $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) /out:$@ $**
+
+clean-unix::
+	$(RM) kvno.o kvno
+
+install-unix::
+	for f in kvno; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
