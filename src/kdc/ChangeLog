@@ -1,3 +1,18 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): If disable-transited-check
+	option isn't set, try to verify transit path.  If
+	reject_bad_transit flag is set and transit path isn't verified,
+	reject the request.  Use a temporary variable to simplify
+	references to the second ticket.
+	* extern.h (struct __kdc_realm_data): Add new field
+	realm_reject_bad_transit.
+	(find_realm_data): Declare.
+	(reject_bad_transit): New macro.
+	* main.c (find_realm_data): Delete declaration.
+	(init_realm): Copy reject-bad-transit value or use default.
+	* rtest.c (find_realm_data): Define dummy version.
+
 2001-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (foreach_localaddr): Sync with lib/krb5/os/localaddr.c

@@ -1,7 +1,7 @@
 /*
  * include/krb5.h
  *
- * Copyright 1989,1990,1995 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990,1995,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1701,8 +1701,8 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_copy_creds
 
 /* chk_trans.c */
 krb5_error_code krb5_check_transited_list
-	KRB5_PROTOTYPE((krb5_context,
-		krb5_data *trans, krb5_data *realm1, krb5_data *realm2));
+	(krb5_context, const krb5_data *trans,
+	 const krb5_data *realm1, const krb5_data *realm2);
 
 /* free_rtree.c */
 void krb5_free_realm_tree

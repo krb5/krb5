@@ -1,3 +1,9 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm.h (struct __krb5_realm_params): Added fields
+	realm_reject_bad_transit, realm_reject_bad_transit_valid; deleted
+	field realm_filler.
+
 2000-10-02	Alexandra Ellwood <lxs@mit.edu>
 
 	* kdb.h: added Mac OS X #define (__MACH__) -- we're still a kerberos client

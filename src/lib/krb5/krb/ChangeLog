@@ -1,3 +1,7 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* chk_trans.c: Reimplemented from scratch.
+
 2001-01-30  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c (krb5_obtain_padata): Don't dereference a NULL pointer

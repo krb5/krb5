@@ -4,6 +4,8 @@
 	TKT_FLG_OK_AS_DELEGATE, TKT_FLG_ANONYMOUS): New macros.
 	(KDC_OPT_REQUEST_ANONYMOUS, KDC_OPT_DISABLE_TRANSITED_CHECK):
 	Likewise.
+	(krb5_check_transited_list): Pointed-to krb5_data structures are
+	now all const.
 
 2000-10-16  Miro Jurisic  <meeroh@mit.edu>
 

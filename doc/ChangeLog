@@ -1,3 +1,8 @@
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (realms (kdc.conf)): Add description of
+	reject_bad_transit realm option.
+
 2001-02-22  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo: Remove references to "rename_princpal".
