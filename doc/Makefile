@@ -7,8 +7,7 @@ RM=rm -f
 TAR=tar -chvf
 GZIP=gzip -9
 MANPS=./man2ps
-all::
-	echo "Can't make all guides at once--nodes in include files will be wrong."
+all:: admin-guide-full install-guide-full user-guide-full
 
 admin-guide-full:: admin-guide admin-guide-info admin-guide-html
 
