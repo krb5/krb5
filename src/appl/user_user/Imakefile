@@ -27,10 +27,10 @@
 LOCAL_LIBRARIES = $(KLIB)
         DEFINES = -DDEBUG
 
-SERVERSRCS = server.c
+SERVERSRCS = $(SRCDIR)server.c
 SERVEROBJS = server.o
 
-CLIENTSRCS = client.c
+CLIENTSRCS = $(SRCDIR)client.c
 CLIENTOBJS = client.o
 
 all:: uuclient uuserver

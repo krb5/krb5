@@ -26,12 +26,10 @@ NormalLibraryObjectRule()
 
 OBJS=	md4.o md4glue.o md4crypto.o
 
-SRCS=	md4.c md4glue.c md4crypto.c
+SRCS=	$(SRCDIR)md4.c $(SRCDIR)md4glue.c $(SRCDIR)md4crypto.c
 
 DEFINES= $(DESDEFINES)
 
-/* Make a local copy of the md4 library and also merge it with -des5 */
-Krb5LibraryTarget(md4,$(OBJS))
+OtherdirLibraryTarget(..,$(DESLIB),$(OBJS))
 
-OtherdirLibraryTarget(..,des5,$(OBJS))
-
+DependTarget()
