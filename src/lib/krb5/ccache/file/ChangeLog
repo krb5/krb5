@@ -1,3 +1,8 @@
+Fri Oct  7 14:18:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add test for unistd.h
+	* fcc_maybe.c: Use POSIX_FILE_LOCKS if _POSIX_VERSION is defined.
+
 Fri Sep 30 21:54:20 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_defops.c (krb5_cc_file_ops):
