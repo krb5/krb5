@@ -18,6 +18,19 @@ static char rcsid_rd_req_c[] =
 #include <krb5/copyright.h>
 #include "krb425.h"
 
+static krb5_error_code
+setkey_key_proc(DECLARG(krb5_pointer,arg),
+		DECLARG(krb5_principal,princ),
+		DECLARG(krb5_kvno,kvno),
+		DECLARG(krb5_keyblock **,retkey))
+OLDDECLARG(krb5_pointer,arg)
+OLDDECLARG(krb5_principal,princ)
+OLDDECLARG(krb5_kvno,kvno)
+OLDDECLARG(krb5_keyblock **,retkey)
+{
+    return krb5_copy_keyblock(&_krb425_servkey, retkey);
+}
+
 int
 krb_rd_req(authent, service, instance, from_addr, ad, fn)
 KTEXT authent;
@@ -35,7 +48,7 @@ char *fn;
 	krb5_error_code r;
 	krb5_data authe;
 	extern int gethostname();
-
+	int use_set_key = 0;
 
 	if (from_addr) {
 		peer.addrtype = ADDRTYPE_INET;
@@ -80,8 +93,12 @@ char *fn;
 	
 	authe.length = authent->length;
 	authe.data = (char *)authent->dat;
-	if (!*fn)
-		fn = (char *)0;
+	if (!fn) {
+	    use_set_key = 1;
+	    fn = (char *)0;
+	} else if (!*fn)
+	    fn = (char *)0;
+
 #ifdef  EBUG
         EPRINT "Calling krb5_rd_req with:\n");
         EPRINT "        Realm   : "); show5(srvdata[0]); ENEWLINE
@@ -112,7 +129,8 @@ char *fn;
 	if (r = krb5_rd_req(&authe,
 			    (krb5_principal)server,
 			    from_addr ? &peer : 0,
-			    fn, 0, 0, 0, &authdat)) {
+			    fn, use_set_key ? setkey_key_proc : 0,
+			    0, 0, &authdat)) {
 #ifdef	EBUG
 		ERROR(r)
 #endif
