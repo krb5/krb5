@@ -78,6 +78,7 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdcc_end_seq_get,
       krb5_stdcc_remove, 
       krb5_stdcc_set_flags,
+      krb5_stdcc_get_flags,
 };
 
 #if defined(_WIN32)
@@ -705,6 +706,23 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_get_principal
  */
 krb5_error_code KRB5_CALLCONV krb5_stdcc_set_flags 
         (krb5_context context, krb5_ccache id , krb5_flags flags)
+{
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
+
+	return 0;
+}
+
+/*
+ * get_flags
+ *
+ * - currently a NOP since we don't store any flags in the NC
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdcc_get_flags 
+        (krb5_context context, krb5_ccache id , krb5_flags *flags)
 {
 	stdccCacheDataPtr	ccapi_data = id->data;
 	krb5_error_code		retval;

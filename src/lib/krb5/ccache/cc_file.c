@@ -2246,6 +2246,30 @@ krb5_fcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     return ret;
 }
 
+/*
+ * Requires:
+ * id is a cred cache returned by krb5_fcc_resolve or
+ * krb5_fcc_generate_new, but has not been opened by krb5_fcc_initialize.
+ *
+ * Modifies:
+ * id (mutex only; temporary)
+ * 
+ * Effects:
+ * Returns the operational flags of id.
+ */
+static krb5_error_code KRB5_CALLCONV
+krb5_fcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
+{
+    krb5_error_code ret = KRB5_OK;
+
+    ret = k5_mutex_lock(&((krb5_fcc_data *) id->data)->lock);
+    if (ret)
+	return ret;
+    *flags = ((krb5_fcc_data *) id->data)->flags;
+    k5_mutex_unlock(&((krb5_fcc_data *) id->data)->lock);
+    return ret;
+}
+
 
 static krb5_error_code
 krb5_fcc_interpret(krb5_context context, int errnum)
@@ -2314,6 +2338,7 @@ const krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_end_seq_get,
      krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
+     krb5_fcc_get_flags,
 };
 
 #if defined(_WIN32)
@@ -2374,4 +2399,5 @@ const krb5_cc_ops krb5_cc_file_ops = {
      krb5_fcc_end_seq_get,
      krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
+     krb5_fcc_get_flags,
 };

@@ -1,3 +1,13 @@
+2004-11-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (krb5_fcc_get_flags): New function.
+	(krb5_fcc_ops, krb5_cc_file_ops): Add it.
+	* cc_memory.c (krb5_mcc_get_flags): New function.
+	(krb5_mcc_ops): Add it.
+	* cc_mslsa.c (krb5_lcc_get_flags): New function.
+	(krb5_lcc_ops): Add it.
+	* ccfns.c (krb5_cc_get_flags): New function.
+
 2004-10-07  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Fix the forced setting of the Initial Ticket Flag
                 on Win2000 and add it to XP and 2003 SP1

@@ -564,6 +564,13 @@ krb5_mcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     return KRB5_OK;
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_mcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
+{
+    *flags = 0;
+    return KRB5_OK;
+}
+
 /* store: Save away creds in the ccache.  */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
@@ -606,4 +613,5 @@ const krb5_cc_ops krb5_mcc_ops = {
      krb5_mcc_end_seq_get,
      krb5_mcc_remove_cred,
      krb5_mcc_set_flags,
+     krb5_mcc_get_flags,
 };

@@ -1798,6 +1798,9 @@ static krb5_error_code KRB5_CALLCONV krb5_lcc_store
 static krb5_error_code KRB5_CALLCONV krb5_lcc_set_flags
         (krb5_context, krb5_ccache id, krb5_flags flags);
 
+static krb5_error_code KRB5_CALLCONV krb5_lcc_get_flags
+        (krb5_context, krb5_ccache id, krb5_flags *flags);
+
 extern const krb5_cc_ops krb5_lcc_ops;
 
 krb5_error_code krb5_change_cache (void);
@@ -2529,6 +2532,18 @@ krb5_lcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     return KRB5_OK;
 }
 
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
+{
+    krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+
+    if (!is_windows_2000())
+        return KRB5_FCC_NOFILE;
+
+    *flags = data->flags;
+    return KRB5_OK;
+}
+
 const krb5_cc_ops krb5_lcc_ops = {
      0,
      "MSLSA",
@@ -2545,6 +2560,7 @@ const krb5_cc_ops krb5_lcc_ops = {
      krb5_lcc_next_cred,
      krb5_lcc_end_seq_get,
      krb5_lcc_remove_cred,
-     krb5_lcc_set_flags
+     krb5_lcc_set_flags,
+     krb5_lcc_get_flags,
 };
 #endif /* _WIN32 */

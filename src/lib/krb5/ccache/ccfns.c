@@ -117,6 +117,12 @@ krb5_cc_set_flags (krb5_context context, krb5_ccache cache, krb5_flags flags)
     return cache->ops->set_flags(context, cache, flags);
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_cc_get_flags (krb5_context context, krb5_ccache cache, krb5_flags *flags)
+{
+    return cache->ops->get_flags(context, cache, flags);
+}
+
 const char * KRB5_CALLCONV
 krb5_cc_get_type (krb5_context context, krb5_ccache cache)
 {

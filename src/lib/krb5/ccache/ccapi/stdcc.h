@@ -73,5 +73,8 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
 krb5_error_code KRB5_CALLCONV krb5_stdcc_set_flags 
         (krb5_context, krb5_ccache id , krb5_flags flags );
 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_get_flags 
+        (krb5_context, krb5_ccache id , krb5_flags *flags );
+
 krb5_error_code KRB5_CALLCONV krb5_stdcc_remove 
         (krb5_context, krb5_ccache id , krb5_flags flags, krb5_creds *creds);

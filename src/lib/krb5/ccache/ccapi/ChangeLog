@@ -1,3 +1,9 @@
+2004-11-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* stdcc.c (krb5_stdcc_get_flags): New function.
+	(krb5_cc_stdcc_ops): Add it.
+	* stdcc.h (krb5_stdcc_get_flags): Declare.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* stdcc_util.c (dupK5toCC): Don't test macintosh.
