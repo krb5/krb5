@@ -281,8 +281,8 @@ sprintf(cksumbuf, "%u:", ntohs(rport));
     if (status = krb5_cc_default(bsd_context, &cc))
     	goto bad2;
 
-    if (krb5_set_default_tgs_ktypes(bsd_context, bsd_ktypes))
-	goto bad2;
+/*     if (krb5_set_default_tgs_ktypes(bsd_context, bsd_ktypes)) */
+/* 	goto bad2; */
     
     if (status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client)) {
     	(void) krb5_cc_close(bsd_context, cc);
