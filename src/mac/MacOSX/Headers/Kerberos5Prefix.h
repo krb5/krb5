@@ -11,6 +11,9 @@
 #define SIZEOF_INT		4
 #define SIZEOF_SHORT	2
 
+/* define while building krb5 */
+#define KRB5_PRIVATE		1
+
 #define	KRB5_DLLIMP		
 #define	GSS_DLLIMP		
 #define KRB5_CALLCONV		
