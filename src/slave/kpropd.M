@@ -26,7 +26,7 @@
 .SH NAME
 kpropd \- Kerberos V5 slave KDC update server
 .SH SYNOPSIS
-.B kprop
+.B kpropd
 [
 .B \-r
 .I realm
