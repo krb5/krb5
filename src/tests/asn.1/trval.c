@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #define OK 0
 #define NOTOK (-1)

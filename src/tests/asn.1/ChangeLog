@@ -1,3 +1,7 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* trval.c: Include string.h for strcmp prototype.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* trval.c (decode_len, do_prim, do_cons, do_prim_bitstring,
