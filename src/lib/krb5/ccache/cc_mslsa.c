@@ -249,14 +249,14 @@ PreserveInitialTicketIdentity(void)
 {
     HKEY hKey;
     DWORD size = sizeof(DWORD);
+    DWORD type = REG_DWORD;
     const char *key_path = "Software\\MIT\\Kerberos5";
     const char *value_name = "PreserveInitialTicketIdentity";
     DWORD retval = 1;     /* default to Preserve */
 
-  userkey:
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
         goto syskey;
-    if (RegQueryValueEx(hKey, value_name, 0, REG_DWORD, &retval, &size) != ERROR_SUCCESS)
+    if (RegQueryValueExA(hKey, value_name, 0, &type, (LPBYTE)&retval, &size) != ERROR_SUCCESS)
     {
         RegCloseKey(hKey);
         goto syskey;
@@ -265,9 +265,9 @@ PreserveInitialTicketIdentity(void)
     goto done;
 
   syskey:
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
         goto done;
-    if (RegQueryValueEx(hKey, value_name, 0, REG_DWORD, &retval, &size) != ERROR_SUCCESS)
+    if (RegQueryValueExA(hKey, value_name, 0, &type, (LPBYTE)&retval, &size) != ERROR_SUCCESS)
     {
         RegCloseKey(hKey);
         goto done;
@@ -288,7 +288,7 @@ MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING InitialTicketDoma
     creds->magic=KV5M_CREDS;
 
     // construct Client Principal
-    if ( PreserveInitialTicketIdentity ) {
+    if ( PreserveInitialTicketIdentity() ) {
         wcsncpy(wrealm, InitialTicketDomain.Buffer, InitialTicketDomain.Length/sizeof(WCHAR));
         wrealm[InitialTicketDomain.Length/sizeof(WCHAR)]=0;
     } else {
@@ -1260,12 +1260,19 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket, * mstgt;
 
+  next_cred:
     if ( lcursor->index >= lcursor->response->CountOfTickets )
         return KRB5_CC_END;
 
     if (!GetMSCacheTicketFromCacheInfo(data->LogonHandle, data->PackageId,
                           &lcursor->response->Tickets[lcursor->index++],&msticket))
         return KRB5_FCC_INTERNAL;
+
+    /* Don't return tickets with NULL Session Keys */
+    if ( msticket->SessionKey.KeyType == KERB_ETYPE_NULL) {
+        LsaFreeReturnBuffer(msticket);
+        goto next_cred;
+    }
 
     /* convert the ticket */
     if (GetMSTGT(data->LogonHandle, data->PackageId, &mstgt)) {
