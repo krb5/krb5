@@ -19,12 +19,14 @@ static char rcsid_kdc_util_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/krb5_err.h>
+#include <krb5/kdb5_err.h>
 
 #include "kdc_util.h"
 #include "extern.h"
 
 #include <errno.h>
 #include <krb5/ext-proto.h>
+#include <stdio.h>
 
 /*
  * concatenate first two authdata arrays, returning an allocated replacement.
@@ -186,6 +188,7 @@ krb5_fulladdr *from;
     krb5_tkt_authent authdat;
     struct kparg who;
     krb5_error_code retval;
+    krb5_checksum our_cksum;
 
     if (isset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
@@ -233,7 +236,28 @@ krb5_fulladdr *from;
 
     /* now rearrange output from rd_req_decoded */
 
-    /* don't need authenticator */
+
+    our_cksum.checksum_type = authdat.authenticator->checksum->checksum_type;
+    if (!valid_cksumtype(our_cksum.checksum_type)) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX cktype nosupp */
+    }	
+    /* check application checksum vs. tgs request */
+#ifdef notdef
+    if (retval = (*krb5_cksumarray[our_cksum.checksum_type]->
+		  sum_func)(in,		/* where to? */
+			    NULL,	/* don't produce output */
+			    authdat.ticket->enc_part2->session->contents, /* seed */
+			    in_length,	/* input length */
+			    authdat.ticket->enc_part2->session->length,	/* seed length */
+			    &our_cksum)) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	return KRB5KRB_AP_ERR_BAD_INTEGRITY; /* XXX wrong code? */
+    }
+#endif
+    /* don't need authenticator anymore */
     krb5_free_authenticator(authdat.authenticator);
 
     /* copy the ptr to enc_part2, then free remaining stuff */
@@ -255,4 +279,34 @@ int direction;
 	return krb5_kdb_decrypt_key(in, out, &master_encblock);
     } else
 	return KRB5_KDB_ILLDIRECTION;
+}
+
+/*
+ * get the master key from somewhere, filling it into *key.
+ *
+ * key->keytype should be set to the desired type.
+ *
+ */
+
+krb5_error_code
+kdc_input_mkey(mname, key)
+krb5_principal mname;
+krb5_keyblock *key;
+{
+    krb5_error_code retval;
+    char password[BUFSIZ];
+    krb5_data pwd;
+    int size = sizeof(password);
+
+    /* XXX need a way to read from file */
+    if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
+				    krb5_mkey_pwd_prompt2,
+				    password,
+				    &size))
+	return(retval);
+
+    return (*master_encblock.crypto_entry->string_to_key)(key->keytype,
+							  key,
+							  &pwd,
+							  mname);
 }
