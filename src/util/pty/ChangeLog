@@ -1,3 +1,9 @@
+2000-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* sane_hostname.c (pty_make_sane_hostname, do_ntoa): Pass address
+	as sockaddr pointer.
+	* libpty.h (pty_make_sane_hostname): Update prototype.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Quote macro use inside AC_CHECK_LIB. Change

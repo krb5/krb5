@@ -1,3 +1,9 @@
+2000-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogind.c (doit): Cast first argument to pty_make_sane_hostname
+	to sockaddr pointer.
+	* krshd.c (doit): Likewise.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Update to autoconf 2 macro names:

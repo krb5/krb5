@@ -987,7 +987,7 @@ pty_init();
 	}
 #endif	/* _SC_CRAY_SECURE_SYS */
 
-	retval = pty_make_sane_hostname(who, maxhostlen,
+	retval = pty_make_sane_hostname((struct sockaddr *) who, maxhostlen,
 					stripdomain, always_ip,
 					&rhost_sane);
 	if (retval) {

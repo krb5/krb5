@@ -49,7 +49,7 @@ long pty_cleanup(char *slave, int pid, int update_utmp);
 struct sockaddr_in;
 #endif
 
-long pty_make_sane_hostname(struct sockaddr_in *, int, int, int, char **);
+long pty_make_sane_hostname(struct sockaddr *, int, int, int, char **);
 #else /*__STDC__*/
 long pty_init();
 long pty_getpty();

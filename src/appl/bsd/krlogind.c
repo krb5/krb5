@@ -812,7 +812,7 @@ void doit(f, fromp)
         setenv("TERM",term, 1);
     }
 
-    retval = pty_make_sane_hostname(fromp, maxhostlen,
+    retval = pty_make_sane_hostname((struct sockaddr *) fromp, maxhostlen,
 				    stripdomain, always_ip,
 				    &rhost_sane);
     if (retval)

@@ -778,7 +778,7 @@ void doit(f, fromp)
 	hostname[0] = '\0';
 
 #ifdef KERBEROS
-    status = pty_make_sane_hostname(fromp, maxhostlen,
+    status = pty_make_sane_hostname((struct sockaddr *) fromp, maxhostlen,
 				    stripdomain, always_ip, &sane_host);
     if (status) {
 	error("failed make_sane_hostname: %s\n", error_message(status));

@@ -2,7 +2,7 @@
  * pty_make_sane_hostname: Make a sane hostname from an IP address.
  * This returns allocated memory!
  * 
- * Copyright 1999 by the Massachusetts Institute of Technology.
+ * Copyright 1999,2000 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
@@ -25,17 +25,21 @@
 #include <arpa/inet.h>
 
 static long
-do_ntoa(struct sockaddr_in *addr,
+do_ntoa(struct sockaddr *addr,
 		     size_t hostlen,
 		     char **out)
 {
-    strncpy(*out, inet_ntoa(addr->sin_addr), hostlen);
+    if (addr->sa_family == AF_INET)
+	strncpy(*out, inet_ntoa(((struct sockaddr_in *)addr)->sin_addr),
+		hostlen);
+    else
+	strncpy(*out, "??", hostlen);
     (*out)[hostlen - 1] = '\0';
     return 0;
 }
 
 long
-pty_make_sane_hostname(struct sockaddr_in *addr,
+pty_make_sane_hostname(struct sockaddr *addr,
 		       int maxlen,
 		       int strip_ldomain,
 		       int always_ipaddr,
@@ -69,8 +73,11 @@ pty_make_sane_hostname(struct sockaddr_in *addr,
     if (always_ipaddr) {
 	return do_ntoa(addr, ut_host_len, out);
     }
-    hp = gethostbyaddr((char *)&addr->sin_addr, sizeof (struct in_addr),
-		       addr->sin_family);
+    if (addr->sa_family == AF_INET)
+	hp = gethostbyaddr((char *)&((struct sockaddr_in *)addr)->sin_addr,
+			   sizeof (struct in_addr), addr->sa_family);
+    else
+	hp = NULL;
     if (hp == NULL) {
 	return do_ntoa(addr, ut_host_len, out);
     }

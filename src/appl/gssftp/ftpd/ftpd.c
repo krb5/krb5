@@ -1980,7 +1980,7 @@ dolog(sin)
 		remotehost[0] = '\0';
 	strncpy(rhost_addra, inet_ntoa(sin->sin_addr), sizeof (rhost_addra));
 	rhost_addra[sizeof (rhost_addra) - 1] = '\0';
-	retval = pty_make_sane_hostname(sin, maxhostlen,
+	retval = pty_make_sane_hostname((struct sockaddr *) sin, maxhostlen,
 					stripdomain, always_ip, &rhost_sane);
 	if (retval) {
 		fprintf(stderr, "make_sane_hostname: %s\n",
