@@ -1,6 +1,9 @@
-Sun Sep 10 12:00:00 1995  James Mattly <mattly@fusion.com>
-
-	* renamed ustime.c to c_ustime.c
+Thu Sep  7 12:00:00 1995  James Mattly <mattly@fusion.com>
+	
+	* Renamed ustime.c to c_ustime.c
+	* Renamed localaddr.c to c_localaddr.c because Mac can't have
+	  two files with the same name.
+	* Makefile.in, .Sanitize updated for the above change.
 
 Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
