@@ -34,7 +34,7 @@
  * bytes, otherwise, -1.
  */
 
-KRB5_CALLCONV int
+int KRB5_CALLCONV
 krb_strnlen(const char *s, int n)
 {
     int i = 0;

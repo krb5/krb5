@@ -1,3 +1,8 @@
+2000-11-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* strnlen.c (krb_strnlen): Put The return type before the calling
+	convention.
+
 2000-11-08  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS, SRCS): Add strnlen.o, strnlen.c.
