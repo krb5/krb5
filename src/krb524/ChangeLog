@@ -1,3 +1,9 @@
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.c (krb524_convert_creds_kdc, krb524_init_ets): Mark as
+	KRB5_CALLCONV_WRONG.
+	(krb524_init_ets): Takes a krb5_context.
+
 2003-06-09  Tom Yu  <tlyu@mit.edu>
 
 	* krb524.c: Fix copyright notice.
