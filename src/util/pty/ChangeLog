@@ -1,3 +1,8 @@
+Sun Dec  7 00:05:28 1997  Tom Yu  <tlyu@mit.edu>
+
+	* getpty.c (pty_getpty): Fix goof in previous, which introduced
+	another fencepost error.
+
 Thu Dec  4 21:48:12 1997  Tom Yu  <tlyu@mit.edu>
 
 	* getpty.c (pty_getpty): Fix checks on string lengths to account

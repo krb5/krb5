@@ -111,8 +111,8 @@ long pty_getpty (fd, slave, slavelength)
     } else {
     	for (cp = "pqrstuvwxyzPQRST";*cp; cp++) {
 	    sprintf(slavebuf,"/dev/ptyXX");
-	    slavebuf[sizeof("/dev/pty")] = *cp;
-	    slavebuf[sizeof("/dev/ptyp")] = '0';
+	    slavebuf[sizeof("/dev/pty") - 1] = *cp;
+	    slavebuf[sizeof("/dev/ptyp") - 1] = '0';
 	    if (stat(slavebuf, &stb) < 0)
 		break;
 	    for (i = 0; i < 16; i++) {
@@ -121,7 +121,7 @@ long pty_getpty (fd, slave, slavelength)
 		if (*fd < 0) continue;
 
 		/* got pty */
-		slavebuf[strlen("/dev/")] = 't';
+		slavebuf[sizeof("/dev/") - 1] = 't';
 		if (strlen(slavebuf) > slavelength -1) {
 		    close(*fd);
 		    *fd = -1;
