@@ -36,6 +36,7 @@ typedef krb5_error_code (*pa_function)(krb5_context,
 				       krb5_pa_data *in_padata,
 				       krb5_pa_data **out_padata,
 				       krb5_data *salt,
+				       krb5_enctype *etype,
 				       krb5_keyblock *as_key,
 				       krb5_prompter_fct prompter_fct,
 				       void *prompter_data,
@@ -57,6 +58,7 @@ krb5_error_code pa_salt(krb5_context context,
 			krb5_pa_data *in_padata,
 			krb5_pa_data **out_padata,
 			krb5_data *salt,
+			krb5_enctype *etype,
 			krb5_keyblock *as_key,
 			krb5_prompter_fct prompter, void *prompter_data,
 			krb5_gic_get_as_key_fct gak_fct, void *gak_data)
@@ -92,6 +94,7 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
 				 krb5_pa_data *in_padata,
 				 krb5_pa_data **out_padata,
 				 krb5_data *salt,
+				 krb5_enctype *etype,
 				 krb5_keyblock *as_key,
 				 krb5_prompter_fct prompter,
 				 void *prompter_data,
@@ -105,8 +108,17 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     krb5_pa_data *pa;
    
     if (as_key->length == 0) {
+#ifdef DEBUG
+	fprintf (stderr, "%s:%d: salt len=%d", __FILE__, __LINE__,
+		 salt->length);
+	if (salt->length > 0)
+	    fprintf (stderr, " '%*s'", salt->length, salt->data);
+	fprintf (stderr, "; *etype=%d request->ktype[0]=%d\n",
+		 *etype, request->ktype[0]);
+#endif
        if (ret = ((*gak_fct)(context, request->client,
-			     request->ktype[0], prompter, prompter_data,
+			     *etype ? *etype : request->ktype[0],
+			     prompter, prompter_data,
 			     salt, as_key, gak_data)))
            return(ret);
     }
@@ -119,9 +131,20 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     if (ret = encode_krb5_pa_enc_ts(&pa_enc, &tmp))
 	return(ret);
 
+#ifdef DEBUG
+    fprintf (stderr, "key type %d bytes %02x %02x ...\n",
+	     as_key->enctype,
+	     as_key->contents[0], as_key->contents[1]);
+#endif
     ret = krb5_encrypt_helper(context, as_key,
 			      KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
 			      tmp, &enc_data);
+#ifdef DEBUG
+    fprintf (stderr, "enc data { type=%d kvno=%d data=%02x %02x ... }\n",
+	     enc_data.enctype, enc_data.kvno,
+	     0xff & enc_data.ciphertext.data[0],
+	     0xff & enc_data.ciphertext.data[1]);
+#endif
 
     krb5_free_data(context, tmp);
 
@@ -211,6 +234,7 @@ krb5_error_code pa_sam(krb5_context context,
 		       krb5_pa_data *in_padata,
 		       krb5_pa_data **out_padata,
 		       krb5_data *salt,
+		       krb5_enctype *etype,
 		       krb5_keyblock *as_key,
 		       krb5_prompter_fct prompter,
 		       void *prompter_data,
@@ -443,7 +467,7 @@ krb5_error_code
 krb5_do_preauth(krb5_context context,
 		krb5_kdc_req *request,
 		krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
-		krb5_data *salt,
+		krb5_data *salt, krb5_enctype *etype,
 		krb5_keyblock *as_key,
 		krb5_prompter_fct prompter, void *prompter_data,
 		krb5_gic_get_as_key_fct gak_fct, void *gak_data)
@@ -460,6 +484,17 @@ krb5_do_preauth(krb5_context context,
 	*out_padata = NULL;
 	return(0);
     }
+
+#ifdef DEBUG
+    fprintf (stderr, "salt len=%d", salt->length);
+    if (salt->length > 0)
+	fprintf (stderr, " '%*s'", salt->length, salt->data);
+    fprintf (stderr, "; preauth data types:");
+    for (i = 0; in_padata[i]; i++) {
+	fprintf (stderr, " %d", in_padata[i]->pa_type);
+    }
+    fprintf (stderr, "\n");
+#endif
 
     out_pa_list = NULL;
     out_pa_list_size = 0;
@@ -491,6 +526,17 @@ krb5_do_preauth(krb5_context context,
 		}
 		salt->data = (char *) etype_info[0]->salt;
 		salt->length = etype_info[0]->length;
+		*etype = etype_info[0]->etype;
+#ifdef DEBUG
+		for (j = 0; etype_info[j]; j++) {
+		    krb5_etype_info_entry *e = etype_info[j];
+		    fprintf (stderr, "etype info %d: etype %d salt len=%d",
+			     j, e->etype, e->length);
+		    if (e->length > 0)
+			fprintf (stderr, " '%*s'", e->length, e->salt);
+		    fprintf (stderr, "\n");
+		}
+#endif
 		break;
 	    case KRB5_PADATA_PW_SALT:
 	    case KRB5_PADATA_AFS3_SALT:
@@ -507,7 +553,7 @@ krb5_do_preauth(krb5_context context,
 
 		    if (ret = ((*pa_types[j].fct)(context, request,
 						  in_padata[i], &out_pa,
-						  salt, as_key,
+						  salt, etype, as_key,
 						  prompter, prompter_data,
 						  gak_fct, gak_data))) {
 			if (out_pa_list) {

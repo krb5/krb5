@@ -1,3 +1,19 @@
+2000-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (pa_function): Called function now takes new
+	krb5_enctype pointer argument.
+	(pa_salt, pa_sam): Accept new arg, ignore it.
+	(pa_enc_timestamp): Accept new arg.  If value pointed to is
+	nonzero, pass it to get-AS-key fn instead of first requested
+	enctype.  Added some debugging fprintf calls, conditionally
+	compiled.
+	(krb5_do_preauth): Accept new arg, and pass it through to the
+	specific preauth functions.  Added some debugging fprintf calls,
+	conditionally compiled.
+
+	* get_in_tkt.c (krb5_get_init_creds): Pass etype pointer to
+	krb5_do_preauth.
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* addr_comp.c, addr_order.c, addr_srch.c, bld_pr_ext.c,

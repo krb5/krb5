@@ -722,6 +722,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     krb5_error *err_reply;
     krb5_kdc_rep *local_as_reply;
     krb5_timestamp time_now;
+    krb5_enctype etype = 0;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -910,7 +911,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
 	if (ret = krb5_do_preauth(context, &request,
 				  padata, &request.padata,
-				  &salt, &as_key, prompter,
+				  &salt, &etype, &as_key, prompter,
 				  prompter_data, gak_fct, gak_data))
 	    goto cleanup;
 
@@ -955,7 +956,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
     if (ret = krb5_do_preauth(context, &request,
 			      local_as_reply->padata, &padata,
-			      &salt, &as_key, prompter,
+			      &salt, &etype, &as_key, prompter,
 			      prompter_data, gak_fct, gak_data))
 	goto cleanup;
 
