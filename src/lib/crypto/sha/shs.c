@@ -1,5 +1,5 @@
 #include <sys/types.h>
-#include <netinet/in.h>
+#include <string.h>
 #include "shs.h"
 
 /* The SHS f()-functions.  The f1 and f3 functions can be optimized to
@@ -48,10 +48,11 @@
    for this information */
 
 #ifdef NEW_SHS
-#define expand(W,i) ( W[ i & 15 ] = ROTL( 1, ( W[ i & 15 ] ^ W[ i - 14 & 15 ] ^ \
-                                                 W[ i - 8 & 15 ] ^ W[ i - 3 & 15 ] ) ) )
+#define expand(W,i) ( W[ i & 15 ] = ROTL( 1, ( W[ i & 15 ] ^ W[ (i - 14) & 15 ] ^ \
+                                                 W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )))
 #else
-#define expand(W,i) ( W[ i & 15 ] ^= W[ i - 14 & 15 ] ^ W[ i - 8 & 15 ] ^ W[ i - 3 & 15 ] )
+#define expand(W,i) ( W[ i & 15 ] ^= W[ (i - 14) & 15 ] ^ \
+		      W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )
 #endif /* NEW_SHS */
 
 /* The prototype SHS sub-round.  The fundamental sub-round is:
@@ -214,10 +215,12 @@ void longReverse( LONG *buffer, int byteCount )
 {
     LONG value;
     static int init = 0;
+    char *cp;
 
     switch (init) {
     case 0:
-	if (htonl(1) != 1) {
+	cp = (char *) &init;
+	if (*cp == 1) {
 	    init=2;
 	    break;
 	}
