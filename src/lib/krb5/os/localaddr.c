@@ -39,6 +39,7 @@ static char rcsid_getaddr_c[] =
 
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <net/if.h>
 #include <errno.h>
 
