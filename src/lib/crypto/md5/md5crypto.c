@@ -37,7 +37,7 @@ krb5_checksum FAR *outcksum;
     keyblock.contents = (krb5_octet *)seed;
     keyblock.keytype = KEYTYPE_DES;
 
-    if (retval = mit_des_process_key(&eblock, &keyblock))
+    if ((retval = mit_des_process_key(&eblock, &keyblock)))
 	return retval;
     /* now encrypt it */
     retval = mit_des_cbc_encrypt((mit_des_cblock *)&outtmp[0],
