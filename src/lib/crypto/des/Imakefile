@@ -58,47 +58,47 @@ EXT_LIB = $(TOP)/error_tables/krb5_err.o \
                   $(TOP)/error_tables/isode_err.o \
                   $(TOP)/lib/cryptoconf.o \
                   $(TOP)/lib/crc-32/libcrc32.a \
-                  libdes.a $(COMERRLIB)
+                  libdes.a $(OSLIB) $(COMERRLIB)
 
-NormalProgramTarget(verify, $(VERIFYOBJ), ,$(EXT_LIB),)
+NormalProgramTarget(verify,$(VERIFYOBJ),libdes.a,$(EXT_LIB),)
 
-NormalProgramTarget(destest, $(DESTESTOBJ), ,$(EXT_LIB),)
+NormalProgramTarget(destest,$(DESTESTOBJ),libdes.a,$(EXT_LIB),)
 
-NormalProgramTarget(make_e, make_e.o, misc.o, misc.o, )
+NormalProgramTarget(make_e,make_e.o,misc.o,misc.o,)
 
-NormalProgramTarget(make_fp, make_fp.o, misc.o, misc.o, )
+NormalProgramTarget(make_fp,make_fp.o,misc.o,misc.o,)
 
 fp.c: make_fp
 	./make_fp fp.c
 
-NormalProgramTarget(make_ip, make_ip.o, misc.o, misc.o, )
+NormalProgramTarget(make_ip,make_ip.o,misc.o,misc.o,)
 
 ip.c: make_ip
 	./make_ip ip.c
 
-NormalProgramTarget(make_kp,make_kp.o, misc.o, misc.o, )
+NormalProgramTarget(make_kp,make_kp.o,misc.o,misc.o,)
 
 key_perm.h: make_kp
 	./make_kp key_perm.h
 
-NormalProgramTarget(make_odd, make_odd.o, misc.o, misc.o, )
+NormalProgramTarget(make_odd,make_odd.o,misc.o,misc.o,)
 
 odd.h: make_odd
 	./make_odd odd.h
 
-NormalProgramTarget(make_p, make_p.o, misc.o, misc.o, )
+NormalProgramTarget(make_p,make_p.o,misc.o,misc.o,)
 
 p.c: make_p
 	./make_p p.c
 
-NormalProgramTarget(make_pt, make_pt.o, misc.o, misc.o, )
+NormalProgramTarget(make_pt,make_pt.o,misc.o,misc.o,)
 
 p_table.h: make_pt
 	./make_pt p_table.h
 
-NormalProgramTarget(make_s, make_s.o, misc.o, misc.o, )
+NormalProgramTarget(make_s,make_s.o,misc.o,misc.o,)
 
-NormalProgramTarget(make_st, make_st.o, misc.o, misc.o, )
+NormalProgramTarget(make_st,make_st.o,misc.o,misc.o,)
 
 s_table.h: make_st
 	./make_st s_table.h
