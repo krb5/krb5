@@ -1,3 +1,8 @@
+Tue Jun 20 14:32:46 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* main.c: HAS_GETUSERSHELL -> HAVE_GETUSERSHELL
+
+	* configure.in: add test for getusershell()
 
 Thu Jun 15 17:46:22 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and

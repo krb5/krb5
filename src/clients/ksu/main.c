@@ -702,7 +702,7 @@ char * dir_of_cc_source;
 		shell = _DEF_CSH;  /* default is cshell */   
     	}
 
-#ifdef HAS_GETUSERSHELL
+#ifdef HAVE_GETUSERSHELL
 
       /* insist that the target login uses a standard shell (root is omited) */ 
 
@@ -711,7 +711,7 @@ char * dir_of_cc_source;
 	       sweep_up(ksu_context, use_source_cache, cc_target);
 	       exit(1);
 	}
-#endif /* HAS_GETUSERSHELL */
+#endif /* HAVE_GETUSERSHELL */
 	
        if (target_pwd->pw_uid){
 	
@@ -847,7 +847,7 @@ char * dir_of_cc_source;
 	}
 }
 
-#ifdef HAS_GETUSERSHELL
+#ifdef HAVE_GETUSERSHELL
 
 int standard_shell(sh)
 char *sh;
@@ -861,7 +861,7 @@ char *getusershell();
 	 return (0);    
 }
 						  
-#endif /* HAS_GETUSERSHELL */
+#endif /* HAVE_GETUSERSHELL */
 
 char * ontty()
 {
