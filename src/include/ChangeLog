@@ -1,3 +1,10 @@
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+	* win-mac.h: Set up the macintosh build to use KerberosLogin.
+
 2000-03-25  Miro Jurisic  <meeroh@mit.edu>
 
 	* k5-int.h: Fixed protos for krb5_locate_srv_* (naddrs is int*)
