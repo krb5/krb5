@@ -8,7 +8,7 @@ AC_TYPE_UID_T
 HAS_ANSI_VOLATILE
 AC_HEADER_STDARG
 AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h)
-AC_CHECK_FUNCS(flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv setsid)
+AC_CHECK_FUNCS(flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv setsid gethostbyname2)
 AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon getuid sscanf syslog)
 KRB5_AC_REGEX_FUNCS
 dnl

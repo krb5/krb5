@@ -1,3 +1,7 @@
+2000-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for gethostbyname2.
+
 Tue Feb 22 10:20:57 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean-unix): Add clean-libobjs.
