@@ -67,7 +67,7 @@ dnl right thing happens.
 dnl
 if test -f $srcdir/$ac_reltopdir/util/autoconf/autoconf ; then
 	AUTOCONF=$ac_reltopdir/util/autoconf/autoconf
-	AUTOCONFFLAGS="--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf"
+	AUTOCONFFLAGS='--macrodir=$(CONFIG_RELTOPDIR)/util/autoconf'
 else
 	AUTOCONF=autoconf
 	AUTOCONFFLAGS=

@@ -1,3 +1,7 @@
+2000-11-01  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Quote AUTOCONFFLAGS properly.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: If the cache_file is /dev/null (autoconf 2.49),
