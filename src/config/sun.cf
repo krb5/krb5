@@ -46,3 +46,6 @@
 #define LintLibFlag		-o
 
 #define DesDefines		-DBIG -DMUSTALIGN -DMSBFIRST
+
+
+#define	UseSedHack
