@@ -53,7 +53,7 @@ char *argv[];
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
-    krb5_tkt_authent authd;
+    krb5_tkt_authent *authdat;
     krb5_principal server;
     char repbuf[BUFSIZ];
     char *cname;
@@ -138,17 +138,18 @@ char *argv[];
 	syslog(LOG_ERR, "read contents: %m");
 	exit(1);
     }
-    if (retval = krb5_rd_req_simple(&recv_data, server, &peeraddr, &authd)) {
+    if (retval = krb5_rd_req_simple(&recv_data, server, &peeraddr, &authdat)) {
 	syslog(LOG_ERR, "rd_req failed: %s", error_message(retval));
 	sprintf(repbuf, "RD_REQ failed: %s\n", error_message(retval));
 	goto sendreply;
     }
     xfree(recv_data.data);
 
-    if (retval = krb5_unparse_name(authd.ticket->enc_part2->client, &cname)) {
+    if (retval = krb5_unparse_name(authdat->ticket->enc_part2->client, &cname)) {
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
 	cname = "<unparse error>";
     }
+    krb5_free_tkt_authent(authdat);
     sprintf(repbuf, "You are %s\n", cname);
     if (!retval)
 	free(cname);
