@@ -1,3 +1,7 @@
+2003-05-04  Sam Hartman  <hartmans@mit.edu>
+
+	* chpass_util_strings.et: Replace reference to ovpasswd with kpasswd
+
 2003-04-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): Add aes256 to the default
