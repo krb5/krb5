@@ -1,3 +1,8 @@
+
+Wed May 03 20:10:39 1995  Chris Provenzano (proven@mit.edu)
+
+	* krcp.c (answer_auth()): Set auth_context = NULL before using it.
+
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 
         * krlogind.c, krshd.c: (krb5_compat_recvauth()): 

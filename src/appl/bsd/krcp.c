@@ -1310,7 +1310,7 @@ void
     krb5_creds creds, *new_creds;
     krb5_ccache cc;
     krb5_error_code status;
-    krb5_auth_context *auth_context;
+    krb5_auth_context *auth_context = NULL;
     extern krb5_flags krb5_kdc_default_options;
     
     
@@ -1353,8 +1353,8 @@ void
 	krb5_cc_destroy(bsd_context, cc);
 	exit(1);
     }
-    krb5_cc_destroy(bsd_context, cc);
     status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg);
+    krb5_cc_destroy(bsd_context, cc);
     krb5_xfree(msg.data);
     if (status){
 	exit(1);
