@@ -28,15 +28,15 @@ kprop: $(CLIENTOBJS) $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kprop $(CLIENTOBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
-	cp kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
-	cp kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
+	$(INSTALL_PROGRAM) kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
+	$(INSTALL_DATA) kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
 
 kpropd: $(SERVEROBJS) $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kpropd $(SERVEROBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
-	cp kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
-	cp kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
+	$(INSTALL_PROGRAM) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
+	$(INSTALL_DATA) kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
 
 clean::
 	$(RM) $(CLIENTOBJS) $(SERVEROBJS)

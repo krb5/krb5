@@ -1,3 +1,7 @@
+Wed Jul 20 00:10:30 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: autoconf'ing gss-sample
+
 Thu Jul 14 02:04:07 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in: suck in bsd now

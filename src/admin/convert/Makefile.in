@@ -25,8 +25,8 @@ kdb5_convert: kdb5_convert.o $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kdb5_convert kdb5_convert.o $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
-	cp kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
-	cp kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.8
+	$(INSTALL_PROGRAM) kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
+	$(INSTALL_DATA) kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.8
 
 clean::
 	$(RM) kdb5_convert kdb5_convert.o

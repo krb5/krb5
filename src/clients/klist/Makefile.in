@@ -20,5 +20,5 @@ clean::
 	$(RM) klist.o klist
 
 install::
-	cp klist ${DESTDIR}$(CLIENT_BINDIR)/klist
-	cp klist.M ${DESTDIR}$(CLIENT_MANDIR)/klist.1
+	$(INSTALL_PROGRAM) klist ${DESTDIR}$(CLIENT_BINDIR)/klist
+	$(INSTALL_DATA) klist.M ${DESTDIR}$(CLIENT_MANDIR)/klist.1

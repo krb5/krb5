@@ -19,7 +19,7 @@ sim_server.o:	$(srcdir)/sim_server.c
 all:: sim_server
 
 install::
-	cp sim_server $(DESTDIR)$(SERVER_BINDIR)/sim_server
+	$(INSTALL_PROGRAM) sim_server $(DESTDIR)$(SERVER_BINDIR)/sim_server
 
 
 clean::

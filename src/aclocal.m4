@@ -469,3 +469,72 @@ dnl allow for compilation with isode (yuck!)
 dnl
 define(ISODE_DEFS,
 [AC_ENABLE([isode],[ADD_DEF(KRB5_USE_ISODE)],)])dnl
+undefine([AC_PROG_INSTALL])dnl
+define(AC_PROG_INSTALL,
+[# Make sure to not get the incompatible SysV /etc/install and
+# /usr/sbin/install, which might be in PATH before a BSD-like install,
+# or the SunOS /usr/etc/install directory, or the AIX /bin/install,
+# or the AFS install, which mishandles nonexistent args, or
+# /usr/ucb/install on SVR4, which tries to use the nonexistent group
+# `staff', or /sbin/install on IRIX which has incompatible command-line
+# syntax.  Sigh.
+#
+#     On most BSDish systems install is in /usr/bin, not /usr/ucb
+#     anyway.
+# This turns out not to be true, so the mere pathname isn't an indication
+# of whether the program works.  What we really need is a set of tests for
+# the install program to see if it actually works in all the required ways.
+#
+# Avoid using ./install, which might have been erroneously created
+# by make from ./install.sh.
+if test -z "${INSTALL}"; then
+  AC_CHECKING(for a BSD compatible install)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    case "$ac_dir" in
+    ''|.|/etc|/sbin|/usr/sbin|/usr/etc|/usr/afsws/bin|/usr/ucb) ;;
+    *)
+      # OSF1 and SCO ODT 3.0 have their own names for install.
+      for ac_prog in installbsd scoinst install; do
+        if test -f $ac_dir/$ac_prog; then
+	  if test $ac_prog = install &&
+            grep dspmsg $ac_dir/$ac_prog >/dev/null 2>&1; then
+	    # AIX install.  It has an incompatible calling convention.
+	    # OSF/1 installbsd also uses dspmsg, but is usable.
+	    :
+	  else
+	    INSTALL="$ac_dir/$ac_prog -c"
+	    break 2
+	  fi
+	fi
+      done
+      ;;
+    esac
+  done
+  IFS="$ac_save_ifs"
+fi
+
+if test -z "$INSTALL"; then
+  # As a last resort, use the slow shell script.
+  for ac_dir in ${srcdir} ${srcdir}/.. ${srcdir}/../.. ${srcdir}/AC_TOPDIR/util/autoconf; do
+    if test -f $ac_dir/install.sh; then
+      INSTALL="$ac_dir/install.sh -c"; break
+    fi
+  done
+fi
+if test -z "$INSTALL"; then
+  AC_ERROR([can not find install.sh in ${srcdir} or ${srcdir}/.. or ${srcdir}/../.. ${srcdir}/AC_TOPDIR/util/autoconf])
+fi
+AC_SUBST(INSTALL)dnl
+AC_VERBOSE(setting INSTALL to $INSTALL)
+
+# Use test -z because SunOS4 sh mishandles ${INSTALL_PROGRAM-'${INSTALL}'}.
+# It thinks the first close brace ends the variable substitution.
+test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
+AC_SUBST(INSTALL_PROGRAM)dnl
+AC_VERBOSE(setting INSTALL_PROGRAM to $INSTALL_PROGRAM)
+
+test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
+AC_SUBST(INSTALL_DATA)dnl
+AC_VERBOSE(setting INSTALL_DATA to $INSTALL_DATA)
+])dnl

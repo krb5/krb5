@@ -17,34 +17,34 @@ rsh: krsh.o kcmd.o forward.o
 	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(KLIB) $(LIBS)
 
 install::
-	cp rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
+	$(INSTALL_PROGRAM) rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
 
 rcp: krcp.o kcmd.o forward.o
 	$(CC) $(CFLAGS) -o rcp krcp.o kcmd.o forward.o $(KLIB) $(LIBS)
 
 install::
-	cp rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
+	$(INSTALL_PROGRAM) rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
 
 rlogin: krlogin.o kcmd.o forward.o
 	$(CC) $(CFLAGS) -o rlogin krlogin.o kcmd.o forward.o $(KLIB) $(LIBS)
 
 install::
-	cp rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
+	$(INSTALL_PROGRAM) rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
 
 krshd: krshd.o kcmd.o logutil.o forward.o
 	$(CC) $(CFLAGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(KLIB) $(K4LIB) $(LIBS)
 
 install::
-	cp krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
+	$(INSTALL_PROGRAM) krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
 
 krlogind: krlogind.o logutil.o kcmd.o forward.o
 	$(CC) $(CFLAGS) -o krlogind krlogind.o logutil.o kcmd.o forward.o $(KLIB) $(K4LIB) $(LIBS)
 
 install::
-	cp krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
+	$(INSTALL_PROGRAM) krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
 
 login.krb5: login.o logutil.o $(SETENVOBJ)
 	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(KLIB) $(LIBS)
 
 install::
-	cp login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
+	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5

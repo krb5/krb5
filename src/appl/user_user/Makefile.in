@@ -28,8 +28,8 @@ server.o:	$(srcdir)/server.c
 all:: uuserver
 
 install::
-	cp uuclient $(DESTDIR)$(CLIENT_BINDIR)/uuclient
-	cp uuserver $(DESTDIR)$(SERVER_BINDIR)/uusrever
+	$(INSTALL_PROGRAM) uuclient $(DESTDIR)$(CLIENT_BINDIR)/uuclient
+	$(INSTALL_PROGRAM) uuserver $(DESTDIR)$(SERVER_BINDIR)/uusrever
 
 clean::
 	$(RM) server.o uuserver

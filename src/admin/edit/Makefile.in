@@ -24,8 +24,8 @@ kdb5_edit: kdb5_edit.o $(DEPLIBS) $(OBJS)
 	$(CC) $(CFLAGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
-	cp kdb5_edit ${DESTDIR}$(ADMIN_BINDIR)/kdb5_edit
-	cp kdb5_edit.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_edit.8
+	$(INSTALL_PROGRAM) kdb5_edit ${DESTDIR}$(ADMIN_BINDIR)/kdb5_edit
+	$(INSTALL_DATA) kdb5_edit.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_edit.8
 
 # needed until we run makedepend
 kdb5_ed_ct.c: kdb5_ed_ct.ct

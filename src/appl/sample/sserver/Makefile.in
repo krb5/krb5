@@ -21,5 +21,5 @@ clean::
 	$(RM) sserver.o sserver
 
 install::
-	cp sserver ${DESTDIR}$(SERVER_BINDIR)/sserver
-	cp sserver.M ${DESTDIR}$(SERVER_MANDIR)/sserver.8
+	$(INSTALL_PROGRAM) sserver ${DESTDIR}$(SERVER_BINDIR)/sserver
+	$(INSTALL_DATA) sserver.M ${DESTDIR}$(SERVER_MANDIR)/sserver.8
