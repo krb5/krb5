@@ -1,3 +1,21 @@
+2001-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (prog): New variable.
+	(main): Set it, and use it when printing error messages.  When
+	reinitializing v4 ticket file, reject case where client and server
+	realms are different.  Print krb4 errors properly.
+
+	* conv_princ.c (krb524_convert_princs): Accept new arg SREALM,
+	passed through to krb5_524_conv_principal.
+	* krb524.h (krb524_convert_princs): Update prototype.
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Pass extra arg.
+	Reject tickets with transited realms for simplicity.
+	* conv_creds.c (krb524_convert_creds_plain): Pass extra arg.  Use
+	the server realm instead of the client realm.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Permit non-CRC DES
+	enctypes; patch from Assar Westerlund.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c, encode.c, krb524.h, test.c: Always use prototypes,

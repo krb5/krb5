@@ -59,7 +59,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      struct sockaddr_in *saddr;
 {
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
-     char sname[ANAME_SZ], sinst[INST_SZ];
+     char sname[ANAME_SZ], sinst[INST_SZ], srealm[REALM_SZ];
      krb5_enc_tkt_part *v5etkt;
      int ret, lifetime, v4endtime;
      krb5_timestamp server_time;
@@ -72,15 +72,36 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      }
      v5etkt = v5tkt->enc_part2;
 
+     if (v5etkt->transited.tr_contents.length != 0) {
+	 /* Some intermediate realms transited -- do we accept them?
+
+	    Simple answer: No.
+
+	    More complicated answer: Check our local config file to
+	    see if the path is correct, and base the answer on that.
+	    This denies the krb4 application server any ability to do
+	    its own validation as krb5 servers can.
+
+	    Fast answer: Not right now.  */
+	  krb5_free_enc_tkt_part(context, v5etkt);
+	  v5tkt->enc_part2 = NULL;
+	  return KRB5KRB_AP_ERR_ILL_CR_TKT;
+     }
+     /* We could also encounter a case where luser@R1 gets a ticket
+	for krbtgt/R3@R2, and then tries to convert it.  But the
+	converted ticket would be one the v4 KDC code should reject
+	anyways.  So we don't need to worry about it here.  */
+
      if ((ret = krb524_convert_princs(context, v5etkt->client, v5tkt->server,
 				     pname, pinst, prealm, sname,
-				     sinst))) {
+				     sinst, srealm))) {
 	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
 	  return ret;
      }
-     
-     if (v5etkt->session->enctype != ENCTYPE_DES_CBC_CRC ||
+     if ((v5etkt->session->enctype != ENCTYPE_DES_CBC_CRC &&
+	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD4 &&
+	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD5) ||
 	 v5etkt->session->length != sizeof(C_Block)) {
 	  if (krb524_debug)
 	       fprintf(stderr, "v5 session keyblock type %d length %d != C_Block size %d\n",

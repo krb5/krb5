@@ -38,9 +38,9 @@ int krb524_convert_tkt_skey
 /* conv_princ.c */
 
 int krb524_convert_princs
-	(krb5_context context, krb5_principal client, 
-		   krb5_principal server, char *pname, 
-		   char *pinst, char *prealm, char *sname, char *sinst);
+	(krb5_context context, krb5_principal client, krb5_principal server,
+	 char *pname, char *pinst, char *prealm,
+	 char *sname, char *sinst, char *srealm);
 
 /* conv_creds.c */
 

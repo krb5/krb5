@@ -25,17 +25,16 @@
 #include "krb524.h"
 
 int krb524_convert_princs(context, client, server, pname, pinst, prealm, 
-			  sname, sinst)
+			  sname, sinst, srealm)
      krb5_context context;
      krb5_principal client, server;
-     char *pname, *pinst, *prealm, *sname, *sinst;
+     char *pname, *pinst, *prealm, *sname, *sinst, *srealm;
 {
-     char dummy[REALM_SZ];
      int ret;
      
      if ((ret = krb5_524_conv_principal(context, client, pname, pinst, 
 					prealm)))
 	  return ret;
      
-     return krb5_524_conv_principal(context, server, sname, sinst, dummy);
+     return krb5_524_conv_principal(context, server, sname, sinst, srealm);
 }

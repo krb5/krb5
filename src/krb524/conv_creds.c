@@ -128,14 +128,14 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
 #endif
      int ret;
      krb5_timestamp endtime;
-     
+     char dummy[REALM_SZ];
      memset((char *) v4creds, 0, sizeof(CREDENTIALS));
 
      if ((ret = krb524_convert_princs(context, v5creds->client, 
 				      v5creds->server,
 				      v4creds->pname, v4creds->pinst,
-				      v4creds->realm, v4creds->service,
-				      v4creds->instance)))
+				      dummy, v4creds->service,
+				      v4creds->instance, v4creds->realm)))
 	  return ret;
 
      /* Check enctype too */
