@@ -64,7 +64,7 @@ pty_open_ctty (slave, fd)
 #endif
 
 #ifdef TIOCSCTTY
-    ioctl(*fd, TIOCSTTY, 0); /* Don't check return.*/
+    ioctl(*fd, TIOCSCTTY, 0); /* Don't check return.*/
 #endif /* TIOCSTTY */
 
     testfd = open("/dev/tty", O_RDWR|O_NDELAY);

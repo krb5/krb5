@@ -1,0 +1,5 @@
+Tue Aug  1 12:06:14 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* open_ctty.c (pty_open_ctty): Fixed typo TIOCSTTY to TIOCSCTTY.
+
+
