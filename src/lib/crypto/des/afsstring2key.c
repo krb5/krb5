@@ -28,7 +28,7 @@ mit_afs_string_to_key (keyblock, data, salt)
     register krb5_octet *key = keyblock->contents;
 
     if (data->length <= 8) {
-      char password[9];		/* trailing null for crypt() */
+      char password[9];		/* trailing nul for crypt() */
       strncpy(password, realm, 8);
       for (i=0; i<8; i++)
 	if (isupper(password[i]))
@@ -38,6 +38,7 @@ mit_afs_string_to_key (keyblock, data, salt)
       for (i=0; i<8; i++)
 	if (password[i] == '\0')
 	  password[i] = 'X';
+      password[8] = '\0';
       strncpy(key, (char *) afs_crypt(password, "#~") + 2, 8);
       for (i=0; i<8; i++)
 	key[i] <<= 1;
