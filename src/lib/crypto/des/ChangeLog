@@ -1,3 +1,7 @@
+2001-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* string2key.c (mit_des_string_to_key_int): Undo last change.
+
 2001-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* destest.c (value): Now signed int, since some entries are
