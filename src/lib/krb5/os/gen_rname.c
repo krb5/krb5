@@ -48,11 +48,11 @@ char **string;
 
     tmp = inet_ntoa(inaddr);
     tmp2 = malloc(strlen(uniq)+strlen(tmp)+1+1+5); /* 1 for NUL,
-						      1 for /,
+						      1 for ,,
 						      5 for digits (65535 is max) */
     if (!tmp2)
 	return ENOMEM;
-    (void) sprintf(tmp2, "%s%s/%u",uniq,tmp,ntohs(port));
+    (void) sprintf(tmp2, "%s%s,%u",uniq,tmp,ntohs(port));
     *string = tmp2;
     return 0;
 #else
