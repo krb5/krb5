@@ -71,6 +71,7 @@ OLDDECLARG(krb5_kdc_rep **, dec_rep)
     }
 
     if (local_dec_rep->etype != etype) {
+	krb5_free_kdc_rep(local_dec_rep);
 	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
     }
     if (retval = krb5_kdc_rep_decrypt_proc(key, 0, local_dec_rep)) {
