@@ -1,3 +1,53 @@
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Renamed from krb5_init_context, now
+	static.  New argument SECURE provides initialization of
+	profile_secure field.
+	(krb5_init_context): Call it.
+	(krb5_init_secure_context): New function.
+
+	* in_tkt_ktb.c (keytab_keyproc): Now static.
+	* in_tkt_pwd.c (pwd_keyproc): Now static.
+	* in_tkt_sky.c (skey_keyproc): Now static.
+
+	* preauth2.c (krb5_do_preauth): Fix syntax in switch statement.
+	Cast padata contents pointer to avoid warning.
+	(pa_types): Now static.
+
+	* str_conv.c (krb5_deltat_to_string): Always write to a local
+	temporary buffer that's guaranteed to be large enough, then see if
+	the supplied output buffer is big enough.
+	(krb5_string_to_deltat): Deleted.
+	* x-deltat.y, deltat.c: New files.
+	* Makefile.in (deltat.c): Add rule for building from x-deltat.y,
+	but comment out dependencies for easier maintenance.
+	(BISON, BISONFLAGS): New variables.
+
+	* str_conv.c: Removed most static char arrays, substituting the
+	values in place.
+	(krb5_string_to_timestamp): Move atime_format_table inside here.
+	(krb5_timestamp_to_sfstring): Move sftime_format_table inside
+	here.
+
+	* str_conv.c: If strftime or strptime are not available, include
+	the renamed NetBSD versions, and define the function names as
+	macros to map them to the replacement names.
+	(__P, _CurrentTimeLocale, dummy_locale_info, TM_YEAR_BASE,
+	DAYSPERLYEAR, DAYSPERNYEAR, DAYSPERWEEK, isleap, tzname, tzset):
+	Define some dummies for strftime/strptime to use.
+	(strptime): Deleted old stub version.
+	(krb5_timestamp_to_string, krb5_timestamp_to_sfstring): Always
+	assume strftime is available.
+	(krb5_string_to_timestamp): Assume strptime is always available.
+	* strftime.c, strptime.c: New files, based on NetBSD versions.
+	Modified to rename the functions and not export any symbols.
+
+	* Makefile.in (T_DELTAT_OBJS): New variable.
+	(TEST_PROGS): Add t_deltat.
+	(t_deltat): Add rule.
+	(clean): Added t_deltat stuff.  Run rm only once.
+	* t_deltat.c: New file.
+
 1999-11-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_ref_kerb.out: Fix expected zephyr/zephyr output.
@@ -14,10 +64,6 @@
 	* conv_princ.c (sconv_list): Don't do conversion for "zephyr"
 	principal.  (Noticed by Derrick Brashear.)  Delete about a dozen
 	duplicate entries.
-
-	* str_conv.c (dt_output_donly, dt_output_dhms, dt_output_hms,
-	sftime_default_fmt): Replace char arrays with macros, so gcc can
-	do better format-string checking.
 
 1999-09-01  Ken Raeburn  <raeburn@mit.edu>
 

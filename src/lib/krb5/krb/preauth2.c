@@ -375,7 +375,7 @@ krb5_error_code pa_sam(krb5_context context,
     return(0);
 }
 
-pa_types_t pa_types[] = {
+static pa_types_t pa_types[] = {
     {
 	KRB5_PADATA_PW_SALT,
 	pa_salt,
@@ -414,6 +414,8 @@ krb5_do_preauth(krb5_context context,
 {
     int h, i, j, out_pa_list_size;
     krb5_pa_data *out_pa, **out_pa_list;
+    krb5_data scratch;
+    krb5_etype_info etype_info = NULL;
     krb5_error_code ret;
     static int paorder[] = { PA_INFO, PA_REAL };
     int realdone;
@@ -431,6 +433,37 @@ krb5_do_preauth(krb5_context context,
     for (h=0; h<(sizeof(paorder)/sizeof(paorder[0])); h++) {
 	realdone = 0;
 	for (i=0; in_padata[i] && !realdone; i++) {
+	    /*
+	     * This is really gross, but is necessary to prevent
+	     * lossge when talking to a 1.0.x KDC, which returns an
+	     * erroneous PA-PW-SALT when it returns a KRB-ERROR
+	     * requiring additional preauth.
+	     */
+	    switch (in_padata[i]->pa_type) {
+	    case KRB5_PADATA_ETYPE_INFO:
+		if (etype_info)
+		    continue;
+		scratch.length = in_padata[i]->length;
+		scratch.data = (char *) in_padata[i]->contents;
+		ret = decode_krb5_etype_info(&scratch, &etype_info);
+		if (ret) {
+		    if (out_pa_list) {
+			out_pa_list[out_pa_list_size++] = NULL;
+			krb5_free_pa_data(context, out_pa_list);
+		    }
+		    return ret;
+		}
+		salt->data = (char *) etype_info[0]->salt;
+		salt->length = etype_info[0]->length;
+		break;
+	    case KRB5_PADATA_PW_SALT:
+	    case KRB5_PADATA_AFS3_SALT:
+		if (etype_info)
+		    continue;
+		break;
+	    default:
+		;
+	    }
 	    for (j=0; pa_types[j].type >= 0; j++) {
 		if ((in_padata[i]->pa_type == pa_types[j].type) &&
 		    (pa_types[j].flags & paorder[h])) {
@@ -445,6 +478,8 @@ krb5_do_preauth(krb5_context context,
 			    out_pa_list[out_pa_list_size++] = NULL;
 			    krb5_free_pa_data(context, out_pa_list);
 			}
+			if (etype_info)
+			    krb5_free_etype_info(context, etype_info);
 			return(ret);
 		    }
 
