@@ -754,13 +754,11 @@ static struct togglelist Togglelist[] = {
 	    0,
 		&showoptions,
 		    "show option processing" },
-#if	defined(unix)
     { "termdata",
 	"(debugging) toggle printing of hexadecimal terminal data",
 	    0,
 		&termdata,
 		    "print hexadecimal representation of terminal traffic" },
-#endif	/* defined(unix) */
     { "?",
 	0,
 	    togglehelp },

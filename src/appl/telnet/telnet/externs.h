@@ -138,13 +138,11 @@ extern int
     crmod,
     netdata,		/* Print out network data flow */
     prettydump,		/* Print "netdata" output in user readable format */
-#if	defined(unix)
 #if	defined(TN3270)
     cursesdata,		/* Print out curses data flow */
     apitrace,		/* Trace API transactions */
 #endif	/* defined(TN3270) */
     termdata,		/* Print out terminal data flow */
-#endif	/* defined(unix) */
     debug;			/* Debug level */
 
 extern cc_t escape;	/* Escape to command mode */

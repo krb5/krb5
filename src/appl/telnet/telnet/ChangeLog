@@ -1,3 +1,8 @@
+Tue Aug 16 18:07:54 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* externs.h: don't hide termdata under defined(unix).
+	* commands.c: ditto.
+
 Tue Aug 16 18:00:48 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: use AC_VFORK (runtime test -- consider just using
