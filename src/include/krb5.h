@@ -44,7 +44,7 @@ typedef struct _krb5_auth_context krb5_auth_context;
 
 #include "encryption.h"
 #include "fieldbits.h"
-#include "errors.h"
+#include "k5-errors.h"
 #include "proto.h"
 #include "macros.h"
 #include "error_def.h"

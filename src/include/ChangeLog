@@ -1,3 +1,9 @@
+Tue Mar 28 18:12:32 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (KRB5_HEADERS, install):  `Make install' now works.
+	* configure.in (WITH_KRB5ROOT):  For `make install'.
+	* krb5.h:  Include "k5-errors.h" rather than "errors.h".
+
 Fri Mar 17 19:10:41 1995  John Gilmore  (gnu at toad.com)
 
 	* krb5.h:  Move <sys/types> and u_long (etc) code to krb5/k5-config.h.

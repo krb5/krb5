@@ -1,6 +1,7 @@
 AC_INIT(configure.in)
 AC_SET_BUILDTOP
 WITH_CCOPTS
+WITH_KRB5ROOT
 CONFIG_DIRS(krb5 kerberosIV)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
