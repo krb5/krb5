@@ -124,10 +124,12 @@ clean::									@@\
 #ifndef RanlibLibraryTarget
 #define	RanlibLibraryTarget(libname)					@@\
 AllTarget(lib/**/libname.a)						@@\
-lib/**/libname.a:: foo/**/libname					@@\
-	$(RANLIB) lib/**/libname.a					@@\
+foo2/**/libname: foo/**/libname						@@\
+	$(TOUCH) $@							@@\
+lib/**/libname.a: foo2/**/libname					@@\
+	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM_CMD) foo/**/libname lib/**/libname.a
+	$(RM_CMD) foo/**/libname foo2/**/libname lib/**/libname.a
 #endif
 
 /*
