@@ -1130,9 +1130,9 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 20 & No & Yes & CHANGEPW & all fail \\
 40 & No & No & ADMIN & all fail \\
 60 & No & No & CHANGEPW & all fail \\
-80 & Yes & Yes & ADMIN & all fail \\
+80 & Yes & Yes & ADMIN & 7 passes \\
 100 & Yes & Yes & CHANGEPW & all fail \\
-120 & Yes & No & ADMIN & all fail \\
+120 & Yes & No & ADMIN & 7 passes \\
 140 & Yes & No & CHANGEPW & all fail \\
 \end{tabular}
 
@@ -1245,12 +1245,29 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 \numtest{180}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
 	other's password.}
+\Status{Implemented}	
 }
 
 \numtest{180.5}{
 \Priority{High}
 \Reason{Succeeds for user with ``modify'' but not ``get'' access, on
 	other's password.}
+\Conditions{RPC}
+\Status{Implemented}	
+}
+\numtest{180.625}{
+\Priority{High}
+\Reason{Fails for user with modify when connecting with CHANGEPW_SERVICE on
+	others password}
+\Conditions{RPC}
+\Status{Implemented}
+}
+\numtest{180.75}{
+\Priority{High}
+\Reason{Fails for user with modify when connecting with CHANGEPW_SERVICE
+	on other's password which has expired}
+\Conditions{RPC}
+\Status{Implemented}
 }
 
 %\numtest{181}{
@@ -1258,8 +1275,11 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 %	if override_qual is true.}
 %\Expected{Returns CANNOT_OVERRIDE.}
 %}
-
-
+\numtest{182}{
+\Priority{High}
+\Reason{Can not change key of ovsec_adm/history principal.}
+\Status{Implemented}
+}
 \section{ovsec_kadm_chpass_principal_util}
 
 Rerun all the tests listed for ovsec_kadm_chpass_principal above in
@@ -1307,15 +1327,15 @@ run of the test.
 \subsubsection{List of parameter settings}
 
 \begin{tabular}{llllll}
-Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
-1 & No & Yes & ADMIN & fail \\
-3 & No & Yes & CHANGEPW & fail \\
+Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hline
+1 & No & Yes & ADMIN & fail & Yes \\
+3 & No & Yes & CHANGEPW & fail & Yes \\
 5 & No & No & ADMIN & fail \\
 7 & No & No & CHANGEPW & fail \\
-9 & Yes & Yes & ADMIN & fail \\
+9 & Yes & Yes & ADMIN & pass \\
 11 & Yes & Yes & CHANGEPW & fail \\
-13 & Yes & No & ADMIN & fail \\
-15 & Yes & No & CHANGEPW & fail \\
+13 & Yes & No & ADMIN & pass & Yes \\
+15 & Yes & No & CHANGEPW & fail & Yes \\
 \end{tabular}
 
 \subsection{Other tests}
@@ -1379,12 +1399,21 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 \numtest{28}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
 	other's password.}
+\Status{Implemented}
+}
+\numtest{28.25}{
+\Priority{High}
+\Reason{Fails for user with get and modify access on others password
+	When conneceted with CHANGEPW_SERVICE}
+\Status{Implemented}
 }
 
 \numtest{28.5}{
 \Priority{High}
 \Reason{Succeeds for user with ``modify'' but not ``get'' access, on
 	other's password.}
+\Status{Implemented}
+	
 }
 
 \numtest{29}{
@@ -1392,6 +1421,18 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 	to test this.}
 }
 
+\numtest{30}{
+\Reason{Succeeds for own key, no other access bits when connecting with CHANGEPW service}
+\Status{Implemented}
+}
+\numtest{31}{
+\Reason{Succeeds for own key, no other access bits when connecting with ADMIM service}
+\Status{Implemented}
+}
+\numtest{32}{
+\Reason{Cannot change ovsec_adm/history key}
+\Status{Implemented}
+}
 
 
 \section{ovsec_kadm_get_principal}
