@@ -384,7 +384,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	 	return(retval);
 
 	    key_salt.data = *saltdata;
-	    key_salt.data.length = -1; /*length actually used below...*/
+	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
 	    krb5_xfree(saltdata);
 #else
 	    /* Why do we do this? Well, the afs_mit_string_to_key needs to
@@ -396,7 +396,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	    memcpy((char *)key_salt.data.data,
 		   (char *)(*krb5_princ_realm(context,db_entry->princ)).data,
 		   slen);
-	    key_salt.data.length = -1; /*length actually used below...*/
+	    key_salt.data.length = SALT_TYPE_AFS_LENGTH; /*length actually used below...*/
 #endif
 
 	}
@@ -408,6 +408,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
 
+	/* AFS string to key will happen here */
 	if ((retval = krb5_c_string_to_key(context, ks_tuple[i].ks_enctype,
 					   &pwd, &key_salt.data, &key))) {
 	     if (key_salt.data.data)
@@ -415,7 +416,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	     return(retval);
 	}
 
-	if (key_salt.data.length == -1)
+	if (key_salt.data.length == SALT_TYPE_AFS_LENGTH)
 	    key_salt.data.length = 
 	      krb5_princ_realm(context, db_entry->princ)->length;
 

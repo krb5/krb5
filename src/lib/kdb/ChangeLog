@@ -1,4 +1,11 @@
-2000-09-20  Ezra Peisach  <epeisach@engrailed.mit.edu>
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* fetch_mkey.c: Signed/unsigned int cleanup. 
+
+	* kdb_cpw.c (add_key_pwd): Change salt data length of -1 to
+	SALT_TYPE_AFS_LENGTH.
+
+2000-09-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_free_contents): Clean up signedness warning.
 
