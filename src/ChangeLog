@@ -1,3 +1,8 @@
+Fri Apr 28 14:34:17 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (WITH_KRB4): put AC_CONST in, since we always end up
+	needing it.
+
 Fri Apr 28 13:28:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Also compile the kadmin.old directory, at least

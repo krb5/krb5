@@ -347,6 +347,7 @@ else
 fi
 AC_SUBST(KRB4_LIB)
 AC_SUBST(KDB4_LIB)
+AC_CONST
 ])dnl
 dnl
 dnl set $(CC) from --with-cc=value
