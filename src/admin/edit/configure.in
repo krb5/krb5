@@ -7,6 +7,7 @@ AC_PROG_YACC
 AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
 AC_HAVE_FUNCS(ftime timezone)
 AC_CONST
+AC_HEADER_STDC
 WITH_NETLIB
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)

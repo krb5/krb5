@@ -1,3 +1,8 @@
+Sun May  7 13:46:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_HEADER_STDC to define STDC_HEADERS for
+		getdate.y. 
+
 Mon May  1 13:36:41 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb5_edit.c (kdb5_edit_Init): Check the return code from
