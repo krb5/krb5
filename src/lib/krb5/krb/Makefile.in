@@ -101,7 +101,6 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	copy_princ.$(OBJEXT)	\
 	copy_tick.$(OBJEXT)	\
 	cp_key_cnt.$(OBJEXT)	\
-	crypto_glue.$(OBJEXT)	\
 	decode_kdc.$(OBJEXT)	\
 	decrypt_tk.$(OBJEXT)	\
 	encode_kdc.$(OBJEXT)	\
@@ -177,7 +176,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/copy_princ.c	\
 	$(srcdir)/copy_tick.c	\
 	$(srcdir)/cp_key_cnt.c	\
-	$(srcdir)/crypto_glue.c	\
 	$(srcdir)/decode_kdc.c	\
 	$(srcdir)/decrypt_tk.c	\
 	$(srcdir)/encode_kdc.c	\
