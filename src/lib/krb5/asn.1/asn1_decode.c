@@ -39,13 +39,15 @@
 
 #define setup()\
 asn1_error_code retval;\
-asn1_class asn1class;\
-asn1_construction construction;\
-asn1_tagnum tagnum;\
-unsigned int length
+taginfo tinfo
+
+#define asn1class	(tinfo.asn1class)
+#define construction	(tinfo.construction)
+#define tagnum		(tinfo.tagnum)
+#define length		(tinfo.length)
 
 #define tag(type)\
-retval = asn1_get_tag(buf,&asn1class,&construction,&tagnum,&length);\
+retval = asn1_get_tag_2(buf,&tinfo);\
 if(retval) return retval;\
 if(asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
   return ASN1_BAD_ID

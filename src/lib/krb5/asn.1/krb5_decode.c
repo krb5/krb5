@@ -64,28 +64,46 @@ if((var) == NULL) clean_return(ENOMEM)
 
 /* process encoding header ***************************************/
 /* decode tag and check that it == [APPLICATION tagnum] */
-#define check_apptag(tagexpect)\
-retval = asn1_get_tag(&buf,&asn1class,&construction,&tagnum,NULL);\
-if(retval) clean_return(retval);\
-if(asn1class != APPLICATION || construction != CONSTRUCTED) \
-   clean_return(ASN1_BAD_ID);\
-if(tagnum != (tagexpect)) clean_return(KRB5_BADMSGTYPE)
+#define check_apptag(tagexpect)						\
+{									\
+    taginfo t1;								\
+    retval = asn1_get_tag_2(&buf, &t1);					\
+    if (retval) clean_return (retval);					\
+    if (t1.asn1class != APPLICATION || t1.construction != CONSTRUCTED)	\
+	clean_return(ASN1_BAD_ID);					\
+    if (t1.tagnum != (tagexpect)) clean_return(KRB5_BADMSGTYPE);	\
+    asn1class = t1.asn1class;						\
+    construction = t1.construction;					\
+    tagnum = t1.tagnum;							\
+}
 
 
 
 /* process a structure *******************************************/
 
 /* decode an explicit tag and place the number in tagnum */
-#define next_tag()\
-retval = asn1_get_tag_indef(&subbuf,&asn1class,&construction,&tagnum,NULL,&indef);\
-if(retval) clean_return(retval)
+#define next_tag()				\
+{ taginfo t2;					\
+  retval = asn1_get_tag_2(&subbuf, &t2);	\
+  if(retval) clean_return(retval);		\
+  asn1class = t2.asn1class;			\
+  construction = t2.construction;		\
+  tagnum = t2.tagnum;				\
+  indef = t2.indef;				\
+}
 
 #define get_eoc()						\
-retval = asn1_get_tag_indef(&subbuf,&asn1class,&construction,	\
-			    &tagnum,NULL,&indef);		\
-if(retval) return retval;					\
-if(asn1class != UNIVERSAL || tagnum || indef)			\
-  return ASN1_MISSING_EOC
+{								\
+    taginfo t3;							\
+    retval = asn1_get_tag_2(&subbuf, &t3);			\
+    if (retval) return retval;					\
+    if (t3.asn1class != UNIVERSAL || t3.tagnum || t3.indef)	\
+        return ASN1_MISSING_EOC;				\
+    asn1class = t3.asn1class;					\
+    construction = t3.construction;				\
+    tagnum = t3.tagnum;						\
+    indef = t3.indef;						\
+}
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
@@ -306,14 +324,15 @@ error_out:
 
 krb5_error_code decode_krb5_enc_kdc_rep_part(const krb5_data *code, krb5_enc_kdc_rep_part **rep)
 {
-  setup_no_length();
+  taginfo t4;
+  setup_buf_only();
   alloc_field(*rep,krb5_enc_kdc_rep_part);
 
-  retval = asn1_get_tag(&buf,&asn1class,&construction,&tagnum,NULL);
-  if(retval) clean_return(retval);
-  if(asn1class != APPLICATION || construction != CONSTRUCTED) clean_return(ASN1_BAD_ID);
-  if(tagnum == 25) (*rep)->msg_type = KRB5_AS_REP;
-  else if(tagnum == 26) (*rep)->msg_type = KRB5_TGS_REP;
+  retval = asn1_get_tag_2(&buf, &t4);
+  if (retval) clean_return(retval);
+  if (t4.asn1class != APPLICATION || t4.construction != CONSTRUCTED) clean_return(ASN1_BAD_ID);
+  if (t4.tagnum == 25) (*rep)->msg_type = KRB5_AS_REP;
+  else if(t4.tagnum == 26) (*rep)->msg_type = KRB5_TGS_REP;
   else clean_return(KRB5_BADMSGTYPE);
 
   retval = asn1_decode_enc_kdc_rep_part(&buf,*rep);

@@ -1,3 +1,28 @@
+2003-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_get.c (asn1_get_tag): Deleted.
+	(asn1_get_tag_2): Renamed from asn1_get_tag_indef, now uses a
+	pointer to taginfo rather than a bunch of pointer args.
+	(asn1_get_id, asn1_get_length): Folded into asn1_get_tag_2.
+	(asn1_get_sequence): Call asn1_get_tag_2.
+	* asn1_get.h (taginfo): New structure.
+	(asn1_get_tag_indef, asn1_get_tag, asn1_get_id, asn1_get_length):
+	Declarations deleted.
+	(asn1_get_tag_2): Declare.
+	* asn1_decode.c (setup): Declare only a taginfo variable.
+	(asn1class, construction, tagnum, length): New macros.
+	(tag): Call asn1_get_tag_2.
+	* asn1_k_decode.c (next_tag, get_eoc, apptag, end_sequence_of,
+	end_sequence_of_no_tagvars, asn1_decode_krb5_flags): Call
+	asn1_get_tag_2; if no error, copy out values into scalar
+	variables.
+	(asn1_decode_ticket): Call asn1_get_tag_2.
+	* asn1buf.c (asn1buf_skiptail): Call asn1_get_tag_2.
+	* krb5_decode.c (check_apptag, next_tag, get_eoc): Call
+	asn1_get_tag_2; if no error, copy out values into scalar
+	variables.
+	(decode_krb5_enc_kdc_rep_part): Call asn1_get_tag_2.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

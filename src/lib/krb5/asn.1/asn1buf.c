@@ -111,12 +111,8 @@ asn1_error_code asn1buf_sync(asn1buf *buf, asn1buf *subbuf,
 asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const int indef)
 {
   asn1_error_code retval;
-  asn1_class asn1class;
-  asn1_construction construction;
-  asn1_tagnum tagnum;
-  unsigned int taglen;
+  taginfo t;
   int nestlevel;
-  int tagindef;
 
   nestlevel = 1 + indef;
   if (!indef) {
@@ -126,18 +122,17 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
       return ASN1_OVERRUN;
   }
   while (nestlevel > 0) {
-    retval = asn1_get_tag_indef(buf, &asn1class, &construction, &tagnum,
-				&taglen, &tagindef);
+    retval = asn1_get_tag_2(buf, &t);
     if (retval) return retval;
-    if (!tagindef) {
-      if (taglen <= buf->bound - buf->next + 1)
-	buf->next += taglen;
+    if (!t.indef) {
+      if (t.length <= buf->bound - buf->next + 1)
+	buf->next += t.length;
       else
 	return ASN1_OVERRUN;
     }
-    if (tagindef)
+    if (t.indef)
       nestlevel++;
-    if (asn1_is_eoc(asn1class, tagnum, tagindef))
+    if (asn1_is_eoc(t.asn1class, t.tagnum, t.indef))
       nestlevel--;		/* got an EOC encoding */
   }
   return 0;

@@ -40,29 +40,52 @@
 #define unused_var(x) if (0) { x = 0; x = x - x; }
 
 /* This is used for prefetch of next tag in sequence. */
-#define next_tag()							\
-  retval = asn1_get_tag_indef(&subbuf, &asn1class, &construction,	\
-			      &tagnum, &taglen, &indef);		\
-  if (retval) return retval;
+#define next_tag()								\
+{ taginfo t2;									\
+  retval = asn1_get_tag_2(&subbuf, &t2);					\
+  if (retval) return retval;							\
+  /* Copy out to match previous functionality, until better integrated.  */	\
+  asn1class = t2.asn1class;							\
+  construction = t2.construction;						\
+  tagnum = t2.tagnum;								\
+  taglen = t2.length;								\
+  indef = t2.indef;								\
+}
 
 /* Force check for EOC tag. */
-#define get_eoc()							\
-  retval = asn1_get_tag_indef(&subbuf, &asn1class, &construction,	\
-			      &tagnum, &taglen, &indef);		\
-  if (retval) return retval;						\
-  if (asn1class != UNIVERSAL || tagnum || indef)			\
-    return ASN1_MISSING_EOC
+#define get_eoc()									\
+    {											\
+	taginfo t3;									\
+	retval = asn1_get_tag_2(&subbuf, &t3);						\
+	if(retval) return retval;							\
+        if (t3.asn1class != UNIVERSAL || t3.tagnum || t3.indef)				\
+	    return ASN1_MISSING_EOC;							\
+        /* Copy out to match previous functionality, until better integrated.  */	\
+	asn1class = t3.asn1class;							\
+	construction = t3.construction;							\
+	tagnum = t3.tagnum;								\
+	taglen = t3.length;								\
+	indef = t3.indef;								\
+    }
 
 #define alloc_field(var, type)			\
   var = (type*)calloc(1, sizeof(type));		\
   if ((var) == NULL) return ENOMEM
 
 /* Fetch an expected APPLICATION class tag and verify. */
-#define apptag(tagexpect)						   \
-  retval = asn1_get_tag(buf, &asn1class, &construction, &tagnum, &applen); \
-  if (retval) return retval;						   \
-  if (asn1class != APPLICATION || construction != CONSTRUCTED ||	   \
-      tagnum != (tagexpect)) return ASN1_BAD_ID
+#define apptag(tagexpect)								\
+  {											\
+      taginfo t1;									\
+      retval = asn1_get_tag_2(buf, &t1);						\
+      if (retval) return retval;						   	\
+      if (t1.asn1class != APPLICATION || t1.construction != CONSTRUCTED ||	   	\
+	  t1.tagnum != (tagexpect)) return ASN1_BAD_ID;					\
+      /* Copy out to match previous functionality, until better integrated.  */		\
+      asn1class = t1.asn1class;								\
+      construction = t1.construction;							\
+      tagnum = t1.tagnum;								\
+      applen = t1.length;								\
+  }
 
 /**** normal fields ****/
 
@@ -211,12 +234,20 @@
  * Attempts to fetch an EOC tag, if any, and to sync over trailing
  * garbage, if any.
  */
-#define end_sequence_of(buf)						\
-  retval = asn1_get_tag_indef(&seqbuf, &asn1class, &construction,	\
-			      &tagnum, &taglen, &indef);		\
-  if (retval) return retval;						\
-  retval = asn1buf_sync(buf, &seqbuf, asn1class, tagnum,		\
-			length, indef, seqofindef);			\
+#define end_sequence_of(buf)							\
+  {										\
+      taginfo t4;								\
+      retval = asn1_get_tag_2(&seqbuf, &t4);					\
+      if (retval) return retval;						\
+      /* Copy out to match previous functionality, until better integrated.  */	\
+      asn1class = t4.asn1class;							\
+      construction = t4.construction;						\
+      tagnum = t4.tagnum;							\
+      taglen = t4.length;							\
+      indef = t4.indef;								\
+  }										\
+  retval = asn1buf_sync(buf, &seqbuf, asn1class, tagnum,			\
+			length, indef, seqofindef);				\
   if (retval) return retval;
 
 /*
@@ -225,12 +256,20 @@
  * Like end_sequence_of(), but uses the different (non-shadowing)
  * variable names.
  */
-#define end_sequence_of_no_tagvars(buf)				\
-  retval = asn1_get_tag_indef(&seqbuf, &eseqclass, &eseqconstr,	\
-			      &eseqnum, &eseqlen, &eseqindef);	\
-  if (retval) return retval;					\
-  retval = asn1buf_sync(buf, &seqbuf, eseqclass, eseqnum,	\
-			eseqlen, eseqindef, seqofindef);	\
+#define end_sequence_of_no_tagvars(buf)						\
+  {										\
+      taginfo t5;								\
+      retval = asn1_get_tag_2(&seqbuf, &t5);					\
+      if (retval) return retval;						\
+      /* Copy out to match previous functionality, until better integrated.  */	\
+      eseqclass = t5.asn1class;							\
+      eseqconstr = t5.construction;						\
+      eseqnum = t5.tagnum;							\
+      eseqlen = t5.length;							\
+      eseqindef = t5.indef;							\
+  }										\
+  retval = asn1buf_sync(buf, &seqbuf, eseqclass, eseqnum,			\
+			eseqlen, eseqindef, seqofindef);			\
   if (retval) return retval;
 
 #define cleanup()				\
@@ -374,16 +413,19 @@ asn1_error_code asn1_decode_encrypted_data(asn1buf *buf, krb5_enc_data *val)
 
 asn1_error_code asn1_decode_krb5_flags(asn1buf *buf, krb5_flags *val)
 {
-  setup();
+  asn1_error_code retval;
   asn1_octet unused, o;
+  taginfo t;
   int i;
   krb5_flags f=0;
-  unused_var(taglen);
+  unsigned int length;
 
-  retval = asn1_get_tag(buf,&asn1class,&construction,&tagnum,&length);
-  if(retval) return retval;
-  if(asn1class != UNIVERSAL || construction != PRIMITIVE ||
-     tagnum != ASN1_BITSTRING) return ASN1_BAD_ID;
+  retval = asn1_get_tag_2(buf, &t);
+  if (retval) return retval;
+  if (t.asn1class != UNIVERSAL || t.construction != PRIMITIVE ||
+      t.tagnum != ASN1_BITSTRING)
+      return ASN1_BAD_ID;
+  length = t.length;
 
   retval = asn1buf_remove_octet(buf,&unused); /* # of padding bits */
   if(retval) return retval;
@@ -472,9 +514,10 @@ asn1_error_code asn1_decode_ticket(asn1buf *buf, krb5_ticket *val)
     end_structure();
     val->magic = KV5M_TICKET;
   }
-  if(!applen) {
-    retval = asn1_get_tag(buf,&asn1class,&construction,&tagnum,NULL);
-    if (retval) return retval;
+  if (!applen) {
+      taginfo t;
+      retval = asn1_get_tag_2(buf, &t);
+      if (retval) return retval;
   }
   cleanup();
 }
