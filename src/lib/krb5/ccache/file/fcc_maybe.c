@@ -11,6 +11,11 @@
  * This file contains the source code for conditional open/close calls.
  */
 
+#if !defined(lint) && !defined(SABER)
+static char rcsid_fcc_maybe_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
 #include "fcc.h"
 #include <netinet/in.h>			/* XXX ip only? */
 
