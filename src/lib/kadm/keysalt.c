@@ -110,7 +110,8 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
     krb5_int32		*nksaltp;
 {
     krb5_error_code	kret;
-    char 		*kp, *sp, *ep, *tp;
+    char 		*kp, *sp, *ep;
+    char		sepchar, trailchar;
     krb5_keytype	ktype;
     krb5_int32		stype;
     krb5_key_salt_tuple	*savep;
@@ -133,16 +134,9 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	}
 
 	if (ep) {
-	    /* Fill in trailing whitespace of kp */
-	    tp = ep - 1;
-	    while (isspace(*tp) && (tp < kp)) {
-		*tp = '\0';
-		tp--;
-	    }
+	    trailchar = *ep;
 	    *ep = '\0';
 	    ep++;
-	    /* Skip trailing whitespace of ep */
-	    while (isspace(*ep) && (*ep)) ep++;
 	}
 	/*
 	 * kp points to something (hopefully) of the form:
@@ -159,6 +153,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 
 	if (sp) {
 	    /* Separate keytype from salttype */
+	    sepchar = *sp;
 	    *sp = '\0';
 	    sp++;
 	}
@@ -198,6 +193,10 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 		break;
 	    }
 	}
+	if (sp)
+	    sp[-1] = sepchar;
+	if (ep)
+	    ep[-1] = trailchar;
 	kp = ep;
     }
     return(kret);

@@ -1,4 +1,12 @@
 
+Mon Aug 7 17:38:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* keysalt.c(krb5_string_to_keysalt) - Don't do the silly whitespace
+		filling logic.  If the string has imbedded whitespace, then
+		it's just tough rocks.  Save replaced string separators and
+		terminators so that they string looks the same coming out as
+		going in.
+
+
 Fri Aug 4 16:21:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, keysalt.c - Add keysalt.c modules.
 
