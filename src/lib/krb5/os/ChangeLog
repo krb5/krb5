@@ -1,3 +1,31 @@
+1999-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_ustime.c (AbsoluteToSecsNanosecs): Fixed the UInt64 division
+	* c_ustime.c (krb5_crypto_us_timeofday): now returning the correct value
+
+1999-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_ustime.c (AbsoluteToSecsNanosecs): Fixed the UInt64 comparison
+
+1999-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* net_read.c, net_write.c: now setting errno on Mac too
+	
+1999-06-09  Miro Jurisic  <meeroh@mit.edu>
+
+	* c_ustime.c (krb5_crypto_us_timeofday, HaveAccurateTime,
+		AbsoluteToSecsNanosecs): Added support for microseconds or
+		better timers on the Mac when available
+
+	* c_ustime.c (krb5_crypto_us_timeofday): fixed usecs counting bug
+		(From Chas Williams)
+
+	* init_os_ctx.c (GetMacProfilePathname): removed hardcoded config file name
+		(From Chas Williams)
+	
+	* init_os_ctx.c (os_init_paths): added NRL config file name
+		(From Chas Williams)
+
 Tue Jun  8 15:26:21 1999  Alexandra Ellwood  <lxs@mit.edu>
 
 	* changepw.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO

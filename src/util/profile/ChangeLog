@@ -1,3 +1,9 @@
+1999-06-09 Miro Jurisic   <meeroh@mit.edu>
+
+	* prof_file.c (profile_update_file): if fopen fails and errno is 0, set
+	errno to ENOENT so that we can try multiple names for settings file
+	(From Chas Williams)
+
 Wed May 19 11:46:02 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add windows build rules for putting header files in

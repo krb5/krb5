@@ -80,7 +80,7 @@ OSErr		err;
 }
 
 char*
-GetMacProfilePathName(void)
+GetMacProfilePathName(Str255 filename)
 {
 short	vRefnum;
 long	parID;
@@ -89,7 +89,7 @@ FSSpec	krbSpec;
 char	pathbuf[255];
 
 	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
-	FSMakeFSSpec(vRefnum, parID, "\pkrb5.ini", &krbSpec);
+	FSMakeFSSpec(vRefnum, parID, filename, &krbSpec);
 	GetPathname(&krbSpec, &pathbuf);
 	return strdup(pathbuf);
 }
@@ -106,7 +106,9 @@ os_init_paths(ctx, secure)
 	krb5_error_code	retval = 0;
 	char *name = 0;
 
-#if defined(macintosh) || defined(_MSDOS) || defined(_WIN32)
+#if defined(macintosh)
+	const char *filenames[3];
+#elif defined(_MSDOS) || defined(_WIN32)
 	const char *filenames[2];
 #endif
 
@@ -132,7 +134,8 @@ os_init_paths(ctx, secure)
 
 #else /* _MSDOS || _WIN32 */
 #ifdef macintosh
-	filenames[0] = GetMacProfilePathName();
+	filenames[0] = GetMacProfilePathName("\pkrb Configuration");
+	filenames[0] = GetMacProfilePathName("\pkrb5.ini");
 	filenames[1] = 0;
 	retval = profile_init(filenames, &ctx->profile);
 #else

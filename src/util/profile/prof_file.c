@@ -130,7 +130,7 @@ errcode_t profile_update_file(prf)
 	if (f == NULL) {
 		retval = errno;
 		if (retval == 0)
-			retval = PROF_FAIL_OPEN;
+			retval = ENOENT;
 		return retval;
 	}
 	prf->upd_serial++;
