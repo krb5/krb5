@@ -8,17 +8,11 @@ MakeSubdirs($(SUBDIRS))
 NormalLibraryObjectRule()
 
 OBJS=	default.o \
-	destroy.o \
 	resolve.o \
-	init.o \
-	dir.o \
-	store.o
+	dir.o
 
 SRCS=	default.c \
-	destroy.c \
 	resolve.c \
-	init.c \
-	dir.c \
-	store.c
+	dir.c
 
 NormalLibraryTarget(cred,$(OBJS))
