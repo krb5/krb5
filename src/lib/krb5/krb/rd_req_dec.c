@@ -127,11 +127,13 @@ krb5_tkt_authent **authdat;
      * we ever have an error, we're responsible for freeing it.
      */
     if (!(tktauthent =
-	  (krb5_tkt_authent *) malloc(sizeof(krb5_tkt_authent)))) {
+	  (krb5_tkt_authent *) malloc(sizeof(*tktauthent)))) {
 	    retval = ENOMEM;
 	    goto cleanup;
     }
     
+    memset((char *)tktauthent, 0, sizeof(*tktauthent));
+
     if (retval = decrypt_authenticator(req, &tktauthent->authenticator))
 	goto cleanup;
     *authdat = NULL;		/* Set authdat to tktauthent when we finish */
