@@ -1,3 +1,8 @@
+1999-08-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Use multiple addresses, if
+	present, on Mac and Windows.
+
 1999-08-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_krbhst.c (krb5_get_krbhst): Fix double-indirection
