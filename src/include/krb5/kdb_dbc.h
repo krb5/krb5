@@ -77,13 +77,13 @@ typedef struct __krb5_db_context {
 } krb5_db_context;
 
 krb5_error_code krb5_ktkdb_resolve
-        KRB5_PROTOTYPE((krb5_context, krb5_db_context *, krb5_keytab *));
+        (krb5_context, krb5_db_context *, krb5_keytab *);
 
 krb5_error_code krb5_dbm_db_set_mkey
-        KRB5_PROTOTYPE((krb5_context,krb5_db_context *,krb5_encrypt_block *));
+        (krb5_context,krb5_db_context *,krb5_encrypt_block *);
 
 krb5_error_code krb5_dbm_db_get_mkey
-        KRB5_PROTOTYPE((krb5_context,krb5_db_context *,krb5_encrypt_block **));
+        (krb5_context,krb5_db_context *,krb5_encrypt_block **);
 
 #endif /* !defined(macintosh) && !defined(_MSDOS) */
 #endif /* KRB5_KDB5_DBM__ */

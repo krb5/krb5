@@ -63,60 +63,58 @@
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name 
-	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
+	(krb5_context, char * );
 krb5_error_code krb5_dbm_db_init 
-	KRB5_PROTOTYPE((krb5_context));
+	(krb5_context);
 krb5_error_code krb5_dbm_db_fini 
-	KRB5_PROTOTYPE((krb5_context));
+	(krb5_context);
 krb5_error_code krb5_dbm_db_get_age 
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   time_t * ));
+	(krb5_context,
+	 char *,
+	 time_t * );
 krb5_error_code krb5_dbm_db_create 
-	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
+	(krb5_context,
+	 char * );
 krb5_error_code krb5_dbm_db_destroy 
-	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
+	(krb5_context,
+	 char * );
 krb5_error_code krb5_dbm_db_rename 
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   char * ));
+	(krb5_context,
+	 char *,
+	 char * );
 krb5_error_code krb5_dbm_db_get_principal 
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const_principal,
-		   krb5_db_entry *,
-		   int *,
-		   krb5_boolean * ));
+	(krb5_context,
+	 krb5_const_principal,
+	 krb5_db_entry *,
+	 int *,
+	 krb5_boolean * );
 void krb5_dbm_db_free_principal 
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_db_entry *,
-		   int ));
+	(krb5_context,
+	 krb5_db_entry *,
+	 int );
 krb5_error_code krb5_dbm_db_delete_principal 
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const_principal,
-		   int * ));
+	(krb5_context,
+	 krb5_const_principal,
+	 int * );
 krb5_error_code krb5_dbm_db_put_principal 
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_db_entry *,
-		   int * ));
+	(krb5_context,
+	 krb5_db_entry *,
+	 int * );
 krb5_error_code krb5_dbm_db_iterate
-    	KRB5_PROTOTYPE((krb5_context,
-		   krb5_error_code (*) KRB5_PROTOTYPE((krb5_pointer,
-					          krb5_db_entry *)),
-	           krb5_pointer ));
+        (krb5_context,
+	 krb5_error_code (*) (krb5_pointer, krb5_db_entry *),
+	 krb5_pointer );
 krb5_error_code krb5_dbm_db_set_nonblocking 
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_boolean,
-		   krb5_boolean * ));
+	(krb5_context,
+	 krb5_boolean,
+	 krb5_boolean * );
 krb5_boolean krb5_dbm_db_set_lockmode
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_boolean ));
+	(krb5_context,
+	 krb5_boolean );
 krb5_error_code krb5_dbm_db_open_database 
-	KRB5_PROTOTYPE((krb5_context));
+	(krb5_context);
 krb5_error_code krb5_dbm_db_close_database 
-	KRB5_PROTOTYPE((krb5_context));
+	(krb5_context);
 
 #endif /* !defined(macintosh) && !defined(_MSDOS) && !defined(WIN32) */
 #endif /* KRB5_KDB5_DBM__ */

@@ -1,3 +1,8 @@
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_proto.h, kdb.h, kdb_dbc.h, kdb_dbm.h, kdb_kt.h: Make all
+	prototypes unconditional.
+
 2000-05-30  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in, osconf.h: Use bindir and sbindir from configure

@@ -35,8 +35,7 @@
 
 #include "kdb.h"
 
-krb5_error_code krb5_ktkdb_resolve
-        KRB5_PROTOTYPE((krb5_context, krb5_keytab *));
+krb5_error_code krb5_ktkdb_resolve (krb5_context, krb5_keytab *);
 
 #endif /* !defined(macintosh) && !defined(_MSDOS) */
 #endif /* KRB5_KDB5_DBM__ */

@@ -195,214 +195,134 @@ extern char *krb5_mkey_pwd_prompt2;
 	}
 
 /* libkdb.spec */
-krb5_error_code krb5_db_set_name
-	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
-krb5_error_code krb5_db_init
-	KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_db_fini
-	KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_db_get_age
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   time_t * ));
-krb5_error_code krb5_db_create
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   krb5_int32 ));
-krb5_error_code krb5_db_rename
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   char * ));
-krb5_error_code krb5_db_get_principal
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const_principal ,
-		   krb5_db_entry *,
-		   int *,
-		   krb5_boolean * ));
-void krb5_db_free_principal
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_db_entry *,
-		   int  ));
-krb5_error_code krb5_db_put_principal
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_db_entry *,
-		   int * ));
-krb5_error_code krb5_db_delete_principal
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_const_principal,
-		   int * ));
-krb5_error_code krb5_db_iterate
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_error_code (* ) KRB5_PROTOTYPE((krb5_pointer,
-						   krb5_db_entry *)),
-		   krb5_pointer ));
-krb5_error_code krb5_db_verify_master_key
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal, 
-		   krb5_keyblock *));
-krb5_error_code krb5_db_store_mkey 
-	KRB5_PROTOTYPE((krb5_context,
-		   char *,
-		   krb5_principal,
-		   krb5_keyblock *));
+krb5_error_code krb5_db_set_name (krb5_context, char * );
+krb5_error_code krb5_db_init (krb5_context);
+krb5_error_code krb5_db_fini (krb5_context);
+krb5_error_code krb5_db_get_age (krb5_context, char *, time_t * );
+krb5_error_code krb5_db_create (krb5_context, char *, krb5_int32 );
+krb5_error_code krb5_db_rename (krb5_context, char *, char * );
+krb5_error_code krb5_db_get_principal (krb5_context, krb5_const_principal ,
+				       krb5_db_entry *, int *,
+				       krb5_boolean * );
+void krb5_db_free_principal (krb5_context, krb5_db_entry *, int  );
+krb5_error_code krb5_db_put_principal (krb5_context, krb5_db_entry *, int * );
+krb5_error_code krb5_db_delete_principal (krb5_context, krb5_const_principal,
+					  int * );
+krb5_error_code krb5_db_iterate (krb5_context,
+				 krb5_error_code (* ) (krb5_pointer,
+						       krb5_db_entry *),
+				 krb5_pointer);
+krb5_error_code krb5_db_verify_master_key (krb5_context, krb5_principal, 
+					   krb5_keyblock *);
+krb5_error_code krb5_db_store_mkey (krb5_context, char *, krb5_principal,
+				    krb5_keyblock *);
 
-krb5_error_code krb5_db_setup_mkey_name
-	KRB5_PROTOTYPE((krb5_context,
-		   const char *, 
-		   const char *, 
-		   char **, 
-		   krb5_principal *));
+krb5_error_code krb5_db_setup_mkey_name (krb5_context, const char *, 
+					 const char *, char **,
+					 krb5_principal *);
 
-krb5_error_code krb5_db_set_mkey
-        KRB5_PROTOTYPE((krb5_context, krb5_keyblock *));
+krb5_error_code krb5_db_set_mkey (krb5_context, krb5_keyblock *);
 
-krb5_error_code krb5_db_get_mkey
-        KRB5_PROTOTYPE((krb5_context, krb5_keyblock **));
-krb5_error_code krb5_db_destroy 
-	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
-krb5_error_code krb5_db_lock
-	KRB5_PROTOTYPE((krb5_context,
-		   int ));
-krb5_error_code krb5_db_unlock
-	KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_db_set_nonblocking
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_boolean,
-		   krb5_boolean * ));
-krb5_boolean krb5_db_set_lockmode
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_boolean));
-krb5_error_code	krb5_db_fetch_mkey
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_principal, 
-		   krb5_enctype, 
-		   krb5_boolean,
-		   krb5_boolean, 
-		   char *,
-		   krb5_data *, 
-		   krb5_keyblock * ));
+krb5_error_code krb5_db_get_mkey (krb5_context, krb5_keyblock **);
+krb5_error_code krb5_db_destroy (krb5_context, char * );
+krb5_error_code krb5_db_lock (krb5_context, int );
+krb5_error_code krb5_db_unlock (krb5_context);
+krb5_error_code krb5_db_set_nonblocking (krb5_context, krb5_boolean,
+					 krb5_boolean * );
+krb5_boolean krb5_db_set_lockmode (krb5_context, krb5_boolean);
+krb5_error_code	krb5_db_fetch_mkey (krb5_context, krb5_principal, krb5_enctype,
+				    krb5_boolean, krb5_boolean, char *,
+				    krb5_data *, 
+				    krb5_keyblock * );
 
-krb5_error_code krb5_db_open_database
-	KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_db_close_database
-	KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_db_open_database (krb5_context);
+krb5_error_code krb5_db_close_database (krb5_context);
 
-krb5_error_code krb5_dbekd_encrypt_key_data
-	KRB5_PROTOTYPE((krb5_context,
-		   const krb5_keyblock *,
-		   const krb5_keyblock *,
-		   const krb5_keysalt *,
-		   int,
-		   krb5_key_data *));
-krb5_error_code krb5_dbekd_decrypt_key_data
-	KRB5_PROTOTYPE((krb5_context,
-		   const krb5_keyblock *,
-		   const krb5_key_data *,
-		   krb5_keyblock *,
-		   krb5_keysalt *));
-krb5_error_code krb5_dbe_create_key_data
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *));
-krb5_error_code krb5_dbe_update_tl_data
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_tl_data *));
-krb5_error_code krb5_dbe_lookup_tl_data
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_tl_data *));
-krb5_error_code krb5_dbe_update_last_pwd_change
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_timestamp));
-krb5_error_code krb5_dbe_lookup_last_pwd_change
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_timestamp *));
-krb5_error_code krb5_dbe_update_mod_princ_data
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_timestamp,
-			krb5_const_principal));
-krb5_error_code krb5_dbe_lookup_mod_princ_data
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_timestamp *,
-			krb5_principal *));
-int krb5_encode_princ_dbkey
-	KRB5_PROTOTYPE((krb5_context,
-    		   krb5_data  *,
-    		   krb5_const_principal));
-void krb5_free_princ_dbkey
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_data *));
-krb5_error_code krb5_encode_princ_contents
-	KRB5_PROTOTYPE((krb5_context,
-    		   krb5_data  *,
-    		   krb5_db_entry *));
-void krb5_free_princ_contents
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_data  *));
-krb5_error_code krb5_decode_princ_contents
-	KRB5_PROTOTYPE((krb5_context,
-    		   krb5_data  *,
-    		   krb5_db_entry *));
-void krb5_dbe_free_contents
-	KRB5_PROTOTYPE((krb5_context,
-    		   krb5_db_entry *));
+krb5_error_code krb5_dbekd_encrypt_key_data (krb5_context,
+					     const krb5_keyblock *,
+					     const krb5_keyblock *,
+					     const krb5_keysalt *,
+					     int,
+					     krb5_key_data *);
+krb5_error_code krb5_dbekd_decrypt_key_data (krb5_context,
+					     const krb5_keyblock *,
+					     const krb5_key_data *,
+					     krb5_keyblock *,
+					     krb5_keysalt *);
+krb5_error_code krb5_dbe_create_key_data (krb5_context,
+					  krb5_db_entry *);
+krb5_error_code krb5_dbe_update_tl_data (krb5_context,
+					 krb5_db_entry *,
+					 krb5_tl_data *);
+krb5_error_code krb5_dbe_lookup_tl_data (krb5_context,
+					 krb5_db_entry *,
+					 krb5_tl_data *);
+krb5_error_code krb5_dbe_update_last_pwd_change (krb5_context,
+						 krb5_db_entry *,
+						 krb5_timestamp);
+krb5_error_code krb5_dbe_lookup_last_pwd_change (krb5_context,
+						 krb5_db_entry *,
+						 krb5_timestamp *);
+krb5_error_code krb5_dbe_update_mod_princ_data (krb5_context,
+						krb5_db_entry *,
+						krb5_timestamp,
+						krb5_const_principal);
+krb5_error_code krb5_dbe_lookup_mod_princ_data (krb5_context,
+						krb5_db_entry *,
+						krb5_timestamp *,
+						krb5_principal *);
+int krb5_encode_princ_dbkey (krb5_context, krb5_data  *, krb5_const_principal);
+void krb5_free_princ_dbkey (krb5_context, krb5_data *);
+krb5_error_code krb5_encode_princ_contents (krb5_context, krb5_data *,
+					    krb5_db_entry *);
+void krb5_free_princ_contents (krb5_context, krb5_data  *);
+krb5_error_code krb5_decode_princ_contents (krb5_context, krb5_data  *,
+					    krb5_db_entry *);
+void krb5_dbe_free_contents (krb5_context, krb5_db_entry *);
 
-krb5_error_code krb5_dbe_find_enctype
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_int32,
-			krb5_int32,
-			krb5_int32,
-			krb5_key_data **));
+krb5_error_code krb5_dbe_find_enctype (krb5_context, krb5_db_entry *,
+				       krb5_int32,
+				       krb5_int32,
+				       krb5_int32,
+				       krb5_key_data **);
 
-krb5_error_code krb5_dbe_search_enctype
-	KRB5_PROTOTYPE((krb5_context,
-			krb5_db_entry *,
-			krb5_int32 *,
-			krb5_int32,
-			krb5_int32,
-			krb5_int32,
-			krb5_key_data **));
+krb5_error_code krb5_dbe_search_enctype (krb5_context,
+					 krb5_db_entry *,
+					 krb5_int32 *,
+					 krb5_int32,
+					 krb5_int32,
+					 krb5_int32,
+					 krb5_key_data **);
 
 struct __krb5_key_salt_tuple;
 
-krb5_error_code krb5_dbe_cpw
-        KRB5_PROTOTYPE((krb5_context,
-			krb5_keyblock  *,
-			struct __krb5_key_salt_tuple *,
-			int,
-			char *,
-			int,
-			krb5_boolean,
-			krb5_db_entry *));
-krb5_error_code krb5_dbe_apw
-        KRB5_PROTOTYPE((krb5_context,
-                   krb5_keyblock  *,
-                   struct __krb5_key_salt_tuple *,
-                   int,
-                   char *,
-                   krb5_db_entry *));
-krb5_error_code krb5_dbe_crk
-        KRB5_PROTOTYPE((krb5_context,
-                   krb5_keyblock  *,
-                   struct __krb5_key_salt_tuple *,
-                   int,
-		   krb5_boolean,
-                   krb5_db_entry *));
-krb5_error_code krb5_dbe_ark
-        KRB5_PROTOTYPE((krb5_context,
-                   krb5_keyblock  *,
-                   struct __krb5_key_salt_tuple *,
-                   int,
-                   krb5_db_entry *));
+krb5_error_code krb5_dbe_cpw (krb5_context,
+			      krb5_keyblock  *,
+			      struct __krb5_key_salt_tuple *,
+			      int,
+			      char *,
+			      int,
+			      krb5_boolean,
+			      krb5_db_entry *);
+krb5_error_code krb5_dbe_apw (krb5_context,
+			      krb5_keyblock  *,
+			      struct __krb5_key_salt_tuple *,
+			      int,
+			      char *,
+			      krb5_db_entry *);
+krb5_error_code krb5_dbe_crk (krb5_context,
+			      krb5_keyblock  *,
+			      struct __krb5_key_salt_tuple *,
+			      int,
+			      krb5_boolean,
+			      krb5_db_entry *);
+krb5_error_code krb5_dbe_ark (krb5_context,
+			      krb5_keyblock  *,
+			      struct __krb5_key_salt_tuple *,
+			      int,
+			      krb5_db_entry *);
 
-krb5_error_code krb5_ser_db_context_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_db_context_init (krb5_context);
  
 #define KRB5_KDB_DEF_FLAGS	0
 
@@ -464,19 +384,18 @@ typedef struct _kdb5_dispatch_table {
     char *	kdb5_db_index_ext;
     char *	kdb5_db_data_ext;
     char *	kdb5_db_lock_ext;
-    DBM *	(*kdb5_dbm_open) KRB5_NPROTOTYPE((const char *, int, int));
-    void	(*kdb5_dbm_close) KRB5_NPROTOTYPE((DBM *));
-    datum	(*kdb5_dbm_fetch) KRB5_NPROTOTYPE((DBM *, datum));
-    datum	(*kdb5_dbm_firstkey) KRB5_NPROTOTYPE((DBM *));
-    datum	(*kdb5_dbm_nextkey) KRB5_NPROTOTYPE((DBM *));
-    int		(*kdb5_dbm_delete) KRB5_NPROTOTYPE((DBM *, datum));
-    int		(*kdb5_dbm_store) KRB5_NPROTOTYPE((DBM *, datum, datum, int));
-    int		(*kdb5_dbm_dirfno) KRB5_NPROTOTYPE((DBM *));
-    int		(*kdb5_dbm_pagfno) KRB5_NPROTOTYPE((DBM *));
+    DBM *	(*kdb5_dbm_open) (const char *, int, int);
+    void	(*kdb5_dbm_close) (DBM *);
+    datum	(*kdb5_dbm_fetch) (DBM *, datum);
+    datum	(*kdb5_dbm_firstkey) (DBM *);
+    datum	(*kdb5_dbm_nextkey) (DBM *);
+    int		(*kdb5_dbm_delete) (DBM *, datum);
+    int		(*kdb5_dbm_store) (DBM *, datum, datum, int);
+    int		(*kdb5_dbm_dirfno) (DBM *);
+    int		(*kdb5_dbm_pagfno) (DBM *);
 } kdb5_dispatch_table;
 
-krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
-						  kdb5_dispatch_table *));
+krb5_error_code kdb5_db_set_dbops (krb5_context, kdb5_dispatch_table *);
 #else
 typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
 #endif	/* KDB5_DISPATCH */
