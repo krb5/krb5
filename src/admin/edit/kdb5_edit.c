@@ -473,7 +473,6 @@ set_dbname_help(pname, dbname)
 	    return(1);
 	}
 	retval = krb5_string_to_key(edit_context, &master_encblock, 
-				    master_keyblock.enctype,
 				    &master_keyblock, &pwd, &scratch);
 	if (retval) {
 	    com_err(pname, retval,
