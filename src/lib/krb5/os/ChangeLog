@@ -1,5 +1,10 @@
 1999-06-09  Miro Jurisic  <meeroh@mit.edu>
 
+	* c_ustime.c (krb5_crypto_us_timeofday): #ifdefed microseconds on Mac to be
+		PPC-only
+
+1999-06-09  Miro Jurisic  <meeroh@mit.edu>
+
 	* c_ustime.c (AbsoluteToSecsNanosecs): Fixed the UInt64 division
 	* c_ustime.c (krb5_crypto_us_timeofday): now returning the correct value
 

@@ -41,6 +41,7 @@
  * Macintosh ooperating system interface for Kerberos.
  */
 
+#include <ConditionalMacros.h>
 #include <script.h>		/* Defines MachineLocation, used by getTimeZoneOffset */
 #include <ToolUtils.h>		/* Defines BitTst(), called by getTimeZoneOffset() */
 #include <OSUtils.h>		/* Defines GetDateTime */
@@ -109,7 +110,8 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     sec = the_time - 
     	((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
     	(getTimeZoneOffset() * 60 * 60));
-    	
+
+#ifdef TARGET_CPU_PPC    						/* Only PPC has accurate time */
     if (HaveAccurateTime ()) {					/* Does hardware support accurate time? */
     
     	AbsoluteTime 	absoluteTime;
@@ -120,7 +122,9 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     	
     	usec = nanoseconds / 1000;
 
-    } else {
+    } else
+#endif /* TARGET_CPU_PPC */
+    {
 	    usec = 0;
 
 	    if (sec == last_sec) {				/* Same as last time? */
