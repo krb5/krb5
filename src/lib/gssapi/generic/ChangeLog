@@ -1,3 +1,7 @@
+Wed Feb  5 23:28:47 1997  Richard Basch  <basch@lehman.com>
+
+	* gssapi.hin: Make sure KRB5_EXPORTVAR is defined.
+
 Tue Feb  4 15:55:11 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Only override the object build of the error table
