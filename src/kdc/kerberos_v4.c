@@ -387,7 +387,13 @@ main(argc, argv)
 
 static krb5_error_code retval; 
 static krb5_data *response;
-void bzero(), bcopy(), com_err(), sleep();
+#ifndef bzero
+void bzero();
+#endif
+#ifndef bcopy
+void bcopy();
+#endif
+void com_err(), sleep();
 void kerberos_v4(), kerb_err_reply();
 #ifdef HAS_STDLIB_H
 #include <stdlib.h>
