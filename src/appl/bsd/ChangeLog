@@ -1,3 +1,10 @@
+Wed Jul  5 20:03:37 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* login.c (main): Don't use the TIOCLSET ioctl unless we're not
+		using POSIX_TERMIOS.  Don't just blindly set the file
+		status flags to 0.  Instead, do a fcntl(0, F_GETFL), and
+		then reset the nonblocking flags.
+
 Sun Jul  2 19:48:27 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krcp.c: make errno extern

@@ -399,17 +399,24 @@ int main(argc, argv)
 	if (*argv)
 		username = *argv;
 
-#if !defined(_AIX)
+#if !defined(POSIX_TERMIOS) && defined(TIOCLSET)
 	ioctlval = 0;
-#ifdef TIOCLSET
-	/* linux, sco don't have this line discipline interface */
+	/* Only do this we we're not using POSIX_TERMIOS */
 	(void)ioctl(0, TIOCLSET, (char *)&ioctlval);
 #endif
+	
 #ifdef TIOCNXCL
 	(void)ioctl(0, TIOCNXCL, (char *)0);
 #endif
-	(void)fcntl(0, F_SETFL, ioctlval);
+	
+	ioctlval = fcntl(0, F_GETFL);
+#ifdef O_NONBLOCK
+	ioctlval &= ~O_NONBLOCK;
 #endif
+#ifdef O_NDELAY
+	ioctlval &= ~O_NDELAY;
+#endif
+	(void)fcntl(0, F_SETFL, ioctlval);
 
 #ifdef POSIX_TERMIOS
 	(void)tcgetattr(0, &tc);
