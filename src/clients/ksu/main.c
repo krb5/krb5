@@ -1,0 +1,871 @@
+/* 
+ * Copyright (c) 1994 by the University of Southern California
+ *
+ * EXPORT OF THIS SOFTWARE from the United States of America may
+ *     require a specific license from the United States Government.
+ *     It is the responsibility of any person or organization contemplating
+ *     export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to copy, modify, and distribute
+ *     this software and its documentation in source and binary forms is
+ *     hereby granted, provided that any documentation or other materials
+ *     related to such distribution or use acknowledge that the software
+ *     was developed by the University of Southern California. 
+ *
+ * DISCLAIMER OF WARRANTY.  THIS SOFTWARE IS PROVIDED "AS IS".  The
+ *     University of Southern California MAKES NO REPRESENTATIONS OR
+ *     WARRANTIES, EXPRESS OR IMPLIED.  By way of example, but not
+ *     limitation, the University of Southern California MAKES NO
+ *     REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY
+ *     PARTICULAR PURPOSE. The University of Southern
+ *     California shall not be held liable for any liability nor for any
+ *     direct, indirect, or consequential damages with respect to any
+ *     claim by the user or distributor of the ksu software.
+ *
+ * KSU was writen by:  Ari Medvinsky, ari@isi.edu
+ */
+
+#include "ksu.h"
+
+/* globals */
+char * prog_name;
+int auth_debug =0;     
+char k5login_path[MAXPATHLEN];
+char k5users_path[MAXPATHLEN];
+char * gb_err = NULL;
+/***********/
+
+#define _DEF_CSH "/bin/csh" 
+int set_env_var();  
+void sweep_up();
+char * ontty();
+void init_auth_names();
+
+/* Note -e and -a options are mutually exclusive */
+/* insure the proper specification of target user as well as catching         
+   ill specified arguments to commands */        
+
+void usage (){
+	fprintf(stderr, "Usage: %s [target user] [-n principal] [-c source cachename] [-C target cachename] [-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-e command [args... ] ] [-a [args... ] ] \n", prog_name);
+
+}
+
+#define DEBUG
+
+main (argc, argv)
+	int argc;
+	char ** argv;
+{ 
+int hp =0;
+int some_rest_copy = 0;	
+int all_rest_copy = 0;	
+char localhostname [MAXHOSTNAMELEN];
+opt_info options;
+int option=0;
+int statusp=0;
+int use_source_cache = 0; 
+krb5_error_code retval = 0; 
+krb5_principal client = NULL;
+krb5_ccache cc_target = NULL;
+char * cc_target_tag = NULL; 
+char * target_user = NULL;
+char * source_user,  *p; 
+char * local_realm_name = NULL;
+
+krb5_ccache cc_source = NULL;
+char * cc_source_tag = NULL; 
+uid_t source_uid, target_uid;
+uid_t source_gid, target_gid;
+char * cc_source_tag_tmp = NULL;
+char * cc_target_tag_tmp=NULL; 
+char * cmd = NULL, * exec_cmd = NULL;
+int errflg = 0;
+uid_t eff_uid, eff_gid;	
+krb5_boolean auth_val; 
+krb5_boolean authorization_val = FALSE; 
+int path_passwd = 0;
+int done =0,i,j;
+uid_t ruid;
+struct passwd *pwd=NULL,  *target_pwd ;
+char * shell;
+char ** params;
+int keep_target_cache = 0;
+int child_pid, ret_pid;
+extern char * getpass(), *crypt();
+int pargc;
+char ** pargv;
+struct stat  st_temp;
+int temp_debug;
+
+    options.opt = KRB5_DEFAULT_OPTIONS;
+    options.lifetime = KRB5_DEFAULT_TKT_LIFE;
+    options.rlife =0; 
+    options.princ =0;	
+
+    params = (char **) calloc (2, sizeof (char *));
+    params[1] = NULL;
+
+
+    krb5_init_ets(); /* initialize kerberos error tables */     
+
+#ifdef LOCAL_REALM 
+    local_realm_name = LOCAL_REALM ;	
+#endif
+
+
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
+    prog_name = argv[0];
+
+
+#ifndef LOG_NDELAY
+#define LOG_NDELAY 0
+#endif
+
+#ifndef LOG_AUTH /* 4.2 syslog */
+    openlog(prog_name, LOG_PID|LOG_NDELAY);
+#else
+    openlog(prog_name, LOG_PID | LOG_AUTH | LOG_NDELAY, LOG_AUTH);
+#endif /* 4.2 syslog */
+
+      
+    if (( argc == 1) || (argv[1][0] == '-')){
+                target_user = strdup("root");
+                pargc = argc;
+                pargv = argv;
+        } else {
+                target_user = strdup(argv[1]);
+                pargc = argc -1;
+
+                if ((pargv =(char **) calloc(pargc +1,sizeof(char *)))==NULL){
+                	com_err(prog_name, errno, "while allocating memory");
+			exit(1);
+                }
+
+                pargv[pargc] = NULL;
+                pargv[0] = argv[0];
+
+                for(i =1; i< pargc; i ++){
+                        pargv[i] = argv[i + 1];
+                }
+        }
+
+
+    while(!done && ((option = getopt(pargc, pargv,"n:c:C:r:a:zZDfpkl:e:")) != EOF)){
+	switch (option) {
+	case 'r':
+	    options.opt |= KDC_OPT_RENEWABLE;
+	    retval = krb5_parse_lifetime(optarg, &options.rlife);
+	    if (retval != 0 || options.rlife == 0) {
+		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
+		errflg++;
+	    }
+	    break;
+	case 'a':
+            /* when integrating this remember to pass in pargc, pargv and
+               take care of params argument */
+	    optind --;	
+	    if (auth_debug){printf("Before get_params optind=%d \n", optind);}
+
+            if ( retval = get_params( & optind, pargc, pargv, &params)){
+                com_err(prog_name, retval, "when gathering parameters");
+                errflg++;
+            }
+            if(auth_debug){ printf("After get_params optind=%d \n", optind);}
+                done = 1;
+            break;
+	case 'p':
+	    options.opt |= KDC_OPT_PROXIABLE;
+	    break;
+	case 'f':
+	    options.opt |= KDC_OPT_FORWARDABLE;
+	    break;
+	case 'k':
+	    keep_target_cache =1;
+	    break;
+        case 'l':
+	    retval = krb5_parse_lifetime(optarg, &options.lifetime);
+	    if (retval != 0 || options.lifetime == 0) {
+		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
+		errflg++;
+	    }
+	    break;
+	case 'n': 
+	    if (retval = krb5_parse_name(optarg, &client)){
+		com_err(prog_name, retval, "when parsing name %s", optarg); 
+		errflg++;
+	    }	
+
+    	    options.princ = 1;
+	    	
+	    break;
+	case 'D':
+	    auth_debug = 1;	
+	    break;	
+	case 'z':
+	    some_rest_copy = 1;	
+	    if(all_rest_copy || use_source_cache){  	
+		fprintf(stderr, 
+			"-z option is mutually exclusive with -Z and -C . \n"); 
+		errflg++;
+	    }	
+	    break;	
+	case 'Z':
+	    all_rest_copy = 1;	
+	    if(some_rest_copy || use_source_cache){  	
+		fprintf(stderr, 
+			"-Z option is mutually exclusive with -z and -C . \n"); 
+		errflg++;
+	    } 	
+	    break;	
+	case 'C':
+	    if (cc_target_tag == NULL) {
+		cc_target_tag = strdup(optarg);
+
+		if ((strlen(cc_target_tag) == 1) &&
+		    	(*cc_target_tag == NO_TARGET_FILE)){
+			use_source_cache = 1; 
+	    		if(some_rest_copy || all_rest_copy){  	
+			   fprintf(stderr, 
+			   "-C . option is mutually exclusive with -z and -Z\n"); 
+		 	   errflg++;
+	    		} 	
+		}
+		else {
+			fprintf(stderr,"In -C option \n");  
+			if ( strchr(cc_target_tag, ':')){
+				cc_target_tag_tmp=strchr(cc_target_tag,':') + 1;
+				if(!stat(cc_target_tag_tmp, &st_temp )){
+					fprintf(stderr,"File %s exists \n",
+						cc_target_tag_tmp);	
+					errflg++;
+				}
+			}
+			else { 
+				fprintf(stderr,
+					"malformed credential cache name %s\n",
+					cc_target_tag); 
+				errflg++;
+			}
+		}
+	    } else {
+		fprintf(stderr, "Only one -C option allowed\n");
+		errflg++;
+	    }
+	    break;
+	case 'c':
+	    if (cc_source_tag == NULL) {
+		cc_source_tag = strdup(optarg);
+		if ( strchr(cc_source_tag, ':')){
+			cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
+
+			if( stat( cc_source_tag_tmp, &st_temp)){
+				fprintf(stderr,"File %s does not exist \n",
+					cc_source_tag_tmp);	
+				errflg++;
+
+			}
+		}
+		else { 
+			fprintf(stderr,"malformed credential cache name %s\n",
+				cc_source_tag); 
+			errflg++;
+		}
+		
+	    } else {
+		fprintf(stderr, "Only one -c option allowed\n");
+		errflg++;
+	    }
+	    break;
+	case 'e': 
+	    cmd = strdup(optarg);
+            if(auth_debug){printf("Before get_params optind=%d \n", optind);}
+            if ( retval = get_params( & optind, pargc, pargv, &params)){
+                com_err(prog_name, retval, "when gathering parameters");
+                errflg++;
+            }
+            if(auth_debug){printf("After get_params optind=%d \n", optind);}
+            done = 1;
+
+            if (auth_debug){
+                fprintf(stderr,"Command to be executed: %s\n", cmd);
+            }
+            break;
+	case '?':
+	default:
+	    errflg++;
+	    break;
+	}
+    }
+
+    if (errflg) {
+	usage();
+	exit(2);
+    }
+
+    if (optind != pargc ){
+        usage();
+        exit(2);
+    }
+
+    if (auth_debug){	
+	for(j=1; params[j] != NULL; j++){
+        	fprintf (stderr,"params[%d]= %s\n", j,params[j]);
+	}
+    }	
+
+	/***********************************/
+	ruid = getuid();
+	source_user = getlogin(); /*checks for the the login name in /etc/utmp*/
+
+	/* verify that that the user exists and get his passwd structure */      
+
+	if (source_user == NULL ||(pwd = getpwnam(source_user)) == NULL ||
+	    pwd->pw_uid != ruid){
+		pwd = getpwuid(ruid);
+	}
+
+	if (pwd == NULL) {
+    		fprintf(stderr, "ksu: who are you?\n");
+    		exit(1);
+	}
+
+	/* allocate space and copy the usernamane there */        
+	source_user = strdup(pwd->pw_name);
+	source_uid = pwd->pw_uid;
+	source_gid = pwd->pw_gid;
+
+	if ((target_pwd = getpwnam(target_user)) == NULL){ 
+		fprintf(stderr, "ksu: unknown login %s\n", target_user); 
+		exit(1);
+	}
+	target_uid = target_pwd->pw_uid;
+	target_gid = target_pwd->pw_gid;
+
+	init_auth_names(target_pwd->pw_dir);
+
+	if (gethostname (localhostname, MAXHOSTNAMELEN)){
+		fprintf (stderr, " failed to get localhostname\n");    
+	}
+
+	/***********************************/
+
+	if (cc_source_tag == NULL){
+		cc_source_tag = krb5_cc_default_name();
+		cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
+	}
+	
+	/* get a handle for the cache */      
+	if ( retval = krb5_cc_resolve(cc_source_tag, &cc_source)){
+		com_err(prog_name, retval,"while getting source cache");    
+		exit(0);
+	}
+
+	
+	if (! stat(cc_source_tag_tmp, &st_temp)){ 
+
+
+		if (access(cc_source_tag_tmp, R_OK | W_OK )){
+		    fprintf(stderr,
+			"%s does not have correct permissions for %s\n", 
+						   source_user, cc_source_tag); 
+		    exit(0); 	
+		}
+
+
+		if (retval= krb5_ccache_refresh(cc_source)){
+			   com_err(prog_name, retval, 
+				"while refreshing %s (source cache)", cc_source_tag); 
+			   exit(0);	
+		}
+
+	}
+
+
+	if (retval = get_best_princ_for_target(source_uid,target_uid, source_user,
+				       target_user, cc_source, &options, cmd, 
+				       localhostname, &client, &hp)){
+		com_err(prog_name, retval, "while selecting the best principal"); 
+		exit(0);
+	}
+
+	if (auth_debug){
+		if (hp){	
+			fprintf(stderr,
+			"GET_best_princ_for_target result: NOT AUTHORIZED\n");
+		}else{
+	  		fprintf(stderr,
+			       "GET_best_princ_for_target result-best principal ");
+			plain_dump_principal (client);
+			fprintf(stderr,"\n");
+		}
+	}
+
+	if (hp){	
+		if (gb_err) fprintf(stderr, "%s", gb_err);
+		fprintf(stderr, "Not authorized\n");	
+		exit(0);
+	}
+
+
+	if ( stat(cc_source_tag_tmp, &st_temp)){ 
+		if (use_source_cache){
+
+			eff_uid = geteuid();	
+			eff_gid = getegid();	
+	
+			if (seteuid(source_uid) < 0)
+				 { perror("ksu: seteuid"); exit(1);}
+
+			if (setegid(source_gid) < 0)
+				{ perror("ksu: setegid"); exit(1);}
+
+			if (retval = krb5_cc_initialize(cc_source, client)){  
+				com_err(prog_name, retval,
+					"while initializing source cache");    
+				exit(0);
+			}
+
+			if (seteuid(eff_uid) < 0) 
+				{ perror("ksu: seteuid"); exit(1); }
+
+			if (setegid(eff_gid) < 0)
+				{ perror("ksu: setegid"); exit(1); }
+
+		}
+	}
+
+
+	if (cc_target_tag == NULL) {
+
+		cc_target_tag = (char *)calloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
+		do {
+			sprintf(cc_target_tag, "%s%d.%d", KRB5_SECONDARY_CACHE,
+				target_uid, gen_sim());
+			cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
+
+		}while ( !stat ( cc_target_tag_tmp, &st_temp)); 
+		/* make sure that the new ticket file does not already exist */ 
+	}
+
+
+	if (auth_debug){	
+		fprintf(stderr, " source cache =  %s\n", cc_source_tag); 
+		fprintf(stderr, " target cache =  %s\n", cc_target_tag); 
+	}
+
+
+
+	/* Make sure that the resulting cache file is owned by the
+	   source user. Only when proper authentication and authorization
+	   takes place, the target user becomes the owner of the cache.         
+	 */           
+
+	if (! use_source_cache){
+			
+		/* if root ksu's to a regular user, then      
+		   then only the credentials for that particular user 
+		   should be copied */            
+
+		if ((source_uid == 0) && (target_uid != 0)) {
+			krb5_principal  kdc_server ;
+			krb5_boolean stored = FALSE;
+
+			if (retval =krb5_ccache_copy_restricted( cc_source,
+				cc_target_tag,client,&cc_target, &stored)){
+	    			com_err (prog_name, retval, 
+				     "while copying cache %s to %s",
+				     krb5_cc_get_name(cc_source),cc_target_tag);
+				exit(0);
+			}
+
+			if (retval = krb5_tgtname( krb5_princ_realm (client),
+						   krb5_princ_realm(client),
+                              			   &kdc_server)){
+		                com_err(prog_name, retval,
+					"while creating tgt for local realm") ;
+				sweep_up(use_source_cache, cc_target);
+				exit(0);
+			}
+
+	
+#ifdef GET_TGT_VIA_PASSWD
+			if ((!all_rest_copy) && options.princ && (stored == FALSE)){
+          			fprintf(stderr,"WARNING: Your password may get exposed if you are logged in remotely \n");
+                		fprintf(stderr,"         and don't have a secure channel. \n");
+				if (krb5_get_tkt_via_passwd (&cc_target, client,
+					 kdc_server, &options) == FALSE){
+					fprintf(stderr,
+					"could not get a tgt for ");    
+					plain_dump_principal (client);
+					fprintf(stderr, "\n");    
+					
+				}
+			}
+#endif /* GET_TGT_VIA_PASSWD */
+                } else{
+			if (retval = krb5_ccache_copy(cc_source, cc_target_tag,
+					     client,&cc_target)){
+	    			com_err (prog_name, retval, 
+					"while copying cache %s to %s",
+			     		krb5_cc_get_name(cc_source),
+					cc_target_tag);
+				exit(0);
+			}
+		}
+
+	}
+	else{
+	
+		cc_target = cc_source;
+		cc_target_tag = cc_source_tag;
+		cc_target_tag_tmp = cc_source_tag_tmp;
+
+	}
+
+ 	/* if the user is root then authentication is not neccesary,
+	   root gets in automatically */   	
+
+	if (source_uid) {
+		char * client_name;
+
+       		auth_val = krb5_auth_check(client, localhostname, &options,
+				target_user,cc_target, &path_passwd); 
+		/* cache the tickets if possible in the source cache */ 
+		if (!path_passwd && !use_source_cache){ 	
+
+			if (retval = krb5_ccache_overwrite(cc_target, cc_source,
+				      client)){
+		  		com_err (prog_name, retval,
+					"while copying cache %s to %s",
+				 	krb5_cc_get_name(cc_target),
+				 	krb5_cc_get_name(cc_source));
+				sweep_up(use_source_cache, cc_target);
+				exit(0);
+			}
+
+		}
+		
+		/* if kerbereros authentication failed then exit */     
+		if (auth_val ==FALSE){
+			fprintf(stderr, "Authentication failed.\n");
+		  	 syslog(LOG_WARNING,
+				"'%s %s' authentication failed for %s%s",
+				prog_name,target_user,source_user,ontty());
+			sweep_up(use_source_cache, cc_target);
+			exit(0);
+		}
+			
+		if (retval = krb5_unparse_name(client, &client_name)) {
+               		 com_err (prog_name, retval, "When unparsing name");
+			 sweep_up(use_source_cache, cc_target);
+			 exit(0);
+         	}     
+		
+		fprintf(stderr,"Authenticated %s\n", client_name);
+		syslog(LOG_NOTICE,"'%s %s' authenticated %s for %s%s",
+			prog_name,target_user,client_name,
+			source_user,ontty());
+
+		if(retval = krb5_authorization(client,target_user,
+		 	 local_realm_name, cmd, &authorization_val, &exec_cmd)){
+               	       com_err(prog_name,retval,"while checking authorization");
+		       sweep_up(use_source_cache, cc_target);
+		       exit(0);
+		}
+
+		if (authorization_val == TRUE){
+
+		   if (cmd) {	
+		  	fprintf(stderr,
+	    "Account %s: authorization for %s for execution of\n",
+			  	target_user, client_name);
+		  	fprintf(stderr, "               %s successful\n",exec_cmd);
+		 	 syslog(LOG_NOTICE,
+	     "Account %s: authorization for %s for execution of %s successful",
+			  	target_user, client_name, exec_cmd);
+
+		   }else{
+		  	fprintf(stderr,
+				"Account %s: authorization for %s successful\n",
+			  	target_user, client_name);
+		 	syslog(LOG_NOTICE,
+				"Account %s: authorization for %s successful",
+			  	target_user, client_name);
+		   }
+		}else {
+		    if (cmd){ 	
+			if (exec_cmd){ /* was used to pass back the error msg */
+ 				fprintf(stderr, "%s", exec_cmd );
+				syslog(LOG_WARNING, "%s",exec_cmd);
+			}
+ 			fprintf(stderr,
+	       "Account %s: authorization for %s for execution of %s failed \n",
+			   	target_user, client_name, cmd );
+			syslog(LOG_WARNING,
+	       "Account %s: authorization for %s for execution of %s failed \n",
+			   	target_user, client_name, cmd );
+			
+		    }else{
+ 			fprintf(stderr,
+				"Account %s: authorization of %s failed \n",
+			   	target_user, client_name);
+			syslog(LOG_WARNING,
+				"Account %s: authorization of %s failed \n",
+			   	target_user, client_name);
+
+		    }
+
+		    sweep_up(use_source_cache, cc_target);
+		    exit(0);
+		}
+	}
+	
+	if( some_rest_copy){ 
+		if (retval = krb5_ccache_filter(cc_target, client)){ 	
+               	       com_err(prog_name,retval,"while calling cc_filter");
+		       sweep_up(use_source_cache, cc_target);
+		       exit(0);
+		}
+	}
+
+	if (all_rest_copy){
+			if (retval = krb5_cc_initialize(cc_target, client)){  
+				com_err(prog_name, retval,
+					"while erasing target cache");    
+				exit(0);
+			}
+
+	}
+
+	/* get the shell of the user, this will be the shell used by su */      
+	target_pwd = getpwnam(target_user);
+
+	if (target_pwd->pw_shell)
+		shell = strdup(target_pwd->pw_shell);
+	else {
+		shell = _DEF_CSH;  /* default is cshell */   
+    	}
+
+      /* insist that the target login uses a standard shell (root is omited) */ 
+
+       if (!standard_shell(target_pwd->pw_shell) && source_uid) {
+	       fprintf(stderr, "ksu: permission denied (shell).\n");
+	       sweep_up(use_source_cache, cc_target);
+	       exit(1);
+	}
+
+      /*  want to check the scoop with USER for the real ksu , MOD */          	
+	
+       if (target_pwd->pw_uid){
+	
+	      if(set_env_var("USER", target_pwd->pw_name)){
+   		fprintf(stderr,"ksu: couldn't set environment variable USER\n");
+	        sweep_up(use_source_cache, cc_target);
+	        exit(1);
+	      } 			
+       }	
+
+      if(set_env_var( "HOME", target_pwd->pw_dir)){
+		fprintf(stderr,"ksu: couldn't set environment variable USER\n");
+	        sweep_up(use_source_cache, cc_target);
+	        exit(1);
+      } 			
+
+      if(set_env_var( "SHELL", shell)){
+		fprintf(stderr,"ksu: couldn't set environment variable USER\n");
+	        sweep_up(use_source_cache, cc_target);
+	        exit(1);
+      } 			
+
+      /* set the cc env name to target */         	
+
+      if(set_env_var( KRB5_CC_NAME, cc_target_tag)){
+		fprintf(stderr,"ksu: couldn't set environment variable %s \n",
+			KRB5_CC_NAME);
+	        sweep_up(use_source_cache, cc_target);
+	        exit(1);
+      } 			
+
+
+	if (!use_source_cache){	
+
+	/* set up ownership  on cache for target user */       
+
+		if (chown(cc_target_tag_tmp, target_uid, target_gid)){      
+			com_err(prog_name, errno, "while changing owner for %s",
+				cc_target_tag_tmp);   
+	       		sweep_up(use_source_cache, cc_target);
+	       		exit(1);
+		}
+
+	}
+	
+   	/* set permissions */
+        if (setgid(target_pwd->pw_gid) < 0) {
+		   perror("ksu: setgid");
+	           sweep_up(use_source_cache, cc_target);
+		   exit(1);
+	   }
+
+
+       if (initgroups(target_user, target_pwd->pw_gid)) {
+   		fprintf(stderr, "ksu: initgroups failed.\n");
+	        sweep_up(use_source_cache, cc_target);
+	        exit(1);
+	}
+
+       fprintf(stderr,"Changing uid to %d\n", target_pwd->pw_uid); 
+       if (setuid(target_pwd->pw_uid) < 0) {
+		   perror("ksu: setuid");
+	           sweep_up(use_source_cache, cc_target);
+		   exit(1);
+       }   
+
+	/* verify that the target user can read and write           
+	   to the new cache */    	
+	
+	if (access( cc_target_tag_tmp, R_OK | W_OK )){
+		com_err(prog_name, errno,
+		"%s does not have correct permissions for %s, %s aborted",
+			target_user, cc_target_tag_tmp, prog_name);   
+	        exit(1);
+	}
+
+
+	if (cmd){
+		if (source_uid == 0){
+			exec_cmd = cmd;
+		}
+
+		if( !exec_cmd){ 
+		   fprintf(stderr,
+		       "Internal error: command %s did not get resolved\n",cmd);
+		   exit(1);	
+		}
+
+		params[0] = exec_cmd;
+	}
+	else{
+		params[0] = shell;
+	}
+
+	if (auth_debug){		
+		 fprintf(stderr, "program to be execed %s\n",params[0]);
+	}
+
+	if( keep_target_cache || use_source_cache ) {
+		 execv(params[0], params);
+		 com_err(prog_name, errno, "while trying to execv %s",
+		 	 params[0]);
+		 sweep_up(use_source_cache, cc_target);
+		 exit(1);
+	}else{
+		if (child_pid = fork()){	
+			if (auth_debug){
+			 	printf(" The childs pid is %d \n", child_pid);
+        			printf(" The parents pid is %d \n", getpid());
+			}
+        		ret_pid = waitpid(child_pid, &statusp, 0);
+        		if (ret_pid == -1){
+				com_err(prog_name, errno, "while calling waitpid");
+		 		exit(1);
+        		}
+		 	sweep_up(use_source_cache, cc_target);
+		}else{
+		 	execv(params[0], params);
+			com_err(prog_name, errno, "while trying to execv %s",
+				params[0]);
+			exit(1);
+		
+		}
+	}
+}
+
+
+int standard_shell(sh)
+char *sh;
+{
+register char *cp;
+char *getusershell();
+	 
+	 while ((cp = getusershell()) != NULL)
+		 if (!strcmp(cp, sh))
+			 return (1);
+	 return (0);    
+}
+						  
+
+/* Modify this later , (clean it up) , MOD */     
+
+char * ontty()
+{
+char *p, *ttyname();
+static char buf[MAXPATHLEN + 4];
+
+       buf[0] = 0;
+       if (p = ttyname(STDERR_FILENO))
+	   sprintf(buf, " on %s", p);
+       return (buf);
+}
+
+
+int set_env_var( char * name, char * value){  
+char * env_var_buf;
+
+	/* allocate extra two spaces, one for the = and one for the \0 */  
+	env_var_buf = (char *) calloc(2 + strlen(name) + strlen(value),
+					sizeof(char)); 
+
+        sprintf(env_var_buf,"%s=%s",name, value);  
+        return putenv(env_var_buf);
+
+}
+
+void sweep_up(int use_source_cache, krb5_ccache cc){
+krb5_error_code retval; 
+char * cc_name;
+struct stat  st_temp;
+
+	if (! use_source_cache){
+		cc_name = krb5_cc_get_name(cc);
+		if ( ! stat(cc_name, &st_temp)){
+			if (retval = krb5_cc_destroy(cc)){
+				com_err(prog_name, retval, 
+					"while destroying cache");   
+			}
+		}
+	}
+}
+/*****************************************************************
+get_params is to be called for the -a option or -e option to
+           collect all params passed in for the shell or for
+           cmd.  An aray is returned containing all params.
+           optind is incremented accordingly and the first
+           element in the returned array is reserved for the
+           name of the command to be executed or the name of the
+           shell.
+*****************************************************************/
+
+krb5_error_code
+get_params( int * optind, int pargc, char ** pargv, char *** params ) {
+
+int i,j;
+char ** ret_params;
+int size = pargc - *optind + 2;
+
+        if ((ret_params = (char **) calloc(size, sizeof (char *)))== NULL ){
+                return errno;
+        }
+
+        for (i = *optind, j=1; i < pargc; i++,j++){
+                ret_params[j] = pargv[i];
+                *optind = *optind + 1;
+        }
+
+        ret_params[size-1] = NULL;
+        *params = ret_params;
+return 0;
+
+}
+
