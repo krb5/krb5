@@ -1,3 +1,7 @@
+Tue Feb 28 02:10:44 1995  John Gilmore  (gnu at toad.com)
+
+	* kinit.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Mon Feb 13 23:50:52 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(LD) instead of $(CC) when linking.

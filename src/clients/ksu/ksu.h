@@ -25,16 +25,9 @@
  * KSU was writen by:  Ari Medvinsky, ari@isi.edu
  */
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/dbm.h>
-
-#include <krb5/osconf.h>
-#include <krb5/sysincl.h>
+#include "k5-int.h"
 #include <stdio.h>
-#include <com_err.h>
+#include "com_err.h"
 #include <sys/types.h> 
 #include <sys/param.h>
 #include <pwd.h>

@@ -30,11 +30,7 @@
  * 
  */
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-
+#include "k5-int.h"
 #include "./kdb5_edit.h"
 
 #if defined(sysvimp) || ( defined(mips) && defined(SYSTYPE_BSD43)) || (defined(vax) && !defined(ultrix))

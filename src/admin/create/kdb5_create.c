@@ -24,18 +24,9 @@
  * Generate (from scratch) a Kerberos KDC database.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
-#include <krb5/osconf.h>
-
-#include <com_err.h>
+#include "k5-int.h"
+#include "com_err.h"
 #include <stdio.h>
-
-
-#include <krb5/ext-proto.h>
 
 enum ap_op {
     NULL_KEY,				/* setup null keys */

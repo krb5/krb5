@@ -24,15 +24,8 @@
  * Store the master database key in a file.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/sysincl.h>
-#include <krb5/osconf.h>
-
-#include <com_err.h>
+#include "k5-int.h"
+#include "com_err.h"
 #include <stdio.h>
 
 extern int errno;

@@ -1,3 +1,7 @@
+Tue Feb 28 02:10:17 1995  John Gilmore  (gnu at toad.com)
+
+	* kdestroy.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Fri Feb 10 18:46:17 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove ISODE cruft.  Use $(LIBS) so that

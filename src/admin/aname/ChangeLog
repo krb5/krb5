@@ -1,3 +1,7 @@
+Tue Feb 28 02:04:08 1995  John Gilmore  (gnu at toad.com)
+
+	* kdb5_anadd.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Mon Oct  3 19:11:27 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

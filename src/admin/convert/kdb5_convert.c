@@ -39,18 +39,9 @@ static C_Block master_key;
 static Key_schedule master_key_schedule;
 static long master_key_version;
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
-#include <krb5/osconf.h>
-#include <krb5/sysincl.h>
-
-#include <com_err.h>
+#include "k5-int.h"
+#include "com_err.h"
 #include <stdio.h>
-
-#include <krb5/ext-proto.h>
 
 #include <netinet/in.h>			/* ntohl */
 

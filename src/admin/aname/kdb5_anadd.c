@@ -24,13 +24,9 @@
  * Program to add/delete entries to/from the aname translation database.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-#include <krb5/sysincl.h>
-#include <krb5/ext-proto.h>
-#include <krb5/dbm.h>
+#include "k5-int.h"
 #include <sys/file.h>
-#include <com_err.h>
+#include "com_err.h"
 #include <stdio.h>
 #include <errno.h>
 

@@ -1,3 +1,8 @@
+Tue Feb 28 02:06:26 1995  John Gilmore  (gnu at toad.com)
+
+	* dump.c, dumpv4.c, kdb5_edit.c, ss_wrapper.c, tcl_wrapper.c,
+	util.c: Avoid <krb5/...> includes.
+
 Thu Feb 23 19:52:35 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* kdb5_edit.c: add struct timeb and sys/timeb includes from

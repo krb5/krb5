@@ -26,10 +26,8 @@
 
 #include <stdio.h>
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 
 extern int optind;
 extern char *optarg;

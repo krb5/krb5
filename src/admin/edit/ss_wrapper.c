@@ -24,7 +24,7 @@
  * ss wrapper for kdb5_edit
  */
 
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include "kdb5_edit.h"
 #include <ss/ss.h>
 #include <stdio.h>

@@ -25,12 +25,10 @@
  */
 
 #include <stdio.h>
-#include <com_err.h>
+#include "com_err.h"
 #include <pwd.h>
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "krb5.h"
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */

@@ -26,14 +26,9 @@
  * This version knows about DBM format databases.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
+#include "k5-int.h"
 #include <stdio.h>
-
-#include <com_err.h>
-#include <krb5/ext-proto.h>
-#include <krb5/sysincl.h>		/* for MAXPATHLEN */
+#include "com_err.h"
 
 extern int errno;
 
