@@ -29,6 +29,7 @@
 #include "com_err.h"
 #include "profile.h"
 
+#ifdef SWIGTCL
 /* Reduce warnings about cast discarding const to just this one, from
    every SWIG-generated call to Tcl_SetResult.  */
 static void my_tcl_setresult(Tcl_Interp *i, const char *str, Tcl_FreeProc *f)
@@ -37,15 +38,19 @@ static void my_tcl_setresult(Tcl_Interp *i, const char *str, Tcl_FreeProc *f)
 }
 #undef Tcl_SetResult
 #define Tcl_SetResult my_tcl_setresult
+#endif
 %}
 
 %include "typemaps.i"
 
-%typemap(tcl8,in,numinputs=0) SWIGTYPE *OUTPUT ($1_basetype tmp) {
-    $1 = &tmp;
+/* These should perhaps be part of the general SWIG package, maybe?  */
+%typemap(in,numinputs=0) SWIGTYPE *OUTPUT ($1_basetype tmp) {
+    /*generic swigtype hack*/ $1 = &tmp;
 }
 %typemap(tcl8,argout) SWIGTYPE *OUTPUT
-  "/*foo*/Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *$1, $*1_descriptor,0));";
+  "/*generic swigtype hack*/ Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *$1, $*1_descriptor,0));";
+%typemap(python,argout) SWIGTYPE *OUTPUT
+  "/*generic swigtype hack*/ resultobj = SWIG_NewPointerObj((void *) *$1, $*1_descriptor,0);";
 
 %module profile
 
@@ -81,6 +86,12 @@ typedef void **iter_t; /* ick */
 	Tcl_SetResult(interp, error_message($1), TCL_STATIC);
 	SWIG_fail;
     }
+}
+%typemap(python,argout) errcode_t* {
+    /* do something with *($1) */ abort();
+}
+%typemap(python,out) errcode_t {
+    /* do something with $1 */ abort();
 }
 
 /* "char **OUTPUT" : Supply a place for the function to stuff one
@@ -239,4 +250,6 @@ errcode_t profile_rename_section(profile_t p, const char **nullterm,
 errcode_t profile_add_relation(profile_t p, const char **nullterm,
 			       const char *new_val = NULL);
 
+#ifdef SWIGTCL
 %include "tclsh.i"
+#endif
