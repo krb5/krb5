@@ -1476,10 +1476,12 @@ sb_auth_complete();
 		 */
 		break;
 	case TELQUAL_IS:
-		auth_is(subpointer, SB_LEN());
+	  if (!auth_negotiated)
+  auth_is(subpointer, SB_LEN());
 		break;
 	case TELQUAL_NAME:
-		auth_name(subpointer, SB_LEN());
+	  if (!auth_negotiated)
+  auth_name(subpointer, SB_LEN());
 		break;
 	}
 	break;
@@ -1640,11 +1642,12 @@ send_status()
 }
 
 static int envvarok(varp)
-char *varp;
+  char *varp;
 {
     if (!strncmp(varp, "LD_", 3) || !strncmp(varp, "_RLD_", 5) ||
 	!strncmp(varp, "ELF_LD_", 7) || !strncmp(varp, "AOUT_LD_", 8) ||
         !strcmp(varp, "LIBPATH") || !strcmp(varp, "IFS") ||
+!strcmp(varp, "KRB5_KTNAME")|| !strcmp(varp, "KRB5CCNAME")||
 	strchr(varp, '='))
     {
 	syslog(LOG_INFO, "Rejected the attempt to modify the environment variable \"%s\"", varp);

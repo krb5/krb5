@@ -1,3 +1,8 @@
+Thu Apr 18 16:33:42 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* state.c (suboption): Don't accept authentication suboptions after authentication negotiation complete. 
+	(envvarok):  exclude KRB5_KTNAME and KRB5CCNAME
+
 Tue Apr 16 12:23:02 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in : Treat HPUX as if it doesn't have streams.
