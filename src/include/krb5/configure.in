@@ -158,4 +158,5 @@ else
 	AC_MSG_RESULT(Kerberos 4 compatibility enabled)
 	AC_DEFINE(KRB5_KRB4_COMPAT)
 fi
+AC_PROG_INSTALL
 V5_AC_OUTPUT_MAKEFILE

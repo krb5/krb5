@@ -33,10 +33,9 @@ clean-windows::
 	@echo Making clean locally
 
 KRB5_HEADERS = krb5.h k5-int.h
-install:: $(KRB5_HEADERS)
+
+install::
 	@set -x; for f in $(KRB5_HEADERS) ; \
-	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/$$f; \
-	then true; else \
-		$(RM) $(DESTDIR)$(KRB5_INCDIR)/$$f; \
-		cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/$$f ; \
-	fi; done
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)$(S)$$f ; \
+	done

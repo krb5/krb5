@@ -36,19 +36,14 @@ clean::
 
 depend::
 
-install:: $(KRB5_HEADERS) osconf.h autoconf.h 
+install::
 	@set -x; for f in $(KRB5_HEADERS) ; \
-	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
-	then true; else \
-		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
-		cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
-	fi; done
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f	\
+		$(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)$$f ; \
+	done
 	@set -x; for f in osconf.h autoconf.h $(ET_HEADERS); \
-	do if cmp -s $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
-	then true; else \
-		$(RM) $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f; \
-		cp $$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
-	fi; done
+	do $(INSTALL_DATA) $(C)$$f $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)$$f; \
+	done
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		  -e "s+@KDB5DIR+$(KDB5DIR)+" \

@@ -7,4 +7,5 @@ MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
 CONFIG_RULES
+AC_PROG_INSTALL
 V5_AC_OUTPUT_MAKEFILE

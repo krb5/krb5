@@ -1,3 +1,9 @@
+
+Mon May 22 09:41:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- (install) Always perform install actions using
+			  $(INSTALL_DATA).
+	* configure.in	- Locate install program.
+
 Sun May 21 15:25:45 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (PROCESS_REPLACE): Replace the RCTMPDIR in stock.h
