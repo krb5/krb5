@@ -5,6 +5,11 @@
           - Activate support for KerbQueryTicketCacheEx2Message
           - Add locale support for regions which use MultiByte characters
 
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_mslsa.c (MSCredToMITCred): Don't create an empty array for
+	addresses, just use a null pointer now.
+
 2004-10-07  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Fix the forced setting of the Initial Ticket Flag
                 on Win2000 and add it to XP and 2003 SP1
