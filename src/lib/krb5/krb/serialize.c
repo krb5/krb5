@@ -174,7 +174,7 @@ krb5_internalize_opaque(krb5_context kcontext, krb5_magic odtype, krb5_pointer *
 }
 
 /*
- * krb5_ser_pack_int32()	- Pack a 4-byte integer if space is availble.
+ * krb5_ser_pack_int32()	- Pack a 4-byte integer if space is available.
  *				  Update buffer pointer and remaining space.
  */
 krb5_error_code KRB5_CALLCONV
@@ -187,6 +187,23 @@ krb5_ser_pack_int32(krb5_int32 iarg, krb5_octet **bufp, size_t *remainp)
 	(*bufp)[3] = (krb5_octet) (iarg & 0xff);
 	*bufp += sizeof(krb5_int32);
 	*remainp -= sizeof(krb5_int32);
+	return(0);
+    }
+    else
+	return(ENOMEM);
+}
+
+/*
+ * krb5_ser_pack_int64()	- Pack an 8-byte integer if space is available.
+ *				  Update buffer pointer and remaining space.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_ser_pack_int64(krb5_int64 iarg, krb5_octet **bufp, size_t *remainp)
+{
+    if (*remainp >= sizeof(krb5_int64)) {
+	store_64_be(iarg, (unsigned char *)*bufp);
+	*bufp += sizeof(krb5_int64);
+	*remainp -= sizeof(krb5_int64);
 	return(0);
     }
     else
@@ -222,6 +239,22 @@ krb5_ser_unpack_int32(krb5_int32 *intp, krb5_octet **bufp, size_t *remainp)
 		 ((krb5_int32) ((unsigned char) (*bufp)[3])));
 	*bufp += sizeof(krb5_int32);
 	*remainp -= sizeof(krb5_int32);
+	return(0);
+    }
+    else
+	return(ENOMEM);
+}
+
+/*
+ * krb5_ser_unpack_int64()	- Unpack an 8-byte integer if it's there.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_ser_unpack_int64(krb5_int64 *intp, krb5_octet **bufp, size_t *remainp)
+{
+    if (*remainp >= sizeof(krb5_int64)) {
+	*intp = load_64_be((unsigned char *)*bufp);
+	*bufp += sizeof(krb5_int64);
+	*remainp -= sizeof(krb5_int64);
 	return(0);
     }
     else

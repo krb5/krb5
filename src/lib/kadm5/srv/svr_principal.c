@@ -19,6 +19,9 @@ static char *rcsid = "$Header$";
 #include	"server_internal.h"
 #include	<stdarg.h>
 #include	<stdlib.h>
+#ifdef USE_PASSWORD_SERVER
+#include	<sys/wait.h>
+#endif
 
 extern	krb5_principal	    master_princ;
 extern	krb5_principal	    hist_princ;
@@ -1065,6 +1068,105 @@ static kadm5_ret_t add_to_history(krb5_context context,
 }
 #undef KADM_MOD
 
+#ifdef USE_PASSWORD_SERVER
+
+/* FIXME: don't use global variable for this */
+krb5_boolean use_password_server = 0;
+
+static krb5_boolean
+kadm5_use_password_server (void)
+{
+    return use_password_server;
+}
+
+void
+kadm5_set_use_password_server (void)
+{
+    use_password_server = 1;
+}
+
+/*
+ * kadm5_launch_task () runs a program (task_path) to synchronize the 
+ * Apple password server with the Kerberos database.  Password server
+ * programs can receive arguments on the command line (task_argv)
+ * and a block of data via stdin (data_buffer).
+ *
+ * Because a failure to communicate with the tool results in the
+ * password server falling out of sync with the database,
+ * kadm5_launch_task() always fails if it can't talk to the tool.
+ */
+
+static kadm5_ret_t
+kadm5_launch_task (krb5_context context,
+                   const char *task_path, char * const task_argv[],
+                   const char *data_buffer) 
+{
+    kadm5_ret_t ret = 0;
+    int data_pipe[2];
+    
+    if (data_buffer != NULL) {
+        ret = pipe (data_pipe);
+        if (ret) { ret = errno; }
+    }
+
+    if (!ret) {
+        pid_t pid = fork ();
+        if (pid == -1) {
+            ret = errno;
+        } else if (pid == 0) {
+            /* The child: */
+            
+            if (data_buffer != NULL) {
+                if (dup2 (data_pipe[0], STDIN_FILENO) == -1) {
+                    _exit (1);
+                }
+            } else {
+                close (data_pipe[0]);
+            }
+
+            close (data_pipe[1]);
+            
+            execv (task_path, task_argv);
+            
+            _exit (1); /* Fail if execv fails */
+        } else {
+            /* The parent: */
+            int status;
+                       
+            if (data_buffer != NULL) {
+                /* Write out the buffer to the child */
+                if (krb5_net_write (context, data_pipe[1],
+                                    data_buffer, strlen (data_buffer)) < 0) {
+                    /* kill the child to make sure waitpid() won't hang later */
+                    ret = errno;
+                    kill (pid, SIGKILL);
+                }
+            }
+
+            close (data_buffer[0]);
+            close (data_buffer[1]);
+
+            waitpid (pid, &status, 0);
+
+            if (!ret) {
+                if (WIFEXITED (status)) {
+                    /* child read password and exited.  Check the return value. */
+                    if ((WEXITSTATUS (status) != 0) && (WEXITSTATUS (status) != 252)) {
+                       ret = KRB5KDC_ERR_POLICY; /* password change rejected */
+                    }
+                } else {
+                    /* child read password but crashed or was killed */
+                    ret = KRB5KRB_ERR_GENERIC; /* FIXME: better error */
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
+#endif
+
 kadm5_ret_t
 kadm5_chpass_principal(void *server_handle,
 			    krb5_principal principal, char *password)
@@ -1192,6 +1294,42 @@ kadm5_chpass_principal_3(void *server_handle,
     } else {
 	kdb.pw_expiration = 0;
     }
+
+#ifdef USE_PASSWORD_SERVER
+    if (kadm5_use_password_server () &&
+        (krb5_princ_size (handle->context, principal) == 1)) {
+        krb5_data *princ = krb5_princ_component (handle->context, principal, 0);
+        const char *path = "/usr/sbin/mkpassdb";
+        char *argv[] = { "mkpassdb", "-setpassword", NULL, NULL };
+        char *pstring = NULL;
+        char pwbuf[256];
+        int pwlen = strlen (password);
+
+        if (pwlen > 254) pwlen = 254;
+        strncpy (pwbuf, password, pwlen);
+        pwbuf[pwlen] = '\n';
+        pwbuf[pwlen + 1] = '\0';
+
+        if (!ret) {
+            pstring = malloc ((princ->length + 1) * sizeof (char));
+            if (pstring == NULL) { ret = errno; }
+        }
+
+        if (!ret) {
+            memcpy (pstring, princ->data, princ->length);
+            pstring [princ->length] = '\0';
+            argv[2] = pstring;
+
+            ret = kadm5_launch_task (handle->context, path, argv, pwbuf);
+        }
+        
+        if (pstring != NULL)
+            free (pstring);
+        
+        if (ret)
+            goto done;
+    }
+#endif
 
     ret = krb5_dbe_update_last_pwd_change(handle->context, &kdb, now);
     if (ret)

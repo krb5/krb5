@@ -122,6 +122,7 @@ extern const char * const krb_err_txt[MAX_KRB_ERRORS];
 #define		REALM_SZ	40
 #define		SNAME_SZ	40
 #define		INST_SZ		40
+#define     ADDR_SZ     40
 /*
  * NB: This overcounts due to NULs.
  */
@@ -208,6 +209,9 @@ struct credentials {
 #if TARGET_OS_MAC
     KRB_UINT32 address;			/* Address in ticket */
     KRB_UINT32 stk_type;		/* string_to_key function needed */
+#endif
+#ifdef _WIN32
+    char    address[ADDR_SZ];   /* Address in ticket */
 #endif
 };
 

@@ -30,8 +30,6 @@
 #include "des_int.h"
 #include "des.h"
 
-extern char *errmsg();
-extern int errno;
 extern unsigned long quad_cksum();
 char *progname;
 int des_debug;

@@ -1,3 +1,7 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Substitute FAKEDEST.  Substitue "$" for "$$".
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.

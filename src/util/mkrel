@@ -136,6 +136,7 @@ echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	-o -name BADSYMS -o -name .Sanitize -o -name .rconf \) -print \
 	| xargs rm -f
+find $reldir -type d -name autom4te.cache -exec rm -rf {} \;
 
 if test $dodoc = t; then
 	echo "Building doc..."

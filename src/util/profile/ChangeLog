@@ -1,3 +1,19 @@
+2004-01-30  Alexandra Ellwood  <lxs@mit.edu>
+
+    * prof-int.h: prof-int.h should include pthread.h when USE_PTHREADS 
+    is defined.
+
+2003-12-14 Jeffrey Altman <jaltman@mit.edu>
+
+   * all files: move prof-int.h to be the first include file
+     in order to obtain platform specific config preprocessor
+     variables which are used to selectively include stdlib.h
+
+2003-07-03 Alexandra Ellwood <lxs@mit.edu>
+
+    * profile.hin: Remove leading spaces in #define and #include 
+    in public headers to support K&R C compilers
+    
 2003-03-06 Alexandra Ellwood <lxs@mit.edu>
     * profile.hin, prof_file.c (profile_flush_file_data): Stop copying
     the resource fork.  We stopped writing resources to the krb5
