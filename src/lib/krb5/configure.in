@@ -6,23 +6,10 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 DO_SUBDIRS
-V5_MAKE_SHARED_LIB(libkrb5)
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build shared libraries],[
-LinkFileDir(../libkrb5.[$](SHEXT), libkrb5.[$](SHEXT), ./krb5)
-AppendRule([all-unix:: ../libkrb5.$(SHEXT)])
-AppendRule([install-unix::	libkrb5.[$](SHEXT)
-	[$](INSTALL_DATA) libkrb5.[$](SHEXT)	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libkrb5.[$](SHEXT)])
-])dnl
-if test -n "$krb5_cv_staticlibs_enabled" ; then
-	LinkFileDir(../libkrb5.[$](STEXT), libkrb5.[$](STEXT), ./krb5)
-        AppendRule([install-unix:: 
-	[$](INSTALL_DATA) libkrb5.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb5.[$](STEXT)
-	[$](RANLIB) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb5.[$](STEXT)]) 
-	AppendRule([all-unix:: ../libkrb5.[$](STEXT)])
-        AppendRule([all:: libkrb5.[$](STEXT)])
-fi
-AppendRule([install:: install-[$](WHAT)])
+V5_MAKE_SHARED_LIB(libkrb5,0.1,.., ./krb5)
+CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
+AC_SUBST(CRYPTO_SH_VERS)
+COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
+AC_SUBST(COMERR_SH_VERS)
 AppendRule([all::	all-$(WHAT)])
 V5_AC_OUTPUT_MAKEFILE
