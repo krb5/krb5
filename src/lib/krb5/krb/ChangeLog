@@ -1,3 +1,11 @@
+2003-08-08  Tom Yu  <tlyu@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): If DNS SRV support is
+	turned off, the second call to get_init_creds() will fail with
+	KRB5_REALM_UNKNOWN under certain circumstances.  If that happens,
+	return the error from the first call to get_init_creds(), which
+	will be more useful to the user.
+
 2003-07-22  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* preauth2.c (krb5_do_preauth): Use the etype_info2 decoder for decoding etype_info2
