@@ -1,3 +1,8 @@
+Tue Jan 12 18:26:04 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Define NDBM_PW_CHECK if enable_athena is set to
+	deal with v4kadmind kludge.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

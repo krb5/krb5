@@ -31,6 +31,12 @@ if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != "" -a
 fi
 AC_SUBST(DO_V4_TEST)
 dnl
+dnl For ndbm password checking kludge.
+dnl
+if test "$ath_compat" = "compat"; then
+	AC_DEFINE(NDBM_PW_CHECK)
+fi
+dnl
 dnl The following are substituted into testing/scripts/env-setup.sh
 RBUILD=`pwd`/..
 AC_SUBST(RBUILD)
