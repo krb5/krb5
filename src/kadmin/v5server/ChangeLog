@@ -1,4 +1,9 @@
 
+Thu Jul 27 15:08:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c - Remove inclusion of "mit-des.h", it's no longer needed.
+		Use KRB5_MIT_DES_KEYSIZE instead of sizeof(mit_des_cblock).
+
+
 Mon Jul 17 15:07:08 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_main.c - Add stash-file handling and supply appropriate value to
 		krb5_db_fetch_mkey().  Add KDC profile reading/handling to

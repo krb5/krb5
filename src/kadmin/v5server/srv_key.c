@@ -29,7 +29,6 @@
 #include "adm.h"
 #include "com_err.h"
 #include "kadm5_defs.h"
-#include "mit-des.h"
 
 /*
  * These control the maximum [renewable] life of the changepw principal, if
@@ -833,11 +832,11 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
 				  &asalt);
 	if (!kret) {
 	    if (primary.length &&
-		(primary.length == sizeof(mit_des_cblock)) &&
+		(primary.length == KRB5_MIT_DES_KEYSIZE) &&
 		mit_des_is_weak_key(primary.contents))
 		weakness = 1;
 	    if (alternate.length &&
-		(alternate.length == sizeof(mit_des_cblock)) &&
+		(alternate.length == KRB5_MIT_DES_KEYSIZE) &&
 		mit_des_is_weak_key(alternate.contents))
 		weakness = 1;
 	    if (primary.contents) {
