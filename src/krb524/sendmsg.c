@@ -30,11 +30,13 @@
 #define NEED_LOWLEVEL_IO
 #include "k5-int.h"
 
+#ifndef _WIN32
 #include <unistd.h>
+#include <sys/time.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/time.h>
 
 #ifdef _AIX
 #include <sys/select.h>
@@ -42,9 +44,6 @@
 
 #include <krb.h>
 #include "krb524.h"
-
-/* For krb5_locate_kdc() */
-#include <k5-int.h>
 
 /*
  * krb524_sendto_kdc:
@@ -60,11 +59,6 @@
  * The storage for 'reply' is allocated and should be freed by the caller
  * when finished.
  */
-
-extern int krb5_max_dgram_size;
-extern int krb5_max_skdc_timeout;
-extern int krb5_skdc_timeout_shift;
-extern int krb5_skdc_timeout_1;
 
 krb5_error_code
 krb524_sendto_kdc (context, message, realm, reply)
@@ -83,12 +77,15 @@ krb524_sendto_kdc (context, message, realm, reply)
     fd_set readable;
     struct timeval waitlen;
     int cc;
+    krb5int_access internals;
 
+    if (retval = krb5int_accessor(&internals, KRB5INT_ACCESS_VERSION))
+	return retval;
     /*
      * find KDC location(s) for realm
      */
 
-    if ((retval = krb5_locate_kdc(context, realm, &addr, &naddr, NULL, NULL)))
+    if ((retval = internals.krb5_locate_kdc(context, realm, &addr, &naddr, 0)))
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
@@ -111,12 +108,12 @@ krb524_sendto_kdc (context, message, realm, reply)
 	else
 	    ((struct sockaddr_in *)&addr[i])->sin_port = htons(KRB524_PORT);
 
-    if (!(reply->data = malloc(krb5_max_dgram_size))) {
+    if (!(reply->data = malloc(internals.krb5_max_dgram_size))) {
 	free(addr);
 	free(socklist);
 	return ENOMEM;
     }
-    reply->length = krb5_max_dgram_size;
+    reply->length = internals.krb5_max_dgram_size;
 
 #if 0
     /*
@@ -137,8 +134,8 @@ krb524_sendto_kdc (context, message, realm, reply)
      * do exponential backoff.
      */
 
-    for (timeout = krb5_skdc_timeout_1; timeout < krb5_max_skdc_timeout;
-	 timeout <<= krb5_skdc_timeout_shift) {
+    for (timeout = internals.krb5_skdc_timeout_1; timeout < internals.krb5_max_skdc_timeout;
+	 timeout <<= internals.krb5_skdc_timeout_shift) {
 	sent = 0;
 	for (host = 0; host < naddr; host++) {
 	    /* send to the host, wait timeout seconds for a response,

@@ -23,7 +23,10 @@ BUILDTOP=$(REL)$(U)
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
-LIB=krb524
+LIBNAME=krb524
+##WIN32##!if 0
+LIB=$(LIBNAME)
+##WIN32##!endif
 LIBMAJOR=1
 LIBMINOR=0
 RELDIR=../krb524
@@ -35,20 +38,47 @@ PROG_RPATH=$(KRB5_LIBDIR)
 KRB524_DEPLIB	= libkrb524.a
 KRB524_LIB	= libkrb524.a
 
+
+##WIN32##KRB4_INCLUDES = -I../../../krb4/krbv4/include -I../../../krb4/include
+##WIN32##K4LIB = ../../../krb4/krbv4/krbdll/$(OUTPRE)krbv4w32.lib
+###WIN32##K4LIB = ../lib/$(OUTPRE)krb4_32.lib
+K524DEF = krb524.def
+WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
+	version.lib advapi32.lib gdi32.lib
+
 LOCALINCLUDES= $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 # Library sources
-SRCS	= conv_creds.c conv_princ.c cnv_tkt_skey.c \
-	encode.c misc.c globals.c sendmsg.c krb524_err.et
-STLIBOBJS = conv_creds.o conv_princ.o cnv_tkt_skey.o \
-	encode.o misc.o globals.o sendmsg.o krb524_err.o
+SRCS	= \
+	conv_creds.c \
+	conv_princ.c \
+	cnv_tkt_skey.c \
+	encode.c \
+	misc.c \
+	globals.c \
+	sendmsg.c \
+	krb524_err.et \
+	libinit.c
+
+STLIBOBJS = \
+	$(OUTPRE)conv_creds.$(OBJEXT) \
+	$(OUTPRE)conv_princ.$(OBJEXT) \
+	$(OUTPRE)cnv_tkt_skey.$(OBJEXT) \
+	$(OUTPRE)encode.$(OBJEXT) \
+	$(OUTPRE)misc.$(OBJEXT) \
+	$(OUTPRE)globals.$(OBJEXT) \
+	$(OUTPRE)sendmsg.$(OBJEXT) \
+	$(OUTPRE)krb524_err.$(OBJEXT) \
+	$(OUTPRE)libinit.$(OBJEXT)
 
 GENS	= krb524_err.c krb524_err.h
 
-all:: $(GENS)
-all:: all-libs
+all-unix:: $(GENS)
+all-unix:: all-libs
 
-all:: krb524d krb524test k524init
+all-unix:: krb524d krb524test k524init
+
+all-windows:: $(OUTPRE)$(LIBNAME).lib $(OUTPRE)k524init.exe
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
@@ -59,10 +89,17 @@ krb524d: krb524d.o $(KADMSRV_DEPLIBS) $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 k524init: k524init.o  $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init k524init.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-install:: install-libs
+$(OUTPRE)$(LIBNAME).lib: $(STLIBOBJS) $(K4LIB) $(KLIB)
+	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
+
+$(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
+	link $(EXE_LINKOPTS) -out:$@ $** $(KLIB) $(K4LIB) $(WINLIBS) $(CLIB)\
+        $(OUTPRE)krb524.lib
+
+install-unix:: install-libs
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
 	$(INSTALL_PROGRAM) k524init $(DESTDIR)$(CLIENT_BINDIR)/krb524init
 
-clean:: clean-libs clean-libobjs
+clean-unix:: clean-libs clean-libobjs
 	$(RM) $(OBJS) $(GENS) core *~ *.bak #*
 	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o

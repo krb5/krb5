@@ -24,7 +24,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <netinet/in.h>
+#endif
 #include <krb.h>
 
 #include "krb524.h"

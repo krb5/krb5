@@ -1,5 +1,34 @@
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
+	* Makefile.in: Make krb524 library and k524init program build on
+	Windows.
+
+	* krb524.def, libinit.c: Files needed to build on Windows.
+
+	* k524init.c: Use public krb_in_tkt() with realm paramter instead of
+	potentially private in_tkt() w/o realm parameter (which does not
+	even exist w/o the realm paramter in some krb4 libraries).  Use
+	krb_save_credentials() instead of tf_init() then
+	tf_save_credentials() then tf_close().
+
+	* cnv_tkt_skey.c: Put copy of krb_cr_tkt_krb5() and
+	krb_create_ticket() as static functions in this file, calling them
+	krb524int_*().  Call these functions instead of the ones in the
+	MIT krb4 library included in the krb5 tree.
+	
+	* conv_princ.c: Remove unused headers.
+
+	* k524init.c, cnv_tkt_skey.c, conv_creds.c, encode.c, misc.c,
+	sendmsg.c, test.c: Do not include Unix headers on Windows.
+
+	* sendmsg.c (krb524_sendto_kdc): Fix call to krb5_locate_kdc() to
+	use right number and types of parameters.  Use krb5int_accessor()
+	to get at internals: krb5_locate_kdc(), krb5_max_dgram_size,
+	krb5_skdc_timeout_1, and krb5_skdc_timeout_shift.  (The latter 3
+	should probably be #defines...)
+
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
 	* getcred.c (main): Use correct parameters for krb5_cc_default()
 	in case someone actually wants to build this file.
 	

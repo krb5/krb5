@@ -23,9 +23,12 @@
 #include <krb5.h>
 #include <stdio.h>
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <sys/time.h>
 #include <sys/signal.h>
 #include <netinet/in.h>
+#endif
 
 #include <krb.h>
 #include "krb524.h"

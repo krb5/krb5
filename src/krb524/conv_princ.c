@@ -21,14 +21,7 @@
  */
 
 #include "krb5.h"
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/signal.h>
-#include <netinet/in.h>
-
 #include <krb.h>
-
 #include "krb524.h"
 
 int krb524_convert_princs(context, client, server, pname, pinst, prealm, 

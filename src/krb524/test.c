@@ -25,7 +25,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <netinet/in.h>
+#endif
 
 #include <des.h>
 #include <krb.h>

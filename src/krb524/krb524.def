@@ -1,0 +1,13 @@
+;----------------------------------------------------
+;   KRB524.DEF - KRB524.DLL module definition file
+;----------------------------------------------------
+
+; ****************************************************************************
+; Do not add any function to this file until you make sure the calling
+; convention for the exported function is KRB5_CALLCONV
+; ****************************************************************************
+
+
+EXPORTS
+    krb524_convert_creds_kdc
+    krb524_init_ets
