@@ -92,4 +92,5 @@ KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM
 KRB5_RUN_FLAGS
+AC_CONFIG_FILES(include/generated.stmp:Makefile.in)
 V5_AC_OUTPUT_MAKEFILE(. hash btree db mpool recno clib test)

@@ -28,13 +28,14 @@ $(HDRDIR)/db-config.h: include/db-config.h
 $(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
 	$(CP) $(srcdir)/include/db-ndbm.h $@
 
-include/config.h: $(srcdir)/include/config.h.in
+include/config.h include/db-config.h: include/generated.stmp
+include/generated.stmp: $(srcdir)/include/config.h.in $(srcdir)/include/db-config.h.in
 	cd $(thisconfigdir) && $(SHELL) config.status
-$(srcdir)/include/config.h.in: @MAINT@ $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
+$(srcdir)/include/config.h.in: @MAINT@ $(srcdir)/include/autoconf.stmp
+$(srcdir)/include/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
 	cd $(srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
-include/db-config.h: $(srcdir)/include/db-config.h.in
-	cd $(thisconfigdir) && $(SHELL) config.status
+	touch $(srcdir)/include/autoconf.stmp
 
 clean-includes::
-	$(RM) $(HDRS)
+	$(RM) $(HDRS) include/*.stmp
 # @lib_frag@

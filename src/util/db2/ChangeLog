@@ -1,3 +1,14 @@
+2004-06-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (include/generated.stmp): New intermediate target
+	file, to prevent repeated generation of unchanging header files.
+	(include/config.h, include/db-config.h): Depend on it.
+	($(srcdir)/include/autoconf.stmp, $(srcdir)/include/config.h.in):
+	Likewise.
+	(clean-includes): Delete the new intermediate target files.
+	* configure.in: Generate include/generated.stmp when config.status
+	is run.
+
 2004-06-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(srcdir)/include/config.h.in): Always use
