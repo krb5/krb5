@@ -85,7 +85,7 @@ OM_uint32 gss_service_import_name(minor_status, input_name_buffer, output_name)
 	 * Assume the first eight characters are "service:"
 	 */
 	service = cp = str + 8;
-	if (!(cp = index(cp, '@'))) {
+	if (!(cp = strchr(cp, '@'))) {
 		free(str);
 		return(GSS_S_BAD_NAME);
 	}
