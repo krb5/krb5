@@ -131,6 +131,9 @@ Notes, Major Changes, and Known Bugs
 * A security problem in login.krb5 has been fixed.  This problem was
   only present if the krb4 compatibility code was not compiled in.
 
+* A security problem with ftpd has been fixed.  An error in the in the
+  yacc grammar permitted potential root access.
+
 * The client programs kinit, klist and kdestroy have been changed to
   incorporate krb4 support.  New command-line options control whether
   krb4 behavior, krb5 behavior, or both are used.
@@ -354,6 +357,9 @@ their many suggestions and bug fixes.
 
 Thanks to Nalin Dahyabhai of RedHat and Chris Evans for locating and
 providing patches for numerous buffer overruns.
+
+Thanks to Christopher Thompson and Marcus Watts for discovering the
+ftpd security bug.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danillo Almeida, Jay Berkenbilt, Richard Basch, John
