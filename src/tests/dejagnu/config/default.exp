@@ -304,7 +304,7 @@ proc restore_kerberos_env { } {
     global orig_kerberos_server
 
     if [info exists orig_krb5_config] {
-    set env(KRB_5CONFIG) $orig_krb5_config
+    set env(KRB5_CONFIG) $orig_krb5_config
     } else {
     catch "unset env(KRB5_CONFIG)"
     }

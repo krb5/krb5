@@ -1,4 +1,8 @@
 
+Fri May 26 17:55:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - fix typo for restoring setting of KRB5_CONFIG on exit.
+
+
 Fri May 12 16:15:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp: Change to use new kadmin/kadmind.  Add entries for
 		krbtest/kadmin5, changepw and extraction for changepw service
