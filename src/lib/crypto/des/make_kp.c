@@ -22,7 +22,7 @@
 #include "des_int.h"
 
 #ifndef lint
-static char rcsid[]=
+static char rcsid_make_kp[]=
     "$Id$";
 #endif /* lint */
 

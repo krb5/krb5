@@ -16,7 +16,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char des_cbc_checksum_c[] =
+static char rcsid_cbc_cksum_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

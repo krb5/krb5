@@ -16,7 +16,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char weak_key_c[] =
+static char rcsid_weak_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

@@ -10,7 +10,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char des_fnr_key_c[] =
+static char rcsid_fin_rndkey_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

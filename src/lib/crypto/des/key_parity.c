@@ -18,7 +18,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char key_parity_c[] =
+static char rcsid_key_parity_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

@@ -10,7 +10,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char des_prc_key_c[] =
+static char rcsid_process_ky_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

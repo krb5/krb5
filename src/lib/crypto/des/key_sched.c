@@ -31,7 +31,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char key_sched_c[] =
+static char rcsid_key_sched_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
