@@ -113,7 +113,6 @@ KRB5_LIBDIR = @libdir@
 KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = @includedir@
 KRB5_INCSUBDIRS = \
-	$(KRB5_INCDIR)/asn.1 \
 	$(KRB5_INCDIR)/gssapi \
 	$(KRB5_INCDIR)/kerberosIV
 
