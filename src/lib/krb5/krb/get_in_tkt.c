@@ -108,12 +108,12 @@ OLDDECLARG(krb5_ccache, ccache)
 OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 {
     krb5_kdc_req request;
-    krb5_kdc_rep *as_reply;
+    krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
     krb5_error_code retval;
     krb5_data *packet;
     krb5_data reply;
-    krb5_keyblock *decrypt_key;
+    krb5_keyblock *decrypt_key = 0;
     krb5_enctype etypes[1];
     krb5_timestamp time_now;
     krb5_pa_data	*padata;
@@ -122,6 +122,12 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	*ret_as_reply = 0;
     
     request.msg_type = KRB5_AS_REQ;
+    if (!addrs)
+	krb5_os_localaddr(&request.addresses);
+    else
+	request.addresses = (krb5_address **) addrs;
+
+    reply.data = 0;
 
     if (pre_auth_type == KRB5_PADATA_NONE) {
 	    decrypt_key = 0;
@@ -144,18 +150,15 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
 						      * 2);
 	    if (!request.padata) {
-		krb5_free_keyblock(decrypt_key);
-		return retval;
+		retval = ENOMEM;
+		goto cleanup;
 	    }
 	    
 	    retval = krb5_obtain_padata(pre_auth_type, creds->client,
-					creds->addresses, decrypt_key,
+					request.addresses, decrypt_key,
 					&padata);
-	    if (retval) {
-		krb5_free_keyblock(decrypt_key);
-		free(request.padata);
-		return retval;
-	    }
+	    if (retval)
+		goto cleanup;
 	    request.padata[0] = padata;
 	    request.padata[1] = 0;
     }
@@ -167,11 +170,8 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (retval = krb5_timeofday(&time_now)) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	return(retval);
-    }
+    if (retval = krb5_timeofday(&time_now))
+	goto cleanup;
 
     /* XXX we know they are the same size... */
     request.nonce = (krb5_int32) time_now;
@@ -179,38 +179,27 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     etypes[0] = etype;
     request.etype = etypes;
     request.netypes = 1;
-    if (!addrs)
-	krb5_os_localaddr(&request.addresses);
-    else
-	request.addresses = (krb5_address **) addrs;
     request.second_ticket = 0;
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
 
     /* encode & send to KDC */
-    if (retval = encode_krb5_as_req(&request, &packet)) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	return(retval);
-    }
+    if (retval = encode_krb5_as_req(&request, &packet))
+	goto cleanup;
+
     retval = krb5_sendto_kdc(packet, krb5_princ_realm(creds->client), &reply);
     krb5_free_data(packet);
-    if (retval) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	return(retval);
-    }
+    if (retval)
+	goto cleanup;
 
     /* now decode the reply...could be error or as_rep */
 
     if (krb5_is_krb_error(&reply)) {
-	if (retval = decode_krb5_error(&reply, &err_reply)) {
-	    if (decrypt_key)
-		krb5_free_keyblock(decrypt_key);
-	    krb5_xfree(reply.data);
-            return retval;              /* some other reply--??? */
-	}
+	if (retval = decode_krb5_error(&reply, &err_reply))
+	    /* some other error code--??? */	    
+	    goto cleanup;
+    
 	/* it was an error */
 
 	if ((err_reply->ctime != request.nonce) ||
@@ -223,29 +212,20 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	/* XXX somehow make error msg text available to application? */
 
 	krb5_free_error(err_reply);
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	krb5_xfree(reply.data);
-	return retval;
+	goto cleanup;
     }
 
     if (!krb5_is_as_rep(&reply)) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	krb5_xfree(reply.data);
-	return KRB5KRB_AP_ERR_MSG_TYPE;
+	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	goto cleanup;
     }
-    if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-	krb5_xfree(reply.data);
-	return retval;		/* some other reply--??? */
-    }
-    krb5_xfree(reply.data);
+    if (retval = decode_krb5_as_rep(&reply, &as_reply))
+	/* some other error code ??? */
+	goto cleanup;
+
     if (as_reply->msg_type != KRB5_AS_REP) {
-	if (decrypt_key)
-	    krb5_free_keyblock(decrypt_key);
-        return KRB5KRB_AP_ERR_MSG_TYPE;
+	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	goto cleanup;
     }
 
     /* it was a kdc_rep--decrypt & check */
@@ -253,20 +233,16 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
      /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
 	    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed,
-				     as_reply->padata)) {
-		    krb5_free_kdc_rep(as_reply);
-		    return retval;
-	    }
+				     as_reply->padata))
+		goto cleanup;
     }
     
-    retval = (*decrypt_proc)(decrypt_key, decryptarg, as_reply);
-    memset((char *)decrypt_key->contents, 0, decrypt_key->length);
-    krb5_free_keyblock(decrypt_key);
-    if (retval) {
-	krb5_free_kdc_rep(as_reply);
-	return retval;
-    }
+    if (retval = (*decrypt_proc)(decrypt_key, decryptarg, as_reply))
+	goto cleanup;
 
+    krb5_free_keyblock(decrypt_key);
+    decrypt_key = 0;
+    
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
@@ -291,66 +267,77 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	    (request.till != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request.till))
 	) {
-	memset((char *)as_reply->enc_part2->session->contents, 0,
-	      as_reply->enc_part2->session->length);
-	krb5_free_kdc_rep(as_reply);
-	return KRB5_KDCREP_MODIFIED;
+	retval = KRB5_KDCREP_MODIFIED;
+	goto cleanup;
     }
 
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
     /* fill in the credentials */
     if (retval = krb5_copy_keyblock_contents(as_reply->enc_part2->session,
-					     &creds->keyblock)) {
-	memset((char *)as_reply->enc_part2->session->contents, 0,
-	      as_reply->enc_part2->session->length);
-	krb5_free_kdc_rep(as_reply);
-	return retval;
-    }
-#define cleanup_key() {memset((char *)creds->keyblock.contents, 0,\
-			     creds->keyblock.length); \
-		       krb5_xfree(creds->keyblock.contents); \
-		       creds->keyblock.contents = 0; \
-		       creds->keyblock.length = 0;}
+					     &creds->keyblock))
+	goto cleanup;
 
     creds->times = as_reply->enc_part2->times;
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
 					   be encrypted in skey */
     creds->ticket_flags = as_reply->enc_part2->flags;
     if (retval = krb5_copy_addresses(as_reply->enc_part2->caddrs,
-				     &creds->addresses)) {
-	cleanup_key();
-	krb5_free_kdc_rep(as_reply);
-	return retval;
-    }
+				     &creds->addresses))
+	goto cred_cleanup;
+
     creds->second_ticket.length = 0;
     creds->second_ticket.data = 0;
 
-    retval = encode_krb5_ticket(as_reply->ticket, &packet);
-    if (retval) {
-	krb5_free_kdc_rep(as_reply);
-	krb5_free_addresses(creds->addresses);
-	cleanup_key();
-	krb5_free_kdc_rep(as_reply);
-	return retval;
-    }	
+    if (retval = encode_krb5_ticket(as_reply->ticket, &packet))
+	goto cred_cleanup;
+
     creds->ticket = *packet;
     krb5_xfree(packet);
 
     /* store it in the ccache! */
-    if (retval = krb5_cc_store_cred(ccache, creds)) {
-	krb5_free_kdc_rep(as_reply);
-	/* clean up the pieces */
-	krb5_xfree(creds->ticket.data);
-	krb5_free_addresses(creds->addresses);
-	cleanup_key();
-	krb5_free_kdc_rep(as_reply);
-	return retval;
-    }
-    if (ret_as_reply)
+    if (retval = krb5_cc_store_cred(ccache, creds))
+	goto cred_cleanup;
+
+    if (ret_as_reply) {
 	*ret_as_reply = as_reply;
-    else
+	as_reply = 0;
+    }
+
+    retval = 0;
+    
+cleanup:
+    if (as_reply)
 	krb5_free_kdc_rep(as_reply);
-    return 0;
+    if (reply.data)
+	free(reply.data);
+    if (decrypt_key)
+	krb5_free_keyblock(decrypt_key);
+    if (request.padata)
+	free(request.padata);
+    return retval;
+    
+    /*
+     * Clean up left over mess in credentials structure, in case of 
+     * error
+     */
+cred_cleanup:
+    if (creds->keyblock.contents) {
+	memset((char *)creds->keyblock.contents, 0, creds->keyblock.length);
+	krb5_xfree(creds->keyblock.contents);
+	creds->keyblock.contents = 0;
+	creds->keyblock.length = 0;
+    }
+    if (creds->ticket.data) {
+	krb5_xfree(creds->ticket.data);
+	creds->ticket.data = 0;
+    }
+    if (creds->addresses) {
+	krb5_free_addresses(creds->addresses);
+	creds->addresses = 0;
+    }
+    
+
+    
 }
 
