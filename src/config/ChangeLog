@@ -1,3 +1,9 @@
+Wed Apr 26 14:27:03 1995 Keith Vetter (keithv@fusion.com)
+
+	* post.in: added target check-windows.
+	* ren2long, ren2long.awk: scripts to rename DOS 8.3 names back
+	   to their proper longer names.
+
 Thu Apr 20 20:00:42 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* post.in: The .depend production rule now does even more

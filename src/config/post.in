@@ -4,6 +4,7 @@
 all::
 
 check::
+check-windows::
 
 .depend: $(SRCS) $(SRCTOP)/util/depfix.sed
 	if test -n "$(SRCS)" ; then \
