@@ -1,3 +1,11 @@
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* svc_auth_gssapi.c (_svcauth_gssapi_unset_names): If invoked more
+	than once, do not double free memory.
+
+	* clnt_perror.c (clnt_sperror): Do not write past end of allocated
+	buffer.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,

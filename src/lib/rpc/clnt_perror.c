@@ -91,7 +91,7 @@ clnt_sperror(rpch, s)
 	strncat (str, ": ", BUFSIZ - 1 - strlen (bufstart));
 	str += strlen(str);
 	strncat (str, clnt_sperrno(e.re_status), BUFSIZ - 1 - strlen (bufstart));
-	str[BUFSIZ - 1] = '\0';
+	strstart[BUFSIZ - 1] = '\0';
 	str += strlen(str);
 
 	switch (e.re_status) {
