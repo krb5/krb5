@@ -1,3 +1,8 @@
+Tue Sep 27 23:31:50 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_encode.c (encode_krb5_enc_kdc_rep_part): = should have been
+	        == in commented-out code.  Get it right for the future...
+
 Wed Sep 21 00:18:12 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_decode.c (decode_krb5_authdata): Initialize variable where

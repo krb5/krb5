@@ -318,8 +318,8 @@ krb5_error_code encode_krb5_enc_kdc_rep_part(DECLARG(const krb5_enc_kdc_rep_part
 #ifdef KRB5_ENCKRB5KDCREPPART_COMPAT
   krb5_apptag(26);
 #else
-  if(rep->msg_type = KRB5_AS_REP){ krb5_apptag(ASN1_KRB_AS_REP); }
-  else if(rep->msg_type = KRB5_TGS_REP){ krb5_apptag(ASN1_KRB_TGS_REP); }
+  if (rep->msg_type == KRB5_AS_REP) { krb5_apptag(ASN1_KRB_AS_REP); }
+  else if (rep->msg_type == KRB5_TGS_REP) { krb5_apptag(ASN1_KRB_TGS_REP); }
   else return KRB5_BADMSGTYPE;
 #endif
   krb5_cleanup();
