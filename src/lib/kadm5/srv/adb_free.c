@@ -4,6 +4,10 @@
  * $Header$
  * 
  * $Log$
+ * Revision 1.2  1996/10/18 19:45:49  bjaspan
+ * 	* svr_misc_free.c, server_dict.c, adb_policy.c, adb_free.c:
+ *  	include stdlib.h instead of malloc.h [krb5-admin/35]
+ *
  * Revision 1.1  1996/07/24 22:23:09  tlyu
  * 	* Makefile.in, configure.in: break out server lib into a
  * 		subdirectory
@@ -49,7 +53,7 @@ static char *rcsid = "$Header$";
 
 #include	"adb.h"
 #include	<memory.h>
-#include	<malloc.h>
+#include	<stdlib.h>
 
 void
 osa_free_princ_ent(osa_princ_ent_t val)

@@ -17,7 +17,6 @@ static char *rcsid = "$Header$";
 #include    <stdlib.h>
 #include    <stdio.h>
 #include    <string.h>
-#include    <malloc.h>
 #include    <memory.h>
 #include    <syslog.h>
 #include    "server_internal.h"

@@ -12,7 +12,6 @@ static char *rcsid = "$Header$";
 #include	<fcntl.h>
 #include	"adb.h"
 #include	<stdlib.h>
-#include	<malloc.h>
 #include	<string.h>
 
 extern	int errno;

@@ -1,5 +1,8 @@
 Fri Oct 18 14:24:12 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* svr_misc_free.c, server_dict.c, adb_policy.c, adb_free.c:
+ 	include stdlib.h instead of malloc.h [krb5-admin/35]
+
 	* adb_openclose.c (osa_adb_rename_db): create the destination
  	database if necessary before renaming [krb5-admin/58]
 
