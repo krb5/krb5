@@ -116,6 +116,7 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 
     creds.times = tgt.times;
     creds.times.starttime = 0;
+    creds.keyblock.enctype = tgt.keyblock.enctype;
     kdcoptions = flags2options(tgt.ticket_flags)|KDC_OPT_FORWARDED;
 
     if (!forwardable) /* Reset KDC_OPT_FORWARDABLE */

@@ -1,3 +1,8 @@
+2001-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Copy enctype for new creds from
+	tgt.
+
 2001-06-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (t_walk_rtree, t_kerb): Do not link against kdb libraries
