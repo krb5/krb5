@@ -1,3 +1,17 @@
+2001-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* standalone.exp: Change check for missing ccache to look for "No
+	credentials cache found" instead of "No credentials cache file
+	found" due to change in message text.
+
+	* v4gssftp.exp: Remove -U flag frmo ftpd invocation for now, since
+	1.2.x won't have it.  Change check for missing ccache to look for
+	"No credentials cache found" instead of "No credentials cache file
+	found" due to change in message text.
+
+	* v4krb524d.exp: Remove -p flag from krb524d invocation for now,
+	since 1.2.x won't have it.
+
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* rcp.exp, rsh_exp (stop_rsh_daemon): Do not close a process and

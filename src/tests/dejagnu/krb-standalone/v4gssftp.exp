@@ -50,11 +50,9 @@ proc start_ftp_daemon { } {
     # don't need to use inetd.  The 3021 is the port to listen at.
     # We rely on KRB5_KTNAME being set to the proper keyfile as there is
     # no way to cleanly set it with the gssapi API.
-    # The -U argument tells it to use an alternate ftpusers file (using
-    # /dev/null will allow root to login regardless of /etc/ftpusers).
     # The -a argument requires authorization, to mitigate any
     # vulnerability introduced by circumventing ftpusers.
-    spawn $FTPD -p 3021 -a -U /dev/null -r $tmppwd/krb.conf
+    spawn $FTPD -p 3021 -a -r $tmppwd/krb.conf
     set ftpd_spawn_id $spawn_id
     set ftpd_pid [exp_pid]
 
@@ -246,7 +244,7 @@ proc v4ftp_test { } {
     expect "GSSAPI error major: Miscellaneous failure"
     expect {
 	"GSSAPI error minor: Unsupported credentials cache format version number" {}
-	"GSSAPI error minor: No credentials cache file found" {}
+	"GSSAPI error minor: No credentials cache found" {}
 	"GSSAPI error minor: Decrypt integrity check failed" {}
     }
     expect "GSSAPI error: initializing context"
