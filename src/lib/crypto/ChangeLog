@@ -1,3 +1,10 @@
+2001-11-19  Sam Hartman  <hartmans@mit.edu>
+
+	* t_prng.reseedtest: New test; description in t_prng.reseedtest-comments
+
+	* t_prng.c (main): If we request 0 bytes of output don't try to
+	get output 
+
 2001-11-15  Sam Hartman  <hartmans@mit.edu>
 
 	* t_prng.c: New file for PRNG tests

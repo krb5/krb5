@@ -66,20 +66,22 @@ int main () {
     }
     if (scanf ("%u", &i) == EOF)
       break;
-    assert ((output.data = malloc (i)) != NULL);
-    output.length = i;
-    ret = krb5_c_random_make_octets (0, &output);
-    if (ret)
-      printf ("failed\n");
-    else {
-      for (; i > 0; i--) {
-	printf ("%2x",
-		(unsigned int) ((unsigned char ) output.data[output.length-i]));
+    if (i) {
+      assert ((output.data = malloc (i)) != NULL);
+      output.length = i;
+      ret = krb5_c_random_make_octets (0, &output);
+      if (ret)
+	printf ("failed\n");
+      else {
+	for (; i > 0; i--) {
+	  printf ("%02x",
+		  (unsigned int) ((unsigned char ) output.data[output.length-i]));
+	}
+	printf ("\n");
       }
-      printf ("\n");
+      free (output.data);
+      output.data = NULL;
     }
-    free (output.data);
-    output.data = NULL;
   }
   return (0);
 }
