@@ -1288,6 +1288,7 @@ void
     krb5_creds creds, *new_creds;
     krb5_ccache cc;
     krb5_error_code status;
+    krb5_auth_context *auth_context;
     extern krb5_flags krb5_kdc_default_options;
     
     
@@ -1326,14 +1327,10 @@ void
 	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
-    
-    if (status = krb5_mk_req_extended(bsd_context, AP_OPTS_USE_SESSION_KEY,
-				      0,     /* no application checksum here */
-				      0,
-				      0,     /* no need for subkey */
-				      new_creds,
-				      0,     /* don't need authenticator copy */
-				      &msg)) {
+
+    if (status = krb5_mk_req_extended(bsd_context, &auth_context,
+			  	      AP_OPTS_USE_SESSION_KEY,
+				      NULL, new_creds, &msg)) {
 	krb5_cc_destroy(bsd_context, cc);
 	krb5_cc_close(bsd_context, cc);
 	exit(1);
