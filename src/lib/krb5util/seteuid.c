@@ -17,7 +17,11 @@
  * express or implied warranty.
  * 
  */
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
+#include <k5-int.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -27,11 +31,13 @@
 #include <stdlib.h>
 #endif
 
+
 #include <errno.h>
 
-int krb5_seteuid( euid)
-  uid_t euid;
+int krb5_seteuid( euid_in)
+  int euid_in;
 {
+  uid_t euid = (uid_t) euid_in;
 #if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
   return  (seteuid(euid)) ;
 #else

@@ -1,3 +1,7 @@
+Mon May 20 02:37:44 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* seteuid.c: Include k5-int.h
+
 Sun May 19 23:28:22 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* seteuid.c (krb5_seteuid): set saved uid to current effective
