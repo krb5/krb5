@@ -400,6 +400,7 @@ int main(argc, argv)
 			if (argc == 0) 
 			  usage();
 			strncpy(krb_realm,*argv,REALM_SZ);
+			krb_realm[REALM_SZ-1] = 0;
 			sprintf(realmarg, " -k %s", krb_realm);
 			goto next_arg;
 #endif /* KERBEROS */

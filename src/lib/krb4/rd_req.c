@@ -258,7 +258,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     }
 
     /* Get ticket from authenticator */
-    tkt->length = (int) *ptr++;
+    tkt->length = (int) *ptr++ & 0xff;
     if ((tkt->length + (ptr+1 - (char *) authent->dat)) > authent->length)
 	return(RD_AP_MODIFIED);
     memcpy((char *)(tkt->dat), ptr+1, tkt->length);

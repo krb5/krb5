@@ -1,3 +1,8 @@
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4rcp.c (main, case 'k'): Make sure krb_realm is
+	null-terminated.
+
 2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* krlogin.c (main): Don't overflow buffer "term".

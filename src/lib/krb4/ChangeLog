@@ -1,3 +1,11 @@
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* rd_req.c (krb_rd_req): Mask length byte with 0xff in case the
+	length is over 127 and char is signed.
+
+	* recvauth.c (krb_recvauth): If the number of bytes to be read
+	from the net is not positive, just return an error.
+
 2000-05-03  Tom Yu  <tlyu@mit.edu>
 
 	* cr_tkt.c: Delete prototype for krb_cr_tkt_int(), since the
