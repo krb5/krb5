@@ -1,3 +1,8 @@
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.M: Remove "kdc =" lines from "realms" section example,
+	and recommend not using it unless DNS info isn't available.
+
 2003-05-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdc.conf.M (FILES): Refer to correct location for kdc.conf in
