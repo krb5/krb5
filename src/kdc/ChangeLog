@@ -1,3 +1,7 @@
+Wed Feb 28 13:07:28 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c: Move com_err.h after k5-int.h include.
+
 Tue Feb 27 17:33:44 1996  Richard Basch  <basch@lehman.com>
 
 	* main.c:

@@ -29,8 +29,8 @@
 #include <errno.h>
 #include <netdb.h>
 
-#include "com_err.h"
 #include "k5-int.h"
+#include "com_err.h"
 #include "adm.h"
 #include "adm_proto.h"
 #include "kdc_util.h"
