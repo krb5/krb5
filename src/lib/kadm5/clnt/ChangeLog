@@ -1,3 +1,10 @@
+2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
+
+	* client_init.c (enctypes): New array, listing only
+	ENCTYPE_DES_CBC_CRC.
+	(_kadm5_init_any): Pass it in krb5_get_in_tkt_with_* calls for
+	now, while GSSAPI/krb5 can only handle DES.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
