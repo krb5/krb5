@@ -25,6 +25,7 @@ static char mk_req_ext_c[] =
 #include <krb5/libos-proto.h>
 
 #include <krb5/ext-proto.h>
+#include <errno.h>
 
 /*
  Formats a KRB_AP_REQ message into outbuf, with more complete options than
@@ -73,6 +74,8 @@ krb5_data *outbuf;
     krb5_ap_req request;
     krb5_authenticator authent;
     krb5_data *scratch;
+    krb5_enctype etype;
+    krb5_encrypt_block eblock;
 
     if ((ap_req_options & AP_OPTS_USE_SESSION_KEY) &&
 	!creds->ticket.length)
@@ -86,22 +89,79 @@ krb5_data *outbuf;
 					  creds))
 	    return(retval);
     }
+    /* verify a valid etype is available */
+    etype = keytype_to_etype(creds->keyblock.keytype); /* XXX */
+
+    if (!valid_etype(etype))
+	return KRB5KDC_ERR_ETYPE_NOSUPP;
+
     request.ap_options = ap_req_options;
     /* we need a native ticket */
     if (retval = krb5_decode_ticket(&creds->ticket, &request.ticket))
 	return(retval);			/* XXX who cleans up creds? */
 
-    if (retval = generate_authenticator(&authent, creds, checksum))
+#define cleanup_ticket() krb5_free_ticket(request.ticket)
+    if (retval = generate_authenticator(&authent, creds, checksum)) {
+	cleanup_ticket();
 	return retval;
-    if (retval = encode_krb5_authenticator(&authent, &scratch))
+    }
+    /* encode it before encrypting */
+    retval = encode_krb5_authenticator(&authent, &scratch);
+    cleanup_ticket();
+    if (retval)
 	return(retval);
-    request.authenticator = *scratch;
-    free((char *)scratch);
 
-    /* now request is the output */
+#define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
 
-    if (retval = encode_krb5_ap_req(&request, &outbuf))
-	free(request.authenticator.data);
+    /* put together an eblock for this encryption */
+
+    eblock.crypto_entry = krb5_csarray[etype]->system;
+    request.authenticator.length = krb5_encrypt_size(scratch->length,
+						     eblock.crypto_entry);
+    if (!(request.authenticator.data = malloc(request.authenticator.length))) {
+	retval = ENOMEM;
+	goto clean_scratch;
+    }
+
+#define cleanup_encpart() {(void) bzero(request.authenticator.data, request.authenticator.length); free(request.authenticator.data); request.authenticator.length = 0; request.authenticator.data = 0;}
+
+    /* do any necessary key pre-processing */
+    if (retval = (*eblock.crypto_entry->process_key)(&eblock,
+						     &creds->keyblock)) {
+	goto clean_encpart;
+    }
+
+#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+
+    /* call the encryption routine */
+    if (retval =
+	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
+					     (krb5_pointer) request.authenticator.data,
+					     scratch->length, &eblock)) {
+	goto clean_prockey;
+    }
+
+    /* authenticator now assembled-- do some cleanup */
+    cleanup_scratch();
+
+    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+	cleanup_encpart();
+	return retval;
+    }
+
+    retval = encode_krb5_ap_req(&request, &outbuf);
+    cleanup_encpart();
+    if (retval)
+	return(retval);
+
+ clean_prockey:
+    cleanup_prockey();
+ clean_encpart:
+    cleanup_encpart();
+ clean_scratch:
+    cleanup_scratch();
+    cleanup_ticket();
+
     return retval;
 }
 
