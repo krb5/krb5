@@ -1,3 +1,9 @@
+Wed Feb  5 22:52:41 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Remove the target ct_c.awk before copying over it.
+		If ct_c.awk.in were read-only, ct_c.awk will become
+		read-only and cannot be updated again.
+
 Thu Jun 13 21:43:44 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to SS_RULES, ET_RULES	

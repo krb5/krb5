@@ -138,7 +138,8 @@ mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script
 	chmod 755 mk_cmds	
 
 ct_c.awk: $(srcdir)/ct_c_awk.in
-	$(CP) $(srcdir)/ct_c_awk.in ct_c.awk
+	$(RM) $@
+	$(CP) $(srcdir)/ct_c_awk.in $@
 
 ct_c.sed: $(srcdir)/ct_c_sed.in
 	$(SED) -e '/^#/d' $(srcdir)/ct_c_sed.in > ct_c.sed
