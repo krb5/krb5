@@ -1,3 +1,11 @@
+2001-07-02  Tom Yu  <tlyu@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Remember to chop off leading
+	"/dev/" for the non-sysV case.  Handle lseek() returning non-zero
+	yet non-negative values (it usually does... :-), so that we can
+	actually write somewhere not at the beginning of the utmp file if
+	necessary.
+
 2001-06-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Don't copy host if it's a null

@@ -636,7 +636,10 @@ pty_update_utmp(int process_type, int pid, const char *username,
 		const char *line, const char *host, int flags)
 {
     struct utmp ent, ut;
+    const char *cp;
     int tty, lc, fd;
+    off_t seekpos;
+    ssize_t ret;
     struct stat statb;
 
     memset(&ent, 0, sizeof(ent));
@@ -645,10 +648,13 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	strncpy(ent.ut_host, host, sizeof(ent.ut_host));
 #endif
     strncpy(ent.ut_name, username, sizeof(ent.ut_name));
-    strncpy(ent.ut_line, line, sizeof(ent.ut_line));
+    cp = line;
+    if (strncmp(cp, "/dev/", sizeof("/dev/") - 1) == 0)
+	cp += sizeof("/dev/") - 1;
+    strncpy(ent.ut_line, cp, sizeof(ent.ut_line));
     (void)time(&ent.ut_time);
 
-    if (flags & PTY_TTYSLOT_USABLE) 
+    if (flags & PTY_TTYSLOT_USABLE)
 	tty = ttyslot();
     else {
 	tty = -1;
@@ -656,8 +662,8 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	if (fd == -1)
 	    return errno;
 	for (lc = 0; ; lc++) {
-	    if (lseek(fd, (off_t)(lc * sizeof(struct utmp)),
-		      SEEK_SET))
+	    seekpos = lseek(fd, (off_t)(lc * sizeof(struct utmp)), SEEK_SET);
+	    if (seekpos != (off_t)(lc * sizeof(struct utmp)))
 		break;
 	    if (read(fd, (char *) &ut, sizeof(struct utmp))
 		!= sizeof(struct utmp))
@@ -677,12 +683,13 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	    close(fd);
 	    return 0;
 	}
-	if (lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET)) {
+	seekpos = lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET);
+	if (seekpos != (off_t)(tty * sizeof(struct utmp))) {
 	    close(fd);
 	    return 0;
 	}
-	if (write(fd, (char *)&ent, sizeof(struct utmp))
-	    != sizeof(struct utmp)) {
+	ret = write(fd, (char *)&ent, sizeof(struct utmp));
+	if (ret != sizeof(struct utmp)) {
 	    ftruncate(fd, statb.st_size);
 	}
 	close(fd);
