@@ -1,3 +1,8 @@
+2000-06-05      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5-int.h: Fix the prototype for krb5int_cc_default so that it builds
+          on Windows.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5-int.h: Added krb5int_cc_default.  This function supports the 
