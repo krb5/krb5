@@ -588,7 +588,7 @@ void settenex()
 }
 
 static char *
-getmode()
+get_mode()
 {
 	return("stream");
 }
@@ -597,12 +597,12 @@ getmode()
  * Set file transfer mode.
  */
 /*ARGSUSED*/
-void setmode(argc, argv)
+void set_mode(argc, argv)
 	int argc;
 	char *argv[];
 {
 
-	printf("We only support %s mode, sorry.\n", getmode());
+	printf("We only support %s mode, sorry.\n", get_mode());
 	code = -1;
 }
 
@@ -1114,7 +1114,7 @@ static void cstatus()
 	printf("Data Channel Protection Level: %s\n", getdlevel());
 	printf("Passive mode %s\n", onoff(passivemode));
 	printf("Mode: %s; Type: %s; Form: %s; Structure: %s\n",
-		getmode(), gettype(), getform(), getstruct());
+		get_mode(), gettype(), getform(), getstruct());
 	printf("Store unique: %s; Receive unique: %s\n", onoff(sunique),
 		onoff(runique));
 	printf("Case: %s; CR stripping: %s\n",onoff(mcase),onoff(crflag));

@@ -162,7 +162,7 @@ void changetype PROTOTYPE((int, int));
 void setbinary PROTOTYPE((void));
 void setascii PROTOTYPE((void));
 void settenex PROTOTYPE((void));
-void setmode  PROTOTYPE((int, char **));
+void set_mode  PROTOTYPE((int, char **));
 void setform  PROTOTYPE((int, char **));
 void setstruct  PROTOTYPE((int, char **));
 void siteidle  PROTOTYPE((int, char **));
