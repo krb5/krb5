@@ -95,6 +95,11 @@
 #endif
 #endif
 
+#ifdef _PATH_DEFPATH
+#define LPATH _PATH_DEFPATH
+#define RPATH _PATH_DEFPATH
+#endif
+
 /* catch-all entries for operating systems we haven't looked up
    hardcoded paths for */
 #ifndef LPATH

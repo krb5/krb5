@@ -205,6 +205,10 @@ static const char * krb_get_err_text(kerror)
 #endif
 #endif
 
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif
+
 #include "loginpaths.h"
 
 #ifdef POSIX_TERMIOS
@@ -232,12 +236,33 @@ static const char * krb_get_err_text(kerror)
 
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
 
+#if defined(_PATH_MAILDIR)
+#define MAILDIR		_PATH_MAILDIR
+#else
+#define MAILDIR		"/usr/spool/mail"
+#endif
+#if defined(_PATH_NOLOGIN)
+#define NOLOGIN		_PATH_NOLOGIN
+#else
+#define NOLOGIN		"/etc/nologin"
+#endif
+#if defined(_PATH_LASTLOG)
+#define LASTLOG		_PATH_LASTLOG
+#else
+#define LASTLOG		"/usr/adm/lastlog"
+#endif
+#if defined(_PATH_BSHELL)
+#define BSHELL		_PATH_BSHELL
+#else
+#define BSHELL		"/bin/sh"
+#endif
+
+#if (defined(BSD) && (BSD >= 199103))	/* no /usr/ucb */
+#define QUOTAWARN	"/usr/bin/quota"
+#endif
+
 #define	MOTDFILE	"/etc/motd"
-#define	MAILDIR		"/usr/spool/mail"
-#define	NOLOGIN		"/etc/nologin"
 #define	HUSHLOGIN	".hushlogin"
-#define	LASTLOG		"/usr/adm/lastlog"
-#define	BSHELL		"/bin/sh"
 
 #if !defined(OQUOTA) && !defined(QUOTAWARN)
 #define QUOTAWARN	"/usr/ucb/quota" /* warn user about quotas */
@@ -1397,7 +1422,6 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		if (pwd == NULL || pwd->pw_uid)
 			checknologin();
 
-
 		/*
 		 * Allows automatic login by root.
 		 * If not invoked by root, disallow if the uid's differ.
@@ -2200,7 +2224,7 @@ void dolastlog(quiet, tty)
 	int quiet;
 	char *tty;
 {
-#ifdef HAVE_LASTLOG_H
+#if defined(HAVE_LASTLOG_H) || (defined(BSD) && (BSD >= 199103))
 	struct lastlog ll;
 	int fd;
 
