@@ -115,7 +115,7 @@ ss_err.h: ss_err.et
 ss_err.c: ss_err.et
 
 clean::
-	$(RM) ss_err.o ss_err.c ss_err.h
+	$(RM) ss_err.o ss_err.c ss_err.h std_rqs.c
 
 depend:: ss_err.h
 
