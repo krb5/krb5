@@ -1,3 +1,7 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* kuserok.c (krb5_kuserok): Use k5_getpwnam_r.
+
 2005-03-22  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.h: Define ns_rr_class to ns_rr_cl if ns_rr_class doesn't
