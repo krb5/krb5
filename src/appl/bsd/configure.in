@@ -17,6 +17,10 @@ dnl Make our operating system-specific security checks and definitions for
 dnl login.
 dnl
 case $krb5_cv_host in
+*-*-aix3*) # AIX has streams include files but not streams TTY
+# Moreover, strops.h trashes sys/ioctl.h
+krb5_cv_has_streams=no
+;;
 alpha-dec-osf*)
 	AC_CHECK_LIB(security,main,
 		AC_DEFINE(HAVE_SETLUID)

@@ -1425,11 +1425,11 @@ getpty(fd,slave)
 	if (grantpt(*fd) || unlockpt(*fd)) return 1;
 #endif
     
-#ifdef	HAVE_TTYNAME
-	p = ttyname(*fd);
-#else
 #ifdef HAVE_PTSNAME
 	p = ptsname(*fd);
+#else
+#ifdef	HAVE_TTYNAME
+	p = ttyname(*fd);
 #else
 	/* XXX If we don't have either what do we do */
 #endif

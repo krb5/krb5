@@ -1,3 +1,14 @@
+Thu Jul 13 17:49:54 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in : Short circuit the streams test for AIX to false
+        because AIX strops.h trashes definition of _IO from sys/ioctl.h.
+        I think this is fixed in AIX4, so the test is only bypassed for
+        AIX3.
+
+Tue Jul 11 12:50:16 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogind.c (getpty): Use ptsname before ttyname; it has a higher
+        chance of doing what we want.
 
 Fri Jul 7 15:40:42 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explcitit library handling.
