@@ -2,11 +2,10 @@
 
 	* ftpd.c (login): New function.  Essentially, the old pass
 	function has been split into its two logical components, pass and
-	login.
+	login.  Don't reply 230 "User logged in" if the user didn't
+	send a PASS command; this causes the client to get a bit confused.
 	(pass): If auth_ok is true, reply with code 202 to tell the
-	user that a PASS command is not necessary.  Also, don't reply
-	230 "User logged in" if the user didn't send a PASS command; 
-	this causes the client to get a bit confused.
+	user that a PASS command is not necessary. 
 	(auth_ok): New function that returns true if either gss_ok or
 	kerb_ok is true (all the #ifdefs were beginning to clutter things,
 	and it's a good abstraction in case other auth types are ever
