@@ -1,5 +1,9 @@
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_pcbc.c: New file.
+	* Makefile.in (t_pcbc): New target.
+	(check-unix): Depend on and run t_pcbc.
+
 	* pcbc_encrypt.c (des_pcbc_encrypt): Initialize plainl and plainr
 	to keep compiler happy.
 
