@@ -92,6 +92,9 @@ krb5_scc_open_file (context, id, mode)
 #ifdef ANSI_STDIO
      switch(mode) {
      case SCC_OPEN_AND_ERASE:
+	 unlink(data->filename);
+	 /* XXX should do an exclusive open here, but no way to do */
+	 /* this under stdio */
 	 open_flag = "wb+";
 	 break;
      case SCC_OPEN_RDWR:
@@ -105,6 +108,9 @@ krb5_scc_open_file (context, id, mode)
 #else
      switch(mode) {
      case SCC_OPEN_AND_ERASE:
+	 unlink(data->filename);
+	 /* XXX should do an exclusive open here, but no way to do */
+	 /* this under stdio */
 	 open_flag = "w+";
 	 break;
      case SCC_OPEN_RDWR:

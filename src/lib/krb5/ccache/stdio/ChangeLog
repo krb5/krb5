@@ -1,3 +1,10 @@
+Thu Dec 21 18:33:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* scc_maybe.c (krb5_scc_open_file): In the case of
+		SCC_OPEN_AND_ERASE, unlink the filename first, in case
+		there's a symbolic link lurking about.  (We should do an
+		exclusive open then, but there's no such thing in stdio.)
+
 Mon Sep 25 16:56:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
