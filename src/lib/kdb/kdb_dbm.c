@@ -35,8 +35,13 @@ static char rcsid_krb_dbm_c[] =
 #include <krb5/ext-proto.h>
 #include <krb5/sysincl.h>
 #include <stdio.h>
+#include <errno.h>
 
-#ifdef POSIX_FILE_LOCKS
+#if (defined(mips) && defined(SYSTYPE_BSD43)) || defined(aix)
+#include <sys/time.h>
+#endif
+
+#if defined (POSIX_FILE_LOCKS) && !defined(unicos61)
 #include <fcntl.h>
 #endif
 
@@ -52,15 +57,12 @@ extern long krb5_dbm_db_debug;
 extern char *progname;
 #endif
 
-
-extern int errno;
-
 static int dblfd = -1;
 static int mylock = 0;
 static int lockmode = 0;
 static int inited = 0;
 
-static char default_db_name[] = DEFAULT_DBM_FILE;
+static char default_db_name[] = DEFAULT_KDB_FILE;
 static char *current_db_name = default_db_name;
 
 static DBM *current_db_ptr = 0;
@@ -509,7 +511,8 @@ krb5_db_entry *entry;
     }
     princ_size = strlen(unparse_princ)+1;
     mod_size = strlen(unparse_mod_princ)+1;
-    contents->dsize = (sizeof(copy_princ) + princ_size + mod_size
+    contents->dsize = (2 + sizeof(copy_princ) + princ_size
+		       + sizeof(entry->principal->type) + mod_size
 		       + sizeof(copy_princ.key.length) 
 		       + copy_princ.key.length + copy_princ.salt_length
 		       + sizeof(copy_princ.alt_key.length)
@@ -523,11 +526,17 @@ krb5_db_entry *entry;
 	contents->dptr = 0;
 	return(ENOMEM);
     }
-    (void) memcpy(contents->dptr, (char *)&copy_princ, sizeof(copy_princ));
-    nextloc = contents->dptr + sizeof(copy_princ);
+    nextloc = contents->dptr;
+    *nextloc++ = 1;		/* Version number 1.0 */
+    *nextloc++ = 0;
+    (void) memcpy(nextloc, (char *)&copy_princ, sizeof(copy_princ));
+    nextloc += sizeof(copy_princ);
 
     (void) memcpy(nextloc, unparse_princ, princ_size);
     nextloc += princ_size;
+    (void) memcpy(nextloc, (char *)&entry->principal->type,
+		  sizeof(entry->principal->type));
+    nextloc +=  sizeof(entry->principal->type);
     (void) memcpy(nextloc, unparse_mod_princ, mod_size);
     nextloc += mod_size;
     if (copy_princ.key.length) {
@@ -573,15 +582,35 @@ krb5_db_entry *entry;
     krb5_error_code retval;
     int	sizeleft;
     int keysize;
+    int major_version = 0, minor_version = 0;
 
-    /* undo the effects of encode_princ_contents.
+    /*
+     * undo the effects of encode_princ_contents.
      */
+    sizeleft = contents->dsize;
+    nextloc = contents->dptr;
+    if (sizeleft <= 0)
+	return KRB5_KDB_TRUNCATED_RECORD;
 
-    sizeleft = contents->dsize - sizeof(*entry);
+    /*
+     * First, check the version number.  If the major version number is
+     * greater than zero, then the version number is explicitly
+     * allocated; otherwise, it is part of the zeroed principal pointer.
+     */
+    major_version = *nextloc;
+    if (major_version) {
+	nextloc++; sizeleft--;
+	minor_version = *nextloc;
+	nextloc++; sizeleft--;
+    }
+    if (major_version < 0 || major_version > 1)
+	return KRB5_KDB_BAD_VERSION;
+    
+    sizeleft -= sizeof(*entry);
     if (sizeleft < 0) 
 	return KRB5_KDB_TRUNCATED_RECORD;
 
-    memcpy((char *) entry, contents->dptr, sizeof(*entry));
+    memcpy((char *) entry, nextloc, sizeof(*entry));
     /*
      * These values should be zero if they are not in use, but just in
      * case, we clear them to make sure nothing bad happens if we need
@@ -593,7 +622,7 @@ krb5_db_entry *entry;
     entry->alt_salt = 0;
     entry->key.contents = 0;
     entry->alt_key.contents = 0;
-    nextloc = contents->dptr + sizeof(*entry); /* Skip past structure */
+    nextloc += sizeof(*entry);	/* Skip past structure */
 
     /*
      * Get the principal name for the entry (stored as a string which
@@ -609,6 +638,17 @@ krb5_db_entry *entry;
 	goto error_out;
     entry->principal = princ;
     nextloc += strlen(nextloc)+1;	/* advance past 1st string */
+
+    if (major_version >= 1) {		/* Get principal type */
+	sizeleft -= sizeof(entry->principal->type);
+	if (sizeleft < 0) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	memcpy((char *)&entry->principal->type,nextloc,
+	       sizeof(entry->principal->type));
+	nextloc += sizeof(princ->type);
+    }
     
     /*
      * Get the last modified principal for the entry (again stored as
@@ -694,8 +734,9 @@ krb5_db_entry *entry;
 	    retval = KRB5_KDB_TRUNCATED_RECORD;
 	    goto error_out;
 	}
-	(void) memcpy((char *)entry->alt_salt, nextloc, entry->salt_length);
-	nextloc += entry->salt_length; /* advance past salt */
+	(void) memcpy((char *)entry->alt_salt, nextloc,
+		      entry->alt_salt_length);
+	nextloc += entry->alt_salt_length; /* advance past salt */
     }
     
     return 0;
