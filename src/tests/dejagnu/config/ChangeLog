@@ -1,3 +1,8 @@
+Mon Nov 25 14:23:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* defualt.exp: Ezra's fix so that the dejagnu tests don't bomb out
+ 		if KRB5_KTNAME is set for some reason.
+
 Tue Nov 19 15:13:30 1996  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (check_k5login): Check for principal
