@@ -1,3 +1,9 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* prof_file.c: Cast return from prof_mutex_lock and
+	prof_mutex_unlock to void to avoid warnings of code with no side
+	effects.
+
 2002-12-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h: Define USE_PTHREADS and include pthread.h if on
