@@ -68,6 +68,13 @@
 
 #define DEFAULT_KDC_PORTLIST	"88,750"
 
+/*
+ * Defaults for the KADM5 admin system.
+ */
+#define DEFAULT_KADM5_KEYTAB	"@PREFIX/lib/krb5kdc/kadm5.keytab"
+#define DEFAULT_KADM5_ACL_FILE	"@PREFIX/lib/krb5kdc/kadm5.acl"
+#define DEFAULT_KADM5_PORT	749 /* assigned by IANA */
+
 #define MAX_DGRAM_SIZE	4096
 #define MAX_SKDC_TIMEOUT 30
 #define SKDC_TIMEOUT_SHIFT 2		/* left shift of timeout for backoff */
