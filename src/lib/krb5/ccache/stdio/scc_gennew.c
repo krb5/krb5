@@ -97,8 +97,8 @@ krb5_scc_generate_new (context, id)
      } else {
 	 unsigned char scc_fvno[2];
 
-	 scc_fvno[0] = (unsigned char) (KRB5_SCC_DEFAULT_FVNO >> 8);
-	 scc_fvno[1] = (unsigned char) (KRB5_SCC_DEFAULT_FVNO & 0xFF);
+	 scc_fvno[0] = (unsigned char) ((context->scc_default_format >> 8) & 0xFF);
+	 scc_fvno[1] = (unsigned char) (context->scc_default_format & 0xFF);
 
 	 if (!fwrite((char *)scc_fvno, sizeof(scc_fvno), 1, f)) {
 	     retcode = krb5_scc_interpret(context, errno);
@@ -107,7 +107,7 @@ krb5_scc_generate_new (context, id)
 	     goto err_out;
 	 }
  	 /* For version 4 we save a length for the rest of the header */
-          if (KRB5_SCC_DEFAULT_FVNO == KRB5_SCC_FVNO_4) {
+          if (context->scc_default_format == KRB5_SCC_FVNO_4) {
 	     unsigned char scc_flen[2];
 	     scc_flen[0] = 0;
 	     scc_flen[1] = 0;

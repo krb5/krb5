@@ -29,8 +29,6 @@
 #include "scc.h"
 #include "k5-int.h"
 
-int krb5_scc_default_format = KRB5_SCC_DEFAULT_FVNO;
-
 krb5_error_code
 krb5_scc_close_file (context, id)
    krb5_context context;
@@ -151,9 +149,9 @@ krb5_scc_open_file (context, id, mode)
 	 /* write the version number */
 	 int errsave;
 
-	 fvno_bytes[0] = krb5_scc_default_format >> 8;
-	 fvno_bytes[1] = krb5_scc_default_format & 0xFF;
-	 data->version = krb5_scc_default_format;
+	 fvno_bytes[0] = (context->scc_default_format >> 8) & 0xFF;
+	 fvno_bytes[1] = context->scc_default_format & 0xFF;
+	 data->version = context->scc_default_format;
 	 if (!fwrite((char *)fvno_bytes, sizeof(fvno_bytes), 1, f)) {
 	     errsave = errno;
 	     (void) krb5_unlock_file(context, fileno(f));

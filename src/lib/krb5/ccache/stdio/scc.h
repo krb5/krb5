@@ -42,16 +42,12 @@
  * what KRB5_SCC_DEFAULT_FVNO is set to, it will create version 1 or
  * version 2 SCC caches.
  *
- * KRB5_SCC_DEFAULT_FVNO should be set to version 2, unless there is
- * some overriding compatibility reasons not to do so.
  */
 
 #define KRB5_SCC_FVNO_1   0x0501	/* krb v5, scc v1 */
 #define KRB5_SCC_FVNO_2   0x0502	/* krb v5, scc v2 */
 #define KRB5_SCC_FVNO_3   0x0503	/* krb v5, scc v3 */
 #define KRB5_SCC_FVNO_4   0x0504	/* krb v5, scc v4 */
-
-#define KRB5_SCC_DEFAULT_FVNO KRB5_SCC_FVNO_3
 
 #define	SCC_OPEN_AND_ERASE	1
 #define	SCC_OPEN_RDWR		2

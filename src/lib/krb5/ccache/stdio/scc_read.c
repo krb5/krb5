@@ -202,7 +202,7 @@ krb5_scc_read_keyblock(context, id, keyblock)
      if (data->version == KRB5_SCC_FVNO_3) {
 		/* This works because the old etype is the same as the new enctype. */
 	     kret = krb5_scc_read_ui_2(context, id, &ui2);
-	     keyblock->enctype = ui2;
+	     /* keyblock->enctype = ui2; */
 	     CHECK(kret);
      }
 
