@@ -1936,8 +1936,11 @@ krb5_lcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
         return KRB5_FCC_NOFILE;
 
     code = krb5_cc_start_seq_get(context, id, &cursor);
-    if (code)
+    if (code) {
+        if (code == KRB5_CC_NOTFOUND)
+            return KRB5_OK;
         return code;
+    }
 
     while ( !(code = krb5_cc_next_cred(context, id, &cursor, &cred)) )
     {
@@ -2041,7 +2044,7 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     if (!GetMSTGT(context, data->LogonHandle, data->PackageId, &lcursor->mstgt, TRUE)) {
         free(lcursor);
         *cursor = 0;
-        return KRB5_FCC_INTERNAL;
+        return KRB5_CC_NOTFOUND;
     }
 
 #ifdef HAVE_CACHE_INFO_EX2
