@@ -233,9 +233,13 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
     memcpy(prealm, ptr, (size_t)len);
     ptr += len;
 
-    /* temporary hack until realms are dealt with properly */
+    /*
+     * This hack may be needed for some really krb4 servers, such as
+     * AFS kaserver (?), that fail to fill in the realm of a ticket
+     * under some circumstances.
+     */
     if (*prealm == '\0')
-        strcpy(prealm, KRB_REALM);
+	krb_get_lrealm(prealm, 1);
 
     /*
      * Ensure there's enough remaining in the ticket to get the

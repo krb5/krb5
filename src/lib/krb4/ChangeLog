@@ -1,3 +1,8 @@
+2003-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* decomp_tkt.c (dcmp_tkt_int): Patch from Booker Bense to use
+	krb_get_lrealm() instead of copying KRB_REALM into prealm.
+
 2003-01-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* RealmsConfig-glue.c (get_krbhst_default, krb_get_krbhst):
