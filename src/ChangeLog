@@ -1,7 +1,9 @@
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Don't test for pthread.h
-	specifically.
+	specifically.  Always include the thread library on Tru64 UNIX.
+	(KRB5_AC_CHECK_INET6): If the first test fails, try adding -DINET6
+	and test again; if it works, define INET6 for the build.
 
 2004-07-08  Ken Raeburn  <raeburn@mit.edu>
 

@@ -148,8 +148,10 @@ AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
 AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
 dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
 dnl AC_CHECK_HEADERS(pthread.h)
+# AIX and Tru64 don't support weak references, and don't have
+# stub versions of the pthread code in libc.
 case "${host_os}" in
-  aix*) LIBS="$LIBS $PTHREAD_LIBS" ;;
+  aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ;;
 esac
 fi
 dnl We want to know where these routines live, so on systems with weak
@@ -375,8 +377,6 @@ AC_DEFUN(KRB5_AC_CHECK_INET6,[
 AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])dnl
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
-dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
-dnl as of the time I'm writing this, so we'll use get*info only.
 if test "$ac_cv_func_inet_ntop" != "yes" ; then
   krb5_cv_inet6=no
 else
@@ -398,7 +398,34 @@ AC_TRY_COMPILE([
 ],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
 fi
 AC_MSG_RESULT($krb5_cv_inet6)
-if test $krb5_cv_inet6 = yes ; then
+if test "$krb5_cv_inet6" = no && test "$ac_cv_func_inet_ntop" = yes; then
+AC_MSG_CHECKING(for IPv6 compile-time support with -DINET6)
+AC_CACHE_VAL(krb5_cv_inet6_with_dinet6,[
+old_CC="$CC"
+CC="$CC -DINET6"
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_MACSOCK_H
+#include <macsock.h>
+#else
+#include <sys/socket.h>
+#endif
+#include <netinet/in.h>
+#include <netdb.h>
+],[
+  struct sockaddr_in6 in;
+  AF_INET6;
+  IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
+],krb5_cv_inet6_with_dinet6=yes,krb5_cv_inet6_with_dinet6=no)
+CC="$old_CC"])
+AC_MSG_RESULT($krb5_cv_inet6_with_dinet6)
+fi
+if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes; then
+  if test "$krb5_cv_inet6_with_dinet6" = yes; then
+    AC_DEFINE(INET6,1,[May need to be defined to enable IPv6 support, for example on IRIX])
+  fi
   AC_DEFINE(KRB5_USE_INET6,1,[Define if we should compile in IPv6 support (even if we can't use it at run time)])
 fi
 ])dnl
