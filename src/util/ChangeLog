@@ -1,3 +1,10 @@
+Fri Dec  6 10:59:32 1996  Tom Yu  <tlyu@mit.edu>
+
+	* getsyms: Don't echo filename if there are no bad symbols.
+
+	* getsyms.sed: Fixup to handle long comments somewhat more
+	gracefully.
+
 Mon Nov 25 21:00:24 1996  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Add support for --srconly, --doconly, --nocheckout,

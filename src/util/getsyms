@@ -55,7 +55,9 @@ for dir in $configs; do
 				badsyms="$badsyms $sym"
 			fi
 		done
-		echo $file:$badsyms
+		if test -n "$badsyms"; then
+			echo $file:$badsyms
+		fi
 	done
 	fi
 done

@@ -1,26 +1,28 @@
 # emulate a C preprocessor (well, sort of)
+:TOP
 y/	/ /
 s/  */ /g
+s%/\*.*\*/%%
 /\/\*/{
 	:COMMENT
-	y/	/ /
-	s/  */ /g
 	/\*\//!{
+		s/.*//
 		N
 		bCOMMENT
 	}
+	s%^.*\*/%%
+	bTOP
 }
-s/\/\*.*\*\///
-/^ *#ifdef/{
-	s/^ *#ifdef //
+/^ *# *ifdef/{
+	s/^ *# *ifdef //
 	b
 }
-/^ *#ifndef/{
-	s/^ *#ifndef //
+/^ *# *ifndef/{
+	s/^ *# *ifndef //
 	b
 }
-/^ *#if.*defined/{
-	s/^ *#if //
+/^ *# *if.*defined/{
+	s/^ *# *if //
 	:IF
 	/^defined/!{
 		:NUKE
