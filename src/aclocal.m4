@@ -46,7 +46,7 @@ fi
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
-define(CONFIG_RULES,[dnl
+AC_DEFUN(CONFIG_RULES,[dnl
 V5_SET_TOPDIR dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
