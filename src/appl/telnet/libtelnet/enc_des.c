@@ -36,6 +36,7 @@
 #ifdef	ENCRYPTION
 # ifdef	AUTHENTICATION
 #  ifdef DES_ENCRYPTION
+#include <krb5.h>
 #include <arpa/telnet.h>
 #include <stdio.h>
 #ifdef	__STDC__
@@ -53,6 +54,8 @@
 
 extern encrypt_debug_mode;
 
+extern krb5_context telnet_context;
+
 #define	CFB	0
 #define	OFB	1
 
@@ -65,20 +68,19 @@ extern encrypt_debug_mode;
 
 
 struct fb {
-	Block krbdes_key;
-	Schedule krbdes_sched;
 	Block temp_feed;
 	unsigned char fb_feed[64];
 	int need_start;
 	int state[2];
 	int keyid[2];
 	int once;
+	int validkey;
 	struct stinfo {
 		Block		str_output;
 		Block		str_feed;
 		Block		str_iv;
-		Block		str_ikey;
-		Schedule	str_sched;
+		unsigned char	str_keybytes[8]; /* yuck */
+		krb5_keyblock	str_key;
 		int		str_index;
 		int		str_flagshift;
 	} streams[2];
@@ -121,6 +123,29 @@ int fb64_reply P((unsigned char *, int, struct fb *));
 static void fb64_session P((Session_Key *, int, struct fb *));
 void fb64_stream_key P((Block, struct stinfo *));
 int fb64_keyid P((int, unsigned char *, int *, struct fb *));
+
+static void ecb_encrypt(stp, in, out)
+     struct stinfo *stp;
+     Block in;
+     Block out;
+{
+	krb5_error_code code;
+	krb5_data din;
+	krb5_enc_data dout;
+	
+	din.length = 8;
+	din.data = in;
+
+	dout.ciphertext.length = 8;
+	dout.ciphertext.data = out;
+	dout.enctype = ENCTYPE_UNKNOWN;
+
+	code = krb5_c_encrypt(telnet_context, &stp->str_key, 0, 0,
+			      &din, &dout);
+	/* XXX I'm not sure what to do if this fails */
+	if (code)
+		com_err("libtelnet", code, "encrypting stream data");
+}
 
 	void
 cfb64_init(server)
@@ -207,7 +232,7 @@ fb64_start(fbp, dir, server)
 		else if ((state & NO_SEND_IV) == 0)
 			break;
 
-		if (!VALIDKEY(fbp->krbdes_key)) {
+		if (!fbp->validkey) {
 			fbp->need_start = 1;
 			break;
 		}
@@ -218,9 +243,18 @@ fb64_start(fbp, dir, server)
 		/*
 		 * Create a random feed and send it over.
 		 */
-		des_new_random_key(fbp->temp_feed);
-		des_ecb_encrypt(fbp->temp_feed, fbp->temp_feed,
-				fbp->krbdes_sched, 1);
+		{
+			krb5_data d;
+			krb5_error_code code;
+
+			d.data = fbp->temp_feed;
+			d.length = sizeof(fbp->temp_feed);
+
+			if (code = krb5_c_random_make_octets(telnet_context,
+							     &d))
+				return(FAILED);
+		}
+
 		p = fbp->fb_feed + 3;
 		*p++ = ENCRYPT_IS;
 		p++;
@@ -418,23 +452,18 @@ fb64_session(key, server, fbp)
 	int server;
 	struct fb *fbp;
 {
-
 	if (!key || key->type != SK_DES) {
 		if (encrypt_debug_mode)
 			printf("Can't set krbdes's session key (%d != %d)\r\n",
 				key ? key->type : -1, SK_DES);
 		return;
 	}
-	memcpy((void *)fbp->krbdes_key, (void *)key->data, sizeof(Block));
 
-	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_ENCRYPT-1]);
-	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_DECRYPT-1]);
+	fbp->validkey = 1;
 
-	if (fbp->once == 0) {
-		des_set_random_generator_seed(fbp->krbdes_key);
-		fbp->once = 1;
-	}
-	des_key_sched(fbp->krbdes_key, fbp->krbdes_sched);
+	fb64_stream_key(key->data, &fbp->streams[DIR_ENCRYPT-1]);
+	fb64_stream_key(key->data, &fbp->streams[DIR_DECRYPT-1]);
+
 	/*
 	 * Now look to see if krbdes_start() was was waiting for
 	 * the key to show up.  If so, go ahead an call it now
@@ -551,11 +580,8 @@ fb64_stream_iv(seed, stp)
 	Block seed;
 	register struct stinfo *stp;
 {
-
 	memcpy((void *)stp->str_iv,     (void *)seed, sizeof(Block));
 	memcpy((void *)stp->str_output, (void *)seed, sizeof(Block));
-
-	des_key_sched(stp->str_ikey, stp->str_sched);
 
 	stp->str_index = sizeof(Block);
 }
@@ -565,8 +591,13 @@ fb64_stream_key(key, stp)
 	Block key;
 	register struct stinfo *stp;
 {
-	memcpy((void *)stp->str_ikey, (void *)key, sizeof(Block));
-	des_key_sched(key, stp->str_sched);
+	memcpy((void *)stp->str_keybytes, (void *)key, sizeof(Block));
+	stp->str_key.length = 8;
+	stp->str_key.contents = stp->str_keybytes;
+	/* the original version of this code uses des ecb mode, but
+	   it only ever does one block at a time.  cbc with a zero iv
+	   is identical */
+	stp->str_key.enctype = ENCTYPE_DES_CBC_RAW;
 
 	memcpy((void *)stp->str_output, (void *)stp->str_iv, sizeof(Block));
 
@@ -607,7 +638,7 @@ cfb64_encrypt(s, c)
 	while (c-- > 0) {
 		if (index == sizeof(Block)) {
 			Block b;
-			des_ecb_encrypt(stp->str_output, b, stp->str_sched, 1);
+			ecb_encrypt(stp, stp->str_output, b);
 			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
 			index = 0;
 		}
@@ -641,7 +672,7 @@ cfb64_decrypt(data)
 	index = stp->str_index++;
 	if (index == sizeof(Block)) {
 		Block b;
-		des_ecb_encrypt(stp->str_output, b, stp->str_sched, 1);
+		ecb_encrypt(stp, stp->str_output, b);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		index = 0;		/* But now use 0 */ 
@@ -683,7 +714,7 @@ ofb64_encrypt(s, c)
 	while (c-- > 0) {
 		if (index == sizeof(Block)) {
 			Block b;
-			des_ecb_encrypt(stp->str_feed, b, stp->str_sched, 1);
+			ecb_encrypt(stp, stp->str_feed, b);
 			memcpy((void *)stp->str_feed,(void *)b,sizeof(Block));
 			index = 0;
 		}
@@ -714,7 +745,7 @@ ofb64_decrypt(data)
 	index = stp->str_index++;
 	if (index == sizeof(Block)) {
 		Block b;
-		des_ecb_encrypt(stp->str_feed, b, stp->str_sched, 1);
+		ecb_encrypt(stp, stp->str_feed, b);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
 		index = 0;		/* But now use 0 */ 
