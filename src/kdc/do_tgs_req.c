@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -37,6 +38,11 @@ static char rcsid_do_tgs_req_c[] =
 #include "extern.h"
 
 
+static void find_alternate_tgs PROTOTYPE((krb5_kdc_req *,
+					  krb5_db_entry *,
+					  krb5_boolean *,
+					  int *));
+
 static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 						    krb5_ticket *,
 						    int,
@@ -69,6 +75,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_address *noaddrarray[1];
     krb5_enctype useetype;
     register int i;
+    int firstpass = 1;
 
     if ((retval = kdc_process_tgs_req(request, from, &header_ticket))) {
 	if (!header_ticket || !header_ticket->enc_part2)
@@ -118,6 +125,7 @@ krb5_data **response;			/* filled in with a response packet */
 	krb5_free_ticket(header_ticket);
 	return(retval);
     }
+tgt_again:
     if (more) {
 	krb5_db_free_principal(&server, nprincs);
 	return(prepare_error_tgs(request,
@@ -125,6 +133,19 @@ krb5_data **response;			/* filled in with a response packet */
 				 KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 				 response));
     } else if (nprincs != 1) {
+	/* might be a request for a TGT for some other realm; we should
+	   do our best to find such a TGS in this db */
+	if (firstpass && request->server[1] &&
+	    request->server[1]->length == tgs_server[1]->length &&
+	    !memcmp(request->server[1]->data, tgs_server[1]->data,
+		    tgs_server[1]->length) &&
+	    /* also must be proper form for tgs request */
+	    request->server[2] && !request->server[3]) {
+	    krb5_db_free_principal(&server, nprincs);
+	    find_alternate_tgs(request, &server, &more, &nprincs);
+	    firstpass = 0;
+	    goto tgt_again;
+	}
 	krb5_db_free_principal(&server, nprincs);
 	return(prepare_error_tgs(request,
 				 header_ticket,
@@ -558,3 +579,86 @@ krb5_data **response;
     krb5_free_ticket(ticket);
     return retval;
 }
+
+#include "../lib/krb/int-proto.h"
+
+/*
+ * The request seems to be for a ticket-granting service somewhere else,
+ * but we don't have a ticket for the final TGS.  Try to give the requestor
+ * some intermediate realm.
+ */
+static void
+find_alternate_tgs(request, server, more, nprincs)
+krb5_kdc_req *request;
+krb5_db_entry *server;
+krb5_boolean *more;
+int *nprincs;
+{
+    krb5_error_code retval;
+    krb5_principal *plist, *pl2;
+    krb5_data *tmp;
+
+    *nprincs = 0;
+    *more = FALSE;
+
+    if (retval = krb5_walk_realm_tree(request->server[0],
+				      request->server[2],
+				      &plist))
+	return;
+
+    /* move to the end */
+    for (pl2 = plist; *pl2; pl2++);
+
+    /* the first entry in this array is for krbtgt/local@local, so we
+       ignore it */
+    while (--pl2 > plist) {
+	*nprincs = 1;
+	tmp = (*pl2)[0];
+	(*pl2)[0] = tgs_server[0];
+	retval = krb5_db_get_principal(*pl2, server, nprincs, more);
+	(*pl2)[0] = tmp;
+	if (retval) {
+	    *nprincs = 0;
+	    *more = FALSE;
+	    krb5_free_realm_tree(plist);
+	    return;
+	}
+	if (*more) {
+	    krb5_db_free_principal(server, *nprincs);
+	    continue;
+	} else if (*nprincs == 1) {
+	    /* Found it! */
+	    krb5_principal tmpprinc;
+	    char *sname;
+
+	    tmp = (*pl2)[0];
+	    (*pl2)[0] = tgs_server[0];
+	    if (retval = krb5_copy_principal(*pl2, &tmpprinc)) {
+		krb5_db_free_principal(server, *nprincs);
+		(*pl2)[0] = tmp;
+		continue;
+	    }
+	    (*pl2)[0] = tmp;
+
+	    krb5_free_principal(request->server);
+	    request->server = tmpprinc;
+	    if (krb5_unparse_name(request->server, &sname)) {
+		syslog(LOG_INFO,
+		       "TGS_REQ: issuing alternate <un-unparseable> TGT");
+	    } else {
+		syslog(LOG_INFO,
+		       "TGS_REQ: issuing TGT %s", sname);
+		free(sname);
+	    }
+	    return;
+	}
+	krb5_db_free_principal(server, *nprincs);
+	continue;
+    }
+
+    *nprincs = 0;
+    *more = FALSE;
+    krb5_free_realm_tree(plist);
+    return;
+}
+
