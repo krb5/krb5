@@ -279,6 +279,15 @@ echo "no krb4 support; use --with-krb4=krb4dir"
 KRB4=)dnl
 AC_SUBST(KRB4)])dnl
 dnl
+dnl set $(CCOPTS) from --with-ccopts=value
+dnl
+define(WITH_CCOPTS,[
+AC_WITH([ccopts],
+echo "CCOPTS is $withval"
+CCOPTS=$withval,
+CCOPTS=)dnl
+AC_SUBST(CCOPTS)])dnl
+dnl
 dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
 define(LinkFile,[
