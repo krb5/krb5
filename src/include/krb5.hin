@@ -68,10 +68,6 @@
 #endif
 #endif
 
-#if defined(_WIN32) || defined(macintosh)
-#include <win-mac.h>
-#endif
-
 #ifndef KRB5_CONFIG__
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
@@ -86,16 +82,7 @@
 #define KRB5_OLD_CRYPTO
 
 #include <stdlib.h>
-
-/*
- * begin "error_def.h"
- */
-
-#include <profile.h>
-
-/*
- * end "error_def.h"
- */
+#include <limits.h>		/* for *_MAX */
 
 #if defined(__cplusplus) && !defined(KRB5INT_BEGIN_DECLS)
 #define KRB5INT_BEGIN_DECLS	extern "C" {
@@ -107,6 +94,10 @@
 
 KRB5INT_BEGIN_DECLS
 
+/* from profile.h */
+struct _profile_t;
+/* typedef struct _profile_t *profile_t; */
+
 /*
  * begin wordsize.h
  */
@@ -116,34 +107,32 @@ KRB5INT_BEGIN_DECLS
  */
 
 typedef	unsigned char	krb5_octet;
-typedef	unsigned char	krb5_ui_1;
 
-#if (SIZEOF_INT == 2)
+#if INT_MAX == 0x7fff
 typedef	int	krb5_int16;
 typedef	unsigned int	krb5_ui_2;
-#define VALID_INT_BITS	  0x7fff
-#define VALID_UINT_BITS	  0xffff
-#elif (SIZEOF_SHORT == 2)
+#elif SHRT_MAX == 0x7fff
 typedef	short	krb5_int16;
 typedef	unsigned short	krb5_ui_2;
 #else
-  ?==error: undefined 16 bit type
+#error undefined 16 bit type
 #endif
 
-#if (SIZEOF_INT == 4)
+#if INT_MAX == 0x7fffffffL
 typedef	int	krb5_int32;
 typedef	unsigned int	krb5_ui_4;
-#define VALID_INT_BITS	  0x7fffffff
-#define VALID_UINT_BITS	  0xffffffff
-#elif (SIZEOF_LONG == 4)
+#elif LONG_MAX == 0x7fffffffL
 typedef	long	krb5_int32;
 typedef	unsigned long	krb5_ui_4;
-#elif (SIZEOF_SHORT == 4)
+#elif SHRT_MAX == 0x7fffffffL
 typedef	short	krb5_int32;
 typedef	unsigned short	krb5_ui_4;
 #else
- ?== error: undefined 32 bit type
+#error: undefined 32 bit type
 #endif
+
+#define VALID_INT_BITS	  INT_MAX
+#define VALID_UINT_BITS	  UINT_MAX
 
 #define KRB5_INT32_MAX	2147483647
 /* this strange form is necessary since - is a unary operator, not a sign
@@ -204,8 +193,8 @@ typedef struct _krb5_data {
  * We also overload for an unset salt type length - which is also -1, but
  * hey, why not....
 */
-#define SALT_TYPE_AFS_LENGTH VALID_UINT_BITS
-#define SALT_TYPE_NO_LENGTH VALID_UINT_BITS
+#define SALT_TYPE_AFS_LENGTH UINT_MAX
+#define SALT_TYPE_NO_LENGTH  UINT_MAX
 
 typedef	void * krb5_pointer;
 typedef void const * krb5_const_pointer;
@@ -1836,7 +1825,7 @@ void KRB5_CALLCONV krb5_free_config_files
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_profile
-	(krb5_context, profile_t *);
+	(krb5_context, struct _profile_t * /* profile_t */ *);
 
 #if KRB5_PRIVATE
 krb5_error_code krb5_send_tgs

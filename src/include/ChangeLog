@@ -1,3 +1,18 @@
+2002-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	Reduce build-time per-system dependencies and krb5.h namespace
+	intrusions:
+	* krb5.hin: Don't include profile.h.  Do include limits.h.
+	(krb5_int16, krb5_ui_2, krb5_int32, krb5_ui_4): Conditionalize on
+	the values of INT_MAX, LONG_MAX and SHRT_MAX.
+	(VALID_INT_BITS, VALID_UINT_BITS, SALT_TYPE_AFS_LENGTH,
+	SALT_TYPE_NO_LENGTH): Define in terms of INT_MAX and UINT_MAX.
+	(struct _profile_t): Declare forward.
+	(krb5_get_profile): Use struct _profile_t instead of profile_t in
+	declaration.
+	(krb5_ui_1): Delete.
+	* Makefile.in (krb5.h): Don't put SIZEOF macros into output.
+
 2002-04-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (GET_HOST_BY_NAME, GET_HOST_BY_ADDR)
