@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 RANLIB = @RANLIB@
 ARCHIVE = @ARCHIVE@
 ARADD = @ARADD@
@@ -16,7 +17,6 @@ LDFLAGS = -g
 RM = rm -f
 CP = cp
 
-BUILDTOP = ../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)

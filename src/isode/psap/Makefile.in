@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 ###############################################################################
 #   Instructions to Make, for compilation of ISODE PSAP processes
 ###############################################################################
@@ -5,8 +6,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-BUILDTOP = ../../
-TOPDIR = $(BUILDTOP)
+TOPDIR = $(BUILDTOP)/
 LIBDIR	=	$(TOPDIR)lib/
 
 OPTIONS	=	-I. -I$(HDIR) -I$(ISODEINC) $(PEPYPATH) $(KRBOPT)
@@ -17,7 +17,7 @@ ISODEINCM=	$(KRBINC)isode
 ISODEINC=	$(ISODEINCM)/
 
 HDIR	=	$(TOPDIR)isode/h/
-UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
+UTILDIR	=	$(srcdir)/$(TOPDIR)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy

@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -11,7 +12,6 @@ LDFLAGS = -g
 RM = rm -f
 CP = cp
 
-BUILDTOP = ../../..
 
 PEPSY = @PEPSY@
 PSYFLAGS = @PSYFLAGS@

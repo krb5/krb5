@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 SUBDIRS = @SUBDIRS@
 
 srcdir = @srcdir@
@@ -14,7 +15,6 @@ CP = cp
 
 AWK = @AWK@
 
-BUILDTOP = ../../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)

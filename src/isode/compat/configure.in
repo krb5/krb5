@@ -1,3 +1,4 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 AC_REPLACE_FUNCS(strdup)
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile,[EXTRA_RULES])

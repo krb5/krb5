@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 CONFIG_DIRS(krb5 kdb des425 krb425 crypto gssapi)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB

@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
@@ -7,7 +8,6 @@ LIBS = @LIBS@
 CFLAGS = -g $(DEFS) -DDEBUG
 LDFLAGS = -g
 
-BUILDTOP=../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 TOPLIBD = $(BUILDTOP)/lib
 ISODELIB=$(TOPLIBD)/libisode.a

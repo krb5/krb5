@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 CONFIG_RULES
 SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE

@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
@@ -9,7 +10,6 @@ K4LIB = @K4LIB@
 CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-BUILDTOP=..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 TOPLIBD = $(BUILDTOP)/lib
 ISODELIB=$(TOPLIBD)/libisode.a

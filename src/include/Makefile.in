@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 # nothing needed here
 srcdir = @srcdir@
 SUBDIRS = @SUBDIRS@

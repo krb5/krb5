@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
@@ -16,7 +17,6 @@ RM = rm -f
 
 all::
 
-BUILDTOP=../..
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
 LIBOBJS= error_message.o et_name.o init_et.o com_err.o

@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 CONFIG_DIRS(h compat psap pepsy support)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)

@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
@@ -22,7 +23,6 @@ CHMOD=chmod
 
 all::
 
-BUILDTOP=../..
 TOP=$(BUILDTOP)
 
 # hard coded srcdir/.. is so that ss/ss.h works

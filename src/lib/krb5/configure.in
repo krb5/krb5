@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 CONFIG_DIRS(error_tables asn.1 ccache keytab krb rcache free os posix)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD

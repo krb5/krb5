@@ -1,4 +1,5 @@
 AC_INIT(configure.in)
+AC_SET_BUILDTOP
 AC_HAVE_LIBRARY(nsl)
 AC_HAVE_LIBRARY(socket)
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile,[EXTRA_RULES])

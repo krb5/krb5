@@ -26,11 +26,20 @@ define(AC__CONFIG_AUX,[
 AC_PROVIDE([$0])dnl
 ])dnl
 dnl
+dnl set up buildtop stuff
+dnl
+define(AC_BUILDTOP,[.])dnl
+define(AC_SET_BUILDTOP,
+[BUILDTOP=AC_BUILDTOP
+AC_SUBST(BUILDTOP)dnl
+])dnl
+dnl
+dnl
 dnl Does configure need to be run in immediate subdirectories of this
 dnl directory?
 dnl
 define(CONFIG_DIRS,[
-AC_REQUIRE([AC__CONFIG_AUX])
+AC_REQUIRE([AC__CONFIG_AUX])dnl
 changequote(<<<,>>>)dnl
 SUBDIRS="$1"
 if [ -z "${norecursion}" ] ; then
@@ -123,8 +132,9 @@ $2::<<<
 	@case '${MFLAGS}' in *[ik]*) set +e ;; esac; \
 	for i in $(SUBDIRS) ;\
 	do \
-		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)/$$i..."; \
-			$(MAKE) $(MFLAGS) CURRENT_DIR=$(CURRENT_DIR)/$$i >>>$2<<<); \
+		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
+			$(MAKE) $(MFLAGS) \
+			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
 	done>>>
 divert(0)dnl
 changequote([,])dnl

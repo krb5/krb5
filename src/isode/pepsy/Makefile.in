@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 ###############################################################################
 #   Instructions to Make, for compilation of ISODE PEPSY process
 ###############################################################################
@@ -6,14 +7,13 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 DEFS = @DEFS@
 
-BUILDTOP = ../../
-TOPDIR = $(BUILDTOP)
+TOPDIR = $(BUILDTOP)/
 
 OPTIONS	=	-I. -I$(HDIR) -I$(TOPDIR)include $(PEPYPATH) $(KRBOPT)
 CFLAGS  =       $(OPTIONS) $(LOPTIONS) $(DEFS)
 
 HDIR	=	$(srcdir)/$(TOPDIR)isode/h/
-UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
+UTILDIR	=	$(srcdir)/$(TOPDIR)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy

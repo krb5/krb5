@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -8,7 +9,6 @@ KRB5ROOT = @KRB5ROOT@
 KDB5DIR = $(KRB5ROOT)
 KRB5SRVTABDIR = /etc
 
-BUILDTOP = ../..
 
 RM = rm -f
 

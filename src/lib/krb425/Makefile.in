@@ -1,3 +1,4 @@
+BUILDTOP=@BUILDTOP@
 RANLIB = @RANLIB@
 ARCHIVE = @ARCHIVE@
 ARADD = @ARADD@
@@ -18,7 +19,6 @@ CP = cp
 
 AWK = @AWK@
 
-BUILDTOP = ../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: krb_err.h includes $(OBJS)
