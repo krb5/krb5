@@ -71,23 +71,13 @@ krb5_boolean krb5_kuserok
 krb5_error_code krb5_random_confounder
 	PROTOTYPE((int,
 		   krb5_pointer ));
-krb5_error_code krb5_unpack_full_ipaddr
-    PROTOTYPE((krb5_address *,
-	       krb5_int32 *,
-	       krb5_int16 *));
-
-
-#ifdef NARROW_PROTOTYPES
-krb5_error_code krb5_make_full_ipaddr
-    PROTOTYPE((krb5_int32,
-	       krb5_int16,
+krb5_error_code krb5_gen_replay_name
+    PROTOTYPE((const krb5_address *,
+	       const char *,
+	       char **));
+krb5_error_code krb5_gen_portaddr
+    PROTOTYPE((const krb5_address *,
+	       krb5_const_pointer,
 	       krb5_address **));
-#else
-krb5_error_code krb5_make_full_ipaddr
-    PROTOTYPE((krb5_int32,
-	       int,			/* unsigned short promotes to signed
-					   int */
-	       krb5_address **));
-#endif /* not NARROW_PROTOTYPES */
 
 #endif /* KRB5_LIBOS_PROTO__ */
