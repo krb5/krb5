@@ -24,11 +24,7 @@
 #include <krb5/asn1.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#ifdef USE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
+#include <krb5/ext-proto.h>
 
 #define min(a,b)	((a) < (b) ? (a) : (b))
 
@@ -57,13 +53,7 @@ extern int		_krb425_error_init;
 
 extern int	krb425error();
 
-extern char *malloc();
 extern char *basename();
-extern int atoi();
-extern void bzero();
-extern void bcopy();
-extern int read();
-extern void free();
 extern int des_key_sched();
 extern int kname_parse();
 extern int krb_get_cred();
