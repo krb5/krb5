@@ -59,9 +59,9 @@
 
 #include <stdio.h>
 
-void convert PROTOTYPE((char *, unsigned char []));
+void convert (char *, unsigned char []);
 
-void des_cblock_print_file PROTOTYPE((mit_des_cblock, FILE *));
+void des_cblock_print_file (mit_des_cblock, FILE *);
 
 krb5_octet zeroblock[8] = {0,0,0,0,0,0,0,0};
 

@@ -1,3 +1,7 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* afsstring2key.c, destest.c: Don't use PROTOTYPE macro.
+
 2001-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_afss2k.c: Extend test cases to cover situation where krb5_data

@@ -61,7 +61,7 @@
 #include "des_int.h"
 #include <ctype.h>
 
-static char *afs_crypt PROTOTYPE((char*,char*,char*));
+static char *afs_crypt (char*,char*,char*);
 
 #undef min
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -186,8 +186,8 @@ mit_afs_string_to_key (keyblock, data, salt)
  *	netatalk@terminator.cc.umich.edu
  */
 
-static void krb5_afs_crypt_setkey PROTOTYPE((char*, char*, char(*)[48]));
-static void krb5_afs_encrypt PROTOTYPE((char*,long,char*,char (*)[48]));
+static void krb5_afs_crypt_setkey (char*, char*, char(*)[48]);
+static void krb5_afs_encrypt (char*,long,char*,char (*)[48]);
 
 /*
  * Initial permutation,
