@@ -37,6 +37,8 @@
 #define	KDC_ERR_POLICY			12 /* KDC policy rejects request */
 #define	KDC_ERR_BADOPTION		13 /* KDC can't do requested opt. */
 #define	KDC_ERR_ETYPE_NOSUPP		14 /* No support for encryption type */
+#define KDC_ERR_SUMTYPE_NOSUPP		15 /* No support for checksum type */
+#define KDC_ERR_PADATA_TYPE_NOSUPP	16 /* No support for padata type */
 
 /* Application errors */
 #define	KRB_AP_ERR_BAD_INTEGRITY 31	/* Decrypt integrity check failed */
