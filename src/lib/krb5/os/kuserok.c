@@ -38,6 +38,12 @@ static char rcsid_kuserok_c [] =
 #include <stdio.h>
 #include <pwd.h>
 
+#if defined(_AIX) && defined(_IBMR2)
+#include <sys/access.h>
+/* xlc has a bug with "const" */
+#define getpwnam(user) getpwnam((char *)user)
+#endif
+
 #define MAX_USERNAME 10
 
 /*
