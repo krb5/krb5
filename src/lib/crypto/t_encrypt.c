@@ -57,6 +57,7 @@ int main () {
   krb5_context context ;
   krb5_data  in, out, check;
   int i;
+  size_t len;
   krb5_enc_data enc_out;
   krb5_error_code retval;
   krb5_keyblock key;
@@ -74,8 +75,12 @@ int main () {
     printf ("Testing enctype %d\n", enctype);
     test ("Generating random key",
 	  krb5_c_make_random_key (context, enctype, &key));
-    enc_out.ciphertext = out;
-    krb5_c_encrypt_length (context, key.enctype, in.length, &enc_out.ciphertext.length);
+    enc_out.ciphertext.data = out.data;
+    enc_out.ciphertext.length = out.length;
+    /* We use an intermediate `len' because size_t may be different size 
+       than `int' */
+    krb5_c_encrypt_length (context, key.enctype, in.length, &len);
+    enc_out.ciphertext.length = len;
     test ("Encrypting",
 	  krb5_c_encrypt (context, &key, 7, 0, &in, &enc_out));
     test ("Decrypting",

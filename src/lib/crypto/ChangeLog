@@ -1,3 +1,9 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_encrypt.c: Argument to krb5_c_encrypt_length must be size_t
+ 	instead of int (which is the length in krb5_data) or unaligned
+ 	access occurs on Dec OSF machines.
+
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (RUN_SETUP): Include so make check works correctly
