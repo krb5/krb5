@@ -90,3 +90,4 @@ install::
 
 getdtablesize.o: $(srcdir)/getdtablesize.c
 
+kcmd.o krcp.o krlogin.o krlogind.o krsh.o krshd.o : defines.h

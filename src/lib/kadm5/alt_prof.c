@@ -644,8 +644,8 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 if (aprofile)
 	      krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue);
 	 if (svalue == NULL)
-	      svalue = strdup("des-cbc-crc:normal");
-	 
+	      svalue = strdup("des3-hmac-sha1:normal des-cbc-crc:normal");
+
 	 params.keysalts = NULL;
 	 params.num_keysalts = 0;
 	 krb5_string_to_keysalts(svalue,

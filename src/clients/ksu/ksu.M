@@ -37,9 +37,6 @@ ksu \- Kerberized super-user
 .B \-c
 .I source_cache_name
 ] [
-.B \-C
-.I target_cache_name
-] [
 .B \-k
 ] [
 .B \-D
@@ -169,10 +166,8 @@ The real and effective user ID are changed to that of the
 target user.  The target user's shell is then invoked
 (the shell name is specified in the password file).
 Upon termination of the shell, ksu deletes the target cache (unless
-ksu is invoked with
-.B \-k
- or '
-.B \-C .' options).
+ksu is invoked with the
+.B \-k option).
 This is implemented by first doing a fork and then an exec, instead
 of just exec, as done by su.
 .br
@@ -287,19 +282,7 @@ option is not used then the
 name is obtained from KRB5CCNAME environment variable.
 If KRB5CCNAME is not defined the source cache name
 is set to krb5cc_<source uid>.
-.TP 10
-\fB\-C \fItarget_cache_name
-Specify the target cache name (e.g.
-.B \-C
-FILE:/tmp/target_cache).
-If '.' is specified (e.g. ksu
-\-C .) ksu uses the source
-cache and does not create a new target cache. Note:
-this case requires both source and target user
-to have read and write permissions for the source cache.
-If
-.B \-C
-option is not used, the default target cache name is
+The target cache name is automatically
 set to krb5cc_<target uid>.(gen_sym()),
 where gen_sym generates a new number such that
 the resulting cache does not already exist.
@@ -313,8 +296,7 @@ target shell or a command (
 command).
 Without
 .B \-k,
-ksu deletes the target cache
-(unless ksu was invoked with '-C .' option).
+ksu deletes the target cache.
 .TP 10
 \fB\-D
 turn on debug mode.
@@ -359,7 +341,7 @@ if you want the tickets for other then the default
 principal. Note that the
 .B \-z 
 option is mutually
-exclusive with '-C .' and -Z options.
+exclusive with the -Z option.
 .TP 10
 \fB\-Z
 Don't copy any tickets from the source cache to the
@@ -368,7 +350,7 @@ where the default principal name of the cache is
 initialized to the target principal name.  Note that
 .B \-Z
 option is mutually
-exclusive with '-C .' and -z options.
+exclusive with the -z option.
 .TP 10
 \fB\-q
 suppress the printing of status messages.

@@ -36,8 +36,7 @@ krb5_error_code krb5_locate_kdc
 	       const krb5_data *,
 	       struct sockaddr **,
 	       int *,
-	       int *,
-	       int *));
+	       int));
 #endif
 
 #ifdef HAVE_NETINET_IN_H

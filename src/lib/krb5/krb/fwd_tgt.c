@@ -90,7 +90,7 @@ krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 	goto errout;
 	
     if (cc == 0) {
-	if ((retval = krb5_cc_default(context, &cc)))
+	if ((retval = krb5int_cc_default(context, &cc)))
 	    goto errout;
 	close_cc = 1;
     }
