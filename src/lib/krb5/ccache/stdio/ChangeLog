@@ -1,3 +1,7 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* scc_skip.c (krb5_scc_skip_header): Remove unused variables.
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
