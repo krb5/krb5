@@ -82,7 +82,7 @@ usage(who, status)
     fprintf(stderr,
 	    "usage: %s [-d dbpathname] [-r realmname] [-R request ]\n",
 	    who);
-    fprintf(stderr, "\t [-k enctype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-k enctype] [-M mkeyname] [-f stashfile]\n");
     exit(status);
 }
 
@@ -129,7 +129,7 @@ char *kdb5_edit_Init(argc, argv)
 
     progname = argv[0];
 
-    while ((optchar = getopt(argc, argv, "P:d:r:R:k:M:e:ms:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "P:d:r:R:k:M:e:ms:f:")) != EOF) {
 	switch(optchar) {
         case 'P':		/* Only used for testing!!! */
 	    mkey_password = optarg;
@@ -170,6 +170,9 @@ char *kdb5_edit_Init(argc, argv)
 			optarg);
 		exit(1);
 	    }
+	    break;
+	case 'f':
+	    stash_file = optarg;
 	    break;
 	case '?':
 	default:
@@ -256,17 +259,17 @@ char *kdb5_edit_Init(argc, argv)
     }
 
     if (master_keyblock.enctype != ENCTYPE_UNKNOWN) {
-	    if (!valid_enctype(master_keyblock.enctype)) {
-		    char tmp[32];
-		    if (krb5_enctype_to_string(master_keyblock.enctype,
-					       tmp, sizeof(tmp)))
-			    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-				    "while setting up enctype %d", master_keyblock.enctype);
-		    else
-			    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-		    exit(1);
-	    }
-	    krb5_use_enctype(edit_context, &master_encblock,
+	if (!valid_enctype(master_keyblock.enctype)) {
+	    char tmp[32];
+	    if (krb5_enctype_to_string(master_keyblock.enctype,
+				       tmp, sizeof(tmp)))
+		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+			"while setting up enctype %d", master_keyblock.enctype);
+	    else
+		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+	    exit(1);
+	}
+	krb5_use_enctype(edit_context, &master_encblock,
 			 master_keyblock.enctype);
     }
 
@@ -878,7 +881,7 @@ void extract_v4_srvtab(argc, argv)
 	
 	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
 						  &master_encblock,
-					          pkey,
+						  pkey,
 						  &key, NULL))) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
 	    exit_status++;
@@ -891,7 +894,6 @@ void extract_v4_srvtab(argc, argv)
 		krb5_xfree(key.contents);
 		continue;
 	}
-/*XXX handle host*/
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
 	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */

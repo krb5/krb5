@@ -47,6 +47,9 @@ kdb5_edit \- edit a Kerberos V5 principal database
 ] [
 .B \-s
 .I script
+] [
+.B \-f
+.I stashfile
 ]
 .br
 .SH DESCRIPTION
@@ -88,6 +91,14 @@ The
 .I keytype
 option specifies the key type of the master key in the database; the default is
 the string representation of DEFAULT_KDC_KEYTYPE (defined in <krb5/osconf.h>).
+.PP
+The
+.B \-f
+.I stashfile
+option specifies the filename of the stashed V5 master key. The default is
+defined as DEFAULT_KEYFILE_STUB in <krb5/osconf.h> and is 
+typically $(prefix)/lib/krb5kdc/.k5.REALMNAME. (In previous
+releases, this would have been /.k5.REALMNAME.)
 .PP
 The
 .B \-M
