@@ -32,10 +32,6 @@ SRCS= \
 	KRB5_tables.c	\
 	encode.c 	\
 	decode.c	\
-	decode_arp.c	\
-	decode_arq.c	\
-	encode_arp.c	\
-	encode_arq.c	\
 	adat2kadat.c	\
 	addr2kaddr.c	\
 	adr2kadr.c	\
@@ -57,10 +53,8 @@ SRCS= \
 	kaprp2aprp.c	\
 	kaprq2aprq.c	\
 	karep2arep.c	\
-	kasrp2kdcr.c	\
 	kauth2auth.c	\
 	kck2ck.c	\
-	kdcr2kasrp.c	\
 	kdcr2kkdcr.c	\
 	kdcr2ktgsr.c	\
 	kedat2edat.c	\
@@ -95,10 +89,6 @@ OBJS= \
 	KRB5_tables.o	\
 	encode.o	\
 	decode.o	\
-	decode_arp.o	\
-	decode_arq.o	\
-	encode_arp.o	\
-	encode_arq.o	\
 	adat2kadat.o	\
 	addr2kaddr.o	\
 	adr2kadr.o	\
@@ -120,10 +110,8 @@ OBJS= \
 	kaprp2aprp.o	\
 	kaprq2aprq.o	\
 	karep2arep.o	\
-	kasrp2kdcr.o	\
 	kauth2auth.o	\
 	kck2ck.o	\
-	kdcr2kasrp.o	\
 	kdcr2kkdcr.o	\
 	kdcr2ktgsr.o	\
 	kedat2edat.o	\
