@@ -272,13 +272,13 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      	} else if ((retval == 0) && (realm_name == NULL)) {
      		break;
      	}
-     	if (realm_name != nil) {
+     	if (realm_name != NULL) {
      		profile_release_string (realm_name);
-     		realm_name = nil;
+     		realm_name = NULL;
      	}
-     	if (dummy_value != nil) {
+     	if (dummy_value != NULL) {
      		profile_release_string (dummy_value);
-     		dummy_value = nil;
+     		dummy_value = NULL;
      	}
      }
      
