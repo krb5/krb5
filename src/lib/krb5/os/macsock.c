@@ -5,6 +5,8 @@
  *
  * This only implements what's needed for Cygnus Kerberos -- a warped
  * subset of UDP.
+ * 
+ * 	Sep 24 1997 mjv: Changed PBControl -> PBControlSync
  *
  * Written by John Gilmore, Cygnus Support, June 1994.
  * Adapted from:
@@ -149,8 +151,8 @@ socket(af, type, protocol)
 		pb.udppb.csParam.create.rcvBuffLen	= UDPbuflen;
 		pb.udppb.csParam.create.notifyProc	= NULL;
 		pb.udppb.csParam.create.localPort		= 0;
-	
-		err = PBControl( (ParamBlockRec *) &pb.udppb, false );
+		
+		err = PBControlSync( (ParamBlockRec *) &pb.udppb );
 		if (err) {
 			free (theUDP);
 			SOCKET_SET_ERRNO (EIO);
@@ -170,7 +172,7 @@ socket(af, type, protocol)
 		pb.tcppb.csParam.create.rcvBuff = theUDP->fRecvBuf;
 		pb.tcppb.csParam.create.rcvBuffLen = TCPbuflen;
 		pb.tcppb.csParam.create.notifyProc = NULL;
-		err = PBControl((ParamBlockRec *)&pb,false);
+		err = PBControlSync((ParamBlockRec *)&pb);
 		if (err) {
 			free(theUDP);
 			SOCKET_SET_ERRNO (EIO);
@@ -202,7 +204,7 @@ closesocket (theUDP)
 			pb.udppb.csCode		= UDPRelease;
 			pb.udppb.udpStream	= (StreamPtr) theUDP->fStream;
 	
-			(void) PBControl( (ParamBlockRec *) &pb.udppb, false );
+			(void) PBControlSync( (ParamBlockRec *) &pb.udppb );
 		}
 		break;
 	case SOCK_STREAM:
@@ -211,7 +213,7 @@ closesocket (theUDP)
 			pb.tcppb.csCode		= TCPRelease;
 			pb.tcppb.tcpStream	= (StreamPtr) theUDP->fStream;
 	
-			(void) PBControl( (ParamBlockRec *) &pb.tcppb, false );
+			(void) PBControlSync( (ParamBlockRec *) &pb.tcppb );
 		}
 		break;
 	}
@@ -288,7 +290,7 @@ sendto (theUDP, buf, len, flags, to_param, tolen)
 	pb.csParam.send.sendLength	= 0;			// reserved
 	pb.csParam.send.remoteHost	= to->sin_addr.s_addr;
 
-	err = PBControl( (ParamBlockRec *) &pb, false );
+	err = PBControlSync( (ParamBlockRec *) &pb);
 	if (err != noErr) {
 		SOCKET_SET_ERRNO (EIO);
 		return SOCKET_ERROR;
@@ -343,7 +345,7 @@ recvfrom (theUDP, buf, len, flags, from_param, fromlen)
 	pb.csParam.receive.timeOut			= last_timeout.tv_sec;
 	pb.csParam.receive.secondTimeStamp	= 0;			// reserved
 
-	err = PBControl( (ParamBlockRec *) &pb, false );
+	err = PBControlSync( (ParamBlockRec *) &pb);
 	if( err ) {
 		SOCKET_SET_ERRNO (EIO);
 		return SOCKET_ERROR;
@@ -360,7 +362,7 @@ recvfrom (theUDP, buf, len, flags, from_param, fromlen)
 
 	if( pb.csParam.receive.rcvBuffLen ) {
 		pb.csCode = UDPBfrReturn;
-		err = PBControl( (ParamBlockRec *) &pb, false );
+		err = PBControlSync( (ParamBlockRec *) &pb);
 	}
 
 	if (len < packet_len) {
@@ -419,7 +421,7 @@ connect (s, addr, tolen)
 		pb.tcppb.csParam.open.security = 0;
 		pb.tcppb.csParam.open.optionCnt = 0;
 		pb.tcppb.csParam.open.userDataPtr = 0;	/* jfm */
-		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		err = PBControlSync((ParamBlockRec *)&pb.tcppb);
 		if (err) {
 			SOCKET_SET_ERRNO (EINVAL);
 			return SOCKET_ERROR;
@@ -460,7 +462,7 @@ recv (theUDP, buf, len, flags)
 		pb.tcppb.csParam.receive.rcvBuff = buf;
 		pb.tcppb.csParam.receive.rcvBuffLen = len;
 		pb.tcppb.tcpStream = theUDP->fStream;
-		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		err = PBControlSync((ParamBlockRec *)&pb.tcppb);
 		if (err) {
 			SOCKET_SET_ERRNO (EIO);
 			return SOCKET_ERROR;
@@ -500,7 +502,7 @@ send (theUDP, buf, len, flags)
 		pb.tcppb.csParam.send.urgentFlag = false;
 		pb.tcppb.csParam.send.wdsPtr = (Ptr) wds;
 		pb.tcppb.tcpStream = theUDP->fStream;
-		err = PBControl((ParamBlockRec *)&pb.tcppb,false);
+		err = PBControlSync((ParamBlockRec *)&pb.tcppb);
 		if (err) {
 			SOCKET_SET_ERRNO (EIO);
 			return SOCKET_ERROR;
@@ -669,7 +671,7 @@ getmyipaddr ()
 		return 0;
 	pb.ioCRefNum	= sock->fMacTCPRef;
 	pb.csCode		= ipctlGetAddr;
-	err = PBControl( (ParamBlockRec *) &pb, false );
+	err = PBControlSync( (ParamBlockRec *) &pb);
 	if (err) {
 		closesocket (sock);
 		SOCKET_SET_ERRNO (EIO);
@@ -708,7 +710,7 @@ struct GetAddrParamBlock	pb;
 	err = OpenDriver( "\p.IPP", &refnum );
 	pb.ioCRefNum	= refnum;
 	pb.csCode		= ipctlGetAddr;
-	err = PBControl( (ParamBlockRec *) &pb, false );
+	err = PBControlSync( (ParamBlockRec *) &pb);
 	if (err) {
 		SOCKET_SET_ERRNO (EIO);
 		return 0;
@@ -757,7 +759,7 @@ struct GetAddrParamBlock	pb;
 		return -1;
 	pb.ioCRefNum	= sock->fMacTCPRef;
 	pb.csCode		= ipctlGetAddr;
-	err = PBControl( (ParamBlockRec *) &pb, false );
+	err = PBControlSync( (ParamBlockRec *) &pb );
 	if (err) {
 		free (theUDP);
 		SOCKET_SET_ERRNO (EIO);
