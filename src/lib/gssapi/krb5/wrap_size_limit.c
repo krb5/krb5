@@ -156,7 +156,8 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 	/* Calculate the token size and subtract that from the output size */
 	cfsize = (conf_req_flag) ? kg_confounder_size(context, ctx->enc) : 0;
 	ohlen = g_token_size((gss_OID) ctx->mech_used,
-			     (unsigned int) cfsize + ctx->cksum_size + 14);
+			     (unsigned int) (req_output_size + cfsize +
+					     ctx->cksum_size + 14));
 
 	if (ohlen < req_output_size)
 	    /*

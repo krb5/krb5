@@ -558,5 +558,9 @@ OM_uint32 krb5_gss_validate_cred
 PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_cred_id_t		/* cred */
          ));
+
+gss_OID krb5_gss_convert_static_mech_oid
+PROTOTYPE( (gss_OID FAR oid
+	 ));
 	
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -1,3 +1,28 @@
+Thu Mar 25 22:43:54 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_krb5.c: Rearrange OID's so that the V1V2 mechanism set
+		returns all three mechanism ID's recognized by this
+		implementation, with the RFC1964 OID first (and thus
+		preferred). 
+
+	* import_sec_context.c (krb5_gss_convert_static_mech_oid): Make
+		the old convert_static_oid() function globally accessible
+		with a namespace compliant name, since init_sec_context()
+		needs to be able to use this function.
+
+	* indicate_mechs.c (krb5_gss_indicate_mechs): Return the v1v2
+		mechanism set OID, since we should return all the
+		mechanisms that we support.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Make
+ 		ctx->mech_used use a static OID, since it is returned by
+ 		gss_inquire_context which must return a static OID.
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix bug where we
+		would overestimate the size of the allowable input message
+		by one byte, because we weren't passing the right estimate
+		of the wrapped data to g_token_size().
+
 1999-03-14  Miro Jurisic  <meeroh@mit.edu>
 
 	* gssapi_krb5.h: added extern "C" for C++ friendliness

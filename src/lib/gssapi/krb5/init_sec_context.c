@@ -655,6 +655,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  code = *minor_status;
 	  goto fail;
       }
+      /*
+       * Now try to make it static if at all possible....
+       */
+      ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
 
       if (ctx->gsskrb5_version == 2000) {
 	  /* gsskrb5 v2 */

@@ -31,7 +31,7 @@
  * Fix up the OID of the mechanism so that uses the static version of
  * the OID if possible.
  */
-static gss_OID convert_static_oid(oid)
+gss_OID krb5_gss_convert_static_mech_oid(oid)
      gss_OID	FAR oid;
 {
 	const gss_OID_desc 	*p;
@@ -85,7 +85,7 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
        return(GSS_S_FAILURE);
     }
-    ctx->mech_used = convert_static_oid(ctx->mech_used);
+    ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
     
     *context_handle = (gss_ctx_id_t) ctx;
 
