@@ -26,8 +26,6 @@
 #include <krb5/fieldbits.h>
 #include <krb5/errors.h>
 #include <krb5/proto.h>
-#include <krb5/ccache.h>
-#include <krb5/rcache.h>
 
 /* Time set */
 typedef struct _krb5_ticket_times {
@@ -81,10 +79,10 @@ typedef struct _krb5_tkt_authent {
 } krb5_tkt_authent;
 
 /* credentials:  Ticket, session key, etc. */
-typedef struct _krb5_credentials {
+typedef struct _krb5_creds {
     krb5_principal client;		/* client's principal identifier */
     krb5_principal server;		/* server's principal identifier */
-    krb5_encrypt_block keyblock;	/* session encryption key info */
+    krb5_keyblock keyblock;		/* session encryption key info */
     krb5_ticket_times times;		/* lifetime info */
     krb5_boolean is_skey;		/* true if ticket is encrypted in
 					   another ticket's skey */
@@ -93,7 +91,7 @@ typedef struct _krb5_credentials {
     krb5_data second_ticket;		/* second ticket, if related to
 					   ticket (via DUPLICATE-SKEY or
 					   ENC-TKT-IN-SKEY) */
-} krb5_credentials;
+} krb5_creds;
 
 /* Last request fields */
 typedef struct _krb5_last_req_entry {
@@ -206,6 +204,10 @@ typedef struct _krb5_priv_enc_part {
     krb5_address **addresses;		/* array of ptrs to addresses */
 } krb5_priv_enc_part;
 
+/* these need to be here so the typedefs are available for the prototypes */
+#include <krb5/ccache.h>
+#include <krb5/rcache.h>
+#include <krb5/keytab.h>
 #include <krb5/func-proto.h>
 
 #endif /* __KRB5_GENERAL__ */
