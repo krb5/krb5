@@ -5,9 +5,6 @@ BUILDTOP=$(U)$(U)
 ##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst keytab.lst krb.lst os.lst posix.lst rcache.lst
 ##DOSOBJFILELIST=@asn1.lst @ccache.lst @err_tbls.lst @keytab.lst @krb.lst @os.lst @posix.lst @rcache.lst
 
-ANAME_DBDEP=@ANAME_DBDEP@
-ANAME_DBLIB=@ANAME_DBLIB@
-
 TST=if test -n "`cat DONE`" ; then
 
 MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache os posix 
@@ -22,7 +19,7 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		posix/DONE $(BUILDTOP)/util/profile/DONE
 
 #
-#SHLIB_LIBS=-lcrypto -lcom_err $(ANAME_DBLIB) @SHLIB_GEN@
+#SHLIB_LIBS=-lcrypto -lcom_err @SHLIB_GEN@
 #SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 #SHLIB_LIBDIRS= @SHLIB_LIBDIRS@

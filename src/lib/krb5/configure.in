@@ -3,12 +3,6 @@ CONFIG_RULES
 AC_CONFIG_SUBDIRS(error_tables asn.1 ccache keytab krb rcache os posix)
 AC_PROG_INSTALL
 dnl
-USE_ANAME
-ANAME_DBDEP="$kaname_dbdep"
-ANAME_DBLIB="$kaname_libs"
-AC_SUBST(ANAME_DBDEP)
-AC_SUBST(ANAME_DBLIB)
-dnl
 AC_CHECK_LIB(gen,compile,SHLIB_GEN=-lgen,SHLIB_GEN='')
 AC_SUBST(SHLIB_GEN)
 dnl
