@@ -1,3 +1,7 @@
+Tue Sep  3 22:10:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (install): Fixed typo: ($PROG) -> $(PROG)
+
 Thu Aug 29 16:08:10 1996  Jeff Bigler  <jcb@mit.edu>
 
 	* Makefile.in (install): added man pages for kadmin and
