@@ -109,8 +109,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	return (-1);
     }
     
-    host_save = (char *)malloc(strlen(hp->h_name) + 1);
-    if ( host_save == (char *) 0){
+    if ((host_save = malloc(strlen(hp->h_name) + 1)) == NULL) {
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
@@ -209,7 +208,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    continue;
     	}
 #endif /* !(defined(ultrix) || defined(sun)) */
-    	perror(hp->h_name);
+    	perror(host_save);
 #ifdef POSIX_SIGNALS
 	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
@@ -329,7 +328,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
 	if (status = get_for_creds(bsd_context, auth_context,
-					hp->h_name,
+					host_save,
 					ret_cred->client,
 					/* Forwardable TGT? */
 					options & OPTS_FORWARDABLE_CREDS,
