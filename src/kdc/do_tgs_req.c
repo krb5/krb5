@@ -154,31 +154,11 @@ krb5_data **response;			/* filled in with a response packet */
     }
     useetype = request->etype[i];
 
-    if (isflagset(request->kdc_options, KDC_OPT_REUSE_SKEY)) {
-	/* decrypt second ticket, and examine */
-	if (!request->second_ticket ||
-	    !request->second_ticket[st_idx]) {
-	    cleanup();
-	    return(prepare_error_tgs(request,
-				     header_ticket,
-				     KDC_ERR_BADOPTION, response));
-	}
-	if (!isflagset(request->second_ticket[st_idx]->enc_part2->flags,
-		   TKT_FLG_DUPLICATE_SKEY)) {
-	    cleanup();
-	    return(prepare_error_tgs(request,
-				     header_ticket,
-				     KDC_ERR_BADOPTION, response));
-	}
-	session_key = request->second_ticket[st_idx]->enc_part2->session;
-	st_idx++;
-    } else {
-	if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
-	    /* random key failed */
-	    tkt_cleanup();
-	    cleanup();
-	    return(retval);
-	}
+    if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
+	/* random key failed */
+	tkt_cleanup();
+	cleanup();
+	return(retval);
     }
 
 #undef cleanup
@@ -256,9 +236,6 @@ krb5_data **response;			/* filled in with a response packet */
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
 
-    if (isflagset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY) ||
-	isflagset(request->kdc_options, KDC_OPT_REUSE_SKEY))
-	setflag(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
     if (isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
 	if (header_ticket->enc_part2->times.starttime > kdc_time) {
 	    cleanup();

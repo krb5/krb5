@@ -39,7 +39,6 @@ const register krb5_kdc_req *request;
 	isflagset(request->kdc_options, KDC_OPT_PROXY) ||
 	isflagset(request->kdc_options, KDC_OPT_RENEW) ||
 	isflagset(request->kdc_options, KDC_OPT_VALIDATE) ||
-	isflagset(request->kdc_options, KDC_OPT_REUSE_SKEY) ||
 	isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
 	return TRUE;			/* against policy */
 

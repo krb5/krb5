@@ -182,9 +182,6 @@ krb5_data **response;			/* filled in with a response packet */
     if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
 	setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
-    if (isflagset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY))
-	setflag(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
-
 
     enc_tkt_reply.session = session_key;
     enc_tkt_reply.client = request->client;
