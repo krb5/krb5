@@ -240,6 +240,19 @@ AC_MSG_RESULT($krb5_cv_has_struct_lifconf)
 if test $krb5_cv_has_struct_lifconf = yes; then
     AC_DEFINE(HAVE_STRUCT_LIFCONF,1,[Define if there is a struct lifconf.])
 fi
+dnl HP-UX 11 uses stuct if_laddrconf
+AC_MSG_CHECKING(for struct if_laddrconf)
+AC_CACHE_VAL(krb5_cv_has_struct_if_laddrconf,
+[AC_TRY_COMPILE(
+[#include <sys/socket.h>
+#include <net/if.h>
+#include <net/if6.h>
+],[sizeof (struct if_laddrconf);],
+krb5_cv_has_struct_if_laddrconf=yes,krb5_cv_has_struct_if_laddrconf=no)])
+AC_MSG_RESULT($krb5_cv_has_struct_if_laddrconf)
+if test $krb5_cv_has_struct_if_laddrconf = yes; then
+    AC_DEFINE(HAVE_STRUCT_IF_LADDRCONF,1,[Define if there is a struct if_laddrconf.])
+fi
 dnl
 dnl
 AC_MSG_CHECKING([for h_errno in netdb.h])

@@ -1,3 +1,8 @@
+2004-10-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for struct if_laddrconf, as for struct
+	lifconf.
+
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use AC_MSG_NOTICE for krb4 messages instead of
