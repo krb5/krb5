@@ -553,37 +553,12 @@ typedef struct _krb5_sam_response {
  */
 #if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
 
-#ifndef ODBM
-#include <ndbm.h>
-#else /* ODBM */
-#ifdef unicos61
-#include <rpcsvc/dbm.h>
-#else
-#include <dbm.h>
-#endif
-#endif /*ODBM */
+/*
+ * Since we are always using db, use the db-ndbm include header file.
+ */	
 
-#ifndef ODBM
-#define dbm_next(db,key) dbm_nextkey(db)
-#else /* OLD DBM */
-typedef char DBM;
-
-/* Macros to convert ndbm names to dbm names.
- * Note that dbm_nextkey() cannot be simply converted using a macro, since
- * it is invoked giving the database, and nextkey() needs the previous key.
- *
- * Instead, all routines call "dbm_next" instead.
- */
-
-#define dbm_open(file, flags, mode) ((dbminit(file) == 0)?"":((char *)0))
-#define dbm_fetch(db, key) fetch(key)
-#define dbm_store(db, key, content, flag) store(key, content)
-#define dbm_delete(db, key) delete(key)
-#define dbm_firstkey(db) firstkey()
-#define dbm_next(db,key) nextkey(key)
-#define dbm_close(db) dbmclose()
-#endif /* OLD DBM */
-
+#include "db-ndbm.h"
+	
 #endif /* !MSDOS && !MACINTOSH */
 /*
  * End "dbm.h"

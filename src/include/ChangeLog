@@ -1,3 +1,9 @@
+Thu Aug 15 16:31:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Since we are only supporting the db in the util/db2
+		directory, just use db-ndbm.h, instead of hoping that the
+		system ndbm.h will be appropriate.
+
 Fri Aug  2 14:15:26 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.hin: Add prototype for krb5_free_keyblock_contents
