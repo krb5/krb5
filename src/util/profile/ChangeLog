@@ -1,3 +1,10 @@
+2002-01-23	Alexandra Ellwood <lxs@mit.edu>
+
+	* prof_init.c, prof_tree.c: Fixed calls to profile_update_file_data to handle
+    the possibility that we have lost permission to read one of the configuration 
+    files in the file list.  We should only fail catastrophically (EACCES) if we 
+    can't read all of the files in the profile.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* test_profile.c (main): Call profile_release() before exiting

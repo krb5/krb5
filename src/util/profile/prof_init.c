@@ -46,7 +46,7 @@ profile_init(files, ret_profile)
 	    for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
 		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
-		if (retval == ENOENT) {
+		if (retval == ENOENT || retval == EACCES) {
 			continue;
 		}
 		if (retval) {
