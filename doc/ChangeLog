@@ -1,3 +1,8 @@
+2001-01-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* coding-style: Assume ANSI C '89.  Use krb5int_ for internal
+	names.
+
 2000-07-12  Tom Yu  <tlyu@mit.edu>
 
 	* coding-style: Update after some discussion.  Add sections

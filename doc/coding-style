@@ -136,6 +136,10 @@ In general, do not parenthesize the argument of "return".
 Coding practices for C
 ----------------------
 
+Assume, for most purposes, working ANSI/ISO C ('89, not '99) support,
+both for internal use and for applications compiling against Kerberos
+header files and libraries.  Some exceptions are noted below.
+
 Do not use assignments as truth values.  Rather than this:
 
 	/* bad style */
@@ -318,15 +322,10 @@ required to return int by the standard.  If a function is not supposed
 to return a value, declare it as returning void rather than omitting
 the return type, which will default the return type to int.
 
-When using K&R style function definitions, declare all the argument
-types, even those that are int. [XXX it is debatable whether to
-require K&R style function definitions for all except stdarg
-functions]
-
-For krb5 code, we have been making the assumption that an ANSI
-compiler is required to compile the distribution, but not to link
-against it.  For this, and other reasons, the use of narrow types in
-API functions is highly discouraged.
+Try to use ANSI C prototype-style function definitions in preference
+to K&R style definitions.  When using K&R style function definitions,
+declare all the argument types, even those that are int, but beware of
+any narrow types in the argument list.
 
 Do not declare variables in an inner scope, e.g. inside the compound
 substatement of an if statement, unless the complexity of the code
@@ -418,11 +417,11 @@ the application, pick another (related) prefix to use for the internal
 globals.  This applies to typedef names, tag names, and preprocessor
 identifiers as well.
 
-For the krb5 library, the prefix for public global symbols is
-"krb5_".  It is a matter of debate whether to use "krb5__" or
-"krb5int_" as a prefix for library internal globals.  There are
-admittedly a number of places where we leak thing into the namespace;
-we should try to fix these.
+For the krb5 library, the prefix for public global symbols is "krb5_".
+Use "krb5int_" as a prefix for library internal globals.  Avoid using
+"__" in symbol names, as it may confuse C++ implementations.  There
+are admittedly a number of places where we leak thing into the
+namespace; we should try to fix these.
 
 Header files should also not leak symbols.  Usually using the upcased
 version of the prefix you've picked will suffice, e.g. "KRB5_" as a
