@@ -101,7 +101,7 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     krb5_pointer isode_temp;
     PE pe;
     PS ps;
-    krb5_error_code error;
+    krb5_error_code error = 0;
 
     if (!(ps = ps_alloc(str_open))) {
 	return(ENOMEM);
