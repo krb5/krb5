@@ -62,6 +62,7 @@ AC_DEFINE([KRB5_DEPRECATED], 1, [Define only if building in-tree])
 AC_C_CONST dnl
 WITH_NETLIB dnl
 WITH_HESIOD dnl
+KRB5_AC_MAINTAINER_MODE dnl
 AC_ARG_PROGRAM dnl
 dnl
 dnl This selects the correct autoconf file; either the one in our source tree,
@@ -99,6 +100,28 @@ AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
 ])dnl
+
+dnl Maintainer mode, akin to what automake provides, 'cept we don't
+dnl want to use automake right now.
+AC_DEFUN([KRB5_AC_MAINTAINER_MODE],
+[AC_ARG_ENABLE([maintainer-mode],
+[  --enable-maintainer-mode
+                          enable rebuilding of source files etc],
+USE_MAINTAINER_MODE=$enableval,
+USE_MAINTAINER_MODE=no)
+if test "$USE_MAINTAINER_MODE" = yes; then
+  MAINTAINER_MODE_TRUE=
+  MAINTAINER_MODE_FALSE='#'
+  AC_MSG_NOTICE(enabling maintainer mode)
+else
+  MAINTAINER_MODE_TRUE='#'
+  MAINTAINER_MODE_FALSE=
+fi
+MAINT=$MAINTAINER_MODE_TRUE
+AC_SUBST(MAINTAINER_MODE_TRUE)
+AC_SUBST(MAINTAINER_MODE_FALSE)
+AC_SUBST(MAINT)
+])
 
 dnl This is somewhat gross and should go away when the build system
 dnl is revamped. -- tlyu

@@ -1,3 +1,8 @@
+2003-09-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_MAINTAINER_MODE): New macro.
+	(CONFIG_RULES): Invoke it.
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_NEED_DAEMON): New macro.
