@@ -35,7 +35,9 @@ extern Key_schedule schedule;
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-#ifndef _WIN32
+#ifdef _WIN32
+#include <port-sockets.h>
+#else
 #include <netinet/in.h>
 #endif
 #include <errno.h>

@@ -78,6 +78,11 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 
 #include <port-sockets.h>
 
+#ifdef _WIN32
+/* For SO_SYNCHRONOUS_NONALERT and SO_OPENTYPE: */
+#include <mswsock.h>
+#endif
+
 #ifndef _WIN32
 uid_t	getuid();
 #endif

@@ -1,3 +1,13 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ftp.c: Include Winsock 2 instead of Winsock.
+	* ftp_var.h: Include Winsock 2 headers.
+	* secure.c: Include port-sockets.h on Win32.
+	* main.c: Include mswsock.h (MS Winsock extensions) so that we get
+	some socket options we need to convert sockets to "file
+	descriptors" used in posix-like routines.  We now need to pull
+	this in explictly now that we are using Winsock 2.
+
 2002-04-04  Sam Hartman  <hartmans@mit.edu>
 
 	* radix.c (decode;):  Patch from Mark Eichin for one char buffer overflow [635]

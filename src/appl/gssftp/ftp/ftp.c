@@ -63,7 +63,7 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 
 #ifdef _WIN32
 #include <windows.h>
-#include <winsock.h>
+#include <winsock2.h>
 #include <sys/timeb.h>
 #include <time.h>
 #include <crtdbg.h>
