@@ -28,6 +28,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-thread.h"
 
 extern const krb5_kt_ops krb5_ktf_ops;
 extern const krb5_kt_ops krb5_ktf_writable_ops;
@@ -35,21 +36,23 @@ extern const krb5_kt_ops krb5_kts_ops;
 
 struct krb5_kt_typelist {
     const krb5_kt_ops *ops;
-    struct krb5_kt_typelist *next;
+    const struct krb5_kt_typelist *next;
 };
-static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
+const static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
     &krb5_ktf_writable_ops,
     0
 };
-static struct krb5_kt_typelist krb5_kt_typelist_file  = {
+const static struct krb5_kt_typelist krb5_kt_typelist_file  = {
     &krb5_ktf_ops,
     &krb5_kt_typelist_wrfile
 };
-static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
+const static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
     &krb5_kts_ops,
     &krb5_kt_typelist_file
 };
-static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
+static const struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
+/* Lock for protecting the type list.  */
+static k5_mutex_t kt_typehead_lock = K5_MUTEX_INITIALIZER;
 
 
 /*
@@ -58,19 +61,29 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_register(krb5_context context, krb5_kt_ops *ops)
+krb5_kt_register(krb5_context context, const krb5_kt_ops *ops)
 {
-    struct krb5_kt_typelist *t;
-    for (t = kt_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
+    const struct krb5_kt_typelist *t;
+    struct krb5_kt_typelist *newt;
+    krb5_error_code err;
+
+    err = k5_mutex_lock(&kt_typehead_lock);
+    if (err)
+	return err;
+    for (t = kt_typehead; t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
 	;
     if (t) {
+	k5_mutex_unlock(&kt_typehead_lock);
 	return KRB5_KT_TYPE_EXISTS;
     }
-    if (!(t = (struct krb5_kt_typelist *) malloc(sizeof(*t))))
+    if (!(newt = (struct krb5_kt_typelist *) malloc(sizeof(*t)))) {
+	k5_mutex_unlock(&kt_typehead_lock);
 	return ENOMEM;
-    t->next = kt_typehead;
-    t->ops = ops;
-    kt_typehead = t;
+    }
+    newt->next = kt_typehead;
+    newt->ops = ops;
+    kt_typehead = newt;
+    k5_mutex_unlock(&kt_typehead_lock);
     return 0;
 }
 
@@ -87,10 +100,11 @@ krb5_kt_register(krb5_context context, krb5_kt_ops *ops)
 krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 {
-    struct krb5_kt_typelist *tlist;
+    const struct krb5_kt_typelist *tlist;
     char *pfx;
     unsigned int pfxlen;
     const char *cp, *resid;
+    krb5_error_code err;
     
     cp = strchr (name, ':');
     if (!cp) {
@@ -98,12 +112,14 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     }
 
     pfxlen = cp - name;
+
 #if defined(_WIN32)
     if ( pfxlen == 1 ) {
         /* We found a drive letter not a prefix */
-	    return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
+        return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
     }
-#endif    
+#endif
+
     resid = name + pfxlen + 1;
 	
     pfx = malloc (pfxlen+1);
@@ -115,7 +131,15 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
     *ktid = (krb5_keytab) 0;
 
-    for (tlist = kt_typehead; tlist; tlist = tlist->next) {
+    err = k5_mutex_lock(&kt_typehead_lock);
+    if (err)
+	return err;
+    tlist = kt_typehead;
+    /* Don't need to hold the lock, since entries are never modified
+       or removed once they're in the list.  Just need to protect
+       access to the list head variable itself.  */
+    k5_mutex_unlock(&kt_typehead_lock);
+    for (; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
 	    free(pfx);
 	    return (*tlist->ops->resolve)(context, resid, ktid);
