@@ -1,3 +1,8 @@
+Fri Sep 15 14:24:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* simple.h (SIMPLE_SERVICE, SIMPLE_PORT): Use separate definitions
+		for the Kerberos instance name and the UDP port name.
+
 Thu Aug 24 19:25:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

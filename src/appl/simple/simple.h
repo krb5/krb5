@@ -25,4 +25,5 @@
  * server & client applications.
  */
 
-#define SERVICE	"sample"
+#define SIMPLE_SERVICE	"sample"
+#define SIMPLE_PORT	"sample"
