@@ -2,7 +2,7 @@ AC_INIT(configure.in)
 WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
-CONFIG_DIRS(krb5 kdb des425 crypto gssapi)
+CONFIG_DIRS(krb5 kdb des425 crypto gssapi krb4)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 _MAKE_SUBDIRS("making",all-unix-subdirs,all)
