@@ -1,3 +1,7 @@
+Wed Aug  2 13:06:02 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogind.c (main): call pty_init()call pty_init()
+
 Tue Aug  1 08:43:22 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in :  Remove references to logutil.c and logutil.o

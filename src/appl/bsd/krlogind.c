@@ -316,6 +316,8 @@ main(argc, argv)
     
     progname = *argv;
     
+pty_init();
+    
 #ifndef LOG_NDELAY
 #define LOG_NDELAY 0
 #endif
