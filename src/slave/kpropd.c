@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,7 +15,6 @@ static char rcsid_kpropd_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
@@ -26,7 +26,10 @@ static char rcsid_kpropd_c[] =
 #include <errno.h>
 
 #include <stdio.h>
+#ifndef __STDC__
+/* com_err.h gets <stdarg.h> */
 #include <varargs.h>
+#endif
 #include <ctype.h>
 #include <sys/file.h>
 #include <signal.h>
@@ -587,7 +590,8 @@ recv_database(fd, database_fd)
 		recv_error(&inbuf);
 	if (retval = krb5_rd_safe(&inbuf, session_key, &sender_addr,
 				  &receiver_addr, his_seq_num++,
-				  KRB5_SAFE_DOSEQUENCE, 0, &outbuf)) {
+				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
+				  0, &outbuf)) {
 		send_error(fd, retval, "while decoding database size");
 		xfree(inbuf.data);
 		com_err(progname, retval,
@@ -627,7 +631,8 @@ recv_database(fd, database_fd)
 			recv_error(&inbuf);
 		if (retval = krb5_rd_priv(&inbuf, session_key,
 					  &sender_addr, &receiver_addr,
-					  his_seq_num++, KRB5_PRIV_DOSEQUENCE,
+					  his_seq_num++,
+					  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
 					  i_vector, 0, &outbuf)) {
 			sprintf(buf,
 				"while decoding database block starting at offset %d",
@@ -673,7 +678,9 @@ recv_database(fd, database_fd)
 				  /* Note these are reversed because */
 				  /* we are sending, not receiving! */
 				  &receiver_addr, &sender_addr, 
-				  my_seq_num++, KRB5_PRIV_DOSEQUENCE,
+				  my_seq_num++,
+				  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
+				  0,	/* no rcache when NOTIME */
 				  &outbuf)) {
 		com_err(progname, retval,
 			"while encoding # of receieved bytes");

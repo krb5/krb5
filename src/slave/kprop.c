@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,7 +15,6 @@ static char rcsid_kprop_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
@@ -382,7 +382,7 @@ void kerberos_authenticate(fd, me)
 		exit(1);
 	}
 	his_seq_num = rep_result->seq_number;
-	krb5_free_ap_rep_enc_part(repl);
+	krb5_free_ap_rep_enc_part(rep_result);
 }
 
 /*
@@ -471,7 +471,9 @@ xmit_database(fd, database_fd, database_size)
 	if (retval = krb5_mk_safe(&inbuf, KPROP_CKSUMTYPE,
 				  &my_creds.keyblock, 
 				  &sender_addr, &receiver_addr,
-				  my_seq_num++, KRB5_PRIV_DOSEQUENCE,
+				  my_seq_num++,
+				  KRB5_PRIV_DOSEQUENCE|KRB5_SAFE_NOTIME,
+				  0,	/* no rcache when NOTIME */
 				  &outbuf)) {
 		com_err(progname, retval, "while encoding database size");
 		send_error(fd, "while encoding database size", retval);
@@ -507,7 +509,8 @@ xmit_database(fd, database_fd, database_size)
 					  &sender_addr,
 					  &receiver_addr,
 					  my_seq_num++,
-					  KRB5_PRIV_DOSEQUENCE,
+					  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
+					  0, /* again, no rcache */
 					  i_vector,
 					  &outbuf)) {
 			sprintf(buf,
@@ -572,7 +575,8 @@ xmit_database(fd, database_fd, database_size)
 	}
 	if (retval = krb5_rd_safe(&inbuf, &my_creds.keyblock, &receiver_addr,
 				  &sender_addr, his_seq_num++,
-				  KRB5_SAFE_DOSEQUENCE, 0, &outbuf)) {
+				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
+				  0, &outbuf)) {
 		com_err(progname, retval,
 			"while decoding final size packet from server");
 		exit(1);
