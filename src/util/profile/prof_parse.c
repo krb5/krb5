@@ -32,15 +32,9 @@ static char *skip_over_blanks(cp)
 static void strip_line(line)
 	char	*line;
 {
-	char	*p;
-
-	while (*line) {
-		p = line + strlen(line) - 1;
-		if ((*p == '\n') || (*p == '\r'))
-			*p = 0;
-		else
-			break;
-	}
+	char *p = line + strlen(line);
+	while (p > line && (p[-1] == '\n' || p[-1] == '\r'))
+	    *p-- = 0;
 }
 
 static void parse_quoted_string(char *str)
