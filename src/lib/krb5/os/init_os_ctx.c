@@ -31,6 +31,10 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
+#ifdef USE_LOGIN_LIBRARY
+#include "KerberosLoginPrivate.h"
+#endif
+
 #if defined(_WIN32)
 
 static krb5_error_code
