@@ -1,4 +1,19 @@
 
+Wed Aug 9 17:17:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_cpw.c - Add check for uniqueness of key or key/salt combo.  Don't
+		generate a new key_data entry if one already exists.  Also,
+		fill in the key_data list at the end so as not to overwrite
+		already present data.
+		- Free krbtgt_keyblock contents in add_key_rnd().
+		- Put a "break" at the end of the KRB5_KDB_SALTTYPE_ONLYREALM
+		  in add_key_pwd().  Also pass in key_salt to encrypt_key_data
+		  always.
+	* kdb_xdr.c - initialize retval to 0 in decode_mod_princ data.  This is
+		questionable whether we should return an error if there's no
+		mod_princ data.  Also, free the allocated mod_princ only if
+		we allocated it and there's a failure.
+
+
 Wed Aug 9 09:47:08 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_cpw.c(add_key_rnd) - Terminate the variable length argument list
 		to krb5_build_principal_ext() with a zero.

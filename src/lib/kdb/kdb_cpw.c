@@ -80,10 +80,11 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_pointer 	  krbtgt_seed;	
     krb5_encrypt_block	  krbtgt_eblock;
     krb5_db_entry	  krbtgt_entry;
-    krb5_boolean	  more;
+    krb5_boolean	  more, found;
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
 
+    memset(&krbtgt_keyblock, 0, sizeof(krbtgt_keyblock));
     retval = krb5_build_principal_ext(context, &krbtgt_princ,
 				      db_entry->princ->realm.length,
 				      db_entry->princ->realm.data,
@@ -116,6 +117,20 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     }
 
     for (i = 0; i < ks_tuple_count; i++) {
+	/*
+	 * We could use krb5_keysalt_iterate to replace this loop, or use
+	 * krb5_keysalt_is_present for the loop below, but we want to avoid
+	 * circular library dependencies.
+	 */
+	found = 0;
+	for (j = 0; j < i; j++) {
+	    if (ks_tuple[j].ks_keytype == ks_tuple[i].ks_keytype) {
+		found = 1;
+		break;
+	    }
+	}
+	if (found)
+	    continue;
         if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    goto add_key_rnd_err;
 
@@ -163,7 +178,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 
     	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, 
 						 key, NULL, kvno + 1, 
-						 db_entry->key_data)) {
+						 &db_entry->key_data[db_entry->n_key_data-1])) {
     	    krb5_free_keyblock(context, key);
 	    goto add_key_rnd_err;
 	}
@@ -174,6 +189,10 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 
 add_key_rnd_err:;
     krb5_db_free_principal(context, &krbtgt_entry, one);
+    if (krbtgt_keyblock.contents && krbtgt_keyblock.length) {
+	memset(krbtgt_keyblock.contents, 0, krbtgt_keyblock.length);
+	krb5_xfree(krbtgt_keyblock.contents);
+    }
     return(retval);
 }
 
@@ -285,9 +304,25 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     krb5_keysalt	  key_salt;
     krb5_keyblock	  key;
     krb5_data	  	  pwd;
-    int			  i;
+    krb5_boolean	  found;
+    int			  i, j;
 
     for (i = 0; i < ks_tuple_count; i++) {
+	/*
+	 * We could use krb5_keysalt_iterate to replace this loop, or use
+	 * krb5_keysalt_is_present for the loop below, but we want to avoid
+	 * circular library dependencies.
+	 */
+	found = 0;
+	for (j = 0; j < i; j++) {
+	    if ((ks_tuple[j].ks_keytype == ks_tuple[i].ks_keytype) &&
+		(ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype)) {
+		found = 1;
+		break;
+	    }
+	}
+	if (found)
+	    continue;
 	krb5_use_keytype(context, &key_eblock, ks_tuple[i].ks_keytype);
 	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    return(retval);
@@ -303,6 +338,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	    key_salt.data = *saltdata;
 	    krb5_xfree(saltdata);
 	}
+		break;
     	case KRB5_KDB_SALTTYPE_NOREALM:
             if (retval=krb5_principal2salt_norealm(context, db_entry->princ,
                                                          &key_salt.data)) 
@@ -329,8 +365,8 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	    return(retval);
 
 	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,
-		     key_salt.type ? (const krb5_keysalt *)&key_salt : NULL,
-		     kvno + 1, &db_entry->key_data[i])) {
+		     (const krb5_keysalt *)&key_salt,
+		     kvno + 1, &db_entry->key_data[db_entry->n_key_data-1])) {
 	    krb5_xfree(key.contents);
 	    return(retval);
 	}

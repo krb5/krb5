@@ -112,6 +112,7 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
     krb5_tl_data        * tl_data;
     krb5_octet		* nextloc;
 
+    retval = 0;
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
 	if (tl_data->tl_data_type == KRB5_TL_MOD_PRINC) {
     	    if ((*mod_princ = malloc(sizeof(krb5_tl_mod_princ))) == NULL)
@@ -135,7 +136,7 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
 	}
     }
 
-    if (retval) 
+    if (retval && (*mod_princ)) 
 	free(*mod_princ);
     return retval;
 }
