@@ -2,6 +2,17 @@
 
 	* README: s-pty_init_ets/pty_init/
 
+2001-11-28  Tom Yu  <tlyu@mit.edu>
+
+	* update_utmp.c (PTY_GETUTXENT): Fix typo.  Thanks to Shawn
+	Stepper. [fixes krb5-build/1020]
+
+2001-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Patch from Garry Zacheiss to
+	kludge around cases where we need to use more than 2 characters of
+	LINE in order to avoid conflicts in UT_ID.
+
 2001-10-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname): Do not declare addrbuf

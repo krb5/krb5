@@ -338,7 +338,7 @@
 #else
 #define PTY_STRUCT_UTMPX struct utmp
 #define PTY_SETUTXENT setutent
-#define PTY_GETUTXENT gettutent
+#define PTY_GETUTXENT getutent
 #define PTY_GETUTXLINE getutline
 #define PTY_PUTUTXLINE pututline
 #define PTY_ENDUTXENT endutent
@@ -532,7 +532,10 @@ pty_update_utmp(int process_type, int pid, const char *username,
 #ifdef __hpux
     strcpy(utmp_id, cp);
 #else
-    sprintf(utmp_id, "kl%s", cp);
+    if (len > 2 && *(cp - 1) != '/')
+      sprintf(utmp_id, "k%s", cp - 1);
+    else
+      sprintf(utmp_id, "k0%s", cp);
 #endif
     strncpy(utx.ut_id, utmp_id, sizeof(utx.ut_id));
     /*
