@@ -1,3 +1,7 @@
+2001-04-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* et.pbexp: export com_err() on Mac OS X
+
 2001-03-19	Miro Jurisic <meeroh@mit.edu>
 
 	* error_massage.c: #include <KerberosSupport/ErrorLib.h> on Mac OS
