@@ -1,3 +1,9 @@
+Fri Apr 7 15:14:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* telnet.c, wt-proto.h: port numbers better supported. You can
+           now specify '<host> <port>' in the initial dialog. This gets
+           saved in the ini file.
+
 Wed Apr 5 16:18:30 1995 Keith Vetter (keithv@fusion.com)
 
 	* screen.c, screen.h, dialog.h, telnet.rc: added an about 

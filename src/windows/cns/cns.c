@@ -39,7 +39,7 @@
 	#include "krbini.h"
 	#include "com_err.h"
 
-	#define DEFAULT_TKT_LIFE    120
+	#define DEFAULT_TKT_LIFE    120             // In 5 minute units
 	#define ANAME_SZ	        40
 	#define	REALM_SZ	        40
 	#define	SNAME_SZ	        40
@@ -77,8 +77,6 @@ static HFONT hfontdialog = NULL;		/* Font in which the dialog is drawn. */
 static HFONT hfonticon = NULL;			/* Font for icon label */
 static HINSTANCE hinstance;
 static int dlgncmdshow;					/* ncmdshow from WinMain */
-static char confname[FILENAME_MAX];		/* current krb.conf location */
-static char realmsname[FILENAME_MAX];	/* current krb.realms location */
 static UINT wm_kerberos_changed;		/* Registered message for cache changing */
 static int action;						/* After login actions */
 static UINT kwin_timer_id;				/* Timer being used for update */
@@ -92,6 +90,7 @@ static FARPROC hook_instance;			/* Intance handle for blocking hook function */
 #ifdef KRB5
 	krb5_context k5_context;
 	krb5_ccache k5_ccache;
+    static char ccname[FILENAME_MAX];           /* ccache file location */
 #endif
 
 /*+
@@ -803,40 +802,54 @@ opts_initdialog (
 	LPARAM lparam)
 {
 	char defname[FILENAME_MAX];
+    char newname[FILENAME_MAX];
 	UINT rc;
 	int lifetime;
 
 	center_dialog(hwnd);
 	set_dialog_font(hwnd, hfontdialog);
 
-	/* krb.conf file */
+/* krb.conf file */
 	rc = GetWindowsDirectory(defname, sizeof(defname));
 	assert(rc > 0);
 
 	strcat(defname, "\\");
 	strcat(defname, DEF_KRB_CONF);
 	GetPrivateProfileString(INI_FILES, INI_KRB_CONF, defname,
-		confname, sizeof(confname), KERBEROS_INI);
-	_strupr(confname);
-	SetDlgItemText(hwnd, IDD_CONF, confname);
+		newname, sizeof(newname), KERBEROS_INI);
+	_strupr(newname);
+	SetDlgItemText(hwnd, IDD_CONF, newname);
 
-	/* krb.realms file */
+/* krb.realms file */
 	rc = GetWindowsDirectory(defname, sizeof(defname));
 	assert(rc > 0);
 
 	strcat(defname, "\\");
 	strcat(defname, DEF_KRB_REALMS);
 	GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
-		realmsname, sizeof(realmsname), KERBEROS_INI);
-	_strupr(realmsname);
-	SetDlgItemText(hwnd, IDD_REALMS, realmsname);
+		newname, sizeof(newname), KERBEROS_INI);
+	_strupr(newname);
+	SetDlgItemText(hwnd, IDD_REALMS, newname);
 
-	/* Ticket duration */
+/* Credential cache file */
+    #ifdef KRB5
+    	rc = GetWindowsDirectory(defname, sizeof(defname));
+    	assert(rc > 0);
+
+    	strcat(defname, "\\");
+    	strcat(defname, "krb5cc");
+    	GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
+    		ccname, sizeof(ccname), KERBEROS_INI);
+    	_strupr(ccname);
+    	SetDlgItemText(hwnd, IDD_CCACHE, ccname);
+    #endif /* KRB5 */
+
+/* Ticket duration */
 	lifetime = GetPrivateProfileInt(INI_OPTIONS, INI_DURATION,
 		DEFAULT_TKT_LIFE * 5, KERBEROS_INI);
 	SetDlgItemInt(hwnd, IDD_LIFETIME, lifetime, FALSE);
 
-	/* Expiration action */
+/* Expiration action */
 	GetPrivateProfileString(INI_EXPIRATION, INI_ALERT, "No",
 		defname, sizeof(defname), KERBEROS_INI);
 	alert = _stricmp(defname, "Yes") == 0;
@@ -870,20 +883,19 @@ opts_command (
 	LPARAM lparam)
 {
 	char defname[FILENAME_MAX];
+	char newname[FILENAME_MAX];
 	char *p;
 	BOOL b;
 	int lifetime;
 	int rc;
 
 	switch (wparam) {
-
 	case IDOK:
-		/* Ticket duration */
+/* Ticket duration */
 		lifetime = GetDlgItemInt(hwnd, IDD_LIFETIME, &b, FALSE);
 
 		if (!b) {
 			MessageBox(hwnd, "Lifetime must be a number!", "", MB_OK | MB_ICONEXCLAMATION);
-
 			return TRUE;
 		}
 
@@ -891,37 +903,79 @@ opts_command (
 		b = WritePrivateProfileString(INI_OPTIONS, INI_DURATION, defname, KERBEROS_INI);
 		assert(b);
 
-		/* krb.conf file */
-		GetDlgItemText(hwnd, IDD_CONF, confname, sizeof(confname));
-		trim(confname);
+/* krb.conf file */
+		GetDlgItemText(hwnd, IDD_CONF, newname, sizeof(newname));
+		trim(newname);
 		rc = GetWindowsDirectory(defname, sizeof(defname));
 		assert(rc > 0);
 
 		strcat(defname, "\\");
 		strcat(defname, DEF_KRB_CONF);
-		if (_stricmp(confname, defname) == 0 || !confname[0])
+		if (_stricmp(newname, defname) == 0 || !newname[0])
 			p = NULL;
 		else
-			p = confname;
+			p = newname;
 		b = WritePrivateProfileString(INI_FILES, INI_KRB_CONF, p, KERBEROS_INI);
 		assert(b);
 
-		/* krb.realms file */
-		GetDlgItemText(hwnd, IDD_REALMS, realmsname, sizeof(realmsname));
-		trim(realmsname);
+/* krb.realms file */
+		GetDlgItemText(hwnd, IDD_REALMS, newname, sizeof(newname));
+		trim(newname);
 		rc = GetWindowsDirectory(defname, sizeof(defname));
 		assert(rc > 0);
 
 		strcat(defname, "\\");
 		strcat(defname, DEF_KRB_REALMS);
-		if (_stricmp(realmsname, defname) == 0 || !realmsname[0])
+		if (_stricmp(newname, defname) == 0 || !newname[0])
 			p = NULL;
 		else
-			p = realmsname;
+			p = newname;
 		b = WritePrivateProfileString(INI_FILES, INI_KRB_REALMS, p, KERBEROS_INI);
 		assert(b);
 
-		/* Expiration action */
+/* Credential cache file */
+        #ifdef KRB5
+    		GetDlgItemText(hwnd, IDD_CCACHE, newname, sizeof(newname));
+    		trim(newname);
+    		rc = GetWindowsDirectory(defname, sizeof(defname));
+    		assert(rc > 0);
+
+    		strcat(defname, "\\");
+    		strcat(defname, "krb5cc");
+            if (*newname == '\0')
+                strcpy (newname, defname);
+    		if (_stricmp(newname, defname) == 0 || *newname == '\0')
+    			p = NULL;
+    		else
+    			p = newname;
+    		b = WritePrivateProfileString(INI_FILES, INI_KRB_CCACHE, p, KERBEROS_INI);
+    		assert(b);
+
+            if (strcmp (ccname, newname)) {     // Did we change ccache file?
+                krb5_error_code code;
+                krb5_ccache cctemp;
+
+                code = k5_init_ccache (&cctemp);
+                if (code) {                     // Problem opening new one?
+                    com_err (NULL, code, 
+                        "while changing ccache.\r\nRestoring old ccache.");
+    		        b = WritePrivateProfileString(INI_FILES, INI_KRB_CCACHE,
+                        ccname, KERBEROS_INI);
+                } else {
+                    code = krb5_cc_close (k5_context, k5_ccache);
+                    k5_ccache = cctemp;         // Copy new into old
+                    if (k5_name_from_ccache (k5_ccache)) {
+                        kwin_init_name (GetParent(hwnd), "");
+                		kwin_set_default_focus(GetParent(hwnd));
+                    }
+                	ticket_init_list (GetDlgItem (GetParent(hwnd),
+                        IDD_TICKET_LIST));
+                }
+            }
+
+        #endif /* KRB5 */
+
+/* Expiration action */
 		alert = (BOOL) SendDlgItemMessage(hwnd, IDD_ALERT, BM_GETCHECK, 0, 0);
 		p = (alert) ? "Yes" : "No";
 		b = WritePrivateProfileString(INI_EXPIRATION, INI_ALERT, p, KERBEROS_INI);
@@ -1260,6 +1314,8 @@ kwin_init_name (
 			krc = krb_get_lrealm(realm, 1);
 			if (krc != KSUCCESS)
 				realm[0] = 0;
+    		GetPrivateProfileString(INI_DEFAULTS, INI_REALM, realm,
+	    		realm, sizeof(realm), KERBEROS_INI);
 		#endif
 
 
@@ -1270,9 +1326,6 @@ kwin_init_name (
 
             GetPrivateProfileString (INI_DEFAULTS, INI_USER, "",
                 name, sizeof(name), KERBEROS_INI);
-            //GetPrivateProfileString(INI_DEFAULTS, INI_INSTANCE, "",
-            //    instance, sizeof(instance), KERBEROS_INI);
-            *instance = '\0';
 
             *realm = '\0';
             code = krb5_get_default_realm (k5_context, &ptr);
@@ -1280,14 +1333,15 @@ kwin_init_name (
                 strcpy (realm, ptr);
                 free (ptr);
             }
+    		GetPrivateProfileString(INI_DEFAULTS, INI_REALM, realm,
+        		realm, sizeof(realm), KERBEROS_INI);
         }
 		#endif
 
-		GetPrivateProfileString(INI_DEFAULTS, INI_REALM, realm,
-			realm, sizeof(realm), KERBEROS_INI);
 	} else {
 		#ifdef KRB4
 			kname_parse(name, instance, realm, fullname);
+        	SetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance);
 		#endif
 
 		#ifdef KRB5
@@ -1297,13 +1351,7 @@ kwin_init_name (
 	}
 
 	SetDlgItemText(hwnd, IDD_LOGIN_NAME, name);
-	name[0] = 0;
-	GetDlgItemText(hwnd, IDD_LOGIN_NAME, name, sizeof(name));
 	SetDlgItemText(hwnd, IDD_LOGIN_REALM, realm);
-
-    #ifdef KRB4
-    	SetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance);
-    #endif
 
 } /* kwin_init_name */
 
@@ -2013,16 +2061,16 @@ kwin_command (
 		    	creds.client = principal;
 	    		creds.server = server;
 
-                //code = krb5_timeofday(k5_context, &now);
-                //if (code) break;
                 code = krb5_us_timeofday(k5_context, &sec, &usec);
                 if (code) break;
-//if (labs(now-sec) > 60*60) {            // Off by more than an hour
-//    MessageBox (NULL, "DEBUG: timeofday != us_timeofday", NULL, 0);
-//    now = sec;
-//}
+ code = krb5_timeofday(k5_context, &now);
+ if (code) break;
+ if (labs(now-sec) > 60*60) {            // Off by more than an hour
+     MessageBox (NULL, "DEBUG: timeofday != us_timeofday", NULL, 0);
+     now = sec;
+ }
                 creds.times.starttime = 0;
-    			creds.times.endtime = now + 60L * lifetime;
+    			creds.times.endtime = sec + 60L * lifetime;
 	    		creds.times.renew_till = 0;
 
 		    	code = krb5_get_in_tkt_with_password(k5_context, 0, NULL,
@@ -2113,6 +2161,7 @@ kwin_command (
 		return TRUE;
 
 	case IDM_ABOUT:
+    	ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
 		if (isblocking)
 			return TRUE;
 
@@ -2555,16 +2604,19 @@ init_instance (
 	#endif
 
 	#ifdef KRB5
-		krb5_init_context(&k5_context);
-		krb5_init_ets(k5_context);
-		krb5_cc_default(k5_context, &k5_ccache);
+        {
+            krb5_error_code code;
 
-        i = k5_get_num_cred (0);            /* Test integrity */
-        if (i == -1) {
-            remove (krb5_cc_get_name(k5_context, k5_ccache));
-            i = k5_get_num_cred (1);
-            if (i == -1)
+    		code = krb5_init_context(&k5_context);
+            if (! code) {
+        		krb5_init_ets(k5_context);
+        		code = k5_init_ccache (&k5_ccache);
+            }
+            if (code) {
+                com_err (NULL, code, "while initializing program");
                 return FALSE;
+            }
+            k5_name_from_ccache (k5_ccache);
         }
 	#endif
 
@@ -2836,23 +2888,20 @@ static krb5_error_code
 k5_dest_tkt (void) {
     krb5_error_code code;
     krb5_principal princ;
-    char *defname;                              /* Name of cache */
 
     if (code = krb5_cc_get_principal(k5_context, k5_ccache, &princ)) {
         com_err (NULL, code, "while retrieving principal name");
-        return code;
-    }
-    if (code = krb5_unparse_name(k5_context, princ, &defname)) {
-        com_err (NULL, code, "while unparsing principal name");
         return code;
     }
 
     code = krb5_cc_initialize (k5_context, k5_ccache, princ);
     if (code != 0) {
         com_err (NULL, code, "when re-initializing cache");
+        krb5_free_principal (k5_context, princ);
         return code;
     }
 
+    krb5_free_principal (k5_context, princ);
     return code;
 }
 
@@ -2968,5 +3017,85 @@ k5_kname_parse (char *name, char *realm, char *fullname) {
         *ptr = '\0';
 
     return 0;
+}
+/*+
+ * Function: Initializes ccache and catches illegal caches such as
+ *  bad format or no permissions.
+ *
+ * Parameters:
+ *  ccache - credential cache structure to use
+ *
+ * Returns: krb5_error_code
+ */
+static krb5_error_code
+k5_init_ccache (krb5_ccache *ccache) {
+    krb5_error_code code;
+    krb5_principal princ;
+    FILE *fp;
+
+    code = krb5_cc_default (k5_context, ccache); // Initialize the ccache
+    if (code)
+        return code;
+
+    code = krb5_cc_get_principal (k5_context, *ccache, &princ);
+    if (code == KRB5_FCC_NOFILE) {              // Doesn't exist yet
+        fp = fopen (krb5_cc_get_name(k5_context, *ccache), "w");
+        if (fp == NULL)                         // Can't open it
+            return KRB5_FCC_PERM;
+        fclose (fp);
+    }
+
+    if (code) {                                 // Bad, delete and try again
+        remove (krb5_cc_get_name(k5_context, *ccache));
+        code = krb5_cc_get_principal (k5_context, *ccache, &princ);
+        if (code == KRB5_FCC_NOFILE)            // Doesn't exist yet
+            return 0;
+        if (code)
+            return code;
+    }
+
+    krb5_free_principal (k5_context, princ);
+    return 0;
+}
+/*+
+ * 
+ * Function: Reads the name and realm out of the ccache.
+ * 
+ * Parameters:
+ *  ccache - credentials cache to get info from
+ * 
+ *  name - buffer to hold user name
+ * 
+ *  realm - buffer to hold the realm
+ * 
+ * 
+ * Returns: TRUE if read names, FALSE if not
+ * 
+ */
+static int
+k5_name_from_ccache (krb5_ccache k5_ccache) {
+    krb5_error_code code;
+    krb5_principal princ;
+	char name[ANAME_SZ];
+	char realm[REALM_SZ];
+    char *defname;
+
+    if (code = krb5_cc_get_principal(k5_context, k5_ccache, &princ))
+        return FALSE;
+
+    code = krb5_unparse_name(k5_context, princ, &defname);
+    if (code) {
+        krb5_free_principal (k5_context, princ);
+        return FALSE;
+    }
+
+    k5_kname_parse(name, realm, defname);       // Extract the components
+    WritePrivateProfileString(INI_DEFAULTS, INI_USER, name, KERBEROS_INI);
+	WritePrivateProfileString(INI_DEFAULTS, INI_REALM, realm, KERBEROS_INI);
+
+    krb5_free_principal(k5_context, princ);
+    free (defname);
+
+    return TRUE;
 }
 #endif /* KRB5 */

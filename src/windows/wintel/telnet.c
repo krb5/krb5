@@ -39,9 +39,8 @@ int debug = 1;
 char __near strTmp[1024];                       // Scratch buffer 
 
 BOOL bAutoConnection = FALSE; 
-char szAutoHostName[64];
 int port_no = 23;
-char szUserName[64];
+char szUserName[64];                            // Used in auth.c
 char szHostName[64];
 
 #ifdef KRB4
@@ -90,7 +89,7 @@ int nCmdShow;                    /* show-window type (open/icon) */
 
     /* Perform initializations that apply to a specific instance */
 
-    parse_cmdline (lpCmdLine);
+    bAutoConnection = parse_cmdline (lpCmdLine);
 	
     if (!InitInstance(hInstance, nCmdShow))
         return (FALSE);
@@ -424,99 +423,82 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
 /*+***************************************************************************
 
-    FUNCTION: SaveHostName(hostname)
+    FUNCTION: SaveHostName(hostname, port)
 
-    PURPOSE: Saves the currently selected host name in the KERBEROS.INI file
-		and returns the preferred backspace setting if one exists for
-		that host.
+    PURPOSE: Saves the currently selected host name and port number
+        in the KERBEROS.INI file and returns the preferred backspace
+        setting if one exists for that host.
 
 	RETURNS: VK_BACK or 0x7f depending on the desired backspace setting.
 
 ****************************************************************************/
 
 int
-SaveHostName(char *host)
+SaveHostName (char *host, int port)
 {
-    char buf[128];
-	char hostName[10][128];
-	char *tmpCommaLoc;
-	char tmpName[128];
-	char tmpBuf[80];
-	int nhosts;
-	int n;
-    int iHostNum;
-	int bs;
+    char buf[128];                              // Scratch buffer
+    char fullhost[128];                         // Host & port combination
+	char hostName[10][128];                     // Entries from INI files
+	char *comma;                                // For parsing del/bs info
+    int len;                                    // Length of fullhost
+	int n;                                      // Number of items written
+    int i;                                      // Index
+	int bs;                                     // What we return
 
-	nhosts = 0;
-    for (iHostNum = 0; iHostNum < 10; iHostNum++) {
-        wsprintf(tmpBuf, INI_HOST "%d", iHostNum);
-        GetPrivateProfileString(INI_HOSTS, tmpBuf, "", hostName[iHostNum], 
+    if (port == 23)                             // Default telnet port
+        strcpy (fullhost, host);                // ...then don't add it on
+    else
+        wsprintf (fullhost, "%s %d", host, port);
+    len = strlen (fullhost);
+
+    comma = NULL;
+    for (i = 0; i < 10; i++) {
+        wsprintf(buf, INI_HOST "%d", i); // INI item to fetch
+        GetPrivateProfileString(INI_HOSTS, buf, "", hostName[i], 
             128, TELNET_INI);
-		strcpy(tmpName, hostName[iHostNum]);
-        tmpCommaLoc = strchr(tmpName, ',');  
-        if (tmpCommaLoc) {
-			*tmpCommaLoc = '\0';
-			while (tmpCommaLoc[1] == ' ')
-				tmpCommaLoc++;
-		}
-		if (!hostName[iHostNum][0])
+
+		if (!hostName[i][0])
 			break;
-		nhosts++;
-        if (strcmp(tmpName, host) == 0)
-			break;
+
+        if (strncmp (hostName[i], fullhost, len)) // A match??
+            continue;                           // Nope, keep going
+        comma = strchr (hostName[i], ',');
     }
 
-	for (iHostNum++; iHostNum < 10; iHostNum++) {
-        wsprintf(tmpBuf, INI_HOST "%d", iHostNum);
-        GetPrivateProfileString(INI_HOSTS, tmpBuf, "", hostName[iHostNum], 
-            128, TELNET_INI);
-		if (!hostName[iHostNum][0])
-			break;
-		nhosts++;
-	}
-
-    if (tmpCommaLoc)
-		tmpCommaLoc++;
-
-    if (tmpName[0] && tmpCommaLoc) {
-		if (_stricmp(tmpCommaLoc, INI_HOST_DEL) == 0)
+    if (comma) {
+        while (*comma == ' ')                   // Past leading white space
+            ++comma;
+        bs = VK_BACK;                           // Default for unknown entry
+		if (_stricmp(comma, INI_HOST_DEL) == 0)
 			bs = 0x7f;
-		else if (_stricmp(tmpCommaLoc, INI_HOST_BS) == 0)
-			bs = VK_BACK;
 	}
-    else {
+    else {                                      // No matching entry
    	    GetPrivateProfileString(INI_TELNET, INI_BACKSPACE, INI_BACKSPACE_BS, 
-			tmpBuf, sizeof(tmpBuf), TELNET_INI);
-		if (_stricmp(tmpBuf, INI_BACKSPACE_DEL) == 0)
+			buf, sizeof(buf), TELNET_INI);
+        bs = VK_BACK;                           // Default value
+		if (_stricmp(buf, INI_BACKSPACE_DEL) == 0)
 			bs = 0x7f;
-		else
-			bs = VK_BACK;
 	}
 
-	strcpy(buf, tmpConfig->title);
+    /*
+    ** Build up default host name
+    */
+	strcpy(buf, fullhost);
 	strcat(buf, ", ");
-	if (bs == VK_BACK)
-		strcat(buf, INI_BACKSPACE_BS);
-	else
-		strcat(buf, INI_BACKSPACE_DEL);
-
+    strcat(buf, (bs == VK_BACK) ? INI_BACKSPACE_BS : INI_BACKSPACE_DEL);
 	WritePrivateProfileString(INI_HOSTS, INI_HOST "0", buf, TELNET_INI);
-	n = 1;
-    for (iHostNum = 0; iHostNum < nhosts; iHostNum++) {
-		strcpy(tmpName, hostName[iHostNum]);
-        tmpCommaLoc = strchr(tmpName, ',');  
-        if (tmpCommaLoc) {
-			*tmpCommaLoc = '\0';
-			while (tmpCommaLoc[1] == ' ')
-				tmpCommaLoc++;
-		}
-        if (strcmp(tmpName, host) != 0) {
-	        wsprintf(tmpBuf, INI_HOST "%d", n++);
-			WritePrivateProfileString(INI_HOSTS, tmpBuf, hostName[iHostNum], 
+
+	n = 0;
+    for (i = 0; i < 10; i++) {
+		if (!hostName[i][0])                    // End of the list?
+			break;
+        if (strncmp(hostName[i], fullhost, len) != 0) {
+	        wsprintf(buf, INI_HOST "%d", ++n);
+			WritePrivateProfileString(INI_HOSTS, buf, hostName[i], 
                 TELNET_INI);
 		}
     }
-	return (bs);
+	return bs;
 }
 
 /*+*/
@@ -532,9 +514,9 @@ OpenTelnetConnection(void) {
     tmpConfig = (CONFIG *) GlobalLock(hGlobalMem);
     
     if (bAutoConnection) {
-		hTitleMem = GlobalAlloc(GPTR, lstrlen(szAutoHostName));
+		hTitleMem = GlobalAlloc(GPTR, lstrlen(szHostName));
    		tmpConfig->title = (char *) GlobalLock(hTitleMem);            
-		lstrcpy(tmpConfig->title, (char *) szAutoHostName);
+		lstrcpy(tmpConfig->title, (char *) szHostName);
     } else {
     	nReturn = DoDialog("OPENTELNETDLG", OpenTelnetDlg);
     	if (nReturn == FALSE) return(FALSE);
@@ -550,7 +532,7 @@ OpenTelnetConnection(void) {
 	con->width = tmpConfig->width;
 	con->height = tmpConfig->height;
 
-	con->backspace = SaveHostName(tmpConfig->title);
+	con->backspace = SaveHostName(tmpConfig->title, port_no);
 
 	if (con->backspace == VK_BACK) {
         tmpConfig->backspace = TRUE;
@@ -692,7 +674,7 @@ OpenTelnetDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam) {
     int  xExt, yExt;
     DWORD Ext;
     HWND hEdit;
-    int  nLen;
+    int  n;
     int iHostNum = 0;
     char tmpName[128], tmpBuf[80];
     char *tmpCommaLoc;
@@ -736,23 +718,25 @@ OpenTelnetDlg(HWND hDlg, WORD message, WORD wParam, LONG lParam) {
 
         case WM_COMMAND:              /* message: received a command */
             switch (wParam) {
-                case TEL_CANCEL:
-                     EndDialog(hDlg, FALSE);        /* Exits the dialog box   */
-                     break;
+            case TEL_CANCEL:
+                EndDialog(hDlg, FALSE);         /* Exits the dialog box   */
+                break;
                  
-                case TEL_OK:
-                     GetDlgItemText(hDlg, TEL_CONNECT_NAME, szConnectName, 256);
-                     nLen = lstrlen(szConnectName);
-                     if (nLen == 0) { 
-                        MessageBox(hDlg, "You must enter a session name!", 
-                            NULL, MB_OK);
-                        break;
-                        }
-                     hTitleMem = GlobalAlloc(GPTR, nLen);
-                     tmpConfig->title = (char *) GlobalLock(hTitleMem);
-                     lstrcpy(tmpConfig->title, szConnectName);
-                     EndDialog(hDlg, TRUE);
-                     break;
+            case TEL_OK:
+                GetDlgItemText(hDlg, TEL_CONNECT_NAME, szConnectName, 256);
+                
+                n = parse_cmdline (szConnectName);
+                if (! n) {
+                    MessageBox(hDlg, "You must enter a session name!",
+                        NULL, MB_OK);
+                    break;
+                }
+
+                hTitleMem = GlobalAlloc(GPTR, lstrlen(szHostName)+1);
+                tmpConfig->title = (char *) GlobalLock(hTitleMem);
+                lstrcpy(tmpConfig->title, szConnectName);
+                EndDialog(hDlg, TRUE);
+                break;
             }                
             return (FALSE);                    
     }
@@ -843,14 +827,15 @@ trim (
 **          telnet <host> <port no>
 **          telnet -p <port no>
 **
+** Returns: TRUE if we have a hostname
 */
-void
+BOOL
 parse_cmdline (char *cmdline) {
     char *ptr;
     
-    bAutoConnection = FALSE;                    // Initialize to off
+    *szHostName = '\0';                         // Nothing yet
     if (*cmdline == '\0')                       // Empty command line?
-        return;
+        return FALSE;
 
     trim (cmdline);                             // Remove excess spaces
     ptr = strchr (cmdline, ' ');                // Find 2nd token
@@ -861,7 +846,9 @@ parse_cmdline (char *cmdline) {
     }
 
     if (*cmdline != '-' && *cmdline != '/') {   // Host name given
-		bAutoConnection = TRUE;
-		lstrcpy (szAutoHostName, cmdline);
+		lstrcpy (szHostName, cmdline);
+        return TRUE;
     }
+
+    return FALSE;
 }

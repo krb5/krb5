@@ -97,7 +97,7 @@
 	#define IDD_LIFETIME 303
 	#define IDD_BEEP 304
 	#define IDD_ALERT 305
-
+   #define IDD_CCACHE 306
 /*
  * Dialog dimensions
  */
@@ -142,12 +142,17 @@
  * Prototypes
  */
 
+static void kwin_init_name (HWND hwnd, char *fullname);
+void kwin_set_default_focus (HWND hwnd);
 time_t kwin_get_epoch(void);
+
 #ifdef KRB5
    static krb5_error_code k5_dest_tkt (void);
    static int k5_get_num_cred (int verbose);
    static int k5_kname_parse (char *name, char *realm, char *fullname);
    static int k5_get_lrealm (char *realm);
+   static krb5_error_code k5_init_ccache (krb5_ccache *ccache);
+   static int k5_name_from_ccache (krb5_ccache k5_ccache);
 #endif
 
 HICON kwin_get_icon(time_t expiration);

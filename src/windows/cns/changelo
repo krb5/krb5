@@ -1,3 +1,10 @@
+Fri Apr 7 15:03:10 1995 Keith Vetter (keithv@fusion.com)
+
+        * cns.c, cns.h, cns.rc: added option dialog widget allowing user
+           to specify where the ccache lives. Also, default name and realm
+           is now pulled from the ccache everytime you select one.
+	* cns.c: fixed memory leak in k5_dest_tkt.
+
 Wed Apr 5 16:01:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.h, cns.rc, cns.c: GUI changes: re-order and resize
