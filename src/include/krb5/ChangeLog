@@ -1,4 +1,8 @@
-Mon Feb 26 13:22:43 2001  Ezra Peisach  <epeisach@mit.edu>
+2001-04-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* .cvsignore: Add stamp-h.in
+
+2001-02-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* adm_proto.h (krb5_adm_connect): Declare prompt string const char *. 
 
