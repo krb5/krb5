@@ -6453,9 +6453,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
-				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				IMPLICITLY_INCLUDED_HEADERS = "\"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
