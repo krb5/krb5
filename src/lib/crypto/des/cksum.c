@@ -68,8 +68,8 @@ mit_des_cbc_cksum(in,out,length,key,iv)
     t_in_p = (unsigned char *) t_input;
 #ifdef MUSTALIGN
     if ((long) ivec & 3) {
-	bcopy((char *)ivec++,(char *)&t_output[0],sizeof(t_output[0]));
-	bcopy((char *)ivec,(char *)&t_output[1],sizeof(t_output[1]));
+	memcpy((char *)&t_output[0],(char *)ivec++,sizeof(t_output[0]));
+	memcpy((char *)&t_output[1],(char *)ivec,sizeof(t_output[1]));
     }
     else
 #endif
@@ -82,8 +82,8 @@ mit_des_cbc_cksum(in,out,length,key,iv)
 	/* get input */
 #ifdef MUSTALIGN
 	if ((long) input & 3) {
-	    bcopy((char *)input++,(char *)&t_input[0],sizeof(t_input[0]));
-	    bcopy((char *)input++,(char *)&t_input[1],sizeof(t_input[1]));
+	    memcpy((char *)&t_input[0],(char *)input++,sizeof(t_input[0]));
+	    memcpy((char *)&t_input[1],(char *)input++,sizeof(t_input[1]));
 	}
 	else
 #endif
@@ -120,8 +120,8 @@ mit_des_cbc_cksum(in,out,length,key,iv)
     /* copy temp output and save it for checksum */
 #ifdef MUSTALIGN
     if ((long) output & 3) {
-	bcopy((char *)&t_output[0],(char *)output++,sizeof(t_output[0]));
-	bcopy((char *)&t_output[1],(char *)output,sizeof(t_output[1]));
+	memcpy((char *)output++,(char *)&t_output[0],sizeof(t_output[0]));
+	memcpy((char *)output,(char *)&t_output[1],sizeof(t_output[1]));
     }
     else
 #endif

@@ -89,7 +89,7 @@ void mit_des_init_random_number_generator(key,p_seed)
      */
     bzero((char *)seed, sizeof(seed));
     if (!krb5_os_localaddr(&addrs) && *addrs) {
-	bcopy((char *)addrs[0]->contents, (char *)seed,
+	memcpy((char *)seed, (char *)addrs[0]->contents,
 	      min(sizeof(seed), addrs[0]->length));
 	/* XXX may not do all of the seed. */
     }
@@ -177,7 +177,7 @@ mit_des_set_sequence_number(new_sequence_number, p_seed)
     mit_des_cblock new_sequence_number;
     mit_des_random_key_seed	*p_seed;
 {
-    bcopy((char *)new_sequence_number, (char *)p_seed->sequence_number,
+    memcpy((char *)p_seed->sequence_number, (char *)new_sequence_number,
 	  sizeof(p_seed->sequence_number));
 }
 

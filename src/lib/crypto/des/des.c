@@ -114,8 +114,8 @@ mit_des_ecb_encrypt(clear, cipher, schedule, encrypt)
     }
 #endif
     if ((long) clear & 3) {
-	bcopy((char *)clear++,(char *)&L_save,sizeof(L_save));
-	bcopy((char *)clear,(char *)&R_save,sizeof(R_save));
+	memcpy((char *)&L_save,(char *)clear++,sizeof(L_save));
+	memcpy((char *)&R_save,(char *)clear,sizeof(R_save));
 	L1 = L_save;
 	R1 = R_save;
     }
@@ -426,8 +426,8 @@ mit_des_ecb_encrypt(clear, cipher, schedule, encrypt)
     if ((long) cipher & 3) {
 	L_save = L2;	/* cant bcopy a reg */
 	R_save = R2;
-	bcopy((char *)&L_save,(char *)cipher++,sizeof(L_save));
-	bcopy((char *)&R_save,(char *)cipher,sizeof(R_save));
+	memcpy((char *)cipher++,(char *)&L_save,sizeof(L_save));
+	memcpy((char *)cipher,(char *)&R_save,sizeof(R_save));
     }
     else
 #endif
