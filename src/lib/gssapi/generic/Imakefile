@@ -2,7 +2,7 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1993 by the Massachusetts Institute of Technology.
+#  Copyright 1993, 1994 by the Massachusetts Institute of Technology.
 #  All Rights Reserved.
 # 
 # Export of this software from the United States of America may
@@ -27,6 +27,14 @@ ETSRCS= gssapi_generic_err.c
 ETOBJS= gssapi_generic_err.o
 ETHDRS= gssapi_generic_err.h
 
+#ifdef HasHashLibrary
+UTIL_VALIDATE_SRC= util_validate.c
+UTIL_VALIDATE_OBJ= util_validate.o
+#else
+UTIL_VALIDATE_SRC= util_val_nohash.c
+UTIL_VALIDATE_OBJ= util_val_nohash.o
+#endif
+
 CCSRCS = \
 	display_major_status.c \
 	display_com_err_status.c \
@@ -37,8 +45,8 @@ CCSRCS = \
 	util_canonhost.c \
 	util_dup.c \
 	util_oid.c \
-#	util_validate.c \
-	util_token.c 
+	util_token.c \
+	$(UTIL_VALIDATE_SRC)
 
 CCOBJS = \
 	display_major_status.o \
@@ -50,8 +58,9 @@ CCOBJS = \
 	util_canonhost.o \
 	util_dup.o \
 	util_oid.o \
-#	util_validate.o \
-	util_token.o
+	util_token.o \
+	$(UTIL_VALIDATE_OBJ)
+
 
 EHDRDIR= $(TOP)/include/gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
