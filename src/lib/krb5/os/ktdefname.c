@@ -34,9 +34,9 @@ krb5_kt_default_name(context, name, namesize)
     char *name;
     int namesize;
 {
-    char *cp;
+    char *cp = 0;
 
-    cp = getenv("KRB5_KTNAME");
+    if (context->profile_secure == FALSE) cp = getenv("KRB5_KTNAME");
     if (cp) {
 	strncpy(name, cp, namesize);
 	if (strlen(cp) >= (size_t) namesize)
