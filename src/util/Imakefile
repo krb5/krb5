@@ -25,5 +25,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=unifdef et ss
+SUBDIRS=unifdef et ss makedepend
 MakeSubdirs($(SUBDIRS))
