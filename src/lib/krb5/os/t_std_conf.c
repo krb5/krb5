@@ -107,7 +107,7 @@ static void test_locate_kdc(ctx, realm)
 	krb5_context ctx;
 	char	*realm;
 {
-    	struct sockaddr **addrs;
+    	struct addrlist addrs;
 	struct sockaddr_in *s_sin;
 	int	i, naddrs;
 	int	get_masters=0;
@@ -116,19 +116,18 @@ static void test_locate_kdc(ctx, realm)
 
 	rlm.data = realm;
 	rlm.length = strlen(realm);
-	retval = krb5_locate_kdc(ctx, &rlm, &addrs, &naddrs,
-				 get_masters);
+	retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters);
 	if (retval) {
 		com_err("krb5_locate_kdc", retval, 0);
 		return;
 	}
 	printf("krb_locate_kdc(%s) returned:", realm);
-	for (i=0; i < naddrs; i++) {
-	    s_sin = (struct sockaddr_in *) addrs[i];
+	for (i=0; i < addrs.naddrs; i++) {
+	    s_sin = (struct sockaddr_in *) addrs.addrs[i];
 	    printf(" %s/%d", inet_ntoa(s_sin->sin_addr), 
 		   ntohs(s_sin->sin_port));
 	}
-	free(addrs);
+	krb5int_free_addrlist(&addrs);
 	printf("\n");
 }
 
