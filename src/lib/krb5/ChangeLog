@@ -1,3 +1,7 @@
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to changes in error tables.
+
 2000-11-29	Miro Jurisic <meeroh@mit.edu>
 
 	* krb5_libinit.c: Install a callback in the Mac OS sleep
