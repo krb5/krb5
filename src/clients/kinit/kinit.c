@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Initialize a credentials cache.
  */
@@ -19,45 +19,69 @@ static char rcsid_kinit_c [] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/kdb.h>			/* for TGTNAME */
+#include <krb5/ext-proto.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
+#include <krb5/krb5_err.h>
+#include <krb5/isode_err.h>
+#include <com_err.h>
 
-#define KRB5_DEFAULT_FLAGS 0
+#define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
+#define KRB5_RENEWABLE_LIFE 60*60*2 /* 2 hours */
 
 extern int optind;
 extern char *optarg;
 
+krb5_error_code
 krb5_parse_lifetime (time, len)
     char *time;
     long *len;
 {
     *len = atoi (time) * 60 * 60; /* XXX stub version */
+    return 0;
 }
     
+krb5_data tgtname = {
+    sizeof(TGTNAME)-1,
+    TGTNAME
+};
 
+void
 main(argc, argv)
     int argc;
     char **argv;
 {
-    krb5_ccache cache = NULL;
+    krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
-    int flags = KRB5_DEFAULT_FLAGS;
+    int options = KRB5_DEFAULT_OPTIONS;
     int option;
     int errflg = 0;
     krb5_address **my_addresses;
-    int code;
+    krb5_error_code code;
     krb5_principal me;
+    krb5_data *server[3];
+    krb5_creds my_creds;
     
     /*
      * XXX init error tables here
      */
+
+    initialize_krb5_error_table();
+    initialize_isod_error_table();
+
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
+
     while ((option = getopt(argc, argv, "rpl:c:")) != EOF) {
 	switch (option) {
 	case 'r':
-	    flags |= KDC_OPT_RENEWABLE;
+	    options |= KDC_OPT_RENEWABLE;
 	    break;
 	case 'p':
-	    flags |= KDC_OPT_PROXIABLE;
+	    options |= KDC_OPT_PROXIABLE;
 	    break;
 	case 'l':
 	    code = krb5_parse_lifetime(optarg, &lifetime);
@@ -67,10 +91,10 @@ main(argc, argv)
 	    }
 	    break;
 	case 'c':
-	    if (cache == NULL) {
+	    if (ccache == NULL) {
 		cache_name = optarg;
 		
-		code = krb5_cc_resolve (cache_name, &cache);
+		code = krb5_cc_resolve (cache_name, &ccache);
 		if (code != 0) {
 		    com_err (argv[0], code, "resolving %s", cache_name);
 		    errflg++;
@@ -93,35 +117,53 @@ main(argc, argv)
 	fprintf(stderr, "Usage: %s [ -rp ] [ -l lifetime ] [ -c cachename ] principal", argv[0]);
 	exit(2);
     }
-    if (cache == NULL)
-	cache = krb5_cc_default();
+    if (ccache == NULL)
+	ccache = krb5_cc_default();
 
-    krb5_parse_name (argv[optind], &me);
+    if (code = krb5_parse_name (argv[optind], &me)) {
+	com_err (argv[0], code, "when parsing name %s",argv[optind]);
+	exit(1);
+    }
 
-    code = krb5_cc_initialize (cache, me);
+    code = krb5_cc_initialize (ccache, me);
     if (code != 0) {
 	com_err (argv[0], code, "when initializing cache %s",
 		 cache_name?cache_name:"");
 	exit(1);
     }
 
+    my_creds.client = me;
+    my_creds.server = server;
+
+    server[0] = me[0];		/* realm name */
+    server[1] = &tgtname;
+    server[2] = 0;
+
     code = krb5_os_localaddr(&my_addresses);
     if (code != 0) {
 	com_err (argv[0], code, "when getting my address");
 	exit(1);
-    }	
-#ifdef notyet
-    code = krb5_get_in_tkt_with_password
-	(flags, my_addresses, <<<enctype>>>,
-	 <<<keytype>>>,
-	 <<<char *>>>,
-	 ccache,
-	 my_creds,
-	 <<<int>>>);
+    }
+    if (code = krb5_timeofday(&my_creds.times.starttime)) {
+	com_err(argv[0], code, "while getting time of day");
+	exit(1);
+    }
+    my_creds.times.endtime = my_creds.times.starttime + lifetime;
+    if (options & KDC_OPT_RENEWABLE) {
+	my_creds.times.renew_till = my_creds.times.starttime +
+	    KRB5_RENEWABLE_LIFE;
+    } else
+	my_creds.times.renew_till = 0;
+
+    code = krb5_get_in_tkt_with_password(options, my_addresses,
+					 ETYPE_DES_CBC_CRC,
+					 KEYTYPE_DES,
+					 0, /* let lib read pwd from kbd */
+					 ccache,
+					 &my_creds);
     if (code != 0) {
 	com_err (argv[0], code, "getting initial credentials");
 	exit(1);
     }
-#endif
     exit(0);
 }
