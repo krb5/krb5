@@ -1,3 +1,11 @@
+2001-04-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftp_var.h: Prototype for recvrequest() needs volatile
+ 	declaration to match code. Native Dec Alpha compiler errors on the
+ 	inconsistancy.
+
+	* secure.h (PROTOTYPE): Only define if not defined already.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftp_var.h (PROTOTYPE): Always define to use supplied prototype.

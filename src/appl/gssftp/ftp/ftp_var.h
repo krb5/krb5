@@ -141,7 +141,9 @@ extern	char *mktemp();
 extern int command(char *, ...);
 #endif
 
+#ifndef PROTOTYPE
 #define PROTOTYPE(x) x
+#endif
 
 char *remglob PROTOTYPE((char **, int));
 int another PROTOTYPE((int *, char ***, char *));
@@ -217,7 +219,7 @@ void setpassive PROTOTYPE((void));
 
 /* ftp.c */
 void sendrequest PROTOTYPE((char *, char *, char *, int));
-void recvrequest PROTOTYPE((char *, char *, char *, char *, int));
+void recvrequest PROTOTYPE((char *, char *volatile, char *, char *, int));
 int login PROTOTYPE((char *));
 void setpbsz PROTOTYPE((unsigned int));
 void pswitch PROTOTYPE((int));

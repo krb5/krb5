@@ -5,7 +5,9 @@
 #define myaddr		data_addr
 #define hisaddr		hisdataaddr
 
+#ifndef PROTOTYPE
 #define PROTOTYPE(x) x
+#endif
 
 int secure_flush PROTOTYPE((int));
 int secure_putc PROTOTYPE((int, FILE *));
