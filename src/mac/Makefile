@@ -493,12 +493,14 @@ standard-libraries-macos9-debug			= ¶
 	"{runtimelib-macos9-debug}" ¶
 	"{runtimelib-static-macos9-debug}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
+	¶"{SharedLibraries}OpenTptInternetLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 standard-libraries-macos9-final			= ¶
 	"{clib-macos9-final}" ¶
 	"{runtimelib-macos9-final}" ¶
 	"{runtimelib-static-macos9-final}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
+	¶"{SharedLibraries}OpenTptInternetLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 standard-libraries-carbon-debug			= ¶
 	"{clib-carbon-debug}" ¶
