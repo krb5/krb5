@@ -1,3 +1,8 @@
+2000-05-16  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kfree.c (krb5_free_keyblock_contents): Set contents pointer to
+	null after freeing.
+
 2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
 
         * Added new source file appdefault.c

@@ -387,6 +387,7 @@ krb5_free_keyblock_contents(context, key)
      if (key->contents) {
 	  memset(key->contents, 0, key->length);
 	  krb5_xfree(key->contents);
+	  key->contents = 0;
      }
      return;
 }
