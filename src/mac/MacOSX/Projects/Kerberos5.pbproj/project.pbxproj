@@ -4105,7 +4105,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../MoreFiles/Headers\"";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../MoreFiles/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libKerberosProfile.a;
