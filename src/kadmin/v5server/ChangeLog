@@ -1,4 +1,8 @@
 
+Tue Jun 27 16:02:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_net.c, srv_acl.c, proto_serv.c - Add signal name parameter to
+		signal handlers to conform to prototype.
+
 Thu Jun 15 17:54:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

@@ -104,7 +104,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, skey)
 			     pinst,
 			     prealm,
 			     *((unsigned long *)v5etkt->caddrs[0]->contents),
-			     v5etkt->session->contents,
+			     (char *) v5etkt->session->contents,
 			     lifetime,
 			     /* issue_data */
 			     v5etkt->times.starttime,

@@ -1,3 +1,11 @@
+
+Tue Jun 27 16:05:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* acl_files.c - Change check for return value from fputs(3) from NULL
+		to EOF.  That's what's returned on error.
+	* admin_server.c - Cast 4th argument of setsockopt(2) to be const char *
+	* kadm_funcs.c - Cast argument to ctime(3)
+	* kadm_server.c - Cast first argument to strcpy(3) and strcat(3).
+
 Tue Jun 20 14:44:54 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: add tests for TIME_WITH_SYS_TIME and sys/time.h

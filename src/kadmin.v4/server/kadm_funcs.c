@@ -58,10 +58,10 @@ kadm_entry2princ(entry, princ)
   if (retval)
     return retval;
   princ->exp_date = entry.expiration;
-  strncpy(ctime(&entry.expiration), princ->exp_date_txt,
+  strncpy(ctime((const time_t *) &entry.expiration), princ->exp_date_txt,
 	  DATE_SZ);
   princ->mod_date = entry.mod_date;
-  strncpy(ctime(&entry.mod_date), princ->mod_date_txt,
+  strncpy(ctime((const time_t *) &entry.mod_date), princ->mod_date_txt,
 	  DATE_SZ);
   princ->attributes = entry.attributes;
   princ->max_life = entry.max_life / (60 * 5);

@@ -1,3 +1,8 @@
+
+Tue Jun 27 15:46:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* listen.c(listen_int_handler) - Add argument to conform to signal
+		handler prototype.
+
 Tue Jun 13 01:48:33 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: don't install libss.a

@@ -45,7 +45,7 @@
 #ifndef	__P
 #define __P(x)	()
 #endif
-char *__findenv __P((const char *, int *)); 
+static char *__findenv __P((const char *, int *)); 
 
 /*
  * setenv --

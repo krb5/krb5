@@ -131,13 +131,10 @@ char copyright[] =
 #include "com_err.h"
 #include "defines.h"
      
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-#define BUFSIZ 4096
+#define RLOGIN_BUFSIZ 4096
      
-char des_inbuf[2*BUFSIZ];       /* needs to be > largest read size */
-char des_outbuf[2*BUFSIZ];      /* needs to be > largest write size */
+char des_inbuf[2*RLOGIN_BUFSIZ];       /* needs to be > largest read size */
+char des_outbuf[2*RLOGIN_BUFSIZ];      /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 
@@ -219,8 +216,8 @@ struct	winsize winsize;
 char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
-krb5_sigtype	sigwinch(), oob();
-krb5_sigtype	lostpeer();
+krb5_sigtype	sigwinch KRB5_PROTOTYPE((int)), oob KRB5_PROTOTYPE((int));
+krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 #if __STDC__
 int setsignal(int sig, krb5_sigtype (*act)());
 #endif
@@ -677,8 +674,9 @@ int confirm_death ()
 #define CRLF "\r\n"
 
 int	child;
-krb5_sigtype	catchild();
-krb5_sigtype	copytochild(), writeroob();
+krb5_sigtype	catchild KRB5_PROTOTYPE((int));
+krb5_sigtype	copytochild KRB5_PROTOTYPE((int)),
+		writeroob KRB5_PROTOTYPE((int));
 
 int	defflags, tabflag;
 int	deflflags;
@@ -918,7 +916,8 @@ done(status)
  * Copy SIGURGs to the child process.
  */
 krb5_sigtype
-  copytochild()
+  copytochild(signo)
+int signo;
 {
     (void) kill(child, SIGURG);
 }
@@ -930,7 +929,8 @@ krb5_sigtype
  * request to turn on the window-changing protocol.
  */
 krb5_sigtype
-  writeroob()
+  writeroob(signo)
+int signo;
 {
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -953,7 +953,8 @@ krb5_sigtype
 
 
 krb5_sigtype
-  catchild()
+  catchild(signo)
+int signo;
 {
 #ifdef WAIT_USES_INT
     int status;
@@ -1166,13 +1167,14 @@ stop(cmdc)
 #endif
     
     mode(1);
-    sigwinch();			/* check for size changes */
+    sigwinch(SIGWINCH);		/* check for size changes */
 }
 
 
 
 krb5_sigtype
-  sigwinch()
+  sigwinch(signo)
+int signo;
 {
     struct winsize ws;
     
@@ -1224,14 +1226,15 @@ jmp_buf rcvtop;
 #endif
 
 krb5_sigtype
-  oob()
+  oob(signo)
+int signo;
 {
 #ifndef POSIX_TERMIOS
     int out = FWRITE;
 #endif
     int atmark, n;
     int rcvd = 0;
-    char waste[BUFSIZ], mark;
+    char waste[RLOGIN_BUFSIZ], mark;
 #ifdef POSIX_TERMIOS
     struct termios tty;
 #else
@@ -1658,7 +1661,7 @@ void try_normal(argv)
 
 
 
-char storage[2*BUFSIZ];			/* storage for the decryption */
+char storage[2*RLOGIN_BUFSIZ];		/* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
 
@@ -1958,7 +1961,8 @@ int des_write(fd, buf, len)
 
 
 
-krb5_sigtype lostpeer()
+krb5_sigtype lostpeer(signo)
+    int signo;
 {
 #ifdef POSIX_SIGNALS
     struct sigaction sa;

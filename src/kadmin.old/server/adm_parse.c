@@ -259,4 +259,7 @@ char *input_string;
         return;
     }
 }
+#else
+/* Need something to compile. */
+#include <stdio.h>
 #endif

@@ -211,10 +211,6 @@ struct winsize {
 #include "krb5.h"
 #include <kerberosIV/krb.h>
 
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
 #define KRB5_RECVAUTH_V4	4
@@ -227,7 +223,7 @@ AUTH_DAT	*v4_kdata;
 Key_schedule v4_schedule;
 int v4_des_read(), v4_des_write();
 
-#define BUFSIZ 5120
+#define RLOGIND_BUFSIZ 5120
 
 int v5_des_read(), v5_des_write();
 
@@ -236,8 +232,8 @@ int v5_des_read(), v5_des_write();
 #define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
 
 int (*des_read)(), (*des_write)();
-char des_inbuf[2*BUFSIZ];         /* needs to be > largest read size */
-char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
+char des_inbuf[2*RLOGIND_BUFSIZ]; /* needs to be > largest read size */
+char des_outbuf[2*RLOGIND_BUFSIZ];/* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 
@@ -477,7 +473,8 @@ main(argc, argv)
 	 fd = 0;
      }
 
-    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof (on)) < 0)
+    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE,
+		   (const char *) &on, sizeof (on)) < 0)
       syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
     
     doit(fd, &from);
@@ -1243,7 +1240,7 @@ getstr(fd, buf, cnt, err)
 
 
 
-char storage[2*BUFSIZ];                    /* storage for the decryption */
+char storage[2*RLOGIND_BUFSIZ];             /* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
 

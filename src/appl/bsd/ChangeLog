@@ -1,3 +1,20 @@
+
+Tue Jun 27 16:18:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - When checking number/type of arguments to {get,set}pgrp
+		attempt to set __STDC__ in a vain attempt to ensure that we
+		get function prototype checking turned on.  OSF/1's native
+		compiler didn't really care what's passed as arguments unless
+		__STDC__'s set.
+	* krcp.c - Change usage of BUFSIZ to RCP_BUFSIZ.  Remove & from in
+		front of array.  It's redundant.
+	* krlogin.c - Change usage of BUFSIZ to RLOGIN_BUFSIZ.  Add signal
+		name parameter to signal handlers to conform to prototype.
+	* krlogind.c - Change usage of BUFSIZ to RLOGIND_BUFSIZ.  Cast 4th
+		argument to setsockopt(2) to be const char *.
+	* krsh.c - Change usage of BUFSIZ to RSH_BUFSIZ.  Cast 4th argument
+		to setsockopt(2) to be const char *.
+	* krshd.c - Change usage of BUFSIZ to RSHD_BUFSIZ.
+
 Thu Jun 22 14:36:46 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Change AC_HAVE_HEADERS with AC_CHECK_HEADERS, and

@@ -49,7 +49,7 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_pointer	*acontextp;
 {
     krb5_error_code	kret;
-    char		*namelist[2];
+    const char		*namelist[2];
     profile_t		profile;
     extern char		*getenv PROTOTYPE((char *));
     
@@ -86,7 +86,7 @@ krb5_aprof_init(fname, envname, acontextp)
 krb5_error_code
 krb5_aprof_getvals(acontext, hierarchy, retdata)
     krb5_pointer	acontext;
-    char		**hierarchy;
+    const char		**hierarchy;
     char		***retdata;
 {
     return(profile_get_values((profile_t) acontext,
@@ -121,7 +121,7 @@ krb5_aprof_getvals(acontext, hierarchy, retdata)
 krb5_error_code
 krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
     krb5_pointer	acontext;
-    char		**hierarchy;
+    const char		**hierarchy;
     krb5_boolean	uselast;
     krb5_deltat		*deltatp;
 {
@@ -213,7 +213,7 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
 krb5_error_code
 krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
     krb5_pointer	acontext;
-    char		**hierarchy;
+    const char		**hierarchy;
     krb5_boolean	uselast;
     char		**stringp;
 {
@@ -257,7 +257,7 @@ krb5_aprof_get_string(acontext, hierarchy, uselast, stringp)
 krb5_error_code
 krb5_aprof_get_int32(acontext, hierarchy, uselast, intp)
     krb5_pointer	acontext;
-    char		**hierarchy;
+    const char		**hierarchy;
     krb5_boolean	uselast;
     krb5_int32		*intp;
 {

@@ -160,7 +160,7 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
     krb5_boolean	def_manual;
 {
     krb5_error_code	kret;
-    char		*hierarchy[4];
+    const char		*hierarchy[4];
     krb5_boolean	manual;
     krb5_db_entry	db_entry;
     int			num2get;
@@ -509,7 +509,8 @@ init_realm(progname, rdp, altp, realm, def_dbname, def_mpname,
 }
 
 krb5_sigtype
-request_exit()
+request_exit(signo)
+    int signo;
 {
     signal_requests_exit = 1;
 

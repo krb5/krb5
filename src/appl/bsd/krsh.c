@@ -83,13 +83,11 @@ krb5_sigtype  sendsig();
 #ifndef UCB_RSH
 #define UCB_RSH "/usr/ucb/rsh"
 #endif
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-#define BUFSIZ 4096
 
-char des_inbuf[2*BUFSIZ];       /* needs to be > largest read size */
-char des_outbuf[2*BUFSIZ];      /* needs to be > largest write size */
+#define RSH_BUFSIZ 4096
+
+char des_inbuf[2*RSH_BUFSIZ];       /* needs to be > largest read size */
+char des_outbuf[2*RSH_BUFSIZ];      /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 krb5_context bsd_context;
@@ -126,7 +124,7 @@ main(argc, argv0)
      char **argv0;
 {
     int rem, pid;
-    char *host=0, *cp, **ap, buf[BUFSIZ], *args, **argv = argv0, *user = 0;
+    char *host=0, *cp, **ap, buf[RSH_BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     struct passwd *pwd;
     fd_set readfrom, ready;
@@ -380,9 +378,11 @@ main(argc, argv0)
 	exit(2);
     }
     if (options & SO_DEBUG) {
-	if (setsockopt(rem, SOL_SOCKET, SO_DEBUG, &one, sizeof (one)) < 0)
+	if (setsockopt(rem, SOL_SOCKET, SO_DEBUG,
+		       (const char *) &one, sizeof (one)) < 0)
 	  perror("setsockopt (stdin)");
-	if (setsockopt(rfd2, SOL_SOCKET, SO_DEBUG, &one, sizeof (one)) < 0)
+	if (setsockopt(rfd2, SOL_SOCKET, SO_DEBUG,
+		       (const char *) &one, sizeof (one)) < 0)
 	  perror("setsockopt (stderr)");
     }
     (void) setuid(getuid());
@@ -562,7 +562,7 @@ void try_normal(argv)
 }
 
 
-char storage[2*BUFSIZ];
+char storage[2*RSH_BUFSIZ];
 int nstored = 0;
 char *store_ptr = storage;
 

@@ -1,4 +1,10 @@
 
+Tue Jun 27 15:59:48 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Change profile name hierarchy storage to const char *.  Add
+		signal name argument to signal handler to conform to prototype.
+	* kerberos_v4.c - Cast key to (char *) to conform to prototype.
+
+
 Thu Jun 22 15:24:16 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* main.c - Change option parsing logic to support multiple realms.
 		Use alternate profile routines from libkadm to support reading

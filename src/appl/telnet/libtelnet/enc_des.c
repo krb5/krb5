@@ -719,4 +719,6 @@ ofb64_decrypt(data)
 }
 #  endif /* DES_ENCRYPTION */
 # endif	/* AUTHENTICATION */
+#else	/* ENCRYPTION */
+#include "misc-proto.h"
 #endif	/* ENCRYPTION */

@@ -162,8 +162,8 @@ int *outlen;
 	    if (fascist_cpw) {
 		    *outlen = strlen(bad_pw_err)+strlen(pw_blurb)+1;
 		    if (*datout = (u_char *) malloc(*outlen)) {
-			    strcpy(*datout, bad_pw_err);
-			    strcat(*datout, pw_blurb);
+			    strcpy((char *) *datout, bad_pw_err);
+			    strcat((char *) *datout, pw_blurb);
 		    } else
 			    *outlen = 0;
 		    (void) krb_log("'%s.%s@%s' tried to use an insecure password in changepw",
@@ -177,8 +177,8 @@ int *outlen;
 	    } else {
 		    *outlen = strlen(bad_pw_warn) + strlen(pw_blurb)+1;
 		    if (*datout = (u_char *) malloc(*outlen)) {
-			    strcpy(*datout, bad_pw_warn);
-			    strcat(*datout, pw_blurb);
+			    strcpy((char *) *datout, bad_pw_warn);
+			    strcat((char *) *datout, pw_blurb);
 		    } else
 			    *outlen = 0;
 		    (void) krb_log("'%s.%s@%s' used an insecure password in changepw",
@@ -385,8 +385,8 @@ int *outlen;
     if (retval) {
 	    *outlen = strlen(check_pw_msg)+strlen(pw_blurb)+1;
 	    if (*datout = (u_char *) malloc(*outlen)) {
-		    strcpy(*datout, check_pw_msg);
-		    strcat(*datout, pw_blurb);
+		    strcpy((char *) *datout, check_pw_msg);
+		    strcat((char *) *datout, pw_blurb);
 	    } else
 		    *outlen = 0;
 	    (void) krb_log("'%s.%s@%s' sent an insecure password to be checked",

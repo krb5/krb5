@@ -74,7 +74,7 @@ int encode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
 
      if ((ret = encode_int32(&buf, &buflen, &v4tkt->length)))
 	  return ret;
-     if ((ret = encode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN)))
+     if ((ret = encode_bytes(&buf, &buflen, (char *)v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
      if ((ret = encode_int32(&buf, &buflen, (krb5_int32 *) &v4tkt->mbz)))
 	  return ret;
@@ -113,7 +113,7 @@ int decode_v4tkt(KTEXT_ST *v4tkt, char *buf, int *encoded_len)
      buflen = *encoded_len;
      if ((ret = decode_int32(&buf, &buflen, &v4tkt->length)))
 	  return ret;
-     if ((ret = decode_bytes(&buf, &buflen, v4tkt->dat, MAX_KTXT_LEN)))
+     if ((ret = decode_bytes(&buf, &buflen, (char *)v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
      if ((ret = decode_int32(&buf, &buflen, (krb5_int32 *) &v4tkt->mbz)))
 	  return ret;

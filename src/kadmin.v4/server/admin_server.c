@@ -343,7 +343,8 @@ struct sockaddr_in *who;
     des_init_random_number_generator(server_parm.master_keyblock.contents);
 #endif /* NOENCRYPTION */
     
-    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) < 0)
+    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE,
+		   (const char *) &on, sizeof(on)) < 0)
 	syslog(LOG_ERR, "setsockopt keepalive: %d", errno);
 
     server_parm.recv_addr = *who;

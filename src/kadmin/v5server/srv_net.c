@@ -174,7 +174,8 @@ net_free_slave_entry(entp)
  * net_shutdown()	- Destroy all slaves on signal reception
  */
 static krb5_sigtype
-net_shutdown()
+net_shutdown(signo)
+    int signo;
 {
     int i;
 
@@ -209,7 +210,8 @@ net_shutdown()
  * net_reaper()	- Child process termination handler.
  */
 static krb5_sigtype
-net_reaper()
+net_reaper(signo)
+    int signo;
 {
 #ifdef	WAIT_USES_INT
     int 		child_exit;

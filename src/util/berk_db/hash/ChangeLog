@@ -1,3 +1,7 @@
+
+Tue Jun 27 15:47:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* hash.c - Cast 2nd argument to memmove to (char *).
+
 Fri Jun  9 18:59:55 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -132,7 +132,8 @@ process_client(context, prog)
 
     outbuf.data = retbuf;
     if (setsockopt(client_server_info.client_socket, 
-			SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) < 0) {
+			SOL_SOCKET, SO_KEEPALIVE,
+		   	(const char *) &on, sizeof(on)) < 0) {
 	syslog(LOG_ERR, "adm_process: setsockopt keepalive: %d", errno);
     }
 

@@ -276,9 +276,11 @@ acl_load_acl_file()
  * acl_reload_acl_file()	- Reload the acl file.
  */
 static krb5_sigtype
-acl_reload_acl_file()
+acl_reload_acl_file(signo)
+    int signo;
 {
-    DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_reload_acl_file()\n"));
+    DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_reload_acl_file(%d)\n",
+					  signo));
     acl_free_entries();
     acl_inited = acl_load_acl_file();
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_reload_acl_file()\n"));

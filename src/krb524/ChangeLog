@@ -1,4 +1,13 @@
 
+Tue Jun 27 15:54:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* cnv_tkt_skey.c - Cast key contents argument to conform to prototype.
+	* encode.c - Cast argument to match argument list of encode_bytes().
+	* krb524d.c - Add signal name argument to conform to prototype.
+	* sendmsg.c - Cast second argument to connect(2).
+	* test.c - Cast arguments to print_key() and ctime(3).  Cast assignment
+		to key.contents.
+
+
 Thu Jun 22 11:55:23 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb524d.c - Change KRB_CONVERT_KEY_OUTOF_DB to decrypt_key calls.
 

@@ -1,4 +1,10 @@
 
+Tue Jun 27 16:10:19 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_parse.c - Give compiler something to compile if SANDIA is not
+		defined.  Some compilers choke when nothing to compile.
+	* adm_process.c - Cast 4th argument of setsockopt(2) to be const char *
+
+
 Thu Jun 22 11:54:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_server.c - Change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key call.
 

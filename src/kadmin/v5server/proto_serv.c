@@ -55,7 +55,8 @@ static int	proto_debug_level = 0;
 static jmp_buf	timeout_jmp;
 
 static krb5_sigtype
-proto_alarmclock()
+proto_alarmclock(signo)
+    int signo;
 {
 #if	POSIX_SETJMP
     siglongjmp(timeout_jmp, 1);

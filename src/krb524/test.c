@@ -158,9 +158,10 @@ void krb4_print_ticket(KTEXT ticket, krb5_keyblock *secret_key)
      printf("Ticket: Client: %s.%s@%s\n", pname, pinst, prealm);
      printf("Ticket: Service: %s.%s\n", sname, sinst);
      printf("Ticket: Address: %08lx\n", addr);
-     print_key("Ticket: Session Key", session_key);
+     print_key("Ticket: Session Key", (char *) session_key);
      printf("Ticket: Lifetime: %d\n", life);
-     printf("Ticket: Issue Date: %ld, %s", issue_time, ctime(&issue_time));
+     printf("Ticket: Issue Date: %ld, %s", issue_time, ctime((time_t *)
+							     &issue_time));
 }
 
 void krb4_print_creds(CREDENTIALS *creds, krb5_keyblock *secret_key)
@@ -169,7 +170,7 @@ void krb4_print_creds(CREDENTIALS *creds, krb5_keyblock *secret_key)
 	    creds->realm);
      printf("Service: %s.%s@%s\n", creds->service, creds->instance,
 	    creds->realm);
-     print_key("Session key", creds->session);
+     print_key("Session key", (char *) creds->session);
      printf("Lifetime: %d\n", creds->lifetime);
      printf("Key Version: %d\n", creds->kvno);
      print_time("Issue Date", creds->issue_date);
@@ -264,7 +265,7 @@ int main(int argc, char **argv)
      
      key.keytype = KEYTYPE_DES;
      key.length = KEYSIZE; /* presumably */
-     key.contents = keybuf;
+     key.contents = (krb5_octet *) keybuf;
 
      do_remote(context, v5creds, remote, &key);
      exit(0);

@@ -1,3 +1,7 @@
+
+Tue Jun 27 15:49:35 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kparse.c - Change LineNbr to sLineNbr to avoid conflict with kparse.h
+
 Mon Jun 26 14:58:02 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* log.c: Use HAVE_TIME_H not NEED_TIME_H

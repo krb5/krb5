@@ -426,7 +426,8 @@ char *name, *passwd;
   } else passwdok_status = 0;
   return(passwdok_status);
 }
-
+#else
+#include "misc-proto.h"
 #endif
 
 #ifdef notdef

@@ -820,7 +820,7 @@ kerberos_v4(client, pkt)
 	    /* construct and seal the ticket */
 	    krb_create_ticket(tk, k_flags, a_name_data.name,
 		a_name_data.instance, local_realm,
-		 client_host.s_addr, session_key, lifetime, kerb_time.tv_sec,
+		 client_host.s_addr, (char *) session_key, lifetime, kerb_time.tv_sec,
 			 s_name_data.name, s_name_data.instance, key);
 	    memset(key, 0, sizeof(key));
 	    memset(key_s, 0, sizeof(key_s));
@@ -952,7 +952,7 @@ kerberos_v4(client, pkt)
 
 	    krb_create_ticket(tk, k_flags, ad->pname, ad->pinst,
 			      ad->prealm, client_host.s_addr,
-			      session_key, lifetime, kerb_time.tv_sec,
+			      (char *) session_key, lifetime, kerb_time.tv_sec,
 			      s_name_data.name, s_name_data.instance,
 			      key);
 	    memset(key, 0, sizeof(key));
@@ -1202,7 +1202,7 @@ int set_tgtkey(r)
     memcpy(((KRB4_32 *) key) + 1, &p->key_high, 4);
     kdb_encrypt_key(key, key, master_key,
 		    master_key_schedule, DECRYPT);
-    krb_set_key(key, 0);
+    krb_set_key((char *) key, 0);
     strcpy(lastrealm, r);
     return (KSUCCESS);
 }

@@ -63,7 +63,8 @@ void usage()
      cleanup_and_exit(1, NULL);
 }
 
-RETSIGTYPE request_exit()
+RETSIGTYPE request_exit(signo)
+     int signo;
 {
      signalled = 1;
 }

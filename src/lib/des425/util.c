@@ -13,7 +13,7 @@
 #ifndef	lint
 static char rcsid_util_c[] =
 "$Header$";
-#endif	lint
+#endif	/* lint */
 
 #include <stdio.h>
 

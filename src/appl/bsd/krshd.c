@@ -163,16 +163,13 @@ char copyright[] =
 
 #define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
 
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-#define BUFSIZ 5120
+#define RSHD_BUFSIZ 5120
 
 #define MAXRETRIES 4
 
-char des_inbuf[2*BUFSIZ];         /* needs to be > largest read size */
+char des_inbuf[2*RSHD_BUFSIZ];    /* needs to be > largest read size */
 krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
-char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
+char des_outbuf[2*RSHD_BUFSIZ];   /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_context bsd_context;
 char *srvtab = NULL;
@@ -532,7 +529,7 @@ doit(f, fromp)
     short port;
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
-    char buf[BUFSIZ], sig;
+    char buf[RSHD_BUFSIZ], sig;
     int one = 1;
     krb5_sigtype     cleanup();
     int fd;
@@ -1298,7 +1295,7 @@ error(fmt, a1, a2, a3)
      char *fmt;
      char *a1, *a2, *a3;
 {
-    char buf[BUFSIZ];
+    char buf[RSHD_BUFSIZ];
     
     buf[0] = 1;
     (void) sprintf(buf+1, "%s: ", progname);
@@ -1715,7 +1712,7 @@ recvauth(netf, peersin)
 }
 
 
-char storage[2*BUFSIZ];                    /* storage for the decryption */
+char storage[2*RSHD_BUFSIZ];               /* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
 

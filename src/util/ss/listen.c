@@ -37,7 +37,8 @@ static RETSIGTYPE print_prompt()
     (void) fflush(stdout);
 }
 
-static RETSIGTYPE listen_int_handler()
+static RETSIGTYPE listen_int_handler(signo)
+    int signo;
 {
     putc('\n', stdout);
     longjmp(listen_jmpb, 1);

@@ -55,7 +55,7 @@ static char *strutol();
 static char *strsave();
 #endif
 
-static int LineNbr=1;		/* current line nbr in parameter file */
+static int sLineNbr=1;		/* current line nbr in parameter file */
 static char ErrorMsg[80];	/* meaningful only when KV_SYNTAX, PS_SYNTAX,
 				 * or PS_BAD_KEYWORD is returned by
 				 * fGetKeywordValue or fGetParameterSet */
@@ -529,7 +529,7 @@ int fUngetChar(ch,fp)
     int ch;
     FILE *fp;
 {
-    if (ch=='\n') LineNbr--;
+    if (ch=='\n') sLineNbr--;
     return(ungetc(ch,fp));
 }
 
@@ -542,7 +542,7 @@ int fGetChar(fp)
     FILE *fp;
 {
     int ch = fgetc(fp);
-    if (ch=='\n') LineNbr++;
+    if (ch=='\n') sLineNbr++;
     return(ch);
 }
 
@@ -675,18 +675,18 @@ main(argc,argv)
         switch (rc) {
 
         case KV_EOL:
-            printf("%s, line %d: nada mas.\n",filename,LineNbr-1);
+            printf("%s, line %d: nada mas.\n",filename,sLineNbr-1);
             break;
 
         case KV_SYNTAX:
             printf("%s, line %d: syntax error: %s\n",
-                   filename,LineNbr,ErrorMsg);
+                   filename,sLineNbr,ErrorMsg);
             while ( ((ch=fGetChar(fp))!=EOF) && (ch!='\n') );
             break;
 
         case KV_OKAY:
             printf("%s, line %d: okay, %s=\"%s\"\n",
-                   filename,LineNbr,key,valu);
+                   filename,sLineNbr,key,valu);
             break;
 
         default:
@@ -733,19 +733,19 @@ main(argc,argv)
         switch (rc) {
 
         case PS_BAD_KEYWORD:
-            printf("%s, line %d: %s\n",filename,LineNbr,ErrorMsg);
+            printf("%s, line %d: %s\n",filename,sLineNbr,ErrorMsg);
             while ( ((ch=fGetChar(fp))!=EOF) && (ch!='\n') );
             break;
 
         case PS_SYNTAX:
             printf("%s, line %d: syntax error: %s\n",
-                   filename,LineNbr,ErrorMsg);
+                   filename,sLineNbr,ErrorMsg);
             while ( ((ch=fGetChar(fp))!=EOF) && (ch!='\n') );
             break;
 
         case PS_OKAY:
             printf("%s, line %d: valid parameter set found:\n",
-                   filename,LineNbr-1);
+                   filename,sLineNbr-1);
             for (i=0; i<PARMCOUNT(kparm); i++) {
                 printf("\t%s = \"%s\"\n",kparm[i].keyword,
                        (kparm[i].value ? kparm[i].value

@@ -112,7 +112,10 @@ dnl
 AC_MSG_CHECKING([arguments to getpgrp])
 AC_CACHE_VAL(krb5_cv_getpgrp_args,
 [AC_TRY_COMPILE(
-[#include <unistd.h>
+[#ifndef __STDC__
+#define __STDC__ 1
+#endif
+#include <unistd.h>
 #include <sys/types.h>], [pid_t pid = getpgrp(getpid())],
 krb5_cv_getpgrp_args=pid, krb5_cv_getpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_getpgrp_args)
@@ -124,7 +127,10 @@ dnl
 AC_MSG_CHECKING([number of arguments to setpgrp])
 AC_CACHE_VAL(krb5_cv_setpgrp_args,
 [AC_TRY_COMPILE(
-[#include <unistd.h>],[setpgrp(0,0)],
+[#ifndef __STDC__
+#define __STDC__ 1
+#endif
+#include <unistd.h>],[setpgrp(0,0)],
 krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_setpgrp_args)
 if test $krb5_cv_setpgrp_args = two; then

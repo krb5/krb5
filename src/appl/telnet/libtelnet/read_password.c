@@ -143,4 +143,6 @@ lose:
     s[max-1] = 0;		/* force termination */
     return !ok;			/* return nonzero if not okay */
 }
+#else	/* defined(RSA_ENCPWD) || defined(KRB4_ENCPWD) */
+#include "misc-proto.h"
 #endif	/* defined(RSA_ENCPWD) || defined(KRB4_ENCPWD) */

@@ -38,7 +38,8 @@
 static jmp_buf pwd_jump;
 
 static krb5_sigtype
-intr_routine()
+intr_routine(signo)
+    int signo;
 {
     longjmp(pwd_jump, 1);
     /*NOTREACHED*/

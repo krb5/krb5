@@ -568,7 +568,8 @@ spx_printsub(data, cnt, buf, buflen)
 		break;
 	}
 }
-
+#else
+#include "misc-proto.h"
 #endif
 
 #ifdef notdef

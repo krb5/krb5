@@ -1,3 +1,12 @@
+
+Tue Jun 27 16:16:18 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* enc_des.c, encrypt.c, krb4encpwd.c, read_password.c, rsaencpwd.c,
+		spx.c - Give the compiler something to compile when these
+		modules are essentially disabled.  Some compilers choke when
+		there's nothing to compile.
+	* setenv.c - Change prototype for __findenv to be static since it's
+		really static.
+
 Tue Jun 20 13:59:43 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: fix typo

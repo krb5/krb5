@@ -91,7 +91,7 @@ int krb524_send_message (addr, message, reply)
      * recvfrom.  The connect here may return an error if the
      * destination host is known to be unreachable.
      */
-    if (connect(s, addr, sizeof(struct sockaddr)) == -1) {
+    if (connect(s, (struct sockaddr *) addr, sizeof(struct sockaddr)) == -1) {
 	 retval = errno;
 	 goto out;
     }

@@ -994,4 +994,6 @@ encrypt_printsub(data, cnt, buf, buflen)
 	else
 		encrypt_gen_printsub(data, cnt, buf, buflen);
 }
+#else	/* ENCRYPTION */
+#include "misc-proto.h"
 #endif	/* ENCRYPTION */

@@ -1,4 +1,8 @@
 
+Tue Jun 27 15:50:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Change filename and hierarchy lists to be const char.
+
+
 Thu Jun 22 11:56:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* alt_prof.c - New jacket routines for handling profiles.  This includes
 		the ability to parse certain string values to appropriate types

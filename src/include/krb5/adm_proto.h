@@ -133,12 +133,18 @@ int krb5_klog_syslog KRB5_PROTOTYPE((int, const char *, ...));
 krb5_error_code krb5_aprof_init
 	KRB5_PROTOTYPE((char *, char *, krb5_pointer *));
 krb5_error_code krb5_aprof_getvals
-	KRB5_PROTOTYPE((krb5_pointer, char **, char ***));
+	KRB5_PROTOTYPE((krb5_pointer, const char **, char ***));
 krb5_error_code krb5_aprof_get_deltat
-	KRB5_PROTOTYPE((krb5_pointer, char **, krb5_boolean, krb5_deltat *));
+	KRB5_PROTOTYPE((krb5_pointer,
+			const char **,
+			krb5_boolean,
+			krb5_deltat *));
 krb5_error_code krb5_aprof_get_string
-	KRB5_PROTOTYPE((krb5_pointer, char **, krb5_boolean, char **));
+	KRB5_PROTOTYPE((krb5_pointer, const char **, krb5_boolean, char **));
 krb5_error_code krb5_aprof_get_int32
-	KRB5_PROTOTYPE((krb5_pointer, char **, krb5_boolean, krb5_int32 *));
+	KRB5_PROTOTYPE((krb5_pointer,
+			const char **,
+			krb5_boolean,
+			krb5_int32 *));
 krb5_error_code krb5_aprof_finish KRB5_PROTOTYPE((krb5_pointer));
 #endif	/* KRB5_ADM_PROTO_H__ */

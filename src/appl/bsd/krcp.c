@@ -72,18 +72,15 @@ char copyright[] =
 #include "krb5.h"
 #include "com_err.h"
      
-#ifdef BUFSIZ
-#undef BUFSIZ
-#endif
-#define BUFSIZ 4096
+#define RCP_BUFSIZ 4096
      
 int sock;
 struct sockaddr_in foreign;	   /* set up by kcmd used by send_auth */
 char *krb_realm = NULL;
 char *krb_cache = NULL;
 char *krb_config = NULL;
-char des_inbuf[2*BUFSIZ];          /* needs to be > largest read size */
-char des_outbuf[2*BUFSIZ];         /* needs to be > largest write size */
+char des_inbuf[2*RCP_BUFSIZ];          /* needs to be > largest read size */
+char des_outbuf[2*RCP_BUFSIZ];         /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_keyblock *session_key;	   /* static key for session */
@@ -144,7 +141,7 @@ main(argc, argv)
     char *suser, *tuser, *thost;
     int i;
     int cmdsiz = 30;
-    char buf[BUFSIZ], cmdbuf[30];
+    char buf[RCP_BUFSIZ], cmdbuf[30];
     char *cmd = cmdbuf;
     struct servent *sp;
     static char curhost[256];
@@ -672,7 +669,7 @@ source(argc, argv)
     struct buffer *bp;
     int x, readerr, f, amt;
     off_t i;
-    char buf[BUFSIZ];
+    char buf[RCP_BUFSIZ];
     
     for (x = 0; x < argc; x++) {
 	name = argv[x];
@@ -725,7 +722,7 @@ source(argc, argv)
 	    (void) close(f);
 	    continue;
 	}
-	if ((bp = allocbuf(&buffer, f, BUFSIZ)) == NULLBUF) {
+	if ((bp = allocbuf(&buffer, f, RCP_BUFSIZ)) == NULLBUF) {
 	    (void) close(f);
 	    continue;
 	}
@@ -766,7 +763,7 @@ rsource(name, statp)
 #else
     struct direct *dp;
 #endif
-    char buf[BUFSIZ];
+    char buf[RCP_BUFSIZ];
     char *bufv[1];
     
     if (d == 0) {
@@ -798,7 +795,7 @@ rsource(name, statp)
 	  continue;
 	if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
 	  continue;
-	if (strlen(name) + 1 + strlen(dp->d_name) >= BUFSIZ - 1) {
+	if (strlen(name) + 1 + strlen(dp->d_name) >= RCP_BUFSIZ - 1) {
 	    error("%s/%s: Name too long.\n", name, dp->d_name);
 	    continue;
 	}
@@ -815,7 +812,7 @@ rsource(name, statp)
 
 response()
 {
-    char resp, c, rbuf[BUFSIZ], *cp = rbuf;
+    char resp, c, rbuf[RCP_BUFSIZ], *cp = rbuf;
     if (des_read(rem, &resp, 1) != 1)
       lostconn();
     switch (resp) {
@@ -832,7 +829,7 @@ response()
 	    if (des_read(rem, &c, 1) != 1)
 	      lostconn();
 	    *cp++ = c;
-	} while (cp < &rbuf[BUFSIZ] && c != '\n');
+	} while (cp < &rbuf[RCP_BUFSIZ] && c != '\n');
 	if (iamremote == 0)
 	  (void) write(2, rbuf, cp - rbuf);
 	errs++;
@@ -891,7 +888,7 @@ sink(argc, argv)
     struct stat stb;
     int targisdir = 0;
     char *myargv[1];
-    char cmdbuf[BUFSIZ], nambuf[BUFSIZ];
+    char cmdbuf[RCP_BUFSIZ], nambuf[RCP_BUFSIZ];
     int setimes = 0;
     struct timeval tv[2];
 #define atime	tv[0]
@@ -1022,15 +1019,15 @@ sink(argc, argv)
 #endif
 	}
 	ga();
-	if ((bp = allocbuf(&buffer, of, BUFSIZ)) == NULLBUF) {
+	if ((bp = allocbuf(&buffer, of, RCP_BUFSIZ)) == NULLBUF) {
 	    (void) close(of);
 	    continue;
 	}
 	cp = bp->buf;
 	count = 0;
 	wrerr = 0;
-	for (i = 0; i < size; i += BUFSIZ) {
-	    amt = BUFSIZ;
+	for (i = 0; i < size; i += RCP_BUFSIZ) {
+	    amt = RCP_BUFSIZ;
 	    if (i + amt > size)
 	      amt = size - i;
 	    count += amt;
@@ -1119,7 +1116,7 @@ error(fmt, a1, a2, a3, a4, a5)
      char *fmt;
      int a1, a2, a3, a4, a5;
 {
-    char buf[BUFSIZ], *cp = buf;
+    char buf[RCP_BUFSIZ], *cp = buf;
     
     errs++;
     *cp++ = 1;
@@ -1414,7 +1411,7 @@ void
 
 
 
-char storage[2*BUFSIZ];			/* storage for the decryption */
+char storage[2*RCP_BUFSIZ];		/* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
 
@@ -1445,7 +1442,7 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(bsd_context, fd, (char *)&len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, (char *)len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
