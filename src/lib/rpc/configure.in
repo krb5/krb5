@@ -1,10 +1,6 @@
 AC_INIT(auth_gssapi.c)
 CONFIG_RULES
 AC_CONFIG_SUBDIRS(unit-test)
-AC_PROG_ARCHIVE
-AC_PROG_ARCHIVE_ADD
-AC_PROG_RANLIB
-AC_PROG_INSTALL
 AC_CHECK_HEADERS(sys/uio.h)
 AC_TYPE_GETGROUPS
 dnl Arrange for types.hin to include stdlib.h

@@ -1,10 +1,6 @@
 AC_INIT(getpty.c)
 CONFIG_RULES
 AC_PROG_AWK
-dnl LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
-AC_PROG_INSTALL
-AC_PROG_ARCHIVE
-AC_PROG_RANLIB
 AC_CHECK_FUNCS(fchmod fchown revoke vhangup killpg _getpty)
 dnl
 LOGINLIBS=

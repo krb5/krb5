@@ -1,5 +1,12 @@
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Require
+	AC_PROG_ARCHIVE, AC_PROG_ARCHIVE_ADD, and AC_PROG_INSTALL.
+	(KRB5_BUILD_LIBRARY): Use KRB5_BUILD_LIBRARY_WITH_DEPS instead of
+	duplicating its contents.
+	* configure.in: Don't explicitly invoke AC_PROG_INSTALL,
+	AC_PROG_ARCHIVE, AC_PROG_ARCHIVE_ADD, AC_PROG_RANLIB.
+
 	* aclocal.m4 (CONFIG_RULES): Substitute files for @lib_frag@ and
 	@libobj_frag@ markers.
 	(V5_SET_TOPDIR): Don't define krb5_append_frags.

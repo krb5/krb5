@@ -47,10 +47,6 @@ dnl
 dnl Begin autoconf tests for the Makefiles generated out of the top-level
 dnl configure.in...
 dnl
-AC_PROG_INSTALL
-AC_PROG_ARCHIVE
-AC_PROG_ARCHIVE_ADD
-AC_PROG_RANLIB
 AC_CHECK_FUNCS(memmove)
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY

@@ -1,5 +1,7 @@
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Don't explicitly invoke AC_PROG_INSTALL.
+
 	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
 
 2002-12-06  Tom Yu  <tlyu@mit.edu>

@@ -1,5 +1,8 @@
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,
+	AC_PROG_ARCHIVE_ADD, AC_PROG_RANLIB, AC_PROG_INSTALL.
+
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
 	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
 

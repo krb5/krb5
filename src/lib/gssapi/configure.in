@@ -1,12 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-dnl AC_CONFIG_SUBDIRS(generic krb5)
-dnl AC_CONFIG_SUBDIRS(generic krb5 mechglue)
-AC_PROG_ARCHIVE
-AC_PROG_ARCHIVE_ADD
 AC_PROG_AWK
-AC_PROG_INSTALL
-AC_PROG_RANLIB
 AC_CHECK_HEADERS(stdlib.h sys/types.h limits.h memory.h)
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF(short)
