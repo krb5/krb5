@@ -93,8 +93,6 @@
 
 #include "defines.h"
 
-#include "fake-addrinfo.c"
-
 extern krb5_context bsd_context;
 #ifdef KRB5_KRB4_COMPAT
 extern Key_schedule v4_schedule;
@@ -160,6 +158,152 @@ krb_sendauth(long options, int fd, KTEXT ticket,
 	     char *version);
 #endif
 
+#ifdef POSIX_SIGNALS
+typedef sigset_t masktype;
+#else
+typedef sigmasktype masktype;
+#endif
+
+static void
+block_urgent (masktype *oldmask)
+{
+#ifdef POSIX_SIGNALS
+    sigset_t urgmask;
+
+    sigemptyset(&urgmask);
+    sigaddset(&urgmask, SIGURG);
+    sigprocmask(SIG_BLOCK, &urgmask, oldmask);
+#else
+    *oldmask = sigblock(sigmask(SIGURG));
+#endif /* POSIX_SIGNALS */
+}
+
+static void
+restore_sigs (masktype *oldmask)
+{
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
+#else
+    sigsetmask(*oldmask);
+#endif /* POSIX_SIGNALS */
+}
+
+static int
+kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
+	      char *hname, char **host_save, unsigned int rport, int *lportp)
+{
+    int s;
+    struct sockaddr_in sockin;
+    struct hostent *hp;
+
+    hp = gethostbyname(hname);
+    if (hp == 0) {
+	fprintf(stderr, "%s: unknown host\n", hname);
+	return (-1);
+    }
+    *host_save = malloc(strlen(hp->h_name) + 1);
+    if (*host_save == NULL) {
+	fprintf(stderr, "kcmd: no memory\n");
+	return -1;
+    }
+    strcpy(*host_save, hp->h_name);
+
+    for (;;) {
+        s = getport(lportp, addrfamilyp);
+    	if (s < 0) {
+	    if (errno == EAGAIN)
+		fprintf(stderr, "socket: All ports in use\n");
+	    else
+		perror("kcmd: socket");
+	    return -1;
+    	}
+    	sockin.sin_family = hp->h_addrtype;
+    	memcpy((caddr_t)&sockin.sin_addr, hp->h_addr,
+	       sizeof(sockin.sin_addr));
+    	sockin.sin_port = rport;
+    	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
+	    break;
+    	(void) close(s);
+    	if (errno == EADDRINUSE) {
+	    if (lportp)
+		(*lportp)--;
+	    continue;
+	}
+
+#if !(defined(tek) || defined(ultrix) || defined(sun) || defined(SYSV))
+    	if (hp->h_addr_list[1] != NULL) {
+	    int oerrno = errno;
+
+	    fprintf(stderr,
+		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
+	    errno = oerrno;
+	    perror(0);
+	    hp->h_addr_list++;
+	    memcpy((caddr_t)&sockin.sin_addr,hp->h_addr_list[0],
+		   sizeof(sockin.sin_addr));
+	    fprintf(stderr, "Trying %s...\n",
+		    inet_ntoa(sockin.sin_addr));
+	    continue;
+    	}
+#endif /* !(defined(ultrix) || defined(sun)) */
+    	perror(hp->h_name);
+    	return -1;
+    }
+    *sp = s;
+    *sockinp = sockin;
+    return 0;
+}
+
+static int
+setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
+			 struct sockaddr_in *fromp, int anyport)
+{
+    int status = 0;
+    if (fd2p == 0) {
+    	write(s, "", 1);
+    	*lportp = 0;
+    } else {
+    	char num[8];
+    	int s2 = getport(lportp, addrfamilyp), s3;
+    	int len = sizeof (*fromp);
+
+    	if (s2 < 0) {
+	    status = -1;
+	    goto bad;
+    	}
+    	listen(s2, 1);
+    	(void) sprintf(num, "%d", *lportp);
+    	if (write(s, num, strlen(num)+1) != strlen(num)+1) {
+	    perror("write: setting up stderr");
+	    (void) close(s2);
+	    status = -1;
+	    goto bad;
+    	}
+    	s3 = accept(s2, (struct sockaddr *)fromp, &len);
+    	(void) close(s2);
+    	if (s3 < 0) {
+	    perror("accept");
+	    *lportp = 0;
+	    status = -1;
+	    goto bad;
+    	}
+    	*fd2p = s3;
+    	fromp->sin_port = ntohs(fromp->sin_port);
+	/* This check adds nothing when using Kerberos.  */
+    	if (! anyport &&
+	    (fromp->sin_family != AF_INET ||
+    	     fromp->sin_port >= IPPORT_RESERVED)) {
+	    fprintf(stderr, "socket: protocol failure in circuit setup.\n");
+	    status = -1;
+	    close(s3);
+	    *fd2p = -1;
+	    goto bad;
+    	}
+    }
+bad:
+    return status;
+}
+
 int
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authconp, authopts, anyport,
@@ -181,17 +325,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      int suppress_err;		/* Don't print if authentication fails */
      enum kcmd_proto *protonump;
 {
-    int s, pid;
-#ifdef POSIX_SIGNALS
-    sigset_t oldmask, urgmask;
-#else
-    long oldmask;
-#endif
+    int s;
+    masktype oldmask;
     struct sockaddr_in sockin, from, local_laddr;
-    krb5_creds *get_cred, *ret_cred = 0;
+    krb5_creds *get_cred = 0, *ret_cred = 0;
     char c;
     int lport;
-    struct addrinfo *ap, *ap2;
     int rc;
     char *host_save;
     krb5_error_code status;
@@ -206,13 +345,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_data cksumdat;
     char *kcmd_version;
     enum kcmd_proto protonum = *protonump;
-    char rport_buf[10];
-    struct addrinfo ai_hints;
     int addrfamily = AF_INET;
-    int err;
-    int inet6_ok = 1;
-
-    sprintf(rport_buf, "%d", ntohs(rport));
 
     if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser)+64)) == 0 ) {
 	fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
@@ -224,96 +357,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     cksumdat.data = cksumbuf;
     cksumdat.length = strlen(cksumbuf);
 	
-    pid = getpid();
-    memset(&ai_hints, 0, sizeof (ai_hints));
-    ai_hints.ai_socktype = SOCK_STREAM;
-    ai_hints.ai_flags = AI_CANONNAME;
-    ai_hints.ai_family = AF_INET;
-    err = getaddrinfo(*ahost, rport_buf, &ai_hints, &ap);
-    if (err != 0) {
-	fprintf(stderr, "%s: %s\n", *ahost, gai_strerror (err));
+    block_urgent(&oldmask);
+    
+    if (kcmd_connect(&s, &addrfamily, &sockin, *ahost, &host_save, rport, 0) == -1) {
+	restore_sigs(&oldmask);
 	return -1;
     }
-    if (ap == 0) {
-	fprintf(stderr, "%s: no addresses?\n", *ahost);
-	return -1;
-    }
-    fixup_addrinfo(ap);
-
-#ifdef POSIX_SIGNALS
-    sigemptyset(&urgmask);
-    sigaddset(&urgmask, SIGURG);
-    sigprocmask(SIG_BLOCK, &urgmask, &oldmask);
-#else
-    oldmask = sigblock(sigmask(SIGURG));
-#endif /* POSIX_SIGNALS */
-
-    for (ap2 = ap; ap2; ap2 = ap2->ai_next) {
-	int af = ap2->ai_family;
-	switch (af) {
-	case AF_INET:
-	    break;
-#ifdef KRB5_USE_INET6
-	case AF_INET6:
-	    if (inet6_ok)
-		break;
-	    continue;
-#endif
-	default:
-	    break;
-	}
-	s = getport(0, &af);
-	if (s < 0) {
-	    char *fam = (af == AF_INET) ? "inet" : "inet6";
-	    char perrorbuf[40];
-	    if (errno == EAGAIN)
-		fprintf(stderr, "socket(%s): All ports in use\n", fam);
-	    else {
-		sprintf(perrorbuf, "kcmd: socket(%s)", fam);
-		perror(perrorbuf);
-	    }
-#ifdef KRB5_USE_INET6
-	    /* Should this be done only for certain error codes?  */
-	    if (af == AF_INET6) {
-		inet6_ok = 0;
-		continue;
-	    }
-#endif
-	    goto fix_signals_and_return;
-	}
-	/* Got a socket, now connect.  */
-	if (connect(s, ap2->ai_addr, ap2->ai_addrlen) >= 0)
-	    break;
-	(void) close(s);
-	if (errno == EADDRINUSE)
-	    continue;
-	/* Print message about failing on this address before moving
-	   on to the next.  */
-	if (ap2->ai_next) {
-	    char naddrbuf[NI_MAXHOST];
-	    int oerrno = errno;
-	    if (getnameinfo(ap2->ai_addr, ap2->ai_addrlen,
-			    naddrbuf, sizeof(naddrbuf), 0, 0,
-			    NI_NUMERICHOST) == 0) {
-		fprintf(stderr, "connect to address %s: ", naddrbuf);
-		errno = oerrno;
-		perror(0);
-	    } else {
-		errno = oerrno;
-		perror("connect failed");
-	    }
-	    fprintf(stderr, "trying next address...\n");
-	}
-    }
-    if (ap2 == 0) {
-    fix_signals_and_return:
-#ifdef POSIX_SIGNALS
-	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-    	sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
-    	return (-1);
-    }
+    *ahost = host_save;
     /* If no service is given set to the default service */
     if (!service) service = default_service;
     
@@ -321,13 +371,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    host_save = malloc(strlen(ap->ai_canonname) + 1);
-    if (host_save == NULL) {
-	fprintf(stderr, "kcmd: no memory\n");
-	free(get_cred);
-	return -1;
-    }
-    strcpy(host_save, ap->ai_canonname);
     status = krb5_sname_to_principal(bsd_context, host_save, service,
 				     KRB5_NT_SRV_HST, &get_cred->server);
     if (status) {
@@ -345,50 +388,19 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	  return(-1);
 	}
     }
-    if (fd2p == 0) {
-    	write(s, "", 1);
-    	lport = 0;
-    } else {
-    	char num[8];
-    	int s2 = getport(&lport, &addrfamily), s3;
-    	int len = sizeof (from);
-	
-    	if (s2 < 0) {
-	    status = -1;
-	    goto bad;
-    	}
-    	listen(s2, 1);
-    	(void) sprintf(num, "%d", lport);
-    	if (write(s, num, strlen(num)+1) != strlen(num)+1) {
-	    perror("write: setting up stderr");
-	    (void) close(s2);
-	    status = -1;
-	    goto bad;
-    	}
-    	s3 = accept(s2, (struct sockaddr *)&from, &len);
-    	(void) close(s2);
-    	if (s3 < 0) {
-	    perror("accept");
-	    lport = 0;
-	    status = -1;
-	    goto bad;
-    	}
-    	*fd2p = s3;
-    	from.sin_port = ntohs((u_short)from.sin_port);
-    	if (! anyport &&
-	    (from.sin_family != AF_INET ||
-    	     from.sin_port >= IPPORT_RESERVED)) {
-	    fprintf(stderr,
-    		    "socket: protocol failure in circuit setup.\n");
-	    goto bad2;
-    	}
-    }
-    
+    if (fd2p)
+	*fd2p = -1;
+    status = setup_secondary_channel(s, fd2p, &lport, &addrfamily, &from,
+				     anyport);
+    if (status)
+	goto bad;
+
     if (!laddr) laddr = &local_laddr;
-    if (!faddr) faddr = &sockin;
-    else 
-      memcpy(faddr,&sockin,sizeof(sockin));
-    
+    if (!faddr)
+	faddr = &sockin;
+    else
+	*faddr = sockin;
+
     sin_len = sizeof (struct sockaddr_in);
     if (getsockname(s, (struct sockaddr *)laddr, &sin_len) < 0) {
         perror("getsockname");
@@ -533,11 +545,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	status = -1;
 	goto bad2;
     }
-#ifdef POSIX_SIGNALS
-    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-    sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
+    restore_sigs(&oldmask);
     *sock = s;
     *protonump = protonum;
     
@@ -553,11 +561,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
       (void) close(*fd2p);
   bad:
     (void) close(s);
-#ifdef POSIX_SIGNALS
-    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-    sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
+    restore_sigs(&oldmask);
     if (ret_cred)
       krb5_free_creds(bsd_context, ret_cred);
     return (status);
@@ -584,130 +588,34 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
      long authopts;
      int anyport;
 {
-    int s, pid;
-#ifdef POSIX_SIGNALS
-    sigset_t oldmask, urgmask;
-#else
-    sigmasktype oldmask;
-#endif
+    int s;
+    masktype oldmask;
     struct sockaddr_in sockin, from;
     char c;
     int lport = START_PORT;
-    struct hostent *hp;
     int rc;
     GETSOCKNAME_ARG3_TYPE sin_len;
     char *host_save;
     int status;
     int addrfamily = AF_INET;
 
-    pid = getpid();
-    hp = gethostbyname(*ahost);
-    if (hp == 0) {
-	fprintf(stderr, "%s: unknown host\n", *ahost);
-	return (-1);
+    block_urgent(&oldmask);
+    if (kcmd_connect (&s, &addrfamily, &sockin, *ahost, &host_save, rport, &lport) == -1) {
+	restore_sigs(&oldmask);
+	return -1;
     }
-    host_save = malloc(strlen(hp->h_name) + 1);
-    strcpy(host_save, hp->h_name);
     *ahost = host_save;
-
-#ifdef POSIX_SIGNALS
-    sigemptyset(&urgmask);
-    sigaddset(&urgmask, SIGURG);
-    sigprocmask(SIG_BLOCK, &urgmask, &oldmask);
-#else
-    oldmask = sigblock(sigmask(SIGURG));
-#endif /* POSIX_SIGNALS */
-    for (;;) {
-	s = getport(&lport, &addrfamily);
-	if (s < 0) {
-	    if (errno == EAGAIN)
-		fprintf(stderr, "socket: All ports in use\n");
-	    else
-		perror("rcmd: socket");
-#ifdef POSIX_SIGNALS
-	    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-	    sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
-	    return (-1);
-	}
-	sockin.sin_family = hp->h_addrtype;
-	memcpy((caddr_t)&sockin.sin_addr, hp->h_addr, sizeof(sockin.sin_addr));
-	sockin.sin_port = rport;
-	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
-	    break;
-	(void) close(s);
-	if (errno == EADDRINUSE) {
-	    lport--;
-	    continue;
-	}
-#if !(defined(tex) || defined(ultrix) || defined(sun) || defined(SYSV))
-	if (hp->h_addr_list[1] != NULL) {
-	    int oerrno = errno;
-
-	    fprintf(stderr,
-		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
-	    errno = oerrno;
-	    perror(0);
-	    hp->h_addr_list++;
-	    memcpy((caddr_t)&sockin.sin_addr, hp->h_addr_list[0],
-		   sizeof(sockin.sin_addr));
-	    fprintf(stderr, "Trying %s...\n", inet_ntoa(sockin.sin_addr));
-	    continue;
-	}
-#endif						/* !(defined(ultrix) || defined(sun)) */
-	perror(host_save);
-#ifdef POSIX_SIGNALS
-	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-	sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
-	return (-1);
-    }
     /* If realm is null, look up from table */
     if ((realm == NULL) || (realm[0] == '\0')) {
 	realm = krb_realmofhost(host_save);
     }
     lport--;
-    if (fd2p == 0) {
-	write(s, "", 1);
-	lport = 0;
-    } else {
-	char num[8];
-	int s2 = getport(&lport, &addrfamily), s3;
-	int len = sizeof (from);
-
-	if (s2 < 0) {
-	    status = -1;
-	    goto bad;
-	}
-	listen(s2, 1);
-	(void) sprintf(num, "%d", lport);
-	if (write(s, num, strlen(num)+1) != strlen(num)+1) {
-	    perror("write: setting up stderr");
-	    (void) close(s2);
-	    status = -1;
-	    goto bad;
-	}
-	s3 = accept(s2, (struct sockaddr *)&from, &len);
-	(void) close(s2);
-	if (s3 < 0) {
-	    perror("accept");
-	    lport = 0;
-	    status = -1;
-	    goto bad;
-	}
-	*fd2p = s3;
-	from.sin_port = ntohs((u_short)from.sin_port);
-	/* This check adds nothing when using Kerberos.  */
-	if (! anyport &&
-	    (from.sin_family != AF_INET ||
-	     from.sin_port >= IPPORT_RESERVED)) {
-	    fprintf(stderr, "socket: protocol failure in circuit setup.\n");
-	    status = -1;
-	    goto bad2;
-	}
-    }
+    if (fd2p)
+	*fd2p = -1;
+    status = setup_secondary_channel(s, fd2p, &lport, &addrfamily, &from,
+				     anyport);
+    if (status)
+	goto bad;
 
     /* set up the needed stuff for mutual auth */
     *faddr = sockin;
@@ -718,12 +626,10 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 	goto bad2;
     }
 
-    if ((status = krb_sendauth(authopts, s, ticket, service, *ahost,
-			       realm, (unsigned long) getpid(), msg_data,
-			       cred, schedule,
-			       laddr,
-			       faddr,
-			       "KCMDV0.1")) != KSUCCESS) {
+    status = krb_sendauth(authopts, s, ticket, service, *ahost,
+			  realm, (unsigned long) getpid(), msg_data,
+			  cred, schedule, laddr, faddr, "KCMDV0.1");
+    if (status != KSUCCESS) {
 	fprintf(stderr, "krb_sendauth failed: %s\n", krb_get_err_text(status));
 	status = -1;
 	goto bad2;
@@ -784,11 +690,7 @@ reread:
 	status = -1;
 	goto bad2;
     }
-#ifdef POSIX_SIGNALS
-    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-    sigsetmask(oldmask);
-#endif
+    restore_sigs(&oldmask);
     *sock = s;
     return (KSUCCESS);
  bad2:
@@ -796,11 +698,7 @@ reread:
 	(void) close(*fd2p);
  bad:
     (void) close(s);
-#ifdef POSIX_SIGNALS
-    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-    sigsetmask(oldmask);
-#endif
+    restore_sigs(&oldmask);
     return (status);
 }
 #endif /* KRB5_KRB4_COMPAT */
