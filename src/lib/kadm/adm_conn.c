@@ -209,8 +209,8 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
 					&creds->server,
 					client->realm.length,
 					client->realm.data,
-					strlen(KRB5_ADM_SERVICE_NAME),
-					KRB5_ADM_SERVICE_NAME,
+					strlen(KRB5_ADM_SERVICE_INSTANCE),
+					KRB5_ADM_SERVICE_INSTANCE,
 					client->realm.length,
 					client->realm.data,
 					0))
