@@ -54,8 +54,6 @@
  * $Id$
  */
 
-static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
-
 int
 kg_confounder_size(context, key)
      krb5_context context;
@@ -136,9 +134,7 @@ kg_encrypt(context, key, iv, in, out, length)
    outputd.ciphertext.data = out;
 
    return(krb5_c_encrypt(context, key,
-			 /* XXX this routine is only used for the old
-			    bare-des stuff which doesn't use the
-			    key usage */ 0, pivd, &inputd, &outputd));
+			 KG_USAGE_SEAL, pivd, &inputd, &outputd));
 }
 
 /* length is the length of the cleartext. */
@@ -176,7 +172,5 @@ kg_decrypt(context, key, iv, in, out, length)
    outputd.data = out;
 
    return(krb5_c_decrypt(context, key,
-			 /* XXX this routine is only used for the old
-			    bare-des stuff which doesn't use the
-			    key usage */ 0, pivd, &inputd, &outputd));
+			 KG_USAGE_SEAL, pivd, &inputd, &outputd));
 }

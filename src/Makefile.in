@@ -290,7 +290,10 @@ clean-windows:: Makefile-windows
 	@echo Making clean in clients
 	cd ..\clients
 	$(MAKE) -$(MFLAGS) clean
-	cd ..
+	@echo Making in appl\gss-sample
+	cd ..\appl\gss-sample
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\..
 	@echo Making clean in root
 
 #

@@ -1,4 +1,28 @@
 /*
+ * Copyright 2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+/*
  * Copyright (C) 1998 by the FundsXpress, INC.
  * 
  * All rights reserved.
@@ -110,8 +134,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     /* check that desired_mech isn't already in the credential */
 
     if ((g_OID_equal(desired_mech, gss_mech_krb5_old) && cred->prerfc_mech) ||
-	(g_OID_equal(desired_mech, gss_mech_krb5) && cred->rfc_mech) ||
-	(g_OID_equal(desired_mech, gss_mech_krb5_v2) && cred->rfcv2_mech)) {
+	(g_OID_equal(desired_mech, gss_mech_krb5) && cred->rfc_mech)) {
 	*minor_status = 0;
 	return(GSS_S_DUPLICATE_ELEMENT);
     }
@@ -156,7 +179,6 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	new_cred->usage = cred_usage;
 	new_cred->prerfc_mech = cred->prerfc_mech;
 	new_cred->rfc_mech = cred->rfc_mech;
-	new_cred->rfcv2_mech = cred->rfcv2_mech;
 	new_cred->tgt_expire = cred->tgt_expire;
 
 	if (code = krb5_copy_principal(context, cred->princ,
@@ -280,8 +302,6 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	cred->prerfc_mech = 1;
     else if (g_OID_equal(desired_mech, gss_mech_krb5))
 	cred->rfc_mech = 1;
-    else if (g_OID_equal(desired_mech, gss_mech_krb5_v2))
-	cred->rfcv2_mech = 1;
 
     /* set the outputs */
 

@@ -1,3 +1,8 @@
+2000-03-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for alpha*-dec-osf* instead of
+	alpha-dec-osf*.
+
 2000-03-15  Ken Raeburn  <raeburn@mit.edu>
 	    Mark D. Roth  <roth@uiuc.edu>
 

@@ -27,6 +27,7 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
+/* Checksumming the channel bindings always uses plain MD5.  */
 krb5_error_code
 kg_checksum_channel_bindings(context, cb, cksum, bigend)
      krb5_context context;

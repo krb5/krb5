@@ -103,7 +103,7 @@ krb5_get_default_realm(context, lrealm)
 
 #ifdef KRB5_DNS_LOOKUP
         if (context->default_realm == 0) {
-            int use_dns =  _krb5_use_dns(context);
+            int use_dns =  _krb5_use_dns_realm(context);
             if ( use_dns ) {
 		/*
 		 * Since this didn't appear in our config file, try looking

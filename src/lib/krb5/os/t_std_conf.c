@@ -110,14 +110,14 @@ void test_locate_kdc(ctx, realm)
     	struct sockaddr *addrs;
 	struct sockaddr_in *sin;
 	int	i, naddrs;
-	int	master_index, nmasters;
+	int	get_masters=0;
 	krb5_data rlm;
 	krb5_error_code	retval;
 
 	rlm.data = realm;
 	rlm.length = strlen(realm);
 	retval = krb5_locate_kdc(ctx, &rlm, &addrs, &naddrs,
-				 &master_index, &nmasters);
+				 get_masters);
 	if (retval) {
 		com_err("krb5_get_krbhst", retval, 0);
 		return;

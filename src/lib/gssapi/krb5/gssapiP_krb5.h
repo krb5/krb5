@@ -1,4 +1,28 @@
 /*
+ * Copyright 2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+/*
  * Copyright 1993 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -79,6 +103,27 @@
 #define KG2_RESP_FLAG_ERROR		0x0001
 #define KG2_RESP_FLAG_DELEG_OK		0x0002
 
+/* These are to be stored in little-endian order, i.e., des-mac is
+   stored as 02 00.  */
+enum sgn_alg {
+  SGN_ALG_DES_MAC_MD5           = 0x0000,
+  SGN_ALG_MD2_5                 = 0x0001,
+  SGN_ALG_DES_MAC               = 0x0002,
+  SGN_ALG_3			= 0x0003, /* not published */
+  SGN_ALG_HMAC_MD5              = 0x0011, /* microsoft w2k; no support */
+  SGN_ALG_HMAC_SHA1_DES3_KD     = 0x0004
+};
+enum seal_alg {
+  SEAL_ALG_NONE            = 0xffff,
+  SEAL_ALG_DES             = 0x0000,
+  SEAL_ALG_1		   = 0x0001, /* not published */
+  SEAL_ALG_MICROSOFT_RC4   = 0x0010, /* microsoft w2k; no support */
+  SEAL_ALG_DES3KD          = 0x0002
+};
+
+#define KG_USAGE_SEAL 22
+#define KG_USAGE_SIGN 23
+
 /** internal types **/
 
 typedef krb5_principal krb5_gss_name_t;
@@ -89,7 +134,6 @@ typedef struct _krb5_gss_cred_id_rec {
    krb5_principal princ;	/* this is not interned as a gss_name_t */
    int prerfc_mech;
    int rfc_mech;
-   int rfcv2_mech;
 
    /* keytab (accept) data */
    krb5_keytab keytab;
@@ -125,7 +169,6 @@ typedef struct _krb5_gss_ctx_id_rec {
    int big_endian;
    krb5_auth_context auth_context;
    gss_OID_desc *mech_used;
-   int gsskrb5_version;
    int nctypes;
    krb5_cksumtype *ctypes;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;

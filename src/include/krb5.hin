@@ -1401,6 +1401,7 @@ krb5_error_code krb5_get_tgs_ktypes
 
 krb5_error_code krb5_get_permitted_enctypes
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype **));
+void krb5_free_ktypes KRB5_PROTOTYPE ((krb5_context, krb5_enctype *));
 
 krb5_boolean krb5_is_permitted_enctype
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype));

@@ -1,3 +1,33 @@
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.  If called functions fail, drop out of loop and
+	return nonzero.
+	(krb5_os_localaddr): Increment count of addresses to include null
+	pointer terminator.  Delete check for zero count.
+
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5int_set_prompt_types): Set to actual value
+	intead of 0.
+
+2000-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (maybe_use_dns): Renamed from _krb5_use_dns.  Now
+	takes an arg to indicate a key to look up in krb5.conf, falling
+	back to "dns_fallback", and an arg indicating the default value if
+	no config file entries match.
+	(_krb5_use_dns_realm): New routine; use "dns_lookup_realm" and
+	KRB5_DNS_LOOKUP_REALM setting.
+	(_krb5_use_dns_kdc): New routine; use "dns_lookup_kdc" and
+	KRB5_DNS_LOOKUP_KDC.
+	(krb5_locate_kdc): Call _krb5_use_dns_kdc.
+	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
+	* def_realm.c (krb5_get_default_realm): Call _krb5_use_dns_realm.
+	* hst_realm.c (krb5_get_host_realm): Call _krb5_use_dns_realm.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c: Add krb5int_set_prompt_types() and

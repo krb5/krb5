@@ -1,4 +1,28 @@
 /*
+ * Copyright 2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+/*
  * Copyright 1993 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -49,6 +73,7 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 #include <stdlib.h>
+#include <assert.h>
 
 /*
  * $Id$
@@ -63,17 +88,20 @@ int krb5_gss_dbg_client_expcreds = 0;
  * ccache.
  */
 static krb5_error_code get_credentials(context, cred, server, now,
-				       endtime, enctype, out_creds)
+				       endtime, enctypes, out_creds)
     krb5_context context;
     krb5_gss_cred_id_t cred;
     krb5_principal server;
     krb5_timestamp now;
     krb5_timestamp endtime;
-    krb5_enctype enctype;
+    const krb5_enctype *enctypes;
     krb5_creds **out_creds;
 {
     krb5_error_code	code;
     krb5_creds 		in_creds;
+    krb5_enctype *senctypes = 0;
+    int i;
+    int found_supported_enctype;
     
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
 
@@ -82,11 +110,37 @@ static krb5_error_code get_credentials(context, cred, server, now,
     if ((code = krb5_copy_principal(context, server, &in_creds.server)))
 	goto cleanup;
     in_creds.times.endtime = endtime;
-    in_creds.keyblock.enctype = enctype;
 
-    if ((code = krb5_get_credentials(context, 0, cred->ccache, 
-				     &in_creds, out_creds)))
+    in_creds.keyblock.enctype = 0;
+    code = krb5_get_tgs_ktypes (context,
+				/* unused! */ cred->princ,
+				&senctypes);
+    if (code)
 	goto cleanup;
+
+    found_supported_enctype = 0;
+    for (i = 0; enctypes[i]; i++) {
+	int j;
+	for (j = 0; senctypes[j]; j++)
+	    if (enctypes[i] == senctypes[j])
+		break;
+	if (senctypes[j] == 0)
+	    continue;
+	found_supported_enctype = 1;
+	in_creds.keyblock.enctype = enctypes[i];
+	code = krb5_get_credentials(context, 0, cred->ccache, 
+				    &in_creds, out_creds);
+	if (code == 0)
+	    break;
+	if (code == KRB5_CC_NOT_KTYPE)
+	    continue;
+    }
+    if (enctypes[i] == 0) {
+	if (found_supported_enctype)
+	    return code;
+	else
+	    return KRB5_CONFIG_ETYPE_NOSUPP;
+    }
 
     /*
      * Enforce a stricter limit (without timeskew forgiveness at the
@@ -99,6 +153,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
     
 cleanup:
+    if (senctypes)
+	krb5_free_ktypes (context, senctypes);
     if (in_creds.client)
 	    krb5_free_principal(context, in_creds.client);
     if (in_creds.server)
@@ -117,196 +173,8 @@ make_ap_req_v2(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     gss_OID mech_type;
     gss_buffer_t token;
 {
-    krb5_flags mk_req_flags = 0;
-    krb5_int32 con_flags;
-    krb5_error_code code;
-    krb5_data credmsg, cksumdata, ap_req;
-    int i, tlen, cblen, nctypes;
-    krb5_cksumtype *ctypes;
-    unsigned char *t, *ptr;
-
-    credmsg.data = 0;
-    cksumdata.data = 0;
-    ap_req.data = 0;
-    ctypes = 0;
-
-    /* create the option data if necessary */
-    if (ctx->gss_flags & GSS_C_DELEG_FLAG) {
-	/* first get KRB_CRED message, so we know its length */
-
-	/* clear the time check flag that was set in krb5_auth_con_init() */
-	krb5_auth_con_getflags(context, ctx->auth_context, &con_flags);
-	krb5_auth_con_setflags(context, ctx->auth_context,
-			       con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
-
-	code = krb5_fwd_tgt_creds(context, ctx->auth_context, 0,
-				  cred->princ, ctx->there, cred->ccache, 1,
-				  &credmsg);
-
-	/* turn KRB5_AUTH_CONTEXT_DO_TIME back on */
-	krb5_auth_con_setflags(context, ctx->auth_context, con_flags);
-
-	if (code) {
-	    /* don't fail here; just don't accept/do the delegation
-               request */
-	    ctx->gss_flags &= ~GSS_C_DELEG_FLAG;
-	} else {
-	    if (credmsg.length > KRB5_INT16_MAX) {
-		krb5_free_data_contents(context, &credmsg);
-		return(KRB5KRB_ERR_FIELD_TOOLONG);
-	    }
-	}
-    } else {
-       credmsg.length = 0;
-    }
-       
-    /* construct the list of compatible cksum types */
-
-    if ((code = krb5_c_keyed_checksum_types(context,
-					    k_cred->keyblock.enctype,
-					    &nctypes, &ctypes)))
-	goto cleanup;
-
-    if (nctypes == 0) {
-	code = KRB5_CRYPTO_INTERNAL;
-	goto cleanup;
-    }
-
-    /* construct the checksum fields */
-
-    cblen = 4*5;
-    if (chan_bindings)
-	cblen += (chan_bindings->initiator_address.length+
-		  chan_bindings->acceptor_address.length+
-		  chan_bindings->application_data.length);
-
-    cksumdata.length = cblen + 8 + 4*nctypes + 4;
-    if (credmsg.length)
-	cksumdata.length += 4 + credmsg.length;
-
-    if ((cksumdata.data = (char *) malloc(cksumdata.length)) == NULL)
-	goto cleanup;
-
-    /* helper macros.  This code currently depends on a long being 32
-       bits, and htonl dtrt. */
-
-    ptr = cksumdata.data;
-
-    if (chan_bindings) {
-	TWRITE_INT(ptr, chan_bindings->initiator_addrtype, 1);
-	TWRITE_BUF(ptr, chan_bindings->initiator_address, 1);
-	TWRITE_INT(ptr, chan_bindings->acceptor_addrtype, 1);
-	TWRITE_BUF(ptr, chan_bindings->acceptor_address, 1);
-	TWRITE_BUF(ptr, chan_bindings->application_data, 1);
-    } else {
-	memset(ptr, 0, cblen);
-	ptr += cblen;
-    }
-
-    /* construct the token fields */
-
-    ptr[0] = (KG2_TOK_INITIAL >> 8) & 0xff;
-    ptr[1] = KG2_TOK_INITIAL & 0xff;
-
-    ptr[2] = (ctx->gss_flags >> 24) & 0xff;
-    ptr[3] = (ctx->gss_flags >> 16) & 0xff;
-    ptr[4] = (ctx->gss_flags >> 8) & 0xff;
-    ptr[5] = ctx->gss_flags & 0xff;
-
-    ptr[6] = (nctypes >> 8) & 0xff;
-    ptr[7] = nctypes & 0xff;
-
-    ptr += 8;
-
-    for (i=0; i<nctypes; i++) {
-	ptr[0] = (ctypes[i] >> 24) & 0xff;
-	ptr[1] = (ctypes[i] >> 16) & 0xff;
-	ptr[2] = (ctypes[i] >> 8) & 0xff;
-	ptr[3] = ctypes[i] & 0xff;
-
-	ptr += 4;
-    }
-
-    if (credmsg.length) {
-	ptr[0] = (KRB5_GSS_FOR_CREDS_OPTION >> 8) & 0xff;
-	ptr[1] = KRB5_GSS_FOR_CREDS_OPTION & 0xff;
-
-	ptr[2] = (credmsg.length >> 8) & 0xff;
-	ptr[3] = credmsg.length & 0xff;
-
-	ptr += 4;
-
-	memcpy(ptr, credmsg.data, credmsg.length);
-
-	ptr += credmsg.length;
-    }
-
-    memset(ptr, 0, 4);
-
-    /* call mk_req.  subkey and ap_req need to be used or destroyed */
-
-    mk_req_flags = AP_OPTS_USE_SUBKEY;
-
-    if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
-	mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED;
-
-    if ((code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
-				     &cksumdata, k_cred, &ap_req)))
-	goto cleanup;
-
-   /* store the interesting stuff from creds and authent */
-   ctx->endtime = k_cred->times.endtime;
-   ctx->krb_flags = k_cred->ticket_flags;
-
-   /* build up the token */
-
-   /* allocate space for the token */
-   tlen = g_token_size((gss_OID) mech_type,
-		       (cksumdata.length-(2+cblen))+2+ap_req.length);
-
-   if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
-      code = ENOMEM;
-      goto cleanup;
-   }
-
-   ptr = t;
-
-   g_make_token_header((gss_OID) mech_type,
-		       (cksumdata.length-(2+cblen))+2+ap_req.length,
-		       &ptr, KG2_TOK_INITIAL);
-
-   /* skip over the channel bindings and the token id */
-   memcpy(ptr, cksumdata.data+cblen+2, cksumdata.length-(cblen+2));
-   ptr += cksumdata.length-(cblen+2);
-   ptr[0] = (ap_req.length >> 8) & 0xff;
-   ptr[1] = ap_req.length & 0xff;
-   ptr += 2;
-   memcpy(ptr, ap_req.data, ap_req.length);
-
-   /* pass allocated data back */
-
-   ctx->nctypes = nctypes;
-   ctx->ctypes = ctypes;
-
-   token->length = tlen;
-   token->value = (void *) t;
-
-   code = 0;
-
-cleanup:
-   if (code) {
-       if (ctypes)
-	   krb5_free_cksumtypes(context, ctypes);
-   }
-
-   if (credmsg.data)
-       free(credmsg.data);
-   if (ap_req.data)
-       free(ap_req.data);
-   if (cksumdata.data)
-       free(cksumdata.data);
-
-   return(code);
+    int krb5_mech2_supported = 0;
+    assert(krb5_mech2_supported);
 }
 
 static krb5_error_code
@@ -480,13 +348,19 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    krb5_context context;
    krb5_gss_cred_id_t cred;
    krb5_creds *k_cred = 0;
-   krb5_enctype enctype = ENCTYPE_DES_CBC_CRC;
+   static const krb5_enctype wanted_enctypes[] = {
+#if 1
+     ENCTYPE_DES3_CBC_SHA1,
+#endif
+     ENCTYPE_DES_CBC_CRC,
+     ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
+     0
+   };
    krb5_error_code code; 
    krb5_gss_ctx_id_rec *ctx, *ctx_free;
    krb5_timestamp now;
    gss_buffer_desc token;
-   int gsskrb5_vers = 0;
-   int i, err;
+   int i, j, err;
    int default_mech = 0;
    krb5_ui_4 resp_flags;
    OM_uint32 major_status;
@@ -528,32 +402,19 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    err = 0;
    if (mech_type == GSS_C_NULL_OID) {
        default_mech = 1;
-       if (cred->rfcv2_mech) {
-	   mech_type = gss_mech_krb5_v2;
-	   gsskrb5_vers = 2000;
-       } else if (cred->rfc_mech) {
+       if (cred->rfc_mech) {
 	   mech_type = gss_mech_krb5;
-	   gsskrb5_vers = 1000;
-	   enctype = ENCTYPE_DES_CBC_CRC;
        } else if (cred->prerfc_mech) {
 	   mech_type = gss_mech_krb5_old;
-	   gsskrb5_vers = 1000;
-	   enctype = ENCTYPE_DES_CBC_CRC;
        } else {
 	   err = 1;
        }
-   } else if (g_OID_equal(mech_type, gss_mech_krb5_v2)) {
-       if (!cred->rfcv2_mech)
-	   err = 1;
-       gsskrb5_vers = 2000;
    } else if (g_OID_equal(mech_type, gss_mech_krb5)) {
        if (!cred->rfc_mech)
 	   err = 1;
-       gsskrb5_vers = 1000;
    } else if (g_OID_equal(mech_type, gss_mech_krb5_old)) {
        if (!cred->prerfc_mech)
 	   err = 1;
-       gsskrb5_vers = 1000;
    } else {
        err = 1;
    }
@@ -607,7 +468,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       ctx->seed_init = 0;
       ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
       ctx->seqstate = 0;
-      ctx->gsskrb5_version = gsskrb5_vers;
       ctx->nctypes = 0;
       ctx->ctypes = 0;
 
@@ -628,27 +488,12 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  goto fail;
 
       if ((code = get_credentials(context, cred, ctx->there, now,
-				       ctx->endtime, enctype, &k_cred)))
+				  ctx->endtime, wanted_enctypes, &k_cred)))
 	  goto fail;
 
-      /*
-       * If the default mechanism was requested, and the keytype is
-       * DES_CBC, force the old mechanism
-       */
-      if (default_mech &&
-	  ((k_cred->keyblock.enctype == ENCTYPE_DES_CBC_CRC) ||
-	   (k_cred->keyblock.enctype == ENCTYPE_DES_CBC_MD4) ||
-	   (k_cred->keyblock.enctype == ENCTYPE_DES_CBC_MD5))) {
-	 ctx->gsskrb5_version = gsskrb5_vers = 1000;
+      if (default_mech) {
 	 mech_type = gss_mech_krb5;
-	 if (k_cred->keyblock.enctype != ENCTYPE_DES_CBC_CRC) {
-	     krb5_free_creds(context, k_cred);
-	     enctype = ENCTYPE_DES_CBC_CRC;
-	     if ((code = get_credentials(context, cred, ctx->there, now,
-					 ctx->endtime, enctype, &k_cred)))
-		 goto fail;
-         }
-     }
+      }
 
       if (generic_gss_copy_oid(minor_status, mech_type, &ctx->mech_used)
 	  != GSS_S_COMPLETE) {
@@ -660,24 +505,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
        */
       ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
 
-      if (ctx->gsskrb5_version == 2000) {
-	  /* gsskrb5 v2 */
-	  if ((code = make_ap_req_v2(context, ctx,
-				     cred, k_cred, input_chan_bindings, 
-				     mech_type, &token))) {
-	      if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
-		  (code == KG_EMPTY_CCACHE))
-		  major_status = GSS_S_NO_CRED;
-	      if (code == KRB5KRB_AP_ERR_TKT_EXPIRED)
-		  major_status = GSS_S_CREDENTIALS_EXPIRED;
-	      goto fail;
-	  }
-
-	  krb5_auth_con_getlocalseqnumber(context, ctx->auth_context,
-					  &ctx->seq_send);
-	  krb5_auth_con_getlocalsubkey(context, ctx->auth_context,
-				       &ctx->subkey);
-      } else {
+      {
 	  /* gsskrb5 v1 */
 	  if ((code = make_ap_req_v1(context, ctx,
 				     cred, k_cred, input_chan_bindings, 
@@ -699,11 +527,41 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
 	  switch(ctx->subkey->enctype) {
 	  case ENCTYPE_DES_CBC_MD5:
+	  case ENCTYPE_DES_CBC_MD4:
 	  case ENCTYPE_DES_CBC_CRC:
 	      ctx->subkey->enctype = ENCTYPE_DES_CBC_RAW;
-	      ctx->signalg = 0;
+	      ctx->signalg = SGN_ALG_DES_MAC_MD5;
 	      ctx->cksum_size = 8;
-	      ctx->sealalg = 0;
+	      ctx->sealalg = SEAL_ALG_DES;
+
+	      /* The encryption key is the session key XOR
+		 0xf0f0f0f0f0f0f0f0.  */
+	      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc)))
+		  goto fail;
+
+	      for (i=0; i<ctx->enc->length; i++)
+		  /*SUPPRESS 113*/
+		  ctx->enc->contents[i] ^= 0xf0;
+
+	      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq)))
+		  goto fail;
+
+	      break;
+
+	  case ENCTYPE_DES3_CBC_SHA1:
+	      ctx->subkey->enctype = ENCTYPE_DES3_CBC_RAW;
+	      ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
+	      ctx->cksum_size = 20;
+	      ctx->sealalg = SEAL_ALG_DES3KD;
+
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
+	      if (code)
+		  goto fail;
+	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
+	      if (code) {
+		  krb5_free_keyblock (context, ctx->enc);
+		  goto fail;
+	      }
 	      break;
 #if 0
 	  case ENCTYPE_DES3_CBC_MD5:
@@ -714,20 +572,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	      break;
 #endif
 	  default:
+	      *minor_status = KRB5_BAD_ENCTYPE;
 	      return GSS_S_FAILURE;
 	  }
 
-	  /* the encryption key is the session key XOR 0xf0f0f0f0f0f0f0f0 */
-
-	  if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc)))
-	      goto fail;
-
-	  for (i=0; i<ctx->enc->length; i++)
-	      /*SUPPRESS 113*/
-	      ctx->enc->contents[i] ^= 0xf0;
-
-	  if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq)))
-	      goto fail;
       }
 
       if (k_cred) {
@@ -824,93 +672,37 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       ptr = (unsigned char *) input_token->value;
 
-      if (ctx->gsskrb5_version == 2000) {
-	  int token_length;
-	  int nctypes;
-	  krb5_cksumtype *ctypes = 0;
+      if ((err = g_verify_token_header((gss_OID) ctx->mech_used,
+				       &(ap_rep.length),
+				       &ptr, KG_TOK_CTX_AP_REP,
+				       input_token->length))) {
+	  if (g_verify_token_header((gss_OID) ctx->mech_used,
+				    &(ap_rep.length),
+				    &ptr, KG_TOK_CTX_ERROR,
+				    input_token->length) == 0) {
 
-	  /* gsskrb5 v2 */
+	      /* Handle a KRB_ERROR message from the server */
 
-	  if ((code = g_verify_token_header((gss_OID) ctx->mech_used,
-					   &token_length,
-					   &ptr, KG2_TOK_RESPONSE,
-					   input_token->length))) {
-	      major_status = GSS_S_DEFECTIVE_TOKEN;
-	      goto fail;
-	  }
-
-	  if (GSS_ERROR(major_status =
-			kg2_parse_token(minor_status, ptr, token_length,
-					&resp_flags, &nctypes, &ctypes,
-					0, NULL, &ap_rep, &mic))) {
-	      if (ctypes)
-		  free(ctypes);
-	      code = *minor_status;
-	      goto fail;
-	  }
-	  major_status = GSS_S_FAILURE;
-
-	  kg2_intersect_ctypes(&ctx->nctypes, ctx->ctypes, nctypes, ctypes);
-
-	  free(ctypes);
-
-	  if (ctx->nctypes == 0) {
-	      code = KG_NO_CTYPES;
-	      goto fail;
-	  }
-
-	  if (resp_flags & KG2_RESP_FLAG_ERROR) {
-	      if ((code = krb5_rd_error(context, &ap_rep, &krb_error)))
+	      sptr = (char *) ptr;           /* PC compiler bug */
+	      TREAD_STR(sptr, ap_rep.data, ap_rep.length);
+		      
+	      code = krb5_rd_error(context, &ap_rep, &krb_error);
+	      if (code)
 		  goto fail;
-
 	      if (krb_error->error)
 		  code = krb_error->error + ERROR_TABLE_BASE_krb5;
 	      else
 		  code = 0;
-
 	      krb5_free_error(context, krb_error);
 	      goto fail;
+	  } else {
+	      *minor_status = 0;
+	      return(GSS_S_DEFECTIVE_TOKEN);
 	  }
-
-	  if (resp_flags & KG2_RESP_FLAG_DELEG_OK)
-	      ctx->gss_flags |= GSS_C_DELEG_FLAG;
-
-	  /* drop through to ap_rep handling */
-      } else {
-	  /* gsskrb5 v1 */
-
-	  if ((err = g_verify_token_header((gss_OID) ctx->mech_used,
-					   &(ap_rep.length),
-					   &ptr, KG_TOK_CTX_AP_REP,
-					   input_token->length))) {
-	      if (g_verify_token_header((gss_OID) ctx->mech_used,
-					&(ap_rep.length),
-					&ptr, KG_TOK_CTX_ERROR,
-					input_token->length) == 0) {
-
-		  /* Handle a KRB_ERROR message from the server */
-
-		  sptr = (char *) ptr;           /* PC compiler bug */
-		  TREAD_STR(sptr, ap_rep.data, ap_rep.length);
-		      
-		  code = krb5_rd_error(context, &ap_rep, &krb_error);
-		  if (code)
-		      goto fail;
-		  if (krb_error->error)
-		      code = krb_error->error + ERROR_TABLE_BASE_krb5;
-		  else
-		      code = 0;
-		  krb5_free_error(context, krb_error);
-		  goto fail;
-	      } else {
-		  *minor_status = 0;
-		  return(GSS_S_DEFECTIVE_TOKEN);
-	      }
-	  }
-
-	  sptr = (char *) ptr;                      /* PC compiler bug */
-	  TREAD_STR(sptr, ap_rep.data, ap_rep.length);
       }
+
+      sptr = (char *) ptr;                      /* PC compiler bug */
+      TREAD_STR(sptr, ap_rep.data, ap_rep.length);
 
       /* decode the ap_rep */
       if ((code = krb5_rd_rep(context, ctx->auth_context, &ap_rep,
@@ -937,26 +729,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       /* set established */
       ctx->established = 1;
-
-      if (ctx->gsskrb5_version == 2000) {
-	  gss_buffer_desc mic_data, mic_token;
-
-	  /* start with the token id */
-	  mic_data.value = ptr-2;
-	  /* end before the ap-rep length */
-	  mic_data.length = ((char*)(ap_rep.data-2)-(char*)(ptr-2));
-
-	  mic_token.length = mic.length;
-	  mic_token.value = mic.data;
-
-	  if (GSS_ERROR(major_status = 
-			krb5_gss_verify_mic(minor_status, *context_handle,
-					    &mic_data, &mic_token, NULL))) {
-	      code = *minor_status;
-	      goto fail;
-	  }
-	  major_status = GSS_S_FAILURE;
-      }
 
       /* set returns */
 

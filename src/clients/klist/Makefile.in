@@ -14,7 +14,7 @@ all-mac::
 klist: klist.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
+$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** wsock32.lib
 
 clean-unix::

@@ -233,7 +233,6 @@ kg_ctx_size(kcontext, arg, sizep)
      *	krb5_int32	for seq_recv.
      *	krb5_int32	for established.
      *	krb5_int32	for big_endian.
-     *	krb5_int32	for gsskrb5_version.
      *	krb5_int32	for nctypes.
      *	krb5_int32	for trailer.
      */
@@ -348,8 +347,6 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->established,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->big_endian,
-				       &bp, &remain);
-	    (void) krb5_ser_pack_int32((krb5_int32) ctx->gsskrb5_version,
 				       &bp, &remain);
 	    (void) krb5_ser_pack_int32((krb5_int32) ctx->nctypes,
 				       &bp, &remain);
@@ -476,8 +473,6 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    ctx->established = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->big_endian = (int) ibuf;
-	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    ctx->gsskrb5_version = (int) ibuf;
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    ctx->nctypes = (int) ibuf;
 
