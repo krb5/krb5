@@ -1,5 +1,10 @@
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.conf: Delete Athena KDC specifications.  Delete Cygnus
+	realm info.  Replace CLUB.CC.CMU.EDU info with ANDREW.CMU.EDU,
+	which has SRV records and thus doesn't need KDC specs.  Provide a
+	commented-out example of a [logging] spec.
+
 	* krb5.conf.M: Remove "kdc =" lines from "realms" section example,
 	and recommend not using it unless DNS info isn't available.
 
