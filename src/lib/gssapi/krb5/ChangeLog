@@ -15,6 +15,11 @@ Mon Feb 20 12:00:00 1995  keith Vetter (keithv@fusion.com)
 	* gssapiP_krb5.h changed to match
 	* Makefile.in changed to match
 
+Tue Feb 14 15:01:36 1995 Chris Provenzano (proven@mit.edu)
+
+    * init_sec_context.c (make_ap_req()) Use new API for 
+        krb5_mk_req_extended() and cleanup internal processing.
+
 Fri Feb  3 00:34:55 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files for DOS 8.3 uniqueness:

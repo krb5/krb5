@@ -37,65 +37,75 @@ make_ap_req(context, cred, server, endtime, chan_bindings, do_mutual,
      krb5_int32 *seqnum;
      gss_buffer_t token;
 {
-   krb5_error_code code;
-   krb5_checksum md5, checksum;
-   krb5_creds creds;
-   krb5_authenticator authent;
-   krb5_data ap_req;
-   long tmp;
-   unsigned char *ptr;
-   unsigned char ckbuf[24];		/* see the token formats doc */
-   unsigned char *t;
-   int tlen;
+    krb5_error_code code;
+    krb5_checksum md5, checksum;
+    krb5_creds in_creds, * out_creds;
+    krb5_authenticator authent;
+    krb5_data ap_req;
+    long tmp;
+    unsigned char *ptr;
+    unsigned char ckbuf[24];		/* see the token formats doc */
+    unsigned char *t;
+    int tlen;
 
-   /* build the checksum buffer */
+    /* build the checksum buffer */
+ 
+    /* compute the hash of the channel bindings */
 
-   /* compute the hash of the channel bindings */
+    if (code = kg_checksum_channel_bindings(chan_bindings, &md5, 0))
+        return(code);
 
-   if (code = kg_checksum_channel_bindings(chan_bindings, &md5, 0))
-      return(code);
+    ptr = ckbuf;
 
-   ptr = ckbuf;
+    TWRITE_INT(ptr, md5.length, 0);
+    TWRITE_STR(ptr, (unsigned char *) md5.contents, md5.length);
+    TWRITE_INT(ptr, do_mutual?GSS_C_MUTUAL_FLAG:0, 0);
 
-   TWRITE_INT(ptr, md5.length, 0);
-   TWRITE_STR(ptr, (unsigned char *) md5.contents, md5.length);
-   TWRITE_INT(ptr, do_mutual?GSS_C_MUTUAL_FLAG:0, 0);
+    /* done with this, free it */
+    xfree(md5.contents);
 
-   /* done with this, free it */
-   xfree(md5.contents);
+    checksum.checksum_type = CKSUMTYPE_KG_CB;
+    checksum.length = sizeof(ckbuf);
+    checksum.contents = (krb5_octet *) ckbuf;
 
-   checksum.checksum_type = CKSUMTYPE_KG_CB;
-   checksum.length = sizeof(ckbuf);
-   checksum.contents = (krb5_octet *) ckbuf;
+    /* fill in the necessary fields in creds */
 
-   /* fill in the necessary fields in creds */
+    memset((char *) &in_creds, 0, sizeof(krb5_creds));
+    if (code = krb5_copy_principal(context, cred->princ, &in_creds.client))
+        return code;
+    if (code = krb5_copy_principal(context, server, &in_creds.server)) {
+        krb5_free_cred_contents(context, &in_creds);
+        return code;
+    }
+    in_creds.times.endtime = *endtime;
 
-   memset((char *) &creds, 0, sizeof(creds));
-   if (code = krb5_copy_principal(context, cred->princ, &creds.client))
+    /*
+     * Get the credential..., I don't know in 0 is a good value for the
+     * kdcoptions
+     */
+    if (code = krb5_get_credentials(context, 0, cred->ccache, 
+				    &in_creds, &out_creds)) {
+       krb5_free_cred_contents(context, &in_creds);
        return code;
-   if (code = krb5_copy_principal(context, server, &creds.server)) {
-       krb5_free_cred_contents(context, &creds);
-       return code;
-   }
-   creds.times.endtime = *endtime;
+    }
 
-   /* call mk_req.  subkey and ap_req need to be used or destroyed */
+    krb5_free_cred_contents(context, &in_creds);
+    /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
-   if (code = krb5_mk_req_extended(context, do_mutual?AP_OPTS_MUTUAL_REQUIRED:0,
-				   &checksum, 0, 0, subkey, cred->ccache,
-				   &creds, &authent, &ap_req)) {
-       krb5_free_cred_contents(context, &creds);
+    if (code = krb5_mk_req_extended(context,do_mutual?AP_OPTS_MUTUAL_REQUIRED:0,
+				   &checksum, 0, subkey, out_creds, &authent, 
+				   &ap_req)) {
+       krb5_free_creds(context, out_creds);
        return(code);
    }
 
    /* store the interesting stuff from creds and authent */
-   *endtime = creds.times.endtime;
-   *flags = creds.ticket_flags;
+   *endtime = out_creds->times.endtime;
+   *flags = out_creds->ticket_flags;
    *seqnum = authent.seq_number;
 
    /* free stuff which was created */
-
-   krb5_free_cred_contents(context, &creds);
+   krb5_free_creds(context, out_creds);
 
    /* build up the token */
 
