@@ -1,3 +1,9 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* asn1_k_decode.c (asn1_decode_sam_challenge_2_body): Add
+	unused_var declaration to cleanup warnings. Signed/unsigned fix as
+	well.
+
 2002-11-07  Ezra Peisach  <epeisach@bu.edu>
 
 	* asn1_k_encode.c (asn1_encode_sam_challenge_2): Test for error
