@@ -1,3 +1,8 @@
+Tue May  7 19:48:57 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+	* t_kdb.c (do_testing): Compile if using BERK_DB and dbm is not
+        available on system.
+
 Thu Mar 21 20:38:38 1996  Richard Basch  <basch@lehman.com>
 
 	* decrypt_key.c (krb5_dbekd_decrypt_key_data): bullet-proofing the

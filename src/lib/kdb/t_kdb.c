@@ -108,6 +108,7 @@ static kdb5_dispatch_table berkeley_dispatch = {
 };
 #endif
 
+#if defined(NDBM) || defined(ODBM)
 /*
  * The following prototypes are necessary in case dbm_error and
  * dbm_clearerr are in the library but not prototyped
@@ -165,6 +166,7 @@ static kdb5_dispatch_table dbm_dispatch = {
     dbm_pagfno,			/* Get Database FD num	*/
 #endif	/* dbm_pagfno */
 };
+#endif /* NDBM || ODBM */
 
 
 /*
@@ -492,11 +494,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	    goto goodbye;
 	break;
 #endif
+#if defined(ODBM) || defined(NDBM)
     case DB_DBM:
 	op = "setting up DBM database operations";
 	if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
 	    goto goodbye;
 	break;
+#endif
     case DB_DEFAULT:
 	break;
     default:
@@ -911,10 +915,12 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 			exit(1);
 		    break;
 #endif
+#if defined(ODBM) || defined(NDBM)
 		case DB_DBM:
 		    if (kret = kdb5_db_set_dbops(ccontext, &dbm_dispatch))
 			exit(1);
 		    break;
+#endif
 		case DB_DEFAULT:
 		    break;
 		default:
@@ -1010,11 +1016,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		    goto goodbye1;
 		break;
 #endif
+#if defined(ODBM) || defined(NDBM)
 	    case DB_DBM:
 		op = "setting up DBM database operations";
 		if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
 		    goto goodbye1;
 		break;
+#endif
 	    case DB_DEFAULT:
 		break;
 	    default:
