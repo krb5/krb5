@@ -607,6 +607,15 @@ krb5_error_code INTERFACE krb5_walk_realm_tree
 	       krb5_principal **,
 	       int));
 
+krb5_error_code INTERFACE krb5_mk_cred
+    	PROTOTYPE((krb5_context,
+                   krb5_kdc_rep *,
+                   krb5_enctype,
+                   krb5_keyblock *,
+                   krb5_address *,
+                   krb5_address *,
+                   krb5_data *));
+
 #define KRB5_REALM_BRANCH_CHAR '.'
 
 #endif /* KRB5_FUNC_PROTO__ */

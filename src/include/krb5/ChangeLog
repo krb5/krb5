@@ -1,3 +1,10 @@
+Wed Mar 1 17:40:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* func-proto.h: added missing prototype for krb5_mk_cred.
+	* los-proto.h: added windows INTERFACE keyword to all functions,
+	   plus added 2 missing prototypes: krb5_os_init_context and
+	   krb5_os_free_context.
+
 Wed Mar 1 12:48:20 1995 Keith Vetter (keithv@fusion.com)
 
 	* config.h: added defines to pull in winsock.h as needed
