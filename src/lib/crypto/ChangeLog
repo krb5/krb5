@@ -1,3 +1,8 @@
+Thu Jun  6 00:03:05 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Include sha in the list of
+		subdirectories for the Macintosh
+
 Mon May 20 10:59:23 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in (libcrypto.$(STEXT): deal with new improved
