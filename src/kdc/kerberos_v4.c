@@ -387,15 +387,24 @@ krb5_data **resp;
     krb5_address *addr = client_fulladdr->address;
     krb5_error_code retval;
     KTEXT_ST v4_pkt;
+    char *lrealm;
 
     if (retval = krb5_timeofday((krb5_timestamp *) &kerb_time.tv_sec))
         return(retval);
 
-    if (*local_realm);		/* local-realm name already set up */
-    else if (retval =
-	     krb5_get_default_realm( sizeof( local_realm), local_realm)) {
-	com_err("KRBV4KDC", retval, "while attempting to get default realm");
-	exit(1);
+    if (!*local_realm); {		/* local-realm name already set up */
+	retval = krb5_get_default_realm(&lrealm);
+	if (!retval) {
+	    if (strlen(lrealm) < sizeof(local_realm))
+		strcpy(local_realm, lrealm);
+	    else
+		retval = KRB5_CONFIG_NOTENUFSPACE;
+        }
+	if (retval) {
+	    com_err("KRBV4KDC", retval,
+		    "while attempting to get default realm");
+	    exit(1);
+        }
     }
     /* convert client_fulladdr to client_sockaddr:
      */
@@ -850,6 +859,7 @@ kerberos_v4(client, pkt)
 	    if (kerno) {
 		klog(L_ERR_UNK, "FAILED krb_rd_req from %s: %s",
 		     inet_ntoa(client_host), krb_err_txt[kerno]);
+		req_name_ptr = req_inst_ptr = req_realm_ptr = "";
 		kerb_err_reply(client, pkt, kerno, "krb_rd_req failed");
 		return;
 	    }
@@ -866,6 +876,9 @@ kerberos_v4(client, pkt)
 	    klog(L_APPL_REQ, "APPL Request %s.%s@%s on %s for %s.%s",
 	     (int) ad->pname, (int) ad->pinst, (int) ad->prealm,
 	     (int) inet_ntoa(client_host), (int) service, (int) instance, 0);
+	    req_name_ptr = ad->pname;
+	    req_inst_ptr = ad->pinst;
+	    req_realm_ptr = ad->prealm;
 
 	    if (strcmp(ad->prealm, tktrlm)) {
 		kerb_err_reply(client, pkt, KERB_ERR_PRINCIPAL_UNKNOWN,

@@ -140,7 +140,7 @@ char **argv;
     int keytypedone = 0;
     char *db_realm = 0;
     char *mkey_name = 0;
-    char lrealm[BUFSIZ];
+    char *lrealm;
     krb5_error_code retval;
     krb5_enctype etype;
 
@@ -172,7 +172,7 @@ char **argv;
     }
     if (!db_realm) {
 	/* no realm specified, use default realm */
-	if (retval = krb5_get_default_realm(sizeof(lrealm), lrealm)) {
+	if (retval = krb5_get_default_realm(&lrealm)) {
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    exit(1);
