@@ -1,3 +1,10 @@
+2000-06-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* pty-int.h: Add getutmpx() prototype if needed.
+
+	* configure.in: If getutmpx() exists on the system, test if a
+	prototype is provided by the system headers.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* getpty.c (pty_getpty): More conditionalizing variable defintion

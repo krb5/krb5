@@ -90,6 +90,10 @@
 #define VHANG_LAST
 #endif
 
+#if defined(NEED_GETUTMPX_PROTOTYPE)
+extern void getutmpx (const struct utmp *, struct utmpx *);
+#endif
+
 /* Internal functions */
 #ifdef __STDC__
 long ptyint_void_association(void);

@@ -147,6 +147,28 @@ AC_DEFINE(UT_EXIT_STRUCTURE_DIFFER)
 fi
 fi
 dnl
+dnl Test to see if a certain prototype exists in the system header files
+dnl If we get a conflict - then we back off. Note: If our prototype matches 
+dnl exactly, then we will list it and we both win.
+if test x$ac_cv_func_getutmpx = xyes; then
+AC_CACHE_CHECK([need to provide getutmpx prototype], krb5_cv_decl_getutmpx,
+[AC_TRY_COMPILE(dnl
+[#include <sys/types.h>
+#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
+#ifdef HAVE_UTMPX_H
+#include <utmpx.h>
+#endif
+extern void getutmpx (const struct utmp *, struct utmpx *);
+],
+[], krb5_cv_decl_getutmpx=yes, krb5_cv_decl_getutmpx=no)])
+ if test $krb5_cv_decl_getutmpx = yes; then
+	AC_DEFINE(NEED_GETUTMPX_PROTOTYPE)
+ fi
+fi
+dnl
+dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
 KRB5_BUILD_LIBRARY_WITH_DEPS
