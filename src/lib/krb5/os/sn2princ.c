@@ -100,7 +100,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 	if (type == KRB5_NT_SRV_HST)
 	    for (cp = remote_host; *cp; cp++)
 		if (isupper((int) (*cp)))
-		    *cp = tolower(*cp);
+		    *cp = tolower((int) (*cp));
 
 	/*
 	 * Windows NT5's broken resolver gratuitously tacks on a

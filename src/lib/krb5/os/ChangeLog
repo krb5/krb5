@@ -1,3 +1,10 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* sn2princ.c (krb5_sname_to_principal): Cast tolower argument to int. 
+
+	* hst_realm.c (krb5_get_host_realm): Cast argument to toupper and
+	tolower to int.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_std_conf.c (test_locate_kdc): Get rid of unused variable.
