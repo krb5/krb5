@@ -9,8 +9,6 @@ DATA		PRELOAD MOVEABLE SINGLE
 HEAPSIZE	8192
 
 EXPORTS
-	WEP					@1001
-	LibMain					@1002
 ; Kerberos 5
 	krb5_build_principal
 	krb5_build_principal_ext
@@ -158,17 +156,6 @@ EXPORTS
 	krb5_free_adm_data
 	krb5_read_adm_reply
 	krb5_send_adm_cmd
-;Com_err routines
-	com_err
-	error_message
-	et_init
-	et_shutdown
-	et_add_error_table
-	et_error_message
-	et_com_err
-	et_com_err_va
-	et_set_hook
-	_et_list
 ;
 ;Temporary exports (DO NOT USE)
 	decode_krb5_ticket

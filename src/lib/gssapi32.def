@@ -9,9 +9,6 @@ DATA		PRELOAD MOVEABLE SINGLE
 HEAPSIZE	8192
 
 EXPORTS
-	WEP					@1001
-	LibMain					@1002
-;
 	gss_acquire_cred
 	gss_release_cred
 	gss_init_sec_context

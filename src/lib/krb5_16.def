@@ -159,17 +159,6 @@ EXPORTS
 	krb5_free_adm_data
 	krb5_read_adm_reply
 	krb5_send_adm_cmd
-;Com_err routines
-	_com_err
-	error_message
-	et_init
-	et_shutdown
-	et_add_error_table
-	et_error_message
-	_et_com_err
-	_et_com_err_va
-	et_set_hook
-	__et_list
 ;
 ;Temporary exports (DO NOT USE)
 	_sscanf

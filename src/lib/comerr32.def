@@ -1,0 +1,12 @@
+;LIBRARY		COMERR32
+DESCRIPTION	'DLL for ComErr'
+CODE		PRELOAD MOVEABLE DISCARDABLE
+DATA		PRELOAD MOVEABLE SINGLE
+HEAPSIZE	8192
+
+EXPORTS
+	com_err
+	com_err_va
+	error_message
+	add_error_table
+	remove_error_table

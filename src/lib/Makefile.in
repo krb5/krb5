@@ -24,12 +24,14 @@ clean-windows::
 
 # Windows stuff to make krb5 and gssapi DLLs.
 
-GLIBS = gssapi\gssapi.lib
+CLIBS = $(BUILDTOP)\util\et\comerr.lib
 KLIBS = krb5\krb5.lib crypto\crypto.lib \
 	$(BUILDTOP)\util\profile\profile.lib \
-	$(BUILDTOP)\util\et\comerr.lib \
 	kadm\kadm.lib des425\des425.lib
+GLIBS = gssapi\gssapi.lib
 
+##WIN16##CDEF = comerr16.def
+##WIN32##CDEF = comerr32.def
 ##WIN16##KDEF = krb5_16.def
 ##WIN32##KDEF = krb5_32.def
 ##WIN16##GDEF = gssapi16.def
@@ -39,33 +41,52 @@ KLIBS = krb5\krb5.lib crypto\crypto.lib \
 ##WIN32##WINLIBS = msvcrt.lib kernel32.lib wsock32.lib \
 ##WIN32##	user32.lib shell32.lib oldnames.lib
 ##WIN32##WINDLLFLAGS = /nodefaultlib /incremental:no /pdb:none /release \
-##WIN32##		/nologo /align:0x1000 /base:0x1c000000 /dll /debug
+##WIN32##		/nologo /align:0x1000 /base:0x1c000000 /dll \
+##WIN32##		/entry:DllMain
 
 
 
-$(KLIB): $(KLIBS) $(WLIB) $(KDEF) win_glue.obj
+$(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
-##WIN16##	   win_glue, $*.dll, $*.map, \
-##WIN16##	   $(KLIBS) $(WINLIBS), $(KDEF)
+##WIN16##	   no_glue, $*.dll, $*.map, $(CLIBS) $(WINLIBS), $(CDEF)
+##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
+##WIN32##	   no_glue.obj $(CLIBS) $(WINLIBS)
+
+$(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) krb_glue.obj
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   krb_glue, $*.dll, $*.map, \
+##WIN16##	   $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   win_glue.obj $(KLIBS) $(WINLIBS)
+##WIN32##	   krb_glue.obj $(KLIBS) $(CLIB) $(WINLIBS)
 
-$(GLIB): $(GLIBS) $(KLIB) $(GDEF) win_glue.obj
+$(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
-##WIN16##	   win_glue, $*.dll, $*.map, \
-##WIN16##	   $(GLIBS) $(KLIB) $(WINLIBS), $(GDEF)
+##WIN16##	   gss_glue, $*.dll, $*.map, \
+##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   win_glue.obj $(GLIBS) $(KLIB) $(WINLIBS)
+##WIN32##	   gss_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
-win_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) /c win_glue.c
+krb_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) /c /DKRB5=1 /Fo$@ $**
+gss_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
+no_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) /c /Fo$@ $**
 
 ##WIN16##$(WLIB):  winsock.def
 ##WIN16##	implib /nologo $@ winsock.def
+
+
+# Build Convenience
+comerr.lib: $(CLIB)
+krb5.lib:   $(KLIB)
+gssapi.lib: $(GLIB)
 
 
 sap_glue.obj: win_glue.c

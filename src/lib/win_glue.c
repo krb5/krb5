@@ -57,6 +57,15 @@
 #include <vs.h>
 #include <v.h>
 
+
+#if defined(GSSAPI) && !defined(KRB5)
+#define KRB5 1
+#endif
+#if defined(KRB5) && !defined(NEED_WINSOCK)
+#define NEED_WINSOCK 1
+#endif
+
+
 /*
  * Use the version server to give us some control on distribution and usage
  * We're going to test track as well
@@ -149,10 +158,8 @@ static krb5_error_code do_timebomb()
  */
 krb5_error_code krb5_vercheck()
 {
-	krb5_error_code retval;
-	
 #ifdef TIMEBOMB
-	retval = do_timebomb();
+	krb5_error_code retval = do_timebomb();
 	if (retval)
 		return retval;
 #endif
@@ -163,6 +170,7 @@ krb5_error_code krb5_vercheck()
 	return 0;
 }
 
+#ifdef NEED_WINSOCK
 int
 win_socket_initialize()
 {
@@ -184,6 +192,54 @@ win_socket_initialize()
 
     return 0;
 }
+#endif
+
+#ifdef _WIN32
+
+BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
+{
+   switch (fdwReason)
+   {
+       case DLL_PROCESS_ATTACH:
+#ifdef NEED_WINSOCK
+	   win_socket_initialize ();
+#endif
+#ifdef KRB5
+	   krb5_init_ets((krb5_context)0);
+#endif
+#ifdef GSSAPI
+	   initialize_k5g_error_table();
+	   initialize_ggss_error_table();
+#endif	   
+	   break;
+
+       case DLL_THREAD_ATTACH:
+	   break;
+
+       case DLL_THREAD_DETACH:
+	   break;
+
+       case DLL_PROCESS_DETACH:
+#ifdef GSSAPI
+	   cleanup_k5g_error_table();
+	   cleanup_ggss_error_table();
+#endif
+#ifdef KRB5
+	   krb5_finish_ets((krb5_context)0);
+#endif
+#ifdef NEED_WINSOCK
+	   WSACleanup ();
+#endif
+	   break;
+
+       default:
+	   return FALSE;
+   }
+ 
+   return TRUE;   // successful DLL_PROCESS_ATTACH
+}
+
+#else
 
 BOOL CALLBACK
 LibMain (hInst, wDataSeg, cbHeap, CmdLine)
@@ -192,7 +248,16 @@ WORD wDataSeg;
 WORD cbHeap;
 LPSTR CmdLine;
 {
+#ifdef NEED_WINSOCK
     win_socket_initialize ();
+#endif
+#ifdef KRB5
+    krb5_init_ets((krb5_context)0);
+#endif
+#ifdef GSSAPI
+    initialize_k5g_error_table();
+    initialize_ggss_error_table();
+#endif
     return 1;
 }
 
@@ -200,6 +265,17 @@ int CALLBACK __export
 WEP(nParam)
 	int nParam;
 {
+#ifdef GSSAPI
+    cleanup_k5g_error_table();
+    cleanup_ggss_error_table();
+#endif
+#ifdef KRB5
+    krb5_finish_ets((krb5_context)0);
+#endif
+#ifdef NEED_WINSOCK
     WSACleanup();
+#endif
     return 1;
 }
+
+#endif

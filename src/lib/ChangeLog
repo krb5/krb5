@@ -1,3 +1,11 @@
+Fri Feb 14 16:40:03 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Build separate ComErr DLL
+	* comerr16.def comerr32.def: ComErr exported API
+	* krb5_16.def krb5_32.def: Removed ComErr/Win16 entries
+	* no_glue.c: Dummy stub for ComErr (win16/win32)
+	* win_glue.c: Win32 DLL startup/exit code added
+
 Sat Feb  8 12:21:53 1997  Richard Basch  <basch@lehman.com>
 
 	* krb5_16.def krb5_32.def:
