@@ -28,3 +28,9 @@ Changes in 1.1a3:
 1.1b6
  Fixed debug vs. non-debug import mistakes in GSSLib and globals lib.
  Fixed ccache API_VER_1 vs. API_VER_2 bug
+ 
+1.1b7
+ Fixed clean target
+ Added template target
+ Fixed inconsistency about bugger size in globals API
+ Updated to ccache 2.0b1
