@@ -42,6 +42,12 @@
 #include "com_err.h"
 #include "adm_defs.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
+
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif
@@ -799,7 +805,7 @@ adm5_init_link(context, realm_of_server, local_socket)
 	return(1);
     }
     /* connect to the server */
-    if (connect(*local_socket, &remote_sin, sizeof(remote_sin)) < 0) {
+    if (connect(*local_socket, (struct sockaddr *) &remote_sin, sizeof(remote_sin)) < 0) {
 	fprintf(stderr, "Cannot Connect to Socket\n");
 	close(*local_socket);
 	return(1);
