@@ -209,6 +209,11 @@ char *argv[];
 	com_err(progname, retval, "while closing database");
 	exit(1);
     }
+
+    if (str_master_princ) {
+	krb5_free_unparsed_name(context, str_master_princ);
+    }
+    krb5_free_context(context);
     exit(0);
 }
 
@@ -241,6 +246,7 @@ check_princ(context, str_princ)
 
     if ((retval = krb5_principal2salt(context, princ, &salt))) {
 	com_err(progname, retval, "while converting principal to salt for '%s'", princ_name);
+	krb5_free_principal(context, princ);
 	goto out;
     }
 
@@ -248,14 +254,19 @@ check_princ(context, str_princ)
 				    &pwd_key, &pwd, &salt))) {
 	com_err(progname, retval, "while converting password to key for '%s'", 
 		princ_name);
+	krb5_free_data_contents(context, &salt);
+	krb5_free_principal(context, princ);
 	goto out;
     }
+    krb5_free_data_contents(context, &salt);
 
     if ((retval = krb5_db_get_principal(context, princ, &kdbe, 
 					&nprincs, &more))) {
       com_err(progname, retval, "while attempting to verify principal's existence");
+      krb5_free_principal(context, princ);
       goto out;
     }
+    krb5_free_principal(context, princ);
 
     if (nprincs != 1) {
       com_err(progname, 0, "Found %d entries db entry for %s.\n", nprincs,

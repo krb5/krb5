@@ -1,3 +1,10 @@
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_verify.c (main): Use krb5_free_unparsed_name() to free up
+	memory.
+	(check_princ): Use krb5_free_data_contents() and
+	krb5_free_principal() to cleanup memory leak.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb5_verify.c: Make prototypes unconditional.
