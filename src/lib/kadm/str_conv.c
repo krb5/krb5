@@ -47,6 +47,7 @@
  * krb5_cksumtype_to_string()	- Convert krb5_cksumtype to string.
  * krb5_flags_to_string()	- Convert krb5_flags to string.
  * krb5_timestamp_to_string()	- Convert krb5_timestamp to string.
+ * krb5_timestamp_to_sfstring()	- Convert krb5_timestamp to short filled string
  * krb5_deltat_to_string()	- Convert krb5_deltat to string.
  */
 
@@ -194,6 +195,14 @@ static const char ascan_rel_hm[]	= "%02d%02d";
 static const char ascan_rel_col_hms[]	= "%02d:%02d:%02d";
 static const char ascan_rel_col_hm[]	= "%02d:%02d";
 #endif	/* !HAVE_STRPTIME */
+#ifdef	HAVE_STRFTIME
+static const char sftime_ldep_time[]	= "%c";
+static const char sftime_med_fmt[]	= "%d %b %y %T";
+static const char sftime_short_fmt[]	= "%x %X";
+static const char sftime_last_fmt[]	= "%d/%m/%y %R";
+#endif	/* HAVE_STRFTIME */
+static const char sftime_default_fmt[]	= "%02d/%02d/%02d %02d:%02d";
+static const int sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
 
 /* Delta time strings */
 static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
@@ -296,6 +305,15 @@ atime_full_text_nos	/* dd-month-yyyy:hh:mm		*/
 };
 static const int atime_format_table_nents = sizeof(atime_format_table)/
 					    sizeof(atime_format_table[0]);
+
+static const char * const sftime_format_table[] = {
+sftime_ldep_time,	/* Default locale-dependent date and time	*/
+sftime_med_fmt,		/* dd mon yy hh:mm:ss				*/
+sftime_short_fmt,	/* locale-dependent short format		*/
+sftime_last_fmt		/* dd/mm/yy hh:mm				*/
+};
+static const int sftime_format_table_nents = sizeof(sftime_format_table)/
+					    sizeof(sftime_format_table[0]);
 
 static const struct deltat_match_entry deltat_table[] = {
 /* scan format		nmatch	daypos	hourpos	minpos	secpos	*/
@@ -771,13 +789,55 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
     char		* buffer;
     size_t		buflen;
 {
+#if	HAVE_STRFTIME
+    if (strftime(buffer, buflen, "%c", localtime((time_t *) &timestamp)))
+	return(0);
+    else
+	return(ENOMEM);
+#else	/* HAVE_STRFTIME */
     if (strlen(ctime((time_t *) &timestamp)) <= buflen) {
 	strcpy(buffer, ctime((time_t *) &timestamp));
 	/* ctime returns <datestring>\n\0 */
 	buffer[strlen(buffer)-1] = '\0';
 	return(0);
     }
+#endif	/* HAVE_STRFTIME */
     return(ENOMEM);
+}
+
+krb5_error_code
+krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
+    krb5_timestamp	timestamp;
+    char		* buffer;
+    size_t		buflen;
+    char		* pad;
+{
+    struct tm	*tmp;
+    int		i;
+    size_t	ndone;
+
+    tmp = localtime((time_t *) &timestamp);
+    ndone = 0;
+#if	HAVE_STRFTIME
+    for (i=0; i<sftime_format_table_nents; i++) {
+	if ((ndone = strftime(buffer, buflen, sftime_format_table[i], tmp)))
+	    break;
+    }
+#endif	/* HAVE_STRFTIME */
+    if (!ndone) {
+	if (buflen >= sftime_default_len) {
+	    sprintf(buffer, sftime_default_fmt,
+		    tmp->tm_mday, tmp->tm_mon+1, tmp->tm_year,
+		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	    ndone = strlen(buffer);
+	}
+    }
+    if (ndone && pad) {
+	for (i=ndone; i<buflen-1; i++)
+	    buffer[i] = *pad;
+	buffer[buflen-1] = '\0';
+    }
+    return((ndone) ? 0 : ENOMEM);
 }
 
 krb5_error_code

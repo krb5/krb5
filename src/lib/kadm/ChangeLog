@@ -1,4 +1,11 @@
 
+Mon Aug 21 17:07:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* str_conv.c - Add krb5_timestamp_to_sfstring().  This converts time
+		to a short string, potentially filled.  Use strftime() for
+		krb5_timestamp_to_string() if present so that locale-dependent
+		time format is used.
+
+
 Tue Aug 8 17:35:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* str_conv.c - Fix Purify complaint.
 
