@@ -79,8 +79,8 @@ the kadm5 API to provide the primary Kerberos database interface.
 kadm5_get_policies have been added.
 
 \item The KADM5 API now obeys a caller-allocates rather than
-callee-allocates system.  kadm5_get_principal and kadm5_get_policy
-(XXX not yet!) are affected.
+callee-allocates system.  kadm5_get_principal and kadm5_get_policy are
+affected.
 \end{enumerate}
 \end{description}
 
@@ -1630,17 +1630,16 @@ as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the get privilege is disregarded.
 
 In KADM5_API_VERSION_1, return all of the principal's attributes in
-allocated memory.  In KADM5_API_VERSION_2, fill in the fields of the
-principal structure specified in the mask; memory for the structure is
-not allocated.  Typically, a caller will specify the mask
-KADM5_PRINCIPAL_NORMAL_MASK, which includes all the fields {\it
-except} key_data and tl_data to improve time and memory efficiency.  A
-caller that wants key_data and tl_data can bitwise-OR those masks onto
-NORMAL_MASK.  
+allocated memory; if an error is returned entry is set to NULL.  In
+KADM5_API_VERSION_2, fill in the fields of the principal structure
+specified in the mask; memory for the structure is not allocated.
+Typically, a caller will specify the mask KADM5_PRINCIPAL_NORMAL_MASK,
+which includes all the fields {\it except} key_data and tl_data to
+improve time and memory efficiency.  A caller that wants key_data and
+tl_data can bitwise-OR those masks onto NORMAL_MASK.
 
-In KADM5_API_VERSION_1, the caller must free the returned entry with
-kadm5_free_principal_ent.  If an error is returned entry is set to
-NULL.
+The caller must free the returned entry with kadm5_free_principal_ent.
+
 
 The function behaves differently for local and remote clients.  For
 remote clients, the KEY_DATA mask is illegal and results in a
@@ -1781,19 +1780,29 @@ is invalid.
 
 \subsection{kadm5_get_policy}
 
+In KADM5_API_VERSION_1:
+
 \begin{verbatim}
 kadm5_ret_t
-kadm5_get_policy(void *server_handle, char *policy,
-                      kadm5_policy_ent_t *ent); 
+kadm5_get_policy(void *server_handle, char *policy, kadm5_policy_ent_t *ent); 
+\end{verbatim}
+
+In KADM5_API_VERSION_2:
+
+\begin{verbatim}
+kadm5_ret_t
+kadm5_get_policy(void *server_handle, char *policy, kadm5_policy_ent_t ent); 
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: get, or the calling principal's policy being
 the same as the policy argument.  If the request is authenticated to
 the kadmin/changepw service, the get privilege is disregarded.
 
-Return the policy's attributes in allocated memory.  The caller must
-free the returned entry with kadm5_free_policy_ent.  If an error is
-returned entry is set to NULL.
+In KADM5_API_VERSION_1, return the policy's attributes in allocated
+memory; if an error is returned entry is set to NULL.  In
+KADM5_API_VERSION_2, fill in fields of the policy structure allocated
+by the caller.  The caller must free the returned entry with
+kadm5_free_policy_ent
 
 RETURN CODES: 
 
