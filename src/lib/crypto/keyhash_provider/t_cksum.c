@@ -132,6 +132,7 @@ main(argc, argv)
     printf("Verify of bad checksum OK for \"%s\"\n", argv[msgindex]);
     kret = 0;
   }
+  free(newstyle_checksum.data);
   if (!kret)
     printf("%d tests passed successfully for MD%d checksum\n", argc-1, MD);
   return(kret);

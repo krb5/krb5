@@ -1,3 +1,7 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_cksum.c (main): Free memory leak in tests.
+
 2001-10-28  Jeff Altman <jaltman@columbia.edu>
 
         * Makefile.in - added dependency info for hmac_md5.c
