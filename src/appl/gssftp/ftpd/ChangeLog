@@ -1,3 +1,14 @@
+Fri Oct 23 18:18:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpd.c (pass): Wait 5 seconds before returning "password
+		incorrect", and only allow three bad passwords.  Then
+		return an 421 reply code before closing the connection and
+		going away.
+
+	* ftpcmd.y (cmd): Don't allow the PORT command to accept a port
+		number lower than 1024; this prevents some nasty ftp
+		"bounce attacks" to SMTP ports, etc.
+
 Tue Oct 20 16:29:46 1998  Dan Winship  <danw@mit.edu>
 
 	* ftpd.M: Reality check. Add -a to synopsis, document -c and -u

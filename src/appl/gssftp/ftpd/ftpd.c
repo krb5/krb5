@@ -910,14 +910,17 @@ pass(passwd)
 		    strcmp(xpasswd, pw->pw_passwd))
 #endif /* KRB5_KRB4_COMPAT */
 		                                                      {
-			reply(530, "Login incorrect.");
 			pw = NULL;
-			if (login_attempts++ >= 5) {
+			sleep(5);
+			if (++login_attempts >= 3) {
+				reply(421,
+				      "Login incorrect, closing connection.");
 				syslog(LOG_NOTICE,
 				    "repeated login failures from %s",
 				    remotehost);
 				exit(0);
 			}
+			reply(530, "Login incorrect.");
 			return;
 	        }
 	}
