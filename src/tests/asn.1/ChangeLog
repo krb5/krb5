@@ -1,3 +1,14 @@
+Wed Nov  8 20:03:51 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_encode_test.c (main): In case of an error in the encoding
+		routines, exit.  Otherwise, calling the print routines
+		will often lead to a coredump.
+
+	* ktest.c (ktest_make_sample_etype_info): Set etype.length to -1
+		to mean that the optional salt string is missing.  (This
+		is change in the convention used by the ASN.1 encoder and
+		decoder for this ASN.1 structure.) 
+
 Tue Oct 31 21:30:28 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_decode_test.c (main): Add tests for

@@ -680,7 +680,7 @@ krb5_error_code ktest_make_sample_etype_info(p)
 	info[i]->magic = KV5M_ETYPE_INFO_ENTRY;
     }
     free(info[1]->salt);
-    info[1]->length = 0;
+    info[1]->length = -1;
     info[1]->salt = 0;
     *p = info;
     return 0;
