@@ -27,6 +27,13 @@
 #
 error_table krb5
 
+
+#
+# Note: the first 128 error codes are hard-coded and must match the error
+# numbers defined in the Kerberos protocol specification, RFC-1510 or
+# its successors.
+#
+
 # vv 0
 error_code KRB5KDC_ERR_NONE,		"No error"
 error_code KRB5KDC_ERR_NAME_EXP,	"Client's entry in database has expired"

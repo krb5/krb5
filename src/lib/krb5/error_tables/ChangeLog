@@ -1,3 +1,8 @@
+Thu Feb  5 22:58:09 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_err.et: Add a comment about the low 128 error codes being
+		defined by the Krb5 protocol spec.
+
 Sat Dec  6 02:27:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_err.et: Add codes for Cygnus chpw.
