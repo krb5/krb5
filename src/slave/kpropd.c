@@ -52,6 +52,10 @@ static char rcsid_kpropd_c[] =
 #include <sys/param.h>
 #include <netdb.h>
 #include <syslog.h>
+/* BSD_COMP is needed for solaris, harmless elsewhere */
+#define BSD_COMP
+/* for TIOCNOTTY */
+#include <sys/ioctl.h>
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
