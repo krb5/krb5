@@ -1,3 +1,22 @@
+2002-06-14  Alexandra Ellwood <lxs@mit.edu>
+
+	* k5-int.h: Added krb5_kt_dfl_ops for KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+
+	* k5-int.h: Removed conditionals now defined in prefix files
+	and updated header paths
+
+	[pullups from 1-2-2-branch]
+
+2002-06-14  Miro Jurisic  <meeroh@mit.edu>
+
+	* k5-int.h: Rearranged the #ifdef macintosh section to
+	work on Mac OS 9 and X
+
+	* k5-int.h: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+
+	[pullups from 1-2-2-branch]
+
 2002-06-14  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Fix BEGIN_DECLS conditional.

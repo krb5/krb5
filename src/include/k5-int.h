@@ -89,14 +89,9 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_MSDOS) || defined(_WIN32)
 #include "win-mac.h"
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
-#endif
-#endif
 
-#if defined(_WIN32)
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI	"kerberos.ini"
 #define INI_FILES	"Files"
@@ -106,10 +101,12 @@
 #define ANSI_STDIO
 #endif
 
-
-#ifndef macintosh
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+/* Note, this may shoot us in the foot if we switch to CW compilers for Mach-o builds */
+#if !defined(macintosh) && (defined(__MWERKS__) || defined(applec) || defined(THINK_C))
 #define macintosh
+#endif
+
+#ifdef macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -117,15 +114,11 @@
 #define HAVE_LABS
 /*#define ENOMEM -1*/
 #define ANSI_STDIO
-#ifndef _SIZET
-typedef unsigned int size_t;
-#define _SIZET
-#endif
+#include <size_t.h>
 #include <unix.h>
 #include <ctype.h>
+#include <fcntl.h>
 #endif
-#endif
-
 
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
@@ -980,7 +973,12 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
+#if TARGET_OS_MAC
+#include <Kerberos/profile.h>
+#include <Kerberos/com_err.h>  /* Not included by Kerberos/profile.h */
+#else
 #include "profile.h"
+#endif
 
 struct _krb5_context {
 	krb5_magic	magic;
