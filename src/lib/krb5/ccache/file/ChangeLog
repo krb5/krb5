@@ -1,3 +1,9 @@
+Fri Jan 27 00:49:36 1995  Chris Provenzano (proven@mit.edu)
+
+        * Fix fcc_read.c (krb5_fcc_read_authdatum()) krb5_authdatatype
+                is of type unsigned int and therefore shouldn't be the
+                argument to krb5_fcc_read_ui_2(). 
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
 	* Added krb5_context to all krb5_routines

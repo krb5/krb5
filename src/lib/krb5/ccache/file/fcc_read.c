@@ -442,13 +442,15 @@ krb5_fcc_read_authdatum(context, id, a)
 {
     krb5_error_code kret;
     krb5_int32 int32;
+    krb5_ui_2 ui2;
     int ret;
     
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
 
-    kret = krb5_fcc_read_ui_2(context, id, &a->ad_type);
+    kret = krb5_fcc_read_ui_2(context, id, &ui2);
     CHECK(kret);
+    a->ad_type = (krb5_authdatatype)ui2;
     kret = krb5_fcc_read_int32(context, id, &int32);
     CHECK(kret);
     a->length = int32;
