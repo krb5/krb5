@@ -149,6 +149,10 @@ char *argv[];
 	    fascist_cpw = 0;
 	    break;
 	case 'r':
+	    if (strlen (optarg) + 1 > REALM_SZ) {
+		com_err(argv[0], 0, "realm name `%s' too long", optarg);
+		exit(1);
+	    }
 	    (void) strncpy(krbrlm, optarg, sizeof(krbrlm) - 1);
 	    break;
         case 'k':

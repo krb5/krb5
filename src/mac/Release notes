@@ -153,4 +153,47 @@ Changes in 1.1a3:
 3.0d3
  from tag Mac_GSSKerberos5_3_0d3
  no changes on the Mac side
- fixed crash in get_init_creds when no network
+ fixed crash in get_init_creds when no network 
+ 
+3.0d4
+ from tag Mac_GSSKerberos5_3_0d4
+ no changes on the Mac side
+ 
+3.0d5
+ from tag Mac_GSSKerberos5_3_0d5
+ no changes on the Mac side
+
+3.0d6
+ from tag Mac_GSSKerberos5_3_0d6
+ login lib support
+ fixed to ccache v5 creds copying code
+
+3.0d7
+ from tag Mac_GSSKerberos5_3_0d7
+ support for login library in expired passwords
+
+3.0d8
+ from tag Mac_GSSKerberos5_3_0d8
+ now following the krb5-1-2 branch (except in util/profile)
+
+3.0a1
+ from tag Mac_GSSKerberos5_3_0a1
+ fixed krb5_cc_default
+ workaround for hostname resolution problems
+ 
+3.0a2
+ from tag Mac_GSSKerberos5_3_0a2
+ no changes on the Mac side
+
+3.0b1
+ from tag Mac_GSSKerberos5_3_0b1
+ Kerberos5Lib now uses PreferencesLib
+ fixed get_credentials [BZ 323]
+
+3.0b2
+ from tag Mac_GSSKerberos5_3_0b2
+ changed error in krb5_init_context from ENFILE to ENOENT when file not found
+
+3.0fc1
+ from tag Mac_GSSKerberos5_3_0fc1
+ no changes on the Mac side

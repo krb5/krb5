@@ -4,6 +4,7 @@
  */
 
 #include "krb5.h"
+#include "kerberosIV/krb.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -54,6 +55,32 @@ void test_425_conv_principal(ctx, name, inst, realm)
 	   name, inst, realm, out_name);
     free(out_name);
     krb5_free_principal(ctx, princ);
+}
+
+void test_524_conv_principal(ctx, name)
+     krb5_context ctx;
+     char *name;
+{
+    krb5_principal princ = 0;
+    krb5_error_code retval;
+    char aname[ANAME_SZ+1], inst[INST_SZ+1], realm[REALM_SZ+1];
+
+    aname[ANAME_SZ] = inst[INST_SZ] = realm[REALM_SZ] = 0;
+    retval = krb5_parse_name(ctx, name, &princ);
+    if (retval) {
+	com_err("krb5_parse_name", retval, 0);
+	goto fail;
+    }
+    retval = krb5_524_conv_principal(ctx, princ, aname, inst, realm);
+    if (retval) {
+	com_err("krb5_524_conv_principal", retval, 0);
+	goto fail;
+    }
+    printf("524_converted_principal(%s): '%s' '%s' '%s'\n",
+	   name, aname, inst, realm);
+ fail:
+    if (princ)
+	krb5_free_principal (ctx, princ);
 }
 
 void test_parse_name(ctx, name)
@@ -131,6 +158,7 @@ void usage(progname)
 {
 	fprintf(stderr, "%s: Usage: %s 425_conv_principal <name> <inst> <realm\n",
 		progname, progname);
+	fprintf(stderr, "\t%s 524_conv_principal <name>\n", progname);
 	fprintf(stderr, "\t%s parse_name <name>\n", progname);
 	fprintf(stderr, "\t%s set_realm <name> <realm>\n", progname);
 	fprintf(stderr, "\t%s string_to_timestamp <time>\n", progname);
@@ -186,6 +214,10 @@ main(argc, argv)
 		  argc--; argv++;
 		  if (!argc) usage(progname);
 		  test_string_to_timestamp(ctx, *argv);
+	  } else if (strcmp(*argv, "524_conv_principal") == 0) {
+	      argc--; argv++;
+	      if (!argc) usage(progname);
+	      test_524_conv_principal(ctx, *argv);
 	  }
 	  else
 	      usage(progname);

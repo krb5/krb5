@@ -392,8 +392,12 @@ char *kadmin_startup(argc, argv)
 					KADM5_API_VERSION_2,
 					&handle);
     } else if (use_keytab) {
-	 printf("Authenticating as principal %s with keytab %s.\n",
-		princstr, keytab_name);
+	 if (keytab_name)
+	     printf("Authenticating as principal %s with keytab %s.\n",
+		    princstr, keytab_name);
+	 else
+	     printf("Authenticating as principal %s with default keytab.\n",
+		    princstr);
 	 retval = kadm5_init_with_skey(princstr, keytab_name,
 				       KADM5_ADMIN_SERVICE, 
 				       &params,

@@ -423,7 +423,8 @@ kerberos5_is(ap, data, cnt)
 				    NULL, keytabid, NULL, &ticket);
 		if (r) {
 			(void) strcpy(errbuf, "krb5_rd_req failed: ");
-			(void) strcat(errbuf, error_message(r));
+			errbuf[sizeof(errbuf) - 1] = '\0';
+			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 			goto errout;
 		}
 
@@ -440,8 +441,12 @@ kerberos5_is(ap, data, cnt)
 		    princ[krb5_princ_component(telnet_context, 
 					       ticket->server,0)->length] = '\0';
 		    if (strcmp("host", princ)) {
-			(void) sprintf(errbuf, "incorrect service name: \"%s\" != \"%s\"",
-				       princ, "host");
+                        if(strlen(princ) < sizeof(errbuf) - 39) {
+                            (void) sprintf(errbuf, "incorrect service name: \"%s\" != \"host\"",
+                                           princ);
+                        } else {
+                            (void) sprintf(errbuf, "incorrect service name: principal != \"host\"");
+                        }
 			goto errout;
 		    }
 		} else {
@@ -455,7 +460,8 @@ kerberos5_is(ap, data, cnt)
 		if (r) {
 		    (void) strcpy(errbuf,
 				  "krb5_auth_con_getauthenticator failed: ");
-		    (void) strcat(errbuf, error_message(r));
+		    errbuf[sizeof(errbuf) - 1] = '\0';
+		    (void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 		    goto errout;
 		}
 		if ((ap->way & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON &&
@@ -476,7 +482,8 @@ kerberos5_is(ap, data, cnt)
 					     &key);
 		    if (r) {
 			(void) strcpy(errbuf, "krb5_auth_con_getkey failed: ");
-			(void) strcat(errbuf, error_message(r));
+			errbuf[sizeof(errbuf) - 1] = '\0';
+			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 			goto errout;
 		    }
 		    r = krb5_verify_checksum(telnet_context,
@@ -495,7 +502,8 @@ kerberos5_is(ap, data, cnt)
 		    if (r) {
 			(void) strcpy(errbuf,
 				      "checksum verification failed: ");
-			(void) strcat(errbuf, error_message(r));
+		        errbuf[sizeof(errbuf) - 1] = '\0';
+			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 			goto errout;
 		    }
 		    krb5_free_keyblock(telnet_context, key);
@@ -506,7 +514,8 @@ kerberos5_is(ap, data, cnt)
 		    if ((r = krb5_mk_rep(telnet_context, auth_context,
 					 &outbuf))) {
 			(void) strcpy(errbuf, "Make reply failed: ");
-			(void) strcat(errbuf, error_message(r));
+		        errbuf[sizeof(errbuf) - 1] = '\0';
+			(void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 			goto errout;
 		    }
 
@@ -560,7 +569,8 @@ kerberos5_is(ap, data, cnt)
 		    char errbuf[128];
 		    
 		    (void) strcpy(errbuf, "Read forwarded creds failed: ");
-		    (void) strcat(errbuf, error_message(r));
+		    errbuf[sizeof(errbuf) - 1] = '\0';
+		    (void) strncat(errbuf, error_message(r), sizeof(errbuf) - 1 - strlen(errbuf));
 		    Data(ap, KRB_FORWARD_REJECT, errbuf, -1);
 		    if (auth_debug_mode)
 		      printf(
@@ -586,7 +596,8 @@ kerberos5_is(ap, data, cnt)
 	    char eerrbuf[329];
 
 	    strcpy(eerrbuf, "telnetd: ");
-	    strcat(eerrbuf, errbuf);
+	    eerrbuf[sizeof(eerrbuf) - 1] = '\0';
+	    strncat(eerrbuf, errbuf, sizeof(eerrbuf) - 1 - strlen(eerrbuf));
 	    Data(ap, KRB_REJECT, eerrbuf, -1);
 	}
 	if (auth_debug_mode)
@@ -706,7 +717,9 @@ kerberos5_status(ap, name, level)
 	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
 			 UserNameRequested))
 	{
-		strcpy(name, UserNameRequested);
+		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
+		strncpy(name, UserNameRequested, 255);
+		name[255] = '\0';
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);

@@ -1,3 +1,144 @@
+2000-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c (recvauth): Call krb5_recvauth_version() rather than
+	calling krb5_recvauth() with arguments intended for
+	krb5_recvauth_version().
+
+	* kcmd.c: Conditionalize krb_sendauth prototype based on sense of
+	KRB5_KRB4_COMPAT.
+
+2000-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (try_convert524): Add use_ccache argument.  Handle case
+	where we have gotten v5 creds via password being entered and don't
+	crash in that case, since previous code was assuming that v5 creds
+	were always being provided.  Adapted from patch by Bob Basch.
+
+2000-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (main): Fix logic again, this time in the "success"
+	case.  If there's a problem retrieving the new-protocol subkey,
+	print a message and exit, don't fall back.
+	* krsh.c (main): Ditto; don't look at enctype to try to guess
+	protocol version.  Delete unused variable "similar".
+
+2000-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): Rework fallback logic.  Fall back to k4cmd
+	unless encryption and the new protocol were both requested.
+
+	* krsh.c (main): Rework fallback logic.  Fall back to k4cmd if new
+	protocol wasn't requested.
+
+	* krcp.c (main): Revert setting of AP_OPTS_MUTUAL_REQUIRED
+	unconditionally, which was added by mistake with last set of
+	patches.  If kcmd fails and the new protocol is requested, don't
+	fall back to v4.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (kcmd.o, krcp.o, krlogin.o, krlogind.o, krsh.o,
+	krshd.o): Depend on defines.h.
+	* krlogind.c: Include defines.h.
+	* krcp.c: Ditto.
+
+	* defines.h (enum kcmd_proto): New type.
+	(rcmd_stream_read, rcmd_stream_write, getport,
+	rcmd_stream_init_krb5): Add prototypes.
+
+	* kcmd.c (use_ivecs): New variable.
+	(encivec_i, encivec_o): Each is now an array of two elements.
+	(input, output, twrite, krb5_write_message, krb5_net_read,
+	krb5_net_write, krb_sendauth): Add prototypes.
+	(kcmd): New argument PROTONUMP points to enum kcmd_proto.  If
+	value is KCMD_PROTOCOL_COMPAT_HACK, set it to KCMD_NEW_PROTOCOL or
+	KCMD_OLD_PROTOCOL depending on session key type.  Use subkeys for
+	new protocol.  Callers updated.
+	(normal_read, v5_des_read, v4_des_read, twrite, v5_des_write,
+	v4_des_write, rcmd_stream_write, rcmd_stream_read): Take
+	additional argument indicating whether the fd is for the secondary
+	channel; ignored except in some v5 cases.  Callers updated.
+	(rcmd_stream_init_krb5): New argument, kcmd protocol version.  Set
+	up ivecs for secondary channel in each direction with values 0x2
+	ior primary channel value.  Callers updated.
+	(v5_des_read, v5_des_write): For new protocol, plaintext now has
+	its length prepended but not counted.
+
+	* krcp.c (main): Set kcmd protocol version based on command line,
+	not on encryption type.  Default to COMPAT_HACK.
+	* krsh.c (main): Ditto.
+	* krlogin.c (main): Ditto.
+
+	* krlogind.c (recvauth): Use new krb5_compat_recvauth_version
+	routine.  Determine client's kcmd protocol version and initialize
+	based on it.
+	* krshd.c (recvauth): Ditto.
+
+2000-05-19  Nalin Dahyabhai  <nalin@redhat.com>
+	    Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (sink): bail if the target directory/file name is too long
+	* krlogind.c (recvauth, krb4 compat): truncate user name if the
+	principal's root would be too long to be valid
+	* v4rcp.c (sink): bail if the target directory/file name is too long
+
+2000-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c: Shuffle inclusion of defines.h so that some krb5
+	structures are declared prior to the kcmd() prototype.
+
+2000-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* defines.h (kcmd): Add prototype.
+	* krcp.c (main): Add extra arg to a kcmd call I missed yesterday.
+
+2000-05-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* krcp.c (main): Fix some conditionalizations to make proper
+	indentation easier.
+
+	* kcmd.c (encivec_i, encivec_o): New variables replace old single
+	variable encivec.
+	(rcmd_stream_init_krb5): New argument am_client, used to
+	initialize both ivec values.
+	* krcp.c (main, answer_auth): Pass new argument.
+	* krlogin.c (main): Ditto.
+	* krlogind.c (recvauth): Ditto.
+	* krsh.c (main): Ditto.
+	* krshd.c (recvauth): Ditto.
+
+	* defines.h (OPTS_FORWARD_CREDS, OPTS_FORWARDABLE_CREDS): Change
+	numbers so they don't conflict with AP_OPTS_USE_SUBKEY.
+	* kcmd.c (kcmd): New argument authconp, used to return the auth
+	context to the caller if desired.
+	* krlogin.c (auth_context): New variable.
+	(main): Request a subkey from sendauth.  Get the auth context from
+	kcmd so we can retrieve the subkey.  If non-DES session key is
+	being used, pass the subkey to rcmd_stream_init_krb5 instead of
+	the session key; fail if no subkey is found and encryption is
+	required.
+	* krlogind.c (recvauth): If a non-DES session key is being used,
+	pass the client-provided subkey to rcmd_stream_init_krb5.
+	* krcp.c (main): Set up and use subkey as above.
+	* krsh.c (main): Set up and use subkey as above.
+	* krshd.c (recvauth): Accept and use subkey as above.
+
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4rcp.c (main, case 'k'): Make sure krb_realm is
+	null-terminated.
+
+2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* krlogin.c (main): Don't overflow buffer "term".
+	* krshd.c (doit): Don't overflow buffer "cmdbuf".
+	* login.c (afs_login): Don't overflow buffer "aklog_path".
+
+2000-03-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for alpha*-dec-osf* instead of
+	alpha-dec-osf*.
+
 2000-03-15  Ken Raeburn  <raeburn@mit.edu>
 	    Mark D. Roth  <roth@uiuc.edu>
 
