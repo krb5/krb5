@@ -58,6 +58,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply, *header_ticket;
+    krb5_tkt_authent *req_authdat;
     int st_idx = 0;
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_transited enc_tkt_transited;
@@ -83,9 +84,14 @@ krb5_data **response;			/* filled in with a response packet */
     if (!fromstring)
 	fromstring = "<unknown>";
 
-    if ((retval = kdc_process_tgs_req(request, from, &header_ticket))) {
+    header_ticket = 0;
+    req_authdat = 0;
+    retval = kdc_process_tgs_req(request, from, &req_authdat);
+    if (req_authdat)
+	header_ticket = req_authdat->ticket;
+    if (retval) {
 	if (header_ticket && !header_ticket->enc_part2) {
-	    krb5_free_ticket(header_ticket);
+	    krb5_free_tkt_authent(req_authdat);
 	    header_ticket = 0;
 	}
 	if (retval > ERROR_TABLE_BASE_krb5 &&
@@ -106,12 +112,12 @@ krb5_data **response;			/* filled in with a response packet */
        */
 
     if (retval = krb5_unparse_name(header_ticket->enc_part2->client, &cname)) {
-	krb5_free_ticket(header_ticket);
+	krb5_free_tkt_authent(req_authdat);
 	return(retval);
     }
     if (retval = krb5_unparse_name(request->server, &sname)) {
 	free(cname);
-	krb5_free_ticket(header_ticket);
+	krb5_free_tkt_authent(req_authdat);
 	return(retval);
     }
 
@@ -125,7 +131,7 @@ krb5_data **response;			/* filled in with a response packet */
     nprincs = 1;
     if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
 				       &more)) {
-	krb5_free_ticket(header_ticket);
+	krb5_free_tkt_authent(req_authdat);
 	return(retval);
     }
 tgt_again:
@@ -158,7 +164,7 @@ tgt_again:
 				 response));
     }
 
-#define tkt_cleanup() {krb5_free_ticket(header_ticket); }
+#define tkt_cleanup() {krb5_free_tkt_authent(req_authdat); }
 #define cleanup() { krb5_db_free_principal(&server, 1);}
 
     if (retval = krb5_timeofday(&kdc_time)) {
@@ -533,7 +539,12 @@ tgt_again:
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
 
+    /* use the session key in the ticket, unless there's a subsession key
+       in the AP_REQ */
+
     retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
+				 req_authdat->authenticator->subkey ?
+				 req_authdat->authenticator->subkey :
 				 header_ticket->enc_part2->session,
 				 &reply, response);
     krb5_free_keyblock(session_key);
