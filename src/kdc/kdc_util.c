@@ -92,9 +92,15 @@ krb5_principal princ;
 }
 
 struct kparg {
-    krb5_db_entry *dbentry;
     krb5_keyblock *key;
+    krb5_kvno kvno;
 };
+
+/*
+ * Since we do the checking of the server name before passing into
+ * krb5_rd_req_decoded, there's no reason to do it here, so we ignore the
+ * "principal" argument.
+ */
 
 static krb5_error_code
 kdc_rdreq_keyproc(DECLARG(krb5_pointer, keyprocarg),
@@ -108,10 +114,8 @@ OLDDECLARG(krb5_keyblock **, key)
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
 
-    if (vno != whoisit->dbentry->kvno)
+    if (vno != whoisit->kvno)
 	return KRB5KRB_AP_ERR_BADKEYVER;
-    if (!krb5_principal_compare(principal, whoisit->dbentry->principal))
-	return KRB5KRB_AP_ERR_NOKEY;
     return(krb5_copy_keyblock(whoisit->key, key));
 }
 
@@ -123,17 +127,12 @@ const krb5_fulladdr *from;
 krb5_tkt_authent **ret_authdat;
 {
     krb5_ap_req *apreq;
-    int nprincs;
-    krb5_boolean more;
-    krb5_db_entry server;
-    krb5_keyblock encrypting_key;
     krb5_tkt_authent *authdat, *nauthdat;
     struct kparg who;
     krb5_error_code retval;
     krb5_checksum our_cksum;
     krb5_data *scratch, scratch2;
     krb5_pa_data **tmppa;
-    krb5_boolean freeprinc = FALSE;
     krb5_boolean local_client = TRUE;
 
     if (!request->padata)
@@ -168,60 +167,27 @@ krb5_tkt_authent **ret_authdat;
 	return KRB5KDC_ERR_POLICY;
     }
 
-    if (krb5_principal_compare(tgs_server, apreq->ticket->server)) {
-	encrypting_key = tgs_key;
-	server.kvno = tgs_kvno;
-	server.principal = tgs_server;
-    } else {
-	nprincs = 1;
-	/* If the "server" principal in the ticket is not something
-	   in the local realm, then we must refuse to service the request
-	   if the client claims to be from the local realm.
-	   
-	   If we don't do this, then some other realm's nasty KDC can
-	   claim to be authenticating a client from our realm, and we'll
-	   give out tickets concurring with it!
-	   
-	   we set a flag here for checking below.
-	   */
-	if ((apreq->ticket->server[0]->length != tgs_server[0]->length) ||
-	    memcmp(apreq->ticket->server[0]->data, tgs_server[0]->data,
-		   tgs_server[0]->length))
-	    local_client = FALSE;
-
-	if (retval = krb5_db_get_principal(apreq->ticket->server,
-					   &server, &nprincs,
-					   &more)) {
-	    cleanup_apreq();
-	    return(retval);
-	}
-	if (more) {
-	    krb5_db_free_principal(&server, nprincs);
-	    cleanup_apreq();
-	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-	} else if (nprincs != 1) {
-	    char *sname;
-
-	    krb5_db_free_principal(&server, nprincs);
-	    if (!krb5_unparse_name(apreq->ticket->server, &sname)) {
-		syslog(LOG_ERR, "TGS_REQ: can't find key for '%s'",
-		       sname);
-		free(sname);
-	    }
-	    cleanup_apreq();
-	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-	}
-	/* convert server.key into a real key (it may be encrypted
-	   in the database) */
-	if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
-	    krb5_db_free_principal(&server, nprincs);
-	    cleanup_apreq();
-	    return retval;
-	}
-	freeprinc = TRUE;
+    if (retval = kdc_get_server_key(apreq->ticket, &who.key,
+				    &who.kvno)) {
+	cleanup_apreq();
+	return retval;
     }
-    who.dbentry = &server;
-    who.key = &encrypting_key;
+    /* If the "server" principal in the ticket is not something
+       in the local realm, then we must refuse to service the request
+       if the client claims to be from the local realm.
+       
+       If we don't do this, then some other realm's nasty KDC can
+       claim to be authenticating a client from our realm, and we'll
+       give out tickets concurring with it!
+       
+       we set a flag here for checking below.
+       */
+    if ((krb5_princ_realm(apreq->ticket->server)->length !=
+	 krb5_princ_realm(tgs_server)->length) ||
+	memcmp(krb5_princ_realm(apreq->ticket->server)->data,
+	       krb5_princ_realm(tgs_server)->data,
+	       krb5_princ_realm(tgs_server)->length))
+	local_client = FALSE;
 
     retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
 				 from->address,
@@ -230,11 +196,8 @@ krb5_tkt_authent **ret_authdat;
 				 (krb5_pointer)&who,
 				 kdc_rcache,
 				 &nauthdat);
-    if (freeprinc) {
-	krb5_db_free_principal(&server, nprincs);
-	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-	xfree(encrypting_key.contents);
-    }
+    krb5_free_keyblock(who.key);
+
     if (retval) {
         cleanup_apreq();
 	return(retval);
@@ -310,6 +273,54 @@ krb5_tkt_authent **ret_authdat;
 
     krb5_free_ap_req(apreq);
     return 0;
+}
+
+krb5_error_code
+kdc_get_server_key(ticket, key, kvno)
+krb5_ticket *ticket;
+krb5_keyblock **key;
+krb5_kvno *kvno;
+{
+    krb5_error_code retval;
+    int nprincs;
+    krb5_db_entry server;
+    krb5_boolean more;
+
+    if (krb5_principal_compare(tgs_server, ticket->server)) {
+	*kvno = tgs_kvno;
+	return krb5_copy_keyblock(&tgs_key, key);
+    } else {
+	nprincs = 1;
+
+	if (retval = krb5_db_get_principal(ticket->server,
+					   &server, &nprincs,
+					   &more)) {
+	    return(retval);
+	}
+	if (more) {
+	    krb5_db_free_principal(&server, nprincs);
+	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+	} else if (nprincs != 1) {
+	    char *sname;
+
+	    krb5_db_free_principal(&server, nprincs);
+	    if (!krb5_unparse_name(ticket->server, &sname)) {
+		syslog(LOG_ERR, "TGS_REQ: can't find key for '%s'",
+		       sname);
+		free(sname);
+	    }
+	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+	}
+	/* convert server.key into a real key (it may be encrypted
+	   in the database) */
+	if (*key = (krb5_keyblock *)malloc(sizeof **key)) {
+	    retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, *key);
+	} else
+	    retval = ENOMEM;
+	*kvno = server.kvno;
+	krb5_db_free_principal(&server, nprincs);
+	return retval;
+    }
 }
 
 /* This probably wants to be updated if you support last_req stuff */
