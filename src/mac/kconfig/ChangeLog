@@ -1,3 +1,8 @@
+Mon Mar  3 15:14:34 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kconfig.c (main): Move krb5_init_context earlier in order to
+		initialize kcontext before use. 
+
 Fri Dec 20 12:01:10 1996 Marshall Vale <mjv@mit.edu>
 
 	* kconfig.c: Adjusted time-bomb date to June 1, 1997

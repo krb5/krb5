@@ -207,6 +207,10 @@ int main (void)
 	DateTimeRec		goalTimeBomb;
 	long			currentTime, goalTimeBombInSecs;
 #endif
+#ifdef KRB5
+	krb5_error_code code;
+#endif
+	
 
 	/*	
 	 * Setup
@@ -243,6 +247,15 @@ int main (void)
 #ifdef KRB4
 	init_cornell_des();
 #endif
+#ifdef KRB5
+    code = krb5_init_context(&kcontext);
+    if (code)
+    {
+    	doalert("Kerberos configuration file not present");
+    	getout(0);
+    }
+#endif
+
 #ifdef KRB5
 	k5_init_ccache (&k5_ccache);
 	/*strcpy(gUserName, kUNKNOWNUSERNAME);*/
@@ -302,14 +315,6 @@ int main (void)
 	}
 #endif
 
-#ifdef KRB5
-    krb5_init_context(&kcontext);
-    if (kcontext->profile == 0)
-    {
-    	doalert("Kerberos configuration file not present");
-    	getout(0);
-    }
-#endif
 
 	/*
 	 * build the main window
