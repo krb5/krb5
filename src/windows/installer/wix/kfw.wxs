@@ -108,13 +108,15 @@
             Id="ListRunningProcesses"
             BinaryKey="binCustom"
             DllEntry="ListRunningProcesses"
-            Execute="immediate" />
-		 		 
+            Execute="immediate"
+            Return="ignore" />
+            
         <CustomAction
             Id="KillRunningProcesses"
             BinaryKey="binCustom"
             DllEntry="KillRunningProcesses"
-            Execute="immediate" />
+            Execute="immediate"
+            Return="ignore" />
 
 		<AdminExecuteSequence />
         <InstallExecuteSequence>
@@ -152,7 +154,7 @@
         </ComplianceCheck>
         
         <!-- We embed all the files in a single cabinet. -->
-        <Media Id="1" Cabinet="Disk1" CompressionLevel="mszip" EmbedCab="yes" />
+        <Media Id="1" Cabinet="Disk1" CompressionLevel="high" EmbedCab="yes" />
         
         <!-- Custom table used by KillProcesses custom action -->
         <CustomTable Id="KillProcess">

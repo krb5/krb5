@@ -51,4 +51,91 @@
     <?define SystemDir="$(env.SystemRoot)\System32\"?>
 
     <?include lang\config_$(var.BuildLang).wxi?>
+    
+    <!-- Configuration macros -->
+    <?ifndef LeashAfsStatus?>
+        <?define LeashAfsStatus="1"?>
+    <?endif?>
+    <?ifndef LeashCreateMissingConfig?>
+        <?define LeashCreateMissingConfig="0"?>
+    <?endif?>
+    <?ifndef LeashAutoRenewTickets?>
+        <?define LeashAutoRenewTickets="1"?>
+    <?endif?>
+    <?ifndef LeashLockFileLocations?>
+        <?define LeashLockFileLocations="0"?>
+    <?endif?>
+    <?ifndef LeashMsLsaImport?>
+        <?define LeashMsLsaImport="2"?>
+    <?endif?>
+    <?ifndef LeashLifetime?>
+        <?define LeashLifetime="0"?>
+    <?endif?>
+    <?ifndef LeashRenewTill?>
+        <?define LeashRenewTill="0"?>
+    <?endif?>
+    <?ifndef LeashRenewable?>
+        <?define LeashRenewable="0"?>
+    <?endif?>
+    <?ifndef LeashForwardable?>
+        <?define LeashForwardable="1"?>
+    <?endif?>
+    <?ifndef LeashNoAddresses?>
+        <?define LeashNoAddresses="1"?>
+    <?endif?>
+    <?ifndef LeashProxiable?>
+        <?define LeashProxiable="0"?>
+    <?endif?>
+    <?ifndef LeashPublicIp?>
+        <?define LeashPublicIp="0"?>
+    <?endif?>
+    <?ifndef LeashUseKrb4?>
+        <?define LeashUseKrb4="1"?>
+    <?endif?>
+    <?ifndef LeashHideKinitOptions?>
+        <?define LeashHideKinitOptions="0"?>
+    <?endif?>
+    <?ifndef LeashLifeMin?>
+        <?define LeashLifeMin="5"?>
+    <?endif?>
+    <?ifndef LeashLifeMax?>
+        <?define LeashLifeMax="1440"?>
+    <?endif?>
+    <?ifndef LeashRenewMin?>
+        <?define LeashRenewMin="600"?>
+    <?endif?>
+    <?ifndef LeashRenewMax?>
+        <?define LeashRenewMax="43200"?>
+    <?endif?>
+    <?ifndef LeashUppercaseRealm?>
+        <?define LeashUppercaseRealm="1"?>
+    <?endif?>
+    <?ifndef LeashTimeHost?>
+        <?define LeashTimeHost="time"?>
+    <?endif?>
+    <?ifndef LeashPreserveKinitOptions?>
+        <?define LeashPreserveKinitOptions="0"?>
+    <?endif?>
+    <!-- These actually have no defaults. -->
+    <?ifndef Krb4KrbRealms?>
+        <?define Krb4KrbRealms=""?>
+    <?endif?>
+    <?ifndef Krb4KrbConf?>
+        <?define Krb4KrbConf=""?>
+    <?endif?>
+    <?ifndef Krb4ConfigDir?>
+        <?define Krb4ConfigDir=""?>
+    <?endif?>
+    <?ifndef Krb4TicketFile?>
+        <?define Krb4TicketFile=""?>
+    <?endif?>
+    <?ifndef Krb5Config?>
+        <?define Krb5Config=""?>
+    <?endif?>
+    <?ifndef Krb5CcName?>
+        <?define Krb5CcName=""?>
+    <?endif?>
+    <?ifndef Krb5PreserveIdentity?>
+        <?define Krb5PreserveIdentity="1"?>
+    <?endif?>
 </Include>
