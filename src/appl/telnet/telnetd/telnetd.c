@@ -54,7 +54,6 @@ static char copyright[] =
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <netdb.h>
 #include <libpty.h>
 #include <com_err.h>
 #if	defined(_SC_CRAY_SECURE_SYS)

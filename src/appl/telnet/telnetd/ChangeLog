@@ -1,3 +1,9 @@
+Wed Mar 27 00:27:32 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* telnetd.c: remove inclusion of netdb.h; it's already in defs.h,
+		and #$%&* ultrix doesn't protect it from multiple
+		inclusions.
+
 Sat Mar 23 01:33:09 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* sys_term.c: Remove utmpx stuff so libpty can do it.
