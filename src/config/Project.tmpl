@@ -222,6 +222,11 @@ P_TIME_DEFS=-DUseTimeH -UUseSysTimeH
 #else
 P_TIME_DEFS=-DUseSysTimeH -UUseTimeH
 #endif
+#if NeedNarrowPrototypes
+P_PROTOS=-DUseNarrowPrototypes
+#else
+P_PROTOS=-UUseNarrowPrototypes
+#endif
 
 /*
  * Default Definitions.
@@ -239,7 +244,7 @@ P_TIME_DEFS=-DUseSysTimeH -UUseTimeH
              POSY = PosyCmd
             TOUCH = TouchCmd
              PERL = PerlCmd
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) -DUnifdefRan
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
