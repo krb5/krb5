@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_nfold.c (main): Cast argument to printf to be consistant with
+	format. 
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* make_checksum.c (krb5_c_make_checksum): Add cast assigning to

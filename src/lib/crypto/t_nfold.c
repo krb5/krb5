@@ -122,7 +122,7 @@ main(argc, argv)
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", strlen(nfold_in[i]), nfold_in[i]);
+	printf("\tInput:\t\"%.*s\"\n", (int) strlen(nfold_in[i]), nfold_in[i]);
 	printf("\t192-Fold:\t");
 	krb5_nfold(strlen(nfold_in[i])*8, nfold_in[i], 24*8, cipher_text);
 	for (j=0; j<24; j++)
