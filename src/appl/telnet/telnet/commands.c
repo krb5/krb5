@@ -2554,6 +2554,13 @@ tn(argc, argv)
 	    return 0;
 	}
 	connected++;
+	host = gethostbyaddr((char *) &sin.sin_addr, sizeof(struct in_addr), sin.sin_family);
+	    if (host) {
+	      strncpy(_hostname, host->h_name, sizeof(_hostname));
+		_hostname[sizeof(_hostname)-1] = '\0';
+		hostname = _hostname;
+	    } 
+
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 	auth_encrypt_connect(connected);
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
