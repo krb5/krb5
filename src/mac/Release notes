@@ -72,3 +72,7 @@ Changes in 1.1a3:
  removed CLib and RuntimeLib from output binary
  renamed output to MIT Kerberos Library
  changed vers 2 resource to new name (MIT Kerberos for the Macintosh)
+
+2.0fc2
+ updated to CCache 2.0fc2
+ removed 68K builds which snuck in somehow
