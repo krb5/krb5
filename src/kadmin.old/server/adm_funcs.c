@@ -125,7 +125,6 @@ adm_modify_kdb(context, cmdname, newprinc, principal, req_type, is_rand,
         entry->max_life = master_entry.max_life;
         entry->max_renewable_life = master_entry.max_renewable_life;
         entry->expiration = master_entry.expiration;
-        entry->mkvno = master_entry.mkvno;
     } else { /* Modify existing entry */
 #ifdef SANDIA
 	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;

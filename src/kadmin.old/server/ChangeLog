@@ -1,3 +1,7 @@
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * adm_funcs.c : Remove mkvno for krb5_db_entry
+
 Mon Oct  2 14:50:57 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* adm_v4_pwd.c: Changes to work under OSF/1.
