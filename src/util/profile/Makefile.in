@@ -112,9 +112,9 @@ prof_err.c: $(srcdir)/prof_err.et
 prof_err.o: prof_err.c
 
 # not built by default, but may be useful for testing
-profile_tcl.c: profile.swg
+$(srcdir)/profile_tcl.c: profile.swg
 	(cd $(srcdir) && swig -tcl8 -o profile_tcl.c profile.swg)
-profile_tcl.o: $(srcdir)/profile_tcl.c
+profile_tcl.o: $(srcdir)/profile_tcl.c profile.h
 profile_tcl: profile_tcl.o libprofile.a
 	$(CC_LINK) -o profile_tcl profile_tcl.o \
 		$(TCL_MAYBE_RPATH) \
@@ -128,6 +128,18 @@ clean-windows::
 	$(RM) $(PROFILE_HDR)
 
 check-unix:: test_parse test_profile
+
+DO_TCL=@DO_TCL@
+check-unix:: check-unix-tcl-$(DO_TCL)
+
+check-unix-tcl-:
+	@echo "+++"
+	@echo "+++ Tcl not available, some profile tests not run."
+	@echo "+++"
+
+check-unix-tcl-ok: profile_tcl
+	cp $(srcdir)/test.ini test2.ini
+	./profile_tcl $(srcdir)/prof_test1
 
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj

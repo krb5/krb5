@@ -33,6 +33,7 @@ struct profile_node {
 	char *value;
 	int group_level;
 	int final:1;		/* Indicate don't search next file */
+	int deleted:1;
 	struct profile_node *first_child;
 	struct profile_node *parent;
 	struct profile_node *next, *prev;
@@ -149,7 +150,6 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
 {
 	errcode_t retval;
 	struct profile_node *p, *last, *new;
-	int	cmp = -1;
 
 	CHECK_MAGIC(section);
 
@@ -162,6 +162,7 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
 	 * order matters.
 	 */
 	for (p=section->first_child, last = 0; p; last = p, p = p->next) {
+		int cmp;
 		cmp = strcmp(p->name, name);
 		if (cmp > 0)
 			break;
@@ -170,6 +171,7 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
 	if (retval)
 		return retval;
 	new->group_level = section->group_level+1;
+	new->deleted = 0;
 	new->parent = section;
 	new->prev = last;
 	new->next = p;
@@ -262,6 +264,8 @@ errcode_t profile_find_node(struct profile_node *section, const char *name,
 			if (value && (strcmp(p->value, value)))
 				continue;
 		}
+		if (p->deleted)
+		    continue;
 		/* A match! */
 		if (node)
 			*node = p;
@@ -570,15 +574,7 @@ errcode_t profile_remove_node(struct profile_node *node)
 	if (node->parent == 0)
 		return PROF_EINVAL; /* Can't remove the root! */
 	
-	if (node->prev)
-		node->prev->next = node->next;
-	else
-		node->parent->first_child = node->next;
-
-	if (node->next)
-		node->next->prev = node->prev;
-
-	profile_free_node(node);
+	node->deleted = 1;
 
 	return 0;
 }

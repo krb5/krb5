@@ -1,5 +1,19 @@
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
+	* prof_tree.c (struct profile_node): Add new bitfield DELETED.
+	(profile_add_node): Move variable CMP into inner block where it's
+	used.  Clear deleted flag.
+	(profile_find_node): Skip deleted nodes.
+	(profile_remove_node): Just set the deleted flag, don't modify the
+	tree.
+	* Makefile.in (profile_tcl.c): Target should be in srcdir.
+	(profile_tcl.o): Depend on profile.h.
+	(DO_TCL): New variable.
+	(check-unix-tcl-, check-unix-tcl-ok): New targets.
+	(check-unix): Depend on one of them, based on DO_TCL.
+	* configure.in: Set and substitute DO_TCL.
+	* prof_test1: New file.
+
 	* profile.swg: Only include tclsh.i if building for Tcl.
 	(Tcl_SetResult, my_tcl_setresult): Compile hack only if building
 	for Tcl.
@@ -7,6 +21,7 @@
 	scripting language.  Add Python code.
 	(%typemap errcode_t, errcode_t*): Add placeholders for Python
 	support.
+	* profile_tcl.c: Regenerated.
 
 2004-08-28  Ken Raeburn  <raeburn@mit.edu>
 

@@ -81,7 +81,7 @@ static errcode_t rw_setup(profile_t profile)
 
 	profile_unlock_global();
 	retval = profile_update_file(file);
-	
+
 	return retval;
 }
 

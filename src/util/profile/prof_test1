@@ -1,0 +1,70 @@
+set wd [pwd]
+set p [profile_init_path $wd/test2.ini]
+set verbose 0
+
+proc test1 {} {
+    global wd p verbose
+    set sect {{test section 1} child_section child}
+    set iter [profile_iterator_create $p $sect 0]
+    set done 0
+    if $verbose { puts "Iterating over {$sect} entries:" }
+    while {!$done} {
+	set pair [profile_iterator $iter]
+	if [string match $pair {{} {}}] {
+	    set done 1
+	} else {
+	    set val [lindex $pair 1]
+	    if $verbose { puts -nonewline "\t$val" }
+	}
+    }
+    if $verbose { puts "" }
+    #profile_iterator_free $iter
+
+    set iter [profile_iterator_create $p $sect 0]
+    set done 0
+    if $verbose { puts "Iterating again, deleting:" }
+    while {!$done} {
+	set pair [profile_iterator $iter]
+	if [string match $pair {{} {}}] {
+	    set done 1
+	} else {
+	    set val [lindex $pair 1]
+	    if $verbose { puts -nonewline "\t$val" }
+	    profile_update_relation $p $sect $val
+	}
+    }
+    if $verbose { puts "" }
+    #profile_iterator_free $iter
+    profile_flush $p
+
+    if $verbose { puts "Reloading profile" }
+    set p [profile_init_path $wd/test2.ini]
+    set iter [profile_iterator_create $p $sect 0]
+    set done 0
+    if $verbose { puts "Iterating again:" }
+    set found_some 0
+    while {!$done} {
+	set pair [profile_iterator $iter]
+	if [string match $pair {{} {}}] {
+	    set done 1
+	} else {
+	    set found_some 1
+	    set val [lindex $pair 1]
+	    if $verbose { puts -nonewline "\t$val" }
+	}
+    }
+    #profile_iterator_free $iter
+    profile_abandon $p
+
+    if {$found_some} {
+	if $verbose { puts "" }
+	puts stderr "Error: Deleting in iterator didn't get them all."
+	exit 1
+    } else {
+	puts "OK: Deleting in iteration got rid of all entries."
+    }
+}
+
+test1
+
+exit 0
