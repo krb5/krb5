@@ -1,3 +1,10 @@
+Mon Feb 10 11:30:56 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Set CC_LINK_STATIC for platforms
+		w/o shared library support.
+		     (KRB5_LIB_AUX); Set CC_LINK if --enable-shared is not
+		specified.
+
 Mon Feb  3 00:11:37 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in:

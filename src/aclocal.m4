@@ -1095,7 +1095,10 @@ AC_ARG_ENABLE([shared],
 else
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
-fi])dnl
+fi],
+	RUN_ENV=
+	CC_LINK="$CC_LINK_STATIC"
+)dnl
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
@@ -1144,6 +1147,9 @@ PFLIBEXT=_p.a
 STOBJEXT=.o
 SHOBJEXT=.so
 PFOBJEXT=.po
+# Default for systems w/o shared libraries
+CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+
 # Set up architecture-specific variables.
 case $krb5_cv_host in
 alpha-dec-osf*)
