@@ -31,12 +31,12 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
 libdir=@libdir@
-CC_LINK="@CC_LINK@"
+CC_LINK='@CC_LINK@'
 KRB4_LIB=@KRB4_LIB@
 DES425_LIB=@DES425_LIB@
 
 
-LIBS=@LIBS@
+LIBS='@LIBS@'
 GEN_LIB=@GEN_LIB@
 
 # Defaults for program

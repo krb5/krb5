@@ -1,3 +1,9 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5-config.in (CC_LINK): Use ' vs " to prevent bash expansion of
+	variables. 
+	(LIBS): Quote autoconf substitution in case of space being present. 
+
 2001-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (CONFIG_RULES): Set and substitute AUTOHEADER and
