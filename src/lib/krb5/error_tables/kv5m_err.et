@@ -71,4 +71,5 @@ error_code KV5M_AUTH_CONTEXT,	"Bad magic number for krb5_auth_context structure"
 error_code KV5M_KEYTAB,		"Bad magic number for krb5_keytab structure"
 error_code KV5M_RCACHE,		"Bad magic number for krb5_rcache structure"
 error_code KV5M_CCACHE,		"Bad magic number for krb5_ccache structure"
+error_code KV5M_PREAUTH_OPS,	"Bad magic number for krb5_preauth_ops"
 end

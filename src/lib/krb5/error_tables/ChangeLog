@@ -1,3 +1,7 @@
+Wed Nov  8 02:45:56 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kv5m_err.et: Added magic number for krb5_preauth_ops.
+
 Mon Oct 23 21:24:12 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_err.et: Added new error code KRB5_GET_IN_TKT_LOOP.
