@@ -63,6 +63,12 @@ struct type_KRB5_HostAddresses *krb5_address2KRB5_HostAddresses
 krb5_address **KRB5_HostAddresses2krb5_address
 	PROTOTYPE((const struct type_KRB5_HostAddresses *,
 		   int * ));
+struct type_KRB5_HostAddress *krb5_addr2KRB5_HostAddress
+	PROTOTYPE((krb5_address const *,
+		   int * ));
+krb5_address *KRB5_HostAddress2krb5_addr
+	PROTOTYPE((const struct type_KRB5_HostAddress *,
+		   int * ));
 struct type_KRB5_AuthorizationData *krb5_authdata2KRB5_AuthorizationData
 	PROTOTYPE((krb5_authdata * const *,
 		   int * ));
