@@ -14,7 +14,7 @@
 
 #define assert(pred,message)\
   if(pred) printf("OK: ");\
-  else printf("ERROR: ");\
+  else { printf("ERROR: "); error_count++; }\
   printf(message);
 
 #endif

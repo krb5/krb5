@@ -9,11 +9,7 @@
 
 #include "debug.h"
 
-/* The ISODE routines crashed when certain fields were omitted (even
-   though they were optional).  My encoders should handle any NULL
-   fields (both optional and non-optional) gracefully, so this #define
-   is probably no longer needed. */
-/*#define ISODE_SUCKS*/
+int error_count = 0;
 
 void main()
 {
@@ -380,5 +376,5 @@ void main()
     encode_run(pd,krb5_pwd_data,"pwd_data","",encode_krb5_pwd_data);
   }
 
-  exit(0);
+  exit(error_count);
 }

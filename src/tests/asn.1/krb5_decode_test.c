@@ -8,8 +8,7 @@
 #include "debug.h"
 #include <string.h>
 
-/* See krb5_encode_test.c for explanation. */
-/*#define ISODE_SUCKS*/
+int error_count = 0;
 
 void main()
 {
@@ -352,5 +351,5 @@ void main()
     decode_run("PasswdData","","30 3D A0 03 02 01 02 A1 36 30 34 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_pwd_data,ktest_equal_krb5_pwd_data);
   }
 
-  exit(0);
+  exit(error_count);
 }

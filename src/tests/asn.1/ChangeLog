@@ -1,5 +1,10 @@
 Wed Oct 19 00:11:43 1994  Theodore Y. Ts'o  (tytso@maytag)
 
+	* debug.h (assert):
+	  krb5_encode_test.c (main):
+	  krb5_decode_test.c (main): Exit with a non-zero exit status when
+	  	  the test suite detects errors.
+
 	* ktest.c (ktest_destroy_enc_data): Clear the kvno field when
 		destroying the encrypted data.
 
