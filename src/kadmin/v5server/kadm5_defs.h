@@ -141,10 +141,6 @@ krb5_keyblock *key_admin_key();
 krb5_encrypt_block *key_master_encblock();
 void key_free_key_data KRB5_PROTOTYPE((krb5_key_data *,
 				       krb5_int32));
-krb5_error_code key_name_to_data KRB5_PROTOTYPE((krb5_db_entry *,
-						 krb5_key_salt_tuple *,
-						 krb5_int32,
-						 krb5_key_data **));
 krb5_error_code key_dbent_to_keysalts
 	KRB5_PROTOTYPE((krb5_db_entry *,
 			krb5_int32 *,

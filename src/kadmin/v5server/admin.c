@@ -228,10 +228,18 @@ admin_merge_keys(kcontext, dbentp, unique,
 		xxx2.n_key_data = nkeys2;
 		xxx2.key_data = in2;
 		for (i=0; i<nksents; i++) {
-		    if (key_name_to_data(&xxx1, &kslist[i], -1, &kp1))
-			kp1 = (krb5_key_data *) NULL;
-		    if (key_name_to_data(&xxx2, &kslist[i], -1, &kp2))
-			kp2 = (krb5_key_data *) NULL;
+		    (void) krb5_dbe_find_keytype(kcontext,
+						 &xxx1,
+						 kslist[i].ks_keytype,
+						 kslist[i].ks_salttype,
+						 -1,
+						 &kp1);
+		    (void) krb5_dbe_find_keytype(kcontext,
+						 &xxx2,
+						 kslist[i].ks_keytype,
+						 kslist[i].ks_salttype,
+						 -1,
+						 &kp2);
 		    if (kp1 && kp2) {
 			if (kp2->key_data_kvno > kp1->key_data_kvno)
 			    kp1 = kp2;
@@ -1189,7 +1197,12 @@ admin_keysalt_verify(kcontext, debug_level, dbentp, should_be_there,
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_verify()\n"));
     for (i=0; i<nksents; i++) {
 	kdata = (krb5_key_data *) NULL;
-	(void) key_name_to_data(dbentp, &kslist[i], kvnolist[i], &kdata);
+	(void) krb5_dbe_find_keytype(kcontext,
+				     dbentp,
+				     kslist[i].ks_keytype,
+				     kslist[i].ks_salttype,
+				     kvnolist[i],
+				     &kdata);
 	if (should_be_there && !kdata) {
 	    retval = KRB5_ADM_KEY_DOES_NOT_EXIST;
 	    break;
@@ -1232,7 +1245,12 @@ admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
     if (keyectomy) {
 	count = dbentp->n_key_data;
 	for (i=0; i<nksents; i++) {
-	    if (!key_name_to_data(dbentp, &kslist[i], kvnolist[i], &kdata)) {
+	    if (!krb5_dbe_find_keytype(kcontext,
+				       dbentp,
+				       kslist[i].ks_keytype,
+				       kslist[i].ks_salttype,
+				       kvnolist[i],
+				       &kdata)) {
 		if (kdata->key_data_contents[0])
 		    krb5_xfree(kdata->key_data_contents[0]);
 		if (kdata->key_data_contents[1])

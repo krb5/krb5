@@ -1,4 +1,9 @@
 
+Tue Aug 15 14:28:03 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm5_defs.h, admin.c, passwd.c, srv_key.c - Replace key_name_to_data
+		with krb5_dbe_find_keytype().
+
+
 Thu Aug 10 14:34:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c - Consolidate handling of tagged database attributes here
 		in key_update_tl_attrs().  Fix a bug which was never encountered

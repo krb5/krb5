@@ -305,7 +305,6 @@ key_get_admin_entry(kcontext)
     }
 
     if (!kret && madmin_num_keys && madmin_keys) {
-	krb5_key_salt_tuple	kstmp;
 	krb5_key_data		*kdata;
 	krb5_db_entry		xxx;
 
@@ -314,9 +313,12 @@ key_get_admin_entry(kcontext)
 	 */
 	xxx.n_key_data = (krb5_int16) madmin_num_keys;
 	xxx.key_data = madmin_keys;
-	kstmp.ks_keytype = KEYTYPE_DES;	/* XXX - how to specify? */
-	kstmp.ks_salttype = -1;
-	if (key_name_to_data(&xxx, &kstmp, -1, &kdata))
+	if (krb5_dbe_find_keytype(kcontext,
+				  &xxx,
+				  KEYTYPE_DES,
+				  -1,
+				  -1,
+				  &kdata))
 	    kdata = &madmin_keys[0];
 
 	memset(&madmin_key, 0, sizeof(krb5_keyblock));
@@ -650,7 +652,12 @@ key_string2key_keysalt(ksent, ptr)
      */
     salted = 0;
     krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
-    if (!key_name_to_data(argp->dbentry, ksent, -1, &kdata)) {
+    if (!krb5_dbe_find_keytype(argp->context,
+			       argp->dbentry,
+			       ksent->ks_keytype,
+			       ksent->ks_salttype,
+			       -1,
+			       &kdata)) {
 	if (kdata->key_data_length[1] && kdata->key_data_contents[1])
 	    salted = 1;
     }
@@ -835,7 +842,12 @@ key_randomkey_keysalt(ksent, ptr)
     kret = 0;
 
     krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
-    if (key_name_to_data(argp->dbentry, ksent, -1, &kdata)) {
+    if (krb5_dbe_find_keytype(argp->context,
+			      argp->dbentry,
+			      ksent->ks_keytype,
+			      ksent->ks_salttype,
+			      -1,
+			      &kdata)) {
 	/*
 	 * Cannot find a name-to-data matching, so we must have to create a
 	 * new key entry.
@@ -1182,56 +1194,6 @@ key_free_key_data(keys, nkeys)
 	}
 	free(keys);
     }
-}
-
-/*
- * key_name_to_data()	- Find the appropriate krb5_key_data entry for a
- *			  given name.
- *
- * Name consists of key/salt tuple and a kvno.  If the kvno is negative, then
- * this routine returns the key_data entry with the highest kvno.  Otherwise,
- * it searches for an exact match.
- */
-krb5_error_code
-key_name_to_data(dbentp, ksent, kvno, kdatap)
-    krb5_db_entry	*dbentp;
-    krb5_key_salt_tuple	*ksent;
-    krb5_int32		kvno;
-    krb5_key_data	**kdatap;
-{
-    /*
-     * XXX - this should probably be a dbe routine.
-     */
-    int			i;
-    int			maxkvno;
-    krb5_key_data	*datap;
-
-    maxkvno = -1;
-    datap = (krb5_key_data *) NULL;
-    for (i=0; i<dbentp->n_key_data; i++) {
-	if ((dbentp->key_data[i].key_data_type[0] == ksent->ks_keytype) &&
-	    ((dbentp->key_data[i].key_data_type[1] == ksent->ks_salttype) ||
-	     (ksent->ks_salttype < 0))) {
-	    if (kvno >= 0) {
-		if (kvno == dbentp->key_data[i].key_data_kvno) {
-		    maxkvno = kvno;
-		    datap = &dbentp->key_data[i];
-		    break;
-		}
-	    }
-	    else {
-		if (dbentp->key_data[i].key_data_kvno > maxkvno) {
-		    maxkvno = dbentp->key_data[i].key_data_kvno;
-		    datap = &dbentp->key_data[i];
-		}
-	    }
-	}
-    }
-    if (maxkvno >= 0) {
-	*kdatap = datap;
-	return(0);
-    }
-    return(ENOENT);
 }
 
 /*

@@ -116,7 +116,6 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     krb5_boolean	pwret;
     krb5_int32		num_keys, num_dkeys, tmpn;
     krb5_key_data	*key_list, *dkey_list, *kent, *tmp;
-    krb5_key_salt_tuple	keysalt;
     krb5_error_code	kret;
     krb5_key_data	*skey_list;
     krb5_int16		nskeys;
@@ -161,9 +160,12 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     dbentp->key_data = dkey_list;
     dbentp->n_key_data = num_dkeys;
     for (i=0; i<num_keys; i++) {
-	keysalt.ks_keytype = (krb5_keytype) key_list[i].key_data_type[0];
-	keysalt.ks_salttype = (krb5_int32) key_list[i].key_data_type[1];
-	if (!key_name_to_data(dbentp, &keysalt, -1, &kent)) {
+	if (!krb5_dbe_find_keytype(kcontext,
+				   dbentp,
+				   (krb5_keytype) key_list[i].key_data_type[0],
+				   (krb5_int32) key_list[i].key_data_type[1],
+				   -1,
+				   &kent)) {
 	    if ((key_list[i].key_data_length[0] != kent->key_data_length[0]) ||
 		memcmp(key_list[i].key_data_contents[0],
 		       kent->key_data_contents[0],
