@@ -159,7 +159,7 @@ extern krb5_error_code krb5_find_princ_in_cache
 extern void printtime (time_t);
 
 /* authorization.c */
-extern krb5_boolean fowner (FILE *, int);
+extern krb5_boolean fowner (FILE *, uid_t);
 
 extern krb5_error_code krb5_authorization
 	(krb5_context, krb5_principal, const char *, char *, 
@@ -191,8 +191,6 @@ extern krb5_error_code get_line (FILE *, char **);
 extern char *  get_first_token (char *, char **);
 
 extern char *  get_next_token (char **);
-
-extern krb5_boolean fowner (FILE *, int);
 
 extern void init_auth_names (char *);
 
@@ -231,7 +229,7 @@ extern krb5_error_code find_princ_in_list
 	(krb5_context, krb5_principal, char **, krb5_boolean *);
 
 extern krb5_error_code get_best_princ_for_target
-	(krb5_context, int, int, char *, char *, krb5_ccache, 
+	(krb5_context, uid_t, uid_t, char *, char *, krb5_ccache, 
 		opt_info *, char *, char *, krb5_principal *, int *);
 
 extern krb5_error_code ksu_tgtname (krb5_context, const krb5_data *,

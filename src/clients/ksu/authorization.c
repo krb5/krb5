@@ -31,7 +31,7 @@ static void auth_cleanup (FILE *, FILE *, char *);
 
 krb5_boolean fowner(fp, uid)
     FILE *fp;
-    int uid;
+    uid_t uid;
 {
     struct stat sbuf;
 
@@ -503,8 +503,8 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     krb5_boolean retbool= FALSE;
     int j =0;
     char * err;
-    int max_ln=0;
-    int tln=0;
+    unsigned int max_ln=0;
+    unsigned int tln=0;
 
     while(fcmd_arr[i]){
 	tln = strlen(fcmd_arr[i]);

@@ -1,3 +1,9 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* authorization.c, heuristic.c, ksu.h: Use uid_t instead of int in
+	arguments to fowner() and get_best_princ_for_target(). Signed
+	vs. unsigned int cleanup.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

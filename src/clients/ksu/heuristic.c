@@ -97,7 +97,7 @@ krb5_error_code list_union(list1, list2, combined_list)
     char ***combined_list;
 {
 
-    int c1 =0, c2 = 0, i=0, j=0;
+    unsigned int c1 =0, c2 = 0, i=0, j=0;
     char ** tlist;
 
     if (! list1){   	
@@ -150,7 +150,7 @@ filter(fp, cmd, k5users_list, k5users_filt_list)
     krb5_error_code retval =0;
     krb5_boolean found = FALSE;
     char * out_cmd = NULL;
-    int i=0, j=0, found_count = 0, k=0;	
+    unsigned int i=0, j=0, found_count = 0, k=0;	
     char ** temp_filt_list;
 
     *k5users_filt_list = NULL;
@@ -203,7 +203,7 @@ get_authorized_princ_names(luser, cmd, princ_list)
     struct passwd *pwd;
     int k5login_flag =0;
     int k5users_flag =0;
-    FILE * login_fp, * users_fp;
+    FILE * login_fp = NULL , * users_fp = NULL;
     char **  k5login_list = NULL, ** k5users_list = NULL;
     char ** k5users_filt_list = NULL;
     char ** combined_list = NULL;
@@ -536,8 +536,8 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
 					  cc_source, options, cmd,
 					  hostname, client, path_out)
     krb5_context context;
-    int source_uid;
-    int target_uid;
+    uid_t source_uid;
+    uid_t target_uid;
     char *source_user;
     char *target_user;
     krb5_ccache cc_source;
