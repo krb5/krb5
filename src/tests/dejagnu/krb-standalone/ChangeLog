@@ -1,3 +1,10 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* rcp.exp, rsh_exp (stop_rsh_daemon): Do not close a process and
+	then look for eof. Some versions of expect go through a full
+	timeout in this scenario and others return immediately. New order:
+	kill process, expect eof, close, and then wait.
+
 2001-10-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* rsh.exp (rsh_test): Add stop_rsh_daemon before invoking
