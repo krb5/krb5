@@ -32,7 +32,6 @@
 #include "k5-int.h"
 #include <stdio.h>
 #include <time.h>
-#include <syslog.h>
 
 static krb5_error_code obtain_enc_ts_padata
 	(krb5_context,

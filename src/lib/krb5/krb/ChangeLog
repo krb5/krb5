@@ -1,3 +1,7 @@
+2002-06-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth.c: Don't include syslog.h.
+
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_in_tkt.c (send_as_request): Update arg list for
