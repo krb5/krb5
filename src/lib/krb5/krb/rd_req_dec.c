@@ -28,7 +28,9 @@ static char rcsid_rd_req_dec_c[] =
 /*
  Parses a KRB_AP_REQ message, returning its contents.
 
- server specifies the expected server's name for the ticket.
+ server specifies the expected server's name for the ticket; if NULL, then
+ any server will be accepted if the key can be found, and the caller should
+ verify that the principal is something it trusts.
 
  sender_addr specifies the address(es) expected to be present in the
  ticket.
@@ -82,7 +84,8 @@ krb5_tkt_authent *tktauthent;
     krb5_timestamp currenttime;
 
 
-    if (!krb5_principal_compare(server, req->ticket->server))
+    if ((server != NULL) &&
+	(!krb5_principal_compare(server, req->ticket->server))
 	return KRB5KRB_AP_WRONG_PRINC;
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
