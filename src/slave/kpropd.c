@@ -35,21 +35,7 @@ static char rcsid_kpropd_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/osconf.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <com_err.h>
-#include <errno.h>
-
 #include <stdio.h>
-#ifndef __STDC__
-/* com_err.h gets <stdarg.h> */
-#include <varargs.h>
-#endif
 #include <ctype.h>
 #include <sys/file.h>
 #include <signal.h>
@@ -66,6 +52,16 @@ static char rcsid_kpropd_c[] =
 #include <sys/param.h>
 #include <netdb.h>
 #include <syslog.h>
+
+#include <krb5/krb5.h>
+#include <krb5/asn1.h>
+#include <krb5/osconf.h>
+#include <krb5/kdb.h>
+#include <krb5/kdb_dbm.h>
+#include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
+#include <com_err.h>
+#include <errno.h>
 
 #include "kprop.h"
 

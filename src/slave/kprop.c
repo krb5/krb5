@@ -29,14 +29,6 @@ static char rcsid_kprop_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/osconf.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <com_err.h>
 #include <errno.h>
 #ifdef POSIX_FILE_LOCKS
 #include <fcntl.h>
@@ -54,6 +46,15 @@ static char rcsid_kprop_c[] =
 #include <netinet/in.h>
 #include <sys/param.h>
 #include <netdb.h>
+
+#include <krb5/krb5.h>
+#include <krb5/asn1.h>
+#include <krb5/osconf.h>
+#include <krb5/kdb.h>
+#include <krb5/kdb_dbm.h>
+#include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
+#include <com_err.h>
 
 #include "kprop.h"
 
