@@ -3,7 +3,9 @@ VPATH = @srcdir@
  
 DEFS = @DEFS@
 LIBS = @LIBS@
- 
+KRB4 = @KRB4@
+K4LIB = @K4LIB@
+
 CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
@@ -22,16 +24,13 @@ AWK = @AWK@
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
 
+KRB4INCLUDES=-I$(BUILDTOP)/include/kerberosIV
+
 all::
 
-
-#ifdef Krb4KDCCompat
-KRB4DEF = -DKRB4
-K4LIB=$(KRB4LIB)
-#endif
 DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-INCLUDES = $(KRB4INCLUDES) -I.
+LOCALINCLUDE = $(KRB4INCLUDES) -I.
 SRCS= \
 	kdc5_err.c \
 	$(srcdir)/dispatch.c \

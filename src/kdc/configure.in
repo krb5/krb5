@@ -5,4 +5,12 @@ ET_RULES
 CONFIG_RULES
 KRB_INCLUDE
 ISODE_INCLUDE
+WITH_KRB4
+AC_WITH([krb4],
+ADD_DEF(-DKRB4)
+ADD_DEF(-DBACKWARD_COMPAT)
+K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a',
+echo "warning: no krb4 support will be built in kdc"
+K4LIB=)
+AC_SUBST(K4LIB)
 AC_OUTPUT(Makefile,[EXTRA_RULES])
