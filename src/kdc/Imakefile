@@ -22,6 +22,11 @@ OBJS= \
 
 ErrorTableObjectRule()
 
-all::	krb5kdc $(SRCS)
+all::	krb5kdc
+
+kdc5_err.c: kdc5_err.et
 
 NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
+
+clean::
+	$(RM) kdc5_err.h kdc5_err.c
