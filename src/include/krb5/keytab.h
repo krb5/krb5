@@ -59,7 +59,7 @@ typedef struct _krb5_kt_ops {
 	krb5_error_code (*add) PROTOTYPE((krb5_keytab,
 					  krb5_keytab_entry *));
 	krb5_error_code (*remove) PROTOTYPE((krb5_keytab,
-				  krb5_kt_cursor));
+					     krb5_keytab_entry *));
 } krb5_kt_ops;
 
 #endif /* KRB5_KEYTAB__ */
