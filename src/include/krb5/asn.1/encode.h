@@ -33,7 +33,7 @@
 typedef	int (*encoder_func) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
 typedef void (*free_func) PROTOTYPE((krb5_pointer ));
 typedef krb5_pointer (*translator_func) PROTOTYPE((krb5_const_pointer, int * ));
-typedef int (*decoder_func) PROTOTYPE((PE, int, int, char *, krb5_pointer));
+typedef int (*decoder_func) PROTOTYPE((PE, int, int, char *, krb5_pointer *));
 
 /* encode.c */
 krb5_error_code krb5_encode_generic
