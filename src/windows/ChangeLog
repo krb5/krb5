@@ -1,3 +1,8 @@
+2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: 1.2.3 beta 1 (pre-release)
+	* README: Note on building ms2mit.
+
 2000-07-07  Danilo Almeida  <dalmeida@mit.edu>
 
 	* version.rc: No longer pre-release.
