@@ -27,10 +27,11 @@
 #define krb5_msgtype	int
 #define krb5_kvno	int
 
-#define krb5_addrtype	unsigned int
-#define krb5_keytype	unsigned int
-#define krb5_enctype	unsigned int
-#define krb5_cksumtype	unsigned int
-#define krb5_authdatatype	unsigned int
+/* these are unsigned shorts, but promote to signed ints.  Ick. */
+#define krb5_addrtype	int
+#define krb5_keytype	int
+#define krb5_enctype	int
+#define krb5_cksumtype	int
+#define krb5_authdatatype	int
 
 #endif /* not NARROW_PROTOTYPES */
