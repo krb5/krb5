@@ -45,36 +45,11 @@ KDC parameters.
 The following relations are defined in the
 .I [kdcdefaults]
 section:
-.IP primary_ports
-This relation lists the primary ports (e.g. ports to serve Kerberos version
-5 requests) to listen on.  This list is a comma separated list of integers.
-If supplied, this list serves as a base list of ports to listen on.  If any
-other ports are named in the
-.I [realms]
-section explicitly; or are named by
-.B kdc
-relations specifying this host in the
-.I krb5.conf
-file specified in the
-.B profile
-entry for a particular realm, then these ports are also listened on.
-.IP secondary_ports
-This relation lists the secondary ports (e.g. ports to serve Kerberos version
-4 requests) to listen on.  If supplied, this list serves as a base list of
-ports to listen on.  If any other ports are named in the
-.I [realms]
-section explicitly; or are named by
-.B v4kdc
-relations specifying this host in the
-.I krb5.conf
-file specified in the
-.B profile
-entry for a particular realm, then these ports are also listened on.
-Further, if this list is specified and the first element is
-.I \-1
-then no secondary ports are listened to, even if specified in the
-.I [realms]
-section.
+.IP kdc_ports
+This relation lists the ports which the Kerberos server should listen
+on, by default.  This list is a comma separated list of integers.  If
+this relation is not specified, the compiled-in default is usually
+port 88 and port 750.
 .SH REALMS SECTION
 Each tag in the
 .I [realms]
@@ -111,17 +86,15 @@ This
 specifies the location where the master key has been stored with
 .I kdb5_stash.
 
-.IP port
+.IP kdc_ports
 This
-.B integer
-specifies the primary port that the KDC is to listen to for this
-realm.
-
-.IP secondary_port
-This
-.B integer
-specifies the secondary port that the KDC is to listen to for this
-realm.
+.B string
+specifies the list of ports that the KDC is to listen to for this realm.  
+By default, the value of 
+.I kdc_ports
+as specified in the 
+.I [kdcdefaults] 
+section is used.
 
 .IP max_life
 This

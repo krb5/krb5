@@ -1,3 +1,8 @@
+Thu Oct  5 22:38:24 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc.conf.M: Documented kdc_ports, and removed references to
+		primary_port and secondary_port, which are no longer used.
+
 Wed Sep 13 18:40:24 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc.conf.M (profile): Remove definition of the profile field,
