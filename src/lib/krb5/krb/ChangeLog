@@ -1,3 +1,7 @@
+2002-03-14  Sam Hartman  <hartmans@mit.edu>
+
+	* walk_rtree.c (krb5_walk_realm_tree):  Fix handling of null client or server realm
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_actx.c (krb5_auth_context_externalize): Do bounds checking
