@@ -97,11 +97,48 @@ typedef char const * krb5_const_pointer;
 #define OLDDECLARG(type, val) type val;
 #endif /* STDC or PROTOTYPES */
 
-typedef	krb5_data **	krb5_principal;	/* array of strings */
-					/* CONVENTION: realm is first elem. */
-/* constant version thereof: */
-typedef krb5_data * const *  krb5_const_principal;
+#ifdef NO_NESTED_PROTOTYPES
+#define	NPROTOTYPE(x) ()
+#else
+#define	NPROTOTYPE(x) PROTOTYPE(x)
+#endif
 
-#define krb5_princ_realm(princ) ((princ)[0])
+typedef struct krb5_principal_data {
+    krb5_data realm;
+    krb5_data *data;
+    krb5_int32 length;
+    krb5_int32 type;
+} krb5_principal_data;
+
+typedef	krb5_principal_data *krb5_principal;	/* array of strings */
+
+/*
+ * Per V5 spec on definition of principal types
+ */
+
+/* Name type not known */
+#define KRB5_NT_UNKNOWN		0
+/* Just the name of the principal as in DCE, or for users */
+#define KRB5_NT_PRINCIPAL	1
+/* Service and other unique instance (krbtgt) */
+#define KRB5_NT_SRV_INST	2
+/* Service with host name as instance (telnet, rcommands) */
+#define KRB5_NT_SRV_HST		3
+/* Service with host as remaining components */
+#define KRB5_NT_SRV_XHST	4
+/* Unique ID */
+#define KRB5_NT_UID		5
+
+/* constant version thereof: */
+typedef const krb5_principal_data *krb5_const_principal;
+
+#define krb5_princ_realm(princ) (&(princ)->realm)
+#define krb5_princ_set_realm(princ,value) ((princ)->realm = *(value))
+#define krb5_princ_set_realm_length(princ,value) (princ)->realm.length = (value)
+#define krb5_princ_set_realm_data(princ,value) (princ)->realm.data = (value)
+#define	krb5_princ_size(princ) (princ)->length
+#define	krb5_princ_type(princ) (princ)->type
+#define	krb5_princ_name(princ) (princ)->data
+#define	krb5_princ_component(princ,i) ((princ)->data + i)
 
 #endif /* KRB5_BASE_DEFS__ */
