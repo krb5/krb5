@@ -1,3 +1,10 @@
+Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp
+ 		and sam-usec fields, which should always be set if the
+		nonce is not available, not just SAM_USE_SAD_AS_KEY is
+		being used.  [krb5-libs/325]
+
 Wed Feb 12 20:47:30 1997  Tom Yu  <tlyu@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Use the client's realm rather
