@@ -33,11 +33,11 @@
 #include <gssapi/gssapi.h>
 #endif
 
-KRB5_DLLIMP extern gss_OID gss_nt_user_name;
-KRB5_DLLIMP extern gss_OID gss_nt_machine_uid_name;
-KRB5_DLLIMP extern gss_OID gss_nt_string_uid_name;
-KRB5_DLLIMP extern gss_OID gss_nt_service_name;
-KRB5_DLLIMP extern gss_OID gss_nt_exported_name;
-KRB5_DLLIMP extern gss_OID gss_nt_service_name_v2;
+GSS_DLLIMP extern gss_OID gss_nt_user_name;
+GSS_DLLIMP extern gss_OID gss_nt_machine_uid_name;
+GSS_DLLIMP extern gss_OID gss_nt_string_uid_name;
+GSS_DLLIMP extern gss_OID gss_nt_service_name;
+GSS_DLLIMP extern gss_OID gss_nt_exported_name;
+GSS_DLLIMP extern gss_OID gss_nt_service_name_v2;
 
 #endif /* _GSSAPI_GENERIC_H_ */

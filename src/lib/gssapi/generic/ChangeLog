@@ -1,3 +1,11 @@
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (DLL_FILE_DEF): Tell the Makefile template that we
+		are building object files for the GSSAPI DLL.
+
+	* gssapi.hin, gssapi_generic.c: Change use of KRB5_DLLIMP to be
+		GSS_DLLIMP.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

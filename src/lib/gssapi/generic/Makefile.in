@@ -9,6 +9,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 ##DOS##OBJFILE=..\generic.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
+##DOS##DLL_EXP_TYPE=GSS
+
 ETSRCS= gssapi_err_generic.c
 ETOBJS= gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h

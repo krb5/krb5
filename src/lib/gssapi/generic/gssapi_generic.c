@@ -61,9 +61,9 @@ static gss_OID_desc oids[] = {
    { 6, "\053\006\001\005\006\002"},
 };
 
-KRB5_DLLIMP gss_OID gss_nt_user_name = oids+0;
-KRB5_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
-KRB5_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
-KRB5_DLLIMP gss_OID gss_nt_service_name = oids+3;
-KRB5_DLLIMP gss_OID gss_nt_exported_name = oids+4;
-KRB5_DLLIMP gss_OID gss_nt_service_name_v2 = oids+5;
+GSS_DLLIMP gss_OID gss_nt_user_name = oids+0;
+GSS_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
+GSS_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
+GSS_DLLIMP gss_OID gss_nt_service_name = oids+3;
+GSS_DLLIMP gss_OID gss_nt_exported_name = oids+4;
+GSS_DLLIMP gss_OID gss_nt_service_name_v2 = oids+5;
