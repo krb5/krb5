@@ -1,6 +1,6 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-        SUBDIRS = ccache crc-32 des kdb keytab krb os-4.3 rcache
+        SUBDIRS = ccache crc-32 des kdb keytab krb os-4.3 rcache free
 
 MakeSubdirs($(SUBDIRS))
