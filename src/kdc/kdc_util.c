@@ -119,7 +119,7 @@ krb5_kdc_req *request;
 const krb5_fulladdr *from;
 krb5_ticket **ticket;
 {
-    register krb5_ap_req apreq;
+    krb5_ap_req *apreq;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
@@ -136,12 +136,12 @@ krb5_ticket **ticket;
     if (retval = decode_krb5_ap_req(&request->padata, &apreq))
 	return retval;
 
-#define cleanup_apreq() {if (apreq.ticket) krb5_free_ticket(apreq.ticket);\
-if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.data);}
+#define cleanup_apreq() {krb5_free_ap_req(apreq); *ticket = 0;}
 
+#ifdef notdef
     /* XXX why copy here? */
     krb5_free_data(request->server[0]);
-    if (retval = krb5_copy_data(apreq.ticket->server[0],
+    if (retval = krb5_copy_data(apreq->ticket->server[0],
 				  &request->server[0])) {
 	register krb5_data **foo;
 	request->server[0] = 0;
@@ -151,9 +151,10 @@ if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.da
 	cleanup_apreq();
 	return retval;
     }
+#endif
 
-    if (isflagset(apreq.ap_options, AP_OPTS_USE_SESSION_KEY) ||
-	isflagset(apreq.ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
+    if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
+	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
 	cleanup_apreq();
 	return KRB5KDC_ERR_POLICY;
     }
@@ -161,7 +162,7 @@ if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.da
     /* XXX perhaps we should optimize the case of the TGS ? */
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(apreq.ticket->server,
+    if (retval = krb5_db_get_principal(apreq->ticket->server,
 				       &server, &nprincs,
 				       &more)) {
 	cleanup_apreq();
@@ -186,7 +187,7 @@ if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.da
     }
     who.dbentry = &server;
     who.key = &encrypting_key;
-    retval = krb5_rd_req_decoded(&apreq, apreq.ticket->server,
+    retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
 				 from->address,
 				 0,	/* no fetchfrom */
 				 kdc_rdreq_keyproc,
@@ -260,10 +261,9 @@ if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.da
 
     /* ticket already filled in by rd_req_dec, so free the ticket */
     krb5_free_ticket(authdat.ticket);
-    *ticket = apreq.ticket;
-    apreq.ticket = 0;
-    if (apreq.authenticator.ciphertext.data)
-	xfree(apreq.authenticator.ciphertext.data);
+    *ticket = apreq->ticket;
+    apreq->ticket = 0;
+    krb5_free_ap_req(apreq);
     return 0;
 }
 
