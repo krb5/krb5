@@ -1,3 +1,14 @@
+Fri May  3 00:26:47 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.hin (krb5_get_credentials_validate): declaration for new
+	function.
+	(krb5_get_cred_from_kdc_validate): ditto.
+
+Thu May  2 22:52:14 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.hin (krb5_rd_req_decoded_anyflag): declaration for new
+	function, see rd_req_dec.c for details.
+
 Tue Apr 30 14:51:55 1996    <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Fix Windows definition of PROVIDE_DES_CBC_RAW so that
