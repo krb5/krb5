@@ -76,12 +76,31 @@ STLIBOBJS = \
 
 GENS	= krb524_err.c krb524_err.h
 
-all-unix:: $(GENS)
+KRB524_HDR=$(BUILDTOP)$(S)include$(S)krb524.h
+
+all-unix:: $(GENS) 
 all-unix:: all-libs
+all-unix:: includes
 
 all-unix:: krb524d krb524test k524init
 
-all-windows:: $(OUTPRE)krb524.lib $(OUTPRE)k524init.exe
+includes:: krb524.h krb524_err.h
+	if cmp $(srcdir)/krb524.h \
+	$(BUILDTOP)/include/krb524.h  >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/krb524.h; \
+		 $(CP) $(srcdir)/krb524.h \
+			$(BUILDTOP)/include/krb524.h) ; \
+	fi
+	if cmp $(srcdir)/krb524_err.h \
+	$(BUILDTOP)/include/krb524_err.h  >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/krb524_err.h; \
+		 $(CP) krb524_err.h \
+			$(BUILDTOP)/include/krb524_err.h) ; \
+	fi
+
+all-windows:: $(KRB524_HDR) $(OUTPRE)krb524.lib $(OUTPRE)k524init.exe
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
@@ -106,3 +125,7 @@ install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(OBJS) $(GENS) core *~ *.bak #*
 	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o
+	$(RM) $(BUILDTOP)/include/krb524.h $(BUILDTOP)/include/krb524_err.h
+
+$(KRB524_HDR): krb524.h
+	$(CP) krb524.h $@
