@@ -8,7 +8,8 @@ BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)	\
-	alt_prof.$(OBJEXT)
+	alt_prof.$(OBJEXT)	\
+	str_conv.$(OBJEXT)
 
 UNIX_OBJS = logger.$(OBJEXT)
 
@@ -24,7 +25,8 @@ SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kw_dec.c	\
 	$(srcdir)/adm_kw_enc.c	\
 	$(srcdir)/logger.c	\
-	$(srcdir)/alt_prof.c
+	$(srcdir)/alt_prof.c	\
+	$(srcdir)/str_conv.c
 
 all:: all-$(WHAT) $(BASE_OBJS) 
 
@@ -54,8 +56,9 @@ clean-windows::
 # t_dbentry
 #
 T_DBENTRY_OBJS =  t_dbentry.$(OBJEXT) \
-		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
-		$(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a
+		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkdb5.a \
+		$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a \
+		$(TOPLIBD)/libcom_err.a
 
 t_dbentry:	$(T_DBENTRY_OBJS)
 	$(LD) -o t_dbentry $(T_DBENTRY_OBJS) $(LIBS)

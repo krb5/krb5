@@ -1,0 +1,824 @@
+/*
+ * lib/kadm/str_conv.c
+ *
+ * Copyright 1995 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ */
+
+/*
+ * str_conv.c - Convert between strings and Kerberos internal data.
+ */
+
+/*
+ * Table of contents:
+ *
+ * String decoding:
+ * ----------------
+ * krb5_string_to_keytype()	- Convert string to krb5_keytype.
+ * krb5_string_to_salttype()	- Convert string to salttype (krb5_int32)
+ * krb5_string_to_enctype()	- Convert string to krb5_enctype.
+ * krb5_string_to_cksumtype()	- Convert string to krb5_cksumtype;
+ * krb5_string_to_flags()	- Convert string to krb5_flags.
+ * krb5_string_to_timestamp()	- Convert string to krb5_timestamp.
+ * krb5_string_to_deltat()	- Convert string to krb5_deltat.
+ *
+ * String encoding:
+ * ----------------
+ * krb5_keytype_to_string()	- Convert krb5_keytype to string.
+ * krb5_salttype_to_string()	- Convert salttype (krb5_int32) to string.
+ * krb5_enctype_to_string()	- Convert krb5_enctype to string.
+ * krb5_cksumtype_to_string()	- Convert krb5_cksumtype to string.
+ * krb5_flags_to_string()	- Convert krb5_flags to string.
+ * krb5_timestamp_to_string()	- Convert krb5_timestamp to string.
+ * krb5_deltat_to_string()	- Convert krb5_deltat to string.
+ */
+
+#include "k5-int.h"
+#include "adm.h"
+#include "adm_proto.h"
+
+/*
+ * Local data structures.
+ */
+struct keytype_lookup_entry {
+    krb5_keytype	ktt_keytype;		/* Keytype		*/
+    const char *	ktt_specifier;		/* How to recognize it	*/
+    const char *	ktt_output;		/* How to spit it out	*/
+};
+
+struct salttype_lookup_entry {
+    krb5_int32		stt_keytype;		/* Salt type		*/
+    const char *	stt_specifier;		/* How to recognize it	*/
+    const char *	stt_output;		/* How to spit it out	*/
+};
+
+struct enctype_lookup_entry {
+    krb5_enctype	ett_enctype;		/* Encryption type	*/
+    const char *	ett_specifier;		/* How to recognize it	*/
+    const char *	ett_output;		/* How to spit it out	*/
+};
+
+struct cksumtype_lookup_entry {
+    krb5_cksumtype	cst_cksumtype;		/* Checksum type	*/
+    const char *	cst_specifier;		/* How to recognize it	*/
+    const char *	cst_output;		/* How to spit it out	*/
+};
+
+struct flags_lookup_entry {
+    krb5_flags		fl_flags;		/* Flag			*/
+    krb5_boolean	fl_sense;		/* Sense of the flag	*/
+    const char *	fl_specifier;		/* How to recognize it	*/
+    const char *	fl_output;		/* How to spit it out	*/
+};
+
+struct deltat_match_entry {
+    const char *	dt_scan_format;		/* sscanf format	*/
+    int			dt_nmatch;		/* Number to match	*/
+    int			dt_dindex;		/* Day index		*/
+    int			dt_hindex;		/* Hour index		*/
+    int			dt_mindex;		/* Minute index		*/
+    int			dt_sindex;		/* Second index		*/
+};
+
+/*
+ * Local strings
+ */
+/* Keytype strings */
+static const char keytype_null_in[]	= "null";
+static const char keytype_des_in[]	= "des";
+static const char keytype_null_out[]	= "Null";
+static const char keytype_des_out[]	= "DES";
+
+/* Salttype strings */
+static const char stype_v5_in[]		= "normal";
+static const char stype_v4_in[]		= "v4";
+static const char stype_norealm_in[]	= "norealm";
+static const char stype_olrealm_in[]	= "onlyrealm";
+static const char stype_special_in[]	= "special";
+static const char stype_v5_out[]	= "Version 5";
+static const char stype_v4_out[]	= "Version 4";
+static const char stype_norealm_out[]	= "Version 5 - No Realm";
+static const char stype_olrealm_out[]	= "Version 5 - Realm Only";
+static const char stype_special_out[]	= "Special";
+
+/* Encryption type strings */
+static const char etype_null_in[]	= "null";
+static const char etype_descbccrc_in[]	= "des-cbc-crc";
+static const char etype_descbcmd4_in[]	= "des-cbc-md4";
+static const char etype_descbcmd5_in[]	= "des-cbc-md5";
+static const char etype_rawdescbc_in[]	= "raw-des-cbc";
+static const char etype_null_out[]	= "Null";
+static const char etype_descbccrc_out[]	= "DES cbc mode with CRC-32";
+static const char etype_descbcmd4_out[]	= "DES cbc mode with RSA-MD4";
+static const char etype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
+static const char etype_rawdescbc_out[]	= "DES cbc mode";
+
+/* Checksum type strings */
+static const char cstype_crc32_in[]	= "crc32";
+static const char cstype_md4_in[]	= "md4";
+static const char cstype_md4des_in[]	= "md4-des";
+static const char cstype_descbc_in[]	= "des-cbc";
+static const char cstype_md5_in[]	= "md5";
+static const char cstype_md5des_in[]	= "md5-des";
+static const char cstype_crc32_out[]	= "CRC-32";
+static const char cstype_md4_out[]	= "RSA-MD4";
+static const char cstype_md4des_out[]	= "RSA-MD4 with DES cbc mode";
+static const char cstype_descbc_out[]	= "DES cbc mode";
+static const char cstype_md5_out[]	= "RSA-MD5";
+static const char cstype_md5des_out[]	= "RSA-MD5 with DES cbc mode";
+
+/* Flags strings */
+static const char flags_pdate_in[]	= "postdateable";
+static const char flags_fwd_in[]	= "forwardable";
+static const char flags_tgtbased_in[]	= "tgt-based";
+static const char flags_renew_in[]	= "renewable";
+static const char flags_proxy_in[]	= "proxiable";
+static const char flags_dup_skey_in[]	= "dup-skey";
+static const char flags_tickets_in[]	= "allow-tickets";
+static const char flags_preauth_in[]	= "preauth";
+static const char flags_hwauth_in[]	= "hwauth";
+static const char flags_pwchange_in[]	= "pwchange";
+static const char flags_service_in[]	= "service";
+static const char flags_pwsvc_in[]	= "pwservice";
+static const char flags_md5_in[]	= "md5";
+static const char flags_pdate_out[]	= "Not Postdateable";
+static const char flags_fwd_out[]	= "Not Forwardable";
+static const char flags_tgtbased_out[]	= "No TGT-based requests";
+static const char flags_renew_out[]	= "Not renewable";
+static const char flags_proxy_out[]	= "Not proxiable";
+static const char flags_dup_skey_out[]	= "No DUP_SKEY requests";
+static const char flags_tickets_out[]	= "All Tickets Disallowed";
+static const char flags_preauth_out[]	= "Preauthorization required";
+static const char flags_hwauth_out[]	= "HW Authorization required";
+static const char flags_pwchange_out[]	= "Password Change required";
+static const char flags_service_out[]	= "Service Disabled";
+static const char flags_pwsvc_out[]	= "Password Changing Service";
+static const char flags_md5_out[]	= "RSA-MD5 supported";
+static const char flags_default_neg[]	= "-";
+static const char flags_default_sep[]	= " ";
+
+/* Absolute time strings */
+static const char atime_full_digits[]	= "%y%m%d%H%M%S";
+static const char atime_full_digits_d[]	= "%y.%m.%d.%H.%M.%S";
+static const char atime_nsec_digits[]	= "%y%m%d%H%M";
+static const char atime_rel_hms[]	= "%H%M%S";
+static const char atime_rel_hm[]	= "%H%M";
+static const char atime_rel_col_hms[]	= "%T";
+static const char atime_rel_col_hm[]	= "%R";
+static const char atime_ldep_sfmt[]	= "%x:%X";
+static const char atime_full_text[]	= "%d-%b-%Y:%T";
+static const char atime_full_text_nos[]	= "%d-%b-%Y:%R";
+#if	!HAVE_STRPTIME
+static const char ascan_full_digits[]	= "%02d%02d%02d%02d%02d%02d";
+static const char ascan_full_digits_d[]	= "%02d.%02d.%02d.%02d.%02d.%02d";
+static const char ascan_nsec_digits[]	= "%02d%02d%02d%02d%02d";
+static const char ascan_rel_hms[]	= "%02d%02d%02d";
+static const char ascan_rel_hm[]	= "%02d%02d";
+static const char ascan_rel_col_hms[]	= "%02d:%02d:%02d";
+static const char ascan_rel_col_hm[]	= "%02d:%02d";
+#endif	/* !HAVE_STRPTIME */
+
+/* Delta time strings */
+static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
+static const char dtscan_dhms_stext[]	= "%dd%dh%dm%ds";
+static const char dtscan_hms_notext[]	= "%d:%02d:%02d";
+static const char dtscan_hms_stext[]	= "%dh%dm%ds";
+static const char dtscan_hm_notext[] 	= "%d:%02d";
+static const char dtscan_hm_stext[]	= "%dh%dm";
+static const char dtscan_days[]		= "%d%[d]";
+static const char dtscan_hours[]	= "%d%[h]";
+static const char dtscan_minutes[]	= "%d%[m]";
+static const char dtscan_seconds[]	= "%d%[s]";
+static const char dt_day_singular[]	= "day";
+static const char dt_day_plural[]	= "days";
+static const char dt_output_donly[]	= "%d %s";
+static const char dt_output_dhms[]	= "%d %s %02d:%02d:%02d";
+static const char dt_output_hms[]	= "%d:%02d:%02d";
+
+/*
+ * Lookup tables.
+ */
+static const struct keytype_lookup_entry keytype_table[] = {
+/* krb5_keytype	input specifier		output string		*/
+/*-------------	-----------------------	------------------------*/
+{ KEYTYPE_NULL,	keytype_null_in,	keytype_null_out	},
+{ KEYTYPE_DES,	keytype_des_in,		keytype_des_out		}
+};
+static const int keytype_table_nents = sizeof(keytype_table)/
+				       sizeof(keytype_table[0]);
+
+static const struct salttype_lookup_entry salttype_table[] = {
+/* salt type			input specifier		output string	  */
+/*-----------------------------	-----------------------	------------------*/
+{ KRB5_KDB_SALTTYPE_NORMAL,	stype_v5_in,		stype_v5_out	  },
+{ KRB5_KDB_SALTTYPE_V4,		stype_v4_in,		stype_v4_out	  },
+{ KRB5_KDB_SALTTYPE_NOREALM,	stype_norealm_in,	stype_norealm_out },
+{ KRB5_KDB_SALTTYPE_ONLYREALM,	stype_olrealm_in,	stype_olrealm_out },
+{ KRB5_KDB_SALTTYPE_SPECIAL,	stype_special_in,	stype_special_out }
+};
+static const int salttype_table_nents = sizeof(salttype_table)/
+					sizeof(salttype_table[0]);
+
+static const struct enctype_lookup_entry enctype_table[] = {
+/* krb5_enctype	     input specifier		output string		*/
+/*------------------ ---------------------	------------------------*/
+{ ETYPE_NULL,	     etype_null_in,		etype_null_out		},
+{ ETYPE_DES_CBC_CRC, etype_descbccrc_in,	etype_descbccrc_out	},
+{ ETYPE_DES_CBC_MD4, etype_descbcmd4_in,	etype_descbcmd4_out	},
+{ ETYPE_DES_CBC_MD5, etype_descbcmd5_in,	etype_descbcmd5_out	},
+{ ETYPE_RAW_DES_CBC, etype_rawdescbc_in,	etype_rawdescbc_out	}
+};
+static const int enctype_table_nents = sizeof(enctype_table)/
+				       sizeof(enctype_table[0]);
+
+static const struct cksumtype_lookup_entry cksumtype_table[] = {
+/* krb5_cksumtype         input specifier	output string		*/
+/*----------------------- ---------------------	------------------------*/
+{ CKSUMTYPE_CRC32,        cstype_crc32_in,	cstype_crc32_out	},
+{ CKSUMTYPE_RSA_MD4,      cstype_md4_in,	cstype_md4_out		},
+{ CKSUMTYPE_RSA_MD4_DES,  cstype_md4des_in,	cstype_md4des_out	},
+{ CKSUMTYPE_DESCBC,       cstype_descbc_in,	cstype_descbc_out	},
+{ CKSUMTYPE_RSA_MD5,      cstype_md5_in,	cstype_md5_out		},
+{ CKSUMTYPE_RSA_MD5_DES,  cstype_md5des_in,	cstype_md5des_out	}
+};
+static const int cksumtype_table_nents = sizeof(cksumtype_table)/
+					 sizeof(cksumtype_table[0]);
+
+static const struct flags_lookup_entry flags_table[] = {
+/* flag				sense	input specifier	   output string     */
+/*----------------------------- -------	------------------ ------------------*/
+{ KRB5_KDB_DISALLOW_POSTDATED,	0,	flags_pdate_in,	   flags_pdate_out   },
+{ KRB5_KDB_DISALLOW_FORWARDABLE,0,	flags_fwd_in,	   flags_fwd_out     },
+{ KRB5_KDB_DISALLOW_TGT_BASED,	0,	flags_tgtbased_in, flags_tgtbased_out},
+{ KRB5_KDB_DISALLOW_RENEWABLE,	0,	flags_renew_in,	   flags_renew_out   },
+{ KRB5_KDB_DISALLOW_PROXIABLE,	0,	flags_proxy_in,	   flags_proxy_out   },
+{ KRB5_KDB_DISALLOW_DUP_SKEY,	0,	flags_dup_skey_in, flags_dup_skey_out},
+{ KRB5_KDB_DISALLOW_ALL_TIX,	0,	flags_tickets_in,  flags_tickets_out },
+{ KRB5_KDB_REQUIRES_PRE_AUTH,	1,	flags_preauth_in,  flags_preauth_out },
+{ KRB5_KDB_REQUIRES_HW_AUTH,	1,	flags_hwauth_in,   flags_hwauth_out  },
+{ KRB5_KDB_REQUIRES_PWCHANGE,	1,	flags_pwchange_in, flags_pwchange_out},
+{ KRB5_KDB_DISALLOW_SVR,	0,	flags_service_in,  flags_service_out },
+{ KRB5_KDB_PWCHANGE_SERVICE,	1,	flags_pwsvc_in,	   flags_pwsvc_out   },
+{ KRB5_KDB_SUPPORT_DESMD5,	1,	flags_md5_in,	   flags_md5_out     }
+};
+static const int flags_table_nents = sizeof(flags_table)/
+				     sizeof(flags_table[0]);
+
+static const char * const atime_format_table[] = {
+atime_full_digits,	/* yymmddhhmmss			*/
+atime_full_digits_d,	/* yy.mm.dd.hh.mm.ss		*/
+atime_nsec_digits,	/* yymmddhhmm			*/
+atime_rel_hms,		/* hhmmss			*/
+atime_rel_hm,		/* hhmm				*/
+atime_rel_col_hms,	/* hh:mm:ss			*/
+atime_rel_col_hm,	/* hh:mm			*/
+/* The following not really supported unless native strptime present */
+atime_ldep_sfmt,	/*locale-dependent short format	*/
+atime_full_text,	/* dd-month-yyyy:hh:mm:ss	*/
+atime_full_text_nos	/* dd-month-yyyy:hh:mm		*/
+};
+static const int atime_format_table_nents = sizeof(atime_format_table)/
+					    sizeof(atime_format_table[0]);
+
+static const struct deltat_match_entry deltat_table[] = {
+/* scan format		nmatch	daypos	hourpos	minpos	secpos	*/
+/*---------------------	-------	-------	-------	-------	--------*/
+{ dtscan_dhms_notext,	4,	0,	1,	2,	3	},
+{ dtscan_dhms_stext,	4,	0,	1,	2,	3	},
+{ dtscan_hms_notext,	3,	-1,	0,	1,	2	},
+{ dtscan_hms_stext,	3,	-1,	0,	1,	2	},
+{ dtscan_hm_notext,	2,	-1,	-1,	0,	1	},
+{ dtscan_hm_stext,	2,	-1,	-1,	0,	1	},
+{ dtscan_days,		2,	0,	-1,	-1,	-1	},
+{ dtscan_hours,		2,	-1,	0,	-1,	-1	},
+{ dtscan_minutes,	2,	-1,	-1,	0,	-1	},
+{ dtscan_seconds,	2,	-1,	-1,	-1,	0	}
+};
+static const int deltat_table_nents = sizeof(deltat_table)/
+				      sizeof(deltat_table[0]);
+
+#if	!HAVE_STRPTIME
+/*
+ * Rudimentary version of strptime for systems which don't have it.
+ */
+static char *
+strptime(buf, format, tm)
+    char *buf;
+    const char *format;
+    struct tm *tm;
+{
+    int year, month, day, hour, minute, second;
+    char *bp;
+    time_t now;
+    
+    /*
+     * We only understand the following fixed formats:
+     *    %y%m%d%H%M%S
+     *    %y.%m.%d.%H.%M.%S
+     *    %y%m%d%H%M
+     *    %H%M%S
+     *    %H%M
+     *    %T
+     *    %R
+     */
+    bp = (char *) NULL;
+    if (!strcmp(format, atime_full_digits) &&
+	(sscanf(buf, ascan_full_digits,
+		&year, &month, &day, &hour, &minute, &second) == 6)) {
+	tm->tm_year = year;
+	tm->tm_mon = month - 1;
+	tm->tm_mday = day;
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_full_digits)];
+    }
+    else if (!strcmp(format,atime_full_digits_d) &&
+	     (sscanf(buf, ascan_full_digits_d,
+		     &year, &month, &day, &hour, &minute, &second) == 6)) {
+	tm->tm_year = year;
+	tm->tm_mon = month - 1;
+	tm->tm_mday = day;
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_full_digits_d)];
+    }
+    else if (!strcmp(format, atime_nsec_digits) &&
+	     (sscanf(buf, ascan_nsec_digits,
+		&year, &month, &day, &hour, &minute) == 5)) {
+	tm->tm_year = year;
+	tm->tm_mon = month - 1;
+	tm->tm_mday = day;
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = 0;
+	bp = &buf[strlen(atime_nsec_digits)];
+    }
+    else if (!strcmp(format, atime_rel_hms) &&
+	     (sscanf(buf, ascan_rel_hms, &hour, &minute, &second) == 3)) {
+	now = time((time_t *) NULL);
+	memcpy(tm, localtime(&now), sizeof(struct tm));
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_rel_hms)];
+    }
+    else if (!strcmp(format, atime_rel_hm) &&
+	     (sscanf(buf, ascan_rel_hm, &hour, &minute) == 2)) {
+	now = time((time_t *) NULL);
+	memcpy(tm, localtime(&now), sizeof(struct tm));
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	bp = &buf[strlen(atime_rel_hm)];
+    }
+    else if (!strcmp(format, atime_rel_col_hms) &&
+	     (sscanf(buf, ascan_rel_col_hms, &hour, &minute, &second) == 3)) {
+	now = time((time_t *) NULL);
+	memcpy(tm, localtime(&now), sizeof(struct tm));
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_rel_col_hms)];
+    }
+    else if (!strcmp(format, atime_rel_col_hm) &&
+	     (sscanf(buf, ascan_rel_col_hm, &hour, &minute) == 2)) {
+	now = time((time_t *) NULL);
+	memcpy(tm, localtime(&now), sizeof(struct tm));
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	bp = &buf[strlen(atime_rel_col_hm)];
+    }
+    return(bp);
+}
+#endif	/* HAVE_STRPTIME */
+
+/*
+ * String to internal datatype routines.
+ *
+ * These routines return 0 for success, EINVAL for invalid entry.
+ */
+krb5_error_code
+krb5_string_to_keytype(string, keytypep)
+    char		* string;
+    krb5_keytype	* keytypep;
+{
+    int i;
+    int found;
+
+    found = 0;
+    for (i=0; i<keytype_table_nents; i++) {
+	if (!strcasecmp(string, keytype_table[i].ktt_specifier)) {
+	    found = 1;
+	    *keytypep = keytype_table[i].ktt_keytype;
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_salttype(string, salttypep)
+    char	* string;
+    krb5_int32	* salttypep;
+{
+    int i;
+    int found;
+
+    found = 0;
+    for (i=0; i<salttype_table_nents; i++) {
+	if (!strcasecmp(string, salttype_table[i].stt_specifier)) {
+	    found = 1;
+	    *salttypep = salttype_table[i].stt_keytype;
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_enctype(string, enctypep)
+    char		* string;
+    krb5_enctype	* enctypep;
+{
+    int i;
+    int found;
+
+    found = 0;
+    for (i=0; i<enctype_table_nents; i++) {
+	if (!strcasecmp(string, enctype_table[i].ett_specifier)) {
+	    found = 1;
+	    *enctypep = enctype_table[i].ett_enctype;
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_cksumtype(string, cksumtypep)
+    char		* string;
+    krb5_cksumtype	* cksumtypep;
+{
+    int i;
+    int found;
+
+    found = 0;
+    for (i=0; i<cksumtype_table_nents; i++) {
+	if (!strcasecmp(string, cksumtype_table[i].cst_specifier)) {
+	    found = 1;
+	    *cksumtypep = cksumtype_table[i].cst_cksumtype;
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_flags(string, positive, negative, flagsp)
+    char	* string;
+    const char	* positive;
+    const char	* negative;
+    krb5_flags	* flagsp;
+{
+    int 	i;
+    int 	found;
+    const char	*neg;
+    size_t	nsize, psize;
+    int		cpos;
+    int		sense;
+
+    found = 0;
+    /* We need to have a way to negate it. */
+    neg = (negative) ? negative : flags_default_neg;
+    nsize = strlen(neg);
+    psize = (positive) ? strlen(positive) : 0;
+
+    cpos = 0;
+    sense = 1;
+    /* First check for positive or negative sense */
+    if (!strncasecmp(neg, string, nsize)) {
+	sense = 0;
+	cpos += (int) nsize;
+    }
+    else if (psize && !strncasecmp(positive, string, psize)) {
+	cpos += (int) psize;
+    }
+
+    for (i=0; i<flags_table_nents; i++) {
+	if (!strcasecmp(&string[cpos], flags_table[i].fl_specifier)) {
+	    found = 1;
+	    if (sense == flags_table[i].fl_sense)
+		*flagsp |= flags_table[i].fl_flags;
+	    else
+		*flagsp &= ~flags_table[i].fl_flags;
+
+	    break;
+	}
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_timestamp(string, timestampp)
+    char		* string;
+    krb5_timestamp	* timestampp;
+{
+    int i;
+    int found;
+    struct tm timebuf;
+
+    found = 0;
+    for (i=0; i<atime_format_table_nents; i++) {
+	if (strptime(string, atime_format_table[i], &timebuf)) {
+	    found = 1;
+	    break;
+	}
+    }
+    if (found)
+	*timestampp = (krb5_timestamp) mktime(&timebuf);
+    return((found) ? 0 : EINVAL);
+}
+
+krb5_error_code
+krb5_string_to_deltat(string, deltatp)
+    char	* string;
+    krb5_deltat	* deltatp;
+{
+    int i;
+    int found;
+    int svalues[4];
+    int days, hours, minutes, seconds;
+    krb5_deltat	dt;
+
+    found = 0;
+    days = hours = minutes = seconds = 0;
+    for (i=0; i<deltat_table_nents; i++) {
+	if (sscanf(string, deltat_table[i].dt_scan_format,
+		   &svalues[0], &svalues[1], &svalues[2], &svalues[3]) ==
+	    deltat_table[i].dt_nmatch) {
+	    if (deltat_table[i].dt_dindex >= 0)
+		days = svalues[deltat_table[i].dt_dindex];
+	    if (deltat_table[i].dt_hindex >= 0)
+		hours = svalues[deltat_table[i].dt_hindex];
+	    if (deltat_table[i].dt_mindex >= 0)
+		minutes = svalues[deltat_table[i].dt_mindex];
+	    if (deltat_table[i].dt_sindex >= 0)
+		seconds = svalues[deltat_table[i].dt_sindex];
+	    found = 1;
+	    break;
+	}
+    }
+    if (found) {
+	dt = days;
+	dt *= 24;
+	dt += hours;
+	dt *= 60;
+	dt += minutes;
+	dt *= 60;
+	dt += seconds;
+	*deltatp = dt;
+    }
+    return((found) ? 0 : EINVAL);
+}
+
+/*
+ * Internal datatype to string routines.
+ *
+ * These routines return 0 for success, EINVAL for invalid parameter, ENOMEM
+ * if the supplied buffer/length will not contain the output.
+ */
+krb5_error_code
+krb5_keytype_to_string(keytype, buffer, buflen)
+    krb5_keytype	keytype;
+    char		* buffer;
+    size_t		buflen;
+{
+    int i;
+    const char *out;
+
+    out = (char *) NULL;
+    for (i=0; i<keytype_table_nents; i++) {
+	if (keytype ==  keytype_table[i].ktt_keytype) {
+	    out = keytype_table[i].ktt_output;
+	    break;
+	}
+    }
+    if (out) {
+	if (buflen > strlen(out))
+	    strcpy(buffer, out);
+	else
+	    out = (char *) NULL;
+	return((out) ? 0 : ENOMEM);
+    }
+    else
+	return(EINVAL);
+}
+
+krb5_error_code
+krb5_salttype_to_string(salttype, buffer, buflen)
+    krb5_int32	salttype;
+    char	* buffer;
+    size_t	buflen;
+{
+    int i;
+    const char *out;
+
+    out = (char *) NULL;
+    for (i=0; i<salttype_table_nents; i++) {
+	if (salttype ==  salttype_table[i].stt_keytype) {
+	    out = salttype_table[i].stt_output;
+	    break;
+	}
+    }
+    if (out) {
+	if (buflen > strlen(out))
+	    strcpy(buffer, out);
+	else
+	    out = (char *) NULL;
+	return((out) ? 0 : ENOMEM);
+    }
+    else
+	return(EINVAL);
+}
+
+krb5_error_code
+krb5_enctype_to_string(enctype, buffer, buflen)
+    krb5_enctype	enctype;
+    char		* buffer;
+    size_t		buflen;
+{
+    int i;
+    const char *out;
+
+    out = (char *) NULL;
+    for (i=0; i<enctype_table_nents; i++) {
+	if (enctype ==  enctype_table[i].ett_enctype) {
+	    out = enctype_table[i].ett_output;
+	    break;
+	}
+    }
+    if (out) {
+	if (buflen > strlen(out))
+	    strcpy(buffer, out);
+	else
+	    out = (char *) NULL;
+	return((out) ? 0 : ENOMEM);
+    }
+    else
+	return(EINVAL);
+}
+
+krb5_error_code
+krb5_cksumtype_to_string(cksumtype, buffer, buflen)
+    krb5_cksumtype	cksumtype;
+    char		* buffer;
+    size_t		buflen;
+{
+    int i;
+    const char *out;
+
+    out = (char *) NULL;
+    for (i=0; i<cksumtype_table_nents; i++) {
+	if (cksumtype ==  cksumtype_table[i].cst_cksumtype) {
+	    out = cksumtype_table[i].cst_output;
+	    break;
+	}
+    }
+    if (out) {
+	if (buflen > strlen(out))
+	    strcpy(buffer, out);
+	else
+	    out = (char *) NULL;
+	return((out) ? 0 : ENOMEM);
+    }
+    else
+	return(EINVAL);
+}
+
+krb5_error_code
+krb5_flags_to_string(flags, sep, buffer, buflen)
+    krb5_flags	flags;
+    const char	* sep;
+    char	* buffer;
+    size_t	buflen;
+{
+    int			i;
+    krb5_flags		pflags;
+    const char		*sepstring;
+    char		*op;
+    int			initial;
+    krb5_error_code	retval;
+
+    retval = 0;
+    op = buffer;
+    pflags = 0;
+    initial = 1;
+    sepstring = (sep) ? sep : flags_default_sep;
+    /* Blast through the table matching all we can */
+    for (i=0; i<flags_table_nents; i++) {
+	if (flags & flags_table[i].fl_flags) {
+	    /* Found a match, see if it'll fit into the output buffer */
+	    if ((op+strlen(flags_table[i].fl_output)+strlen(sepstring)) <
+		(buffer + buflen)) {
+		if (!initial) {
+		    strcpy(op, sep);
+		    op += strlen(sep);
+		}
+		initial = 0;
+		strcpy(op, flags_table[i].fl_output);
+		op += strlen(flags_table[i].fl_output);
+	    }
+	    else {
+		retval = ENOMEM;
+		break;
+	    }
+	    /* Keep track of what we matched */
+	    pflags |= flags_table[i].fl_flags;
+	}
+    }
+    if (!retval) {
+	/* See if there's any leftovers */
+	if (flags & ~pflags)
+	    retval = EINVAL;
+	else if (initial)
+	    *buffer = '\0';
+    }
+    return(retval);
+}
+
+krb5_error_code
+krb5_timestamp_to_string(timestamp, buffer, buflen)
+    krb5_timestamp	timestamp;
+    char		* buffer;
+    size_t		buflen;
+{
+    if (strlen(ctime((time_t *) &timestamp)) <= buflen) {
+	strcpy(buffer, ctime((time_t *) &timestamp));
+	/* ctime returns <datestring>\n\0 */
+	buffer[strlen(buffer)-1] = '\0';
+	return(0);
+    }
+    return(ENOMEM);
+}
+
+krb5_error_code
+krb5_deltat_to_string(deltat, buffer, buflen)
+    krb5_deltat	deltat;
+    char	* buffer;
+    size_t	buflen;
+{
+    int			days, hours, minutes, seconds;
+    krb5_deltat		dt;
+    krb5_error_code	retval;
+
+    days = deltat / (24*3600);
+    dt = deltat % (24*3600);
+    hours = dt / 3600;
+    dt %= 3600;
+    minutes = dt / 60;
+    seconds = dt % 60;
+
+    retval = 0;
+    if (days) {
+	if (hours || minutes || seconds) {
+	    if (buflen < (strlen(dt_output_dhms)+strlen(dt_day_plural)))
+		retval = ENOMEM;
+	    else
+		sprintf(buffer, dt_output_dhms, days,
+			(days > 1) ? dt_day_plural : dt_day_singular,
+			hours, minutes, seconds);
+	}
+	else {
+	    if (buflen < (strlen(dt_output_donly)+strlen(dt_day_plural)))
+		retval = ENOMEM;
+	    else
+		sprintf(buffer, dt_output_donly, days,
+			(days > 1) ? dt_day_plural : dt_day_singular);
+	}
+    }
+    else {
+	if (buflen < strlen(dt_output_hms))
+	    retval = ENOMEM;
+	else
+	    sprintf(buffer, dt_output_hms, hours, minutes, seconds);
+    }
+    return(retval);
+}
