@@ -1,3 +1,8 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Fix up terminal modes if we're
+	interrupted. [reported by Booker Bense] [pullup from trunk]
+
 2001-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (foreach_localaddr): Increase buffer space initially
