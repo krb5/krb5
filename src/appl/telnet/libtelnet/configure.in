@@ -12,6 +12,8 @@ if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   LIBOBJS="$LIBOBJS setenv.o"
   AC_DEFINE([NEED_SETENV])
 fi
+dnl
+KRB5_NEED_PROTO([#include <stdlib.h>],setenv)
 AC_C_CONST
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)

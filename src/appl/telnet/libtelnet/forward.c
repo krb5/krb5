@@ -30,7 +30,7 @@
 #include "k5-int.h"
 #include "krb5forw.h"
  
-#ifdef NEED_SETENV
+#if defined(NEED_SETENV) || defined(NEED_SETENV_PROTO)
 extern int setenv(char *, char *, int);
 #endif
 

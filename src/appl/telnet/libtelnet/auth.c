@@ -510,7 +510,7 @@ auth_name(data, cnt)
 	if (cnt > sizeof(savename) - 1) {
 		if (auth_debug_mode)
 			printf(">>>%s: Name in NAME (%d) exceeds %d length\r\n",
-					Name, cnt, sizeof(savename)-1);
+					Name, cnt, (int) sizeof(savename)-1);
 		return;
 	}
 	memcpy((void *)savename, (void *)data, cnt);
