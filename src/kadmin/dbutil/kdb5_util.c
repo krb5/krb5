@@ -141,14 +141,14 @@ static struct _cmd_table *cmd_lookup(name)
      return NULL;
 }
 
-#define ARG_VAL (--argc > 0 ? (optarg = *(++argv)) : (char *)(usage(), NULL))
+#define ARG_VAL (--argc > 0 ? (koptarg = *(++argv)) : (char *)(usage(), NULL))
      
 int main(argc, argv)
     int argc;
     char *argv[];
 {
     struct _cmd_table *cmd = NULL;
-    char *optarg, **cmd_argv;	
+    char *koptarg, **cmd_argv;	
     int cmd_argc;
     krb5_error_code retval;
 
@@ -172,13 +172,13 @@ int main(argc, argv)
     argv++; argc--;
     while (*argv) {
        if (strcmp(*argv, "-P") == 0 && ARG_VAL) {
-	    mkey_password = optarg;
+	    mkey_password = koptarg;
 	    manual_mkey = TRUE;
        } else if (strcmp(*argv, "-d") == 0 && ARG_VAL) {
-	    global_params.dbname = optarg;
+	    global_params.dbname = koptarg;
 	    global_params.mask |= KADM5_CONFIG_DBNAME;
        } else if (strcmp(*argv, "-r") == 0 && ARG_VAL) {
-	    global_params.realm = optarg;
+	    global_params.realm = koptarg;
 	    global_params.mask |= KADM5_CONFIG_REALM;
 	    /* not sure this is really necessary */
 	    if ((retval = krb5_set_default_realm(util_context,
@@ -187,15 +187,15 @@ int main(argc, argv)
 		 exit(1);
 	    }
        } else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
-	    if (krb5_string_to_enctype(optarg, &global_params.enctype))
-		 com_err(argv[0], 0, "%s is an invalid enctype", optarg);
+	    if (krb5_string_to_enctype(koptarg, &global_params.enctype))
+		 com_err(argv[0], 0, "%s is an invalid enctype", koptarg);
 	    else
 		 global_params.mask |= KADM5_CONFIG_ENCTYPE;
        } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
-	    global_params.mkey_name = optarg;
+	    global_params.mkey_name = koptarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;
        } else if (strcmp(*argv, "-sf") == 0 && ARG_VAL) {
-	    global_params.stash_file = optarg;
+	    global_params.stash_file = koptarg;
 	    global_params.mask |= KADM5_CONFIG_STASH_FILE;
        } else if (strcmp(*argv, "-m") == 0) {
 	    manual_mkey = TRUE;
