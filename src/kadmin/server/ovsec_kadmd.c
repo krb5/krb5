@@ -20,7 +20,6 @@ static char *rcsid = "$Header$";
 #include    <unistd.h>
 #include    <netinet/in.h>
 #include    <arpa/inet.h>  /* inet_ntoa */
-#include    <netdb.h>
 #include    <rpc/rpc.h>
 #include    <gssapi/gssapi_krb5.h>
 #include    <rpc/auth_gssapi.h>
