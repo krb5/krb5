@@ -443,8 +443,6 @@ character classes.
 \item[OVSEC_KADM_PASS_TOOSOON] Current password's minimum life has not
 expired.
 \item[OVSEC_KADM_POLICY_REF] Policy reference count is not zero.
-\item[OVSEC_KADM_CANNOT_OVERRIDE] Request to override password minimum
-life or dictionary check denied.
 \end{description}
 
 \subsection{Authentication and Authorization}
@@ -651,26 +649,20 @@ RETURN CODES:
 \begin{verbatim}
 ovsec_kadm_ret_t
 ovsec_kadm_create_principal(ovsec_kadm_principal_ent_t princ, u_int32 mask,
-		char *pw, int override_qual);
+		char *pw);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: add
 
 \begin{enumerate}
-\item Determine whether password quality checks should be overridden.
-\begin{enumerate}
-\item If the POLICY bit is not set in aux_attributes, set
-override_qual to true.
-\item Otherwise, use the specified override_qual.
-\end{enumerate}
 
 \item Return OVSEC_KADM_BAD_MASK if the mask is invalid.
 \item If the named principal exists, return OVSEC_KADM_DUP.
 \item If the POLICY bit is set and the named policy does not exist,
 return OVSEC_KADM_UNK_POLICY.
-\item If override_qual is false and the password does not meet the
-quality standards, return the appropriate OVSEC_KADM_PASS_Q_* error
-code.
+\item If OVSEC_KADM_POLICY bit is set in aux_attributes check to see if
+the password does not meets quality standards, return the appropriate
+OVSEC_KADM_PASS_Q_* error code if it fails.
 \item Store the principal, set the key.  The key is generated with
 Kerberos' string-to-key function, using the salt method specified on
 the admin server's command line; see section \ref{sec:commandline}.
@@ -834,8 +826,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_chpass_principal(krb5_principal princ, char *pw, 
-                int override_qual);
+ovsec_kadm_chpass_principal(krb5_principal princ, char *pw);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -851,39 +842,12 @@ If the principal's POLICY bit is set in aux_attributes, compliance
 with each of the named policy fields is verified and an appropriate
 error code is returned if verification fails.
 
-{\it However}, passsword policy and dictionary checks can be overriden
-under very precise circumstances.  Specifically,
-
-\begin{itemize}
-\item if the calling principal has the modify priviledge, and
-
-\item if the calling principal is different from the princ argument,
-and
-
-\item if the request is authenticated to the ovsec_kadm/admin service,
-and
-
-\item if override_qual is specified as true,
-\end{itemize}
-
-then {\it neither the password dictionary check nor pw_min_life check
-is performed}.  The rationale behind the exception is that an
-administrator must always be able to change a principal's password
-immediately (in case it is compromised).  (Note that this leaves the
-dictionary check overriden without a rationalization; not
-surprisingly, the author thinks it is irrational.  It also does not
-explain why an administrator cannot override its own policy, which the
-author also thinks is irrational.)
-
 Note that the policy checks are only be performed if the POLICY bit is
 set in the principal's aux_attributes field.
 
 \begin{enumerate}
-\item If override_qual is set to true, verify that the three
-conditions stated above are met; if any condition is not met, return
-OVSEC_KADM_CANNOT_OVERRIDE.
 \item Make sure principal exists, if not return OVSEC_KADM_UNK_PRINC error.
-\item If override_qual is false, (now - last_pwd_change) $<$
+\item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
 principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
 \item If the password does not meet the quality
@@ -891,8 +855,8 @@ standards, return the appropriate OVSEC_KADM_PASS_Q_* error code.
 \item Convert password to key.  The key is generated with
 Kerberos' string-to-key function, using the salt method specified on
 the admin server's command line; see section \ref{sec:commandline}.
-\item If override_qual is false and the new key is in the principal's
-password history, return OVSEC_KADM_PASS_REUSE.
+\item If the new key is in the principal's password history, return
+OVSEC_KADM_PASS_REUSE.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
@@ -923,7 +887,7 @@ life.
 \begin{verbatim}
 ovsec_kadm_ret_t
 ovsec_kadm_chpass_principal_util(krb5_principal princ, char *new_pw, 
-                int override_qual, char **pw_ret, char *msg_ret);
+				 char **pw_ret, char *msg_ret);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -955,7 +919,7 @@ krb5_read_password.
 point to a static buffer containing the password.  If pw_ret is non-NULL
 and the password was supplied, set *pw_ret to the supplied password.
 
-\item Call ovsec_kadm_chpass_principal with princ, new_pw, and override_qual.
+\item Call ovsec_kadm_chpass_principal with princ, and new_pw.
 
 \item If successful copy ``Password Changed.'' into msg_ret and return zero.
 
@@ -1030,8 +994,7 @@ life.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_randkey_principal(krb5_principal princ, krb5_keyblock **new_key,
-		int override_qual);
+ovsec_kadm_randkey_principal(krb5_principal princ, krb5_keyblock **new_key)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -1047,34 +1010,12 @@ is set in aux_attributes, compliance with each of the named policy
 fields is verified and an appropriate error code is returned if
 verification fails.
 
-{\it However}, passsword policy and dictionary checks can be overriden
-under very precise circumstances.  Specifically,
-
-\begin{itemize}
-\item if the calling principal has the modify priviledge, and
-
-\item if the calling principal is different from the princ argument,
-and
-
-\item if the request is authenticated to the ovsec_kadm/admin service,
-and
-
-\item if override_qual is specified as true,
-\end{itemize}
-
-then {\it the pw_min_life check is not performed}.  The rationale
-behind the exception is that an administrator must always be able to
-change a principal's password immediately (in case it is compromised).
-
 Note that the policy checks are only be performed if the POLICY bit is
 set in the principal's aux_attributes field.
 
 \begin{enumerate}
-\item If override_qual is set to true, verify that the three
-conditions stated above are met; if any condition is not met, return
-OVSEC_KADM_CANNOT_OVERRIDE.
 \item If the principal does not exist, return OVSEC_KADM_UNK_PRINC.
-\item If override_qual is false, (now - last_pwd_change) $<$
+\item If caller does not have modify privilege, (now - last_pwd_change) $<$
 pw_min_life, and the KRB5_KDB_REQUIRES_PWCHANGE bit is not set in the
 principal's attributes, return OVSEC_KADM_PASS_TOOSOON.
 \item Store old key in history.
