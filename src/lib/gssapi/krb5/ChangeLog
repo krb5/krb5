@@ -1,3 +1,13 @@
+
+Tue Aug 29 13:31:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in, .Sanitize, {im,ex}port_sec_context.c, ser_sctx.c - Add
+		new modules to support {im,ex}port of GSSAPI context.
+	* krb5_gss_glue.c - Add krb5_gss_{im,ex}port_sec_context() wrapper
+		routines.
+	* gssapiP_krb5.h - Add prototypes for krb5_gss_{im,ex}port_sec_context
+		and kg_ser_context_init.
+	* gssapi_err_krb5.et - Add magic numbers for GSSAPI data structures.
+
 Mon Aug  7 19:08:52 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* inq_cred.c (krb5_gss_inquire_cred): Use

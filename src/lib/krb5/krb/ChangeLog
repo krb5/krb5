@@ -1,3 +1,17 @@
+
+Tue Aug 29 14:14:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in, .Sanitize, ser_{actx,adata,addr,auth,cksum,ctx,eblk,key,
+		princ}.c, serialize.c, t_ser.c - Add serialization operations
+		for data structures required to serialize krb5_context, krb5_
+		auth_context, krb5_encrypt_block and krb5_principal.
+	* auth_con.h - Add magic number.
+	* auth_con.c - Add static routine to copy an address and use this
+		instead of the other code.  Set the magic number when initing
+		an auth_context.  Use krb5_free_address to release an address.
+	* init_ctx.c - Free the allocated serializers when releasing context.
+	* rd_rep.c - Copy the keyblock from the message instead of setting
+		a pointer into it.
+
 Thu Aug 24 18:55:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list.
