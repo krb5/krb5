@@ -1,3 +1,7 @@
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* libgssrpc.exports: Export svc_maxfd.
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for sockaddr_in.sin_len and

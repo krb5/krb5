@@ -52,6 +52,7 @@ gssrpc_svc_fdset
 gssrpc_svc_fdset_init
 gssrpc_svc_getreq
 gssrpc_svc_getreqset
+gssrpc_svc_maxfd
 gssrpc_svc_register
 gssrpc_svc_run
 gssrpc_svc_sendreply
