@@ -5,3 +5,9 @@ Boolean GSSAPILibraryIsPresent ()
 	Ptr	symAddr;
 	return (Find_Symbol (&symAddr, "\pgss_init_sec_context", gss_init_sec_context_ProcInfo)) == noErr;
 }
+
+Boolean GSSAPILibrarySupportsCCacheName ()
+{
+	Ptr	symAddr;
+	return (Find_Symbol (&symAddr, "\pgss_krb5_ccache_name", gss_krb5_ccache_name_ProcInfo)) == noErr;
+}

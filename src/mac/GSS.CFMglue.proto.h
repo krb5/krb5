@@ -7,3 +7,4 @@ OM_uint32 gss_init_sec_context(OM_uint32 *, gss_cred_id_t, gss_ctx_id_t *, gss_n
 OM_uint32 gss_import_name(OM_uint32 *, gss_buffer_t, gss_OID, gss_name_t *);
 OM_uint32 gss_release_name(OM_uint32 *, gss_name_t *);
 OM_uint32 gss_wrap_size_limit(OM_uint32 *, gss_ctx_id_t, int, gss_qop_t, OM_uint32, OM_uint32 *);
+OM_uint32 gss_krb5_ccache_name(OM_uint32 *minor_status, const char *name, const char **out_name);
