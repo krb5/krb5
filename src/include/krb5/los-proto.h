@@ -20,33 +20,33 @@
 
 /* libos.spec */
 krb5_error_code krb5_read_password
-	PROTOTYPE((char *prompt,
-		   char *prompt2,
-		   char *return_pwd,
-		   int size_return ));
-krb5_error_code krb5_lock_file
-	PROTOTYPE((FILE *filep,
+	PROTOTYPE((char *,
 		   char *,
-		   int mode ));
+		   char *,
+		   int * ));
+krb5_error_code krb5_lock_file
+	PROTOTYPE((FILE *,
+		   char *,
+		   int  ));
 krb5_error_code krb5_unlock_file
-	PROTOTYPE((FILE *filep,
+	PROTOTYPE((FILE *,
 		   char * ));
 krb5_error_code krb5_timeofday
-	PROTOTYPE((krb5_int32 *timeret ));
+	PROTOTYPE((krb5_int32 * ));
 krb5_error_code krb5_ms_timeofday
-	PROTOTYPE((krb5_int32 *seconds,
-		   krb5_int16 *milliseconds ));
+	PROTOTYPE((krb5_int32 *,
+		   krb5_int16 * ));
 int krb5_net_read
-	PROTOTYPE((int fd,
-		   char *buf,
-		   int len ));
+	PROTOTYPE((int ,
+		   char *,
+		   int  ));
 int krb5_net_write
-	PROTOTYPE((int fd,
-		   char *buf,
-		   int len ));
+	PROTOTYPE((int ,
+		   char *,
+		   int  ));
 		 /* get all the addresses of this host */
 krb5_error_code krb5_os_localaddr
-	PROTOTYPE((krb5_address ***addr));
+	PROTOTYPE((krb5_address ***));
 
 
 #endif /* __KRB5_LIBOS_PROTO__ */
