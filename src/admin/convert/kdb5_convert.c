@@ -24,11 +24,14 @@
  *
  * Generate (from scratch) a Kerberos V5 KDC database, filling it in with the
  * entries from a V4 database.
- * You'd better have NDBM if you're doing this!
+ *
+ * Code lifted from kdb5_create, kdb5_edit (v5 utilities),
+ * kdb_util, kdb_edit, libkdb (v4 utilities/libraries), put into a blender,
+ * and this is the result. 
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_create_c[] =
+static char rcsid_kdb5_convert_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -53,12 +56,6 @@ static long master_key_version;
 #include <stdio.h>
 
 #include <krb5/ext-proto.h>
-
-#ifdef ODBM
-#error:  This program cannot work properly with a DBM database unless it has the NDBM package
-/* This is because the program opens both databases simultaneously,
-   and the old DBM does not support multiple simultaneous databases. */
-#endif
 
 #define PROGNAME argv[0]
 
@@ -86,34 +83,35 @@ struct realm_info {
 
 static krb5_error_code add_principal PROTOTYPE((krb5_principal, enum ap_op,
 						struct realm_info *));
-void v4cleanup PROTOTYPE((void));
+void v4fini PROTOTYPE((void));
 int v4init PROTOTYPE((char *, char *, int));
 krb5_error_code enter_in_v5_db PROTOTYPE((char *, Principal *));
+krb5_error_code process_v4_dump PROTOTYPE((char *, char *));
 
-/*
- * Steps in creating a database:
- *
- * 1) use the db calls to open/create a new database
- *
- * 2) get a realm name for the new db
- *
- * 3) get a master password for the new db; convert to an encryption key.
- *
- * 4) create various required entries in the database
- *
- * 5) close & exit
- */
-
+#ifdef ODBM
 static void
 usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d v5dbpathname] [-D v4dbpathname] [-n] [-r realmname] [-k keytype]\n\
-\t[-e etype] [-M mkeyname]\n",
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-k keytype]\n\
+\t[-e etype] [-M mkeyname] -f inputfile\n",
+	    who);
+    fprintf(stderr, "\t(You must supply a v4 database dump file for this version of %s\n",who);
+    exit(status);
+}
+#else
+static void
+usage(who, status)
+char *who;
+int status;
+{
+    fprintf(stderr, "usage: %s [-d v5dbpathname] [-n] [-r realmname] [-k keytype]\n\
+\t[-e etype] [-M mkeyname] [-D v4dbpathname | -f inputfile]\n",
 	    who);
     exit(status);
 }
+#endif
 
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
@@ -150,6 +148,7 @@ char *argv[];
     krb5_error_code retval;
     char *dbname = 0;
     char *v4dbname = 0;
+    char *v4dumpfile = 0;
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
@@ -158,21 +157,25 @@ char *argv[];
     int v4manual = 0;
     krb5_enctype etype = 0xffff;
 
-    initialize_krb5_error_table();
-    initialize_kdb5_error_table();
-    initialize_isod_error_table();
+    krb5_init_ets();
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:D:r:k:M:e:n")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:D:r:k:M:e:nf:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
 	case 'D':			/* set db name */
+#ifdef ODBM
+	    usage(PROGNAME, 1);
+#else
+	    if (v4dumpfile)
+		usage(PROGNAME, 1);
 	    v4dbname = optarg;
 	    break;
+#endif
 	case 'r':
 	    realm = optarg;
 	    break;
@@ -189,12 +192,23 @@ char *argv[];
 	case 'n':
 	    v4manual++;
 	    break;
+	case 'f':
+	    if (v4dbname)
+		usage(PROGNAME, 1);
+	    v4dumpfile = optarg;
+	    break;
 	case '?':
 	default:
 	    usage(PROGNAME, 1);
 	    /*NOTREACHED*/
 	}
     }
+
+#ifdef ODBM
+    if (!v4dumpfile) {
+	usage(PROGNAME, 1);
+    }
+#endif
 
     if (!keytypedone)
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
@@ -294,6 +308,7 @@ master key name '%s'\n",
     if (retval = krb5_db_init()) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
+	v4fini();
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
 		dbname);
 	exit(1);
@@ -304,25 +319,32 @@ master key name '%s'\n",
 	(void) krb5_db_fini();
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
+	v4fini();
 	com_err(PROGNAME, retval, "while adding entries to the database");
 	exit(1);
     }
-    if (retval = kerb_db_iterate(enter_in_v5_db, realm)) {
-	com_err(PROGNAME, retval, "while translating entries to the database");
-    }
+    if (v4dumpfile)
+	retval = process_v4_dump(v4dumpfile, realm);
+    else
+	retval = kerb_db_iterate(enter_in_v5_db, realm);
     putchar('\n');
+    if (retval)
+	com_err(PROGNAME, retval, "while translating entries to the database");
     /* clean up */
     (void) krb5_db_fini();
     (void) krb5_finish_key(&master_encblock);
     (void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    v4fini();
     exit(retval ? 1 : 0);
 }
 
 void
-v4cleanup()
+v4fini()
 {
-    return;
+#ifndef ODBM
+    kerb_fini();
+#endif
 }
 
 int
@@ -330,7 +352,9 @@ v4init(pname, name, manual)
 char *pname, *name;
 int manual;
 {
+#ifndef ODBM
     kerb_init();
+#endif
     if (name) {
 	if (kerb_db_set_name(name) != 0) {
 	    com_err(pname, 0,
@@ -344,12 +368,14 @@ int manual;
 	com_err(pname, 0, "Couldn't read v4 master key.");
 	return 1;
     }
+#ifndef ODBM
     if ((master_key_version = kdb_verify_master_key(master_key,
 						    master_key_schedule,
-						    stdout)) < 0) {
-	com_err(pname, 0, "Couldn't verify v4 master key.");
+						    0)) < 0) {
+	com_err(pname, 0, "Couldn't verify v4 master key (did you type it correctly?).");
 	return 1;
     }
+#endif
     return 0;
 }
 
@@ -367,12 +393,40 @@ Principal *princ;
     char *name;
 
     /* don't convert certain principals... */
-    if (!strcmp(princ->name, "krbtgt") ||
-	(!strcmp(princ->name, KERB_M_NAME) &&
-	 !strcmp(princ->instance, KERB_M_INST))) {
+    if (!strcmp(princ->name, "krbtgt")) {
+    ignore:
 	printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
 	return 0;
     }
+#ifdef ODBM
+    if (!strcmp(princ->name, KERB_M_NAME) &&
+	!strcmp(princ->instance, KERB_M_INST)) {
+	des_cblock key_from_db;
+	int val;
+
+	/* here's our chance to verify the master key */
+	/*
+	 * use the master key to decrypt the key in the db, had better
+	 * be the same! 
+	 */
+	bcopy((char *)&princ->key_low, key_from_db, 4);
+	bcopy((char *)&princ->key_high, ((long *) key_from_db) + 1, 4);
+	kdb_encrypt_key (key_from_db, key_from_db, 
+			 master_key, master_key_schedule, DECRYPT);
+	val = bcmp((char *) master_key, (char *) key_from_db,
+		   sizeof(master_key));
+	memset((char *)key_from_db, 0, sizeof(key_from_db));
+	if (val) {
+	    return KRB5_KDB_BADMASTERKEY;
+	}
+	return 0;
+    }
+#else
+    if (!strcmp(princ->name, KERB_M_NAME) &&
+	 !strcmp(princ->instance, KERB_M_INST)) {
+	goto ignore;
+    }
+#endif
     if (retval = krb5_build_principal(&entry.principal, strlen(realm),
 				      realm, princ->name,
 				      princ->instance[0] ? princ->instance : 0,
@@ -483,5 +537,181 @@ struct realm_info *pblock;
 	return retval;
 
     xfree(ekey.contents);
+    return 0;
+}
+
+/*
+ * $Source$
+ * $Author$
+ *
+ * Convert a struct tm * to a UNIX time.
+ */
+
+
+#define daysinyear(y) (((y) % 4) ? 365 : (((y) % 100) ? 366 : (((y) % 400) ? 365 : 366)))
+
+#define SECSPERDAY 24*60*60
+#define SECSPERHOUR 60*60
+#define SECSPERMIN 60
+
+static int cumdays[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
+			     365};
+
+static int leapyear[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static int nonleapyear[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+long
+maketime(tp, local)
+register struct tm *tp;
+int local;
+{
+    register long retval;
+    int foo;
+    int *marray;
+
+    if (tp->tm_mon < 0 || tp->tm_mon > 11 ||
+	tp->tm_hour < 0 || tp->tm_hour > 23 ||
+	tp->tm_min < 0 || tp->tm_min > 59 ||
+	tp->tm_sec < 0 || tp->tm_sec > 59) /* out of range */
+	return 0;
+
+    retval = 0;
+    if (tp->tm_year < 1900)
+	foo = tp->tm_year + 1900;
+    else
+	foo = tp->tm_year;
+
+    if (foo < 1901 || foo > 2038)	/* year is too small/large */
+	return 0;
+
+    if (daysinyear(foo) == 366) {
+	if (tp->tm_mon > 1)
+	    retval+= SECSPERDAY;	/* add leap day */
+	marray = leapyear;
+    } else
+	marray = nonleapyear;
+
+    if (tp->tm_mday < 0 || tp->tm_mday > marray[tp->tm_mon])
+	return 0;			/* out of range */
+
+    while (--foo >= 1970)
+	retval += daysinyear(foo) * SECSPERDAY;
+
+    retval += cumdays[tp->tm_mon] * SECSPERDAY;
+    retval += (tp->tm_mday-1) * SECSPERDAY;
+    retval += tp->tm_hour * SECSPERHOUR + tp->tm_min * SECSPERMIN + tp->tm_sec;
+
+    if (local) {
+	/* need to use local time, so we retrieve timezone info */
+	struct timezone tz;
+	struct timeval tv;
+	if (gettimeofday(&tv, &tz) < 0) {
+	    /* some error--give up? */
+	    return(retval);
+	}
+	retval += tz.tz_minuteswest * SECSPERMIN;
+    }
+    return(retval);
+}
+
+long
+time_explode(cp)
+register char *cp;
+{
+    char wbuf[5];
+    struct tm tp;
+    int local;
+
+    memset((char *)&tp, 0, sizeof(tp));
+    
+    if (strlen(cp) > 10) {		/* new format */
+	(void) strncpy(wbuf, cp, 4);
+	wbuf[4] = 0;
+	tp.tm_year = atoi(wbuf);
+	cp += 4;			/* step over the year */
+	local = 0;			/* GMT */
+    } else {				/* old format: local time, 
+					   year is 2 digits, assuming 19xx */
+	wbuf[0] = *cp++;
+	wbuf[1] = *cp++;
+	wbuf[2] = 0;
+	tp.tm_year = 1900 + atoi(wbuf);
+	local = 1;			/* local */
+    }
+
+    wbuf[0] = *cp++;
+    wbuf[1] = *cp++;
+    wbuf[2] = 0;
+    tp.tm_mon = atoi(wbuf)-1;
+
+    wbuf[0] = *cp++;
+    wbuf[1] = *cp++;
+    tp.tm_mday = atoi(wbuf);
+    
+    wbuf[0] = *cp++;
+    wbuf[1] = *cp++;
+    tp.tm_hour = atoi(wbuf);
+    
+    wbuf[0] = *cp++;
+    wbuf[1] = *cp++;
+    tp.tm_min = atoi(wbuf);
+
+
+    return(maketime(&tp, local));
+}
+
+krb5_error_code
+process_v4_dump(dumpfile, realm)
+char *dumpfile;
+char *realm;
+{
+    krb5_error_code retval;
+    FILE *input_file;
+    Principal aprinc;
+    char    exp_date_str[50];
+    char    mod_date_str[50];
+    int     temp1, temp2, temp3;
+    long time_explode();
+
+    input_file = fopen(dumpfile, "r");
+    if (!input_file)
+	return errno;
+
+    for (;;) {			/* explicit break on eof from fscanf */
+	bzero((char *)&aprinc, sizeof(aprinc));
+	if (fscanf(input_file,
+		   "%s %s %d %d %d %hd %x %x %s %s %s %s\n",
+		   aprinc.name,
+		   aprinc.instance,
+		   &temp1,
+		   &temp2,
+		   &temp3,
+		   &aprinc.attributes,
+		   &aprinc.key_low,
+		   &aprinc.key_high,
+		   exp_date_str,
+		   mod_date_str,
+		   aprinc.mod_name,
+		   aprinc.mod_instance) == EOF)
+	    break;
+	aprinc.key_low = ntohl (aprinc.key_low);
+	aprinc.key_high = ntohl (aprinc.key_high);
+	aprinc.max_life = (unsigned char) temp1;
+	aprinc.kdc_key_ver = (unsigned char) temp2;
+	aprinc.key_version = (unsigned char) temp3;
+	aprinc.exp_date = time_explode(exp_date_str);
+	aprinc.mod_date = time_explode(mod_date_str);
+	if (aprinc.instance[0] == '*')
+	    aprinc.instance[0] = '\0';
+	if (aprinc.mod_name[0] == '*')
+	    aprinc.mod_name[0] = '\0';
+	if (aprinc.mod_instance[0] == '*')
+	    aprinc.mod_instance[0] = '\0';
+	if (retval = enter_in_v5_db(realm, &aprinc)) {
+	    (void) fclose(input_file);
+	    return retval;
+	}	
+    }
+    (void) fclose(input_file);
     return 0;
 }
