@@ -1,0 +1,5 @@
+AC_INIT(configure.in)
+CONFIG_RULES
+V5_SHARED_LIB_OBJS
+SubdirLibraryRule([${OBJS}])
+V5_AC_OUTPUT_MAKEFILE
