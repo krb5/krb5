@@ -1,4 +1,9 @@
 
+Thu Jul 27 15:14:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb524d.c - Use the etype which is supplied in the krb5_keytype_array
+		specified by the master key type.
+
+
 Mon Jul 17 15:15:01 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb524d.c - Add NULL stash file argument to krb5_db_fetch_mkey().
 

@@ -217,13 +217,10 @@ void init_master(context)
 	  cleanup_and_exit(1, context);
      }
 
-#ifdef PROVIDE_DES_CBC_CRC
-     krb5_use_cstype(context, &master_encblock, ETYPE_DES_CBC_CRC);
-#else
-     error(You gotta figure out what cryptosystem to use in the KDC);
-#endif
-
      master_keyblock.keytype = KEYTYPE_DES;
+     krb5_use_cstype(context, &master_encblock,
+		     krb5_keytype_array[master_keyblock.keytype]->
+		     	system->proto_enctype);
      if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
 				  FALSE, /* non-manual type-in */
 				  FALSE, /* irrelevant, given prev. arg */
