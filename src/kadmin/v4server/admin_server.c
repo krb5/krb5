@@ -117,7 +117,7 @@ char *argv[];
     memset(krbrlm, 0, sizeof(krbrlm));
 
     fascist_cpw = 1;		/* by default, enable fascist mode */
-    while ((c = getopt(argc, argv, "Df:hnd:a:r:FNk:")) != EOF)
+    while ((c = getopt(argc, argv, "Df:hnd:a:r:FNk:")) != -1)
 	switch(c) {
 	case 'D':
 	    debug++;
