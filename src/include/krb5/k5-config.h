@@ -59,7 +59,6 @@
 #define NO_PASSWORD
 #define WM_KERBEROS5_CHANGED "Kerberos5 Changed"
 
-#define HAS_ANSI_CONST                          /* For compiling w/o -Za */
 #define HAS_ANSI_VOLATILE
 #define HAS_VOID_TYPE
 #define KRB5_PROVIDE_PROTOTYPES

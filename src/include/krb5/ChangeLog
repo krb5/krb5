@@ -1,3 +1,10 @@
+Thu Apr 20 11:35:07 1995    <tytso@rsx-11.mit.edu>
+
+	* k5-config.h, configure.in: Remove support for HAS_ANSI_CONST
+		(that was needed only for compatibility with the old imake
+		build; autoconf uses -Dconst=), and HAS_ANSI_VOLATILE,
+		which isn't used at all.
+
 Wed Apr 19 13:25:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* func-proto.h: Remove global_context hack. Added prototype for

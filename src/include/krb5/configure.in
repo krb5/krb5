@@ -111,22 +111,7 @@ AC_DEFINE(HAS_VOID_TYPE)
 fi
 dnl
 
-
-dnl base-defs.h tries to do the same thing anyhow.
-dnl HAS_ANSI_CONST is here, but -Dconst= is better...
 AC_CONST
-AC_DEFINE(HAS_ANSI_CONST)
-
-AC_MSG_CHECKING([volatile])
-AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
-[AC_TRY_COMPILE(
-[volatile int x();], [],
-krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
-AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
-if test $krb5_cv_has_ansi_volatile = yes; then
-AC_DEFINE(HAS_ANSI_VOLATILE)
-fi
-dnl
 
 dnl Word sizes...
 AC_CHECK_SIZEOF(short)
