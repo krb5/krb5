@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_initialize.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_resolve_c[] = "$Id$";
-#endif	/* lint */
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 
@@ -46,7 +46,7 @@ krb5_fcc_initialize(id, princ)
      if (ret == -1)
 	  return ret;
 
-     krb5_fcc_write_principal(id, princ);
+     krb5_fcc_store_principal(id, princ);
 
 #ifdef OPENCLOSE
      close(((krb5_fcc_data *) id->data)->fd);

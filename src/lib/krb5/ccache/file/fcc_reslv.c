@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_resolve.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_resolve_c[] = "$Id$";
-#endif	lint
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 
@@ -41,42 +41,51 @@ extern krb5_cc_ops krb5_fcc_ops;
  */
 krb5_error_code
 krb5_fcc_resolve (id, residual)
-   krb5_ccache id;
+   krb5_ccache *id;
    char *residual;
 {
+     krb5_ccache lid;
      int ret;
      
-     id = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-     if (id == NULL)
+     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
+     if (lid == NULL)
 	  return KRB5_NOMEM;
 
-     ((krb5_fcc_data *) id->data) = (krb5_fcc_data *)
-	  malloc(sizeof(krb5_fcc_data));
-     if (((krb5_fcc_data *) id->data) == NULL) {
-	  free(id);
+     lid->ops = (krb5_cc_ops *) malloc(sizeof(krb5_cc_ops));
+     if (lid->ops == NULL) {
+	  free(lid);
 	  return KRB5_NOMEM;
      }
 
-     ((krb5_fcc_data *) id->data)->filename = (char *)
+     lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
+     if (((krb5_fcc_data *) lid->data) == NULL) {
+	  free(lid->ops);
+	  free(lid);
+	  return KRB5_NOMEM;
+     }
+
+     ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(residual) + 1);
-     if (((krb5_fcc_data *) id->data)->filename == NULL) {
-	  free(((krb5_fcc_data *) id->data));
-	  free(id);
+     if (((krb5_fcc_data *) lid->data)->filename == NULL) {
+	  free(((krb5_fcc_data *) lid->data));
+	  free(lid->ops);
+	  free(lid);
 	  return KRB5_NOMEM;
      }
 
-     /* Copy the virtual operation pointers into id */
-     bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(struct _krb5_ccache));
+     /* Copy the virtual operation pointers into lid */
+     bcopy((char *) &krb5_fcc_ops, lid->ops, sizeof(krb5_cc_ops));
 
      /* Set up the filename */
-     strcpy(((krb5_fcc_data *) id->data)->filename, residual);
+     strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_EXCL, 0);
-     if (ret == -1 && errno != EEXIST)
-	  return ret;
+     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT|O_EXCL,0600);
+     if (ret == -1)
+	  return errno;
      else {
 	  close(ret);
+	  *id = lid;
 	  return KRB5_OK;
      }
 }

@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_generate_new.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_resolve_c[] = "$Id$";
-#endif	lint
+#endif /* !lint && !SABER */
 
 #include "fcc.h"
 
@@ -49,8 +49,7 @@ krb5_fcc_generate_new (id)
      sprintf(scratch, "%sXXXXXX", TKT_ROOT);
      mktemp(scratch);
 
-     ((krb5_fcc_data *) id->data) = (krb5_fcc_data *)
-	  malloc(sizeof(krb5_fcc_data));
+     id->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
      if (((krb5_fcc_data *) id->data) == NULL) {
 	  free(id);
 	  return KRB5_NOMEM;
@@ -68,11 +67,11 @@ krb5_fcc_generate_new (id)
      strcpy(((krb5_fcc_data *) id->data)->filename, scratch);
 
      /* Copy the virtual operation pointers into id */
-     bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(struct _krb5_ccache));
+     bcopy((char *) &krb5_fcc_ops, id->ops, sizeof(krb5_cc_ops));
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_EXCL, 0);
-     if (ret == -1 && errno != EEXIST)
+     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT| O_EXCL,0600);
+     if (ret == -1)
 	  return ret;
      else {
 	  close(ret);

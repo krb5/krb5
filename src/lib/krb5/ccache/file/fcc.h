@@ -18,6 +18,7 @@
 #define __KRB5_FILE_CCACHE__
 
 #include <krb5/krb5.h>
+#include "fcc-proto.h"
 #include "fcc-os.h"
 
 /* XXX Until I find out the right #define for this.. XXX */

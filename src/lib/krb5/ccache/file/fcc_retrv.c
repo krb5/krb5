@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_retrieve.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_retrieve_c[] = "$Id$";
-#endif	/* lint */
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 
@@ -53,15 +53,15 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
      /* This function could be considerably faster if it kept indexing */
      /* information.. sounds like a "next version" idea to me. :-) */
 
-     krb5_cc_cursor *cursor;
+     krb5_cc_cursor cursor;
      krb5_error_code kret;
 
-     kret = krb5_fcc_start_seq_get(id, cursor);
+     kret = krb5_fcc_start_seq_get(id, &cursor);
      if (kret != KRB5_OK)
 	  return kret;
 
-     while ((kret = krb5_fcc_next_cred(id, creds, cursor)) == KRB5_OK) {
-	  if (standard_fields_match(mcreds, creds)
+     while ((kret = krb5_fcc_next_cred(id, &cursor, creds)) == KRB5_OK) {
+	  if (1 /* XXX standard_fields_match(mcreds, creds) */
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
 	       mcreds->is_skey == creds->is_skey)
@@ -83,11 +83,11 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	  }
 
 	  /* This one doesn't match */
-	  krb5_free_credentials(creds);
+	  /* XXX krb5_free_credentials(creds); */
      }
 
      /* If we get here, a match wasn't found */
-     krb5_fcc_end_seq_get(id, cursor);
+     krb5_fcc_end_seq_get(id, &cursor);
      return KRB5_NOTFOUND;
 }
 

@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_next_cred.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_nseq_c[] = "$Id$";
-#endif	lint
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 
@@ -31,8 +31,9 @@ static char fcc_nseq_c[] = "$Id$";
  * Effects:
  * Fills in creds with the "next" credentals structure from the cache
  * id.  The actual order the creds are returned in is arbitrary.
- * creds is set to allocated storage which must be freed by the caller
- * via a call to krb5_free_credentials.
+ * Space is allocated for the variable length fields in the
+ * credentials structure, so the object returned must be passed to
+ * krb5_destroy_credential.
  *
  * The cursor is updated for the next call to krb5_fcc_next_cred.
  *
@@ -40,11 +41,12 @@ static char fcc_nseq_c[] = "$Id$";
  * system errors
  */
 krb5_error_code
-krb5_fcc_next_cred(id, creds, cursor)
+krb5_fcc_next_cred(id, cursor, creds)
    krb5_ccache id;
-   krb5_creds *creds;
    krb5_cc_cursor *cursor;
+   krb5_creds *creds;
 {
+#define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      int ret;
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
@@ -62,25 +64,30 @@ krb5_fcc_next_cred(id, creds, cursor)
      if (ret < 0)
 	  return errno;
 
-     creds = (krb5_creds *) malloc(sizeof(krb5_creds));
-     if (creds == NULL)
-	  return KRB5_NOMEM;
-
-     kret = krb5_fcc_read_principal(&creds->client);
-     kret = krb5_fcc_read_principal(&creds->server);
-     kret = krb5_fcc_read_keyblock(&creds->keyblock);
-     kret = krb5_fcc_read_times(&creds->times);
-     kret = krb5_fcc_read_bool(&creds->is_skey);
-     kret = krb5_fcc_read_flags(&creds->ticket_flags);
-     kret = krb5_fcc_read_data(&creds->ticket);
-     kret = krb5_fcc_read_data(&creds->second_ticket);
-
+     kret = krb5_fcc_read_principal(id, &creds->client);
+     TCHECK(kret);
+     kret = krb5_fcc_read_principal(id, &creds->server);
+     TCHECK(kret);
+     kret = krb5_fcc_read_keyblock(id, &creds->keyblock);
+     TCHECK(kret);
+     kret = krb5_fcc_read_times(id, &creds->times);
+     TCHECK(kret);
+     kret = krb5_fcc_read_bool(id, &creds->is_skey);
+     TCHECK(kret);
+     kret = krb5_fcc_read_flags(id, &creds->ticket_flags);
+     TCHECK(kret);
+     kret = krb5_fcc_read_data(id, &creds->ticket);
+     TCHECK(kret);
+     kret = krb5_fcc_read_data(id, &creds->second_ticket);
+     TCHECK(kret);
+     
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
      cursor = (krb5_cc_cursor *) fcursor;
 
 #ifdef OPENCLOSE
      close(((krb5_fcc_data *) id->data)->fd);
 #endif
-
-     return KRB5_OK;
+lose:
+     
+     return kret;
 }

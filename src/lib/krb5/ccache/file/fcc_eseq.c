@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_end_seq_get.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_eseq_c[] = "$Id$";
-#endif	/* lint */
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 #include "fcc.h"

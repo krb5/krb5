@@ -2,34 +2,32 @@
 
 #include "fcc.h"
 
-krb5_data client[] = {
-     {
+krb5_data client1 = {
 #define DATA "client1-comp1"
-	  sizeof(DATA),
-	  DATA,
+     sizeof(DATA),
+     DATA,
 #undef DATA
-     },
-     {
-#define DATA "client1-comp2"
-	  sizeof(DATA),
-	  DATA,
-#undef DATA
-     },
 };
 
-krb5_data server[] = {
-     {
+krb5_data client2 = {
+#define DATA "client1-comp2"
+     sizeof(DATA),
+     DATA,
+#undef DATA
+};
+
+krb5_data server1 = {
 #define DATA "server1-comp1"
-	  sizeof(DATA),
-	  DATA,
+     sizeof(DATA),
+     DATA,
 #undef DATA
-     },
-     {
+};
+
+krb5_data server2 = {
 #define DATA "server1-comp2"
-	  sizeof(DATA),
-	  DATA,
+     sizeof(DATA),
+     DATA,
 #undef DATA
-     },
 };
 
 krb5_creds test_creds = {
@@ -37,7 +35,7 @@ krb5_creds test_creds = {
      NULL,
      {
 	  1,
-	  5,
+	  1,
 	  "1"
      },
      {
@@ -64,6 +62,13 @@ krb5_creds test_creds = {
 
 void init_test_cred()
 {
-     test_creds.client = &client;
-     test_creds.server = &server;
+     test_creds.client = (krb5_principal) malloc(sizeof(krb5_data *)*3);
+     test_creds.client[0] = &client1;
+     test_creds.client[1] = &client2;
+     test_creds.client[2] = NULL;
+
+     test_creds.server = (krb5_principal) malloc(sizeof(krb5_data *)*3);
+     test_creds.server[0] = &server1;
+     test_creds.server[1] = &server2;
+     test_creds.server[2] = NULL;
 }

@@ -10,9 +10,9 @@
  * This file contains the source code for krb5_fcc_start_seq_get.
  */
 
-#ifndef	lint
+#if !defined(lint) && !defined(SABER)
 static char fcc_sseq_c[] = "$Id$";
-#endif	lint
+#endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
 
@@ -53,9 +53,9 @@ krb5_fcc_start_seq_get(id, cursor)
      lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 #endif
 
-     krb5_fcc_skip_pprincipal(id);
+     krb5_fcc_skip_principal(id);
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
-     cursor = (krb5_cc_cursor *) fcursor;
+     *cursor = (krb5_cc_cursor *) fcursor;
 
 #ifdef OPENCLOSE
      close(((krb5_fcc_data *) id->data)->fd);
