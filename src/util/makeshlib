@@ -19,6 +19,17 @@ case $host in
 	echo $CC -G -o $library $FILES
 	$CC -G -o $library $FILES
 	;;
+alpha-*-osf*)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/;" -e "s; ; $i/;g" $i/DONE
+
+	done`
+
+	echo 	ld -shared -o $library -all $FILES -none -lc
+	ld -shared -o $library -all $FILES -none -lc
+	;;
+
 *)
 	echo "Host type $host not supported!"
 	exit 1

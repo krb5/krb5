@@ -1,3 +1,8 @@
+Fri May 26 12:41:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* makeshlib (library): Added alpha-osf1 support. Will only work
+		for libcrypto at the moment.
+
 Thu May 25 21:39:02 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* makeshlib: Added shell script for creating shared libraries
