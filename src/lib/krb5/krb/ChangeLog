@@ -1,3 +1,8 @@
+2003-04-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kfree.c (krb5_free_pwd_sequences): Actually free the entire
+	sequence of passwd_phase_elements and not just the first one.
+
 2003-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (DEFAULT_ETYPE_LIST): Add AES with 256 bits at the
