@@ -1,3 +1,8 @@
+2002-09-30  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp (rsh_test): Explicitly call stop_rsh_daemon upon pass
+	for "encrypted rsh" test, to avoid zombies.
+
 2002-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* v4gssftp.exp (v4ftp_test): Update checked messages for change of
