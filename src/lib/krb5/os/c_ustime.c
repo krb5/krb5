@@ -346,6 +346,8 @@ pascal long SleepNotification (
 	if (message == sleepWakeUp) {
 		gResetCachedDifference = 1;
 	}
+	
+	return 0;
 }
 
 #elif defined(_WIN32)
