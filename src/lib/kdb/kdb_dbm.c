@@ -22,6 +22,10 @@ static char rcsid_krb_dbm_c[] =
 #include <krb5/sysincl.h>
 #include <stdio.h>
 
+#ifdef POSIX_FILE_LOCKS
+#include <fcntl.h>
+#endif
+
 #define KRB5_DBM_MAX_RETRY 5
 
 /* exclusive or shared lock flags */
@@ -563,13 +567,29 @@ krb5_error_code
 krb5_dbm_db_lock(mode)
 int mode;
 {
+#ifdef POSIX_FILE_LOCKS
+    struct flock fl;
+#else
     int flock_mode;
-
+#endif
     if (mylock && (lockmode >= mode)) {
 	    mylock++;		/* No need to upgrade lock, just return */
 	    return(0);
     }
 
+#ifdef POSIX_FILE_LOCKS
+    if (mode == KRB5_DBM_EXCLUSIVE)
+	fl.l_type = F_WRLCK;
+    else if (mode == KRB5_DBM_SHARED)
+	fl.l_type = F_RDLCK;
+    else
+	return KRB5_KDB_BADLOCKMODE;
+    fl.l_whence = 0;
+    fl.l_start = 0;
+    fl.l_len = 0;
+    if (fcntl(dblfd, non_blocking ? F_SETLK : F_SETLKW, &fl) == -1)
+	return errno;
+#else
     switch (mode) {
     case KRB5_DBM_EXCLUSIVE:
 	flock_mode = LOCK_EX;
@@ -583,9 +603,10 @@ int mode;
     lockmode = mode;
     if (non_blocking)
 	flock_mode |= LOCK_NB;
-    
+
     if (flock(dblfd, flock_mode) < 0) 
 	return errno;
+#endif
     mylock++;
     return 0;
 }
@@ -597,8 +618,18 @@ krb5_dbm_db_unlock()
 	return KRB5_KDB_NOTLOCKED;
 
     if (--mylock == 0) {
+#ifdef POSIX_FILE_LOCKS
+	    struct flock fl;
+	    fl.l_type = F_UNLCK;
+	    fl.l_whence = 0;
+	    fl.l_start = 0;
+	    fl.l_len = 0;
+	    if (fcntl(dblfd, F_SETLK, &fl) == -1)
+		    return errno;
+#else
 	    if (flock(dblfd, LOCK_UN) < 0)
 		    return errno;
+#endif
     }
     return 0;
 }
