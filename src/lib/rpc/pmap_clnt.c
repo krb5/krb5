@@ -60,7 +60,7 @@ pmap_set(program, version, protocol, port)
 	rpc_u_int32 program;
 	rpc_u_int32 version;
 	int protocol;
-	unsigned short port;
+	int port;
 {
 	struct sockaddr_in myaddress;
 	int socket = -1;

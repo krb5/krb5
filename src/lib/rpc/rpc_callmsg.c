@@ -60,10 +60,11 @@ xdr_callmsg(xdrs, cmsg)
 		if (cmsg->rm_call.cb_verf.oa_length > MAX_AUTH_BYTES) {
 			return (FALSE);
 		}
-		buf = (rpc_int32 *) XDR_INLINE(xdrs, 8 * BYTES_PER_XDR_UNIT
+		buf = (rpc_int32 *) XDR_INLINE(xdrs, (int) (
+		        8 * BYTES_PER_XDR_UNIT
 			+ RNDUP(cmsg->rm_call.cb_cred.oa_length)
 			+ 2 * BYTES_PER_XDR_UNIT
-			+ RNDUP(cmsg->rm_call.cb_verf.oa_length));
+			+ RNDUP(cmsg->rm_call.cb_verf.oa_length)));
 		if (buf != NULL) {
 			IXDR_PUT_LONG(buf, cmsg->rm_xid);
 			IXDR_PUT_ENUM(buf, cmsg->rm_direction);
@@ -125,7 +126,7 @@ xdr_callmsg(xdrs, cmsg)
 						mem_alloc(oa->oa_length);
 				}
 				buf = (rpc_int32 *)
-				   XDR_INLINE(xdrs, RNDUP(oa->oa_length));
+				   XDR_INLINE(xdrs, (int)RNDUP(oa->oa_length));
 				if (buf == NULL) {
 					if (xdr_opaque(xdrs, oa->oa_base,
 					    oa->oa_length) == FALSE) {
@@ -161,7 +162,7 @@ xdr_callmsg(xdrs, cmsg)
 						mem_alloc(oa->oa_length);
 				}
 				buf = (rpc_int32 *)
-				   XDR_INLINE(xdrs, RNDUP(oa->oa_length));
+				   XDR_INLINE(xdrs, (int)RNDUP(oa->oa_length));
 				if (buf == NULL) {
 					if (xdr_opaque(xdrs, oa->oa_base,
 					    oa->oa_length) == FALSE) {

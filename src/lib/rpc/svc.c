@@ -468,7 +468,7 @@ svc_getreqset(readfds)
 					
 				/* now match message with a registered service*/
 				prog_found = FALSE;
-				low_vers = 0 - 1;
+				low_vers = (rpc_u_int32) -1L;
 				high_vers = 0;
 				for (s = svc_head; s != NULL_SVC; s = s->sc_next) {
 					if (s->sc_prog == r.rq_prog) {

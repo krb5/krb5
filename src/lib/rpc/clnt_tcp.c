@@ -86,7 +86,10 @@ struct ct_data {
 	bool_t          ct_waitset;       /* wait set by clnt_control? */
 	struct sockaddr_in ct_addr; 
 	struct rpc_err	ct_error;
-	char		ct_mcall[MCALL_MSG_SIZE];	/* marshalled callmsg */
+	union {
+	  char		ct_mcall[MCALL_MSG_SIZE];	/* marshalled callmsg */
+	  rpc_u_int32   ct_mcalli;
+	} ct_u;
 	unsigned int		ct_mpos;			/* pos after marshal */
 	XDR		ct_xdrs;
 };
@@ -191,7 +194,7 @@ clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
 	/*
 	 * pre-serialize the staic part of the call msg and stash it away
 	 */
-	xdrmem_create(&(ct->ct_xdrs), ct->ct_mcall, MCALL_MSG_SIZE,
+	xdrmem_create(&(ct->ct_xdrs), ct->ct_u.ct_mcall, MCALL_MSG_SIZE,
 	    XDR_ENCODE);
 	if (! xdr_callhdr(&(ct->ct_xdrs), &call_msg)) {
 		if (ct->ct_closeit) {
@@ -236,7 +239,7 @@ clnttcp_call(h, proc, xdr_args, args_ptr, xdr_results, results_ptr, timeout)
 	register XDR *xdrs = &(ct->ct_xdrs);
 	struct rpc_msg reply_msg;
 	rpc_u_int32 x_id;
-	rpc_u_int32 *msg_x_id = (rpc_u_int32 *)(ct->ct_mcall);	/* yuk */
+	rpc_u_int32 *msg_x_id = &ct->ct_u.ct_mcalli;	/* yuk */
 	register bool_t shipnow;
 	int refreshes = 2;
 	long procl = proc;
@@ -253,7 +256,7 @@ call_again:
 	xdrs->x_op = XDR_ENCODE;
 	ct->ct_error.re_status = RPC_SUCCESS;
 	x_id = ntohl(--(*msg_x_id));
-	if ((! XDR_PUTBYTES(xdrs, ct->ct_mcall, ct->ct_mpos)) ||
+	if ((! XDR_PUTBYTES(xdrs, ct->ct_u.ct_mcall, ct->ct_mpos)) ||
 	    (! XDR_PUTLONG(xdrs, &procl)) ||
 	    (! AUTH_MARSHALL(h->cl_auth, xdrs)) ||
 	    (! AUTH_WRAP(h->cl_auth, xdrs, xdr_args, args_ptr))) {
@@ -457,7 +460,7 @@ readtcp(ctptr, buf, len)
 		}
 		break;
 	}
-	switch (len = read(ct->ct_sock, buf, len)) {
+	switch (len = read(ct->ct_sock, buf, (size_t) len)) {
 
 	case 0:
 		/* premature eof */
@@ -484,7 +487,7 @@ writetcp(ctptr, buf, len)
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {
-		if ((i = write(ct->ct_sock, buf, cnt)) == -1) {
+		if ((i = write(ct->ct_sock, buf, (size_t) cnt)) == -1) {
 			ct->ct_error.re_errno = errno;
 			ct->ct_error.re_status = RPC_CANTSEND;
 			return (-1);

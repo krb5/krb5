@@ -151,10 +151,10 @@ xdr_rmtcallres(xdrs, crp)
 {
 	caddr_t port_ptr;
 
-	port_ptr = (caddr_t)crp->port_ptr;
+	port_ptr = (caddr_t)(void *)crp->port_ptr;
 	if (xdr_reference(xdrs, &port_ptr, sizeof (rpc_u_int32),
 	    xdr_u_int32) && xdr_u_int32(xdrs, &crp->resultslen)) {
-		crp->port_ptr = (rpc_u_int32 *)port_ptr;
+		crp->port_ptr = (rpc_u_int32 *)(void *)port_ptr;
 		return ((*(crp->xdr_results))(xdrs, crp->results_ptr));
 	}
 	return (FALSE);

@@ -1,3 +1,27 @@
+2001-12-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* clnt_raw, clnt_tcp.c, clnt_udp.c: Use a union structure to
+	ensure argument alignment.
+
+	* pmap_clnt.c, pmap_clnt.h (pmap_set): Change port argument to int
+	to avoid width warnings.
+
+	* rpc_callmsg.c (xdr_callmsg): Cast argument to XDR_INLINE to
+	avoid signed vs. unsigned warning.
+
+	* svc.c: Cast assignment to avoid signed warning.
+
+	* xdr.c (xdr_u_short, xdr_u_long): cast pointers to long * in
+	invocation of XDR_PUTLONG.
+
+	* xdr_alloc.c (xdralloc_putbytes): Cast argument to DynInsert to
+	avoid signed/unsigned warning.
+
+	* auth_gssapi.c, svc_auth_gssapi, xdr_rec.c: Cast arguments to
+	avoid alignment warnings.
+
+	* svc_tcp.c, xdr_stdio.c: Cast argument to fread/fwrite/read/write.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* auth_gssapi.h, auth_gssapi_misc.c, getrpcent.c,

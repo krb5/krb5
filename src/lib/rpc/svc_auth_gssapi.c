@@ -661,7 +661,8 @@ static svc_auth_gssapi_data *create_client()
      if (client_data == NULL)
 	  return NULL;
      memset((char *) client_data, 0, sizeof(*client_data));
-     L_PRINTF(2, ("create_client: new client_data = %p\n", client_data));
+     L_PRINTF(2, ("create_client: new client_data = %p\n", 
+		  (void *) client_data));
      
      /* set up client data structure */
      client_data->established = 0;
@@ -781,7 +782,7 @@ static void destroy_client(client_data)
      client_list *c, *c2;
 
      PRINTF(("destroy_client: destroying client_data\n"));
-     L_PRINTF(2, ("destroy_client: client_data = %p\n", client_data));
+     L_PRINTF(2, ("destroy_client: client_data = %p\n", (void *) client_data));
 
 #ifdef DEBUG_GSSAPI
      if (svc_debug_gssapi >= 3)
@@ -848,7 +849,7 @@ static void dump_db(msg)
      while (c) {
 	  client_data = c->client;
 	  L_PRINTF(3, ("\tclient_data = %p, exp = %d\n",
-		       client_data, client_data->expiration));
+		       (void *) client_data, client_data->expiration));
 	  c = c->next;
      }
 
@@ -867,7 +868,7 @@ static void clean_client()
 	  client_data = c->client;
 	  
 	  L_PRINTF(2, ("clean_client: client_data = %p\n",
-		       client_data));
+		       (void *) client_data));
 	  
 	  if (client_data->expiration < time(0)) {
 	       PRINTF(("clean_client: client %d expired\n",
@@ -1066,7 +1067,7 @@ static bool_t svc_auth_gssapi_unwrap(auth, in_xdrs, xdr_func, xdr_ptr)
 
      if (! client_data->established) {
 	  PRINTF(("svc_gssapi_unwrap: not established, noop\n"));
-	  return (*xdr_func)(in_xdrs, (auth_gssapi_init_arg *) xdr_ptr);
+	  return (*xdr_func)(in_xdrs, (auth_gssapi_init_arg *)(void *) xdr_ptr);
      } else if (! auth_gssapi_unwrap_data(&gssstat, &minor_stat,
 					  client_data->context,
 					  client_data->seq_num-1,

@@ -341,7 +341,7 @@ readtcp(xprtptr, buf, len)
 #else
 	} while (readfds != mask);
 #endif /* def FD_SETSIZE */
-	if ((len = read(sock, buf, len)) > 0) {
+	if ((len = read(sock, buf, (size_t) len)) > 0) {
 		return (len);
 	}
 fatal_err:
@@ -363,7 +363,7 @@ writetcp(xprtptr, buf, len)
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {
-		if ((i = write(xprt->xp_sock, buf, cnt)) < 0) {
+		if ((i = write(xprt->xp_sock, buf, (size_t) cnt)) < 0) {
 			((struct tcp_conn *)(xprt->xp_p1))->strm_stat =
 			    XPRT_DIED;
 			return (-1);

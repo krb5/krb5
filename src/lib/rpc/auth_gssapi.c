@@ -508,7 +508,7 @@ static bool_t marshall_new_creds(auth, auth_msg, client_handle)
 	  creds.client_handle.value = NULL;
      }
      
-     xdrmem_create(&xdrs, AUTH_PRIVATE(auth)->cred_buf,
+     xdrmem_create(&xdrs, (caddr_t) AUTH_PRIVATE(auth)->cred_buf,
 		   MAX_AUTH_BYTES, XDR_ENCODE);
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
 	  PRINTF(("marshall_new_creds: failed encoding auth_gssapi_creds\n"));

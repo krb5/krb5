@@ -65,7 +65,7 @@
 #define pmap_getport	gssrpc_pmap_getport
 
 extern bool_t		pmap_set(rpc_u_int32, rpc_u_int32, int, 
-				 unsigned short);
+				 int);
 extern bool_t		pmap_unset(rpc_u_int32, rpc_u_int32);
 extern struct pmaplist	*pmap_getmaps(struct sockaddr_in *);
 enum clnt_stat		pmap_rmtcall(struct sockaddr_in *, rpc_u_int32, 

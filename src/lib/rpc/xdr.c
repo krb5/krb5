@@ -214,7 +214,7 @@ xdr_u_long(xdrs, ulp)
 	return (FALSE);
       }
     }
-    return (XDR_PUTLONG(xdrs, ulp));
+    return (XDR_PUTLONG(xdrs, (long *)ulp));
   }
   if (xdrs->x_op == XDR_DECODE) {
     return (XDR_GETLONG(xdrs, (long *)ulp));
@@ -267,10 +267,10 @@ xdr_u_short(xdrs, usp)
 
 	case XDR_ENCODE:
 		l = (unsigned long) *usp;
-		return (XDR_PUTLONG(xdrs, &l));
+		return (XDR_PUTLONG(xdrs, (long *) &l));
 
 	case XDR_DECODE:
-		if (!XDR_GETLONG(xdrs, &l)) {
+		if (!XDR_GETLONG(xdrs, (long *) &l)) {
 			return (FALSE);
 		}
 		*usp = (unsigned short) l;

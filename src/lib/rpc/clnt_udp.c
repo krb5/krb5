@@ -263,7 +263,7 @@ call_again:
 	/*
 	 * the transaction is the first thing in the out buffer
 	 */
-	(*(unsigned short *)(cu->cu_outbuf))++;
+	(*(rpc_u_int32 *)(void *)(cu->cu_outbuf))++;
 	if ((! XDR_PUTLONG(xdrs, &procl)) ||
 	    (! AUTH_MARSHALL(cl->cl_auth, xdrs)) ||
 	    (! AUTH_WRAP(cl->cl_auth, xdrs, xargs, argsp)))
@@ -340,7 +340,8 @@ send_again:
 		if (inlen < sizeof(rpc_u_int32))
 			continue;	
 		/* see if reply transaction id matches sent id */
-		if (*((rpc_u_int32 *)(cu->cu_inbuf)) != *((rpc_u_int32 *)(cu->cu_outbuf)))
+		if (*((rpc_u_int32 *)(void *)(cu->cu_inbuf)) != 
+		    *((rpc_u_int32 *)(void *)(cu->cu_outbuf)))
 			continue;	
 		/* we now assume we have the proper reply */
 		break;

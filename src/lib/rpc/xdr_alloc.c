@@ -128,7 +128,7 @@ static bool_t xdralloc_putbytes(xdrs, addr, len)
 {
      if (DynInsert((DynObject) xdrs->x_private,
 		   DynSize((DynObject) xdrs->x_private),
-		   addr, len) != DYN_OK)
+		   addr, (int) len) != DYN_OK)
 	  return FALSE;
      return TRUE;
 }

@@ -133,7 +133,8 @@ xdrstdio_getbytes(xdrs, addr, len)
 	unsigned int len;
 {
 
-	if ((len != 0) && (fread(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
+	if ((len != 0) && (fread(addr, (size_t)len, 1, 
+				 (FILE *)xdrs->x_private) != 1))
 		return (FALSE);
 	return (TRUE);
 }
@@ -145,7 +146,8 @@ xdrstdio_putbytes(xdrs, addr, len)
 	unsigned int len;
 {
 
-	if ((len != 0) && (fwrite(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
+	if ((len != 0) && (fwrite(addr, (size_t)len, 1, 
+			   (FILE *)xdrs->x_private) != 1))
 		return (FALSE);
 	return (TRUE);
 }
