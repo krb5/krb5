@@ -1,0 +1,479 @@
+\input texinfo @c -*-texinfo-*-
+@c Note: the above texinfo file must include the "doubleleftarrow"
+@c definitions added by jcb.
+@c %**start of header
+@c guide
+@setfilename Kerb*Net-Upgrading.info
+@settitle Upgrading to Kerb*Net from Kerberos V4
+@c @setchapternewpage odd                  @c chapter begins on next odd page
+@setchapternewpage on                   @c chapter begins on next page
+@smallbook                              @c Format for 7" X 9.25" paper
+@c %**end of header
+
+@paragraphindent 0
+@iftex
+@parskip 6pt plus 6pt
+@end iftex
+
+@include definitions.texinfo
+@set EDITION 0.1 alpha
+
+@c @finalout                               @c don't print black warning boxes
+
+@titlepage
+@title Upgrading to @value{PRODUCT} from Kerberos V4
+@subtitle Release:  @value{RELEASE}
+@subtitle Document Edition:  @value{EDITION}
+@subtitle Last updated:  @value{UPDATED}
+@author @value{COMPANY}
+
+@page
+
+@vskip 0pt plus 1filll
+
+@include copyright.texinfo
+@end titlepage
+
+
+@node Upgrading to @value{PRODUCT} from Kerberos V4, Installing @value{PRODUCT} at Your Site
+@top Upgrading to @value{PRODUCT} from Kerberos V4
+
+@ifinfo
+This document describes how to convert to @value{PRODUCT} from Kerberos V4.
+
+@include copyright.texinfo
+@end ifinfo
+
+@menu
+* Installing CNS::              Installing CNS at Your Site
+@end menu
+            
+@node Installing @value{PRODUCT} at Your Site
+@chapter Installing @value{PRODUCT} at Your Site
+
+@value{COMPANY} developed Cygnus Network Security (CNS) to provide strong
+system access security, with minimal impact on users' ease of access.
+Using Kerberos Version 5 encryption and client-server technology, CNS
+assures that user identities can be checked securely without
+transmitting passwords in clear over the Net.  CNS is useful in closing
+up several large security holes: eavesdroppers recording login names and
+passwords as your users log in from remote locations; and active attacks
+based on providing a fake TCP/IP source address (IP address spoofing).
+
+Introducing CNS to an existing site involves more planning and execution
+than installing the average software package.  CNS software is required
+on both ends of the remote login connections, and remote users must
+change their habits.
+
+To install CNS and make it useful, you have to:
+
+@itemize @bullet
+@item 
+Install and configure the CNS software on the machines at your site.
+@item
+Set up a CNS Key Distribution Center server machine.
+@item 
+[Optional] Set up one or more slave servers for reliability.
+@item 
+Install and configure CNS client software on the machines from which
+your remote users log in.
+@item 
+Add users and their passwords to your CNS server. (If you are converting
+from a CNS V4 system or a Transarc AFS "KAserver" system, there are
+tools to migrate the user entries and passwords directly.)
+@item 
+Inform your users about CNS.
+@item 
+[Optional] Turn off ordinary @code{rlogin}, @code{telnet}, @code{ftp}, and
+@code{rsh} services so that users are @emph{required} to use CNS rather
+than potentially exposing their passwords.
+@end itemize
+
+This manual covers only basic installation and configuration of the CNS
+software.  See the @ref{Top,,Administration Tools,kerbman,Cygnus Network
+Security User and Administrator Documentation for CNS Version 5}, manual
+for more detailed information.
+
+
+@menu
+* What::                        Contents of the CNS V5 distribution.
+* Where::                       Where programs should be installed
+* Config Files::                Configuration Files affected
+* quick start::                 Getting Started from an existing Realm
+* AFS enhancements::            Using CNS V5 with AFS
+* kprop::                       Redundant Slave Servers
+* interrealm::                  Arranging Interrealm Authentication
+* CNS V4 Compatibility::        CNS V4 Backward Compatibility Support
+@end menu
+
+@node What, Where, Installing @value{PRODUCT} at Your Site, Installing @value{PRODUCT} at Your Site
+@section Contents of the CNS V5 distribution.
+
+A collection of programs are included in CNS. The categories are
+@itemize @bullet
+@item user programs
+such as @code{kinit}, @code{klist}, @code{kdestroy}, @code{kpasswd},
+@code{krb524init}
+@item replacement programs
+such as @code{rlogin}, @code{rcp}, @code{rsh}, @code{telnet},
+@code{ftp}, @code{ksu}
+@item demos
+such as @code{sim_client}, @code{sclient}, @code{uuclient}, @code{gss-client}
+@item administration tools
+such as @code{kdb5_anadd}, @code{kdb5_convert}, @code{kdb5_create},
+@code{kdb5_destroy}, @code{kdb5_edit}, 
+@code{kdb5_stash}, and the client program @code{kadmin5}
+@item programming support
+such as include files and libraries for writing kerberized
+@footnote{The verb @dfn{to kerberize} means to modify (usually an
+application) to use Kerberos for authentication and possibly encryption.}
+applications.
+@item documentation
+in the form of man pages.
+@item kerberized application servers
+such as @code{ftpd}, @code{krlogind}, @code{krshd}, @code{popper},
+@code{telnetd}, @code{sim_server}, @code{sserver},
+@code{uuserver}
+@item kerberos management servers
+such as @code{kadmind5}, @code{kpropd}, @code{krb524d}, @code{krb5kdc},
+@code{v4kadmind}
+@end itemize
+
+@node Where, Config Files, What, Installing @value{PRODUCT} at Your Site
+@section Where programs should be installed
+
+Cygnus releases unpack in directories named
+@file{/usr/cygnus/@var{package}-@var{release}}. It is suggested that a
+user-convenience 
+symlink be placed in @file{/usr/cygnus} pointing from @var{package} to
+@var{package}-@var{release}, for example from @file{cns5} to
+@file{cns5-95q2}, to simplify 
+upgrades (a new release can be installed in the new directory, tested
+there, and then the symlink can be moved to make the code available by
+default to the user community.)
+
+It should be noted that while the programs simply need to be on
+reliable storage (possibly read-only, but protected from network
+replacement) the @file{lib/krb5kdc} directory should be local to the security
+server and not visible to other machines at all. One approach that
+permits sharing is to create a symlink from @file{lib/krb5kdc} to a
+local directory, perhaps in @file{/var}.
+@example
+mkdir /var/krb5kdc
+chmod 700 /var/krb5kdc
+ln -s /var/krb5kdc /usr/cygnus/cns5/lib/krb5kdc
+@end example
+
+Also, @file{/usr/cygnus/cns5/lib/krb5.conf} is a fallback location for a
+common config file -- @file{/etc/krb5.conf} is examined instead if present, and
+the user can override by setting the environment variable @samp{KRB5_CONFIG}.
+Since @file{/etc} is usually local, if you want to avoid maintaining
+@file{krb.conf} files on all machines, one approach is to create a
+@file{/usr/cygnus/krb.conf} and make a symlink to it from the release
+directory. You still need to remember to recreate the symlink when you
+install a new release.
+
+@node Config Files, quick start, Where, Installing @value{PRODUCT} at Your Site
+@section Configuration Files affected
+
+A number of files should be adjusted for kerberos use.
+@table @file
+@item /etc/services
+needs to contain additional entries for kerberos and application servers.
+@item /etc/inetd.conf
+needs to contain lines for the new kerberized services
+@item /etc/rc.local
+(or equivalent) needs to contain commands to start up long-running
+kerberos servers (@code{kadmind5}, @code{krb5kdc}, and @code{krb524d})
+@end table
+
+@node quick start, AFS enhancements, Config Files, Installing @value{PRODUCT} at Your Site
+@section Getting Started from an existing Realm
+If you're converting from a V4 realm, you can do
+@example
+	@dots{}/admin/kdb5_convert
+@end example
+directly from an existing database, or
+@example
+	/usr/kerberos/bin/kdb_util dump v4db
+	@dots{}/admin/kdb5_convert -f v4db
+@end example
+to make a slave dump file and work from that (useful if you've got a
+V4 system with slave servers and want to add a V5 slave on a trial
+basis.)
+
+If you're creating a V5 realm from scratch, you need to
+@example
+	.../admin/kdb5_create
+@end example
+and possibly
+@example
+	.../admin/kdb5_stash
+@end example
+
+The config files for this release are completely different from the V4
+config files; they're much more like windows @code{.ini} files, and are
+called @dfn{profiles}. The default location (which can be adjusted via the
+@samp{KRB_CONF} environment variable) is @file{/etc/krb5.conf}. An example file
+follows. You'll need to change the @code{default_realm} and add a @dfn{stanza}
+(like the CYGNUS.COM=@{...@} section) for your realm.
+
+@example
+[libdefaults]
+      ticket_lifetime = 600
+      default_realm = ATHENA.MIT.EDU
+
+[realms]
+      ATHENA.MIT.EDU = @{
+              kdc = KERBEROS-2.MIT.EDU:750
+              kdc = KERBEROS.MIT.EDU
+              kdc = KERBEROS-1.MIT.EDU
+              admin_server = KERBEROS.MIT.EDU
+              default_domain = MIT.EDU
+      @}
+      CYGNUS.COM = @{
+              kdc = KERBEROS.CYGNUS.COM
+              kdc = KERBEROS-1.CYGNUS.COM
+      @}
+
+[domain_realm]
+      .mit.edu = ATHENA.MIT.EDU
+      mit.edu = ATHENA.MIT.EDU
+      .media.mit.edu = MEDIA-LAB.MIT.EDU
+      media.mit.edu = MEDIA-LAB.MIT.EDU
+      .ucsc.edu = CATS.UCSC.EDU
+@end example
+
+
+@node AFS enhancements, kprop, quick start, Installing @value{PRODUCT} at Your Site
+@section Using CNS V5 with AFS
+
+It is possible to run a TransArc AFS cell off of CNS5 security servers,
+instead of using the "KAserver". There are a few tools that help (note
+that because they use TransArc libraries which we are not licensed to
+distribute, you'll need to compile these yourself.)
+
+@menu
+* asetkey::                     asetkey
+@end menu
+
+@node asetkey,  , AFS enhancements, AFS enhancements
+@subsection asetkey
+
+The asetkey program is a replacement for the existing setkey or asetkey
+program which informs an AFS file server of the keys it uses. The steps
+to get the keys into a V5 database are:
+
+@example
+% kdb5_edit
+kdb5_edit: av4k afs/@var{cell.name}
+kdb5_edit: xst @var{cell.name} afs
+@end example
+
+which should create a @file{@var{cell.name}-new-srvtab} which should be
+securely moved to the afs server and placed in @file{/etc/v5srvtab}.
+
+To double check, 
+@example
+% klist -k @var{cell.name}-new-srvtab
+@end example
+
+and find out what the key version number is (I use 1 in the example
+below, it may be larger if you've changed the key since creating it.)
+
+Then, running
+@example
+% asetkey add 1 /etc/v5srvtab afs/@var{cell.name} 
+@end example
+
+(where 1 is the key version number, and @samp{afs/@var{cell.name}} is the
+principal for the server [which will get converted by @file{krb524d} to
+@samp{afs.@var{cell.name}}]) will initialize the afs key list.
+@example
+% asetkey list
+@end example
+
+should show the current list.
+
+If you're using @code{cklog} for interrealm AFS, you may need to duplicate
+the @samp{afs/@var{cell.name}@@@var{REALM}} key as @samp{afs@@@var{REALM}}.
+
+@node kprop, interrealm, AFS enhancements, Installing @value{PRODUCT} at Your Site
+@section Redundant Slave Servers
+
+CNS V5 supports redundant @dfn{slave} servers. The @dfn{master} server
+has the primary copy of the database; the slaves get periodic updates of
+that database, usually every few hours. Clients are normally configured
+to talk to the master first, and to timeout and talk to a slave if the
+master is unreachable. It is sometimes useful to have geographically
+seperated slaves, and to have clients configured (via @file{krb5.conf})
+to talk to the nearest one instead. Note that all password changes and
+other administrative operations must go through the master server.
+
+@enumerate
+@item
+On both the master and slave, add the following line to @file{/etc/services}:
+@example
+krb5_prop       754/tcp                         # Kerberos slave propagation
+@end example
+@end enumerate
+
+On the slave, 
+@enumerate
+@item 
+Add the principal name for the master to the @sc{acl} for @code{kpropd}.
+@example
+ echo host/@var{master.host.name}@@@var{REALM} > /usr/cygnus/cns5/lib/krb5kdc/kpropd.acl
+@end example
+
+@item
+Add a line to @file{/etc/inetd.conf} that enables the receiving @code{kpropd}.
+@example
+krb5_prop stream tcp nowait root /usr/cygnus/cns5/sbin/kpropd kpropd
+@end example
+
+@end enumerate
+
+@enumerate
+On the master:
+@item 
+Be sure that the master has a @file{v5srvtab} (created with 
+@example
+	sbin/kdb5_edit
+		ark host/@var{master.host.name}
+		xst @var{master.host.name} host
+	mv @var{master.host.name}-new-srvtab /etc/v5srvtab
+@end example
+you've probably already done this.)
+
+@item 
+Create an initial database dump for transfer to the slave.
+@example
+ echo ddb /usr/cygnus/cns5/lib/krb5kdc/slave_datatrans | admin/kdb5_edit 
+ sbin/kprop slavehost
+@end example
+
+@item 
+Back on the slave, securely install the stash file, and start the kdc:
+@example
+	rcp -xp root@@@var{master}:/.k5.@var{REALM} /.k5.@var{REALM}
+	sbin/krb5kdc
+@end example
+
+@item 
+On any clients, add an addition
+@example
+	kdc = @var{master.host.name}
+@end example
+line to the @samp{REALM} entry in the @samp{[realms]} section of
+@file{krb5.conf}. 
+
+@end enumerate
+
+For continued operation,
+@enumerate
+@item 
+Run @file{sbin/krb5kdc} on the slave (usually from @file{/etc/rc.local}).
+@item
+On the master, Periodically (using the @code{cron} facility) run 
+@example
+  echo ddb /usr/cygnus/cns5/lib/krb5kdc/slave_datatrans | admin/kdb5_edit 
+  sbin/kprop @var{slave.host.name}
+@end example
+@end enumerate
+
+Note that the first time through, the master will indicates success, but
+the slave server may indicate failure. Once a database has actually
+propagated once, it will work correctly.
+
+@node interrealm, CNS V4 Compatibility, kprop, Installing @value{PRODUCT} at Your Site
+@section Arranging Interrealm Authentication
+
+Kerberos V4 supports simple automatic cross-realm
+authentication. Given two realms @var{REALM1} and @var{REALM2}, the
+administrators 
+agree on a common key, and then create
+@example
+	krbtgt.@var{REALM2} (in the @var{REALM1} database)
+	krbtgt.@var{REALM1} (in the @var{REALM2} database.)
+@end example
+At this point, a user with tickets @var{user@@REALM1} can get tickets for
+servers in @var{REALM2} automatically, and is authenticated as
+@var{user@@REALM1},
+not as simply @var{user}.
+
+Kerberos V5 uses the same mechanism with different names.
+@example
+	krbtgt/@var{REALM2} (in the @var{REALM1} database)
+	krbtgt/@var{REALM1} (in the @var{REALM2} database.)
+@end example
+
+If you convert a V4 database with interrealm keys, you'll
+automatically get working keys for V5 interrealm use as well. If
+you're doing a new V5 database,
+@example
+	% kdb5_edit
+	kdb5_edit: ank krbtgt/@var{REALM2}
+@end example
+(and the corresponding @samp{krbtgt/@var{REALM1}} on the other server) is
+sufficient. If you need to do interrealm using V4 backwards
+compatibility, even though this is a new V5 realm, you should create the
+keys as V4 keys instead:
+@example
+	% kdb5_edit
+	kdb5_edit: av4k krbtgt/@var{REALM2}
+@end example
+
+@node CNS V4 Compatibility,  , interrealm, Installing @value{PRODUCT} at Your Site
+@section CNS V4 Backward Compatibility Support
+
+CNS V5 has a variety of forms of support for the continued use of CNS V4
+clients and servers. This permits gradually phasing out older software,
+and gives time for the user community to adjust to new tools.
+
+
+@menu
+* V4 servers::                  Servers that support V4 clients
+* krb524d::                     krb524d
+* v4kadmind::                   Version 4 Adminstration Server
+@end menu
+
+@node V4 servers, krb524d, CNS V4 Compatibility, CNS V4 Compatibility
+@subsection Servers that support V4 clients
+
+The @code{rlogind} and @code{telnetd} servers can accept authentication
+from CNS V4 clients. To enable this, it is sufficient for the servers to
+be able to find a CNS V4 srvtab with the correct key.
+
+Normally the servers will look in @file{/etc/krb-srvtab}, but this can
+be changed in the @file{krb5.conf} file by setting the variable
+@code{krb5_srvtab} in the @code{[libdefaults]} stanza to a filename.
+
+@node krb524d, v4kadmind, V4 servers, CNS V4 Compatibility
+@subsection krb524d
+
+If you're using Kerberos V4 backwards compatibility, it may be easier to
+have users get V5 tickets and then convert them to V4 tickets when
+needed. (For example, only V5 tickets can be forwarded, but the
+forwarded ticket could be used to get a local V4 ticket.)
+
+@node v4kadmind,  , krb524d, CNS V4 Compatibility
+@subsection Version 4 Adminstration Server
+
+Many existing clients support password change functions using the old V4
+administrative protocol. @code{v4kadmind} provides this V4 interface to
+a V5 database. This also provides an easy path to incrementally update
+from V4 to V5. Simply convert the database, move or link the @sc{acl}
+files from @file{/usr/kerberos/lib/admin_acl.@var{tag}} to
+@file{/usr/cygnus/cns5/lib/krb5kdc/v4acl.@var{tag}}@footnote{@var{tag}
+can be one of @code{add}, @code{del}, @code{get}, or @code{mod}.}  and
+run @code{v4kadmind}.
+
+
+
+
+@contents
+@c second page break makes sure right-left page alignment works right
+@c with a one-page toc, even though we don't have setchapternewpage odd.
+@c end of texinfo file
+@bye

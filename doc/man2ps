@@ -1,0 +1,42 @@
+#!/bin/sh
+
+com=`basename $0`
+files=$*
+docdir=`pwd`
+mandir=$docdir/man
+
+cd $mandir
+
+for file in $files
+do
+    troff -C -man -Tps $mandir/man?/$file.? | grops -g > $file.ps
+
+    pages=`grep '%%Pages\:' $file.ps | awk '{print $2}'`
+    pp=$(($pages - 1))
+
+    echo $file': '$pages' pages'
+
+    if [ -e csplit ]; then
+        csplit -k $file.ps /Page:/ \{$pp\}
+
+        counter=0
+
+        for number in `ls xx*`
+        do
+            cat xx00 > $docdir/$file$counter.ps
+            echo '.7 dup scale' >> $docdir/$file$counter.ps
+            cat $number >> $docdir/$file$counter.ps
+            if [ $counter != $pages ];
+                then
+                echo '%%Trailer' >> $docdir/$file$counter.ps
+                echo 'end' >> $docdir/$file$counter.ps
+                echo '%%EOF' >> $docdir/$file$counter.ps
+            fi
+            counter=$(($counter + 1))
+        done
+
+        rm $file.ps $docdir/$file'0.ps' xx*
+    else
+        echo "Can't find the csplit command.  You'll have to split $file.ps manually."
+    fi
+done
