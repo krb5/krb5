@@ -29,6 +29,7 @@
  * ser_princ.c - Serialize a krb5_principal structure.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Routines to deal with externalizing the krb5_principal:

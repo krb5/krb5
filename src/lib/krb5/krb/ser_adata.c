@@ -29,6 +29,7 @@
  * ser_adata.c - Serialize a krb5_authdata structure.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Routines to deal with externalizing the krb5_authdata:

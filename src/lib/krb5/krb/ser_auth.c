@@ -29,6 +29,7 @@
  * ser_auth.c - Serialize krb5_authenticator structure.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Routines to deal with externalizing the krb5_authenticator:

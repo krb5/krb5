@@ -1,3 +1,17 @@
+2000-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_ser.c: Cast getpid() calls to int as arguments to sprintf.
+
+	* ser_actx.c: Move prototypes (listed below) to int-proto.h
+
+	* int-proto.h: Add prototypes for krb5_ser_authdata_init,
+	krb5_ser_address_init, krb5_ser_authenticator_init,
+	krb5_ser_checksum_init, krb5_ser_keyblock_init,
+	krb5_ser_principal_init.
+	
+	* ser_adata.c, ser_addr.c, ser_auth.c, ser_cksum.c, ser_key.c,
+	ser_princ.c: Include int-proto.h for prototypes.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* bld_pr_ext.c, bld_princ.c (krb5_build_principal_ext,

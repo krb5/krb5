@@ -41,5 +41,12 @@ krb5_error_code krb5_libdefault_boolean
         KRB5_PROTOTYPE((krb5_context, const krb5_data *, const char *,
 			int *));
 
+krb5_error_code krb5_ser_authdata_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_address_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_authenticator_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_checksum_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_keyblock_init KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_ser_principal_init KRB5_PROTOTYPE((krb5_context));
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

@@ -29,6 +29,7 @@
  * ser_actx.c - Serialize krb5_auth_context structure.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 #define	TOKEN_RADDR	950916
@@ -55,12 +56,6 @@ static krb5_error_code krb5_auth_context_internalize
 /*
  * Other metadata serialization initializers.
  */
-krb5_error_code krb5_ser_authdata_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_address_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_authenticator_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_checksum_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_keyblock_init KRB5_PROTOTYPE((krb5_context));
-krb5_error_code krb5_ser_principal_init KRB5_PROTOTYPE((krb5_context));
 
 /* Local data */
 static const krb5_ser_entry krb5_auth_context_ser_entry = {
@@ -207,7 +202,8 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
     size_t		required;
     krb5_octet		*bp;
     size_t		remain;
-    krb5_int32		obuf;
+    size_t              obuf;
+    krb5_int32		obuf32;
 
     required = 0;
     bp = *buffer;
@@ -241,14 +237,16 @@ krb5_auth_context_externalize(kcontext, arg, buffer, lenremain)
 	    } else {
 		obuf = 0;
 	    }
-		
+
+	    /* Convert to signed 32 bit integer */
+	    obuf32 = obuf;
 	    if (!kret)
-		(void) krb5_ser_pack_int32(obuf, &bp, &remain);
+		(void) krb5_ser_pack_int32(obuf32, &bp, &remain);
 
 	    /* Now copy i_vector */
 	    if (!kret && auth_context->i_vector)
 		(void) krb5_ser_pack_bytes(auth_context->i_vector,
-					   (size_t) obuf,
+					   obuf,
 					   &bp, &remain);
 
 	    /* Now handle remote_addr, if appropriate */

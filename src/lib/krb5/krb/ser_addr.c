@@ -29,6 +29,7 @@
  * ser_addr.c - Serialize a krb5_address structure.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Routines to deal with externalizing the krb5_address:
