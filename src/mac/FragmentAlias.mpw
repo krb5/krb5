@@ -11,12 +11,12 @@
 /¶/¶* ¶[[0-9]*¶] ¶*¶//
 	Set FragEntry ""
 	
-/GSSLibrary/
-	Print "¶t¶t¶"MIT Kerberos¥GSSLib¶",¶t¶t"
+/¶"MIT_¥GSSLib¶"/
+	Print "¶t¶t¶"GSSLibrary¶",¶t¶t"
 	Print FragEntry
 
-/K5Library/
-	Print "¶t¶t¶"MIT Kerberos¥Kerberos5Lib¶",¶t¶t"
+/¶"MIT_¥Kerberos5Lib¶"/
+	Print "¶t¶t¶"K5Library¶",¶t¶t"
 	Print FragEntry
 
 /Å/

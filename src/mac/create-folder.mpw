@@ -1,0 +1,27 @@
+### usage: create-folder path
+###
+### path must be path to a folder (can be relative path)
+### creates the folder and its parents if necessary
+
+### Create path components of path one at a time
+set left-part ""
+set right-part "{1}"
+
+loop
+	if "{right-part}" == ""
+		break
+	end
+	
+	(evaluate "{right-part}" =~ /([Â:]*:)¨1Å/) > Dev:Null
+	set car "{¨1}"
+	(evaluate "{right-part}" =~ /[Â:]*:(Å)¨1/) > Dev:Null
+	set cdr "{¨1}"
+	
+	set left-part "{left-part}{car}"
+	set right-part "{cdr}"
+
+	if not (`Exists "{left-part}"`)	
+		NewFolder "{left-part}"
+	end
+end
+	

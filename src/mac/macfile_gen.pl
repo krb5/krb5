@@ -1,86 +1,161 @@
 #!/usr/athena/bin/perl -w
 
-if (defined ($ENV{'KERBSRCROOT'}))
-{
-	$ROOT=$ENV{'KERBSRCROOT'};
+# Usage:
+# macfile_gen.pl list-type start-path prefix
+# 	list-type is one of:
+#		all-files				-- complete list of mac sources, relative to root
+#		all-folders				-- complete list of mac directories, relative to root
+#		gss-sources				-- complete list of mac GSS sources, relative to root
+#		krb5-sources			-- complete list of mac Krb5 sources, relative to root
+#		gss-objects-ppc-debug	-- complete list of mac GSS PPC debug objects, relative to root
+#		gss-objects-68k-debug	-- complete list of mac GSS 68K debug objects, relative to root
+#		gss-objects-ppc-final	-- complete list of mac GSS PPC final objects, relative to root
+#		gss-objects-68k-final	-- complete list of mac GSS 68K final objects, relative to root
+#		krb5-objects-ppc-debug	-- complete list of mac Kerberos v5 PPC debug objects, relative to root
+#		krb5-objects-68k-debug	-- complete list of mac Kerberos v5 68K debug objects, relative to root
+#		krb5-objects-ppc-final	-- complete list of mac Kerberos v5 PPC final objects, relative to root
+#		krb5-objects-68k-final	-- complete list of mac Kerberos v5 68K final objects, relative to root
+#		include-folders			-- complete list of include paths, relative to root
+#
+#	input on stdin
+#	output on stdout
+
+# Check number of arguments
+if (scalar @ARGV != 3) {
+	print (STDERR "Got " . scalar @ARGV . " arguments, expected 2");
+	&usage;
+	exit;
+}
+
+# Parse arguments
+$action = $ARGV [0];
+$ROOT = $ARGV [1];
+$prefix = $ARGV [2];
+
+# Read source list
+if ($action ne "all-files") {
+
+	@sourceList = <STDIN>;
+	grep (s/\n$//, @sourceList);
+	
 } else {
-	$ROOT='.';
+
+	@sourceList = &make_macfile_maclist (&make_macfile_list ());
+	@sourceList = map { $prefix . $_;} @sourceList;
+	
 }
 
-# if we get "maclist" as a command line argument, print out a
-# list of files we need.
 
-if (defined($ARGV[0]) && $ARGV[0] eq "maclist")
-{
-	print(STDERR "Creating maclist.\n");
-	print(join(" ", &make_macfile_maclist(&make_macfile_list())), "\n");
-	print(STDERR "Done.\n");
+if ($action eq "all-folders") {
+
+	print (STDERR "# Building folder listÉ ");
+	@outputList = grep (s/(.*:)[^:]*\.c$/$1/, @sourceList);
+	@outputList = &uniq (sort (@outputList));
+	
+	print (STDERR "Done.\n");
+
+} elsif ($action eq "all-files") {
+
+	print (STDERR "# Building file listÉ ");
+	@outputList = @sourceList;
+	print (STDERR "Done.\n");
+
+} elsif ($action eq "all-sources") {
+
+	print (STDERR "# Building source listÉ ");
+	@outputList = grep (/.c$/, @sourceList);
+	print (STDERR "Done.\n");
+
+} elsif ($action eq "gss-sources") {
+
+	print (STDERR "# Building GSS source listÉ ");
+	@outputList = grep (/:gssapi:/, @sourceList);
+	print (STDERR "Done. \n");
+	
+} elsif ($action eq "krb5-sources") {
+
+	print (STDERR "# Building Kerberos v5 source listÉ ");
+	@outputList = grep (!/:gssapi:/, @sourceList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "gss-objects-ppc-debug") {
+
+	print (STDERR "# Building GSS PPC debug object listÉ ");
+	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "gss-objects-68k-debug") {
+
+	print (STDERR "# Building GSS 68K debug object listÉ ");
+	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "gss-objects-ppc-final") {
+
+	print (STDERR "# Building GSS PPC final object listÉ ");
+	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "gss-objects-68k-final") {
+
+	print (STDERR "# Building GSS 68K final object listÉ ");
+	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-ppc-debug") {
+
+	print (STDERR "# Building Kerberos v5 PPC debug object listÉ ");
+	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	@outputList = grep (!/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-68k-debug") {
+
+	print (STDERR "# Building Kerberos v5 68K debug object listÉ ");
+	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	@outputList = grep (!/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-ppc-final") {
+
+	print (STDERR "# Building Kerberos v5 PPC final object listÉ ");
+	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
+	@outputList = grep (!/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-68k-final") {
+
+	print (STDERR "# Building Kerberos v5 68K final object listÉ ");
+	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
+	@outputList = grep (!/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "include-folders") {
+
+	print (STDERR "# Building include listÉ ");
+	@outputList = grep (s/(.*:)[^:]*\.h$/-i $1/, @sourceList);
+	@outputList = &uniq (sort (@outputList));
+	print (STDERR "Done. \n");
+
+} else {
+
+	&usage;
 	exit;
-}	
-
-# if we get "macdirs" as a command line argument, print out a
-# list of directories we need.  Else, generate a makefile.
-
-if (defined($ARGV[0]) && $ARGV[0] eq "macdirs")
-{
-	print(STDERR "Creating macdirs.\n");
-	@MFSRCD=grep(s/(.*:)[^:]*\.c$/$1/, &make_macfile_maclist(&make_macfile_list()));
-	@MFSRCD=&uniq(sort(@MFSRCD));
-	print(join(" ", @MFSRCD), "\n");
-	print(STDERR "Done.\n");
-	exit;
-}	
-
-print(STDERR "Creating makefile.\n");
-
-@MACLIST=&make_macfile_maclist(&make_macfile_list());
-@MACSRCS=grep(/\.c$/, @MACLIST);
-@MACSRCSK5=grep($_!~/:gssapi:/, @MACSRCS);
-@MACSRCSGSS=grep($_=~/:gssapi:/, @MACSRCS);
-
-$MAKEFILE=&chew_on_filename("Makefile");
-&delete_file("Makefile") && print(STDERR "Old makefile ($MAKEFILE) deleted.\n");
-open(MF, ">".&chew_on_filename("Makefile")) || die "Can't open Makefile for writing";
-print(MF "sources = ", join(" ", @MACSRCS), "\n\n");
-@MFSRCD=grep(s/(.*:)[^:]*\.c$/$1/, &copy_array(@MACLIST));
-@MFSRCD=&uniq(sort(@MFSRCD));
-print(MF "source-folders =  @MFSRCD\n\n");
-
-@MACSRCSGSS=grep(s/.*://, @MACSRCSGSS);
-@MACSRCSK5=grep(s/.*://, @MACSRCSK5);
-
-for $A (0..1)
-{
-	@ARCH=('cfm68k', 'CFM68', 'CFM-68K') if $A==0;
-	@ARCH=('ppc', 'PPC', 'PPC') if $A==1;
-
-	print MF "gss-obj-$ARCH[0] = ";
-	for $SRC (@MACSRCSGSS)
-	{
-		print(MF ":bin:$ARCH[2]:$SRC.$ARCH[1].o ");
-	}
-	print(MF "\n\n");
-
-	print MF "krb5-obj-$ARCH[0] = ";
-	for $SRC (@MACSRCSK5)
-	{
-		print(MF ":bin:$ARCH[2]:$SRC.$ARCH[1].o ");
-	}
-	print(MF "\n\n");
+	
 }
 
-@HEADERS=grep(s/(.*:)[^:]*\.h$/ -i $1/, @MACLIST);
-print(MF "autogenerated-include-paths = ", &uniq(sort(@HEADERS)), "\n");
+print (join ("\n", @outputList), "\n");
 
-print(MF "\n#  TEMPLATE BEGINS HERE\n\n");
-
-@TEMPLATE=&read_file("mac/Makefile.tmpl");
-$TEMPLATE=join("\n", @TEMPLATE)."\n";
-$TEMPLATE=~tr#\*/:\\#\245:\304\266#;
-print MF $TEMPLATE;
-
-print(STDERR "$MAKEFILE successfully generated.\n");
 exit;
+
+#
+# Brad wrote rest of this stuff. Bug him, not me :-)
+#
+
 
 # Assuming the arguments are sorted, returns a copy with all duppliactes
 # removed.
