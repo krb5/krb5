@@ -151,6 +151,7 @@ dnl
 dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
+AC_SUBST([CC])dnl
 divert(9)dnl
 [
 Makefile: $(srcdir)/Makefile.in config.status
