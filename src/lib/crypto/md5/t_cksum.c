@@ -105,11 +105,7 @@ main(int argc, char *argv[])
   pwdata.length = strlen(pwd);
   pwdata.data = pwd;
   krb5_use_enctype(kcontext, &encblock, DEFAULT_KDC_ENCTYPE);
-  if (kret = mit_des_string_to_key(&encblock,
-				   DEFAULT_KDC_ENCTYPE,
-				   &keyblock,
-				   &pwdata,
-				   (krb5_data *) NULL)) {
+  if (kret = mit_des_string_to_key(&encblock, &keyblock, &pwdata, NULL)) {
     printf("mit_des_string_to_key choked with %d\n", kret);
     return(kret);
   }

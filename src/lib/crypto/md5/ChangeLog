@@ -1,3 +1,7 @@
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * t_cksum.c : Remove krb5_enctype from krb5_string_to_key() args.
+
 Fri Oct  6 22:00:32 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
