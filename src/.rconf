@@ -8,7 +8,7 @@ copy *;d
 link *;r
 link include/stdc-incl
 link include/isode-6.8
-link config
+;link config
 copy include/isode
 copy include/com_err.h
 copy *Makefile
