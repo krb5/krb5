@@ -1,3 +1,9 @@
+Sun Jun 29 14:52:04 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_err.et: Add support for kadm5_setv4key_principal.
+
+	* admin.h: Add prototype for kadm5_setv4key_principal.
+
 Wed May 28 13:34:17 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* admin.h: add prototype for kadm5_setkey_principal

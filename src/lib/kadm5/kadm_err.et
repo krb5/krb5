@@ -56,4 +56,5 @@ error_code KADM5_MISSING_CONF_PARAMS, "Required parameters in kdc.conf missing"
 error_code KADM5_BAD_SERVER_NAME, "Bad krb5 admin server hostname"
 error_code KADM5_AUTH_SETKEY, "Operation requires ``set-key'' privilege"
 error_code KADM5_SETKEY_DUP_ENCTYPES, "Multiple values for single or folded enctype"
+error_code KADM5_SETV4KEY_INVAL_ENCTYPE, "Invalid enctype for setv4key"
 end
