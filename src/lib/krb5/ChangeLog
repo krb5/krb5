@@ -1,3 +1,8 @@
+2003-08-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for or replace vfprintf, vsprintf,
+	strerror, memmove, or sscanf, all part of C 89.
+
 2003-07-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_libinit.c: Include autoconf.h.
