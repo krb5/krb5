@@ -17,8 +17,8 @@ INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
 PEPSYDIR=	$(PEPSYDIRM)/
-LIBISODE=	$(TOPDIR)libisode.a
-LIBDSAP	=	$(TOPDIR)libdsap.a
+LIBISODE=	$(TOPDIR)lib/libisode.a
+LIBDSAP	=	$(TOPDIR)lib/libdsap.a
 
 LIBES	=	libcompat.a
 LLIBS   =
@@ -37,7 +37,7 @@ LN	=	ln
 ###############################################################################
 
 
-LIBES   =       $(TOPDIR)libpepsy.a $(TOPDIR)libpsap.a $(TOPDIR)libcompat.a
+LIBES   =       $(TOPDIR)lib/libpepsy.a $(TOPDIR)lib/libpsap.a $(TOPDIR)lib/libcompat.a
 
 
 LLIBS   =       $(TOPDIR)llib-lpsap $(TOPDIR)llib-lcompat
@@ -74,7 +74,7 @@ libisode.a:	isodevrsn.o
 		    rm -f *); done
 		$(UTILDIR)make-lib.sh $(SYSTEM) $@ -ranlib
 		-rm -rf tmp
-		-@rm -f $(TOPDIR)libisode.a
+		-@rm -f $(TOPDIR)lib/libisode.a
 		-@$(LN) $@ $(TOPDIR)lib/libisode.a || cp $@ $(TOPDIR)lib/libisode.a
 		-@ls -l $@
 		-@echo "ISODE library built normally"

@@ -18,8 +18,8 @@ INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy
 PEPSYDIR=	$(PEPSYDIRM)/
-LIBISODE=	$(TOPDIR)libisode.a
-LIBDSAP	=	$(TOPDIR)libdsap.a
+LIBISODE=	$(TOPDIR)lib/libisode.a
+LIBDSAP	=	$(TOPDIR)lib/libdsap.a
 
 LLIBS   =
 LN	=	ln
@@ -121,9 +121,9 @@ libpsap.a:	psapvrsn.o
 		-rm -f $@
 		@$(UTILDIR)make-lib.sh $(SYSTEM) $@ $(OFILES) \
 			psapvrsn.o
-		-@rm -f $(TOPDIR)libpsap.a $(TOPDIR)llib-lpsap
-		-@$(LN) libpsap.a $(TOPDIR)libpsap.a || cp libpsap.a $(TOPDIR)libpsap.a
-		-@$(LN) llib-lpsap $(TOPDIR)llib-lpsap
+		-@rm -f $(TOPDIR)lib/libpsap.a $(TOPDIR)lib/llib-lpsap
+		-@$(LN) libpsap.a $(TOPDIR)lib/libpsap.a || cp libpsap.a $(TOPDIR)lib/libpsap.a
+		-@$(LN) llib-lpsap $(TOPDIR)lib/llib-lpsap
 		-@ls -l $@
 		-@echo "PSAP library built normally"
 
