@@ -1,3 +1,7 @@
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-config.h: Unused file deleted.
+
 2003-05-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb.h: Add prototype for krb5_db_iterate_ext.
