@@ -28,15 +28,6 @@
 #include "k5-int.h"
 #include <stdio.h>
 #include <sys/types.h>
-#ifndef _WINSOCKAPI_
-#include <sys/socket.h>
-#ifdef KRB5_USE_INET
-#include <netinet/in.h>
-#endif
-#endif
-#ifndef _WINSOCKAPI_
-#include <netdb.h>
-#endif
 #include "os-proto.h"
 
 #ifdef KRB5_USE_INET

@@ -27,9 +27,6 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
-#ifndef _WINSOCKAPI_
-#include <netdb.h>
-#endif
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>

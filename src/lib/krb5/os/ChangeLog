@@ -1,3 +1,14 @@
+Fri Mar 24 17:58:15 1995  Theodore Y. Ts'o  (tytso@rt-11)
+
+	* locate_kdc.c: Don't include sys/socket.h, netdb.h, netinet/in.h,
+		since these files are already included by k5-config.h
+	
+	* sendto_kdc.c: Don't include sys/socket.h, since it is already
+		included by k5-config.h
+
+	* sn2princ.c: Don't include netdb.h, since it is already included
+		by k5-config.h
+
 Thu Mar 23 23:11:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* realm_dom.c (krb5_get_realm_domain): Don't indent preprocessor

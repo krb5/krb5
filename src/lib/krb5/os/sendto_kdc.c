@@ -30,9 +30,6 @@
 #include "k5-int.h"
 
 #include <sys/types.h>
-#ifndef _WINSOCKAPI_
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
