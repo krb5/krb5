@@ -1129,7 +1129,11 @@ alpha*-dec-osf*)
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
-	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	# Need -oldstyle_liblookup to avoid picking up shared libs from
+	# other builds.  OSF/1 / Tru64 ld programs look through the entire
+	# library path for shared libs prior to looking through the
+	# entire library path for static libs.
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH) -Wl,-oldstyle_liblookup'
 	# $(PROG_RPATH) is here to handle things like a shared tcl library
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;

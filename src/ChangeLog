@@ -1,3 +1,10 @@
+2000-06-08  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CC_LINK_STATIC): Fix to use old library search
+	order; otherwise if there are shared libraries with the same name
+	elsewhere in the search path, they'll take precedence over the
+	static ones in the tree.
+
 2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* wconfig.c (main): Warn if copying command-line option string
