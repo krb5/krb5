@@ -1,7 +1,5 @@
 extern long FAR PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 
-//#define WINMEM
-
 /*
 *          Definition of attribute bits in the Virtual Screen
 *
@@ -43,25 +41,9 @@ extern long FAR PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 #define ALERT 0x21
 #define MAX_LINE_WIDTH 256 /* not restricted to 1 byte */
 
-#ifdef WINMEM
-#define HSCREENLINE DWORD
-#define LINE_MEM_ALLOC(x) sAlloc(x)
-#define LINE_MEM_LOCK(x) (SCREENLINE *)sLock(x)
-#define LINE_MEM_UNLOCK(x) sUnlock(x)
-#define LINE_MEM_FREE(x) sFree(x)
-#else
-#define HSCREENLINE HGLOBAL
-#define LINE_MEM_ALLOC(x) GlobalAlloc(GHND,x)
-#define LINE_MEM_LOCK(x) (SCREENLINE *) GlobalLock(x)
-#define LINE_MEM_UNLOCK(x) GlobalUnlock(x)
-#define LINE_MEM_FREE(x) GlobalFree(x)
-#endif
-
-#define HSCREEN HGLOBAL
-
 typedef struct SCREENLINE {
-	HSCREENLINE next;
-	HSCREENLINE prev;
+	struct SCREENLINE *next;
+	struct SCREENLINE *prev;
 	int width;
 	char *text;
 	char *attrib;
@@ -69,56 +51,63 @@ typedef struct SCREENLINE {
 } SCREENLINE;
 
 typedef struct SCREEN {
-    LPSTR title;
-    HWND hWnd;
-    HWND hwndTel;
-    HSCREENLINE screen_top,
-                screen_bottom,
-                buffer_top,
-                buffer_bottom;
-	int ID,
-        type,
-        width,
-        height,
-        maxlines,       //Maximum number of scrollback lines
-        numlines,       //Current number of scrollback lines
-        savelines,      //Save lines off top?
-        ESscroll,       //Scroll screen when ES received
-        attrib,         //current attribute
-        x,y,            //current cursor position
-        Oldx,Oldy,      // internally used to redraw cursor
-        Px,Py,Pattrib,  //saved cursor pos and attribute
-        VSIDC,          // Insert/Delete character mode 0=draw line
-        DECAWM,         // AutoWrap mode 0=off
-        DECCKM,         // Cursor key mode
-        DECPAM,         // keyPad Application mode
-        IRM,            // Insert/Replace mode
-        escflg,         // Current Escape level        
-        top,bottom,     // Vertical bounds of screen
-        parmptr,
-        cxChar,         /* Width of the current font */
-        cyChar;         /* Height of the current font */
-    BOOL bAlert;
-    int parms[6];       //Ansi Params
-    LOGFONT lf;
-    HFONT ghSelectedFont,ghSelectedULFont;
-    char tabs[MAX_LINE_WIDTH];
-    HSCREEN next, prev;
+	LPSTR title;
+	HWND hWnd;
+	HWND hwndTel;
+	SCREENLINE *screen_top;
+	SCREENLINE *screen_bottom;
+	SCREENLINE *buffer_top;
+	SCREENLINE *buffer_bottom;
+	int ID;
+	int type;
+	int width;
+	int height;
+	int maxlines;       // Maximum number of scrollback lines
+	int numlines;       // Current number of scrollback lines
+	int savelines;      // Save lines off top?
+	int ESscroll;       // Scroll screen when ES received
+	int attrib;         // current attribute
+	int x;              // current cursor position
+	int y;              // current cursor position
+	int Oldx;           // internally used to redraw cursor
+	int Oldy;
+	int Px;             // saved cursor pos and attribute
+	int Py;
+	int Pattrib;
+	int VSIDC;          // Insert/Delete character mode 0=draw line
+	int DECAWM;         // AutoWrap mode 0=off
+	int DECCKM;         // Cursor key mode
+	int DECPAM;         // keyPad Application mode
+	int IRM;            // Insert/Replace mode
+	int escflg;         // Current Escape level        
+	int top;            // Vertical bounds of screen
+	int bottom;
+	int parmptr;
+	int cxChar;         // Width of the current font
+	int cyChar;         // Height of the current font
+	BOOL bAlert;
+	int parms[6];       // Ansi Params
+	LOGFONT lf;
+	HFONT hSelectedFont;
+	HFONT hSelectedULFont;
+	char tabs[MAX_LINE_WIDTH];
+	struct SCREEN *next;
+	struct SCREEN *prev;
 } SCREEN;
 
 typedef struct CONFIG {
-    LPSTR title;
-    HWND hwndTel;
-    int ID,
-        type,
-        height,
-        width,
-        maxlines,       //Maximum number of scrollback lines
-        backspace,
-        ESscroll,       //Scroll screen when ES received
-        VSIDC,          // Insert/Delete character mode 0=draw line
-        DECAWM,         // AutoWrap mode 0=off
-        IRM;            // Insert/Replace mode
+	LPSTR title;
+	HWND hwndTel;
+	int ID;
+	int type;
+	int height;
+	int width;
+	int maxlines;       // Maximum number of scrollback lines
+	int backspace;
+	int ESscroll;       // Scroll screen when ES received
+	int VSIDC;          // Insert/Delete character mode 0=draw line
+	int DECAWM;         // AutoWrap mode 0=off
+	int IRM;            // Insert/Replace mode
 } CONFIG;
 
 #define TELNET_SCREEN   0
@@ -142,66 +131,190 @@ typedef struct CONFIG {
 
 #define DESIREDPOINTSIZE 12
 
+/*
+Prototypes
+*/
+	void NEAR InitializeStruct(
+		WORD wCommDlgType,
+		LPSTR lpStruct,
+		HWND hWnd);
 
-void        ReportError(WORD);
-LPSTR NEAR AllocAndLockMem(HANDLE *hChunk, WORD wSize);
-void NEAR InitializeStruct(WORD wCommDlgType, LPSTR lpStruct, HWND hWnd);
+	void ScreenInit(
+		HANDLE hInstance);
 
-void ScreenInit(HANDLE hInstance);
-HSCREENLINE ScreenNewLine();
-void ScreenBell(SCREEN *fpScr);
-void ScreenBackspace(SCREEN * fpScr);
-void ScreenTab(SCREEN *fpScr);
-void ScreenCarriageFeed(SCREEN *fpScr);
-int ScreenScroll(SCREEN *fpScr);
-void DeleteTopLine(SCREEN *fpScr);
-/* emul.c */
-void ScreenEm(LPSTR c,int len,HSCREEN hsScr);
+	void SetScreenInstance(
+		HINSTANCE hInstance);
 
+	SCREENLINE *ScreenNewLine();
 
-/* intern.c */
-HSCREENLINE GetScreenLineFromY(SCREEN *fpScr,int y);
-HSCREENLINE ScreenClearLine(SCREEN *fpScr,HSCREENLINE hgScrLine);
-void ScreenUnscroll(SCREEN *fpScr);
-void ScreenELO(SCREEN *fpScr,int s);
-void ScreenEraseScreen(SCREEN *fpScr);
-void ScreenTabClear(SCREEN *fpScr);
-void ScreenTabInit(SCREEN *fpScr);
-void ScreenReset(SCREEN *fpScr);
-void ScreenIndex(SCREEN * fpScr);
-void ScreenWrapNow(SCREEN *fpScr,int *xp,int *yp);
-void ScreenEraseToEOL(SCREEN *fpScr);
-void ScreenEraseToBOL(SCREEN *fpScr);
-void ScreenEraseLine(SCREEN *fpScr,int s);
-void ScreenEraseToEndOfScreen(SCREEN *fpScr);
-void ScreenRange(SCREEN *fpScr);
-void ScreenAlign(SCREEN *fpScr);
-void ScreenApClear(SCREEN *fpScr);
-int ScreenInsChar(SCREEN *fpScr,int x);
-void ScreenInsString(SCREEN *fpScr,int len,char *start);
-void ScreenSaveCursor(SCREEN *fpScr);
-void ScreenRestoreCursor(SCREEN *fpScr);
-void ScreenDraw(SCREEN *fpScr,int x,int y,int a,int len,char *c);
-void ScreenCursorOff(SCREEN *fpScr);
-void ScreenCursorOn(SCREEN *fpScr);
-void ScreenDelChars(SCREEN *fpScr, int n);
-void ScreenRevIndex(SCREEN *fpScr);
-void ScreenDelLines(SCREEN *fpScr, int n, int s);
-void ScreenInsLines(SCREEN *fpScr, int n, int s);
-#ifdef _DEBUG
-	BOOL CheckScreen(SCREEN *fpScr);
-#endif
+	void ScreenBell(
+		SCREEN *pScr);
 
-void ProcessFontChange(HWND hWnd);
-void Edit_LbuttonDown(HWND hWnd,LPARAM lParam);
-void Edit_LbuttonDblclk(HWND hWnd,LPARAM lParam);
-void Edit_LbuttonUp(HWND hWnd, LPARAM lParam);
-void Edit_TripleClick(HWND hWnd, LPARAM lParam);
-void Edit_MouseMove(HWND hWnd, LPARAM lParam);
-void Edit_ClearSelection(SCREEN *fpScr);
-void Edit_Copy(HWND hWnd);
-void Edit_Paste(HWND hWnd);
+	void ScreenBackspace(
+		SCREEN *pScr);
 
-HSCREEN InitNewScreen(CONFIG *Config);
+	void ScreenTab(
+		SCREEN *pScr);
 
+	void ScreenCarriageFeed(
+		SCREEN *pScr);
 
+	int ScreenScroll(
+		SCREEN *pScr);
+
+	void DeleteTopLine(
+		SCREEN *pScr);
+
+/*
+emul.c
+*/
+	void ScreenEm(
+		LPSTR c,
+		int len,
+		SCREEN *pScr);
+
+/*
+intern.c
+*/
+	SCREENLINE *GetScreenLineFromY(
+		SCREEN *pScr,
+		int y);
+
+	SCREENLINE *ScreenClearLine(
+		SCREEN *pScr,
+		SCREENLINE *pScrLine);
+
+	void ScreenUnscroll(
+		SCREEN *pScr);
+
+	void ScreenELO(
+		SCREEN *pScr,
+		int s);
+
+	void ScreenEraseScreen(
+		SCREEN *pScr);
+
+	void ScreenTabClear(
+		SCREEN *pScr);
+
+	void ScreenTabInit(
+		SCREEN *pScr);
+
+	void ScreenReset(
+		SCREEN *pScr);
+
+	void ScreenIndex(
+		SCREEN *pScr);
+
+	void ScreenWrapNow(
+		SCREEN *pScr,
+		int *xp,
+		int *yp);
+
+	void ScreenEraseToEOL(
+		SCREEN *pScr);
+
+	void ScreenEraseToBOL(
+		SCREEN *pScr);
+
+	void ScreenEraseLine(
+		SCREEN *pScr,
+		int s);
+
+	void ScreenEraseToEndOfScreen(
+		SCREEN *pScr);
+
+	void ScreenRange(
+		SCREEN *pScr);
+
+	void ScreenAlign(
+		SCREEN *pScr);
+
+	void ScreenApClear(
+		SCREEN *pScr);
+
+	int ScreenInsChar(
+		SCREEN *pScr,
+		int x);
+
+	void ScreenInsString(
+		SCREEN *pScr,
+		int len,
+		char *start);
+
+	void ScreenSaveCursor(
+		SCREEN *pScr);
+
+	void ScreenRestoreCursor(
+		SCREEN *pScr);
+
+	void ScreenDraw(
+		SCREEN *pScr,
+		int x,
+		int y,
+		int a,
+		int len,
+		char *c);
+
+	void ScreenCursorOff(
+		SCREEN *pScr);
+
+	void ScreenCursorOn(
+		SCREEN *pScr);
+
+	void ScreenDelChars(
+		SCREEN *pScr,
+		int n);
+
+	void ScreenRevIndex(
+		SCREEN *pScr);
+
+	void ScreenDelLines(
+		SCREEN *pScr,
+		int n,
+		int s);
+
+	void ScreenInsLines(
+		SCREEN *pScr,
+		int n,
+		int s);
+
+	#ifdef _DEBUG
+		BOOL CheckScreen(
+			SCREEN *pScr);
+	#endif
+
+	void ProcessFontChange(
+		HWND hWnd);
+
+	void Edit_LbuttonDown(
+		HWND hWnd,
+		LPARAM lParam);
+
+	void Edit_LbuttonDblclk(
+		HWND hWnd,
+		LPARAM lParam);
+
+	void Edit_LbuttonUp(
+		HWND hWnd,
+		LPARAM lParam);
+
+	void Edit_TripleClick(
+		HWND hWnd,
+		LPARAM lParam);
+
+	void Edit_MouseMove(
+		HWND hWnd,
+		LPARAM lParam);
+
+	void Edit_ClearSelection(
+		SCREEN *pScr);
+
+	void Edit_Copy(
+		HWND hWnd);
+
+	void Edit_Paste(
+		HWND hWnd);
+
+	SCREEN *InitNewScreen(
+		CONFIG *Config);

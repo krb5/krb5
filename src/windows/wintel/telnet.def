@@ -1,22 +1,12 @@
 ; module-definition file for testdll -- used by LINK.EXE
-NAME         telnet        ; application's module name
-
-DESCRIPTION  'Sample Microsoft Windows Application'
-
-EXETYPE      WINDOWS       ; required for all Windows applications
-
-STUB         'WINSTUB.EXE' ; Generates error message if application
-               ; is run without Windows
-
-;CODE can be moved in memory and discarded/reloaded
-CODE  PRELOAD MOVEABLE 
-;DISCARDABLE
-
-;DATA must be MULTIPLE if program can be invoked more than once
-DATA  PRELOAD MOVEABLE
-
-
-HEAPSIZE     10240
+NAME TELNET
+DESCRIPTION 'Sample Microsoft Windows Application'
+EXETYPE WINDOWS
+STUB 'WINSTUB.EXE'
+SEGMENTS _TEXT CLASS 'CODE' PRELOAD
+CODE DISCARDABLE
+DATA PRELOAD MOVEABLE MULTIPLE
+HEAPSIZE 10240
 
 ; All functions that will be called by any Windows routine
 ; MUST be exported.

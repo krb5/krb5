@@ -1,767 +1,829 @@
+/* intern.c */
+
 #include <windows.h>
 #include <string.h>
+#include <assert.h>
 #include "screen.h"
+
 #define ScreenClearAttrib 0
 
-HSCREENLINE GetScreenLineFromY(SCREEN *fpScr,int y)
+SCREENLINE *GetScreenLineFromY(
+	SCREEN *pScr,
+	int y)
 {
-    HSCREENLINE hgScrLine,hgScrLineTmp;
-    SCREENLINE *fpScrLine;
-    int idx;
+	SCREENLINE *pScrLine;
+	int idx;
 
-    hgScrLine=fpScr->screen_top;
-    for (idx=0; idx<fpScr->height; idx++) {
-        if (idx==y) return(hgScrLine);
-        fpScrLine=LINE_MEM_LOCK(hgScrLine);
-        if (fpScrLine==NULL) return (NULL);    
-        hgScrLineTmp=fpScrLine->next;        
-        LINE_MEM_UNLOCK(hgScrLine);
-        hgScrLine=hgScrLineTmp;
-    }
-    return(NULL);
-}    
+	pScrLine = pScr->screen_top;
+	for (idx = 0; idx < pScr->height; idx++) {
+		if (idx == y)
+			return(pScrLine);
+		if (pScrLine == NULL)
+			return(NULL);
+		pScrLine = pScrLine->next;
+	}
 
-HSCREENLINE ScreenClearLine(SCREEN *fpScr,HSCREENLINE hgScrLine)
+	return(NULL);
+
+} /* GetScreenLineFromY */
+
+
+SCREENLINE *ScreenClearLine(
+	SCREEN *pScr,
+	SCREENLINE *pScrLine)
 {
-    SCREENLINE *fpScrLine;
-      
-    fpScrLine=LINE_MEM_LOCK(hgScrLine);
-	memset(fpScrLine->attrib, ScreenClearAttrib, fpScr->width);
-	memset(fpScrLine->text, ' ', fpScr->width);
-    LINE_MEM_UNLOCK(hgScrLine);
-    return(hgScrLine);
-}
+	memset(pScrLine->attrib, ScreenClearAttrib, pScr->width);
+	memset(pScrLine->text, ' ', pScr->width);
+	return(pScrLine);
 
-void ScreenUnscroll(SCREEN *fpScr)
+} /* ScreenClearLine */
+
+
+void ScreenUnscroll(
+	SCREEN *pScr)
 {
 	int idx;
-    HSCREENLINE hgScrLine,hgScrLineTmp;
-    SCREENLINE *fpScrLine;
+	SCREENLINE *pScrLine;
 
-    if (fpScr->screen_bottom == fpScr->buffer_bottom)
+	if (pScr->screen_bottom == pScr->buffer_bottom)
 		return;
 
-    fpScr->screen_bottom=fpScr->buffer_bottom;
-    hgScrLine=fpScr->screen_bottom;
-    for (idx = 1; idx < fpScr->height; idx++) {
-        fpScrLine=LINE_MEM_LOCK(hgScrLine);
-        if (fpScrLine==NULL)
-            return;
-        hgScrLineTmp=fpScrLine->prev;
-        LINE_MEM_UNLOCK(hgScrLine);
-        hgScrLine=hgScrLineTmp;
-    }
-    fpScr->screen_top=hgScrLine;
-}
+	pScr->screen_bottom = pScr->buffer_bottom;
+	pScrLine = pScr->screen_bottom;
+	for (idx = 1; idx < pScr->height; idx++) {
+		if (pScrLine == NULL)
+			return;
+		pScrLine = pScrLine->prev;
+	}
+	pScr->screen_top = pScrLine;
 
-void ScreenCursorOn(SCREEN *fpScr)
+} /* ScreenUnscroll */
+
+
+void ScreenCursorOn(
+	SCREEN *pScr)
 {
 	int y;
 	int nlines;
 
-	if (fpScr->screen_bottom != fpScr->buffer_bottom)
-    	nlines = fpScr->numlines - GetScrollPos(fpScr->hWnd, SB_VERT);
+	if (pScr->screen_bottom != pScr->buffer_bottom)
+		nlines = pScr->numlines - GetScrollPos(pScr->hWnd, SB_VERT);
 	else
 		nlines = 0;
 
-	y = fpScr->y + nlines;
-	SetCaretPos(fpScr->x * fpScr->cxChar, (y+1) * fpScr->cyChar);
-	ShowCaret(fpScr->hWnd);
-}
+	y = pScr->y + nlines;
+	SetCaretPos(pScr->x * pScr->cxChar, (y+1) * pScr->cyChar);
+	ShowCaret(pScr->hWnd);
 
-void ScreenCursorOff(SCREEN *fpScr)
+} /* ScreenCursorOn */
+
+
+void ScreenCursorOff(
+	SCREEN *pScr)
 {
-	HideCaret(fpScr->hWnd);
-}
+	HideCaret(pScr->hWnd);
 
-void ScreenELO(SCREEN *fpScr,int s)
+} /* ScreenCursorOff */
+
+
+void ScreenELO(
+	SCREEN *pScr,
+	int s)
 {
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
-            
-/*  fpScrrapnow(&i,&j); */
-    if(s<0) 
-        s=fpScr->y;
-    
-    hgScrLine=GetScreenLineFromY(fpScr,s);
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-	memset(fpScrLine->attrib, ScreenClearAttrib, fpScr->width);
-	memset(fpScrLine->text, ' ', fpScr->width);
-    LINE_MEM_UNLOCK(hgScrLine);
-    rc.left=0;
-    rc.right=(fpScr->width*fpScr->cxChar);
-    rc.top=(fpScr->cyChar*s);    
-    rc.bottom=(fpScr->cyChar*(s+1));
-    InvalidateRect(fpScr->hWnd,&rc,TRUE);
-}
+	SCREENLINE *pScrLine;
+	RECT rc;
+			
+	if (s < 0) 
+		s = pScr->y;
+	
+	pScrLine = GetScreenLineFromY(pScr,s);
+	memset(pScrLine->attrib, ScreenClearAttrib, pScr->width);
+	memset(pScrLine->text, ' ', pScr->width);
+	rc.left = 0;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = pScr->cyChar * s;    
+	rc.bottom = pScr->cyChar * (s+1);
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
 
-void ScreenEraseScreen(SCREEN *fpScr) 
+} /* ScreenELO */
+
+void ScreenEraseScreen(
+	SCREEN *pScr)
 {
-    int i;
-    int x1=0,y1=0;
-    int x2=fpScr->width,y2=fpScr->height;
-    int n=(-1);
-            
-    for(i=0; i<fpScr->height; i++)
-        ScreenELO(fpScr,i);
-    InvalidateRect(fpScr->hWnd,NULL,TRUE);
-    UpdateWindow(fpScr->hWnd);
-}
+	int i;
+	int x1 = 0;
+	int y1 = 0;
+	int x2 = pScr->width;
+	int y2 = pScr->height;
+	int n = -1;
+			
+	for(i = 0; i < pScr->height; i++)
+		ScreenELO(pScr,i);
 
-void ScreenTabClear(SCREEN *fpScr)
+	InvalidateRect(pScr->hWnd, NULL, TRUE);
+	UpdateWindow(pScr->hWnd);
+
+} /* ScreenEraseScreen */
+
+
+void ScreenTabClear(
+	SCREEN *pScr)
 {
-    int x=0;
+	int x = 0;
 
-    while(x<=fpScr->width) {
-        fpScr->tabs[x]=' ';
-        x++;
-      } /* end while */
-}
+	while(x <= pScr->width) {
+		pScr->tabs[x] = ' ';
+		x++;
+	}
 
-void ScreenTabInit(SCREEN *fpScr)
+} /* ScreenTabClear */
+
+
+void ScreenTabInit(
+	SCREEN *pScr)
 {
-    int x=0;
+	int x = 0;
 
-    ScreenTabClear(fpScr);
+	ScreenTabClear(pScr);
 
-    while(x<=fpScr->width) { 
-        fpScr->tabs[x]='x';
-        x+=8;
-    } /* end while */
-    fpScr->tabs[fpScr->width]='x';
-}
+	while(x <= pScr->width) { 
+		pScr->tabs[x] = 'x';
+		x += 8;
+	}
+	pScr->tabs[pScr->width] = 'x';
 
-void ScreenReset(SCREEN *fpScr)
+} /* ScreenTabInit */
+
+
+void ScreenReset(
+	SCREEN *pScr)
 {
-    fpScr->top=0;
-    fpScr->bottom=fpScr->height-1;
-    fpScr->parmptr=0;
-    fpScr->escflg=0;
-    fpScr->DECAWM=1;
-    fpScr->DECCKM=0;
-    fpScr->DECPAM=0;
-/*  fpScr->DECORG=0;     */
-/*  fpScr->Pattrib=-1;   */
-    fpScr->IRM=0;
-    fpScr->attrib=0;
-    fpScr->x=0;
-    fpScr->y=0;
-//    fpScr->charset=0;
-    ScreenEraseScreen(fpScr);
-    ScreenTabInit(fpScr);
-//    set_vtwrap(fpScrn,fpScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
-}
+	pScr->top = 0;
+	pScr->bottom = pScr->height-1;
+	pScr->parmptr = 0;
+	pScr->escflg = 0;
+	pScr->DECAWM = 1;
+	pScr->DECCKM = 0;
+	pScr->DECPAM = 0;
+/*  pScr->DECORG = 0;     */
+/*  pScr->Pattrib = -1;   */
+	pScr->IRM = 0;
+	pScr->attrib = 0;
+	pScr->x = 0;
+	pScr->y = 0;
+//    pScr->charset = 0;
+	ScreenEraseScreen(pScr);
+	ScreenTabInit(pScr);
+//    set_vtwrap(pScrn, pScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
+
+} /* ScreenReset */
 
 
-void ScreenListMove(HSCREENLINE hTD,HSCREENLINE hBD,HSCREENLINE hTI,HSCREENLINE hBI)
+void ScreenListMove(
+	SCREENLINE *TD,
+	SCREENLINE *BD,
+	SCREENLINE *TI,
+	SCREENLINE *BI)
 {
-    HSCREENLINE hTmpLine;
-    SCREENLINE *TD,*BD,*TI,*BI,*tmpLine;
-    
-//    OutputDebugString("ScreenListMove");
-    TD= (SCREENLINE *)GlobalLock(hTD);
-    BD= (SCREENLINE *)GlobalLock(hBD);
-    TI= (SCREENLINE *)GlobalLock(hTI);
-    BI= (SCREENLINE *)GlobalLock(hBI);
-    
-    if(TD->prev!=NULL) {
-        hTmpLine=TD->prev;
-        tmpLine=(SCREENLINE *)GlobalLock(hTmpLine);
-        tmpLine->next=BD->next;    /* Maintain circularity */
-        GlobalUnlock(hTmpLine);
-    }        
-    if(BD->next!=NULL) {
-        hTmpLine=BD->next;
-        tmpLine=(SCREENLINE *)GlobalLock(hTmpLine);
-        tmpLine->prev=TD->prev;
-        GlobalUnlock(hTmpLine);
-    }
-    TD->prev=hTI;                    /* Place the node in its new home */
-    BD->next=hBI;
-    if(TI!=NULL) 
-        TI->next=hTD;                /* Ditto prev->prev */
-    if(BI!=NULL) 
-        BI->prev=hBD;
-        
-    GlobalUnlock(hTD);
-    GlobalUnlock(hBD);
-    GlobalUnlock(hTI);
-    GlobalUnlock(hBI);            
-}
+	if (TD->prev != NULL)
+		TD->prev->next = BD->next;    /* Maintain circularity */
+
+	if (BD->next != NULL)
+		BD->next->prev = TD->prev;
+
+	TD->prev = TI;                    /* Place the node in its new home */
+	BD->next = BI;
+
+	if (TI != NULL) 
+		TI->next = TD;                /* Ditto prev->prev */
+
+	if (BI != NULL) 
+		BI->prev = BD;
+
+} /* ScreenListMove */
 
 
-void ScreenDelLines(SCREEN *fpScr, int n, int s)
+void ScreenDelLines(
+	SCREEN *pScr,
+	int n,
+	int s)
 {
-    HSCREENLINE hBI,hTI,hTD,hBD;
-    SCREENLINE *TI;
-    SCREENLINE *BD;
-    HSCREENLINE hLine;
-    SCREENLINE *fpLine;
-    HSCREENLINE hTemp;
+	SCREENLINE *BI;
+	SCREENLINE *TI;
+	SCREENLINE *TD;
+	SCREENLINE *BD;
+	SCREENLINE *pLine;
 	int idx;
 	RECT rc;
 	HDC hDC;
-    
-    if (s < 0) 
-        s = fpScr->y;
+	
+	if (s < 0) 
+		s = pScr->y;
 
-    if (s + n - 1 > fpScr->bottom)
-        n = fpScr->bottom - s + 1;
+	if (s + n - 1 > pScr->bottom)
+		n = pScr->bottom - s + 1;
 
-    hTD = GetScreenLineFromY(fpScr, s);
-    hBD = GetScreenLineFromY(fpScr, s + n - 1);
-    hTI = GetScreenLineFromY(fpScr, fpScr->bottom);
-    TI= LINE_MEM_LOCK(hTI);
-    hBI = TI->next;
-    LINE_MEM_UNLOCK(hTI);
+	TD = GetScreenLineFromY(pScr, s);
+	BD = GetScreenLineFromY(pScr, s + n - 1);
+	TI = GetScreenLineFromY(pScr, pScr->bottom);
+	BI = TI->next;
 
 	/*
 	Adjust the top of the screen and buffer if they will move.
 	*/
-	if (hTD == fpScr->screen_top) {
-	    BD = LINE_MEM_LOCK(hBD);
-		if (fpScr->screen_top == fpScr->buffer_top)
-			fpScr->buffer_top = BD->next;
-		fpScr->screen_top = BD->next;
-	    LINE_MEM_UNLOCK(hBD);
+	if (TD == pScr->screen_top) {
+		if (pScr->screen_top == pScr->buffer_top)
+			pScr->buffer_top = BD->next;
+		pScr->screen_top = BD->next;
 	}
 
 	/*
 	Adjust the bottom of the screen and buffer if they will move.
 	*/
-	if (hTI == fpScr->screen_bottom) {
-		if (fpScr->screen_bottom == fpScr->buffer_bottom)
-			fpScr->buffer_bottom = hBD;
-		fpScr->screen_bottom = hBD;
+	if (TI == pScr->screen_bottom) {
+		if (pScr->screen_bottom == pScr->buffer_bottom)
+			pScr->buffer_bottom = BD;
+		pScr->screen_bottom = BD;
 	}
 
-    if (hTI != hBD)
-        ScreenListMove(hTD, hBD, hTI, hBI);
+	if (TI != BD)
+		ScreenListMove(TD, BD, TI, BI);
 
 	/*
 	Clear the lines moved from the deleted area to the
 	bottom of the scrolling area.
 	*/
-	hLine = hTI;
+	pLine = TI;
 
 	for (idx = 0; idx < n; idx++) {
-		fpLine = LINE_MEM_LOCK(hLine);
-		hTemp = fpLine->next;
-		LINE_MEM_UNLOCK(hLine);
-		hLine = hTemp;
-		ScreenClearLine(fpScr, hLine);
+		pLine = pLine->next;
+		ScreenClearLine(pScr, pLine);
 	}
 
-//	CheckScreen(fpScr);
+//	CheckScreen(pScr);
 
 	/*
 	Scroll the affected area on the screen.
 	*/
-    rc.left = 0;
-    rc.right = fpScr->width * fpScr->cxChar;
-    rc.top = s * fpScr->cyChar;
-    rc.bottom = (fpScr->bottom + 1) * fpScr->cyChar;
+	rc.left = 0;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = s * pScr->cyChar;
+	rc.bottom = (pScr->bottom + 1) * pScr->cyChar;
 
-    hDC = GetDC(fpScr->hWnd);
+	hDC = GetDC(pScr->hWnd);
 
-    ScrollDC(hDC, 0, -fpScr->cyChar * n, &rc, &rc, NULL, NULL);
+	ScrollDC(hDC, 0, -pScr->cyChar * n, &rc, &rc, NULL, NULL);
 
-    PatBlt(hDC, 0, (fpScr->bottom - n + 1) * fpScr->cyChar,
-		fpScr->width * fpScr->cxChar, n * fpScr->cyChar, WHITENESS);
+	PatBlt(hDC, 0, (pScr->bottom - n + 1) * pScr->cyChar,
+		pScr->width * pScr->cxChar, n * pScr->cyChar, WHITENESS);
 
-    ReleaseDC(fpScr->hWnd, hDC);
+	ReleaseDC(pScr->hWnd, hDC);
 
 } /* ScreenDelLines */
 
 
-void ScreenInsertLine(SCREEN *fpScr, int s)
+void ScreenInsertLine(
+	SCREEN *pScr,
+	int s)
 {
-	ScreenInsLines(fpScr, 1, s);
+	ScreenInsLines(pScr, 1, s);
+
 } /* ScreenInsertLine */
 
 
-void ScreenInsLines(SCREEN *fpScr, int n, int s)
+void ScreenInsLines(
+	SCREEN *pScr,
+	int n,
+	int s)
 {
-    HSCREENLINE hLine;
-    HSCREENLINE hTemp;
-    HSCREENLINE hTI;
-    HSCREENLINE hBI;
-    HSCREENLINE hTD;
-    HSCREENLINE hBD;
-    SCREENLINE *fpLine;
-    SCREENLINE *BI;
+	SCREENLINE *TI;
+	SCREENLINE *BI;
 	SCREENLINE *TD;
-    int idx;
-    RECT rc;
-    HDC hDC;
+	SCREENLINE *BD;
+	SCREENLINE *pLine;
+	int idx;
+	RECT rc;
+	HDC hDC;
  
 //    wsprintf(strTmp, "ScreenInsLine (n=%d s=%d)", n, s);
 //    OutputDebugString(strTmp);
 
-    if (s < 0)
-		s = fpScr->y;
+	if (s < 0)
+		s = pScr->y;
 
-    if (s + n - 1 > fpScr->bottom) 
-        n = fpScr->bottom - s + 1;
+	if (s + n - 1 > pScr->bottom) 
+		n = pScr->bottom - s + 1;
 
 	/*
 	Determine the top and bottom of the insert area.  Also determine
 	the top and bottom of the area to be deleted and moved to the
 	insert area.
 	*/
-    hBI = GetScreenLineFromY(fpScr, s);
-    BI = LINE_MEM_LOCK(hBI);
-    hTI = BI->prev;
-    hTD = GetScreenLineFromY(fpScr, fpScr->bottom - n + 1);
-    hBD = GetScreenLineFromY(fpScr, fpScr->bottom);
-    
+	BI = GetScreenLineFromY(pScr, s);
+	TI = BI->prev;
+	TD = GetScreenLineFromY(pScr, pScr->bottom - n + 1);
+	BD = GetScreenLineFromY(pScr, pScr->bottom);
+
 	/*
 	Adjust the top of the screen and buffer if they will move.
 	*/
-	if (hBI == fpScr->screen_top) {
-		if (fpScr->screen_top == fpScr->buffer_top)
-			fpScr->buffer_top = hTD;
-		fpScr->screen_top = hTD;
+	if (BI == pScr->screen_top) {
+		if (pScr->screen_top == pScr->buffer_top)
+			pScr->buffer_top = TD;
+		pScr->screen_top = TD;
 	}
 
 	/*
 	Adjust the bottom of the screen and buffer if they will move.
 	*/
-	if (hBD == fpScr->screen_bottom) {
-	    TD = LINE_MEM_LOCK(hTD);
-		if (fpScr->screen_bottom == fpScr->buffer_bottom)
-			fpScr->buffer_bottom = TD->prev;
-		fpScr->screen_bottom = TD->prev;
-	    LINE_MEM_UNLOCK(hTD);
+	if (BD == pScr->screen_bottom) {
+		if (pScr->screen_bottom == pScr->buffer_bottom)
+			pScr->buffer_bottom = TD->prev;
+		pScr->screen_bottom = TD->prev;
 	}
 
 	/*
 	Move lines from the bottom of the scrolling region to the insert area.
 	*/
-    if (hTD != hBI)
-        ScreenListMove(hTD,hBD,hTI,hBI);
+	if (TD != BI)
+		ScreenListMove(TD,BD,TI,BI);
 
 	/*
 	Clear the inserted lines
 	*/
-    hLine = GetScreenLineFromY(fpScr, s);
+	pLine = GetScreenLineFromY(pScr, s);
 
-    for (idx = 0; idx < n; idx++) {
-		ScreenClearLine(fpScr, hLine);
-        fpLine = LINE_MEM_LOCK(hLine);
-		hTemp = fpLine->next;
-        LINE_MEM_UNLOCK(hLine);
-		hLine = hTemp;
-    }
+	for (idx = 0; idx < n; idx++) {
+		ScreenClearLine(pScr, pLine);
+		pLine = pLine->next;
+	}
 
-//	CheckScreen(fpScr);
+//	CheckScreen(pScr);
 
 	/*
 	Scroll the affected area on the screen.
 	*/
-    rc.left = 0;
-    rc.right = fpScr->width * fpScr->cxChar;
-    rc.top = s * fpScr->cyChar;
-    rc.bottom = (fpScr->bottom + 1) * fpScr->cyChar;
+	rc.left = 0;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = s * pScr->cyChar;
+	rc.bottom = (pScr->bottom + 1) * pScr->cyChar;
 
-    hDC = GetDC(fpScr->hWnd);
+	hDC = GetDC(pScr->hWnd);
 
-    ScrollDC(hDC, 0, fpScr->cyChar * n, &rc, &rc, NULL, NULL);
+	ScrollDC(hDC, 0, pScr->cyChar * n, &rc, &rc, NULL, NULL);
 
-    PatBlt(hDC, 0, s * fpScr->cyChar,
-		fpScr->width * fpScr->cxChar, n * fpScr->cyChar, WHITENESS);
+	PatBlt(hDC, 0, s * pScr->cyChar,
+		pScr->width * pScr->cxChar, n * pScr->cyChar, WHITENESS);
 
-    ReleaseDC(fpScr->hWnd, hDC);
+	ReleaseDC(pScr->hWnd, hDC);
 
 } /* ScreenInsLines */
 
 
-void ScreenIndex(SCREEN * fpScr)
+void ScreenIndex(
+	SCREEN * pScr)
 {
-    if(fpScr->y>=fpScr->bottom)
-        ScreenScroll(fpScr);
-    else
-        fpScr->y++;    
-}
+	if (pScr->y >= pScr->bottom)
+		ScreenScroll(pScr);
+	else
+		pScr->y++;    
 
-void ScreenWrapNow(SCREEN *fpScr,int *xp,int *yp)
+} /* ScreenIndex */
+
+
+void ScreenWrapNow(
+	SCREEN *pScr,
+	int *xp,
+	int *yp)
 {
-    if(fpScr->x > fpScr->width) {
-        fpScr->x=0;
-        ScreenIndex(fpScr);
-      } /* end if */
-    *xp=fpScr->x;
-    *yp=fpScr->y;
-}
-
-void ScreenEraseToEOL(SCREEN *fpScr)
-{
-    int x1=fpScr->x,y1=fpScr->y;
-    int x2=fpScr->width,y2=fpScr->y;
-    int n=(-1);
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
-        
-    ScreenWrapNow(fpScr,&x1,&y1);
-    y2=y1;
-//    wsprintf(strTmp,"[EraseEOL:%d]",y2);
-//    OutputDebugString(strTmp);
-    hgScrLine=GetScreenLineFromY(fpScr,y2);
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-	memset(&fpScrLine->attrib[x1], ScreenClearAttrib, fpScr->width-x1+1);
-	memset(&fpScrLine->text[x1], ' ', fpScr->width-x1+1);
-    LINE_MEM_UNLOCK(hgScrLine);      
-    rc.left=x1*fpScr->cxChar;
-    rc.right=(fpScr->width*fpScr->cxChar);
-    rc.top=(fpScr->cyChar*y1);    
-    rc.bottom=(fpScr->cyChar*(y1+1));
-    InvalidateRect(fpScr->hWnd,&rc,TRUE);
-    UpdateWindow(fpScr->hWnd);
-}
-
-void ScreenDelChars(SCREEN *fpScr, int n)
-{
-    int x = fpScr->x;
-	int y = fpScr->y;
-    int width;
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
-	
-    hgScrLine = GetScreenLineFromY(fpScr, y);
-    fpScrLine = LINE_MEM_LOCK(hgScrLine);
-
-	width = fpScr->width - x - n;
-
-	if (width > 0) {
-		memmove(&fpScrLine->attrib[x], &fpScrLine->attrib[x + n], width);
-		memmove(&fpScrLine->text[x], &fpScrLine->text[x + n], width);
+	if (pScr->x > pScr->width) {
+		pScr->x = 0;
+		ScreenIndex(pScr);
 	}
 
-	memset(&fpScrLine->attrib[fpScr->width - n], ScreenClearAttrib, n);
-    memset(&fpScrLine->text[fpScr->width - n], ' ', n);
+	*xp = pScr->x;
+	*yp = pScr->y;
+
+} /* ScreenWrapNow */
+
+
+void ScreenEraseToEOL(
+	SCREEN *pScr)
+{
+	int x1 = pScr->x;
+	int y1 = pScr->y;
+	int x2 = pScr->width;
+	int y2 = pScr->y;
+	int n = -1;
+	SCREENLINE *pScrLine;
+	RECT rc;
+		
+	ScreenWrapNow(pScr, &x1, &y1);
+
+	y2 = y1;
+//    wsprintf(strTmp,"[EraseEOL:%d]",y2);
+//    OutputDebugString(strTmp);
+	pScrLine = GetScreenLineFromY(pScr,y2);
+	memset(&pScrLine->attrib[x1], ScreenClearAttrib, pScr->width-x1+1);
+	memset(&pScrLine->text[x1], ' ', pScr->width - x1 + 1);
+	rc.left = x1 * pScr->cxChar;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = pScr->cyChar * y1;
+	rc.bottom = pScr->cyChar * (y1 + 1);
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+	UpdateWindow(pScr->hWnd);
+
+} /* ScreenEraseToEOL */
+
+
+void ScreenDelChars(
+	SCREEN *pScr,
+	int n)
+{
+	int x = pScr->x;
+	int y = pScr->y;
+	int width;
+	SCREENLINE *pScrLine;
+	RECT rc;
 	
-    LINE_MEM_UNLOCK(hgScrLine);
+	pScrLine = GetScreenLineFromY(pScr, y);
 
-    rc.left = x * fpScr->cxChar;
-    rc.right = fpScr->width * fpScr->cxChar;
-    rc.top = fpScr->cyChar * y;
-    rc.bottom = fpScr->cyChar * (y + 1);
+	width = pScr->width - x - n;
 
-    InvalidateRect(fpScr->hWnd, &rc, TRUE);
+	if (width > 0) {
+		memmove(&pScrLine->attrib[x], &pScrLine->attrib[x + n], width);
+		memmove(&pScrLine->text[x], &pScrLine->text[x + n], width);
+	}
 
-    UpdateWindow(fpScr->hWnd);
-}
+	memset(&pScrLine->attrib[pScr->width - n], ScreenClearAttrib, n);
+	memset(&pScrLine->text[pScr->width - n], ' ', n);
+	
+	rc.left = x * pScr->cxChar;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = pScr->cyChar * y;
+	rc.bottom = pScr->cyChar * (y + 1);
 
-void ScreenRevIndex(SCREEN *fpScr)
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+
+	UpdateWindow(pScr->hWnd);
+
+} /* ScreenDelChars */
+
+
+void ScreenRevIndex(
+	SCREEN *pScr)
 {
-    HSCREENLINE hgScrLine,hTopLine;
-    
-    hgScrLine=GetScreenLineFromY(fpScr,fpScr->y);
-    hTopLine=GetScreenLineFromY(fpScr,fpScr->top);
-    
-    if(hgScrLine==hTopLine) 
-        ScreenInsertLine(fpScr,fpScr->y);
-    else
-        fpScr->y--;
-}
+	SCREENLINE *pScrLine;
+	SCREENLINE *pTopLine;
+	
+	pScrLine = GetScreenLineFromY(pScr, pScr->y);
+	pTopLine = GetScreenLineFromY(pScr, pScr->top);
 
-void ScreenEraseToBOL(SCREEN *fpScr)
+	if(pScrLine == pTopLine) 
+		ScreenInsertLine(pScr, pScr->y);
+	else
+		pScr->y--;
+
+} /* ScreenRevIndex */
+
+
+void ScreenEraseToBOL(
+	SCREEN *pScr)
 {
-    int x1=0,y1=fpScr->y;
-    int x2=fpScr->x,y2=fpScr->y;
-    int n=(-1);
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
+	int x1 = 0;
+	int y1 = pScr->y;
+	int x2 = pScr->x;
+	int y2 = pScr->y;
+	int n = -1;
+	SCREENLINE *pScrLine;
 
-    hgScrLine=GetScreenLineFromY(fpScr,fpScr->y);
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
+	pScrLine = GetScreenLineFromY(pScr, pScr->y);
 
-    ScreenWrapNow(fpScr,&x2,&y1);
-    y2=y1;
-	memset(fpScrLine->attrib, ScreenClearAttrib, x2);
-	memset(fpScrLine->text, ' ', x2);
-    LINE_MEM_UNLOCK(hgScrLine);      
-}
+	ScreenWrapNow(pScr, &x2, &y1);
+	y2 = y1;
+	memset(pScrLine->attrib, ScreenClearAttrib, x2);
+	memset(pScrLine->text, ' ', x2);
 
-void ScreenEraseLine(SCREEN *fpScr,int s)
+} /* ScreenEraseToBOL */
+
+
+void ScreenEraseLine(
+	SCREEN *pScr,
+	int s)
 {
-    int x1=0,y1=s;
-    int x2=fpScr->width,y2=s;
-    int n=(-1);
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
-    
-    if(s<0) {
-        ScreenWrapNow(fpScr,&x1,&y1);
-        s=y2=y1;
-        x1=0;
-      } /* end if */
+	int x1 = 0;
+	int y1 = s;
+	int x2 = pScr->width;
+	int y2 = s;
+	int n = -1;
+	SCREENLINE *pScrLine;
+	RECT rc;
+	
+	if (s < 0) {
+		ScreenWrapNow(pScr, &x1, &y1);
+		s = y2 = y1;
+		x1 = 0;
+	}
 
-    hgScrLine=GetScreenLineFromY(fpScr,y1);
-    fpScrLine=LINE_MEM_LOCK(hgScrLine);
-	memset(fpScrLine->attrib, ScreenClearAttrib, fpScr->width);
-	memset(fpScrLine->text, ' ', fpScr->width);
-    LINE_MEM_UNLOCK(hgScrLine);      
-    rc.left=0;
-    rc.right=(fpScr->width*fpScr->cxChar);
-    rc.top=(fpScr->cyChar*y1);    
-    rc.bottom=(fpScr->cyChar*(y1+1));
-    InvalidateRect(fpScr->hWnd,&rc,TRUE);
-    SendMessage(fpScr->hWnd,WM_PAINT,NULL,NULL);
-}
+	pScrLine = GetScreenLineFromY(pScr,y1);
+	memset(pScrLine->attrib, ScreenClearAttrib, pScr->width);
+	memset(pScrLine->text, ' ', pScr->width);
+	rc.left = 0;
+	rc.right = pScr->width * pScr->cxChar;
+	rc.top = pScr->cyChar * y1;
+	rc.bottom = pScr->cyChar * (y1+1);
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
 
-void ScreenEraseToEndOfScreen(SCREEN *fpScr)
+} /* ScreenEraseLine */
+
+
+void ScreenEraseToEndOfScreen(
+	SCREEN *pScr)
 {
-    register int i;
-    int x1=0,y1=fpScr->y+1;
-    int x2=fpScr->width,y2=fpScr->height;
-    int n=(-1);
+	int i;
+	int x1 = 0;
+	int y1 = pScr->y+1;
+	int x2 = pScr->width;
+	int y2 = pScr->height;
+	int n = -1;
 
-    ScreenWrapNow(fpScr,&x1,&y1);
-    y1++;
-    x1=0;
-    i=y1;
-    ScreenEraseToEOL(fpScr);
-    while(i<fpScr->height) {
-        ScreenELO(fpScr,i);
-        ScreenEraseLine(fpScr,i);
-        i++;
-    } /* end while */
-}
+	ScreenWrapNow(pScr, &x1, &y1);
+	y1++;
+	x1 = 0;
+	i = y1;
+	ScreenEraseToEOL(pScr);
+	while (i < pScr->height) {
+		ScreenELO(pScr, i);
+		ScreenEraseLine(pScr, i);
+		i++;
+	}
 
-void ScreenRange(SCREEN *fpScr)               /* check and resolve range errors on x and y */
+} /* ScreenEraseToEndOfScreen */
+
+
+void ScreenRange(
+	SCREEN *pScr)
 {
-    int wrap=0;
+	int wrap = 0;
 
-    if(fpScr->DECAWM)
-        wrap=1;
-    if(fpScr->x<0)
-        fpScr->x=0;
-    if(fpScr->x>(fpScr->width+wrap))
-        fpScr->x=fpScr->width+wrap;
-    if(fpScr->y<0)
-        fpScr->y=0;
-    if(fpScr->y>=fpScr->height)
-        fpScr->y=fpScr->height-1;
-}
+	if (pScr->DECAWM)
+		wrap = 1;
 
-void ScreenAlign(SCREEN *fpScr)  /* vt100 alignment, fill screen with 'E's */
+	if (pScr->x < 0)
+		pScr->x = 0;
+
+	if (pScr->x > pScr->width + wrap)
+		pScr->x = pScr->width + wrap;
+
+	if (pScr->y < 0)
+		pScr->y = 0;
+
+	if (pScr->y >= pScr->height)
+		pScr->y = pScr->height - 1;
+
+} /* ScreenRange */
+
+
+void ScreenAlign(
+	SCREEN *pScr)  /* vt100 alignment, fill screen with 'E's */
 {
-    char *tt;
-    register int i,j;
-    HSCREENLINE hgScrLine,hgScrLineTmp;
-    SCREENLINE *fpScrLine;
-    
-    hgScrLine=GetScreenLineFromY(fpScr,fpScr->top);
-    ScreenEraseScreen(fpScr);        /* erase the screen */
+	char *tt;
+	int i;
+	int j;
+	SCREENLINE *pScrLine;
+	
+	pScrLine = GetScreenLineFromY(pScr, pScr->top);
+	ScreenEraseScreen(pScr);
 
-    for(j=0; j<fpScr->height; j++) {
-        fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-        tt=&fpScrLine->text[0];
-        for(i=0; i<=fpScr->width; i++)
-            *tt++='E';
-        hgScrLineTmp=fpScrLine->next;            
-        LINE_MEM_UNLOCK(hgScrLine);
-        hgScrLine=hgScrLineTmp;    
-        
-      } /* end for */
-    LINE_MEM_UNLOCK(hgScrLine);      
-}
+	for(j = 0; j < pScr->height; j++) {
+		tt = &pScrLine->text[0];
+		for(i = 0; i <= pScr->width; i++)
+			*tt++ = 'E';
+		pScrLine = pScrLine->next;
+	}
 
-/* reset all the ANSI parameters back to the default state */
-void ScreenApClear(SCREEN *fpScr)
+} /* ScreenAlign */
+
+
+void ScreenApClear(
+	SCREEN *pScr)
 {
-    for(fpScr->parmptr=5; fpScr->parmptr>=0; fpScr->parmptr--)
-        fpScr->parms[fpScr->parmptr]=-1;
-    fpScr->parmptr=0;
-}
+	/*
+	reset all the ANSI parameters back to the default state
+	*/
+	for(pScr->parmptr=5; pScr->parmptr>=0; pScr->parmptr--)
+		pScr->parms[pScr->parmptr] = -1;
 
-void ScreenSetOption(SCREEN *fpScr,int toggle) {
-//    int WindWidth=(fpScr->width - 1);
+	pScr->parmptr = 0;
 
-    switch(fpScr->parms[0]) {
-        case -2:
-            switch(fpScr->parms[1]) {
-                case 1:     /* set/reset cursor key mode */
-                    fpScr->DECCKM=toggle;
-                    break;
+} /* ScreenApClear */
+
+
+void ScreenSetOption(
+	SCREEN *pScr,
+	int toggle)
+{
+
+	switch(pScr->parms[0]) {
+
+	case -2:
+		switch(pScr->parms[1]) {
+
+		case 1:     /* set/reset cursor key mode */
+			pScr->DECCKM = toggle;
+			break;
+
+		#ifdef NOT_SUPPORTED
+			case 2:     /* set/reset ANSI/vt52 mode */
+				break;
+		#endif
+
+		case 3:     /* set/reset column mode */
+			pScr->x = pScr->y = 0;      /* Clear the screen, mama! */
+			ScreenEraseScreen(pScr);
+			#if 0	/* removed for variable screen size */
+				if (toggle)      /* 132 column mode */
+					pScr->width = pScr->allwidth;
+	            else
+		            pScr->width = 79;
+			#endif
+			break;
+
+		#ifdef NOT_SUPPORTED
+			case 4:     /* set/reset scrolling mode */
+			case 5:     /* set/reset screen mode */
+			case 6:     /* set/rest origin mode */
+				pScr->DECORG = toggle;
+				break;
+		#endif
+
+		case 7:		/* set/reset wrap mode */
+			pScr->DECAWM = toggle;
+//          set_vtwrap(pScrn, fpScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
+			break;
+
+		#ifdef NOT_SUPPORTED
+			case 8:     /* set/reset autorepeat mode */
+			case 9:     /* set/reset interlace mode */
+				break;
+		#endif
+
+		default:
+			break;
+		} /* end switch */
+		break;
+
+	case 4:
+		pScr->IRM=toggle;
+		break;
+
+	default:
+		break;
+
+	} /* end switch */
+
+} /* ScreenSetOption */
+
 
 #ifdef NOT_SUPPORTED
-                case 2:     /* set/reset ANSI/vt52 mode */
-                    break;
+	void ScreenTab(
+		SCREEN *pScr)
+	{
+		if (pScr->x> = pScr->width)
+			pScr->x = pScr->width;
+		pScr->x++;
+		while (pScr->tabs[fpScr->x] != 'x' && pScr->x < pScr->width)
+			pScr->x++;
+	} /* ScreenTab */
 #endif
 
-                case 3:     /* set/reset column mode */
-                    fpScr->x=fpScr->y=0;      /* Clear the screen, mama! */
-                    ScreenEraseScreen(fpScr);
-					#if 0	/* removed for variable screen size */
-	                    if(toggle)      /* 132 column mode */
-    	                    fpScr->width=fpScr->allwidth;
-        	            else
-            	            fpScr->width=79;
-					#endif
-                    break;
 
-#ifdef NOT_SUPPORTED
-                case 4:     /* set/reset scrolling mode */
-                case 5:     /* set/reset screen mode */
-                case 6:     /* set/rest origin mode */
-                    fpScr->DECORG = toggle;
-                    break;
-#endif
-
-                case 7:     /* set/reset wrap mode */
-                    fpScr->DECAWM=toggle;
-//                    set_vtwrap(fpScrn,fpScr->DECAWM);     /* QAK - 7/27/90: added because resetting the virtual screen's wrapping flag doesn't reset telnet window's wrapping */
-                    break;
-
-#ifdef NOT_SUPPORTED
-                case 8:     /* set/reset autorepeat mode */
-                case 9:     /* set/reset interlace mode */
-                    break;
-#endif
-
-                default:
-                    break;
-            } /* end switch */
-            break;
-
-        case 4:
-            fpScr->IRM=toggle;
-            break;
-
-        default:
-            break;
-
-    } /* end switch */
-}
-
-#ifdef NOT_SUPPORTED
-void ScreenTab(SCREEN *fpScr)
+int ScreenInsChar(
+	SCREEN *pScr,
+	int x)
 {
-    if(fpScr->x>=fpScr->width)
-        fpScr->x=fpScr->width;
-    fpScr->x++;
-    while((fpScr->tabs[fpScr->x] != 'x') && (fpScr->x < fpScr->width)) 
-        fpScr->x++;
-}
-#endif
-
-int ScreenInsChar(SCREEN *fpScr,int x)
-{
-    int i;
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
-        
+	int i;
+	SCREENLINE *pScrLine;
+	RECT rc;
+		
 //    ScreenWrapNow(&i,&j);  /* JEM- Why is this here? comment out for now */
 
 //    OutputDebugString("OOPS-InsChar!");
-    hgScrLine=GetScreenLineFromY(fpScr,fpScr->y);
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-    if (fpScrLine==NULL) return (-1);
+	pScrLine = GetScreenLineFromY(pScr, pScr->y);
+	if (pScrLine == NULL)
+		return(-1);
 
-    for(i=fpScr->width-x; i>=fpScr->x; i--) {
-        fpScrLine->text[x+i]=fpScrLine->text[i];
-        fpScrLine->attrib[x+i]=fpScrLine->attrib[i];
-    } /* end for */
+	for(i = pScr->width - x; i >= pScr->x; i--) {
+		pScrLine->text[x+i] = pScrLine->text[i];
+		pScrLine->attrib[x+i] = pScrLine->attrib[i];
+	}
 
-	memset(&fpScrLine->attrib[fpScr->x], ScreenClearAttrib, x);
-	memset(&fpScrLine->text[fpScr->x], ' ', x);
+	memset(&pScrLine->attrib[pScr->x], ScreenClearAttrib, x);
+	memset(&pScrLine->text[pScr->x], ' ', x);
 
-    for(i=fpScr->x; i<fpScr->x+x; i++) {
-        fpScrLine->text[i]=' ';
-        fpScrLine->attrib[i]=ScreenClearAttrib;
-    } /* end for */
-    LINE_MEM_UNLOCK(hgScrLine);  
-    rc.left= (fpScr->cxChar*x);
-    rc.right= ((fpScr->cxChar*x)+(fpScr->cxChar*(x+fpScr->x)));
-    rc.top=(fpScr->cyChar*((fpScr->y)-1));    
-    rc.bottom=(fpScr->cyChar*(fpScr->y));
-    InvalidateRect(fpScr->hWnd,&rc,TRUE);
-    SendMessage(fpScr->hWnd,WM_PAINT,NULL,NULL);
-}
+	for(i = pScr->x; i < pScr->x + x; i++) {
+		pScrLine->text[i] = ' ';
+		pScrLine->attrib[i] = ScreenClearAttrib;
+	}
+	rc.left = pScr->cxChar * x;
+	rc.right = (pScr->cxChar * x) + (pScr->cxChar * (x + pScr->x));
+	rc.top = pScr->cyChar * (pScr->y - 1);
+	rc.bottom = pScr->cyChar * pScr->y;
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
 
-void ScreenInsString(SCREEN *fpScr,int len,char *start)
+} /* ScreenInsChar */
+
+
+void ScreenInsString(
+	SCREEN *pScr,
+	int len,
+	char *start)
 {
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    int idx;
-    RECT rc;
-    
-    if(fpScr->VSIDC) return;  /* Call RSinsstring which does nothing? */
-    
-    hgScrLine=GetScreenLineFromY(fpScr,fpScr->y);
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-    if (fpScrLine==NULL) return;
+	SCREENLINE *pScrLine;
+	int idx;
+	RECT rc;
+	
+	if (pScr->VSIDC)
+		return;
+	
+	pScrLine = GetScreenLineFromY(pScr, pScr->y);
+	if (pScrLine == NULL)
+		return;
 
-    for(idx=fpScr->x; idx<fpScr->x+len; idx++) {
-        fpScrLine->text[idx]=start[idx];
-        fpScrLine->attrib[idx]=fpScr->attrib;
-    } /* end for */
-    LINE_MEM_UNLOCK(hgScrLine);
-    rc.left= (fpScr->cxChar*fpScr->x);
-    rc.right= ((fpScr->cxChar*fpScr->x)+(fpScr->cxChar*(fpScr->x+len)));
-    rc.top=(fpScr->cyChar*(fpScr->y));    
-    rc.bottom=(fpScr->cyChar*(fpScr->y+1));    
-    
-    InvalidateRect(fpScr->hWnd,&rc,TRUE);
-    SendMessage(fpScr->hWnd,WM_PAINT,NULL,NULL);
-}
+	for(idx = pScr->x; idx < pScr->x + len; idx++) {
+		pScrLine->text[idx] = start[idx];
+		pScrLine->attrib[idx] = pScr->attrib;
+	}
+	rc.left = pScr->cxChar * pScr->x;
+	rc.right = pScr->cxChar * pScr->x + pScr->cxChar * (pScr->x + len);
+	rc.top = pScr->cyChar * pScr->y;
+	rc.bottom = pScr->cyChar * (pScr->y + 1);
 
-void ScreenSaveCursor(SCREEN *fpScr)
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
+
+} /* ScreenInsString */
+
+
+void ScreenSaveCursor(
+	SCREEN *pScr)
 {
-    fpScr->Px=fpScr->x;
-    fpScr->Py=fpScr->y;
-    fpScr->Pattrib=fpScr->attrib;
-}
+	pScr->Px = pScr->x;
+	pScr->Py = pScr->y;
+	pScr->Pattrib = pScr->attrib;
 
-void ScreenRestoreCursor(SCREEN *fpScr)
+} /* ScreenSaveCursor */
+
+
+void ScreenRestoreCursor(
+	SCREEN *pScr)
 {
-    fpScr->x=fpScr->Px;
-    fpScr->y=fpScr->Py;
-    ScreenRange(fpScr);
-}
+	pScr->x = pScr->Px;
+	pScr->y = pScr->Py;
+	ScreenRange(pScr);
 
-void ScreenDraw(SCREEN *fpScr,int x,int y,int a,int len,char *c)
+} /* ScreenRestoreCursor */
+
+
+void ScreenDraw(
+	SCREEN *pScr,
+	int x,
+	int y,
+	int a,
+	int len,
+	char *c)
 {
 	int idx;
-    HSCREENLINE hgScrLine;
-    SCREENLINE *fpScrLine;
-    RECT rc;
+	SCREENLINE *pScrLine;
+	RECT rc;
 
-    hgScrLine=GetScreenLineFromY(fpScr,y);  
-    fpScrLine=(SCREENLINE *)LINE_MEM_LOCK(hgScrLine);
-    if (fpScrLine==NULL) {
-        OutputDebugString("fpScrLine==NULL");
-        return;
-    }
-    
-    for(idx=x; idx<(x+len); idx++) {
-        fpScrLine->text[idx]=c[idx-x];
-        fpScrLine->attrib[idx-x]=a;
-    } 
-    LINE_MEM_UNLOCK(hgScrLine);
+	pScrLine = GetScreenLineFromY(pScr, y);  
+	assert(pScrLine != NULL);
+	
+	for(idx = x; idx < x + len; idx++) {
+		pScrLine->text[idx] = c[idx - x];
+		pScrLine->attrib[idx - x] = a;
+	}
 
-	rc.left= (fpScr->cxChar*x);
-    rc.right= (fpScr->cxChar*(x+len));
-	rc.top=(fpScr->cyChar*(fpScr->y));    
-    rc.bottom=(fpScr->cyChar*((fpScr->y)+1));
-	InvalidateRect(fpScr->hWnd,&rc,TRUE);    
-    SendMessage(fpScr->hWnd,WM_PAINT,NULL,NULL);
-}
+	rc.left = pScr->cxChar * x;
+	rc.right = pScr->cxChar * (x + len);
+	rc.top = pScr->cyChar * pScr->y;
+	rc.bottom = pScr->cyChar * (pScr->y + 1);
+	InvalidateRect(pScr->hWnd, &rc, TRUE);
+	SendMessage(pScr->hWnd, WM_PAINT, NULL, NULL);
+
+} /* ScreenDraw */
+
 
 #ifdef _DEBUG
 
-	BOOL CheckScreen(SCREEN *fpScr)
+	BOOL CheckScreen(
+		SCREEN *pScr)
 	{
-		HSCREENLINE hLine;
-		HSCREENLINE hLinePrev;
-		SCREENLINE *fpLine;
+		SCREENLINE *pLinePrev;
+		SCREENLINE *pLine;
 		int nscreen = 0;
 		int nbuffer = 0;
 		int topline = 0;
@@ -769,9 +831,9 @@ void ScreenDraw(SCREEN *fpScr,int x,int y,int a,int len,char *c)
 		BOOL bBottom;
 		BOOL bOK;
 
-		hLine = fpScr->buffer_top;
+		pLine = pScr->buffer_top;
 
-		if (hLine == NULL) {
+		if (pLine == NULL) {
 			OutputDebugString("CheckScreen: buffer_top invalid");
 			MessageBox(NULL, "buffer_top invalid", "CheckScreen", MB_OK);
 			return(FALSE);
@@ -779,32 +841,28 @@ void ScreenDraw(SCREEN *fpScr,int x,int y,int a,int len,char *c)
 
 		bBottom = FALSE;
 		while (TRUE) {
-			hLinePrev = hLine;
-			if (nscreen > 0 || hLine == fpScr->screen_top)
+			pLinePrev = pLine;
+			if (nscreen > 0 || pLine == pScr->screen_top)
 				if (!bBottom)
 					nscreen++;
 			nbuffer++;
-			if (hLine == fpScr->screen_top)
+			if (pLine == pScr->screen_top)
 				topline = nbuffer - 1;
-			if (hLine == fpScr->screen_bottom)
+			if (pLine == pScr->screen_bottom)
 				bBottom = TRUE;
-			fpLine = LINE_MEM_LOCK(hLine);
-			hLine = fpLine->next;
-			LINE_MEM_UNLOCK(hLine);
-			if (hLine == NULL)
+			pLine = pLine->next;
+			if (pLine == NULL)
 				break;
-			fpLine = LINE_MEM_LOCK(hLine);
-			if (fpLine->prev != hLinePrev) {
+			if (pLine->prev != pLinePrev) {
 				wsprintf(buf,
 					"Previous ptr of line %d does not match next ptr of line %d",
 					nbuffer, nbuffer - 1);
 				OutputDebugString(buf);
 				MessageBox(NULL, buf, "CheckScreen", MB_OK);
 			}
-			LINE_MEM_UNLOCK(hLine);
 		}
 
-		if (hLinePrev == fpScr->buffer_bottom && nscreen == fpScr->height)
+		if (pLinePrev == pScr->buffer_bottom && nscreen == pScr->height)
 			bOK = TRUE;
 		else {
 			OutputDebugString("CheckScreen: Invalid number of lines on screen");
@@ -824,14 +882,15 @@ void ScreenDraw(SCREEN *fpScr,int x,int y,int a,int len,char *c)
 			"Actual buffer lines = %d\n"
 			"Actual screen lines = %d\n"
 			"Bottom of buffer is %s",
-			fpScr->width, fpScr->height, fpScr->maxlines, fpScr->numlines,
-			fpScr->x, fpScr->y, fpScr->top, fpScr->bottom,
+			pScr->width, pScr->height, pScr->maxlines, pScr->numlines,
+			pScr->x, pScr->y, pScr->top, pScr->bottom,
 			topline, nbuffer, nscreen,
-			(hLinePrev == fpScr->buffer_bottom) ? "valid" : "invalid");
+			(pLinePrev == pScr->buffer_bottom) ? "valid" : "invalid");
 
 		MessageBox(NULL, buf, "CheckScreen", MB_OK);
 
 		return(bOK);
-	}
+
+	} /* CheckScreen */
 
 #endif

@@ -1,3 +1,26 @@
+Thu Apr 27 12:00:00 1995  John Rivlin  <jrvlin@fusion.com>
+
+	* edit.c, emul.c, font.c, intern.c, screen.c, telnet.c, screen.h
+	struct.h, telnet.h, wt-proto.h
+	Clean up code extensively:
+		Change memory management to use calloc rather than locking
+		and unlocking handles everywhere.  This makes the code
+		much easier to understand and maintain.
+
+		Add assertions
+
+		Remove unused global values and scope global values
+		appropriately to remove accidental overlays of liked
+		name values (like hInst)
+
+		Make code formatting uniform and remove dead code.
+
+	* screen.c (InitNewScreen, ScreenWndProc): Rearranged window
+	creation order to so that SCREEN_HANDLE gets set up at the 
+	beginning of the window creation.  Thus we can create the 
+	window in the correct size and shape prior to showing it,
+	eliminating a resize after the window is shown.
+
 Tue Apr 18 17:11:56 1995 Keith Vetter (keithv@fusion.com)
 
 	* telnet.c: bug fix with saving/restoring delete versus backspace.

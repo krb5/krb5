@@ -5,8 +5,8 @@
 #include <stdarg.h>
 
 #ifdef KRB5
-#include "krb5.h"
-#include "k5stream.h"
+	#include "krb5.h"
+	#include "k5stream.h"
 #endif
 
 #include "dialog.h"
@@ -25,8 +25,14 @@ extern char szHostName[64];
    extern krb5_context k5_context;
 #endif
 
-extern void parse(CONNECTION *con,unsigned char *st,int cnt);
-extern void send_naws(CONNECTION *con);
+extern void parse(
+	CONNECTION *con,
+	unsigned char *st,
+	int cnt);
+
+extern void send_naws(
+	CONNECTION *con);
+
 extern char __near strTmp[];
 
 #define DEF_WIDTH 80
