@@ -33,3 +33,5 @@ LOCAL_LIBRARIES = $(KLIB) $(HESLIBS)
 #endif
 
 SimpleTestProgramTarget(movemail)
+
+DependTarget()

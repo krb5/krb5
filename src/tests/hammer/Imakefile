@@ -26,3 +26,5 @@
 LOCAL_LIBRARIES = $(KLIB)
 
 SimpleTestProgramTarget(kdc5_hammer)
+
+DependTarget()
