@@ -139,14 +139,14 @@ static Block	challenge	= { 0 };
 Data(ap, type, d, c)
 	Authenticator *ap;
 	int type;
-	void *d;
+	const void *d;
 	int c;
 {
         unsigned char *p = str_data + 4;
-	unsigned char *cd = (unsigned char *)d;
+	const unsigned char *cd = (const unsigned char *)d;
 
 	if (c == -1)
-		c = strlen((char *)cd);
+		c = strlen((const char *)cd);
 
         if (auth_debug_mode) {
                 printf("%s:%d: [%d] (%d)",
@@ -387,7 +387,7 @@ kerberos4_is(ap, data, cnt)
 				    instance, 0, &adat, ""))) {
 			if (auth_debug_mode)
 				printf("Kerberos failed him as %s\r\n", name);
-			Data(ap, KRB_REJECT, (void *)krb_err_txt[r], -1);
+			Data(ap, KRB_REJECT, (const void *)krb_err_txt[r], -1);
 			auth_finished(ap, AUTH_REJECT);
 			return;
 		}

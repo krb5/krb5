@@ -70,7 +70,7 @@
 void auth_encrypt_init P((char *, char *, char *, int));
 void auth_encrypt_user P((char *));
 void auth_encrypt_connect P((int));
-void printd P((unsigned char *, int));
+void printd P((const unsigned char *, int));
 
 /*
  * These functions are imported from the application

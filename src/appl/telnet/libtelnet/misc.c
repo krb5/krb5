@@ -84,7 +84,7 @@ auth_encrypt_connect(cnt)
 
 	void
 printd(data, cnt)
-	unsigned char *data;
+	const unsigned char *data;
 	int cnt;
 {
 	if (cnt > 16)

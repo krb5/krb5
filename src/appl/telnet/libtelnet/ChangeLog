@@ -1,3 +1,14 @@
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos.c (Data): Third argument now const.
+
+	* misc.c (printd): First argument now const.
+
+	* misc-proto.h: Modify printd prototype to take const first
+	argument. 
+
+	* auth.c: Cast argument to memcpy to unsigned. 
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Check for need to provide setenv prototype if
