@@ -1,3 +1,8 @@
+Fri Apr 30 12:27:14 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* set_ccache.c (gss_krb5_ccache_name): Add call to free the
+		default credential changing the ccache name.
+
 Thu Apr 29 18:02:00 1999  Miro Jurisic  <meeroh@mit.edu>
 
 	* gssapi_krb5.h: Remove gssapi_generic.h includes because
