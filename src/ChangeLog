@@ -1,3 +1,10 @@
+Tue Jun 21 02:08:27 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in (in all relevant subdirs): added CCOPTS=@CCOPTS@ in
+	order to allow for configured default flags
+	* configure.in (in all relevant subdirs): add WITH_CCOPTS
+	* acloca.m4: define WITH_CCOPTS
+
 Fri Jun 17 19:54:00 1994  Mark Eichin  (eichin at cygnus.com)
 
 	* aclocal.m4 (MAKE_SUBDIRS): pass CCOPTS, CC in every make
