@@ -51,6 +51,9 @@ proc expect_kadm_ok {} {
     expect {
 	-i $kadmin_tcl_spawn_id
 	-re "^OK OVSEC_KADM_OK \[^\n\]*\n" {}
+	-re "^marshall_new_creds: \[^\n\]*\n" { exp_continue }
+	-re "^gssapi_\[^\n\]*\n" { exp_continue }
+	-re "^\r?\n" { exp_continue }
 	default { perror "didn't get ok back" }
     }
 }
@@ -190,6 +193,9 @@ proc eof_client {testname ccname id status} {
 
 	expect {
 		-i $id
+		-re "^marshall_new_creds\[^\n\]*\n" { exp_continue }
+		-re "^gssapi_\[^\n\]*\n" { exp_continue }
+		-re "^\r?\n" { exp_continue }
 		eof { verbose $expect_out(buffer) 1 }
 		timeout { 
 			fail "$testname: timeout waiting for client $ccname to exit"
