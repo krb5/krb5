@@ -53,15 +53,15 @@ krb5_fcc_generate_new (id)
 
      lid->data = (krb5_fcc_data *) malloc(sizeof(krb5_fcc_data));
      if (((krb5_fcc_data *) lid->data) == NULL) {
-	  free(lid);
+	  xfree(lid);
 	  return KRB5_NOMEM;
      }
 
      ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
-	  free(((krb5_fcc_data *) lid->data));
-	  free(lid);
+	  xfree(((krb5_fcc_data *) lid->data));
+	  xfree(lid);
 	  return KRB5_NOMEM;
      }
 
