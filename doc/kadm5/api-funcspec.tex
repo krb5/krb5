@@ -860,6 +860,7 @@ chpass_principal & changepw\footnotemark[\thefootnote] &
 chpass_principal_util & changepw\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
 randkey_principal & changepw\footnotemark[\thefootnote] &
         Randomize a principal's key. \\
+decrypt_key & none & Decrypt a principal key. \\
 create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
@@ -925,12 +926,12 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
                                  void **server_handle)
 
 kadm5_ret_t kadm5_init_with_creds(char *client_name,
-				  krb5_ccache ccache,
-				  char *service_name,
-				  kadm5_config_params *params,
-				  krb5_ui_4 struct_version,
-				  krb5_ui_4 api_version,
-				  void **server_handle)
+                                  krb5_ccache ccache,
+                                  char *service_name,
+                                  kadm5_config_params *params,
+                                  krb5_ui_4 struct_version,
+                                  krb5_ui_4 api_version,
+                                  void **server_handle)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: none
@@ -1609,6 +1610,30 @@ RETURN CODES:
 \item[KADM5_BAD_MASK] The mask is not valid for a get operation.
 
 \end{description}
+
+\subsection{kadm5_decyrpt_key}
+
+\begin{verbatim}
+kadm5_ret_t kadm5_decrypt_key(void *server_handle,
+                              kadm5_principal_ent_t entry, krb5_int32
+                              ktype, krb5_int32 stype, krb5_int32
+                              kvno, krb5_keyblock *keyblock,
+                              krb5_keysalt *keysalt, int *kvnop)
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: none, local function
+
+Searches a principal's key_data array to find a key with the specified
+enctype, salt type, and kvno, and decrypts the key into keyblock and
+keysalt if found.  entry must have been returned by
+kadm5_get_principal with at least the KADM5_KEY_DATA mask set.
+Returns ENOENT if the key cannot be found, EINVAL if the key_data
+array is empty (as it always is in an RPC client).
+
+If ktype or stype is -1, it is ignored for the search.  If kvno is -1,
+ktype and stype are ignored and the key with the max kvno is returned.
+If kvno is 0, only the key with the max kvno is returned and only if
+it matches the ktype and stype; otherwise, ENOENT is returned.
 
 \subsection{kadm5_get_principals}
 
