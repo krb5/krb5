@@ -523,7 +523,17 @@ krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG	23
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV		24
 
+krb5_boolean KRB5_CALLCONV krb5_c_valid_enctype
+	(krb5_enctype ktype);
+krb5_boolean KRB5_CALLCONV krb5_c_valid_cksumtype
+	(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV krb5_c_is_coll_proof_cksum
+	(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV krb5_c_is_keyed_cksum
+	(krb5_cksumtype ctype);
+
 #if KRB5_PRIVATE
+/* Use the above four instead.  */
 krb5_boolean KRB5_CALLCONV valid_enctype
 	(krb5_enctype ktype);
 krb5_boolean KRB5_CALLCONV valid_cksumtype

@@ -1,3 +1,8 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_c_valid_enctype, krb5_c_valid_cksumtype,
+	krb5_c_is_coll_proof_cksum, krb5_c_is_keyed_cksum): Declare.
+
 2002-04-02  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Default to KRB5_DEPRECATED=1, allowing compiler
