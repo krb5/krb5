@@ -497,7 +497,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    krb5_error_code code; 
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;
-   krb5_enctype enctype;
    gss_buffer_desc token;
    int gsskrb5_vers;
    int i, err;
@@ -706,7 +705,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  switch(ctx->subkey->enctype) {
 	  case ENCTYPE_DES_CBC_MD5:
 	  case ENCTYPE_DES_CBC_CRC:
-	      enctype = ENCTYPE_DES_CBC_RAW;
+	      ctx->subkey->enctype = ENCTYPE_DES_CBC_RAW;
 	      ctx->signalg = 0;
 	      ctx->cksum_size = 8;
 	      ctx->sealalg = 0;
