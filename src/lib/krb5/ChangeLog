@@ -1,3 +1,8 @@
+2004-11-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Remove -ldl accidentally added in
+	last change.
+
 2004-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add support
