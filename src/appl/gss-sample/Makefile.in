@@ -15,10 +15,10 @@ DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
 		$(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 gss-server: gss-server.o gss-misc.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o gss-server gss-server.o gss-misc.o $(KLIB) $(LIBS)
+	$(LD) $(CFLAGS) -o gss-server gss-server.o gss-misc.o $(KLIB) $(LIBS)
 
 gss-client: gss-client.o gss-misc.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o gss-client gss-client.o gss-misc.o $(KLIB) $(LIBS)
+	$(LD) $(CFLAGS) -o gss-client gss-client.o gss-misc.o $(KLIB) $(LIBS)
 
 gss-client.o:	$(srcdir)/gss-client.c
 

@@ -1,5 +1,8 @@
 Fri Apr 28 15:30:00 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in (gss-client): Use $(LD) instead of $(CC) so that we can
+		do purify checking.
+
 	* gss-server.c (main, sign_server): Make changes to allow
 		gss-server to be fired out of inetd.  New options: -inetd
 		and -logfile.  The -logfile allows the output of
