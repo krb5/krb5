@@ -1,3 +1,8 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
+	for extra separator characters (like spaces) between keysalts.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* admin_internal.h (_KADM5_CHECK_HANDLE): Change code to ecode in

@@ -363,7 +363,22 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 	if (ep)
 	    ep[-1] = trailchar;
 	kp = ep;
-    }
+
+	/* Skip over extra separators - like spaces */
+	if (kp && *tseplist) {
+	  septmp = tseplist;
+	  while(*septmp && *kp) {
+	    if(*septmp == *kp) {
+	      /* Increment string - reset separator list */
+	      kp++;
+	      septmp = tseplist;
+	    } else {
+	      septmp++;
+	    }
+	  }
+	  if (!*kp) kp = NULL;
+	}
+    } /* while kp */
     return(kret);
 }
 
