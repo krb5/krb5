@@ -1,3 +1,10 @@
+Fri May 10 01:34:46 1996  Richard Basch  <basch@lehman.com>
+
+	* configure.in cryptoconf.c des3_sha.c:
+	Support enctype-des3-sha, cksum-sha, cksum-sha-des3
+
+	* Removed des3_md5.c (and all des3-md5 support).
+
 Tue Apr 30 00:38:14 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (libcrypto.$(STEXT)): Remove before creating.

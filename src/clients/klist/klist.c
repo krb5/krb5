@@ -358,8 +358,8 @@ etype_string(enctype)
     case ENCTYPE_DES_CBC_MD5:
 	return "DES-CBC-MD5";
 	break;
-    case ENCTYPE_DES3_CBC_MD5:
-	return "DES3-CBC-MD5";
+    case ENCTYPE_DES3_CBC_SHA:
+	return "DES3-CBC-SHA";
 	break;
     default:
 	sprintf(buf, "etype %d", enctype);

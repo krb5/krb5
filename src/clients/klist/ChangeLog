@@ -1,3 +1,7 @@
+Fri May 10 02:50:58 1996  Richard Basch  <basch@lehman.com>
+
+	* klist.c (etype_string): changed des3-md5 to des3-sha
+
 Fri Jan 26 16:14:38 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* klist.c : Implement -e option for keytabs as well.
