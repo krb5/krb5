@@ -65,6 +65,7 @@
 #include "com_err.h"
 #include <netdb.h>
 #include <ctype.h>
+#include <syslog.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -86,11 +87,6 @@ extern int net;
 
 #ifdef	FORWARD
 int forward_flags = 0;  /* Flags get set in telnet/main.c on -f and -F */
-
-/* These values need to be the same as those defined in telnet/main.c. */
-/* Either define them in both places, or put in some common header file. */
-#define OPTS_FORWARD_CREDS           0x00000002
-#define OPTS_FORWARDABLE_CREDS       0x00000001
 
 void kerberos5_forward();
 
@@ -219,14 +215,16 @@ kerberos5_send(ap)
 
         if (!UserNameRequested) {
                 if (auth_debug_mode) {
-                        printf("Kerberos V5: no user name supplied\r\n");
+                        printf(
+			"telnet: Kerberos V5: no user name supplied\r\n");
                 }
                 return(0);
         }
 
 	if ((r = krb5_cc_default(telnet_context, &ccache))) {
 		if (auth_debug_mode) {
-			printf("Kerberos V5: could not get default ccache\r\n");
+		    printf(
+		    "telnet: Kerberos V5: could not get default ccache\r\n");
 		}
 		return(0);
 	}
@@ -236,7 +234,7 @@ kerberos5_send(ap)
 					 "host", KRB5_NT_SRV_HST,
 					 &creds.server))) {
 	    if (auth_debug_mode)
-		printf("Kerberos V5: error while constructing service name: %s\r\n", error_message(r));
+		printf("telnet: Kerberos V5: error while constructing service name: %s\r\n", error_message(r));
 	    return(0);
 	}
 
@@ -256,7 +254,8 @@ kerberos5_send(ap)
 	if ((r = krb5_cc_get_principal(telnet_context, ccache,
 				       &creds.client))) {
 		if (auth_debug_mode) {
-			printf("Kerberos V5: failure on principal (%s)\r\n",
+			printf(
+			"telnet: Kerberos V5: failure on principal (%s)\r\n",
 				error_message(r));
 		}
 		krb5_free_cred_contents(telnet_context, &creds);
@@ -267,7 +266,8 @@ kerberos5_send(ap)
 	if ((r = krb5_get_credentials(telnet_context, 0,
 				      ccache, &creds, &new_creds))) {
 		if (auth_debug_mode) {
-			printf("Kerberos V5: failure on credentials(%s)\r\n",
+			printf(
+			"telnet: Kerberos V5: failure on credentials(%s)\r\n",
 			       error_message(r));
 		}
 		krb5_free_cred_contents(telnet_context, &creds);
@@ -336,7 +336,7 @@ kerberos5_send(ap)
 	krb5_free_creds(telnet_context, new_creds);
 	if (r) {
 		if (auth_debug_mode) {
-			printf("Kerberos V5: mk_req failed (%s)\r\n",
+			printf("telnet: Kerberos V5: mk_req failed (%s)\r\n",
 			       error_message(r));
 		}
 		return(0);
@@ -344,16 +344,17 @@ kerberos5_send(ap)
 
         if (!auth_sendname(UserNameRequested, strlen(UserNameRequested))) {
                 if (auth_debug_mode)
-                        printf("Not enough room for user name\r\n");
+                        printf("telnet: Not enough room for user name\r\n");
                 return(0);
         }
 	if (!Data(ap, KRB_AUTH, auth.data, auth.length)) {
 		if (auth_debug_mode)
-			printf("Not enough room for authentication data\r\n");
+		    printf(
+		    "telnet: Not enough room for authentication data\r\n");
 		return(0);
 	}
 	if (auth_debug_mode) {
-		printf("Sent Kerberos V5 credentials to server\r\n");
+		printf("telnet: Sent Kerberos V5 credentials to server\r\n");
 	}
 	return(1);
 }
@@ -452,6 +453,15 @@ kerberos5_is(ap, data, cnt)
 					     cksum->checksum_type, cksum,
 					     &type_check, 2, key->contents,
 					     key->length);
+		/*
+		 * Note that krb5_verify_checksum() will fail if a pre-
+		 * MIT Kerberos Beta 5 client is attempting to connect
+		 * to this server (Beta 6 or later). There is not way to
+		 * fix this without compromising encryption. It would be
+		 * reasonable to add a -i option to telnetd to ignore
+		 * checksums (like in klogind). Such an option is not
+		 * present at this time.
+		 */
 		    if (r) {
 			(void) strcpy(errbuf,
 				      "checksum verification failed: ");
@@ -478,7 +488,8 @@ kerberos5_is(ap, data, cnt)
 			name = 0;
 		Data(ap, KRB_ACCEPT, name, name ? -1 : 0);
 		if (auth_debug_mode) {
-			printf("Kerberos5 identifies him as ``%s''\r\n",
+			printf(
+			"telnetd: Kerberos5 identifies him as ``%s''\r\n",
 							name ? name : "");
 		}
                 auth_finished(ap, AUTH_USER);
@@ -522,26 +533,35 @@ kerberos5_is(ap, data, cnt)
 		    (void) strcat(errbuf, error_message(r));
 		    Data(ap, KRB_FORWARD_REJECT, errbuf, -1);
 		    if (auth_debug_mode)
-		      printf("Could not read forwarded credentials\r\n");
+		      printf(
+			"telnetd: Could not read forwarded credentials\r\n");
 		}
 		else 
 		  Data(ap, KRB_FORWARD_ACCEPT, 0, 0);
 		  if (auth_debug_mode)
-		    printf("Forwarded credentials obtained\r\n");
+		    printf("telnetd: Forwarded credentials obtained\r\n");
 		break;
 #endif	/* FORWARD */
 	default:
 		if (auth_debug_mode)
-			printf("Unknown Kerberos option %d\r\n", data[-1]);
+			printf("telnetd: Unknown Kerberos option %d\r\n",
+			data[-1]);
 		Data(ap, KRB_REJECT, 0, 0);
 		break;
 	}
 	return;
 	
     errout:
-	Data(ap, KRB_REJECT, errbuf, -1);
+	{
+	    char eerrbuf[128+9];
+
+	    strcpy(eerrbuf, "telnetd: ");
+	    strcat(eerrbuf, errbuf);
+	    Data(ap, KRB_REJECT, eerrbuf, -1);
+	}
 	if (auth_debug_mode)
-	    printf("%s\r\n", errbuf);
+	    printf("telnetd: %s\r\n", errbuf);
+	syslog(LOG_ERR, "%s", errbuf);
 	if (auth_context) {
 	    krb5_auth_con_free(telnet_context, auth_context);
 	    auth_context = 0;

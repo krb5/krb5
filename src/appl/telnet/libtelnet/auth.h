@@ -83,5 +83,8 @@ typedef struct XauthP {
 
 #include "auth-proto.h"
 
+#define OPTS_FORWARD_CREDS           0x00000002
+#define OPTS_FORWARDABLE_CREDS       0x00000001
+
 extern auth_debug_mode;
 #endif
