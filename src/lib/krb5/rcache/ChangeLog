@@ -1,3 +1,7 @@
+2001-07-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* rc_io.c: Declare krb5_rc_io_open_internal static.
+
 2001-06-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* rc_io.c (krb5_rc_io_creat): Make cleanup code easier to read.

@@ -176,7 +176,7 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 			 char* full_pathname)
 {
