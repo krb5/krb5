@@ -87,23 +87,24 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
             buffer[0] = '\0';
             if (entry->flags & SS_OPT_DONT_LIST)
                 continue;
+            buffer[sizeof(buffer) - 1] = '\0';
             for (name = entry->command_names; *name; name++) {
                 register int len = strlen(*name);
-                strncat(buffer, *name, len);
+                strncat(buffer, *name, sizeof(buffer) - 1 - strlen(buffer));
                 spacing += len + 2;
                 if (name[1]) {
-                    strcat(buffer, ", ");
+                    strncat(buffer, ", ", sizeof(buffer) - 1 - strlen(buffer));
                 }
             }
             if (spacing > 23) {
-                strcat(buffer, NL);
+                strncat(buffer, NL, sizeof(buffer) - 1 - strlen(buffer));
                 fputs(buffer, output);
                 spacing = 0;
                 buffer[0] = '\0';
             }
-            strncat(buffer, twentyfive_spaces, 25-spacing);
-            strcat(buffer, entry->info_string);
-            strcat(buffer, NL);
+            strncat(buffer, twentyfive_spaces, sizeof(buffer) - 1 - (25-spacing));
+            strncpy(buffer + 25, entry->info_string, sizeof(buffer) - 1 - 25);
+            strncat(buffer, NL, sizeof(buffer) - 1 - strlen(buffer));
             fputs(buffer, output);
         }
     }

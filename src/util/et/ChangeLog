@@ -1,3 +1,8 @@
+2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* com_err.c (default_com_err_proc) [_MSDOS || _WIN32 ||
+	macintosh]: Don't overflow buffer "errbuf".
+
 2000-02-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (com_err.o): Depends on com_err.c.

@@ -53,16 +53,18 @@ void ss_help (argc, argv, sci_idx, info_ptr)
 	return;
     }
     for (idx = 0; info->info_dirs[idx] != (char *)NULL; idx++) {
-	(void) strcpy(buffer, info->info_dirs[idx]);
-	(void) strcat(buffer, "/");
-	(void) strcat(buffer, argv[1]);
-	(void) strcat(buffer, ".info");
+	(void) strncpy(buffer, info->info_dirs[idx], sizeof(buffer) - 1);
+	buffer[sizeof(buffer) - 1] = '\0';
+	(void) strncat(buffer, "/", sizeof(buffer) - 1 - strlen(buffer));
+	(void) strncat(buffer, argv[1], sizeof(buffer) - 1 - strlen(buffer));
+	(void) strncat(buffer, ".info", sizeof(buffer) - 1 - strlen(buffer));
 	if ((fd = open(&buffer[0], O_RDONLY)) >= 0) goto got_it;
     }
     if ((fd = open(&buffer[0], O_RDONLY)) < 0) {
 	char buf[MAXPATHLEN];
-	strcpy(buf, "No info found for ");
-	strcat(buf, argv[1]);
+	strncpy(buf, "No info found for ", sizeof(buf) - 1);
+	buf[sizeof(buf) - 1] = '\0';
+	strncat(buf, argv[1], sizeof(buf) - 1 - strlen(buf));
 	ss_perror(sci_idx, 0, buf);
 	return;
     }

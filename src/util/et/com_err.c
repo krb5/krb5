@@ -50,15 +50,18 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	char errbuf[1024] = "";
 
 	if (whoami) {
-		strcat (errbuf, whoami);
-		strcat (errbuf, ": ");
+		errbuf[sizeof(errbuf) - 1] = '\0';
+		strncat (errbuf, whoami, sizeof(errbuf) - 1 - strlen(errbuf));
+		strncat (errbuf, ": ", sizeof(errbuf) - 1 - strlen(errbuf));
 	}
 	if (code) {
-		strcat (errbuf, error_message(code));
-		strcat (errbuf, " ");
+		errbuf[sizeof(errbuf) - 1] = '\0';
+		strcat (errbuf, error_message(code), sizeof(errbuf) - 1 - strlen(errbuf));
+		strcat (errbuf, " ", sizeof(errbuf) - 1 - strlen(errbuf));
 	}
 	if (fmt)
 		vsprintf (errbuf + strlen (errbuf), fmt, ap);
+	errbuf[sizeof(errbuf) - 1] = '\0';
 
 #ifdef macintosh
 	MacMessageBox(errbuf);
