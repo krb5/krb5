@@ -139,7 +139,8 @@ asn1_error_code asn1_encode_krb5_authdata_elt
 	PROTOTYPE((asn1buf *buf, const krb5_authdata *val, int *retlen));
 
 asn1_error_code asn1_encode_kdc_rep
-	PROTOTYPE((asn1buf *buf, const krb5_kdc_rep *val, int *retlen));
+	PROTOTYPE((int msg_type, asn1buf *buf, const krb5_kdc_rep *val,
+		   int *retlen));
 
 asn1_error_code asn1_encode_enc_kdc_rep_part
 	PROTOTYPE((asn1buf *buf, const krb5_enc_kdc_rep_part *val,
@@ -186,7 +187,8 @@ asn1_error_code asn1_encode_sequence_of_enctype
 		   int *retlen));
 
 asn1_error_code asn1_encode_kdc_req
-	PROTOTYPE((asn1buf *buf,
+	PROTOTYPE((int msg_type,
+		   asn1buf *buf,
 		   const krb5_kdc_req *val,
 		   int *retlen));
 

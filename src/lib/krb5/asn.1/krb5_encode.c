@@ -333,16 +333,8 @@ krb5_error_code encode_krb5_as_rep(DECLARG(const krb5_kdc_rep *, rep),
 {
   krb5_setup();
 
-  /* Not all applications set this. The sample app "sclient", for
-     example.  So I guess it should just be ignored. */
-/*  if(rep->msg_type != KRB5_AS_REP) return KRB5_BADMSGTYPE;*/
-  /* In fact, I may have to be even more forgiving in order for the
-     encoding to come out properly.  I'm explicitly fixing up the
-     msg_type here. */
-  rep->msg_type = KRB5_AS_REP;
-
   /* AS-REP ::= [APPLICATION 11] KDC-REP */
-  retval = asn1_encode_kdc_rep(buf,rep,&length);
+  retval = asn1_encode_kdc_rep(KRB5_AS_REP,buf,rep,&length);
   if(retval) return retval;
   sum += length;
 
@@ -359,11 +351,8 @@ krb5_error_code encode_krb5_tgs_rep(DECLARG(const krb5_kdc_rep *, rep),
 {
   krb5_setup();
 
-/*  if(rep->msg_type != KRB5_TGS_REP) return KRB5_BADMSGTYPE;*/
-  rep->msg_type = KRB5_TGS_REP;
-
   /* TGS-REP ::= [APPLICATION 13] KDC-REP */
-  retval = asn1_encode_kdc_rep(buf,rep,&length);
+  retval = asn1_encode_kdc_rep(KRB5_TGS_REP,buf,rep,&length);
   if(retval) return retval;
   sum += length;
 
@@ -460,11 +449,8 @@ krb5_error_code encode_krb5_as_req(DECLARG(const krb5_kdc_req *, rep),
 {
   krb5_setup();
 
-/*  if(rep->msg_type != KRB5_AS_REQ) return KRB5_BADMSGTYPE;*/
-  rep->msg_type = KRB5_AS_REQ;
-
   /* AS-REQ ::= [APPLICATION 10] KDC-REQ */
-  retval = asn1_encode_kdc_req(buf,rep,&length);
+  retval = asn1_encode_kdc_req(KRB5_AS_REQ,buf,rep,&length);
   if(retval) return retval;
   sum += length;
 
@@ -480,11 +466,8 @@ krb5_error_code encode_krb5_tgs_req(DECLARG(const krb5_kdc_req *, rep),
 {
   krb5_setup();
 
-/*  if(rep->msg_type != KRB5_TGS_REQ) return KRB5_BADMSGTYPE;*/
-  rep->msg_type = KRB5_TGS_REQ;
-
   /* TGS-REQ ::= [APPLICATION 12] KDC-REQ */
-  retval = asn1_encode_kdc_req(buf,rep,&length);
+  retval = asn1_encode_kdc_req(KRB5_TGS_REQ,buf,rep,&length);
   if(retval) return retval;
   sum += length;
 

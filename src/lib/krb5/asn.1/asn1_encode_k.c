@@ -130,37 +130,6 @@ asn1_error_code asn1_encode_ui_4(buf, val, retlen)
 }
 
 
-asn1_error_code asn1_encode_msgtype(buf, val, retlen)
-     asn1buf * buf;
-     const /*krb5_msgtype*/int val;
-     int * retlen;
-{
-  switch(val){
-  case KRB5_AS_REQ:
-    return asn1_encode_integer(buf,ASN1_KRB_AS_REQ,retlen);
-  case KRB5_AS_REP:
-    return asn1_encode_integer(buf,ASN1_KRB_AS_REP,retlen);
-  case KRB5_TGS_REQ:
-    return asn1_encode_integer(buf,ASN1_KRB_TGS_REQ,retlen);
-  case KRB5_TGS_REP:
-    return asn1_encode_integer(buf,ASN1_KRB_TGS_REP,retlen);
-  case KRB5_AP_REQ:
-    return asn1_encode_integer(buf,ASN1_KRB_AP_REQ,retlen);
-  case KRB5_AP_REP:
-    return asn1_encode_integer(buf,ASN1_KRB_AP_REP,retlen);
-  case KRB5_SAFE:
-    return asn1_encode_integer(buf,ASN1_KRB_SAFE,retlen);
-  case KRB5_PRIV:
-    return asn1_encode_integer(buf,ASN1_KRB_PRIV,retlen);
-  case KRB5_CRED:
-    return asn1_encode_integer(buf,ASN1_KRB_CRED,retlen);
-  case KRB5_ERROR:
-    return asn1_encode_integer(buf,ASN1_KRB_ERROR,retlen);
-  default:
-    return KRB5_BADMSGTYPE;
-  }
-}
-
 asn1_error_code asn1_encode_realm(DECLARG(asn1buf *, buf),
 				  DECLARG(const krb5_principal, val),
 				  DECLARG(int *, retlen))
@@ -383,9 +352,11 @@ asn1_error_code asn1_encode_krb5_authdata_elt(DECLARG(asn1buf *, buf),
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_kdc_rep(DECLARG(asn1buf *, buf),
+asn1_error_code asn1_encode_kdc_rep(DECLARG(int, msg_type),
+				    DECLARG(asn1buf *, buf),
 				    DECLARG(const krb5_kdc_rep *, val),
 				    DECLARG(int *, retlen))
+     OLDDECLARG(int, msg_type)
      OLDDECLARG(asn1buf *, buf)
      OLDDECLARG(const krb5_kdc_rep *, val)
      OLDDECLARG(int *, retlen)
@@ -400,7 +371,9 @@ asn1_error_code asn1_encode_kdc_rep(DECLARG(asn1buf *, buf),
   asn1_addfield(val->client,3,asn1_encode_realm);
   if(val->padata != NULL && val->padata[0] != NULL)
     asn1_addfield((const krb5_pa_data**)val->padata,2,asn1_encode_sequence_of_pa_data);
-  asn1_addfield(val->msg_type,1,asn1_encode_msgtype);
+  if (msg_type != KRB5_AS_REP && msg_type != KRB5_TGS_REP)
+	  return KRB5_BADMSGTYPE;
+  asn1_addfield(msg_type,1,asn1_encode_integer);
   asn1_addfield(KVNO,0,asn1_encode_integer);
   asn1_makeseq();
 
@@ -743,9 +716,11 @@ asn1_error_code asn1_encode_sequence_of_enctype(DECLARG(asn1buf *, buf),
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_kdc_req(DECLARG(asn1buf *, buf),
+asn1_error_code asn1_encode_kdc_req(DECLARG(int, msg_type),
+				    DECLARG(asn1buf *, buf),
 				    DECLARG(const krb5_kdc_req *, val),
 				    DECLARG(int *, retlen))
+     OLDDECLARG(int, msg_type)
      OLDDECLARG(asn1buf *, buf)
      OLDDECLARG(const krb5_kdc_req *, val)
      OLDDECLARG(int *, retlen)
@@ -757,11 +732,9 @@ asn1_error_code asn1_encode_kdc_req(DECLARG(asn1buf *, buf),
   asn1_addfield(val,4,asn1_encode_kdc_req_body);
   if(val->padata != NULL && val->padata[0] != NULL)
     asn1_addfield((const krb5_pa_data**)val->padata,3,asn1_encode_sequence_of_pa_data);
-  if(val->msg_type == KRB5_AS_REQ){
-    asn1_addfield(ASN1_KRB_AS_REQ,2,asn1_encode_integer);
-  }else if(val->msg_type == KRB5_TGS_REQ){
-    asn1_addfield(ASN1_KRB_TGS_REQ,2,asn1_encode_integer);
-  }else return KRB5_BADMSGTYPE;
+  if (msg_type != KRB5_AS_REQ && msg_type != KRB5_TGS_REQ)
+	  return KRB5_BADMSGTYPE;
+  asn1_addfield(msg_type,2,asn1_encode_integer);
   asn1_addfield(KVNO,1,asn1_encode_integer);
   asn1_makeseq();
 

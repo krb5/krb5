@@ -1,3 +1,19 @@
+Thu Aug 11 00:38:10 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_encode_k.c (asn1_encode_kdc_req): Add extra argument which
+	specifies the msg_type of the encoding; don't use req->msg_type
+	which is generally not set right.  (That output is only as a place
+	to stash the msg_type from decode).  All callers updated.
+
+	* asn1_encode_k.c (asn1_encode_kdc_rep): Add extra argument which
+	specifies the msg_type of the encoding; don't use rep->msg_type
+	which is generally not set right.  (That output is only as a place
+	to stash the msg_type from decode).  All callers updated.
+
+	* asn1_encode_k.c (asn1_encode_msgtype): Routine removed.  Not
+	really necessary, since a msg_type is really just an integer.  
+
+
 Thu Aug  4 13:19:14 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* asn1_decode_k.c (asn1_decode_sequence_of_enctype): fix typo
