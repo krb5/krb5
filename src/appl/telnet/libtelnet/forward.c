@@ -61,7 +61,6 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     struct hostent *hp;
     krb5_address **addrs;
     krb5_error_code retval;
-    krb5_data *scratch;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
@@ -388,7 +387,6 @@ rd_and_store_for_creds(inbuf, ticket, lusername)
      krb5_ticket *ticket;
      char *lusername;
 {
-    krb5_encrypt_block eblock;
     krb5_creds creds;
     krb5_error_code retval;
     char ccname[35];

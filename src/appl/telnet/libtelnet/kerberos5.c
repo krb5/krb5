@@ -185,12 +185,8 @@ kerberos5_init(ap, server)
 kerberos5_send(ap)
 	Authenticator *ap;
 {
-	char **realms;
-	char *name;
-	char *p1, *p2;
 	krb5_checksum ksum;
 	krb5_octet sum[CRC32_CKSUM_LENGTH];
- 	krb5_principal server;
 	krb5_error_code r;
 	krb5_ccache ccache;
 	krb5_creds creds;		/* telnet gets session key from here */
@@ -311,9 +307,6 @@ kerberos5_is(ap, data, cnt)
 	int cnt;
 {
 	int r;
-	struct hostent *hp;
-	char *p1, *p2;
-	static char *realm = NULL;
 	krb5_principal server;
 	krb5_ap_rep_enc_part reply;
 	krb5_data outbuf;
@@ -619,13 +612,11 @@ kerberos5_printsub(data, cnt, buf, buflen)
 kerberos5_forward(ap)
      Authenticator *ap;
 {
-    struct hostent *hp;
     krb5_creds *local_creds;
     krb5_error_code r;
     krb5_data forw_creds;
     extern krb5_cksumtype krb5_kdc_req_sumtype;
     krb5_ccache ccache;
-    int i;
 
     if (!(local_creds = (krb5_creds *) 
 	  calloc(1, sizeof(*local_creds)))) {
