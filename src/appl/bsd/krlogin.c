@@ -1336,7 +1336,7 @@ FD_ZERO(&readset);
     for (;;) {
 	if ((remaining = rcvcnt - (bufp - rcvbuf)) > 0)
 	{
-	    FD_SET(1,&writeset1);
+	    FD_SET(1,&writeset);
 	    rcvstate = WRITING;
 	    FD_CLR(rem, &readset);
 	}
@@ -1349,7 +1349,7 @@ FD_SET(rem,&readset);
 	FD_CLR(1,&writeset);
 	}
 	FD_SET(rem,&excset);
-	if (select(rem+1, &readset, 0, &excset, 0) > 0 ) {
+	if (select(rem+1, &readset, &writeset, &excset, 0) > 0 ) {
 	    if (FD_ISSET(rem, &excset))
   oob();
 	    if (FD_ISSET(1,&writeset)) {

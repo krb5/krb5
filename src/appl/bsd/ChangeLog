@@ -3,6 +3,7 @@ Fri Jan 26 00:37:23 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 	* krlogin.c (endif
 ): 
 (reader):  Deal with exceptions even while writing.
+(reader): Fix bogus select bug; actually select on writing
 
 Wed Jan 24 00:34:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
