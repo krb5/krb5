@@ -260,6 +260,7 @@ change_password.so change_password.po $(OUTPRE)change_password.$(OBJEXT): change
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
   $(BUILDTOP)/include/profile.h krb4int.h $(SRCTOP)/include/kerberosIV/kadm.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/kerberosIV/prot.h
 cr_auth_repl.so cr_auth_repl.po $(OUTPRE)cr_auth_repl.$(OBJEXT): cr_auth_repl.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
@@ -313,6 +314,7 @@ kadm_net.so kadm_net.po $(OUTPRE)kadm_net.$(OBJEXT): kadm_net.c $(SRCTOP)/includ
   $(SRCTOP)/include/kerberosIV/kadm.h $(BUILDTOP)/include/kerberosIV/kadm_err.h \
   $(SRCTOP)/include/kerberosIV/prot.h
 kadm_stream.so kadm_stream.po $(OUTPRE)kadm_stream.$(OBJEXT): kadm_stream.c $(SRCTOP)/include/kerberosIV/kadm.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kerberosIV/kadm_err.h \
