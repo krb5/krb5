@@ -26,6 +26,7 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
+admin.c
 configure
 configure.in
 kadm5_defs.h

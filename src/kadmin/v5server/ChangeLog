@@ -1,4 +1,34 @@
 
+Tue May 9 15:29:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add new administrative protocol support functions and fix bugs.
+	* kadm5_defs.h	- Add extract operation.  Move error subcodes
+			  to adm.h.  Update prototypes.
+	* kadmind5.M	- Add descriptions of -n, -p and -T options.  Change
+			  name of -i to -m option.  Add description of
+			  'e' acl entry.
+	* passwd.c	- Make passwd_check_npass_ok a global routine.
+	* proto_serv.c	- Use keytab supplied with -T option.  Support
+			  new administrative protocol functions.  Destroy
+			  replay cache when done with request.
+	* srv_acl.c	- Add catchall entry which allows principals to
+			  change their own passwords.  This is the last entry
+			  inserted and can be overridden with an entry in
+			  the ACL file.  By default, we now deny operations
+			  unless there is an entry.
+	* srv_key.c	- Use keytab supplied with -T option.  Actually set
+			  the default realm to be the specified realm.  Return
+			  salt values from key_string_to_keys().  Add random
+			  key generator.
+	* srv_main.c	- Add support for -T option.  Change -i to -m.  Add
+			  daemon() call if -n option is not specified.  Add
+			  support for -p option.
+	* srv_net.c	- Close connected socket in parent.  This was causing
+			  the connection to remain open even when the child
+			  was finished with it.  Add support for -p option.
+			  Determine our port otherwise from the profile, and
+			  then the /etc/services entry.
+	* srv_output.c	- Add support for new error codes.
+
 Fri May 5 11:11:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	#ifdef out language flags.  Remove description from manpage.
 
