@@ -61,8 +61,7 @@ krb5_error_code krb5_aname_to_localname
 		   const int,
 		   char * ));
 krb5_error_code krb5_get_default_realm
-	PROTOTYPE((const int,
-		   char * ));
+	PROTOTYPE(( char ** ));
 krb5_error_code krb5_get_host_realm
 	PROTOTYPE((const char *,
 		   char *** ));

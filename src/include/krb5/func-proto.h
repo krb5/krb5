@@ -63,7 +63,7 @@ krb5_error_code krb5_rd_req_simple
 	PROTOTYPE((const krb5_data *,
 		   krb5_const_principal,
 		   const krb5_address *,
-		   krb5_tkt_authent * ));
+		   krb5_tkt_authent ** ));
 krb5_error_code krb5_mk_rep
 	PROTOTYPE((const krb5_ap_rep_enc_part *,
 		   const krb5_keyblock *,
@@ -71,19 +71,20 @@ krb5_error_code krb5_mk_rep
 krb5_error_code krb5_rd_rep
 	PROTOTYPE((const krb5_data *,
 		   const krb5_keyblock *,
-		   krb5_ap_rep_enc_part *));
+		   krb5_ap_rep_enc_part **));
 krb5_error_code krb5_mk_error
 	PROTOTYPE((const krb5_error *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_error
 	PROTOTYPE((const krb5_data *,
-		   krb5_error * ));
+		   krb5_error ** ));
 krb5_error_code krb5_rd_safe
 	PROTOTYPE((const krb5_data *,
 		   const krb5_keyblock *,
 		   const krb5_address *,
 		   const krb5_address *,
 		   krb5_int32, krb5_int32,
+		   krb5_rcache,
 		   krb5_data * ));
 krb5_error_code krb5_rd_priv
 	PROTOTYPE((const krb5_data *,
@@ -92,6 +93,7 @@ krb5_error_code krb5_rd_priv
 		   const krb5_address *,
 		   krb5_int32, krb5_int32,
 		   krb5_pointer,
+		   krb5_rcache,
 		   krb5_data * ));
 krb5_error_code krb5_parse_name
 	PROTOTYPE((const char *,
@@ -119,6 +121,9 @@ int krb5_fulladdr_order
 	PROTOTYPE((const krb5_fulladdr *,
 		   const krb5_fulladdr *));
 krb5_error_code krb5_copy_keyblock
+    PROTOTYPE((const krb5_keyblock *,
+	       krb5_keyblock **));
+krb5_error_code krb5_copy_keyblock_contents
     PROTOTYPE((const krb5_keyblock *,
 	       krb5_keyblock *));
 krb5_error_code krb5_copy_creds
@@ -236,6 +241,8 @@ void krb5_free_pa_data
 	PROTOTYPE((krb5_pa_data **));
 void krb5_free_ap_rep_enc_part
 	PROTOTYPE((krb5_ap_rep_enc_part *));
+void krb5_free_tkt_authent
+	PROTOTYPE((krb5_tkt_authent *));
 
 #include <krb5/widen.h>
 
@@ -311,7 +318,7 @@ krb5_error_code krb5_rd_req
 					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
-		   krb5_tkt_authent * ));
+		   krb5_tkt_authent ** ));
 krb5_error_code krb5_rd_req_decoded
 	PROTOTYPE((const krb5_ap_req *,
 		   krb5_const_principal,
@@ -323,7 +330,7 @@ krb5_error_code krb5_rd_req_decoded
 					krb5_keyblock ** ),
 		   krb5_pointer,
 		   krb5_rcache,
-		   krb5_tkt_authent * ));
+		   krb5_tkt_authent ** ));
 
 krb5_error_code krb5_kt_read_service_key
 	PROTOTYPE((krb5_pointer,

@@ -23,7 +23,6 @@ static char rcsid_krb5_kt_read_service_key_c[] =
 
 #include <krb5/ext-proto.h>
 
-/* XXX  Things that I need and don't know where to get yet */
 #define KSUCCESS 0
 
 krb5_error_code 
@@ -74,16 +73,7 @@ OLDDECLARG(krb5_keyblock **, key)
     if (kerror)
 	return(kerror);
 
-    /* 
-     * This routine takes a krb5_keyblock **.   Should it?  I assume this
-     * means that it is supposed allocate the key and return it...
-     * XXX
-     */
-
-    if (!(*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))))
-	return (ENOMEM);	/* XXX */
-
-    krb5_copy_keyblock(&entry.key, *key);
+    krb5_copy_keyblock(&entry.key, key);
 
     krb5_kt_free_entry(&entry);
 
