@@ -53,23 +53,6 @@
 /* for HAVE_SOCKLEN_T, KRB5_USE_INET6, etc */
 #include "krb5/autoconf.h"
 
-/* Either size_t or int or unsigned int is probably right.  Under
-   SunOS 4, it looks like int is desired, according to the accept man
-   page.  */
-#ifndef HAVE_SOCKLEN_T
-typedef int socklen_t;
-#endif
-
-/* XXX should only be done if sockaddr_storage not found */
-#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
-struct krb5int_sockaddr_storage {
-    struct sockaddr_in s;
-    /* Plenty of slop just in case we get an ipv6 address anyways.  */
-    long extra[16];
-};
-#define sockaddr_storage krb5int_sockaddr_storage
-#endif
-
 #if defined (__GNUC__)
 /*
  * There's a lot of confusion between pointers to different sockaddr

@@ -1,5 +1,12 @@
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* socket-utils.h (socklen_t, krb5int_sockaddr_storage): Move
+	definitions...
+	* port-sockets.h (socklen_t, krb5int_sockaddr_storage): ...to
+	here.
+	(socket) [!_WIN32 && S_SPLINT_S]: Declare with Splint
+	annotations.
+
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
 	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
 
