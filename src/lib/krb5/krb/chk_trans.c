@@ -328,7 +328,7 @@ krb5_check_transited_list (krb5_context ctx, const krb5_data *trans_in,
 	trans.length--;
 
     Tprintf (("krb5_check_transited_list(trans=\"%.*s\", crealm=\"%.*s\", srealm=\"%.*s\")\n",
-	      (int) translength, trans.data,
+	      (int) trans.length, trans.data,
 	      (int) crealm->length, crealm->data,
 	      (int) srealm->length, srealm->data));
     if (trans.length == 0)
