@@ -2063,7 +2063,7 @@ int do_auth()
 		  fprintf(stderr, "Base 64 encoding failed: %s\n",
 			  radix_error(kerror));
 		} else if ((comcode = command("ADAT %s", out_buf))!=COMPLETE
-			   /* && comcode != 3 (335)*/) {
+			   && comcode != 3 /* (335) */) {
 		    if (trial == n_gss_trials-1) {
 			fprintf(stderr, "GSSAPI ADAT failed\n");
 			/* force out of loop */
