@@ -1,3 +1,22 @@
+2000-03-16  Ken Raeburn  <raeburn@mit.edu>
+	    Matt Crawford  <crawdad@fnal.gov>
+
+	* server_acl.c: Include kadm5/admin.h.
+	(struct _acl_entry): Add new fields for restrictions.
+	(struct _wildstate): New type.
+	(acl_parse_line): Input is const.  Parse and save restrictions.
+	Allow backslash at end of line to indicate continuation.
+	(acl_parse_restrictions, acl_impose_restrictions): New functions.
+	(acl_free_entries): Free up restriction data if any.
+	(acl_load_acl_file): Don't use tmpbuf for catch-all entry.
+	(acl_match_data): Add new arguments for wildcard state.
+	(acl_find_entry): Support wildcard component matching.
+	Reorganized checks for bad ACL entries.
+	(acl_check): Add restrictions parameter.
+	* server_acl.h (struct _restriction): New type.
+	(acl_check): Update prototype.
+	(acl_impose_restrictions): Declare.
+
 2000-02-26  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_create_principal_3): Remove keepold

@@ -33,8 +33,9 @@
 #include <sys/param.h>
 #include <gssapi/gssapi_generic.h>
 #include "k5-int.h"
-#include "server_acl.h"
 #include <kadm5/server_internal.h>
+#include <kadm5/admin.h>
+#include "server_acl.h"
 #include <ctype.h>
 
 typedef struct _acl_op_table {
@@ -51,6 +52,10 @@ typedef struct _acl_entry {
     char		*ae_target;
     krb5_boolean	ae_target_bad;
     krb5_principal	ae_target_princ;
+    char		*ae_restriction_string;
+			/* eg: "-maxlife 3h -service +proxiable" */
+    krb5_boolean	ae_restriction_bad;
+    restriction_t	*ae_restrictions;
 } aent_t;
 
 static const aop_t acl_op_table[] = {
@@ -65,6 +70,11 @@ static const aop_t acl_op_table[] = {
     { '*',	ACL_ALL_MASK },
     { '\0',	0 }
 };
+
+typedef struct _wildstate {
+    int		nwild;
+    krb5_data	*backref[9];
+} wildstate_t;
 
 static aent_t	*acl_list_head = (aent_t *) NULL;
 static aent_t	*acl_list_tail = (aent_t *) NULL;
@@ -151,11 +161,12 @@ acl_get_line(fp, lnp)
  */
 static aent_t *
 acl_parse_line(lp)
-    char *lp;
+    const char *lp;
 {
     static char acle_principal[BUFSIZ];
     static char acle_ops[BUFSIZ];
     static char acle_object[BUFSIZ];
+    static char acle_restrictions[BUFSIZ];
     aent_t	*acle;
     char	*op;
     int		t, found, opok, nmatch;
@@ -163,13 +174,15 @@ acl_parse_line(lp)
     DPRINT(DEBUG_CALLS, acl_debug_level,
 	   ("* acl_parse_line(line=%20s)\n", lp));
     /*
-     * Format is very simple:
-     *	entry ::= <whitespace> <principal> <whitespace> <opstring> <whitespace>
-     *		  [<target> <whitespace>]
+     * Format is still simple:
+     *  entry ::= [<whitespace>] <principal> <whitespace> <opstring>
+     *		  [<whitespace> <target> [<whitespace> <restrictions>
+     *					  [<whitespace>]]]
      */
     acle = (aent_t *) NULL;
     acle_object[0] = '\0';
-    nmatch = sscanf(lp, "%s %s %s", acle_principal, acle_ops, acle_object);
+    nmatch = sscanf(lp, "%s %s %s %[^\n]", acle_principal, acle_ops,
+		    acle_object, acle_restrictions);
     if (nmatch >= 2) {
 	acle = (aent_t *) malloc(sizeof(aent_t));
 	if (acle) {
@@ -222,11 +235,202 @@ acl_parse_line(lp)
 		free(acle);
 		acle = (aent_t *) NULL;
 	    }
+	    if ( nmatch >= 4 ) {
+		char	*trailing;
+
+		trailing = &acle_restrictions[strlen(acle_restrictions)-1];
+		while ( isspace(*trailing) )
+		    trailing--;
+		trailing[1] = '\0';
+		acle->ae_restriction_string = strdup(acle_restrictions);
+	    }
+	    else {
+		acle->ae_restriction_string = (char *) NULL;
+	    }
+	    acle->ae_restriction_bad = 0;
+	    acle->ae_restrictions = (restriction_t *) NULL;
 	}
     }
     DPRINT(DEBUG_CALLS, acl_debug_level,
 	   ("X acl_parse_line() = %x\n", (long) acle));
     return(acle);
+}
+
+/*
+ * acl_parse_restrictions()	- Parse optional restrictions field
+ *
+ * Allowed restrictions are:
+ *	[+-]flagname		(recognized by krb5_string_to_flags)
+ *				flag is forced to indicated value
+ *	-clearpolicy		policy is forced clear
+ *	-policy pol		policy is forced to be "pol"
+ *	-{expire,pwexpire,maxlife,maxrenewlife} deltat
+ *				associated value will be forced to
+ *				MIN(deltat, requested value)
+ *
+ * Returns: 0 on success, or system errors
+ */
+static krb5_error_code
+acl_parse_restrictions(s, rpp)
+    char		*s;
+    restriction_t	**rpp;
+{
+    char		*sp, *tp, *ap;
+    static const char	*delims = "\t\n\f\v\r ,";
+    krb5_error_code	ret;
+    krb5_deltat		dt;
+    krb5_flags		flag;
+    krb5_error_code	code;
+
+   DPRINT(DEBUG_CALLS, acl_debug_level,
+	   ("* acl_parse_restrictions(s=%20s, rpp=0x%08x)\n", s, (long)rpp));
+
+    *rpp = (restriction_t *) NULL;
+    code = 0;
+    if (s)
+	if (!(sp = strdup(s))	/* Don't munge the original */
+	    || !(*rpp = (restriction_t *) malloc(sizeof(restriction_t)))) {
+	    code = ENOMEM;
+	} else {
+	    memset(*rpp, 0, sizeof(**rpp));
+	    for (tp=strtok(sp, delims); tp; tp=strtok((char *)NULL, delims)) {
+		flag = 0;
+		if (!krb5_string_to_flags(tp, "+", "-", &flag)) {
+		    /* OK, but was it in the positive or negative sense? */
+		    if (flag) {
+			(*rpp)->require_attrs |= flag;
+		    } else {
+			flag = ~0;
+			(void) krb5_string_to_flags(tp, "+", "-", &flag);
+			(*rpp)->forbid_attrs |= ~flag;
+		    }
+		    (*rpp)->mask |= KADM5_ATTRIBUTES;
+		} else if (!strcmp(tp, "-clearpolicy")) {
+		    (*rpp)->mask |= KADM5_POLICY_CLR;
+		} else {
+		    /* everything else needs an argument ... */
+		    if (!(ap = strtok((char *)NULL, delims))) {
+			code = EINVAL;
+			break;
+		    }
+		    if (!strcmp(tp, "-policy")) {
+			if (!((*rpp)->policy = strdup(ap))) {
+			    code = ENOMEM;
+			    break;
+			}
+			(*rpp)->mask |= KADM5_POLICY;
+		    } else {
+			/* all other arguments must be a deltat ... */
+			if (krb5_string_to_deltat(ap, &dt)) {
+			    code = EINVAL;
+			    break;
+			}
+			if (!strcmp(tp, "-expire")) {
+			    (*rpp)->princ_lifetime = dt;
+			    (*rpp)->mask |= KADM5_PRINC_EXPIRE_TIME;
+			} else if (!strcmp(tp, "-pwexpire")) {
+			    (*rpp)->pw_lifetime = dt;
+			    (*rpp)->mask |= KADM5_PW_EXPIRATION;
+			} else if (!strcmp(tp, "-maxlife")) {
+			    (*rpp)->max_life = dt;
+			    (*rpp)->mask |= KADM5_MAX_LIFE;
+			} else if (!strcmp(tp, "-maxrenewlife")) {
+			    (*rpp)->max_renewable_life = dt;
+			    (*rpp)->mask |= KADM5_MAX_RLIFE;
+			} else {
+			    code = EINVAL;
+			    break;
+			}
+		    }
+		}
+	    }
+	}
+    if (sp)
+	free(sp);
+    if (*rpp && code) {
+	if ((*rpp)->policy)
+	    free((*rpp)->policy);
+	free(*rpp);
+	*rpp = (restriction_t *) NULL;
+    }
+    DPRINT(DEBUG_CALLS, acl_debug_level,
+	   ("X acl_parse_restrictions() = %d, mask=0x%08x\n",
+	    code, (*rpp) ? (*rpp)->mask : 0));
+    return code;
+}
+
+/*
+ * acl_impose_restrictions()	- impose restrictions, modifying *recp, *maskp
+ *
+ * Returns: 0 on success;
+ *	    malloc or timeofday errors
+ */
+krb5_error_code
+acl_impose_restrictions(kcontext, recp, maskp, rp)
+     krb5_context		kcontext;
+     kadm5_principal_ent_rec	*recp;
+     long			*maskp;
+     restriction_t		*rp;
+{
+    krb5_error_code	code;
+    krb5_int32		now;
+
+    DPRINT(DEBUG_CALLS, acl_debug_level,
+	   ("* acl_impose_restrictions(..., *maskp=0x%08x, rp=0x%08x)\n",
+	    *maskp, (long)rp));
+    if (!rp)
+	return 0;
+    if (rp->mask & (KADM5_PRINC_EXPIRE_TIME|KADM5_PW_EXPIRATION))
+	if ((code = krb5_timeofday(kcontext, &now)))
+	    return code;
+
+    if (rp->mask & KADM5_ATTRIBUTES) {
+	recp->attributes |= rp->require_attrs;
+	recp->attributes &= ~(rp->forbid_attrs);
+	*maskp |= KADM5_ATTRIBUTES;
+    }
+    if (rp->mask & KADM5_POLICY_CLR) {
+	*maskp &= ~KADM5_POLICY;
+	*maskp |= KADM5_POLICY_CLR;
+    } else if (rp->mask & KADM5_POLICY) {
+	if (recp->policy && strcmp(recp->policy, rp->policy)) {
+		free(recp->policy);
+		recp->policy = (char *) NULL;
+	}
+	if (!recp->policy) {
+	    recp->policy = strdup(rp->policy);  /* XDR will free it */
+	    if (!recp->policy)
+		return ENOMEM;
+	}
+	*maskp |= KADM5_POLICY;
+    }
+    if (rp->mask & KADM5_PRINC_EXPIRE_TIME) {
+	if (!(*maskp & KADM5_PRINC_EXPIRE_TIME)
+	    || (recp->princ_expire_time > (now + rp->princ_lifetime)))
+	    recp->princ_expire_time = now + rp->princ_lifetime;
+	*maskp |= KADM5_PRINC_EXPIRE_TIME;
+    }
+    if (rp->mask & KADM5_PW_EXPIRATION) {
+	if (!(*maskp & KADM5_PW_EXPIRATION)
+	    || (recp->pw_expiration > (now + rp->pw_lifetime)))
+	    recp->pw_expiration = now + rp->pw_lifetime;
+	*maskp |= KADM5_PW_EXPIRATION;
+    }
+    if (rp->mask & KADM5_MAX_LIFE) {
+	if (!(*maskp & KADM5_MAX_LIFE)
+	    || (recp->max_life > rp->max_life))
+	    recp->max_life = rp->max_life;
+	*maskp |= KADM5_MAX_LIFE;
+    }
+    if (rp->mask & KADM5_MAX_RLIFE) {
+	if (!(*maskp & KADM5_MAX_RLIFE)
+	    || (recp->max_renewable_life > rp->max_renewable_life))
+	    recp->max_renewable_life = rp->max_renewable_life;
+	*maskp |= KADM5_MAX_RLIFE;
+    }
+    DPRINT(DEBUG_CALLS, acl_debug_level,
+	   ("X acl_impose_restrictions() = 0, *maskp=0x%08x\n", *maskp));
+    return 0;
 }
 
 /*
@@ -248,6 +452,13 @@ acl_free_entries()
 	    free(ap->ae_target);
 	if (ap->ae_target_princ)
 	    krb5_free_principal((krb5_context) NULL, ap->ae_target_princ);
+	if (ap->ae_restriction_string)
+	    free(ap->ae_restriction_string);
+	if (ap->ae_restrictions) {
+	    if (ap->ae_restrictions->policy)
+		free(ap->ae_restrictions->policy);
+	    free(ap->ae_restrictions);
+	}
 	np = ap->ae_next;
 	free(ap);
     }
@@ -262,7 +473,6 @@ acl_free_entries()
 static int
 acl_load_acl_file()
 {
-char tmpbuf[10];
     FILE 	*afp;
     char 	*alinep;
     aent_t	**aentpp;
@@ -293,8 +503,7 @@ char tmpbuf[10];
 	fclose(afp);
 
 	if (acl_catchall_entry) {
-	     strcpy(tmpbuf, acl_catchall_entry);
-	     if (*aentpp = acl_parse_line(tmpbuf)) {
+	     if (*aentpp = acl_parse_line(acl_catchall_entry)) {
 		  acl_list_tail = *aentpp;
 	     }
 	     else {
@@ -334,17 +543,38 @@ char tmpbuf[10];
  * Wildcarding is only supported for a whole component.
  */
 static krb5_boolean
-acl_match_data(e1, e2)
+acl_match_data(e1, e2, targetflag, ws)
     krb5_data	*e1, *e2;
+    int		targetflag;
+    wildstate_t	*ws;
 {
     krb5_boolean	retval;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, 
 	   ("* acl_match_entry(%s, %s)\n", e1->data, e2->data));
     retval = 0;
-    if (!strncmp(e1->data, "*", e1->length) ||
-	!strncmp(e2->data, "*", e2->length)) {
+    if (!strncmp(e1->data, "*", e1->length)) {
 	retval = 1;
+	if (ws && !targetflag) {
+	    if (ws->nwild >= 9) {
+		DPRINT(DEBUG_ACL, acl_debug_level,
+		    ("Too many wildcards in ACL entry %s\n", entry->ae_name));
+	    }
+	    else
+		ws->backref[ws->nwild++] = e2;
+	}
+    }
+    else if (ws && targetflag && (e1->length == 2) && (e1->data[0] == '*') &&
+	     (e1->data[1] >= '1') && (e1->data[1] <= '9')) {
+	int	n = e1->data[1] - '1';
+	if (n >= ws->nwild) {
+	    DPRINT(DEBUG_ACL, acl_debug_level,
+		   ("Too many backrefs in ACL entry %s\n", entry->ae_name));
+	}
+	else if ((ws->backref[n]->length == e2->length) &&
+		 (!strncmp(ws->backref[n]->data, e2->data, e2->length)))
+	    retval = 1;
+	
     }
     else {
 	if ((e1->length == e2->length) &&
@@ -368,50 +598,41 @@ acl_find_entry(kcontext, principal, dest_princ)
     krb5_error_code	kret;
     int			i;
     int			matchgood;
+    wildstate_t		state;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_find_entry()\n"));
+    memset((char *)&state, 0, sizeof state);
     for (entry=acl_list_head; entry; entry = entry->ae_next) {
+	if (entry->ae_name_bad)
+	    continue;
 	if (!strcmp(entry->ae_name, "*")) {
 	    DPRINT(DEBUG_ACL, acl_debug_level, ("A wildcard ACL match\n"));
-	    break;
-	}
-	if (!entry->ae_principal && !entry->ae_name_bad) {
-	    kret = krb5_parse_name(kcontext,
-				   entry->ae_name,
-				   &entry->ae_principal);
-	    if (kret)
-		entry->ae_name_bad = 1;
-	}
-	if (entry->ae_name_bad) {
-	    DPRINT(DEBUG_ACL, acl_debug_level,
-		   ("A Bad ACL entry %s\n", entry->ae_name));
-	    continue;
-	}
-	if (entry->ae_target &&
-	    !entry->ae_target_princ &&
-	    !entry->ae_target_bad) {
-	    kret = krb5_parse_name(kcontext,
-				   entry->ae_target,
-				   &entry->ae_target_princ);
-	    if (kret)
-		entry->ae_target_bad = 1;
-	}
-	if (entry->ae_target_bad) {
-	    DPRINT(DEBUG_ACL, acl_debug_level,
-		   ("A Bad target in an ACL entry for %s\n", entry->ae_name));
-	    entry->ae_name_bad = 1;
-	    continue;
-	}
-	matchgood = 0;
-	if (acl_match_data(&entry->ae_principal->realm,
-			   &principal->realm) &&
-	    (entry->ae_principal->length == principal->length)) {
 	    matchgood = 1;
-	    for (i=0; i<principal->length; i++) {
-		if (!acl_match_data(&entry->ae_principal->data[i],
-				    &principal->data[i])) {
-		    matchgood = 0;
-		    break;
+	}
+	else {
+	    if (!entry->ae_principal && !entry->ae_name_bad) {
+		kret = krb5_parse_name(kcontext,
+				       entry->ae_name,
+				       &entry->ae_principal);
+		if (kret)
+		    entry->ae_name_bad = 1;
+	    }
+	    if (entry->ae_name_bad) {
+		DPRINT(DEBUG_ACL, acl_debug_level,
+		       ("Bad ACL entry %s\n", entry->ae_name));
+		continue;
+	    }
+	    matchgood = 0;
+	    if (acl_match_data(&entry->ae_principal->realm,
+			       &principal->realm, 0, (wildstate_t *)0) &&
+		(entry->ae_principal->length == principal->length)) {
+		matchgood = 1;
+		for (i=0; i<principal->length; i++) {
+		    if (!acl_match_data(&entry->ae_principal->data[i],
+					&principal->data[i], 0, &state)) {
+			matchgood = 0;
+			break;
+		    }
 		}
 	    }
 	}
@@ -419,24 +640,56 @@ acl_find_entry(kcontext, principal, dest_princ)
 	    continue;
 
 	/* We've matched the principal.  If we have a target, then try it */
-	if (entry->ae_target && entry->ae_target_princ && dest_princ) {
+	if (entry->ae_target) {
+	    if (!strcmp(entry->ae_target, "*"))
+		break;
+	    if (!entry->ae_target_princ && !entry->ae_target_bad) {
+		kret = krb5_parse_name(kcontext, entry->ae_target,
+				       &entry->ae_target_princ);
+		if (kret)
+		    entry->ae_target_bad = 1;
+	    }
+	}
+	if (entry->ae_target_bad) {
+	    DPRINT(DEBUG_ACL, acl_debug_level,
+		   ("Bad target in ACL entry for %s\n", entry->ae_name));
+	    entry->ae_name_bad = 1;
+	    continue;
+	}
+	if (entry->ae_target && !dest_princ)
+	    matchgood = 0;
+	else if (entry->ae_target && entry->ae_target_princ && dest_princ) {
 	    if (acl_match_data(&entry->ae_target_princ->realm,
-			       &dest_princ->realm) &&
+			       &dest_princ->realm, 1, (wildstate_t *)0) &&
 		(entry->ae_target_princ->length == dest_princ->length)) {
-	       for (i=0; i<dest_princ->length; i++) {
-		  if (!acl_match_data(&entry->ae_target_princ->data[i],
-				      &dest_princ->data[i])) {
-		     matchgood = 0;
-		     break;
-		  }
-	       }
+		for (i=0; i<dest_princ->length; i++) {
+		    if (!acl_match_data(&entry->ae_target_princ->data[i],
+					&dest_princ->data[i], 1, &state)) {
+			matchgood = 0;
+			break;
+		    }
+		}
 	    }
 	    else
-	       matchgood = 0;
+		matchgood = 0;
 	}
+	if (!matchgood)
+	    continue;
 
-	if (matchgood)
-	    break;
+	if (entry->ae_restriction_string
+	    && !entry->ae_restriction_bad
+	    && !entry->ae_restrictions
+	    && acl_parse_restrictions(entry->ae_restriction_string,
+				      &entry->ae_restrictions)) {
+	    DPRINT(DEBUG_ACL, acl_debug_level,
+		   ("Bad restrictions in ACL entry for %s\n", entry->ae_name));
+	    entry->ae_restriction_bad = 1;
+	}
+	if (entry->ae_restriction_bad) {
+	    entry->ae_name_bad = 1;
+	    continue;
+	}
+	break;
     }
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_find_entry()=%x\n",entry));
     return(entry);
@@ -479,7 +732,7 @@ acl_finish(kcontext, debug_level)
 }
 
 /*
- * acl_op_permitted()	- Is this operation permitted for this principal?
+ * acl_check()	- Is this operation permitted for this principal?
  *			this code used not to be based on gssapi.  In order
  *			to minimize porting hassles, I've put all the
  *			gssapi hair in this function.  This might not be
@@ -487,11 +740,12 @@ acl_finish(kcontext, debug_level)
  *			solution is, of course, a real authorization service.)
  */
 krb5_boolean
-acl_check(kcontext, caller, opmask, principal)
+acl_check(kcontext, caller, opmask, principal, restrictions)
     krb5_context	kcontext;
     gss_name_t		caller;
     krb5_int32		opmask;
     krb5_principal	principal;
+    restriction_t	**restrictions;
 {
     krb5_boolean	retval;
     aent_t		*aentry;
@@ -517,8 +771,15 @@ acl_check(kcontext, caller, opmask, principal)
 
     retval = 0;
     if (aentry = acl_find_entry(kcontext, caller_princ, principal)) {
-	if ((aentry->ae_op_allowed & opmask) == opmask)
+	if ((aentry->ae_op_allowed & opmask) == opmask) {
 	    retval = 1;
+	    if (restrictions) {
+		*restrictions =
+		    (aentry->ae_restrictions && aentry->ae_restrictions->mask)
+		    ? aentry->ae_restrictions
+		    : (restriction_t *) NULL;
+	    }
+	}
     }
 
     krb5_free_principal(kcontext, caller_princ);
@@ -528,7 +789,8 @@ acl_check(kcontext, caller, opmask, principal)
     return(retval);
 }
 
-kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
+kadm5_ret_t
+kadm5_get_privs(void *server_handle, long *privs)
 {
      kadm5_server_handle_t handle = server_handle;
 

@@ -70,6 +70,18 @@
 				 ACL_LIST	| \
 				 ACL_SETKEY)
 
+typedef struct _restriction {
+    long		mask;
+    krb5_flags		require_attrs;
+    krb5_flags		forbid_attrs;
+    krb5_deltat		princ_lifetime;
+    krb5_deltat		pw_lifetime;
+    krb5_deltat		max_life;
+    krb5_deltat		max_renewable_life;
+    long		aux_attributes;
+    char		*policy;
+} restriction_t;
+
 krb5_error_code acl_init
 	KRB5_PROTOTYPE((krb5_context,
 		   int,
@@ -81,6 +93,11 @@ krb5_boolean acl_check
 	KRB5_PROTOTYPE((krb5_context,
 		   gss_name_t,
 		   krb5_int32,
-		   krb5_principal));
-
+		   krb5_principal,
+		   restriction_t **));
+krb5_error_code acl_impose_restrictions
+	KRB5_PROTOTYPE((krb5_context,
+		   kadm5_principal_ent_rec *,
+		   long *,
+		   restriction_t *));
 #endif	/* SERVER_ACL_H__ */

@@ -1,3 +1,11 @@
+2000-03-16  Ken Raeburn  <raeburn@mit.edu>
+	    Matt Crawford  <crawdad@fnal.gov>
+
+	* server_stubs.c: All callers of acl_check updated to add new
+	restriction argument.  Impose any provided restrictions on add- or
+	modify-principal operations; pass NULL pointer for all other
+	operations including rename-principal.
+
 2000-02-27  Tom Yu  <tlyu@mit.edu>
 
 	* server_stubs.c (create_principal3_1): Remove keepold argument.
