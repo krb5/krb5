@@ -1,3 +1,7 @@
+2004-07-29  Sam Hartman  <hartmans@mit.edu>
+
+	* libgssapi_krb5.exports: Add lucid context routines and gss_krb5_set_allowable_enctypes
+
 2004-07-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): Use _DEPLIB variables.

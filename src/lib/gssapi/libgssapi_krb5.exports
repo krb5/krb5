@@ -31,7 +31,10 @@ gss_inquire_cred_by_mech
 gss_inquire_names_for_mech
 gss_krb5_ccache_name
 gss_krb5_copy_ccache
+gss_krb5_export_lucid_sec_context
 gss_krb5_get_tkt_flags
+gss_krb5_free_lucid_sec_context
+gss_krb5_set_allowable_enctypes
 gss_krb5int_make_seal_token_v3
 gss_krb5int_unseal_token_v3
 gss_mech_krb5
