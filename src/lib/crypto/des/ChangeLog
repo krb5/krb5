@@ -1,5 +1,8 @@
 Wed Jun 12 00:08:31 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* des_int.h: Add missing prototypes; needed to make Win-32
+		compiler happy.
+
 	* f_tables.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
 
 Tue May 21 19:30:10 1996  Sam Hartman  <hartmans@mit.edu>

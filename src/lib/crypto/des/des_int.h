@@ -92,6 +92,13 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * End "mit-des.h"
  */
 
+/* afsstring2key.c */
+extern krb5_error_code mit_afs_string_to_key
+	PROTOTYPE((const krb5_encrypt_block FAR *eblock,
+		   krb5_keyblock FAR *keyblock,
+		   const krb5_data FAR *data,
+		   const krb5_data FAR *salt));
+
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
     PROTOTYPE((krb5_octet FAR *, krb5_octet FAR *, long , mit_des_key_schedule ,
@@ -220,6 +227,12 @@ extern krb5_error_code mit_des_n_fold
 		   const size_t out_len));
 
 /* u_rn_key.c */
+extern int mit_des_is_weak_keyblock
+	PROTOTYPE((krb5_keyblock *keyblock));
+
+extern void mit_des_fixup_keyblock_parity
+	PROTOTYPE((krb5_keyblock *keyblock));
+
 extern krb5_error_code mit_des_set_random_generator_seed
 	PROTOTYPE((const krb5_data * seed,
 		   krb5_pointer random_state));
