@@ -4,8 +4,9 @@ AC_PROG_INSTALL
 AC_CHECK_LIB(util,main)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
-  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses")
-)
+  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
+  AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
+))
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
@@ -30,6 +31,13 @@ case $krb5_cv_host in
 *-*-hpux*)
      broken_streams=yes
      ;;
+*-*-linux*)
+     # Someday Linux may have a Streams user-level interface, so checking
+     # for sys/stream.h may not always work.  But I'm reasonably
+     # sure Linux will never require pushing magic streams modules onto 
+     # pty's! :-)   --- TYT
+     broken_streams=yes
+     ;;
 *-*-irix*)
      # Irix doesn't have a working granpt, and more over
      # you can't push anything onto a pty, so telnetd really
@@ -37,7 +45,7 @@ case $krb5_cv_host in
      broken_streams=yes
      ;;
 esac
-if test -z "$broken_streams" ; then
+if test -z "$broken_streams" -a "$ac_cv_header_sys_stream" = yes; then
     AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
 fi
 AC_MSG_CHECKING([if setpgrp takes two arguments])
