@@ -1,3 +1,8 @@
+Mon Feb 26 03:38:24 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* *.exp: use $REALMNAME for the testing realm.
+	* default.exp: if REALMNAME isn't set, set it to KRBTEST.COM.
+
 Fri Sep 29 14:23:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (clean-unix): Remove the dejagnu temporary files.

@@ -1,6 +1,6 @@
 Sat Mar 16 07:11:06 1996  Ezra Peisach  <epeisach@mit.edu>
 
-	* configure.in: Add USE_ANAME
+	* configure.in: pop_init.c authenticate() needs USE_ANAME.
 
 Tue Jan  2 19:23:52 1996  Mark Eichin  <eichin@cygnus.com>
 

@@ -1,3 +1,7 @@
+Tue Oct  3 17:57:32 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.conf[libdefaults]: add krb4_config, krb4_realms.
+
 Wed Jan 10 22:13:04 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.conf.M: Added documentation for the DCE compat options,
@@ -47,7 +51,6 @@ Wed Jul 12 12:06:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc.conf[.M] - Change syntax.  KDC now has per-realm information in
 		[realms] section and has [kdcdefaults] to contain global data.
 		Add profile and secondary_port per-realm data.
-
 
 Fri Jun 23 10:36:48 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc.conf[.M] - Add description of new KDC configuration file.
