@@ -55,12 +55,12 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefiles-recurse:
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
 		in *[ik]*) e=:;; *) e="exit 1";; esac; \
-	if test -n "$(SUBDIRS)" && test -z "$(NORECURSE)"; then \
 	if test -z "$(MY_SUBDIRS)" ; then \
 		do_subdirs="$(SUBDIRS)" ; \
 	else \
 		do_subdirs="$(MY_SUBDIRS)" ; \
 	fi; \
+	if test -n "$$do_subdirs" && test -z "$(NORECURSE)"; then \
 	for i in $$do_subdirs ; do \
 		if test -d $$i ; then \
 		case $$i in .);; *) \
