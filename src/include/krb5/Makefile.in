@@ -7,8 +7,12 @@ KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		keytab.h krb5.h libos.h los-proto.h macros.h mit-des.h \
 		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
 		sysincl.h widen.h wordsize.h
+# these are installed here for the build from lib/krb5/error_tables but 
+# also need to be in the installed tree
+ET_HEADERS = adm_err.h asn1_err.h isode_err.h kdb5_err.h krb5_err.h
+BUILT_HEADERS = autoconf.h config.h osconf.h
 
-all:: autoconf.h osconf.h config.h
+all:: $(BUILT_HEADERS)
 
 includes:: autoconf.h
 
@@ -28,11 +32,10 @@ KRB5ROOT = @KRB5ROOT@
 
 KRB5_INCDIR = $(KRB5ROOT)/include
 
-install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h
-	@set -x; for f in $(KRB5_HEADERS) ; \
-	do cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
+install::
+	@set -x; for f in $(KRB5_HEADERS) $(BUILT_HEADERS) $(ET_HEADERS); \
+	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f ; \
 	done
-	cp config.h osconf.h $(DESTDIR)$(KRB5_INCDIR)/krb5/$$f 
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		  -e "s+@KDB5DIR+$(KDB5DIR)+" \
@@ -56,4 +59,4 @@ config.h: $(CONFSRC)
 	else (set -x; $(RM) config.h ; $(CP) config.new config.h) fi
 
 clean::
-	$(RM) config.h config.new osconf.h osconf.new
+	$(RM) config.new osconf.new $(ET_HEADERS) $(BUILT_HEADERS)

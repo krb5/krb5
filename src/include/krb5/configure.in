@@ -6,6 +6,7 @@ CONFIG_RULES
 ISODE_DEFS
 AC_CONFIG_HEADER(autoconf.h)
 AC_PROG_LEX
+AC_PROG_INSTALL
 HAVE_YYLINENO
 AC_FUNC_CHECK(strdup,AC_DEFINE(HAS_STRDUP))
 CHECK_DIRENT
@@ -15,15 +16,10 @@ CHECK_WAIT_TYPE
 dnl stuff from config.h
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 
-AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
-AC_COMPILE_CHECK([POSIX file locking -- structs and flags],
-[#include <sys/types.h>
-#include <fcntl.h>],
-[struct flock f; 1+F_SETLK;], 
-AC_DEFINE(POSIX_FILE_LOCKS)))
+KRB5_POSIX_LOCKS
 
 dnl time_t, only used in lib/krb5/os/timeofday.c
-AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
+AC_EGREP_HEADER(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 
 
 dnl AC_RETSIGTYPE isn't quite right, but almost.

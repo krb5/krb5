@@ -1,3 +1,19 @@
+Fri Nov 18 01:28:47 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): elide dependency so $(srcdir) works; use
+	$(INSTALL_DATA).
+	(ET_HEADERS): new variable for the names of the headers that
+	lib/krb5/error_tables builds and installs here (so that they get
+	pushed out to the installed include directory.)
+	(BUILT_HEADERS): locally built headers, for all, install, and
+	clean.
+	(clean): delete built and et headers.
+
+Fri Nov 18 01:15:00 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use KRB5_POSIX_LOCKS, AC_EGREP_HEADER. (from
+	epeisach).
+
 Thu Nov 10 22:04:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* hostaddr.h (krb5_address): Add magic number field.
