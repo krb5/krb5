@@ -1,3 +1,7 @@
+Thu Aug 24 18:21:07 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Updated for autoconf 2.4
+
 Wed Jun 21 14:48:19 1995    <tytso@rsx-11.mit.edu>
 
 	* Installed autoconf 2.4 in the Kerberos V5 tree.  This reverted a
