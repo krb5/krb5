@@ -201,6 +201,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    flags = 0;		/* turns off OPENCLOSE mode */
    if ((code = krb5_cc_set_flags(context, ccache, flags))) {
+      (void)krb5_cc_close(context, ccache);
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
