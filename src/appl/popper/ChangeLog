@@ -1,3 +1,8 @@
+Wed Nov  2 21:09:38 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* popper.h: NULL should not be used as a character assignment
+		value.  Use '\0' instead. 
+
 Wed Oct 26 15:00:13 1994    (tytso@rsx-11)
 
 	* Makefile.in (CFLAGS): Control -g/-O via $(CCOPTS)
