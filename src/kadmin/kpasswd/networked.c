@@ -46,20 +46,18 @@
 #define MAXHOSTNAME 64
 #endif
 
-int utfile;			/* Global utfile file descriptor for BSD version
-				   of setutent, getutline, and endutent */
+#if defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
 
-#if !defined(SYSV) && !defined(UMIPS)	/* Setutent, Endutent, and getutline
-					   routines for non System V Unix
-						 systems */
+static int utfile;
+
 #include <fcntl.h>
 
-void setutent()
+static void kadmin_setutent()
 {
   utfile = open("/etc/utmp",O_RDONLY);
 }
 
-struct utmp * getutline(utmpent)
+static struct utmp * kadmin_getutline(utmpent)
 struct utmp *utmpent;
 {
  static struct utmp tmputmpent;
@@ -81,11 +79,15 @@ struct utmp *utmpent;
  return((struct utmp *) 0);
 }
 
-void endutent()
+static void kadmin_endutent()
 {
   close(utfile);
 }
-#endif /* not SYSV */
+#else
+#define kadmin_setutent  setutent
+#define kadmin_getutline getutline
+#define kadmin_endutent  endutent
+#endif /* defined(HAVE_GETUTENT) && !defined(NO_UT_PID) */
 
 
 int network_connected()
@@ -117,12 +119,12 @@ char *username,*tmpname;
 
     /* See if this device is currently listed in /etc/utmp under
        calling user */
-#ifdef SYSV
+#ifndef NO_UT_TYPE
     utmpent.ut_type = USER_PROCESS;
 #define ut_name ut_user
 #endif
-    setutent();
-    while ( (tmpptr = (struct utmp *) getutline(&utmpent)) 
+    kadmin_setutent();
+    while ( (tmpptr = (struct utmp *) kadmin_getutline(&utmpent)) 
             != ( struct utmp *) 0) {
 
 	/* If logged out name and host will be empty */
@@ -135,11 +137,11 @@ char *username,*tmpname;
 	else break;
     }
     if (  tmpptr   == (struct utmp *) 0) {
-	endutent();
+	kadmin_endutent();
 	return(1);
     }
     byte_copy((char *)tmpptr,(char *)&retutent,sizeof(struct utmp));
-    endutent();
+    kadmin_endutent();
 #ifdef DEBUG
 #ifdef NO_UT_HOST
     printf("User %s on line %s :\n",
