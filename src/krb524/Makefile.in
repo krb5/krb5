@@ -129,3 +129,11 @@ clean-unix:: clean-libs clean-libobjs
 
 $(KRB524_HDR): krb524.h
 	$(CP) krb524.h $@
+
+PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
+
+tcltest: tcltest.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o tcltest tcltest.o $(KRB524_LIB) $(KRB4COMPAT_LIBS) \
+		$(TCL_LIBS)
+tcltest.o: tcltest.c

@@ -80,52 +80,12 @@ fail:
      return ret;
 }
 
-#if 0
-int broken()
-{
-     if ((ret = krb5_locate_kdc(context, &v5creds->server->realm, &addrs,
-			       &naddrs)))
-	  return ret;
-     if (naddrs == 0)
-	  ret = KRB5_KDC_UNREACH;
-     else {
-          for (i = 0; i<naddrs; i++) {
-	    addrs[i].sin_port = 0; /* use krb524 default port */
-	    ret = krb524_convert_creds_addr(context, v5creds, v4creds,
-					    (struct sockaddr *) &addrs[i]);
-	    /* stop trying on success */
-	    if (!ret) break;
-	    switch(ret) {
-	    case ECONNREFUSED:
-	    case ENETUNREACH:
-	    case ENETDOWN:
-	    case ETIMEDOUT:
-	    case EHOSTDOWN:
-	    case EHOSTUNREACH:
-	    case KRB524_NOTRESP:
-	      continue;
-	    default:
-	      break;		/* out of switch */
-	    }
-	    /* if we fall through to here, it wasn't an "ok" error */
-	    break;
-	  }
-     }
-     
-     free(addrs);
-     return ret;
-}
-#endif
-
 krb5_error_code
 krb524_convert_creds_plain(context, v5creds, v4creds)
      krb5_context context;
      krb5_creds *v5creds;
      CREDENTIALS *v4creds;
 {
-#if 0
-     krb5_ui_4 addr;
-#endif
      int ret;
      krb5_timestamp endtime;
      char dummy[REALM_SZ];
@@ -162,19 +122,5 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
      if (endtime > v5creds->times.endtime)
 	 v4creds->issue_date -= endtime - v5creds->times.endtime;
 
-#if 0
-     /* XXX perhaps we should use the addr of the client host if */
-     /* v5creds contains more than one addr.  Q: Does V4 support */
-     /* non-INET addresses? */
-     if (!v5creds->addresses || !v5creds->addresses[0] ||
-	 v5creds->addresses[0]->addrtype != ADDRTYPE_INET ||
-	 v5creds->addresses[0]->length != sizeof(addr)) {
-	  if (krb524_debug)
-	       fprintf(stderr, "Invalid v5creds address information.\n");
-	  return KRB524_BADADDR;
-     } else
-	  memcpy((char *) &addr, v5creds->addresses[0]->contents,
-		 sizeof(addr));
-#endif
      return 0;
 }

@@ -65,7 +65,7 @@ krb5_error_code  kdc_get_server_key(krb5_context, krb5_principal,
 static void usage(context)
      krb5_context context;
 {
-     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork]\n", whoami);
+     fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork] [-p portnum]\n", whoami);
      cleanup_and_exit(1, context);
 }
 
@@ -99,6 +99,7 @@ int main(argc, argv)
      krb5_context context;
      krb5_error_code retval;
      kadm5_config_params config_params;
+     int port = 0;
 
      retval = krb5_init_context(&context);
      if (retval) {
@@ -126,6 +127,14 @@ int main(argc, argv)
 	       config_params.mask |= KADM5_CONFIG_REALM;
 	       config_params.realm = *argv;
 	  }
+	  else if (strcmp(*argv, "-p") == 0) {
+	      argv++; argc--;
+	      if (argc == 0)
+		  usage (context);
+	      port = atoi (*argv);
+	      if (port <= 0 || port > 65535)
+		  usage (context);
+	  }
 	  else
 	       break;
 	  argv++; argc--;
@@ -148,12 +157,16 @@ int main(argc, argv)
      memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
      saddr.sin_family = AF_INET;
      saddr.sin_addr.s_addr = INADDR_ANY;
-     serv = getservbyname(KRB524_SERVICE, "udp");
-     if (serv == NULL) {
-	  com_err(whoami, 0, "service entry not found, using %d", KRB524_PORT);
-	  saddr.sin_port = htons(KRB524_PORT);
+     if (port == 0) {
+	 serv = getservbyname(KRB524_SERVICE, "udp");
+	 if (serv == NULL) {
+	     com_err(whoami, 0, "service entry not found, using %d",
+		     KRB524_PORT);
+	     saddr.sin_port = htons(KRB524_PORT);
+	 } else
+	     saddr.sin_port = serv->s_port;
      } else
-	  saddr.sin_port = serv->s_port;
+	 saddr.sin_port = htons(port);
 	  
      if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	  com_err(whoami, errno, "creating main socket");
