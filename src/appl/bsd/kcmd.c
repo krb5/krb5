@@ -58,6 +58,7 @@ static char sccsid[] = "derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88";
 #include <errno.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+#include <krb5/ext-proto.h>
 
 #include "defines.h"
      

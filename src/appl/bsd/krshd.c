@@ -155,6 +155,7 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #include <krb5/asn1.h>
 #include <krb5/crc-32.h>
 #include <krb5/mit-des.h>
+#include <krb5/ext-proto.h>
 
 #include <com_err.h>
 

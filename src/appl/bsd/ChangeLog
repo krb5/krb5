@@ -1,3 +1,8 @@
+Sat Jul 23 08:48:50 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* kcmd.c:
+	* krshd.c: include ext-proto.h to avoid type warnings
+
 Sat Jul 16 02:24:31 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* kcmd.c:
