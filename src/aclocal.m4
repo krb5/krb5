@@ -208,7 +208,7 @@ if test $krb5_cv_func_sigprocmask_use = yes; then
 fi
 ])dnl
 dnl
-define(AC_PROG_ARCHIVE, [AC_PROGRAM_CHECK(ARCHIVE, ar, ar qv, false)])dnl
+define(AC_PROG_ARCHIVE, [AC_PROGRAM_CHECK(ARCHIVE, ar, ar cqv, false)])dnl
 define(AC_PROG_ARCHIVE_ADD, [AC_PROGRAM_CHECK(ARADD, ar, ar cruv, false)])dnl
 dnl
 dnl drop in rules for building error tables -- ET_RULES

@@ -1,5 +1,7 @@
 Fri Jun 16 00:45:03 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* aclocal.m4: ARCHIVE gets a "cqv" to shut it up about the warning
+
 	* aclocal.m4: Fix new append.out stuff to work with config.status
 		properly; previously append.out was not getting sucked
 		into the body of config.status.  The EXTRA_RULES macros
