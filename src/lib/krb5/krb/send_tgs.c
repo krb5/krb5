@@ -104,8 +104,8 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
         goto cleanup_data;
 
     /* put together an eblock for this encryption */
-    krb5_use_enctype(context, &eblock, request.ticket->enc_part.enctype);
-    request.authenticator.enctype = request.ticket->enc_part.enctype;
+    krb5_use_enctype(context, &eblock, in_cred->keyblock.enctype);
+    request.authenticator.enctype = in_cred->keyblock.enctype;
     request.authenticator.ciphertext.length =
         krb5_encrypt_size(scratch->length, eblock.crypto_entry);
 

@@ -1,3 +1,10 @@
+Sun Mar 24 01:34:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* send_tgs.c (krb5_send_tgs_basic): You want to setup the eblock
+ 	used for the authenticator using the in_cred->keyblock, *not*
+ 	request.ticket.enc_part.enctype.  Under a multi-enctype system,
+ 	the session key may be different from the ticket key.
+
 Wed Mar 20 23:00:59 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* walk_rtree.c (krb5_walk_realm_tree): Fix 16bit vs. 32bit error.
