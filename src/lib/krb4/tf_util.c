@@ -80,7 +80,7 @@ static int  curpos;			/* Position in tfbfr */
 static int  lastpos;			/* End of tfbfr */
 static char tfbfr[BUFSIZ];		/* Buffer for ticket data */
 
-static tf_gets(), tf_read();
+static int tf_gets PROTOTYPE((char *, int)), tf_read PROTOTYPE((char *, int));
 
 /*
  * This file contains routines for manipulating the ticket cache file.
@@ -144,7 +144,7 @@ static tf_gets(), tf_read();
  * TKT_FIL_LCK  - couldn't lock the file, even after a retry
  */
 
-int tf_init(tf_name, rw)
+KRB5_DLLIMP int KRB5_CALLCONV tf_init(tf_name, rw)
     char   *tf_name;
     int rw;
 {
@@ -387,7 +387,7 @@ int tf_init(tf_name, rw)
  * was longer than ANAME_SZ, TKT_FIL_FMT is returned. 
  */
 
-int tf_get_pname(p)
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname(p)
     char   *p;
 {
     if (fd < 0) {
@@ -410,7 +410,7 @@ int tf_get_pname(p)
  * instance may be null. 
  */
 
-int tf_get_pinst(inst)
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst(inst)
     char   *inst;
 {
     if (fd < 0) {
@@ -434,7 +434,7 @@ int tf_get_pinst(inst)
  * EOF          - end of file encountered
  */
 
-int tf_get_cred(c)
+KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred(c)
     CREDENTIALS *c;
 {
     KTEXT   ticket = &c->ticket_st;	/* pointer to ticket */
@@ -501,7 +501,7 @@ int tf_get_cred(c)
  * The return value is not defined.
  */
 
-void tf_close()
+KRB5_DLLIMP void KRB5_CALLCONV tf_close()
 {
     if (!(fd < 0)) {
 #ifdef TKT_SHMEM
@@ -632,7 +632,7 @@ int tf_save_cred(service, instance, realm, session, lifetime, kvno,
 {
 
     off_t   lseek();
-    int     count;		/* count for write */
+    unsigned int count;		/* count for write */
 #ifdef TKT_SHMEM
     int	    *skey_check;
 #endif /* TKT_SHMEM */

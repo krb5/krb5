@@ -1,3 +1,8 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* tf_util.c (tf_init): Add KRB5_DLLIMP/KRB5_CALLCONV definitions
+	for functions exported prototypes in krb.h.
+
 2000-07-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* g_pw_tkt.c, unix_time.c: Add KRB5_DLLIMP/KRB5_CALLCONV defintion.
