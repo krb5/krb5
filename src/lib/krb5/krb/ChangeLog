@@ -1,3 +1,8 @@
+2001-02-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* gic_pwd.c, sendauth.c, recvauth.c: com_err.h is already included by 
+	k5-int.h.  Removed #include because it was confusing the Mac OS X builds
+	
 2001-01-30  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c (krb5_obtain_padata): Don't dereference a NULL pointer

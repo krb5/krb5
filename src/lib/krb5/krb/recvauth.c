@@ -30,7 +30,6 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include "auth_con.h"
-#include "com_err.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
