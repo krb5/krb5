@@ -37,7 +37,7 @@
 
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
-krb5_error_code
+static krb5_error_code
 recvauth_common(krb5_context context,
 		krb5_auth_context FAR * auth_context,
 		/* IN */

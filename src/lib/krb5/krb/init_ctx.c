@@ -61,7 +61,7 @@ extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 
-static krb5_error_code init_common ();
+static krb5_error_code init_common (krb5_context *, krb5_boolean);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)

@@ -158,18 +158,20 @@ krb5_sendauth(context, auth_context,
 	       not to guarantee randomness, but to make it less likely
 	       that multiple sessions could pick the same subkey.  */
 	    char rnd_data[1024];
-	    size_t len;
+	    size_t len2;
 	    krb5_data d;
 	    d.length = sizeof (rnd_data);
 	    d.data = rnd_data;
-	    len = sizeof (rnd_data);
-	    if (getpeername (*(int*)fd, (struct sockaddr *) rnd_data, &len) == 0) {
-		d.length = len;
+	    len2 = sizeof (rnd_data);
+	    if (getpeername (*(int*)fd, (struct sockaddr *) rnd_data, 
+			     &len2) == 0) {
+		d.length = len2;
 		(void) krb5_c_random_seed (context, &d);
 	    }
-	    len = sizeof (rnd_data);
-	    if (getsockname (*(int*)fd, (struct sockaddr *) rnd_data, &len) == 0) {
-		d.length = len;
+	    len2 = sizeof (rnd_data);
+	    if (getsockname (*(int*)fd, (struct sockaddr *) rnd_data, 
+			     &len2) == 0) {
+		d.length = len2;
 		(void) krb5_c_random_seed (context, &d);
 	    }
 	}

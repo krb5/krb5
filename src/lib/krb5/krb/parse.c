@@ -217,9 +217,9 @@ krb5_parse_name(context, name, nprincipal)
 	krb5_princ_set_realm_length(context, principal, realmsize);
 	krb5_princ_set_realm_data(context, principal, tmpdata);
 	for (i=0; i < components; i++) {
-		char *tmpdata =
+		char *tmpdata2 =
 		  malloc(krb5_princ_component(context, principal, i)->length + 1);
-		if (!tmpdata) {
+		if (!tmpdata2) {
 			for (i--; i >= 0; i--)
 				krb5_xfree(krb5_princ_component(context, principal, i)->data);
 			krb5_xfree(krb5_princ_realm(context, principal)->data);
@@ -227,7 +227,7 @@ krb5_parse_name(context, name, nprincipal)
 			krb5_xfree(principal);
 			return(ENOMEM);
 		}
-		krb5_princ_component(context, principal, i)->data = tmpdata;
+		krb5_princ_component(context, principal, i)->data = tmpdata2;
 		krb5_princ_component(context, principal, i)->magic = KV5M_DATA;
 	}
 	

@@ -28,6 +28,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 

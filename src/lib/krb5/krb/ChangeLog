@@ -1,3 +1,14 @@
+2001-03-10  Ezra Peisach  <epeisach@mit.edu>
+
+	* init_ctx.c: Provide a full prototype for init_common().
+
+	* recvauth.c (recvauth_common): Declare recvauth_common as static. 
+
+	* parse.c, sendauth.c: Changes to prevent shadowing of local
+	variables.
+
+	* get_in_tkt.c, tgtname.c: Include int-proto.h for prototypes.
+
 2001-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth2.c (pa_sam): Return an error if no prompter was
