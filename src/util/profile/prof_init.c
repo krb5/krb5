@@ -72,7 +72,7 @@ errcode_t profile_init_path(filepath, ret_profile)
 {
 	int n_entries, i;
 	int ent_len;
-	char *s, *t;
+	const char *s, *t;
 	char **filenames;
 	errcode_t retval;
 
@@ -106,7 +106,7 @@ errcode_t profile_init_path(filepath, ret_profile)
 	/* cap the array */
 	filenames[i] = 0;
 
-	retval = profile_init(filenames, ret_profile);
+	retval = profile_init((const char **)filenames, ret_profile);
 
 	/* count back down and free the entries */
 	while(--i >= 0) free(filenames[i]);

@@ -1,3 +1,7 @@
+Mon Oct  2 16:39:49 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_init.c (profile_init_path): Add const declarations.
+
 Tue Sep 26 20:00:28 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* prof_init.c (profile_init_path): takes a single string entry
