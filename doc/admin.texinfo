@@ -1053,7 +1053,7 @@ Use @i{REALM} as the default Kerberos realm for the database.
 Use the Kerberos principal @i{principal} to authenticate to Kerberos.
 If this option is not given, @code{kadmin} will append @code{admin} to
 either the primary principal name, the environment variable USER, or to
-the username obtained grom @code{getpwuid}, in order of preference.
+the username obtained from @code{getpwuid}, in order of preference.
 
 @item @b{-k} @i{keytab}
 Use the keytab @i{keytab} to decrypt the KDC response instead of
@@ -1924,7 +1924,7 @@ load_dump version 3.0'').
 requires the dump to be in ovsec_adm_export format.
 @itemx -verbose
 causes the name of each principal and policy to be printed as it is
-dumped.
+loaded.
 @itemx -update
 causes records from the dump file to be updated in or added to the
 existing database.  This is useful in conjunction with an
@@ -2132,7 +2132,7 @@ kadmin:}
 @node Removing Principals from Keytabs,  , Adding Principals to Keytabs, Keytabs
 @subsection Removing Principals from Keytabs
 
-To remove a principal to an existing keytab, use the kadmin
+To remove a principal from an existing keytab, use the kadmin
 @code{ktremove} command.  The syntax is:
 
 @smallexample
@@ -2258,7 +2258,7 @@ and then @code{klist}, the host's service principal should be
 If you need off-site users to be able to get Kerberos tickets in your
 realm, they must be able to get to your KDC.  This requires either that
 you have a slave KDC outside your firewall, or you configure your
-firewall to allow UDP requests into to at least one of your KDCs, on
+firewall to allow UDP requests into at least one of your KDCs, on
 whichever port the KDC is running.  (The default is port 88; other ports
 may be specified in the KDC's kdc.conf file.)  Similarly, if you need
 off-site users to be able to change their passwords in your realm, they
@@ -2273,7 +2273,7 @@ UDP requests to port 750.  If your on-site users inside your firewall
 will need to get to Kerberos admin servers in other realms, you will
 also need to allow outgoing TCP and UDP requests to port 749.
 
-If any of your KDCs is outside your firewall, you will need to allow
+If any of your KDCs are outside your firewall, you will need to allow
 @code{kprop} requests to get through to the remote KDC.  @code{Kprop}
 uses the krb5_prop service on port 754 (tcp).
 
@@ -2311,7 +2311,7 @@ these programs to non-default port numbers and allow ftp and telnet
 connections on those ports to get through.
 
 @value{PRODUCT} @code{rlogin} uses the @code{klogin} service, which by
-default uses port 543.  Encrypted @value{PRODUCT} rlogin uses uses the
+default uses port 543.  Encrypted @value{PRODUCT} rlogin uses the
 @code{eklogin} service, which by default uses port 2105.
 
 @value{PRODUCT} @code{rsh} uses the @code{kshell} service, which by

@@ -271,7 +271,7 @@ another realm.  In that case, you would set up TXT records for all
 hosts, rather than relying on the fallback to the domain name.)
 
 Even if you do not choose to use this mechanism within your site, you
-may wish to set up anyways, for use when interacting with other sites.
+may wish to set it up anyway, for use when interacting with other sites.
 
 @node Ports for the KDC and Admin Services, Slave KDCs, Mapping Hostnames onto Kerberos Realms, Realm Configuration Decisions
 @section Ports for the KDC and Admin Services
@@ -747,7 +747,7 @@ have a stash file in order to do this.
 
 You can verify that they started properly by checking for their startup
 messages in the logging locations you defined in @code{/etc/krb5.conf}.
-(See @xref{Edit the Configuration Files}.)  For example:
+(@xref{Edit the Configuration Files}.)  For example:
 
 @smallexample
 @b{shell%} tail /var/log/krb5kdc.log

@@ -88,10 +88,6 @@ not need.
 It is important that you fill in the @i{release} field and tell us
 what changes you have made, if any.
 
-Bug reports that include proposed fixes are especially welcome.  If you
-include proposed fixes, please send them using either context diffs
-(@samp{diff -c}) or unified diffs (@samp{diff -u}).
-
 @iftex
 @vfill
 @end iftex
@@ -142,3 +138,6 @@ If the @code{krb5-send-pr} program does not work for you, or if you did
 not get far enough in the process to have an installed and working
 @code{krb5-send-pr}, you can generate your own form, using the above as
 an example.
+
+
+
