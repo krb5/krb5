@@ -1,0 +1,18 @@
+rule Kerberos5Core.pbexp
+{
+    DEPENDS "$(1)" : "$(2)" ;
+}
+
+actions Kerberos5Core.pbexp
+{
+    cat "$(2)" > "$(1)"
+}
+
+GSSKRB5_TEMP_DIR = "$(SYMROOT)/GSSKerberos5.intermediates" ;
+EXPORT_DIR = "$(SRCROOT)" ;
+Kerberos5Core.pbexp 		"$(GSSKRB5_TEMP_DIR)/Kerberos5Core.pbexp" : 
+                            "$(EXPORT_DIR)/Kerberos5Lib.pbexp"
+                            "$(EXPORT_DIR)/Kerberos5PrivateLib.pbexp" ;
+
+DEPENDS install 	: all ;
+DEPENDS	all			: "$(GSSKRB5_TEMP_DIR)/Kerberos5Core.pbexp" ;
