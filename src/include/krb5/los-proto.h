@@ -47,6 +47,14 @@ int krb5_net_write
 		 /* get all the addresses of this host */
 krb5_error_code krb5_os_localaddr
 	PROTOTYPE((krb5_address ***));
-
+krb5_error_code krb5_sendto_kdc
+	PROTOTYPE((krb5_data *,
+		   krb5_data *,
+		   krb5_data * ));
+krb5_error_code krb5_get_krbhst
+	PROTOTYPE((krb5_data *,
+		   char *** ));
+krb5_error_code krb5_free_krbhst
+	PROTOTYPE((char ** ));
 
 #endif /* KRB5_LIBOS_PROTO__ */
