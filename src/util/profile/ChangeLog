@@ -1,3 +1,8 @@
+2004-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_open_file): Handle earlier (draft POSIX)
+	specifications of getpwuid_r.
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for getpwuid_r.

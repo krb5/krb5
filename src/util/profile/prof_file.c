@@ -150,13 +150,17 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 #endif
 
 		    uid = getuid();
-#ifdef HAVE_GETPWUID_R
+#ifndef HAVE_GETPWUID_R
+		    pw = getpwuid(uid);
+#elif defined(GETPWUID_R_4_ARGS)
+		    /* earlier POSIX drafts */
+		    pw = getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf));
+#else
+		    /* POSIX */
 		    if (getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0)
 			/* Probably already null, but let's make sure.  */
 			pw = NULL;
-#else
-		    pw = getpwuid(uid);
-#endif
+#endif /* getpwuid variants */
 		    if (pw != NULL && pw->pw_dir[0] != 0)
 			home_env = pw->pw_dir;
 		}
