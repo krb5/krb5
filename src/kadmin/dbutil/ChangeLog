@@ -3,6 +3,10 @@ Fri Oct 18 14:23:41 1996  Barry Jaspan  <bjaspan@mit.edu>
 	* dump.c (load_db): osa_adb_rename_policy_db will create the db,
  	so this function doesn't have to [krb5-admin/58]
 
+	* dump.c (dump_k5beta6_iterator): don't dump tl types that are
+ 	special to us and the previous version did not understand
+ 	[krb5-admin/89]
+
 Tue Oct  8 13:35:56 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* dump.c (load_db): rework the way policy database naming and

@@ -566,7 +566,7 @@ dump_k5beta6_iterator(ptr, entry)
     char		*name;
     krb5_tl_data	*tlp;
     krb5_key_data	*kdata;
-    int			counter, i, j;
+    int			counter, skip, i, j;
 
     /* Initialize */
     arg = (struct dump_args *) ptr;
@@ -610,15 +610,28 @@ dump_k5beta6_iterator(ptr, entry)
 	/*
 	 * Make sure that the tagged list is reasonably correct.
 	 */
-	counter = 0;
-	for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next)
-	    counter++;
-	if (counter == entry->n_tl_data) {
+	counter = skip = 0;
+	for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
+	     /*
+	      * don't dump tl data types we know aren't understood by
+	      * earlier revisions [krb5-admin/89]
+	      */
+	     switch (tlp->tl_data_type) {
+	     case KRB5_TL_KADM_DATA:
+		  skip++;
+		  break;
+	     default:
+		  counter++;
+		  break;
+	     }
+	}
+	
+	if (counter + skip == entry->n_tl_data) {
 	    /* Pound out header */
 	    fprintf(arg->ofile, "%d\t%d\t%d\t%d\t%d\t%s\t",
 		    (int) entry->len,
 		    strlen(name),
-		    (int) entry->n_tl_data,
+		    counter,
 		    (int) entry->n_key_data,
 		    (int) entry->e_length,
 		    name);
@@ -633,6 +646,9 @@ dump_k5beta6_iterator(ptr, entry)
 		    entry->fail_auth_count);
 	    /* Pound out tagged data. */
 	    for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
+		if (tlp->tl_data_type == KRB5_TL_KADM_DATA)
+		     continue; /* see above, [krb5-admin/89] */
+
 		fprintf(arg->ofile, "%d\t%d\t",
 			(int) tlp->tl_data_type,
 			(int) tlp->tl_data_length);
@@ -679,7 +695,8 @@ dump_k5beta6_iterator(ptr, entry)
 	}
 	else {
 	    fprintf(stderr, sdump_tl_inc_err,
-		    arg->programname, name, counter, (int) entry->n_tl_data);
+		    arg->programname, name, counter+skip,
+		    (int) entry->n_tl_data); 
 	    retval = EINVAL;
 	}
     }
@@ -1541,7 +1558,16 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop, pol_db)
 		    error++;
 		}
 
-		/* Get the tagged data */
+		/*
+		 * Get the tagged data.
+		 *
+		 * Really, this code ought to discard tl data types
+		 * that it knows are special to the current version
+		 * and were not supported in the previous version.
+		 * But it's a pain to implement that here, and doing
+		 * it at dump time has almost as good an effect, so
+		 * that's what I did.  [krb5-admin/89/
+		 */
 		if (!error && dbentry.n_tl_data) {
 		    for (tl = dbentry.tl_data; tl; tl = tl->tl_data_next) {
 			nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
