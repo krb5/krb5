@@ -93,7 +93,19 @@ krb5_fcc_next_cred(id, cursor, creds)
 	  ((krb5_fcc_data *) id->data)->fd = -1;
      }
 lose:
-     if (kret != KRB5_OK)
-	 krb5_free_creds(creds);
+     if (kret != KRB5_OK) {
+	 if (creds->client)
+	     krb5_free_principal(creds->client);
+	 if (creds->server)
+	     krb5_free_principal(creds->server);
+	 if (creds->keyblock.contents)
+	     xfree(creds->keyblock.contents);
+	 if (creds->ticket.data)
+	     xfree(creds->ticket.data);
+	 if (creds->second_ticket.data)
+	     xfree(creds->second_ticket.data);
+	 if (creds->addresses)
+	     krb5_free_address(creds->addresses);
+     }
      return kret;
 }
