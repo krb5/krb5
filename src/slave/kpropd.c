@@ -168,7 +168,8 @@ void do_standalone()
 {
 	struct	sockaddr_in	my_sin, frominet;
 	struct servent *sp;
-	int	finet, fromlen, s;
+	int	finet, s;
+	unsigned int fromlen;
 	int	ret;
 	
 	finet = socket(AF_INET, SOCK_STREAM, 0);
@@ -258,7 +259,8 @@ void doit(fd)
 	int	fd;
 {
 	struct sockaddr_in from;
-	int on = 1, fromlen;
+	int on = 1;
+	unsigned int fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
 	krb5_data confmsg;
@@ -533,7 +535,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     krb5_error_code	  retval;
     krb5_ticket		* ticket;
     struct sockaddr_in	  r_sin;
-    int			  sin_length;
+    unsigned int	  sin_length;
     krb5_keytab		  keytab = NULL;
 
     /*
@@ -704,7 +706,7 @@ recv_database(context, fd, database_fd, confmsg)
     int	database_fd;
     krb5_data *confmsg;
 {
-	int	database_size;
+	krb5_ui_4	database_size; /* This must be 4 bytes */
 	int	received_size, n;
 	char		buf[1024];
 	krb5_data	inbuf, outbuf;

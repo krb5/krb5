@@ -1,3 +1,8 @@
+Sat Oct 14 14:16:20 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpropd.c, kprop.c:  Ensure size of database sent OTW as 4 bytes
+	instead of sizeof(int). 
+
 2000-08-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* kprop.c, kpropd.c: Compiler warning fixes including: not

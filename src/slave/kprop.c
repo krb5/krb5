@@ -323,7 +323,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	struct hostent	*hp;
 	register struct servent *sp;
 	struct sockaddr_in my_sin;
-	int		socket_length;
+	unsigned int	socket_length;
 
 	hp = gethostbyname(host);
 	if (hp == NULL) {
@@ -532,20 +532,24 @@ close_database(context, fd)
  * will abort the entire operation.
  */
 void
-xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
+xmit_database(context, auth_context, my_creds, fd, database_fd, 
+	      in_database_size)
     krb5_context context;
     krb5_auth_context auth_context;
     krb5_creds *my_creds;
     int	fd;
     int	database_fd;
-    int	database_size;
+    int	in_database_size;
 {
-	krb5_int32	send_size, sent_size, n;
+	krb5_int32	sent_size, n;
 	krb5_data	inbuf, outbuf;
 	char		buf[KPROP_BUFSIZ];
 	krb5_error_code	retval;
 	krb5_error	*error;
-	
+	/* These must be 4 bytes */
+	krb5_ui_4	database_size = in_database_size; 
+	krb5_ui_4	send_size;
+
 	/*
 	 * Send over the size
 	 */
