@@ -65,6 +65,7 @@ char copyright[] =
 #else
 #include <varargs.h>
 #endif
+#include <sys/wait.h>
 
 #ifdef KERBEROS
 #include <krb5.h>

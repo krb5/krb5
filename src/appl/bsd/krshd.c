@@ -105,10 +105,13 @@ char copyright[] =
 #include <arpa/inet.h>
      
 #include <stdio.h>
+#include <grp.h>
 #include <errno.h>
 #include <pwd.h>
 #include <ctype.h>
 #include <string.h>
+#include <libpty.h>
+#include <sys/wait.h>
      
 #ifdef HAVE_SYS_LABEL_H
 /* only SunOS 4? */
@@ -254,8 +257,7 @@ void	error();
 void usage(void), getstr(int, char *, int, char *), 
     doit(int, struct sockaddr_in *);
 
-#ifdef __SCO__
-/* sco has getgroups and setgroups but no initgroups */
+#ifndef HAVE_INITGROUPS
 int initgroups(char* name, gid_t basegid) {
   gid_t others[NGROUPS_MAX+1];
   int ngrps;
@@ -606,7 +608,6 @@ void doit(f, fromp)
 #endif
     int valid_checksum;
     int cnt;
-    register char *p;
     char *crypt();
     struct passwd *pwd;
     char *path;

@@ -1,3 +1,12 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* krshd.c: Include <grp.h>, <libpty.h>, and <sys/wait.h> for
+	initgroups(), pty_logwtmp()/pty_make_sane_hostname(), and wait()
+	prototypes. For local initgroups definition, conditionalize on
+	HAVE_INITGROUPS and not __SCO__.
+
+	* krcp.c: Include <sys/wait.h> for wait()/waitpid() prototype.
+
 2001-06-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* krlogin.c: Always provide prototype for setsignal and not if
