@@ -1,3 +1,15 @@
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* dest_tkt.c (dest_tkt): Don't overflow buffer "shmidname".
+	* in_tkt.c (in_tkt): Don't overflow buffer "shmidname".
+	* kuserok.c (kuserok): Don't overflow buffer "pbuf".
+	* tf_util.c (tf_init): Don't overflow buffer "shmidname".
+	* win_store.c (krb__get_cnffile): Don't overflow buffers "defname"
+	and "cnfname".
+	(krb__get_realmsfile): Don't overflow buffers "defname" and
+	"realmsname".
+
 2000-04-28  Tom Yu  <tlyu@mit.edu>
 
 	* rd_req.c (krb_rd_req): Fix some uses of strcpy().

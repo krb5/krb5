@@ -62,15 +62,17 @@ krb__get_cnffile()
 	char defname[FILENAME_MAX];
 	UINT rc;
 
-	rc = GetWindowsDirectory(defname, sizeof(defname));
+	defname[sizeof(defname) - 1] = '\0';
+	rc = GetWindowsDirectory(defname, sizeof(defname) - 1);
 	assert(rc > 0);
 
-	strcat(defname, "\\");
+	strncat(defname, "\\", sizeof(defname) - 1 - strlen(defname));
 
-	strcat(defname, DEF_KRB_CONF);
+	strncat(defname, DEF_KRB_CONF, sizeof(defname) - 1 - strlen(defname));
 
+	cnfname[sizeof(cnfname) - 1] = '\0';
 	GetPrivateProfileString(INI_FILES, INI_KRB_CONF, defname,
-		cnfname, sizeof(cnfname), KERBEROS_INI);
+		cnfname, sizeof(cnfname) - 1, KERBEROS_INI);
 
 	cnffile = fopen(cnfname, "r");
 
@@ -94,15 +96,17 @@ krb__get_realmsfile()
 	char defname[FILENAME_MAX];
 	UINT rc;
 
-	rc = GetWindowsDirectory(defname, sizeof(defname));
+	defname[sizeof(defname) - 1] = '\0';
+	rc = GetWindowsDirectory(defname, sizeof(defname) - 1);
 	assert(rc > 0);
 
-	strcat(defname, "\\");
+	strncat(defname, "\\", sizeof(defname) - 1 - strlen(defname));
 
-	strcat(defname, DEF_KRB_REALMS);
+	strncat(defname, DEF_KRB_REALMS, sizeof(defname) - 1 - strlen(defname));
 
+	defname[sizeof(defname) - 1] = '\0';
 	GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
-		realmsname, sizeof(realmsname), KERBEROS_INI);
+		realmsname, sizeof(realmsname) - 1, KERBEROS_INI);
 
 	realmsfile = fopen(realmsname, "r");
 

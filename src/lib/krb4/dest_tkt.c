@@ -87,8 +87,9 @@ out:
     /* 
      * handle the shared memory case 
      */
-    (void) strcpy(shmidname, file);
-    (void) strcat(shmidname, ".shm");
+    (void) strncpy(shmidname, file, sizeof(shmidname) - 1);
+    shmidname[sizeof(shmidname) - 1] = '\0';
+    (void) strcat(shmidname, ".shm", sizeof(shmidname) - 1 - strlen(shmidname));
     if ((i = krb_shm_dest(shmidname)) != KSUCCESS)
 	return(i);
 #endif /* TKT_SHMEM */

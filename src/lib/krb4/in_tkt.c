@@ -159,8 +159,9 @@ in_tkt(pname,pinst)
     }
     (void) close(tktfile);
 #ifdef TKT_SHMEM
-    (void) strcpy(shmidname, file);
-    (void) strcat(shmidname, ".shm");
+    (void) strncpy(shmidname, file, sizeof(shmidname) - 1);
+    shmidname[sizeof(shmidname) - 1] = '\0';
+    (void) strncat(shmidname, ".shm", sizeof(shmidname) - 1 - strlen(shmidname));
     return(krb_shm_create(shmidname));
 #else /* !TKT_SHMEM */
     return(KSUCCESS);
