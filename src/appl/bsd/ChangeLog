@@ -1,3 +1,10 @@
+Fri Apr 12 23:38:25 1996  Richard Basch  <basch@lehman.com>
+
+	* krlogind.c (cleanup): Destroy any forwarded credentials at the
+	end of the login session (they were placed in an unusual location
+	anyway, so the chance that someone will be trying to reuse those
+	credentials is minimal)
+
 Thu Apr 11 00:22:51 1996  Richard Basch  <basch@lehman.com>
 
 	* kcmd.c: Cleaned up whitespace and removed commented & unused cruft
@@ -27,6 +34,11 @@ Mon Apr  1 10:12:44 1996  Richard Basch  <basch@lehman.com>
 	* loginpaths.h: Leading/trailing colons should not be there based
 	on the variable usage in the code.  Also, the tests for Solaris
 	were incorrect.
+
+Fri Mar 29 16:22:18 1996  Richard Basch  <basch@lehman.com>
+
+	* kcmd.c, krlogin.c, krsh.c, krcp.c:
+		Allow for a proxy forwarder to be specified
 
 Sat Mar 23 17:20:00 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 

@@ -994,8 +994,10 @@ protocol(f, p)
 
 krb5_sigtype cleanup()
 {
-pty_cleanup (line, pid, 1);
+    pty_cleanup (line, pid, 1);
     shutdown(netf, 2);
+    if (ccache)
+	krb5_cc_destroy(bsd_context, ccache);
     exit(1);
 }
 
