@@ -386,7 +386,7 @@ define(Krb5InstallHeaders,[
 divert(9)dnl
 install:: $1
 	@set -x; for f in $1 ; \
-	do [$](INSTALL) -c [$](INSTDATFLAGS) [$$]f $2/[$$]f ; \
+	do [$](INSTALL_DATA) [$$]f $2/[$$]f ; \
 	done
 divert(0)dnl
 ])dnl

@@ -39,7 +39,9 @@ depend:: includes
 
 
 install-mkdirs:
-	-mkdir $(INSTALLMKDIRS)
+	@for i in $(INSTALLMKDIRS); do \
+		if test -d $$i; then :; else (set -x; mkdir $$i); fi \
+	done
 
 # install::
 #	$(MAKE) $(MFLAGS) install.man
