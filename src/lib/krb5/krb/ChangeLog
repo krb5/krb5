@@ -1,3 +1,9 @@
+2000-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c (krb5_get_in_tkt): If enctypes are specified, send
+	the server the intersection of that list and the supported types,
+	in the order requested.
+
 2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_ctx.c (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
