@@ -10,6 +10,7 @@
 NormalLibraryObjectRule()
 
 OBJS=	addr_comp.o	\
+	addr_order.o	\
 	addr_srch.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
@@ -54,6 +55,7 @@ OBJS=	addr_comp.o	\
 	walk_rtree.o
 
 SRCS=	addr_comp.c	\
+	addr_order.c	\
 	addr_srch.c	\
 	copy_addrs.c	\
 	copy_auth.c	\
