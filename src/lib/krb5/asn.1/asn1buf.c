@@ -43,6 +43,7 @@
    asn1buf structure or be NULL.
 
    base points to a valid, allocated octet array or is NULL
+   bound, if non-NULL, points to the last valid octet
    next >= base
    next <= bound+2  (i.e. next should be able to step just past the bound,
                      but no further.  (The bound should move out in response
@@ -231,7 +232,7 @@ asn1_error_code asn1buf_remove_octetstring(buf, len, s)
 {
   int i;
 
-  if(buf->next + len - 1 > buf->bound) return ASN1_OVERRUN;
+  if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
   if (len == 0) {
       *s = 0;
       return 0;
@@ -252,7 +253,7 @@ asn1_error_code asn1buf_remove_charstring(buf, len, s)
 {
   int i;
 
-  if (buf->next + len - 1 > buf->bound) return ASN1_OVERRUN;
+  if (len > buf->bound + 1 - buf->next) return ASN1_OVERRUN;
   if (len == 0) {
       *s = 0;
       return 0;
@@ -407,7 +408,7 @@ asn1_error_code asn1buf_expand(buf, inc)
 #define STANDARD_INCREMENT 200
   int next_offset = buf->next - buf->base;
   int bound_offset;
-  if(buf->base == NULL) bound_offset = -1;
+  if (buf->base == NULL) bound_offset = -1;
   else bound_offset = buf->bound - buf->base;
 
   if (inc < STANDARD_INCREMENT)
@@ -418,7 +419,7 @@ asn1_error_code asn1buf_expand(buf, inc)
   else
     buf->base = realloc(buf->base,
 			(asn1buf_size(buf)+inc) * sizeof(asn1_octet));
-  if(buf->base == NULL) return ENOMEM;
+  if (buf->base == NULL) return ENOMEM;
   buf->bound = (buf->base) + bound_offset + inc;
   buf->next = (buf->base) + next_offset;
   return 0;
