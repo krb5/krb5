@@ -1,3 +1,8 @@
+2004-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (do_yarrow_init): Move mutex initialization here.
+	(krb5int_prng_init): Don't do it here.
+
 2004-11-15  Sam Hartman  <hartmans@mit.edu>
 
 	* t_prng.expected t_prng.reseedtest-expected :  Update expected

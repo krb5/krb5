@@ -63,13 +63,19 @@ int krb5int_prng_init(void)
     do_yarrow_init();
     if (init_error)
 	return KRB5_CRYPTO_INTERNAL;
-    return k5_mutex_finish_init(&yarrow_lock);
+    return 0;
 }
 
 static void do_yarrow_init(void)
 {
     unsigned i;
     int yerr;
+
+    yerr = k5_mutex_finish_init(&yarrow_lock);
+    if (yerr) {
+	init_error = yerr;
+	return;
+    }
 
     yerr = krb5int_yarrow_init (&y_ctx, NULL);
     if ((yerr != YARROW_OK) && (yerr != YARROW_NOT_SEEDED)) {
