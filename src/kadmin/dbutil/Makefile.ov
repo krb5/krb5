@@ -6,14 +6,14 @@ CFLAGS	+= -I$(TOP)/../include/kerberosIV
 PROG	= kdb5_util
 SRCS	= kdb5_util.c kdb5_util_ct.c dump.c ss_wrapper.c dumpv4.c loadv4.c \
 	kdb5_create.c kadm5_create.c string_table.c kdb5_stash.c \
-	kdb5_destroy.c
+	kdb5_destroy.c ovload.c strtok.c
 OBJS	= kdb5_util.o kdb5_util_ct.o dump.o dumpv4.o loadv4.o ss_wrapper.o \
 	kdb5_create.o kadm5_create.o string_table.o kdb5_stash.o \
-	kdb5_destroy.o
-ETABLES	= kdb5_util_ct.ct
+	kdb5_destroy.o ovload.o import_err.o strtok.o
+ETABLES	= import_err.et
 
-LIBS	= $(LIBADMSRV) $(LIBKDB5) $(LIBKRB5_ALL) $(LIBRPCLIB) $(LIBDYN) \
-	$(LIBSS) $(LIBDB)
+LIBS	= $(LIBADMSRV) $(LIBKDB5) $(LIBDES425) $(LIBKRB5_ALL) \
+	$(LIBRPCLIB) $(LIBDYN) $(LIBSS) $(LIBDB) $(NETLIB)
 
 expand NormalProgram
 expand ErrorTables

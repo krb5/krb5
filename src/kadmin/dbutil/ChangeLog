@@ -1,3 +1,8 @@
+Thu Aug  1 14:34:51 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* Makefile.in, Makefile.ov, configure.in, dump.c: add support for
+        dump/load of OV*Secure-compatible format.
+
 Wed Jul 31 14:55:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_stash.c (kdb5_stash): Declare optind.
