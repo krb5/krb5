@@ -1,3 +1,7 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
+
 2002-03-02  Sam Hartman  <hartmans@mit.edu>
 
 	* server_acl.c (acl_find_entry):  Patch from sxw@sxw.org.uk:

@@ -1,3 +1,7 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
+
 2001-11-07  Sam Hartman  <hartmans@mit.edu>
 
 	* client_init.c: Allow arcfour-hmac-md5 to be used for  kadmin

@@ -1,6 +1,7 @@
 2002-02-19  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile.in (LIBMINOR): Bump.
+	* Makefile.in (LIBMINOR): Bump due to change in internals.  (Tom's
+	change from 1.2.x branch.)
 
 2001-12-03  Sam Hartman  <hartmans@mit.edu>
 
