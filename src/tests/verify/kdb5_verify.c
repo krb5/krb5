@@ -106,7 +106,7 @@ char *argv[];
     register krb5_cryptosystem_entry *csentry;
     int num_to_check;
     char principal_string[BUFSIZ];
-    char *suffix;
+    char *suffix = 0;
     int depth, errors;
 
     krb5_init_ets();
@@ -158,7 +158,7 @@ char *argv[];
 	}
     }
 
-    if (!(num_to_check && principal_string[0])) usage(progname, 1);
+    if (!(num_to_check && suffix)) usage(progname, 1);
 
     if (!keytypedone)
 	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
