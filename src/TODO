@@ -3,9 +3,9 @@ Major projects:
 1.  Run a V5 KDC on the master KDC.
 	* audit code in v4 kadmind server
 DONE	* convert syslog -> log (to real file)
-	* save versus deletion of rcache file (HIGH PRIORITY)
-	* Use dbm as the default database. (HIGH PRIORITY)
-	* Solaris: KDC does not notice new databases.
+DONE	* save versus deletion of rcache file (HIGH PRIORITY)
+DONE	* Use dbm as the default database. (HIGH PRIORITY)
+DONE	* KDC does not notice new databases after new db loads (HIGH PRIORITY)
 
 2.  API changes
 DONE	* context changes (mostly done)
