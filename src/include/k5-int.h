@@ -1221,6 +1221,9 @@ krb5_error_code encode_krb5_kdc_req_body
 krb5_error_code encode_krb5_safe
 	(const krb5_safe *rep, krb5_data **code);
 
+krb5_error_code encode_krb5_safe_with_body
+	(const krb5_safe *rep, const krb5_data *body, krb5_data **code);
+
 krb5_error_code encode_krb5_priv
 	(const krb5_priv *rep, krb5_data **code);
 
@@ -1399,6 +1402,9 @@ krb5_error_code decode_krb5_kdc_req_body
 
 krb5_error_code decode_krb5_safe
 	(const krb5_data *output, krb5_safe **rep);
+
+krb5_error_code decode_krb5_safe_with_body
+	(const krb5_data *output, krb5_safe **rep, krb5_data *body);
 
 krb5_error_code decode_krb5_priv
 	(const krb5_data *output, krb5_priv **rep);

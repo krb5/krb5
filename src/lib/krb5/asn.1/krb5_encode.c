@@ -478,6 +478,43 @@ krb5_error_code encode_krb5_safe(const krb5_safe *rep, krb5_data **code)
   krb5_cleanup();
 }
 
+/*
+ * encode_krb5_safe_with_body
+ *
+ * Like encode_krb5_safe(), except takes a saved KRB-SAFE-BODY
+ * encoding to avoid problems with re-encoding.
+ */
+krb5_error_code encode_krb5_safe_with_body(
+  const krb5_safe *rep,
+  const krb5_data *body,
+  krb5_data **code)
+{
+  krb5_setup();
+
+  if (body == NULL) {
+      asn1buf_destroy(&buf);
+      return ASN1_MISSING_FIELD;
+  }
+
+  /* cksum[3]		Checksum */
+  krb5_addfield(rep->checksum,3,asn1_encode_checksum);
+
+  /* safe-body[2]	KRB-SAFE-BODY */
+  krb5_addfield(body,2,asn1_encode_krb_saved_safe_body);
+
+  /* msg-type[1]	INTEGER */
+  krb5_addfield(ASN1_KRB_SAFE,1,asn1_encode_integer);
+
+  /* pvno[0]		INTEGER */
+  krb5_addfield(KVNO,0,asn1_encode_integer);
+
+  /* KRB-SAFE ::= [APPLICATION 20] SEQUENCE */
+  krb5_makeseq();
+  krb5_apptag(20);
+
+  krb5_cleanup();
+}
+
 krb5_error_code encode_krb5_priv(const krb5_priv *rep, krb5_data **code)
 {
   krb5_setup();

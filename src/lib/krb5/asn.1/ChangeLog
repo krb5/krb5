@@ -1,3 +1,19 @@
+2003-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_k_encode.c (asn1_encode_krb_saved_safe_body): New function;
+	kludge to insert a raw pre-encoded KRB-SAFE-BODY.
+
+	* asn1_k_encode.h (asn1_encode_krb_saved_safe_body): Add
+	prototype.
+
+	* krb5_decode.c (decode_krb5_safe_with_body): New function; saves
+	a copy of the encoding of the KRB-SAFE-BODY to avoid problems
+	caused by re-encoding it during verification.
+
+	* krb5_encode.c (encode_krb5_safe_with_body): New function;
+	re-encode a KRB-SAFE using a saved KRB-SAFE-BODY encoding, to
+	avoid trouble with re-encoding a KRB-SAFE-BODY.
+
 2003-07-22  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* asn1_k_decode.c (asn1_decode_etype_info2_entry_1_3): Decoder for

@@ -266,4 +266,7 @@ asn1_error_code asn1_encode_predicted_sam_response
 	(asn1buf *buf, const krb5_predicted_sam_response *val, 
 		   unsigned int *retlen);
 
+asn1_error_code asn1_encode_krb_saved_safe_body
+	(asn1buf *buf, const krb5_data *body, unsigned int *retlen);
+
 #endif

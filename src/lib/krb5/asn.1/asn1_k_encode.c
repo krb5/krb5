@@ -942,3 +942,20 @@ asn1_error_code asn1_encode_predicted_sam_response(asn1buf *buf, const krb5_pred
 
   asn1_cleanup();
 }
+
+/*
+ * Do some ugliness to insert a raw pre-encoded KRB-SAFE-BODY.
+ */
+asn1_error_code asn1_encode_krb_saved_safe_body(asn1buf *buf, const krb5_data *body, unsigned int *retlen)
+{
+  asn1_error_code retval;
+
+  retval = asn1buf_insert_octetstring(buf, body->length,
+				      (krb5_octet *)body->data);
+  if (retval){
+    asn1buf_destroy(&buf);
+    return retval; 
+  }
+  *retlen = body->length;
+  return 0;
+}
