@@ -76,7 +76,8 @@ Notes, Major Changes, and Known Bugs
   service keys at the moment, due to a large number of compatibility
   issues.  For example, the GSSAPI library has some (buggy) support
   for a triple DES session key, but it is intentionally disabled.
-  More here later.
+  ** Do not use triple-DES in your config files except as described in
+  ** the documentation.
 
 * The lib/rpc tests do not appear to work under NetBSD-1.4, for
   reasons that are not completely clear at the moment, but probably
