@@ -1,5 +1,7 @@
 Thu Feb 18 18:34:23 1999  Tom Yu  <tlyu@mit.edu>
 
+	* configure.in: Add check for setluid() in libsecurity.
+
 	* ftpd.c (login): Add call to setluid() if necessary.
 
 Fri Feb 12 21:16:26 1999  Tom Yu  <tlyu@mit.edu>

@@ -47,6 +47,14 @@ AC_DEFINE(HAVE_SHADOW)
 fi
 dnl
 dnl
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID)
+		LIBS="$LIBS -lsecurity"
+	)
+	;;
+esac
 USE_ANAME
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB
