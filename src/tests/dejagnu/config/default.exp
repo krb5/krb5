@@ -1445,6 +1445,12 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    return 0
 	}
+	eof {
+	    perror "eof from rlogin $hostname -l root"
+	    stop_root_shell
+	    catch "expect_after"
+	    return 0
+	}
     }
 
     expect_after {
