@@ -483,7 +483,9 @@ static Tcl_DString *unparse_tl_data(krb5_tl_data *tl_data, int n_tl_data)
 	  Tcl_DStringAppendElement(str, buf);
 	  sprintf(buf, "%d", tl_data->tl_data_length);
 	  Tcl_DStringAppendElement(str, buf);
-	  Tcl_DStringAppendElement(str, tl_data->tl_data_contents);
+	  Tcl_DStringAppend(str, " ", 1);
+	  Tcl_DStringAppend(str, tl_data->tl_data_contents,
+			    tl_data->tl_data_length);
 	  Tcl_DStringEndSublist(str);
      }
      Tcl_DStringEndSublist(str);
@@ -1130,7 +1132,8 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
 	  fprintf(stderr, "Out of memory!\n");
 	  exit(1); /* XXX */
      }
-  
+     memset(princ, 0, sizeof(*princ));
+     
      if ((krb5_ret = krb5_parse_name(context, argv[0], &princ->principal)) != 0) {
 	  stash_error(interp, krb5_ret);
 	  Tcl_AppendElement(interp, "while parsing principal");
