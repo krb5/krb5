@@ -959,7 +959,7 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 		      &name_len, &mod_name_len, &key_len,
 		      &alt_key_len, &salt_len, &alt_salt_len);
     if (nmatched == 6) {
-	pkey->key_data_length[0] = key_len;
+        pkey->key_data_length[0] = key_len;
 	akey->key_data_length[0] = alt_key_len;
 	pkey->key_data_length[1] = salt_len;
 	akey->key_data_length[1] = alt_salt_len;
@@ -1137,15 +1137,20 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 			    int one = 1;
 
 			    dbent.len = KRB5_KDB_V1_BASE_LENGTH;
-			    pkey->key_data_ver = (pkey->key_data_length[1]) ?
+			    pkey->key_data_ver = (pkey->key_data_type[1] || pkey->key_data_length[1]) ?
 				2 : 1;
-			    akey->key_data_ver = (akey->key_data_length[1]) ?
+			    akey->key_data_ver = (akey->key_data_type[1] || akey->key_data_length[1]) ?
 				2 : 1;
 			    if ((pkey->key_data_type[0] ==
 				 akey->key_data_type[0]) &&
 				(pkey->key_data_type[1] ==
 				 akey->key_data_type[1]))
 				dbent.n_key_data--;
+			    else if ((akey->key_data_type[0] == 0)
+				     && (akey->key_data_length[0] == 0)
+				     && (akey->key_data_type[1] == 0)
+				     && (akey->key_data_length[1] == 0))
+			        dbent.n_key_data--;
 			    if ((kret = krb5_db_put_principal(kcontext,
 							      &dbent,
 							      &one)) ||
