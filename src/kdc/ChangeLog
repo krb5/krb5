@@ -1,3 +1,7 @@
+2002-10-27  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (add_to_transited): Don't include trailing null in transited encoding length; doing so breaks using codee
+
 2002-10-05  Tom Yu  <tlyu@mit.edu>
 
 	* do_as_req.c (process_as_req): Apply fix from Kevin Coffman to
