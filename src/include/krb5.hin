@@ -167,7 +167,7 @@ typedef char FAR * krb5_pointer;
 typedef char krb5_const FAR * krb5_const_pointer;
 #endif
 
-#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
+#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
 #define KRB5_PROTOTYPE(x) x
 #if defined(__STDC__) || defined(HAVE_STDARG_H) || defined(_WINDOWS)
 #define	KRB5_STDARG_P(x) x
@@ -179,7 +179,13 @@ typedef char krb5_const FAR * krb5_const_pointer;
 #define KRB5_STDARG_P(x) ()
 #endif /* STDC or PROTOTYPES */
 
-#ifdef NO_NESTED_PROTOTYPES
+/*
+ * This gross compiler dependency is in here because the stock Ultrix
+ * compiler defines __STDC__ but doesn't deal with nested prototypes
+ * properly.  The reason this isn't tested for is so that this header
+ * is actually useful when installed.
+ */
+#if defined(KRB5_NO_NESTED_PROTOTYPES) || (defined(__ultrix) && !defined(__GNUC__))
 #define	KRB5_NPROTOTYPE(x) ()
 #else
 #define	KRB5_NPROTOTYPE(x) KRB5_PROTOTYPE(x)

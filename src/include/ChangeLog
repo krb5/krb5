@@ -1,3 +1,11 @@
+Thu Jun 22 16:03:07 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
+	* krb5.hin: special-case ultrix brokenness, reverse sense of
+		KRB5_PROVIDE_PROTOTYPES (becomes KRB5_NO_PROTOTYPES);
+		also, NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES
+	* Makefile.in: don't install NO_NESTED_PROTOTYPES, HAS_VOID_TYPE,
+		and KRB5_PROVIDE_PROTOTYPES symbols into krb5.h
 
 Thu Jun 22 11:51:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Add pointer in krb5_context for database context.
