@@ -1,3 +1,9 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c (krb5_enctypes_list): Fill in required_ctype field.
+	* mandatory_sumtype.c: New file.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Build it.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* block_size.c (krb5_c_block_size): Read new numeric fields for

@@ -1,3 +1,21 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_AUTH_CONTEXT_USE_SUBKEY): New macro.
+
+	* k5-int.h (struct krb5_keytypes): Added field required_ctype.
+	(krb5int_c_mandatory_cksumtype): New declaration.
+	(krb5int_generate_and_set_subkey): Declare.
+	(memset) [__GNUC__ && __GLIBC__]: Undef, to reduce compilation
+	warnings in zap() macro with volatile pointer.
+
+	* k5-platform.h: New header file.  Manages inline-function and
+	64-bit support, in platform-specific ways.
+	* fake-addrinfo.h: Include k5-platform.h.
+	(inline): Don't define here.
+	* k5-int.h: Include k5-platform.h.
+	(krb5_ui_8, krb5_int64): New typedefs.
+	(krb5_ser_pack_int64, krb5_ser_unpack_int64): New function decls.
+
 2003-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Add prototypes for decode_krb5_safe_with_body and

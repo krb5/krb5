@@ -54,6 +54,7 @@ STLIBOBJS=\
 	keyed_checksum_types.o	\
 	make_checksum.o		\
 	make_random_key.o	\
+	mandatory_sumtype.o	\
 	nfold.o			\
 	old_api_glue.o		\
 	pbkdf2.o		\
@@ -86,6 +87,7 @@ OBJS=\
 	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
 	$(OUTPRE)make_checksum.$(OBJEXT)	\
 	$(OUTPRE)make_random_key.$(OBJEXT)	\
+	$(OUTPRE)mandatory_sumtype.$(OBJEXT)	\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
 	$(OUTPRE)pbkdf2.$(OBJEXT)		\
@@ -118,6 +120,7 @@ SRCS=\
 	$(srcdir)/keyed_checksum_types.c\
 	$(srcdir)/make_checksum.c	\
 	$(srcdir)/make_random_key.c	\
+	$(srcdir)/mandatory_sumtype.c	\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/pbkdf2.c	\
