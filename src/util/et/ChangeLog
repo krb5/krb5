@@ -1,3 +1,6 @@
+Thu Jun 22 16:14:25 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* error_table.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
 
 Fri Jun 23 10:50:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change "./done" and "done" to DONE.  Shared library
@@ -8,8 +11,6 @@ Thu Jun 22 13:06:47 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 	* Makefile.in Changed libcom_err.a to libcom_err.$(STEXT), removed rule to clean it up on Unix as aclocal.m4 already inserts the rule.  If this breaks on Macs, please let me know how I should do this in the future.
 
 	* configure.in: Changed to make libcom_err as a shared library.
-
-
 
 Fri Jun  9 19:00:05 1995    <tytso@rsx-11.mit.edu>
 
