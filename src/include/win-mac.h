@@ -259,6 +259,7 @@ typedef unsigned long size_t;
  */
 
 /* there is no <stat.h> for mpw */
+#ifndef __MWERKS__
 typedef unsigned long	mode_t;
 typedef unsigned long	ino_t;
 typedef unsigned long	dev_t;
@@ -267,7 +268,6 @@ typedef unsigned long	uid_t;
 typedef unsigned long	gid_t;
 typedef long			off_t;
 
-#ifndef __MWERKS__
 struct stat
 {
 	mode_t		st_mode;	/* File mode; see #define's below */
