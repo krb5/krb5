@@ -23,11 +23,7 @@
  * Dispatch an incoming packet.
  */
 
-
-#include <krb5/copyright.h>
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/kdb.h>
+#include "k5-int.h"
 #include <syslog.h>
 #include "kdc_util.h"
 #include "extern.h"

@@ -23,8 +23,6 @@
  * Declarations for policy.c
  */
 
-#include <krb5/copyright.h>
-
 #ifndef __KRB5_KDC_UTIL__
 #define __KRB5_KDC_UTIL__
 

@@ -24,17 +24,10 @@
  * Utility functions for the KDC implementation.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/asn1.h>
-
+#include "k5-int.h"
 #include "kdc_util.h"
 #include "extern.h"
-
-#include <krb5/ext-proto.h>
 #include <stdio.h>
-
 #include <syslog.h>
 
 /*

@@ -23,13 +23,7 @@
  * Policy decision routines for KDC.
  */
 
-
-#include <krb5/copyright.h>
-
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-
+#include "k5-int.h"
 #include "kdc_util.h"
 
 int

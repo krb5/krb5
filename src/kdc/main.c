@@ -23,30 +23,18 @@
  * Main procedure body for the KDC server process.
  */
 
-
 #include <stdio.h>
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
 
-#include <com_err.h>
+#include "com_err.h"
 /* for STDC, com_err gets varargs/stdarg */
 #ifndef __STDC__
 #include <varargs.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-
-#include <krb5/config.h>
-#ifdef PROVIDE_DES_CBC_CRC
-#include <krb5/mit-des.h>
-#endif
-
+#include "k5-int.h"
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"

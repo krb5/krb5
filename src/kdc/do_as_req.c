@@ -24,16 +24,8 @@
  * KDC Routines to deal with AS_REQ's
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/preauth.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
-#include <krb5/osconf.h>
-#include <com_err.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
+#include "com_err.h"
 
 #include <syslog.h>
 #ifdef KRB5_USE_INET

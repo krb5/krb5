@@ -23,14 +23,8 @@
  * Network code for Kerberos v5 KDC.
  */
 
-
-#include <krb5/copyright.h>
-#include <krb5/osconf.h>
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/kdb.h>
-#include <com_err.h>
+#include "k5-int.h"
+#include "com_err.h"
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"

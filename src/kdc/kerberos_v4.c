@@ -25,8 +25,7 @@
 
 #ifdef KRB4
 
-#include <krb5/config.h>
-#include <krb5/sysincl.h>
+#include "k5-int.h"
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
@@ -385,15 +384,7 @@ main(argc, argv)
 /*
  * v5 include files:
  */
-#include <krb5/krb5.h>
-#include <krb5/base-defs.h>
-#include <krb5/encryption.h>
-#include <krb5/wordsize.h>
-#include <krb5/mit-des.h>
-#include <krb5/kdb.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <com_err.h>
+#include "com_err.h"
 #include "extern.h"		/* to pick up master_princ */
 
 static krb5_error_code retval; 

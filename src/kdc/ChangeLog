@@ -1,3 +1,7 @@
+Tue Feb 28 02:27:11 1995  John Gilmore  (gnu at toad.com)
+
+	* *.[ch]:  Avoid <krb5/...> and <com_err.h> includes.
+
 Fri Feb 10 14:35:42 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* do_tgs_req.c (process_tgs_req): krb5_use_keytype() was being

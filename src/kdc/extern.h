@@ -23,8 +23,6 @@
  * <<< Description >>>
  */
 
-#include <krb5/copyright.h>
-
 #ifndef __KRB5_KDC_EXTERN__
 #define __KRB5_KDC_EXTERN__
 
