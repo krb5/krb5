@@ -109,14 +109,14 @@ clean_scratch:
 static krb5_error_code
 krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,                 
 		    replaydata, local_addr, remote_addr, pcred)
-    krb5_context 	  context;
-    krb5_creds 	       ** ppcreds;
-    krb5_int32 		  nppcreds;
-    krb5_keyblock 	* keyblock;
-    krb5_replay_data    * replaydata;
-    krb5_address  	* local_addr;
-    krb5_address  	* remote_addr;
-    krb5_cred 		* pcred;
+    krb5_context 	context;
+    krb5_creds 	        FAR * FAR * ppcreds;
+    krb5_int32 		nppcreds;
+    krb5_keyblock 	FAR * keyblock;
+    krb5_replay_data    FAR * replaydata;
+    krb5_address  	FAR * local_addr;
+    krb5_address  	FAR * remote_addr;
+    krb5_cred 		FAR * pcred;
 {
     krb5_cred_enc_part 	  credenc;
     krb5_error_code	  retval;
@@ -135,8 +135,8 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
     credenc.timestamp = replaydata->timestamp;
 
     /* Get memory for creds and initialize it */
-    size = sizeof(krb5_cred_info *) * (nppcreds + 1);
-    credenc.ticket_info = (krb5_cred_info **) malloc(size);
+    size = sizeof(krb5_cred_info FAR *) * (nppcreds + 1);
+    credenc.ticket_info = (krb5_cred_info FAR * FAR *) malloc(size);
     if (credenc.ticket_info == NULL)
 	return ENOMEM;
     memset(credenc.ticket_info, 0, size);
@@ -207,15 +207,15 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     krb5_data 	       FAR * FAR * ppdata;
     krb5_replay_data  	FAR * outdata;
 {
-    krb5_address * premote_fulladdr = NULL;
-    krb5_address * plocal_fulladdr = NULL;
+    krb5_address FAR * premote_fulladdr = NULL;
+    krb5_address FAR * plocal_fulladdr = NULL;
     krb5_address remote_fulladdr;
     krb5_address local_fulladdr;
-    krb5_error_code 	  retval;
-    krb5_keyblock	* keyblock;
-    krb5_replay_data      replaydata;
-    krb5_cred 		* pcred;
-    int			  ncred;
+    krb5_error_code 	retval;
+    krb5_keyblock	FAR * keyblock;
+    krb5_replay_data    replaydata;
+    krb5_cred 		FAR * pcred;
+    krb5_int32		ncred;
 
     local_fulladdr.contents = 0;
     remote_fulladdr.contents = 0;
@@ -235,11 +235,11 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     memset(pcred, 0, sizeof(krb5_cred));
 
     if ((pcred->tickets 
-      = (krb5_ticket **)malloc(sizeof(krb5_ticket *) * (ncred + 1))) == NULL) {
+      = (krb5_ticket FAR * FAR *)malloc(sizeof(krb5_ticket FAR *) * (ncred + 1))) == NULL) {
 	retval = ENOMEM;
 	free(pcred);
     }
-    memset(pcred->tickets, 0, sizeof(krb5_ticket *) * (ncred +1));
+    memset(pcred->tickets, 0, sizeof(krb5_ticket FAR *) * (ncred +1));
 
     /* Get keyblock */
     if ((keyblock = auth_context->local_subkey) == NULL) 
@@ -355,9 +355,9 @@ krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     krb5_replay_data  	FAR * outdata;
 {
     krb5_error_code retval;
-    krb5_creds **ppcreds;
+    krb5_creds FAR * FAR *ppcreds;
 
-    if ((ppcreds = (krb5_creds **)malloc(sizeof(*ppcreds) * 2)) == NULL) {
+    if ((ppcreds = (krb5_creds FAR * FAR *)malloc(sizeof(*ppcreds) * 2)) == NULL) {
 	return ENOMEM;
     }
 

@@ -60,8 +60,8 @@ krb5_sendauth(context, auth_context,
 {
 	krb5_octet		result;
 	krb5_creds 		creds;
-	krb5_creds * 		credsp = NULL;
-	krb5_creds * 		credspout = NULL;
+	krb5_creds		FAR * credsp = NULL;
+	krb5_creds		FAR * credspout = NULL;
 	krb5_error_code		retval = 0;
 	krb5_data		inbuf, outbuf;
 	int			len;
@@ -218,7 +218,7 @@ krb5_sendauth(context, auth_context,
 
 error_return:
     krb5_free_cred_contents(context, &creds);
-    if (credspout)
+    if (!out_creds && credspout)
 	krb5_free_creds(context, credspout); 
     if (!ccache && use_ccache)
 	krb5_cc_close(context, use_ccache);

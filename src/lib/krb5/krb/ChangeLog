@@ -1,3 +1,15 @@
+Fri Feb  7 09:41:33 1997  Richard Basch  <basch@lehman.com>
+
+	* mk_cred.c (krb5_mk_ncred): Declare ncred as krb5_int32 so that
+		the right value is pushed onto the stack when calling
+		krb5_mk_ncred_basic()
+
+	* copy_addrs.c fwd_tgt.c mk_cred.c:
+		Use FAR keyword in pointer declarations.
+
+	* sendauth.c (krb5_sendauth): Do not free the credentials if they
+		are being returned to the caller [krb5-libs/357]
+
 Sun Feb  2 20:57:15 1997  Richard Basch  <basch@lehman.com>
 
 	* serialize.c: Added FAR declarations to pointer arguments for

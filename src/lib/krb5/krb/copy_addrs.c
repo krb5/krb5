@@ -32,9 +32,9 @@ krb5_copy_addr(context, inad, outad)
     const krb5_address FAR *inad;
     krb5_address FAR * FAR *outad;
 {
-    krb5_address *tmpad;
+    krb5_address FAR *tmpad;
 
-    if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
+    if (!(tmpad = (krb5_address FAR *)malloc(sizeof(*tmpad))))
 	return ENOMEM;
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tmpad = *inad;
