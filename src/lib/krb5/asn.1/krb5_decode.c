@@ -23,7 +23,7 @@
 
 #include "krb5_decode.h"
 #include "krbasn1.h"
-#include "asn1_decode_k.h"
+#include "asn1_k_decode.h"
 #include "asn1_decode.h"
 #include "asn1_get.h"
 

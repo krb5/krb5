@@ -1,5 +1,5 @@
 /*
- * src/lib/krb5/asn.1/asn1_encode_k.h
+ * src/lib/krb5/asn.1/asn1_k_encode.h
  * 
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

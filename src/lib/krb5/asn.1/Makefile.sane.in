@@ -24,26 +24,26 @@ EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 
 SRCS= \
 	$(srcdir)asn1_decode.c\
-	$(srcdir)asn1_decode_k.c\
-	$(srcdir)asn1_encode.c\
+	$(srcdir)asn1_k_decode.c\
+	$(srcdir)asn1_ncode.c\
 	$(srcdir)asn1_get.c\
 	$(srcdir)asn1_make.c\
 	$(srcdir)asn1buf.c\
 	$(srcdir)krb5_decode.c\
 	$(srcdir)krb5_encode.c\
-	$(srcdir)asn1_encode_k.c\
+	$(srcdir)asn1_k_encode.c\
 	$(srcdir)asn1_misc.c
 
 OBJS= \
 	asn1_decode.o\
-	asn1_decode_k.o\
+	asn1_k_decode.o\
 	asn1_encode.o\
 	asn1_get.o\
 	asn1_make.o\
 	asn1buf.o\
 	krb5_decode.o\
 	krb5_encode.o\
-	asn1_encode_k.o\
+	asn1_k_encode.o\
 	asn1_misc.o
 
 all:: includes

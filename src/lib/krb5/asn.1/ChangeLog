@@ -1,3 +1,12 @@
+Fri Feb  3 01:02:43 1995  John Gilmore  <gnu@cygnus.com>
+
+	* asn1_decode_k.c => asn1_k_decode.c
+	* asn1_decode_k.h => asn1_k_decode.h
+	* asn1_encode_k.c => asn1_k_encode.c
+	* asn1_encode_k.h => asn1_k_encode.h
+	* Makefile.sane.in, krb5_decode.c, krb5_encode.c,
+	asn1_k_encode.c, asn1_k_decode.c:  updated to match.
+
 Fri Nov 18 16:24:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_decode.c (decode_krb5_encryption_key): Add magic number to

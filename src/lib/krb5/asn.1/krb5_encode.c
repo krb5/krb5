@@ -22,7 +22,7 @@
  */
 
 #include "krb5_encode.h"
-#include "asn1_encode_k.h"
+#include "asn1_k_encode.h"
 #include "asn1_encode.h"
 #include "krbasn1.h"
 #include "asn1buf.h"

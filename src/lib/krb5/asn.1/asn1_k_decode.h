@@ -1,5 +1,5 @@
 /*
- * src/lib/krb5/asn.1/asn1_decode_k.h
+ * src/lib/krb5/asn.1/asn1_k_decode.h
  * 
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
