@@ -47,6 +47,7 @@
  */
 
 #include "k5-int.h"
+#include <ctype.h>
 
 /* Salt type conversions */
 
@@ -184,6 +185,10 @@ krb5_string_to_timestamp(string, timestampp)
 	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
 	if ((s = strptime(string, atime_format_table[i], &timebuf))
 	    && (s != string)) {
+ 	    /* See if at end of buffer - otherwise partial processing */
+	    while(*s != 0 && isspace((int) *s)) s++;
+	    if (*s != 0)
+	        continue;
 	    if (timebuf.tm_year <= 0)
 		continue;	/* clearly confused */
 	    ret_time = mktime(&timebuf);

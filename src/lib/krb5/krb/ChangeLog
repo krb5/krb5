@@ -1,3 +1,15 @@
+2001-02-15  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_deltat.c (main): Test of overflow and underflow of krb5_int32. 
+
+	* x-deltat.y: Test for over/underflow of krb5_int32 for a
+	krb5_deltat. Return EINVAL. [krb5-libs/922]
+
+	* deltat.c: Regenerated from x-deltat.y
+
+	* str_conv.c (krb5_string_to_timestamp): Do not accept a time
+	format that only partially matches the input string. [krb5-lib/922]
+
 2001-01-30  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c (krb5_obtain_padata): Don't dereference a NULL pointer

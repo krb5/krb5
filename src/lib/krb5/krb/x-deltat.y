@@ -42,15 +42,70 @@
 #include "k5-int.h"
 
 struct param {
-    krb5_deltat delta;
+    krb5_int32 delta;
     char *p;
 };
 
 #define YYPARSE_PARAM tmv
 
+#define MAX_TIME KRB5_INT32_MAX
+#define MIN_TIME KRB5_INT32_MIN
+
+#define DAY (24 * 3600)
+#define HOUR 3600
+
+#define MAX_DAY (MAX_TIME / DAY)
+#define MIN_DAY (MIN_TIME / DAY)
+#define MAX_HOUR (MAX_TIME / HOUR)
+#define MIN_HOUR (MIN_TIME / HOUR)
+#define MAX_MIN (MAX_TIME / 60)
+#define MIN_MIN (MIN_TIME / 60)
+
+/* An explanation of the tests being performed. 
+   We do not want to overflow a 32 bit integer with out manipulations, 
+   even for testing for overflow. Therefore we rely on the following:
+
+   The lex parser will not return a number > MAX_TIME (which is out 32
+   bit limit).
+
+   Therefore, seconds (s) will require 
+       MIN_TIME < s < MAX_TIME
+
+   For subsequent tests, the logic is as follows:
+
+      If A < MAX_TIME and  B < MAX_TIME
+
+      If we want to test if A+B < MAX_TIME, there are two cases
+        if (A > 0) 
+         then A + B < MAX_TIME if B < MAX_TIME - A
+	else A + B < MAX_TIME  always.
+
+      if we want to test if MIN_TIME < A + B
+          if A > 0 - then nothing to test
+          otherwise, we test if MIN_TIME - A < B.
+
+   We of course are testing for:
+          MIN_TIME < A + B < MAX_TIME
+*/
+
+
+#define DAY_NOT_OK(d) (d) > MAX_DAY || (d) < MIN_DAY
+#define HOUR_NOT_OK(h) (h) > MAX_HOUR || (h) < MIN_HOUR
+#define MIN_NOT_OK(m) (m) > MAX_MIN || (m) < MIN_MIN
+#define SUM_OK(a, b) (((a) > 0) ? ( (b) <= MAX_TIME - (a)) : (MIN_TIME - (a) <= (b)))
+#define DO_SUM(res, a, b) if (!SUM_OK((a), (b))) YYERROR; \
+                          res = (a) + (b)
+
+
+#define OUT_D ((struct param *)tmv)->delta 
 #define DO(D,H,M,S) \
  { \
-     ((struct param *)tmv)->delta = (((D * 24) + H) * 60 + M) * 60 + S; \
+     /* Overflow testing - this does not handle negative values well.. */ \
+     if (DAY_NOT_OK(D) || HOUR_NOT_OK(H) || MIN_NOT_OK(M)) YYERROR; \
+     OUT_D = D * DAY; \
+     DO_SUM(OUT_D, OUT_D, H * HOUR); \
+     DO_SUM(OUT_D, OUT_D, M * 60); \
+     DO_SUM(OUT_D, OUT_D, S); \
  }
 
 static int mylex (int *, char **);
@@ -69,7 +124,7 @@ static int yyparse (void *);
 
 %union { int val; }
 
-%token <val> NUM LONGNUM
+%token <val> NUM LONGNUM OVERFLOW
 %token '-' ':' 'd' 'h' 'm' 's' WS
 
 %type <val> num opt_hms opt_ms opt_s wsnum posnum
@@ -78,35 +133,38 @@ static int yyparse (void *);
 
 %%
 
-start: deltat ;
+start: deltat;
 posnum: NUM | LONGNUM ;
 num: posnum | '-' posnum { $$ = - $2; } ;
 ws: /* nothing */ | WS ;
-wsnum: ws num { $$ = $2; };
+wsnum: ws num { $$ = $2; }
+        | ws OVERFLOW { YYERROR };
 deltat:
-	  wsnum 'd' opt_hms			{ DO ($1,  0,  0, $3); }
-	| wsnum 'h' opt_ms			{ DO ( 0, $1,  0, $3); }
-	| wsnum 'm' opt_s			{ DO ( 0,  0, $1, $3); }
-	| wsnum 's'				{ DO ( 0,  0,  0, $1); }
-	| wsnum '-' NUM ':' NUM ':' NUM		{ DO ($1, $3, $5, $7); }
-	| wsnum ':' NUM ':' NUM			{ DO ( 0, $1, $3, $5); }
-	| wsnum ':' NUM				{ DO ( 0, $1, $3,  0); }
+	  wsnum 'd' opt_hms		{ DO ($1,  0,  0, $3); }
+	| wsnum 'h' opt_ms		{ DO ( 0, $1,  0, $3); }
+	| wsnum 'm' opt_s		{ DO ( 0,  0, $1, $3); }
+	| wsnum 's'			{ DO ( 0,  0,  0, $1); }
+	| wsnum '-' NUM ':' NUM ':' NUM	{ DO ($1, $3, $5, $7); }
+	| wsnum ':' NUM ':' NUM		{ DO ( 0, $1, $3, $5); }
+	| wsnum ':' NUM			{ DO ( 0, $1, $3,  0); }
 	;
 
 opt_hms:
 	  opt_ms
-	| wsnum 'h' opt_ms			{ $$ = $1 * 3600 + $3; };
+	  | wsnum 'h' opt_ms		{ if (HOUR_NOT_OK($1)) YYERROR;
+	                                  DO_SUM($$, $1 * 3600, $3); }; 
 opt_ms:
 	  opt_s
-	| wsnum 'm' opt_s			{ $$ = $1 * 60 + $3; };
+	| wsnum 'm' opt_s		{ if (MIN_NOT_OK($1)) YYERROR;
+	                                  DO_SUM($$, $1 * 60, $3); }; 
 opt_s:
-	  ws					{ $$ = 0; }
+	  ws				{ $$ = 0; }
 	| wsnum 's' ;
 
 %%
 
 static int
-mylex (int *intp, char **pp)
+mylex (krb5_int32 *intp, char **pp)
 {
     int num, c;
 #define P (*pp)
@@ -136,8 +194,12 @@ mylex (int *intp, char **pp)
     case '9':
 	/* XXX assumes ASCII */
 	num = c - '0';
-	while (isdigit (*P)) {
+	while (isdigit ((int) *P)) {
+	  if (num > MAX_TIME / 10) 
+	    return OVERFLOW;
 	    num *= 10;
+	    if (num > MAX_TIME - (*P - '0')) 
+	      return OVERFLOW;
 	    num += *P++ - '0';
 	}
 	*intp = num;
@@ -145,7 +207,7 @@ mylex (int *intp, char **pp)
     case ' ':
     case '\t':
     case '\n':
-	while (isspace (*P))
+	while (isspace ((int) *P))
 	    P++;
 	return WS;
     default:
