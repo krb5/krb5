@@ -607,11 +607,18 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
     /* Get the value for the supported enctype/salttype matrix */
     hierarchy[2] = "supported_enctypes";
     if (params_in->mask & KADM5_CONFIG_ENCTYPES) {
-	 params.keysalts = copy_key_salt_tuple(params_in->keysalts, 
-					       params_in->num_keysalts);
-	 if(params.keysalts) {
-	     params.mask |= KADM5_CONFIG_ENCTYPES;
-	     params.num_keysalts = params_in->num_keysalts;
+         /* The following scenario is when the input keysalts are !NULL */
+         if(params_in->keysalts) {
+	       params.keysalts = copy_key_salt_tuple(params_in->keysalts, 
+						     params_in->num_keysalts);
+	       if(params.keysalts) {
+		 params.mask |= KADM5_CONFIG_ENCTYPES;
+		 params.num_keysalts = params_in->num_keysalts;
+	       }
+	 } else {
+		 params.mask |= KADM5_CONFIG_ENCTYPES;
+		 params.keysalts = 0;
+		 params.num_keysalts = params_in->num_keysalts;
 	 }
     } else {
 	 svalue = NULL;
