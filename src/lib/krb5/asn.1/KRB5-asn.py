@@ -195,7 +195,9 @@ TGS-REQ ::= [APPLICATION 12] SEQUENCE {
 -- the preceding two sequences MUST be the same except for the
 -- APPLICATION identifier
 
-KDC-REP ::= [APPLICATION 1] SEQUENCE {
+-- the following two sequences MUST be the same except for the
+-- APPLICATION identifier
+AS-REP ::= [APPLICATION 11] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER, -- MessageType
 	crealm[2]			Realm,
@@ -203,6 +205,16 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 	ticket[4]			Ticket,		-- Ticket
 	enc-part[5]			EncryptedData	-- EncKDCRepPart
 }
+TGS-REP ::= [APPLICATION 13] SEQUENCE {
+	pvno[0]				INTEGER,
+	msg-type[1]			INTEGER, -- MessageType
+	crealm[2]			Realm,
+	cname[3]			PrincipalName,
+	ticket[4]			Ticket,		-- Ticket
+	enc-part[5]			EncryptedData	-- EncKDCRepPart
+}
+-- the preceding two sequences MUST be the same except for the
+-- APPLICATION identifier
 
 -- the following two sequences MUST be the same except for the
 -- APPLICATION identifier
