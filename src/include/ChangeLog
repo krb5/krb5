@@ -1,3 +1,8 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_C_CONST instead of AC_CONST and
+	AC_CHECK_HEADER instead of AC_HEADER_CHECK.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-int.h: krb5_alt_method, krb5_etype_info_entry length fields
