@@ -57,7 +57,7 @@
                     $(TOP)/asn.1/libasn1.a \
                     $(TOP)/lib/free/libkfree.a
 
-             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err $(TOP)/lib/syslog.o
+             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err $(TOP)/lib/libsyslog.a
            KDBLIB = $(TOP)/lib/kdb/libkdb.a
 
 #ifdef UseInstalled
