@@ -33,6 +33,7 @@ s;/[^ ]*/tclDecls\.h ;;g
 s;/[^ ]*/tclPlatDecls\.h ;;g
 
 # delete system-specific or compiler-specific files from list
+s;/os/usr/include/[^ ]* ;;g
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 

@@ -1,3 +1,9 @@
+2004-06-16  Tom Yu  <tlyu@mit.edu>
+
+	* depfix.sed: Delete /os/usr/include as well, to cope with an
+	athena hack.  (#include "/os/usr/include/sys/rwstlock.h" in
+	sys/vnode.h)
+
 2004-05-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCAL_SUBDIRS): Build support library.
