@@ -26,11 +26,7 @@ static char rcsid_read_pwd_c[] =
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef __STDC__
-#include <stdlib.h>
-#else
-char *malloc(), *index();
-#endif
+#include <krb5/ext-proto.h>
 
 #ifdef POSIX
 #define sigtype void
