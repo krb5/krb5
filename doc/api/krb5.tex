@@ -462,7 +462,8 @@ Parses a KRB_AP_REQ message, returning its contents.
 in the ticket.
 
 \funcparam{rcache} specifies a replay detection cache used to store
-authenticators and server names.
+authenticators and server names.  If \funcparam{rcache} is NULL, then no
+replay detection is performed.
 
 \funcparam{keyproc} specifies a procedure to generate a decryption key for the
 ticket.  If \funcparam{keyproc} is non-NULL, \funcparam{keyprocarg} is
