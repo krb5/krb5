@@ -199,8 +199,6 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 // - analagous to above but in the reverse direction
 void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
 
-		krb5_address **tA;
-		krb5_authdata **tAd;
 		cc_creds *c;
 		int err;
 	#ifdef macintosh
@@ -212,6 +210,7 @@ void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
 		//allocate the cred_union
 		*cu = (cred_union *)sys_alloc(sizeof(cred_union));
 		if ((*cu) == NULL) return;
+		
 		(*cu)->cred_type = CC_CRED_V5;
 		
 		//allocate creds structure (and install)
@@ -281,7 +280,6 @@ void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
 	
 	return;
 }
-	
 
 // bitTst
 // - utility function for below function
@@ -300,12 +298,11 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, i
 	krb5_ticket_times b, m;
 	krb5_authdata **bp, **mp;
 	krb5_boolean retval;
-	krb5_principal_data p1, p2;
 	
 
 	//always check the standard fields
 	if ((krb5_principal_compare(context, base->client, match->client) &&
-	    krb5_principal_compare(context, base->server, match->server)) == false)
+	    krb5_principal_compare(context, base->server, match->server)) == FALSE)
 	    return FALSE;
 
 	if (bitTst(whichfields, KRB5_TC_MATCH_TIMES)) {
@@ -322,17 +319,17 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, i
 	} //continue search
 	
 	if (bitTst(whichfields, KRB5_TC_MATCH_IS_SKEY)) 
-		if (base->is_skey != match->is_skey) return false;
+		if (base->is_skey != match->is_skey) return FALSE;
 	
 	if (bitTst(whichfields, KRB5_TC_MATCH_FLAGS)) 
-		if (base->ticket_flags != match->ticket_flags) return false;
+		if (base->ticket_flags != match->ticket_flags) return FALSE;
 		
 	if (bitTst(whichfields, KRB5_TC_MATCH_TIMES_EXACT)) {
 		b = base->times; m = match->times;
 		if ((b.authtime != m.authtime) ||
 			(b.starttime != m.starttime) ||
 			(b.endtime != m.endtime) ||
-			(b.renew_till != m.renew_till)) return false;
+			(b.renew_till != m.renew_till)) return FALSE;
 		}
 		
 	if (bitTst(whichfields, KRB5_TC_MATCH_AUTHDATA)) {
@@ -342,7 +339,7 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, i
 		while ( (bp) && (*bp != NULL) ){
 			if (( (*bp)->ad_type != (*mp)->ad_type) ||
 				( (*bp)->length != (*mp)->length) ||
-				( memcmp( (*bp)->contents, (*mp)->contents, (*bp)->length) != 0)) return false;
+				( memcmp( (*bp)->contents, (*mp)->contents, (*bp)->length) != 0)) return FALSE;
 			mp++; bp++;
 		}
 	  }
@@ -351,18 +348,18 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, i
 	if (bitTst(whichfields, KRB5_TC_MATCH_SRV_NAMEONLY)) {
 		//taken from cc_retrv.c
 		retval = krb5_principal_compare(context, base->client,match->client);
-		if (!retval) return false;
+		if (!retval) return FALSE;
 	  
 	  }
 	 
 	if (bitTst(whichfields, KRB5_TC_MATCH_2ND_TKT)) 
 		if ( (base->second_ticket.length != match->second_ticket.length) ||
 			(memcmp(base->second_ticket.data, match->second_ticket.data, base->second_ticket.length) != 0))
-			return false;
+			return FALSE;
 			
 	if (bitTst(whichfields,	KRB5_TC_MATCH_KTYPE))
-		if (base->keyblock.enctype != match->keyblock.enctype) return false;
+		if (base->keyblock.enctype != match->keyblock.enctype) return FALSE;
 			
 	//if we fall through to here, they must match
-	return true;
+	return TRUE;
 }

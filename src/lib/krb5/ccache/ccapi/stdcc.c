@@ -8,6 +8,8 @@
 
 #include "stdcc.h"
 #include "string.h"
+#include <stdio.h>
+
 
 //declare our global object wanna-be
 //must be installed in ccdefops.c
@@ -33,7 +35,7 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
 // -- generate_new  --------------------------------
 // - create a new cache with a unique name, corresponds to creating a named cache
 // - iniitialize the API here if we have to.
-krb5_error_code  krb5_stdcc_generate_new 
+krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new 
        (krb5_context context, krb5_ccache *id ) 
 	
   {
@@ -58,8 +60,8 @@ krb5_error_code  krb5_stdcc_generate_new
   	sprintf(name, "gen_new_cache%d", time);
   	
   	//create the new cache
-  	err = cc_create(gCntrlBlock, name, CC_CRED_V5,  
-  			name, 0L, &(((stdccCacheDataPtr)(newCache->data))->NamedCache) );
+  	err = cc_create(gCntrlBlock, name, name, CC_CRED_V5,  
+  			0L, &(((stdccCacheDataPtr)(newCache->data))->NamedCache) );
 	if (err != CC_NOERROR) return err;
 	
   	//setup some fields
@@ -75,11 +77,11 @@ krb5_error_code  krb5_stdcc_generate_new
 // -- resolve ------------------------------
 //
 // - create a new cache with the name stored in residual
-krb5_error_code  krb5_stdcc_resolve 
+krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve 
         (krb5_context context, krb5_ccache *id , const char *residual ) {
 
 	krb5_ccache newCache;
-	int err,pos;
+	int err;
 	char *cName;
 	
   	//make sure the API has been intialized
@@ -95,12 +97,12 @@ krb5_error_code  krb5_stdcc_resolve
   	newCache->data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData));
   	if (newCache->data == NULL) return KRB5_CC_NOMEM;
   	
- 	cName = residual;
+ 	cName = (char *)residual;
 	//attempt to find a cache by the same name before creating it
  	err = cc_open(gCntrlBlock, cName, CC_CRED_V5, 0L, &(((stdccCacheDataPtr)(newCache->data))->NamedCache));
  	//we didn't find it.. create it.
  	if (err) {
-		err = cc_create(gCntrlBlock, cName, CC_CRED_V5,  cName, 
+		err = cc_create(gCntrlBlock, cName, cName, CC_CRED_V5, 
 			0L, &(((stdccCacheDataPtr)(newCache->data))->NamedCache) );
 		if (err != CC_NOERROR) return err; //still an error, return it
 	}
@@ -113,16 +115,15 @@ krb5_error_code  krb5_stdcc_resolve
  // -- initialize --------------------------------
  //-initialize the cache, check to see if one already exists for this principal
  //	if not set our principal to this principal. This searching enables ticket sharing
-  krb5_error_code  krb5_stdcc_initialize 
+krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize 
        (krb5_context context, krb5_ccache id,  krb5_principal princ) 
 
   {
   
   	int err, err1, found;
-  	//char cName[kStringLiteralLen];
   	char *cName = nil;
   	ccache_p *testNC = NULL;
-  	ccache_it *it;
+  	ccache_cit *it;
   	char *p = NULL, *targetName = NULL;
   	
   	//test id for null
@@ -137,8 +138,6 @@ krb5_error_code  krb5_stdcc_resolve
 	if (err)
 		return(err);
 		
-	//sprintf(cName, "%s@%s", krb5_princ_name(context, princ)->data, krb5_princ_realm(context, princ)->data);
-
 	//look for a cache already extant for this principal
 	it = NULL;
 	found = err = 0;
@@ -175,7 +174,7 @@ krb5_error_code  krb5_stdcc_resolve
 
 // -- store ----------------------------------
 // - store some credentials in our cache
- krb5_error_code  krb5_stdcc_store 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_store 
         (krb5_context context, krb5_ccache id , krb5_creds *creds )  {
        
        cred_union *cu = NULL;
@@ -199,7 +198,7 @@ krb5_error_code  krb5_stdcc_resolve
 
 // -- start_seq_get --------------------------
 // - begin an iterator call to get all of the credentials in the cache
-krb5_error_code  krb5_stdcc_start_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_start_seq_get 
 (krb5_context context, krb5_ccache id , krb5_cc_cursor *cursor ) {
 
 	//all we have to do is initialize the cursor
@@ -210,7 +209,7 @@ krb5_error_code  krb5_stdcc_start_seq_get
 // -- next cred ---------------------------
 // - get the next credential in the cache as part of an iterator call
 // - this maps to call to cc_seq_fetch_creds
-krb5_error_code  krb5_stdcc_next_cred 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred 
         (krb5_context context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
@@ -218,10 +217,9 @@ krb5_error_code  krb5_stdcc_next_cred
 
 	int err;
 	cred_union *credU = NULL;
-	cc_creds *c = NULL;
 	
 	err = cc_seq_fetch_creds(gCntrlBlock, ((stdccCacheDataPtr)(id->data))->NamedCache,
-							 &credU, (ccache_it **)cursor);
+							 &credU, (ccache_cit **)cursor);
 	
 	if (err != CC_NOERROR)
 		return err;
@@ -233,13 +231,12 @@ krb5_error_code  krb5_stdcc_next_cred
 	cc_free_creds(gCntrlBlock, &credU);
 	
 	return CC_NOERROR;
-	
 }
 
 
 // -- retreive -------------------
 // - try to find a matching credential in the cache
-krb5_error_code  krb5_stdcc_retrieve 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve 
        		(krb5_context context, 
 		   krb5_ccache id, 
 		   krb5_flags whichfields, 
@@ -276,7 +273,7 @@ krb5_error_code  krb5_stdcc_retrieve
 
 // -- end seq ------------------------
 // - just free up the storage assoicated with the cursor (if we could)
- krb5_error_code  krb5_stdcc_end_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get 
         (krb5_context context, krb5_ccache id , krb5_cc_cursor *cursor ) {
         
        //the limitation of the Ccache api and the seq calls
@@ -287,28 +284,38 @@ krb5_error_code  krb5_stdcc_retrieve
       
       //LEAK IT!
        *cursor = NULL;
+
+	   return(0);
      }
      
 // -- close ---------------------------
 // - free our pointers to the NC
-krb5_error_code  
-krb5_stdcc_close(context, id, princ)
+krb5_error_code KRB5_CALLCONV 
+krb5_stdcc_close(context, id)
    krb5_context context;
    krb5_ccache id;
-   krb5_principal princ;
 {
-		
 	//free it
-	free((stdccCacheDataPtr)(id->data));
-	//null it out
-	(stdccCacheDataPtr)(id->data) = NULL;
+	
+	if (id->data != NULL)
+	
+		{
+		free((stdccCacheDataPtr)(id->data));
+		//null it out
+		(stdccCacheDataPtr)(id->data) = NULL;
+		}
+	
+	//I suppose we ought to check if id is null before doing this, but no other place in krb5 does... -smcguire
+	free(id);
+	
+	id = NULL;
 	
 	return CC_NOERROR;
 }
 
 // -- destroy -------------
 // - free our storage and the cache
-krb5_error_code  
+krb5_error_code KRB5_CALLCONV
 krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 
 	int err;
@@ -316,6 +323,8 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 	//destroy the named cache
 	err = cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
 	//free the pointer to the record that held the pointer to the cache
+	cc_shutdown(&gCntrlBlock);
+
 	free((stdccCacheDataPtr)(id->data));
 	//null it out
 	(stdccCacheDataPtr)(id->data) = NULL;
@@ -326,7 +335,7 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 	
 // -- getname ---------------------------
 // - return the name of the named cache
-char *  krb5_stdcc_get_name 
+char * KRB5_CALLCONV krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id ) {
         
        char *ret = NULL;
@@ -344,7 +353,7 @@ char *  krb5_stdcc_get_name
 
 // -- get_principal ---------------------------
 // - return the principal associated with the named cache
-krb5_error_code  
+krb5_error_code KRB5_CALLCONV
 krb5_stdcc_get_principal (krb5_context context, krb5_ccache id , krb5_principal *princ ) {
 
 	int err;
@@ -359,12 +368,25 @@ krb5_stdcc_get_principal (krb5_context context, krb5_ccache id , krb5_principal 
 	//turn it into a krb principal
 	err = krb5_parse_name(context, name, princ);
 	
+#if defined(macintosh)
+	/* have to do something special on the Mac because name has been allocated with
+	   Mac memory routine NewPtr and held in memory */
+	if (name != NULL)
+	{
+		UnholdMemory(name,GetPtrSize(name));
+		DisposePtr(name);
+	}
+#else
+	if (name != NULL)
+		free(name);
+#endif
+
 	return err;	
 }
 
 // -- set_flags ---------------------------
 // - currently a NOP since we don't store any flags in the NC
-krb5_error_code  krb5_stdcc_set_flags 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_set_flags 
         (krb5_context context, krb5_ccache id , krb5_flags flags ) {
 
 	return CC_NOERROR;
@@ -372,7 +394,7 @@ krb5_error_code  krb5_stdcc_set_flags
 
 // - remove ---------------------------
 // - remove the specified credentials from the NC
-krb5_error_code  krb5_stdcc_remove 
+krb5_error_code KRB5_CALLCONV krb5_stdcc_remove 
         (krb5_context context, krb5_ccache id , krb5_flags flags, krb5_creds *creds ) {
     
     	cred_union *cu = NULL;
