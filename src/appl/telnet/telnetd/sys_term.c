@@ -96,7 +96,9 @@ extern struct sysv sysv;
 #endif	/* NEWINIT */
 
 #ifdef	STREAMSPTY
-#include <sac.h>
+#ifdef HAS_SAC
+#include <sac.h> 
+#endif
 #include <sys/stropts.h>
 #endif
 

@@ -85,11 +85,14 @@ extern	int utmp_len;
 int	registerd_host_only = 0;
 
 #ifdef	STREAMSPTY
+#include <sys/stream.h>
 # include <stropts.h>
 # include <termio.h>
 /* make sure we don't get the bsd version */
 # include "/usr/include/sys/tty.h"
+#ifdef  HAS_PTYVAR
 # include <sys/ptyvar.h>
+#endif
 
 /*
  * Because of the way ptyibuf is used with streams messages, we need

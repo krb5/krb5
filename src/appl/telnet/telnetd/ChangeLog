@@ -1,3 +1,8 @@
+Wed Apr 25 22:53:20 1995  Chris Provenzano  (proven@mit.edu)
+
+        * configure.in, sys_term.c, telnetd.c : Have configure check for
+                sys/ptyvar.h and sac.h before .c files include it.
+
 Sat Apr 22 00:52:01 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* telnetd.c (main): Don't use krb5_override_default_realm, as it
