@@ -107,8 +107,8 @@ krb5_tkt_authent *tktauthent;
 	    if (!retval) {
 		retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
 		tkt_key = &tkt_key_real;
+		(void) krb5_kt_free_entry(&ktentry);
 	    }
-	    (void) krb5_kt_free_entry(&ktentry);
 	}
     }
     if (retval)
