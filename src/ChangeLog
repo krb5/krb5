@@ -1,3 +1,8 @@
+2003-12-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use AC_HELP_STRING for kdc-replay-cache option
+	info, to tidy up the output.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (WITH_CC): Drop -Wno-comment, since we don't support
