@@ -84,7 +84,7 @@ OLDDECLARG(const krb5_pointer, decryptarg)
 OLDDECLARG(krb5_creds *, creds)
 OLDDECLARG(krb5_ccache, ccache)
 {
-    krb5_as_req request;
+    krb5_kdc_req request;
     krb5_kdc_rep *as_reply;
     krb5_error *err_reply;
     krb5_error_code retval;
@@ -92,16 +92,27 @@ OLDDECLARG(krb5_ccache, ccache)
     krb5_data reply;
     krb5_keyblock *decrypt_key;
 
+    request.msg_type = KRB5_AS_REQ;
+
+    /* AS_REQ has no pre-authentication. */
+    request.padata_type = 0;
+    request.padata.data = 0;
+    request.padata.length = 0;
+
     request.kdc_options = options;
-    if (retval = krb5_timeofday(&request.ctime))
-	return(retval);
+    request.client = creds->client;
+    request.server = creds->server;
+
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
+    if (retval = krb5_timeofday(&request.ctime))
+	return(retval);
+    /* XXX we know they are the same size... */
+    request.nonce = (krb5_int32) request.ctime;
     request.etype = etype;
-    request.client = creds->client;
     request.addresses = (krb5_address **) addrs;
-    request.server = creds->server;
+    request.second_ticket = 0;
 
     /* encode & send to KDC */
     if (retval = encode_krb5_as_req(&request, &packet))
@@ -113,7 +124,7 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* now decode the reply...could be error or as_rep */
 
-    if (!krb5_is_kdc_rep(&reply) && !krb5_is_krb_error(&reply))
+    if (!krb5_is_as_rep(&reply) && !krb5_is_krb_error(&reply))
 	    return KRB5KRB_AP_ERR_MSG_TYPE;
     if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
 	if (decode_krb5_error(&reply, &err_reply))
@@ -152,7 +163,7 @@ OLDDECLARG(krb5_ccache, ccache)
     if (!krb5_principal_compare(as_reply->client, request.client)
 	|| !krb5_principal_compare(as_reply->enc_part2->server, request.server)
 	|| !krb5_principal_compare(as_reply->ticket->server, request.server)
-	|| (request.ctime != as_reply->enc_part2->ctime)
+	|| (request.nonce != as_reply->enc_part2->nonce)
 	/* XXX check for extraneous flags */
 	/* XXX || (!krb5_addresses_compare(addrs, as_reply->enc_part2->caddrs)) */
 	|| ((request.from == 0) &&
