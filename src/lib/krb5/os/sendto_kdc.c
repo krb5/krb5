@@ -171,9 +171,12 @@ krb5int_debug_fprint (const char *fmt, ...)
 	case 't':
 	    /* %t => struct timeval * */
 	    tv = va_arg(args, struct timeval *);
-	    sprintf(tmpbuf, "%ld.%06ld",
-		    (long) tv->tv_sec, (long) tv->tv_usec);
-	    putstr(tmpbuf);
+	    if (tv) {
+		sprintf(tmpbuf, "%ld.%06ld",
+			(long) tv->tv_sec, (long) tv->tv_usec);
+		putstr(tmpbuf);
+	    } else
+		putstr("never");
 	    break;
 	case 'd':
 	    /* %d => int */
@@ -434,27 +437,32 @@ krb5_error_code
 krb5int_cm_call_select (const struct select_state *in,
 			struct select_state *out, int *sret)
 {
-    struct timeval now;
+    struct timeval now, *timo;
     krb5_error_code e;
 
     *out = *in;
     e = getcurtime(&now);
     if (e)
 	return e;
-    out->end_time.tv_sec -= now.tv_sec;
-    out->end_time.tv_usec -= now.tv_usec;
-    if (out->end_time.tv_usec < 0) {
-	out->end_time.tv_usec += 1000000;
-	out->end_time.tv_sec--;
-    }
-    if (out->end_time.tv_sec < 0) {
-	*sret = 0;
-	return 0;
+    if (out->end_time.tv_sec == 0)
+	timo = 0;
+    else {
+	timo = &out->end_time;
+	out->end_time.tv_sec -= now.tv_sec;
+	out->end_time.tv_usec -= now.tv_usec;
+	if (out->end_time.tv_usec < 0) {
+	    out->end_time.tv_usec += 1000000;
+	    out->end_time.tv_sec--;
+	}
+	if (out->end_time.tv_sec < 0) {
+	    *sret = 0;
+	    return 0;
+	}
     }
     dprint("selecting on max=%d sockets [%F] timeout %t\n",
 	   out->max,
 	   &out->rfds, &out->wfds, &out->xfds, out->max,
-	   &out->end_time);
+	   timo);
     *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds,
 		   &out->end_time);
     e = SOCKET_ERRNO;
