@@ -21,7 +21,7 @@ kinit: kinit.o $(KRB5_BASE_DEPLIBS)
 
 ##WIN32##all-windows:: $(OUTPRE)kinit.exe
 ##WIN32##$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $**
+##WIN32##	link $(LINKOPTS2) -out:$@ $**
 
 
 clean-unix::
