@@ -215,7 +215,7 @@ char *argv[];
     }
 
     if (errors)
-      fprintf(stdout, "\n%d errors principals failed.\n", errors);
+      fprintf(stdout, "\n%d errors/principals failed.\n", errors);
     else
       fprintf(stdout, "\nNo errors.\n");
 
@@ -273,8 +273,9 @@ OLDDECLARG(char *, str_princ)
     }
 
     if (nprincs != 1) {
-      com_err(progname, 0, "Found more than one db entry for %s.\n", str_princ);
-      goto out;
+      com_err(progname, 0, "Found %d entries db entry for %s.\n", nprincs,
+	      str_princ);
+      goto errout;
     }
 
     retval = krb5_kdb_decrypt_key(&master_encblock,
@@ -282,10 +283,10 @@ OLDDECLARG(char *, str_princ)
 				  &db_key);
     if (retval) {
 	com_err(progname, retval, "while decrypting key for '%s'", str_princ);
-	goto out;
+	goto errout;
     }
 
-    if ((pwd_key.keytype != db_key.keytype) | 
+    if ((pwd_key.keytype != db_key.keytype) ||
 	(pwd_key.length != db_key.length)) {
       fprintf (stderr, "\tKey types do not agree (%d expected, %d from db)\n",
 	       pwd_key.keytype, db_key.keytype);
