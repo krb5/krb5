@@ -1,3 +1,7 @@
+Sun Nov 12 04:56:15 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* telnetd.8: source tmac.doc for correct parsing.
+
 Sat Oct 21 15:37:55 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* state.c (envvarok): Also check for variables involving =.
