@@ -27,8 +27,13 @@
 #include <sys/signal.h>
 #include <netinet/in.h>
 
+#if TARGET_OS_MAC
+#include <Kerberos/krb.h>
+#include <Kerberos/krb524.h>
+#else
 #include <krb.h>
 #include "krb524.h"
+#endif
 
 void krb524_init_ets(context)
      krb5_context context;

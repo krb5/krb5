@@ -1,5 +1,11 @@
 #include <assert.h>
 
+#if TARGET_OS_MAC
+// Mac OS X com_err files do not include com_err for you
+#include <Kerberos/com_err.h>
+#endif
+
+#include "gssapiP_krb5.h"
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
 

@@ -1,7 +1,7 @@
 /*
  * kdc/do_tgs_req.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -59,10 +59,10 @@ static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 /*ARGSUSED*/
 krb5_error_code
 process_tgs_req(pkt, from, portnum, response)
-krb5_data *pkt;
-const krb5_fulladdr *from;		/* who sent it ? */
-int	portnum;
-krb5_data **response;			/* filled in with a response packet */
+    krb5_data *pkt;
+    const krb5_fulladdr *from;	/* who sent it ? */
+    int	portnum;
+    krb5_data **response;	/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
     krb5_kdc_req *request = 0;
@@ -90,6 +90,8 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     int firstpass = 1;
     const char	*status = 0;
+    char ktypestr[128];
+    char rep_etypestr[128];
 
     session_key.contents = 0;
     
@@ -97,6 +99,8 @@ krb5_data **response;			/* filled in with a response packet */
     if (retval)
 	return retval;
 
+    ktypes2str(ktypestr, sizeof(ktypestr),
+	       request->nktypes, request->ktype);
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
      */
@@ -491,6 +495,36 @@ tgt_again:
 	}
 	newtransited = 1;
     }
+    if (!isflagset (request->kdc_options, KDC_OPT_DISABLE_TRANSITED_CHECK)) {
+	errcode = krb5_check_transited_list (kdc_context,
+					     &enc_tkt_reply.transited.tr_contents,
+					     krb5_princ_realm (kdc_context, header_ticket->enc_part2->client),
+					     krb5_princ_realm (kdc_context, request->server));
+	if (errcode == 0) {
+	    setflag (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED);
+	} else if (errcode == KRB5KRB_AP_ERR_ILL_CR_TKT)
+	    krb5_klog_syslog (LOG_INFO,
+			      "bad realm transit path from '%s' to '%s' via '%.*s'",
+			      cname ? cname : "<unknown client>",
+			      sname ? sname : "<unknown server>",
+			      enc_tkt_reply.transited.tr_contents.length,
+			      enc_tkt_reply.transited.tr_contents.data);
+	else
+	    krb5_klog_syslog (LOG_ERR,
+			      "unexpected error checking transit from '%s' to '%s' via '%.*s': %s",
+			      cname ? cname : "<unknown client>",
+			      sname ? sname : "<unknown server>",
+			      enc_tkt_reply.transited.tr_contents.length,
+			      enc_tkt_reply.transited.tr_contents.data,
+			      error_message (errcode));
+    } else
+	krb5_klog_syslog (LOG_ERR, "not checking transit path");
+    if (reject_bad_transit
+	&& !isflagset (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED)) {
+	errcode = KRB5KDC_ERR_POLICY;
+	status = "BAD_TRANSIT";
+	goto cleanup;
+    }
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
@@ -505,27 +539,26 @@ tgt_again:
 	 * Make sure the client for the second ticket matches
 	 * requested server.
 	 */
-	if (!krb5_principal_compare(kdc_context, request->server,
-				    request->second_ticket[st_idx]->enc_part2->client)) {
-		if ((errcode = krb5_unparse_name(kdc_context,
-						request->second_ticket[st_idx]->enc_part2->client,
-						&tmp)))
+	krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
+	krb5_principal client2 = t2enc->client;
+	if (!krb5_principal_compare(kdc_context, request->server, client2)) {
+		if ((errcode = krb5_unparse_name(kdc_context, client2, &tmp)))
 			tmp = 0;
-		krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: authtime %d, %s for %s, 2nd tkt client %s",
-		       fromstring, portnum, authtime,
-		       cname ? cname : "<unknown client>",
-		       sname ? sname : "<unknown server>",
-		       tmp ? tmp : "<unknown>");
+		krb5_klog_syslog(LOG_INFO,
+				 "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: "
+				 "authtime %d, %s for %s, 2nd tkt client %s",
+				 fromstring, portnum, authtime,
+				 cname ? cname : "<unknown client>",
+				 sname ? sname : "<unknown server>",
+				 tmp ? tmp : "<unknown>");
 		errcode = KRB5KDC_ERR_SERVER_NOMATCH;
 		goto cleanup;
 	}
 	    
 	ticket_reply.enc_part.kvno = 0;
-	ticket_reply.enc_part.enctype =
-		request->second_ticket[st_idx]->enc_part2->session->enctype;
-	if ((errcode = krb5_encrypt_tkt_part(kdc_context, 
-					    request->second_ticket[st_idx]->enc_part2->session,
-					    &ticket_reply))) {
+	ticket_reply.enc_part.enctype = t2enc->session->enctype;
+	if ((errcode = krb5_encrypt_tkt_part(kdc_context, t2enc->session,
+					     &ticket_reply))) {
 	    status = "2ND_TKT_ENCRYPT";
 	    goto cleanup;
 	}
@@ -551,9 +584,6 @@ tgt_again:
 	    status = "DECRYPT_SERVER_KEY";
 	    goto cleanup;
 	}
-	if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
-	    (isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
-	    encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
 	errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
 					&ticket_reply);
 	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
@@ -619,13 +649,22 @@ tgt_again:
     free(reply.enc_part.ciphertext.data);
     
 cleanup:
-    if (status)
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): %s: authtime %d, %s for %s%s%s",
-	       fromstring, portnum, status, authtime, 
-	       cname ? cname : "<unknown client>",
-	       sname ? sname : "<unknown server>",
-	       errcode ? ", " : "",
-	       errcode ? error_message(errcode) : "");
+    if (status) {
+	if (!errcode)
+	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
+        krb5_klog_syslog(LOG_INFO,
+			 "TGS_REQ (%s) %s(%d): %s: authtime %d, "
+			 "%s%s %s for %s%s%s",
+			 ktypestr,
+			 fromstring, portnum, status, authtime,
+			 !errcode ? rep_etypestr : "",
+			 !errcode ? "," : "",
+			 cname ? cname : "<unknown client>",
+			 sname ? sname : "<unknown server>",
+			 errcode ? ", " : "",
+			 errcode ? error_message(errcode) : "");
+    }
+    
     if (errcode) {
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)

@@ -7,8 +7,8 @@
 # if they exist.  If they do not, then they must be in PATH.  We
 # expect $objdir to be .../kerberos/src.
 
-if ![info exists RLOGIN] {
-    set RLOGIN [findfile $objdir/../../appl/bsd/rlogin]
+if ![info exists KRLOGIN] {
+    set KRLOGIN [findfile $objdir/../../appl/bsd/rlogin]
 }
 
 if ![info exists KRLOGIND] {
@@ -119,7 +119,7 @@ proc stop_rlogin_daemon { } {
 
 proc rlogin_test { } {
     global REALMNAME
-    global RLOGIN
+    global KRLOGIN
     global BINSH
     global SHELL_PROMPT
     global KEY
@@ -141,7 +141,7 @@ proc rlogin_test { } {
     start_rlogin_daemon -k
 
     # Make an rlogin connection.
-    spawn $RLOGIN $hostname -k $REALMNAME -D 3543
+    spawn $KRLOGIN $hostname -k $REALMNAME -D 3543
 
     expect_after {
 	timeout {
@@ -215,7 +215,7 @@ proc rlogin_test { } {
 
     # Try an encrypted connection.
     start_rlogin_daemon -e
-    spawn $RLOGIN $hostname -x -k $REALMNAME -D 3543
+    spawn $KRLOGIN $hostname -x -k $REALMNAME -D 3543
 
     expect_after {
 	timeout {

@@ -38,16 +38,14 @@ case $host  in
 	stat=$?
 	if [ $stat -eq 0 ] ; then
 	    if test "$HAVE_GCC" = "yes" ; then
-
-
-		$CC -o shr.o.$version $library  -nostartfiles -Xlinker -bgcbypass:1 -Xlinker -bfilelist -Xlinker -bM:SRE -Xlinker -bE:${library}.syms   $LDFLAGS -lc
+		$CC -o shr.o.$version $library  -nostartfiles -Xlinker -bgcbypass:1 -Xlinker -bfilelist -Xlinker -bM:SRE -Xlinker -bE:${library}.syms -Xlinker -berok $LDFLAGS -lc
 	    else
 		# Pull in by explicit pathname so we don't get gnu ld if
 		# installed (it could be even if we chose not to use gcc).
 		# Better still would be to do this through $CC -- how do
 		# we get crt0.o left out?
-    echo	/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms $libdirfl $liblist -lc
-		/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms  -lc
+    echo	/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms -berok $libdirfl $liblist -lc
+		/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms -berok -lc
 	    fi
 	    stat=$?
 	    if [ $stat -eq 0 ] ; then

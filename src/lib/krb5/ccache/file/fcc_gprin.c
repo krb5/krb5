@@ -50,7 +50,6 @@ krb5_fcc_get_principal(context, id, princ)
    krb5_principal *princ;
 {
      krb5_error_code kret = KRB5_OK;
-     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
 
      MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
      

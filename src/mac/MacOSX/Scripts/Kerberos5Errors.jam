@@ -1,0 +1,86 @@
+include "$(SRCROOT)/../../KerberosErrors/Scripts/compile_et.jam" ;
+
+IntermediateErrorTables = "$(SYMROOT)/Kerberos5.intermediates/ErrorTables" ;
+
+compile_et 	"$(IntermediateErrorTables)/prof_err.h"
+            "$(IntermediateErrorTables)/prof_err.c"
+            "$(IntermediateErrorTables)/prof_err.strings" : 
+            "$(SRCROOT)/../Sources/KerberosProfile/prof_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/krb524_err.h"
+            "$(IntermediateErrorTables)/krb524_err.c"
+            "$(IntermediateErrorTables)/krb524_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos524/krb524_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/adm_err.h"
+            "$(IntermediateErrorTables)/adm_err.c"
+            "$(IntermediateErrorTables)/adm_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/adm_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/asn1_err.h"
+            "$(IntermediateErrorTables)/asn1_err.c"
+            "$(IntermediateErrorTables)/asn1_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/asn1_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/kdb5_err.h"
+            "$(IntermediateErrorTables)/kdb5_err.c"
+            "$(IntermediateErrorTables)/kdb5_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/kdb5_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/krb5_err.h"
+            "$(IntermediateErrorTables)/krb5_err.c"
+            "$(IntermediateErrorTables)/krb5_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/krb5_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/kv5m_err.h"
+            "$(IntermediateErrorTables)/kv5m_err.c"
+            "$(IntermediateErrorTables)/kv5m_err.strings" : 
+            "$(SRCROOT)/../Sources/Kerberos5/error_tables/kv5m_err.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/gssapi_err_generic.h"
+            "$(IntermediateErrorTables)/gssapi_err_generic.c"
+            "$(IntermediateErrorTables)/gssapi_err_generic.strings" : 
+            "$(SRCROOT)/../Sources/GSS/generic/gssapi_err_generic.et" ;
+
+compile_et 	"$(IntermediateErrorTables)/gssapi_err_krb5.h"
+            "$(IntermediateErrorTables)/gssapi_err_krb5.c"
+            "$(IntermediateErrorTables)/gssapi_err_krb5.strings" : 
+            "$(SRCROOT)/../Sources/GSS/krb5/gssapi_err_krb5.et" ;
+                        
+DEPENDS all :	"$(IntermediateErrorTables)/prof_err.h"
+                "$(IntermediateErrorTables)/prof_err.c"
+                "$(IntermediateErrorTables)/prof_err.strings"
+                
+                "$(IntermediateErrorTables)/krb524_err.h"
+                "$(IntermediateErrorTables)/krb524_err.c"
+                "$(IntermediateErrorTables)/krb524_err.strings"
+                
+                "$(IntermediateErrorTables)/adm_err.h"
+                "$(IntermediateErrorTables)/adm_err.c"
+                "$(IntermediateErrorTables)/adm_err.strings"
+                
+                "$(IntermediateErrorTables)/asn1_err.h"
+                "$(IntermediateErrorTables)/asn1_err.c"
+                "$(IntermediateErrorTables)/asn1_err.strings"
+                
+                "$(IntermediateErrorTables)/kdb5_err.h"
+                "$(IntermediateErrorTables)/kdb5_err.c"
+                "$(IntermediateErrorTables)/kdb5_err.strings"
+                
+                "$(IntermediateErrorTables)/krb5_err.h"
+                "$(IntermediateErrorTables)/krb5_err.c"
+                "$(IntermediateErrorTables)/krb5_err.strings"
+            
+                "$(IntermediateErrorTables)/kv5m_err.h"
+                "$(IntermediateErrorTables)/kv5m_err.c"
+                "$(IntermediateErrorTables)/kv5m_err.strings"
+                
+                "$(IntermediateErrorTables)/gssapi_err_generic.h"
+                "$(IntermediateErrorTables)/gssapi_err_generic.c"
+                "$(IntermediateErrorTables)/gssapi_err_generic.strings" 
+            
+                "$(IntermediateErrorTables)/gssapi_err_krb5.h"
+                "$(IntermediateErrorTables)/gssapi_err_krb5.c"
+                "$(IntermediateErrorTables)/gssapi_err_krb5.strings" ;
+DEPENDS install : all ;
+DEPENDS installhdrs : all ;

@@ -1,3 +1,36 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb5_libinit.c: Added an include for com_err.h since
+    it is not included by error table headers on Mac OS X.  Also
+    fixed busted check for Mac OS
+
+2001-12-03	Miro Jurisic <meeroh@mit.edu>
+
+	* krb5_libinit.c: punted the Mac OS 9 sleep notification code
+
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to changes in error tables.
+
+2000-11-29	Miro Jurisic <meeroh@mit.edu>
+
+	* krb5_libinit.c: Install a callback in the Mac OS sleep
+	queue to get notification of the machine coming out
+	of sleep, in order to refresh the cached uptime to
+	real time offset
+
+2000-10-02  Alexandra Ellwood <lxs@mit.edu
+
+   * krb5_libinit.c: added #define for Mac OS X so
+   that krb5int_cleanup_library calls krb5_stdcc_shutdown.
+
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMAJOR, LIBMINOR): Bump version.
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Add @RESOLV_LIB@.
+
 2000-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for gethostbyname2.

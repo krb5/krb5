@@ -56,7 +56,7 @@ krb5_db_setup_mkey_name(context, keyname, realm, fullname, principal)
 
     keylen = strlen(keyname);
 	 
-    fname = malloc(keylen+rlen+2);
+    fname = malloc(keylen+rlen+strlen(REALM_SEP_STRING)+1);
     if (!fname)
 	return ENOMEM;
 

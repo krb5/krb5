@@ -188,9 +188,12 @@ krb_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 	if (i < KRB_SENDAUTH_VLEN) {
 	    /* since we already got the space, and part of the ticket,
 	       we read fewer bytes to get the rest of the ticket */
+	    int len_to_read = tkt_len - KRB_SENDAUTH_VLEN + 1 + i;
+	    if (len_to_read <= 0)
+		return KFAILURE;
 	    if (krb_net_read(fd, (char *)(tmp_buf+KRB_SENDAUTH_VLEN),
-			     (int) (tkt_len - KRB_SENDAUTH_VLEN + 1 + i))
-		!= (int)(tkt_len - KRB_SENDAUTH_VLEN + 1 + i))
+			     len_to_read)
+		!= len_to_read)
 		return(errno);
 	} else {
 	    if (krb_net_read(fd, (char *)(tmp_buf+i), (int)tkt_len) !=
