@@ -25,6 +25,7 @@ STLIBOBJS= \
 	ccdefops.o \
 	cc_retr.o \
 	cc_file.o cc_memory.o \
+##WIN32##   cc_mslsa.c \
 	ccfns.o \
 	ser_cc.o
 
@@ -35,6 +36,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
 	$(OUTPRE)cc_memory.$(OBJEXT) \
+##WIN32##   $(OUTPRE)cc_mslsa.$(OBJEXT) \
 	$(OUTPRE)ccfns.$(OBJEXT) \
 	$(OUTPRE)ser_cc.$(OBJEXT)
 
@@ -45,6 +47,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/cc_file.c \
 	$(srcdir)/cc_memory.c \
+##WIN32##   $(srcdir)cc_mslsa.c \
 	$(srcdir)/ccfns.c \
 	$(srcdir)/ser_cc.c
 
@@ -139,6 +142,9 @@ cc_memory.so cc_memory.po $(OUTPRE)cc_memory.$(OBJEXT): cc_memory.c $(SRCTOP)/in
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h
+##WIN32##cc_mslsa.so cc_mslsa.po $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h \
+##WIN32##  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+##WIN32##  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 ccfns.so ccfns.po $(OUTPRE)ccfns.$(OBJEXT): ccfns.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \

@@ -13,7 +13,7 @@ PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 all-windows:: $(OUTPRE)ms2mit.exe
 
 $(OUTPRE)ms2mit.exe: $(OUTPRE)ms2mit.obj
-    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)ms2mit.obj user32.lib secur32.lib advapi32.lib $(KLIB) $(CLIB)
+    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)ms2mit.obj user32.lib advapi32.lib $(KLIB) $(CLIB)
 
 install::
 	copy $(OUTPRE)ms2mit.exe $(DESTDIR)

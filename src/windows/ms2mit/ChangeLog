@@ -1,3 +1,14 @@
+2003-12-11  Jeffrey Altman <jaltman@mit.edu>
+
+    * ms2mit.c, Makefile.in:
+
+    Remove all of the code that manipulates the MS LSA cache.  Instead
+    of reading in the TGT directly we now take advantage of the new
+    "MSLSA:" krb5_ccache type.  We open the MS LSA cache as a read-only
+    ccache and copy it to the default ccache for the system.
+
+    This removes the dependency on secur32.dll from this file.
+
 2003-10-21  Jeffrey Altman <jaltman@mit.edu>
 
     * ms2mit.c:

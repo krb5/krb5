@@ -1,3 +1,8 @@
+2003-12-11  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: Add secur32.lib to libraries necessary to build 
+          krb5_32.dll.  Necessary to support the new MSLSA ccache type.
+
 2003-12-08  Jeffrey Altman <jaltman@mit.edu>
 
         * krb4_32.def: Add exports for functions exported by KfM

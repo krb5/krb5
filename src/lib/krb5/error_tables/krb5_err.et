@@ -338,4 +338,6 @@ error_code KRB5_ERR_BAD_S2K_PARAMS, "Invalid key generation parameters from KDC"
 
 error_code KRB5_ERR_NO_SERVICE,	"service not available"
 
+error_code KRB5_CC_READONLY,    "Ccache function not supported: read-only ccache type"
+
 end
