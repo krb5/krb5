@@ -1,3 +1,10 @@
+Fri Jul  1 13:01:19 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* aclocal.m4: added WITH_CC for use when CONFIG_RULES isn't safe.
+	added EXTRA_RULES_IN for chosing the file that the extra rules get
+	appended to (particularly for lib/krb5/asn.1).
+	made CONFIG_RULES use WITH_CC directly.
+
 Fri Jul  1 02:21:51 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* aclocal.m4: fixes for dealing with new version of autoconf, in

@@ -153,15 +153,18 @@ undivert(9)
 SUBDIREOF
 ])dnl
 dnl
+dnl take saved makefile stuff and put it in the Makeile
+dnl
+define(EXTRA_RULES_IN,[
+cat >> $1 <<"SUBDIREOF"
+undivert(9)
+SUBDIREOF
+])dnl
+dnl
 dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
-AC_WITH([cc],
-echo CC=$withval
-CC=$withval,
-if test -z "$CC" ; then CC=cc; fi
-echo CC defaults to $CC)dnl
-AC_SUBST([CC])dnl
+WITH_CC dnl
 divert(9)dnl
 [
 Makefile: $(srcdir)/Makefile.in config.status
@@ -289,6 +292,16 @@ KRB4=$withval,
 echo "no krb4 support; use --with-krb4=krb4dir"
 KRB4=)dnl
 AC_SUBST(KRB4)])dnl
+dnl
+dnl set $(CC) from --with-cc=value
+dnl
+define(WITH_CC,[
+AC_WITH([cc],
+echo CC=$withval
+CC=$withval,
+if test -z "$CC" ; then CC=cc; fi
+echo CC defaults to $CC)dnl
+AC_SUBST([CC])])dnl
 dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
