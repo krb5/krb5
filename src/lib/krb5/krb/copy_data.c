@@ -43,15 +43,23 @@ krb5_data **outdata;
 {
     krb5_data *tempdata;
 
+    if (!indata) {
+	*outdata = 0;
+	return 0;
+    }
+    
     if (!(tempdata = (krb5_data *)malloc(sizeof(*tempdata))))
 	return ENOMEM;
 
-    *tempdata = *indata;
-    if (!(tempdata->data = malloc(tempdata->length))) {
-	xfree(tempdata);
-	return ENOMEM;
-    }
-    memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);
+    tmpdata->length = indata->length;
+    if (tempdata->length) {
+	if (!(tempdata->data = malloc(tempdata->length))) {
+	    xfree(tempdata);
+	    return ENOMEM;
+	}
+	memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);
+    } else
+	tempdata->data = 0;
     *outdata = tempdata;
     return 0;
 }
