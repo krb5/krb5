@@ -123,8 +123,18 @@ gai_strerror (int code) /*@*/;
 # define COPY_FIRST_CANONNAME
 #endif
 
+#ifdef _AIX
+# define NUMERIC_SERVICE_BROKEN
+#endif
+
+
 #ifdef COPY_FIRST_CANONNAME
 # include <string.h>
+#endif
+
+#ifdef NUMERIC_SERVICE_BROKEN
+# include <ctype.h>		/* isdigit */
+# include <stdlib.h>		/* strtoul */
 #endif
 
 #ifdef _WIN32
@@ -588,6 +598,7 @@ fake_getaddrinfo (const char *name, const char *serv,
     return 0;
 }
 
+#include <errno.h>
 static inline int
 fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 		  char *host, socklen_t hostlen,
@@ -597,11 +608,23 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
     struct hostent *hp;
     const struct sockaddr_in *sinp;
     struct servent *sp;
+    size_t hlen, slen;
 
     if (sa->sa_family != AF_INET) {
 	return EAI_FAMILY;
     }
     sinp = (const struct sockaddr_in *) sa;
+
+    hlen = hostlen;
+    if (hostlen < 0 || hlen != hostlen) {
+	errno = EINVAL;
+	return EAI_SYSTEM;
+    }
+    slen = servicelen;
+    if (servicelen < 0 || slen != servicelen) {
+	errno = EINVAL;
+	return EAI_SYSTEM;
+    }
 
     if (host) {
 	if (flags & NI_NUMERICHOST) {
@@ -615,12 +638,12 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	numeric_host:
 	    uc = (const unsigned char *) &sinp->sin_addr;
 	    sprintf(tmpbuf, "%d.%d.%d.%d", uc[0], uc[1], uc[2], uc[3]);
-	    strncpy(host, tmpbuf, hostlen);
+	    strncpy(host, tmpbuf, hlen);
 #else
 	    char *p;
 	numeric_host:
 	    p = inet_ntoa (sinp->sin_addr);
-	    strncpy (host, p, hostlen);
+	    strncpy (host, p, hlen);
 #endif
 	} else {
 	    int herr;
@@ -635,7 +658,7 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    /* According to the Open Group spec, getnameinfo can
 	       silently truncate, but must still return a
 	       null-terminated string.  */
-	    strncpy (host, hp->h_name, hostlen);
+	    strncpy (host, hp->h_name, hlen);
 	}
 	host[hostlen-1] = 0;
     }
@@ -649,7 +672,7 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    if (port < 0 || port > 65535)
 		return EAI_FAIL;
 	    sprintf (numbuf, "%d", port);
-	    strncpy (service, numbuf, servicelen);
+	    strncpy (service, numbuf, slen);
 	} else {
 	    int serr;
 	    GET_SERV_BY_PORT(sinp->sin_port,
@@ -657,7 +680,7 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 			     sp, serr);
 	    if (sp == 0)
 		goto numeric_service;
-	    strncpy (service, sp->s_name, servicelen);
+	    strncpy (service, sp->s_name, slen);
 	}
 	service[servicelen-1] = 0;
     }
@@ -752,6 +775,33 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
     struct addrinfo *ai;
 #endif
 
+#ifdef NUMERIC_SERVICE_BROKEN
+    int service_is_numeric = 0;
+    int service_port = 0;
+    int socket_type = 0;
+
+    /* AIX 4.3.3 is broken.  (Or perhaps out of date?)
+
+       If a numeric service is provided, and it doesn't correspond to
+       a known service name, an error code (for "host not found") is
+       returned.  If the port maps to a known service, all is
+       well.  */
+    if (serv && serv[0] && isdigit(serv[0])) {
+	unsigned long lport;
+	char *end;
+	lport = strtoul(serv, &end, 10);
+	if (!*end) {
+	    if (lport < 0 || lport > 65535)
+		return EAI_SOCKTYPE;
+	    service_is_numeric = 1;
+	    service_port = htons(lport);
+	    serv = 0;
+	    if (hint)
+		socket_type = hint->ai_socktype;
+	}
+    }
+#endif
+
     aierr = (*gaiptr) (name, serv, hint, result);
     if (aierr || *result == 0)
 	return aierr;
@@ -844,6 +894,21 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	    (*faiptr)(ai);
 	    *result = 0;
 	    return EAI_MEMORY;
+	}
+    }
+#endif
+
+#ifdef NUMERIC_SERVICE_BROKEN
+    for (ai = *result; ai; ai = ai->ai_next) {
+	if (socket_type != 0 && ai->ai_socktype == 0)
+	    ai->ai_socktype = socket_type;
+	switch (ai->ai_family) {
+	case AF_INET:
+	    ((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
+	    break;
+	case AF_INET6:
+	    ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
+	    break;
 	}
     }
 #endif

@@ -1,3 +1,15 @@
+2002-11-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h [NEED_FAKE_GETADDRINFO]: Include errno.h.
+	(fake_getnameinfo): Check that socklen_t size arguments are
+	positive and fit in size_t; return EAI_SYSTEM/EINVAL if not.  Use
+	the size_t variants when calling string functions.
+	[_AIX]: Define NUMERIC_SERVICE_BROKEN.
+	[NUMERIC_SERVICE_BROKEN]: Include ctype.h and stdlib.h.
+	(getaddrinfo) [NUMERIC_SERVICE_BROKEN]: If the service name is a
+	numeric string, save its value and the socket type, pass a null
+	pointer to the real getaddrinfo, and patch the returned results.
+
 2002-10-23  Sam Hartman  <hartmans@mit.edu>
 
 	* spnego-asn1.h: New file.
