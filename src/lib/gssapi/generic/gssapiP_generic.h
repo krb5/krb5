@@ -29,7 +29,12 @@
 
 #if (defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH))
 #include <k5-int.h>
+#else
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
+#endif
+
 #include "gssapi_generic.h"
 
 #include "gssapi_err_generic.h"

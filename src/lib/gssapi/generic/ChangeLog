@@ -1,3 +1,10 @@
+Fri Aug  2 13:37:10 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapiP_generic.h: If not on a Mac or under Dos, and stdlib.h
+		exists, include it.
+
+	* configure.in: Check for stdlib.h
+
 Thu Jul 25 00:03:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* util_ordering.c (g_order_check): 
