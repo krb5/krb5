@@ -514,9 +514,9 @@ write_msg.so write_msg.po $(OUTPRE)write_msg.$(OBJEXT): write_msg.c $(SRCTOP)/in
 t_an_to_ln.so t_an_to_ln.po $(OUTPRE)t_an_to_ln.$(OBJEXT): t_an_to_ln.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS)
 t_gifconf.so t_gifconf.po $(OUTPRE)t_gifconf.$(OBJEXT): t_gifconf.c
-t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): t_locate_kdc.c $(COM_ERR_DEPS) \
-  locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): t_locate_kdc.c $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(COM_ERR_DEPS) \
+  locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
