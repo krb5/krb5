@@ -50,6 +50,7 @@ krb5_parse_lifetime (time, len)
 }
     
 krb5_data tgtname = {
+    0,
     KRB5_TGS_NAME_SIZE,
     KRB5_TGS_NAME
 };

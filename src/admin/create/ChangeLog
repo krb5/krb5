@@ -1,3 +1,7 @@
+Fri Sep 30 22:04:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_create.c: Add placeholders for magic numbers.
+
 Thu Sep 29 22:19:37 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executable when libraries change.

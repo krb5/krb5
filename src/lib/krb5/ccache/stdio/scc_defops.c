@@ -29,6 +29,7 @@
 #include "scc.h"
 
 krb5_cc_ops krb5_cc_stdio_ops = {
+     0,
      "STDIO",
      krb5_scc_get_name,
      krb5_scc_resolve,

@@ -1,3 +1,8 @@
+Fri Sep 30 21:54:20 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fcc_defops.c (krb5_cc_file_ops):
+	  fcc_ops.c (krb5_fcc_ops): Add placeholder for magic number
+
 Thu Sep 22 21:37:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fcc_destry.c (krb5_fcc_destroy): Make sure memory associated

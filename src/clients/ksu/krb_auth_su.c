@@ -30,6 +30,7 @@
 void plain_dump_principal ();
 
 krb5_data tgtname = {
+    0,
     KRB5_TGS_NAME_SIZE,
     KRB5_TGS_NAME
 };

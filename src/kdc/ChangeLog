@@ -1,3 +1,7 @@
+Fri Sep 30 22:13:13 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* extern.c: Add placeholder for magic number
+
 Thu Sep 29 00:03:59 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executable when library changes.

@@ -1,3 +1,8 @@
+Fri Sep 30 21:53:31 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* scc_defops.c (krb5_cc_stdio_ops):
+	  scc_ops.c (krb5_scc_ops): Add placeholder for magic number
+
 Thu Sep 22 21:38:09 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* scc_destry.c (krb5_scc_destroy): Make sure memory associated

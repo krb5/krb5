@@ -91,23 +91,25 @@ krb5_principal master_princ;
 krb5_encrypt_block master_encblock;
 
 krb5_data tgt_princ_entries[] = {
-	{KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
-	{0, 0} };
+	{0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
+	{0, 0, 0} };
 
 krb5_data db_creator_entries[] = {
-	{sizeof("db_creation")-1, "db_creation"} };
+	{0, sizeof("db_creation")-1, "db_creation"} };
 
 /* XXX knows about contents of krb5_principal, and that tgt names
  are of form TGT/REALM@REALM */
 krb5_principal_data tgt_princ = {
-	{0, 0},					/* krb5_data realm */
+        0,					/* magic number */
+	{0, 0, 0},				/* krb5_data realm */
 	tgt_princ_entries,			/* krb5_data *data */
 	2,					/* int length */
 	KRB5_NT_SRV_INST			/* int type */
 };
 
 krb5_principal_data db_create_princ = {
-	{0, 0},					/* krb5_data realm */
+        0,					/* magic number */
+	{0, 0, 0},				/* krb5_data realm */
 	db_creator_entries,			/* krb5_data *data */
 	1,					/* int length */
 	KRB5_NT_SRV_INST			/* int type */

@@ -30,6 +30,7 @@
 
 krb5_rc_ops krb5_rc_dfl_ops =
  {
+  0,
   "dfl",
   krb5_rc_dfl_init,
   krb5_rc_dfl_recover,

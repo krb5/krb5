@@ -29,6 +29,7 @@
 #include "fcc.h"
 
 krb5_cc_ops krb5_fcc_ops = {
+     0,
      "FILE",
      krb5_fcc_get_name,
      krb5_fcc_resolve,

@@ -36,7 +36,7 @@
 /* real declarations of KDC's externs */
 krb5_rcache kdc_rcache;
 
-krb5_data empty_string = {0, ""};
+krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 
 krb5_deltat max_life_for_realm = KRB5_KDB_MAX_LIFE;		/* XXX parameter per-realm? */
@@ -53,5 +53,5 @@ char *dbm_db_name = DEFAULT_KDB_FILE;
 krb5_keyblock tgs_key;
 krb5_kvno tgs_kvno;
 
-static krb5_data tgs_data[3] = { {KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME}, {0, 0}};
-krb5_principal_data tgs_server_struct = { { 0, 0}, tgs_data, 2, 0};
+static krb5_data tgs_data[3] = { {0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME}, {0, 0, 0}};
+krb5_principal_data tgs_server_struct = { 0, { 0, 0, 0}, tgs_data, 2, 0};
