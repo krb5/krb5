@@ -69,6 +69,10 @@ typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
 						       const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
+
+static krb5_error_code make_preauth_list PROTOTYPE((krb5_context, 
+						    krb5_preauthtype *,
+						    int, krb5_pa_data ***));
 /*
  * This function sends a request to the KDC, and gets back a response;
  * the response is parsed into ret_err_reply or ret_as_reply if the
