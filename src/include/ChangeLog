@@ -1,3 +1,7 @@
+
+Fri Jun 16 11:39:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Fix install logic for krb5.h and k5-int.h.
+
 Sun Jun 11 09:20:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.hin: Add missing declaration of krb5_auth_con_initivector.
