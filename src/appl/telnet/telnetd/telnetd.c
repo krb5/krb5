@@ -650,6 +650,7 @@ getterminaltype(name)
 
 #ifdef	ENCRYPTION
     send_will(TELOPT_ENCRYPT, 1);
+    send_do(TELOPT_ENCRYPT, 1);
 #endif	/* ENCRYPTION */
     send_do(TELOPT_TTYPE, 1);
     send_do(TELOPT_TSPEED, 1);

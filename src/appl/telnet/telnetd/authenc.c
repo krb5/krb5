@@ -87,3 +87,7 @@ telnet_gets(prompt, result, length, echo)
 	return((char *)0);
 }
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
+
+
+
+

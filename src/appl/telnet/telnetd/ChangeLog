@@ -1,3 +1,8 @@
+Mon Oct  9 23:01:36 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* telnetd.c (getterminaltype): If ENCRYPTION defined, send do
+        encryption, *not* just will encrypt. if you don't do this, then you won't encrypt the input to the server; your password prompt is encrypted, but your password isn't.
+
 Tue Aug  8 11:26:54 1995  Sam Hartman  <hartmans@pao.mit.edu>
 
 	* sys_term.c: Fail if the slave side dies.
