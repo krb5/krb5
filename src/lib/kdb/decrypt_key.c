@@ -36,34 +36,40 @@ krb5_keyblock *out;
 {
     krb5_error_code retval;
 
-    *out = *in;
-    out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
+    /* the encrypted version is stored as the unencrypted key length
+       (in host byte order), followed by the encrypted key.
+     */
+    out->keytype = in->keytype;
+    out->length = krb5_encrypt_size(in->length-sizeof(in->length),
+				    eblock->crypto_entry);
     out->contents = (krb5_octet *)malloc(out->length);
     if (!out->contents) {
 	out->contents = 0;
 	out->length = 0;
 	return ENOMEM;
     }
+    /* copy out the real length count */
+    bcopy((char *)in->contents, (char *)&out->length,
+	  sizeof(out->length));
+
+    /* remember the contents of the encrypted version has a sizeof(in->length)
+       integer length of the real embedded key, followed by the
+       encrypted key, so the offset here is needed */
     if (retval = (*eblock->crypto_entry->
-		  decrypt_func)((krb5_pointer) in->contents,
+		  decrypt_func)((krb5_pointer) (((char *) in->contents) +
+						sizeof(in->length)),
 				(krb5_pointer) out->contents,
-				in->length, eblock)) {
+				in->length-sizeof(in->length), eblock)) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return retval;
     }
-    out->length -= sizeof(out->length);
     if (out->length < 0) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;
 	return KRB5_KDB_INVALIDKEYSIZE;
     }
-    /* shift key down to beginning of contents, and ignore extra wasted
-       space */
-    bcopy((char *)out->contents,
-	  ((char *) out->contents ) + sizeof(out->length),
-	  out->length);
     return retval;
 }
