@@ -21,6 +21,8 @@
 #define SaberDefines -DPOSIX -DBITS32 -Dconst=
 #define StandardDefines -YPOSIX -D_POSIX_SOURCE -DBITS32
 
+#define DefaultCDebugFlags OptimizedCDebugFlags
+
 #undef HasNdbm
 #define HasNdbm NO
 
