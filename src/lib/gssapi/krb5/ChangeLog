@@ -1,3 +1,10 @@
+2003-01-07  Sam Hartman  <hartmans@mit.edu>
+
+	* init_sec_context.c (make_gss_checksum): New function to
+	construct the checksum in the authenticator, used directly  or
+	indirectly depending on whether krb5_cred is encrypted.
+	(make_ap_req_v1): use it
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.original: Deleted.

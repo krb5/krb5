@@ -1,5 +1,5 @@
 /*
- * Copyright 2000,2002 by the Massachusetts Institute of Technology.
+ * Copyright 2000,2002, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -138,7 +138,91 @@ cleanup:
 	    krb5_free_principal(context, in_creds.server);
     return code;
 }
+struct gss_checksum_data {
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_gss_cred_id_t cred;
+    krb5_checksum md5;
+    krb5_data checksum_data;
+};
 
+static krb5_error_code KRB5_CALLCONV
+make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
+		   void *cksum_data, krb5_data **out)
+{
+    krb5_error_code code;
+    krb5_int32 con_flags;
+    unsigned char *ptr;
+    struct gss_checksum_data *data = cksum_data;
+    krb5_data credmsg;
+    data->checksum_data.data = 0;
+    credmsg.data = 0;
+    /* build the checksum field */
+
+    if (data->ctx->gss_flags & GSS_C_DELEG_FLAG) {
+	/* first get KRB_CRED message, so we know its length */
+
+	/* clear the time check flag that was set in krb5_auth_con_init() */
+	krb5_auth_con_getflags(context, auth_context, &con_flags);
+	krb5_auth_con_setflags(context, auth_context,
+			       con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
+
+	code = krb5_fwd_tgt_creds(context, auth_context, 0,
+				  data->cred->princ, data->ctx->there,
+				  data->cred->ccache, 1,
+				  &credmsg);
+
+	/* turn KRB5_AUTH_CONTEXT_DO_TIME back on */
+	krb5_auth_con_setflags(context, auth_context, con_flags);
+
+	if (code) {
+	    /* don't fail here; just don't accept/do the delegation
+               request */
+	    data->ctx->gss_flags &= ~GSS_C_DELEG_FLAG;
+
+	    data->checksum_data.length = 24;
+	} else {
+	    if (credmsg.length+28 > KRB5_INT16_MAX) {
+		krb5_free_data_contents(context, &credmsg);
+		return(KRB5KRB_ERR_FIELD_TOOLONG);
+	    }
+
+	    data->checksum_data.length = 28+credmsg.length;
+	}
+    } else {
+	data->checksum_data.length = 24;
+    }
+
+    /* now allocate a buffer to hold the checksum data and
+       (maybe) KRB_CRED msg */
+
+    if ((data->checksum_data.data =
+	 (char *) xmalloc(data->checksum_data.length)) == NULL) {
+	if (credmsg.data)
+	    krb5_free_data_contents(context, &credmsg);
+	return(ENOMEM);
+    }
+
+    ptr = data->checksum_data.data;
+
+    TWRITE_INT(ptr, data->md5.length, 0);
+    TWRITE_STR(ptr, (unsigned char *) data->md5.contents, data->md5.length);
+    TWRITE_INT(ptr, data->ctx->gss_flags, 0);
+
+    /* done with this, free it */
+    xfree(data->md5.contents);
+
+    if (credmsg.data) {
+	TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
+	TWRITE_INT16(ptr, credmsg.length, 0);
+	TWRITE_STR(ptr, (unsigned char *) credmsg.data, credmsg.length);
+
+	/* free credmsg data */
+	krb5_free_data_contents(context, &credmsg);
+    }
+    *out = &data->checksum_data;
+    return 0;
+}
+    
 static krb5_error_code
 make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     krb5_context context;
@@ -151,21 +235,17 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 {
     krb5_flags mk_req_flags = 0;
     krb5_error_code code;
-    krb5_data checksum_data;
+    struct gss_checksum_data cksum_struct;
     krb5_checksum md5;
     krb5_data ap_req;
+    krb5_data *checksum_data = NULL;
     unsigned char *ptr;
-    krb5_data credmsg;
     unsigned char *t;
     int tlen;
-    krb5_int32 con_flags;
+
 
     ap_req.data = 0;
-    checksum_data.data = 0;
-    credmsg.data = 0;
 
-    /* build the checksum buffer */
- 
     /* compute the hash of the channel bindings */
 
     if ((code = kg_checksum_channel_bindings(context, chan_bindings, &md5, 0)))
@@ -173,69 +253,26 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 
     krb5_auth_con_set_req_cksumtype(context, ctx->auth_context,
 				    CKSUMTYPE_KG_CB);
-
-    /* build the checksum field */
-
-    if (ctx->gss_flags & GSS_C_DELEG_FLAG) {
-	/* first get KRB_CRED message, so we know its length */
-
-	/* clear the time check flag that was set in krb5_auth_con_init() */
-	krb5_auth_con_getflags(context, ctx->auth_context, &con_flags);
-	krb5_auth_con_setflags(context, ctx->auth_context,
-			       con_flags & ~KRB5_AUTH_CONTEXT_DO_TIME);
-
-	code = krb5_fwd_tgt_creds(context, ctx->auth_context, 0,
-				  cred->princ, ctx->there, cred->ccache, 1,
-				  &credmsg);
-
-	/* turn KRB5_AUTH_CONTEXT_DO_TIME back on */
-	krb5_auth_con_setflags(context, ctx->auth_context, con_flags);
-
-	if (code) {
-	    /* don't fail here; just don't accept/do the delegation
-               request */
-	    ctx->gss_flags &= ~GSS_C_DELEG_FLAG;
-
-	    checksum_data.length = 24;
-	} else {
-	    if (credmsg.length+28 > KRB5_INT16_MAX) {
-		krb5_free_data_contents(context, &credmsg);
-		return(KRB5KRB_ERR_FIELD_TOOLONG);
-	    }
-
-	    checksum_data.length = 28+credmsg.length;
-	}
-    } else {
-	checksum_data.length = 24;
+    cksum_struct.md5 = md5;
+    cksum_struct.ctx = ctx;
+    cksum_struct.cred = cred;
+    cksum_struct.checksum_data.data = NULL;
+    switch (k_cred->keyblock.enctype) {
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES3_CBC_SHA1:
+      code = make_gss_checksum(context, ctx->auth_context, &cksum_struct,
+				 &checksum_data);
+	    if (code)
+		goto cleanup;
+	break;
+    default:
+	krb5_auth_con_set_checksum_func(context, ctx->auth_context,
+					make_gss_checksum, &cksum_struct);
+	    break;
     }
 
-    /* now allocate a buffer to hold the checksum data and
-       (maybe) KRB_CRED msg */
-
-    if ((checksum_data.data =
-	 (char *) xmalloc(checksum_data.length)) == NULL) {
-	if (credmsg.data)
-	    krb5_free_data_contents(context, &credmsg);
-	return(ENOMEM);
-    }
-
-    ptr = checksum_data.data;
-
-    TWRITE_INT(ptr, md5.length, 0);
-    TWRITE_STR(ptr, (unsigned char *) md5.contents, md5.length);
-    TWRITE_INT(ptr, ctx->gss_flags, 0);
-
-    /* done with this, free it */
-    xfree(md5.contents);
-
-    if (credmsg.data) {
-	TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
-	TWRITE_INT16(ptr, credmsg.length, 0);
-	TWRITE_STR(ptr, (unsigned char *) credmsg.data, credmsg.length);
-
-	/* free credmsg data */
-	krb5_free_data_contents(context, &credmsg);
-    }
 
     /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
@@ -245,7 +282,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 	mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED;
 
     if ((code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
-				     &checksum_data, k_cred, &ap_req)))
+				     checksum_data, k_cred, &ap_req)))
 	goto cleanup;
 
    /* store the interesting stuff from creds and authent */
@@ -278,9 +315,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 
    code = 0;
     
-cleanup:
-   if (checksum_data.data)
-       xfree(checksum_data.data);
+ cleanup:
    if (ap_req.data)
        krb5_free_data_contents(context, &ap_req);
 
