@@ -192,7 +192,8 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_get_server_rcache(sprinc[1], &rcache)) {
+    if (retval = krb5_get_server_rcache(krb5_princ_component(sprinc, 0),
+					&rcache)) {
 	com_err(PROGNAME, retval, "while opening replay cache");
 	exit(1);
     }
