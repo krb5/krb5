@@ -1,3 +1,7 @@
+Sun Aug 16 16:52:10 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (SHLIB_EXPLIBS): Include $(LIBS) so building on AIX works
+
 Sun Jul 26 18:12:22 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* Makefile.in (LIBMAJOR): bump libmajor

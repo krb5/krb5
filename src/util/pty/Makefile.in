@@ -31,6 +31,11 @@ CFILES=$(srcdir)/cleanup.c $(srcdir)/getpty.c $(srcdir)/init_slave.c \
 
 
 SRCS=pty_err.c $(CFILES)
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libcom_err$(SHLIBEXT)
+SHLIB_EXPLIBS= -lcom_err 
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 DEPLIBS=
 

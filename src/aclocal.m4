@@ -888,6 +888,10 @@ AC_ARG_ENABLE([shared],
 	*)
 		if test "$krb5_force_static" = "yes"; then
 			AC_MSG_RESULT([Forcing static libraries.])
+		SHLIBEXT=.so-nobuild
+	SHLIBVEXT=.so.v-nobuild
+		CC_LINK="$CC_LINK_STATIC"
+	SHLIBSEXT=.so.s-nobuild
 		else
 			AC_MSG_RESULT([Enabling shared libraries.])
 			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
@@ -903,13 +907,13 @@ AC_ARG_ENABLE([shared],
 				;;
 			esac
 			OBJLISTS="$OBJLISTS OBJS.SH"
-		fi
 		DEPLIBEXT=$SHLIBEXT
 		CC_LINK="$CC_LINK_SHARED"
 		if test "$STLIBEXT" = "$SHLIBEXT" ; then
 		  STLIBEXT=".a-no-build"
 		  LIBINSTLIST="install-shared" #don't install static
 		fi
+fi
 		;;
 	esac
 else
@@ -1018,7 +1022,7 @@ mips-sgi-irix6.3)	# This is a Kludge; see below
 	SHLIBEXT=.so
 	SHOBJEXT=.o
 	# Kludge follows: (gcc makes n32 object files but ld expects o32, so we reeducate ld)
-	if test "$GCC" = yes; then
+	if test "$KRB5_CV_PROG_GCC" = yes; then
 		LDCOMBINE='ld -n32 -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
 	else
 		LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
@@ -1047,7 +1051,7 @@ mips-sgi-irix*)
 
 # untested...
 mips-sni-sysv4)
-	if test "$GCC" = yes; then
+	if test "$KRB5_CV_PROG_GCC" = yes; then
 		PICFLAGS=-fpic
 		LDCOMBINE='$(CC) -G -Wl,-h -Wl,lib$(LIB)$(SHLIBSEXT)'
 	else
@@ -1114,7 +1118,7 @@ mips-*-netbsd*)
 	;;
 
 *-*-solaris*)
-	if test "$GCC" = yes; then
+	if test "$KRB5_CV_PROG_GCC" = yes; then
 		PICFLAGS=-fpic
 		LDCOMBINE='$(CC) -shared -h lib$(LIB)$(SHLIBSEXT)'
 	else
@@ -1171,7 +1175,7 @@ mips-*-netbsd*)
 	LDCOMBINE='$(BUILDTOP)/util/makeshlib $(LIBMAJOR).$(LIBMINOR)'
 	SHLIB_EXPFLAGS='  $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
-	if test "$gcc" = "yes" ; then
+	if test "$krb5_cv_prog_gcc" = "yes" ; then
  	  CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Xlinker -bex4:$(BUILDTOP)/util/aix.bincmds '
 	else
 	  CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -bex4:$(BUILDTOP)/util/aix.bincmds '

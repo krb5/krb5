@@ -36,6 +36,11 @@ MLIBS = -lcom_err $(GEN_LIB)
 LIB=profile
 LIBMAJOR=1
 LIBMINOR=0
+SHLIB_EXPDEPS = $(TOPLIBD)/libcom_err$(SHLIBEXT)
+SHLIB_EXPLIBS = -lcom_err
+SHLIB_DIRS = -L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
 STOBJLISTS=OBJS.ST
 
 all-unix:: includes test_parse test_profile
