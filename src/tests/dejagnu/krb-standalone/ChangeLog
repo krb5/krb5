@@ -1,5 +1,8 @@
 2000-07-04  Tom Yu  <tlyu@mit.edu>
 
+	* rsh.exp: Drain buffers on klist test to avoid wedging rsh on
+	exit under HP/UX.
+
 	* gssapi.exp: Rework significantly to deal with HP/UX lossage that
 	probably resulted from when either the client or the server wound
 	up blocking on tty output.  Abstract things a little more.  Remove

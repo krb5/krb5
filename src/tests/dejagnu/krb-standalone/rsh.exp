@@ -162,7 +162,9 @@ proc rsh_test { } {
 
     spawn $RSH $hostname -f -k $REALMNAME -D 3544 -A $BINSH -c $tmppwd/klist.wrap 
     expect {
-	"Ticket cache:" { }
+	"Ticket cache:*\r" {
+	    expect eof
+	}
  	"klist: No credentials cache file found" {
 	    fail "$testname (not forwarded)"
 	    return
@@ -191,7 +193,9 @@ proc rsh_test { } {
     set testname "encrypted rsh forwarding tickets"
     spawn $RSH $hostname -x -f -k $REALMNAME -D 3544 -A $BINSH -c $tmppwd/klist.wrap 
     expect {
-	"Ticket cache:" { }
+	"Ticket cache:*\r" {
+	    expect eof
+	}
  	"klist: No credentials cache file found" {
 	    fail "$testname (not forwarded)"
 	    return
