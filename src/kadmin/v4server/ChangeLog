@@ -1,3 +1,7 @@
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: kadmin4d depends on the kdb5 lib.
+
 2000-05-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin_server.c (main, case 'r'): Reject realm name that's too
