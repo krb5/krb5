@@ -1,3 +1,10 @@
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo (DefaultETypeList,
+	DefaultSupportedEnctypes): Update for AES.
+	* install.texinfo (Client Machine Configuration Files): Fix typo
+	in variable reference.
+
 2003-04-08  Tom Yu  <tlyu@mit.edu>
 
 	* krb4-xrealm.txt: New file.  Describe the krb4 cross-realm
