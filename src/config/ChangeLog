@@ -1,3 +1,8 @@
+Fri Feb 13 22:16:51 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* config.guess, config.sub: Checked in lxs's changes to add
+		support for Rhapsody DR1.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* pre.in: SUBDIRS now also includes LOCAL_SUBDIRS, which is
