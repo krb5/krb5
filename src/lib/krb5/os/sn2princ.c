@@ -75,9 +75,30 @@ OLDDECLARG(krb5_principal *,ret_princ)
 	/* copy the hostname into non-volatile storage */
 
 	if (type == KRB5_NT_SRV_HST) {
+	    char *addr;
+	    
 	    if (!(hp = gethostbyname(hostname)))
 		return KRB5_ERR_BAD_HOSTNAME;
 	    remote_host = strdup(hp->h_name);
+	    if (!remote_host)
+		return ENOMEM;
+	    /*
+	     * Do a reverse resolution to get the full name, just in
+	     * case there's some funny business going on.  If there
+	     * isn't an in-addr record, give up.
+	     */
+	    addr = malloc(hp->h_length);
+	    if (!addr)
+		return ENOMEM;
+	    memcpy(addr, hp->h_addr, hp->h_length);
+	    hp = gethostbyaddr(addr, hp->h_length, hp->h_addrtype);
+	    free(addr);
+	    if (hp) {
+		free(remote_host);
+		remote_host = strdup(hp->h_name);
+		if (!remote_host)
+		    return ENOMEM;
+	    }
 	} else /* type == KRB5_NT_UNKNOWN */ {
 	    remote_host = strdup(hostname);
 	}
