@@ -1,3 +1,8 @@
+2001-09-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: New file.
+	* depfix.sed: Remove /foo/../ sequences, looping til no more.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.sed: Temporarily add trailing whitespace to make

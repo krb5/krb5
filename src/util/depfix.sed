@@ -28,6 +28,14 @@ s/  */ /g
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 s;/mit/cygnus[^ ]* ;;g
+
+# remove foo/../ sequences
+:dotdot
+/\/[a-z][a-z0-9_.\-]*\/\.\.\// {
+s;/[a-z][a-z0-9_.\-]*/\.\./;/;g
+bdotdot
+}
+
 # rely on VPATH for $(srcdir) files
 s;\$(srcdir)/\([^ /]* \);\1;g
 # now delete trailing whitespace
