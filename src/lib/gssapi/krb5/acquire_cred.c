@@ -78,6 +78,29 @@
 #include <strings.h>
 #endif
 
+static char *krb5_gss_keytab = NULL;
+
+/* Heimdal calls this gsskrb5_register_acceptor_identity. */
+OM_uint32 KRB5_CALLCONV
+krb5_gss_register_acceptor_identity(const char *keytab)
+{
+    size_t	len;
+
+    if (keytab == NULL)
+	return GSS_S_FAILURE;
+    if (krb5_gss_keytab != NULL)
+	free(krb5_gss_keytab);
+
+    len = strlen(keytab);
+    krb5_gss_keytab = malloc(len);
+    if (krb5_gss_keytab == NULL)
+	return GSS_S_FAILURE;
+
+    strcpy(krb5_gss_keytab, keytab);
+
+    return GSS_S_COMPLETE;
+}
+
 /* get credentials corresponding to a key in the krb5 keytab.
    If the default name is requested, return the name in output_princ.
      If output_princ is non-NULL, the caller will use or free it, regardless
@@ -103,32 +126,37 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default keytab */
 
-   if ((code = krb5_kt_default(context, &kt))) {
+   if (krb5_gss_keytab != NULL)
+      code = krb5_kt_resolve(context, krb5_gss_keytab, &kt);
+   else
+      code = krb5_kt_default(context, &kt);
+
+   if (code) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
 
-if (desired_name != GSS_C_NO_NAME) {
-    princ = (krb5_principal) desired_name;
-    if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
-	(void) krb5_kt_close(context, kt);
-	if (code == KRB5_KT_NOTFOUND)
+   if (desired_name != GSS_C_NO_NAME) {
+      princ = (krb5_principal) desired_name;
+      if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
+	 (void) krb5_kt_close(context, kt);
+	 if (code == KRB5_KT_NOTFOUND)
 	    *minor_status = KG_KEYTAB_NOMATCH;
-	else
+	 else
 	    *minor_status = code;
-	return(GSS_S_CRED_UNAVAIL);
-    }
-    krb5_kt_free_entry(context, &entry);
+	 return(GSS_S_CRED_UNAVAIL);
+      }
+      krb5_kt_free_entry(context, &entry);
 
-    /* Open the replay cache for this principal. */
-    if ((code = krb5_get_server_rcache(context,
-				       krb5_princ_component(context, princ, 0),
-				       &cred->rcache))) {
-	*minor_status = code;
-	return(GSS_S_FAILURE);
-    }
+      /* Open the replay cache for this principal. */
+      if ((code = krb5_get_server_rcache(context,
+					 krb5_princ_component(context, princ, 0),
+					 &cred->rcache))) {
+	 *minor_status = code;
+	 return(GSS_S_FAILURE);
+      }
 
-}
+   }
 
 /* hooray.  we made it */
 

@@ -100,6 +100,11 @@ extern const gss_OID_desc krb5_gss_oid_array[];
 #define gss_krb5_nt_machine_uid_name	gss_nt_machine_uid_name
 #define gss_krb5_nt_string_uid_name	gss_nt_string_uid_name
 
+/* Alias for Heimdal compat. */
+#define gsskrb5_register_acceptor_identity krb5_gss_register_acceptor_identity
+
+OM_uint32 KRB5_CALLCONV krb5_gss_register_acceptor_identity(const char *);
+
 OM_uint32 KRB5_CALLCONV gss_krb5_get_tkt_flags 
 	(OM_uint32 *minor_status,
 		   gss_ctx_id_t context_handle,
