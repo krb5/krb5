@@ -27,6 +27,7 @@
 #define HasPosixTypes NO
 #define HasStringH YES
 #define HasStdlibH NO
+#define HasInet YES
 #define Bitsize32
 
 #define HasSaberC YES
