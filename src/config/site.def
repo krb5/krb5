@@ -84,6 +84,7 @@
    				 &c installed */
 #define UseImakeInstalled /* -- turn on if you have imake installed */
 #define UseMakedependInstalled /* -- turn on if you have makedepend installed */
+#define UseUnifdefInstalled /* -- turn on if you have unifdef installed */
 
 #define Krb4ApplCompat /* turn this on if you want selected applications to
 			  work with both v4 & v5 code */
