@@ -5,10 +5,7 @@ AC_PROG_YACC
 AC_PROG_AWK
 AC_CHECK_HEADERS(unistd.h stdlib.h krb_db.h kdc.h regex.h alloca.h sys/time.h sys/select.h memory.h arpa/inet.h)
 AC_CHECK_FUNCS(ftime timezone getcwd strstr waitpid vsprintf)
-AC_REPLACE_FUNCS([memmove strftime])
-KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif],daemon,1)
+KRB5_AC_NEED_DAEMON
 AC_HEADER_TIME
 CHECK_SIGNALS
 CHECK_WAIT_TYPE

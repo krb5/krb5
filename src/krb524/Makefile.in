@@ -74,7 +74,7 @@ all-windows:: $(OUTPRE)k524init.exe $(K524LIB)
 krb524test: test.o $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB5_LIB) $(KRB4COMPAT_LIBS)
 
-SERVER_OBJS= krb524d.o cnv_tkt_skey.o conv_princ.o
+SERVER_OBJS= krb524d.o cnv_tkt_skey.o conv_princ.o @LIBOBJS@
 CLIENT_OBJS= $(OUTPRE)k524init.$(OBJEXT)
 
 krb524d: $(SERVER_OBJS) $(KADMSRV_DEPLIBS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)

@@ -615,6 +615,13 @@ AC_HELP_STRING([--with-netlib=LIBS], use user defined resolver library),
 [AC_LIBRARY_NET]
 )])dnl
 dnl
+dnl
+AC_DEFUN(KRB5_AC_NEED_DAEMON, [
+AC_REPLACE_FUNCS(daemon)
+KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],daemon,1)])dnl
+dnl
 dnl Check if stdarg or varargs is available *and compiles*; prefer stdarg.
 dnl (This was sent to djm for incorporation into autoconf 3/12/1996.  KR)
 dnl

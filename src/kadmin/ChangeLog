@@ -1,3 +1,8 @@
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of

@@ -1,5 +1,8 @@
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+
 	* krshd.c (ignore_signals): Split out from cleanup().
 	(doit): Call it when the shell process has completed, before
 	calling syslog.

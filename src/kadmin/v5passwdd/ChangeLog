@@ -1,3 +1,7 @@
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SERV_OBJS): Use @LIBOBJS@.
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_conn.c (kadm_contact_server): Use socklen_t when passing

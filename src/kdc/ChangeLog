@@ -1,3 +1,9 @@
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+	* Makefile.in (OBJS, fakeka): Use @LIBOBJS@.
+
 2003-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* extern.h (master_princ): Remove realm_mkvno, realm_tgskey,

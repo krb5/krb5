@@ -1,3 +1,9 @@
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+	* Makefile.in (SERVEROBJS): Use @LIBOBJS@.
+
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.

@@ -11,7 +11,7 @@ CLIENTSRCS= $(srcdir)/kprop.c
 CLIENTOBJS= kprop.o 
 
 SERVERSRCS= $(srcdir)/kpropd.c 
-SERVEROBJS= kpropd.o 
+SERVEROBJS= kpropd.o @LIBOBJS@
 
 SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 

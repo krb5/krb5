@@ -1,3 +1,7 @@
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_NEED_DAEMON): New macro.
+
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (WITH_CCOPTS, WITH_CPPOPTS, WITH_LINKER,

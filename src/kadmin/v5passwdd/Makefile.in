@@ -8,7 +8,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 COMMON_SRCS = $(srcdir)/adm_rw.c
 COMMON_OBJS = adm_rw.o
 SERV_SRCS = $(srcdir)/main.c $(srcdir)/srv_net.c $(srcdir)/proto_serv.c 
-SERV_OBJS = main.o srv_net.o proto_serv.o 
+SERV_OBJS = main.o srv_net.o proto_serv.o  @LIBOBJS@
 CLI_SRCS = $(srcdir)/kpasswd.c $(srcdir)/adm_conn.c
 CLI_OBJS = kpasswd.o adm_conn.o
 

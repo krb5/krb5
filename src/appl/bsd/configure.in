@@ -80,9 +80,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 dnl
-KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif],daemon,1)
+KRB5_AC_NEED_DAEMON
 dnl
 KRB5_SIGTYPE
 CHECK_SIGNALS
