@@ -1,3 +1,8 @@
+2004-08-09  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Solaris getpwnam_r returns struct passwd*, not
+	struct pwd*.
+
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: If getpwnam_r is available, determine its return

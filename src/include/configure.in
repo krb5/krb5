@@ -57,7 +57,7 @@ if test "$ac_cv_func_getpwnam_r" = yes; then
    extern int getpwnam_r();], [1;],
    getpwnam_r_returns_int=yes,getpwnam_r_returns_int=no)
    AC_TRY_COMPILE([#include <pwd.h>
-   extern struct pwd *getpwnam_r();], [1;],
+   extern struct passwd *getpwnam_r();], [1;],
    getpwnam_r_returns_ptr=yes,getpwnam_r_returns_ptr=no)
    case "$getpwnam_r_returns_int/$getpwnam_r_returns_ptr" in
      yes/no) krb5_cv_getpwnam_r_return_type=int ;;
