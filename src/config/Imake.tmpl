@@ -533,6 +533,9 @@
 #ifndef TagsCmd
 #define TagsCmd ctags
 #endif
+#ifndef EtagsCmd
+#define EtagsCmd etags
+#endif
 #ifndef LoaderLibPrefix
 #define LoaderLibPrefix /**/			/* cray does -l libX11.a */
 #endif
@@ -580,6 +583,7 @@
  EXTRA_LOAD_FLAGS = ExtraLoadFlags
   EXTRA_LIBRARIES = ExtraLibraries
              TAGS = TagsCmd
+            ETAGS = EtagsCmd
 #if ConstructMFLAGS
            MFLAGS = -$(MAKEFLAGS)
 #endif

@@ -567,7 +567,7 @@ clean::									@@\
 #define	TagsTarget()							@@\
 tags::									@@\
 	$(TAGS) -w *.[ch]						@@\
-	$(TAGS) -xw *.[ch] > TAGS
+	$(ETAGS) *.[ch]
 #endif /* TagsTarget */
 
 
@@ -1173,7 +1173,7 @@ NamedCleanSubdirs(clean,dirs)
  */
 #ifndef NamedTagSubdirs
 #define NamedTagSubdirs(name,dirs) \
-NamedTargetSubdirs(name,dirs,"tagging",TAGS='$(TAGS)',tags)
+NamedTargetSubdirs(name,dirs,"tagging",TAGS='$(TAGS)' ETAGS='$(ETAGS)',tags)
 #endif /* TagSubdirs */
 
 #ifndef TagSubdirs
