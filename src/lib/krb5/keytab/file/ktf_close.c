@@ -26,7 +26,7 @@ static char rcsid_krb5_ktfile_close_c[] =
 
 krb5_error_code 
 krb5_ktfile_close(id)
-  krb5_keytab *id;
+  krb5_keytab id;
   /*
    * This routine is responsible for freeing all memory allocated 
    * for this keytab.  There are no system resources that need
@@ -35,8 +35,8 @@ krb5_ktfile_close(id)
    * This routine should undo anything done by krb5_ktfile_resolve().
    */
 {
-    (void) free(KTFILENAME(*id));
-    (void) free((krb5_pointer)(*id)->data);
-    *id = NULL;
+    (void) free(KTFILENAME(id));
+    (void) free((krb5_pointer)(id)->data);
+    id->ops = 0;
     return (0); /* XXX */
 }
