@@ -1,3 +1,11 @@
+Sun Feb 22 19:16:12 1998  Tom Yu  <tlyu@mit.edu>
+
+	* v4rcp.c: Punt nastiness to redefine setreuid, as we don't use
+	it.
+
+	* krcp.c: Use krb5_seteuid(). [krb5-libs/505]  Fix up inclusions
+	to use <> rather than "".
+
 Wed Feb 18 15:26:52 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

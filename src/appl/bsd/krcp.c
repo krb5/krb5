@@ -65,21 +65,16 @@ char copyright[] =
 #else
 #include <varargs.h>
 #endif
-     
-#ifdef HAVE_SETRESUID
-#ifndef HAVE_SETREUID
-#define HAVE_SETREUID
-#define setreuid(r,e) setresuid(r,e,-1)
-#endif
-#endif
+
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
 
 #ifdef KERBEROS
-#include "krb5.h"
-#include "com_err.h"
-     
+#include <krb5.h>
+#include <k5-util.h>
+#include <com_err.h>
+
 #define RCP_BUFSIZ 4096
      
 int sock;
@@ -546,26 +541,18 @@ krb5_creds *cred;
 
 		}
 		euid = geteuid();
-#ifdef HAVE_SETREUID
-		if (euid == 0)
-		    (void) setreuid(0, userid);
-		sink(1, argv+argc-1);
-		if (euid == 0)
-		    (void) setreuid(userid, 0);
-#else
 		if (euid == 0) {
 		    (void) setuid(0);
-		    if(seteuid(userid)) {
+		    if(krb5_seteuid(userid)) {
 			perror("rcp seteuid user"); errs++; exit(errs);
 		    }
 		}
 		sink(1, argv+argc-1);
 		if (euid == 0) {
-		    if(seteuid(0)) {
+		    if(krb5_seteuid(0)) {
 			perror("rcp seteuid 0"); errs++; exit(errs);
 		    }
 		}
-#endif
 #else
 		rem = rcmd(&host, port, pwd->pw_name, suser,
 			   buf, 0);

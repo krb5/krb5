@@ -36,8 +36,9 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
  * rcp
  */
 #ifdef KERBEROS
-#include "krb5.h"
-#include "com_err.h"
+#include <krb5.h>
+#include <com_err.h>
+#include <k5-util.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -286,12 +287,6 @@ int kstream_write(krem, buf, len)
 #define vfork fork
 #endif
 
-#ifdef hpux
-#define setreuid(r,e) setresuid(r,e,-1)
-#endif
-#ifdef __svr4__
-#define setreuid(r,e) setuid(r)
-#endif
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
