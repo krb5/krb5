@@ -212,8 +212,8 @@ char *argv[];
     }
 
     if (retval = krb5_auth_con_genaddrs(context, auth_context, s,
-			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR |
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
+			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR |
+			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) {
       	com_err("uu-client", retval, "generating addrs for auth_context");
       	return 9;
     }
@@ -239,14 +239,6 @@ char *argv[];
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&s, "???",
 			 0, /* server */, NULL, 0, NULL, &ticket);
 #endif
-
-/* XXX This will be removed -- proven */
-    if (retval = krb5_auth_con_genaddrs(context, auth_context, s,
-			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR |
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) {
-      	com_err("uu-client", retval, "generating addrs for auth_context");
-      	return 9;
-    }
 
   if (retval) {
       com_err("uu-client", retval, "reading AP_REQ from server");

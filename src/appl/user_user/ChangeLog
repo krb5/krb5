@@ -1,4 +1,9 @@
 
+Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
+
+        * client.c (main()): Changes to auth_context to better
+                support full addresses, for mk_safe() and friends.
+
 Wed Apr 26 22:12:26 1995  Chris Provenzano (proven@mit.edu)
 
 	* server.c, client.c : Use krb5_auth_con_genaddrs() instead of
