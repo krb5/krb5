@@ -22,7 +22,9 @@
 .\"     claim by the user or distributor of the ksu software.
 .\"
 .\" KSU was writen by:  Ari Medvinsky, ari@isi.edu
-.TH KSU 1 "Kerberos Version 5.4" 
+.\" "
+.so man1/header.doc
+.TH KSU 1 \*h
 .SH NAME
 ksu \- Kerberized super-user    	
 .SH SYNOPSIS
@@ -486,11 +488,12 @@ PERMISSIONS FOR KSU
 ksu should be owned by root and have the set user id  bit turned on.   
 .TP 10
 END-SERVER ENTRY     
-ksu attempts to get a ticket for the end server just as 
-Kerberized telnet and rlogin.  Thus, there must be
-an entry for the server in the Kerberos database
-(e.g. host/nii.isi.edu@ISI.EDU). k5srvtab must be in
-an appropriate location.               
+
+ksu attempts to get a ticket for the end server just as Kerberized
+telnet and rlogin.  Thus, there must be an entry for the server in the
+Kerberos database (e.g. host/nii.isi.edu@ISI.EDU).  The keytab file must
+be in an appropriate location.
+
 .SH SIDE EFFECTS
 ksu deletes all expired tickets from the source cache. 
 .SH AUTHOR OF KSU:	GENNADY (ARI) MEDVINSKY
