@@ -1,3 +1,8 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in (KADM_COMM_DEPLIBS): Depend on GSSRPC_DEPLIBS and not
+	UTIL_DEPLIB. (KADMSRC_DEPLIBS) add dependency on KDB5_DEPLIB.
+
 2001-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (AUTOHEADER, AUTOHEADERFLAGS): New variables.
