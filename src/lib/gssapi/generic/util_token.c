@@ -148,7 +148,7 @@ void g_make_token_header(mech, body_size, buf, tok_type)
    der_write_length(buf, 4 + mech->length + body_size);
    *(*buf)++ = 0x06;
    *(*buf)++ = (unsigned char) mech->length;
-   TWRITE_STR(*buf, mech->elements, ((int) mech->length));
+   TWRITE_STR(*buf, mech->elements, mech->length);
    *(*buf)++ = (unsigned char) ((tok_type>>8)&0xff);
    *(*buf)++ = (unsigned char) (tok_type&0xff);
 }

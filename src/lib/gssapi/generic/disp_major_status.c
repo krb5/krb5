@@ -107,16 +107,16 @@ static const char * const unknown_error = "Unknown %s (field = %d)";
 
 /**/
 
-int display_unknown(kind, value, buffer)
+static int 
+display_unknown(kind, value, buffer)
      const char *kind;
      OM_uint32 value;
      gss_buffer_t buffer;
 {
-   int len;
    char *str;
 
    if ((str =
-	(char *) xmalloc(len = strlen(unknown_error)+strlen(kind)+7)) == NULL)
+	(char *) xmalloc(strlen(unknown_error)+strlen(kind)+7)) == NULL)
       return(0);
 
    sprintf(str, unknown_error, kind, value);

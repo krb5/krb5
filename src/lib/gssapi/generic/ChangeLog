@@ -1,3 +1,19 @@
+2001-05-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* disp_major_status.c (display_unknown): Remove unused variable. 
+
+	* util_token.c (g_make_token_header): Remove incorrect cast of
+	length argument to memcpy.
+
+	* oid_ops.c (generic_gss_str_to_oid): Cast argument of isxxx()
+	functions to int - avoids gcc warning when these are implemented
+	as macros indexing an array.
+
+2001-05-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* disp_major_status.c (display_unknown): Declare as static. Remove
+	non-useful code.
+
 2001-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unixmac): Target deleted.

@@ -278,13 +278,13 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     bp = (char *) oid_str->value;
     cp = bp;
     /* Skip over leading space */
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) && isspace((int) *bp))
 	bp++;
     if (*bp == '{') {
 	brace = 1;
 	bp++;
     }
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) && isspace((int) *bp))
 	bp++;
     startp = bp;
     nbytes = 0;
@@ -296,20 +296,20 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 	*minor_status = EINVAL;
 	return(GSS_S_FAILURE);
     }
-    while ((bp < &cp[oid_str->length]) && isdigit(*bp))
+    while ((bp < &cp[oid_str->length]) && isdigit((int) *bp))
 	bp++;
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) && isspace((int) *bp))
 	bp++;
     if (sscanf(bp, "%ld", &numbuf) != 1) {
 	*minor_status = EINVAL;
 	return(GSS_S_FAILURE);
     }
-    while ((bp < &cp[oid_str->length]) && isdigit(*bp))
+    while ((bp < &cp[oid_str->length]) && isdigit((int) *bp))
 	bp++;
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) && isspace((int) *bp))
 	bp++;
     nbytes++;
-    while (isdigit(*bp)) {
+    while (isdigit((int) *bp)) {
 	if (sscanf(bp, "%ld", &numbuf) != 1) {
 	    *minor_status = EINVAL;
 	    return(GSS_S_FAILURE);
@@ -318,9 +318,9 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 	    nbytes++;
 	    numbuf >>= 7;
 	}
-	while ((bp < &cp[oid_str->length]) && isdigit(*bp))
+	while ((bp < &cp[oid_str->length]) && isdigit((int) *bp))
 	    bp++;
-	while ((bp < &cp[oid_str->length]) && isspace(*bp))
+	while ((bp < &cp[oid_str->length]) && isspace((int) *bp))
 	    bp++;
     }
     if (brace && (*bp != '}')) {
@@ -337,20 +337,20 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 	    op = (unsigned char *) (*oid)->elements;
 	    bp = startp;
 	    sscanf(bp, "%ld", &numbuf);
-	    while (isdigit(*bp))
+	    while (isdigit((int) *bp))
 		bp++;
-	    while (isspace(*bp))
+	    while (isspace((int) *bp))
 		bp++;
 	    onumbuf = 40*numbuf;
 	    sscanf(bp, "%ld", &numbuf);
 	    onumbuf += numbuf;
 	    *op = (unsigned char) onumbuf;
 	    op++;
-	    while (isdigit(*bp))
+	    while (isdigit((int) *bp))
 		bp++;
-	    while (isspace(*bp))
+	    while (isspace((int) *bp))
 		bp++;
-	    while (isdigit(*bp)) {
+	    while (isdigit((int) *bp)) {
 		sscanf(bp, "%ld", &numbuf);
 		nbytes = 0;
 		/* Have to fill in the bytes msb-first */
@@ -369,9 +369,9 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 		    idx--;
 		    numbuf >>= 7;
 		}
-		while (isdigit(*bp))
+		while (isdigit((int) *bp))
 		    bp++;
-		while (isspace(*bp))
+		while (isspace((int) *bp))
 		    bp++;
 	    }
 	    *minor_status = 0;
