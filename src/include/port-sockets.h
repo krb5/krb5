@@ -8,6 +8,16 @@
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
 
+typedef WSABUF sg_buf;
+
+#define SG_ADVANCE(SG, N) \
+	((SG)->len < (N)				\
+	 ? (abort(), 0)					\
+	 : ((SG)->buf += (N), (SG)->len -= (N), 0))
+
+#define SG_LEN(SG)		((SG)->len + 0)
+#define SG_SET(SG, B, N)	((SG)->buf = (char *)(B),(SG)->len = (N))
+
 #define SOCKET_INITIALIZE()     0
 #define SOCKET_CLEANUP()
 #define SOCKET_ERRNO            (WSAGetLastError())
@@ -16,6 +26,40 @@
 #define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
 #define SOCKET_WRITE(fd, b, l)  (send(fd, b, l, 0))
 #define SOCKET_EINTR            WSAEINTR
+
+/* Return -1 for error or number of bytes written.
+   TMP is a temporary variable; must be declared by the caller, and
+   must be used by this macro (to avoid compiler warnings).  */
+/* WSASend returns 0 or SOCKET_ERROR.  */
+#define SOCKET_WRITEV_TEMP DWORD
+#define SOCKET_WRITEV(FD, SG, LEN, TMP)	\
+	(WSASend((FD), (SG), (LEN), &(TMP), 0, 0, 0) ? -1 : (TMP))
+
+#define SHUTDOWN_READ	SD_RECEIVE
+#define SHUTDOWN_WRITE	SD_SEND
+#define SHUTDOWN_BOTH	SD_BOTH
+
+#ifndef EINPROGRESS
+#define EINPROGRESS WSAEINPROGRESS
+#endif
+#ifndef EWOULDBLOCK
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#endif
+#ifndef ECONNRESET
+#define ECONNRESET  WSAECONNRESET
+#endif
+#ifndef ECONNABORTED
+#define ECONNABORTED WSAECONNABORTED
+#endif
+#ifndef ECONNREFUSED
+#define ECONNREFUSED WSAECONNREFUSED
+#endif
+#ifndef EHOSTUNREACH
+#define EHOSTUNREACH WSAEHOSTUNREACH
+#endif
+#ifndef ETIMEDOUT
+#define ETIMEDOUT WSAETIMEDOUT
+#endif
 
 int win_socket_initialize();
 
@@ -46,6 +90,17 @@ int win_socket_initialize();
 #define	ioctlsocket	ioctl
 #define	SOCKET_ERROR	(-1)
 
+typedef struct iovec sg_buf;
+
+#define SG_ADVANCE(SG, N) \
+	((SG)->iov_len < (N)					\
+	 ? (abort(), 0)						\
+	 : ((SG)->iov_base = (char *) (SG)->iov_base + (N),	\
+	    (SG)->iov_len -= (N), 0))
+
+#define SG_LEN(SG)		((SG)->iov_len + 0)
+#define SG_SET(SG, B, L)	((SG)->iov_base = (char*)(B), (SG)->iov_len = (L))
+
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
 
@@ -57,6 +112,15 @@ int win_socket_initialize();
 #define SOCKET_READ		read
 #define SOCKET_WRITE		write
 #define SOCKET_EINTR		EINTR
+#define SOCKET_WRITEV_TEMP int
+/* Use TMP to avoid compiler warnings and keep things consistent with
+   Windoze version.  */
+#define SOCKET_WRITEV(FD, SG, LEN, TMP) \
+	((TMP) = writev((FD), (SG), (LEN)))
+
+#define SHUTDOWN_READ	0
+#define SHUTDOWN_WRITE	1
+#define SHUTDOWN_BOTH	2
 
 #endif /* HAVE_MACSOCK_H */
 

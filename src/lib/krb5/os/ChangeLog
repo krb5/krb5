@@ -1,3 +1,31 @@
+2002-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c: Include sys/timeb.h on Windows.
+	(ENABLE_TCP): Macro deleted, always enable code.
+	(krb5_sendto_kdc): Don't try UDP if outgoing message is 1500
+	bytes or larger.  Print info on arguments if DEBUG defined.
+	(bogus_strerror) [_WIN32 && DEBUG]: New function.
+	(dperror, dfprintf): New macros.
+	(krb5int_sendto_udp): Use SOCKET_ERRNO where appropriate.  Log
+	more info if DEBUG defined; use dperror and dfprintf.
+	(struct conn_state): Use new scatter-gather definitions from
+	port-sockets.h.  Don't try to reuse data structures for both
+	input and output.
+	(struct select_state): Add exception fd set.
+	(print_fdsets) [DEBUG]: Print exception fd set; callers changed.
+	(getcurtime): New function.
+	(call_select): Call it.  Pass exception fd set to select.
+	(make_nonblocking, iov_advance): Deleted.
+	(start_tcp_connection): Expand non-blocking setting inline; set
+	linger period to zero.  Use new scatter-gather framework.  Log
+	more info if DEBUG defined.
+	(service_tcp_fd): New argument indicates exception; handle
+	exception fd set.  Print more info if DEBUG.  Use SOCKET_*
+	macros, scatter-gather support, SHUTDOWN_* macros.  Adjust for
+	new conn_state definitions.
+	(krb5int_sendto_tcp): Set up exception fd set.  Adjust for new
+	conn_state definitions.  Use new scatter-gather support.
+
 2002-06-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c: Include sys/ioctl.h and sys/filio.h only if

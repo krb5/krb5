@@ -1,3 +1,16 @@
+2002-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (sg_buf): New typedef name for OS-specific
+	scatter-gather buffer handle type.
+	(SG_ADVANCE, SG_LEN, SG_SET): New macros to manipulate sg_buf.
+	(SOCKET_WRITEV, SOCKET_WRITEV_TEMP): New macros for sending on
+	socket with gathered input.
+	(SHUTDOWN_READ, SHUTDOWN_WRITE, SHUTDOWN_BOTH): New macros, to be
+	passed to shutdown() to indicate direction.
+	(EINPROGRESS, EWOULDBLOCK, ECONNRESET, ECONNABORTED,
+	ECONNREFUSED, EHOSTUNREACH, ETIMEDOUT) [_WIN32]: Define as WSA
+	equivalents if not already defined.
+
 2002-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin: Delete inclusion of profile.h again.
