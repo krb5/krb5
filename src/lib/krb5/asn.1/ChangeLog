@@ -1,3 +1,8 @@
+2000-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.h (asn1buf_insert_octet): Define using __inline__ rather
+	than inline in order to shut up gcc -pedantic.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* asn1_get.c (asn1_get_tag):  Remove unused variable.

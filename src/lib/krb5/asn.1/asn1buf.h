@@ -143,7 +143,7 @@ asn1_error_code asn1buf_insert_octet
    effects   Inserts o into the buffer *buf, expanding the buffer if
              necessary.  Returns ENOMEM memory is exhausted. */
 #if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS))
-extern inline asn1_error_code asn1buf_insert_octet(buf, o)
+extern __inline__ asn1_error_code asn1buf_insert_octet(buf, o)
      asn1buf * buf;
      const int o;
 {
