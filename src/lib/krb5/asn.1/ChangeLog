@@ -1,3 +1,7 @@
+Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed library name for the PC.
+
 Wed Mar 1 18:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* asn1_decode.c, asn1_encode.c, ans1_k_encode.c, asn1_misc.c: 16 vs 
