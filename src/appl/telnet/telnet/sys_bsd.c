@@ -673,7 +673,7 @@ TerminalNewMode(f)
 	{
 	  sigset_t tmask;
 	  sigemptyset(&tmask);
-	  sigaddtoset(&tmask, SIGTSTP);
+	  sigaddset(&tmask, SIGTSTP);
 	  sigprocmask(SIG_UNBLOCK, &tmask, (sigset_t*)0);
 	}
 #else
