@@ -33,7 +33,6 @@ encrypt_key.c
 fetch_mkey.c
 kdb_compat.h
 kdb_dbm.c
-kdbint.h
 setup_mkey.c
 store_mkey.c
 verify_mky.c

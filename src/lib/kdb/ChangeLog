@@ -1,4 +1,8 @@
 
+Thu Jul 27 15:28:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdbint.h - Obsolete.
+
+
 Thu Jul 27 02:59:05 1995        Chris Provenzano (proven@mit.edu)
         * decrypt_key.c, encrypt_key.c, kdb_dbm.c, kdb_xdr.c:
 		Rewritten for new kdb format.
