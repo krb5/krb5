@@ -47,7 +47,14 @@
 #include <string.h>
 #include "k5-util.h"
 
-static int krb_v4_recvauth();
+static int krb_v4_recvauth(long options, int fd, KTEXT ticket,
+			   char *service, char *instance, 
+			   struct sockaddr_in *faddr,
+			   struct sockaddr_in *laddr,
+			   AUTH_DAT *kdata,
+			   char *filename,
+			   Key_schedule schedule,
+			   char *version);
 
 #define	KRB_V4_SENDAUTH_VERS	"AUTHV0.1" /* MUST be 8 chars long */
 #define KRB_V5_SENDAUTH_VERS	"KRB5_SENDAUTH_V1.0"

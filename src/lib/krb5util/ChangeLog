@@ -1,3 +1,7 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* compat_recv.c: Flush out prototype for static krb_v4_recvauth.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* compat_recv.c: Include k5-util.h to ensure new prototypes agree
