@@ -45,3 +45,4 @@ ignore STDC-grep
 ignore IMAKEFILES
 ignore dtree.out
 ignore RCS.locked
+copy kadmin.old;d

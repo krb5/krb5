@@ -196,7 +196,7 @@ clean-windows::
 	cd ..
 	@echo Making clean in root
 	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
- 
+
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.
 #

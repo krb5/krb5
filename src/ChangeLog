@@ -1,3 +1,9 @@
+Tue May  2 21:26:09 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* .rconf: copy kadmin.old as well
+
+	* Makefile.in: nuke spurious whitespace on blank line
+
 Sat Apr 29 14:13:45 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* aclocal.m4 (WITH_KRB4): fix so configure --help looks nice.
