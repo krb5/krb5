@@ -1,3 +1,8 @@
+2002-05-22 Alexandra Ellwood <lxs@mit.edu>
+    * krb5_libinit.c: Conditionalized error table loading for
+    Mac OS X.  Error tables should always be loaded on other 
+    platforms.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * krb5_libinit.c: Added an include for com_err.h since
     it is not included by error table headers on Mac OS X.  Also
