@@ -197,7 +197,7 @@ int krb5_fulladdr_order
 krb5_error_code krb5_copy_keyblock
     PROTOTYPE((krb5_keyblock *,
 	       krb5_keyblock *));
-krb5_error_code krb5_copy_cred
+krb5_error_code krb5_copy_creds
     PROTOTYPE((krb5_creds *,
 	       krb5_creds **));
 krb5_error_code krb5_copy_data
