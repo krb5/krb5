@@ -1,3 +1,11 @@
+Wed Jun 21 10:54:58 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in, krb5.hin: Don't include autoconf.h anymore; have
+		the Makefile include the few configure symbols which
+		krb5.h needs.
+
+	* krb5.hin: Change PROTOTYPE -> KRB5_PROTOTYPE and 
+		NPROTOTYPE -> KRB5_NPROTOTYPE.
 
 Fri Jun 16 11:39:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Fix install logic for krb5.h and k5-int.h.

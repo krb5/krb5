@@ -17,8 +17,18 @@ all-windows::
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
-krb5.h: $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h asn1_err.h
-	cat $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
+krb5-pro.h: krb5/autoconf.h
+	echo "/* This is the prologue to krb5.h */" > krb5-pro.h
+	echo "/* Unfortunately some of these defines are compiler dependent */" >> krb5-pro.h
+	grep SIZEOF krb5/autoconf.h >> krb5-pro.h
+	grep PROTOTYPES krb5/autoconf.h >> krb5-pro.h
+	grep HAS_VOID_TYPE krb5/autoconf.h >> krb5-pro.h
+	grep HAVE_STDARG_H krb5/autoconf.h >> krb5-pro.h
+	echo "/* End of prologue section */"  >> krb5-pro.h
+
+krb5.h: krb5-pro.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
+		asn1_err.h
+	cat krb5-pro.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
 		asn1_err.h > krb5.h
 
 #
