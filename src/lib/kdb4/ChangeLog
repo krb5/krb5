@@ -1,3 +1,7 @@
+Mon May 22 15:14:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb_dbm.c (kerb_end_update): Use the POSIX  utime instead of utimes.
+
 Fri Apr 28 16:24:20 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Add check for KRB5_POSIX_LOCKS

@@ -21,6 +21,7 @@
 /* before krb_db.h */
 #include <krb.h>
 #include <krb_db.h>
+#include <utime.h>
 
 #ifdef NDBM
 #include <ndbm.h>
@@ -246,16 +247,14 @@ static long kerb_end_update(db_name, age)
 	retval = errno;
     else {
 	struct stat st;
-	struct timeval tv[2];
+	struct utimbuf times;
 	/* make sure that semaphore is "after" previous value. */
 	if (fstat (fd, &st) == 0
 	    && st.st_mtime <= age) {
-	    tv[0].tv_sec = st.st_atime;
-	    tv[0].tv_usec = 0;
-	    tv[1].tv_sec = age;
-	    tv[1].tv_usec = 0;
+	    times.actime = st.st_atime;
+	    times.modtime = age;
 	    /* set times.. */
-	    utimes (new_okname, tv);
+	    utime (new_okname, &times);
 #ifndef NO_FSYNC
 	    fsync(fd);
 #endif
