@@ -1,3 +1,9 @@
+Tue Nov  1 14:56:47 1994    (tytso@rsx-11)
+
+	* Makefile.in:
+	* configure.in: Change the way the library is built to use the
+		libupdate script.
+
 Mon Oct  3 21:11:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: make install obey $(DESTDIR)

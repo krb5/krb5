@@ -8,7 +8,7 @@ AC_PROG_RANLIB
 AC_PROG_INSTALL
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
-AppendRule([all:: libkrb5.a])
+AppendRule([all:: libkrb5.a libkrb5_ranlib])
 WITH_CCOPTS
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE

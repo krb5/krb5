@@ -1,27 +1,34 @@
 TST=if test -n "`cat DONE`" ; then
 
-all::
+LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
+	keytab keytab/file krb rcache free os posix
+LIBUPDATE= $(BUILDTOP)/util/libupdate
+
+all:: 
+
+libkrb5_ranlib: libkrb5.a
+	$(RANLIB) libkrb5.a
+	touch $@
 
 libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
 		rcache/DONE free/DONE os/DONE posix/DONE
-	(cd error_tables; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd asn.1; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd ccache; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd ccache/stdio; $(TST) $(ARADD) ../../$@ `cat DONE` ; fi)
-	(cd ccache/file; $(TST) $(ARADD) ../../$@ `cat DONE` ; fi)
-	(cd keytab; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd keytab/file; $(TST) $(ARADD) ../../$@ `cat DONE` ; fi)
-	(cd krb; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd rcache; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd free; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd os; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd posix; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	$(RANLIB) $@
+	if test -f $@ ; then \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+		done \
+	else \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
+		done \
+	fi
+		
 
-install:: libkrb5.a
+install:: libkrb5_ranlib
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 
 clean::
-	$(RM) libkrb5.a
+	$(RM) libkrb5.a libkrb5_ranlib
