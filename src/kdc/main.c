@@ -37,6 +37,11 @@ static char rcsid_main_c[] =
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
 
+#include <krb5/config.h>
+#ifdef PROVIDE_DES_CBC_CRC
+#include <krb5/des.h>
+#endif
+
 #include "kdc_util.h"
 #include "extern.h"
 #include "../admin/common.h"
@@ -169,7 +174,7 @@ char **argv;
 
     /* assemble & parse the master key name */
 
-    if (retval = setup_mkey_name(mkey_name, db_realm, 0, &master_princ)) {
+    if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
     }
@@ -198,8 +203,12 @@ krb5_keyblock *masterkeyblock;
     if (retval = krb5_db_init())
 	return(retval);
 
-    master_encblock.crypto_entry = &krb5_des_cs_entry; /* XXX */
-
+#ifdef PROVIDE_DES_CBC_CRC
+    master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
+#else
+#error You gotta figure out what cryptosystem to use in the KDC.
+#endif
+    
     if (retval = krb5_db_verify_master_key(masterkeyname, masterkeyblock,
 					   &master_encblock)) {
 	master_encblock.crypto_entry = 0;
