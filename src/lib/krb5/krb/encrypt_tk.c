@@ -59,7 +59,7 @@ krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[dec_ticket->enc_part.etype]->system;
+    krb5_use_cstype(&eblock, dec_ticket->enc_part.etype);
     dec_ticket->enc_part.ciphertext.length =
 	krb5_encrypt_size(scratch->length,
 			  eblock.crypto_entry);

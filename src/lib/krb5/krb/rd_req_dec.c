@@ -199,7 +199,7 @@ krb5_authenticator **authpp;
     if (!valid_etype(request->authenticator.etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
-    eblock.crypto_entry = krb5_csarray[request->authenticator.etype]->system;
+    krb5_use_cstype(&eblock, request->authenticator.etype);
 
     scratch.length = request->authenticator.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length)))

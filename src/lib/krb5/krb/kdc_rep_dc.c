@@ -52,7 +52,7 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[dec_rep->enc_part.etype]->system;
+    krb5_use_cstype(&eblock, dec_rep->enc_part.etype);
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {

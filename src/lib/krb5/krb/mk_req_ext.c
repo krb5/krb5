@@ -132,7 +132,7 @@ krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[etype]->system;
+    krb5_use_cstype(&eblock, etype);
     request.authenticator.etype = etype;
     request.authenticator.kvno = 0; /* XXX user set? */
     request.authenticator.ciphertext.length =

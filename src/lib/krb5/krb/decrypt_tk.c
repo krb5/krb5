@@ -46,7 +46,7 @@ register krb5_ticket *ticket;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[ticket->enc_part.etype]->system;
+    krb5_use_cstype(&eblock, ticket->enc_part.etype);
 
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))

@@ -67,7 +67,7 @@ krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[etype]->system;
+    krb5_use_cstype(&eblock, etype);
     reply.enc_part.etype = etype;
     reply.enc_part.kvno = 0;		/* XXX user set? */
 

@@ -83,7 +83,7 @@ OLDDECLARG(krb5_data *, outbuf)
 			   
     /* put together an eblock for this decryption */
 
-    eblock.crypto_entry = krb5_csarray[privmsg->enc_part.etype]->system;
+    krb5_use_cstype(&eblock, privmsg->enc_part.etype);
     scratch.length = privmsg->enc_part.ciphertext.length;
     
     if (!(scratch.data = malloc(scratch.length))) {

@@ -89,7 +89,7 @@ OLDDECLARG(krb5_data *, outbuf)
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[etype]->system;
+    krb5_use_cstype(&eblock, etype);
     privmsg.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,
 						eblock.crypto_entry);
     /* add padding area, and zero it */

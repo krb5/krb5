@@ -60,7 +60,7 @@ krb5_ap_rep_enc_part *repl;
 	krb5_free_ap_rep(reply);
 	return KRB5_PROG_ETYPE_NOSUPP;
     }
-    eblock.crypto_entry = krb5_csarray[reply->enc_part.etype]->system;
+    krb5_use_cstype(&eblock, reply->enc_part.etype);
 
     scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {
