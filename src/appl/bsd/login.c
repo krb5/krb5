@@ -1029,8 +1029,8 @@ do_krb_login(host, strict)
 	(void) memset((char *) &sin, 0, (int) sizeof(sin));
 
         if (hp)
-                (void) bcopy (hp->h_addr, (char *)&sin.sin_addr,
-			      sizeof(sin.sin_addr));
+                (void) memcpy ((char *)&sin.sin_addr, hp->h_addr,
+			       sizeof(sin.sin_addr));
 	else
 		sin.sin_addr.s_addr = inet_addr(host);
 

@@ -1379,12 +1379,12 @@ int des_read(fd, buf, len)
       return(read(fd, buf, len));
     
     if (nstored >= len) {
-	bcopy(store_ptr, buf, len);
+	memcpy(buf, store_ptr, len);
 	store_ptr += len;
 	nstored -= len;
 	return(len);
     } else if (nstored) {
-	bcopy(store_ptr, buf, nstored);
+	memcpy(buf, store_ptr, nstored);
 	nreturned += nstored;
 	buf += nstored;
 	len -= nstored;
@@ -1435,12 +1435,12 @@ int des_read(fd, buf, len)
       store_ptr = storage;
     nstored = net_len;
     if (nstored > len) {
-	bcopy(store_ptr, buf, len);
+	memcpy(buf, store_ptr, len);
 	nreturned += len;
 	store_ptr += len;
 	nstored -= len;
     } else {
-	bcopy(store_ptr, buf, nstored);
+	memcpy(buf, store_ptr, nstored);
 	nreturned += nstored;
 	nstored = 0;
     }
@@ -1471,10 +1471,10 @@ int des_write(fd, buf, len)
 	}
 	garbage = random();
 	/* insert random garbage */
-	(void) bcopy(&garbage, garbage_buf, min(sizeof(long),8));
+	(void) memcpy(garbage_buf, &garbage, min(sizeof(long),8));
 	
 	/* this "right-justifies" the data in the buffer */
-	(void) bcopy(buf, garbage_buf + 8 - len, len);
+	(void) memcpy(garbage_buf + 8 - len, buf, len);
     }
     
     (void) mit_des_cbc_encrypt((len < 8) ? garbage_buf : buf,
