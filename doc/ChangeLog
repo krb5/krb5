@@ -1,3 +1,7 @@
+Fri Mar  8 09:43:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* install.texi (The DejaGnu Tests): Describe the DejaGnu tests.
+
 Mon Oct 30 16:58:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* install.texi: Fix all path names, spelling check, convert tabs

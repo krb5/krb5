@@ -158,6 +158,10 @@ Doing the Build
 * Building with Separate Build Directories::  
 * Building using lndir::        
 
+Testing the Build
+
+* The DejaGnu Tests::           
+
 Shared Library Support
 
 * Shared Library Theory::       
@@ -581,6 +585,37 @@ building Kerberos; see @ref{Doing the Build}.):
 @example
 % @b{make check}
 @end example
+
+@menu
+* The DejaGnu Tests::           
+@end menu
+
+@node The DejaGnu Tests,  , Testing the Build, Testing the Build
+@subsection The DejaGnu Tests 
+
+Some of the built-in regression tests are setup to use the DejaGnu
+framework for running tests. These tests tend to be more comprehensive
+than the normal built-in tests as they setup test servers and test
+client/server activities. 
+
+DejaGnu may be found wherever GNU software is archived. 
+
+Most of the tests are setup to run as a non-privledged user. There are
+two series of tests (rlogind and telnetd) which require the ability to
+@samp{rlogin} as root to the local machine. Admittedly, this does
+require the use of a @file{.rhosts} file or some other authenticated
+means. @footnote{If you are fortunate enough to have a previous version
+of Kerberos V5 or V4 installed, and the Kerberos rlogin is first in your
+path, you can setup @file{.k5login} or @file{.klogin} as appropriate to
+allow you access.}
+
+If you cannot obtain root access to your machine, all the other tests
+will still run. Note however, with DejaGnu 1.2, the "untested testcases"
+will cause the testsuite to exit with a non-zero exit status which
+@samp{make} will consider a failure of the testing process. Do not worry
+about this, as these tests are the last run when @samp{make check} is
+executed from the top level of the build tree.
+
 
 @node Options to Configure, osconf.h, Testing the Build, Building Kerberos
 @section Options to Configure 
