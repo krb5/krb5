@@ -78,6 +78,7 @@ typedef struct _krb5_authenticator {
 typedef struct _krb5_tkt_authent {
     krb5_ticket *ticket;
     krb5_authenticator *authenticator;
+    krb5_flags ap_options;
 } krb5_tkt_authent;
 
 /* credentials:  Ticket, session key, etc. */
