@@ -879,7 +879,8 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 	    sec_udpport = 0;
     }
 
-    return krb5int_locate_server(context, realm, addrlist, get_masters, "kdc",
+    return krb5int_locate_server(context, realm, addrlist, 0,
+				 get_masters ? "master_kdc" : "kdc",
 				 (get_masters
 				  ? "_kerberos-master"
 				  : "_kerberos"),
