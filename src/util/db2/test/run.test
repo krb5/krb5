@@ -69,7 +69,7 @@ main()
 }
 
 getnwords() {
-	sed -e ${1}q -e '/^$/d' $DICT
+	sed -e '/^$/d' < $DICT | sed -e ${1}q
 }
 
 # Take the first hundred entries in the dictionary, and make them

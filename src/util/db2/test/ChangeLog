@@ -1,3 +1,8 @@
+2004-08-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (getnwords): Rewrite to drop blank lines before
+	counting lines, not after.
+
 2004-08-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* run.test (getnwords): New function.  Uses sed to get N words
