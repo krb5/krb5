@@ -1,3 +1,6 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * setenv.c: Updated macros to removed warning
+
 2000-04-28  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 
