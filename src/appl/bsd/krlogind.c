@@ -1561,7 +1561,7 @@ recvauth(valid_checksum)
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
 	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
-					  ticket, lusername, &ccache))) {
+					  ticket, &ccache))) {
          fatal(netf, "Can't get forwarded credentials");
     }
     return 0;

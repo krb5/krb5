@@ -1,3 +1,8 @@
+Thu Nov 20 16:42:54 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (recvauth): Fix args in call to
+ 	rd_and_store_for_creds. [krb5-appl/502]
+
 Mon Nov 17 20:55:31 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c: Don't set checksum_ignored to 1 if checksum_required is
