@@ -10,9 +10,9 @@ LIBOBJS = @LIBOBJS@
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-OBJS=	rnd_confoun.$(OBJEXT) localaddr.$(OBJEXT) ustime.$(OBJEXT) $(LIBOBJS)
+OBJS=	rnd_confoun.$(OBJEXT) c_localaddr.$(OBJEXT) ustime.$(OBJEXT) $(LIBOBJS)
 
-SRCS=	rnd_confoun.c localaddr.c ustime.c
+SRCS=	rnd_confoun.c c_localaddr.c ustime.c
 
 all:: all-$(WHAT)
 

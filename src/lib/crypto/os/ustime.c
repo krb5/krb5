@@ -27,7 +27,7 @@
 #define	NEED_SOCKETS
 #include "k5-int.h"
 
-#ifdef HAVE_MACSOCK_H
+#ifdef _MACINTOSH
 /* We're a Macintosh -- do Mac time things.  */
 
 /*
@@ -65,17 +65,16 @@
   *******************************/
 
 /* returns the offset in hours between the mac local time and the GMT  */
-
-static
-unsigned krb5_int32
+/* unsigned krb5_int32 */
+krb5_int32
 getTimeZoneOffset()
 {
 	MachineLocation		macLocation;
 	long			gmtDelta;
 
-	macLocation.gmtFlags.gmtDelta=0L;
+	macLocation.u.gmtDelta=0L;
 	ReadLocation(&macLocation); 
-	gmtDelta=macLocation.gmtFlags.gmtDelta & 0x00FFFFFF;
+	gmtDelta=macLocation.u.gmtDelta & 0x00FFFFFF;
 	if (BitTst((void *)&gmtDelta,23L))	gmtDelta |= 0xFF000000;
 	gmtDelta /= 3600L;
 	return(gmtDelta);
@@ -91,8 +90,12 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 {
     krb5_int32 sec, usec;
     time_t the_time;
-    
-    GetDateTime (&the_time);
+	struct tm *gtime, *ltime;
+
+//	GetDateTime (&the_time);
+	time(&the_time);
+//	gtime = gmtime(&the_time);
+//	ltime = localtime(&the_time);
     sec = the_time - 
 	    ((66 * 365 * 24 * 60 * 60) + 
 		  (17 *  24 * 60 * 60) +
@@ -112,6 +115,7 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 	    
     *seconds = sec;
     *microseconds = usec;
+
     return 0;
 }
 
