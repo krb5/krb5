@@ -51,7 +51,7 @@
 #endif
 /* AdminMandir: manual page directory for administrative man pages */
 #ifndef AdminMandir
-#define AdminMandir /krb5/man/man8
+#define AdminMandir $(KRB5ROOT)/man/man8
 #endif
 
 /* ServerManSuffix: man page suffix for server programs */
@@ -60,7 +60,7 @@
 #endif
 /* ServerMandir: manual page directory for server man pages */
 #ifndef ServerMandir
-#define ServerMandir /krb5/man/man8
+#define ServerMandir $(KRB5ROOT)/man/man8
 #endif
 
 /* ClientManSuffix: man page suffix for client programs */
@@ -69,7 +69,7 @@
 #endif
 /* ClientMandir: manual page directory for client man pages */
 #ifndef ClientMandir
-#define ClientMandir /krb5/man/man1
+#define ClientMandir $(KRB5ROOT)/man/man1
 #endif
 
 /*
@@ -77,19 +77,27 @@
  */
 /* AdminBindir: binary install directory for administrative programs */
 #ifndef AdminBindir
-#define AdminBindir /krb5/admin
+#define AdminBindir $(KRB5ROOT)/admin
 #endif
 
 /* ServerBindir: binary install directory for server programs */
 #ifndef ServerBindir
-#define ServerBindir /krb5/sbin
+#define ServerBindir $(KRB5ROOT)/sbin
 #endif
 
 /* ClientBindir: binary install directory for client programs */
 #ifndef ClientBindir
-#define ClientBindir /krb5/bin
+#define ClientBindir $(KRB5ROOT)/bin
 #endif
 
+/* Libdir: install directory for kerberos libraries */
+#ifndef Krb5Libdir
+#define	Krb5Libdir $(KRB5ROOT)/lib
+#endif
+
+#ifndef Krb5Incdir
+#define	Krb5Incdir $(KRB5ROOT)/include
+#endif
 /*****************************************************************************
  *                                                                           *
  *			       Build Parameters                              *
@@ -109,10 +117,10 @@
    -T0x400000 has a similar effect on AIX 1.2
 
    Symbolic debugging is difficult on RT and PS/2 when this option is used. */
-#ifndef UltrixArchitecture
 #if defined(AIXArchitecture) && OSMajorVersion == 1
 #define	ExtraLoadFlags -T0x400000
 #else
+#if !defined(UltrixArchitecture) && !defined(AIXArchitecture)
 #define ExtraLoadFlags -Z
 #endif
 #endif
@@ -151,8 +159,12 @@
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
 
+#define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
+#define IsodeDir /mit/isode/isode-7.0
+/*
 #define IsodeLib -L/mit/isode/isode-6.8/@sys/lib -lisode
 #define IsodeDir /mit/isode/isode-6.8
+*/
 
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
@@ -187,12 +199,16 @@
    			  (might want to be in the architecture-specific
 			   configuration file) */
 
-/* #define LdLibLocations -L/foo/bar -- alternate library search paths,
-					if needed for some system libraries */
-/* #define StandardIncludes -I/foo/bar -- additional include paths, if
-					needed, such as those needed
-					to get special include files,
-					like <ss/ss.h> or <com_err.h> */
+/* alternate library search paths, if needed for some system libraries */
+#define LdLibLocations -L/usr/athena/lib
+
+/* additional include paths, if needed, such as those needed
+   to get special include files, like <ss/ss.h> or <com_err.h> */
+#define	StandardIncludes -I/usr/athena/include
+
+#if defined(AIXArchitecture) && OSMajorVersion == 3
+#define	StandardDefines	-D_ALL_SOURCE
+#endif
 
 #define	AthenaEnv YES		/* Define this if you are in the
 				   athena environment.
