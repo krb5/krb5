@@ -1976,12 +1976,8 @@ load_db(argc, argv)
      */
     fgets(buf, sizeof(buf), f);
     if (load) {
-	 /*
-	  * If the header does not end in newline, only check what we know.
-	  */
-	 if ((load->header[strlen(load->header)-1] != '\n' &&
-	      strncmp(buf, load->header, strlen(load->header)) != 0) ||
-	     (strcmp(buf, load->header) != 0)) {
+	 /* only check what we know; some headers only contain a prefix */
+	 if (strncmp(buf, load->header, strlen(load->header)) != 0) {
 	      fprintf(stderr, head_bad_fmt, programname, dumpfile);
 	      exit_status++;
 	      if (dumpfile) fclose(f);
@@ -2006,8 +2002,8 @@ load_db(argc, argv)
 	 }
     }
     if (load->updateonly && !update) {
-	 fprintf(stderr, "%s: dump version %s can only be loaded in "
-		 "update mode\n", programname, load->name);
+	 fprintf(stderr, "%s: dump version %s can only be loaded with the "
+		 "-update flag\n", programname, load->name);
 	 exit_status++;
 	 return;
     }
