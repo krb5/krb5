@@ -1,5 +1,8 @@
 Fri Nov  1 19:05:15 1996  Tom Yu  <tlyu@mit.edu>
 
+	* copyright.texinfo: Add call to "@pagealignmacro" to force a
+	blank page after copyright spewage. [krb5-doc/54]
+
 	* Makefile: Apply jik's changes for dependencies [krb5-doc/101]
 
 	* install.texinfo (krb5.conf): Fixed extra
