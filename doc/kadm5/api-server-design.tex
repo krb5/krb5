@@ -577,6 +577,9 @@ To store the an encrypted key in old_keys, insert it as the
 next_old_key element of old_keys, and increment next_old_key by one
 modulo pw_history_num.
 
+The new key version number is returned only if the API version
+specified to ovsec_kadm_init was greater than 1.
+
 \subsection{ovsec_kadm_get_principal}
 
 If the named principal exists in either the Kerberos or admin
