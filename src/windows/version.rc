@@ -182,16 +182,41 @@ BEGIN
     BEGIN
 	BLOCK "040904E4"
 	BEGIN
-	    VALUE "CompanyName",        K5_COMPANY_NAME
+#if defined(VER_EXTRA_LABEL) && defined(VER_EXTRA_VALUE)
+            VALUE VER_EXTRA_LABEL,   VER_EXTRA_VALUE
+#endif
+#ifdef VER_COMMENT
+            VALUE "Comment",         VER_COMMENT
+#endif
+#ifdef VER_USERNAME
+            VALUE "Built By",        VER_USERNAME
+#endif
+#ifdef VER_HOSTNAME
+            VALUE "Build Host",      VER_HOSTNAME
+#endif
+#ifdef VER_DATE
+            VALUE "Build Time",      VER_DATE
+#endif
+#ifdef VER_VENDOR
+            VALUE "Modified by Vendor",  VER_VENDOR
+#endif
+            VALUE "CompanyName",        K5_COMPANY_NAME
 	    VALUE "FileDescription",	K5_DESCRIPTION
 	    VALUE "FileVersion",	K5_PRODUCT_VERSION_STRING
 	    VALUE "InternalName",	K5_INTERNAL_NAME
+#ifdef VER_LEGALTRADEMARK_STR
+            VALUE VER_LEGALTRADEMARK_STR
+#else
 	    VALUE "LegalTrademarks",	"\0"
+#endif
 	    VALUE "OriginalFilename",	K5_ORIGINAL_NAME
 	    VALUE "ProductName",	K5_ORIGINAL_NAME
 	    VALUE "ProductVersion",	K5_PRODUCT_VERSION_STRING
 
 	    VALUE "LegalCopyright",	K5_COPYRIGHT
+#ifdef VER_SPECIALBUILD
+            VALUE "SpecialBuild",       VER_SPECIALBUILD
+#endif
 	END
     END
 END
