@@ -12,13 +12,14 @@ THDRDIR=$(BUILDTOP)$(S)include
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
-      kv5m_err.o init_ets.o
+      kv5m_err.o krb524_err.o init_ets.o
 
-HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h
+HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
 OBJS= $(OUTPRE)asn1_err.$(OBJEXT) $(OUTPRE)kdb5_err.$(OBJEXT) $(OUTPRE)krb5_err.$(OBJEXT) \
-      $(OUTPRE)kv5m_err.$(OBJEXT) $(OUTPRE)init_ets.$(OBJEXT)
-ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c
-SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c \
+      $(OUTPRE)kv5m_err.$(OBJEXT) $(OUTPRE)krb524_err.$(OBJEXT) \
+      $(OUTPRE)init_ets.$(OBJEXT)
+ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c
+SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c \
 	$(srcdir)/init_ets.c
 
 ##DOS##LIBOBJS = $(OBJS)
@@ -40,14 +41,17 @@ awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kdb5_err.h kdb5_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb5_err.h krb5_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kv5m_err.h kv5m_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb524_err.h krb524_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=asn1_err.c asn1_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kdb5_err.c kdb5_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=krb5_err.c krb5_err.et
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kv5m_err.c kv5m_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=krb524_err.c krb524_err.et
 	if exist asn1_err.h copy asn1_err.h "$(EHDRDIR)"
 	if exist kdb5_err.h copy kdb5_err.h "$(EHDRDIR)"
 	if exist krb5_err.h copy krb5_err.h "$(EHDRDIR)"
 	if exist kv5m_err.h copy kv5m_err.h "$(EHDRDIR)"
+	if exist krb524_err.h copy krb524_err.h "$(EHDRDIR)"
 
 #
 # dependencies for traditional makes
@@ -56,6 +60,7 @@ $(OUTPRE)asn1_err.$(OBJEXT): asn1_err.c
 $(OUTPRE)kdb5_err.$(OBJEXT): kdb5_err.c
 $(OUTPRE)krb5_err.$(OBJEXT): krb5_err.c
 $(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c
+$(OUTPRE)krb524_err.$(OBJEXT): krb524_err.c
 
 clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)
@@ -71,9 +76,10 @@ asn1_err.so asn1_err.po $(OUTPRE)asn1_err.$(OBJEXT): asn1_err.c $(COM_ERR_DEPS)
 kdb5_err.so kdb5_err.po $(OUTPRE)kdb5_err.$(OBJEXT): kdb5_err.c $(COM_ERR_DEPS)
 krb5_err.so krb5_err.po $(OUTPRE)krb5_err.$(OBJEXT): krb5_err.c $(COM_ERR_DEPS)
 kv5m_err.so kv5m_err.po $(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c $(COM_ERR_DEPS)
+krb524_err.so krb524_err.po $(OUTPRE)krb524_err.$(OBJEXT): krb524_err.c $(COM_ERR_DEPS)
 init_ets.so init_ets.po $(OUTPRE)init_ets.$(OBJEXT): init_ets.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
 

@@ -62,8 +62,7 @@ if test $withval = no; then
 	V4RCP=
 	V4RCPO=
 else 
-	AC_MSG_RESULT(Adding in krb4 support)
-	LOGINLIBS="../../krb524/libkrb524.a $LOGINLIBS"
+	AC_MSG_RESULT(Adding in krb4 rcp support)
 	V4RCP=v4rcp
 	V4RCPO=v4rcp.o
 fi

@@ -113,6 +113,10 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 int schpw;
 void do_schpw(int s, kadm5_config_params *params);
 
+#ifdef USE_PASSWORD_SERVER
+void kadm5_set_use_password_server (void);
+#endif
+
 /*
  * Function: usage
  * 
@@ -127,6 +131,9 @@ void do_schpw(int s, kadm5_config_params *params);
 static void usage()
 {
      fprintf(stderr, "Usage: kadmind [-r realm] [-m] [-nofork] "
+#ifdef USE_PASSWORD_SERVER
+             "[-passwordserver] "
+#endif
 	     "[-port port-number]\n");
      exit(1);
 }
@@ -242,6 +249,10 @@ int main(int argc, char *argv[])
 	       params.mask |= KADM5_CONFIG_MKEY_FROM_KBD;
 	  } else if (strcmp(*argv, "-nofork") == 0) {
 	       nofork = 1;
+#ifdef USE_PASSWORD_SERVER
+          } else if (strcmp(*argv, "-passwordserver") == 0) {
+              kadm5_set_use_password_server ();
+#endif              
 	  } else if(strcmp(*argv, "-port") == 0) {
 	    argc--; argv++;
 	    if(!argc)

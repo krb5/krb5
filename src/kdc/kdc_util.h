@@ -176,6 +176,7 @@ krb5_error_code process_v4 (const krb5_data *,
 				      const krb5_fulladdr *,
 				      krb5_data **);
 void process_v4_mode (const char *, const char *);
+void enable_v4_crossrealm(char *);
 #else
 #define process_v4(foo,bar,quux,foobar)	KRB5KRB_AP_ERR_BADVERSION
 #endif

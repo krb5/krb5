@@ -149,7 +149,8 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 		$(SRCTOP)/aclocal.m4
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 	cd $(srcdir)/$(thisconfigdir) && \
-		$(AUTOCONF) ${AUTOCONFINCFLAGS}=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
+		($(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS) || \
+		 $(AUTOCONF) --localdir=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS))
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
