@@ -1,3 +1,19 @@
+Sun Mar 31 01:17:26 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): use context->clockskew
+	in all time bound checks.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): for time periods that
+	would occupy greater than 128 ticks, use the CMU algorithm, based
+	on the table cmu_seconds. (In conjunction with the previous
+	changes, even non-CMU clients can be used for the full lifetime of
+	a V5 ticket by rerunning krb524init when their lower
+	interpretation of the end time is expired.)
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): rather than apply fit
+ 	an extended v5 lifetime into a v4 range, give out a v4 ticket with
+ 	as much of the v5 lifetime is available "now" instead.
+
 Tue Mar 19 17:07:44 1996  Richard Basch  <basch@lehman.com>
 
 	* conv_creds.c (krb524_convert_creds_plain):
