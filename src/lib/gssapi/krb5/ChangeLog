@@ -1,3 +1,8 @@
+Wed Jul 24 22:54:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Initialize variable
+		before use if GSS_C_NULL_OID_SET.
+
 Wed Jul 24 19:40:55 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* ser_sctx.c (kg_oid_externalize): Add proper return code

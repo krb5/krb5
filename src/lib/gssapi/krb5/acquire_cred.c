@@ -297,6 +297,8 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    if (desired_mechs == GSS_C_NULL_OID_SET) {
       valid_mechs = gss_mech_set_krb5_both;
+      req_old = 1;
+      req_new = 1;
    } else {
       req_old = 0;
       req_new = 0;
