@@ -227,3 +227,7 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_3_1d5
  fixed Carbon fragment names
  
+3.1d6
+ from tag Mac_GSSKerberos5_3_1d5
+ fixed sleep time bug
+ fixed dependencies on 8.5+ InterfaceLib
