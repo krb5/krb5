@@ -1,3 +1,10 @@
+2005-01-11  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+          - do not free krb5_creds if krb5_copy_creds fails
+          - cause MSTicketToMITTicket to return failure if
+            krb5_copy_data fails
+
 2004-12-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* cc_file.c (krb5_fcc_close): Free the cache id.

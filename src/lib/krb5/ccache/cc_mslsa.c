@@ -342,18 +342,25 @@ MSFlagsToMITFlags(ULONG msflags, ULONG *mitflags)
     *mitflags=msflags;
 }
 
-static void
+static BOOL
 MSTicketToMITTicket(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_data *ticket)
 {
-    krb5_data tmpdata, *newdata;
+    krb5_data tmpdata, *newdata = 0;
+    krb5_error_code rc;
+
     tmpdata.magic=KV5M_DATA;
     tmpdata.length=msticket->EncodedTicketSize;
     tmpdata.data=msticket->EncodedTicket;
 
     // this is ugly and will break krb5_free_data() 
     // now that this is being done within the library it won't break krb5_free_data()
-    krb5_copy_data(context, &tmpdata, &newdata);
+    rc = krb5_copy_data(context, &tmpdata, &newdata);
+    if (rc)
+        return FALSE;
+    
     memcpy(ticket, newdata, sizeof(krb5_data));
+    krb5_xfree(newdata);
+    return TRUE;
 }
 
 /*
@@ -427,8 +434,7 @@ MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING ClientRealm,
 
     creds->addresses = NULL;
 
-    MSTicketToMITTicket(msticket, context, &creds->ticket);
-    return TRUE;
+    return MSTicketToMITTicket(msticket, context, &creds->ticket);
 }
 
 #ifdef HAVE_CACHE_INFO_EX2
@@ -2369,7 +2375,7 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     krb5_error_code kret = KRB5_OK;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket = 0, *mstgt = 0, *mstmp = 0;
-    krb5_creds * mcreds_noflags;
+    krb5_creds * mcreds_noflags = 0;
     krb5_creds   fetchcreds;
 
     if (!is_windows_2000())
@@ -2383,7 +2389,9 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
         return KRB5_OK;
     
     /* if not, we must try to get a ticket without specifying any flags or etypes */
-    krb5_copy_creds(context, mcreds, &mcreds_noflags);
+    kret = krb5_copy_creds(context, mcreds, &mcreds_noflags);
+    if (kret)
+        goto cleanup;
     mcreds_noflags->ticket_flags = 0;
     mcreds_noflags->keyblock.enctype = 0;
 
@@ -2492,7 +2500,7 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     krb5_error_code kret = KRB5_OK;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket = 0, *msticket2 = 0;
-    krb5_creds * creds_noflags;
+    krb5_creds * creds_noflags = 0;
 
     if (!is_windows_2000())
         return KRB5_FCC_NOFILE;
@@ -2506,12 +2514,14 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     /* If not, lets try to obtain a matching ticket from the KDC */
     if ( creds->ticket_flags != 0 && creds->keyblock.enctype != 0 ) {
         /* if not, we must try to get a ticket without specifying any flags or etypes */
-        krb5_copy_creds(context, creds, &creds_noflags);
-        creds_noflags->ticket_flags = 0;
-        creds_noflags->keyblock.enctype = 0;
+        kret = krb5_copy_creds(context, creds, &creds_noflags);
+        if (kret == 0) {
+            creds_noflags->ticket_flags = 0;
+            creds_noflags->keyblock.enctype = 0;
 
-        GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds_noflags, &msticket2);
-        krb5_free_creds(context, creds_noflags);
+            GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds_noflags, &msticket2);
+            krb5_free_creds(context, creds_noflags);
+        }
     }
 
     GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds, &msticket);
