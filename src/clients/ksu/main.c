@@ -45,9 +45,13 @@ static int set_env_var PROTOTYPE((char *, char *));
 static void sweep_up PROTOTYPE((krb5_context, int, krb5_ccache));
 static char * ontty PROTOTYPE((void));
 #ifdef HAVE_STDARG_H
-void print_status( const char *fmt, ...);
+static void print_status( const char *fmt, ...)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+     __attribute__ ((__format__ (__printf__, 1, 2)))
+#endif
+     ;
 #else
-void print_status();
+static void print_status();
 #endif
 char * get_dir_of_file();     
 
@@ -975,6 +979,7 @@ return 0;
 
 }
 
+static
 #ifdef HAVE_STDARG_H
 void print_status( const char *fmt, ...)
 #else
