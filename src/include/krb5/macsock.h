@@ -23,7 +23,7 @@
 #define macsock_h
 
 #include <Sockets.h>
-#include <ErrorLib.h>
+#include <KerberosSupport/ErrorLib.h>
 #include <netdb.h>
 
 /* Handle ANSI C versus traditional C */
