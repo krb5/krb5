@@ -1,3 +1,39 @@
+2000-02-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_preauth.c: Include <syslog.h>.
+	(struct _krb5_preauth_systems, preauth_systems): Add new NAME
+	field, for logging debug info.
+	(check_padata): Call krb5_klog_syslog instead of com_err.
+	(missing_required_preauth, check_padata): Added debugging
+	krb5_klog_syslog calls, currently disabled.
+	(sam_inst_map): Add {} around array element initializers to keep
+	gcc quiet.
+	(get_sam_edata): Delete unused variable I.
+
+	Patches from Frank Cusack for hw-preauth replay detection.
+	* main.c (rc_lifetime): New global variables.
+	(kdc_initialize_rcache): Initialize rc_lifetime from context
+	clockskew.
+	(setup_sam): New function; initializes psr_key.
+	(main): Call setup_sam.
+	* kdc_preauth.c (get_sam_edata): Fill in new fields of PSR.  Use
+	psr_key for encrypting instead of database master key.
+	(verify_sam_response): Use psr_key instead of database master
+	key.  Do replay detection if USE_RCACHE is defined.
+	(get_sam_edata): Clear SC and PSR structures before using them.
+	Set new FLAGS field of PSR.
+	(return_sam_data): New function.
+	(preauth_systems): Use return_sam_data in sam-response entry.
+	* extern.c (psr_key): Define.
+	* extern.h (psr_key): Declare.
+
+	* kdc_preauth.c (get_sam_edata, verify_sam_response): Add parens
+	around assignments in if statements, to keep "gcc -Wall" quiet.
+	(return_sam_data): Delete unused variable padata.
+
+	* main.c (kdc_current_rcname): Declare only if USE_RCACHE is
+	defined.
+
 2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* dispatch.c (dispatch): Log address and port number of detected

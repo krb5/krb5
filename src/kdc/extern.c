@@ -36,6 +36,7 @@ kdc_realm_t	*kdc_active_realm = (kdc_realm_t *) NULL;
 krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
+krb5_keyblock	psr_key;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 volatile int signal_requests_hup = 0;   /* ditto */

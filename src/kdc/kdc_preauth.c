@@ -56,6 +56,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
+#include <syslog.h>
 
 typedef krb5_error_code (*verify_proc)
     KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
@@ -76,6 +77,7 @@ typedef krb5_error_code (*return_proc)
 		    krb5_pa_data **send_pa));
 
 typedef struct _krb5_preauth_systems {
+    char *	name;
     int		type;
     int		flags;
     edata_proc	get_edata;
@@ -110,6 +112,13 @@ static krb5_error_code get_sam_edata
     KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
 		    krb5_pa_data *data));
+static krb5_error_code return_sam_data
+    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+		    krb5_db_entry *client,
+		    krb5_kdc_req *request, krb5_kdc_rep *reply,
+		    krb5_key_data *client_key,
+		    krb5_keyblock *encrypting_key,
+		    krb5_pa_data **send_pa));
 /*
  * Preauth property flags
  */
@@ -121,6 +130,7 @@ static krb5_error_code get_sam_edata
 
 static krb5_preauth_systems preauth_systems[] = {
     {
+	"timestamp",
         KRB5_PADATA_ENC_TIMESTAMP,
         0,
         0,
@@ -128,6 +138,7 @@ static krb5_preauth_systems preauth_systems[] = {
 	0
     },
     {
+	"etype-info",
 	KRB5_PADATA_ETYPE_INFO,
 	0,
 	get_etype_info,
@@ -135,6 +146,7 @@ static krb5_preauth_systems preauth_systems[] = {
 	0
     },
     {
+	"pw-salt",
 	KRB5_PADATA_PW_SALT,
 	PA_PSEUDO,		/* Don't include this in the error list */
 	0, 
@@ -142,20 +154,22 @@ static krb5_preauth_systems preauth_systems[] = {
 	return_pw_salt
     },
     {
+	"sam-response",
 	KRB5_PADATA_SAM_RESPONSE,
 	0,
 	0,
 	verify_sam_response,
-	0
+	return_sam_data
     },
     {
+	"sam-challenge",
 	KRB5_PADATA_SAM_CHALLENGE,
 	PA_HARDWARE,		/* causes get_preauth_hint_list to use this */
 	get_sam_edata,
 	0,
 	0
     },
-    { -1,}
+    { "[end]", -1,}
 };
 
 #define MAX_PREAUTH_SYSTEMS (sizeof(preauth_systems)/sizeof(preauth_systems[0]))
@@ -192,10 +206,19 @@ const char *missing_required_preauth(client, server, enc_tkt_reply)
 	return 0;
 #endif
     
+#ifdef DEBUG
+    krb5_klog_syslog (LOG_DEBUG,
+		      "client needs %spreauth, %shw preauth; request has %spreauth, %shw preauth",
+		      isflagset (client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) ? "" : "no ",
+		      isflagset (client->attributes, KRB5_KDB_REQUIRES_HW_AUTH) ? "" : "no ",
+		      isflagset (enc_tkt_reply->flags, TKT_FLG_PRE_AUTH) ? "" : "no ",
+		      isflagset (enc_tkt_reply->flags, TKT_FLG_HW_AUTH) ? "" : "no ");
+#endif
+
     if (isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
 	 !isflagset(enc_tkt_reply->flags, TKT_FLG_PRE_AUTH))
 	return "NEEDED_PREAUTH";
-    
+
     if (isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
 	!isflagset(enc_tkt_reply->flags, TKT_FLG_HW_AUTH))
 	return "NEEDED_HW_PREAUTH";
@@ -282,21 +305,34 @@ check_padata (context, client, request, enc_tkt_reply)
     if (request->padata == 0)
 	return 0;
 
+#ifdef DEBUG
+    krb5_klog_syslog (LOG_DEBUG, "checking padata");
+#endif
     for (padata = request->padata; *padata; padata++) {
+#ifdef DEBUG
+	krb5_klog_syslog (LOG_DEBUG, ".. pa_type 0x%x", (*padata)->pa_type);
+#endif
 	if (find_pa_system((*padata)->pa_type, &pa_sys))
 	    continue;
+#ifdef DEBUG
+	krb5_klog_syslog (LOG_DEBUG, ".. pa_type %s", pa_sys->name);
+#endif
 	if (pa_sys->verify_padata == 0)
 	    continue;
 	pa_found++;
 	retval = pa_sys->verify_padata(context, client, request,
 				       enc_tkt_reply, *padata);
 	if (retval) {
-	    com_err("krb5kdc", retval, "pa verify failure");
+	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
+			      pa_sys->name, error_message (retval));
 	    if (pa_sys->flags & PA_REQUIRED) {
 		pa_ok = 0;
 		break;
 	    }
 	} else {
+#ifdef DEBUG
+	    krb5_klog_syslog (LOG_DEBUG, ".. .. ok");
+#endif
 	    pa_ok = 1;
 	    if (pa_sys->flags & PA_SUFFICIENT) 
 		break;
@@ -312,7 +348,8 @@ check_padata (context, client, request, enc_tkt_reply)
        return 0;
 
     if (!pa_found)
-	com_err("krb5kdc", retval, "no valid preauth type found");
+	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s",
+			  error_message (retval));
     return KRB5KDC_ERR_PREAUTH_FAILED;
 }
 
@@ -635,15 +672,144 @@ cleanup:
     return retval;
 }
 
+static krb5_error_code
+return_sam_data(context, in_padata, client, request, reply, client_key,
+	        encrypting_key, send_pa)
+    krb5_context	context;
+    krb5_pa_data *	in_padata;
+    krb5_db_entry *	client;
+    krb5_kdc_req *	request;
+    krb5_kdc_rep *	reply;
+    krb5_key_data *	client_key;
+    krb5_keyblock *	encrypting_key;
+    krb5_pa_data **	send_pa;
+{
+    krb5_error_code	retval;
+    krb5_data		scratch;
+    int			i;
+
+    krb5_sam_response		*sr = 0;
+    krb5_predicted_sam_response	*psr = 0;
+
+    /*
+     * We start by doing the same thing verify_sam_response() does:
+     * extract the psr from the padata (which is an sr). Nothing
+     * here should generate errors! We've already successfully done
+     * all this once.
+     */
+
+    scratch.data = in_padata->contents;
+    scratch.length = in_padata->length;
+    
+    if ((retval = decode_krb5_sam_response(&scratch, &sr))) {
+	com_err("krb5kdc", retval,
+		"return_sam_data(): decode_krb5_sam_response failed");
+	goto cleanup;
+    }
+
+    {
+	krb5_enc_data tmpdata;
+
+	tmpdata.enctype = ENCTYPE_UNKNOWN;
+	tmpdata.ciphertext = sr->sam_track_id;
+
+	scratch.length = tmpdata.ciphertext.length;
+	if ((scratch.data = (char *) malloc(scratch.length)) == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+
+	if ((retval = krb5_c_decrypt(context, &psr_key, /* XXX */ 0, 0,
+				     &tmpdata, &scratch))) {
+	    com_err("krb5kdc", retval,
+		    "return_sam_data(): decrypt track_id failed");
+	    free(scratch.data);
+	    goto cleanup;
+	}
+    }
+
+    if ((retval = decode_krb5_predicted_sam_response(&scratch, &psr))) {
+	com_err("krb5kdc", retval,
+		"return_sam_data(): decode_krb5_predicted_sam_response failed");
+	free(scratch.data);
+	goto cleanup;
+    }
+
+    /* We could use sr->sam_flags, but it may be absent or altered. */
+    if (psr->sam_flags & KRB5_SAM_MUST_PK_ENCRYPT_SAD) {
+	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+		"Unsupported SAM flag must-pk-encrypt-sad");
+	goto cleanup;
+    }
+    if (psr->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
+	/* No key munging */
+	goto cleanup;
+    }
+    if (psr->sam_flags & KRB5_SAM_USE_SAD_AS_KEY) {
+	/* Use sam_key instead of client key */
+	krb5_free_keyblock_contents(context, encrypting_key);
+	krb5_copy_keyblock_contents(context, &psr->sam_key, encrypting_key);
+	/* XXX Attach a useful pa_data */
+	goto cleanup;
+    }
+
+    /* Otherwise (no flags set), we XOR the keys */
+    /* XXX The passwords-04 draft is underspecified here wrt different
+	   key types. We will do what I hope to get into the -05 draft. */
+    {
+	krb5_octet *p = encrypting_key->contents;
+	krb5_octet *q = psr->sam_key.contents;
+
+	for (i = 0; i < encrypting_key->length, i < psr->sam_key.length; i++)
+	    p[i] ^= q[i];
+    }
+
+    /* Post-mixing key correction */
+    switch (encrypting_key->enctype) {
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES_CBC_RAW:
+	mit_des_fixup_key_parity(encrypting_key->contents);
+	if (mit_des_is_weak_key(encrypting_key->contents))
+	    ((krb5_octet *) encrypting_key->contents)[7] ^= 0xf0;
+	break;
+
+    /* XXX case ENCTYPE_DES3_CBC_MD5: listed in 1510bis-04 draft */
+    case ENCTYPE_DES3_CBC_SHA: /* XXX deprecated? */
+    case ENCTYPE_DES3_CBC_RAW:
+    case ENCTYPE_DES3_CBC_SHA1:
+	for (i = 0; i < 3; i++) {
+	    mit_des_fixup_key_parity(encrypting_key->contents + i * 8);
+	    if (mit_des_is_weak_key(encrypting_key->contents + i * 8))
+		((krb5_octet *) encrypting_key->contents)[7 + i * 8] ^= 0xf0;
+	}
+	break;
+
+    default:
+	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+		"Unimplemented keytype for SAM key mixing");
+	goto cleanup;
+    }
+
+    /* XXX Attach a useful pa_data */
+cleanup:
+    if (sr)
+	krb5_free_sam_response(context, sr);
+    if (psr)
+	krb5_free_predicted_sam_response(context, psr);
+
+    return retval;
+}
     
 static struct {
   char* name;
   int   sam_type;
 } *sam_ptr, sam_inst_map[] = {
-  "SNK4", PA_SAM_TYPE_DIGI_PATH,
-  "SECURID", PA_SAM_TYPE_SECURID,
-  "GRAIL", PA_SAM_TYPE_GRAIL,
-  0, 0
+  { "SNK4", PA_SAM_TYPE_DIGI_PATH, },
+  { "SECURID", PA_SAM_TYPE_SECURID, },
+  { "GRAIL", PA_SAM_TYPE_GRAIL, },
+  { 0, 0 },
 };
 
 static krb5_error_code
@@ -658,11 +824,13 @@ get_sam_edata(context, request, client, server, pa_data)
     krb5_sam_challenge		sc;
     krb5_predicted_sam_response	psr;
     krb5_data *			scratch;
-    int 			i = 0;
     krb5_keyblock encrypting_key;
     char response[9];
     char inputblock[8];
     krb5_data predict_response;
+
+    memset(&sc, 0, sizeof(sc));
+    memset(&psr, 0, sizeof(psr));
 
     /* Given the client name we can figure out what type of preauth
        they need. The spec is currently for querying the database for
@@ -752,7 +920,15 @@ get_sam_edata(context, request, client, server, pa_data)
       }
     }
     sc.magic = KV5M_SAM_CHALLENGE;
-    sc.sam_flags = KRB5_SAM_USE_SAD_AS_KEY;
+    psr.sam_flags = sc.sam_flags = KRB5_SAM_USE_SAD_AS_KEY;
+
+    /* Replay prevention */
+    if ((retval = krb5_copy_principal(context, request->client, &psr.client)))
+	return retval;
+#ifdef USE_RCACHE
+    if ((retval = krb5_us_timeofday(context, &psr.stime, &psr.susec)))
+	return retval;
+#endif /* USE_RCACHE */
 
     switch (sc.sam_type) {
     case PA_SAM_TYPE_GRAIL:
@@ -781,7 +957,7 @@ get_sam_edata(context, request, client, server, pa_data)
 	    krb5_enc_data tmpdata;
 
 	    if ((retval = krb5_c_encrypt_length(context,
-						master_keyblock.enctype,
+						psr_key.enctype,
 						scratch->length, &enclen)))
 		goto cleanup;
 
@@ -791,7 +967,7 @@ get_sam_edata(context, request, client, server, pa_data)
 	    }
 	    tmpdata.ciphertext.length = enclen;
 
-	    if ((retval = krb5_c_encrypt(context, &master_keyblock,
+	    if ((retval = krb5_c_encrypt(context, &psr_key,
 					 /* XXX */ 0, 0, scratch, &tmpdata)))
 		goto cleanup;
 
@@ -809,6 +985,7 @@ get_sam_edata(context, request, client, server, pa_data)
 	seed_length,outcksum) */
       /*krb5_verify_checksum(context,ctype,cksum,in,in_length,seed,
 	seed_length) */
+#if 0 /* XXX a) glue appears broken; b) this gives up the SAD */
       sc.sam_cksum.contents = (krb5_octet *)
 	malloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5_DES));
       if (sc.sam_cksum.contents == NULL) return(ENOMEM);
@@ -820,6 +997,7 @@ get_sam_edata(context, request, client, server, pa_data)
 				       psr.sam_key.length, /* key length */
 				       &sc.sam_cksum);
       if (retval) { free(sc.sam_cksum.contents); return(retval); }
+#endif /* 0 */
       
       retval = encode_krb5_sam_challenge(&sc, &scratch);
       if (retval) goto cleanup;
@@ -946,7 +1124,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
 	    krb5_enc_data tmpdata;
 
 	    if ((retval = krb5_c_encrypt_length(context,
-						master_keyblock.enctype,
+						psr_key.enctype,
 						scratch->length, &enclen)))
 		goto cleanup;
 
@@ -956,7 +1134,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
 	    }
 	    tmpdata.ciphertext.length = enclen;
 
-	    if ((retval = krb5_c_encrypt(context, &master_keyblock,
+	    if ((retval = krb5_c_encrypt(context, &psr_key,
 					 /* XXX */ 0, 0, scratch, &tmpdata)))
 		goto cleanup;
 
@@ -975,6 +1153,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
 	seed_length,outcksum) */
       /*krb5_verify_checksum(context,ctype,cksum,in,in_length,seed,
 	seed_length) */
+#if 0 /* XXX a) glue appears broken; b) this gives up the SAD */
       sc.sam_cksum.contents = (krb5_octet *)
 	malloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5_DES));
       if (sc.sam_cksum.contents == NULL) return(ENOMEM);
@@ -986,6 +1165,7 @@ sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
 				       psr.sam_key.length, /* key length */
 				       &sc.sam_cksum);
       if (retval) { free(sc.sam_cksum.contents); return(retval); }
+#endif /* 0 */
       
       retval = encode_krb5_sam_challenge(&sc, &scratch);
       if (retval) goto cleanup;
@@ -1017,6 +1197,7 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
     krb5_predicted_sam_response	*psr = 0;
     krb5_enc_sam_response_enc	*esre = 0;
     krb5_timestamp		timenow;
+    char			*princ_req = 0, *princ_psr = 0;
 
     scratch.data = pa->contents;
     scratch.length = pa->length;
@@ -1027,6 +1208,8 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
 	goto cleanup;
     }
 
+    /* XXX We can only handle the challenge/response model of SAM.
+	   See passwords-04, par 4.1, 4.2 */
     {
       krb5_enc_data tmpdata;
 
@@ -1039,7 +1222,7 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
 	  goto cleanup;
       }
 
-      if ((retval = krb5_c_decrypt(context, &master_keyblock, /* XXX */ 0, 0,
+      if ((retval = krb5_c_decrypt(context, &psr_key, /* XXX */ 0, 0,
 				   &tmpdata, &scratch))) {
 	  com_err("krb5kdc", retval, "decrypt track_id failed");
 	  goto cleanup;
@@ -1048,9 +1231,50 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
 
     if ((retval = decode_krb5_predicted_sam_response(&scratch, &psr))) {
 	com_err("krb5kdc", retval,
-		"decode_krb5_predicted_sam_response failed");
+		"decode_krb5_predicted_sam_response failed -- replay attack?");
 	goto cleanup;
     }
+
+    /* Replay detection */
+    if ((retval = krb5_unparse_name(context, request->client, &princ_req)))
+	goto cleanup;
+    if ((retval = krb5_unparse_name(context, psr->client, &princ_psr)))
+	goto cleanup;
+    if (strcmp(princ_req, princ_psr) != 0) {
+	com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+		"Principal mismatch in SAM psr! -- replay attack?");
+	goto cleanup;
+    }
+
+    if ((retval = krb5_timeofday(context, &timenow)))
+	goto cleanup;
+
+#ifdef USE_RCACHE
+    {
+	krb5_donot_replay rep;
+	/*
+	 * Verify this response came back in a timely manner.
+	 * We do this b/c otherwise very old (expunged from the rcache)
+	 * psr's would be able to be replayed.
+	 */
+	if (timenow - psr->stime > rc_lifetime) {
+	    com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
+	    "SAM psr came back too late! -- replay attack?");
+	    goto cleanup;
+	}
+
+	/* Now check the replay cache. */
+	rep.client = princ_psr;
+	rep.server = "SAM/rc";  /* Should not match any principal name. */
+	rep.ctime = psr->stime;
+	rep.cusec = psr->susec;
+	if (retval = krb5_rc_store(kdc_context, kdc_rcache, &rep)) {
+	    com_err("krb5kdc", retval, "SAM psr replay attack!");
+	    goto cleanup;
+	}
+    }
+#endif /* USE_RCACHE */
+
 
     {
 	free(scratch.data);
@@ -1076,9 +1300,6 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
       retval = KRB5KDC_ERR_PREAUTH_FAILED;
       goto cleanup;
     }
-
-    if ((retval = krb5_timeofday(context, &timenow)))
-	goto cleanup;
     
     if (labs(timenow - sr->sam_patimestamp) > context->clockskew) {
 	retval = KRB5KRB_AP_ERR_SKEW;

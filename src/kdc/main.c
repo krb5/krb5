@@ -53,13 +53,21 @@ krb5_sigtype request_hup  PROTOTYPE((int));
 
 void setup_signal_handlers PROTOTYPE((void));
 
+krb5_error_code setup_sam PROTOTYPE((void));
+
 void initialize_realms PROTOTYPE((krb5_context, int, char **));
 
 void finish_realms PROTOTYPE((char *));
 
 static int nofork = 0;
+#ifdef USE_RCACHE
 static char *kdc_current_rcname = (char *) NULL;
+#endif
 static int rkey_init_done = 0;
+
+#ifdef USE_RCACHE
+krb5_deltat rc_lifetime; /* See kdc_initialize_rcache() */
+#endif /* USE_RCACHE */
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
@@ -81,6 +89,11 @@ kdc_initialize_rcache(kcontext, rcache_name)
     char		*sname;
 
     rcname = (rcache_name) ? rcache_name : kdc_current_rcname;
+
+    /* rc_lifetime used elsewhere to verify we're not */
+    /*  replaying really old data                     */
+    rc_lifetime = kcontext->clockskew;
+
     if (!rcname)
 	rcname = KDCRCACHE;
     if (!(retval = krb5_rc_resolve_full(kcontext, &kdc_rcache, rcname))) {
@@ -582,6 +595,12 @@ setup_signal_handlers()
     return;
 }
 
+krb5_error_code
+setup_sam()
+{
+    return krb5_c_make_random_key(kdc_context, ENCTYPE_DES_CBC_MD5, &psr_key);
+}
+
 void
 usage(name)
 char *name;
@@ -793,8 +812,8 @@ finish_realms(prog)
  */
 
 int main(argc, argv)
-int argc;
-char *argv[];
+     int argc;
+     char *argv[];
 {
     krb5_error_code	retval;
     krb5_context	kcontext;
@@ -833,6 +852,12 @@ char *argv[];
     initialize_realms(kcontext, argc, argv);
 
     setup_signal_handlers();
+
+    if (retval = setup_sam()) {
+	com_err(argv[0], retval, "while initializing SAM");
+	finish_realms(argv[0]);
+	return 1;
+    }
 
     if ((retval = setup_network(argv[0]))) {
 	com_err(argv[0], retval, "while initializing network");
