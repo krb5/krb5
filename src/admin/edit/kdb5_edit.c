@@ -84,10 +84,10 @@ extern ss_request_table kdb5_edit_cmds;
 
 extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
 
-static char *progname;
-static char *cur_realm = 0;
-static char *mkey_name = 0;
-static krb5_boolean manual_mkey = FALSE;
+char *progname;
+char *cur_realm = 0;
+char *mkey_name = 0;
+krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
 void
