@@ -108,7 +108,7 @@ actions krb5.h
     grep SIZEOF "$(SRCROOT)/GSSKerberosPrefix.h" >> "$(1)" ;
     grep HAVE_STDARG_H "$(SRCROOT)/GSSKerberosPrefix.h" >> "$(1)" ;
     grep HAVE_SYS_TYPES_H "$(SRCROOT)/GSSKerberosPrefix.h" >> "$(1)" ;
-    cat "$(2[1])" > "$(1)" ;
+    cat "$(2[1])" >> "$(1)" ;
     for header in "$(2[2-])" ; do
         echo Processing $header
         cat $header | $(EXTRACT_ERROR_CODES) >> "$(1)" ;
@@ -145,7 +145,7 @@ actions gssapi.h
     grep 'HAVE_.*_H' "$(SRCROOT)/GSSKerberosPrefix.h" >>  "$(1)" ;
     grep 'USE_.*_H' "$(SRCROOT)/GSSKerberosPrefix.h" >>  "$(1)" ;
     echo "/* End of gssapi.h prologue. */" >>  "$(1)" ;
-    cat "$(2[1])" > "$(1)" ;
+    cat "$(2[1])" >> "$(1)" ;
     for header in "$(2[2-])" ; do 
         cat $header | $(EXTRACT_ERROR_CODES) >> "$(1)" ;
     done
