@@ -426,8 +426,8 @@ microseconds portion in \funcparam{*microseconds}.}
 
 \begin{funcdecl}{krb5_read_password}{krb5_error_code}{\funcin}
 \funcarg{krb5_context}{context}
-\funcarg{char *}{prompt}
-\funcarg{char *}{prompt2}
+\funcarg{const char *}{prompt}
+\funcarg{const char *}{prompt2}
 \funcout
 \funcarg{char *}{return_pwd}
 \funcinout

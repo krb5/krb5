@@ -27,8 +27,8 @@ KDC_OPT_VALIDATE	& 2.2	&		\\
 
 The following is a list of preauthentication methods which are supported
 by Kerberos.  Most preauthentication methods are used by
-krb5_get_in_tkt(), krb5_get_in_tkt_with_password(), and
-krb5_get_in_tkt_with_skey(); at some sites, the Kerberos server can be
+\funcname{krb5_get_in_tkt}, \funcname{krb5_get_in_tkt_with_password}, and
+\funcname{krb5_get_in_tkt_with_skey}; at some sites, the Kerberos server can be
 configured so that during the initial ticket transation, it will only
 return encrypted tickets after the user has proven his or her identity
 using a supported preauthentication mechanism.  This is done to make

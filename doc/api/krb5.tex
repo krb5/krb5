@@ -54,7 +54,7 @@ Returns {\sc enomem}.
 \subsubsection{The krb5_auth_context}
 
 While the \datatype{krb5_context} represents a per-process or per-thread
-contex, the \datatype{krb5_auth_context} represents a per-connection
+context, the \datatype{krb5_auth_context} represents a per-connection
 context are are used by the various functions involved directly in
 client/server authentication.  Some of the data stored in this context
 include keyblocks, addresses, sequence numbers, authenticators, checksum
@@ -68,19 +68,11 @@ type, and replay cache pointer.
 
 The auth_context may be described as a per connection context. This
 context contains all data pertinent to the the various authentication
-routines. This function initializes the auth_context. The default flags
-for the context are set to enable the use of the replay cache
-(KRB5_AUTH_CONTEXT_DO_TIME) but no sequence numbers. 
+routines. This function initializes the auth_context. 
 
-Valid flags that may be set with \funcname{krb5_auth_con_setflags}:
-
-\begin{tabular}{ll}
-\multicolumn{1}{c}{Symbol} & Meaning \\
-KRB5_AUTH_CONTEXT_DO_TIME & Use timestamps \\
-KRB5_AUTH_CONTEXT_RET_TIME & Save timestamps\\ &\  to output structure\\
-KRB5_AUTH_CONTEXT_DO_SEQUENCE	& Use sequence numbers \\
-KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers \\ &\ to output structure\\
-\end{tabular}
+The default flags for the context are set to enable the use of the replay cache
+(KRB5_AUTH_CONTEXT_DO_TIME) but no sequence numbers. The function
+\funcname{krb5_auth_con_setflags} allows the flags to be changed.
 
 The default checksum type is set to CKSUMTYPE_RSA_MD4_DES. This may be
 changed with \funcname{krb5_auth_con_setcksumtype}.
@@ -104,7 +96,15 @@ Frees the auth_context \funcparam{auth_context} returned by
 \end{funcdecl}
 
 Sets the flags of \funcparam{auth_context} to funcparam{flags}. Valid
-flags are listed above.
+flags are:
+
+\begin{tabular}{ll}
+\multicolumn{1}{c}{Symbol} & Meaning \\
+KRB5_AUTH_CONTEXT_DO_TIME & Use timestamps \\
+KRB5_AUTH_CONTEXT_RET_TIME & Save timestamps\\ &\  to output structure\\
+KRB5_AUTH_CONTEXT_DO_SEQUENCE	& Use sequence numbers \\
+KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers \\ &\ to output structure\\
+\end{tabular}
 
 
 \begin{funcdecl}{krb5_auth_con_getflags}{krb5_error_code}{\funcinout}
@@ -181,7 +181,7 @@ Retrieves the keyblock stored in \funcparam{auth_context}. The memory
 allocated in this function should be freed with a call to
 \funcname{krb5_free_keyblock}. 
 
-\begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_getlocalsubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context *}{auth_context}
 \funcout
@@ -192,7 +192,7 @@ Retrieves the local_subkey keyblock stored in
 \funcparam{auth_context}. The memory allocated in this function should
 be freed with a call to \funcname{krb5_free_keyblock}.
 
-\begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_getremotesubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context *}{auth_context}
 \funcout
@@ -1617,6 +1617,8 @@ The \funcparam{auth_context} flags specify whether timestamps
 (KRB5_AUTH_CONTEXT_DO_SEQUENCE) are to be used.
 
 Returns system errors, integrity errors.
+
+\subsubsection{Miscellaneous main functions}
 
 \begin{funcdecl}{krb5_address_search}{krb5_boolean}{\funcinout}
 \funcarg{krb5_context}{context}

@@ -1,3 +1,12 @@
+Sun May  7 13:56:43 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.tex (subsubsection{The krb5_auth_context}): Some function
+		names were misformed. 
+
+	* errors.tex (subsection{error_table kv5m}): Reformatting nits.
+
+	* tables.tex: Formatting fixes.
+
 Thu May  4 14:29:45 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.tex: Reorganized into subsubsections. Added principal
