@@ -29,7 +29,8 @@
 
 The Admin API Password Quality mechanism provides the following
 controls.  Note that two strings are defined to be ``significantly
-different'' if they differ by at least two characters.
+different'' if they differ by at least one character. The compare is not
+case sensitive.
 
 \begin{itemize}
 \item A minimum length can be required; a password with
@@ -133,8 +134,9 @@ changed, as a Kerberos timestamp.
 
 \item[pw_expiration] The expire time of the user's current password, as a
 Kerberos timestamp.  No application service tickets will be issued for the
-principal once the password expire time has passed.  Note that the
-user can still obtain ticket-granting tickets.
+principal once the password expire time has passed.  Note that the user can
+only obtain tickets for services that have the PW_CHANGE_SERVICE bit set in
+the attributes field.
 
 \item[max_life] The maximum lifetime of any Kerberos ticket issued to
 this principal.
@@ -469,6 +471,11 @@ details.
 Each Admin API operation authenticated to the ovsec_kadm/admin service
 requires a specific authorization to run.  This version uses a simple
 named privilege system with the following names and meanings:
+
+The Authorization checks only happen if you are using the RPC mechanism.
+If you are using the server side API functions locally on the admin server,
+the only authorization check is if you can access the approporiate local
+files. 
 
 \begin{description}
 \item[Get] Able to examine the attributes (NOT key data) of principals
