@@ -353,11 +353,11 @@ else
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
 	KRB4_LIB='-lkrb4'
-	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
+	DEPKRB4_LIB='\$(TOPLIBD)/libkrb4.a'
 	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+	DEPKRB4_CRYPTO_LIB='\$(TOPLIBD)/libdes425.a'
 	KDB4_LIB='-lkdb4'
-	DEPKDB4_LIB='$(TOPLIBD)/libkdb4.a'
+	DEPKDB4_LIB='\$(TOPLIBD)/libkdb4.a'
 	LDARGS=
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
@@ -366,7 +366,7 @@ else
 	KRB4_LIB="-lkrb"
 	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_CRYPTO_LIB='-ldes425'
-	DEPKRB4_CRYPTO_LIB='$(TOPLIBD)/libdes425.a'
+	DEPKRB4_CRYPTO_LIB='\$(TOPLIBD)/libdes425.a'
 	KDB4_LIB="-lkdb"
 	DEPKDB4_LIB="$withval/lib/libkdb.a"
 	LDARGS="-L$withval/lib"
@@ -742,10 +742,10 @@ LD_SHLIBDIR_PREFIX=$krb5_cv_shlibs_dirhead
 AC_SUBST(LD_SHLIBDIR_PREFIX)
 SHLIB_RPATH_DIRS=
 if test $krb5_cv_shlibs_use_dirs = yes ; then
-	SHLIB_RPATH_DIRS="$krb5_cv_shlibs_dirhead [$](KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`[$](S)[$](TOPLIBD)"
+	SHLIB_RPATH_DIRS="$krb5_cv_shlibs_dirhead \$(KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`/\$(TOPLIBD)"
 fi
 AC_SUBST(SHLIB_RPATH_DIRS)
-SHLIB_LIBDIRS="-L[$](TOPLIBD)"
+SHLIB_LIBDIRS="-L\$(TOPLIBD)"
 if test X$krb5_cv_krb4_libdir != X ; then
 	SHLIB_LIBDIRS="$SHLIB_LIBDIRS -L$krb5_cv_krb4_libdir"
 fi
@@ -775,8 +775,7 @@ AC_SUBST(DO_MAKE_SHLIB)
 ])dnl
 
 dnl
-dnl This rule adds the additional Makefile fragment necessary to actually
-dnl link with the shared library
+dnl Defines LDARGS correctly so that we actually link with the shared library
 dnl
 define(V5_USE_SHARED_LIB,[
 AC_ARG_WITH([shared],
@@ -788,18 +787,18 @@ withval=yes
 if test "$krb5_cv_shlibs_enabled" = yes ; then
   if test "$withval" = yes; then
 	AC_MSG_RESULT(Using shared libraries)
-	LDARGS="$krb5_cv_shlibs_ldflag -L[$](TOPLIBD) $LDARGS"
+	LDARGS="$krb5_cv_shlibs_ldflag -L\$(TOPLIBD) $LDARGS"
 	if test "$krb5_cv_exe_need_dirs" = yes; then
-		LDARGS="$LDARGS $krb5_cv_shlibs_dirhead [$](KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`[$](S)[$](TOPLIBD)"
+		LDARGS="$LDARGS $krb5_cv_shlibs_dirhead \$(KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`/\$(TOPLIBD)"
 	fi
 	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 	AC_SUBST(SHLIB_TAIL_COMP)
   else
 	AC_MSG_RESULT(Using archive libraries)
-	LDARGS="$krb5_cv_noshlibs_ldflag -L[$](TOPLIBD) $LDARGS"
+	LDARGS="$krb5_cv_noshlibs_ldflag -L\$(TOPLIBD) $LDARGS"
   fi
 else
-  LDARGS="-L[$](TOPLIBD) $LDARGS"
+  LDARGS="-L\$(TOPLIBD) $LDARGS"
 fi
 AC_SUBST(LDARGS)
 ])dnl
