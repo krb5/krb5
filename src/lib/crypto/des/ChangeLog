@@ -1,3 +1,10 @@
+Thu Oct  6 12:49:29 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* verify.c (main): Take out check that assures that long is 4
+		bytes.  The DES implementation shouldn't be depending on
+		this, and if it is, then that's what the verify program
+		should be discovering, yes?
+
 Thu Jun 23 01:09:33 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* cs_entry.c: oops typo in that last one
