@@ -1,5 +1,5 @@
 /*
- * lib/crypto/os/ustime.c
+ * lib/crypto/os/c_ustime.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -86,7 +86,7 @@ getTimeZoneOffset()
 
 /* Returns the GMT in seconds (and fake microseconds) using the Unix epoch */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_crypto_us_timeofday(seconds, microseconds)
     krb5_int32 *seconds, *microseconds;
 {
@@ -145,7 +145,7 @@ krb5_crypto_us_timeofday(seconds, microseconds)
 static time_t win_gettime ();
 static long win_time_get_epoch();               /* Adjust for MSC 7.00 bug */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_crypto_us_timeofday(seconds, microseconds)
 register krb5_int32 *seconds, *microseconds;
 {
@@ -251,7 +251,7 @@ extern int errno;
 
 static struct timeval last_tv = {0, 0};
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_crypto_us_timeofday(seconds, microseconds)
     register krb5_int32 *seconds, *microseconds;
 {

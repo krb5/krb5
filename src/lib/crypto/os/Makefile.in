@@ -10,7 +10,8 @@ LIBOBJS = @LIBOBJS@
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-OBJS=	rnd_confoun.$(OBJEXT) c_localaddr.$(OBJEXT) c_ustime.$(OBJEXT) $(LIBOBJS)
+COBJS=	rnd_confoun.$(OBJEXT) c_localaddr.$(OBJEXT) c_ustime.$(OBJEXT) 
+OBJS= $(COBJS) $(LIBOBJS)
 
 SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
 
@@ -20,7 +21,7 @@ all-unix:: shared $(OBJS)
 
 all-mac:: $(OBJS)
 
-all-windows: rnd_confoun.obj
+all-windows: $(COBJS)
 
 shared:
 	mkdir shared

@@ -1,5 +1,5 @@
 /*
- * lib/crypto/os/localaddr.c
+ * lib/crypto/os/c_localaddr.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -105,7 +105,7 @@ extern int errno;
  * This uses the SIOCGIFCONF, SIOCGIFFLAGS, and SIOCGIFADDR ioctl's.
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_crypto_os_localaddr(addr)
     krb5_address ***addr;
 {
@@ -243,7 +243,7 @@ n_found = 0;
  * card per machine, so gethostent is good enough. 
  */
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_crypto_os_localaddr (krb5_address ***addr) {
     char host[64];                              /* Name of local machine */
     struct hostent *hostrec;

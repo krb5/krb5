@@ -1,3 +1,8 @@
+Wed Sep 13 10:33:53 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: PC builds all C files because of function name changes.
+	* c_localtime.c, c_ustime.c: removed INTERFACE keyword.
+
 Wed Sep 13 17:32:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* c_localaddr.c (krb5_crypto_os_localaddr): Clear the buffer
