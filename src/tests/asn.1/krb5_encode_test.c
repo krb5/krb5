@@ -10,12 +10,80 @@
 #include "debug.h"
 
 int error_count = 0;
+int do_trval = 0;
 
-void main()
+void encoder_print_results(code, typestring, description)
+	krb5_data *code;
+	char	*typestring;
+	char	*description;
+{
+	char	*code_string = NULL;
+	krb5_error_code	retval;
+	int r, rlen;
+
+	if (do_trval) {
+		printf("encode_krb5_%s%s:\n", typestring, description);
+		r = trval2(stdout, code->data, code->length, 0, &rlen);
+		printf("\n\n");
+		if (rlen != code->length) {
+			printf("Error: length mismatch: was %d, parsed %d\n",
+			       code->length, rlen);
+			exit(1);
+		}
+		if (r != 0)
+			exit(1);
+	} else {
+		retval = asn1_krb5_data_unparse(code,&(code_string));
+		if(retval) {
+			com_err("krb5_encode_test", retval ,
+				"while unparsing %s", typestring);
+			exit(1);
+		}
+		printf("encode_krb5_%s%s: %s\n", typestring, description,
+		       code_string);
+		free(code_string);
+	}
+	ktest_destroy_data(&code);
+}	
+
+void PRS(argc, argv)
+	int	argc;
+	char	**argv;
+{
+	extern char *optarg;	
+	int optchar;
+	extern int print_types, print_krb5_types, print_id_and_len,
+		print_constructed_length, print_skip_context,
+		print_skip_tagnum, print_context_shortcut;
+
+	while ((optchar = getopt(argc, argv, "t")) != EOF) {
+		switch(optchar) {
+		case 't':
+			do_trval = 1;
+			break;
+		case '?':
+		default:
+			fprintf(stderr, "Usage: %s [-t]\n", argv[0]);
+			exit(1);
+		}
+	}
+	print_types = 1;
+	print_krb5_types = 1;
+	print_id_and_len = 0;
+	print_constructed_length = 0;
+	print_skip_context = 1;
+	print_skip_tagnum = 1;
+	print_context_shortcut = 1;
+}
+
+void main(argc, argv)
+	int	argc;
+	char	**argv;
 {
   krb5_data *code;
-  char *code_string=NULL;
   krb5_error_code retval;
+
+  PRS(argc, argv);
   
   krb5_init_ets();
   
@@ -32,14 +100,7 @@ void main()
     com_err("krb5_encode_test", retval,"while encoding %s", typestring);\
     exit(1);\
   }\
-  retval = asn1_krb5_data_unparse(code,&(code_string));\
-  if(retval){\
-    com_err("krb5_encode_test", retval ,"while unparsing %s", typestring);\
-    exit(1);\
-  }\
-  ktest_destroy_data(&code);\
-  printf("encode_krb5_%s%s: %s\n",typestring,description,code_string);
-      
+  encoder_print_results(code, typestring, description);
       
   /****************************************************************/
   /* encode_krb5_authenticator */
@@ -354,10 +415,7 @@ void main()
 
     retval = encode_krb5_authdata((const krb5_authdata**)ad,&(code));
     if(retval) com_err("encoding authorization_data",retval,"");
-    retval = asn1_krb5_data_unparse(code,&(code_string));
-    if(retval) com_err("unparsing authorization_data",retval,"");
-    ktest_destroy_data(&code);
-    printf("encode_krb5_authorization_data: %s\n",code_string);
+    encoder_print_results(code, "authorization_data", "");
   }
   
   /****************************************************************/

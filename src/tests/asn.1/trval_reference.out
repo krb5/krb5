@@ -1,0 +1,1821 @@
+encode_krb5_authenticator:
+
+[Krb5 Autenticator] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <4>
+            31 32 33 34                 1234
+.  .  [4] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [6] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [7] [Integer] <1>
+         11                          .
+.  .  [8] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Octet String] <6>
+               66 6f 6f 62 61 72           foobar
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Octet String] <6>
+               66 6f 6f 62 61 72           foobar
+
+encode_krb5_authenticator(optionals empty):
+
+[Krb5 Autenticator] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [4] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+
+encode_krb5_authenticator(optionals NULL):
+
+[Krb5 Autenticator] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [4] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+
+encode_krb5_ticket:
+
+[Krb5 Ticket] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_keyblock:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      01                          .
+.  [1] [Octet String] <8>
+      31 32 33 34 35 36 37 38     12345678
+
+encode_krb5_enc_tkt_part:
+
+[Krb5 Encrypted ticket part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Bit String] <5>
+         00 fe dc ba 98              .....
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [2] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <35>
+            45 44 55 2c 4d 49 54 2e     EDU,MIT.
+            2c 41 54 48 45 4e 41 2e     ,ATHENA.
+            2c 57 41 53 48 49 4e 47     ,WASHING
+            54 4f 4e 2e 45 44 55 2c     TON.EDU,
+            43 53 2e                    CS.
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [6] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [7] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [8] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [9] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  [10] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Octet String] <6>
+               66 6f 6f 62 61 72           foobar
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Octet String] <6>
+               66 6f 6f 62 61 72           foobar
+
+encode_krb5_enc_tkt_part(optionals NULL):
+
+[Krb5 Encrypted ticket part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Bit String] <5>
+         00 fe dc ba 98              .....
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [2] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <35>
+            45 44 55 2c 4d 49 54 2e     EDU,MIT.
+            2c 41 54 48 45 4e 41 2e     ,ATHENA.
+            2c 57 41 53 48 49 4e 47     ,WASHING
+            54 4f 4e 2e 45 44 55 2c     TON.EDU,
+            43 53 2e                    CS.
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [7] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+
+encode_krb5_enc_kdc_rep_part:
+
+[Krb5 Encrypted TGS-REQ part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <2>
+               00 fb                       ..
+.  .  .  .  [1] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <2>
+               00 fb                       ..
+.  .  .  .  [1] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  [2] [Integer] <1>
+         2a                          *
+.  .  [3] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [4] [Bit String] <5>
+         00 fe dc ba 98              .....
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [6] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [7] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [8] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [9] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [10] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [11] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+
+encode_krb5_enc_kdc_rep_part(optionals NULL):
+
+[Krb5 Encrypted TGS-REQ part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <2>
+               00 fb                       ..
+.  .  .  .  [1] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <2>
+               00 fb                       ..
+.  .  .  .  [1] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  [2] [Integer] <1>
+         2a                          *
+.  .  [4] [Bit String] <5>
+         00 fe 5c ba 98              ..\..
+.  .  [5] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [7] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [9] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [10] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+
+encode_krb5_as_rep:
+
+[Krb5 AS-REP packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0b                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  [3] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [5] [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [6] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_as_rep(optionals NULL):
+
+[Krb5 AS-REP packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0b                          .
+.  .  [3] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [5] [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [6] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_tgs_rep:
+
+[Krb5 TGS-REP packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0d                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  [3] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [5] [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [6] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_tgs_rep(optionals NULL):
+
+[Krb5 TGS-REP packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0d                          .
+.  .  [3] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [5] [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [6] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_ap_req:
+
+[Krb5 AP-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0e                          .
+.  .  [2] [Bit String] <5>
+         00 fe dc ba 98              .....
+.  .  [3] [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_ap_rep:
+
+[Krb5 AP-REP packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         0f                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_ap_rep_enc_part:
+
+[Krb5 Encrypted AP-REP part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [1] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <8>
+            31 32 33 34 35 36 37 38     12345678
+.  .  [3] [Integer] <1>
+         11                          .
+
+encode_krb5_ap_rep_enc_part(optionals NULL):
+
+[Krb5 Encrypted AP-REP part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [1] [Integer] <3>
+         01 e2 40                    ..@
+
+encode_krb5_as_req:
+
+[Krb5 AS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0a                          .
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 90              .....
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [4] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [6] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+.  .  .  [9] [Sequence/Sequence Of] 
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  02                          .
+.  .  .  .  .  [1] [Octet String] <4>
+                  12 d0 00 23                 ...#
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  02                          .
+.  .  .  .  .  [1] [Octet String] <4>
+                  12 d0 00 23                 ...#
+.  .  .  [10] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               00                          .
+.  .  .  .  [1] [Integer] <1>
+               05                          .
+.  .  .  .  [2] [Octet String] <21>
+               6b 72 62 41 53 4e 2e 31     krbASN.1
+               20 74 65 73 74 20 6d 65      test me
+               73 73 61 67 65              ssage
+.  .  .  [11] [Sequence/Sequence Of] 
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+
+encode_krb5_as_req(optionals NULL except second_ticket):
+
+[Krb5 AS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0a                          .
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 98              .....
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+.  .  .  [11] [Sequence/Sequence Of] 
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+
+encode_krb5_as_req(optionals NULL except server):
+
+[Krb5 AS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0a                          .
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 90              .....
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+
+encode_krb5_tgs_req:
+
+[Krb5 TGS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0c                          .
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [1] [Integer] <1>
+               0d                          .
+.  .  .  .  [2] [Octet String] <7>
+               70 61 2d 64 61 74 61        pa-data
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 90              .....
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [4] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [6] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+.  .  .  [9] [Sequence/Sequence Of] 
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  02                          .
+.  .  .  .  .  [1] [Octet String] <4>
+                  12 d0 00 23                 ...#
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  02                          .
+.  .  .  .  .  [1] [Octet String] <4>
+                  12 d0 00 23                 ...#
+.  .  .  [10] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               00                          .
+.  .  .  .  [1] [Integer] <1>
+               05                          .
+.  .  .  .  [2] [Octet String] <21>
+               6b 72 62 41 53 4e 2e 31     krbASN.1
+               20 74 65 73 74 20 6d 65      test me
+               73 73 61 67 65              ssage
+.  .  .  [11] [Sequence/Sequence Of] 
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+
+encode_krb5_tgs_req(optionals NULL except second_ticket):
+
+[Krb5 TGS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0c                          .
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 98              .....
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+.  .  .  [11] [Sequence/Sequence Of] 
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+.  .  .  .  [Krb5 Ticket] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [1] [General string] <14>
+                     41 54 48 45 4e 41 2e 4d     ATHENA.M
+                     49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        01                          .
+.  .  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  .  [General string] <6>
+                           68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  .  [General string] <5>
+                           65 78 74 72 61              extra
+.  .  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [0] [Integer] <1>
+                        00                          .
+.  .  .  .  .  .  .  [1] [Integer] <1>
+                        05                          .
+.  .  .  .  .  .  .  [2] [Octet String] <21>
+                        6b 72 62 41 53 4e 2e 31     krbASN.1
+                        20 74 65 73 74 20 6d 65      test me
+                        73 73 61 67 65              ssage
+
+encode_krb5_tgs_req(optionals NULL except server):
+
+[Krb5 TGS-REQ packet] 
+.  [Sequence/Sequence Of] 
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Integer] <1>
+         0c                          .
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Bit String] <5>
+            00 fe dc ba 90              .....
+.  .  .  [2] [General string] <14>
+            41 54 48 45 4e 41 2e 4d     ATHENA.M
+            49 54 2e 45 44 55           IT.EDU
+.  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               01                          .
+.  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  [General string] <6>
+                  68 66 74 73 61 69           hftsai
+.  .  .  .  .  [General string] <5>
+                  65 78 74 72 61              extra
+.  .  .  [5] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [7] [Integer] <1>
+            2a                          *
+.  .  .  [8] [Sequence/Sequence Of] 
+.  .  .  .  [Integer] <1>
+               00                          .
+.  .  .  .  [Integer] <1>
+               01                          .
+
+encode_krb5_kdc_req_body:
+
+[Sequence/Sequence Of] 
+.  [0] [Bit String] <5>
+      00 fe dc ba 90              .....
+.  [1] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [General string] <6>
+            68 66 74 73 61 69           hftsai
+.  .  .  [General string] <5>
+            65 78 74 72 61              extra
+.  [2] [General string] <14>
+      41 54 48 45 4e 41 2e 4d     ATHENA.M
+      49 54 2e 45 44 55           IT.EDU
+.  [3] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [General string] <6>
+            68 66 74 73 61 69           hftsai
+.  .  .  [General string] <5>
+            65 78 74 72 61              extra
+.  [4] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [5] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [6] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [7] [Integer] <1>
+      2a                          *
+.  [8] [Sequence/Sequence Of] 
+.  .  [Integer] <1>
+         00                          .
+.  .  [Integer] <1>
+         01                          .
+.  [9] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+.  [10] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         00                          .
+.  .  [1] [Integer] <1>
+         05                          .
+.  .  [2] [Octet String] <21>
+         6b 72 62 41 53 4e 2e 31     krbASN.1
+         20 74 65 73 74 20 6d 65      test me
+         73 73 61 67 65              ssage
+.  [11] [Sequence/Sequence Of] 
+.  .  [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+
+encode_krb5_kdc_req_body(optionals NULL except second_ticket):
+
+[Sequence/Sequence Of] 
+.  [0] [Bit String] <5>
+      00 fe dc ba 98              .....
+.  [2] [General string] <14>
+      41 54 48 45 4e 41 2e 4d     ATHENA.M
+      49 54 2e 45 44 55           IT.EDU
+.  [5] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [7] [Integer] <1>
+      2a                          *
+.  [8] [Sequence/Sequence Of] 
+.  .  [Integer] <1>
+         00                          .
+.  .  [Integer] <1>
+         01                          .
+.  [11] [Sequence/Sequence Of] 
+.  .  [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+.  .  [Krb5 Ticket] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               05                          .
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  00                          .
+.  .  .  .  .  [1] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [2] [Octet String] <21>
+                  6b 72 62 41 53 4e 2e 31     krbASN.1
+                  20 74 65 73 74 20 6d 65      test me
+                  73 73 61 67 65              ssage
+
+encode_krb5_kdc_req_body(optionals NULL except server):
+
+[Sequence/Sequence Of] 
+.  [0] [Bit String] <5>
+      00 fe dc ba 90              .....
+.  [2] [General string] <14>
+      41 54 48 45 4e 41 2e 4d     ATHENA.M
+      49 54 2e 45 44 55           IT.EDU
+.  [3] [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Sequence/Sequence Of] 
+.  .  .  [General string] <6>
+            68 66 74 73 61 69           hftsai
+.  .  .  [General string] <5>
+            65 78 74 72 61              extra
+.  [5] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [7] [Integer] <1>
+      2a                          *
+.  [8] [Sequence/Sequence Of] 
+.  .  [Integer] <1>
+         00                          .
+.  .  [Integer] <1>
+         01                          .
+
+encode_krb5_safe:
+
+[Krb5 SAFE packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         14                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+.  .  .  [1] [Generalized Time] <15>
+            31 39 39 34 30 36 31 30     19940610
+            30 36 30 33 31 37 5a        060317Z
+.  .  .  [2] [Integer] <3>
+            01 e2 40                    ..@
+.  .  .  [3] [Integer] <1>
+            11                          .
+.  .  .  [4] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  .  [5] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <4>
+            31 32 33 34                 1234
+
+encode_krb5_safe(optionals NULL):
+
+[Krb5 SAFE packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         14                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [0] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+.  .  .  [4] [Sequence/Sequence Of] 
+.  .  .  .  [0] [Integer] <1>
+               02                          .
+.  .  .  .  [1] [Octet String] <4>
+               12 d0 00 23                 ...#
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Octet String] <4>
+            31 32 33 34                 1234
+
+encode_krb5_priv:
+
+[Krb5 PRIV packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         15                          .
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_enc_priv_part:
+
+[Krb5 Encrypted PRIV part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Octet String] <8>
+         6b 72 62 35 64 61 74 61     krb5data
+.  .  [1] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [2] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [3] [Integer] <1>
+         11                          .
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+.  .  [5] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+
+encode_krb5_enc_priv_part(optionals NULL):
+
+[Krb5 Encrypted PRIV part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Octet String] <8>
+         6b 72 62 35 64 61 74 61     krb5data
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+
+encode_krb5_cred:
+
+[Krb5 CRED packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         16                          .
+.  .  [2] [Sequence/Sequence Of] 
+.  .  .  [Krb5 Ticket] 
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [1] [General string] <14>
+                  41 54 48 45 4e 41 2e 4d     ATHENA.M
+                  49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     01                          .
+.  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [General string] <6>
+                        68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  [General string] <5>
+                        65 78 74 72 61              extra
+.  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     00                          .
+.  .  .  .  .  .  [1] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [2] [Octet String] <21>
+                     6b 72 62 41 53 4e 2e 31     krbASN.1
+                     20 74 65 73 74 20 6d 65      test me
+                     73 73 61 67 65              ssage
+.  .  .  [Krb5 Ticket] 
+.  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  05                          .
+.  .  .  .  .  [1] [General string] <14>
+                  41 54 48 45 4e 41 2e 4d     ATHENA.M
+                  49 54 2e 45 44 55           IT.EDU
+.  .  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     01                          .
+.  .  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  .  [General string] <6>
+                        68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  .  [General string] <5>
+                        65 78 74 72 61              extra
+.  .  .  .  .  [3] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     00                          .
+.  .  .  .  .  .  [1] [Integer] <1>
+                     05                          .
+.  .  .  .  .  .  [2] [Octet String] <21>
+                     6b 72 62 41 53 4e 2e 31     krbASN.1
+                     20 74 65 73 74 20 6d 65      test me
+                     73 73 61 67 65              ssage
+.  .  [3] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            00                          .
+.  .  .  [1] [Integer] <1>
+            05                          .
+.  .  .  [2] [Octet String] <21>
+            6b 72 62 41 53 4e 2e 31     krbASN.1
+            20 74 65 73 74 20 6d 65      test me
+            73 73 61 67 65              ssage
+
+encode_krb5_enc_cred_part:
+
+[Krb5 Encrypted CRED part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Octet String] <8>
+                  31 32 33 34 35 36 37 38     12345678
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Bit String] <5>
+               00 fe dc ba 98              .....
+.  .  .  .  [4] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [5] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [6] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [7] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [8] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [9] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [10] [Sequence/Sequence Of] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Octet String] <8>
+                  31 32 33 34 35 36 37 38     12345678
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Bit String] <5>
+               00 fe dc ba 98              .....
+.  .  .  .  [4] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [5] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [6] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [7] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [8] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [9] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [10] [Sequence/Sequence Of] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+.  .  [1] [Integer] <1>
+         2a                          *
+.  .  [2] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [3] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [4] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+.  .  [5] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            02                          .
+.  .  .  [1] [Octet String] <4>
+            12 d0 00 23                 ...#
+
+encode_krb5_enc_cred_part(optionals NULL):
+
+[Krb5 Encrypted CRED part] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Sequence/Sequence Of] 
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Octet String] <8>
+                  31 32 33 34 35 36 37 38     12345678
+.  .  .  [Sequence/Sequence Of] 
+.  .  .  .  [0] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Octet String] <8>
+                  31 32 33 34 35 36 37 38     12345678
+.  .  .  .  [1] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [2] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [3] [Bit String] <5>
+               00 fe dc ba 98              .....
+.  .  .  .  [4] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [5] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [6] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [7] [Generalized Time] <15>
+               31 39 39 34 30 36 31 30     19940610
+               30 36 30 33 31 37 5a        060317Z
+.  .  .  .  [8] [General string] <14>
+               41 54 48 45 4e 41 2e 4d     ATHENA.M
+               49 54 2e 45 44 55           IT.EDU
+.  .  .  .  [9] [Sequence/Sequence Of] 
+.  .  .  .  .  [0] [Integer] <1>
+                  01                          .
+.  .  .  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  .  .  [General string] <6>
+                     68 66 74 73 61 69           hftsai
+.  .  .  .  .  .  [General string] <5>
+                     65 78 74 72 61              extra
+.  .  .  .  [10] [Sequence/Sequence Of] 
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+.  .  .  .  .  [Sequence/Sequence Of] 
+.  .  .  .  .  .  [0] [Integer] <1>
+                     02                          .
+.  .  .  .  .  .  [1] [Octet String] <4>
+                     12 d0 00 23                 ...#
+
+encode_krb5_error:
+
+[Krb5 ERROR packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         1e                          .
+.  .  [2] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [3] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [4] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [5] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [6] [Integer] <1>
+         3c                          <
+.  .  [7] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [8] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [9] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [10] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+.  .  [11] [General string] <8>
+         6b 72 62 35 64 61 74 61     krb5data
+.  .  [12] [Octet String] <8>
+         6b 72 62 35 64 61 74 61     krb5data
+
+encode_krb5_error(optionals NULL):
+
+[Krb5 ERROR packet] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         05                          .
+.  .  [1] [Integer] <1>
+         1e                          .
+.  .  [3] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [4] [Generalized Time] <15>
+         31 39 39 34 30 36 31 30     19940610
+         30 36 30 33 31 37 5a        060317Z
+.  .  [5] [Integer] <3>
+         01 e2 40                    ..@
+.  .  [6] [Integer] <1>
+         3c                          <
+.  .  [9] [General string] <14>
+         41 54 48 45 4e 41 2e 4d     ATHENA.M
+         49 54 2e 45 44 55           IT.EDU
+.  .  [10] [Sequence/Sequence Of] 
+.  .  .  [0] [Integer] <1>
+            01                          .
+.  .  .  [1] [Sequence/Sequence Of] 
+.  .  .  .  [General string] <6>
+               68 66 74 73 61 69           hftsai
+.  .  .  .  [General string] <5>
+               65 78 74 72 61              extra
+
+encode_krb5_authorization_data:
+
+[Sequence/Sequence Of] 
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Octet String] <6>
+         66 6f 6f 62 61 72           foobar
+.  [Sequence/Sequence Of] 
+.  .  [0] [Integer] <1>
+         01                          .
+.  .  [1] [Octet String] <6>
+         66 6f 6f 62 61 72           foobar
+
+encode_krb5_pwd_sequence:
+
+[Sequence/Sequence Of] 
+.  [0] [Octet String] <8>
+      6b 72 62 35 64 61 74 61     krb5data
+.  [1] [Octet String] <8>
+      6b 72 62 35 64 61 74 61     krb5data
+
+encode_krb5_pwd_data:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      02                          .
+.  [1] [Sequence/Sequence Of] 
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+.  .  .  [1] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+.  .  [Sequence/Sequence Of] 
+.  .  .  [0] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+.  .  .  [1] [Octet String] <8>
+            6b 72 62 35 64 61 74 61     krb5data
+

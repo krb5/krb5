@@ -1,3 +1,12 @@
+Tue Nov  1 20:25:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5_encode_test.c: 
+	* Makefile.in: 
+	* trval.c: Add the "-t option to krb5_encode_test, which causes it
+		to use the ASN.1 unparser found in trval.c.  This routine
+		will attempt to decode the ASN.1 data stream and display
+		it in a logical format for a human being to decipher.
+
 Wed Oct 19 00:11:43 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* debug.h (assert):

@@ -12,7 +12,7 @@ DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 
-ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o 
+ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o trval.o
 
 krb5_encode_test: $(ENCOBJS) $(DEPKLIB) 
 	$(CC) $(CFLAGS) -o krb5_encode_test $(ENCOBJS) $(LIBS) $(KLIB)
@@ -27,6 +27,8 @@ check:: krb5_decode_test krb5_encode_test
 	$(RM) test.out
 	./krb5_encode_test > test.out
 	cmp test.out $(srcdir)/reference_encode.out
+	./krb5_encode_test -t > test.out
+	cmp test.out $(srcdir)/trval_reference.out
 	$(RM) test.out	
 
 install::
