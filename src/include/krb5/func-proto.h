@@ -286,6 +286,8 @@ void krb5_free_enc_tkt_part
 	PROTOTYPE((krb5_enc_tkt_part * ));
 void krb5_free_ticket
 	PROTOTYPE((krb5_ticket * ));
+void krb5_free_tickets
+	PROTOTYPE((krb5_ticket ** ));
 void krb5_free_kdc_req
 	PROTOTYPE((krb5_kdc_req * ));
 void krb5_free_kdc_rep
@@ -306,6 +308,7 @@ void krb5_free_priv
 	PROTOTYPE((krb5_priv * ));
 void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_priv_enc_part * ));
-
+void krb5_free_kdc_req
+	PROTOTYPE((krb5_kdc_req * ));
 
 #endif /* KRB5_FUNC_PROTO__ */
