@@ -1,3 +1,9 @@
+Tue Nov  8 01:39:50 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos.c: Use des_init_random_number_genator(), since that
+		will result in different subsession keys on successive
+		runs of telnet.
+
 Mon Nov  7 22:36:20 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* auth.c (auth_status): Only print each possible authentication

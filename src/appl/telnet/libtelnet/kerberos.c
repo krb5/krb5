@@ -225,7 +225,7 @@ kerberos4_send(ap)
 		register int i;
 
 		des_key_sched(cred.session, sched);
-		des_set_random_generator_seed(cred.session);
+		des_init_random_number_generator(cred.session);
 		des_new_random_key(challenge);
 		des_ecb_encrypt(challenge, session_key, sched, 1);
 		/*
