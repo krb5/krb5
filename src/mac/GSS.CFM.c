@@ -34,6 +34,10 @@ OSErr __initializeGSS(CFragInitBlockPtr ibp)
 
 void __terminateGSS(void)
 {
+
+	OM_uint32 maj_stat, min_stat;
+
+	maj_stat = kg_release_defcred (&min_stat);
 	
     remove_error_table(&et_k5g_error_table);
     remove_error_table(&et_ggss_error_table);
