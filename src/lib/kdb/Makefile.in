@@ -46,7 +46,8 @@ LIB_SUBDIRS= .
 LIBDONE = DONE
 
 all-unix:: shared
-shared::
+
+shared:
 	mkdir shared
 
 clean-unix::
