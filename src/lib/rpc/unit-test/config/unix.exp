@@ -65,11 +65,11 @@ proc rpc_test_start { } {
 	expect {
 		"running" { }
 		eof { 
-			fail "server exited!"
+			send_error "server exited!"
 			verbose $expect_out(buffer) 1
 		}
 		timeout { 
-			fail "server didn't start in $timeout seconds"
+			send_error "server didn't start in $timeout seconds"
 			verbose $expect_out(buffer) 1
 		}
 	}

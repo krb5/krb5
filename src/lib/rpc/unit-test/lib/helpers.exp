@@ -21,20 +21,20 @@ proc kinit {princ pass lifetime} {
 	global kinit
 	global wait_error_index wait_errno_index wait_status_index
 
-	spawn -noecho $kinit -l $lifetime $princ
+	spawn -noecho $kinit -5 -l $lifetime $princ
 	expect {
 		-re "Password for $princ.*: " { send "$pass\n" }
-		timeout { error "Timeout waiting for kinit"; close }
+		timeout { perror "Timeout waiting for kinit"; close }
 	}
 	expect { eof {} }
 
 	set ret [wait]
 	if {[lindex $ret $wait_error_index] == -1} {
-	 	error \
+	 	perror \
 	    "wait(kinit $princ) returned error [lindex $ret $wait_errno_index]"
 	} else {
 		if {[lindex $ret $wait_status_index] != 0} {
-			error \
+			perror \
 		    "kinit $princ failed with [lindex $ret $wait_status_index]"
 		}
 	}
@@ -116,7 +116,7 @@ proc wait_client {testname ccname id status} {
 	}
 
 	set env(KRB5CCNAME) FILE:/tmp/krb5cc_rpc_test_$ccname
- 	if {[catch "exec $kdestroy"] != 0} {
+ 	if {[catch "exec $kdestroy -5"] != 0} {
  		error "$testname: cannot destroy client $ccname ccache"
  	}
 

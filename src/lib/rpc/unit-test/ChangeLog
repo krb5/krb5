@@ -1,3 +1,12 @@
+2000-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp: Call send_error instead of fail to prevent
+	referencing variables not yet set up by the test framework.
+
+	* lib/helpers.exp: Call kinit and kdestroy with the -5 flag to
+	deal with new program behavior.  Also call perror rather than
+	error to avoid spewing a stack trace.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
