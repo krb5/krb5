@@ -34,7 +34,7 @@ struct krb5_cc_typelist
   krb5_cc_ops *ops;
   struct krb5_cc_typelist *next;
  };
-extern krb5_cc_ops krb5_mcc_ops;
+extern const krb5_cc_ops krb5_mcc_ops;
 
 static struct krb5_cc_typelist cc_entry = { &krb5_mcc_ops, NULL };
 

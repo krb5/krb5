@@ -201,7 +201,7 @@ static krb5_error_code krb5_fcc_skip_principal
 static krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags
         (krb5_context, krb5_ccache id, krb5_flags flags);
 
-extern krb5_cc_ops krb5_cc_file_ops;
+extern const krb5_cc_ops krb5_cc_file_ops;
 
 krb5_error_code krb5_change_cache (void);
 
@@ -2458,7 +2458,7 @@ krb5_get_notification_message (void)
 
 #endif /* _WIN32 */
 
-krb5_cc_ops krb5_cc_file_ops = {
+const krb5_cc_ops krb5_cc_file_ops = {
      0,
      "FILE",
      krb5_fcc_get_name,

@@ -1680,7 +1680,7 @@ krb5_error_code KRB5_CALLCONV krb5int_accessor
 
 struct _krb5_ccache {
     krb5_magic magic;
-    struct _krb5_cc_ops *ops;
+    const struct _krb5_cc_ops *ops;
     krb5_pointer data;
 };
 

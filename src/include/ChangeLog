@@ -4,6 +4,7 @@
 	(struct krb5_rc_st): Field ops now points to const.
 	(krb5_rc_register_type): Ops argument now points to const.
 	(krb5_rc_dfl_ops): Now const.
+	(struct _krb5_ccache): Field ops now points to const.
 
 2003-01-06  Sam Hartman  <hartmans@mit.edu>
 

@@ -80,7 +80,7 @@ krb5_error_code KRB5_CALLCONV krb5_mcc_store
 krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
 	(krb5_context, krb5_ccache id , krb5_flags flags );
 
-extern krb5_cc_ops krb5_mcc_ops;
+extern const krb5_cc_ops krb5_mcc_ops;
 krb5_error_code krb5_change_cache (void);
 
 #define KRB5_OK 0
@@ -538,7 +538,7 @@ krb5_mcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
 
 #define NEED_WINDOWS
 
-krb5_cc_ops krb5_mcc_ops = {
+const krb5_cc_ops krb5_mcc_ops = {
      0,
      "MEMORY",
      krb5_mcc_get_name,

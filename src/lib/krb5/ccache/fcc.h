@@ -35,7 +35,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-extern krb5_cc_ops krb5_cc_file_ops;
+extern const krb5_cc_ops krb5_cc_file_ops;
 
 #define KRB5_OK 0
 
