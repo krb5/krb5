@@ -1,6 +1,9 @@
 	       Building & Running Kerberos 5 on Windows
 	       ----------------------------------------
 
+Kerberos 5 Windows support now only includes Win32 and no longer
+includes Win16.
+
 We build Kerberos 5 on Windows just with MSVC++ 6.0.  You should
 not need anything else.  We do not know whether it currently
 builds with other compilers or make utilities.

@@ -1,3 +1,7 @@
+1999-09-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Explicitly say that we support only Win32 and not Win16.
+
 1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Update with install target information and more.
