@@ -854,7 +854,7 @@ static kadm5_ret_t
 check_pw_reuse(krb5_context context,
 	       krb5_keyblock *hist_keyblock,
 	       int n_new_key_data, krb5_key_data *new_key_data,
-	       int n_pw_hist_data, osa_pw_hist_ent *pw_hist_data)
+	       unsigned int n_pw_hist_data, osa_pw_hist_ent *pw_hist_data)
 {
     int x, y, z;
     krb5_keyblock newkey, histkey;
