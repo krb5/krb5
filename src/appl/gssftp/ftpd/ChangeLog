@@ -1,3 +1,11 @@
+Fri Apr 10 20:06:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (receive_data):
+	(send_data): Add support for sigsetjmp().
+	(main): Use sigaction() if we can to avoid SysV lossage.
+
+	* ftpcmd.y (PBSZ): Remove restriction on shrinking buffer size.
+
 Thu Mar  5 13:59:47 1998  Dan Winship  <danw@mit.edu>
 
 	* ftpcmd.y (getline): Don't syslog passwords! (or newlines)

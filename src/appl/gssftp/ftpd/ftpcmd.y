@@ -243,8 +243,6 @@ cmd:		USER SP username CRLF
 			else if (strlen($3) > 10 ||
 				 strlen($3) == 10 && strcmp($3,"4294967296") >= 0)
 			    reply(501, "Bad value for PBSZ: %s", $3);
-			else if (actualbuf >= (maxbuf =(unsigned int) atol($3)))
-			    reply(200, "PBSZ=%u", actualbuf);
 			else {
 			    if (ucbuf) (void) free(ucbuf);
 			    actualbuf = (unsigned int) atol($3);
