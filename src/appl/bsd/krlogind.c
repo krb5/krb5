@@ -953,7 +953,7 @@ protocol(f, p)
 		FD_SET(p, &ibits);
 	FD_SET(p, &ebits);
 	
-	if (select(16, &ibits, &obits, &ebits, 0) < 0) {
+	if (select(8*sizeof(ibits), &ibits, &obits, &ebits, 0) < 0) {
 	    if (errno == EINTR)
 	      continue;
 	    fatalperror(f, "select");

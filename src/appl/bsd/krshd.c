@@ -1063,7 +1063,7 @@ doit(f, fromp)
 	    /* should set s nbio! */
 	    do {
 		ready = readfrom;
-		if (select(16, &ready, (fd_set *)0,
+		if (select(8*sizeof(ready), &ready, (fd_set *)0,
 			   (fd_set *)0, (struct timeval *)0) < 0)
 		  break;
 		if (FD_ISSET(s, &ready)) {

@@ -44,6 +44,10 @@ char copyright[] =
 #include <pwd.h>
 #include <netdb.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
 #include <sys/filio.h>
@@ -101,7 +105,7 @@ main(argc, argv0)
     char *host=0, *cp, **ap, buf[BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     struct passwd *pwd;
-    int readfrom, ready;
+    fd_set readfrom, ready;
     int one = 1;
     struct servent *sp;
 #ifdef POSIX_SIGNALS
@@ -392,7 +396,10 @@ main(argc, argv0)
     ioctl(rfd2, FIONBIO, &one);
     ioctl(rem, FIONBIO, &one);
     if (nflag == 0 && pid == 0) {
-	char *bp; int rembits, wc;
+	char *bp;
+	int wc;
+	fd_set rembits;
+	
 	(void) close(rfd2);
       reread:
 	errno = 0;
@@ -401,15 +408,16 @@ main(argc, argv0)
 	  goto done;
 	bp = buf;
       rewrite:
-	rembits = 1<<rem;
-	if (select(16, 0, &rembits, 0, 0) < 0) {
+	FD_ZERO(&rembits);
+	FD_SET(rem, &rembits);
+	if (select(8*sizeof(rembits), 0, &rembits, 0, 0) < 0) {
 	    if (errno != EINTR) {
 		perror("select");
 		exit(1);
 	    }
 	    goto rewrite;
 	}
-	if ((rembits & (1<<rem)) == 0)
+	if (FD_ISSET(rem, &rembits) == 0)
 	  goto rewrite;
 	wc = write(rem, bp, cc);
 	if (wc < 0) {
@@ -432,35 +440,37 @@ main(argc, argv0)
     sigsetmask(omask);
 #endif
 #endif /* POSIX_SIGNALS */
-    readfrom = (1<<rfd2) | (1<<rem);
+    FD_ZERO(&readfrom);
+    FD_SET(rfd2, &readfrom);
+    FD_SET(rem, &readfrom);
     do {
 	ready = readfrom;
-	if (select(16, &ready, 0, 0, 0) < 0) {
+	if (select(8*sizeof(ready), &ready, 0, 0, 0) < 0) {
 	    if (errno != EINTR) {
 		perror("select");
 		exit(1);
 	    }
 	    continue;
 	}
-	if (ready & (1<<rfd2)) {
+	if (FD_ISSET(rfd2, &ready)) {
 	    errno = 0;
 	    cc = read(rfd2, buf, sizeof buf);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
-		  readfrom &= ~(1<<rfd2);
+		    FD_CLR(rfd2, &readfrom);
 	    } else
 	      (void) write(2, buf, cc);
 	}
-	if (ready & (1<<rem)) {
+	if (FD_ISSET(rem, &ready)) {
 	    errno = 0;
 	    cc = read(rem, buf, sizeof buf);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
-		  readfrom &= ~(1<<rem);
+		    FD_CLR(rem, &readfrom);
 	    } else
 	      (void) write(1, buf, cc);
 	}
-    } while (readfrom);
+    } while (FD_ISSET(rem, &readfrom) || FD_ISSET(rfd2, &readfrom));
     if (nflag == 0)
       (void) kill(pid, SIGKILL);
     exit(0);

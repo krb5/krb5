@@ -1,5 +1,12 @@
 Wed Dec 28 14:59:58 1994  Richard Basch  (probe@tardis)
 
+	* krlogin.c
+	* krlogind.c
+	* krsh.c
+	* krshd.c
+	  	Corrected the arguments to select, based on sizeof fd_set.
+		Converted what remained to use FD_* macros, instead of bitshift
+
 	* login.c
 	  	Changed uid_type to uid_t, gid_type to gid_t
 		Added shadow password support
