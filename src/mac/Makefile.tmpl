@@ -239,7 +239,7 @@ K5RTLCFMPPC = "/bin/MIT CLib.PPC" \
 	"{SharedLibraries}MathLib"
 OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
         -mpw_pointers -warnings off -fatext -nosyspath -maxerrors 1000 \
-        -align mac68k -opt off -toc_data on -fp_contract on -sym fullpath \
+        -align mac68k -opt off -toc_data on -fp_contract on -sym on \
 		-model farData
 
 ################################################################################
@@ -360,7 +360,7 @@ link-68KCFM : K5Library68K GSSLibrary68K
 	
 K5Library68K K5Library68K.MAP :: {AUTOGEN_OUTPUT} /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name K5Library -m "" \
-		-model cfmflat -@export "/mac/K5Library.exp" -sym fullpath \
+		-model cfmflat -@export "/mac/K5Library.exp" -sym on \
 		-map K5Library68K.MAP -o K5Library68K \
 		-init "__initializeK5" -term "__terminateK5" \
 		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
@@ -374,7 +374,7 @@ K5Library68K :: /mac/version.r
 
 GSSLibrary68K GSSLibrary68K.MAP :: {AUTOGEN_OUTPUT}  K5Library68K /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
-		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym fullpath \
+		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym on \
 		-map GSSLibrary68K.MAP -o GSSLibrary68K \
 		-init "__initializeGSS" -term "__terminateGSS" \
 		{GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM} K5Library68K
@@ -405,7 +405,7 @@ libkrb5.PPC :: /mac/version.r
 
 K5LibraryPPC K5LibraryPPC.MAP :: {AUTOGEN_OUTPUT}  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
 	MWLinkPPC -sharedlibrary -name K5Library -m "" \
-		-@export "/mac/K5Library.exp" -sym fullpath -init "__initializeK5" \
+		-@export "/mac/K5Library.exp" -sym on -init "__initializeK5" \
 		-term "__terminateK5" \
 		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
 		-map K5LibraryPPC.MAP -o K5LibraryPPC \
@@ -431,7 +431,7 @@ libgss.PPC :: /mac/version.r
 
 GSSLibraryPPC GSSLibraryPPC.MAP :: {AUTOGEN_OUTPUT} K5LibraryPPC /mac/GSSLibrary.exp {GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC}
 	MWLinkPPC -sharedlibrary -name GSSLibrary -m "" \
-		-@export "/mac/GSSLibrary.exp" -sym fullpath -init "__initializeGSS" \
+		-@export "/mac/GSSLibrary.exp" -sym on -init "__initializeGSS" \
 		-term "__terminateGSS" -map GSSLibraryPPC.MAP -o GSSLibraryPPC \
 		{GSSRTLCFMPPC} {GSSOBJSPPC} {GSSSHLIBOBJPPC} K5LibraryPPC
 GSSLibraryPPC :: /mac/version.r
