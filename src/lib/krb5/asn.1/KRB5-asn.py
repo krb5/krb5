@@ -86,17 +86,18 @@ AuthenticatorVersion ::= INTEGER {krb5(5)}
 
 -- Encrypted part of ticket
 EncTicketPart ::= SEQUENCE {
-	flags[0]			TicketFlags,
-	key[1]				EncryptionKey,
-	crealm[2]			Realm,
-	cname[3]			PrincipalName,
-	transited[4]			GeneralString,
-	authtime[5]			GeneralizedTime,
-	starttime[6]			GeneralizedTime,
-	endtime[7]			GeneralizedTime,
-	renew-till[8]			GeneralizedTime OPTIONAL,
-	caddr[9]			HostAddresses,
-	authorization-data[10]		AuthorizationData OPTIONAL
+	confounder[0]			INTEGER, -- krb5_ui_4
+	flags[1]			TicketFlags,
+	key[2]				EncryptionKey,
+	crealm[3]			Realm,
+	cname[4]			PrincipalName,
+	transited[5]			GeneralString,
+	authtime[6]			GeneralizedTime,
+	starttime[7]			GeneralizedTime,
+	endtime[8]			GeneralizedTime,
+	renew-till[9]			GeneralizedTime OPTIONAL,
+	caddr[10]			HostAddresses,
+	authorization-data[11]		AuthorizationData OPTIONAL
 }
 
 
@@ -179,18 +180,19 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 }
 
 EncKDCRepPart ::= SEQUENCE {
-	key[0]				EncryptionKey,
-	last-req[1]			LastReq,
-	ctime[2]			GeneralizedTime,
+	confounder[0]			INTEGER, -- krb5_ui_4
+	key[1]				EncryptionKey,
+	last-req[2]			LastReq,
+	ctime[3]			GeneralizedTime,
 	key-exp[4]			GeneralizedTime,
 	flags[5]			TicketFlags,
-	authtime[3]			GeneralizedTime,-- also known as ktime
-	starttime[6]			GeneralizedTime,
-	endtime[7]			GeneralizedTime,
-	renew-till[8]			GeneralizedTime OPTIONAL,
-	srealm[9]			Realm,
-	sname[10]			PrincipalName,
-	caddr[11]			HostAddresses
+	authtime[6]			GeneralizedTime,-- also known as ktime
+	starttime[7]			GeneralizedTime,
+	endtime[8]			GeneralizedTime,
+	renew-till[9]			GeneralizedTime OPTIONAL,
+	srealm[10]			Realm,
+	sname[11]			PrincipalName,
+	caddr[12]			HostAddresses
 }
 
 KRB-ERROR ::= [APPLICATION 2] SEQUENCE {
