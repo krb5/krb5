@@ -52,19 +52,20 @@
 
 #define PROGNAME argv[0]
 
-void
+static void
 usage(name)
     char *name;
 {
 	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n", name);
 }	
 
-void
+int
 main(argc, argv)
 int argc;
 char *argv[];
 {
     int sock, i;
+    unsigned int len;
     int flags = 0;			/* for recvfrom() */
     int on = 1;
     struct servent *serv;
@@ -179,9 +180,9 @@ char *argv[];
     /* GET KRB_AP_REQ MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(struct sockaddr_in);
+    len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &i)) < 0) {
+		 (struct sockaddr *)&c_sock, &len)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }
@@ -226,9 +227,9 @@ char *argv[];
     /* GET KRB_MK_SAFE MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(struct sockaddr_in);
+    len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &i)) < 0) {
+		 (struct sockaddr *)&c_sock, &len)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }
@@ -252,9 +253,9 @@ char *argv[];
     /* NOW GET ENCRYPTED MESSAGE */
 
     /* use "recvfrom" so we know client's address */
-    i = sizeof(struct sockaddr_in);
+    len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		      (struct sockaddr *)&c_sock, &i)) < 0) {
+		      (struct sockaddr *)&c_sock, &len)) < 0) {
 	perror("receiving datagram");
 	exit(1);
     }

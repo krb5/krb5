@@ -1,3 +1,8 @@
+Tue Sep 26 18:16:33 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* sim_server.c: Warnigs cleanup of signed vs. unsigned arguments
+ 	to functions.
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

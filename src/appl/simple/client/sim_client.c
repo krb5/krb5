@@ -46,6 +46,9 @@
 #else
 extern char *malloc();
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
@@ -53,6 +56,8 @@ extern char *malloc();
 #endif
 
 #define MSG "hi there!"			/* message text */
+
+void usage KRB5_PROTOTYPE((char *));
 
 void
 usage(name)
@@ -67,6 +72,7 @@ main(argc, argv)
     char *argv[];
 {
     int sock, i;
+    unsigned int len;
     int flags = 0;			/* flags for sendto() */
     struct servent *serv;
     struct hostent *host;
@@ -96,7 +102,6 @@ main(argc, argv)
 
     krb5_context 	  context;
     krb5_auth_context 	  auth_context = NULL;
-    krb5_replay_data 	  replaydata;
 
     retval = krb5_init_context(&context);
     if (retval) {
@@ -237,7 +242,8 @@ main(argc, argv)
 	exit(1);
     }
     /* Send authentication info to server */
-    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0) 
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
+		  flags)) < 0) 
 	com_err(progname, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
     krb5_free_data_contents(context, &packet);
@@ -246,8 +252,8 @@ main(argc, argv)
 
     /* Get my address */
     memset((char *) &c_sock, 0, sizeof(c_sock));
-    i = sizeof(c_sock);
-    if (getsockname(sock, (struct sockaddr *)&c_sock, &i) < 0) {
+    len = sizeof(c_sock);
+    if (getsockname(sock, (struct sockaddr *)&c_sock, &len) < 0) {
 	com_err(progname, errno, "while getting socket name");
 	exit(1);
     }
@@ -305,7 +311,8 @@ main(argc, argv)
     }
 
     /* Send it */
-    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
+		  flags)) < 0)
 	com_err(progname, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
     krb5_free_data_contents(context, &packet);
@@ -320,7 +327,8 @@ main(argc, argv)
     }
 
     /* Send it */
-    if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
+		  flags)) < 0)
 	com_err(progname, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
     krb5_free_data_contents(context, &packet);
