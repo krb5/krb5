@@ -1,3 +1,8 @@
+2002-12-23  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (WITH_KRB4): Substitute some variables for generated
+	krb524 and krb4 headers.
+
 2002-12-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_GETSOCKNAME_ARGS, KRB5_GETPEERANME_ARGS): Check

@@ -51,6 +51,11 @@ s;\$(BUILDTOP)/include/com_err.h ;$(COM_ERR_DEPS) ;g
 s;\$(BUILDTOP)/include/ss/ss.h \$(BUILDTOP)/include/ss/ss_err.h ;$(SS_DEPS) ;g
 s;\$(BUILDTOP)/include/db.h \$(BUILDTOP)/include/db-config.h ;$(DB_DEPS) ;g
 
+# Some krb4 dependencies should only be present if building with krb4 enabled
+s;\$(BUILDTOP)/include/kerberosIV/krb_err.h ;$(KRB_ERR_H_DEP) ;g
+s;\$(BUILDTOP)/include/krb524.h ;$(KRB524_H_DEP) ;g
+s;\$(BUILDTOP)/include/krb524_err.h ;$(KRB524_ERR_H_DEP) ;g
+
 # now delete trailing whitespace
 s; *$;;g
 

@@ -84,16 +84,15 @@ $(OUTPRE)ftpd.$(OBJEXT): ftpd.c $(srcdir)/../arpa/ftp.h \
   pathnames.h $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/k5-util.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/krb524.h \
-  $(BUILDTOP)/include/krb524_err.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi_krb5.h ftpd_var.h \
-  secure.h
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/profile.h $(KRB524_H_DEP) $(KRB524_ERR_H_DEP) \
+  $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  ftpd_var.h secure.h
 $(OUTPRE)ftpcmd.$(OBJEXT): ftpcmd.c $(srcdir)/../arpa/ftp.h \
   $(SRCTOP)/include/syslog.h ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(srcdir)/../arpa/telnet.h
 $(OUTPRE)popen.$(OBJEXT): popen.c ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h
@@ -104,8 +103,8 @@ $(OUTPRE)radix.$(OBJEXT): $(srcdir)/../ftp/radix.c \
 $(OUTPRE)secure.$(OBJEXT): $(srcdir)/../ftp/secure.c \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   secure.h $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
-  $(BUILDTOP)/include/profile.h $(srcdir)/../arpa/ftp.h
+  $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(srcdir)/../arpa/ftp.h
 $(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c
 $(OUTPRE)setenv.$(OBJEXT): $(srcdir)/../../bsd/setenv.c
 

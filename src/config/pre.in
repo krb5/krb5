@@ -312,6 +312,13 @@ DB_DEPS-sys	=
 DB_DEPS-k5	= $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
 DB_DEPS-redirect = $(BUILDTOP)/include/db.h
 
+# Header file dependencies that might depend on whether krb4 support
+# is compiled.
+
+KRB_ERR_H_DEP	= @KRB_ERR_H_DEP@
+KRB524_H_DEP	= @KRB524_H_DEP@
+KRB524_ERR_H_DEP= @KRB524_ERR_H_DEP@
+
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
 # GEN_LIB is -lgen if needed for regexp

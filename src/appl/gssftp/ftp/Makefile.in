@@ -82,7 +82,7 @@ $(OUTPRE)domacro.$(OBJEXT): domacro.c ftp_var.h
 $(OUTPRE)ftp.$(OBJEXT): ftp.c $(srcdir)/../arpa/ftp.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/krb5.h ftp_var.h secure.h
@@ -91,13 +91,12 @@ $(OUTPRE)glob.$(OBJEXT): glob.c ftp_var.h
 $(OUTPRE)main.$(OBJEXT): main.c ftp_var.h $(srcdir)/../arpa/ftp.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
-  $(BUILDTOP)/include/profile.h
+  $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 $(OUTPRE)radix.$(OBJEXT): radix.c ftp_var.h
 $(OUTPRE)ruserpass.$(OBJEXT): ruserpass.c ftp_var.h
 $(OUTPRE)secure.$(OBJEXT): secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h secure.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
-  $(BUILDTOP)/include/profile.h $(srcdir)/../arpa/ftp.h
+  $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(srcdir)/../arpa/ftp.h
 

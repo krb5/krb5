@@ -1,3 +1,8 @@
+2002-12-23  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add variables for krb524 and krb4 generated headers for
+	dependencies.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* post.in: Fix depend rules to keep state about whether

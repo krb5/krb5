@@ -1,3 +1,8 @@
+2002-12-23  Tom Yu  <tlyu@mit.edu>
+
+	* depfix.sed: Convert dependencies on generated krb524 and krb4
+	headers to variable references.
+
 2002-11-27  Tom Yu  <tlyu@mit.edu>
 
 	* depfix.sed: Remove tcl-specific headers from dependencies.

@@ -394,6 +394,9 @@ if test $withval = no; then
 	KRB4_LIBPATH=
 	KRB524_DEPLIB=
 	KRB524_LIB=
+	KRB_ERR_H_DEP=
+	KRB524_H_DEP=
+	KRB524_ERR_H_DEP=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir=
 else 
@@ -406,6 +409,9 @@ else
 	KRB4_LIBPATH=
 	KRB524_DEPLIB='$(BUILDTOP)/krb524/libkrb524.a'
 	KRB524_LIB='$(BUILDTOP)/krb524/libkrb524.a'
+	KRB_ERR_H_DEP='$(BUILDTOP)/include/kerberosIV/krb_err.h'
+	KRB524_H_DEP='$(BUILDTOP)/include/krb524.h'
+	KRB524_ERR_H_DEP='$(BUILDTOP)/include/krb524_err.h'
 	krb5_cv_build_krb4_libs=yes
 	krb5_cv_krb4_libdir=
  else
@@ -414,6 +420,9 @@ else
 dnl	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_INCLUDES="-I$withval/include"
 	KRB4_LIBPATH="-L$withval/lib"
+	KRB_ERR_H_DEP=
+	KRB524_H_DEP=
+	KRB524_ERR_H_DEP=
 	krb5_cv_build_krb4_libs=no
 	krb5_cv_krb4_libdir="$withval/lib"
  fi
@@ -424,6 +433,9 @@ AC_SUBST(KRB4_LIB)
 AC_SUBST(KRB4_DEPLIB)
 AC_SUBST(KRB524_DEPLIB)
 AC_SUBST(KRB524_LIB)
+AC_SUBST(KRB_ERR_H_DEP)
+AC_SUBST(KRB524_H_DEP)
+AC_SUBST(KRB524_ERR_H_DEP)
 dnl We always compile the des425 library
 DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
 DES425_LIB=-ldes425
