@@ -97,12 +97,12 @@ void shsInit(shsInfo)
 
    Note that this corrupts the shsInfo->data area */
 
-static void SHSTransform KRB5_PROTOTYPE((SHS_LONG *digest, SHS_LONG *data));
+static void SHSTransform (SHS_LONG *digest, const SHS_LONG *data);
 
 static
 void SHSTransform(digest, data)
     SHS_LONG *digest;
-    SHS_LONG *data;
+    const SHS_LONG *data;
 {
     SHS_LONG A, B, C, D, E;     /* Local vars */
     SHS_LONG eData[ 16 ];       /* Expanded data */
@@ -237,25 +237,21 @@ void shsUpdate(shsInfo, buffer, count)
     /* Handle any leading odd-sized chunks */
     if (dataCount) {
 	lp = shsInfo->data + dataCount / 4;
-	canfill = (count >= dataCount);
 	dataCount = SHS_DATASIZE - dataCount;
+	canfill = (count >= dataCount);
 
 	if (dataCount % 4) {
 	    /* Fill out a full 32 bit word first if needed -- this
 	       is not very efficient (computed shift amount),
 	       but it shouldn't happen often. */
 	    while (dataCount % 4 && count > 0) {
-		*lp |= (SHS_LONG) *buffer++ << ((3 - dataCount++ % 4) * 8);
+		*lp |= (SHS_LONG) *buffer++ << ((--dataCount % 4) * 8);
 		count--;
 	    }
 	    lp++;
 	}
 	while (lp < shsInfo->data + 16) {
-	    *lp = (SHS_LONG) *buffer++ << 24;
-	    *lp |= (SHS_LONG) *buffer++ << 16;
-	    *lp |= (SHS_LONG) *buffer++ << 8;
-	    *lp++ |= (SHS_LONG) *buffer++;
-	    if ((count -= 4) < 4 && lp < shsInfo->data + 16) {
+	    if (count < 4) {
 		*lp = 0;
 		switch (count % 4) {
 		case 3:
@@ -265,9 +261,14 @@ void shsUpdate(shsInfo, buffer, count)
 		case 1:
 		    *lp |= (SHS_LONG) buffer[0] << 24;
 		}
-		break;
 		count = 0;
+		break;		/* out of while loop */
 	    }
+	    *lp = (SHS_LONG) *buffer++ << 24;
+	    *lp |= (SHS_LONG) *buffer++ << 16;
+	    *lp |= (SHS_LONG) *buffer++ << 8;
+	    *lp++ |= (SHS_LONG) *buffer++;
+	    count -= 4;
 	}
 	if (canfill) {
 	    SHSTransform(shsInfo->digest, shsInfo->data);
