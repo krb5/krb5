@@ -12,7 +12,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_sendauth_c [] =
+static char rcsid_write_msg_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
