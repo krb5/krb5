@@ -1131,9 +1131,11 @@ dnl
 dnl Determine parameters related to libraries, e.g. various extensions.
 
 AC_DEFUN(KRB5_LIB_PARAMS,
-[AC_CACHE_VAL(krb5_cv_host,
+[AC_MSG_CHECKING([for host type])
+AC_CACHE_VAL(krb5_cv_host,
 [AC_CANONICAL_HOST
 krb5_cv_host=$host])
+AC_MSG_RESULT($krb5_cv_host)
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([V5_SET_TOPDIR])
 . $ac_topdir/config/shlib.conf
@@ -1259,10 +1261,13 @@ dnl Check if we need the prototype for a function - we give it a bogus
 dnl prototype and if it complains - then a valid prototype exists on the 
 dnl system.
 dnl
-dnl KRB5_NEED_PROTO(includes, function)
+dnl KRB5_NEED_PROTO(includes, function, [bypass])
+dnl if $3 set, don't see if library defined. 
+dnl Useful for case where we will define in libkrb5 the function if need be
+dnl but want to know if a prototype exists in either case on system.
 dnl
 AC_DEFUN([KRB5_NEED_PROTO], [
-if test "x$ac_cv_func_$2" = xyes; then
+ifelse([$3], ,[if test "x$ac_cv_func_$2" = xyes; then])
 AC_CACHE_CHECK([if $2 needs a prototype provided], krb5_cv_func_$2_noproto,
 AC_TRY_COMPILE([$1],
 [struct k5foo {int foo; } xx;
@@ -1274,5 +1279,5 @@ if test $krb5_cv_func_$2_noproto = yes; then
 	AC_DEFINE([NEED_]translit($2, [a-z], [A-Z])[_PROTO], 1, dnl
 [define if the system header files are missing prototype for $2()])
 fi
-fi
+ifelse([$3], ,[fi])
 ])

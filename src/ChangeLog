@@ -1,3 +1,11 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Display test for host type and
+	result so that "cached" is not simply output from configure.
+	(KRB5_NEED_PROTO): Add optional third argument, which if set means 
+	to test for prototype even if configure script does not test for
+	function. 
+	
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* acconfig.h: Add HAVE_REGCOMP.
