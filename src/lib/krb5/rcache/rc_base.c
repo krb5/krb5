@@ -138,13 +138,15 @@ krb5_error_code krb5_rc_resolve_full(context, id, string_name)
     char *type;
     char *residual;
     krb5_error_code retval;
+    unsigned int diff;
 
     if (!(residual = strchr(string_name,':')))
 	return KRB5_RC_PARSE;
  
-    if (!(type = malloc(residual - string_name + 1)))
+    diff = residual - string_name;
+    if (!(type = malloc(diff + 1)))
 	return KRB5_RC_MALLOC;
-    (void) strncpy(type,string_name,residual - string_name);
+    (void) strncpy(type, string_name, diff);
     type[residual - string_name] = '\0';
 
     if (!(*id = (krb5_rcache) malloc(sizeof(**id)))) {

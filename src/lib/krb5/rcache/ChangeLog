@@ -1,3 +1,17 @@
+2000-09-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* rc_io.h (struct krb5_rc_iostuff): Internal structure - change
+	position in file from long to off_t (as argument for lseek). 
+
+	* rc_io.c (krb5_rc_io_read, krb5_rc_io_write): Unsigned vs signed
+	warnings cleanup.
+
+	* rc_dfl.c (alive): Do not shadow time() with variable named for same. 
+
+	* rc_base.c (krb5_rc_resolve_full): Cleanup unsigned vs. signed
+	warnings.
+
+	
 2000-06-29  Ezra Peisach  <epeisach@engrailed.mit.edu>
 
 	* rc_io.c (krb5_rc_io_creat): Cast getpid() to int.

@@ -19,7 +19,7 @@ typedef struct krb5_rc_iostuff
 #ifdef MSDOS_FILESYSTEM
   long mark;
 #else
-  int mark; /* on newer systems, should be pos_t */
+  off_t mark; /* on newer systems, should be pos_t */
 #endif
   char *fn;
  }
@@ -43,12 +43,12 @@ krb5_error_code krb5_rc_io_write
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   krb5_pointer,
-		   int));
+		   unsigned int));
 krb5_error_code krb5_rc_io_read 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *,
 		   krb5_pointer,
-		   int));
+		   unsigned int));
 krb5_error_code krb5_rc_io_close 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_iostuff *));

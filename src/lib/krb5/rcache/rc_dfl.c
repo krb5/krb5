@@ -93,11 +93,11 @@ static int alive(context, new, t)
     krb5_donot_replay *new;
     krb5_deltat t;
 {
- krb5_int32 time;
+ krb5_int32 mytime;
 
- if (krb5_timeofday(context, &time))
+ if (krb5_timeofday(context, &mytime))
    return CMP_HOHUM; /* who cares? */
- if (new->ctime + t < time) /* I hope we don't have to worry about overflow */
+ if (new->ctime + t < mytime) /* I hope we don't have to worry about overflow */
    return CMP_EXPIRED;
  return CMP_HOHUM;
 }
@@ -481,7 +481,7 @@ krb5_rc_io_store (context, t, rep)
     struct dfl_data *t;
     krb5_donot_replay *rep;
 {
-    int clientlen, serverlen, len;
+    unsigned int clientlen, serverlen, len;
     char *buf, *ptr;
     krb5_error_code ret;
 

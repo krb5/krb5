@@ -46,7 +46,7 @@ extern int errno; /* this should be in errno.h, but isn't on some systems */
 #define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
-static int dirlen = 0;
+static unsigned int dirlen = 0;
 static char *dir;
 
 /* The do ... while(0) is required to insure that GETDIR looks like a
@@ -282,7 +282,7 @@ krb5_error_code krb5_rc_io_write (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
-    int num;
+    unsigned int num;
 {
  if (write(d->fd,(char *) buf,num) == -1)
    switch(errno)
@@ -320,7 +320,7 @@ krb5_error_code krb5_rc_io_read (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
-    int num;
+    unsigned int num;
 {
  int count;
  if ((count = read(d->fd,(char *) buf,num)) == -1)
@@ -367,7 +367,7 @@ krb5_error_code krb5_rc_io_mark (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
- d->mark = lseek(d->fd,0,SEEK_CUR); /* can't fail */
+ d->mark = lseek(d->fd,(off_t) 0,SEEK_CUR); /* can't fail */
  return 0;
 }
 
