@@ -227,4 +227,8 @@ error_code KRB5DES_WEAK_KEY,		"DES key is a weak key"
 error_code KRB5_BAD_KEYTYPE,		"Keytype is incompatible with encryption type"
 error_code KRB5_BAD_KEYSIZE,		"Key size is incompatible with encryption type"
 error_code KRB5_BAD_MSIZE,		"Message size is incompatible with encryption type"
+
+error_code KRB5_CC_TYPE_EXISTS,		"Credentials cache type is already registered."
+error_code KRB5_KT_TYPE_EXISTS,		"Key table type is already registered."
+
 end
