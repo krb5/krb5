@@ -71,8 +71,8 @@ stored; by default the database is in DEFAULT_DBM_FILE (normally
 The
 .B \-k
 .I keytype
-option specifies the key type (as an ascii representation of a decimal
-number) of the master key in the database; the default is KEYTYPE_DES.
+option specifies the key type of the master key in the database; the default
+is KEYTYPE_DES.
 .PP
 The
 .B \-M
@@ -83,9 +83,8 @@ the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
 The
 .B \-e
 .I enctype
-option specifies the encryption type (as an ascii representation of a decimal
-number) used for entries in the database; the default is the default
-encryption type for the master keytype.
+option specifies the encryption type used for entries in the database; the
+default is the default encryption type for the master keytype.
 .PP
 The
 .B \-f

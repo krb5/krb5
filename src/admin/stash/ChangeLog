@@ -1,4 +1,8 @@
 
+Mon Aug 21 16:48:01 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_stash.M - Remove "ascii representation of a decimal number".
+
+
 Mon Jul 31 15:49:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_stash.c - Use kadm string conversion routines.
 
