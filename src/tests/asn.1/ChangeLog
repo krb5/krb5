@@ -1,3 +1,7 @@
+Sun Feb 18 15:33:50 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* trval.c: Add prototypes for trval() and trval2().
+
 2000-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_decode_test.c (main): Add new test cases for indefinite

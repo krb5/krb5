@@ -119,7 +119,8 @@ int do_prim_bitstring PROTOTYPE((FILE *, int, unsigned char *, int, int));
 int do_prim_int PROTOTYPE((FILE *, int, unsigned char *, int, int));
 int do_prim_string PROTOTYPE((FILE *, int, unsigned char *, int, int));
 void print_tag_type PROTOTYPE((FILE *, int, int));
-int trval(), trval2();
+int trval PROTOTYPE((FILE *, FILE *));
+int trval2 PROTOTYPE((FILE *, unsigned char *, int, int, int *));
 
 
 /****************************************************************************/
@@ -136,6 +137,7 @@ static void usage()
  * Returns true if the option was selected.  Allow "-option" and
  * "--option" syntax, since we used to accept only "-option"
  */
+static
 int check_option(word, option)
 	char *word;
 	char *option;
