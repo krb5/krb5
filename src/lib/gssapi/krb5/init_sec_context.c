@@ -850,7 +850,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	   return GSS_S_FAILURE;
        }
    } else {
-       context = ((krb5_gss_ctx_id_rec *) context_handle)->k5_context;
+       context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
    }
 
    /* set up return values so they can be "freed" successfully */
