@@ -23,14 +23,7 @@
 #define krb5_apoptions2KRB5_APOptions(val, err) (struct type_KRB5_APOptions *)krb5_flags2KRB5_TicketFlags(val, err)
 #define KRB5_APOptions2krb5_apoptions(val, err) KRB5_TicketFlags2krb5_flags((struct type_KRB5_APOptions *) (val), err)
 
-#define krb5_free_data(val) { xfree((val)->data); xfree(val);}
-
-#define krb5_free_ap_rep_enc_part xfree
-#define krb5_free_checksum xfree
-#define krb5_free_keyblock xfree
-
 /* to keep lint happy */
-#define xfree(val) free((char *)(val))
 #define xbcopy(src,dst,size) bcopy((char *)(src), (char *)(dst), size)
 #define xbzero(targ, size) bzero((char *)(targ), size)
 #define xmalloc(n) malloc((unsigned) (n))
