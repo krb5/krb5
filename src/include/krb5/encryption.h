@@ -108,7 +108,7 @@ typedef struct _krb5_checksum_entry {
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
-#define	CKSUMTYPE_XEROX		0x0003	/* SNEFRU */
+#define	CKSUMTYPE_RSA_MD4_DES	0x0003
 #define	CKSUMTYPE_DESCBC	0x0004
 
 /* macros to determine if a type is a local type */
