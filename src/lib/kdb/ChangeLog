@@ -1,3 +1,8 @@
+2000-02-21  Bear Giles  <bgiles@coyotesong.com>
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Don't attempt to override
+	type of key read from stash file.
+
 2000-02-18  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_cpw.c (krb5_dbe_crk): 
