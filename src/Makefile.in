@@ -467,16 +467,16 @@ KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
 	$(INC)kv5m_err.h $(INC)asn1_err.h
 
 $(INC)krb5.h: $(KRBHDEP)
-	$(RM) $@
+	rm -f $@
 	cat $(KRBHDEP) > $@
 $(PR)profile.h: $(PR)profile.hin $(PR)prof_err.h
-	$(RM) $@
+	rm -f $@
 	cat $(PR)profile.hin $(PR)prof_err.h > $@
 $(GG)gssapi.h: $(GG)gssapi.hin
-	$(RM) $@
+	rm -f $@
 	cat $(GG)gssapi.hin > $@
 
 awk-windows-mac: $(ETOUT) $(HOUT)
 
 clean-windows-mac:
-	$(RM) $(CLEANUP)
+	rm -f $(CLEANUP)

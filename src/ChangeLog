@@ -1,5 +1,8 @@
 1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* Makefile.in: Don't depend on $(RM) macro being defined when
+		building kerbsrc-nt.zip
+
 	* Makefile.in: include krb5/ccache/memory and windows/lib in
 		the list of directories built by the Windows build.
 		When building kerbsrc-nt.zip, put a copy of mkbin.bat
