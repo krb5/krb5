@@ -1,3 +1,7 @@
+Sun Sep 17 23:41:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rd_safe.c: Fix typo error.
+
 Sat Sep 16 01:23:14 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sendauth.c (krb5_sendauth): Make sure the scratch credentials

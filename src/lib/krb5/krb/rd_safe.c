@@ -266,8 +266,8 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	
     /* everything is ok - return data to the user */
     return 0;
-eh
-error:;
+
+error:
     krb5_xfree(outbuf->data);
     return retval;
 
