@@ -274,7 +274,7 @@ klog_com_err_proc(whoami, code, format, ap)
 	    if (fprintf(log_control.log_entries[lindex].lfu_filep,
 			outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_file_err,
+		fprintf(stderr, log_file_err, whoami,
 			log_control.log_entries[lindex].lfu_fname);
 	    }
 	    else {
@@ -290,7 +290,7 @@ klog_com_err_proc(whoami, code, format, ap)
 	    if (DEVICE_PRINT(log_control.log_entries[lindex].ldu_filep,
 			     outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_device_err,
+		fprintf(stderr, log_device_err, whoami,
 			log_control.log_entries[lindex].ldu_devname);
 	    }
 	    break;
