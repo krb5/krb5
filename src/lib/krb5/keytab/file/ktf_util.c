@@ -258,6 +258,7 @@ krb5_int32 *delete_point;
     krb5_data	*princ;
 
     memset(ret_entry, 0, sizeof(krb5_keytab_entry));
+    ret_entry->magic = KV5M_KEYTAB_ENTRY;
 
     /* fseek to synchronise buffered I/O on the key table. */
 
@@ -303,6 +304,7 @@ krb5_int32 *delete_point;
     if (!ret_entry->principal)
         return ENOMEM;
     
+    ret_entry->principal->magic = KV5M_PRINCIPAL;
     ret_entry->principal->length = count;
     ret_entry->principal->data = (krb5_data *)calloc(count, sizeof(krb5_data));
     if (!ret_entry->principal->data) {
@@ -398,6 +400,9 @@ krb5_int32 *delete_point;
 	ret_entry->key.keytype = ntohs(ret_entry->key.keytype);
     
     /* key contents */
+    ret_entry->key.magic = KV5M_KEYBLOCK;
+    ret_entry->key.etype = ETYPE_UNKNOWN;
+    
     if (!xfread(&count, sizeof(count), 1, KTFILEP(id))) {
 	error = KRB5_KT_END;
 	goto fail;
