@@ -43,3 +43,7 @@ Changes in 1.1a3:
  Updated to ccache 2.0b3
  Added Krb5GlobalsGetDefaultCacheNameModification to globals library
  Fix for profiler crashing when krb5.ini is missing
+ 
+1.1b10
+ Exported krb5 and gss interfaces to set cache name
+ 

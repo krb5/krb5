@@ -181,6 +181,8 @@
 	krb5_realm_iterator
 	krb5_realm_iterator_free
 	krb5_free_realm_string
+#
+	krb5_cc_set_default_name
 
 #Temporary exports (DO NOT USE)
 	decode_krb5_ticket
