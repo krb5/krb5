@@ -1,0 +1,16 @@
+USER = root
+
+check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+
+unit-test-body::	
+	$(ENV_SETUP) $(RUNTEST) KPASSWD=../kpasswd \
+		KINIT=$(BUILDTOP)/clients/kinit/kinit \
+		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
+		USER=$(USER) --tool kpasswd
+    
+unit-test-setup::
+	$(ENV_SETUP) $(START_SERVERS)
+	echo "source \$$env(TCLUTIL); catch {ovsec_kadm_init admin admin \$$OVSEC_KADM_ADMIN_SERVICE null \$$OVSEC_KADM_STRUCT_VERSION \$$OVSEC_KADM_API_VERSION_1 server_handle; ovsec_kadm_create_principal \$$server_handle [simple_principal $(USER)] {OVSEC_KADM_PRINCIPAL} $(USER); ovsec_kadm_destroy \$$server_handle;}; if {[info exists errorInfo]} { puts stderr \$$errorInfo; exit 1; }" | $(ENV_SETUP) $(CLNTTCL)
+
+unit-test-cleanup::
+	$(ENV_SETUP) $(STOP_SERVERS)
