@@ -1,3 +1,10 @@
+2000-02-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: New enable-kdc-replay-cache arg.  Define
+	USE_RCACHE when enabled, NOCACHE when disabled.  Defaults to
+	enabled.
+	* Makefile.in (DEFINES): Don't define NOCACHE any more.
+
 2000-02-25  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for sys/sockio.h

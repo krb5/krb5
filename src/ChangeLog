@@ -1,3 +1,8 @@
+2000-02-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Add enable-kdc-replay-cache arg, to make usage
+	message more complete.
+
 2000-02-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4: Define DES425_LIB and DES425_DEPLIB all the time. We

@@ -6,7 +6,8 @@ BUILDTOP=$(REL)$(U)
 # -DNOCACHE    - disable lookaside cache, which is used to resend previous
 #                response to replay (i.e., *don't* define this if you
 #                define USE_RCACHE)
-DEFINES = -DNOCACHE
+# These are now set in configure.in.
+DEFINES = # -DNOCACHE
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)

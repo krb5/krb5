@@ -41,6 +41,30 @@ AC_ARG_ENABLE([athena],
                               includes 32-bit length codings],
 [AC_DEFINE(ATHENA_DES3_KLUDGE)],)
 dnl
+dnl Needed for hw-preauth replay detection on KDC.
+dnl
+dnl USE_RCACHE enables the replay cache
+dnl NOCACHE disables the lookaside cache
+dnl
+dnl The lookaside cache is checked first; if *exactly* the same message
+dnl comes in twice, e.g., because the (legitimate) client resent it,
+dnl the previous response will be resent.  Otherwise, the replay cache
+dnl is used to check for attempts to fake out the KDC.  Some hardware
+dnl preauth methods are weak enough that we *really* want to have this
+dnl checking turned on.
+dnl
+AC_ARG_ENABLE([kdc-replay-cache],
+[  --enable-kdc-replay-cache	check for replayed/retransmitted KDC requests
+				(recommended for replay attack detection
+				 when hardware preauthentication is in use)
+  --disable-kdc-replay-cache	omit replay detection],
+enableval=yes)dnl
+if test "$enableval" = yes ; then
+	AC_DEFINE(USE_RCACHE)
+else
+	AC_DEFINE(NOCACHE)
+fi
+dnl
 dnl
 KRB5_RUN_FLAGS
 KRB5_BUILD_PROGRAM
