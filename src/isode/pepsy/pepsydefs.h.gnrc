@@ -17,9 +17,12 @@
  *
  *
  * $Log$
- * Revision 1.1  1994/06/10 03:31:25  eichin
- * autoconfed isode for kerberos work
+ * Revision 1.2  1994/06/11 07:42:43  tlyu
+ * fixed yytext declaration problem
  *
+Revision 1.1  1994/06/10  03:31:25  eichin
+autoconfed isode for kerberos work
+
 # Revision 1.2  1994/06/07 04:06:25  eichin
 # yytext is char* under mips too
 #
@@ -391,7 +394,7 @@ extern char *yyprfdflt;
 extern int yydebug;
 extern int yylineno;
 
-#if defined(linux) || defined(mips)
+#if defined(linux)
 extern char *yytext;
 #else
 #ifndef	HPUX
