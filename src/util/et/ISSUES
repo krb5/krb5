@@ -32,3 +32,18 @@ around), the error table is gone, even if the library is still in use.
 
 Workaround: None.
 
+64-bit support:
+
+Values are currently computed as 32-bit values, sign-extended to
+"long", and output with "L" suffixes.  Type errcode_t is "long".
+Kerberos uses a seperately chosen signed type of at least 32 bits for
+error codes.  The com_err library only look at the low 32 bits, so
+this is mostly just an issue for application code -- if anything
+truncates to 32 bits, and then widens without sign-extending, the
+value may not compare equal to the macro defined in the .h file.  This
+isn't anything unusual for signed constants, of course, just something
+to keep in mind....
+
+Workaround: Always use signed types of at least 32 bits for error
+codes.
+
