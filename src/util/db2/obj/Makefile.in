@@ -56,10 +56,6 @@ check:: dbtest
 	TMPDIR=$(TMPDIR) $(FCTSH) $(top_srcdir)/test/run.test
 
 install::
-	cp $(LIBDB) $(libdir)
-	$(RANLIB) $(libdir)/$(LIBDB)
-	cp $(top_srcdir)/include/db.h $(includedir)
-	cp ../db-config.h $(includedir)
 
 clean::
 	rm -f $(ALL_OBJS) $(LIBDB) \

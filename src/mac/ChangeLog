@@ -1,3 +1,11 @@
+Fri Nov 22 07:54:57 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.tmpl: Use '%' in Makefiles where you really want a '/'
+ 		character in the mpw Makefile.  (Translation in
+ 		src/Makefile.in)
+
+	* version.r: Fix typos, and set version resource for 1.0 release.
+
 Fri Nov  8 17:44:10 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.tmpl: Add in version resource

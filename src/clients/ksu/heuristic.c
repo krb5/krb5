@@ -59,7 +59,7 @@ krb5_error_code get_all_princ_from_file (fp, plist)
 	fprinc = get_first_token (line, &lp);
 		
 	if (fprinc ){
-	    temp_list[count] = strdup(fprinc);
+	    temp_list[count] = xstrdup(fprinc);
 	    count ++;
 	}
 
@@ -253,17 +253,19 @@ get_authorized_princ_names(luser, cmd, princ_list)
    	}
     }	
 
-    if(retval = list_union(k5login_list, k5users_filt_list, &combined_list)){
-	close_time(k5users_flag,users_fp, k5login_flag,login_fp);
-	return retval;
-    }
-
     close_time(k5users_flag,users_fp, k5login_flag, login_fp);
 
     if (cmd) {
+	if (retval = list_union(k5login_list,
+			       k5users_filt_list, &combined_list)){
+	    close_time(k5users_flag,users_fp, k5login_flag,login_fp);
+	    return retval;
+	}
 	*princ_list = combined_list;
 	return 0;
     } else {
+	if (k5users_filt_list != NULL)
+	    free(k5users_filt_list);
 	*princ_list = k5login_list;
 	return 0;
     }

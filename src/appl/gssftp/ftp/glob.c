@@ -104,8 +104,17 @@ ftpglob(v)
 	vv[1] = 0;
 	gflag = 0;
 	rscan(vv, tglob);
-	if (gflag == 0)
-		return (copyblk(vv));
+	if (gflag == 0) {
+	  /* Caller will always free the contents, so make a copy.  */
+	  size_t len = strlen (v) + 1;
+	  vv[0] = malloc (len);
+	  if (vv[0] == 0) {
+	    globerr = "Can't allocate memory";
+	    return 0;
+	  }
+	  memcpy (vv[0], v, len);
+	  return (copyblk(vv));
+	}
 
 	globerr = 0;
 	gpath = agpath; gpathp = gpath; *gpathp = 0;

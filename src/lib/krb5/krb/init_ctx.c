@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -30,11 +33,28 @@
 extern void krb5_win_do_init();
 #endif
 
-krb5_error_code INTERFACE
+static krb5_error_code init_common ();
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)
 	krb5_context *context;
 {
-	krb5_context ctx;
+	return init_common (context, FALSE);
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_init_secure_context(context)
+	krb5_context *context;
+{
+	return init_common (context, TRUE);
+}
+
+static krb5_error_code
+init_common (context, secure)
+	krb5_context *context;
+	krb5_boolean secure;
+{
+	krb5_context ctx = 0;
 	krb5_error_code retval;
 	int tmp;
 
@@ -56,6 +76,8 @@ krb5_init_context(context)
 
 	/* Initialize error tables */
 	krb5_init_ets(ctx);
+
+	ctx->profile_secure = secure;
 
 	/* Set the default encryption types, possible defined in krb5/conf */
 	if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))

@@ -1,23 +1,29 @@
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
 
+KSU_LIBS=@KSU_LIBS@
+
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
 	$(srcdir)/ccache.c \
 	$(srcdir)/authorization.c \
 	$(srcdir)/main.c \
-	$(srcdir)/heuristic.c
+	$(srcdir)/heuristic.c \
+	$(srcdir)/setenv.c \
+	$(srcdir)/xmalloc.c
 OBJS = \
 	krb_auth_su.o \
 	ccache.o \
 	authorization.o \
 	main.o \
-	heuristic.o
+	heuristic.o \
+	@SETENVOBJ@ \
+	xmalloc.o
 
 all:: ksu
 
 ksu: $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(LIBS) $(KSU_LIBS)
 
 clean::
 	$(RM) ksu

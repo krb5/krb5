@@ -50,6 +50,7 @@ dnl
 AC_SUBST(LOGINLIBS)
 dnl
 AC_TYPE_MODE_T
+AC_CHECK_TYPE(time_t, int)
 AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
 AC_HAVE_FUNCS(getutent setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty logwtmp getutmpx)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h utmpx.h utmp.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)

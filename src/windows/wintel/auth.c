@@ -184,7 +184,7 @@ auth_send(
 	unsigned char *parsedat,
 	int end_sub)
 {
-    char buf[512];
+    char buf[2048];	/* be sure that this is > auth.length+9 */
 	char *pname;
     int plen;
 	int r;

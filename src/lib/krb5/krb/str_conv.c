@@ -1,7 +1,7 @@
 /*
  * lib/kadm/str_conv.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2000 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -49,6 +52,8 @@
 
 #include "k5-int.h"
 
+/* Salt type conversions */
+
 /*
  * Local data structures.
  */
@@ -70,15 +75,6 @@ struct cksumtype_lookup_entry {
     const char *	cst_output;		/* How to spit it out	*/
 };
 
-struct deltat_match_entry {
-    const char *	dt_scan_format;		/* sscanf format	*/
-    int			dt_nmatch;		/* Number to match	*/
-    int			dt_dindex;		/* Day index		*/
-    int			dt_hindex;		/* Hour index		*/
-    int			dt_mindex;		/* Minute index		*/
-    int			dt_sindex;		/* Second index		*/
-};
-
 /*
  * Local strings
  */
@@ -98,20 +94,6 @@ static const char enctype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
 static const char enctype_des3cbcsha_out[]	= "DES-3 cbc mode with NIST-SHA";
 static const char enctype_descbcraw_out[]	= "DES cbc mode raw";
 
-/* Salttype strings */
-static const char stype_v5_in[]		= "normal";
-static const char stype_v4_in[]		= "v4";
-static const char stype_norealm_in[]	= "norealm";
-static const char stype_olrealm_in[]	= "onlyrealm";
-static const char stype_special_in[]	= "special";
-static const char stype_afs3_in[]	= "afs3";
-static const char stype_v5_out[]	= "Version 5";
-static const char stype_v4_out[]	= "Version 4";
-static const char stype_norealm_out[]	= "Version 5 - No Realm";
-static const char stype_olrealm_out[]	= "Version 5 - Realm Only";
-static const char stype_special_out[]	= "Special";
-static const char stype_afs3_out[]	= "AFS version 3";
-
 /* Checksum type strings */
 static const char cstype_crc32_in[]	= "crc32";
 static const char cstype_md4_in[]	= "md4";
@@ -129,52 +111,6 @@ static const char cstype_md5_out[]	= "RSA-MD5";
 static const char cstype_md5des_out[]	= "RSA-MD5 with DES cbc mode";
 static const char cstype_sha_out[]	= "NIST-SHA";
 static const char cstype_hmacsha_out[]	= "HMAC-SHA";
-
-/* Absolute time strings */
-static const char atime_full_digits[]	= "%y%m%d%H%M%S";
-static const char atime_full_digits_d[]	= "%y.%m.%d.%H.%M.%S";
-static const char atime_nsec_digits[]	= "%y%m%d%H%M";
-static const char atime_rel_hms[]	= "%H%M%S";
-static const char atime_rel_hm[]	= "%H%M";
-static const char atime_rel_col_hms[]	= "%T";
-static const char atime_rel_col_hm[]	= "%R";
-static const char atime_ldep_sfmt[]	= "%x:%X";
-static const char atime_full_text[]	= "%d-%b-%Y:%T";
-static const char atime_full_text_nos[]	= "%d-%b-%Y:%R";
-#if	!HAVE_STRPTIME
-static const char ascan_full_digits[]	= "%02d%02d%02d%02d%02d%02d";
-static const char ascan_full_digits_d[]	= "%02d.%02d.%02d.%02d.%02d.%02d";
-static const char ascan_nsec_digits[]	= "%02d%02d%02d%02d%02d";
-static const char ascan_rel_hms[]	= "%02d%02d%02d";
-static const char ascan_rel_hm[]	= "%02d%02d";
-static const char ascan_rel_col_hms[]	= "%02d:%02d:%02d";
-static const char ascan_rel_col_hm[]	= "%02d:%02d";
-#endif	/* !HAVE_STRPTIME */
-#ifdef	HAVE_STRFTIME
-static const char sftime_ldep_time[]	= "%c";
-static const char sftime_med_fmt[]	= "%d %b %y %T";
-static const char sftime_short_fmt[]	= "%x %X";
-static const char sftime_last_fmt[]	= "%d/%m/%y %R";
-#endif	/* HAVE_STRFTIME */
-static const char sftime_default_fmt[]	= "%02d/%02d/%02d %02d:%02d";
-static const size_t sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
-
-/* Delta time strings */
-static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
-static const char dtscan_dhms_stext[]	= "%dd%dh%dm%ds";
-static const char dtscan_hms_notext[]	= "%d:%02d:%02d";
-static const char dtscan_hms_stext[]	= "%dh%dm%ds";
-static const char dtscan_hm_notext[] 	= "%d:%02d";
-static const char dtscan_hm_stext[]	= "%dh%dm";
-static const char dtscan_days[]		= "%d%[d]";
-static const char dtscan_hours[]	= "%d%[h]";
-static const char dtscan_minutes[]	= "%d%[m]";
-static const char dtscan_seconds[]	= "%d%[s]";
-static const char dt_day_singular[]	= "day";
-static const char dt_day_plural[]	= "days";
-static const char dt_output_donly[]	= "%d %s";
-static const char dt_output_dhms[]	= "%d %s %02d:%02d:%02d";
-static const char dt_output_hms[]	= "%d:%02d:%02d";
 
 /*
  * Lookup tables.
@@ -195,14 +131,14 @@ static const int enctype_table_nents = sizeof(enctype_table)/
 				       sizeof(enctype_table[0]);
 
 static const struct salttype_lookup_entry salttype_table[] = {
-/* salt type			input specifier		output string	  */
-/*-----------------------------	-----------------------	------------------*/
-{ KRB5_KDB_SALTTYPE_NORMAL,	stype_v5_in,		stype_v5_out	  },
-{ KRB5_KDB_SALTTYPE_V4,		stype_v4_in,		stype_v4_out	  },
-{ KRB5_KDB_SALTTYPE_NOREALM,	stype_norealm_in,	stype_norealm_out },
-{ KRB5_KDB_SALTTYPE_ONLYREALM,	stype_olrealm_in,	stype_olrealm_out },
-{ KRB5_KDB_SALTTYPE_SPECIAL,	stype_special_in,	stype_special_out },
-{ KRB5_KDB_SALTTYPE_AFS3,	stype_afs3_in,		stype_afs3_out    }
+/* salt type			input specifier	output string  */
+/*-----------------------------	--------------- ---------------*/
+{ KRB5_KDB_SALTTYPE_NORMAL,	"normal",	"Version 5"	  },
+{ KRB5_KDB_SALTTYPE_V4,		"v4",		"Version 4"	  },
+{ KRB5_KDB_SALTTYPE_NOREALM,	"norealm",	"Version 5 - No Realm" },
+{ KRB5_KDB_SALTTYPE_ONLYREALM,	"onlyrealm",	"Version 5 - Realm Only" },
+{ KRB5_KDB_SALTTYPE_SPECIAL,	"special",	"Special" },
+{ KRB5_KDB_SALTTYPE_AFS3,	"afs3",		"AFS version 3"    }
 };
 static const int salttype_table_nents = sizeof(salttype_table)/
 					sizeof(salttype_table[0]);
@@ -222,146 +158,7 @@ static const struct cksumtype_lookup_entry cksumtype_table[] = {
 static const int cksumtype_table_nents = sizeof(cksumtype_table)/
 					 sizeof(cksumtype_table[0]);
 
-static const char * const atime_format_table[] = {
-atime_full_digits,	/* yymmddhhmmss			*/
-atime_full_digits_d,	/* yy.mm.dd.hh.mm.ss		*/
-atime_nsec_digits,	/* yymmddhhmm			*/
-atime_rel_hms,		/* hhmmss			*/
-atime_rel_hm,		/* hhmm				*/
-atime_rel_col_hms,	/* hh:mm:ss			*/
-atime_rel_col_hm,	/* hh:mm			*/
-/* The following not really supported unless native strptime present */
-atime_ldep_sfmt,	/*locale-dependent short format	*/
-atime_full_text,	/* dd-month-yyyy:hh:mm:ss	*/
-atime_full_text_nos	/* dd-month-yyyy:hh:mm		*/
-};
-static const int atime_format_table_nents = sizeof(atime_format_table)/
-					    sizeof(atime_format_table[0]);
 
-#ifdef HAVE_STRFTIME
-static const char * const sftime_format_table[] = {
-sftime_ldep_time,	/* Default locale-dependent date and time	*/
-sftime_med_fmt,		/* dd mon yy hh:mm:ss				*/
-sftime_short_fmt,	/* locale-dependent short format		*/
-sftime_last_fmt		/* dd/mm/yy hh:mm				*/
-};
-static const int sftime_format_table_nents = sizeof(sftime_format_table)/
-					    sizeof(sftime_format_table[0]);
-#endif /* HAVE_STRFTIME */
-
-static const struct deltat_match_entry deltat_table[] = {
-/* scan format		nmatch	daypos	hourpos	minpos	secpos	*/
-/*---------------------	-------	-------	-------	-------	--------*/
-{ dtscan_dhms_notext,	4,	0,	1,	2,	3	},
-{ dtscan_dhms_stext,	4,	0,	1,	2,	3	},
-{ dtscan_hms_notext,	3,	-1,	0,	1,	2	},
-{ dtscan_hms_stext,	3,	-1,	0,	1,	2	},
-{ dtscan_hm_notext,	2,	-1,	-1,	0,	1	},
-{ dtscan_hm_stext,	2,	-1,	-1,	0,	1	},
-{ dtscan_days,		2,	0,	-1,	-1,	-1	},
-{ dtscan_hours,		2,	-1,	0,	-1,	-1	},
-{ dtscan_minutes,	2,	-1,	-1,	0,	-1	},
-{ dtscan_seconds,	2,	-1,	-1,	-1,	0	}
-};
-static const int deltat_table_nents = sizeof(deltat_table)/
-				      sizeof(deltat_table[0]);
-
-#if	!HAVE_STRPTIME
-/*
- * Rudimentary version of strptime for systems which don't have it.
- */
-static char *
-strptime(buf, format, tm)
-    char *buf;
-    const char *format;
-    struct tm *tm;
-{
-    int year, month, day, hour, minute, second;
-    char *bp;
-    time_t now;
-    
-    /*
-     * We only understand the following fixed formats:
-     *    %y%m%d%H%M%S
-     *    %y.%m.%d.%H.%M.%S
-     *    %y%m%d%H%M
-     *    %H%M%S
-     *    %H%M
-     *    %T
-     *    %R
-     */
-    bp = (char *) NULL;
-    if (!strcmp(format, atime_full_digits) &&
-	(sscanf(buf, ascan_full_digits,
-		&year, &month, &day, &hour, &minute, &second) == 6)) {
-	tm->tm_year = year;
-	tm->tm_mon = month - 1;
-	tm->tm_mday = day;
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	tm->tm_sec = second;
-	bp = &buf[strlen(atime_full_digits)];
-    }
-    else if (!strcmp(format,atime_full_digits_d) &&
-	     (sscanf(buf, ascan_full_digits_d,
-		     &year, &month, &day, &hour, &minute, &second) == 6)) {
-	tm->tm_year = year;
-	tm->tm_mon = month - 1;
-	tm->tm_mday = day;
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	tm->tm_sec = second;
-	bp = &buf[strlen(atime_full_digits_d)];
-    }
-    else if (!strcmp(format, atime_nsec_digits) &&
-	     (sscanf(buf, ascan_nsec_digits,
-		&year, &month, &day, &hour, &minute) == 5)) {
-	tm->tm_year = year;
-	tm->tm_mon = month - 1;
-	tm->tm_mday = day;
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	tm->tm_sec = 0;
-	bp = &buf[strlen(atime_nsec_digits)];
-    }
-    else if (!strcmp(format, atime_rel_hms) &&
-	     (sscanf(buf, ascan_rel_hms, &hour, &minute, &second) == 3)) {
-	now = time((time_t *) NULL);
-	memcpy(tm, localtime(&now), sizeof(struct tm));
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	tm->tm_sec = second;
-	bp = &buf[strlen(atime_rel_hms)];
-    }
-    else if (!strcmp(format, atime_rel_hm) &&
-	     (sscanf(buf, ascan_rel_hm, &hour, &minute) == 2)) {
-	now = time((time_t *) NULL);
-	memcpy(tm, localtime(&now), sizeof(struct tm));
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	bp = &buf[strlen(atime_rel_hm)];
-    }
-    else if (!strcmp(format, atime_rel_col_hms) &&
-	     (sscanf(buf, ascan_rel_col_hms, &hour, &minute, &second) == 3)) {
-	now = time((time_t *) NULL);
-	memcpy(tm, localtime(&now), sizeof(struct tm));
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	tm->tm_sec = second;
-	bp = &buf[strlen(atime_rel_col_hms)];
-    }
-    else if (!strcmp(format, atime_rel_col_hm) &&
-	     (sscanf(buf, ascan_rel_col_hm, &hour, &minute) == 2)) {
-	now = time((time_t *) NULL);
-	memcpy(tm, localtime(&now), sizeof(struct tm));
-	tm->tm_hour = hour;
-	tm->tm_min = minute;
-	bp = &buf[strlen(atime_rel_col_hm)];
-    }
-    return(bp);
-}
-#endif	/* HAVE_STRPTIME */
-
 /*
  * String to internal datatype routines.
  *
@@ -388,8 +185,8 @@ krb5_string_to_enctype(string, enctypep)
 
 krb5_error_code
 krb5_string_to_salttype(string, salttypep)
-    char	* string;
-    krb5_int32	* salttypep;
+    char		* string;
+    krb5_int32		* salttypep;
 {
     int i;
     int found;
@@ -420,78 +217,6 @@ krb5_string_to_cksumtype(string, cksumtypep)
 	    *cksumtypep = cksumtype_table[i].cst_cksumtype;
 	    break;
 	}
-    }
-    return((found) ? 0 : EINVAL);
-}
-
-krb5_error_code
-krb5_string_to_timestamp(string, timestampp)
-    char		* string;
-    krb5_timestamp	* timestampp;
-{
-    int i;
-    int found;
-    struct tm timebuf;
-    time_t now;
-    char *s;
-
-    found = 0;
-    now = time((time_t *) NULL);
-    for (i=0; i<atime_format_table_nents; i++) {
-        /* We reset every time throughout the loop as the manual page
-	 * indicated that no guarantees are made as to preserving timebuf
-	 * when parsing fails
-	 */
-	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
-	if ((s = strptime(string, atime_format_table[i], &timebuf))
-	    && (s != string)) {
-	    found = 1;
-	    break;
-	}
-    }
-    if (found)
-	*timestampp = (krb5_timestamp) mktime(&timebuf);
-    return((found) ? 0 : EINVAL);
-}
-
-krb5_error_code
-krb5_string_to_deltat(string, deltatp)
-    char	* string;
-    krb5_deltat	* deltatp;
-{
-    int i;
-    int found;
-    int svalues[4];
-    int days, hours, minutes, seconds;
-    krb5_deltat	dt;
-
-    found = 0;
-    days = hours = minutes = seconds = 0;
-    for (i=0; i<deltat_table_nents; i++) {
-	if (sscanf(string, deltat_table[i].dt_scan_format,
-		   &svalues[0], &svalues[1], &svalues[2], &svalues[3]) ==
-	    deltat_table[i].dt_nmatch) {
-	    if (deltat_table[i].dt_dindex >= 0)
-		days = svalues[deltat_table[i].dt_dindex];
-	    if (deltat_table[i].dt_hindex >= 0)
-		hours = svalues[deltat_table[i].dt_hindex];
-	    if (deltat_table[i].dt_mindex >= 0)
-		minutes = svalues[deltat_table[i].dt_mindex];
-	    if (deltat_table[i].dt_sindex >= 0)
-		seconds = svalues[deltat_table[i].dt_sindex];
-	    found = 1;
-	    break;
-	}
-    }
-    if (found) {
-	dt = days;
-	dt *= 24;
-	dt += hours;
-	dt *= 60;
-	dt += minutes;
-	dt *= 60;
-	dt += seconds;
-	*deltatp = dt;
     }
     return((found) ? 0 : EINVAL);
 }
@@ -582,53 +307,118 @@ krb5_cksumtype_to_string(cksumtype, buffer, buflen)
     else
 	return(EINVAL);
 }
+
+/* (absolute) time conversions */
 
-krb5_error_code
-krb5_timestamp_to_string(timestamp, buffer, buflen)
-    krb5_timestamp	timestamp;
-    char		* buffer;
-    size_t		buflen;
+#ifndef HAVE_STRFTIME
+#undef strftime
+#define strftime my_strftime
+static size_t strftime (char *, size_t, const char *, const struct tm *);
+#endif
+
+#ifndef HAVE_STRPTIME
+#undef strptime
+#define strptime my_strptime
+static char *strptime (const char *, const char *, struct tm *);
+#endif
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_string_to_timestamp(string, timestampp)
+    char		FAR * string;
+    krb5_timestamp	FAR * timestampp;
 {
-#if	HAVE_STRFTIME
-    if (strftime(buffer, buflen, "%c", localtime((time_t *) &timestamp)))
-	return(0);
-    else
-	return(ENOMEM);
-#else	/* HAVE_STRFTIME */
-    if (strlen(ctime((time_t *) &timestamp)) <= buflen) {
-	strcpy(buffer, ctime((time_t *) &timestamp));
-	/* ctime returns <datestring>\n\0 */
-	buffer[strlen(buffer)-1] = '\0';
-	return(0);
+    int i;
+    struct tm timebuf;
+    time_t now, ret_time;
+    char *s;
+    static const char * const atime_format_table[] = {
+	"%Y%m%d%H%M%S",		/* yyyymmddhhmmss		*/
+	"%Y.%m.%d.%H.%M.%S",	/* yyyy.mm.dd.hh.mm.ss		*/
+	"%y%m%d%H%M%S",		/* yymmddhhmmss			*/
+	"%y.%m.%d.%H.%M.%S",	/* yy.mm.dd.hh.mm.ss		*/
+	"%y%m%d%H%M",		/* yymmddhhmm			*/
+	"%H%M%S",		/* hhmmss			*/
+	"%H%M",			/* hhmm				*/
+	"%T",			/* hh:mm:ss			*/
+	"%R",			/* hh:mm			*/
+	/* The following not really supported unless native strptime present */
+	"%x:%X",		/* locale-dependent short format */
+	"%d-%b-%Y:%T",		/* dd-month-yyyy:hh:mm:ss	*/
+	"%d-%b-%Y:%R"		/* dd-month-yyyy:hh:mm		*/
+    };
+    static const int atime_format_table_nents =
+	sizeof(atime_format_table)/sizeof(atime_format_table[0]);
+
+
+    now = time((time_t *) NULL);
+    for (i=0; i<atime_format_table_nents; i++) {
+        /* We reset every time throughout the loop as the manual page
+	 * indicated that no guarantees are made as to preserving timebuf
+	 * when parsing fails
+	 */
+	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
+	if ((s = strptime(string, atime_format_table[i], &timebuf))
+	    && (s != string)) {
+	    if (timebuf.tm_year <= 0)
+		continue;	/* clearly confused */
+	    ret_time = mktime(&timebuf);
+	    if (ret_time == (time_t) -1)
+		continue;	/* clearly confused */
+	    *timestampp = (krb5_timestamp) ret_time;
+	    return 0;
+	}
     }
-    return(ENOMEM);
-#endif	/* HAVE_STRFTIME */
+    return(EINVAL);
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_timestamp_to_string(timestamp, buffer, buflen)
+    krb5_timestamp	timestamp;
+    char		FAR * buffer;
+    size_t		buflen;
+{
+    int ret;
+    time_t timestamp2 = timestamp;
+
+    ret = strftime(buffer, buflen, "%c", localtime(&timestamp2));
+    if (ret == 0 || ret == buflen)
+	return(ENOMEM);
+    return(0);
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     krb5_timestamp	timestamp;
-    char		* buffer;
+    char		FAR * buffer;
     size_t		buflen;
-    char		* pad;
+    char		FAR * pad;
 {
     struct tm	*tmp;
     size_t i;
     size_t	ndone;
+    time_t timestamp2 = timestamp;
 
-    tmp = localtime((time_t *) &timestamp);
+    static const char * const sftime_format_table[] = {
+	"%c",			/* Default locale-dependent date and time */
+	"%d %b %Y %T",		/* dd mon yyyy hh:mm:ss			*/
+	"%x %X",		/* locale-dependent short format	*/
+	"%d/%m/%Y %R"		/* dd/mm/yyyy hh:mm			*/
+    };
+    static const int sftime_format_table_nents =
+	sizeof(sftime_format_table)/sizeof(sftime_format_table[0]);
+
+    tmp = localtime(&timestamp2);
     ndone = 0;
-#if	HAVE_STRFTIME
     for (i=0; i<sftime_format_table_nents; i++) {
 	if ((ndone = strftime(buffer, buflen, sftime_format_table[i], tmp)))
 	    break;
     }
-#endif	/* HAVE_STRFTIME */
     if (!ndone) {
+#define sftime_default_len	2+1+2+1+4+1+2+1+2+1
 	if (buflen >= sftime_default_len) {
-	    sprintf(buffer, sftime_default_fmt,
-		    tmp->tm_mday, tmp->tm_mon+1, tmp->tm_year,
-		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	    sprintf(buffer, "%02d/%02d/%4d %02d:%02d",
+		    tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
+		    tmp->tm_hour, tmp->tm_min);
 	    ndone = strlen(buffer);
 	}
     }
@@ -639,47 +429,114 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     }
     return((ndone) ? 0 : ENOMEM);
 }
+
+/* relative time (delta-t) conversions */
 
-krb5_error_code
+/* string->deltat is in deltat.y */
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_deltat_to_string(deltat, buffer, buflen)
     krb5_deltat	deltat;
-    char	* buffer;
+    char	FAR * buffer;
     size_t	buflen;
 {
     int			days, hours, minutes, seconds;
     krb5_deltat		dt;
-    krb5_error_code	retval;
 
-    days = (int) (deltat / (24*3600l));
-    dt = deltat % (24*3600l);
+    /*
+     * We want something like ceil(log10(2**(nbits-1))) + 1.  That log
+     * value is log10(2)*(nbits-1) or log10(2**8)*(nbits-1)/8.  So,
+     * 2.4... is log10(256), rounded up.  Add one to handle leading
+     * minus, and one more to force int cast to round the value up.
+     * This doesn't include room for a trailing nul.
+     *
+     * This will break if bytes are more than 8 bits.
+     */
+#define MAX_CHARS_FOR_INT_TYPE(TYPE)	((int) (2 + 2.408241 * sizeof (TYPE)))
+    char tmpbuf[MAX_CHARS_FOR_INT_TYPE(int) * 4 + 8];
+
+    days = (int) (deltat / (24*3600L));
+    dt = deltat % (24*3600L);
     hours = (int) (dt / 3600);
     dt %= 3600;
     minutes = (int) (dt / 60);
     seconds = (int) (dt % 60);
 
-    retval = 0;
-    if (days) {
-	if (hours || minutes || seconds) {
-	    if (buflen < (strlen(dt_output_dhms)+strlen(dt_day_plural)))
-		retval = ENOMEM;
-	    else
-		sprintf(buffer, dt_output_dhms, days,
-			(days > 1) ? dt_day_plural : dt_day_singular,
-			hours, minutes, seconds);
-	}
-	else {
-	    if (buflen < (strlen(dt_output_donly)+strlen(dt_day_plural)))
-		retval = ENOMEM;
-	    else
-		sprintf(buffer, dt_output_donly, days,
-			(days > 1) ? dt_day_plural : dt_day_singular);
-	}
-    }
-    else {
-	if (buflen < strlen(dt_output_hms))
-	    retval = ENOMEM;
-	else
-	    sprintf(buffer, dt_output_hms, hours, minutes, seconds);
-    }
-    return(retval);
+    memset (tmpbuf, 0, sizeof (tmpbuf));
+    if (days == 0)
+	sprintf(buffer, "%d:%02d:%02d", hours, minutes, seconds);
+    else if (hours || minutes || seconds)
+	sprintf(buffer, "%d %s %02d:%02d:%02d", days,
+		(days > 1) ? "days" : "day",
+		hours, minutes, seconds);
+    else
+	sprintf(buffer, "%d %s", days,
+		(days > 1) ? "days" : "day");
+    if (tmpbuf[sizeof(tmpbuf)-1] != 0)
+	/* Something must be very wrong with my math above, or the
+	   assumptions going into it...  */
+	abort ();
+    if (strlen (tmpbuf) > buflen)
+	return ENOMEM;
+    else
+	strncpy (buffer, tmpbuf, buflen);
+    return 0;
 }
+
+#undef __P
+#define __P(X) X
+
+#if !defined (HAVE_STRFTIME) || !defined (HAVE_STRPTIME)
+#undef _CurrentTimeLocale
+#define _CurrentTimeLocale (&dummy_locale_info)
+
+struct dummy_locale_info_t {
+    char d_t_fmt[15];
+    char t_fmt_ampm[12];
+    char t_fmt[9];
+    char d_fmt[9];
+    char day[7][10];
+    char abday[7][4];
+    char mon[12][10];
+    char abmon[12][4];
+    char am_pm[2][3];
+};
+static const struct dummy_locale_info_t dummy_locale_info = {
+    "%a %b %d %X %Y",		/* %c */
+    "%I:%M:%S %p",		/* %r */
+    "%H:%M:%S",			/* %X */
+    "%m/%d/%y",			/* %x */
+    { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+      "Saturday" },
+    { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" },
+    { "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December" },
+    { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" },
+    { "AM", "PM" },
+};
+#undef  TM_YEAR_BASE
+#define TM_YEAR_BASE 1900
+#endif
+
+#ifndef HAVE_STRFTIME
+#undef  DAYSPERLYEAR
+#define DAYSPERLYEAR 366
+#undef  DAYSPERNYEAR
+#define DAYSPERNYEAR 365
+#undef  DAYSPERWEEK
+#define DAYSPERWEEK 7
+#undef  isleap
+#define isleap(N)	((N % 4) == 0 && (N % 100 != 0 || N % 400 == 0))
+#undef  tzname
+#define tzname my_tzname
+static const char *const tzname[2] = { 0, 0 };
+#undef  tzset
+#define tzset()
+
+#include "strftime.c"
+#endif
+
+#ifndef HAVE_STRPTIME
+#include "strptime.c"
+#endif

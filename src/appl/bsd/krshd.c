@@ -150,8 +150,15 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"ek54ciD:S:M:AP:?L:"
+#if HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
 
+#ifndef MAXDNAME
+#define MAXDNAME 256 /*per the rfc*/
+#endif
+
+#define ARGSTR	"ek54ciD:S:M:AP:?L:w:"
 
 #define RSHD_BUFSIZ 5120
 
@@ -176,6 +183,9 @@ int do_encrypt = 0;
 int anyport = 0;
 char *kprogdir = KPROGDIR;
 int netf;
+int maxhostlen = 0;
+int stripdomain = 1;
+int always_ip = 0;
 
 #else /* !KERBEROS */
 
@@ -349,8 +359,30 @@ int main(argc, argv)
 	case 'D':
 	  debug_port = atoi(optarg);
 	  break;
-	case '?':
-	default:
+      case 'w':
+	  if (!strcmp(optarg, "ip"))
+	      always_ip = 1;
+	  else {
+	      char *cp;
+	      cp = strchr(optarg, ',');
+	      if (cp == NULL)
+		  maxhostlen = atoi(optarg);
+	      else if (*(++cp)) {
+		  if (!strcmp(cp, "striplocal"))
+		      stripdomain = 1;
+		  else if (!strcmp(cp, "nostriplocal"))
+		      stripdomain = 0;
+		  else {
+		      usage();
+		      exit(1);
+		  }
+		  *(--cp) = '\0';
+		  maxhostlen = atoi(optarg);
+	      }
+	  }
+	  break;
+      case '?':
+      default:
 	  usage();
 	  exit(1);
 	  break;
@@ -420,9 +452,6 @@ int main(argc, argv)
 	syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
 
-    if (!checksum_required && !checksum_ignored)
-	checksum_ignored = 1;
-
     if (checksum_required&&checksum_ignored) {
 	syslog(LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
 	fatal(fd, "Configuration error: mutually exclusive options specified");
@@ -446,8 +475,10 @@ char    term[64] = "TERM=network";
 char	path_rest[] = RPATH;
 
 char	remote_addr[64];	/* = "KRB5REMOTEADDR=" */
+char	remote_port[64];	/* = "KRB5REMOTEPORT=" */
 char	local_addr[64];		/* = "KRB5LOCALADDR=" */
-#define ADDRPAD 0,0		/* remoteaddr, localaddr */
+char	local_port[64];		/* = "KRB5LOCALPORT=" */
+#define ADDRPAD 0,0,0,0
 #define KRBPAD 0		/* KRB5CCNAME, optional */
 
 /* The following include extra space for TZ and MAXENV pointers... */
@@ -575,7 +606,9 @@ void doit(f, fromp)
     
     int s;
     struct hostent *hp;
-    char *hostname;
+    char hostname[MAXDNAME];
+    char *sane_host;
+    char hostaddra[16];
     short port;
     int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
@@ -735,16 +768,23 @@ void doit(f, fromp)
     dup2(f, 2);
     hp = gethostbyaddr((char *)&fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
-    if (hp){
-	hostname = malloc(strlen(hp->h_name) + 1);
-	strcpy(hostname,hp->h_name);
+    strncpy(hostaddra, inet_ntoa(fromp->sin_addr), sizeof (hostaddra));
+    hostaddra[sizeof (hostaddra) - 1] = '\0';
+    if (hp != NULL){
+	strncpy(hostname, hp->h_name, sizeof (hostname));
+	hostname[sizeof (hostname) - 1] = '\0';
     }
-    else {
-	hostname = malloc(strlen((char *)inet_ntoa(fromp->sin_addr)) + 1);
-	strcpy(hostname,(char *)inet_ntoa(fromp->sin_addr));
-    }
+    else
+	hostname[0] = '\0';
 
 #ifdef KERBEROS
+    status = pty_make_sane_hostname(fromp, maxhostlen,
+				    stripdomain, always_ip, &sane_host);
+    if (status) {
+	error("failed make_sane_hostname: %s\n", error_message(status));
+	exit(1);
+    }
+
     if ((status = recvauth(f, fromaddr,&valid_checksum))) {
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
@@ -776,8 +816,9 @@ void doit(f, fromp)
     pwd = getpwnam(locuser);
     if (pwd == (struct passwd *) 0 ) {
 	syslog(LOG_ERR ,
-	       "Principal %s (%s@%s) for local user %s has no account.\n",
-	       kremuser, remuser, hostname, locuser); /* xxx sprintf buffer in syslog*/
+	       "Principal %s (%s@%s (%s)) for local user %s has no account.\n",
+	       kremuser, remuser, hostaddra, hostname,
+	       locuser); /* xxx sprintf buffer in syslog*/
 	error("Login incorrect.\n");
 	exit(1);
     }
@@ -828,18 +869,18 @@ void doit(f, fromp)
     endudb();
     if (secflag) {
 	if(getsysv(&sysv, sizeof(struct sysv)) != 0) {
-	    loglogin(hostname, SLG_LLERR, 0, ue);
+	    loglogin(sane_host, SLG_LLERR, 0, ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
 	if ((packet_level != ue->ue_deflvl) ||
 	    ((packet_compart & ue->ue_comparts) != packet_compart )){
-	    loglogin(hostname, SLG_LLERR, 0, ue);
+	    loglogin(sane_host, SLG_LLERR, 0, ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
 	if (ue->ue_disabled != 0) {
-	    loglogin(hostname,SLG_LOCK,ue->ue_logfails,ue);
+	    loglogin(sane_host,SLG_LOCK,ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    exit(1);
 	}
@@ -873,13 +914,13 @@ void doit(f, fromp)
     if (port) {
 	/* Place entry into wtmp */
 	sprintf(ttyn,"krsh%1d",getpid());
-	pty_logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,sane_host);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-	pty_logwtmp(ttyn,locuser,hostname);
+	pty_logwtmp(ttyn,locuser,sane_host);
     }
     
 #ifdef CRAY
@@ -892,7 +933,7 @@ void doit(f, fromp)
 	if (getusrv(&usrv)){
 	    syslog(LOG_ERR,"Cannot getusrv");
 	    error("Permission denied.\n");
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    goto signout_please;
 	}
 	/*
@@ -901,12 +942,12 @@ void doit(f, fromp)
 	if((ue->ue_valcat & TFM_TRUSTED) ||
 	   (sysv.sy_oldtfm &&
 	    ((ue->ue_comparts & TRUSTED_SUBJECT) == TRUSTED_SUBJECT))) {
-	    loglogin(hostname, SLG_TRSUB, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_TRSUB, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
 	
-	loglogin(hostname, SLG_OKLOG, ue->ue_logfails,ue);
+	loglogin(sane_host, SLG_OKLOG, ue->ue_logfails,ue);
 	
 	/*	Setup usrv structure with user udb info and 
 		packet_level and packet_compart. */
@@ -991,7 +1032,7 @@ void doit(f, fromp)
 	    }
 	}
 	if (nal_error) {
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
@@ -1001,7 +1042,7 @@ void doit(f, fromp)
 	sethost(paddr);
 	
 	if (setusrv(&usrv) == -1) {
-	    loglogin(hostname, SLG_LVERR, ue->ue_logfails,ue);
+	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
@@ -1014,11 +1055,11 @@ void doit(f, fromp)
 #endif /*CRAY*/
     
     if (chdir(pwd->pw_dir) < 0) {
-	syslog(LOG_ERR ,
-	       "Principal %s  (%s@%s) for local user %s has no home directory.\n",
-	       kremuser, remuser, hostname, locuser);
-	error("No remote directory.\n");
+      if(chdir("/") < 0) {
+      	error("No remote directory.\n");
 	goto signout_please;
+      }
+	   pwd->pw_dir = "/";
     }
 
 #ifdef KERBEROS
@@ -1028,8 +1069,8 @@ void doit(f, fromp)
 	    /* kuserok returns 0 if OK */
 	    if (kuserok(v4_kdata, locuser)){
 		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s) for local user %s failed kuserok.\n",
-		       kremuser, remuser, hostname, locuser);
+		       "Principal %s (%s@%s (%s)) for local user %s failed kuserok.\n",
+		       kremuser, remuser, hostaddra, hostname, locuser);
 		}
 	    else auth_sent |= AUTH_KRB4;
 	} else
@@ -1038,8 +1079,8 @@ void doit(f, fromp)
 	    /* krb5_kuserok returns 1 if OK */
 	    if (!krb5_kuserok(bsd_context, client, locuser)){
 		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
-		       kremuser, remuser, hostname, locuser);
+		       "Principal %s (%s@%s (%s)) for local user %s failed krb5_kuserok.\n",
+		       kremuser, remuser, hostaddra, hostname, locuser);
 	    }
 	    else
 		auth_sent |=
@@ -1049,7 +1090,8 @@ void doit(f, fromp)
 	
 #else
     if (pwd->pw_passwd != 0 && *pwd->pw_passwd != '\0' &&
-	ruserok(hostname, pwd->pw_uid == 0, remuser, locuser) < 0) {
+	ruserok(hostname[0] ? hostname : hostaddra,
+		pwd->pw_uid == 0, remuser, locuser) < 0) {
 	error("Permission denied.\n");
 	goto signout_please;
     }
@@ -1087,11 +1129,11 @@ void doit(f, fromp)
     pwd = (struct passwd *) getpwnam(locuser);
     if (pwd && (pwd->pw_uid == 0)) {
 #ifdef LOG_CMD
-	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s) as ROOT", 
-	       cmdbuf, kremuser, remuser, hostname);
+	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as ROOT", 
+	       cmdbuf, kremuser, remuser, hostaddra, hostname);
 #else
-	syslog(LOG_NOTICE ,"Access as ROOT by principal %s (%s@%s)",
-	       kremuser, remuser, hostname);
+	syslog(LOG_NOTICE ,"Access as ROOT by principal %s (%s@%s (%s))",
+	       kremuser, remuser, hostaddra, hostname);
 #endif
     }
 #if defined(KERBEROS) && defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
@@ -1111,11 +1153,11 @@ void doit(f, fromp)
 #if defined(LOG_REMOTE_REALM) || defined(LOG_OTHER_USERS) || defined(LOG_ALL_LOGINS)
       {
 #ifdef LOG_CMD
-	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s) as local user %s", 
-		 cmdbuf, kremuser, remuser, hostname, locuser);
+	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as local user %s", 
+		 cmdbuf, kremuser, remuser, hostaddra, hostname, locuser);
 #else
-	  syslog(LOG_NOTICE ,"Access as %s by principal %s (%s@%s)",
-		 locuser, kremuser, remuser, hostname);
+	  syslog(LOG_NOTICE ,"Access as %s by principal %s (%s@%s (%s))",
+		 locuser, kremuser, remuser, hostaddra, hostname);
 #endif
       }
 #endif
@@ -1316,6 +1358,13 @@ if(port)
         initgroups(pwd->pw_name, pwd->pw_gid);
     }
 #endif
+#ifdef	HAVE_SETLUID
+    /*
+     * If we're on a system which keeps track of login uids, then
+     * set the login uid. 
+     */
+    setluid((uid_t) pwd->pw_uid);
+#endif	/* HAVE_SETLUID */
     (void) setuid((uid_t)pwd->pw_uid);
     /* if TZ is set in the parent, drag it in */
     {
@@ -1357,14 +1406,22 @@ if(port)
 
     {
       int i;
-      /* these two are covered by ADDRPAD */
+      /* these four are covered by ADDRPAD */
       sprintf(local_addr,  "KRB5LOCALADDR=%s", inet_ntoa(localaddr.sin_addr));
       for (i = 0; envinit[i]; i++);
       envinit[i] =local_addr;
 
+      sprintf(local_port,  "KRB5LOCALPORT=%d", ntohs(localaddr.sin_port));
+      for (; envinit[i]; i++);
+      envinit[i] =local_port;
+
       sprintf(remote_addr, "KRB5REMOTEADDR=%s", inet_ntoa(fromp->sin_addr));
       for (; envinit[i]; i++);
       envinit[i] =remote_addr;
+
+      sprintf(remote_port, "KRB5REMOTEPORT=%d", ntohs(fromp->sin_port));
+      for (; envinit[i]; i++);
+      envinit[i] =remote_port;
     }
 
     /* If we do anything else, make sure there is space in the array. */
@@ -1412,15 +1469,16 @@ if(port)
         strcpy((char *) cmdbuf + offst, kprogdir);
 	cp = copy + 3 + offst;
 
+	cmdbuf[sizeof(cmdbuf) - 1] = '\0';
 	if (auth_sys == KRB5_RECVAUTH_V4) {
-	  strcat(cmdbuf, "/v4rcp");
+	  strncat(cmdbuf, "/v4rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	} else {
-	  strcat(cmdbuf, "/rcp");
+	  strncat(cmdbuf, "/rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	}
 	if (stat((char *)cmdbuf + offst, &s) >= 0)
-	  strcat(cmdbuf, cp);
+	  strncat(cmdbuf, cp, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	else
-	  strcpy(cmdbuf, copy);
+	  strncpy(cmdbuf, copy, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	free(copy);
     }
 #endif
@@ -1722,6 +1780,9 @@ recvauth(netf, peersin, valid_checksum)
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
     krb5_rcache		rcache;
+    struct passwd *pwd;
+    uid_t uid;
+    gid_t gid;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1827,7 +1888,7 @@ recvauth(netf, peersin, valid_checksum)
 						 &authenticator)))
       return status;
     
-    if (authenticator->checksum && checksum_required) {
+    if (authenticator->checksum && !checksum_ignored) {
 	struct sockaddr_in adr;
 	int adr_length = sizeof(adr);
 	char * chksumbuf = (char *) malloc(strlen(cmdbuf)+strlen(locuser)+32);
@@ -1877,10 +1938,22 @@ recvauth(netf, peersin, valid_checksum)
     }
 
     if (inbuf.length) { /* Forwarding being done, read creds */
+	pwd = getpwnam(locuser);
+	if (!pwd) {
+	    error("Login incorrect.\n");
+	    exit(1);
+	}
+	uid = pwd->pw_uid;
+	gid = pwd->pw_gid;
 	if ((status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf,
-					     ticket, locuser, &ccache))) {
+					     ticket, &ccache))) {
 	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
+	    exit(1);
+	}
+	if (chown(krb5_cc_get_name(bsd_context, ccache), uid, gid) == -1) {
+	    error("Can't chown forwarded credentials: %s\n",
+		  error_message(errno));
 	    exit(1);
 	}
     }

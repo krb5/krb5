@@ -1,3 +1,7 @@
+Mon Nov 18 20:43:54 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Shared library version number to 1.0. [krb5-libs/201]
+
 Wed Jun 12 00:50:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Remove include of config/windows.in; that's done

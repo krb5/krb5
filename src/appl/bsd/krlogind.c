@@ -246,7 +246,7 @@ krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"k54ciepPD:S:M:L:?"
+#define ARGSTR	"k54ciepPD:S:M:L:w:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rpPD:?"
 #define (*des_read)  read
@@ -274,11 +274,20 @@ char *login_program = LOGIN_PROGRAM;
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
 #endif
 
+#if HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
+
+#ifndef MAXDNAME
+#define MAXDNAME 256 /*per the rfc*/
+#endif
+
 char		lusername[UT_NAMESIZE+1];
 char		rusername[UT_NAMESIZE+1];
 char            *krusername = 0;
 char		term[64];
-char            rhost_name[128];
+char            rhost_name[MAXDNAME];
+char		rhost_addra[16];
 krb5_principal  client;
 
 int	reapchild();
@@ -313,6 +322,10 @@ krb5_error_code recvauth();
 int auth_ok = 0, auth_sent = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
 int checksum_required = 0, checksum_ignored = 0;
+
+int stripdomain = 1;
+int maxhostlen = 0;
+int always_ip = 0;
 
 int main(argc, argv)
      int argc;
@@ -410,6 +423,34 @@ int main(argc, argv)
 	  break;
 	case 'L':
 	  login_program = optarg;
+	  break;
+        case 'u':
+	  maxhostlen = atoi(optarg);
+	  break;
+        case 'I':
+	  always_ip = 1;
+	  break;
+	case 'w':
+	  if (!strcmp(optarg, "ip"))
+	    always_ip = 1;
+	  else {
+	    char *cp;
+	    cp = strchr(optarg, ',');
+	    if (cp == NULL)
+	      maxhostlen = atoi(optarg);
+	    else if (*(++cp)) {
+	      if (!strcmp(cp, "striplocal"))
+		stripdomain = 1;
+	      else if (!strcmp(cp, "nostriplocal"))
+		stripdomain = 0;
+	      else {
+		usage();
+		exit(1);
+	      }
+	      *(--cp) = '\0';
+	      maxhostlen = atoi(optarg);
+	    }
+	  }
 	  break;
 	case '?':
 	default:
@@ -515,7 +556,9 @@ void doit(f, fromp)
     struct sigaction sa;
 #endif
     int retval;
-int syncpipe[2];
+    char *rhost_sane;
+    int syncpipe[2];
+
     netf = -1;
     alarm(60);
     read(f, &c, 1);
@@ -539,15 +582,14 @@ int syncpipe[2];
     fromp->sin_port = ntohs((u_short)fromp->sin_port);
     hp = gethostbyaddr((char *) &fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
-    if (hp == 0) {
-	/*
-	 * Only the name is used below.
-	 */
-	sprintf(rhost_name,"%s",inet_ntoa(fromp->sin_addr));
-    }
-    
-    /* Save hostent information.... */
-    else strcpy(rhost_name,hp->h_name);
+    strncpy(rhost_addra, inet_ntoa(fromp->sin_addr), sizeof (rhost_addra));
+    rhost_addra[sizeof (rhost_addra) -1] = '\0';
+    if (hp != NULL) {
+	/* Save hostent information.... */
+	strncpy(rhost_name,hp->h_name,sizeof (rhost_name));
+	rhost_name[sizeof (rhost_name) - 1] = '\0';
+    } else
+	rhost_name[0] = '\0';
     
     if (fromp->sin_family != AF_INET)
       fatal(f, "Permission denied - Malformed from address\n");
@@ -570,7 +612,7 @@ int syncpipe[2];
     
 #if defined(KERBEROS)
     /* All validation, and authorization goes through do_krb_login() */
-    do_krb_login(rhost_name);
+    do_krb_login(rhost_addra, rhost_name);
 #else
     getstr(f, rusername, sizeof(rusername), "remuser");
     getstr(f, lusername, sizeof(lusername), "locuser");
@@ -660,11 +702,13 @@ int syncpipe[2];
 	pwd = (struct passwd *) getpwnam(lusername);
 	if (pwd && (pwd->pw_uid == 0)) {
 	    if (passwd_req)
-	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s) forcing password access",
-		     krusername ? krusername : "", rusername, rhost_name);
+	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s (%s)) forcing password access",
+		     krusername ? krusername : "",
+		     rusername, rhost_addra, rhost_name);
 	    else
-	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s) ", 
-		     krusername ? krusername : "", rusername, rhost_name);
+	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s (%s))", 
+		     krusername ? krusername : "",
+		     rusername, rhost_addra, rhost_name);
 	}
 #ifdef KERBEROS
 #if defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
@@ -685,14 +729,14 @@ int syncpipe[2];
 	{
 	    if (passwd_req)
 	      syslog(LOG_NOTICE,
-		     "login by %s (%s@%s) as %s forcing password access\n",
+		     "login by %s (%s@%s (%s)) as %s forcing password access",
 		     krusername ? krusername : "", rusername,
-		     rhost_name, lusername);
+		     rhost_addra, rhost_name, lusername);
 	    else 
 	      syslog(LOG_NOTICE,
-		     "login by %s (%s@%s) as %s\n",
+		     "login by %s (%s@%s (%s)) as %s",
 		     krusername ? krusername : "", rusername,
-		     rhost_name, lusername); 
+		     rhost_addra, rhost_name, lusername); 
 	}
 #endif /* LOG_REMOTE_REALM || LOG_OTHER_USERS || LOG_ALL_LOGINS */
 #endif /* KERBEROS */
@@ -715,15 +759,20 @@ int syncpipe[2];
             *cp = '\0';
         setenv("TERM",term, 1);
     }
- 
+
+    retval = pty_make_sane_hostname(fromp, maxhostlen,
+				    stripdomain, always_ip,
+				    &rhost_sane);
+    if (retval)
+        fatalperror(2, "failed make_sane_hostname");
     if (passwd_req)
-        execl(login_program, "login", "-p", "-h", rhost_name,
+        execl(login_program, "login", "-p", "-h", rhost_sane,
           lusername, 0);
     else
-        execl(login_program, "login", "-p", "-h", rhost_name,
+        execl(login_program, "login", "-p", "-h", rhost_sane,
              "-f", lusername, 0);
 #else /* USE_LOGIN_F */
-	execl(login_program, "login", "-r", rhost_name, 0);
+	execl(login_program, "login", "-r", rhost_sane, 0);
 #endif /* USE_LOGIN_F */
 	
 	fatalperror(2, login_program);
@@ -847,7 +896,7 @@ int control(pty, cp, n)
 void protocol(f, p)
      int f, p;
 {
-    unsigned char pibuf[1024], fibuf[1024], *pbp, *fbp;
+    unsigned char pibuf[BUFSIZ], fibuf[BUFSIZ], *pbp, *fbp;
     register pcc = 0, fcc = 0;
     int cc;
     char cntl;
@@ -1056,8 +1105,8 @@ void fatalperror(f, msg)
 #ifdef KERBEROS
 
 void
-do_krb_login(host)
-     char *host;
+do_krb_login(host_addr, hostname)
+     char *host_addr, *hostname;
 {
     krb5_error_code status;
     struct passwd *pwd;
@@ -1075,8 +1124,8 @@ do_krb_login(host)
 	  krb5_free_ticket(bsd_context, ticket);
 	if (status != 255)
 	  syslog(LOG_ERR,
-		 "Authentication failed from %s: %s\n",
-		 host,error_message(status));
+		 "Authentication failed from %s (%s): %s\n",host_addr,
+		 hostname,error_message(status));
 	fatal(netf, "Kerberos authentication failed");
 	return;
     }
@@ -1329,7 +1378,7 @@ void usage()
 {
 #ifdef KERBEROS
     syslog(LOG_ERR, 
-	   "usage: klogind [-ke45pP] [-D port] or [r/R][k/K][x/e][p/P]logind");
+	   "usage: klogind [-ke45pP] [-D port] [-w[ip|maxhostlen[,[no]striplocal]]] or [r/R][k/K][x/e][p/P]logind");
 #else
     syslog(LOG_ERR, 
 	   "usage: rlogind [-rpP] [-D port] or [r/R][p/P]logind");
@@ -1558,7 +1607,7 @@ recvauth(valid_checksum)
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
 	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
-					  ticket, lusername, &ccache))) {
+					  ticket, &ccache))) {
          fatal(netf, "Can't get forwarded credentials");
     }
     return 0;

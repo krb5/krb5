@@ -67,6 +67,40 @@ static const struct krb_convert sconv_list[] = {
     {"imap",	"imap",		DO_REALM_CONVERSION},
     {"ftp",	"ftp",		DO_REALM_CONVERSION},
     {"ecat",	"ecat",		DO_REALM_CONVERSION},
+    {"daemon",        "daemon",       DO_REALM_CONVERSION},
+    {"gnats", "gnats",        DO_REALM_CONVERSION},
+    {"moira", "moira",        DO_REALM_CONVERSION},
+    {"prms",  "prms",         DO_REALM_CONVERSION},
+    {"mandarin",      "mandarin",     DO_REALM_CONVERSION},
+    {"register",      "register",     DO_REALM_CONVERSION},
+    {"changepw",      "changepw",     DO_REALM_CONVERSION},
+    {"sms",   "sms",          DO_REALM_CONVERSION},
+    {"afpserver",     "afpserver",    DO_REALM_CONVERSION},
+    {"gdss",  "gdss",         DO_REALM_CONVERSION},
+    {"news",  "news",         DO_REALM_CONVERSION},
+    {"abs",   "abs",          DO_REALM_CONVERSION},
+    {"nfs",   "nfs",          DO_REALM_CONVERSION},
+    {"tftp",  "tftp",         DO_REALM_CONVERSION},
+    {"zephyr",        "zephyr",       DO_REALM_CONVERSION},
+    {"http",  "http",         DO_REALM_CONVERSION},
+    {"khttp", "khttp",        DO_REALM_CONVERSION},
+    {"pgpsigner", "pgpsigner",        DO_REALM_CONVERSION},
+    {"irc",   "irc",          DO_REALM_CONVERSION},
+    {"mandarin-agent",        "mandarin-agent",       DO_REALM_CONVERSION},
+    {"write", "write",        DO_REALM_CONVERSION},
+    {"palladium", "palladium",        DO_REALM_CONVERSION},
+    {"news",	"news",		DO_REALM_CONVERSION},
+    {"abs",	"abs",		DO_REALM_CONVERSION},
+    {"nfs",	"nfs",		DO_REALM_CONVERSION},
+    {"tftp",	"tftp",		DO_REALM_CONVERSION},
+    {"zephyr",	"zephyr",	DO_REALM_CONVERSION},
+    {"http",	"http",		DO_REALM_CONVERSION},
+    {"khttp",	"khttp",	DO_REALM_CONVERSION},
+    {"pgpsigner", "pgpsigner",	DO_REALM_CONVERSION},
+    {"irc",	"irc",		DO_REALM_CONVERSION},
+    {"mandarin-agent",	"mandarin-agent",	DO_REALM_CONVERSION},
+    {"write",	"write",	DO_REALM_CONVERSION},
+    {"palladium", "palladium",	DO_REALM_CONVERSION},
     {0,		0,		0},
 };
 
@@ -209,7 +243,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 	      if (retval == 0 && full_name && full_name[0]) {
 		  instance = full_name[0];
 	      } else {
-		  strcpy(buf, instance);
+		  strncpy(buf, instance, sizeof(buf));
+		  buf[sizeof(buf) - 1] = '\0';
 		  retval = krb5_get_realm_domain(context, realm, &domain);
 		  if (retval)
 		      return retval;
@@ -217,8 +252,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		      for (cp = domain; *cp; cp++)
 			  if (isupper(*cp))
 			      *cp = tolower(*cp);
-		      strcat(buf, ".");
-		      strcat(buf, domain);
+		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
+		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
 		      krb5_xfree(domain);
 		  }
 		  instance = buf;

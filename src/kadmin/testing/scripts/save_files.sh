@@ -15,7 +15,7 @@ done
 # 	/.secure/etc/passwd /etc/athena/inetd.conf"
 
 files="/etc/krb.conf /etc/krb.realms /etc/athena/krb.conf \
-	/etc/athena/krb.realms /etc/v5srvtab"
+	/etc/athena/krb.realms /etc/v5srvtab /etc/krb5.keytab"
 
 name=`basename $0`
 
