@@ -1,4 +1,13 @@
-2001-06-06  Ezra Peisach  <epeisach@rna.mit.edu>
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* auth-proto.h: Add prototype for kerberos5_cleanup().
+
+	* enc-proto.h: Add prototypes for encrypt_printsub(),
+	encrypt_request_sart(), encrypt_request_end(),
+	encrypt_enc_keyid()m encrypt_dec_keyid(), encrypt_support(),
+	encrypt_start(), encrypt_end().
+
+2001-06-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* auth-proto.h: Add prototypes for getauthmask(), auth_enable,
 	auth_disable(), auth_onoff(), auth_togdebug(), auth_status(),

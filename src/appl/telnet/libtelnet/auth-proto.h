@@ -109,5 +109,6 @@ void kerberos5_is P((Authenticator *, unsigned char *, int));
 void kerberos5_reply P((Authenticator *, unsigned char *, int));
 int kerberos5_status P((Authenticator *, char *, int));
 void kerberos5_printsub P((unsigned char *, int, unsigned char *, int));
+void kerberos5_cleanup P((void));
 #endif
 #endif
