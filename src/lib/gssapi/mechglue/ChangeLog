@@ -1,3 +1,7 @@
+Sun Mar  3 12:49:25 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* g_imp_sec_context.c, g_exp_sec_context.c: Include string.h
+
 Thu Feb 29 11:32:16 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* g_glue.c (__gss_get_mech_type): Fix code to properly parse token

@@ -33,6 +33,7 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <string.h>
 
 OM_uint32 INTERFACE
 gss_import_sec_context(minor_status,
