@@ -1,3 +1,8 @@
+Wed Jul 31 15:22:10 1996  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c: remove #include <netdb.h> (already gotten by
+		kadm5/kadm_rpc.h)
+
 Wed Jul 24 18:34:33 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* ovsec_kadmd.c (main): Put the #ifdef SO_REUSEADDR at the
