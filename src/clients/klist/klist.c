@@ -32,6 +32,7 @@ main(argc, argv)
 {
     int c;
     int errflg = 0;
+    int show_flags = 0;
     int code;
     krb5_ccache cache = NULL;
     krb5_cc_cursor cur;
@@ -48,8 +49,11 @@ main(argc, argv)
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
 
-    while ((c = getopt(argc, argv, "c:")) != EOF) {
+    while ((c = getopt(argc, argv, "fc:")) != EOF) {
 	switch (c) {
+	case 'f':
+	     show_flags = 1;
+	     break;
 	case 'c':
 	    if (cache == NULL) {
 		cache_name = optarg;
@@ -123,7 +127,10 @@ main(argc, argv)
 	    free(name);
 	    continue;
 	}
-	printf("C: %s\tS:%s\n", name, sname);
+	if (show_flags)
+	     printf("C: %s\tS: %s\tF: %d\n", name, sname, creds.ticket_flags);
+	else
+	     printf("C: %s\tS: %s\n", name, sname);
 	free(name);
 	free(sname);
     }
