@@ -32,6 +32,7 @@ crc32
 cryptoconf.c
 decrypt_data.c
 des
+des3_raw.c
 des3_sha.c
 des_crc.c
 des_md5.c
@@ -40,6 +41,7 @@ md4
 md5
 os
 raw_des.c
+sha
 
 Things-to-lose:
 
