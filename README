@@ -54,6 +54,81 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+Important notice regarding Kerberos 4 support
+---------------------------------------------
+
+In the past few years, several developments have shown the inadequacy
+of the security of version 4 of the Kerberos protocol.  These
+developments have led the MIT Kerberos Team to begin the process of
+ending support for version 4 of the Kerberos protocol.  The plan
+involves the eventual removal of Kerberos 4 support from the MIT
+implementation of Kerberos.
+
+The Data Encryption Standard (DES) has reached the end of its useful
+life.  DES is the only encryption algorithm supported by Kerberos 4,
+and the increasingly obvious inadequacy of DES motivates the
+retirement of the Kerberos 4 protocol.  The National Institute of
+Standards and Technology (NIST), which had previously certified DES as
+a US government encryption standard, has officially announced[1] its
+intention to withdraw the specification of DES.
+
+NIST's action reflects the long-held opinion of the cryptographic
+community that DES has too small a key space to be secure.  Breaking
+DES encryption by an exhaustive search of its key space is within the
+means of some individuals, many companies, and all major governments.
+Consequently, DES cannot be considered secure for any long-term keys,
+particularly the ticket-granting key that is central to Kerberos.
+
+Serious protocol flaws[2] have been found in Kerberos 4.  These flaws
+permit attacks which require far less effort than an exhaustive search
+of the DES key space.  These flaws make Kerberos 4 cross-realm
+authentication an unacceptable security risk and raise serious
+questions about the security of the entire Kerberos 4 protocol.
+
+The known insecurity of DES, combined with the recently discovered
+protocol flaws, make it extremely inadvisable to rely on the security
+of version 4 of the Kerberos protocol.  These factors motivate the MIT
+Kerberos Team to remove support for Kerberos version 4 from the MIT
+implementation of Kerberos.
+
+The process of ending Kerberos 4 support began with release 1.3 of MIT
+Kerberos 5.  In release 1.3, the KDC support for version 4 of the
+Kerberos protocol is disabled by default.  Release 1.4 of MIT Kerberos
+continues to include Kerberos 4 support (also disabled by default in
+the KDC), but we intend to completely remove Kerberos 4 support from
+some future release of MIT Kerberos, possibly as early as the 1.5
+release of MIT Kerberos.
+
+The MIT Kerberos Team has ended active development of Kerberos 4,
+except for the eventual removal of all Kerberos 4 functionality.  We
+will continue to provide critical security fixes for Kerberos 4, but
+routine bug fixes and feature enhancements are at an end.
+
+We recommend that any sites which have not already done so begin a
+migration to Kerberos 5.  Kerberos 5 provides significant advantages
+over Kerberos 4, including support for strong encryption,
+extensibility, improved cross-vendor interoperability, and ongoing
+development and enhancement.
+
+If you have questions or issues regarding migration to Kerberos 5, we
+recommend discussing them on the kerberos@mit.edu mailing list.
+
+                              References
+
+[1] National Institute of Standards and Technology.  Announcing
+    Proposed Withdrawal of Federal Information Processing Standard
+    (FIPS) for the Data Encryption Standard (DES) and Request for
+    Comments.  Federal Register 04-16894, 69 FR 44509-44510, 26 July
+    2004.  DOCID:fr26jy04-31.
+
+[2] Tom Yu, Sam Hartman, and Ken Raeburn. The Perils of
+    Unauthenticated Encryption: Kerberos Version 4. In Proceedings of
+    the Network and Distributed Systems Security Symposium. The
+    Internet Society, February 2004.
+    http://web.mit.edu/tlyu/papers/krb4peril-ndss04.pdf
+
+----------------------------------------------------------------------
+
 Major changes in 1.4
 --------------------
 
@@ -70,7 +145,7 @@ Major changes in 1.4
   removed.
 
 * [1303, 2740, 2755, 2781, 2782, 2812, 2858, 2859, 2874, 2875, 2878,
-  2879, 2884] Thread safety for krb5 libraries.
+  2879, 2884, 2893] Thread safety for krb5 libraries.
 
 * [2410] Yarrow code now uses AES.
 
@@ -314,6 +389,8 @@ for a complete list.
 
 * [2861] Minor documenation fixes.
 
+* [2864] Fix IPv6 support on Windows.
+
 * [2865] New API function krb5_is_thread_safe() to test for thread
   safety.
 
@@ -325,10 +402,14 @@ for a complete list.
 
 * [2887] Fix null pointer dereference in krb5_unparse_name().
 
+* [2892] Fix some gcc-4.0 compatibility problems.
+
+* [2891] lib/kdb/keytab.c no longer accesses an uninitialized variable.
+
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-2004 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2005 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
@@ -528,3 +609,10 @@ Peter Litwack, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul Park,
 Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
 Schiller, Jen Selby, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall
 Vale, Tom Yu.
+
+Very special thanks go to Marshall Vale, our departing team leader.
+Over the past few years, Marshall has been extremely valuable to us as
+mentor, advisor, manager, and friend.  Marshall's devotion as a
+champion of Kerberos has helped our team immensely through many trials
+and hardships.  We will miss him tremendously, and we wish him the
+best in his future endeavors.
