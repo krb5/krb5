@@ -1,3 +1,10 @@
+2003-02-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (translate_ai_error): Handle EAI_ADDRFAMILY like
+	EAI_NONAME.
+	(krb5int_add_host_to_list): Translate errors returned from the
+	second getaddrinfo call.
+
 2003-02-04  Tom Yu  <tlyu@mit.edu>
 
 	* prompter.c (krb5_prompter_posix): Rewrite to no longer use

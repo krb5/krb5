@@ -170,9 +170,6 @@ static int translate_ai_error (int err)
     switch (err) {
     case 0:
 	return 0;
-#ifdef EAI_ADDRFAMILY
-    case EAI_ADDRFAMILY:
-#endif
     case EAI_BADFLAGS:
     case EAI_FAMILY:
     case EAI_SOCKTYPE:
@@ -185,6 +182,9 @@ static int translate_ai_error (int err)
     case EAI_MEMORY:
 	/* Translate to standard errno code.  */
 	return ENOMEM;
+#ifdef EAI_ADDRFAMILY
+    case EAI_ADDRFAMILY:
+#endif
 #if EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
 #endif
@@ -281,11 +281,8 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
     hint.ai_family = AF_INET;
     err = getaddrinfo (hostname, secportbuf, &hint, &addrs);
     if (err) {
-#if 0
-	return translate_ai_error (err);
-#else
+	err = translate_ai_error (err);
 	goto egress;
-#endif
     }
     for (a = addrs; a != 0 && err == 0; a = anext) {
 	anext = a->ai_next;
