@@ -20,7 +20,7 @@ OBJS=\
 	$(OUTPRE)gss_libinit.$(OBJEXT)
 
 SRCS=\
-	$(subdir)/gss_libinit.c
+	$(srcdir)/gss_libinit.c
 
 LIB=gssapi_krb5
 LIBMAJOR=2
@@ -68,4 +68,16 @@ clean-windows::
 #	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in gssapi
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+gss_libinit.o: gss_libinit.c generic/gssapi_err_generic.h \
+  $(BUILDTOP)/include/com_err.h krb5/gssapi_err_krb5.h \
+  $(srcdir)/krb5/gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(srcdir)/generic/gssapiP_generic.h \
+  $(srcdir)/generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(srcdir)/krb5/gssapi_krb5.h gss_libinit.h generic/gssapi.h
 

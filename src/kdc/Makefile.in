@@ -87,3 +87,83 @@ install::
 clean::
 	$(RM) kdc5_err.h kdc5_err.c krb5kdc logger.c rtest.o rtest
 
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+kdc5_err.o: kdc5_err.c $(BUILDTOP)/include/com_err.h
+dispatch.o: dispatch.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/syslog.h \
+  kdc_util.h extern.h $(SRCTOP)/include/krb5/adm_proto.h
+do_as_req.o: do_as_req.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/syslog.h kdc_util.h policy.h $(SRCTOP)/include/krb5/adm.h \
+  $(SRCTOP)/include/krb5/adm_proto.h extern.h
+do_tgs_req.o: do_tgs_req.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/syslog.h kdc_util.h policy.h extern.h \
+  $(SRCTOP)/include/krb5/adm_proto.h
+kdc_util.o: kdc_util.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h kdc_util.h extern.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/include/krb5/adm.h $(SRCTOP)/include/krb5/adm_proto.h
+kdc_preauth.o: kdc_preauth.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  kdc_util.h extern.h $(SRCTOP)/include/krb5/adm_proto.h \
+  $(SRCTOP)/include/syslog.h
+logger.o: $(SRCTOP)/lib/kadm5/logger.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h
+main.o: main.c $(SRCTOP)/include/syslog.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/krb5/adm.h $(SRCTOP)/include/krb5/adm_proto.h \
+  kdc_util.h extern.h kdc5_err.h $(SRCTOP)/include/krb5/kdb_kt.h \
+  $(SRCTOP)/include/kerberosIV/des.h
+network.o: network.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h kdc_util.h extern.h kdc5_err.h \
+  $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h
+sock2p.o: sock2p.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h kdc_util.h
+policy.o: policy.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h kdc_util.h
+extern.o: extern.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h extern.h
+replay.o: replay.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h kdc_util.h extern.h
+kerberos_v4.o: kerberos_v4.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  kdc_util.h $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/klog.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/kdc.h \
+  extern.h
+

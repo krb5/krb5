@@ -51,3 +51,60 @@ OBJS= \
 all-unix:: all-libobjs
 
 clean-unix:: clean-libobjs
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+asn1_decode.o: asn1_decode.c asn1_decode.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1buf.h asn1_get.h
+asn1_k_decode.o: asn1_k_decode.c asn1_k_decode.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1buf.h asn1_decode.h asn1_get.h asn1_misc.h
+asn1_encode.o: asn1_encode.c asn1_encode.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1buf.h asn1_make.h
+asn1_get.o: asn1_get.c asn1_get.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1buf.h
+asn1_make.o: asn1_make.c asn1_make.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1buf.h
+asn1buf.o: asn1buf.c asn1buf.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h asn1_get.h
+krb5_decode.o: krb5_decode.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  krbasn1.h $(BUILDTOP)/../src/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  asn1_k_decode.h asn1buf.h asn1_decode.h asn1_get.h
+krb5_encode.o: krb5_encode.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  asn1_k_encode.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/../src/include/krb5/kdb.h asn1buf.h krbasn1.h \
+  asn1_encode.h asn1_make.h
+asn1_k_encode.o: asn1_k_encode.c asn1_k_encode.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  asn1buf.h krbasn1.h asn1_make.h asn1_encode.h
+asn1_misc.o: asn1_misc.c asn1_misc.h $(BUILDTOP)/../src/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/../src/include/krb5/kdb.h \
+  krbasn1.h
+

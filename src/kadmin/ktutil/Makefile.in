@@ -11,7 +11,7 @@ OBJS= 	ktutil.o \
 	ktutil_funcs.o
 
 SRCS= 	$(srcdir)/ktutil.c \
-	$(srcdir)/ktutil_ct.c \
+	ktutil_ct.c \
 	$(srcdir)/ktutil_funcs.c
 
 all:: ktutil
@@ -35,3 +35,22 @@ depend:: ktutil_ct.c
 
 clean::
 	$(RM) ktutil
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+ktutil.o: ktutil.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/krb5/adm_proto.h \
+  $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
+ktutil_ct.o: ktutil_ct.c $(BUILDTOP)/include/ss/ss.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
+ktutil_funcs.o: ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  ktutil.h $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+

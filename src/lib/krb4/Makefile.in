@@ -238,3 +238,233 @@ check-windows::
 
 
 install-unix:: install-libs
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+cr_auth_repl.o: cr_auth_repl.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+cr_ciph.o: cr_ciph.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+cr_tkt.o: cr_tkt.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+debug.o: debug.c $(SRCTOP)/include/kerberosIV/mit-copyright.h
+decomp_tkt.o: decomp_tkt.c $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb54proto.h
+g_ad_tkt.o: g_ad_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+g_pw_in_tkt.o: g_pw_in_tkt.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb_err.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h
+g_phost.o: g_phost.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+g_pw_tkt.o: g_pw_tkt.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+g_tkt_svc.o: g_tkt_svc.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+getst.o: getst.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+gethostname.o: gethostname.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+kname_parse.o: kname_parse.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+err_txt.o: err_txt.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+lifetime.o: lifetime.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+g_in_tkt.o: g_in_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+mk_auth.o: mk_auth.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+mk_err.o: mk_err.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+mk_priv.o: mk_priv.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h
+mk_req.o: mk_req.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  krb4int.h
+mk_safe.o: mk_safe.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h
+month_sname.o: month_sname.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  krb4int.h
+one.o: one.c
+pkt_cipher.o: pkt_cipher.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h
+pkt_clen.o: pkt_clen.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h
+prot_client.o: prot_client.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+prot_common.o: prot_common.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+prot_kdc.o: prot_kdc.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+rd_err.o: rd_err.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+rd_priv.o: rd_priv.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h
+rd_safe.o: rd_safe.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h
+send_to_kdc.o: send_to_kdc.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krbports.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+stime.o: stime.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+strnlen.o: strnlen.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+rd_preauth.o: rd_preauth.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h krb4int.h
+mk_preauth.o: mk_preauth.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+unix_time.o: unix_time.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+unix_time.o: unix_time.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+tf_util.o: tf_util.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h krb4int.h
+dest_tkt.o: dest_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+in_tkt.o: in_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
+tkt_string.o: tkt_string.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+g_tf_fname.o: g_tf_fname.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+g_tf_realm.o: g_tf_realm.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+g_cred.o: g_cred.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+save_creds.o: save_creds.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+unix_glue.o: unix_glue.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  krb4int.h
+klog.o: klog.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h $(SRCTOP)/include/kerberosIV/klog.h
+kuserok.o: kuserok.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+log.o: log.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h $(SRCTOP)/include/kerberosIV/klog.h
+kntoln.o: kntoln.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+fgetst.o: fgetst.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+rd_svc_key.o: rd_svc_key.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/krb54proto.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h
+cr_err_repl.o: cr_err_repl.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+rd_req.o: rd_req.c $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb54proto.h
+g_svc_in_tkt.o: g_svc_in_tkt.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/kerberosIV/krb_conf.h krb4int.h
+recvauth.o: recvauth.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+krb_err.o: krb_err.c $(BUILDTOP)/include/com_err.h
+ad_print.o: ad_print.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+cr_death_pkt.o: cr_death_pkt.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/krb_conf.h
+kparse.o: kparse.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/kparse.h
+put_svc_key.o: put_svc_key.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  krb4int.h
+sendauth.o: sendauth.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+netread.o: netread.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+netwrite.o: netwrite.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h
+g_cnffile.o: g_cnffile.c $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h krb4int.h
+g_krbhst.o: g_krbhst.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+g_krbrlm.o: g_krbrlm.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+g_admhst.o: g_admhst.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+realmofhost.o: realmofhost.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h
+

@@ -1,3 +1,8 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (COMMON_SRCS, SERV_SRCS, CLI_SRCS): All live in
+	srcdir.
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* adm_conn.c (kadm_get_ccache): Cast return from getpid() to int

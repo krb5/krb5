@@ -77,32 +77,32 @@ OBJS=\
 	$(OUTPRE)verify_checksum.$(OBJEXT)
 
 SRCS=\
-	$(subdir)/block_size.c		\
-	$(subdir)/checksum_length.c	\
-	$(subdir)/cksumtype_to_string.c	\
-	$(subdir)/cksumtypes.c		\
-	$(subdir)/coll_proof_cksum.c	\
-	$(subdir)/crypto_libinit.c	\
-	$(subdir)/decrypt.c		\
-	$(subdir)/encrypt.c		\
-	$(subdir)/encrypt_length.c	\
-	$(subdir)/enctype_compare.c	\
-	$(subdir)/enctype_to_string.c	\
-	$(subdir)/etypes.c		\
-	$(subdir)/hmac.c		\
-	$(subdir)/keyed_cksum.c		\
-	$(subdir)/keyed_checksum_types.c\
-	$(subdir)/make_checksum.c	\
-	$(subdir)/make_random_key.c	\
-	$(subdir)/nfold.c		\
-	$(subdir)/old_api_glue.c	\
-	$(subdir)/prng.c		\
-	$(subdir)/string_to_cksumtype.c	\
-	$(subdir)/string_to_enctype.c	\
-	$(subdir)/string_to_key.c	\
-	$(subdir)/valid_cksumtype.c	\
-	$(subdir)/valid_enctype.c	\
-	$(subdir)/verify_checksum.c
+	$(srcdir)/block_size.c		\
+	$(srcdir)/checksum_length.c	\
+	$(srcdir)/cksumtype_to_string.c	\
+	$(srcdir)/cksumtypes.c		\
+	$(srcdir)/coll_proof_cksum.c	\
+	$(srcdir)/crypto_libinit.c	\
+	$(srcdir)/decrypt.c		\
+	$(srcdir)/encrypt.c		\
+	$(srcdir)/encrypt_length.c	\
+	$(srcdir)/enctype_compare.c	\
+	$(srcdir)/enctype_to_string.c	\
+	$(srcdir)/etypes.c		\
+	$(srcdir)/hmac.c		\
+	$(srcdir)/keyed_cksum.c		\
+	$(srcdir)/keyed_checksum_types.c\
+	$(srcdir)/make_checksum.c	\
+	$(srcdir)/make_random_key.c	\
+	$(srcdir)/nfold.c		\
+	$(srcdir)/old_api_glue.c	\
+	$(srcdir)/prng.c		\
+	$(srcdir)/string_to_cksumtype.c	\
+	$(srcdir)/string_to_enctype.c	\
+	$(srcdir)/string_to_key.c	\
+	$(srcdir)/valid_cksumtype.c	\
+	$(srcdir)/valid_enctype.c	\
+	$(srcdir)/verify_checksum.c
 
 
 LIB=k5crypto
@@ -247,4 +247,132 @@ check-windows::
 	@echo Making check in crypto\sha1
 	$(MAKE) -$(MFLAGS) check
 	cd ..
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+block_size.o: block_size.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+checksum_length.o: checksum_length.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+cksumtype_to_string.o: cksumtype_to_string.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+cksumtypes.o: cksumtypes.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(srcdir)/hash_provider/hash_provider.h $(srcdir)/keyhash_provider/keyhash_provider.h \
+  cksumtypes.h
+coll_proof_cksum.o: coll_proof_cksum.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+crypto_libinit.o: crypto_libinit.c crypto_libinit.h
+decrypt.o: decrypt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h etypes.h
+encrypt.o: encrypt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h etypes.h
+encrypt_length.o: encrypt_length.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+enctype_compare.o: enctype_compare.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+enctype_to_string.o: enctype_to_string.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+etypes.o: etypes.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/enc_provider/enc_provider.h \
+  $(srcdir)/hash_provider/hash_provider.h etypes.h $(srcdir)/old/old.h \
+  $(srcdir)/raw/raw.h $(srcdir)/dk/dk.h
+hmac.o: hmac.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h
+keyed_cksum.o: keyed_cksum.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+keyed_checksum_types.o: keyed_checksum_types.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h cksumtypes.h
+make_checksum.o: make_checksum.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h etypes.h $(srcdir)/dk/dk.h
+make_random_key.o: make_random_key.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+nfold.o: nfold.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h
+old_api_glue.o: old_api_glue.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+prng.o: prng.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/enc_provider/enc_provider.h
+string_to_cksumtype.o: string_to_cksumtype.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+string_to_enctype.o: string_to_enctype.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+string_to_key.o: string_to_key.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+valid_cksumtype.o: valid_cksumtype.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
+valid_enctype.o: valid_enctype.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  etypes.h
+verify_checksum.o: verify_checksum.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  cksumtypes.h
 

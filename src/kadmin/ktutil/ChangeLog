@@ -1,3 +1,7 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Find ktutil_ct.c in build directory.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktutil_funcs.c (ktutil_add): Cast argument to isxdigit() to int.

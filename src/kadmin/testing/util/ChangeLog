@@ -1,3 +1,7 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): All files live in srcdir.
+
 2001-07-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* tcl_kadm5.h: File with prototypes for Tcl_kadm5_init and
