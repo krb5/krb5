@@ -30,7 +30,8 @@ mit_des3_process_key (eblock, keyblock)
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
 
-    if (keyblock->enctype != ENCTYPE_DES3_CBC_MD5)
+    if ((keyblock->enctype != ENCTYPE_DES3_CBC_MD5) &&
+	(keyblock->enctype != ENCTYPE_DES3_CBC_RAW))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     if (keyblock->length != sizeof (mit_des3_cblock))

@@ -75,7 +75,8 @@ extern krb5_cs_table_entry krb5_raw_des_cst_entry;
 extern krb5_cs_table_entry krb5_des_crc_cst_entry;
 extern krb5_cs_table_entry krb5_des_md5_cst_entry;
 extern krb5_cs_table_entry krb5_des3_md5_cst_entry;
-extern krb5_checksum_entry	krb5_des_cbc_cksumtable_entry;
+extern krb5_cs_table_entry krb5_des3_raw_cst_entry;
+extern krb5_checksum_entry krb5_des_cbc_cksumtable_entry;
 
 /*
  * Check if k5-int.h has been included before us.  If so, then check to see

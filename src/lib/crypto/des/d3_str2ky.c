@@ -51,7 +51,8 @@ const krb5_data FAR * salt;
     mit_des3_key_schedule ks;
     krb5_enctype enctype = eblock->crypto_entry->proto_enctype;
 
-    if (enctype == ENCTYPE_DES3_CBC_MD5)
+    if ((enctype == ENCTYPE_DES3_CBC_MD5) ||
+	(enctype == ENCTYPE_DES3_CBC_RAW))
 	keyblock->length = sizeof(mit_des3_cblock);
     else
 	return (KRB5_PROG_ETYPE_NOSUPP);
