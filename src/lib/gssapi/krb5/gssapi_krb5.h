@@ -1,0 +1,44 @@
+/*
+ * Copyright 1993 by OpenVision Technologies, Inc.
+ * 
+ * Permission to use, copy, modify, distribute, and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appears in all copies and
+ * that both that copyright notice and this permission notice appear in
+ * supporting documentation, and that the name of OpenVision not be used
+ * in advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission. OpenVision makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ * 
+ * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef _GSSAPI_KRB5_H_
+#define _GSSAPI_KRB5_H_
+
+/*
+ * $Id$
+ */
+
+#include <gssapi/gssapi_generic.h>
+#include <krb5/krb5.h>
+
+extern const gss_OID_desc * const gss_mech_krb5;
+extern const gss_OID_set_desc * const gss_mech_set_krb5;
+
+extern const gss_OID_desc * const gss_nt_krb5_name;
+extern const gss_OID_desc * const gss_nt_krb5_principal;
+
+OM_uint32 gss_krb5_get_tkt_flags(OM_uint32 *minor_status,
+				 gss_ctx_id_t context_handle,
+				 krb5_flags *ticket_flags);
+
+
+#endif /* _GSSAPI_KRB5_H_ */
