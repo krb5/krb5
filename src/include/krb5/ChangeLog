@@ -1,5 +1,12 @@
 Mon Oct  3 18:45:55 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kdb.h: Add magic number to _krb5_db_entry.  (This among other
+	things will cause a backwards incompatible change to the database
+	format.)  The previous magic number changes also force a database
+	format change; we will eventually need to completely redo how we
+	encode the database format, so that it isn't structure layout
+	dependent!
+
 	* Makefile.in: Fix install to obey ${DESTDIR}, copy conf.h and
 		osconf.h from build tree.
 

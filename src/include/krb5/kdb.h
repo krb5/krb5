@@ -44,6 +44,7 @@ typedef struct _krb5_encrypted_keyblock {
  * database version number in libkdb.a
  */
 typedef struct _krb5_db_entry {
+    krb5_magic magic;
     krb5_principal principal;
     krb5_encrypted_keyblock key;
     krb5_kvno kvno;
