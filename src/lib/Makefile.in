@@ -6,7 +6,6 @@ BUILDTOP=$(REL)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..
-##DOS##VERS_DIR = \vers
 
 MAC_SUBDIRS = crypto krb5 gssapi
 
@@ -27,14 +26,16 @@ clean-windows::
 
 # Windows stuff to make krb5 and gssapi DLLs.
 
-##DOS##VERLIBS=$(BUILDTOP)\mit\windows\lib\$(CPU)\vsnt.lib
-##DOS##!if defined(KRB5_USE_DNS)
-##DOS##DNSLIBS= $(BUILDTOP)\mit\windows\lib\$(CPU)\wshelp32.lib
-##DOS##!else
-##DOS##DNSLIBS=
-##DOS##!endif
-##MIT##MITLIBS= $(VERLIBS) $(DNSLIBS)
-##MIT##MITFLAGS=-I$(BUILDTOP)\mit\windows\include /DVERSERV=1
+##MIT##!if !defined(VS_INC)
+##MIT##!message Must define VS_INC to point to version server include dir!
+##MIT##!error
+##MIT##!endif
+##MIT##!if !defined(VS_LIB)
+##MIT##!message Must define VS_LIB to point to version server library!
+##MIT##!error
+##MIT##!endif
+##MIT##MITLIBS=$(VS_LIB)
+##MIT##MITFLAGS=-I$(VS_INC) /DVERSERV=1
 
 CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
@@ -50,15 +51,6 @@ KDEF = krb5_32.def
 GDEF = gssapi32.def
 K4DEF = krb4_32.def
 
-#
-# The following kludge is for MIT's SAP/Version server hack
-#
-
-SGDEF = gssapi32.def
-SKDEF = krb5_32.def
-SGLIB = $(OUTPRE)sapgss32.lib
-SKLIB = $(OUTPRE)sapkrb32.lib
-
 KRB5RC = krb5.rc
 VERSIONRC = $(BUILDTOP)\windows\version.rc
 
@@ -70,14 +62,12 @@ NO_GLUE=$(OUTPRE)no_glue.obj
 K5_GLUE=$(OUTPRE)k5_glue.obj
 K4_GLUE=$(OUTPRE)k4_glue.obj
 GSS_GLUE=$(OUTPRE)gss_glue.obj
-SAP_GLUE=$(OUTPRE)sap_glue.obj
 
 CGLUE=$(NO_GLUE)
 PGLUE=$(NO_GLUE)
 KGLUE=$(K5_GLUE)
 GGLUE=$(GSS_GLUE)
 K4GLUE=$(K4_GLUE)
-SKGLUE=$(SAP_GLUE)
 
 RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 
@@ -86,8 +76,6 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 ##WIN32##KRES=$(KLIB:.lib=.res)
 ##WIN32##GRES=$(GLIB:.lib=.res)
 ##WIN32##K4RES=$(K4LIB:.lib=.res)
-##WIN32##SKRES=$(SKLIB:.lib=.res)
-##WIN32##SGRES=$(SGLIB:.lib=.res)
 
 ##WIN32##$(CRES): $(VERSIONRC)
 ##WIN32##	$(RC) $(RCFLAGS) -DCE_LIB -fo $@ -r $**
@@ -99,10 +87,6 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 ##WIN32##	$(RC) $(RCFLAGS) -DKRB4_LIB -fo $@ -r $**
 ##WIN32##$(GRES): $(VERSIONRC)
 ##WIN32##	$(RC) $(RCFLAGS) -DGSSAPI_LIB -fo $@ -r $**
-##WIN32##$(SKRES): $(KRB5RC)
-##WIN32##	$(RC) $(RCFLAGS) -DSAPKRB_LIB -fo $@ -r $**
-##WIN32##$(SGRES): $(VERSIONRC)
-##WIN32##	$(RC) $(RCFLAGS) -DSAPGSS_LIB -fo $@ -r $**
 ##WIN32##$(KRB5RC): $(VERSIONRC)
 
 ##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CRES)
@@ -113,9 +97,9 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 ##WIN32##	link $(WINDLLFLAGS) -def:$(PDEF) -out:$*.dll \
 ##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(WINLIBS)
 
-##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS)
+##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(DNSLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
-##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(WINLIBS)
+##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(DNSLIBS) $(WINLIBS)
 
 ##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
@@ -125,20 +109,8 @@ RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 ##WIN32##	link $(WINDLLFLAGS) -def:$(K4DEF) -out:$*.dll \
 ##WIN32##	  $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS)
 
-##WIN32##$(SKLIB): $(KDEF) $(KLIBS) $(SKGLUE) $(SKRES) $(CLIB) $(MITLIBS)
-##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
-##WIN32##	  $(KLIBS) $(SKGLUE) $(SKRES) $(CLIB) $(MITLIBS) $(WINLIBS)
-
-##WIN32##$(SGLIB): $(GDEF) $(GLIBS) $(GGLUE) $(SGRES) $(SKLIB) $(CLIB) $(MITLIBS)
-##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
-##WIN32##	  $(GLIBS) $(GGLUE) $(SGRES) $(SKLIB) $(CLIB) $(MITLIBS) $(WINLIBS)
-
-##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
-
 $(K5_GLUE): win_glue.c
 	$(CC) $(CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
-$(SAP_GLUE): win_glue.c
-	$(CC) $(CFLAGS) $(MITFLAGS) /DSAP_VERSERV=1 /DKRB5=1 /c /Fo$@ $**
 $(K4_GLUE): win_glue.c
 	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
 $(GSS_GLUE): win_glue.c
