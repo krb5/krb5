@@ -1,3 +1,8 @@
+Wed Oct 22 00:29:33 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* send_tgs.c (krb5_send_tgs): Don't send a zero endtime; if the
+		requested endtime is zero, set it equal to the TGT endtime.
+
 Mon Oct  6 12:07:19 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* set_realm.c (krb5_set_principal_realm): Allocate extra byte for
