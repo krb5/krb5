@@ -114,6 +114,11 @@ the option @samp{--exec-prefix=@var{path}}, the package will use
 @var{path} as the prefix for installing programs and libraries.
 Documentation and other data files will still use the regular prefix.
 
+In addition, if you use an unusual directory layout you can give options
+like @samp{--bindir=@var{path}} to specify different values for
+particular kinds of files.  Run @samp{configure --help} for a list of
+the directories you can set and what kinds of files go in them.
+
 If the package supports it, you can cause programs to be installed with
 an extra prefix or suffix on their names by giving @code{configure} the
 option @samp{--program-prefix=@var{PREFIX}} or

@@ -1,6 +1,6 @@
 dnl Driver and redefinitions of some Autoconf macros for autoheader.
 dnl This file is part of Autoconf.
-dnl Copyright (C) 1994 Free Software Foundation, Inc.
+dnl Copyright (C) 1994, 1995 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -31,10 +31,22 @@ dnl a line.
 
 define([AC_CHECK_FUNCS], [#
 @@@funcs="$funcs $1"@@@
+ifelse([$2], , , [
+# If it was found, we do:
+$2
+# If it was not found, we do:
+$3
+])
 ])
 
 define([AC_CHECK_HEADERS], [#
 @@@headers="$headers $1"@@@
+ifelse([$2], , , [
+# If it was found, we do:
+$2
+# If it was not found, we do:
+$3
+])
 ])
 
 define([AC_CHECK_HEADERS_DIRENT], [#
@@ -72,7 +84,8 @@ define([AC_CHECK_SIZEOF], [#
 ])
 
 define([AC_CONFIG_HEADER], [#
-@@@config_h=$1@@@
+define([AC_CONFIG_H], patsubst($1, [ .*$], []))dnl
+@@@config_h=AC_CONFIG_H@@@
 ])
 
 define([AC_DEFINE], [#

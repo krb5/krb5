@@ -114,6 +114,10 @@ substitutions done on them.
 ------------------------------------------------------------------------------
 
 Have AC_CANONICAL_* cache the host/build/target types.
+They have to be overridden by the command line arguments,
+just as for X includes and libraries.  Should they be cached
+all in one variable, or three?  In that case, what if only one
+or two of the cache variables are set?
 
 ------------------------------------------------------------------------------
 
@@ -130,16 +134,6 @@ Look at contributions:
 
 Except that [...] is the convention for telling the user the default,
 So I guess a changequote(`,') or something would be in order in some cases.
-From: "K. Berry" <kb@cs.umb.edu>
-
-------------------------------------------------------------------------------
-
-I would find it a wonderful boon if config.log contained not just the
-output from the compilers, but also the invocation. Almost all
-the errors I've found are due to the wrong options getting passed for
-one reason or another.
-
-Saving the input test file(s) that failed would be useful, too.
 From: "K. Berry" <kb@cs.umb.edu>
 
 ------------------------------------------------------------------------------
@@ -219,7 +213,7 @@ From Roland McGrath.
 
 	ls -lt configure configure.in | sort
 doesn't work right if configure.in is from a symlink farm, where the
-symlink has either a timestamp of it's own, or under BSD 4.4, it has
+symlink has either a timestamp of its own, or under BSD 4.4, it has
 the timestamp of the current directory, neither of which
 helps. Changing it to
 	ls -Llt configure configure.in | sort
@@ -261,8 +255,8 @@ From: Randall Winchester
 
 AC_C_CROSS assumes that configure was
 called like 'CC=target-gcc; ./configure'. I want to write a package
-that has target dependend libraries and host dependend tools. So I
-dont't like to lose the distinction between CC and [G]CC_FOR_TARGET. 
+that has target dependent libraries and host dependent tools. So I
+don't like to lose the distinction between CC and [G]CC_FOR_TARGET. 
 AC_C_CROSS should check for equality of target and host.
 
 It would be great if 
@@ -317,25 +311,6 @@ Make easy macros for checking for X functions and libraries.
 
 ------------------------------------------------------------------------------
 
-We probably shouldn't cache a path for INSTALL within a source
-directory, because that will break other packages using the cache if
-that directory is removed.
-
-------------------------------------------------------------------------------
-
-Document this trick:
-
->> Half my time these days seems to be spent porting
->> configure.in files to new OS releases.)  Alas, there doesn't seem to
->> be any way to turn off caching (with a configure.in directive).
-
-define([AC_CACHE_LOAD], )dnl
-define([AC_CACHE_SAVE], )dnl
-AC_INIT(whatever)
- ... rest of configure.in ...
-
-------------------------------------------------------------------------------
-
 Testing for ANSI header files (AC_HEADER_STDC) fails under linux when
 using the latest libraries (libc-4.6.30, at least libc-4.6.27 works
 ok) when LC_CTYPE is set to ISO-8859-1. The islower/toupper test
@@ -344,22 +319,6 @@ Anyway, adding a line like
 if test "${LC_CTYPE+set}"   = set; then LC_CTYPE=C;   export LC_CTYPE;   fi
 to the configure script can solve the problem.
 From: tom@vlsivie.tuwien.ac.AT (Thomas Winder)
-
-------------------------------------------------------------------------------
-
-A number of people have tried to fix configuration problems by editing
-acconfig.h. (Despite comments at the top of the file.) I think they're
-confused because anything.h looks like a regular source file name.
-Maybe acconfig.h could be called acconfig.extra or something?
-From: kb@cs.umb.edu (K. Berry)
-
-------------------------------------------------------------------------------
-
-Using the macro AC_CHECK_LIB, if the library name contains a dot (which is
-the case of the library complib.sgimath on Irix 5.x) a syntax error occurs
-because the corresponding cache variable name contains a dot.
-Should dots be converted to underlines in variable names by autoconf?
-From: Frederic.DEvernay@sophia.inria.fr (Frederic Devernay)
 
 ------------------------------------------------------------------------------
 

@@ -111,7 +111,7 @@ while read dir; do
   test ! -f $aclocal && aclocal=
 
   if test $force = no && test -f configure &&
-    ls -Llt configure configure.in $aclocal | sed 1q |
+    ls -lt configure configure.in $aclocal | sed 1q |
       grep 'configure$' > /dev/null
   then
     :
@@ -134,7 +134,7 @@ q
 }' configure.in`
     if test ! -f $template || grep autoheader $template >/dev/null; then
       if test $force = no && test -f $template &&
-	ls -Llt $template configure.in $aclocal | sed 1q |
+	ls -lt $template configure.in $aclocal | sed 1q |
 	  grep "$template$" > /dev/null
       then
         :

@@ -1,7 +1,7 @@
 dnl Parameterized macros.
 dnl Requires GNU m4.
 dnl This file is part of Autoconf.
-dnl Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+dnl Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ dnl
 divert(-1)dnl Throw away output until AC_INIT is called.
 changequote([, ])
 
-define(AC_ACVERSION, 2.4)
+define(AC_ACVERSION, 2.10)
 
 dnl Some old m4's don't support m4exit.  But they provide
 dnl equivalent functionality by core dumping because of the
@@ -130,7 +130,7 @@ dnl it will bring back all the code accumulated in the diversion stack.
 dnl This, combined with AC_REQUIRE, achieves the topological ordering of
 dnl macros.  We don't use this macro to define some frequently called
 dnl macros that are not involved in ordering constraints, to save m4
-dnl processing. 
+dnl processing.
 dnl AC_DEFUN(NAME, EXPANSION)
 define([AC_DEFUN],
 [define($1, [AC_PRO([$1])$2[]AC_EPI()])])
@@ -143,7 +143,7 @@ dnl AC_INIT_NOTICE()
 AC_DEFUN(AC_INIT_NOTICE,
 [# Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version] AC_ACVERSION [
-# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 93, 94, 95, 96 Free Software Foundation, Inc.
 #
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
@@ -183,9 +183,23 @@ target=NONE
 verbose=
 x_includes=NONE
 x_libraries=NONE
+dnl Installation directory options.
+bindir='${exec_prefix}/bin'
+sbindir='${exec_prefix}/sbin'
+libexecdir='${exec_prefix}/libexec'
+datadir='${prefix}/share'
+sysconfdir='${prefix}/etc'
+sharedstatedir='${prefix}/com'
+localstatedir='${prefix}/var'
+libdir='${exec_prefix}/lib'
+includedir='${prefix}/include'
+oldincludedir='/usr/include'
+infodir='${prefix}/info'
+mandir='${prefix}/man'
 
 # Initialize some other variables.
 subdirs=
+MFLAGS= MAKEFLAGS=
 
 ac_prev=
 for ac_option
@@ -209,9 +223,14 @@ changequote([, ])dnl
 
   case "$ac_option" in
 
-  -build | --build | --buil | --bui | --bu | --b)
+  -bindir | --bindir | --bindi | --bind | --bin | --bi)
+    ac_prev=bindir ;;
+  -bindir=* | --bindir=* | --bindi=* | --bind=* | --bin=* | --bi=*)
+    bindir="$ac_optarg" ;;
+
+  -build | --build | --buil | --bui | --bu)
     ac_prev=build ;;
-  -build=* | --build=* | --buil=* | --bui=* | --bu=* | --b=*)
+  -build=* | --build=* | --buil=* | --bui=* | --bu=*)
     build="$ac_optarg" ;;
 
   -cache-file | --cache-file | --cache-fil | --cache-fi \
@@ -220,6 +239,12 @@ changequote([, ])dnl
   -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
   | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* | --c=*)
     cache_file="$ac_optarg" ;;
+
+  -datadir | --datadir | --datadi | --datad | --data | --dat | --da)
+    ac_prev=datadir ;;
+  -datadir=* | --datadir=* | --datadi=* | --datad=* | --data=* | --dat=* \
+  | --da=*)
+    datadir="$ac_optarg" ;;
 
   -disable-* | --disable-*)
     ac_feature=`echo $ac_option|sed -e 's/-*disable-//'`
@@ -276,12 +301,29 @@ Configuration:
 Directory and file names:
   --prefix=PREFIX         install architecture-independent files in PREFIX
                           [$ac_default_prefix]
-  --exec-prefix=PREFIX    install architecture-dependent files in PREFIX
+  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
                           [same as prefix]
+  --bindir=DIR            user executables in DIR [EPREFIX/bin]
+  --sbindir=DIR           system admin executables in DIR [EPREFIX/sbin]
+  --libexecdir=DIR        program executables in DIR [EPREFIX/libexec]
+  --datadir=DIR           read-only architecture-independent data in DIR
+                          [PREFIX/share]
+  --sysconfdir=DIR        read-only single-machine data in DIR [PREFIX/etc]
+  --sharedstatedir=DIR    modifiable architecture-independent data in DIR
+                          [PREFIX/com]
+  --localstatedir=DIR     modifiable single-machine data in DIR [PREFIX/var]
+  --libdir=DIR            object code libraries in DIR [EPREFIX/lib]
+  --includedir=DIR        C header files in DIR [PREFIX/include]
+  --oldincludedir=DIR     C header files for non-gcc in DIR [/usr/include]
+  --infodir=DIR           info documentation in DIR [PREFIX/info]
+  --mandir=DIR            man documentation in DIR [PREFIX/man]
   --srcdir=DIR            find the sources in DIR [configure dir or ..]
   --program-prefix=PREFIX prepend PREFIX to installed program names
   --program-suffix=SUFFIX append SUFFIX to installed program names
-  --program-transform-name=PROGRAM run sed PROGRAM on installed program names
+  --program-transform-name=PROGRAM
+                          run sed PROGRAM on installed program names
+EOF
+    cat << EOF
 Host type:
   --build=BUILD           configure for building on BUILD [BUILD=HOST]
   --host=HOST             configure for HOST [guessed]
@@ -293,15 +335,55 @@ Features and packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --x-includes=DIR        X include files are in DIR
   --x-libraries=DIR       X library files are in DIR
---enable and --with options recognized:$ac_help
 changequote([, ])dnl
 EOF
+    if test -n "$ac_help"; then
+      echo "--enable and --with options recognized:$ac_help"
+    fi
     exit 0 ;;
 
   -host | --host | --hos | --ho)
     ac_prev=host ;;
   -host=* | --host=* | --hos=* | --ho=*)
     host="$ac_optarg" ;;
+
+  -includedir | --includedir | --includedi | --included | --include \
+  | --includ | --inclu | --incl | --inc)
+    ac_prev=includedir ;;
+  -includedir=* | --includedir=* | --includedi=* | --included=* | --include=* \
+  | --includ=* | --inclu=* | --incl=* | --inc=*)
+    includedir="$ac_optarg" ;;
+
+  -infodir | --infodir | --infodi | --infod | --info | --inf)
+    ac_prev=infodir ;;
+  -infodir=* | --infodir=* | --infodi=* | --infod=* | --info=* | --inf=*)
+    infodir="$ac_optarg" ;;
+
+  -libdir | --libdir | --libdi | --libd)
+    ac_prev=libdir ;;
+  -libdir=* | --libdir=* | --libdi=* | --libd=*)
+    libdir="$ac_optarg" ;;
+
+  -libexecdir | --libexecdir | --libexecdi | --libexecd | --libexec \
+  | --libexe | --libex | --libe)
+    ac_prev=libexecdir ;;
+  -libexecdir=* | --libexecdir=* | --libexecdi=* | --libexecd=* | --libexec=* \
+  | --libexe=* | --libex=* | --libe=*)
+    libexecdir="$ac_optarg" ;;
+
+  -localstatedir | --localstatedir | --localstatedi | --localstated \
+  | --localstate | --localstat | --localsta | --localst \
+  | --locals | --local | --loca | --loc | --lo)
+    ac_prev=localstatedir ;;
+  -localstatedir=* | --localstatedir=* | --localstatedi=* | --localstated=* \
+  | --localstate=* | --localstat=* | --localsta=* | --localst=* \
+  | --locals=* | --local=* | --loca=* | --loc=* | --lo=*)
+    localstatedir="$ac_optarg" ;;
+
+  -mandir | --mandir | --mandi | --mand | --man | --ma | --m)
+    ac_prev=mandir ;;
+  -mandir=* | --mandir=* | --mandi=* | --mand=* | --man=* | --ma=* | --m=*)
+    mandir="$ac_optarg" ;;
 
   -nfp | --nfp | --nf)
     # Obsolete; use --without-fp.
@@ -314,6 +396,15 @@ EOF
   -no-recursion | --no-recursion | --no-recursio | --no-recursi \
   | --no-recurs | --no-recur | --no-recu | --no-rec | --no-re | --no-r)
     no_recursion=yes ;;
+
+  -oldincludedir | --oldincludedir | --oldincludedi | --oldincluded \
+  | --oldinclude | --oldinclud | --oldinclu | --oldincl | --oldinc \
+  | --oldin | --oldi | --old | --ol | --o)
+    ac_prev=oldincludedir ;;
+  -oldincludedir=* | --oldincludedir=* | --oldincludedi=* | --oldincluded=* \
+  | --oldinclude=* | --oldinclud=* | --oldinclu=* | --oldincl=* | --oldinc=* \
+  | --oldin=* | --oldi=* | --old=* | --ol=* | --o=*)
+    oldincludedir="$ac_optarg" ;;
 
   -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
     ac_prev=prefix ;;
@@ -355,6 +446,23 @@ EOF
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
+    ac_prev=sbindir ;;
+  -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
+  | --sbi=* | --sb=*)
+    sbindir="$ac_optarg" ;;
+
+  -sharedstatedir | --sharedstatedir | --sharedstatedi \
+  | --sharedstated | --sharedstate | --sharedstat | --sharedsta \
+  | --sharedst | --shareds | --shared | --share | --shar \
+  | --sha | --sh)
+    ac_prev=sharedstatedir ;;
+  -sharedstatedir=* | --sharedstatedir=* | --sharedstatedi=* \
+  | --sharedstated=* | --sharedstate=* | --sharedstat=* | --sharedsta=* \
+  | --sharedst=* | --shareds=* | --shared=* | --share=* | --shar=* \
+  | --sha=* | --sh=*)
+    sharedstatedir="$ac_optarg" ;;
+
   -site | --site | --sit)
     ac_prev=site ;;
   -site=* | --site=* | --sit=*)
@@ -364,6 +472,13 @@ EOF
     ac_prev=srcdir ;;
   -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
     srcdir="$ac_optarg" ;;
+
+  -sysconfdir | --sysconfdir | --sysconfdi | --sysconfd | --sysconf \
+  | --syscon | --sysco | --sysc | --sys | --sy)
+    ac_prev=sysconfdir ;;
+  -sysconfdir=* | --sysconfdir=* | --sysconfdi=* | --sysconfd=* | --sysconf=* \
+  | --syscon=* | --sysco=* | --sysc=* | --sys=* | --sy=*)
+    sysconfdir="$ac_optarg" ;;
 
   -target | --target | --targe | --targ | --tar | --ta | --t)
     ac_prev=target ;;
@@ -424,7 +539,7 @@ changequote([, ])dnl
   -*) AC_MSG_ERROR([$ac_option: invalid option; use --help to show usage])
     ;;
 
-  *) 
+  *)
 changequote(, )dnl
     if test -n "`echo $ac_option| sed 's/[-a-z0-9.]//g'`"; then
 changequote([, ])dnl
@@ -570,6 +685,19 @@ AC_SUBST(LIBS)dnl
 AC_SUBST(exec_prefix)dnl
 AC_SUBST(prefix)dnl
 AC_SUBST(program_transform_name)dnl
+dnl Installation directory options.
+AC_SUBST(bindir)dnl
+AC_SUBST(sbindir)dnl
+AC_SUBST(libexecdir)dnl
+AC_SUBST(datadir)dnl
+AC_SUBST(sysconfdir)dnl
+AC_SUBST(sharedstatedir)dnl
+AC_SUBST(localstatedir)dnl
+AC_SUBST(libdir)dnl
+AC_SUBST(includedir)dnl
+AC_SUBST(oldincludedir)dnl
+AC_SUBST(infodir)dnl
+AC_SUBST(mandir)dnl
 ])
 
 
@@ -583,8 +711,8 @@ ac_help="$ac_help
 [$2]"
 AC_DIVERT_POP()dnl
 [#] Check whether --enable-[$1] or --disable-[$1] was given.
-enableval="[$enable_]patsubst([$1], -, _)"
-if test -n "$enableval"; then
+if test "[${enable_]patsubst([$1], -, _)+set}" = set; then
+  enableval="[$enable_]patsubst([$1], -, _)"
   ifelse([$3], , :, [$3])
 ifelse([$4], , , [else
   $4
@@ -608,8 +736,8 @@ ac_help="$ac_help
 [$2]"
 AC_DIVERT_POP()dnl
 [#] Check whether --with-[$1] or --without-[$1] was given.
-withval="[$with_]patsubst([$1], -, _)"
-if test -n "$withval"; then
+if test "[${with_]patsubst([$1], -, _)+set}" = set; then
+  withval="[$with_]patsubst([$1], -, _)"
   ifelse([$3], , :, [$3])
 ifelse([$4], , , [else
   $4
@@ -631,8 +759,10 @@ AC_DEFUN(AC_ARG_PROGRAM,
 [if test "$program_transform_name" = s,x,x,; then
   program_transform_name=
 else
-  # Double any \ or $.
-  echo 's,\\,\\\\,g; s,\$,$$,g' > conftestsed
+  # Double any \ or $.  echo might interpret backslashes.
+  cat <<\EOF_SED > conftestsed
+s,\\,\\\\,g; s,\$,$$,g
+EOF_SED
   program_transform_name="`echo $program_transform_name|sed -f conftestsed`"
   rm -f conftestsed
 fi
@@ -736,7 +866,7 @@ AC_BEFORE([$0], [AC_ARG_PROGRAM])
 #
 # The rules are:
 # 1. You are not allowed to specify --host, --target, and nonopt at the
-#    same time. 
+#    same time.
 # 2. Host defaults to nonopt.
 # 3. If nonopt is not specified, then host defaults to the current host,
 #    as determined by config.guess.
@@ -940,6 +1070,12 @@ else
 fi
 ])
 
+dnl AC_CACHE_CHECK(MESSAGE, CACHE-ID, COMMANDS)
+define(AC_CACHE_CHECK,
+[AC_MSG_CHECKING([$1])
+AC_CACHE_VAL([$2], [$3])
+AC_MSG_RESULT([$]$2)])
+
 
 dnl ### Defining symbols
 
@@ -1023,8 +1159,8 @@ AC_DEFUN(AC_LANG_C,
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
 ac_cpp='$CPP $CPPFLAGS'
-ac_compile='${CC-cc} -c $CFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC 2>&AC_FD_CC'
-ac_link='${CC-cc} -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC 2>&AC_FD_CC'
+ac_compile='${CC-cc} -c $CFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC'
+ac_link='${CC-cc} -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC'
 ])
 
 dnl AC_LANG_CPLUSPLUS()
@@ -1033,8 +1169,8 @@ AC_DEFUN(AC_LANG_CPLUSPLUS,
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
 ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='${CXX-g++} -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC 2>&AC_FD_CC'
-ac_link='${CXX-g++} -o conftest $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC 2>&AC_FD_CC'
+ac_compile='${CXX-g++} -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC'
+ac_link='${CXX-g++} -o conftest $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC'
 ])
 
 dnl Push the current language on a stack.
@@ -1046,6 +1182,21 @@ dnl Restore the current language from the stack.
 dnl AC_LANG_RESTORE()
 define(AC_LANG_RESTORE,
 [ifelse(AC_LANG_STACK, C, [ifelse(AC_LANG, C, , [AC_LANG_C])], [ifelse(AC_LANG, CPLUSPLUS, , [AC_LANG_CPLUSPLUS])])[]popdef([AC_LANG_STACK])])
+
+
+dnl ### Compiler-running mechanics
+
+
+dnl The purpose of this macro is to "configure:123: command line"
+dnl written into config.log for every test run.
+dnl AC_TRY_EVAL(VARIABLE)
+AC_DEFUN(AC_TRY_EVAL,
+[{ (eval echo configure:__oline__: \"[$]$1\") 1>&AC_FD_CC; dnl
+(eval [$]$1) 2>&AC_FD_CC; }])
+
+dnl AC_TRY_COMMAND(COMMAND)
+AC_DEFUN(AC_TRY_COMMAND,
+[{ ac_try='$1'; AC_TRY_EVAL(ac_try); }])
 
 
 dnl ### Dependencies between macros
@@ -1078,7 +1229,7 @@ dnl ### Checking for programs
 
 
 dnl AC_CHECK_PROG(VARIABLE, PROG-TO-CHECK-FOR, VALUE-IF-FOUND
-dnl               [, VALUE-IF-NOT-FOUND])
+dnl               [, [VALUE-IF-NOT-FOUND] [, [PATH] [, [REJECT]]]])
 AC_DEFUN(AC_CHECK_PROG,
 [# Extract the first word of "$2", so it can be a program name with args.
 set dummy $2; ac_word=[$]2
@@ -1088,14 +1239,43 @@ AC_CACHE_VAL(ac_cv_prog_$1,
   ac_cv_prog_$1="[$]$1" # Let the user override the test.
 else
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
-  for ac_dir in $PATH; do
+ifelse([$6], , , [  ac_prog_rejected=no
+])dnl
+  for ac_dir in ifelse([$5], , $PATH, [$5]); do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
+ifelse([$6], , , dnl
+[      if test "[$ac_dir/$ac_word]" = "$6"; then
+        ac_prog_rejected=yes
+	continue
+      fi
+])dnl
       ac_cv_prog_$1="$3"
       break
     fi
   done
   IFS="$ac_save_ifs"
+ifelse([$6], , , [if test $ac_prog_rejected = yes; then
+  # We found a bogon in the path, so make sure we never use it.
+  set dummy [$]ac_cv_prog_$1
+  shift
+  if test [$]# -gt 0; then
+    # We chose a different compiler from the bogus one.
+    # However, it has the same basename, so the bogon will be chosen
+    # first if we set $1 to just the basename; use the full file name.
+    shift
+    set dummy "$ac_dir/$ac_word" "[$]@"
+    shift
+    ac_cv_prog_$1="[$]@"
+ifelse([$2], [$4], dnl
+[  else
+    # Default is a loser.
+    AC_MSG_ERROR([$1=$6 unacceptable, but no other $4 found in dnl
+ifelse([$5], , [\$]PATH, [$5])])
+])dnl
+  fi
+fi
+])dnl
 dnl If no 4th arg is given, leave the cache variable unset,
 dnl so AC_CHECK_PROGS will keep looking.
 ifelse([$4], , , [  test -z "[$]ac_cv_prog_$1" && ac_cv_prog_$1="$4"
@@ -1110,7 +1290,7 @@ fi
 AC_SUBST($1)dnl
 ])
 
-dnl AC_PATH_PROG(VARIABLE, PROG-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND])
+dnl AC_PATH_PROG(VARIABLE, PROG-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND [, PATH]])
 AC_DEFUN(AC_PATH_PROG,
 [# Extract the first word of "$2", so it can be a program name with args.
 set dummy $2; ac_word=[$]2
@@ -1122,7 +1302,7 @@ AC_CACHE_VAL(ac_cv_path_$1,
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
-  for ac_dir in $PATH; do
+  for ac_dir in ifelse([$4], , $PATH, [$4]); do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
       ac_cv_path_$1="$ac_dir/$ac_word"
@@ -1145,21 +1325,23 @@ fi
 AC_SUBST($1)dnl
 ])
 
-dnl AC_CHECK_PROGS(VARIABLE, PROGS-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND])
+dnl AC_CHECK_PROGS(VARIABLE, PROGS-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND
+dnl                [, PATH]])
 AC_DEFUN(AC_CHECK_PROGS,
 [for ac_prog in $2
 do
-AC_CHECK_PROG($1, [$]ac_prog, [$]ac_prog, )
+AC_CHECK_PROG($1, [$]ac_prog, [$]ac_prog, , $4)
 test -n "[$]$1" && break
 done
 ifelse([$3], , , [test -n "[$]$1" || $1="$3"
 ])])
 
-dnl AC_PATH_PROGS(VARIABLE, PROGS-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND])
+dnl AC_PATH_PROGS(VARIABLE, PROGS-TO-CHECK-FOR [, VALUE-IF-NOT-FOUND
+dnl               [, PATH]])
 AC_DEFUN(AC_PATH_PROGS,
 [for ac_prog in $2
 do
-AC_PATH_PROG($1, [$]ac_prog)
+AC_PATH_PROG($1, [$]ac_prog, , $4)
 test -n "[$]$1" && break
 done
 ifelse([$3], , , [test -n "[$]$1" || $1="$3"
@@ -1175,11 +1357,11 @@ else
 fi
 ])
 
-dnl AC_CHECK_TOOL(VARIABLE, PROG-TO-CHECK-FOR[, VALUE-IF-NOT-FOUND])
+dnl AC_CHECK_TOOL(VARIABLE, PROG-TO-CHECK-FOR[, VALUE-IF-NOT-FOUND [, PATH]])
 AC_DEFUN(AC_CHECK_TOOL,
 [AC_REQUIRE([AC_CHECK_TOOL_PREFIX])dnl
-AC_CHECK_PROG($1, ${ac_tool_prefix}$2, ${ac_tool_prefix}$2, 
-	      ifelse([$3], , [$2], ))
+AC_CHECK_PROG($1, ${ac_tool_prefix}$2, ${ac_tool_prefix}$2,
+	      ifelse([$3], , [$2], ), $4)
 ifelse([$3], , , [
 if test -z "$ac_cv_prog_$1"; then
 if test -n "$ac_tool_prefix"; then
@@ -1222,17 +1404,35 @@ dnl AC_CHECK_LIB(LIBRARY, FUNCTION [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND
 dnl              [, OTHER-LIBRARIES]]])
 AC_DEFUN(AC_CHECK_LIB,
 [AC_MSG_CHECKING([for -l$1])
-AC_CACHE_VAL(ac_cv_lib_$1,
+dnl Use a cache variable name containing both the library and function name,
+dnl because the test really is for library $1 defining function $2, not
+dnl just for library $1.  Separate tests with the same $1 and different $2s
+dnl may have different results.
+ac_lib_var=`echo $1['_']$2 | tr './+\055' '__p_'`
+AC_CACHE_VAL(ac_cv_lib_$ac_lib_var,
 [ac_save_LIBS="$LIBS"
 LIBS="-l$1 $5 $LIBS"
-AC_TRY_LINK(, [$2()], eval "ac_cv_lib_$1=yes", eval "ac_cv_lib_$1=no")dnl
+AC_TRY_LINK(dnl
+ifelse([$2], [main], , dnl Avoid conflicting decl of main.
+[/* Override any gcc2 internal prototype to avoid an error.  */
+]ifelse(AC_LANG, CPLUSPLUS, [#ifdef __cplusplus
+extern "C"
+#endif
+])dnl
+[/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $2();
+]),
+	    [$2()],
+	    eval "ac_cv_lib_$ac_lib_var=yes",
+	    eval "ac_cv_lib_$ac_lib_var=no")dnl
 LIBS="$ac_save_LIBS"
 ])dnl
-if eval "test \"`echo '$ac_cv_lib_'$1`\" = yes"; then
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   AC_MSG_RESULT(yes)
-  ifelse([$3], , 
+  ifelse([$3], ,
 [changequote(, )dnl
-  ac_tr_lib=HAVE_LIB`echo $1 | tr '[a-z]' '[A-Z]'`
+  ac_tr_lib=HAVE_LIB`echo $1 | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
 changequote([, ])dnl
   AC_DEFINE_UNQUOTED($ac_tr_lib)
   LIBS="-l$1 $LIBS"
@@ -1262,7 +1462,7 @@ LIBS="$ac_save_LIBS"
 ])dnl
 AC_MSG_RESULT($AC_CV_NAME)
 if test "$AC_CV_NAME" = yes; then
-  ifelse([$2], , 
+  ifelse([$2], ,
 [AC_DEFINE([HAVE_LIB]translit(AC_LIB_NAME, [a-z], [A-Z]))
   LIBS="-l[]AC_LIB_NAME[] $LIBS"
 ], [$2])
@@ -1278,7 +1478,7 @@ undefine([AC_CV_NAME])dnl
 dnl ### Examining declarations
 
 
-dnl AC_TRY_CPP(INCLUDES, ACTION-IF-TRUE [, ACTION-IF-FALSE])
+dnl AC_TRY_CPP(INCLUDES, [ACTION-IF-TRUE [, ACTION-IF-FALSE]])
 AC_DEFUN(AC_TRY_CPP,
 [AC_REQUIRE_CPP()dnl
 cat > conftest.$ac_ext <<EOF
@@ -1290,7 +1490,8 @@ dnl Capture the stderr of cpp.  eval is necessary to expand ac_cpp.
 dnl We used to copy stderr to stdout and capture it in a variable, but
 dnl that breaks under sh -x, which writes compile commands starting
 dnl with ` +' to stderr in eval and subshells.
-eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+AC_TRY_EVAL(ac_try)
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   ifelse([$2], , :, [rm -rf conftest*
@@ -1310,8 +1511,8 @@ AC_DEFUN(AC_EGREP_HEADER,
 
 dnl Because this macro is used by AC_PROG_GCC_TRADITIONAL, which must
 dnl come early, it is not included in AC_BEFORE checks.
-dnl AC_EGREP_CPP(PATTERN, PROGRAM, ACTION-IF-FOUND [,
-dnl              ACTION-IF-NOT-FOUND])
+dnl AC_EGREP_CPP(PATTERN, PROGRAM, [ACTION-IF-FOUND [,
+dnl              ACTION-IF-NOT-FOUND]])
 AC_DEFUN(AC_EGREP_CPP,
 [AC_REQUIRE_CPP()dnl
 cat > conftest.$ac_ext <<EOF
@@ -1338,7 +1539,7 @@ dnl ### Examining syntax
 
 
 dnl AC_TRY_COMPILE(INCLUDES, FUNCTION-BODY,
-dnl             ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+dnl             [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 AC_DEFUN(AC_TRY_COMPILE,
 [cat > conftest.$ac_ext <<EOF
 dnl This sometimes fails to find confdefs.h, for some reason.
@@ -1351,7 +1552,7 @@ int t() {
 [$2]
 ; return 0; }
 EOF
-if eval $ac_compile; then
+if AC_TRY_EVAL(ac_compile); then
   ifelse([$3], , :, [rm -rf conftest*
   $3])
 ifelse([$4], , , [else
@@ -1376,7 +1577,7 @@ AC_TRY_LINK([$2], [$3], [$4], [$5])dnl
 ])
 
 dnl AC_TRY_LINK(INCLUDES, FUNCTION-BODY,
-dnl             ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+dnl             [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 AC_DEFUN(AC_TRY_LINK,
 [cat > conftest.$ac_ext <<EOF
 dnl This sometimes fails to find confdefs.h, for some reason.
@@ -1389,7 +1590,7 @@ int t() {
 [$2]
 ; return 0; }
 EOF
-if eval $ac_link; then
+if AC_TRY_EVAL(ac_link); then
   ifelse([$3], , :, [rm -rf conftest*
   $3])
 ifelse([$4], , , [else
@@ -1404,8 +1605,8 @@ rm -f conftest*]
 dnl ### Checking for run-time features
 
 
-dnl AC_TRY_RUN(PROGRAM, ACTION-IF-TRUE [, ACTION-IF-FALSE
-dnl            [, ACTION-IF-CROSS-COMPILING]])
+dnl AC_TRY_RUN(PROGRAM, [ACTION-IF-TRUE [, ACTION-IF-FALSE
+dnl            [, ACTION-IF-CROSS-COMPILING]]])
 AC_DEFUN(AC_TRY_RUN,
 [AC_REQUIRE([AC_C_CROSS])dnl
 if test "$cross_compiling" = yes; then
@@ -1424,7 +1625,7 @@ extern "C" void exit(int);
 ])dnl
 [$1]
 EOF
-eval $ac_link
+AC_TRY_EVAL(ac_link)
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ifelse([$2], , :, [$2])
 ifelse([$3], , , [else
@@ -1438,7 +1639,7 @@ rm -fr conftest*])
 dnl ### Checking for header files
 
 
-dnl AC_CHECK_HEADER(HEADER-FILE, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+dnl AC_CHECK_HEADER(HEADER-FILE, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 AC_DEFUN(AC_CHECK_HEADER,
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
 ac_safe=`echo "$1" | tr './\055' '___'`
@@ -1462,7 +1663,7 @@ AC_DEFUN(AC_CHECK_HEADERS,
 do
 AC_CHECK_HEADER($ac_hdr,
 [changequote(, )dnl
-  ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./\055' '[A-Z]___'`
+  ac_tr_hdr=HAVE_`echo $ac_hdr | tr 'abcdefghijklmnopqrstuvwxyz./\055' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ___'`
 changequote([, ])dnl
   AC_DEFINE_UNQUOTED($ac_tr_hdr) $2], $3)dnl
 done
@@ -1472,7 +1673,7 @@ done
 dnl ### Checking for library functions
 
 
-dnl AC_CHECK_FUNC(FUNCTION, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
+dnl AC_CHECK_FUNC(FUNCTION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 AC_DEFUN(AC_CHECK_FUNC,
 [AC_MSG_CHECKING([for $1])
 AC_CACHE_VAL(ac_cv_func_$1,
@@ -1488,7 +1689,9 @@ dnl select.  Similarly for bzero.
 extern "C"
 #endif
 ])dnl
-[char $1(); 
+[/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $1();
 ], [
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -1515,7 +1718,7 @@ AC_DEFUN(AC_CHECK_FUNCS,
 do
 AC_CHECK_FUNC($ac_func,
 [changequote(, )dnl
-  ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  ac_tr_func=HAVE_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
 changequote([, ])dnl
   AC_DEFINE_UNQUOTED($ac_tr_func) $2], $3)dnl
 done
@@ -1534,7 +1737,7 @@ AC_SUBST(LIBOBJS)dnl
 dnl ### Checking compiler characteristics
 
 
-dnl AC_CHECK_SIZEOF(TYPE)
+dnl AC_CHECK_SIZEOF(TYPE [, CROSS-SIZE])
 AC_DEFUN(AC_CHECK_SIZEOF,
 [changequote(<<, >>)dnl
 dnl The name to #define.
@@ -1551,7 +1754,7 @@ main()
   if (!f) exit(1);
   fprintf(f, "%d\n", sizeof($1));
   exit(0);
-}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0)])dnl
+}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$2], , , AC_CV_NAME=$2))])dnl
 AC_MSG_RESULT($AC_CV_NAME)
 AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME)
 undefine([AC_TYPE_NAME])dnl
@@ -1670,11 +1873,13 @@ ifdef(<<AC_LIST_HEADER>>,
 <<trap 'rm -fr `echo "$1 AC_LIST_HEADER" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15>>,
 <<trap 'rm -fr `echo "$1" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15>>)
 changequote([, ])dnl
+EOF
+cat >> $CONFIG_STATUS <<EOF
 
 AC_OUTPUT_FILES($1)
 ifdef([AC_LIST_HEADER], [AC_OUTPUT_HEADER(AC_LIST_HEADER)])dnl
 ifdef([AC_LIST_LINKS], [AC_OUTPUT_LINKS(AC_LIST_FILES, AC_LIST_LINKS)])dnl
-ifelse([$3], , , 
+ifelse([$3], , ,
 [EOF
 cat >> $CONFIG_STATUS <<EOF
 $3
@@ -1700,7 +1905,7 @@ dnl Using a here document instead of a string reduces the quoting nightmare.
 # Protect against Makefile macro expansion.
 cat > conftest.defs <<\EOF
 changequote(<<, >>)dnl
-s%<<#define>> \([A-Za-z_][A-Za-z0-9_]*\) \(.*\)%-D\1=\2%g
+s%<<#define>> \([A-Za-z_][A-Za-z0-9_]*\) *\(.*\)%-D\1=\2%g
 s%[ 	`~<<#>>$^&*(){}\\|;'"<>?]%\\&%g
 s%\[%\\&%g
 s%\]%\\&%g
@@ -1715,10 +1920,10 @@ dnl This is a subroutine of AC_OUTPUT.  It is called inside an unquoted
 dnl here document whose contents are going into config.status.
 dnl AC_OUTPUT_FILES(FILE...)
 define(AC_OUTPUT_FILES,
-[# Protect against being on the right side of a sed subst in config.status. 
+[# Protect against being on the right side of a sed subst in config.status.
 changequote(, )dnl
-sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\\\&%]/\\\\&/g; 
- s/@@/%@/; s/@@/@%/; s/@g$/%g/' > conftest.subs <<\CEOF
+sed 's/%@/@@/; s/@%/@@/; s/%g\$/@g/; /@g\$/s/[\\\\&%]/\\\\&/g;
+ s/@@/%@/; s/@@/@%/; s/@g\$/%g/' > conftest.subs <<\\CEOF
 changequote([, ])dnl
 dnl These here document variables are unquoted when configure runs
 dnl but quoted when config.status runs, so variables are expanded once.
@@ -1795,6 +2000,14 @@ s%@top_srcdir@%$top_srcdir%g
 ifdef([AC_PROVIDE_AC_PROG_INSTALL], [s%@INSTALL@%$INSTALL%g
 ])dnl
 " -f conftest.subs $ac_given_srcdir/$ac_file_in > $ac_file
+dnl This would break Makefile dependencies.
+dnl  if cmp -s $ac_file conftest.out 2>/dev/null; then
+dnl    echo "$ac_file is unchanged"
+dnl    rm -f conftest.out
+dnl   else
+dnl     rm -f $ac_file
+dnl    mv conftest.out $ac_file
+dnl  fi
 fi; done
 rm -f conftest.subs
 ])
@@ -1842,7 +2055,7 @@ EOF
 
 # Transform confdefs.h into a sed script conftest.vals that substitutes
 # the proper values into config.h.in to produce config.h.  And first:
-# Protect against being on the right side of a sed subst in config.status. 
+# Protect against being on the right side of a sed subst in config.status.
 # Protect against being in an unquoted here document in config.status.
 rm -f conftest.vals
 dnl Using a here document instead of a string reduces the quoting nightmare.
@@ -1851,7 +2064,7 @@ cat > conftest.hdr <<\EOF
 changequote(<<, >>)dnl
 s/[\\&%]/\\&/g
 s%[\\$`]%\\&%g
-s%<<#define>> \([A-Za-z_][A-Za-z0-9_]*\) \(.*\)%${ac_dA}\1${ac_dB}\1${ac_dC}\2${ac_dD}%gp
+s%<<#define>> \([A-Za-z_][A-Za-z0-9_]*\) *\(.*\)%${ac_dA}\1${ac_dB}\1${ac_dC}\2${ac_dD}%gp
 s%ac_d%ac_u%gp
 s%ac_u%ac_e%gp
 changequote([, ])dnl
@@ -1903,6 +2116,14 @@ cat >> $CONFIG_STATUS <<\EOF
     echo "$ac_file is unchanged"
     rm -f conftest.h
   else
+    # Remove last slash and all that follows it.  Not all systems have dirname.
+  changequote(, )dnl
+    ac_dir=`echo $ac_file|sed 's%/[^/][^/]*$%%'`
+  changequote([, ])dnl
+    if test "$ac_dir" != "$ac_file" && test "$ac_dir" != .; then
+      # The file is in a subdirectory.
+      test ! -d "$ac_dir" && mkdir "$ac_dir"
+    fi
     rm -f $ac_file
     mv conftest.h $ac_file
   fi

@@ -1,6 +1,6 @@
 #! /bin/sh
 # autoconf -- create `configure' using m4 macros
-# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 # the given template file.
 
 usage="\
-Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir] 
-       [-l dir] [--localdir=dir] [--version] [template-file]" 
+Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir]
+       [-l dir] [--localdir=dir] [--version] [template-file]"
 
 # NLS nuisances.
 # Only set `LANG' and `LC_ALL' to "C" if already set.
@@ -33,6 +33,7 @@ if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
 
 : ${AC_MACRODIR=@datadir@}
 : ${M4=@M4@}
+: ${AWK=@AWK@}
 case "${M4}" in
 /*) # Handle the case that m4 has moved since we were configured.
     # It may have been found originally in a build directory.
@@ -45,7 +46,7 @@ localdir=
 show_version=no
 
 while test $# -gt 0 ; do
-   case "${1}" in 
+   case "${1}" in
       -h | --help | --h* )
          echo "${usage}" 1>&2; exit 0 ;;
       --localdir=* | --l*=* )
@@ -59,7 +60,7 @@ while test $# -gt 0 ; do
       --macrodir=* | --m*=* )
          AC_MACRODIR="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
          shift ;;
-      -m | --macrodir | --m* ) 
+      -m | --macrodir | --m* )
          shift
          test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
          AC_MACRODIR="${1}"
@@ -125,11 +126,12 @@ $M4 -I$AC_MACRODIR $use_localdir $r autoconf.m4$f $infile > $tmpout ||
 pattern="AC_"
 
 status=0
-if grep "${pattern}" $tmpout > /dev/null 2>&1; then
+if grep "^[^#]*${pattern}" $tmpout > /dev/null 2>&1; then
   echo "autoconf: Undefined macros:" >&2
-  grep "${pattern}" $tmpout | sed "s/.*\(${pattern}[_A-Z0-9]*\).*/\1/" |
-    while read name; do
-      grep -n $name $infile /dev/null
+  sed -n "s/^[^#]*\\(${pattern}[_A-Za-z0-9]*\\).*/\\1/p" $tmpout |
+    while read macro; do
+      grep -n "^[^#]*$macro" $infile /dev/null
+      test $? -eq 1 && echo >&2 "***BUG in Autoconf--please report*** $macro"
     done | sort -u >&2
   status=1
 fi
@@ -141,11 +143,11 @@ else
 fi
 
 # Put the real line numbers into configure to make config.log more helpful.
-awk '
+$AWK '
 /__oline__/ { printf "%d:", NR + 1 }
            { print }
 ' $tmpout | sed '
-/__oline__/s/^\([0-9][0-9]*\):\(.*\)__oline__\(.*\)$/\2\1\3/
+/__oline__/s/^\([0-9][0-9]*\):\(.*\)__oline__/\2\1/
 ' >&4
 
 rm -f $tmpout

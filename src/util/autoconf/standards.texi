@@ -3,7 +3,7 @@
 @setfilename standards.info
 @settitle GNU Coding Standards
 @c UPDATE THIS DATE WHENEVER YOU MAKE CHANGES!
-@set lastupdate 16 May 1995
+@set lastupdate 27 February 1996
 @c %**end of header
 
 @ifinfo
@@ -14,11 +14,21 @@ END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
+@c @setchapternewpage odd
 @setchapternewpage off
+
+@c This is used by a cross ref in make-stds.texi
+@set CODESTD  1
+@iftex
+@set CHAPTER chapter
+@end iftex
+@ifinfo
+@set CHAPTER node
+@end ifinfo
 
 @ifinfo
 GNU Coding Standards
-Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -49,7 +59,7 @@ by the Free Software Foundation.
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -75,26 +85,12 @@ Last updated @value{lastupdate}.
 
 @menu
 * Preface::			About the GNU Coding Standards
-* Reading Non-Free Code::	Referring to Proprietary Programs
-* Contributions::		Accepting Contributions
-* Change Logs::			Recording Changes
-* Compatibility::		Compatibility with Other Implementations
-* Makefile Conventions::	Makefile Conventions
-* Configuration::		How Configuration Should Work
-* Source Language::		Using Languages Other Than C
-* Formatting::			Formatting Your Source Code
-* Comments::			Commenting Your Work
-* Syntactic Conventions::	Clean Use of C Constructs
-* Names::			Naming Variables, Functions and Files
-* Using Extensions::		Using Non-standard Features
-* System Functions::            Portability and ``standard'' library functions
-* Semantics::			Program Behavior for All Programs
-* Errors::			Formatting Error Messages
-* Libraries::			Library Behavior
-* Portability::			Portability As It Applies to GNU
-* User Interfaces::		Standards for Command Line Interfaces
+* Intellectual Property::       Keeping Free Software Free
+* Design Advice::               General Program Design
+* Program Behavior::            Program Behavior for All Programs
+* Writing C::                   Making The Best Use of C
 * Documentation::		Documenting Programs
-* Releases::			Making Releases
+* Managing Releases::           The Release Process
 @end menu
 
 @node Preface
@@ -103,7 +99,7 @@ Last updated @value{lastupdate}.
 The GNU Coding Standards were written by Richard Stallman and other GNU
 Project volunteers.  Their purpose is to make the GNU system clean,
 consistent, and easy to install.  This document can also be read as a
-guide to write portable, robust and reliable programs.  It focuses on
+guide to writing portable, robust and reliable programs.  It focuses on
 programs written in C, but many of the rules and principles are useful
 even if you write in another programming language.  The rules often
 state reasons for writing in a certain way.
@@ -117,8 +113,19 @@ you don't have those files, please mail your suggestion anyway.
 This release of the GNU Coding Standards was last updated
 @value{lastupdate}.
 
+@node Intellectual Property
+@chapter Keeping Free Software Free
+
+This @value{CHAPTER} discusses how you can make sure that GNU software
+remains unencumbered.
+
+@menu
+* Reading Non-Free Code::	Referring to Proprietary Programs
+* Contributions::		Accepting Contributions
+@end menu
+
 @node Reading Non-Free Code
-@chapter Referring to Proprietary Programs
+@section Referring to Proprietary Programs
 
 Don't in any circumstances refer to Unix source code for or during
 your work on GNU!  (Or to any other proprietary programs.)
@@ -152,7 +159,7 @@ to free memory, or use a new GNU facility such as obstacks.
 
 
 @node Contributions
-@chapter Accepting Contributions
+@section Accepting Contributions
 
 If someone else sends you a piece of code to add to the program you are
 working on, we need legal papers to use it---the same sort of legal
@@ -167,7 +174,7 @@ that we have received the signed papers, before you actually use the
 contribution.
 
 This applies both before you release the program and afterward.  If
-you receive diffs to fix a bug, and they make significant change, we
+you receive diffs to fix a bug, and they make significant changes, we
 need legal papers for it.
 
 You don't need papers for changes of a few lines here or there, since
@@ -176,7 +183,7 @@ papers if all you get from the suggestion is some ideas, not actual code
 which you use.  For example, if you write a different solution to the
 problem, you don't need to get papers.
 
-I know this is frustrating; it's frustrating for us as well.  But if
+We know this is frustrating; it's frustrating for us as well.  But if
 you don't wait, you are going out on a limb---for example, what if the
 contributor's employer won't sign a disclaimer?  You might have to take
 that code out again!
@@ -185,102 +192,37 @@ The very worst thing is if you forget to tell us about the other
 contributor.  We could be very embarrassed in court some day as a
 result.
 
-@node Change Logs
-@chapter Change Logs
+@node Design Advice
+@chapter General Program Design
 
-Keep a change log for each directory, describing the changes made to
-source files in that directory.  The purpose of this is so that people
-investigating bugs in the future will know about the changes that
-might have introduced the bug.  Often a new bug can be found by
-looking at what was recently changed.  More importantly, change logs
-can help eliminate conceptual inconsistencies between different parts
-of a program; they can give you a history of how the conflicting
-concepts arose.
+This @value{CHAPTER} discusses some of the issues you should take into
+account when designing your program.
 
-Use the Emacs command @kbd{M-x add-change-log-entry} to start a new
-entry in the
-change log.  An entry should have an asterisk, the name of the changed
-file, and then in parentheses the name of the changed functions,
-variables or whatever, followed by a colon.  Then describe the changes
-you made to that function or variable.
-
-Separate unrelated entries with blank lines.  When two entries
-represent parts of the same change, so that they work together, then
-don't put blank lines between them.  Then you can omit the file name
-and the asterisk when successive entries are in the same file.
-
-Here are some examples:
-
-@example
-* register.el (insert-register): Return nil.
-(jump-to-register): Likewise.
-
-* sort.el (sort-subr): Return nil.
-
-* tex-mode.el (tex-bibtex-file, tex-file, tex-region):
-Restart the tex shell if process is gone or stopped.
-(tex-shell-running): New function.
-
-* expr.c (store_one_arg): Round size up for move_block_to_reg.
-(expand_call): Round up when emitting USE insns.
-* stmt.c (assign_parms): Round size up for move_block_from_reg.
-@end example
-
-It's important to name the changed function or variable in full.  Don't
-abbreviate them; don't combine them.  Subsequent maintainers will often
-search for a function name to find all the change log entries that
-pertain to it; if you abbreviate the name, they won't find it when they
-search.  For example, some people are tempted to abbreviate groups of
-function names by writing @samp{* register.el
-(@{insert,jump-to@}-register)}; this is not a good idea, since searching
-for @code{jump-to-register} or @code{insert-register} would not find the
-entry.
-
-There's no need to describe the full purpose of the changes or how they
-work together.  It is better to put such explanations in comments in the
-code.  That's why just ``New function'' is enough; there is a comment
-with the function in the source to explain what it does.
-
-However, sometimes it is useful to write one line to describe the
-overall purpose of a large batch of changes.
-
-You can think of the change log as a conceptual ``undo list'' which
-explains how earlier versions were different from the current version.
-People can see the current version; they don't need the change log
-to tell them what is in it.  What they want from a change log is a
-clear explanation of how the earlier version differed.
-
-When you change the calling sequence of a function in a simple
-fashion, and you change all the callers of the function, there is no
-need to make individual entries for all the callers.  Just write in
-the entry for the function being called, ``All callers changed.''
-
-When you change just comments or doc strings, it is enough to write an
-entry for the file, without mentioning the functions.  Write just,
-``Doc fix.''  There's no need to keep a change log for documentation
-files.  This is because documentation is not susceptible to bugs that
-are hard to fix.  Documentation does not consist of parts that must
-interact in a precisely engineered fashion; to correct an error, you
-need not know the history of the erroneous passage.
-
+@menu
+* Compatibility::		Compatibility with other implementations
+* Using Extensions::		Using non-standard features
+* ANSI C::                      Using ANSI C features
+* Source Language::		Using languages other than C
+@end menu
 
 @node Compatibility
-@chapter Compatibility with Other Implementations
+@section Compatibility with Other Implementations
 
-With certain exceptions, utility programs and libraries for GNU should
-be upward compatible with those in Berkeley Unix, and upward compatible
-with @sc{ANSI} C if @sc{ANSI} C specifies their behavior, and upward
-compatible with @sc{POSIX} if @sc{POSIX} specifies their behavior.
+With occasional exceptions, utility programs and libraries for GNU
+should be upward compatible with those in Berkeley Unix, and upward
+compatible with @sc{ansi} C if @sc{ansi} C specifies their behavior, and
+upward compatible with @sc{POSIX} if @sc{POSIX} specifies their
+behavior.
 
 When these standards conflict, it is useful to offer compatibility
 modes for each of them.
 
-@sc{ANSI} C and @sc{POSIX} prohibit many kinds of extensions.  Feel
-free to make the extensions anyway, and include a @samp{--ansi} or
-@samp{--compatible} option to turn them off.  However, if the extension
-has a significant chance of breaking any real programs or scripts,
-then it is not really upward compatible.  Try to redesign its
-interface.
+@sc{ansi} C and @sc{POSIX} prohibit many kinds of extensions.  Feel free
+to make the extensions anyway, and include a @samp{--ansi},
+@samp{--posix}, or @samp{--compatible} option to turn them off.
+However, if the extension has a significant chance of breaking any real
+programs or scripts, then it is not really upward compatible.  Try to
+redesign its interface.
 
 Many GNU programs suppress extensions that conflict with POSIX if the
 environment variable @code{POSIXLY_CORRECT} is defined (even if it is
@@ -290,567 +232,16 @@ variable if appropriate.
 When a feature is used only by users (not by programs or command
 files), and it is done poorly in Unix, feel free to replace it
 completely with something totally different and better.  (For example,
-vi is replaced with Emacs.)  But it is nice to offer a compatible
-feature as well.  (There is a free vi clone, so we offer it.)
+@code{vi} is replaced with Emacs.)  But it is nice to offer a compatible
+feature as well.  (There is a free @code{vi} clone, so we offer it.)
 
 Additional useful features not in Berkeley Unix are welcome.
 Additional programs with no counterpart in Unix may be useful,
 but our first priority is usually to duplicate what Unix already
 has.
 
-@comment The makefile standards are in a separate file that is also
-@comment included by make.texinfo.  Done by roland@gnu.ai.mit.edu on 1/6/93.
-@include make-stds.texi
-
-@node Configuration
-@chapter How Configuration Should Work
-
-Each GNU distribution should come with a shell script named
-@code{configure}.  This script is given arguments which describe the
-kind of machine and system you want to compile the program for.
-
-The @code{configure} script must record the configuration options so
-that they affect compilation.
-
-One way to do this is to make a link from a standard name such as
-@file{config.h} to the proper configuration file for the chosen system.
-If you use this technique, the distribution should @emph{not} contain a
-file named @file{config.h}.  This is so that people won't be able to
-build the program without configuring it first.
-
-Another thing that @code{configure} can do is to edit the Makefile.  If
-you do this, the distribution should @emph{not} contain a file named
-@file{Makefile}.  Instead, include a file @file{Makefile.in} which
-contains the input used for editing.  Once again, this is so that people
-won't be able to build the program without configuring it first.
-
-If @code{configure} does write the @file{Makefile}, then @file{Makefile}
-should have a target named @file{Makefile} which causes @code{configure}
-to be rerun, setting up the same configuration that was set up last
-time.  The files that @code{configure} reads should be listed as
-dependencies of @file{Makefile}.
-
-All the files which are output from the @code{configure} script should
-have comments at the beginning explaining that they were generated
-automatically using @code{configure}.  This is so that users won't think
-of trying to edit them by hand.
-
-The @code{configure} script should write a file named @file{config.status}
-which describes which configuration options were specified when the
-program was last configured.  This file should be a shell script which,
-if run, will recreate the same configuration.
-
-The @code{configure} script should accept an option of the form
-@samp{--srcdir=@var{dirname}} to specify the directory where sources are found
-(if it is not the current directory).  This makes it possible to build
-the program in a separate directory, so that the actual source directory
-is not modified.
-
-If the user does not specify @samp{--srcdir}, then @code{configure} should
-check both @file{.} and @file{..} to see if it can find the sources.  If
-it finds the sources in one of these places, it should use them from
-there.  Otherwise, it should report that it cannot find the sources, and
-should exit with nonzero status.
-
-Usually the easy way to support @samp{--srcdir} is by editing a
-definition of @code{VPATH} into the Makefile.  Some rules may need to
-refer explicitly to the specified source directory.  To make this
-possible, @code{configure} can add to the Makefile a variable named
-@code{srcdir} whose value is precisely the specified directory.
-
-The @code{configure} script should also take an argument which specifies the
-type of system to build the program for.  This argument should look like
-this:
-
-@example
-@var{cpu}-@var{company}-@var{system}
-@end example
-
-For example, a Sun 3 might be @samp{m68k-sun-sunos4.1}.
-
-The @code{configure} script needs to be able to decode all plausible
-alternatives for how to describe a machine.  Thus, @samp{sun3-sunos4.1}
-would be a valid alias.  For many programs, @samp{vax-dec-ultrix} would
-be an alias for @samp{vax-dec-bsd}, simply because the differences
-between Ultrix and @sc{BSD} are rarely noticeable, but a few programs
-might need to distinguish them.
-@c Real 4.4BSD now runs on some Suns.
-
-There is a shell script called @file{config.sub} that you can use
-as a subroutine to validate system types and canonicalize aliases.
-
-Other options are permitted to specify in more detail the software
-or hardware present on the machine, and include or exclude optional
-parts of the package:
-
-@table @samp
-@item --enable-@var{feature}@r{[}=@var{parameter}@r{]}
-Configure the package to build and install an optional user-level
-facility called @var{feature}.  This allows users to choose which
-optional features to include.  Giving an optional @var{parameter} of
-@samp{no} should omit @var{feature}, if it is built by default.
-
-No @samp{--enable} option should @strong{ever} cause one feature to
-replace another.  No @samp{--enable} option should ever substitute one
-useful behavior for another useful behavior.  The only proper use for
-@samp{--enable} is for questions of whether to build part of the program
-or exclude it.
-
-@item --with-@var{package}
-@c @r{[}=@var{parameter}@r{]}
-The package @var{package} will be installed, so configure this package
-to work with @var{package}.
-
-@c  Giving an optional @var{parameter} of
-@c @samp{no} should omit @var{package}, if it is used by default.
-
-Possible values of @var{package} include @samp{x}, @samp{x-toolkit},
-@samp{gnu-as} (or @samp{gas}), @samp{gnu-ld}, @samp{gnu-libc}, and
-@samp{gdb}.
-
-Do not use a @samp{--with} option to specify the file name to use to
-find certain files.  That is outside the scope of what @samp{--with}
-options are for.
-
-@item --nfp
-The target machine has no floating point processor.
-
-@item --gas
-The target machine assembler is GAS, the GNU assembler.
-This is obsolete; users should use @samp{--with-gnu-as} instead.
-
-@item --x
-The target machine has the X Window System installed.
-This is obsolete; users should use @samp{--with-x} instead.
-@end table
-
-All @code{configure} scripts should accept all of these ``detail''
-options, whether or not they make any difference to the particular
-package at hand.  In particular, they should accept any option that
-starts with @samp{--with-} or @samp{--enable-}.  This is so users will
-be able to configure an entire GNU source tree at once with a single set
-of options.
-
-You will note that the categories @samp{--with-} and @samp{--enable-}
-are narrow: they @strong{do not} provide a place for any sort of option
-you might think of.  That is deliberate.  We want to limit the possible
-configuration options in GNU software.  We do not want GNU programs to
-have idiosyncratic configuration options.
-
-Packages that perform part of compilation may support cross-compilation.
-In such a case, the host and target machines for the program may be
-different.  The @code{configure} script should normally treat the
-specified type of system as both the host and the target, thus producing
-a program which works for the same type of machine that it runs on.
-
-The way to build a cross-compiler, cross-assembler, or what have you, is
-to specify the option @samp{--host=@var{hosttype}} when running
-@code{configure}.  This specifies the host system without changing the
-type of target system.  The syntax for @var{hosttype} is the same as
-described above.
-
-Bootstrapping a cross-compiler requires compiling it on a machine other
-than the host it will run on.  Compilation packages accept a
-configuration option @samp{--build=@var{hosttype}} for specifying the
-configuration on which you will compile them, in case that is different
-from the host.
-
-Programs for which cross-operation is not meaningful need not accept the
-@samp{--host} option, because configuring an entire operating system for
-cross-operation is not a meaningful thing.
-
-Some programs have ways of configuring themselves automatically.  If
-your program is set up to do this, your @code{configure} script can simply
-ignore most of its arguments.
-
-@node Source Language
-@chapter Using Languages Other Than C
-
-Using a language other than C is like using a non-standard feature: it
-will cause trouble for users.  Even if GCC supports the other language,
-users may find it inconvenient to have to install the compiler for that
-other language in order to build your program.  So please write in C.
-
-There are three exceptions for this rule:
-
-@itemize @bullet
-@item
-It is okay to use a special language if the same program contains an
-interpreter for that language.
-
-Thus, it is not a problem that GNU Emacs contains code written in Emacs
-Lisp, because it comes with a Lisp interpreter.
-
-@item
-It is okay to use another language in a tool specifically intended for
-use with that language.
-
-This is okay because the only people who want to build the tool will be
-those who have installed the other language anyway.
-
-@item
-If an application is not of extremely widespread interest, then perhaps
-it's not important if the application is inconvenient to install.
-@end itemize
-
-@node Formatting
-@chapter Formatting Your Source Code
-
-It is important to put the open-brace that starts the body of a C
-function in column zero, and avoid putting any other open-brace or
-open-parenthesis or open-bracket in column zero.  Several tools look
-for open-braces in column zero to find the beginnings of C functions.
-These tools will not work on code not formatted that way.
-
-It is also important for function definitions to start the name of the
-function in column zero.  This helps people to search for function
-definitions, and may also help certain tools recognize them.  Thus,
-the proper format is this:
-
-@example
-static char *
-concat (s1, s2)        /* Name starts in column zero here */
-     char *s1, *s2;
-@{                     /* Open brace in column zero here */
-  @dots{}
-@}
-@end example
-
-@noindent
-or, if you want to use @sc{ANSI} C, format the definition like this:
-
-@example
-static char *
-concat (char *s1, char *s2)
-@{
-  @dots{}
-@}
-@end example
-
-In @sc{ANSI} C, if the arguments don't fit nicely on one line,
-split it like this:
-
-@example
-int
-lots_of_args (int an_integer, long a_long, short a_short,
-              double a_double, float a_float)
-@dots{}
-@end example
-
-For the body of the function, we prefer code formatted like this:
-
-@example
-if (x < foo (y, z))
-  haha = bar[4] + 5;
-else
-  @{
-    while (z)
-      @{
-        haha += foo (z, z);
-        z--;
-      @}
-    return ++x + bar ();
-  @}
-@end example
-
-We find it easier to read a program when it has spaces before the
-open-parentheses and after the commas.  Especially after the commas.
-
-When you split an expression into multiple lines, split it
-before an operator, not after one.  Here is the right way:
-
-@example
-if (foo_this_is_long && bar > win (x, y, z)
-    && remaining_condition)
-@end example
-
-Try to avoid having two operators of different precedence at the same
-level of indentation.  For example, don't write this:
-
-@example
-mode = (inmode[j] == VOIDmode
-        || GET_MODE_SIZE (outmode[j]) > GET_MODE_SIZE (inmode[j])
-        ? outmode[j] : inmode[j]);
-@end example
-
-Instead, use extra parentheses so that the indentation shows the nesting:
-
-@example
-mode = ((inmode[j] == VOIDmode
-         || (GET_MODE_SIZE (outmode[j]) > GET_MODE_SIZE (inmode[j])))
-        ? outmode[j] : inmode[j]);
-@end example
-
-Insert extra parentheses so that Emacs will indent the code properly.
-For example, the following indentation looks nice if you do it by hand,
-but Emacs would mess it up:
-
-@example
-v = rup->ru_utime.tv_sec*1000 + rup->ru_utime.tv_usec/1000
-    + rup->ru_stime.tv_sec*1000 + rup->ru_stime.tv_usec/1000;
-@end example
-
-But adding a set of parentheses solves the problem:
-
-@example
-v = (rup->ru_utime.tv_sec*1000 + rup->ru_utime.tv_usec/1000
-     + rup->ru_stime.tv_sec*1000 + rup->ru_stime.tv_usec/1000);
-@end example
-
-Format do-while statements like this:
-
-@example
-do
-  @{
-    a = foo (a);
-  @}
-while (a > 0);
-@end example
-
-Please use formfeed characters (control-L) to divide the program into
-pages at logical places (but not within a function).  It does not matter
-just how long the pages are, since they do not have to fit on a printed
-page.  The formfeeds should appear alone on lines by themselves.
-
-
-@node Comments
-@chapter Commenting Your Work
-
-Every program should start with a comment saying briefly what it is for.
-Example: @samp{fmt - filter for simple filling of text}.
-
-Please put a comment on each function saying what the function does,
-what sorts of arguments it gets, and what the possible values of
-arguments mean and are used for.  It is not necessary to duplicate in
-words the meaning of the C argument declarations, if a C type is being
-used in its customary fashion.  If there is anything nonstandard about
-its use (such as an argument of type @code{char *} which is really the
-address of the second character of a string, not the first), or any
-possible values that would not work the way one would expect (such as,
-that strings containing newlines are not guaranteed to work), be sure
-to say so.
-
-Also explain the significance of the return value, if there is one.
-
-Please put two spaces after the end of a sentence in your comments, so
-that the Emacs sentence commands will work.  Also, please write
-complete sentences and capitalize the first word.  If a lower-case
-identifier comes at the beginning of a sentence, don't capitalize it!
-Changing the spelling makes it a different identifier.  If you don't
-like starting a sentence with a lower case letter, write the sentence
-differently (e.g., ``The identifier lower-case is @dots{}'').
-
-The comment on a function is much clearer if you use the argument
-names to speak about the argument values.  The variable name itself
-should be lower case, but write it in upper case when you are speaking
-about the value rather than the variable itself.  Thus, ``the inode
-number NODE_NUM'' rather than ``an inode''.
-
-There is usually no purpose in restating the name of the function in
-the comment before it, because the reader can see that for himself.
-There might be an exception when the comment is so long that the function
-itself would be off the bottom of the screen.
-
-There should be a comment on each static variable as well, like this:
-
-@example
-/* Nonzero means truncate lines in the display;
-   zero means continue them.  */
-int truncate_lines;
-@end example
-
-Every @samp{#endif} should have a comment, except in the case of short
-conditionals (just a few lines) that are not nested.  The comment should
-state the condition of the conditional that is ending, @emph{including
-its sense}.  @samp{#else} should have a comment describing the condition
-@emph{and sense} of the code that follows.  For example:
-
-@example
-#ifdef foo
-  @dots{}
-#else /* not foo */
-  @dots{}
-#endif /* not foo */
-@end example
-
-@noindent
-but, by contrast, write the comments this way for a @samp{#ifndef}:
-
-@example
-#ifndef foo
-  @dots{}
-#else /* foo */
-  @dots{}
-#endif /* foo */
-@end example
-
-
-@node Syntactic Conventions
-@chapter Clean Use of C Constructs
-
-Please explicitly declare all arguments to functions.
-Don't omit them just because they are @code{int}s.
-
-Declarations of external functions and functions to appear later in the
-source file should all go in one place near the beginning of the file
-(somewhere before the first function definition in the file), or else
-should go in a header file.  Don't put @code{extern} declarations inside
-functions.
-
-It used to be common practice to use the same local variables (with
-names like @code{tem}) over and over for different values within one
-function.  Instead of doing this, it is better declare a separate local
-variable for each distinct purpose, and give it a name which is
-meaningful.  This not only makes programs easier to understand, it also
-facilitates optimization by good compilers.  You can also move the
-declaration of each local variable into the smallest scope that includes
-all its uses.  This makes the program even cleaner.
-
-Don't use local variables or parameters that shadow global identifiers.
-
-Don't declare multiple variables in one declaration that spans lines.
-Start a new declaration on each line, instead.  For example, instead
-of this:
-
-@example
-int    foo,
-       bar;
-@end example
-
-@noindent
-write either this:
-
-@example
-int foo, bar;
-@end example
-
-@noindent
-or this:
-
-@example
-int foo;
-int bar;
-@end example
-
-@noindent
-(If they are global variables, each should have a comment preceding it
-anyway.)
-
-When you have an @code{if}-@code{else} statement nested in another
-@code{if} statement, always put braces around the @code{if}-@code{else}.
-Thus, never write like this:
-
-@example
-if (foo)
-  if (bar)
-    win ();
-  else
-    lose ();
-@end example
-
-@noindent
-always like this:
-
-@example
-if (foo)
-  @{
-    if (bar)
-      win ();
-    else
-      lose ();
-  @}
-@end example
-
-If you have an @code{if} statement nested inside of an @code{else}
-statement, either write @code{else if} on one line, like this,
-
-@example
-if (foo)
-  @dots{}
-else if (bar)
-  @dots{}
-@end example
-
-@noindent
-with its @code{then}-part indented like the preceding @code{then}-part,
-or write the nested @code{if} within braces like this:
-
-@example
-if (foo)
-  @dots{}
-else
-  @{
-    if (bar)
-      @dots{}
-  @}
-@end example
-
-Don't declare both a structure tag and variables or typedefs in the
-same declaration.  Instead, declare the structure tag separately
-and then use it to declare the variables or typedefs.
-
-Try to avoid assignments inside @code{if}-conditions.  For example,
-don't write this:
-
-@example
-if ((foo = (char *) malloc (sizeof *foo)) == 0)
-  fatal ("virtual memory exhausted");
-@end example
-
-@noindent
-instead, write this:
-
-@example
-foo = (char *) malloc (sizeof *foo);
-if (foo == 0)
-  fatal ("virtual memory exhausted");
-@end example
-
-Don't make the program ugly to placate @code{lint}.  Please don't insert any
-casts to @code{void}.  Zero without a cast is perfectly fine as a null
-pointer constant.
-
-@node  Names
-@chapter Naming Variables, Functions, and Files
-
-Please use underscores to separate words in a name, so that the Emacs
-word commands can be useful within them.  Stick to lower case; reserve
-upper case for macros and @code{enum} constants, and for name-prefixes
-that follow a uniform convention.
-
-For example, you should use names like @code{ignore_space_change_flag};
-don't use names like @code{iCantReadThis}.
-
-Variables that indicate whether command-line options have been
-specified should be named after the meaning of the option, not after
-the option-letter.  A comment should state both the exact meaning of
-the option and its letter.  For example,
-
-@example
-/* Ignore changes in horizontal whitespace (-b).  */
-int ignore_space_change_flag;
-@end example
-
-When you want to define names with constant integer values, use
-@code{enum} rather than @samp{#define}.  GDB knows about enumeration
-constants.
-
-Use file names of 14 characters or less, to avoid creating gratuitous
-problems on System V.  You can use the program @code{doschk} to test for
-this.  @code{doschk} also tests for potential name conflicts if the
-files were loaded onto an MS-DOS file system---something you may or may
-not care about.
-
-In general, use @samp{-} to separate words in file names, not @samp{_}.
-Make all letters in file names be lower case, except when following
-specific conventions that call for upper case in certain kinds of names.
-Conventional occasions for using upper case letters in file names
-include @file{Makefile}, @file{ChangeLog}, @file{COPYING} and
-@file{README}.  It is common to name other @file{README}-like
-documentation files in all upper case just like @file{README}.
-
 @node Using Extensions
-@chapter Using Non-standard Features
+@section Using Non-standard Features
 
 Many GNU facilities that already exist support a number of convenient
 extensions over the comparable Unix facilities.  Whether to use these
@@ -880,128 +271,99 @@ order to bootstrap the GNU compilation facilities.  If these require
 the GNU compiler, then no one can compile them without having them
 installed already.  That would be no good.
 
-Since most computer systems do not yet implement @sc{ANSI} C, using the
-@sc{ANSI} C features is effectively using a GNU extension, so the
-same considerations apply.  (Except for @sc{ANSI} features that we
-discourage, such as trigraphs---don't ever use them.)
+@node ANSI C
+@section @sc{ansi} C and pre-@sc{ansi} C
 
+Do not ever use the ``trigraph'' feature of @sc{ansi} C.
 
-@node System Functions
-@chapter Calling System Functions
+@sc{ansi} C is widespread enough now that it is ok to write new programs
+that use @sc{ansi} C features (and therefore will not work in
+non-@sc{ansi} compilers).  And if a program is already written in
+@sc{ansi} C, there's no need to convert it to support non-@sc{ansi}
+compilers.
 
-C implementations differ substantially.  ANSI C reduces but does not
-eliminate the incompatibilities; meanwhile, many users wish to compile
-GNU software with pre-ANSI compilers.  This chapter gives
-recommendations for how to use the more or less standard C library
-functions to avoid unnecessary loss of portability.
+However, it is easy to support non-@sc{ansi} compilers in most programs,
+so you might still consider doing so when you write a program.  Instead
+of writing function definitions in @sc{ansi} prototype form,
+
+@example
+int
+foo (int x, int y)
+@dots{}
+@end example
+
+@noindent
+write the definition in pre-@sc{ansi} style like this,
+
+@example
+int
+foo (x, y)
+     int x, y;
+@dots{}
+@end example
+
+@noindent
+and use a separate declaration to specify the argument prototype:
+
+@example
+int foo (int, int);
+@end example
+
+You need such a declaration anyway, in a header file, to get the benefit
+of @sc{ansi} C prototypes in all the files where the function is called.
+And once you have it, you lose nothing by writing the function
+definition in the pre-@sc{ansi} style.
+
+If you don't know non-@sc{ansi} C, there's no need to learn it; just
+write in @sc{ansi} C.
+
+@node Source Language
+@section Using Languages Other Than C
+
+Using a language other than C is like using a non-standard feature: it
+will cause trouble for users.  Even if GCC supports the other language,
+users may find it inconvenient to have to install the compiler for that
+other language in order to build your program.  So please write in C.
+
+There are three exceptions for this rule:
 
 @itemize @bullet
 @item
-Don't use the value of @code{sprintf}.  It returns the number of
-characters written on some systems, but not on all systems.
+It is okay to use a special language if the same program contains an
+interpreter for that language.
+
+For example, if your program links with GUILE, it is ok to write part of
+the program in Scheme or another language supported by GUILE.
 
 @item
-Don't declare system functions explicitly.
+It is okay to use another language in a tool specifically intended for
+use with that language.
 
-Almost any declaration for a system function is wrong on some system.
-To minimize conflicts, leave it to the system header files to declare
-system functions.  If the headers don't declare a function, let it
-remain undeclared.
-
-While it may seem unclean to use a function without declaring it, in
-practice this works fine for most system library functions on the
-systems where this really happens.  The problem is only theoretical.  By
-contrast, actual declarations have frequently caused actual conflicts.
+This is okay because the only people who want to build the tool will be
+those who have installed the other language anyway.
 
 @item
-If you must declare a system function, don't specify the argument types.
-Use an old-style declaration, not an ANSI prototype.  The more you
-specify about the function, the more likely a conflict.
-
-@item
-In particular, don't unconditionally declare @code{malloc} or
-@code{realloc}.
-
-Most GNU programs use those functions just once, in functions
-conventionally named @code{xmalloc} and @code{xrealloc}.  These
-functions call @code{malloc} and @code{realloc}, respectively, and
-check the results.
-
-Because @code{xmalloc} and @code{xrealloc} are defined in your program,
-you can declare them in other files without any risk of type conflict.
-
-On most systems, @code{int} is the same length as a pointer; thus, the
-calls to @code{malloc} and @code{realloc} work fine.  For the few
-exceptional systems (mostly 64-bit machines), you can use
-@strong{conditionalized} declarations of @code{malloc} and
-@code{realloc}---or put these declarations in configuration files
-specific to those systems.
-
-@item
-The string functions require special treatment.  Some Unix systems have
-a header file @file{string.h}; other have @file{strings.h}.  Neither
-file name is portable.  There are two things you can do: use Autoconf to
-figure out which file to include, or don't include either file.
-
-@item
-If you don't include either strings file, you can't get declarations for
-the string functions from the header file in the usual way.
-
-That causes less of a problem than you might think.  The newer ANSI
-string functions are off-limits anyway because many systems still don't
-support them.  The string functions you can use are these:
-
-@example
-strcpy   strncpy   strcat   strncat
-strlen   strcmp   strncmp
-strchr   strrchr
-@end example
-
-The copy and concatenate functions work fine without a declaration as
-long as you don't use their values.  Using their values without a
-declaration fails on systems where the width of a pointer differs from
-the width of @code{int}, and perhaps in other cases.  It is trivial to
-avoid using their values, so do that.
-
-The compare functions and @code{strlen} work fine without a declaration
-on most systems, possibly all the ones that GNU software runs on.
-You may find it necessary to declare them @strong{conditionally} on a
-few systems.
-
-The search functions must be declared to return @code{char *}.  Luckily,
-there is no variation in the data type they return.  But there is
-variation in their names.  Some systems give these functions the names
-@code{index} and @code{rindex}; other systems use the names
-@code{strchr} and @code{strrchr}.  Some systems support both pairs of
-names, but neither pair works on all systems.
-
-You should pick a single pair of names and use it throughout your
-program.  (Nowadays, it is better to choose @code{strchr} and
-@code{strrchr}.)  Declare both of those names as functions returning
-@code{char *}.  On systems which don't support those names, define them
-as macros in terms of the other pair.  For example, here is what to put
-at the beginning of your file (or in a header) if you want to use the
-names @code{strchr} and @code{strrchr} throughout:
-
-@example
-#ifndef HAVE_STRCHR
-#define strchr index
-#endif
-#ifndef HAVE_STRRCHR
-#define strrchr rindex
-#endif
-
-char *strchr ();
-char *strrchr ();
-@end example
+If an application is not of extremely widespread interest, then perhaps
+it's not important if the application is inconvenient to install.
 @end itemize
 
-Here we assume that @code{HAVE_STRCHR} and @code{HAVE_STRRCHR} are
-macros defined in systems where the corresponding functions exist.
-One way to get them properly defined is to use Autoconf.
+@node Program Behavior
+@chapter Program Behavior for All Programs
+
+This @value{CHAPTER} describes how to write robust software. It also
+describes general standards for error messages, the command line interface,
+and how libraries should behave.
+
+@menu
+* Semantics::			Writing robust programs
+* Libraries::			Library behavior
+* Errors::			Formatting error messages
+* User Interfaces::		Standards for command line interfaces
+* Memory Usage::                When and how to care about memory needs
+@end menu
 
 @node Semantics
-@chapter Program Behavior for All Programs
+@section Writing Robust Programs
 
 Avoid arbitrary limits on the length or number of @emph{any} data
 structure, including file names, lines, files, and symbols, by allocating
@@ -1047,6 +409,7 @@ makes this unreasonable.
 When static storage is to be written in during program execution, use
 explicit C code to initialize it.  Reserve C initialized declarations
 for data that will not be changed.
+@c ADR: why?
 
 Try to avoid low-level interfaces to obscure Unix data structures (such
 as file directories, utmp, or the layout of kernel memory), since these
@@ -1072,8 +435,41 @@ bits (0 through 255).  A single run of the program might have 256
 errors; if you try to return 256 as the exit status, the parent process
 will see 0 as the status, and it will appear that the program succeeded.
 
+If you make temporary files, check the @code{TMPDIR} environment
+variable; if that variable is defined, use the specified directory
+instead of @file{/tmp}.
+
+@node Libraries
+@section Library Behavior
+
+Try to make library functions reentrant.  If they need to do dynamic
+storage allocation, at least try to avoid any nonreentrancy aside from
+that of @code{malloc} itself.
+
+Here are certain name conventions for libraries, to avoid name
+conflicts.
+
+Choose a name prefix for the library, more than two characters long.
+All external function and variable names should start with this
+prefix.  In addition, there should only be one of these in any given
+library member.  This usually means putting each one in a separate
+source file.
+
+An exception can be made when two external symbols are always used
+together, so that no reasonable program could use one without the
+other; then they can both go in the same file.
+
+External symbols that are not documented entry points for the user
+should have names beginning with @samp{_}.  They should also contain
+the chosen name prefix for the library, to prevent collisions with
+other libraries.  These can go in the same files with user entry
+points if you like.
+
+Static functions and variables can be used as you like and need not
+fit any naming convention.
+
 @node Errors
-@chapter Formatting Error Messages
+@section Formatting Error Messages
 
 Error messages from compilers should look like this:
 
@@ -1112,107 +508,8 @@ Error messages from interactive programs, and other messages such as
 usage messages, should start with a capital letter.  But they should not
 end with a period.
 
-
-@node Libraries
-@chapter Library Behavior
-
-Try to make library functions reentrant.  If they need to do dynamic
-storage allocation, at least try to avoid any nonreentrancy aside from
-that of @code{malloc} itself.
-
-Here are certain name conventions for libraries, to avoid name
-conflicts.
-
-Choose a name prefix for the library, more than two characters long.
-All external function and variable names should start with this
-prefix.  In addition, there should only be one of these in any given
-library member.  This usually means putting each one in a separate
-source file.
-
-An exception can be made when two external symbols are always used
-together, so that no reasonable program could use one without the
-other; then they can both go in the same file.
-
-External symbols that are not documented entry points for the user
-should have names beginning with @samp{_}.  They should also contain
-the chosen name prefix for the library, to prevent collisions with
-other libraries.  These can go in the same files with user entry
-points if you like.
-
-Static functions and variables can be used as you like and need not
-fit any naming convention.
-
-
-@node Portability
-@chapter Portability As It Applies to GNU
-
-Much of what is called ``portability'' in the Unix world refers to
-porting to different Unix versions.  This is a secondary consideration
-for GNU software, because its primary purpose is to run on top of one
-and only one kernel, the GNU kernel, compiled with one and only one C
-compiler, the GNU C compiler.  The amount and kinds of variation among
-GNU systems on different cpu's will be like the variation among Berkeley
-4.3 systems on different cpu's.
-
-All users today run GNU software on non-GNU systems.  So supporting a
-variety of non-GNU systems is desirable; simply not paramount.
-The easiest way to achieve portability to a reasonable range of systems
-is to use Autoconf.  It's unlikely that your program needs to know more
-information about the host machine than Autoconf can provide, simply
-because most of the programs that need such knowledge have already been
-written.
-
-It is difficult to be sure exactly what facilities the GNU kernel
-will provide, since it isn't finished yet.  Therefore, assume you can
-use anything in 4.3; just avoid using the format of semi-internal data
-bases (e.g., directories) when there is a higher-level alternative
-(@code{readdir}).
-
-You can freely assume any reasonably standard facilities in the C
-language, libraries or kernel, because we will find it necessary to
-support these facilities in the full GNU system, whether or not we
-have already done so.  The fact that there may exist kernels or C
-compilers that lack these facilities is irrelevant as long as the GNU
-kernel and C compiler support them.
-
-It remains necessary to worry about differences among cpu types, such
-as the difference in byte ordering and alignment restrictions.  It's
-unlikely that 16-bit machines will ever be supported by GNU, so there
-is no point in spending any time to consider the possibility that an
-int will be less than 32 bits.
-
-You can assume that all pointers have the same format, regardless
-of the type they point to, and that this is really an integer.
-There are some weird machines where this isn't true, but they aren't
-important; don't waste time catering to them.  Besides, eventually
-we will put function prototypes into all GNU programs, and that will
-probably make your program work even on weird machines.
-
-Since some important machines (including the 68000) are big-endian,
-it is important not to assume that the address of an @code{int} object
-is also the address of its least-significant byte.  Thus, don't
-make the following mistake:
-
-@example
-int c;
-@dots{}
-while ((c = getchar()) != EOF)
-        write(file_descriptor, &c, 1);
-@end example
-
-You can assume that it is reasonable to use a meg of memory.  Don't
-strain to reduce memory usage unless it can get to that level.  If
-your program creates complicated data structures, just make them in
-core and give a fatal error if malloc returns zero.
-
-If a program works by lines and could be applied to arbitrary
-user-supplied input files, it should keep only a line in memory, because
-this is not very hard and users will want to be able to operate on input
-files that are bigger than will fit in core all at once.
-
-
 @node User Interfaces
-@chapter Standards for Command Line Interfaces
+@section Standards for Command Line Interfaces
 
 Please don't make the behavior of a utility depend on the name used
 to invoke it.  It is useful sometimes to make a link to a utility
@@ -1278,12 +575,13 @@ standard output and exits successfully.  These options should inhibit
 the normal function of the command; they should do nothing except print
 the requested information.
 
-@c longopts begin here (keyword for isearch)
 @c Please leave newlines between items in this table; it's much easier
 @c to update when it isn't completely squashed together and unreadable.
 @c When there is more than one short option for a long option name, put
 @c a semicolon between the lists of the programs that use them, not a
 @c period.   --friedman
+
+Here is the table of long options used by GNU programs.
 
 @table @samp
 
@@ -1317,7 +615,7 @@ and @code{unexpand}.
 @samp{-a} in @code{diff}.
 
 @item assign
-@samp{-v} in Gawk.
+@samp{-v} in @code{gawk}.
 
 @item assume-new
 @samp{-W} in Make.
@@ -1399,7 +697,7 @@ Used in various programs to specify the directory to use.
 @samp{-d} in @code{tar}.
 
 @item compat
-Used in gawk (no corresponding single-letter option).
+Used in @code{gawk}.
 
 @item compress
 @samp{-Z} in @code{tar} and @code{shar}.
@@ -1414,11 +712,11 @@ Used in gawk (no corresponding single-letter option).
 Used in @code{diff}.
 
 @item copyleft
-Used in gawk (no corresponding single-letter option).
+@samp{-W copyleft} in @code{gawk}.
 
 @item copyright
-@samp{-C} in @code{ptx}, @code{recode}, and @code{wdiff}.
-Also used in gawk (no corresponding single-letter option).
+@samp{-C} in @code{ptx}, @code{recode}, and @code{wdiff};
+@samp{-W copyright} in @code{gawk}.
 
 @item core
 Used in GDB.
@@ -1513,7 +811,7 @@ specially.
 Used in GDB.
 
 @item error-limit
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item error-output
 @samp{-o} in @code{m4}.
@@ -1555,13 +853,13 @@ Used in GDB.
 @item fatal-warnings
 @samp{-E} in @code{m4}.
 
-@item field-separator
-p@samp{-F} in Gawk.
-
 @item file
-@samp{-f} in Gawk, @code{info}, Make, @code{mt}, and @code{tar};
+@samp{-f} in @code{info}, @code{gawk}, Make, @code{mt}, and @code{tar};
 @samp{-n} in @code{sed};
 @samp{-r} in @code{touch}.
+
+@item field-separator
+@samp{-F} in @code{gawk}.
 
 @item file-prefix
 @samp{-b} in Bison.
@@ -1573,7 +871,7 @@ p@samp{-F} in Gawk.
 @samp{-T} in @code{tar}.
 
 @item fill-column
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item flag-truncation
 @samp{-F} in @code{ptx}.
@@ -1585,7 +883,7 @@ Used in Makeinfo.
 @samp{-f} in @code{tail}.
 
 @item footnote-style
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item force
 @samp{-f} in @code{cp}, @code{ln}, @code{mv}, and @code{rm}.
@@ -1750,7 +1048,8 @@ Used in @code{split}, @code{head}, and @code{tail}.
 @samp{-l} in @code{cpio}.
 
 @item lint
-Used in gawk (no corresponding single-letter option).
+@itemx lint-old
+Used in @code{gawk}.
 
 @item list
 @samp{-t} in @code{cpio};
@@ -1882,7 +1181,7 @@ Used in GDB.
 @samp{-p} in @code{nm}.
 
 @item no-split
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item no-static
 @samp{-a} in @code{gprof}.
@@ -1894,7 +1193,7 @@ Used in Makeinfo.
 @samp{-m} in @code{shar}.
 
 @item no-validate
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item no-warn
 Used in various programs to inhibit warnings.
@@ -1966,7 +1265,7 @@ In various programs, specify the output file name.
 @samp{-l} in @code{diff}.
 
 @item paragraph-indent
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item parents
 @samp{-p} in @code{mkdir} and @code{rmdir}.
@@ -1984,7 +1283,7 @@ Used in Makeinfo.
 @samp{-c} in @code{cpio} and @code{tar}.
 
 @item posix
-Used in gawk (no corresponding single-letter option).
+Used in @code{gawk}.
 
 @item prefix-builtins
 @samp{-P} in @code{m4}.
@@ -2051,6 +1350,9 @@ synonym.
 @item rcs
 @samp{-n} in @code{diff}.
 
+@item re-interval
+Used in @code{gawk}.
+
 @item read-full-blocks
 @samp{-B} in @code{tar}.
 
@@ -2068,7 +1370,7 @@ Used in @code{chgrp}, @code{chown}, @code{cp}, @code{ls}, @code{diff},
 and @code{rm}.
 
 @item reference-limit
-Used in Makeinfo.
+Used in @code{makeinfo}.
 
 @item references
 @samp{-r} in @code{ptx}.
@@ -2160,7 +1462,7 @@ Used in many programs to inhibit the usual output.
 Used in @code{ls}.
 
 @item source
-Used in gawk (no corresponding single-letter option).
+@samp{-W source} in @code{gawk}.
 
 @item sparse
 @samp{-S} in @code{tar}.
@@ -2268,6 +1570,7 @@ Used in @code{ls} and @code{touch}.
 
 @item traditional
 @samp{-t} in @code{hello};
+@samp{-W traditional} in @code{gawk};
 @samp{-G} in @code{ed}, @code{m4}, and @code{ptx}.
 
 @item tty
@@ -2298,7 +1601,7 @@ Used in GDB.
 @samp{-u} in @code{cp}, @code{ctags}, @code{mv}, @code{tar}.
 
 @item usage
-Used in gawk (no corresponding single-letter option).
+Used in @code{gawk}; same as @samp{--help}.
 
 @item uuencode
 @samp{-B} in @code{shar}.
@@ -2341,9 +1644,605 @@ Print the version number.
 
 @item zeros
 @samp{-z} in @code{gprof}.
-
 @end table
-@c longopts end here (keyword for isearch)
+
+@node Memory Usage
+@section Memory Usage
+
+If it typically uses just a few meg of memory, don't bother making any
+effort to reduce memory usage.  For example, if it is impractical for
+other reasons to operate on files more than a few meg long, it is
+reasonable to read entire input files into core to operate on them.
+
+However, for programs such as @code{cat} or @code{tail}, that can
+usefully operate on very large files, it is important to avoid using a
+technique that would artificially limit the size of files it can handle.
+If a program works by lines and could be applied to arbitrary
+user-supplied input files, it should keep only a line in memory, because
+this is not very hard and users will want to be able to operate on input
+files that are bigger than will fit in core all at once.
+
+If your program creates complicated data structures, just make them in
+core and give a fatal error if @code{malloc} returns zero.
+
+@node Writing C
+@chapter Making The Best Use of C
+
+This @value{CHAPTER} provides advice on how best to use the C language
+when writing GNU software.
+
+@menu
+* Formatting::			Formatting Your Source Code
+* Comments::			Commenting Your Work
+* Syntactic Conventions::	Clean Use of C Constructs
+* Names::			Naming Variables and Functions
+* System Portability::		Portability between different operating systems
+* CPU Portability::             Supporting the range of CPU types
+* System Functions::            Portability and ``standard'' library functions
+@end menu
+
+@node Formatting
+@section Formatting Your Source Code
+
+It is important to put the open-brace that starts the body of a C
+function in column zero, and avoid putting any other open-brace or
+open-parenthesis or open-bracket in column zero.  Several tools look
+for open-braces in column zero to find the beginnings of C functions.
+These tools will not work on code not formatted that way.
+
+It is also important for function definitions to start the name of the
+function in column zero.  This helps people to search for function
+definitions, and may also help certain tools recognize them.  Thus,
+the proper format is this:
+
+@example
+static char *
+concat (s1, s2)        /* Name starts in column zero here */
+     char *s1, *s2;
+@{                     /* Open brace in column zero here */
+  @dots{}
+@}
+@end example
+
+@noindent
+or, if you want to use @sc{ansi} C, format the definition like this:
+
+@example
+static char *
+concat (char *s1, char *s2)
+@{
+  @dots{}
+@}
+@end example
+
+In @sc{ansi} C, if the arguments don't fit nicely on one line,
+split it like this:
+
+@example
+int
+lots_of_args (int an_integer, long a_long, short a_short,
+              double a_double, float a_float)
+@dots{}
+@end example
+
+For the body of the function, we prefer code formatted like this:
+
+@example
+if (x < foo (y, z))
+  haha = bar[4] + 5;
+else
+  @{
+    while (z)
+      @{
+        haha += foo (z, z);
+        z--;
+      @}
+    return ++x + bar ();
+  @}
+@end example
+
+We find it easier to read a program when it has spaces before the
+open-parentheses and after the commas.  Especially after the commas.
+
+When you split an expression into multiple lines, split it
+before an operator, not after one.  Here is the right way:
+
+@example
+if (foo_this_is_long && bar > win (x, y, z)
+    && remaining_condition)
+@end example
+
+Try to avoid having two operators of different precedence at the same
+level of indentation.  For example, don't write this:
+
+@example
+mode = (inmode[j] == VOIDmode
+        || GET_MODE_SIZE (outmode[j]) > GET_MODE_SIZE (inmode[j])
+        ? outmode[j] : inmode[j]);
+@end example
+
+Instead, use extra parentheses so that the indentation shows the nesting:
+
+@example
+mode = ((inmode[j] == VOIDmode
+         || (GET_MODE_SIZE (outmode[j]) > GET_MODE_SIZE (inmode[j])))
+        ? outmode[j] : inmode[j]);
+@end example
+
+Insert extra parentheses so that Emacs will indent the code properly.
+For example, the following indentation looks nice if you do it by hand,
+but Emacs would mess it up:
+
+@example
+v = rup->ru_utime.tv_sec*1000 + rup->ru_utime.tv_usec/1000
+    + rup->ru_stime.tv_sec*1000 + rup->ru_stime.tv_usec/1000;
+@end example
+
+But adding a set of parentheses solves the problem:
+
+@example
+v = (rup->ru_utime.tv_sec*1000 + rup->ru_utime.tv_usec/1000
+     + rup->ru_stime.tv_sec*1000 + rup->ru_stime.tv_usec/1000);
+@end example
+
+Format do-while statements like this:
+
+@example
+do
+  @{
+    a = foo (a);
+  @}
+while (a > 0);
+@end example
+
+Please use formfeed characters (control-L) to divide the program into
+pages at logical places (but not within a function).  It does not matter
+just how long the pages are, since they do not have to fit on a printed
+page.  The formfeeds should appear alone on lines by themselves.
+
+
+@node Comments
+@section Commenting Your Work
+
+Every program should start with a comment saying briefly what it is for.
+Example: @samp{fmt - filter for simple filling of text}.
+
+Please put a comment on each function saying what the function does,
+what sorts of arguments it gets, and what the possible values of
+arguments mean and are used for.  It is not necessary to duplicate in
+words the meaning of the C argument declarations, if a C type is being
+used in its customary fashion.  If there is anything nonstandard about
+its use (such as an argument of type @code{char *} which is really the
+address of the second character of a string, not the first), or any
+possible values that would not work the way one would expect (such as,
+that strings containing newlines are not guaranteed to work), be sure
+to say so.
+
+Also explain the significance of the return value, if there is one.
+
+Please put two spaces after the end of a sentence in your comments, so
+that the Emacs sentence commands will work.  Also, please write
+complete sentences and capitalize the first word.  If a lower-case
+identifier comes at the beginning of a sentence, don't capitalize it!
+Changing the spelling makes it a different identifier.  If you don't
+like starting a sentence with a lower case letter, write the sentence
+differently (e.g., ``The identifier lower-case is @dots{}'').
+
+The comment on a function is much clearer if you use the argument
+names to speak about the argument values.  The variable name itself
+should be lower case, but write it in upper case when you are speaking
+about the value rather than the variable itself.  Thus, ``the inode
+number NODE_NUM'' rather than ``an inode''.
+
+There is usually no purpose in restating the name of the function in
+the comment before it, because the reader can see that for himself.
+There might be an exception when the comment is so long that the function
+itself would be off the bottom of the screen.
+
+There should be a comment on each static variable as well, like this:
+
+@example
+/* Nonzero means truncate lines in the display;
+   zero means continue them.  */
+int truncate_lines;
+@end example
+
+Every @samp{#endif} should have a comment, except in the case of short
+conditionals (just a few lines) that are not nested.  The comment should
+state the condition of the conditional that is ending, @emph{including
+its sense}.  @samp{#else} should have a comment describing the condition
+@emph{and sense} of the code that follows.  For example:
+
+@example
+@group
+#ifdef foo
+  @dots{}
+#else /* not foo */
+  @dots{}
+#endif /* not foo */
+@end group
+@end example
+
+@noindent
+but, by contrast, write the comments this way for a @samp{#ifndef}:
+
+@example
+@group
+#ifndef foo
+  @dots{}
+#else /* foo */
+  @dots{}
+#endif /* foo */
+@end group
+@end example
+
+
+@node Syntactic Conventions
+@section Clean Use of C Constructs
+
+Please explicitly declare all arguments to functions.
+Don't omit them just because they are @code{int}s.
+
+Declarations of external functions and functions to appear later in the
+source file should all go in one place near the beginning of the file
+(somewhere before the first function definition in the file), or else
+should go in a header file.  Don't put @code{extern} declarations inside
+functions.
+
+It used to be common practice to use the same local variables (with
+names like @code{tem}) over and over for different values within one
+function.  Instead of doing this, it is better declare a separate local
+variable for each distinct purpose, and give it a name which is
+meaningful.  This not only makes programs easier to understand, it also
+facilitates optimization by good compilers.  You can also move the
+declaration of each local variable into the smallest scope that includes
+all its uses.  This makes the program even cleaner.
+
+Don't use local variables or parameters that shadow global identifiers.
+
+Don't declare multiple variables in one declaration that spans lines.
+Start a new declaration on each line, instead.  For example, instead
+of this:
+
+@example
+@group
+int    foo,
+       bar;
+@end group
+@end example
+
+@noindent
+write either this:
+
+@example
+int foo, bar;
+@end example
+
+@noindent
+or this:
+
+@example
+int foo;
+int bar;
+@end example
+
+@noindent
+(If they are global variables, each should have a comment preceding it
+anyway.)
+
+When you have an @code{if}-@code{else} statement nested in another
+@code{if} statement, always put braces around the @code{if}-@code{else}.
+Thus, never write like this:
+
+@example
+if (foo)
+  if (bar)
+    win ();
+  else
+    lose ();
+@end example
+
+@noindent
+always like this:
+
+@example
+if (foo)
+  @{
+    if (bar)
+      win ();
+    else
+      lose ();
+  @}
+@end example
+
+If you have an @code{if} statement nested inside of an @code{else}
+statement, either write @code{else if} on one line, like this,
+
+@example
+if (foo)
+  @dots{}
+else if (bar)
+  @dots{}
+@end example
+
+@noindent
+with its @code{then}-part indented like the preceding @code{then}-part,
+or write the nested @code{if} within braces like this:
+
+@example
+if (foo)
+  @dots{}
+else
+  @{
+    if (bar)
+      @dots{}
+  @}
+@end example
+
+Don't declare both a structure tag and variables or typedefs in the
+same declaration.  Instead, declare the structure tag separately
+and then use it to declare the variables or typedefs.
+
+Try to avoid assignments inside @code{if}-conditions.  For example,
+don't write this:
+
+@example
+if ((foo = (char *) malloc (sizeof *foo)) == 0)
+  fatal ("virtual memory exhausted");
+@end example
+
+@noindent
+instead, write this:
+
+@example
+foo = (char *) malloc (sizeof *foo);
+if (foo == 0)
+  fatal ("virtual memory exhausted");
+@end example
+
+Don't make the program ugly to placate @code{lint}.  Please don't insert any
+casts to @code{void}.  Zero without a cast is perfectly fine as a null
+pointer constant.
+
+@node  Names
+@section Naming Variables and Functions
+
+Please use underscores to separate words in a name, so that the Emacs
+word commands can be useful within them.  Stick to lower case; reserve
+upper case for macros and @code{enum} constants, and for name-prefixes
+that follow a uniform convention.
+
+For example, you should use names like @code{ignore_space_change_flag};
+don't use names like @code{iCantReadThis}.
+
+Variables that indicate whether command-line options have been
+specified should be named after the meaning of the option, not after
+the option-letter.  A comment should state both the exact meaning of
+the option and its letter.  For example,
+
+@example
+@group
+/* Ignore changes in horizontal whitespace (-b).  */
+int ignore_space_change_flag;
+@end group
+@end example
+
+When you want to define names with constant integer values, use
+@code{enum} rather than @samp{#define}.  GDB knows about enumeration
+constants.
+
+Use file names of 14 characters or less, to avoid creating gratuitous
+problems on older System V systems.  You can use the program @code{doschk} to test for
+this.  @code{doschk} also tests for potential name conflicts if the
+files were loaded onto an MS-DOS file system---something you may or may
+not care about.
+
+@node System Portability
+@section Portability between System Types
+
+In the Unix world, ``portability'' refers to porting to different Unix
+versions.  For a GNU program, this kind of portability is desirable, but
+not paramount.
+
+The primary purpose of GNU software is to run on top of the GNU kernel,
+compiled with the GNU C compiler, on various types of @sc{cpu}.  The
+amount and kinds of variation among GNU systems on different @sc{cpu}s
+will be comparable to the variation among Linux-based GNU systems or
+among BSD systems today.  So the kinds of portability that are absolutely
+necessary are quite limited.
+
+But many users do run GNU software on non-GNU Unix or Unix-like systems.
+So supporting a variety of Unix-like systems is desirable, although not
+paramount.
+
+The easiest way to achieve portability to most Unix-like systems is to
+use Autoconf.  It's unlikely that your program needs to know more
+information about the host platform than Autoconf can provide, simply
+because most of the programs that need such knowledge have already been
+written.
+
+Avoid using the format of semi-internal data bases (e.g., directories)
+when there is a higher-level alternative (@code{readdir}).
+
+As for systems that are not like Unix, such as MSDOS, Windows, the
+Macintosh, VMS, and MVS, supporting them is usually so much work that it
+is better if you don't.
+
+The planned GNU kernel is not finished yet, but you can tell which
+facilities it will provide by looking at the GNU C Library Manual.  The
+GNU kernel is based on Mach, so the features of Mach will also be
+available.  However, if you use Mach features, you'll probably have
+trouble debugging your program today.
+
+@node CPU Portability
+@section Portability between @sc{cpu}s
+
+Even GNU systems will differ because of differences among @sc{cpu}
+types---for example, difference in byte ordering and alignment
+requirements.  It is absolutely essential to handle these differences.
+However, don't make any effort to cater to the possibility that an
+@code{int} will be less than 32 bits.  We don't support 16-bit machines
+in GNU.
+
+Don't assume that the address of an @code{int} object is also the
+address of its least-significant byte.  This is false on big-endian
+machines.  Thus, don't make the following mistake:
+
+@example
+int c;
+@dots{}
+while ((c = getchar()) != EOF)
+  write(file_descriptor, &c, 1);
+@end example
+
+When calling functions, you need not worry about the difference between
+pointers of various types, or between pointers an integers.  On most
+machines, there's no difference anyway.  As for the few machines where
+there is a difference, all of them support @sc{ansi} C, so you can use
+prototypes (conditionalized to be active only in @sc{ansi} C) to make
+the code work on those systems.
+
+In certain cases, it is ok to pass integer and pointer arguments
+indiscriminately to the same function, and use no prototype on any
+system.  For example, many GNU programs have error-reporting functions
+that pass their arguments along to @code{printf} and friends:
+
+@example
+error (s, a1, a2, a3)
+     char *s;
+     int a1, a2, a3;
+@{
+  fprintf (stderr, "error: ");
+  fprintf (stderr, s, a1, a2, a3);
+@}
+@end example
+
+@noindent
+In practice, this works on all machines, and it is much simpler than any
+``correct'' alternative.
+
+However, avoid casting pointers to integers unless you really need to.
+These assumptions really reduce portability, and in most programs they
+are easy to avoid.  In the cases where casting pointers to integers is
+essential---such as, a Lisp interpreter which stores type information as
+well as an address in one word---it is ok to do so, but you'll have to
+make explicit provisions to handle different word sizes.
+
+@node System Functions
+@section Calling System Functions
+
+C implementations differ substantially.  @sc{ansi} C reduces but does not
+eliminate the incompatibilities; meanwhile, many users wish to compile
+GNU software with pre-@sc{ansi} compilers.  This chapter gives
+recommendations for how to use the more or less standard C library
+functions to avoid unnecessary loss of portability.
+
+@itemize @bullet
+@item
+Don't use the value of @code{sprintf}.  It returns the number of
+characters written on some systems, but not on all systems.
+
+@item
+Don't declare system functions explicitly.
+
+Almost any declaration for a system function is wrong on some system.
+To minimize conflicts, leave it to the system header files to declare
+system functions.  If the headers don't declare a function, let it
+remain undeclared.
+
+While it may seem unclean to use a function without declaring it, in
+practice this works fine for most system library functions on the
+systems where this really happens; thus, the disadvantage is only
+theoretical.  By contrast, actual declarations have frequently caused
+actual conflicts.
+
+@item
+If you must declare a system function, don't specify the argument types.
+Use an old-style declaration, not an @sc{ansi} prototype.  The more you
+specify about the function, the more likely a conflict.
+
+@item
+In particular, don't unconditionally declare @code{malloc} or
+@code{realloc}.
+
+Most GNU programs use those functions just once, in functions
+conventionally named @code{xmalloc} and @code{xrealloc}.  These
+functions call @code{malloc} and @code{realloc}, respectively, and
+check the results.
+
+Because @code{xmalloc} and @code{xrealloc} are defined in your program,
+you can declare them in other files without any risk of type conflict.
+
+On most systems, @code{int} is the same length as a pointer; thus, the
+calls to @code{malloc} and @code{realloc} work fine.  For the few
+exceptional systems (mostly 64-bit machines), you can use
+@strong{conditionalized} declarations of @code{malloc} and
+@code{realloc}---or put these declarations in configuration files
+specific to those systems.
+
+@item
+The string functions require special treatment.  Some Unix systems have
+a header file @file{string.h}; others have @file{strings.h}.  Neither
+file name is portable.  There are two things you can do: use Autoconf to
+figure out which file to include, or don't include either file.
+
+@item
+If you don't include either strings file, you can't get declarations for
+the string functions from the header file in the usual way.
+
+That causes less of a problem than you might think.  The newer @sc{ansi}
+string functions should be avoided anyway because many systems still
+don't support them.  The string functions you can use are these:
+
+@example
+strcpy   strncpy   strcat   strncat
+strlen   strcmp    strncmp
+strchr   strrchr
+@end example
+
+The copy and concatenate functions work fine without a declaration as
+long as you don't use their values.  Using their values without a
+declaration fails on systems where the width of a pointer differs from
+the width of @code{int}, and perhaps in other cases.  It is trivial to
+avoid using their values, so do that.
+
+The compare functions and @code{strlen} work fine without a declaration
+on most systems, possibly all the ones that GNU software runs on.
+You may find it necessary to declare them @strong{conditionally} on a
+few systems.
+
+The search functions must be declared to return @code{char *}.  Luckily,
+there is no variation in the data type they return.  But there is
+variation in their names.  Some systems give these functions the names
+@code{index} and @code{rindex}; other systems use the names
+@code{strchr} and @code{strrchr}.  Some systems support both pairs of
+names, but neither pair works on all systems.
+
+You should pick a single pair of names and use it throughout your
+program.  (Nowadays, it is better to choose @code{strchr} and
+@code{strrchr} for new programs, since those are the standard @sc{ansi}
+names.)  Declare both of those names as functions returning @code{char
+*}.  On systems which don't support those names, define them as macros
+in terms of the other pair.  For example, here is what to put at the
+beginning of your file (or in a header) if you want to use the names
+@code{strchr} and @code{strrchr} throughout:
+
+@example
+#ifndef HAVE_STRCHR
+#define strchr index
+#endif
+#ifndef HAVE_STRRCHR
+#define strrchr rindex
+#endif
+
+char *strchr ();
+char *strrchr ();
+@end example
+@end itemize
+
+Here we assume that @code{HAVE_STRCHR} and @code{HAVE_STRRCHR} are
+macros defined in systems where the corresponding functions exist.
+One way to get them properly defined is to use Autoconf.
 
 @node Documentation
 @chapter Documenting Programs
@@ -2352,9 +2251,10 @@ Print the version number.
 * GNU Manuals::                 Writing proper manuals.
 * Manual Structure Details::    Specific structure conventions.
 * NEWS File::                   NEWS files supplement manuals.
+* Change Logs::			Recording Changes
 * Man Pages::                   Man pages are secondary.
 * Reading other Manuals::       How far you can go in learning
-                                  from other manuals.
+                                from other manuals.
 @end menu
 
 @node GNU Manuals
@@ -2362,8 +2262,8 @@ Print the version number.
 
 The preferred way to document part of the GNU system is to write a
 manual in the Texinfo formatting language.  See the Texinfo manual,
-either the hardcopy or the version in the Emacs Info subsystem (@kbd{C-h
-i}).
+either the hardcopy, or the on-line version available through
+@code{info} or the Emacs Info subsystem (@kbd{C-h i}).
 
 The manual should document all of the program's command-line options and
 all of its commands.  It should give examples of their use.  But don't
@@ -2377,7 +2277,7 @@ and for reading straight through (appendixes aside).  A GNU manual
 should give a good introduction to a beginner reading through from the
 start, and should also provide all the details that hackers want.
 
-That is not as hard as it sounds at first.  Arrange each chapter as a
+That is not as hard as it first sounds.  Arrange each chapter as a
 logical breakdown of its topic, but order the sections, and write their
 text, so that reading the chapter straight through makes sense.  Do
 likewise when structuring the book into chapters, and when structuring a
@@ -2400,7 +2300,7 @@ documentation; use ``file name'' (two words) instead.  We use the term
 @section Manual Structure Details
 
 The title page of the manual should state the version of the program
-which the manual applies to.  The Top node of the manual should also
+to which the manual applies.  The Top node of the manual should also
 contain this information.  If the manual is changing more frequently
 than or independent of the program, also state a version number for
 the manual in both of these places.
@@ -2438,27 +2338,114 @@ If the @file{NEWS} file gets very long, move some of the older items
 into a file named @file{ONEWS} and put a note at the end referring the
 user to that file.
 
+@node Change Logs
+@section Change Logs
+
+Keep a change log for each directory, describing the changes made to
+source files in that directory.  The purpose of this is so that people
+investigating bugs in the future will know about the changes that
+might have introduced the bug.  Often a new bug can be found by
+looking at what was recently changed.  More importantly, change logs
+can help eliminate conceptual inconsistencies between different parts
+of a program; they can give you a history of how the conflicting
+concepts arose.
+
+Use the Emacs command @kbd{M-x add-change-log-entry} to start a new
+entry in the
+change log.  An entry should have an asterisk, the name of the changed
+file, and then in parentheses the name of the changed functions,
+variables or whatever, followed by a colon.  Then describe the changes
+you made to that function or variable.
+
+Separate unrelated entries with blank lines.  When two entries
+represent parts of the same change, so that they work together, then
+don't put blank lines between them.  Then you can omit the file name
+and the asterisk when successive entries are in the same file.
+
+Here are some examples:
+
+@example
+* register.el (insert-register): Return nil.
+(jump-to-register): Likewise.
+
+* sort.el (sort-subr): Return nil.
+
+* tex-mode.el (tex-bibtex-file, tex-file, tex-region):
+Restart the tex shell if process is gone or stopped.
+(tex-shell-running): New function.
+
+* expr.c (store_one_arg): Round size up for move_block_to_reg.
+(expand_call): Round up when emitting USE insns.
+* stmt.c (assign_parms): Round size up for move_block_from_reg.
+@end example
+
+It's important to name the changed function or variable in full.  Don't
+abbreviate function or variable names, and don't combine them.
+Subsequent maintainers will often
+search for a function name to find all the change log entries that
+pertain to it; if you abbreviate the name, they won't find it when they
+search.  For example, some people are tempted to abbreviate groups of
+function names by writing @samp{* register.el
+(@{insert,jump-to@}-register)}; this is not a good idea, since searching
+for @code{jump-to-register} or @code{insert-register} would not find the
+entry.
+
+There's no need to describe the full purpose of the changes or how they
+work together.  It is better to put such explanations in comments in the
+code.  That's why just ``New function'' is enough; there is a comment
+with the function in the source to explain what it does.
+
+However, sometimes it is useful to write one line to describe the
+overall purpose of a large batch of changes.
+
+You can think of the change log as a conceptual ``undo list'' which
+explains how earlier versions were different from the current version.
+People can see the current version; they don't need the change log
+to tell them what is in it.  What they want from a change log is a
+clear explanation of how the earlier version differed.
+
+When you change the calling sequence of a function in a simple
+fashion, and you change all the callers of the function, there is no
+need to make individual entries for all the callers.  Just write in
+the entry for the function being called, ``All callers changed.''
+
+When you change just comments or doc strings, it is enough to write an
+entry for the file, without mentioning the functions.  Write just,
+``Doc fix.''  There's no need to keep a change log for documentation
+files.  This is because documentation is not susceptible to bugs that
+are hard to fix.  Documentation does not consist of parts that must
+interact in a precisely engineered fashion; to correct an error, you
+need not know the history of the erroneous passage.
+
 @node Man Pages
 @section Man Pages
 
-It is ok to supply a man page for the program as well as a Texinfo
-manual if you wish to.  But keep in mind that supporting a man page
-requires continual effort, each time the program is changed.  Any time
-you spend on the man page is time taken away from more useful things you
-could contribute.
+In the GNU project, man pages are secondary.  It is not necessary or
+expected for every GNU program to have a man page, but some of them do.
+It's your choice whether to include a man page in your program.
 
-Thus, even if a user volunteers to donate a man page, you may find this
-gift costly to accept.  Unless you have time on your hands, it may be
-better to refuse the man page unless the same volunteer agrees to take
-full responsibility for maintaining it---so that you can wash your hands
-of it entirely.  If the volunteer ceases to do the job, then don't feel
-obliged to pick it up yourself; it may be better to withdraw the man
-page until another volunteer offers to carry on with it.
+When you make this decision, consider that supporting a man page
+requires continual effort each time the program is changed.  The time
+you spend on the man page is time taken away from more useful work.
 
-Alternatively, if you expect the discrepancies to be small enough that
-the man page remains useful, put a prominent note near the beginning of
-the man page explaining that you don't maintain it and that the Texinfo
-manual is more authoritative, and describing how to access the Texinfo
+For a simple program which changes little, updating the man page may be
+a small job.  Then there is little reason not to include a man page, if
+you have one.
+
+For a large program that changes a great deal, updating a man page may
+be a substantial burden.  If a user offers to donate a man page, you may
+find this gift costly to accept.  It may be better to refuse the man
+page unless the same person agrees to take full responsibility for
+maintaining it---so that you can wash your hands of it entirely.  If
+this volunteer later ceases to do the job, then don't feel obliged to
+pick it up yourself; it may be better to withdraw the man page from the
+distribution until someone else agrees to update it.
+
+When a program changes only a little, you may feel that the
+discrepancies are small enough that the man page remains useful without
+updating.  If so, put a prominent note near the beginning of the man
+page explaining that you don't maintain it and that the Texinfo manual
+is more authoritative.  The note should say how to access the Texinfo
 documentation.
 
 @node Reading other Manuals
@@ -2476,8 +2463,193 @@ outline structure, wording, tables or examples from preexisting non-free
 documentation.  Copying from free documentation may be ok; please check
 with the FSF about the individual case.
 
+@node Managing Releases
+@chapter The Release Process
+
+Making a release is more than just bundling up your source files in a
+tar file and putting it up for FTP.  You should set up your software so
+that it can be configured to run on a variety of systems.  Your Makefile
+should conform to the GNU standards described below, and your directory
+layout should also conform to the standards discussed below.  Doing so
+makes it easy to include your package into the larger framework of
+all GNU software.
+
+@menu
+* Configuration::		How Configuration Should Work
+* Makefile Conventions::	Makefile Conventions
+* Releases::			Making Releases
+@end menu
+
+@node Configuration
+@section How Configuration Should Work
+
+Each GNU distribution should come with a shell script named
+@code{configure}.  This script is given arguments which describe the
+kind of machine and system you want to compile the program for.
+
+The @code{configure} script must record the configuration options so
+that they affect compilation.
+
+One way to do this is to make a link from a standard name such as
+@file{config.h} to the proper configuration file for the chosen system.
+If you use this technique, the distribution should @emph{not} contain a
+file named @file{config.h}.  This is so that people won't be able to
+build the program without configuring it first.
+
+Another thing that @code{configure} can do is to edit the Makefile.  If
+you do this, the distribution should @emph{not} contain a file named
+@file{Makefile}.  Instead, it should include a file @file{Makefile.in} which
+contains the input used for editing.  Once again, this is so that people
+won't be able to build the program without configuring it first.
+
+If @code{configure} does write the @file{Makefile}, then @file{Makefile}
+should have a target named @file{Makefile} which causes @code{configure}
+to be rerun, setting up the same configuration that was set up last
+time.  The files that @code{configure} reads should be listed as
+dependencies of @file{Makefile}.
+
+All the files which are output from the @code{configure} script should
+have comments at the beginning explaining that they were generated
+automatically using @code{configure}.  This is so that users won't think
+of trying to edit them by hand.
+
+The @code{configure} script should write a file named @file{config.status}
+which describes which configuration options were specified when the
+program was last configured.  This file should be a shell script which,
+if run, will recreate the same configuration.
+
+The @code{configure} script should accept an option of the form
+@samp{--srcdir=@var{dirname}} to specify the directory where sources are found
+(if it is not the current directory).  This makes it possible to build
+the program in a separate directory, so that the actual source directory
+is not modified.
+
+If the user does not specify @samp{--srcdir}, then @code{configure} should
+check both @file{.} and @file{..} to see if it can find the sources.  If
+it finds the sources in one of these places, it should use them from
+there.  Otherwise, it should report that it cannot find the sources, and
+should exit with nonzero status.
+
+Usually the easy way to support @samp{--srcdir} is by editing a
+definition of @code{VPATH} into the Makefile.  Some rules may need to
+refer explicitly to the specified source directory.  To make this
+possible, @code{configure} can add to the Makefile a variable named
+@code{srcdir} whose value is precisely the specified directory.
+
+The @code{configure} script should also take an argument which specifies the
+type of system to build the program for.  This argument should look like
+this:
+
+@example
+@var{cpu}-@var{company}-@var{system}
+@end example
+
+For example, a Sun 3 might be @samp{m68k-sun-sunos4.1}.
+
+The @code{configure} script needs to be able to decode all plausible
+alternatives for how to describe a machine.  Thus, @samp{sun3-sunos4.1}
+would be a valid alias.  For many programs, @samp{vax-dec-ultrix} would
+be an alias for @samp{vax-dec-bsd}, simply because the differences
+between Ultrix and @sc{BSD} are rarely noticeable, but a few programs
+might need to distinguish them.
+@c Real 4.4BSD now runs on some Suns.
+
+There is a shell script called @file{config.sub} that you can use
+as a subroutine to validate system types and canonicalize aliases.
+
+Other options are permitted to specify in more detail the software
+or hardware present on the machine, and include or exclude optional
+parts of the package:
+
+@table @samp
+@item --enable-@var{feature}@r{[}=@var{parameter}@r{]}
+Configure the package to build and install an optional user-level
+facility called @var{feature}.  This allows users to choose which
+optional features to include.  Giving an optional @var{parameter} of
+@samp{no} should omit @var{feature}, if it is built by default.
+
+No @samp{--enable} option should @strong{ever} cause one feature to
+replace another.  No @samp{--enable} option should ever substitute one
+useful behavior for another useful behavior.  The only proper use for
+@samp{--enable} is for questions of whether to build part of the program
+or exclude it.
+
+@item --with-@var{package}
+@c @r{[}=@var{parameter}@r{]}
+The package @var{package} will be installed, so configure this package
+to work with @var{package}.
+
+@c  Giving an optional @var{parameter} of
+@c @samp{no} should omit @var{package}, if it is used by default.
+
+Possible values of @var{package} include @samp{x}, @samp{x-toolkit},
+@samp{gnu-as} (or @samp{gas}), @samp{gnu-ld}, @samp{gnu-libc}, and
+@samp{gdb}.
+
+Do not use a @samp{--with} option to specify the file name to use to
+find certain files.  That is outside the scope of what @samp{--with}
+options are for.
+
+@item --nfp
+The target machine has no floating point processor.
+
+@item --gas
+The target machine assembler is GAS, the GNU assembler.
+This is obsolete; users should use @samp{--with-gnu-as} instead.
+
+@item --x
+The target machine has the X Window System installed.
+This is obsolete; users should use @samp{--with-x} instead.
+@end table
+
+All @code{configure} scripts should accept all of these ``detail''
+options, whether or not they make any difference to the particular
+package at hand.  In particular, they should accept any option that
+starts with @samp{--with-} or @samp{--enable-}.  This is so users will
+be able to configure an entire GNU source tree at once with a single set
+of options.
+
+You will note that the categories @samp{--with-} and @samp{--enable-}
+are narrow: they @strong{do not} provide a place for any sort of option
+you might think of.  That is deliberate.  We want to limit the possible
+configuration options in GNU software.  We do not want GNU programs to
+have idiosyncratic configuration options.
+
+Packages that perform part of the compilation process may support cross-compilation.
+In such a case, the host and target machines for the program may be
+different.  The @code{configure} script should normally treat the
+specified type of system as both the host and the target, thus producing
+a program which works for the same type of machine that it runs on.
+
+The way to build a cross-compiler, cross-assembler, or what have you, is
+to specify the option @samp{--host=@var{hosttype}} when running
+@code{configure}.  This specifies the host system without changing the
+type of target system.  The syntax for @var{hosttype} is the same as
+described above.
+
+Bootstrapping a cross-compiler requires compiling it on a machine other
+than the host it will run on.  Compilation packages accept a
+configuration option @samp{--build=@var{hosttype}} for specifying the
+configuration on which you will compile them, in case that is different
+from the host.
+
+Programs for which cross-operation is not meaningful need not accept the
+@samp{--host} option, because configuring an entire operating system for
+cross-operation is not a meaningful thing.
+
+Some programs have ways of configuring themselves automatically.  If
+your program is set up to do this, your @code{configure} script can simply
+ignore most of its arguments.
+
+@comment The makefile standards are in a separate file that is also
+@comment included by make.texinfo.  Done by roland@gnu.ai.mit.edu on 1/6/93.
+@comment For this document, turn chapters into sections, etc.
+@lowersections
+@include make-stds.texi
+@raisesections
+
 @node Releases
-@chapter Making Releases
+@section Making Releases
 
 Package the distribution of Foo version 69.96 in a gzipped tar file
 named @file{foo-69.96.tar.gz}.  It should unpack into a subdirectory
@@ -2494,7 +2666,7 @@ Naturally, all the source files must be in the distribution.  It is okay
 to include non-source files in the distribution, provided they are
 up-to-date and machine-independent, so that building the distribution
 normally will never modify them.  We commonly include non-source files
-produced by Bison, Lex, @TeX{}, and Makeinfo; this helps avoid
+produced by Bison, @code{lex}, @TeX{}, and @code{makeinfo}; this helps avoid
 unnecessary dependencies between our distributions, so that users can
 install whichever packages they want to install.
 
@@ -2525,16 +2697,16 @@ names for one file in different directories, because certain file
 systems cannot handle this and that prevents unpacking the
 distribution.
 
-Try to make sure that all the file names will be unique on MS-DOG.  A
-name on MS-DOG consists of up to 8 characters, optionally followed by a
-period and up to three characters.  MS-DOG will truncate extra
+Try to make sure that all the file names will be unique on MS-DOS.  A
+name on MS-DOS consists of up to 8 characters, optionally followed by a
+period and up to three characters.  MS-DOS will truncate extra
 characters both before and after the period.  Thus,
 @file{foobarhacker.c} and @file{foobarhacker.o} are not ambiguous; they
 are truncated to @file{foobarha.c} and @file{foobarha.o}, which are
 distinct.
 
 Include in your distribution a copy of the @file{texinfo.tex} you used
-to test print any @file{*.texinfo} files.
+to test print any @file{*.texinfo} or @file{*.texi} files.
 
 Likewise, if your program uses small GNU software packages like regex,
 getopt, obstack, or termcap, include them in the distribution file.

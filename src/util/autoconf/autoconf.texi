@@ -6,9 +6,9 @@
 @c @setchapternewpage odd
 @c %**end of header
 
-@set EDITION 2.3
-@set VERSION 2.3
-@set UPDATED March 1995
+@set EDITION 2.8
+@set VERSION 2.8
+@set UPDATED January 1996
 
 @iftex
 @finalout
@@ -27,7 +27,7 @@ This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an @code{m4} macro
 package.
 
-Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -61,7 +61,7 @@ by the Foundation.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1992, '93, '94, '95, '96 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -410,7 +410,7 @@ Files used in preparing a software package for distribution:
 your source files --> [autoscan*] --> [configure.scan] --> configure.in
 
 configure.in --.   .------> autoconf* -----> configure
-               +---+ 
+               +---+
 [aclocal.m4] --+   `---.
 [acsite.m4] ---'       |
                        +--> [autoheader*] -> [config.h.in]
@@ -719,7 +719,7 @@ environment variable.
 @item --verbose
 Print the name of each directory where @code{autoreconf} runs
 @code{autoconf} (and @code{autoheader}, if appropriate).
- 
+
 @item --version
 Print the version number of Autoconf and exit.
 @end table
@@ -794,6 +794,7 @@ Create output files.  The @var{file}@dots{} argument is a
 whitespace-separated list of output files; it may be empty.  This macro
 creates each file @file{@var{file}} by copying an input file (by default
 named @file{@var{file}.in}), substituting the output variable values.
+@c If the file would be unchanged, it is left untouched, to preserve its timestamp.
 @xref{Makefile Substitutions}, for more information on using output variables.
 @xref{Setting Output Variables}, for more information on creating them.  This
 macro creates the directory that the file is in if it doesn't exist (but
@@ -871,7 +872,7 @@ distributed with a file @file{Makefile.in}, but no @file{Makefile}; that
 way, the user has to properly configure the package for the local system
 before compiling it.
 
-@xref{Makefile Conventions, , Makefile Conventions, standards.info, The
+@xref{Makefile Conventions, , Makefile Conventions, standards, The
 GNU Coding Standards}, for more information on what to put in
 @file{Makefile}s.
 
@@ -888,7 +889,14 @@ Some output variables are preset by the Autoconf macros.  Some of the
 Autoconf macros set additional output variables, which are mentioned in
 the descriptions for those macros.  @xref{Output Variable Index}, for a
 complete list of output variables.  Here is what each of the preset ones
-contains.
+contains.  @xref{Directory Variables, , Variables for Installation Directories,
+standards, The GNU Coding Standards}, for more information about
+the variables with names that end in @samp{dir}.
+
+@defvar bindir
+@ovindex bindir
+The directory for installing executables that users run.
+@end defvar
 
 @defvar configure_input
 @ovindex configure_input
@@ -909,9 +917,49 @@ The presence of that line also reminds people editing the file that it
 needs to be processed by @code{configure} in order to be used.
 @end defvar
 
+@defvar datadir
+@ovindex datadir
+The directory for installing read-only architecture-independent data.
+@end defvar
+
 @defvar exec_prefix
 @ovindex exec_prefix
 The installation prefix for architecture-dependent files.
+@end defvar
+
+@defvar includedir
+@ovindex includedir
+The directory for installing C header files.
+@end defvar
+
+@defvar infodir
+@ovindex infodir
+The directory for installing documentation in Info format.
+@end defvar
+
+@defvar libdir
+@ovindex libdir
+The directory for installing object code libraries.
+@end defvar
+
+@defvar libexecdir
+@ovindex libexecdir
+The directory for installing executables that other programs run.
+@end defvar
+
+@defvar localstatedir
+@ovindex localstatedir
+The directory for installing modifiable single-machine data.
+@end defvar
+
+@defvar mandir
+@ovindex mandir
+The top-level directory for installing documentation in man format.
+@end defvar
+
+@defvar oldincludedir
+@ovindex oldincludedir
+The directory for installing C header files for non-gcc compilers.
 @end defvar
 
 @defvar prefix
@@ -919,9 +967,25 @@ The installation prefix for architecture-dependent files.
 The installation prefix for architecture-independent files.
 @end defvar
 
+@defvar sbindir
+@ovindex sbindir
+The directory for installing executables that system
+administrators run.
+@end defvar
+
+@defvar sharedstatedir
+@ovindex sharedstatedir
+The directory for installing modifiable architecture-independent data.
+@end defvar
+
 @defvar srcdir
 @ovindex srcdir
 The directory that contains the source code for that @file{Makefile}.
+@end defvar
+
+@defvar sysconfdir
+@ovindex sysconfdir
+The directory for installing read-only single-machine data.
 @end defvar
 
 @defvar top_srcdir
@@ -1175,7 +1239,8 @@ symbol).
 The @code{autoheader} program can create a template file of C
 @samp{#define} statements for @code{configure} to use.  If
 @file{configure.in} invokes @code{AC_CONFIG_HEADER(@var{file})},
-@code{autoheader} creates @file{@var{file}.in}.  Otherwise,
+@code{autoheader} creates @file{@var{file}.in}; if multiple file
+arguments are given, the first one is used.  Otherwise,
 @code{autoheader} creates @file{config.h.in}.
 
 If you give @code{autoheader} an argument, it uses that file instead of
@@ -1353,7 +1418,7 @@ produces this in @code{configure}:
 
 @example
 #! /bin/sh
-# From configure.in Revision: 1.30 
+# From configure.in Revision: 1.30
 @end example
 @end defmac
 
@@ -1392,7 +1457,7 @@ Symbols}, for how to get those symbol definitions into your program.
 
 These macros check for the presence or behavior of particular programs.
 They are used to choose between several alternative programs and to
-decide what to do once one has been chosen.  
+decide what to do once one has been chosen.
 If there is no macro specifically defined to check for a program you need,
 and you don't need to check for any special properties of
 it, then you can use one of the general program check macros.
@@ -1579,26 +1644,30 @@ to @samp{byacc}.  Otherwise set @code{YACC} to @samp{yacc}.
 
 These macros are used to find programs not covered by the particular
 test macros.  If you need to check the behavior of a program as well as
-find out whether it is present, you have to write your own test for
-it (@pxref{Writing Tests}).  If you need to check for a program that
-might not be in the user's @code{PATH}, you can temporarily add to it:
+find out whether it is present, you have to write your own test for it
+(@pxref{Writing Tests}).  By default, these macros use the environment
+variable @code{PATH}.  If you need to check for a program that might not
+be in the user's @code{PATH}, you can pass a modified path to use
+instead, like this:
 
 @example
-ac_save_path="$PATH"
-PATH=/usr/libexec:/usr/sbin:/usr/etc:/etc
-AC_PATH_PROG(INETD, inetd, /usr/libexec/inetd)
-PATH="$ac_save_path"
+AC_PATH_PROG(INETD, inetd, /usr/libexec/inetd,
+  $PATH:/usr/libexec:/usr/sbin:/usr/etc:etc)
 @end example
 
-@defmac AC_CHECK_PROG (@var{variable}, @var{prog-to-check-for}, @var{value-if-found} @r{[}, @var{value-if-not-found}@r{]})
+@defmac AC_CHECK_PROG (@var{variable}, @var{prog-to-check-for}, @var{value-if-found} @r{[}, @var{value-if-not-found} @r{[}, @var{path}, @r{[} @var{reject} @r{]]]})
 @maindex CHECK_PROG
 Check whether program @var{prog-to-check-for} exists in @code{PATH}.  If
 it is found, set @var{variable} to @var{value-if-found}, otherwise to
-@var{value-if-not-found}, if given.  If @var{variable} was already set,
-do nothing.  Calls @code{AC_SUBST} for @var{variable}.
+@var{value-if-not-found}, if given.  Always pass over @var{reject} (an
+absolute file name) even if it is the first found in the search path; in
+that case, set @var{variable} using the absolute file name of the
+@var{prog-to-check-for} found that is not @var{reject}.  If
+@var{variable} was already set, do nothing.  Calls @code{AC_SUBST} for
+@var{variable}.
 @end defmac
 
-@defmac AC_CHECK_PROGS (@var{variable}, @var{progs-to-check-for} @r{[}, @var{value-if-not-found}@r{]})
+@defmac AC_CHECK_PROGS (@var{variable}, @var{progs-to-check-for} @r{[}, @var{value-if-not-found} @r{[}, @var{path}@r{]]})
 @maindex CHECK_PROGS
 Check for each program in the whitespace-separated list
 @var{progs-to-check-for} exists in @code{PATH}.  If it is found, set
@@ -1609,7 +1678,7 @@ list are found, set @var{variable} to @var{value-if-not-found}; if
 is not changed.  Calls @code{AC_SUBST} for @var{variable}.
 @end defmac
 
-@defmac AC_CHECK_TOOL (@var{variable}, @var{prog-to-check-for} @r{[}, @var{value-if-not-found}@r{]})
+@defmac AC_CHECK_TOOL (@var{variable}, @var{prog-to-check-for} @r{[}, @var{value-if-not-found} @r{[}, @var{path}@r{]]})
 @maindex CHECK_TOOL
 Like @code{AC_CHECK_PROG}, but first looks for @var{prog-to-check-for}
 with a prefix of the host type as determined by @code{AC_CANONICAL_HOST},
@@ -1624,13 +1693,13 @@ sets @code{RANLIB} to @file{i386-gnu-ranlib} if that program exists in
 or to @samp{:} if neither program exists.
 @end defmac
 
-@defmac AC_PATH_PROG (@var{variable}, @var{prog-to-check-for} @r{[}, @var{value-if-not-found}@r{]})
+@defmac AC_PATH_PROG (@var{variable}, @var{prog-to-check-for} @r{[}, @var{value-if-not-found} @r{[}, @var{path}@r{]]})
 @maindex PATH_PROG
 Like @code{AC_CHECK_PROG}, but set @var{variable} to the entire
 path of @var{prog-to-check-for} if found.
 @end defmac
 
-@defmac AC_PATH_PROGS (@var{variable}, @var{progs-to-check-for} @r{[}, @var{value-if-not-found}@r{]})
+@defmac AC_PATH_PROGS (@var{variable}, @var{progs-to-check-for} @r{[}, @var{value-if-not-found} @r{[}, @var{path}@r{]]})
 @maindex PATH_PROGS
 Like @code{AC_CHECK_PROGS}, but if any of @var{progs-to-check-for}
 are found, set @var{variable} to the entire path of the program
@@ -1807,9 +1876,9 @@ to the name of the group that should own the installed program.
 @defmac AC_FUNC_GETMNTENT
 @maindex FUNC_GETMNTENT
 @cvindex HAVE_GETMNTENT
-Check for @code{getmntent} in the @file{sun} and @file{seq}
-libraries, for Irix 4 and PTX, respectively.  Then, if @code{getmntent} is
-available, define @code{HAVE_GETMNTENT}.
+Check for @code{getmntent} in the @file{sun}, @file{seq}, and @file{gen}
+libraries, for Irix 4, PTX, and Unixware, respectively.  Then, if
+@code{getmntent} is available, define @code{HAVE_GETMNTENT}.
 @end defmac
 
 @defmac AC_FUNC_GETPGRP
@@ -1909,7 +1978,7 @@ If you need to check the behavior of a function as well as find out
 whether it is present, you have to write your own test for
 it (@pxref{Writing Tests}).
 
-@defmac AC_CHECK_FUNC (@var{function}, @var{action-if-found} @r{[}, @var{action-if-not-found}@r{]})
+@defmac AC_CHECK_FUNC (@var{function}, @r{[}@var{action-if-found} @r{[}, @var{action-if-not-found}@r{]]})
 @maindex CHECK_FUNC
 If C function @var{function} is available, run shell commands
 @var{action-if-found}, otherwise @var{action-if-not-found}.  If you just
@@ -2205,7 +2274,7 @@ particular test macros.  If you need to check the contents of a header
 as well as find out whether it is present, you have to write your own
 test for it (@pxref{Writing Tests}).
 
-@defmac AC_CHECK_HEADER (@var{header-file}, @var{action-if-found} @r{[}, @var{action-if-not-found}@r{]})
+@defmac AC_CHECK_HEADER (@var{header-file}, @r{[}@var{action-if-found} @r{[}, @var{action-if-not-found}@r{]]})
 @maindex CHECK_HEADER
 If the system header file @var{header-file} exists, execute shell commands
 @var{action-if-found}, otherwise execute @var{action-if-not-found}.  If
@@ -2454,13 +2523,17 @@ If the C compiler supports the @code{long double} type, define
 that define @code{__STDC__} do not support @code{long double}.
 @end defmac
 
-@defmac AC_CHECK_SIZEOF (@var{type})
+@defmac AC_CHECK_SIZEOF (@var{type} @r{[}, @var{cross-size}@r{]})
 @maindex CHECK_SIZEOF
 Define @code{SIZEOF_@var{uctype}} to be the size in bytes of the C (or
 C++) builtin type @var{type}, e.g. @samp{int} or @samp{char *}.  If
 @samp{type} is unknown to the compiler, it gets a size of 0.  @var{uctype}
 is @var{type}, with lowercase converted to uppercase, spaces changed to
-underscores, and asterisks changed to @samp{P}.  For example, the call
+underscores, and asterisks changed to @samp{P}.  If cross-compiling, the
+value @var{cross-size} is used if given, otherwise @code{configure}
+exits with an error message.
+
+For example, the call
 @example
 AC_CHECK_SIZEOF(int *)
 @end example
@@ -2666,7 +2739,7 @@ The macro @code{AC_TRY_CPP} is used to check whether particular header
 files exist.  You can check for one at a time, or more than one if you
 need several header files to all exist for some purpose.
 
-@defmac AC_TRY_CPP (@var{includes}, @var{action-if-true} @r{[}, @var{action-if-false}@r{]})
+@defmac AC_TRY_CPP (@var{includes}, @r{[}@var{action-if-true} @r{[}, @var{action-if-false}@r{]]})
 @maindex TRY_CPP
 @var{includes} is C or C++ @code{#include} statements and declarations,
 on which shell variable, backquote, and backslash substitutions are
@@ -2680,7 +2753,7 @@ This macro uses @code{CPPFLAGS}, but not @code{CFLAGS}, because
 preprocessors.
 @end defmac
 
-Here is now to find out whether a header file contains a particular
+Here is how to find out whether a header file contains a particular
 declaration, such as a typedef, a structure, a structure member, or a
 function.  Use @code{AC_EGREP_HEADER} instead of running @code{grep}
 directly on the header file; on some systems the symbol might be defined
@@ -2706,7 +2779,7 @@ AC_EGREP_CPP(yes,
 ], is_aix=yes, is_aix=no)
 @end example
 
-@defmac AC_EGREP_CPP (@var{pattern}, @var{program}, @var{action-if-found} @r{[}, @var{action-if-not-found}@r{]})
+@defmac AC_EGREP_CPP (@var{pattern}, @var{program}, @r{[}@var{action-if-found} @r{[}, @var{action-if-not-found}@r{]]})
 @maindex EGREP_CPP
 @var{program} is the text of a C or C++ program, on which shell
 variable, backquote, and backslash substitutions are performed.  If the
@@ -2728,7 +2801,7 @@ compile a small program that uses that feature.  You can also use it to
 check for structures and structure members that are not present on all
 systems.
 
-@defmac AC_TRY_COMPILE (@var{includes}, @var{function-body}, @var{action-if-found} @r{[}, @var{action-if-not-found}@r{]})
+@defmac AC_TRY_COMPILE (@var{includes}, @var{function-body}, @r{[}@var{action-if-found} @r{[}, @var{action-if-not-found}@r{]]})
 @maindex TRY_COMPILE
 Create a test C program to see whether a function whose body consists of
 @var{function-body} can be compiled; @var{includes} is any
@@ -2769,7 +2842,7 @@ functions and global variables.  It is also used (by
 checked for to @code{LIBS} temporarily and trying to link a small
 program.
 
-@defmac AC_TRY_LINK (@var{includes}, @var{function-body}, @var{action-if-found} @r{[}, @var{action-if-not-found}@r{]})
+@defmac AC_TRY_LINK (@var{includes}, @var{function-body}, @r{[}@var{action-if-found} @r{[}, @var{action-if-not-found}@r{]]})
 @maindex TRY_LINK
 Create a test C program to see whether a function whose body consists of
 @var{function-body} can be compiled and linked; @var{includes} is any
@@ -2815,7 +2888,7 @@ package for cross-compiling.
 Use the following macro if you need to test run-time behavior of the
 system while configuring.
 
-@defmac AC_TRY_RUN (@var{program}, @var{action-if-true} @r{[}, @var{action-if-false} @r{[}, @var{action-if-cross-compiling}@r{]]})
+@defmac AC_TRY_RUN (@var{program}, @r{[}@var{action-if-true} @r{[}, @var{action-if-false} @r{[}, @var{action-if-cross-compiling}@r{]]]})
 @maindex TRY_RUN
 @var{program} is the text of a C program, on which shell variable and
 backquote substitutions are performed.  If it compiles and links
@@ -2955,10 +3028,10 @@ as a 4-byte magic number.
 
 The set of external programs you should run in a @code{configure} script
 is fairly small.  @xref{Utilities in Makefiles, , Utilities in
-Makefiles, standards.info, GNU Coding Standards}, for the list.  This
+Makefiles, standards, GNU Coding Standards}, for the list.  This
 restriction allows users to start out with a fairly small set of
 programs and build the rest, avoiding too many interdependencies between
-packages. 
+packages.
 
 Some of these external utilities have a portable subset of features, as
 well; for example, don't rely on @code{ln} having a @samp{-f} option or
@@ -3273,6 +3346,15 @@ before @code{configure} creates its output files.  @xref{Cache
 Variable Names}, for how to choose the name of the @var{cache-id} variable.
 @end defmac
 
+@defmac AC_CACHE_CHECK (@var{message}, @var{cache-id}, @var{commands})
+@maindex CACHE_CHECK
+A wrapper for @code{AC_CACHE_VAL} that takes care of printing the
+messages.  This macro provides a convenient shorthand for the most
+common way to use these macros.  It calls @code{AC_MSG_CHECKING} for
+@var{message}, then @code{AC_CACHE_VAL} with the @var{cache-id} and
+@var{commands} arguments, and @code{AC_MSG_RESULT} with @var{cache-id}.
+@end defmac
+
 @menu
 * Cache Variable Names::        Shell variables used in caches.
 * Cache Files::	        	Files @code{configure} uses for caching.
@@ -3296,7 +3378,7 @@ for example, @samp{ac_cv_header_stat_broken} or
 An abbreviation for your package or organization; the same prefix you
 begin local Autoconf macros with, except lowercase by convention.
 For cache values used by the distributed Autoconf macros, this value is
-@samp{ac}. 
+@samp{ac}.
 
 @item @code{_cv_}
 Indicates that this shell variable is a cache value.
@@ -3334,13 +3416,23 @@ By default, configure uses @file{./config.cache} as the cache file,
 creating it if it does not exist already.  @code{configure} accepts the
 @samp{--cache-file=@var{file}} option to use a different cache file;
 that is what @code{configure} does when it calls @code{configure}
-scripts in subdirectories, so they share the cache.  Giving
-@samp{--cache-file=/dev/null} disables caching, for debugging
-@code{configure}.  @xref{Subdirectories}, for information on configuring
-subdirectories with the @code{AC_CONFIG_SUBDIRS} macro.
-@file{config.status} only pays attention to the cache file if it is
-given the @samp{--recheck} option, which makes it rerun
-@code{configure}.
+scripts in subdirectories, so they share the cache.
+@xref{Subdirectories}, for information on configuring subdirectories
+with the @code{AC_CONFIG_SUBDIRS} macro.
+
+Giving @samp{--cache-file=/dev/null} disables caching, for debugging
+@code{configure}.  @file{config.status} only pays attention to the cache
+file if it is given the @samp{--recheck} option, which makes it rerun
+@code{configure}.  If you are anticipating a long debugging period, you
+can also disable cache loading and saving for a @code{configure} script
+by redefining the cache macros at the start of @file{configure.in}:
+
+@example
+define([AC_CACHE_LOAD], )dnl
+define([AC_CACHE_SAVE], )dnl
+AC_INIT(@r{whatever})
+@r{ ... rest of configure.in ...}
+@end example
 
 It is wrong to try to distribute cache files for particular system types.
 There is too much room for error in doing that, and too much
@@ -3532,7 +3624,7 @@ Definitions of C structures in header files.
 @item SYS
 Operating system features.
 @item TYPE
-C builtin or declared types. 
+C builtin or declared types.
 @item VAR
 C variables in libraries.
 @end table
@@ -3778,7 +3870,7 @@ example, @samp{decstation} can be given on the command line instead of
 @code{config.sub} to canonicalize system type aliases.
 
 @node Canonicalizing, System Type Variables, Specifying Names, Manual Configuration
-@section Getting the Canonical System Type 
+@section Getting the Canonical System Type
 
 The following macros make the system type available to @code{configure}
 scripts.  They run the shell script @code{config.guess} to determine any
@@ -3913,7 +4005,7 @@ The options have one of these forms:
 @end example
 
 For example, @samp{--with-gnu-ld} means work with the GNU linker instead
-of some other linker.  @samp{--with-x11} means work with X11.
+of some other linker.  @samp{--with-x} means work with The X Window System.
 
 The user can give an argument by following the package name with
 @samp{=} and the argument.  Giving an argument of @samp{no} is for
@@ -3941,8 +4033,9 @@ only of alphanumeric characters and dashes.
 
 The option's argument is available to the shell commands
 @var{action-if-given} in the shell variable @code{withval}, which is
-actually just the value of the shell variable @code{with_@var{package}};
-you may use that variable instead, if you wish.
+actually just the value of the shell variable @code{with_@var{package}},
+with any @samp{-} characters changed into @samp{_}.
+You may use that variable instead, if you wish.
 
 The argument @var{help-string} is a description of the option which
 looks like this:
@@ -4003,9 +4096,10 @@ alphanumeric characters and dashes.
 
 The option's argument is available to the shell commands
 @var{action-if-given} in the shell variable @code{enableval}, which is
-actually just the value of the shell variable @code{enable_@var{package}};
-you may use that variable instead, if you wish.
-The @var{help-string} argument is like that of @code{AC_ARG_WITH}
+actually just the value of the shell variable
+@code{enable_@var{package}}, with any @samp{-} characters changed into
+@samp{_}.  You may use that variable instead, if you wish.  The
+@var{help-string} argument is like that of @code{AC_ARG_WITH}
 (@pxref{External Software}).
 @end defmac
 

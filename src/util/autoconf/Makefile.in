@@ -29,8 +29,9 @@ M4 = @M4@
 AWK = @AWK@
 PERL = @PERL@
 
-# Programs that are always installed.
+# Programs that are ALWAYS installed (and are created in the build dir).
 ASCRIPTS = autoconf autoheader autoreconf autoupdate ifnames 
+# All programs, including those only installed if you have perl.
 SCRIPTS = $(ASCRIPTS) @SCRIPTS@
 
 transform=@program_transform_name@
@@ -39,14 +40,14 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 
 # Directory in which to install scripts.
-bindir = $(exec_prefix)/bin
+bindir = @bindir@
 
 # Directory in which to install library files.
-datadir = $(prefix)/share
+datadir = @datadir@
 acdatadir = $(datadir)/autoconf
 
 # Directory in which to install documentation info files.
-infodir = $(prefix)/info
+infodir = @infodir@
 
 #### End of system configuration section. ####
 
@@ -75,7 +76,7 @@ editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e \
 	's,@''M4''@,$(M4),g'  -e 's,@''AWK''@,$(AWK),g'
 editpl = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''PERL''@,$(PERL),g'
 
-all: ${SCRIPTS}
+all: ${SCRIPTS} info
 
 .SUFFIXES:
 .SUFFIXES: .sh .pl

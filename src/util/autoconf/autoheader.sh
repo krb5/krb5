@@ -182,8 +182,7 @@ fi
 
 echo "$types" | tr , \\012 | sort | uniq | while read ctype; do
   test -z "$ctype" && continue
-  # Solaris 2.3 tr rejects noncontiguous characters in character classes.
-  sym="`echo "${ctype}" | tr '[a-z] *' '[A-Z]_P'`"
+  sym="`echo "${ctype}" | tr 'abcdefghijklmnopqrstuvwxyz *' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_P'`"
   echo "
 /* The number of bytes in a ${ctype}.  */
 #undef SIZEOF_${sym}"
@@ -192,7 +191,7 @@ done
 # /bin/sh on the Alpha gives `for' a random value if $funcs is empty.
 if test -n "$funcs"; then
   for func in `for x in $funcs; do echo $x; done | sort | uniq`; do
-    sym="`echo ${func} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+    sym="`echo ${func} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
     echo "
 /* Define if you have the ${func} function.  */
 #undef HAVE_${sym}"
@@ -201,7 +200,8 @@ fi
 
 if test -n "$headers"; then
   for header in `for x in $headers; do echo $x; done | sort | uniq`; do
-    sym="`echo ${header} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+
+    sym="`echo ${header} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
     echo "
 /* Define if you have the <${header}> header file.  */
 #undef HAVE_${sym}"
@@ -210,7 +210,7 @@ fi
 
 if test -n "$libs"; then
   for lib in `for x in $libs; do echo $x; done | sort | uniq`; do
-   sym="`echo ${lib} | sed 's/[^a-zA-Z0-9_]/_/g' | tr '[a-z]' '[A-Z]'`"
+   sym="`echo ${lib} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
     echo "
 /* Define if you have the ${lib} library (-l${lib}).  */
 #undef HAVE_LIB${sym}"

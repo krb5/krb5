@@ -1,3 +1,25 @@
+Major changes in release 2.10:
+
+* Bug fixes.
+* The cache variable names used by `AC_CHECK_LIB(LIB, FUNC, ...)' has
+  changed: now $ac_cv_lib_LIB_FUNC, previously $ac_cv_lib_LIB.
+
+Major changes in releases 2.6 through 2.9:
+
+* Bug fixes.
+
+Major changes in release 2.5:
+
+* New configure options --bindir, --libdir, --datadir, etc., with
+  corresponding output variables.
+* New macro: AC_CACHE_CHECK, to make using the cache easier.
+* config.log contains the command being run as well as any output from it.
+* AC_CHECK_LIB can check for libraries with "." or "/" or "+" in their name.
+* AC_PROG_INSTALL doesn't cache a path to install-sh, for sharing caches.
+* AC_CHECK_PROG, AC_PATH_PROG, AC_CHECK_PROGS, AC_PATH_PROGS, and
+  AC_CHECK_TOOL can search a path other than $PATH.
+* AC_CHECK_SIZEOF takes an optional size to use when cross-compiling.
+
 Major changes in release 2.4:
 
 * Fix a few bugs found by Emacs testers.
@@ -131,7 +153,7 @@ Major changes in release 2.0:
 * Uses config.cache to cache test results.  An alternate cache file
   can be selected with the --cache-file=FILE option.
 * Uses optional shell scripts $prefix/share/config.site and
-  $prefix/etc/config.site to perform site or system specific initializations. 
+  $prefix/etc/config.site to perform site or system specific initializations.
 * configure saves compiler output to ./config.log for debugging.
 * New files autoconf.m4 and autoheader.m4 load the other Autoconf macros.
 * acsite.m4 is the new name for the system-wide aclocal.m4.
@@ -257,9 +279,9 @@ Major changes in release 1.4:
   set the shell variables `gen_files' and `gen_config' to the list of
   filenames to output.
 * AC_DECLARE_YYTEXT does an AC_SUBST of `LEX_OUTPUT_ROOT', which may be
-  "lex.yy" or "lexyy", depending on the system. 
+  "lex.yy" or "lexyy", depending on the system.
 * AC_PROGRAMS_CHECK takes an optional third arg.  If given, it is used as
-  the default value. 
+  the default value.
 * If AC_ALLOCA chooses alloca.c, it also defines STACK_DIRECTION.
 * AC_CONST works much more reliably on more systems.
 * Many bug fixes.
