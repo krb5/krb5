@@ -1,4 +1,10 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_kt_dec.c, adm_kt_enc.c, alt_prof.c, str_conv.c: 
+		Remove krb5_enctype references, and replace 
+		with krb5_keytype where appropriate
+
 Tue Aug 29 15:31:50 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* .Sanitize, krb5strings.M - Add new manpage describing string syntax
 		for common datatypes handled by str_conv.c.

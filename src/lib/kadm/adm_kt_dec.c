@@ -100,18 +100,6 @@ krb5_adm_proto_to_ktent(kcontext, ncomp, complist, ktentp)
 	 ((krb5_int32) ((unsigned char) v[2]) << 8) +
 	 ((krb5_int32) ((unsigned char) v[3])));
 
-    /* Parse the supplied key_etype */
-    if (complist[KRB5_ADM_KT_KEY_ETYPE].length < sizeof(krb5_enctype)) {
-	kret = EINVAL;
-	goto done;
-    }
-    v = complist[KRB5_ADM_KT_KEY_ETYPE].data;
-    ktentp->key.etype = (krb5_enctype)
-	(((krb5_int32) ((unsigned char) v[0]) << 24) +
-	 ((krb5_int32) ((unsigned char) v[1]) << 16) +
-	 ((krb5_int32) ((unsigned char) v[2]) << 8) +
-	 ((krb5_int32) ((unsigned char) v[3])));
-
     /* Finally, shuck the key contents */
     if (ktentp->key.contents = (krb5_octet *)
 	malloc((size_t) complist[KRB5_ADM_KT_KEY_KEY].length)) {

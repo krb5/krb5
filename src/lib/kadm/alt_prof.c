@@ -338,14 +338,6 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 		krb5_xfree(svalue);
 	    }
 	    
-	    /* Get the value for the encryption type */
-	    hierarchy[2] = "encryption_type";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
-		    rparams->realm_enctype_valid = 1;
-		krb5_xfree(svalue);
-	    }
-	    
 	    /* Get the value for the stashfile */
 	    hierarchy[2] = "key_stash_file";
 	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
