@@ -1,3 +1,8 @@
+2000-07-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* test/dbtest.c: Cleanup gcc -Wall complaints with printf format
+	strings.
+
 2000-07-02  Ezra Peisach  <epeisach@engrailed.mit.edu>
 
 	* recno/rec_seq.c: Include unused sccsid when LIBC_SCCS defined.

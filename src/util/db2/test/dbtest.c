@@ -31,13 +31,13 @@
  * SUCH DAMAGE.
  */
 
-#ifndef lint
+#if !defined(lint) && defined(LIBC_SCCS)
 static char copyright[] =
 "@(#) Copyright (c) 1992, 1993, 1994\n\
 	The Regents of the University of California.  All rights reserved.\n";
 #endif /* not lint */
 
-#ifndef lint
+#if !defined(lint) && defined(LIBC_SCCS)
 static char sccsid[] = "@(#)dbtest.c	8.17 (Berkeley) 9/1/94";
 #endif /* not lint */
 
@@ -66,7 +66,7 @@ enum S { COMMAND, COMPARE, GET, PUT, REMOVE, SEQ, SEQFLAG, KEY, DATA };
 void	 compare __P((DBT *, DBT *));
 DBTYPE	 dbtype __P((char *));
 void	 dump __P((DB *, int));
-void	 err __P((const char *, ...)) ATTR ((__format__(__printf__,1,2)));
+void	 err __P((const char *, ...)) ATTR ((__format__(__printf__,1,2))) ATTR ((__noreturn__));
 void	 get __P((DB *, DBT *));
 void	 getdata __P((DB *, DBT *, DBT *));
 void	 put __P((DB *, DBT *, DBT *));
@@ -351,7 +351,7 @@ compare(db1, db2)
 
 	if (db1->size != db2->size)
 		printf("compare failed: key->data len %lu != data len %lu\n",
-		    db1->size, db2->size);
+		    (u_long) db1->size, (u_long) db2->size);
 
 	len = MIN(db1->size, db2->size);
 	for (p1 = db1->data, p2 = db2->data; len--;)
@@ -383,8 +383,9 @@ get(dbp, kp)
 		if (ofd != STDOUT_FILENO)
 			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
 		else
-			(void)fprintf(stderr, "%d: %.*s: %s",
-			    lineno, MIN(kp->size, 20), kp->data, NOSUCHKEY);
+			(void)fprintf(stderr, "%lu: %.*s: %s",
+			    lineno, (int) MIN(kp->size, 20), (char *) kp->data, 
+				      NOSUCHKEY);
 #undef	NOSUCHKEY
 		break;
 	}
@@ -440,11 +441,12 @@ rem(dbp, kp)
 		if (ofd != STDOUT_FILENO)
 			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
 		else if (flags != R_CURSOR)
-			(void)fprintf(stderr, "%d: %.*s: %s", 
-			    lineno, MIN(kp->size, 20), kp->data, NOSUCHKEY);
+			(void)fprintf(stderr, "%lu: %.*s: %s", 
+			    lineno, (int) MIN(kp->size, 20), (char *) kp->data, 
+				      NOSUCHKEY);
 		else
 			(void)fprintf(stderr,
-			    "%d: rem of cursor failed\n", lineno);
+			    "%lu: rem of cursor failed\n", lineno);
 #undef	NOSUCHKEY
 		break;
 	}
@@ -484,11 +486,12 @@ seq(dbp, kp)
 		if (ofd != STDOUT_FILENO)
 			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
 		else if (flags == R_CURSOR)
-			(void)fprintf(stderr, "%d: %.*s: %s", 
-			    lineno, MIN(kp->size, 20), kp->data, NOSUCHKEY);
+			(void)fprintf(stderr, "%lu: %.*s: %s", 
+			    lineno, (int) MIN(kp->size, 20), (char *) kp->data, 
+				      NOSUCHKEY);
 		else
 			(void)fprintf(stderr,
-			    "%d: seq (%s) failed\n", lineno, sflags(flags));
+			    "%lu: seq (%s) failed\n", lineno, sflags(flags));
 #undef	NOSUCHKEY
 		break;
 	}
