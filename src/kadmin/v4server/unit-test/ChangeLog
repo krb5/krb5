@@ -1,5 +1,8 @@
 Mon Oct 21 17:19:41 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* v4server.0/setup-srvtab.exp: use KRB5_KTNAME instead of
+ 	ovsec_adm.srvtab explicitly
+
 	* lib/helpers.exp: don't specify -k ovsec_adm.srvtab on the
  	command line, since kadmind4 now uses the config param value
  	[krb5-admin/30]
