@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.orig: Deleted.
+
 2002-11-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Test for speed_t being present.

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.orig: Deleted.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos.c (kerberos4_send, kerberos4_is): Use

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.original: Deleted.
+
 2002-12-05  Sam Hartman  <hartmans@mit.edu>
 
 	* util_token.c (g_verify_token_header g_make_token_header):

@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.orig: Deleted.
+
 2002-11-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* sys_bsd.c: Moved declaration for susp() to type of file and

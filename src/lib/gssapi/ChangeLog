@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.original: Deleted.
+
 2002-09-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,
