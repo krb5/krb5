@@ -1,3 +1,42 @@
+2004-02-12  Jeffrey Altman <jaltman@mit.edu>
+
+    * Fix libpath for krbcc32.lib (only affects KRB5_KFW_COMPILE builds)
+
+2004-02-11  Jeffrey Altman <jaltman@mit.edu>
+
+    * gss-misc.h: Add file.  Copy from src/appl/gss-sample/
+
+2004-02-06  Jeffrey Altman <jaltman@mit.edu>
+
+    * resource.h: add new component id values for replay, mutual, sequence
+
+    * gss.rc: add new components for replay, mutual, sequence
+
+    * gss.h, gss.c, gss-client.c: add support for replay, mutual, and sequence
+
+2004-02-04  Jeffrey Altman <jaltman@mit.edu>
+
+    * resource.h: add new component id values for ccache
+
+    * Makefile.in: add conditional linkage to krbcc32.lib (if KRB5_KFW_BUILD)
+
+    * gss.rc: add new component for ccache selection
+ 
+    * gss.h, gss.c, gss-client.c: add support for ccache selection and 
+      if built with USE_LEASH add support for dynamic querying of the 
+      available ccache list
+
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * resource.h: new file containing new ui component id values
+    
+    * gss.rc: new user interface definition
+
+    * gss.h, gss-misc.c, gss-client.c: Updates to support new UI and 
+      corrections to add compatibility with the Unix gss-server
+
+    * Makefile.in: add linkage to comctl32.lib
+
 2002-06-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SYSLIBS): Use ws2_32.lib instead of wsock32.lib.

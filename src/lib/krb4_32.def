@@ -54,3 +54,33 @@ EXPORTS
 ;	kstream_destroy
 ;	kstream_set_buffer_mode
 	krb_in_tkt
+
+; Added to match exports from KfM
+    krb_change_password
+    decomp_ticket
+    krb_err_txt
+    ;krb_ad_tkt
+    krb_get_in_tkt
+    krb_get_in_tkt_creds
+    krb_get_pw_in_tkt_creds
+    ;krb_pw_tkt
+    k_isrealm
+    k_isinst
+    k_isname
+    kname_unparse
+    ;kuserok
+    krb_set_lifetime
+    krb_rd_req_int
+    krb_sendauth
+    ;tkt_string
+    krb_set_tkt_string
+    krb_get_num_cred
+    krb_get_nth_cred
+    krb_delete_cred
+    dest_all_tkts
+    krb_get_profile 
+    ;FSp_krb_get_svc_in_tkt
+    ;FSp_put_svc_key
+    ;FSp_read_service_key
+    krb_time_to_life
+    krb_life_to_time

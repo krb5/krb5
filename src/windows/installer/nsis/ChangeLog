@@ -1,0 +1,10 @@
+2004-04-14  Jeffrey Altman <jaltman@mit.edu>
+
+* nsi-includes.nsi:  update version to 2.6.1
+
+* kfw-fixed.nsi:  add kvno.exe, gss-client.exe, gss-server.exe
+
+2004-03-31  Jeffrey Altman <jaltman@mit.edu>
+
+* Add the NSIS installer for KFW 2.6 to the repository
+

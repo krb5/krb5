@@ -3,14 +3,14 @@
  * 	object.
  */
 
+#include "prof_int.h"
+
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <errno.h>
-
-#include "prof_int.h"
 
 /* Find a 4-byte integer type */
 #if	(SIZEOF_SHORT == 4)

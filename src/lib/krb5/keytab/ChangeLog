@@ -1,3 +1,42 @@
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:
+      Since we have to reserve all the single letter
+      prefixes make them apply to all platforms
+
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, improve the treat drive letter
+      prefix string as a FILE: keytab change to work if the
+      default keytab type was changed to not be of type FILE:
+
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  Restore the thread safety fixes
+
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, if we see a colon do not assume it means
+      we found a prefix string unless the length of the prefix is 
+      not equal to one.  If it is one, it means we found a drive letter
+      and not a prefix.  
+
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfile_get_entry): Check principal name prior to
+	checking enctype.  Suggested by Wyllys Ingersoll.
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* ktbase.c: Register writable keytab by default
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kt_file.c (krb5_ktfileint_internal_read_entry): Use
+	krb5_princ_size instead of direct field access.
+	(krb5_ktfileint_write_entry, krb5_ktfileint_size_entry):
+	Likewise.
+
 2003-02-08  Tom Yu  <tlyu@mit.edu>
 
 	* kt_file.c (krb5_ktfile_get_entry): Fix comment; not going to

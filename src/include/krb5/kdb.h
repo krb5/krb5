@@ -212,6 +212,10 @@ krb5_error_code krb5_db_iterate (krb5_context,
 				 krb5_error_code (* ) (krb5_pointer,
 						       krb5_db_entry *),
 				 krb5_pointer);
+krb5_error_code krb5_db_iterate_ext (krb5_context,
+				     krb5_error_code (* ) (krb5_pointer,
+					  	           krb5_db_entry *),
+				     krb5_pointer, int, int);
 krb5_error_code krb5_db_verify_master_key (krb5_context, krb5_principal, 
 					   krb5_keyblock *);
 krb5_error_code krb5_db_store_mkey (krb5_context, char *, krb5_principal,

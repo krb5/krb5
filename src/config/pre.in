@@ -123,6 +123,10 @@ SRCTOP = @srcdir@/$(BUILDTOP)
 VPATH = @srcdir@
 CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
 
+FAKEDEST=$(BUILDTOP)/util/fakedest
+FAKEPREFIX=$(FAKEDEST)/$(prefix)
+FAKELIBDIR=$(FAKEPREFIX)/lib
+
 # DEFS		set by configure
 # DEFINES	set by local Makefile.in
 # LOCALINCLUDES	set by local Makefile.in
@@ -291,12 +295,11 @@ COM_ERR_DEPLIB-k5 = $(TOPLIBD)/libcom_err$(DEPLIBEXT)
 SS_DEPLIB	= $(SS_DEPLIB-@SS_VERSION@)
 SS_DEPLIB-k5	= $(TOPLIBD)/libss.a
 SS_DEPLIB-sys	=
-KRB524_DEPLIB	= @KRB524_DEPLIB@
 PTY_DEPLIB	= $(TOPLIBD)/libpty.a
 
 KRB5_BASE_DEPLIBS	= $(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(COM_ERR_DEPLIB)
 KRB4COMPAT_DEPLIBS	= $(KRB4_DEPLIB) $(DES425_DEPLIB) $(KRB5_BASE_DEPLIBS)
-KDB5_DEPLIBS		= $(KDB5_DEPLIB) $(DB_DEPLIB)
+KDB5_DEPLIBS		= $(KDB5_DEPLIB)
 GSS_DEPLIBS		= $(GSS_DEPLIB)
 GSSRPC_DEPLIBS		= $(GSSRPC_DEPLIB) $(GSS_DEPLIBS)
 KADM_COMM_DEPLIBS	= $(GSSRPC_DEPLIBS) $(KDB5_DEPLIBS) $(GSSRPC_DEPLIBS)
@@ -325,8 +328,6 @@ DB_DEPS-redirect = $(BUILDTOP)/include/db.h
 # is compiled.
 
 KRB_ERR_H_DEP	= @KRB_ERR_H_DEP@
-KRB524_H_DEP	= @KRB524_H_DEP@
-KRB524_ERR_H_DEP= @KRB524_ERR_H_DEP@
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
@@ -338,6 +339,7 @@ SS_LIB-sys	= @SS_LIB@
 SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
 DB_LIB		= @DB_LIB@
+KDB5_DB_LIB	= @KDB5_DB_LIB@
 
 KRB5_LIB			= -lkrb5
 K5CRYPTO_LIB			= -lk5crypto
@@ -352,16 +354,12 @@ KRB4_LIB	= @KRB4_LIB@
 # needs fixing if ever used on Mac OS X!
 DES425_LIB	= @DES425_LIB@
 
-# KRB524_LIB is $(BUILDTOP)/krb524/libkrb524.a if building --with-krb4
-# needs fixing if ever used on Mac OS X!
-KRB524_LIB	= @KRB524_LIB@
-
 # HESIOD_LIBS is -lhesiod...
 HESIOD_LIBS	= @HESIOD_LIBS@
 
 KRB5_BASE_LIBS	= $(KRB5_LIB) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(GEN_LIB) $(LIBS)
 KRB4COMPAT_LIBS	= $(KRB4_LIB) $(DES425_LIB) $(KRB5_BASE_LIBS)
-KDB5_LIBS	= $(KDB5_LIB) $(DB_LIB)
+KDB5_LIBS	= $(KDB5_LIB) $(KDB5_DB_LIB)
 GSS_LIBS	= $(GSS_KRB5_LIB)
 # needs fixing if ever used on Mac OS X!
 GSSRPC_LIBS	= -lgssrpc $(GSS_LIBS)

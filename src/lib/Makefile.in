@@ -52,8 +52,9 @@ KRB5RC = krb5.rc
 VERSIONRC = $(BUILDTOP)\windows\version.rc
 
 WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
-	version.lib advapi32.lib gdi32.lib
-WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000
+	version.lib secur32.lib advapi32.lib gdi32.lib delayimp.lib
+WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000 /DELAYLOAD:secur32.dll \
+	/DELAYLOAD:advapi32.dll /DELAY:UNLOAD /DELAY:NOBIND
 
 NO_GLUE=$(OUTPRE)no_glue.obj
 K5_GLUE=$(OUTPRE)k5_glue.obj

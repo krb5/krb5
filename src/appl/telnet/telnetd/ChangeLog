@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.h: Don't declare errno.
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnetd.c (main): Use socklen_t when passing address to socket
