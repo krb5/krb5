@@ -36,7 +36,7 @@ krb5_prompter_posix(krb5_context context,
     int scratchchar;
     krb5_sigtype (*volatile ointrfunc)();
     volatile krb5_error_code errcode;
-    int i;
+    volatile int i = 0;
 #ifndef ECHO_PASSWORD
     struct termios echo_control, save_control;
     volatile int fd;

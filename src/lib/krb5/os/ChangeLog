@@ -3,6 +3,9 @@
 	* lock_file.c (krb5_lock_file) [POSIX_FILE_LOCKS]: Make static
 	"zero" variable const.
 
+	* prompter.c (krb5_prompter_posix): Initialize 'i' and make it
+	volatile.
+
 	* locate_kdc.c (add_addrinfo_to_list) [TEST]: Print out socket
 	type before returning.
 	(add_host_to_list): Don't need to initialize err.  Supply
