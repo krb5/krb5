@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* svr_chpass_util.c (kadm5_chpass_principal_util): Change msg_len
+	to unsigned int.
+
 Tue Oct 10 03:09:27 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_dict.c (init_dict): Change syslog() to krb5_klog_syslog()
