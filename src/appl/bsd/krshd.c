@@ -89,7 +89,7 @@ char copyright[] =
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
-#ifndef KERBEROS
+#if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
 /* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <sys/socket.h>
 #endif
@@ -120,7 +120,7 @@ char copyright[] =
 #endif
      
 #include <signal.h>
-#ifndef KERBEROS
+#if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
 /* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */
 #include <netdb.h>
 #endif
@@ -639,7 +639,7 @@ void doit(f, fromp)
     
     { 
       int sin_len = sizeof (struct sockaddr_in);
-      if (getsockname(f, &localaddr, &sin_len) < 0) {
+      if (getsockname(f, (struct sockaddr*)&localaddr, &sin_len) < 0) {
 	perror("getsockname");
 	exit(1);
       }
@@ -1771,8 +1771,10 @@ recvauth(netf, peersin, valid_checksum)
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
     krb5_data inbuf;
+#ifdef KRB5_KRB4_COMPAT
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
+#endif
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
     krb5_rcache		rcache;
@@ -1792,7 +1794,9 @@ recvauth(netf, peersin, valid_checksum)
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
+#ifdef KRB5_KRB4_COMPAT
     strcpy(v4_instance, "*");
+#endif
 
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
 	return status;
@@ -1821,6 +1825,7 @@ recvauth(netf, peersin, valid_checksum)
 	if (status) return status;
     }
 
+#ifdef KRB5_KRB4_COMPAT
     status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
 				  NULL,		/* Specify daemon principal */
@@ -1836,6 +1841,15 @@ recvauth(netf, peersin, valid_checksum)
 				  &ticket, 	/* return ticket */
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, 0, v4_version);
+#else
+    status = krb5_recvauth(bsd_context, &auth_context, &netf,
+                           "KCMDV0.1",
+                           NULL,        /* daemon principal */
+                           0,           /* no flags */
+		           keytab,      /* normally NULL to use v5srvtab */
+		           &ticket);    /* return ticket */
+    auth_sys = KRB5_RECVAUTH_V5;
+#endif
 
     if (status) {
 	if (auth_sys == KRB5_RECVAUTH_V5) {
@@ -1852,6 +1866,7 @@ recvauth(netf, peersin, valid_checksum)
     getstr(netf, locuser, sizeof(locuser), "locuser");
     getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
 
+#ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
 	rcmd_stream_init_normal();
 	
@@ -1870,6 +1885,7 @@ recvauth(netf, peersin, valid_checksum)
 	
 	return status;
     }
+#endif /* KRB5_KRB4_COMPAT */
 
     /* Must be V5  */
 	

@@ -130,8 +130,8 @@ static int v5_des_read(), v5_des_write();
 static int v4_des_read(), v4_des_write();
 static C_Block v4_session;
 static int right_justify;
-static int do_lencheck;
 #endif
+static int do_lencheck;
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authopts, anyport, suppress_err)

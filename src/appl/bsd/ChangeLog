@@ -1,3 +1,15 @@
+1999-08-02  Ken Raeburn  <raeburn@mit.edu>
+	and Brad Thompson  <yak@mit.edu>
+
+	Patches from Brad Thompson for building without krb4
+	compatibility:
+	* krshd.c: Include sys/socket.h and netdb.h if KRB5_KRB4_COMPAT
+	isn't defined.
+	(doit): Cast pointer argument to getsockname.
+	(recvauth): Do krb4 stuff only if KRB5_KRB4_COMPAT is defined;
+	otherwise, skip it and call krb5_recvauth.
+	* kcmd.c (do_lencheck): Define even if !KRB5_KRB4_COMPAT.
+
 1999-07-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* login.c (main): Fix typo in computing strncpy length for shell
