@@ -45,6 +45,9 @@ Specifies KRB5_KDB_SALTTYPE_NOREALM.
 .I onlyrealm
 Specifies KRB5_KDB_SALTTYPE_ONLYREALM.
 .TP 2i
+.I afs3
+Specifies KRB5_KDB_SALTTYPE_AFS3.
+.TP 2i
 .I special
 Specifies KRB5_KDB_SALTTYPE_SPECIAL.
 
