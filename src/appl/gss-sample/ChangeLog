@@ -1,3 +1,8 @@
+2004-02-10  Jeffrey Altman <jaltman@mit.edu>
+
+    * gss-client.c: Remove extraneous parameters from 
+      client_establish_context()
+
 2004-02-06  Jeffrey Altman <jaltman@mit.edu>
 
     * Update usage() for gss-client
