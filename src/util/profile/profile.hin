@@ -5,6 +5,20 @@
 #ifndef _KRB5_PROFILE_H
 #define _KRB5_PROFILE_H
 
+#if defined(_MSDOS) || defined(_WIN32) || defined(MACINTOSH)
+#include <win-mac.h>
+#endif
+
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
+#define KRB5_EXPORTVAR
+#define FAR
+#define NEAR
+#endif
+
+
 typedef struct _profile_t *profile_t;
 
 #if !defined(PROTOTYPE)
