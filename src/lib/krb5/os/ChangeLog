@@ -1,3 +1,10 @@
+2003-02-06  Tom Yu  <tlyu@mit.edu>
+
+	* prompter.c (krb5_prompter_posix, setup_tty, restore_tty): Fix to
+	use the actual file descriptor we dup()'ed to in case tcsetattr()
+	doesn't actually change the underlying device modes and instead
+	only affects the specific file descriptor.
+
 2003-02-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (translate_ai_error): Handle EAI_ADDRFAMILY like

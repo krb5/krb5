@@ -15,8 +15,8 @@ static void	catch_signals(void);
 static void	restore_signals(void);
 static krb5_sigtype	intrfunc(int sig);
 
-static krb5_error_code	setup_tty(int);
-static krb5_error_code	restore_tty(void);
+static krb5_error_code	setup_tty(FILE*, int);
+static krb5_error_code	restore_tty(FILE*);
 
 #ifdef POSIX_SIGNALS
 static struct sigaction osigint;
@@ -75,7 +75,7 @@ krb5_prompter_posix(
 	(void)fflush(stdout);
 	(void)memset(prompts[i].reply->data, 0, prompts[i].reply->length);
 
-	errcode = setup_tty(prompts[i].hidden);
+	errcode = setup_tty(fp, prompts[i].hidden);
 	if (errcode) {
 	    if (prompts[i].hidden)
 		putchar('\n');
@@ -91,7 +91,7 @@ krb5_prompter_posix(
 		errcode = KRB5_LIBOS_PWDINTR;
 	    else
 		errcode = KRB5_LIBOS_CANTREADPWD;
-	    restore_tty();
+	    restore_tty(fp);
 	    break;
 	}
 
@@ -106,7 +106,7 @@ krb5_prompter_posix(
 	    } while (scratchchar != EOF && scratchchar != '\n');
 	}
 
-	errcode = restore_tty();
+	errcode = restore_tty(fp);
 	if (errcode)
 	    break;
 	prompts[i].reply->length = strlen(prompts[i].reply->data);
@@ -153,19 +153,21 @@ restore_signals(void)
 static struct termios saveparm;
 
 static krb5_error_code
-setup_tty(int hidden)
+setup_tty(FILE *fp, int hidden)
 {
     krb5_error_code	ret;
+    int			fd;
     struct termios	tparm;
 
     ret = KRB5_LIBOS_CANTREADPWD;
     catch_signals();
+    fd = fileno(fp);
     do {
-	if (!isatty(STDIN_FILENO)) {
+	if (!isatty(fd)) {
 	    ret = 0;
 	    break;
 	}
-	if (tcgetattr(STDIN_FILENO, &tparm) < 0)
+	if (tcgetattr(fd, &tparm) < 0)
 	    break;
 	saveparm = tparm;
 #ifndef ECHO_PASSWORD
@@ -184,13 +186,14 @@ setup_tty(int hidden)
 }
 
 static krb5_error_code
-restore_tty(void)
+restore_tty(FILE* fp)
 {
-    int ret;
+    int ret, fd;
 
     ret = 0;
-    if (isatty(STDIN_FILENO)) {
-	ret = tcsetattr(STDIN_FILENO, TCSANOW, &saveparm);
+    fd = fileno(fp);
+    if (isatty(fd)) {
+	ret = tcsetattr(fd, TCSANOW, &saveparm);
 	if (ret < 0)
 	    ret = KRB5_LIBOS_CANTREADPWD;
 	else
