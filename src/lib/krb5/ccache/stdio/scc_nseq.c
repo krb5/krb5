@@ -51,7 +51,15 @@ krb5_scc_next_cred(id, cursor, creds)
      krb5_error_code kret;
      krb5_scc_cursor *fcursor;
 
-     bzero((char *)creds, sizeof(*creds));
+#define Z(field)	creds->field = 0
+     Z (client);
+     Z (server);
+     Z (keyblock.contents);
+     Z (authdata);
+     Z (ticket.data);
+     Z (second_ticket.data);
+     Z (addresses);
+#undef Z
 
      MAYBE_OPEN (id, "r");
 
@@ -77,6 +85,8 @@ krb5_scc_next_cred(id, cursor, creds)
      TCHECK(kret);
      kret = krb5_scc_read_addrs(id, &creds->addresses);
      TCHECK(kret);
+     kret = krb5_scc_read_authdata (id, &creds->authdata);
+     TCHECK (kret);
      kret = krb5_scc_read_data(id, &creds->ticket);
      TCHECK(kret);
      kret = krb5_scc_read_data(id, &creds->second_ticket);
@@ -99,6 +109,8 @@ lose:
 	     xfree(creds->second_ticket.data);
 	 if (creds->addresses)
 	     krb5_free_address(creds->addresses);
+	 if (creds->authdata)
+	     krb5_free_authdata (creds->authdata);
      }
      MAYBE_CLOSE (id, kret);
      return kret;
