@@ -1,3 +1,16 @@
+2001-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (struct profile_iterator): Member "names" now points
+	to const.
+	(profile_node_iterator_create): Argument "names" now points to
+	const.
+	(profile_node_iterator): Local variable "cpp" now points to
+	const.
+	* prof_int.h (profile_node_iterator_create): Decl updated.
+	* prof_get.c (profile_get_values): Argument "names" now points to
+	const.
+	* profile.hin (profile_get_values): Decl updated.
+
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* prof_int.h: Provide prototypes for profile_ser_size,

@@ -151,7 +151,7 @@ errcode_t profile_find_node_name
 		    char **ret_name));
 
 errcode_t profile_node_iterator_create
-	PROTOTYPE((profile_t profile, const char **names,
+	PROTOTYPE((profile_t profile, const char *const *names,
 		   int flags, void **ret_iter));
 
 void profile_node_iterator_free

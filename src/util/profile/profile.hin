@@ -81,7 +81,7 @@ KRB5_DLLIMP void KRB5_CALLCONV profile_release
 	PROTOTYPE ((profile_t profile));
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_get_values
-	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
+	PROTOTYPE ((profile_t profile, const char *const *names, char ***ret_values));
 
 KRB5_DLLIMP void KRB5_CALLCONV profile_free_list
 	PROTOTYPE ((char **list));

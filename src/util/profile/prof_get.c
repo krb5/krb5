@@ -139,7 +139,7 @@ KRB5_DLLIMP void KRB5_CALLCONV profile_free_list(list)
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_get_values(profile, names, ret_values)
 	profile_t	profile;
-	const char	**names;
+	const char	*const *names;
 	char	***ret_values;
 {
 	errcode_t		retval;

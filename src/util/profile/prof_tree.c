@@ -387,7 +387,7 @@ struct profile_iterator {
 	prf_magic_t		magic;
 	profile_t		profile;
 	int			flags;
-	const char 		**names;
+	const char 		*const *names;
 	const char		*name;
 	prf_file_t		file;
 	int			file_serial;
@@ -398,7 +398,7 @@ struct profile_iterator {
 
 errcode_t profile_node_iterator_create(profile, names, flags, ret_iter)
 	profile_t	profile;
-	const char	**names;
+	const char	*const *names;
 	int		flags;
 	void		**ret_iter;
 {
@@ -460,7 +460,7 @@ errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
 {
 	struct profile_iterator 	*iter = *iter_p;
 	struct profile_node 		*section, *p;
-	const char			**cpp;
+	const char			*const *cpp;
 	errcode_t			retval;
 	int				skip_num = 0;
 
