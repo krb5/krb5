@@ -1,3 +1,8 @@
+Fri Jun 23 20:08:16 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: fix typo; appended "all" rule needs two colons to
+		keep gmake from breaking.
+
 Thu Jun 22 16:14:25 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* error_table.h: reverse sense of KRB5_PROVIDE_PROTOTYPES

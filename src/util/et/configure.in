@@ -38,6 +38,6 @@ if test -n "$krb5_cv_staticlibs_enabled" ; then
         AppendRule([install:: libcom_err.[$](STEXT)
 	[$](INSTALL_DATA) libcom_err.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libcom_err.[$](STEXT)])
         LinkFileDir([$](TOPLIBD)/libcom_err.[$](STEXT),libcom_err.[$](STEXT),../util/et)
-        AppendRule([all: [$](TOPLIBD)/libcom_err.[$](STEXT)])
+        AppendRule([all:: [$](TOPLIBD)/libcom_err.[$](STEXT)])
 fi
 V5_AC_OUTPUT_MAKEFILE
