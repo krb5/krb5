@@ -216,7 +216,7 @@ krb5_keytab_entry *entry;
     if (fflush(KTFILEP(id)) == EOF)
 	retval = errno;
 
-    bzero(iobuf, sizeof(iobuf));
+    (void) memset(iobuf, 0, sizeof(iobuf));
     setbuf(KTFILEP(id), 0);
     return retval;
 }
