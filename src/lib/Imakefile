@@ -25,11 +25,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-#if BuildGssapi
-GSSAPI= gssapi
-#endif
-
-SUBDIRS = krb5 kdb des425 krb425 crypto $(GSSAPI)
+SUBDIRS = krb5 kdb des425 krb425 crypto gssapi
 
 MakeSubdirs($(SUBDIRS))
 
