@@ -35,6 +35,7 @@
 
 #include "telnetd.h"
 #include "pathnames.h"
+#include <com_err.h>
 
 #ifndef LOGIN_PROGRAM
 #define LOGIN_PROGRAM _PATH_LOGIN
@@ -960,7 +961,7 @@ getptyslave()
 
 	if ( (retval = pty_open_slave (line, &t)) != 0 )
 	    {
-		fatalperror(net, (char *) error_message(retval));
+		fatalperror(net,  error_message(retval));
 	    }
 
 #ifdef  STREAMSPTY
@@ -1027,8 +1028,8 @@ termbuf.c_cflag |= HUPCL;
 	 * Set the tty modes, and make this our controlling tty.
 	 */
 	set_termbuf();
-	if (login_tty(t) == -1)
-		fatalperror(net, "login_tty");
+	if (dup_tty(t) == -1)
+		fatalperror(net, "dup_tty");
 #endif	/* !defined(CRAY) || !defined(NEWINIT) */
 	if (net > 2)
 		(void) close(net);
@@ -1052,10 +1053,10 @@ termbuf.c_cflag |= HUPCL;
 
 #endif	/* !defined(CRAY) || !defined(NEWINIT) */
 
-#if BSD <= 43
+
 
 	int
-login_tty(t)
+dup_tty(t)
 	int t;
 {
 	if (t != 0)
@@ -1068,7 +1069,7 @@ login_tty(t)
 		close(t);
 	return(0);
 }
-#endif	/* BSD <= 43 */
+
 
 #ifdef	NEWINIT
 char *gen_id = "fe";
@@ -1126,7 +1127,11 @@ slavepid = i; /* So we can clean it up later */
 
 		/* Wait for child before writing to parent side of pty.*/
 (void) close(syncpipe[1]);
-		read(syncpipe[0], &c, 1);
+if ( read(syncpipe[0], &c, 1) == 0 ) {
+  /* Slave side died */
+  fatal ( net, "Slave failed to initialize");
+}
+
 		close(syncpipe[0]);
 
 		
