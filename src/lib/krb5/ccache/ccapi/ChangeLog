@@ -1,3 +1,8 @@
+2000-02-10  Alexandra Ellwood <lxs@mit.edu>
+
+	* stdcc_util.c: Added +1 to strlen()'s so that the null terminator 
+		will fit in the buffer.
+
 2000-02-04  Scott McGuire  <smcguire@mit.edu>
 
 	* stdcc.c (krb5_stdcc_initialize):  Removed calls that destroyed
