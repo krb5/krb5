@@ -1,3 +1,8 @@
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* def_realm.c (krb5_free_default_realm): Added, use to free
+	result of krb5_get_default_realm
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c: Add krb5int_set_prompt_types() and

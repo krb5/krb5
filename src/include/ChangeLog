@@ -1,3 +1,7 @@
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* krb5.hin: Add krb5_free_default_realm
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin: Add krb5_get_prompt_types() and related defs..
