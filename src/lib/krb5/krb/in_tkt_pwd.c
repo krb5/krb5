@@ -28,7 +28,7 @@ struct pwd_keyproc_arg {
     krb5_data password;
 };
 
-extern char *krb5_default_pwd_prompt1, *krb5_default_pwd_prompt2;
+extern char *krb5_default_pwd_prompt1;
 
 /* 
  * key-producing procedure for use by krb5_get_in_tkt_with_password.
@@ -53,7 +53,7 @@ OLDDECLARG(krb5_pointer, keyseed)
     arg = (struct pwd_keyproc_arg *)keyseed;
     if (!arg->password.length) {
 	if (retval = krb5_read_password(krb5_default_pwd_prompt1,
-					krb5_default_pwd_prompt2,
+					0,
 					pwdbuf, &pwsize))
 	    return retval;
 	arg->password.length = pwsize;
