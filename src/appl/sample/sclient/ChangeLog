@@ -1,3 +1,7 @@
+Mon Sep 18 05:05:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sclient.c (main): Set the default service name to SAMPLE_SERVICE.
+
 Sat Sep 16 03:40:41 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sclient.c (main): Add an optional third argument which allows

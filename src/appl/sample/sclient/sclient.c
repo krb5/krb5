@@ -66,7 +66,7 @@ char *argv[];
     krb5_ap_rep_enc_part *rep_ret;
     krb5_auth_context auth_context = 0;
     short xmitlen;
-    char *service = 0;
+    char *service = SAMPLE_SERVICE;
 
     if (argc != 2 && argc != 3 && argc != 4) {
 	fprintf(stderr, "usage: %s <hostname> [port] [service]\n",argv[0]);
