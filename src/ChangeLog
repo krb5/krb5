@@ -1,4 +1,6 @@
 Sun Jul  2 04:40:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+	* aclocal.m4 (_MAKE_SUBDIRS): Fixed so that error propogates
+		upward if -[ik] not specified.
 
 	* aclocal.m4 (SubdirLibRule): don't recreate DONE if list of objs
 		is null to avoid re-making lotsa stuff.

@@ -86,7 +86,7 @@ changequote(<<<,>>>)dnl
 
 $2::<<<
 	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) e=:;; *) e=break;; esac; \
+		*[ik]*) e=:;; *) e="exit 1";; esac; \
 	for i in $(SUBDIRS) ; do \
 		if (cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
