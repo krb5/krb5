@@ -5,6 +5,8 @@
 	(CONFIG_RULES): Do the non-useless parts directly here.
 	(V5_SET_TOPDIR): Work quietly.
 	(WITH_KRB4): Use AC_MSG_NOTICE.
+	(KRB5_AC_ENABLE_DNS): Drop --enable-dns and --enable-dns-for-kdc
+	options; turn them on always.
 
 2003-07-15  Ken Raeburn  <raeburn@mit.edu>
 
