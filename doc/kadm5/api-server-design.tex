@@ -280,7 +280,7 @@ it does not exist.
 \begin{verbatim}
 osa_adb_ret_t
 osa_adb_get_T(osa_adb_T_t db, osa_T_t name,
-        ovsec_kadm_ent_T_t *entry); 
+        osa_princ_ent_t *entry); 
 \end{verbatim}
 
 Looks up the named entry in the db, and returns it in *entry in
@@ -306,17 +306,20 @@ Frees the memory associated with an osa_T_ent_t allocated by
 osa_adb_get_T.
 
 \begin{verbatim}
-typedef void (*osa_adb_iter_T_func)(void *data,
+typedef osa_adb_ret_t (*osa_adb_iter_T_func)(void *data,
 				    osa_T_ent_t entry);
 
-void osa_adb_iter_T(osa_adb_T_t db, osa_adb_iter_T_func func, 
+osa_adb_ret_t osa_adb_iter_T(osa_adb_T_t db, osa_adb_iter_T_func func, 
 		    void *data);
 \end{verbatim}
 
 Iterates over every entry in the database.  For each entry ent in the
-database db, the function (*func)(data, ent) is called.  The function
-func is permitted to access the database, but the consequences of
-modifying the database during the iteration are undefined.
+database db, the function (*func)(data, ent) is called.  If func
+returns an error code, osa_adb_iter_T returns an error code.  If all
+invokations of func return OSA_ADB_OK, osa_adb_iter_T returns
+OSA_ADB_OK.  The function func is permitted to access the database,
+but the consequences of modifying the database during the iteration
+are undefined.
 
 \subsection{Kerberos Database}
 
