@@ -1159,7 +1159,7 @@ typedef struct _krb5_pwd_data {
 typedef struct krb5_replay_data { 
     krb5_timestamp	timestamp; 
     krb5_int32		usec;
-    krb5_int32		seq; 
+    krb5_ui_4		seq; 
 } krb5_replay_data;
 
 /* flags for krb5_auth_con_genaddrs() */
