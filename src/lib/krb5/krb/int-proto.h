@@ -46,8 +46,6 @@ krb5_error_code krb5_walk_realm_tree
     PROTOTYPE((const krb5_data *,
 	       const krb5_data *,
 	       krb5_principal **));
-void krb5_free_realm_tree
-    PROTOTYPE((const krb5_principal *));
 
 /* and back to normal... */
 #include <krb5/narrow.h>
