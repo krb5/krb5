@@ -7,7 +7,7 @@
 /* XXX Not part of official public API.  */
 extern const char *error_table_name (errcode_t);
 
-#ifdef HAVE_SYS_ERRLIST
+#ifdef NEED_SYS_ERRLIST
 extern int sys_nerr;
 #endif
 
