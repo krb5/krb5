@@ -41,24 +41,26 @@ OBJS=	cksum.o		\
 	new_rn_key.o	\
 	weak_key.o	
 
-SRCS=	cksum.c		\
-	des.c		\
-	cs_entry.c	\
-	cbc_cksum.c	\
-	enc_dec.c	\
-	krb_glue.c	\
-	finish_key.c	\
-	fin_rndkey.c	\
-	init_rkey.c	\
-	process_ky.c	\
-	random_key.c	\
-	string2key.c	\
-	key_parity.c	\
-	key_sched.c	\
-	new_rn_key.c	\
-	weak_key.c	
+SRCS=	$(SRCDIR)cksum.c	\
+	$(SRCDIR)des.c		\
+	$(SRCDIR)cs_entry.c	\
+	$(SRCDIR)cbc_cksum.c	\
+	$(SRCDIR)enc_dec.c	\
+	$(SRCDIR)krb_glue.c	\
+	$(SRCDIR)finish_key.c	\
+	$(SRCDIR)fin_rndkey.c	\
+	$(SRCDIR)init_rkey.c	\
+	$(SRCDIR)process_ky.c	\
+	$(SRCDIR)random_key.c	\
+	$(SRCDIR)string2key.c	\
+	$(SRCDIR)key_parity.c	\
+	$(SRCDIR)key_sched.c	\
+	$(SRCDIR)new_rn_key.c	\
+	$(SRCDIR)weak_key.c	
 
 DEFINES = $(DESDEFINES)
+
+INCLUDES = -I.
 
 VERIFYOBJ = verify.o
 
@@ -68,6 +70,8 @@ all::
 depend:: des.c $(SRCS)
 
 OtherdirLibraryTarget(..,des5,$(OBJS))
+
+DependTarget()
 
 $(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
