@@ -154,7 +154,7 @@ krb5_error_code return_padata
 /* replay.c */
 krb5_boolean kdc_check_lookaside PROTOTYPE((krb5_data *, const krb5_fulladdr *,
 					    krb5_data **));
-void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_fulladdr *,
+void kdc_insert_lookaside PROTOTYPE((krb5_data *, const krb5_fulladdr *,
 				     krb5_data *));
 
 /* which way to convert key? */
