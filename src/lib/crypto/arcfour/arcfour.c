@@ -27,22 +27,22 @@ krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
   *length = hashsize + krb5_roundup(8 + inputlen, blocksize);
 }
 
- krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage)
+ krb5_keyusage
+ krb5int_arcfour_translate_usage(krb5_keyusage usage)
 {
   switch (usage) {
   case 1:			/* AS-REQ PA-ENC-TIMESTAMP padata timestamp,  */
-    /*Microsoft does not actually support this padata, not sure which usage they would use*/
     return 1;
   case 2:			/* ticket from kdc */
     return 2;
   case 3:			/* as-rep encrypted part */
     return 8;
   case 4:			/* tgs-req authz data */
-    return 4;			/* xxx Microsoft doesn't say */
+    return 16; /*vague possibility to change to 4 in the future --sdh*/
   case 5:			/* tgs-req authz data in subkey */
-    return 5;			/* xxx Microsoft doesn't say */
+    return 16; /* vague possibility to become 5 in future --sdh*/
   case 6:			/* tgs-req authenticator cksum */
-    return 6;			/* xxx Microsoft  doesn't say*/
+    return 6;			
 case 7:				/* tgs-req authenticator */
   return 7;
     case 8:
@@ -50,7 +50,7 @@ case 7:				/* tgs-req authenticator */
   case 9:			/* tgs-rep encrypted with subkey */
     return 8;
   case 10:			/* ap-rep authentication cksum */
-    return 10;			/* xxx Microsoft didn't say */
+    return 10;			/* xxx  Microsoft never uses this*/
   case 11:			/* app-req authenticator */
     return 11;
   case 12:			/* app-rep encrypted part */

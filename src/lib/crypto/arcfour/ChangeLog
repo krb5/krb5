@@ -1,6 +1,7 @@
 2001-11-07  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c (krb5_arcfour_encrypt): Set output length
+	(ms_translate_usage): Be consistent with latest mail from Microsoft
 
 2001-11-06  Sam Hartman  <hartmans@mit.edu>
 
