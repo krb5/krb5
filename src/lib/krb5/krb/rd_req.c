@@ -98,8 +98,10 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
         (void) krb5_kt_close(context, new_keytab);
 
 cleanup_auth_context:
-    if (new_auth_context && retval)
+    if (new_auth_context && retval) {
 	krb5_auth_con_free(context, new_auth_context);
+	*auth_context = NULL;
+    }
 
 cleanup_request:
     krb5_free_ap_req(context, request);

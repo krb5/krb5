@@ -197,8 +197,8 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
       	 * and the local realm.                                        
   	 */
       	if (trans->tr_contents.data && trans->tr_contents.data[0]) {
-            lrealm.length = strlen(lrealm.data);
             krb5_get_default_realm(context, &(lrealm.data));
+            lrealm.length = strlen(lrealm.data);
             retval = krb5_check_transited_list(context, &(trans->tr_contents), 
 					       realm, &lrealm);
             free(lrealm.data);

@@ -1,3 +1,13 @@
+Mon Oct 23 11:09:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decoded): For heirarchal cross-realm,
+		set the length after initializing string.
+
+	* rd_req.c (krb5_rd_req): If a new auth_context is created
+		and then there is an error, make sure return pointer is not
+		looking at freed memory.
+
+
 Fri Oct  6 22:04:42 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
