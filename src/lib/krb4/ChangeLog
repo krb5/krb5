@@ -1,5 +1,7 @@
 2001-01-25  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (OBJS, SRCS): Add prot_client.o, prot_client.c.
+
 	* prot_client.c: New file; client-side protocol support.
 
 	* prot_common.c (krb4prot_decode_header): Decode the first two
