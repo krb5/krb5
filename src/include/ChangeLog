@@ -1,3 +1,8 @@
+Sat Sep 23 01:37:19 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin: Added preauth numbers for KRB5_CYBERSAFE_SECUREID and
+	        KRB5_PADATA_AFS3_SALT.
+
 Fri Sep 22 19:42:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Change length field in krb5_alt_method and

@@ -644,6 +644,8 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define KRB5_PADATA_ENC_SANDIA_SECURID  6  /* SecurId passcode */
 #define KRB5_PADATA_SESAME		7  /* Sesame project */
 #define KRB5_PADATA_OSF_DCE		8  /* OSF DCE */
+#define KRB5_CYBERSAFE_SECUREID		9  /* Cybersafe */
+#define	KRB5_PADATA_AFS3_SALT		10 /* Cygnus */
     
 /* Reserved for SPX pre-authentication. */
 #define KRB5_PADATA_DASS		16
