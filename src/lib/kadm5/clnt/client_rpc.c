@@ -107,6 +107,20 @@ chpass_principal_1(argp, clnt)
 }
 
 generic_ret *
+setv4key_principal_1(argp, clnt)
+	setv4key_arg *argp;
+	CLIENT *clnt;
+{
+	static generic_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, SETV4KEY_PRINCIPAL, xdr_setv4key_arg, argp, xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
+generic_ret *
 setkey_principal_1(argp, clnt)
 	setkey_arg *argp;
 	CLIENT *clnt;
