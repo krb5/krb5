@@ -1,0 +1,98 @@
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
+
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\gssapi.$(LIBEXT)
+##DOSsrcdir = .
+##DOS!include $(BUILDTOP)\config\windows.in
+
+LIBDONE=DONE
+LIB_SUBDIRSS=.
+
+SRCS	= gss_acquire_cred.c \
+	  gss_release_cred.c \
+	  gss_init_sec_context.c \
+	  gss_accept_sec_context.c \
+	  gss_process_context.c \
+	  gss_delete_sec_context.c \
+	  gss_context_time.c \
+	  gss_sign.c \
+	  gss_verify.c \
+	  gss_seal.c \
+	  gss_unseal.c \
+	  gss_display_status.c \
+	  gss_indicate_mechs.c \
+	  gss_compare_name.c \
+	  gss_display_name.c \
+	  gss_import_name.c \
+	  gss_release_name.c \
+	  gss_release_buffer.c \
+	  gss_release_oid_set.c \
+	  gss_inquire_cred.c \
+	  gss_initialize.c \
+	  get_mech_type.c \
+	  get_mechanism.c \
+	  internal_name.c \
+	  gssd_pname_to_uid.c \
+	  add_mechanism.c
+
+OBJS	= gss_acquire_cred.$(OBJEXT) \
+	  gss_release_cred.$(OBJEXT) \
+	  gss_init_sec_context.$(OBJEXT) \
+	  gss_accept_sec_context.$(OBJEXT) \
+	  gss_process_context.$(OBJEXT) \
+	  gss_delete_sec_context.$(OBJEXT) \
+	  gss_context_time.$(OBJEXT) \
+	  gss_sign.$(OBJEXT) \
+	  gss_verify.$(OBJEXT) \
+	  gss_seal.$(OBJEXT) \
+	  gss_unseal.$(OBJEXT) \
+	  gss_display_status.$(OBJEXT) \
+	  gss_indicate_mechs.$(OBJEXT) \
+	  gss_compare_name.$(OBJEXT) \
+	  gss_display_name.$(OBJEXT) \
+	  gss_import_name.$(OBJEXT) \
+	  gss_release_name.$(OBJEXT) \
+	  gss_release_buffer.$(OBJEXT) \
+	  gss_release_oid_set.$(OBJEXT) \
+	  gss_inquire_cred.$(OBJEXT) \
+	  gss_initialize.$(OBJEXT) \
+	  get_mech_type.$(OBJEXT) \
+	  get_mechanism.$(OBJEXT) \
+	  internal_name.$(OBJEXT) \
+	  gssd_pname_to_uid.$(OBJEXT) \
+	  add_mechanism.$(OBJEXT)
+
+EXPORTED_HEADERS = mechglue.h
+
+all:: all-$(WHAT) $(OBJS)
+
+all-unix::
+
+all-mac::
+
+all-windows::
+	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
+	copy mechglue.h $(EHDRDIR)
+
+unixmac: 
+
+libgssapi.$(LIBEXT): $(OBJS)
+	$(ARCHIVE) $@ $(OBJS)
+	$(RANLIB) $@
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+ 
+clean-mac::
+ 
+clean-windows::
+	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
+	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+
+# Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
+install::
+	@set -x; for f in $(EXPORTED_HEADERS) ; \
+	do $(INSTALL_DATA) $(srcdir)$(S)$$f     \
+		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
+	done
