@@ -206,7 +206,7 @@ aname_do_match(string, contextp)
 #if	HAVE_REGCOMP
     regex_t		match_exp;
     regmatch_t		match_match;
-#elif	HAVE_REGEXP_H
+#elif	HAVE_REGEXPR_H
     char		regexp_buffer[RE_BUF_SIZE];
 #endif	/* HAVE_REGEXP_H */
 

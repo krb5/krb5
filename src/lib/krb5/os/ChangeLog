@@ -1,3 +1,8 @@
+Sun Jul 28 22:39:12 1996  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (aname_do_match): #elif HAVE_REGEXP_H should have
+		been HAVE_REGEXPR_H
+
 Fri Jul 26 15:58:32 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in, an_to_ln.c (do_replacement, aname_do_match): use
