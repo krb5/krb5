@@ -104,9 +104,9 @@ main(int argc, char *argv[])
   pwd = "test password";
   pwdata.length = strlen(pwd);
   pwdata.data = pwd;
-  krb5_use_cstype(kcontext, &encblock, DEFAULT_KDC_ETYPE);
+  krb5_use_keytype(kcontext, &encblock, DEFAULT_KDC_KEYTYPE);
   if (kret = mit_des_string_to_key(&encblock,
-				   KEYTYPE_DES,
+				   DEFAULT_KDC_KEYTYPE,
 				   &keyblock,
 				   &pwdata,
 				   (krb5_data *) NULL)) {

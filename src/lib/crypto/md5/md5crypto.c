@@ -61,7 +61,7 @@ krb5_checksum FAR *outcksum;
 
     keyblock.length = seed_length;
     keyblock.contents = (krb5_octet *)seed;
-    keyblock.keytype = KEYTYPE_DES;
+    keyblock.keytype = KEYTYPE_DES_CBC_MD5;
 
     if ((retval = mit_des_process_key(&eblock, &keyblock)))
 	return retval;
@@ -129,7 +129,7 @@ krb5_checksum FAR *outcksum;
 
     keyblock.length = sizeof(mit_des_cblock);
     keyblock.contents = (krb5_octet *) tmpkey;
-    keyblock.keytype = KEYTYPE_DES;
+    keyblock.keytype = KEYTYPE_DES_CBC_MD5;
 
     if ((retval = mit_des_process_key(&eblock, &keyblock)))
 	return retval;
@@ -196,7 +196,7 @@ size_t seed_length;
 	    /* Use the key "as-is" */
 	    keyblock.length = seed_length;
 	    keyblock.contents = (krb5_octet *) seed;
-	    keyblock.keytype = KEYTYPE_DES;
+	    keyblock.keytype = KEYTYPE_DES_CBC_MD5;
 
 	    if ((retval = mit_des_process_key(&eblock, &keyblock)))
 		return retval;
@@ -239,7 +239,7 @@ size_t seed_length;
 
 	    keyblock.length = sizeof(mit_des_cblock);
 	    keyblock.contents = (krb5_octet *) tmpkey;
-	    keyblock.keytype = KEYTYPE_DES;
+	    keyblock.keytype = KEYTYPE_DES_CBC_MD5;
 
 	    if ((retval = mit_des_process_key(&eblock, &keyblock)))
 		return retval;

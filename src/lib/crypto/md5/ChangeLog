@@ -1,3 +1,11 @@
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * md5crypto.c : Replace KEYTYPE_DES_CBC_MD5 for KEYTYPE_DES.
+
+	* t_cksum.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
