@@ -1,3 +1,10 @@
+Fri Mar 28 02:18:20 1997  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): add lib$(LIB)$(SHLIBVEXT) to the list
+	of libraries that get symlinked into $(TOPLIBD).  This allows
+	linkers that look for libfoo.so.maj.min rather than libfoo.so at
+	link time to work, e.g. NetBSD/i386.
+
 Wed Mar 19 15:43:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Fix up Macintosh and Windows build rules now that

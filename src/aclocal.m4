@@ -1071,9 +1071,9 @@ AC_ARG_ENABLE([shared],
 	*)
 		AC_MSG_RESULT([Enabling shared libraries.])
 		LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
 		case "$SHLIBSEXT" in
-		.so-snobuild)
+		.so.s-nobuild)
 			LIBINSTLIST="$LIBINSTLIST install-shared"
 			;;
 		*)
