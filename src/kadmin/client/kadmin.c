@@ -169,7 +169,7 @@ main(argc,argv)
     (void) sprintf(cache_name, "FILE:/tmp/tkt_adm_%d", getpid());
 
     if ((retval = krb5_cc_resolve(cache_name, &cache))) {
-	fprintf(stderr, "Unable to Resolve Cache: !\n", cache_name);
+	fprintf(stderr, "Unable to Resolve Cache: %s!\n", cache_name);
     }
     
     if ((retval = krb5_cc_initialize(cache, client))) {
@@ -565,7 +565,8 @@ OLDDECLARG(krb5_principal, client)
 					client->realm.data, 
 					   /* instance is <realm> */
                                         0))) {
-        fprintf(stderr, "Error %s while building client name!\n");
+        fprintf(stderr, "Error %s while building client name!\n",
+		error_message(retval));
 	krb5_free_addresses(my_addresses);
         return(1);
     }

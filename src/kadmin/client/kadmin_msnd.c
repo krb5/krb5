@@ -35,10 +35,6 @@ static char rcsid_kadmin[] =
 #include <string.h>
 #include <com_err.h>
 
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 1024
-#endif
-
 #include <sys/param.h>
 #include <pwd.h>
 
@@ -63,6 +59,10 @@ static char rcsid_kadmin[] =
 #include <krb5/kdb5_err.h>
 #include <krb5/krb5_err.h>
 
+#ifndef MAXPATHLEN
+#define MAXPATHLEN 1024
+#endif
+
 krb5_error_code
 kadm_snd_mod(my_creds, rep_ret, local_addr, foreign_addr, local_socket, seqno)
 krb5_creds *my_creds;
@@ -78,7 +78,6 @@ krb5_int32 *seqno;
     char version[10];
     int value;
     int valid_command;
-    extern int errno;
     int i;
 
     for ( ; ; ) {
