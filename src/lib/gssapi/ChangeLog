@@ -1,3 +1,7 @@
+
+Mon May 22 10:04:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in	- Add SUBDIRS for install target.
+
 Tue May  2 21:42:32 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: nuke spurious whitespace in blank line

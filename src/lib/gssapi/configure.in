@@ -10,5 +10,6 @@ AC_PROG_RANLIB
 AC_PROG_INSTALL
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("installing",install)
 AppendRule([all:: libgssapi_krb5.a])
 V5_AC_OUTPUT_MAKEFILE
