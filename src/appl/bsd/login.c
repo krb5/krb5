@@ -1060,7 +1060,7 @@ int main(argc, argv)
 #endif
     char *ccname = 0;   /* name of forwarded cache */
     char *tz = 0;
-    char *hostname;
+    char *hostname = 0;
 
     off_t lseek();
     handler sa;

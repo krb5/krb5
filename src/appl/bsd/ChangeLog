@@ -1,7 +1,7 @@
 2003-01-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* login.c (try_krb4): Delete unused krb5 principal name argument.
-	(main): Don't pass it.
+	(main): Don't pass it.  Initialize 'hostname'.
 
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
