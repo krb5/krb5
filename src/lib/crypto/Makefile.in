@@ -180,7 +180,7 @@ check-unix:: t_nfold t_encrypt t_prng t_hmac t_pkcs5
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 
-t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT)
+t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) 
