@@ -525,7 +525,7 @@ char * dir_of_cc_source;
 	}
 
 	if ((source_uid == 0) || (target_uid == source_uid)){
-	#ifdef GET_TGT_VIA_PASSWD
+#ifdef GET_TGT_VIA_PASSWD
 			if ((!all_rest_copy) && options.princ && (stored == FALSE)){
 				if (retval = krb5_tgtname(krb5_princ_realm (client),
 						          krb5_princ_realm(client),
@@ -556,7 +556,7 @@ char * dir_of_cc_source;
 					
 				}
 			}
-	#endif /* GET_TGT_VIA_PASSWD */
+#endif /* GET_TGT_VIA_PASSWD */
 	}
 
  	/* if the user is root or same uid then authentication is not neccesary,
