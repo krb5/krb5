@@ -107,10 +107,6 @@ if ![info exists RESOLVE] {
     set RESOLVE [findfile $objdir/../resolve/resolve]
 }
 
-if ![info exists SHLIBDIR] {
-    set SHLIBDIR [findfile $objdir/../../lib]
-}
-
 if ![info exists T_INETD] {
     set T_INETD [findfile $objdir/t_inetd]
 }
@@ -175,6 +171,75 @@ proc check_exit_status { testname } {
     }
 }
 
+# setup_runtime_flags
+# Sets the proper flags for shared libraries. 
+# Configuration is through a site.exp and the runvarlist variable
+# Returns 1 if variables were already set, otherwise 0
+proc setup_runtime_env { } {
+    global env
+    global runvarlist
+    global krb5_init_vars
+    global krb5_old_vars
+    global runtime_setup
+
+    if [info exists runtime_setup] {
+	return 1
+    }
+
+    set runtime_setup 1
+    set krb5_init_vars [list ]
+    set krb5_old_vars [list ]
+
+    # Only keep the foo=bar and ignore export commands...
+    foreach i $runvarlist {
+	if {[regexp ".*=.*" $i]} {
+		lappend krb5_init_vars $i
+	}
+    }
+
+
+    # Set the variables... (and save the old ones)
+    foreach i $krb5_init_vars {
+	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+	if [info exists env($evar)] {
+		lappend krb5_old_vars $evar=$env($evar) 
+	} 
+	set env($evar) "$evalue"
+	verbose "$evar=$evalue"
+    }
+
+    return 0
+}
+
+# Configuration is through a site.exp and the runvarlist variable
+proc restore_runtime_env { } {
+    global env
+    global krb5_init_vars
+    global krb5_old_vars
+    global runtime_setup
+
+
+    if ![info exists runtime_setup] {
+	return 1
+    }
+
+    # restore the variables...
+    foreach i $krb5_init_vars {
+	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+	set idx [lsearch -regexp $krb5_old_vars "^$evar=" ]
+	if {$idx >= 0} {
+	
+		regexp "^(\[^=\]*)=(.*)" [lindex $krb5_old_vars $idx] foo evar evalue
+		set env($evar) "$evalue"
+
+	} else  {
+		catch "unset env($evar)"
+	}
+    }
+
+    unset runtime_setup
+}
+
 # get_hostname
 # This procedure will get the local hostname.  It sets the global
 # variables hostname (the full name) and localhostname (the first part
@@ -185,42 +250,25 @@ proc get_hostname { } {
     global hostname
     global localhostname
     global domain
-    global SHLIBDIR
-    global env
 
     if {[info exists hostname] && [info exists localhostname]} {
 	return 1
     }
 
-    if [info exists env(LD_LIBRARY_PATH)] {
-	set tmp_ldlib_path $env(LD_LIBRARY_PATH)
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
-    } else {
-	catch "unset tmp_ldlib_path"
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
-    }
+    set setup [setup_runtime_env]
+
     catch "exec $RESOLVE -q >tmpdir/hostname" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output
 	send_error "ERROR: can't get hostname\n"
-	if [info exists tmp_ldlib_path] {
-	    set env(LD_LIBRARY_PATH) $tmp_ldlib_path
-	} else {
-	    catch "unset env(LD_LIBRARY_PATH)"
-	}
-	catch "unset tmp_ldlib_path"
+	if {$setup == 0} restore_runtime_env
 	return 0
     }
     set file [open tmpdir/hostname r]
     if { [ gets $file hostname ] == -1 } {
 	send_error "ERROR: no output from hostname\n"
-	if [info exists tmp_ldlib_path] {
-	    set env(LD_LIBRARY_PATH) $tmp_ldlib_path
-	} else {
-	    catch "unset env(LD_LIBRARY_PATH)"
-	}
-	catch "unset tmp_ldlib_path"
+	if {$setup == 0} restore_runtime_env
 	return 0
     }
     close $file
@@ -231,13 +279,8 @@ proc get_hostname { } {
     set localhostname [string tolower $localhostname]
     set domain [string tolower $domain]
     verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
-    if [info exists tmp_ldlib_path] {
-	set env(LD_LIBRARY_PATH) $tmp_ldlib_path
-    } else {
-	catch "unset env(LD_LIBRARY_PATH)"
-    }
-    catch "unset tmp_ldlib_path"
 
+    if {$setup == 0} restore_runtime_env
     return 1
 }
 
@@ -342,15 +385,6 @@ if [ info exists env(KERBEROS_SERVER)] {
     catch "unset orig_kerberos_server"
 }
 
-#
-# Set LD_LIBRARY_PATH to specify our built shared libraries.
-#
-if [info exists env(LD_LIBRARY_PATH)] {
-    set orig_ld_lib_path $env(LD_LIBRARY_PATH)
-} else {
-    catch "unset orig_ld_lib_path"
-}
-
 # setup_kerberos_env
 # Set the environment variables needed to run Kerberos programs.
 
@@ -359,7 +393,7 @@ proc setup_kerberos_env { } {
     global env
     global tmppwd
     global hostname
-    global SHLIBDIR
+    global krb5_init_vars
 
     # Set the environment variable KRB5_CONFIG to point to our krb5.conf file.
     # All the Kerberos tools check KRB5_CONFIG.
@@ -380,15 +414,8 @@ proc setup_kerberos_env { } {
     set env(KERBEROS_SERVER) "$REALMNAME:$hostname:3088"
     verbose "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
 
-    # Tell the dynamic loader where to get our shared libraries
-    if [info exists env(LD_LIBRARY_PATH)] {
-	set oldpath $env(LD_LIBRARY_PATH)
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
-    } else {
-	catch "unset oldpath"
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
-    }
-    verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
+    # Get the run time environment variables... (including LD_LIBRARY_PATH)
+    setup_runtime_env
 
     # Set our kdc config file.
     set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf
@@ -401,10 +428,14 @@ proc setup_kerberos_env { } {
 	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
 	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 	puts $envfile "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
-	puts $envfile "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
 	puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
 	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
-	puts $envfile "export KERBEROS_SERVER LD_LIBRARY_PATH KRB5_KDC_PROFILE"
+	puts $envfile "export KERBEROS_SERVER KRB5_KDC_PROFILE"
+	foreach i $krb5_init_vars {
+		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+		puts $envfile "$evar=$env($evar)"
+		puts $envfile "export $evar"
+	}
 	close $envfile
     }
     if ![file exists tmpdir/env.csh] {
@@ -413,8 +444,11 @@ proc setup_kerberos_env { } {
 	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
 	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
 	puts $envfile "setenv KERBEROS_SERVER $env(KERBEROS_SERVER)"
-	puts $envfile "setenv LD_LIBRARY_PATH $env(LD_LIBRARY_PATH)"
 	puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
+	foreach i $krb5_init_vars {
+		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+		puts $envfile "setenv $evar $env($evar)"
+	}
 	close $envfile
     }
     return 1
@@ -453,6 +487,8 @@ proc restore_kerberos_env { } {
     } else {
 	catch "unset env(KERBEROS_SERVER)"
     }
+
+    restore_runtime_env
 }
 
 # setup_kadmind_srvtab
@@ -723,7 +759,6 @@ proc start_kerberos_daemons { standalone } {
 
     for {set count 0} {$count < $retry} {incr count} {
 	if { [file mtime $kdc_lfile] != $start } then  {
-		send_user win\r
 		break;
 	}	
 	catch "exec sleep 1"
@@ -1080,7 +1115,8 @@ proc setup_root_shell { testname } {
     global rlogin_pid
     global tmppwd
     global env
-    global SHLIBDIR
+    global krb5_init_vars
+
 
     # Make sure we are using the original values of the environment
     # variables.  This means that the caller must call
@@ -1088,15 +1124,7 @@ proc setup_root_shell { testname } {
 
     restore_kerberos_env
 
-    # Tell the dynamic loader where to get our shared libraries
-    if [info exists env(LD_LIBRARY_PATH)] {
-	set oldpath $env(LD_LIBRARY_PATH)
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
-    } else {
-	catch "unset oldpath"
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
-    }
-    verbose "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)"
+    setup_runtime_env
 
     if ![get_hostname] {
 	return 0
@@ -1182,14 +1210,18 @@ proc setup_root_shell { testname } {
 	-re "$ROOT_PROMPT" { }
     }
 
-    # Set up our LD_LIBRARY_PATH
-    send "LD_LIBRARY_PATH=$env(LD_LIBRARY_PATH)\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-    send "export LD_LIBRARY_PATH\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
+    # For all of our runtime environment variables - send them over...
+    foreach i $krb5_init_vars {
+	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
+	send "$evar=$env($evar)\r"
+	expect {
+		-re "$ROOT_PROMPT" { }
+        }
+
+        send "export $evar\r"
+        expect {
+		-re "$ROOT_PROMPT" { }
+        }
     }
 
     # Move over to the right directory.
@@ -1204,13 +1236,8 @@ proc setup_root_shell { testname } {
 	}
     }
 
-    # Restore old setting of LD_LIBRARY_PATH
-    if [info exists oldpath] {
-	set env(LD_LIBRARY_PATH) $oldpath
-	catch "unset oldpath"
-    } else {
-	catch "unset env(LD_LIBRARY_PATH)"
-    }
+    restore_runtime_env
+
     expect_after
 
     return 1

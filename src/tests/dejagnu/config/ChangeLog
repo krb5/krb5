@@ -1,3 +1,8 @@
+Sun Apr  7 23:06:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Major changes to use run time environment variables as
+		passed in by configure. 
+
 Tue Mar 26 00:38:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp (start_kerberos_daemons): New methodology for
