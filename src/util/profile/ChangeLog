@@ -1,8 +1,17 @@
+2000-06-26  Ezra Peisach  <epeisach@zif.mit.edu>
+
+	* prof_init.c (profile_init_path): Use profile_filespec_t instead
+	     of char *. (change  provided by Nathan Neulinger <nneul@umr.edu>)
+
+	* profile.hin: Make definition of const_profile_filespec_t to be
+		based on profile_filespec_t.
+
 2000-05-15	Alexandra Ellwood <lxs@mit.edu>
-		* prof_get.c:
-			prof_parse_boolean () was missing some curly brackets
-			and was failing to check all the values in the list of
-			possible strings.
+
+	* prof_get.c:
+		prof_parse_boolean () was missing some curly brackets
+		and was failing to check all the values in the list of
+		possible strings.
 
 2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
 

@@ -85,7 +85,7 @@ profile_init_path(filepath, ret_profile)
 	int n_entries, i;
 	int ent_len;
 	const char *s, *t;
-	char **filenames;
+	profile_filespec_t *filenames;
 	errcode_t retval;
 
 	/* count the distinct filename components */
@@ -95,7 +95,7 @@ profile_init_path(filepath, ret_profile)
 	}
 	
 	/* the array is NULL terminated */
-	filenames = (char**) malloc((n_entries+1) * sizeof(char*));
+	filenames = (profile_filespec_t*) malloc((n_entries+1) * sizeof(char*));
 	if (filenames == 0)
 		return ENOMEM;
 

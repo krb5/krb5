@@ -53,8 +53,8 @@ extern "C" {
 #ifdef PROFILE_USES_PATHS
 typedef char* profile_filespec_t;	/* path as C string */
 typedef char* profile_filespec_list_t;	/* list of : separated paths, C string */
-typedef const char* const_profile_filespec_t;	/* path as C string */
-typedef const char* const_profile_filespec_list_t;	/* list of : separated paths, C string */
+typedef const profile_filespec_t const_profile_filespec_t;	/* path as C string */
+typedef const profile_filespec_list_t const_profile_filespec_list_t;	/* list of : separated paths, C string */
 #else
 /* On MacOS, we use native file specifiers as unique file identifiers */
 #include <Files.h>
