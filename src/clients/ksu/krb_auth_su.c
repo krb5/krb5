@@ -45,10 +45,14 @@ int preauth_search_list[] = {
 
 
 
-krb5_boolean krb5_auth_check(krb5_principal client_pname, 
-			     char * hostname, opt_info * options, 
-			     char * target_user, krb5_ccache cc, 
-			     int * path_passwd)
+krb5_boolean krb5_auth_check(client_pname, hostname, options,
+			     target_user, cc, path_passwd)
+    krb5_principal client_pname;
+    char *hostname;
+    opt_info *options;
+    char *target_user;
+    krb5_ccache cc;
+    int *path_passwd;
 {
 krb5_principal client, server, temp_client; 
 krb5_creds tgt, tgtq, cred;
@@ -211,8 +215,12 @@ krb5_boolean zero_password;
 /* krb5_fast_auth checks if ticket for the end server is already in
    the cache, if it is, we don't need a tgt */     
 
-krb5_boolean krb5_fast_auth(krb5_principal client, krb5_principal server, 
-			    char * target_user, krb5_ccache cc){
+krb5_boolean krb5_fast_auth(client, server, target_user, cc)
+    krb5_principal client;
+    krb5_principal server;
+    char *target_user;
+    krb5_ccache cc;
+{
 				 
 krb5_creds tgt, tgtq;
 krb5_ticket * target_tkt;                 
@@ -251,13 +259,14 @@ char * client_name;
 
 
 
-krb5_error_code krb5_verify_tkt_def( /* IN */ 
-				   krb5_principal client,
-				   krb5_principal server,
-				   krb5_keyblock * cred_ses_key,	
-				   krb5_data * scr_ticket,
-				   /* OUT */	 
-				   krb5_ticket ** clear_ticket)
+krb5_error_code krb5_verify_tkt_def(client, server, cred_ses_key, scr_ticket, clear_ticket)
+    /* IN */
+    krb5_principal client;
+    krb5_principal server;
+    krb5_keyblock *cred_ses_key;
+    krb5_data *scr_ticket;
+    /* OUT */
+    krb5_ticket **clear_ticket;
 {
 krb5_keytab keytabid;
 krb5_keytab_entry ktentry;
@@ -350,9 +359,14 @@ krb5_keyblock *	tkt_ses_key;
 }
 
 
-krb5_boolean krb5_get_tkt_via_passwd (krb5_ccache * ccache, krb5_principal client,
-				    krb5_principal server, opt_info * options,
-				    krb5_boolean * zero_password) { 
+krb5_boolean krb5_get_tkt_via_passwd (ccache, client, server,
+				      options, zero_password)
+    krb5_ccache *ccache;
+    krb5_principal client;
+    krb5_principal server;
+    opt_info *options;
+    krb5_boolean *zero_password;
+{
     krb5_address **my_addresses;
     krb5_error_code code;
     krb5_creds my_creds;
@@ -463,7 +477,9 @@ krb5_boolean krb5_get_tkt_via_passwd (krb5_ccache * ccache, krb5_principal clien
 }
 
 
-void dump_principal (char * str, krb5_principal p)
+void dump_principal (str, p)
+    char *str;
+    krb5_principal p;
 {    
 char * stname;
 krb5_error_code retval; 
@@ -475,7 +491,8 @@ krb5_error_code retval;
 		fprintf(stderr, " %s: %s\n", str, stname );
 }
 
-void plain_dump_principal ( krb5_principal p)
+void plain_dump_principal (p)
+    krb5_principal p;
 {    
 char * stname;
 krb5_error_code retval; 
@@ -563,8 +580,14 @@ convtime(p)
         return (r);
 }
 
-krb5_error_code get_tgt_via_login_list(krb5_principal server, krb5_ccache cc,
-		 char ** k5login_plist, krb5_principal * client, int * got_it){
+krb5_error_code get_tgt_via_login_list(server, cc, k5login_plist,
+				       client, got_it)
+    krb5_principal server;
+    krb5_ccache cc;
+    char **k5login_plist;
+    krb5_principal *client;
+    int *got_it;
+{
 
 krb5_creds tgt, tgtq;
 int i =0;	
@@ -631,7 +654,9 @@ A principal is picked that has the best chance of getting in.
 **********************************************************************/
 
 
-krb5_error_code get_best_principal( char ** plist, krb5_principal * client)              
+krb5_error_code get_best_principal(plist, client)
+    char **plist;
+    krb5_principal *client;
 {
 krb5_error_code retval =0; 
 char * client_name;

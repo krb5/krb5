@@ -43,12 +43,16 @@ void show_credential();
    with k5 beta 3 release.                                          
 */
 
-krb5_error_code krb5_ccache_copy (/* IN */  
-				  krb5_ccache cc_def, char * cc_other_tag,
-				  krb5_principal primary_principal,
-				  /* OUT */		
-			          krb5_ccache  * cc_out, krb5_boolean * stored){     
-
+krb5_error_code krb5_ccache_copy (cc_def, cc_other_tag, primary_principal,
+				  cc_out, stored)
+    /* IN */
+    krb5_ccache cc_def;
+    char *cc_other_tag;
+    krb5_principal primary_principal;
+    /* OUT */
+    krb5_ccache *cc_out;
+    krb5_boolean *stored;
+{
 int i=0; 
 krb5_ccache  * cc_other;
 char * cc_def_name;
@@ -111,8 +115,11 @@ struct stat st_temp;
 
 
 
-krb5_error_code krb5_store_all_creds(krb5_ccache  cc, 
-			krb5_creds ** creds_def, krb5_creds ** creds_other ){
+krb5_error_code krb5_store_all_creds(cc, creds_def, creds_other)
+    krb5_ccache cc;
+    krb5_creds **creds_def;
+    krb5_creds **creds_other;
+{
 
 int i = 0; 
 int j = 0; 
@@ -175,8 +182,10 @@ krb5_boolean cmp;
 	return 0;
 }
 
-krb5_boolean compare_creds( krb5_creds * cred1, krb5_creds * cred2){     
-
+krb5_boolean compare_creds(cred1, cred2)
+    krb5_creds *cred1;
+    krb5_creds *cred2;
+{
 krb5_boolean retval; 
 
 	retval = krb5_principal_compare (cred1->client, cred2->client);
@@ -190,8 +199,10 @@ krb5_boolean retval;
 
 
  
-krb5_error_code krb5_get_nonexp_tkts(krb5_ccache  cc,
-					 krb5_creds *** creds_array){
+krb5_error_code krb5_get_nonexp_tkts(cc, creds_array)
+    krb5_ccache cc;
+    krb5_creds ***creds_array;
+{
 
 krb5_creds creds, temp_tktq, temp_tkt;
 krb5_creds **temp_creds; 
@@ -259,7 +270,8 @@ int chunk_count = 1;
 
 extern krb5_deltat krb5_clockskew;
 
-krb5_error_code krb5_check_exp(krb5_ticket_times tkt_time)
+krb5_error_code krb5_check_exp(tkt_time)
+    krb5_ticket_times tkt_time;
 {
 krb5_error_code retval =0;
 krb5_timestamp currenttime;
@@ -285,7 +297,8 @@ krb5_timestamp currenttime;
 }
 
 
-char *flags_string( krb5_creds *cred)
+char *flags_string(cred)
+    krb5_creds *cred;
 {
     static char buf[32];
     int i = 0;
@@ -319,7 +332,8 @@ char *flags_string( krb5_creds *cred)
 static  char *Month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 				"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-void printtime( time_t tv)
+void printtime(tv)
+    time_t tv;
 {
     struct tm *stime;
 
@@ -335,7 +349,9 @@ void printtime( time_t tv)
 
 
 krb5_error_code
-krb5_get_login_princ( const char *luser, char *** princ_list )
+krb5_get_login_princ(luser, princ_list)
+    const char *luser;
+    char ***princ_list;
 {
     struct stat sbuf;
     struct passwd *pwd;
@@ -420,7 +436,9 @@ krb5_get_login_princ( const char *luser, char *** princ_list )
 
 
 void
-show_credential(krb5_creds * cred, krb5_ccache cc)
+show_credential(cred, cc)
+    krb5_creds *cred;
+    krb5_ccache cc;
 {
     krb5_error_code retval;
     char *name, *sname, *flags;
@@ -495,8 +513,11 @@ int gen_sym(){
 	return i;
 }
 
-krb5_error_code krb5_ccache_overwrite( krb5_ccache ccs, krb5_ccache cct,
-				  krb5_principal primary_principal){ 
+krb5_error_code krb5_ccache_overwrite(ccs, cct, primary_principal)
+    krb5_ccache ccs;
+    krb5_ccache cct;
+    krb5_principal primary_principal;
+{
 char * cct_name;
 char * ccs_name; 
 krb5_error_code retval=0;
@@ -540,9 +561,14 @@ struct stat st_temp;
     return retval;	
 }
 
-krb5_error_code krb5_store_some_creds(krb5_ccache  cc, krb5_creds ** creds_def,
-				      krb5_creds ** creds_other,
-				      krb5_principal prst,krb5_boolean *stored){
+krb5_error_code krb5_store_some_creds(cc, creds_def, creds_other, prst,
+				      stored)
+    krb5_ccache cc;
+    krb5_creds **creds_def;
+    krb5_creds **creds_other;
+    krb5_principal prst;
+    krb5_boolean *stored;
+{
 
 int i = 0; 
 int j = 0; 
@@ -595,11 +621,15 @@ but I had to do it this way, since cc_remove function did not come
 with k5 beta 3 release.                                          
 ************************************************************************/
 
-krb5_error_code krb5_ccache_copy_restricted (/* IN */  
-				  krb5_ccache cc_def, char * cc_other_tag,
-				  krb5_principal prst,
-				  /* OUT */		
-			          krb5_ccache  * cc_out, krb5_boolean *stored ){     
+krb5_error_code krb5_ccache_copy_restricted (cc_def, cc_other_tag, prst,
+					     cc_out, stored)
+    krb5_ccache cc_def;
+    char *cc_other_tag;
+    krb5_principal prst;
+    /* OUT */
+    krb5_ccache *cc_out;
+    krb5_boolean *stored;
+{
 
 int i=0; 
 krb5_ccache  * cc_other;
@@ -668,7 +698,9 @@ not available with beta3 release.
 
 ************************************************************/
 
-krb5_error_code krb5_ccache_refresh (  krb5_ccache cc ){     
+krb5_error_code krb5_ccache_refresh (cc)
+    krb5_ccache cc;
+{
 
 int i=0; 
 krb5_error_code retval=0;
@@ -712,7 +744,10 @@ struct stat st_temp;
     return 0;	
 }
 
-krb5_error_code krb5_ccache_filter (  krb5_ccache cc, krb5_principal prst){   
+krb5_error_code krb5_ccache_filter (cc, prst)
+    krb5_ccache cc;
+    krb5_principal prst;
+{
 
 int i=0; 
 krb5_error_code retval=0;
@@ -756,8 +791,10 @@ struct stat st_temp;
     return 0;	
 }
 
-krb5_boolean  krb5_find_princ_in_cred_list ( krb5_creds ** creds_list,
-				      krb5_principal princ){
+krb5_boolean  krb5_find_princ_in_cred_list (creds_list, princ)
+    krb5_creds **creds_list;
+    krb5_principal princ;
+{
 
 int i = 0; 
 krb5_boolean temp_stored = FALSE; 
@@ -777,9 +814,11 @@ krb5_boolean temp_stored = FALSE;
 return temp_stored;
 }
 
-krb5_error_code  krb5_find_princ_in_cache ( krb5_ccache cc,
-					    krb5_principal princ, 
-					    krb5_boolean  * found ){
+krb5_error_code  krb5_find_princ_in_cache (cc, princ, found)
+    krb5_ccache cc;
+    krb5_principal princ;
+    krb5_boolean *found;
+{
 krb5_error_code retval;
 krb5_creds ** creds_list = NULL;
 char * cc_name;

@@ -872,7 +872,10 @@ static char buf[MAXPATHLEN + 4];
 }
 
 
-int set_env_var( char * name, char * value){  
+int set_env_var(name, value)
+    char *name;
+    char *value;
+{
 char * env_var_buf;
 
 	/* allocate extra two spaces, one for the = and one for the \0 */  
@@ -884,7 +887,10 @@ char * env_var_buf;
 
 }
 
-void sweep_up(int use_source_cache, krb5_ccache cc){
+void sweep_up(use_source_cache, cc)
+    int use_source_cache;
+    krb5_ccache cc;
+{
 krb5_error_code retval; 
 char * cc_name;
 struct stat  st_temp;
@@ -910,7 +916,12 @@ get_params is to be called for the -a option or -e option to
 *****************************************************************/
 
 krb5_error_code
-get_params( int * optind, int pargc, char ** pargv, char *** params ) {
+get_params(optind, pargc, pargv, params)
+    int *optind;
+    int pargc;
+    char **pargv;
+    char ***params;
+{
 
 int i,j;
 char ** ret_params;
@@ -955,7 +966,8 @@ void print_status (va_alist)
 }
 
 
-char *get_dir_of_file(char * path)
+char *get_dir_of_file(path)
+    char *path;
 {
     char * temp_path;      
     char * ptr;

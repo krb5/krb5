@@ -35,7 +35,10 @@ get_all_princ_from_file - retrieves all principal names
 void close_time();
 krb5_boolean find_str_in_list();
 
-krb5_error_code get_all_princ_from_file ( FILE * fp, char *** plist){  
+krb5_error_code get_all_princ_from_file (fp, plist)
+    FILE *fp;
+    char ***plist;
+{
 
 	krb5_error_code retval;
 	char * line, * fprinc, * lp, ** temp_list = NULL; 
@@ -86,8 +89,11 @@ list_union - combines list1 and list2 into combined_list.
 	     or used by combined_list.     
 **************************************************************/
 
-krb5_error_code list_union(char ** list1,char ** list2, 
-			   char *** combined_list){  
+krb5_error_code list_union(list1, list2, combined_list)
+    char **list1;
+    char **list2;
+    char ***combined_list;
+{
 
 int c1 =0, c2 = 0, i=0, j=0; 
 char ** tlist;
@@ -134,7 +140,12 @@ char ** tlist;
 }
 
 krb5_error_code 
-filter(FILE *fp,char *cmd, char ** k5users_list,char *** k5users_filt_list){
+filter(fp, cmd, k5users_list, k5users_filt_list)
+    FILE *fp;
+    char *cmd;
+    char **k5users_list;
+    char ***k5users_filt_list;
+{
 
 krb5_error_code retval =0;
 krb5_boolean found = FALSE;
@@ -186,7 +197,10 @@ char ** temp_filt_list;
 }
 
 krb5_error_code
-get_authorized_princ_names( const char *luser, char *cmd, char *** princ_list)
+get_authorized_princ_names(luser, cmd, princ_list)
+    const char *luser;
+    char *cmd;
+    char ***princ_list;
 {
 
     struct passwd *pwd;
@@ -267,15 +281,22 @@ get_authorized_princ_names( const char *luser, char *cmd, char *** princ_list)
     return 0;
 }
 
-void close_time(int k5users_flag, FILE * users_fp,
-                  int k5login_flag, FILE * login_fp){
+void close_time(k5users_flag, users_fp, k5login_flag, login_fp)
+    int k5users_flag;
+    FILE *users_fp;
+    int k5login_flag;
+    FILE *login_fp;
+{
 
         if (!k5users_flag) fclose(users_fp);
         if (!k5login_flag) fclose(login_fp);
 
 }
 
-krb5_boolean find_str_in_list( char ** list , char *  elm){
+krb5_boolean find_str_in_list(list , elm)
+    char **list;
+    char *elm;
+{
 
 int i=0;
 krb5_boolean found = FALSE;
@@ -303,8 +324,10 @@ A principal is picked that has the best chance of getting in.
 **********************************************************************/
 
 
-krb5_error_code get_closest_principal( char ** plist, krb5_principal * client,
-				    krb5_boolean * found )              
+krb5_error_code get_closest_principal(plist, client, found)
+    char **plist;
+    krb5_principal *client;
+    krb5_boolean *found;
 {
 krb5_error_code retval =0; 
 char * client_name;
@@ -379,8 +402,12 @@ find_either_ticket checks to see whether there is a ticket for the
    end server or tgt, if neither is there the return FALSE,
 *****************************************************************/                
 
-krb5_error_code find_either_ticket (krb5_ccache cc, krb5_principal client, 
-krb5_principal end_server, krb5_boolean * found) {
+krb5_error_code find_either_ticket (cc, client, end_server, found)
+    krb5_ccache cc;
+    krb5_principal client;
+    krb5_principal end_server;
+    krb5_boolean *found;
+{
 
 krb5_principal kdc_server; 
 krb5_creds tgt, tgtq;
@@ -423,8 +450,12 @@ if ( ! stat(cc_source_name, &st_temp)){
 }
 
 
-krb5_error_code find_ticket (krb5_ccache cc, krb5_principal client, 
-krb5_principal server, krb5_boolean * found) {
+krb5_error_code find_ticket (cc, client, server, found)
+    krb5_ccache cc;
+    krb5_principal client;
+    krb5_principal server;
+    krb5_boolean *found;
+{
 
 krb5_principal kdc_server; 
 krb5_creds tgt, tgtq;
@@ -468,8 +499,11 @@ char * client_name;
 
 
 
-krb5_error_code find_princ_in_list (krb5_principal princ, 
-				    char **plist , krb5_boolean * found ){  
+krb5_error_code find_princ_in_list (princ, plist, found)
+    krb5_principal princ;
+    char **plist;
+    krb5_boolean *found;
+{
 
 int i=0;
 char * princname; 
@@ -508,11 +542,21 @@ path_out gets set to ...
 
 ***********************************************************************/
 
-krb5_error_code get_best_princ_for_target(int source_uid, int target_uid, 
-			 char * source_user, char * target_user,  
-			 krb5_ccache cc_source, opt_info *options,
-			 char * cmd, char *hostname,  
-			 krb5_principal * client, int * path_out){  
+krb5_error_code get_best_princ_for_target(source_uid, target_uid,
+					  source_user, target_user,
+					  cc_source, options, cmd,
+					  hostname, client, path_out)
+    int source_uid;
+    int target_uid;
+    char *source_user;
+    char *target_user;
+    krb5_ccache cc_source;
+    opt_info *options;
+    char *cmd;
+    char *hostname;
+    krb5_principal *client;
+    int *path_out;
+{
 
 princ_info princ_trials[10]; 
 char * cc_source_name;
