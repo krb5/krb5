@@ -1,3 +1,7 @@
+Tue Nov 12 00:04:00 1996  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (ftpd_userok): Don't undconditionally return -1.
+
 Thu Nov  7 15:38:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* ftpd.c (ftpd_userok): Check return value of krb5_init_context()

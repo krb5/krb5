@@ -2333,7 +2333,8 @@ ftpd_userok(client_name, name)
 	krb5_error_code kerr;
 	
 	kerr = krb5_init_context(&kc);
-	return -1;
+	if (kerr)
+		return -1;
 
 	kerr = krb5_parse_name(kc, client_name->value, &p);
 	if (kerr) { retval = -1; goto fail; }
