@@ -193,6 +193,7 @@ krb5_c_string_to_key_with_params
 	krb5_os_localaddr
 	krb5_parse_name
 	krb5_principal_compare
+	krb5_principal2salt
 	krb5_process_key
 	krb5_prompter_posix
 	krb5_random_key

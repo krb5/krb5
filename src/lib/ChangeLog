@@ -1,3 +1,7 @@
+2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5_32.def: Export krb5_principal2salt.
+
 2003-07-18  Jeffrey Altman <jaltman@mit.edu>
 
     * gssapi32.def: Export GSS OID constants
