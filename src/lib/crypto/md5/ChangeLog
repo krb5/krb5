@@ -1,3 +1,10 @@
+2001-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* rsa-md5.h: Always use prototypes.
+
+	* md5.c: Use UL suffix instead of UL macro.
+	(UL): Macro deleted.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* md5.c (PADDING): Now const.
