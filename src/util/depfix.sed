@@ -24,6 +24,7 @@ s/  */ /g
 
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
+s;/mit/cygnus[^ ]* ;;g
 
 #
 # Now insert a trailing newline...

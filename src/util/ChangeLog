@@ -1,3 +1,8 @@
+Thu Apr 20 21:19:36 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* depfix.sed: Also remove pathnames of the form /mit/cygnus....
+		from the generated list of dependencies.
+
 Sat Apr 15 06:40:28 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* configure.in: Add profile directory
