@@ -1,5 +1,7 @@
 Mon Feb 10 08:39:10 1997  Tom Yu  <tlyu@mit.edu>
 
+	* post.in: Fix recursion rules to deal with Ultrix sh lossage.
+
 	* libobj.in: Remove instances of STAMP.*, since they aren't
 	actually necessary.
 

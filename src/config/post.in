@@ -64,4 +64,5 @@ all-recurse clean-recurse install-recurse check-recurse Makefiles-recurse:
 			echo "Skipping missing directory $(CURRENT_DIR)$$i" ; \
 		fi; \
 	done; \
+	else :; \
 	fi
