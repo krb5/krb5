@@ -407,9 +407,9 @@ strerror(e)
     extern char *sys_errlist[];
 
     if (errno < sys_nerr)
-      s = sys_errlist[errno];
+      return sys_errlist[errno];
     else
-      s = "unknown error";
+      return "unknown error";
 }
 #endif
 

@@ -1,5 +1,7 @@
 Tue Aug  9 16:45:53 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* poplib.c: fix stupid sterror bug
+
 	* Makefile.in:
 	* configure.in: make install fixes
 
