@@ -1,3 +1,10 @@
+Mon May  8 22:13:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* los-proto.h: krb5_read_password - prompt strings should be const
+		char *. 
+		Remove krb5_init_os_context and krb5_free_os_context. (The
+		proper prototypes are already in place i.e.
+		krb5_os_init_context). 
 
 Fri Apr 28 15:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Remove INTERFACE from prototype definitions in adm_proto.h
