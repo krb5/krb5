@@ -1,3 +1,9 @@
+Sat Jun 10 08:14:22 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* acconfig.h: Removed HAS_ANSI_CONST, HAS_ANSI_VOLATILE,
+		HAS_SYS_FILE, HAS_SYS_PARAM_H, TM_IN_SYS_TIME.
+		include/krb5/configure.in does not check for these.
+
 Fri Jun  9 18:01:26 1995    <tytso@rsx-11.mit.edu>
 
 	* aclocal.m4 (CONFIG_RULES): CONFIG_RULES now contains the

@@ -5,13 +5,9 @@
 
 #undef ANSI_STDIO
 #undef HAS_SETVBUF
-#undef HAS_ANSI_CONST
-#undef HAS_ANSI_VOLATILE
 #undef HAS_STDLIB_H
 #undef HAS_STRDUP
 #undef HAS_LABS
-#undef HAS_SYS_FILE_H
-#undef HAS_SYS_PARAM_H
 #undef HAS_VOID_TYPE
 #undef KRB5_PROVIDE_PROTOTYPES
 #undef NEED_SYS_FCNTL_H
@@ -29,7 +25,7 @@
 #undef HAS_UNISTD_H
 #undef KRB5_USE_INET
 #undef ODBM
-#undef TM_IN_SYS_TIME
+
 
 /* Define if MIT Project Athena default configuration should be used */
 #undef KRB5_ATHENA_COMPAT
