@@ -1,3 +1,9 @@
+1999-09-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): For Rhapsody, add "-undefined
+	warning" when building shared libs, and remove "-static" from
+	CC_LINK_STATIC.
+
 1999-09-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Treat Rhapsody like Mac OS 10.

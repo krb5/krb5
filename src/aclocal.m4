@@ -1100,9 +1100,9 @@ mips-*-netbsd*)
 	SHLIB_EXPFLAGS='$(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	SHLIBEXT=.dylib
 	SHOBJEXT=.so
-	LDCOMBINE='cc -dynamiclib -dylib_compatibility_version=$(LIBMAJOR).$(LIBMINOR) -dylib_current_version=$(LIBMAJOR).$(LIBMINOR)'
+	LDCOMBINE='cc -undefined warning -dynamiclib -dylib_compatibility_version=$(LIBMAJOR).$(LIBMINOR) -dylib_current_version=$(LIBMAJOR).$(LIBMINOR)'
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -dynamic'
-	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH) -static'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='DYLD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export DYLD_LIBRARY_PATH;'
 	;;
 
