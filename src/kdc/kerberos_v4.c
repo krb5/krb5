@@ -155,7 +155,7 @@ static int set_tgtkey PROTOTYPE((char *, krb5_kvno));
 #define V4_KDB_REQUIRES_PREAUTH  0x1
 #define V4_KDB_DISALLOW_ALL_TIX  0x2
 #define V4_KDB_REQUIRES_PWCHANGE 0x4
-
+#define V4_KDB_DISALLOW_SVR      0x8
 
 /* v4 compatibitly mode switch */
 #define KDC_V4_NONE		0	/* Don't even respond to packets */
@@ -539,6 +539,9 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     }
     if (isflagset(entries.attributes,  KRB5_KDB_DISALLOW_ALL_TIX)) {
           principal->attributes |= V4_KDB_DISALLOW_ALL_TIX;
+    }
+    if (issrv && isflagset(entries.attributes, KRB5_KDB_DISALLOW_SVR)) {
+	principal->attributes |= V4_KDB_DISALLOW_SVR;
     }
     if (isflagset(entries.attributes,  KRB5_KDB_REQUIRES_PWCHANGE)) {
           principal->attributes |= V4_KDB_REQUIRES_PWCHANGE;
@@ -1091,6 +1094,13 @@ check_princ(p_name, instance, lifetime, p, k5key, issrv)
 	return KERB_ERR_NAME_EXP;
     }
 
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_SVR)) {
+	lt = klog(L_ERR_SEXP, "V5 DISALLOW_SVR set: "
+		  "\"%s\" \"%s\"", p_name, instance);
+	/* Not sure of a better error to return */
+	return KERB_ERR_NAME_EXP;
+    }
+
     /*
      * Does the principal require preauthentication?
      */
@@ -1149,6 +1159,19 @@ set_tgtkey(r, kvno)
     n = kerb_get_principal("krbtgt", r, p, 1, &more, &k5key, kvno, 1);
     if (n == 0)
 	return (KFAILURE);
+
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_ALL_TIX)) {
+	lt = klog(L_ERR_SEXP,
+		  "V5 DISALLOW_ALL_TIX set: \"krbtgt\" \"%s\"", r);
+	krb5_free_keyblock_contents(kdc_context, &k5key);
+	return KFAILURE;
+    }
+
+    if (isflagset(p->attributes, V4_KDB_DISALLOW_SVR)) {
+	lt = klog(L_ERR_SEXP, "V5 DISALLOW_SVR set: \"krbtgt\" \"%s\"", r);
+	krb5_free_keyblock_contents(kdc_context, &k5key);
+	return KFAILURE;
+    }
 
     if (!K4KDC_ENCTYPE_OK(k5key.enctype)) {
 	krb_set_key_krb5(kdc_context, &k5key);
