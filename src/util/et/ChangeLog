@@ -1,3 +1,9 @@
+2000-10-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* com_err.h, error_message.c, et.pbexp, et_c.awk, et_h.awk: 
+        conditionalized com_err so it doesn't need to export et_list 
+        on Mac OS X 
+
 2000-05-07  Miro Jurisic  <meeroh@mit.edu>
 
 	* com_err.c (default_com_err_proc): use strncpy
