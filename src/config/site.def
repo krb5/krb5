@@ -126,3 +126,7 @@
    don't get the benefit.
 */
 #define HavePerl YES
+
+#define	AthenaEnv Yes		/* Define this if you are in the
+				   athena environment.
+				   No one else should define this.  */
