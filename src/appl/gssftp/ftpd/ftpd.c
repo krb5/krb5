@@ -2871,7 +2871,8 @@ secure_gss_error(maj_stat, min_stat, s)
 OM_uint32 maj_stat, min_stat;
 char *s;
 {
-  return reply_gss_error(535, maj_stat, min_stat, s);
+  reply_gss_error(535, maj_stat, min_stat, s);
+  return;
 }
 
 
