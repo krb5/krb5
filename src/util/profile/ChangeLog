@@ -1,3 +1,9 @@
+Thu May  4 23:57:56 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* prof_tree.c (profile_free_node): Copy child->next to a scratch
+		pointer before freeing the node; otherwise we have to
+		dereference a freed object.
+
 Fri Apr 28 15:54:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* prof_parse.c (strip_line): Don't try to strip an empty line.

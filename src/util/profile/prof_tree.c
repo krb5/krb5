@@ -45,7 +45,7 @@ struct profile_node {
 void profile_free_node(node)
 	struct profile_node *node;
 {
-	struct profile_node *child;
+	struct profile_node *child, *next;
 
 	if (node->magic != PROF_MAGIC_NODE)
 		return;
@@ -54,8 +54,10 @@ void profile_free_node(node)
 		free(node->name);
 	if (node->value)
 		free(node->value);
-	for (child=node->first_child; child; child = child->next)
+	for (child=node->first_child; child; child = next) {
+		next = child->next;
 		profile_free_node(child);
+	}
 	node->magic = 0;
 	
 	free(node);
