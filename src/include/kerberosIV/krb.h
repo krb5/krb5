@@ -136,7 +136,7 @@ typedef struct ktext KTEXT_ST;
 /* Maximum alloable clock skew in seconds */
 #define 	CLOCK_SKEW	5*60
 /* Filename for readservkey */
-#define		KEYFILE		"/etc/srvtab"
+#define		KEYFILE		((char*)krb__get_srvtabname("/etc/srvtab"))
 
 /* Structure definition for rd_ap_req */
 

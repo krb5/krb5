@@ -1,3 +1,8 @@
+Sun Nov 12 05:18:05 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* krb.h (KEYFILE): change to call krb__get_srvtabname with a
+	default of the old hardcoded value "/etc/srvtab".
+
 Wed Jun 28 00:01:52 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb4-proto.h: correct signature for krb_rd_req.
