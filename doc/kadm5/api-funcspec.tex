@@ -10,7 +10,7 @@
 
 \title{OV*Secure Admin \\ Functional Specifications}
 \author{}
-\date{\today}
+\date{DRAFT --- \today}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make _ actually generate an _, and allow line-breaking after it.
@@ -68,34 +68,26 @@ in the dictionary will not be accepted.
 component and the realm of the principal's name will not be accepted.
 \end{itemize}
 
-\subsection{Principals, ovsec_kadm_principal_ent_t}
+\subsection{Data Structures}
+
+This section describes the data structures used by the Admin API that
+are unique to \secure{}.
+
+\subsubsection{Principals, ovsec_kadm_principal_ent_t}
 \label{sec:principal-structure}
 
 A Kerberos principal entry is represented by a
 ovsec_kadm_principal_ent_t.  It contains a subset of the information
 stored in the master Kerberos database as well as the additional
-information maintained by \secure{}.  The new principal information
-consists of a named password policy (\v{policy}) and optional
-overrides for each field of the password policy (\v{pw_*}).  
+information maintained by \secure{}.  In the current version, the only
+additional information is the principal's policy and the
+aux_attributes flags.
 
-The policy name and override fields may or may not be enabled
-depending on the value of the aux_attributes bitmask (see section
-\ref{sec:masks}).  Specfically:
-
-\begin{itemize}
-\item For each PW_* bit set in aux_attributes, the corresponding pw_*
-field is enforced on the principal.
-
-\item If the POLICY bit is set in aux_attributes, then for each PW_*
-bit that is {\it not} set in aux_attributes, the corresponding pw_*
-field from the named policy is enforced on the principal.
-
-\item If the POLICY bit is not set, then for each PW_* bit that is
-{\it not} set in aux_attributes, no corresponding policy is enforced.
-\end{itemize}
-
-For a retrieved principal, the value of the policy or pw_* fields when
-the corresponding bits in aux_attributes are not set is undefined.
+The principal may or may not have a policy enforced on it.  If the
+POLICY bit (see section \ref{sec:masks}) is set in aux_attributes, the
+policy field names the principal's policy.  If the POLICY bit is not
+set in aux_attributes, no policy is enforced on the principal and the
+value of the policy field is undefined.
 
 \begin{figure}[htbp]
 \begin{verbatim}
@@ -113,11 +105,6 @@ typedef struct _ovsec_kadm_principal_ent_t {
         krb5_mkvno mkvno;
 
         char * policy;
-        u_int32 pw_min_life;
-        u_int32 pw_max_life;
-        u_int32 pw_min_length;
-        u_int32 pw_min_classes;
-        u_int32 pw_history_num;
         u_int32 aux_attributes;
 } ovsec_kadm_principal_ent_rec, *ovsec_kadm_principal_ent_t;
 \end{verbatim}
@@ -126,8 +113,7 @@ typedef struct _ovsec_kadm_principal_ent_t {
 \end{figure}
 
 The fields of an ovsec_kadm_principal_ent_t are interpreted as
-follows.  For the semantics of the policy overriding fields, see
-\ref{sec:policy-fields}.
+follows.
 
 \begin{description}
 \item[principal] The name of the principal; must conform to Kerberos
@@ -148,24 +134,25 @@ user can still obtain ticket-granting tickets.
 \item[max_life] The maximum lifetime of any Kerberos ticket issued to
 this principal.
 
-\item[attributes] A bitfield of attributes for use by the KDC.  The
-bits are as follows.  Note that only DISALLOW_ALL_TIX and
-REQUIRES_PWCHANGE are explicitly supported by \secure{}.
+\item[attributes] A bitfield of attributes for use by the KDC.  
+Note that only some are explicitly supported by \secure{}.  XXX Note:
+We really should check what all of these mean.
 
-\begin{verbatim}
-KRB5_KDB_DISALLOW_POSTDATED     0x00000001
-KRB5_KDB_DISALLOW_FORWARDABLE   0x00000002
-KRB5_KDB_DISALLOW_TGT_BASED     0x00000004
-KRB5_KDB_DISALLOW_RENEWABLE     0x00000008
-KRB5_KDB_DISALLOW_PROXIABLE     0x00000010
-KRB5_KDB_DISALLOW_DUP_SKEY      0x00000020
-KRB5_KDB_DISALLOW_ALL_TIX       0x00000040
-KRB5_KDB_REQUIRES_PRE_AUTH      0x00000080
-KRB5_KDB_REQUIRES_HW_AUTH       0x00000100
-KRB5_KDB_REQUIRES_PWCHANGE      0x00000200
-KRB5_KDB_DISALLOW_SVR           0x00001000
-KRB5_KDB_PWCHANGE_SERVICE       0x00002000
-\end{verbatim}
+\begin{tabular}{clr}
+{\bf Supported} & {\bf Name} & {\bf Value} \\
+  & KRB5_KDB_DISALLOW_POSTDATED     & 0x00000001 \\
+  & KRB5_KDB_DISALLOW_FORWARDABLE   & 0x00000002 \\
+X & KRB5_KDB_DISALLOW_TGT_BASED     & 0x00000004 \\
+  & KRB5_KDB_DISALLOW_RENEWABLE     & 0x00000008 \\
+  & KRB5_KDB_DISALLOW_PROXIABLE     & 0x00000010 \\
+  & KRB5_KDB_DISALLOW_DUP_SKEY      & 0x00000020 \\
+X & KRB5_KDB_DISALLOW_ALL_TIX       & 0x00000040 \\
+  & KRB5_KDB_REQUIRES_PRE_AUTH      & 0x00000080 \\
+  & KRB5_KDB_REQUIRES_HW_AUTH       & 0x00000100 \\
+X & KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
+  & KRB5_KDB_DISALLOW_SVR           & 0x00001000 \\
+  & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000
+\end{tabular}
 
 \item[mod_name] The name of the Kerberos principal that most recently
 modified this principal.
@@ -181,28 +168,12 @@ this principal's key was last changed.
 \item[policy] If the POLICY bit is set in aux_attributes, the name
 of the policy controlling this principal.
 
-\item[pw_min_life] If the PW_MIN_LIFE bit is set in aux_attributes,
-the pw_min_life for this principal.
-
-\item[pw_max_life] If the PW_MAX_LIFE bit is set in aux_attributes,
-the pw_max_life for this principal.
-
-\item[pw_min_length] If the PW_MIN_LENGTH bit is set in
-aux_attributes, the pw_min_length for this principal.
-
-\item[pw_min_classes] If the PW_MIN_CLASSES bit is set in the
-aux_attributes, the pw_min_classes for this principal.
-
-\item[pw_history_num] If the PW_HISTORY_NUM bit is set in
-aux_attributes, the pw_history_num for this principal.
-
 \item[aux_attributes]  A bitfield of flags for use by the
-administration system.  Currently, the only valid flags specify which
-policy fields are overridden for this principal.  See section
-\ref{sec:masks}.
+administration system.  Currently, the only valid flag is POLICY, and
+it indicates whether or not the principal has a policy enforced on it.
 \end{description}
 
-\subsection{Policies, ovsec_kadm_policy_ent_t}
+\subsubsection{Policies, ovsec_kadm_policy_ent_t}
 \label{sec:policy-fields}
 
 If the POLICY bit is set in aux_attributes, the \v{policy} name field
@@ -224,11 +195,10 @@ typedef struct _ovsec_kadm_policy_ent_t {
 
 The fields of an ovsec_kadm_policy_ent_t are interpreted as follows.
 Note that a policy's values only apply to a principal using that
-policy, and only when the corresponding override bit is not set in the
-principal's aux_attributes field.
+policy.
 
 \begin{description}
-\item[name] The name of this policy, as a NULL-terminated string.
+\item[policy] The name of this policy, as a NULL-terminated string.
 The ASCII characters between 32 (space) and 126 (tilde), inclusive,
 are legal.
 
@@ -256,19 +226,21 @@ set its password to any of its previous pw_history_num passwords.
 A policy cannot be deleted unless this number is zero.
 \end{description}
 
-\subsection{Create/Modify Masks}
+\subsubsection{Create/Modify Masks}
 \label{sec:masks}
 
 The API functions for creating and modifying principals and policies
-allow for a relevant subset of the fields to be specified or changed.
-The chosen fields are determined by a bitmask that is passed to the
-relevant function.  Each API function has different rules for which
-mask values can be specified, and can specify whether a given mask
-value is mandatory, optional, or forbidden.  Mandatory fields must be
-present and forbidden fields must not be present or an error is
-generated.  When creating a principal or policy, optional fields have
-a default value if they are not specified; when modifying a principal
-or policy, optional fields are unchanged if they are not specified.
+allow for a relevant subset of the fields of the
+ovsec_kadm_principal_ent_t and ovsec_kadm_policy_ent_t to be specified
+or changed.  The chosen fields are determined by a bitmask that is
+passed to the relevant function.  Each API function has different
+rules for which mask values can be specified, and can specify whether
+a given mask value is mandatory, optional, or forbidden.  Mandatory
+fields must be present and forbidden fields must not be present or an
+error is generated.  When creating a principal or policy, optional
+fields have a default value if they are not specified; when modifying
+a principal or policy, optional fields are unchanged if they are not
+specified.
 
 The masks for principals are in table \ref{tab:princ-bits} and the
 masks for policies are in table \ref{tab:policy-bits}.  The
@@ -277,19 +249,13 @@ Create and Modify fields, M means mandatory, F means forbidden, and O
 means optional.  Create fields that are optional specify the default
 value.
 
-Note that the POLICY, POLICY_CLR, PW_*, and PW_*_CLR masks are
-special.  When POLICY is set, the policy is assigned to the principal.
-When POLICY_CLR is specified, the policy is unassigned to the
-principal and as a result no policy controls the principal.  When a
-PW_* bit is set, the new value is stored and registered as a policy
-override.  When a PW_*_CLR bit is set, the policy override value is
-removed, thus putting that field back under the principal's policy's
-control.  It is an error to specify both a PW_* bit and its PW_*_CLR
-bit or both the POLICY and POLICY_CLR bits.
+Note that the POLICY and POLICY_CLR bits are special.  When POLICY is
+set, the policy is assigned to the principal.  When POLICY_CLR is
+specified, the policy is unassigned to the principal and as a result
+no policy controls the principal.
 
 If the principal has a policy assigned, the POLICY bit is set in
-aux_attributes.  Each enabled override is indicated by having the
-corresponding PW_* bit set in aux_attributes.
+aux_attributes.
 
 \begin{table}[htbp]
 \begin{tabular}{@{}lclll}
@@ -305,19 +271,9 @@ MOD_TIME                & 0x000040 & mod_date & F & F \\
 MOD_NAME                & 0x000080 & mod_name & F & F \\
 KVNO                    & 0x000100 & kvno & O, 1 & O \\
 MKVNO                   & 0x000200 & mkvno & F & F \\
-POLICY                  & 0x000400 & policy & O, none & O \\
-POLICY_CLR              & 0x000800 & policy & F & O \\
-PW_MAX_LIFE             & 0x001000 & pw_max_life & O, policy & O \\
-PW_MAX_LIFE_CLR         & 0x002000 & pw_max_life & F & O \\
-PW_MIN_LIFE             & 0x004000 & pw_min_life & O, policy & O \\
-PW_MIN_LIFE_CLR         & 0x008000 & pw_min_life & F & O \\
-PW_MIN_LENGTH           & 0x010000 & pw_min_length & O, policy & O \\
-PW_MIN_LENGTH_CLR       & 0x020000 & pw_min_length & F & O \\
-PW_MIN_CLASSES          & 0x040000 & pw_min_classes & O, policy & O \\
-PW_MIN_CLASSES_CLR      & 0x080000 & pw_min_classes & F & O \\
-PW_HISTORY_NUM          & 0x100000 & pw_history_num & O, policy & O \\
-PW_HISTORY_NUM_CLR      & 0x200000 & pw_history_num & F & O \\
-AUX_ATTRIBUTES          & 0x400000 & aux_attributes & O, 0 & O \\
+AUX_ATTRIBUTES          & 0x000400 & aux_attributes & O, 0 & O \\
+POLICY                  & 0x000800 & policy & O, none & O \\
+POLICY_CLR              & 0x001000 & policy & F & O
 \end{tabular}
 \caption{Mask bits for creating/modifying principals.}
 \label{tab:princ-bits}
@@ -326,13 +282,13 @@ AUX_ATTRIBUTES          & 0x400000 & aux_attributes & O, 0 & O \\
 \begin{table}[htbp]
 \begin{tabular}{@{}lclll}
 Name & Value & Field Affected & Create & Modify \\
-POLICY & same & policy & M & F \\
-PW_MAX_LIFE & same & pw_max_life & O, infinite & O \\
-PW_MIN_LIFE & same & pw_min_life & O, 0 & O \\
-PW_MIN_LENGTH & same & pw_min_length & O, 0 & O \\
-PW_MIN_CLASSES & same & pw_min_classes & O, 1 & O \\
-PW_HISTORY_NUM & same & pw_history_num & O, 0 & O \\
-REF_COUNT & 0x01 & pw_refcnt & O, 0 & O 
+POLICY                  & 0x002000 & policy & M & F \\
+PW_MAX_LIFE             & 0x004000 & pw_max_life & O, infinite & O \\
+PW_MIN_LIFE             & 0x008000 & pw_min_life & O, 0 & O \\
+PW_MIN_LENGTH           & 0x010000 & pw_min_length & O, 0 & O \\
+PW_MIN_CLASSES          & 0x020000 & pw_min_classes & O, 1 & O \\
+PW_HISTORY_NUM          & 0x040000 & pw_history_num & O, 0 & O \\
+REF_COUNT               & 0x080000 & pw_refcnt & O, 0 & O 
 \end{tabular}
 \caption{Mask bits for creating/modifying policies.}
 \label{tab:policy-bits}
@@ -373,6 +329,8 @@ policy.
 \item[OVSEC_KADM_UNK_POLICY] The named policy does not exist.
 \item[OVSEC_KADM_BAD_MASK] The principal or policy field mask is invalid
 for the current operation.
+\item[OVSEC_KADM_BAD_CLASS] The number of character classes specified
+is invalid.
 \item[OVSEC_KADM_PASS_Q_TOOSHORT] The password does not contain enough
 characters.
 \item[OVSEC_KADM_PASS_Q_CLASS] The password must contain characters
@@ -426,12 +384,10 @@ ever returned to an unauthorized user.
 obviously invalid values, and returns OVSEC_KADM_BAD_ARG if any are
 detected.
 
-\item Any function that uses a policy value uses the principal's
-policy override value if the appropriate aux_attributes bit is set;
-otherwise, if the POLICY bit is set in aux_attributes, it uses the
-value from the principal's policy.  If a function attempts to check a
-policy value and neither the principal's corresponding PW_* nor POLICY
-bits are set in aux_attributes, the policy check is not performed.
+\item Any function that performs a policy check uses the policy named
+in the principal's policy field.  If the POLICY bit is not set in the
+principal's aux_attributes field, however, the principal has no
+policy, so the policy check is not performed.
 
 \item Unless otherwise specified, all functions return OVSEC_KADM_OK.
 \end{itemize}
@@ -447,7 +403,8 @@ rename_principal & add and delete & Rename a principal. \\
 get_principal & get\footnotemark & Retrieve a principal. \\
 chpass_principal & modify\footnotemark[\thefootnote] &
          Change a principal's password. \\
-randkey_principal & modify & Randomize a principal's key. \\
+randkey_principal & modify\footnotemark[\thefootnote] &
+        Randomize a principal's key. \\
 create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
@@ -466,8 +423,7 @@ details.}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_create_principal(ovsec_kadm_princ_ent_t, 
-                ovsec_kadm_princ_mask_t, char *);
+ovsec_kadm_create_principal(ovsec_kadm_princ_ent_t, u_int32, char *);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: add
@@ -485,10 +441,15 @@ count by one.
 
 \item Set the pw_expiration field.
 \begin{enumerate}
-\item If the POLICY bit is not set, set pw_expiration to never.
-\item Otherwise, if the PW_EXPIRATION bit is set, set
-pw_expiration to the given value.
-\item Otherwise, set pw_expiration time to now + pw_max_life.
+\item If the POLICY bit is not set, then
+\begin{enumerate}
+\item if the PW_EXPIRATION bit is set, set pw_expiration to the given
+value, else
+\item set pw_expiration to never.
+\end{enumerate}
+\item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
+the maximum of the given value and now + pw_max_life.
+\item Otherwise, set pw_expiration to now + pw_max_life.
 \end{enumerate}
 
 \item Set last_pwd_change and mod_date to now and set mod_name to caller.
@@ -529,8 +490,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_modify_principal(ovsec_kadm_prin_ent_t,
-                        ovsec_kadm_princ_mask);
+ovsec_kadm_modify_principal(ovsec_kadm_prin_ent_t, u_int32);
 \end{verbatim}
 
 Modify the attributes of the principal named in
@@ -544,8 +504,8 @@ AUTHORIZATION REQUIRED: modify
 \item Return OVSEC_KADM_BAD_MASK if the mask is invalid.
 \item If POLICY bit is set but the new policy does not exist, return
 OVSEC_KADM_UNK_POLICY.
-\item If any of the POLICY, POLICY_CLR, PW_*, or PW_*_CLR bits are
-set, update the corresponding bits in aux_attributes.
+\item If either the POLICY or POLICY_CLR bits are set, update the
+corresponding bits in aux_attributes.
 
 \item Update policy reference counts.
 \begin{enumerate}
@@ -557,14 +517,15 @@ aux_attributes is set, decrement policy count on old policy.
 
 \item Set pw_expiration according to the new policy.
 \begin{enumerate}
-\item If the POLICY bit is not set in aux_attributes, set
-pw_expiration to never.  
-\item Otherwise, if PW_EXPIRATION is specified, then set
-pw_expiration to the new value.
-\item Otherwise, if PW_MAX_LIFE changes (either because it or POLICY
-is specified in the mask), set pw_expiration to last_pwd_change +
-pw_max_life.  Note that this means an explicit PW_EXPIRATION overrides
-pw_max_life.
+\item If the POLICY bit is not set in aux_attributes, then
+\begin{enumerate}
+\item if the PW_EXPIRATION bit is set, set pw_expiration to the given
+value, else
+\item set pw_expiration to never.
+\end{enumerate}
+\item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
+the maximum of the given value and last_pwd_change + pw_max_life.
+\item Otherwise, set pw_expiration to last_pwd_change + pw_max_life.
 \end{enumerate}
 
 \item Update the fields specified in the mask.
@@ -585,8 +546,7 @@ policy does not exist.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_rename_principal(krb5_principal source,
-                         krb5_principal target);
+ovsec_kadm_rename_principal(krb5_principal source, krb5_principal target);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: add and delete
@@ -597,6 +557,19 @@ OVSEC_KADM_UNK_PRINC error.
 \item Check to see if target exists, if so return OVSEC_KADM_DUP error.
 \item Rename principal.
 \end{enumerate}
+
+Note that since the principal name may have been used as the salt for
+the principal's key, renaming the principal may render the principal's
+current password useless; with the new salt, the key generated by
+string-to-key on the password will suddenly be different.  Therefore,
+an application that renames a principal must also require the user to
+specify a new password for the principal (and administrators should
+notify the affected party).
+
+Note also that, by the same argument, renaming a principal will
+invalidate that principal's password history information; since the
+salt will be different, a user will be able to select a previous
+password without error.
 
 RETURN CODES: 
 
@@ -609,37 +582,51 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_chpass_principal(krb5_principal princ, char *pw);
+ovsec_kadm_chpass_principal(krb5_principal princ, char *pw, 
+                int override_qual);
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
 same as the princ argument.
 
-Change a principal's password.  In the description below, all the
-checks that can result in password-related errors do not apply to
-callers that have the modify privilege but are {\it not} the same as
-the principal being affected.  Thus, an administrator can change a
-principal's password to one that violates the principal's policy, but
-cannot change its own password to one that violates its own policy.
+Change a principal's password.  
 
-Also note that the password quality or history steps should only be
-performed if the POLICY bit is set in the principal's aux_attributes
-field.
+In the description below, all the checks that can result in
+policy-related errors do not apply to callers that have the modify
+privilege but are {\it not} the same as the principal being affected.
+Thus, an administrator can change a principal's password in violation
+of that principal's policy, but cannot change its own password in
+violation of its own policy.
+
+Note that the policy checks are only be performed if the POLICY bit is
+set in the principal's aux_attributes field.
 
 \begin{enumerate}
+\item Determine whether password quality checks should be overridden.
+\begin{enumerate}
+\item If the POLICY bit is not set in aux_attributes, set
+override_qual to true.
+\item Otherwise, if the caller does not have the modify priviledge,
+set override_qual to false.
+\item Otherwise, if the caller has the modify privilege, but princ is the
+same as the caller, set override_qual to false.
+\item Otherwise, if the caller has the modify privilege and princ is
+not the same as the caller, leave override_qual as it is.
+\end{enumerate}
 \item Make sure principal exists, if not return OVSEC_KADM_UNK_PRINC error.
-\item See if current password is older than password minimum life,
-if not return OVSEC_KADM_PASS_TOOSOON error.
-\item If the password does not meet quality standards, return the
-appropriate OVSEC_KADM_PASS_Q_* error code.
-\item Convert password to key.
-\item Check to see if new key is in history, if so return
-OVSEC_KADM_PASS_REUSE error.
+\item If override_qual is false and (now - last_pwd_change) $<$
+pw_min_life, return OVSEC_KADM_PASS_TOOSOON.
+\item If override_qual is false and the password does not meet the quality
+standards, return the appropriate OVSEC_KADM_PASS_Q_* error code.
+\item Convert password to key.  The key is generated with
+Kerberos' string-to-key function, using the salt method specified on
+the admin server's command line; see section \ref{sec:commandline}.
+\item If override_qual is false and the new key is in the principal's
+password history, return OVSEC_KADM_PASS_REUSE.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
-\item If the POLICY bit in aux_attributes if set, set pw_expiration to
-now + max_pw_life.
+\item If the POLICY bit is set, set pw_expiration to now + max_pw_life.
 \item Update last_pwd_change and mod_date to now, update mod_name to
 caller.
 \end{enumerate}
@@ -660,21 +647,46 @@ life.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_randkey_principal(krb5_principal, krb5_keyblock **);
+ovsec_kadm_randkey_principal(krb5_principal, krb5_keyblock **,
+		int override_qual);
 \end{verbatim}
-
-AUTHORIZATION REQUIRED: modify
 
 Generate and assign a new random key to the named principal, and
 return the generated key in allocated storage.  The caller must free
 the returned krb5_keyblock * with krb5_free_keyblock.
 
+AUTHORIZATION REQUIRED: modify, or the calling principal being the
+same as the princ argument.
+
+In the description below, all the checks that can result in
+key-related errors do not apply to callers that have the modify
+privilege but are {\it not} the same as the principal being affected.
+Thus, an administrator can randomize a principal's password in
+violation of the principal's policy, but cannot randomize its own
+password in violation of its own policy.
+
+Note that the policy checks are only be performed if the POLICY bit is
+set in the principal's aux_attributes field.
+
 \begin{enumerate}
+\item Determine whether policy checks should be overriden.
+\begin{enumerate}
+\item If the POLICY bit is not set in aux_attributes, set
+override_qual to true.
+\item Otherwise, if the caller does not have the modify priviledge,
+set override_qual to false.
+\item Otherwise, if the caller has the modify privilege, but princ is the
+same as the caller, set override_qual to false.
+\item Otherwise, if the caller has the modify privilege and princ is
+not the same as the caller, leave override_qual as it is.
+\end{enumerate}
 \item If the principal does not exist, return OVSEC_KADM_UNK_PRINC.
+\item If override_qual is false and (now - last_pwd_change) $<$
+pw_min_life, return OVSEC_KADM_PASS_TOOSOON.
 \item Store old key in history.
 \item Update principal to have new key.
 \item Increment principal's key version number by one.
-\item If the POLICY bit in aux_attributes if set, set pw_expiration to
+\item If the POLICY bit in aux_attributes is set, set pw_expiration to
 now + max_pw_life.
 \item Update last_pwd_change and mod_date to now, update mod_name to
 caller.
@@ -684,6 +696,8 @@ RETURN CODES:
 
 \begin{description}
 \item[OVSEC_KADM_UNK_PRINC] Principal does not exist.
+\item[OVSEC_KADM_PASS_TOOSOON] The minimum lifetime for the current
+key has not expired.
 \end{description}
 
 This function can also be used as part of a sequence to create a new
@@ -705,8 +719,7 @@ KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_principal(krb5_principal princ,,
-                        ovsec_kadm_princ_ent_t *ent);  
+ovsec_kadm_get_principal(krb5_principal princ, ovsec_kadm_princ_ent_t *ent);  
 \end{verbatim}
 
 Return the principal's attributes in allocated memory.  The caller
@@ -725,8 +738,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_create_policy(ovsec_kadm_policy_ent_t,
-                        ovsec_kadm_policy_mask); 
+ovsec_kadm_create_policy(ovsec_kadm_policy_ent_t, u_int32); 
 \end{verbatim}
 
 Create a new policy.
@@ -737,6 +749,8 @@ AUTHORIZATION REQUIRED: add
 \item Check to see if mask is valid, if not return OVSEC_KADM_BAD_MASK error.
 \item Check to see if the policy already exists, if so return
 OVSEC_KADM_DUP error. 
+\item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
+3, or 4, return OVSEC_KADM_BAD_CLASS.
 \item Create a new policy setting the appropriate fields determined
 by the mask.
 \end{enumerate}
@@ -747,6 +761,8 @@ RETURN CODES:
 \item[OVSEC_KADM_DUP] Policy already exists
 \item[OVSEC_KADM_BAD_MASK] The mask is not valid for a create
 operation.
+\item[OVSEC_KADM_BAD_CLASS] The specified number of character classes
+is invalid.
 \end{description}
 
 \subsection{ovsec_kadm_delete_policy}
@@ -777,8 +793,7 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_modify_policy(ovsec_kadm_policy_ent_t,
-                        ovsec_kadm_policy_mask);
+ovsec_kadm_modify_policy(ovsec_kadm_policy_ent_t, u_int32);
 \end{verbatim}
 
 Modify an existing policy.  Note that modifying a policy has no affect
@@ -791,6 +806,8 @@ AUTHORIZATION REQUIRED: modify
 \item Check to see if mask is legal, if not return OVSEC_KADM_BAD_MASK error.
 \item Check to see if policy exists, if not return
 OVSEC_KADM_UNK_POLICY error.
+\item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
+3, or 4, return OVSEC_KADM_BAD_CLASS.
 \item Update the fields specified in the mask.
 \end{enumerate}
 
@@ -800,14 +817,15 @@ RETURN CODES:
 \item[OVSEC_KADM_UNK_POLICY] Policy not found.
 \item[OVSEC_KADM_BAD_MASK] The mask is not valid for a modify
 operation.
+\item[OVSEC_KADM_BAD_CLASS] The specified number of character classes
+is invalid.
 \end{description}
 
 \subsection{ovsec_kadm_get_policy}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_policy(char *,
-                        ovsec_kadm_policy_ent_t *); 
+ovsec_kadm_get_policy(char *, ovsec_kadm_policy_ent_t *); 
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: get
@@ -1015,6 +1033,10 @@ admin principal database.
 \item  If a policy's reference count does not equal the
 number of principals that use the policy, the reference count is
 corrected.
+
+\item  If a principal has the POLICY bit set in aux_attributes, and
+its (pw_expiration - last_pwd_change) $>$ pw_max_life, the pw_expiration
+field is set to last_pwd_change + pw_max_life.
 \end{itemize}
 
 The operations that are only performed if -p is not specified are:

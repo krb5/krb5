@@ -4,15 +4,14 @@
 
 \setlength{\parskip}{.7\baselineskip}
 \setlength{\parindent}{0pt}
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
 
 \def\secure{OV*Secure}
 \def\v#1{\verb+#1+}
+\def\k#1{K$_#1$}
 
 \title{OV*Secure Admin Server \\ Implementation Design}
-\author{}
-\date{\today}
+\author{Barry Jaspan}
+\date{DRAFT --- \today}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Make _ actually generate an _, and allow line-breaking after it.
@@ -26,8 +25,6 @@
 \maketitle
 
 {\setlength{\parskip}{0pt}\tableofcontents}
-
-This section describes the implementation design for the admin server.
 
 \section{Overview}
 
@@ -54,6 +51,16 @@ information.
 \item The policy database stores \secure{} policy information.
 \end{itemize}
 
+The per-principal information stored in the admin principal database
+consists of the principal's policy name and an array of the
+principal's previous keys.  The old keys are stored encrypted in the
+key of the special principal ``kadmin/history'' that is created by
+ovsec_kadm_create.  Since a change in kadmin/history's key renders
+every principal's key history array useless, it can only be changed
+using the ovsec_kadm_edit utility; that program will reencrypt every
+principal's key history in the new key.  The admin server refuses all
+requests to change kdamin/history's key.
+
 \section{Main}
 
 The admin server starts by trapping all fatal signals and directing
@@ -71,11 +78,6 @@ The RPC for the Admin system will be based on SUNRPC.  SUNRPC is used
 because it is a well-known, portable RPC mechanism.  The underlying
 external data representation (xdr) mechanisms for wire encapsulation
 are well-known and extensible.
-
-%The RPC specifics can be found in \verb+~access/src/rpc/acl.x+.
-%[This, and all the other rpcgen files referenced in this document
-%should be in appendices at some point.]  Supporting data types are in
-%\verb+~access/src/common/api_types.x+.
 
 Authentication to the admin server will be handled by adding a GSS-API
 authentication type within the existing SUNRPC structure.  This will
@@ -97,35 +99,36 @@ necessary bookkeeping information.  The records are keyed by the ASCII
 representation of the principal's name, including the trailing NULL.
 
 \begin{verbatim}
-#define MAX_PW_HIST 10
-
 typedef struct _osa_princ_ent_t {
         krb5_principal name;
 
         char * policy;
-        u_int32 pw_min_life;
-        u_int32 pw_max_life;
-        u_int32 pw_min_length;
-        u_int32 pw_min_classes;
-        u_int32 pw_history_num;
         u_int32 aux_attributes;
 
-        krb5_keyblock old_keys[MAX_PW_HIST];
+        u_int32 num_old_keys;
         u_int32 next_old_key;
-
-        u_int32 expansion[8];
+        krb5_kvno admin_history_kvno;
+        krb5_encrypted_keyblock *old_keys;
 } osa_princ_ent_rec, *osa_princ_ent_t;
 \end{verbatim}
 
-The only fields that are different from ovsec_kadm_principal_ent_t are
-old_keys and next_key.
+The fields that are different from ovsec_kadm_principal_ent_t are:
 
 \begin{description}
-\item[old_keys] The array of previous keys used for password history
-checking.  Only pw_history_num of these keys should be checked.
+\item[num_old_keys] The number of previous keys in the old_keys array.
+This value must be 0 $\le$ num_old_keys $<$ pw_history_num.
 
-\item[next_key] The index into old_keys where the next key should be
-inserted.  This value is always computed modulo pw_history_num.
+\item[next_old_key] The index into old_keys where the next key should
+be inserted.  This value must be 0 $\le$ next_old_key $\le$
+num_old_keys.
+
+\item[admin_history_kvno] The key version number of the admin/history
+principal's key used to encrypt the values in old_keys.  If the admin
+server finds that admin/history's kvno is different from the value in
+this field, an error message is logged.  (XXX where?)
+
+\item[old_keys] The array of the principal's previous keys, each
+encrypted in the admin/history key.  There are num_old_keys elements.
 \end{description}
 
 \subsection{Policy, osa_policy_ent_t}
@@ -145,7 +148,6 @@ typedef struct _osa_policy_ent_t {
         u_int32 pw_history_num;
 
         u_int32 refcnt;
-        u_int32 expansion[8];
 } osa_policy_ent_rec, *osa_policy_ent_t;
 \end{verbatim}
 
@@ -223,7 +225,8 @@ presented here.
 \item[OSA_ADB_FAILURE] General failure.
 \end{description}
 
-Unless otherwise specified, database functions return OSA_ADB_OK.
+Database functions can also return system errors.  Unless otherwise
+specified, database functions return OSA_ADB_OK.
 
 \begin{verbatim}
 osa_adb_ret_t
@@ -378,117 +381,61 @@ void krb5_dbm_db_free_principal(krb5_db_entry *entries, int nentries)
 Frees entries returned by krb5_dbm_db_get_principal.  nentries entries
 in the array entries will be freed.
 
-\subsubsection{Access Initialization}
+\subsubsection{Initialization and Key Access}
 
-Before it is possible to access keys from the Kerberos database, the
-Kerberos master key must be acquired so that it can be used to encrypt
-and decrypt principal keys as necessary.
-
-Accessing principal keys from the Kerberos database is not as simple
-as calling krb5_dbm_db_get_principal.  The following function (from
-the \v{krb524} server) performs the necessary initialization.
+Keys stored in the Kerberos database are encrypted in the Kerberos
+master key.  The admin server will therefore have to acquire the key
+before it can perform any key-changing operations, and will have to
+decrypt and encrypt the keys retrieved from and placed into the
+database via krb5_db_get_principal and _put_principal.  This section
+describes the internal admin server API that will be used to perform
+these functions.
 
 \begin{verbatim}
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#ifdef PROVIDE_DES_CBC_CRC
-#include <krb5/mit-des.h>
-#endif
-
 krb5_principal master_princ;
 krb5_encrypt_block master_encblock;
 krb5_keyblock master_keyblock;
 
-void init_master()
-{
-     int ret;
-     char *realm;
-     
-     if (ret = krb5_get_default_realm(&realm)) {
-          com_err(whoami, ret, "getting default realm");
-          cleanup_and_exit(1);
-     }
-     if (ret = krb5_db_setup_mkey_name(NULL, realm, (char **) 0,
-                                       &master_princ)) {
-          com_err(whoami, ret, "while setting up master key name");
-          cleanup_and_exit(1);
-     }
-
-#ifdef PROVIDE_DES_CBC_CRC
-     master_encblock.crypto_entry = &mit_des_cryptosystem_entry;
-#else
-     error(You gotta figure out what cryptosystem to use in the KDC);
-#endif
-
-     master_keyblock.keytype = KEYTYPE_DES;
-     if (ret = krb5_db_fetch_mkey(master_princ, &master_encblock,
-                                  FALSE, /* non-manual type-in */
-                                  FALSE, /* irrelevant, given prev. arg */
-                                  0, &master_keyblock)) {
-          com_err(whoami, ret, "while fetching master key");
-          cleanup_and_exit(1);
-     }
-
-     if (ret = krb5_db_init()) {
-          com_err(whoami, ret, "while initializing master database");
-          cleanup_and_exit(1);
-     }
-     if (ret = krb5_process_key(&master_encblock, &master_keyblock)) {
-          krb5_db_fini();
-          com_err(whoami, ret, "while processing master key");
-          cleanup_and_exit(1);
-     }
-}
+void kdc_init_master()
 \end{verbatim}
 
-\subsubsection{Reading Principals and Keys}
+kdc_init_master opens the database and acquires the master key.  It
+also sets the global variables master_princ, master_encblock, and
+master_keyblock:
 
-The following function, taken from \v{krb524d} and modified somewhat,
-shows how to read a principal from the database and decrypt its key.
-server, key, and kvno must all point to allocated storage that will be
-filled in.  The returned values must be freed with
-krb5_db_free_principal and krb5_free_keyblock_contents.
+\begin{itemize}
+\item master_princ is set to the name of the Kerberos master principal
+(\v{K/M@REALM}).
+
+\item master_encblock is something I have no idea about.
+
+\item master_keyblock is the Kerberos master key
+\end{itemize}
 
 \begin{verbatim}
-krb5_error_code kdc_get_server(service, server, key, kvno)
-   krb5_principal service;
-   krb5_db_entry *server;
-   krb5_keyblock *key;
-   krb5_kvno *kvno;
-{
-     krb5_error_code ret;
-     int nprincs;
-     krb5_boolean more;
-
-     nprincs = 1;
-     if (ret = krb5_db_get_principal(service, server, &nprincs, &more)) 
-          return(ret);
-     
-     if (more) {
-          krb5_db_free_principal(server, nprincs);
-          return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-     } else if (nprincs != 1) {
-          krb5_db_free_principal(server, nprincs);
-          return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-     }
-
-     /*
-      * convert server.key into a real key (it is encrypted in the
-      * database)
-      */
-     ret = krb5_kdc_decrypt_key(&master_encblock, server->key, key);
-     if (kvno)
-          *kvno = server->kvno;
-     return ret;
-}
+krb5_error_code kdb_get_entry_and_key(krb5_principal principal,
+                                      krb5_db_entry *entry,
+                                      krb5_keyblock *key)
 \end{verbatim}
 
-\subsubsection{Writing Principals and Keys}
+kdb_get_entry_and_key retrieves the named principal's entry from the
+database in entry, and decrypts its key into key.  The caller must
+free entry with krb5_dbm_db_free_principal and free key-$>$contents with
+free.\footnote{The caller should also \v{memset(key-$>$contents, 0,
+key-$>$length)}.  There should be a function krb5_free_keyblock_contents
+for this, but there is not.}
 
-I don't know how to do this yet, but the code is contained in
-\v{src/admin/edit/kdb5_edit.c}.
+\begin{verbatim}
+krb5_error_code kdb_put_entry_pw(krb5_db_entry *entry, char *pw)
+\end{verbatim}
+
+kdb_put_entry_pw stores entry in the database.  All the entry values
+must already be set; this function does not change any of them except
+the key.  pw, the NULL-terminated password string, is converted to a
+key using string-to-key with the salt type specified in
+entry-$>$salt_type.\footnote{The salt_type should be set based on the
+command line arguments to the kadmin server (see the ``Command Line''
+section of the functional specification).}
 
 \section{Admin Principal and Policy Database Implementation}
 
@@ -533,10 +480,8 @@ that are not addresed by the functional specifications.
 If the named principal exists in either the Kerberos or admin
 principal database, but not both, return OVSEC_KADM_BAD_DB.
 
-Initialize the elements of the key history array to contain DES keys
-of all zero bits; such a key is guaranteed to be invalid (it does not
-have proper parity) and so will never generate a false
-OVSEC_KADM_PASS_REUSE error.
+The principal's initial key is not stored in the key history array at
+creation time.
 
 \subsection{ovsec_kadm_delete_principal}
 
@@ -548,29 +493,50 @@ principal database, but not both, return OVSEC_KADM_BAD_DB.
 If the named principal exists in either the Kerberos or admin
 principal database, but not both, return OVSEC_KADM_BAD_DB.
 
-If PW_HISTORY is specified and the new value $n$ is smaller than the
-old value, copy the key values so that the $n$ most recent keys end up
-in the part of the history array that will be checked by
-ovsec_kadm_chpass_principal.  If the new value $n$ is larger than the
-old value, initialize the previously unused elements to all have DES
-keys with all zero bits.
+If pw_history_num changes and the new value $n$ is smaller than the
+current value of num_old_keys, old_keys should end up with the $n$
+most recent keys; these are found by counting backwards $n$ elements
+in old_keys from next_old_key.  next_old_keys should then be reset to
+0, the oldest of the saved keys, and num_old_keys set to $n$, the
+new actual number of old keys in the array.  
 
-\subsection{ovsec_kadm_chpass_principal}
+\subsection{ovsec_kadm_chpass_principal, randkey_principal}
 
-When comparing the new key to the elements of the key history array,
-always compare it to the first pw_history_num values.  Even if fewer
-than pw_history_num keys have been placed into the array, the create
-and modify functions guarantee that the unused elements will be
-invalid DES keys and will therefore not result in a false
-OVSEC_KADM_PASS_REUSE error.
+The algorithm for determining whether a password is in the principal's
+key history is complicated by the use of the kadmin/history \k{h}
+encrypting key.  
 
-Insert the new key as the next_key element in the history array, and
-increment next_key by one modulo pw_history_num.
+\begin{enumerate}
+\item For ovsec_kadm_chpass_principal, convert the password to a key
+using string-to-key and the salt method specified by the command line
+arguments.
+
+\item If the POLICY bit is set and pw_history_num is not zero, check
+if the new key is in the history.
+\begin{enumerate}
+\item Retrieve the principal's current key and decrypt it with \k{M}.
+If it is the same as the new key, return OVSEC_KADM_PASS_REUSE.
+\item Retrieve the kadmin/history key \k{h} and decrypt it with \k{M}.
+\item Encrypt the principal's new key in \k{h}.
+\item If the principal's new key encrypted in \k{h} is in old_keys,
+return OVSEC_KADM_PASS_REUSE.
+\item Encrypt the principal's current key in \k{h} and store it in
+old_keys.
+\item Erase the memory containing \k{h}.
+\end{enumerate}
+
+\item Encrypt the principal's new key in \k{M} and store it in the
+database.
+\item Erase the memory containing \k{M}.
+\end{enumerate}
+
+To store the an encrypted key in old_keys, insert it as the
+next_old_key element of old_keys, and increment next_old_key by one
+modulo pw_history_num.
 
 \subsection{ovsec_kadm_get_principal}
 
 If the named principal exists in either the Kerberos or admin
 principal database, but not both, return OVSEC_KADM_BAD_DB.
-
 
 \end{document}
