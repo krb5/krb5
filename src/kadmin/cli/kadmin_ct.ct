@@ -32,9 +32,6 @@ request kadmin_delprinc, "Delete principal",
 request kadmin_modprinc, "Modify principal",
 	modify_principal, modprinc;
 
-request kadmin_renprinc, "Rename principal",
-	rename_principal, renprinc;
-
 request kadmin_cpw, "Change password",
 	change_password, cpw;
 
