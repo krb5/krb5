@@ -1,3 +1,10 @@
+Thu Dec  3 22:27:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode_test.c (main): Add variant test cases on
+	enc_tkt_part to test bit string values that aren't exactly 32
+	bits, including 38, 40, 29, and 24 bits to test boundary
+	conditions.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5_encode_test.c (PRS): POSIX states that getopt returns -1

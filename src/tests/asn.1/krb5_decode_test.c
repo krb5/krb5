@@ -44,7 +44,6 @@ int main(argc, argv)
     assert(comparator(&ref,var),typestring);\
     printf("%s\n",description)
 
-
   /****************************************************************/
   /* decode_krb5_authenticator */
   {
@@ -95,6 +94,17 @@ int main(argc, argv)
     ktest_destroy_authorization_data(&(ref.authorization_data));
   
     decode_run("enc_tkt_part","(optionals NULL)","63 81 A5 30 81 A2 A0 07 03 05 00 FE DC BA 98 A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part);
+
+    decode_run("enc_tkt_part","(optionals NULL + bitstring enlarged to 38 bits)","63 81 A6 30 81 A3 A0 08 03 06 02 FE DC BA 98 DC A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part);
+
+    decode_run("enc_tkt_part","(optionals NULL + bitstring enlarged to 40 bits)","63 81 A6 30 81 A3 A0 08 03 06 00 FE DC BA 98 DE A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part);
+
+    decode_run("enc_tkt_part","(optionals NULL + bitstring reduced to 29 bits)","63 81 A5 30 81 A2 A0 07 03 05 03 FE DC BA 98 A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part);
+
+    ref.flags &= 0xFFFFFF00;
+
+    decode_run("enc_tkt_part","(optionals NULL + bitstring reduced to 24 bits)","63 81 A4 30 81 A1 A0 06 03 04 00 FE DC BA A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part);
+    
   }  
   
   /****************************************************************/
