@@ -276,3 +276,6 @@
 #define	OptimizedCDebugFlags -O3
 #define DefaultCDebugFlags OptimizedCDebugFlags -g
 #endif
+#define HasTcl YES
+#define TclIncludes -I/u1/tcl/include
+#define TclLibs -L/u1/tcl/lib -ltcl -lm

@@ -172,6 +172,18 @@
 #define HasHashLibrary NO
 #endif
 
+#ifndef HasTcl
+#define HasTcl NO
+#define TclDefines /**/
+#else
+#define TclDefines -DTCL
+#endif
+#ifndef TclLibs
+#define TclLibs /**/
+#endif
+#ifndef TclIncludes
+#define TclIncludes /**/
+#endif
 /* Hack around sun cpp bug */
   
 PEPSY_WARNING_STRING = \
@@ -651,3 +663,7 @@ P_KRB4_COMPAT=-UKrb4Compat
                     Concat(Krb5Incdir,/krb5/asn.1) \
                     Concat(Krb5Incdir,/kerberosIV)
  KRB5_OTHERMKDIRS = Krb5Othermkdirs
+
+      TCLINCLUDES = TclIncludes
+          TCLLIBS = TclLibs
+       TCLDEFINES = TclDefines
