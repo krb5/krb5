@@ -1,3 +1,15 @@
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Fix memcpy argument to
+	actually be a pointer.
+	(asn1_encode_enumerated): Drop "const" from scalar argument type.
+	* asn1_encode.h (asn1_encode_integer, asn1_encode_enumerated,
+	asn1_encode_unsigned_integer, asn1_encode_octetstring,
+	asn1_encode_charstring, asn1_encode_printablestring,
+	asn1_encode_ia5string, asn1_encode_generaltime,
+	asn1_encode_generalstring): Drop "const" from scalar argument
+	types.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_encode.c (asn1_encode_generaltime): Use gmtime_r if

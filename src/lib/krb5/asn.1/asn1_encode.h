@@ -50,7 +50,7 @@
 */
 
 asn1_error_code asn1_encode_integer
-	(asn1buf *buf, const long val, unsigned int *retlen);
+	(asn1buf *buf, long val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns 
@@ -59,10 +59,10 @@ asn1_error_code asn1_encode_integer
               to expand the buffer. */
 
 asn1_error_code asn1_encode_enumerated
-(asn1buf *buf, const long val, unsigned int *retlen);
+(asn1buf *buf, long val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_unsigned_integer
-	(asn1buf *buf, const unsigned long val, 
+	(asn1buf *buf, unsigned long val, 
 		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -73,7 +73,7 @@ asn1_error_code asn1_encode_unsigned_integer
 
 asn1_error_code asn1_encode_octetstring
 	(asn1buf *buf,
-		   const unsigned int len, const asn1_octet *val,
+		   unsigned int len, const asn1_octet *val,
 		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -84,7 +84,7 @@ asn1_error_code asn1_encode_octetstring
 
 asn1_error_code asn1_encode_oid
 	(asn1buf *buf,
-		   const unsigned int len, const asn1_octet *val,
+		   unsigned int len, const asn1_octet *val,
 		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -95,7 +95,7 @@ asn1_error_code asn1_encode_oid
 
 asn1_error_code asn1_encode_charstring
 	(asn1buf *buf,
-		   const unsigned int len, const char *val,
+		   unsigned int len, const char *val,
 		   unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -115,7 +115,7 @@ asn1_error_code asn1_encode_null
 
 asn1_error_code asn1_encode_printablestring
 	(asn1buf *buf,
-		   const unsigned int len, const char *val,
+		   unsigned int len, const char *val,
 		   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -126,7 +126,7 @@ asn1_error_code asn1_encode_printablestring
 
 asn1_error_code asn1_encode_ia5string
 	(asn1buf *buf,
-		   const unsigned int len, const char *val,
+		   unsigned int len, const char *val,
 		   int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -136,7 +136,7 @@ asn1_error_code asn1_encode_ia5string
               to expand the buffer. */
 
 asn1_error_code asn1_encode_generaltime
-	(asn1buf *buf, const time_t val, unsigned int *retlen);
+	(asn1buf *buf, time_t val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -147,7 +147,7 @@ asn1_error_code asn1_encode_generaltime
 
 asn1_error_code asn1_encode_generalstring
 	(asn1buf *buf,
-		   const unsigned int len, const char *val,
+		   unsigned int len, const char *val,
 		   unsigned int *retlen);
 /* requires  *buf is allocated,  val has a length of len characters
    modifies  *buf, *retlen

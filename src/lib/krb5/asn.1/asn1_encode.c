@@ -80,7 +80,7 @@ asn1_error_code asn1_encode_integer(asn1buf * buf,  long val,
 }
 
 asn1_error_code
-asn1_encode_enumerated(asn1buf * buf, const long val,
+asn1_encode_enumerated(asn1buf * buf, long val,
 		       unsigned int *retlen)
 {
   asn1_error_code retval;
@@ -248,7 +248,7 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
       gtime = gmtime(&gmt_time);
       if (gtime == NULL)
 	  return ASN1_BAD_GMTIME;
-      memcpy(gtimebuf, gtime, sizeof(gtimebuf));
+      memcpy(&gtimebuf, gtime, sizeof(gtimebuf));
 #endif
       gtime = &gtimebuf;
 
