@@ -1,3 +1,7 @@
+2002-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_context): Add new member udp_pref_limit.
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (install): Don't install port-sockets.h.

@@ -983,17 +983,18 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype *in_tkt_ktypes;
+	krb5_enctype	*in_tkt_ktypes;
 	int		in_tkt_ktype_count;
-	krb5_enctype *tgs_ktypes;
+	krb5_enctype	*tgs_ktypes;
 	int		tgs_ktype_count;
-	void	 *os_context;
-	char	 *default_realm;
-	profile_t     profile;
-	void	 *db_context;
+	void		*os_context;
+	char		*default_realm;
+	profile_t	profile;
+	void		*db_context;
 	int		ser_ctx_count;
-	void	      	 *ser_ctx;
-	krb5_deltat 	clockskew; /* allowable clock skew */
+	void		*ser_ctx;
+	/* allowable clock skew */
+	krb5_deltat 	clockskew;
 	krb5_cksumtype	kdc_req_sumtype;
 	krb5_cksumtype	default_ap_req_sumtype;
 	krb5_cksumtype	default_safe_sumtype;
@@ -1003,6 +1004,11 @@ struct _krb5_context {
 	int		fcc_default_format;
 	int		scc_default_format;
 	krb5_prompt_type *prompt_types;
+	/* Message size above which we'll try TCP first in send-to-kdc
+	   type code.  Aside from the 2**16 size limit, we put no
+	   absolute limit on the UDP packet size.  */
+	int		udp_pref_limit;
+
 #ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
 #endif /* KRB5_DNS_LOOKUP */
