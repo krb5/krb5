@@ -127,22 +127,16 @@ TicketFlags ::= BIT STRING {
 	initial(9)
 }
 
--- the following two sequences MUST be the same except for the
--- APPLICATION identifier
-AS-REQ ::= [APPLICATION 10] SEQUENCE {
-	pvno[1]	INTEGER,
-	msg-type[2]	INTEGER,
-	padata[3]	PA-DATA OPTIONAL,
-	req-body[4]	KDC-REQ-BODY
-}
-TGS-REQ ::= [APPLICATION 12] SEQUENCE {
+AS-REQ ::= [APPLICATION 10] KDC-REQ
+TGS-REQ ::= [APPLICATION 12] KDC-REQ
+
+KDC-REQ ::= SEQUENCE {
 	pvno[1]	INTEGER,
 	msg-type[2]	INTEGER,
 	padata[3]	PA-DATA OPTIONAL, -- encoded AP-REQ, not optional
+					  -- in the TGS-REQ
 	req-body[4]	KDC-REQ-BODY
 }
--- the preceding two sequences MUST be the same except for the
--- APPLICATION identifier
 
 -- Note that the RFC specifies that PA-DATA is just a SEQUENCE, and when
 -- it appears in the messages, it's a SEQUENCE OF PA-DATA.
@@ -172,9 +166,9 @@ KDC-REQ-BODY ::=	SEQUENCE {
 	 additional-tickets[11]	SEQUENCE OF Ticket OPTIONAL
 }
 
--- the following two sequences MUST be the same except for the
--- APPLICATION identifier
-AS-REP ::= [APPLICATION 11] SEQUENCE {
+AS-REP ::= [APPLICATION 11] KDC-REP
+TGS-REP ::= [APPLICATION 13] KDC-REP
+KDC-REP ::= SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	padata[2]			PA-DATA OPTIONAL,
@@ -183,21 +177,10 @@ AS-REP ::= [APPLICATION 11] SEQUENCE {
 	ticket[5]			Ticket,		-- Ticket
 	enc-part[6]			EncryptedData	-- EncKDCRepPart
 }
-TGS-REP ::= [APPLICATION 13] SEQUENCE {
-	pvno[0]				INTEGER,
-	msg-type[1]			INTEGER,
-	padata[2]			PA-DATA OPTIONAL,
-	crealm[3]			Realm,
-	cname[4]			PrincipalName,
-	ticket[5]			Ticket,		-- Ticket
-	enc-part[6]			EncryptedData	-- EncKDCRepPart
-}
--- the preceding two sequences MUST be the same except for the
--- APPLICATION identifier
 
--- the following two sequences MUST be the same except for the
--- APPLICATION identifier
-EncASRepPart ::=	[APPLICATION 25] SEQUENCE {
+EncASRepPart ::= [APPLICATION 25] EncKDCRepPart
+EncTGSRepPart ::= [APPLICATION 26] EncKDCRepPart
+EncKDCRepPart ::=  SEQUENCE {
 	key[0]	EncryptionKey,
 	last-req[1]	LastReq,
 	nonce[2]	INTEGER,
@@ -211,22 +194,6 @@ EncASRepPart ::=	[APPLICATION 25] SEQUENCE {
 	sname[10]	PrincipalName,
 	caddr[11]	HostAddresses OPTIONAL
 }
-EncTGSRepPart ::=	[APPLICATION 26] SEQUENCE {
-	key[0]	EncryptionKey,
-	last-req[1]	LastReq,
-	nonce[2]	INTEGER,
-	key-expiration[3]	KerberosTime OPTIONAL,
-	flags[4]	TicketFlags,
-	authtime[5]	KerberosTime,
-	starttime[6]	KerberosTime OPTIONAL,
-	endtime[7]	KerberosTime,
-	renew-till[8]	KerberosTime OPTIONAL,
-	srealm[9]	Realm,
-	sname[10]	PrincipalName,
-	caddr[11]	HostAddresses OPTIONAL
-}
--- the preceding two sequences MUST be the same except for the
--- APPLICATION identifier
 
 AP-REQ ::= [APPLICATION 14] SEQUENCE {
 	pvno[0]				INTEGER,
