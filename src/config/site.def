@@ -94,6 +94,7 @@
 #define CcCmd gcc -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
 #else				/* server won't compile with -traditional */
 #define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
+#define STDCTopIncludes -I$(TOP)/include/stdc-incl
 #endif
 #endif
 #endif
@@ -198,6 +199,7 @@
 #define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
 #else				/* server won't compile with -traditional */
 #define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
+#define STDCTopIncludes -I$(TOP)/include/stdc-incl
 #endif
 #endif
 #endif

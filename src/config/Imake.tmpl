@@ -551,6 +551,9 @@
 #ifndef FilesToClean
 #define FilesToClean *.CKP *.ln *.BAK *.bak *.o core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut 
 #endif
+#ifndef STDCTopIncludes
+#define STDCTopIncludes  
+#endif
 
             SHELL = BourneShell
 
@@ -588,6 +591,8 @@
   EXTRA_LIBRARIES = ExtraLibraries
              TAGS = TagsCmd
             ETAGS = EtagsCmd
+STDC_TOP_INCLUDES = STDCTopIncludes
+
 #if ConstructMFLAGS
            MFLAGS = -$(MAKEFLAGS)
 #endif
