@@ -13,6 +13,7 @@ Tue May 23 15:08:54 1995  Theodore Y. Ts'o  (tytso@dcl)
 		  .o files, so that recent binuntils can compress the
 		  debugging information in executables linked with a
 		  debugging library.
+
 Mon May 22 10:24:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- (install) Always perform install actions using
 			  $(INSTALL_DATA).
