@@ -8,3 +8,5 @@ kv5m_err.h
 kv5m_err.c
 adm_err.h
 adm_err.c
+krb524_err.c
+krb524_err.h
