@@ -1155,8 +1155,13 @@ int main(argc, argv)
 	}
     argc -= optind;
     argv += optind;
-    if (*argv)
-	username = *argv;
+    /* Throw away too-long names, they can't be usernames.  */
+    if (*argv) {
+	if (strlen (*argv) < UT_NAMESIZE)
+	    username = *argv;
+	else
+	    fprintf (stderr, "login name '%s' too long\n", *argv);
+    }
 
 #if !defined(POSIX_TERMIOS) && defined(TIOCLSET)
     ioctlval = 0;
