@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/init_ctx.c
  *
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994,1999,2000 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -281,7 +281,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 {
     krb5_enctype *old_ktypes;
 
-    if (context->in_tkt_ktype_count) {
+    if (ctx_count) {
 	/* application-set defaults */
 	if ((old_ktypes = 
 	     (krb5_enctype *)malloc(sizeof(krb5_enctype) *
@@ -396,10 +396,18 @@ krb5_set_default_tgs_ktypes(context, ktypes)
     }
 
     if (context->tgs_ktypes) 
-        free(context->tgs_ktypes);
+        krb5_free_ktypes(context, context->tgs_ktypes);
     context->tgs_ktypes = new_ktypes;
     context->tgs_ktype_count = i;
     return 0;
+}
+
+void
+krb5_free_ktypes (context, val)
+     krb5_context context;
+     krb5_enctype FAR *val;
+{
+    free (val);
 }
 
 krb5_error_code
@@ -441,7 +449,7 @@ krb5_is_permitted_enctype(context, etype)
 	if (*ptr == etype)
 	    ret = 1;
 
-    krb5_xfree(list);
+    krb5_free_ktypes (context, list);
 
     return(ret);
 }

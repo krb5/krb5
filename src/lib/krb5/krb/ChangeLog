@@ -1,3 +1,13 @@
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (krb5_free_ktypes): New routine, to free values
+	returned by krb5_get_tgs_ktypes, krb5_get_permitted_enctypes, and
+	krb5_get_default_in_tkt_ktypes.
+	(krb5_set_default_tgs_ktypes, krb5_is_permitted_enctype): Use it.
+	(get_profile_etype_list): Use passed-in enctype list if the
+	passed-in count is non-zero, instead of checking the
+	in_tkt_ktype_count value in the context.
+
 2000-04-08  Tom Yu  <tlyu@mit.edu>
 
 	* vfy_increds.c (krb5_verify_init_creds): appdefault_boolean ->
