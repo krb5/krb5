@@ -46,6 +46,8 @@
 #ifndef _KRB5_INT_H
 #define _KRB5_INT_H
 
+#include "osconf.h"
+
 /*
  * Begin "k5-config.h"
  */
@@ -500,8 +502,6 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
  */
 #if !defined(_MACINTOSH) && !defined(_MSDOS)
 
-#include "osconf.h"
-
 #ifndef ODBM
 #include <ndbm.h>
 #else /* ODBM */
@@ -590,7 +590,6 @@ extern char *strdup KRB5_PROTOTYPE((const char *));
 /* #include <sys/types.h> */
 #endif /* KRB5_SYSTYPES__ */
 
-#include "osconf.h"			/* USE*TIME_H macros */
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
