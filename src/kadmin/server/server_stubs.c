@@ -263,7 +263,10 @@ create_principal_1_svc(cprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (CHANGEPW_SERVICE(rqstp)
 	|| !acl_check(handle->context, rqstp->rq_clntcred, ACL_ADD,
@@ -317,7 +320,10 @@ create_principal3_1_svc(cprinc3_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (CHANGEPW_SERVICE(rqstp)
 	|| !acl_check(handle->context, rqstp->rq_clntcred, ACL_ADD,
@@ -373,7 +379,10 @@ delete_principal_1_svc(dprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
     
     if (CHANGEPW_SERVICE(rqstp)
 	|| !acl_check(handle->context, rqstp->rq_clntcred, ACL_DELETE,
@@ -421,7 +430,10 @@ modify_principal_1_svc(mprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (CHANGEPW_SERVICE(rqstp)
 	|| !acl_check(handle->context, rqstp->rq_clntcred, ACL_MODIFY,
@@ -475,8 +487,11 @@ rename_principal_1_svc(rprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->src, &prime_arg1);
-    krb5_unparse_name(handle->context, arg->dest, &prime_arg2);
+    if (krb5_unparse_name(handle->context, arg->src, &prime_arg1) ||
+        krb5_unparse_name(handle->context, arg->dest, &prime_arg2)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
     sprintf(prime_arg, "%s to %s", prime_arg1, prime_arg2);
 
     ret.code = KADM5_OK;
@@ -545,7 +560,10 @@ get_principal_1_svc(gprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (! cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ) &&
 	(CHANGEPW_SERVICE(rqstp) || !acl_check(handle->context,
@@ -665,7 +683,10 @@ chpass_principal_1_svc(chpass_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
 	 ret.code = chpass_principal_wrapper((void *)handle, arg->princ,
@@ -723,7 +744,10 @@ chpass_principal3_1_svc(chpass3_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
 	 ret.code = chpass_principal_wrapper((void *)handle, arg->princ,
@@ -784,7 +808,10 @@ setv4key_principal_1_svc(setv4key_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
@@ -839,7 +866,10 @@ setkey_principal_1_svc(setkey_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
@@ -894,7 +924,10 @@ setkey_principal3_1_svc(setkey3_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_FAILURE;
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (!(CHANGEPW_SERVICE(rqstp)) &&
 	       acl_check(handle->context, rqstp->rq_clntcred,
@@ -958,7 +991,10 @@ chrand_principal_1_svc(chrand_arg *arg, struct svc_req *rqstp)
 	 free_server_handle(handle);
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
 	 ret.code = randkey_principal_wrapper((void *)handle,
@@ -1031,7 +1067,10 @@ chrand_principal3_1_svc(chrand3_arg *arg, struct svc_req *rqstp)
 	 free_server_handle(handle);
 	 return &ret;
     }
-    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+    if (krb5_unparse_name(handle->context, arg->princ, &prime_arg)) {
+	 ret.code = KADM5_BAD_PRINCIPAL;
+	 return &ret;
+    }
 
     if (cmp_gss_krb5_name(handle, rqstp->rq_clntcred, arg->princ)) {
 	 ret.code = randkey_principal_wrapper((void *)handle,
