@@ -1,3 +1,7 @@
+Fri Nov  6 10:29:34 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Fix for make check to work out of source tree.
+
 Sun Jul 19 12:00:00 1998  Marc Horowitz <marc@mit.edu>
 
 	* *.c: replace the crypto layer.

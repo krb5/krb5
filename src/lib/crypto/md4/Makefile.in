@@ -1,6 +1,6 @@
 thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
+CFLAGS = $(CCOPTS) $(DEFS)  -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md4

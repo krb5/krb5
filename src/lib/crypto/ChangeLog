@@ -1,3 +1,8 @@
+Fri Nov  6 10:23:32 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* keyhash_provider/Makefile.in: Fix to allow building out of the
+ 	source tree.
+
 Tue Sep 22 21:19:01 1998  Tom Yu  <tlyu@mit.edu>
 
 	* prng.c (krb5_c_random_make_octets): Fix to nfold into 15 bytes,
