@@ -2124,6 +2124,117 @@ encrypt_cmd(argc, argv)
 }
 #endif	/* ENCRYPTION */
 
+#if	defined(FORWARD)
+#include <libtelnet/auth.h>
+
+/*
+ * The FORWARD command.
+ */
+
+
+extern int forward_flags;
+
+struct forwlist {
+	char	*name;
+	char	*help;
+	int	(*handler)();
+	int	f_flags;
+};
+
+static int
+	forw_status P((void)),
+	forw_set P((int)),
+	forw_help P((void));
+
+struct forwlist ForwList[] = {
+    { "status",	"Display current status of credential forwarding",
+						forw_status,	0 },
+    { "disable", "Disable credential forwarding",
+						forw_set,	0 },
+    { "enable", "Enable credential forwarding",
+						forw_set,
+						OPTS_FORWARD_CREDS },
+    { "forwardable", "Enable credential forwarding of forwardable credentials",
+						forw_set,
+						OPTS_FORWARD_CREDS |
+						OPTS_FORWARDABLE_CREDS },
+    { "help",	0,				forw_help,		0 },
+    { "?",	"Print help information",	forw_help,		0 },
+    { 0 },
+};
+
+    static int
+forw_status()
+{
+    if (forward_flags & OPTS_FORWARD_CREDS) {
+	if (forward_flags & OPTS_FORWARDABLE_CREDS) {
+	    printf("Credential forwarding of forwardable credentials enabled\n");
+	} else {
+	    printf("Credential forwarding enabled\n");
+	}
+    } else {
+	printf("Credential forwarding disabled\n");
+    }
+    return(0);
+}
+
+forw_set(f_flags)
+     int f_flags;
+{
+    forward_flags = f_flags;
+    return(0);
+}
+
+    static int
+forw_help()
+{
+    struct forwlist *c;
+
+    for (c = ForwList; c->name; c++) {
+	if (c->help) {
+	    if (*c->help)
+		printf("%-15s %s\n", c->name, c->help);
+	    else
+		printf("\n");
+	}
+    }
+    return 0;
+}
+
+forw_cmd(argc, argv)
+    int  argc;
+    char *argv[];
+{
+    struct forwlist *c;
+
+    if (argc < 2) {
+      fprintf(stderr,
+          "Need an argument to 'forward' command.  'forward ?' for help.\n");
+      return 0;
+    }
+
+    c = (struct forwlist *)
+		genget(argv[1], (char **) ForwList, sizeof(struct forwlist));
+    if (c == 0) {
+        fprintf(stderr, "'%s': unknown argument ('forw ?' for help).\n",
+    				argv[1]);
+        return 0;
+    }
+    if (Ambiguous(c)) {
+        fprintf(stderr, "'%s': ambiguous argument ('forw ?' for help).\n",
+    				argv[1]);
+        return 0;
+    }
+    if (argc != 2) {
+	fprintf(stderr,
+       "No arguments needed to 'forward %s' command.  'forward ?' for help.\n",
+		c->name);
+	return 0;
+    }
+    return((*c->handler)(c->f_flags));
+}
+#endif
+
 #if	defined(unix) && defined(TN3270)
     static void
 filestuff(fd)
@@ -2506,6 +2617,9 @@ static char
 #ifdef	ENCRYPTION
 	encrypthelp[] =	"turn on (off) encryption ('encrypt ?' for more)",
 #endif	/* ENCRYPTION */
+#ifdef  FORWARD
+	forwardhelp[] = "turn on (off) credential forwarding ('forward ?' for more)",
+#endif
 #if	defined(unix)
 	zhelp[] =	"suspend telnet",
 #endif	/* defined(unix) */
@@ -2537,6 +2651,9 @@ static Command cmdtab[] = {
 #ifdef	ENCRYPTION
 	{ "encrypt",	encrypthelp,	encrypt_cmd,	0 },
 #endif	/* ENCRYPTION */
+#ifdef  FORWARD
+	{ "forward",    forwardhelp,    forw_cmd,       0 },
+#endif
 #if	defined(unix)
 	{ "z",		zhelp,		suspend,	0 },
 #endif	/* defined(unix) */

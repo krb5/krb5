@@ -1,3 +1,15 @@
+Fri Nov  1 00:49:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c: Implement Type Of Service patch from jhawk. [57]
+
+Thu Oct 31 18:12:15 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c commands.c: Don't define OPTS_FORWARD* here; include
+ 	libtelnet/auth.h to get them.
+
+	* commands.c (forw_status): Integrate forward command from
+ 	jik@cam.ov.com [45]
+
 Mon Oct 14 02:22:16 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* commands.c (env_cmd): Print only' at correct times.  Patch from

@@ -40,15 +40,15 @@ char copyright[] =
 /* based on @(#)main.c	5.5 (Berkeley) 12/18/92 */
 
 #include <sys/types.h>
+#include <libtelnet/auth.h>
+
+
+# include <netinet/in.h>
 
 #include "ring.h"
 #include "externs.h"
 #include "defines.h"
 
-/* These values need to be the same as defined in libtelnet/kerberos5.c */
-/* Either define them in both places, or put in some common header file. */
-#define OPTS_FORWARD_CREDS           0x00000002
-#define OPTS_FORWARDABLE_CREDS       0x00000001
 
 #if 0
 #define FORWARD
@@ -160,7 +160,7 @@ main(argc, argv)
 			break;
 		case 'S':
 		    {
-#ifdef	HAS_GETTOS
+#if defined(HAS_GETTOS) || (defined(IPPROTO_IP) && defined(IP_TOS))
 			extern int tos;
 
 			if ((tos = parsetos(optarg, "tcp")) < 0)
@@ -168,6 +168,8 @@ main(argc, argv)
 					prompt, ": Bad TOS argument '",
 					optarg,
 					"; will try to use default TOS");
+
+                      fprintf(stderr, "Setting TOS to 0x%x\n", tos);
 #else
 			fprintf(stderr,
 			   "%s: Warning: -S ignored, no parsetos() support.\n",
