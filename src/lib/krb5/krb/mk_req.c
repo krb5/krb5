@@ -71,7 +71,6 @@ krb5_data *outbuf;
 
     retval = krb5_mk_req_extended(ap_req_options,
 				  checksum,
-				  &creds.times,
 				  krb5_kdc_default_options,
 				  0,	/* no sequence number */
 				  0,	/* no sub-key */
