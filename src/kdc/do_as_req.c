@@ -251,7 +251,7 @@ krb5_data **response;			/* filled in with a response packet */
     useetype = request->etype[i];
     krb5_use_cstype(&eblock, useetype);
     
-    if (retval = krb5_random_key(eblock,
+    if (retval = krb5_random_key(&eblock,
 				 krb5_csarray[useetype]->random_sequence,
 				 &session_key)) {
 	/* random key failed */

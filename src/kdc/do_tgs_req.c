@@ -66,6 +66,7 @@ const krb5_fulladdr *from;		/* who sent it ? */
 int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
 {
+    krb5_encrypt_block eblock;
     krb5_kdc_req *request = 0;
     krb5_db_entry server;
     krb5_kdc_rep reply;
@@ -208,8 +209,11 @@ tgt_again:
 	goto cleanup;
     }
     useetype = request->etype[i];
+    krb5_use_keytype(&eblock, useetype);
 
-    if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
+    retval = krb5_random_key(&eblock, krb5_csarray[useetype]->random_sequence,
+			     &session_key);
+    if (retval) {
 	/* random key failed */
 	status = "RANDOM_KEY_FAILED";
 	goto cleanup;
