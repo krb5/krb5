@@ -1,4 +1,8 @@
 
+Tue Aug 15 14:27:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb.h - Add prototype for krb5_dbe_find_keytype().
+
+
 Thu Aug 10 14:33:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb.h - Always define KRB5_MAX_FAIL_COUNT.
 

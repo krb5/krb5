@@ -298,6 +298,14 @@ void krb5_dbe_free_contents
 	KRB5_PROTOTYPE((krb5_context,
     		   krb5_db_entry *));
 
+krb5_error_code krb5_dbe_find_keytype
+	KRB5_PROTOTYPE((krb5_context,
+			krb5_db_entry *,
+			krb5_keytype,
+			krb5_int32,
+			krb5_int32,
+			krb5_key_data **));
+
 struct __krb5_key_salt_tuple;
 
 krb5_error_code krb5_dbe_cpw
