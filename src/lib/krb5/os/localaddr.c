@@ -76,7 +76,7 @@ extern int errno;
  * This uses the SIOCGIFCONF, SIOCGIFFLAGS, and SIOCGIFADDR ioctl's.
  */
 
-int krb5_os_localaddr(addr)
+krb5_error_code krb5_os_localaddr(addr)
     krb5_address ***addr;
 {
     struct ifreq *ifr;
@@ -130,13 +130,21 @@ int krb5_os_localaddr(addr)
 		    (struct sockaddr_in *)&ifr->ifr_addr;
 		
 		address = (krb5_address *)
-		    malloc (sizeof(krb5_address) + sizeof(struct in_addr));
+		    malloc (sizeof(krb5_address));
 		if (address) {
 		    address->addrtype = ADDRTYPE_INET;
 		    address->length = sizeof(struct in_addr);
-		    memcpy ((char *)address->contents, (char *)&in->sin_addr, 
-			    address->length);
-		    break;
+		    address->contents = (unsigned char *)malloc(address->length);
+		    if (!address->contents) {
+			free((char *)address);
+			address = 0;
+			mem_err++;
+		    } else {
+			memcpy ((char *)address->contents,
+				(char *)&in->sin_addr, 
+				address->length);
+			break;
+		    }
 		} else mem_err++;
 	    }
 #endif
