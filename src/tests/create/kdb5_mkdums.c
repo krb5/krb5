@@ -102,7 +102,6 @@ char *argv[];
     krb5_error_code retval;
     char *dbname = 0;
     int enctypedone = 0;
-    register krb5_cryptosystem_entry *csentry;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     int num_to_create;
     char principal_string[BUFSIZ];
@@ -178,7 +177,6 @@ char *argv[];
     }
 
     krb5_use_enctype(test_context, &master_encblock, master_keyblock.enctype);
-    csentry = master_encblock.crypto_entry;
 
     if (!dbname)
 	dbname = DEFAULT_KDB_FILE;	/* XXX? */
@@ -210,8 +208,9 @@ char *argv[];
       }
     }
 
-    (void) (*csentry->finish_key)(&master_encblock);
-    (void) (*csentry->finish_random_key)(&master_random);
+    krb5_finish_random_key(test_context, &master_encblock, &master_random);
+    krb5_finish_key(test_context, &master_encblock);
+
     retval = krb5_db_fini(test_context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
@@ -333,10 +332,7 @@ char *dbname;
     krb5_error_code retval;
     int nentries;
     krb5_boolean more;
-    register krb5_cryptosystem_entry *csentry;
     krb5_data pwd, scratch;
-
-    csentry = master_encblock.crypto_entry;
 
     if (retval = krb5_db_set_name(test_context, dbname)) {
 	com_err(pname, retval, "while setting active database to '%s'",
@@ -400,16 +396,17 @@ char *dbname;
 	return(1);
     }
 
-    if (retval = (*csentry->process_key)(&master_encblock,
-					 &master_keyblock)) {
+    if (retval = krb5_process_key(test_context,
+				  &master_encblock, &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
 	(void) krb5_db_fini(test_context);
 	return(1);
     }
-    if (retval = (*csentry->init_random_key)(&master_keyblock,
-					     &master_random)) {
+    if (retval = krb5_init_random_key(test_context,
+				      &master_encblock, &master_keyblock,
+				      &master_random)) {
 	com_err(pname, retval, "while initializing random key generator");
-	(void) (*csentry->finish_key)(&master_encblock);
+	krb5_finish_key(test_context, &master_encblock);
 	(void) krb5_db_fini(test_context);
 	return(1);
     }

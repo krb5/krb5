@@ -1,3 +1,8 @@
+Thu May  2 21:16:40 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_verify.c: fixed various abstraction violations where the
+		code "knew" the cryptosystem_entry structure
+
 Sat Dec 23 01:05:33 1995    <tytso@rsts-11.mit.edu>
 
 	* configure.in (withval): Add check for DBM/db libraries.

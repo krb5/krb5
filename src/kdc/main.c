@@ -619,9 +619,9 @@ goto whoops;
 	    }
 	    if (!rkey_init_done) {
 		krb5_enctype enctype;
+		krb5_encrypt_block temp_eblock;
 #ifdef KRB5_KRB4_COMPAT
 		krb5_keyblock *temp_key;
-		krb5_encrypt_block temp_eblock;
 #endif
 		/*
 		 * If all that worked, then initialize the random key
@@ -630,10 +630,11 @@ goto whoops;
 		for (enctype = 0; enctype <= krb5_max_enctype; enctype++) {
 		    if (krb5_enctype_array[enctype] &&
 			!krb5_enctype_array[enctype]->random_sequence) {
-			if ((kret = (*krb5_enctype_array[enctype]->system->
-				     init_random_key)
-			     (&rdp->realm_mkey,
-			      &krb5_enctype_array[enctype]->random_sequence))) {
+			krb5_use_enctype(rdp->realm_context, &temp_eblock, enctype);
+			if ((kret = krb5_init_random_key(
+				rdp->realm_context, &temp_eblock,
+				&rdp->realm_mkey,
+				&krb5_enctype_array[enctype]->random_sequence))) {
 			    com_err(progname, kret, 
 				    "while setting up random key generator for enctype %d--enctype disabled",
 				    enctype);
@@ -641,13 +642,10 @@ goto whoops;
 			} else {
 #ifdef KRB5_KRB4_COMPAT
 			    if (enctype == ENCTYPE_DES_CBC_CRC) {
-				krb5_use_enctype(rdp->realm_context,
-						 &temp_eblock, enctype);
-				if ((kret = (*krb5_enctype_array[enctype]->
-					     system->random_key)
-				     (&temp_eblock,
-				      krb5_enctype_array[enctype]->random_sequence,
-				      &temp_key)))
+				if ((kret = krb5_random_key(
+					rdp->realm_context, &temp_eblock,
+					krb5_enctype_array[enctype]->random_sequence,
+					&temp_key)))
 				    com_err(progname, kret,
 					    "while initializing V4 random key generator");
 				else {
