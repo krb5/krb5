@@ -47,7 +47,15 @@ static const char *out_adm_no_cmd = "No command in message.";
 static const char *out_adm_no_err = "Unknown error.";
 static int output_debug_level = 0;
 static int output_mime_enabled = 0;
+static int output_lang_inited = 0;
+static char **output_lang_list = (char **) NULL;
+static char *output_langstring = (char *) NULL;
 
+/*
+ * lang_error_message()	- Return language-dependent Kerberos error message.
+ *
+ * This is just a hook.
+ */
 static char *
 lang_error_message(lang, kval)
     char		*lang;
@@ -73,6 +81,11 @@ lang_error_message(lang, kval)
     return(ret);
 }
 
+/*
+ * lang_adm_message()	- Return language-dependent administrative message.
+ *
+ * This is just a hook.
+ */
 static char *
 lang_adm_message(lang, ecode, aux, nargs, alist)
     char		*lang;
@@ -84,7 +97,7 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
     char	*ret;
     const char	*ermsg;
     char	*erarg;
-    int		alen;
+    size_t	alen;
 
     erarg = (char *) NULL;
     switch (ecode) {
@@ -182,6 +195,11 @@ lang_adm_message(lang, ecode, aux, nargs, alist)
     return(ret);
 }
 
+/*
+ * mimeify_text()	- MIME encode text.
+ *
+ * This is just a hook.
+ */
 static char *
 mimeify_text(msg)
     char *msg;
@@ -204,6 +222,55 @@ mimeify_text(msg)
 }
 
 /*
+ * lang_init_slist()	- Initialize list of supported languages.
+ */
+static int
+lang_init_slist(llist)
+    char	*llist;
+{
+    int ret;
+
+    DPRINT(DEBUG_CALLS, output_debug_level, ("* lang_init_slist()\n"));
+    ret = 1;
+    if (llist) {
+	int	nseps, i;
+	char	*sepp;
+
+	/* First count the number of commas. */
+	sepp = llist;
+	for (nseps=1;
+	     (sepp = strchr(sepp, (int) ',')) != (char *) NULL;
+	     nseps++)
+	    sepp++;
+
+	output_langstring =
+	    (char *) malloc((size_t) (strlen(llist)+1));
+	output_lang_list =
+	    (char **) malloc((size_t) ((nseps+1) * sizeof(char *)));
+	if (output_lang_list && output_langstring) {
+	    strcpy(output_langstring, llist);
+	    sepp = output_langstring;
+	    for (i=0; i<nseps; i++) {
+		output_lang_list[i] = sepp;
+		sepp = strchr(sepp, (int) ',');
+		if (sepp) {
+		    *sepp = '\0';
+		    sepp++;
+		}
+	    }
+	    output_lang_list[nseps] = (char *) NULL;
+	}
+	else {
+	    if (output_langstring)
+		free(output_langstring);
+	    ret = 0;
+	}
+    }
+    DPRINT(DEBUG_CALLS, output_debug_level,
+	   ("X lang_init_slist() = %d\n", ret));
+}
+
+/*
  * output_init()	- Initialize output context.
  */
 krb5_error_code
@@ -222,6 +289,7 @@ output_init(kcontext, debug_level, language_list, mime_enabled)
 	    ((language_list) ? language_list : "(null)"),
 	    mime_enabled));
     output_mime_enabled = mime_enabled;
+    output_lang_inited = lang_init_slist(language_list);
     DPRINT(DEBUG_CALLS, output_debug_level, ("X output_init() = %d\n", kret));
     return(kret);
 }
@@ -235,6 +303,12 @@ output_finish(kcontext, debug_level)
     int			debug_level;
 {
     DPRINT(DEBUG_CALLS, output_debug_level, ("* output_finish()\n"));
+    if (output_lang_inited) {
+	if (output_langstring)
+	    free(output_langstring);
+	if (output_lang_list)
+	    free(output_lang_list);
+    }
     DPRINT(DEBUG_CALLS, output_debug_level, ("X output_finish()\n"));
 }
 
@@ -246,10 +320,19 @@ output_lang_supported(lname)
     char		*lname;
 {
     krb5_boolean	ret;
+    int			i;
     DPRINT(DEBUG_CALLS, output_debug_level,
 	   ("* output_lang_supported(lang=%s)\n",
 	    ((lname) ? lname : "(default)")));
     ret = 1;
+    if (lname) {
+	ret = 0;
+	if (output_lang_inited && output_lang_list) {
+	    for (i=0; output_lang_list[i]; i++)
+		if (!strcmp(output_lang_list[i], lname))
+		    ret = 1;
+	}
+    }
     DPRINT(DEBUG_CALLS, output_debug_level,
 	   ("X output_lang_supported() = %d\n", ret));
     return(ret);

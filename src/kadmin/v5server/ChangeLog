@@ -1,3 +1,17 @@
+
+Fri Apr 28 10:13:21 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add new library libkadm. 
+	* configure.in	- Check for presence of vsprintf.
+	* passwd.c	- Use size_t for sizes.
+	* proto_serv.c	- Allow for case-insensitivity of commands.
+			- Remove socket-dependent includes and add NEED_SOCKETS
+	* srv_key.c	- Use size_t for sizes.
+	* srv_main.c	- Check for presence of vsprintf.
+	* srv_net.c	- Remove socket-dependent includes and add NEED_SOCKETS
+			- Use size_t for sizes.
+			- Return success if bind succeeds.
+	* srv_output.c	- Add language name recoginition.
+
 Fri Apr 28 13:06:18 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* srv_net.c: Linux doesn't have SOMAXCONN, assume 5 if not defined.

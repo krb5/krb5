@@ -102,7 +102,13 @@ kadm_com_err_proc(whoami, code, format, ap)
 	    strcat(outbuf, " - ");
 	}
 	cp = &outbuf[strlen(outbuf)];
+#if	HAVE_VSPRINTF
 	vsprintf(cp, format, ap);
+#else	/* HAVE_VSPRINTF */
+	sprintf(cp, format, ((int *) ap)[0], ((int *) ap)[1],
+		((int *) ap)[2], ((int *) ap)[3],
+		((int *) ap)[4], ((int *) ap)[5]);
+#endif	/* HAVE_VSPRINTF */
 #ifndef	DEBUG
 	syslog(LOG_AUTH|LOG_ERR, outbuf);
 #endif	/* DEBUG */

@@ -25,11 +25,6 @@
 /*
  * srv_net.c - handle networking functions of the administrative server.
  */
-#include <sys/types.h>
-#include <sys/signal.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <errno.h>
 #include <setjmp.h>
 #include <sys/wait.h>
@@ -37,6 +32,7 @@
 #include <pthread.h>
 #endif	/* USE_PTHREADS */
 
+#define	NEED_SOCKETS
 #include "k5-int.h"
 #include "com_err.h"
 #include "kadm5_defs.h"
@@ -414,8 +410,8 @@ net_init(kcontext, debug_level)
     }
 
     /* Allocate the slave table */
-    net_slave_table = (net_slave_info *) malloc(MAX_SLAVES *
-						sizeof(net_slave_info));
+    net_slave_table = (net_slave_info *)
+	malloc((size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     /* Make our service name */
     net_service_name = (char *) malloc(strlen(local_realm) +
 				       strlen(KRB5_ADM_SERVICE_NAME) + 2);
@@ -429,7 +425,8 @@ net_init(kcontext, debug_level)
     (void) sprintf(net_service_name, "%s%s%s",
 		   KRB5_ADM_SERVICE_NAME, "/", local_realm);
     krb5_xfree(local_realm);
-    memset((char *) net_slave_table, 0, MAX_SLAVES * sizeof(net_slave_info));
+    memset((char *) net_slave_table, 0,
+	   (size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     net_max_slaves = MAX_SLAVES;
     DPRINT(DEBUG_HOST, net_debug_level,
 	   ("- name of service is %s\n", net_service_name));
@@ -513,6 +510,7 @@ net_init(kcontext, debug_level)
 	else {
 	    DPRINT(DEBUG_HOST, net_debug_level,
 		   ("- bound socket %d on port\n", net_listen_socket));
+	    kret = 0;
 	    break;
 	}
     } while (bind_tries < MAX_BIND_TRIES);

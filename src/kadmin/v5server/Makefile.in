@@ -4,12 +4,13 @@ LDFLAGS = -g
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 SSLIB=$(BUILDTOP)/util/ss/libss.a
 DBMLIB=
-KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDBLIB=$(TOPLIBD)/libkdb5.a
+KADMLIB=$(TOPLIBD)/libkadm.a
 
 all::
 
-KLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB) 
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+KLIB = $(KADMLIB) $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(KADMLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
 
 SRCS = \
 	$(srcdir)/srv_main.c $(srcdir)/srv_key.c  \

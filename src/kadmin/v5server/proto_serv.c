@@ -27,15 +27,12 @@
  * 	protocol as implemented in lib/krb5/os/adm_conn.c.  Any changes
  *	in one module must be reflected in the other.
  */
-#include <sys/types.h>
-#include <sys/signal.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <setjmp.h>
+#define	NEED_SOCKETS
 #include "k5-int.h"
 #include "com_err.h"
 #include "kadm5_defs.h"
 #include "adm.h"
+#include <setjmp.h>
 
 static const char *proto_addrs_msg = "%d: cannot get memory for addresses";
 static const char *proto_rcache_msg = "%d: cannot get replay cache";
@@ -298,7 +295,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	    cmd_repl_complist = (krb5_data *) NULL;
 	    err_aux = 0;
 	    if (num_args > 0) {
-		if (!strcmp(arglist[0].data, KRB5_ADM_QUIT_CMD)) {
+		if (!strcasecmp(arglist[0].data, KRB5_ADM_QUIT_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:QUIT command\n", my_id));
 		    /* QUIT takes no arguments */
@@ -314,7 +311,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
-		else if (!strcmp(arglist[0].data, KRB5_ADM_CHECKPW_CMD)) {
+		else if (!strcasecmp(arglist[0].data, KRB5_ADM_CHECKPW_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:CHECKPW command\n", my_id));
 		    if (num_args == 2) {
@@ -334,7 +331,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
-		else if (!strcmp(arglist[0].data, KRB5_ADM_CHANGEPW_CMD)) {
+		else if (!strcasecmp(arglist[0].data, KRB5_ADM_CHANGEPW_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:CHANGEPW command\n", my_id));
 		    if (num_args == 3) {
@@ -355,7 +352,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
-		else if (!strcmp(arglist[0].data, KRB5_ADM_MOTD_CMD)) {
+		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MOTD_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MOTD command\n", my_id));
 		    if (num_args <= 2) {
@@ -373,7 +370,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
-		else if (!strcmp(arglist[0].data, KRB5_ADM_MIME_CMD)) {
+		else if (!strcasecmp(arglist[0].data, KRB5_ADM_MIME_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:MIME command\n", my_id));
 		    if (num_args == 1) {
@@ -388,7 +385,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 			err_aux = KRB5_ADM_BAD_ARGS;
 		    }
 		}
-		else if (!strcmp(arglist[0].data, KRB5_ADM_LANGUAGE_CMD)) {
+		else if (!strcasecmp(arglist[0].data, KRB5_ADM_LANGUAGE_CMD)) {
 		    DPRINT(DEBUG_REQUESTS, proto_debug_level,
 			   ("> %d:LANGUAGE command\n", my_id));
 		    if (num_args == 2) {

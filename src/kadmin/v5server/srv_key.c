@@ -232,7 +232,8 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	    mencb_init = 0;
 	}
 	if (mkeyb_init) {
-	    memset(master_keyblock.contents, 0, master_keyblock.length);
+	    memset(master_keyblock.contents, 0,
+		   (size_t) master_keyblock.length);
 	    krb5_xfree(master_keyblock.contents);
 	    mkeyb_init = 0;
 	}
@@ -368,20 +369,21 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
  done:
     if (kret) {
 	if (primary->contents) {
-	    memset((char *) primary->contents, 0, primary->length);
+	    memset((char *) primary->contents, 0, (size_t) primary->length);
 	    krb5_xfree(primary->contents);
 	}
 	if (alternate->contents) {
-	    memset((char *) alternate->contents, 0, alternate->length);
+	    memset((char *) alternate->contents, 0,
+		   (size_t) alternate->length);
 	    krb5_xfree(alternate->contents);
 	}
     }
     if (psalt_data.data) {
-	memset(psalt_data.data, 0, psalt_data.length);
+	memset(psalt_data.data, 0, (size_t) psalt_data.length);
 	krb5_xfree(psalt_data.data);
     }
     if (asalt_data.data) {
-	memset(asalt_data.data, 0, asalt_data.length);
+	memset(asalt_data.data, 0, (size_t) asalt_data.length);
 	krb5_xfree(asalt_data.data);
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
@@ -417,11 +419,12 @@ key_encrypt_keys(kcontext, principal, primary, alternate, eprimary, ealternate)
  done:
     if (kret) {
 	if (eprimary->contents) {
-	    memset((char *) eprimary->contents, 0, eprimary->length);
+	    memset((char *) eprimary->contents, 0, (size_t) eprimary->length);
 	    krb5_xfree(eprimary->contents);
 	}
 	if (ealternate->contents) {
-	    memset((char *) ealternate->contents, 0, ealternate->length);
+	    memset((char *) ealternate->contents, 0,
+		   (size_t) ealternate->length);
 	    krb5_xfree(ealternate->contents);
 	}
     }
@@ -458,11 +461,12 @@ key_decrypt_keys(kcontext, principal, eprimary, ealternate, primary, alternate)
  done:
     if (kret) {
 	if (primary->contents) {
-	    memset((char *) primary->contents, 0, primary->length);
+	    memset((char *) primary->contents, 0, (size_t) primary->length);
 	    krb5_xfree(primary->contents);
 	}
 	if (alternate->contents) {
-	    memset((char *) alternate->contents, 0, alternate->length);
+	    memset((char *) alternate->contents, 0,
+		   (size_t) alternate->length);
 	    krb5_xfree(alternate->contents);
 	}
     }
@@ -511,11 +515,12 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
 		mit_des_is_weak_key(alternate.contents))
 		weakness = 1;
 	    if (primary.contents) {
-		memset((char *) primary.contents, 0, primary.length);
+		memset((char *) primary.contents, 0, (size_t) primary.length);
 		krb5_xfree(primary.contents);
 	    }
 	    if (alternate.contents) {
-		memset((char *) alternate.contents, 0, alternate.length);
+		memset((char *) alternate.contents, 0,
+		       (size_t) alternate.length);
 		krb5_xfree(alternate.contents);
 	    }
 	}

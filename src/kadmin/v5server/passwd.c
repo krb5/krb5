@@ -161,19 +161,19 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     if (kret)
 	pwret = 0;
     if (akey1.contents) {
-	memset((char *) akey1.contents, 0, akey1.length);
+	memset((char *) akey1.contents, 0, (size_t) akey1.length);
 	krb5_xfree(akey1.contents);
     }
     if (pkey1.contents) {
-	memset((char *) pkey1.contents, 0, pkey1.length);
+	memset((char *) pkey1.contents, 0, (size_t) pkey1.length);
 	krb5_xfree(pkey1.contents);
     }
     if (akey.contents) {
-	memset((char *) akey.contents, 0, akey.length);
+	memset((char *) akey.contents, 0, (size_t) akey.length);
 	krb5_xfree(akey.contents);
     }
     if (pkey.contents) {
-	memset((char *) pkey.contents, 0, pkey.length);
+	memset((char *) pkey.contents, 0, (size_t) pkey.length);
 	krb5_xfree(pkey.contents);
     }
     DPRINT(DEBUG_CALLS, debug_level,
@@ -309,11 +309,11 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 	krb5_xfree(entry2write.alt_key.contents);
     }
     if (akey.contents) {
-	memset((char *) akey.contents, 0, akey.length);
+	memset((char *) akey.contents, 0, (size_t) akey.length);
 	krb5_xfree(akey.contents);
     }
     if (pkey.contents) {
-	memset((char *) pkey.contents, 0, pkey.length);
+	memset((char *) pkey.contents, 0, (size_t) pkey.length);
 	krb5_xfree(pkey.contents);
     }
     DPRINT(DEBUG_CALLS, debug_level,
