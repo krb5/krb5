@@ -1,3 +1,11 @@
+Fri Mar 24 14:45:00 1995    <tytso@rsx-11.mit.edu>
+
+	* kinit.c (main): Remove the call to krb5_os_localaddr() since
+		get_in_tkt_XXXX will default appropriately.
+
+	* kinit.c (main): Kinit will print an error when there are two
+		many arguments.
+
 Thu Mar  2 12:31:49 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

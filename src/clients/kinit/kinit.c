@@ -73,7 +73,6 @@ main(argc, argv)
     int options = KRB5_DEFAULT_OPTIONS;
     int option;
     int errflg = 0;
-    krb5_address **my_addresses;
     krb5_error_code code;
     krb5_principal me;
     krb5_principal server;
@@ -155,6 +154,12 @@ main(argc, argv)
 	}
     }
 
+    if (argc - optind > 1) {
+	fprintf(stderr, "Extra arguments (starting with \"%s\").\n",
+		argv[optind+1]);
+	errflg++;
+    }
+
     if (errflg) {
 	fprintf(stderr, "Usage: %s [-r time] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [principal]\n", argv[0]);
 	exit(2);
@@ -231,11 +236,6 @@ main(argc, argv)
 
     my_creds.server = server;
 
-    code = krb5_os_localaddr(&my_addresses);
-    if (code != 0) {
-	com_err (argv[0], code, "when getting my address");
-	exit(1);
-    }
     if (code = krb5_timeofday(kcontext, &now)) {
 	com_err(argv[0], code, "while getting time of day");
 	exit(1);
@@ -258,22 +258,20 @@ main(argc, argv)
 	      fprintf(stderr, "Error while reading password for '%s'\n",
 		      client_name);
 	      memset(password, 0, sizeof(password));
-	      krb5_free_addresses(kcontext, my_addresses);
 	      exit(1);
 	 }
 
-	 code = krb5_get_in_tkt_with_password(kcontext, options, my_addresses,
+	 code = krb5_get_in_tkt_with_password(kcontext, options, 0,
 					      NULL, preauth, password, ccache,
 					      &my_creds, 0);
 	 memset(password, 0, sizeof(password));
     } else {
-	 code = krb5_get_in_tkt_with_keytab(kcontext, options, my_addresses,
+	 code = krb5_get_in_tkt_with_keytab(kcontext, options, 0,
 					    NULL, preauth, keytab, ccache,
 					    &my_creds, 0);
     }
     
     krb5_free_principal(kcontext, server);
-    krb5_free_addresses(kcontext, my_addresses);
     
     if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
