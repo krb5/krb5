@@ -6613,6 +6613,986 @@
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		A1AFE5D406D19E7A0073AEA1 = {
+			children = (
+				A1AFE5D506D19E7A0073AEA1,
+				A1AFE5D606D19E7A0073AEA1,
+				A1AFE5D706D19E7A0073AEA1,
+				A1AFE5D806D19E7A0073AEA1,
+				A1AFE5D906D19E7A0073AEA1,
+				A1AFE5DA06D19E7A0073AEA1,
+				A1AFE5DB06D19E7A0073AEA1,
+				A1AFE5DC06D19E7A0073AEA1,
+				A1AFE5DD06D19E7A0073AEA1,
+				A1AFE5DE06D19E7A0073AEA1,
+				A1AFE5DF06D19E7A0073AEA1,
+				A1AFE5EC06D19E7A0073AEA1,
+				A1AFE5ED06D19E7A0073AEA1,
+				A1AFE5EE06D19E7A0073AEA1,
+				A1AFE5EF06D19E7A0073AEA1,
+				A1AFE5F006D19E7A0073AEA1,
+				A1AFE5F106D19E7A0073AEA1,
+				A1AFE5F206D19E7A0073AEA1,
+				A1AFE5F306D19E7A0073AEA1,
+				A1AFE5F406D19E7A0073AEA1,
+				A1AFE5F506D19E7A0073AEA1,
+				A1AFE5F606D19E7A0073AEA1,
+				A1AFE60B06D19E7B0073AEA1,
+				A1AFE60C06D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = kadm5;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5D506D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .cvsignore;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5D606D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = adb.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5D706D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = adb_err.et;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5D806D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = admin.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5D906D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = admin_internal.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DA06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = admin_xdr.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DB06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = alt_prof.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DC06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DD06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = chpass_util.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DE06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = chpass_util_strings.et;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5DF06D19E7A0073AEA1 = {
+			children = (
+				A1AFE5E006D19E7A0073AEA1,
+				A1AFE5E106D19E7A0073AEA1,
+				A1AFE5E206D19E7A0073AEA1,
+				A1AFE5E306D19E7A0073AEA1,
+				A1AFE5E406D19E7A0073AEA1,
+				A1AFE5E506D19E7A0073AEA1,
+				A1AFE5E606D19E7A0073AEA1,
+				A1AFE5E706D19E7A0073AEA1,
+				A1AFE5E806D19E7A0073AEA1,
+				A1AFE5E906D19E7A0073AEA1,
+				A1AFE5EA06D19E7A0073AEA1,
+				A1AFE5EB06D19E7A0073AEA1,
+			);
+			isa = PBXGroup;
+			path = clnt;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E006D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .cvsignore;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E106D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E206D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = client_handle.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E306D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = client_init.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E406D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = client_internal.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E506D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = client_principal.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E606D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = client_rpc.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E706D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = clnt_chpass_util.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E806D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = clnt_policy.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5E906D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = clnt_privs.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5EA06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = libkadm5clnt.exports;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5EB06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5EC06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.sh;
+			path = configure;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5ED06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = configure.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5EE06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = kadm_err.et;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5EF06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = kadm_rpc.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F006D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = kadm_rpc_xdr.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F106D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = logger.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F206D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F306D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = misc_free.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F406D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = ovsec_glue.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F506D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = server_internal.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F606D19E7A0073AEA1 = {
+			children = (
+				A1AFE5F706D19E7A0073AEA1,
+				A1AFE5F806D19E7A0073AEA1,
+				A1AFE5F906D19E7A0073AEA1,
+				A1AFE5FA06D19E7A0073AEA1,
+				A1AFE5FB06D19E7A0073AEA1,
+				A1AFE5FC06D19E7A0073AEA1,
+				A1AFE5FD06D19E7A0073AEA1,
+				A1AFE5FE06D19E7A0073AEA1,
+				A1AFE5FF06D19E7A0073AEA1,
+				A1AFE60006D19E7A0073AEA1,
+				A1AFE60106D19E7A0073AEA1,
+				A1AFE60206D19E7A0073AEA1,
+				A1AFE60306D19E7A0073AEA1,
+				A1AFE60406D19E7A0073AEA1,
+				A1AFE60506D19E7A0073AEA1,
+				A1AFE60606D19E7A0073AEA1,
+				A1AFE60706D19E7A0073AEA1,
+				A1AFE60806D19E7A0073AEA1,
+				A1AFE60906D19E7A0073AEA1,
+				A1AFE60A06D19E7A0073AEA1,
+			);
+			isa = PBXGroup;
+			path = srv;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F706D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .cvsignore;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F806D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = adb_free.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5F906D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = adb_openclose.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FA06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = adb_policy.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FB06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = adb_xdr.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FC06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FD06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = libkadm5srv.exports;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FE06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE5FF06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_acl.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60006D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = server_acl.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60106D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_dict.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60206D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_handle.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60306D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_init.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60406D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_kdb.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60506D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = server_misc.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60606D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = svr_chpass_util.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60706D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = svr_iters.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60806D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = svr_misc_free.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60906D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = svr_policy.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60A06D19E7A0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = svr_principal.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60B06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = str_conv.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60C06D19E7B0073AEA1 = {
+			children = (
+				A1AFE60D06D19E7B0073AEA1,
+				A1AFE60E06D19E7B0073AEA1,
+				A1AFE61C06D19E7B0073AEA1,
+				A1AFE61D06D19E7B0073AEA1,
+				A1AFE62F06D19E7B0073AEA1,
+				A1AFE63006D19E7B0073AEA1,
+				A1AFE63206D19E7B0073AEA1,
+				A1AFE63306D19E7B0073AEA1,
+				A1AFE63606D19E7B0073AEA1,
+				A1AFE63706D19E7B0073AEA1,
+				A1AFE63806D19E7B0073AEA1,
+				A1AFE63906D19E7B0073AEA1,
+				A1AFE63B06D19E7B0073AEA1,
+				A1AFE63C06D19E7B0073AEA1,
+				A1AFE63D06D19E7B0073AEA1,
+				A1AFE63E06D19E7B0073AEA1,
+				A1AFE63F06D19E7B0073AEA1,
+				A1AFE64006D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = "unit-test";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60D06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .cvsignore;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60E06D19E7B0073AEA1 = {
+			children = (
+				A1AFE60F06D19E7B0073AEA1,
+				A1AFE61006D19E7B0073AEA1,
+				A1AFE61106D19E7B0073AEA1,
+				A1AFE61206D19E7B0073AEA1,
+				A1AFE61306D19E7B0073AEA1,
+				A1AFE61406D19E7B0073AEA1,
+				A1AFE61506D19E7B0073AEA1,
+				A1AFE61606D19E7B0073AEA1,
+				A1AFE61706D19E7B0073AEA1,
+				A1AFE61806D19E7B0073AEA1,
+				A1AFE61906D19E7B0073AEA1,
+				A1AFE61A06D19E7B0073AEA1,
+				A1AFE61B06D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = api.0;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE60F06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "chpass-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61006D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "crte-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61106D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "crte-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61206D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = destroy.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61306D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "dlte-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61406D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "dlte-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61506D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "get-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61606D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "get-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61706D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = init.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61806D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "mod-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61906D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "mod-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61A06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "randkey-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61B06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "rename-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61C06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.man;
+			path = api.1;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61D06D19E7B0073AEA1 = {
+			children = (
+				A1AFE61E06D19E7B0073AEA1,
+				A1AFE61F06D19E7B0073AEA1,
+				A1AFE62006D19E7B0073AEA1,
+				A1AFE62106D19E7B0073AEA1,
+				A1AFE62206D19E7B0073AEA1,
+				A1AFE62306D19E7B0073AEA1,
+				A1AFE62406D19E7B0073AEA1,
+				A1AFE62506D19E7B0073AEA1,
+				A1AFE62606D19E7B0073AEA1,
+				A1AFE62706D19E7B0073AEA1,
+				A1AFE62806D19E7B0073AEA1,
+				A1AFE62906D19E7B0073AEA1,
+				A1AFE62A06D19E7B0073AEA1,
+				A1AFE62B06D19E7B0073AEA1,
+				A1AFE62C06D19E7B0073AEA1,
+				A1AFE62D06D19E7B0073AEA1,
+				A1AFE62E06D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = api.2;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61E06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "chpass-principal-v2.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE61F06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "chpass-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62006D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "crte-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62106D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "crte-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62206D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = destroy.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62306D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "dlte-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62406D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "dlte-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62506D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "get-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62606D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "get-principal-v2.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62706D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "get-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62806D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "init-v2.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62906D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = init.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62A06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "mod-policy.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62B06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "mod-principal-v2.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62C06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "mod-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62D06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "randkey-principal-v2.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62E06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = "randkey-principal.exp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE62F06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63006D19E7B0073AEA1 = {
+			children = (
+				A1AFE63106D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = config;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63106D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = unix.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63206D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "destroy-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63306D19E7B0073AEA1 = {
+			children = (
+				A1AFE63406D19E7B0073AEA1,
+				A1AFE63506D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = "diff-files";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63406D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "destroy-1";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63506D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "no-diffs";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63606D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "handle-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63706D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "init-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63806D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "iter-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63906D19E7B0073AEA1 = {
+			children = (
+				A1AFE63A06D19E7B0073AEA1,
+			);
+			isa = PBXGroup;
+			path = lib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63A06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = lib.t;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63B06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "lock-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63C06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63D06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "randkey-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63E06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "README.new-tests";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE63F06D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "setkey-test.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1AFE64006D19E7B0073AEA1 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.exports;
+			path = site.exp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
 		A1B21F170417D6BC00120114 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -7167,6 +8147,7 @@
 				F517332403F1B65901120114,
 				F517332503F1B65901120114,
 				F517332603F1B65901120114,
+				A1AFE5D406D19E7A0073AEA1,
 				F517342003F1B65A01120114,
 				F517348E03F1B65A01120114,
 				F51735B103F1B65A01120114,
