@@ -5,7 +5,6 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CONST
-KRB5_POSIX_LOCKS
 AC_CHECK_HEADERS(sys/select.h time.h unistd.h)
 dnl Could check for full stdc environment, but will only test
 dnl for stdlib.h

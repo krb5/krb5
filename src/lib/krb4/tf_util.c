@@ -10,6 +10,7 @@
 #include "mit-copyright.h"
 
 #include "krb.h"
+#include "k5-int.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +30,8 @@
 					 * locked */
 extern int errno;
 extern int krb_debug;
+
+void tf_close();
 
 #ifdef TKT_SHMEM
 char *krb_shm_addr;
@@ -58,42 +61,6 @@ int utimes(path, times)
   return utime(path,&tv);
 }
 #endif
-#ifndef LOCK_SH
-#define   LOCK_SH   1    /* shared lock */
-#define   LOCK_EX   2    /* exclusive lock */
-#define   LOCK_NB   4    /* don't block when locking */
-#define   LOCK_UN   8    /* unlock */
-#endif
-
-
-#ifdef POSIX_FILE_LOCKS
-
-/*
- * This function emulates a subset of flock()
- */
-int emul_flock(fd, cmd)
-    int fd, cmd;
-{
-    static struct flock flock_zero;
-    struct flock f;
-
-    f = flock_zero;
-
-    memset(&f, 0, sizeof (f));
-
-    if (cmd & LOCK_UN)
-	f.l_type = F_UNLCK;
-    if (cmd & LOCK_SH)
-	f.l_type = F_RDLCK;
-    if (cmd & LOCK_EX)
-	f.l_type = F_WRLCK;
-
-    return fcntl(fd, (cmd & LOCK_NB) ? F_SETLK : F_SETLKW, &f);
-}
-
-#define flock(f,c)	emul_flock(f,c)
-#endif
-
 
 /*
  * fd must be initialized to something that won't ever occur as a real
@@ -189,6 +156,11 @@ int tf_init(tf_name, rw)
     FILE *sfp;
     int shmid;
 #endif
+
+    if (!krb5__krb4_context) {
+	    if (krb5_init_context(&krb5__krb4_context))
+		    return TKT_FIL_LCK;
+    }
 
     me = getuid();
 
@@ -335,9 +307,13 @@ int tf_init(tf_name, rw)
 	    fd = -1;
 	    return TKT_FIL_ACC;
 	}
-	if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
+	if (krb5_lock_file(krb5__krb4_context, fd,
+			   KRB5_LOCKMODE_EXCLUSIVE |
+			   KRB5_LOCKMODE_DONTBLOCK) < 0) {
 	    sleep(TF_LCK_RETRY);
-	    if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
+	    if (krb5_lock_file(krb5__krb4_context, fd,
+			   KRB5_LOCKMODE_EXCLUSIVE |
+			   KRB5_LOCKMODE_DONTBLOCK) < 0) {
 		(void) close(fd);
 		fd = -1;
 		return TKT_FIL_LCK;
@@ -386,9 +362,13 @@ int tf_init(tf_name, rw)
 	fd = -1;
 	return TKT_FIL_ACC;
     }
-    if (flock(fd, LOCK_SH | LOCK_NB) < 0) {
+    if (krb5_lock_file(krb5__krb4_context, fd,
+			   KRB5_LOCKMODE_SHARED |
+			   KRB5_LOCKMODE_DONTBLOCK) < 0) {
 	sleep(TF_LCK_RETRY);
-	if (flock(fd, LOCK_SH | LOCK_NB) < 0) {
+	if (krb5_lock_file(krb5__krb4_context, fd,
+			   KRB5_LOCKMODE_SHARED |
+			   KRB5_LOCKMODE_DONTBLOCK) < 0) {
 	    (void) close(fd);
 	    fd = -1;
 	    return TKT_FIL_LCK;
@@ -520,7 +500,7 @@ int tf_get_cred(c)
  * The return value is not defined.
  */
 
-tf_close()
+void tf_close()
 {
     if (!(fd < 0)) {
 #ifdef TKT_SHMEM
@@ -532,7 +512,9 @@ tf_close()
 	    krb_shm_addr = 0;
 	}
 #endif /* TKT_SHMEM */
-	(void) flock(fd, LOCK_UN);
+	if (!krb5__krb4_context)
+		krb5_init_context(&krb5__krb4_context);
+	(void) krb5_lock_file(krb5__krb4_context, fd, KRB5_LOCKMODE_UNLOCK);
 	(void) close(fd);
 	fd = -1;		/* see declaration of fd above */
     }

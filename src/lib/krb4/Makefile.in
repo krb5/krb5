@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=lib/krb4
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
 DEFINES=-I$(srcdir)/../../include/kerberosIV
