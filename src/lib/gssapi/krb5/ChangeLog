@@ -1,3 +1,78 @@
+Fri Mar 26 22:17:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Don't use strcmp to
+ 		compare against principal components (they aren't null
+ 		terminated!)
+
+Thu Mar 25 22:43:54 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_krb5.c: Rearrange OID's so that the V1V2 mechanism set
+		returns all three mechanism ID's recognized by this
+		implementation, with the RFC1964 OID first (and thus
+		preferred). 
+
+	* import_sec_context.c (krb5_gss_convert_static_mech_oid): Make
+		the old convert_static_oid() function globally accessible
+		with a namespace compliant name, since init_sec_context()
+		needs to be able to use this function.
+
+	* indicate_mechs.c (krb5_gss_indicate_mechs): Return the both
+		mechanism set OID, since we should return all the
+		mechanisms that we support.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Make
+ 		ctx->mech_used use a static OID, since it is returned by
+ 		gss_inquire_context which must return a static OID.
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix bug where we
+		would overestimate the size of the allowable input message
+		by one byte, because we weren't passing the right estimate
+		of the wrapped data to g_token_size().
+
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi_krb5.c, gssapi_krb5.h: Export the oid of static
+		arrays as krb5_gss_oid_array since it's needed by
+		gss_import_sec_context.
+
+	* import_sec_context.c: Fix up the OID of the mechanism in the
+		imported security context so that we use the static
+		OID if at all possible.  This is needed since
+		gss_inquire_context() must return a static OID.
+
+Tue Jul 29 22:56:04 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* inq_names.c (krb5_gss_inquire_names_for_mech): Add the 
+ 		the new OID value for the host-based service name and 
+ 		the exported name OID to the list of OID's supported by
+		this mechanism.
+	
+	* import_name.c (krb5_gss_import_name): Add support for the new
+		OID value for the host-based service name.
+
+Mon Mar 31 21:22:19 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_gss_glue.c: Add GSSAPI V2 calls to the glue layer.
+
+Fri Mar 28 03:52:14 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* import_name.c (krb5_gss_import_name): Add support for importing
+		the exported name call
+
+Thu Mar 27 15:52:04 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add canon_name.c, duplicate_name.c, export_name.c
+		to the GSSAPI library.
+	
+	* canon_name.c (krb5_gss_canonicalize_name): New GSSAPI V2 function
+
+	* duplicate_name.c (krb5_gss_duplicate_name): New GSSAPI V2 function
+
+	* export_name.c (krb5_gss_export_name): New GSSAPI V2 function
+
+	* gssapiP_krb5.h (KG_IMPLFLAGS): Add support for
+		GSS_C_PROT_STATE_READY and GSS_C_TRANS_FLAG
+
 Fri Jul 24 21:13:53 1998  Tom Yu  <tlyu@mit.edu>
 
 	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix to round down
