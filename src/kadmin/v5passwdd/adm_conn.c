@@ -602,7 +602,7 @@ kadm_get_auth(kcontext, ctxp, local, remote)
  *	free auth_context
  *	close socket.
  */
-krb5_error_code INTERFACE
+krb5_error_code KRB5_CALLCONV
 krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
 		 ccachep, ccname, tlife)
     krb5_context	kcontext;	/* Context handle	(In ) */
@@ -745,7 +745,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
  * If ccache is supplied, then it is destroyed.  Otherwise, the ccache is
  * the caller's responsibility to close.
  */
-void INTERFACE
+void KRB5_CALLCONV
 krb5_adm_disconnect(kcontext, socketp, auth_context, ccache)
     krb5_context	kcontext;
     int			*socketp;
