@@ -48,6 +48,7 @@ struct mblock {
 };
 
 char	*Err_no_master_msg = "Master key not entered!\n";
+char	*Err_no_database = "Database not currently opened!\n";
 char	*current_dbname = NULL;
 
 /* krb5_kvno may be narrow */
@@ -203,8 +204,7 @@ char *argv[];
 	}	    
 	cur_realm = defrealm;
     }
-    if (retval = set_dbname_help(progname, dbname))
-	exit(retval);
+    (void) set_dbname_help(progname, dbname);
 
     if (request) {
 	    (void) ss_execute_line(sci_idx, request, &code);
@@ -412,6 +412,10 @@ krb5_pointer infop;
 		(void) krb5_finish_key(&master_encblock);
 		(void) krb5_finish_random_key(&master_encblock,
 					      &master_random);
+		memset((char *)master_keyblock.contents, 0,
+		       master_keyblock.length);
+		free((char *) master_keyblock.contents);
+		master_keyblock.contents = NULL;
 	}
 	krb5_free_principal(master_princ);
 	dbactive = FALSE;
@@ -497,13 +501,19 @@ char *dbname;
     if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
 					   &master_encblock)) {
 	com_err(pname, retval, "while verifying master key");
-	(void) krb5_db_fini();
+	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+	free((char *)master_keyblock.contents);
+	valid_master_key = 0;
+	dbactive = TRUE;
 	return(1);
     }
     if (retval = krb5_process_key(&master_encblock,
 				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
-	(void) krb5_db_fini();
+	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+	free((char *)master_keyblock.contents);
+	valid_master_key = 0;
+	dbactive = TRUE;
 	return(1);
     }
     if (retval = krb5_init_random_key(&master_encblock,
@@ -511,7 +521,10 @@ char *dbname;
 				      &master_random)) {
 	com_err(pname, retval, "while initializing random key generator");
 	(void) krb5_finish_key(&master_encblock);
-	(void) krb5_db_fini();
+	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+	free((char *)master_keyblock.contents);
+	valid_master_key = 0;
+	dbactive = TRUE;
 	return(1);
     }
     dbactive = TRUE;
@@ -526,7 +539,7 @@ void enter_master_key(argc, argv)
 	krb5_error_code retval;
 	
 	if (!dbactive) {
-		com_err(pname, 0, "Kerberos database not selected");
+		com_err(pname, 0, Err_no_database);
 		return;
 	}
 	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
@@ -586,6 +599,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
 	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
@@ -692,6 +709,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
 	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
@@ -803,6 +824,10 @@ list_db(argc, argv)
 int argc;
 char *argv[];
 {
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
+    }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
 	    return;
@@ -824,6 +849,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
@@ -875,6 +904,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
@@ -929,6 +962,10 @@ char *argv[];
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
     }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
+    }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
 	    return;
@@ -960,6 +997,10 @@ char *argv[];
 	com_err(argv[0], 0, "Too few arguments");
 	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
 	return;
+    }
+    if (!dbactive) {
+	    com_err(argv[0], 0, Err_no_database);
+	    return;
     }
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
