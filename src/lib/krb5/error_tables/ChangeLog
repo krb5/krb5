@@ -1,3 +1,9 @@
+Wed Nov  6 11:15:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5_err.et: Make the KRB5_CONFIG_CANTOPEN and
+ 		KRB5_CONFIG_BADFORMAT error messages more clear that the
+  		problem is with the _Kerberos_ configuration file.
+
 Fri Oct 18 17:49:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kv5m_err.et: Add magic code for GSSAPI OID and GSSAPI QUEUE,

@@ -170,8 +170,8 @@ error_code KRB5_LIBOS_PWDINTR,		"Password read interrupted"
 error_code KRB5_PARSE_ILLCHAR,		"Illegal character in component name"
 error_code KRB5_PARSE_MALFORMED,	"Malformed representation of principal"
 
-error_code KRB5_CONFIG_CANTOPEN,	"Can't open/find configuration file"
-error_code KRB5_CONFIG_BADFORMAT,	"Improper format of configuration file"
+error_code KRB5_CONFIG_CANTOPEN,	"Can't open/find Kerberos configuration file"
+error_code KRB5_CONFIG_BADFORMAT,	"Improper format of Kerberos configuration file"
 error_code KRB5_CONFIG_NOTENUFSPACE,	"Insufficient space to return complete information"
 
 error_code KRB5_BADMSGTYPE,		"Invalid message type specified for encoding"
