@@ -1,3 +1,7 @@
+2004-05-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_cc.c (cc_test): Clean up memory leaks in tests.
+
 2004-05-15  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:  The FAILED() macro only considered an error 

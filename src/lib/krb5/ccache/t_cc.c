@@ -90,6 +90,14 @@ static void init_test_cred(krb5_context context)
 		       "server-comp1", "server-comp2", 0);
 }
 
+static void free_test_cred(krb5_context context)
+{
+  krb5_free_principal(context, test_creds.client);
+
+  krb5_free_principal(context, test_creds.server);
+
+}
+
 #define CHECK(kret,msg) \
      if (kret != KRB5_OK) {\
 	  com_err(msg, kret, ""); \
@@ -193,6 +201,9 @@ static void cc_test(krb5_context context, const char *name, int flags)
      kret = krb5_cc_destroy(context, id);
      CHECK(kret, "destroy");
 #endif
+
+     free_test_cred(context);
+
 }
 
 static void do_test(krb5_context context, const char *prefix)
