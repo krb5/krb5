@@ -596,6 +596,110 @@ char *argv[];
     return;
 }
 
+void
+extract_v4_srvtab(argc, argv)
+int argc;
+char *argv[];
+{
+    char ktname[MAXPATHLEN+1];
+    FILE	*fout;
+    krb5_keytab ktid;
+    krb5_error_code retval;
+    krb5_principal princ;
+    krb5_db_entry dbentry;
+    char *pname;
+    register int i;
+    int nentries;
+    krb5_boolean more;
+    krb5_keyblock	key;
+
+    if (argc < 3) {
+	com_err(argv[0], 0, "Too few arguments");
+	com_err(argv[0], 0, "Usage: %s instance name [name ...]", argv[0]);
+	return;
+    }
+
+    memset(ktname, 0, sizeof(ktname));
+    if (strlen(argv[1])+sizeof("-new-v4-srvtab") >= sizeof(ktname)) {
+	com_err(argv[0], 0,
+		"Instance name '%s' is too long to form a filename", argv[1]);
+	com_err(argv[0], 0, "using 'foobar' instead.");
+	strcat(ktname, "foobar");
+    } else
+	strcat(ktname, argv[1]);
+
+    strcat(ktname, "-new-v4-srvtab");
+    if ((fout = fopen(ktname, "w")) == NULL) {
+	com_err(argv[0], 0, "Couldn't create file '%s'.\n", ktname);
+	return;
+    }
+    for (i = 2; i < argc; i++) {
+	/* iterate over the names */
+	pname = malloc(strlen(argv[1])+strlen(argv[i])+strlen(cur_realm)+3);
+	if (!pname) {
+	    com_err(argv[0], ENOMEM,
+		    "while preparing to extract key for %s/%s",
+		    argv[i], argv[1]);
+	    continue;
+	}
+	strcpy(pname, argv[i]);
+	strcat(pname, "/");
+	strcat(pname, argv[1]);
+	if (!strchr(argv[1], REALM_SEP)) {
+	    strcat(pname, REALM_SEP_STR);
+	    strcat(pname, cur_realm);
+	}
+
+	if (retval = krb5_parse_name(pname, &princ)) {
+	    com_err(argv[0], retval, "while parsing %s", pname);
+	    free(pname);
+	    continue;
+	}
+	nentries = 1;
+	if (retval = krb5_db_get_principal(princ, &dbentry, &nentries,
+					   &more)) {
+	    com_err(argv[0], retval, "while retrieving %s", pname);
+	    goto cleanmost;
+	} else if (more) {
+	    com_err(argv[0], KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
+		    "while retrieving %s", pname);
+	    if (nentries)
+		krb5_db_free_principal(&dbentry, nentries);
+	    goto cleanmost;
+	} else if (!nentries) {
+	    com_err(argv[0], KRB5_KDB_NOENTRY, "while retrieving %s", pname);
+	    goto cleanmost;
+	}
+	if (retval = krb5_kdb_decrypt_key(&master_encblock,
+					  &dbentry.key,
+					  &key)) {
+	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
+	    goto cleanall;
+	}
+	if (key.keytype != 1) {
+		com_err(argv[0], 0, "%s does not have a DES key!", pname);
+		memset((char *)key.contents, 0, key.length);
+		free((char *)key.contents);
+		continue;
+	}
+	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.name */
+	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.instance */
+	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
+	fwrite(&dbentry.kvno, sizeof(dbentry.kvno), 1, fout);
+	fwrite(key.contents, 8, 1, fout);
+	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
+	memset((char *)key.contents, 0, key.length);
+	free((char *)key.contents);
+    cleanall:
+	    krb5_db_free_principal(&dbentry, nentries);
+    cleanmost:
+	    free(pname);
+	    krb5_free_principal(princ);
+    }
+    fclose(fout);
+    return;
+}
+
 krb5_error_code
 list_iterator(ptr, entry)
 krb5_pointer ptr;
