@@ -1,0 +1,303 @@
+.TH DYN 3 "07 December 1992"
+
+.SH NAME
+dyn \- the C Dynamic Object library
+
+.SH DESCRIPTION
+
+A C Dynamic Object is an array that takes care of resizing
+itself as you add and delete elements from it.  It can be of any type
+for which sizeof is defined and for which an address of a variable of
+that type can be passed to a function.  The library containing the
+functions described below is called 
+.IR libdyn.a ,
+and the necessary declarations to use them are in
+.RI < dyn.h >.
+.PP
+A DynObject is actually a structure that contains an array and a
+couple of integers to maintain necessary state information.  When a
+Dyn function is said to operate on "the object" or "the array", it is
+operating on the array stored in the structure while at the same time
+updating internal state information.
+
+.SH LIST OF FUNCTIONS 
+.nf
+DynObject DynCreate(size, increment)
+	int size, increment;
+.fi
+.PP
+.IR Requires :
+.I size
+and
+.I increment
+are greater than zero.
+.PP
+.IR Effects :
+Creates a new DynObject that will store elements of size
+.IR size .
+If
+.I increment
+is positive, the object will allocate memory in blocks large enough to
+hold exactly
+.I increment
+elements; if it is negative, the object will allocate memory by
+doubling in size each time more space is needed, starting with an
+initial size of
+.RI - increment .
+For example, if you are storing 8-byte double precision numbers and
+.I increment
+is 5, each 5th element you add to the object will cause it to request
+40 more bytes (8 * 5) from the operating system.  If
+.I increment
+is -4, adding the first element causes the object to request 32 bytes
+(4 * 8); adding the fifth element requests 32 more bytes for a total
+of 8 elements; adding the ninth element requests 64 more bytes, for a
+total of 16 elements.  If
+.I increment
+is zero, a default value is used (currently 100).  This is the only
+time the programmer deals with a dynamic object's memory allocation.
+.PP
+.IR Returns :
+.B DynCreate
+returns the new DynObject, or NULL if there is insufficient memory.
+.PP
+.nf
+int DynDestroy(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+Frees all memory associated with
+.IR obj .
+The results of calling any Dyn function on a destroyed object are
+undefined (except for DynCreate, which resets the object).
+.PP
+.IR Returns :
+.B DynDestroy
+returns DYN_OK.
+.PP
+.nf
+int DynRelease(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+Frees the memory used to store
+.IR obj 's
+internal state, but leaves the object's array intact.  This is useful
+when you want to use a DynObject to create an arbitrary sized array,
+but then do not want to deal with the DynObject abstraction or having
+to remember to free the object later.
+.nf
+int DynAdd(obj, el)
+	DynObject obj;
+	DynPtr el;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+Adds the element pointed to by
+.I el
+to the object
+.IR obj ,
+resizing the object if necessary.
+The new element becomes the last element in obj's array.
+.PP
+.IR Returns :
+.B DynAdd
+returns DYN_OK on success or DYN_NOMEM if there is insufficient
+memory.
+.PP
+.nf
+int DynInsert(obj, index, els, num)
+        DynObject obj;
+        DynPtr els;
+        int index, num;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+Inserts the array of
+.I num
+elements, pointed to by
+.IR els,
+into the object
+.I obj
+starting at the array location
+.IR index ,
+resizing the object if necessary.  Order is preserved; if you have the
+array "1 2 3 4 5" and insert "10 11 12" at the third position, you
+will have the array "1 2 10 11 12 3 4 5".
+.PP
+.IR Returns :
+.B DynInsert
+returns DYN_BADINDEX if
+.I index
+is not between 0 and
+.BR DynSize ( obj ) ;
+DYN_BADVALUE if
+.I num
+is less than 1; DYN_NOMEM if there is insufficient memory.
+.PP
+.nf
+int DynGet(obj, index)
+	DynObject obj;
+	int index;
+.fi
+.PP
+.IR Effects :
+Returns the address of the element
+.I index
+in the array of
+.IR obj .
+This pointer can be treated as a normal array of the type specified to
+.BR DynCreate .
+The order of elements in this array is the order in which they were
+added to the object.  The returned pointer is guaranteed to be valid
+only until obj is modified.
+.PP
+.IR Returns :
+.B DynGet
+returns NULL if 
+.I index
+is larger than the number of elements in the array of less than zero.
+.PP
+.nf
+int DynArray(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Effects :
+Returns the address of 
+.IR obj 's
+array.  This function is equivalent to
+.BR DynGet (
+.I obj
+, 0).
+.PP
+.nf
+int DynDelete(obj, index)
+	DynObject obj;
+	int index;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+The element
+.I index
+is deleted from the object
+.IR obj .
+Note that the element is actually removed permanently from the array.
+If you have the array "1 2 3 4 5" and delete the third element, you
+will have the array "1 2 4 5".  The order of elements in not affected.
+.PP
+.IR Returns :
+.B DynDelete
+will return DYN_OK on success or DYN_BADINDEX if the element
+.I index
+does not exist in the array or is less than zero.
+.PP
+.nf
+int DynSize(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Effects :
+Returns the number of elements in the object
+.IR obj .
+.PP
+.nf
+int DynCapacity(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Effects :
+Returns the number of elements that
+.IR obj .
+can store without resizing.
+.PP
+.nf
+int DynHigh(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Effects :
+Returns the index of the highest element in the object
+.IR obj .
+In this version,
+.B DynHigh
+is macro that expands to
+.B DynSize
+- 1.
+.PP
+.nf
+int DynLow(obj)
+	DynObject obj;
+.fi
+.PP
+.IR Effects :
+Returns the index of the lowest element in the object
+.IR obj .
+In this version,
+.B DynLow
+is macro that expands to 0.
+.PP
+.nf
+int DynParanoid(obj, state)
+   DynObjectP obj;
+   char state;
+.fi
+.PP
+.IR Modified :
+obj
+.OO
+.IR Effects :
+Sets the paranoid state of
+.I obj
+to 
+.IR state .
+When paranoid mode is on, all data deleted from the object is erased
+with bzero.
+.PP
+.IR Returns :
+.B DynParanoid
+returns DYN_OK.
+.PP
+.nf
+int DynDebug(obj, state)
+	DynObject obj;
+	int state;
+.fi
+.PP
+.IR Modifies :
+obj
+.PP
+.IR Effects :
+Sets the debugging state of
+.I obj
+to 
+.I state
+and prints a message on stderr saying what state debugging was set to.
+Any non-zero value for
+.I state
+turns debugging ``on''.  When debugging is on, all Dyn functions will 
+produce (hopefully useful) output to stderr describing what is going on.
+.PP
+.IR Returns :
+.B DynDebug 
+returns DYN_OK.
+.SH AUTHOR
+Barr3y Jaspan, Student Information Processing Board (SIPB) and
+MIT-Project Athena, bjaspan@athena.mit.edu

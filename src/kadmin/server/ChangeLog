@@ -1,0 +1,10 @@
+Mon Jul 22 04:16:15 1996  Marc Horowitz  <marc@mit.edu>
+
+	* ovsec_kadmd.c (main): open the socket with SO_REUSEADDR.  The
+ 	old server did this, and the tests require it on some platforms.
+
+Tue Jul  9 16:04:53 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kadm_rpc_svc.c: renamed <ovsec_admin/foo.h> to <kadm5/foo.h>
+	* configure.in: cosmetic changes.
+	* Makefile.in: complete rewrite.
