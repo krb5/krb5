@@ -561,6 +561,15 @@ succeedes, and both clients maintain their correct privileges.}
 \Status{Implemented}
 }
 
+\numtest{117}{
+\Version{KADM5_API_VERSION_2}
+\Reason{The max_life field defaults to value specified in the API
+Functional Specification when kdc.conf is unreadable.}
+\Priority{Bug fix, krb5-admin/18}
+\Conditions{local}
+\Status{xxx}
+}
+
 \numtest{150}{
 \Version{KADM5_API_VERSION_2}
 \Reason{init_with_creds works when given an open ccache with a valid
