@@ -34,8 +34,6 @@ krb5_error_code krb5_encode_ticket
 		   krb5_data ** ));
 krb5_error_code krb5_decode_ticket
 	PROTOTYPE((krb5_data *,
-		   krb5_keyblock *,
-		   krb5_enctype,
 		   krb5_ticket ** ));
 krb5_error_code krb5_encrypt_tkt_part
 	PROTOTYPE((krb5_keyblock *,
