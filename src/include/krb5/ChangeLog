@@ -1,3 +1,8 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* macsock.h: Updated location of Utilities.h and Sockets headers
+	* macsock.h: #include <KerberosSupport/ErrorLib.h> 
+
 2001-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm.h (struct __krb5_realm_params): Added fields

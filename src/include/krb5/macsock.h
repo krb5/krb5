@@ -22,9 +22,9 @@
 #ifndef macsock_h
 #define macsock_h
 
-#include <Sockets.h>
-#include <ErrorLib.h>
-#include <netdb.h>
+#include <KerberosSupport/Sockets.h>
+#include <KerberosSupport/ErrorLib.h>
+#include <KerberosSupport/netdb.h>
 
 /* Handle ANSI C versus traditional C */
 #ifndef __STDC__
