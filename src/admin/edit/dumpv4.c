@@ -78,13 +78,16 @@ v4_print_time(file, timeval)
 
 krb5_error_code
 dump_v4_iterator(ptr, entry)
-krb5_pointer ptr;
-krb5_db_entry *entry;
+    krb5_pointer ptr;
+    krb5_db_entry *entry;
 {
-    krb5_error_code retval;
     struct dump_record *arg = (struct dump_record *) ptr;
-    char *name=NULL, *mod_name=NULL;
-    int	i;
+    krb5_tl_mod_princ *mod_princ = NULL;
+    krb5_error_code retval;
+    char *mod_name=NULL;
+    char *name=NULL;
+    int	i, max_kvno, ok_key;
+
     struct v4princ {
       char name[ANAME_SZ+1];
       char instance[INST_SZ+1];
@@ -102,83 +105,99 @@ krb5_db_entry *entry;
 
     principal = &v4princ;
 
-    if (retval = krb5_unparse_name(edit_context, entry->principal, &name)) {
-	com_err(arg->comerr_name, retval, "while unparsing principal");
-	exit_status++;
-	return retval;
-    }
-    if (retval = krb5_unparse_name(edit_context, entry->mod_name, &mod_name)) {
-	free(name);
+    if (retval = krb5_unparse_name(edit_context, entry->princ, &name)) {
 	com_err(arg->comerr_name, retval, "while unparsing principal");
 	exit_status++;
 	return retval;
     }
 
-    if (entry->salt_type != KRB5_KDB_SALTTYPE_V4) {
+    if (strcmp(krb5_princ_realm(edit_context, entry->princ)->data, arg->realm)){
+	/* 
+	 * skip this because it's a key for a different realm, probably
+	 * a paired krbtgt key 
+	 */
         free(name);
-	free(mod_name);
-	/* skip this because it's a new style key and we can't help it */
 	return 0;
     }
-
-    if (strcmp(krb5_princ_realm(edit_context, entry->principal)->data,
-		arg->realm)) {
-        free(name);
-	free(mod_name);
-	/* skip this because it's a key for a different realm, probably
-	   a paired krbtgt key */
-	return 0;
-    }
-
 
     strncpy(principal->name,
-	    krb5_princ_component(edit_context, entry->principal, 0)->data, 
-	    ANAME_SZ);
-    if (!principal->name[0]) {
-      strcpy(principal->name, "*");
-    }
+	    krb5_princ_component(edit_context, entry->princ, 0)->data,ANAME_SZ);
     if (!strcmp(principal->name, "host")) {
-      strcpy(principal->name, "rcmd");
+        strcpy(principal->name, "rcmd");
+    }
+    if (!principal->name[0]) {
+        strcpy(principal->name, "*");
     }
       
-    if (entry->principal->length > 1) {
-      char *inst;
-      strncpy(principal->instance,
-	      krb5_princ_component(edit_context, entry->principal, 1)->data, 
-	      INST_SZ);
-      inst = strchr(principal->instance, '.');
-      if (inst && strcmp(principal->name, "krbtgt")) {
-	/* nuke domain off the end of anything that isn't a tgt */
-	*inst = '\0';
-      }
+    if (entry->princ->length > 1) {
+        char *inst;
+        strncpy(principal->instance,
+	        krb5_princ_component(edit_context, entry->princ, 1)->data, 
+	        INST_SZ);
+        inst = strchr(principal->instance, '.');
+        if (inst && strcmp(principal->name, "krbtgt")) {
+	    /* nuke domain off the end of anything that isn't a tgt */
+	    *inst = '\0';
+        }
+    } else {
+        principal->instance[0] = '*';
+        principal->instance[1] = '\0';
     }
-    else {
-      principal->instance[0] = '*';
-      principal->instance[1] = '\0';
-    }
+    free(name);
 
+    /* Now move to mod princ */
+    if (retval = krb5_dbe_decode_mod_princ_data(edit_context,entry,&mod_princ)){
+	com_err(arg->comerr_name, retval, "while unparsing db entry");
+	exit_status++;
+	return retval;
+    }
+    if (retval=krb5_unparse_name(edit_context,mod_princ->mod_princ,&mod_name)) {
+	com_err(arg->comerr_name, retval, "while unparsing principal");
+	exit_status++;
+	return retval;
+    }
     strncpy(principal->mod_name,
-	    krb5_princ_component(edit_context, entry->mod_name, 0)->data, 
+	    krb5_princ_component(edit_context, mod_princ->mod_princ, 0)->data, 
 	    ANAME_SZ);
     if (!principal->mod_name[0]) {
       strcpy(principal->mod_name, "*");
     }
 
-    if (entry->mod_name->length > 1) {
-      strncpy(principal->mod_instance, 
-	      krb5_princ_component(edit_context, entry->mod_name, 1)->data, 
-	      INST_SZ);
+    if (mod_princ->mod_princ->length > 1) {
+        strncpy(principal->mod_instance, 
+	        krb5_princ_component(edit_context,mod_princ->mod_princ,1)->data,
+	        INST_SZ);
+    } else {
+        principal->mod_instance[0] = '*';
+        principal->mod_instance[1] = '\0';
     }
-    else {
-      principal->mod_instance[0] = '*';
-      principal->mod_instance[1] = '\0';
-    }
+    free(mod_name);
 
+    /* OK deal with the key now. */
+    for (max_kvno = i = 0; i < entry->n_key_data; i++) {
+	if (max_kvno < entry->key_data[i].key_data_kvno) {
+	     max_kvno = entry->key_data[i].key_data_kvno;
+	     ok_key = i;
+	}
+    }
+    while (ok_key < entry->n_key_data) {
+	if (max_kvno == entry->key_data[ok_key].key_data_kvno) {
+	    if (entry->key_data[ok_key].key_data_type[1]
+		== KRB5_KDB_SALTTYPE_V4) {
+		goto found_one;
+	    }
+	}
+	ok_key++;
+    }
+    /* skip this because it's a new style key and we can't help it */
+    return 0;
+
+found_one:;
+    principal->key_version = max_kvno;
     principal->max_life = entry->max_life / (60 * 5);
     principal->kdc_key_ver = entry->mkvno; /* ??? not preserved incoming */
-    principal->key_version = entry->kvno;
     principal->attributes = 0;	/* ??? not preserved either */
-    
+
     fprintf(arg->f, "%s %s %d %d %d %d ",
 	    principal->name,
 	    principal->instance,
@@ -187,26 +206,21 @@ krb5_db_entry *entry;
 	    principal->key_version,
 	    principal->attributes);
 
-    handle_one_key(arg, arg->v5master, &entry->key, v4key);
+    handle_one_key(arg, arg->v5master, &entry->key_data[ok_key], v4key);
 
-    for (i=0; i<8; i++) {
+    for (i = 0; i < 8; i++) {
 	fprintf(arg->f, "%02x", ((unsigned char*)v4key)[i]);
 	if (i == 3) fputc(' ', arg->f);
     }
 
     v4_print_time(arg->f, entry->expiration);
-    v4_print_time(arg->f, entry->mod_date);
+    v4_print_time(arg->f, mod_princ->mod_date);
 
-    fprintf(arg->f, " %s %s\n",
-	    principal->mod_name,
-	    principal->mod_instance);
-
-    free(name);
-    free(mod_name);
+    fprintf(arg->f, " %s %s\n", principal->mod_name, principal->mod_instance);
     return 0;
 }
-/*ARGSUSED*/
 
+/*ARGSUSED*/
 void dump_v4db(argc, argv)
 	int	argc;
 	char	**argv;
@@ -349,10 +363,10 @@ int handle_keys(arg)
 }
 
 handle_one_key(arg, v5master, v5key, v4key)
-     struct dump_record *arg;
-     krb5_encrypt_block *v5master;
-     krb5_encrypted_keyblock *v5key;
-     des_cblock v4key;
+    struct dump_record *arg;
+    krb5_encrypt_block *v5master;
+    krb5_key_data *v5key;
+    des_cblock v4key;
 {
     krb5_error_code retval;
 
@@ -360,10 +374,9 @@ handle_one_key(arg, v5master, v5key, v4key)
     krb5_keyblock v5plainkey;
     /* v4key is the actual v4 key from the file. */
 
-    retval = krb5_kdb_decrypt_key(edit_context, v5master, v5key, &v5plainkey);
-    if (retval) {
+    if (retval = krb5_dbekd_decrypt_key_data(edit_context, v5master, v5key, 
+				             &v5plainkey, NULL)) 
 	return retval;
-    }
 
     /* v4v5key.contents = (krb5_octet *)v4key; */
     /* v4v5key.keytype = KEYTYPE_DES; */
@@ -382,7 +395,6 @@ handle_one_key(arg, v5master, v5key, v4key)
 		 (C_Block *) arg->v4_master_key,
 		 ENCRYPT);
 #endif	/* KDB4_DISABLE */
-
     return 0;
 }
 

@@ -1,4 +1,9 @@
 
+Thu Aug 03 12:13:50 1995  Chris Provenzano   (proven@mit.edu)
+
+	* cpw.c : New change password code for kdb5_edit.
+	* dumpv4.c : Get it to compile with new kdb format.
+
 Mon Jul 31 15:47:30 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_edit.c - Use libkadm string conversion routines.  These are
 		shared by all utilities.
