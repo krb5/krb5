@@ -433,13 +433,15 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     pw0array[0] = '\0';
     pw0.data = pw0array;
     if (password) {
-	if (strlen(password) >= sizeof(pw0array))
+	pw0.length = strlen(password);
+	if (pw0.length > sizeof(pw0array))
 	    return EINVAL;
 	strncpy(pw0.data, password, sizeof(pw0array));
-	pw0array[strlen(password)] = '\0';
+	if (pw0.length == 0)
+	    pw0.length = sizeof(pw0array);
+    } else {
+	pw0.length = sizeof(pw0array);
     }
-    pw0.length = sizeof(pw0array);
-    
     krb5int_populate_gic_opt(context, &opt,
 			     options, addrs, ktypes,
 			     pre_auth_types);

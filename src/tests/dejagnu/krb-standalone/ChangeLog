@@ -1,3 +1,8 @@
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp: Be slightly more lenient about matching password
+	prompts.
+
 2003-03-26  Tom Yu  <tlyu@mit.edu>
 
 	* v4gssftp.exp (v4ftp_test): Return early if $des3_krbtgt set.
