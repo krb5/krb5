@@ -1,3 +1,9 @@
+Thu Jun  8 23:32:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: $($(WHAT)_OBJS) is not accepted by all Makes!  We
+		assume for now that libkadm.a rule is only used by Unix,
+		which should be a valid assumption, and build handle
+		$(UNIX_OBJS) there.
 
 Thu Jun 8 14:32:33 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* logger.c - New module to provide profile-controlled logging.  This

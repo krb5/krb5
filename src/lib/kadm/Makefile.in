@@ -10,14 +10,12 @@ BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)
 
-unix_OBJS = logger.$(OBJEXT)
-mac_OBJS =
-windows_OBJS =
+UNIX_OBJS = logger.$(OBJEXT)
 
 DB_OBJS= adm_kw_dec.$(OBJEXT)	\
 	adm_kw_enc.$(OBJEXT)
 
-OBJS=	$(BASE_OBJS) $(DB_OBJS) $($(WHAT)_OBJS)
+OBJS=	$(BASE_OBJS) $(DB_OBJS) 
 
 SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kt_dec.c	\
@@ -27,15 +25,15 @@ SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kw_enc.c	\
 	$(srcdir)/logger.c
 
-all:: all-$(WHAT) $(BASE_OBJS) $($(WHAT)_OBJS)
+all:: all-$(WHAT) $(BASE_OBJS) 
 
-all-unix:: $(DB_OBJS)
+all-unix:: $(DB_OBJS) $(UNIX_OBJS)
 all-mac:: $(DB_OBJS)
 all-windows::
 
-libkadm.a: $(OBJS)
+libkadm.a: $(OBJS) $(UNIX_OBJS)
 	$(RM) $@
-	$(ARADD) $@ $(OBJS)
+	$(ARADD) $@ $(OBJS) $(UNIX_OBJS)
 	$(RANLIB) $@
 	$(RM) $(TOPLIBD)/libkadm.a
 	$(CP) libkadm.a $(BUILDTOP)/lib/libkadm.a
