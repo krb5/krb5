@@ -29,11 +29,11 @@
 #ifndef __KRB5_KDC_POLICY__
 #define __KRB5_KDC_POLICY__
 
-extern int against_postdate_policy PROTOTYPE((krb5_timestamp));
+extern int against_postdate_policy (krb5_timestamp);
 
-extern int against_flag_policy_as PROTOTYPE((const krb5_kdc_req *));
+extern int against_flag_policy_as (const krb5_kdc_req *);
 
-extern int against_flag_policy_tgs PROTOTYPE((const krb5_kdc_req *,
-					      const krb5_ticket *));
+extern int against_flag_policy_tgs (const krb5_kdc_req *,
+					      const krb5_ticket *);
 
 #endif /* __KRB5_KDC_POLICY__ */

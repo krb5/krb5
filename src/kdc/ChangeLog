@@ -1,3 +1,11 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_preauth.c, kdc_util.h,
+	kerberos_v4.c, main.c, policy.h: Don't use macros PROTOTYPE or
+	KRB5_PROTOTYPE.
+	* kerberos_v4.c (req_act_vno): Delete variable definition.
+	(kerberos_v4): Don't set it.
+
 2001-03-08  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code

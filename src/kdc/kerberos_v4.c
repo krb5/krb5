@@ -68,18 +68,18 @@
 
 extern int errno;
 
-static int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block,
-					 krb5_keyblock *, int));
-static int kerb_get_principal PROTOTYPE((char *, char *, Principal *, int,
+static int compat_decrypt_key (krb5_key_data *, C_Block,
+					 krb5_keyblock *, int);
+static int kerb_get_principal (char *, char *, Principal *, int,
 					 int *, krb5_keyblock *, krb5_kvno,
-					 int, krb5_deltat *));
-static int check_princ PROTOTYPE((char *, char *, int, Principal *,
-				  krb5_keyblock *, int, krb5_deltat *));
+					 int, krb5_deltat *);
+static int check_princ (char *, char *, int, Principal *,
+				  krb5_keyblock *, int, krb5_deltat *);
 
 #ifdef HAVE_STDARG_H
-char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
+char * v4_klog (int, const char *, ...);
 #else
-char * v4_klog KRB5_PROTOTYPE((int, char *, va_dcl));
+char * v4_klog (int, char *, va_dcl);
 #endif
 #define klog v4_klog
 
@@ -113,8 +113,6 @@ static char *req_realm_ptr;
 
 static krb5_ui_4 req_time_ws;
 
-int req_act_vno = KRB_PROT_VERSION; /* Temporary for version skew */
-
 static char local_realm[REALM_SZ];
 
 static long n_auth_req;
@@ -147,9 +145,9 @@ static void hang();
 static krb5_error_code retval; 
 static krb5_data *response;
 
-void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
-void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
-static int set_tgtkey PROTOTYPE((char *, krb5_kvno));
+void kerberos_v4 (struct sockaddr_in *, KTEXT);
+void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
+static int set_tgtkey (char *, krb5_kvno);
 
 /* Attributes converted from V5 to V4 - internal representation */
 #define V4_KDB_REQUIRES_PREAUTH  0x1
@@ -623,8 +621,6 @@ kerberos_v4(client, pkt)
     /* eval macros and correct the byte order and alignment as needed */
     req_version = pkt_version(pkt);	/* 1 byte, version */
     req_msg_type = pkt_msg_type(pkt);	/* 1 byte, Kerberos msg type */
-
-    req_act_vno = req_version;
 
     /* set these to point to something safe */
     req_name_ptr = req_inst_ptr = req_realm_ptr = "";

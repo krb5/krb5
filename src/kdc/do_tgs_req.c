@@ -45,16 +45,11 @@
 #include "adm_proto.h"
 
 
-static void find_alternate_tgs PROTOTYPE((krb5_kdc_req *,
-					  krb5_db_entry *,
-					  krb5_boolean *,
-					  int *));
+static void find_alternate_tgs (krb5_kdc_req *, krb5_db_entry *,
+				krb5_boolean *, int *);
 
-static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
-						    krb5_ticket *,
-						    int,
-						    const char *,
-						    krb5_data **));
+static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
+					  int, const char *, krb5_data **);
 
 /*ARGSUSED*/
 krb5_error_code

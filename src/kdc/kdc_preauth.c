@@ -59,22 +59,22 @@
 #include <syslog.h>
 
 typedef krb5_error_code (*verify_proc)
-    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
+    (krb5_context, krb5_db_entry *client,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
 
 typedef krb5_error_code (*edata_proc)
-    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+    (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
-		    krb5_pa_data *data));
+		    krb5_pa_data *data);
 
 typedef krb5_error_code (*return_proc)
-    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+    (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa));
+		    krb5_pa_data **send_pa);
 
 typedef struct _krb5_preauth_systems {
     char *	name;
@@ -86,39 +86,39 @@ typedef struct _krb5_preauth_systems {
 } krb5_preauth_systems;
 
 static krb5_error_code verify_enc_timestamp
-    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
+    (krb5_context, krb5_db_entry *client,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
 
 static krb5_error_code get_etype_info
-    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+    (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
-		    krb5_pa_data *data));
+		    krb5_pa_data *data);
 static krb5_error_code return_pw_salt
-    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+    (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa));
+		    krb5_pa_data **send_pa);
 
 /* SAM preauth support */
 static krb5_error_code verify_sam_response
-    KRB5_PROTOTYPE((krb5_context, krb5_db_entry *client,
+    (krb5_context, krb5_db_entry *client,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data));
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
 
 static krb5_error_code get_sam_edata
-    KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *request,
+    (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
-		    krb5_pa_data *data));
+		    krb5_pa_data *data);
 static krb5_error_code return_sam_data
-    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+    (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa));
+		    krb5_pa_data **send_pa);
 /*
  * Preauth property flags
  */

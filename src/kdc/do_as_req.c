@@ -45,10 +45,8 @@
 #include "adm_proto.h"
 #include "extern.h"
 
-static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
-						   int,
-						   krb5_data *, 
-						   krb5_data **));
+static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *, 
+					 krb5_data **);
 
 /*ARGSUSED*/
 krb5_error_code
