@@ -1,154 +1,197 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ **********************************************************************
+ ** md4driver.c -- sample routines to test                           **
+ ** RSA Data Security, Inc. MD4 message digest algorithm.            **
+ ** Created: 2/16/90 RLR                                             **
+ ** Updated: 1/91 SRD                                                **
+ **********************************************************************
  */
 
 /*
- * md4driver.c from RFC1186
- *
- * $Log$
- * Revision 5.1  1990/11/08 11:33:37  jtkohl
- * fix indentation to remove extra space from documentation file
- * use kerberos include files
- * add missing double quotes in printf statements
- * only use "rb" if this is ANSI C
- *
- * Revision 5.0  90/11/07  14:12:29  jtkohl
- * Initial code from RFC
- * 
+ **********************************************************************
+ ** Copyright (C) 1990, RSA Data Security, Inc. All rights reserved. **
+ **                                                                  **
+ ** RSA Data Security, Inc. makes no representations concerning      **
+ ** either the merchantability of this software or the suitability   **
+ ** of this software for any particular purpose.  It is provided "as **
+ ** is" without express or implied warranty of any kind.             **
+ **                                                                  **
+ ** These notices must be retained in any copies of any part of this **
+ ** documentation and/or software.                                   **
+ **********************************************************************
  */
-
-/*
-** ********************************************************************
-** md4driver.c -- sample routines to test                            **
-** MD4 message digest algorithm.                                     **
-** Updated: 2/16/90 by Ronald L. Rivest                              **
-** (C) 1990 RSA Data Security, Inc.                                  **
-** ********************************************************************
-*/
 
 #include <stdio.h>
-#include <krb5/krb5.h>
-#include <krb5/rsa-md4.h>
+#include <sys/types.h>
+#include <time.h>
+#include <string.h>
+#include "md4.h"
 
-/* MDtimetrial()
-** A time trial routine, to measure the speed of MD4.
-** Measures speed for 1M blocks = 64M bytes.
-*/
-MDtimetrial()
-{ unsigned int X[16];
-  MDstruct MD;
-  int i;
-  double t;
-  for (i=0;i<16;i++) X[i] = 0x01234567 + i;
-  printf
-  ("MD4 time trial. Processing 1 million 64-character blocks...\n");
-  clock();
-  MDbegin(&MD);
-  for (i=0;i<1000000;i++) MDupdate(&MD,X,512);
-  MDupdate(&MD,X,0);
-  t = (double) clock(); /* in microseconds */
-  MDprint(&MD); printf(" is digest of 64M byte test input.\n");
-  printf("Seconds to process test input:   %g\n",t/1e6);
-  printf("Characters processed per second: %ld.\n",(int)(64e12/t));
-}
-
-/* MDstring(s)
-** Computes the message digest for string s.
-** Prints out message digest, a space, the string (in quotes) and a
-** carriage return.
-*/
-MDstring(s)
-unsigned char *s;
-{ unsigned int i, len = strlen(s);
-  MDstruct MD;
-  MDbegin(&MD);
-  for (i=0;i+64<=len;i=i+64) MDupdate(&MD,s+i,512);
-  MDupdate(&MD,s+i,(len-i)*8);
-  MDprint(&MD);
-  printf(" \"%s\"\n",s);
-}
-
-/* MDfile(filename)
-** Computes the message digest for a specified file.
-** Prints out message digest, a space, the file name, and a
-** carriage return.
-*/
-MDfile(filename)
-char *filename;
-{ 
-#ifdef __STDC__
-  FILE *f = fopen(filename,"rb");
-#else
-  FILE *f = fopen(filename,"r");
-#endif
-  unsigned char X[64];
-  MDstruct MD;
-  int b;
-  if (f == NULL)
-     { printf("%s can't be opened.\n",filename); return; }
-  MDbegin(&MD);
-  while ((b=fread(X,1,64,f))!=0) MDupdate(&MD,X,b*8);
-
-  MDupdate(&MD,X,0);
-  MDprint(&MD);
-  printf(" %s\n",filename);
-  fclose(f);
-}
-
-/* MDfilter()
-** Writes the message digest of the data from stdin onto stdout,
-** followed by a carriage return.
-*/
-MDfilter()
-{ unsigned char X[64];
-  MDstruct MD;
-  int b;
-  MDbegin(&MD);
-  while ((b=fread(X,1,64,stdin))!=0) MDupdate(&MD,X,b*8);
-  MDupdate(&MD,X,0);
-  MDprint(&MD);
-  printf("\n");
-}
-
-/* MDtestsuite()
-** Run a standard suite of test data.
-*/
-MDtestsuite()
+/* Prints message digest buffer in mdContext as 32 hexadecimal digits.
+   Order is from low-order byte to high-order byte of digest.
+   Each byte is printed with high-order hexadecimal digit first.
+ */
+static void MDPrint (mdContext)
+MD4_CTX *mdContext;
 {
-  printf("MD4 test suite results:\n");
-  MDstring("");
-  MDstring("a");
-  MDstring("abc");
-  MDstring("message digest");
-  MDstring("abcdefghijklmnopqrstuvwxyz");
-  MDstring
-  ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-  MDfile("foo"); /* Contents of file foo are "abc" */
+  int i;
+
+  for (i = 0; i < 16; i++)
+    printf ("%02x", mdContext->digest[i]);
 }
 
-main(argc,argv)
+/* size of test block */
+#define TEST_BLOCK_SIZE 1000
+
+/* number of blocks to process */
+#define TEST_BLOCKS 2000
+
+/* number of test bytes = TEST_BLOCK_SIZE * TEST_BLOCKS */
+static long TEST_BYTES = (long)TEST_BLOCK_SIZE * (long)TEST_BLOCKS;
+
+/* A time trial routine, to measure the speed of MD4.
+   Measures wall time required to digest TEST_BLOCKS * TEST_BLOCK_SIZE
+   characters.
+ */
+static void MDTimeTrial ()
+{
+  MD4_CTX mdContext;
+  time_t endTime, startTime;
+  unsigned char data[TEST_BLOCK_SIZE];
+  unsigned int i;
+
+  /* initialize test data */
+  for (i = 0; i < TEST_BLOCK_SIZE; i++)
+    data[i] = (unsigned char)(i & 0xFF);
+
+  /* start timer */
+  printf ("MD4 time trial. Processing %ld characters...\n", TEST_BYTES);
+  time (&startTime);
+
+  /* digest data in TEST_BLOCK_SIZE byte blocks */
+  MD4Init (&mdContext);
+  for (i = TEST_BLOCKS; i > 0; i--)
+    MD4Update (&mdContext, data, TEST_BLOCK_SIZE);
+  MD4Final (&mdContext);
+  /* stop timer, get time difference */
+  time (&endTime);
+  MDPrint (&mdContext);
+  printf (" is digest of test input.\n");
+  printf
+    ("Seconds to process test input: %ld\n", (long)(endTime-startTime));
+  printf
+    ("Characters processed per second: %ld\n",
+     TEST_BYTES/(endTime-startTime));
+}
+
+/* Computes the message digest for string inString.
+   Prints out message digest, a space, the string (in quotes) and a
+   carriage return.
+ */
+static void MDString (inString)
+char *inString;
+{
+  MD4_CTX mdContext;
+  unsigned int len = strlen (inString);
+
+  MD4Init (&mdContext);
+  MD4Update (&mdContext, inString, len);
+  MD4Final (&mdContext);
+  MDPrint (&mdContext);
+  printf (" \"%s\"\n\n", inString);
+}
+
+/* Computes the message digest for a specified file.
+   Prints out message digest, a space, the file name, and a carriage
+   return.
+ */
+static void MDFile (filename)
+char *filename;
+{
+  FILE *inFile = fopen (filename, "rb");
+  MD4_CTX mdContext;
+  int bytes;
+  unsigned char data[1024];
+
+  if (inFile == NULL) {
+    printf ("%s can't be opened.\n", filename);
+    return;
+  }
+
+  MD4Init (&mdContext);
+  while ((bytes = fread (data, 1, 1024, inFile)) != 0)
+    MD4Update (&mdContext, data, bytes);
+  MD4Final (&mdContext);
+  MDPrint (&mdContext);
+  printf (" %s\n", filename);
+  fclose (inFile);
+}
+
+
+/* Writes the message digest of the data from stdin onto stdout,
+   followed by a carriage return.
+ */
+static void MDFilter ()
+{
+  MD4_CTX mdContext;
+  int bytes;
+  unsigned char data[16];
+
+  MD4Init (&mdContext);
+  while ((bytes = fread (data, 1, 16, stdin)) != 0)
+    MD4Update (&mdContext, data, bytes);
+  MD4Final (&mdContext);
+  MDPrint (&mdContext);
+  printf ("\n");
+}
+
+/* Runs a standard suite of test data.
+ */
+static void MDTestSuite ()
+{
+  printf ("MD4 test suite results:\n\n");
+  MDString ("");
+  MDString ("a");
+  MDString ("abc");
+  MDString ("message digest");
+  MDString ("abcdefghijklmnopqrstuvwxyz");
+  MDString
+    ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+  MDString
+    ("1234567890123456789012345678901234567890\
+1234567890123456789012345678901234567890");
+  /* Contents of file foo are "abc" */
+  MDFile ("foo");
+}
+
+void main (argc, argv)
 int argc;
 char *argv[];
-{ int i;
+{
+  int i;
+
   /* For each command line argument in turn:
   ** filename          -- prints message digest and name of file
   ** -sstring          -- prints message digest and contents of string
-  ** -t                -- prints time trial statistics for 64M bytes
+  ** -t                -- prints time trial statistics for 1M characters
   ** -x                -- execute a standard suite of test data
   ** (no args)         -- writes messages digest of stdin onto stdout
   */
-
-  if (argc==1) MDfilter();
+  if (argc == 1)
+    MDFilter ();
   else
-    for (i=1;i<argc;i++)
-      if (argv[i][0]=='-' && argv[i][1]=='s') MDstring(argv[i]+2);
-      else if (strcmp(argv[i],"-t")==0)       MDtimetrial();
-      else if (strcmp(argv[i],"-x")==0)       MDtestsuite();
-      else                                    MDfile(argv[i]);
+    for (i = 1; i < argc; i++)
+      if (argv[i][0] == '-' && argv[i][1] == 's')
+        MDString (argv[i] + 2);
+      else if (strcmp (argv[i], "-t") == 0)
+        MDTimeTrial ();
+      else if (strcmp (argv[i], "-x") == 0)
+        MDTestSuite ();
+      else MDFile (argv[i]);
 }
 
 /*
-** end of md4driver.c
-*/
+ **********************************************************************
+ ** End of md4driver.c                                               **
+ ******************************* (cut) ********************************
+ */
