@@ -1,3 +1,9 @@
+2004-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* import_name.c [HAVE_GETPWUID_R]: Include stdio.h.
+	(krb5_gss_import_name) [HAVE_GETPWUID_R]: Use getpwuid_r instead
+	of getpwuid, for thread safety.
+
 2004-06-17  Tom Yu  <tlyu@mit.edu>
 
 	* ser_sctx.c (kg_ctx_size, kg_ctx_externalize):

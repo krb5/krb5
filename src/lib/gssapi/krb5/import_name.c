@@ -28,6 +28,9 @@
 
 #ifndef NO_PASSWORD
 #include <pwd.h>
+#ifdef HAVE_GETPWUID_R
+#include <stdio.h>
+#endif
 #endif
 
 #ifdef HAVE_STRING_H
@@ -116,6 +119,14 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 return(GSS_S_FAILURE);
       }
    } else {
+#ifndef NO_PASSWORD
+      uid_t uid;
+#ifdef HAVE_GETPWUID_R
+      struct passwd pwx;
+      char pwbuf[BUFSIZ];
+#endif
+#endif
+
       stringrep = NULL;
 
       if ((tmp =
@@ -135,15 +146,25 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 stringrep = (char *) tmp;
 #ifndef NO_PASSWORD
       } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
-	 if ((pw = getpwuid(*((uid_t *) input_name_buffer->value))))
+	 uid = *(uid_t *) input_name_buffer->value;
+      do_getpwuid:
+#ifndef HAVE_GETPWUID_R
+	 pw = getpwuid(uid);
+#elif defined(GETPWUID_R_4_ARGS)
+	 /* old POSIX drafts */
+	 pw = getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf));
+#else
+	 /* POSIX */
+	 if (getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0)
+	     pw = NULL;
+#endif
+	 if (pw)
 	    stringrep = pw->pw_name;
 	 else
 	    *minor_status = (OM_uint32) G_NOUSER;
       } else if (g_OID_equal(input_name_type, gss_nt_string_uid_name)) {
-	 if ((pw = getpwuid((uid_t) atoi(tmp))))
-	    stringrep = pw->pw_name;
-	 else
-	    *minor_status = (OM_uint32) G_NOUSER;
+	 uid = atoi(tmp);
+	 goto do_getpwuid;
 #endif
       } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
 	 cp = tmp;
