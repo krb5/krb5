@@ -513,89 +513,76 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 			 * If there is a facility present, then parse that.
 			 */
 			if (cp2) {
+			    const struct {
+				const char *name;
+				int value;
+			    } facilities[] = {
+				{ "AUTH",	LOG_AUTH	},
+#ifdef	LOG_AUTHPRIV
+				{ "AUTHPRIV",	LOG_AUTHPRIV	},
+#endif	/* LOG_AUTHPRIV */
+#ifdef	LOG_KERN
+				{ "KERN",	LOG_KERN	},
+#endif	/* LOG_KERN */
+#ifdef	LOG_USER
+				{ "USER",	LOG_USER	},
+#endif	/* LOG_USER */
+#ifdef	LOG_MAIL
+				{ "MAIL",	LOG_MAIL	},
+#endif	/* LOG_MAIL */
+#ifdef	LOG_DAEMON
+				{ "DAEMON",	LOG_DAEMON	},
+#endif	/* LOG_DAEMON */
+#ifdef	LOG_FTP
+				{ "FTP",	LOG_FTP		},
+#endif	/* LOG_FTP */
+#ifdef	LOG_LPR
+				{ "LPR",	LOG_LPR		},
+#endif	/* LOG_LPR */
+#ifdef	LOG_NEWS
+				{ "NEWS",	LOG_NEWS	},
+#endif	/* LOG_NEWS */
+#ifdef	LOG_UUCP
+				{ "UUCP",	LOG_UUCP	},
+#endif	/* LOG_UUCP */
+#ifdef	LOG_CRON
+				{ "CRON",	LOG_CRON	},
+#endif	/* LOG_CRON */
+#ifdef	LOG_LOCAL0
+				{ "LOCAL0",	LOG_LOCAL0	},
+#endif	/* LOG_LOCAL0 */
+#ifdef	LOG_LOCAL1
+				{ "LOCAL1",	LOG_LOCAL1	},
+#endif	/* LOG_LOCAL1 */
+#ifdef	LOG_LOCAL2
+				{ "LOCAL2",	LOG_LOCAL2	},
+#endif	/* LOG_LOCAL2 */
+#ifdef	LOG_LOCAL3
+				{ "LOCAL3",	LOG_LOCAL3	},
+#endif	/* LOG_LOCAL3 */
+#ifdef	LOG_LOCAL4
+				{ "LOCAL4",	LOG_LOCAL4	},
+#endif	/* LOG_LOCAL4 */
+#ifdef	LOG_LOCAL5
+				{ "LOCAL5",	LOG_LOCAL5	},
+#endif	/* LOG_LOCAL5 */
+#ifdef	LOG_LOCAL6
+				{ "LOCAL6",	LOG_LOCAL6	},
+#endif	/* LOG_LOCAL6 */
+#ifdef	LOG_LOCAL7
+				{ "LOCAL7",	LOG_LOCAL7	},
+#endif	/* LOG_LOCAL7 */
+			    };
+			    int j;
+
+			    for (j = 0; j < sizeof(facilities)/sizeof(facilities[0]); j++)
+				if (!strcasecmp(cp2, facilities[j].name)) {
+				    log_control.log_entries[i].lsu_facility = facilities[j].value;
+				    break;
+				}
 			    if (!strcasecmp(cp2, "AUTH")) {
 				log_control.log_entries[i].lsu_facility = LOG_AUTH;
 			    }
-#ifdef	LOG_KERN
-			    else if (!strcasecmp(cp2, "KERN")) {
-				log_control.log_entries[i].lsu_facility = LOG_KERN;
-			    }
-#endif	/* LOG_KERN */
-#ifdef	LOG_USER
-			    else if (!strcasecmp(cp2, "USER")) {
-				log_control.log_entries[i].lsu_facility = LOG_USER;
-			    }
-#endif	/* LOG_USER */
-#ifdef	LOG_MAIL
-			    else if (!strcasecmp(cp2, "MAIL")) {
-				log_control.log_entries[i].lsu_facility = LOG_MAIL;
-			    }
-#endif	/* LOG_MAIL */
-#ifdef	LOG_DAEMON
-			    else if (!strcasecmp(cp2, "DAEMON")) {
-				log_control.log_entries[i].lsu_facility = LOG_DAEMON;
-			    }
-#endif	/* LOG_DAEMON */
-#ifdef	LOG_LPR
-			    else if (!strcasecmp(cp2, "LPR")) {
-				log_control.log_entries[i].lsu_facility = LOG_LPR;
-			    }
-#endif	/* LOG_LPR */
-#ifdef	LOG_NEWS
-			    else if (!strcasecmp(cp2, "NEWS")) {
-				log_control.log_entries[i].lsu_facility = LOG_NEWS;
-			    }
-#endif	/* LOG_NEWS */
-#ifdef	LOG_UUCP
-			    else if (!strcasecmp(cp2, "UUCP")) {
-				log_control.log_entries[i].lsu_facility = LOG_UUCP;
-			    }
-#endif	/* LOG_UUCP */
-#ifdef	LOG_CRON
-			    else if (!strcasecmp(cp2, "CRON")) {
-				log_control.log_entries[i].lsu_facility = LOG_CRON;
-			    }
-#endif	/* LOG_CRON */
-#ifdef	LOG_LOCAL0
-			    else if (!strcasecmp(cp2, "LOCAL0")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL0;
-			    }
-#endif	/* LOG_LOCAL0 */
-#ifdef	LOG_LOCAL1
-			    else if (!strcasecmp(cp2, "LOCAL1")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL1;
-			    }
-#endif	/* LOG_LOCAL1 */
-#ifdef	LOG_LOCAL2
-			    else if (!strcasecmp(cp2, "LOCAL2")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL2;
-			    }
-#endif	/* LOG_LOCAL2 */
-#ifdef	LOG_LOCAL3
-			    else if (!strcasecmp(cp2, "LOCAL3")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL3;
-			    }
-#endif	/* LOG_LOCAL3 */
-#ifdef	LOG_LOCAL4
-			    else if (!strcasecmp(cp2, "LOCAL4")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL4;
-			    }
-#endif	/* LOG_LOCAL4 */
-#ifdef	LOG_LOCAL5
-			    else if (!strcasecmp(cp2, "LOCAL5")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL5;
-			    }
-#endif	/* LOG_LOCAL5 */
-#ifdef	LOG_LOCAL6
-			    else if (!strcasecmp(cp2, "LOCAL6")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL6;
-			    }
-#endif	/* LOG_LOCAL6 */
-#ifdef	LOG_LOCAL7
-			    else if (!strcasecmp(cp2, "LOCAL7")) {
-				log_control.log_entries[i].lsu_facility = LOG_LOCAL7;
-			    }
-#endif	/* LOG_LOCAL7 */
 			    cp2--;
 			    *cp2 = savec;
 			}

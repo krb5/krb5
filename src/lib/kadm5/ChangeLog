@@ -1,3 +1,9 @@
+2001-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (krb5_klog_init) [HAVE_SYSLOG]: Loop over an array of
+	syslog facility names rather than open-coding each check.  Add
+	"authpriv" and "ftp" names.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_internal.h: Add prototype for kdb_iter_entry().
