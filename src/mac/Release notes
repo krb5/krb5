@@ -21,3 +21,6 @@ Changes in 1.1a3:
  additional tweaks to config file (reordering realms)
  fix debug targets to link against debug C and runtime libs
  
+1.1b5
+ preliminary version of ccache v2 library and headers
+ Mac changes for cc_set_cache_name, including addition of Krb5GlobalsLib
