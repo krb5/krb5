@@ -93,7 +93,15 @@ void asn1buf_sync(buf, subbuf)
      asn1buf * buf;
      asn1buf * subbuf;
 {
-  buf->next = subbuf->bound + 1;
+  if (subbuf->bound != buf->bound) {
+    buf->next = subbuf->bound + 1;
+  } else {
+    /*
+     * indefinite length; this will suck
+     * XXX - need to skip fields somehow
+     */
+    buf->next = subbuf->next;
+  }
 }
 
 asn1_error_code asn1buf_destroy(buf)
