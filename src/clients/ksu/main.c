@@ -116,7 +116,6 @@ krb5_boolean stored = FALSE;
 krb5_principal  kdc_server;
 krb5_boolean zero_password;
 char * dir_of_cc_target;     
-char * dir_of_cc_source; 
 
     options.opt = KRB5_DEFAULT_OPTIONS;
     options.lifetime = KRB5_DEFAULT_TKT_LIFE;
@@ -799,7 +798,7 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
 	default:
 	    if (auth_debug){
 	 	printf(" The child pid is %ld\n", (long) child_pid);
-        	printf(" The parent pid is %d\n", getpid());
+        	printf(" The parent pid is %ld\n", (long) getpid());
 	    }
             while ((ret_pid = waitpid(child_pid, &statusp, WUNTRACED)) != -1) {
 		if (WIFSTOPPED(statusp)) {

@@ -86,7 +86,8 @@ krb5_error_code krb5_authorization(context, principal, luser,
     if ((pwd = getpwnam(luser)) == NULL)
 	return 0;
 
-    if (retval = krb5_unparse_name(context, principal, &princname))
+    retval = krb5_unparse_name(context, principal, &princname);
+    if (retval)
 	return retval;
 
 #ifdef DEBUG
@@ -146,7 +147,9 @@ krb5_error_code krb5_authorization(context, principal, luser,
 	    fprintf(stderr,
 		    "In krb5_authorization: principal to be authorized %s\n",
 		    princname);
-	if (retval = k5login_lookup( login_fp,  princname, &retbool)){
+
+	retval = k5login_lookup(login_fp,  princname, &retbool);
+	if (retval) {
 	    auth_cleanup(users_fp, login_fp, princname);
 	    return retval;
 	}
@@ -157,8 +160,9 @@ krb5_error_code krb5_authorization(context, principal, luser,
     }
 
     if ((!k5users_flag) && (retbool == FALSE) ){
-	if(retval = k5users_lookup (users_fp, princname,
-				    cmd, &retbool, out_fcmd)){
+	retval = k5users_lookup (users_fp, princname,
+				 cmd, &retbool, out_fcmd);
+	if(retval) {
 	    auth_cleanup(users_fp, login_fp, princname);
 	    return retval;
 	}
@@ -201,10 +205,9 @@ krb5_error_code k5login_lookup (fp, princname, found)
     char * lp;
     krb5_boolean loc_found = FALSE;
 
-
-    if (retval = get_line(fp, &line )){
+    retval = get_line(fp, &line);
+    if (retval)
 	return retval;
-    }
 
     while (line){
 	fprinc = get_first_token (line, &lp);
@@ -222,7 +225,10 @@ krb5_error_code k5login_lookup (fp, princname, found)
 	}
 
 	free (line);
-	if (retval = get_line(fp, &line )){ return retval;}
+
+	retval = get_line(fp, &line);
+	if (retval)
+	    return retval;
     }
 
 
@@ -263,7 +269,8 @@ krb5_error_code k5users_lookup (fp, princname, cmd, found, out_fcmd)
     char * loc_fcmd = NULL;
     krb5_boolean loc_found = FALSE;
 
-    if (retval = get_line(fp, &line ))
+    retval = get_line(fp, &line);
+    if (retval)
 	return retval;
 
     while (line){
@@ -307,7 +314,7 @@ krb5_error_code k5users_lookup (fp, princname, cmd, found, out_fcmd)
 			    }
 			}
 
-		    }while (fcmd = get_next_token( &lp));
+		    }while ((fcmd = get_next_token( &lp)));
 		}
 		free (line);
 		break;
@@ -315,7 +322,11 @@ krb5_error_code k5users_lookup (fp, princname, cmd, found, out_fcmd)
 	}
 
 	free (line);
-	if (retval = get_line(fp, &line )){ return retval;}
+
+	retval = get_line(fp, &line);
+	if (retval) { 
+	    return retval;
+	}
     }
 
     *out_fcmd = loc_fcmd;
@@ -397,7 +408,7 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
 
 	    i++;
 
-	} while(tc = get_next_token (&lp));
+	} while((tc = get_next_token (&lp)));
 
 	tmp_fcmd[i] = NULL;
 	*out_fcmd = tmp_fcmd;
@@ -589,7 +600,8 @@ krb5_error_code get_line (fp, out_line)
     line[0] = '\0';
 
     while (( r = fgets(line_ptr, BUFSIZ , fp)) != NULL){
-	if (newline = strchr(line_ptr, '\n')){
+	newline = strchr(line_ptr, '\n');
+	if (newline) {
 	    *newline = '\0';
 	    break;
 	}

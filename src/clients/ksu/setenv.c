@@ -26,6 +26,7 @@
  *	"value".  If rewrite is set, replace any current value.
  */
 #ifndef HAVE_SETENV
+int
 setenv(name, value, rewrite)
 	register char *name, *value;
 	int rewrite;
@@ -43,7 +44,7 @@ setenv(name, value, rewrite)
 		if (!rewrite)
 			return(0);
 		if (strlen(C) >= l_value) {	/* old larger; copy over */
-			while (*C++ = *value++);
+			while ((*C++ = *value++));
 			return(0);
 		}
 	}

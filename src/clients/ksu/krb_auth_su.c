@@ -344,7 +344,8 @@ krb5_keyblock *	tkt_ses_key;
 	}
 
 	/* Check to make sure ticket hasn't expired */
-	if (retval = krb5_check_exp(context, tkt->enc_part2->times)) {
+	retval = krb5_check_exp(context, tkt->enc_part2->times);
+	if (retval) {
 		if (auth_debug && (retval == KRB5KRB_AP_ERR_TKT_EXPIRED)) {
 			fprintf(stderr,
 				"krb5_verify_tkt_def: ticket has expired");

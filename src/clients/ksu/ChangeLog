@@ -1,3 +1,8 @@
+2001-06-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* authorization.c, heuristic.c, krb_auth_su.c, main.c, setenv.c:
+	Cleanup assignments in conditionals.
+
 2001-04-03  Tom Yu  <tlyu@mit.edu>
 
 	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
