@@ -37,9 +37,9 @@ CL=
 # compiling the Kerberos library
 #
 !if defined(DLL_EXP_TYPE)
-DLL_FILE_DEF=/DKRB5_DLL_FILE
-!else
 DLL_FILE_DEF=/D$(DLL_EXP_TYPE)_DLL_FILE
+!else
+DLL_FILE_DEF=/DKRB5_DLL_FILE
 !endif
 #
 # CCOPTS for DLL functions
