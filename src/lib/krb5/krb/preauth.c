@@ -48,12 +48,14 @@
 
 static krb5_preauth_ops preauth_systems[] = {
     {
+	0,
         KRB5_PADATA_ENC_UNIX_TIME,
         KRB5_PREAUTH_FLAGS_ENCRYPT,
         get_unixtime_padata,
         verify_unixtime_padata,
     },
     {
+	0,
 	KRB5_PADATA_ENC_SANDIA_SECURID,
 	KRB5_PREAUTH_FLAGS_ENCRYPT | KRB5_PREAUTH_FLAGS_HARDWARE,
 	get_securid_padata,

@@ -1,3 +1,7 @@
+Fri Sep 30 21:58:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* preauth.c (preauth_systems): Add placeholder for magic number
+
 Thu Sep 29 15:31:10 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* srv_rcache.c (krb5_get_server_rcache): cachename was not being
