@@ -1,3 +1,8 @@
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* adb_xdr.c (xdr_krb5_key_data): Use xdr_krb5_ui_2 instead of
+	xdr_krb5_int16 for key_data_length field.
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* svr_iters.c: Declare kadm5_get_either static

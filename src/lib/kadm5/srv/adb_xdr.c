@@ -30,9 +30,9 @@ xdr_krb5_key_data(XDR *xdrs, krb5_key_data *objp)
 	return(FALSE);
     if (!xdr_krb5_int16(xdrs, &objp->key_data_type[1]))
 	return(FALSE);
-    if (!xdr_krb5_int16(xdrs, &objp->key_data_length[0]))
+    if (!xdr_krb5_ui_2(xdrs, &objp->key_data_length[0]))
 	return(FALSE);
-    if (!xdr_krb5_int16(xdrs, &objp->key_data_length[1]))
+    if (!xdr_krb5_ui_2(xdrs, &objp->key_data_length[1]))
 	return(FALSE);
 
     tmp = (unsigned int) objp->key_data_length[0];
