@@ -1090,6 +1090,36 @@ static void check_db_age()
 }
 #endif /* BACKWARD_COMPAT */
 
+/*
+ * Given a pointer to a long containing the number of seconds
+ * since the beginning of time (midnight 1 Jan 1970 GMT), return
+ * a string containing the local time in the form:
+ *
+ * "25-Jan-88 10:17:56"
+ */
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+
+static char *krb4_stime(t)
+    long *t;
+{
+    static char st[40];
+    static long adjusted_time;
+    struct tm *tm;
+    char *month_sname();
+
+    adjusted_time = *t /* - CONVERT_TIME_EPOCH */;
+    tm = localtime(&adjusted_time);
+    (void) sprintf(st,"%2d-%s-%02d %02d:%02d:%02d",tm->tm_mday,
+                   month_sname(tm->tm_mon + 1),tm->tm_year,
+                   tm->tm_hour, tm->tm_min, tm->tm_sec);
+    return st;
+}
+
 int check_princ(p_name, instance, lifetime, p)
     char   *p_name;
     char   *instance;
@@ -1149,7 +1179,7 @@ int check_princ(p_name, instance, lifetime, p)
 	/* service did expire, log it */
 	lt = klog(L_ERR_SEXP,
 	    "EXPIRED \"%s\" \"%s\"  %s", (int) p->name, (int) p->instance,
-	     (int) stime(&(p->exp_date)), 0);
+	     (int) krb4_stime(&(p->exp_date)), 0);
 	return KERB_ERR_NAME_EXP;
     }
     /* ok is zero */
