@@ -71,7 +71,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
    /* Go find the appropriate string rep to pass into parse_name */
 
    if ((input_name_type != GSS_C_NULL_OID) &&
-       g_OID_equal(input_name_type, gss_nt_service_name)) {
+       (g_OID_equal(input_name_type, gss_nt_service_name) ||
+	g_OID_equal(input_name_type, gss_nt_service_name_v2))) {
       char *service, *host;
 
       if ((tmp =

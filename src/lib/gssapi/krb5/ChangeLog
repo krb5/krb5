@@ -1,3 +1,13 @@
+Tue Jul 29 22:56:04 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* inq_names.c (krb5_gss_inquire_names_for_mech): Add the 
+ 		the new OID value for the host-based service name and 
+ 		the exported name OID to the list of OID's supported by
+		this mechanism.
+	
+	* import_name.c (krb5_gss_import_name): Add support for the new
+		OID value for the host-based service name.
+
 Mon Jul 21 20:32:14 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Initialize
