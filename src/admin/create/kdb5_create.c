@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_kdb_create_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
@@ -115,7 +115,7 @@ char *argv[];
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
-    char defrealm[BUFSIZ];
+    char *defrealm;
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
 
@@ -183,7 +183,7 @@ char *argv[];
 	exit(1);
     }
     if (!realm) {
-	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
+	if (retval = krb5_get_default_realm(&defrealm)) {
 	    com_err(argv[0], retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
@@ -316,6 +316,6 @@ struct realm_info *pblock;
     if (retval = krb5_db_put_principal(&entry, &nentries))
 	return retval;
 
-    free((char *)ekey.contents);
+    xfree(ekey.contents);
     return 0;
 }

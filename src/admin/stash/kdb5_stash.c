@@ -57,7 +57,6 @@ char *argv[];
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
-    char defrealm[BUFSIZ];
     char *keyfile = 0;
 
     int keytypedone = 0;
@@ -127,11 +126,10 @@ char *argv[];
 	exit(1);
     }
     if (!realm) {
-	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
+	if (retval = krb5_get_default_realm(&realm)) {
 	    com_err(argv[0], retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
-	realm = defrealm;
     }
 
     /* assemble & parse the master key name */
