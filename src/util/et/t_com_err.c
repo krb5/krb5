@@ -78,6 +78,8 @@ int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) add_error_table (&et_et1_error_table);
     try_em (1, 0);
     (void) remove_error_table (&et_et1_error_table);
+    try_em (1, 0);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 0);
 
     initialize_et1_error_table ();
@@ -85,6 +87,8 @@ int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) add_error_table (&et_et1_error_table);
     try_em (1, 0);
     (void) add_error_table (&et_et2_error_table);
+    try_em (1, 1);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (1, 1);
     (void) remove_error_table (&et_et1_error_table);
     try_em (0, 1);
@@ -100,6 +104,8 @@ int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
     (void) add_error_table (&et_et1_error_table);
     try_em (1, 1);
     (void) remove_error_table (&et_et1_error_table);
+    try_em (0, 1);
+    (void) remove_error_table (&et_et2_error_table);
     try_em (0, 1);
     (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);

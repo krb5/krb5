@@ -19,18 +19,24 @@ API divergence:
 Transarc and Heimdal both have APIs that are different from this
 version.  (Specifics?)
 
+Karl Ramm has offered to try to combine them.
+
 Workaround:
 
-No reference counting:
+Reference counting:
 
 If libraries are dynamically loaded and unloaded, and the init/fini
 functions add and remove error tables for *other* libraries they
 depend on (e.g., if a dynamically loadable Zephyr library's fini
 function removes the krb4 library error table and then dlcloses the
 krb4 library, while another dlopen reference keeps the krb4 library
-around), the error table is gone, even if the library is still in use.
+around), the error table is kept; a table must be removed the same
+number of times it was added before the library itself can be
+discarded.
 
-Workaround: None.
+It's not implemented as a reference count, but the effect is the same.
+
+Fix needed: Update documentation.
 
 64-bit support:
 
@@ -46,4 +52,9 @@ to keep in mind....
 
 Workaround: Always use signed types of at least 32 bits for error
 codes.
+
+man page:
+
+No documentation on add_error_table/remove_error_table interfaces,
+even though they're the new, preferred interface.
 

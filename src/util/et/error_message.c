@@ -1,5 +1,5 @@
 /*
- * Copyright 1997 by Massachusetts Institute of Technology
+ * Copyright 1997,2000,2001 by Massachusetts Institute of Technology
  * 
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -235,18 +235,7 @@ KRB5_DLLIMP errcode_t KRB5_CALLCONV
 add_error_table(et)
     /*@dependent@*/ const struct error_table FAR * et;
 {
-    struct et_list *el;
     struct dynamic_et_list *del;
-
-    /* Always check both lists, because the old interface code
-       wouldn't check the dynamically maintained list before adding an
-       entry to the static list.  */
-    for (el = _et_list; el != NULL; el = el->next)
-	if (el->table != NULL && el->table->base == et->base)
-	    return EEXIST;
-    for (del = et_list_dynamic; del != NULL; del = del->next)
-	if (del->table->base == et->base)
-	    return EEXIST;
 
 #ifdef _MSDOS
     if (etl_used < PREALLOCATE_ETL) {
@@ -274,18 +263,15 @@ remove_error_table(et)
 {
     struct dynamic_et_list **del;
     struct et_list **el;
-    errcode_t ret = ENOENT;
 
-    /* Always check both lists, because the old interface code
-       wouldn't check the dynamically maintained list before adding an
-       entry to the static list.  */
+    /* Remove the first occurrance we can find.  Prefer dynamic
+       entries, but if there are none, check for a static one too.  */
     for (del = &et_list_dynamic; *del; del = &(*del)->next)
 	if ((*del)->table->base == et->base) {
 	    /*@only@*/ struct dynamic_et_list *old = *del;
 	    *del = old->next;
 	    free (old);
-	    ret = 0;
-	    break;
+	    return 0;
 	}
     for (el = &_et_list; *el; el = &(*el)->next)
 	if ((*el)->table != NULL && (*el)->table->base == et->base) {
@@ -297,8 +283,7 @@ remove_error_table(et)
 	    if ((old >= etl) && (old < &etl[PREALLOCATE_ETL-1]))
 		/* do something? */;
 #endif
-	    ret = 0;
-	    break;
+	    return 0;
 	}
-    return ret;
+    return ENOENT;
 }

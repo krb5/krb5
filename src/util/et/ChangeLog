@@ -1,3 +1,10 @@
+2001-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c (add_error_table, remove_error_table): Allow
+	tables to be entered and removed multiple times, keeping the count
+	correct.
+	* t_com_err.c (main): Update to reflect new semantics.
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (test1.c, test2.c, et1.c, et2.c, test1.h, test2.h,
