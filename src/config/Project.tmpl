@@ -3,6 +3,9 @@
 
 #define ProjectKRB		5
 
+#ifndef TouchCmd
+#define TouchCmd touch
+#endif
 #ifndef CompileEtCmd
 #define CompileEtCmd $(ETSRC)/compile_et
 #endif
@@ -21,6 +24,9 @@
 #ifndef PosyCmd
 #define PosyCmd $(ISODE)/@sys/bin/posy
 #endif
+#ifndef ArAddCmd
+#define ArAddCmd ar cruv
+#endif
 
 #ifndef PepyPosyRules
 #define	PepyPosyRules()							@@\
@@ -28,51 +34,6 @@
 .py.c:									@@\
 	$(PEPY) $(PYFLAGS) $<
 #endif /* PepyPosyRules */
-
-/*
- * Default Definitions.
- */
-
-     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
-        CONFIGSRC = $(TOP)/config
-         IMAKESRC = $(CONFIGSRC)
-            ISODE = /mit/isode/isode-6.0
-          POFLAGS = PosyFlags
-          PYFLAGS = PepyFlags
-             PEPY = PepyCmd
-             POSY = PosyCmd
-            ETSRC = $(TOP)/lib/comerr/compile_et
-         SSCMDSRC = $(TOP)/lib/ss/mk_cmds
-          DEPKLIB = $(TOP)/lib/krb/libkrb.a \
-                    $(TOP)/lib/ccache/libcred.a \
-                    $(TOP)/lib/ccache/file/libfcc.a \
-		    $(TOP)/lib/rcache/librc.a \
-                    $(TOP)/lib/keytab/libkt.a \
-                    $(TOP)/lib/keytab/file/libktfile.a \
-                    $(TOP)/lib/os-4.3/libos.a \
-                    $(TOP)/error_tables/libkrberrs.a \
-                    $(TOP)/lib/cryptoconf.o \
-                    $(TOP)/lib/des/libdes.a \
-                    $(TOP)/lib/crc-32/libcrc32.a \
-                    $(TOP)/asn.1/libasn1.a \
-                    $(TOP)/lib/free/libkfree.a
-
-             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err $(TOP)/lib/libsyslog.a
-           KDBLIB = $(TOP)/lib/kdb/libkdb.a
-
-#ifdef UseInstalled
-            IMAKE = imake		/* assume BINDIR in path */
-           DEPEND = makedepend		/* assume BINDIR in path */
-        MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
-       COMPILE_ET = compile_et
-          MK_CMDS = mk_cmds
-#else
-            IMAKE = $(IMAKESRC)/imake
-           DEPEND = DependCmd
-        MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
-       COMPILE_ET = CompileEtCmd
-          MK_CMDS = MkCmdsCmd
-#endif
 
 #ifndef ErrorTableObjectRule
 
@@ -95,5 +56,80 @@
 .ct.c: 									@@\
 	$(MK_CMDS) $*.ct
 
+#endif
+
+/*
+ * AdditiveLibraryTarget - generate rules to create a library from
+ * several directories
+ */
+#ifndef AdditiveLibraryTarget
+#define	AdditiveLibraryTarget(libname,objlist)				@@\
+AllTarget(lib/**/libname.a)						@@\
+AllTarget(foo/**/libname)						@@\
+									@@\
+foo/**/libname: objlist							@@\
+	$(ARADD) lib/**/libname.a objlist				@@\
+	$(TOUCH) foo/**/libname						@@\
+	$(RANLIB) $@							@@\
+lib/**/libname.a: objlist						@@\
+	$(ARADD) $@ objlist						@@\
+	$(RANLIB) $@
+#endif /* AdditiveLibraryTarget */
+
+/*
+ * OtherdirLibraryTarget - generate rules to create a library in another
+ * directory from object files here
+ */
+#ifndef OtherdirLibraryTarget
+#define	OtherdirLibraryTarget(libdir,libname,objlist)			@@\
+AllTarget(libdir/lib/**/libname.a)					@@\
+AllTarget(foo/**/libname)						@@\
+									@@\
+foo/**/libname: objlist							@@\
+	$(ARADD) libdir/lib/**/libname.a objlist			@@\
+	$(TOUCH) foo/**/libname						@@\
+libdir/lib/**/libname.a:						@@\
+	$(ARADD) $@ objlist						@@\
+	$(TOUCH) foo/**/libname
+/* The $(RANLIB) is done at the end by the directory itself */
+#endif /* OtherdirLibraryTarget */
+
+/*
+ * Default Definitions.
+ */
+
+            ARADD = ArAddCmd
+     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
+        CONFIGSRC = $(TOP)/config
+         IMAKESRC = $(CONFIGSRC)
+            ISODE = /mit/isode/isode-6.0
+          POFLAGS = PosyFlags
+          PYFLAGS = PepyFlags
+             PEPY = PepyCmd
+             POSY = PosyCmd
+            TOUCH = TouchCmd
+            ETSRC = $(TOP)/lib/comerr/compile_et
+         SSCMDSRC = $(TOP)/lib/ss/mk_cmds
+          DEPKLIB = $(TOP)/lib/libkrb5.a \
+                    $(TOP)/lib/os-4.3/libos.a \
+                    $(TOP)/lib/des/libdes.a \
+                    $(TOP)/lib/crc-32/libcrc32.a \
+                    $(TOP)/asn.1/libasn1.a
+
+             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err
+           KDBLIB = $(TOP)/lib/kdb/libkdb.a
+
+#ifdef UseInstalled
+            IMAKE = imake		/* assume BINDIR in path */
+           DEPEND = makedepend		/* assume BINDIR in path */
+        MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
+       COMPILE_ET = compile_et
+          MK_CMDS = mk_cmds
+#else
+            IMAKE = $(IMAKESRC)/imake
+           DEPEND = DependCmd
+        MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
+       COMPILE_ET = CompileEtCmd
+          MK_CMDS = MkCmdsCmd
 #endif
 
