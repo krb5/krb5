@@ -1,3 +1,10 @@
+Wed Aug 28 17:25:10 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add check for SIZEOF_INT.
+
+	* include/db.h: Check SIZEOF_INT rather than UINT_MAX; it's broken
+		under Ultrix.
+
 Thu Aug 22 23:13:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Add dummy rule for Makefiles.
