@@ -19,10 +19,10 @@ clean-unix::
 	$(RM) $(CLEANLIBS)
 
 clean-windows::
-	$(RM) krb516.dll krb516.lib krb516.bak krb516.map winsock.lib
+	$(RM) krb5_16.dll krb5_16.lib krb5_16.bak krb5_16.map winsock.lib
 	$(RM) gssapi.dll gssapi.lib gssapi.bak gssapi.map
 #
-# Windows stuff to make krb516.dll and krb516.lib. Currently it
+# Windows stuff to make krb5_16.dll and krb5_16.lib. Currently it
 # combines crypto, krb5, kadm and the util/et directories.
 #
 ALIB  = kadm\kadm.lib
@@ -34,7 +34,7 @@ PLIB  = $(BUILDTOP)\util\profile\profile.lib
 WLIB  = .\winsock.lib
 LIBS  = $(ALIB) $(CLIB) $(KLIB) $(GLIB) $(ETLIB) $(PLIB) $(WLIB)
 
-lib-windows: winsock.lib krb516.lib gssapi.lib 
+lib-windows: winsock.lib krb5_16.lib gssapi.lib 
 
 gssapi.lib:: gssapi.dll
 	implib /nologo gssapi.lib gssapi.dll
@@ -44,13 +44,13 @@ gssapi.dll:: $(GLIB) $(LIBS) gssapi.def win_glue.obj
 	   $(LIBS) ldllcew libw oldnames, gssapi.def
 	rc /nologo /p /k gssapi.dll
 
-krb516.lib:: krb516.dll
-	implib /nologo krb516.lib krb516.dll
+krb5_16.lib:: krb5_16.dll
+	implib /nologo krb5_16.lib krb5_16.dll
 
-krb516.dll:: $(LIBS) krb516.def win_glue.obj
-	link /co /seg:400 /noe /nod /nol win_glue, krb516.dll, krb516.map, \
-	   $(LIBS) ldllcew libw oldnames, krb516.def
-	rc /nologo /p /k krb516.dll
+krb5_16.dll:: $(LIBS) krb5_16.def win_glue.obj
+	link /co /seg:400 /noe /nod /nol win_glue, krb5_16.dll, krb5_16.map, \
+	   $(LIBS) ldllcew libw oldnames, krb5_16.def
+	rc /nologo /p /k krb5_16.dll
 
 sap_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -I$(VERS_DIR) /c \
@@ -83,7 +83,7 @@ all-windows::
 	@echo Making in lib
 	cd ..
 
-all-windows:: krb516.lib gssapi.lib
+all-windows:: krb5_16.lib gssapi.lib
 
 clean-windows::
 	@echo Making clean in lib\crypto

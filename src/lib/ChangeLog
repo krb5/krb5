@@ -1,3 +1,8 @@
+Sat Nov 23 00:25:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (all-windows): Change name of dll from krb5_16.dll,
+		which will be the final name of the DLL. [PR#204]
+
 Wed Nov 20 18:28:47 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (clean-windows): Change the name of the Windows (16)
