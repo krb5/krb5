@@ -27,10 +27,6 @@
 
 #include "ksu.h"
 
-static krb5_error_code _dbm_an_to_ln PROTOTYPE((krb5_context, 
-		     krb5_const_principal, const int, char *));
-static krb5_error_code _username_an_to_ln PROTOTYPE((krb5_context,
-		     krb5_const_principal, const int, char *, char *));
 static void auth_cleanup PROTOTYPE((int, FILE *, int, FILE *, char *));
 
 krb5_boolean fowner(fp, uid)
@@ -64,13 +60,12 @@ return(TRUE);
  *
  */
 
-krb5_error_code krb5_authorization(context, principal, luser, local_realm_name,
+krb5_error_code krb5_authorization(context, principal, luser,
 				   cmd, ok, out_fcmd)
     /* IN */
     krb5_context context;
     krb5_principal principal;
     const char *luser;
-    char *local_realm_name;
     char *cmd;
     /* OUT */
     krb5_boolean *ok;
@@ -181,44 +176,14 @@ krb5_error_code krb5_authorization(context, principal, luser, local_realm_name,
     if ( k5login_flag && k5users_flag){
 
 	char * kuser =  (char *) calloc (strlen(princname), sizeof(char));
-
-#ifdef DEBUG 	
-	printf("krb5_lname_file %s\n", krb5_lname_file); 
-#endif
-
-	if (!stat(krb5_lname_file, &statbuf)){
-		if ((! _dbm_an_to_ln(context, principal, strlen(princname), kuser)) &&
-	 			     (strcmp(kuser, luser) == 0)){
-			retbool = TRUE; /* found the right one in db */
-		}
+	if (!(krb5_aname_to_localname(context, principal,
+				      strlen(princname), kuser))
+	    && (strcmp(kuser, luser) == 0)) {
+	    retbool = TRUE;
 	}
-	
-	if (local_realm_name && (retbool == FALSE)){ 
-		char * realm;	
-		int used_def = 0;
 
-		if (!strcmp(local_realm_name, USE_DEFAULT_REALM_NAME)){
-
-    			if (retval = krb5_get_default_realm(context, &realm)) {
-				auth_cleanup(k5users_flag,users_fp,
-					k5login_flag,login_fp, princname); 
-				free(kuser);
-				return(retval);
-    			}
-			used_def =1;
-		}
-		else{ realm = local_realm_name; }
-
-		if((! _username_an_to_ln(context, principal, strlen(princname),
-					 kuser, realm)) 
-		    && (strcmp(kuser,luser) == 0)){
-			retbool = TRUE;
-		}
-
-		if (used_def) free (realm); 
-	}
 	free(kuser);
-    }
+   }
 	 
    *ok =retbool;	
    auth_cleanup(k5users_flag,users_fp, k5login_flag,login_fp, princname); 
@@ -728,106 +693,6 @@ char * lptr, * out_ptr;
 	}
 
 return out_ptr;
-}
-
-/********************************************************************
- * Implementation:  This version uses a DBM database, indexed by aname,
- * to generate a lname.
- *
- * The entries in the database are normal C strings, and include the trailing
- * null in the DBM datum.size.
- ********************************************************************/
-static krb5_error_code
-_dbm_an_to_ln(context, aname, lnsize, lname)
-    krb5_context context;
-    krb5_const_principal aname;
-    const int lnsize;
-    char *lname;
-{
-    DBM *db;
-    krb5_error_code retval;
-    datum key, contents;
-    char *princ_name;
-
-    if (retval = krb5_unparse_name(context, aname, &princ_name))
-	return(retval);
-    key.dptr = princ_name;
-    key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
-					   decoding */
-
-    db = dbm_open(krb5_lname_file, O_RDONLY, 0600);
-    if (!db) {
-	krb5_xfree(princ_name);
-	return KRB5_LNAME_CANTOPEN;
-    }
-
-    contents = dbm_fetch(db, key);
-
-    krb5_xfree(princ_name);
-
-    if (contents.dptr == NULL) {
-	retval = KRB5_LNAME_NOTRANS;
-    } else {
-	strncpy(lname, contents.dptr, lnsize);
-	if (lnsize < contents.dsize)
-	    retval = KRB5_CONFIG_NOTENUFSPACE;
-	else if (lname[contents.dsize-1] != '\0')
-	    retval = KRB5_LNAME_BADFORMAT;
-	else
-	    retval = 0;
-    }
-    /* can't close until we copy the contents. */
-    (void) dbm_close(db);
-    return retval;
-}
-
-/*****************************************************************
- * Implementation:  This version checks the realm to see if it is the 
- * realm passed in; if so, and there is exactly one non-realm 
- * component to the name, that name is returned as the lname.
- ************************************************************/
-
-static krb5_error_code
-_username_an_to_ln (context, aname, lnsize, lname, realm)
-    krb5_context context;
-    krb5_const_principal aname;
-    const int lnsize;
-    char *lname;
-    char *realm;
-{
-    krb5_error_code retval;
-    int realm_length;
-
-    realm_length = krb5_princ_realm(context, aname)->length;
-    
-    if ((realm_length != strlen(realm)) ||
-        (memcmp(realm, krb5_princ_realm(context, aname)->data, realm_length))) {
-        return KRB5_LNAME_NOTRANS;
-    }
-
-    if (krb5_princ_size(context, aname) != 1) {
-        if (krb5_princ_size(context, aname) == 2 ) {
-           /* Check to see if 2nd component is the local realm. */
-           if ( strncmp(krb5_princ_component(context, aname,1)->data,realm,
-                        realm_length) ||
-                realm_length != krb5_princ_component(context, aname,1)->length)
-                return KRB5_LNAME_NOTRANS;
-        }
-        else
-           /* no components or more than one component to non-realm part of name
-           --no translation. */
-            return KRB5_LNAME_NOTRANS;
-    }
-
-    strncpy(lname, krb5_princ_component(context, aname,0)->data, 
-	    min(krb5_princ_component(context, aname,0)->length,lnsize));
-    if (lnsize < krb5_princ_component(context, aname,0)->length ) {
-	retval = KRB5_CONFIG_NOTENUFSPACE;
-    } else {
-	lname[krb5_princ_component(context, aname,0)->length] = '\0';
-	retval = 0;
-    }
-    return retval;
 }
 
 static void auth_cleanup(k5users_flag, users_fp, k5login_flag,

@@ -84,7 +84,6 @@ krb5_context ksu_context;
 char * cc_target_tag = NULL; 
 char * target_user = NULL;
 char * source_user;
-char * local_realm_name = NULL;
 
 krb5_ccache cc_source = NULL;
 char * cc_source_tag = NULL; 
@@ -125,11 +124,7 @@ char * dir_of_cc_source;
 
     krb5_init_context(&ksu_context); 
     krb5_init_ets(ksu_context); 	/* initialize kerberos error tables */
-
-#ifdef LOCAL_REALM 
-    local_realm_name = LOCAL_REALM ;	
-#endif
-
+    krb5_secure_config_files(ksu_context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -624,7 +619,7 @@ char * dir_of_cc_source;
 			source_user,ontty());
 
 		if ((retval = krb5_authorization(ksu_context, client,target_user,
-		 	 local_realm_name, cmd, &authorization_val, &exec_cmd))){
+		 	 cmd, &authorization_val, &exec_cmd))){
                	       com_err(prog_name,retval,"while checking authorization");
 		       sweep_up(ksu_context, use_source_cache, cc_target);
 		       exit(1);

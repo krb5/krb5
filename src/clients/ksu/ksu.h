@@ -161,7 +161,7 @@ extern void printtime PROTOTYPE((time_t));
 extern krb5_boolean fowner PROTOTYPE((FILE *, int));
 
 extern krb5_error_code krb5_authorization
-	PROTOTYPE((krb5_context, krb5_principal, const char *, char *, char *, 
+	PROTOTYPE((krb5_context, krb5_principal, const char *, char *, 
 		   krb5_boolean *, char **));
 
 extern krb5_error_code k5login_lookup PROTOTYPE((FILE *, char *,

@@ -149,15 +149,11 @@ If the target principal name is found without any trailing commands
 or followed only by '*' then the source user is authorized.  
 If either .k5login or .k5users exist but an appropriate entry for the target
 principal does not exist then access is denied. If neither
-file exists then a database of local principal names is
-consulted (the name of this database is defined in Kerberos osconf.h
-file by DEFAULT_LNAME_FILENAME macro). If the target principal name is
-found then the source user is authorized to access the account.
-If it's not found, and ksu was compiled with LOCAL_REALM macro undefined,
-authorization fails. If LOCAL_REALM is defined, and it matches
-the target principal's realm and the first component of the
-target principal name translates to the target account name then
-authorization is successful.  Otherwise, authorization fails.
+file exists then the principal will be granted access 
+to the account according to the aname\->lname mapping rules (see
+.IR krb5_anadd(8) 
+for more details).
+Otherwise, authorization fails.
 .br
 .SH EXECUTION OF THE TARGET SHELL
 Upon successful authentication and authorization, ksu
@@ -456,11 +452,6 @@ is interpreted by the c-shell to execute the command.
 .SH INSTALLATION INSTRUCTIONS
 ksu can be compiled with the following 5 flags (see the Imakefile):
 .TP 10
-\fILOCAL_REALM\fP 
-possible values: the name of the local realm
-or '.' in which case krb.conf is used to look
-up the local realm name.
-.TP 10
 \fIGET_TGT_VIA_PASSWD\fP 
 in case no appropriate tickets are found in the source
 cache, the user will be prompted for a Kerberos
@@ -488,7 +479,7 @@ the names of "legal shells".  Note that the target user's
 shell is obtained from the passwd file.
 .TP 10
 SAMPLE CONFIGURATION:
-KSU_OPTS = -DLOCAL_REALM='"ISI.EDU"' -DGET_TGT_VIA_PASSWD 
+KSU_OPTS = -DGET_TGT_VIA_PASSWD 
 -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /usr/ucb /local/bin"
 .TP 10
 PERMISSIONS FOR KSU

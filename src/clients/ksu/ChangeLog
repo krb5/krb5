@@ -1,3 +1,21 @@
+Thu Oct  5 11:23:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ksu.M: Document authorization changes.
+
+	* ksu.1: Remove as was out of date.
+
+	* Makefile.in (DEFINES): Remove LOCAL_REALM definition.
+
+	* ksu.h: Remove local_realm from krb5_authorization.
+
+	* authorization.c (krb5_authorization): Remove old copied code
+		that is in krb5 library and is out of date. Use the
+		configurable aname to localname methods.
+
+	* main.c (main): Add krb5_secure_config_files so that users cannot
+		override system config files.
+	
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * krb_auth_su.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
