@@ -240,7 +240,7 @@
 /* Define this if you are building for multiple architectures or operating
    systems.  This tells the build where to look for the sources.  */
 #ifndef UseInstalled
-#define SourceTop /mit/krb5/src
+/* #define SourceTop /u1/krb5/sandbox/build */
 #endif
 
 #if defined(VaxArchitecture) || defined(RtArchitecture)
