@@ -1053,7 +1053,6 @@ krb5_fcc_store_authdatum (context, id, a)
     CHECK(ret);
     return krb5_fcc_write(context, id, (krb5_pointer) a->contents, a->length);
 }
-/* end of former file/fcc_write.c */
 #undef CHECK
 
 static krb5_error_code
@@ -2006,7 +2005,7 @@ krb5_fcc_interpret(context, errnum)
     case ENOTDIR:
 #ifdef ELOOP
     case ELOOP:				/* XXX */
-#endif /* ELOOP */
+#endif
 #ifdef ETXTBSY
     case ETXTBSY:
 #endif
