@@ -31,7 +31,7 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
-static void display_status_1(char *m, OM_uint32 code, int type);
+static void display_status_1();
 
 /*
  * Function: send_token
@@ -51,7 +51,9 @@ static void display_status_1(char *m, OM_uint32 code, int type);
  * token data to the file descriptor s.  It returns 0 on success, and
  * -1 if an error occurs or if it could not write all the data.
  */
-int send_token(int s, gss_buffer_t tok)
+int send_token(s, tok)
+     int s;
+     gss_buffer_t tok;
 {
      int len, ret;
 
@@ -101,7 +103,9 @@ int send_token(int s, gss_buffer_t tok)
  * gss_release_buffer.  It returns 0 on success, and -1 if an error
  * occurs or if it could not read all the data.
  */
-int recv_token(int s, gss_buffer_t tok)
+int recv_token(s, tok)
+     int s;
+     gss_buffer_t tok;
 {
      int ret;
 
@@ -154,13 +158,19 @@ int recv_token(int s, gss_buffer_t tok)
  * displayed on stderr, each preceeded by "GSS-API error <msg>: " and
  * followed by a newline.
  */
-void display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
+void display_status(msg, maj_stat, min_stat)
+     char *msg;
+     OM_uint32 maj_stat;
+     OM_uint32 min_stat;
 {
      display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
      display_status_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
-static void display_status_1(char *m, OM_uint32 code, int type)
+static void display_status_1(m, code, type)
+     char *m;
+     OM_uint32 code;
+     int type;
 {
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;

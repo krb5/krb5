@@ -1,3 +1,10 @@
+Thu Jul 21 01:02:28 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: fix infinite recursion in rules
+	* gss-client.c:
+	* gss-misc.c:
+	* gss-server.c: downgrade to K&R function definitions
+
 Tue Jul 19 20:28:46 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* Makefile.in:

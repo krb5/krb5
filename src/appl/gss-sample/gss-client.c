@@ -33,13 +33,13 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
-int establish_context(int s, char *service_name, gss_ctx_id_t *gss_context);
-int connect_to_server(char *host, u_short port);
-int call_server(char *host, u_short port, char *service_name, char *msg);
+int establish_context();
+int connect_to_server();
+int call_server();
 
-int send_token(int s, gss_buffer_t tok);
-int recv_token(int s, gss_buffer_t tok);
-void display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
+int send_token();
+int recv_token();
+void display_status();
 
 usage()
 {
@@ -47,7 +47,9 @@ usage()
      exit(1);
 }
 
-main(int argc, char **argv)
+main(argc, argv)
+     int argc;
+     char **argv;
 {
      char *service_name, *server_host, *msg;
      u_short port = 4444;
@@ -99,7 +101,11 @@ main(int argc, char **argv)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.
  */
-int call_server(char *host, u_short port, char *service_name, char *msg)
+int call_server(host, port, service_name, msg)
+     char *host;
+     u_short port;
+     char *service_name;
+     char *msg;
 {
      gss_ctx_id_t context;
      gss_buffer_desc in_buf, out_buf;
@@ -174,7 +180,9 @@ int call_server(char *host, u_short port, char *service_name, char *msg)
  * opened and connected.  If an error occurs, an error message is
  * displayed and -1 is returned.
  */
-int connect_to_server(char *host, u_short port)
+int connect_to_server(host, port)
+     char *host;
+     u_short port;
 {
      struct sockaddr_in saddr;
      struct hostent *hp;
@@ -226,8 +234,10 @@ int connect_to_server(char *host, u_short port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-int client_establish_context(int s, char *service_name,
-			     gss_ctx_id_t *gss_context) 
+int client_establish_context(s, service_name, gss_context)
+     int s;
+     char *service_name;
+     gss_ctx_id_t *gss_context;
 {
      gss_buffer_desc send_tok, recv_tok, *token_ptr;
      gss_name_t target_name;

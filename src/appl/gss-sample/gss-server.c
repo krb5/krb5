@@ -32,11 +32,11 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
-int create_socket(u_short port);
+int create_socket();
 
-int send_token(int s, gss_buffer_t tok);
-int recv_token(int s, gss_buffer_t tok);
-void display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
+int send_token();
+int recv_token();
+void display_status();
 
 usage()
 {
@@ -44,7 +44,9 @@ usage()
      exit(1);
 }
 
-main(int argc, char **argv)
+main(argc, argv)
+     int argc;
+     char **argv;
 {
      struct sockaddr_in saddr;
      char *service_name;
@@ -92,7 +94,8 @@ main(int argc, char **argv)
  * A listening socket on the specified port and created and returned.
  * On error, an error message is displayed and -1 is returned.
  */
-int create_socket(u_short port)
+int create_socket(port)
+     u_short port;
 {
      struct sockaddr_in saddr;
      int s;
@@ -142,7 +145,9 @@ int create_socket(u_short port)
  *
  * If any error occurs, -1 is returned.
  */
-int sign_server(int s, char *service_name)
+int sign_server(s, service_name)
+     int s;
+     char *service_name;
 {
      gss_cred_id_t server_creds;     
      gss_buffer_desc client_name, xmit_buf, msg_buf;
@@ -237,7 +242,9 @@ int sign_server(int s, char *service_name)
  * fails, an error message is displayed and -1 is returned; otherwise,
  * 0 is returned.
  */
-int server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
+int server_acquire_creds(service_name, server_creds)
+     char *service_name;
+     gss_cred_id_t *server_creds;
 {
      gss_buffer_desc name_buf;
      gss_name_t server_name;
@@ -288,9 +295,11 @@ int server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
  * in client_name and 0 is returned.  If unsuccessful, an error
  * message is displayed and -1 is returned.
  */
-int server_establish_context(int s, gss_cred_id_t server_creds,
-			     gss_ctx_id_t *context, gss_buffer_t
-			     client_name)
+int server_establish_context(s, server_creds, context, client_name)
+     int s;
+     gss_cred_id_t server_creds;
+     gss_ctx_id_t *context;
+     gss_buffer_t client_name;
 {
      gss_buffer_desc send_tok, recv_tok;
      gss_name_t client;
