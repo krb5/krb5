@@ -1,3 +1,7 @@
+2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* etypes.c: Remove ENCTYPE_LOCAL_DES3_HMAC_SHA1
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* block_size.c, checksum_length.c, cksumtype_to_string.c,

@@ -1,3 +1,11 @@
+2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): As below.
+
+	* kdc_preauth.c (enctype_requires_etype_info_2): As below.
+
+	* main.c (initialize_realms): Remove support for marc 3des with length
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJS, krb5kdc, fakeka): Link against apputils lib

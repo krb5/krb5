@@ -79,28 +79,3 @@ krb5_error_code krb5_dk_make_checksum
 		const krb5_keyblock *key, krb5_keyusage usage,
 		const krb5_data *input, krb5_data *output);
 
-#ifdef ATHENA_DES3_KLUDGE
-void krb5_marc_dk_encrypt_length
-(const struct krb5_enc_provider *enc,
-		const struct krb5_hash_provider *hash,
-		size_t input, size_t *length);
-
-krb5_error_code krb5_marc_dk_encrypt
-(const struct krb5_enc_provider *enc,
-		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, krb5_keyusage usage,
-		const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output);
-
-krb5_error_code krb5_marc_dk_decrypt
-(const struct krb5_enc_provider *enc,
-		const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, krb5_keyusage usage,
-		const krb5_data *ivec, const krb5_data *input,
-		krb5_data *arg_output);
-
-krb5_error_code krb5_marc_dk_make_checksum
-(const struct krb5_hash_provider *hash,
-		const krb5_keyblock *key, krb5_keyusage usage,
-		const krb5_data *input, krb5_data *output);
-#endif /* ATHENA_DES3_KLUDGE */

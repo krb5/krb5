@@ -378,8 +378,7 @@ compat_decrypt_key (krb5_key_data *in5, unsigned char *out4,
 	    retval = -1;
 	} else {
 	    /* KLUDGE! If it's a non-raw des3 key, bash its enctype */
-	    if (out5->enctype == ENCTYPE_DES3_CBC_SHA1 ||
-		out5->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
+	    if (out5->enctype == ENCTYPE_DES3_CBC_SHA1 )
 		out5->enctype = ENCTYPE_DES3_CBC_RAW;
 	}
     }
@@ -499,9 +498,6 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 	krb5_free_keyblock_contents (kdc_context, k5key);
       	if (krb5_dbe_find_enctype(kdc_context, &entries,
 				  ENCTYPE_DES3_CBC_RAW,
-				  -1, kvno, &pkey) &&
-	    krb5_dbe_find_enctype(kdc_context, &entries,
-				  ENCTYPE_LOCAL_DES3_HMAC_SHA1,
 				  -1, kvno, &pkey) &&
 	    krb5_dbe_find_enctype(kdc_context, &entries,
 				  ENCTYPE_DES3_CBC_SHA1,

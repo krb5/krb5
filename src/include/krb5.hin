@@ -356,9 +356,6 @@ typedef struct _krb5_enc_data {
 #define ENCTYPE_ARCFOUR_HMAC	0x0017
 #define ENCTYPE_ARCFOUR_HMAC_EXP 0x0018
 #define ENCTYPE_UNKNOWN		0x01ff
-/* local crud */
-/* marc's DES-3 with 32-bit length */
-#define ENCTYPE_LOCAL_DES3_HMAC_SHA1 0x7007
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
@@ -2412,6 +2409,8 @@ void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_salt
 (krb5_get_init_creds_opt *opt,
 		krb5_data *salt);
+
+
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password

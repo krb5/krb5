@@ -195,8 +195,7 @@ krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
     /* Bash types */
     /* KLUDGE! If it's a non-raw des3 key, bash its enctype */
     /* See kdc/kerberos_v4.c */
-    if (keyblock->enctype == ENCTYPE_DES3_CBC_SHA1 ||
-	keyblock->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
+    if (keyblock->enctype == ENCTYPE_DES3_CBC_SHA1 )
       keyblock->enctype = ENCTYPE_DES3_CBC_RAW;
     
     krb5_kt_free_entry(krb5__krb4_context, &kt_entry);

@@ -465,7 +465,6 @@ enctype_requires_etype_info_2(krb5_enctype enctype)
     case ENCTYPE_DES3_CBC_RAW:
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP :
-    case ENCTYPE_LOCAL_DES3_HMAC_SHA1:
 	return 0;
     default:
 	if (krb5_c_valid_enctype(enctype))

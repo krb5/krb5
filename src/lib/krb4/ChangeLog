@@ -1,3 +1,7 @@
+2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* rd_svc_key.c (krb54_get_service_keyblock): Remove ENCTYPE_LOCAL_DES3_HMAC_SHA1
+
 2003-12-11  Sam Hartman  <hartmans@mit.edu>
 
 	* rd_req.c (krb_rd_req_with_key): Note that the expiration difference between krb5 and krb4 is important

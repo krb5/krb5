@@ -148,19 +148,6 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5int_enc_aes256, &krb5int_hash_sha1,
       krb5int_aes_encrypt_length, krb5int_aes_dk_encrypt, krb5int_aes_dk_decrypt,
       krb5int_aes_string_to_key, CKSUMTYPE_HMAC_SHA1_96_AES256 },
-
-#ifdef ATHENA_DES3_KLUDGE
-    /*
-     * If you are using this, you're almost certainly doing the
-     * Wrong Thing.
-     */
-    { ENCTYPE_LOCAL_DES3_HMAC_SHA1,
-      "des3-marc-hmac-sha1",
-      "Triple DES with HMAC/sha1 and 32-bit length code",
-      &krb5int_enc_des3, &krb5int_hash_sha1,
-      krb5_marc_dk_encrypt_length, krb5_marc_dk_encrypt, krb5_marc_dk_decrypt,
-      krb5int_dk_string_to_key, CKSUMTYPE_HMAC_SHA1_DES3 },
-#endif
 };
 
 const int krb5_enctypes_length =
