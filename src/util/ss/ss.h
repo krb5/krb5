@@ -48,7 +48,6 @@ void ss_help __SS_PROTO;
 void ss_list_requests __SS_PROTO;
 void ss_quit __SS_PROTO;
 char *ss_current_request();
-#ifdef __STDC__
 char *ss_name(int);
 void ss_error (int, long, char const *, ...);
 void ss_perror (int, long, char const *);
@@ -64,22 +63,5 @@ char *ss_get_prompt(int);
 void ss_add_request_table(int, ss_request_table *, int, int *);
 void ss_delete_request_table(int, ss_request_table *, int *);
 int ss_execute_line (int, char*);
-#else
-char *ss_name();
-void ss_error ();
-void ss_perror ();
-int ss_listen ();
-int ss_create_invocation();
-void ss_delete_invocation();
-void ss_add_info_dir();
-void ss_delete_info_dir();
-int ss_execute_command();
-void ss_abort_subsystem();
-void ss_set_prompt();
-char *ss_get_prompt();
-void ss_add_request_table();
-void ss_delete_request_table();
-int ss_execute_line();
-#endif
 extern ss_request_table ss_std_requests;
 #endif /* _ss_h */

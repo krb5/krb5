@@ -1,3 +1,10 @@
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* error.c (ss_error): Always use ANSI C form.  Don't try to hide
+	the declaration in the header file.
+
+	* ss.h: Always use the prototype forms of declarations.
+
 2003-06-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (HDRS): Remove mit-sipb-copyright.h.
