@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -DUSE_AUTOCONF_H
+CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
@@ -30,6 +30,15 @@ gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 
 gssapi_err_generic.c: gssapi_err_generic.et
+
+gssapi.h: gssapi.hin
+	$(RM) $@
+	echo "/* This is the gssapi.h prologue. */" >> $@
+	echo "/* It contains some choice pieces of autoconf.h */" >> $@
+	grep SIZEOF $(BUILDTOP)/include/krb5/autoconf.h >> $@
+	grep 'HAVE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
+	echo "/* End of gssapi.h prologue. */"
+	cat $(srcdir)/gssapi.hin >> $@
 
 #if HasHashLibrary
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c

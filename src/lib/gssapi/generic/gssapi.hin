@@ -91,26 +91,9 @@ typedef unsigned int uid_t;
 #define NEAR
 #endif /* !KRB5_CALLCONV */
 
-#if defined(USE_AUTOCONF_H)
-/*
- * Use autoconf generated header.
- */
-#include "autoconf.h"
 #define	GSS_SIZEOF_INT		SIZEOF_INT
 #define	GSS_SIZEOF_LONG		SIZEOF_LONG
 #define	GSS_SIZEOF_SHORT	SIZEOF_SHORT
-#else	/* USE_AUTOCONF_H */
-    
-/*
- * Do it brute force.
- */
-#define GSS_SIZEOF_INT 4
-#define GSS_SIZEOF_LONG 4
-#define GSS_SIZEOF_SHORT 2
-/* #define	HAVE_STDDEF_H	1 */
-/* #define	HAVE_XOM_H	1 */
-
-#endif	/* USE_AUTOCONF_H */
 #endif /* _MSDOS */
 
 #ifndef FAR

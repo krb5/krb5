@@ -1,3 +1,17 @@
+Mon Nov 18 12:38:34 1996  Tom Yu  <tlyu@mit.edu>
+
+	*gssapi.h: Renamed to gssapi.hin.
+
+	* gssapi.hin: Remove #ifdef USE_AUTOCONF_H; we're grepping symbols
+	directly from autoconf.h now.
+
+	* configure.in: Change CopySrcHeader to CopyHeader, as gssapi.h is
+	now generated in the build tree.
+
+	* Makefile.in: Add rules to generate gssapi.h from gssapi.hin,
+	similar to how krb5.h is generated from krb5.hin.  Remove
+	-DUSE_AUTOCONF_H from $(CFLAGS)
+
 Tue Nov  5 18:47:44 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (HDRS): Changes so that $(OBJS) will not get
