@@ -115,7 +115,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 	in_creds.keyblock.enctype = enctypes[i];
 	code = krb5_get_credentials(context, 0, cred->ccache, 
 				    &in_creds, out_creds);
-	if (code != KRB5_CC_NOT_KTYPE)
+	if (code != KRB5_CC_NOT_KTYPE && code != KRB5KDC_ERR_ETYPE_NOSUPP)
 	    break;
     }
     if (enctypes[i] == 0) {

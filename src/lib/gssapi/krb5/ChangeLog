@@ -1,3 +1,9 @@
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): The KDC as well as the
+	ccache may indicate that an enctype is not supported; reflect that
+	in the loop breakout condition.
+
 2000-06-07  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (get_credentials): Rework the enctype loop
