@@ -1,3 +1,9 @@
+Mon May  1 17:05:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* init_os_ctx.c (krb5_set_config_files): Added required const to
+		function declaration to be compatbile with call to
+		profile_init. 
+
 Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
 
         * genaddrs.c (krb5_auth_con_genaddrs()),

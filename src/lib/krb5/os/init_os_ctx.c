@@ -91,7 +91,7 @@ krb5_os_init_context(ctx)
 krb5_error_code INTERFACE
 krb5_set_config_files(ctx, filenames)
 	krb5_context ctx;
-	char	**filenames;
+	const char **filenames;
 {
 	krb5_error_code retval;
 	profile_t	profile;
