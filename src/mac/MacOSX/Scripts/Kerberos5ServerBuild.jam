@@ -8,9 +8,9 @@ Makefile = "$(IntermediateBuild)/Makefile" ;
 MakeStamp = "$(IntermediateBuild)/make.stamp" ;
 
 if $(KerberosCFLAGS) != "" { 
-    KerberosCFLAGS = "CFLAGS=$(CFLAGS) -fno-common -include /usr/include/TargetConditionals.h" ; 
+    KerberosCFLAGS = "CFLAGS=$(CFLAGS) -fno-common -include /usr/include/TargetConditionals.h -DUSE_PASSWORD_SERVER" ; 
 } else {
-    KerberosCFLAGS = "CFLAGS=-fno-common -include /usr/include/TargetConditionals.h" ;
+    KerberosCFLAGS = "CFLAGS=-fno-common -include /usr/include/TargetConditionals.h -DUSE_PASSWORD_SERVER" ;
 }
 
 if $(KerberosLDFLAGS) != "" { 
