@@ -15,6 +15,8 @@ set timeout 100
 set stty_init {erase \^h kill \^u}
 set env(TERM) dumb
 
+set des3_krbtgt 1
+
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
 
@@ -350,7 +352,8 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		master_key_type = des-cbc-md5"
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		supported_enctypes = des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
+# des3-cbc-sha1:normal
+	puts $conffile "		supported_enctypes =  des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
 	puts $conffile "		kdc_ports = 3088"
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
@@ -579,6 +582,7 @@ proc setup_kerberos_db { standalone } {
     global KEY
     global tmppwd
     global spawn_id
+    global des3_krbtgt
 
     if {!$standalone && [file exists tmpdir/db.ok]} {
 	return 1
@@ -728,6 +732,46 @@ proc setup_kerberos_db { standalone } {
 	    catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	}
 	return 0
+    }
+
+    if $des3_krbtgt {
+	# Set the TGT key to DES3.
+	spawn $KADMIN_LOCAL -r $REALMNAME -e "des3-cbc-sha1:normal des-cbc-crc:normal"
+	expect_after {
+	    timeout {
+		catch "expect_after"
+		fail "kadmin.local (timeout)"
+		if {!$standalone} {
+		    catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
+		}
+		return 0
+	    }
+	    eof {
+		catch "expect_after"
+		fail "kadmin.local (eof)"
+		if {!$standalone} {
+		    catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
+		}
+		return 0
+	    }
+	}
+	expect "kadmin.local: "
+	send "cpw -randkey krbtgt/$REALMNAME@$REALMNAME\r"
+	# It echos...
+	expect "cpw -randkey krbtgt/$REALMNAME@$REALMNAME\r"
+	expect {
+	    "Key for \"krbtgt/$REALMNAME@$REALMNAME\" randomized." { }
+	}
+	expect "kadmin.local: "
+	send "quit\r"
+	expect "\r"
+	expect_after
+	if ![check_exit_status kadmin_local] {
+	    if {!$standalone} {
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
+	    }
+	    return 0
+	}
     }
 
     if ![setup_kadmind_srvtab] {

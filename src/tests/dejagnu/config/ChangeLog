@@ -1,3 +1,11 @@
+1999-08-30  Ken Raeburn  <raeburn@raeburn.org>
+
+	* default.exp (des3_krbtgt): New variable.
+	(setup_kerberos_files): Remove des3 from supported_enctypes in
+	kdc.conf.
+	(setup_kerberos_db): If des3_krbtgt is set, change krbtgt key, and
+	get a des3 key in addition to des.
+
 1999-08-27  Ken Raeburn  <raeburn@raeburn.org>
 
 	* default.exp: Set default principal expiration a bit further into
