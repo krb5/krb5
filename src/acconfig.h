@@ -28,7 +28,6 @@
 #undef krb5_sigtype
 #undef HAS_UNISTD_H
 #undef KRB5_USE_INET
-#undef ODBM
 
 #undef HAVE_STDARG_H
 #undef HAVE_VARARGS_H
