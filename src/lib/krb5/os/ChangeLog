@@ -1,3 +1,11 @@
+2000-02-25  Ken Raeburn  <raeburn@raeburn.org>
+
+	* localaddr.c (foreach_localaddr): Broken out from old
+	krb5_os_localaddr.  Iterates over all active interface addresses,
+	invoking callback functions; knows nothing about Kerberos.
+	(count_addrs, allocate, add_addr): New callback functions.
+	(krb5_os_localaddr): Use the above.
+
 2000-02-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Dynamically grow buffer used
