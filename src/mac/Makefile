@@ -20,7 +20,7 @@ library-kind-final						=
 ##############################################################################################################
 
 #	Everything
-all Ä glue gss-krb5-library-debug gss-krb5-library-final headers
+all Ä glue all-debug all-final headers
 
 #	Debugging versions
 all-debug Ä ppc-debug 68k-debug
@@ -381,11 +381,6 @@ ccachelib-68k-debug						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCache
 ccachelib-ppc-final						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCacheLib.PPC
 ccachelib-68k-final						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCacheLib.68K
 
-ccachelib-ppc-debug						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.PPC.debug¶"
-ccachelib-68k-debug						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.68K.debug¶"
-ccachelib-ppc-final						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.PPC¶"
-ccachelib-68k-final						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.68K¶"
-
 socketslib-ppc-debug					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC.debug
 socketslib-68k-debug					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.68K.debug
 socketslib-ppc-final					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC
@@ -555,7 +550,7 @@ mitsupportlib-include-paths = ¶
 	-i {mitsupportlib-root-folder}UtilitiesLib:Headers:
 
 include-paths = `catenate {include-folders-list}` ¶
-	-i {root-folder}mac:libraries:¶"CCache API¶":include: ¶
+	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {krb5-globals-root-folder} ¶
 	{mitsupportlib-include-paths}
 		
