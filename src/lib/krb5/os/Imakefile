@@ -17,6 +17,7 @@ OBJS= \
 	net_read.o	\
 	net_write.o	\
 	osconfig.o	\
+	rnd_confoun.o	\
 	read_pwd.o	\
 	sendto_kdc.o	\
 	timeofday.o	\
@@ -40,6 +41,7 @@ SRCS= \
 	net_write.c	\
 	osconfig.c	\
 	read_pwd.c	\
+	rnd_confoun.c	\
 	sendto_kdc.c	\
 	timeofday.c	\
 	unlck_file.c
