@@ -31,8 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include <krb5/osconf.h>
-#include <krb5/config.h>
+#include "k5-int.h"
 #include <sys/types.h>
 #ifdef USE_STRING_H
 #include <string.h>

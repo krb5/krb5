@@ -19,8 +19,7 @@
 
 /* based on @(#)strdup.c	5.3 (Berkeley) 6/1/90 */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"		/* For "const" */
 
 char *
 strdup(str)

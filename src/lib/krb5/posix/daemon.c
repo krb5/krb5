@@ -38,7 +38,7 @@
 #ifdef HAS_PATHS_H
 #include <paths.h>
 #endif
-#include <krb5/autoconf.h>
+#include "k5-int.h"
 
 #ifndef _PATH_DEVNULL
 #define _PATH_DEVNULL "/dev/null"

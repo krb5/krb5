@@ -1,3 +1,9 @@
+Tue Feb 28 01:05:42 1995  John Gilmore  (gnu at toad.com)
+
+	* daemon.c, memmove.c, strcasecmp.c, strdup.c:  Avoid <krb5/...>
+	includes.
+	* memmove.c:  Use HAS_SYS_TYPES_H.
+
 Thu Dec 22 16:33:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: 
