@@ -49,6 +49,7 @@ libcrypto.a: $(LIBDONE)
 		done ; \
 	fi
 	$(RANLIB) $@
+	touch libcrypto.stamp
 
 libcrypto.lib:
 	libdir crypto.lib
@@ -60,8 +61,7 @@ install:: libcrypto.a
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) libcrypto.a
-	$(RM) shared/*
+	$(RM) libcrypto.a libcrypto.stamp shared/*
 
 clean-windows::
 	$(RM) crypto.lib crypto.bak
