@@ -90,7 +90,6 @@ $2::<<<
 	for i in $(SUBDIRS) ; do \
 		if (cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			LDFLAGS="$(LDFLAGS)" \
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
 		else $$e; fi; \
 	done>>>
@@ -777,6 +776,9 @@ dnl
 define(KRB5_LIBRARIES,[
 DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
 LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib -lkrb5 $kdb4_lib $krb4_lib -lcrypto $ss_lib -lcom_err $LIBS"
+LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
+AC_SUBST(LDFLAGS)
+AC_SUBST(LDARGS)
 AC_SUBST(DEPLIBS)])
 dnl
 dnl This rule supports the generation of the shared library object files

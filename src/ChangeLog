@@ -1,3 +1,10 @@
+
+Wed Jul 12 11:47:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* aclocal.m4 - Add LDFLAGS setting to KRB5_LIBRARIES.  This allows
+		building without using the rule V5_USE_SHARED_LIBS.  Also,
+		don't pass LDFLAGS in recursion because this overrides
+		the values in individual Makefiles.
+
 Sun Jul  9 06:15:33 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* aclocal.m4: backslash '$' characters that go into double-quoted
