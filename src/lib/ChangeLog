@@ -1,3 +1,7 @@
+Wed Mar 15 22:45:33 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: I had missed some dependencies on the PC build.
+
 Wed Mar 15 20:45:33 1995 Keith Vetter (keithv@fusion.com)
 
 	* libkrb5.def, winsock.def, win_glue.c: new files for making DLL.

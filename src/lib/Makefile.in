@@ -30,7 +30,7 @@ LIBS = $(CLIB) $(KLIB) $(ETLIB) $(WLIB)
 # Fast: is a faster way to make things on the PC. Unfortunately it requires
 # the unix utility sed so it can't be part of the final production release.
 #
-fast:
+fast: win_glue.obj winsock.lib
 	$(RM) libkrb5.lib libkrb5.dll
 	cd crypto
 	$(MAKE) -$(MFLAGS) LIBCMD=rem
