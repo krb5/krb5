@@ -13,7 +13,8 @@ set ovpasswd $env(TOP)/kpasswd/kpasswd
 set kadmin_local $env(TOP)/cli/kadmin.local
 set remove_changepw_perms $srcdir/remove_changepw_perms.sh
 set getpid $srcdir/getpid.sh
-set ovsec_adm_server $env(TOP)/server/kadmind
+set ovsec_adm_server_path $env(TOP)/server
+set ovsec_adm_server_name ./kadmind
 set ovsec_edit_keytab $env(TOP)/keytab/kadm5_keytab
 set hostname [exec hostname]
 
