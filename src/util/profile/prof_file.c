@@ -2,6 +2,8 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
+#include "prof_int.h"
+
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -10,8 +12,6 @@
 #include <unistd.h>
 #endif
 #include <string.h>
-
-#include "prof_int.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -8,7 +8,12 @@ XOBJS	= $(RESFILE)
 ##### Options
 # Set NODEBUG if building release instead of debug
 BUILDTOP=..\..
-LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+
+!if defined(KRB5_KFW_COMPILE)
+KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
+KFWLIB= krbcc32.lib
+!endif
+LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 $(KFWINC)
 
 ##### RC Compiler
 RFLAGS	= $(LOCALINCLUDES)
@@ -17,7 +22,7 @@ RCFLAGS	= $(RFLAGS) -D_WIN32 -DGSS_APP
 ##### Linker
 LINK	= link
 LIBS	= $(GLIB) $(CLIB) $(WLIB)
-SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib
+SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib $(KFWLIB)
 LFLAGS	= /nologo $(LOPTS)
 
 all:: Makefile $(OUTPRE)gss.exe

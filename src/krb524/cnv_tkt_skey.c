@@ -1,4 +1,29 @@
 /*
+ * Copyright 2003  by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.	Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ */
+
+/*
  * Copyright 1994 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -31,21 +56,9 @@
 #include <netinet/in.h>
 #endif
 #include <krb.h>
-#include "krb524.h"
+#include "krb524d.h"
 
-static int
-krb524int_krb_create_ticket(KTEXT, unsigned int, char *, char *, char *, long,
-			    char *, int, long, char *, char *, C_Block);
-
-static int
-krb524int_krb_cr_tkt_krb5(KTEXT, unsigned int, char *, char *, char *, long,
-			  char *, int, long, char *, char *,
-			  krb5_keyblock *);
-
-static int
-krb524int_krb_cr_tkt_int(KTEXT, unsigned int, char *, char *, char *, long,
-			 char *, int, long, char *, char *, C_Block,
-			 krb5_keyblock *);
+static int krb524d_debug = 0;
 
 /*
  * Convert a v5 ticket for server to a v4 ticket, using service key
@@ -104,7 +117,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD4 &&
 	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD5) ||
 	 v5etkt->session->length != sizeof(C_Block)) {
-	  if (krb524_debug)
+	  if (krb524d_debug)
 	       fprintf(stderr, "v5 session keyblock type %d length %d != C_Block size %d\n",
 		       v5etkt->session->enctype,
 		       v5etkt->session->length,
@@ -121,7 +134,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	give out a v4 ticket with as much of the v5 lifetime is available
 	"now" instead. */
      if ((ret = krb5_timeofday(context, &server_time))) {
-         if (krb524_debug)
+         if (krb524d_debug)
 	      fprintf(stderr, "krb5_timeofday failed!\n");
 	 krb5_free_enc_tkt_part(context, v5etkt);
 	 v5tkt->enc_part2 = NULL;
@@ -130,7 +143,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      if ((server_time + context->clockskew >= v5etkt->times.starttime)
 	 && (server_time - context->clockskew <= v5etkt->times.endtime)) {
 	  lifetime = krb_time_to_life(server_time, v5etkt->times.endtime);
-	  v4endtime = krb_life_to_time(v5etkt->times.starttime, lifetime);
+	  v4endtime = krb_life_to_time(server_time, lifetime);
 	  /*
 	   * Adjust start time backwards if the lifetime value
 	   * returned by krb_time_to_life() maps to a longer lifetime
@@ -139,7 +152,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	  if (v4endtime > v5etkt->times.endtime)
 	      server_time -= v4endtime - v5etkt->times.endtime;
      } else {
-          if (krb524_debug)
+          if (krb524d_debug)
 	       fprintf(stderr, "v5 ticket time out of bounds\n");
 	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
@@ -156,14 +169,14 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      kaddr.contents = (krb5_octet *)&sinp->sin_addr;
 
      if (!krb5_address_search(context, &kaddr, v5etkt->caddrs)) {
-	 if (krb524_debug)
+	 if (krb524d_debug)
 	     fprintf(stderr, "Invalid v5creds address information.\n");
 	 krb5_free_enc_tkt_part(context, v5etkt);
 	 v5tkt->enc_part2 = NULL;
 	 return KRB524_BADADDR;
      }
 
-     if (krb524_debug)
+     if (krb524d_debug)
 	printf("startime = %ld, authtime = %ld, lifetime = %ld\n",
 	       (long) v5etkt->times.starttime,
 	       (long) v5etkt->times.authtime,
@@ -171,12 +184,12 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 
      /* XXX are there V5 flags we should map to V4 equivalents? */
      if (v4_skey->enctype == ENCTYPE_DES_CBC_CRC) {
-	 ret = krb524int_krb_create_ticket(v4tkt,
+	 ret = krb_create_ticket(v4tkt,
 				 0, /* flags */			     
 				 pname,
 				 pinst,
 				 prealm,
-				 *((unsigned long *)kaddr.contents),
+				 sinp->sin_addr.s_addr,
 				 (char *) v5etkt->session->contents,
 				 lifetime,
 				 /* issue_data */
@@ -184,253 +197,12 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 				 sname,
 				 sinst,
 				 v4_skey->contents);
-     } else {
-	 /* Force enctype to be raw if using DES3. */
-	 if (v4_skey->enctype == ENCTYPE_DES3_CBC_SHA1 ||
-	     v4_skey->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
-	     v4_skey->enctype = ENCTYPE_DES3_CBC_RAW;
-	 ret = krb524int_krb_cr_tkt_krb5(v4tkt,
-			       0, /* flags */			     
-			       pname,
-			       pinst,
-			       prealm,
-			       *((unsigned long *)kaddr.contents),
-			       (char *) v5etkt->session->contents,
-			       lifetime,
-			       /* issue_data */
-			       server_time,
-			       sname,
-			       sinst,
-			       v4_skey);
      }
-
+     else abort();
      krb5_free_enc_tkt_part(context, v5etkt);
      v5tkt->enc_part2 = NULL;
      if (ret == KSUCCESS)
 	  return 0;
      else
 	  return KRB524_V4ERR;
-}
-
-/*****************************************************************************
- * Copied from krb4's cr_tkt.
- * Modified functions below to be static.
- *****************************************************************************/
-
-#define          HOST_BYTE_ORDER (* (const char *) &temp_ONE)
-static const int temp_ONE = 1;
-
-/*
- * Create ticket takes as arguments information that should be in a
- * ticket, and the KTEXT object in which the ticket should be
- * constructed.  It then constructs a ticket and returns, leaving the
- * newly created ticket in tkt.
-#ifndef NOENCRYPTION
- * The data in tkt->dat is encrypted in the server's key.
-#endif
- * The length of the ticket is a multiple of
- * eight bytes and is in tkt->length.
- *
- * If the ticket is too long, the ticket will contain nulls.
- * The return value of the routine is undefined.
- *
- * The corresponding routine to extract information from a ticket it
- * decomp_ticket.  When changes are made to this routine, the
- * corresponding changes should also be made to that file.
- *
- * The packet is built in the following format:
- * 
- * 			variable
- * type			or constant	   data
- * ----			-----------	   ----
- *
- * tkt->length		length of ticket (multiple of 8 bytes)
- * 
-#ifdef NOENCRYPTION
- * tkt->dat:
-#else
- * tkt->dat:		(encrypted in server's key)
-#endif
- * 
- * unsigned char	flags		   namely, HOST_BYTE_ORDER
- * 
- * string		pname		   client's name
- * 
- * string		pinstance	   client's instance
- * 
- * string		prealm		   client's realm
- * 
- * 4 bytes		paddress	   client's address
- * 
- * 8 bytes		session		   session key
- * 
- * 1 byte		life		   ticket lifetime
- * 
- * 4 bytes		time_sec	   KDC timestamp
- * 
- * string		sname		   service's name
- * 
- * string		sinstance	   service's instance
- * 
- * <=7 bytes		null		   null pad to 8 byte multiple
- *
- */
-static int
-krb524int_krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
-		  session, life, time_sec, sname, sinstance, key)
-    KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags;		/* Various Kerberos flags */
-    char    *pname;             /* Principal's name */
-    char    *pinstance;         /* Principal's instance */
-    char    *prealm;            /* Principal's authentication domain */
-    long    paddress;           /* Net address of requesting entity */
-    char    *session;           /* Session key inserted in ticket */
-    int     life;               /* Lifetime of the ticket */
-    long    time_sec;           /* Issue time and date */
-    char    *sname;             /* Service Name */
-    char    *sinstance;         /* Instance Name */
-    C_Block key;                /* Service's secret key */
-{
-    return krb524int_krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm,
-				    paddress, session, life, time_sec, sname,
-				    sinstance, key, NULL);
-}
-
-static int
-krb524int_krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
-			  session, life, time_sec, sname, sinstance, k5key)
-    KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags;		/* Various Kerberos flags */
-    char    *pname;             /* Principal's name */
-    char    *pinstance;         /* Principal's instance */
-    char    *prealm;            /* Principal's authentication domain */
-    long    paddress;           /* Net address of requesting entity */
-    char    *session;           /* Session key inserted in ticket */
-    int     life;               /* Lifetime of the ticket */
-    long    time_sec;           /* Issue time and date */
-    char    *sname;             /* Service Name */
-    char    *sinstance;         /* Instance Name */
-    krb5_keyblock *k5key;	/* NULL if not present */
-{
-    C_Block key;
-
-    return krb524int_krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm,
-				    paddress, session, life, time_sec, sname,
-				    sinstance, key, k5key);
-}
-
-static int
-krb524int_krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
-	       session, life, time_sec, sname, sinstance, key, k5key)
-    KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags_in;	/* Various Kerberos flags */
-    char    *pname;             /* Principal's name */
-    char    *pinstance;         /* Principal's instance */
-    char    *prealm;            /* Principal's authentication domain */
-    long    paddress;           /* Net address of requesting entity */
-    char    *session;           /* Session key inserted in ticket */
-    int     life;               /* Lifetime of the ticket */
-    long    time_sec;           /* Issue time and date */
-    char    *sname;             /* Service Name */
-    char    *sinstance;         /* Instance Name */
-    C_Block key;                /* Service's secret key */
-    krb5_keyblock *k5key;	/* NULL if not present */
-{
-    Key_schedule key_s;
-    register char *data;        /* running index into ticket */
-
-    unsigned char flags = flags_in & 0xFF; /* This must be one byte */
-
-    tkt->length = 0;            /* Clear previous data  */
-
-    /* Check length of ticket */
-    if (sizeof(tkt->dat) < (sizeof(flags) +
-                            1 + strlen(pname) +
-                            1 + strlen(pinstance) +
-                            1 + strlen(prealm) +
-                            4 +                         /* address */
-			    8 +                         /* session */
-			    1 +                         /* life */
-			    4 +                         /* issue time */
-                            1 + strlen(sname) +
-                            1 + strlen(sinstance) +
-			    7) / 8) {                   /* roundoff */
-        memset(tkt->dat, 0, sizeof(tkt->dat));
-        return KFAILURE /* XXX */;
-    }
-
-    flags |= HOST_BYTE_ORDER;   /* ticket byte order   */
-    memcpy((char *) (tkt->dat), (char *) &flags, sizeof(flags));
-    data = ((char *)tkt->dat) + sizeof(flags);
-    (void) strcpy(data, pname);
-    data += 1 + strlen(pname);
-    (void) strcpy(data, pinstance);
-    data += 1 + strlen(pinstance);
-    (void) strcpy(data, prealm);
-    data += 1 + strlen(prealm);
-    memcpy(data, (char *) &paddress, 4);
-    data += 4;
-
-    memcpy(data, (char *) session, 8);
-    data += 8;
-    *(data++) = (char) life;
-    /* issue time */
-    memcpy(data, (char *) &time_sec, 4);
-    data += 4;
-    (void) strcpy(data, sname);
-    data += 1 + strlen(sname);
-    (void) strcpy(data, sinstance);
-    data += 1 + strlen(sinstance);
-
-    /* guarantee null padded ticket to multiple of 8 bytes */
-    memset(data, 0, 7);
-    tkt->length = ((data - ((char *)tkt->dat) + 7)/8)*8;
-
-    /* Check length of ticket */
-    if (tkt->length > (sizeof(KTEXT_ST) - 7)) {
-        memset(tkt->dat, 0, tkt->length);
-        tkt->length = 0;
-        return KFAILURE /* XXX */;
-    }
-
-#ifndef NOENCRYPTION
-    /* Encrypt the ticket in the services key */
-    if (k5key != NULL) {
-	/* block locals */
-	krb5_data in;
-	krb5_enc_data out;
-	krb5_error_code ret;
-	size_t enclen;
-
-	in.length = tkt->length;
-	in.data = tkt->dat;
-	/* XXX assumes context arg is ignored */
-	ret = krb5_c_encrypt_length(NULL, k5key->enctype,
-				    (size_t)in.length, &enclen);
-	if (ret)
-	    return KFAILURE;
-	out.ciphertext.length = enclen;
-	out.ciphertext.data = malloc(enclen);
-	if (out.ciphertext.data == NULL)
-	    return KFAILURE;	/* XXX maybe ENOMEM? */
-
-	/* XXX assumes context arg is ignored */
-	ret = krb5_c_encrypt(NULL, k5key, KRB5_KEYUSAGE_KDC_REP_TICKET,
-			     NULL, &in, &out);
-	if (ret) {
-	    free(out.ciphertext.data);
-	    return KFAILURE;
-	} else {
-	    tkt->length = out.ciphertext.length;
-	    memcpy(tkt->dat, out.ciphertext.data, out.ciphertext.length);
-	    memset(out.ciphertext.data, 0, out.ciphertext.length);
-	    free(out.ciphertext.data);
-	}
-    } else {
-	key_sched(key,key_s);
-	pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
-		     (long) tkt->length,key_s,(C_Block *)key,1);
-    }
-#endif /* !NOENCRYPTION */
-    return 0;
 }

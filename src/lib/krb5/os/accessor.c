@@ -35,18 +35,32 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
   if (version == KRB5INT_ACCESS_VERSION)
   {
     krb5int_access internals_temp;
-    internals_temp.krb5_locate_server = krb5int_locate_server;
-    internals_temp.krb5_locate_kdc = krb5_locate_kdc;
     internals_temp.free_addrlist = krb5int_free_addrlist;
-    internals_temp.krb5_max_skdc_timeout = krb5_max_skdc_timeout;
-    internals_temp.krb5_skdc_timeout_shift = krb5_skdc_timeout_shift;
-    internals_temp.krb5_skdc_timeout_1 = krb5_skdc_timeout_1;
-    internals_temp.krb5_max_dgram_size = krb5_max_dgram_size;
     internals_temp.krb5_hmac = krb5_hmac;
     internals_temp.md5_hash_provider = &krb5int_hash_md5;
     internals_temp.arcfour_enc_provider = &krb5int_enc_arcfour;
+    internals_temp.locate_server = &krb5int_locate_server;
     internals_temp.sendto_udp = &krb5int_sendto;
     internals_temp.add_host_to_list = krb5int_add_host_to_list;
+#ifdef KRB5_DNS_LOOKUP
+    internals_temp.make_srv_query_realm = krb5int_make_srv_query_realm;
+    internals_temp.free_srv_dns_data = krb5int_free_srv_dns_data;
+#else
+    internals_temp.make_srv_query_realm = 0;
+    internals_temp.free_srv_dns_data = 0;
+#endif
+#ifdef KRB5_KRB4_COMPAT
+    internals_temp.krb_life_to_time = krb5int_krb_life_to_time;
+    internals_temp.krb_time_to_life = krb5int_krb_time_to_life;
+    internals_temp.krb524_encode_v4tkt = krb5int_encode_v4tkt;
+#else
+    internals_temp.krb_life_to_time = 0;
+    internals_temp.krb_time_to_life = 0;
+    internals_temp.krb524_encode_v4tkt = 0;
+#endif
+    internals_temp.krb5int_c_mandatory_cksumtype = krb5int_c_mandatory_cksumtype;
+    internals_temp.krb5_ser_pack_int64 = krb5_ser_pack_int64;
+    internals_temp.krb5_ser_unpack_int64 = krb5_ser_unpack_int64;
     *internals = internals_temp;
     return 0;
   }

@@ -17,7 +17,6 @@ HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h $(HDRDIR)/db-ndbm.h
 
 all-unix:: all-liblinks includes
 clean-unix:: clean-liblinks clean-libs clean-includes
-install-unix:: install-libs
 
 includes:: $(HDRS)
 

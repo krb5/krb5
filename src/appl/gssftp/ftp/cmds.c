@@ -940,7 +940,7 @@ usage:
 	}
 
 	recvrequest("RETR", argv[2], argv[1], rmode,
-	    argv[1] != oldargv1 || argv[2] != oldargv2);
+	    argv[1] != oldargv1 || argv[2] != oldargv2, loc);
 	restart_point = 0;
 	return (0);
 }
@@ -1017,7 +1017,7 @@ void mget(argc, argv)
 				tp = domap(tp);
 			}
 			recvrequest("RETR", tp, cp, "w",
-			    tp != cp || !interactive);
+			    tp != cp || !interactive, 1);
 			if (!mflag && fromatty) {
 				ointer = interactive;
 				interactive = 1;
@@ -1085,7 +1085,7 @@ remglob(argv,doswitch)
 			pswitch(!proxy);
 		}
 		for (rmode = "w"; *++argv != NULL; rmode = "a")
-			recvrequest ("NLST", temp, *argv, rmode, 0);
+			recvrequest ("NLST", temp, *argv, rmode, 0, 0);
 		if (doswitch) {
 			pswitch(!proxy);
 		}
@@ -1455,7 +1455,7 @@ void ls(argc, argv)
 			code = -1;
 			return;
 	}
-	recvrequest(cmd, argv[2], argv[1], "w", 0);
+	recvrequest(cmd, argv[2], argv[1], "w", 0, 0);
 }
 
 /*
@@ -1493,7 +1493,7 @@ usage:
 	(void) setjmp(jabort);
 	for (i = 1; mflag && i < argc-1; ++i) {
 		*rmode = (i == 1) ? 'w' : 'a';
-		recvrequest(cmd, dest, argv[i], rmode, 0);
+		recvrequest(cmd, dest, argv[i], rmode, 0, 0);
 		if (!mflag && fromatty) {
 			ointer = interactive;
 			interactive = 1;
