@@ -25,7 +25,7 @@ getst(fd, s, n)
     register char *s;
     int n;
 {
-    register count = n;
+    register int count = n;
     while (read(fd, s, 1) > 0 && --count)
         if (*s++ == '\0')
             return (n - count);
