@@ -131,7 +131,10 @@ C=./
 # "/" for UNIX, "\" for Windows; *sigh*
 S=/
 
-SUBDIRS = @subdirs@ $(LOCAL_SUBDIRS)
+#SUBDIRS = @subdirs@ $(LOCAL_SUBDIRS)
+SUBDIRS_@top_srcdir@ = @subdirs@
+SUBDIRS = $(SUBDIRS_@srcdir@) $(LOCAL_SUBDIRS)
+#
 srcdir = @srcdir@
 SRCTOP = @srcdir@/$(BUILDTOP)
 VPATH = @srcdir@

@@ -1,3 +1,7 @@
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Deleted.
+
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Removed.  Directory configured from top level

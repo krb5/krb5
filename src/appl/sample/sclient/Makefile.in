@@ -1,7 +1,6 @@
 thisconfigdir=./../..
 myfulldir=appl/sample/sclient
 mydir=sample/sclient
-MY_SUBDIRS=.
 
 BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)

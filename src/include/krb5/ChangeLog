@@ -1,3 +1,7 @@
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Deleted.
+
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-config.h: Unused file deleted.

@@ -1,7 +1,6 @@
 thisconfigdir=..
 myfulldir=slave
 mydir=slave
-MY_SUBDIRS=.
 BUILDTOP=$(REL)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

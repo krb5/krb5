@@ -1,7 +1,6 @@
 thisconfigdir=./../..
 myfulldir=appl/simple/server
 mydir=simple/server
-MY_SUBDIRS=.
 BUILDTOP=$(REL)..$(S)..$(S)..
 
 LOCALINCLUDES= -I.. -I$(srcdir)/..

@@ -1,3 +1,11 @@
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (SUBDIRS): Use autoconf substitution trick to make
+	SUBDIRS contain @subdirs@ only for the directory containing the
+	configure script, and only LOCAL_SUBDIRS elsewhere.
+
+	* post.in (RECURSE_TARGETS): Drop MY_SUBDIRS support.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (APPUTILS_DEPLIB, APPUTILS_LIB): New vars.

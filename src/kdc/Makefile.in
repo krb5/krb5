@@ -1,7 +1,6 @@
 thisconfigdir=..
 myfulldir=kdc
 mydir=kdc
-MY_SUBDIRS=.
 BUILDTOP=$(REL)..
 # -DUSE_RCACHE - enable replay cache for KDC
 # -DNOCACHE    - disable lookaside cache, which is used to resend previous

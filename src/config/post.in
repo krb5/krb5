@@ -168,11 +168,7 @@ RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 $(RECURSE_TARGETS):
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
 		in *[ik]*) e="status=1" ;; *) e="exit 1";; esac; \
-	if test -z "$(MY_SUBDIRS)" ; then \
-		do_subdirs="$(SUBDIRS)" ; \
-	else \
-		do_subdirs="$(MY_SUBDIRS)" ; \
-	fi; \
+	do_subdirs="$(SUBDIRS)" ; \
 	status=0; \
 	if test -n "$$do_subdirs" && test -z "$(NORECURSE)"; then \
 	for i in $$do_subdirs ; do \

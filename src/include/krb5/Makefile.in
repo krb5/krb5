@@ -1,7 +1,6 @@
 thisconfigdir=./..
 myfulldir=include/krb5
 mydir=krb5
-MY_SUBDIRS=.
 BUILDTOP=$(REL)..$(S)..
 KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 

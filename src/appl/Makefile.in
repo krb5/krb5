@@ -3,5 +3,5 @@ myfulldir=appl
 mydir=.
 BUILDTOP=$(REL)..
 
-MY_SUBDIRS= sample simple user_user bsd gss-sample gssftp telnet
+LOCAL_SUBDIRS= sample simple user_user gss-sample
 

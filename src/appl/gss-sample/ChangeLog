@@ -1,3 +1,7 @@
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Deleted.
+
 2003-02-26  Jeffrey Altman <jaltman@mit.edu>
 
     * gss-client.c: merge if (this) if (that) into if (this && that)

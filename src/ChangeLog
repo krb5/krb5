@@ -1,3 +1,7 @@
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SUBDIRS): Renamed from MY_SUBDIRS.
+
 2004-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Look for tclConfig.sh in

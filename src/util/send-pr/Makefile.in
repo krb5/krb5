@@ -1,7 +1,6 @@
 thisconfigdir=./../..
 myfulldir=util/send-pr
 mydir=util/send-pr
-MY_SUBDIRS=.
 BUILDTOP=$(REL)..$(S)..
 #
 # Makefile for building a standalone send-pr.
