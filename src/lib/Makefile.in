@@ -27,12 +27,12 @@ clean-windows::
 
 # Windows stuff to make krb5 and gssapi DLLs.
 
-VERLIBS=$(BUILDTOP)\mit\windows\lib\$(CPU)\vsnt.lib
-!if defined(KRB5_USE_DNS)
-DNSLIBS= $(BUILDTOP)\mit\windows\lib\$(CPU)\wshelp32.lib
-!else
-DNSLIBS=
-!endif
+##DOS##VERLIBS=$(BUILDTOP)\mit\windows\lib\$(CPU)\vsnt.lib
+##DOS##!if defined(KRB5_USE_DNS)
+##DOS##DNSLIBS= $(BUILDTOP)\mit\windows\lib\$(CPU)\wshelp32.lib
+##DOS##!else
+##DOS##DNSLIBS=
+##DOS##!endif
 ##MIT##MITLIBS= $(VERLIBS) $(DNSLIBS)
 ##MIT##MITFLAGS=-I$(BUILDTOP)\mit\windows\include /DVERSERV=1
 

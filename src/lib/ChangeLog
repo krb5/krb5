@@ -1,3 +1,8 @@
+1999-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix jaltman's changes so they don't break the unix
+	build.
+
 1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Add krb5_get_default_config_files and 
