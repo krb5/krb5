@@ -1,3 +1,8 @@
+Thu Sep 29 15:24:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* 425error.c (krb425error): Recognize the KRB5_KDCREP_SKEW and
+		return generic error.
+
 Thu Aug  4 03:42:04 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: oops look for install program

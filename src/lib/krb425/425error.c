@@ -75,6 +75,7 @@ krb5_error_code e;
 	case KRB5KDC_ERR_BADOPTION:	/* KDC can't do requested opt. */
 	case KRB5KDC_ERR_ETYPE_NOSUPP:	/* No support for encryption type */
 	case KRB5_KDCREP_MODIFIED:	/* KDC reply did not match expectations */
+	case KRB5_KDCREP_SKEW:		/* Clock skew too great in KDC reply */
 		return(KDC_GEN_ERR);
 	case KRB5_KDC_UNREACH:		/* Cannot contact any KDC for requested realm */
 	case KRB5_REALM_UNKNOWN:	/* Cannot find KDC for requested realm */
