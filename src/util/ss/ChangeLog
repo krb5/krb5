@@ -1,7 +1,8 @@
 Thu Feb 23 14:24:31 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* mk_cmds.sh: use ${SED} not sed in backtick expressions.
-	Use set -e so that if ${FILE} isn't found we actually fail.
+	Explicitly check for ${FILE} since sed doesn't give an error if it
+	is absent. Also set -e to catch other conditions.
 
 Sat Oct 22 09:54:50 1994    (tytso@rsx-11)
 

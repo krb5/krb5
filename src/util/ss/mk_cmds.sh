@@ -12,6 +12,11 @@ ROOT=`echo $1 | ${SED} -e s/.ct$//`
 BASE=`echo $ROOT | ${SED} -e 's;.*/;;'`
 TMP=ct$$.c
 
+if [ ! -r ${FILE} ] ; then
+	echo mk_cmds: ${FILE} not found
+	exit 1
+fi
+
 ${SED} -f ${DIR}/ct_c.sed  ${FILE} \
 	| ${AWK} -f ${DIR}/ct_c.awk rootname=${ROOT} outfile=${TMP} -
 
