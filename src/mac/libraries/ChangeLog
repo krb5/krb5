@@ -1,3 +1,11 @@
+Wed Apr 10 10:14:22 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* KerberosHeaders.h (PROVIDE_DES_CBC_RAW): Fix #define of
+		PROVIDE_DES_CBC_RAW so that the mac implementation
+		actually exported the raw DES encryption system (needed
+		for GSSAPI).  Also added defines for the triple-DES
+		encryption systems.
+
 Wed Mar 27 00:07:46 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* KerberosHeaders.h: Add #define of HAVE_STDLIB_H, since
