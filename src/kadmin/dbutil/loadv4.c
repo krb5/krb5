@@ -530,11 +530,9 @@ Principal *princ;
     }
     mod_time = princ->mod_date;
 
-    if (!shortlife) {
+    if (!shortlife)
 	entry.max_life = krb_life_to_time(0, princ->max_life);
-	if (entry.max_life == KRB_NEVERDATE)
-	    entry.max_life = rblock.max_life;
-    } else
+    else
 	entry.max_life = princ->max_life * 60 * 5;
     entry.max_renewable_life = rblock.max_rlife;
     entry.len = KRB5_KDB_V1_BASE_LENGTH;

@@ -1,3 +1,7 @@
+2001-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* loadv4.c: Remove references to KRB_NEVERDATE.
+
 2001-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_util.M: Fix some formatting nits and document new flags
