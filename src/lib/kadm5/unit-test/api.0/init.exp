@@ -681,15 +681,13 @@ test42
 
 
 proc test45_46 {service} {
-    global test kdb5_edit env
+    global test kadmin_local env
 
-    spawn $kdb5_edit -R "del $service"
+    spawn $kadmin_local -q "delprinc -force $service"
     expect {
-	{Type 'yes' to confirm:} {
-	    send "yes\n"
-	}
+	-re "Principal .* deleted." {}
 	default {
-	    error "kdb5_edit del failed\n";
+	    error "kadmin.local delprinc failed\n";
 	}
     }
     expect eof
@@ -701,7 +699,7 @@ proc test45_46 {service} {
 	    server_handle}] "SECURE_PRINC_MISSING"
 
     # this leaves the keytab with an incorrect entry
-    exec $kdb5_edit -R "ark $service"
+    exec $kadmin_local -q "ank -randkey $service"
 
     # restart the api so it gets a new ccache
     api_exit

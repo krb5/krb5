@@ -132,7 +132,7 @@ capi.2: api.2
 	ln -s api.2 capi.2
 
 unit-test-client-body: capi.0 capi.2 site.exp test-noauth test-destroy test-handle-client test-sizes
-	$(RUNTEST) --tool capi API=$(CLNTTCL) KDBFIVE_EDIT=$(TOP)/../admin/edit/kdb5_edit KINIT=$(TOP)/../clients/kinit/kinit KDESTROY=$(TOP)/../clients/kdestroy/kdestroy KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=1
+	$(RUNTEST) --tool capi API=$(CLNTTCL) KINIT=$(TOP)/../clients/kinit/kinit KDESTROY=$(TOP)/../clients/kdestroy/kdestroy KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=1
 
 sapi.0: api.0
 	-rm -f sapi.0
