@@ -223,7 +223,7 @@ void get_tickets(context)
 	}
 	/* get canonicalized  service instance name */
 	if (!(hp = gethostbyname(my_host_name))) {
-		fprintf(stderr, "Couldn't get my cannonicalized host name!\n");
+		fprintf(stderr, "Couldn't get my canonicalized host name!\n");
 		exit(1);
 	}
 	for (cp=hp->h_name; *cp; cp++)
@@ -262,7 +262,7 @@ void get_tickets(context)
 	memset((char *)&creds, 0, sizeof(creds));
 	if (!(hp = gethostbyname(slave_host))) {
 		fprintf(stderr,
-			"Couldn't get cannonicalized name for slave\n");
+			"Couldn't get canonicalized name for slave\n");
 		exit(1);
 	}
 	for (cp=hp->h_name; *cp; cp++)
