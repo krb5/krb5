@@ -2,19 +2,27 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 \
 	-I$(srcdir)/md5
 LDFLAGS = -g
 
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libcrypto.$(LIBEXT)
+##DOS!include $(BUILDTOP)\config\windows.in
+
 TST=if test -n "`cat DONE`" ; then
 
-OBJS=	cryptoconf.o \
-	des_crc.o \
-	des_md5.o \
-	raw_des.o
+OBJS=	cryptoconf.$(OBJEXT) \
+	des_crc.$(OBJEXT) \
+	des_md5.$(OBJEXT) \
+	raw_des.$(OBJEXT)
 
 SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/des_crc.c \
 	$(srcdir)/des_md5.c \
 	$(srcdir)/raw_des.c 
 
-all::
+all:: all-$(WHAT)
+
+all-unix::
+
+all-windows:: $(OBJS)
 
 libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 	(cd des; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
@@ -29,5 +37,66 @@ install:: libcrypto.a
 	$(INSTALL_DATA) libcrypto.a $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libcrypto.a
 
-clean::
-	$(RM) libcrypto.a
+clean:: clean-$(WHAT)
+	$(RM) libcrypto.$(LIBEXT) libcrypto.bak
+
+clean-unix::
+
+check:: check-$(WHAT)
+
+check-unix::
+
+all-windows::
+	cd crc32
+	@echo Making in ..\crc32
+	-$(MAKE) -$(MFLAGS)
+	cd ..\des
+	@echo Making in des
+	-$(MAKE) -$(MFLAGS)
+	cd ..\md4
+	@echo Making in ..\md4
+	-$(MAKE) -$(MFLAGS)
+	cd ..\md5
+	@echo Making in ..\md5
+	-$(MAKE) -$(MFLAGS)
+	cd ..\os
+	@echo Making in ..\os
+	-$(MAKE) -$(MFLAGS)
+	cd ..
+
+clean-windows::
+	cd crc32
+	@echo Making clean in ..\crc32
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\des
+	@echo Making clean in des
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\md4
+	@echo Making clean in ..\md4
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\md5
+	@echo Making clean in ..\md5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\os
+	@echo Making clean in ..\os
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+
+
+check-windows::
+	cd crc32
+	@echo Making check in ..\crc32
+	-$(MAKE) -$(MFLAGS) check
+	cd ..\des
+	@echo Making check in des
+	-$(MAKE) -$(MFLAGS) check
+	cd ..\md4
+	@echo Making check in ..\md4
+	-$(MAKE) -$(MFLAGS) check
+	cd ..\md5
+	@echo Making check in ..\md5
+	-$(MAKE) -$(MFLAGS) check
+	cd ..\os
+	@echo Making check in ..\os
+	-$(MAKE) -$(MFLAGS) check
+	cd ..

@@ -25,11 +25,11 @@
 #include "crc-32.h"
 #include "des_int.h"
 
-static krb5_error_code mit_des_crc_encrypt_func
+krb5_error_code INTERFACE mit_des_crc_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
-static krb5_error_code mit_des_crc_decrypt_func
+krb5_error_code INTERFACE mit_des_crc_decrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
@@ -58,7 +58,7 @@ krb5_cs_table_entry krb5_des_crc_cst_entry = {
     };
 
 
-static krb5_error_code
+krb5_error_code INTERFACE
 mit_des_crc_encrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
@@ -123,7 +123,7 @@ mit_des_crc_encrypt_func(in, out, size, key, ivec)
     
 }
 
-static krb5_error_code
+krb5_error_code INTERFACE
 mit_des_crc_decrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
@@ -140,8 +140,8 @@ mit_des_crc_decrypt_func(in, out, size, key, ivec)
     if ( size < 2*sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE;
 
-    retval = mit_des_cbc_encrypt(in,
-				 out,
+    retval = mit_des_cbc_encrypt((mit_des_cblock FAR *) in,
+				 (mit_des_cblock FAR *) out,
 				 size,
 				 (struct mit_des_ks_struct *) key->priv,
 				 ivec ? ivec : (krb5_pointer)key->key->contents,

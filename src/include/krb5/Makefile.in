@@ -22,8 +22,6 @@ all-windows:
 	copy stock\config.win config.h
 	echo /* not used in windows */ > osconf.h
 	echo /* not used in windows */ > autoconf.h
-	copy $(BUILDTOP)\lib\krb5\asn.1\krb5_decode.h .\asn.1\krb5_decode.h
-	copy $(BUILDTOP)\lib\krb5\asn.1\krb5_encode.h .\asn.1\krb5_encode.h
  
 includes:: autoconf.h
 

@@ -46,7 +46,7 @@
 
 /* forward declaration */
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
-static void Transform (krb5_ui_4 *, krb5_ui_4 *);
+static void Transform (krb5_ui_4 FAR *, krb5_ui_4 FAR *);
 #else
 static void Transform ();
 #endif
@@ -82,8 +82,9 @@ static unsigned char PADDING[64] = {
   {(a) += H ((b), (c), (d)) + (x) + UL(015666365641); \
    (a) = ROTATE_LEFT ((a), (s));}
 
-void MD4Init (mdContext)
-MD4_CTX *mdContext;
+void INTERFACE
+MD4Init (mdContext)
+MD4_CTX FAR *mdContext;
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -95,9 +96,10 @@ MD4_CTX *mdContext;
   mdContext->buf[3] = UL(0x10325476);
 }
 
-void MD4Update (mdContext, inBuf, inLen)
-MD4_CTX *mdContext;
-unsigned char *inBuf;
+void INTERFACE
+MD4Update (mdContext, inBuf, inLen)
+MD4_CTX FAR *mdContext;
+unsigned char FAR *inBuf;
 unsigned int inLen;
 {
   krb5_ui_4 in[16];
@@ -130,8 +132,9 @@ unsigned int inLen;
   }
 }
 
-void MD4Final (mdContext)
-MD4_CTX *mdContext;
+void INTERFACE
+MD4Final (mdContext)
+MD4_CTX FAR *mdContext;
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -173,8 +176,8 @@ MD4_CTX *mdContext;
 /* Basic MD4 step. Transform buf based on in.
  */
 static void Transform (buf, in)
-krb5_ui_4 *buf;
-krb5_ui_4 *in;
+krb5_ui_4 FAR *buf;
+krb5_ui_4 FAR *in;
 {
   krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 

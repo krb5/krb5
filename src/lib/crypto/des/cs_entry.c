@@ -27,11 +27,12 @@
 #include "k5-int.h"
 #include "des_int.h"
 
-extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,
+extern krb5_error_code INTERFACE mit_des_cbc_checksum PROTOTYPE ((
+                                                        krb5_pointer ,
 							size_t ,
 							krb5_pointer ,
 							size_t ,
-							krb5_checksum * ));
+							krb5_checksum FAR * ));
 
 
 krb5_checksum_entry krb5_des_cbc_cksumtable_entry = {

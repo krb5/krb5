@@ -1,3 +1,9 @@
+Mon Feb 20 16:54:51 1995 Keith Vetter (keithv@fusion.com)
+
+	* encryption.h, los-proto.h, rsa-md5.h: added windows 
+          INTERFACE keyword.
+        * Makefile.in: removed isode cruft ala Feb 10 changes but for windows
+
 Thu Feb 16 20:12:23 1995  John Gilmore  (gnu at toad.com)
 
 	* configure.in:  Use AC_HAVE_HEADER rather than AC_HEADER_CHECK.

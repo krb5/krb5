@@ -16,7 +16,7 @@
 /*
  * des_ecb_encrypt - {en,de}crypt a block in ECB mode
  */
-int
+int INTERFACE
 mit_des_ecb_encrypt(in, out, schedule, encrypt)
 	des_cblock *in;
 	des_cblock *out;

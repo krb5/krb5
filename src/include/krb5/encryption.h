@@ -61,28 +61,28 @@ typedef struct _krb5_enc_data {
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     krb5_magic magic;
-    krb5_error_code (*encrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
+    krb5_error_code (INTERFACE *encrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
 					       krb5_encrypt_block *,
 					       krb5_pointer));
-    krb5_error_code (*decrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
+    krb5_error_code (INTERFACE *decrypt_func) NPROTOTYPE(( krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
 					       krb5_encrypt_block *,
 					       krb5_pointer));
-    krb5_error_code (*process_key) NPROTOTYPE(( krb5_encrypt_block *,
+    krb5_error_code (INTERFACE *process_key) NPROTOTYPE(( krb5_encrypt_block *,
 					      const krb5_keyblock *));
-    krb5_error_code (*finish_key) NPROTOTYPE(( krb5_encrypt_block *));
-    krb5_error_code (*string_to_key) NPROTOTYPE(( const krb5_encrypt_block *,
+    krb5_error_code (INTERFACE *finish_key) NPROTOTYPE(( krb5_encrypt_block *));
+    krb5_error_code (INTERFACE *string_to_key) NPROTOTYPE(( const krb5_encrypt_block *,
 						 const krb5_keytype,
 						krb5_keyblock *,
 						const krb5_data *,
  	                                        const krb5_data *));
-    krb5_error_code  (*init_random_key) NPROTOTYPE(( const krb5_keyblock *,
+    krb5_error_code  (INTERFACE *init_random_key) NPROTOTYPE(( const krb5_keyblock *,
 						   krb5_pointer *));
-    krb5_error_code  (*finish_random_key) NPROTOTYPE(( krb5_pointer *));
-    krb5_error_code (*random_key) NPROTOTYPE(( const krb5_encrypt_block *,
+    krb5_error_code  (INTERFACE *finish_random_key) NPROTOTYPE(( krb5_pointer *));
+    krb5_error_code (INTERFACE *random_key) NPROTOTYPE(( const krb5_encrypt_block *,
 					      krb5_pointer,
 					      krb5_keyblock **));
     int block_length;
@@ -103,8 +103,9 @@ typedef struct _krb5_cs_table_entry {
 } krb5_cs_table_entry;
 
 /* could be used in a table to find a sumtype */
-typedef krb5_error_code  (API *SUM_FUNC) NPROTOTYPE ((krb5_pointer /* in */,
-		   size_t /* in_length */,
+typedef krb5_error_code  (INTERFACE *SUM_FUNC) NPROTOTYPE (
+			(krb5_pointer /* in */,
+			size_t /* in_length */,
 			krb5_pointer /* key/seed */,
 			size_t /* key/seed size */,
 			krb5_checksum FAR * /* out_cksum */));

@@ -56,7 +56,7 @@
  */
 
 /* forward declaration */
-static void Transform ();
+static void Transform PROTOTYPE((krb5_ui_4 FAR *buf, krb5_ui_4 FAR *in));
 
 static unsigned char PADDING[64] = {
   0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -104,8 +104,9 @@ static unsigned char PADDING[64] = {
 /* The routine MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
-void MD5Init (mdContext)
-MD5_CTX *mdContext;
+void INTERFACE 
+MD5Init (mdContext)
+MD5_CTX FAR *mdContext;
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -121,9 +122,10 @@ MD5_CTX *mdContext;
    account for the presence of each of the characters inBuf[0..inLen-1]
    in the message whose digest is being computed.
  */
-void MD5Update (mdContext, inBuf, inLen)
-MD5_CTX *mdContext;
-unsigned char *inBuf;
+void INTERFACE
+MD5Update (mdContext, inBuf, inLen)
+MD5_CTX FAR *mdContext;
+unsigned char FAR *inBuf;
 unsigned int inLen;
 {
   krb5_ui_4 in[16];
@@ -159,8 +161,9 @@ unsigned int inLen;
 /* The routine MD5Final terminates the message-digest computation and
    ends with the desired message digest in mdContext->digest[0...15].
  */
-void MD5Final (mdContext)
-MD5_CTX *mdContext;
+void INTERFACE
+MD5Final (mdContext)
+MD5_CTX FAR *mdContext;
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -201,8 +204,8 @@ MD5_CTX *mdContext;
 /* Basic MD5 step. Transforms buf based on in.
  */
 static void Transform (buf, in)
-krb5_ui_4 *buf;
-krb5_ui_4 *in;
+krb5_ui_4 FAR *buf;
+krb5_ui_4 FAR *in;
 {
   register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 

@@ -24,11 +24,11 @@
 #include "k5-int.h"
 #include "des_int.h"
 
-static krb5_error_code mit_raw_des_encrypt_func
+krb5_error_code INTERFACE mit_raw_des_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
-static krb5_error_code mit_raw_des_decrypt_func
+krb5_error_code INTERFACE mit_raw_des_decrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
@@ -55,7 +55,7 @@ krb5_cs_table_entry krb5_raw_des_cst_entry = {
     0
     };
 
-static krb5_error_code
+krb5_error_code INTERFACE
 mit_raw_des_decrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
@@ -63,7 +63,7 @@ mit_raw_des_decrypt_func(in, out, size, key, ivec)
     krb5_encrypt_block * key;
     krb5_pointer ivec;
 {
-    return (mit_des_cbc_encrypt (in, 
+    return (mit_des_cbc_encrypt ((const mit_des_cblock *) in, 
 				 out, 
 				 size, 
 				 (struct mit_des_ks_struct *)key->priv, 
@@ -71,7 +71,7 @@ mit_raw_des_decrypt_func(in, out, size, key, ivec)
 				 MIT_DES_DECRYPT));
 }
 
-static krb5_error_code
+krb5_error_code INTERFACE
 mit_raw_des_encrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;

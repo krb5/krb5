@@ -1,3 +1,8 @@
+Mon Feb 20 15:54:1 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work for the PC
+        * md5.c, md5crypt.c md5glue.c: added windows INTERFACE keyword
+
 Thu Feb  2 03:01:28 1995  John Gilmore  <gnu@cygnus.com>
 
 	* Makefile.in (CFLAGS):  Handle $(srcdir) properly in -I options.

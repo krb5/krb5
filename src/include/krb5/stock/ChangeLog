@@ -1,3 +1,9 @@
+Mon Feb 20 15:25:26 1995 Keith Vetter (keithv@fusion.com)
+
+	* config.h: changed API to INTERFACE.
+        * config.win: changed API to INTERFACE and changed BITS16
+           to SIZEOF_INT/SIZEOF_LONG to track an autoconf change.
+
 Mon Feb 6 20:5:58 1995 Keith Vetter (keithv@fusion.com)
 
 	* config.win: new file--windows base template for config.h

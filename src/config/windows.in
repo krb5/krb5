@@ -14,8 +14,8 @@ srcdir = .
 # /* The name of the C compiler for the target */
 CC=cl /nologo
 CL=
-CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W2
-CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W2 -DAPI=
+CCOPTS=/ALw /Zpa /GD2s /Os /Zi /Od /W2 $(XTRA)
+CCOPTS2=/AL /Zpa /G2s  /Os /Zi /Od /W2 -DINTERFACE= $(XTRA)
 CPPFLAGS =  -I$(SRCTOP)/include
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
@@ -42,6 +42,7 @@ CP=copy
 MV=ren
 LN=copy
 LIB=lib
+AWK=rem
 
 ARADD=rem
 RANLIB=rem

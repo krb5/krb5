@@ -1,31 +1,33 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libcrypto.$(LIBEXT)
+##DOS!include $(BUILDTOP)\config\windows.in
+
 ISODELIB=@ISODELIB@
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.$(LIBEXT)
 
-all:: $(OBJS)
-
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+KLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(ISODELIB) $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.$(LIBEXT) $(TOPLIBD)/libcrypto.$(LIBEXT) $(COMERRLIB)
 
 OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
 	$(srcdir)/f_sched.c $(srcdir)/f_ecb.c $(srcdir)/f_parity.c \
 	$(srcdir)/f_tables.c
 
-OTHEROBJS=f_cbc.o f_cksum.o f_sched.o f_ecb.o f_parity.o f_tables.o
+OTHEROBJS=f_cbc.$(OBJEXT) f_cksum.$(OBJEXT) f_sched.$(OBJEXT) f_ecb.$(OBJEXT) f_parity.$(OBJEXT) f_tables.$(OBJEXT)
 
-OBJS=	cbc_cksum.o	\
-	cs_entry.o	\
-	finish_key.o	\
-	fin_rndkey.o	\
-	init_rkey.o	\
-	process_ky.o	\
-	random_key.o	\
-	string2key.o	\
-	new_rn_key.o	\
-	key_sched.o	\
-	weak_key.o	\
+OBJS=	cbc_cksum.$(OBJEXT)	\
+	cs_entry.$(OBJEXT)	\
+	finish_key.$(OBJEXT)	\
+	fin_rndkey.$(OBJEXT)	\
+	init_rkey.$(OBJEXT)	\
+	process_ky.$(OBJEXT)	\
+	random_key.$(OBJEXT)	\
+	string2key.$(OBJEXT)	\
+	new_rn_key.$(OBJEXT)	\
+	key_sched.$(OBJEXT)	\
+	weak_key.$(OBJEXT)	\
 	$(OTHEROBJS)
 
 SRCS=	$(srcdir)/cs_entry.c	\
@@ -41,26 +43,30 @@ SRCS=	$(srcdir)/cs_entry.c	\
 	$(srcdir)/weak_key.c	\
 	$(OTHERSRCS)
 
-includes:: depend
+all:: $(OBJS)
 
-all:: 
+includes:: depend
 
 depend:: $(SRCS)
 
 clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
-verify: verify.o $(DEPKLIB)
-	$(CC) -o $@ verify.o $(KLIB) $(LIBS) $(LDFLAGS) 
+verify: verify.$(OBJEXT) $(DEPKLIB)
+	$(CC) -o $@ verify.$(OBJEXT) $(KLIB) $(LIBS) $(LDFLAGS) 
 
-destest: destest.o $(DEPKLIB)
-	$(CC) -o $@ destest.o $(KLIB) $(LIBS) $(LDFLAGS) 
+destest: destest.$(OBJEXT) $(DEPKLIB)
+	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(LDFLAGS) 
 
-check:: destest verify
+check:: check-$(WHAT)
+
+check-unix:: destest verify
 	./verify -z
 	./verify -m
 	./verify
 	./destest < $(srcdir)/keytest.data
 
+check-windows::
+
 clean::
-	$(RM) destest verify destest.o verify.o
+	$(RM) destest verify destest.$(OBJEXT) verify.$(OBJEXT)

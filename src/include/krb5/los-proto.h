@@ -104,7 +104,7 @@ krb5_error_code krb5_get_realm_domain
 krb5_boolean krb5_kuserok
 	PROTOTYPE((krb5_context,
 		   krb5_principal, const char *));
-krb5_error_code krb5_random_confounder
+krb5_error_code INTERFACE krb5_random_confounder
 	PROTOTYPE((int,
 		   krb5_pointer ));
 krb5_error_code krb5_gen_replay_name

@@ -1,3 +1,9 @@
+Mon Feb 20 15:54:1 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work for the PC
+        * md4.c, md4crypt.c md4glue.c: added windows INTERFACE keyword
+        * rsa-md4.h: added windows INTERFACE to prototypes
+
 Thu Feb  2 03:00:41 1995  John Gilmore  <gnu@cygnus.com>
 
 	* Makefile.in (CFLAGS):  Handle $(srcdir) properly in -I options.
@@ -5,7 +11,8 @@ Thu Feb  2 03:00:41 1995  John Gilmore  <gnu@cygnus.com>
 Wed Jan 25 20:08:47 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (CFLAGS):  Add -I../des to pull in DES header file.
-	* rsa-md4.h:  New include file, moved from include/krb5, since
+	* 
+rsa-md4.h:  New include file, moved from include/krb5, since
 	it's only used locally.
 	* md4.c, md4crypto.c, md4driver.c, md4glue.c:  Replace <.../...>
 	includes with "..."s.

@@ -48,9 +48,10 @@
 #include "des_int.h"
 #include <stdio.h>
 
-void make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
+int INTERFACE
+make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
 
-int
+int INTERFACE
 mit_des_key_sched(k,schedule)
     mit_des_cblock k;
     mit_des_key_schedule schedule;

@@ -1,3 +1,12 @@
+Mon Feb 20 16:10:29 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work under windows PC
+        * cbc_cksu.c cs_entry.c finish_k.c fin_rndk.c f_cbc.c f_cksum.c 
+          f_ecb.c f_parity.c f_pcbc.c f_sched.c init_rke.c key_sche.c 
+          new_rn_k.c process_.c random_k.c string2k.c weak_key.c: added
+          windows INTERFACE keyword.
+        * string2key.c: needed long -> int casts for memset and malloc
+
 Wed Feb  8 13:59:05 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* des.h: Add KRB5_INT32 definitions for non-32 int platforms.

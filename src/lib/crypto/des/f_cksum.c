@@ -28,7 +28,7 @@
  * multiple of eight bytes.
  */
 
-unsigned long
+unsigned long INTERFACE
 mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	des_cblock *in;
 	des_cblock *out;

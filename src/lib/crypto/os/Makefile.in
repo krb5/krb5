@@ -1,15 +1,21 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libcrypto.$(LIBEXT)
+##DOS!include $(BUILDTOP)\config\windows.in
+
 LIBOBJS = @LIBOBJS@
 
-all:: $(OBJS)
-
-
-
-OBJS=	rnd_confoun.o localaddr.o ustime.o $(LIBOBJS)
+OBJS=	rnd_confoun.$(OBJEXT) localaddr.$(OBJEXT) ustime.$(OBJEXT) $(LIBOBJS)
 
 SRCS=	rnd_confoun.c localaddr.c ustime.c 
+
+all:: all-$(WHAT)
+
+all-unix:: $(OBJS)
+
+all-windows: rnd_confoun.obj
 
 localaddr.c: ../../krb5/os/localaddr.c
 	-$(LN) $(srcdir)/../../krb5/os/localaddr.c $@

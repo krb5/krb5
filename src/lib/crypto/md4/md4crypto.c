@@ -28,13 +28,17 @@
 #include "rsa-md4.h"
 #include "des_int.h"	/* we cheat a bit and call it directly... */
 
-static krb5_error_code
+krb5_error_code INTERFACE
+md4_crypto_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
+    krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
+
+krb5_error_code INTERFACE
 md4_crypto_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
 krb5_pointer seed;
 size_t seed_length;
-krb5_checksum *outcksum;
+krb5_checksum FAR *outcksum;
 {
     krb5_octet outtmp[RSA_MD4_DES_CKSUM_LENGTH];
     krb5_octet *input = (krb5_octet *)in;
@@ -62,8 +66,8 @@ krb5_checksum *outcksum;
     if (retval = mit_des_process_key(&eblock, &keyblock))
 	return retval;
     /* now encrypt it */
-    retval = mit_des_cbc_encrypt(&outtmp[0],
-				 outcksum->contents,
+    retval = mit_des_cbc_encrypt((mit_des_cblock *)&outtmp[0],
+				 (mit_des_cblock *)outcksum->contents,
 				 RSA_MD4_DES_CKSUM_LENGTH,
 				 (struct mit_des_ks_struct *)eblock.priv,
 				 keyblock.contents,

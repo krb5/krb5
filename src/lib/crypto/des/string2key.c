@@ -40,12 +40,13 @@
 	returns: errors
  */
 
-krb5_error_code mit_des_string_to_key (eblock, keytype, keyblock, data, salt)
-const krb5_encrypt_block * eblock;
+krb5_error_code INTERFACE
+mit_des_string_to_key (eblock, keytype, keyblock, data, salt)
+const krb5_encrypt_block FAR * eblock;
 const krb5_keytype keytype;
-krb5_keyblock * keyblock;
-const krb5_data * data;
-const krb5_data * salt;
+krb5_keyblock FAR * keyblock;
+const krb5_data FAR * data;
+const krb5_data FAR * salt;
 {
     register char *str, *copystr;
     register krb5_octet *key;
@@ -78,7 +79,7 @@ const krb5_data * salt;
     else
 	length = data->length;
 
-    copystr = malloc(length);
+    copystr = malloc((size_t) length);
     if (!copystr) {
 	free(keyblock->contents);
 	keyblock->contents = 0;
@@ -148,7 +149,7 @@ const krb5_data * salt;
     memset((char *)key_sked, 0, sizeof(key_sked));
 
     /* clean & free the input string */
-    memset(copystr, 0, length);
+    memset(copystr, 0, (size_t) length);
     krb5_xfree(copystr);
 
     /* now fix up key parity again */

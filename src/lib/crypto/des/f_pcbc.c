@@ -16,7 +16,7 @@
 /*
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
  */
-int
+int INTERFACE
 mit_des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock *in;
 	des_cblock *out;

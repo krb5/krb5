@@ -1,3 +1,8 @@
+Mon Feb 20 16:25:36 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makfile.in: made to work for the PC
+        * rnd_confoun.c: added windows INTERFACE keyword
+
 Wed Jan 25 20:24:35 1995  John Gilmore  (gnu at toad.com)
 
 	* rnd_confoun.c: Replace <.../...> includes with "..."s.

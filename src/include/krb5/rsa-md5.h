@@ -49,13 +49,13 @@ typedef struct {
 } MD5_CTX;
 
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
-extern void MD5Init(MD5_CTX *);
-extern void MD5Update (MD5_CTX *, unsigned char *, unsigned int);
-extern void MD5Final (MD5_CTX *);
+extern void INTERFACE MD5Init(MD5_CTX FAR *);
+extern void INTERFACE MD5Update (MD5_CTX FAR *, unsigned char FAR *, unsigned int);
+extern void INTERFACE MD5Final (MD5_CTX FAR *);
 #else
-extern void MD5Init();
-extern void MD5Update ();
-extern void MD5Final ();
+extern void INTERFACE MD5Init();
+extern void INTERFACE MD5Update ();
+extern void INTERFACE MD5Final ();
 #endif
 
 #define	RSA_MD5_CKSUM_LENGTH		16

@@ -31,6 +31,9 @@
 #define KRB5_KDB5_DBM__                         /* Don't load kdb_dbm.h */
 
 #define BITS16
+#define SIZEOF_INT      2
+#define SIZEOF_SHORT    2
+#define SIZEOF_LONG     4
 
 #define USE_STRING_H 
 #define HAVE_SRAND
@@ -46,8 +49,8 @@ typedef unsigned char u_char;
 #define _U_LONG_DEFINED
 #endif 
 
-#ifndef API
-#define API __far __export __pascal
+#ifndef INTERFACE
+#define INTERFACE __far __export __pascal
 #endif
 #define FAR __far
 

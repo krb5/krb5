@@ -47,7 +47,7 @@
  *        to be a weak des key.  Mit_Des_generate_random_block is used to
  *        provide the random bits.
  */
-int
+int INTERFACE
 mit_des_new_random_key(key, p_seed)
     mit_des_cblock key;
     mit_des_random_key_seed	*p_seed;
@@ -75,7 +75,8 @@ mit_des_new_random_key(key, p_seed)
  * Note: this routine calls mit_des_set_random_generator_seed.
  */
 
-void mit_des_init_random_number_generator(key,p_seed)
+void INTERFACE
+mit_des_init_random_number_generator(key,p_seed)
     mit_des_cblock key;
     mit_des_random_key_seed	*p_seed;
 {
@@ -155,7 +156,7 @@ void mit_des_init_random_number_generator(key,p_seed)
  * Requires: key is a valid des key.  I.e., has correct parity and is not a
  *           weak des key.
  */
-void
+void INTERFACE
 mit_des_set_random_generator_seed(key, p_seed)
     mit_des_cblock key;
     mit_des_random_key_seed	*p_seed;
@@ -178,7 +179,7 @@ mit_des_set_random_generator_seed(key, p_seed)
  *
  * Note that mit_des_set_random_generator_seed resets the sequence number to 0.
  */
-void
+void INTERFACE
 mit_des_set_sequence_number(new_sequence_number, p_seed)
     mit_des_cblock new_sequence_number;
     mit_des_random_key_seed	*p_seed;
@@ -195,7 +196,8 @@ mit_des_set_sequence_number(new_sequence_number, p_seed)
  * Requires: mit_des_set_random_generator_seed must have been called at least once
  *           before this routine is called.
  */
-void mit_des_generate_random_block(block, p_seed)
+void INTERFACE
+mit_des_generate_random_block(block, p_seed)
     mit_des_cblock block;
     mit_des_random_key_seed	*p_seed;
 {

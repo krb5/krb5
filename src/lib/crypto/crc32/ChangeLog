@@ -1,3 +1,7 @@
+Mon Feb 20 15:37:10 1995 Keith Vetter (keithv@fusion.com)
+
+	* crc.c: changed API to INTERFACE
+
 Fri Feb 20 11:08:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* crc.c: added function prototype and removed a function

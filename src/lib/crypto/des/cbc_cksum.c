@@ -42,12 +42,13 @@
 
 	returns: errors
 */
-krb5_error_code mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
+krb5_error_code INTERFACE
+mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
     krb5_pointer in;
     size_t in_length;
     krb5_pointer key;
     size_t key_size;
-    krb5_checksum * cksum;
+    krb5_checksum FAR * cksum;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     krb5_octet 	*contents;

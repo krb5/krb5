@@ -80,7 +80,7 @@
  * Windows requires a different api interface to each function. Here
  * just define it as NULL.
  */
-#define API
+#define INTERFACE
 #define FAR
 
 #endif /* KRB5_CONFIG__ */

@@ -20,7 +20,7 @@
 #define pstep(x,step) (((x)&smask(step))^(((x)>>step)&smask(step)))
 #define parity_char(x) pstep(pstep(pstep((x),4),2),1)
 
-void
+void INTERFACE
 mit_des_fixup_key_parity(key)
      register des_cblock key;
 {
@@ -39,7 +39,7 @@ mit_des_fixup_key_parity(key)
  *                       See des_fix_key_parity for the definition of
  *                       correct des parity.
  */
-int
+int INTERFACE
 mit_des_check_key_parity(key)
      register des_cblock key;
 {
