@@ -1,3 +1,11 @@
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (_make_etype_info_entry): Add flag to know if we
+	are producing etype_info2 so we know whether filling in s2kparams
+	is allowed.    In the etype_info2 case support afs3 salts.
+	(etype_info_helper): Pass in flag
+	(return_etype_info2): And here
+
 2003-05-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc_preauth.c (return_etype_info2): After encoding the

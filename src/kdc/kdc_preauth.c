@@ -572,12 +572,10 @@ cleanup:
 }
 
 static krb5_error_code
-_make_etype_info_entry(context, request, client_key, etype, entry)
-    krb5_context 		context;
-    krb5_kdc_req *		request;
-    krb5_key_data *		client_key;
-    const krb5_enctype		etype;
-    krb5_etype_info_entry **	entry;
+_make_etype_info_entry(krb5_context context,
+		       krb5_kdc_req *request, krb5_key_data *client_key,
+		       krb5_enctype etype, krb5_etype_info_entry **entry,
+		       int etype_info2)
 {
     krb5_data			salt;
     krb5_etype_info_entry *	tmp_entry; 
@@ -598,6 +596,24 @@ _make_etype_info_entry(context, request, client_key, etype, entry)
 			       client_key, &salt);
     if (retval)
 	goto fail;
+    if (etype_info2 && client_key->key_data_ver > 1 &&
+	client_key->key_data_type[1] == KRB5_KDB_SALTTYPE_AFS3) {
+	switch (etype) {
+	case ENCTYPE_DES_CBC_CRC:
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_MD5:
+	    tmp_entry->s2kparams.data = malloc(1);
+	    if (tmp_entry->s2kparams.data == NULL) {
+		retval = ENOMEM;
+		goto fail;
+	    }
+	    tmp_entry->s2kparams.length = 1;
+	    tmp_entry->s2kparams.data[0] = 1;
+	    break;
+	default:
+	    break;
+	}
+    }
 
     if (salt.length >= 0) {
 	tmp_entry->length = salt.length;
@@ -608,8 +624,11 @@ _make_etype_info_entry(context, request, client_key, etype, entry)
     return 0;
 
 fail:
-    if (tmp_entry)
+    if (tmp_entry) {
+	if (tmp_entry->s2kparams.data)
+	    free(tmp_entry->s2kparams.data);
 	free(tmp_entry);
+    }
     if (salt.data)
 	free(salt.data);
     return retval;
@@ -654,7 +673,7 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 	    assert(etype_info2 ||
 		   !enctype_requires_etype_info_2(db_etype));
 	    if ((retval = _make_etype_info_entry(context, request, client_key,
-			    db_etype, &entry[i])) != 0) {
+			    db_etype, &entry[i], etype_info2)) != 0) {
 		goto cleanup;
 	    }
 	    entry[i+1] = 0;
@@ -679,7 +698,7 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
 	    }
 	    if (request_contains_enctype(context, request, db_etype)) {
 		if ((retval = _make_etype_info_entry(context, request,
-				client_key, db_etype, &entry[i])) != 0) {
+				client_key, db_etype, &entry[i], etype_info2)) != 0) {
 		    goto cleanup;
 		}
 		entry[i+1] = 0;
@@ -754,7 +773,7 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
     entry[0] = NULL;
     entry[1] = NULL;
     retval = _make_etype_info_entry(context, request, client_key, client_key->key_data_type[0],
-				    entry);
+				    entry, 1);
     if (retval)
 	goto cleanup;
     retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry, &scratch);
