@@ -1,3 +1,19 @@
+2000-09-20  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_free_contents): Clean up signedness warning.
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Clean up signedness warnings. 
+
+	* kdb_db2.c (destroy_file_suffix): Declare function as
+	static. Rewrite code to use off_t and unsigned ints to handle gcc
+	warnings. (kdb5_context_internalize) Unmarshal boolean type properly. 
+	
+	* store_mkey.c (krb5_db_store_mkey): Use mode_t instead of int in
+	call to umask.
+
+	* configure.in: Add AC_TYPE_MODE_T and AC_TYPE_OFF_T for mode_t
+	and off_t declarations.
+
 2000-07-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* encrypt_key.c, kdb_cpw.c, kdb_xdr.c: Add parenthesis about

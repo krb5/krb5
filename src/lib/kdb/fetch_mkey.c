@@ -126,6 +126,7 @@ krb5_db_fetch_mkey(context, mname, etype, fromkeyboard, twice, keyfile,
 	char defkeyfile[MAXPATHLEN+1];
 	krb5_data *realm = krb5_princ_realm(context, mname);
 	FILE *kf;
+	unsigned int len;
 
 	retval = 0;
 	key->magic = KV5M_KEYBLOCK;
@@ -160,14 +161,18 @@ krb5_db_fetch_mkey(context, mname, etype, fromkeyboard, twice, keyfile,
 	    retval = KRB5_KDB_BADSTORED_MKEY;
 	    goto errout;
 	}
-	if (!(key->contents = (krb5_octet *)malloc(key->length))) {
+	
+	/* Provide an unsigned int */
+	len = key->length; 
+	if (!(key->contents = (krb5_octet *)malloc(len))) {
 	    retval = ENOMEM;
 	    goto errout;
 	}
 	if (fread((krb5_pointer) key->contents,
-		  sizeof(key->contents[0]), key->length, kf) != key->length) {
+		  sizeof(key->contents[0]), len, kf) 
+	    != key->length) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
-	    memset(key->contents, 0, key->length);
+	    memset(key->contents, 0, len);
 	    free(key->contents);
 	    key->contents = 0;
 	} else

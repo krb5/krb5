@@ -688,7 +688,8 @@ krb5_dbe_free_contents(context, entry)
 	    	if (entry->key_data[i].key_data_length[j]) {
 		    if (entry->key_data[i].key_data_contents[j]) {
 		        memset(entry->key_data[i].key_data_contents[j], 
-			       0, entry->key_data[i].key_data_length[j]);
+			       0, 
+			       (unsigned) entry->key_data[i].key_data_length[j]);
 		    	free (entry->key_data[i].key_data_contents[j]);
 		    }
 		}
