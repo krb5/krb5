@@ -47,11 +47,11 @@ krb5_encrypt_block *eblock;
 const krb5_encrypted_keyblock *in;
 krb5_keyblock *out;
 {
+    int length;
     krb5_error_code retval;
 
     /* the encrypted version is stored as the unencrypted key length
-       (in host byte order), followed by the encrypted key.
-     */
+       (4 bytes, MSB first) followed by the encrypted key. */
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length-sizeof(in->length),
 				    eblock->crypto_entry);
@@ -62,7 +62,11 @@ krb5_keyblock *out;
 	return ENOMEM;
     }
     /* copy out the real length count */
-    memcpy((char *)&out->length, (char *)in->contents, sizeof(out->length));
+    length  = ((unsigned char *)in->contents)[0] << 24;
+    length += ((unsigned char *)in->contents)[1] << 16;
+    length += ((unsigned char *)in->contents)[2] << 8;
+    length += ((unsigned char *)in->contents)[3];
+    out->length = length;
 
     /* remember the contents of the encrypted version has a sizeof(in->length)
        integer length of the real embedded key, followed by the

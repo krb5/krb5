@@ -51,6 +51,7 @@ krb5_encrypted_keyblock *out;
 
     krb5_error_code retval;
     krb5_keyblock tmpin;
+    int length;
 
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
@@ -63,7 +64,14 @@ krb5_encrypted_keyblock *out;
 	out->length = 0;
 	return ENOMEM;
     }
-    memcpy((char *)tmpin.contents, (const char *)in->contents, tmpin.length);
+    /* Convert length from MSB first to host byte order for the encryption
+       routine.  Assumes sizeof (int) is 4. */
+    length = ((((unsigned char*)in->contents)[0] << 24) + 
+	      (((unsigned char*)in->contents)[1] << 16) + 
+	      (((unsigned char*)in->contents)[2] << 8) + 
+	      ((unsigned char*)in->contents)[3]);
+    memcpy((char *)tmpin.contents, (const char *)&length, 4);
+    memcpy((char *)tmpin.contents + 4, (const char *)in->contents + 4, tmpin.length);
 
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
