@@ -1,3 +1,8 @@
+2000-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* accessor.c: Add NEED_SOCKETS in order to get prototype for
+	krb5_locate_kdc().
+
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* accessor.c (krb5int_accessor): Add krb5int_accessor() to access
