@@ -232,7 +232,7 @@ void doit(fd)
 	int on = 1, fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
-	FILE *lock_fp;
+	int lock_fd;
 	int omask;
 
 	fromlen = sizeof (from);
@@ -279,9 +279,9 @@ void doit(fd)
 		exit(1);
 	}
 	omask = umask(077);
-	lock_fp = fopen(temp_file_name, "a");
+	lock_fd = fopen(temp_file_name, O_RDONLY);
 	(void) umask(omask);
-	retval = krb5_lock_file(kpropd_context, lock_fp, temp_file_name,
+	retval = krb5_lock_file(kpropd_context, lock_fd, 
 				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while trying to lock '%s'",
@@ -307,13 +307,12 @@ void doit(fd)
 		exit(1);
 	}
 	load_database(kpropd_context, kdb5_edit, file);
-	retval = krb5_lock_file(kpropd_context, lock_fp, temp_file_name, 
-				KRB5_LOCKMODE_UNLOCK);
+	retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_UNLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while unlocking '%s'", temp_file_name);
 	    exit(1);
 	}
-	(void) fclose(lock_fp);
+	(void)close(lock_fd);
 	exit(0);
 }
 

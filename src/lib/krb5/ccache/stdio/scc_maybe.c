@@ -56,12 +56,12 @@ krb5_scc_close_file (context, id)
      memset (data->stdio_buffer, 0, sizeof (data->stdio_buffer));
      if (ret == EOF) {
 	  int errsave = errno;
-	  (void) krb5_unlock_file(context, data->file, data->filename);
+	  (void) krb5_unlock_file(context, fileno(data->file));
 	  (void) fclose (data->file);
 	  data->file = 0;
 	  return krb5_scc_interpret (context, errsave);
      }
-     retval = krb5_unlock_file(context, data->file, data->filename);
+     retval = krb5_unlock_file(context, fileno(data->file));
      ret = fclose (data->file);
      data->file = 0;
      if (retval)
@@ -85,7 +85,7 @@ krb5_scc_open_file (context, id, mode)
      data = (krb5_scc_data *) id->data;
      if (data->file) {
 	  /* Don't know what state it's in; shut down and start anew.  */
-	  (void) krb5_unlock_file(context, data->file, data->filename);
+	  (void) krb5_unlock_file(context, fileno(data->file));
 	  (void) fclose (data->file);
 	  data->file = 0;
      }
@@ -127,14 +127,14 @@ krb5_scc_open_file (context, id, mode)
 #endif
      switch (mode) {
      case SCC_OPEN_RDONLY:
-	 if ((retval = krb5_lock_file(context, f, data->filename, KRB5_LOCKMODE_SHARED))) {
+	 if ((retval = krb5_lock_file(context,fileno(f),KRB5_LOCKMODE_SHARED))){
 	     (void) fclose(f);
 	     return retval;
 	 }
 	 break;
      case SCC_OPEN_RDWR:
      case SCC_OPEN_AND_ERASE:
-	 if ((retval = krb5_lock_file(context, f, data->filename,
+	 if ((retval = krb5_lock_file(context, fileno(f), 
 				      KRB5_LOCKMODE_EXCLUSIVE))) {
 	     (void) fclose(f);
 	     return retval;
@@ -150,14 +150,14 @@ krb5_scc_open_file (context, id, mode)
 	 data->version = krb5_scc_default_format;
 	 if (!fwrite((char *)fvno_bytes, sizeof(fvno_bytes), 1, f)) {
 	     errsave = errno;
-	     (void) krb5_unlock_file(context, f, data->filename);
+	     (void) krb5_unlock_file(context, fileno(f));
 	     (void) fclose(f);
 	     return krb5_scc_interpret(context, errsave);
 	 }
      } else {
 	 /* verify a valid version number is there */
 	 if (!fread((char *)fvno_bytes, sizeof(fvno_bytes), 1, f)) {
-	     (void) krb5_unlock_file(context, f, data->filename);
+	     (void) krb5_unlock_file(context, fileno(f));
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
@@ -165,7 +165,7 @@ krb5_scc_open_file (context, id, mode)
 	 if ((data->version != KRB5_SCC_FVNO_1) &&
 	     (data->version != KRB5_SCC_FVNO_2) &&
 	     (data->version != KRB5_SCC_FVNO_3)) {
-	     (void) krb5_unlock_file(context, f, data->filename);
+	     (void) krb5_unlock_file(context, fileno(f));
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }

@@ -122,8 +122,7 @@ int mode;
 	} else				/* some other error */
 	    return errno;
     }
-    if ((kerror = krb5_lock_file(context, KTFILEP(id), KTFILENAME(id),
-				 mode))) {
+    if ((kerror = krb5_lock_file(context, fileno(KTFILEP(id)), mode))) {
 	(void) fclose(KTFILEP(id));
 	KTFILEP(id) = 0;
 	return kerror;
@@ -137,7 +136,7 @@ int mode;
 	KTVERSION(id) = krb5_kt_default_vno;
 	if (!xfwrite(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
 	    kerror = errno;
-	    (void) krb5_unlock_file(context, KTFILEP(id), KTFILENAME(id));
+	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
 	    return kerror;
 	}
@@ -145,14 +144,14 @@ int mode;
 	/* gotta verify it instead... */
 	if (!xfread(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
 	    kerror = errno;
-	    (void) krb5_unlock_file(context, KTFILEP(id), KTFILENAME(id));
+	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
 	    return kerror;
 	}
 	kt_vno = KTVERSION(id) = ntohs(kt_vno);
 	if ((kt_vno != KRB5_KT_VNO) &&
 	    (kt_vno != KRB5_KT_VNO_1)) {
-	    (void) krb5_unlock_file(context, KTFILEP(id), KTFILENAME(id));
+	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
 	    return KRB5_KEYTAB_BADVNO;
 	}
@@ -185,7 +184,7 @@ krb5_keytab id;
 
     if (!KTFILEP(id))
 	return 0;
-    kerror = krb5_unlock_file(context, KTFILEP(id), KTFILENAME(id));
+    kerror = krb5_unlock_file(context, fileno(KTFILEP(id)));
     (void) fclose(KTFILEP(id));
     KTFILEP(id) = 0;
     return kerror;

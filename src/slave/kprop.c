@@ -437,7 +437,6 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
 	krb5_free_ap_rep_enc_part(context, rep_result);
 }
 
-FILE * dbfp;
 char * dbpathname;
 /*
  * Open the Kerberos database dump file.  Takes care of locking it
@@ -465,13 +464,13 @@ open_database(context, data_fn, size)
  		    data_fn);
  	    exit(1);
  	}
-	if ((dbfp = fopen(dbpathname, "r")) == 0) {
+	if ((fd = open(dbpathname, O_RDONLY)) < 0) {
 		com_err(progname, errno, "while trying to open %s",
 			dbpathname);
 		exit(1);
 	}
 
-	err = krb5_lock_file(context, dbfp, dbpathname,
+	err = krb5_lock_file(context, fd,
 			     KRB5_LOCKMODE_SHARED|KRB5_LOCKMODE_DONTBLOCK);
 	if (err == EAGAIN || err == EWOULDBLOCK || errno == EACCES) {
 	    com_err(progname, 0, "database locked");
@@ -480,7 +479,6 @@ open_database(context, data_fn, size)
 	    com_err(progname, err, "while trying to lock '%s'", dbpathname);
 	    exit(1);
 	}	    
-	fd = fileno(dbfp);
 	if (fstat(fd, &stbuf)) {
 		com_err(progname, errno, "while trying to stat %s",
 			data_fn);
@@ -514,15 +512,10 @@ close_database(context, fd)
     int fd;
 {
     int err;
-    if (fd != fileno(dbfp)) {
-	com_err(progname, 0, "bad fd passed to close_database");
-	exit(1);
-    }
-    err = krb5_lock_file(context, dbfp, dbpathname, KRB5_LOCKMODE_UNLOCK);
-    if (err)
+    if (err = krb5_lock_file(context, fd, KRB5_LOCKMODE_UNLOCK));
 	com_err(progname, err, "while unlocking database '%s'", dbpathname);
     free(dbpathname);
-    (void) fclose(dbfp);
+    (void)close(fd);
     return;
 }
   

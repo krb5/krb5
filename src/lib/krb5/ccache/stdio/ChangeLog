@@ -1,3 +1,7 @@
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * scc_maybe.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
+
 Tue Jul 11 19:22:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* scc-proto.h: Add prototype for krb5_scc_read.

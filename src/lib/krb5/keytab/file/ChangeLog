@@ -1,3 +1,7 @@
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * ktf_util.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
+
 Tue Aug 15 01:34:57 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* ktf_util.c: return KRB5_KEYTAB_BADVNO instead of -1
