@@ -76,6 +76,8 @@ extern Key_schedule v4_schedule;
 #define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 
+#define KCMD_KEYUSAGE	1026
+
 /*
  * Note that the encrypted rlogin packets take the form of a four-byte
  * length followed by encrypted data.  On writing the data out, a significant
@@ -89,7 +91,7 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
-static krb5_encrypt_block eblock;	 /* eblock for encrypt/decrypt */
+static krb5_keyblock keyblock;		 /* key for encrypt/decrypt */
 static int (*input)();
 static int (*output)();
 static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
@@ -713,8 +715,8 @@ void rcmd_stream_init_normal()
     output = twrite;
 }
 
-void rcmd_stream_init_krb5(keyblock, encrypt_flag, lencheck)
-     krb5_keyblock *keyblock;
+void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
+     krb5_keyblock *in_keyblock;
      int encrypt_flag;
      int lencheck;
 {
@@ -726,12 +728,8 @@ void rcmd_stream_init_krb5(keyblock, encrypt_flag, lencheck)
     }
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outpkt+4;	/* Set up des buffers */
-    krb5_use_enctype(bsd_context, &eblock, keyblock->enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock, keyblock)) {
-	fprintf(stderr, "rcmd: Cannot process session key: %s\n",
-		error_message(status));
-	exit(1);
-    }
+    keyblock = in_keyblock;
+
     do_lencheck = lencheck;
     input = v5_des_read;
     output = v5_des_write;
@@ -787,9 +785,11 @@ static int v5_des_read(fd, buf, len)
      int len;
 {
     int nreturned = 0;
-    long net_len,rd_len;
+    size_t net_len,rd_len;
     int cc;
     unsigned char c;
+    krb5_error_code ret;
+    krb5_data cipher, plain;
     
     if (nstored >= len) {
 	memcpy(buf, store_ptr, len);
@@ -823,7 +823,12 @@ static int v5_des_read(fd, buf, len)
     if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
     rd_len = (rd_len << 8) | c;
 
-    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
+    if (ret = krb5_encrypt_length(bsd_context, keyblock->enctype,
+				  rd_len, &net_len)) {
+	errno = ret;
+	return(-1);
+    }
+
     if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
 	/* preposterous length, probably out of sync */
 	errno = EIO;
@@ -834,11 +839,15 @@ static int v5_des_read(fd, buf, len)
 	errno = EIO;
 	return(-1);
     }
+
+    cipher.length = net_len;
+    cipher.data = desinbuf.data;
+    plain.length = sizeof(storage);
+    plain.data = storage;
+
     /* decrypt info */
-    if ((krb5_decrypt(bsd_context, desinbuf.data,
-		      (krb5_pointer) storage,
-		      net_len,
-		      &eblock, 0))) {
+    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
+		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
 	return(-1);
@@ -867,17 +876,15 @@ static int v5_des_write(fd, buf, len)
      int len;
 {
     unsigned char *len_buf = (unsigned char *) des_outpkt;
-    
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outpkt)-4){
-	errno = EIO;
-	return(-1);
-    }
-    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		      desoutbuf.data,
-		      len,
-		      &eblock,
-		      0))){
+    krb5_data plain;
+
+    plain.data = buf;
+    plain.length = len;
+
+    desoutbuf.length = sizeof(des_outpkt)-4;
+
+    if (krb5_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
+		      &plain, &desoutbuf)) {
 	errno = EIO;
 	return(-1);
     }
@@ -891,6 +898,7 @@ static int v5_des_write(fd, buf, len)
 	errno = EIO;
 	return(-1);
     }
+
     else return(len);
 }
 
