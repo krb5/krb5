@@ -156,12 +156,12 @@ static const char ascan_rel_col_hm[]	= "%02d:%02d";
 #endif	/* !HAVE_STRPTIME */
 #ifdef	HAVE_STRFTIME
 static const char sftime_ldep_time[]	= "%c";
-static const char sftime_med_fmt[]	= "%d %b %y %T";
+static const char sftime_med_fmt[]	= "%d %b %Y %T";
 static const char sftime_short_fmt[]	= "%x %X";
-static const char sftime_last_fmt[]	= "%d/%m/%y %R";
+static const char sftime_last_fmt[]	= "%d/%m/%Y %R";
 #endif	/* HAVE_STRFTIME */
-static const char sftime_default_fmt[]	= "%02d/%02d/%02d %02d:%02d";
-static const size_t sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
+static const char sftime_default_fmt[]	= "%02d/%02d/%4d %02d:%02d";
+static const size_t sftime_default_len	= 2+1+2+1+4+1+2+1+2+1;
 
 /* Delta time strings */
 static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
@@ -674,7 +674,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     if (!ndone) {
 	if (buflen >= sftime_default_len) {
 	    sprintf(buffer, sftime_default_fmt,
-		    tmp->tm_mday, tmp->tm_mon+1, tmp->tm_year,
+		    tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
 		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 	    ndone = strlen(buffer);
 	}
