@@ -1,3 +1,7 @@
+Fri Apr 28 14:56:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* lsb_addr_cmp.h: Don't try to include osconf.h
+
 Fri Apr 28 08:24:23 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* conf.h, conf-*.h: Removed.  We don't need them anymore,

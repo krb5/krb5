@@ -14,7 +14,7 @@
 #ifndef LSB_ADDR_COMP_DEFS
 #define LSB_ADDR_COMP_DEFS
 
-#include "osconf.h"
+/* #include "osconf.h" */
 
 /* note that if we don't explicitly know if we're LSBFIRST, the 
    alternate code is byte order independent and will give the
