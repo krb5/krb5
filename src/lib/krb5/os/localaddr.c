@@ -21,7 +21,8 @@ static char rcsid_getaddr_c[] =
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>
 
-#include <stdlib.h>
+#include <krb5/ext-proto.h>
+
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
