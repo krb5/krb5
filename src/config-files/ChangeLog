@@ -1,3 +1,8 @@
+2003-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc.conf.M (FILES): Refer to correct location for kdc.conf in
+	the default installation path.
+
 2002-09-24  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5.conf: Update enctypes and add club.cc.cmu.edu
