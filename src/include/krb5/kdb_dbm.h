@@ -67,9 +67,13 @@ krb5_error_code krb5_dbm_db_iterate
 #ifdef NARROW_PROTOTYPES
 krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((krb5_boolean,
 						       krb5_boolean * ));
+krb5_boolean krb5_dbm_db_set_lockmode
+	PROTOTYPE((krb5_boolean ));
 #else
 krb5_error_code krb5_dbm_db_set_nonblocking PROTOTYPE((int, /* krb5_boolean */
 						       krb5_boolean * ));
+krb5_boolean krb5_dbm_db_set_lockmode
+	PROTOTYPE((int /* krb5_boolean */ ));
 #endif /* NARROW_PROTOTYPES */
 
 #endif /* KRB5_KDB5_DBM__ */

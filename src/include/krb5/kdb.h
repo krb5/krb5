@@ -107,18 +107,20 @@ krb5_error_code krb5_db_unlock
 krb5_error_code krb5_db_set_nonblocking
 	PROTOTYPE((krb5_boolean,
 		   krb5_boolean * ));
+krb5_boolean krb5_db_set_lockmode
+	PROTOTYPE((krb5_boolean ));
 #else
 krb5_error_code krb5_db_set_nonblocking
 	PROTOTYPE((int, /* krb5_boolean */
 		   krb5_boolean * ));
+krb5_boolean krb5_db_set_lockmode
+	PROTOTYPE((int /* krb5_boolean */ ));
 #endif /* NARROW_PROTOTYPES */
 #include <krb5/widen.h>
 
 /* Only put things which don't have pointers to the narrow types in this
    section */
 
-krb5_boolean krb5_db_set_lockmode
-	PROTOTYPE((krb5_boolean ));
 krb5_error_code	krb5_db_fetch_mkey
 	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
 		   krb5_boolean, krb5_keyblock * ));
