@@ -1,3 +1,10 @@
+1998-11-16  Geoffrey King  <gjking@mit.edu>
+
+	* login.c (login_get_kconf): Also test whether *kconf_val is null
+ 		rather than just kconf_val before passing *kconf_val to
+ 		conf_affirmative (where strcasecmp will choke on it
+		if it is in fact null).
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

@@ -407,7 +407,7 @@ void login_get_kconf(k)
 				    kconf_names, &kconf_val);
 	if (retval) {
 	    /* ignore most (all?) errors */
-	} else if (kconf_val) {
+	} else if (kconf_val && *kconf_val) {
 	    switch(conf_affirmative(*kconf_val)) {
 	    case 1:
 		*login_conf_set[i].flag = 1;
