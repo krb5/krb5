@@ -66,7 +66,7 @@ make_ap_req(ctx, auth_context, cred, server, endtime, chan_bindings,
     if ((code = krb5_auth_con_init(context, auth_context)))
 	return(code);
 
-    krb5_auth_con_setcksumtype(context, *auth_context, CKSUMTYPE_KG_CB);
+    krb5_auth_con_set_req_cksumtype(context, *auth_context, CKSUMTYPE_KG_CB);
 
     /* build the checksum field */
 
