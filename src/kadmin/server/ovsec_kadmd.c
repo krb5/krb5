@@ -41,7 +41,6 @@
 #include    <unistd.h>
 #include    <netinet/in.h>
 #include    <arpa/inet.h>  /* inet_ntoa */
-#include    <netdb.h>
 #include    <gssrpc/rpc.h>
 #include    <gssapi/gssapi.h>
 #include    "gssapiP_krb5.h" /* for kg_get_context */
@@ -86,6 +85,7 @@ static struct sigaction s_action;
 #define	TIMEOUT	15
 
 gss_name_t gss_changepw_name = NULL, gss_oldchangepw_name = NULL;
+gss_name_t gss_kadmin_name = NULL;
 void *global_server_handle;
 
 /*
@@ -210,7 +210,9 @@ int main(int argc, char *argv[])
      gss_buffer_desc gssbuf;
      gss_OID nt_krb5_name_oid;
      kadm5_config_params params;
-     
+
+     setvbuf(stderr, NULL, _IONBF, 0);
+
      /* This is OID value the Krb5_Name NameType */
      gssbuf.value = "{1 2 840 113554 1 2 2 1}";
      gssbuf.length = strlen(gssbuf.value);
@@ -538,15 +540,15 @@ kterr:
       * Try to acquire creds for the old OV services as well as the
       * new names, but if that fails just fall back on the new names.
       */
-     if (_svcauth_gssapi_set_names(names, 4) == TRUE)
+     if (svcauth_gssapi_set_names(names, 4) == TRUE)
 	  oldnames++;
-     if (!oldnames && _svcauth_gssapi_set_names(names, 2) == FALSE) {
+     if (!oldnames && svcauth_gssapi_set_names(names, 2) == FALSE) {
 	  krb5_klog_syslog(LOG_ERR,
 			   "Cannot set GSS-API authentication names (keytab not present?), "
 			   "failing.");
 	  fprintf(stderr, "%s: Cannot set GSS-API authentication names.\n",
 		  whoami);
-	  _svcauth_gssapi_unset_names();
+	  svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close(context);	  
 	  exit(1);
@@ -564,16 +566,26 @@ kterr:
 				 &gss_oldchangepw_name);
      }
 
-     _svcauth_gssapi_set_log_badauth_func(log_badauth, NULL);
-     _svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);
-     _svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
+     svcauth_gssapi_set_log_badauth_func(log_badauth, NULL);
+     svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);
+     svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
      
+     svcauth_gss_set_log_badauth_func(log_badauth, NULL);
+     svcauth_gss_set_log_badverf_func(log_badverf, NULL);
+     svcauth_gss_set_log_miscerr_func(log_miscerr, NULL);
+     
+     if (svcauth_gss_set_svc_name(GSS_C_NO_NAME) != TRUE) {
+	 fprintf(stderr, "%s: Cannot initialize RPCSEC_GSS service name.\n",
+		 whoami);
+	 exit(1);
+     }
+
      if ((ret = acl_init(context, 0, params.acl_file))) {
 	  krb5_klog_syslog(LOG_ERR, "Cannot initialize acl file: %s",
 		 error_message(ret));
 	  fprintf(stderr, "%s: Cannot initialize acl file: %s\n",
 		  whoami, error_message(ret));
-	  _svcauth_gssapi_unset_names();
+	  svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close(context);
 	  exit(1);
@@ -584,7 +596,7 @@ kterr:
 	  krb5_klog_syslog(LOG_ERR, "Cannot detach from tty: %s", error_message(ret));
 	  fprintf(stderr, "%s: Cannot detach from tty: %s\n",
 		  whoami, error_message(ret));
-	  _svcauth_gssapi_unset_names();
+	  svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close(context);
 	  exit(1);
@@ -596,7 +608,7 @@ kterr:
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
      /* Clean up memory, etc */
-     _svcauth_gssapi_unset_names();
+     svcauth_gssapi_unset_names();
      kadm5_destroy(global_server_handle);
      close(s);
      acl_finish(context, 0);
@@ -670,7 +682,7 @@ void kadm_svc_run(params)
 kadm5_config_params *params;
 {
      fd_set	rfd;
-     int	sz = _gssrpc_rpc_dtablesize();
+     int	sz = gssrpc__rpc_dtablesize();
      struct	timeval	    timeout;
      
      while(signal_request_exit == 0) {
@@ -942,6 +954,10 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 
      (void) gss_display_name(&minor, client_name, &client, &gss_type);
      (void) gss_display_name(&minor, server_name, &server, &gss_type);
+     if (client.value == NULL)
+	 client.value = "(null)";
+     if (server.value == NULL)
+	 server.value = "(null)";
      a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
 
      proc = msg->rm_call.cb_proc;
@@ -1114,7 +1130,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 			 error_message(errno));
 	fprintf(stderr, "Cannot create connecting socket: %s",
 		error_message(errno));
-	_svcauth_gssapi_unset_names();
+	svcauth_gssapi_unset_names();
 	kadm5_destroy(global_server_handle);
 	krb5_klog_close(context);	  
 	exit(1);

@@ -34,8 +34,8 @@
  *
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
-#ifndef __RPC_HEADER__
-#define __RPC_HEADER__
+#ifndef GSSRPC_RPC_H
+#define GSSRPC_RPC_H
 
 #include <gssrpc/types.h>		/* some typedefs */
 #include <netinet/in.h>
@@ -52,11 +52,14 @@
 /* semi-private protocol headers */
 #include <gssrpc/rpc_msg.h>	/* protocol for rpc messages */
 #include <gssrpc/auth_unix.h>	/* protocol for unix style cred */
+#include <gssrpc/auth_gss.h>	/* RPCSEC_GSS */
 /*
  *  Uncomment-out the next line if you are building the rpc library with    
  *  DES Authentication (see the README file in the secure_rpc/ directory).
  */
-/*#include <gssrpc/auth_des.h>	protocol for des style cred */
+#if 0
+#include <gssrpc/auth_des.h>	protocol for des style cred
+#endif
 
 /* Server side only remote procedure callee */
 #include <gssrpc/svc_auth.h>	/* service side authenticator */
@@ -84,17 +87,13 @@
  * get the local host's IP address without consulting
  * name service library functions
  */
-#define get_myaddress	gssrpc_get_myaddress
-extern int get_myaddress (struct sockaddr_in *);
-
-#define bindresvport 	gssrpc_bindresvport
+GSSRPC__BEGIN_DECLS
+extern int get_myaddress(struct sockaddr_in *);
 extern int bindresvport(int, struct sockaddr_in *);
+extern int callrpc(char *, rpcprog_t, rpcvers_t, rpcproc_t, xdrproc_t,
+		   char *, xdrproc_t , char *);
+extern int getrpcport(char *, rpcprog_t, rpcvers_t, rpcprot_t);
+extern int gssrpc__rpc_dtablesize(void);
+GSSRPC__END_DECLS
 
-#define callrpc         gssrpc_callrpc
-extern int callrpc (char *, rpc_u_int32, rpc_u_int32, rpc_u_int32, xdrproc_t, 
-		    char *, xdrproc_t , char *);
-
-#define getrpcport     gssrpc_getrpcport
-extern int getrpcport (char *, rpc_u_int32, rpc_u_int32, rpc_u_int32);
-
-#endif /* ndef __RPC_HEADER__ */
+#endif /* !defined(GSSRPC_RPC_H) */

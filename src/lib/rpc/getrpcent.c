@@ -60,7 +60,7 @@ struct rpcdata {
 	char	line[BUFSIZ+1];
 	char	*domain;
 } *rpcdata;
-static struct rpcdata *_rpcdata();
+static struct rpcdata *get_rpcdata();
 
 static	struct rpcent *interpret();
 struct	hostent *gethostent();
@@ -69,7 +69,7 @@ char	*inet_ntoa();
 static char RPCDB[] = "/etc/rpc";
 
 static struct rpcdata *
-_rpcdata()
+get_rpcdata()
 {
 	register struct rpcdata *d = rpcdata;
 
@@ -84,7 +84,7 @@ struct rpcent *
 getrpcbynumber(number)
 	register int number;
 {
-	register struct rpcdata *d = _rpcdata();
+	register struct rpcdata *d = get_rpcdata();
 	register struct rpcent *p;
 	int reason;
 	char adrstr[16], *val = NULL;

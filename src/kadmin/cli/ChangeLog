@@ -1,3 +1,8 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (kadmin_startup): Add option to force old AUTH_GSSAPI
+	flavor.
+
 2004-05-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadmin.h, keytab.c: Remove inclusion of k5-int.h.

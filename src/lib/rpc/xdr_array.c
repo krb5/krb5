@@ -45,7 +45,7 @@ static char sccsid[] = "@(#)xdr_array.c 1.10 87/08/11 Copyr 1984 Sun Micro";
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
 
-#define LASTUNSIGNED	((unsigned int)0-1)
+#define LASTUNSIGNED	((u_int)0-1)
 
 
 /*
@@ -59,16 +59,16 @@ bool_t
 xdr_array(xdrs, addrp, sizep, maxsize, elsize, elproc)
 	register XDR *xdrs;
 	caddr_t *addrp;		/* array pointer */
-	unsigned int *sizep;		/* number of elements */
-	unsigned int maxsize;		/* max numberof elements */
-	unsigned int elsize;		/* size in bytes of each element */
+	u_int *sizep;		/* number of elements */
+	u_int maxsize;		/* max numberof elements */
+	u_int elsize;		/* size in bytes of each element */
 	xdrproc_t elproc;	/* xdr routine to handle each element */
 {
-	register unsigned int i;
+	register u_int i;
 	register caddr_t target = *addrp;
-	register unsigned int c;  /* the actual element count */
+	register u_int c;  /* the actual element count */
 	register bool_t stat = TRUE;
-	register unsigned int nodesize;
+	register u_int nodesize;
 
 	/* like strings, arrays are really counted arrays */
 	if (! xdr_u_int(xdrs, sizep)) {
@@ -138,11 +138,11 @@ bool_t
 xdr_vector(xdrs, basep, nelem, elemsize, xdr_elem)
 	register XDR *xdrs;
 	register char *basep;
-	register unsigned int nelem;
-	register unsigned int elemsize;
+	register u_int nelem;
+	register u_int elemsize;
 	register xdrproc_t xdr_elem;	
 {
-	register unsigned int i;
+	register u_int i;
 	register char *elptr;
 
 	elptr = basep;

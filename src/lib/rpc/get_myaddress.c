@@ -50,7 +50,7 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
  * don't use gethostbyname, which would invoke yellow pages
  */
 int
-gssrpc_get_myaddress(addr)
+get_myaddress(addr)
 	struct sockaddr_in *addr;
 {
 	memset((void *) addr, 0, sizeof(*addr));

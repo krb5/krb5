@@ -109,7 +109,7 @@ xdr_pmaplist(xdrs, rp)
 		if (freeing)
 			next = &((*rp)->pml_next); 
 		if (! xdr_reference(xdrs, (caddr_t *)rp,
-		    (unsigned int)sizeof(struct pmaplist), xdr_pmap))
+		    (u_int)sizeof(struct pmaplist), xdr_pmap))
 			return (FALSE);
 		rp = (freeing) ? next : &((*rp)->pml_next);
 	}

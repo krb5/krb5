@@ -35,7 +35,8 @@
  * Actually initialized to prevent creation of common blocks, which
  * can be problematic on some architectures.
  */
-struct opaque_auth _null_auth = {0};
+/* RENAMED: should be _null_auth */
+struct opaque_auth gssrpc__null_auth = {0};
 #ifdef FD_SETSIZE
 fd_set svc_fdset; /* Will be zeroed in data segment */
 int gssrpc_svc_fdset_init = 0;

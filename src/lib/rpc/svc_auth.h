@@ -39,43 +39,79 @@
  * Interface to server-side authentication flavors.
  */
 
-typedef struct __rpc_svc_auth {
-     struct svc_auth_ops {
-	  int	(*svc_ah_wrap)(struct __rpc_svc_auth *, XDR *, xdrproc_t, 
-			       caddr_t);
-	  int	(*svc_ah_unwrap)(struct __rpc_svc_auth *, XDR *, xdrproc_t, 
-				 caddr_t);
-     } *svc_ah_ops;
-     void * svc_ah_private;
+#ifndef GSSRPC_SVC_AUTH_H
+#define GSSRPC_SVC_AUTH_H
+
+#include <gssapi/gssapi.h>
+
+GSSRPC__BEGIN_DECLS
+
+struct svc_req;
+
+typedef struct SVCAUTH {
+	struct svc_auth_ops {
+		int	(*svc_ah_wrap)(struct SVCAUTH *, XDR *, xdrproc_t,
+				       caddr_t);
+		int	(*svc_ah_unwrap)(struct SVCAUTH *, XDR *, xdrproc_t,
+					 caddr_t);
+		int	(*svc_ah_destroy)(struct SVCAUTH *);
+	} *svc_ah_ops;
+	void * svc_ah_private;
 } SVCAUTH;
 
-extern SVCAUTH svc_auth_any;
+extern SVCAUTH svc_auth_none;
 
-#include <gssrpc/svc.h>
+extern struct svc_auth_ops svc_auth_none_ops;
+extern struct svc_auth_ops svc_auth_gssapi_ops;
+extern struct svc_auth_ops svc_auth_gss_ops;
 
 /*
  * Server side authenticator
  */
-#define _authenticate	_gssrpc_authenticate
-extern enum auth_stat _authenticate(struct svc_req *rqst, struct rpc_msg *msg,
-        bool_t *no_dispatch);
+/* RENAMED: should be _authenticate. */
+extern enum auth_stat gssrpc__authenticate(struct svc_req *rqst,
+	struct rpc_msg *msg, bool_t *no_dispatch);
 
 #define SVCAUTH_WRAP(auth, xdrs, xfunc, xwhere) \
      ((*((auth)->svc_ah_ops->svc_ah_wrap))(auth, xdrs, xfunc, xwhere))
 #define SVCAUTH_UNWRAP(auth, xdrs, xfunc, xwhere) \
      ((*((auth)->svc_ah_ops->svc_ah_unwrap))(auth, xdrs, xfunc, xwhere))
-
+#define SVCAUTH_DESTROY(auth) \
+     ((*((auth)->svc_ah_ops->svc_ah_destroy))(auth))
       
-#define _svcauth_null		_gssrpc_svcauth_null
-#define _svcauth_unix		_gssrpc_svcauth_unix
-#define _svcauth_short		_gssrpc_svcauth_short
-#define _svcauth_gssapi		_gssrpc_svcauth_gssapi
-/* no authentication */
-enum auth_stat _svcauth_null(struct svc_req *, struct rpc_msg *, bool_t *);
-/* unix style (uid, gids) */
-enum auth_stat _svcauth_unix(struct svc_req *, struct rpc_msg *, bool_t *);
-/* short hand unix style */
-enum auth_stat _svcauth_short(struct svc_req *, struct rpc_msg *, bool_t *);
-/* GSS-API style */
-enum auth_stat _svcauth_gssapi(struct svc_req *, struct rpc_msg *, bool_t *);
+/*
+ * Approved way of getting principal of caller
+ */
+char *svcauth_gss_get_principal(SVCAUTH *auth);
+/*
+ * Approved way of setting server principal
+ */
+bool_t svcauth_gss_set_svc_name(gss_name_t name);
 
+#ifdef GSSRPC__IMPL
+
+/* no authentication */
+/* RENAMED: should be _svcauth_none. */
+enum auth_stat gssrpc__svcauth_none(struct svc_req *,
+	struct rpc_msg *, bool_t *);
+/* unix style (uid, gids) */
+/* RENAMED: shoudl be _svcauth_unix. */
+enum auth_stat gssrpc__svcauth_unix(struct svc_req *,
+	struct rpc_msg *, bool_t *);
+/* short hand unix style */
+/* RENAMED: should be _svcauth_short. */
+enum auth_stat gssrpc__svcauth_short(struct svc_req *,
+	struct rpc_msg *, bool_t *);
+/* GSS-API style */
+/* RENAMED: should be _svcauth_gssapi. */
+enum auth_stat gssrpc__svcauth_gssapi(struct svc_req *,
+	struct rpc_msg *, bool_t *);
+/* RPCSEC_GSS */
+enum auth_stat gssrpc__svcauth_gss(struct svc_req *,
+	struct rpc_msg *, bool_t *);
+
+#endif /* defined(GSSRPC__IMPL) */
+
+GSSRPC__END_DECLS
+
+#endif /* !defined(GSSRPC_SVC_AUTH_H) */

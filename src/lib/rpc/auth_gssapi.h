@@ -7,6 +7,11 @@
  *
  */
 
+#ifndef GSSRPC_AUTH_GSSAPI_H
+#define GSSRPC_AUTH_GSSAPI_H
+
+GSSRPC__BEGIN_DECLS
+
 #define AUTH_GSSAPI_EXIT		0
 #define AUTH_GSSAPI_INIT 		1
 #define AUTH_GSSAPI_CONTINUE_INIT 	2
@@ -29,18 +34,18 @@ typedef struct _auth_gssapi_name {
 } auth_gssapi_name;
 
 typedef struct _auth_gssapi_creds {
-     rpc_u_int32 version;
+     uint32_t version;
      bool_t auth_msg;
      gss_buffer_desc client_handle;
 } auth_gssapi_creds;
 
 typedef struct _auth_gssapi_init_arg {
-     rpc_u_int32 version;
+     uint32_t version;
      gss_buffer_desc token;
 } auth_gssapi_init_arg;
 
 typedef struct _auth_gssapi_init_res {
-     rpc_u_int32 version;
+     uint32_t version;
      gss_buffer_desc client_handle;
      OM_uint32 gss_major, gss_minor;
      gss_buffer_desc token;
@@ -73,12 +78,12 @@ bool_t xdr_authgssapi_init_res(XDR *, auth_gssapi_init_res *);
 
 bool_t auth_gssapi_wrap_data
 (OM_uint32 *major, OM_uint32 *minor,
-	   gss_ctx_id_t context, rpc_u_int32 seq_num, XDR
+	   gss_ctx_id_t context, uint32_t seq_num, XDR
 	   *out_xdrs, bool_t (*xdr_func)(), caddr_t
 	   xdr_ptr);
 bool_t auth_gssapi_unwrap_data
 (OM_uint32 *major, OM_uint32 *minor,
-	   gss_ctx_id_t context, rpc_u_int32 seq_num, XDR
+	   gss_ctx_id_t context, uint32_t seq_num, XDR
 	   *in_xdrs, bool_t (*xdr_func)(), caddr_t
 	   xdr_ptr);
 
@@ -103,25 +108,32 @@ void auth_gssapi_display_status
 	   OM_uint32 minor); 
 
 bool_t auth_gssapi_seal_seq
-(gss_ctx_id_t context, rpc_u_int32 seq_num, gss_buffer_t out_buf);
+(gss_ctx_id_t context, uint32_t seq_num, gss_buffer_t out_buf);
 
 bool_t auth_gssapi_unseal_seq
-(gss_ctx_id_t context, gss_buffer_t in_buf, rpc_u_int32 *seq_num);
+(gss_ctx_id_t context, gss_buffer_t in_buf, uint32_t *seq_num);
 
-bool_t _svcauth_gssapi_set_names
+bool_t svcauth_gssapi_set_names
 (auth_gssapi_name *names, int num);
-void _svcauth_gssapi_unset_names
+void svcauth_gssapi_unset_names
 (void);
 
-void _svcauth_gssapi_set_log_badauth_func
+void svcauth_gssapi_set_log_badauth_func
 (auth_gssapi_log_badauth_func func,
 	   caddr_t data);
-void _svcauth_gssapi_set_log_badverf_func
+void svcauth_gssapi_set_log_badverf_func
 (auth_gssapi_log_badverf_func func,
 	   caddr_t data);
-void _svcauth_gssapi_set_log_miscerr_func
+void svcauth_gssapi_set_log_miscerr_func
 (auth_gssapi_log_miscerr_func func,
 	   caddr_t data);
+
+void svcauth_gss_set_log_badauth_func(auth_gssapi_log_badauth_func,
+				      caddr_t);
+void svcauth_gss_set_log_badverf_func(auth_gssapi_log_badverf_func,
+				      caddr_t);
+void svcauth_gss_set_log_miscerr_func(auth_gssapi_log_miscerr_func,
+				      caddr_t data);
 
 #define GSS_COPY_BUFFER(dest, src) { \
      (dest).length = (src).length; \
@@ -135,3 +147,7 @@ void _svcauth_gssapi_set_log_miscerr_func
 #define GSS_BUFFERS_EQUAL(b1, b2) (((b1).length == (b2).length) && \
 				   !memcmp((b1).value,(b2).value,(b1.length)))
 
+
+GSSRPC__END_DECLS
+
+#endif /* !defined(GSSRPC_AUTH_GSSAPI_H) */

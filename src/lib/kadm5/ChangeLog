@@ -1,3 +1,11 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h (kadm5_get_admin_service_name): Prototype for new function.
+	(KADM5_CONFIG_OLD_AUTH_GSSAPI): New flag to force old AUTH_GSSAPI
+	flavor.
+
+	* alt_prof.c (kadm5_get_admin_service_name): New function.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Invoke PRIOCNTL_HACK.

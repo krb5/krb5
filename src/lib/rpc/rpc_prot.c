@@ -55,7 +55,7 @@ static char sccsid[] = "@(#)rpc_prot.c 1.36 87/08/11 Copyr 1984 Sun Micro";
  * (see auth.h)
  */
 bool_t
-gssrpc_xdr_opaque_auth(xdrs, ap)
+xdr_opaque_auth(xdrs, ap)
 	register XDR *xdrs;
 	register struct opaque_auth *ap;
 {
@@ -83,13 +83,13 @@ xdr_des_block(xdrs, blkp)
  * XDR the MSG_ACCEPTED part of a reply message union
  */
 bool_t 
-gssrpc_xdr_accepted_reply(xdrs, ar)
+xdr_accepted_reply(xdrs, ar)
 	register XDR *xdrs;   
 	register struct accepted_reply *ar;
 {
 
 	/* personalized union, rather than calling xdr_union */
-	if (! gssrpc_xdr_opaque_auth(xdrs, &(ar->ar_verf)))
+	if (! xdr_opaque_auth(xdrs, &(ar->ar_verf)))
 		return (FALSE);
 	if (! xdr_enum(xdrs, (enum_t *)&(ar->ar_stat)))
 		return (FALSE);
@@ -116,7 +116,7 @@ gssrpc_xdr_accepted_reply(xdrs, ar)
  * XDR the MSG_DENIED part of a reply message union
  */
 bool_t 
-gssrpc_xdr_rejected_reply(xdrs, rr)
+xdr_rejected_reply(xdrs, rr)
 	register XDR *xdrs;
 	register struct rejected_reply *rr;
 {
@@ -138,8 +138,8 @@ gssrpc_xdr_rejected_reply(xdrs, rr)
 }
 
 static struct xdr_discrim reply_dscrm[3] = {
-	{ (int)MSG_ACCEPTED, gssrpc_xdr_accepted_reply },
-	{ (int)MSG_DENIED, gssrpc_xdr_rejected_reply },
+	{ (int)MSG_ACCEPTED, xdr_accepted_reply },
+	{ (int)MSG_DENIED, xdr_rejected_reply },
 	{ __dontcare__, NULL_xdrproc_t } };
 
 /*
@@ -219,8 +219,8 @@ accepted(acpt_stat, error)
 	}
 	/* something's wrong, but we don't know what ... */
 	error->re_status = RPC_FAILED;
-	error->re_lb.s1 = (rpc_int32)MSG_ACCEPTED;
-	error->re_lb.s2 = (rpc_int32)acpt_stat;
+	error->re_lb.s1 = (int32_t)MSG_ACCEPTED;
+	error->re_lb.s2 = (int32_t)acpt_stat;
 }
 
 static void 
@@ -241,15 +241,15 @@ rejected(rjct_stat, error)
 	}
 	/* something's wrong, but we don't know what ... */
 	error->re_status = RPC_FAILED;
-	error->re_lb.s1 = (rpc_int32)MSG_DENIED;
-	error->re_lb.s2 = (rpc_int32)rjct_stat;
+	error->re_lb.s1 = (int32_t)MSG_DENIED;
+	error->re_lb.s2 = (int32_t)rjct_stat;
 }
 
 /*
  * given a reply message, fills in the error
  */
 void
-sunrpc_seterr_reply(msg, error)
+gssrpc__seterr_reply(msg, error)
 	register struct rpc_msg *msg;
 	register struct rpc_err *error;
 {
@@ -271,7 +271,7 @@ sunrpc_seterr_reply(msg, error)
 
 	default:
 		error->re_status = RPC_FAILED;
-		error->re_lb.s1 = (rpc_int32)(msg->rm_reply.rp_stat);
+		error->re_lb.s1 = (int32_t)(msg->rm_reply.rp_stat);
 		break;
 	}
 	switch (error->re_status) {

@@ -45,7 +45,7 @@ static char sccsid[] = "@(#)xdr_reference.c 1.11 87/08/11 SMI";
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
 
-#define LASTUNSIGNED	((unsigned int)0-1)
+#define LASTUNSIGNED	((u_int)0-1)
 
 /*
  * XDR an indirect pointer
@@ -60,7 +60,7 @@ bool_t
 xdr_reference(xdrs, pp, size, proc)
 	register XDR *xdrs;
 	caddr_t *pp;		/* the pointer to work on */
-	unsigned int size;		/* size of the object pointed to */
+	u_int size;		/* size of the object pointed to */
 	xdrproc_t proc;		/* xdr routine to handle the object */
 {
 	register caddr_t loc = *pp;
@@ -118,7 +118,7 @@ bool_t
 xdr_pointer(xdrs,objpp,obj_size,xdr_obj)
 	register XDR *xdrs;
 	char **objpp;
-	unsigned int obj_size;
+	u_int obj_size;
 	xdrproc_t xdr_obj;
 {
 

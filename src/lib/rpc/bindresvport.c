@@ -47,7 +47,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
  * Bind a socket to a privileged IP port
  */
 int
-gssrpc_bindresvport(sd, sockin)
+bindresvport(sd, sockin)
 	int sd;
 	struct sockaddr_in *sockin;
 {

@@ -1,3 +1,56 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.c (print_rpc_gss_sec): Use gss_oid_to_str().
+	(rpc_gss_data): Add field "established" to indicate whether
+	context establishment is in progress; this prevents recursive
+	failures when auth_refresh() calls clnt_call().  If clnt_call()
+	called from auth_refresh() gets an error condition, the
+	clnt_call() logic will attempt a refresh, which can cause the
+	cl_auth to get destroyed multiple times, corrupting memory.
+	(authgss_validate, authgss_refresh): Use gd->established.
+	(authgss_refresh): Release gd->gc_wire_verf.
+	(authgss_destroy_context): Log clnt_call() failures.
+
+	* auth_gssapi.h: Add prototypes for svcauth_gss_set_log_*_func.
+
+	* authgss_prot.c (log_status): Correctly reset msg_ctx between
+	different types of calls to gss_display_status().
+
+	* svc.c: Don't reset xp_auth prior to authenticating message.
+
+	* svc.h (svc_req): Remove rq_svcname; application can get it from
+	rq_svccred anyway.
+
+	* svc_auth_gss.c: Include auth_gssapi.h to get typedefs for
+	logging callback functions.  Enable logging callbacks.  Replace
+	SVCAUTH_PRIVATE_LVALUE() kludge.  Fix up namespace somewhat to not
+	use reserved names.
+	(svcauth_gss_accept_sec_context): Free rpc_gss_init_args to avoid
+	leak.  Release gr->gr_token on error conditions.
+	(svcauth_gss_nextverf, svcauth_gss_accept_sec_context):
+	(gssrpc__svcauth_gss): Use gd->checksum.
+	(gssrpc__svcauth_gss): Use macro ret_freegc() to ensure freeing of
+	gc.  On destroy, set *no_dispatch=TRUE and explicitly send reply
+	to avoid application sending a NULLPROC reply with an invalid
+	verifier.
+
+	* svc_auth_gssapi.c (gssrpc__svcauth_gssapi): Set xp_auth to NULL
+	upon destroy.
+	(svc_auth_gssapi_destroy): New function so SVCAUTH_DESTROY() will
+	work.
+
+	* svc_tcp.c (svctcp_create, makefd_xprt): Initialize xp_auth to
+	NULL.
+	(svctcp_destroy): Call SVCAUTH_DESTROY() if appropriate.
+
+	* svc_udp.c (svcudp_bufcreate, svcudp_destroy): Initialize xp_auth
+	to NULL.
+	(svcudp_destroy): Only close xp_sock if it's not -1.  Call
+	SVCAUTH_DESTROY() if appropriate.
+
+	* xdr_rec.c (xdrrec_getpos): Add CITI's fix to return position for
+	non-flushed buffers.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Renamed from LIB.
@@ -5,6 +58,88 @@
 2004-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* clnt_tcp.c: Include string.h.
+
+2004-05-27  Tom Yu  <tlyu@mit.edu>
+
+	* auth_any.c, svc_auth_any.c: Removed.
+
+	* auth_gss.h: New file, was CITI's auth_ssapi.h.
+
+	* auth_gss.c, authgss_prot.c, svc_auth_gssapi.c, svc_auth_none.c:
+	New files.
+
+	* rename.h: New file containing renaming macros for external
+	names.
+
+	* Makefile.in (DEFINES): Add -DGSSRPC__IMPL for accessing
+	internals.
+	(LIBMAJOR): Bump due to ABI changes; this ABI is still subject to
+	change without future version bumps until released.
+	(SRCS, OBJS, STLIBOBJS, HDRS, SRC_HDRS): Adjust for new files
+
+	* types.hin: Check for 8-bit bytes, two's-complement integers.
+	Use configure-determined inclusions of various headers instead of
+	depending on HAVE_*.  Rearrange logic of sys/select.h,
+	netinet/in.h, etc. inclusions.  Include rename.h.  Add typedefs
+	for rpcprog_t, rpcvers_t, rpcprot_t, rpcproc_t, rpcport_t,
+	rpc_inline_t.
+	(GSSRPC__BEGIN_DECLS, GSSRPC__END_DECLS): New macros for C++
+	compatibility.
+	[GSSRPC__FAKE_INT32]: Fake up a fixed-width 32-bit integer if the
+	system doesn't provide one in its headers.
+	[GSSRPC__BSD_TYPEALIASES]: Add typedefs for BSD-style type
+	aliases, e.g., u_char.  Can be overridden at compile-time.
+
+	* auth.h, auth_gssapi.h, auth_unix.h, clnt.h, pmax_clnt.h:
+	* pmap_prot.h, pmap_rmt.h, rpc.h, rpc_msg.h, svc.h, svc_auth.h:
+	* xdr.h: Fix inclusion protection.  Use GSSRPC__{BEGIN,END}_DECLS
+	for declarations.  "unsigned int" -> "u_int", etc.  "rpc_int32" ->
+	"int32_t", etc.  Move renaming to rename.h.  Move some external
+	names out of implementation namespace.  Make struct tags identical
+	to typedef names, mostly.  Use rpcprog_t and friends as
+	appropriate.
+
+	* auth.h: Add RPCSEC_GSS errors.  Add RPCSEC_GSS flavor.  Disable
+	AUTH_GSSAPI_COMPAT flavor.  "AUTH_wrap" -> "auth_wrap",
+	"AUTH_unwrap" -> "auth_unwrap".
+
+	* svc_auth.h: Hide individual flavors of authenticators under
+	GSSRPC__IMPL.  Adjust for "svc_auth_any" -> "svc_auth_none".
+	(SVCAUTH_DESTROY): New macro.
+
+	* rpc.h: Prototype gssrpc__rpc_dtablesize().
+
+	* svc.h (svc_req): Add rq_clntname, rq_svcname.
+
+	* xdr.h (MAX_NETOBJ_SZ): Adjust to 2048.
+
+	* auth_gssapi.c, auth_gssapi_misc.c, auth_none.c, auth_unix.c:
+	* bindresvport.c, clnt_generic.c, clnt_perror.c, clnt_raw.c:
+	* clnt_simple.c, clnt_tcp.c, clnt_udp.c, get_myaddress.c:
+	* getrpcent.c, getrpcport.c, pmax_clnt.c, pmap_getport.c:
+	* pmap_prot2.c, pmap_rmt.c, rpc_callmsg.c, rpc_commondata.c:
+	* rpc_dtablesize.c, rpc_port.c, svc.c, svc_auth.c:
+	* svc_auth_gssapi.c, svc_auth_unix.c, svc_run.c, svc_simple.c:
+	* svc_tcp.c, svc_udp.c, xdr.c, xdr_alloc.c, xdr_array.c:
+	* xdr_float.c, xdr_mem.c, xdr_rec.c, xdr_reference.c, xdr_stdio.c:
+	* xdr_stdio.c: Lots of type renaming, including BSD typealiases,
+	use of int32_t and uint32_t, rpc*_t for protocol constants.  Fixed
+	namespace issues, moving renaming out of individual files.  Moved
+	symbols out of implementation namespace.
+
+	* xdr.c: Add checks on integer values, in order to return errors
+	when an attempt is made to encode an integer that won't fit in 4
+	bytes, or to decode an integer that won't fit into its target
+	type.
+
+	* auth_none.c: Use authnone_wrap instead of authany_wrap.
+	(authnone_wrap): New function.
+
+	* auth_unix.c: Use authunix_wrap instead of authany_wrap.
+	(authunix_wrap): New function.
+
+	* xdr_mem.c, xdr_rec.c: Fix some sizeof vs BYTES_PER_XDR_UNIT
+	issues.
 
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 

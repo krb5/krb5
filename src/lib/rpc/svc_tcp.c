@@ -91,16 +91,16 @@ static struct xp_ops svctcp_rendezvous_op = {
 };
 
 static int readtcp(char *, caddr_t, int), writetcp(char *, caddr_t, int);
-static SVCXPRT *makefd_xprt(int, unsigned int, unsigned int);
+static SVCXPRT *makefd_xprt(int, u_int, u_int);
 
 struct tcp_rendezvous { /* kept in xprt->xp_p1 */
-	unsigned int sendsize;
-	unsigned int recvsize;
+	u_int sendsize;
+	u_int recvsize;
 };
 
 struct tcp_conn {  /* kept in xprt->xp_p1 */
 	enum xprt_stat strm_stat;
-	rpc_u_int32 x_id;
+	uint32_t x_id;
 	XDR xdrs;
 	char verf_body[MAX_AUTH_BYTES];
 };
@@ -128,8 +128,8 @@ struct tcp_conn {  /* kept in xprt->xp_p1 */
 SVCXPRT *
 svctcp_create(sock, sendsize, recvsize)
 	register int sock;
-	unsigned int sendsize;
-	unsigned int recvsize;
+	u_int sendsize;
+	u_int recvsize;
 {
 	bool_t madesock = FALSE;
 	register SVCXPRT *xprt;
@@ -146,7 +146,7 @@ svctcp_create(sock, sendsize, recvsize)
 	}
 	memset((char *)&addr, 0, sizeof (addr));
 	addr.sin_family = AF_INET;
-	if (gssrpc_bindresvport(sock, &addr)) {
+	if (bindresvport(sock, &addr)) {
 		addr.sin_port = 0;
 		(void)bind(sock, (struct sockaddr *)&addr, len);
 	}
@@ -176,7 +176,8 @@ svctcp_create(sock, sendsize, recvsize)
 	}
 	xprt->xp_p2 = NULL;
 	xprt->xp_p1 = (caddr_t)r;
-	xprt->xp_verf = _null_auth;
+	xprt->xp_auth = NULL;
+	xprt->xp_verf = gssrpc__null_auth;
 	xprt->xp_ops = &svctcp_rendezvous_op;
 	xprt->xp_port = ntohs(addr.sin_port);
 	xprt->xp_sock = sock;
@@ -190,10 +191,10 @@ svctcp_create(sock, sendsize, recvsize)
  * descriptor as its first input.
  */
 SVCXPRT *
-gssrpc_svcfd_create(fd, sendsize, recvsize)
+svcfd_create(fd, sendsize, recvsize)
 	int fd;
-	unsigned int sendsize;
-	unsigned int recvsize;
+	u_int sendsize;
+	u_int recvsize;
 {
 
 	return (makefd_xprt(fd, sendsize, recvsize));
@@ -202,8 +203,8 @@ gssrpc_svcfd_create(fd, sendsize, recvsize)
 static SVCXPRT *
 makefd_xprt(fd, sendsize, recvsize)
 	int fd;
-	unsigned int sendsize;
-	unsigned int recvsize;
+	u_int sendsize;
+	u_int recvsize;
 {
 	register SVCXPRT *xprt;
 	register struct tcp_conn *cd;
@@ -225,6 +226,7 @@ makefd_xprt(fd, sendsize, recvsize)
 	    (caddr_t)xprt, readtcp, writetcp);
 	xprt->xp_p2 = NULL;
 	xprt->xp_p1 = (caddr_t)cd;
+	xprt->xp_auth = NULL;
 	xprt->xp_verf.oa_base = cd->verf_body;
 	xprt->xp_addrlen = 0;
 	xprt->xp_laddrlen = 0;
@@ -292,6 +294,10 @@ svctcp_destroy(xprt)
 		/* an actual connection socket */
 		XDR_DESTROY(&(cd->xdrs));
 	}
+	if (xprt->xp_auth != NULL) {
+		SVCAUTH_DESTROY(xprt->xp_auth);
+		xprt->xp_auth = NULL;
+	}
 	mem_free((caddr_t)cd, sizeof(struct tcp_conn));
 	mem_free((caddr_t)xprt, sizeof(SVCXPRT));
 }
@@ -329,7 +335,7 @@ readtcp(xprtptr, buf, len)
 	do {
 		readfds = mask;
 		tout = wait_per_try;
-		if (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set*)NULL,
+		if (select(gssrpc__rpc_dtablesize(), &readfds, (fd_set*)NULL,
 			   (fd_set*)NULL, &tout) <= 0) {
 			if (errno == EINTR) {
 				continue;

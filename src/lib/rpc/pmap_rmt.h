@@ -35,21 +35,29 @@
  * Copyright (C) 1986, Sun Microsystems, Inc.
  */
 
+#ifndef GSSRPC_PMAP_RMT_H
+#define GSSRPC_PMAP_RMT_H
+GSSRPC__BEGIN_DECLS
+
 struct rmtcallargs {
-	rpc_u_int32 prog, vers, proc, arglen;
+	rpcprog_t prog;
+	rpcvers_t vers;
+	rpcproc_t proc;
+	uint32_t arglen;
 	caddr_t args_ptr;
 	xdrproc_t xdr_args;
 };
 
-#define xdr_rmtcall_args	gssrpc_xdr_rmtcall_args
 bool_t xdr_rmtcall_args(XDR *, struct rmtcallargs *);
 
 struct rmtcallres {
-	rpc_u_int32 *port_ptr;
-	rpc_u_int32 resultslen;
+	rpcport_t *port_ptr;
+	uint32_t resultslen;
 	caddr_t results_ptr;
 	xdrproc_t xdr_results;
 };
 
-#define xdr_rmtcallres		gssrpc_xdr_rmtcallres
 bool_t xdr_rmtcallres(XDR *, struct rmtcallres *);
+
+GSSRPC__END_DECLS
+#endif /* !defined(GSSRPC_PMAP_RMT_H) */

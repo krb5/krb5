@@ -64,6 +64,7 @@ static bool_t	authunix_marshal(AUTH *, XDR *);
 static bool_t	authunix_validate(AUTH *, struct opaque_auth *);
 static bool_t	authunix_refresh(AUTH *, struct rpc_msg *);
 static void	authunix_destroy(AUTH *);
+static bool_t	authunix_wrap(AUTH *, XDR *, xdrproc_t, caddr_t);
 
 static struct auth_ops auth_unix_ops = {
 	authunix_nextverf,
@@ -71,8 +72,8 @@ static struct auth_ops auth_unix_ops = {
 	authunix_validate,
 	authunix_refresh,
 	authunix_destroy,
-	authany_wrap,
-	authany_wrap,
+	authunix_wrap,
+	authunix_wrap
 };
 
 /*
@@ -81,9 +82,9 @@ static struct auth_ops auth_unix_ops = {
 struct audata {
 	struct opaque_auth	au_origcred;	/* original credentials */
 	struct opaque_auth	au_shcred;	/* short hand cred */
-	rpc_u_int32			au_shfaults;	/* short hand cache faults */
+	uint32_t		au_shfaults;	/* short hand cache faults */
 	char			au_marshed[MAX_AUTH_BYTES];
-	unsigned int			au_mpos;	/* xdr pos at end of marshed */
+	u_int			au_mpos;	/* xdr pos at end of marshed */
 };
 #define	AUTH_PRIVATE(auth)	((struct audata *)auth->ah_private)
 
@@ -128,7 +129,7 @@ authunix_create(machname, uid, gid, len, aup_gids)
 #endif
 	auth->ah_ops = &auth_unix_ops;
 	auth->ah_private = (caddr_t)au;
-	auth->ah_verf = au->au_shcred = _null_auth;
+	auth->ah_verf = au->au_shcred = gssrpc__null_auth;
 	au->au_shfaults = 0;
 
 	/*
@@ -139,7 +140,7 @@ authunix_create(machname, uid, gid, len, aup_gids)
 	aup.aup_machname = machname;
 	aup.aup_uid = uid;
 	aup.aup_gid = gid;
-	aup.aup_len = (unsigned int)len;
+	aup.aup_len = (u_int)len;
 	aup.aup_gids = aup_gids;
 
 	/*
@@ -151,14 +152,14 @@ authunix_create(machname, uid, gid, len, aup_gids)
 	au->au_origcred.oa_length = len = XDR_GETPOS(&xdrs);
 	au->au_origcred.oa_flavor = AUTH_UNIX;
 #ifdef KERNEL
-	au->au_origcred.oa_base = mem_alloc((unsigned int) len);
+	au->au_origcred.oa_base = mem_alloc((u_int) len);
 #else
-	if ((au->au_origcred.oa_base = mem_alloc((unsigned int) len)) == NULL) {
+	if ((au->au_origcred.oa_base = mem_alloc((u_int) len)) == NULL) {
 		(void)fprintf(stderr, "authunix_create: out of memory\n");
 		return (NULL);
 	}
 #endif
-	memmove(au->au_origcred.oa_base, mymem, (unsigned int)len);
+	memmove(au->au_origcred.oa_base, mymem, (u_int)len);
 
 	/*
 	 * set auth handle to reflect new cred.
@@ -233,11 +234,11 @@ authunix_validate(auth, verf)
 			    au->au_shcred.oa_length);
 			au->au_shcred.oa_base = NULL;
 		}
-		if (gssrpc_xdr_opaque_auth(&xdrs, &au->au_shcred)) {
+		if (xdr_opaque_auth(&xdrs, &au->au_shcred)) {
 			auth->ah_cred = au->au_shcred;
 		} else {
 			xdrs.x_op = XDR_FREE;
-			(void)gssrpc_xdr_opaque_auth(&xdrs, &au->au_shcred);
+			(void)xdr_opaque_auth(&xdrs, &au->au_shcred);
 			au->au_shcred.oa_base = NULL;
 			auth->ah_cred = au->au_origcred;
 		}
@@ -322,11 +323,17 @@ marshal_new_auth(auth)
 	register struct audata *au = AUTH_PRIVATE(auth);
 
 	xdrmem_create(xdrs, au->au_marshed, MAX_AUTH_BYTES, XDR_ENCODE);
-	if ((! gssrpc_xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
-	    (! gssrpc_xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
+	if ((! xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
+	    (! xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
 		perror("auth_none.c - Fatal marshalling problem");
 	} else {
 		au->au_mpos = XDR_GETPOS(xdrs);
 	}
 	XDR_DESTROY(xdrs);
+}
+
+static bool_t
+authunix_wrap(AUTH *auth, XDR *xdrs, xdrproc_t xfunc, caddr_t xwhere)
+{
+	return ((*xfunc)(xdrs, xwhere));
 }

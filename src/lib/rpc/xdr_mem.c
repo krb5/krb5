@@ -52,11 +52,11 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 
 static bool_t	xdrmem_getlong(XDR *, long *);
 static bool_t	xdrmem_putlong(XDR *, long *);
-static bool_t	xdrmem_getbytes(XDR *, caddr_t, unsigned int);
-static bool_t	xdrmem_putbytes(XDR *, caddr_t, unsigned int);
-static unsigned int	xdrmem_getpos(XDR *);
-static bool_t	xdrmem_setpos(XDR *, unsigned int);
-static rpc_int32 *	xdrmem_inline(XDR *, int);
+static bool_t	xdrmem_getbytes(XDR *, caddr_t, u_int);
+static bool_t	xdrmem_putbytes(XDR *, caddr_t, u_int);
+static u_int	xdrmem_getpos(XDR *);
+static bool_t	xdrmem_setpos(XDR *, u_int);
+static rpc_inline_t *	xdrmem_inline(XDR *, int);
 static void	xdrmem_destroy(XDR *);
 
 static struct	xdr_ops xdrmem_ops = {
@@ -78,7 +78,7 @@ void
 xdrmem_create(xdrs, addr, size, op)
 	register XDR *xdrs;
 	caddr_t addr;
-	unsigned int size;
+	u_int size;
 	enum xdr_op op;
 {
 
@@ -100,12 +100,12 @@ xdrmem_getlong(xdrs, lp)
 	long *lp;
 {
 
-	if (xdrs->x_handy < sizeof(rpc_int32))
+	if (xdrs->x_handy < BYTES_PER_XDR_UNIT)
 		return (FALSE);
 	else
-		xdrs->x_handy -= sizeof(rpc_int32);
-	*lp = (long)ntohl(*((rpc_u_int32 *)(xdrs->x_private)));
-	xdrs->x_private = (char *)xdrs->x_private + sizeof(rpc_int32);
+		xdrs->x_handy -= BYTES_PER_XDR_UNIT;
+	*lp = (long)ntohl(*((uint32_t *)(xdrs->x_private)));
+	xdrs->x_private = (char *)xdrs->x_private + BYTES_PER_XDR_UNIT;
 	return (TRUE);
 }
 
@@ -115,12 +115,12 @@ xdrmem_putlong(xdrs, lp)
 	long *lp;
 {
 
-	if (xdrs->x_handy < sizeof(rpc_int32))
+	if (xdrs->x_handy < BYTES_PER_XDR_UNIT)
 		return (FALSE);
 	else
-		xdrs->x_handy -= sizeof(rpc_int32);
-	*(rpc_int32 *)xdrs->x_private = (rpc_int32)htonl((rpc_u_int32)(*lp));
-	xdrs->x_private = (char *)xdrs->x_private + sizeof(rpc_int32);
+		xdrs->x_handy -= BYTES_PER_XDR_UNIT;
+	*(int32_t *)xdrs->x_private = (int32_t)htonl((uint32_t)(*lp));
+	xdrs->x_private = (char *)xdrs->x_private + BYTES_PER_XDR_UNIT;
 	return (TRUE);
 }
 
@@ -128,7 +128,7 @@ static bool_t
 xdrmem_getbytes(xdrs, addr, len)
 	register XDR *xdrs;
 	caddr_t addr;
-	register unsigned int len;
+	register u_int len;
 {
 
 	if (xdrs->x_handy < len)
@@ -144,7 +144,7 @@ static bool_t
 xdrmem_putbytes(xdrs, addr, len)
 	register XDR *xdrs;
 	caddr_t addr;
-	register unsigned int len;
+	register u_int len;
 {
 
 	if (xdrs->x_handy < len)
@@ -156,7 +156,7 @@ xdrmem_putbytes(xdrs, addr, len)
 	return (TRUE);
 }
 
-static unsigned int
+static u_int
 xdrmem_getpos(xdrs)
 	register XDR *xdrs;
 {
@@ -164,13 +164,13 @@ xdrmem_getpos(xdrs)
  * 11/3/95 - JRG - Rather than recast everything for 64 bit, just convert
  * pointers to longs, then cast to int.
  */
-	return (unsigned int)((unsigned long)xdrs->x_private - (unsigned long)xdrs->x_base);
+	return (u_int)((u_long)xdrs->x_private - (u_long)xdrs->x_base);
 }
 
 static bool_t
 xdrmem_setpos(xdrs, pos)
 	register XDR *xdrs;
-	unsigned int pos;
+	u_int pos;
 {
 	register caddr_t newaddr = xdrs->x_base + pos;
 	register caddr_t lastaddr = (char *) xdrs->x_private + xdrs->x_handy;
@@ -182,16 +182,16 @@ xdrmem_setpos(xdrs, pos)
 	return (TRUE);
 }
 
-static rpc_int32 *
+static rpc_inline_t *
 xdrmem_inline(xdrs, len)
 	register XDR *xdrs;
 	int len;
 {
-	rpc_int32 *buf = 0;
+	rpc_inline_t *buf = 0;
 
 	if (len >= 0 && xdrs->x_handy >= len) {
 		xdrs->x_handy -= len;
-		buf = (rpc_int32 *) xdrs->x_private;
+		buf = (rpc_inline_t *) xdrs->x_private;
 		xdrs->x_private = (char *)xdrs->x_private + len;
 	}
 	return (buf);

@@ -43,7 +43,7 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 static bool_t	xdralloc_putlong(XDR *, long *);
 static bool_t	xdralloc_putbytes(XDR *, caddr_t, unsigned int);
 static unsigned int	xdralloc_getpos(XDR *);
-static rpc_int32 *	xdralloc_inline(XDR *, int);
+static rpc_inline_t *	xdralloc_inline(XDR *, int);
 static void	xdralloc_destroy(XDR *);
 static bool_t	xdralloc_notsup_getlong(XDR *, long *);
 static bool_t	xdralloc_notsup_getbytes(XDR *, caddr_t, unsigned int);
@@ -102,7 +102,7 @@ static bool_t xdralloc_putlong(xdrs, lp)
    register XDR *xdrs;
    long *lp;
 {
-     int l = htonl((rpc_u_int32) *lp); /* XXX need bounds checking */
+     int l = htonl((uint32_t) *lp); /* XXX need bounds checking */
 
      /* XXX assumes sizeof(int)==4 */
      if (DynInsert((DynObject) xdrs->x_private,
@@ -149,9 +149,9 @@ static bool_t xdralloc_notsup_setpos(xdrs, lp)
 
 
 
-static rpc_int32 *xdralloc_inline(xdrs, len)
+static rpc_inline_t *xdralloc_inline(xdrs, len)
    register XDR *xdrs;
    int len;
 {
-     return (rpc_int32 *) 0;
+     return (rpc_inline_t *) 0;
 }

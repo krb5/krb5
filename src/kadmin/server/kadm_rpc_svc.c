@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <gssrpc/rpc.h>
+#include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
 #include <syslog.h>
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
@@ -17,7 +18,15 @@
 #include <arpa/inet.h>
 #endif
 #include "misc.h"
+#include "kadm5/server_internal.h"
 
+extern void *global_server_handle;
+
+static int check_rpcsec_auth(struct svc_req *);
+static int gss_to_krb5_name(struct svc_req *, krb5_context, gss_name_t, krb5_principal *, gss_buffer_t);
+
+void log_badauth(OM_uint32 major, OM_uint32 minor,
+		 struct sockaddr_in *addr, char *data);
 /*
  * Function: kadm_1
  * 
@@ -63,8 +72,8 @@ void kadm_1(rqstp, transp)
      char *(*local)();
 
      if (rqstp->rq_cred.oa_flavor != AUTH_GSSAPI &&
-	 rqstp->rq_cred.oa_flavor != AUTH_GSSAPI_COMPAT) {
-	  krb5_klog_syslog(LOG_ERR, "Authentication attempt failed: %s, invalid "
+	 !check_rpcsec_auth(rqstp)) {
+	  krb5_klog_syslog(LOG_ERR, "Authentication attempt failed: %s, "
 		 "RPC authentication flavor %d",
 		 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
 		 rqstp->rq_cred.oa_flavor);
@@ -226,4 +235,101 @@ void kadm_1(rqstp, transp)
 		 "continuing.");
      }
      return;
+}
+
+static int
+check_rpcsec_auth(struct svc_req *rqstp)
+{
+     gss_ctx_id_t ctx;
+     krb5_context kctx;
+     OM_uint32 maj_stat, min_stat;
+     gss_name_t name;
+     krb5_principal princ;
+     int ret, success;
+     krb5_data *c1, *c2, *realm;
+     gss_buffer_desc gss_str;
+     kadm5_server_handle_t handle;
+
+     success = 0;
+     handle = (kadm5_server_handle_t)global_server_handle;
+
+     if (rqstp->rq_cred.oa_flavor != RPCSEC_GSS)
+	  return 0;
+
+     ctx = rqstp->rq_svccred;
+
+     maj_stat = gss_inquire_context(&min_stat, ctx, NULL, &name,
+				    NULL, NULL, NULL, NULL, NULL);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  krb5_klog_syslog(LOG_ERR, "check_rpcsec_auth: "
+			   "failed inquire_context, stat=%u", maj_stat);
+	  log_badauth(maj_stat, min_stat,
+		      &rqstp->rq_xprt->xp_raddr, NULL);
+	  goto fail_name;
+     }
+
+     kctx = handle->context;
+     ret = gss_to_krb5_name(rqstp, kctx, name, &princ, &gss_str);
+     if (ret == 0)
+	  goto fail_name;
+
+     /*
+      * Since we accept with GSS_C_NO_NAME, the client can authenticate
+      * against the entire kdb.  Therefore, ensure that the service
+      * name is something reasonable.
+      */
+     if (krb5_princ_size(kctx, princ) != 2)
+	  goto fail_princ;
+
+     c1 = krb5_princ_component(kctx, princ, 0);
+     c2 = krb5_princ_component(kctx, princ, 1);
+     realm = krb5_princ_realm(kctx, princ);
+     if (strncmp(handle->params.realm, realm->data, realm->length) == 0
+	 && strncmp("kadmin", c1->data, c1->length) == 0) {
+
+	  if (strncmp("history", c2->data, c2->length) == 0)
+	       goto fail_princ;
+	  else
+	       success = 1;
+     }
+
+fail_princ:
+     if (!success) {
+	 krb5_klog_syslog(LOG_ERR, "bad service principal %.*s",
+			  gss_str.length, gss_str.value);
+     }
+     gss_release_buffer(&min_stat, &gss_str);
+     krb5_free_principal(kctx, princ);
+fail_name:
+     gss_release_name(&min_stat, &name);
+     return success;
+}
+
+static int
+gss_to_krb5_name(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
+		 krb5_principal *princ, gss_buffer_t gss_str)
+{
+     OM_uint32 status, minor_stat;
+     gss_OID gss_type;
+     char *str;
+     int success;
+
+     status = gss_display_name(&minor_stat, gss_name, gss_str, &gss_type);
+     if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name)) {
+	  krb5_klog_syslog(LOG_ERR,
+			   "gss_to_krb5_name: "
+			   "failed display_name status %d", status);
+	  log_badauth(status, minor_stat,
+		      &rqstp->rq_xprt->xp_raddr, NULL);
+	  return 0;
+     }
+     str = malloc(gss_str->length +1);
+     if (str == NULL)
+	  return 0;
+     *str = '\0';
+
+     strncat(str, gss_str->value, gss_str->length);
+     success = (krb5_parse_name(ctx, str, princ) == 0);
+     free(str);
+     return success;
 }

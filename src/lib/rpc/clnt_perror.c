@@ -60,7 +60,7 @@ static char *auth_errmsg(enum auth_stat);
 static char *buf;
 
 static char *
-_buf()
+get_buf()
 {
 	if (buf == NULL)
 		buf = (char *)malloc(BUFSIZ);
@@ -78,7 +78,7 @@ clnt_sperror(rpch, s)
 	struct rpc_err e;
 	void clnt_perrno();
 	char *err;
-	char *bufstart = _buf();
+	char *bufstart = get_buf();
 	char *str = bufstart;
 	char *strstart = str;
 
@@ -124,8 +124,8 @@ clnt_sperror(rpch, s)
 		if(str - bufstart + 33 + 22 < BUFSIZ)
 		    (void) sprintf(str,
 				   "; low version = %lu, high version = %lu", 
-				   (unsigned long) e.re_vers.low,
-				   (unsigned long) e.re_vers.high);
+				   (u_long) e.re_vers.low,
+				   (u_long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
@@ -153,8 +153,8 @@ clnt_sperror(rpch, s)
 		if(str - bufstart + 33 + 22 < BUFSIZ)
 		    (void) sprintf(str,
 				   "; low version = %lu, high version = %lu",
-				   (unsigned long) e.re_vers.low,
-				   (unsigned long) e.re_vers.high);
+				   (u_long) e.re_vers.low,
+				   (u_long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
@@ -163,8 +163,8 @@ clnt_sperror(rpch, s)
 		if(str - bufstart + 14 + 22 < BUFSIZ)
 		    (void) sprintf(str,
 				   "; s1 = %lu, s2 = %lu",
-				   (unsigned long) e.re_lb.s1,
-				   (unsigned long) e.re_lb.s2);
+				   (u_long) e.re_lb.s1,
+				   (u_long) e.re_lb.s2);
 		str += strlen(str);
 		break;
 	}
@@ -256,7 +256,7 @@ char *
 clnt_spcreateerror(s)
 	char *s;
 {
-	char *str = _buf();
+	char *str = get_buf();
 
 	if (str == 0)
 		return(0);

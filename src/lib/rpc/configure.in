@@ -3,11 +3,6 @@ CONFIG_RULES
 AC_CONFIG_SUBDIRS(unit-test)
 AC_CHECK_HEADERS(sys/uio.h)
 AC_TYPE_GETGROUPS
-dnl Arrange for types.hin to include stdlib.h
-AC_CHECK_HEADER(stdlib.h, [
-     STDLIB_INCLUDE="#include <stdlib.h>"],
-     [STDLIB_INCLUDE=""])
-AC_SUBST(STDLIB_INCLUDE) dnl
 ### Check where struct rpcent is declared.
 #
 # This is necessary to determine:
@@ -39,12 +34,107 @@ rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'],
 rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'])
 AC_SUBST(rpcent_define)
 
-AC_CHECK_SIZEOF(int)
-SIZEOF_INT=$ac_cv_sizeof_int
-AC_SUBST(SIZEOF_INT)
-AC_CHECK_SIZEOF(long)
-SIZEOF_LONG=$ac_cv_sizeof_long
-AC_SUBST(SIZEOF_LONG)
+AC_CHECK_HEADERS(sys/select.h sys/time.h unistd.h)
+if test $ac_cv_header_sys_select_h = yes; then
+  GSSRPC__SYS_SELECT_H='#include <sys/select.h>'
+else
+  GSSRPC__SYS_SELECT_H='/* #include <sys/select.h> */'
+fi
+AC_SUBST(GSSRPC__SYS_SELECT_H)
+if test $ac_cv_header_sys_time_h = yes; then
+  GSSRPC__SYS_TIME_H='#include <sys/time.h>'
+else
+  GSSRPC__SYS_TIME_H='/* #include <sys/time.h> */'
+fi
+AC_SUBST(GSSRPC__SYS_TIME_H)
+if test $ac_cv_header_unistd_h = yes; then
+  GSSRPC__UNISTD_H='#include <unistd.h>'
+else
+  GSSRPC__UNISTD_H='/* #include <unistd.h> */'
+fi
+AC_SUBST(GSSRPC__UNISTD_H)
+
+AC_CACHE_CHECK([for MAXHOSTNAMELEN in sys/param.h],
+  [krb5_cv_header_sys_param_h_maxhostnamelen],
+  [AC_TRY_COMPILE([#include <sys/param.h>],
+    [int i = MAXHOSTNAMELEN;],
+    [krb5_cv_headersys_param_h_maxhostnamelen=yes],
+    [krb5_cv_header_sys_param_h_maxhostnamelen=no])])
+AC_CACHE_CHECK([for MAXHOSTNAMELEN in netdb.h],
+  [krb5_cv_header_netdb_h_maxhostnamelen],
+  [AC_TRY_COMPILE([#include <netdb.h>],
+    [int i = MAXHOSTNAMELEN;],
+    [krb5_cv_header_netdb_h_maxhostnamelen=yes],
+    [krb5_cv_header_netdb_h_maxhostnamelen=no])])
+
+GSSRPC__SYS_PARAM_H='/* #include <sys/param.h> */'
+GSSRPC__NETDB_H='/* #include <netdb.h> */'
+if test $krb5_cv_header_sys_param_h_maxhostnamelen = yes; then
+  GSSRPC__SYS_PARAM_H='#include <sys/param.h>'
+else
+  if test $krb5_cv_header_netdb_h_maxhostnamelen = yes; then
+    GSSRPC__NETDB_H='#include <netdb.h>'
+  else
+    AC_MSG_WARN([can't find MAXHOSTNAMELEN definition; faking it])
+  fi
+fi
+AC_SUBST(GSSRPC__SYS_PARAM_H)
+AC_SUBST(GSSRPC__NETDB_H)
+
+AC_CACHE_CHECK([for int32_t in sys/types.h],
+  [krb5_cv_header_sys_types_h_int32_t],
+  [AC_TRY_COMPILE([#include <sys/types.h>],
+      [int32_t i = 0;],
+      [krb5_cv_header_sys_types_h_int32_t=yes],
+      [krb5_cv_header_sys_types_h_int32_t=no])])
+AC_CACHE_CHECK([for int32_t in stdint.h],
+  [krb5_cv_header_stdint_h_int32_t],
+  [AC_TRY_COMPILE([#include <stdint.h>],
+      [int32_t i = 0;],
+      [krb5_cv_header_stdint_h_int32_t=yes],
+      [krb5_cv_header_stdint_h_int32_t=no])])
+AC_CACHE_CHECK([for int32_t in inttypes.h],
+  [krb5_cv_header_inttypes_h_int32_t],
+  [AC_TRY_COMPILE([#include <inttypes.h>],
+      [int32_t i = 0;],
+      [krb5_cv_header_inttypes_h_int32_t=yes],
+      [krb5_cv_header_inttypes_h_int32_t=no])])
+GSSRPC__STDINT_H='/* #include <stdint.h> */'
+GSSRPC__INTTYPES_H='/* #include <inttypes.h> */'
+GSSRPC__FAKE_INT32='/* #undef GSSRPC__FAKE_INT32 */'
+if test $krb5_cv_header_sys_types_h_int32_t = yes; then
+  : # already included sys/types.h
+else
+  if test $krb5_cv_header_stdint_h_int32_t = yes; then
+    GSSRPC__STDINT_H='#include <stdint.h>'
+  else
+    if test $krb5_cv_header_inttypes_h_int_32_t = yes; then
+      GSSRPC__INTTYPES_H='#include <inttypes.h>'
+    else
+      AC_MSG_WARN([can't find a fixed-width 32-bit type anywhere; faking it])
+      GSSRPC__FAKE_INT32='#define GSSRPC__FAKE_INT32 1'
+    fi
+  fi
+fi
+AC_SUBST(GSSRPC__STDINT_H)
+AC_SUBST(GSSRPC__INTTYPES_H)
+AC_SUBST(GSSRPC__FAKE_INT32)
+
+AC_CACHE_CHECK([for BSD type aliases], [krb5_cv_type_bsdaliases],
+  [AC_TRY_COMPILE(
+    [#include <sys/types.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif],
+    [u_char c;
+u_int i;
+u_long l;], [krb5_cv_type_bsdaliases=yes], [krb5_cv_type_bsdaliases=no])])
+if test $krb5_cv_type_bsdaliases = yes; then
+  GSSRPC__BSD_TYPEALIASES='/* #undef GSSRPC__BSD_TYPEALIASES */'
+else
+  GSSRPC__BSD_TYPEALIASES='#define GSSRPC__BSD_TYPEALIASES 1'
+fi
+AC_SUBST(GSSRPC__BSD_TYPEALIASES)
 
 AC_CHECK_FUNCS(strerror)
 
