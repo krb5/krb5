@@ -1,3 +1,9 @@
+Mon Jan 22 18:14:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krcp.c: Use KRB5_STDARG_P.
+
+	* configure.in: Add KRB5_CHECK_PROTOS for prototyps definitions.
+
 Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krshd.c (recvauth): Verify checksum against command line and remote user.

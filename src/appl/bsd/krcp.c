@@ -132,10 +132,10 @@ struct buffer {
 #define	NULLBUF	(struct buffer *) 0
   
 #ifdef HAVE_STDARG_H
-int 	error KRB5_PROTOTYPE((char *fmt, ...));
+int 	error KRB5_STDARG_P((char *fmt, ...));
 #else
 /*VARARGS*/
-int	error KRB5_PROTOTYPE((char *, va_list));
+int	error KRB5_STDARG_P((char *, va_list));
 #endif
 
 #define	ga()	 	(void) des_write(rem, "", 1)
@@ -1127,6 +1127,7 @@ struct buffer *allocbuf(bp, fd, blksize)
 
 
 
+int
 #ifdef HAVE_STDARG_H
 error(char *fmt, ...)
 #else
