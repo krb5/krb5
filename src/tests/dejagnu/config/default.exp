@@ -609,7 +609,7 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Start up the kerberos daemon
-    spawn $KRB5KDC -r KRBTEST.COM -p 3088 -d $tmppwd/db -m -n
+    spawn $KRB5KDC -p 3088 -d $tmppwd/db -m -n -r KRBTEST.COM
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
     expect {
