@@ -66,7 +66,7 @@ char *argv[];
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "n:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
