@@ -1,3 +1,7 @@
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdc5_hammer.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
 
 Wed Jul 12 12:31:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Remove V5_USE_SHARED_LIB

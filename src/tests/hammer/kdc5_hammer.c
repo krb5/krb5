@@ -87,14 +87,13 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype]\n");
+    fprintf(stderr, "\t [-D depth] [-k keytype]\n");
     fprintf(stderr, "\t [-P preauth type] [-R repeat_count]\n");
 
     exit(status);
 }
 
 static krb5_preauthtype * patype = NULL, patypedata[2] = { 0, -1 };
-static krb5_enctype etype = 0xffff;
 static krb5_context test_context;
 static krb5_keytype keytype;
 
@@ -177,9 +176,6 @@ main(argc, argv)
 	    keytype = atoi(optarg);
 	    keytypedone++;
 	    break;
-	case 'e':
-	    etype = atoi(optarg);
-	    break;
 	case 'P':
 	    patypedata[0] = atoi(optarg);
 	    patype = patypedata;
@@ -221,15 +217,6 @@ main(argc, argv)
       com_err(prog, KRB5_PROG_KEYTYPE_NOSUPP,
 	      "while setting up keytype %d", keytype);
       exit(1);
-    }
-
-    if (etype == 0xffff)
-	etype = krb5_keytype_array[keytype]->system->proto_enctype;
-
-    if (!valid_etype(etype)) {
-	com_err(prog, KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", etype);
-	exit(1);
     }
 
     if (ccache == NULL) {
