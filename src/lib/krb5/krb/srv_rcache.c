@@ -32,6 +32,8 @@ static char rcsid_srv_rcache_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <ctype.h>
+#include <stdio.h>
 
 krb5_error_code
 krb5_get_server_rcache(piece, rcptr)

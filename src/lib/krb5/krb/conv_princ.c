@@ -33,6 +33,7 @@
 
 #include <krb5/krb5.h>
 #include <string.h>
+#include <ctype.h>
 
 /* The maximum sizes for V4 aname, realm, sname, and instance +1 */
 /* Taken from krb.h */

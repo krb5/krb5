@@ -106,7 +106,9 @@ krb5_compat_recvauth(/* IN */
 	int	len, length;
 	krb5_int32	retval;
 	int		fd = *( (int *) fdp);
+#ifdef KRB5_KRB4_COMPAT
 	KTEXT		v4_ticket;	 /* storage for client's ticket */
+#endif
 		
 	if ((retval = krb5_net_read(fd, vers.vers, 4)) != 4)
 		return((retval < 0) ? errno : ECONNABORTED);
