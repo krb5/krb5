@@ -7,7 +7,7 @@
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * Definition of default config file pathname.
+ * Definition of default configuration parameters.
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -20,4 +20,5 @@ static char rcsid_config_fn_c [] =
 
 
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
+char *krb5_kdc_udp_portname = KDC_PORTNAME;
 
