@@ -1,3 +1,10 @@
+Mon Jan  9 21:48:54 1995  Theodore Y. Ts'o  (tytso@dcl)
+    
+    	* kcmd.c, krlogin.c, krcp.c: Always include fcntl.h, and never
+		sys/fcntl.h.
+
+	* krshd.c: Always define the Kerberos V4 data structures.
+
 Tue Jan  3 16:54:02 1995  Richard Basch  (probe@tardis)
 
 	* krshd.c

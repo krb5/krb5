@@ -31,11 +31,6 @@
 #define _TYPES_
 #endif
 #include <fcntl.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
-
-     
      
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024

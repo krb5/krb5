@@ -36,9 +36,7 @@ char copyright[] =
 #define _TYPES_
 #endif
 #include <sys/file.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>

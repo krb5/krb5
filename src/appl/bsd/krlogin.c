@@ -50,9 +50,6 @@ char copyright[] =
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
 
 #include <netinet/in.h>
 
