@@ -1,3 +1,8 @@
+Mon Mar 30 16:48:17 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc5_hammer.c (usage): Change usage to refelect reality
+	Add parenthesis around assignements in conditionals.
+
 Wed Feb 18 16:29:34 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
