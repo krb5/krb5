@@ -8,8 +8,7 @@
 #include    <kadm5/adb.h>
 #include    "import_err.h"
 #include    "kdb5_util.h"
-
-char *nstrtok();
+#include    "nstrtok.h"
 
 #define LINESIZE	32768 /* XXX */
 #define PLURAL(count)	(((count) == 1) ? error_message(IMPORT_SINGLE_RECORD) : error_message(IMPORT_PLURAL_RECORDS))

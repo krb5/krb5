@@ -1,7 +1,6 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Id$
  * $Source$
  */
 
@@ -30,10 +29,6 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include "string_table.h"
 
@@ -146,7 +141,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
  *
  * Requires: both strings are null-terminated
  */
-char *build_name_with_realm(char *name, char *realm)
+static char *build_name_with_realm(char *name, char *realm)
 {
      char *n;
 

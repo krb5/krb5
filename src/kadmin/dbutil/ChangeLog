@@ -1,3 +1,16 @@
+2001-06-29  Ezra Peisach  <epeisach@mit.edu>
+
+	* nstrtok.h: New file with prototype for nstrtok.
+
+	* ovload.c: Include nstrtok.h
+
+	* strtok.c: Include nstrtok.h for prototype. Declare delim as
+	const char * argument. Delete rcsid. 
+
+	* string_table.c: Delete rcsid.
+
+	* kadm5_create.c (build_name_with_realm): Declare static.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb5_util.c (main): Change optarg to koptarg to prevent

@@ -1,25 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$
- * 
- * $Log$
- * Revision 1.1  1996/08/01 18:39:54  bjaspan
- * 	* Makefile.in, Makefile.ov, configure.in, dump.c: add support for
- *         dump/load of OV*Secure-compatible format.
- *
- * Revision 1.1.2.1  1996/06/20  21:49:01  marc
- * File added to the repository on a branch
- *
- * Revision 1.1  1993/11/14  23:51:23  shanzer
- * Initial revision
- *
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 
 /*
  * Copyright (c) 1988 Regents of the University of California.
@@ -40,12 +22,9 @@ static char *rcsid = "$Header$";
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)strtok.c	5.7 (Berkeley) 6/1/90";
-#endif /* LIBC_SCCS and not lint */
-
 #include <stddef.h>
 #include <string.h>
+#include "nstrtok.h"
 
 /*
  * Function: nstrtok
@@ -71,9 +50,10 @@ static char sccsid[] = "@(#)strtok.c	5.7 (Berkeley) 6/1/90";
 
 char *
 nstrtok(s, delim)
-	register char *s, *delim;
+	register char *s;
+	register const char *delim;
 {
-	register char *spanp;
+	register const char *spanp;
 	register int c, sc;
 	char *tok;
 	static char *last;
