@@ -34,6 +34,22 @@ AC_REQUIRE([AC__CONFIG_AUX])
 changequote(<<<,>>>)dnl
 SUBDIRS="$1"
 if [ -z "${norecursion}" ] ; then
+	recurse_args=
+	recur_state=
+	for recur_arg in ${configure_args} ; do
+		if test -n "${recur_state}" ; then
+			case "${recur_arg}" in
+			  -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
+			    recur_state="skip"
+			    ;;
+			  -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
+			    ;;
+			*) recurse_args="${recurse_args} ${recur_arg}" ;;
+			esac
+		else
+			recur_state=
+		fi
+	done
 	for configdir in $1 ; do
 
 		if [ -d ${srcdir}/${configdir} ] ; then
@@ -81,10 +97,7 @@ if [ -z "${norecursion}" ] ; then
 
 ### The recursion line is here.
 			if [ ! -z "${recprog}" ] ; then
-#				if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
-#					${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-#					${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
-				if eval ${config_shell} ${recprog} "<<<$>>>@" ; then
+				if eval ${config_shell} ${recprog} "${recurse_args}" ${srcdiroption}; then
 					true
 				else
 					echo Configure in `pwd` failed, exiting. 1>&2
