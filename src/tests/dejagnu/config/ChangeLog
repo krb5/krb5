@@ -1,3 +1,10 @@
+2001-08-06    <epeisach@mit.edu>
+
+	* default.exp (setup_root_shell): Also recognize "nection reset by
+	peer" as a failure to get a root shell. This happens if
+	tcp_wrappers are in use in inetd.conf, but rlogind is not prsent
+	on the machine.
+
 2001-06-22  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Use the interface variable $TMPDIR to allow the

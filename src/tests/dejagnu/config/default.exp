@@ -1654,7 +1654,7 @@ proc setup_root_shell { testname } {
     set rlogin_spawn_id $spawn_id
     set rlogin_pid [exp_pid]
     expect {
-	-re "word:|erberos rlogin failed|ection refused" {
+	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
 	    note "$testname test requires ability to rlogin as root"
 	    unsupported "$testname"
 	    stop_root_shell
