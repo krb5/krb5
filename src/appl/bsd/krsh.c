@@ -325,8 +325,8 @@ main(argc, argv0)
 	sp->s_port = htons(544);
 #else 
 	fprintf(stderr, "rsh: shell/tcp: unknown service\n");
-#endif /* KERBEROS */
 	exit(1);
+#endif /* KERBEROS */
       }
 
       debug_port = sp->s_port;
