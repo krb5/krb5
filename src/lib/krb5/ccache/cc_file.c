@@ -579,11 +579,7 @@ krb5_fcc_read_data(krb5_context context, krb5_ccache id, krb5_data *data)
 	return KRB5_OK;
      }
 
-#ifndef USE_STDIO
-     data->data = (char *) malloc((unsigned) data->length+1);
-#else
-     data->data = (char *) malloc((unsigned int) data->length+1);
-#endif
+     data->data = (char *) malloc(data->length+1);
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -616,11 +612,11 @@ krb5_fcc_read_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
      CHECK(kret);
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
 	  return KRB5_CC_NOMEM;
-#ifndef USE_STDIO
-     addr->length = (int) int32;
-#else
      addr->length = int32;
-#endif
+     /* Length field is "unsigned int", which may be smaller than 32
+        bits.  */
+     if (addr->length != int32)
+	 return KRB5_CC_NOMEM;	/* XXX */
 
      if (addr->length == 0)
 	     return KRB5_OK;
@@ -645,9 +641,7 @@ krb5_fcc_read_int32(krb5_context context, krb5_ccache id, krb5_int32 *i)
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     unsigned char buf[4];
-#ifndef USE_STDIO
     krb5_int32 val;
-#endif
 
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2)) 
@@ -656,15 +650,11 @@ krb5_fcc_read_int32(krb5_context context, krb5_ccache id, krb5_int32 *i)
 	retval = krb5_fcc_read(context, id, buf, 4);
 	if (retval)
 	    return retval;
-#ifndef USE_STDIO
         val = buf[0];
         val = (val << 8) | buf[1];
         val = (val << 8) | buf[2];
         val = (val << 8) | buf[3];
         *i = val;
-#else
-        *i = (((((buf[0] << 8) + buf[1]) << 8 ) + buf[2]) << 8) + buf[3];
-#endif
 	return 0;
     }
 }
@@ -789,11 +779,11 @@ krb5_fcc_read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
     CHECK(kret);
     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
           return KRB5_CC_NOMEM;
-#ifndef USE_STDIO
-    a->length = (int) int32;
-#else
     a->length = int32;
-#endif
+    /* Value could have gotten truncated if int is smaller than 32
+       bits.  */
+    if (a->length != int32)
+	return KRB5_CC_NOMEM;	/* XXX */
     
     if (a->length == 0 )
 	    return KRB5_OK;
@@ -1143,7 +1133,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 #ifndef USE_STDIO
     krb5_ui_2 fcc_fvno;
 #else
-    char fvno_bytes[2];         /* In nework byte order */
+    char fvno_bytes[2];         /* In network byte order */
 #endif
     krb5_ui_2 fcc_flen;
     krb5_ui_2 fcc_tag;
@@ -1819,9 +1809,6 @@ static krb5_error_code KRB5_CALLCONV
 krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor, krb5_creds *creds)
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
-#ifdef USE_STDIO
-     int ret;
-#endif
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
      krb5_int32 int32;
@@ -1846,20 +1833,15 @@ krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
      fcursor = (krb5_fcc_cursor *) *cursor;
 
 #ifndef USE_STDIO
-     kret = lseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, SEEK_SET);
-     if (kret < 0) {
-	 kret = krb5_fcc_interpret(context, errno);
-	 MAYBE_CLOSE(context, id, kret);
-	 return kret;
-     }
+     kret = (lseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, SEEK_SET) == (off_t) -1);
 #else
-     ret = fseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, 0);
-     if (ret < 0) {
+     kret = (fseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, 0) < 0);
+#endif
+     if (kret) {
 	 kret = krb5_fcc_interpret(context, errno);
 	 MAYBE_CLOSE(context, id, kret);
 	 return kret;
      }
-#endif
 
      kret = krb5_fcc_read_principal(context, id, &creds->client);
      TCHECK(kret);

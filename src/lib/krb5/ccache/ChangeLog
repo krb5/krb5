@@ -1,3 +1,13 @@
+2004-06-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (krb5_fcc_read_data): Combine stdio and posix versions
+	of code with gratuitous minor differences.
+	(krb5_fcc_read_int32, krb5_fcc_next_cred): Likewise.
+	(krb5_fcc_read_addr): Likewise.  Check that filled-in length field
+	matches the value we tried to store (i.e., that type conversion
+	didn't throw away information).
+	(krb5_fcc_read_authdatum): Likewise.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (my_fopen): Function deleted.
