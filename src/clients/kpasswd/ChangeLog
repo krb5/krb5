@@ -1,3 +1,7 @@
+2000-07-29  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpasswd.c (main): Warnings cleanup.
+
 2000-03-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* kpasswd.c (main): Remove unused variables.
