@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 1990 Dennis Ferguson.  All rights reserved.
+ *
+ * Commercial use is permitted only if products which are derived from
+ * or include this software are made available for purchase and/or use
+ * in Canada.  Otherwise, redistribution and use in source and binary
+ * forms are permitted.
+ */
+
+Sorry about the poor quality of installation instructions.  Included
+here are replacements for the DES portions of Eric Young's kerberos
+DES library replacement.  To use this you will need his distribution.
+Untar the latter and:
+
+(1) Copy all .c and .h files into the distribution directory.  This will
+    overwrite some files and add others.
+
+(2) Apply the patch included here to set_key.c in the distribution directory.
+
+(3) Edit the Imakefile (or the Makefile) to include the following files
+    on the SRCS= line:
+
+	des_tables.c ecb_buffer.c make_sched.c
+
+    Add the following files to the OBJS= line:
+
+	des_tables.o ecb_buffer.o make_sched.o
+
+    Add the following file to the CODE= line:
+
+	des_tables.h
+
+Recompile and you're done.
+
+The salient differences between this DES and Eric Young's are as follows:
+
+(1) There are no dependencies on byte ordering, the ability to do
+    unaligned loads and stores, or any other machine dependencies
+    that I know of.  There are no #ifdef's.  The code could probably
+    be made faster by adding such things, but not enough to be worth
+    it.
+
+(2) Combined S and P tables are used for the inner loop of the cipher
+    routine and the E expansion is computed on the fly, like Eric
+    Young's code, but the computation is reordered from the standard
+    to save instructions.
+
+(3) The initial and final permutations are table driven, and take
+    about the same amount of work as a single round of the inner
+    loop (i.e. only about 12% of the work done for an ecb encryption
+    is spent in the IP and FP code).
+
+(4) Since NTP (for which this DES was originally implemented) uses
+    lots of keys to encrypt small things, the key permutation code
+    has been well worked over and is quite speedy (the amount of
+    work required to permute a key is on the order of that required
+    to do a single ECB encryption, more or less).
+
+(5) Since the code required to do an ECB encryption using the tables
+    is actually fairly compact, even with lots of inlining, it was
+    implemented as a macro and is expanded in situ where needed.
+
+On the one machine I ran a comparison on this code ran 80% faster than
+Eric's, compiled into a slightly smaller space, and did pass destest.
+I suspect this stuff is also faster, and not a lot larger, than the
+library MIT doesn't export with kerberos.  You mileage may vary.
+
+The silly copyright was a (probably ineffective) afterthought.  If it
+really inconveniences you give me a call.

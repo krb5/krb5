@@ -1,0 +1,33 @@
+Changes between CodeWarrior Pro 4 and MITAthena MSL project:
+
+ - “MSL C.PPC DLL.mcp” renamed to “MIT C.PPC DLL.prj”
+ - This document added to the project
+ - “MSL Runtime PPC.DLL” removed from the project
+ - Changed settings in “MSL C.PPC DLL” target
+ - Added “MIT C.PPC DLL.debug” target
+ 
+Changes to “MSL C.PPC DLL” target:
+
+ - Added “MIT RuntimeLib.PPC”
+ - Name set to “MIT C.PPC DLL”
+ - Output directory changed to “{Project ƒ}::bin:”
+ - Added “{Compiler ƒ}:Metrowerks Standard Library:MSL C:” to user paths
+ 	••• Important: this path must come after “{Project ƒ}::” so that we can override
+ 	••• original MSL with our own sources
+ - Turned on “Activate Browser”
+ - Changed output file name to “MIT CLib.PPC”
+ - Changed output file creator to '????'
+ - Global optimizations turned off (because of reports of optimizer bugs)
+ - Changed PPC PEF fragment name to “MIT_•MITCLib”
+ 
+Configuration of the “MIT C.PPC DLL.debug” target:
+
+ - Added “MIT RuntimeLib.PPC.debug”
+ - Started by cloning “MIT C.PPC DLL” target after making the above modifications
+ - Changed output file name to “MIT CLib.PPC.debug”
+ - Instruction scheduling turned off
+ - Global optimization turned off
+ - Peephole optimization turned off
+ - Global optimizations turned off (because of reports of optimizer bugs)
+ - Generating SYM files turned on
+ - Changed PPC PEF fragment name to “MIT_•MITCLib.debug”
