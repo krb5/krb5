@@ -18,11 +18,15 @@ static char rcsid_fetch_mkey_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
+#include <krb5/kdb5_err.h>
 #include <krb5/kdb.h>
 #include <errno.h>
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/ext-proto.h>
+#include "kdbint.h"
+#include <sys/param.h>			/* XXX for MAXPATHLEN */
 
 /* these are available to other funcs, and the pointers may be reassigned */
 
@@ -43,6 +47,10 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
  *
  */
 
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 krb5_error_code
 krb5_db_fetch_mkey(DECLARG(krb5_principal, mname),
 		   DECLARG(krb5_encrypt_block *, eblock),
@@ -57,6 +65,7 @@ OLDDECLARG(krb5_keyblock *,key)
     char password[BUFSIZ];
     krb5_data pwd;
     int size = sizeof(password);
+
 
     if (fromkeyboard) {
 	if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
@@ -76,6 +85,48 @@ OLDDECLARG(krb5_keyblock *,key)
 
     } else {
 	/* from somewhere else */
-	return EOPNOTSUPP;		/* XXX */
+	krb5_keytype keytype;
+	char defkeyfile[MAXPATHLEN+1];
+	krb5_data *realm = krb5_princ_realm(mname);
+	FILE *kf;
+
+	retval = 0;
+	(void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
+	(void) strncat(defkeyfile, realm->data,
+		       min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
+			   realm->length));
+	(void) strcat(defkeyfile, "");
+	
+	if (!(kf = fopen(defkeyfile, "r")))
+	    return KRB5_KDB_CANTREAD_STORED;
+	if (fread((krb5_pointer) &keytype, sizeof(keytype), 1, kf) != 1) {
+	    retval = KRB5_KDB_CANTREAD_STORED;
+	    goto errout;
+	}
+	if (keytype != key->keytype) {
+	    retval = KRB5_KDB_BADSTORED_MKEY;
+	    goto errout;
+	}
+	if (fread((krb5_pointer) &key->length,
+		  sizeof(key->length), 1, kf) != 1) {
+	    retval = KRB5_KDB_CANTREAD_STORED;
+	    goto errout;
+	}
+	if (!key->length || key->length < 0) {
+	    retval = KRB5_KDB_BADSTORED_MKEY;
+	    goto errout;
+	}
+	if (!(key->contents = (krb5_octet *)malloc(key->length))) {
+	    retval = ENOMEM;
+	    goto errout;
+	}
+	if (fread((krb5_pointer) key->contents,
+		  sizeof(key->contents[0]), key->length, kf) != key->length)
+	    retval = KRB5_KDB_CANTREAD_STORED;
+	else
+	    retval = 0;
+    errout:
+	(void) fclose(kf);
+	return retval;
     }
 }
