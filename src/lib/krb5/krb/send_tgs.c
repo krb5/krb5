@@ -170,7 +170,7 @@ OLDDECLARG(krb5_response *,rep)
     }
 
     if (!(ap_checksum.contents = (krb5_octet *)
-	  malloc(krb5_checsum_size(sumtype)))) {
+	  malloc(krb5_checksum_size(sumtype)))) {
 	if (sec_ticket)
 	    krb5_free_ticket(sec_ticket);
 	krb5_free_data(scratch);
