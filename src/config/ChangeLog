@@ -1,3 +1,9 @@
+Wed Apr 15 18:01:39 1998  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (CRYPTO_DEPLIB):
+	(KRB5_BASE_LIBS):
+	(KRB4COMPAT_LIBS): Rename; libcrypto -> libk5crypto.
+
 Sun Mar  1 22:25:34 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* pre.in: Define AUTOCONF and CONFIG_RELTOPDIR from the autoconf

@@ -207,7 +207,7 @@ GSS_DEPLIB	= $(TOPLIBD)/libgssapi_krb5$(DEPLIBEXT)
 KRB4_DEPLIB	= @KRB4_DEPLIB@		# $(TOPLIBD)/libkrb4$(DEPLIBEXT)
 DES425_DEPLIB	= @DES425_DEPLIB@	# $(TOPLIBD)/libdes425$(DEPLIBEXT)
 KRB5_DEPLIB	= $(TOPLIBD)/libkrb5$(DEPLIBEXT)
-CRYPTO_DEPLIB	= $(TOPLIBD)/libcrypto$(DEPLIBEXT)
+CRYPTO_DEPLIB	= $(TOPLIBD)/libk5crypto$(DEPLIBEXT)
 COM_ERR_DEPLIB	= $(TOPLIBD)/libcom_err$(DEPLIBEXT)
 DYN_DEPLIB	= $(TOPLIBD)/libdyn$(DEPLIBEXT)
 
@@ -246,8 +246,8 @@ DES425_LIB	= @DES425_LIB@
 # HESIOD_LIBS is -lhesiod...
 HESIOD_LIBS	= @HESIOD_LIBS@
 
-KRB5_BASE_LIBS	= -lkrb5 -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
-KRB4COMPAT_LIBS	= $(KRB4_LIB) -lkrb5 $(DES425_LIB) -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
+KRB5_BASE_LIBS	= -lkrb5 -lk5crypto -lcom_err $(GEN_LIB) $(LIBS)
+KRB4COMPAT_LIBS	= $(KRB4_LIB) -lkrb5 $(DES425_LIB) -lk5crypto -lcom_err $(GEN_LIB) $(LIBS)
 KDB5_LIBS	= $(KDB5_LIB) $(DB_LIB)
 GSS_LIBS	= -lgssapi_krb5
 GSSRPC_LIBS	= -lgssrpc -ldyn $(GSS_LIBS)
