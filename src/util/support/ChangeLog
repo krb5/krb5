@@ -1,3 +1,7 @@
+2004-06-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkrb5support.exports: Drop krb5int_foreach_localaddr.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Renamed from LIB.
