@@ -1,0 +1,4 @@
+Thu Sep 15 17:38:51 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_hammer.c (get_server_key): index() -> strchr()
+

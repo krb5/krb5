@@ -262,7 +262,7 @@ OLDDECLARG(krb5_keyblock **,key)
 
   /* The kdb5_create does not include realm names in the password ... 
      this is ugly */
-  at = index(princ_str, '@');
+  at = strchr(princ_str, '@');
   if (at) *at = '\0';
 
   pwd.data = princ_str;
