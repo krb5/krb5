@@ -222,8 +222,6 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 		error_message(kret));
 	goto cleanup;
     }
-    mencb_init = 1;
-    mkeyb_init = 1;
 
     /* Verify the master key */
     if (kret = krb5_db_verify_master_key(kcontext,
@@ -242,6 +240,8 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	fprintf(stderr, key_key_pp_fmt, programname, error_message(kret));
 	goto leave;
     }
+    mencb_init = 1;
+    mkeyb_init = 1;
 
     /* Now initialize the random key */
     kret = krb5_init_random_key(kcontext,
