@@ -772,8 +772,15 @@ service principal, but the sets of operations that can be performed by
 a request authenticated to each service are different.  In particular,
 only the functions chpass_principal, randkey_principal, get_principal,
 and get_policy can be performed by a request authenticated to the
-kadmin/changepw service.  The function semantics descriptions below
-give the precise details.
+kadmin/changepw service, and they can only be performed when the
+target principal of the operation is the same as the authenticated
+client principal; the function semantics descriptions below give the
+precise details.  This means that administrative operations can only
+be performed when authenticated to the kadmin/admin service.  The
+reason for this distinction is that tickets for kadmin/changepw can be
+acquired with an expired password, and the KADM system does not want
+to allow an administrator with an expired password to perform
+administrative operations on arbitrary principals.
 
 Each Admin API operation authenticated to the kadmin/admin service
 requires a specific authorization to run.  This version uses a simple
