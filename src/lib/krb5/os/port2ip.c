@@ -24,14 +24,9 @@
  * Take an ADDRPORT address and split into IP addr & port.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 #ifdef KRB5_USE_INET
-
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
 #include "os-proto.h"
 #include <netinet/in.h>
 

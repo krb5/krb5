@@ -24,10 +24,7 @@
  * Definition of default configuration parameters.
  */
 
-
-#include <krb5/osconf.h>
-#include <krb5/config.h>
-
+#include "k5-int.h"
 
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
 char *krb5_trans_file = DEFAULT_TRANS_FILENAME;

@@ -24,17 +24,7 @@
  * krb5_aname_to_localname()
  */
 
-
-#include <krb5/osconf.h>
-
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-
-#include <krb5/sysincl.h>
-#ifdef USE_DBM_LNAME
-#include <krb5/dbm.h>
-#endif
+#include "k5-int.h"
 
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))

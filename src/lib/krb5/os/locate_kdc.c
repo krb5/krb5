@@ -24,14 +24,8 @@
  * get socket addresses for KDC.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include <stdio.h>
-#include <krb5/los-proto.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #ifdef KRB5_USE_INET

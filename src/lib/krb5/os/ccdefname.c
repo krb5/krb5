@@ -24,12 +24,8 @@
  * Return default cred. cache name.
  */
 
-
-#include <krb5/krb5.h>
-
+#include "k5-int.h"
 #include <stdio.h>
-#include <krb5/ext-proto.h>
-#include <krb5/osconf.h>
 
 char *krb5_cc_default_name(context)
     krb5_context context;

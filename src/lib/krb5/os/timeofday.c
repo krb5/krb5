@@ -28,9 +28,7 @@
 #include <time.h>
 #include <stdio.h>			/* needed for libos-proto.h */
 
-#include <krb5/config.h>
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 
 #ifdef POSIX_TYPES
 #define timetype time_t

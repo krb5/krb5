@@ -33,14 +33,9 @@
 static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/libos.h>
-#include <krb5/los-proto.h>
-
+#include "k5-int.h"
 #include <sys/file.h>
-
 #include <sys/types.h>
-#include <krb5/ext-proto.h>
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
 #endif

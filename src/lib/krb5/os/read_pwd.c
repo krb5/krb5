@@ -24,9 +24,7 @@
  * libos: krb5_read_password for BSD 4.3
  */
 
-
-#include <krb5/krb5.h>
-
+#include "k5-int.h"
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -35,8 +33,6 @@
 #ifdef sun
 #include <sgtty.h>
 #endif
-
-#include <krb5/ext-proto.h>
 
 /* POSIX_* are auto-magically defined in <krb5/config.h> at source
    configuration time. */

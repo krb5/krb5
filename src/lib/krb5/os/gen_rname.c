@@ -25,12 +25,7 @@
  * a replay cache tag string.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 #include "os-proto.h"
 #ifdef KRB5_USE_INET
 #include <sys/types.h>

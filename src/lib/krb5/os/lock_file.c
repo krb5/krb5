@@ -24,14 +24,10 @@
  * libos: krb5_lock_file routine
  */
 
-
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-          
-#include <krb5/krb5.h>
-#include <krb5/libos.h>
-
+#include "k5-int.h"
 #include <stdio.h>
 
 #ifdef POSIX_FILE_LOCKS
@@ -48,7 +44,6 @@
 #endif
 
 #include <sys/types.h>
-#include <krb5/ext-proto.h>
 
 extern int errno;
 

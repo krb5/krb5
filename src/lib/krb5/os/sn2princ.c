@@ -25,10 +25,7 @@
  * form.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 #include <netdb.h>
 #include <ctype.h>
 #include <sys/param.h>

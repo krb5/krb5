@@ -24,15 +24,8 @@
  * Write a message to the network
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-#include <com_err.h>
+#include "k5-int.h"
 #include <errno.h>
-
-#include <stdio.h>
-#include <string.h>
 #include <netinet/in.h>
 
 krb5_error_code

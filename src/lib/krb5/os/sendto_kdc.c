@@ -25,16 +25,11 @@
  * as necessary.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/sysincl.h>
+#include "k5-int.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-
-#include <krb5/los-proto.h>
 #include "os-proto.h"
 
 #ifdef _AIX
@@ -50,9 +45,7 @@
  *
  * The storage for 'reply' is allocated and should be freed by the caller
  * when finished.
- *
  */
-
 
 extern int krb5_max_dgram_size;
 extern int krb5_max_skdc_timeout;

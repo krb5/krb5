@@ -1,3 +1,7 @@
+Tue Feb 28 01:07:37 1995  John Gilmore  (gnu at toad.com)
+
+	* *.c:  Avoid <krb5/...> includes.
+
 Fri Feb  3 08:24:18 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* gmt_mktime.c (gmt_mktime): Don't double count the leap day in a

@@ -24,12 +24,8 @@
  * krb5_free_host_realm()
  */
 
-
-#include <krb5/krb5.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include <stdio.h>
-#include <krb5/los-proto.h>
 
 /*
  Frees the storage taken by a realm list returned by krb5_get_local_realm.

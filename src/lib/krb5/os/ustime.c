@@ -24,11 +24,7 @@
  * krb5_mstimeofday for BSD 4.3
  */
 
-
-#include <krb5/config.h>
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/sysincl.h>
+#include "k5-int.h"
 
 extern int errno;
 
