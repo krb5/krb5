@@ -1336,6 +1336,69 @@ proc setup_kerberos_db { standalone } {
     return 1
 }
 
+proc start_tail { fname spawnid_var pid_var which } {
+    upvar $spawnid_var spawnid
+    upvar $pid_var pid
+    global timeout
+
+    set f [open $fname a]
+
+    spawn tail -f $fname
+    set spawnid $spawn_id
+    set pid [exp_pid]
+
+    set markstr "===MARK $pid [clock format [clock seconds]] ==="
+    puts $f $markstr
+    flush $f
+
+    set p 0
+    set otimeout $timeout
+    set timeout 1
+    set ok 0
+    while { $ok == 0 && $p < 3 } {
+	expect {
+	    -i $spawn_id
+	    -ex "$markstr\r\n" { set ok 1 }
+	    -re "\[^\r\n\]*\r\n" { exp_continue }
+	    timeout {
+		# Some versions of GNU tail had a race condition where
+		# the first batch of data would be read from the end
+		# of the file, and then there was a brief window
+		# before calling stat and recording the size of the
+		# file.  If the marker is written during that window,
+		# then yet another file modification is needed to get
+		# the first one noticed.
+		if { $p < 3 } {
+		    verbose -log "no tail output yet, prodding with a blank line"
+		    incr p
+		    puts $f ""
+		    flush $f
+		    exp_continue
+		} else {
+		    close $f
+		    verbose -log "tail $fname output:"
+		    verbose -log [exec tail $fname]
+		    if {$standalone} {
+			verbose -log "tail -f timed out ($timeout sec) looking for mark in $which log"
+			fail "$which"
+		    } else {
+			perror "$which tail -f timed out ($timeout sec) looking for mark in $which log"
+		    }
+		    stop_kerberos_daemons
+		    exec kill $pid
+		    expect -i $spawn_id eof
+		    wait -i $spawn_id
+		    set timeout $otimeout
+		    return 0
+		}
+	    }
+	}
+    }
+    close $f
+    set timeout $otimeout
+    return 1
+}
+
 # start_kerberos_daemons
 # A procedure to build a Kerberos database and start up the kerberos
 # and kadmind daemons.  This sets the global variables kdc_pid,
@@ -1379,39 +1442,8 @@ proc start_kerberos_daemons { standalone } {
     set kdc_lfile $tmppwd/kdc.log
     set kadmind_lfile $tmppwd/kadmind5.log
 
-    if ![file exists $kdc_lfile] then {
-	catch [touch $kdc_lfile]
-    }
-
-    spawn tail -f $kdc_lfile
-    set tailf_spawn_id $spawn_id
-    set tailf_pid [exp_pid]
-
-    set markstr "===MARK $tailf_pid [clock format [clock seconds]] ==="
-    sleep 2
-    set f [open $kdc_lfile a]
-    puts $f $markstr
-    close $f
-
-    expect {
-	-i $tailf_spawn_id
-	-ex "$markstr\r\n" { }
-	-re "\[^\r\n\]*\r\n" { exp_continue }
-	timeout {
-	    verbose -log "tail $kdc_lfile output:"
-	    verbose -log [exec tail $kdc_lfile]
-	    if {$standalone} {
-		verbose -log "tail -f timed out ($timeout sec) looking for mark in kdc log"
-		fail "krb5kdc"
-	    } else {
-		perror "krbkdc tail -f timed out ($timeout sec) looking for mark in kdc log"
-	    }
-	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
-	    return 0
-	}
+    if ![start_tail $kdc_lfile tailf_spawn_id tailf_pid krb5kdc] {
+	return 0
     }
 
     envstack_push
@@ -1476,37 +1508,8 @@ proc start_kerberos_daemons { standalone } {
     }
     catch "unset env(KRB5_KTNAME)"
 
-    if ![file exists $kadmind_lfile] then {
-	catch [touch $kadmind_lfile]
-    }
-
-    spawn tail -f $kadmind_lfile
-    set tailf_spawn_id $spawn_id
-    set tailf_pid [exp_pid]
-
-    set markstr "===MARK $tailf_pid [clock format [clock seconds]] ==="
-    sleep 2
-    set f [open $kadmind_lfile a]
-    puts $f $markstr
-    close $f
-
-    expect {
-	-i $tailf_spawn_id
-	-ex "$markstr\r\n" { }
-	-re "\[^\r\n\]*\r\n" { exp_continue }
-	timeout {
-	    if {$standalone} {
-		verbose -log "tail -f timed out ($timeout sec) looking for mark in kadmind log"
-		fail "kadmind"
-	    } else {
-		perror "kadmind tail -f timed out ($timeout sec) looking for mark in kadmind log"
-	    }
-	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
-	    return 0
-	}
+    if ![start_tail $kadmind_lfile tailf_spawn_id tailf_pid kadmind] {
+	return 0
     }
 
     # Start up the kadmind daemon

@@ -1,3 +1,10 @@
+2005-01-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_tail): New proc.  Handles GNU tail race
+	condition with less delay than the old code that was in
+	start_kerberos_daemons.
+	(start_kerberos_daemons): Call start_tail for both log files.
+
 2005-01-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Format date internally
