@@ -1,5 +1,8 @@
 Wed Sep 13 15:19:17 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* kdb_xdr.c (krb5_dbe_encode_mod_princ_data): Fix memory leaks.
+		Fix lint flames.
+
 	* fetch_mkey.c (krb5_db_fetch_mkey): This routine now sets the
 		master encblock's crypto system using krb5_use_enctype()
 		from the stored keytype of the master key.

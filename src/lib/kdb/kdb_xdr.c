@@ -53,10 +53,10 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
     krb5_tl_mod_princ	* mod_princ;
     krb5_db_entry	* entry;
 {
-    krb5_error_code 	  retval;
+    krb5_error_code 	  retval = 0;
     krb5_tl_data       ** tl_data;
-    krb5_octet		* nextloc;
-    char		* unparse_mod_princ;
+    krb5_octet		* nextloc = 0;
+    char		* unparse_mod_princ = 0;
     int			  unparse_mod_princ_size;
 
     /* 
@@ -70,8 +70,10 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
 
     unparse_mod_princ_size = (int) strlen(unparse_mod_princ) + 1;
 
-    if ((nextloc = malloc(unparse_mod_princ_size + 4)) == NULL)
-	return ENOMEM;
+    if ((nextloc = malloc(unparse_mod_princ_size + 4)) == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
 
     /* Find any old versions and delete them. */
     for (tl_data = &(entry->tl_data); *tl_data; 
@@ -83,25 +85,34 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
 	}
     }
 
-    if ((*tl_data) || 
-	/* Only zero data if it is freshly allocated */
-	((*tl_data) = (krb5_tl_data *)calloc(1, sizeof(krb5_tl_data)))) {
-	entry->n_tl_data++;
-	(*tl_data)->tl_data_type = KRB5_TL_MOD_PRINC;
-	(*tl_data)->tl_data_length = unparse_mod_princ_size + 4;
-	(*tl_data)->tl_data_contents = nextloc;
-
-	/* Mod Date */
-	krb5_kdb_encode_int32(mod_princ->mod_date, nextloc);
-	nextloc += 4;
-
-	/* Mod Princ */
-	memcpy(nextloc, unparse_mod_princ, unparse_mod_princ_size);
-	return 0;
+    /* Allocate a new TL_MOD_PRINC structure if necessary */
+    if (*tl_data == 0) {
+	(*tl_data) = (krb5_tl_data *)calloc(1, sizeof(krb5_tl_data));
+	if (*tl_data == 0) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
     }
+	
+    entry->n_tl_data++;
+    (*tl_data)->tl_data_type = KRB5_TL_MOD_PRINC;
+    (*tl_data)->tl_data_length = unparse_mod_princ_size + 4;
+    (*tl_data)->tl_data_contents = nextloc;
 
-    free(nextloc);
-    return ENOMEM;
+    /* Mod Date */
+    krb5_kdb_encode_int32(mod_princ->mod_date, nextloc);
+    nextloc += 4;
+
+    /* Mod Princ */
+    memcpy(nextloc, unparse_mod_princ, unparse_mod_princ_size);
+    nextloc = 0;
+
+cleanup:
+    if (nextloc)
+	free(nextloc);
+    if (unparse_mod_princ)
+	free(unparse_mod_princ);
+    return retval;
 }
 
 krb5_error_code
@@ -131,7 +142,7 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
 					 &((*mod_princ)->mod_princ))))
 		break;
     	    if ((strlen((char *) nextloc) + 1 + 4) !=
-		tl_data->tl_data_length) {
+		(size_t) tl_data->tl_data_length) {
 		retval = KRB5_KDB_TRUNCATED_RECORD;
 		break;
 	    }
@@ -475,7 +486,7 @@ krb5_decode_princ_contents(context, content, entry)
 
     if ((retval = krb5_parse_name(context, nextloc, &(entry->princ))))
 	goto error_out;
-    if ((i != (strlen(nextloc) + 1)) || (sizeleft < i)) {
+    if (((size_t) i != (strlen(nextloc) + 1)) || (sizeleft < i)) {
 	retval = KRB5_KDB_TRUNCATED_RECORD;
 	goto error_out;
     }
@@ -637,7 +648,7 @@ krb5_dbe_find_enctype(kcontext, dbentp, ktype, stype, kvno, kdatap)
     maxkvno = -1;
     datap = (krb5_key_data *) NULL;
     for (i=0; i<dbentp->n_key_data; i++) {
-	if ((dbentp->key_data[i].key_data_type[0] == ktype) &&
+	if (((krb5_enctype) dbentp->key_data[i].key_data_type[0]) == ktype &&
 	    ((dbentp->key_data[i].key_data_type[1] == stype) ||
 	     (stype < 0))) {
 	    if (kvno >= 0) {
