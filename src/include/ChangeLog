@@ -1,3 +1,9 @@
+2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-mac.h: Since this file is now only Win32, remove non-Win32
+	stuff to make it easier to read.  Never used __declspec(dllexport)
+	so that we do not accidentally export symbols.
+
 2002-04-05 Alexandra Ellwood <lxs@mit.edu>
     * krb5.hin: Conditionalize KRB5_CALLCONV_WRONG separately
     because gssapi.h defines KRB5_CALLCONV but doesn't need
