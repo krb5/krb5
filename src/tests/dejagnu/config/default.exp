@@ -25,28 +25,28 @@ set passes {
 	des3_krbtgt=0
 	{supported_enctypes=\"des-cbc-crc:normal\"}
 	{kdc_supported_enctypes=\"des-cbc-crc:normal\"}
-	{dummy=[verbose -log \"DES TGT, DES enctype\"]}
+	{dummy=[verbose -log "DES TGT, DES enctype"]}
     }
     {
 	des.des3tgt
 	des3_krbtgt=1
 	{supported_enctypes=\"des-cbc-crc:normal\"}
 	{kdc_supported_enctypes=\"des3-cbc-sha1:normal des-cbc-crc:normal\"}
-	{dummy=[verbose -log \"DES3 TGT, DES enctype\"]}
+	{dummy=[verbose -log "DES3 TGT, DES enctype"]}
     }
     {
 	des3
 	des3_krbtgt=1
 	{supported_enctypes=\"des3-cbc-sha1:normal des-cbc-crc:normal\"}
 	{kdc_supported_enctypes=\"des3-cbc-sha1:normal des-cbc-crc:normal\"}
-	{dummy=[verbose -log \"DES3 TGT, DES3 + DES enctypes\"]}
+	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
     }
     {
 	allenctypes
 	des3_krbtgt=1
 	{supported_enctypes=\"des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm\"}
 	{kdc_supported_enctypes=\"des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm\"}
-	{dummy=[verbose -log \"DES3 TGT, many DES3 + DES enctypes\"]}
+	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
     }
 }
 
