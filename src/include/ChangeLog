@@ -1,3 +1,8 @@
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Default KRB5_DEPRECATED to 0.  Default KRB5_PRIVATE to
+	0 on all platforms.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: krb5int_populate_gic_opt returns void
