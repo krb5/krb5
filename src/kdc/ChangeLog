@@ -1,3 +1,7 @@
+Wed Jan 28 08:56:07 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5kdc.M: Document V4 mode handling [krb5-kdc/464].
+
 Wed Jan 21 15:15:58 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* rtest.c (main): returns int, not void. ANSI X3.159-1989
