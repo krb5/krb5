@@ -452,6 +452,7 @@ int quit()
      }
 
      /* insert more random cleanup here */
+     krb5_free_context(context);
      return 0;
 }
 

@@ -1,3 +1,7 @@
+Tue Oct  7 19:57:43 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadmin.c (quit): Call krb5_free_context.
+
 Thu Sep 18 17:54:10 1997  Tom Yu  <tlyu@mit.edu>
 
 	* memmove.c: Replace USE_STRING_H with something more sane.
