@@ -191,40 +191,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	fprintf(stderr, "%s: unknown host\n", *ahost);
 	return (-1);
     }
-    
-    if ((host_save = (char *) malloc(strlen(hp->h_name) + 1)) == NULL) {
-        fprintf(stderr,"kcmd: no memory\n");
-        return(-1);
-    }
 
-    strcpy(host_save, hp->h_name);
-
-    /* If no service is given set to the default service */
-    if (!service) service = default_service;
-    
-    sin_len = strlen(host_save) + strlen(service)
-      + (realm ? strlen(realm): 0) + 3;
-    if ( sin_len < 20 ) sin_len = 20;
-    
-    if (!(get_cred = (krb5_creds *)calloc(1, sizeof(krb5_creds)))) {
-        fprintf(stderr,"kcmd: no memory\n");
-        return(-1);
-    }
-    status = krb5_sname_to_principal(bsd_context, host_save, service,
-				     KRB5_NT_SRV_HST, &get_cred->server);
-    if (status) {
-	    fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
-		    error_message(status));
-	    return(-1);
-    }
-
-    if (realm && *realm) {
-	free(krb5_princ_realm(bsd_context,get_cred->server)->data);
-	/*krb5_xfree(krb5_princ_realm(bsd_context,get_cred->server)->data);*/
-
-	krb5_princ_set_realm_length(bsd_context,get_cred->server,strlen(realm));
-	krb5_princ_set_realm_data(bsd_context,get_cred->server,strdup(realm));
-   }
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
     sigaddset(&urgmask, SIGURG);
@@ -245,7 +212,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
 	    sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
-	    krb5_free_creds(bsd_context, get_cred);
 	    return (-1);
     	}
     	sin.sin_family = hp->h_addrtype;
@@ -273,14 +239,42 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    continue;
     	}
 #endif /* !(defined(ultrix) || defined(sun)) */
-    	perror(host_save);
+    	perror(hp->h_name);
 #ifdef POSIX_SIGNALS
 	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
     	sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
-	krb5_free_creds(bsd_context, get_cred);
     	return (-1);
+    }
+    /* If no service is given set to the default service */
+    if (!service) service = default_service;
+    
+    if (!(get_cred = (krb5_creds *)calloc(1, sizeof(krb5_creds)))) {
+        fprintf(stderr,"kcmd: no memory\n");
+        return(-1);
+    }
+    host_save = malloc(strlen(hp->h_name) + 1);
+    if (host_save == NULL) {
+	fprintf(stderr, "kcmd: no memory\n");
+	free(get_cred);
+	return -1;
+    }
+    strcpy(host_save, hp->h_name);
+    status = krb5_sname_to_principal(bsd_context, host_save, service,
+				     KRB5_NT_SRV_HST, &get_cred->server);
+    if (status) {
+	fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
+		error_message(status));
+	return(-1);
+    }
+
+    if (realm && *realm) {
+	free(krb5_princ_realm(bsd_context,get_cred->server)->data);
+	/*krb5_xfree(krb5_princ_realm(bsd_context,get_cred->server)->data);*/
+
+	krb5_princ_set_realm_length(bsd_context,get_cred->server,strlen(realm));
+	krb5_princ_set_realm_data(bsd_context,get_cred->server,strdup(realm));
     }
     if (fd2p == 0) {
     	write(s, "", 1);

@@ -1,3 +1,9 @@
+Mon Feb 22 22:26:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kcmd.c (kcmd): Fix up to not call sname_to_principal until after
+	all the addresses in hp have been iterated through to avoid
+	smashing. [krb5-appl/516]
+
 Wed Feb 17 17:24:11 1999  Tom Yu  <tlyu@mit.edu>
 
 	* klogind.M: Document things a little better, including new
