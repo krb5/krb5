@@ -1,3 +1,10 @@
+Fri Apr 28 13:06:18 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* srv_net.c: Linux doesn't have SOMAXCONN, assume 5 if not defined.
+
+Fri Apr 28 07:32:55 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* configure.in: Add check for -ldbm and -lndbm.
 
 Thu Apr 27 17:05:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 

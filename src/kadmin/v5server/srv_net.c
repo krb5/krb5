@@ -44,6 +44,11 @@
 
 #define	MAX_BIND_TRIES	5
 
+/* linux doesn't have SOMAXCONN */
+#ifndef SOMAXCONN
+#define SOMAXCONN 5
+#endif
+
 /*
  * This module can use the pthreads library.  To do so, define USE_PTHREADS.
  * You'll need to find out what else pthreads requires (e.g. -lmach -lc_r
