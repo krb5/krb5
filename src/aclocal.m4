@@ -157,7 +157,8 @@ dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
 dnl
 define(DECLARE_SYS_ERRLIST,[
 AC_COMPILE_CHECK([sys_errlist declaration],
-[#include <errno.h>], [sys_nerr;], , AC_DEFINE(NEED_SYS_ERRLIST))])dnl
+[#include <stdio.h>
+#include <errno.h>], [sys_nerr;], , AC_DEFINE(NEED_SYS_ERRLIST))])dnl
 dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
