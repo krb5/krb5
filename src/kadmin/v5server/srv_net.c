@@ -334,6 +334,7 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 	    DPRINT(DEBUG_SPROC, net_debug_level,
 		   ("| (%d) created child process %d\n",
 		    getpid(), slent->sl_id));
+	    close(conn_sock);
 	    kret = 0;
 	    goto done;
 	}
@@ -346,8 +347,9 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 	    signal(SIGPIPE, SIG_IGN);	/* Ignore SIGPIPE */
 	    signal(SIGCHLD, SIG_DFL);	/* restore SIGCHLD handling */
 	    close(listen_sock);
+	    slent->sl_id = getpid();
 	    DPRINT(DEBUG_SPROC, net_debug_level,
-		   ("| process %d starting\n", getpid()));
+		   ("| process %d starting\n", slent->sl_id));
 	    kret = proto_serv(slent->sl_context,
 			      (krb5_int32) slent->sl_id,
 			      slent->sl_socket,
@@ -362,6 +364,7 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
     }
     else {
 	net_slave_info *sl1;
+	signal(SIGPIPE, SIG_IGN);	/* Ignore SIGPIPE */
 	DPRINT(DEBUG_SPROC, net_debug_level,
 	       ("| (%d) not doing child creation\n", getpid()));
 	slent->sl_id = (net_slave_type) getpid();
@@ -375,6 +378,7 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
 	    net_free_slave_entry(sl1);
 	DPRINT(DEBUG_SPROC, net_debug_level,
 	       ("| (%d) returned with %d\n", getpid(), kret));
+	kret = 0;
     }
 #endif	/* DEBUG */
  done:
@@ -387,45 +391,39 @@ net_dispatch_client(kcontext, listen_sock, conn_sock, client_addr)
  * net_init()	- Initialize network context.
  */
 krb5_error_code
-net_init(kcontext, debug_level)
+net_init(kcontext, debug_level, port)
     krb5_context	kcontext;
     int			debug_level;
+    krb5_int32		port;
 {
     krb5_error_code	kret;
-    char		*local_realm;
     char		our_host_name[MAXHOSTNAMELEN];
     struct hostent	*our_hostent;
     struct servent	*our_servent;
+    char		*realm;
     int			bind_tries;
     int			bind_sleep;
 
     net_debug_level = debug_level;
-    DPRINT(DEBUG_CALLS, net_debug_level, ("* net_init()\n"));
+    DPRINT(DEBUG_CALLS, net_debug_level, ("* net_init(port=%d)\n", port));
 
-    /*
-     * Get our realm.
-     */
-    if (kret = krb5_get_default_realm(kcontext, &local_realm)) {
-	fprintf(stderr, net_def_realm_fmt, programname, error_message(kret));
-	goto done;
-    }
+    /* Get our realm name */
+    realm = key_master_realm();
 
     /* Allocate the slave table */
     net_slave_table = (net_slave_info *)
 	malloc((size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     /* Make our service name */
-    net_service_name = (char *) malloc(strlen(local_realm) +
+    net_service_name = (char *) malloc(strlen(realm) +
 				       strlen(KRB5_ADM_SERVICE_NAME) + 2);
     if ((net_service_name == (char *) NULL) ||
 	(net_slave_table == (net_slave_info *) NULL)) {
 	kret = ENOMEM;
-	krb5_xfree(local_realm);
 	fprintf(stderr, net_no_mem_fmt, programname);
 	goto done;
     }
     (void) sprintf(net_service_name, "%s%s%s",
-		   KRB5_ADM_SERVICE_NAME, "/", local_realm);
-    krb5_xfree(local_realm);
+		   KRB5_ADM_SERVICE_NAME, "/", realm);
     memset((char *) net_slave_table, 0,
 	   (size_t) (MAX_SLAVES * sizeof(net_slave_info)));
     net_max_slaves = MAX_SLAVES;
@@ -442,6 +440,7 @@ net_init(kcontext, debug_level)
     }
     net_service_princ_init = 1;
 
+#ifdef	KRB5_USE_INET
     /* Now get our host name/entry */
     if (gethostname(our_host_name, sizeof(our_host_name))) {
 	kret = errno;
@@ -465,18 +464,124 @@ net_init(kcontext, debug_level)
 	   ("- address of host is %x\n",
 	    ntohl(net_server_addr.sin_addr.s_addr)));
 
-    /* Get the service entry */
-    if (!(our_servent = getservbyname(KRB5_ADM_SERVICE_NAME, "tcp"))) {
-	kret = errno;
-	fprintf(stderr, net_no_servent_fmt, programname,
-		KRB5_ADM_SERVICE_NAME, error_message(kret));
-	goto done;
+    /*
+     * Fill in the port address.
+     * If the port is supplied by the invoker, then use that one.
+     * If not, then try the profile, and if all fails, then use the service
+     * 	entry.
+     */
+    if (port > 0) {
+	net_server_addr.sin_port = htons(port);
+	DPRINT(DEBUG_HOST, net_debug_level,
+	       ("- service name (%s) is on port %d from options\n",
+		KRB5_ADM_SERVICE_NAME,
+		ntohs(net_server_addr.sin_port)));
     }
-    net_server_addr.sin_port = our_servent->s_port;
+    else {
+	char		**admin_hostlist;
+	const char	*realm_admin_names[4];	/* XXX */
+	krb5_boolean	found;
+
+	/*
+	 * Try to get the service entry out of the profile.
+	 */
+	admin_hostlist = (char **) NULL;
+	realm_admin_names[0] = "realms";
+	realm_admin_names[1] = realm;
+	realm_admin_names[2] = "admin_server";
+	realm_admin_names[3] = (char *) NULL;
+	found = 0;
+#ifndef	OLD_CONFIG_FILES
+	if (!(kret = profile_get_values(kcontext->profile,
+					realm_admin_names,
+					&admin_hostlist))) {
+	    int		hi;
+	    char	*cport;
+	    char	*cp;
+	    krb5_int32	pport;
+	    int		ai;
+
+	    cport = (char *) NULL;
+	    pport = KRB5_ADM_DEFAULT_PORT;
+	    for (hi=0; admin_hostlist[hi]; hi++) {
+		/*
+		 * This knows a little too much about the format of profile
+		 * entries.  Shouldn't it just be some sort of tuple?
+		 *
+		 * The form is assumed to be:
+		 *	admin_server = <hostname>[:<portname>[<whitespace>]]
+		 */
+		cp = strchr(admin_hostlist[hi], ' ');
+		if (cp)
+		    *cp = '\0';
+		cp = strchr(admin_hostlist[hi], '\t');
+		if (cp)
+		    *cp = '\0';
+		cport = strchr(admin_hostlist[hi], ':');
+		if (cport) {
+		    *cport = '\0';
+		    cport++;
+		    if (sscanf(cport, "%d", &pport) != 1) {
+			DPRINT(DEBUG_HOST, net_debug_level,
+			       ("- profile entry for %s has bad port %s\n",
+				admin_hostlist[hi],
+				cport));
+			pport = KRB5_ADM_DEFAULT_PORT;
+		    }
+		}
+		/*
+		 * We've stripped away the crud.  Now check to see if the
+		 * profile entry matches our hostname.  If so, then this
+		 * is the one to use.  Additionally, check the host alias
+		 * list.
+		 */
+		if (!strcmp(admin_hostlist[hi], our_hostent->h_name)) {
+		    net_server_addr.sin_port = ntohs((u_short) pport);
+		    DPRINT(DEBUG_HOST, net_debug_level,
+			   ("- service name (%s) is on port %d from profile\n",
+			    KRB5_ADM_SERVICE_NAME,
+			    pport));
+		    found = 1;
+		}
+		else {
+		    for (ai=0; our_hostent->h_aliases[ai]; ai++) {
+			if (!strcmp(admin_hostlist[hi],
+				    our_hostent->h_aliases[ai])) {
+			    net_server_addr.sin_port = ntohs(pport);
+			    DPRINT(DEBUG_HOST, net_debug_level,
+				   ("- service name (%s) is on port %d from profile and alias\n",
+				    KRB5_ADM_SERVICE_NAME,
+				    pport));
+			    found = 1;
+			    break;
+			}
+		    }
+		}
+	    }
+	    krb5_xfree(admin_hostlist);
+	}
+#endif	/* OLD_CONFIG_FILES */
+
+	/*
+	 * If we didn't find an entry in the profile, then as a last gasp
+	 * effort, attempt to find it in /etc/services.
+	 */
+	if (!found) {
+	    /* Get the service entry out of /etc/services */
+	    if (!(our_servent = getservbyname(KRB5_ADM_SERVICE_NAME, "tcp"))) {
+		kret = errno;
+		fprintf(stderr, net_no_servent_fmt, programname,
+			KRB5_ADM_SERVICE_NAME, error_message(kret));
+		goto done;
+	    }
+	    net_server_addr.sin_port = our_servent->s_port;
+	    DPRINT(DEBUG_HOST, net_debug_level,
+		   ("- service name (%s) is on port %d from services\n",
+		    our_servent->s_name,
+		    ntohs(our_servent->s_port)));
+	}
+    }
     net_server_addr_init = 1;
-    DPRINT(DEBUG_HOST, net_debug_level,
-	   ("- service name (%s) is on port %d\n", our_servent->s_name,
-	    our_servent->s_port));
 
     /* Now open the listen socket */
     net_listen_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -515,6 +620,10 @@ net_init(kcontext, debug_level)
 	    break;
 	}
     } while (bind_tries < MAX_BIND_TRIES);
+#else	/* KRB5_USE_INET */
+    /* Don't know how to do anything else. */
+    kret = ENOENT;
+#endif	/* KRB5_USE_INET */
 
  done:
     DPRINT(DEBUG_CALLS, net_debug_level, ("X net_init() = %d\n", kret));
