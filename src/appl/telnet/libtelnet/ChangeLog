@@ -1,3 +1,7 @@
+Tue Feb 28 01:48:32 1995  John Gilmore  (gnu at toad.com)
+
+	* forward.c, kerberos5.c, sys_term.c:  Avoid <krb5/...> includes.
+
 Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
 
         * kerberos5.c (kerberos5_send(), kerberos5_forward()) 

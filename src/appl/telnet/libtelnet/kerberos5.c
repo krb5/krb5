@@ -61,11 +61,8 @@
 #ifdef	KRB5
 #include <arpa/telnet.h>
 #include <stdio.h>
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 #include <netdb.h>
 #include <ctype.h>
 
