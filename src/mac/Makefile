@@ -407,6 +407,9 @@ ccachelib-ppc-final						= {mitkerberoslib-root-folder}CCacheLib:Binaries:CCache
 loginlib-ppc-debug						= {mitkerberoslib-root-folder}LoginLib:Binaries:KrbLoginLib.stub.PPC.debug
 loginlib-ppc-final						= {mitkerberoslib-root-folder}LoginLib:Binaries:KrbLoginLib.stub.PPC
 
+preferenceslib-ppc-debug				= {mitkerberoslib-root-folder}PreferencesLib:Binaries:PreferencesLib.PPC.debug
+preferenceslib-ppc-final				= {mitkerberoslib-root-folder}PreferencesLib:Binaries:PreferencesLib.PPC
+
 socketslib-ppc-debug					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC.debug
 socketslib-ppc-final					= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC
 
@@ -439,6 +442,7 @@ krb5-library-libraries-ppc-final = ¶
 privatekrb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
 	{ccachelib-ppc-debug} ¶
+	{preferenceslib-ppc-debug} ¶
 	{loginlib-ppc-debug} ¶
 	{socketslib-ppc-debug} ¶
 	{errorlib-ppc-debug} ¶
@@ -449,6 +453,7 @@ privatekrb5-library-libraries-ppc-debug = ¶
 privatekrb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccachelib-ppc-final} ¶
+	{preferenceslib-ppc-final} ¶
 	{loginlib-ppc-final} ¶
 	{socketslib-ppc-final} ¶
 	{errorlib-ppc-final} ¶
@@ -558,6 +563,7 @@ mitsupportlib-include-paths = ¶
 include-paths = `catenate {include-folders-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/-i (Å)¨1/ Print '-i 'prefix¨1"` ¶
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {mitkerberoslib-root-folder}LoginLib:Headers: ¶
+	-i {mitkerberoslib-root-folder}PreferencesLib:Headers: ¶
 	{mitsupportlib-include-paths}
 		
 compiler-options-ppc-debug = {include-paths} {common-compiler-options} {ppc-compiler-options} ¶
