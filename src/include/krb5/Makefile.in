@@ -5,8 +5,7 @@ KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		error_def.h errors.h ext-proto.h fieldbits.h \
 		free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
 		keytab.h krb5.h libos.h los-proto.h macros.h mit-des.h \
-		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
-		sysincl.h widen.h wordsize.h
+		proto.h rcache.h rsa-md4.h safepriv.h sysincl.h wordsize.h
 # these are installed here for the build from lib/krb5/error_tables but 
 # also need to be in the installed tree
 ET_HEADERS = adm_err.h asn1_err.h isode_err.h kdb5_err.h krb5_err.h

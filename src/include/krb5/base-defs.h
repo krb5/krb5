@@ -24,7 +24,6 @@
  * Basic definitions for Kerberos V5 library
  */
 
-
 #ifndef KRB5_BASE_DEFS__
 #define KRB5_BASE_DEFS__
 
@@ -37,15 +36,15 @@
 #define	TRUE	1
 #endif
 
-typedef krb5_octet	krb5_boolean;
-typedef	krb5_octet	krb5_msgtype;
-typedef	krb5_octet	krb5_kvno;
+typedef	int		krb5_boolean;
+typedef	int		krb5_msgtype;	
+typedef	int		krb5_kvno;	
 
-typedef	krb5_ui_2	krb5_addrtype;
-typedef krb5_ui_2	krb5_keytype;
-typedef krb5_ui_2	krb5_enctype;
-typedef krb5_ui_2	krb5_cksumtype;
-typedef krb5_ui_2	krb5_authdatatype;
+typedef	int		krb5_addrtype;
+typedef int		krb5_keytype;
+typedef int		krb5_enctype;
+typedef int		krb5_cksumtype;
+typedef int		krb5_authdatatype;
 
 typedef krb5_int32	krb5_preauthtype; /* This may change, later on */
 typedef	krb5_int32	krb5_flags;

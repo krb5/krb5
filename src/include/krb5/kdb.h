@@ -34,7 +34,7 @@
 
 typedef struct _krb5_encrypted_keyblock {
     krb5_magic magic;
-    krb5_keytype keytype;
+    short keytype;				/* XXX this is SO ugly --- proven */
     int length;
     krb5_octet *contents;
 } krb5_encrypted_keyblock;
@@ -188,15 +188,6 @@ krb5_error_code krb5_db_unlock
 
 /* need to play games here, since we take a pointer and the real thing,
    and it might be narrow. */
-#ifdef NARROW_PROTOTYPES
-krb5_error_code krb5_db_set_nonblocking
-	PROTOTYPE((krb5_context,
-		   krb5_boolean,
-		   krb5_boolean * ));
-krb5_boolean krb5_db_set_lockmode
-	PROTOTYPE((krb5_context,
-		   krb5_boolean ));
-#else
 krb5_error_code krb5_db_set_nonblocking
 	PROTOTYPE((krb5_context,
 		   int, /* krb5_boolean */
@@ -204,11 +195,6 @@ krb5_error_code krb5_db_set_nonblocking
 krb5_boolean krb5_db_set_lockmode
 	PROTOTYPE((krb5_context,
 		   int /* krb5_boolean */ ));
-#endif /* NARROW_PROTOTYPES */
-#include <krb5/widen.h>
-
-/* Only put things which don't have pointers to the narrow types in this
-   section */
 
 krb5_error_code	krb5_db_fetch_mkey
 	PROTOTYPE((krb5_context,
@@ -218,8 +204,6 @@ krb5_error_code	krb5_db_fetch_mkey
 		   krb5_boolean, 
 		   krb5_data *, 
 		   krb5_keyblock * ));
-#include <krb5/narrow.h>
-
 
 #define KRB5_KDB_DEF_FLAGS	0
 

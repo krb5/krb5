@@ -391,7 +391,6 @@ void krb5_free_ap_rep_enc_part
 void krb5_free_tkt_authent
 	PROTOTYPE((krb5_context,
 		   krb5_tkt_authent *));
-#include <krb5/widen.h>
 
 /* Only put things which don't have pointers to the narrow types in this
    section */
@@ -562,25 +561,13 @@ krb5_error_code krb5_recvauth PROTOTYPE((krb5_context,
 		   krb5_ticket **,
 		   krb5_authenticator **));
 
-
-#ifdef NARROW_PROTOTYPES
-krb5_error_code krb5_walk_realm_tree
-    	PROTOTYPE((krb5_context,
-		   const krb5_data *,
-	       const krb5_data *,
-	       krb5_principal **,
-	       char));
-#else
 krb5_error_code krb5_walk_realm_tree
     	PROTOTYPE((krb5_context,
 		   const krb5_data *,
 	       const krb5_data *,
 	       krb5_principal **,
 	       int));
-#endif
 
 #define KRB5_REALM_BRANCH_CHAR '.'
-
-#include <krb5/narrow.h>
 
 #endif /* KRB5_FUNC_PROTO__ */

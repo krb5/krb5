@@ -134,13 +134,11 @@ krb5_error_code krb5_write_message
 		   krb5_pointer, 
 		   krb5_data *));
 
-#include <krb5/widen.h>
 krb5_error_code krb5_sname_to_principal
     PROTOTYPE((krb5_context,
 		   const char *,
 	       const char *,
 	       krb5_int32,
 	       krb5_principal *));
-#include <krb5/narrow.h>
 
 #endif /* KRB5_LIBOS_PROTO__ */

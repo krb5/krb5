@@ -50,9 +50,6 @@ typedef struct _krb5_kt {
 } *krb5_keytab;
 
 
-/* widen prototypes, if needed */
-#include <krb5/widen.h>
-
 typedef struct _krb5_kt_ops {
     krb5_magic magic;
     char *prefix;
@@ -98,9 +95,6 @@ typedef struct _krb5_kt_ops {
 		    krb5_keytab,
 		  krb5_keytab_entry *));
 } krb5_kt_ops;
-
-/* and back to narrow */
-#include <krb5/narrow.h>
 
 #define krb5_kt_get_name(context, keytab, name, namelen) (*(keytab)->ops->get_name)(context, keytab,name,namelen)
 #define krb5_kt_close(context, keytab) (*(keytab)->ops->close)(context, keytab)

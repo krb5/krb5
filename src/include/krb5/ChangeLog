@@ -1,3 +1,12 @@
+Wed Jan 25 17:07:17 1995  Chris Provenzano  (proven@mit.edu)
+
+	* Removed all narrow types and references to wide.h and narrow.h
+	* base-defs.h Typedef krb5_boolean, krb5_msgtype, krb5_kvno,
+		krb5_addrtype, krb5_keytyp, krb5_enctype, krb5_cksumtype,
+		and krb5_authdatatype as int.
+	* kdb.h Made keytype in krb5_encrypted_keyblock explicitly short
+		for backwards compatibility. 
+
 Sun Jan 22 18:17:06 1995  John Gilmore  (gnu@cygnus.com)
 
 	* preauth.h, rsa-md5.h:  Protect against multiple inclusion.

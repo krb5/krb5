@@ -58,8 +58,6 @@ typedef struct _krb5_enc_data {
     krb5_data ciphertext;
 } krb5_enc_data;
 
-#include <krb5/widen.h>
-
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     krb5_magic magic;
@@ -97,8 +95,6 @@ typedef struct _krb5_cryptosystem_entry {
 					   (assigned protocol number AND
 					    table index) */
 } krb5_cryptosystem_entry;
-
-#include <krb5/narrow.h>
 
 typedef struct _krb5_cs_table_entry {
     krb5_magic magic;
