@@ -1,3 +1,7 @@
+Sun Oct 29 20:07:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* run.test: Add /usr/lib/ispell/ispell.words for Linux
+
 Thu Oct 12 01:18:07 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* dbtest.c (rfile):  Don't declare index.

@@ -19,6 +19,9 @@ main()
 	elif [ -f /usr/share/lib/dict/words ]; then
 		# SGI Irix 5.x
 		DICT=/usr/share/lib/dict/words
+	elif [ -f /usr/lib/ispell/ispell.words ]; then
+		# Linux w/ ispell
+		DICT=/usr/lib/ispell/ispell.words
  	else
 		echo 'run.test: no dictionary'
 		exit 1
