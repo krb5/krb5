@@ -3,6 +3,9 @@
 	* k5-int.h: Include errno.h.
 	* krb5.hin: Don't include errno.h.
 
+	* fake-addrinfo.h (getaddrinfo) [__linux__]: Don't crash if hint
+	is a null pointer.
+
 2002-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h [NEED_FAKE_GETADDRINFO]: Include errno.h.

@@ -625,7 +625,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        they get around to fixing it, add a compile-time or run-time
        check for the glibc version in use.  */
 #define COPY_FIRST_CANONNAME
-    if (name && (hint->ai_flags & AI_CANONNAME)) {
+    if (name && hint && (hint->ai_flags & AI_CANONNAME)) {
 	struct hostent *hp;
 	const char *name2 = 0;
 	int i;
