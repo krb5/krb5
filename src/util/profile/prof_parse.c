@@ -43,6 +43,36 @@ static void strip_line(line)
 	}
 }
 
+static void parse_quoted_string(char *str)
+{
+	char *to, *from;
+
+	to = from = str;
+
+	for (to = from = str; *from && *from != '"'; to++, from++) {
+		if (*from == '\\') {
+			from++;
+			switch (*from) {
+			case 'n':
+				*to = '\n';
+				break;
+			case 't':
+				*to = '\t';
+				break;
+			case 'b':
+				*to = '\b';
+				break;
+			default:
+				*to = *from;
+			}
+			continue;
+		}
+		*to = *from;
+	}
+	*to = '\0';
+}
+
+
 static errcode_t parse_init_state(state)
 	struct parse_state *state;
 {
@@ -126,12 +156,19 @@ static errcode_t parse_std_line(line, state)
 	}
 	cp = skip_over_blanks(cp+1);
 	value = cp;
-	if (value[0] == 0) {
+	if (value[0] == '"') {
+		value++;
+		parse_quoted_string(value);
+	} else if (value[0] == 0) {
 		do_subsection++;
 		state->state = STATE_GET_OBRACE;
-	}
-	if (value[0] == '{' && value[1] == 0) 
+	} else if (value[0] == '{' && value[1] == 0) 
 		do_subsection++;
+	else {
+		cp = value + strlen(value) - 1;
+		while ((cp > value) && isspace(*cp))
+			*cp-- = 0;
+	}
 	if (do_subsection) {
 		retval = profile_add_node(state->current_section,
 					  tag, 0, &state->current_section);
@@ -200,6 +237,60 @@ errcode_t profile_parse_file(f, root)
 	return 0;
 }
 
+/*
+ * Return TRUE if the string begins or ends with whitespace
+ */
+static int need_double_quotes(str)
+	char *str;
+{
+	if (!str || !*str)
+		return 0;
+	if (isspace(*str) ||isspace(*(str + strlen(str) - 1)))
+		return 1;
+	if (strchr(str, '\n') || strchr(str, '\t') || strchr(str, '\b'))
+		return 1;
+	return 0;
+}
+
+/*
+ * Output a string with double quotes, doing appropriate backquoting
+ * of characters as necessary.
+ */
+static void output_quoted_string(str, f)
+	char	*str;
+	FILE	*f;
+{
+	char	ch;
+	
+	fputc('"', f);
+	if (!str) {
+		fputc('"', f);
+		return;
+	}
+	while (ch = *str++) {
+		switch (ch) {
+		case '\\':
+			fputs("\\\\", f);
+			break;
+		case '\n':
+			fputs("\\n", f);
+			break;
+		case '\t':
+			fputs("\\t", f);
+			break;
+		case '\b':
+			fputs("\\b", f);
+			break;
+		default:
+			fputc(ch, f);
+			break;
+		}
+	}
+	fputc('"', f);
+}
+
+
+
 #if defined(_MSDOS) || defined(_WIN32)
 #define EOL "\r\n"
 #endif
@@ -232,7 +323,13 @@ void dump_profile(root, level)
 			break;
 		for (i=0; i < level; i++)
 			printf("   ");
-		printf("%s = '%s'%s", name, value, EOL);
+		if (need_double_quotes(value)) {
+			fputs(name, stdout);
+			fputs(" = ", stdout);
+			output_quoted_string(value, stdout);
+			fputs(EOL, stdout);
+		} else
+			printf("%s = '%s'%s", name, value, EOL);
 	} while (iter != 0);
 
 	iter = 0;
@@ -269,7 +366,13 @@ void dump_profile_to_file(root, level, dstfile)
 			break;
 		for (i=0; i < level; i++)
 			fprintf(dstfile, "\t");
-		fprintf(dstfile, "%s = %s%s", name, value, EOL);
+		if (need_double_quotes(value)) {
+			fputs(name, dstfile);
+			fputs(" = ", dstfile);
+			output_quoted_string(value, dstfile);
+			fputs(EOL, dstfile);
+		} else
+			fprintf(dstfile, "%s = %s%s", name, value, EOL);
 	} while (iter != 0);
 
 	iter = 0;
