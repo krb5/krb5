@@ -1,3 +1,23 @@
+Tue Jun  8 15:26:21 1999  Alexandra Ellwood  <lxs@mit.edu>
+
+	* changepw.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+	
+	* hst_realm.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+	
+	* localaddr.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+	
+	* net_read.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+	
+	* net_write.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+	
+	* sn2princ.c: Changed errno to SOCKET_ERRNO/SOCKET_SET_ERRNO
+	    after socket operations to work with new Mac OT SocketsLib.
+
 Mon May 10 15:26:20 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

@@ -93,7 +93,7 @@ krb5_get_host_realm(context, host, realmsp)
 	strncpy(local_host, host, MAXHOSTNAMELEN);
     else {
 	if (gethostname(local_host, sizeof(local_host)-1) == -1)
-	    return errno;
+	    return SOCKET_ERRNO;
     }
     local_host[sizeof(local_host)-1] = '\0';
     for (cp = local_host; *cp; cp++) {

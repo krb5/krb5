@@ -207,39 +207,35 @@ krb5_change_password(context, creds, newpw, result_code,
 
     if ((s1 = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
 	free(addr_p);
-	return(errno);
+	return(SOCKET_ERRNO);
     }
 
     if ((s2 = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
 	free(addr_p);
-	return(errno);
+	return(SOCKET_ERRNO);
     }
 
     for (i=0; i<out; i++) {
 	if (connect(s2, &addr_p[i], sizeof(addr_p[i])) == SOCKET_ERROR) {
-#ifndef HAVE_MACSOCK_H
-	    if ((cc < 0) && ((errno == ECONNREFUSED) ||
-			     (errno == EHOSTUNREACH)))
-#endif
+	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
+			     (SOCKET_ERRNO == EHOSTUNREACH)))
 		continue; /* try the next addr */
 	    free(addr_p);
 	    closesocket(s1);
 	    closesocket(s2);
-	    return(errno);
+	    return(SOCKET_ERRNO);
 	}
 
 	addrlen = sizeof(local_addr);
 
 	if (getsockname(s2, &local_addr, &addrlen) < 0) {
-#ifndef HAVE_MACSOCK_H
-	    if ((errno == ECONNREFUSED) ||
-		(errno == EHOSTUNREACH))
-#endif
+	    if ((SOCKET_ERRNO == ECONNREFUSED) ||
+		(SOCKET_ERRNO == EHOSTUNREACH))
 		continue; /* try the next addr */
 	    free(addr_p);
 	    closesocket(s1);
 	    closesocket(s2);
-	    return(errno);
+	    return(SOCKET_ERRNO);
 	}
 
 	/* some brain-dead OS's don't return useful information from
@@ -266,15 +262,13 @@ krb5_change_password(context, creds, newpw, result_code,
 
 	addrlen = sizeof(remote_addr);
 	if (getpeername(s2, &remote_addr, &addrlen) < 0) {
-#ifndef HAVE_MACSOCK_H
-	    if ((errno == ECONNREFUSED) ||
-		(errno == EHOSTUNREACH))
-#endif
+	    if ((SOCKET_ERRNO == ECONNREFUSED) ||
+		(SOCKET_ERRNO == EHOSTUNREACH))
 		continue; /* try the next addr */
 	    free(addr_p);
 	    closesocket(s1);
 	    closesocket(s2);
-	    return(errno);
+	    return(SOCKET_ERRNO);
 	}
 
 	remote_kaddr.addrtype = ADDRTYPE_INET;
@@ -317,15 +311,13 @@ krb5_change_password(context, creds, newpw, result_code,
 			 (struct sockaddr *) &addr_p[i],
 			 sizeof(addr_p[i]))) !=
 	    chpw_req.length) {
-#ifndef HAVE_MACSOCK_H
-	    if ((cc < 0) && ((errno == ECONNREFUSED) ||
-			     (errno == EHOSTUNREACH)))
-#endif
+	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
+			     (SOCKET_ERRNO == EHOSTUNREACH)))
 		continue; /* try the next addr */
 	    free(addr_p);
 	    closesocket(s1);
 	    closesocket(s2);
-	    return((cc < 0)?errno:ECONNABORTED);
+	    return((cc < 0)?SOCKET_ERRNO:ECONNABORTED);
 	}
 
 	krb5_xfree(chpw_req.data);
@@ -348,7 +340,7 @@ krb5_change_password(context, creds, newpw, result_code,
 	    free(addr_p);
 	    closesocket(s1);
 	    closesocket(s2);
-	    return(errno);
+	    return(SOCKET_ERRNO);
 	}
 
 	closesocket(s1);
@@ -395,5 +387,5 @@ krb5_change_password(context, creds, newpw, result_code,
     free(addr_p);
     closesocket(s1);
     closesocket(s2);
-    return(errno);
+    return(SOCKET_ERRNO);
 }

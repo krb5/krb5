@@ -53,7 +53,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 	/* if hostname is NULL, use local hostname */
 	if (! hostname) {
 	    if (gethostname(localname, MAXHOSTNAMELEN))
-		return errno;
+		return SOCKET_ERRNO;
 	    hostname = localname;
 	}
 

@@ -49,10 +49,8 @@ krb5_net_write(context, fd, buf, len)
 	if (cc < 0) {
 	    if (SOCKET_ERRNO == SOCKET_EINTR)
 		continue;
-#if defined(_MSDOS) || (_WIN32)
-            /* XXX this interface sucks! */
-            errno = SOCKET_ERRNO;
-#endif            
+		/* XXX this interface sucks! */
+        errno = SOCKET_ERRNO;           
 	    return(cc);
 	}
 	else {

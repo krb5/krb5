@@ -123,7 +123,7 @@ krb5_os_localaddr(context, addr)
     
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
-	return errno;
+	return SOCKET_ERRNO;
 
     code = ioctl (s, SIOCGIFCONF, (char *)&ifc);
     if (code < 0) {
@@ -303,13 +303,13 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     err = 0;
     
     if (gethostname (host, sizeof(host))) {
-        err = WSAGetLastError();
+        err = SOCKET_ERRNO;
     }
 
     if (!err) {
 	    hostrec = gethostbyname (host);
 	    if (hostrec == NULL) {
-		    err = WSAGetLastError();
+		    err = SOCKET_ERRNO;
 	    }
     }
 
