@@ -42,6 +42,10 @@ static char copyright[] =
 #include "telnetd.h"
 #include "pathnames.h"
 
+
+extern int getent(char *, char *);
+extern int tgetent(char *, char *);
+
 #if	defined(_SC_CRAY_SECURE_SYS) && !defined(SCM_SECURITY)
 /*
  * UNICOS 6.0/6.1 do not have SCM_SECURITY defined, so we can
@@ -104,7 +108,6 @@ int	registerd_host_only = 0;
 #ifdef  HAVE_SYS_PTYVAR_H
 # include <sys/ptyvar.h>
 #endif
-
 
 /*
  * Because of the way ptyibuf is used with streams messages, we need

@@ -1,5 +1,9 @@
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
+	* telnetd.c: Add prototypes for getent() and tgetent(). 
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
 	* configure.in: Test if prototypes needed for setenv and unsetenv. 
 
 	* ext.h: Provide prototypes for unsetenv and setenv if needed.
