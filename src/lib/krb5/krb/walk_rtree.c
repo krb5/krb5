@@ -36,17 +36,21 @@ static char rcsid_walk_rtree_c[] =
 
 /* internal function, used by krb5_get_cred_from_kdc() */
 
-#define REALM_BRANCH_CHAR '.'
-
 #ifndef min
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 #endif
 
 krb5_error_code
-krb5_walk_realm_tree(client, server, tree)
+#ifdef NARROW_PROTOTYPES
+krb5_walk_realm_tree(const krb5_data *client, const krb5_data *server,
+		     krb5_principal **tree, char realm_branch_char)
+#else
+krb5_walk_realm_tree(client, server, tree, realm_branch_char)
 const krb5_data *client, *server;
 krb5_principal **tree;
+char realm_branch_char;
+#endif
 {
     krb5_error_code retval;
     krb5_principal *rettree;
@@ -65,7 +69,7 @@ krb5_principal **tree;
 	 com_sdot = scp = server->data + slen - 1;
 	 clen && slen && *ccp == *scp ;
 	 ccp--, scp--, 	clen--, slen--) {
-	if (*ccp == REALM_BRANCH_CHAR) {
+	if (*ccp == realm_branch_char) {
 	    com_cdot = ccp;
 	    com_sdot = scp;
 	    nocommon = 0;
@@ -81,7 +85,7 @@ krb5_principal **tree;
 	    /* in the same realm--this means there is no ticket
 	       in this realm. */
 	    return KRB5_NO_TKT_IN_RLM;
-	if (*scp == REALM_BRANCH_CHAR) {
+	if (*scp == realm_branch_char) {
 	    /* one is a subdomain of the other */
 	    com_cdot = client->data;
 	    com_sdot = scp;
@@ -89,7 +93,7 @@ krb5_principal **tree;
     }
     if (!slen) {
 	/* construct path from client to server, up the tree */
-	if (*ccp == REALM_BRANCH_CHAR) {
+	if (*ccp == realm_branch_char) {
 	    /* one is a subdomain of the other */
 	    com_sdot = server->data;
 	    com_cdot = ccp;
@@ -103,7 +107,7 @@ krb5_principal **tree;
     /* if no common ancestor, artificially set up common root at the last
        component, then join with special code */
     for (ccp = client->data; ccp < com_cdot; ccp++) {
-	if (*ccp == REALM_BRANCH_CHAR) {
+	if (*ccp == realm_branch_char) {
 	    links++;
 	    if (nocommon)
 		prevccp = ccp;
@@ -111,7 +115,7 @@ krb5_principal **tree;
     }
 
     for (scp = server->data; scp < com_sdot; scp++) {
-	if (*scp == REALM_BRANCH_CHAR) {
+	if (*scp == realm_branch_char) {
 	    links++;
 	    if (nocommon)
 		prevscp = scp;
@@ -142,7 +146,7 @@ krb5_principal **tree;
     for (prevccp = ccp = client->data;
 	 ccp <= com_cdot;
 	 ccp++) {
-	if (*ccp != REALM_BRANCH_CHAR)
+	if (*ccp != realm_branch_char)
 	    continue;
 	++ccp;				/* advance past dot */
 	tmpcrealm.data = prevccp;
@@ -183,7 +187,7 @@ krb5_principal **tree;
     for (prevscp = com_sdot + 1, scp = com_sdot - 1;
 	 scp > server->data;
 	 scp--) {
-	if (*scp != REALM_BRANCH_CHAR)
+	if (*scp != realm_branch_char)
 	    continue;
 	if (scp - 1 < server->data)
 	    break;			/* XXX only if . starts realm? */
