@@ -46,11 +46,11 @@
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,
 		   krb5_ccache, 
-		   krb5_principal));
+		   krb5_principal,
+		   krb5_creds *));
 
 struct sockaddr_in local_sin, remote_sin;
 
-krb5_creds my_creds;
 char cache_name[255] = "";
 
 static void get_def_princ
@@ -77,6 +77,7 @@ main(argc,argv)
     char *client_name;	/* Single string representation of client id */
 
     krb5_data *requested_realm;
+    krb5_creds my_creds;
 
     krb5_error_code retval;	/* return code */
 
@@ -169,7 +170,7 @@ main(argc,argv)
  *	Verify User by Obtaining Initial Credentials prior to Initial Link
  */
 
-    if ((retval = get_first_ticket(context, cache, client))) {
+    if ((retval = get_first_ticket(context, cache, client, &my_creds))) {
         (void) krb5_cc_destroy(context, cache);
 	exit(1);
     }
@@ -252,7 +253,8 @@ main(argc,argv)
 			&seqno, 
 			0,           /* don't need a subsession key */
 			&err_ret,
-			&rep_ret))) {
+			&rep_ret, 
+			NULL))) {
 	fprintf(stderr, "Error while performing sendauth: %s!\n",
 			error_message(retval));
 	free(send_cksum.contents);
@@ -515,10 +517,11 @@ repeat:
 }
 
 static krb5_error_code
-get_first_ticket(context, cache, client)
+get_first_ticket(context, cache, client, my_creds)
     krb5_context context;
     krb5_ccache cache;
     krb5_principal client;
+    krb5_creds * my_creds;
 {
     char prompt[255];			/* for the password prompt */
     
@@ -540,11 +543,11 @@ get_first_ticket(context, cache, client)
 	return(1);
     }
 
-    memset((char *) &my_creds, 0, sizeof(my_creds));
+    memset((char *) my_creds, 0, sizeof(krb5_creds));
 
-    my_creds.client = client;
+    my_creds->client = client;
 
-    if ((retval = krb5_build_principal_ext(context, &my_creds.server,
+    if ((retval = krb5_build_principal_ext(context, &my_creds->server,
                                         client->realm.length, 
 					client->realm.data,
                                         strlen(CPWNAME),
@@ -584,7 +587,7 @@ get_first_ticket(context, cache, client)
 					my_addresses,
                                         NULL, /* Default encryption list */
                                         NULL, /* Default preauth list */
-					password, cache, &my_creds, 0);
+					password, cache, my_creds, 0);
     
         /* Do NOT Forget to zap password  */
     memset((char *) password, 0, pwsize);
