@@ -1,3 +1,15 @@
+2004-02-04  Jeffrey Altman <jaltman@mit.edu>
+
+    * resource.h: add new component id values for ccache
+
+    * Makefile.in: add conditional linkage to krbcc32.lib (if KRB5_KFW_BUILD)
+
+    * gss.rc: add new component for ccache selection
+ 
+    * gss.h, gss.c, gss-client.c: add support for ccache selection and 
+      if built with USE_LEASH add support for dynamic querying of the 
+      available ccache list
+
 2004-01-30  Jeffrey Altman <jaltman@mit.edu>
 
     * resource.h: new file containing new ui component id values
@@ -7,7 +19,7 @@
     * gss.h, gss-misc.c, gss-client.c: Updates to support new UI and 
       corrections to add compatibility with the Unix gss-server
 
-    * Makefile: add linkage to comctl32.lib
+    * Makefile.in: add linkage to comctl32.lib
 
 2002-06-13  Ken Raeburn  <raeburn@mit.edu>
 

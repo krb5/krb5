@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <commctrl.h>
 #include "gss.h"
+#include <krb5.h>
+#ifdef USE_LEASH
+#include <cacheapi.h>
+#endif
 
 #include "resource.h"
 
@@ -38,6 +42,7 @@
 #define INI_LAST_NOWRAP    "No Wrap"
 #define INI_LAST_NOCRYPT   "No Encrypt"
 #define INI_LAST_NOMIC     "No Mic"
+#define INI_LAST_CCACHE    "CCache"
 
 #define MAX_SAVED 9
 char hosts[MAX_SAVED][256];
@@ -48,6 +53,7 @@ char szHost[256];			// GSSAPI Host to connect to
 char szService[256];		// Service to do
 char szMessage[256];        // Message to send
 char szMech[256];			// OID to use
+char szCCache[256];         // CCache to use
 int port = 0;				// Which port to use
 int delegate = 0;           // Delegate?
 int verbose = 1;            // Verbose?
@@ -118,7 +124,8 @@ do_gssapi_test (void) {
 
 	hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
 	n = gss (szHost, szService, szMech, szMessage[0] ? szMessage : "Test Gssapi Message", port,
-             verbose, delegate, gssv1, !noauth, !nowrap, !nocrypt, !nomic, ccount, mcount);
+             verbose, delegate, gssv1, !noauth, !nowrap, !nocrypt, !nomic, ccount, mcount, 
+             szCCache);
 	SetCursor(hcursor);
 
 	if (n)
@@ -146,7 +153,7 @@ OpenGssapiDlg(
 	HDC hDC;									// For getting graphic info
 	DWORD Ext;									// Size of dialog
 	int xExt, yExt;								// Size broken apart
-    char buff[32];
+    char buff[64];
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -170,6 +177,49 @@ OpenGssapiDlg(
 
 		SendMessage(hDlg, WM_SETFOCUS, 0, 0);
 		return (TRUE);
+
+    case WM_HSCROLL:
+		switch (LOWORD(wParam)) {
+		case TB_THUMBTRACK:
+		case TB_THUMBPOSITION: 
+			{
+				long pos = HIWORD(wParam); // the position of the slider
+				int  ctrlID = GetDlgCtrlID((HWND)lParam);
+
+				if (ctrlID == GSS_CALL_COUNT) {
+                    sprintf(buff,"Call Count: %d",pos);
+					SetWindowText(GetDlgItem(hDialog, IDC_STATIC_CCOUNT),buff);
+				}
+				if (ctrlID == GSS_MESSAGE_COUNT) {
+                    sprintf(buff,"Message Count: %d",pos);
+					SetWindowText(GetDlgItem(hDialog, IDC_STATIC_MSG_COUNT),buff);
+				}
+			}
+			break;
+        case TB_BOTTOM:
+        case TB_TOP:
+        case TB_ENDTRACK:
+        case TB_LINEDOWN:
+        case TB_LINEUP:
+        case TB_PAGEDOWN:
+        case TB_PAGEUP:
+		default:
+			{
+				int  ctrlID = GetDlgCtrlID((HWND)lParam);
+				long pos = SendMessage(GetDlgItem(hDialog,ctrlID), TBM_GETPOS, 0, 0); // the position of the slider
+
+				if (ctrlID == GSS_CALL_COUNT) {
+                    sprintf(buff,"Call Count: %d",pos);
+					SetWindowText(GetDlgItem(hDialog, IDC_STATIC_CCOUNT),buff);
+				}
+				if (ctrlID == GSS_MESSAGE_COUNT) {
+                    sprintf(buff,"Message Count: %d",pos);
+					SetWindowText(GetDlgItem(hDialog, IDC_STATIC_MSG_COUNT),buff);
+				}
+			}
+		}
+        break;
+
 
 	case WM_COMMAND:
 		switch (wParam) {
@@ -196,6 +246,7 @@ OpenGssapiDlg(
 			}
 
             GetDlgItemText(hDlg, GSS_MECHANISM, szMech, 256);
+            GetDlgItemText(hDlg, GSS_CCACHE_NAME, szCCache, 256);
             GetDlgItemText(hDlg, GSS_MESSAGE, szMessage, 256);
             GetDlgItemText(hDlg, GSS_PORT, buff, 32);
             if (!*buff) {
@@ -224,7 +275,7 @@ OpenGssapiDlg(
 
 			update_saved ();        			// Add it to the host list
 			fill_combo (hDlg);					// Update the combo box
-            SetDlgItemText(hDlg, GSS_OUTPUT, "", 0);
+            SetDlgItemText(hDlg, GSS_OUTPUT, "");
             do_gssapi_test ();      			// Test GSSAPI
 
 			//EndDialog(hDlg, TRUE);
@@ -342,6 +393,7 @@ read_saved (void) {
     GetPrivateProfileString(INI_LAST, INI_LAST_SVC, "", szService, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_MSG, "", szMessage, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_MECH, "", szMech, 256, GSSAPI_INI);
+    GetPrivateProfileString(INI_LAST, INI_LAST_CCACHE, "", szCCache, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_DELEGATE, "", buff, 32, GSSAPI_INI);
     if ( buff[0] )  
         delegate = atoi(buff);
@@ -412,6 +464,7 @@ write_saved () {
     WritePrivateProfileString(INI_LAST, INI_LAST_PORT, buff, GSSAPI_INI);
     WritePrivateProfileString(INI_LAST, INI_LAST_SVC, szService, GSSAPI_INI);
     WritePrivateProfileString(INI_LAST, INI_LAST_MECH, szMech, GSSAPI_INI);
+    WritePrivateProfileString(INI_LAST, INI_LAST_CCACHE, szCCache, GSSAPI_INI);
     WritePrivateProfileString(INI_LAST, INI_LAST_MSG, szMessage, GSSAPI_INI);
     wsprintf(buff, "%d", delegate);
     WritePrivateProfileString(INI_LAST, INI_LAST_DELEGATE, buff, GSSAPI_INI);
@@ -492,7 +545,12 @@ update_saved (void) {
 static void
 fill_combo (HWND hDlg) {
 	int i;										// Index
-    char buff[32];
+    char buff[256];
+#ifdef USE_LEASH
+    krb5_error_code retval;
+    apiCB * cc_ctx = 0;
+    struct _infoNC ** pNCi = 0;
+#endif
 
 	SendDlgItemMessage(hDlg, GSS_HOST_NAME, CB_RESETCONTENT, 0, 0);
 	SetDlgItemText(hDlg, GSS_HOST_NAME, szHost);
@@ -520,6 +578,37 @@ fill_combo (HWND hDlg) {
 			break;
 		SendDlgItemMessage(hDlg, GSS_MECHANISM, CB_ADDSTRING, 0, (LPARAM) ((LPSTR) mechs[i]));
 	}
+
+    SendDlgItemMessage(hDlg, GSS_CCACHE_NAME, CB_RESETCONTENT, 0, 0);
+	SetDlgItemText(hDlg, GSS_CCACHE_NAME, szCCache);
+	SendDlgItemMessage(hDlg, GSS_CCACHE_NAME, CB_SETEDITSEL, 0, 0);
+
+#ifdef USE_LEASH
+    retval = cc_initialize(&cc_ctx, CC_API_VER_2, NULL, NULL);
+    if (retval)
+        goto skip_ccache;
+
+    retval = cc_get_NC_info(cc_ctx, &pNCi);
+    if (retval) 
+        goto clean_ccache;
+
+    for ( i=0; pNCi[i]; i++ ) {
+        if (pNCi[i]->vers == CC_CRED_V5) {
+            sprintf(buff,"API:%s",pNCi[i]->name);
+            SendDlgItemMessage(hDlg, GSS_CCACHE_NAME, CB_ADDSTRING, 0, (LPARAM) ((LPSTR) buff));
+        }
+    }
+
+  clean_ccache:
+    if (pNCi)
+        cc_free_NC_info(cc_ctx, &pNCi);
+    if (cc_ctx)
+        cc_shutdown(&cc_ctx);
+  skip_ccache:
+#endif /* USE_LEASH */
+    if ( szCCache[0] )
+        SendDlgItemMessage(hDlg, GSS_CCACHE_NAME, CB_ADDSTRING, 0, (LPARAM) ((LPSTR) szCCache));
+    SendDlgItemMessage(hDlg, GSS_CCACHE_NAME, CB_ADDSTRING, 0, (LPARAM) ((LPSTR) "MSLSA:"));
 
 	SendDlgItemMessage(hDlg, GSS_MESSAGE, CB_RESETCONTENT, 0, 0);
 	SetDlgItemText(hDlg, GSS_MESSAGE, szMessage);
@@ -553,14 +642,17 @@ fill_combo (HWND hDlg) {
         EnableWindow(GetDlgItem(hDlg, GSS_NO_MIC), TRUE);
     }
 
-    SendDlgItemMessage(hDlg, GSS_CALL_COUNT, TBM_SETRANGEMIN, (WPARAM) FALSE, (LPARAM) 0);
+    SendDlgItemMessage(hDlg, GSS_CALL_COUNT, TBM_SETRANGEMIN, (WPARAM) FALSE, (LPARAM) 1);
     SendDlgItemMessage(hDlg, GSS_CALL_COUNT, TBM_SETRANGEMAX, (WPARAM) FALSE, (LPARAM) 20);
     SendDlgItemMessage(hDlg, GSS_CALL_COUNT, TBM_SETPOS, (WPARAM) FALSE, (LPARAM) ccount);
+    sprintf(buff,"Call Count: %d",ccount);
+    SetWindowText(GetDlgItem(hDialog, IDC_STATIC_CCOUNT),buff);
 
-    SendDlgItemMessage(hDlg, GSS_MESSAGE_COUNT, TBM_SETRANGEMIN, (WPARAM) FALSE, (LPARAM) 0);
+    SendDlgItemMessage(hDlg, GSS_MESSAGE_COUNT, TBM_SETRANGEMIN, (WPARAM) FALSE, (LPARAM) 1);
     SendDlgItemMessage(hDlg, GSS_MESSAGE_COUNT, TBM_SETRANGEMAX, (WPARAM) FALSE, (LPARAM) 20);
     SendDlgItemMessage(hDlg, GSS_MESSAGE_COUNT, TBM_SETPOS, (WPARAM) FALSE, (LPARAM) mcount);
-
+    sprintf(buff,"Message Count: %d",mcount);
+    SetWindowText(GetDlgItem(hDialog, IDC_STATIC_MSG_COUNT),buff);
 }
 
 int

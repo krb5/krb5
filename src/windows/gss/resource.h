@@ -28,6 +28,9 @@
 #define GSS_OK                          1024
 #define GSS_CANCEL                      1025
 #define IDC_STATIC_PORT                 1026
+#define IDC_STATIC_HOST                 1027
+#define GSS_CCACHE_NAME                 1028
+#define IDC_STATIC_CCACHE               1029
 
 #define IDD_GSSAPIDLG                   101
 
@@ -38,7 +41,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        102
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1027
+#define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
