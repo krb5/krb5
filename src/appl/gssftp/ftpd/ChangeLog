@@ -1,3 +1,7 @@
+Fri May  8 18:06:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpcmd.y (cmd): Fix Y2K problem in the MDTM command.
+
 Fri Apr 10 20:06:31 1998  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.c (receive_data):

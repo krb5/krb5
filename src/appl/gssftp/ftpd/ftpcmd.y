@@ -592,9 +592,10 @@ cmd:		USER SP username CRLF
 					struct tm *gmtime();
 					t = gmtime(&stbuf.st_mtime);
 					reply(213,
-					    "19%02d%02d%02d%02d%02d%02d",
-					    t->tm_year, t->tm_mon+1, t->tm_mday,
-					    t->tm_hour, t->tm_min, t->tm_sec);
+					    "%4d%02d%02d%02d%02d%02d",
+					    1900+t->tm_year, t->tm_mon+1, 
+					    t->tm_mday, t->tm_hour, 
+					    t->tm_min, t->tm_sec);
 				}
 			}
 			if ($4 != NULL)
