@@ -28,6 +28,7 @@
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/sysincl.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -38,11 +39,6 @@
 
 #ifdef _AIX
 #include <sys/select.h>
-#endif
-
-#ifndef AF_MAX
-/* good enough -- only missing on old linux so far anyhow. */
-#define AF_MAX 10
 #endif
 
 /*
@@ -75,7 +71,7 @@ krb5_sendto_kdc (context, message, realm, reply)
     int naddr;
     int sent, nready;
     krb5_error_code retval;
-    int socklist[AF_MAX];		/* one for each, if necessary! */
+    int *socklist;
     fd_set readable;
     struct timeval waitlen;
     int cc;
@@ -88,12 +84,19 @@ krb5_sendto_kdc (context, message, realm, reply)
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
-    
-    for (i = 0; i < AF_MAX; i++)
+
+    socklist = (int *)malloc(naddr * sizeof(int));
+    if (socklist == NULL) {
+	krb5_xfree(addr);
+	krb5_xfree(socklist);
+	return ENOMEM;
+    }
+    for (i = 0; i < naddr; i++)
 	socklist[i] = -1;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
 	krb5_xfree(addr);
+	krb5_xfree(socklist);
 	return ENOMEM;
     }
     reply->length = krb5_max_dgram_size;
@@ -108,35 +111,40 @@ krb5_sendto_kdc (context, message, realm, reply)
 	for (host = 0; host < naddr; host++) {
 	    /* send to the host, wait timeout seconds for a response,
 	       then move on. */
-	    /* cache some sockets for various address families in the
-	       list */
-	    if (socklist[addr[host].sa_family] == -1) {
+	    /* cache some sockets for each host */
+	    if (socklist[host] == -1) {
 		/* XXX 4.2/4.3BSD has PF_xxx = AF_xxx, so the socket
 		   creation here will work properly... */
-		socklist[addr[host].sa_family] = socket(addr[host].sa_family,
-							SOCK_DGRAM,
-							0); /* XXX always zero? */
-		if (socklist[addr[host].sa_family] == -1)
+		/*
+		 * From socket(2):
+		 *
+		 * The protocol specifies a particular protocol to be
+		 * used with the socket.  Normally only a single
+		 * protocol exists to support a particular socket type
+		 * within a given protocol family.
+		 */
+		socklist[host] = socket(addr[host].sa_family, SOCK_DGRAM, 0);
+		if (socklist[host] == -1)
 		    continue;		/* try other hosts */
+		/* have a socket to send/recv from */
+		/* On BSD systems, a connected UDP socket will get connection
+		   refused and net unreachable errors while an unconnected
+		   socket will time out, so use connect, send, recv instead of
+		   sendto, recvfrom.  The connect here may return an error if
+		   the destination host is known to be unreachable. */
+		if (connect(socklist[host],
+			    &addr[host], sizeof(addr[host])) == -1)
+		  continue;
 	    }
-	    /* have a socket to send/recv from */
-	    /* On BSD systems, a connected UDP socket will get connection
-	       refused and net unreachable errors while an unconnected
-	       socket will time out, so use connect, send, recv instead of
-	       sendto, recvfrom.  The connect here may return an error if
-	       the destination host is known to be unreachable. */
-	    if (connect(socklist[addr[host].sa_family],
-			&addr[host], sizeof(addr[host])) == -1)
-	      continue;
-	    if (send(socklist[addr[host].sa_family],
+	    if (send(socklist[host],
 		       message->data, message->length, 0) != message->length)
 	      continue;
 	retry:
 	    waitlen.tv_usec = 0;
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
-	    FD_SET(socklist[addr[host].sa_family], &readable);
-	    if (nready = select(1 + socklist[addr[host].sa_family],
+	    FD_SET(socklist[host], &readable);
+	    if (nready = select(1 + socklist[host],
 				&readable,
 				0,
 				0,
@@ -147,7 +155,7 @@ krb5_sendto_kdc (context, message, realm, reply)
 		    retval = errno;
 		    goto out;
 		}
-		if ((cc = recv(socklist[addr[host].sa_family],
+		if ((cc = recv(socklist[host],
 			       reply->data, reply->length, 0)) == -1)
 		  {
 		    /* man page says error could be:
@@ -192,10 +200,11 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     retval = KRB5_KDC_UNREACH;
  out:
-    for (i = 0; i < AF_MAX; i++)
+    for (i = 0; i < naddr; i++)
 	if (socklist[i] != -1)
 	    (void) close(socklist[i]);
     krb5_xfree(addr);
+    krb5_xfree(socklist);
     if (retval) {
 	free(reply->data);
 	reply->data = 0;

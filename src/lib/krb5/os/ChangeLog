@@ -1,3 +1,10 @@
+Wed Jan 18 11:08:59 1995    <tytso@rsx-11.mit.edu>
+
+	* sendto_kdc.c (krb5_sendto_kdc): Fix use of connected sockets;
+		previously krb5_sendto_kdc only used one socket per
+		address family.  This doesn't work; it now uses one
+		socket per address. (krb5-bugs #938)
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
 	* Actually move the file init_ctx.c to init_os_ctx.c in the CVS
