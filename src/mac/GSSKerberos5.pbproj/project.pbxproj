@@ -1246,6 +1246,17 @@
 			settings = {
 			};
 		};
+		13CD711900D835ED7F000001 = {
+			isa = PBXFileReference;
+			path = ccfns.c;
+			refType = 4;
+		};
+		13CD711A00D835ED7F000001 = {
+			fileRef = 13CD711900D835ED7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		174475CBFF5EEEE312120111 = {
 			buildArgumentsString = "-d3 -f $(SRCROOT)/ErrorTables.jam $(ACTION)";
 			buildPhases = (
@@ -2262,6 +2273,7 @@
 				00CC642E00975C167F000001,
 				00CC642F00975C167F000001,
 				00CC643000975C167F000001,
+				13CD711A00D835ED7F000001,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -3517,6 +3529,7 @@
 				17447865FF60323212120111,
 				17447866FF60323212120111,
 				17447867FF60323212120111,
+				13CD711900D835ED7F000001,
 				1744786BFF60323212120111,
 				1744786FFF60323212120111,
 			);
