@@ -14,25 +14,18 @@
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/param.h>
-#ifdef BSD
-#include <sgtty.h>
-#endif
 
 static ss_data *current_info;
 static jmp_buf listen_jmpb;
 
 static RETSIGTYPE print_prompt()
 {
-#ifdef BSD
-    /* put input into a reasonable mode */
-    struct sgttyb ttyb;
-    if (ioctl(fileno(stdin), TIOCGETP, &ttyb) != -1) {
-	if (ttyb.sg_flags & (CBREAK|RAW)) {
-	    ttyb.sg_flags &= ~(CBREAK|RAW);
-	    (void) ioctl(0, TIOCSETP, &ttyb);
-	}
+    struct termios termbuf;
+
+    if (tcgetattr(STDIN_FILENO, &termbuf) == 0) {
+	termbuf.c_lflag |= ICANON|ISIG|ECHO;
+	tcsetattr(STDIN_FILENO, TCSANOW, &termbuf);
     }
-#endif
     (void) fputs(current_info->prompt, stdout);
     (void) fflush(stdout);
 }

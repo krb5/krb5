@@ -1,3 +1,8 @@
+1999-01-20  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* listen.c (print_prompt): Replace BSD-style ioctl with termios
+		interface.
+
 Mon Apr  6 19:45:25 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (includes): Don't mkdir unless the directory doesn't

@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=util/ss
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
