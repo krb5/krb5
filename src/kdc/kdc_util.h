@@ -107,18 +107,15 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 /* do_as_req.c */
 krb5_error_code process_as_req (krb5_kdc_req *,
 					  const krb5_fulladdr *,
-					  int,
 					  krb5_data ** );
 
 /* do_tgs_req.c */
 krb5_error_code process_tgs_req (krb5_data *,
 					   const krb5_fulladdr *,
-					   int, 
 					   krb5_data ** );
 /* dispatch.c */
 krb5_error_code dispatch (krb5_data *,
 				    const krb5_fulladdr *,
-				    int,
 				    krb5_data **);
 
 /* main.c */
@@ -181,7 +178,6 @@ extern void sockaddr2p (const struct sockaddr *, char *, size_t, int *);
 #ifdef KRB5_KRB4_COMPAT
 krb5_error_code process_v4 (const krb5_data *,
 				      const krb5_fulladdr *,
-				      int is_secondary,
 				      krb5_data **);
 void process_v4_mode (const char *, const char *);
 #else

@@ -53,10 +53,9 @@ static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(pkt, from, portnum, response)
+process_tgs_req(pkt, from, response)
     krb5_data *pkt;
     const krb5_fulladdr *from;	/* who sent it ? */
-    int	portnum;
     krb5_data **response;	/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
@@ -540,9 +539,9 @@ tgt_again:
 		if ((errcode = krb5_unparse_name(kdc_context, client2, &tmp)))
 			tmp = 0;
 		krb5_klog_syslog(LOG_INFO,
-				 "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: "
+				 "TGS_REQ %s: 2ND_TKT_MISMATCH: "
 				 "authtime %d, %s for %s, 2nd tkt client %s",
-				 fromstring, portnum, authtime,
+				 fromstring, authtime,
 				 cname ? cname : "<unknown client>",
 				 sname ? sname : "<unknown server>",
 				 tmp ? tmp : "<unknown>");
@@ -648,10 +647,10 @@ cleanup:
 	if (!errcode)
 	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
         krb5_klog_syslog(LOG_INFO,
-			 "TGS_REQ (%s) %s(%d): %s: authtime %d, "
+			 "TGS_REQ (%s) %s: %s: authtime %d, "
 			 "%s%s %s for %s%s%s",
 			 ktypestr,
-			 fromstring, portnum, status, authtime,
+			 fromstring, status, authtime,
 			 !errcode ? rep_etypestr : "",
 			 !errcode ? "," : "",
 			 cname ? cname : "<unknown client>",

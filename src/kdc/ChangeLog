@@ -1,6 +1,18 @@
+2002-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (dispatch): Remove arg "portnum"; update callers.
+	* do_as_req.c (process_as_req): Ditto.
+	* do_tgs_req.c (process_tgs_req): Ditto.
+	* kerberos_v4.c (process_v4): Remove arg "is_secondary"; update
+	callers.
+	* kdc_util.h (dispatch, process_as_req, process_tgs_req,
+	process_v4): Update prototypes.
+	* main.c (init_realm): Remove unused variable.
+
 2002-06-24  Sam Hartman  <hartmans@mit.edu>
 
-	* kdc_preauth.c (get_etype_info): We get KRB5_KDB_NO_MATCHING_KEY not ENOENT; per 5.27 of kdb_xdr.c.
+	* kdc_preauth.c (get_etype_info): We get KRB5_KDB_NO_MATCHING_KEY
+	not ENOENT; per 5.27 of kdb_xdr.c.
 
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
@@ -32,7 +44,8 @@
 
 2001-11-26  Sam Hartman  <hartmans@mit.edu>
 
-	* main.c (init_realm): Don't seed from current time; krb5_init_context already does that.
+	* main.c (init_realm): Don't seed from current time;
+	krb5_init_context already does that.
 
 2001-10-25  Tom Yu  <tlyu@mit.edu>
 

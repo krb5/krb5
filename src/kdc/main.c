@@ -462,7 +462,6 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     }
 
     if (!rkey_init_done) {
-	krb5_timestamp now;
 	krb5_data seed;
 #ifdef KRB5_KRB4_COMPAT
 	krb5_keyblock temp_key;

@@ -38,10 +38,9 @@
 static krb5_int32 last_usec = 0, last_os_random = 0;
 
 krb5_error_code
-dispatch(pkt, from, portnum, response)
+dispatch(pkt, from, response)
     krb5_data *pkt;
     const krb5_fulladdr *from;
-    int		portnum;
     krb5_data **response;
 {
 
@@ -72,8 +71,8 @@ dispatch(pkt, from, portnum, response)
 	if (name == 0)
 	    name = "[unknown address type]";
 	krb5_klog_syslog(LOG_INFO,
-			 "DISPATCH: repeated (retransmitted?) request from %s port %d, resending previous response",
-			 name, portnum);
+			 "DISPATCH: repeated (retransmitted?) request from %s, resending previous response",
+			 name);
 	return 0;
     }
 #endif
@@ -99,7 +98,7 @@ dispatch(pkt, from, portnum, response)
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
-	retval = process_tgs_req(pkt, from, portnum, response);
+	retval = process_tgs_req(pkt, from, response);
     } else if (krb5_is_as_req(pkt)) {
 	if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
 	    /*
@@ -107,14 +106,14 @@ dispatch(pkt, from, portnum, response)
 	     * pointer.
 	     */
 	    if (!(retval = setup_server_realm(as_req->server))) {
-		retval = process_as_req(as_req, from, portnum, response);
+		retval = process_as_req(as_req, from, response);
 	    }
 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }
 #ifdef KRB5_KRB4_COMPAT
     else if (pkt->data[0] == 4)		/* old version */
-	retval = process_v4(pkt, from, portnum, response);
+	retval = process_v4(pkt, from, response);
 #endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;

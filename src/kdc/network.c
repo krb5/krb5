@@ -320,7 +320,7 @@ void process_packet(port_fd, prog, portnum)
 	break;
     }
     /* this address is in net order */
-    if ((retval = dispatch(&request, &faddr, portnum, &response))) {
+    if ((retval = dispatch(&request, &faddr, &response))) {
 	com_err(prog, retval, "while dispatching");
 	return;
     }

@@ -50,10 +50,9 @@ static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(request, from, portnum, response)
+process_as_req(request, from, response)
     krb5_kdc_req *request;
     const krb5_fulladdr *from;	/* who sent it ? */
-    int	portnum;
     krb5_data **response;	/* filled in with a response packet */
 {
 
@@ -413,10 +412,10 @@ process_as_req(request, from, portnum, response)
 
     rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
     krb5_klog_syslog(LOG_INFO,
-		     "AS_REQ (%s) %s(%d): ISSUE: authtime %d, "
+		     "AS_REQ (%s) %s: ISSUE: authtime %d, "
 		     "%s, %s for %s",
 		     ktypestr,
-	             fromstring, portnum, authtime,
+	             fromstring, authtime,
 		     rep_etypestr,
 		     cname, sname);
 
@@ -431,9 +430,9 @@ process_as_req(request, from, portnum, response)
 
 errout:
     if (status)
-        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s(%d): %s: %s for %s%s%s",
+        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
 			 ktypestr,
-	       fromstring, portnum, status, 
+	       fromstring, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",

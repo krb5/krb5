@@ -212,10 +212,9 @@ void process_v4_mode(program_name, string)
 }
 
 krb5_error_code
-process_v4( pkt, client_fulladdr, is_secondary, resp)
+process_v4( pkt, client_fulladdr, resp)
 const krb5_data *pkt;
 const krb5_fulladdr *client_fulladdr;
-int	is_secondary;
 krb5_data **resp;
 {
     struct sockaddr_in client_sockaddr;
