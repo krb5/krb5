@@ -1,3 +1,7 @@
+Thu Apr 20 11:39:15 1995    <tytso@rsx-11.mit.edu>
+
+	* rsa-md4.h: removed unneeded #include of wordsize.h
+
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
