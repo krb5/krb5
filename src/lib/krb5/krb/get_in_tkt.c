@@ -103,6 +103,7 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     krb5_enctype etypes[1];
     krb5_timestamp time_now;
     krb5_pa_data	*padata;
+    char k4_version;		/* same type as *(krb5_data::data) */
 
     if (! krb5_realm_compare(context, creds->client, creds->server))
 	return KRB5_IN_TKT_REALM_MISMATCH;
@@ -177,6 +178,7 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     if (retval = encode_krb5_as_req(&request, &packet))
 	goto cleanup;
 
+    k4_version = packet->data[0];
     retval = krb5_sendto_kdc(context, packet, 
 			     krb5_princ_realm(context, creds->client), &reply);
     krb5_free_data(context, packet);
@@ -218,8 +220,9 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
 	t_switch = reply.data[1];
 	t_switch &= ~1;
 
-	if (reply.data[0] == V4_KRB_PROT_VERSION
-	    && t_switch == V4_AUTH_MSG_ERR_REPLY) {
+	if (t_switch == V4_AUTH_MSG_ERR_REPLY
+	    && (reply.data[0] == V4_KRB_PROT_VERSION
+		|| reply.data[0] == k4_version)) {
 	    retval = KRB5KRB_AP_ERR_V4_REPLY;
 	} else {
 	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
