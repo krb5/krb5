@@ -8,6 +8,8 @@ LOCAL_SUBDIRS= generic krb5
 ##DOSOBJFILELIST=@generic.lst @krb5.lst
 ##DOSOBJFILEDEP=generic.lst krb5.lst
 
+##DOS##DLL_EXP_TYPE=GSS
+
 MAC_SUBDIRS = generic krb5
 
 LIB=gssapi_krb5
