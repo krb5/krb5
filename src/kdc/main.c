@@ -59,6 +59,7 @@ static int rkey_init_done = 0;
 
 #define	KRB5_KDC_MAX_REALMS	32
 
+#ifdef USE_RCACHE
 /*
  * initialize the replay cache.
  */
@@ -94,6 +95,7 @@ kdc_initialize_rcache(kcontext, rcache_name)
     }
     return(retval);
 }
+#endif
 
 /*
  * Find the realm entry for a given realm.
@@ -799,6 +801,7 @@ char *argv[];
 	    exit(1);
     }
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
+    initialize_kdc5_error_table();
 
     /*
      * Scan through the argument list

@@ -1,3 +1,8 @@
+Wed Oct  8 12:20:35 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (main): Initialize kdc error table with
+	        initialize_kdc_error_table().
+
 Thu Sep 25 21:19:08 1997  Tom Yu  <tlyu@mit.edu>
 
 	* network.c: Replace KRB5_USE_IENT with something more sane.
