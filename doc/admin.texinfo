@@ -1,6 +1,6 @@
+\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
+                                % this line must come *before* \input texinfo
 \input texinfo @c -*-texinfo-*-
-@c Note: the above texinfo file must include the "doubleleftarrow"
-@c definitions added by jcb.
 @c %**start of header
 @c guide
 @setfilename kerberos-admin.info
