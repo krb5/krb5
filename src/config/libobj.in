@@ -40,16 +40,19 @@ PROFFLAGS=@PROFFLAGS@
 # The "STAMP.*" files are there in case the object list happens to be
 # empty.
 OBJS.ST: STAMP.ST
+	touch $@
 STAMP.ST: $(STLIBOBJS)
 	@echo $(STLIBOBJS) > OBJS.ST
 	touch $@
 
 OBJS.SH: STAMP.SH
+	touch $@
 STAMP.SH: $(SHLIBOBJS)
 	@echo $(SHLIBOBJS) > OBJS.SH
 	touch $@
 
 OBJS.PF: STAMP.PF
+	touch $@
 STAMP.PF: $(PFLIBOBJS)
 	@echo $(PFLIBOBJS) > OBJS.PF
 	touch $@

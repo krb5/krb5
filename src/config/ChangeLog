@@ -1,3 +1,9 @@
+Sun Feb  9 13:43:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in (OBJS.*): Work around a gmake optimization where the
+	timestamps of OBJS.* would not get checked after STAMP.* get
+	updated, even though OBJS.* get updated as a side effect.
+
 Fri Feb  7 08:44:32 1997  Richard Basch  <basch@lehman.com>
 
 	* windows.in: Compile win16 non-DLL objects with /GA to add the
