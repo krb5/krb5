@@ -87,7 +87,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype]\n");
+    fprintf(stderr, "\t [-D depth] [-k enctype]\n");
     fprintf(stderr, "\t [-P preauth type] [-R repeat_count]\n");
 
     exit(status);
@@ -95,7 +95,7 @@ int status;
 
 static krb5_preauthtype * patype = NULL, patypedata[2] = { 0, -1 };
 static krb5_context test_context;
-static krb5_keytype keytype;
+static krb5_enctype enctype;
 
 struct timeval	tstart_time, tend_time;
 struct timezone	dontcare;
@@ -123,7 +123,7 @@ main(argc, argv)
     int errflg = 0;
     krb5_error_code code;
     int num_to_check, n, i, j, repeat_count, counter;
-    int n_tried, errors, keytypedone;
+    int n_tried, errors, enctypedone;
     char prefix[BUFSIZ], client[4096], server[4096];
     int depth;
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
@@ -144,7 +144,7 @@ main(argc, argv)
     brief = 0;
     n_tried = 0;
     errors = 0;
-    keytypedone = 0;
+    enctypedone = 0;
 
     while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != EOF) {
 	switch (option) {
@@ -173,8 +173,8 @@ main(argc, argv)
 	    num_to_check = atoi(optarg);
 	    break;
 	case 'k':
-	    keytype = atoi(optarg);
-	    keytypedone++;
+	    enctype = atoi(optarg);
+	    enctypedone++;
 	    break;
 	case 'P':
 	    patypedata[0] = atoi(optarg);
@@ -203,8 +203,8 @@ main(argc, argv)
 
     if (!(num_to_check && prefix[0])) usage(prog, 1);
 
-    if (!keytypedone)
-	keytype = DEFAULT_KDC_KEYTYPE;
+    if (!enctypedone)
+	enctype = DEFAULT_KDC_ENCTYPE;
 
     if (!cur_realm) {
 	if (retval = krb5_get_default_realm(test_context, &cur_realm)) {
@@ -213,9 +213,9 @@ main(argc, argv)
 	}	    
     }
 
-    if (!valid_keytype(keytype)) {
-      com_err(prog, KRB5_PROG_KEYTYPE_NOSUPP,
-	      "while setting up keytype %d", keytype);
+    if (!valid_enctype(enctype)) {
+      com_err(prog, KRB5_PROG_ETYPE_NOSUPP,
+	      "while setting up enctype %d", enctype);
       exit(1);
     }
 
@@ -296,10 +296,10 @@ main(argc, argv)
 
 
 static krb5_error_code 
-get_server_key(context, server, keytype, key)
+get_server_key(context, server, enctype, key)
     krb5_context context;
     krb5_principal server;
-    krb5_keytype keytype;
+    krb5_enctype enctype;
     krb5_keyblock ** key;
 {
     krb5_error_code retval;
@@ -318,8 +318,8 @@ get_server_key(context, server, keytype, key)
     pwd.length = strlen(string);
 
     if (*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))) {
-    	krb5_use_keytype(context, &eblock, keytype);
-    	if (retval = krb5_string_to_key(context, &eblock, keytype, 
+    	krb5_use_enctype(context, &eblock, enctype);
+    	if (retval = krb5_string_to_key(context, &eblock, enctype, 
 				        *key, &pwd, &salt))
 	    free(*key);
     } else 
@@ -407,7 +407,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 
     /* Do server side now */
     if (retval = get_server_key(context, credsp->server,
-				credsp->keyblock.keytype, &keyblock)) {
+				credsp->keyblock.enctype, &keyblock)) {
 	com_err(prog, retval, "while getting server key for %s", hostname);
 	goto cleanup_rdata;
     }

@@ -1,3 +1,7 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdc5_hammer.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
         * kdc5_hammer.c : Remove krb5_enctype references, and replace with
