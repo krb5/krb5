@@ -1,3 +1,9 @@
+Thu Oct  9 20:58:35 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in, Makefile.in: Add test to disable udp test under
+ 	Solaris 2.0 thru 2.5; a getsockname() bug prevents channel
+	bindings from working.
+
 Thu Feb  6 15:58:52 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

@@ -40,7 +40,7 @@ unit-test-:
 
 unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 
-unit-test-body:: unit-test-body-tcp unit-test-body-udp
+unit-test-body:: unit-test-body-tcp @UDP_TEST@
 
 unit-test-body-tcp:
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \

@@ -9,7 +9,18 @@ AC_KRB5_TCL
 if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
  	DO_TEST=ok
 fi
-AC_SUBST(DO_TEST) 
+AC_SUBST(DO_TEST)
+changequote(<<, >>)
+case "$host" in
+*-*-solaris2.[012345]*)
+	UDP_TEST=
+	;;
+*)
+	UDP_TEST=unit-test-body-udp
+	;;
+esac
+changequote([, ])
+AC_SUBST(UDP_TEST)
 dnl
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE
