@@ -1,3 +1,8 @@
+Wed Feb  3 22:57:52 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c: Increase size of subbufer so that we don't truncate
+		mongo-gram tickets from Microsoft.  [telnet/688]
+
 Wed Jan 28 17:21:08 1998  Dan Winship  <danw@mit.edu>
 
 	* telnetd.c (doit): additional fix for previous terminaltype change
