@@ -101,11 +101,14 @@ typedef struct _ss_data {	/* init values */
      (*code_ptr=0,ss_info(sci_idx)->current_request)
 void ss_unknown_function();
 void ss_delete_info_dir();
-int ss_execute_line();
-char **ss_parse();
+char **ss_parse PROTOTYPE((int, char *, int *));
 ss_abbrev_info *ss_abbrev_initialize PROTOTYPE((char *, int *));
-void ss_page_stdin();
-int ss_pager_create();
+void ss_page_stdin PROTOTYPE((void));
+int ss_pager_create PROTOTYPE((void));
+void ss_self_identify __SS_PROTO;
+void ss_subsystem_name __SS_PROTO;
+void ss_subsystem_version __SS_PROTO;
+void ss_unimplemented __SS_PROTO;
 
 extern ss_data **_ss_table;
 extern char *ss_et_msgs[];

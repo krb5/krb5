@@ -48,18 +48,40 @@ typedef struct _ss_rp_options {	/* DEFAULT VALUES */
 void ss_help __SS_PROTO;
 void ss_list_requests __SS_PROTO;
 char *ss_current_request();
-char *ss_name();
 #ifdef __STDC__
+char *ss_name(int);
 void ss_error (int, long, char const *, ...);
 void ss_perror (int, long, char const *);
 int ss_listen (int);
 int ss_create_invocation(char *, char *, char *, ss_request_table *, int *);
+void ss_delete_invocation(int);
+void ss_add_info_dir(int , char *, int *);
+void ss_delete_info_dir(int , char *, int *);
+int ss_execute_command(int sci_idx, char **);
+void ss_abort_subsystem(int, int);
+void ss_set_prompt(int, char *);
+char *ss_get_prompt(int);
+void ss_add_request_table(int, ss_request_table *, int, int *);
+void ss_delete_request_table(int, ss_request_table *, int *);
+int ss_execute_line PROTOTYPE((int, char*));
+int ss_quit PROTOTYPE((int, char**, int, pointer));
 #else
+char *ss_name();
 void ss_error ();
 void ss_perror ();
 int ss_listen ();
 int ss_create_invocation();
-#endif
+void ss_delete_invocation();
+void ss_add_info_dir();
+void ss_delete_info_dir();
+int ss_execute_command();
 void ss_abort_subsystem();
+void ss_set_prompt();
+char *ss_get_prompt();
+void ss_add_request_table();
+void ss_delete_request_table();
+int ss_execute_line();
+int ss_quit();
+#endif
 extern ss_request_table ss_std_requests;
 #endif /* _ss_h */

@@ -1,3 +1,22 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* requests.c (DECLARE): Fix prototype for dispatch functions to
+	properly match what is expected by ss library.
+
+	* pager.c (ss_pager_create): Cast return from fork to int for use
+	in switch statement.
+
+	* ss.h: Provide full prototype for ss_name(). Add prototypes for
+	ss_execute_line(), ss_delete_invocation(), ss_add_info_dir(),
+	ss_delete_info_dir(), ss_abort_subsystem(), ss_get_prompt(),
+	ss_set_prompt(), ss_add_request_table(),
+	ss_delete_request_table(), ss_quit().
+
+	* ss_internal.h: Made full prototypes for ss_parse(),
+	ss_page_stdin(), ss_pagre_create(). Add prototypes for
+	ss_self_identify(), ss_subsystem_name(), ss_subsystem_version(),
+	ss_unimplemented(). Moved ss_execute_line() to ss.h
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* test_ss.c (main): Change usage of ss_listen to agree with 

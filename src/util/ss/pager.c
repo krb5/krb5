@@ -36,7 +36,7 @@ int ss_pager_create()
 	if (pipe(filedes) != 0)
 		return(-1);
 
-	switch(fork()) {
+	switch((int) fork()) {
 	case -1:
 		return(-1);
 	case 0:
@@ -102,7 +102,7 @@ void ss_page_stdin()
 		char buf[80];
 		register int n;
 		while ((n = read(0, buf, 80)) > 0)
-			write(1, buf, n);
+			write(1, buf, (unsigned) n);
 	}
 	exit(errno);
 }
