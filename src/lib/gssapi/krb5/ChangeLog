@@ -1,3 +1,10 @@
+Sat Feb 24 11:45:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rel_oid.c (krb5_gss_internal_release_oid): Change to match prototype.
+
+	* process_context_token.c (krb5_gss_process_context_token): Change
+		to match prototype.
+
 Sat Feb 24 00:06:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapiP_krb5.h: Changed most krb5 gssapi functions to take a

@@ -55,11 +55,12 @@ krb5_gss_release_oid(minor_status, oid)
 
 
 OM_uint32
-krb5_gss_internal_release_oid(context, minor_status, oid)
-    krb5_context context;
+krb5_gss_internal_release_oid(ct, minor_status, oid)
+    void *ct;
     OM_uint32	*minor_status;
     gss_OID	*oid;
 {
+    krb5_context context = ct;
     /*
      * This function only knows how to release internal OIDs. It will
      * return GSS_S_CONTINUE_NEEDED for any OIDs it does not recognize.
