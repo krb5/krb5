@@ -2124,16 +2124,6 @@ error:
 		   exit_status++;
 	      }
 
-	      if (load->create_kadm5 &&
-		  (kret = osa_adb_create_policy_db(&global_params)) &&
-		  kret != EEXIST) {
-		   fprintf(stderr,
-			   "%s: %s while creating new policy db %s\n",
-			   programname, error_message(kret),
-			   global_params.admin_dbname);
-		   exit_status++;
-	      }
-			   
 	      if (kret = osa_adb_rename_policy_db(&newparams,
 						  &global_params)) {
 		   fprintf(stderr,
