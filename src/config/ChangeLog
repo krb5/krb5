@@ -1,3 +1,9 @@
+2004-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*, *-*-gnu*, *-*-k*bsd*-gnu): Don't use the
+	linker option --retain-symbols-file, it doesn't work for shared
+	libraries.
+
 2004-09-17  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (INSTALL_SCRIPT): New variable; use to install scripts,
