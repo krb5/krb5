@@ -89,7 +89,11 @@ print_ut(int all, const struct utmp *u)
 	return;
 #endif
 
+#ifdef HAVE_STRUCT_UTMP_UT_USER
     lu = sizeof(u->ut_user);
+#else
+    lu = sizeof(u->ut_name);
+#endif
     ll = sizeof(u->ut_line);
     printf("%-*.*s:", lu, lu, u->ut_name);
     printf("%-*.*s:", ll, ll, u->ut_line);
@@ -113,7 +117,7 @@ print_ut(int all, const struct utmp *u)
     printf(" %s", ctime(&u->ut_time) + 4);
 #ifdef HAVE_STRUCT_UTMP_UT_HOST
     if (u->ut_host[0])
-	printf(" %s\n", u->ut_host);
+	printf(" %.*s\n", (int) sizeof(u->ut_host), u->ut_host);
 #endif
 
     return;
@@ -194,10 +198,6 @@ main(int argc, char **argv)
 	struct utmpx utx;
 #endif
     } u;
-    struct utmp *utp;
-#ifdef UTMPX
-    struct utmpx *utxp;
-#endif
 
     all = is_utmpx = do_getut = 0;
     recsize = sizeof(struct utmp);
@@ -256,6 +256,7 @@ main(int argc, char **argv)
 	if (is_utmpx) {
 #ifdef UTMPX
 #ifdef HAVE_UTMPXNAME
+	    struct utmpx *utxp;
 	    utmpxname(fn);
 	    setutxent();
 	    while ((utxp = getutxent()) != NULL)
@@ -269,6 +270,7 @@ main(int argc, char **argv)
 #endif
 	} else {
 #ifdef HAVE_UTMPNAME
+	    struct utmp *utp;
 	    utmpname(fn);
 	    setutxent();
 	    while ((utp = getutent()) != NULL)

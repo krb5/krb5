@@ -3,6 +3,13 @@
 	* update_utmp.c (pty_update_utmp): Don't copy host if it's a null
 	pointer.
 
+	* dump-utmp.c (print_ut): Use size of ut_name field, not ut_user,
+	which may not exist, for width when printing ut_name field value.
+	Specify width when printing hostname, it may be unterminated.
+	(main): Move utp and utxp declarations closer to their usages, and
+	make both conditionalized so they're not declared if they're not
+	used.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* libpty.h: Change variable line in prototype to tty_line to
