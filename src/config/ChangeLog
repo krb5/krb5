@@ -1,3 +1,7 @@
+Thu Oct  6 19:41:52 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in: add default all:: rule at the end of pre.in
+
 Thu Aug  4 03:52:23 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* pre.in: strip installed programs by default

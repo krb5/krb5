@@ -49,3 +49,5 @@ SRCTOP = $(srcdir)/$(BUILDTOP)
 SUBDIRS = @SUBDIRS@
 
 TOPLIBD = $(BUILDTOP)/lib
+
+all::
