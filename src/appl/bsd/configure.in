@@ -63,25 +63,8 @@ AC_SUBST(V4RCPO)
 dnl
 AC_VFORK
 AC_TYPE_MODE_T
-AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
-AC_FUNC_CHECK(utimes,AC_DEFINE(HAS_UTIMES))
-AC_CHECK_FUNCS(isatty inet_aton) 
-AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAVE_GETTOSBYNAME))
-AC_FUNC_CHECK(killpg,AC_DEFINE(HAVE_KILLPG))
-AC_FUNC_CHECK(initgroups,AC_DEFINE(HAVE_INITGROUPS))
-AC_FUNC_CHECK(setpriority,AC_DEFINE(HAVE_SETPRIORITY))
-AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
-AC_FUNC_CHECK(setresuid,AC_DEFINE(HAVE_SETRESUID))
-AC_FUNC_CHECK(waitpid,AC_DEFINE(HAVE_WAITPID))
-AC_FUNC_CHECK(setsid,AC_DEFINE(HAVE_SETSID))
-AC_FUNC_CHECK(ptsname,AC_DEFINE(HAVE_PTSNAME))
-AC_FUNC_CHECK(setlogin,AC_DEFINE(HAVE_SETLOGIN))
-AC_FUNC_CHECK(tcgetpgrp,AC_DEFINE(HAVE_TCGETPGRP))
-AC_FUNC_CHECK(tcsetpgrp,AC_DEFINE(HAVE_TCSETPGRP))
-AC_FUNC_CHECK(setpgid,AC_DEFINE(HAVE_SETPGID))
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h )
-AC_CHECK_HEADERS(sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h )
-AC_CHECK_HEADERS(sys/ptyvar.h utmp.h sys/time.h)
+AC_CHECK_FUNCS(isatty inet_aton gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 KRB5_SIGTYPE
@@ -175,8 +158,7 @@ dnl
 dnl
 AC_MSG_CHECKING([/etc/environment])
 AC_CACHE_VAL(krb5_cv_etc_environment,
-[AC_C_CROSS
-if test "$ac_cv_c_cross" = yes; then
+[if test "$cross_compiling" = yes; then
 errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
 )dnl
 AC_MSG_ERROR(Cannot check for file existence when cross compiling)
@@ -195,8 +177,7 @@ dnl
 dnl
 AC_MSG_CHECKING([/etc/TIMEZONE])
 AC_CACHE_VAL(krb5_cv_etc_timezone,
-[AC_C_CROSS
-if test "$ac_cv_c_cross" = yes; then
+[if test "$cross_compiling" = yes; then
 errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
 )dnl
 AC_MSG_ERROR(Cannot check for file existence when cross compiling)

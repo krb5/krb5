@@ -1,3 +1,14 @@
+Sat Feb 28 10:44:46 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Clean up configure script.  Check $cross_compiling
+		instead of (no longer correct) cache variable; remove
+		obsolete AC_C_CROSS.  Use AC_CHECK_FUNCS instead of
+		individual AC_FUNC_CHECK calls for speed.  Change checks
+		for strsave and utimes to use AC_CHECK_FUNCS
+
+	* krcp.c, v4rcp.c: Change usages of HAS_STRSAVE and HAS_UTIMES to
+	 	HAVE_*.
+
 Tue Feb 24 14:52:33 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kcmd.c: Integrate ghudson's changes for client-side krb4

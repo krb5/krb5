@@ -82,7 +82,7 @@ void sink(), source(), rsource(), usage();
 /*VARARGS*/
 void	error();
 int	response();
-#if !defined(HAS_UTIMES)
+#if !defined(HAVE_UTIMES)
 int	utimes();
 #endif
 
@@ -654,7 +654,7 @@ krb5_sigtype lostconn()
 	exit(1);
 }
 
-#if !defined(HAS_UTIMES)
+#if !defined(HAVE_UTIMES)
 #include <utime.h>
 #include <sys/time.h>
 

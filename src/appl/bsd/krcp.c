@@ -883,7 +883,7 @@ krb5_sigtype
 }
 
 
-#if !defined(HAS_UTIMES)
+#if !defined(HAVE_UTIMES)
 #include <utime.h>
 #include <sys/time.h>
 
