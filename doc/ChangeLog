@@ -1,3 +1,9 @@
+2000-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo (Upgrading Existing Kerberos V5 Installations):
+	Add info describing how to preserve policy information while
+	upgrading.  Also needs to go into other sections, possibly.
+
 2000-06-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* build.texinfo: Enter correct xref info for DNS data

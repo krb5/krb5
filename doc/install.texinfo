@@ -1465,27 +1465,29 @@ should be readable only by root.
 
 If you already have an existing Kerberos database that you created with
 a prior release of Kerberos 5, you can upgrade it to work with the
-current release with the @code{kdb5_util} command.  The process for
-upgrading a Master KDC involves the following steps (the lines beginning
-with => indicate a continuation of the previous line):
+current release with the @code{kdb5_util} command.  It is only necessary
+to perform this dump/undump procedure if you were running a krb5-1.0.x
+KDC and are migrating to a krb5-1.1.x or newer KDC.  The process for
+upgrading a Master KDC involves the following steps:
 
 @enumerate
 
-@item Stopping your current KDC and administration
+@item Stop your current KDC and administration
 server processes, if any.
 
-@item Dumping your existing Kerberos database to an ASCII file with 
+@item Dump your existing Kerberos database to an ASCII file with 
 @code{kdb5_util}'s ``dump'' command:
 
 @smallexample
 @group
-@b{shell%} kdb5_util -r @value{PRIMARYREALM} dump
-@result{} @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
+@b{shell%} cd @value{ROOTDIR}/var/krb5kdc
+@b{shell%} kdb5_util dump old-kdb-dump
+@b{shell%} kdb5_util dump -ov old-kdb-dump.ov
 @b{shell%}
 @end group
 @end smallexample
 
-@item Creating a new Master KDC installation (@xref{Install the Master
+@item Create a new Master KDC installation (@xref{Install the Master
 KDC}).  If you have a stash file for your current database, choose any
 new master password but then copy your existing stash file to the
 location specified by your kdc.conf; if you do not have a stash file for
@@ -1496,12 +1498,20 @@ your current database, you must choose the same master password.
 
 @smallexample
 @group
-@b{shell%} kdb5_util load @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
+@b{shell%} cd @value{ROOTDIR}/var/krb5kdc
+@b{shell%} kdb5_util load old-kdb-dump
+@b{shell%} kdb5_util load -update old-kdb-dump.ov
 @b{shell%}
 @end group
 @end smallexample
 
 @end enumerate
+
+The ``dump -ov'' and ``load -update'' commands are necessary in order to
+preserve per-principal policy information, since the default dump format
+filters out that information.  If you omit those steps, the loaded
+database database will lose the policy information for each principal
+that has a policy.
 
 To update a Slave KDC, you must stop the old server processes on the
 Slave KDC, install the new server binaries, reload the most recent slave
