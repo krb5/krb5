@@ -14,8 +14,10 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KTFILE__
-#define __KTFILE__
+#ifndef KRB5_KTFILE__
+#define KRB5_KTFILE__
+
+#include <stdio.h>
 
 /*
  * Constants
@@ -28,12 +30,15 @@
  */
 typedef struct _krb5_ktfile_data {
     char *name;			/* Name of the file */
+    FILE *openf;		/* open file, if any. */
 } krb5_ktfile_data;
 
 /*
  * Macros
  */
+#define KTPRIVATE(id) ((krb5_ktfile_data *)(id)->data)
 #define KTFILENAME(id) (((krb5_ktfile_data *)(id)->data)->name)
+#define KTFILEP(id) (((krb5_ktfile_data *)(id)->data)->openf)
 
 extern struct _krb5_kt_ops krb5_ktf_ops;
 krb5_error_code krb5_ktfile_resolve PROTOTYPE((char *,
@@ -42,10 +47,10 @@ krb5_error_code krb5_ktfile_get_name PROTOTYPE((krb5_keytab,
 						char *,
 						int));
 krb5_error_code krb5_ktfile_close PROTOTYPE((krb5_keytab));
-krb5_error_code krb5_ktfile_get PROTOTYPE((krb5_keytab,
-					   krb5_principal,
-					   krb5_kvno,
-					   krb5_keytab_entry *));
+krb5_error_code krb5_ktfile_get_entry PROTOTYPE((krb5_keytab,
+						 krb5_principal,
+						 krb5_kvno,
+						 krb5_keytab_entry *));
 krb5_error_code krb5_ktfile_start_seq_get PROTOTYPE((krb5_keytab,
 						     krb5_kt_cursor *));
 krb5_error_code krb5_ktfile_get_next PROTOTYPE((krb5_keytab,
@@ -59,4 +64,12 @@ krb5_error_code krb5_ktfile_add PROTOTYPE((krb5_keytab,
 krb5_error_code krb5_ktfile_remove PROTOTYPE((krb5_keytab,
 					      krb5_keytab_entry *));
 
-#endif /* __KTFILE__ */
+krb5_error_code krb5_ktfileint_openr PROTOTYPE((krb5_keytab));
+krb5_error_code krb5_ktfileint_openw PROTOTYPE((krb5_keytab));
+krb5_error_code krb5_ktfileint_close PROTOTYPE((krb5_keytab));
+krb5_error_code krb5_ktfileint_read_entry PROTOTYPE((krb5_keytab,
+						     krb5_keytab_entry **));
+krb5_error_code krb5_ktfileint_write_entry PROTOTYPE((krb5_keytab,
+						      krb5_keytab_entry *));
+
+#endif /* KRB5_KTFILE__ */
