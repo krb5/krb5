@@ -61,6 +61,10 @@ OM_uint32 gss_krb5_copy_ccache
 		   gss_cred_id_t cred_handle,
 		   krb5_ccache out_ccache));
 
+OM_uint32 gss_krb5_ccache_name
+	PROTOTYPE((OM_uint32 *minor_status, const char *name,
+		   const char **out_name));
+
 /* this is for backward compatibility only.  It is declared here for
    completeness, but should not be used */
 
