@@ -15,7 +15,7 @@ proc test100 {} {
 		[config_params {KADM5_CONFIG_PROFILE} /does-not-exist] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "BADFORMAT"
+    } "MISSING_CONF_PARAMS"
 }
 if {$RPC} test100
 
@@ -49,7 +49,7 @@ proc test102 {} {
 		[config_params {KADM5_CONFIG_ADMIN_SERVER} does.not.exist] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "CONFIG_BADFORMAT"
+    } "BAD_SERVER_NAME"
 }
 if {$RPC} test102
 
@@ -570,5 +570,24 @@ proc test153 {} {
     } "GSS_ERROR"
 }
 if {$RPC} test153
+
+test "init 154"
+proc test154 {} {
+    global test env
+
+    set orig $env(KRB5_KDC_PROFILE)
+    set env(KRB5_KDC_PROFILE) /does-not-exist
+    api_exit; api_start
+    set env(KRB5_KDC_PROFILE) $orig
+
+    one_line_fail_test {
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
+		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
+		server_handle
+    } "ENOENT"
+
+    api_exit; lib_start_api
+}
+if {! $RPC} test154
 
 return ""
