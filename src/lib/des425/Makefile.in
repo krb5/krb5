@@ -50,7 +50,7 @@ check-unix:: verify
 check-windows::
 
 clean::
-	$(RM) verify$(EXEEXT)
+	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
 
 libdes425.a: $(OBJS)
 	$(RM) $@

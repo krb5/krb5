@@ -1,3 +1,7 @@
+Wed Mar  8 17:13:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (clean): Dete verify.o on a "make clean".
+
 Wed Mar  1 17:57:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* verify.c: Remove declaration of exit().
