@@ -1,3 +1,8 @@
+2003-03-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_kerb.c: Only include krb.h if krb4 support compiled in,
+	otherwise define ANAME_SZ, INST_SZ and REALM_SZ.
+	
 2003-03-06  Tom Yu  <tlyu@mit.edu>
 
 	* preauth2.c (pa_sam_2): Add intermediate size_t variable to hold
