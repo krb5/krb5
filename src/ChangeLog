@@ -1,3 +1,11 @@
+Thu Aug 15 17:10:58 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove top-level calls to WITH_ANAME_DB and
+		WITH_KDB_DB. 
+
+	* aclocal.m4 (WITH_ANAME_DB, WITH_KDB_DB): Remove --with-aname-db
+		and --with-kdb-db since we're not using any of them.
+
 Thu Aug 15 20:00:15 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* acconfig.h: Remove line with ODBM as definition no longer is

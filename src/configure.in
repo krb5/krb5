@@ -251,12 +251,6 @@ kadminv4=kadmin.v4
 krb524=krb524
 fi
 dnl
-dnl These are here so that the top level configure --help gives useful
-dnl	information. 
-dnl
-WITH_ANAME_DB
-WITH_KDB_DB
-dnl
 CONFIG_DIRS(util include lib $krb524 kdc admin kadmin slave clients appl tests config-files)
 dnl $kadminv4 removed from the above
 DO_SUBDIRS
