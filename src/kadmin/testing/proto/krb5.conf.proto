@@ -1,6 +1,6 @@
 [libdefaults]
 	default_realm = __REALM__
-	default_keytab_name = FILE:/krb5/v5srvtab
+	default_keytab_name = FILE:__K5ROOT__/v5srvtab
 
 [realms]
 	__REALM__ = {
@@ -12,6 +12,6 @@
 	localhost = __REALM__
 
 [logging]
-	admin_server = FILE:/krb5/syslog
-	kdc = FILE:/krb5/syslog
-	default = FILE:/krb5/syslog
+	admin_server = FILE:__K5ROOT__/syslog
+	kdc = FILE:__K5ROOT__/syslog
+	default = FILE:__K5ROOT__/syslog

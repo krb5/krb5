@@ -1,3 +1,7 @@
+Thu Sep 26 17:47:23 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto, kdc.conf.proto: use K5ROOT instead of /krb5
+
 Wed Sep 25 16:20:29 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdc.conf.proto: remove admin_dbname and admin_lockfile
