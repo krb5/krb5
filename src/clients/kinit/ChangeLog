@@ -1,3 +1,8 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* kinit.c: Include krb524.h if suport desired. Clean up
+	addignements in conditionals and do not shadow global variables. 
+
 2000-03-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* kinit.c (k4_kinit): Fix the code that was broken with
