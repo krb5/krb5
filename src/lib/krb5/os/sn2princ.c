@@ -13,7 +13,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_modulsn2princ_c[] =
+static char rcsid_sn2princ_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -36,10 +36,14 @@ register char *s;
 #endif
 
 krb5_error_code
-krb5_sname_to_principal(hostname, sname, ret_princ)
-const char *hostname;
-const char *sname;
-krb5_principal *ret_princ;
+krb5_sname_to_principal(DECLARG(const char *,hostname),
+			DECLARG(const char *,sname),
+			DECLARG(krb5_boolean,canonicalize),
+			DECLARG(krb5_principal *,ret_princ))
+OLDDECLARG(const char *,hostname)
+OLDDECLARG(const char *,sname)
+OLDDECLARG(krb5_boolean,canonicalize)
+OLDDECLARG(krb5_principal *,ret_princ)
 {
     krb5_principal lprinc;
     struct hostent *hp;
@@ -47,14 +51,17 @@ krb5_principal *ret_princ;
     krb5_error_code retval;
     register char **cpp, *cp;
 
-    if (!(hp = gethostbyname(hostname)))
-	return KRB5_ERR_BAD_HOSTNAME;
-
     /* copy the hostname into non-volatile storage */
-    remote_host = malloc(strlen(hp->h_name) + 1);
+
+    if (canonicalize) {
+	if (!(hp = gethostbyname(hostname)))
+	    return KRB5_ERR_BAD_HOSTNAME;
+	remote_host = strdup(hp->h_name);
+    } else {
+	remote_host = strdup(hostname);
+    }
     if (!remote_host)
 	return ENOMEM;
-    (void) strcpy(remote_host, hp->h_name);
 
     for (cp = remote_host; *cp; cp++)
 	if (isupper(*cp))
