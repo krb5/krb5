@@ -181,6 +181,12 @@ expiration date specified in \funcparam{creds{\ptsto}times.endtime} (0
 means as long as possible), session key type specified in
 \funcparam{creds{\ptsto}keyblock.keytype} (if non-zero).
 
+If \funcparam{options} specifies KRB5_GC_CACHED, \funcname{get_credentials}
+will only search the credentials cache for a ticket.  If
+\funcparam{options} specifies KRB5_GC_USER_USER, \funcname{get_credentials}
+will set the KDC_OPT_ENC_TKT_IN_SKEY flag in the KDC request.
+\funcparam{creds{\ptsto}second_ticket} must contain a ticket.
+
 Any returned ticket and intermediate ticket-granting tickets are
 stored in \funcparam{ccache}.
 
@@ -754,8 +760,8 @@ Returns system errors.
 \begin{funcdecl}{krb5_rd_safe}{krb5_error_code}{\funcin}
 \funcarg{krb5_data *}{inbuf}
 \funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_fulladdr *}{sender_addr}
-\funcarg{krb5_fulladdr *}{recv_addr}
+\funcarg{krb5_address *}{sender_addr}
+\funcarg{krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{safe_flags}
 \funcinout
@@ -884,7 +890,9 @@ principal name to the multi-part principal format used in the protocols.
 \funcparam{*principal} will point to allocated storage which should be freed by
 the caller (using \funcname{krb5_free_principal}) after use.
 
-Returns system errors XXX.
+\funcname{krb5_parse_name} returns KRB5_PARSE_MALFORMED if the string is
+ badly formatted, or ENOMEM if space for the return value can't be
+allocated.
 
 \begin{funcdecl}{krb5_unparse_name}{krb5_error_code}{\funcin}
 \funcarg{krb5_principal}{principal}
@@ -898,7 +906,48 @@ format used in the protocols to a single-string representation of the name.
 \funcparam{*name} points to allocated storage and should be freed by the caller
 when finished.
 
-Returns system errors XXX.
+\funcname{krb5_unparse_name} returns KRB_PARSE_MALFORMED if the principal
+does not contain at least 2 components, and system errors (ENOMEM if
+unable to allocate memory).
+
+\begin{funcdecl}{krb5_build_principal}{krb5_error_code}{\funcout}
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{char}{*s1, *s2, ..., 0}
+\end{funcdecl}
+\begin{funcdecl}{krb5_build_principal_va}{krb5_error_code}{\funcout}
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{va_list}{ap}
+\end{funcdecl}
+
+\funcname{krb5_build_principal} and \funcname{krb5_build_principal_va}
+perform the same function; the former takes variadic arguments, while
+the latter takes a pre-computed varargs pointer.
+
+Both functions take a realm name \funcparam{realm}, realm name length
+\funcparam{rlen}, and a list of null-terminated strings, and fill in a
+pointer to a principal structure \funcparam{princ}, making it point to a
+structure representing the named principal.
+The last string must be followed in the argument list by a null pointer.
+
+
+\begin{funcdecl}{krb5_build_principal_ext}{krb5_error_code}{\funcout}
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{}{int len1, char *s1, int len2, char *s2, ..., 0}
+\end{funcdecl}
+
+\funcname{krb5_build_principal_ext} is similar to
+\funcname{krb5_build_principal} but it takes its components as a list of
+(length, contents) pairs rather than a list of null-terminated strings.
+A length of zero indicates the end of the list.
 
 \begin{funcdecl}{krb5_address_search}{krb5_boolean}{\funcin}
 \funcarg{krb5_address *}{addr}
