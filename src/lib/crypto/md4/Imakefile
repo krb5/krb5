@@ -16,4 +16,8 @@ SRCS=	md4.c md4glue.c md4crypto.c
 
 DEFINES= $(DESDEFINES)
 
+/* Make a local copy of the md4 library and also merge it with -des5 */
 Krb5LibraryTarget(md4,$(OBJS))
+
+OtherdirLibraryTarget(..,des5,$(OBJS))
+
