@@ -1,3 +1,7 @@
+2003-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (ETOUT): Replace $(S) with "/".
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (lib/krb4/krb_err_txt.c): Replace $(S) with "/" to

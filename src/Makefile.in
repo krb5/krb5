@@ -367,7 +367,7 @@ ETOUT =	\
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
-	lib$(S)krb4$(S)krb_err_txt.c
+	lib/krb4/krb_err_txt.c
 
 HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
 
