@@ -1,3 +1,8 @@
+Fri Jun 23 12:15:02 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: Typo: krb5_cv_staticlibs_enabled, not
+        krb5_cv_enable_staticlibs
+
 Thu Jun 22 18:03:35 1995  Sam Hartman  (hartmans@tardis)
 
 	* Makefile.in: Treat libcom_err.a as shared, use new conventions
