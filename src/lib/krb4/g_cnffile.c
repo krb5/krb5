@@ -62,17 +62,18 @@ krb__get_srvtabname(default_srvtabname)
 	names[0] = "libdefaults";
 	names[1] = "krb4_srvtab";
 	names[2] = 0;
-	if (krb5__krb4_context &&
-	    (retval = profile_get_values(krb5__krb4_context->profile, names, 
-					 &full_name))
-	    && retval == 0 && full_name && full_name[0]) {
-	    retname = strdup(full_name[0]);
-	    for (cpp = full_name; *cpp; cpp++) 
-		krb5_xfree(*cpp);
-	    krb5_xfree(full_name);
-	}else {
-	    retname = strdup(default_srvtabname);
+	if (krb5__krb4_context) {
+	    retval = profile_get_values(krb5__krb4_context->profile, names, 
+					&full_name);
+	    if (retval == 0 && full_name && full_name[0]) {
+		retname = strdup(full_name[0]);
+		for (cpp = full_name; *cpp; cpp++) 
+		    krb5_xfree(*cpp);
+		krb5_xfree(full_name);
+		return retname;
+	    }
 	}
+	retname = strdup(default_srvtabname);
 	return retname;
 }
 
