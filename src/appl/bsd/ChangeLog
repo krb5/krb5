@@ -1,3 +1,8 @@
+Sat Jan 27 18:40:31 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kcmd.c (kcmd): We no longer need F_SETOWN as nothing in appl/bsd
+        handles oob data with signals any more.
+
 Fri Jan 26 00:37:23 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogin.c (endif

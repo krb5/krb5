@@ -180,9 +180,6 @@ sprintf(cksumbuf, "%u:", ntohs(rport));
 	    krb5_free_creds(bsd_context, get_cred);
 	    return (-1);
     	}
-#ifdef HAVE_SETOWN
-    	fcntl(s, F_SETOWN, pid);
-#endif
     	sin.sin_family = hp->h_addrtype;
     	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, hp->h_length);
     	sin.sin_port = rport;
