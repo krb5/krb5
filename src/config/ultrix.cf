@@ -30,6 +30,7 @@
 #define Bitsize32
 #define	HasVfprintf	YES
 #define	HasStrerror	YES
+#define HasMemmove	YES
 
 /* #define StandardCppDefines -DPOSIX -D_POSIX_SOURCE */
 /* Saber bug doesn't allow deref through const *'s */
