@@ -1,3 +1,11 @@
+Tue Nov  5 18:43:46 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Revert removal of CopySrcHeader, etc., for now.
+
+	* Makefile.in (OBJS): Remove dependency of $(OBJS) on shared, also
+	remove dependency of $(HDRS) on $(HDRDIR).  Both of these to avoid
+	unecessary copying.
+
 Wed Oct 30 13:18:34 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* xdr_stdio.c: Remove the #ifndef mc68000 cruft.  I'm not sure

@@ -80,6 +80,21 @@ AC_SUBST(CRYPTO_SH_VERS)
 COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err
 AC_SUBST(COMERR_SH_VERS)
 
+CopySrcHeader(auth.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(auth_gssapi.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(auth_unix.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(clnt.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(netdb.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(pmap_clnt.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(pmap_prot.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(pmap_rmt.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(rpc.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(rpc_msg.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(svc.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(svc_auth.h,[$](BUILDTOP)/include/rpc)
+CopyHeader(types.h,[$](BUILDTOP)/include/rpc)
+CopySrcHeader(xdr.h,[$](BUILDTOP)/include/rpc)
+
 dnl
 dnl This is gross but necessary because of the way we build shared libs
 dnl
