@@ -26,6 +26,7 @@
  * srv_acl.c - Handle Kerberos ACL related functions.
  */
 #include <stdio.h>
+#include <syslog.h>
 #include <sys/param.h>
 #include <gssapi/gssapi_generic.h>
 #include "k5-int.h"
@@ -73,10 +74,11 @@ static int acl_debug_level = 0;
  */
 static const char *acl_catchall_entry = NULL;
 
-static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
-static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
-static const char *acl_syn_err_msg = "%s: syntax error at line %d <%10s...>\n";
-static const char *acl_cantopen_msg = "\007cannot open ACL file";
+static const char *acl_line2long_msg = "%s: line %d too long, truncated";
+static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s";
+static const char *acl_syn_err_msg = "%s: syntax error at line %d <%10s...>";
+static const char *acl_cantopen_msg = "%s while opening ACL file %s";
+
 
 /*
  * acl_get_line()	- Get a line from the ACL file.
@@ -99,8 +101,9 @@ acl_get_line(fp, lnp)
 
 	/* Check if we exceeded our buffer size */
 	if ((i == BUFSIZ) && (!feof(fp)) && (acl_buf[i] != '\n')) {
-	    fprintf(stderr, acl_line2long_msg, acl_acl_file, *lnp);
+	    krb5_klog_syslog(LOG_ERR, acl_line2long_msg, acl_acl_file, *lnp);
 	    while (fgetc(fp) != '\n');
+	    i--;
 	}
 		acl_buf[i] = '\0';
 	if (acl_buf[0] == (char) EOF)	/* ptooey */
@@ -165,7 +168,7 @@ acl_parse_line(lp)
 		    }
 		}
 		if (!found) {
-		    fprintf(stderr, acl_op_bad_msg, *op, lp);
+		    krb5_klog_syslog(LOG_ERR, acl_op_bad_msg, *op, lp);
 		    opok = 0;
 		}
 	    }
@@ -251,7 +254,7 @@ char tmpbuf[10];
 	    *aentpp = acl_parse_line(alinep);
 	    /* If syntax error, then fall out */
 	    if (!*aentpp) {
-		fprintf(stderr, acl_syn_err_msg,
+		krb5_klog_syslog(LOG_ERR, acl_syn_err_msg,
 			acl_acl_file, alineno, alinep);
 		retval = 0;
 		break;
@@ -275,8 +278,10 @@ char tmpbuf[10];
 	}
     }
     else {
-	com_err(acl_acl_file, errno, acl_cantopen_msg);
-	if (acl_list_head = acl_parse_line(acl_catchall_entry)) {
+	krb5_klog_syslog(LOG_ERR, acl_cantopen_msg,
+			 error_message(errno), acl_acl_file);
+	if (acl_catchall_entry &&
+	    (acl_list_head = acl_parse_line(acl_catchall_entry))) {
 	    acl_list_tail = acl_list_head;
 	}
 	else {

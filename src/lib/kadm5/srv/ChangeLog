@@ -1,3 +1,10 @@
+Tue Dec  3 15:14:29 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_acl.c (acl_load_acl_file): log errors via
+ 	krb5_klog_syslog, not fprintf and com_err [krb5-admin/238]; don't
+ 	coredump when an acl line is too long; handle catchall_entry ==
+ 	NULL
+
 Fri Nov 22 11:11:34 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (SHLIB_LIBS): Do not link shared against -ldb [224]
