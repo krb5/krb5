@@ -1,3 +1,7 @@
+Mon Nov 11 20:51:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.
+
 Thu Nov  7 20:54:24 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.

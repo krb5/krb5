@@ -1,3 +1,7 @@
+Mon Nov 11 20:51:58 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.
+
 Mon Oct 21 17:19:41 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* v4server.0/setup-srvtab.exp: use KRB5_KTNAME instead of

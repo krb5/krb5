@@ -1,3 +1,9 @@
+Mon Nov 11 20:53:01 1996  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (DEJAFLAGS): Change gmake-dependent $(shell uname foo) to
+	use $(host), which will get set by AC_CANONICAL_HOST in
+	configure.in.
+
 Thu Oct 31 17:45:21 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* pre.in (FILE_MANDIR): Create $prefix/include/kerberosIV [36]
