@@ -3,7 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOSVERS_DIR = \vers
 
-MAC_SUBDIRS = crypto krb5 gssapi kadm
+MAC_SUBDIRS = crypto KRB5 gssapi kadm
 
 all-unix::
 
@@ -67,7 +67,8 @@ $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   k5_glue.obj $(KRB5RC) $(KLIBS) $(CLIB) $(WINLIBS) gdi32.lib
+##WIN32##	   k5_glue.obj $(KRB5RC) $(KLIBS) $(CLIB) $(WINLIBS) \
+##WIN32##	   advapi32.lib gdi32.lib
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
