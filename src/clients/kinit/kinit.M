@@ -35,6 +35,7 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 [\fB\-r\fP \fIrenewable_life\fP]
 [\fB\-p\fP | \fB\-P\fP]
 [\fB\-f\fP | \fB\-F\fP]
+[\fB\-a\fP]
 [\fB\-A\fP]
 [\fB\-v\fP] [\fB\-R\fP]
 [\fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]] [\fB\-c\fP \fIcache_name\fP]
@@ -121,6 +122,9 @@ request proxiable tickets.  (Not applicable to Kerberos 4.)
 .TP
 .B \-P
 do not request proxiable tickets.  (Not applicable to Kerberos 4.)
+.TP
+.B \-a
+request tickets with the local address[es].  (Not applicable to Kerberos 4.)
 .TP
 .B \-A
 request address-less tickets.  (Not applicable to Kerberos 4.)

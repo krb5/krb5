@@ -1,3 +1,7 @@
+2002-07-17  Jen Selby <jenselby@mit.edu>
+
+	* kinit.M: added documentation of the "-a" option
+
 2001-12-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.c (main): Fix typo in #ifdef KRB5_KRB4_COMPAT.  Thanks to
