@@ -60,6 +60,7 @@ static krb5_error_code get_first_ticket
 struct sockaddr_in local_sin, remote_sin;
 
 krb5_creds my_creds;
+char cache_name[255] = "";
 
 static void get_def_princ
 	PROTOTYPE((krb5_context,
@@ -67,15 +68,16 @@ static void get_def_princ
 
 void decode_kadmind_reply();
 int print_status_message();
+extern char *optarg;
+extern int optind;
 
+
+void
 main(argc,argv)
   int argc;
   char *argv[];
 {
-    extern char *optarg;
-
     krb5_ccache cache = NULL;
-    char cache_name[255];
 
     krb5_address local_addr, foreign_addr;
 
@@ -104,6 +106,7 @@ main(argc,argv)
     int i, valid;
     int option;
     int oper_type;
+    int nflag = 0;
 
     krb5_init_context(&context);
     krb5_init_ets(context);
@@ -111,64 +114,56 @@ main(argc,argv)
     client_name = (char *) malloc(755);
     memset((char *) client_name, 0, sizeof(client_name));
 
-    if (argc > 3)
-      usage();
-
-    if (argc == 1) {  /* No User Specified */
-	get_def_princ(context, &client);
-	strcpy(client_name, client->data[0].data);
-	strncat(client_name, "/admin@", 7);
-	strncat(client_name, client->realm.data, client->realm.length);
+    while ((option = getopt(argc, argv, "c:n")) != EOF) {
+	switch (option) {
+	  case 'c':
+	    strcpy (cache_name, optarg);
+	    break;
+	  case 'n':
+	    nflag++;
+	    break;
+	  case '?':
+	  default:
+	    usage();
+	    break;
+	}
+    }
+    
+    if (optind < argc) {
+	/* Admin name specified on command line */
+	strcpy(client_name, argv[optind++]);
 	if (retval = krb5_parse_name(context, client_name, &client)) {
-	    fprintf(stderr, "Unable to Parse Client Name!\n");
+	    fprintf(stderr, "Error Parsing %s\n", client_name);
 	    usage();
 	}
     }
     else {
-	while ((option = getopt(argc, argv, "n")) != EOF) {
-	    switch (option) {
-	      case 'n':
-		if (argc == 3) {
-		    strcpy(client_name, argv[2]);
-		    if (retval = krb5_parse_name(context, client_name, &client)) {
-			fprintf(stderr, "Unable to Parse Client Name!\n");
-			usage();
-		    }
-		}
-		else {
-		    get_def_princ(context, &client);
-		    if (retval = krb5_unparse_name(context, client, &client_name)) {
-			fprintf(stderr, "Unable to unparse Client Name!\n");
-			usage();
-		    }
-		}
-		break;
-	      case '?':
-	      default:
-		usage();
-		break;
-	    }
+	/* Admin name should be defaulted */
+	get_def_princ(context, &client);
+	if (retval = krb5_unparse_name(context, client, &client_name)) {
+	    fprintf(stderr, "Unable to unparse default administrator name!\n");
+	    usage();
 	}
-	
-	if (client_name[0] == '\0') { /* No -n option specified */
-	    if (argc > 2)
-	      usage();
-	    strcpy(client_name, argv[1]);
-	    if (!strncmp("help", client_name, strlen(client_name))) 
-	      usage();
-	    if (!strncmp("root", client_name, strlen(client_name))) {
-    		fprintf(stderr, "root is not a valid Administrator!\n\n");
-		usage();
-	    }
-	    if (retval = krb5_parse_name(context, client_name, &client)) {
-		fprintf(stderr, "Error Parsing User Specified Name Option!\n");
-		exit(1);
-	    }
-	} 
-    }	/* switch */
+    }
+
+    /* At this point, both client and client_name are set up. */
+
+    if (!nflag) {
+	strcpy(client_name, client->data[0].data);
+	strncat(client_name, "/admin@", 7);
+	strncat(client_name, client->realm.data, client->realm.length);
+	if (retval = krb5_parse_name(context, client_name, &client)) {
+	    fprintf(stderr, "Unable to Parse %s\n", client_name);
+	    usage();
+	}
+    }
+
+    if (optind < argc)
+	usage();
 
 	/* Create credential cache for kadmin */
-    (void) sprintf(cache_name, "FILE:/tmp/tkt_adm_%d", getpid());
+    if (!cache_name[0])
+        (void) sprintf(cache_name, "FILE:/tmp/tkt_adm_%d", getpid());
 
     if ((retval = krb5_cc_resolve(context, cache_name, &cache))) {
 	fprintf(stderr, "Unable to Resolve Cache: %s!\n", cache_name);
@@ -617,7 +612,7 @@ get_first_ticket(context, cache, client)
     krb5_free_addresses(context, my_addresses);
     
     if (retval) {
-            fprintf(stderr, "\nUnable to Get Initial Credentials : %s!\n",
+            fprintf(stderr, "\nUnable to Get Initial Credentials: %s!\n",
                         error_message(retval));
             return(1);
     }

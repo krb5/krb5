@@ -1,3 +1,10 @@
+Fri Feb  3 03:03:27 1995  John Gilmore  <gnu@cygnus.com>
+
+	* kadmin.c (main):  Real live non-kludged argument parsing.
+	Add -c option to specify ticket cache location (it really
+	should just use a cache in memory in the process, but that
+	isn't written yet).  Make some error messages more explicit!
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
