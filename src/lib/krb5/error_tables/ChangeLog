@@ -1,3 +1,7 @@
+2000-06-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* init_ets.c: Remove unused variable.
+
 1999-12-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_OBSOLETE_FN): New error code.

@@ -29,8 +29,6 @@
 
 #include "k5-int.h"
 
-static int et_init = 0;
-
 void
 krb5_init_ets (context)
      krb5_context context;
