@@ -286,8 +286,8 @@ void krb5_free_enc_tkt_part
 	PROTOTYPE((krb5_enc_tkt_part * ));
 void krb5_free_ticket
 	PROTOTYPE((krb5_ticket * ));
-void krb5_free_as_req
-	PROTOTYPE((krb5_as_req * ));
+void krb5_free_kdc_req
+	PROTOTYPE((krb5_kdc_req * ));
 void krb5_free_kdc_rep
 	PROTOTYPE((krb5_kdc_rep * ));
 void krb5_free_last_req
@@ -300,10 +300,6 @@ void krb5_free_ap_req
 	PROTOTYPE((krb5_ap_req * ));
 void krb5_free_ap_rep
 	PROTOTYPE((krb5_ap_rep * ));
-void krb5_free_tgs_req
-	PROTOTYPE((krb5_tgs_req * ));
-void krb5_free_tgs_req_enc_part
-	PROTOTYPE((krb5_tgs_req_enc_part * ));
 void krb5_free_safe
 	PROTOTYPE((krb5_safe * ));
 void krb5_free_priv
