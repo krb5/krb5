@@ -252,7 +252,7 @@ krb5_error_code kg_make_confounder (krb5_context context,
 krb5_error_code kg_encrypt (krb5_context context, 
 				      krb5_keyblock *key, int usage,
 				      krb5_pointer iv,
-				      krb5_pointer in,
+				      krb5_const_pointer in,
 				      krb5_pointer out,
 				      unsigned int length);
 krb5_error_code
@@ -264,7 +264,7 @@ kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
 krb5_error_code kg_decrypt (krb5_context context,
 				      krb5_keyblock *key,  int usage,
 				      krb5_pointer iv,
-				      krb5_pointer in,
+				      krb5_const_pointer in,
 				      krb5_pointer out,
 				      unsigned int length);
 

@@ -1,3 +1,10 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_crypt.c (kg_encrypt, kg_decrypt): Input pointer now points
+	to const.
+	* gssapiP_krb5.h: Declarations updated.
+	* util_seed.c (zeros): Now const.
+
 2003-12-19  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c: Include k5-int.h for accessor.

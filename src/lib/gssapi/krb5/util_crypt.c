@@ -96,7 +96,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
      krb5_keyblock *key;
      int usage;
      krb5_pointer iv;
-     krb5_pointer in;
+     krb5_const_pointer in;
      krb5_pointer out;
      unsigned int length;
 {
@@ -140,7 +140,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
      krb5_keyblock *key;
      int usage;
      krb5_pointer iv;
-     krb5_pointer in;
+     krb5_const_pointer in;
      krb5_pointer out;
      unsigned int length;
 {
