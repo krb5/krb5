@@ -484,6 +484,9 @@ krb_get_krbhst(
 	    strcpy(host, scratch);
 	    return KSUCCESS;
 	}
+	if (i > 0)
+	    /* Found some, but not as many as requested.  */
+	    return KFAILURE;
     } while (0);
 #ifdef KRB5_DNS_LOOKUP
     do {

@@ -1,3 +1,9 @@
+2003-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* RealmsConfig-glue.c (krb_get_krbhst): Don't fall back to DNS if
+	entries were found in krb.conf, and just not enough to fill the
+	request.
+
 2003-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* RealmsConfig-glue.c: Include k5-int.h.
