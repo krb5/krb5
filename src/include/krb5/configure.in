@@ -119,9 +119,9 @@ fi
 dnl
 
 dnl Word sizes...
-AC_SIZEOF_TYPE(short)
-AC_SIZEOF_TYPE(int)
-AC_SIZEOF_TYPE(long)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
 
 dnl then from osconf.h, we have
 AC_TIME_WITH_SYS_TIME

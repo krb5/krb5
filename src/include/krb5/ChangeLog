@@ -1,5 +1,8 @@
 Fri Feb  3 07:57:31 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* configure.in: Use politically correct name of AC_CHECK_SIZEOF
+		instead of AC_SIZEOF_TYPE.
+
         * configure.in:
         * wordsize.h: Don't use BITS16, BITS32, etc. anymore.  Use
                 autoconf's SIZEOF_INT and SIZEOF_LONG definitions to make
