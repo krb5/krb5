@@ -1,3 +1,8 @@
+Mon Feb 10 21:30:41 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* com_err.c, com_err.h (com_err_va): Fix broken Windows 16
+		declaration.  (Should be KRB5_CALLCONV, and using ET_P)
+
 Fri Feb  7 22:10:23 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* compile_et.c: Change the emitted name of the struct error_table
