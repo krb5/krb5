@@ -24,6 +24,13 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_ext=so
 	krb5_cv_shlibs_dir=shared
 	;;
+alpha-dec-osf*)
+	echo "Enabling shared libraries for Alpha OSF...."
+	krb5_cv_shlibs_cflags=
+	krb5_cv_shlibs_ext=so
+	krb5_cv_shlibs_dir=
+	;;
+
 *) 
 	echo " "
 	echo "Shared libraries not supported on $krb5_cv_host"
