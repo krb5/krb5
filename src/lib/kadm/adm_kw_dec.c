@@ -27,6 +27,7 @@
  */
 #include "k5-int.h"
 #include "adm.h"
+#include "adm_proto.h"
 
 #define	char2int(c)	((c) - '0')
 

@@ -27,6 +27,8 @@
  */
 #include "k5-int.h"
 #include "adm.h"
+#include "adm_proto.h"
+
 
 /*
  * krb5_adm_ktent_to_proto()	- Convert a keytab entry into an external

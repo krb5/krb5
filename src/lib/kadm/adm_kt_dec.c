@@ -27,6 +27,7 @@
  */
 #include "k5-int.h"
 #include "adm.h"
+#include "adm_proto.h"
 
 /*
  * krb5_adm_proto_to_ktent()	- Convert a list of reply components to

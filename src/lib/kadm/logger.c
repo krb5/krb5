@@ -26,6 +26,7 @@
  * logger.c	- Handle logging functions for those who want it.
  */
 #include "k5-int.h"
+#include "adm_proto.h"
 #include "com_err.h"
 #include <stdio.h>
 #if	HAVE_SYSLOG_H

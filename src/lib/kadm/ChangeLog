@@ -1,8 +1,11 @@
-
 Mon Jul 17 15:16:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* alt_prof.c - Add krb5_{read,free}_realm_params() to read in per-
 		realm KDC data and to free the allocated structure.
 
+Mon Jul 10 17:59:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_kt_dec.c, adm_kt_enc.c, adm_kw_dec.c, adm_kw_enc.c,
+		alt_prof.c, logger.c: Include adm_proto.h for prototypes.
 
 Fri Jul 7 16:23:57 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, it's set by configure.  Find com_err
