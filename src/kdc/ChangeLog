@@ -1,3 +1,10 @@
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (verify_enc_timestamp): Save decryption error, in
+	case we get NO_MATCHING_KEY later.  This allows us to log a more
+	sane error if an incorrect password is used for encrypting the
+	enc-timestamp preauth.
+
 2003-03-16  Sam Hartman  <hartmans@mit.edu>
 
 	* main.c (initialize_realms): Add support to call
