@@ -1,3 +1,8 @@
+1999-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install): Install port-sockets.h, needed by
+	kerberosIV/krb.h.
+
 1999-09-13  Miro Jurisic <meeroh@mit.edu>
 
     * win-mac.h:  Remove #define HAVE_STRING_H for MacOS builds (it's already

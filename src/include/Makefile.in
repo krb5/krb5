@@ -72,3 +72,5 @@ clean-windows::
 install:: krb5.h profile.h
 	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
 	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h
+	$(INSTALL_DATA) $(srcdir)/port-sockets.h \
+		$(DESTDIR)$(KRB5_INCDIR)$(S)port-sockets.h
