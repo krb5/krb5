@@ -28,5 +28,6 @@ error_table	kdc5
 error_code KDC5_RCSID,		"$Id$"
 error_code KDC5_NOPORT,		"No server port found"
 error_code KDC5_NONET,		"Network not initialized"
+error_code KDC5_IO_RESPONSE,	"Short write while sending response"
 
 end
