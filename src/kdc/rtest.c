@@ -26,6 +26,34 @@
 #include "k5-int.h"
 #include <stdio.h>
 #include "kdc_util.h"
+#include "extern.h"
+
+krb5_principal 
+make_princ(ctx, str, prog)
+    krb5_context ctx;
+    const char *str;
+    const char *prog;
+{
+    krb5_principal ret;
+    char *dat;
+
+    if(!(ret = (krb5_principal) malloc(sizeof(krb5_principal_data)))) {
+	  com_err(prog, ENOMEM, "while allocating principal data");
+	  exit(3);
+    }
+    memset(ret, 0, sizeof(krb5_principal_data));
+
+    /* We do not include the null... */
+    if(!(dat = (char *) malloc(strlen(str)))) {
+	  com_err(prog, ENOMEM, "while allocating principal realm data");
+	  exit(3);
+    }
+    memcpy(dat, str, strlen(str));
+    krb5_princ_set_realm_data(ctx, ret, dat);
+    krb5_princ_set_realm_length(ctx, ret, strlen(str));
+    
+    return ret;
+}
 
 void
 main(argc,argv)
@@ -34,47 +62,50 @@ main(argc,argv)
     {
 	krb5_data otrans;
 	krb5_data ntrans;
-
-	krb5_data *tgnames[10];
-	krb5_principal tgs = tgnames;
-	krb5_data tgsrlm;
-
-	krb5_data *cnames[10];
-	krb5_principal cl = cnames;
-	krb5_data crlm;
-
-	krb5_data *snames[10];
-	krb5_principal sv = snames;
-	krb5_data srlm;
+	krb5_principal tgs, cl, sv;
+	krb5_error_code kret;
+	kdc_realm_t	kdc_realm;
 
 	if (argc < 4) {
 	    fprintf(stderr, "not enough args\n");
 	    exit(1);
 	}
+
+
+	/* Get a context */
+	kret = krb5_init_context(&kdc_realm.realm_context);
+	if (kret) {
+	  com_err(argv[0], kret, "while getting krb5 context");
+	  exit(2);
+	}
+	/* Needed so kdc_context will work */
+	kdc_active_realm = &kdc_realm;
+
 	ntrans.length = 0;
-	otrans.length = strlen(argv[1]) + 1;
+	ntrans.data = 0;
+
+	otrans.length = strlen(argv[1]);
 	otrans.data = (char *) malloc(otrans.length);
-	strcpy(otrans.data,argv[1]);
+	memcpy(otrans.data,argv[1], otrans.length);
 
-	tgsrlm.length = strlen(argv[2]) + 1;
-	tgsrlm.data = (char *) malloc(tgsrlm.length);
-	strcpy(tgsrlm.data,argv[2]);
-	tgs[0] = &tgsrlm;
-
-	crlm.length = strlen(argv[3]) + 1;
-	crlm.data = (char *) malloc(crlm.length);
-	strcpy(crlm.data,argv[3]);
-	cl[0] = &crlm;
-
-	srlm.length = strlen(argv[4]) + 1;
-	srlm.data = (char *) malloc(srlm.length);
-	strcpy(srlm.data,argv[4]);
-	sv[0] = &srlm;
+	tgs = make_princ(kdc_context, argv[2], argv[0]);
+	cl  = make_princ(kdc_context, argv[3], argv[0]);
+	sv  = make_princ(kdc_context, argv[4], argv[0]);
 	
 	add_to_transited(&otrans,&ntrans,tgs,cl,sv);
 
 	printf("%s\n",ntrans.data);
 
+	/* Free up all memory so we can profile for leaks */
+	free(otrans.data);
+	free(ntrans.data);
+
+	krb5_free_principal(kdc_realm.realm_context, tgs);
+	krb5_free_principal(kdc_realm.realm_context, cl);
+	krb5_free_principal(kdc_realm.realm_context, sv);
+	krb5_free_context(kdc_realm.realm_context);
+
+	exit(0);
     }
 
-krb5_encrypt_block master_encblock;
+void krb5_klog_syslog() {}

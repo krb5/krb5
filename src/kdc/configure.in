@@ -32,6 +32,7 @@ if test "$withval" = yes; then
 	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB)
 fi
 dnl
-
+dnl
+KRB5_RUN_FLAGS
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

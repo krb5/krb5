@@ -537,7 +537,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 {
   char        *realm;
   char        *trans;
-  char        *otrans;
+  char        *otrans, *otrans_ptr;
 
   /* The following are for stepping through the transited field     */
 
@@ -558,17 +558,28 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
   realm[krb5_princ_realm(kdc_context, tgs)->length] = '\0';
 
   if (!(otrans = (char *) malloc(tgt_trans->length+1))) {
+    free(realm);
     return(ENOMEM);
   }
   memcpy(otrans, tgt_trans->data, tgt_trans->length);
   otrans[tgt_trans->length] = '\0';
+  /* Keep track of start so we can free */
+  otrans_ptr = otrans;
 
-  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 1))) {
+  /* +1 for null, 
+     +1 for extra comma which may be added between
+     +1 for potential space when leading slash in realm */
+  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 3))) {
+    free(realm);
+    free(otrans_ptr);
     return(ENOMEM);
   }
 
   if (new_trans->data)  free(new_trans->data);
   new_trans->data = trans;
+  new_trans->length = 0;
+
+  trans[0] = '\0';
 
   /* For the purpose of appending, the realm preceding the first */
   /* realm in the transited field is considered the null realm   */
@@ -706,6 +717,8 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
     new_trans->length = strlen(trans) + 1;
   }
 
+  free(realm);
+  free(otrans_ptr);
   return(0);
 }
 

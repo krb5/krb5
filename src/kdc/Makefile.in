@@ -1,8 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-all:: krb5kdc
+all:: krb5kdc rtest
 
 DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
@@ -37,6 +38,11 @@ OBJS= \
 	replay.o \
 	kerberos_v4.o
 
+RT_OBJS= rtest.o \
+	kdc_util.o \
+	policy.o \
+	extern.o
+
 depend:: kdc5_err.c
 
 logger.c: $(SRCTOP)/lib/kadm5/logger.c
@@ -54,10 +60,19 @@ kdc5_err.o: kdc5_err.h
 krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb5kdc $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS)
 
+rtest: $(RT_OBJS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o rtest $(RT_OBJS) $(KADM_COMM_LIBS) $(KRB5_BASE_LIBS) 
+
+check-unix:: rtest
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) $(srcdir)/rtscript > test.out
+	cmp test.out $(srcdir)/rtest.good
+	$(RM) test.out
+
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 	$(INSTALL_DATA) $(srcdir)/krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
 
 clean::
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc logger.c
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc logger.c rtest.o rtest
 
