@@ -1,5 +1,10 @@
 Wed Aug  9 00:16:40 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
+	* pty-int.h (VHANG_first): Change defines so VHANG_FIRST doesn't
+        get defined under Ultrix because Ultrix can only establish
+        controlling terminal once per process and we need to get
+        controlling terminal again after vhangup().
+
 	* getpty.c (pty_getpty): Use the right test for slave buffer length.
 
 Tue Aug  8 22:20:33 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
