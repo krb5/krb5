@@ -1,3 +1,20 @@
+2002-08-23  Tom Yu  <tlyu@mit.edu>
+
+	* dump.c (dump_db): Update usage comment.  Add "-rev" and
+	"-recurse" flags to permit reverse and recursive dumping of the
+	database, respectively.  Check for dump filename beginning with
+	"-" to avoid accidental dumps to such filenames.
+
+	* kdb5_util.c (usage): Update to match reality, primarily by
+	updating the "dump" usage, but also showing global options before
+	the command, which is how they were being interpreted anyway.
+
+	* kdb5_util.M: Update to match reality.  Document "-mkey_convert",
+	"-new_mkey_file", "-rev", and "-recurse" options to "dump".
+	Document "dump to stdout" behavior.  Show global options before
+	the command.  Make some formatting fixes.  s/binary tree/btree/
+	since the btree back end is actually an n-ary tree.
+
 2002-08-14  Jen Selby <jenselby@mit.edu>
 
 	* dump.c: added -mkey_convert and -new_mkey_file to the usage

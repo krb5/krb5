@@ -43,6 +43,9 @@
 static int			mkey_convert;
 static krb5_keyblock		new_master_keyblock;
 
+static int	backwards;
+static int	recursive;
+
 /*
  * Use compile(3) if no regcomp present.
  */
@@ -1002,7 +1005,8 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 /*
  * usage is:
  *	dump_db [-old] [-b6] [-b7] [-ov] [-verbose] [-mkey_convert]
- *	[-new_mkey_file] [filename [principals...]]
+ *		[-new_mkey_file mkey_file] [-rev] [-recurse]
+ *		[filename [principals...]]
  */
 void
 dump_db(argc, argv)
@@ -1031,6 +1035,8 @@ dump_db(argc, argv)
     arglist.verbose = 0;
     new_mkey_file = 0;
     mkey_convert = 0;
+    backwards = 0;
+    recursive = 0;
 
     /*
      * Parse the qualifiers.
@@ -1051,7 +1057,11 @@ dump_db(argc, argv)
 	else if (!strcmp(argv[aindex], "-new_mkey_file")) {
 	    new_mkey_file = argv[++aindex];
 	    mkey_convert = 1;
-        } else
+        } else if (!strcmp(argv[aindex], "-rev"))
+	    backwards = 1;
+	else if (!strcmp(argv[aindex], "-recurse"))
+	    recursive = 1;
+	else
 	    break;
     }
 
@@ -1123,6 +1133,11 @@ dump_db(argc, argv)
     locked = 0;
     if (ofile && strcmp(ofile, "-")) {
 	/*
+	 * Discourage accidental dumping to filenames beginning with '-'.
+	 */
+	if (ofile[0] == '-')
+	    usage();
+	/*
 	 * Make sure that we don't open and truncate on the fopen,
 	 * since that may hose an on-going kprop process.
 	 * 
@@ -1159,9 +1174,10 @@ dump_db(argc, argv)
 	if (dump->header[strlen(dump->header)-1] != '\n')
 	     fputc('\n', arglist.ofile);
 	
-	if ((kret = krb5_db_iterate(util_context,
-				    dump->dump_princ,
-				    (krb5_pointer) &arglist))) {
+	if ((kret = krb5_db_iterate_ext(util_context,
+					dump->dump_princ,
+					(krb5_pointer) &arglist,
+					backwards, recursive))) {
 	     fprintf(stderr, dumprec_err,
 		     programname, dump->name, error_message(kret));
 	     exit_status++;

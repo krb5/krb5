@@ -3,11 +3,12 @@
 kdb5_util \- Kerberos database maintainance utility
 .SH SYNOPSIS
 .B kdb5_util
-.I command
 [\fB\-r\fP\ \fIrealm\fP] [\fB\-d\fP\ \fIdbname\fP]
 [\fB\-k\fP\ \fImkeytype\fP] [\fB\-M\fP\ \fImkeyname\fP]
+[\fB\-sf\fP\ \fIstashfilename\fP]
 [\fB\-m\fP]
-.I command_options
+.I command
+.I [command_options]
 .SH DESCRIPTION
 .B kdb5_util
 allows an administrator to perform low-level maintainance procedures on
@@ -90,11 +91,16 @@ Stores the master principal's keys in a stash file.  The
 argument can be used to override the keyfile specified at startup.
 .TP
 \fBdump\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-b7\fP] [\fB\-ov\fP]
-[\fB\-verbose\fP] [\fIfilename\fP [\fIprincipals...\fP]]
+[\fB\-verbose\fP] [\fB\-mkey_convert\fP]
+[\fB\-new_mkey_file\fP \fImkey_file\fP] [\fB\-rev\fP] [\fB\-recurse\fP]
+[\fIfilename\fP [\fIprincipals...\fP]]
 .br
 Dumps the current Kerberos and KADM5 database into an ASCII file.  By
 default, the database is dumped in current format, "kdb5_util
-load_dumpversion 5".  Options:
+load_dumpversion 5".  If
+.I filename
+is not specified, or is the string "\-", the dump is sent to standard
+output.  Options:
 .RS
 .TP
 .B \-old
@@ -116,6 +122,27 @@ format.
 .B \-verbose
 causes the name of each principal and policy to be printed as it is
 dumped.
+.TP
+.B \-mkey_convert
+prompts for a new master key.  This new master key will be used to
+re-encrypt the key data in the dumpfile.  The key data in the database
+will not be changed.
+.TP
+.B \-new_mkey_file \fImkey_file\fP
+the filename of a stash file.  The master key in this stash file will
+be used to re-encrypt the key data in the dumpfile.  The key data in
+the database will not be changed.
+.TP
+.B \-rev
+dumps in reverse order.  This may recover principals that do not dump
+normally, in cases where database corruption has occured.
+.TP
+.B \-recurse
+causes the dump to walk the database recursively (btree only).  This
+may recover principals that do not dump normally, in cases where
+database corruption has occured.  In cases of such corruption, this
+option will probably retrieve more principals than the \fB\-rev\fP
+option will.
 .RE
 .TP
 \fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-b7\fP] [\fB\-ov\fP] [\fB\-hash\fP]
@@ -126,7 +153,7 @@ Unless the
 .B \-old
 or 
 .B \-b6
-option is givnen, the format of the dump file is detected
+option is given, the format of the dump file is detected
 automatically and handled as appropriate.  Unless the
 .B \-update
 option is given, 
@@ -156,7 +183,7 @@ option.
 .TP
 .B \-hash
 requires the database to be stored as a hash.  If this option is not
-specified, the database will be stored as a binary tree.  This option
+specified, the database will be stored as a btree.  This option
 is not recommended, as databases stored in hash format are known to
 corrupt data and lose principals.
 .TP
@@ -184,8 +211,9 @@ Dumps the current database into the Kerberos 4 database dump format.
 The \-S option specifies the short lifetime algorithm.
 .TP
 \fBload_v4\fP [\fB\-T\fP] [\fB\-v\fP] [\fB\-h\fP] [\fB\-S\fP]
-[\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\ \fIstashfile\fP]
+[\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\fP\ \fIstashfile\fP]
 \fIinputfile\fP
+.br
 Loads a Kerberos 4 database dump file.  Options:
 .RS
 .TP
@@ -214,7 +242,7 @@ the keys to the current database.
 Uses the short lifetime algorithm for conversion.
 .TP
 .B \-h
-Stores the database as a hash instead of a binary tree.  This option is
+Stores the database as a hash instead of a btree.  This option is
 not recommended, as databases stored in hash format are known to
 corrupt data and lose principals.
 .PP
@@ -229,6 +257,7 @@ record; Version 5 stores a seperate modification time and last
 password change time.  In practice, Version 4 "modifications" were
 always password changes.  \fIload_v4\fP copies the value into both
 fields.
+.RE
 .TP
 \fBark\fP
 Adds a random key.
