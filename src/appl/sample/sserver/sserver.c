@@ -49,13 +49,17 @@
 #include <netdb.h>
 #include <syslog.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "../sample.h"
 
 extern krb5_deltat krb5_clockskew;
 
 #define DEBUG
 
-void
+static void
 usage(name)
     char *name;
 {
@@ -114,7 +118,7 @@ main(argc, argv)
 	service = optarg;
 	break;
     case 'S':
-	if (retval = krb5_kt_resolve(context, optarg, &keytab)) {
+	if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
 	    com_err(progname, retval,
 		    "while resolving keytab file %s", optarg);
 	    exit(2);
@@ -136,8 +140,9 @@ main(argc, argv)
 	    port = atoi(argv[1]);
     }
 
-    if (retval = krb5_sname_to_principal(context, NULL, service, 
-					 KRB5_NT_SRV_HST, &server)) {
+    retval = krb5_sname_to_principal(context, NULL, service, 
+				     KRB5_NT_SRV_HST, &server);
+    if (retval) {
 	syslog(LOG_ERR, "while generating service name (%s): %s",
 	       service, error_message(retval));
 	exit(1);
@@ -150,7 +155,7 @@ main(argc, argv)
 
     if (port) {
 	int acc;
-	struct sockaddr_in sin;
+	struct sockaddr_in sockin;
 
 	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 	    syslog(LOG_ERR, "socket: %m");
@@ -160,10 +165,10 @@ main(argc, argv)
 	(void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
 			  sizeof(on));
 
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = 0;
-	sin.sin_port = htons(port);
-	if (bind(sock, (struct sockaddr *) &sin, sizeof(sin))) {
+	sockin.sin_family = AF_INET;
+	sockin.sin_addr.s_addr = 0;
+	sockin.sin_port = htons(port);
+	if (bind(sock, (struct sockaddr *) &sockin, sizeof(sockin))) {
 	    syslog(LOG_ERR, "bind: %m");
 	    exit(3);
 	}
@@ -190,17 +195,19 @@ main(argc, argv)
 	sock = 0;
     }
 
-    if (retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
-			       SAMPLE_VERSION, server, 
-			       0,	/* no flags */
-			       keytab,	/* default keytab is NULL */
-			       &ticket)) {
+    retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
+			   SAMPLE_VERSION, server, 
+			   0,	/* no flags */
+			   keytab,	/* default keytab is NULL */
+			   &ticket);
+    if (retval) {
 	syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
 	exit(1);
     }
 
     /* Get client name */
-    if (retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname)){
+    retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname);
+    if (retval){
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
         sprintf(repbuf, "You are <unparse error>\n");
     } else {
