@@ -73,7 +73,9 @@ krb5_sigtype  sendsig();
 #ifdef KERBEROS
 char	*krb_realm = (char *)0;
 void	try_normal();
+#ifndef UCB_RSH
 #define UCB_RSH "/usr/ucb/rsh"
+#endif
 #endif
 
 #ifndef RLOGIN_PROGRAM
