@@ -29,6 +29,7 @@
 #include "adm.h"
 #include "adm_proto.h"
 #include <stdio.h>
+#include <ctype.h>
 
 /*
  * krb5_aprof_init()	- Initialize alternate profile context.
@@ -54,7 +55,7 @@ krb5_aprof_init(fname, envname, acontextp)
     namelist[1] = (char *) NULL;
     profile = (profile_t) NULL;
     if (envname) {
-	if (namelist[0] = getenv(envname)) {
+	if ((namelist[0] = getenv(envname))) {
 	    if (!(kret = profile_init(namelist, &profile))) {
 		*acontextp = (krb5_pointer) profile;
 		return(0);
@@ -237,6 +238,7 @@ krb5_aprof_finish(acontext)
     krb5_pointer	acontext;
 {
     profile_release(acontext);
+    return(0);
 }
 
 /*
@@ -254,7 +256,7 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     char		*filename;
     char		*envname;
     char		*lrealm;
-    krb5_pointer	aprofile;
+    krb5_pointer	aprofile = 0;
     krb5_realm_params	*rparams;
     const char		*hierarchy[4];
     char		*svalue;
@@ -266,156 +268,172 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     filename = (kdcprofile) ? kdcprofile : DEFAULT_KDC_PROFILE;
     envname = (kdcenv) ? kdcenv : KDC_PROFILE_ENV;
     rparams = (krb5_realm_params *) NULL;
-    kret = 0;
-    if (!realm)
-	kret = krb5_get_default_realm(kcontext, &lrealm);
-    else
+    if (realm)
 	lrealm = strdup(realm);
-    if (!kret && !(kret = krb5_aprof_init(filename, envname, &aprofile))) {
-	if (rparams =
-	    (krb5_realm_params *) malloc(sizeof(krb5_realm_params))) {
-
-	    /* Initialize realm parameters */
-	    memset((char *) rparams, 0, sizeof(krb5_realm_params));
-
-	    /* Get the value of the per-realm profile */
-	    hierarchy[0] = "realms";
-	    hierarchy[1] = lrealm;
-	    hierarchy[2] = "profile";
-	    hierarchy[3] = (char *) NULL;
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		const char *filenames[2];
-
-		/*
-		 * XXX this knows too much about krb5 contexts.
-		 */
-		filenames[0] = svalue;
-		filenames[1] = (char *) NULL;
-		if (kcontext->profile)
-		    profile_release(kcontext->profile);
-		if (!(kret = profile_init(filenames, &kcontext->profile)))
-		    rparams->realm_profile = svalue;
-		else
-		    krb5_xfree(svalue);
-	    }
-
-	    /* Get the value for the database */
-	    hierarchy[2] = "database_name";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
-		rparams->realm_dbname = svalue;
-
-	    /* Get the value for the KDC primary port */
-	    hierarchy[2] = "port";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_kdc_pport = ivalue;
-		rparams->realm_kdc_pport_valid = 1;
-	    }
-	    
-	    /* Get the value for the KDC secondary port */
-	    hierarchy[2] = "secondary_port";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_kdc_sport = ivalue;
-		rparams->realm_kdc_sport_valid = 1;
-	    }
-	    
-	    /* Get the value for the kadmind port */
-	    hierarchy[2] = "kadmind_port";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_kadmind_port = ivalue;
-		rparams->realm_kadmind_port_valid = 1;
-	    }
-	    
-	    /* Get the value for the master key name */
-	    hierarchy[2] = "master_key_name";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
-		rparams->realm_mkey_name = svalue;
-	    
-	    /* Get the value for the master key type */
-	    hierarchy[2] = "master_key_type";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
-		    rparams->realm_enctype_valid = 1;
-		krb5_xfree(svalue);
-	    }
-	    
-	    /* Get the value for the stashfile */
-	    hierarchy[2] = "key_stash_file";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
-		rparams->realm_stash_file = svalue;
-	    
-	    /* Get the value for maximum ticket lifetime. */
-	    hierarchy[2] = "max_life";
-	    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
-		rparams->realm_max_life = dtvalue;
-		rparams->realm_max_life_valid = 1;
-	    }
-	    
-	    /* Get the value for maximum renewable ticket lifetime. */
-	    hierarchy[2] = "max_renewable_life";
-	    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
-		rparams->realm_max_rlife = dtvalue;
-		rparams->realm_max_rlife_valid = 1;
-	    }
-	    
-	    /* Get the value for the default principal expiration */
-	    hierarchy[2] = "default_principal_expiration";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		if (!krb5_string_to_timestamp(svalue,
-					      &rparams->realm_expiration))
-		    rparams->realm_expiration_valid = 1;
-		krb5_xfree(svalue);
-	    }
-	    
-	    /* Get the value for the default principal flags */
-	    hierarchy[2] = "default_principal_flags";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		char *sp, *ep, *tp;
-
-		sp = svalue;
-		rparams->realm_flags = 0;
-		while (sp) {
-		    if ((ep = strchr(sp, (int) ',')) ||
-			(ep = strchr(sp, (int) ' ')) ||
-			(ep = strchr(sp, (int) '\t'))) {
-			/* Fill in trailing whitespace of sp */
-			tp = ep - 1;
-			while (isspace(*tp) && (tp < sp)) {
-			    *tp = '\0';
-			    tp--;
-			}
-			*ep = '\0';
-			ep++;
-			/* Skip over trailing whitespace of ep */
-			while (isspace(*ep) && (*ep)) ep++;
-		    }
-		    /* Convert this flag */
-		    if (krb5_string_to_flags(sp,
-					     "+",
-					     "-",
-					     &rparams->realm_flags))
-			break;
-		    sp = ep;
-		}
-		if (!sp)
-		    rparams->realm_flags_valid = 1;
-		krb5_xfree(svalue);
-	    }
-
-	    /* Get the value for the supported enctype/salttype matrix */
-	    hierarchy[2] = "supported_enctypes";
-	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		krb5_string_to_keysalts(svalue,
-					", \t",	/* Tuple separators	*/
-					":.-",	/* Key/salt separators	*/
-					0,	/* No duplicates	*/
-					&rparams->realm_keysalts,
-					&rparams->realm_num_keysalts);
-		krb5_xfree(svalue);
-	    }
-	}
-	krb5_aprof_finish(aprofile);
+    else {
+	kret = krb5_get_default_realm(kcontext, &lrealm);
+	if (kret)
+	    goto cleanup;
     }
-    *rparamp = rparams;
+
+    kret = krb5_aprof_init(filename, envname, &aprofile);
+    if (kret)
+	goto cleanup;
+    
+    rparams = (krb5_realm_params *) malloc(sizeof(krb5_realm_params));
+    if (rparams == 0) {
+	kret = ENOMEM;
+	goto cleanup;
+    }
+
+    /* Initialize realm parameters */
+    memset((char *) rparams, 0, sizeof(krb5_realm_params));
+
+    /* Get the value of the per-realm profile */
+    hierarchy[0] = "realms";
+    hierarchy[1] = lrealm;
+    hierarchy[2] = "profile";
+    hierarchy[3] = (char *) NULL;
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	const char *filenames[2];
+
+	/*
+	 * XXX this knows too much about krb5 contexts.
+	 */
+	filenames[0] = svalue;
+	filenames[1] = (char *) NULL;
+	if (kcontext->profile)
+	    profile_release(kcontext->profile);
+	if (!(kret = profile_init(filenames, &kcontext->profile)))
+	    rparams->realm_profile = svalue;
+	else
+	    krb5_xfree(svalue);
+    }
+
+    /* Get the value for the database */
+    hierarchy[2] = "database_name";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_dbname = svalue;
+	
+    /* Get the value for the KDC primary port */
+    hierarchy[2] = "port";
+    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+	rparams->realm_kdc_pport = ivalue;
+	rparams->realm_kdc_pport_valid = 1;
+    }
+	    
+    /* Get the value for the KDC secondary port */
+    hierarchy[2] = "secondary_port";
+    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+	rparams->realm_kdc_sport = ivalue;
+	rparams->realm_kdc_sport_valid = 1;
+    }
+	    
+    /* Get the value for the kadmind port */
+    hierarchy[2] = "kadmind_port";
+    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
+	rparams->realm_kadmind_port = ivalue;
+	rparams->realm_kadmind_port_valid = 1;
+    }
+	    
+    /* Get the value for the master key name */
+    hierarchy[2] = "master_key_name";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_mkey_name = svalue;
+	    
+    /* Get the value for the master key type */
+    hierarchy[2] = "master_key_type";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
+	    rparams->realm_enctype_valid = 1;
+	krb5_xfree(svalue);
+    }
+	    
+    /* Get the value for the stashfile */
+    hierarchy[2] = "key_stash_file";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_stash_file = svalue;
+	    
+    /* Get the value for maximum ticket lifetime. */
+    hierarchy[2] = "max_life";
+    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
+	rparams->realm_max_life = dtvalue;
+	rparams->realm_max_life_valid = 1;
+    }
+	    
+    /* Get the value for maximum renewable ticket lifetime. */
+    hierarchy[2] = "max_renewable_life";
+    if (!krb5_aprof_get_deltat(aprofile, hierarchy, TRUE, &dtvalue)) {
+	rparams->realm_max_rlife = dtvalue;
+	rparams->realm_max_rlife_valid = 1;
+    }
+	    
+    /* Get the value for the default principal expiration */
+    hierarchy[2] = "default_principal_expiration";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	if (!krb5_string_to_timestamp(svalue,
+				      &rparams->realm_expiration))
+	    rparams->realm_expiration_valid = 1;
+	krb5_xfree(svalue);
+    }
+	    
+    /* Get the value for the default principal flags */
+    hierarchy[2] = "default_principal_flags";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	char *sp, *ep, *tp;
+
+	sp = svalue;
+	rparams->realm_flags = 0;
+	while (sp) {
+	    if ((ep = strchr(sp, (int) ',')) ||
+		(ep = strchr(sp, (int) ' ')) ||
+		(ep = strchr(sp, (int) '\t'))) {
+		/* Fill in trailing whitespace of sp */
+		tp = ep - 1;
+		while (isspace(*tp) && (tp < sp)) {
+		    *tp = '\0';
+		    tp--;
+		}
+		*ep = '\0';
+		ep++;
+		/* Skip over trailing whitespace of ep */
+		while (isspace(*ep) && (*ep)) ep++;
+	    }
+	    /* Convert this flag */
+	    if (krb5_string_to_flags(sp,
+				     "+",
+				     "-",
+				     &rparams->realm_flags))
+		break;
+	    sp = ep;
+	}
+	if (!sp)
+	    rparams->realm_flags_valid = 1;
+	krb5_xfree(svalue);
+    }
+
+    /* Get the value for the supported enctype/salttype matrix */
+    hierarchy[2] = "supported_enctypes";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+	krb5_string_to_keysalts(svalue,
+				", \t",	/* Tuple separators	*/
+				":.-",	/* Key/salt separators	*/
+				0,	/* No duplicates	*/
+				&rparams->realm_keysalts,
+				&rparams->realm_num_keysalts);
+	krb5_xfree(svalue);
+    }
+
+cleanup:
+    if (aprofile)
+	krb5_aprof_finish(aprofile);
+    if (lrealm)
+	free(lrealm);
+    if (kret) {
+	if (rparams)
+	    krb5_free_realm_params(kcontext, rparams);
+    } else
+	*rparamp = rparams;
     return(kret);
 }
 

@@ -1,3 +1,10 @@
+Wed Sep 13 18:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_read_realm_params): Fix memory leak.  Free the
+		default realm when we're done.  Remove the "profile"
+		parameter from the kdc.conf file.  This is bad idea,
+		architecturally.
+
 Tue Sep 12 13:18:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* adm_conn.c: For Macintosh hardwire cache name. Various casting
