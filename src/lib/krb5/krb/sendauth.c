@@ -49,7 +49,7 @@
 #define GETSOCKNAME_ARG3_TYPE size_t
 #endif
 
-static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
+static const char sendauth_version[] = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code KRB5_CALLCONV
 krb5_sendauth(context, auth_context,
@@ -93,7 +93,7 @@ krb5_sendauth(context, auth_context,
 	 * by the string itself.  
 	 */
 	outbuf.length = strlen(sendauth_version) + 1;
-	outbuf.data = sendauth_version;
+	outbuf.data = (char *) sendauth_version;
 	if ((retval = krb5_write_message(context, fd, &outbuf)))
 		return(retval);
 	outbuf.length = strlen(appl_version) + 1;

@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
+static const char sendauth_version[] = "KRB5_SENDAUTH_V1.0";
 
 static krb5_error_code
 recvauth_common(krb5_context context,
