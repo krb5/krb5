@@ -1205,10 +1205,8 @@ if(port)
 #endif
 	    /* Finish session in wmtp */
 	    pty_logwtmp(ttyn,"","");
-if (ccache)
-    krb5_cc_destroy(bsd_context, ccache);
-	    ccache = NULL;
-	    
+	    if (ccache)
+		krb5_cc_destroy(bsd_context, ccache);
 	    exit(0);
 	}
 #if defined(HAVE_SETSID)&&(!defined(ULTRIX))
@@ -1369,8 +1367,8 @@ if (ccache)
     exit(1);
     
   signout_please:
-if (ccache)
-    krb5_cc_destroy(bsd_context, ccache);
+    if (ccache)
+	krb5_cc_destroy(bsd_context, ccache);
     ccache = NULL;
     pty_logwtmp(ttyn,"","");
     exit(1);
@@ -1443,8 +1441,8 @@ krb5_sigtype
     
     pty_logwtmp(ttyn,"","");
     syslog(LOG_INFO ,"Shell process completed.");
-if (ccache)
-    krb5_cc_destroy(bsd_context, ccache);
+    if (ccache)
+	krb5_cc_destroy(bsd_context, ccache);
     exit(0);
 }
 

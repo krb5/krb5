@@ -101,17 +101,16 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		if (isupper(*cp))
 		    *cp = tolower(*cp);
 
-	    if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
-		free(remote_host);
-		return retval;
-	    }
-	    if (!hrealms[0]) {
-		free(remote_host);
-		krb5_xfree(hrealms);
-		return KRB5_ERR_HOST_REALM_UNKNOWN;
-	    }
-	    realm = hrealms[0];
-
+	if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
+	    free(remote_host);
+	    return retval;
+	}
+	if (!hrealms[0]) {
+	    free(remote_host);
+	    krb5_xfree(hrealms);
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	}
+	realm = hrealms[0];
 
 	retval = krb5_build_principal(context, ret_princ, strlen(realm),
 				      realm, sname, remote_host,
