@@ -139,8 +139,14 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
-			    &ret_cred->server);
+    status = krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
+				     &ret_cred->server);
+    if (status) {
+	    fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
+		    error_message(status));
+	    return(-1);
+    }
+
     if (realm && *realm) {
        char *copyrealm;
        krb5_data rdata;
