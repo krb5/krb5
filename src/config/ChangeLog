@@ -1,3 +1,12 @@
+Sun Mar  1 22:25:34 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pre.in: Define AUTOCONF and CONFIG_RELTOPDIR from the autoconf
+ 		substitution macros.
+
+	* post.in: Fix the call to autoconf to use $(AUTOCONF) and
+	 	$(CONFIG_RELTOPDIR), so that configure regeneration rule
+	 	works even in a subdirectory below the configure script.
+
 Wed Feb 18 17:31:52 1998  Tom Yu  <tlyu@mit.edu>
 
 	* windows.in: Rewrite some of the directory syntax.
