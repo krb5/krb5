@@ -281,7 +281,7 @@ krb5_keyblock *masterkeyblock;
 	the master key name here is from the master_princ global,
 	so we can safely share its substructure
  */
-    strcpy(tgs_name, TGTNAME);
+    strcpy(tgs_name, KRB5_TGS_NAME);
     strcat(tgs_name, "/");
     strcat(tgs_name, masterkeyname->realm.data);
     krb5_parse_name(tgs_name, &tgs_server);

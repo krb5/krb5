@@ -35,7 +35,6 @@ static char rcsid_hammer_c [] =
 #include <krb5/copyright.h>
 #include <krb5/osconf.h>
 #include <krb5/krb5.h>
-#include <krb5/kdb.h>			/* for TGTNAME */
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
 
@@ -61,8 +60,8 @@ krb5_parse_lifetime (time, len)
 }
     
 krb5_data tgtname = {
-    sizeof(TGTNAME)-1,
-    TGTNAME
+    KRB5_TGS_NAME_SIZE,
+    KRB5_TGS_NAME
 };
 
 int verify_cs_pair PROTOTYPE((char *,

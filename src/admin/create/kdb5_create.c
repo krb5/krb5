@@ -97,7 +97,7 @@ krb5_principal master_princ;
 krb5_encrypt_block master_encblock;
 
 krb5_data tgt_princ_entries[] = {
-	{sizeof(TGTNAME)-1, TGTNAME},
+	{KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
 	{0, 0} };
 
 krb5_data db_creator_entries[] = {

@@ -32,7 +32,6 @@ static char rcsid_tgtname_c [] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <krb5/kdb.h>
 
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 
@@ -42,7 +41,7 @@ const krb5_data *client, *server;
 krb5_principal *tgtprinc;
 {
     return krb5_build_principal_ext(tgtprinc, server->length, server->data,
-				    sizeof(TGTNAME) - 1, TGTNAME, 
+				    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME, 
 				    client->length, client->data,
 				    0);
 }

@@ -188,8 +188,5 @@ krb5_error_code	krb5_db_fetch_mkey
 
 #define KRB5_KDB_DEF_FLAGS	0
 
-/* XXX THIS REALLY BELONGS ELSEWHERE */
-#define	TGTNAME	"krbtgt"
-
 #endif /* KRB5_KDB5__ */
 

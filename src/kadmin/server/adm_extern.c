@@ -59,7 +59,7 @@ int send_seqno;
 int recv_seqno;
 
 /*
-static krb5_data tgs_name = {sizeof(TGTNAME)-1, TGTNAME};
+static krb5_data tgs_name = {KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME};
 krb5_data *tgs_server[4] = {0, &tgs_name, 0, 0};
 */
 

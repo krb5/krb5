@@ -106,12 +106,12 @@ typedef char const * krb5_const_pointer;
 
 typedef struct krb5_principal_data {
     krb5_data realm;
-    krb5_data *data;
+    krb5_data *data;		/* An array of strings */
     krb5_int32 length;
     krb5_int32 type;
 } krb5_principal_data;
 
-typedef	krb5_principal_data *krb5_principal;	/* array of strings */
+typedef	krb5_principal_data *krb5_principal;
 
 /*
  * Per V5 spec on definition of principal types
@@ -141,5 +141,9 @@ typedef const krb5_principal_data *krb5_const_principal;
 #define	krb5_princ_type(princ) (princ)->type
 #define	krb5_princ_name(princ) (princ)->data
 #define	krb5_princ_component(princ,i) ((princ)->data + i)
+
+/* The name of the Kerberos ticket granting service... and its size */
+#define	KRB5_TGS_NAME		"krbtgt"
+#define KRB5_TGS_NAME_SIZE	6
 
 #endif /* KRB5_BASE_DEFS__ */

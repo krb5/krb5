@@ -41,7 +41,6 @@ static char *rcsid_forward_c =
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
-#define TGTNAME "krbtgt"            /* Else #include <krb5/kdb.h> */
 #define KRB5_DEFAULT_LIFE 60*60*8   /* 8 hours */
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
@@ -126,8 +125,8 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     if (retval = krb5_build_principal_ext(&creds.server,
 					  strlen(hrealms[0]),
 					  hrealms[0],
-					  sizeof(TGTNAME) - 1,
-					  TGTNAME,
+					  KRB5_TGS_NAME_SIZE,
+					  KRB5_TGS_NAME,
 					  client->realm.length,
 					  client->realm.data,
 					  0))
