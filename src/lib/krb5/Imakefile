@@ -96,7 +96,6 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 
 all:: libkrb5.a
 
-Krb5InstallLibrary($(DESLIB),$(KRB5_LIBDIR))
 Krb5InstallLibrary(krb5,$(KRB5_LIBDIR))
 
 # SharedLibraryTarget(kdb5,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -lkrb5 -l$(DESLIB) $(ISODELIB) -lcom_err)
