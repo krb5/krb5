@@ -93,8 +93,6 @@ krb5_sigtype  sendsig();
 #define UCB_RSH "/usr/ucb/rsh"
 #endif
 
-
-
 krb5_context bsd_context;
 krb5_creds *cred;
 
@@ -137,7 +135,7 @@ main(argc, argv0)
     struct servent *sp;
     struct servent defaultservent;
     struct sockaddr_in local, foreign;
-    int suppress;
+    int suppress = 0;
 
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
@@ -156,6 +154,7 @@ main(argc, argv0)
 #endif
 #endif  /* KERBEROS */
     int debug_port = 0;
+    enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
 
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
@@ -238,6 +237,16 @@ main(argc, argv0)
     }
     if (argc > 0 && !strncmp(*argv, "-A", 2)) {
 	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PO")) {
+	argv++, argc--;
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PN")) {
+	argv++, argc--;
+	kcmd_proto = KCMD_NEW_PROTOCOL;
 	goto another;
     }
 #endif  /* KERBEROS */
@@ -349,7 +358,7 @@ main(argc, argv0)
 	    com_err(argv[0], status, "while initializing krb5");
 	    exit(1);
     }
-    authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
+    authopts = AP_OPTS_MUTUAL_REQUIRED;
 
     /* Piggy-back forwarding flags on top of authopts; */
     /* they will be reset in kcmd */
@@ -370,44 +379,46 @@ main(argc, argv0)
 		  &local, &foreign,
 		  &auth_context, authopts,
 		  1,	/* Always set anyport, there is no need not to. --proven */
-		  suppress);
+		  suppress,
+		  &kcmd_proto);
     if (status) {
+	if (kcmd_proto != KCMD_NEW_PROTOCOL) {
 #ifdef KRB5_KRB4_COMPAT
-	/* No encrypted Kerberos 4 rsh. */
-	if (encrypt_flag)
-	    exit(1);
+	    /* No encrypted Kerberos 4 rsh. */
+	    if (encrypt_flag)
+		exit(1);
 #ifdef HAVE_ISATTY
-	if (isatty(fileno(stderr)))
-	    fprintf(stderr, "Trying krb4 rsh...\n");
+	    if (isatty(fileno(stderr)))
+		fprintf(stderr, "Trying krb4 rsh...\n");
 #endif
-	status = k4cmd(&rem, &host, debug_port,
-		       pwd->pw_name,
-		       user ? user : pwd->pw_name, args,
-		       &rfd2, &v4_ticket, "rcmd", krb_realm,
-		       &v4_cred, v4_schedule, &v4_msg_data,
-		       &local, &foreign, 0L, 0);
-	if (status)
-	    try_normal(argv0);
-	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 0, 1);
+	    status = k4cmd(&rem, &host, debug_port,
+			   pwd->pw_name,
+			   user ? user : pwd->pw_name, args,
+			   &rfd2, &v4_ticket, "rcmd", krb_realm,
+			   &v4_cred, v4_schedule, &v4_msg_data,
+			   &local, &foreign, 0L, 0);
+	    if (status)
+		try_normal(argv0);
+	    rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 0, 1);
 #else
-	try_normal(argv0);
+	    try_normal(argv0);
 #endif
+	}
+	/* If new protocol requested, don't fall back to less secure
+	   ones.  */
+	exit (1);
     } else {
 	krb5_boolean similar;
 	krb5_keyblock *key = &cred->keyblock;
 
-	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					    cred->keyblock.enctype, &similar))
-	    try_normal(argv0);
-
-	if (!similar) {
+	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
 	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
 						   &key);
 	    if ((status || !key) && encrypt_flag)
 		try_normal(argv0);
 	}
 
-	rcmd_stream_init_krb5(key, encrypt_flag, 0, 1);
+	rcmd_stream_init_krb5(key, encrypt_flag, 0, 1, kcmd_proto);
     }
 
 #ifdef HAVE_ISATTY
@@ -505,7 +516,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &rembits) == 0)
 	  goto rewrite;
-	wc = rcmd_stream_write(rem, bp, cc);
+	wc = rcmd_stream_write(rem, bp, cc, 0);
 	if (wc < 0) {
 	    if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
 	      goto rewrite;
@@ -540,7 +551,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rfd2, &ready)) {
 	    errno = 0;
-	    cc = rcmd_stream_read(rfd2, buf, sizeof buf);
+	    cc = rcmd_stream_read(rfd2, buf, sizeof buf, 1);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rfd2, &readfrom);
@@ -549,7 +560,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &ready)) {
 	    errno = 0;
-	    cc = rcmd_stream_read(rem, buf, sizeof buf);
+	    cc = rcmd_stream_read(rem, buf, sizeof buf, 0);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rem, &readfrom);
@@ -562,9 +573,9 @@ main(argc, argv0)
     exit(0);
   usage:
     fprintf(stderr,
-	    "usage: \trsh host [ -l login ] [ -n ] [ -x ] [ -f / -F] command\n");
+	    "usage: \trsh host [ -PN / -PO ] [ -l login ] [ -n ] [ -x ] [ -f / -F] command\n");
     fprintf(stderr,
-	    "OR \trsh [ -l login ] [-n ] [ -x ] [ -f / -F ] host command\n");
+	    "OR \trsh [ -PN / -PO ] [ -l login ] [-n ] [ -x ] [ -f / -F ] host command\n");
     exit(1);
 }
 
@@ -573,7 +584,7 @@ main(argc, argv0)
 krb5_sigtype sendsig(signo)
      char signo;
 {
-    (void) rcmd_stream_write(rfd2, &signo, 1);
+    (void) rcmd_stream_write(rfd2, &signo, 1, 1);
 }
 
 

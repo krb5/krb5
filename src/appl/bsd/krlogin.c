@@ -378,6 +378,7 @@ main(argc, argv)
 #endif
 #endif
     int port, debug_port = 0;
+    enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
    
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
@@ -503,6 +504,16 @@ main(argc, argv)
 	argv++, argc--;
 	goto another;
     }
+    if (argc > 0 && !strcmp(*argv, "-PO")) {
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PN")) {
+	kcmd_proto = KCMD_NEW_PROTOCOL;
+	argv++, argc--;
+	goto another;
+    }
 #endif /* KERBEROS */
     if (host == 0)
       goto usage;
@@ -618,7 +629,6 @@ main(argc, argv)
 
 #ifdef KERBEROS
     authopts = AP_OPTS_MUTUAL_REQUIRED;
-    authopts |= AP_OPTS_USE_SUBKEY;
 
     /* Piggy-back forwarding flags on top of authopts; */
     /* they will be reset in kcmd */
@@ -637,37 +647,32 @@ main(argc, argv)
 		  &local, &foreign,
 		  &auth_context, authopts,
 		  0,		/* Not any port # */
-		  0);
+		  0,
+		  &kcmd_proto);
     if (status) {
+	if (kcmd_proto != KCMD_NEW_PROTOCOL) {
 #ifdef KRB5_KRB4_COMPAT
-	fprintf(stderr, "Trying krb4 rlogin...\n");
-	status = k4cmd(&sock, &host, port,
-		       null_local_username ? "" : pwd->pw_name,
-		       name ? name : pwd->pw_name, term,
-		       0, &v4_ticket, "rcmd", krb_realm,
-		       &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
-		       (encrypt_flag) ? KOPT_DO_MUTUAL : 0L, 0);
-	if (status)
-	    try_normal(orig_argv);
-	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 1, 1);
+	    fprintf(stderr, "Trying krb4 rlogin...\n");
+	    status = k4cmd(&sock, &host, port,
+			   null_local_username ? "" : pwd->pw_name,
+			   name ? name : pwd->pw_name, term,
+			   0, &v4_ticket, "rcmd", krb_realm,
+			   &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
+			   (encrypt_flag) ? KOPT_DO_MUTUAL : 0L, 0);
+	    if (status)
+		try_normal(orig_argv);
+	    rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 1, 1);
 #else
-	try_normal(orig_argv);
+	    try_normal(orig_argv);
 #endif
+	}
+	exit (1);
     } else {
-	krb5_boolean similar;
 	krb5_keyblock *key = 0;
 
-	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					    cred->keyblock.enctype, &similar))
-	    try_normal(orig_argv); /* doesn't return */
-
-	if (!similar) {
+	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
 	    do_inband = 1;
-	    if (debug_port)
-		fprintf(stderr, "DEBUG: setting do_inband\n");
-	}
 
-	if (!similar) {
 	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
 						   &key);
 	    if ((status || !key) && encrypt_flag)
@@ -676,7 +681,7 @@ main(argc, argv)
 	if (key == 0)
 	    key = &cred->keyblock;
 
-	rcmd_stream_init_krb5(key, encrypt_flag, 1, 1);
+	rcmd_stream_init_krb5(key, encrypt_flag, 1, 1, kcmd_proto);
     }
 	
     rem = sock;
@@ -1136,9 +1141,9 @@ writer()
 #endif
 
 	    if (c != cmdchar)
-	      (void) rcmd_stream_write(rem, &cmdchar, 1);
+	      (void) rcmd_stream_write(rem, &cmdchar, 1, 0);
 	}
-	if (rcmd_stream_write(rem, &c, 1) == 0) {
+	if (rcmd_stream_write(rem, &c, 1, 0) == 0) {
 	    prf("line gone");
 	    break;
 	}
@@ -1253,7 +1258,7 @@ sendwindow()
     wp->ws_col = htons(winsize.ws_col);
     wp->ws_xpixel = htons(winsize.ws_xpixel);
     wp->ws_ypixel = htons(winsize.ws_ypixel);
-    (void) rcmd_stream_write(rem, obuf, sizeof(obuf));
+    (void) rcmd_stream_write(rem, obuf, sizeof(obuf), 0);
 }
 
 
@@ -1472,7 +1477,7 @@ fd_set readset, excset, writeset;
 		bufp += n;
 	    }
 	    if (FD_ISSET(rem, &readset)) {
-	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf));
+	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf), 0);
 		if (rcvcnt == 0)
 		    return (0);
 		if (rcvcnt < 0)

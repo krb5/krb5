@@ -48,8 +48,8 @@ char copyright[] =
  * or by the name of the daemon. If command-line arguments are present, they 
  * take priority. The options are:
  * -k means trust krb4 or krb5
-* -5 means trust krb5
-* -4 means trust krb4 (using .klogin)
+ * -5 means trust krb5
+ * -4 means trust krb4 (using .klogin)
  * 
  */
      
@@ -1245,7 +1245,7 @@ if(port)
 			shutdown(s, 1+1);
 			FD_CLR(pv[0], &readfrom);
 		    } else {
-			(void) rcmd_stream_write(s, buf, cc);
+			(void) rcmd_stream_write(s, buf, cc, 1);
 		    }
 		}
 		if (FD_ISSET(pw[0], &ready)) {
@@ -1256,12 +1256,12 @@ if(port)
 			shutdown(f, 1+1);
 			FD_CLR(pw[0], &readfrom);
 		    } else {
-			(void) rcmd_stream_write(f, buf, cc);
+			(void) rcmd_stream_write(f, buf, cc, 0);
 		    }
 		}
 		if (port&&FD_ISSET(s, &ready)) {
 		    /* read from the alternate channel, signal the child */
-		    if (rcmd_stream_read(s, &sig, 1) <= 0) {
+		    if (rcmd_stream_read(s, &sig, 1, 1) <= 0) {
 			FD_CLR(s, &readfrom);
 		    } else {
 #ifdef POSIX_SIGNALS
@@ -1277,7 +1277,7 @@ if(port)
 		if (FD_ISSET(f, &ready)) {
 		    /* read from the net, write to child stdin */
 		    errno = 0;
-		    cc = rcmd_stream_read(f, buf, sizeof(buf));
+		    cc = rcmd_stream_read(f, buf, sizeof(buf), 0);
 		    if (cc <= 0) {
 			(void) close(px[1]);
 			FD_CLR(f, &readfrom);
@@ -1772,11 +1772,10 @@ recvauth(netf, peersin, valid_checksum)
     krb5_error_code status;
     struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
-    int len, new_proto;
+    int len;
     krb5_data inbuf;
 #ifdef KRB5_KRB4_COMPAT
     char v4_instance[INST_SZ];	/* V4 Instance */
-    char v4_version[9];
 #endif
     krb5_authenticator *authenticator;
     krb5_ticket        *ticket;
@@ -1784,6 +1783,8 @@ recvauth(netf, peersin, valid_checksum)
     struct passwd *pwd;
     uid_t uid;
     gid_t gid;
+    enum kcmd_proto kcmd_proto;
+    krb5_data version;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1829,8 +1830,7 @@ recvauth(netf, peersin, valid_checksum)
     }
 
 #ifdef KRB5_KRB4_COMPAT
-    status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
-				  "KCMDV0.1",
+    status = krb5_compat_recvauth_version(bsd_context, &auth_context, &netf,
 				  NULL,		/* Specify daemon principal */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
@@ -1843,14 +1843,14 @@ recvauth(netf, peersin, valid_checksum)
 
 				  &ticket, 	/* return ticket */
 				  &auth_sys, 	/* which authentication system*/
-				  &v4_kdata, 0, v4_version);
+				  &v4_kdata, 0, &version);
 #else
     status = krb5_recvauth(bsd_context, &auth_context, &netf,
-                           "KCMDV0.1",
                            NULL,        /* daemon principal */
                            0,           /* no flags */
 		           keytab,      /* normally NULL to use v5srvtab */
-		           &ticket);    /* return ticket */
+		           &ticket,    /* return ticket */
+			   &version); /* application version string */
     auth_sys = KRB5_RECVAUTH_V5;
 #endif
 
@@ -1892,16 +1892,13 @@ recvauth(netf, peersin, valid_checksum)
 
     /* Must be V5  */
 	
-    {
-       krb5_boolean similar;
-
-       if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					   ticket->enc_part2->session->enctype,
-					   &similar))
-	  return(status);
-
-       new_proto = !similar;
-    }
+    kcmd_proto = KCMD_UNKNOWN_PROTOCOL;
+    if (version.length != 9)
+	fatal (netf, "bad application version length");
+    if (!memcmp (version.data, "KCMDV0.1", 9))
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+    if (!memcmp (version.data, "KCMDV0.2", 9))
+	kcmd_proto = KCMD_NEW_PROTOCOL;
 
     getstr(netf, remuser, sizeof(locuser), "remuser");
 
@@ -1952,18 +1949,20 @@ recvauth(netf, peersin, valid_checksum)
     if (!strncmp(cmdbuf, "-x ", 3))
 	do_encrypt = 1;
 
-    if (new_proto) {
+    {
 	krb5_keyblock *key;
 	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
 						&key);
 	if (status)
 	    fatal (netf, "Server can't get session subkey");
-	if (!key && do_encrypt)
+	if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)
 	    fatal (netf, "No session subkey sent");
-	rcmd_stream_init_krb5 (key, do_encrypt, 0, 0);
-    } else
-	/* old way */
-	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 0, 0);
+	if (key && kcmd_proto == KCMD_OLD_PROTOCOL)
+	    fatal (netf, "Session subkey not allowed in old kcmd protocol");
+	if (key == 0)
+	    key = ticket->enc_part2->session;
+	rcmd_stream_init_krb5 (key, do_encrypt, 0, 0, kcmd_proto);
+    }
 
     /* Null out the "session" because kcmd.c references the session
      * key here, and we do not want krb5_free_ticket() to destroy it. */
@@ -2014,7 +2013,7 @@ void fatal(f, msg)
     buf[0] = '\01';             /* error indicator */
     (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
     if ((f == netf) && (pid > 0))
-      (void) rcmd_stream_write(f, buf, strlen(buf));
+      (void) rcmd_stream_write(f, buf, strlen(buf), 0);
     else
       (void) write(f, buf, strlen(buf));
     syslog(LOG_ERR,"%s\n",msg);

@@ -117,14 +117,18 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
-static krb5_data encivec_i, encivec_o;
+
+/* XXX Overloaded: use_ivecs!=0 -> new protocol, inband signalling, etc.  */
+static int use_ivecs;
+static krb5_data encivec_i[2], encivec_o[2];
+
 static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
-static int (*input)();
-static int (*output)();
+static int (*input)(int, char *, int, int);
+static int (*output)(int, char *, int, int);
 static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
 static int nstored = 0;
 static char *store_ptr = storage;
-static int twrite();
+static int twrite(int, char *, int, int);
 static int v5_des_read(), v5_des_write();
 #ifdef KRB5_KRB4_COMPAT
 static int v4_des_read(), v4_des_write();
@@ -133,9 +137,28 @@ static int right_justify;
 #endif
 static int do_lencheck;
 
+/* XXX: These should be internal to krb5 library, or declared in krb5.h.  */
+extern krb5_error_code krb5_write_message (krb5_context, krb5_pointer,
+					   krb5_data *);
+extern int krb5_net_read (krb5_context, int , char *, int);
+extern int krb5_net_write (krb5_context, int , const char *, int);
+/* XXX: And these should be declared in krb.h, or private.  */
+extern int
+krb_sendauth(long options, int fd, KTEXT ticket,
+	     char *service, char *inst, char *realm,
+	     unsigned KRB4_32 checksum,
+	     MSG_DAT *msg_data,
+	     CREDENTIALS *cred,
+	     Key_schedule schedule,
+	     struct sockaddr_in *laddr,
+	     struct sockaddr_in *faddr,
+	     char *version);
+
+
+int
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authconp, authopts, anyport,
-     suppress_err)
+     suppress_err, protonump)
      int *sock;
      char **ahost;
      u_short rport;
@@ -143,7 +166,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      int *fd2p;
      char *service;
      char *realm;
-     krb5_creds **cred;
+     krb5_creds **cred; /* output only */
      krb5_int32 *seqno;
      krb5_int32 *server_seqno;
      struct sockaddr_in *laddr, *faddr;
@@ -151,8 +174,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      krb5_flags authopts;
      int anyport;
      int suppress_err;		/* Don't print if authentication fails */
+     enum kcmd_proto *protonump;
 {
-    int i, s, timo = 1, pid;
+    int s, pid;
 #ifdef POSIX_SIGNALS
     sigset_t oldmask, urgmask;
 #else
@@ -166,7 +190,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     int rc;
     char *host_save;
     krb5_error_code status;
-    krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
     krb5_error	*error = 0;
     int sin_len;
@@ -176,6 +199,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_auth_context auth_context = NULL;
     char *cksumbuf;
     krb5_data cksumdat;
+    char *kcmd_version;
+    enum kcmd_proto protonum = *protonump;
 
     if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser)+64)) == 0 ) {
 	fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
@@ -363,11 +388,33 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR))
 	goto bad2;
 
-   /* call Kerberos library routine to obtain an authenticator,
+    if (protonum == KCMD_PROTOCOL_COMPAT_HACK) {
+	krb5_boolean is_des;
+	status = krb5_c_enctype_compare (bsd_context, ENCTYPE_DES_CBC_CRC,
+					 ret_cred->keyblock.enctype, &is_des);
+	if (status)
+	    goto bad2;
+	protonum = is_des ? KCMD_OLD_PROTOCOL : KCMD_NEW_PROTOCOL;
+    }
+
+    switch (protonum) {
+    case KCMD_NEW_PROTOCOL:
+	authopts |= AP_OPTS_USE_SUBKEY;
+	kcmd_version = "KCMDV0.2";
+	break;
+    case KCMD_OLD_PROTOCOL:
+	kcmd_version = "KCMDV0.1";
+	break;
+    default:
+	status = EINVAL;
+	goto bad2;
+    }
+
+    /* Call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
-       authentication. */
+       authentication.  */
     status = krb5_sendauth(bsd_context, &auth_context, (krb5_pointer) &s,
-                           "KCMDV0.1", ret_cred->client, ret_cred->server,
+			   kcmd_version, ret_cred->client, ret_cred->server,
 			   authopts, &cksumdat, ret_cred, 0,
 			   &error, &rep_ret, NULL);
     free(cksumbuf);
@@ -443,6 +490,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
     *sock = s;
+    *protonump = protonum;
     
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(bsd_context, ret_cred, cred);
@@ -469,6 +517,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 
 
 #ifdef KRB5_KRB4_COMPAT
+int
 k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
       cred, schedule, msg_data, laddr, faddr, authopts, anyport)
      int *sock;
@@ -706,7 +755,7 @@ reread:
 #endif /* KRB5_KRB4_COMPAT */
 
 
-
+int
 getport(alport)
      int *alport;
 {
@@ -738,17 +787,25 @@ getport(alport)
     return -1;
 }
 
+static int
+normal_read (int fd, char *buf, int len, int secondary)
+{
+    return read (fd, buf, len);
+}
+
 void rcmd_stream_init_normal()
 {
-    input = read;
+    input = normal_read;
     output = twrite;
 }
 
-void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client)
+void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
+			   protonum)
      krb5_keyblock *in_keyblock;
      int encrypt_flag;
      int lencheck;
      int am_client;
+     enum kcmd_proto protonum;
 {
     krb5_error_code status;
     size_t blocksize;
@@ -766,17 +823,12 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client)
     input = v5_des_read;
     output = v5_des_write;
 
-    if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					keyblock->enctype,
-					&similar)) {
-	/* XXX what do I do? */
-	abort();
-    }
-
-    if (similar) {
-	encivec_i.length = encivec_o.length = 0;
+    if (protonum == KCMD_OLD_PROTOCOL) {
+	use_ivecs = 0;
 	return;
     }
+
+    use_ivecs = 1;
 
     if (status = krb5_c_block_size(bsd_context, keyblock->enctype,
 				   &blocksize)) {
@@ -784,17 +836,22 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client)
 	abort();
     }
 
-    encivec_i.length = encivec_o.length = blocksize;
+    encivec_i[0].length = encivec_i[1].length = encivec_o[0].length
+	= encivec_o[1].length = blocksize;
 
-    if ((encivec_i.data = malloc(encivec_i.length * 2)) == NULL) {
+    if ((encivec_i[0].data = malloc(encivec_i[0].length * 4)) == NULL) {
 	/* XXX what do I do? */
 	abort();
     }
-    encivec_o.data = encivec_i.data + encivec_i.length;
+    encivec_i[1].data = encivec_i[0].data + encivec_i[0].length;
+    encivec_o[0].data = encivec_i[1].data + encivec_i[0].length;
+    encivec_o[1].data = encivec_o[0].data + encivec_i[0].length;
 
     /* is there a better way to initialize this? */
-    memset(encivec_i.data, am_client, blocksize);
-    memset(encivec_o.data, 1 - am_client, blocksize);
+    memset(encivec_i[0].data, am_client, blocksize);
+    memset(encivec_o[0].data, 1 - am_client, blocksize);
+    memset(encivec_i[1].data, 2 | am_client, blocksize);
+    memset(encivec_o[1].data, 2 | (1 - am_client), blocksize);
 }
 
 #ifdef KRB5_KRB4_COMPAT
@@ -816,35 +873,39 @@ void rcmd_stream_init_krb4(session, encrypt_flag, lencheck, justify)
 }
 #endif
 
-int rcmd_stream_read(fd, buf, len)
+int rcmd_stream_read(fd, buf, len, sec)
      int fd;
      register char *buf;
      int len;
+     int sec;
 {
-    return (*input)(fd, buf, len);
+    return (*input)(fd, buf, len, sec);
 }
 
-int rcmd_stream_write(fd, buf, len)
+int rcmd_stream_write(fd, buf, len, sec)
      int fd;
      register char *buf;
      int len;
+     int sec;
 {
-    return (*output)(fd, buf, len);
+    return (*output)(fd, buf, len, sec);
 }
 
 /* Because of rcp lossage, translate fd 0 to 1 when writing. */
-static int twrite(fd, buf, len)
+static int twrite(fd, buf, len, secondary)
      int fd;
      char *buf;
      int len;
+     int secondary;
 {
     return write((fd == 0) ? 1 : fd, buf, len);
 }
 
-static int v5_des_read(fd, buf, len)
+static int v5_des_read(fd, buf, len, secondary)
      int fd;
      char *buf;
      int len;
+     int secondary;
 {
     int nreturned = 0;
     size_t net_len,rd_len;
@@ -887,7 +948,8 @@ static int v5_des_read(fd, buf, len)
     rd_len = (rd_len << 8) | c;
 
     if (ret = krb5_c_encrypt_length(bsd_context, keyblock->enctype,
-				  rd_len, &net_len)) {
+				    use_ivecs ? rd_len + 4 : rd_len,
+				    &net_len)) {
 	errno = ret;
 	return(-1);
     }
@@ -910,8 +972,8 @@ static int v5_des_read(fd, buf, len)
     plain.data = storage;
 
     /* decrypt info */
-    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
-		       encivec_i.length?&encivec_i:0,
+    if (ret = krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+		       use_ivecs ? encivec_i + secondary : 0,
 		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
@@ -919,6 +981,19 @@ static int v5_des_read(fd, buf, len)
     }
     store_ptr = storage;
     nstored = rd_len;
+    if (use_ivecs) {
+	int rd_len2;
+	rd_len2 = storage[0] & 0xff;
+	rd_len2 <<= 8; rd_len2 |= storage[1] & 0xff;
+	rd_len2 <<= 8; rd_len2 |= storage[2] & 0xff;
+	rd_len2 <<= 8; rd_len2 |= storage[3] & 0xff;
+	if (rd_len2 != rd_len) {
+	    /* cleartext length trashed? */
+	    errno = EIO;
+	    return -1;
+	}
+	store_ptr += 4;
+    }
     if (nstored > len) {
 	memcpy(buf, store_ptr, len);
 	nreturned += len;
@@ -935,23 +1010,39 @@ static int v5_des_read(fd, buf, len)
 
 
 
-static int v5_des_write(fd, buf, len)
+static int v5_des_write(fd, buf, len, secondary)
      int fd;
      char *buf;
      int len;
+     int secondary;
 {
-    unsigned char *len_buf = (unsigned char *) des_outpkt;
     krb5_data plain;
     krb5_enc_data cipher;
+    char tmpbuf[2*RCMD_BUFSIZ+8];
+    unsigned char *len_buf = (unsigned char *) tmpbuf;
 
-    plain.data = buf;
-    plain.length = len;
+    if (use_ivecs) {
+	unsigned char *lenbuf2 = (unsigned char *) tmpbuf;
+	if (len + 4 > sizeof(tmpbuf))
+	    abort ();
+	lenbuf2[0] = (len & 0xff000000) >> 24;
+	lenbuf2[1] = (len & 0xff0000) >> 16;
+	lenbuf2[2] = (len & 0xff00) >> 8;
+	lenbuf2[3] = (len & 0xff);
+	memcpy (tmpbuf + 4, buf, len);
+
+	plain.data = tmpbuf;
+	plain.length = len + 4;
+    } else {
+	plain.data = buf;
+	plain.length = len;
+    }
 
     cipher.ciphertext.length = sizeof(des_outpkt)-4;
     cipher.ciphertext.data = desoutbuf.data;
 
     if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
-		       encivec_o.length?&encivec_o:0,
+		       use_ivecs ? encivec_o + secondary : 0,
 		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
@@ -959,6 +1050,7 @@ static int v5_des_write(fd, buf, len)
 
     desoutbuf.length = cipher.ciphertext.length;
 
+    len_buf = (unsigned char *) des_outpkt;
     len_buf[0] = (len & 0xff000000) >> 24;
     len_buf[1] = (len & 0xff0000) >> 16;
     len_buf[2] = (len & 0xff00) >> 8;
@@ -1040,11 +1132,11 @@ int len;
 		errno = EIO;
 		return(-1);
 	}
-	(void) pcbc_encrypt(des_inbuf,
-			    storage,
+	(void) pcbc_encrypt((des_cblock *) des_inbuf,
+			    (des_cblock *) storage,
 			    (net_len < 8) ? 8 : net_len,
 			    v4_schedule,
-			    v4_session,
+			    &v4_session,
 			    DECRYPT);
 	/* 
 	 * when the cleartext block is < 8 bytes, it is "right-justified"
@@ -1100,11 +1192,11 @@ int len;
 		/* this "right-justifies" the data in the buffer */
 		(void) memcpy(garbage_buf + 8 - len, buf, len);
 	}
-	(void) pcbc_encrypt((len < 8) ? garbage_buf : buf,
-			    des_outpkt+4,
+	(void) pcbc_encrypt((des_cblock *) ((len < 8) ? garbage_buf : buf),
+			    (des_cblock *) (des_outpkt+4),
 			    (len < 8) ? 8 : len,
 			    v4_schedule,
-			    v4_session,
+			    &v4_session,
 			    ENCRYPT);
 
 	/* tell the other end the real amount, but send an 8-byte padded

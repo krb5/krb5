@@ -1,3 +1,42 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (kcmd.o, krcp.o, krlogin.o, krlogind.o, krsh.o,
+	krshd.o): Depend on defines.h.
+	* krlogind.c: Include defines.h.
+	* krcp.c: Ditto.
+
+	* defines.h (enum kcmd_proto): New type.
+	(rcmd_stream_read, rcmd_stream_write, getport,
+	rcmd_stream_init_krb5): Add prototypes.
+
+	* kcmd.c (use_ivecs): New variable.
+	(encivec_i, encivec_o): Each is now an array of two elements.
+	(input, output, twrite, krb5_write_message, krb5_net_read,
+	krb5_net_write, krb_sendauth): Add prototypes.
+	(kcmd): New argument PROTONUMP points to enum kcmd_proto.  If
+	value is KCMD_PROTOCOL_COMPAT_HACK, set it to KCMD_NEW_PROTOCOL or
+	KCMD_OLD_PROTOCOL depending on session key type.  Use subkeys for
+	new protocol.  Callers updated.
+	(normal_read, v5_des_read, v4_des_read, twrite, v5_des_write,
+	v4_des_write, rcmd_stream_write, rcmd_stream_read): Take
+	additional argument indicating whether the fd is for the secondary
+	channel; ignored except in some v5 cases.  Callers updated.
+	(rcmd_stream_init_krb5): New argument, kcmd protocol version.  Set
+	up ivecs for secondary channel in each direction with values 0x2
+	ior primary channel value.  Callers updated.
+	(v5_des_read, v5_des_write): For new protocol, plaintext now has
+	its length prepended but not counted.
+
+	* krcp.c (main): Set kcmd protocol version based on command line,
+	not on encryption type.  Default to COMPAT_HACK.
+	* krsh.c (main): Ditto.
+	* krlogin.c (main): Ditto.
+
+	* krlogind.c (recvauth): Use new krb5_compat_recvauth_version
+	routine.  Determine client's kcmd protocol version and initialize
+	based on it.
+	* krshd.c (recvauth): Ditto.
+
 2000-05-19  Nalin Dahyabhai  <nalin@redhat.com>
 	    Ken Raeburn  <raeburn@mit.edu>
 

@@ -250,6 +250,7 @@ AUTH_DAT	*v4_kdata;
 Key_schedule v4_schedule;
 
 #include "com_err.h"
+#include "defines.h"
      
 #define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
 
@@ -850,7 +851,7 @@ void doit(f, fromp)
     
 #if defined(KERBEROS) 
     if (do_encrypt) {
-	if (rcmd_stream_write(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE)) < 0){
+	if (rcmd_stream_write(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE), 0) < 0){
 	    sprintf(buferror, "Cannot encrypt-write network.");
 	    fatal(p,buferror);
 	}
@@ -918,11 +919,11 @@ int sendoob(fd, byte)
 	message[3] = 'o';
 	message[4] = *byte;
 
-	cc = rcmd_stream_write(fd, message, sizeof(message));
+	cc = rcmd_stream_write(fd, message, sizeof(message), 0);
 	while (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 	    /* also shouldn't happen */
 	    sleep(5);
-	    cc = rcmd_stream_write(fd, message, sizeof(message));
+	    cc = rcmd_stream_write(fd, message, sizeof(message), 0);
 	}
     } else {
 	send(fd, byte, 1, MSG_OOB);
@@ -1033,7 +1034,7 @@ void protocol(f, p)
 	}
 #define	pkcontrol(c)	((c)&(TIOCPKT_FLUSHWRITE|TIOCPKT_NOSTOP|TIOCPKT_DOSTOP))
 	if (FD_ISSET(f, &ibits)) {
-	    fcc = rcmd_stream_read(f, fibuf, sizeof (fibuf));
+	    fcc = rcmd_stream_read(f, fibuf, sizeof (fibuf), 0);
 	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 		fcc = 0;
 	    } else {
@@ -1121,7 +1122,7 @@ void protocol(f, p)
 	}
 
 	if (FD_ISSET(f, &obits) && pcc > 0) {
-	    cc = rcmd_stream_write(f, pbp, pcc);
+	    cc = rcmd_stream_write(f, pbp, pcc, 0);
 	    if (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 		/* also shouldn't happen */
 		sleep(5);
@@ -1160,7 +1161,7 @@ void fatal(f, msg)
     buf[0] = '\01';		/* error indicator */
     (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
     if ((f == netf) && (pid > 0))
-      (void) rcmd_stream_write(f, buf, strlen(buf));
+      (void) rcmd_stream_write(f, buf, strlen(buf), 0);
     else
       (void) write(f, buf, strlen(buf));
     syslog(LOG_ERR,"%s\n",msg);
@@ -1377,9 +1378,11 @@ recvauth(valid_checksum)
     int len;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
-    char v4_version[9];
+    krb5_data version;
     krb5_authenticator *authenticator;
     krb5_rcache rcache;
+    enum kcmd_proto kcmd_proto;
+    krb5_keyblock *key;
 
     *valid_checksum = 0;
     len = sizeof(laddr);
@@ -1423,8 +1426,8 @@ recvauth(valid_checksum)
 	if (status) return status;
     }
 
-    if ((status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
-				  "KCMDV0.1",
+    if ((status = krb5_compat_recvauth_version(bsd_context, &auth_context,
+					       &netf,
 				  NULL, 	/* Specify daemon principal */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
@@ -1438,8 +1441,8 @@ recvauth(valid_checksum)
 
 				  &ticket, 	/* return ticket */
 				  &auth_sys, 	/* which authentication system*/
-				  &v4_kdata, v4_schedule, v4_version))) {
-
+				  &v4_kdata, v4_schedule,
+					       &version))) {
 	if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
 	     * clean up before exiting
@@ -1453,7 +1456,25 @@ recvauth(valid_checksum)
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
-    if ((auth_sys == KRB5_RECVAUTH_V5) && !checksum_ignored) {
+
+    kcmd_proto = KCMD_UNKNOWN_PROTOCOL;
+    if (auth_sys == KRB5_RECVAUTH_V5) {
+	if (version.length != 9) {
+	    fatal (netf, "bad application version length");
+	}
+	if (!memcmp (version.data, "KCMDV0.1", 9))
+	    kcmd_proto = KCMD_OLD_PROTOCOL;
+	else if (!memcmp (version.data, "KCMDV0.2", 9))
+	    kcmd_proto = KCMD_NEW_PROTOCOL;
+    }
+#ifdef KRB5_KRB4_COMPAT
+    if (auth_sys == KRB5_RECVAUTH_V4)
+	kcmd_proto = KCMD_V4_PROTOCOL;
+#endif
+
+    if ((auth_sys == KRB5_RECVAUTH_V5)
+	&& !(checksum_ignored
+	     && kcmd_proto == KCMD_OLD_PROTOCOL)) {
       
       if ((status = krb5_auth_con_getauthenticator(bsd_context, auth_context,
 						   &authenticator)))
@@ -1520,33 +1541,20 @@ recvauth(valid_checksum)
 				      &client)))
 	return status;
 
-    {
-       krb5_boolean similar;
+    key = 0;
+    status = krb5_auth_con_getremotesubkey (bsd_context, auth_context, &key);
+    if (status)
+	fatal (netf, "Server can't get session subkey");
+    if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)
+	fatal (netf, "No session subkey sent");
+    if (key && kcmd_proto == KCMD_OLD_PROTOCOL)
+	fatal (netf, "Session subkey not permitted under old kcmd protocol");
+    if (key == 0)
+	key = ticket->enc_part2->session;
 
-       if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
-					   ticket->enc_part2->session->enctype,
-					   &similar))
-	  return(status);
+    rcmd_stream_init_krb5 (key, do_encrypt, 1, 0, kcmd_proto);
 
-       if (!similar) {
-	  do_inband = 1;
-	  syslog(LOG_DEBUG, "setting do_inband");
-       }
-    }
-
-    if (do_inband) {
-	/* new way */
-	krb5_keyblock *key;
-	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
-						&key);
-	if (status)
-	    fatal (netf, "Server can't get session subkey");
-	if (!key && do_encrypt)
-	    fatal (netf, "No session subkey sent");
-	rcmd_stream_init_krb5 (key, do_encrypt, 1, 0);
-    } else
-	/* old way */
-	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 1, 0);
+    do_inband = (kcmd_proto == KCMD_NEW_PROTOCOL);
 
     getstr(netf, rusername, sizeof(rusername), "remuser");
 

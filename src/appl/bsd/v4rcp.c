@@ -208,7 +208,7 @@ int kstream_read(krem, buf, len)
       /* decrypt it */
       des_pcbc_encrypt ((des_cblock *)krem->retbuf, 
 			(des_cblock *)krem->retbuf, 
-			sz, *krem->sched, *krem->ivec, 
+			sz, *krem->sched, krem->ivec, 
 			DECRYPT);
 
       /* now retbuf has sz bytes, return len or x of them to the user */
@@ -265,7 +265,7 @@ int kstream_write(krem, buf, len)
       abort ();
     /* memset(outbuf+4+4, 0x42, BUFSIZ); */
     st = des_pcbc_encrypt ((des_cblock *)buf, (des_cblock *)(krem->outbuf+4+4), outlen,
-			   *krem->sched, *krem->ivec, ENCRYPT);
+			   *krem->sched, krem->ivec, ENCRYPT);
 
     if (st) abort();
     return write(krem->write_fd, krem->outbuf+4, 4+outlen);
