@@ -198,9 +198,9 @@ void get_tickets()
 		if (isupper(*cp))
 			*cp = tolower(*cp);
 	if (realm)
-		sprintf(buf, "rcmd/%s@%s", hp->h_name, realm);
+		sprintf(buf, "host/%s@%s", hp->h_name, realm);
 	else
-		sprintf(buf, "rcmd/%s", hp->h_name);
+		sprintf(buf, "host/%s", hp->h_name);
 	if (retval = krb5_parse_name(buf, &my_principal)) {
 		com_err (progname, retval, "when parsing name %s",buf);
 		exit(1);
@@ -269,10 +269,11 @@ void get_tickets()
 		exit(1);
 	}
 	retval = krb5_get_in_tkt_with_skey(0, my_addresses,
+					   0,
 					   ETYPE_DES_CBC_CRC,
-					   0, ccache, &my_creds);
+					   0, ccache, &my_creds, 0);
 	if (retval) {
-		com_err(progname, retval, "While getting initial ticket\n");
+		com_err(progname, retval, "while getting initial ticket\n");
 		exit(1);
 	}
 	/*
