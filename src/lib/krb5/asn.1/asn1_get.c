@@ -16,19 +16,24 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
 
 #include "asn1_get.h"
 
-asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
+asn1_error_code
+asn1_get_tag_indef(buf, class, construction, tagnum, retlen, indef)
      asn1buf * buf;
      asn1_class * class;
      asn1_construction * construction;
      asn1_tagnum * tagnum;
      int * retlen;
+     int * indef;
 {
   asn1_error_code retval;
   
@@ -45,21 +50,36 @@ asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
   }
   retval = asn1_get_id(buf,class,construction,tagnum);
   if(retval) return retval;
-  retval = asn1_get_length(buf,retlen);
+  retval = asn1_get_length(buf,retlen,indef);
   if(retval) return retval;
   return 0;
 }
 
-asn1_error_code asn1_get_sequence(buf, retlen)
+asn1_error_code
+asn1_get_tag(buf, class, construction, tagnum, retlen)
+     asn1buf *buf;
+     asn1_class *class;
+     asn1_construction *construction;
+     asn1_tagnum *tagnum;
+     int *retlen;
+{
+  asn1_error_code retval;
+  int indef;
+
+  return asn1_get_tag_indef(buf, class, construction, tagnum, retlen, &indef);
+}
+
+asn1_error_code asn1_get_sequence(buf, retlen, indef)
      asn1buf * buf;
      int * retlen;
+     int * indef;
 {
   asn1_error_code retval;
   asn1_class class;
   asn1_construction construction;
   asn1_tagnum tagnum;
 
-  retval = asn1_get_tag(buf,&class,&construction,&tagnum,retlen);
+  retval = asn1_get_tag_indef(buf,&class,&construction,&tagnum,retlen,indef);
   if(retval) return retval;
   if(retval) return (krb5_error_code)retval;
   if(class != UNIVERSAL || construction != CONSTRUCTED ||
@@ -106,13 +126,16 @@ asn1_error_code asn1_get_id(buf, class, construction, tagnum)
   return 0;
 }
 
-asn1_error_code asn1_get_length(buf, retlen)
+asn1_error_code asn1_get_length(buf, retlen, indef)
      asn1buf * buf;
      int * retlen;
+     int * indef;
 {
   asn1_error_code retval;
   asn1_octet o;
 
+  if (indef != NULL)
+    *indef = 0;
   retval = asn1buf_remove_octet(buf,&o);
   if(retval) return retval;
   if((o&0x80) == 0){
@@ -126,6 +149,8 @@ asn1_error_code asn1_get_length(buf, retlen)
       if(retval) return retval;
       len = (len<<8) + (int)o;
     }
+    if (indef != NULL && !len)
+      *indef = 1;
     if(retlen != NULL) *retlen = len;
   }
   return 0;

@@ -1,3 +1,33 @@
+1999-11-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Fix bug in direction of
+	test while walking through whitespace.  Thanks to Matt Crawford.
+
+1999-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (klog_com_err_proc, klog_vsyslog): Use proper format
+	strings in syslog() calls too.
+	(lspec_parse_err_1, lspec_parse_err_2, log_file_err,
+	log_device_err, log_ufo_string, log_emerg_string,
+	log_alert_string, log_crit_string, log_err_string,
+	log_warning_string, log_notice_string, log_info_string,
+	log_debug_string): Replace char arrays with macros.
+	(klog_vsyslog): Convert pid_t to long for printing.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (DEVICE_PRINT, klog_com_err_proc, klog_vsyslog): Use
+	proper format strings to fprintf, instead of net-supplied data.
+	Fold in writes of following end-of-line sequences when
+	appropriate.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

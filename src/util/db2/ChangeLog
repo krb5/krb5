@@ -1,3 +1,13 @@
+1999-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* README.NOT.SLEEPYCAT.DB: New file; pointer to README to
+	hopefully unconfuse people.
+
+	* README: Add notice to the effect that this is not Berkeley or
+	Sleepycat DB.
+
+	* README.db2: Renamed from README.
+
 Fri Feb 13 14:37:47 1998  Tom Yu  <tlyu@mit.edu>
 
 	* recno/extern.h: Additional renaming.

@@ -3,7 +3,6 @@ myfulldir=util
 mydir=util
 MY_SUBDIRS=et ss profile pty dyn db2 send-pr
 BUILDTOP=$(REL)$(U)
-CFLAGS = $(CCOPTS)
 
 MAC_SUBDIRS = profile et
 

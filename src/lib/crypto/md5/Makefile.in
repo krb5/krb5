@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=lib/crypto/md5
 mydir=md5
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md5
@@ -29,7 +28,7 @@ includes:: depend
 depend:: $(SRCS)
 
 t_mddriver: t_mddriver.o md5.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
 
 $(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md5.obj
 	link -out:$@ $**

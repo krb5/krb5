@@ -170,7 +170,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 				 v4_skey->contents);
      } else {
 	 /* Force enctype to be raw if using DES3. */
-	 if (v4_skey->enctype == ENCTYPE_DES3_HMAC_SHA1 ||
+	 if (v4_skey->enctype == ENCTYPE_DES3_CBC_SHA1 ||
 	     v4_skey->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
 	     v4_skey->enctype = ENCTYPE_DES3_CBC_RAW;
 	 ret = krb_cr_tkt_krb5(v4tkt,

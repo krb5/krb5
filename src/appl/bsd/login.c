@@ -505,19 +505,19 @@ void k_init (ttyn)
 #ifdef KRB5_GET_TICKETS
     krb5_error_code retval;
     
-    retval = krb5_init_context(&kcontext);
+    retval = krb5_init_secure_context(&kcontext);
     if (retval) {
 	com_err("login", retval, "while initializing krb5");
 	exit(1);
     }
 
-    krb5_secure_config_files (kcontext);
     login_get_kconf(kcontext);
 
     /* Set up the credential cache environment variable */
     if (!getenv(KRB5_ENV_CCNAME)) {
 	sprintf(ccfile, "FILE:/tmp/krb5cc_p%d", getpid());
 	setenv(KRB5_ENV_CCNAME, ccfile, 1);
+	krb5_cc_set_default_name(kcontext, ccfile);
 	unlink(ccfile+strlen("FILE:"));
     } else {
 	/* note it correctly */
@@ -1748,8 +1748,10 @@ int main(argc, argv)
 
 #ifdef KRB5_GET_TICKETS
     /* ccfile[0] is only set if we got tickets above */
-    if (login_krb5_get_tickets && ccfile[0])
+    if (login_krb5_get_tickets && ccfile[0]) {
 	(void) setenv(KRB5_ENV_CCNAME, ccfile, 1);
+	krb5_cc_set_default_name(kcontext, ccfile);
+    }
 #endif /* KRB5_GET_TICKETS */
 
     if (tty[sizeof("tty")-1] == 'd')

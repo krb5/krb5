@@ -3,7 +3,6 @@ myfulldir=util/et
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 RELDIR=../util/et
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
 ##DOS##BUILDTOP = ..\..
@@ -28,7 +27,7 @@ LIBOBJS=$(OUTPRE)com_err.$(OBJEXT) \
 	$(OUTPRE)et_name.$(OBJEXT) \
 	$(OUTPRE)init_et.$(OBJEXT)
 # for et_lex.lex.c include in error_table.y
-LOCALINCLUDE=-I. -I$(srcdir)
+LOCALINCLUDES=-I. -I$(srcdir)
 
 FILES=	Makefile et_name.c error_message.c compile_et.c \
 		et_lex.lex.l error_table.y init_et.c \
@@ -72,7 +71,7 @@ error_table.c: et_lex.lex.c
 error_table.c: $(srcdir)/error_table.y
 
 error_table.o: error_table.c et_lex.lex.c
-	$(CC) $(CFLAGS) -c error_table.c
+	$(CC) $(ALL_CFLAGS) -c error_table.c
 
 et_lex.lex.o: et_lex.lex.c
 test1.o: test1.c

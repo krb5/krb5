@@ -1,3 +1,38 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-09-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): For Rhapsody, add "-undefined
+	warning" when building shared libs, and remove "-static" from
+	CC_LINK_STATIC.
+
+1999-09-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Treat Rhapsody like Mac OS 10.
+
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add install target for windows.  Remove references
+	to unused mit directory.
+
+1999-08-27  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add some missing dirs needed for generating a proper
+	kerbsrc.zip.  Make krbsrc83.zip obsolete.
+
+1999-08-13  Brad Thompson  <yak@mit.edu>
+
+	* aclocal.m4: Added MacOS X shared library support.
+
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build kpasswd under windows.
+
 1999-07-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-mkdirs): Use mkinstalldirs rather than

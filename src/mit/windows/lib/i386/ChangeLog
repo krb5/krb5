@@ -1,8 +1,0 @@
-Mon May 17 18:54:35 1999  Danilo Almeida  <dalmeida@mit.edu>
-
-	* vs32.dll, vsnt.lib: Set -kb sticky bits.
-
-Mon May 17 18:47:15 1999  Danilo Almeida  <dalmeida@mit.edu>
-
-	* vs32.dll, vsnt.lib: Move from .. into this subdirectory.
-
