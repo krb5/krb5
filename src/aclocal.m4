@@ -712,7 +712,8 @@ if test -n "$tcl_conf" ; then
     AC_MSG_CHECKING(Tcl info in $file)
     . $file
     v=$TCL_MAJOR_VERSION.$TCL_MINOR_VERSION
-    if test -z "$tcl_vers_maj" -o "$tcl_vers_maj" -lt "$TCL_MAJOR_VERSION" \
+    if test -z "$tcl_vers_maj" \
+	|| test "$tcl_vers_maj" -lt "$TCL_MAJOR_VERSION" \
 	|| test "$tcl_vers_maj" = "$TCL_MAJOR_VERSION" -a "$tcl_vers_min" -lt "$TCL_MINOR_VERSION" ; then
       for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
 	if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
