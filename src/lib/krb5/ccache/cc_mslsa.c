@@ -1057,6 +1057,7 @@ typedef struct _krb5_lcc_data {
 typedef struct _krb5_lcc_cursor {
     PKERB_QUERY_TKT_CACHE_RESPONSE  response;
     int                             index;
+    PKERB_EXTERNAL_TICKET mstgt;
 } krb5_lcc_cursor;
 
 
@@ -1214,24 +1215,29 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
     KERB_EXTERNAL_TICKET *msticket;
 
+    lcursor = (krb5_lcc_cursor *) malloc(sizeof(krb5_lcc_cursor));
+    if (lcursor == NULL) {
+        *cursor = 0;
+        return KRB5_CC_NOMEM;
+    }
+
     /*
      * obtain a tgt to refresh the ccache in case the ticket is expired
      */
-    if (GetMSTGT(data->LogonHandle, data->PackageId, &msticket)) {
-        LsaFreeReturnBuffer(msticket);
+    if (!GetMSTGT(data->LogonHandle, data->PackageId, &lcursor->mstgt)) {
+        free(lcursor);
+        *cursor = 0;
+        KRB5_FCC_INTERNAL;
     }
 
-    lcursor = (krb5_lcc_cursor *) malloc(sizeof(krb5_lcc_cursor));
-    if (lcursor == NULL)
-        return KRB5_CC_NOMEM;
-
     if ( !GetQueryTktCacheResponse(data->LogonHandle, data->PackageId, &lcursor->response) ) {
+        LsaFreeReturnBuffer(lcursor->mstgt);
         free(lcursor);
+        *cursor = 0;
         KRB5_FCC_INTERNAL;
     }
     lcursor->index = 0;
     *cursor = (krb5_cc_cursor) lcursor;
-
     return KRB5_OK;
 }
 
@@ -1258,15 +1264,20 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
-    KERB_EXTERNAL_TICKET *msticket, * mstgt;
+    KERB_EXTERNAL_TICKET *msticket;
 
   next_cred:
     if ( lcursor->index >= lcursor->response->CountOfTickets )
         return KRB5_CC_END;
 
     if (!GetMSCacheTicketFromCacheInfo(data->LogonHandle, data->PackageId,
-                          &lcursor->response->Tickets[lcursor->index++],&msticket))
+                                        &lcursor->response->Tickets[lcursor->index++],&msticket)) {
+        LsaFreeReturnBuffer(lcursor->mstgt);
+        LsaFreeReturnBuffer(lcursor->response);
+        free(*cursor);
+        *cursor = 0;
         return KRB5_FCC_INTERNAL;
+    }
 
     /* Don't return tickets with NULL Session Keys */
     if ( msticket->SessionKey.KeyType == KERB_ETYPE_NULL) {
@@ -1275,15 +1286,9 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
     }
 
     /* convert the ticket */
-    if (GetMSTGT(data->LogonHandle, data->PackageId, &mstgt)) {
-        MSCredToMITCred(msticket, mstgt->DomainName, context, creds);
-        LsaFreeReturnBuffer(mstgt);
-        LsaFreeReturnBuffer(msticket);
-        return KRB5_OK;
-    } else {
-        LsaFreeReturnBuffer(msticket);
-        return KRB5_FCC_INTERNAL;
-    }
+    MSCredToMITCred(msticket, lcursor->mstgt->DomainName, context, creds);
+    LsaFreeReturnBuffer(msticket);
+    return KRB5_OK;
 }
 
 /*
@@ -1304,8 +1309,10 @@ krb5_lcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 {
     krb5_lcc_cursor *lcursor = (krb5_lcc_cursor *) *cursor;
 
+    LsaFreeReturnBuffer(lcursor->mstgt);
     LsaFreeReturnBuffer(lcursor->response);
     free(*cursor);
+    *cursor = 0;
     return KRB5_OK;
 }
 
