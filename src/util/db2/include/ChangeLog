@@ -1,5 +1,7 @@
 Fri Feb 13 14:39:25 1998  Tom Yu  <tlyu@mit.edu>
 
+	* db-int.h: Additional renaming.
+
 	* db.h: Rename dbopen to avoid collision with NetBSD libc.
 
 	* db-ndbm.h: Rename lots of functions to avoid collisions with

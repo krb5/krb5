@@ -135,7 +135,11 @@ typedef u_int32_t	recno_t;
 
 /* open functions for each database type, used in dbopen() */
 
+#define __bt_open	__kdb2_bt_open
 #define __hash_open	__kdb2_hash_open
+#define __rec_open	__kdb2_rec_open
+#define __dbpanic	__kdb2_dbpanic
+
 DB	*__bt_open __P((const char *, int, int, const BTREEINFO *, int));
 DB	*__hash_open __P((const char *, int, int, const HASHINFO *, int));
 DB	*__rec_open __P((const char *, int, int, const RECNOINFO *, int));
