@@ -13,7 +13,7 @@ OBJS=	cksum.o		\
 	string2key.o	\
 	key_parity.o	\
 	key_sched.o	\
-	new_rnd_key.o	\
+	new_rn_key.o	\
 	weak_key.o
 
 SRCS=	cksum.c		\
@@ -29,7 +29,7 @@ SRCS=	cksum.c		\
 	string2key.c	\
 	key_parity.c	\
 	key_sched.c	\
-	new_rnd_key.c	\
+	new_rn_key.c	\
 	weak_key.c
 
 VERIFYOBJ = verify.o
