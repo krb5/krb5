@@ -310,8 +310,10 @@ void do_remote(context, v5creds, server, key)
      char *server;
      krb5_keyblock *key;
 {
+#if 0
      struct sockaddr_in saddr;
      struct hostent *hp;
+#endif
      CREDENTIALS v4creds;
      int ret;
 

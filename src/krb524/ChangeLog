@@ -1,3 +1,11 @@
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* k524init.c: Inculde unistd.h for getopt() prototype.
+
+	* test.c (do_remote): Comment out unused variables. 
+
+	* sendmsg.c (krb524_sendto_kdc): Cleanup assignment in conditional.
+
 2001-05-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendmsg.c (krb524_sendto_kdc): Do fallback if KRB5_REALM_UNKNOWN

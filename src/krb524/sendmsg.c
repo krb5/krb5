@@ -184,11 +184,9 @@ krb524_sendto_kdc (context, message, realm, reply)
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
 	    FD_SET(socklist[host], &readable);
-	    if (nready = select(SOCKET_NFDS(socklist[host]),
-				&readable,
-				0,
-				0,
-				&waitlen)) {
+	    nready = select(SOCKET_NFDS(socklist[host]),
+			    &readable, 0, 0, &waitlen);
+	    if (nready) {
 		if (nready == SOCKET_ERROR) {
 		    if (SOCKET_ERRNO == SOCKET_EINTR)
 			goto retry;
