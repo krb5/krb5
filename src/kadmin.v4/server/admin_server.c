@@ -20,7 +20,9 @@
 #endif
 
 /* define it for now */
+#ifndef POSIX_SIGNALS
 #define POSIX_SIGNALS
+#endif
 
 #include <stdio.h>
 #include <string.h>
