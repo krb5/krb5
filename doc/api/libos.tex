@@ -1,7 +1,10 @@
 The operating-system specific functions provide an interface between the
 other parts of the \libname{libkrb5.a} libraries and the operating system.
 
-Beware! Any of these are allowed to be implemented as macros.
+Beware! Any of the functions below are allowed to be implemented as
+macros.  Prototypes for functions can be found in {\tt
+<krb5/libos-proto.h>}; other definitions (including macros, if used) are
+in {\tt <krb5/libos.h>}.
 
 The following global symbols are provided in \libname{libos.a}.  If you
 wish to substitute for any of them, you must substitute for all of them
@@ -134,7 +137,6 @@ Only useful on stream sockets and pipes.
 Like write(2), but guarantees that it writes as much as was requested
 or returns -1 and sets errno.
 
-(make sure your sender will send all the stuff you are looking for!)
 Only useful on stream sockets and pipes.
 
 \begin{funcdecl}{krb5_os_localaddr}{krb5_error_code}{\funcout}
