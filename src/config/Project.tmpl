@@ -39,6 +39,13 @@
 #ifndef ArAddCmd
 #define ArAddCmd ar cruv
 #endif
+#ifndef SSTopIncludes
+#ifdef UseSSInstalled
+#define SSTopIncludes /**/  
+#else /* not installed SS */
+#define SSTopIncludes -I$(TOP)
+#endif /* UseSSInstalled */
+#endif /* SSTopIncludes */
 #ifndef DesDefines
 #define DesDefines YouMustFigureOutYourDesDefines
 #endif
@@ -115,7 +122,8 @@ libdir/lib/**/libname.a:						@@\
  */
 
             ARADD = ArAddCmd
-     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
+     TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES) $(SS_TOP_INCLUDES)
+  SS_TOP_INCLUDES = SSTopIncludes
         CONFIGSRC = $(TOP)/config
             ISODE = IsodeDir
          IMAKESRC = $(CONFIGSRC)
