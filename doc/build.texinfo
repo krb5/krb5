@@ -569,7 +569,10 @@ This option is ignored if @samp{--with-system-ss} is not specified.
 @item --with-system-db
 
 Use an installed version of the Berkeley DB package, which must
-provide an API compatible with version 1.85.
+provide an API compatible with version 1.85.  This option is
+@emph{unsupported} and untested.  In particular, we do not know if the
+database-rename code used in the dumpfile load operation will behave
+properly.
 
 If this option is not given, a version supplied with the Kerberos
 sources will be built and installed.  (We are not updating this
@@ -772,7 +775,7 @@ NetBSD and FreeBSD.)
 The native (bundled) compiler for HPUX currently will not work,
 because it is not a full ANSI C compiler.  The optional ANSI C
 compiler should work as long as you give it the @samp{-Ae} flag
-(i.e. @samp{./configure CC='cc -Ae}).  This is equivalent to
+(i.e. @samp{./configure CC='cc -Ae'}).  This is equivalent to
 @samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
 recommendation.  This has only been tested recently for HPUX 10.20.
 

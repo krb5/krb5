@@ -90,18 +90,14 @@ Notes, Major Changes, and Known Bugs for 1.3
   may be necessary when talking to Microsoft KDCs (domain controllers),
   if they issue you tickets with lots of PAC data.
 
-* If you have versions of the com_err, ss, or Berkeley DB packages
-  installed locally, you can use the --with-system-et,
-  --with-system-ss, and --with-system-db configure options to use them
-  rather than using the versions supplied here.  Note that the
-  interfaces are assumed to be similar to those we supply; in
+* If you have versions of the com_err or ss installed locally, you can
+  use the --with-system-et and --with-system-ss configure options to
+  use them rather than using the versions supplied here.  Note that
+  the interfaces are assumed to be similar to those we supply; in
   particular, some older, divergent versions of the com_err library
   may not work with the krb5 sources.  Many configure-time variables
   can be used to help the compiler and linker find the installed
   packages; see the build documentation for details.
-
-  We have not tested this change with version 4 of the Berkeley DB
-  library.
 
 * The AES cryptosystem has been implemented.  However, support in the
   Kerberos GSSAPI mechanism has not been written (or even fully
