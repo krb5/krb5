@@ -6,12 +6,6 @@ Wed Nov  6 16:24:56 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 		something better with intelligent defaulting if krb5.conf
 		doesn't exist, but we don't have this today.
 
-Wed Oct 23 01:15:40 1996  Theodore Y. Ts'o  <tytso@mit.edu>
-
-	* configure.in, Makefile.in: Check to see if compile in -lgen
-		exists; if so, add it to the SHLIB_LIBS line, since it
-		will be needed by an_to_ln.c, in all probability.
-
 Thu Aug 22 15:19:47 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* an_to_ln.c (db_an_to_ln): Remove references to dead BERK_DB_DBM
