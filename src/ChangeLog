@@ -1,3 +1,9 @@
+Wed Apr 27 11:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: added stuff for new directory: util/profile. This
+	   affects configuring, building, cleaning and zipping.
+	* Makefile.in: added ren2long target to expand 8.3 shortened names.
+
 Wed Apr 26 14:29:03 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (HAS_ANSI_VOLATILE): define it here for kdc and

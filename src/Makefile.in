@@ -23,19 +23,23 @@ all-mac::
 
 all-: all-windows
 
+LIBCMD = lib
 all-windows:: makefile-windows
 	@echo Making in include
 	cd include
-	-$(MAKE) -$(MAKEFLAGS)
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in util\et
 	cd ..\util\et
-	-$(MAKE) -$(MAKEFLAGS)
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	@echo Making in util\profile
+	cd ..\profile
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in lib
 	cd ..\..\lib
-	-$(MAKE) -$(MAKEFLAGS)
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows
 	cd ..\windows
-	-$(MAKE) -$(MAKEFLAGS)
+	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 world::
@@ -121,7 +125,7 @@ config-windows:: makefile-windows
 	-$(MAKE) -$(MAKEFLAGS)
 	cd ..
 
-makefile-windows:: wconfig.exe config\pre.in config\post.in \
+makefile-windows:: wconfig.c config\pre.in config\post.in \
 		include\makefile.in include\krb5\makefile.in \
 		lib\makefile.in lib\crypto\makefile.in \
 		lib\crypto\crc32\makefile.in lib\crypto\des\makefile.in \
@@ -137,8 +141,10 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 		lib\krb5\keytab\file\makefile.in lib\krb5\krb\makefile.in \
 		lib\krb5\os\makefile.in lib\krb5\posix\makefile.in \
 		lib\krb5\rcache\makefile.in \
-		util\et\makefile.in
+		util\et\makefile.in util\profile\makefile.in
 	type makefile.in >makefile
+	SET CL=/nologo
+	$(CC) /AL wconfig.c
 	.\wconfig config <include\makefile.in >include\makefile
 	.\wconfig config <include\krb5\makefile.in >include\krb5\makefile
 	.\wconfig config <lib\makefile.in >lib\makefile
@@ -166,11 +172,8 @@ makefile-windows:: wconfig.exe config\pre.in config\post.in \
 	.\wconfig config <lib\krb5\posix\makefile.in >lib\krb5\posix\makefile
 	.\wconfig config <lib\krb5\rcache\makefile.in >lib\krb5\rcache\makefile
 	.\wconfig config <util\et\makefile.in >util\et\makefile
+	.\wconfig config <util\profile\makefile.in >util\profile\makefile
 	config\rm.bat wconfig.obj msvc.pdb
-
-wconfig.exe: wconfig.c
-	SET CL=/nologo
-	$(CC) /AL wconfig.c
 
 clean-windows::
 	@echo Making clean in include
@@ -179,6 +182,9 @@ clean-windows::
 	@echo Making clean in util\et
 	cd ..\util\et
 	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in util\profile
+	cd ..\profile
+	-$(MAKE) -$(MAKEFLAGS) clean
 	@echo Making clean in lib
 	cd ..\..\lib
 	-$(MAKE) -$(MAKEFLAGS) clean
@@ -186,8 +192,14 @@ clean-windows::
 	cd ..\windows
 	-$(MAKE) -$(MAKEFLAGS) clean
 	cd ..
-	@echo Making clean locally
+	@echo Making clean in root
 	config\rm.bat *.obj msvc.pdb *.err wconfig.obj wconfig.exe
+
+#
+# Renames DOS 8.3 filenames back to their proper, longer names.
+#
+ren2long:
+	-sh config/ren2long
 
 #
 # Builds the zip file that distributes Kerberos sources for DOS sites
@@ -204,13 +216,14 @@ ZIPFILES= ./* \
 	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
-	windows/* windows/cns/* windows/wintel/*
+	util/profile/* windows/* windows/cns/* windows/wintel/*
 
 ZIPBINARYFILES=windows/cns/*.ico windows/wintel/*.ico
 
 ZIPEXCLUDE= LIB/KRB5.SAB \
 	INCLUDE/KRB5/AUTOCONF.H \
 	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
+	UTIL/PROFILE/TEST_PAR UTIL/PROFILE/TEST_PRO \
 	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO \
 	*.O *.A
 
@@ -232,6 +245,7 @@ INC = include/krb5/
 ET  = lib/krb5/error_tables/
 GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
+PR  = util/profile/
 
 awk-windows:
 	gawk -f $(AH) outfile=$(INC)asn1_err.h $(ET)asn1_err.et
@@ -248,4 +262,7 @@ awk-windows:
 	gawk -f $(AC) outfile=$(GG)gssapi_err_generic.c $(GG)gssapi_err_generic.et
 	gawk -f $(AH) outfile=$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.et
 	gawk -f $(AC) outfile=$(GK)gssapi_err_krb5.c $(GK)gssapi_err_krb5.et
-
+	gawk -f $(AH) outfile=$(PR)prof_err.h $(PR)prof_err.et
+	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
+	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
+	cp $(PR)profile.h include/profile.h
