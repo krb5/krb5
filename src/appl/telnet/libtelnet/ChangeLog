@@ -1,3 +1,9 @@
+2001-06-21  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* forward.c: If NEED_SETENV defined, provide prototype for setenv.
+
+	* configure.in: If compiling setenv.c, define NEED_SETENV.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos5.c: Add prototype for rd_and_store_for_creds().

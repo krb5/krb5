@@ -29,6 +29,10 @@
  
 #include "k5-int.h"
  
+#ifdef NEED_SETENV
+extern int setenv(char *, char *, int);
+#endif
+
 extern char *line;		/* see sys_term.c */
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */

@@ -10,6 +10,7 @@ LIBOBJS="$LIBOBJS getent.o"
 if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   || test $ac_cv_func_getenv = no; then
   LIBOBJS="$LIBOBJS setenv.o"
+  AC_DEFINE([NEED_SETENV])
 fi
 AC_C_CONST
 if test "$KRB4_LIB" = ''; then
