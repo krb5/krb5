@@ -41,8 +41,7 @@ krb5_data      *realm2;
   krb5_principal  *tgs_list;
 
   if (!trans || !trans->data)  return(0);
-  if (trans_length)
-    trans_length = trans->data[trans->length-1] ?
+  trans_length = trans->data[trans->length-1] ?
       trans->length : trans->length - 1;
 
   for (i = 0; i < trans_length; i++)
