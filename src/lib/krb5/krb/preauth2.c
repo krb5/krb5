@@ -530,6 +530,11 @@ krb5_do_preauth(krb5_context context,
 		    }
 		    return ret;
 		}
+		if (etype_info[0] == NULL) {
+		    krb5_free_etype_info(context, etype_info);
+		    etype_info = NULL;
+		    break;
+		}
 		salt->data = (char *) etype_info[0]->salt;
 		salt->length = etype_info[0]->length;
 		*etype = etype_info[0]->etype;

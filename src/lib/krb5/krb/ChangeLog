@@ -1,3 +1,13 @@
+2001-01-30  Tom Yu  <tlyu@mit.edu>
+
+	* preauth.c (krb5_obtain_padata): Don't dereference a NULL pointer
+	if we receive an empty ETYPE_INFO preauth. [krb5-libs/903 from
+	craziboy77@hotmail.com]
+
+	* preauth2.c (krb5_do_preauth): Don't dereference a NULL pointer
+	if we receive an empty ETYPE_INFO preauth. [krb5-libs/903 from
+	craziboy77@hotmail.com]
+
 2001-01-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Free
