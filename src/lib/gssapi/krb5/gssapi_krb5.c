@@ -132,46 +132,31 @@ void *kg_vdb = NULL;
 
 static gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
 
+/*
+ * init_sec_context() will explicitly re-acquire default credentials,
+ * so handling the expiration/invalidation condition here isn't needed.
+ */
 OM_uint32
 kg_get_defcred(minor_status, cred)
      OM_uint32 *minor_status;
      gss_cred_id_t *cred;
 {
-   OM_uint32 major;
+   if (defcred == GSS_C_NO_CREDENTIAL) {
+      OM_uint32 major;
 
-   *cred = GSS_C_NO_CREDENTIAL;
-   *minor_status = 0;
-
-   if (defcred != GSS_C_NO_CREDENTIAL) {
-      /*
-       * If a default credential exists, ensure that it is valid and
-       * not expired.
-       */
-      major = krb5_gss_inquire_cred(minor_status, defcred,
-				    NULL, NULL, NULL, NULL);
-      if (major != GSS_S_CREDENTIALS_EXPIRED) {
-	 if (GSS_ERROR(major))
-	    *cred = GSS_C_NO_CREDENTIAL;
-	 else
-	    *cred = defcred;
-	 return major;
+      if ((major = krb5_gss_acquire_cred(minor_status, 
+					 (gss_name_t) NULL, GSS_C_INDEFINITE, 
+					 GSS_C_NULL_OID_SET, GSS_C_INITIATE, 
+					 &defcred, NULL, NULL)) &&
+	  GSS_ERROR(major)) {
+	 defcred = GSS_C_NO_CREDENTIAL;
+	 return(major);
       }
-      major = kg_release_defcred(minor_status);
-      if (GSS_ERROR(major))
-	 return major;
-   }
-   major = krb5_gss_acquire_cred(minor_status,
-				 (gss_name_t) NULL, GSS_C_INDEFINITE,
-				 GSS_C_NULL_OID_SET, GSS_C_INITIATE,
-				 &defcred, NULL, NULL);
-   if (GSS_ERROR(major)) {
-      defcred = GSS_C_NO_CREDENTIAL;
-   } else {
-      *cred = defcred;
-      *minor_status = 0;
    }
 
-   return major;
+   *cred = defcred;
+   *minor_status = 0;
+   return(GSS_S_COMPLETE);
 }
 
 OM_uint32

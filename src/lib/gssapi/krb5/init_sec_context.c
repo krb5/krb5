@@ -382,6 +382,13 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
       OM_uint32 major;
 
+      /*
+       * Release default cred prior to re-acquiring it, to notice when
+       * the ccache has changed.
+       */
+      major = kg_release_defcred(minor_status);
+      if (GSS_ERROR(major))
+	 return major;
       if ((major = kg_get_defcred(minor_status, &claimant_cred_handle)) &&
 	  GSS_ERROR(major)) {
 	 return(major);

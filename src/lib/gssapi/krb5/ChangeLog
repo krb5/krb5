@@ -1,3 +1,13 @@
+2003-02-24  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.c (kg_get_defcred): Revert previous; it's probably
+	not appropriate for inquire_cred() to cause new credentials to be
+	fetched.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Explicitly
+	release default cred in the NO_CREDENTIAL case, so it is always
+	refreshed.
+
 2003-02-21  Tom Yu  <tlyu@mit.edu>
 
 	* gssapi_krb5.c (kg_get_defcred): Check for invalid or expired
