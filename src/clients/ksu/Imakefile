@@ -28,6 +28,8 @@ LOCAL_LIBRARIES = $(KLIB)
 OBJS = krb_auth_su.o ccache.o authorization.o main.o heuristic.o
 SRCS = krb_auth_su.c ccache.c authorization.c main.c heuristic.c
 
+all:: ksu
+
 NormalProgramTarget(ksu,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
 Krb5InstallClientProgram(ksu)
 DependTarget()
