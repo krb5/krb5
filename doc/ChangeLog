@@ -1,5 +1,9 @@
 Mon Sep  9 13:25:06 1996  Jeff Bigler  <jcb@viola.cygnus.com>
 
+	* texinfo-suppl.tex: extracted @doubleleftarrow{} hack into
+	separate file so we don't have to ship a modified version of
+	texinfo.tex.
+
 	* user-guide.texinfo (Reference): changed offset to -700 for
 	PostScript man pages for full page printing.
 
