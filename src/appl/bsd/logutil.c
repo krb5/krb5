@@ -55,6 +55,7 @@ void update_utmp(ent, username, line, host)
     struct utmp ut;
 #else
     struct stat statb;
+    int tty;
 #endif
 #ifdef HAVE_SETUTXENT
     struct utmpx utx;
@@ -124,7 +125,7 @@ void update_utmp(ent, username, line, host)
 
 #else /* HAVE_SETUTENT */
 	
-    int tty = ttyslot();
+    tty = ttyslot();
     if (tty > 0 && (fd = open(UTMP_FILE, O_WRONLY, 0)) >= 0) {
 	(void)lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET);
 	(void)write(fd, (char *)ent, sizeof(struct utmp));
@@ -139,6 +140,11 @@ void update_utmp(ent, username, line, host)
 void update_wtmp(ent)
     struct utmp *ent;
 {
+#ifndef HAVE_SETUTENT
+    struct utmp ut;
+    struct stat statb;
+    int fd;
+#endif /* !HAVE_SETUTENT */
 #ifdef HAVE_SETUTXENT
     struct utmpx utx;
 

@@ -1,3 +1,9 @@
+Wed Jan 11 01:25:09 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* logutil.c (update_wtmp): declare missing variables if
+	HAVE_SETUTENT isn't set.
+	(update_utmp): declare tty at top of function.
+
 Tue Jan 10 19:43:18 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogin.c (doit): use exit_handler for signal exits, don't use
