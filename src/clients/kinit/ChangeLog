@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* kinit.c (k4_kinit): Argument to krb5_read_password takes as
+	unsigned int as argument.
+
 2000-10-09  Tom Yu  <tlyu@mit.edu>
 
 	* kinit.c (k4_kinit): Call time_to_life().

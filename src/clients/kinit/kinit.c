@@ -901,7 +901,7 @@ k4_kinit(opts, k4, ctx)
     {
     case INIT_PW:
 	if (!got_password) {
-	    int pwsize = sizeof(stash_password);
+	    unsigned int pwsize = sizeof(stash_password);
 	    krb5_error_code code;
 	    char prompt[1024];
 
