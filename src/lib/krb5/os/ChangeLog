@@ -1,3 +1,13 @@
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_os_ctx.c (os_init_paths): Delete SECURE argument; read the
+	value from the profile structure instead.
+	(krb5_os_init_context, krb5_get_profile): Don't pass SECURE
+	argument.
+	(os_init_paths, krb5_get_profile): Cast first arg to
+	profile_init.
+	(krb5_secure_config_files): Don't define.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
