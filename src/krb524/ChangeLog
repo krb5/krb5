@@ -1,3 +1,8 @@
+Thu Feb 12 21:58:56 1998  Tom Yu  <tlyu@mit.edu>
+
+	* sendmsg.c: Explicitly include k5-int.h in order to get proper
+	prototype of krb5_locate_kdc().
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

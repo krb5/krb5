@@ -40,10 +40,8 @@
 #include <krb.h>
 #include "krb524.h"
 
-/* Cheat and grab this internal function from lib/krb5/os. */
-krb5_error_code krb5_locate_kdc
-    PROTOTYPE((krb5_context, const krb5_data *,
-	       struct sockaddr **, int *));
+/* For krb5_locate_kdc() */
+#include <k5-int.h>
 
 /*
  * krb524_sendto_kdc:
@@ -87,7 +85,7 @@ krb524_sendto_kdc (context, message, realm, reply)
      * find KDC location(s) for realm
      */
 
-    if (retval = krb5_locate_kdc (context, realm, &addr, &naddr))
+    if ((retval = krb5_locate_kdc(context, realm, &addr, &naddr, NULL, NULL)))
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
