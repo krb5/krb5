@@ -712,6 +712,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        free(ctypes);
    if (authdat)
        krb5_free_authenticator(context, authdat);
+   /* The ctx structure has the handle of the auth_context */
+   if (auth_context && !ctx) {
+       (void)krb5_auth_con_setrcache(context, auth_context, NULL);
+       krb5_auth_con_free(context, auth_context);
+   }
    if (reqcksum.contents)
        xfree(reqcksum.contents);
    if (ap_rep.data)
