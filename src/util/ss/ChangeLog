@@ -1,8 +1,18 @@
+Thu Jun  8 23:22:07 1995    <tytso@rsx-11.mit.edu>
+
+	* list_req.c, ss_internal.h: Clean up -Wall flames.
+
+	* configure.in: Don't install the internal ss include files.
+
 Thu Jun  8 22:54:16 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* mk_cmds.c (main): Change mk_cmds so that the output file is
 		always created in the current directory, instead of in the
 		directory where the source file is located.
+
+Thu Jun  8 11:27:47 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* Makefile.in (install): Don't install in this directory.
 
 Thu Apr 27 12:26:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 

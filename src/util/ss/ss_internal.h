@@ -8,6 +8,8 @@
 #define _ss_ss_internal_h __FILE__
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #ifdef __STDC__
 

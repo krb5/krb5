@@ -21,7 +21,5 @@ AC_RETSIGTYPE
 AC_CHECK_HEADERS(stdarg.h)
 CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
-CopySrcHeader(copyright.h,$(BUILDTOP)/include/ss)
 CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)
-CopySrcHeader(ss_internal.h,$(BUILDTOP)/include/ss)
 V5_AC_OUTPUT_MAKEFILE

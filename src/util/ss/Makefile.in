@@ -46,7 +46,8 @@ MKCMDSFILES=	mk_cmds.c utils.c options.c ct.y cmd_tbl.lex.l
 MKCMDSCSRCS=	mk_cmds.c utils.c options.c ct.tab.c cmd_tbl.lex.c
 
 
-HFILES=	ss.h ss_internal.h copyright.h
+HFILES=	ss.h mit-sipb-copyright.h
+BUILT_HFILES = ss_err.h
 
 # for 'tags' and dependencies
 
@@ -72,22 +73,25 @@ unixmac:: includes
 
 dist:	archives
 
-install:: libss.a
-	$(INSTALLLIB) libss.a ${DESTDIR}$(LIBDIR)/libss.a
-	$(RANLIB) ${DESTDIR}$(LIBDIR)/libss.a
-	@rm -rf ${DESTDIR}$(INCLDIR)/ss
-	@mkdir ${DESTDIR}$(INCLDIR)/ss
+install::
+
+#install:: libss.a
+#	$(INSTALLLIB) libss.a ${DESTDIR}$(LIBDIR)/libss.a
+#	$(RANLIB) ${DESTDIR}$(LIBDIR)/libss.a
+#	@rm -rf ${DESTDIR}$(INCLDIR)/ss
+#	@mkdir ${DESTDIR}$(INCLDIR)/ss
 
 
 includes:: mk_cmds ss_err.h
 
-install:: $(HFILES) copyright.h
-	for i in $(HFILES) copyright.h; do \
-		$(INSTALLFILE) $(srcdir)/$$i ${DESTDIR}$(INCLDIR)/ss/$$i; \
-	done
+#install:: $(HFILES) copyright.h
+#	for i in $(HFILES) copyright.h; do \
+#		$(INSTALLFILE) $(srcdir)/$$i ${DESTDIR}$(INCLDIR)/ss/$$i; \
+#	done
 
-install:: copyright.h
-	$(INSTALLFILE) $(srcdir)/copyright.h ${DESTDIR}$(INCLDIR)/ss/mit-sipb-copyright.h
+#install:: copyright.h
+#	$(INSTALLFILE) $(srcdir)/copyright.h ${DESTDIR}$(INCLDIR)/ss/mit-sipb-copyright.h
+#
 
 std_rqs.c: std_rqs.ct
 
