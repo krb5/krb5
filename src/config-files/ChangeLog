@@ -1,3 +1,11 @@
+Mon May 20 17:25:09 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.conf.M: Document kdc_req_checksumtype,
+		as_req_checksum_type, and safe_checksum_type.
+
+	* krb5.conf: Remove the tkt_lifetime parameter altogether.  We may
+ 		end up doing it slightly differently post-Beta 6...
+
 Mon May 13 20:39:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.conf: Change the default ticket lifetime to something
