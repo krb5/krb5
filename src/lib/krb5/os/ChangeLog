@@ -1,3 +1,8 @@
+2000-12-19	Miro Jurisic <meeroh@mit.edu>
+
+	* c_us_time.c: Fix the sleep queue notification code to
+		build with Universal Headers 3.3
+
 2000-11-29	Miro Jurisic <meeroh@mit.edu>
 
 	* c_us_time.c: Install a callback in the Mac OS sleep

@@ -321,7 +321,7 @@ void MicrosecondsToSecsMicrosecs (
 
 void InstallSleepNotification ()
 {
-	gSleepQUPP = NewSleepQUPP (SleepNotification);
+	gSleepQUPP = NewSleepQProc (SleepNotification);
 	gSleepQRecord.sleepQLink = nil;
 	gSleepQRecord.sleepQType = slpQType;
 	gSleepQRecord.sleepQProc = gSleepQUPP;
@@ -332,6 +332,11 @@ void InstallSleepNotification ()
 void RemoveSleepNotification ()
 {
 	SleepQRemove (&gSleepQRecord);
+#if TARGET_API_MAC_CARBON
+	DisposeSleepQUPP (gSleepQUPP);
+#else
+	DisposeRoutineDescriptor (gSleepQUPP);
+#endif
 }
 
 pascal long SleepNotification (
