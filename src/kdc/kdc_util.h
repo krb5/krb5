@@ -49,7 +49,7 @@ krb5_error_code process_tgs_req PROTOTYPE((krb5_kdc_req *,
 					   const krb5_fulladdr *,
 					   krb5_data ** ));
 /* dispatch.c */
-krb5_error_code dispatch PROTOTYPE((const krb5_data *,
+krb5_error_code dispatch PROTOTYPE((krb5_data *,
 				    const krb5_fulladdr *,
 				    krb5_data **));
 

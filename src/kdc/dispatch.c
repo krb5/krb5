@@ -23,7 +23,7 @@ static char rcsid_dispatch_c[] =
 
 krb5_error_code
 dispatch(pkt, from, response)
-const krb5_data *pkt;
+krb5_data *pkt;
 const krb5_fulladdr *from;
 krb5_data **response;
 {
