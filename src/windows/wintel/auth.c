@@ -209,7 +209,7 @@ copy_for_net(unsigned char *to, unsigned char *from, int c)
 static int
 auth_send(kstream ks, unsigned char *parsedat, int end_sub)
 {
-  char buf[512];
+  char buf[2048];	/* be sure that this is > auth.length+9 */
   char *pname;
   int plen;
   int r;

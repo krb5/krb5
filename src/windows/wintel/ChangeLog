@@ -1,3 +1,8 @@
+Wed Feb  3 23:00:05 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* auth.c (auth_send): Increase size of buf so we can handle
+		mongo-gram sized tickets from Microsoft.  [telnet/686]
+
 Tue Aug  5 18:47:02 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in, telnet.rc: Add version resource to the executable.
