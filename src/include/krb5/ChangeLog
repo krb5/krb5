@@ -1,3 +1,17 @@
+Thu Mar 16 20:58:22 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Replace nonstandard CHECK_STDARG with
+	AC_CHECK_HEADERS.  Also check for header file macsock.h, which
+	is a dummy test -- it's false on Unix and PC's, but on the Mac
+	we hand-configure it to be true, to indicate that we want Mac
+	socket support rather than Unix socket support.
+	* base-defs.h, k5-config.h:  Use HAVE_STDARG_H, not STDARG_PROTOTYPES.
+	* k5-config.h (NEED_SOCKETS):  Add new section which brings in
+	socket include files for the appropriate compilation environment
+	(Mac or Unix; Windows already did this).
+	* macsock.h:  New include file, derived from Cygnus Network Security
+	Mac K4 release, for simulating sockets under MacTCP.
+
 Thu Mar 16 12:12:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: PC change, getting sys_nerr and sys_errlist to work.

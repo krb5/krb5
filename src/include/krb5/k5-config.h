@@ -54,7 +54,7 @@
 #define HAS_ANSI_VOLATILE
 #define HAS_VOID_TYPE
 #define KRB5_PROVIDE_PROTOTYPES
-#define STDARG_PROTOTYPES
+#define HAVE_STDARG_H
 
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;
@@ -213,7 +213,26 @@ typedef unsigned char u_char;
 #define labs(x) abs(x)
 #endif
 
+
+#ifdef NEED_SOCKETS
+/* If this source file requires it, define struct sockaddr_in
+   (and possibly other things related to network I/O).  */
+
+#ifdef HAVE_MACSOCK_H		/* Sockets stuff differs on Mac */
+#include "macsock.h"		/* Macintosh sockets emulation library */
+
+#else  /* HAVE_MACSOCK_H */	/* Sockets stuff for Unix machines */
+
+#include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
+#include <arpa/inet.h>		/* For inet_ntoa */
+#include <netdb.h>		/* For struct hostent, gethostbyname, etc */
+#include <sys/param.h>		/* For MAXHOSTNAMELEN */
+#include <sys/socket.h>		/* For SOCK_*, AF_*, etc */
+#include <sys/time.h>		/* For struct timeval */
+
+#endif /* HAVE_MACSOCK_H */
+#endif /* NEED_SOCKETS */
+
 #endif /* _MSDOS */
 
 #endif /* KRB5_CONFIG__ */
-
