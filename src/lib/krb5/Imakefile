@@ -28,18 +28,25 @@ VSSRCS=
 VSOBJS=syslog.o
 VSSRCS=syslog.c
 #endif
+#ifdef HasStrdup
+STOBJS=
+STSRCS=
+#else
+STOBJS=strdup.o
+STSRCS=strdup.c
+#endif
 
 INCLUDES=-I$(TOP)/include/stdc-incl
 
 OBJS =	\
 	cryptoconf.o \
 	perror.o \
-	$(VSOBJS) $(VPOBJS)
+	$(VSOBJS) $(VPOBJS) $(STOBJS)
 
 SRCS =	\
 	cryptoconf.c \
 	perror.c \
-	$(VSSRCS) $(VPSRCS)
+	$(VSSRCS) $(VPSRCS) $(STSRCS)
 
 MakeSubdirs($(SUBDIRS))
 
