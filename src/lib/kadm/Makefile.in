@@ -10,19 +10,24 @@ BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)
 
+unix_OBJS = logger.$(OBJEXT)
+mac_OBJS =
+windows_OBJS =
+
 DB_OBJS= adm_kw_dec.$(OBJEXT)	\
 	adm_kw_enc.$(OBJEXT)
 
-OBJS=	$(BASE_OBJS) $(DB_OBJS)
+OBJS=	$(BASE_OBJS) $(DB_OBJS) $($(WHAT)_OBJS)
 
 SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kt_dec.c	\
 	$(srcdir)/adm_kt_enc.c	\
 	$(srcdir)/adm_rw.c	\
 	$(srcdir)/adm_kw_dec.c	\
-	$(srcdir)/adm_kw_enc.c
+	$(srcdir)/adm_kw_enc.c	\
+	$(srcdir)/logger.c
 
-all:: all-$(WHAT) $(BASE_OBJS)
+all:: all-$(WHAT) $(BASE_OBJS) $($(WHAT)_OBJS)
 
 all-unix:: $(DB_OBJS)
 all-mac:: $(DB_OBJS)

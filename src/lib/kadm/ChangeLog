@@ -1,4 +1,13 @@
 
+Thu Jun 8 14:32:33 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* logger.c - New module to provide profile-controlled logging.  This
+		can optionally take over control of com_err(3) output to also
+		direct this output to where the profile specifies.  Also
+		includes a syslog(3) compatible interface which also follows
+		the profile's direction.
+	* Makefile.in, configure.in - update for logger.c
+
+
 Mon Jun 5 14:15:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_conn.c - Rework kadm_get_ccache() and kadm_get_creds() so that
 		we can specify differing credentials caches and the lifetime
