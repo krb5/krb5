@@ -25,6 +25,7 @@ Things-to-keep:
 
 rcp.exp
 rsh.exp
+sample.exp
 standalone.exp
 
 Things-to-lose:
