@@ -1,0 +1,110 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1993 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+# Export of this software from the United States of America may
+#   require a specific license from the United States Government.
+#   It is the responsibility of any person or organization contemplating
+#   export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+# 
+# 
+
+ETSRCS= gssapi_krb5_err.c
+ETOBJS= gssapi_krb5_err.o
+ETHDRS= gssapi_krb5_err.h
+
+CCSRCS = \
+	accept_sec_context.c \
+	acquire_cred.c \
+	compare_name.c \
+	context_time.c \
+	delete_sec_context.c \
+	display_name.c \
+	display_status.c \
+	get_tkt_flags.c \
+	gssapi_krb5.c \
+	import_name.c \
+	indicate_mechs.c \
+	init_sec_context.c \
+	inquire_context.c \
+	inquire_cred.c \
+	k5seal.c \
+	k5unseal.c \
+	krb5_gss_glue.c \
+	process_context_token.c \
+	release_cred.c \
+	release_name.c \
+	seal.c \
+	sign.c \
+	unseal.c \
+	util_cksum.c \
+	util_crypt.c \
+	util_seed.c \
+	util_seqnum.c \
+	verify.c
+
+CCSRCS = \
+	accept_sec_context.o \
+	acquire_cred.o \
+	compare_name.o \
+	context_time.o \
+	delete_sec_context.o \
+	display_name.o \
+	display_status.o \
+	get_tkt_flags.o \
+	gssapi_krb5.o \
+	import_name.o \
+	indicate_mechs.o \
+	init_sec_context.o \
+	inquire_context.o \
+	inquire_cred.o \
+	k5seal.o \
+	k5unseal.o \
+	krb5_gss_glue.o \
+	process_context_token.o \
+	release_cred.o \
+	release_name.o \
+	seal.o \
+	sign.o \
+	unseal.o \
+	util_cksum.o \
+	util_crypt.o \
+	util_seed.o \
+	util_seqnum.o \
+	verify.o
+
+SRCS= $(ETSRCS) $(CSRCS)
+OBJS= $(ETOBJS) $(COBJS)
+HDRS= $(ETHDRS)
+
+EHDRDIR=$(TOP)/include/gssapi
+
+NormalLibraryObjectRule()
+ErrorTableObjectRule()
+
+all:: ${SRCS} ${HDRS} includes ${OBJS}
+
+clean::
+	$(RM) $(ETHDRS) $(ETSRCS)
+
+SubdirLibraryRule($(OBJS))
+
+depend:: $(ETSRCS)
+
+DependTarget()
+
+SpecialObjectRule(gssapi_krb5_err.o,gssapi_krb5_err.c,)
