@@ -51,17 +51,25 @@ int use_keytab, use_master;
 char *keytab = NULL;
 krb5_keytab kt;
 
-void init_keytab(), init_master(), cleanup_and_exit();
-krb5_error_code do_connection(), lookup_service_key(), kdc_get_server_key();
+void init_keytab(krb5_context), 
+    init_master(krb5_context, kadm5_config_params *),
+    cleanup_and_exit(int, krb5_context);
+krb5_error_code do_connection(int, krb5_context);
+krb5_error_code lookup_service_key(krb5_context, krb5_principal, 
+				   krb5_enctype, krb5_kvno, 
+				   krb5_keyblock *, krb5_kvno *);
+krb5_error_code  kdc_get_server_key(krb5_context, krb5_principal, 
+				    krb5_keyblock *, krb5_kvno *,
+				    krb5_enctype, krb5_kvno);
 
-void usage(context)
+static void usage(context)
      krb5_context context;
 {
      fprintf(stderr, "Usage: %s [-k[eytab]] [-m[aster] [-r realm]] [-nofork]\n", whoami);
      cleanup_and_exit(1, context);
 }
 
-RETSIGTYPE request_exit(signo)
+static RETSIGTYPE request_exit(signo)
      int signo;
 {
      signalled = 1;

@@ -43,6 +43,7 @@
 void do_local PROTOTYPE((krb5_creds *, krb5_keyblock *)),
      do_remote PROTOTYPE((krb5_context, krb5_creds *, char *, krb5_keyblock *));
 
+static 
 void print_key(msg, key)
      char *msg;
      char *key;
@@ -52,6 +53,7 @@ void print_key(msg, key)
      printf("\n");
 }
 
+static
 void print_time(msg, t)
      char *msg;
      int t;
@@ -59,6 +61,7 @@ void print_time(msg, t)
      printf("%s: %d, %s", msg, t, ctime((time_t *) &t));
 }
 
+static
 void krb5_print_times(msg, t)
      char *msg;
      krb5_ticket_times *t;
@@ -73,6 +76,7 @@ void krb5_print_times(msg, t)
 	    ctime((time_t *) &t->renew_till));
 }
 
+static
 void krb5_print_keyblock(msg, key)
      char *msg;
      krb5_keyblock *key;
@@ -84,6 +88,7 @@ void krb5_print_keyblock(msg, key)
      printf("\n");
 }
 
+static
 void krb5_print_ticket(context, ticket_data, key)
      krb5_context context;
      krb5_data *ticket_data;
@@ -119,6 +124,7 @@ void krb5_print_ticket(context, ticket_data, key)
      krb5_free_ticket(context, tkt);
 }
 
+static
 void krb5_print_creds(context, creds, secret_key)
      krb5_context context;
      krb5_creds *creds;
@@ -141,6 +147,7 @@ void krb5_print_creds(context, creds, secret_key)
      /* krb5_print_ticket(context, &creds->second_ticket, secret_key); */
 }
 
+static
 void krb4_print_ticket(ticket, secret_key)
      KTEXT ticket;
      krb5_keyblock *secret_key;
@@ -177,6 +184,7 @@ void krb4_print_ticket(ticket, secret_key)
 							     &issue_time));
 }
 
+static
 void krb4_print_creds(creds, secret_key)
      CREDENTIALS *creds;
      krb5_keyblock *secret_key;
@@ -192,6 +200,7 @@ void krb4_print_creds(creds, secret_key)
      krb4_print_ticket(&creds->ticket_st, secret_key);
 }
 
+static
 void usage()
 {
      fprintf(stderr, "Usage: test [-remote server] client service\n");

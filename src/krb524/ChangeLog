@@ -1,3 +1,9 @@
+2001-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c: Provide prototypes for local functions.
+
+	* test.c: Declare local functions static.
+
 2001-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Avoid double-free;
