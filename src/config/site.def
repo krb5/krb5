@@ -93,6 +93,9 @@
 /* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc
    			  (might want to be in the architecture-specific
 			   configuration file) */
+/* #define HasVsyslog -- turn on if you have vsyslog in libc
+   			  (might want to be in the architecture-specific
+			   configuration file) */
 /* #define LdLibLocations -L/foo/bar -- alternate library search paths,
 					if needed for some system libraries */
 /* #define StandardIncludes -I/foo/bar -- additional include paths, if
