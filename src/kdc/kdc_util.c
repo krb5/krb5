@@ -80,9 +80,11 @@ realm_compare(realmname, princ)
 krb5_data *realmname;
 krb5_principal princ;
 {
-    return(strncmp(realmname->data, krb5_princ_realm(princ)->data,
-		   min(realmname->length,
-		       krb5_princ_realm(princ)->length)) ? FALSE : TRUE);
+    if (realmname->length != krb5_princ_realm(princ)->length)
+	return FALSE;
+    return(memcmp((char *)realmname->data,
+		  (char *)krb5_princ_realm(princ)->data,
+		  realmname->length) ? FALSE : TRUE);
 }
 
 struct kparg {
@@ -442,10 +444,10 @@ krb5_principal server;
 
     if(*otrans == ',') otrans++;
 	       
-    if(strcmp(krb5_princ_realm(client)->data,realm) == 0)
+    if (realm_compare(realm, client))
 	added = 1;
 
-    if(strcmp(krb5_princ_realm(server)->data,realm) == 0)
+    if(realm_compare(realm, server))
 	added = 1;
 
     while(*current) {
