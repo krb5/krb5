@@ -302,7 +302,7 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
 
     new_fn = new1->fn;
     new1->fn = NULL;
-    close(new->fd);
+    close(new1->fd);
     new1->fd = -1;
 
     unlink(new_fn);
