@@ -1,4 +1,4 @@
-# Copyright 1994 by the Massachusetts Institute of Technology.
+# Copyright 1994,2001 by the Massachusetts Institute of Technology.
 # All Rights Reserved.
 # 
 # Export of this software from the United States of America may
@@ -68,11 +68,14 @@ request kadmin_keytab_add, "Add entry(s) to a keytab",
 request kadmin_keytab_remove, "Remove entry(s) from a keytab",
 	ktremove, ktrem;
 
+request kadmin_getgeneration, "Display the database generation number",
+	get_generation, getgen, showgen, gen;
+
 # list_requests is generic -- unrelated to Kerberos
-request	ss_list_requests, "List available requests.",
+request	ss_list_requests, "List available requests",
 	list_requests, lr, "?";
 
-request	ss_quit, "Exit program.",
+request	ss_quit, "Exit program",
 	quit, exit, q;
 
 end;

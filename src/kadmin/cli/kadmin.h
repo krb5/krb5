@@ -47,6 +47,7 @@ extern void kadmin_getpols(int argc, char *argv[]);
 extern void kadmin_getprivs(int argc, char *argv[]);
 extern void kadmin_keytab_add(int argc, char *argv[]);
 extern void kadmin_keytab_remove(int argc, char *argv[]);
+extern void kadmin_getgeneration(int argc, char *argv[]);
 
 /* Yucky global variables */
 extern krb5_context context;

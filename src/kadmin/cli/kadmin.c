@@ -1,5 +1,5 @@
 /*
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1515,3 +1515,23 @@ void kadmin_getprivs(argc, argv)
     printf("\n");
     return;
 }
+
+void kadmin_getgeneration(argc, argv)
+    int argc;
+    char *argv[];
+{
+    kadm5_ret_t retval;
+    krb5_int32 generation;
+    if (argc != 1) {
+        fprintf(stderr, "usage: get_generation\n");
+	return;
+    }
+    retval = kadm5_get_generation_number(handle, &generation);
+    if (retval) {
+        com_err("get_generation", retval, "while retrieving generation");
+	return;
+    }
+    printf("Current generation number: %ld\n", generation);
+    return;
+}
+

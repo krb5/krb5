@@ -1,3 +1,11 @@
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* kadmin.c: New function kadmin_getgeneration added.
+
+	* kadmin.h: Prototype for kadmin_getgeneration added.
+
+	* kadmin_ct.ct: Request added to go with kadmin_getgeneration.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* getdate.y: Cast argument to isalpha()/isspace()/isdigit() to int.
