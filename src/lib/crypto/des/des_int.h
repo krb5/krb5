@@ -34,6 +34,14 @@
 #ifndef KRB5_MIT_DES__
 #define KRB5_MIT_DES__
 
+#if !defined(PROTOTYPE)
+#if defined(__STDC__) || defined(_MSDOS)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+#endif
+
 typedef krb5_octet mit_des_cblock[8];	/* crypto-block size */
 
 /* Key schedule--used internally by DES routines to gain some speed */
