@@ -97,7 +97,7 @@ typedef struct {
 	void	(*printsub) P((unsigned char *, int, unsigned char *, int));
 } Encryptions;
 
-#define	SK_DES		1	/* Matched Kerberos v5 KEYTYPE_DES */
+#define	SK_DES		1	/* Matched Kerberos v5 ENCTYPE_DES */
 
 #include "enc-proto.h"
 

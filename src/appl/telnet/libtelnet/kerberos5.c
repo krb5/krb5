@@ -282,7 +282,7 @@ kerberos5_send(ap)
 	 * ---see kerberos5_reply() below 
 	 */
 	if (newkey) {
-	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
+	    if (new_creds->keyblock.enctype == ENCTYPE_DES)
 		/* use the session key in credentials instead */
 		krb5_copy_keyblock_contents(telnet_context, 
 					    &new_creds->keyblock,
