@@ -1,3 +1,10 @@
+Thu Mar 28 17:20:12 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* DNR.c: Replace eight-year-old version of this file with the
+		latest version from the Code Warrior MacTCP files.  
+
+	* macsock.c: Use new MacTCP header files.
+
 Wed Mar 27 18:31:44 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* macsock.c (gethostbyname, gethostbyaddr): Use universal

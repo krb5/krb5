@@ -1,70 +1,135 @@
-/* 	DNR.c - Domain Name Resolver library for MPW
+/* 	
 
-	(c) Copyright 1988 by Apple Computer.  All rights reserved
+	File:		DNR.c 
 	
+	Contains:	DNR library for MPW
+
+  	Copyright:	© 1989-1995 by Apple Computer, Inc., all rights reserved
+
+	Version:	Technology:			Networking
+				Package:			Use with MacTCP 2.0.6 and the Universal
+									Interfaces 2.1b1	
+		
+	Change History (most recent first):
+		<3>	 1/23/95	rrk  	implemented use of universal procptrs
+		 						Changed selector name HINFO to HXINFO
+		 						due to conflict of name in MacTCP header
+		 						Removed use of TrapAvailable and exchanged
+		 						for the TrapExists call.
+								Changed symbol codeHandle to gDNRCodeHndl
+								Changed symbol dnr to gDNRCodePtr
+	Further modifications by Steve Falkenburg, Apple MacDTS 8/91
 	Modifications by Jim Matthews, Dartmouth College, 5/91
+
 	
-	FIXME jcm - copied from Authman 1.0.7 release, file not in ftp.seeding.apple.com
-	FIXME jcm -	slight improvments over the version in the KClient 1.1b1 release
-	FIXME jcm - All rights reserved Apple Computer
 */
 
 #include "k5-int.h"
-#ifdef HAVE_MACSOCK_H		/* Only build this on the Macintosh */
+#ifdef HAVE_MACSOCK_H           /* Only build this on the Macintosh */
 
+#ifndef __OSUTILS__
 #include <OSUtils.h>
+#endif
+
+#ifndef __ERRORS__
 #include <Errors.h>
+#endif
+
+#ifndef __FILES__
 #include <Files.h>
+#endif
+
+#ifndef __RESOURCES__
 #include <Resources.h>
+#endif
+
+#ifndef __MEMORY__
 #include <Memory.h>
+#endif
+
+#ifndef __TRAPS__
 #include <Traps.h>
+#endif
+
+#ifndef __GESTALTEQU__
 #include <GestaltEqu.h>
+#endif
+
+#ifndef __FOLDERS__
 #include <Folders.h>
+#endif
+
+#ifndef __TOOLUTILS__
 #include <ToolUtils.h>
-
-#define OPENRESOLVER	1L
-#define CLOSERESOLVER	2L
-#define STRTOADDR		3L
-#define	ADDRTOSTR		4L
-#define	ENUMCACHE		5L
-#define ADDRTONAME		6L
-#define	HINFO			7L
-#define MXINFO			8L
-
-Handle codeHndl = nil;
-
-typedef OSErr (*OSErrProcPtr)(long,...);
-OSErrProcPtr dnr = nil;
+#endif
 
 
-TrapType GetTrapType(theTrap)
-unsigned long theTrap;
+#ifndef __MACTCP__
+#include "MacTCP.h"
+#endif
+
+#ifndef __ADDRESSXLATION__
+#include "AddressXlation.h"
+#endif
+
+// think C compatibility stuff
+
+#ifndef	_GestaltDispatch
+#define	_GestaltDispatch	_Gestalt
+#endif
+
+
+/* RRK Modification 1/95 - commenting out the following defines as they are
+	defined in the DNRCalls.h header file
+*/
+
+void GetSystemFolder(short *vRefNumP, long *dirIDP);
+void GetCPanelFolder(short *vRefNumP, long *dirIDP);
+short SearchFolderForDNRP(long targetType, long targetCreator, short vRefNum, long dirID);
+short OpenOurRF(void);
+short	NumToolboxTraps(void);
+TrapType	GetTrapType(short theTrap);
+Boolean TrapExists(short theTrap);
+
+static Handle 			gDNRCodeHndl = nil;
+static ProcPtr			gDNRCodePtr = nil;
+
+/*	Check the bits of a trap number to determine its type. */
+
+/* InitGraf is always implemented (trap $A86E).  If the trap table is big
+** enough, trap $AA6E will always point to either Unimplemented or some other
+** trap, but will never be the same as InitGraf.  Thus, you can check the size
+** of the trap table by asking if the address of trap $A86E is the same as
+** $AA6E. */
+
+#pragma segment UtilMain
+short	NumToolboxTraps(void)
 {
-	if (BitAnd(theTrap, 0x0800) > 0)
-		return(ToolTrap);
-	else
-		return(OSTrap);
-	}
-	
-Boolean TrapAvailable(trap)
-unsigned long trap;
-{
-TrapType trapType = ToolTrap;
-unsigned long numToolBoxTraps;
-
 	if (NGetTrapAddress(_InitGraf, ToolTrap) == NGetTrapAddress(0xAA6E, ToolTrap))
-		numToolBoxTraps = 0x200;
+		return(0x200);
 	else
-		numToolBoxTraps = 0x400;
+		return(0x400);
+}
 
-	trapType = GetTrapType(trap);
-	if (trapType == ToolTrap) {
-		trap = BitAnd(trap, 0x07FF);
-		if (trap >= numToolBoxTraps)
-			trap = _Unimplemented;
-		}
-	return(NGetTrapAddress(trap, trapType) != NGetTrapAddress(_Unimplemented, ToolTrap));
+#pragma segment UtilMain
+TrapType	GetTrapType(short theTrap)
+{
+	/* OS traps start with A0, Tool with A8 or AA. */
+	if ((theTrap & 0x0800) == 0)					/* per D.A. */
+		return(OSTrap);
+	else
+		return(ToolTrap);
+}
 
+Boolean TrapExists(short theTrap)
+{
+	TrapType	theTrapType;
+
+	theTrapType = GetTrapType(theTrap);
+	if ((theTrapType == ToolTrap) && ((theTrap &= 0x07FF) >= NumToolboxTraps()))
+		theTrap = _Unimplemented;
+
+	return(NGetTrapAddress(_Unimplemented, ToolTrap) != NGetTrapAddress(theTrap, theTrapType));
 }
 
 void GetSystemFolder(short *vRefNumP, long *dirIDP)
@@ -73,35 +138,33 @@ void GetSystemFolder(short *vRefNumP, long *dirIDP)
 	long wdProcID;
 	
 	SysEnvirons(1, &info);
-	if (GetWDInfo(info.sysVRefNum, vRefNumP, dirIDP, &wdProcID) != noErr) {
+	if (GetWDInfo(info.sysVRefNum, vRefNumP, dirIDP, &wdProcID) != noErr) 
+	{
 		*vRefNumP = 0;
 		*dirIDP = 0;
-		}
 	}
+}
 
 void GetCPanelFolder(short *vRefNumP, long *dirIDP)
 {
 	Boolean hasFolderMgr = false;
 	long feature;
 	
-/*
-	if (TrapAvailable(_GestaltDispatch)) if (Gestalt(gestaltFindFolderAttr, &feature) == noErr) hasFolderMgr = true;
-	
-	FIXME jcm - what defines _Gestalt
-	if (TrapAvailable(_Gestalt)) 
-*/
-	if (Gestalt(gestaltFindFolderAttr, &feature) == noErr) hasFolderMgr = true;
-	if (!hasFolderMgr) {
+	if (TrapExists(_GestaltDispatch)) if (Gestalt(gestaltFindFolderAttr, &feature) == noErr) hasFolderMgr = true;
+	if (!hasFolderMgr) 
+	{
 		GetSystemFolder(vRefNumP, dirIDP);
 		return;
-		}
-	else {
-		if (FindFolder(kOnSystemDisk, kControlPanelFolderType, kDontCreateFolder, vRefNumP, dirIDP) != noErr) {
+	}
+	else 
+	{
+		if (FindFolder(kOnSystemDisk, kControlPanelFolderType, kDontCreateFolder, vRefNumP, dirIDP) != noErr) 
+		{
 			*vRefNumP = 0;
 			*dirIDP = 0;
-			}
 		}
 	}
+}
 	
 /* SearchFolderForDNRP is called to search a folder for files that might 
 	contain the 'dnrp' resource */
@@ -117,35 +180,29 @@ short SearchFolderForDNRP(long targetType, long targetCreator, short vRefNum, lo
 	fi.fileParam.ioDirID = dirID;
 	fi.fileParam.ioFDirIndex = 1;
 	
-	while (PBHGetFInfo(&fi, false) == noErr) {
+	while (PBHGetFInfo(&fi, false) == noErr) 
+	{
 		/* scan system folder for driver resource files of specific type & creator */
 		if (fi.fileParam.ioFlFndrInfo.fdType == targetType &&
-			fi.fileParam.ioFlFndrInfo.fdCreator == targetCreator) {
+			fi.fileParam.ioFlFndrInfo.fdCreator == targetCreator) 
+		{
 			/* found the MacTCP driver file? */
-						
 			refnum = HOpenResFile(vRefNum, dirID, filename, fsRdPerm);
-
-			SetResLoad(false);
-			if (GetIndResource('dnrp', 1) == NULL)	{
-				SetResLoad(true);
+			if (GetIndResource('dnrp', 1) == NULL)
 				CloseResFile(refnum);
-				}
-			else	{
-				SetResLoad(true);
+			else
 				return refnum;
-				}
-			SetResLoad(true);
-			}
+		}
 		/* check next file in system folder */
 		fi.fileParam.ioFDirIndex++;
 		fi.fileParam.ioDirID = dirID;	/* PBHGetFInfo() clobbers ioDirID */
-		}
+	}
 	return(-1);
-	}	
+}	
 
 /* OpenOurRF is called to open the MacTCP driver resources */
 
-short OpenOurRF()
+short OpenOurRF(void)
 {
 	short refnum;
 	short vRefNum;
@@ -155,7 +212,7 @@ short OpenOurRF()
 	GetCPanelFolder(&vRefNum, &dirID);
 	refnum = SearchFolderForDNRP('cdev', 'ztcp', vRefNum, dirID);
 	if (refnum != -1) return(refnum);
-
+		
 	/* next search System Folder for MacTCP 1.0.x */
 	GetSystemFolder(&vRefNum, &dirID);
 	refnum = SearchFolderForDNRP('cdev', 'mtcp', vRefNum, dirID);
@@ -167,16 +224,15 @@ short OpenOurRF()
 	if (refnum != -1) return(refnum);
 		
 	return -1;
-	}	
+}	
 
 
-OSErr OpenResolver(fileName)
-char *fileName;
+OSErr OpenResolver(char *fileName)
 {
-	short refnum;
-	OSErr rc;
+	short 			refnum;
+	OSErr 			rc;
 	
-	if (dnr != nil)
+	if (gDNRCodePtr != nil)
 		/* resolver already loaded in */
 		return(noErr);
 		
@@ -188,127 +244,144 @@ char *fileName;
 	   System file if running on a Mac 512Ke */
 	   
 	/* load in the DNR resource package */
-	codeHndl = GetIndResource('dnrp', 1);
-	if (codeHndl == nil) {
+	gDNRCodeHndl = GetIndResource('dnrp', 1);
+	if (gDNRCodeHndl == nil)
+	{
 		/* can't open DNR */
 		return(ResError());
-		}
+	}
 	
-	DetachResource(codeHndl);
-	if (refnum != -1) {
-		CloseWD(refnum);
+	DetachResource(gDNRCodeHndl);
+	if (refnum != -1) 
+	{
 		CloseResFile(refnum);
-		}
+	}
 		
 	/* lock the DNR resource since it cannot be reloated while opened */
-	HLock(codeHndl);
-	dnr = (OSErrProcPtr) *codeHndl;
+	MoveHHi(gDNRCodeHndl);
+	HLock(gDNRCodeHndl);
+	
+	gDNRCodePtr = (ProcPtr)*gDNRCodeHndl;
 	
 	/* call open resolver */
-	rc = (*dnr)(OPENRESOLVER, fileName);
-	if (rc != noErr) {
+	// RRK modification 1/95 use CallOpenResolverProc define to call UPP
+	
+	rc = CallOpenResolverProc(gDNRCodePtr, OPENRESOLVER, fileName);
+	if (rc != noErr) 
+	{
 		/* problem with open resolver, flush it */
-		HUnlock(codeHndl);
-		DisposHandle(codeHndl);
-		dnr = nil;
-		}
-	return(rc);
+		HUnlock(gDNRCodeHndl);
+		DisposeHandle(gDNRCodeHndl);
+		gDNRCodePtr = nil;
 	}
+	return(rc);
+}
 
 
-OSErr CloseResolver()
+OSErr CloseResolver(void)
 {
-	if (dnr == nil)
+	
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
 	/* call close resolver */
-	(void) (*dnr)(CLOSERESOLVER);
+	// RRK modification 1/95 use CallCloseResolverProc define to call UPP
+	// (void) (*dnr)(CLOSERESOLVER);
 
+	CallCloseResolverProc(gDNRCodePtr, CLOSERESOLVER);
+	
 	/* release the DNR resource package */
-	HUnlock(codeHndl);
-	DisposHandle(codeHndl);
-	dnr = nil;
+	HUnlock(gDNRCodeHndl);
+	DisposeHandle(gDNRCodeHndl);
+	gDNRCodePtr = nil;
 	return(noErr);
-	}
+}
 
-OSErr StrToAddr(hostName, rtnStruct, resultproc, userDataPtr)
-char *hostName;
-struct hostInfo *rtnStruct;
-long resultproc;
-char *userDataPtr;
-{
-	if (dnr == nil)
-		/* resolver not loaded error */
-		return(notOpenErr);
-		
-	return((*dnr)(STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
-	}
+	// RRK modification 1/95 declare parameter resultProc to be of type 
+	// ResultProcUPP instead of a long
 	
-OSErr AddrToStr(addr, addrStr)
-unsigned long addr;
-char *addrStr;									
+OSErr StrToAddr(char *hostName, struct hostInfo *rtnStruct, 
+			ResultUPP resultproc, Ptr userDataPtr)
 {
-	if (dnr == nil)
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
-	(*dnr)(ADDRTOSTR, addr, addrStr);
+	// RRK modification 1/95 use CallStrToAddrProc define to call UPP
+	// return((*dnr)(STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
+			
+	return (CallStrToAddrProc(gDNRCodePtr, STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
+}
+	
+OSErr AddrToStr(unsigned long addr, char *addrStr)
+{
+	OSErr	err;
+	if (gDNRCodePtr == nil)
+		/* resolver not loaded error */
+		return(notOpenErr);
+		
+	// RRK modification 1/95 use CallAddrToStrProc define to call UPP
+	// (*dnr)(ADDRTOSTR, addr, addrStr);
+	
+	err = CallAddrToStrProc(gDNRCodePtr, ADDRTOSTR, addr, addrStr);
 	return(noErr);
-	}
+}
 	
-OSErr EnumCache(resultproc, userDataPtr)
-long resultproc;
-char *userDataPtr;
+OSErr EnumCache(EnumResultUPP resultproc, Ptr userDataPtr)
 {
-	if (dnr == nil)
+
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
-	return((*dnr)(ENUMCACHE, resultproc, userDataPtr));
-	}
+	// RRK modification 1/95 use CallEnumCacheProc define to call UPP
+	// return((*dnr)(ENUMCACHE, resultproc, userDataPtr));
+
+	return (CallEnumCacheProc(gDNRCodePtr, ENUMCACHE, resultproc, userDataPtr));
+}
 	
 	
-OSErr AddrToName(addr, rtnStruct, resultproc, userDataPtr)
-unsigned long addr;
-struct hostInfo *rtnStruct;
-long resultproc;
-char *userDataPtr;									
+OSErr AddrToName(unsigned long addr, struct hostInfo *rtnStruct, 
+			ResultUPP resultproc, Ptr userDataPtr)
 {
-	if (dnr == nil)
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
-	return((*dnr)(ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
-	}
+	// RRK modification 1/95 use CallAddrToNameProc define to call UPP
+	// return((*dnr)(ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
+
+	return(CallAddrToNameProc(gDNRCodePtr, ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
+}
 
 
-extern OSErr HInfo(hostName, returnRecPtr, resultProc, userDataPtr)
-char *hostName;
-struct returnRec *returnRecPtr;
-long resultProc;
-char *userDataPtr;
+extern OSErr HInfo(char *hostName, struct returnRec *returnRecPtr, 
+			ResultProc2UPP resultProc, Ptr userDataPtr)
 {
-	if (dnr == nil)
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
-	return((*dnr)(HINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+	// RRK modification 1/95 use CallHInfoProc define to call UPP
+	// return((*dnr)(HINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
-	}
+	return(CallHInfoProc(gDNRCodePtr, HXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+
+}
 	
-extern OSErr MXInfo(hostName, returnRecPtr, resultProc, userDataPtr)
-char *hostName;
-struct returnRec *returnRecPtr;
-long resultProc;
-char *userDataPtr;
+extern OSErr MXInfo(char *hostName, struct returnRec *returnRecPtr, 
+			ResultProc2UPP resultProc, Ptr userDataPtr)
 {
-	if (dnr == nil)
+	if (gDNRCodePtr == nil)
 		/* resolver not loaded error */
 		return(notOpenErr);
 		
-	return((*dnr)(MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+	// RRK modification 1/95 use CallHInfoProc define to call UPP
+	// return((*dnr)(MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
-	}
+	return(CallMXInfoProc(gDNRCodePtr, MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+
+}	/* removed ; (causes syntax err in Think C 5.0 */
 
 #endif /* HAVE_MACSOCK_H */

@@ -34,11 +34,8 @@
 #include "macsock.h"
 
 /* MacTCP headers from Apple */
-#include "MacTCPCommonTypes.h"
-#include "UDPPB.h"
-#include "TCPPB.h"
 #include "AddressXlation.h"		/* MacTCP Domain name resolver decls */
-#include "GetMyIPAddr.h"		/* Like it sez... */
+#include "MacTCP.h"
 
 typedef union {
 	UDPiopb		udppb;
