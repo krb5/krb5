@@ -37,20 +37,18 @@
 
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
-krb5_recvauth(context, auth_context,
-	      /* IN */
-	      fd, appl_version, server, flags, keytab,
-	      /* OUT */
-	      ticket)
-    krb5_context 	  context;
-    krb5_auth_context   FAR * auth_context;
-    krb5_pointer	  fd;
-    char		FAR * appl_version;
-    krb5_principal	  server;
-    krb5_int32		  flags;
-    krb5_keytab		  keytab;
-    krb5_ticket	       FAR * FAR * ticket;
+krb5_error_code
+recvauth_common(krb5_context context,
+		krb5_auth_context FAR * auth_context,
+		/* IN */
+		krb5_pointer fd,
+		char FAR *appl_version,
+		krb5_principal server,
+		krb5_int32 flags,
+		krb5_keytab keytab,
+		/* OUT */
+		krb5_ticket FAR * FAR * ticket,
+		krb5_data FAR *version)
 {
     krb5_auth_context	  new_auth_context;
     krb5_flags		  ap_option;
@@ -91,12 +89,15 @@ krb5_recvauth(context, auth_context,
 	 */
 	if ((retval = krb5_read_message(context, fd, &inbuf)))
 		return(retval);
-	if (strcmp(inbuf.data, appl_version)) {
+	if (appl_version && strcmp(inbuf.data, appl_version)) {
 		krb5_xfree(inbuf.data);
 		if (!problem)
 			problem = KRB5_SENDAUTH_BADAPPLVERS;
 	}
-	krb5_xfree(inbuf.data);
+	if (version && !problem)
+	    *version = inbuf;
+	else
+	    krb5_xfree(inbuf.data);
 	/*
 	 * OK, now check the problem variable.  If it's zero, we're
 	 * fine and we can continue.  Otherwise, we have to signal an
@@ -242,4 +243,39 @@ cleanup:;
 	}
     }
     return retval;
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_recvauth(context, auth_context,
+	      /* IN */
+	      fd, appl_version, server, flags, keytab,
+	      /* OUT */
+	      ticket)
+    krb5_context 	  context;
+    krb5_auth_context   FAR * auth_context;
+    krb5_pointer	  fd;
+    char		FAR * appl_version;
+    krb5_principal	  server;
+    krb5_int32		  flags;
+    krb5_keytab		  keytab;
+    krb5_ticket	       FAR * FAR * ticket;
+{
+    return recvauth_common (context, auth_context, fd, appl_version,
+			    server, flags, keytab, ticket, 0);
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_recvauth_version(krb5_context context,
+		      krb5_auth_context FAR *auth_context,
+		      /* IN */
+		      krb5_pointer fd,
+		      krb5_principal server,
+		      krb5_int32 flags,
+		      krb5_keytab keytab,
+		      /* OUT */
+		      krb5_ticket FAR * FAR *ticket,
+		      krb5_data FAR *version)
+{
+    return recvauth_common (context, auth_context, fd, 0,
+			    server, flags, keytab, ticket, version);
 }

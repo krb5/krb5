@@ -1,3 +1,13 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* recvauth.c (krb5_recvauth_version): New routine, takes a
+	krb5_data in which to store the client's application version
+	string.
+	(recvauth_common): Renamed from krb5_recvauth, added above
+	functionality depending on extra argument values.
+	(krb5_recvauth): New stub, calls above routine with extra dummy
+	values.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* sendauth.c, fwd_tgt.c: Changed to use krb5int_cc_default.  This function 
