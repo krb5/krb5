@@ -1,3 +1,8 @@
+2000-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_chpass3_arg): 
+	(xdr_chrand3_arg): Fix up calls to xdr_array.
+
 2000-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_xdr.c: Add xdr functions for new kadm rpc functions.

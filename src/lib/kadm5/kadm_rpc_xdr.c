@@ -635,7 +635,7 @@ xdr_chpass3_arg(XDR *xdrs, chpass3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
-		       objp->n_ks_tuple, ~0,
+		       (unsigned int*)&objp->n_ks_tuple, ~0,
 		       sizeof(krb5_key_salt_tuple),
 		       xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
@@ -732,7 +732,7 @@ xdr_chrand3_arg(XDR *xdrs, chrand3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
-		       objp->n_ks_tuple, ~0,
+		       (unsigned int*)&objp->n_ks_tuple, ~0,
 		       sizeof(krb5_key_salt_tuple),
 		       xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
