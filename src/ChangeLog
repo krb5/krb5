@@ -1,5 +1,9 @@
 Tue Mar 22 12:00:00 1995  Keith Vetter (keithv@fusion.com)
 
+	* Makefile.in: added all-mac target.
+
+Tue Mar 22 12:00:00 1995  Keith Vetter (keithv@fusion.com)
+
 	* Makefile.in: zipping up for the PC now handles trees containing
 	   binary files such as *.o and *.a.
 

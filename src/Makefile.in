@@ -24,6 +24,8 @@ all:: all-$(WHAT)
 
 all-unix::
 
+all-mac::
+
 all-: all-windows
 
 all-windows:: makefile-windows
@@ -180,8 +182,7 @@ clean-windows::
 
 #
 # Builds the zip file that distributes Kerberos sources for DOS sites
-# from the source tree on Unix.	Note, it doesn't handle binary files 
-# well, so you MUST do a make clean before hand. 
+# from the source tree on Unix.	
 #
 ZIPFILES= ./* \
 	config/* include/* include/krb5/* include/krb5/asn.1/* \
