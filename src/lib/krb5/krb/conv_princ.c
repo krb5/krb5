@@ -214,9 +214,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		      for (cp = domain; *cp; cp++)
 			  if (isupper(*cp))
 			      *cp = tolower(*cp);
-#ifndef OLD_CONFIG_FILES
 		      strcat(buf, ".");
-#endif
 		      strcat(buf, domain);
 		      krb5_xfree(domain);
 		  }

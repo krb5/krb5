@@ -1,3 +1,8 @@
+Wed Jun  7 15:23:21 1995    <tytso@rsx-11.mit.edu>
+
+	* conv_princ.c (krb5_425_conv_principal): Remove old CONFIG_FILES
+		code. 
+
 Fri May 26 10:18:28 1995 Keith Vetter (keithv@fusion.com)
 
 	* makefile.in: removed for the PC creating shared directory.
