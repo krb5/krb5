@@ -25,5 +25,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=client server
+SUBDIRS=server client kpasswd
 MakeSubdirs($(SUBDIRS))
