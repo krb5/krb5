@@ -29,7 +29,6 @@
 #define KPROP_SERVICE_NAME "host"
 #define TGT_SERVICE_NAME "krbtgt"
 #define KPROP_SERVICE "krb5_prop"
-#define KPROP_CKSUMTYPE CKSUMTYPE_RSA_MD4_DES
 
 #define KPROP_PROT_VERSION "kprop5_01"
 

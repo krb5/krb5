@@ -1,3 +1,7 @@
+2001-01-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kprop.h (KPROP_CKSUMTYPE): Delete unused macro.
+
 Tue Oct 17 08:11:56 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* kprop.c, kpropd.c: Use krb5_set_principal_realm() instead of
