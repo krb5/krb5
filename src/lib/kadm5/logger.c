@@ -413,9 +413,9 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 		 *	<whitespace><data><whitespace>
 		 * so, trim off the leading and trailing whitespace here.
 		 */
-		for (cp = logging_specs[i]; isspace(*cp); cp++);
+		for (cp = logging_specs[i]; isspace((int) *cp); cp++);
 		for (cp2 = &logging_specs[i][strlen(logging_specs[i])-1];
-		     isspace(*cp2); cp2--);
+		     isspace((int) *cp2); cp2--);
 		cp2++;
 		*cp2 = '\0';
 		/*

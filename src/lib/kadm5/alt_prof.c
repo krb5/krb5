@@ -598,14 +598,14 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 		  (ep = strchr(sp, (int) '\t'))) {
 		   /* Fill in trailing whitespace of sp */
 		   tp = ep - 1;
-		   while (isspace(*tp) && (tp > sp)) {
+		   while (isspace((int) *tp) && (tp > sp)) {
 			*tp = '\0';
 			tp--;
 		   }
 		   *ep = '\0';
 		   ep++;
 		   /* Skip over trailing whitespace of ep */
-		   while (isspace(*ep) && (*ep)) ep++;
+		   while (isspace((int) *ep) && (*ep)) ep++;
 	      }
 	      /* Convert this flag */
 	      if (krb5_string_to_flags(sp,
@@ -846,14 +846,14 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 		(ep = strchr(sp, (int) '\t'))) {
 		/* Fill in trailing whitespace of sp */
 		tp = ep - 1;
-		while (isspace(*tp) && (tp < sp)) {
+		while (isspace((int) *tp) && (tp < sp)) {
 		    *tp = '\0';
 		    tp--;
 		}
 		*ep = '\0';
 		ep++;
 		/* Skip over trailing whitespace of ep */
-		while (isspace(*ep) && (*ep)) ep++;
+		while (isspace((int) *ep) && (*ep)) ep++;
 	    }
 	    /* Convert this flag */
 	    if (krb5_string_to_flags(sp,

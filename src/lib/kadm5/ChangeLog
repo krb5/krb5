@@ -1,3 +1,10 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+
+	* alt_prof.c (krb5_read_realm_params): Cast argument to isspace()
+	to int.
+	* logger.c (krb5_klog_init): Likewise.
+
 2001-06-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* logger.c (klog_vsyslog): If krb5_klog_init() is not called, do
