@@ -30,8 +30,8 @@ proc expect_tcl_prompt {} {
     global kadmin_tcl_spawn_id
     expect {
 	-i $kadmin_tcl_spawn_id
-	"^% " { }
-	-re . { error "unexpected output {$expect_out(buffer)} from subprocess, expecting tcl prompt" }
+	-re "^% $" { }
+	-re . { perror "unexpected output {$expect_out(buffer)} from subprocess, expecting tcl prompt" }
 	timeout { perror "timeout waiting for tcl prompt" }
 	eof { perror "eof from subprocess when expecting tcl prompt" }
     }
@@ -51,7 +51,7 @@ proc expect_kadm_ok {} {
     expect {
 	-i $kadmin_tcl_spawn_id
 	-re "^OK OVSEC_KADM_OK \[^\n\]*\n" {}
-	default { error "didn't get ok back" }
+	default { perror "didn't get ok back" }
     }
 }
 # trying to translate rpc_test_setup.sh into inline tcl...
@@ -76,6 +76,10 @@ proc setup_database {} {
     set kadmin_tcl_spawn_id $spawn_id
     if [info exists x] { set spawn_id $x }
 
+    expect_tcl_prompt
+    # tcl 8.4 for some reason screws up autodetection of output EOL
+    # translation.  Work around it for now.
+    send_tcl_cmd_await_echo "if { \[info commands fconfigure\] ne \"\" } { fconfigure stdout -translation lf }"
     expect_tcl_prompt
     send_tcl_cmd_await_echo "source {$TCLUTIL}"
     expect_tcl_prompt
