@@ -8,7 +8,7 @@
 
 @set EDITION pre-BETA 5
 @set VERSION pre-BETA 5
-@set UPDATED March 3, 1995
+@set UPDATED March 6, 1995
 
 @ignore
 @iftex
@@ -644,15 +644,19 @@ send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 @node Ultrix 4.2/3, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
 @subsection Ultrix 4.2/3
 
-On the MIPS platform, @file{md4.c} and @file{md5.c} can not be
-compiled with the optimizer set at level 1.  That is, you must specify
-either @samp{--with-ccopts=-O} and @samp{--with-ccopts=-g} to
-configure.  If you don't specify either, the compile will never complete.
+On the MIPS platform, using the native compiler, @file{md4.c} and
+@file{md5.c} can not be compiled with the optimizer set at level 1.
+That is, you must specify either @samp{--with-ccopts=-O} and
+@samp{--with-ccopts=-g} to configure.  If you don't specify either, the
+compile will never complete.
 
 The optimizer isn't hung; it just takes an exponentially long time.  6
 out of the 48 algorithmic steps takes 3 seconds, 7 steps takes 9
 seconds, 8 steps takes 27 seconds, and so on.  Calculations estimate
 it will finish in approximately 3,469 billion years....
+
+Using GCC version 2.5 instead of the native compiler will also fine,
+both with or without optimization.
 
 @node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, Ultrix 4.2/3, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
@@ -660,12 +664,22 @@ it will finish in approximately 3,469 billion years....
 There is a bug in OSF/1's fgrep which causes the @samp{configure}
 script to fail.
 
+Using the native compiler, compiling with the @samp{-O} compiler flag
+causes the @code{asn.1} library to be compiled incorrectly.  
+
+Using GCC version 2.6.3 instead of the native compiler will also work
+fine, both with or without optimization.
+
 @node Alpha OSF/1 V2.0, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0
 
-@file{md4.c} can not be compiled with the optimizer on.  (This could possibly
-be the same sort of bug as found in @ref{Ultrix 4.2/3}, but that seems
-rather remarkable.)
+Using the native compiler, @file{md4.c} must be compiled with either the
+@samp{-O} or @samp{-g} compiler options.  (This could possibly be the
+same sort of bug as found in @ref{Ultrix 4.2/3}, but that seems rather
+remarkable.)
+
+Using GCC version 2.6.3 as the compiler will also work fine, both with
+or without optimization.
 
 @node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, OS Incompatibilities
 @subsection BSDI
