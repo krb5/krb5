@@ -1,3 +1,7 @@
+Mon Mar  3 14:52:58 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Change KRB5 to krb5 for Mac subdirs.
+
 Tue Feb 25 01:03:41 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: krb5_32.lib now also depends on gdi32.lib

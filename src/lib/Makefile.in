@@ -3,7 +3,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOSVERS_DIR = \vers
 
-MAC_SUBDIRS = crypto KRB5 gssapi kadm
+MAC_SUBDIRS = crypto krb5 gssapi kadm
 
 all-unix::
 
