@@ -1,3 +1,10 @@
+Wed Feb 28 11:42:26 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-client.c (call_server): Get the nametype OID from
+		gss_display_name, print it, and then release the nametype
+		OID.  This tests gss_display_name()'s ability to return a
+		valid nametype, which can then be freed successfully.
+
 Tue Feb 27 17:26:15 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* configure.in: Add USE_ANAME.

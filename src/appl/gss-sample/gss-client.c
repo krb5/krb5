@@ -130,7 +130,7 @@ int call_server(host, port, dov2, service_name, msg)
      gss_name_t		src_name, targ_name;
      gss_buffer_desc	sname, tname;
      OM_uint32		lifetime;
-     gss_OID		mechanism;
+     gss_OID		mechanism, name_type;
      int		is_local;
 #ifdef	GSSAPI_V2
      OM_uint32		context_flags;
@@ -189,7 +189,7 @@ int call_server(host, port, dov2, service_name, msg)
      }
 
      maj_stat = gss_display_name(&min_stat, src_name, &sname,
-				 (gss_OID *) NULL);
+				 &name_type);
      if (maj_stat != GSS_S_COMPLETE) {
 	 display_status("displaying context", maj_stat, min_stat);
 	 return -1;
@@ -216,6 +216,18 @@ int call_server(host, port, dov2, service_name, msg)
 #ifdef	GSSAPI_V2
      if (dov2) {
 	 size_t	i;
+
+	 maj_stat = gss_oid_to_str(&min_stat,
+				   name_type,
+				   &oid_name);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("converting oid->string", maj_stat, min_stat);
+	     return -1;
+	 }
+	 fprintf(stderr, "Name type of source name is %s.\n",
+		 oid_name.value);
+	 (void) gss_release_buffer(&min_stat, &oid_name);
+	 (void) gss_release_oid(&min_stat, &name_type);
 
 	 /* Now get the names supported by the mechanism */
 	 maj_stat = gss_inquire_names_for_mech(&min_stat,
