@@ -1,3 +1,7 @@
+Wed Oct  2 13:41:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in, Makefile.in: Let autoconf determine path to perl.
+
 Fri Sep 27 14:12:59 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* start_servers, start_servers_local, stop_servers, init_db,

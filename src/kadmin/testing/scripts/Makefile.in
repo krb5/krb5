@@ -1,5 +1,4 @@
-# XXX This isn't right!
-PERL	= /usr/athena/bin/perl
+PERL=@PERL@
 
 GEN_SCRIPTS = compare_dump.pl fixup-conf-files.pl make-host-keytab.pl \
 	simple_dump.pl verify_xrunner_report.pl qualname.pl
