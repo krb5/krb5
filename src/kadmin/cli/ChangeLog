@@ -1,3 +1,10 @@
+2000-10-16  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (strdur): Print negative durations somewhat (!)
+	sanely.
+	(kadmin_startup): Call krb5_klog_init() to avoid coredumping if
+	kadm5_init() logs something via krb5_klog_syslog().
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadmin.c (kadmin_getpol): Change format strings from %d to %ld
