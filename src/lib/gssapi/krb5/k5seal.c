@@ -21,7 +21,7 @@
  */
 
 #include "gssapiP_krb5.h"
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 
 static krb5_error_code
 make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,

@@ -1,4 +1,11 @@
 
+Thu Jul 27 15:26:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add -I$(srcdir)/../../crypto/md5 to get rsa-md5.h.
+	* accept_sec_context.c - Include "rsa-md5.h" instead of <krb5/...>.
+	* gssapiP_krb5.h - Replace k5-specific includes with k5-int.h
+	* k5[un]seal.c - Include "rsa-md5.h" instead of <krb5/...>.
+
+
 Fri Jul 7 16:23:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, it's set by configure.
 

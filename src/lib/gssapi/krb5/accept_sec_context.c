@@ -21,7 +21,7 @@
  */
 
 #include "gssapiP_krb5.h"
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 #include <memory.h>
 
 OM_uint32
