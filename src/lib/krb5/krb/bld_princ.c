@@ -16,7 +16,7 @@ static char rcsid_bld_princ_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -93,7 +93,7 @@ va_list ap;
 }
 
 krb5_error_code
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 krb5_build_principal(krb5_principal *princ, int rlen, const char *realm, ...)
 #else
 krb5_build_principal(princ, rlen, realm, va_alist)
@@ -106,7 +106,7 @@ va_dcl
     va_list ap;
     krb5_error_code retval;
 
-#ifdef __STDC__
+#if __STDC__ || defined(STDARG_PROTOTYPES)
     va_start(ap, realm);
 #else
     va_start(ap);
