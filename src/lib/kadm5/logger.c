@@ -182,7 +182,7 @@ klog_com_err_proc(whoami, code, format, ap)
 {
     char	outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
     int		lindex;
-    char	*actual_format;
+    const char	*actual_format;
 #ifdef	HAVE_SYSLOG
     int		log_pri = -1;
 #endif	/* HAVE_SYSLOG */
@@ -205,7 +205,7 @@ klog_com_err_proc(whoami, code, format, ap)
     }
     cp = &outbuf[strlen(outbuf)];
     
-    actual_format = (char *) format;
+    actual_format = format;
 #ifdef	HAVE_SYSLOG
     /*
      * This is an unpleasant hack.  If the first character is less than
@@ -216,7 +216,7 @@ klog_com_err_proc(whoami, code, format, ap)
      * intermediate representation.
      */
     if ((((unsigned char) *format) > 0) && (((unsigned char) *format) <= 8)) {
-	actual_format = (char *) (format + 1);
+	actual_format = (format + 1);
 	switch ((unsigned char) *format) {
 #ifdef	LOG_EMERG
 	case 1:
@@ -744,7 +744,7 @@ krb5_klog_close(kcontext)
 /*
  * severity2string()	- Convert a severity to a string.
  */
-static char *
+static const char *
 severity2string(severity)
     int	severity;
 {
@@ -793,7 +793,7 @@ severity2string(severity)
 	break;
 #endif	/* LOG_DEBUG */
     }
-    return((char *) ss);
+    return(ss);
 }
 
 /*
