@@ -1,3 +1,6 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * read_servi.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Tue Aug 29 13:37:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* ktbase.c - Add routines to deal with externalizing krb5_keytab.  These
