@@ -1,3 +1,9 @@
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* des_stringtokey.c (krb5int_des_string_to_key): If param has  one
+	byte, treat it as a type.   Type 0 is normal, type 1 is AFS
+	string2key. 
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* des_stringtokey.c (krb5int_des_string_to_key): Renamed from

@@ -128,10 +128,10 @@ that the library will tolerate before assuming that a Kerberos message
 is invalid.  The default value is 300 seconds, or five minutes.
 
 .IP kdc_timesync 
-If the value of this relation is non-zero, the library will compute the
-difference between the system clock and the time returned by the KDC and
-in order to correct for an inaccurate system clock.  This corrective
-factor is only used by the Kerberos library.
+If the value of this relation is non-zero (the default), the library
+will compute the difference between the system clock and the time
+returned by the KDC and in order to correct for an inaccurate system
+clock.  This corrective factor is only used by the Kerberos library.
 
 .IP kdc_req_checksum_type
 For compatability with DCE security servers which do not support the
@@ -164,6 +164,18 @@ do not support the default cache as created by this version of
 Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
 DCE 1.1 systems.
 
+.IP krb4_srvtab 
+Specifies the location of the Kerberos V4 srvtab file.  Default is
+"/etc/srvtab".
+
+.IP krb4_config
+Specifies the location of hte Kerberos V4 configuration file.  Default
+is "/etc/krb.conf".
+
+.IP krb4_realms
+Specifies the location of the Kerberos V4 domain/realm translation
+file.  Default is "/etc/krb.realms".
+
 .IP dns_lookup_kdc
 Indicate whether DNS SRV records shoud be used to locate the KDCs and 
 other servers for a realm, if they are not listed in the information 
@@ -181,6 +193,34 @@ of the preceding options are specified, this option has no effect.
 This allows a computer to use multiple local addresses, in order to
 allow Kerberos to work in a network that uses NATs.  The addresses should
 be in a comma-separated list.
+
+.IP udp_preference_limit
+When sending a message to the KDC, the library will try using TCP
+before UDP if the size of the message is above "udp_preference_list".
+If the message is smaller than "udp_preference_list", then UDP will be
+tried before TCP.  Regardless of the size, both protocols will be
+tried if the first attempt fails.
+
+.IP verify_ap_req_nofail
+If this flag is set, then an attempt to get initial credentials will
+fail if the client machine does not have a keytab.  The default for the
+flag is false.
+
+.IP renew_lifetime
+The value of this tag is the default renewable lifetime for initial
+tickets.  The default value for the tag is 0.
+
+.IP noaddresses
+Setting this flag causes the initial Kerberos ticket to be addressless.
+The default for the flag is true.
+
+.IP forwardable
+If this flag is set, initial tickets by default will be forwardable.
+The default value for this flag is false.
+
+.IP proxiable
+If this flag is set, initial tickets by default will be proxiable.
+The default value for this flag is false.
 
 .SH APPDEFAULTS SECTION
 
@@ -233,9 +273,6 @@ subsection define the properties of that particular realm.  For example:
 .in +1i
 [realms]
 	ATHENA.MIT.EDU = {
-		kdc = KERBEROS.MIT.EDU
-		kdc = KERBEROS-1.MIT.EDU:750
-		kdc = KERBEROS-2.MIT.EDU:88
 		admin_server = KERBEROS.MIT.EDU
 		default_domain = MIT.EDU
 		v4_instance_convert = {
@@ -254,7 +291,8 @@ subsection:
 .IP kdc
 The value of this relation is the name of a host running a KDC for that
 realm.  An optional port number (preceded by a colon) may be appended to
-the hostname.
+the hostname.  This tag should generally be used only if the realm
+administrator has not made the information available through DNS.
 
 .IP admin_server
 This relation identifies the host where the administration server is

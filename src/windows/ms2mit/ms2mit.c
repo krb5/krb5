@@ -264,11 +264,11 @@ MSCredToMITCred(
     creds->times.endtime=FileTimeToUnixTime(&msticket->EndTime);
     creds->times.renew_till=FileTimeToUnixTime(&msticket->RenewUntil);
 
-    // krb5_cc_store_cred crashes downstream if creds->addresses is NULL.
-    // unfortunately, the MS interface doesn't seem to return a list of
-    // addresses as part of the credentials information. for now i'll just
-    // use krb5_os_localaddr to mock up the address list. is this sufficient?
-    krb5_os_localaddr(context, &creds->addresses);
+    /* MS Tickets are addressless.  MIT requires an empty address
+     * not a NULL list of addresses.
+     */
+    creds->addresses = (krb5_address **)malloc(sizeof(krb5_address *));
+    memset(creds->addresses, 0, sizeof(krb5_address *));
 
     MSTicketToMITTicket(msticket, context, &creds->ticket);
 }
