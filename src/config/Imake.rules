@@ -926,7 +926,7 @@ Concat(lib,libname.a): deplist						@@\
 all:: DONE								@@\
 									@@\
 DONE: objlist								@@\
-	touch $@							@@\
+	echo objlist > $@						@@\
 									@@\
 clean::									@@\
 	$(RM) DONE
