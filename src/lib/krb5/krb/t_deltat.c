@@ -70,7 +70,7 @@ main (void)
 	/* XX We might want to require exactly two digits after a colon?  */
 	GOOD ("3:4", 3 * HOUR + 4 * MIN),
 	/* misc */
-	BAD ("42"),
+	GOOD ("42", 42),
 	BAD ("1-2"),
 	/* Test overflow limitations */
 	GOOD ("2147483647s", 2147483647),
