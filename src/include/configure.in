@@ -187,9 +187,12 @@ AC_DEFINE(KRB5_ATHENA_COMPAT,1,[Define if MIT Project Athena default configurati
 
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 compatibility)
+	maybe_kerberosIV=
 else
 	AC_MSG_RESULT(Kerberos 4 compatibility enabled)
+	maybe_kerberosIV=kerberosIV
 	AC_DEFINE(KRB5_KRB4_COMPAT,1,[Define if Kerberos V4 backwards compatibility should be supported])
 fi
+AC_SUBST(maybe_kerberosIV)
 dnl
 V5_AC_OUTPUT_MAKEFILE(. krb5 kerberosIV)

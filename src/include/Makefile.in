@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=include
 mydir=.
-MY_SUBDIRS=krb5 kerberosIV
+MY_SUBDIRS=krb5 @maybe_kerberosIV@
 BUILDTOP=$(REL)..
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
