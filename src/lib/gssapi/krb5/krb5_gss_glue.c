@@ -482,10 +482,6 @@ gss_unseal(minor_status, context_handle, input_message_buffer,
      int *conf_state;
      int *qop_state;
 {
-   if (input_message_buffer->length == 0) {
-       if (fork() == 0)
-	   abort();
-   }
    return(krb5_gss_unseal(minor_status, context_handle,
 			  input_message_buffer, output_message_buffer,
 			  conf_state, qop_state));
