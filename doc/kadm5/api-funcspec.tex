@@ -27,15 +27,15 @@
 
 \section{Introduction}
 
-This section describes the Admin API that can be used to maintain
+This document describes the Admin API that can be used to maintain
 principals and policies.  It describes the data structures used for
 each function and the interpretation of each data type field, the
 semantics of each API function, and the possible return codes.
 
 The Admin API is intended to be used by remote clients using an RPC
 interface.  It is implemented by the admin server running on the
-Kerberos master server.  It is also be possible for a program running
-on the Kerberos master server to use the Admin API directly, without
+Kerberos master server.  It is also possible for a program running on
+the Kerberos master server to use the Admin API directly, without
 going through the admin server.
 
 \section{Versions of the API}
@@ -311,7 +311,9 @@ list.  This field only exists in KADM5_API_VERSION_2.
 \item[n_key_data] The number of elements in the \v{key_data}
 array. This field only exists in KADM5_API_VERSION_2.
 
-\item[tl_data] A linked list of tagged data.  Each element is of type
+\item[tl_data] A linked list of tagged data.  This list is a mechanism
+by which programs can store extended information in a principal entry,
+without having to modify the database API.  Each element is of type
 krb5_tl_data:
 \begin{verbatim}
 typedef struct _krb5_tl_data {
@@ -321,9 +323,14 @@ typedef struct _krb5_tl_data {
     krb5_octet          * tl_data_contents;     
 } krb5_tl_data;
 \end{verbatim}
-All currently defined tagged data types are supported directly by the
-kadm5 API, so none of the them provided in this list.  Any new tagged
-data types defined in the future will be provided, however.
+The currently defined tagged data types are KRB5_TL_LAST_PWD_CHANGE,
+KRB5_TL_MOD_PRINC, and KRB5_TL_ADM_DATA, which store the last password
+modification time, time and modifier of last principal modification,
+and administration system data.  All of these entries are expected by
+the administration system and parsed out into fields of the
+kadm5_principal_ent_rec structure; they are also passed back in the
+tl_data list.  Any additional tagged data fields found in the database
+will also be provided, without interpretation.
 
 \item[key_data] An array of the principal's keys.  The keys contained
 in this array are encrypted in the Kerberos master key.  See section
@@ -391,7 +398,7 @@ A policy cannot be deleted unless this number is zero.
 
 The KADM5 API acquires configuration information from the Kerberos
 configuration file (/etc/krb5.conf) and from the KDC configuration
-file (XXX/kdc.conf).  The remote clients libraries use the following
+file (XXX/kdc.conf).  The remote client libraries use the following
 variables: XXX.  The local clients libraries use the following
 variables: XXX.  The administration server and administration
 utilities (kadmin_create, etc.) may use other variables as defined in
@@ -454,12 +461,13 @@ server).
 In KADM5_API_VERSION_2, principals can have multiple keys, each with
 its own encryption type and salt.  Each time a principal's key is
 changed with kadm5_create_principal, kadm5_chpass_principal or
-kadm5_randkey_principal, a key entry for each encryption and salt type
-tuple specified in the configuration parameters is added.  There is no
-provision for specifying encryption and salt type information on a
-per-principal basis; in a future version, this will probably be part
-of the admin policy.  There is also presently no provision for keeping
-multiple key versions for a single principal active in the database.
+kadm5_randkey_principal, existing key entries are removed and a key
+entry for each encryption and salt type tuple specified in the
+configuration parameters is added.  There is no provision for
+specifying encryption and salt type information on a per-principal
+basis; in a future version, this will probably be part of the admin
+policy.  There is also presently no provision for keeping multiple key
+versions for a single principal active in the database.
 
 A single key is represented by a krb5_key_data:
 %
