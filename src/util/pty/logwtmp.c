@@ -24,10 +24,10 @@
 long pty_logwtmp (tty, user, host )
     char *user, *tty, *host;
 {
-    #ifdef HAVE_LOGWTMP
+#ifdef HAVE_LOGWTMP
     logwtmp(tty,user,host);
     return 0;
-    #else
+#else
         struct utmp ut;
     char *tmpx;
     char utmp_id[5];

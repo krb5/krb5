@@ -51,17 +51,17 @@ return PTY_OPEN_SLAVE_CHMODFAIL;
 #endif /*HAVE_FCHMOD*/
 #ifdef HAVE_FCHOWN
     if ( fchown(vfd, 0, 0 ) == -1 ) 
-	#else
+#else
 	if ( chown(slave, 0, 0 ) == -1 ) 
 #endif /* HAVE_FCHOWN*/
 	    return PTY_OPEN_SLAVE_CHOWNFAIL;
 
-	    #ifdef VHANG_FIRST
+#ifdef VHANG_FIRST
     ptyint_vhangup();
 #endif
 
     (void) close(vfd);
-    #ifdef HAVE_REVOKE
+#ifdef HAVE_REVOKE
     if (revoke (slave) < 0 ) {
 	return PTY_OPEN_SLAVE_REVOKEFAIL;
     }

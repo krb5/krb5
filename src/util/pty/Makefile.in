@@ -8,7 +8,7 @@ SED = sed
 
 LIBOBJS= cleanup.o getpty.o initialize_slave.o open_ctty.o open_slave.o \
    update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o init.o
-
+LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE=DONE
 LIB_SUBDIRS=.
 INSTALLFILE = cp
@@ -47,16 +47,21 @@ install:: libpty.h
 
 
 
-libpty.a: $(LIBOBJS)
-	$(ARCHIVE) $@ $(LIBOBJS)
+libpty.a: DONE
+	@if test -f $@ ; then \
+		(set -x; $(LIBUPDATE) $@ DONE .) \
+	else \
+		(set -x; $(LIBUPDATE) --force $@ DONE .) \
+	fi
 	$(RANLIB) $@
+	touch libpty.stamp
 
 DONE:: $(LIBOBJS)
 	 $(RM) DONE
 	 echo $(LIBOBJS) >DONE
 
 clean-unix::
-	$(RM) $(LIBOBJS)
+	$(RM) $(LIBOBJS) libpty.stamp
 
 clean-mac::
 	$(RM) libpty.a

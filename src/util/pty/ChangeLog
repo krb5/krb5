@@ -1,5 +1,17 @@
 Fri Aug  4 00:59:20 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
+	* Makefile.in: use libupdate so to not get multiple copies of
+		object files upon rebuild.
+
+	* vhangup.c (ptyint_vhangup): Make sure preprocessor directives
+		are at left margin.
+
+	* open_slave.c (pty_open_slave): Make sure preprocessor directives
+		are at left margin.
+
+	* open_ctty.c (pty_open_ctty): Make sure preprocessor directives
+		are at left margin.
+
 	* cleanup.c (pty_cleanup): Add missing declarations for retval and
 		fd.  Also, align preprocessor directives with left margin.
 

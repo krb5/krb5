@@ -53,7 +53,7 @@ pty_open_ctty (slave, fd)
     *fd = open(slave, O_RDWR);
     if (*fd < 0 )
 	return PTY_OPEN_SLAVE_OPENFAIL;
-    #ifdef ultrix
+#ifdef ultrix
     setpgrp(0, getpid());
 #endif
 #ifdef ultrix
