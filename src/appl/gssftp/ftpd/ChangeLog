@@ -1,3 +1,8 @@
+Fri Feb  6 13:25:28 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* popen.c (ftpd_popen): Make sure you can't overrun the argv[] and
+		gargv[] arrays.  (Patch submitted by dima@best.net).
+
 Thu Jan 29 19:51:02 1998  Dan Winship  <danw@mit.edu>
 
 	* ftpd.c (auth_data): Accept forwarded credentials and dispose of
