@@ -59,17 +59,22 @@ typedef struct _krb5_data {
     char *data;
 } krb5_data;
 
+/* make const & volatile available without effect */
 
-#ifdef __STDC__
+#if !defined(__STDC__) && !defined(HAS_ANSI_CONST)
+#define const
+#endif
+#if !defined(__STDC__) && !defined(HAS_ANSI_VOLATILE)
+#define volatile
+#endif
+
+#if defined(__STDC__) || defined(HAS_VOID_TYPE)
 typedef	void * krb5_pointer;
 typedef void const * krb5_const_pointer;
 #else
-/* make const & volatile available without effect */
-#define const
-#define volatile
 typedef char * krb5_pointer;
-typedef char * krb5_const_pointer;
-#endif /* __STDC__ */
+typedef char const * krb5_const_pointer;
+#endif
 
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
 #define PROTOTYPE(x) x
