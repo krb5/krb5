@@ -63,6 +63,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_principal final_server;
     krb5_error_code retval;
     int nservers;
+    int returning_tgt = 0;
     krb5_enctype etype;
 
     /* in case we never get a TGT, zero the return */
@@ -202,6 +203,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		goto out;
 	    }
 	    tgt = *ret_tgts[nservers];
+	    returning_tgt = 1;		/* don't free it below... */
 	    tgtq.client = 0;
 	    tgtq.server = 0;
 	    krb5_free_cred_contents(&tgtq);
@@ -220,7 +222,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 				   etype,
 				   krb5_kdc_req_sumtype,
 				   cred);
-    krb5_free_cred_contents(&tgt);
+    if (!returning_tgt)
+	krb5_free_cred_contents(&tgt);
 out:
     krb5_free_principal(final_server);
     return retval;
