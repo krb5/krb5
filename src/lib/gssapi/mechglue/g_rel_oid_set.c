@@ -40,7 +40,6 @@ OM_uint32 *		minor_status;
 gss_OID_set *		set;
 {
    size_t index;
-   OM_uint32	temp_minor;
    gss_OID oid;
     if (minor_status)
 	*minor_status = 0;

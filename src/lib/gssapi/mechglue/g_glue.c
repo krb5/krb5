@@ -27,6 +27,7 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <string.h>
 #include <errno.h>
 
 #define g_OID_equal(o1,o2) \

@@ -1,4 +1,18 @@
+Thu Mar 21 00:12:07 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_imp_sec_context.c (gss_import_sec_context):
+	* g_exp_sec_context.c (gss_export_sec_context): Fix 16bit vs 32bit
+		lint flame.
+
 Wed Mar 20 20:20:38 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_glue.c: 
+	* g_initialize.c: Add include of string.h, as it is needed.
+
+	* g_acquire_cred.c: 
+	* g_inq_cred.c: Add include of time.h
+
+	* g_rel_oid_set.c (gss_release_oid_set): Removed unused variable.
 
 	* mechglue.h: Don't include <sys/types.h>; it's included if
 		necessary in gssapi/gssapi.h.  On a Macintosh, #include

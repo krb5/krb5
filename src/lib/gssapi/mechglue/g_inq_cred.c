@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #endif
 #include <string.h>
+#include <time.h>
 
 OM_uint32 INTERFACE
 gss_inquire_cred(minor_status,

@@ -44,7 +44,8 @@ gss_buffer_t		interprocess_token;
 gss_ctx_id_t *		context_handle;
 
 {
-    OM_uint32		length, status;
+    size_t		length;
+    OM_uint32		status;
     char		*p;
     gss_union_ctx_id_t	ctx;
     gss_buffer_desc	token;
@@ -76,7 +77,7 @@ gss_ctx_id_t *		context_handle;
     length = (length << 8) + *p++;
 
     ctx->mech_type->length = length;
-    ctx->mech_type->elements = malloc((size_t) length);
+    ctx->mech_type->elements = malloc(length);
     if (!ctx->mech_type->elements) {
 	*minor_status = ENOMEM;
 	goto error_out;

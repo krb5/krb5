@@ -45,7 +45,7 @@ gss_buffer_t		interprocess_token;
 
 {
     OM_uint32		status;
-    OM_uint32		length;
+    size_t		length;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
     gss_buffer_desc	token;
@@ -90,7 +90,7 @@ gss_buffer_t		interprocess_token;
     buf[1] = (unsigned char) (length & 0xFF);
     length >>= 8;
     buf[0] = (unsigned char) (length & 0xFF);
-    memcpy(buf+4, ctx->mech_type->elements, ctx->mech_type->length);
+    memcpy(buf+4, ctx->mech_type->elements, (size_t) ctx->mech_type->length);
     memcpy(buf+4+ctx->mech_type->length, token.value, token.length);
 
     (void) gss_release_buffer(minor_status, &token);

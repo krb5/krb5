@@ -33,6 +33,7 @@
 #endif
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #define g_OID_equal(o1,o2) \
    (((o1)->length == (o2)->length) && \
