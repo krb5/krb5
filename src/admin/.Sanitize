@@ -29,13 +29,13 @@ Makefile.in
 aname
 configure
 configure.in
-convert
 create
 destroy
 edit
 stash
 
 Things-to-lose:
+convert
 
 Do-last:
 
