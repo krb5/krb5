@@ -117,7 +117,7 @@ int	pflag;
 int	forcenet;
 struct	passwd *pwd;
 int	userid;
-int	port;
+int	port = 0;
 
 struct buffer {
     int	cnt;
@@ -153,25 +153,12 @@ main(argc, argv)
     int euid;
     char **orig_argv = save_argv(argc, argv);
     
-    sp = getservbyname("kshell", "tcp");
     krb5_init_context(&bsd_context);
     krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;    /* Set up des buffers */
-#else
-    sp = getservbyname("shell", "tcp");
-#endif /* KERBEROS */
-    
-    if (sp == NULL) {
-#ifdef KERBEROS
-	fprintf(stderr, "rcp: kshell/tcp: unknown service\n");
-	try_normal(orig_argv);
-#else
-	fprintf(stderr, "rcp: shell/tcp: unknown service\n");
-	exit(1);
-#endif /* KERBEROS */
-    }
-    port = sp->s_port;
+#endif
+
     pwd = getpwuid(userid = getuid());
     if (pwd == 0) {
 	fprintf(stderr, "who are you?\n");
@@ -271,6 +258,27 @@ main(argc, argv)
     if (argc > 2)
       targetshouldbedirectory = 1;
     rem = -1;
+
+
+    if (port == 0) {
+#ifdef KERBEROS
+      sp = getservbyname("kshell", "tcp");
+#else
+      sp = getservbyname("shell", "tcp");
+#endif /* KERBEROS */
+    
+      if (sp == NULL) {
+#ifdef KERBEROS
+	fprintf(stderr, "rcp: kshell/tcp: unknown service\n");
+	try_normal(orig_argv);
+#else
+	fprintf(stderr, "rcp: shell/tcp: unknown service\n");
+	exit(1);
+#endif /* KERBEROS */
+      }
+      port = sp->s_port;
+    }
+
 #ifdef KERBEROS
     if (krb_realm != NULL)
 	cmdsiz += strlen(krb_realm);

@@ -322,8 +322,8 @@ main(argc, argv)
     int sock;
     krb5_flags authopts;
     krb5_error_code status;
-    int debug_port = 0;
 #endif
+    int debug_port = 0;
    
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1;
@@ -341,7 +341,7 @@ main(argc, argv)
 
     if (argc > 0 && !strcmp(*argv, "-D")) {
 	argv++; argc--;
-	debug_port = atoi(*argv);
+	debug_port = htons(atoi(*argv));
 	argv++; argc--;
 	goto another;
     }
@@ -459,28 +459,38 @@ main(argc, argv)
     krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;	/* Set up des buffers */
+#endif
+
+
+    if(debug_port == 0) {
+#ifdef KERBEROS
     /*
      * if there is an entry in /etc/services for Kerberos login,
      * attempt to login with Kerberos. 
      * If we fail at any step,  use the standard rlogin
      */
-    if (encrypt_flag)
-      sp = getservbyname("eklogin","tcp");
-    else 
-      sp = getservbyname("klogin","tcp");
-    if (sp == 0) {
+      if (encrypt_flag)
+	sp = getservbyname("eklogin","tcp");
+      else 
+	sp = getservbyname("klogin","tcp");
+      if (sp == 0) {
 	fprintf(stderr, "rlogin: %s/tcp: unknown service\n",
 		encrypt_flag ? "eklogin" : "klogin");
 	
 	try_normal(orig_argv);
-    }
+      }
 #else
-    sp = getservbyname("login", "tcp");
-    if (sp == 0) {
+      sp = getservbyname("login", "tcp");
+      if (sp == 0) {
 	fprintf(stderr, "rlogin: login/tcp: unknown service\n");
 	exit(2);
-    }
+      }
 #endif /* KERBEROS */
+
+      debug_port = sp->s_port;
+    }
+
+
     if (cp == (char *) NULL) cp = getenv("TERM");
     if (cp)
       (void) strcpy(term, cp);
@@ -546,9 +556,6 @@ main(argc, argv)
     oldmask = sigblock(sigmask(SIGURG) | sigmask(SIGUSR1));
 #endif
 #endif /* POSIX_SIGNALS */
-    
-    if (debug_port)
-      sp->s_port = htons(debug_port);
 
 #ifdef KERBEROS
     authopts = AP_OPTS_MUTUAL_REQUIRED;
@@ -560,7 +567,7 @@ main(argc, argv)
     if (Fflag)
       authopts |= OPTS_FORWARDABLE_CREDS;
 
-    status = kcmd(&sock, &host, sp->s_port,
+    status = kcmd(&sock, &host, debug_port,
 		  null_local_username ? NULL : pwd->pw_name,
 		  name ? name : pwd->pw_name, term,
 		  0, "host", krb_realm,
@@ -588,7 +595,7 @@ main(argc, argv)
 	exit(1);
     }
 #else
-    rem = rcmd(&host, sp->s_port,
+    rem = rcmd(&host, debug_port,
 	       null_local_username ? NULL : pwd->pw_name,
 	       name ? name : pwd->pw_name, term, 0);
 #endif /* KERBEROS */

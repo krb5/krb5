@@ -130,6 +130,7 @@ main(argc, argv0)
     fd_set readfrom, ready;
     int one = 1;
     struct servent *sp;
+
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
     struct sigaction sa, osa;
@@ -140,8 +141,8 @@ main(argc, argv0)
     krb5_flags authopts;
     krb5_error_code status;
     int fflag = 0, Fflag = 0, Aflag = 0;
-    int debug_port = 0;
 #endif  /* KERBEROS */
+    int debug_port = 0;
    
     if (strrchr(argv[0], '/'))
       argv[0] = strrchr(argv[0], '/')+1; 
@@ -159,7 +160,7 @@ main(argc, argv0)
 
     if (argc > 0 && !strcmp(*argv, "-D")) {
 	argv++; argc--;
-	debug_port = atoi(*argv);
+	debug_port = htons(atoi(*argv));
 	argv++; argc--;
 	goto another;
     }
@@ -309,12 +310,14 @@ main(argc, argv0)
 	if (ap[1])
 	  *cp++ = ' ';
     }
+
+    if(debug_port == 0) {
 #ifdef KERBEROS
-    sp = getservbyname("kshell", "tcp");
+      sp = getservbyname("kshell", "tcp");
 #else 
-    sp = getservbyname("shell", "tcp");
+      sp = getservbyname("shell", "tcp");
 #endif  /* KERBEROS */
-    if (sp == 0) {
+      if (sp == 0) {
 #ifdef KERBEROS
 	fprintf(stderr, "rsh: kshell/tcp: unknown service\n");
 	try_normal(argv0);
@@ -322,11 +325,11 @@ main(argc, argv0)
 	fprintf(stderr, "rsh: shell/tcp: unknown service\n");
 #endif /* KERBEROS */
 	exit(1);
+      }
+
+      debug_port = sp->s_port;
     }
 
-    if (debug_port)
-      sp->s_port = htons(debug_port);
-    
 #ifdef KERBEROS
     krb5_init_context(&bsd_context);
     krb5_init_ets(bsd_context);
@@ -339,7 +342,7 @@ main(argc, argv0)
     if (Fflag)
       authopts |= OPTS_FORWARDABLE_CREDS;    
 
-    status = kcmd(&rem, &host, sp->s_port,
+    status = kcmd(&rem, &host, debug_port,
 		  pwd->pw_name,
 		  user ? user : pwd->pw_name,
 		  args, &rfd2, "host", krb_realm,
@@ -368,7 +371,7 @@ main(argc, argv0)
         exit(1);
     }
 #else /* !KERBEROS */
-    rem = rcmd(&host, sp->s_port, pwd->pw_name,
+    rem = rcmd(&host, debug_port, pwd->pw_name,
 	       user ? user : pwd->pw_name, args, &rfd2);
     if (rem < 0)
       exit(1);
