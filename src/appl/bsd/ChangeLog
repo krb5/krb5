@@ -1,3 +1,7 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* krlogin.c (main): Declare main as int.
+
 2000-09-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFINES): Define HEIMDAL_FRIENDLY.

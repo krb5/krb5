@@ -272,7 +272,7 @@ int setsignal(int sig, krb5_sigtype (*act)());
 #endif
 
 /* to allow exits from signal handlers, without conflicting declarations */
-krb5_sigtype exit_handler() {
+static krb5_sigtype exit_handler() {
   exit(1);
 }
 
@@ -341,7 +341,7 @@ struct  termio ixon_state;
 #endif
 
 
-
+int
 main(argc, argv)
      int argc;
      char **argv;
