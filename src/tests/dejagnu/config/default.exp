@@ -196,15 +196,19 @@ proc setup_kerberos_files { } {
 	return 0
     }
 
-    # Create a krb.conf file.
-    # We don't bother to do this for V5, we use an environment
-    # variable instead.
-    # if ![file exists tmpdir/krb.conf] {
-    #	set conffile [open tmpdir/krb.conf w]
-    #	puts $conffile "KRBTEST.COM"
-    #	puts $conffile "KRBTEST.COM $hostname:3750 admin server"
-    #	close $conffile
-    # }
+    # Create a krb5.conf file.
+    if ![file exists tmpdir/krb5.conf] {
+    set conffile [open tmpdir/krb5.conf w]
+    puts $conffile "\[libdefaults\]"
+    puts $conffile "	default_realm = KRBTEST.COM"
+    puts $conffile ""
+    puts $conffile "\[realms\]"
+    puts $conffile "	KRBTEST.COM = \{"
+    puts $conffile "		kdc = $hostname:3088"
+    puts $conffile "		admin_server = $hostname:3750"
+    puts $conffile "	\}"
+    close $conffile
+    }
 
     # Create ACL file.
     if ![file exists tmpdir/acl] {
@@ -219,11 +223,11 @@ proc setup_kerberos_files { } {
 # Save the original values of the environment variables we are going
 # to muck with.
 
-#if [info exists env(KRB_CONF)] {
-#    set orig_krb_conf $env(KRB_CONF)
-#} else {
-#    catch "unset orig_krb_conf"
-#}
+if [info exists env(KRB5_CONFIG)] {
+    set orig_krb_conf $env(KRB5_CONFIG)
+} else {
+    catch "unset orig_krb5_config"
+}
 
 if [info exists env(KRB5CCNAME)] {
     set orig_krb5ccname $env(KRB5CCNAME)
@@ -251,11 +255,11 @@ proc setup_kerberos_env { } {
     global tmppwd
     global hostname
 
-    # Set the environment variable KRB_CONF to point to our krb.conf file.
-    # All the Kerberos tools check KRB_CONF.
+    # Set the environment variable KRB5_CONFIG to point to our krb5.conf file.
+    # All the Kerberos tools check KRB5_CONFIG.
     # Actually, V5 doesn't currently use this.
-    # set env(KRB_CONF) $tmppwd/krb.conf
-    # verbose "KRB_CONF=$env(KRB_CONF)"
+    set env(KRB5_CONFIG) $tmppwd/krb5.conf
+    verbose "KRB5_CONFIG=$env(KRB5_CONFIG)"
 
     # Direct the Kerberos programs at a local ticket file.
     set env(KRB5CCNAME) FILE:$tmppwd/tkt
@@ -278,16 +282,16 @@ proc setup_kerberos_env { } {
 
 proc restore_kerberos_env { } {
     global env
-    global orig_krb_conf
+    global orig_krb5_config
     global orig_krb5ccname
     global orig_krb5rcachedir
     global orig_kerberos_server
 
-    # if [info exists orig_krb_conf] {
-    #	set env(KRB_CONF) $orig_krb_conf
-    # } else {
-    #	catch "unset env(KRB_CONF)"
-    # }
+    if [info exists orig_krb5_config] {
+    set env(KRB_5CONFIG) $orig_krb5_config
+    } else {
+    catch "unset env(KRB5_CONFIG)"
+    }
 
     if [info exists orig_krb5ccname] {
 	set env(KRB5CCNAME) $orig_krb5ccname
@@ -500,7 +504,7 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Start up the kerberos daemon
-    spawn $KRB5KDC -r KRBTEST.COM -p 3088 -d $tmppwd/db -m
+    spawn $KRB5KDC -r KRBTEST.COM -p 3088 -d $tmppwd/db -m -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
     expect {
@@ -544,7 +548,7 @@ proc start_kerberos_daemons { standalone } {
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
     expect {
-	"Enter KDC database master key" {
+	"Enter KDC database master key:" {
 	    send "masterkey$KEY\r"
 	}
 	timeout {

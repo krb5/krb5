@@ -1,3 +1,8 @@
+Thu Apr 27 00:22:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: KRB5KDC: add -n to don't fork. Set up krb5.conf 
+		and set KRB5_CONFIG to point to it.
+
 Wed Apr 26 17:46:57 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* default.exp (KADMIND, KADMIN): use kadmind.old, since these test
