@@ -67,6 +67,8 @@
 #undef encode_KRB5_KRB__SAFE__BODY
 #undef encode_KRB5_KRB__PRIV
 #undef encode_KRB5_EncKrbPrivPart
+#undef encode_KRB5_KRB__CRED
+#undef encode_KRB5_EncKrbCredPart
 #undef encode_KRB5_KRB__ERROR
 #undef encode_KRB5_EncryptedData
 #undef encode_KRB5_EncryptionKey
@@ -106,6 +108,8 @@
 #undef decode_KRB5_KRB__SAFE__BODY
 #undef decode_KRB5_KRB__PRIV
 #undef decode_KRB5_EncKrbPrivPart
+#undef decode_KRB5_KRB__CRED
+#undef decode_KRB5_EncKrbCredPart
 #undef decode_KRB5_KRB__ERROR
 #undef decode_KRB5_EncryptedData
 #undef decode_KRB5_EncryptionKey
@@ -140,6 +144,8 @@
 #undef free_KRB5_KRB__SAFE__BODY
 #undef free_KRB5_KRB__PRIV
 #undef free_KRB5_EncKrbPrivPart
+#undef free_KRB5_KRB__CRED
+#undef free_KRB5_EncKrbCredPart
 #undef free_KRB5_KRB__ERROR
 #undef free_KRB5_EncryptedData
 #undef free_KRB5_EncryptionKey
@@ -181,6 +187,8 @@ int encode_KRB5_KRB__SAFE P_TYPE_((PE *, int , integer , char *, struct type_KRB
 int encode_KRB5_KRB__SAFE__BODY P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__SAFE__BODY *));
 int encode_KRB5_KRB__PRIV P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__PRIV *));
 int encode_KRB5_EncKrbPrivPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncKrbPrivPart *));
+int encode_KRB5_KRB__CRED P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__CRED *));
+int encode_KRB5_EncKrbCredPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncKrbCredPart *));
 int encode_KRB5_KRB__ERROR P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__ERROR *));
 int encode_KRB5_EncryptedData P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncryptedData *));
 int encode_KRB5_EncryptionKey P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncryptionKey *));
@@ -221,6 +229,8 @@ int decode_KRB5_KRB__SAFE P_TYPE_((PE , int , integer *, char **, struct type_KR
 int decode_KRB5_KRB__SAFE__BODY P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__SAFE__BODY **));
 int decode_KRB5_KRB__PRIV P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__PRIV **));
 int decode_KRB5_EncKrbPrivPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncKrbPrivPart **));
+int decode_KRB5_KRB__CRED P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__CRED **));
+int decode_KRB5_EncKrbCredPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncKrbCredPart **));
 int decode_KRB5_KRB__ERROR P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__ERROR **));
 int decode_KRB5_EncryptedData P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncryptedData **));
 int decode_KRB5_EncryptionKey P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncryptionKey **));
@@ -256,6 +266,8 @@ void free_KRB5_KRB__SAFE P_TYPE_((struct type_KRB5_KRB__SAFE *));
 void free_KRB5_KRB__SAFE__BODY P_TYPE_((struct type_KRB5_KRB__SAFE__BODY *));
 void free_KRB5_KRB__PRIV P_TYPE_((struct type_KRB5_KRB__PRIV *));
 void free_KRB5_EncKrbPrivPart P_TYPE_((struct type_KRB5_EncKrbPrivPart *));
+void free_KRB5_KRB__CRED P_TYPE_((struct type_KRB5_KRB__CRED *));
+void free_KRB5_EncKrbCredPart P_TYPE_((struct type_KRB5_EncKrbCredPart *));
 void free_KRB5_KRB__ERROR P_TYPE_((struct type_KRB5_KRB__ERROR *));
 void free_KRB5_EncryptedData P_TYPE_((struct type_KRB5_EncryptedData *));
 void free_KRB5_EncryptionKey P_TYPE_((struct type_KRB5_EncryptionKey *));
