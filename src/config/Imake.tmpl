@@ -603,7 +603,7 @@ XCOMM the platform-specific parameters - edit site.def to change
 #if SystemV
 #define LnCmd ln /* or even cp */
 #else
-#define LnCmd ln -s
+#define LnCmd ln -sf
 #endif
 #endif
 #ifndef MakeCmd
