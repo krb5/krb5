@@ -42,6 +42,7 @@ OBJS= \
 	sendto_kdc.$(OBJEXT)	\
 	sn2princ.$(OBJEXT)	\
 	timeofday.$(OBJEXT)	\
+	toffset.$(OBJEXT)	\
 	unlck_file.$(OBJEXT)	\
 	ustime.$(OBJEXT)	\
 	write_msg.$(OBJEXT)
@@ -79,6 +80,7 @@ SRCS= \
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
 	$(srcdir)/timeofday.c	\
+	$(srcdir)/toffset.c	\
 	$(srcdir)/unlck_file.c	\
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c

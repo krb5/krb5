@@ -46,6 +46,10 @@ krb5_os_init_context(ctx)
 
 	ctx->os_context = (void *) os_ctx;
 
+	os_ctx->time_offset = 0;
+	os_ctx->usec_offset = 0;
+	os_ctx->os_flags = 0;
+
 #ifdef _WINDOWS
     {
         char defname[160];                      /* Default value */

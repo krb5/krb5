@@ -20,8 +20,12 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * Just a stub that calls krb5_crypto_us_timeofday().
- *
+ * krb5_crypto_us_timeofday() does all of the real work; however, we
+ * handle the time offset adjustment here, since this is context
+ * specific, and the crypto version of this call doesn't have access
+ * to the context variable.  Fortunately the only user of
+ * krb5_crypto_us_timeofday in the crypto library doesn't require that
+ * this time adjustment be done.
  */
 
 #include "k5-int.h"
@@ -31,5 +35,27 @@ krb5_us_timeofday(context, seconds, microseconds)
     krb5_context context;
     krb5_int32 *seconds, *microseconds;
 {
-    return krb5_crypto_us_timeofday(seconds, microseconds);
+    krb5_os_context os_ctx = context->os_context;
+    krb5_int32 sec, usec;
+    krb5_error_code retval;
+    
+    if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {
+	    *seconds = os_ctx->time_offset;
+	    *microseconds = os_ctx->usec_offset;
+	    return 0;
+    }
+    retval = krb5_crypto_us_timeofday(&sec, &usec);
+    if (retval)
+	    return retval;
+    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
+	    usec += os_ctx->usec_offset;
+	    if (usec > 1000000) {
+		    usec -= 1000000;
+		    sec++;
+	    }
+	    sec += os_ctx->time_offset;
+    }
+    *seconds = sec;
+    *microseconds = usec;
+    return 0;
 }

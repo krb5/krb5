@@ -1,5 +1,20 @@
+Fri Sep  1 00:47:27 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* toffset.c: Added new file which implements the abstract
+		interfaces for manipulating the time offset fields in the
+		os context.
+
+	* ustime.c (krb5_us_timeofday): Add support for using the time
+		offset fields in the os context.
+
+	* timeofday.c (krb5_timeofday): Add support for using the time
+		offset fields in the os context.
+
+	* init_os_ctx.c (krb5_os_init_context): Initialize the time offset
+		and flags fields in the os context.
 
 Thu Aug 31 17:24:48 EDT 1995	Paul Park	(pjpark@mit.edu)
+
 	* t_an_to_ln.c - Translate until error and return status.
 	* Makefile.in - Test aname_to_lname under check-unix.
 

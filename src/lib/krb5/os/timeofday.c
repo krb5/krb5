@@ -44,11 +44,18 @@ krb5_timeofday(context, timeret)
     krb5_context context;
     register krb5_int32 *timeret;
 {
+    krb5_os_context os_ctx = context->os_context;
     timetype tval;
 
+    if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {
+	    *timeret = os_ctx->time_offset;
+	    return 0;
+    }
     tval = time(0);
     if (tval == (timetype) -1)
 	return (krb5_error_code) errno;
+    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
+	    tval += os_ctx->time_offset;
     *timeret = tval;
     return 0;
 }
