@@ -497,7 +497,7 @@ dnl
 dnl local includes are used -- KRB_INCLUDE
 dnl
 define(KRB_INCLUDE,[
-ADD_DEF([-I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5])dnl
+CPPFLAGS='-I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I$(SRCTOP)/include/krb5'" $CPPFLAGS"
 ])dnl
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
