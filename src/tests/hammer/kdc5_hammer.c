@@ -260,11 +260,12 @@ main(argc, argv)
   }
 
 
-krb5_error_code get_server_key(context, keyprocarg, princ, vno, key)
+krb5_error_code get_server_key(context, keyprocarg, princ, vno, keytype, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal princ;
     krb5_kvno vno;
+    krb5_keytype keytype;
     krb5_keyblock ** key;
 {
   krb5_encrypt_block eblock;

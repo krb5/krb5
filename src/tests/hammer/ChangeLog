@@ -1,3 +1,7 @@
+Fri Feb  3 11:45:23 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_hammer.c (get_server_key): Add keytype parameter
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
