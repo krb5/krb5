@@ -76,83 +76,83 @@ struct _profile_section_t {
 
 typedef struct _profile_section_t *profile_section_t;
 
-extern errcode_t profile_get
+errcode_t profile_get
 	PROTOTYPE((const char *filename, prf_file_t *ret_prof));
 
-extern errcode_t profile_update
+errcode_t profile_update
 	PROTOTYPE((prf_file_t profile));
 
-extern errcode_t profile_parse_file
+errcode_t profile_parse_file
 	PROTOTYPE((FILE *f, struct profile_node **root));
 
 /* prof_tree.c */
 
-extern void profile_free_node
+void profile_free_node
 	PROTOTYPE((struct profile_node *relation));
 
-extern errcode_t profile_create_node
+errcode_t profile_create_node
 	PROTOTYPE((const char *name, const char *value,
 		   struct profile_node **ret_node));
 
-extern errcode_t profile_verify_node
+errcode_t profile_verify_node
 	PROTOTYPE((struct profile_node *node));
 
-extern errcode_t profile_add_node
+errcode_t profile_add_node
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, const char *value,
 		    struct profile_node **ret_node));
 
-extern errcode_t profile_find_node_relation
+errcode_t profile_find_node_relation
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, void **state,
 		    char **ret_name, char **value));
 
-extern errcode_t profile_find_node_subsection
+errcode_t profile_find_node_subsection
 	PROTOTYPE ((struct profile_node *section,
 		    const char *name, void **state,
 		    char **ret_name, struct profile_node **subsection));
 		   
-extern errcode_t profile_get_node_parent
+errcode_t profile_get_node_parent
 	PROTOTYPE ((struct profile_node *section,
 		   struct profile_node **parent));
 		   
-extern errcode_t profile_delete_node_relation
+errcode_t profile_delete_node_relation
 	PROTOTYPE ((struct profile_node *section, const char *name));
 
-extern errcode_t profile_find_node_name
+errcode_t profile_find_node_name
 	PROTOTYPE ((struct profile_node *section, void **state,
 		    char **ret_name));
 
 /* prof_file.c */
 
-extern errcode_t profile_open_file
+errcode_t profile_open_file
 	PROTOTYPE ((const char *filename, prf_file_t *ret_prof));
 
-extern errcode_t profile_update_file
+errcode_t profile_update_file
 	PROTOTYPE ((prf_file_t profile));
 
-extern errcode_t profile_close_file
+errcode_t profile_close_file
 	PROTOTYPE ((prf_file_t profile));
 
 /* prof_init.c */
 
-extern errcode_t profile_init
+errcode_t profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
-extern errcode_t profile_init_path
+errcode_t profile_init_path
 	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
 
-extern void profile_release
+void profile_release
 	PROTOTYPE ((profile_t profile));
 
 
-extern errcode_t profile_get_values
+KRB5_DLLIMP errcode_t KRB5_CALLCONV profile_get_values
 	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
-extern errcode_t profile_get_string
+errcode_t profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
 			char **ret_string));
-extern errcode_t profile_get_integer
+errcode_t profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));

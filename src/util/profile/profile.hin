@@ -15,22 +15,22 @@ typedef struct _profile_t *profile_t;
 #endif
 #endif
 
-extern long profile_init
+long profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
-extern long profile_init_path
+long profile_init_path
 	PROTOTYPE ((const char *filepath, profile_t *ret_profile));
 
-extern void profile_release
+void profile_release
 	PROTOTYPE ((profile_t profile));
 
-extern long profile_get_values
+KRB5_DLLIMP long KRB5_CALLCONV profile_get_values
 	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
-extern long profile_get_string
+long profile_get_string
 	PROTOTYPE((profile_t profile, const char *name, const char *subname, 
 			const char *subsubname, const char *def_val,
 			char **ret_string));
-extern long profile_get_integer
+long profile_get_integer
 	PROTOTYPE((profile_t profile, const char *name, const char *subname,
 			const char *subsubname, int def_val,
 			int *ret_default));

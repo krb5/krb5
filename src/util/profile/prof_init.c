@@ -188,7 +188,8 @@ static errcode_t add_to_list(list, str)
  * To do more than that means we have to implement some "interesting"
  * code to do the section searching.
  */
-errcode_t profile_get_values(profile, names, ret_values)
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_get_values(profile, names, ret_values)
     profile_t	profile;
     const char	**names;
     char		***ret_values;
