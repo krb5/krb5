@@ -219,7 +219,7 @@ END {
 	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
 	print "	   if (!link.table) {" > outfile
 	print "	       link.next = _et_list;" > outfile
-	print "	       link.table = &et;" > outfile
+	print "	       link.table = &et_" table_name "_error_table;" > outfile
 	print "	       _et_list = &link;" > outfile
 	print "	   }" > outfile
 	print "}" > outfile
