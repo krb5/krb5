@@ -44,7 +44,9 @@ krb5_error_code process_as_req PROTOTYPE((krb5_as_req *,
 krb5_error_code process_tgs_req PROTOTYPE((krb5_tgs_req *,
 					   krb5_fulladdr *,
 					   krb5_data ** ));
-
+void listen_and_process PROTOTYPE((void));
+void setup_network PROTOTYPE((void));
+void closedown_network PROTOTYPE((void));
 
 /* which way to convert key? */
 #define CONVERT_INTO_DB	0
