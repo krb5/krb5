@@ -1,3 +1,9 @@
+2002-10-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (print_addr) [TEST]: Don't mix size_t and socklen_t,
+	just assume socklen macro will return a socklen_t value.  Cast
+	buffer size to socklen_t in getnameinfo call.
+
 2002-10-22  Ezra Peisach  <epeisach@bu.edu>
 
 	* sendto_kdc.c (service_tcp_fd): If DEBUG defined, ensure that

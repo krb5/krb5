@@ -59,14 +59,10 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
     char hostbuf[NI_MAXHOST];
     int err;
     socklen_t len;
-    size_t len_sz;
 
     printf ("  --> family %2d ", sa->sa_family);
-    len_sz = socklen (sa);
-    len = (socklen_t) len_sz;
-    if ((size_t) len != len_sz)
-	abort ();
-    err = getnameinfo (sa, len, hostbuf, sizeof (hostbuf),
+    len = socklen (sa);
+    err = getnameinfo (sa, len, hostbuf, (socklen_t) sizeof (hostbuf),
 		       (char *) NULL, 0, NI_NUMERICHOST);
     if (err)
 	printf ("<getnameinfo error %d: %s>\n", err, gai_strerror (err));
@@ -80,7 +76,7 @@ int main ()
     int r;
 
     (void) setvbuf (stdout, (char *)NULL, _IONBF, 0);
-    r = foreach_localaddr (0, print_addr, 0, 0);
+    r = foreach_localaddr (0, print_addr, NULL, NULL);
     printf ("return value = %d\n", r);
     return 0;
 }
