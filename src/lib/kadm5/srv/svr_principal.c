@@ -377,6 +377,14 @@ kadm5_modify_principal(void *server_handle,
 	return KADM5_BAD_MASK;
     if(entry == (kadm5_principal_ent_t) NULL)
 	return EINVAL;
+    if (mask & KADM5_TL_DATA) {
+	 tl_data_orig = entry->tl_data;
+	 while (tl_data_orig) {
+	      if (tl_data_orig->tl_data_type < 256)
+		   return KADM5_BAD_TL_TYPE;
+	      tl_data_orig = tl_data_orig->tl_data_next;
+	 }
+    }
 
     if (ret = kdb_get_entry(handle, entry->principal, &kdb, &adb))
 	return(ret);
@@ -693,32 +701,21 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 	 if (mask & KADM5_TL_DATA) {
 	      krb5_tl_data td, *tl, *tl2;
 
-	      entry->n_tl_data = kdb.n_tl_data;
 	      entry->tl_data = NULL;
 	      
 	      tl = kdb.tl_data;
 	      while (tl) {
-		   if ((tl2 = dup_tl_data(tl)) == NULL) {
-			ret = ENOMEM;
-			goto done;
+		   if (tl->tl_data_type > 255) {
+			if ((tl2 = dup_tl_data(tl)) == NULL) {
+			     ret = ENOMEM;
+			     goto done;
+			}
+			tl2->tl_data_next = entry->tl_data;
+			entry->tl_data = tl2;
+			entry->n_tl_data++;
 		   }
-		   tl2->tl_data_next = entry->tl_data;
-		   entry->tl_data = tl2;
-
+			
 		   tl = tl->tl_data_next;
-	      }
-	      
-	      if (kdb.e_length) {
-		   td.tl_data_type = KRB5_TL_KADM5_E_DATA;
-		   td.tl_data_length = kdb.e_length;
-		   td.tl_data_contents = kdb.e_data;
-
-		   if ((tl = dup_tl_data(&td)) == NULL) {
-			ret = ENOMEM;
-			goto done;
-		   }
-		   tl->tl_data_next = entry->tl_data;
-		   entry->tl_data = tl;
 	      }
 	 }
 	 if (mask & KADM5_KEY_DATA) {

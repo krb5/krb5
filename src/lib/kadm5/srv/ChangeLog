@@ -1,3 +1,8 @@
+Fri Nov  1 13:18:40 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_principal.c (kadm5_modify_principal): update for new tl_data
+ 	semantics [krb5-admin/140]
+
 Mon Oct 21 16:28:52 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svr_principal.c (kadm5_modify_principal): fix modify_principal's
