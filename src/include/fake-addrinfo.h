@@ -1055,17 +1055,19 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #endif
 
 #ifdef NUMERIC_SERVICE_BROKEN
-    for (ai = *result; ai; ai = ai->ai_next) {
-	if (socket_type != 0 && ai->ai_socktype == 0)
-	    /* Is this check actually needed?  */
-	    ai->ai_socktype = socket_type;
-	switch (ai->ai_family) {
-	case AF_INET:
-	    ((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
-	    break;
-	case AF_INET6:
-	    ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
-	    break;
+    if (service_port != 0) {
+	for (ai = *result; ai; ai = ai->ai_next) {
+	    if (socket_type != 0 && ai->ai_socktype == 0)
+		/* Is this check actually needed?  */
+		ai->ai_socktype = socket_type;
+	    switch (ai->ai_family) {
+	    case AF_INET:
+		((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
+		break;
+	    case AF_INET6:
+		((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
+		break;
+	    }
 	}
     }
 #endif

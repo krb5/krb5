@@ -1,3 +1,9 @@
+2003-04-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [NUMERIC_SERVICE_BROKEN]:
+	Overwrite the port number only if a numeric service port was
+	supplied.
+
 2003-04-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (COPY_FIRST_CANONNAME) [_AIX]: Define.
