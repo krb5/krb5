@@ -101,7 +101,6 @@ struct sockaddr_in *receiver;
 			 0,		/* ignore ivec */
 			 &out5);
 	krb5_rc_close(rcache);
-	krb5_xfree(rcache);
 	krb5_free_address(saddr2);
 
 	if (r) {
