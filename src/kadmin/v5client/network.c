@@ -155,13 +155,16 @@ net_connect()
     if (!multiple || !server_active) {
 	char opassword[KRB5_ADM_MAX_PASSWORD_LEN];
 
+	server_ccache = (ccache2use) ? ccache2use : (krb5_ccache) NULL;
 	if (!(kret = server_stat = krb5_adm_connect(kcontext,
 						    principal_name,
 						    password_prompt,
 						    opassword,
 						    &server_socket,
 						    &server_auth_context,
-						    &server_ccache))) {
+						    &server_ccache,
+						    ccname2use,
+						    ticket_life))) {
 	    server_active = 1;
 	    memset(opassword, 0, KRB5_ADM_MAX_PASSWORD_LEN);
 	}
@@ -223,7 +226,10 @@ net_disconnect(force)
 	    krb5_adm_disconnect(kcontext,
 				&server_socket,
 				server_auth_context,
-				server_ccache);
+				(delete_ccache) ? server_ccache :
+					(krb5_ccache) NULL);
+	    if (!delete_ccache)
+		krb5_cc_close(kcontext, server_ccache);
 
 	    /* Clean up our state. */
 	    server_socket = -1;

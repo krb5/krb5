@@ -1,4 +1,12 @@
 
+Mon Jun 5 14:11:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.c - Add support for specifiable credentials caches and
+		ticket lifetimes.
+	* network.c - Use new krb5_adm_connect() calling sequence.
+	* kadmin5.h - Update prototypes and externals.
+	* kadmin5.M - Update description to add -c -l -d and -s flags.
+
+
 Thu Jun 1 14:31:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.c: Change the default admin instance name to "kadmin"
 	* kadmin5.c(kadmin_list): Compare principals to each of the supplied

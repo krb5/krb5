@@ -38,6 +38,10 @@ extern char		*requestname;
 extern krb5_boolean	multiple;
 extern char		*principal_name;
 extern char		*password_prompt;
+extern char		*ccname2use;
+extern krb5_ccache	ccache2use;
+extern krb5_timestamp	ticket_life;
+extern krb5_boolean	delete_ccache;
 
 /*
  * Function prototypes.

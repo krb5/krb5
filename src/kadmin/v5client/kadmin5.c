@@ -42,11 +42,15 @@
  */
 int		exit_status = 0;
 krb5_context	kcontext;
+krb5_ccache	ccache2use = (krb5_ccache) NULL;
 char		*programname = (char *) NULL;
 char		*requestname = (char *) NULL;
 krb5_boolean	multiple = 0;
 char 		*principal_name = (char *) NULL;
 char		*password_prompt = (char *) NULL;
+char		*ccname2use = (char *) NULL;
+krb5_timestamp	ticket_life = 0;
+krb5_boolean	delete_ccache = 0;
 
 extern krb5_kt_ops krb5_ktf_writable_ops;
 
@@ -145,9 +149,12 @@ static const char *cd_usage_fmt		= "usage is %s directory";
 static const char *pwd_mess_fmt		= "Current directory is %s\n";
 static const char *pwd_err_fmt		= "cannot get current directory: %s";
 static const char *pwd_usage_fmt	= "usage is %s";
-static const char *kadmin_usage_fmt	= "usage is %s [-r realm] [-p principal] [-m] [command ...]";
+static const char *kadmin_badtime_fmt	= "%s is a bad time value";
+static const char *kadmin_usage_fmt	= "usage is %s [-c ccache] [-r realm] [-p principal] [-l lifetime] [-dms] [command ...]";
+static const char *kadmin_sd_err_fmt	= "-d and -s are mutually exclusive";
 static const char *kadmin_defrealm_msg	= ": cannot get default realm";
 static const char *kadmin_srealm_fmt	= ": cannot set realm to \"%s\"";
+static const char *kadmin_ccache_fmt	= ": cannot find credential cache %s";
 static const char *kadmin_nopname_msg	= ": cannot find a principal name";
 static const char *kadmin_unparse_msg	= ": cannot flatten principal name";
 static const char *kadmin_nocomp_msg	= ": no components in principal name";
@@ -1267,11 +1274,36 @@ kadmin_startup(argc, argv)
     extern char		*optarg;
     extern int		optind;
     char 		*action = (char *) NULL;
+    krb5_boolean	saveit = 0;
+    krb5_boolean	delit = 0;
 
     programname = strrchr(argv[0], (int) '/');
     programname = (programname) ? programname+1 : argv[0];
-    while ((option = getopt(argc, argv, "r:p:mt:")) != EOF) {
+    while ((option = getopt(argc, argv, "c:dsl:r:p:m")) != EOF) {
 	switch (option) {
+	case 'c':
+	    ccname2use = optarg;
+	    break;
+	case 'd':
+	    delit = 1;
+	    break;
+	case 's':
+	    saveit = 1;
+	    break;
+	case 'l':
+	    {
+		int hours, minutes;
+
+		if (sscanf(optarg, "%d:%d", &hours, &minutes) == 2)
+		    ticket_life = (hours * 3600) + (minutes * 60);
+		else if (sscanf(optarg, "%d", &minutes) == 1)
+		    ticket_life = minutes * 60;
+		else {
+		    com_err(argv[0], 0, kadmin_badtime_fmt, optarg);
+		    exit(1);
+		}
+	    }
+	    break;
 	case 'r':
 	    realm_name = optarg;
 	    break;
@@ -1286,6 +1318,14 @@ kadmin_startup(argc, argv)
 	    exit(1);
 	}
     }
+
+    if (delit && saveit) {
+	com_err(argv[0], 0, kadmin_sd_err_fmt);
+	exit(1);
+    }
+
+    delete_ccache = (delit || saveit) ? (delit & !saveit) :
+	((ccname2use) ? 0 : 1);
 
     /* Now we do some real work */
     krb5_init_context(&kcontext);
@@ -1307,6 +1347,14 @@ kadmin_startup(argc, argv)
 	}
     }
 
+    /* Verify ccache name if supplied. */
+    if (ccname2use) {
+	if (kret = krb5_cc_resolve(kcontext, ccname2use, &ccache2use)) {
+	    com_err(argv[0], kret, kadmin_ccache_fmt, ccname2use);
+	    exit(4);
+	}
+    }
+
     /* If no principal name, formulate a reasonable response */
     if (!principal_name) {
 	krb5_principal	me;
@@ -1320,9 +1368,31 @@ kadmin_startup(argc, argv)
 	ccache = (krb5_ccache) NULL;
 	user = (char *) NULL;
 
-	/* First try our default credentials cache */
-	if (!(kret = krb5_cc_default(kcontext, &ccache)) &&
-	    !(kret = krb5_cc_get_principal(kcontext, ccache, &me))) {
+	/* First try supplied credentials cache */
+	if (ccache2use && 
+	    !(kret = krb5_cc_get_principal(kcontext, ccache2use, &me))) {
+
+	    /* Use our first component, if it exists. */
+	    if (krb5_princ_size(kcontext, me) > 0) {
+		krb5_data	*dp;
+
+		dp = krb5_princ_component(kcontext, me, 0);
+		if (user = (char *) malloc((size_t) dp->length + 1)) {
+		    strncpy(user, dp->data, (size_t) dp->length);
+		    user[dp->length] = '\0';
+		}
+		else {
+		    kret = ENOMEM;
+		}
+	    }
+	    else {
+		com_err(argv[0], 0, kadmin_nocomp_msg);
+		exit(1);
+	    }
+	}
+	/* Then try our default credentials cache */
+	else if (!(kret = krb5_cc_default(kcontext, &ccache)) &&
+		 !(kret = krb5_cc_get_principal(kcontext, ccache, &me))) {
 
 	    /* Use our first component, if it exists. */
 	    if (krb5_princ_size(kcontext, me) > 0) {

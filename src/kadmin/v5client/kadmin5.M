@@ -32,6 +32,16 @@ kadmin5 \- administer a Kerberos principal database over the network.
 .B \-p
 .I principal
 ] [
+.B \-c
+.I ccache
+] [
+.B \-l
+.I [hours:]minutes
+] [
+.B \-d
+] [
+.B \-s
+] [
 .B \-m
 ]
 [ command ... ]
@@ -46,6 +56,17 @@ specifies the default realm.
 specifies a principal name to use instead of the default 
 .I user
 .B /kadmin@realm.
+.IP \-c
+.B ccache
+specifies a credentials cache to use instead of the default.
+.IP \-l
+.B [hours:]minutes
+specifies the lifetime for an administrative ticket, if one needs to be
+acquired.
+.IP \-d
+specifies that the credentials cache is to be deleted after use.
+.IP \-s
+specifies that the credentials cache is to be saved for further use.
 .IP \-m
 specifies that multiple operations will be permitted for only one entry of the
 administrative principal's password.
@@ -77,6 +98,16 @@ access control list.  The default administrative principal is
 .PP
 One command may be specified on the command line, or if no command is provided,
 an interactive command loop is entered for the administrator to enter commands.
+.PP
+If a credentials cache is specified with
+.I \-c
+.B ccache,
+then the default is not to delete the credentials cache.  Otherwise, the
+default is to delete it.  The use of the
+.I \-d
+and
+.I \-s
+flags override this default behavior.
 .PP
 .SH AVAILABLE COMMANDS
 
