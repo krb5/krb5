@@ -1,3 +1,9 @@
+1999-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* changepw.c (krb5_locate_kpasswd): Declare local variable i even
+	when DNS code is not in use.
+	(krb5_locate_srv_conf, krb5_locate_srv_dns): Delete declarations.
+
 1999-09-21  Ken Raeburn  <raeburn@mit.edu>
 
 	Changes from Jeffrey Altman to look up kpasswd server using DNS.

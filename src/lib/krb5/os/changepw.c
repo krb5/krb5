@@ -49,12 +49,6 @@
  * Wrapper function for the two backends
  */
 
-krb5_error_code 
-krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmasters);
-#ifdef KRB5_DNS_LOOKUP
-krb5_error_code krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs);
-#endif
-
 static krb5_error_code
 krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
     krb5_context context;
@@ -65,10 +59,11 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
     int *nmasters;
 {
     krb5_error_code code;
+    int i;
 #ifdef KRB5_DNS_LOOKUP
     struct sockaddr *admin_addr_p, *kdc_addr_p;
     int nadmin_addrs, nkdc_addrs;
-    int i,j;
+    int j;
 #endif /* KRB5_DNS_LOOKUP */
 
     /*
