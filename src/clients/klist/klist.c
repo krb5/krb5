@@ -85,7 +85,7 @@ main(argc, argv)
 
     retval = krb5_init_context(&kcontext);
     if (retval) {
-	    com_err(argv[0], status, "while initializing krb5");
+	    com_err(argv[0], retval, "while initializing krb5");
 	    exit(1);
     }
 
