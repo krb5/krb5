@@ -29,10 +29,13 @@ static char rcsid_faddr_ordr_c[] =
  */
 int
 krb5_fulladdr_order(addr1, addr2)
-const krb5_fulladdr *addr1;
-const krb5_fulladdr *addr2;
+register const krb5_fulladdr *addr1;
+register const krb5_fulladdr *addr2;
 {
     int dir;
+    const int minlen = min(addr1->address->length, addr2->address->length);
+    register int i;
+
     dir = addr1->address->addrtype - addr2->address->addrtype;
     if (dir)
 	return(dir);
@@ -41,12 +44,14 @@ const krb5_fulladdr *addr2;
     if (dir)
 	return(dir);
 
-    dir = bcmp((char *)addr1->address->contents,
-	       (char *)addr2->address->contents,
-	       min(addr1->address->length, addr2->address->length));
-    if (dir)
-	return(dir);
-
+    for (i = 0; i < minlen; i++) {
+	if ((unsigned char) addr1->address->contents[i] <
+	    (unsigned char) addr2->address->contents[i])
+	    return -1;
+	else if ((unsigned char) addr1->address->contents[i] >
+		 (unsigned char) addr2->address->contents[i])
+	    return 1;
+    }
     if (addr1->port > addr2->port)
 	return(1);
     else if (addr1->port < addr2->port)
