@@ -1305,13 +1305,37 @@ proc start_kerberos_daemons { standalone } {
     # The same thing is done a little later for the kadmind
     set kdc_lfile $tmppwd/kdc.log
     set kadmind_lfile $tmppwd/kadmind5.log
-    set retry 30
 
     if ![file exists $kdc_lfile] then {
 	catch [touch $kdc_lfile]
     }
-		sleep 2
-    set kdc_start [file mtime $kdc_lfile]
+
+    spawn tail -f $kdc_lfile
+    set tailf_spawn_id $spawn_id
+    set tailf_pid [exp_pid]
+
+    set markstr "===MARK $tailf_pid [exec date] ==="
+    set f [open $kdc_lfile a]
+    puts $f $markstr
+    close $f
+
+    expect {
+	-i $tailf_spawn_id
+	-ex "$markstr\r\n" { }
+	timeout {
+	    if {$standalone} {
+		verbose -log "tail -f timed out looking for mark"
+		fail "krb5kdc"
+	    } else {
+		perror "krbkdc tail -f timed out looking for mark"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
+	}
+    }
 
     envstack_push
     setup_kerberos_env kdc
@@ -1320,42 +1344,33 @@ proc start_kerberos_daemons { standalone } {
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
 
-    for {set count 0} {$count < $retry} {incr count} {
-	if { [file mtime $kdc_lfile] != $kdc_start } then  {
-		break;
-	}	
-	sleep 2
-    }
-
-    if {$count >= $retry} {
-	if {$standalone} {
-	    verbose -log "krb5kdc startup timed out"
-	    fail "krb5kdc"
-	} else {
-	    perror "krb5kdc startup timed out"
+    expect {
+	-i $tailf_spawn_id
+	-re "commencing operation\r\n" { }
+	timeout {
+	    if {$standalone} {
+		verbose -log "krb5kdc startup timed out"
+		fail "krb5kdc"
+	    } else {
+		perror "krb5kdc startup timed out"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
 	}
-	stop_kerberos_daemons
-	return 0
     }
-
-    if ![regexp "commencing operation" [tail1 $kdc_lfile]] {
-	if {$standalone} {
-	    verbose -log "krb5kdc failed to start"
-	    fail "krb5kdc"
-	} else {
-	    perror "krb5kdc failed to start"
-	}
-	stop_kerberos_daemons
-	return 0
-    }
+    exec kill $tailf_pid
+    expect -i $tailf_spawn_id eof
+    wait -i $tailf_spawn_id
 
     if {$standalone} {
 	pass "krb5kdc"
     }
 
     # Give the kerberos daemon a few seconds to get set up.
-    sleep 2
-
+#    sleep 2
 
     #
     # Save setting of KRB5_KTNAME. We do not want to override kdc.conf
@@ -1369,10 +1384,34 @@ proc start_kerberos_daemons { standalone } {
 
     if ![file exists $kadmind_lfile] then {
 	catch [touch $kadmind_lfile]
-	sleep 1
     }
 
-    set kadmind_start [file mtime $kadmind_lfile]
+    spawn tail -f $kadmind_lfile
+    set tailf_spawn_id $spawn_id
+    set tailf_pid [exp_pid]
+
+    set markstr "===MARK $tailf_pid [exec date] ==="
+    set f [open $kadmind_lfile a]
+    puts $f $markstr
+    close $f
+
+    expect {
+	-i $tailf_spawn_id
+	-ex "$markstr\r\n" { }
+	timeout {
+	    if {$standalone} {
+		verbose -log "tail -f timed out looking for mark"
+		fail "kadmind"
+	    } else {
+		perror "kadmind tail -f timed out looking for mark"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
+	}
+    }
 
     # Start up the kadmind daemon
     # XXXX kadmind uses stderr a lot.  the sh -c and redirect can be
@@ -1384,48 +1423,16 @@ proc start_kerberos_daemons { standalone } {
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
 
-    for {set count 0} {$count < $retry} {incr count} {
-	if { [file mtime $kadmind_lfile] != $kadmind_start } then  {
-		break;
-	}	
-	sleep 1
-    }
-
-    if {$count >= $retry} {
-	if {$standalone} {
-	    verbose -log "kadmind startup timed out"
-	    fail "kadmind"
-	} else {
-	    perror "kadmind startup timed out"
-	}
-	if [info exists start_save_ktname] {
-	   set env(KRB5_KTNAME) $start_save_ktname
-	   unset start_save_ktname
-	}
-	stop_kerberos_daemons
-	return 0
-    }
-
     # Restore KRB5_KTNAME
     if [info exists start_save_ktname] {
         set env(KRB5_KTNAME) $start_save_ktname
         unset start_save_ktname
     }
 
-    set line [tail1 $kadmind_lfile]
-    switch -regexp $line {
-	"Seeding random number" {
-	    # Wait a few seconds and get the new line.
-	    # (Should loop -- we don't want to wait 10 seconds if it takes
-	    # 1, but we don't want to give up at 3 seconds if it takes 14
-	    # either.  Probably should wait up to $timeout seconds.)
-	    sleep 20
-  	    set line [tail1 $kadmind_lfile]
-	}
-    }
-
-    switch -regexp $line {
-	"cannot initialize network" {
+    expect {
+	-i $tailf_spawn_id
+	"Seeding random number" exp_continue
+	"cannont initialize network" {
 	    if {$standalone} {
 		verbose -log "kadmind failed network init"
 		fail "kadmind"
@@ -1433,6 +1440,9 @@ proc start_kerberos_daemons { standalone } {
 		perror "kadmind failed network init"
 	    }
 	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
 	    return 0
 	}
 	"cannot bind to network address" {
@@ -1443,29 +1453,38 @@ proc start_kerberos_daemons { standalone } {
 		perror "kadmind failed to bind socket"
 	    }
 	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
 	    return 0
 	}
 	"starting" { }
-	default {
+	timeout {
 	    if {$standalone} {
-		verbose -log "kadmind failed to start: $line"
+		verbose -log "kadmind failed to start"
 		fail "kadmind"
 	    } else {
-		verbose -log "kadmind failed to start: $line"
+		verbose -log "kadmind failed to start"
 		perror "kadmind failed to start"
 	    }
-sleep 10
+#sleep 10
 	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
 	    return 0
 	}
     }
+    exec kill $tailf_pid
+    expect -i $tailf_spawn_id eof
+    wait -i $tailf_spawn_id
 
     if {$standalone} {
 	pass "kadmind"
     }
 
     # Give the kadmind daemon a few seconds to get set up.
-    sleep 2
+#    sleep 2
 
     return 1
 }
