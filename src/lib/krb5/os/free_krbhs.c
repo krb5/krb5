@@ -27,9 +27,9 @@ static char free_krbhs_c[] =
 
 krb5_error_code
 krb5_free_krbhst(hostlist)
-char **hostlist;
+char * const *hostlist;
 {
-    register char **cp;
+    register char * const *cp;
 
     for (cp = hostlist; *cp; cp++)
 	free(*cp);
