@@ -1,3 +1,8 @@
+Sat Jan 28 14:45:55 1995  Chris Provenzano (proven@mit.edu)
+
+        * krb_auth_su.c (krb5_verify_tkt_def()) use new API for 
+		krb5_kt_get_entry.
+
 Wed Jan 18 12:21:30 1995    <tytso@rsx-11.mit.edu>
 
 	* main.c (main): If gethostbyname returns an error, exit after

@@ -277,6 +277,7 @@ krb5_verify_tkt_def(context, client, server, cred_ses_key,
     krb5_ticket **clear_ticket;
 {
 krb5_keytab keytabid;
+krb5_keytype keytype;
 krb5_keytab_entry ktentry;
 krb5_keyblock *tkt_key = NULL;
 krb5_ticket * tkt = NULL;
@@ -303,8 +304,11 @@ krb5_keyblock *	tkt_ses_key;
 		return retval;
 	}
 
+	/* We have the encryption type get the keytpe. */
+	keytype = krb5_csarray[tkt->enc_part.etype]->system->proto_keytype;
+
 	if (retval = krb5_kt_get_entry(context, keytabid, server,
-				       tkt->enc_part.kvno, &ktentry)){
+				       tkt->enc_part.kvno, keytype, &ktentry)){
 		krb5_free_ticket(context, tkt);	
 		return retval;
 	}
