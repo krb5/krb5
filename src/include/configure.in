@@ -119,7 +119,7 @@ AC_CHECK_HEADER(termios.h,dnl
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
 dnl
 KRB5_SIGTYPE
-AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h macsock.h xom.h sys/uio.h sys/filio.h sys/select.h time.h paths.h)
+AC_CHECK_HEADERS(stdlib.h string.h stddef.h unistd.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h xom.h sys/uio.h sys/filio.h sys/select.h time.h paths.h)
 AC_HEADER_STDARG
 KRB5_AC_INET6
 dnl
@@ -132,11 +132,7 @@ AC_CACHE_CHECK([for in6addr_any definition in library],
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_MACSOCK_H
-#include <macsock.h>
-#else
 #include <sys/socket.h>
-#endif
 #include <netinet/in.h>
 #include <netdb.h>
 ],[

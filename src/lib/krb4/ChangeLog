@@ -1,3 +1,7 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* macsock.c: Deleted.
+
 2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
 
 	* CCache-glue.c (krb_get_cred) 

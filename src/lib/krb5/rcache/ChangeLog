@@ -1,3 +1,7 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_io.c: Don't check for macsock.h.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_io.c (krb5_rc_io_move, krb5_rc_io_sync): Don't test

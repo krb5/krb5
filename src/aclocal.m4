@@ -313,7 +313,7 @@ dnl
 dnl Check for IPv6 compile-time support.
 dnl
 AC_DEFUN(KRB5_AC_INET6,[
-AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h netdb.h)
+AC_CHECK_HEADERS(sys/types.h sys/socket.h netinet/in.h netdb.h)
 AC_CHECK_FUNCS(inet_ntop inet_pton getnameinfo)
 dnl getaddrinfo test needs netdb.h, for proper compilation on alpha
 dnl under OSF/1^H^H^H^H^HDigital^H^H^H^H^H^H^HTru64 UNIX, where it's
@@ -365,11 +365,7 @@ KRB5_AC_CHECK_TYPE_WITH_HEADERS(struct sockaddr_storage, [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_MACSOCK_H
-#include <macsock.h>
-#else
 #include <sys/socket.h>
-#endif
 #include <netinet/in.h>
 ])])dnl
 dnl
@@ -385,11 +381,7 @@ AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_MACSOCK_H
-#include <macsock.h>
-#else
 #include <sys/socket.h>
-#endif
 #include <netinet/in.h>
 #include <netdb.h>
 ],[
@@ -408,11 +400,7 @@ AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_MACSOCK_H
-#include <macsock.h>
-#else
 #include <sys/socket.h>
-#endif
 #include <netinet/in.h>
 #include <netdb.h>
 ],[

@@ -40,7 +40,6 @@ copyright.h
 kdb.h
 kdb_dbc.h
 kdb_dbm.h
-macsock.h
 stock
 winsock.h
 

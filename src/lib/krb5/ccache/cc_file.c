@@ -121,7 +121,7 @@ etc.
 #endif
 
 #ifdef HAVE_NETINET_IN_H
-#if !defined(_WIN32) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WIN32)
 #include <netinet/in.h>
 #else
 #include "port-sockets.h"

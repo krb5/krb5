@@ -70,17 +70,13 @@ typedef WSABUF sg_buf;
 /* If this source file requires it, define struct sockaddr_in
    (and possibly other things related to network I/O).  */
 
-#ifdef HAVE_MACSOCK_H		/* Sockets stuff differs on Mac */
-#include "macsock.h"		/* Macintosh sockets emulation library */
-#else  /* ! HAVE_MACSOCK_H */	/* Sockets stuff for Unix machines */
-
 #include "krb5/autoconf.h"
 
 #include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */
 
-#if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(HAVE_MACSOCK_H) && !defined(_WIN32)
+#if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(_WIN32)
 /* Hack for HPUX, to get h_errno.  */
 # define _XOPEN_SOURCE_EXTENDED 1
 # include <netdb.h>
@@ -176,8 +172,6 @@ typedef struct iovec sg_buf;
      : (SOCKET_SET_ERRNO(EAFNOSUPPORT), (const char *)NULL))
 #define HAVE_INET_NTOP
 #endif
-
-#endif /* HAVE_MACSOCK_H */
 
 #endif /* _WIN32 */
 

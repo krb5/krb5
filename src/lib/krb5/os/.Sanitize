@@ -49,7 +49,6 @@ kuserok.c
 localaddr.c
 locate_kdc.c
 lock_file.c
-macsock.c
 mk_faddr.c
 net_read.c
 net_write.c

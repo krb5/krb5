@@ -1,3 +1,7 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c: Don't check for macsock.h.
+
 2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
 
 	* ccdefault.c (krb5_cc_default, krb5int_cc_default) 

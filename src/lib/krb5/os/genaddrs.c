@@ -31,7 +31,7 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
-#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WINSOCKAPI_)
 #include <netinet/in.h>
 #endif
 

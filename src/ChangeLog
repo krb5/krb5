@@ -1,3 +1,8 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_INET6, KRB5_AC_CHECK_SOCKADDR_STORAGE,
+	KRB5_AC_CHECK_INET6): Don't check for macsock.h.
+
 2004-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5-config.in: Substitute $(PTHREAD_CFLAGS).

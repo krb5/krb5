@@ -30,7 +30,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#if !defined(_WIN32) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WIN32)
 
 /* Unix version...  */
 

@@ -1,3 +1,8 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* genaddrs.c, localaddr.c, lock_file.c, mk_faddr.c: Don't check
+	for macsock.h.
+
 2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
 
 	* init_os_ctx.c (krb5_os_init_context, krb5_os_free_context) 

@@ -72,7 +72,6 @@ mac_store.c
 mac_store.h
 mac_stubs.c
 mac_time.c
-macsock.c
 memcache.c
 memcache.h
 mk_auth.c

@@ -33,7 +33,7 @@
 #ifdef HAVE_NETINET_IN_H
    
 #include "os-proto.h"
-#if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
+#if !defined(_WINSOCKAPI_)
 
 #include <netinet/in.h>
 #endif
