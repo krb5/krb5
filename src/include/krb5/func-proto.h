@@ -205,6 +205,7 @@ krb5_error_code krb5_copy_ticket
 krb5_error_code krb5_copy_authdata
     PROTOTYPE((krb5_authdata * const *,
 	       krb5_authdata ***));
+void krb5_init_ets PROTOTYPE((void));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
