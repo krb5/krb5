@@ -1,3 +1,7 @@
+2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Prepare Makefile for ms2mit.
+
 2001-01-31  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up previous patch to avoid
