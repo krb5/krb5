@@ -14,6 +14,7 @@ static char rcsid[] = "$Id$";
 #include "kpasswd_strings.h"
 #define string_text error_message
 
+#include "kpasswd.h"
 #include <stdio.h>
 #include <pwd.h>
 #include <string.h>
@@ -21,8 +22,8 @@ static char rcsid[] = "$Id$";
 char *whoami;
 
 void display_intro_message(fmt_string, arg_string)
-     char *fmt_string;
-     char *arg_string;
+     const char *fmt_string;
+     const char *arg_string;
 {
   com_err(whoami, 0, fmt_string, arg_string);
 }
@@ -33,7 +34,7 @@ long read_old_password(context, password, pwsize)
      unsigned int *pwsize;
 {
   long code = krb5_read_password(context,
-			 (char *)string_text(KPW_STR_OLD_PASSWORD_PROMPT),  
+			 string_text(KPW_STR_OLD_PASSWORD_PROMPT),  
 			 0, password, pwsize);
   return code;
 }
@@ -41,7 +42,7 @@ long read_old_password(context, password, pwsize)
 long read_new_password(server_handle, password, pwsize, msg_ret, princ)
      void *server_handle;
      char *password;
-     int *pwsize;
+     unsigned int *pwsize;
      char *msg_ret;
      krb5_principal princ;
 {
@@ -64,7 +65,8 @@ main(argc, argv)
 
   whoami = (whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0];
 
-  if (retval = krb5_init_context(&context)) {
+  retval = krb5_init_context(&context);
+  if (retval) {
        com_err(whoami, retval, "initializing krb5 context");
        exit(retval);
   }

@@ -1,3 +1,12 @@
+Mon Feb 26 13:13:21 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpasswd.c, tty_kpasswd.c, xm_kpasswd.c: Compiler warning
+ 	clenups. Use const when apropriate, remove assignments in
+ 	conditionals, remove unnecessary casts.
+
+	* kpasswd.h: New file with prototypes of functions used in
+ 	different files.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* tty_kpasswd.c (read_old_password): Argument pwsize changed to

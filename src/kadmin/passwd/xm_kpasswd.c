@@ -322,8 +322,8 @@ read_password(password, pwsize)
  */
 void
 display_intro_message(fmt_string, arg_string)
-     char *fmt_string;
-     char *arg_string;
+     const char *fmt_string;
+     const char *arg_string;
 {
   XmString xmstr;
   char buf[1024];
@@ -341,7 +341,7 @@ long
 read_old_password(context, password, pwsize)
      krb5_context context;
      char *password;
-     int *pwsize;
+     unsigned int *pwsize;
 {
   long code;
 
@@ -355,7 +355,7 @@ long
 read_new_password(server_handle, password, pwsize, msg_ret, princ)
      void *server_handle;
      char *password;
-     int *pwsize;
+     unsigned int *pwsize;
      char *msg_ret;
      krb5_principal princ;
 {

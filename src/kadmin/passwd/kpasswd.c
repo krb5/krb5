@@ -14,15 +14,14 @@ static char rcsid[] = "$Id$";
 #include "kpasswd_strings.h"
 #define string_text error_message
 
+#include "kpasswd.h"
+
 #include <stdio.h>
 #include <pwd.h>
 #include <string.h>
 
 extern char *whoami;
 
-extern void display_intro_message();
-extern long read_old_password();
-extern long read_new_password();
 
 #define MISC_EXIT_STATUS 6
 
@@ -82,7 +81,7 @@ kpasswd(context, argc, argv)
   krb5_principal princ = 0;
   char *princ_str;
   struct passwd *pw = 0;
-  int pwsize;
+  unsigned int pwsize;
   char password[255];  /* I don't really like 255 but that's what kinit uses */
   char msg_ret[1024], admin_realm[1024];
   ovsec_kadm_principal_ent_t principal_entry = NULL;
@@ -227,7 +226,9 @@ kpasswd(context, argc, argv)
     com_err(whoami, 0, string_text(KPW_STR_POLICY_EXPLANATION),
 	    princ_str, principal_entry->policy,
 	    policy_entry->pw_min_length, policy_entry->pw_min_classes);
-    if (code = ovsec_kadm_free_principal_ent(server_handle, principal_entry)) {
+
+    code = ovsec_kadm_free_principal_ent(server_handle, principal_entry);
+    if (code) {
 	(void) ovsec_kadm_free_policy_ent(server_handle, policy_entry);
 	krb5_free_principal(context, princ);
 	free(princ_str);
@@ -235,7 +236,9 @@ kpasswd(context, argc, argv)
 	(void) ovsec_kadm_destroy(server_handle);
 	return(MISC_EXIT_STATUS);
     }
-    if (code = ovsec_kadm_free_policy_ent(server_handle, policy_entry)) {
+
+    code = ovsec_kadm_free_policy_ent(server_handle, policy_entry);
+    if (code) {
 	krb5_free_principal(context, princ);
 	free(princ_str);
 	com_err(whoami, code, string_text(KPW_STR_WHILE_FREEING_POLICY));
@@ -246,8 +249,8 @@ kpasswd(context, argc, argv)
   else {
     /* kpasswd *COULD* output something here to encourage the choice
        of good passwords, in the absence of an enforced policy. */
-      if (code = ovsec_kadm_free_principal_ent(server_handle,
-					       principal_entry)) {
+      code = ovsec_kadm_free_principal_ent(server_handle, principal_entry);
+      if (code) {
 	  krb5_free_principal(context, princ);
 	  free(princ_str);
 	  com_err(whoami, code, string_text(KPW_STR_WHILE_FREEING_PRINCIPAL));
