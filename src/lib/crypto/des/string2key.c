@@ -69,6 +69,8 @@
 	returns: errors
  */
 
+/*#define PRINT_TEST_VECTORS*/
+
 krb5_error_code
 mit_des_string_to_key_int (keyblock, data, salt)
     krb5_keyblock * keyblock;
@@ -87,6 +89,11 @@ mit_des_string_to_key_int (keyblock, data, salt)
     register char *p_char;
     char k_char[64];
     mit_des_key_schedule key_sked;
+
+#ifdef PRINT_TEST_VECTORS
+    unsigned char tmp_array[56];
+    unsigned char *t_char;
+#endif
 
 #ifndef min
 #define min(A, B) ((A) < (B) ? (A): (B))
@@ -124,10 +131,13 @@ mit_des_string_to_key_int (keyblock, data, salt)
 
     /* convert to des key */
     forward = 1;
-    p_char = k_char;
 
     /* init key array for bits */
+    p_char = k_char;
     memset(k_char,0,sizeof(k_char));
+#ifdef PRINT_TEST_VECTORS
+    t_char = tmp_array;
+#endif
 
 #if 0
     if (mit_des_debug)
@@ -148,16 +158,45 @@ mit_des_string_to_key_int (keyblock, data, salt)
 #endif
 	/* loop through bits within byte, ignore parity */
 	for (j = 0; j <= 6; j++) {
-	    if (forward)
-		*p_char++ ^= (int) temp & 01;
-	    else
-		*--p_char ^= (int) temp & 01;
+	    unsigned int x = temp & 1;
+	    if (forward) {
+		*p_char++ ^= x;
+#ifdef PRINT_TEST_VECTORS
+		*t_char++ = x;
+#endif
+	    } else {
+		*--p_char ^= x;
+#ifdef PRINT_TEST_VECTORS
+		*--t_char = x;
+#endif
+	    }
 	    temp = temp >> 1;
 	}
 
 	/* check and flip direction */
-	if ((i%8) == 0)
+	if ((i%8) == 0) {
+#ifdef PRINT_TEST_VECTORS
+	    printf("%-20s ",
+		   forward ? "forward block:" : "reversed block:");
+	    for (j = 0; j <= 7; j++) {
+		int k, num = 0;
+		for (k = 0; k <= 6; k++)
+		    num |= tmp_array[j * 7 + k] << k;
+		printf(" %02x", num);
+	    }
+	    printf("\n");
+
+	    printf("%-20s ", "xor result:");
+	    for (j = 0; j <= 7; j++) {
+		int k, num = 0;
+		for (k = 0; k <= 6; k++)
+		    num |= k_char[j * 7 + k] << k;
+		printf(" %02x", num);
+	    }
+	    printf("\n");
+#endif
 	    forward = !forward;
+	}
     }
 
     /* now stuff into the key mit_des_cblock, and force odd parity */
@@ -171,10 +210,29 @@ mit_des_string_to_key_int (keyblock, data, salt)
 	*k_p++ = (unsigned char) temp;
     }
 
+#ifdef PRINT_TEST_VECTORS
+    printf("%-20s ", "after fanfolding:");
+    for (i = 0; i <= 7; i++)
+	printf(" %02x", i[(unsigned char *)key]);
+    printf("\n");
+
+    printf("%-20s ", "after shifting:");
+    for (i = 0; i <= 7; i++)
+	printf(" %02x", i[(unsigned char *)key]);
+    printf("\n");
+#endif
+
     /* fix key parity */
     mit_des_fixup_key_parity(key);
     if (mit_des_is_weak_key(key))
 	((krb5_octet *)key)[7] ^= 0xf0;
+
+#ifdef PRINT_TEST_VECTORS
+    printf("after fixing parity and weak keys: {");
+    for (i = 0; i <= 7; i++)
+	printf(" %02x", i[(unsigned char *)key]);
+    printf(" }\n");
+#endif
 
     /* Now one-way encrypt it with the folded key */
     (void) mit_des_key_sched(key, key_sked);

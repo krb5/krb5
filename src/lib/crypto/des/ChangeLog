@@ -1,3 +1,8 @@
+2002-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* string2key.c (mit_des_string_to_key_int): If PRINT_TEST_VECTORS
+	is defined, print some of the intermediate results.
+
 2002-09-26  Tom Yu  <tlyu@mit.edu>
 
 	* afsstring2key.c (krb5_afs_crypt): Leak this function out as as
