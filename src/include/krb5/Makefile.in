@@ -15,8 +15,12 @@ all-windows:
 	copy stock\osconf.h osconf.h
 	echo /* not used in windows */ > autoconf.h
 
-autoconf.h: $(srcdir)/autoconf.h.in config.status
+# Should only rebuild autoconf.h here (use CONFIG_FILES=), but the weird krb5
+# makefile post-processing is unconditional and would trash the makefile.
+autoconf.h: autoconf.stamp
+autoconf.stamp: $(srcdir)/autoconf.h.in config.status
 	$(SHELL) config.status
+	touch autoconf.stamp
 
 depend::
 
@@ -33,10 +37,10 @@ osconf.h: $(OSCONFSRC)
 	@if cmp -s osconf.new osconf.h ; then :; \
 	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h; $(RM) osconf.new) fi
 
-clean:: 
+clean::
 	$(RM) osconf.new $(BUILT_HEADERS)
 
 clean-unix::
-	$(RM) $(ET_HEADERS) autoconf.h
+	$(RM) $(ET_HEADERS) autoconf.h autoconf.stamp
 clean-mac::
 clean-windows::

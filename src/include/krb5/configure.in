@@ -35,6 +35,7 @@ AC_CHECK_HEADERS(xom.h)
 AC_FUNC_CHECK([setvbuf],AC_DEFINE(HAS_SETVBUF))
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
 dnl requires a run check...
+AC_C_CROSS
 AC_MSG_CHECKING([for ANSI stdio])
 AC_CACHE_VAL(krb5_cv_has_ansi_stdio,
 [AC_TRY_RUN(

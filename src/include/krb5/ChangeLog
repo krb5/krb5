@@ -1,3 +1,12 @@
+Tue Apr 30 17:15:57 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Invoke AC_C_CROSS before AC_TRY_RUN to pretty up
+	output format.
+
+	* Makefile.in (autoconf.h): Use timestamp file to prevent repeated
+	rebuilding if file timestamp is out of date but contents wouldn't
+	change.
+
 Tue Apr 30 15:03:34 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* macsock.h: Added prototype for getpeername().
