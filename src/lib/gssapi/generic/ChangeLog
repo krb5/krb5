@@ -1,3 +1,9 @@
+Tue Mar 18 13:52:29 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add 'extern "C"' for C++ compatibility; also check
+		for __cplusplus since some C++ compilers don't set
+ 		__STDC__
+
 Mon Mar 17 14:42:33 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gssapi.hin: Fix header file so that winmac.h is #included when

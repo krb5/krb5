@@ -50,7 +50,7 @@
  * Make sure we have a definition for PROTOTYPE.
  */
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
@@ -321,6 +321,10 @@ typedef	int		gss_cred_usage_t;
 /*
  * Finally, function prototypes for the GSSAPI routines.
  */
+
+#ifdef __cplusplus
+#extern "C" {
+#endif
 
 KRB5_DLLIMP OM_uint32 KRB5_CALLCONV gss_acquire_cred
 PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
@@ -652,6 +656,10 @@ PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
             int FAR *,          /* conf_state */
             int FAR *           /* qop_state */
            ));
+
+#ifdef __cplusplus
+}
+#endif
 
 /* XXXX these are not part of the GSSAPI C bindings!  (but should be) */
 
