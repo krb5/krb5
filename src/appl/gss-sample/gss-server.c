@@ -33,6 +33,12 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 int create_socket();
 
 int send_token();

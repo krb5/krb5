@@ -29,6 +29,12 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 int establish_context();
 int connect_to_server();
 int call_server();
