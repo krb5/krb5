@@ -1,3 +1,10 @@
+Tue Nov  7 16:35:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Make a more general version
+		of kdb5_dbe_find_enctype() which allows you to search the
+		keylist looking for multiple keys that fit your criteria.
+		Eventually we should convert all programs to use
+		kdb5_dbe_search_enctype() instead of kdb5_dbe_find_enctype().
 
 Fri Nov 03 04:49:58 1995  Chris Provenzano (proven@mit.edu)
 
