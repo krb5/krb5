@@ -25,6 +25,9 @@
 #define WTMP_FILE _PATH_WTMP
 #endif
 
+#if !defined(WTMPX_FILE) && defined(_PATH_WTMPX) && defined(HAVE_UPDWTMPX)
+#define WTMPX_FILE _PATH_WTMPX
+#endif
 
 /* if it is *still* missing, assume SunOS */
 #ifndef WTMP_FILE

@@ -1,3 +1,8 @@
+Sun Mar 28 17:50:57 1999  Tom Yu  <tlyu@mit.edu>
+
+	* update_wtmp.c: Define WTMPX_FILE to be _PATH_WTMPX in case we're
+	on a system that cleans up the namespace that way.
+
 Wed Feb 17 19:47:36 1999  Tom Yu  <tlyu@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname): Remove unused
