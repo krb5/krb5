@@ -24,7 +24,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char enc_dec_c[] =
+static char rcsid_enc_dec_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -59,19 +59,25 @@ OLDDECLARG(krb5_pointer, ivec)
 {
     krb5_checksum cksum;
     krb5_octet 	contents[CRC32_CKSUM_LENGTH];
-    char 	*p;
+    char 	*p, *endinput;
+    int sumsize;
     krb5_error_code retval, mit_des_encrypt_f();
 
-    if ( size < sizeof(mit_des_cblock) )
-	return KRB5_BAD_MSIZE;
+/*    if ( size < sizeof(mit_des_cblock) )
+	return KRB5_BAD_MSIZE; */
 
-    p = (char *)in + size - CRC32_CKSUM_LENGTH;
-    bzero(p, CRC32_CKSUM_LENGTH);
+    /* caller passes data size, and saves room for the padding. */
+    /* we need to put the cksum in the end of the padding area */
+    sumsize =  krb5_roundup(size+CRC32_CKSUM_LENGTH, sizeof(mit_des_cblock));
+
+    p = (char *)in + sumsize - CRC32_CKSUM_LENGTH;
+    endinput = (char *)in + size;
+    bzero(endinput, sumsize - size);
     cksum.contents = contents; 
 
     if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
                   sum_func)(in,
-                            size,
+                            sumsize,
                             (krb5_pointer)key->key->contents,
                             sizeof(mit_des_cblock),
                             &cksum)) 
@@ -79,7 +85,7 @@ OLDDECLARG(krb5_pointer, ivec)
     
     bcopy((char *)contents, p, CRC32_CKSUM_LENGTH);
  
-    return (mit_des_encrypt_f(in, out, size, key, ivec));
+    return (mit_des_encrypt_f(in, out, sumsize, key, ivec));
 }
 
 /*
