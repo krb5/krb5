@@ -35,10 +35,16 @@
     #ifdef KRB5_KRB4_COMPAT
         #include <kerberosIV/krb.h>
     #endif
+    #if USE_CCAPI
+        #include <CredentialsCache.h>
+    #endif
 #endif
 
 #include <string.h>
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 
 #ifdef __STDC__
@@ -91,16 +97,18 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+    char *cache_name = NULL;
+#ifndef USE_CCAPI
     krb5_context kcontext;
     krb5_error_code retval;
-    int c;
     krb5_ccache cache = NULL;
-    char *cache_name = NULL;
     int code = 0;
 #ifdef KRB5_KRB4_COMPAT
     int v4code = 0;
     int v4 = 1;
 #endif
+#endif /* !USE_CCAPI */
+    int c;
     int errflg = 0;
     int quiet = 0;
 
@@ -172,6 +180,61 @@ main(argc, argv)
     if (!use_k4)
 	got_k4 = 0;
 
+#ifdef USE_CCAPI
+    {
+        /* CCAPI version 4 has joint caches for v4 and v5 */
+        cc_context_t				context = NULL;
+        cc_ccache_t					cache = NULL;
+        cc_int32					cc_err;
+    
+        cc_err = cc_initialize (&context, ccapi_version_4, nil, nil);
+        if (cc_err != ccNoError) {
+            fprintf(stderr, "%s: Unable to initialize credentials cache (error = %ld)\n", progname, cc_err);
+            exit(1);
+        }
+
+
+        /* Open the default cache */
+        if (cache_name) {
+            char *name = strchr (cache_name, '.');
+            if (strlen (name) > 0) {
+                cc_err = cc_context_open_ccache (context, name, &cache);
+                if (cc_err == ccErrCCacheNotFound) {
+                    fprintf(stderr, "%s: No credentials cache found while destroying '%s'\n", 
+                            progname, cache_name);
+                    exit(1);                   
+                }
+                if (cc_err != ccNoError) {
+                    fprintf(stderr, "%s: Unable to open cache '%s' (error = %ld)\n", 
+                            progname, cache_name, cc_err);
+                    exit(1);
+                }
+            }
+        }
+        
+        /* if we didn't just open a cache, open the default */
+        if (cache == NULL) {
+            cc_err = cc_context_open_default_ccache (context, &cache);
+            if (cc_err == ccErrCCacheNotFound) {
+                fprintf(stderr, "%s: No credentials cache found while destroying default cache\n", 
+                        progname);
+                exit(1);                   
+            }
+            if (cc_err != ccNoError) {
+                fprintf(stderr, "%s: Unable to open default cache (error = %ld)\n", 
+                        progname, cc_err);
+                exit(1);
+            }
+        }
+        
+        cc_err = cc_ccache_destroy (cache);
+        if (cc_err != ccNoError) {
+            fprintf(stderr, "%s: Unable to destroy cache (error = %ld)\n", 
+                    progname, cc_err);
+            exit(1);
+        }
+    }
+#else
     if (got_k5) {
 	retval = krb5_init_context(&kcontext);
 	if (retval) {
@@ -225,5 +288,6 @@ main(argc, argv)
 	}
     }
 #endif
+#endif /* USE_CCAPI */
     return errflg;
 }
