@@ -220,6 +220,9 @@ char *krb5_cc_default_name
 krb5_error_code krb5_cc_default
 	PROTOTYPE((krb5_ccache *));
 
+/* free_rtree.c */
+void krb5_free_realm_tree
+	PROTOTYPE((krb5_principal *));
 
 /* krb5_free.c */
 void krb5_free_principal
