@@ -114,7 +114,7 @@
 /*
  * Build a "sendauth" packet compatible with Unix sendauth/recvauth.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
      long options;		/* bit-pattern of options */
      KTEXT ticket;		/* where to put ticket (return); or
@@ -209,7 +209,7 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
  * and "schedule" returns the key schedule for that decryption.  The
  * the local and server addresses are given in "laddr" and "faddr".
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_check_auth (buf, checksum, msg_data, session, schedule, laddr, faddr)
      KTEXT buf;			/* The response we read from app server */
      unsigned KRB4_32 checksum; /* checksum we included in request */

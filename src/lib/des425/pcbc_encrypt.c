@@ -22,7 +22,7 @@
 /*
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_pcbc_encrypt(in, out, length, schedule, ivec, enc)
 	des_cblock *in;
 	des_cblock *out;

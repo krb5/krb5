@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h, krb5.hin, win-mac.h: Don't use or define KRB5_DLLIMP,
+	GSS_DLLIMP.
+
 2001-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-unix): Depend directly on kerberosIV/krb_err.h

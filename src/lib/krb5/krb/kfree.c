@@ -28,7 +28,7 @@
 
 #include "k5-int.h"
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_address(context, val)
     krb5_context context;
     krb5_address FAR *val;
@@ -38,7 +38,7 @@ krb5_free_address(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_addresses(context, val)
     krb5_context context;
     krb5_address FAR * FAR *val;
@@ -54,7 +54,7 @@ krb5_free_addresses(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_ap_rep(context, val)
     krb5_context context;
     register krb5_ap_rep FAR *val;
@@ -64,7 +64,7 @@ krb5_free_ap_rep(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_ap_req(context, val)
     krb5_context context;
     register krb5_ap_req FAR *val;
@@ -76,7 +76,7 @@ krb5_free_ap_req(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_ap_rep_enc_part(context, val)
     krb5_context context;
     krb5_ap_rep_enc_part FAR *val;
@@ -86,7 +86,7 @@ krb5_free_ap_rep_enc_part(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_authenticator_contents(context, val)
     krb5_context context;
     krb5_authenticator FAR *val;
@@ -109,7 +109,7 @@ krb5_free_authenticator_contents(context, val)
     }
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_authdata(context, val)
     krb5_context context;
     krb5_authdata FAR * FAR *val;
@@ -124,7 +124,7 @@ krb5_free_authdata(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_authenticator(context, val)
     krb5_context context;
     krb5_authenticator FAR *val;
@@ -133,7 +133,7 @@ krb5_free_authenticator(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_checksum(context, val)
     krb5_context context;
     register krb5_checksum *val;
@@ -142,7 +142,7 @@ krb5_free_checksum(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_checksum_contents(context, val)
     krb5_context context;
     register krb5_checksum *val;
@@ -153,7 +153,7 @@ krb5_free_checksum_contents(context, val)
     }
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_cred(context, val)
     krb5_context context;
     register krb5_cred FAR *val;
@@ -170,7 +170,7 @@ krb5_free_cred(context, val)
  * the credentials structures 
  */
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_cred_contents(context, val)
     krb5_context context;
     krb5_creds FAR *val;
@@ -206,7 +206,7 @@ krb5_free_cred_contents(context, val)
     }
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV 
+void KRB5_CALLCONV 
 krb5_free_cred_enc_part(context, val)
     krb5_context context;
     register krb5_cred_enc_part FAR *val;
@@ -240,7 +240,7 @@ krb5_free_cred_enc_part(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_creds(context, val)
     krb5_context context;
     krb5_creds FAR *val;
@@ -250,7 +250,7 @@ krb5_free_creds(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_data(context, val)
     krb5_context context;
     krb5_data FAR * val;
@@ -260,7 +260,7 @@ krb5_free_data(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_data_contents(context, val)
     krb5_context context;
     krb5_data FAR * val;
@@ -286,7 +286,7 @@ void krb5_free_etype_info(context, info)
 }
     
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_enc_kdc_rep_part(context, val)
     krb5_context context;
     register krb5_enc_kdc_rep_part *val;
@@ -302,7 +302,7 @@ krb5_free_enc_kdc_rep_part(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_enc_tkt_part(context, val)
     krb5_context context;
     krb5_enc_tkt_part FAR *val;
@@ -321,7 +321,7 @@ krb5_free_enc_tkt_part(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_error(context, val)
     krb5_context context;
     register krb5_error FAR *val;
@@ -337,7 +337,7 @@ krb5_free_error(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_kdc_rep(context, val)
     krb5_context context;
     krb5_kdc_rep FAR *val;
@@ -356,7 +356,7 @@ krb5_free_kdc_rep(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_kdc_req(context, val)
     krb5_context context;
     krb5_kdc_req FAR *val;
@@ -380,7 +380,7 @@ krb5_free_kdc_req(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_keyblock_contents(context, key)
      krb5_context context;
      register krb5_keyblock FAR *key;
@@ -392,7 +392,7 @@ krb5_free_keyblock_contents(context, key)
      }
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_keyblock(context, val)
     krb5_context context;
     register krb5_keyblock FAR *val;
@@ -403,7 +403,7 @@ krb5_free_keyblock(context, val)
 
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_last_req(context, val)
     krb5_context context;
     krb5_last_req_entry FAR * FAR *val;
@@ -415,7 +415,7 @@ krb5_free_last_req(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_pa_data(context, val)
     krb5_context context;
     krb5_pa_data FAR * FAR *val;
@@ -430,7 +430,7 @@ krb5_free_pa_data(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_principal(context, val)
     krb5_context context;
     krb5_principal val;
@@ -451,7 +451,7 @@ krb5_free_principal(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_priv(context, val)
     krb5_context context;
     register krb5_priv FAR *val;
@@ -461,7 +461,7 @@ krb5_free_priv(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_priv_enc_part(context, val)
     krb5_context context;
     register krb5_priv_enc_part FAR *val;
@@ -475,7 +475,7 @@ krb5_free_priv_enc_part(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_pwd_data(context, val)
     krb5_context context;
     krb5_pwd_data FAR *val;
@@ -486,7 +486,7 @@ krb5_free_pwd_data(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_pwd_sequences(context, val)
     krb5_context context;
     passwd_phrase_element FAR * FAR *val;
@@ -502,7 +502,7 @@ krb5_free_pwd_sequences(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_safe(context, val)
     krb5_context context;
     register krb5_safe FAR *val;
@@ -519,7 +519,7 @@ krb5_free_safe(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_ticket(context, val)
     krb5_context context;
     krb5_ticket FAR *val;
@@ -533,7 +533,7 @@ krb5_free_ticket(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_tickets(context, val)
     krb5_context context;
     krb5_ticket FAR * FAR *val;
@@ -546,7 +546,7 @@ krb5_free_tickets(context, val)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_tgt_creds(context, tgts)
     krb5_context context;
     krb5_creds FAR * FAR *tgts;
@@ -557,7 +557,7 @@ krb5_free_tgt_creds(context, tgts)
     krb5_xfree(tgts);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_tkt_authent(context, val)
     krb5_context context;
     krb5_tkt_authent FAR *val;
@@ -569,7 +569,7 @@ krb5_free_tkt_authent(context, val)
     krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_unparsed_name(context, val)
     krb5_context context;
     char FAR * val;
@@ -578,7 +578,7 @@ krb5_free_unparsed_name(context, val)
 	krb5_xfree(val);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge FAR *sc)
 {
     if (!sc)
@@ -587,7 +587,7 @@ krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge FAR *sc)
     krb5_xfree(sc);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge FAR *sc)
 {
     if (!sc)
@@ -610,7 +610,7 @@ krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge FAR *sc)
     }
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_sam_response(krb5_context ctx, krb5_sam_response FAR *sr)
 {
     if (!sr)
@@ -619,7 +619,7 @@ krb5_free_sam_response(krb5_context ctx, krb5_sam_response FAR *sr)
     krb5_xfree(sr);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_sam_response_contents(krb5_context ctx, krb5_sam_response FAR *sr)
 {
     if (!sr)
@@ -632,7 +632,7 @@ krb5_free_sam_response_contents(krb5_context ctx, krb5_sam_response FAR *sr)
 	krb5_free_data_contents(ctx, &sr->sam_enc_nonce_or_ts.ciphertext);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_predicted_sam_response(krb5_context ctx,
 				 krb5_predicted_sam_response FAR *psr)
 {
@@ -642,7 +642,7 @@ krb5_free_predicted_sam_response(krb5_context ctx,
     krb5_xfree(psr);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_predicted_sam_response_contents(krb5_context ctx,
 				 krb5_predicted_sam_response FAR *psr)
 {
@@ -658,7 +658,7 @@ krb5_free_predicted_sam_response_contents(krb5_context ctx,
 	krb5_free_data_contents(ctx, &psr->msd);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_enc_sam_response_enc(krb5_context ctx,
 			       krb5_enc_sam_response_enc FAR *esre)
 {
@@ -668,7 +668,7 @@ krb5_free_enc_sam_response_enc(krb5_context ctx,
     krb5_xfree(esre);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
 			       krb5_enc_sam_response_enc FAR *esre)
 {
@@ -678,7 +678,7 @@ krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
 	krb5_free_data_contents(ctx, &esre->sam_sad);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_pa_enc_ts(krb5_context ctx, krb5_pa_enc_ts FAR *pa_enc_ts)
 {
     if (!pa_enc_ts)

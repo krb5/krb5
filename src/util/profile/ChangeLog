@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c, prof_init.c, prof_set.c, profile.hin: Don't use
+	KRB5_DLLIMP.
+
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_tree.c (struct profile_iterator): Member "names" now points

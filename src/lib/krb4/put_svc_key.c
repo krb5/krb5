@@ -38,7 +38,7 @@
    The key (exact match) must already be in the file;
    version numbers are not checked.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 put_svc_key(sfile,name,inst,realm,newvno,key)
 	char FAR *sfile;
 	char FAR *name;

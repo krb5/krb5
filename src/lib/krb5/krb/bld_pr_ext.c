@@ -35,7 +35,7 @@
 #include <varargs.h>
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C
+krb5_error_code KRB5_CALLCONV_C
 #ifdef HAVE_STDARG_H
 krb5_build_principal_ext(krb5_context context,  krb5_principal FAR * princ, unsigned int rlen, krb5_const char FAR * realm, ...)
 #else

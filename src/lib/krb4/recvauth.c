@@ -120,7 +120,7 @@ extern int errno;
 #define	max(a,b) (((a) > (b)) ? (a) : (b))
 #endif /* max */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_recvauth(options, fd, ticket, service, instance, faddr, laddr, kdata,
 	     filename, schedule, version)
     long options;			 /* bit-pattern of options */

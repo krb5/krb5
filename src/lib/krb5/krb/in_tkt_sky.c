@@ -97,7 +97,7 @@ skey_keyproc(context, type, salt, keyseed, key)
  returns system errors, encryption errors
 
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt_with_skey(context, options, addrs, ktypes, pre_auth_types, 
 			  key, ccache, creds, ret_as_reply)
     krb5_context context;

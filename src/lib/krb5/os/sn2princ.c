@@ -35,7 +35,7 @@
 #include <sys/param.h>
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_context context;
     const char FAR * hostname;

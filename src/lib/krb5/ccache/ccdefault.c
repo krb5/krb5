@@ -33,7 +33,7 @@
 #include <KerberosLoginInternal.h>
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_cc_default(context, ccache)
    krb5_context context;
    krb5_ccache FAR *ccache;
@@ -62,7 +62,7 @@ krb5_cc_default(context, ccache)
    All krb5 and GSS functions which need to open a cache to get a tgt to obtain service tickets
    should call this function, not krb5_cc_default() */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(context, ccache)
 	krb5_context context;
 	krb5_ccache FAR *ccache;

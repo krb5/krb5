@@ -232,7 +232,7 @@ krb5_try_realm_txt_rr(prefix, name, realm)
 #endif /* KRB5_DNS_LOOKUP */
 
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
     const char FAR *host;

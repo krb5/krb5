@@ -53,7 +53,7 @@ cleanup:
    return(code);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_verify_init_creds(krb5_context context,
 		       krb5_creds *creds,
 		       krb5_principal server_arg,

@@ -78,7 +78,7 @@ des_init_random_number_generator(key)
  *        to be a weak des key.  Des_generate_random_block is used to
  *        provide the random bits.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_new_random_key(key)
     mit_des_cblock key;
 {

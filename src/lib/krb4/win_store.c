@@ -119,7 +119,7 @@ krb__get_realmsfile()
  * the [DEFAULTS] section of the "kerberos.ini" file located in the
  * Windows directory.
  */
-KRB5_DLLIMP char FAR * KRB5_CALLCONV
+char FAR * KRB5_CALLCONV
 krb_get_default_user()
 {
 	static char username[ANAME_SZ];
@@ -134,7 +134,7 @@ krb_get_default_user()
 /*
  * Sets the default user name stored in the "kerberos.ini" file.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_set_default_user(username)
 	char *username;
 {

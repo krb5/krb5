@@ -29,7 +29,7 @@
  * to avoid namespace pollution.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_save_credentials(service, instance, realm, session, lifetime, kvno,
                  ticket, issue_date)
     char FAR *service;		/* Service name */

@@ -54,7 +54,7 @@ typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
  */
 
 /* adm_conn.c */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_adm_connect
+krb5_error_code KRB5_CALLCONV krb5_adm_connect
 	(krb5_context,
 	 char *,
 	 const char *,
@@ -64,7 +64,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_adm_connect
 	 krb5_ccache *,
 	 char *,
 	 krb5_timestamp);
-KRB5_DLLIMP void KRB5_CALLCONV krb5_adm_disconnect
+void KRB5_CALLCONV krb5_adm_disconnect
 	(krb5_context,
 	 int *,
 	 krb5_auth_context,
@@ -105,12 +105,12 @@ krb5_error_code krb5_adm_ktent_to_proto
 	 krb5_data **);
 
 /* adm_rw.c */
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_adm_data
+void KRB5_CALLCONV krb5_free_adm_data
 	(krb5_context,
 	 krb5_int32,
 	 krb5_data *);
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_send_adm_cmd
+krb5_error_code KRB5_CALLCONV krb5_send_adm_cmd
 	(krb5_context,
 	 krb5_pointer,
 	 krb5_auth_context,
@@ -129,7 +129,7 @@ krb5_error_code krb5_read_adm_cmd
 	 krb5_auth_context,
 	 krb5_int32 *,
 	 krb5_data **);
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_read_adm_reply
+krb5_error_code KRB5_CALLCONV krb5_read_adm_reply
 	(krb5_context,
 	 krb5_pointer,
 	 krb5_auth_context,

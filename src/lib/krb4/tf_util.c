@@ -176,7 +176,7 @@ static int tf_gets PROTOTYPE((char *, int)), tf_read PROTOTYPE((char *, int));
  * TKT_FIL_LCK  - couldn't lock the file, even after a retry
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_init(tf_name, rw)
+int KRB5_CALLCONV tf_init(tf_name, rw)
     char   *tf_name;
     int rw;
 {
@@ -466,7 +466,7 @@ KRB5_DLLIMP int KRB5_CALLCONV tf_init(tf_name, rw)
  * was longer than ANAME_SZ, TKT_FIL_FMT is returned. 
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname(p)
+int KRB5_CALLCONV tf_get_pname(p)
     char   *p;
 {
     if (fd < 0) {
@@ -489,7 +489,7 @@ KRB5_DLLIMP int KRB5_CALLCONV tf_get_pname(p)
  * instance may be null. 
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst(inst)
+int KRB5_CALLCONV tf_get_pinst(inst)
     char   *inst;
 {
     if (fd < 0) {
@@ -513,7 +513,7 @@ KRB5_DLLIMP int KRB5_CALLCONV tf_get_pinst(inst)
  * EOF          - end of file encountered
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred(c)
+int KRB5_CALLCONV tf_get_cred(c)
     CREDENTIALS *c;
 {
     KTEXT   ticket = &c->ticket_st;	/* pointer to ticket */
@@ -580,7 +580,7 @@ KRB5_DLLIMP int KRB5_CALLCONV tf_get_cred(c)
  * The return value is not defined.
  */
 
-KRB5_DLLIMP void KRB5_CALLCONV tf_close()
+void KRB5_CALLCONV tf_close()
 {
     if (!(fd < 0)) {
 #ifdef TKT_SHMEM

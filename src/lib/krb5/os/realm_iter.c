@@ -30,7 +30,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_realm_iterator_create(context, iter_p)
     krb5_context context;
     void **iter_p;
@@ -43,7 +43,7 @@ krb5_realm_iterator_create(context, iter_p)
 				   iter_p);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_realm_iterator(context, iter_p, ret_realm)
     krb5_context context;
     void **iter_p;
@@ -52,7 +52,7 @@ krb5_realm_iterator(context, iter_p, ret_realm)
     return profile_iterator(iter_p, ret_realm, 0);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_realm_iterator_free(context, iter_p)
     krb5_context context;
     void **iter_p;
@@ -60,7 +60,7 @@ krb5_realm_iterator_free(context, iter_p)
     profile_iterator_free(iter_p);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_realm_string(context, str)
     krb5_context context;
     char *str;

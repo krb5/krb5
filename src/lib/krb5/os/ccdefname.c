@@ -230,7 +230,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 #endif
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(context, name)
 	krb5_context context;
 	const char *name;
@@ -276,7 +276,7 @@ krb5_cc_set_default_name(context, name)
 }
 
 	
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+const char FAR * KRB5_CALLCONV
 krb5_cc_default_name(context)
     krb5_context context;
 {

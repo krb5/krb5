@@ -92,28 +92,28 @@ fcc_nseq.c and fcc_read don't check return values a lot.
  #error find some way to use net-byte-order file version numbers.
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_close
+krb5_error_code KRB5_CALLCONV krb5_fcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_destroy 
+krb5_error_code KRB5_CALLCONV krb5_fcc_destroy 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new 
+krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id ));
 
-KRB5_DLLIMP const char * KRB5_CALLCONV krb5_fcc_get_name 
+const char * KRB5_CALLCONV krb5_fcc_get_name 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal 
+krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_initialize 
+krb5_error_code KRB5_CALLCONV krb5_fcc_initialize 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred 
+krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred 
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
@@ -147,20 +147,20 @@ krb5_error_code krb5_fcc_read_authdata
 krb5_error_code krb5_fcc_read_authdatum 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata *));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
+krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id , const char *residual ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
+krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get 
+krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_store 
+krb5_error_code KRB5_CALLCONV krb5_fcc_store 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
 
 krb5_error_code krb5_fcc_skip_header
@@ -168,10 +168,10 @@ krb5_error_code krb5_fcc_skip_header
 krb5_error_code krb5_fcc_skip_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags 
+krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_flags flags ));
 
-KRB5_DLLIMP extern krb5_cc_ops krb5_cc_file_ops;
+extern krb5_cc_ops krb5_cc_file_ops;
 krb5_error_code krb5_change_cache
    KRB5_PROTOTYPE((void));
 
@@ -2103,7 +2103,7 @@ krb5_change_cache (void) {
     return 0;
 }
 
-KRB5_DLLIMP unsigned int KRB5_CALLCONV
+unsigned int KRB5_CALLCONV
 krb5_get_notification_message (void) {
     static unsigned int message = 0;
 

@@ -29,7 +29,7 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5int_accessor(internals, version)
      krb5int_access* internals;
      krb5_int32 version;

@@ -46,7 +46,7 @@
  * The AUTH_MSG_APPL_ERR message format can be found in mk_err.c
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_rd_err(in, in_length, code, m_data)
     u_char FAR *in;                 /* pointer to the msg received */
     u_long in_length;           /* of in msg */

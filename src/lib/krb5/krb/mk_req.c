@@ -49,7 +49,7 @@
  returns system errors
 */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
 	      ccache, outbuf)
     krb5_context          context;

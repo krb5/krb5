@@ -322,7 +322,7 @@ read_pwd_proc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
     }
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     krb5_context context;
     const char *prompt;
@@ -366,7 +366,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 /*
  * Don't expect to be called, just define it for sanity and the linker.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     krb5_context context;
     const char *prompt;

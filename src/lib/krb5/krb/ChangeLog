@@ -1,3 +1,18 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* appdefault.c, auth_con.c, kld_pr_ext.c, bld_princ.c, chpw.c,
+	conv_princ.c, copy_addrs.c, copy_athctr.c, copy_auth.c,
+	copy_cksum.c, copy_creds.c, copy_data.c, copy_key.c, copy_princ.c,
+	copy_tick.c, cp_key_cnt.c, decrypt_tk.c, deltat.c, fwd_tgt.c,
+	get_creds.c, get_in_tkt.c, gic_keytab.c, gic_opt.c, gic_pwd.c,
+	in_tkt_ktb.c, in_tkt_pwd.c, in_tkt_sky.c, init_ctx.c, kfree.c,
+	mk_cred.c, mk_error.c, mk_priv.c, mk_rep.c, mk_req.c,
+	mk_req_ext.c, mk_safe.c, parse.c, princ_comp.c, rd_cred.c,
+	rd_error.c, rd_priv.c, rd_rep.c, rd_req.c, rd_safe.c, recvauth.c,
+	sendauth.c, ser_actx.c, ser_ctx.c, serialize.c, set_realm.c,
+	srv_rcache.c, str_conv.c, unparse.c, vfy_increds.c, vic_opt.c,
+	x-deltat.y: Don't use KRB5_DLLIMP.
+
 2001-09-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_expand.c: New file.

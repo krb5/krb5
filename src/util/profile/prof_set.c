@@ -51,7 +51,7 @@ static errcode_t rw_setup(profile)
  * 
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_update_relation(profile, names, old_value, new_value)
 	profile_t	profile;
 	const char	**names;
@@ -104,7 +104,7 @@ profile_update_relation(profile, names, old_value, new_value)
  * 
  * TYT - 2/25/99
  */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_clear_relation(profile, names)
 	profile_t	profile;
 	const char	**names;
@@ -151,7 +151,7 @@ profile_clear_relation(profile, names)
  * 
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_rename_section(profile, names, new_name)
 	profile_t	profile;
 	const char	**names;
@@ -204,7 +204,7 @@ profile_rename_section(profile, names, new_name)
  *
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_add_relation(profile, names, new_value)
 	profile_t	profile;
 	const char  	**names;

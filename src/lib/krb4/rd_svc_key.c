@@ -210,7 +210,7 @@ errout:
 #endif
 
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 read_service_key(service,instance,realm,kvno,file,key)
     char FAR *service;		/* Service Name */
     char FAR *instance;		/* Instance name or "*" */
@@ -261,7 +261,7 @@ errout:
 /* kvno is passed by reference, so that if it is zero, and we find a match,
    the match gets written back into *kvno so the caller can find it.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 get_service_key(service,instance,realm,kvno,file,key)
     char FAR *service;              /* Service Name */
     char FAR *instance;             /* Instance name or "*" */

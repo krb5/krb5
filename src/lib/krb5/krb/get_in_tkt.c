@@ -406,7 +406,7 @@ make_preauth_list(context, ptypes, nptypes, ret_list)
 
 #define MAX_IN_TKT_LOOPS 16
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;
@@ -717,7 +717,7 @@ krb5_libdefault_boolean(context, realm, option, ret_value)
     return(0);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 		    start_time, in_tkt_service, options, gak_fct, gak_data,
 		    use_master, as_reply)

@@ -127,7 +127,7 @@ static char *strnchr(s, c, n)
 /* XXX This calls for a new error code */
 #define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_524_conv_principal(context, princ, name, inst, realm)
     krb5_context context;
     const krb5_principal princ;
@@ -229,7 +229,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
      return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(context, name, instance, realm, princ)
    krb5_context context;
    const char	FAR *name;

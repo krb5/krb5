@@ -4,7 +4,7 @@
 #include "krb5_err.h"
 #include "auth_con.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
      krb5_context context;
      krb5_auth_context auth_context;
@@ -71,7 +71,7 @@ cleanup:
     return(ret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_rd_chpw_rep(context, auth_context, packet, result_code, result_data)
      krb5_context context;
      krb5_auth_context auth_context;
@@ -208,7 +208,7 @@ cleanup:
     return(ret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_chpw_result_code_string(context, result_code, code_string)
      krb5_context context;
      int result_code;

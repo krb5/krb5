@@ -1,13 +1,13 @@
 #include "k5-int.h"
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_verify_init_creds_opt_init(opt)
      krb5_verify_init_creds_opt *opt;
 {
    opt->flags = 0;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_verify_init_creds_opt_set_ap_req_nofail(opt, ap_req_nofail)
      krb5_verify_init_creds_opt *opt;
      int ap_req_nofail;

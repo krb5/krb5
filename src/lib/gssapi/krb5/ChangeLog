@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* copy_ccache.c, get_tkt_flags.c, gssapi_krb5.h, krb5_gss_glue.c,
+	set_ccache.c: Don't use GSS_DLLIMP.
+
 2001-10-01  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (rd_and_store_for_creds): Handle error

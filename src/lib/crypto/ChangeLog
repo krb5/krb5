@@ -1,3 +1,13 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* block_size.c, checksum_length.c, cksumtype_to_string.c,
+	coll_proof_cksum.c, decrypt.c, encrypt.c, encrypt_length.c,
+	enctype_compare.c, enctype_to_string.c, keyed_checksum_types.c,
+	keyed_cksum.c, make_checksum.c, make_random_key.c, old_api_glue.c,
+	prng.c, string_to_cksumtype.c, string_to_enctype.c,
+	string_to_key.c, valid_cksumtype.c, valid_enctype.c,
+	verify_checksum.c: Don't use KRB5_DLLIMP.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): Use $(srcdir) not $(subdir).

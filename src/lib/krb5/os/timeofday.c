@@ -36,7 +36,7 @@
 extern int errno;
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_timeofday(context, timeret)
     krb5_context context;
     register krb5_int32 FAR *timeret;

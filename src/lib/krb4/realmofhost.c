@@ -43,7 +43,7 @@ extern char *malloc();
 
 static char ret_realm[REALM_SZ+1];
 
-KRB5_DLLIMP char FAR * KRB5_CALLCONV
+char FAR * KRB5_CALLCONV
 krb_realmofhost(host)
     char FAR *host;
 {

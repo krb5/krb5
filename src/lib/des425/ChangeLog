@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c, key_sched.c, new_rnd_key.c, des_pcbc_encrypt.c,
+	quad_cksum.c, str_to_key.c: Don't use KRB5_DLLIMP.
+
 2001-07-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* read_passwd.c: Create local variable that takes the "int"

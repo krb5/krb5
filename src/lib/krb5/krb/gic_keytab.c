@@ -49,7 +49,7 @@ krb5_get_as_key_keytab(context, client, etype, prompter, prompter_data,
     return(ret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
 			   start_time, in_tkt_service, options)
      krb5_context context;

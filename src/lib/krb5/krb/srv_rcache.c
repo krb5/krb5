@@ -31,7 +31,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_server_rcache(context, piece, rcptr)
     krb5_context context;
     const krb5_data *piece;

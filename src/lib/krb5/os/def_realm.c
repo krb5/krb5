@@ -68,7 +68,7 @@
  * the default local realm name.
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_default_realm(context, lrealm)
     krb5_context context;
     char FAR * FAR *lrealm;
@@ -179,7 +179,7 @@ krb5_get_default_realm(context, lrealm)
     return(0);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_set_default_realm(context, lrealm)
     krb5_context context;
     const char *lrealm;
@@ -206,7 +206,7 @@ krb5_set_default_realm(context, lrealm)
 
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_default_realm(context, lrealm)
 	krb5_context context;
 	char FAR* lrealm;

@@ -45,7 +45,7 @@ static struct krb5_cc_typelist *cc_typehead = &cc_entry;
  * If override is set, replace any existing ccache with that type tag
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_cc_register(context, ops, override)
    krb5_context context;
    krb5_cc_ops FAR *ops;
@@ -79,7 +79,7 @@ krb5_cc_register(context, ops, override)
  * particular cache type.
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve (context, name, cache)
    krb5_context context;
    const char *name;

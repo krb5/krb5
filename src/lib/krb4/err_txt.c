@@ -283,7 +283,7 @@ const
 };
 
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+const char FAR * KRB5_CALLCONV
 krb_get_err_text (code)
     int code;
 {

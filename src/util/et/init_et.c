@@ -58,7 +58,7 @@ int init_error_table(msgs, base, count)
     return 0;
 }
 
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_init(ectx)
+extern errcode_t KRB5_CALLCONV et_init(ectx)
 	et_ctx FAR *ectx;
 {
 	struct et_context FAR *ctx;
@@ -74,7 +74,7 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_init(ectx)
 	return 0;
 }
 
-KRB5_DLLIMP extern void KRB5_CALLCONV et_shutdown(ectx)
+extern void KRB5_CALLCONV et_shutdown(ectx)
 	et_ctx ectx;	
 {
 	struct et_list FAR *p, FAR *n;
@@ -88,7 +88,7 @@ KRB5_DLLIMP extern void KRB5_CALLCONV et_shutdown(ectx)
 	free(ectx);
 }
 
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
+extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
 	et_ctx ectx;
 	struct error_table FAR *tbl;
 {

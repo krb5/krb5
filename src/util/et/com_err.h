@@ -19,12 +19,10 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_DLLIMP
-/* We don't use these, but since we're using the Kerberos ones, we
-   need to either provide all the ones the Kerberos and GSSAPI headers
+/* We don't use this, but since we're using the Kerberos ones, we
+   need to either provide all the ones the Kerberos headers
    will use, or not define KRB5_CALLCONV, since that's the only one
    they test.  */
-#define GSS_DLLIMP
 #define KRB5_EXPORTVAR
 #endif
 
@@ -50,18 +48,18 @@ extern "C" {
 #endif
 
 /* Public interfaces */
-KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
+extern void KRB5_CALLCONV_C com_err
 	(const char FAR *, errcode_t, const char FAR *, ...);
-KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
+extern void KRB5_CALLCONV com_err_va
 	(const char FAR *whoami, errcode_t code, const char FAR *fmt,
 	 va_list ap);
-KRB5_DLLIMP extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV error_message
+extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV error_message
 	(errcode_t)
        /*@modifies internalState@*/;
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
+extern errcode_t KRB5_CALLCONV add_error_table
 	(/*@dependent@*/ const struct error_table FAR *)
        /*@modifies internalState@*/;
-KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
+extern errcode_t KRB5_CALLCONV remove_error_table
 	(const struct error_table FAR *)
        /*@modifies internalState@*/;
 

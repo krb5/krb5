@@ -97,7 +97,7 @@ static const KRB4_32 lifetimes[NLIFETIMES] = {
  * Given a start date and a lifetime byte, compute the expiration
  * date.
  */
-KRB5_DLLIMP KRB4_32 KRB5_CALLCONV
+KRB4_32 KRB5_CALLCONV
 krb_life_to_time(KRB4_32 start, int life)
 {
     if (life < 0 || life > 255)	/* possibly sign botch in caller */
@@ -120,7 +120,7 @@ krb_life_to_time(KRB4_32 start, int life)
  * Round up, since we can adjust the start date backwards if we are
  * issuing the ticket to cause it to expire at the correct time.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_time_to_life(KRB4_32 start, KRB4_32 end)
 {
     KRB4_32 dt;

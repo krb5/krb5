@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* g_acquire_cred.c, g_oid_ops.c: Don't use GSS_DLLIMP.
+
 2001-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unixmac): Target deleted.

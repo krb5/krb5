@@ -35,7 +35,6 @@
 #define KRB5_CALLCONV __far __export __pascal
 #define KRB5_CALLCONV_C __far __export __cdecl
 #define KRB5_EXPORTVAR __far __export
-#define KRB5_DLLIMP
 #endif /* !KRB5_CALLCONV */
 
 #include <windows.h>
@@ -68,21 +67,6 @@
 #define HAVE_LABS
 
 #ifndef KRB5_CALLCONV
-#  ifdef _MSC_VER
-#    ifdef KRB5_DLL_FILE
-#      define KRB5_DLLIMP __declspec(dllexport)
-#    else
-#      define KRB5_DLLIMP __declspec(dllimport)
-#    endif
-#    ifdef GSS_DLL_FILE
-#      define GSS_DLLIMP __declspec(dllexport)
-#    else
-#      define GSS_DLLIMP __declspec(dllimport)
-#    endif
-#  else /* !_MSC_VER */
-#    define KRB5_DLLIMP
-#    define GSS_DLLIMP
-#  endif
 #  define KRB5_CALLCONV __stdcall
 #  define KRB5_CALLCONV_C __cdecl
 #  define KRB5_EXPORTVAR
@@ -228,8 +212,6 @@ HINSTANCE get_lib_instance(void);
 
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_DLLIMP
-#define GSS_DLLIMP
 #ifndef FAR
 #define FAR
 #endif
@@ -302,7 +284,6 @@ int fstat(int fildes, struct stat *buf);
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_DLLIMP
 #endif
 #ifndef FAR
 #define FAR

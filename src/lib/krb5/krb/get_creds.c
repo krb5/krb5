@@ -100,7 +100,7 @@ krb5_get_credentials_core(context, options, in_creds, mcreds, fields)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
@@ -222,7 +222,7 @@ krb5_get_credentials_val_renew_core(context, options, ccache,
     return retval;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
@@ -235,7 +235,7 @@ krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
 					       INT_GC_VALIDATE));
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_renew(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;
@@ -327,7 +327,7 @@ cleanup:
     return(ret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds(context, creds, client, ccache, in_tkt_service)
      krb5_context context;
      krb5_creds *creds;
@@ -339,7 +339,7 @@ krb5_get_validated_creds(context, creds, client, ccache, in_tkt_service)
 					in_tkt_service, 1));
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_renewed_creds(context, creds, client, ccache, in_tkt_service)
      krb5_context context;
      krb5_creds *creds;

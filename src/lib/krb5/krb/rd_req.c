@@ -45,7 +45,7 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_rd_req(context, auth_context, inbuf, server, keytab, 
 	    ap_req_options, ticket)
     krb5_context 	  context;

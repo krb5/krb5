@@ -84,7 +84,7 @@ static int lifetime = 255;		/* Default based on the TGT */
  *                  all rounded up to multiple of 8.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_mk_req(authent, service, instance, realm, checksum)
     register	KTEXT authent;	/* Place to build the authenticator */
     char	FAR *service;	/* Name of the service */

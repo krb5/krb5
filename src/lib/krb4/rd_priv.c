@@ -79,7 +79,7 @@ int private_msg_ver = KRB_PROT_VERSION;
  * information, MSG_DAT, is defined in "krb.h".
  */
 
-KRB5_DLLIMP long KRB5_CALLCONV
+long KRB5_CALLCONV
 krb_rd_priv(in, in_length, schedule, key, sender, receiver, m_data)
     u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length; /* length of "in" msg */

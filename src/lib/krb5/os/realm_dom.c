@@ -45,7 +45,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_realm_domain(context, realm, domain)
     krb5_context context;
     const char *realm;

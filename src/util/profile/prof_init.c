@@ -23,7 +23,7 @@ typedef	int	prof_int32;
 error(do not have a 4-byte integer type)
 #endif	/* SIZEOF_LONG == 4 */
 
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_init(files, ret_profile)
 	const_profile_filespec_t *files;
 	profile_t *ret_profile;
@@ -77,7 +77,7 @@ profile_init(files, ret_profile)
 /* 
  * On MacOS, profile_init_path is the same as profile_init
  */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_init_path(filepath, ret_profile)
 	const_profile_filespec_list_t filepath;
 	profile_t *ret_profile;
@@ -129,7 +129,7 @@ profile_init_path(filepath, ret_profile)
 	return retval;
 }
 #else
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_init_path(filelist, ret_profile)
 	profile_filespec_list_t filelist;
 	profile_t *ret_profile;
@@ -138,7 +138,7 @@ profile_init_path(filelist, ret_profile)
 }
 #endif
 
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 profile_flush(profile)
 	profile_t	profile;
 {
@@ -151,7 +151,7 @@ profile_flush(profile)
 	return 0;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 profile_abandon(profile)
 	profile_t	profile;
 {
@@ -168,7 +168,7 @@ profile_abandon(profile)
 	free(profile);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 profile_release(profile)
 	profile_t	profile;
 {

@@ -13,7 +13,7 @@
 /* Time handling.  Translate Unix time calls into Kerberos cnternal 
    procedure calls.  See ../../include/cc-unix.h.  */
 
-KRB5_DLLIMP unsigned KRB4_32 KRB5_CALLCONV
+unsigned KRB4_32 KRB5_CALLCONV
 unix_time_gmt_unixsec (usecptr)
 	unsigned KRB4_32	*usecptr;
 {

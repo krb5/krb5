@@ -1,3 +1,10 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c, ccdefname.c, changepw.c, def_realm.c, free_hstrl.c,
+	genaddrs.c, hst_realm.c, init_os_ctx.c, ktdefname.c, localaddr.c,
+	prompter.c, realm_dom.c, realm_iter.c, sn2princ.c, timeofday.c,
+	ustime.c: Don't use KRB5_DLLIMP.
+
 2001-09-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (add_host_to_list): If address family in sockaddr

@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin, gssapi_generic.c, gssapi_generic.h: Don't use
+	GSS_DLLIMP.
+
 2001-06-25  Tom Yu  <tlyu@mit.edu>
 
 	* gssapi.hin, gssapi_generic.h, gssapi_generic.c:

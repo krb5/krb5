@@ -38,7 +38,7 @@
 
 */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_context context;
     const krb5_keyblock FAR *srv_key;

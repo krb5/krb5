@@ -75,7 +75,7 @@ extern void krb5_win_ccdll_load(krb5_context context);
 
 static krb5_error_code init_common (krb5_context *, krb5_boolean);
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_init_context(context)
 	krb5_context *context;
 {
@@ -83,7 +83,7 @@ krb5_init_context(context)
 	return init_common (context, FALSE);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(context)
 	krb5_context *context;
 {
@@ -227,7 +227,7 @@ cleanup:
 	return retval;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {

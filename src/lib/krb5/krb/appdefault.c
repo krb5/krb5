@@ -141,7 +141,7 @@ goodbye:
 	return 0;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV 
+void KRB5_CALLCONV 
 krb5_appdefault_boolean(context, appname, realm, option,
 			default_value, ret_value)
         krb5_context context;
@@ -162,7 +162,7 @@ krb5_appdefault_boolean(context, appname, realm, option,
 		*ret_value = default_value;
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV 
+void KRB5_CALLCONV 
 krb5_appdefault_string(context, appname, realm, option, default_value,
 		       ret_value)
      krb5_context context;

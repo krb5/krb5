@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "etypes.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt(context, key, usage, ivec, input, output)
      krb5_context context;
      const krb5_keyblock *key;

@@ -159,8 +159,6 @@ typedef unsigned char	u_char;
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_DLLIMP
-#define GSS_DLLIMP
 #define KRB5_EXPORTVAR
 #define FAR
 #define NEAR
@@ -898,7 +896,7 @@ typedef krb5_error_code (*krb5_gic_get_as_key_fct)
 		     krb5_keyblock *as_key,
 		     void *gak_data);
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds
 (krb5_context context,
 		krb5_creds *creds,
@@ -922,24 +920,24 @@ krb5_error_code krb5_do_preauth
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);
 
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_challenge
+void KRB5_CALLCONV krb5_free_sam_challenge
 	(krb5_context, krb5_sam_challenge FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_response
+void KRB5_CALLCONV krb5_free_sam_response
 	(krb5_context, krb5_sam_response FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_predicted_sam_response
+void KRB5_CALLCONV krb5_free_predicted_sam_response
 	(krb5_context, krb5_predicted_sam_response FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_sam_response_enc
+void KRB5_CALLCONV krb5_free_enc_sam_response_enc
 	(krb5_context, krb5_enc_sam_response_enc FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_challenge_contents
+void KRB5_CALLCONV krb5_free_sam_challenge_contents
 	(krb5_context, krb5_sam_challenge FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_response_contents
+void KRB5_CALLCONV krb5_free_sam_response_contents
 	(krb5_context, krb5_sam_response FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_predicted_sam_response_contents
+void KRB5_CALLCONV krb5_free_predicted_sam_response_contents
 	(krb5_context, krb5_predicted_sam_response FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
+void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
 	(krb5_context, krb5_enc_sam_response_enc FAR * );
  
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_enc_ts
+void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts FAR *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
@@ -1006,11 +1004,11 @@ typedef struct _krb5_priv_enc_part {
     krb5_address FAR *r_address;	/* recipient address, optional */
 } krb5_priv_enc_part;
 
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_safe
+void KRB5_CALLCONV krb5_free_safe
 	(krb5_context, krb5_safe FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_priv
+void KRB5_CALLCONV krb5_free_priv
 	(krb5_context, krb5_priv FAR * );
-KRB5_DLLIMP void KRB5_CALLCONV krb5_free_priv_enc_part
+void KRB5_CALLCONV krb5_free_priv_enc_part
 	(krb5_context, krb5_priv_enc_part FAR * );
 
 /*
@@ -1414,14 +1412,14 @@ krb5_error_code krb5_register_serializer
 			const krb5_ser_entry *);
 
 /* Determine the external size of a particular opaque structure */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_size_opaque
+krb5_error_code KRB5_CALLCONV krb5_size_opaque
 	(krb5_context,
 		krb5_magic,
 		krb5_pointer,
 		size_t FAR *);
 
 /* Serialize the structure into a buffer */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_externalize_opaque
+krb5_error_code KRB5_CALLCONV krb5_externalize_opaque
 	(krb5_context,
 		krb5_magic,
 		krb5_pointer,
@@ -1429,7 +1427,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_externalize_opaque
 		size_t FAR *);
 
 /* Deserialize the structure from a buffer */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_internalize_opaque
+krb5_error_code KRB5_CALLCONV krb5_internalize_opaque
 	(krb5_context,
 		krb5_magic,
 		krb5_pointer FAR *,
@@ -1447,47 +1445,47 @@ krb5_error_code krb5_externalize_data
  */
 
 /* Initialize serialization for krb5_[os_]context */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_context_init
+krb5_error_code KRB5_CALLCONV krb5_ser_context_init
 	(krb5_context);
 
 /* Initialize serialization for krb5_auth_context */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_auth_context_init
+krb5_error_code KRB5_CALLCONV krb5_ser_auth_context_init
 	(krb5_context);
 
 /* Initialize serialization for krb5_keytab */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_keytab_init
+krb5_error_code KRB5_CALLCONV krb5_ser_keytab_init
 	(krb5_context);
 
 /* Initialize serialization for krb5_ccache */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_ccache_init
+krb5_error_code KRB5_CALLCONV krb5_ser_ccache_init
 	(krb5_context);
 
 /* Initialize serialization for krb5_rcache */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_rcache_init
+krb5_error_code KRB5_CALLCONV krb5_ser_rcache_init
 	(krb5_context);
 
 /* [De]serialize 4-byte integer */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_pack_int32
+krb5_error_code KRB5_CALLCONV krb5_ser_pack_int32
 	(krb5_int32,
 		krb5_octet FAR * FAR *,
 		size_t FAR *);
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
+krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
 	(krb5_int32 *,
 		krb5_octet FAR * FAR *,
 		size_t FAR *);
 /* [De]serialize byte string */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
+krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
 	(krb5_octet FAR *,
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *);
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
+krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 	(krb5_octet FAR *,
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *);
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5int_cc_default
+krb5_error_code KRB5_CALLCONV krb5int_cc_default
 	(krb5_context, krb5_ccache FAR *);
 
 krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
@@ -1535,7 +1533,7 @@ typedef struct _krb5int_access {
     (((krb5_int32)((sizeof(krb5int_access) & 0xFFFF) | \
 		   (KRB5INT_ACCESS_STRUCT_VERSION << 16))) & 0xFFFFFFFF)
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5int_accessor
+krb5_error_code KRB5_CALLCONV krb5int_accessor
 	(krb5int_access*, krb5_int32);
 
 /* temporary -- this should be under lib/krb5/ccache somewhere */

@@ -48,7 +48,7 @@
  * to the original "alias" argument is returned.
  */
 
-KRB5_DLLIMP char FAR * KRB5_CALLCONV
+char FAR * KRB5_CALLCONV
 krb_get_phost(alias)
     char FAR *alias;
 {

@@ -95,7 +95,7 @@ parmtable kparm[] = {
 #define KPARMS kparm,PARMCOUNT(kparm)
 #endif
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 kuserok(kdata, luser)
     AUTH_DAT	FAR *kdata;
     char	FAR *luser;

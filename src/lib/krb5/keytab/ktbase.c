@@ -52,7 +52,7 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
  * don't replace if it already exists; return an error instead.
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_kt_register(context, ops)
     krb5_context context;
     krb5_kt_ops FAR *ops;
@@ -81,7 +81,7 @@ krb5_kt_register(context, ops)
  * particular keytab type.
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve (context, name, ktid)
     krb5_context context;
     krb5_const char FAR *name;
@@ -198,7 +198,7 @@ krb5_keytab_internalize(kcontext, argp, buffer, lenremain)
     return(kret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_keytab_init(kcontext)
     krb5_context	kcontext;
 {

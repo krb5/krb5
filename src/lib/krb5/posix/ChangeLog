@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* sscanf.c: Don't use KRB5_DLLIMP.
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* setenv.c: Include pos-obsolete.h

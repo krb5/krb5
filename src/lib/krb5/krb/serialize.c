@@ -95,7 +95,7 @@ krb5_register_serializer(kcontext, entry)
  * krb5_size_opaque()	- Determine the size necessary to serialize a given
  *			  piece of opaque data.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_size_opaque(kcontext, odtype, arg, sizep)
     krb5_context	kcontext;
     krb5_magic		odtype;
@@ -115,7 +115,7 @@ krb5_size_opaque(kcontext, odtype, arg, sizep)
 /*
  * krb5_externalize_opaque()	- Externalize a piece of opaque data.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_externalize_opaque(kcontext, odtype, arg, bufpp, sizep)
     krb5_context	kcontext;
     krb5_magic		odtype;
@@ -176,7 +176,7 @@ krb5_externalize_data(kcontext, arg, bufpp, sizep)
  * krb5_internalize_opaque()	- Convert external representation into a data
  *				  structure.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_internalize_opaque(kcontext, odtype, argp, bufpp, sizep)
     krb5_context	kcontext;
     krb5_magic		odtype;
@@ -199,7 +199,7 @@ krb5_internalize_opaque(kcontext, odtype, argp, bufpp, sizep)
  * krb5_ser_pack_int32()	- Pack a 4-byte integer if space is availble.
  *				  Update buffer pointer and remaining space.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_int32(iarg, bufp, remainp)
     krb5_int32		iarg;
     krb5_octet		FAR * FAR *bufp;
@@ -221,7 +221,7 @@ krb5_ser_pack_int32(iarg, bufp, remainp)
 /*
  * krb5_ser_pack_bytes()	- Pack a string of bytes.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_bytes(ostring, osize, bufp, remainp)
     krb5_octet	FAR *ostring;
     size_t	osize;
@@ -241,7 +241,7 @@ krb5_ser_pack_bytes(ostring, osize, bufp, remainp)
 /*
  * krb5_ser_unpack_int32()	- Unpack a 4-byte integer if it's there.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_unpack_int32(intp, bufp, remainp)
     krb5_int32	FAR *intp;
     krb5_octet	FAR * FAR *bufp;
@@ -263,7 +263,7 @@ krb5_ser_unpack_int32(intp, bufp, remainp)
 /*
  * krb5_ser_unpack_bytes()	- Unpack a byte string if it's there.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_unpack_bytes(istring, isize, bufp, remainp)
     krb5_octet	FAR *istring;
     size_t	isize;

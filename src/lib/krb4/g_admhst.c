@@ -35,7 +35,7 @@
  * provided by a nameserver.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_get_admhst(h, r, n)
     char FAR *h;
     char FAR *r;

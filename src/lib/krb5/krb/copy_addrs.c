@@ -29,7 +29,7 @@
 
 #include "k5-int.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_copy_addr(context, inad, outad)
     krb5_context context;
     const krb5_address FAR *inad;
@@ -56,7 +56,7 @@ krb5_copy_addr(context, inad, outad)
 /*
  * Copy an address array, with fresh allocation.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_copy_addresses(context, inaddr, outaddr)
     krb5_context context;
     krb5_address FAR * const FAR * inaddr;

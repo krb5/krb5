@@ -106,7 +106,7 @@ static u_char *__sccl(char *tab, u_char *fmt);
 /*
  * sscanf
  */
-KRB5_DLLIMP int KRB5_CALLCONV_C
+int KRB5_CALLCONV_C
 sscanf(char *str, char const *fmt0, ...)
 {
 	va_list ap;

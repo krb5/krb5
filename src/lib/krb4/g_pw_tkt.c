@@ -41,7 +41,7 @@
  * the password-changing server will be in the user's ticket file.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 get_pw_tkt(user,instance,realm,cpw)
     char *user;
     char *instance;

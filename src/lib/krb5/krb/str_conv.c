@@ -77,7 +77,7 @@ static const struct salttype_lookup_entry salttype_table[] = {
 static const int salttype_table_nents = sizeof(salttype_table)/
 					sizeof(salttype_table[0]);
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_string_to_salttype(string, salttypep)
     char	FAR * string;
     krb5_int32	FAR * salttypep;
@@ -102,7 +102,7 @@ krb5_string_to_salttype(string, salttypep)
  * These routines return 0 for success, EINVAL for invalid parameter, ENOMEM
  * if the supplied buffer/length will not contain the output.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_salttype_to_string(salttype, buffer, buflen)
     krb5_int32	salttype;
     char	FAR * buffer;
@@ -148,7 +148,7 @@ extern char *strptime (const char *, const char *,
 static char *strptime (const char *, const char *, struct tm *);
 #endif
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_string_to_timestamp(string, timestampp)
     char		FAR * string;
     krb5_timestamp	FAR * timestampp;
@@ -201,7 +201,7 @@ krb5_string_to_timestamp(string, timestampp)
     return(EINVAL);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(timestamp, buffer, buflen)
     krb5_timestamp	timestamp;
     char		FAR * buffer;
@@ -218,7 +218,7 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
     return(0);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     krb5_timestamp	timestamp;
     char		FAR * buffer;
@@ -266,7 +266,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
 
 /* string->deltat is in deltat.y */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_deltat_to_string(deltat, buffer, buflen)
     krb5_deltat	deltat;
     char	FAR * buffer;

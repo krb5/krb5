@@ -179,7 +179,7 @@ krb_net_rd_sendauth (fd, reply, raw_len)
  * end-user application server, sucks a response out of the socket, 
  * and decodes it to verify mutual authentication.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_sendauth(options, fd, ticket, service, inst, realm, checksum,
 	     msg_data, cred, schedule, laddr, faddr, version)
      long options;		/* bit-pattern of options */

@@ -36,7 +36,7 @@ extern char *krb5_defkeyname;
 /* this is a an exceedinly gross thing. */
 char *krb5_overridekeyname = NULL;
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
     char FAR *name;

@@ -33,7 +33,7 @@
  * Copy credentials, allocating fresh storage where needed.
  */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_copy_creds(context, incred, outcred)
     krb5_context context;
     const krb5_creds *incred;

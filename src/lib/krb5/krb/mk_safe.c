@@ -114,7 +114,7 @@ cleanup_checksum:
     return retval;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
     krb5_context 	  context;
     krb5_auth_context 	  auth_context;

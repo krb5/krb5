@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.c, com_err.h, error_message.c, init_et.c: Don't use
+	KRB5_DLLIMP.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* error_message.c (error_message): Conditional label on _sgi so

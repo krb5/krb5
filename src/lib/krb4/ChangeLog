@@ -1,3 +1,14 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* dest_tkt.c, err_tkt.c, g_admhst.c, g_cred.c, g_krbhst.c,
+	g_krbrlm.c, g_phost.c, g_pw_in_tkt.c, g_pw_tkt.c, g_svc_in_tkt.c,
+	g_tf_fname.c, g_tf_realm.c, g_tkt_svc.c, in_tkt.c, kname_parse.c,
+	kuserok.c, lifetime.c, memcache.c, mk_auth.c, mk_err.c, mk_priv.c,
+	mk_req.c, mk_safe.c, put_svc_key.c, rd_err.c, rd_priv.c, rd_req.c,
+	rd_safe.c, rd_svc_key.c, realmofhost.c, recvauth.c, save_creds.c,
+	sendauth.c, tf_util.c, unix_time.c, win_store.c: Don't use
+	KRB5_DLLIMP.
+
 2001-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Renamed from DEFINES.  Add

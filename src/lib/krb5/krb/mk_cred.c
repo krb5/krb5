@@ -157,7 +157,7 @@ cleanup:
  * This functions takes as input an array of krb5_credentials, and
  * outputs an encoded KRB_CRED message suitable for krb5_rd_cred
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     krb5_context 	  context;
@@ -305,7 +305,7 @@ error:
 /*
  * A convenience function that calls krb5_mk_ncred.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     krb5_context 	  context;
     krb5_auth_context	  auth_context;

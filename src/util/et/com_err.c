@@ -98,7 +98,7 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 #endif
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
+void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
 	const char FAR *whoami;
 	errcode_t code;
 	const char FAR *fmt;
@@ -111,7 +111,7 @@ KRB5_DLLIMP void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
 }
 
 
-KRB5_DLLIMP void KRB5_CALLCONV_C com_err(const char FAR *whoami,
+void KRB5_CALLCONV_C com_err(const char FAR *whoami,
 					 errcode_t code,
 					 const char FAR *fmt, ...)
 {

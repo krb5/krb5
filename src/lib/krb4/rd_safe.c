@@ -62,7 +62,7 @@ extern int krb_debug;
  * information, MSG_DAT, is defined in "krb.h".
  */
 
-KRB5_DLLIMP long KRB5_CALLCONV
+long KRB5_CALLCONV
 krb_rd_safe(in,in_length,key,sender,receiver,m_data)
     u_char FAR *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length;		/* length of "in" msg */

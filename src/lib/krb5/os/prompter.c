@@ -22,7 +22,7 @@ intr_routine(signo)
     /*NOTREACHED*/
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
 		    void *data,
 		    const char *name,
@@ -137,7 +137,7 @@ cleanup:
 
 #include <io.h>
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
 		    void *data,
 		    const char *name,
@@ -229,7 +229,7 @@ krb5_prompter_posix(krb5_context context,
 
 #else /* !_WIN32 */
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
 		    void *data,
 		    const char *name,
@@ -250,7 +250,6 @@ krb5int_set_prompt_types(context, types)
     context->prompt_types = types;
 }
 
-KRB5_DLLIMP
 krb5_prompt_type*
 KRB5_CALLCONV
 krb5_get_prompt_types(context)

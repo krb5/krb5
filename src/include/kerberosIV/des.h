@@ -49,8 +49,6 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_DLLIMP
-#define GSS_DLLIMP
 #define KRB5_EXPORTVAR
 #endif
 #ifndef FAR
@@ -131,23 +129,23 @@ typedef struct des_ks_struct bit_64;
  * Function Prototypes
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
+int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_pcbc_encrypt (C_Block FAR *in, C_Block FAR *out, long length,
 		  const des_key_schedule schedule, C_Block FAR *ivec,
 		  int enc);
 
-KRB5_DLLIMP unsigned long KRB5_CALLCONV
+unsigned long KRB5_CALLCONV
 des_quad_cksum (const unsigned char FAR *in, unsigned KRB4_32 FAR *out,
 		long length, int out_count, C_Block FAR *seed);
 
-KRB5_DLLIMP int KRB5_CALLCONV des_string_to_key (const char FAR *, C_Block);
+int KRB5_CALLCONV des_string_to_key (const char FAR *, C_Block);
 
 /* new */
 #ifdef KRB5_GENERAL__
 /* Why are we using krb5 types as part of this API?  */
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 des_cbc_cksum(const krb5_octet *, krb5_octet *, unsigned long,
 	      const des_key_schedule, const krb5_octet *);
 int des_cbc_encrypt(krb5_octet *, krb5_octet *, unsigned long,
@@ -156,11 +154,11 @@ krb5_error_code des_read_password(des_cblock *, char *, int);
 #endif
 /* The unsigned long pointers are indicative of the desired alignment;
    the values there aren't really treated as long values.  */
-KRB5_DLLIMP int KRB5_CALLCONV des_ecb_encrypt(unsigned long *, unsigned long *,
+int KRB5_CALLCONV des_ecb_encrypt(unsigned long *, unsigned long *,
 					      const des_key_schedule, int);
 void des_fixup_key_parity(des_cblock);
 int des_check_key_parity(des_cblock);
-KRB5_DLLIMP int KRB5_CALLCONV des_new_random_key(des_cblock);
+int KRB5_CALLCONV des_new_random_key(des_cblock);
 void des_init_random_number_generator(des_cblock);
 int des_random_key(des_cblock *);
 int des_is_weak_key(des_cblock);

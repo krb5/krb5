@@ -71,7 +71,7 @@
  * of name, instance, and realm.  FIXME-gnu:  Does anyone use it this way?
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 kname_parse(np, ip, rp, fullname)
     char FAR *np;
     char FAR *ip;
@@ -174,7 +174,7 @@ kname_parse(np, ip, rp, fullname)
  * Kerberos name; returns 0 if it's not.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 k_isname(s)
     char FAR *s;
 {
@@ -213,7 +213,7 @@ k_isname(s)
  * We now allow periods in instance names -- they are unambiguous.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 k_isinst(s)
     char FAR *s;
 {
@@ -244,7 +244,7 @@ k_isinst(s)
  * Kerberos realm; returns 0 if it's not.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 k_isrealm(s)
     char FAR *s;
 {

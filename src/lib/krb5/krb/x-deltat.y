@@ -215,7 +215,7 @@ mylex (krb5_int32 *intp, char **pp)
     }
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_string_to_deltat(string, deltatp)
     char	FAR * string;
     krb5_deltat	FAR * deltatp;

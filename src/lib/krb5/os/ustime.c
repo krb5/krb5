@@ -33,7 +33,7 @@
 
 #include "k5-int.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_us_timeofday(context, seconds, microseconds)
     krb5_context context;
     krb5_int32 FAR *seconds;

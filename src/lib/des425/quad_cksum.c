@@ -127,7 +127,7 @@ extern int des_debug;
 
 /*** Routines ***************************************************** */
 
-KRB5_DLLIMP unsigned long KRB5_CALLCONV
+unsigned long KRB5_CALLCONV
 des_quad_cksum(in,out,length,out_count,c_seed)
     const unsigned char FAR *in;	/* input block */
     unsigned DES_INT32 FAR *out;	/* optional longer output */

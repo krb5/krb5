@@ -9,7 +9,7 @@
 #include "stdcc.h"
 
 /* from fcc-proto.h */
-KRB5_DLLIMP extern krb5_cc_ops krb5_fcc_ops;
+extern krb5_cc_ops krb5_fcc_ops;
 
 #define KRB5_WINCCLD_C_
 #include "winccld.h"

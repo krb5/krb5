@@ -1,6 +1,6 @@
 #include "gssapiP_krb5.h"
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV 
+OM_uint32 KRB5_CALLCONV 
 gss_krb5_ccache_name(minor_status, name, out_name)
 	OM_uint32 *minor_status;
 	const char *name;

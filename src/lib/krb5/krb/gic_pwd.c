@@ -83,7 +83,7 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
     return(ret);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 			     start_time, in_tkt_service, options)
      krb5_context context;

@@ -162,7 +162,7 @@ krb_clear_key_krb5(ctx)
  * Mutual authentication is not implemented.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_rd_req(authent, service, instance, from_addr, ad, fn)
     register KTEXT authent;	/* The received message */
     char FAR *service;		/* Service name */

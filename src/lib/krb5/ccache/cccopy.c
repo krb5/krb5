@@ -1,6 +1,6 @@
 #include "k5-int.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_cc_copy_creds(context, incc, outcc)
    krb5_context context;
    krb5_ccache incc;

@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "etypes.h"
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_c_make_random_key(context, enctype, random_key)
      krb5_context context;
      krb5_enctype enctype;

@@ -99,7 +99,7 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C
+krb5_error_code KRB5_CALLCONV_C
 #ifdef HAVE_STDARG_H
 krb5_build_principal(krb5_context context,  krb5_principal * princ, 
 		     unsigned int rlen,

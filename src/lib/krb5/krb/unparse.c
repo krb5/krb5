@@ -57,7 +57,7 @@
 #define REALM_SEP	'@'
 #define	COMPONENT_SEP	'/'
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_unparse_name_ext(context, principal, name, size)
     krb5_context context;
     krb5_const_principal principal;
@@ -188,7 +188,7 @@ krb5_unparse_name_ext(context, principal, name, size)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_unparse_name(context, principal, name)
     krb5_context context;
     krb5_const_principal principal;

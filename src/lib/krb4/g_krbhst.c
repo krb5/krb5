@@ -64,7 +64,7 @@ get_krbhst_default(h, r, n)
         return(KFAILURE);
 }
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_get_krbhst(h,r,n)
     char FAR *h;
     char FAR *r;

@@ -64,7 +64,7 @@
  * The ticket file (TKT_FILE) is defined in "krb.h".
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 dest_tkt()
 {
     char *file = TKT_FILE;

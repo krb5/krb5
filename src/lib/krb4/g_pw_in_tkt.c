@@ -93,7 +93,7 @@ passwd_to_key(user,instance,realm,passwd,key)
  * The result of the call to krb_get_in_tkt() is returned.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_get_pw_in_tkt(user,instance,realm,service,sinstance,life,password)
     char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
     int life;
@@ -132,7 +132,7 @@ static int stub_key(user,instance,realm,passwd,key)
    return 0;
 }
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
     char FAR *user, FAR *instance, FAR *realm, FAR *service, FAR *sinstance;
     int life;

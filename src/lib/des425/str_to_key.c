@@ -61,7 +61,7 @@ extern int mit_des_debug;
  * generate a different key for a random input string are pretty low,
  * but non-zero.  So we need this different function for krb4 to use.
  */
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_string_to_key(str,key)
     const char *str;
     register mit_des_cblock key;

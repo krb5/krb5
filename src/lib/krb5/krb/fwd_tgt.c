@@ -34,7 +34,7 @@
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
 
 /* Get a TGT for use at the remote host */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_fwd_tgt_creds(context, auth_context, rhost, client, server, cc,
 		   forwardable, outbuf)
     krb5_context context;

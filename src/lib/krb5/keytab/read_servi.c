@@ -43,7 +43,7 @@
  * returns: Either KSUCCESS or error code.
  * errors: error code if not found or keyprocarg is invalid.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_kt_read_service_key(context, keyprocarg, principal, vno, enctype, key)
     krb5_context context;
     krb5_pointer keyprocarg;

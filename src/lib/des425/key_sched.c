@@ -31,7 +31,7 @@
 #include "des_int.h"
 #include "des.h"
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_key_sched(k,schedule)
     des_cblock k;
     des_key_schedule schedule;

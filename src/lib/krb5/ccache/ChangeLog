@@ -1,3 +1,8 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c, ccbase.c, cccopy.c, ccdefault.c, fcc.h, ser_cc.c:
+	Don't use KRB5_DLLIMP.
+
 2000-10-30  Tom Yu  <tlyu@mit.edu>
 
 	* cc_stdio.c: Add a "mode" field to krb5_scc_data to keep track of

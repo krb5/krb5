@@ -245,7 +245,7 @@ cleanup:;
     return retval;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_recvauth(context, auth_context,
 	      /* IN */
 	      fd, appl_version, server, flags, keytab,
@@ -264,7 +264,7 @@ krb5_recvauth(context, auth_context,
 			    server, flags, keytab, ticket, 0);
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_recvauth_version(krb5_context context,
 		      krb5_auth_context FAR *auth_context,
 		      /* IN */

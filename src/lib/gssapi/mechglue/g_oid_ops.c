@@ -34,7 +34,7 @@
 
 extern gss_mechanism *__gss_mechs_array;
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
     gss_OID	*oid;
@@ -63,7 +63,7 @@ gss_release_oid(minor_status, oid)
     return generic_gss_release_oid(minor_status, oid);
 }
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_create_empty_oid_set(minor_status, oid_set)
     OM_uint32	*minor_status;
     gss_OID_set	*oid_set;
@@ -71,7 +71,7 @@ gss_create_empty_oid_set(minor_status, oid_set)
 	return generic_gss_create_empty_oid_set(minor_status, oid_set);
 }
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_add_oid_set_member(minor_status, member_oid, oid_set)
     OM_uint32	*minor_status;
     gss_OID	member_oid;
@@ -80,7 +80,7 @@ gss_add_oid_set_member(minor_status, member_oid, oid_set)
      return generic_gss_add_oid_set_member(minor_status, member_oid, oid_set);
 }
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_test_oid_set_member(minor_status, member, set, present)
     OM_uint32	*minor_status;
     gss_OID	member;
@@ -90,7 +90,7 @@ gss_test_oid_set_member(minor_status, member, set, present)
     return generic_gss_test_oid_set_member(minor_status, member, set, present);
 }
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_oid_to_str(minor_status, oid, oid_str)
     OM_uint32		*minor_status;
     gss_OID		oid;
@@ -99,7 +99,7 @@ gss_oid_to_str(minor_status, oid, oid_str)
     return generic_gss_oid_to_str(minor_status, oid, oid_str);
 }
 
-GSS_DLLIMP OM_uint32 KRB5_CALLCONV
+OM_uint32 KRB5_CALLCONV
 gss_str_to_oid(minor_status, oid_str, oid)
     OM_uint32		*minor_status;
     gss_buffer_t	oid_str;

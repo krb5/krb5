@@ -25,7 +25,7 @@ actx_copy_addr(context, inad, outad)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_init(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context  FAR * auth_context;
@@ -47,7 +47,7 @@ krb5_auth_con_init(context, auth_context)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_free(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context     auth_context;
@@ -173,7 +173,7 @@ krb5_auth_con_setports(context, auth_context, local_port, remote_port)
  * Once decrypted this key is no longer necessary and is then overwritten
  * with the session key sent by the client.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -184,7 +184,7 @@ krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
     return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -196,7 +196,7 @@ krb5_auth_con_getkey(context, auth_context, keyblock)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -208,7 +208,7 @@ krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -220,7 +220,7 @@ krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_set_req_cksumtype(context, auth_context, cksumtype)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -240,7 +240,7 @@ krb5_auth_con_set_safe_cksumtype(context, auth_context, cksumtype)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getlocalseqnumber(context, auth_context, seqnumber)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -250,7 +250,7 @@ krb5_auth_con_getlocalseqnumber(context, auth_context, seqnumber)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getauthenticator(context, auth_context, authenticator)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -260,7 +260,7 @@ krb5_auth_con_getauthenticator(context, auth_context, authenticator)
 				    authenticator));
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -312,7 +312,7 @@ krb5_auth_con_getivector(context, auth_context, ivector)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setflags(context, auth_context, flags)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -322,7 +322,7 @@ krb5_auth_con_setflags(context, auth_context, flags)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getflags(context, auth_context, flags)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;
@@ -332,7 +332,7 @@ krb5_auth_con_getflags(context, auth_context, flags)
     return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setrcache(context, auth_context, rcache)
     krb5_context      	  context;
     krb5_auth_context 	  auth_context;

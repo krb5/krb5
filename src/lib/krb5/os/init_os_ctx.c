@@ -502,7 +502,7 @@ krb5_os_init_context(ctx)
 	return retval;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_profile (ctx, profile)
 	krb5_context ctx;
 	profile_t* profile;
@@ -552,7 +552,7 @@ krb5_set_config_files(ctx, filenames)
 	return 0;
 }
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_get_default_config_files(pfilenames)
 	char ***pfilenames;
 {
@@ -561,7 +561,7 @@ krb5_get_default_config_files(pfilenames)
     return os_get_default_config_files(pfilenames, FALSE);
 }
 
-KRB5_DLLIMP void KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_free_config_files(filenames)
 	char **filenames;
 {

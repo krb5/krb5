@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.h, krb.h: Don't use or define KRB5_DLLIMP, GSS_DLLIMP.
+
 2001-06-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* klog.h: Flush out prototype for klog().

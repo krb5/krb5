@@ -32,7 +32,7 @@
 /*
  * Copy a keyblock, including alloc'ed storage.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_copy_keyblock(context, from, to)
     krb5_context context;
     const krb5_keyblock FAR *from;

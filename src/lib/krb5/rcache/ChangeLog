@@ -1,3 +1,7 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* ser_rc.c: Don't use KRB5_DLLIMP.
+
 2001-07-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* rc_dfl.c (krb5_rc_io_fetch): Once length element read from

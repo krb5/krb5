@@ -75,7 +75,7 @@ extern int krb_debug;
  *						above using "key"
  */
 
-KRB5_DLLIMP long KRB5_CALLCONV
+long KRB5_CALLCONV
 krb_mk_safe(in, out, length, key, sender, receiver)
     u_char *in;			/* application data */
     u_char *out;		/*

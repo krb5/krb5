@@ -74,7 +74,7 @@ static int etl_used = 0;
 #define dprintf(X) printf X
 #endif
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV
+const char FAR * KRB5_CALLCONV
 error_message(long code)
     /*@modifies internalState@*/
 {
@@ -242,7 +242,7 @@ oops:
 }
 
 /*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 add_error_table(/*@dependent@*/ const struct error_table FAR * et)
 #ifndef _MSDOS
      /*@modifies _et_list,et_list_dynamic@*/
@@ -274,7 +274,7 @@ add_error_table(/*@dependent@*/ const struct error_table FAR * et)
 }
 
 /*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
+errcode_t KRB5_CALLCONV
 remove_error_table(const struct error_table FAR * et)
 #ifdef _MSDOS
      /*@modifies _et_list,et_list_dynamic,etl_used,etl@*/

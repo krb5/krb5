@@ -22,7 +22,7 @@
  * On failure it returns a Kerberos error code.
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 krb_get_cred(service,instance,realm,c)
     char FAR *service;		/* Service name */
     char FAR *instance;		/* Instance */

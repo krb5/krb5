@@ -29,7 +29,7 @@
 #include "des_int.h"
 #include "des.h"
 
-KRB5_DLLIMP int KRB5_CALLCONV
+int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, enc)
     unsigned long *clear;
     unsigned long *cipher;

@@ -551,7 +551,7 @@ krb5_auth_context_internalize(kcontext, argp, buffer, lenremain)
 /*
  * Register the auth_context serializer.
  */
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_ser_auth_context_init(kcontext)
     krb5_context	kcontext;
 {

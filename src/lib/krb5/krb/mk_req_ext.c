@@ -70,7 +70,7 @@ krb5_generate_authenticator PROTOTYPE((krb5_context,
 				       krb5_checksum *, krb5_keyblock *,
 				       krb5_int32, krb5_authdata ** ));
 
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 		     outbuf)
     krb5_context 	  context;
