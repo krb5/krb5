@@ -62,7 +62,7 @@ KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
-AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
 
 ######################################################################
 #
