@@ -1,3 +1,8 @@
+2001-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* chk_trans.c (foreach_realm): Cleanup loal variable set but never
+	used.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* chk_trans.c: Cast length arguments of %.*s in formats to int.

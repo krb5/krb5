@@ -175,7 +175,7 @@ foreach_realm (krb5_error_code (*fn)(krb5_data *comp,void *data), void *data,
 {
     char buf[MAXLEN], last[MAXLEN];
     char *p, *bufp;
-    int next_lit, have_prev, intermediates, l;
+    int next_lit, intermediates, l;
     krb5_data this_component;
     krb5_error_code r;
     krb5_data last_component;
@@ -188,7 +188,6 @@ foreach_realm (krb5_error_code (*fn)(krb5_data *comp,void *data), void *data,
        Keep these consistent, and we should be okay.  */
 
     next_lit = 0;
-    have_prev = 1;
     intermediates = 0;
     memset (buf, 0, sizeof (buf));
 
@@ -236,7 +235,6 @@ foreach_realm (krb5_error_code (*fn)(krb5_data *comp,void *data), void *data,
 			return r;
 		}
 		intermediates = 0;
-		have_prev = 1;
 		memcpy (last, buf, sizeof (buf));
 		last_component.length = this_component.length;
 		memset (buf, 0, sizeof (buf));
