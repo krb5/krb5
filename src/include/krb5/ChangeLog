@@ -1,3 +1,9 @@
+Wed Mar 22 11:37:24 1995 Keith Vetter (keithv@fusion.com)
+
+	* k5-config.h: added HAVE_SYS_TYPES_H. Cleaned up the loading
+           of sys/types.h which john added earlier. Specifically, we always
+           have it and it's missing some typedefs used by this code.            
+
 Tue Mar 21 18:42:23 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: PC: NO_PASSWORD defined and files opened in binary mode.
