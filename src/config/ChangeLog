@@ -1,3 +1,8 @@
+Mon Oct 16 15:19:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pre.in: KRB5_LIBDIR, ADMIN_BINDIR, KRB5_SHLIBDIR, KRB5_INCDIR
+		are all based on exec_prefix.
+
 Wed Oct 11 18:13:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* pre.in (DO_MAKE_SHLIB):  substitute VEXT, for the version extension for shared libs
