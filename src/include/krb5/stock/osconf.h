@@ -83,4 +83,15 @@
 #define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb5"
 #define KRB5_PATH_RLOGIN "@KRB5ROOT/bin/rlogin"
 
+/*
+ * krb4 kadmin stuff follows
+ */
+
+/* the default syslog file */
+#define KADM_SYSLOG  "@KRB5ROOT/admin_server.syslog"
+
+/* where to find the bad password table */
+#define PW_CHECK_FILE "@KRB5ROOT/bad_passwd"
+
+#define DEFAULT_ACL_DIR	"KDBDIR"
 #endif /* KRB5_OSCONF__ */
