@@ -1,3 +1,7 @@
+Wed Oct  8 10:52:36 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (kdb_check): Rewritten to use current admin system tools.
+
 Wed Jul 30 18:28:06 1997  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add "create" directory back.
