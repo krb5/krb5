@@ -32,8 +32,8 @@
 #include "int-proto.h"
 
 /*
- * Retrieve credentials for principal creds->client,
- * server creds->server, ticket flags creds->ticket_flags, possibly
+ * Retrieve credentials for principal in_cred->client,
+ * server in_cred->server, ticket flags creds->ticket_flags, possibly
  * second_ticket if needed by ticket_flags.
  * 
  * Credentials are requested from the KDC for the server's realm.  Any

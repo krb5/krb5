@@ -54,6 +54,7 @@ krb5_copy_data(context, indata, outdata)
 	memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);
     } else
 	tempdata->data = 0;
+    tempdata->magic = KV5M_DATA;
     *outdata = tempdata;
     return 0;
 }

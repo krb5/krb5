@@ -29,10 +29,10 @@
 /*
  Attempts to use the credentials cache or TGS exchange to get an additional
  ticket for the
- client identified by creds->client, the server identified by
- creds->server, with options options, expiration date specified in
- creds->times.endtime (0 means as long as possible), session key type
- specified in creds->keyblock.keytype (if non-zero)
+ client identified by in_creds->client, the server identified by
+ in_creds->server, with options options, expiration date specified in
+ in_creds->times.endtime (0 means as long as possible), session key type
+ specified in in_creds->keyblock.keytype (if non-zero)
 
  Any returned ticket and intermediate ticket-granting tickets are
  stored in ccache.
@@ -60,6 +60,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
         return -EINVAL;
 
     memset((char *)&mcreds, 0, sizeof(krb5_creds));
+    mcreds.magic = KV5M_CREDS;
     mcreds.times.endtime = in_creds->times.endtime;
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     mcreds.keyblock = in_creds->keyblock;
@@ -87,6 +88,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
 	return -ENOMEM;
 
     memset((char *)ncreds, 0, sizeof(krb5_creds));
+    ncreds->magic = KV5M_CREDS;
 
     /* The caller is now responsible for cleaning up in_creds */
     if (retval = krb5_cc_retrieve_cred(context,ccache,fields,&mcreds,ncreds)) {

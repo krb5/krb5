@@ -86,6 +86,7 @@ krb5_copy_addresses(context, inaddr, outaddr)
     return 0;
 }
 
+#if 0
 /*
  * Append an address array, to another address array, with fresh allocation.
  * Note that this function may change the value of *outaddr even if it
@@ -141,4 +142,5 @@ krb5_append_addresses(context, inaddr, outaddr)
 	*outaddr = tempaddr;
     return retval;
 }
+#endif
 

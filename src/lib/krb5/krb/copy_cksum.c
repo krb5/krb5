@@ -21,7 +21,7 @@
  * or implied warranty.
  * 
  *
- * krb5_copy_authenticator()
+ * krb5_copy_checksum()
  */
 
 #include "k5-int.h"

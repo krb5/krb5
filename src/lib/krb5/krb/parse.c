@@ -271,6 +271,7 @@ krb5_parse_name(context, name, nprincipal)
 	 * into the return variable, and let's get out of here.
 	 */
 	krb5_princ_type(context, principal) = KRB5_NT_PRINCIPAL;
+	principal->magic = KV5M_PRINCIPAL;
 	*nprincipal = principal;
 	return(0);
 }

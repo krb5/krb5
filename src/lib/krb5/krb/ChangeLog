@@ -1,5 +1,19 @@
 Mon Apr 24 17:09:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* parse.c (krb5_parse_name): Add magic number to new structure
+
+	* get_creds.c: Fix comments describing operation
+
+	* gc_frm_kdc.c: Fix comments describing operation
+
+	* copy_cksum.c (krb5_copy_checksum): Fix comment in file
+
+	* copy_addrs.c (krb5_append_addresses): ifdef out unused
+		krb5_append_addresses function. (no API or prototype
+		existed). 
+
+	* copy_data.c (krb5_copy_data): Initialize magic number
+
 	* init_ctx.c (krb5_init_context): If an error is returned from
 		krb5_set_default_in_tkt_etypes or krb5_os_init_context,
 		pass to caller instead of stack garbage.
