@@ -1,3 +1,7 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove KRB5_AC_NEED_BIND_8_COMPAT.
+
 2004-09-15  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for h_errno declaration in netdb.h.

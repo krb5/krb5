@@ -1335,7 +1335,6 @@ dnl The check for libresolv is in case you are attempting to link statically
 dnl and happen to have a libresolv.a lying around (and no libnsl.a).
 dnl
 AC_DEFUN(AC_LIBRARY_NET, [
-AC_REQUIRE([KRB5_AC_NEED_BIND_8_COMPAT])
    # Most operating systems have gethostbyname() in the default searched
    # libraries (i.e. libc):
    AC_CHECK_FUNC(gethostbyname, , [
@@ -1361,36 +1360,44 @@ AC_REQUIRE([KRB5_AC_NEED_BIND_8_COMPAT])
     # We assume that if libresolv exists we can link against it.
     # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
-    krb5_res_search_found=no
-    AC_CHECK_DECL(res_nsearch,
-      [AC_DEFINE(HAVE_RES_NSEARCH, 1, [Have the res_nsearch function])
-krb5_res_search_found=yes], ,
-[[#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <resolv.h>
-]])
-    if test $krb5_res_search_found != yes; then
-      AC_CHECK_DECL(res_search,
-	[AC_DEFINE(HAVE_RES_SEARCH, 1, [Have the res_search function])
-krb5_res_search_found=yes], ,
-[[#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <resolv.h>
-]])
-    fi
-    if test $krb5_res_search_found != yes; then
-      AC_CHECK_FUNC(res_search,
-	[AC_DEFINE(HAVE_RES_SEARCH, 1, [Have the res_search function])],
-	[AC_MSG_ERROR(Failed to find resolver search routine)],
-[[#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <resolv.h>
-]])
+_KRB5_AC_CHECK_RES_FUNCS(res_nsearch res_search ns_name_uncompress dn_skipname)
+    if test $krb5_cv_func_res_nsearch = no \
+      && test $krb5_cv_func_res_search = no; then
+	# Attempt to link with res_search(), in case it's not prototyped.
+	AC_CHECK_FUNC(res_search,
+	  [AC_DEFINE(HAVE_RES_SEARCH, 1,
+	    [Define to 1 if you have the `res_search' function])],
+	  [AC_ERROR([cannot find res_nsearch or res_search])])
     fi
   fi
+])
+AC_DEFUN([_KRB5_AC_CHECK_RES_FUNCS],
+[AC_FOREACH([AC_Func], [$1],
+  [AH_TEMPLATE(AS_TR_CPP(HAVE_[]AC_Func),
+               [Define to 1 if you have the `]AC_Func[' function.])])dnl
+for krb5_func in $1; do
+_KRB5_AC_CHECK_RES_FUNC($krb5_func)
+done
+])
+AC_DEFUN([_KRB5_AC_CHECK_RES_FUNC], [
+# Solaris 9 prototypes ns_name_uncompress() in arpa/nameser.h, but
+# doesn't export it from libresolv.so, so we use extreme paranoia here
+# and check both for the declaration and that we can link against the
+# function.
+AC_CACHE_CHECK([for $1], [krb5_cv_func_$1], [AC_TRY_LINK(
+[#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+@%:@include <resolv.h>],
+[/*
+ * Use volatile, or else optimization can cause false positives.
+ */
+void (* volatile p)() = (void (*)())$1;],
+			     [AS_VAR_SET(krb5_cv_func_$1, yes)],
+			     [AS_VAR_SET(krb5_cv_func_$1, no)])])
+AS_IF([test AS_VAR_GET(krb5_cv_func_$1) = yes],
+      [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), 1,
+			  [Define to 1 if you have the `$1' function])])[]dnl
 ])
 dnl
 dnl
@@ -1604,26 +1611,6 @@ AC_SUBST(DB_HEADER)
 AC_SUBST(DB_HEADER_VERSION)
 AC_SUBST(DB_LIB)
 AC_SUBST(KDB5_DB_LIB)
-])
-dnl
-dnl
-dnl KRB5_AC_NEED_BIND_8_COMPAT --- check to see if we are on a bind 9 system
-dnl
-dnl
-AC_DEFUN(KRB5_AC_NEED_BIND_8_COMPAT,[
-AC_REQUIRE([AC_PROG_CC])dnl
-dnl
-dnl On a bind 9 system, we need to define BIND_8_COMPAT
-dnl
-AC_MSG_CHECKING(for bind 9 or higher)
-AC_CACHE_VAL(krb5_cv_need_bind_8_compat,[
-AC_TRY_COMPILE([#include <arpa/nameser.h>], [HEADER hdr;],
-krb5_cv_need_bind_8_compat=no, 
-[AC_TRY_COMPILE([#define BIND_8_COMPAT
-#include <arpa/nameser.h>], [HEADER hdr;],
-krb5_cv_need_bind_8_compat=yes, krb5_cv_need_bind_8_compat=no)])])
-AC_MSG_RESULT($krb5_cv_need_bind_8_compat)
-test $krb5_cv_need_bind_8_compat = yes && AC_DEFINE(BIND_8_COMPAT,1,[Define if OS has bind 9])
 ])
 dnl
 dnl KRB5_AC_PRIOCNTL_HACK

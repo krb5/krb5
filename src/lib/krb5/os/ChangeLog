@@ -1,3 +1,19 @@
+2004-09-20  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add dnsglue.c.
+
+	* dnsglue.c: New file.  Implement resolver glue layer to abstract
+	away the details of calling res_search or res_nsearch, and of
+	parsing the reply packet.
+
+	* dnsglue.h: New file.
+
+	* dnssrv.c (krb5int_make_srv_query_realm): Use dnsglue.  Use
+	MAXDNAME from dnsglue.h or resolv.h instead of MAX_DNS_NAMELEN.
+
+	* hst_realm.c (krb5_try_realm_txt_rr): Use dnsglue.  Use MAXDNAME
+	from dnsglue.h or resolv.h instead of MAX_DNS_NAMELEN.
+
 2004-09-13  Tom Yu  <tlyu@mit.edu>
 
 	* dnssrv.c: 

@@ -1,3 +1,14 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_NEED_BIND_8_COMPAT): Remove.
+	(AC_LIBRARY_NET): Remove KRB5_AC_NEED_BIND_8_COMPAT.  Call
+	_KRB5_AC_CHECK_RES_FUNCS to check declarations and linkability of
+	vairous resolver functions.  Explicitly check linkability of
+	res_search() in case it's not explicitly declared.
+	(_KRB5_AC_CHECK_RES_FUNCS, _KRB5_AC_CHECK_RES_FUNC): New
+	functions.  Check resolver library function prototypes and
+	linkability.
+
 2004-09-17  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-unix): Use $(INSTALL_SCRIPT) for scripts.

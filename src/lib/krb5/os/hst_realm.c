@@ -65,6 +65,8 @@
  * host names should be in the usual form (e.g. FOO.BAR.BAZ)
  */
 
+#include "dnsglue.h"
+
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
@@ -76,29 +78,7 @@
 #include <strings.h>
 #endif
 
-#ifdef KRB5_DNS_LOOKUP       
-#ifdef WSHELPER
-#include <wshelper.h>
-#else /* WSHELPER */
-#include <netinet/in.h>
-#include <arpa/inet.h>       
-#include <arpa/nameser.h>
-#ifndef T_TXT /* not defined on SunOS 4 */
-#  define T_TXT 15
-#endif
-#include <resolv.h>          
-#include <netdb.h>
-#endif /* WSHELPER */
-#endif /* KRB5_DNS_LOOKUP */ 
-
 #include "fake-addrinfo.h"
-
-/* for old Unixes and friends ... */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
-
-#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
 
 #ifdef KRB5_DNS_LOOKUP
 /*
@@ -108,14 +88,11 @@
 krb5_error_code
 krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
 {
-    union {
-        unsigned char bytes[2048];
-        HEADER hdr;
-    } answer;
-    unsigned char *p;
-    char host[MAX_DNS_NAMELEN], *h;
-    int size;
-    int type, rrclass, numanswers, numqueries, rdlen, len;
+    krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
+    const unsigned char *p, *base;
+    char host[MAXDNAME], *h;
+    int ret, rdlen, len;
+    struct krb5int_dns_state *ds = NULL;
 
     /*
      * Form our query, and send it via DNS
@@ -126,7 +103,7 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
 	    return KRB5_ERR_HOST_REALM_UNKNOWN;
         strcpy(host,prefix);
     } else {
-        if ( strlen(prefix) + strlen(name) + 3 > MAX_DNS_NAMELEN )
+        if ( strlen(prefix) + strlen(name) + 3 > MAXDNAME )
             return KRB5_ERR_HOST_REALM_UNKNOWN;
         sprintf(host,"%s.%s", prefix, name);
 
@@ -144,119 +121,36 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
         if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
             strcpy (h, ".");
     }
-#ifdef HAVE_RES_NSEARCH
-    {
-	res_state statp;
-	/* Weird... the man pages I've been looking at (Solaris 9) say
-	   we pass a res_state object (which is a pointer) into
-	   various routines, but they don't say much of anything about
-	   what it should point to initially or how it should be
-	   allocated.
+    ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
+    if (ret < 0)
+	goto errout;
 
-	   They also give no indication what the return value of
-	   res_ninit is.  */
-	typedef union {
-	    struct sockaddr_storage ss;
-	    INT64_TYPE i64;
-	    double d;
-	} aligned_thing;
-	aligned_thing statp_buf[(sizeof(*statp) + sizeof(aligned_thing) - 1) / sizeof(aligned_thing)];
-	int n;
+    ret = krb5int_dns_nextans(ds, &base, &rdlen);
+    if (ret < 0 || base == NULL)
+	goto errout;
 
-	statp = (res_state) &statp_buf;
-	memset(&statp_buf, 0, sizeof(statp_buf));
-	n = res_ninit(statp);
-	/* ignore n? */
-	size = res_nsearch(statp, host, C_IN, T_TXT,
-			   answer.bytes, sizeof(answer.bytes));
+    p = base;
+    if (!INCR_OK(base, rdlen, p, 1))
+	goto errout;
+    len = *p++;
+    *realm = malloc((size_t)len + 1);
+    if (*realm == NULL) {
+	retval = ENOMEM;
+	goto errout;
     }
-#else
-    size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
-#endif
+    strncpy(*realm, (const char *)p, (size_t)len);
+    (*realm)[len] = '\0';
+    /* Avoid a common error. */
+    if ( (*realm)[len-1] == '.' )
+	(*realm)[len-1] = '\0';
+    retval = 0;
 
-    if ((size < sizeof(HEADER)) || (size > sizeof(answer.bytes)))
-	return KRB5_ERR_HOST_REALM_UNKNOWN;
-
-    p = answer.bytes;
-
-    numqueries = ntohs(answer.hdr.qdcount);
-    numanswers = ntohs(answer.hdr.ancount);
-
-    p += sizeof(HEADER);
-
-    /*
-     * We need to skip over the questions before we can get to the answers,
-     * which means we have to iterate over every query record.  We use
-     * dn_expand to tell us how long each compressed name is.
-     */
-
-#define INCR_CHECK(x, y) x += y; if (x > size + answer.bytes) \
-                         return KRB5_ERR_HOST_REALM_UNKNOWN
-#define CHECK(x, y) if (x + y > size + answer.bytes) \
-                         return KRB5_ERR_HOST_REALM_UNKNOWN
-#define NTOHSP(x, y) x[0] << 8 | x[1]; x += y
-
-    while (numqueries--) {
-	len = dn_expand(answer.bytes, answer.bytes + size, p, host, 
-                         sizeof(host));
-	if (len < 0)
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
-	INCR_CHECK(p, len + 4);		/* Name plus type plus class */
+errout:
+    if (ds != NULL) {
+	krb5int_dns_fini(ds);
+	ds = NULL;
     }
-
-    /*
-     * We're now pointing at the answer records.  Process the first
-     * TXT record we find.
-     */
-
-    while (numanswers--) {
-	
-	/* First the name; use dn_expand to get the compressed size */
-	len = dn_expand(answer.bytes, answer.bytes + size, p,
-			host, sizeof(host));
-	if (len < 0)
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
-	INCR_CHECK(p, len);
-
-	/* Next is the query type */
-        CHECK(p, 2);
-	type = NTOHSP(p,2);
-
-	/* Next is the query class; also skip over 4 byte TTL */
-        CHECK(p,6);
-	rrclass = NTOHSP(p,6);
-
-	/* Record data length - make sure we aren't truncated */
-
-        CHECK(p,2);
-	rdlen = NTOHSP(p,2);
-
-	if (p + rdlen > answer.bytes + size)
-	    return KRB5_ERR_HOST_REALM_UNKNOWN;
-
-	/*
-	 * If this is a TXT record, return the string.  Note that the
-	 * string has a 1-byte length in the front
-	 */
-	/* XXX What about flagging multiple TXT records as an error?  */
-
-	if (rrclass == C_IN && type == T_TXT) {
-	    len = *p++;
-	    if (p + len > answer.bytes + size)
-		return KRB5_ERR_HOST_REALM_UNKNOWN;
-	    *realm = malloc(len + 1);
-	    if (*realm == NULL)
-		return ENOMEM;
-	    strncpy(*realm, (char *) p, len);
-	    (*realm)[len] = '\0';
-            /* Avoid a common error. */
-            if ( (*realm)[len-1] == '.' )
-                (*realm)[len-1] = '\0';
-	    return 0;
-	}
-    }
-
-    return KRB5_ERR_HOST_REALM_UNKNOWN;
+    return retval;
 }
 #endif /* KRB5_DNS_LOOKUP */
 
@@ -301,7 +195,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     char *default_realm, *realm, *cp, *temp_realm;
     krb5_error_code retval;
     int l;
-    char local_host[MAX_DNS_NAMELEN+1];
+    char local_host[MAXDNAME+1];
 
     if (host) {
 	/* Filter out numeric addresses if the caller utterly failed to
@@ -326,7 +220,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 	    /* IPv6 numeric address form?  Bye bye.  */
 	    return KRB5_ERR_NUMERIC_REALM;
 
-	/* Should probably error out if strlen(host) > MAX_DNS_NAMELEN.  */
+	/* Should probably error out if strlen(host) > MAXDNAME.  */
 	strncpy(local_host, host, sizeof(local_host));
 	local_host[sizeof(local_host) - 1] = '\0';
     } else {
