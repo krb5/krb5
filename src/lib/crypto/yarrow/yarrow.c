@@ -601,7 +601,7 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
     HASH_CTX hash;
     byte v_0[HASH_DIGEST_SIZE];
     byte v_i[HASH_DIGEST_SIZE];
-    uint32 big_endian_int32;
+    krb5_ui_4 big_endian_int32;
     COUNTER i;
 
     if (!y) { THROW( YARROW_BAD_ARG ); }
@@ -654,9 +654,9 @@ int Yarrow_Reseed(Yarrow_CTX* y, int pool)
 	HASH_Update(&hash, v_i, sizeof(v_i));
 	HASH_Update(&hash, v_0, sizeof(v_0));
 	big_endian_int32 = make_big_endian32(i >> 32); /* MS word */
-	HASH_Update(&hash, &big_endian_int32, sizeof(uint32));
+	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
 	big_endian_int32 = make_big_endian32(i & 0xFFFFFFFF); /* LS word */
-	HASH_Update(&hash, &big_endian_int32, sizeof(uint32));
+	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
 	HASH_Final(&hash, v_i);
     }
 

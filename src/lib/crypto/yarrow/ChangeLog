@@ -1,0 +1,9 @@
+2001-11-08  Sam Hartman  <hartmans@mit.edu>
+
+	* yarrow.h: Don't use #error
+	(YARROW_DLL): Don't actually ever export or import from win32 dlls as Yarrow is not a public part of krb5 API
+	(yarrow_poll): Drop from the API
+	Remove MAc-specific memset and  memcpy
+
+	* ytypes.h yarrow.c: Align with krb5 int types
+

@@ -3,7 +3,8 @@
 #ifndef YARROW_H
 #define YARROW_H
 
-#if defined( YARROW_DETECT_FORK )
+#ifdef HAVE_UNISTD_H
+#define YARROW_DETECT_FORK
 #include <unistd.h>
 #endif
 
@@ -66,19 +67,19 @@ extern "C" {
 /* sanity checks */
 
 #if YARROW_FAST_THRESH > YARROW_POOL_SIZE
-#error "can't have higher YARROW_FAST_THRESH than pool size"
+error "can't have higher YARROW_FAST_THRESH than pool size"
 #endif
 
 #if YARROW_SLOW_THRESH > YARROW_POOL_SIZE
-#error "can't have higher YARROW_SLOW_THRESH than pool size"
+error "can't have higher YARROW_SLOW_THRESH than pool size"
 #endif
 
 #if YARROW_FAST_INIT_THRESH > YARROW_POOL_SIZE
-#error "can't have higher YARROW_FAST_INIT_THRESH than pool size"
+error "can't have higher YARROW_FAST_INIT_THRESH than pool size"
 #endif
 
 #if YARROW_SLOW_INIT_THRESH > YARROW_POOL_SIZE
-#error "can't have higher YARROW_SLOW_INIT_THRESH than pool size"
+error "can't have higher YARROW_SLOW_INIT_THRESH than pool size"
 #endif
 
 typedef size_t estimator_fn(const void* sample, size_t size);
@@ -124,21 +125,12 @@ typedef struct
     int slow_k_of_n_thresh;
 } Yarrow_CTX;
 
-#if defined(WIN32)
-#   if defined(YARROW_IMPL)
-#       define YARROW_DLL __declspec(dllexport) 
-#   else
-#       define YARROW_DLL __declspec(dllimport) 
-#   endif
-#else
 #   define YARROW_DLL
-#endif
+
 
 YARROW_DLL
 int Yarrow_Init( Yarrow_CTX* y, const char *filename );
 
-YARROW_DLL
-int Yarrow_Poll( Yarrow_CTX *y, unsigned source_id );
 
 YARROW_DLL
 int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
@@ -175,22 +167,16 @@ YARROW_DLL
 const char* Yarrow_Str_Error( int );
 
 
-/* portability stuff */
-
-#if defined(macintosh) && YARROW_DRIVER && TARGET_CPU_PPC
-#   define mem_zero(p, n)       BlockZero((p), (n))
-#   define mem_copy(d, s, n)    BlockMoveData((s), (d), (n))
-#else
 #   define mem_zero(p, n)       memset((p), 0, (n))
 #   define mem_copy(d, s, n)    memcpy((d), (s), (n))
-#endif
+
 
 #if !defined(WIN32)
 #   define min(x, y) ((x) < (y) ? (x) : (y))
 #   define max(x, y) ((x) > (y) ? (x) : (y))
 #endif
 
-/* end portability stuff */
+
 
 #ifdef __cplusplus
 }
