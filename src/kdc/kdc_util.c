@@ -709,7 +709,7 @@ register krb5_kdc_req *request;
 krb5_db_entry client;
 krb5_db_entry server;
 krb5_timestamp kdc_time;
-char	**status;
+const char	**status;
 {
     int		errcode;
     
@@ -1001,7 +1001,7 @@ register krb5_kdc_req *request;
 krb5_db_entry server;
 krb5_ticket *ticket;
 krb5_timestamp kdc_time;
-char **status;
+const char **status;
 {
     int		errcode;
     int		st_idx = 0;

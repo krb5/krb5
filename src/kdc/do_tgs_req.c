@@ -88,7 +88,7 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     int firstpass = 1;
     int ok_key_data = 0;
-    char	*status = 0;
+    const char	*status = 0;
     char	secondary_ch;
     
     if (is_secondary)

@@ -1,3 +1,9 @@
+Mon Sep  4 14:10:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_util.c, kdc_util.h, policy.c: Add
+		const declarations to variables pointing to error strings
+		in order to make everything self consistant.
+
 Fri Sep  1 23:28:29 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_preauth.c: New file, to contain the server-side

@@ -32,7 +32,7 @@ register krb5_kdc_req *request;
 krb5_db_entry client;
 krb5_db_entry server;
 krb5_timestamp kdc_time;
-char	**status;
+const char	**status;
 {
 #if 0
      /* An AS request must include the addresses field */
@@ -53,7 +53,7 @@ against_local_policy_tgs(request, server, ticket, status)
 register krb5_kdc_req *request;
 krb5_db_entry server;
 krb5_ticket *ticket;
-char **status;
+const char **status;
 {
 #if 0
     /*

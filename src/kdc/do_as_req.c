@@ -114,7 +114,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
     krb5_data salt_data;
-    char *status;
+    const char *status;
     krb5_encrypt_block eblock;
     krb5_key_data  *server_key, *client_key;
 #ifdef	KRBCONF_KDC_MODIFIES_KDB

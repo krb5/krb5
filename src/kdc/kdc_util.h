@@ -64,11 +64,11 @@ krb5_error_code kdc_get_server_key PROTOTYPE((krb5_ticket *,
 
 int validate_as_request PROTOTYPE((krb5_kdc_req *, krb5_db_entry, 
 					  krb5_db_entry, krb5_timestamp,
-					  char **));
+					  const char **));
 
 int validate_tgs_request PROTOTYPE((krb5_kdc_req *, krb5_db_entry, 
 					  krb5_ticket *, krb5_timestamp,
-					  char **));
+					  const char **));
 
 int fetch_asn1_field PROTOTYPE((unsigned char *, unsigned int, unsigned int,
 				 krb5_data *));
@@ -104,10 +104,10 @@ void process_packet PROTOTYPE((int, const char *, int));
 /* policy.c */
 int against_local_policy_as PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
 					krb5_db_entry, krb5_timestamp,
-					char **));
+					const char **));
 
 int against_local_policy_tgs PROTOTYPE((krb5_kdc_req *, krb5_db_entry,
-					krb5_ticket *, char **));
+					krb5_ticket *, const char **));
 
 /* kdc_preauth.c */
 const char * missing_required_preauth
