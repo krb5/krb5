@@ -80,10 +80,11 @@ mit_des_generate_random_key(state, randkey)
     (* state->eblock.crypto_entry->encrypt_func)
 	(state->sequence.data /*in*/, randkey->contents /*out*/,
 	 state->sequence.length, eblock, zero_ivec);
-    (* state->eblock.crypto_entry->encrypt_func)
-	(randkey->contents /*in*/, randkey->contents /*out*/,
-	 randkey->length, eblock,
-	 randkey->contents + randkey->length - sizeof(mit_des_cblock));
+    if (state->sequence.length > sizeof(mit_des_cblock))
+	(* state->eblock.crypto_entry->encrypt_func)
+	    (randkey->contents /*in*/, randkey->contents /*out*/,
+	     randkey->length, eblock,
+	     randkey->contents + randkey->length - sizeof(mit_des_cblock));
 
     /* Increment the sequence number, with wraparound (LSB) */
     for (i = 0; i < state->sequence.length; i++) {
