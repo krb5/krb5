@@ -1,3 +1,7 @@
+Thu Jan 11 18:32:54 1996  Ezra Peisach  (epeisach@paris)
+
+	* Makefile.in (check-unix): Ultrix test does not support -x.
+
 Fri Jan  5 09:00:47 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Add parrentheses for assignment

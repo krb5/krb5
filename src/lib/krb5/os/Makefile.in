@@ -133,7 +133,7 @@ check-unix::
 	echo '	default_realm = r' >> ./t_an.conf
 	echo '[realms]' >> ./t_an.conf
 	echo 'r = {' >> ./t_an.conf
-	if test -x ../../../admin/aname/kdb5_anadd ; then \
+	if test -r ../../../admin/aname/kdb5_anadd ; then \
 		../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
 		../../../admin/aname/kdb5_anadd -a -n ./t_an p/a/b/c@r pabc; \
 		echo 'auth_to_local = DB:./t_an' >> ./t_an.conf; \
@@ -142,7 +142,7 @@ check-unix::
 		>> ./t_an.conf
 	echo 'auth_to_local = DEFAULT' >> ./t_an.conf
 	echo '}' >> ./t_an.conf
-	if test -x ../../../admin/aname/kdb5_anadd ; then \
+	if test -r ../../../admin/aname/kdb5_anadd ; then \
 		KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
 		./t_an_to_ln p/i/i/i@r p/a/b/c@r; \
 	fi
