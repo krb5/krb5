@@ -602,11 +602,17 @@ $(IMAKE):								@@\
 ImakeDependency(Makefile)						@@\
 									@@\
 Makefile:: 								@@\
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags -s Makefile.new @@\
+	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f Makefile ]; then \					@@\
-		echo "	$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \ @@\
+		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \ @@\
 		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \	@@\
-	else exit 0; fi							@@\
-	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags
+	fi								@@\
+	$(MV) Makefile.new Makefile					@@\
+									@@\
+noop::									@@\
+	/* do nothing */
+
 
 #endif /* BuildMakefileTarget */
 
