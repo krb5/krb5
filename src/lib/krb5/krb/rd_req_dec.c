@@ -105,7 +105,7 @@ krb5_tkt_authent *tktauthent;
 	retval = krb5_kt_get_entry(keytabid, req->ticket->server,
 				   req->ticket->skvno, &ktentry);
 	(void) krb5_kt_close(keytabid);
-	tkt_key_real = *ktentry.key;
+	tkt_key_real = ktentry.key;
 	tkt_key = &tkt_key_real;
 	(void) krb5_kt_free_entry(&ktentry);
     }

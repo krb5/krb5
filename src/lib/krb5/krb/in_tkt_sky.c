@@ -74,7 +74,7 @@ OLDDECLARG(krb5_pointer, keyseed)
     if (arg->key)
 	retval = krb5_copy_keyblock(arg->key, realkey);
     else
-	retval = krb5_copy_keyblock(kt_ent.key, realkey);
+	retval = krb5_copy_keyblock(&kt_ent.key, realkey);
     if (retval) {
 	free((char *)realkey);
 	cleanup();
