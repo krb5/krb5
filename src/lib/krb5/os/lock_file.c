@@ -24,6 +24,7 @@
  * libos: krb5_lock_file routine
  */
 
+#ifndef _MSDOS
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -103,3 +104,17 @@ krb5_lock_file(context, filep, pathname, mode)
 #endif
     return 0;
 }
+#else   /* MSDOS */
+
+#include "k5-int.h"
+
+krb5_error_code INTERFACE
+krb5_lock_file(context, filep, pathname, mode)
+    krb5_context context;
+    FILE *filep;
+    char *pathname;
+    int mode;
+{
+    return 0;
+}
+#endif

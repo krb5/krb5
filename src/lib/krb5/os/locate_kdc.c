@@ -24,14 +24,19 @@
  * get socket addresses for KDC.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef _WINSOCKAPI_
 #include <sys/socket.h>
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
 #endif
+#endif
+#ifndef _WINSOCKAPI_
 #include <netdb.h>
+#endif
 #include "os-proto.h"
 
 #ifdef KRB5_USE_INET
@@ -43,7 +48,7 @@ extern char *krb5_kdc_sec_udp_portname;
  * returns count of number of addresses found
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_locate_kdc(context, realm, addr_pp, naddrs)
     krb5_context context;
     const krb5_data *realm;
@@ -51,7 +56,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     int *naddrs;
 {
     char **hostlist;
-    int code;
+    krb5_error_code code;
     int i, j, out, count;
     struct sockaddr *addr_p;
     struct sockaddr_in *sin_p;

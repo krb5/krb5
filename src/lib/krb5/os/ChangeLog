@@ -1,7 +1,8 @@
-Thu Mar 2 18:00:00 1995 Keith Vetter (keithv@fusion.com)
+Tue Mar 7 13:35:21 1995 Keith Vetter (keithv@fusion.com)
 
-	* ustime.c: added another include for the pc for prototyping.
-	* localaddr.c: used the NEED_SOCKETS mechanism for getting winsock.h.
+	* *.c: ported all the c files except an_to_ln, kuserok, and
+          sendto_kdc which have windows stubs.
+        * Makefile.in: reflects above changes.
 
 Wed Mar 1 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 

@@ -62,9 +62,15 @@
  * host names should be in the usual form (e.g. FOO.BAR.BAZ)
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include <ctype.h>
 #include <stdio.h>
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
@@ -75,7 +81,7 @@
 
 extern char *krb5_trans_file;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_host_realm(context, host, realmsp)
     krb5_context context;
     const char *host;

@@ -57,7 +57,7 @@
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_krbhst(context, realm, hostlist)
     krb5_context context;
     const krb5_data *realm;
@@ -91,7 +91,7 @@ krb5_get_krbhst(context, realm, hostlist)
 		continue;		/* no match */
 
 	    /* +1 to get beyond trailing space */
-	    if (strlen(filebuf) < realm->length + 1) {
+	    if (strlen(filebuf) < (size_t) realm->length + 1) {
 		/* no hostname on config line */
 		retval = KRB5_CONFIG_BADFORMAT;
 		break;

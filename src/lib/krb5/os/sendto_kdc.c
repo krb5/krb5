@@ -26,6 +26,7 @@
  */
 
 #include "k5-int.h"
+#ifndef _MSDOS    /* Not yet for Windows */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -205,3 +206,4 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     return retval;
 }
+#endif

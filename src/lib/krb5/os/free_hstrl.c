@@ -31,7 +31,7 @@
  Frees the storage taken by a realm list returned by krb5_get_local_realm.
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_free_host_realm(context, realmlist)
     krb5_context context;
     char * const *realmlist;

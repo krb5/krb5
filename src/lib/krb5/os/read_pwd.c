@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#ifndef _MSDOS
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -238,3 +239,19 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 
     return 0;
 }
+#else /* MSDOS */
+/* Don't expect to be called, just define it for sanity and the linker.
+*/
+
+krb5_error_code INTERFACE
+krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
+    krb5_context context;
+    char *prompt;
+    char *prompt2;
+    char *return_pwd;
+    int *size_return;
+{
+   *size_return = 0;
+   return 0;
+}
+#endif   /* !MSDOS */

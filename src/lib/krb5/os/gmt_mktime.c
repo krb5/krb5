@@ -38,7 +38,7 @@ time_t gmt_mktime(t)
 {
   time_t accum;
 
-#define assert_time(cnd) if(!(cnd)) return -1
+#define assert_time(cnd) if(!(cnd)) return (time_t) -1
 
   assert_time(t->tm_year>=70);
   assert_time(t->tm_year<=138);

@@ -22,6 +22,7 @@
  * 
  */
 
+#define NEED_LOWLEVEL_IO
 #include "k5-int.h"
 
 /*
@@ -33,7 +34,7 @@
  * XXX must not use non-blocking I/O
  */
 
-int
+int INTERFACE
 krb5_net_write(context, fd, buf, len)
     krb5_context context;
     int fd;

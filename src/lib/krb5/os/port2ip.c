@@ -24,13 +24,16 @@
  * Take an ADDRPORT address and split into IP addr & port.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 #ifdef KRB5_USE_INET
 #include "os-proto.h"
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_unpack_full_ipaddr(context, inaddr, adr, port)
     krb5_context context;
     const krb5_address *inaddr;
@@ -41,7 +44,7 @@ krb5_unpack_full_ipaddr(context, inaddr, adr, port)
     unsigned short smushport;
     register krb5_octet *marshal;
     krb5_addrtype temptype;
-    krb5_int32 templength;
+    krb5_ui_4 templength;
 
     if (inaddr->addrtype != ADDRTYPE_ADDRPORT)
 	return KRB5_PROG_ATYPE_NOSUPP;

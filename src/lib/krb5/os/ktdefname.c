@@ -28,14 +28,14 @@
 
 extern char *krb5_defkeyname;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
     char *name;
     int namesize;
 {
     strncpy(name, krb5_defkeyname, namesize);
-    if (namesize < strlen(krb5_defkeyname))
+    if ((size_t) namesize < strlen(krb5_defkeyname))
 	return KRB5_CONFIG_NOTENUFSPACE;
     else
 	return 0;

@@ -25,15 +25,18 @@
  * a replay cache tag string.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
 #ifdef KRB5_USE_INET
 #include <sys/types.h>
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_gen_replay_name(context, address, uniq, string)
     krb5_context context;
     const krb5_address *address;

@@ -25,12 +25,17 @@
  * form.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
+#ifndef _WINSOCKAPI_
 #include <netdb.h>
+#endif
 #include <ctype.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_context context;
     const char * hostname;

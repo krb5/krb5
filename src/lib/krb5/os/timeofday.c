@@ -36,9 +36,11 @@
 #define timetype long
 #endif
 
+#ifndef HAVE_ERRNO
 extern int errno;
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_timeofday(context, timeret)
     krb5_context context;
     register krb5_int32 *timeret;

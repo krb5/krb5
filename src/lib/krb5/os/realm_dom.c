@@ -51,7 +51,7 @@
 
 extern char *krb5_trans_file;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_realm_domain(context, realm, domain)
     krb5_context context;
     const char *realm;

@@ -27,7 +27,8 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-char *krb5_cc_default_name(context)
+char * INTERFACE
+krb5_cc_default_name(context)
     krb5_context context;
 {
     char *name = getenv(KRB5_ENV_CCNAME);
@@ -37,7 +38,11 @@ char *krb5_cc_default_name(context)
 	if (name_buf == 0)
 	    name_buf = malloc (35);
 	
+#ifdef MSDOS_FILESYSTEM
+        strcpy (name_buf, "FILE:\\krb5cc");
+#else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
+#endif
 	name = name_buf;
     }
     return name;

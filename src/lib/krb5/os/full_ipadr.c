@@ -24,14 +24,17 @@
  * Take an IP addr & port and generate a full IP address.
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 #ifdef KRB5_USE_INET
 
 #include "os-proto.h"
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_make_full_ipaddr(context, adr, port, outaddr)
     krb5_context context;
     krb5_int32 adr;

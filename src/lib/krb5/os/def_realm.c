@@ -51,7 +51,7 @@ extern char *krb5_override_default_realm;
 
 char *krb5_override_default_realm = 0;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_default_realm(context, lrealm)
     krb5_context context;
     char **lrealm;

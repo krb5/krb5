@@ -30,7 +30,7 @@
  Frees the storage taken by a host list returned by krb5_get_krbhst.
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_free_krbhst(context, hostlist)
     krb5_context context;
     char * const *hostlist;

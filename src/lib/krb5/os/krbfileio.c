@@ -33,18 +33,26 @@
 static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #endif
 
+#define NEED_LOWLEVEL_IO                        /* Need open(), etc. */
+
 #include "k5-int.h"
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
 #include <sys/types.h>
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 #ifdef apollo
 #   define OPEN_MODE_NOT_TRUSTWORTHY
 #endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_create_secure_file(context, pathname)
     krb5_context context;
     const char * pathname;
@@ -54,7 +62,7 @@ krb5_create_secure_file(context, pathname)
     /*
      * Create the file with access restricted to the owner
      */
-    fd = open(pathname, O_RDWR | O_CREAT | O_EXCL, 0600);
+    fd = open(pathname, O_RDWR | O_CREAT | O_EXCL | O_BINARY, 0600);
 
 #ifdef OPEN_MODE_NOT_TRUSTWORTHY
     /*
@@ -83,15 +91,17 @@ krb5_create_secure_file(context, pathname)
     }
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_sync_disk_file(context, fp)
     krb5_context context;
     FILE *fp;
 {
     fflush(fp);
+#ifndef MSDOS_FILESYSTEM
     if (fsync(fileno(fp))) {
         return errno;
     }
+#endif
 
     return 0;
 }

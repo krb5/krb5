@@ -25,7 +25,7 @@
  */
 
 #include "k5-int.h"
-
+#ifndef _MSDOS    /* Not yet for Windows */
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))
 #endif /* min */
@@ -168,3 +168,4 @@ username_an_to_ln(context, aname, lnsize, lname)
     }
     return retval;
 }
+#endif

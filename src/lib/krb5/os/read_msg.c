@@ -24,31 +24,40 @@
  * Write a message to the network
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include <errno.h>
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_read_message(context, fdp, inbuf)
     krb5_context context;
 	krb5_pointer fdp;
 	krb5_data	*inbuf;
 {
-	krb5_int32	len, len2;
+	krb5_int32	len;
+   int      len2, ilen;
 	char		*buf = NULL;
 	int		fd = *( (int *) fdp);
 	
 	if ((len2 = krb5_net_read(context, fd, (char *)&len, 4)) != 4)
 		return((len2 < 0) ? errno : ECONNABORTED);
-	inbuf->length = len = ntohl(len);
-	if (len) {
+	len = ntohl(len);
+
+   if ((len & VALID_UINT_BITS) != len)  /* Overflow size_t??? */
+      return ENOMEM;
+
+	inbuf->length = ilen = (int) len;
+	if (ilen) {
 		/*
 		 * We may want to include a sanity check here someday....
 		 */
-		if (!(buf = malloc(len))) {
+		if (!(buf = malloc(ilen))) {
 			return(ENOMEM);
 		}
-		if ((len2 = krb5_net_read(context, fd, buf, len)) != len) {
+		if ((len2 = krb5_net_read(context, fd, buf, ilen)) != ilen) {
 			krb5_xfree(buf);
 			return((len2 < 0) ? errno : ECONNABORTED);
 		}
