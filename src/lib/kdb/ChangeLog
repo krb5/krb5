@@ -1,3 +1,9 @@
+Thu Jun 29 06:54:00 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in (--with-dbm): new option, allows easy building of
+	normal dbm support for compatibility.
+	* Makefile.in (DBFLAGS): variable to hold substitution of flags to
+	enable Berkeley db support.
 
 Thu Jun 22 11:59:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Replace static kdb context with context which is attached

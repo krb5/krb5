@@ -5,6 +5,20 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_HAVE_HEADERS(unistd.h)
+AC_ARG_WITH([dbm],
+[  --with-dbm		use native dbm for kdc database
+  --without-dbm		use included version of Berkeley db (default)],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using native dbm)
+	DBFLAGS=
+else
+	AC_MSG_RESULT(Using Berkeley db)
+	DBFLAGS=-DBERK_DB_DBM
+fi
+AC_SUBST(DBFLAGS)dnl
+dnl
 V5_USE_SHARED_LIB
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 LinkFileDir(../libkdb5.a, libkdb5.a, ./kdb)
