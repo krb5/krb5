@@ -1,3 +1,9 @@
+Thu Feb 12 16:38:14 1998  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c: KLUDGE!! Add global variable
+	krb5_gss_dbg_client_expcreds to allow the client library to send
+	expired credentials for testing and debugging purposes.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

@@ -28,6 +28,10 @@
  * $Id$
  */
 
+/* XXX This is for debugging only!!!  Should become a real bitfield
+   at some point */
+int krb5_gss_dbg_client_expcreds = 0;
+
 static krb5_error_code
 make_ap_req(context, auth_context, cred, server, now, endtime, chan_bindings, 
 	    req_flags, krb_flags, mech_type, token)
@@ -158,7 +162,7 @@ make_ap_req(context, auth_context, cred, server, now, endtime, chan_bindings,
      * boundaries) because accept_sec_context code is also similarly
      * non-forgiving.
      */
-    if (out_creds->times.endtime < now) {
+    if (!krb5_gss_dbg_client_expcreds && out_creds->times.endtime < now) {
 	code = KRB5KRB_AP_ERR_TKT_EXPIRED;
 	goto cleanup;
     }
