@@ -92,8 +92,7 @@ krb5_error_code krb5_fcc_store_flags PROTOTYPE((krb5_ccache id , krb5_flags *f )
 krb5_error_code krb5_fcc_store_addrs PROTOTYPE((krb5_ccache id , krb5_address ** ));
 krb5_error_code krb5_fcc_store_addr PROTOTYPE((krb5_ccache id , krb5_address * ));
 
-/* fcc_test.c */
-void init_test_cred PROTOTYPE((void ));
-
+/* fcc_errs.c */
+krb5_error_code krb5_fcc_interpret PROTOTYPE((int ));
 
 #endif /* KRB5_FCC_PROTO__ */
