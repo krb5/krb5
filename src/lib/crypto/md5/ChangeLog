@@ -1,3 +1,8 @@
+Wed Jun 12 00:11:34 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* rsa-md5.h:
+	* md5.c: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
+
 Tue May 21 20:29:03 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (check-unix): Use KRB5_RUN_FLAGS 

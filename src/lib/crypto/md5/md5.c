@@ -38,7 +38,7 @@
 #include "k5-int.h"
 #include "rsa-md5.h"
 
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #define UL(x) x##UL
 #else
 #define UL(x) ((krb5_ui_4) x)

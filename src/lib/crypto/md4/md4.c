@@ -38,14 +38,14 @@
 #include "k5-int.h"
 #include "rsa-md4.h"
 
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #define UL(x) x##UL
 #else
 #define UL(x) ((krb5_ui_4) x)
 #endif    
 
 /* forward declaration */
-#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
+#if (defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)) && !defined(KRB5_NO_PROTOTYPES)
 static void Transform (krb5_ui_4 FAR *, krb5_ui_4 FAR *);
 #else
 static void Transform ();
