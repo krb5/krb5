@@ -1,3 +1,11 @@
+2000-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Check for dns, dns-for-kdc, and
+	dns-for-realm separately.  Define KRB5_DNS_LOOKUP if either mode
+	is enabled.  Define KRB5_DNS_LOOKUP_KDC and KRB5_DNS_LOOKUP_REALM
+	if the appropriate modes are enabled.
+	* acconfig.h (KRB5_DNS_LOOKUP_KDC, KRB5_DNS_LOOKUP_REALM): Undef.
+
 2000-03-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): Check for alpha*-dec-osf* instead

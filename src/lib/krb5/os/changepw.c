@@ -90,7 +90,7 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_kdc(context);
         if ( use_dns ) {
             code = krb5_locate_srv_dns(realm, "_kpasswd", "_udp",
                                         addr_pp, naddrs);

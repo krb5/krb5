@@ -1,3 +1,15 @@
+2000-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (_krb5_use_dns_realm): Renamed from _krb5_use_dns.
+	Default to 1 iff KRB5_DNS_LOOKUP_REALM.  Look up
+	"dns_lookup_realm" in krb5.conf.
+	(_krb5_use_dns_kdc): Similar function, using "dns_lookup_kdc" and
+	KRB5_DNS_LOOKUP_KDC.
+	(krb5_locate_kdc): Call _krb5_use_dns_kdc.
+	* changepw.c (krb5_locate_kpasswd): Call _krb5_use_dns_kdc.
+	* def_realm.c (krb5_get_default_realm): Call _krb5_use_dns_realm.
+	* hst_realm.c (krb5_get_host_realm): Call _krb5_use_dns_realm.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c: Add krb5int_set_prompt_types() and

@@ -53,8 +53,19 @@
 #define KPASSWD_PORTNAME "kpasswd"
 #endif
 
+#if KRB5_DNS_LOOKUP_KDC
+#define DEFAULT_LOOKUP_KDC "1"
+#else
+#define DEFAULT_LOOKUP_KDC "0"
+#endif
+#if KRB5_DNS_LOOKUP_REALM
+#define DEFAULT_LOOKUP_REALM "1"
+#else
+#define DEFAULT_LOOKUP_REALM "0"
+#endif
+
 int
-_krb5_use_dns(context)
+_krb5_use_dns_kdc(context)
     krb5_context context;
 {
     krb5_error_code code;
@@ -62,8 +73,29 @@ _krb5_use_dns(context)
     int use_dns = 0;
 
     code = profile_get_string(context->profile, "libdefaults",
-                              "dns_fallback", 0, 
-                              context->profile_in_memory?"1":"0",
+                              "dns_lookup_kdc", 0, DEFAULT_LOOKUP_KDC,
+                              &value);
+    if (code)
+        return(code);
+
+    if (value) {
+        use_dns = _krb5_conf_boolean(value);
+        profile_release_string(value);
+    }
+
+    return use_dns;
+}
+
+int
+_krb5_use_dns_realm(context)
+    krb5_context context;
+{
+    krb5_error_code code;
+    char * value = NULL;
+    int use_dns = 0;
+
+    code = profile_get_string(context->profile, "libdefaults",
+                              "dns_lookup_realm", 0, DEFAULT_LOOKUP_REALM,
                               &value);
     if (code)
         return(code);
@@ -588,7 +620,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_kdc(context);
         if ( use_dns ) {
             code = krb5_locate_srv_dns(realm, "_kerberos", "_udp",
                                         addr_pp, naddrs);

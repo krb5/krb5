@@ -312,7 +312,7 @@ krb5_get_host_realm(context, host, realmsp)
 
 #ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
-        int use_dns = _krb5_use_dns(context);
+        int use_dns = _krb5_use_dns_realm(context);
         if ( use_dns ) {
             /*
              * Since this didn't appear in our config file, try looking
