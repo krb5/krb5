@@ -154,7 +154,7 @@ while true; do
 		else
 			LOG_USER='log_user 0'
 		fi
-		if expect <<EOF
+		if $EXPECT <<EOF
 		$LOG_USER
 		spawn telnet localhost 1751
 		expect {

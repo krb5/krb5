@@ -21,6 +21,12 @@ if [ "$K5ROOT" = "" ]; then
 	K5ROOT="`cd $TESTDIR; pwd`/krb5-test-root"
 	export K5ROOT
 fi
+
+REALM=SECURE-TEST.OV.COM; export REALM
+
+# XXX This should be detected by configure!
+EXPECT=/mit/gnu/bin/expect; export EXPECT
+
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl
 export FIX_CONF_FILES
@@ -37,16 +43,6 @@ CLNTTCL=$TESTDIR/util/ovsec_kadm_clnt_tcl; export CLNTTCL
 SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl; export SRVTCL
 QUALNAME=$TOP/inst-scripts/qualname.pl; export QUALNAME
 
-START_SERVERS=$TESTDIR/scripts/start_servers $TEST_SERVER
-export START_SERVERS
-START_SERVERS_LOCAL=$TESTDIR/scripts/start_servers_local
-export START_SERVERS_LOCAL
-
-STOP_SERVERS=$TESTDIR/scripts/stop_servers $TEST_SERVER
-export STOP_SERVERS
-STOP_SERVERS_LOCAL=$TESTDIR/scripts/stop_servers_local
-export STOP_SERVERS_LOCAL
-
 KRB5_CONFIG=$K5ROOT/krb5.conf; export KRB5_CONFIG
 KRB5_KDC_PROFILE=$K5ROOT/kdc.conf; export KRB5_KDC_PROFILE
 KRB5_KTNAME=$K5ROOT/ovsec_adm.srvtab; export KRB5_KTNAME
@@ -56,8 +52,6 @@ if [ "$TEST_SERVER" != "" ]; then
 fi
 if [ "$TEST_PATH" != "" ]; then
 	MAKE_KEYTAB="$MAKE_KEYTAB -top $TEST_PATH"
-	START_SERVERS="$START_SERVERS $TEST_PATH"
-	STOP_SERVERS="$STOP_SERVERS $TEST_PATH"
 fi
 
 if [ "x$PS_ALL" = "x" ]; then

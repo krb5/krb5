@@ -51,6 +51,7 @@ fi
 # done
 
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
+	-e "s/__KDCHOST__/localhost/g" \
 	< $TESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	< $TESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf

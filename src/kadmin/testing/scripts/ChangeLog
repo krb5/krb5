@@ -1,5 +1,9 @@
 Fri Sep 27 14:12:59 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* start_servers, start_servers_local, stop_servers, init_db,
+ 	env-setup.sh: first pass at making TEST_SERVER remote server
+ 	testing work
+
 	* env-setup.sh: set K5ROOT to $TESTDIR/krb5-test-root by default,
  	but use an absolute path
 
