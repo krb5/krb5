@@ -265,6 +265,9 @@
 #define UseImakeInstalled /* -- turn on if you have imake installed */
 #define UseMakedependInstalled /* -- turn on if you have makedepend installed */
 
+#define Krb4ApplCompat /* turn this on if you want selected applications to
+			  work with both v4 & v5 code */
+
 /* the following might want to be put into a specific architecture
    definition file */
 
