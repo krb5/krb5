@@ -10,7 +10,11 @@ klogind \- remote login server
 .SH SYNOPSIS
 .B klogind
 [
-.B \-kr54cpPe
+.B \-kr54cpPesI
+]
+[
+.B \-u
+.I utmp_hostname_length
 ]
 .SH DESCRIPTION
 .I Klogind
@@ -126,6 +130,21 @@ environment variable, ``TERM''; see
 The screen or
 window size of the terminal is requested from the client, and window
 size changes from the client are propagated to the pseudo terminal.
+
+.PP
+.I Klogind
+supports the following options to control the form of the hostname
+passed to the login program:
+
+.IP \fB-u\ utmp_hostname_length\fP
+Set the maximum length of hostname passed to login to
+\fIutmp_hostname_length\fP bytes, including terminating nul.
+
+.IP \fB-I\fP
+Always pass a numeric IP address to login.
+
+.IP \fB-s\fP
+Don't strip the local domain off hostnames.
 
 .PP
 .I Klogind

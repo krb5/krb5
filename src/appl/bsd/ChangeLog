@@ -1,3 +1,15 @@
+Wed Feb 17 17:24:11 1999  Tom Yu  <tlyu@mit.edu>
+
+	* klogind.M: Document things a little better, including new
+	options controlling hostname manipulation.
+
+	* krlogind.c: Make use of pty_make_sane_hostname() for purposes of
+	manipulating hostname to pass to login.  Also unconditionally
+	syslog IP address and full hostname of remote host.  Add command
+	line options to control such behavior.
+
+	* configure.in: Add arpa/nameser.h to CHECK_HEADERS.
+
 Wed Jan 20 21:42:41 1999  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (main): Call setluid().
