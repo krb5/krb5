@@ -57,11 +57,11 @@ users; a password that is not significantly different from every word
 in the dictionary will not be accepted.
 \end{itemize}
 
-\section{Multi-realm Operation}
-
-The behavior of any function when called with a principal name that is
-not in the host's local realm is currently undefined.
-
+%\section{Multi-realm Operation}
+%
+%The behavior of any function when called with a principal name that is
+%not in the host's local realm is currently undefined.
+%
 \section{Admin API requirements}
 
 \subsection{Versioning}
@@ -389,12 +389,10 @@ REF_COUNT               & 0x080000 & pw_refcnt & F & F
 
 \subsection{Constants, Header Files, Libraries}
 
-For release 1.0 and release 1.0.1, all of the files decribed in this
-section are
-rooted off of the ``stage'' directory in the build tree.  If we export
-this interface in future releases they will move to the ``install''
-tree. Include files are found under ``stage/include'', libraries under
-``stage/lib''.
+All of the files decribed in this section are rooted off of the
+``install'' directory in the build tree.  In the product distribution,
+they are simply included in the ``include'' and ``lib''
+subdirectories, as appropriate.
 
 $<$ovsec_admin/admin.h$>$ includes a number of required header files,
 including RPC, Kerberos 5, com_err, and \secure{} admin com_err
@@ -426,10 +424,10 @@ Client applications will link against libadmclnt.a and server programs
 against libadmsrv.a.\footnote{In Secure 1.0, client applications
 linked against libclient.a and libcommon.a, and server applications
 linked against libsrv.a and libcommon.a.}  Client applications must
-also link against: libgssapi_krb5.a, libkrb5.a, libisode.a,
-libcrypto.a, librpclib.a, libcom_err.a, libdyn.a, and libdb.a.  Server
-applications must also link against: libkdb5.a, libkrb5.a,
-libcrypto.a, libdb.a, librpclib.a, libcom_err.a, and libdyn.a.
+also link against: libgssapi_krb5.a, libkrb5.a, libcrypto.a,
+librpclib.a, libcom_err.a, libdyn.a, and libdb.a.  Server applications
+must also link against: libkdb5.a, libkrb5.a, libcrypto.a, libdb.a,
+librpclib.a, libcom_err.a, and libdyn.a.
 
 \subsection{Error Codes}
 
