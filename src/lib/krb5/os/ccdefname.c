@@ -84,6 +84,9 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	char *prefix = krb5_cc_dfl_ops->prefix;
 	int len;
 
+	if (get_from_registry(name_buf, name_size) == 0)
+		return 0;
+
 	if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
 		GetWindowsDirectory (defname, sizeof(defname)-7);
 		strcat (defname, "\\krb5cc");
@@ -129,6 +132,9 @@ krb5_cc_set_default_name(context, name)
 	krb5_error_code retval;
 	krb5_os_context os_ctx;
 
+	if (!context || context->magic != KV5M_CONTEXT)
+		return KV5M_CONTEXT;
+
 	os_ctx = context->os_context;
 	
 	if (!name)
@@ -161,10 +167,12 @@ krb5_cc_default_name(context)
 {
 	krb5_os_context os_ctx;
 
+	if (!context || context->magic != KV5M_CONTEXT)
+		return NULL;
+
 	os_ctx = context->os_context;
 	if (!os_ctx->default_ccname)
 		krb5_cc_set_default_name(context, NULL);
 
 	return(os_ctx->default_ccname);
 }
-    
