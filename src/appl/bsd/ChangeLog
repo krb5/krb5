@@ -1,6 +1,36 @@
+Wed Apr 17 13:46:57 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in (LOGINLIBS): Remove DECLARE_SYS_ERRLIST since it's
+		no longer necessary.
+
+	* krcp.c (verifydir, allocbuf, rsource, source, sink): Don't use
+ 		sys_errlist[]; just call error_message() instead, since we
+ 		depend on com_err anyway.
+
+	* krshd.c (recvauth): 
+	* krlogind.c (recvauth): Don't actually check the checksum unless
+ 		it is required.  Old (pre-beta 5) clients sent a checksum
+ 		of random garbage (such as their pid) which is impossible to
+ 		actually check on the server side.  (Grad student stupidity
+		strikes again.)
+		(fatalperror): Don't use sys_errlist[] to get the right
+		error message; just depend on com_err instead, since we're
+		using it anyway.
+
+	* krshd.c (doit): 
+	* krlogind.c (do_krb_login): Fix logic so that if checksums are
+	 	required, and the checksum is valid, don't syslog the
+	 	stupid warning message about "Checksums are only required
+	 	for v5 clients...."
+  	
+	* krcp.c, krshd.c, krlogind.c: Miscellaneous -Wall cleanups
+
+	* krlogind.c (getpty): Removed dead code.
+
 Tue Apr 16 11:33:33 1996  Sam Hartman  <hartmans@mit.edu>
 
-	* krlogind.c kshd.c (main): Drop support for handling  options in rlogind's name.
+	* krlogind.c kshd.c (main): Drop support for handling options in
+	 	rlogind's name.
 
 Sun Apr 14 03:41:49 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
 

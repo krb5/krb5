@@ -58,7 +58,6 @@ AC_CHECK_HEADERS(sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h )
 AC_CHECK_HEADERS(sys/ptyvar.h utmp.h utmpx.h sys/time.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
-DECLARE_SYS_ERRLIST
 KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP

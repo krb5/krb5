@@ -31,6 +31,9 @@ char copyright[] =
       * rcp
       */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -97,7 +100,8 @@ char	**save_argv();
 char	*strsave();
 #endif
 int	des_write(), des_read();
-void answer_auth();
+void 	usage(), sink(), source(), rsource(), verifydir(), answer_auth();
+int	response(), hosteq(), okname(), susystem();
 int	encryptflag = 0;
 
 #ifndef UCB_RCP
@@ -113,9 +117,6 @@ int	rem;
 char	*colon();
 int	errs;
 krb5_sigtype	lostconn();
-#ifdef NEED_SYS_ERRLIST
-extern char	*sys_errlist[];
-#endif
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
@@ -132,16 +133,15 @@ struct buffer {
 #define	NULLBUF	(struct buffer *) 0
   
 #ifdef HAVE_STDARG_H
-int 	error KRB5_STDARG_P((char *fmt, ...));
+void 	error KRB5_STDARG_P((char *fmt, ...));
 #else
 /*VARARGS*/
-int	error KRB5_STDARG_P((char *, va_list));
+void	error KRB5_STDARG_P((char *, va_list));
 #endif
 
 #define	ga()	 	(void) des_write(rem, "", 1)
 
-
-main(argc, argv)
+int main(argc, argv)
      int argc;
      char **argv;
 {
@@ -437,8 +437,7 @@ krb5_creds *cred;
 			session_key = &cred->keyblock;
 				   
     krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock, 
-				   session_key)){
+    if ((status = krb5_process_key(bsd_context, &eblock, session_key))) {
 	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
 		error_message(status));
 	exit(1);
@@ -534,8 +533,7 @@ krb5_creds *cred;
 			session_key = &cred->keyblock;
 				   
     krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock, 
-				   session_key)){
+    if ((status = krb5_process_key(bsd_context, &eblock, session_key))) {
 	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
 		error_message(status));
 	exit(1);
@@ -593,7 +591,7 @@ krb5_creds *cred;
 
 
 
-verifydir(cp)
+void verifydir(cp)
      char *cp;
 {
     struct stat stb;
@@ -603,7 +601,7 @@ verifydir(cp)
 	  return;
 	errno = ENOTDIR;
     }
-    error("rcp: %s: %s.\n", cp, sys_errlist[errno]);
+    error("rcp: %s: %s.\n", cp, error_message(errno));
     exit(1);
 }
 
@@ -625,7 +623,7 @@ char *colon(cp)
 
 
 
-okname(cp0)
+int okname(cp0)
      char *cp0;
 {
     register char *cp = cp0;
@@ -647,7 +645,7 @@ okname(cp0)
 
 
 
-susystem(s)
+int susystem(s)
      char *s;
 {
     int status;
@@ -693,9 +691,7 @@ susystem(s)
     return (status);
 }
 
-
-
-source(argc, argv)
+void source(argc, argv)
      int argc;
      char **argv;
 {
@@ -710,7 +706,7 @@ source(argc, argv)
     for (x = 0; x < argc; x++) {
 	name = argv[x];
 	if ((f = open(name, 0)) < 0) {
-	    error("rcp: %s: %s\n", name, sys_errlist[errno]);
+	    error("rcp: %s: %s\n", name, error_message(errno));
 	    continue;
 	}
 	if (fstat(f, &stb) < 0)
@@ -775,7 +771,7 @@ source(argc, argv)
 	if (readerr == 0)
 	  ga();
 	else
-	  error("rcp: %s: %s\n", name, sys_errlist[readerr]);
+	  error("rcp: %s: %s\n", name, error_message(readerr));
 	(void) response();
     }
 }
@@ -788,7 +784,7 @@ source(argc, argv)
 #include <dirent.h>
 #endif
 
-rsource(name, statp)
+void rsource(name, statp)
      char *name;
      struct stat *statp;
 {
@@ -803,7 +799,7 @@ rsource(name, statp)
     char *bufv[1];
     
     if (d == 0) {
-	error("rcp: %s: %s\n", name, sys_errlist[errno]);
+	error("rcp: %s: %s\n", name, error_message(errno));
 	return;
     }
     last = strrchr(name, '/');
@@ -846,7 +842,7 @@ rsource(name, statp)
 
 
 
-response()
+int response()
 {
     char resp, c, rbuf[RCP_BUFSIZ], *cp = rbuf;
     if (des_read(rem, &resp, 1) != 1)
@@ -897,7 +893,7 @@ krb5_sigtype
  * set the microsecond values; we don't want to take away
  * functionality unnecessarily.
  */
-utimes(file, tvp)
+int utimes(file, tvp)
 const char *file;
 struct timeval *tvp;
 {
@@ -910,7 +906,7 @@ struct timeval *tvp;
 #endif
 
 
-sink(argc, argv)
+void sink(argc, argv)
      int argc;
      char **argv;
 {
@@ -1038,13 +1034,13 @@ sink(argc, argv)
 		setimes = 0;
 		if (utimes(nambuf, tv) < 0)
 		  error("rcp: can't set times on %s: %s\n",
-			nambuf, sys_errlist[errno]);
+			nambuf, error_message(errno));
 	    }
 	    continue;
 	}
 	if ((of = open(nambuf, O_WRONLY|O_CREAT, mode)) < 0) {
 	  bad:
-	    error("rcp: %s: %s\n", nambuf, sys_errlist[errno]);
+	    error("rcp: %s: %s\n", nambuf, error_message(errno));
 	    continue;
 	}
 	if (exists && pflag) {
@@ -1073,8 +1069,7 @@ sink(argc, argv)
 		    if (j == 0)
 		      error("rcp: dropped connection");
 		    else
-		      error("rcp: %s\n",
-			    sys_errlist[errno]);
+		      error("rcp: %s\n", error_message(errno));
 		    exit(1);
 		}
 		amt -= j;
@@ -1092,18 +1087,17 @@ sink(argc, argv)
 	    write(of, bp->buf, count) != count)
 	  wrerr++;
 	if (ftruncate(of, size))
-	  error("rcp: can't truncate %s: %s\n",
-		nambuf, sys_errlist[errno]);
+	  error("rcp: can't truncate %s: %s\n", nambuf, error_message(errno));
 	(void) close(of);
 	(void) response();
 	if (setimes) {
 	    setimes = 0;
 	    if (utimes(nambuf, tv) < 0)
 	      error("rcp: can't set times on %s: %s\n",
-		    nambuf, sys_errlist[errno]);
+		    nambuf, error_message(errno));
 	}				   
 	if (wrerr)
-	  error("rcp: %s: %s\n", nambuf, sys_errlist[errno]);
+	  error("rcp: %s: %s\n", nambuf, error_message(errno));
 	else
 	  ga();
     }
@@ -1122,7 +1116,7 @@ struct buffer *allocbuf(bp, fd, blksize)
     int size;
     
     if (fstat(fd, &stb) < 0) {
-	error("rcp: fstat: %s\n", sys_errlist[errno]);
+	error("rcp: fstat: %s\n", error_message(errno));
 	return (NULLBUF);
     }
 #ifdef NOROUNDUP
@@ -1147,7 +1141,7 @@ struct buffer *allocbuf(bp, fd, blksize)
 
 
 
-int
+void
 #ifdef HAVE_STDARG_H
 error(char *fmt, ...)
 #else
@@ -1178,7 +1172,7 @@ error(fmt, va_alist)
 
 
 
-usage()
+void usage()
 {
 #ifdef KERBEROS
     fprintf(stderr,
@@ -1191,7 +1185,7 @@ usage()
 
 
 
-hosteq(h1, h2)
+int hosteq(h1, h2)
      char *h1, *h2;
 {
     struct hostent *h_ptr;
@@ -1278,45 +1272,47 @@ void
     	const char * filenames[2];
     	filenames[1] = NULL;
     	filenames[0] = config_file;
-    	if (status = krb5_set_config_files(bsd_context, filenames))
+    	if ((status = krb5_set_config_files(bsd_context, filenames)))
 	    exit(1);
     }
     
     memset ((char*)&creds, 0, sizeof(creds));
 
-    if (status = krb5_read_message(bsd_context, (krb5_pointer)&rem,
-				   &pname_data)) 
+    if ((status = krb5_read_message(bsd_context, (krb5_pointer)&rem,
+				    &pname_data)))
 	exit(1);
     
-    if (status = krb5_read_message(bsd_context, (krb5_pointer) &rem,
-				   &creds.second_ticket)) 
+    if ((status = krb5_read_message(bsd_context, (krb5_pointer) &rem,
+				    &creds.second_ticket)))
 	exit(1);
     
     if (ccache_file == NULL) {
-    	if (status = krb5_cc_default(bsd_context, &cc))
+    	if ((status = krb5_cc_default(bsd_context, &cc)))
 	    exit(1);
     } else {
-	if (status = krb5_cc_resolve(bsd_context, ccache_file, &cc))
+	if ((status = krb5_cc_resolve(bsd_context, ccache_file, &cc)))
 	    exit(1);
     }
 
-    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)) 
+    if ((status = krb5_cc_get_principal(bsd_context, cc, &creds.client)))
 	exit(1);
 
-    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server)) 
+    if ((status = krb5_parse_name(bsd_context, pname_data.data,
+				  &creds.server)) )
 	exit(1);
 
     krb5_xfree(pname_data.data);
-    if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
-				      &creds, &new_creds))
+    if ((status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
+				       &creds, &new_creds)))
 	exit(1);
 
-    if (status = krb5_mk_req_extended(bsd_context, &auth_context,
-			  	      AP_OPTS_USE_SESSION_KEY,
-				      NULL, new_creds, &msg))
+    if ((status = krb5_mk_req_extended(bsd_context, &auth_context,
+				       AP_OPTS_USE_SESSION_KEY,
+				       NULL, new_creds, &msg)))
 	exit(1);
     
-    if (status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg)) {
+    if ((status = krb5_write_message(bsd_context, (krb5_pointer) &rem,
+				     &msg))) {
     	krb5_xfree(msg.data);
 	exit(1);
     }
@@ -1331,7 +1327,7 @@ void
     
     /* OK process key */
     krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if (status = krb5_process_key(bsd_context, &eblock, session_key)) 
+    if ((status = krb5_process_key(bsd_context, &eblock, session_key)))
 	exit(1);
 
     return;
@@ -1436,7 +1432,7 @@ int des_write(fd, buf, len)
       return(krb5_net_write(bsd_context, fd, buf, len));
     
     desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outbuf)){
+    if (desoutbuf.length > (int) sizeof(des_outbuf)){
 	return(-1);
     }
     if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,

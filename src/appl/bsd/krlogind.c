@@ -287,9 +287,11 @@ static	int Pfd;
 #define VHANG_LAST		/* vhangup must occur on close, not open */
 #endif
 
-void	fatal(), fatalperror(), doit(), usage(), do_krb_login();
+void	fatal(), fatalperror(), doit(), usage(), do_krb_login(), getstr();
+void	protocol();
 int	princ_maps_to_lname(), default_realm();
 krb5_sigtype	cleanup();
+krb5_error_code recvauth();
 
 /* There are two authentication related masks:
    * auth_ok and auth_sent.
@@ -306,7 +308,7 @@ int auth_ok = 0, auth_sent = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
 int checksum_required = 0;
 
-main(argc, argv)
+int main(argc, argv)
      int argc;
      char **argv;
 {
@@ -318,7 +320,6 @@ main(argc, argv)
     int debug_port = 0;
     int fd;
 #ifdef KERBEROS
-int valid_checksum;
     krb5_error_code status;
 #endif
     
@@ -378,7 +379,7 @@ pty_init();
 	  break;
 #endif
 	case 'S':
-	  if (status = krb5_kt_resolve(bsd_context, optarg, &keytab)) {
+	  if ((status = krb5_kt_resolve(bsd_context, optarg, &keytab))) {
 		  com_err(progname, status, "while resolving srvtab file %s",
 			  optarg);
 		  exit(2);
@@ -468,6 +469,7 @@ pty_init();
     }
     
     doit(fd, &from);
+    return 0;
 }
 
 
@@ -491,7 +493,7 @@ void doit(f, fromp)
      int f;
      struct sockaddr_in *fromp;
 {
-    int i, p, t, vfd, on = 1;
+    int p, t, on = 1;
     register struct hostent *hp;
     char c;
     char buferror[255];
@@ -568,7 +570,7 @@ int syncpipe[2];
 #endif
     
     write(f, "", 1);
-    if (retval = pty_getpty(&p,line, sizeof(line))) {
+    if ((retval = pty_getpty(&p,line, sizeof(line)))) {
 	com_err(progname, retval, "while getting master pty");
 	exit(2);
     }
@@ -578,10 +580,6 @@ int syncpipe[2];
     (void) ioctl(p, TIOCSWINSZ, &win);
 #endif
     
-
-
-
-
 #ifdef POSIX_SIGNALS
     sa.sa_handler = cleanup;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -599,7 +597,7 @@ int syncpipe[2];
 #else
 	struct sgttyb b;
 #endif /* POSIX_TERMIOS */
-	if ( retval = pty_open_slave(line, &t)) {
+	if ((retval = pty_open_slave(line, &t))) {
 	    fatal(f, error_message(retval));
 	    exit(1);
 	}
@@ -639,7 +637,6 @@ int syncpipe[2];
 	dup2(t, 0), dup2(t, 1), dup2(t, 2);
 	if (t > 2)
 	  close(t);
-
 	
 #if defined(sysvimp)
 	setcompat (COMPAT_CLRPGROUP | (getcompat() & ~COMPAT_BSDTTY));
@@ -763,7 +760,7 @@ int syncpipe[2];
     (void) write(p, lusername, strlen(lusername) +1);
 #endif
     /* stuff term info down to login */
-    if( write(p, term, strlen(term)+1) != strlen(term)+1 ){
+    if ((write(p, term, strlen(term)+1) != (int) strlen(term)+1)) {
 	/*
 	 * Problems write failed ...
 	 */
@@ -790,7 +787,7 @@ char    oobdata[] = {0};
  * in the data stream.  For now, we are only willing to handle
  * window size changes.
  */
-control(pty, cp, n)
+int control(pty, cp, n)
      int pty;
      unsigned char *cp;
      int n;
@@ -798,7 +795,7 @@ control(pty, cp, n)
     struct winsize w;
     int pgrp;
     
-    if (n < 4+sizeof (w) || cp[2] != 's' || cp[3] != 's')
+    if (n < (int) 4+sizeof (w) || cp[2] != 's' || cp[3] != 's')
       return (0);
 #ifdef TIOCSWINSZ
     oobdata[0] &= ~TIOCPKT_WINDOW;	/* we know he heard */
@@ -819,7 +816,7 @@ control(pty, cp, n)
 /*
  * rlogin "protocol" machine.
  */
-protocol(f, p)
+void protocol(f, p)
      int f, p;
 {
     unsigned char pibuf[1024], fibuf[1024], *pbp, *fbp;
@@ -1008,14 +1005,8 @@ void fatalperror(f, msg)
      char *msg;
 {
     char buf[512];
-#ifdef NEED_SYS_ERRLIST
-    extern int sys_nerr;
-    extern char *sys_errlist[];
-#endif    
-    if ((unsigned)errno < sys_nerr)
-      (void) sprintf(buf, "%s: %s", msg, sys_errlist[errno]);
-    else
-      (void) sprintf(buf, "%s: Error %d", msg, errno);
+    
+    (void) sprintf(buf, "%s: %s", msg, error_message(errno));
     fatal(f, buf);
 }
 
@@ -1028,9 +1019,7 @@ do_krb_login(host)
     krb5_error_code status;
     struct passwd *pwd;
     char *msg_fail = NULL;
-int valid_checksum;
-
-
+    int valid_checksum;
 
     if (getuid()) {
 	exit(1);
@@ -1038,7 +1027,7 @@ int valid_checksum;
 
     /* Check authentication. This can be either Kerberos V5, */
     /* Kerberos V4, or host-based. */
-    if (status = recvauth(&valid_checksum)) {
+    if ((status = recvauth(&valid_checksum))) {
 	if (ticket)
 	  krb5_free_ticket(bsd_context, ticket);
 	if (status != 255)
@@ -1087,13 +1076,12 @@ int valid_checksum;
 	}
     }
 
-    if (checksum_required) {
-	if ((auth_sent&AUTH_KRB5)&&(!valid_checksum)) {
+    if (checksum_required && !valid_checksum) {
+	if (auth_sent & AUTH_KRB5) {
 	    syslog(LOG_WARNING, "Client did not supply required checksum.");
 	
 	    fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
-	}
-	else {
+	} else {
 	    syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
 	}
     }
@@ -1120,7 +1108,7 @@ int valid_checksum;
 
 
 
-getstr(fd, buf, cnt, err)
+void getstr(fd, buf, cnt, err)
      int fd;
      char *buf;
      int cnt;
@@ -1156,7 +1144,9 @@ v5_des_read(fd, buf, len)
     int nreturned = 0;
     krb5_ui_4 net_len,rd_len;
     int cc,retry;
+#if 0
     unsigned char len_buf[4];
+#endif
     
     if (!do_encrypt)
       return(read(fd, buf, len));
@@ -1211,7 +1201,8 @@ v5_des_read(fd, buf, len)
 	}
 #endif
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
-    if (net_len < 0 || net_len > sizeof(des_inbuf)) {
+    /* note net_len is unsigned */
+    if (net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
 	   act as if pipe closed */
 	syslog(LOG_ERR,"Read size problem.");
@@ -1300,82 +1291,6 @@ v5_des_write(fd, buf, len)
 }
 #endif /* KERBEROS */
 
-
-
-getpty(fd,slave)
-     int *fd;
-     char *slave;
-{
-    char c;
-    char *p;
-    int i,ptynum;
-    struct stat stb;
-
-#ifdef HAVE_OPENPTY
-    int slavefd;
-
-    if(openpty(fd, &slavefd, slave, (struct termios *) 0,
-         (struct winsize *) 0)) return 1;
-    return 0;
-#else
-
-    *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris, IRIX */
-    if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
-    if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
-
-    if (*fd >= 0) {
-
-#ifdef HAVE_GRANTPT
-	if (grantpt(*fd) || unlockpt(*fd)) return 1;
-#endif
-    
-#ifdef HAVE_PTSNAME
-	p = ptsname(*fd);
-#else
-#ifdef	HAVE_TTYNAME
-	p = ttyname(*fd);
-#else
-	/* XXX If we don't have either what do we do */
-#endif
-#endif
-	if (p) {
-	    strcpy(slave, p);
-	    return 0;
-	}
-
-	if (fstat(*fd, &stb) < 0) {
-	    close(*fd);
-	    return 1;
-	}
-	ptynum = (int)(stb.st_rdev&0xFF);
-	sprintf(slave, "/dev/ttyp%x", ptynum);
-	return 0;
-
-    } else {
-    
-	for (c = 'p'; c <= 's'; c++) {
-	    sprintf(slave,"/dev/ptyXX");
-	    slave[strlen("/dev/pty")] = c;
-	    slave[strlen("/dev/ptyp")] = '0';
-	    if (stat(slave, &stb) < 0)
-		break;
-	    for (i = 0; i < 16; i++) {
-		slave[sizeof("/dev/ptyp") - 1] = "0123456789abcdef"[i];
-		*fd = open(slave, O_RDWR);
-		if (*fd < 0) continue;
-
-		/* got pty */
-		slave[strlen("/dev/")] = 't';
-		return 0;
-	    }
-	}
-	return 1;
-    }
-#endif /* HAVE_OPENPTY */
-}
-
-
-
 void usage()
 {
 #ifdef KERBEROS
@@ -1412,7 +1327,7 @@ int default_realm(principal)
     
     realm_length = krb5_princ_realm(bsd_context, principal)->length;
     
-    if (retval = krb5_get_default_realm(bsd_context, &def_realm)) {
+    if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
 	return 0;
     }
     
@@ -1440,13 +1355,13 @@ recvauth(valid_checksum)
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in peersin, laddr;
-    char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
     krb5_authenticator *authenticator;
-*valid_checksum = 0;
+
+    *valid_checksum = 0;
     len = sizeof(laddr);
     if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
@@ -1460,15 +1375,15 @@ recvauth(valid_checksum)
 
     strcpy(v4_instance, "*");
 
-    if (status = krb5_auth_con_init(bsd_context, &auth_context))
+    if ((status = krb5_auth_con_init(bsd_context, &auth_context)))
         return status;
  
     /* Only need remote address for rd_cred() to verify client */
-    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
+    if ((status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
+		 KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)))
 	return status;
 
-    if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
+    if ((status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
 				  NULL, 	/* Specify daemon principal */
 				  0, 		/* no flags */
@@ -1483,7 +1398,7 @@ recvauth(valid_checksum)
 
 				  &ticket, 	/* return ticket */
 				  &auth_sys, 	/* which authentication system*/
-				  &v4_kdata, v4_schedule, v4_version)) {
+				  &v4_kdata, v4_schedule, v4_version))) {
 
       if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
@@ -1498,9 +1413,10 @@ recvauth(valid_checksum)
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
-    if (auth_sys == KRB5_RECVAUTH_V5) {
+    if ((auth_sys == KRB5_RECVAUTH_V5) && checksum_required) {
       
-      if(status = krb5_auth_con_getauthenticator(bsd_context, auth_context, &authenticator))
+      if ((status = krb5_auth_con_getauthenticator(bsd_context, auth_context,
+						   &authenticator)))
 	return status;
     
       if (authenticator->checksum) {
@@ -1508,24 +1424,23 @@ recvauth(valid_checksum)
 	int adr_length = sizeof(adr);
 	char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
 	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
-	  return errno;
+	    goto error_cleanup;
 	if (chksumbuf == 0)
-	  goto error_cleanup;
+	    goto error_cleanup;
 
 	sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
 	strcat(chksumbuf,term);
 	strcat(chksumbuf,lusername);
 
-	if ( status = krb5_verify_checksum(bsd_context,
-					   authenticator->checksum->checksum_type,
-					   authenticator->checksum,
-					   chksumbuf, strlen(chksumbuf),
-					   ticket->enc_part2->session->contents, 
-					   ticket->enc_part2->session->length))
-	  goto error_cleanup;
-
-      error_cleanup:
-	krb5_xfree(chksumbuf);
+	status = krb5_verify_checksum(bsd_context,
+				      authenticator->checksum->checksum_type,
+				      authenticator->checksum,
+				      chksumbuf, strlen(chksumbuf),
+				      ticket->enc_part2->session->contents, 
+				      ticket->enc_part2->session->length);
+    error_cleanup:
+	if (chksumbuf)
+	    krb5_xfree(chksumbuf);
 	if (status) {
 	  krb5_free_authenticator(bsd_context, authenticator);
 	  return status;
@@ -1561,8 +1476,8 @@ recvauth(valid_checksum)
 
     /* Must be V5  */
 	
-    if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
-				     &client))
+    if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+				      &client)))
 	return status;
 
     des_read  = v5_des_read;
@@ -1570,7 +1485,7 @@ recvauth(valid_checksum)
 
     getstr(netf, rusername, sizeof(rusername), "remuser");
 
-    if (status = krb5_unparse_name(bsd_context, client, &krusername))
+    if ((status = krb5_unparse_name(bsd_context, client, &krusername)))
 	return status;
     
     /* Setup up eblock if encrypted login session */
@@ -1578,12 +1493,12 @@ recvauth(valid_checksum)
     if (do_encrypt) {
 	krb5_use_enctype(bsd_context, &eblock,
 			 ticket->enc_part2->session->enctype);
-	if (status = krb5_process_key(bsd_context, &eblock,
-				      ticket->enc_part2->session))
+	if ((status = krb5_process_key(bsd_context, &eblock,
+				       ticket->enc_part2->session)))
 	    fatal(netf, "Permission denied");
     }      
 
-    if (status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf))
+    if ((status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf)))
 	fatal(netf, "Error reading message");
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
@@ -1606,7 +1521,9 @@ int len;
 	int nreturned = 0;
 	krb5_ui_4 net_len, rd_len;
 	int cc;
+#if 0
 	unsigned char len_buf[4];
+#endif
 
 	if (!do_encrypt)
 		return(read(fd, buf, len));
@@ -1668,7 +1585,8 @@ int len;
 	}
 
 #endif
-	if (net_len < 0 || net_len > sizeof(des_inbuf)) {
+	/* Note: net_len is unsigned */
+	if (net_len > sizeof(des_inbuf)) {
 		/* XXX preposterous length, probably out of sync.
 		   act as if pipe closed */
 		return(0);
