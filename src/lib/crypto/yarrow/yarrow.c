@@ -73,7 +73,7 @@ static int Yarrow_Save_State( Yarrow_CTX *y );
 
 static const byte zero_block[CIPHER_BLOCK_SIZE] = { 0, };
 
-static const char* yarrow_str_error[] = {
+static const char* const yarrow_str_error[] = {
     "ok",
     "failed",
     "failed: uninitialized",
