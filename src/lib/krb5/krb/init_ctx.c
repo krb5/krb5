@@ -143,6 +143,7 @@ KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {
+     krb5_free_ets(ctx);
      krb5_os_free_context(ctx);
 
      if (ctx->in_tkt_ktypes)

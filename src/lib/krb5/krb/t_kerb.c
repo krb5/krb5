@@ -135,7 +135,6 @@ main(argc, argv)
 		retval);
 	exit(1);
     }
-    krb5_init_ets(ctx);
     progname = argv[0];
 
      /* Parse arguments. */

@@ -18,7 +18,6 @@ main(argc, argv)
 	krb5_context context;
 	
 	krb5_init_context(&context);
-	krb5_init_ets(context);
 	
 	if (argc < 3 || argc > 4) {
 		fprintf(stderr,
