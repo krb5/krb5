@@ -47,12 +47,12 @@ define(CONFIG_RULES,[dnl
 V5_SET_TOPDIR dnl
 WITH_CC dnl
 WITH_CCOPTS dnl
+WITH_CPPOPTS dnl
 WITH_LINKER dnl
 WITH_LDOPTS dnl
-WITH_CPPOPTS dnl
 WITH_KRB4 dnl
-CHOOSE_ET dnl
-CHOOSE_SS dnl
+KRB5_AC_CHOOSE_ET dnl
+KRB5_AC_CHOOSE_SS dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
 ADD_DEF([-DKRB5_PRIVATE=1]) dnl
 ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
@@ -429,82 +429,64 @@ dnl set $(CC) from --with-cc=value
 dnl
 AC_DEFUN(KRB5_INIT_CCOPTS,[CCOPTS=
 ])
-AC_DEFUN(WITH_CC,[
-AC_REQUIRE([KRB5_INIT_CCOPTS])
-AC_ARG_WITH([cc],
-[  --with-cc=COMPILER      select compiler to use])
-AC_MSG_CHECKING(for C compiler)
-dnl Default assumed compiler
-test -z "$CC" && CC=cc
-if test "$with_cc" != ""; then
-  if test "$krb5_cv_prog_cc" != "" && test "$krb5_cv_prog_cc" != "$with_cc"; then
-    AC_MSG_ERROR(Specified compiler doesn't match cached compiler name;
-	remove cache and try again.)
-  else
-    CC="$with_cc"
-  fi
-fi
-AC_MSG_RESULT($CC)
-AC_PROG_CC
-dnl Test compiler once. Newer versions of autoconf already does a similar test.
-AC_CACHE_VAL(krb5_cv_prog_cc,[dnl
-  AC_TRY_LINK([#include <stdio.h>],[printf("hi\n");], ,
-    AC_MSG_ERROR(Can't find a working compiler.))
-  krb5_cv_prog_cc="$CC"
+dnl
+AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
+AC_BEFORE([$0],[AC_PROG_CC])
+krb5_ac_cflags_set=${CFLAGS+set}
 ])
+dnl
+AC_DEFUN(WITH_CC,[
+AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])
+AC_ARG_WITH([cc],AC_HELP_STRING(--with-cc=COMPILER,deprecated; use CC=...),
+	    AC_MSG_ERROR(option --with-cc is deprecated; use CC=...))
+AC_PROG_CC
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-comment is for SunOS system header <sys/stream.h>
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
  -Wcast-align -Wconversion -Wshadow -Wno-comment -pedantic"
 if test "$GCC" = yes ; then
-  AC_MSG_RESULT(adding extra warning flags for gcc)
-  CCOPTS="$CCOPTS $extra_gcc_warn_opts"
+  if test "x$krb5_ac_cflags_set" = xset ; then
+    AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
+  else
+    AC_MSG_NOTICE(adding extra warning flags for gcc)
+    CFLAGS="$CFLAGS $extra_gcc_warn_opts"
+  fi
 fi
 ])dnl
 dnl
 dnl set $(LD) from --with-linker=value
 dnl
-define(WITH_LINKER,[
+AC_DEFUN(WITH_LINKER,[
 AC_ARG_WITH([linker],
-[  --with-linker=LINKER    select linker to use],
-AC_MSG_RESULT(LD=$withval)
-LD=$withval,
+	    AC_HELP_STRING(--with-linker=LINKER,deprecated; use LD=...),
+	    AC_MSG_ERROR(option --with-linker is deprecated; use LD=...))
 if test -z "$LD" ; then LD=$CC; fi
-[AC_MSG_RESULT(LD defaults to $LD)])dnl
-AC_SUBST([LD])])dnl
+AC_ARG_VAR(LD,[linker command [CC]])
+])dnl
 dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 AC_DEFUN(WITH_CCOPTS,[
 AC_REQUIRE([KRB5_INIT_CCOPTS])
 AC_ARG_WITH([ccopts],
-[  --with-ccopts=CCOPTS    select compiler command line options],
-AC_MSG_RESULT(CCOPTS is $withval)
-dnl WITH_CC may have already put something in CCOPTS
-CCOPTS="$CCOPTS $withval"
-CFLAGS="$CFLAGS $withval")dnl
-AC_SUBST(CCOPTS)])dnl
+	    AC_HELP_STRING(--with-ccopts=CCOPTS, deprecated; use CFLAGS=...),
+	    AC_MSG_ERROR(option --with-ccopts is deprecated; use CFLAGS=...))])
 dnl
 dnl set $(LDFLAGS) from --with-ldopts=value
 dnl
-define(WITH_LDOPTS,[
+AC_DEFUN(WITH_LDOPTS,[
 AC_ARG_WITH([ldopts],
-[  --with-ldopts=LDOPTS    select linker command line options],
-AC_MSG_RESULT(LDFLAGS is $withval)
-LDFLAGS=$withval,
-LDFLAGS=)dnl
+	    AC_HELP_STRING(--with-ldopts=LDOPTS,deprecated; use LDFLAGS=...),
+	    AC_MSG_ERROR(option --with-ldopts is deprecated; use LDFLAGS=...))
 AC_SUBST(LDFLAGS)])dnl
 dnl
 dnl set $(CPPOPTS) from --with-cppopts=value
 dnl
-define(WITH_CPPOPTS,[
+AC_DEFUN(WITH_CPPOPTS,[
+AC_REQUIRE_CPP
 AC_ARG_WITH([cppopts],
-[  --with-cppopts=CPPOPTS  select compiler preprocessor command line options],
-AC_MSG_RESULT(CPPOPTS=$withval)
-CPPOPTS=$withval
-CPPFLAGS="$CPPFLAGS $withval",
-[AC_MSG_RESULT(CPPOPTS defaults to $CPPOPTS)])dnl
-AC_SUBST(CPPOPTS)])dnl
+	   AC_HELP_STRING(--with-cppopts=CPPOPTS,deprecated; use CPPFLAGS=...),
+	   AC_MSG_ERROR(option --with-cppopts is deprecated; use CPPFLAGS=...))])
 dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
 dnl
@@ -646,7 +628,7 @@ dnl
 dnl
 define(WITH_NETLIB,[
 AC_ARG_WITH([netlib],
-[  --with-netlib[=libs]    use user defined resolve library],
+AC_HELP_STRING([--with-netlib=LIBS], use user defined resolver library),
 [  if test "$withval" = yes -o "$withval" = no ; then
 	AC_MSG_RESULT("netlib will link with C library resolver only")
   else
@@ -937,7 +919,7 @@ dnl
 dnl WITH_HESIOD
 dnl
 AC_DEFUN(WITH_HESIOD,
-[AC_ARG_WITH(hesiod, [  --with-hesiod[=path]    compile with hesiod support],
+[AC_ARG_WITH(hesiod, AC_HELP_STRING(--with-hesiod[=path], compile with hesiod support),
 	hesiod=$with_hesiod, with_hesiod=no)
 if test "$with_hesiod" != "no"; then
 	HESIOD_DEFS=-DHESIOD
@@ -1179,11 +1161,8 @@ dnl
 dnl Determine parameters related to libraries, e.g. various extensions.
 
 AC_DEFUN(KRB5_LIB_PARAMS,
-[AC_MSG_CHECKING([for host type])
-AC_CACHE_VAL(krb5_cv_host,
-[AC_CANONICAL_HOST
-krb5_cv_host=$host])
-AC_MSG_RESULT($krb5_cv_host)
+[AC_REQUIRE([AC_CANONICAL_HOST])
+krb5_cv_host=$host
 AC_SUBST(krb5_cv_host)
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([V5_SET_TOPDIR])
@@ -1414,11 +1393,11 @@ done
 ])
 dnl
 dnl
-AC_DEFUN([CHOOSE_ET],[
-AC_ARG_WITH([system-com_err],
-[  --with-system-com_err       use system -lcom_err and compile_et])
+AC_DEFUN([KRB5_AC_CHOOSE_ET],[
+AC_ARG_WITH([system-et],
+AC_HELP_STRING(--with-system-et,use system compile_et and -lcom_err @<:@default: build and install a local version@:>@))
 AC_MSG_CHECKING(which version of com_err to use)
-if test "$with_system_com_err" = yes ; then
+if test "x$with_system_et" = xyes ; then
   COM_ERR_VERSION=sys
   AC_MSG_RESULT(system)
 else
@@ -1453,10 +1432,10 @@ EOF
 fi
 AC_SUBST(COM_ERR_VERSION)
 ])
-AC_DEFUN([CHOOSE_SS],[
-AC_ARG_WITH([system-ss],
-[  --with-system-ss          use system -lss and mk_cmds])
-if test "$with_system_ss" = yes ; then
+AC_DEFUN([KRB5_AC_CHOOSE_SS],[
+AC_ARG_WITH(system-ss,
+	    AC_HELP_STRING(--with-system-ss,use system -lss and mk_cmds @<:@default: use a private version@:>@))
+if test "x$with_system_ss" = xyes ; then
   SS_VERSION=sys
   # check for various libraries we might need
 else

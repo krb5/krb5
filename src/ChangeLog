@@ -1,5 +1,20 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (KRB5_AC_CHOOSE_ET, KRB5_AC_CHOOSE_SS): Renamed from
+	non-KRB5_AC_ names.  Change --with-system-com_err to
+	--with-system-et, to avoid confusing mix of '-' and '_'.
+	(WITH_CCOPTS): Describe as deprecated in favor of CFLAGS=...; use
+	AC_REQUIRE_CPP.
+	(WITH_LINKER, WITH_LDOPTS, WITH_CPPOPTS): Describe as deprecated;
+	encourage use of LD= etc instead.
+	(WITH_NETLIB, WITH_HESIOD): Use AC_HELP_STRING.
+	(KRB5_AC_CHECK_FOR_CFLAGS): New macro.
+	(WITH_CC): Mark old configure option deprecated, encourage user
+	to use CC= instead.  Add gcc warning flags only if CFLAGS not set
+	by user.  Don't force default to "cc".
+	(KRB5_LIB_PARAMS): Use AC_CANONICAL_HOST, don't bother with
+	cache.
+
 	* aclocal.m4 (CHOOSE_ET, CHOOSE_SS): New macros.
 	(CONFIG_RULES): Invoke them.
 	* configure.in: Configure util/et and util/ss only if they're
