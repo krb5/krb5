@@ -14,7 +14,7 @@ $(PROG): $(OBJS) $(CLNTDEPLIBS)
 kadmin_ct.o: kadmin_ct.c
 
 install::
-	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG).local
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 
 clean::

@@ -1,3 +1,9 @@
+Fri Jul 26 14:26:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (install): Actually install kadmin.local.  (Or
+ 		rather, don't install kadmin.local as kadmin, and then
+ 		reinstall kadmin on top of kadmin.)
+
 Wed Jul 24 00:27:59 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in: Don't replace setenv as it isn't used. 
