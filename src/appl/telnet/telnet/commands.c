@@ -111,6 +111,7 @@
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 int tos = -1;
+static	unsigned long sourceroute(char *, char **, int *);
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 
 char	*hostname;
@@ -2394,7 +2395,7 @@ tn(argc, argv)
     unsigned long temp;
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     char *srp = 0;
-    unsigned long sourceroute(), srlen;
+    int srlen;
 #endif
     char *cmd, *hostp = 0, *portp = 0, *volatile user = 0;
 
@@ -2991,7 +2992,7 @@ cmdrc(m1, m2)
  *		pointed to by *cpp is.
  *	
  */
-	unsigned long
+static	unsigned long
 sourceroute(arg, cpp, lenp)
 	char	*arg;
 	char	**cpp;

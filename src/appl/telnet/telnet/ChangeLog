@@ -1,3 +1,7 @@
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* commands.c: Declare sourceroute() static.
+
 2001-07-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* commands.c: Declare local functions static.
