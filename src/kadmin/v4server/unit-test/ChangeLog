@@ -1,3 +1,11 @@
+1999-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib/helpers.exp (unexpire): Move expiration date ahead a few
+	decades.
+
+	* Makefile.in (check- check-ok): Disable tests until the tests get
+	updated for non-OVSEC mode, etc.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

@@ -1,12 +1,44 @@
 #include <stdio.h>
 #include <sys/types.h>
-#include <pwd.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include <krb5.h>
 
 #define P1 "Enter new password: "
 #define P2 "Enter it again: "
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+
+void get_name_from_passwd_file(program_name, kcontext, me)
+    char * program_name;
+    krb5_context kcontext;
+    krb5_principal * me;
+{
+    struct passwd *pw;
+    krb5_error_code code;
+    if (pw = getpwuid((int) getuid())) {
+	if ((code = krb5_parse_name(kcontext, pw->pw_name, me))) {
+	    com_err (program_name, code, "when parsing name %s", pw->pw_name);
+	    exit(1);
+	}
+    } else {
+	fprintf(stderr, "Unable to identify user from password file\n");
+	exit(1);
+    }
+}
+#else /* HAVE_PWD_H */
+void get_name_from_passwd_file(kcontext, me)
+    krb5_context kcontext;
+    krb5_principal * me;
+{
+    fprintf(stderr, "Unable to identify user\n");
+    exit(1);
+}
+#endif /* HAVE_PWD_H */
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +46,6 @@ int main(int argc, char *argv[])
    krb5_context context;
    krb5_principal princ;
    char *pname;
-   struct passwd *pwd;
    krb5_ccache ccache;
    krb5_get_init_creds_opt opts;
    krb5_creds creds;
@@ -40,7 +71,9 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
+#if 0
    krb5_init_ets(context);
+#endif
 
    /* in order, use the first of:
       - a name specified on the command line
@@ -70,15 +103,8 @@ int main(int argc, char *argv[])
 	 com_err(argv[0], ret, "closing ccache");
 	 exit(1);
       }
-   } else if (pwd = getpwuid(getuid())) {
-      if (ret = krb5_parse_name(context, pwd->pw_name, &princ)) {
-	 com_err(argv[0], ret, "parsing client name");
-	 exit(1);
-      }
    } else {
-      com_err(argv[0], 0,
-	      "no matching password entry while looking for username");
-      exit(1);
+       get_name_from_passwd_file(argv[0], context, &princ);
    }
 
    krb5_get_init_creds_opt_init(&opts);

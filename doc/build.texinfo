@@ -38,17 +38,17 @@ link tree for your build tree.
 The first step in each of these build procedures is to unpack the source
 distribution.  The Kerberos V5 distribution comes in two compressed tar
 files.  The first file, which is generally named
-@file{krb5-1.0.src.tar.gz}, contains the sources for all of Kerberos
+@file{krb5-@value{RELEASE}.src.tar.gz}, contains the sources for all of Kerberos
 except for the crypto library, which is found in the file
-@file{krb5-1.0.crypto.tar.gz}.
+@file{krb5-@value{RELEASE}.crypto.tar.gz}.
 
 Both files should be unpacked in the same directory, such as
-@file{/u1/krb5-1.0}.  (In the rest of this document, we will assume that
+@file{/u1/krb5-@value{RELEASE}}.  (In the rest of this document, we will assume that
 you have chosen to unpack the Kerberos V5 source distribution in this
 directory.  Note that the tarfiles will by default all unpack into the
-@file{./krb5-1.0} directory, so that if your current directory is
+@file{./krb5-@value{RELEASE}} directory, so that if your current directory is
 @file{/u1} when you unpack the tarfiles, you will get
-@file{/u1/krb5-1.0/src}, etc.)
+@file{/u1/krb5-@value{RELEASE}/src}, etc.)
 
 
 @node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
@@ -77,7 +77,7 @@ use the following abbreviated procedure.
 
 @enumerate
 @item
- @code{cd /u1/krb5-1.0/src}
+ @code{cd /u1/krb5-@value{RELEASE}/src}
 @item
  @code{./configure}
 @item
@@ -100,9 +100,9 @@ you might use the following procedure:
 
 @enumerate
 @item 
-@code{mkdir /u1/krb5-1.0/pmax}
+@code{mkdir /u1/krb5-@value{RELEASE}/pmax}
 @item
- @code{cd /u1/krb5-1.0/pmax}
+ @code{cd /u1/krb5-@value{RELEASE}/pmax}
 @item
  @code{../src/configure}
 @item
@@ -122,11 +122,11 @@ you might use the following procedure:
 
 @enumerate
 @item
- @code{mkdir /u1/krb5-1.0/solaris}
+ @code{mkdir /u1/krb5-@value{RELEASE}/solaris}
 @item
- @code{cd /u1/krb5-1.0/solaris}
+ @code{cd /u1/krb5-@value{RELEASE}/solaris}
 @item
- @code{/u1/krb5-1.0/src/util/lndir `pwd`/../src}
+ @code{/u1/krb5-@value{RELEASE}/src/util/lndir `pwd`/../src}
 @item
  @code{./configure}
 @item
@@ -397,8 +397,10 @@ variables when using the programs. Except where noted, multiple versions
 of the libraries may be installed on the same system and continue to
 work.
 
-Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
-Solaris 2.4 (aka SunOS 5.4), Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Currently the supported platforms are
+@comment NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
+Solaris 2.6 (aka SunOS 5.6) and Irix 6.5.
+@comment Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -475,11 +477,11 @@ NetBSD and FreeBSD.)
 @node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
 @subsection HPUX
 
-The native compiler for HPUX currently will not work, because it is not
-a full ANSI C compiler.  The optional compiler (c89) should work as long
-as you give it the @samp{+Olibcalls -D_HPUX_SOURCE} (this has only been
-tested for HPUX 9.0).  At this point, using GCC is probably your best
-bet.
+The native (bundled) compiler for HPUX currently will not work, because
+it is not a full ANSI C compiler.  The optional compiler (c89) should
+work as long as you give it the @samp{+Olibcalls -D_HPUX_SOURCE} (this
+has only been tested for HPUX 9.0).  At this point, using GCC is
+probably your best bet.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
@@ -496,7 +498,7 @@ Workarounds:
 @enumerate
 
 @item
-   Supply your own resolver library. (such as bind-4.9.3pl1 availavle
+   Supply your own resolver library. (such as bind-4.9.3pl1 available
 from ftp.vix.com)
 
 @item
@@ -605,7 +607,7 @@ that you have made a change that will require that all the
 @code{--force} option:
 
 @example
-% cd /u1/krb5-1.0/src
+% cd /u1/krb5-@value{RELEASE}/src
 % ./util/reconf --force
 @end example
 
@@ -625,7 +627,7 @@ Then follow the instructions for building packaged source trees (above).
 To install the binaries into a binary tree, do:
 
 @example
-% cd /u1/krb5-1.0/src
+% cd /u1/krb5-@value{RELEASE}/src
 % make all
 % make install DESTDIR=somewhere-else
 @end example

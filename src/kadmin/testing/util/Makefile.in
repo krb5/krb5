@@ -2,7 +2,7 @@ thisconfigdir=./../..
 myfulldir=kadmin/testing/util
 mydir=testing/util
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(TCL_INCLUDES)
+LOCALINCLUDES = $(TCL_INCLUDES)
 
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)

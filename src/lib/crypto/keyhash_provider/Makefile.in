@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/keyhash_provider
 mydir=keyhash_provider
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)/../md4 \
+LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5
 
 ##DOS##BUILDTOP = ..\..\..
@@ -30,10 +30,10 @@ includes:: depend
 depend:: $(SRCS)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
-	$(CC) -DMD=4 $(CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
+	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
 
 t_cksum5.o: $(srcdir)/t_cksum.c
-	$(CC) -DMD=5 $(CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
+	$(CC) -DMD=5 $(ALL_CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
 
 t_cksum4: t_cksum4.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_cksum4 t_cksum4.o $(KRB5_BASE_LIBS)

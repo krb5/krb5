@@ -2,7 +2,6 @@ thisconfigdir=.
 myfulldir=kadmin
 mydir=.
 BUILDTOP=$(REL)$(U)
-CFLAGS = $(CCOPTS)
 LOCAL_SUBDIRS = cli dbutil passwd ktutil server @V4SERVER@ v5passwdd testing
 
 all::

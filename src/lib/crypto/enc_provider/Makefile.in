@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/enc_provider
 mydir=enc_provider
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
+LOCALINCLUDES = -I$(srcdir)/../des
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=enc_provider

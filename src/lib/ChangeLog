@@ -1,3 +1,29 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Use DLL_LINKOPTS to link DLL.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-09-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* winsock.def, comerr16.def, gssapi16.def, krb4_16.def,
+	krb5_16.def, sapgss16.def, sapkrb16.def, xpprof16.def: Remove
+	obsolete DEF files.
+
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove dependence of mit directory for version
+	server support.  Remove references to SAP.  Remove DNS defines.
+
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Export krb5_kuserok.
+
 1999-07-22  Jeffrey Altman <jaltman@columbia.edu>
 
         * krb5_32.def

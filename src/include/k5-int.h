@@ -32,7 +32,11 @@
  * be used in advertising or publicity pertaining to distribution of the 
  * software.  Title to copyright in this software and any associated 
  * documentation shall at all times remain with M.I.T., and USER agrees to 
- * preserve same.  
+ * preserve same.
+ *
+ * Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.  
  */
 
 /*
@@ -102,6 +106,7 @@
 #define INI_KRB_CCACHE	"krb5cc"	/* Location of the ccache */
 #define INI_KRB5_CONF	"krb5.ini"	/* Location of krb5.conf file */
 #define HAVE_LABS
+#define ANSI_STDIO
 #endif
 
 
@@ -990,7 +995,9 @@ struct _krb5_context {
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
 	int		scc_default_format;
+#ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
+#endif /* KRB5_DNS_LOOKUP */
 };
 
 /* could be used in a table to find an etype and initialize a block */
@@ -1471,6 +1478,11 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *));
+
+
+krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
+	KRB5_PROTOTYPE((krb5_context, krb5_ccache, krb5_flags,
+			krb5_creds *, krb5_creds *));
 
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
