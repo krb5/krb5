@@ -165,8 +165,8 @@ main(argc, argv)
 
     /* lower-case to get name for "instance" part of service name */
     for (cp = full_hname; *cp; cp++)
-        if (isupper(*cp))
-            *cp = tolower(*cp);
+        if (isupper((int) *cp))
+            *cp = tolower((int) *cp);
 
     /* Set server's address */
     (void) memset((char *)&s_sock, 0, sizeof(s_sock));
