@@ -1,3 +1,8 @@
+Sun Dec  6 19:45:54 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb54proto.h: Fix decomp_tkt_krb5 to use KRB4_32, instead of a
+	nonexistent type.
+
 Sat Dec  5 01:08:57 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin: Add KRB5_DLLIMP and KRB5_CALLCONV to the prototypes of
