@@ -1,8 +1,9 @@
 2000-11-08  Ken Raeburn  <raeburn@mit.edu>
 
-	Test out lclint and its4 on com_err library.  One lclint error
-	left on Solaris, due to deficiencies in lclint.  Its4 chokes in
-	parser.
+	Test out lclint and its4 on com_err library, fixing reported
+	problems (including a rewrite of the memory management model).
+	One lclint error left on Solaris, due to deficiencies in lclint.
+	Its4 chokes in parser.
 	* com_err.h (struct error_table): Annotate MSGS as pointing to
 	'shared' data.
 	(error_message): Returned data is 'observer' and 'dependent';
