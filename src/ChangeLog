@@ -1,3 +1,9 @@
+Fri Jun 23 11:48:04 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* aclocal.m4 (V5_MAKE_SHARED_RULE) Set STEXT when not making
+		shared library.
+		(CONFIG_RULES): Move AC_CONST from WITH_KRB4 definition. 
+
 Wed Jun 21 18:10:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* aclocal.m4 (V5_SET_TOPDIR): Replace AC_CONFIG_FRAGMENTS,
