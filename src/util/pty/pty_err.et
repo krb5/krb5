@@ -34,7 +34,7 @@ error_code PTY_OPEN_SLAVE_OPENFAIL, "Failed to open slave side of pty"
 error_code PTY_OPEN_SLAVE_CHMODFAIL, "Failed to chmod slave side of pty"
 
 error_code PTY_OPEN_SLAVE_NOCTTY, "Unable to set controlling terminal"
-error_code PTY_OPEN_SLAVE_CHOWNFAIL, "Failed to chown d;slave side of pty"
+error_code PTY_OPEN_SLAVE_CHOWNFAIL, "Failed to chown slave side of pty"
 error_code PTY_OPEN_SLAVE_LINE_PUSHFAIL, "Call to line_push failed to push streams on slave pty"
 
 error_code PTY_OPEN_SLAVE_PUSH_FAIL, "Failed to push stream on slave side of pty"

@@ -1,9 +1,18 @@
+Tue Aug  8 09:13:50 1995  Sam Hartman  <hartmans@pao.mit.edu>
+
+	* open_slave.c (pty_open_slave): Dissociate from controlling
+        terminal before calling revoke.
+	(pty_open_slave): Don't ask for a controlling terminal unless we need it.
+=======
 Tue Aug  8 20:32:08 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* update_utmp.c: flush preprocessor directive to left margin.
+	* pty_err.et: Fix typo in error description.
 
-Tue Aug 8 17:24:27 EDT 1995	Paul Park	(pjpark@mit.edu)
-	* update_utmp.c - getutmpx() requires address of utmpx structure.
+	* cleanup.c (pty_cleanup): Don't change slave before revoking it.  Also return a value all the time, not just on systems without revoke.
+
+
+	* update_utmp.c (pty_update_utmp): Move #ifdef back to column 1.
 
 Mon Aug  7 17:41:39 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 

@@ -32,11 +32,6 @@ long pty_cleanup (slave, pid, update_utmp)
     
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);
-#ifndef HAVE_STREAMS
-    slave[strlen("/dev/")] = 'p';
-    (void)chmod(slave, 0666);
-    (void)chown(slave, 0, 0);
-#endif
 #ifdef HAVE_REVOKE
     revoke(slave);
     /*
@@ -60,7 +55,12 @@ long pty_cleanup (slave, pid, update_utmp)
     if ( retval = ( pty_open_ctty( slave, &fd ))) 
 	return retval;
     ptyint_vhangup();
+#endif /*VHANG_LAST*/
+#endif /* HAVE_REVOKE*/
+#ifndef HAVE_STREAMS
+    slave[strlen("/dev/")] = 'p';
+    (void)chmod(slave, 0666);
+    (void)chown(slave, 0, 0);
+#endif
     return 0;
-#endif
-#endif
 }

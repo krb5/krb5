@@ -38,15 +38,16 @@ long pty_initialize_slave (fd)
 #endif
 	    
 #ifdef HAVE_STREAMS
-    while (ioctl (fd, I_POP, 0) == 0); /*Clear out any old lined's*/
 #ifdef HAVE_LINE_PUSH
+        while (ioctl (fd, I_POP, 0) == 0); /*Clear out any old lined's*/
+
     if (line_push(fd) < 0)
 	{
 	    (void) close(fd); fd = -1;
 	    return PTY_OPEN_SLAVE_LINE_PUSHFAIL;
 	}
 #else /*No line_push */
-#ifdef sun
+#if 0 /* used to be SUN*/
     if (ioctl(fd, I_PUSH, "ptem") < 0)
 	return PTY_OPEN_SLAVE_PUSH_FAIL;
     if (ioctl(fd, I_PUSH, "ldterm") < 0)

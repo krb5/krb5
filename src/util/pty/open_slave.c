@@ -21,6 +21,7 @@
 #include "libpty.h"
 #include "pty-int.h"
 
+
 long pty_open_slave ( slave, fd)
     const char *slave;
     int *fd;
@@ -36,9 +37,22 @@ long retval;
 #endif
 
     /* First, chmod and chown the slave*/
-if (( retval = pty_open_ctty ( slave, &vfd )) != 0 )
-    return retval;
-	
+    /*
+       * If we have vhangup then we really need pty_open_ctty to make sure
+       * Our controlling terminal is the pty we're opening.  However, if we
+       * are using revoke or nothing then we just need  a file descriiptor
+       * for the pty.  Considering some OSes in this category break on
+       * the second call to open_ctty (currently OSF but others may),
+       * we simply use a descriptor if we can.
+       */
+#ifdef VHANG_FIRST
+    if (( retval = pty_open_ctty ( slave, &vfd )) != 0 )
+      return retval;
+#else /*VHANG_FIRST*/
+    if ( (vfd = open(slave, O_RDWR)) < 0 )
+      return errno;
+#endif
+    
         if (vfd < 0)
 	return PTY_OPEN_SLAVE_OPENFAIL;
 
@@ -61,6 +75,9 @@ return PTY_OPEN_SLAVE_CHMODFAIL;
 #endif
 
     (void) close(vfd);
+    if ( (retval = ptyint_void_association()) != 0)
+      return retval;
+    
 #ifdef HAVE_REVOKE
     if (revoke (slave) < 0 ) {
 	return PTY_OPEN_SLAVE_REVOKEFAIL;
