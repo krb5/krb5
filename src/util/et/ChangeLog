@@ -1,3 +1,7 @@
+2001-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_et.c (main): Only use sys_nerr tests if HAVE_SYS_ERRLIST.
+
 2001-10-31  Miro Jurisic  <meeroh@mit.edu>
 
 	* et_c.awk, et_c.pl, et_h.awk, et_h.pl: Fixed the incorrect
