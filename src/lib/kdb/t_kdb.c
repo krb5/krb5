@@ -795,7 +795,7 @@ main(argc, argv)
     int		argc;
     char	*argv[];
 {
-    char	option;
+    int	option;
     extern char	*optarg;
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;

@@ -1,3 +1,15 @@
+Wed Jun 14 12:37:51 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* configure.in: Check for umask being defined.
+
+	* store_mkey.c (krb5_db_store_mkey): Use HAVE_UMASK instead of
+	unix as a preprocessor define for setting the umask.  AIX doesn't
+	define unix.
+
+	* t_kdb.c (main): Declare option as int, not char.  When char is
+	unsigned, the comparison to EOF fails and it loops forever.
+
+
 Sun Jun 11 09:26:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove t_kdb and t_kdb.o

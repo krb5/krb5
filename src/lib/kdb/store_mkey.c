@@ -57,7 +57,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
     krb5_ui_2 keytype;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
-#if defined(unix) || defined(__unix__)
+#if HAVE_UMASK
     int oumask;
 #endif
 
@@ -70,7 +70,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 	keyfile = defkeyfile;
     }
 
-#if defined(unix) || defined(__unix__)
+#if HAVE_UMASK
     oumask = umask(077);
 #endif
 #ifdef ANSI_STDIO
@@ -79,7 +79,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
     if (!(kf = fopen(keyfile, "w")))
 #endif
     {
-#if defined(unix) || defined(__unix__)
+#if HAVE_UMASK
 	(void) umask(oumask);
 #endif
 	return errno;
@@ -96,7 +96,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
     }
     if (fclose(kf) == EOF)
 	retval = errno;
-#if defined(unix) || defined(__unix__)
+#if HAVE_UMASK
     (void) umask(oumask);
 #endif
     return retval;
