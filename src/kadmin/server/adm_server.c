@@ -284,6 +284,8 @@ krb5_keyblock *masterkeyblock;
     strcpy(tgs_name, KRB5_TGS_NAME);
     strcat(tgs_name, "/");
     strcat(tgs_name, masterkeyname->realm.data);
+    strcat(tgs_name, "@");
+    strcat(tgs_name, masterkeyname->realm.data);
     krb5_parse_name(tgs_name, &tgs_server);
 
     tgs_server->type  = KRB5_NT_SRV_INST;
