@@ -137,6 +137,7 @@ SUBDIRS = $(SUBDIRS_@srcdir@) $(LOCAL_SUBDIRS)
 #
 srcdir = @srcdir@
 SRCTOP = @srcdir@/$(BUILDTOP)
+top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
 

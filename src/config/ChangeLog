@@ -3,6 +3,7 @@
 	* pre.in (SUBDIRS): Use autoconf substitution trick to make
 	SUBDIRS contain @subdirs@ only for the directory containing the
 	configure script, and only LOCAL_SUBDIRS elsewhere.
+	(top_srcdir): Define, set by configure.
 
 	* post.in (RECURSE_TARGETS): Drop MY_SUBDIRS support.
 
