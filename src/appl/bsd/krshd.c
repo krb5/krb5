@@ -35,8 +35,6 @@ char copyright[] =
 static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #endif /* not lint */
 
-#define KERBEROS
-     
      /*
       * remote shell server:
       *	remuser\0
@@ -45,47 +43,55 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
       *	data
       */
      
-     /*
-      * This is the rshell daemon. The very basic protocol for checking 
-      * authentication and authorization is:
-      * 1) Check authentication.
-      * 2) Check authorization via the access-control files: 
-      *    ~/.k5login (using krb5_kuserok) and/or
-      *    ~/.rhosts  (using ruserok).
-      * Execute command if configured authoriztion checks pass, else deny 
-      * permission.
-      *
-      * The configuration is done either by command-line arguments passed by inetd, 
-      * or by the name of the daemon. If command-line arguments are present, they 
-      * take priority. The options are:
-      * -k and -K means check .k5login (using krb5_kuserok).
-      * -r and -R means check .rhosts  (using ruserok).
-      * The difference between upper and lower case is as follows:
-      *    If lower case -r or -k, then as long as one of krb5_kuserok or ruserok 
-      * passes, allow access. If both fail, no access. The program does not fall
-      * back on password verification.
-      *    If uppercase -R or -K, then those checks must be passed, regardless of 
-      * other checks, else no access.
-      * 
-      *     If no command-line arguments are present, then the presence of the 
-      * letters kKrR in the program-name before "shd" determine the 
-      * behaviour of the program exactly as with the command-line arguments.
-      */
+/*
+ * This is the rshell daemon. The very basic protocol for checking 
+ * authentication and authorization is:
+ * 1) Check authentication.
+ * 2) Check authorization via the access-control files: 
+ *    ~/.k5login (using krb5_kuserok) and/or
+ *    ~/.rhosts  (using ruserok).
+ * Execute command if configured authoriztion checks pass, else deny 
+ * permission.
+ *
+ * The configuration is done either by command-line arguments passed by inetd, 
+ * or by the name of the daemon. If command-line arguments are present, they 
+ * take priority. The options are:
+ * -k and -K means check .k5login (using krb5_kuserok).
+ * -r and -R means check .rhosts  (using ruserok).
+ * The difference between upper and lower case is as follows:
+ *    If lower case -r or -k, then as long as one of krb5_kuserok or ruserok 
+ * passes, allow access. If both fail, no access. The program does not fall
+ * back on password verification.
+ *    If uppercase -R or -K, then those checks must be passed, regardless of 
+ * other checks, else no access.
+ * 
+ *     If no command-line arguments are present, then the presence of the 
+ * letters kKrR in the program-name before "shd" determine the 
+ * behaviour of the program exactly as with the command-line arguments.
+ */
      
-     /* DEFINES:
-      *   KERBEROS - Define this if application is to be kerberised.
-      *   LOG_ALL_LOGINS - Define this if you want to log all logins.
-      *   LOG_OTHER_USERS - Define this if you want to log all principals that do
-      *              not map onto the local user.
-      *   LOG_REMOTE_REALM - Define this if you want to log all principals from 
-      *              remote realms.
-      *   LOG_CMD - Define this if you want to log not only the user but also the
-      *             command executed. This only decides the type of information
-      *             logged. Whether or not to log is still decided by the above 
-      *             three DEFINES.
-      *       Note:  Root account access is always logged.
-      */
+/* DEFINES:
+ *   KERBEROS - Define this if application is to be kerberised.
+ *   SERVE_V4 - Define this if v4 rlogin clients are also to be served.
+ *   ALWAYS_V5_KUSEROK - Define this if you want .k5login to be
+ *              checked even for v4 clients (instead of .klogin).
+ *   SERVE_NON_KRB - Define this is non-kerberized rlogin clients are 
+ *              to be served. NOTE HOWEVER THAT THIS IS A SERIOUS
+ *              SECURITY FLAW!
+ *   LOG_ALL_LOGINS - Define this if you want to log all logins.
+ *   LOG_OTHER_USERS - Define this if you want to log all principals that do
+ *              not map onto the local user.
+ *   LOG_REMOTE_REALM - Define this if you want to log all principals from 
+ *              remote realms.
+ *   LOG_CMD - Define this if you want to log not only the user but also the
+ *             command executed. This only decides the type of information
+ *             logged. Whether or not to log is still decided by the above 
+ *             three DEFINES.
+ *       Note:  Root account access is always logged.
+ */
      
+#define SERVE_V4
+#define SERVE_NON_KRB     
 #define LOG_REMOTE_REALM
 #define LOG_CMD
      
@@ -116,6 +122,7 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #include <stdio.h>
 #include <errno.h>
 #include <pwd.h>
+#include <ctype.h>
      
 #ifdef sun
 #include <sys/label.h>
@@ -153,15 +160,15 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 
 #include <com_err.h>
 
-#define ARGSTR	"rRkK?"
+#define ARGSTR	"rRkKD:?"
 #else /* !KERBEROS */
-#define ARGSTR	"rR?"
+#define ARGSTR	"rRD:?"
      
 char *strsave();
 #endif /* KERBEROS */
      
-int must_pass_rhosts = 0, must_pass_krb = 0, must_pass_one = 0;
-int failed_krb = 0;
+int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
+int failed_k5 = 0;
 char *progname;
 
 #define MAX_PROG_NAME 10
@@ -191,7 +198,9 @@ main(argc, argv)
     extern char *optarg;
     char *options, ch;
     int i;
-    
+    int fd;
+    int debug_port;
+
 #ifdef CRAY
     secflag = sysconf(_SC_CRAY_SECURE_SYS);
 #endif
@@ -246,11 +255,14 @@ main(argc, argv)
 	  must_pass_one = 1; /* If just 'k', any one check must succeed */
 	  break;
 	case 'K':         /* If 'K', must pass .k5login check*/
-	  must_pass_krb = 1;
+	  must_pass_k5 = 1;
 	  if (must_pass_one)
 	    must_pass_one = 0;
 	  break;
 #endif
+	case 'D':
+	  debug_port = atoi(optarg);
+	  break;
 	case '?':
 	default:
 	  usage();
@@ -261,23 +273,59 @@ main(argc, argv)
     argv += optind;
     
     fromlen = sizeof (from);
-    if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
-	fprintf(stderr, "%s: ", progname);
-	perror("getpeername");
-	_exit(1);
+
+    if (debug_port) {
+	int s;
+	struct sockaddr_in sin;
+	
+	if ((s = socket(AF_INET, SOCK_STREAM, PF_UNSPEC)) < 0) {
+	    fprintf(stderr, "Error in socket: %s\n", strerror(errno));
+	    exit(2);
+	}
+	
+	bzero((char *) &sin,sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(debug_port);
+	sin.sin_addr.s_addr = INADDR_ANY;
+	
+	if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
+	    fprintf(stderr, "Error in bind: %s\n", strerror(errno));
+	    exit(2);
+	}
+	
+	if ((listen(s, 5)) < 0) {
+	    fprintf(stderr, "Error in listen: %s\n", strerror(errno));
+	    exit(2);
+	}
+	
+	if ((fd = accept(s, &from, &fromlen)) < 0) {
+	    fprintf(stderr, "Error in accept: %s\n", strerror(errno));
+	    exit(2);
+	}
+	
+	close(s);
+    } else {
+	if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
+	    fprintf(stderr, "%s: ", progname);
+	    perror("getpeername");
+	    _exit(1);
+	}
+	
+	fd = 0;
     }
-    if (setsockopt(0, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
+    
+    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
       syslog(LOG_WARNING,
 	     "setsockopt (SO_KEEPALIVE): %m");
 #if defined(BSD) && BSD >= 43
     linger.l_onoff = 1;
     linger.l_linger = 60;			/* XXX */
-    if (setsockopt(0, SOL_SOCKET, SO_LINGER, (char *)&linger,
+    if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *)&linger,
 		   sizeof (linger)) < 0)
       syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
-    doit(dup(0), &from);
+    doit(dup(fd), &from);
 }
 
 #ifdef CRAY
@@ -321,11 +369,6 @@ extern
 extern char	**environ;
 char ttyn[12];		/* Line string for wtmp entries */
 
-#if defined (alliant) /* Alliant compiler complains of too many 
-			 local variables*/
-char cmdbuf[NCARGS+1];
-#endif
-
 #ifdef CRAY
 #define SIZEOF_INADDR  SIZEOF_in_addr
 int maxlogs;
@@ -337,30 +380,32 @@ int maxlogs;
 
 int pid;
 char locuser[NMAX+1];
+char remuser[NMAX +1];
+char cmdbuf[NCARGS+1];
+char *kremuser;
+krb5_principal client;
+krb5_authenticator *kdata;
+krb5_ticket        *ticket = 0;
 
+#ifdef SERVE_V4
+#include <kerberosIV/krb.h>
+AUTH_DAT	*v4_kdata;
+KTEXT		v4_ticket;
+#endif
 
+int V4 = 0;    /* Set when connection is seen to be from a V4 client */
 
 doit(f, fromp)
      int f;
      struct sockaddr_in *fromp;
 {
-#if defined (alliant)
     char *cp;
-#else
-    char cmdbuf[NCARGS+1], *cp;
-#endif
     
 #ifdef KERBEROS
-    char *kremuser;
-    char  *remuser;
-    krb5_authenticator      *kdata;
-    krb5_ticket     *ticket = 0;
     krb5_address peeraddr;
-    krb5_principal client;
     krb5_error_code status;
-#else
-    char  remuser[NMAX +1];
 #endif
+
     int tmpint;
     
     int ioctlval, cnt;
@@ -400,13 +445,12 @@ doit(f, fromp)
     int one = 1;
     krb5_sigtype     cleanup();
     int fd;
-    
-    krb5_principal server;
-    char srv_name[100];
-    char def_host[100];
-    krb5_data inbuf;
+    struct sockaddr_in fromaddr;
+    int non_privileged = 0;
+
 #ifdef IP_TOS
     struct tosent *tp;
+
     if ((tp = gettosbyname("interactive", "tcp")) &&
 	(setsockopt(f, IPPROTO_IP, IP_TOS, &tp->t_tos, sizeof(int)) < 0))
 #ifdef  TOS_WARN
@@ -416,6 +460,8 @@ doit(f, fromp)
 #endif
 #endif /* IP_TOS */
     
+    fromaddr = *fromp;
+
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
     signal(SIGTERM, SIG_DFL);
@@ -435,14 +481,15 @@ doit(f, fromp)
 #ifdef KERBEROS
     if ((must_pass_rhosts || must_pass_one)
 	&& (fromp->sin_port >= IPPORT_RESERVED ||
-	    fromp->sin_port < IPPORT_RESERVED/2)) {
+	    fromp->sin_port < IPPORT_RESERVED/2))
+      non_privileged = 1;
 #else
     if (fromp->sin_port >= IPPORT_RESERVED ||
 	    fromp->sin_port < IPPORT_RESERVED/2) {
-#endif /* KERBEROS */
-	syslog(LOG_NOTICE , "connection from bad port\n");
+	syslog(LOG_ERR , "connection from bad port\n");
 	exit(1);
     }
+#endif /* KERBEROS */
     
 #ifdef CRAY
     
@@ -503,13 +550,14 @@ doit(f, fromp)
 	}
 #ifdef KERBEROS
 	if ((must_pass_rhosts || must_pass_one)
-	    && port >= IPPORT_RESERVED) {
+	    && port >= IPPORT_RESERVED)
+	  non_privileged = 1;
 #else
 	if (port >= IPPORT_RESERVED) {
-#endif /* KERBEROS */
 	    syslog(LOG_ERR , "2nd port not reserved\n");
 	    exit(1);
 	}
+#endif /* KERBEROS */
 	fromp->sin_port = htons((u_short)port);
 	if (connect(s, (struct sockaddr *)fromp, sizeof (*fromp)) < 0) {
 	    syslog(LOG_INFO ,
@@ -530,85 +578,21 @@ doit(f, fromp)
 	hostname = malloc(strlen((char *)inet_ntoa(fromp->sin_addr)) + 1);
 	strcpy(hostname,(char *)inet_ntoa(fromp->sin_addr));
     }
-#ifdef KERBEROS
-    if (must_pass_krb || must_pass_one) {
-	peeraddr.addrtype = fromp->sin_family;
-	peeraddr.length = SIZEOF_INADDR;
-	peeraddr.contents = (krb5_octet *)&fromp->sin_addr;
-	strcpy(srv_name, "host/");
-	
-	gethostname(def_host, 100);
-	strcat(srv_name, def_host);
-	if (status = krb5_parse_name(srv_name, &server)) {
-	    syslog(LOG_ERR, "parse server name %s: %s", "host",
-		   error_message(status));
-	    exit(1);
-	}
-	krb5_princ_type(server) = KRB5_NT_SRV_HST;
-	krb5_init_ets();
-	
-	if (status = krb5_recvauth(&f,
-				   "KCMDV0.1",
-				   server,
-				   &peeraddr, /* We do want to match this
-						 against caddrs in the
-						 ticket. */
-				   0,         /* use srv5tab */
-				   0,         /* no keyproc */
-				   0,         /* no keyproc arg */
-				   0,         /* no rc_type */
-				   0,         /* no seq number */
-				   &client,   /* return client */
-				   &ticket,   /* return ticket */
-				   &kdata     /* return authenticator */
-				   )) {
-	    error("Kerberos rsh or rcp failed: %s\n",
-		  error_message(status));
-	    exit(1);
-	}
-	krb5_unparse_name(kdata->client,&kremuser);
-    } else {
-	if (!(remuser = malloc(sizeof(locuser) + 1))){
-	    error("Error no memory\n");
-	    exit(1);
-	}
-	getstr(remuser, sizeof(locuser), "remuser");
-    }
+    peeraddr.addrtype = fromp->sin_family;
+    peeraddr.length = SIZEOF_INADDR;
+    peeraddr.contents = (krb5_octet *)&fromp->sin_addr;
 
-    /* These two reads will be used in the next release to obtain
-       a forwarded TGT and related info for the rlogin daemon.
-       Put here for compatibility, because both rsh and rlogin 
-       use the same kcmd which sends this out regardless.*/
-    if (status = krb5_read_message((krb5_pointer)&f, &inbuf)) {
-	error("Error reading message");
-	exit(1);
-    }
-    if (inbuf.length) {
-	error("Forwarding is not yet supported");
-	exit(1);
-    }
-    if (status = krb5_read_message((krb5_pointer)&f, &inbuf)) {
-	error("Error reading message");
-	exit(1);
-    }
-    if (inbuf.length) {
-	error("Forwarding is not yet supported");
-	exit(1);
-    }
- 	
-#else
-    getstr(remuser, sizeof(remuser), "remuser");
-#endif /* KERBEROS */
-    getstr(locuser, sizeof(locuser), "locuser");
-    getstr(cmdbuf, sizeof(cmdbuf), "command");
-    
+
 #ifdef KERBEROS
-    if (!(remuser = malloc(sizeof(locuser) + 1))){
-	error("Error no memory\n");
+    if (status = recvauth(f, fromaddr, peeraddr)) {
+	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
     }
-    getstr(remuser, sizeof(locuser), "remuser");
-#endif
+#else
+    getstr(f, remuser, sizeof(remuser), "remuser");
+    getstr(f, locuser, sizeof(locuser), "locuser");
+    getstr(f, cmdbuf, sizeof(cmdbuf), "command");
+#endif /* KERBEROS */
     
 #ifdef CRAY
     paddr = inet_addr(inet_ntoa(fromp->sin_addr));
@@ -883,20 +867,57 @@ doit(f, fromp)
 	error("No remote directory.\n");
 	goto signout_please;
     }
+
 #ifdef KERBEROS
-    if (must_pass_krb || must_pass_one) {
-	if ( !krb5_kuserok(kdata->client,locuser) ) {
+    if (must_pass_k5 || must_pass_one) {
+#ifdef ALWAYS_V5_KUSEROK
+	if (!krb5_kuserok(client,locuser)) {
 	    syslog(LOG_ERR ,
 		   "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
 		   kremuser, remuser, hostname, locuser);
-	    if (must_pass_krb) {
+	    if (must_pass_k5) {
 		error("Permission denied.\n");
 		goto signout_please;
 	    }
-	    failed_krb = 1;
+	    failed_k5 = 1;
 	}
+#else
+	if (V4) {
+	    /* kuserok returns 0 if OK */
+	    if (kuserok(v4_kdata, locuser)){
+		syslog(LOG_ERR ,
+		       "Principal %s (%s@%s) for local user %s failed kuserok.\n",
+		       kremuser, remuser, hostname, locuser);
+		if (must_pass_k5) {
+		    error("Permission denied.\n");
+		    goto signout_please;
+		}
+		failed_k5 = 1;
+	    }
+	}
+	else {
+	    /* krb5_kuserok returns 1 if OK */
+	    if (!krb5_kuserok(client, locuser)){
+		syslog(LOG_ERR ,
+		       "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
+		       kremuser, remuser, hostname, locuser);
+		if (must_pass_k5) {
+		    error("Permission denied.\n");
+		    goto signout_please;
+		}
+		failed_k5 = 1;
+	    }
+	}
+#endif
     }
-    if (must_pass_rhosts || (failed_krb && must_pass_one)) {
+	
+    if (must_pass_rhosts || (failed_k5 && must_pass_one)) {
+	/* Cannot check .rhosts unless connection from privileged port */
+	if (non_privileged) {
+	    syslog(LOG_ERR , "connection from bad port\n");
+	    exit(1);
+	}
+
 	if (ruserok(hostname, pwd->pw_uid == 0,
 		    remuser, locuser) < 0) {
 	    syslog(LOG_ERR ,
@@ -930,15 +951,14 @@ doit(f, fromp)
 	       kremuser, remuser, hostname);
 #endif
     }
-    
 #if defined(KERBEROS) && defined(LOG_REMOTE_REALM) && !defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
     /* Log if principal is from a remote realm */
-    else if (!default_realm(client))
+    else if (client && !default_realm(client))
 #endif
   
 #if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
     /* Log if principal name does not map to local username */
-    else if (!princ_maps_to_lname(client, lusername))
+    else if (client && !princ_maps_to_lname(client, locuser))
 #endif /* LOG_OTHER_USERS */
   
 #ifdef LOG_ALL_LOGINS /* Log everything */
@@ -1076,14 +1096,15 @@ error(fmt, a1, a2, a3)
     char buf[BUFSIZ];
     
     buf[0] = 1;
-    (void) sprintf(buf+1, fmt, a1, a2, a3);
+    (void) sprintf(buf+1, "%s: ", progname);
+    (void) sprintf(buf+strlen(buf), fmt, a1, a2, a3);
     (void) write(2, buf, strlen(buf));
     syslog(LOG_ERR ,"%s",buf+1);
 }
 
 
 
-getstr(buf, cnt, err)
+getstr(fd, buf, cnt, err)
      char *buf;
      int cnt;
      char *err;
@@ -1091,7 +1112,7 @@ getstr(buf, cnt, err)
     char c;
     
     do {
-	if (read(0, &c, 1) != 1)
+	if (read(fd, &c, 1) != 1)
 	  exit(1);
 	*buf++ = c;
 	if (--cnt == 0) {
@@ -1316,7 +1337,6 @@ int princ_maps_to_lname(principal, luser)
 }
 
 
-
 int default_realm(principal)
      krb5_principal principal;
 {
@@ -1338,3 +1358,574 @@ int default_realm(principal)
     free(def_realm);
     return 1;
 }
+
+#ifdef KERBEROS
+
+#ifndef KRB_SENDAUTH_VLEN
+#define	KRB_SENDAUTH_VLEN 8	    /* length for version strings */
+#endif
+
+#define	KRB_SENDAUTH_VERS	"AUTHV0.1" /* MUST be KRB_SENDAUTH_VLEN
+					      chars */
+
+krb5_error_code
+recvauth(netf, peersin, peeraddr)
+     int netf;
+     struct sockaddr_in peersin;
+     krb5_address peeraddr;
+{
+    char hostname[100];
+    krb5_principal server;
+    krb5_error_code status;
+    char krb_vers[KRB_SENDAUTH_VLEN + 1];
+    int len;
+
+    len = sizeof(int);
+    if ((status = krb5_net_read(netf, krb_vers, len)) != len)
+      return((status < 0) ? errno : ECONNABORTED);
+
+    krb_vers[len] = '\0';
+
+    if (!strncmp(krb_vers, KRB_SENDAUTH_VERS, len)) {
+	/* Must be V4 rlogin client */
+#ifdef SERVE_V4
+	char version[9];
+	struct sockaddr_in faddr;
+	char instance[INST_SZ];
+	long authoptions;
+	int len;
+	
+	V4 = 1;
+
+	authoptions = 0L;
+	
+	len = sizeof(faddr);
+	if (getsockname(0, (struct sockaddr *)&faddr, &len)) {
+	    exit(1);
+	}
+
+	v4_kdata = (AUTH_DAT *)malloc( sizeof(AUTH_DAT) );
+	v4_ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
+
+	strcpy(instance, "*");
+
+	if (status = v4_recvauth(krb_vers, authoptions, netf,
+				 v4_ticket, "rcmd",
+				 instance, &peersin, &faddr,
+				 v4_kdata, "", (bit_64 *)0, version)) {
+	    return(status);
+	}
+
+	getstr(netf, locuser, sizeof (locuser), "locuser");
+	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
+	/* We do not really know the remote user's login name.
+         * Assume it to be the same as the first component of the
+	 * principal's name. 
+         */
+	strcpy(remuser, v4_kdata->pname);
+	kremuser = (char *) malloc(strlen(v4_kdata->pname) + 1 +
+				     strlen(v4_kdata->pinst) + 1 +
+				     strlen(v4_kdata->prealm) + 1);
+	sprintf(kremuser, "%s/%s@%s", v4_kdata->pname,
+		v4_kdata->pinst, v4_kdata->prealm);
+
+	if (status = krb5_parse_name(kremuser, &client))
+	  return(status);
+#else
+	syslog(LOG_ERR, "Kerberos V4 authentication: rejected!");
+	error("Permission denied");
+#endif
+    }
+    else if (isprint(krb_vers[0])) { 
+	/* Un-kerberized rlogin client */
+#ifdef SERVE_NON_KRB
+	strncpy(remuser, krb_vers, sizeof(int));
+	getstr(netf, remuser+4, sizeof(remuser)-sizeof(int), "remuser");
+	getstr(netf, locuser, sizeof(locuser), "locuser");
+	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");	
+#else
+	syslog(LOG_ERR, "Un-kerberized client: authentication rejected!");
+	error( "Permission denied");
+#endif
+    }
+    else {
+	/* Must be V5 rlogin client */
+	krb5_principal server;
+	krb5_data inbuf;
+	int len;
+
+	/*
+	 * First read the sendauth version string and check it.
+	 */
+	inbuf.length = ntohl(*((int *) krb_vers));
+
+	if (inbuf.length < 0 || inbuf.length > 25)
+	  return 255;
+	
+	if (!(inbuf.data = malloc(inbuf.length))) {
+	    return(ENOMEM);
+	}
+	
+	if ((len = krb5_net_read(netf, inbuf.data, inbuf.length)) !=
+	    inbuf.length) {
+	    xfree(inbuf.data);
+	    return((len < 0) ? errno : ECONNABORTED);
+	}
+
+	if (strcmp(inbuf.data, "KRB5_SENDAUTH_V1.0")) {
+	    xfree(inbuf.data);
+	    status = KRB5_SENDAUTH_BADAUTHVERS;
+	    return status;
+	}
+	xfree(inbuf.data);
+
+#ifdef unicos61
+#define SIZEOF_INADDR  SIZEOF_in_addr
+#else
+#define SIZEOF_INADDR sizeof(struct in_addr)
+#endif
+
+	gethostname(hostname, 100);
+	if (status = krb5_sname_to_principal(hostname,"host", KRB5_NT_SRV_HST,
+					     &server)) {
+	    syslog(LOG_ERR, "parse server name %s: %s", "host",
+		   error_message(status));
+	    exit(1);
+	}
+	krb5_princ_type(server) = KRB5_NT_SRV_HST;
+
+	krb5_init_ets();
+	
+	if (status = v5_recvauth(&netf,
+				 "KCMDV0.1",
+				 server,    /* Specify daemon principal */
+				 &peeraddr, /* We do want to match this
+					       against caddrs in the
+					       ticket. */
+				 0,         /* use srv5tab */
+				 0,         /* no keyproc */
+				 0,         /* no keyproc arg */
+				 0,         /* no rc_type */
+				 0,         /* no seq number */
+				 &client,   /* return client */
+				 &ticket,   /* return ticket */
+				 &kdata     /* return authenticator */
+				 )) {
+	    error("Kerberos rsh or rcp failed: %s\n",
+		  error_message(status));
+	    exit(1);
+	}
+	krb5_unparse_name(kdata->client,&kremuser);
+	    
+	getstr(netf, locuser, sizeof(locuser), "locuser");
+	getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
+	getstr(netf, remuser, sizeof(locuser), "remuser");
+
+	if (status = krb5_read_message((krb5_pointer)&netf, &inbuf)) {
+	    error("Error reading message: %s\n",
+		  error_message(status));
+	    exit(1);
+	}
+
+	if (inbuf.length) {
+	    if (status = rd_and_store_for_creds(&inbuf, ticket, locuser)) {
+		error("Can't get forwarded credentials: %s\n",
+		      error_message(status));
+		exit(1);
+	    }
+	}
+    }
+    return 0;
+}
+
+#ifdef SERVE_V4
+
+#ifndef max
+#define	max(a,b) (((a) > (b)) ? (a) : (b))
+#endif /* max */
+
+krb5_error_code
+v4_recvauth(krb_vers, options, fd, ticket, service, instance, faddr,
+	    laddr, kdata, filename, schedule, version)
+     char *krb_vers;
+     long options;			 /* bit-pattern of options */
+     int fd;				 /* file descr. to read from */
+     KTEXT ticket;			 /* storage for client's ticket */
+     char *service;			 /* service expected */
+     char *instance;			 /* inst expected (may be filled in) */
+     struct sockaddr_in *faddr;	 /* address of foreign host on fd */
+     struct sockaddr_in *laddr;	 /* local address */
+     AUTH_DAT *kdata;		 /* kerberos data (returned) */
+     char *filename;			 /* name of file with service keys */
+     Key_schedule schedule;		 /* key schedule (return) */
+     char *version;			 /* version string (filled in) */
+{
+    
+    int i, cc, old_vers = 0;
+    char *cp;
+    int rem;
+    long tkt_len, priv_len;
+    u_long cksum;
+    u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)];
+    
+    /* read the protocol version number */
+    if (krb_net_read(fd, krb_vers+sizeof(int), 
+		     KRB_SENDAUTH_VLEN-sizeof(int)) !=
+	KRB_SENDAUTH_VLEN-sizeof(int))
+      return(errno);
+    krb_vers[KRB_SENDAUTH_VLEN] = '\0';
+    
+    /* check version string */
+    if (strcmp(krb_vers,KRB_SENDAUTH_VERS)) {
+	return(KFAILURE);
+    } else {
+	/* read the application version string */
+	if (krb_net_read(fd, version, KRB_SENDAUTH_VLEN) !=
+	    KRB_SENDAUTH_VLEN)
+	  return(errno);
+	version[KRB_SENDAUTH_VLEN] = '\0';
+	
+	/* get the length of the ticket */
+	if (krb_net_read(fd, (char *)&tkt_len, sizeof(tkt_len)) !=
+	    sizeof(tkt_len))
+	  return(errno);
+	
+	/* sanity check */
+	ticket->length = ntohl((unsigned long)tkt_len);
+	if ((ticket->length <= 0) || (ticket->length > MAX_KTXT_LEN)) {
+	    if (options & KOPT_DO_MUTUAL) {
+		rem = KFAILURE;
+		goto mutual_fail;
+	    } else
+	      return(KFAILURE); /* XXX there may still be junk on the fd? */
+	}
+	
+	/* read the ticket */
+	if (krb_net_read(fd, (char *) ticket->dat, ticket->length)
+	    != ticket->length)
+	  return(errno);
+    }
+    /*
+     * now have the ticket.  decrypt it to get the authenticated
+     * data.
+     */
+    rem = krb_rd_req(ticket,service,instance,faddr->sin_addr.s_addr,
+		     kdata,filename);
+    
+    if (old_vers) return(rem);	 /* XXX can't do mutual with old client */
+    
+    /* if we are doing mutual auth (used by erlogin), compose a response */
+    if (options & KOPT_DO_MUTUAL) {
+	if (rem != KSUCCESS)
+	  /* the krb_rd_req failed */
+	  goto mutual_fail;
+	
+	/* add one to the (formerly) sealed checksum, and re-seal it
+	   for return to the client */
+	cksum = kdata->checksum + 1;
+	cksum = htonl(cksum);
+#ifdef CRYPT
+	key_sched(kdata->session,schedule);
+#endif
+	priv_len = krb_mk_priv((unsigned char *)&cksum,
+			       tmp_buf,
+			       (unsigned long) sizeof(cksum),
+			       schedule,
+			       kdata->session,
+			       laddr,
+			       faddr);
+	if (priv_len < 0) {
+	    /* re-sealing failed; notify the client */
+	    rem = KFAILURE;	 /* XXX */
+	  mutual_fail:
+	    priv_len = -1;
+	    tkt_len = htonl((unsigned long) priv_len);
+	    /* a length of -1 is interpreted as an authentication
+	       failure by the client */
+	    if ((cc = krb_net_write(fd, (char *)&tkt_len, sizeof(tkt_len)))
+		!= sizeof(tkt_len))
+	      return(cc);
+	    return(rem);
+	} else {
+	    /* re-sealing succeeded, send the private message */
+	    tkt_len = htonl((unsigned long)priv_len);
+	    if ((cc = krb_net_write(fd, (char *)&tkt_len, sizeof(tkt_len)))
+		!= sizeof(tkt_len))
+	      return(cc);
+	    if ((cc = krb_net_write(fd, (char *)tmp_buf, (int) priv_len))
+		!= (int) priv_len)
+	      return(cc);
+	}
+    }
+    return(0);
+}
+
+#endif /* SERVE_V4 */
+
+extern krb5_flags	krb5_kdc_default_options;
+
+krb5_error_code
+v5_recvauth(/* IN */
+	    fd, appl_version, server, sender_addr, fetch_from,
+	    keyproc, keyprocarg, rc_type, 
+	    /* OUT */
+	    seq_number, client, ticket, authent)
+     krb5_pointer	fd;
+     char	*appl_version;
+     krb5_principal	server;
+     krb5_address	*sender_addr;
+     krb5_pointer	fetch_from;
+     krb5_int32	*seq_number;
+     char		*rc_type;
+     krb5_rdreq_key_proc keyproc;
+     krb5_pointer keyprocarg;
+     krb5_principal	*client;
+     krb5_ticket	**ticket;
+     krb5_authenticator	**authent;
+{
+    krb5_error_code	retval, problem;
+    krb5_data	inbuf;
+    krb5_tkt_authent	*authdat;
+    krb5_data		outbuf;
+    krb5_rcache rcache;
+    krb5_octet		response;
+    krb5_data	*server_name;
+    char *cachename;
+    extern krb5_deltat krb5_clockskew;
+    static char		*rc_base = "rc_";
+    
+    /*
+     * Zero out problem variable.  If problem is set at the end of
+     * the intial version negotiation section, it means that we
+     * need to send an error code back to the client application
+     * and exit.
+     */
+    problem = 0;
+  
+    /*
+     * Read and check the application version string.
+     */
+    if (retval = krb5_read_message(fd, &inbuf))
+      return(retval);
+    if (strcmp(inbuf.data, appl_version)) {
+	xfree(inbuf.data);
+	if (!problem)
+	  problem = KRB5_SENDAUTH_BADAPPLVERS;
+    }
+    xfree(inbuf.data);
+    /*
+     * OK, now check the problem variable.  If it's zero, we're
+     * fine and we can continue.  Otherwise, we have to signal an
+     * error to the client side and bail out.
+     */
+    switch (problem) {
+      case 0:
+	response = 0;
+	break;
+      case KRB5_SENDAUTH_BADAUTHVERS:
+	response = 1;
+	break;
+      case KRB5_SENDAUTH_BADAPPLVERS:
+	response = 2;
+	break;
+      default:
+	/*
+	 * Should never happen!
+	 */
+	response = 255;
+#ifdef SENDAUTH_DEBUG
+	fprintf(stderr, "Programming botch in recvauth!  problem = %d",
+		problem);
+	abort();
+#endif
+	break;
+    }
+
+    /*
+     * Now we actually write the response.  If the response is non-zero,
+     * exit with a return value of problem
+     */
+    if ((krb5_net_write(*((int *) fd), (char *)&response, 1)) < 0) {
+	return(problem); /* We'll return the top-level problem */
+    }
+    if (problem)
+      return(problem);
+    rcache = NULL;
+#ifdef WORKING_RCACHE
+    /*
+     * Setup the replay cache.
+     */
+    if (!(rcache = (krb5_rcache) malloc(sizeof(*rcache)))) 
+      problem = ENOMEM;
+    if (!problem) 
+      problem = krb5_rc_resolve_type(&rcache,
+				     rc_type ? rc_type : "dfl");
+    cachename = NULL;
+    server_name = krb5_princ_component(server, 0);
+    if (!problem && !(cachename = malloc(server_name->length+1+strlen(rc_base))))
+      problem = ENOMEM;
+    if (!problem) {
+	strcpy(cachename, rc_base ? rc_base : "rc_");
+	strncat(cachename, server_name->data, server_name->length);
+	cachename[server_name->length+strlen(rc_base)] = '\0';
+	problem = krb5_rc_resolve(rcache, cachename);
+    }
+    if (!problem) {
+	if (krb5_rc_recover(rcache))
+	  /*
+	   * If the rc_recover didn't work, then try
+	   * initializing the replay cache.
+	   */
+	  problem = krb5_rc_initialize(rcache, krb5_clockskew);
+	if (problem) {
+	    krb5_rc_close(rcache);
+	    rcache = NULL;
+	}
+    }
+#endif
+
+    /*
+     * Now, let's read the AP_REQ message and decode it
+     */
+    if (retval = krb5_read_message(fd, &inbuf)) {
+#ifdef WORKING_RCACHE		
+	(void) krb5_rc_close(rcache);
+	if (cachename)
+	  free(cachename);
+#endif
+	return(retval);
+    }
+    authdat = 0;			/* so we can tell if we need to
+					   free it later... */
+    if (!problem)
+      problem = krb5_rd_req(&inbuf, server, sender_addr, fetch_from,
+			    keyproc, keyprocarg, rcache, &authdat);
+    xfree(inbuf.data);
+#ifdef WORKING_RCACHE
+    if (rcache)
+      retval = krb5_rc_close(rcache);
+#endif
+    if (!problem && retval)
+      problem = retval;
+#ifdef WORKING_RCACHE
+    if (cachename)
+      free(cachename);
+#endif
+    
+    /*
+     * If there was a problem, send back a krb5_error message,
+     * preceeded by the length of the krb5_error message.  If
+     * everything's ok, send back 0 for the length.
+     */
+    if (problem) {
+	krb5_error	error;
+	const	char *message;
+	
+	memset((char *)&error, 0, sizeof(error));
+	krb5_us_timeofday(&error.stime, &error.susec);
+	error.server = server;
+	error.error = problem - ERROR_TABLE_BASE_krb5;
+	if (error.error > 127)
+	  error.error = KRB_ERR_GENERIC;
+	message = error_message(problem);
+	error.text.length  = strlen(message) + 1;
+	if (!(error.text.data = malloc(error.text.length)))
+	  return(ENOMEM);
+	strcpy(error.text.data, message);
+	if (retval = krb5_mk_error(&error, &outbuf)) {
+	    free(error.text.data);
+	    return(retval);
+	}
+	free(error.text.data);
+    } else {
+	outbuf.length = 0;
+	outbuf.data = 0;
+    }
+    if (retval = krb5_write_message(fd, &outbuf)) {
+	if (outbuf.data)
+	  xfree(outbuf.data);
+	if (!problem)
+	  krb5_free_tkt_authent(authdat);
+	return(retval);
+    }
+    if (problem) {
+	/*
+	 * We sent back an error, we need to return
+	 */
+	if (authdat) krb5_free_tkt_authent(authdat);
+	return(problem);
+    }
+
+    /*
+     * Here lies the mutual authentication stuff...
+     *
+     * We're going to compose and send a AP_REP message.
+     */
+    if ((authdat->ap_options & AP_OPTS_MUTUAL_REQUIRED)) {
+	krb5_ap_rep_enc_part	repl;
+	
+	/*
+	 * Generate a random sequence number
+	 */
+	if (seq_number &&
+	    (retval = krb5_generate_seq_number(authdat->ticket->enc_part2->session,
+					       seq_number))) {
+	    krb5_free_tkt_authent(authdat);
+	    return(retval);
+	}
+	
+	repl.ctime = authdat->authenticator->ctime;
+	repl.cusec = authdat->authenticator->cusec;
+	repl.subkey = authdat->authenticator->subkey;
+	if (seq_number)
+	  repl.seq_number = *seq_number;
+	else
+	  repl.seq_number = 0;
+	
+	if (retval = krb5_mk_rep(&repl,
+				 authdat->ticket->enc_part2->session,
+				 &outbuf)) {
+	    krb5_free_tkt_authent(authdat);
+	    return(retval);
+	}
+	if (retval = krb5_write_message(fd, &outbuf)) {
+	    xfree(outbuf.data);
+	    krb5_free_tkt_authent(authdat);
+	    return(retval);
+	}
+	xfree(outbuf.data);
+    }
+    
+    /*
+     * At this point, we've won.  We just need to copy whatever
+     * parts of the authdat structure which the user wants, clean
+     * up, and exit.
+     */
+    if (client)
+      if (retval =
+	  krb5_copy_principal(authdat->ticket->enc_part2->client,
+			      client))
+	return(retval);
+    /*
+     * The following efficiency hack assumes knowledge about the
+     * structure of krb5_tkt_authent.  If we later add additional
+     * allocated substructures to krb5_tkt_authent, they will have
+     * to be reflected here; otherwise, we will probably have a
+     * memory leak.
+     *
+     * If the user wants that part of the authdat structure,
+     * return it; otherwise free it.
+     */
+    if (ticket)
+      *ticket = authdat->ticket;
+    else
+      krb5_free_ticket(authdat->ticket);
+    if (authent)
+      *authent = authdat->authenticator;
+    else
+      krb5_free_authenticator(authdat->authenticator);
+    xfree(authdat);
+    return 0;
+}
+
+#endif /* KERBEROS */
