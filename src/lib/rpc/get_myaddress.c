@@ -51,33 +51,12 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
 gssrpc_get_myaddress(addr)
 	struct sockaddr_in *addr;
 {
-     krb5_address **addrs, **a;
-     int ret;
-
-     /* Hack!  krb5_os_localaddr does not use the context arg! */
-     if (ret = krb5_os_localaddr(NULL, &addrs)) {
-	  com_err("get_myaddress", ret, "calling krb5_os_localaddr");
-	  exit(1);
-     }
-     a = addrs;
-     while (*a) {
-	  if ((*a)->addrtype == ADDRTYPE_INET) {
-	       memset(addr, 0, sizeof(*addr));
-	       addr->sin_family = AF_INET;
-	       addr->sin_port = htons(PMAPPORT);
-	       memcpy(&addr->sin_addr, (*a)->contents, sizeof(addr->sin_addr));
-	       break;
-	  }
-	  a++;
-     }
-     if (*a == NULL) {
-	  com_err("get_myaddress", 0, "no local AF_INET address");
-	  exit(1);
-     }
-     /* Hack!  krb5_free_addresses does not use the context arg! */
-     krb5_free_addresses(NULL, addrs);
+	memset((void *) addr, 0, sizeof(*addr));
+	addr->sin_family = AF_INET;
+	addr->sin_port = htons(PMAPPORT);
+	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	return (0);
 }
-
 #else /* !GSSAPI_KRB5 */
 #include <gssrpc/types.h>
 #include <gssrpc/pmap_prot.h>
