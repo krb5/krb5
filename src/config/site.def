@@ -242,9 +242,9 @@
 #define DefaultCDebugFlags DebuggableCDebugFlags
 #else
 #if HasGcc
-#define DefaultCDebugFlags DebuggableCDebugFlags
-#else
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
+#else
+#define DefaultCDebugFlags DebuggableCDebugFlags
 #endif
 #define ExtraLoadFlags -Z
 #endif
