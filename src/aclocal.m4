@@ -1000,6 +1000,7 @@ if test "$dbval" = "" -o "$dbval" = ndbm; then
 	      AC_CHECK_LIB(dbm,dbm_nextkey,[dblibs=-ldbm],
 		AC_CHECK_LIB(gdbm,dbm_nextkey,[dblibs=-lgdbm]))))
 	  AC_DEFINE(NDBM)
+	  LIBS="$LIBS $dblibs"
 	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
 		AC_DEFINE(MISSING_ERROR_PROTO))
 	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
