@@ -1,3 +1,8 @@
+Fri Apr 28 18:04:26 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCAL_LIBRARIES): put KRB4_LIB inside KLIB, and put
+	KDB4_LIB ahead of them both.
+
 Thu Apr 27 13:47:23 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (LOCAL_LIBRARIES): use KRB4_LIB and KDB4_LIB
