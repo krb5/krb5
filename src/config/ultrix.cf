@@ -9,6 +9,8 @@
 
 #define OSName            Ultrix-32 3.1
 #define OS_Ultrix         1
+#define OS_TelnetName     ultrix3.1 /* see appl/telnet/Makefile.telnet
+				       to select the name for this */
 #define OSMajorVersion    3
 #define OSMinorVersion    1
 #define SystemV NO
