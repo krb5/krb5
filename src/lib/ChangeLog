@@ -1,3 +1,7 @@
+2000-04-29  Jeffrey Altman <jaltman@columbia.edu>
+
+        * krb5_32.def: Add krb5_get_tgs_ktypes, krb5_free_ktypes for gssapi
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Add krb5_get_prompt_types.

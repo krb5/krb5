@@ -225,6 +225,8 @@ EXPORTS
 ;
 ; Added for 1.2:
 	krb5_decode_ticket
+        krb5_get_tgs_ktypes
+        krb5_free_ktypes
 ;
 ; Temporary exports (DO NOT USE)
 ;	decode_krb5_ticket	-- no longer in library
