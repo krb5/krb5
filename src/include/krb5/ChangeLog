@@ -1,3 +1,11 @@
+Thu Mar  2 23:21:46 1995  John Gilmore  (gnu at toad.com)
+
+	Make include files start to work on the Macintosh.
+
+	* configure.in:  Add checks for sys/types.h and sys/stat.h.
+	* k5-config.h:  Remove krb5/ from #include.
+	* sysincl.h:  Avoid <sys/types.h>.  Conditional-include <sys/stat.h>.
+
 Thu Mar 2 13:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: changed NEED_WINSOCK_H to NEED_SOCKETS

@@ -30,7 +30,8 @@
 
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
-#include <sys/types.h>			/* needed for much of the reset */
+/* needed for much of the rest -- but already handled in krb5.h? */
+/* #include <sys/types.h> */
 #endif /* KRB5_SYSTYPES__ */
 
 #include "osconf.h"			/* USE*TIME_H macros */
@@ -42,7 +43,11 @@
 #else
 #include <time.h>
 #endif
+
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>			/* struct stat, stat() */
+#endif
+
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>			/* MAXPATHLEN */
 #endif
