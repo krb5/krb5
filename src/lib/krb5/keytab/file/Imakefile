@@ -12,6 +12,7 @@ OBJS = \
 	ktf_ssget.o	\
 	ktf_util.o	\
 	ktf_ops.o	\
-	ktf_wops.o
+	ktf_wops.o	\
+	ktf_wreslv.o
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
