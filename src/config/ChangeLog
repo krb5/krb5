@@ -9,7 +9,7 @@
 	configure substitutions.
 	(COM_ERR_LIB): Always define as -lcom_err.
 
-	* win-pre.in (COM_ERR_DEPS, SS_DEPS): New variables.
+	* win-pre.in (COM_ERR_DEPS): New variable.
 
 	* shlib.conf: Use $(LDFLAGS) in CC_LINK_SHARED and CC_LINK_STATIC,
 	after other options.
