@@ -239,7 +239,7 @@ krb5_pwd_data *KRB5_PWD__DATA2krb5_pwd_data
 
 /* pwd2kpwd.c */
  passwd_phrase_element *KRB5_PWD__SEQ2krb5_pwd_seq
-	PROTOTYPE((const register struct type_KRB5_PasswdSequence *, int *));
+	PROTOTYPE((const struct type_KRB5_PasswdSequence *, int *));
 
 
 /* qbuf2data.c */
