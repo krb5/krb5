@@ -24,6 +24,11 @@ Tue Apr  7 16:53:58 1998  Dan Winship  <danw@mit.edu>
  	executed, so nout would never be reset and the next transfer
  	would overrun ucbuf.
 
+Wed Apr 30 14:59:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* cmds.c (getit): Fix Y2K bug in the parsing of the MDTM command.
+		[krb5-appl/399]
+
 Fri Nov 22 15:48:19 1996  unknown  <bjaspan@mit.edu>
 
 	* ftp.c (hookup): use sizeof instead of h_length to determine
