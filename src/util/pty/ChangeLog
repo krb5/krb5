@@ -1,3 +1,8 @@
+Sat Aug  5 01:00:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* open_slave.c (pty_open_slave): pty_open_ctty returns != 0 on
+		error, not less than.
+
 Fri Aug  4 13:59:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* libpty.h (pty_cleanup): Fix argument type of pid to patch that

@@ -68,7 +68,7 @@ return PTY_OPEN_SLAVE_CHMODFAIL;
 #endif /*HAVE_REVOKE*/
 
 /* Open the pty for real. */
-    if  (( retval = pty_open_ctty ( slave, fd))  < 0 ) {
+    if  (( retval = pty_open_ctty ( slave, fd))  != 0 ) {
 	return PTY_OPEN_SLAVE_OPENFAIL;
     }
     return pty_initialize_slave (*fd);
