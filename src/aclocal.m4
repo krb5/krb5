@@ -1396,7 +1396,8 @@ AC_DEFUN(AC_LIBRARY_NET, [
           # ugliness is necessary:
           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
-               AC_CHECK_LIB(resolv, gethostbyname),
+               AC_CHECK_LIB(resolv, gethostbyname,
+			    LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv),
              -lnsl)
        )
      )
@@ -1406,10 +1407,11 @@ AC_DEFUN(AC_LIBRARY_NET, [
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
     AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
-	LIBS="$LIBS -lresolv",
+	LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
 	AC_ERROR(Cannot find resolver support routine res_search in -lresolv.)
     ))
   fi
+  AC_SUBST(RESOLV_LIB)
   ])
 dnl
 dnl

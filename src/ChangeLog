@@ -1,3 +1,9 @@
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Set RESOLV_LIB, and substitute
+	it into the Makefile.
+	(AC_LIBRARY_NET): Set RESOLV_LIB.
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in (clean-windows): Actually clean gss-sample on Windows.
