@@ -1,3 +1,11 @@
+Sun Nov 12 04:29:08 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* conv_creds.c (krb524_convert_creds_kdc): loop through all of the
+	addresses returned by krb5_locate_kdc, don't just try the first one.
+	* krb524d.c (do_connection): check for particular failures of
+	decode_krb5_ticket, as well as for messages that are one int long
+	(which will eliminate our own error replies.)
+
 Mon Oct  9 11:34:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: s/test/krb524test/ to handle screw case where test

@@ -275,8 +275,24 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("message received\n");
 
-     if ((ret = decode_krb5_ticket(&msgdata, &v5tkt)))
+     if ((ret = decode_krb5_ticket(&msgdata, &v5tkt))) {
+          switch (ret) {
+	  case KRB5KDC_ERR_BAD_PVNO:
+	  case ASN1_MISPLACED_FIELD:
+	  case ASN1_MISSING_FIELD:
+	  case ASN1_BAD_ID:
+	  case KRB5_BADMSGTYPE:
+	    /* don't even answer parse errors */
+	    return ret;
+	    break;
+	  default:
+	    /* try and recognize our own error packet */
+	    if (msgdata.length == sizeof(int))
+	      return KRB5_BADMSGTYPE;
+	    else
 	  goto error;
+	  }
+     }
      if (debug)
 	  printf("V5 ticket decoded\n");
      

@@ -58,7 +58,7 @@ int krb524_convert_creds_kdc(context, v5creds, v4creds)
      CREDENTIALS *v4creds;
 {
      struct sockaddr_in *addrs;
-     int ret, naddrs;
+     int ret, naddrs, i;
 
      if ((ret = krb5_locate_kdc(context, &v5creds->server->realm, &addrs,
 			       &naddrs)))
@@ -66,9 +66,26 @@ int krb524_convert_creds_kdc(context, v5creds, v4creds)
      if (naddrs == 0)
 	  ret = KRB5_KDC_UNREACH;
      else {
-	  addrs[0].sin_port = 0; /* use krb524 default port */
-	  ret = krb524_convert_creds_addr(context, v5creds, v4creds,
-					  (struct sockaddr *) &addrs[0]);
+          for (i = 0; i<naddrs; i++) {
+	    addrs[i].sin_port = 0; /* use krb524 default port */
+	    ret = krb524_convert_creds_addr(context, v5creds, v4creds,
+					    (struct sockaddr *) &addrs[i]);
+	    /* stop trying on success */
+	    if (!ret) break;
+	    switch(ret) {
+	    case ECONNREFUSED:
+	    case ENETUNREACH:
+	    case ENETDOWN:
+	    case ETIMEDOUT:
+	    case EHOSTDOWN:
+	    case EHOSTUNREACH:
+	      continue;
+	    default:
+	      break;		/* out of switch */
+	    }
+	    /* if we fall through to here, it wasn't an "ok" error */
+	    break;
+	  }
      }
      
      free(addrs);
