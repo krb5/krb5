@@ -632,7 +632,10 @@ ToSeconds(Hours, Minutes, Seconds, Meridian)
     /* NOTREACHED */
 }
 
-
+/*
+ * From hh:mm:ss [am|pm] mm/dd/yy [tz], compute and return the number
+ * of seconds since 00:00:00 1/1/70 GMT.
+ */
 static time_t
 Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
     time_t	Month;
@@ -959,10 +962,60 @@ get_date(p, now)
     yyHaveTime = 0;
     yyHaveZone = 0;
 
+    /*
+     * When yyparse returns, zero or more of yyHave{Time,Zone,Date,Day,Rel} 
+     * will have been incremented.  The value is number of items of
+     * that type that were found; for all but Rel, more than one is
+     * illegal.
+     *
+     * For each yyHave indicator, the following values are set:
+     *
+     * yyHaveTime:
+     *	yyHour, yyMinutes, yySeconds: hh:mm:ss specified, initialized
+     *				      to zeros above
+     *	yyMeridian: MERam, MERpm, or MER24
+     *	yyTimeZone: time zone specified in minutes
+     *  yyDSTmode: DSToff if yyTimeZone is set, otherwise unchanged
+     *		   (initialized above to DSTmaybe)
+     *
+     * yyHaveZone:
+     *  yyTimezone: as above
+     *  yyDSTmode: DSToff if a non-DST zone is specified, otherwise DSTon
+     *	XXX don't understand interaction with yyHaveTime zone info
+     *
+     * yyHaveDay:
+     *	yyDayNumber: 0-6 for Sunday-Saturday
+     *  yyDayOrdinal: val specified with day ("second monday",
+     *		      Ordinal=2), otherwise 1
+     *
+     * yyHaveDate:
+     *	yyMonth, yyDay, yyYear: mm/dd/yy specified, initialized to
+     *				today above
+     *
+     * yyHaveRel:
+     *	yyRelSeconds: seconds specified with MINUTE_UNITs ("3 hours") or
+     *		      SEC_UNITs ("30 seconds")
+     *  yyRelMonth: months specified with MONTH_UNITs ("3 months", "1
+     *		     year")
+     *
+     * The code following yyparse turns these values into a single
+     * date stamp.
+     */
     if (yyparse()
      || yyHaveTime > 1 || yyHaveZone > 1 || yyHaveDate > 1 || yyHaveDay > 1)
 	return -1;
 
+    /*
+     * If an absolute time specified, set Start to the equivalent Unix
+     * timestamp.  Otherwise, set Start to now, and if we do not have
+     * a relatime time (ie: only yyHaveZone), decrement Start to the
+     * beginning of today.
+     *
+     * By having yyHaveDay in the "absolute" list, "next Monday" means
+     * midnight next Monday.  Otherwise, "next Monday" would mean the
+     * time right now, next Monday.  It's not clear to me why the
+     * current behavior is preferred.
+     */
     if (yyHaveDate || yyHaveTime || yyHaveDay) {
 	Start = Convert(yyMonth, yyDay, yyYear, yyHour, yyMinutes, yySeconds,
 		    yyMeridian, yyDSTmode);
@@ -975,9 +1028,30 @@ get_date(p, now)
 	    Start -= ((tm->tm_hour * 60L + tm->tm_min) * 60L) + tm->tm_sec;
     }
 
+    /*
+     * Add in the relative time specified.  RelativeMonth adds in the
+     * months, accounting for the fact that the actual length of "3
+     * months" depends on where you start counting.
+     *
+     * XXX By having this separate from the previous block, we are
+     * allowing dates like "10:00am 3 months", which means 3 months
+     * from 10:00am today, or even "1/1/99 two days" which means two
+     * days after 1/1/99.
+     *
+     * XXX Shouldn't this only be done if yyHaveRel, just for
+     * thoroughness?
+     */
     Start += yyRelSeconds;
     Start += RelativeMonth(Start, yyRelMonth);
 
+    /*
+     * Now, if you specified a day of week and counter, add it in.  By
+     * disallowing Date but allowing Time, you can say "5pm next
+     * monday".
+     *
+     * XXX The yyHaveDay && !yyHaveDate restriction should be enforced
+     * above and be able to cause failure.
+     */
     if (yyHaveDay && !yyHaveDate) {
 	tod = RelativeDate(Start, yyDayOrdinal, yyDayNumber);
 	Start += tod;

@@ -1,3 +1,7 @@
+Wed Sep 25 16:22:12 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* getdate.y: add lots of comments
+
 Tue Sep 10 00:48:38 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kadmin.c (kadmin_startup): -m doesn't take an argument.
