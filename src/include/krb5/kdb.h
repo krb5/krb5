@@ -39,6 +39,14 @@ typedef struct _krb5_db_entry {
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
 
+/* prompts used by default when reading the KDC password from the keyboard. */
+#define KRB5_KDC_MKEY_1	"Enter KDC database master key:"
+#define KRB5_KDC_MKEY_2	"Re-enter KDC database master key to verify:"
+
+extern char *krb5_mkey_pwd_prompt1;
+extern char *krb5_mkey_pwd_prompt2;
+
+
 /* libkdb.spec */
 krb5_error_code krb5_db_set_name
 	PROTOTYPE((char * ));
@@ -62,12 +70,11 @@ krb5_error_code krb5_db_get_principal
 		   krb5_db_entry *,
 		   int *,
 		   krb5_boolean * ));
-krb5_error_code krb5_db_free_principal
+void krb5_db_free_principal
 	PROTOTYPE((krb5_db_entry *,
 		   int  ));
 krb5_error_code krb5_db_put_principal
 	PROTOTYPE((krb5_db_entry *,
-		   int ,
 		   int * ));
 krb5_error_code krb5_db_iterate
 	PROTOTYPE((krb5_error_code (* ) PROTOTYPE((krb5_pointer,
@@ -75,5 +82,8 @@ krb5_error_code krb5_db_iterate
 		   krb5_pointer ));
 krb5_error_code krb5_db_verify_master_key
 	PROTOTYPE((krb5_principal, krb5_keyblock *, krb5_encrypt_block *));
+krb5_error_code	krb5_db_fetch_mkey
+	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
+		   krb5_keyblock * ));
 
 #endif /* __KRB5_KDB5__ */
