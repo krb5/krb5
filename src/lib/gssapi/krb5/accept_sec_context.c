@@ -417,6 +417,29 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
+   /* use the session key if the subkey isn't present */
+
+   if (ctx->subkey == NULL) {
+       if ((code = krb5_auth_con_getkey(context, auth_context,
+					&ctx->subkey))) {
+	   krb5_free_principal(context, ctx->there);
+	   krb5_free_principal(context, ctx->here);
+	   xfree(ctx);
+	   *minor_status = code;
+	   return(GSS_S_FAILURE);
+       }
+   }
+
+   if (ctx->subkey == NULL) {
+       krb5_free_principal(context, ctx->there);
+       krb5_free_principal(context, ctx->here);
+       xfree(ctx);
+       /* this isn't a very good error, but it's not clear to me this
+	  can actually happen */
+       *minor_status = KRB5KDC_ERR_NULL_KEY;
+       return(GSS_S_FAILURE);
+   }
+
    switch(ctx->subkey->enctype) {
    case ENCTYPE_DES_CBC_MD5:
    case ENCTYPE_DES_CBC_CRC:
