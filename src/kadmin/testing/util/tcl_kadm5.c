@@ -11,6 +11,7 @@
 #include <k5-int.h>
 #include <errno.h>
 #include <stdlib.h>
+#include "tcl_kadm5.h"
 
 struct flagval {
      char *name;
@@ -1821,8 +1822,9 @@ finished:
 }
 
 
-int tcl_kadm5_rename_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_kadm5_rename_principal(ClientData clientData, 
+				      Tcl_Interp *interp,
+				      int argc, char *argv[])
 {
      krb5_principal source, target;
      krb5_error_code krb5_ret;
@@ -1861,8 +1863,9 @@ int tcl_kadm5_rename_principal(ClientData clientData, Tcl_Interp *interp,
 
 
 	  
-int tcl_kadm5_chpass_principal(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char *argv[])
+static int tcl_kadm5_chpass_principal(ClientData clientData, 
+				      Tcl_Interp *interp,
+				      int argc, char *argv[])
 {
      krb5_principal princ;
      char *pw;
@@ -1918,9 +1921,9 @@ finished:
 
 
 
-int tcl_kadm5_chpass_principal_util(ClientData clientData,
-					 Tcl_Interp *interp,
-					 int argc, char *argv[])
+static int tcl_kadm5_chpass_principal_util(ClientData clientData,
+					   Tcl_Interp *interp,
+					   int argc, char *argv[])
 {
      krb5_principal princ;
      char *new_pw;
@@ -2005,8 +2008,9 @@ finished:
 
 
 
-int tcl_kadm5_randkey_principal(ClientData clientData, Tcl_Interp *interp,
-				     int argc, char *argv[])
+static int tcl_kadm5_randkey_principal(ClientData clientData, 
+				       Tcl_Interp *interp,
+				       int argc, char *argv[])
 {
      krb5_principal princ;
      krb5_keyblock *keyblocks;
@@ -2079,8 +2083,8 @@ finished:
 
 
 
-int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_kadm5_get_principal(ClientData clientData, Tcl_Interp *interp,
+				   int argc, char *argv[])
 {
      krb5_principal princ;
      kadm5_principal_ent_rec ent;
@@ -2153,8 +2157,8 @@ finished:
      return retcode;
 }
      
-int tcl_kadm5_create_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_kadm5_create_policy(ClientData clientData, Tcl_Interp *interp,
+				   int argc, char *argv[])
 {
      int tcl_ret;
      kadm5_ret_t ret;
@@ -2201,8 +2205,8 @@ finished:
 
 
 
-int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
+				   int argc, char *argv[])
 {
      kadm5_ret_t ret;
      char *policy;
@@ -2229,8 +2233,8 @@ int tcl_kadm5_delete_policy(ClientData clientData, Tcl_Interp *interp,
 
 
 
-int tcl_kadm5_modify_policy(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char *argv[])
+static int tcl_kadm5_modify_policy(ClientData clientData, Tcl_Interp *interp,
+				   int argc, char *argv[])
 {
      char *policy_string;
      kadm5_policy_ent_t policy = 0;
@@ -2275,8 +2279,8 @@ finished:
 }
 
 
-int tcl_kadm5_get_policy(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char *argv[])
+static int tcl_kadm5_get_policy(ClientData clientData, Tcl_Interp *interp,
+				int argc, char *argv[])
 {
      kadm5_policy_ent_rec ent;
      Tcl_DString *ent_dstring = 0;
@@ -2334,9 +2338,9 @@ finished:
 
      
      
-int tcl_kadm5_free_principal_ent(ClientData clientData,
-				      Tcl_Interp *interp,
-				      int argc, char *argv[])
+static int tcl_kadm5_free_principal_ent(ClientData clientData,
+					Tcl_Interp *interp,
+					int argc, char *argv[])
 {
      char *ent_name;
      kadm5_principal_ent_t ent;
@@ -2391,9 +2395,9 @@ int tcl_kadm5_free_principal_ent(ClientData clientData,
 }
 	  
 		    
-int tcl_kadm5_free_policy_ent(ClientData clientData,
-				   Tcl_Interp *interp,
-				   int argc, char *argv[])
+static int tcl_kadm5_free_policy_ent(ClientData clientData,
+				     Tcl_Interp *interp,
+				     int argc, char *argv[])
 {
      char *ent_name;
      kadm5_policy_ent_t ent;
@@ -2447,8 +2451,8 @@ int tcl_kadm5_free_policy_ent(ClientData clientData,
 }
 	  
 		    
-int tcl_kadm5_get_privs(ClientData clientData, Tcl_Interp *interp,
-			     int argc, char *argv[])
+static int tcl_kadm5_get_privs(ClientData clientData, Tcl_Interp *interp,
+			       int argc, char *argv[])
 {
      int tcl_ret;
      char *set_ret;

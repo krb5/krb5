@@ -1,3 +1,16 @@
+2001-07-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_kadm5.h: File with prototypes for Tcl_kadm5_init and
+ 	Tcl_ovsec_kadm_init.
+
+	* tcl_kadm5.c: Include tcl_kadm5.h. Declare
+	tcl_kadm5_{rename,chpass,get}_principal,
+	tcl_kadm5_chpass_principal_util, tcl_kadm5_randkey_principal,
+	tcl_kadm5_{create,delete,modify,get}_policy,
+	tcl_kadm5_free_{principal,policy}_ent, tcl_kadm5_get_privs as static.
+
+	* test.c, tcl_ovsec_kadm.c: Include tcl_kadm5.h.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* tcl_kadm5.c: Cleanup assignments in conditionals.

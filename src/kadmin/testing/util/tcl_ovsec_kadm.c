@@ -11,6 +11,7 @@
 #include <k5-int.h>
 #include <errno.h>
 #include <stdlib.h>
+#include "tcl_kadm5.h"
 
 struct flagval {
      char *name;
