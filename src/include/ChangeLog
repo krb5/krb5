@@ -1,3 +1,9 @@
+2004-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (struct face, struct fac): Always declare.
+	(krb5int_fac): Renamed from fac, and made extern.  Always
+	declare.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in, port-sockets.h: Don't check for macsock.h.

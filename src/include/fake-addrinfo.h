@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001,2002,2003 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002,2003,2004 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -569,6 +569,21 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 #include <stdlib.h>
 #endif
 
+struct face {
+    struct in_addr *addrs4;
+    struct in6_addr *addrs6;
+    unsigned int naddrs4, naddrs6;
+    time_t expiration;
+    char *canonname, *name;
+    struct face *next;
+};
+
+/* fake addrinfo cache */
+struct fac {
+    struct face *data;
+};
+extern struct fac krb5int_fac;
+
 #ifdef NEED_FAKE_GETADDRINFO
 #include <string.h> /* for strspn */
 
@@ -624,30 +639,15 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
 /* fake addrinfo cache entries */
 #define CACHE_ENTRY_LIFETIME	15 /* seconds */
 
-struct face {
-    struct in_addr *addrs4;
-    struct in6_addr *addrs6;
-    unsigned int naddrs4, naddrs6;
-    time_t expiration;
-    char *canonname, *name;
-    struct face *next;
-};
-
-/* fake addrinfo cache */
-struct fac {
-    struct face *data;
-};
-static struct fac fac;
-
 static void plant_face (const char *name, struct face *entry)
 {
     entry->name = strdup(name);
     if (entry->name == NULL)
 	/* @@ Wastes memory.  */
 	return;
-    entry->next = fac.data;
+    entry->next = krb5int_fac.data;
     entry->expiration = time(0) + CACHE_ENTRY_LIFETIME;
-    fac.data = entry;
+    krb5int_fac.data = entry;
 #ifdef DEBUG_ADDRINFO
     printf("added cache entry '%s' at %p: %d ipv4, %d ipv6; expire %d\n",
 	   name, entry, entry->naddrs4, entry->naddrs6, entry->expiration);
@@ -664,7 +664,7 @@ static int find_face (const char *name, struct face **entry)
 #ifdef DEBUG_ADDRINFO
     printf("scanning cache at %d for '%s'...\n", now, name);
 #endif
-    for (fpp = &fac.data; *fpp; ) {
+    for (fpp = &krb5int_fac.data; *fpp; ) {
 	fp = *fpp;
 #ifdef DEBUG_ADDRINFO
 	printf("  checking expiration time of @%p: %d\n",
@@ -686,7 +686,7 @@ static int find_face (const char *name, struct face **entry)
 	    fpp = &(*fpp)->next;
     }
 
-    for (fp = fac.data; fp; fp = fp->next) {
+    for (fp = krb5int_fac.data; fp; fp = fp->next) {
 #ifdef DEBUG_ADDRINFO
 	printf("  comparing entry @%p\n", fp);
 #endif
