@@ -1,3 +1,21 @@
+Tue Apr  2 20:57:12 1996  Chris Provenzano  <proven@mit.edu>
+
+	* utility.c (krb5_data_hex_parse()) : Do a strdup() of string before
+		sending it off to sscanf(), because some systems sscanf can't
+		handle non writeable strings.
+
+Fri Mar 29 03:00:34 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5_decode_test.c (main): add tests for krb5_sam_challenge and
+	krb5_sam_response.
+	* krb5_encode_test.c (main): likewise.
+	* ktest.c (ktest_make_sample_sam_challenge,
+	ktest_make_sample_sam_response): new functions, supporting tests
+	of new types.
+	* ktest_equal.c (ktest_equal_sam_challenge,
+	ktest_equal_sam_response): new comparators.
+	* reference_encode.out, trval_reference.out: add data for test cases.
+	
 Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add KRB5_RUN_FLAGS

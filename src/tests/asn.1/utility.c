@@ -65,12 +65,18 @@ krb5_error_code krb5_data_hex_parse(d, s)
      const char * s;
 {
   int i, digit;
+  char *copy; 
   char *pos;
 
-  d->data = (char*)calloc((strlen(s)+1)/3,sizeof(char));
+    /* 
+     * Do a strdup() and use that, because some systems can't handle non
+     * writeable strings being passed to sscanf() --proven.
+     */
+    copy = strdup(s);
+  d->data = (char*)calloc((strlen(copy)+1)/3,sizeof(char));
   if(d->data == NULL) return ENOMEM;
-  d->length = (strlen(s)+1)/3;
-  for(i=0,pos=(char*)s; i<d->length; i++,pos+=3){
+  d->length = (strlen(copy)+1)/3;
+  for(i=0,pos=(char*)copy; i<d->length; i++,pos+=3){
     if(!sscanf(pos,"%x",&digit)) {
 #ifdef KRB5_USE_ISODE
 	    return EINVAL;
