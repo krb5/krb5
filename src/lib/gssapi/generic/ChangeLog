@@ -2,6 +2,9 @@
 
 	* Makefile.in ($(EHDRDIR)/gssapi.h, $(EHDRDIR)/gssapi_generic.h):
 	Quote target of copies.
+	(HDRS): Quote each name.
+	($(EHDRDIR)) [##DOS##]: Quote mkdir target.
+	(clean-windows): Quote rmdir target.
 
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 

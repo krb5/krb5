@@ -17,8 +17,8 @@ ETHDRS= gssapi_err_generic.h
 
 EHDRDIR= $(BUILDTOP)/include/gssapi
 
-HDRS=	$(EHDRDIR)/gssapi.h \
-	$(EHDRDIR)/gssapi_generic.h
+HDRS=	"$(EHDRDIR)/gssapi.h" \
+	"$(EHDRDIR)/gssapi_generic.h"
 
 $(EHDRDIR)/gssapi.h: gssapi.h
 	$(CP) gssapi.h "$@"
@@ -107,14 +107,14 @@ all-unix:: all-libobjs
 all-windows:: $(EHDRDIR) $(HDRS)
 
 ##DOS##$(EHDRDIR):
-##DOS##	mkdir $(EHDRDIR)
+##DOS##	mkdir "$(EHDRDIR)"
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS)
 
 clean-windows::
 	$(RM) $(HDRS)
-	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+	-if exist $(EHDRDIR)\nul rmdir "$(EHDRDIR)"
 
 includes-unix::
 	@if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)) fi
