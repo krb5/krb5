@@ -81,7 +81,7 @@ CredIsExpired( cr )
 	   everywhere to determine ticket expiration.   */
 
    time = TIME_GMT_UNIXSEC;	
-   return ( (time - cr->issue_date + (2*CLOCK_SKEW)) > (5 * 60 * cr->lifetime) );
+   return krb_life_to_time(cr->issue_date, lifetime) > time - 2 * CLOCK_SKEW;
 }
 
 

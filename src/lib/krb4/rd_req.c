@@ -416,7 +416,8 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
         if ((ad->time_sec - t_local) > CLOCK_SKEW)
             return(RD_AP_NYV);
     }
-    else if ((t_local - ad->time_sec) > 5 * 60 * ad->life)
+    else if (krb_life_to_time((KRB4_32)ad->time_sec, ad->life)
+	     < t_local + CLOCK_SKEW)
         return(RD_AP_EXP);
 
 #ifdef KRB_CRYPT_DEBUG

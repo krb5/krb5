@@ -1,3 +1,13 @@
+2000-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_rd_req): Call life_to_fime().
+
+	* g_tkt_svc.c (CredIsExpired): Call life_to_time().
+
+	* lifetime.c: Add comments for lifetimes[].  Add provisions for
+	compile-time switching of short lifetimes.  Fix sign bug in
+	time_to_life().
+
 2000-10-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* netread.c, netwrite.c: Include unistd.h if present on machine

@@ -54,28 +54,46 @@
  *     }
  * }
  */
+#ifndef SHORT_LIFETIME
 #define NLIFETIMES 64
 static const KRB4_32 lifetimes[NLIFETIMES] = {
-    38400, 41055, 43894, 46929,
-    50174, 53643, 57352, 61318,
-    65558, 70091, 74937, 80119,
-    85658, 91581, 97914, 104684,
-    111922, 119661, 127935, 136781,
-    146239, 156350, 167161, 178720,
-    191077, 204289, 218415, 233517,
-    249664, 266926, 285383, 305116,
-    326213, 348769, 372885, 398668,
-    426234, 455705, 487215, 520904,
-    556921, 595430, 636601, 680618,
-    727680, 777995, 831789, 889303,
-    950794, 1016537, 1086825, 1161973,
-    1242318, 1328218, 1420057, 1518247,
-    1623226, 1735464, 1855462, 1983758,
-    2120925, 2267576, 2424367, 2592000
+    38400, 41055,		/* 00:10:40:00, 00:11:24:15 */
+    43894, 46929,		/* 00:12:11:34, 00:13:02:09 */
+    50174, 53643,		/* 00:13:56:14, 00:14:54:03 */
+    57352, 61318,		/* 00:15:55:52, 00:17:01:58 */
+    65558, 70091,		/* 00:18:12:38, 00:19:28:11 */
+    74937, 80119,		/* 00:20:48:57, 00:22:15:19 */
+    85658, 91581,		/* 00:23:47:38, 01:01:26:21 */
+    97914, 104684,		/* 01:03:11:54, 01:05:04:44 */
+    111922, 119661,		/* 01:07:05:22, 01:09:14:21 */
+    127935, 136781,		/* 01:11:32:15, 01:13:59:41 */
+    146239, 156350,		/* 01:16:37:19, 01:19:25:50 */
+    167161, 178720,		/* 01:22:26:01, 02:01:38:40 */
+    191077, 204289,		/* 02:05:04:37, 02:08:44:49 */
+    218415, 233517,		/* 02:12:40:15, 02:16:51:57 */
+    249664, 266926,		/* 02:21:21:04, 03:02:08:46 */
+    285383, 305116,		/* 03:07:16:23, 03:12:45:16 */
+    326213, 348769,		/* 03:18:36:53, 04:00:52:49 */
+    372885, 398668,		/* 04:07:34:45, 04:14:44:28 */
+    426234, 455705,		/* 04:22:23:54, 05:06:35:05 */
+    487215, 520904,		/* 05:15:20:15, 06:00:41:44 */
+    556921, 595430,		/* 06:10:42:01, 06:21:23:50 */
+    636601, 680618,		/* 07:08:50:01, 07:21:03:38 */
+    727680, 777995,		/* 08:10:08:00, 09:00:06:35 */
+    831789, 889303,		/* 09:15:03:09, 10:07:01:43 */
+    950794, 1016537,		/* 11:00:06:34, 11:18:22:17 */
+    1086825, 1161973,		/* 12:13:53:45, 13:10:46:13 */
+    1242318, 1328218,		/* 14:09:05:18, 15:08:56:58 */
+    1420057, 1518247,		/* 16:10:27:37, 17:13:44:07 */
+    1623226, 1735464,		/* 18:18:53:46, 20:02:04:24 */
+    1855462, 1983758,		/* 21:11:24:22, 22:23:02:38 */
+    2120925, 2267576,		/* 24:13:08:45, 26:05:52:56 */
+    2424367, 2592000		/* 28:01:26:07, 30:00:00:00 */
 };
 #define MINFIXED 0x80
 #define MAXFIXED (MINFIXED + NLIFETIMES - 1)
 #define NOEXPIRE 0xFF
+#endif /* !SHORT_LIFETIME */
 
 /*
  * krb_life_to_time
@@ -83,18 +101,22 @@ static const KRB4_32 lifetimes[NLIFETIMES] = {
  * Given a start date and a lifetime byte, compute the expiration
  * date.
  */
-KRB4_32
+KRB5_DLLIMP KRB4_32 KRB5_CALLCONV
 krb_life_to_time(KRB4_32 start, int life)
 {
+    if (life < 0 || life > 255)	/* possibly sign botch in caller */
+	return start;
+#ifndef SHORT_LIFETIME
     if (life == NOEXPIRE)
 	return KRB_NEVERDATE;
-    if (life < 0)		/* possibly sign botch in caller */
-	return start;
     if (life < MINFIXED)
 	return start + life * 5 * 60;
     if (life > MAXFIXED)
 	return start + lifetimes[NLIFETIMES - 1];
     return start + lifetimes[life - MINFIXED];
+#else  /* SHORT_LIFETIME */
+    return start + life * 5 * 60;
+#endif /* SHORT_LIFETIME */
 }
 
 /*
@@ -104,17 +126,20 @@ krb_life_to_time(KRB4_32 start, int life)
  * Round up, since we can adjust the start date backwards if we are
  * issuing the ticket to cause it to expire at the correct time.
  */
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 krb_time_to_life(KRB4_32 start, KRB4_32 end)
 {
     KRB4_32 dt;
+#ifndef SHORT_LIFETIME
     int i;
+#endif
 
-    if (end == KRB_NEVERDATE)
-	return NOEXPIRE;
-    dt = start - end;
+    dt = end - start;
     if (dt <= 0)
 	return 0;
+#ifndef SHORT_LIFETIME
+    if (end == KRB_NEVERDATE)
+	return NOEXPIRE;
     if (dt < lifetimes[0])
 	return (dt + 5 * 60 - 1) / (5 * 60);
     /* This depends on the array being ordered. */
@@ -123,4 +148,10 @@ krb_time_to_life(KRB4_32 start, KRB4_32 end)
 	    return i + MINFIXED;
     }
     return MAXFIXED;
+#else  /* SHORT_LIFETIME */
+    if (dt > 5 * 60 * 255)
+	return 255;
+    else
+	return (dt + 5 * 60 - 1) / (5 * 60);
+#endif /* SHORT_LIFETIME */
 }
