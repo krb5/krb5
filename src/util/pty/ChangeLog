@@ -1,3 +1,7 @@
+2001-12-03  Sam Hartman  <hartmans@mit.edu>
+
+	* README: s-pty_init_ets/pty_init/
+
 2001-10-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname): Do not declare addrbuf

@@ -3,7 +3,7 @@ libpty until
 more formal docs are written.  By that point, it will probably
 describe how pty can be broken out of the Kerberos distribution.
 
-void pty_init_ets(void);
+void pty_init(void);
 
 	 Initialize error tables.
 
