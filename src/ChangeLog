@@ -1,3 +1,10 @@
+2003-01-14  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (check-unix): Invoke t_krbconf instead of struggling
+	with differing versions of make's quoting of \ and $.
+
+	* t_krbconf: Small shell script to test krb5-config.
+
 2003-01-13  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (check-unix): Test to see if krb5-config outputs
