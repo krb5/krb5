@@ -1,3 +1,7 @@
+2004-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* addrinfo-test.c: New file.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* resolve.c (main): If gethostbyname fails, report the failing
