@@ -110,6 +110,7 @@ krb5_error_code krb5_mk_req_extended
 		   const krb5_flags,
 		   krb5_ccache,
 		   krb5_creds *,
+		   krb5_authenticator *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_req_simple
 	PROTOTYPE((const krb5_data *,
