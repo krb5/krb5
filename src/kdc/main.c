@@ -472,17 +472,11 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	 * generators.
 	 */
 
-	if ((kret = krb5_timeofday(rdp->realm_context, &now)))
-	    goto whoops;
-	seed.length = sizeof(now);
-	seed.data = (char *) &now;
-	if ((kret = krb5_c_random_seed(rdp->realm_context, &seed)))
-	    goto whoops;
-
 	seed.length = rdp->realm_mkey.length;
 	seed.data = rdp->realm_mkey.contents;
 
-	if ((kret = krb5_c_random_seed(rdp->realm_context, &seed)))
+	if ((kret = krb5_c_random_add_entropy(rdp->realm_context,
+					     KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
 	    goto whoops;
 
 #ifdef KRB5_KRB4_COMPAT

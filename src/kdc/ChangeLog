@@ -1,3 +1,8 @@
+2002-01-08  Sam Hartman  <hartmans@mit.edu>
+
+	* dispatch.c (dispatch): Add timing data between requests to PRNG
+	(dispatch): Grab random data from OS every hour
+
 2001-12-14  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c (main, init_realm): Get rid of variables set but never used. 
@@ -6,6 +11,10 @@
 
 	* kdc_util.c (subrealm, add_to_transited): Unsigned vs. signed int
 	fixes.
+
+2001-11-26  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (init_realm): Don't seed from current time; krb5_init_context already does that.
 
 2001-10-25  Tom Yu  <tlyu@mit.edu>
 

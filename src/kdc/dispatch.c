@@ -35,6 +35,8 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+static krb5_int32 last_usec = 0, last_os_random = 0;
+
 krb5_error_code
 dispatch(pkt, from, portnum, response)
     krb5_data *pkt;
@@ -45,7 +47,8 @@ dispatch(pkt, from, portnum, response)
 
     krb5_error_code retval;
     krb5_kdc_req *as_req;
-
+    krb5_int32 now, now_usec;
+    
     /* decode incoming packet, and dispatch */
 
 #ifndef NOCACHE
@@ -74,6 +77,25 @@ dispatch(pkt, from, portnum, response)
 	return 0;
     }
 #endif
+    retval = krb5_crypto_us_timeofday(&now, &now_usec);
+    if (retval == 0) {
+      krb5_int32 usec_difference = now_usec-last_usec;
+      krb5_data data;
+      if(last_os_random == 0)
+	last_os_random = now;
+      /* Grab random data from OS every hour*/
+      if(now-last_os_random >= 60*60) {
+	krb5_c_random_os_entropy(kdc_context, 0, NULL);
+	last_os_random = now;
+      }
+      
+      data.length = sizeof(krb5_int32);
+      data.data = (void *) &usec_difference;
+      
+      krb5_c_random_add_entropy(kdc_context,
+				KRB5_C_RANDSOURCE_TIMING, &data);
+      last_usec = now_usec;
+    }
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
