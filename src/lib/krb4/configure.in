@@ -1,14 +1,7 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-AC_C_CONST
-AC_CHECK_HEADERS(sys/select.h time.h unistd.h)
-dnl Could check for full stdc environment, but will only test
-dnl for stdlib.h
-AC_CHECK_HEADERS(stdlib.h)
-
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
-AC_DEFINE(KRB4_USE_KEYTAB)
 case $krb5_cv_host in
      powerpc-apple-darwin*)
      KRB_ERR_TXT=
@@ -18,7 +11,6 @@ case $krb5_cv_host in
      ;;
 esac
 AC_SUBST([KRB_ERR_TXT])
-AC_CHECK_FUNCS(strdup seteuid setreuid setresuid)
 AC_PROG_AWK
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS

@@ -15,6 +15,7 @@
 #include "krb.h"
 #include <string.h>
 
+#include "krb5/autoconf.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else

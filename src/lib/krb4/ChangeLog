@@ -1,3 +1,16 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* gethostname.c, getst.c, kadm_net.c, klog.c, kparse.c: Include
+	krb5/autoconf.h.
+	* kuserok.c, log.c, memcache.c, mk_preauth.c, netread.c: Ditto.
+	* netwrite.c, put_svc_key.c, recvauth.c, send_to_kdc.c: Ditto.
+	* tkt_string.c: Ditto.
+	* Makefile.in: Update dependencies.
+	(DEFINES): Define KRB4_USE_KEYTAB.
+	* configure.in: Don't define KRB4_USE_KEYTAB.  Don't check for any
+	headers or functions; include/configure.in already does it.  Don't
+	invoke AC_C_CONST explicitly; CONFIG_RULES does that.
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* g_cnffile.c (krb__get_srvtabname): Keep strdup()ed string in a

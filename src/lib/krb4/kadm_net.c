@@ -31,6 +31,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include "krb5/autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
