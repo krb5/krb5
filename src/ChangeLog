@@ -1,3 +1,8 @@
+Tue Mar 22 12:00:00 1995  Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: zipping up for the PC now handles trees containing
+	   binary files such as *.o and *.a.
+
 Tue Mar 21 18:50:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: oops, missed a directory in zipping up for the PC

@@ -200,9 +200,10 @@ ZIPBINARYFILES=windows/cns/*.ico
 
 ZIPEXCLUDE= LIB/KRB5.SAB \
 	INCLUDE/KRB5/AUTOCONF.H \
-	WINDOWS/CNS/*.ICO
+	LIB/CRYPTO/MD4/T_MDDRIV LIB/CRYPTO/MD5/T_MDDRIV \
+	WINDOWS/CNS/*.ICO *.O *.A
 
-zip-windows: awk-windows kerbsrc.zip
+zip-windows: awk-windows
 	rm -f kerbsrc.zip
 	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
 	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
