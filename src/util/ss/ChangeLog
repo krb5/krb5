@@ -1,3 +1,11 @@
+2001-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* request_tbl.c (ss_add_request_table): Delete unnecessary cast in
+	size arg to realloc.
+
+	* invocation.c (ss_delete_invocation): Delete unnecessary cast in
+	arg to free.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* request_tbl.c (ss_add_request_table): Do not cast argument to
