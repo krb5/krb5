@@ -2,7 +2,8 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
 # 
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
@@ -17,6 +18,8 @@ OBJS= \
 	free_hstrl.o	\
 	full_ipadr.o	\
 	get_krbhst.o	\
+	gen_port.o	\
+	gen_rname.o	\
 	hst_realm.o	\
 	ktdefname.o	\
 	kuserok.o	\
@@ -42,6 +45,8 @@ SRCS= \
 	free_hstrl.c	\
 	full_ipadr.c	\
 	get_krbhst.c	\
+	gen_port.c	\
+	gen_rname.c	\
 	hst_realm.c	\
 	ktdefname.c	\
 	kuserok.c	\
