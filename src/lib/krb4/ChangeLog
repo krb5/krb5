@@ -1,3 +1,14 @@
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for strdup().
+
+	* kparse.c: Remove strsave() and replace with an inlined static
+	version of strdup() if HAVE_STRDUP is not defined.
+
+	* g_ad_tkt.c (get_ad_tkt): ptr may be signed; cast while
+	assigning to larger types.  [from Charles Hannum by way of
+	ghudson]
+
 2000-05-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* decomp_tkt.c (dcmp_tkt_int): Add a couple more length checks.

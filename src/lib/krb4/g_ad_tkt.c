@@ -241,9 +241,9 @@ get_ad_tkt(service,sinstance,realm,lifetime)
     rlm[sizeof(rlm)-1];
     ptr += strlen(rlm) + 1;
 
-    lifetime = (unsigned long) ptr[0];
-    kvno = (unsigned long) ptr[1];
-    tkt->length = (int) ptr[2];
+    lifetime = (unsigned char) ptr[0];
+    kvno = (unsigned char) ptr[1];
+    tkt->length = (unsigned char) ptr[2];
     ptr += 3;
     memcpy((char *)(tkt->dat), ptr, tkt->length);
     ptr += tkt->length;
