@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_rd_priv_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 #include <krb5/asn1.h>
@@ -148,6 +148,8 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_mesg() {(void)xfree(privmsg_enc_part);}
 
     if (!(priv_flags & KRB5_PRIV_NOTIME)) {
+	krb5_donot_replay replay;
+
 	if (retval = krb5_timeofday(&currenttime)) {
 	    cleanup_data();
 	    cleanup_mesg();
@@ -158,7 +160,28 @@ OLDDECLARG(krb5_data *, outbuf)
 	    cleanup_mesg();  
 	    return KRB5KRB_AP_ERR_SKEW;
 	}
-	/* replay detection goes here... XXX */
+	if (!rcache) {
+	    /* gotta provide an rcache in this case... */
+	    cleanup_data();
+	    cleanup_mesg();  
+	    return KRB5_RC_REQUIRED;
+	}
+	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
+					  &replay.client)) {
+	    cleanup_data();
+	    cleanup_mesg();  
+	    return retval;
+	}
+	replay.server = "";		/* XXX */
+	replay.cusec = privmsg_enc_part->usec;
+	replay.ctime = privmsg_enc_part->timestamp;
+	if (retval = krb5_rc_store(rcache, &replay)) {
+	    xfree(replay.client);
+	    cleanup_data();
+	    cleanup_mesg();  
+	    return retval;
+	}
+	xfree(replay.client);
     }
 
     if (priv_flags & KRB5_PRIV_DOSEQUENCE)

@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_rd_safe_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 #include <krb5/libos-proto.h>
@@ -70,17 +70,37 @@ krb5_data *outbuf;
 	!is_keyed_cksum(message->checksum->checksum_type))
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
-    if (retval = krb5_timeofday(&currenttime)) {
-	cleanup();
-	return retval;
-    }
     if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+	krb5_donot_replay replay;
+
+	if (retval = krb5_timeofday(&currenttime)) {
+	    cleanup();
+	    return retval;
+	}
 	/* in_clock_skew #defined above */
 	if (!in_clock_skew(message->timestamp)) {
 	    cleanup();
 	    return KRB5KRB_AP_ERR_SKEW;
 	}
-	/* replay detection goes here... XXX */
+	if (!rcache) {
+	    /* gotta provide an rcache in this case... */
+	    cleanup();
+	    return KRB5_RC_REQUIRED;
+	}
+	if (retval = krb5_gen_replay_name(sender_addr, "_safe",
+					  &replay.client)) {
+	    cleanup();
+	    return retval;
+	}
+	replay.server = "";		/* XXX */
+	replay.cusec = message->usec;
+	replay.ctime = message->timestamp;
+	if (retval = krb5_rc_store(rcache, &replay)) {
+	    xfree(replay.client);
+	    cleanup();
+	    return retval;
+	}
+	xfree(replay.client);
     }
 
     if (safe_flags & KRB5_SAFE_DOSEQUENCE)
