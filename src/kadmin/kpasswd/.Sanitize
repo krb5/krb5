@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 .cvsignore
+ChangeLog
 Makefile.in
 configure
 configure.in
