@@ -257,6 +257,13 @@ extern char *slc_names[];
 #define	AUTH_HOW_MUTUAL		2
 #define	AUTH_HOW_MASK		2
 
+/*
+ * should we be encrypting? (not yet formally standardized)
+ */
+#define AUTH_ENCRYPT_OFF	0
+#define AUTH_ENCRYPT_ON		4
+#define AUTH_ENCRYPT_MASK	4
+
 #define	AUTHTYPE_NULL		0
 #define	AUTHTYPE_KERBEROS_V4	1
 #define	AUTHTYPE_KERBEROS_V5	2
