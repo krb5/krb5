@@ -13,14 +13,14 @@
 @set CPRODUCT Kerberos
 @set LCPRODUCT krb5
 @set RANDOMHOST1 daffodil
-@set RANDOMHOST1IP 18.72.0.44
+@set RANDOMHOST1IP 10.0.0.6
 @set RANDOMHOST2 trillium
 @set RANDOMHOST2IP 253.46.124.7
 @set RANDOMUSER johndoe
 @set RANDOMUSER1 jennifer
 @set RANDOMUSER2 david
-@set RELEASE beta 7
-@set PREVRELEASE beta 6
+@set RELEASE 1.0
+@set PREVRELEASE beta 7
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
 @set ROOTDIR /usr/@value{LCPRODUCT}

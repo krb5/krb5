@@ -277,9 +277,7 @@ the master, in case of power outages, fires, or other localized
 disasters.
 @end itemize
 
-If you have a large or complex network, @value{COMPANY} will be
-happy to work with you to determine the optimal number and placement of
-your slave KDCs.
+
 
 @node Hostnames for the Master and Slave KDCs, Database Propagation, Slave KDCs, Realm Configuration Decisions
 @section Hostnames for the Master and Slave KDCs
@@ -397,7 +395,7 @@ first few steps must be done on the master KDC.
 @subsubsection Edit the Configuration Files
 
 Modify the configuration files, @code{/etc/krb5.conf}
-(@pxref{krb5.conf}) and @code{@value{ROOTDIR}/lib/krb5kdc/kdc.conf}
+(@pxref{krb5.conf}) and @code{@value{ROOTDIR}/var/krb5kdc/kdc.conf}
 (@pxref{kdc.conf}) to reflect the correct information (such as the
 hostnames and realm name) for your realm.  @value{COMPANY} recommends
 that you keep @code{krb5.conf} in @code{/etc}.  The @code{krb5.conf}
@@ -443,7 +441,7 @@ Replace @i{@value{PRIMARYREALM}} with the name of your Kerberos realm.
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kdb5_util create -r @value{PRIMARYREALM} -s
-@b{Initializing database '@value{ROOTDIR}/lib/krb5kdc/principal' for
+@b{Initializing database '@value{ROOTDIR}/var/krb5kdc/principal' for
 @result{} realm '@value{PRIMARYREALM}',
 master key name 'K/M@@@value{PRIMARYREALM}'
 You will be prompted for the database Master Password.
@@ -465,7 +463,7 @@ This will create five files in the directory specified in your
 and @code{principal.ok}; the Kerberos administrative database file,
 @code{principal.kadm5}; the administrative database lock file,
 @code{principal.kadm5.lock}; and the stash file, @code{.k5stash}.  (The
-default directory is @code{@value{ROOTDIR}/lib/krb5kdc}.)  If you do not
+default directory is @code{@value{ROOTDIR}/var/krb5kdc}.)  If you do not
 want a stash file, run the above command without the @code{-s} option.
 
 @node Add Administrators to the Acl File, Add Administrators to the Kerberos Database, Create the Database, Install the Master KDC
@@ -590,14 +588,14 @@ continuation of the previous line.):
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kadmin.local
-@b{kadmin.local:} ktadd -k @value{ROOTDIR}/lib/krb5kdc/kadm5.keytab
+@b{kadmin.local:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadm5.keytab
 @result{} kadmin/admin kadmin/changepw 
 @b{Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
-     WRFILE:@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab.
+     WRFILE:@value{ROOTDIR}/var/krb5kdc/kadm5.keytab.
 Entry for principal kadmin/changepw@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
-     WRFILE:@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab.
+     WRFILE:@value{ROOTDIR}/var/krb5kdc/kadm5.keytab.
 kadmin.local:} quit
 @b{shell%}
 @end group
@@ -605,7 +603,7 @@ kadmin.local:} quit
 
 @noindent
 As specified in the @samp{-k} argument, @code{ktadd} will save the
-extracted keytab as @code{@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab}.
+extracted keytab as @code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
 The filename you use must be the one specified in your @code{kdc.conf}
 file.
 
@@ -714,7 +712,7 @@ extract the keytab.
 
 The database is propagated from the master KDC to the slave KDCs via the
 @code{kpropd} daemon.  To set up propagation, create a file on each KDC,
-named @code{@value{ROOTDIR}/lib/krb5kdc/kpropd.acl}, containing the
+named @code{@value{ROOTDIR}/var/krb5kdc/kpropd.acl}, containing the
 principals for each of the KDCs.
 @need 1200
 For example, if the master KDC were
@@ -780,7 +778,7 @@ First, create a dump of the database on the master KDC, as follows:
 
 @smallexample
 @group
-@b{shell%} @value{ROOTDIR}/sbin/kdb5_util dump @value{ROOTDIR}/lib/krb5kdc/slave_datatrans
+@b{shell%} @value{ROOTDIR}/sbin/kdb5_util dump @value{ROOTDIR}/var/krb5kdc/slave_datatrans
 @b{shell%}
 @end group
 @end smallexample
@@ -791,9 +789,9 @@ continuations of the previous line.):
 
 @smallexample
 @group
-@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/lib/krb5kdc/slave_datatrans
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans
 @result{} @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
-@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/lib/krb5kdc/slave_datatrans
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans
 @result{} @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
 @end group
 @end smallexample
@@ -811,11 +809,11 @@ the name of the directory in which you installed @value{PRODUCT}.)
 kdclist = "@value{KDCSLAVE1}.@value{PRIMARYDOMAIN} @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}"
 
 @value{ROOTDIR}/sbin/kdb5_util -R "dump
-@result{} @value{ROOTDIR}/lib/krb5kdc/slave_datatrans"
+@result{} @value{ROOTDIR}/var/krb5kdc/slave_datatrans"
 
 for kdc in $kdclist
 do
-@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/lib/krb5kdc/slave_datatrans $kdc
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans $kdc
 done
 @end group
 @end smallexample
@@ -933,7 +931,7 @@ time    dgram   udp     wait    root    internal
 #
 krb5_prop stream tcp nowait root @value{ROOTDIR}/sbin/kpropd  kpropd
 eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind 
-@result{} klogind -k -c -e
+@result{} klogind -5 -c -e
 @end group
 @end smallexample
 
@@ -1006,7 +1004,7 @@ server processes, if any.
 @smallexample
 @group
 @b{shell%} kdb5_edit -r @value{PRIMARYREALM} -R 'dump_db' > 
-@result{} @value{ROOTDIR}/lib/krb5kdc/old-kdb-dump
+@result{} @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
 @b{shell%}
 @end group
 @end smallexample
@@ -1018,7 +1016,7 @@ command:
 @smallexample
 @group
 @b{shell%} ovsec_adm_export -r @value{PRIMARYREALM} > 
-@result{} @value{ROOTDIR}/lib/krb5kdc/old-adb-dump
+@result{} @value{ROOTDIR}/var/krb5kdc/old-adb-dump
 @b{shell%}
 @end group
 @end smallexample
@@ -1034,7 +1032,7 @@ your current database, you must choose the same master password.
 
 @smallexample
 @group
-@b{shell%} kdb5_util load @value{ROOTDIR}/lib/krb5kdc/old-kdb-dump
+@b{shell%} kdb5_util load @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
 @b{shell%}
 @end group
 @end smallexample
@@ -1045,7 +1043,7 @@ your policy database with @code{kdb5_util}'s ``load'' command with the
 
 @smallexample
 @group
-@b{shell%} kdb5_util load -update @value{ROOTDIR}/lib/krb5kdc/old-adb-dump
+@b{shell%} kdb5_util load -update @value{ROOTDIR}/var/krb5kdc/old-adb-dump
 @b{shell%}
 @end group
 @end smallexample
@@ -1305,7 +1303,7 @@ to close them.
 As stated earlier in this section, @value{COMPANY} recommends that on a
 secure host, you disable the standard @code{ftp}, @code{login},
 @code{telnet}, @code{shell}, and @code{exec} services in
-@code{/etc/services}.  We also recommend that secure hosts have an empty
+@code{/etc/inetd.conf}.  We also recommend that secure hosts have an empty
 @code{/etc/hosts.equiv} file and that there not be a @code{.rhosts} file
 in @code{root}'s home directory.  You can grant Kerberos-authenticated
 root access to specific Kerberos principals by placing those principals
@@ -1367,12 +1365,12 @@ example:
 @smallexample
 @group
 [kdc]
-    profile = @value{ROOTDIR}/lib/krb5kdc/kdc.conf
+    profile = @value{ROOTDIR}/var/krb5kdc/kdc.conf
 
 [logging]
-    kdc = FILE:/dev/ttyp9
-    admin_server = FILE:/dev/ttyp9
-    default = FILE:/dev/ttyp9
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmin.log
+    default = FILE:/var/log/krb5lib.log
 @end group
 @end smallexample
 
@@ -1394,13 +1392,13 @@ Here's an example of a generic kdc.conf file:
 [realms]
     @value{PRIMARYREALM} = @{
         profile = /etc/krb5.conf
-        database_name = @value{ROOTDIR}/lib/krb5kdc/principal
-        admin_database_name = @value{ROOTDIR}/lib/krb5kdc/principal.kadm5
-        admin_database_lockfile = @value{ROOTDIR}/lib/krb5kdc/principal.kadm5.lock
-        admin_keytab = @value{ROOTDIR}/lib/krb5kdc/kadm5.keytab
-        acl_file = @value{ROOTDIR}/lib/krb5kdc/kadm5.acl
-        dict_file = @value{ROOTDIR}/lib/krb5kdc/kadm5.dict
-        key_stash_file = @value{ROOTDIR}/lib/krb5kdc/.k5.@value{PRIMARYREALM}
+        database_name = @value{ROOTDIR}/var/krb5kdc/principal
+        admin_database_name = @value{ROOTDIR}/var/krb5kdc/principal.kadm5
+        admin_database_lockfile = @value{ROOTDIR}/var/krb5kdc/principal.kadm5.lock
+        admin_keytab = @value{ROOTDIR}/var/krb5kdc/kadm5.keytab
+        acl_file = @value{ROOTDIR}/var/krb5kdc/kadm5.acl
+        dict_file = @value{ROOTDIR}/var/krb5kdc/kadm5.dict
+        key_stash_file = @value{ROOTDIR}/var/krb5kdc/.k5.@value{PRIMARYREALM}
         kadmind_port = 749
         max_life = 10h 0m 0s
         max_renewable_life = 7d 0h 0m 0s
