@@ -68,12 +68,12 @@ Major changes in 1.4
   v5passwdd backwards-compatibility password-changing server have been
   removed.
 
-* [1303(inprogress), 2740, 2755, 2781, 2782] Thread safety for krb5
-  libraries.
+* [1303, 2740, 2755, 2781, 2782, 2812] Thread safety for
+  krb5 libraries.
 
 * [2410] Yarrow code now uses AES.
 
-* [2678] New client commands kcpytkt and kdeltkt for Windows.
+* [2678, 2802] New client commands kcpytkt and kdeltkt for Windows.
 
 * [2688] New command mit2ms on Windows.
 
@@ -83,6 +83,9 @@ Major changes in 1.4
 * [2587] Incorporate gss_krb5_set_allowable_enctypes() and
   gss_krb5_export_lucid_sec_context(), which are needed for NFSv4,
   from Kevin Coffman.
+
+* [2841] Fix heap buffer overflow in password history
+  mechanism. [MITKRB5-SA-2004-004]
 
 Minor changes in 1.4
 --------------------
@@ -117,6 +120,9 @@ for a complete list.
 * [1345, 2730, 2757] patchlevel.h is now the master version file.
 
 * [1364] GNU sed is no longer required to make depend on Irix.
+
+* [1383] SRV record support now handles "." target and adds trailing
+  dots to avoid spurious multiple hostname queries.
 
 * [1497] A memory leak in the krb5 context serializer has been fixed.
 
@@ -207,6 +213,8 @@ for a complete list.
 
 * [2657] Default ccache name is evaluated more lazily.
 
+* [2661] Handle return of ai_canonname=NULL from getaddrinfo().
+
 * [2674] libkadm5 acl_init() API renamed to avoid conflict with MacOS
   X acl API.
 
@@ -275,6 +283,22 @@ for a complete list.
   though we removed the configure-time option for this.
 
 * [2795] Fixed some addrinfo problems that affected Irix.
+
+* [2805] Windows NSIS installer script updated.
+
+* [2808] Support library renamed on Windows.
+
+* [2815] krb5-config updated to reference new support library.
+
+* [2814, 2816] Some MSLSA ccache features depending on non-public SDK
+  features were backed out.
+
+* [2818] Don't create empty array for addresses in MSLSA ccache.
+
+* [2832] Fix shared library build on sparc64-netbsd.
+
+* [2833, 2834, 2835] Add support for generating/installing debugging
+  symbols on Windows.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
