@@ -58,8 +58,12 @@ register int *error;
 	return(0);
     }
     retval->msec = val->msec;
-    retval->addresses = krb5_address2KRB5_HostAddresses(val->addresses, error);
-    if (!retval->addresses) {
+    retval->s__address = krb5_addr2KRB5_HostAddress(val->s_address, error);
+    if (!retval->s__address) {
+	goto errout;
+    }
+    retval->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
+    if (!retval->r__address) {
 	goto errout;
     }
     retval->checksum = krb5_checksum2KRB5_Checksum(val->checksum, error);
