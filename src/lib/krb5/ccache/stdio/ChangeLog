@@ -1,3 +1,8 @@
+Thu Aug 15 16:44:32 1996  Tom Yu  <tlyu@mit.edu>
+
+	* scc_retrv.c: Fix def'n of flags_match to be properly
+		parenthesized (noticed by -Wall)
+
 Mon Jun 10 21:46:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* scc_read.c:

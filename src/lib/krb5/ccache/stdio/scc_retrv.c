@@ -27,7 +27,7 @@
 #include "scc.h"
 
 #define set(bits) (whichfields & bits)
-#define flags_match(a,b) (a & b == a)
+#define flags_match(a,b) (((a) & (b)) == (a))
 
 static krb5_boolean
 times_match(t1, t2)
