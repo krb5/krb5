@@ -1,3 +1,6 @@
+Sat Jun 15 04:23:36 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* movemail.c: Initialize auth_context to NULL.
 
 Fri Jul 7 15:44:13 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
