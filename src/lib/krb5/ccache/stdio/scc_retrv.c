@@ -166,7 +166,7 @@ krb5_scc_retrieve(id, whichfields, mcreds, creds)
 	  }
 
 	  /* This one doesn't match */
-	  krb5_free_cred_contents(fetchcreds);
+	  krb5_free_cred_contents(&fetchcreds);
      }
 
      /* If we get here, a match wasn't found */
