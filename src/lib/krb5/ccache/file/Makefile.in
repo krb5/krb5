@@ -24,16 +24,12 @@ SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
 	$(srcdir)/fcc_write.c $(srcdir)/fcc_sflags.c $(srcdir)/fcc_defops.c \
 	$(srcdir)/fcc_errs.c $(srcdir)/fcc_maybe.c
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 shared: 
 	mkdir shared
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*

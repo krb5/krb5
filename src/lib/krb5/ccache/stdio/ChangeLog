@@ -1,3 +1,8 @@
+Mon Sep 25 16:56:51 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Thu Sept 7 12:00:00 EDT 1995	James Mattly	(mattly@fusion.com)
 
 	* scc_retrv.c: fixed paramter passing in a call to standard_fields_match.

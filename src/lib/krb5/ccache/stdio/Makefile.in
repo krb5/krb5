@@ -19,8 +19,6 @@ SRCS 	= $(srcdir)/scc_close.c $(srcdir)/scc_destry.c $(srcdir)/scc_eseq.c \
 	$(srcdir)/scc_errs.c $(srcdir)/scc_maybe.c
 
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
@@ -30,8 +28,6 @@ test: ${OBJS} scc_test.o
 
 shared: 
 	mkdir shared
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*

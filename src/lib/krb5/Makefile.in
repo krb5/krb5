@@ -27,8 +27,6 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all:: all-$(WHAT)
-
 all-unix::
 
 all-windows::
@@ -50,8 +48,6 @@ libkrb5.$(STEXT): $(LIBDONE)
 
 
 
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) libkrb5.$(LIBEXT) libkrb5.stamp

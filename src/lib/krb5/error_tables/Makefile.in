@@ -28,8 +28,6 @@ OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS=$(ETSRCS) init_ets.c
 
-all:: all-$(WHAT)
-
 all-unix:: $(HDRS) shared $(OBJS)
 all-mac:: $(OBJS)
 
@@ -66,8 +64,6 @@ kdb5_err.$(OBJEXT): kdb5_err.c
 krb5_err.$(OBJEXT): krb5_err.c
 adm_err.$(OBJEXT): adm_err.c
 kv5m_err.$(OBJEXT): kv5m_err.c
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(HDRS) $(ETSRCS) shared/*

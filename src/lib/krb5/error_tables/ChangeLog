@@ -1,3 +1,8 @@
+Mon Sep 25 16:57:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * kdb5_err.et : Change KRB5_KDB_BAD_KEYTYPE to KRB5_KDB_BAD_ENCTYPE

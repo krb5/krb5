@@ -152,11 +152,9 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
 
-all:: all-$(WHAT) $(OBJS)
-
-all-unix:: shared
-all-mac:: shared
-all-windows::
+all-unix:: shared $(OBJS)
+all-mac:: shared $(OBJS)
+all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
@@ -185,8 +183,6 @@ t_ser: $(T_SER_OBJS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser
 
-check:: check-$(WHAT)
-
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 	./t_kerb 425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
@@ -205,7 +201,7 @@ check-mac:: $(TEST_PROGS)
 
 check-windows::
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
 	$(RM) t_ser$(EXEEXT) t_ser.$(OBJEXT)

@@ -86,8 +86,6 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 
 all-mac:: $(OBJS)
@@ -113,8 +111,6 @@ t_std_conf: $(T_STD_CONF_OBJS)
 
 t_an_to_ln: $(T_AN_TO_LN_OBJS)
 	$(CC) -o t_an_to_ln $(T_AN_TO_LN_OBJS) $(LIBS)
-
-check:: check-$(WHAT)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
@@ -153,7 +149,7 @@ check-unix::
 	./t_an_to_ln fred/r@r barney/r@r
 	rm ./t_an.*
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
 
 clean-unix::

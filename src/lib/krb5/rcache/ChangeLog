@@ -1,3 +1,8 @@
+Mon Sep 25 16:58:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
 	* rc_io.c:  turn off a call to fsync which MACINTOSH doesn't support
 

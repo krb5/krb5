@@ -1,3 +1,7 @@
+Mon Sep 25 16:56:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
 
 Tue Aug 29 13:35:23 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_cc.c - Add new ccache handle serialization

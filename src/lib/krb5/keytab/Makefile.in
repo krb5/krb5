@@ -24,8 +24,6 @@ SRCS=	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
 
-all:: all-$(WHAT)
-
 shared:
 	mkdir shared
 
@@ -36,8 +34,6 @@ all-windows:: $(OBJS)
 	@echo Making in keytab\file
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*

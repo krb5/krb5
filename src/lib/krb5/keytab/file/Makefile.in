@@ -42,16 +42,12 @@ OBJS = \
 	ktf_defops.$(OBJEXT)	\
 	ser_ktf.$(OBJEXT)
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*

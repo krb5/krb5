@@ -1,3 +1,8 @@
+Mon Sep 25 16:57:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
         * f_kdc_rq.c : Remove krb5_enctype references, and replace with

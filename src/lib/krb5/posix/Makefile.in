@@ -10,16 +10,12 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 OBJS = @LIBOBJS@
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac: $(OBJS)
 all-windows:: syslog.obj sscanf.obj
 
 shared:
 	mkdir shared
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*

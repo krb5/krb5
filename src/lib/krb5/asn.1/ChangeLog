@@ -1,3 +1,8 @@
+Mon Sep 25 16:56:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Fri Sep 22 22:27:33 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* asn1_k_decode.c (asn1_decode_etype_info_entry): 

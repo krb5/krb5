@@ -1,3 +1,8 @@
+Mon Sep 25 16:58:17 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Fri Sep 22 15:57:33 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* write_msg.c (krb5_write_message): check the real length

@@ -74,16 +74,12 @@ SRCS=	\
 	$(srcdir)/f_cred.c	\
 	$(srcdir)/f_cred_enc.c
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 shared:
 	mkdir shared
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) shared/*
