@@ -272,6 +272,7 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
 
         if ( !get_masters || ismaster ) {
             switch (hp->h_addrtype) {
+
 #ifdef HAVE_NETINET_IN_H
             case AF_INET:
                 for (j=0; hp->h_addr_list[j]; j++) {
@@ -350,7 +351,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     struct sockaddr_in *sin = NULL;
     struct hostent *hp = NULL;
     int type, class;
-    int status, priority, weight, size, len, numanswers, numqueries, rdlen;
+    int priority, weight, size, len, numanswers, numqueries, rdlen;
     unsigned short port;
     const int hdrsize = sizeof(HEADER);
     struct srv_dns_entry {

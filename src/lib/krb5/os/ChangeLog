@@ -1,3 +1,11 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* def_realm.c: Add newline at end of file.
+
+	* gmt_mktime.c: Define days_in_month as type int.
+
+	* locate_kdc.c (krb5_locate_srv_dns): Cleanup unused variables.
+
 2000-06-23  Miro Jurisic  <meeroh@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files): Return ENOENT when
