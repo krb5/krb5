@@ -17,7 +17,7 @@
 #include <errno.h>
 
 
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
 #define stat _stat
 #endif
 

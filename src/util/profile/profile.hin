@@ -5,7 +5,7 @@
 typedef struct _profile_t *profile_t;
 
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_MSDOS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()

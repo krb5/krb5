@@ -1,3 +1,21 @@
+Mon Jun 10 17:35:02 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* test_profile.c: Add usage message if not enough arguments.
+
+	* prof_parse.c (dump_profile_to_file, dump_profile): Dump the
+ 		profile using the correct line terminator for Windows,
+ 		Macintosh, etc.
+
+	* prof_parse.c:
+	* prof_file.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.
+
+	* prof_int.h: Add size #defines for _WIN32.  Handle prototypes
+		correctly for _WIN32.
+
+Fri Feb 16 15:18:17 1996    <tytso@rsts-11.mit.edu>
+
+	* prof_int.h: Added comment to profile state structure
+
 Wed Feb 14 16:43:48 1996    <tytso@rsts-11.mit.edu>
 
 	* prof_parse.c (parse_std_line): Make parsing more flexible, so we

@@ -49,12 +49,13 @@ int main(argc, argv)
 	fclose(f);
 	
 	printf("\n\nDebugging dump.\n");
+#if 0
 	dump_profile(root, 0);
-
-#if 1
-	profile_free_node(root);
 #else
 	dump_profile_to_file(root, 0, stdout);
 #endif
+
+	profile_free_node(root);
+
 	return 0;
 }

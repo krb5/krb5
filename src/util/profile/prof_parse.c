@@ -198,7 +198,19 @@ errcode_t profile_parse_file(f, root)
 	return 0;
 }
 
-#ifndef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
+#define EOL "\r\n"
+#endif
+
+#ifdef _MACINTOSH
+#define EOL "\r"
+#endif
+
+#ifndef EOL
+#define EOL "\n"
+#endif
+
+#if !defined(_MSDOS) && !defined(_WIN32)
 
 void dump_profile(root, level)
 	struct profile_node *root;
@@ -218,7 +230,7 @@ void dump_profile(root, level)
 			break;
 		for (i=0; i < level; i++)
 			printf("   ");
-		printf("%s = '%s'\n", name, value);
+		printf("%s = '%s'%s", name, value, EOL);
 	} while (iter != 0);
 
 	iter = 0;
@@ -229,11 +241,11 @@ void dump_profile(root, level)
 			break;
 		for (i=0; i < level; i++)
 			printf("   ");
-		printf("[%s]\n", name);
+		printf("[%s]%s", name, EOL);
 		dump_profile(p, level+1);
 	} while (iter != 0);
 }
-#endif /* ! _WINDOWS */
+#endif /* !_MSDOS && !_WIN32 */
 
 
 void dump_profile_to_file(root, level, dstfile)
@@ -255,7 +267,7 @@ void dump_profile_to_file(root, level, dstfile)
 			break;
 		for (i=0; i < level; i++)
 			fprintf(dstfile, "\t");
-		fprintf(dstfile, "%s = %s\r", name, value);
+		fprintf(dstfile, "%s = %s%s", name, value, EOL);
 	} while (iter != 0);
 
 	iter = 0;
@@ -267,17 +279,17 @@ void dump_profile_to_file(root, level, dstfile)
 		if (level == 0)	{ /* [xxx] */
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
-			fprintf(dstfile, "[%s]\r", name);
+			fprintf(dstfile, "[%s]%s", name, EOL);
 			dump_profile_to_file(p, level+1, dstfile);
-			fprintf(dstfile, "\r");
+			fprintf(dstfile, EOL);
 		} else { 	/* xxx = { ... } */
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
-			fprintf(dstfile, "%s = {\r", name);
+			fprintf(dstfile, "%s = {%s", name, EOL);
 			dump_profile_to_file(p, level+1, dstfile);
 			for (i=0; i < level; i++)
 				fprintf(dstfile, "\t");
-			fprintf(dstfile, "}\r");
+			fprintf(dstfile, "}%s", EOL);
 		}
 	} while (iter != 0);
 }

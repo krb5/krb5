@@ -5,7 +5,7 @@
 #include <time.h>
 #include "prof_err.h"
 
-#if defined(__STDC__) || defined(_MSDOS)
+#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
@@ -17,6 +17,12 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 #endif 
+
+#if defined(_WIN32)
+#define SIZEOF_INT      4
+#define SIZEOF_SHORT    2
+#define SIZEOF_LONG     4
+#endif
 
 #if defined(_MACINTOSH)
 #define NO_SYS_TYPES_H
@@ -31,6 +37,7 @@ typedef long errcode_t;
  */
 struct _prf_file_t {
 	errcode_t	magic;
+	char	*comment;
 	char	*filename;
 	struct profile_node *root;
 	time_t	timestamp;

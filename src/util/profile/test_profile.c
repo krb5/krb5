@@ -31,6 +31,11 @@ int main(argc, argv)
     filenames[0] = argv[1];
     filenames[1] = 0;
 
+    if (argc < 2) {
+	    fprintf(stderr, "Usage: %s filename argset\n", argv[0]);
+	    exit(1);
+    }
+
     initialize_prof_error_table();
     
     retval = profile_init(filenames, &profile);
