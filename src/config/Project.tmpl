@@ -17,15 +17,16 @@
             ISODE = /mit/isode/isode-6.0
             ETSRC = $(TOP)/lib/comerr/compile_et
           DEPKLIB = $(TOP)/lib/krb/libkrb.a \
-                    $(TOP)/lib/des/libdes.a \
                     $(TOP)/lib/ccache/libcred.a \
                     $(TOP)/lib/ccache/file/libfcc.a \
 		    $(TOP)/lib/rcache/librc.a \
                     $(TOP)/lib/os-4.3/libos.a \
                     $(TOP)/error_tables/libkrberrs.a \
+                    $(TOP)/lib/cryptoconf.o \
+                    $(TOP)/lib/des/libdes.a \
+                    $(TOP)/lib/crc-32/libcrc32.a \
                     $(TOP)/asn.1/libasn1.a \
-                    $(TOP)/lib/free/libkfree.a \
-                    $(TOP)/lib/cryptoconf.o
+                    $(TOP)/lib/free/libkfree.a
 
              KLIB = $(DEPKLIB) $(ISODE)/libisode.a -ldes -lcom_err
            KDBLIB = $(TOP)/lib/kdb/libkdb.a
