@@ -1,5 +1,11 @@
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* admin.h (struct __krb5_realm_params): New field
+	realm_kdc_tcp_ports.
+	* alt_prof.c (krb5_read_realm_params): Fill it in by looking up
+	"kdc_tcp_ports" in the config file.
+	(krb5_free_realm_params): Free the storage.
+
 	* logger.c (klog_com_err_proc, krb5_klog_init, krb5_klog_close,
 	severity2string, klog_vsyslog, krb5_klog_syslog,
 	krb5_klog_reopen): Always define functions in prototype style.

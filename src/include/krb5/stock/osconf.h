@@ -76,7 +76,8 @@
 #define DEFAULT_KPASSWD_PORT	464
 #define KPASSWD_PORTNAME "kpasswd"
 
-#define DEFAULT_KDC_PORTLIST	"88,750"
+#define DEFAULT_KDC_UDP_PORTLIST "88,750"
+#define DEFAULT_KDC_TCP_PORTLIST ""
 
 /*
  * Defaults for the KADM5 admin system.

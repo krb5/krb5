@@ -838,7 +838,10 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     hierarchy[2] = "kdc_ports";
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
 	rparams->realm_kdc_ports = svalue;
-	    
+    hierarchy[2] = "kdc_tcp_ports";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_kdc_tcp_ports = svalue;
+
     /* Get the name of the acl file */
     hierarchy[2] = "acl_file";
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
@@ -990,6 +993,8 @@ krb5_free_realm_params(kcontext, rparams)
 	    krb5_xfree(rparams->realm_keysalts);
 	if (rparams->realm_kdc_ports)
 	    krb5_xfree(rparams->realm_kdc_ports);
+	if (rparams->realm_kdc_tcp_ports)
+	    krb5_xfree(rparams->realm_kdc_tcp_ports);
 	if (rparams->realm_acl_file)
 	    krb5_xfree(rparams->realm_acl_file);
 	krb5_xfree(rparams);
