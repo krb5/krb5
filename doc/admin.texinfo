@@ -610,6 +610,33 @@ The list of specifiable options for each application may be found in
 that application's man pages.  The application defaults specified here
 are overridden by those specified in the [realms] section.
 
+A special application name (afs_krb5) is used by the krb524 service to
+know whether new format AFS tokens based on Kerberos 5 can be used
+rather than the older format which used a converted Kerberos 4 ticket.
+The new format allows for cross-realm authentication without
+introducing a security hole.  It is used by default.  Older AFS
+servers (before OpenAFS 1.2.8) will not support the new format.  If
+servers in your cell do not support the new format, you will need to
+add an @code{afs_krb5} relation to the @code{appdefaults} section.
+The following config file shows how to disable new format AFS tickets
+for the @code{afs.example.com} cell in the @code{EXAMPLE.COM} realm.
+
+@smallexample
+@group
+[appdefaults]
+    afs_krb5 = @{ 
+        EXAMPLE.COM = @{
+            afs/afs.example.com = false
+        @}
+    @}
+
+@end group
+@end smallexample
+
+
+
+
+
 @node login, realms (krb5.conf), appdefaults, krb5.conf
 @subsection [login]
 

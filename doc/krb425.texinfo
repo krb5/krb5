@@ -17,7 +17,7 @@
 
 @include definitions.texinfo
 @set EDITION 1.0
-@set UPDATED October 8, 1996
+@set UPDATED May 22, 2003
 
 @finalout                               @c don't print black warning boxes
 
@@ -101,6 +101,7 @@ nonstandard installations.
 @menu
 * libdefaults::                 
 * realms (krb5.conf)::          
+* AFS and the Appdefaults Section::  
 @end menu
 
 @node libdefaults, realms (krb5.conf), krb5.conf, krb5.conf
@@ -122,7 +123,7 @@ Specifies the location of the Kerberos V4 domain/realm translation
 file.  Default is @value{DefaultKrb4Realms}.
 @end table
 
-@node realms (krb5.conf),  , libdefaults, krb5.conf
+@node realms (krb5.conf), AFS and the Appdefaults Section, libdefaults, krb5.conf
 @subsection [realms]
 
 In the [realms] section, the following Kerberos V4 tags may be used:
@@ -147,6 +148,21 @@ realms, with some external means of password sychronization
 between the realms.
 
 @end table
+
+@node AFS and the Appdefaults Section,  , realms (krb5.conf), krb5.conf
+@subsection AFS and the Appdefaults Section
+
+Many Kerberos 4 sites also run the Andrew File System (AFS).
+
+Modern AFS servers (OpenAFS > 1.2.8) support the AFS 2b token format.
+This allows AFS to use Kerberos 5 tickets rather than version 4
+tickets, enabling cross-realm authentication.  By default, the
+@file{krb524d} service will issue the new AFS 2b tokens.  If you are
+using old AFS servers, you will need to disable these new tokens.
+Please see the documentation of the @code{appdefaults} section of
+@file{krb5.conf} in the Kerberos Administration guide.
+
+
 
 @node kdc.conf,  , krb5.conf, Configuration Files
 @section kdc.conf
