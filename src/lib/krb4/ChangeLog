@@ -1,3 +1,8 @@
+Thu Apr 15 20:18:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Fix to actually extract
+	krb5_srvtab value from profile, instead of always ignoring it.
+
 Mon Feb  8 21:56:45 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* rd_req.c (krb_rd_req): Add appropriate #ifdef so that this code
