@@ -1,3 +1,14 @@
+Wed Jan 25 19:19:38 1995  John Gilmore  (gnu at toad.com)
+
+	Make it possible to #include "..." without using slashes,
+	for Macintosh support.
+
+	* krb5.h:  New file, the externally visible interface to
+	Kerberos V5.  Currently the whole kitchen sink, to bootstrap.
+	* k5-int.h:  New file, the internally visible declarations
+	needed by source files that are part of the Kerberos V5 library
+	itself.  Currently the same whole kitchen sink, to bootstrap.
+
 Fri Nov 18 00:16:31 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use WITH_CCOPTS.
