@@ -1,3 +1,8 @@
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* encrypt-i.tex (subsection{Functional interface}): Comment out
+	combine_keys until/unless it gets implemented.
+
 Wed Oct 12 02:19:07 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile: Added better dependencies to do two-pass latex runs
