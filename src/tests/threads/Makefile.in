@@ -1,0 +1,39 @@
+thisconfigdir=./..
+myfulldir=tests/threads
+mydir=threads
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@
+
+SRCS=$(srcdir)/t_rcache.c
+
+all::
+
+N = 4
+run-t_rcache: t_rcache
+	$(RUN_SETUP) ./t_rcache -n $(N)
+
+t_rcache: t_rcache.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_rcache t_rcache.o $(KRB5_BASE_LIBS) -lpthread
+
+syms: syms.o
+	$(CC_LINK) -o syms syms.o
+
+run-syms: syms
+	$(RUN_SETUP) ./syms
+
+check-unix:: run-t_rcache
+
+install::
+
+clean::
+	$(RM) t_rcache.o t_rcache
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+
