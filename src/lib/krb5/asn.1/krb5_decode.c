@@ -197,6 +197,15 @@ error_out:
   return retval;
 }
 
+krb5_error_code
+KRB5_CALLCONV
+krb5_decode_ticket(code, rep)
+     const krb5_data * code;
+     krb5_ticket ** rep;
+{
+    return decode_krb5_ticket(code, rep);
+}
+
 krb5_error_code decode_krb5_ticket(code, rep)
      const krb5_data * code;
      krb5_ticket ** rep;
