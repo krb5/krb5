@@ -1,5 +1,8 @@
 2002-05-31  Ken Raeburn  <raeburn@mit.edu>
 
+	* socket-utils.h (socklen) [! HAVE_SA_LEN]: Return a socklen_t
+	instead of size_t.
+
 	* configure.in: Check return type for getservbyname_r just as for
 	gethostbyname_r.
 	* fake-addrinfo.h (GET_HOST_BY_NAME): Use plain gethostbyname if

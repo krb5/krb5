@@ -109,15 +109,14 @@ static __inline__ struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 #endif
 
 #if !defined (socklen)
-/* size_t socklen (struct sockaddr *) */
-/* Should this return socklen_t instead? */
+/* socklen_t socklen (struct sockaddr *) */
 #  ifdef HAVE_SA_LEN
 #    define socklen(X) ((X)->sa_len)
 #  else
 #    ifdef KRB5_USE_INET6
-#      define socklen(X) ((X)->sa_family == AF_INET6 ? sizeof (struct sockaddr_in6) : (X)->sa_family == AF_INET ? sizeof (struct sockaddr_in) : sizeof (struct sockaddr))
+#      define socklen(X) ((X)->sa_family == AF_INET6 ? (socklen_t) sizeof (struct sockaddr_in6) : (X)->sa_family == AF_INET ? (socklen_t) sizeof (struct sockaddr_in) : (socklen_t) sizeof (struct sockaddr))
 #    else
-#      define socklen(X) ((X)->sa_family == AF_INET ? sizeof (struct sockaddr_in) : sizeof (struct sockaddr))
+#      define socklen(X) ((X)->sa_family == AF_INET ? (socklen_t) sizeof (struct sockaddr_in) : (socklen_t) sizeof (struct sockaddr))
 #    endif
 #  endif
 #endif
