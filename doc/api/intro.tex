@@ -104,10 +104,10 @@ the authenticator in the correct key.
 To provide detection of both replay
 attacks and message stream modification attacks, the integrity of all
 the messages exchanged between principals can also be 
-guaranteed\footnote{Using
+guar\-an\-teed\footnote{Using
 \funcname{krb5_mk_safe} and \funcname{krb5_rd_safe} to create and
 verify KRB5_SAFE messages} by generating and transmitting a
-collision-proof checksum \footnote{aka cryptographic checksum,
+collision-proof checksum\footnote{aka cryptographic checksum,
 elsewhere this is called a hash or digest function} of the client's
 message, keyed with the session key.  Privacy and integrity of the
 messages exchanged between principals can be secured\footnote{Using
@@ -295,4 +295,5 @@ A record that helps a client authenticate itself to a server; it contains
 the client's identity, a session key, a timestamp, and other
 information, all sealed using the server's secret key.  It only serves to
 authenticate a client when presented along with a fresh Authenticator.
+
 \end{description}

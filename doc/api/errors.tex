@@ -13,14 +13,14 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5kdc_err_name_exp }& Client's entry in database has expired \\
 {\sc krb5kdc_err_service_exp }& Server's entry in database has expired \\
 {\sc krb5kdc_err_bad_pvno }& Requested protocol version not supported \\	
-{\sc krb5kdc_err_c_old_mast_kvno }& Client's key is encrypted in an old master key \\
-{\sc krb5kdc_err_s_old_mast_kvno }& Server's key is encrypted in an old master key \\
+{\sc krb5kdc_err_c_old_mast_kvno }& \parbox[t]{2in}{Client's key is encrypted in an old master key} \\
+{\sc krb5kdc_err_s_old_mast_kvno }& \parbox[t]{2in}{Server's key is encrypted in an old master key} \\
 {\sc krb5kdc_err_c_principal_unknown }&  Client not found in Kerberos database \\
 {\sc krb5kdc_err_s_principal_unknown }&  Server not found in Kerberos database \\
-{\sc krb5kdc_err_principal_not_unique }&  Principal has multiple entries in Kerberos database \\
+{\sc krb5kdc_err_principal_not_unique }&\parbox[t]{2in}{\raggedright{Principal has multiple entries in Kerberos database}} \\
 {\sc krb5kdc_err_null_key }& Client or server has a null key \\
 {\sc krb5kdc_err_cannot_postdate }& Ticket is ineligible for postdating \\
-{\sc krb5kdc_err_never_valid }& Requested effective lifetime is negative or too short \\
+{\sc krb5kdc_err_never_valid }& \parbox[t]{2in}{Requested effective lifetime is negative or too short} \\
 {\sc krb5kdc_err_policy }&	 KDC policy rejects request \\
 {\sc krb5kdc_err_badoption }& KDC can't fulfill requested option \\
 {\sc krb5kdc_err_etype_nosupp }& KDC has no support for encryption type \\
@@ -36,8 +36,8 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5kdc_preauth_failed }&  	 Preauthentication failed \\
 {\sc krb5kdc_err_preauth_require }&	Additional pre-authentication required \\
 {\sc krb5kdc_err_server_nomatch }&	Requested server and ticket don't match \\
+\multicolumn{2}{c}{error codes 27-30 are currently placeholders}\\
 
- & \multicolumn{1}{c}{error codes 27-30 are currently placeholders} \\
 \end{tabular}
 
 \begin{tabular}{ll}
@@ -61,13 +61,11 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5krb_ap_err_method }& Alternative authentication method required \\
 {\sc krb5krb_ap_err_badseq }& Incorrect sequence number in message \\
 {\sc krb5krb_ap_err_inapp_cksum }& Inappropriate type of checksum in message \\ 
-
- & \multicolumn{1}{c}{error codes 51-59 are currently placeholders} \\
+\multicolumn{2}{c}{error codes 51-59 are currently placeholders} \\
 
 {\sc krb5krb_err_generic }& Generic error (see e-text) \\
 {\sc krb5krb_err_field_toolong }& Field is too long for this implementation \\
-
-& \multicolumn{1}{c}{error codes 62-127 are currently placeholders} \\
+\multicolumn{2}{c}{error codes 62-127 are currently placeholders} \\
 \end{tabular}
 
 \begin{tabular}{ll}
@@ -91,8 +89,8 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5_princ_nomatch }&	 Requested principal and ticket don't match \\
 {\sc krb5_kdcrep_modified }& KDC reply did not match expectations \\
 {\sc krb5_kdcrep_skew }&	Clock skew too great in KDC reply \\
-{\sc krb5_in_tkt_realm_mismatch }&	Client/server realm mismatch in
-initial ticket requst \\
+{\sc krb5_in_tkt_realm_mismatch }&\parbox[t]{2.5 in}{Client/server realm
+mismatch in initial ticket requst}\\
 
 {\sc krb5_prog_etype_nosupp }& Program lacks support for encryption type \\
 {\sc krb5_prog_keytype_nosupp }& Program lacks support for key type \\
@@ -113,10 +111,10 @@ initial ticket requst \\
 {\sc krb5_rc_unknown }&	 Generic unknown RC error \\
 {\sc krb5_rc_replay }&	 Message is a replay \\
 {\sc krb5_rc_io }&		 Replay I/O operation failed XXX \\
-{\sc krb5_rc_noio }&	 Replay cache type does not support non-volatile storage \\
+{\sc krb5_rc_noio }&	 \parbox[t]{3in}{Replay cache type does not support non-volatile storage} \\
 {\sc krb5_rc_parse }& Replay cache name parse/format error \\
 {\sc krb5_rc_io_eof }&	 End-of-file on replay cache I/O \\
-{\sc krb5_rc_io_malloc }& No more memory to allocate (in replay cache I/O code)\\
+{\sc krb5_rc_io_malloc }& \parbox[t]{3in}{No more memory to allocate (in replay cache I/O code)}\\
 {\sc krb5_rc_io_perm }&	 Permission denied in replay cache code \\
 {\sc krb5_rc_io_io }&	 I/O error in replay cache i/o code \\
 {\sc krb5_rc_io_unknown }&	 Generic unknown RC/IO error \\
@@ -145,12 +143,11 @@ initial ticket requst \\
 {\sc krb5_fcc_perm }&	 Credentials cache file permissions incorrect \\
 {\sc krb5_fcc_nofile }&	 No credentials cache file found \\
 {\sc krb5_fcc_internal }&	 Internal file credentials cache error \\
-{\sc krb5_cc_nomem }& No more memory to allocate (in credentials cache code) \\ 
-
+{\sc krb5_cc_nomem }& \parbox[t]{3in}{No more memory to allocate (in credentials cache code)}\\ 
 \end{tabular}
 
 \begin{tabular}{ll}
-& \multicolumn{1}{c}{errors for dual TGT library calls} \\
+\multicolumn{2}{c}{errors for dual TGT library calls} \\
 
 {\sc krb5_invalid_flags }& Invalid KDC option combination (library internal error) \\
 {\sc krb5_no_2nd_tkt }&	 Request missing second ticket \\
@@ -159,18 +156,19 @@ initial ticket requst \\
 \end{tabular}
 
 \begin{tabular}{ll}
-& \multicolumn{1}{c}{errors for sendauth and recvauth} \\
+\multicolumn{2}{c}{errors for sendauth and recvauth} \\
 
 {\sc krb5_sendauth_badauthvers }& Bad sendauth version was sent \\
 {\sc krb5_sendauth_badapplvers }& Bad application version was sent (via sendauth) \\
 {\sc krb5_sendauth_badresponse }& Bad response (during sendauth exchange) \\
-{\sc krb5_sendauth_rejected }& Server rejected authentication (during sendauth exchange) \\
-{\sc krb5_sendauth_mutual_failed }& Mutual authentication failed (during sendauth exchange) \\
+{\sc krb5_sendauth_rejected }& Server rejected authentication\\
+& \ (during sendauth exchange) \\
+{\sc krb5_sendauth_mutual_failed }& Mutual authentication failed\\&\ (during sendauth exchange) \\
 
 \end{tabular}
 
 \begin{tabular}{ll}
-&\multicolumn{1}{c}{errors for preauthentication} \\
+\multicolumn{2}{c}{errors for preauthentication} \\
 
 {\sc krb5_preauth_bad_type }& Unsupported preauthentication type \\
 {\sc krb5_preauth_no_key }&	 Required preauthentication key not supplied \\
@@ -179,7 +177,7 @@ initial ticket requst \\
 \end{tabular}
 
 \begin{tabular}{ll}
-&\multicolumn{1}{c}{version number errors} \\
+\multicolumn{2}{c}{version number errors} \\
 
 {\sc krb5_rcache_badvno }& Unsupported replay cache format version number \\
 {\sc krb5_ccache_badvno }& Unsupported credentials cache format version number \\
@@ -188,13 +186,17 @@ initial ticket requst \\
 \end{tabular}
 
 \begin{tabular}{ll}
-&\multicolumn{1}{c}{other errors} \\ 
+\multicolumn{2}{c}{other errors} \\ 
 
 {\sc krb5_prog_atype_nosupp }& Program lacks support for address type \\
-{\sc krb5_rc_required }& Message replay detection requires rcache parameter \\
+{\sc krb5_rc_required }& Message replay detection requires\\&\  rcache parameter \\
 {\sc krb5_err_bad_hostname }& Hostname cannot be canonicalized \\
 {\sc krb5_err_host_realm_unknown }& Cannot determine realm for host \\
-{\sc krb5_sname_unsupp_nametype }& Conversion to service principal undefined for name type \\
+{\sc krb5_sname_unsupp_nametype }& Conversion to service principal undefined\\&\ for name type \\
+{\sc krb5krb_ap_err_v4_reply }& Initial Ticket Response appears to be\\
+&\ Version 4 error \\
+{\sc krb5_realm_cant_resolve }& Cannot resolve KDC for requested realm \\
+{\sc krb5_tkt_not_forwardable }& Requesting ticket can't get forwardable tickets \\
 \end{tabular}
 \end{small}
 
@@ -207,7 +209,7 @@ The Kerberos v5 database library error code table
 
 \begin{small}
 \begin{tabular}{ll}
-&\multicolumn{1}{c}{From the server side routines} \\
+\multicolumn{2}{c}{From the server side routines} \\
 {\sc krb5_kdb_inuse }&	Entry already exists in database\\
 {\sc krb5_kdb_uk_serror }&	Database store error\\
 {\sc krb5_kdb_uk_rerror }&	Database read error\\
@@ -237,7 +239,7 @@ The Kerberos v5 database library error code table
 % $Source$
 % $Author$
 
-\subsection{The Kerberos v5 magic numbers errircode table}
+\subsection{The Kerberos v5 magic numbers errorcode table}
 
 \begin{small}
 \begin{tabular}{ll} 
@@ -248,7 +250,7 @@ The Kerberos v5 database library error code table
 {\sc kv5m_checksum }&	Bad magic number for krb5_checksum structure \\
 {\sc kv5m_encrypt_block }&	Bad magic number for krb5_encrypt_block structure \\
 {\sc kv5m_enc_data }&	Bad magic number for krb5_enc_data structure \\
-{\sc kv5m_cryptosystem_entry }&	Bad magic number for krb5_cryptosystem_entry structure \\
+{\sc kv5m_cryptosystem_entry }&	Bad magic number for krb5_cryptosystem_entry\\&\ structure \\
 {\sc kv5m_cs_table_entry }&	Bad magic number for krb5_cs_table_entry structure \\
 {\sc kv5m_checksum_entry }&	Bad magic number for krb5_checksum_entry structure \\
 
