@@ -25,8 +25,9 @@
 #include <krb5/rsa-md5.h>
 
 static krb5_error_code
-make_seal_token(enc_ed, seq_ed, seqnum, direction, text, token,
+make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 		encrypt, toktype, bigend)
+     krb5_context context;
      krb5_gss_enc_desc *enc_ed;
      krb5_gss_enc_desc *seq_ed;
      krb5_int32 *seqnum;
@@ -145,7 +146,7 @@ make_seal_token(enc_ed, seq_ed, seqnum, direction, text, token,
    /* XXX this depends on the key being a single-des key, but that's
       all that kerberos supports right now */
 
-   if (code = krb5_calculate_checksum(CKSUMTYPE_DESCBC, md5.digest, 16,
+   if (code = krb5_calculate_checksum(context, CKSUMTYPE_DESCBC, md5.digest, 16,
 				      seq_ed->key->contents, 
 				      seq_ed->key->length,
 				      &desmac)) {
@@ -217,7 +218,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_NO_CONTEXT);
    }
 
-   if (code = krb5_timeofday(&now)) {
+   if (code = krb5_timeofday(ctx->context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

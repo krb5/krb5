@@ -39,9 +39,10 @@ extern const gss_OID_desc * const gss_nt_krb5_principal;
 #define gss_krb5_nt_machine_uid_name	gss_nt_machine_uid_name
 #define gss_krb5_nt_string_uid_name	gss_nt_string_uid_name
 
-OM_uint32 gss_krb5_get_tkt_flags PROTOTYPE((OM_uint32 *minor_status,
-				 gss_ctx_id_t context_handle,
-				 krb5_flags *ticket_flags));
+OM_uint32 gss_krb5_get_tkt_flags 
+	PROTOTYPE((OM_uint32 *minor_status,
+		   gss_ctx_id_t context_handle,
+		   krb5_flags *ticket_flags));
 
 
 #endif /* _GSSAPI_KRB5_H_ */

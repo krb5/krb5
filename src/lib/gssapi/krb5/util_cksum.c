@@ -23,7 +23,8 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
-krb5_error_code kg_checksum_channel_bindings(cb, cksum, bigend)
+krb5_error_code 
+kg_checksum_channel_bindings(cb, cksum, bigend)
      gss_channel_bindings_t cb;
      krb5_checksum *cksum;
      int bigend;
@@ -38,12 +39,12 @@ krb5_error_code kg_checksum_channel_bindings(cb, cksum, bigend)
    if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
       /* allocate the cksum contents buffer */
       if ((cksum->contents = (krb5_octet *)
-	   xmalloc(krb5_checksum_size(CKSUMTYPE_RSA_MD5))) == NULL)
+	   xmalloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5))) == NULL)
 	 return(ENOMEM);
 
       cksum->checksum_type = CKSUMTYPE_RSA_MD5;
       memset(cksum->contents, '\0',
-	     (cksum->length = krb5_checksum_size(CKSUMTYPE_RSA_MD5)));
+	     (cksum->length = krb5_checksum_size(global_context, CKSUMTYPE_RSA_MD5)));
       return(0);
    }
 
@@ -59,7 +60,7 @@ krb5_error_code kg_checksum_channel_bindings(cb, cksum, bigend)
 
    /* allocate the cksum contents buffer */
    if ((cksum->contents = (krb5_octet *)
-	xmalloc(krb5_checksum_size(CKSUMTYPE_RSA_MD5))) == NULL) {
+	xmalloc(krb5_checksum_size(context, CKSUMTYPE_RSA_MD5))) == NULL) {
       free(buf);
       return(ENOMEM);
    }
@@ -77,8 +78,8 @@ krb5_error_code kg_checksum_channel_bindings(cb, cksum, bigend)
 
    /* checksum the data */
 
-   if (code = krb5_calculate_checksum(CKSUMTYPE_RSA_MD5, buf, len,
-				      NULL, 0, cksum)) {
+   if (code = krb5_calculate_checksum(global_context, CKSUMTYPE_RSA_MD5, 
+				      buf, len, NULL, 0, cksum)) {
       xfree(cksum->contents);
       xfree(buf);
       return(code);

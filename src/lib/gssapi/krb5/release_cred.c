@@ -23,7 +23,8 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_release_cred(minor_status, cred_handle)
+krb5_gss_release_cred(context, minor_status, cred_handle)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_cred_id_t *cred_handle;
 {
@@ -41,17 +42,17 @@ krb5_gss_release_cred(minor_status, cred_handle)
    cred = *cred_handle;
 
    if (cred->ccache)
-      code1 = krb5_cc_close(cred->ccache);
+      code1 = krb5_cc_close(context, cred->ccache);
    else
       code1 = 0;
 
    if (cred->keytab)
-      code2 = krb5_kt_close(cred->keytab);
+      code2 = krb5_kt_close(context, cred->keytab);
    else
       code2 = 0;
 
    if (cred->princ)
-      krb5_free_principal(cred->princ);
+      krb5_free_principal(context, cred->princ);
    xfree(cred);
 
    *cred_handle = NULL;

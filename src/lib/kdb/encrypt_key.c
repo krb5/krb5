@@ -36,10 +36,11 @@
  */
 
 krb5_error_code
-krb5_kdb_encrypt_key(eblock, in, out)
-krb5_encrypt_block *eblock;
-const krb5_keyblock *in;
-register krb5_encrypted_keyblock *out;
+krb5_kdb_encrypt_key(context, eblock, in, out)
+    krb5_context context;
+    krb5_encrypt_block *eblock;
+    const krb5_keyblock *in;
+    register krb5_encrypted_keyblock *out;
 {
     /* Encrypted rep has the real (unencrypted) key length stored
        along with the encrypted key.  The length is stored as a 4
@@ -77,7 +78,7 @@ register krb5_encrypted_keyblock *out;
     ((char *)out->contents)[2] = length >> 8;
     ((char *)out->contents)[3] = length;
     
-    retval = krb5_encrypt((krb5_pointer) tmpin.contents,
+    retval = krb5_encrypt(context, (krb5_pointer) tmpin.contents,
 			  (krb5_pointer) ((char *) out->contents + 4),
 			  tmpin.length, eblock, 0);
     krb5_xfree(tmpin.contents);

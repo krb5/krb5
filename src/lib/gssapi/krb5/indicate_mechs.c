@@ -23,7 +23,8 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_indicate_mechs(minor_status, mech_set)
+krb5_gss_indicate_mechs(context, minor_status, mech_set)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_OID_set *mech_set;
 {

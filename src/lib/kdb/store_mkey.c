@@ -50,15 +50,16 @@
 #endif
 
 krb5_error_code
-krb5_db_store_mkey(keyfile, mname, key)
-char *keyfile;
-krb5_principal mname;
-krb5_keyblock *key;
+krb5_db_store_mkey(context, keyfile, mname, key)
+    krb5_context context;
+    char *keyfile;
+    krb5_principal mname;
+    krb5_keyblock *key;
 {
     FILE *kf;
     krb5_error_code retval = 0;
     char defkeyfile[MAXPATHLEN+1];
-    krb5_data *realm = krb5_princ_realm(mname);
+    krb5_data *realm = krb5_princ_realm(context, mname);
 #if defined(unix) || defined(__unix__)
     int oumask;
 #endif

@@ -25,6 +25,8 @@
 
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
+extern krb5_context kg_context;
+
 int kg_confounder_size(ed)
      krb5_gss_enc_desc *ed;
 {
@@ -38,7 +40,8 @@ kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
 {
-   return(krb5_random_confounder(ed->eblock.crypto_entry->block_length, buf));
+   return(krb5_random_confounder(kg_context, 
+				 ed->eblock.crypto_entry->block_length, buf));
 }
 
 int kg_encrypt_size(ed, n)
@@ -59,12 +62,13 @@ kg_encrypt(ed, iv, in, out, length)
    krb5_error_code code;
 
    if (! ed->processed) {
-      if (code = krb5_process_key(&ed->eblock, ed->key))
+      if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
 	 return(code);
       ed->processed = 1;
    }
 
-   if (code = krb5_encrypt(in, out, length, &ed->eblock, iv?iv:(krb5_pointer)zeros))
+   if (code = krb5_encrypt(kg_context, in, out, length, &ed->eblock, 
+			   iv?iv:(krb5_pointer)zeros))
       return(code);
 
    return(0);
@@ -85,7 +89,7 @@ kg_decrypt(ed, iv, in, out, length)
    char *buf;
 
    if (! ed->processed) {
-      if (code = krb5_process_key(&ed->eblock, ed->key))
+      if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
 	 return(code);
       ed->processed = 1;
    }
@@ -94,7 +98,8 @@ kg_decrypt(ed, iv, in, out, length)
    if ((buf = (char *) xmalloc(elen)) == NULL)
       return(ENOMEM);
 
-   if (code = krb5_decrypt(in, buf, elen, &ed->eblock, iv?iv:(krb5_pointer)zeros)) {
+   if (code = krb5_decrypt(kg_context, in, buf, elen, &ed->eblock, 
+			   iv?iv:(krb5_pointer)zeros)) {
       xfree(buf);
       return(code);
    }

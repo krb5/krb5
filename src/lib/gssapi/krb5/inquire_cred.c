@@ -23,8 +23,9 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
+krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
 		      cred_usage, mechanisms)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_cred_id_t cred_handle;
      gss_name_t *name;
@@ -60,7 +61,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 
    cred = (krb5_gss_cred_id_t) cred_handle;
 
-   if (code = krb5_timeofday(&now)) {
+   if (code = krb5_timeofday(context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -69,7 +70,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       lifetime = 0;
 
    if (name) {
-      if (code = krb5_copy_principal(cred->princ, &ret_name)) {
+      if (code = krb5_copy_principal(context, cred->princ, &ret_name)) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -77,7 +78,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 
    if (mechanisms)
       if (! g_copy_OID_set(gss_mech_set_krb5, &mechs)) {
-	 krb5_free_principal(ret_name);
+	 krb5_free_principal(context, ret_name);
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
       }
@@ -85,7 +86,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    if (name) {
       if (! kg_save_name((gss_name_t) ret_name)) {
 	 (void)gss_release_oid_set(minor_status, &mechs);
-	 krb5_free_principal(ret_name);
+	 krb5_free_principal(context, ret_name);
 	 *minor_status = G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }

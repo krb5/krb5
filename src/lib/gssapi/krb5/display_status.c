@@ -32,8 +32,9 @@ static int init_et = 0;
 /**/
 
 OM_uint32
-krb5_gss_display_status(minor_status, status_value, status_type,
+krb5_gss_display_status(context, minor_status, status_value, status_type,
 			mech_type, message_context, status_string)
+     krb5_context context;
      OM_uint32 *minor_status;
      OM_uint32 status_value;
      int status_type;
@@ -55,7 +56,7 @@ krb5_gss_display_status(minor_status, status_value, status_type,
 				    message_context, status_string));
    } else if (status_type == GSS_C_MECH_CODE) {
       if (!init_et) {
-	 krb5_init_ets();
+	 krb5_init_ets(context);
 	 initialize_k5g_error_table();
 	 init_et = 1;
       }

@@ -61,6 +61,8 @@ static const gss_OID_set_desc oidsets[] = {
 
 const gss_OID_set_desc * const gss_mech_set_krb5 = oidsets+0;
 
+krb5_context kg_context;
+
 void *kg_vdb = NULL;
 
 /** default credential support */
@@ -79,10 +81,10 @@ kg_get_defcred(minor_status, cred)
    if (defcred == GSS_C_NO_CREDENTIAL) {
       OM_uint32 major;
 
-      if ((major = krb5_gss_acquire_cred(minor_status, GSS_C_NO_NAME,
-					 GSS_C_INDEFINITE, GSS_C_NULL_OID_SET,
-					 GSS_C_INITIATE, &defcred, NULL,
-					 NULL)) &&
+      if ((major = krb5_gss_acquire_cred(kg_context, minor_status, 
+					 GSS_C_NO_NAME, GSS_C_INDEFINITE, 
+					 GSS_C_NULL_OID_SET, GSS_C_INITIATE, 
+					 &defcred, NULL, NULL)) &&
 	  GSS_ERROR(major)) {
 	 defcred = GSS_C_NO_CREDENTIAL;
 	 return(major);
@@ -103,5 +105,5 @@ kg_release_defcred(minor_status)
       return(GSS_S_COMPLETE);
    }
 
-   return(krb5_gss_release_cred(minor_status, &defcred));
+   return(krb5_gss_release_cred(kg_context, minor_status, &defcred));
 }

@@ -37,10 +37,11 @@
  */
 
 krb5_error_code
-krb5_kdb_decrypt_key(eblock, in, out)
-krb5_encrypt_block *eblock;
-const krb5_encrypted_keyblock *in;
-krb5_keyblock *out;
+krb5_kdb_decrypt_key(context, eblock, in, out)
+    krb5_context context;
+    krb5_encrypt_block *eblock;
+    const krb5_encrypted_keyblock *in;
+    krb5_keyblock *out;
 {
     krb5_error_code retval;
 
@@ -67,7 +68,8 @@ krb5_keyblock *out;
     /* remember the contents of the encrypted version has a 4 byte
        integer length of the real embedded key, followed by the
        encrypted key, so the offset here is needed */
-    if (retval = krb5_decrypt((krb5_pointer) ((char *) in->contents + 4),
+    if (retval = krb5_decrypt(context, (krb5_pointer) (
+			      (char *) in->contents + 4),
 			      (krb5_pointer) out->contents,
 			      in->length-sizeof(in->length), eblock, 0)) {
 	krb5_xfree(out->contents);

@@ -24,8 +24,9 @@
 #include <memory.h>
 
 static krb5_error_code
-make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
-	    seqnum, token)
+make_ap_req(context, cred, server, endtime, chan_bindings, do_mutual, 
+	    subkey, flags, seqnum, token)
+     krb5_context context;
      krb5_gss_cred_id_t cred;
      krb5_principal server;
      krb5_timestamp *endtime;
@@ -70,20 +71,20 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
    /* fill in the necessary fields in creds */
 
    memset((char *) &creds, 0, sizeof(creds));
-   if (code = krb5_copy_principal(cred->princ, &creds.client))
+   if (code = krb5_copy_principal(context, cred->princ, &creds.client))
        return code;
-   if (code = krb5_copy_principal(server, &creds.server)) {
-       krb5_free_cred_contents(&creds);
+   if (code = krb5_copy_principal(context, server, &creds.server)) {
+       krb5_free_cred_contents(context, &creds);
        return code;
    }
    creds.times.endtime = *endtime;
 
    /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
-   if (code = krb5_mk_req_extended(do_mutual?AP_OPTS_MUTUAL_REQUIRED:0,
+   if (code = krb5_mk_req_extended(context, do_mutual?AP_OPTS_MUTUAL_REQUIRED:0,
 				   &checksum, 0, 0, subkey, cred->ccache,
 				   &creds, &authent, &ap_req)) {
-       krb5_free_cred_contents(&creds);
+       krb5_free_cred_contents(context, &creds);
        return(code);
    }
 
@@ -94,7 +95,7 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
 
    /* free stuff which was created */
 
-   krb5_free_cred_contents(&creds);
+   krb5_free_cred_contents(context, &creds);
 
    /* build up the token */
 
@@ -103,7 +104,7 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
 
    if ((t = (unsigned char *) xmalloc(tlen)) == NULL) {
       xfree(ap_req.data);
-      krb5_free_keyblock(*subkey);
+      krb5_free_keyblock(context, *subkey);
       return(ENOMEM);
    }
 
@@ -129,11 +130,12 @@ make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
 }
 
 OM_uint32
-krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
+krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 			context_handle, target_name, mech_type,
 			req_flags, time_req, input_chan_bindings,
 			input_token, actual_mech_type, output_token,
 			ret_flags, time_rec)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_cred_id_t claimant_cred_handle;
      gss_ctx_id_t *context_handle;
@@ -233,7 +235,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
 	 ctx->endtime = 0;
       } else {
-	 if (code = krb5_timeofday(&now)) {
+	 if (code = krb5_timeofday(context, &now)) {
 	    free(ctx);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
@@ -241,15 +243,15 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	 ctx->endtime = now + time_req;
       }
 
-      if (code = krb5_copy_principal(cred->princ, &ctx->here)) {
+      if (code = krb5_copy_principal(context, cred->princ, &ctx->here)) {
 	 xfree(ctx);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
       
-      if (code = krb5_copy_principal((krb5_principal) target_name,
+      if (code = krb5_copy_principal(context, (krb5_principal) target_name,
 				     &ctx->there)) {
-	 krb5_free_principal(ctx->here);
+	 krb5_free_principal(context, ctx->here);
 	 xfree(ctx);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -259,8 +261,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 			     input_chan_bindings, ctx->mutual,
 			     &ctx->subkey, &ctx->flags,
 			     &ctx->seq_send, &token)) {
-	 krb5_free_principal(ctx->here);
-	 krb5_free_principal(ctx->there);
+	 krb5_free_principal(context, ctx->here);
+	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
@@ -270,15 +272,15 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       /* the encryption key is the session key XOR 0xf0f0f0f0f0f0f0f0 */
 
-      krb5_use_cstype(&ctx->enc.eblock, ETYPE_RAW_DES_CBC);
+      krb5_use_cstype(context, &ctx->enc.eblock, ETYPE_RAW_DES_CBC);
       ctx->enc.processed = 0;
-      if (code = krb5_copy_keyblock(ctx->subkey, &ctx->enc.key))
+      if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
 	 return(code); 
       for (i=0; i<ctx->enc.key->length; i++)
 	 /*SUPPRESS 113*/
 	 ctx->enc.key->contents[i] ^= 0xf0;
 
-      krb5_use_cstype(&ctx->seq.eblock, ETYPE_RAW_DES_CBC);
+      krb5_use_cstype(context, &ctx->seq.eblock, ETYPE_RAW_DES_CBC);
       ctx->seq.processed = 0;
       ctx->seq.key = ctx->subkey;
 
@@ -289,9 +291,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
 	 xfree(token.value);
-	 krb5_free_keyblock(ctx->subkey);
-	 krb5_free_principal(ctx->here);
-	 krb5_free_principal(ctx->there);
+	 krb5_free_keyblock(context, ctx->subkey);
+	 krb5_free_principal(context, ctx->here);
+	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
 
 	 *minor_status = G_VALIDATE_FAILED;
@@ -301,10 +303,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       /* compute time_rec */
 
       if (time_rec) {
-	 if (code = krb5_timeofday(&now)) {
+	 if (code = krb5_timeofday(context, &now)) {
 	    xfree(token.value);
-	    (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t) ctx,
-					 NULL);
+	    (void)krb5_gss_delete_sec_context(context, minor_status, 
+					      (gss_ctx_id_t) ctx, NULL);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);
 	 }
@@ -352,13 +354,16 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       if ((ctx->established) ||
 	  (((gss_cred_id_t) ctx->cred) != claimant_cred_handle) ||
 	  ((req_flags & GSS_C_MUTUAL_FLAG) == 0)) {
-	 (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   context_handle, NULL);
 	 *minor_status = KG_CONTEXT_ESTABLISHED;
 	 return(GSS_S_FAILURE);
       }
 
-      if (! krb5_principal_compare(ctx->there, (krb5_principal) target_name)) {
-	 (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+      if (! krb5_principal_compare(context, ctx->there, 
+				   (krb5_principal) target_name)) {
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   context_handle, NULL);
 	 *minor_status = 0;
 	 return(GSS_S_BAD_NAME);
       }
@@ -366,7 +371,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       /* verify the token and leave the AP_REP message in ap_rep */
 
       if (input_token == GSS_C_NO_BUFFER) {
-	 (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   context_handle, NULL);
 	 *minor_status = 0;
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
@@ -383,8 +389,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       TREAD_STR(ptr, ap_rep.data, ap_rep.length);
 
       /* decode the ap_rep */
-      if (code = krb5_rd_rep(&ap_rep, ctx->subkey, &ap_rep_data)) {
-	 (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+      if (code = krb5_rd_rep(context, &ap_rep, ctx->subkey, &ap_rep_data)) {
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   context_handle, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -393,7 +400,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       ctx->seq_recv = ap_rep_data->seq_number;
 
       /* free the ap_rep_data */
-      krb5_free_ap_rep_enc_part(ap_rep_data);
+      krb5_free_ap_rep_enc_part(context, ap_rep_data);
 
       /* set established */
       ctx->established = 1;
@@ -401,8 +408,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       /* set returns */
 
       if (time_rec) {
-	 if (code = krb5_timeofday(&now)) {
-	    (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t) ctx,
+	 if (code = krb5_timeofday(context, &now)) {
+	    (void)krb5_gss_delete_sec_context(context, minor_status, 
+					      (gss_ctx_id_t) ctx,
 					 NULL);
 	    *minor_status = code;
 	    return(GSS_S_FAILURE);

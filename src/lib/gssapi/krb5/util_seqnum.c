@@ -22,7 +22,8 @@
 
 #include "gssapiP_krb5.h"
 
-krb5_error_code kg_make_seq_num(ed, direction, seqnum, cksum, buf)
+krb5_error_code 
+kg_make_seq_num(ed, direction, seqnum, cksum, buf)
      krb5_gss_enc_desc *ed;
      int direction;
      int seqnum;

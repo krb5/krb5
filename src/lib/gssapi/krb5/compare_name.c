@@ -23,7 +23,8 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_compare_name(minor_status, name1, name2, name_equal)
+krb5_gss_compare_name(context, minor_status, name1, name2, name_equal)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_name_t name1;
      gss_name_t name2;
@@ -40,7 +41,7 @@ krb5_gss_compare_name(minor_status, name1, name2, name_equal)
    }
 
    *minor_status = 0;
-   *name_equal = krb5_principal_compare((krb5_principal) name1,
+   *name_equal = krb5_principal_compare(context, (krb5_principal) name1,
 					(krb5_principal) name2);
    return(GSS_S_COMPLETE);
 }

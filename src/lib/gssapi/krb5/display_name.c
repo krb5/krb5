@@ -23,8 +23,9 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_display_name(minor_status, input_name, output_name_buffer, 
+krb5_gss_display_name(context, minor_status, input_name, output_name_buffer, 
 		      output_name_type)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_name_t input_name;
      gss_buffer_t output_name_buffer;
@@ -41,7 +42,7 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
-   if (code = krb5_unparse_name((krb5_principal) input_name, &str)) {
+   if (code = krb5_unparse_name(context, (krb5_principal) input_name, &str)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

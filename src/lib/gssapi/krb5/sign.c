@@ -23,9 +23,10 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_sign(minor_status, context_handle,
+krb5_gss_sign(context, minor_status, context_handle,
 	      qop_req, message_buffer, 
 	      message_token)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      int qop_req;

@@ -37,10 +37,11 @@
  */
 
 krb5_error_code
-krb5_db_verify_master_key(mprinc, mkey, eblock)
-krb5_principal mprinc;
-krb5_keyblock *mkey;
-krb5_encrypt_block *eblock;
+krb5_db_verify_master_key(context, mprinc, mkey, eblock)
+    krb5_context context;
+    krb5_principal mprinc;
+    krb5_keyblock *mkey;
+    krb5_encrypt_block *eblock;
 {
     krb5_error_code retval;
     krb5_db_entry master_entry;
@@ -49,38 +50,38 @@ krb5_encrypt_block *eblock;
     krb5_keyblock tempkey;
 
     nprinc = 1;
-    if (retval = krb5_db_get_principal(mprinc, &master_entry, &nprinc, &more))
+    if (retval = krb5_db_get_principal(context, mprinc, &master_entry, &nprinc, &more))
 	return(retval);
 	
     if (nprinc != 1) {
 	if (nprinc)
-	    krb5_db_free_principal(&master_entry, nprinc);
+	    krb5_db_free_principal(context, &master_entry, nprinc);
 	return(KRB5_KDB_NOMASTERKEY);
     } else if (more) {
-	krb5_db_free_principal(&master_entry, nprinc);
+	krb5_db_free_principal(context, &master_entry, nprinc);
 	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     }	
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(eblock, mkey)) {
-	krb5_db_free_principal(&master_entry, nprinc);
+    if (retval = krb5_process_key(context, eblock, mkey)) {
+	krb5_db_free_principal(context, &master_entry, nprinc);
 	return(retval);
     }
-    if (retval = krb5_kdb_decrypt_key(eblock, &master_entry.key, &tempkey)) {
-	(void) krb5_finish_key(eblock);
-	krb5_db_free_principal(&master_entry, nprinc);
+    if (retval = krb5_kdb_decrypt_key(context, eblock, &master_entry.key, &tempkey)) {
+	(void) krb5_finish_key(context, eblock);
+	krb5_db_free_principal(context, &master_entry, nprinc);
 	return retval;
     }
     if (mkey->length != tempkey.length ||
 	memcmp((char *)mkey->contents, (char *)tempkey.contents,mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
-	(void) krb5_finish_key(eblock);
+	(void) krb5_finish_key(context, eblock);
     } else
-	retval = krb5_finish_key(eblock);
+	retval = krb5_finish_key(context, eblock);
 
     memset((char *)tempkey.contents, 0, tempkey.length);
     krb5_xfree(tempkey.contents);
-    krb5_db_free_principal(&master_entry, nprinc);
+    krb5_db_free_principal(context, &master_entry, nprinc);
     
     return retval;
 }

@@ -49,7 +49,7 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 	strcpy(prompt2, "Verifying, please re-enter ");
 	strncat(prompt2, prompt, sizeof(prompt2)-(strlen(prompt2)+1));
     }
-    ok = krb5_read_password(prompt, verify ? prompt2 : 0,
+    ok = krb5_read_password(global_context, prompt, verify ? prompt2 : 0,
 			    key_string, &string_size);
     
     if (ok == 0)

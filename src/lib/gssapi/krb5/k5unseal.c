@@ -173,8 +173,8 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
       /* XXX this depends on the key being a single-des key, but that's
 	 all that kerberos supports right now */
 
-      if (code = krb5_calculate_checksum(CKSUMTYPE_DESCBC, md5.digest, 16,
-					 ctx->seq.key->contents, 
+      if (code = krb5_calculate_checksum(context, CKSUMTYPE_DESCBC, md5.digest,
+					 16, ctx->seq.key->contents, 
 					 ctx->seq.key->length,
 					 &desmac)) {
 	 if (toktype == KG_TOK_SEAL_MSG)
@@ -239,7 +239,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    if (qop_state)
       *qop_state = GSS_C_QOP_DEFAULT;
 
-   if (code = krb5_timeofday(&now)) {
+   if (code = krb5_timeofday(ctx->context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

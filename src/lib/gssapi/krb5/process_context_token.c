@@ -23,7 +23,9 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_process_context_token(minor_status, context_handle, token_buffer)
+krb5_gss_process_context_token(context, minor_status, context_handle, 
+			       token_buffer)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t token_buffer;
@@ -53,6 +55,6 @@ krb5_gss_process_context_token(minor_status, context_handle, token_buffer)
 
    /* that's it.  delete the context */
 
-   return(krb5_gss_delete_sec_context(minor_status, &context_handle,
+   return(krb5_gss_delete_sec_context(context, minor_status, &context_handle,
 				      GSS_C_NO_BUFFER));
 }

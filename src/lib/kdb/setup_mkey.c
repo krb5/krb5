@@ -39,11 +39,12 @@
 #define	REALM_SEP_STRING	"@"
 
 krb5_error_code
-krb5_db_setup_mkey_name(keyname, realm, fullname, principal)
-const char *keyname;
-const char *realm;
-char **fullname;
-krb5_principal *principal;
+krb5_db_setup_mkey_name(context, keyname, realm, fullname, principal)
+    krb5_context context;
+    const char *keyname;
+    const char *realm;
+    char **fullname;
+    krb5_principal *principal;
 {
     krb5_error_code retval;
     int keylen;
@@ -63,7 +64,7 @@ krb5_principal *principal;
     strcat(fname, REALM_SEP_STRING);
     strcat(fname, realm);
 
-    if (retval = krb5_parse_name(fname, principal))
+    if (retval = krb5_parse_name(context, fname, principal))
 	return retval;
     if (fullname)
 	*fullname = fname;

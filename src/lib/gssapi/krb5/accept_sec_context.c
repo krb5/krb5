@@ -25,7 +25,9 @@
 #include <memory.h>
 
 #include <krb5/widen.h>
-static krb5_error_code rd_req_keyproc(keyprocarg, server, kvno, keyblock)
+static krb5_error_code 
+rd_req_keyproc(context, keyprocarg, server, kvno, keyblock)
+     krb5_context context;
      krb5_pointer keyprocarg;
      krb5_principal server;
      krb5_kvno kvno;
@@ -35,18 +37,20 @@ static krb5_error_code rd_req_keyproc(keyprocarg, server, kvno, keyblock)
    krb5_error_code code;
    krb5_keytab_entry ktentry;
 
-   if (code = krb5_kt_get_entry((krb5_keytab) keyprocarg, server, kvno,
-				&ktentry))
+   if (code = krb5_kt_get_entry(context, (krb5_keytab) keyprocarg, server, 
+				kvno, &ktentry))
       return(code);
 
-   code = krb5_copy_keyblock(&ktentry.key, keyblock);
+   code = krb5_copy_keyblock(context, &ktentry.key, keyblock);
 
-   (void) krb5_kt_free_entry(&ktentry);
+   (void) krb5_kt_free_entry(context, &ktentry);
 
    return(code);
 }
 
-static krb5_error_code make_ap_rep(authdat, subkey, seq_send, token)
+static krb5_error_code 
+make_ap_rep(context, authdat, subkey, seq_send, token)
+     krb5_context context;
      krb5_tkt_authent *authdat;
      krb5_keyblock *subkey;
      krb5_int32 *seq_send;
@@ -64,11 +68,12 @@ static krb5_error_code make_ap_rep(authdat, subkey, seq_send, token)
    ap_rep_data.cusec = authdat->authenticator->cusec;
    ap_rep_data.subkey = authdat->authenticator->subkey;
 
-   if (code = krb5_generate_seq_number(authdat->ticket->enc_part2->session,
+   if (code = krb5_generate_seq_number(context, 
+				       authdat->ticket->enc_part2->session,
 				       &ap_rep_data.seq_number))
       return(code);
 
-   if (code = krb5_mk_rep(&ap_rep_data, subkey, &ap_rep))
+   if (code = krb5_mk_rep(context, &ap_rep_data, subkey, &ap_rep))
       return(code);
 
    /* build up the token */
@@ -104,11 +109,13 @@ static krb5_error_code make_ap_rep(authdat, subkey, seq_send, token)
    return(0);
 }
 
-OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle, 
-				      verifier_cred_handle, input_token,
-				      input_chan_bindings, src_name, mech_type,
-				      output_token, ret_flags, time_rec,
-				      delegated_cred_handle)
+OM_uint32 
+krb5_gss_accept_sec_context(context, minor_status, context_handle, 
+			    verifier_cred_handle, input_token,
+			    input_chan_bindings, src_name, mech_type,
+			    output_token, ret_flags, time_rec,
+			    delegated_cred_handle)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
      gss_cred_id_t verifier_cred_handle;
@@ -212,8 +219,9 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    /* get the rcache pointer */
 
    if (code =
-       krb5_get_server_rcache(krb5_princ_component(cred->princ,
-			              ((krb5_princ_size(cred->princ)>1)?1:0)),
+       krb5_get_server_rcache(context, 
+			      krb5_princ_component(context, cred->princ,
+			      ((krb5_princ_size(context, cred->princ)>1)?1:0)),
 			      &rcache)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
@@ -221,22 +229,23 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* decode the message */
 
-   if (code = krb5_rd_req(&ap_req, cred->princ, paddr, NULL, &rd_req_keyproc,
-			  (krb5_pointer) cred->keytab, rcache, &authdat)) {
-      (void) krb5_rc_close(rcache);
+   if (code = krb5_rd_req(context, &ap_req, cred->princ, paddr, NULL, 
+			  &rd_req_keyproc, (krb5_pointer) cred->keytab, 
+			  rcache, &authdat)) {
+      (void) krb5_rc_close(context, rcache);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
    /* close and free the rcache */
 
-   krb5_rc_close(rcache);
+   krb5_rc_close(context, rcache);
 
    /* make sure the necessary parts of the authdat are present */
 
    if ((authdat->authenticator->subkey == NULL) ||
        (authdat->ticket->enc_part2 == NULL)) {
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = KG_NO_SUBKEY;
       return(GSS_S_FAILURE);
    }
@@ -248,7 +257,7 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
       can interoperate with an implementation whcih supports negotiation */
    if ((authdat->authenticator->checksum->checksum_type != CKSUMTYPE_KG_CB) ||
        (authdat->authenticator->checksum->length < 24)) {
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = 0;
       return(GSS_S_BAD_BINDINGS);
    }
@@ -275,7 +284,7 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
 
       if (tmp != RSA_MD5_CKSUM_LENGTH) {
 	 xfree(md5.contents);
-	 krb5_free_tkt_authent(authdat);
+	 krb5_free_tkt_authent(context, authdat);
 	 *minor_status = KG_BAD_LENGTH;
 	 return(GSS_S_FAILURE);
       }
@@ -285,7 +294,7 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if (code = kg_checksum_channel_bindings(input_chan_bindings, &md5,
 					   bigend)) {
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -293,7 +302,7 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    TREAD_STR(ptr, ptr2, md5.length);
    if (memcmp(ptr2, md5.contents, md5.length) != 0) {
       xfree(md5.contents);
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = 0;
       return(GSS_S_BAD_BINDINGS);
    }
@@ -316,43 +325,43 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    ctx->cred = cred;
    ctx->big_endian = bigend;
 
-   if (code = krb5_copy_principal(cred->princ, &ctx->here)) {
+   if (code = krb5_copy_principal(context, cred->princ, &ctx->here)) {
       xfree(ctx);
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = krb5_copy_principal(authdat->authenticator->client,
+   if (code = krb5_copy_principal(context, authdat->authenticator->client,
 				  &ctx->there)) {
-      krb5_free_principal(ctx->here);
+      krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = krb5_copy_keyblock(authdat->authenticator->subkey,
+   if (code = krb5_copy_keyblock(context, authdat->authenticator->subkey,
 				 &ctx->subkey)) {
-      krb5_free_principal(ctx->there);
-      krb5_free_principal(ctx->here);
+      krb5_free_principal(context, ctx->there);
+      krb5_free_principal(context, ctx->here);
       xfree(ctx);
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
    /* fill in the encryption descriptors */
 
-   krb5_use_cstype(&ctx->enc.eblock, ETYPE_RAW_DES_CBC);
+   krb5_use_cstype(context, &ctx->enc.eblock, ETYPE_RAW_DES_CBC);
    ctx->enc.processed = 0;
-   if (code = krb5_copy_keyblock(ctx->subkey, &ctx->enc.key))
+   if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key))
       return(code); 
    for (i=0; i<ctx->enc.key->length; i++)
       /*SUPPRESS 113*/
       ctx->enc.key->contents[i] ^= 0xf0;
 
-   krb5_use_cstype(&ctx->seq.eblock, ETYPE_RAW_DES_CBC);
+   krb5_use_cstype(context, &ctx->seq.eblock, ETYPE_RAW_DES_CBC);
    ctx->seq.processed = 0;
    ctx->seq.key = ctx->subkey;
 
@@ -369,9 +378,9 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if (ctx->mutual) {
       if (code = make_ap_rep(authdat, ctx->subkey, &ctx->seq_send, &token)) {
-	 (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
-				      NULL);
-	 krb5_free_tkt_authent(authdat);
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   (gss_ctx_id_t *) &ctx, NULL);
+	 krb5_free_tkt_authent(context, authdat);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -382,16 +391,16 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    /* done with authdat! */
-   krb5_free_tkt_authent(authdat);
+   krb5_free_tkt_authent(context, authdat);
 
    /* set the return arguments */
 
    if (src_name) {
-      if (code = krb5_copy_principal(ctx->there, &name)) {
+      if (code = krb5_copy_principal(context, ctx->there, &name)) {
 	 if (token.value)
 	    xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
-				      NULL);
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -401,12 +410,12 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
       *mech_type = (gss_OID) gss_mech_krb5;
 
    if (time_rec) {
-      if (code = krb5_timeofday(&now)) {
+      if (code = krb5_timeofday(context, &now)) {
 	 if (src_name)
-	    krb5_free_principal(name);
+	    krb5_free_principal(context, name);
 	 xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
-				      NULL);
+	 (void)krb5_gss_delete_sec_context(context, minor_status, 
+					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -422,10 +431,10 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if (src_name)
       if (! kg_save_name((gss_name_t) name)) {
-	 krb5_free_principal(name);
+	 krb5_free_principal(context, name);
 	 if (token.value)
 	    xfree(token.value);
-	 (void)krb5_gss_delete_sec_context(minor_status,
+	 (void)krb5_gss_delete_sec_context(context, minor_status,
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 *minor_status = G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
@@ -436,12 +445,12 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
       if (src_name) {
 	 (void) kg_delete_name((gss_name_t) name);
-	 krb5_free_principal(name);
+	 krb5_free_principal(context, name);
       }
       if (token.value)
 	 xfree(token.value);
-      (void)krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
-					NULL);
+      (void)krb5_gss_delete_sec_context(context, minor_status, 
+					(gss_ctx_id_t *) &ctx, NULL);
       *minor_status = G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }

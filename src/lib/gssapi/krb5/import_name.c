@@ -36,8 +36,9 @@
  */
 
 OM_uint32
-krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
-		     output_name)
+krb5_gss_import_name(context, minor_status, input_name_buffer, 
+		     input_name_type, output_name)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
      const_gss_OID input_name_type;
@@ -76,7 +77,7 @@ krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
       *host = '\0';
       host++;
 
-      code = krb5_sname_to_principal(host, service, KRB5_NT_SRV_HST,
+      code = krb5_sname_to_principal(context, host, service, KRB5_NT_SRV_HST,
 				     &princ);
 
       xfree(tmp);
@@ -91,7 +92,7 @@ krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
 
       input = *((krb5_principal *) input_name_buffer->value);
 
-      if (code = krb5_copy_principal(input, &princ)) {
+      if (code = krb5_copy_principal(context, input, &princ)) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
@@ -119,7 +120,7 @@ krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
       /* at this point, stringrep is set, or if not, *minor_status is. */
 
       if (stringrep)
-	 code = krb5_parse_name((char *) stringrep, &princ);
+	 code = krb5_parse_name(context, (char *) stringrep, &princ);
       else
 	 return(GSS_S_BAD_NAME);
    }
@@ -135,7 +136,7 @@ krb5_gss_import_name(minor_status, input_name_buffer, input_name_type,
    /* save the name in the validation database */
 
    if (! kg_save_name((gss_name_t) princ)) {
-      krb5_free_principal(princ);
+      krb5_free_principal(context, princ);
       *minor_status = G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }

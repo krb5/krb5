@@ -23,7 +23,8 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
+krb5_gss_delete_sec_context(context, minor_status, context_handle, output_token)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
      gss_buffer_t output_token;
@@ -69,15 +70,15 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    ctx = (gss_ctx_id_t) *context_handle;
 
    if (ctx->enc.processed)
-      krb5_finish_key(&ctx->enc.eblock);
-   krb5_free_keyblock(ctx->enc.key);
+      krb5_finish_key(context, &ctx->enc.eblock);
+   krb5_free_keyblock(context, ctx->enc.key);
 
    if (ctx->seq.processed)
-      krb5_finish_key(&ctx->seq.eblock);
+      krb5_finish_key(context, &ctx->seq.eblock);
 
-   krb5_free_principal(ctx->here);
-   krb5_free_principal(ctx->there);
-   krb5_free_keyblock(ctx->subkey);
+   krb5_free_principal(context, ctx->here);
+   krb5_free_principal(context, ctx->there);
+   krb5_free_keyblock(context, ctx->subkey);
 
    xfree(ctx);
 

@@ -23,9 +23,10 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_inquire_context(minor_status, context_handle, initiator_name, 
+krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name, 
 			 acceptor_name, lifetime_rec, mech_type, ret_flags,
 			 locally_initiated)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_name_t *initiator_name;
@@ -62,7 +63,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
    init = NULL;
    accept = NULL;
 
-   if (code = krb5_timeofday(&now)) {
+   if (code = krb5_timeofday(context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -71,30 +72,32 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
       lifetime = 0;
 
    if (initiator_name) {
-      if (code = krb5_copy_principal(ctx->initiate?ctx->here:ctx->there,
+      if (code = krb5_copy_principal(context, 
+				     ctx->initiate?ctx->here:ctx->there,
 				     &init)) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
       if (! kg_save_name((gss_name_t) init)) {
-	 krb5_free_principal(init);
+	 krb5_free_principal(context, init);
 	 *minor_status = G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
    }
 
    if (acceptor_name) {
-      if (code = krb5_copy_principal(ctx->initiate?ctx->there:ctx->here,
+      if (code = krb5_copy_principal(context, 
+				     ctx->initiate?ctx->there:ctx->here,
 				     &accept)) {
-	 if (init) krb5_free_principal(init);
+	 if (init) krb5_free_principal(context, init);
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }
       if (! kg_save_name((gss_name_t) accept)) {
-	 krb5_free_principal(accept);
+	 krb5_free_principal(context, accept);
 	 if (init) {
 	    kg_delete_name((gss_name_t) accept);
-	    krb5_free_principal(init);
+	    krb5_free_principal(context, init);
 	 }
 	 *minor_status = G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);

@@ -58,18 +58,14 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 #endif
 
 krb5_error_code
-krb5_db_fetch_mkey(DECLARG(krb5_principal, mname),
-		   DECLARG(krb5_encrypt_block *, eblock),
-		   DECLARG(krb5_boolean, fromkeyboard),
-		   DECLARG(krb5_boolean, twice),
-		   DECLARG(krb5_data *, salt),
-		   DECLARG(krb5_keyblock *,key))
-OLDDECLARG(krb5_principal, mname)
-OLDDECLARG(krb5_encrypt_block *, eblock)
-OLDDECLARG(krb5_boolean, fromkeyboard)
-OLDDECLARG(krb5_boolean, twice)
-OLDDECLARG(krb5_data *, salt)
-OLDDECLARG(krb5_keyblock *,key)
+krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
+    krb5_context context;
+    krb5_principal mname;
+    krb5_encrypt_block * eblock;
+    krb5_boolean fromkeyboard;
+    krb5_boolean twice;
+    krb5_data * salt;
+    krb5_keyblock * key;
 {
     krb5_error_code retval;
     char password[BUFSIZ];
@@ -80,7 +76,7 @@ OLDDECLARG(krb5_keyblock *,key)
     if (fromkeyboard) {
 	krb5_data scratch;
 
-	if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
+	if (retval = krb5_read_password(context, krb5_mkey_pwd_prompt1,
 					twice ? krb5_mkey_pwd_prompt2 : 0,
 					password,
 					&size))
@@ -89,11 +85,11 @@ OLDDECLARG(krb5_keyblock *,key)
 	pwd.data = password;
 	pwd.length = size;
 	if (!salt) {
-		retval = krb5_principal2salt(mname, &scratch);
+		retval = krb5_principal2salt(context, mname, &scratch);
 		if (retval)
 			return retval;
 	}
-	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd,
+	retval = krb5_string_to_key(context, eblock, key->keytype, key, &pwd,
 				    salt ? salt : &scratch);
 	if (!salt)
 		krb5_xfree(scratch.data);
@@ -104,7 +100,7 @@ OLDDECLARG(krb5_keyblock *,key)
 	/* from somewhere else */
 	krb5_keytype keytype;
 	char defkeyfile[MAXPATHLEN+1];
-	krb5_data *realm = krb5_princ_realm(mname);
+	krb5_data *realm = krb5_princ_realm(context, mname);
 	FILE *kf;
 
 	retval = 0;
