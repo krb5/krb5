@@ -1,0 +1,5 @@
+#define IHaveSubdirs
+#define PassCDebugFlags
+
+SUBDIRS=sample
+MakeSubdirs($(SUBDIRS))
