@@ -79,6 +79,7 @@ typedef unsigned char	u_char;
 /* if __STDC_VERSION__ >= 199901L this shouldn't be needed */
 #define inline __inline
 #define KRB5_USE_INET6
+#define NEED_INSIXADDR_ANY
 #define ENABLE_THREADS
 
 #define WM_KERBEROS5_CHANGED "Kerberos5 Changed"

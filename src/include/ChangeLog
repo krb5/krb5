@@ -1,3 +1,7 @@
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-mac.h: define NEED_INSIXADDR_ANY for ipv6 symbol
+
 2005-01-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for uint32_t and int32_t in system headers.
