@@ -39,6 +39,13 @@ static char *rcsid = "$Header$";
 #endif
 #include <string.h>
 
+/* need struct timeval */
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"
 
@@ -87,21 +94,21 @@ static int read_all(int fildes, char *buf, unsigned int nbyte)
     tv.tv_sec = 10;
     tv.tv_usec = 0;
 
+    for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
+	if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0
+	    || !FD_ISSET(fildes, &rfds))
+	    return(ptr-buf);
+	ret = recv(fildes, ptr, nbyte, 0);
+	if (ret < 0) {
+	    if (errno == EINTR)
+		continue;
+	    return(ret);
+	} else if (ret == 0) {
+	    return(ptr-buf);
+	}
+    }
 
-     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-      if ( select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0 || !FD_ISSET(fildes, &rfds) )
-          return(ptr-buf);
-      ret = recv(fildes, ptr, nbyte, 0);
-	  if (ret < 0) {
-	       if (errno == EINTR)
-		    continue;
-	       return(ret);
-	  } else if (ret == 0) {
-	       return(ptr-buf);
-	  }
-     }
-
-     return(ptr-buf);
+    return(ptr-buf);
 }
 
 /*
