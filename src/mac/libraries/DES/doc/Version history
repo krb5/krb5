@@ -1,10 +1,21 @@
 ==============================================================================
 DES Version History
 ==============================================================================
-Current version:	1.0.3
-Date:				April 21, 1999
-Author:				lxs@mit.edu
+Current version:	1.0.4
+Date:				April 29, 1999
+Author:				lxs@mit.edu, meeroh@mit.edu
 ==============================================================================
+
+DESLib 1.0.4
+April 29, 1999
+
+New features in this revision: none
+
+Bugs fixed in this revision:
+	[     2] Added C++ bracketing to des.h
+	
+========================================================================
+
 
 DESLib 1.0.3
 April 21, 1999

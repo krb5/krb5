@@ -17,6 +17,10 @@
 #include <stdio.h>
 #include <MacTypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef DES_INT32
 #define DES_INT32 SInt32
 #endif
@@ -156,6 +160,10 @@ int des_set_key(des_cblock *key, des_key_schedule schedule);
 /*	CFM magic again */	
 #if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #	pragma import reset
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* DES_DEFS */

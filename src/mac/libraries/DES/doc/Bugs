@@ -1,9 +1,10 @@
 ==============================================================================
 DES Library Bug List
 ==============================================================================
-Current version:	1.0.3
-Date:				April 21, 1999
-Authors:			lxs@mit.edu
+Current version:	1.0.4
+Date:				April 29, 1999
+Authors:			lxs@mit.edu, meeroh@mit.edu
 ==============================================================================
 
-No known bugs in 1.0.3
+[     2] No #ifdef __cplusplus in des.h
+[     1] Missing MacTypes.h in des.h
