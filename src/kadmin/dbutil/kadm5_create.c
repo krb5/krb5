@@ -81,7 +81,7 @@ int kadm5_create(kadm5_config_params *params)
       */
      if ((retval = kadm5_get_config_params(context, NULL, NULL,
 					   params, &lparams))) {
-	  com_err(progname, retval, str_INITING_KCONTEXT);
+	  com_err(progname, retval, "while looking up the Kerberos configuration");
 	  return 1;
      }
 
@@ -111,7 +111,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 			      KADM5_STRUCT_VERSION,
 			      KADM5_API_VERSION_2,
 			      &handle))) {
-	  com_err(progname, retval, str_INITING_KCONTEXT);
+	  com_err(progname, retval, "while initializing the Kerberos admin interface");
 	  return retval;
      }
 

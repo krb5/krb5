@@ -7,7 +7,6 @@
  
 #ifndef _OVSEC_ADM_STRINGS_
  
-extern char *str_INITING_KCONTEXT;
 extern char *str_PARSE_NAME;
 extern char *str_HISTORY_PARSE_NAME;
 extern char *str_ADMIN_PRINC_EXISTS;

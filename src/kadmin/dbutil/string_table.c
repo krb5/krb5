@@ -5,8 +5,6 @@
 
 /* String table of messages for kadm5_create */
 
-char *str_INITING_KCONTEXT = "while initializing the kerberos context";
-
 char *str_PARSE_NAME = "while parsing admin principal name.";
 
 char *str_HISTORY_PARSE_NAME = "while parsing admin history principal name.";

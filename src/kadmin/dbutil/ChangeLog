@@ -1,3 +1,11 @@
+2001-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* string_table.c (str_INITING_KCONTEXT): Variable deleted.
+	* string_table.h (str_INITING_KCONTEXT): Declaration deleted.
+	* kadm5_create.c (kadm5_create, kadm5_create_magic_princs): Don't
+	use str_INITING_KCONTEXT, instead provide (different!) messages
+	more appropriate to the actual code.
+
 2001-06-29  Ezra Peisach  <epeisach@mit.edu>
 
 	* nstrtok.h: New file with prototype for nstrtok.
