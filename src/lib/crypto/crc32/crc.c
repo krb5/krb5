@@ -144,10 +144,6 @@ static u_long const crc_table[256] = {
     };
 
 krb5_error_code
-crc32_sum_func KRB5_NPROTOTYPE((krb5_pointer in, size_t in_length,
-    krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
-
-krb5_error_code
 crc32_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
@@ -169,7 +165,7 @@ krb5_checksum FAR *outcksum;
     }
     /* c now holds the result */
     outcksum->checksum_type = CKSUMTYPE_CRC32;
-    outcksum->length = 4;
+    outcksum->length = CRC32_CKSUM_LENGTH;
     outcksum->contents[0] = (krb5_octet) (c & 0xff);
     outcksum->contents[1] = (krb5_octet) ((c >> 8) & 0xff);
     outcksum->contents[2] = (krb5_octet) ((c >> 16) & 0xff);
@@ -177,10 +173,49 @@ krb5_checksum FAR *outcksum;
     return 0;
 }
 
+krb5_error_code
+crc32_verify_func(cksum, in, in_length, seed, seed_length)
+krb5_checksum FAR *cksum;
+krb5_pointer in;
+size_t in_length;
+krb5_pointer seed;
+size_t seed_length;
+{
+    register u_char *data;
+    register u_long c = 0;
+    register int idx;
+    size_t i;
+    krb5_error_code	retval;
+
+    retval = 0;
+    if (cksum->checksum_type == CKSUMTYPE_CRC32) {
+	if (cksum->length == CRC32_CKSUM_LENGTH) {
+	    data = (u_char *)in;
+	    for (i = 0; i < in_length; i++) {
+		idx = (int) (data[i] ^ c);
+		idx &= 0xff;
+		c >>= 8;
+		c ^= crc_table[idx];
+	    }
+	    if ((cksum->contents[0] != (krb5_octet) (c & 0xff)) ||
+		(cksum->contents[1] != (krb5_octet) ((c >> 8) & 0xff)) ||
+		(cksum->contents[2] != (krb5_octet) ((c >> 16) & 0xff)) ||
+		(cksum->contents[3] != (krb5_octet) ((c >> 32) & 0xff)))
+		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	}
+	else
+	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    }
+    else
+	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
+    return(retval);
+}
+
 
 krb5_checksum_entry crc32_cksumtable_entry = {
     0,
     crc32_sum_func,
+    crc32_verify_func,
     CRC32_CKSUM_LENGTH, /* CRC-32 is 4 octets */
     0,					/* not collision proof */
     0,					/* doesn't use key */

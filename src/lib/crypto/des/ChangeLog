@@ -1,3 +1,8 @@
+
+Fri Jul 7 16:12:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* cbc_cksum.c - Add checksum verifier procedure.
+	* cs_entry.c - Add entry for checksum verifier.
+
 Thu Jul  6 17:16:17 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* new_rn_key.c (mit_des_init_random_number_generator): don't call

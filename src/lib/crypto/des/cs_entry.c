@@ -34,10 +34,17 @@ extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((
 							size_t ,
 							krb5_checksum FAR * ));
 
+extern krb5_error_code mit_des_cbc_verf_cksum PROTOTYPE ((
+							  krb5_checksum FAR *,
+							  krb5_pointer ,
+							  size_t ,
+							  krb5_pointer ,
+							  size_t ));
 
 krb5_checksum_entry krb5_des_cbc_cksumtable_entry = {
     0,
     mit_des_cbc_checksum,
+    mit_des_cbc_verf_cksum,
     sizeof(mit_des_cblock),
     1,					/* is collision proof */
     1,					/* is keyed */

@@ -1,3 +1,8 @@
+
+Fri Jul 7 16:10:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* crc.c - Use CRC32_CKSUM_LENGTH where appropriate.  Add checksum
+		verifier procedure.
+
 Wed Jun 21 10:51:33 1995    <tytso@rsx-11.mit.edu>
 
 	* crc.c: Change PROTOTYPE -> KRB5_PROTOTYPE
