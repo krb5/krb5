@@ -1,3 +1,11 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * server.c: Use new calling conventions for krb5_sendauth(),
+		krb5_mk_req_extended(), and krb5_mk_safe().
+
+        * server.c: Use new calling conventions for krb5_recvauth(),
+		krb5_rd_req(), and krb5_rd_safe().
+
 Thu Mar  2 12:28:58 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

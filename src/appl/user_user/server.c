@@ -51,8 +51,8 @@ char *argv[];
   krb5_creds creds, *new_creds;
   krb5_ccache cc;
   krb5_data msgtext, msg;
-  krb5_int32 seqno;
   krb5_context context;
+    krb5_auth_context * auth_context = NULL;
 
 #ifndef DEBUG
   freopen("/tmp/uu-server.log", "w", stderr);
@@ -165,29 +165,34 @@ char *argv[];
   /* send a ticket/authenticator to the other side, so it can get the key
      we're using for the krb_safe below. */
 
-  if (retval = krb5_generate_seq_number(context, &new_creds->keyblock, &seqno)){
-      com_err("uu-server", retval, "generating sequence number");
-      return 8;
-  }
+    if (retval = krb5_auth_con_init(context, &auth_context)) {
+      	com_err("uu-server", retval, "making auth_context");
+      	return 8;
+    }
+
+    if (retval = krb5_auth_con_setflags(context, auth_context,
+					KRB5_AUTH_CONTEXT_DO_SEQUENCE)) {
+	com_err("uu-server", retval, "initializing the auth_context flags");
+	return 8;
+    }
+
+    if (retval = krb5_auth_con_setaddrs(context, auth_context, &laddr, &faddr)){
+        com_err("uu-server", retval, "setting addresses for auth_context");
+        return 9;
+    }
+
 #if 1
-  if (retval = krb5_mk_req_extended(context, AP_OPTS_USE_SESSION_KEY,
-			       0,	/* no application checksum here */
-			       seqno,
-			       0,	/* no need for subkey */
-			       &creds,
-			       0,	/* don't need authenticator copy */
-			       &msg)) {
-      com_err("uu-server", retval, "making AP_REQ");
-      return 8;
-  }
-  retval = krb5_write_message(context, (krb5_pointer) &sock, &msg);
+    if (retval = krb5_mk_req_extended(context, &auth_context, 
+				      AP_OPTS_USE_SESSION_KEY, 
+				      NULL, new_creds, &msg)) {
+      	com_err("uu-server", retval, "making AP_REQ");
+      	return 8;
+    }
+    retval = krb5_write_message(context, (krb5_pointer) &sock, &msg);
 #else
-  retval = krb5_sendauth(context, (krb5_pointer)&sock, "???", 0, 0,
-			 AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SESSION_KEY,
-			 0, /* no checksum*/
-			 &creds, cc,
-			 0, 0,	/* no sequence number or subsession key */
-			 0, 0);
+    retval = krb5_sendauth(context, &auth_context, (krb5_pointer)&sock,"???", 0,
+			   0, AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SESSION_KEY,
+			   NULL, &creds, cc, NULL, NULL, NULL);
 #endif
   if (retval)
       goto cl_short_wrt;
@@ -197,9 +202,7 @@ char *argv[];
   msgtext.length = 32;
   msgtext.data = "Hello, other end of connection.";
 
-  if (retval = krb5_mk_safe(context, &msgtext, CKSUMTYPE_RSA_MD4_DES, 
-			    &new_creds->keyblock, &laddr, &faddr, seqno,
-			    KRB5_SAFE_NOTIME|KRB5_SAFE_DOSEQUENCE, 0, &msg))
+  if (retval = krb5_mk_safe(context, auth_context, &msgtext, &msg, NULL))
     {
       com_err("uu-server", retval, "encoding message to client");
       return 6;
