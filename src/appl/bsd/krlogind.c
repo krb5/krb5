@@ -234,7 +234,9 @@ struct winsize {
 #ifdef KERBEROS
      
 #include <krb5.h>
+#ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
+#endif
 #include <libpty.h>
 #ifdef HAVE_UTMP_H
 #include <utmp.h>
@@ -249,8 +251,10 @@ int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 int non_privileged = 0; /* set when connection is seen to be from */
 			/* a non-privileged port */
 
+#ifdef KRB5_KRB4_COMPAT
 AUTH_DAT	*v4_kdata;
 Key_schedule v4_schedule;
+#endif
 
 #include "com_err.h"
 #include "defines.h"
@@ -1357,7 +1361,9 @@ recvauth(valid_checksum)
     struct sockaddr_storage peersin, laddr;
     socklen_t len;
     krb5_data inbuf;
+#ifdef KRB5_KRB4_COMPAT
     char v4_instance[INST_SZ];	/* V4 Instance */
+#endif
     krb5_data version;
     krb5_authenticator *authenticator;
     krb5_rcache rcache;
@@ -1376,7 +1382,9 @@ recvauth(valid_checksum)
 	exit(1);
     }
 
+#ifdef KRB5_KRB4_COMPAT
     strcpy(v4_instance, "*");
+#endif
 
     if ((status = krb5_auth_con_init(bsd_context, &auth_context)))
         return status;
@@ -1406,7 +1414,8 @@ recvauth(valid_checksum)
 	if (status) return status;
     }
 
-    if ((status = krb5_compat_recvauth_version(bsd_context, &auth_context,
+#ifdef KRB5_KRB4_COMPAT
+    status = krb5_compat_recvauth_version(bsd_context, &auth_context,
 					       &netf,
 				  NULL, 	/* Specify daemon principal */
 				  0, 		/* no flags */
@@ -1422,7 +1431,13 @@ recvauth(valid_checksum)
 				  &ticket, 	/* return ticket */
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, v4_schedule,
-					       &version))) {
+					       &version);
+#else
+    auth_sys = KRB5_RECVAUTH_V5;
+    status = krb5_recvauth_version(bsd_context, &auth_context, &netf,
+				   NULL, 0, keytab, &ticket, &version);
+#endif
+    if (status) {
 	if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
 	     * clean up before exiting

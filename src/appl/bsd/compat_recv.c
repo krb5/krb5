@@ -39,7 +39,9 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #if !defined(_MACINTOSH)
+#ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
+#endif
 #include "com_err.h"
 #include <errno.h>
 
@@ -48,6 +50,7 @@
 
 #include "defines.h"
 
+#ifdef KRB5_KRB4_COMPAT
 static int krb_v4_recvauth(long options, int fd, KTEXT ticket,
 			   char *service, char *instance, 
 			   struct sockaddr_in *faddr,
@@ -56,6 +59,7 @@ static int krb_v4_recvauth(long options, int fd, KTEXT ticket,
 			   char *filename,
 			   Key_schedule schedule,
 			   char *version);
+#endif
 
 #define	KRB_V4_SENDAUTH_VERS	"AUTHV0.1" /* MUST be 8 chars long */
 #define KRB_V5_SENDAUTH_VERS	"KRB5_SENDAUTH_V1.0"
@@ -63,6 +67,7 @@ static int krb_v4_recvauth(long options, int fd, KTEXT ticket,
 #define KRB5_RECVAUTH_V4	4
 #define KRB5_RECVAUTH_V5	5
 
+#ifdef KRB5_KRB4_COMPAT
 krb5_error_code
 krb5_compat_recvauth(context, auth_context,
 	             /* IN */
@@ -347,6 +352,7 @@ krb5_compat_recvauth_version(context, auth_context,
 
 	return retval;
 }
+#endif /* KRB5_KRB4_COMPAT */
 
 
 #ifndef max

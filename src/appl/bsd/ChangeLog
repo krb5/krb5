@@ -1,3 +1,13 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c: Only include krb.h if KRB5_KRB4_COMPAT.
+	(krb_v4_recvauth, krb5_compat_recvauth,
+	krb5_compat_recvauth_version): Define only if KRB5_KRB4_COMPAT.
+	* krlogind.c: Include krb.h only if KRB5_KRB4_COMPAT.
+	(v4_kdata, v4_schedule): Define only if KRB5_KRB4_COMPAT.
+	(recvauth) [!KRB5_KRB4_COMPAT]: Skip v4 stuff and call
+	krb5_recvauth_version.
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (DEFINES): Add -DKERBEROS.
