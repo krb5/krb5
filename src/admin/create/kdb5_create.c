@@ -25,6 +25,7 @@ static char rcsid_kdb_create_c[] =
 #include <stdio.h>
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
+#include <krb5/config.h>
 
 #include <com_err.h>
 #include <errno.h>
