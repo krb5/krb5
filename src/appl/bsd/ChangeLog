@@ -1,3 +1,14 @@
+Tue Jan  3 16:54:02 1995  Richard Basch  (probe@tardis)
+
+	* krshd.c
+	  	Cleaned up comments
+
+	* krsh.c
+	  	Removed debugging statement
+
+	* kcmd.c
+	  	Removed old sgi code (it has POSIX_SIGNALS).
+
 Mon Jan  2 12:35:18 1995  Richard Basch  (probe@tardis)
 
 	* krsh.c
