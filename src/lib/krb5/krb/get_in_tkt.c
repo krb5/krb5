@@ -19,6 +19,8 @@ static char rcsid_get_in_tkt_c[] =
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
 #include <krb5/asn1.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
 
 #include <errno.h>
 #include <krb5/ext-proto.h>
@@ -112,7 +114,7 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* now decode the reply...could be error or as_rep */
 
-    if (retval = decode_krb5_kdc_rep(packet, &as_reply)) {
+    if (retval = decode_krb5_as_rep(packet, &as_reply)) {
 	if (retval = decode_krb5_error(packet, &err_reply))
 	    return retval;		/* some other packet--??? */
 	/* it was an error */
