@@ -1,3 +1,9 @@
+1999-08-03 Alexandra Ellwood <lxs@mit.edu>
+
+	* prof_file.c (profile_open_file)
+		Mac OS side now sets profile->magic to PROF_MAGIC_FILE 
+		so the rest of the functions think it's a real profile.
+		  
 1999-07-22 Jeffrey Altman <jaltman@columbia.edu>
 
         * prof_init.c (prof_init)
