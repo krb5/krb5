@@ -64,7 +64,7 @@ k5_crc32_hash(unsigned int icount, krb5_const krb5_data *input,
     return(0);
 }
 
-struct krb5_hash_provider krb5_hash_crc32 = {
+const struct krb5_hash_provider krb5_hash_crc32 = {
     k5_crc32_hash_size,
     k5_crc32_block_size,
     k5_crc32_hash

@@ -39,7 +39,7 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
      krb5_data *output;
 {
     int i;
-    struct krb5_enc_provider *enc;
+    const struct krb5_enc_provider *enc;
     size_t blocksize, keybytes, keylength;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
@@ -83,14 +83,14 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
 
     datain.data[4] = 0x99;
 
-    if (ret = krb5_derive_key(enc, key, &kc, &datain))
+    if ((ret = krb5_derive_key(enc, key, &kc, &datain)) != 0)
 	goto cleanup;
 
     /* hash the data */
 
     datain = *input;
 
-    if (ret = krb5_hmac(hash, &kc, 1, &datain, output))
+    if ((ret = krb5_hmac(hash, &kc, 1, &datain, output)) != 0)
 	memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */
@@ -157,7 +157,7 @@ krb5_marc_dk_make_checksum(hash, key, usage, input, output)
 
     datain[0].data[4] = 0x99;
 
-    if (ret = krb5_derive_key(enc, key, &kc, &datain[0]))
+    if ((ret = krb5_derive_key(enc, key, &kc, &datain[0])) != 0)
 	goto cleanup;
 
     /* hash the data */
@@ -170,7 +170,7 @@ krb5_marc_dk_make_checksum(hash, key, usage, input, output)
 
     datain[1] = *input;
 
-    if (ret = krb5_hmac(hash, &kc, 2, datain, output))
+    if ((ret = krb5_hmac(hash, &kc, 2, datain, output)) != 0)
 	memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */

@@ -35,7 +35,7 @@ krb5_c_make_random_key(context, enctype, random_key)
 {
     int i;
     krb5_error_code ret;
-    struct krb5_enc_provider *enc;
+    const struct krb5_enc_provider *enc;
     size_t keybytes, keylength;
     krb5_data random;
     unsigned char *bytes;
@@ -62,7 +62,7 @@ krb5_c_make_random_key(context, enctype, random_key)
     random.data = bytes;
     random.length = keybytes;
 
-    if (ret = krb5_c_random_make_octets(context, &random))
+    if ((ret = krb5_c_random_make_octets(context, &random)))
 	goto cleanup;
 
     random_key->magic = KV5M_KEYBLOCK;

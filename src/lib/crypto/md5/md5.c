@@ -58,7 +58,7 @@
 /* forward declaration */
 static void Transform KRB5_PROTOTYPE((krb5_ui_4 FAR *buf, krb5_ui_4 FAR *in));
 
-static unsigned char PADDING[64] = {
+static const unsigned char PADDING[64] = {
   0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -76,7 +76,7 @@ static unsigned char PADDING[64] = {
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
 /* ROTATE_LEFT rotates x left n bits */
-#define ROTATE_LEFT(x, n) (((x) << (n)) & 0xffffffff | ((x) >> (32-(n))))
+#define ROTATE_LEFT(x, n) ((((x) << (n)) & 0xffffffff) | ((x) >> (32-(n))))
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4 */
 /* Rotation is separate from addition to prevent recomputation */
@@ -133,7 +133,7 @@ krb5_MD5_CTX FAR *mdContext;
 void
 krb5_MD5Update (mdContext, inBuf, inLen)
 krb5_MD5_CTX FAR *mdContext;
-unsigned char FAR *inBuf;
+const unsigned char FAR *inBuf;
 unsigned int inLen;
 {
   krb5_ui_4 in[16];

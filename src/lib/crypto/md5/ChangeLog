@@ -1,3 +1,10 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* md5.c (PADDING): Now const.
+	(krb5_MD5Update): Argument inBuf now points to const.
+	(ROTATE_LEFT): Change (a&b|c) construct to silence gcc warning.
+	* rsa-md5.h (krb5_MD5Update): Update decl.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

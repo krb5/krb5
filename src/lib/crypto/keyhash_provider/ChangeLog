@@ -1,3 +1,22 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* descbc.c (mit_des_zeroblock): Now const, and using C default
+	initializer.
+	(krb5_keyhash_descbc): Now const.
+	* k5_md4des.c (mit_des_zeroblock): Now const, and using C default
+	initializer.
+	(k5_md4des_hash): Change if(a=b) constructs to silence gcc
+	warnings.
+	(k5_md4des_verify): Delete unused variable.
+	(krb5_keyhash_md4des): Now const.
+	* k5_md5des.c (mit_des_zeroblock): Now const, and using C default
+	initializer.
+	(k5_md5des_hash): Change if(a=b) constructs to silence gcc
+	warnings.
+	(k5_md5des_verify): Delete unused variable.
+	(krb5_keyhash_md5des): Now const.
+	* keyhash_provider.h: Updated krb5_keyhash_* decls.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -28,7 +28,7 @@
 #include "des_int.h"
 #include "keyhash_provider.h"
 
-static mit_des_cblock mit_des_zeroblock[8] = {0,0,0,0,0,0,0,0};
+static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
 static void
 k5_descbc_hash_size(size_t *output)
@@ -69,7 +69,7 @@ k5_descbc_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
     return(0);
 }
 
-struct krb5_keyhash_provider krb5_keyhash_descbc = {
+const struct krb5_keyhash_provider krb5_keyhash_descbc = {
     k5_descbc_hash_size,
     k5_descbc_hash,
     NULL

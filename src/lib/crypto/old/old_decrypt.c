@@ -45,7 +45,7 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
 {
     krb5_error_code ret;
     size_t blocksize, hashsize, plainsize;
-    unsigned char *plaintext, *cksumdata;
+    unsigned char *cksumdata;
     krb5_data output, cksum, crcivec;
     int alloced;
 
@@ -89,7 +89,7 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
 	ivec = &crcivec;
     }
 
-    if (ret = ((*(enc->decrypt))(key, ivec, input, &output)))
+    if ((ret = ((*(enc->decrypt))(key, ivec, input, &output))))
 	goto cleanup;
 
     /* verify the checksum */
@@ -100,7 +100,7 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
     cksum.length = hashsize;
     cksum.data = output.data+blocksize;
 
-    if (ret = ((*(hash->hash))(1, &output, &cksum)))
+    if ((ret = ((*(hash->hash))(1, &output, &cksum))))
 	goto cleanup;
 
     if (memcmp(cksum.data, cksumdata, cksum.length) != 0) {
@@ -131,4 +131,3 @@ cleanup:
     free(cksumdata);
     return(ret);
 }
-

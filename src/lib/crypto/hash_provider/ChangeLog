@@ -1,3 +1,11 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* hash_crc32.c (krb5_hash_crc32): Now const.
+	* hash_md4.c (krb5_hash_md4): Now const.
+	* hash_md5.c (krb5_hash_md5): Now const.
+	* hash_sha1.c (krb5_hash_sha1): Now const.
+	* hash_provider.h: Updated decls.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

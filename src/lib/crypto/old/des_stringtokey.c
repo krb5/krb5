@@ -27,6 +27,12 @@
 #include "k5-int.h"
 #include "old.h"
 
+/* XXX */
+extern krb5_error_code mit_des_string_to_key_int
+KRB5_PROTOTYPE ((krb5_keyblock FAR * keyblock,
+		 const krb5_data FAR * data,
+		 const krb5_data FAR * salt));
+
 krb5_error_code
 krb5_des_string_to_key(enc, string, salt, key)
      krb5_const struct krb5_enc_provider *enc;

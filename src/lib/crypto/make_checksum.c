@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "cksumtypes.h"
 #include "etypes.h"
+#include "dk.h"
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)

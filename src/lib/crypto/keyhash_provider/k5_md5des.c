@@ -34,7 +34,7 @@
 /* Force acceptance of krb5-beta5 md5des checksum for now. */
 #define KRB5_MD5DES_BETA5_COMPAT
 
-static mit_des_cblock mit_des_zeroblock[8] = {0,0,0,0,0,0,0,0};
+static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
 static void
 k5_md5des_hash_size(size_t *output)
@@ -70,7 +70,7 @@ k5_md5des_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     data.length = CONFLENGTH;
     data.data = conf;
-    if (ret = krb5_c_random_make_octets(/* XXX */ 0, &data))
+    if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &data)))
 	return(ret);
 
     /* create and schedule the encryption key */
@@ -114,7 +114,6 @@ k5_md5des_verify(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 		 krb5_boolean *valid)
 {
     krb5_error_code ret;
-    krb5_data data;
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
     unsigned char xorkey[8];
@@ -188,7 +187,7 @@ k5_md5des_verify(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
     return(0);
 }
 
-struct krb5_keyhash_provider krb5_keyhash_md5des = {
+const struct krb5_keyhash_provider krb5_keyhash_md5des = {
     k5_md5des_hash_size,
     k5_md5des_hash,
     k5_md5des_verify

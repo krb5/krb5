@@ -89,12 +89,12 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 
     d1.data[4] = 0xAA;
 
-    if (ret = krb5_derive_key(enc, key, &ke, &d1))
+    if ((ret = krb5_derive_key(enc, key, &ke, &d1)) != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    if (ret = krb5_derive_key(enc, key, &ki, &d1))
+    if ((ret = krb5_derive_key(enc, key, &ki, &d1)) != 0)
 	goto cleanup;
 
     /* decrypt the ciphertext */
@@ -105,7 +105,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d2.length = enclen;
     d2.data = plaindata;
 
-    if (ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2)))
+    if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
     /* verify the hash */
@@ -113,7 +113,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d1.length = hashsize;
     d1.data = cksum;
 
-    if (ret = krb5_hmac(hash, &ki, 1, &d2, &d1))
+    if ((ret = krb5_hmac(hash, &ki, 1, &d2, &d1)) != 0)
 	goto cleanup;
 
     if (memcmp(cksum, input->data+enclen, hashsize) != 0) {
@@ -211,12 +211,12 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
 
     d1.data[4] = 0xAA;
 
-    if (ret = krb5_derive_key(enc, key, &ke, &d1))
+    if ((ret = krb5_derive_key(enc, key, &ke, &d1)) != 0)
 	goto cleanup;
 
     d1.data[4] = 0x55;
 
-    if (ret = krb5_derive_key(enc, key, &ki, &d1))
+    if ((ret = krb5_derive_key(enc, key, &ki, &d1)) != 0)
 	goto cleanup;
 
     /* decrypt the ciphertext */
@@ -227,7 +227,7 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d2.length = enclen;
     d2.data = plaindata;
 
-    if (ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2)))
+    if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
     /* verify the hash */
@@ -235,7 +235,7 @@ krb5_marc_dk_decrypt(enc, hash, key, usage, ivec, input, output)
     d1.length = hashsize;
     d1.data = cksum;
 
-    if (ret = krb5_hmac(hash, &ki, 1, &d2, &d1))
+    if ((ret = krb5_hmac(hash, &ki, 1, &d2, &d1)) != 0)
 	goto cleanup;
 
     if (memcmp(cksum, input->data+enclen, hashsize) != 0) {

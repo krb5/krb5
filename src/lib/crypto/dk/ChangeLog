@@ -1,3 +1,12 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum.c (krb5_dk_make_checksum): enc_providers are now
+	const.  Modify if(a=b) assignment/test constructs to silence gcc
+	warnings.
+	* dk_decrypt.c (krb5_dk_decrypt, krb5_marc_dk_decrypt): Ditto.
+	* dk_encrypt.c (krb5_dk_encrypt, krb5_marc_dk_encrypt): Ditto.
+	* stringtokey.c (krb5_dk_string_to_key): Ditto.  Include dk.h.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -50,8 +50,7 @@ krb5_nfold(inbits, in, outbits, out)
      int outbits;
      unsigned char *out;
 {
-    int a,b,c,gcd,lcm;
-    int reps;
+    int a,b,c,lcm;
     int byte, i, msbit;
 
     /* the code below is more readable if I make these bytes

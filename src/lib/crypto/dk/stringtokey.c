@@ -24,7 +24,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
+#include "dk.h"
 
 static unsigned char kerberos[] = "kerberos";
 #define kerberos_len (sizeof(kerberos)-1)
@@ -80,7 +80,7 @@ krb5_dk_string_to_key(enc, string, salt, key)
     indata.length = kerberos_len;
     indata.data = kerberos;
 
-    if (ret = krb5_derive_key(enc, &foldkey, key, &indata))
+    if ((ret = krb5_derive_key(enc, &foldkey, key, &indata)))
 	memset(key->contents, 0, key->length);
 
     /* ret is set correctly by the prior call */

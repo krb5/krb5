@@ -28,7 +28,7 @@
 #include "des_int.h"
 #include "enc_provider.h"
 
-static mit_des_cblock mit_des_zeroblock[8] = {0,0,0,0,0,0,0,0};
+static const mit_des_cblock mit_des_zeroblock[8] /* = all zero */;
 
 static void
 k5_des_block_size(size_t *blocksize)
@@ -119,7 +119,7 @@ k5_des_make_key(krb5_const krb5_data *randombits, krb5_keyblock *key)
     return(0);
 }
 
-struct krb5_enc_provider krb5_enc_des = {
+const struct krb5_enc_provider krb5_enc_des = {
     k5_des_block_size,
     k5_des_keysize,
     k5_des_encrypt,

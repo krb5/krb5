@@ -33,7 +33,7 @@
 
 /* 32-bit rotate left - kludged with shifts */
 
-#define ROTL(n,X)  (((X) << (n)) & 0xffffffff | ((X) >> (32 - n)))
+#define ROTL(n,X)  ((((X) << (n)) & 0xffffffff) | ((X) >> (32 - n)))
 
 /* The initial expanding function.  The hash function is defined over an
    80-word expanded input array W, where the first 16 are copies of the input
@@ -213,41 +213,6 @@ void SHSTransform(digest, data)
     digest[ 4 ] &= 0xffffffff;
 }
 
-/* When run on a little-endian CPU we need to perform byte reversal on an
-   array of longwords.  It is possible to make the code endianness-
-   independant by fiddling around with data at the byte level, but this
-   makes for very slow code, so we rely on the user to sort out endianness
-   at compile time */
-
-void longReverse( LONG *buffer, int byteCount )
-{
-    LONG value;
-    static int init = 0;
-    char *cp;
-
-    switch (init) {
-    case 0:
-	init=1;
-	cp = (char *) &init;
-	if (*cp == 1) {
-	    init=2;
-	    break;
-	}
-	init=1;
-	/* fall through - MSB */
-    case 1:
-	return;
-    }
-
-    byteCount /= sizeof( LONG );
-    while( byteCount-- ) {
-        value = *buffer;
-        value = ( ( value & 0xFF00FF00L ) >> 8  ) | 
-                ( ( value & 0x00FF00FFL ) << 8 );
-        *buffer++ = ( value << 16 ) | ( value >> 16 );
-    }
-}
-
 /* Update SHS for a block of data */
 
 void shsUpdate(shsInfo, buffer, count)
@@ -353,7 +318,6 @@ void shsFinal(shsInfo)
 {
     int count;
     LONG *lp;
-    BYTE *dataPtr;
 
     /* Compute number of bytes mod 64 */
     count = (int) shsInfo->countLo;

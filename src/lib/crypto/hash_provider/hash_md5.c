@@ -60,7 +60,7 @@ k5_md5_hash(unsigned int icount, krb5_const krb5_data *input,
     return(0);
 }
 
-struct krb5_hash_provider krb5_hash_md5 = {
+const struct krb5_hash_provider krb5_hash_md5 = {
     k5_md5_hash_size,
     k5_md5_block_size,
     k5_md5_hash

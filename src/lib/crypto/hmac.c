@@ -96,7 +96,7 @@ krb5_hmac(hash, key, icount, input, output)
     hashout.length = hashsize;
     hashout.data = ihash;
 
-    if (ret = ((*(hash->hash))(icount+1, hashin, &hashout)))
+    if ((ret = ((*(hash->hash))(icount+1, hashin, &hashout))))
 	goto cleanup;
 
     /* create the outer padded key */
@@ -114,7 +114,7 @@ krb5_hmac(hash, key, icount, input, output)
 
     output->length = hashsize;
 
-    if (ret = ((*(hash->hash))(2, hashin, output)))
+    if ((ret = ((*(hash->hash))(2, hashin, output))))
 	memset(output->data, 0, output->length);
 
     /* ret is set correctly by the prior call */

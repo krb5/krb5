@@ -1,3 +1,11 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (mit_des_zeroblock): Now const, and using C default
+	initialization.
+	(krb5_enc_des): Now const.
+	* des3.c (mit_des_zeroblock, krb5_enc_des3): Similar.
+	* enc_provider.h (krb5_enc_des, krb5_enc_des3): Update decls.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

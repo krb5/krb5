@@ -38,7 +38,7 @@
    that the keytypes are all near each other.  I'd rather not make
    that assumption. */
 
-struct krb5_keytypes krb5_enctypes_list[] = {
+const struct krb5_keytypes krb5_enctypes_list[] = {
     { ENCTYPE_DES_CBC_CRC,
       "des-cbc-crc", "DES cbc mode with CRC-32",
       &krb5_enc_des, &krb5_hash_crc32,
@@ -106,5 +106,5 @@ struct krb5_keytypes krb5_enctypes_list[] = {
 #endif
 };
 
-int krb5_enctypes_length =
+const int krb5_enctypes_length =
 sizeof(krb5_enctypes_list)/sizeof(struct krb5_keytypes);

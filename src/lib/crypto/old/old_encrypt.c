@@ -73,7 +73,7 @@ krb5_old_encrypt(enc, hash, key, usage, ivec, input, output)
     datain.length = blocksize;
     datain.data = output->data;
 
-    if (ret = krb5_c_random_make_octets(/* XXX */ 0, &datain))
+    if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &datain)))
 	return(ret);
     memcpy(output->data+blocksize+hashsize, input->data, input->length);
 
@@ -82,7 +82,7 @@ krb5_old_encrypt(enc, hash, key, usage, ivec, input, output)
     datain.length = hashsize;
     datain.data = output->data+blocksize;
 
-    if (ret = ((*(hash->hash))(1, output, &datain)))
+    if ((ret = ((*(hash->hash))(1, output, &datain))))
 	goto cleanup;
 
     /* encrypt it */
@@ -94,7 +94,7 @@ krb5_old_encrypt(enc, hash, key, usage, ivec, input, output)
 	ivec = &crcivec;
     }
 
-    if (ret = ((*(enc->encrypt))(key, ivec, output, output)))
+    if ((ret = ((*(enc->encrypt))(key, ivec, output, output))))
 	goto cleanup;
 
 cleanup:

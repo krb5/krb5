@@ -1,3 +1,11 @@
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* des_stringtokey.c (mit_des_string_to_key_int): Declare.
+	* old_decrypt.c (krb5_old_decrypt): Delete unused variable.
+	Change if(a=b) constructs to silence gcc warning.
+	* old_encrypt.c (krb5_old_encrypt): Change if(a=b) constructs to
+	silence gcc warning.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

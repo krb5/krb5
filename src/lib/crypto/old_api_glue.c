@@ -41,7 +41,7 @@ krb5_encrypt(context, inptr, outptr, size, eblock, ivec)
     krb5_error_code ret;
 
     if (ivec) {
-	if (ret = krb5_c_block_size(context, eblock->key->enctype, &blocksize))
+	if ((ret = krb5_c_block_size(context, eblock->key->enctype, &blocksize)))
 	    return(ret);
 
 	ivecd.length = blocksize;
@@ -54,8 +54,8 @@ krb5_encrypt(context, inptr, outptr, size, eblock, ivec)
 
     /* The size of the output buffer isn't part of the old api.  Not too
        safe.  So, we assume here that it's big enough. */
-    if (ret = krb5_c_encrypt_length(context, eblock->key->enctype, size,
-				    &outlen))
+    if ((ret = krb5_c_encrypt_length(context, eblock->key->enctype, size,
+				     &outlen)))
 	return(ret);
 
     outputd.ciphertext.length = outlen;
@@ -80,7 +80,7 @@ krb5_decrypt(context, inptr, outptr, size, eblock, ivec)
     krb5_error_code ret;
 
     if (ivec) {
-	if (ret = krb5_c_block_size(context, eblock->key->enctype, &blocksize))
+	if ((ret = krb5_c_block_size(context, eblock->key->enctype, &blocksize)))
 	    return(ret);
 
 	ivecd.length = blocksize;
@@ -170,7 +170,7 @@ krb5_random_key(context, eblock, ptr, keyblock)
     if ((key = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
 	return(ENOMEM);
 
-    if (ret = krb5_c_make_random_key(context, eblock->crypto_entry, key))
+    if ((ret = krb5_c_make_random_key(context, eblock->crypto_entry, key)))
 	free(key);
 
     *keyblock = key;
@@ -245,7 +245,7 @@ krb5_calculate_checksum(context, ctype, in, in_length,
     key.length = seed_length;
     key.contents = seed;
 
-    if (ret = krb5_c_make_checksum(context, ctype, &key, 0, &input, &cksum))
+    if ((ret = krb5_c_make_checksum(context, ctype, &key, 0, &input, &cksum)))
 	return(ret);
 
     if (outcksum->length < cksum.length) {
@@ -286,8 +286,8 @@ krb5_verify_checksum(context, ctype, cksum, in, in_length,
     key.length = seed_length;
     key.contents = seed;
 
-    if (ret = krb5_c_verify_checksum(context, &key, 0, &input, cksum,
-				     &valid))
+    if ((ret = krb5_c_verify_checksum(context, &key, 0, &input, cksum,
+				      &valid)))
 	return(ret);
 
     if (!valid)
@@ -320,12 +320,12 @@ krb5_error_code krb5_encrypt_data(context, key, ivec, data, enc_data)
     size_t enclen, blocksize;
     krb5_data ivecd;
 
-    if (ret = krb5_c_encrypt_length(context, key->enctype, data->length,
-				    &enclen))
+    if ((ret = krb5_c_encrypt_length(context, key->enctype, data->length,
+				     &enclen)))
 	return(ret);
 
     if (ivec) {
-	if (ret = krb5_c_block_size(context, key->enctype, &blocksize))
+	if ((ret = krb5_c_block_size(context, key->enctype, &blocksize)))
 	    return(ret);
 
 	ivecd.length = blocksize;
@@ -339,7 +339,7 @@ krb5_error_code krb5_encrypt_data(context, key, ivec, data, enc_data)
     if ((enc_data->ciphertext.data = malloc(enclen)) == NULL)
 	return(ENOMEM);
 
-    if (ret = krb5_c_encrypt(context, key, 0, ivec?&ivecd:0, data, enc_data))
+    if ((ret = krb5_c_encrypt(context, key, 0, ivec?&ivecd:0, data, enc_data)))
 	free(enc_data->ciphertext.data);
 
     return(ret);
@@ -357,7 +357,7 @@ krb5_error_code krb5_decrypt_data(context, key, ivec, enc_data, data)
     size_t blocksize;
 
     if (ivec) {
-	if (ret = krb5_c_block_size(context, key->enctype, &blocksize))
+	if ((ret = krb5_c_block_size(context, key->enctype, &blocksize)))
 	    return(ret);
 
 	ivecd.length = blocksize;
@@ -368,7 +368,7 @@ krb5_error_code krb5_decrypt_data(context, key, ivec, enc_data, data)
     if ((data->data = (krb5_octet *) malloc(data->length)) == NULL)
 	return(ENOMEM);
 
-    if (ret = krb5_c_decrypt(context, key, 0, ivec?&ivecd:0, enc_data, data))
+    if ((ret = krb5_c_decrypt(context, key, 0, ivec?&ivecd:0, enc_data, data)))
 	free(data->data);
 
     return(0);

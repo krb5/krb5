@@ -62,7 +62,7 @@ krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
 
     /* otherwise, make the checksum again, and compare */
 
-    if (ret = krb5_c_checksum_length(context, cksum->checksum_type, &hashsize))
+    if ((ret = krb5_c_checksum_length(context, cksum->checksum_type, &hashsize)))
 	return(ret);
 
     if (cksum->length != hashsize)
@@ -70,8 +70,8 @@ krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
 
     computed.length = hashsize;
 
-    if (ret = krb5_c_make_checksum(context, cksum->checksum_type, key, usage,
-				   data, &computed)) {
+    if ((ret = krb5_c_make_checksum(context, cksum->checksum_type, key, usage,
+				   data, &computed))) {
 	free(computed.contents);
 	return(ret);
     }
