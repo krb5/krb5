@@ -1,3 +1,10 @@
+2000-08-31  Jeffrey Altman <jaltman@columbia.edu>
+
+        * locate_kdc.c: krb5_locate_srv_dns() 
+          Ensure that res_search() is called with a query string
+          that is terminated by a '.' in order to disable the
+          expansion of dns-search lists.
+
 2000-07-22  Tom Yu  <tlyu@mit.edu>
 
 	* accessor.c: Add NEED_SOCKETS in order to get prototype for

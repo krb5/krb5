@@ -359,7 +359,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
 	int priority;
 	int weight;
 	unsigned short port;
-	char *host;
+	char *host, *h;
     };
 
     struct srv_dns_entry *head = NULL;
@@ -383,11 +383,25 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
      *
      */
 
-    if ( strlen(service) + strlen(protocol) + realm->length + 5 
+    if ( strlen(service) + strlen(protocol) + realm->length + 6 
          > MAX_DNS_NAMELEN )
         goto out;
     sprintf(host, "%s.%s.%.*s", service, protocol, realm->length,
 	    realm->data);
+
+    /* Realm names don't (normally) end with ".", but if the query
+    doesn't end with "." and doesn't get an answer as is, the
+    resolv code will try appending the local domain.  Since the
+    realm names are absolutes, let's stop that.  
+
+    But only if a name has been specified.  If we are performing
+    a search on the prefix alone then the intention is to allow
+    the local domain or domain search lists to be expanded.
+    */
+
+    h = host + strlen (host);
+    if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
+        strcpy (h, ".");
 
     size = res_search(host, C_IN, T_SRV, answer.bytes, sizeof(answer.bytes));
 
