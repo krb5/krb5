@@ -1,5 +1,11 @@
 Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* brand.c: New file, which allows a release engineer to "brand"
+ 		the krb5 library or a binary application program
+ 		statically linked against the krb5 library.  This file is
+		statically included by init_ctx.c, to force it be in a
+		binary library or application program.
+	
 	* init_ctx.c (krb5_init_context): Use new call krb5_vercheck() for
  		Windows timebomb checking; this call returns an error
 		code, which is returned to the user if the timebomb should

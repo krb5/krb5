@@ -25,6 +25,7 @@
 
 #include "k5-int.h"
 #include <ctype.h>
+#include "brand.c"
 
 #if (defined(_MSDOS) || defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
