@@ -71,6 +71,17 @@ krb5_error_code krb5_decode_generic
 		   (translator_func) KRB5_Ticket2krb5_ticket, \
 		   (free_func) free_KRB5_Ticket)
 
+#define encode_krb5_encryption_key(ptick, output) \
+    krb5_encode_generic((krb5_const_pointer)ptick,  output, \
+		   (encoder_func) encode_KRB5_EncryptionKey, \
+		   (translator_func) krb5_keyblock2KRB5_EncryptionKey, \
+		   (free_func) free_KRB5_EncryptionKey)
+#define decode_krb5_encryption_key(ptick, output) \
+    krb5_decode_generic((krb5_const_pointer)ptick,  output, \
+		   (decoder_func) decode_KRB5_EncryptionKey, \
+		   (translator_func) KRB5_EncryptionKey2krb5_keyblock, \
+		   (free_func) free_KRB5_EncryptionKey)
+
 #define encode_krb5_enc_tkt_part(ptick, output) \
     krb5_encode_generic((krb5_const_pointer)ptick,  output, \
 		   (encoder_func) encode_KRB5_EncTicketPart, \
@@ -216,6 +227,28 @@ krb5_error_code krb5_decode_generic
 		   (translator_func) KRB5_EncKrbPrivPart2krb5_priv_enc_part, \
 		   (free_func) free_KRB5_EncKrbPrivPart)
 
+#define encode_krb5_cred(req, output) \
+    krb5_encode_generic((krb5_const_pointer)req, output, \
+		   (encoder_func) encode_KRB5_KRB__CRED, \
+		   (translator_func) krb5_cred2KRB5_KRB__CRED, \
+		   (free_func) free_KRB5_KRB__CRED)
+#define decode_krb5_cred(req, output) \
+    krb5_decode_generic(req, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_KRB__CRED, \
+		   (translator_func) KRB5_KRB__CRED2krb5_cred, \
+		   (free_func) free_KRB5_KRB__CRED)
+
+#define encode_krb5_enc_cred_part(req, output) \
+    krb5_encode_generic((krb5_const_pointer)req, output, \
+		   (encoder_func) encode_KRB5_EncKrbCredPart, \
+		   (translator_func) krb5_cred_enc_part2KRB5_EncKrbCredPart, \
+		   (free_func) free_KRB5_EncKrbCredPart)
+#define decode_krb5_enc_cred_part(req, output) \
+    krb5_decode_generic(req, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_EncKrbCredPart, \
+		   (translator_func) KRB5_EncKrbCredPart2krb5_cred_enc_part, \
+		   (free_func) free_KRB5_EncKrbCredPart)
+
 #define encode_krb5_error(req, output) \
     krb5_encode_generic((krb5_const_pointer)req, output, \
 		   (encoder_func) encode_KRB5_KRB__ERROR, \
@@ -274,10 +307,12 @@ krb5_error_code krb5_decode_generic
   AP_REP is APPLICATION 15.
   KRB_SAFE is APPLICATION 20.
   KRB_PRIV is APPLICATION 21.
+  KRB_CRED is APPLICATION 22.
   EncASRepPart is APPLICATION 25.
   EncTGSRepPart is APPLICATION 26.
   EncAPRepPart is APPLICATION 27.
   EncKrbPrivPart is APPLICATION 28.
+  EncKrbCredPart is APPLICATION 29.
   KRB_ERROR is APPLICATION 30.
  */
 /* allow either constructed or primitive encoding, so check for bit 6
@@ -312,6 +347,9 @@ krb5_error_code krb5_decode_generic
 #define krb5_is_krb_priv(dat)\
 	((dat) && (dat)->length && ((dat)->data[0] == 0x75 ||\
 				    (dat)->data[0] == 0x55))
+#define krb5_is_krb_cred(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x76 ||\
+				    (dat)->data[0] == 0x56))
 #define krb5_is_krb_enc_as_rep_part(dat)\
 	((dat) && (dat)->length && ((dat)->data[0] == 0x79 ||\
 				    (dat)->data[0] == 0x59))
@@ -324,6 +362,9 @@ krb5_error_code krb5_decode_generic
 #define krb5_is_krb_enc_krb_priv_part(dat)\
 	((dat) && (dat)->length && ((dat)->data[0] == 0x7c ||\
 				    (dat)->data[0] == 0x5c))
+#define krb5_is_krb_enc_krb_cred_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x7d ||\
+				    (dat)->data[0] == 0x5d))
 #define krb5_is_krb_error(dat)\
 	((dat) && (dat)->length && ((dat)->data[0] == 0x7e ||\
 				    (dat)->data[0] == 0x5e))

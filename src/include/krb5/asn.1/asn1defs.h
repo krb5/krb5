@@ -164,6 +164,10 @@ struct type_KRB5_LastReq *krb5_last_req2KRB5_LastReq
 struct type_KRB5_EncKrbPrivPart *krb5_priv_enc_part2KRB5_EncKrbPrivPart
 	PROTOTYPE((const krb5_priv_enc_part *, int *));
 
+/* kcrep2crep.c */
+struct type_KRB5_EncKrbCredPart *krb5_cred_enc_part2KRB5_EncKrbCredPart
+	PROTOTYPE((const krb5_cred_enc_part *, int *));
+
 /* kprin2prin.c */
 struct type_KRB5_PrincipalName *krb5_principal2KRB5_PrincipalName
 	PROTOTYPE((krb5_const_principal , int *));
@@ -171,6 +175,10 @@ struct type_KRB5_PrincipalName *krb5_principal2KRB5_PrincipalName
 /* kpriv2priv.c */
 struct type_KRB5_KRB__PRIV *krb5_priv2KRB5_KRB__PRIV
 	PROTOTYPE((const krb5_priv *, int *));
+
+/* kcred2cred.c */
+struct type_KRB5_KRB__CRED *krb5_cred2KRB5_KRB__CRED
+	PROTOTYPE((const krb5_cred *, int *));
 
 /* Sandia Passwd Utilities */
 /* kpwds2pwds.c */
@@ -208,6 +216,10 @@ krb5_last_req_entry **KRB5_LastReq2krb5_last_req
 krb5_priv_enc_part *KRB5_EncKrbPrivPart2krb5_priv_enc_part
 	PROTOTYPE((const struct type_KRB5_EncKrbPrivPart *, int *));
 
+/* crep2kcrep.c */
+krb5_cred_enc_part *KRB5_EncKrbCredPart2krb5_cred_enc_part
+	PROTOTYPE((const struct type_KRB5_EncKrbCredPart *, int *));
+
 /* prin2kprin.c */
 krb5_principal KRB5_PrincipalName2krb5_principal
 	PROTOTYPE((const struct type_KRB5_PrincipalName *, const struct type_KRB5_Realm *, int *));
@@ -215,6 +227,10 @@ krb5_principal KRB5_PrincipalName2krb5_principal
 /* priv2kpriv.c */
 krb5_priv *KRB5_KRB__PRIV2krb5_priv
 	PROTOTYPE((const struct type_KRB5_KRB__PRIV *, int *));
+
+/* cred2kcred.c */
+krb5_cred *KRB5_KRB__CRED2krb5_cred
+	PROTOTYPE((const struct type_KRB5_KRB__CRED *, int *));
 
 /* Sandia passwd utilities */
 /* pwds2kpwds.c */
