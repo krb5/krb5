@@ -1,6 +1,9 @@
 /* this should be enough for everything... */
 
+#if !(defined(vax) && defined(unix))
 #define	VSPRINTF		/* has vprintf(3s) routines */
+#endif
+
 #define	TCP			/* has TCP/IP (of course) */
 #define	SOCKETS			/*   provided by sockets */
 #define	GETDENTS		/* has <dirent.h> */

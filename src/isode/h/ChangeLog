@@ -1,4 +1,4 @@
 Mon Jun 20 22:34:46 1994  Mark W. Eichin  (eichin at mit.edu)
 
 	* config.h: add __FreeBSD__ and VAX-BSD ifdefs.
-
+	* config.h: don't define VSPRINTF on VAX-BSD...
