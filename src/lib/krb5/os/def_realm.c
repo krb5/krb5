@@ -86,23 +86,25 @@ krb5_get_default_realm(context, lrealm)
          * on the host's DNS domain.
          */
         context->default_realm = 0;
-        if (context->profile == 0)
-            return KRB5_CONFIG_CANTOPEN;
-        retval = profile_get_string(context->profile, "libdefaults",
-                                     "default_realm", 0, 0,
-                                     &realm);
+        if (context->profile != 0) {
+            retval = profile_get_string(context->profile, "libdefaults",
+                                        "default_realm", 0, 0,
+                                        &realm);
 
-        if (!retval && realm) {
-            context->default_realm = malloc(strlen(realm) + 1);
-            if (!context->default_realm) {
+            if (!retval && realm) {
+                context->default_realm = malloc(strlen(realm) + 1);
+                if (!context->default_realm) {
+                    profile_release_string(realm);
+                    return ENOMEM;
+                }
+                strcpy(context->default_realm, realm);
                 profile_release_string(realm);
-                return ENOMEM;
             }
-            strcpy(context->default_realm, realm);
-            profile_release_string(realm);
         }
-
-#ifdef KRB5_DNS_LOOKUP
+#ifndef KRB5_DNS_LOOKUP
+        else 
+            return KRB5_CONFIG_CANTOPEN;
+#else /* KRB5_DNS_LOOKUP */
         if (context->default_realm == 0) {
             int use_dns =  _krb5_use_dns_realm(context);
             if ( use_dns ) {
