@@ -77,8 +77,13 @@ const krb5_data FAR * salt;
     keyblock->enctype = eblock->crypto_entry->proto_enctype;
     key = keyblock->contents;
 
-    if (salt)
+    if (salt) {
+      if (salt->length == -1) {
+	/* cheat and do AFS string2key instead */
+	return mit_afs_string_to_key (eblock, keyblock, data, salt);
+      } else 
 	length = data->length + salt->length;
+      }
     else
 	length = data->length;
 
