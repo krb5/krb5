@@ -1,3 +1,26 @@
+2004-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* libgssrpc.exports: Don't export internals.
+
+	* svc.c (svc_getreqset):
+	* svc_tcp.c (readtcp): Don't intersperse preprocessor
+	conditionals with braces.
+
+	* auth_gssapi.c, auth_gssapi_misc.c, auth_none.c:
+	* auth_unix.c, authunix_prot.c, bindresvport.c:
+	* clnt_generic.c, clnt_perror.c, clnt_raw.c
+	* clnt_simple.c, clnt_tcp.c, clnt_udp.c, get_myaddress.c:
+	* getrpcent.c, getrpcport.c, pmap_clnt.c:
+	* pmap_getmaps.c, pmap_getport.c, pmap_prot.c, pmap_prot2.c:
+	* pmap_rmt.c, rpc_callmsg.c, rpc_prot.c:
+	* svc.c, svc_auth.c, svc_auth_gss.c:
+	* svc_auth_gssapi.c, svc_auth_unix.c, svc_raw.c:
+	* svc_run.c, svc_simple.c, svc_tcp.c:
+	* svc_udp.c, xdr.c, xdr_alloc.c, xdr_array.c:
+	* xdr_float.c, xdr_mem.c, xdr_rec.c, xdr_reference.c:
+	* xdr_stdio.c: Protoize, to avoid potential problems when
+	fixed-width types are not ints on some platforms.
+
 2004-08-26  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Look for uint32_t, not int32_t, since some BSD-ish

@@ -56,12 +56,13 @@ static void universal(struct svc_req *, SVCXPRT *);
 static SVCXPRT *transp;
 
 int
-registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
-	char *(*progname)();
-	xdrproc_t inproc, outproc;
-	rpcprog_t prognum;
-	rpcvers_t versnum;
-	rpcproc_t procnum;
+registerrpc(
+	rpcprog_t prognum,
+	rpcvers_t versnum,
+	rpcproc_t procnum,
+	char *(*progname)(),
+	xdrproc_t inproc,
+	xdrproc_t outproc)
 {
         struct proglst *pl;
 	
@@ -99,9 +100,9 @@ registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
 }
 
 static void
-universal(rqstp, s_transp)
-	struct svc_req *rqstp;
-	SVCXPRT *s_transp;
+universal(
+	struct svc_req *rqstp,
+	SVCXPRT *s_transp)
 {
 	int prog, proc;
 	char *outdata;

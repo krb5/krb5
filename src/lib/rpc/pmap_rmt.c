@@ -71,15 +71,17 @@ static struct timeval timeout = { 3, 0 };
  * programs to do a lookup and call in one step.
 */
 enum clnt_stat
-pmap_rmtcall(addr, prog, vers, proc, xdrargs, argsp, xdrres, resp, tout, port_ptr)
-	struct sockaddr_in *addr;
-	rpcprog_t prog;
-	rpcvers_t vers;
-	rpcproc_t proc;
-	xdrproc_t xdrargs, xdrres;
-	caddr_t argsp, resp;
-	struct timeval tout;
-	rpcport_t *port_ptr;
+pmap_rmtcall(
+	struct sockaddr_in *addr,
+	rpcprog_t prog,
+	rpcvers_t vers,
+	rpcproc_t proc,
+	xdrproc_t xdrargs,
+	caddr_t argsp,
+	xdrproc_t xdrres,
+	caddr_t resp,
+	struct timeval tout,
+	rpcport_t *port_ptr)
 {
 	int sock = -1;
 	register CLIENT *client;
@@ -115,9 +117,9 @@ pmap_rmtcall(addr, prog, vers, proc, xdrargs, argsp, xdrres, resp, tout, port_pt
  * written for XDR_ENCODE direction only
  */
 bool_t
-xdr_rmtcall_args(xdrs, cap)
-	register XDR *xdrs;
-	register struct rmtcallargs *cap;
+xdr_rmtcall_args(
+	register XDR *xdrs,
+	register struct rmtcallargs *cap)
 {
 	u_int lenposition, argposition, position;
 
@@ -146,9 +148,9 @@ xdr_rmtcall_args(xdrs, cap)
  * written for XDR_DECODE direction only
  */
 bool_t
-xdr_rmtcallres(xdrs, crp)
-	register XDR *xdrs;
-	register struct rmtcallres *crp;
+xdr_rmtcallres(
+	register XDR *xdrs,
+	register struct rmtcallres *crp)
 {
 	caddr_t port_ptr;
 
@@ -171,10 +173,11 @@ xdr_rmtcallres(xdrs, crp)
 #define GIFCONF_BUFSIZE (256 * sizeof (struct ifconf))
 
 static int
-getbroadcastnets(addrs, sock, buf)
-	struct in_addr *addrs;
-	int sock;  /* any valid socket will do */
-	char *buf;  /* why allocxate more when we can use existing... */
+getbroadcastnets(
+	struct in_addr *addrs,
+	int sock,  /* any valid socket will do */
+	char *buf  /* why allocxate more when we can use existing... */
+	)
 {
 	struct ifconf ifc;
         struct ifreq ifreq, *ifr;
@@ -225,15 +228,16 @@ getbroadcastnets(addrs, sock, buf)
 }
 
 enum clnt_stat 
-clnt_broadcast(prog, vers, proc, xargs, argsp, xresults, resultsp, eachresult)
-	rpcprog_t	prog;		/* program number */
-	rpcvers_t	vers;		/* version number */
-	rpcproc_t	proc;		/* procedure number */
-	xdrproc_t	xargs;		/* xdr routine for args */
-	caddr_t		argsp;		/* pointer to args */
-	xdrproc_t	xresults;	/* xdr routine for results */
-	caddr_t		resultsp;	/* pointer to results */
-	resultproc_t	eachresult;	/* call with each result obtained */
+clnt_broadcast(
+	rpcprog_t	prog,		/* program number */
+	rpcvers_t	vers,		/* version number */
+	rpcproc_t	proc,		/* procedure number */
+	xdrproc_t	xargs,		/* xdr routine for args */
+	caddr_t		argsp,		/* pointer to args */
+	xdrproc_t	xresults,	/* xdr routine for results */
+	caddr_t		resultsp,	/* pointer to results */
+	resultproc_t	eachresult	/* call with each result obtained */
+	)
 {
 	enum clnt_stat stat;
 	AUTH *unix_auth = authunix_create_default();

@@ -50,8 +50,7 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
  * don't use gethostbyname, which would invoke yellow pages
  */
 int
-get_myaddress(addr)
-	struct sockaddr_in *addr;
+get_myaddress(struct sockaddr_in *addr)
 {
 	memset((void *) addr, 0, sizeof(*addr));
 	addr->sin_family = AF_INET;
@@ -79,8 +78,7 @@ get_myaddress(addr)
 /* 
  * don't use gethostbyname, which would invoke yellow pages
  */
-get_myaddress(addr)
-	struct sockaddr_in *addr;
+get_myaddress(struct sockaddr_in *addr)
 {
 	int s;
 	char buf[256 * sizeof (struct ifreq)];

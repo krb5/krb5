@@ -683,13 +683,12 @@ svcauth_gss_get_principal(SVCAUTH *auth)
  *
  * See functional specifications.
  */
-void svcauth_gss_set_log_badauth_func
-     (func, data)
-     auth_gssapi_log_badauth_func func;
-     caddr_t data;
+void svcauth_gss_set_log_badauth_func(
+	auth_gssapi_log_badauth_func func,
+	caddr_t data)
 {
-     log_badauth = func;
-     log_badauth_data = data;
+	log_badauth = func;
+	log_badauth_data = data;
 }
 
 /*
@@ -700,13 +699,12 @@ void svcauth_gss_set_log_badauth_func
  *
  * See functional specifications.
  */
-void svcauth_gss_set_log_badverf_func
-     (func, data)
-     auth_gssapi_log_badverf_func func;
-     caddr_t data;
+void svcauth_gss_set_log_badverf_func(
+	auth_gssapi_log_badverf_func func,
+	caddr_t data)
 {
-     log_badverf = func;
-     log_badverf_data = data;
+	log_badverf = func;
+	log_badverf_data = data;
 }
 
 /*
@@ -717,11 +715,10 @@ void svcauth_gss_set_log_badverf_func
  *
  * See functional specifications.
  */
-void svcauth_gss_set_log_miscerr_func
-     (func, data)
-     auth_gssapi_log_miscerr_func func;
-     caddr_t data;
+void svcauth_gss_set_log_miscerr_func(
+	auth_gssapi_log_miscerr_func func,
+	caddr_t data)
 {
-     log_miscerr = func;
-     log_miscerr_data = data;
+	log_miscerr = func;
+	log_miscerr_data = data;
 }

@@ -46,9 +46,7 @@ static char sccsid[] = "@(#)rpc_callmsg.c 1.4 87/08/11 Copyr 1984 Sun Micro";
  * XDR a call message
  */
 bool_t
-xdr_callmsg(xdrs, cmsg)
-	register XDR *xdrs;
-	register struct rpc_msg *cmsg;
+xdr_callmsg(register XDR *xdrs, register struct rpc_msg *cmsg)
 {
 	register rpc_inline_t *buf;
 	register struct opaque_auth *oa;

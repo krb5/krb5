@@ -119,10 +119,10 @@ typedef struct _client_list {
 static client_list *clients = NULL;
 
 
-enum auth_stat gssrpc__svcauth_gssapi(rqst, msg, no_dispatch)
-   register struct svc_req *rqst;
-   register struct rpc_msg *msg;
-   bool_t *no_dispatch;     
+enum auth_stat gssrpc__svcauth_gssapi(
+     register struct svc_req *rqst,
+     register struct rpc_msg *msg,
+     bool_t *no_dispatch)
 {
      XDR xdrs;
      auth_gssapi_creds creds;
@@ -623,7 +623,7 @@ error:
      return ret;
 }
 
-static void cleanup()
+static void cleanup(void)
 {
      client_list *c, *c2;
 
@@ -654,7 +654,7 @@ static void cleanup()
  * b-tree.  A new key that is unique in the current database is
  * chosen; this key should be used as the client's client_handle.
  */
-static svc_auth_gssapi_data *create_client()
+static svc_auth_gssapi_data *create_client(void)
 {
      client_list *c;
      svc_auth_gssapi_data *client_data;
@@ -720,9 +720,9 @@ static svc_auth_gssapi_data *create_client()
  * would break the rep invariant.  Now the database is an unsorted
  * linked list, so it doesn't matter.
  */
-static void client_expire(client_data, exp)
-     svc_auth_gssapi_data *client_data;
-     uint32_t exp;
+static void client_expire(
+     svc_auth_gssapi_data *client_data,
+     uint32_t exp)
 {
      client_data->expiration = exp;
 }
@@ -743,8 +743,7 @@ static void client_expire(client_data, exp)
  * matches the contents of client_handle, or returns NULL if none was
  * found.
  */
-static svc_auth_gssapi_data *get_client(client_handle)
-     gss_buffer_t client_handle;
+static svc_auth_gssapi_data *get_client(gss_buffer_t client_handle)
 {
      client_list *c;
      uint32_t handle;
@@ -779,8 +778,7 @@ static svc_auth_gssapi_data *get_client(client_handle)
  * client_data's entry in the database is destroyed.  client_data is
  * freed.
  */
-static void destroy_client(client_data)
-     svc_auth_gssapi_data *client_data;
+static void destroy_client(svc_auth_gssapi_data *client_data)
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc out_buf;
@@ -842,8 +840,7 @@ done:
 #endif
 }
 
-static void dump_db(msg)
-     char *msg;
+static void dump_db(char *msg)
 {
      svc_auth_gssapi_data *client_data;
      client_list *c;
@@ -861,7 +858,7 @@ static void dump_db(msg)
      L_PRINTF(3, ("\n"));
 }
 
-static void clean_client()
+static void clean_client(void)
 {
      svc_auth_gssapi_data *client_data;
      client_list *c;
@@ -896,9 +893,9 @@ static void clean_client()
  *
  * See functional specifications.
  */
-bool_t svcauth_gssapi_set_names(names, num)
-     auth_gssapi_name *names;
-     int num;
+bool_t svcauth_gssapi_set_names(
+     auth_gssapi_name *names,
+     int num)
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc in_buf;
@@ -964,7 +961,7 @@ fail:
  * svcauth_gssapi_set_names
  */
 
-void svcauth_gssapi_unset_names()
+void svcauth_gssapi_unset_names(void)
 {
      int i;
      OM_uint32 minor_stat;
@@ -997,10 +994,9 @@ void svcauth_gssapi_unset_names()
  *
  * See functional specifications.
  */
-void svcauth_gssapi_set_log_badauth_func
-     (func, data)
-     auth_gssapi_log_badauth_func func;
-     caddr_t data;
+void svcauth_gssapi_set_log_badauth_func(
+     auth_gssapi_log_badauth_func func,
+     caddr_t data)
 {
      log_badauth = func;
      log_badauth_data = data;
@@ -1014,10 +1010,9 @@ void svcauth_gssapi_set_log_badauth_func
  *
  * See functional specifications.
  */
-void svcauth_gssapi_set_log_badverf_func
-     (func, data)
-     auth_gssapi_log_badverf_func func;
-     caddr_t data;
+void svcauth_gssapi_set_log_badverf_func(
+     auth_gssapi_log_badverf_func func,
+     caddr_t data)
 {
      log_badverf = func;
      log_badverf_data = data;
@@ -1031,10 +1026,9 @@ void svcauth_gssapi_set_log_badverf_func
  *
  * See functional specifications.
  */
-void svcauth_gssapi_set_log_miscerr_func
-     (func, data)
-     auth_gssapi_log_miscerr_func func;
-     caddr_t data;
+void svcauth_gssapi_set_log_miscerr_func(
+     auth_gssapi_log_miscerr_func func,
+     caddr_t data)
 {
      log_miscerr = func;
      log_miscerr_data = data;
@@ -1044,11 +1038,11 @@ void svcauth_gssapi_set_log_miscerr_func
  * Encrypt the serialized arguments from xdr_func applied to xdr_ptr
  * and write the result to xdrs.
  */
-static bool_t svc_auth_gssapi_wrap(auth, out_xdrs, xdr_func, xdr_ptr)
-   SVCAUTH *auth;
-   XDR *out_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+static bool_t svc_auth_gssapi_wrap(
+     SVCAUTH *auth,
+     XDR *out_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      OM_uint32 gssstat, minor_stat;
 
@@ -1067,11 +1061,11 @@ static bool_t svc_auth_gssapi_wrap(auth, out_xdrs, xdr_func, xdr_ptr)
 	  return TRUE;
 }
 
-static bool_t svc_auth_gssapi_unwrap(auth, in_xdrs, xdr_func, xdr_ptr)
-   SVCAUTH *auth;
-   XDR *in_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+static bool_t svc_auth_gssapi_unwrap(
+     SVCAUTH *auth,
+     XDR *in_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      svc_auth_gssapi_data *client_data = SVCAUTH_PRIVATE(auth);
      OM_uint32 gssstat, minor_stat;
@@ -1091,8 +1085,7 @@ static bool_t svc_auth_gssapi_unwrap(auth, in_xdrs, xdr_func, xdr_ptr)
 	  return TRUE;
 }
 
-static bool_t svc_auth_gssapi_destroy(auth)
-    SVCAUTH *auth;
+static bool_t svc_auth_gssapi_destroy(SVCAUTH *auth)
 {
      svc_auth_gssapi_data *client_data = SVCAUTH_PRIVATE(auth);
 

@@ -70,7 +70,7 @@ static struct xp_ops server_ops = {
 };
 
 SVCXPRT *
-svcraw_create()
+svcraw_create(void)
 {
 	register struct svcraw_private *srp = svcraw_private;
 
@@ -88,17 +88,14 @@ svcraw_create()
 }
 
 static enum xprt_stat
-svcraw_stat(xprt)
-	SVCXPRT *xprt;
+svcraw_stat(SVCXPRT *xprt)
 {
 
 	return (XPRT_IDLE);
 }
 
 static bool_t
-svcraw_recv(xprt, msg)
-	SVCXPRT *xprt;
-	struct rpc_msg *msg;
+svcraw_recv(SVCXPRT *xprt, struct rpc_msg *msg)
 {
 	register struct svcraw_private *srp = svcraw_private;
 	register XDR *xdrs;
@@ -114,9 +111,7 @@ svcraw_recv(xprt, msg)
 }
 
 static bool_t
-svcraw_reply(xprt, msg)
-	SVCXPRT *xprt;
-	struct rpc_msg *msg;
+svcraw_reply(SVCXPRT *xprt, struct rpc_msg *msg)
 {
 	register struct svcraw_private *srp = svcraw_private;
 	register XDR *xdrs;
@@ -133,10 +128,7 @@ svcraw_reply(xprt, msg)
 }
 
 static bool_t
-svcraw_getargs(xprt, xdr_args, args_ptr)
-	SVCXPRT *xprt;
-	xdrproc_t xdr_args;
-	void * args_ptr;
+svcraw_getargs(SVCXPRT *xprt, xdrproc_t xdr_args, void *args_ptr)
 {
 	register struct svcraw_private *srp = svcraw_private;
 
@@ -150,10 +142,7 @@ svcraw_getargs(xprt, xdr_args, args_ptr)
 }
 
 static bool_t
-svcraw_freeargs(xprt, xdr_args, args_ptr)
-	SVCXPRT *xprt;
-	xdrproc_t xdr_args;
-	void * args_ptr;
+svcraw_freeargs(SVCXPRT *xprt, xdrproc_t xdr_args, void *args_ptr)
 { 
 	register struct svcraw_private *srp = svcraw_private;
 	register XDR *xdrs;
@@ -166,7 +155,6 @@ svcraw_freeargs(xprt, xdr_args, args_ptr)
 } 
 
 static void
-svcraw_destroy(xprt)
-	SVCXPRT *xprt;
+svcraw_destroy(SVCXPRT *xprt)
 {
 }

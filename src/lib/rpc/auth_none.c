@@ -72,7 +72,7 @@ static struct authnone_private {
 } *authnone_private;
 
 AUTH *
-authnone_create()
+authnone_create(void)
 {
 	register struct authnone_private *ap = authnone_private;
 	XDR xdr_stream;
@@ -100,9 +100,7 @@ authnone_create()
 
 /*ARGSUSED*/
 static bool_t
-authnone_marshal(client, xdrs)
-	AUTH *client;
-	XDR *xdrs;
+authnone_marshal(AUTH *client, XDR *xdrs)
 {
 	register struct authnone_private *ap = authnone_private;
 
@@ -114,16 +112,13 @@ authnone_marshal(client, xdrs)
 
 /*ARGSUSED*/
 static void 
-authnone_verf(auth)
-    AUTH *auth;
+authnone_verf(AUTH *auth)
 {
 }
 
 /*ARGSUSED*/
 static bool_t
-authnone_validate(auth, verf)
-   AUTH *auth;
-   struct opaque_auth *verf;
+authnone_validate(AUTH *auth, struct opaque_auth *verf)
 {
 
 	return (TRUE);
@@ -131,9 +126,7 @@ authnone_validate(auth, verf)
 
 /*ARGSUSED*/
 static bool_t
-authnone_refresh(auth, msg)
-   AUTH *auth;
-   struct rpc_msg *msg;
+authnone_refresh(AUTH *auth, struct rpc_msg *msg)
 {
 
 	return (FALSE);
@@ -141,8 +134,7 @@ authnone_refresh(auth, msg)
 
 /*ARGSUSED*/
 static void
-authnone_destroy(auth)
-   AUTH *auth;
+authnone_destroy(AUTH *auth)
 {
 }
 

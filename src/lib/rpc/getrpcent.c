@@ -69,7 +69,7 @@ char	*inet_ntoa();
 static char RPCDB[] = "/etc/rpc";
 
 static struct rpcdata *
-get_rpcdata()
+get_rpcdata(void)
 {
 	register struct rpcdata *d = rpcdata;
 
@@ -81,8 +81,7 @@ get_rpcdata()
 }
 
 struct rpcent *
-getrpcbynumber(number)
-	register int number;
+getrpcbynumber(register int number)
 {
 	register struct rpcdata *d = get_rpcdata();
 	register struct rpcent *p;
@@ -102,8 +101,7 @@ getrpcbynumber(number)
 }
 
 struct rpcent *
-getrpcbyname(name)
-	const char *name;
+getrpcbyname(const char *name)
 {
 	struct rpcent *rpc;
 	char **rp;
@@ -121,8 +119,7 @@ getrpcbyname(name)
 	return (NULL);
 }
 
-SETRPCENT_TYPE setrpcent(f)
-	int f;
+SETRPCENT_TYPE setrpcent(int f)
 {
 	register struct rpcdata *d = _rpcdata();
 
@@ -138,7 +135,7 @@ SETRPCENT_TYPE setrpcent(f)
 	d->stayopen |= f;
 }
 
-ENDRPCENT_TYPE endrpcent()
+ENDRPCENT_TYPE endrpcent(void)
 {
 	register struct rpcdata *d = _rpcdata();
 
@@ -155,7 +152,7 @@ ENDRPCENT_TYPE endrpcent()
 }
 
 struct rpcent *
-getrpcent()
+getrpcent(void)
 {
 	struct rpcent *hp;
 	int reason;
@@ -173,8 +170,7 @@ getrpcent()
 }
 
 static struct rpcent *
-interpret(val, len)
-char *val;
+interpret(char *val, int len)
 {
 	register struct rpcdata *d = _rpcdata();
 	char *p;

@@ -53,11 +53,11 @@ void clnt_perror();
  * Calls the pmap service remotely to do the mapping.
  */
 bool_t
-pmap_set(program, version, protocol, port)
-	rpcprog_t program;
-	rpcvers_t version;
-	rpcprot_t protocol;
-	u_int port;
+pmap_set(
+	rpcprog_t program,
+	rpcvers_t version,
+	rpcprot_t protocol,
+	u_int port)
 {
 	struct sockaddr_in myaddress;
 	int socket = -1;
@@ -89,9 +89,9 @@ pmap_set(program, version, protocol, port)
  * Calls the pmap service remotely to do the un-mapping.
  */
 bool_t
-pmap_unset(program, version)
-	rpcprog_t program;
-	rpcvers_t version;
+pmap_unset(
+	rpcprog_t program,
+	rpcvers_t version)
 {
 	struct sockaddr_in myaddress;
 	int socket = -1;

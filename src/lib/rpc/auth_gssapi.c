@@ -77,9 +77,7 @@ struct auth_gssapi_data {
  *
  * Effects: See design document, section XXX.
  */
-AUTH *auth_gssapi_create_default(clnt, service_name)
-     CLIENT *clnt;
-     char *service_name;
+AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
 {
      AUTH *auth;
      OM_uint32 gssstat, minor_stat;
@@ -123,26 +121,18 @@ AUTH *auth_gssapi_create_default(clnt, service_name)
  *
  * Effects: See design document, section XXX.
  */
-AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
-			 claimant_cred_handle,
-			 target_name,
-			 mech_type,
-			 req_flags,
-			 time_req,
-			 actual_mech_type,
-			 ret_flags,
-			 time_rec)
-     CLIENT *clnt;
-     OM_uint32 *gssstat;
-     OM_uint32 *minor_stat;
-     gss_cred_id_t claimant_cred_handle;
-     gss_name_t target_name;
-     gss_OID mech_type;
-     OM_uint32 req_flags;
-     OM_uint32 time_req;
-     gss_OID *actual_mech_type;
-     OM_uint32 *ret_flags;
-     OM_uint32 *time_rec;
+AUTH *auth_gssapi_create(
+     CLIENT *clnt,
+     OM_uint32 *gssstat,
+     OM_uint32 *minor_stat,
+     gss_cred_id_t claimant_cred_handle,
+     gss_name_t target_name,
+     gss_OID mech_type,
+     OM_uint32 req_flags,
+     OM_uint32 time_req,
+     gss_OID *actual_mech_type,
+     OM_uint32 *ret_flags,
+     OM_uint32 *time_rec)
 {
      AUTH *auth, *save_auth;
      struct auth_gssapi_data *pdata;
@@ -489,10 +479,10 @@ cleanup:
  *
  * Modifies: auth
  */
-static bool_t marshall_new_creds(auth, auth_msg, client_handle)
-   AUTH *auth;
-   bool_t auth_msg;
-   gss_buffer_t client_handle;
+static bool_t marshall_new_creds(
+     AUTH *auth,
+     bool_t auth_msg,
+     gss_buffer_t client_handle)
 {
      auth_gssapi_creds creds;
      XDR xdrs;
@@ -539,8 +529,7 @@ static bool_t marshall_new_creds(auth, auth_msg, client_handle)
  *
  * Effects: None.  Never called.
  */
-static void auth_gssapi_nextverf(auth)
-   AUTH *auth;
+static void auth_gssapi_nextverf(AUTH *auth)
 {
 }
 
@@ -567,9 +556,9 @@ static void auth_gssapi_nextverf(auth)
  * If this took all the header fields as arguments, it could sign
  * them.
  */
-static bool_t auth_gssapi_marshall(auth, xdrs)
-   AUTH *auth;
-   XDR *xdrs;
+static bool_t auth_gssapi_marshall(
+     AUTH *auth,
+     XDR *xdrs)
 {
      OM_uint32 minor_stat;
      gss_buffer_desc out_buf;
@@ -618,9 +607,9 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
  *
  * Effects: See design document, section XXX.
  */
-static bool_t auth_gssapi_validate(auth, verf)
-   AUTH *auth;
-   struct opaque_auth *verf;
+static bool_t auth_gssapi_validate(
+     AUTH *auth,
+     struct opaque_auth *verf)
 {
      gss_buffer_desc in_buf;
      uint32_t seq_num;
@@ -675,9 +664,9 @@ static bool_t auth_gssapi_validate(auth, verf)
  * resyncrhonize by incrementing the client's sequence number and
  * returning TRUE.  If any other error arrives, it returns FALSE.
  */
-static bool_t auth_gssapi_refresh(auth, msg)
-   AUTH *auth;
-   struct rpc_msg *msg;
+static bool_t auth_gssapi_refresh(
+     AUTH *auth,
+     struct rpc_msg *msg)
 {
      if (msg->rm_reply.rp_rjct.rj_stat == AUTH_ERROR &&
 	 msg->rm_reply.rp_rjct.rj_why == AUTH_REJECTEDVERF) {
@@ -701,8 +690,7 @@ static bool_t auth_gssapi_refresh(auth, msg)
  * context.  Since the client doesn't really care whether the server
  * gets this message, no failures are reported.
  */
-static void auth_gssapi_destroy(auth)
-   AUTH *auth;
+static void auth_gssapi_destroy(AUTH *auth)
 {
      struct timeval timeout;
      OM_uint32 gssstat, minor_stat;
@@ -769,11 +757,11 @@ skip_call:
  *
  * Effects: See design doc, section XXX.
  */
-static bool_t auth_gssapi_wrap(auth, out_xdrs, xdr_func, xdr_ptr)
-   AUTH *auth;
-   XDR *out_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+static bool_t auth_gssapi_wrap(
+     AUTH *auth,
+     XDR *out_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      OM_uint32 gssstat, minor_stat;
      
@@ -800,11 +788,11 @@ static bool_t auth_gssapi_wrap(auth, out_xdrs, xdr_func, xdr_ptr)
  *
  * Effects: See design doc, section XXX.
  */
-static bool_t auth_gssapi_unwrap(auth, in_xdrs, xdr_func, xdr_ptr)
-   AUTH *auth;
-   XDR *in_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+static bool_t auth_gssapi_unwrap(
+     AUTH *auth,
+     XDR *in_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      OM_uint32 gssstat, minor_stat;
      

@@ -54,13 +54,15 @@ static struct callrpc_private {
 } *callrpc_private;
 
 int
-callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
-	char *host;
-	xdrproc_t inproc, outproc;
-	rpcprog_t prognum;
-	rpcvers_t versnum;
-	rpcproc_t procnum;
-	char *in, *out;
+callrpc(
+	char *host,
+	rpcprog_t prognum,
+	rpcvers_t versnum,
+	rpcproc_t procnum,
+	xdrproc_t inproc,
+	char *in,
+	xdrproc_t outproc,
+	char *out)
 {
 	register struct callrpc_private *crp = callrpc_private;
 	struct sockaddr_in server_addr;

@@ -43,11 +43,11 @@ static  char sccsid[] = "@(#)getrpcport.c 1.3 87/08/11 SMI";
 #include <sys/socket.h>
 
 int
-gssrpc_getrpcport(host, prognum, versnum, proto)
-	char *host;
-	rpcprog_t prognum;
-	rpcvers_t versnum;
-	rpcprot_t proto;
+gssrpc_getrpcport(
+	char *host,
+	rpcprog_t prognum,
+	rpcvers_t versnum,
+	rpcprot_t proto)
 {
 	struct sockaddr_in addr;
 	struct hostent *hp;

@@ -96,12 +96,12 @@ static void marshal_new_auth(AUTH *);
  * Returns an auth handle with the given stuff in it.
  */
 AUTH *
-authunix_create(machname, uid, gid, len, aup_gids)
-	char *machname;
-	int uid;
-	int gid;
-	register int len;
-	int *aup_gids;
+authunix_create(
+	char *machname,
+	int uid,
+	int gid,
+	register int len,
+	int *aup_gids)
 {
 	struct authunix_parms aup;
 	char mymem[MAX_AUTH_BYTES];
@@ -174,7 +174,7 @@ authunix_create(machname, uid, gid, len, aup_gids)
  * syscalls.
  */
 AUTH *
-authunix_create_default()
+authunix_create_default(void)
 {
 	register int len;
 	char machname[MAX_MACHINE_NAME + 1];
@@ -201,16 +201,13 @@ authunix_create_default()
  */
 
 static void
-authunix_nextverf(auth)
-	AUTH *auth;
+authunix_nextverf(AUTH *auth)
 {
 	/* no action necessary */
 }
 
 static bool_t
-authunix_marshal(auth, xdrs)
-	AUTH *auth;
-	XDR *xdrs;
+authunix_marshal(AUTH *auth, XDR *xdrs)
 {
 	register struct audata *au = AUTH_PRIVATE(auth);
 
@@ -218,9 +215,7 @@ authunix_marshal(auth, xdrs)
 }
 
 static bool_t
-authunix_validate(auth, verf)
-	register AUTH *auth;
-	struct opaque_auth *verf;
+authunix_validate(register AUTH *auth, struct opaque_auth *verf)
 {
 	register struct audata *au;
 	XDR xdrs;
@@ -248,9 +243,7 @@ authunix_validate(auth, verf)
 }
 
 static bool_t
-authunix_refresh(auth, msg)
-	register AUTH *auth;
-	struct rpc_msg *msg;
+authunix_refresh(register AUTH *auth, struct rpc_msg *msg)
 {
 	register struct audata *au = AUTH_PRIVATE(auth);
 	struct authunix_parms aup;
@@ -292,8 +285,7 @@ done:
 }
 
 static void
-authunix_destroy(auth)
-	register AUTH *auth;
+authunix_destroy(register AUTH *auth)
 {
 	register struct audata *au = AUTH_PRIVATE(auth);
 
@@ -315,8 +307,7 @@ authunix_destroy(auth)
  * sets private data, au_marshed and au_mpos
  */
 static void
-marshal_new_auth(auth)
-	register AUTH *auth;
+marshal_new_auth(register AUTH *auth)
 {
 	XDR		xdr_stream;
 	register XDR	*xdrs = &xdr_stream;

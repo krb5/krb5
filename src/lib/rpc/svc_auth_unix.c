@@ -50,10 +50,10 @@ static char sccsid[] = "@(#)svc_auth_unix.c 1.28 88/02/08 Copyr 1984 Sun Micro";
  * Unix longhand authenticator
  */
 enum auth_stat
-gssrpc__svcauth_unix(rqst, msg, dispatch)
-	register struct svc_req *rqst;
-	register struct rpc_msg *msg;
-	bool_t *dispatch;
+gssrpc__svcauth_unix(
+	register struct svc_req *rqst,
+	register struct rpc_msg *msg,
+	bool_t *dispatch)
 {
 	register enum auth_stat stat;
 	XDR xdrs;
@@ -130,10 +130,10 @@ done:
  */
 /*ARGSUSED*/
 enum auth_stat 
-gssrpc__svcauth_short(rqst, msg, dispatch)
-	struct svc_req *rqst;
-	struct rpc_msg *msg;
-	bool_t *dispatch;
+gssrpc__svcauth_short(
+	struct svc_req *rqst,
+	struct rpc_msg *msg,
+	bool_t *dispatch)
 {
 	rqst->rq_xprt->xp_auth = &svc_auth_none;
 	return (AUTH_REJECTEDCRED);

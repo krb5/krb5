@@ -83,8 +83,7 @@ static struct svc_callout *svc_find(rpcprog_t, rpcvers_t,
  * Activate a transport handle.
  */
 void
-xprt_register(xprt)
-	SVCXPRT *xprt;
+xprt_register(SVCXPRT *xprt)
 {
 	register int sock = xprt->xp_sock;
 
@@ -117,8 +116,7 @@ xprt_register(xprt)
  * De-activate a transport handle. 
  */
 void
-xprt_unregister(xprt) 
-	SVCXPRT *xprt;
+xprt_unregister(SVCXPRT *xprt)
 { 
 	register int sock = xprt->xp_sock;
 
@@ -148,12 +146,12 @@ xprt_unregister(xprt)
  * program number comes in.
  */
 bool_t
-svc_register(xprt, prog, vers, dispatch, protocol)
-	SVCXPRT *xprt;
-	rpcprog_t prog;
-	rpcvers_t vers;
-	void (*dispatch)();
-	int protocol;
+svc_register(
+	SVCXPRT *xprt,
+	rpcprog_t prog,
+	rpcvers_t vers,
+	void (*dispatch)(),
+	int protocol)
 {
 	struct svc_callout *prev;
 	register struct svc_callout *s;
@@ -184,9 +182,9 @@ pmap_it:
  * Remove a service program from the callout list.
  */
 void
-svc_unregister(prog, vers)
-	rpcprog_t prog;
-	rpcvers_t vers;
+svc_unregister(
+	rpcprog_t prog,
+	rpcvers_t vers)
 {
 	struct svc_callout *prev;
 	register struct svc_callout *s;
@@ -209,10 +207,10 @@ svc_unregister(prog, vers)
  * struct.
  */
 static struct svc_callout *
-svc_find(prog, vers, prev)
-	rpcprog_t prog;
-	rpcvers_t vers;
-	struct svc_callout **prev;
+svc_find(
+	rpcprog_t prog,
+	rpcvers_t vers,
+	struct svc_callout **prev)
 {
 	register struct svc_callout *s, *p;
 
@@ -233,10 +231,10 @@ done:
  * Send a reply to an rpc request
  */
 bool_t
-svc_sendreply(xprt, xdr_results, xdr_location)
-	register SVCXPRT *xprt;
-	xdrproc_t xdr_results;
-	caddr_t xdr_location;
+svc_sendreply(
+	register SVCXPRT *xprt,
+	xdrproc_t xdr_results,
+	caddr_t xdr_location)
 {
 	struct rpc_msg rply; 
 
@@ -253,8 +251,7 @@ svc_sendreply(xprt, xdr_results, xdr_location)
  * No procedure error reply
  */
 void
-svcerr_noproc(xprt)
-	register SVCXPRT *xprt;
+svcerr_noproc(register SVCXPRT *xprt)
 {
 	struct rpc_msg rply;
 
@@ -269,8 +266,7 @@ svcerr_noproc(xprt)
  * Can't decode args error reply
  */
 void
-svcerr_decode(xprt)
-	register SVCXPRT *xprt;
+svcerr_decode(register SVCXPRT *xprt)
 {
 	struct rpc_msg rply; 
 
@@ -285,8 +281,7 @@ svcerr_decode(xprt)
  * Some system error
  */
 void
-svcerr_systemerr(xprt)
-	register SVCXPRT *xprt;
+svcerr_systemerr(register SVCXPRT *xprt)
 {
 	struct rpc_msg rply; 
 
@@ -301,9 +296,9 @@ svcerr_systemerr(xprt)
  * Authentication error reply
  */
 void
-svcerr_auth(xprt, why)
-	SVCXPRT *xprt;
-	enum auth_stat why;
+svcerr_auth(
+	SVCXPRT *xprt,
+	enum auth_stat why)
 {
 	struct rpc_msg rply;
 
@@ -318,8 +313,7 @@ svcerr_auth(xprt, why)
  * Auth too weak error reply
  */
 void
-svcerr_weakauth(xprt)
-	SVCXPRT *xprt;
+svcerr_weakauth(SVCXPRT *xprt)
 {
 
 	svcerr_auth(xprt, AUTH_TOOWEAK);
@@ -329,8 +323,7 @@ svcerr_weakauth(xprt)
  * Program unavailable error reply
  */
 void 
-svcerr_noprog(xprt)
-	register SVCXPRT *xprt;
+svcerr_noprog(register SVCXPRT *xprt)
 {
 	struct rpc_msg rply;  
 
@@ -345,10 +338,10 @@ svcerr_noprog(xprt)
  * Program version mismatch error reply
  */
 void  
-svcerr_progvers(xprt, low_vers, high_vers)
-	register SVCXPRT *xprt; 
-	rpcvers_t low_vers;
-	rpcvers_t high_vers;
+svcerr_progvers(
+	register SVCXPRT *xprt,
+	rpcvers_t low_vers,
+	rpcvers_t high_vers)
 {
 	struct rpc_msg rply;
 
@@ -380,8 +373,7 @@ svcerr_progvers(xprt, low_vers, high_vers)
  */
 
 void
-svc_getreq(rdfds)
-	int rdfds;
+svc_getreq(int rdfds)
 {
 #ifdef FD_SETSIZE
 	fd_set readfds;
@@ -402,15 +394,17 @@ svc_getreq(rdfds)
 }
 
 void
-svc_getreqset(readfds)
+svc_getreqset(
 #ifdef FD_SETSIZE
-	fd_set *readfds;
-{
+	fd_set *readfds
 #else
-	int *readfds;
-{
-    int readfds_local = *readfds;
+	int *readfds
 #endif /* def FD_SETSIZE */
+	)
+{
+#ifndef FD_SETSIZE
+	int readfds_local = *readfds;
+#endif
 	enum xprt_stat stat;
 	struct rpc_msg msg;
 	int prog_found;
@@ -434,16 +428,19 @@ svc_getreqset(readfds)
 	r.rq_clntcred = cookedcred;
 
 #ifdef FD_SETSIZE
-	for (sock = 0; sock <= max_xport; sock++) {
-	    if (FD_ISSET(sock, readfds)) {
-		/* sock has input waiting */
-		xprt = xports[sock];
+#define loopcond (sock <= max_xport)
+#define loopincr (sock++)
+#define sockready (FD_ISSET(sock, readfds))
 #else
-	for (sock = 0; readfds_local != 0; sock++, readfds_local >>= 1) {
-	    if ((readfds_local & 1) != 0) {
+#define loopcond (readfds_local !=0)
+#define loopincr (sock++, readfds_local >>= 1)
+#define sockready ((readfds_local & 1) != 0)
+#endif
+
+	for (sock = 0; loopcond; loopincr) {
+	    if (sockready) {
 		/* sock has input waiting */
 		xprt = xports[sock];
-#endif /* def FD_SETSIZE */
 		/* now receive msgs from xprtprt (support batch calls) */
 		do {
 			if (SVC_RECV(xprt, &msg)) {

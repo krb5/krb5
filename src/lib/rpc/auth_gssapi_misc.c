@@ -28,9 +28,9 @@ int misc_debug_gssapi = DEBUG_GSSAPI;
 static void auth_gssapi_display_status_1
 	(char *, OM_uint32, int, int);
    
-bool_t xdr_gss_buf(xdrs, buf)
-   XDR *xdrs;
-   gss_buffer_t buf;
+bool_t xdr_gss_buf(
+     XDR *xdrs,
+     gss_buffer_t buf)
 {
      /*
       * On decode, xdr_bytes will only allocate buf->value if the
@@ -49,9 +49,9 @@ bool_t xdr_gss_buf(xdrs, buf)
      return result;
 }
 
-bool_t xdr_authgssapi_creds(xdrs, creds)
-   XDR *xdrs;
-   auth_gssapi_creds *creds;
+bool_t xdr_authgssapi_creds(
+     XDR *xdrs,
+     auth_gssapi_creds *creds)
 {
      if (! xdr_u_int32(xdrs, &creds->version) ||
 	 ! xdr_bool(xdrs, &creds->auth_msg) ||
@@ -60,9 +60,9 @@ bool_t xdr_authgssapi_creds(xdrs, creds)
      return TRUE;
 }
 
-bool_t xdr_authgssapi_init_arg(xdrs, init_arg)
-   XDR *xdrs;
-   auth_gssapi_init_arg *init_arg;
+bool_t xdr_authgssapi_init_arg(
+     XDR *xdrs,
+     auth_gssapi_init_arg *init_arg)
 {
      if (! xdr_u_int32(xdrs, &init_arg->version) ||
 	 ! xdr_gss_buf(xdrs, &init_arg->token))
@@ -70,9 +70,9 @@ bool_t xdr_authgssapi_init_arg(xdrs, init_arg)
      return TRUE;
 }
 
-bool_t xdr_authgssapi_init_res(xdrs, init_res)
-   XDR *xdrs;
-   auth_gssapi_init_res *init_res;
+bool_t xdr_authgssapi_init_res(
+     XDR *xdrs,
+     auth_gssapi_init_res *init_res)
 {
      if (! xdr_u_int32(xdrs, &init_res->version) ||
 	 ! xdr_gss_buf(xdrs, &init_res->client_handle) ||
@@ -84,10 +84,10 @@ bool_t xdr_authgssapi_init_res(xdrs, init_res)
      return TRUE;
 }
 
-bool_t auth_gssapi_seal_seq(context, seq_num, out_buf)
-   gss_ctx_id_t context;
-   uint32_t seq_num;
-   gss_buffer_t out_buf;
+bool_t auth_gssapi_seal_seq(
+     gss_ctx_id_t context,
+     uint32_t seq_num,
+     gss_buffer_t out_buf)
 {
      gss_buffer_desc in_buf;
      OM_uint32 gssstat, minor_stat;
@@ -108,10 +108,10 @@ bool_t auth_gssapi_seal_seq(context, seq_num, out_buf)
      return TRUE;
 }
 
-bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
-   gss_ctx_id_t context;
-   gss_buffer_t in_buf;
-   uint32_t *seq_num;
+bool_t auth_gssapi_unseal_seq(
+     gss_ctx_id_t context,
+     gss_buffer_t in_buf,
+     uint32_t *seq_num)
 {
      gss_buffer_desc out_buf;
      OM_uint32 gssstat, minor_stat;
@@ -138,20 +138,20 @@ bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
      return TRUE;
 }
 
-void auth_gssapi_display_status(msg, major, minor)
-     char *msg;
-     OM_uint32 major;
-     OM_uint32 minor;
+void auth_gssapi_display_status(
+     char *msg,
+     OM_uint32 major,
+     OM_uint32 minor)
 {
      auth_gssapi_display_status_1(msg, major, GSS_C_GSS_CODE, 0);
      auth_gssapi_display_status_1(msg, minor, GSS_C_MECH_CODE, 0);
 }
 
-static void auth_gssapi_display_status_1(m, code, type, rec)
-     char *m;
-     OM_uint32 code;
-     int type;
-     int rec;
+static void auth_gssapi_display_status_1(
+     char *m,
+     OM_uint32 code,
+     int type,
+     int rec)
 {
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc msg;
@@ -185,14 +185,14 @@ static void auth_gssapi_display_status_1(m, code, type, rec)
      }
 }
 
-bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
-			     xdr_func, xdr_ptr)
-   OM_uint32 *major, *minor;
-   gss_ctx_id_t context;
-   uint32_t seq_num;
-   XDR *out_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+bool_t auth_gssapi_wrap_data(
+     OM_uint32 *major,
+     OM_uint32 *minor,
+     gss_ctx_id_t context,
+     uint32_t seq_num,
+     XDR *out_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      gss_buffer_desc in_buf, out_buf;
      XDR temp_xdrs;
@@ -252,14 +252,14 @@ bool_t auth_gssapi_wrap_data(major, minor, context, seq_num, out_xdrs,
      return TRUE;
 }
 
-bool_t auth_gssapi_unwrap_data(major, minor, context, seq_num,
-			       in_xdrs, xdr_func, xdr_ptr)
-   OM_uint32 *major, *minor;
-   gss_ctx_id_t context;
-   uint32_t seq_num;
-   XDR *in_xdrs;
-   bool_t (*xdr_func)();
-   caddr_t xdr_ptr;
+bool_t auth_gssapi_unwrap_data(
+     OM_uint32 *major,
+     OM_uint32 *minor,
+     gss_ctx_id_t context,
+     uint32_t seq_num,
+     XDR *in_xdrs,
+     bool_t (*xdr_func)(),
+     caddr_t xdr_ptr)
 {
      gss_buffer_desc in_buf, out_buf;
      XDR temp_xdrs;

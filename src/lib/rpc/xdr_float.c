@@ -84,9 +84,7 @@ static struct sgl_limits {
 #endif /* vax */
 
 bool_t
-xdr_float(xdrs, fp)
-	register XDR *xdrs;
-	register float *fp;
+xdr_float(XDR *xdrs, float *fp)
 {
 #if defined(vax)
 	struct ieee_single is;
@@ -196,9 +194,7 @@ static struct dbl_limits {
 
 
 bool_t
-xdr_double(xdrs, dp)
-	register XDR *xdrs;
-	double *dp;
+xdr_double(XDR *xdrs, double *dp)
 {
 	register int32_t *lp;
 #if defined(vax)

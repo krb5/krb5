@@ -84,9 +84,9 @@ void	svc_getreq();
  * Create a client handle for memory based rpc.
  */
 CLIENT *
-clntraw_create(prog, vers)
-	rpcprog_t prog;
-	rpcvers_t vers;
+clntraw_create(
+	rpcprog_t prog,
+	rpcvers_t vers)
 {
 	register struct clntraw_private *clp = clntraw_private;
 	struct rpc_msg call_msg;
@@ -127,14 +127,14 @@ clntraw_create(prog, vers)
 }
 
 static enum clnt_stat 
-clntraw_call(h, proc, xargs, argsp, xresults, resultsp, timeout)
-	CLIENT *h;
-	rpcproc_t proc;
-	xdrproc_t xargs;
-	void * argsp;
-	xdrproc_t xresults;
-	void * resultsp;
-	struct timeval timeout;
+clntraw_call(
+	CLIENT *h,
+	rpcproc_t proc,
+	xdrproc_t xargs,
+	void * argsp,
+	xdrproc_t xresults,
+	void * resultsp,
+	struct timeval timeout)
 {
 	register struct clntraw_private *clp = clntraw_private;
 	register XDR *xdrs = &clp->xdr_stream;
@@ -219,18 +219,18 @@ call_again:
 
 /*ARGSUSED*/
 static void
-clntraw_geterr(cl, err)
-     CLIENT *cl;
-     struct rpc_err *err;
+clntraw_geterr(
+	CLIENT *cl,
+	struct rpc_err *err)
 {
 }
 
 
 static bool_t
-clntraw_freeres(cl, xdr_res, res_ptr)
-	CLIENT *cl;
-	xdrproc_t xdr_res;
-	void *res_ptr;
+clntraw_freeres(
+	CLIENT *cl,
+	xdrproc_t xdr_res,
+	void *res_ptr)
 {
 	register struct clntraw_private *clp = clntraw_private;
 	register XDR *xdrs = &clp->xdr_stream;
@@ -247,24 +247,22 @@ clntraw_freeres(cl, xdr_res, res_ptr)
 
 /*ARGSUSED*/
 static void
-clntraw_abort(cl)
-	CLIENT *cl;
+clntraw_abort(CLIENT *cl)
 {
 }
 
 /*ARGSUSED*/
 static bool_t
-clntraw_control(cl, request, info)
-	CLIENT *cl;
-	int request;
-	void *info;
+clntraw_control(
+	CLIENT *cl,
+	int request,
+	void *info)
 {
 	return (FALSE);
 }
 
 /*ARGSUSED*/
 static void
-clntraw_destroy(cl)
-     CLIENT *cl;
+clntraw_destroy(CLIENT *cl)
 {
 }

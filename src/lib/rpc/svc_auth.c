@@ -84,10 +84,10 @@ static int svcauthnum = sizeof(svcauthsw) / sizeof(struct svcauthsw_type);
  * rqst->rq_client_cred, the cooked credentials.
  */
 enum auth_stat
-gssrpc__authenticate(rqst, msg, no_dispatch)
-	register struct svc_req *rqst;
-	struct rpc_msg *msg;
-        bool_t *no_dispatch;
+gssrpc__authenticate(
+	register struct svc_req *rqst,
+	struct rpc_msg *msg,
+	bool_t *no_dispatch)
 {
 	register int cred_flavor, i;
 

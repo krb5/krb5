@@ -75,11 +75,11 @@ static struct	xdr_ops xdrmem_ops = {
  * memory buffer.  
  */
 void
-xdrmem_create(xdrs, addr, size, op)
-	register XDR *xdrs;
-	caddr_t addr;
-	u_int size;
-	enum xdr_op op;
+xdrmem_create(
+	XDR *xdrs,
+	caddr_t addr,
+	u_int size,
+	enum xdr_op op)
 {
 
 	xdrs->x_op = op;
@@ -89,15 +89,12 @@ xdrmem_create(xdrs, addr, size, op)
 }
 
 static void
-xdrmem_destroy(xdrs)
-	XDR *xdrs;
+xdrmem_destroy(XDR *xdrs)
 {
 }
 
 static bool_t
-xdrmem_getlong(xdrs, lp)
-	register XDR *xdrs;
-	long *lp;
+xdrmem_getlong(XDR *xdrs, long *lp)
 {
 
 	if (xdrs->x_handy < BYTES_PER_XDR_UNIT)
@@ -110,9 +107,7 @@ xdrmem_getlong(xdrs, lp)
 }
 
 static bool_t
-xdrmem_putlong(xdrs, lp)
-	register XDR *xdrs;
-	long *lp;
+xdrmem_putlong(XDR *xdrs, long *lp)
 {
 
 	if (xdrs->x_handy < BYTES_PER_XDR_UNIT)
@@ -125,10 +120,7 @@ xdrmem_putlong(xdrs, lp)
 }
 
 static bool_t
-xdrmem_getbytes(xdrs, addr, len)
-	register XDR *xdrs;
-	caddr_t addr;
-	register u_int len;
+xdrmem_getbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
 	if (xdrs->x_handy < len)
@@ -141,10 +133,7 @@ xdrmem_getbytes(xdrs, addr, len)
 }
 
 static bool_t
-xdrmem_putbytes(xdrs, addr, len)
-	register XDR *xdrs;
-	caddr_t addr;
-	register u_int len;
+xdrmem_putbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
 	if (xdrs->x_handy < len)
@@ -157,8 +146,7 @@ xdrmem_putbytes(xdrs, addr, len)
 }
 
 static u_int
-xdrmem_getpos(xdrs)
-	register XDR *xdrs;
+xdrmem_getpos(XDR *xdrs)
 {
 /*
  * 11/3/95 - JRG - Rather than recast everything for 64 bit, just convert
@@ -168,9 +156,7 @@ xdrmem_getpos(xdrs)
 }
 
 static bool_t
-xdrmem_setpos(xdrs, pos)
-	register XDR *xdrs;
-	u_int pos;
+xdrmem_setpos(XDR *xdrs, u_int pos)
 {
 	register caddr_t newaddr = xdrs->x_base + pos;
 	register caddr_t lastaddr = (char *) xdrs->x_private + xdrs->x_handy;
@@ -183,9 +169,7 @@ xdrmem_setpos(xdrs, pos)
 }
 
 static rpc_inline_t *
-xdrmem_inline(xdrs, len)
-	register XDR *xdrs;
-	int len;
+xdrmem_inline(XDR *xdrs, int len)
 {
 	rpc_inline_t *buf = 0;
 

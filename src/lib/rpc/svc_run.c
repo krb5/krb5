@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)svc_run.c 1.1 87/10/13 Copyr 1984 Sun Micro";
 #include <errno.h>
 
 void
-svc_run()
+svc_run(void)
 {
 #ifdef FD_SETSIZE
 	fd_set readfds;
