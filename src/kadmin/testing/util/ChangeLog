@@ -1,3 +1,9 @@
+Mon Oct 14 07:01:34 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Only attempt to build programs if Tcl present.
+
+	* configure.in: Test for existance of Tcl libraries.
+
 Thu Sep 26 11:31:57 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* Makefile.in: Link with -ltcl -lm. Order the Makefile so programs

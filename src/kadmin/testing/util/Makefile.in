@@ -1,9 +1,7 @@
-# XXX Buzz!
-TCLINC	= /mit/gnu/include
-#TCLLIB=-ltcl7.5 -lm
-TCLLIB=-L/mit/gnu/lib -ltcl -lm
+TCLINC=@TCL_INC@
+TCLLIB=@TCL_LIB@ -lm
 
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I$(TCLINC)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(TCLINC)
 
 SRCS	=	tcl_ovsec_kadm.c tcl_kadm5.c test.c
 OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
@@ -11,8 +9,14 @@ OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
 CLNTPROG=	ovsec_kadm_clnt_tcl
 SRVPROG	=	ovsec_kadm_srv_tcl
 
+DO_ALL=@DO_ALL@
 
-all:: $(CLNTPROG) $(SRVPROG)
+all:: all-$(DO_ALL)
+
+all-::
+	@echo "Tcl is not installed on this system. The kadm5 test suite cannot be run."
+
+all-tcl:: $(CLNTPROG) $(SRVPROG)
 
 $(SRVPROG): $(OBJS) $(SRVDEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(SRVPROG) $(OBJS) $(SRVLIBS) $(TCLLIB)
