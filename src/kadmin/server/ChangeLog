@@ -1,3 +1,8 @@
+Tue Oct  4 17:08:25 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* adm_process.c (cpw_keyproc): Add widen.h and narrow.h around
+		declaration so that argument types to keyproc are widened.
+
 Mon Oct  3 19:13:03 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

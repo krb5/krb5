@@ -24,11 +24,13 @@
 #include <krb5/rsa-md5.h>
 #include <memory.h>
 
+#include <krb5/widen.h>
 static krb5_error_code rd_req_keyproc(keyprocarg, server, kvno, keyblock)
      krb5_pointer keyprocarg;
      krb5_principal server;
      krb5_kvno kvno;
      krb5_keyblock **keyblock;
+#include <krb5/narrow.h>
 {
    krb5_error_code code;
    krb5_keytab_entry ktentry;

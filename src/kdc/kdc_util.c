@@ -114,6 +114,7 @@ struct kparg {
  * "principal" argument.
  */
 
+#include <krb5/widen.h>
 static krb5_error_code
 kdc_rdreq_keyproc(DECLARG(krb5_pointer, keyprocarg),
 		  DECLARG(krb5_principal, principal),
@@ -123,6 +124,7 @@ OLDDECLARG(krb5_pointer, keyprocarg)
 OLDDECLARG(krb5_principal, principal)
 OLDDECLARG(krb5_kvno, vno)
 OLDDECLARG(krb5_keyblock **, key)
+#include <krb5/narrow.h>
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
     char	*sname;

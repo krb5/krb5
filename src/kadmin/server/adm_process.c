@@ -45,6 +45,7 @@ struct cpw_keyproc_arg {
     krb5_keyblock *key;
 };
 
+#include <krb5/widen.h>
 static krb5_error_code
 cpw_keyproc(DECLARG(krb5_pointer, keyprocarg),
 		DECLARG(krb5_principal, server),
@@ -54,6 +55,7 @@ OLDDECLARG(krb5_pointer, keyprocarg)
 OLDDECLARG(krb5_principal, server)
 OLDDECLARG(krb5_kvno, key_vno)
 OLDDECLARG(krb5_keyblock **, key)
+#include <krb5/narrow.h>
 {
     krb5_error_code retval;
     krb5_db_entry cpw_entry;

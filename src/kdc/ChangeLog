@@ -1,3 +1,8 @@
+Tue Oct  4 16:42:16 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_util.c (kdc_rdreq_keyproc): Add widen.h and narrow.h around
+		keyproc call so that the argument types are widened.
+
 Mon Oct  3 13:13:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

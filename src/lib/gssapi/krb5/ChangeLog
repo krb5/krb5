@@ -1,3 +1,8 @@
+Tue Oct  4 16:40:45 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* accept_security_context.c (rd_req_keyproc): Add widen.h and
+		narrow.h to widen argument types of keyproc.
+
 Tue Sep 27 23:30:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* accept_security_context.c (krb5_gss_accept_sec_context):
