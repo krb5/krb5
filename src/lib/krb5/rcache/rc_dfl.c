@@ -18,7 +18,6 @@ static char rcsid_rc_base_c[] =
 /*
  * An implementation for the default replay cache type.
  */
-
 #define FREE(x) ((void) free((char *) (x)))
 #include "rc_base.h"
 #include "rc_dfl.h"
@@ -278,15 +277,20 @@ krb5_rcache id;
  struct dfl_data *t = (struct dfl_data *)id->data;
  int i;
  krb5_donot_replay *rep;
+ krb5_error_code retval;
 
- if (krb5_rc_io_open(&t->d,t->name))
-   return KRB5_RC_IO;
- if (krb5_rc_io_read(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan)))
-   return KRB5_RC_IO;
+ if (retval = krb5_rc_io_open(&t->d,t->name))
+   return retval;
+ if (krb5_rc_io_read(&t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan))) {
+     krb5_rc_io_close(&t->d);
+     return KRB5_RC_IO;
+ }
  t->numhits = t->nummisses = 0;
  t->hsize = HASHSIZE; /* no need to store---it's memory-only */
- if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *))))
-   return KRB5_RC_MALLOC;
+ if (!(t->h = (struct authlist **) malloc(t->hsize*sizeof(struct authlist *)))) {
+     krb5_rc_io_close(&t->d);
+     return KRB5_RC_MALLOC;
+ }
  for (i = 0;i < t->hsize;i++)
    t->h[i] = (struct authlist *) 0;
  t->a = (struct authlist *) 0;
@@ -297,47 +301,55 @@ krb5_rcache id;
 #define FREE1 FREE(rep);
 #define FREE2 FREE(rep->client); FREE(rep);
 #define FREE3 FREE(rep->server); FREE(rep->client); FREE(rep);
-   if (krb5_rc_io_mark(&t->d))
+#define CLOSE krb5_rc_io_close(&t->d);
+
+   if (krb5_rc_io_mark(&t->d)) {
+     krb5_rc_io_close(&t->d);
      return KRB5_RC_IO;
-   if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay))))
+   }
+   if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay)))) {
+     CLOSE;
      return KRB5_RC_MALLOC;
+   }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) &i,sizeof(i)))
     {
      case KRB5_RC_IO_EOF: FREE1; goto end_loop;
-     case 0: break; default: FREE1; return KRB5_RC_IO; break;
+     case 0: break; default: FREE1; CLOSE; return KRB5_RC_IO; break;
     }
    if (!(rep->client = malloc(i)))
-    { FREE1; return KRB5_RC_MALLOC; }
+    { FREE1; CLOSE; return KRB5_RC_MALLOC; }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) rep->client,i))
     {
      case KRB5_RC_IO_EOF: FREE2; goto end_loop;
-     case 0: break; default: FREE2; return KRB5_RC_IO; break;
+     case 0: break; default: FREE2; CLOSE; return KRB5_RC_IO; break;
     }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) &i,sizeof(i)))
     {
      case KRB5_RC_IO_EOF: FREE2; goto end_loop;
-     case 0: break; default: FREE2; return KRB5_RC_IO; break;
+     case 0: break; default: FREE2; CLOSE; return KRB5_RC_IO; break;
     }
    if (!(rep->server = malloc(i)))
-    { FREE2; return KRB5_RC_MALLOC; }
+    { FREE2; CLOSE; return KRB5_RC_MALLOC; }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) rep->server,i))
     {
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; return KRB5_RC_IO; break;
+     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
     }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->cusec,sizeof(rep->cusec))) 
     {
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; return KRB5_RC_IO; break;
+     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
     }
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->ctime,sizeof(rep->ctime)))
     {
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
-     case 0: break; default: FREE3; return KRB5_RC_IO; break;
+     case 0: break; default: FREE3; CLOSE; return KRB5_RC_IO; break;
     }
    if (alive(rep,t->lifespan) != CMP_EXPIRED)
-     if (store(id,rep) == CMP_MALLOC) /* can't be a replay */
+     if (store(id,rep) == CMP_MALLOC) {/* can't be a replay */
+       CLOSE; 
        return KRB5_RC_MALLOC; 
+     }
   }
  end_loop: krb5_rc_io_unmark(&t->d);
 /* An automatic expunge here could remove the need for mark/unmark but
@@ -420,6 +432,7 @@ krb5_rcache id;
  struct krb5_rc_iostuff tmp;
  struct authlist *q;
  char *name = t->name;
+ krb5_error_code retval;
 
  (void) krb5_rc_dfl_close(id);
  switch(krb5_rc_dfl_resolve(id, name)) {
@@ -432,8 +445,8 @@ krb5_rcache id;
    case KRB5_RC_IO: return KRB5_RC_IO;
    default: ;
   }
- if (krb5_rc_io_creat(&tmp,(char **) 0))
-   return KRB5_RC_IO;
+ if (retval = krb5_rc_io_creat(&tmp,(char **) 0))
+   return retval;
  if (krb5_rc_io_write(&tmp,(krb5_pointer) &t->lifespan,sizeof(t->lifespan)))
    return KRB5_RC_IO;
  for (q = t->a;q;q = q->na)
