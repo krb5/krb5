@@ -229,8 +229,8 @@ char *version;			 /* version string (filled in) */
     char krb_vers[KRB_SENDAUTH_VLEN + 1]; /* + 1 for the null terminator */
     char *cp;
     int rem;
-    long tkt_len, priv_len;
-    u_long cksum;
+    krb5_int32 tkt_len, priv_len;
+    krb5_ui_4 cksum;
     u_char tmp_buf[MAX_KTXT_LEN+max(KRB_SENDAUTH_VLEN+1,21)];
 
     /* read the application version string */

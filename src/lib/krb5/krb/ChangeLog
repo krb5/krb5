@@ -1,3 +1,8 @@
+Fri Feb  3 08:07:55 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* compat_recv.c (krb_v4_recvauth): Use explicit 32 bit types so
+		this will work on an Alpha.
+
 Fri Feb  3 00:43:48 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* get_in_tkt.c (krb5_get_in_tkt): fix typo
