@@ -31,6 +31,7 @@ krb5_init_context(context)
 {
 	krb5_context ctx;
 	krb5_error_code retval;
+	int tmp;
 
 	*context = 0;
 
@@ -46,9 +47,18 @@ krb5_init_context(context)
 
 	if ((retval = krb5_os_init_context(ctx)))
 		goto cleanup;
-	
 
 	ctx->default_realm = 0;
+	profile_get_integer(ctx->profile, "libdefaults",
+			    "clockskew", 0, 5 * 60,
+			    &tmp);
+	ctx->clockskew = tmp;
+	ctx->kdc_req_sumtype = CKSUMTYPE_RSA_MD5;
+	ctx->kdc_default_options = KDC_OPT_RENEWABLE_OK;
+	profile_get_integer(ctx->profile, "libdefaults",
+			    "kdc_timesync", 0, 0,
+			    &tmp);
+	ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
 
 	*context = ctx;
 	return 0;

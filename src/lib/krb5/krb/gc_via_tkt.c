@@ -28,6 +28,9 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
+extern krb5_deltat krb5_clockskew;
+#define in_clock_skew(date, now) (labs((date)-(now)) < krb5_clockskew)
+
 static krb5_error_code
 krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     krb5_context          context;
@@ -162,16 +165,7 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	if (retval) 			/* neither proper reply nor error! */
 	    goto error_4;
 
-#if 0
-	/* XXX need access to the actual assembled request...
-	   need a change to send_tgs */
-	if ((err_reply->ctime != request.ctime) ||
-	    !krb5_principal_compare(context,err_reply->server,request.server) ||
-	    !krb5_principal_compare(context, err_reply->client, request.client))
-	    retval = KRB5_KDCREP_MODIFIED;
-	else
-#endif
-	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	krb5_free_error(context, err_reply);
 	goto error_4;
@@ -187,42 +181,36 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	goto error_3;
     }
     
-    /* now it's decrypted and ready for prime time */
-    if (!krb5_principal_compare(context, dec_rep->client, tkt->client)) {
+    /* make sure the response hasn't been tampered with..... */
+    if (!krb5_principal_compare(context, dec_rep->client, tkt->client) ||
+	!krb5_principal_compare(context, dec_rep->enc_part2->server,
+				in_cred->server) ||
+	!krb5_principal_compare(context, dec_rep->ticket->server,
+				in_cred->server) ||
+	(dec_rep->enc_part2->nonce != tgsrep.expected_nonce) ||
+	((in_cred->times.starttime != 0) &&
+	 (in_cred->times.starttime != dec_rep->enc_part2->times.starttime)) ||
+	((in_cred->times.endtime != 0) &&
+	 (dec_rep->enc_part2->times.endtime > in_cred->times.endtime)) ||
+	((kdcoptions & KDC_OPT_RENEWABLE) &&
+	 (in_cred->times.renew_till != 0) &&
+	 (dec_rep->enc_part2->times.renew_till > in_cred->times.renew_till)) ||
+	((kdcoptions & KDC_OPT_RENEWABLE_OK) &&
+	 (dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
+	 (in_cred->times.endtime != 0) &&
+	 (dec_rep->enc_part2->times.renew_till > in_cred->times.endtime))
+	) {
 	retval = KRB5_KDCREP_MODIFIED;
 	goto error_3;
     }
 
-#if 0
-    /* XXX probably need access to the request */
-    /* check the contents for sanity: */
-    if (!krb5_principal_compare(context, dec_rep->client, request.client)
-	|| !krb5_principal_compare(context, dec_rep->enc_part2->server, request.server)
-	|| !krb5_principal_compare(context, dec_rep->ticket->server, request.server)
-	|| (request.nonce != dec_rep->enc_part2->nonce)
-	/* XXX check for extraneous flags */
-	/* XXX || (!krb5_addresses_compare(context, addrs, dec_rep->enc_part2->caddrs)) */
-	|| ((request.from != 0) &&
-	    (request.from != dec_rep->enc_part2->times.starttime))
-	|| ((request.till != 0) &&
-	    (dec_rep->enc_part2->times.endtime > request.till))
-	|| ((request.kdc_options & KDC_OPT_RENEWABLE) &&
-	    (request.rtime != 0) &&
-	    (dec_rep->enc_part2->times.renew_till > request.rtime))
-	|| ((request.kdc_options & KDC_OPT_RENEWABLE_OK) &&
-	    (dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
-	    (request.till != 0) &&
-	    (dec_rep->enc_part2->times.renew_till > request.till))
-	)
-	retval = KRB5_KDCREP_MODIFIED;
-
-    if (!request.from && !in_clock_skew(dec_rep->enc_part2->times.starttime)) {
+    if (!in_cred->times.starttime &&
+	!in_clock_skew(dec_rep->enc_part2->times.starttime,
+		       tgsrep.request_time)) {
 	retval = KRB5_KDCREP_SKEW;
 	goto error_3;
     }
     
-#endif
-
     retval = krb5_kdcrep2creds(context, dec_rep, address, 
 			       &in_cred->second_ticket,  out_cred);
 

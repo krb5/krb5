@@ -97,6 +97,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     krb5_keyblock *decrypt_key = 0;
     krb5_timestamp time_now;
 /*    krb5_pa_data	*padata; */
+    krb5_pa_data  **preauth_to_use = 0;
     int f_salt = 0, use_salt = 0;
     krb5_data salt;
     char k4_version;		/* same type as *(krb5_data::data) */
@@ -158,11 +159,6 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if ((retval = krb5_timeofday(context, &time_now)))
-	goto cleanup;
-
-    /* XXX we know they are the same size... */
-    request.nonce = (krb5_int32) time_now;
 
     if (etypes) 
 	request.etype = etypes;
@@ -173,6 +169,12 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     request.authorization_data.ciphertext.data = 0;
     request.unenc_authdata = 0;
     request.second_ticket = 0;
+
+    if ((retval = krb5_timeofday(context, &time_now)))
+	goto cleanup;
+
+    /* XXX we know they are the same size... */
+    request.nonce = (krb5_int32) time_now;
 
     /* encode & send to KDC */
     retval = encode_krb5_as_req(&request, &packet);
@@ -195,14 +197,15 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 	    /* some other error code--??? */	    
 	    goto cleanup;
     
-	/* it was an error */
+	if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED &&
+	    err_reply->e_data.length > 0) {
+	    retval = decode_krb5_padata_sequence(&err_reply->e_data,
+						 &preauth_to_use);
+    	    /* XXX we need to actually do something with the info */
+	    krb5_free_pa_data(context, preauth_to_use);
+	}
 
-	if ((err_reply->ctime != request.nonce) ||
-	    !krb5_principal_compare(context, err_reply->server, request.server) ||
-	    !krb5_principal_compare(context, err_reply->client, request.client))
-	    retval = KRB5_KDCREP_MODIFIED;
-	else
-	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	/* XXX somehow make error msg text available to application? */
 
@@ -310,7 +313,11 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 	retval = KRB5_KDCREP_SKEW;
 	goto cleanup;
     }
-    
+ 
+   if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)
+       krb5_set_time_offsets(context,
+			     as_reply->enc_part2->times.authtime - time_now,
+			     0);
 
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	

@@ -206,7 +206,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
     if ((retval = krb5_timeofday(context, &time_now)))
 	return(retval);
     /* XXX we know they are the same size... */
-    tgsreq.nonce = (krb5_int32) time_now;
+    rep->expected_nonce = tgsreq.nonce = (krb5_int32) time_now;
+    rep->request_time = time_now;
 
     tgsreq.addresses = (krb5_address **) addrs;
 

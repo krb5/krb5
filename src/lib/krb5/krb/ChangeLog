@@ -1,7 +1,23 @@
+Fri Sep  1 20:03:41 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* get_in_tkt.c (krb5_get_in_tkt): If kdc_settime is enabled, then
+		set the time_offset fields from the returned ticket's
+		authtime value.
+
+	* init_ctx.c (krb5_init_context): Initialize new fields in
+		krb5_context (clockskew, kdc_req_sumtype, and
+		kdc_default_options).
+
+	* gc_via_tkt.c (krb5_get_cred_via_tkt): Perform the necessary
+		sanity checking on the KDC response to make sure we detect
+		tampering.
+
+	* send_tgs.c (krb5_send_tgs): Set the expected nonce in the
+		response structure.
 
 Fri Sep 1 11:16:43 EDT 1995	Paul Park	(pjpark@mit.edu)
-	* ser_ctx.c - Add handling of new time offset fields in the os_context.
 
+	* ser_ctx.c - Add handling of new time offset fields in the os_context.
 
 Tue Aug 29 14:14:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_{actx,adata,addr,auth,cksum,ctx,eblk,key,
