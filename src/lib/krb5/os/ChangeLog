@@ -1,3 +1,9 @@
+
+Tue May 16 10:33:03 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gmt_mktime.c	- Use the actual year instead of the number of years
+			  since 1900 when determining if a year has a leapday.
+			  Makes dates after February in the year 2000 correct.
+
 Mon May  8 22:19:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* read_pwd.c (krb5_read_password): use volatile on all

@@ -65,7 +65,7 @@ time_t gmt_mktime(t)
   accum += (t->tm_year - 69) / 4;
   /* add in leap day for this year */
   if(t->tm_mon >= 2)		/* march or later */
-    if(hasleapday(t->tm_year)) accum += 1;
+    if(hasleapday((t->tm_year + 1900))) accum += 1;
 
   accum += days_in_month[t->tm_mon];
   accum += t->tm_mday-1;	/* days of month are the only 1-based field */
