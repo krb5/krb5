@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -253,5 +253,5 @@ krb5_fcc_store_authdatum (id, a)
     CHECK(ret);
     ret = krb5_fcc_store_int32(id, &a->length);
     CHECK(ret);
-    return krb5_fcc_write(id, a->contents, a->length);
+    return krb5_fcc_write(id, (krb5_pointer) a->contents, a->length);
 }
