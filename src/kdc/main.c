@@ -174,7 +174,8 @@ char **argv;
 
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, &master_princ)) {
+    if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, (char **) 0,
+					 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
     }
