@@ -374,7 +374,11 @@ static Tcl_DString *unparse_err(ovsec_kadm_ret_t code)
      case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN: code_string = "KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN"; break;
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
-     default: fprintf(stderr, "**** CODE %ld ***\n", (long) code); code_string = "UNKNOWN"; break;
+     default:
+	 fprintf(stderr, "**** CODE %d (%s) ***\n", code,
+		 error_message (code));
+	 code_string = "UNKNOWN";
+	 break;
      }
 
      error_string = error_message(code);

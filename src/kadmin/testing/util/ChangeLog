@@ -1,3 +1,8 @@
+
+	* tcl_kadm5.c (unparse_err): Print error message, not just number,
+	to stderr for unrecognized error code.
+	* tcl_ovsec_kadm.c (unparse_err): Likewise.
+
 2001-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SRCS): All files live in srcdir.
