@@ -175,6 +175,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    OM_uint32 major_status = GSS_S_FAILURE;
    krb5_error krb_error_data;
    krb5_data scratch;
+   gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
@@ -206,28 +207,30 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
-   /* validate the cred handle - no default */
-
-   /*SUPPRESS 29*/
+   /* handle default cred handle */
    if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
-      *minor_status = 0;
-      return(GSS_S_NO_CRED);
-   } else {
-      OM_uint32 major;
-	   
-      major = krb5_gss_validate_cred(minor_status, verifier_cred_handle);
-      if (GSS_ERROR(major))
-	  return(major);
-   }
+	   major_status = krb5_gss_acquire_cred(&code, GSS_C_NO_NAME,
+				GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
+				GSS_C_ACCEPT, &cred_handle,
+				NULL, NULL);
+	   if (major_status != GSS_S_COMPLETE)
+		   goto fail;
+   } else
+	   cred_handle = verifier_cred_handle;
 
-   cred = (krb5_gss_cred_id_t) verifier_cred_handle;
+   major_status = krb5_gss_validate_cred(minor_status, verifier_cred_handle);
+   if (GSS_ERROR(major_status))
+	   goto fail;
+
+   cred = (krb5_gss_cred_id_t) cred_handle;
 
    /* make sure the supplied credentials are valid for accept */
 
    if ((cred->usage != GSS_C_ACCEPT) &&
        (cred->usage != GSS_C_BOTH)) {
-      *minor_status = 0;
-      return(GSS_S_NO_CRED);
+	   code = 0;
+	   major_status = GSS_S_NO_CRED;
+	   goto fail;
    }
 
    /* verify the token's integrity, and leave the token in ap_req.
@@ -246,24 +249,26 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	 * old behavior.
 	 */
 	if (err != G_WRONG_MECH ||
-	    (err = g_verify_token_header((gss_OID) gss_mech_krb5_old,
-					 &(ap_req.length), 
-					 &ptr, KG_TOK_CTX_AP_REQ,
-					 input_token->length))) {
-	     *minor_status = err;
-	     return(GSS_S_DEFECTIVE_TOKEN);
+	    (code = g_verify_token_header((gss_OID) gss_mech_krb5_old,
+					  &(ap_req.length), 
+					  &ptr, KG_TOK_CTX_AP_REQ,
+					  input_token->length))) {
+		major_status = GSS_S_DEFECTIVE_TOKEN;
+		goto fail;
 	} else {
 	     if (! cred->prerfc_mech) {
-		  *minor_status = G_WRONG_MECH;
-		  return(GSS_S_DEFECTIVE_TOKEN);
+		     code = G_WRONG_MECH;
+		     major_status = GSS_S_DEFECTIVE_TOKEN;
+		     goto fail;
 	     }
 
 	     mech_used = gss_mech_krb5_old;
 	}
    } else {
 	if (! cred->rfc_mech) {
-	     *minor_status = G_WRONG_MECH;
-	     return(GSS_S_DEFECTIVE_TOKEN);
+		code = G_WRONG_MECH;
+		major_status = GSS_S_DEFECTIVE_TOKEN;
+		goto fail;
 	}
 
 	mech_used = gss_mech_krb5;
@@ -687,6 +692,9 @@ fail:
 	   xfree(scratch.data);
 
 	   *output_token = token;
+   }
+   if (!verifier_cred_handle && cred_handle) {
+	   krb5_gss_release_cred(&code, cred_handle);
    }
    return (major_status);
 }

@@ -1,3 +1,8 @@
+Fri Jun 27 08:37:11 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Will now
+ 		obtain default credentials if no credentials are given.
+
 Wed Dec  3 02:16:18 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_sec_context.c (make_ap_req): Enforce a stricter requirement
