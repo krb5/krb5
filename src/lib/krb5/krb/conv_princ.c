@@ -148,18 +148,22 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	  p = sconv_list;
 	  while (p->v4_str) {
 	       if (strncmp(p->v5_str, compo->data, compo->length) == 0) {
-		    /* It is, so set the new name now, and chop off */
-		    /* instance's domain name if requested */
-		    strcpy(name, p->v4_str);
-		    if (p->flags & DO_REALM_CONVERSION) {
-			 compo = krb5_princ_component(context, princ, 1);
-			 c = strnchr(compo->data, '.', compo->length);
-			 if (!c || (c - compo->data) > INST_SZ - 1)
-			      return KRB5_INVALID_PRINCIPAL;
-			 strncpy(inst, compo->data, c - compo->data);
-			 inst[c - compo->data] = '\0';
-		    }
-		    break;
+		   /*
+		    * It is, so set the new name now, and chop off
+		    * instance's domain name if requested.
+		    */
+		   if (strlen (p->v4_str) > ANAME_SZ - 1)
+		       return KRB5_INVALID_PRINCIPAL;
+		   strcpy(name, p->v4_str);
+		   if (p->flags & DO_REALM_CONVERSION) {
+		       compo = krb5_princ_component(context, princ, 1);
+		       c = strnchr(compo->data, '.', compo->length);
+		       if (!c || (c - compo->data) >= INST_SZ - 1)
+			   return KRB5_INVALID_PRINCIPAL;
+		       memcpy(inst, compo->data, c - compo->data);
+		       inst[c - compo->data] = '\0';
+		   }
+		   break;
 	       }
 	       p++;
 	  }
@@ -169,7 +173,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	       compo = krb5_princ_component(context, princ, 1);
 	       if (compo->length >= INST_SZ - 1)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(inst, compo->data, compo->length);
+	       memcpy(inst, compo->data, compo->length);
 	       inst[compo->length] = '\0';
 	  }
 	  /* fall through */
@@ -179,7 +183,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	       compo = krb5_princ_component(context, princ, 0);
 	       if (compo->length >= ANAME_SZ)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(name, compo->data, compo->length);
+	       memcpy(name, compo->data, compo->length);
 	       name[compo->length] = '\0';
 	  }
 	  break;
