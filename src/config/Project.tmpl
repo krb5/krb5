@@ -120,6 +120,7 @@ libdir/lib/**/libname.a:						@@\
                     $(TOP)/lib/crc-32/libcrc32.a
 
              KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err
+        DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
            KDBLIB = $(TOP)/lib/kdb/libkdb.a DbmLib
 
 #ifdef UseInstalled
