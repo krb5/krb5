@@ -1301,13 +1301,16 @@ gss-headers-output = ¶
 	"{gss-headers-output-folder}gssapi_krb5.h"
 
 krb5-headers-output = ¶
+	"{krb5-headers-output-folder}krb5.h" ¶
 	"{krb5-headers-output-folder}Kerberos5.h" ¶
 	"{krb5-headers-output-folder}win-mac.h"
 
 comerr-headers-output = ¶
+	"{comerr-headers-output-folder}com_err.h" ¶
 	"{comerr-headers-output-folder}KerberosComErr.h"
 	
 profile-headers-output = ¶
+	"{profile-headers-output-folder}profile.h" ¶
 	"{profile-headers-output-folder}KerberosProfile.h"
 	
 headers-output = {gss-headers-output} {krb5-headers-output} ¶
@@ -1320,7 +1323,8 @@ headers Ä unset-echo {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Catenate "{root-folder}mac:GSS.h" > "{Targ}"
+	Echo "#include <GSS/gssapi.h>" > "{Targ}"
+	Echo "#include <GSS/gssapi_krb5.h>" >> "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{gss-headers-output-folder}gssapi.h" Ä "{root-folder}lib:gssapi:generic:gssapi.h" {makefile-dependency}
@@ -1344,6 +1348,14 @@ headers Ä unset-echo {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
+	Echo "#include <Kerberos5/krb5.h>" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{krb5-headers-output-folder}krb5.h" Ä "{root-folder}include:krb5.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
 	Catenate "{root-folder}include:krb5.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
@@ -1360,10 +1372,26 @@ headers Ä unset-echo {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
+	Echo "#include <KerberosComErr/com_err.h>" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{comerr-headers-output-folder}com_err.h" Ä "{root-folder}util:et:com_err.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
 	Catenate "{root-folder}util:et:com_err.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{profile-headers-output-folder}KerberosProfile.h" Ä "{root-folder}util:profile:profile.h" {makefile-dependency}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Echo "#include <KerberosProfile/profile.h>" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{profile-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-dependency}
 	"{create-folder}" "{TargDir}"
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
