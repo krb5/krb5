@@ -30,7 +30,7 @@ static char rcsid_decode_c[] =
 
 krb5_error_code
 decode_generic(input, output, decoder, translator, free_translation)
-krb5_data *input;
+const krb5_data *input;
 register krb5_pointer *output;
 int (*decoder) PROTOTYPE((PE, int, int, char *, krb5_pointer));
 krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));

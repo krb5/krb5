@@ -23,13 +23,13 @@ typedef int (*decoder_func) PROTOTYPE((PE, int, int, char *, krb5_pointer));
 
 /* encode.c */
 krb5_error_code encode_generic
-    PROTOTYPE((krb5_pointer,
+    PROTOTYPE((const krb5_pointer,
 	       krb5_data **,
 	       int (* )PROTOTYPE ((PE *,int,int,char *,krb5_pointer )),
 	       krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
 	       void (* )PROTOTYPE ((krb5_pointer ))));
 krb5_error_code decode_generic
-	PROTOTYPE((krb5_data *,
+	PROTOTYPE((const krb5_data *,
 		   krb5_pointer *,
 		   int (* )PROTOTYPE ((PE,int,int,char *,krb5_pointer )),
 		   krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
