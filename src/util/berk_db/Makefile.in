@@ -34,7 +34,7 @@ libdb.$(STEXT): hash/DONE
 	$(RANLIB) $@
 	touch libdb.stamp
 
-install:: libdb_ranlib
+install:: libdb.$(STEXT)
 	$(INSTALL_DATA) libdb.a $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
 
@@ -58,4 +58,5 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally
+
 

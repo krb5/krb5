@@ -1,3 +1,7 @@
+Tue Jul 18 21:57:52 1995  Sam Hartman  <hartmans@screw-loose.MIT.EDU>
+
+	* configure.in: Don't depend on libdb_ranlib.
+
 Tue Jul 18 18:04:21 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (install): Combine the ranlib in with the rest of
