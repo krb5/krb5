@@ -1,3 +1,12 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss_libinit.c (gssint_lib_init): Initialize error tables here.
+	(gssint_initialize_library): Don't do it directly here.  Make sure
+	gssint_lib_init has been called, and return the status.
+	(gssint_lib_fini): Remove error tables here.
+	(gssint_cleanup_library): Function deleted.
+	(initialized): Variable deleted.
+
 2004-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* libgssapi_krb5.exports: Remove et_*, generic_*, gssint_*,
