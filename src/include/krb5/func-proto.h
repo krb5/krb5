@@ -19,28 +19,30 @@
 
 /* libkrb.spec */
 krb5_error_code krb5_encode_kdc_rep
-	PROTOTYPE((int,
+	PROTOTYPE((int,			/* promotion rules require this */
 		   krb5_kdc_rep *,
 		   krb5_enc_kdc_rep_part *,
 		   krb5_keyblock *,
+		   krb5_data ** ));
+krb5_error_code krb5_decode_kdc_rep
+	PROTOTYPE((krb5_data *,
+		   krb5_keyblock *,
+		   int,			/* promotion rules require this */
+		   krb5_kdc_rep ** ));
+krb5_error_code krb5_encode_ticket
+	PROTOTYPE((krb5_ticket *,
 		   krb5_data ** ));
 krb5_error_code krb5_decode_ticket
 	PROTOTYPE((krb5_data *,
 		   krb5_keyblock *,
 		   krb5_enctype,
 		   krb5_ticket ** ));
-krb5_error_code krb5_encode_ticket
-	PROTOTYPE((krb5_ticket *,
-		   krb5_data ** ));
 krb5_error_code krb5_encrypt_tkt_part
-	PROTOTYPE((krb5_enc_tkt_part *,
-		   krb5_keyblock *,
+	PROTOTYPE((krb5_keyblock *,
 		   krb5_ticket * ));
-krb5_error_code krb5_decode_kdc_rep
-	PROTOTYPE((krb5_data *,
-		   krb5_keyblock *,
-		   krb5_enctype,
-		   krb5_kdc_rep ** ));
+krb5_error_code krb5_decrypt_tkt_part
+	PROTOTYPE((krb5_keyblock *,
+		   krb5_ticket * ));
 krb5_error_code krb5_send_tgs
 	PROTOTYPE((krb5_flags,
 		   krb5_ticket_times *,
