@@ -1,0 +1,123 @@
+# -*- TCL -*-
+# Auxiliary procedures for autoconf tests.
+# Copyright (C) 1994 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Written by David MacKenzie <djm@gnu.ai.mit.edu>.
+
+#
+# Create a configure.in from a string.
+# CONFIG.in is the file to create containing CONTENTS plus boilerplate.
+# Return 1 if successful, 0 if an error occurs.
+proc autoconf_create {config contents} {
+    if [catch {open "$config.in" "w"} hand] {
+	error "$config, cannot create $config.in"
+	return 0
+    }
+    puts $hand "AC_INIT(confdummy.in)
+$contents
+AC_OUTPUT(confdummy)"
+    close $hand
+
+    if [catch {open "confdummy.in" "w"} hand] {
+	error "$config, cannot create confdummy.in"
+	return 0
+    }
+    puts $hand "# This is a dummy file for testing.
+srcdir = @srcdir@
+# Please ignore this file."
+    close $hand
+
+    return 1
+}
+
+# Compile a configure.in into a configure
+#  and call error if there's any output (undefined macros, can't
+#  find library files, etc.).
+proc autoconf_start_plus {configout} {
+    global comp_output
+
+    set status [autoconf_start $configout]
+    if {$status==0} {
+	return 0
+    }
+    # Examine $comp_output.
+    if [string match "*is obsolete*" "$comp_output"] then {
+	return 1
+    }
+    if [string match "*allow cross*" "$comp_output"] then {
+	return 1
+    }
+    if ![string match "" "$comp_output"] then {
+	fail "$configout, problem with running autoconf"
+	return 0
+    }
+    return 1
+}
+
+# Execute a configure script and check the output
+#  against what it's supposed to be.
+# Return 1 if successful so far, 0 if failure already.
+proc autoconf_load_plus {args} {
+    global exec_output
+
+    set status [autoconf_load $args]
+    if {$status==0} {
+	return 0
+    }
+    if [string match "*:*" "$exec_output"] then {
+	fail "$args, problem with executing"
+	return 0
+    }
+    return 1
+}
+
+# Remove generated configuration files for test CONFIG.
+# Return 1 if successful, 0 if not.
+proc autoconf_remove {config} {
+    if [catch "exec rm -f $config $config.in [glob -nocomplain conftest* confdummy*] config.status config.cache config.log"] {
+	warning "$config output files, cannot remove"
+	return 0
+    }
+    return 1
+}
+
+# The standard autoconf test: create, compile, run, and remove
+# a simple configure script to test a single macro.
+# TESTNAME is the name of the macro being tested.
+# CONTENTS is the body of the configure script to create and test.
+proc autoconf_test {testname contents} {
+    if ![autoconf_remove $testname] {
+	return 0
+    }
+    if ![autoconf_create $testname "$contents"] {
+	return 0
+    }
+    if ![autoconf_start_plus $testname] {
+	autoconf_remove $testname
+	return 0
+    }
+    if ![autoconf_load_plus $testname] {
+	autoconf_remove $testname
+	return 0
+    }
+    if ![autoconf_remove $testname] {
+	return 0
+    }
+
+    pass "$testname"
+    return 1
+}
