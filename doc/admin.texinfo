@@ -1408,7 +1408,11 @@ Removes the policy @i{policyname} from the principal
 
 @item -randkey
 Sets the key for the principal to a random value (@code{add_principal}
-only).  @value{COMPANY} recommends using this option for host keys.
+only).  @value{COMPANY} recommends using this option for host keys.  You
+may also wish to use the @b{kadmin.local} command-line options @b{-e
+"des3-cbc-sha1:normal des-cbc-crc:normal"}@xref{Kadmin Options} on the
+KDC machine itself for host keys and other service keys that are
+security-critical.
 
 @item -pw @i{password}
 Sets the key of the principal to the specified string and does not

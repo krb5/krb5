@@ -1,3 +1,19 @@
+1999-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Update for 1.1 release.
+
+	* admin.texinfo (Adding or Modifying Principals): Mention des3
+	enctype for host keys.
+
+	* build.texinfo: Replace "krb5-1.0" with "krb5-@value{RELEASE}"
+	throughout.
+	(Shared Library Support): Cut supported-OS list down to Solaris
+	and Irix for now.
+
+	* install.texinfo: Update EDITION to 1.1.
+	(MacOS X Configuration): New node, with info from Brad Thompson.
+	(Encryption Types and Salt Types): Mention des3.
+
 1999-08-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (Kadmin Options): Describe -e option.
