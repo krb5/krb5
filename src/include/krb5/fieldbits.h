@@ -180,6 +180,10 @@
 #define AD_TYPE_FIELD_TYPE_MASK	0x1fff
 #define AD_TYPE_INTERNAL_MASK	0x3fff
 
+/* definitions for msec direction bit for KRB_SAFE, KRB_PRIV */
+#define	MSEC_DIRBIT		0x8000
+#define	MSEC_VAL_MASK		0x7fff
+
 #endif /* __KRB5_FIELDBITS__ */
 
 
