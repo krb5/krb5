@@ -1045,7 +1045,7 @@ and \funcparam{rep{\ptsto}server} are set to allocated storage and
 should be freed when \funcparam{*rep} is no longer needed.
 
 \begin{funcdecl}{krb5_get_server_rcache}{krb5_error_code}{\funcin}
-\funcarg{const char *}{piece}
+\funcarg{const krb5_data *}{piece}
 \funcout
 \funcarg{krb5_rcache *}{ret_rcache}
 \end{funcdecl}
