@@ -708,7 +708,6 @@ krb5_fcc_read_authdatum(context, id, a)
      return kret;
     
 }
-/* end of former stdio/scc_read.c */
 #undef CHECK
 
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
@@ -1312,6 +1311,7 @@ krb5_fcc_skip_principal(context, id)
      return KRB5_OK;
 }
 
+
 /*
  * Modifies:
  * id
@@ -1330,7 +1330,7 @@ krb5_fcc_initialize(context, id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     krb5_error_code kret;
+     krb5_error_code kret = 0;
 
      kret = krb5_fcc_open_file (context, id, FCC_OPEN_AND_ERASE);
      if (kret < 0)
@@ -1580,9 +1580,9 @@ krb5_fcc_next_cred(context, id, cursor, creds)
      fcursor = (krb5_fcc_cursor *) *cursor;
      ret = fseek(((krb5_fcc_data *) id->data)->file, fcursor->pos, 0);
      if (ret < 0) {
-	 ret = krb5_fcc_interpret(context, errno);
-	 MAYBE_CLOSE (context, id, ret);
-	 return ret;
+	 kret = krb5_fcc_interpret(context, errno);
+	 MAYBE_CLOSE (context, id, kret);
+	 return kret;
      }
 
      kret = krb5_fcc_read_principal(context, id, &creds->client);
@@ -1612,9 +1612,8 @@ krb5_fcc_next_cred(context, id, cursor, creds)
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
-     if (kret != KRB5_OK) {
+     if (kret != KRB5_OK)
 	 krb5_free_cred_contents(context, creds);
-     }
      MAYBE_CLOSE (context, id, kret);
      return kret;
 }
@@ -1638,8 +1637,8 @@ krb5_fcc_end_seq_get(context, id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-/*    MAYBE_CLOSE (context, id, ret); */
-
+/*
+    MAYBE_CLOSE (context, id, kret); */
     krb5_xfree((krb5_fcc_cursor *) *cursor);
 
     return 0;
@@ -1785,13 +1784,12 @@ krb5_fcc_get_principal(context, id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
-     krb5_error_code kret;
+     krb5_error_code kret = KRB5_OK;
 
      MAYBE_OPEN (context, id, FCC_OPEN_RDONLY);
 
      kret = krb5_fcc_skip_header(context, id);
      if (kret) goto done;
-
      kret = krb5_fcc_read_principal(context, id, princ);
 
 done:
@@ -1811,6 +1809,7 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
     return krb5_cc_retrieve_cred_default (context, id, whichfields,
 					  mcreds, creds);
 }
+
 
 /*
  * Modifies:
@@ -1836,8 +1835,9 @@ krb5_fcc_store(context, id, creds)
      MAYBE_OPEN (context, id, FCC_OPEN_RDWR);
 
      ret = fseek(((krb5_fcc_data *) id->data)->file, 0, 2);
-     if (ret < 0)
+     if (ret < 0) {
 	  return krb5_fcc_interpret(context, errno);
+     }
 
      ret = krb5_fcc_store_principal(context, id, creds->client);
      TCHECK(ret);
@@ -1861,11 +1861,11 @@ krb5_fcc_store(context, id, creds)
      TCHECK(ret);
 
 lose:
-
      MAYBE_CLOSE (context, id, ret);
      return ret;
 #undef TCHECK
 }
+
 
 /*
  * Requires:
@@ -1909,11 +1909,8 @@ krb5_fcc_interpret(context, errnum)
     krb5_context context;
     int errnum;
 {
-    register int retval;
+    register krb5_error_code retval;
     switch (errnum) {
-#ifdef ELOOP
-    case ELOOP:				/* Bad symlink is like no file. */
-#endif
     case ENOENT:
 	retval = KRB5_FCC_NOFILE;
 	break;
@@ -1923,6 +1920,9 @@ krb5_fcc_interpret(context, errnum)
     case EISDIR:			/* Mac doesn't have EISDIR */
 #endif
     case ENOTDIR:
+#ifdef ELOOP
+    case ELOOP:				/* Bad symlink is like no file. */
+#endif
 #ifdef ETXTBSY
     case ETXTBSY:
 #endif
