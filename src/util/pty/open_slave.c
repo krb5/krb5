@@ -36,6 +36,10 @@ long retval;
     
 #endif
 
+    /* XXX added by Doug Engbert to get things to work under Solaris. */
+#ifdef HAVE_SETSID
+    (void) setsid();
+#endif
 
     /* First, chmod and chown the slave*/
     /*
