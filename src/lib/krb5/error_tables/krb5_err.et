@@ -55,7 +55,7 @@ error_code KRB5KDC_ERR_SERVICE_NOTYET,	"Server not yet valid - try again later"
 error_code KRB5KDC_ERR_KEY_EXP,  	"Password has expired"
 error_code KRB5KDC_PREAUTH_FAILED,  	"Preauthentication failed"
 # ^^ 24
-error_code KRB5KDC_SERVER_NOMATCH,	"Requested server and ticket don't match"
+error_code KRB5PLACEHOLD_25,		"KRB5 error code 25"
 error_code KRB5PLACEHOLD_26,		"KRB5 error code 26"
 error_code KRB5PLACEHOLD_27,		"KRB5 error code 27"
 error_code KRB5PLACEHOLD_28,		"KRB5 error code 28"
@@ -283,5 +283,5 @@ error_code KRB5_PROG_ATYPE_NOSUPP,	"Program lacks support for address type"
 error_code KRB5_RC_REQUIRED,	"Message replay detection requires rcache parameter"
 error_code KRB5_ERR_BAD_HOSTNAME,	"Hostname cannot be canonicalized"
 error_code KRB5_ERR_HOST_REALM_UNKNOWN,	"Cannot determine realm for host"
-
+error_code KRB5_SNAME_UNSUPP_NAMETYPE,	"Conversion to service principal undefined for name type"
 end
