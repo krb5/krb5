@@ -14,7 +14,6 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	bld_pr_ext.$(OBJEXT)	\
 	bld_princ.$(OBJEXT)	\
 	chk_trans.$(OBJEXT)	\
-	compat_recv.$(OBJEXT)	\
 	conv_princ.$(OBJEXT)	\
 	copy_addrs.$(OBJEXT)	\
 	copy_auth.$(OBJEXT)	\
@@ -87,7 +86,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
 	$(srcdir)/chk_trans.c	\
-	$(srcdir)/compat_recv.c	\
 	$(srcdir)/conv_princ.c	\
 	$(srcdir)/copy_addrs.c	\
 	$(srcdir)/copy_auth.c	\
