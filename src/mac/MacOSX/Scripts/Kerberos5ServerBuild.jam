@@ -42,6 +42,7 @@ InstallProgram "$(DSTROOT)/usr/sbin/krb5kdc"         : "$(IntermediateBuild)/kdc
 InstallProgram "$(DSTROOT)/usr/bin/krb5-config"      : "$(IntermediateBuild)/krb5-config" ;
                   
 InstallFile "$(DSTROOT)/usr/share/man/man1/kerberos.1"     : "$(SRCROOT)/../../Kerberos5/Sources/gen-manpages/kerberos.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man1/krb5-config.1"  : "$(SRCROOT)/../../Kerberos5/Sources/krb5-config.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"     : "$(SRCROOT)/../../Kerberos5/Sources/config-files/kdc.conf.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man5/krb5.conf.5"    : "$(SRCROOT)/../../Kerberos5/Sources/config-files/krb5.conf.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man8/kadmin.8"       : "$(SRCROOT)/../../Kerberos5/Sources/kadmin/cli/kadmin.M" ;
@@ -52,6 +53,7 @@ InstallFile "$(DSTROOT)/usr/share/man/man8/kdb5_util.8"    : "$(SRCROOT)/../../K
 InstallFile "$(DSTROOT)/usr/share/man/man8/kprop.8"        : "$(SRCROOT)/../../Kerberos5/Sources/slave/kprop.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man8/kpropd.8"       : "$(SRCROOT)/../../Kerberos5/Sources/slave/kpropd.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man8/krb5kdc.8"      : "$(SRCROOT)/../../Kerberos5/Sources/kdc/krb5kdc.M" ;
+InstallFile "$(DSTROOT)/usr/share/man/man8/krb524d.8"      : "$(SRCROOT)/../../Kerberos5/Sources/krb524/krb524d.M" ;
 
 
 DEPENDS all     : "$(MakeStamp)" ;
@@ -69,6 +71,7 @@ DEPENDS install : all
                   "$(DSTROOT)/usr/bin/krb5-config"
                   
                   "$(DSTROOT)/usr/share/man/man1/kerberos.1"
+                  "$(DSTROOT)/usr/share/man/man1/krb5-config.1"
                   "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"
                   "$(DSTROOT)/usr/share/man/man5/krb5.conf.5"
                   "$(DSTROOT)/usr/share/man/man8/kadmin.8"
@@ -78,6 +81,7 @@ DEPENDS install : all
                   "$(DSTROOT)/usr/share/man/man8/kprop.8"
                   "$(DSTROOT)/usr/share/man/man8/kpropd.8"
                   "$(DSTROOT)/usr/share/man/man8/krb5kdc.8"
-                  "$(DSTROOT)/usr/share/man/man8/ktutil.8" ;
+                  "$(DSTROOT)/usr/share/man/man8/ktutil.8"
+                  "$(DSTROOT)/usr/share/man/man8/krb524d.8" ;
                   
 DEPENDS installhdrs : all ;
