@@ -572,8 +572,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
 	  krb5_auth_con_getlocalseqnumber(context, ctx->auth_context,
 					  &ctx->seq_send);
-	  krb5_auth_con_getlocalsubkey(context, ctx->auth_context,
-				       &ctx->subkey);
+	  krb5_auth_con_getsendsubkey(context, ctx->auth_context,
+				      &ctx->subkey);
 
 	  /* fill in the encryption descriptors */
 

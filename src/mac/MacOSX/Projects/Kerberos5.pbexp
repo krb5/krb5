@@ -57,6 +57,10 @@
 	_krb5_auth_con_getremotesubkey
 	_krb5_auth_con_getlocalseqnumber
 	_krb5_auth_con_getremoteseqnumber
+	_krb5_auth_con_getrecvsubkey
+	_krb5_auth_con_getsendsubkey
+	_krb5_auth_con_setrecvsubkey
+	_krb5_auth_con_setsendsubkey
 	_krb5_auth_con_setrcache
 	_krb5_auth_con_getrcache
 	_krb5_auth_con_getauthenticator

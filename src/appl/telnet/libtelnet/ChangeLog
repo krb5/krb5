@@ -1,3 +1,9 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos5.c (kerberos5_send): Rename getlocalsubkey ->
+	getsendsubkey.
+	(kerberos5_is): Rename getremotesubkey -> getrecvsubkey.
+
 2003-04-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Use library build framework.

@@ -1,3 +1,10 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Add krb5_auth_con_getsendsubkey,
+	krb5_auth_con_getrecvsubkey, krb5_auth_con_setsendsubkey,
+	krb5_auth_con_setrecvsubkey.  Mark krb5_auth_con_getlocalsubkey
+	and krb5_auth_con_getremotesubkey as deprecated.
+
 2003-05-06  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add s2kparams to 

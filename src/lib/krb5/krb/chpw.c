@@ -120,8 +120,18 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_d
 	ap_rep.data = ptr;
 	ptr += ap_rep.length;
 
-	if ((ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc)))
+	/*
+	 * Save send_subkey to later smash recv_subkey.
+	 */
+	ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmp);
+	if (ret)
+	    return ret;
+
+	ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
+	if (ret) {
+	    krb5_free_keyblock(context, tmp);
 	    return(ret);
+	}
 
 	krb5_free_ap_rep_enc_part(context, ap_rep_enc);
 
@@ -130,17 +140,16 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_d
 	cipherresult.data = ptr;
 	cipherresult.length = (packet->data + packet->length) - ptr;
 
-	/* XXX there's no api to do this right. The problem is that
-	   if there's a remote subkey, it will be used.  This is
-	   not what the spec requires */
-
-	tmp = auth_context->remote_subkey;
-	auth_context->remote_subkey = NULL;
+	/*
+	 * Smash recv_subkey to be send_subkey, per spec.
+	 */
+	ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmp);
+	krb5_free_keyblock(context, tmp);
+	if (ret)
+	    return ret;
 
 	ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
 			   &replay);
-
-	auth_context->remote_subkey = tmp;
 
 	if (ret)
 	    return(ret);
@@ -310,6 +319,7 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
     krb5_data cipherresult;
     krb5_data clearresult;
     krb5_replay_data replay;
+    krb5_keyblock *tmpkey;
 /*
 ** validate the packet length -
 */
@@ -381,8 +391,18 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
 	    ap_rep.data = ptr;
 	    ptr += ap_rep.length;
 
-	    if (ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc))
+	    /*
+	     * Save send_subkey to later smash recv_subkey.
+	     */
+	    ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmpkey);
+	    if (ret)
+		return ret;
+
+	    ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
+	    if (ret) {
+		krb5_free_keyblock(context, tmpkey);
 		return(ret);
+	    }
 
 	    krb5_free_ap_rep_enc_part(context, ap_rep_enc);
 /*
@@ -391,19 +411,16 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
 	    cipherresult.data = ptr;
 	    cipherresult.length = (packet->data + packet->length) - ptr;
 
-	    {
-		krb5_keyblock *saved_remote_subkey;
-/*
-** save the remote_subkey, so it doesn't get used when decoding 
-*/
-		saved_remote_subkey	 = auth_context->remote_subkey;
-		auth_context->remote_subkey = NULL;
+	    /*
+	     * Smash recv_subkey to be send_subkey, per spec.
+	     */
+	    ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmpkey);
+	    krb5_free_keyblock(context, tmpkey);
+	    if (ret)
+		return ret;
 
-		ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
-				   NULL);
-		auth_context->remote_subkey = saved_remote_subkey;
-	    }
-
+	    ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
+			       NULL);
 	    if (ret)
 		return(ret);
 	} /*We got an ap_rep*/

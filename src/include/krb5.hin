@@ -2148,10 +2148,29 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_getkey
 		krb5_auth_context,
 		krb5_keyblock **);
 
+krb5_error_code KRB5_CALLCONV krb5_auth_con_getsendsubkey(
+    krb5_context, krb5_auth_context, krb5_keyblock **);
+
+krb5_error_code KRB5_CALLCONV krb5_auth_con_getrecvsubkey(
+    krb5_context, krb5_auth_context, krb5_keyblock **);
+
+krb5_error_code KRB5_CALLCONV krb5_auth_con_setsendsubkey(
+    krb5_context, krb5_auth_context, krb5_keyblock *);
+
+krb5_error_code KRB5_CALLCONV krb5_auth_con_setrecvsubkey(
+    krb5_context, krb5_auth_context, krb5_keyblock *);
+
+#if KRB5_DEPRECATED
 krb5_error_code KRB5_CALLCONV krb5_auth_con_getlocalsubkey
 	(krb5_context,
 		krb5_auth_context,
 		krb5_keyblock **);
+
+krb5_error_code KRB5_CALLCONV krb5_auth_con_getremotesubkey
+	(krb5_context,
+		krb5_auth_context,
+		krb5_keyblock **);
+#endif
 
 #if KRB5_PRIVATE
 krb5_error_code KRB5_CALLCONV krb5_auth_con_set_req_cksumtype
@@ -2219,11 +2238,6 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_getauthenticator
 	(krb5_context,
 		krb5_auth_context,
 		krb5_authenticator **);
-
-krb5_error_code KRB5_CALLCONV krb5_auth_con_getremotesubkey
-	(krb5_context,
-		krb5_auth_context,
-		krb5_keyblock **);
 
 #define KRB5_REALM_BRANCH_CHAR '.'
 

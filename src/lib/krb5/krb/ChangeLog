@@ -1,3 +1,38 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* auth_con.c (krb5_auth_con_setsendsubkey) 
+	(krb5_auth_con_setrecvsubkey, krb5_auth_con_getsendsubkey) 
+	(krb5_auth_con_getrecvsubkey): New functions.  Set or retrieve
+	subkeys from an auth_context.
+	(krb5_auth_con_getlocalsubkey, krb5_auth_con_getremotesubkey):
+	Reimplement in terms of the above.
+
+	* auth_con.h, ser_actx.c: Rename {local,remote}_subkey ->
+	{send,recv}_subkey.
+
+	* chpw.c (krb5int_rd_chpw_rep): Save send_subkey prior to rd_rep;
+	use saved send_subkey to smash recv_subkey obtained from rd_rep.
+
+	* mk_req_ext.c (krb5_mk_req_extended): Rename
+	{local,remote}_subkey -> {send,recv}_subkey.  Set both subkeys if
+	subkey generation is requested.
+
+	* mk_cred.c, mk_priv.c, mk_safe.c: Rename {local,remote}_subkey ->
+	{send,recv}_subkey.  Use either send_subkey or keyblock, in that
+	order.
+
+	* rd_cred.c, rd_priv.c, rd_safe.c: Rename {local,remote}_subkey ->
+	{send,recv}_subkey.  Use either recv_subkey or keyblock, in that
+	order.
+
+	* rd_rep.c (krb5_rd_rep): Rename {local,remote}_subkey ->
+	{send,recv}_subkey.  Set both subkeys if a subkey is present in
+	the AP-REP message.
+
+	* rd_req_dec.c (krb5_rd_req_decoded_opt): Rename
+	{local,remote}_subkey -> {send,recv}_subkey.  Set both subkeys if
+	a subkey is present in the AP-REQ message.
+
 2003-05-06  Sam Hartman  <hartmans@mit.edu>
 
 	* kfree.c (krb5_free_etype_info): Free s2kparams

@@ -313,8 +313,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
     }
 
-    if ((retval = krb5_auth_con_getremotesubkey(kdc_context,
-						auth_context, subkey)))
+    if ((retval = krb5_auth_con_getrecvsubkey(kdc_context,
+					      auth_context, subkey)))
 	goto cleanup_auth_context;
 
     if ((retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
