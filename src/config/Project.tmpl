@@ -52,7 +52,12 @@
 #ifndef ExtraIncludes
 #define ExtraIncludes /**/
 #endif
-
+#ifndef HesiodDefines
+#define HesiodDefines /**/
+#endif
+#ifndef HesiodLibs
+#define HesiodLibs /**/
+#endif
 #ifndef DesDefines
 #define DesDefines YouMustFigureOutYourDesDefines
 #endif
@@ -261,6 +266,9 @@ P_PROTOS=-UUseNarrowPrototypes
             IMAKE = ImakeCmd
            DEPEND = DependCmd
           UNIFDEF = UnifdefCmd
+          HESDEFS = HesiodDefines
+          HESLIBS = HesiodLibs
+
   PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) -DUnifdefRan
        DESDEFINES = DesDefines
           TOPLIBD = $(TOP)/lib

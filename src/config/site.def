@@ -74,6 +74,12 @@
 #define DbmLib -ldbm
 #endif
 
+/* If you have the Hesiod software and libraries installed, and want to
+   use it in some application programs, then turn these on.  If they're
+   not turned on, they are left empty in Project.tmpl */
+#define HesiodDefines -DHESIOD
+#define HesiodLibs -lhesiod
+
 /* define IsodeLib to be what you pass to the loader to find the ISODE
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
