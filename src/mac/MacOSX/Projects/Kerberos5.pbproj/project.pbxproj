@@ -30,7 +30,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SYMROOT)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\"";
+				HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates\" \"$(BUILT_PRODUCTS_DIR)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libKerberos524.a;
@@ -316,7 +316,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SYMROOT)/Kerberos5.intermediates\"";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libGSS.a;
@@ -3991,7 +3991,7 @@
 			refType = 4;
 		};
 		F5CFD5E6022D8A9901120112 = {
-			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Errors.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
+			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Errors.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$DSTROOT)\" \"-sTARGET_BUILD_DIR=$(TARGET_BUILD_DIR)\" \"-sBUILT_PRODUCTS_DIR=$(BUILT_PRODUCTS_DIR)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -4284,7 +4284,7 @@
 			refType = 4;
 		};
 		F5CFD629022D922C01120112 = {
-			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Headers.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
+			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Headers.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$DSTROOT)\" \"-sTARGET_BUILD_DIR=$(TARGET_BUILD_DIR)\" \"-sBUILT_PRODUCTS_DIR=$(BUILT_PRODUCTS_DIR)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -4348,7 +4348,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../CredentialsCache/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
+				HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../CredentialsCache/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = libKerberos5.a;

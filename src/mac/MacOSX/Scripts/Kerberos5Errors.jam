@@ -1,6 +1,6 @@
 include "$(SRCROOT)/../../KerberosErrors/Scripts/compile_et.jam" ;
 
-Intermediates = "$(SYMROOT)/Kerberos5.intermediates" ;
+Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
 Mkdir "$(Intermediates)" ;
 
 compile_et 	"$(Intermediates)/prof_err.h"

@@ -32,7 +32,7 @@ actions CatHeader
     echo "#endif /* $(2[1]) */"                >> "$(1)"
 }
 
-Intermediates = "$(SYMROOT)/Kerberos5.intermediates" ;
+Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
 IntermediateHeaders = "$(Intermediates)/Kerberos" ;
 Mkdir "$(Intermediates)" ;
 Mkdir "$(IntermediateHeaders)" ;
