@@ -226,8 +226,9 @@ kerberos4_send(ap)
 
 		des_key_sched(cred.session, sched);
 		des_init_random_number_generator(cred.session);
-		des_new_random_key(challenge);
-		des_ecb_encrypt(challenge, session_key, sched, 1);
+		des_new_random_key(session_key);
+		des_ecb_encrypt(session_key, session_key, sched, 0);
+		des_ecb_encrypt(session_key, challenge, sched, 0);
 		/*
 		 * Increment the challenge by 1, and encrypt it for
 		 * later comparison.
@@ -320,6 +321,11 @@ kerberos4_is(ap, data, cnt)
 			break;
 		}
 
+		/*
+		 * Initialize the random number generator since it's
+		 * used later on by the encryption routine.
+		 */
+		des_init_random_number_generator(session_key);
 		des_key_sched(session_key, sched);
 		memcpy((void *)datablock, (void *)data, sizeof(Block));
 		/*

@@ -1,3 +1,17 @@
+Mon Nov 14 16:27:29 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos.c (kerberos4_is): Initialize random number generator on
+		the server side so that the encryption routines later on
+		can use it. 
+
+	* kerberos.c (kerberos4_send): Fix bug in how we pick the
+		challenge for the challenge/response mutual
+		authentication.
+
+Fri Nov 11 00:55:36 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* forward.c (mk_cred, rd_cred): Move these routines to libkrb.a.
+
 Tue Nov  8 01:39:50 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kerberos.c (kerberos4_is): Fix bug in logic of incrementing the
