@@ -1,3 +1,9 @@
+2002-06-26  Ezra Peisach  <epeisach@bu.edu>
+
+	* configure.in: Modify test for in6addr_any definition in C
+	library. Original test was stripped out by optimizing gcc
+	compiler.
+
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (GET_SERV_BY_PORT) [HAVE_GETSERVBYNAME_R &&
