@@ -1,9 +1,3 @@
-#!/afs/athena/contrib/perl5/p
-eval 'exec /afs/athena/contrib/perl5/arch/sun4x_55/bin/perl -S $0 ${1+"$@"}'
-    if $running_under_some_shell;
-			# this emulates #! processing on NIH machines.
-			# (remove #! line above if indigestible)
-
 eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_0-9]+=)(.*)/ && shift;
 			# process any FOO=bar switches
 
