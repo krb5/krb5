@@ -97,8 +97,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_error_code status;
     krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
-    krb5_data in_data;
-    char *tmpstr = 0;
     krb5_error	*error = 0;
     int sin_len;
     krb5_ccache cc;
@@ -129,11 +127,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sin_len = strlen(host_save) + strlen(service)
       + (realm ? strlen(realm): 0) + 3;
     if ( sin_len < 20 ) sin_len = 20;
-    tmpstr = (char *) malloc(sin_len);
-    if ( tmpstr == (char *) 0){
-	fprintf(stderr,"kcmd: no memory\n");
-	return(-1);
-    }
     
     if (!(get_cred = (krb5_creds *)calloc(1, sizeof(krb5_creds)))) {
         fprintf(stderr,"kcmd: no memory\n");
@@ -178,7 +171,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
 	    sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
-	    if (tmpstr) krb5_xfree(tmpstr);
 	    krb5_free_creds(bsd_context, get_cred);
 	    return (-1);
     	}
@@ -225,7 +217,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
     	sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
-	if (tmpstr) krb5_xfree(tmpstr);
 	krb5_free_creds(bsd_context, get_cred);
     	return (-1);
     }
@@ -280,9 +271,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         goto bad2;
     }
     
-    in_data.data = tmpstr;
-    in_data.length = strlen(tmpstr);
-    
     status = krb5_cc_default(bsd_context, &cc);
     if (status) goto bad2;
 
@@ -304,12 +292,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
        authentication. */
     status = krb5_sendauth(bsd_context, &auth_context, (krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
-			   authopts,
-                           &in_data,
-                           ret_cred,
-                           0,		/* We have the credentials */
-                           &error,		/* No error return */
-                           &rep_ret, NULL);
+			   authopts, NULL, ret_cred, 0,	&error, &rep_ret, NULL);
     if (status) {
 	printf("Couldn't authenticate to server: %s\n", error_message(status));
 	if (error) {
@@ -380,7 +363,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
     *sock = s;
-    if (tmpstr) krb5_xfree(tmpstr);
     
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(bsd_context, ret_cred, cred);
@@ -397,7 +379,6 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
     sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
-    if (tmpstr) krb5_xfree(tmpstr);
     if (ret_cred)
       krb5_free_creds(bsd_context, ret_cred);
     return (status);

@@ -1513,6 +1513,7 @@ recvauth(netf, peersin, peeraddr)
      struct sockaddr_in peersin;
      krb5_address peeraddr;
 {
+    krb5_auth_context *auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
@@ -1543,18 +1544,17 @@ recvauth(netf, peersin, peeraddr)
 
     strcpy(v4_instance, "*");
 
-    status = krb5_compat_recvauth(bsd_context, &netf,
+    if (status = krb5_auth_con_init(bsd_context, &auth_context))
+	return status;
+
+    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &peeraddr);
+
+    status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
 				  server, /* Specify daemon principal */
-				  &peeraddr, /* We do want to match */
-					     /* this against caddrs in */
-					     /* the ticket */
-				  0, /* use v5srvtab */
-				  0, /* no keyproc */
-				  0, /* no keyprocarg */
-				  0, /* default rc_type */
-				  0, /* no flags */
-
+				  0, 		/* default rc_type */
+				  0, 		/* no flags */
+				  NULL,		/* default keytab */
 				  0, 		/* v4_opts */
 				  "rcmd", 	/* v4_service */
 				  v4_instance, 	/* v4_instance */
@@ -1562,12 +1562,8 @@ recvauth(netf, peersin, peeraddr)
 				  &laddr, 	/* our local address */
 				  "", 		/* use default srvtab */
 
-				  &auth_sys, /* which authentication system */
-				  0, 		/* no seq number */
-				  &client, 	/* return client */
 				  &ticket, 	/* return ticket */
-				  &kdata, 	/* return authenticator */
-				  
+				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, 0, v4_version);
 
     if (status) {
@@ -1606,7 +1602,8 @@ recvauth(netf, peersin, peeraddr)
 	
     getstr(netf, remuser, sizeof(locuser), "remuser");
 
-    if (status = krb5_unparse_name(bsd_context, client, &kremuser))
+    if (status = krb5_unparse_name(bsd_context, ticket->enc_part2->client, 
+				   &kremuser))
 	return status;
     
     /* Setup eblock for encrypted sessions. */

@@ -1139,21 +1139,6 @@ char **save_argv(argc, argv)
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-krb5_error_code tgt_keyproc(context, keyprocarg, principal, vno, keytype, key)
-     krb5_context context;
-     krb5_pointer keyprocarg;
-     krb5_principal principal;
-     krb5_kvno vno;
-     krb5_keytype keytype;
-     krb5_keyblock ** key;
-{
-    krb5_creds *creds = (krb5_creds *)keyprocarg;
-    
-    return krb5_copy_keyblock(context, &creds->keyblock, key);
-}
-
-
-
 void send_auth()
 {
     int sin_len;
@@ -1161,9 +1146,10 @@ void send_auth()
     krb5_ccache cc;
     krb5_creds in_creds, *out_creds;
     krb5_data reply, princ_data;
-    krb5_tkt_authent *authdat;
     krb5_error_code status;
     krb5_address faddr;
+    krb5_ticket * ticket = NULL;
+    krb5_auth_context * auth_context = NULL;
     
     
     if (status = krb5_cc_default(bsd_context, &cc)){
@@ -1246,17 +1232,21 @@ void send_auth()
     faddr.addrtype = foreign.sin_family;
     faddr.length = SIZEOF_INADDR;
     faddr.contents = (krb5_octet *) &foreign.sin_addr;
+
+    if (krb5_auth_con_init(bsd_context, &auth_context))
+	exit(1);
+
+    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &faddr);
+    
+    if (krb5_auth_con_setuseruserkey(bsd_context, auth_context,
+				     &out_creds->keyblock))
+	exit(1);
     
     /* read the ap_req to get the session key */
-    status = krb5_rd_req(bsd_context, &reply,
+    status = krb5_rd_req(bsd_context, &auth_context, &reply,
 			 0,               /* don't know server's name... */
-			 &faddr,
-			 0,               /* no fetchfrom */
-			 tgt_keyproc,
-			 (krb5_pointer)out_creds, /* credentials as arg to
-						  keyproc */
-			 0,               /* no rcache for the moment XXX */
-			 &authdat);
+			 NULL,		  /* default keytab */
+			 NULL, & ticket);
     krb5_xfree(reply.data);
     if (status) {
 	fprintf(stderr, "rcp: send_auth failed krb5_rd_req: %s\n",
@@ -1264,9 +1254,8 @@ void send_auth()
 	exit(1);
     }
     
-    krb5_copy_keyblock(bsd_context, authdat->ticket->enc_part2->session,
+    krb5_copy_keyblock(bsd_context, ticket->enc_part2->session,
 		       &session_key);
-    krb5_free_tkt_authent(bsd_context, authdat);
     krb5_free_creds(bsd_context, out_creds);
     
     krb5_use_keytype(bsd_context, &eblock, session_key->keytype);

@@ -1,3 +1,13 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * krcp.c (send_auth()): Use new calling convention for krb5_rd_req().
+
+        * krshd.c (recvauth()): Use new calling convention for 
+		krb5_compat_recvauth().
+
+        * krlogind.c (recvauth()): Use new calling convention for 
+		krb5_compat_recvauth().
+
 Thu Mar 23 23:23:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (krshd): Move $(K4LIB) after $(KLIB) so that if
@@ -26,6 +36,11 @@ Tue Mar 14 16:08:08 1995    <tytso@rsx-11.mit.edu>
 
 	* krlogind.c (main, doit): Minor type fixes to gethostbyname(),
 		accept().
+
+Tue Mar 14 12:30:23 1995  Chris Provenzano (proven@mit.edu)
+
+	* kcmd.c (kcmd()): Don't pass any data to sendauth() to be 
+		checksummed. The remote side doesn't check it anyway.
 
 Fri Mar 10 18:32:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 

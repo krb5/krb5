@@ -1484,6 +1484,7 @@ int default_realm(principal)
 krb5_error_code
 recvauth()
 {
+    krb5_auth_context * auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in peersin, laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
@@ -1524,34 +1525,29 @@ recvauth()
 
     strcpy(v4_instance, "*");
 
-    status = krb5_compat_recvauth(bsd_context, &netf,
+    if (status = krb5_auth_con_init(bsd_context, &auth_context))
+        return status;
+ 
+    krb5_auth_con_setaddrs(bsd_context, auth_context, NULL, &peeraddr);
+
+    if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
-				  server, /* Specify daemon principal */
-				  &peeraddr, /* We do want to match */
-					     /* this against caddrs in */
-					     /* the ticket */
-				  0, /* use v5srvtab */
-				  0, /* no keyproc */
-				  0, /* no keyprocarg */
-				  0, /* default rc_type */
-				  0, /* no flags */
+				  server, 	/* Specify daemon principal */
+				  0, 		/* default rc_type */
+				  0, 		/* no flags */
+				  NULL,		/* default keytab */
 
 				  do_encrypt ? KOPT_DO_MUTUAL : 0, /*v4_opts*/
-				  "rcmd", /* v4_service */
-				  v4_instance, /* v4_instance */
-				  &peersin, /* foriegn address */
-				  &laddr, /* our local address */
-				  "", /* use default srvtab */
+				  "rcmd", 	/* v4_service */
+				  v4_instance, 	/* v4_instance */
+				  &peersin, 	/* foriegn address */
+				  &laddr, 	/* our local address */
+				  "", 		/* use default srvtab */
 
-				  &auth_sys, /* which authentication system */
-				  0, /* no seq number */
-				  &client, /* return client */
-				  &ticket, /* return ticket */
-				  &kdata, /* return authenticator */
-				  
-				  &v4_kdata, v4_schedule, v4_version);
+				  &ticket, 	/* return ticket */
+				  &auth_sys, 	/* which authentication system*/
+				  &v4_kdata, v4_schedule, v4_version)) {
 
-    if (status) {
 	if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
 	     * clean up before exiting
@@ -1565,6 +1561,10 @@ recvauth()
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
+
+    if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+				     &client))
+	return status;
 
 #ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
