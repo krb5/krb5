@@ -199,4 +199,15 @@ requests.so requests.po $(OUTPRE)requests.$(OBJEXT): requests.c ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS)
 data.so data.po $(OUTPRE)data.$(OBJEXT): data.c ss_internal.h ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h
+mk_cmds.so mk_cmds.po $(OUTPRE)mk_cmds.$(OBJEXT): mk_cmds.c copyright.h ss_internal.h \
+  ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS)
+utils.so utils.po $(OUTPRE)utils.$(OBJEXT): utils.c copyright.h ss_internal.h \
+  ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS)
+options.so options.po $(OUTPRE)options.$(OBJEXT): options.c copyright.h ss.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS)
+cmd_tbl.lex.o: cmd_tbl.lex.c ct.tab.h
+ct.tab.o: ct.tab.c ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS)
+ss_err.so ss_err.po $(OUTPRE)ss_err.$(OBJEXT): ss_err.c $(COM_ERR_DEPS)
+std_rqs.so std_rqs.po $(OUTPRE)std_rqs.$(OBJEXT): std_rqs.c $(SS_DEPS) $(COM_ERR_DEPS)
 
