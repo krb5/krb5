@@ -1,3 +1,10 @@
+Thu Nov  7 11:36:15 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_kadm5.c (parse_keysalts, parse_tl_data): Do not free memory
+		twice. 
+
+	* Makefile.in: Use $(LD) instead of $(CC) for linking.
+
 Fri Nov  1 13:16:43 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* tcl_kadm5.c (unparse_err): update for new tl_data semantics

@@ -809,6 +809,7 @@ static int parse_keysalts(Tcl_Interp *interp, char *list,
 	  (*keysalts)[i].ks_salttype = tmp;
 
 	  free(argv1);
+	  argv1 = NULL;
      }
 
 finished:
@@ -931,6 +932,7 @@ static int parse_tl_data(Tcl_Interp *interp, char *list,
 	  strcpy(tl->tl_data_contents, argv1[2]);
 
 	  free(argv1);
+	  argv1 = NULL;
 	  tl = tl->tl_data_next;
      }
      if (tl != NULL) {
