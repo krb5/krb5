@@ -41,7 +41,7 @@ static char rcsid_adm_fmt_inq[] =
 
 #include <stdio.h>
 
-#ifdef USE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
 #include <time.h>

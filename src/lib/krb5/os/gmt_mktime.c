@@ -3,9 +3,13 @@
 #include <stdio.h>
 
 #include <sys/types.h>
-#include <time.h>
-#ifdef USE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#include <time.h>
 #endif
 
 /* take a struct tm, return seconds from GMT epoch */
