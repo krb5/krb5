@@ -883,13 +883,18 @@ krb5_do_preauth(krb5_context context,
 		    }
 		}
 
-		if (pa_type == KRB5_PADATA_ETYPE_INFO2)
-		    seen_etype_info2++;
 		scratch.length = in_padata[i]->length;
 		scratch.data = (char *) in_padata[i]->contents;
-		ret = decode_krb5_etype_info(&scratch, &etype_info);
+		if (pa_type == KRB5_PADATA_ETYPE_INFO2) {
+		    seen_etype_info2++;
+		    ret = decode_krb5_etype_info2(&scratch, &etype_info);
+		}
+		else ret = decode_krb5_etype_info(&scratch, &etype_info);
 		if (ret) {
-		  goto cleanup;
+		    ret = 0; /*Ignore error and etype_info element*/
+		    krb5_free_etype_info( context, etype_info);
+		    etype_info = NULL;
+		    continue;
 		}
 		if (etype_info[0] == NULL) {
 		    krb5_free_etype_info(context, etype_info);

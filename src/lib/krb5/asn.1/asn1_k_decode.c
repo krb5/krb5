@@ -813,6 +813,32 @@ static asn1_error_code asn1_decode_etype_info2_entry(asn1buf *buf, krb5_etype_in
   { begin_structure();
     get_field(val->etype,0,asn1_decode_enctype);
     if (tagnum == 1) {
+	    get_lenfield(val->length,val->salt,1,asn1_decode_generalstring);
+    } else {
+	    val->length = KRB5_ETYPE_NO_SALT;
+	    val->salt = 0;
+    }
+    if ( tagnum ==2) {
+      krb5_octet *params ;
+      get_lenfield( val->s2kparams.length, params,
+		      2, asn1_decode_octetstring);
+      val->s2kparams.data = ( char *) params;
+    } else {
+	val->s2kparams.data = NULL;
+	val->s2kparams.length = 0;
+    }
+    end_structure();
+    val->magic = KV5M_ETYPE_INFO_ENTRY;
+  }
+  cleanup();
+}
+
+static asn1_error_code asn1_decode_etype_info2_entry_1_3(asn1buf *buf, krb5_etype_info_entry *val )
+{
+  setup();
+  { begin_structure();
+    get_field(val->etype,0,asn1_decode_enctype);
+    if (tagnum == 1) {
 	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
     } else {
 	    val->length = KRB5_ETYPE_NO_SALT;
@@ -832,6 +858,8 @@ static asn1_error_code asn1_decode_etype_info2_entry(asn1buf *buf, krb5_etype_in
   }
   cleanup();
 }
+
+
 static asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry *val )
 {
   setup();
@@ -857,9 +885,16 @@ asn1_error_code asn1_decode_etype_info(asn1buf *buf, krb5_etype_info_entry ***va
   decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info_entry);
 }
 
-asn1_error_code asn1_decode_etype_info2(asn1buf *buf, krb5_etype_info_entry ***val )
+asn1_error_code asn1_decode_etype_info2(asn1buf *buf, krb5_etype_info_entry ***val ,
+					krb5_boolean v1_3_behavior)
 {
-  decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info2_entry);
+    if (v1_3_behavior) {
+	decode_array_body(krb5_etype_info_entry,
+			  asn1_decode_etype_info2_entry_1_3);
+    } else {
+	decode_array_body(krb5_etype_info_entry,
+			  asn1_decode_etype_info2_entry);
+    }
 }
 
 asn1_error_code asn1_decode_passwdsequence(asn1buf *buf, passwd_phrase_element *val)
