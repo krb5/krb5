@@ -34,17 +34,17 @@ static char rcsid_cryptoconf_c[] =
 #endif
 
 #ifdef PROVIDE_DES_CBC_CKSUM
-#include <krb5/des.h>
-#define DES_CBC_CKENTRY &des_cbc_cksumtable_entry
+#include <krb5/mit-des.h>
+#define DES_CBC_CKENTRY &mit_des_cbc_cksumtable_entry
 #else
 #define DES_CBC_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_DES_CBC_CRC
-#include <krb5/des.h>
-static krb5_cs_table_entry des_cbc_crc_csentry = {
+#include <krb5/mit-des.h>
+static krb5_cs_table_entry mit_des_cbc_crc_csentry = {
     &mit_des_cryptosystem_entry, 0 };
-#define DES_CBC_CRC_CSENTRY &des_cbc_crc_csentry
+#define DES_CBC_CRC_CSENTRY &mit_des_cbc_crc_csentry
 #else
 #define DES_CBC_CRC_CSENTRY 0
 #endif
