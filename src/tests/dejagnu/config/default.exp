@@ -91,6 +91,10 @@ if ![info exists KINIT] {
     set KINIT [findfile $objdir/../../clients/kinit/kinit]
 }
 
+if ![info exists RESOLVE] {
+    set RESOLVE [findfile $objdir/../resolve/resolve]
+}
+
 # We use a couple of variables to hold shell prompts which may be
 # overridden by the user.
 
@@ -157,6 +161,7 @@ proc check_exit_status { testname } {
 # of the name).  Returns 1 on success, 0 on failure.
 
 proc get_hostname { } {
+    global RESOLVE
     global hostname
     global localhostname
 
@@ -164,7 +169,7 @@ proc get_hostname { } {
 	return 1
     }
 
-    catch "exec hostname >tmpdir/hostname" exec_output
+    catch "exec $RESOLVE -q >tmpdir/hostname" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output

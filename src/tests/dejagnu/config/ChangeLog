@@ -1,3 +1,10 @@
+Mon May  1 21:32:57 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* default.exp: (get_hostname): Use tests/resolve/resolve to get
+		the fully qualified domain name of the local host.
+		Needed for systems where gethostname() doesn't return the
+		FQDN. 
+
 Thu Apr 27 00:22:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: KRB5KDC: add -n to don't fork. Set up krb5.conf 
