@@ -1,3 +1,7 @@
+2001-06-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* client.c (main): Missing arguments to printf fixed.
+
 2001-04-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* client.c (main): Ensure that end of string is NULL terminated

@@ -5,6 +5,9 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.18  2001/06/05 16:27:38  epeisach
+ * * client.c (main): Missing arguments to printf fixed.
+ *
  * Revision 1.17  2001/04/24 17:05:34  epeisach
  * 	* client.c (main): Ensure that end of string is NULL terminated
  *  	instead of assuming buffer initialized to 0. Include <string.h>
@@ -133,6 +136,7 @@ static void usage()
      exit(1);
 }
 
+int
 main(argc, argv)
    int argc;
    char **argv;
@@ -230,7 +234,7 @@ main(argc, argv)
 	  if (strncmp(*echo_resp, "Echo: ", 6) &&
 	      strcmp(echo_arg, (*echo_resp) + 6) != 0)
 	       fprintf(stderr, "RPC_TEST_ECHO call %d response wrong: "
-		       "arg = %s, resp = %s\n", echo_arg, *echo_resp);
+		       "arg = %s, resp = %s\n", i, echo_arg, *echo_resp);
 	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
      }
 
@@ -336,7 +340,7 @@ main(argc, argv)
 	       if (strncmp(*echo_resp, "Echo: ", 6) &&
 		   strcmp(echo_arg, (*echo_resp) + 6) != 0)
 		    fprintf(stderr,
-			    "RPC_TEST_LENGTHS call %d response wrong\n");
+			    "RPC_TEST_LENGTHS call %d response wrong\n", i);
 	       gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 	  }
 	  
