@@ -272,6 +272,10 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      	} else if ((retval == 0) && (realm_name == NULL)) {
      		break;
      	}
+	if (v4realms != NULL) {
+	        profile_free_list(v4realms);
+		v4realms = NULL;
+	}
      	if (realm_name != NULL) {
      		profile_release_string (realm_name);
      		realm_name = NULL;
@@ -327,10 +331,10 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 not_service:	
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
 				   instance, 0);
-     profile_iterator_free (&iterator);
-     profile_free_list(full_name);
-     profile_free_list(v4realms);
-     profile_release_string (realm_name);
-     profile_release_string (dummy_value);
+     if (iterator) profile_iterator_free (&iterator);
+     if (full_name) profile_free_list(full_name);
+     if (v4realms) profile_free_list(v4realms);
+     if (realm_name) profile_release_string (realm_name);
+     if (dummy_value) profile_release_string (dummy_value);
      return retval;
 }
