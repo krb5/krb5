@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * slave/kpropd.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -30,10 +29,6 @@
  * write...
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kpropd_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 #include <stdio.h>
 #include <ctype.h>

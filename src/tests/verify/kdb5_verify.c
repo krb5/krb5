@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * tests/verify/kdb5_verify.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Edit a KDC database.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_verify_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>

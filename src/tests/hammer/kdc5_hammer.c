@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * tests/hammer/kdc5_hammer.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +23,6 @@
  *
  * Initialize a credentials cache.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_hammer_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 

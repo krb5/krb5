@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * slave/kprop.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,10 +23,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kprop_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 #include <errno.h>
 #ifdef POSIX_FILE_LOCKS

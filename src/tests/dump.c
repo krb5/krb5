@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * tests/dump.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,12 +23,6 @@
  *
  * Dump out a krb5_data to stderr (for debugging purposes).
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_dump_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
-
 
 #include <stdio.h>
 
