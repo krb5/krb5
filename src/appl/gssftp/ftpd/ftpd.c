@@ -1899,13 +1899,14 @@ char *data;
 #ifdef GSSAPI
     if (strcmp(temp_auth_type, "GSSAPI") == 0) {
         int replied = 0;
+	int found = 0;
         gss_cred_id_t server_creds;     
 	gss_name_t client;
 	int ret_flags;
 	struct gss_channel_bindings_struct chan;
 	gss_buffer_desc name_buf;
 	gss_name_t server_name;
-	OM_uint32 maj_stat, min_stat;
+	OM_uint32 maj_stat, min_stat, save_stat;
 	char localname[MAXHOSTNAMELEN];
 	char service_name[MAXHOSTNAMELEN+10];
 	char **service;
@@ -1961,12 +1962,16 @@ char *data;
 		maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
 					    GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
 					    &server_creds, NULL, NULL);
+		save_stat = min_stat;
 		(void) gss_release_name(&min_stat, &server_name);
 		if (maj_stat != GSS_S_COMPLETE)
 		  continue;
+		found++;
 	}
-		if (maj_stat != GSS_S_COMPLETE)
+
+		if (!found && (maj_stat != GSS_S_COMPLETE))
 		{
+			min_stat = save_stat;
 			reply_gss_error(501, maj_stat, min_stat,
 					"acquiring credentials");
 			syslog(LOG_ERR, "gssapi error acquiring credentials");

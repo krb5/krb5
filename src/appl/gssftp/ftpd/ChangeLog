@@ -1,3 +1,9 @@
+Fri Mar 15 14:16:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ftpd.c (auth_data): Do not fail if last gss_service is not
+		present in keytab. If no services present, return a useful
+		minor error status.
+
 Fri Mar 15 01:24:39 1996  Richard Basch  <basch@lehman.com>
 
         * configure.in, ftpd.c: Added shadow password support.
