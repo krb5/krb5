@@ -1,3 +1,12 @@
+2000-5-19	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added krb5int_cc_default.  This function supports the 
+	Kerberos Login Library and pops up a dialog if the cache does not
+	contain valid tickets.  This is used to automatically get a tgt before
+	obtaining service tickets.  Note that this should be an internal function
+	because callers don't expect krb5_cc_default to pop up a dialog!
+	(We found this out the hard way :-)
+
 2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
 
         * krb5.hin
