@@ -1,3 +1,10 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Make Windows Makefile target creation atomic.
+	Build clients/kvno for Windows.  Also pull from 1.1 branch: Add
+	install target for windows.  Remove references to unused mit
+	directory.
+
 1999-11-02  Ken Raeburn  <raeburn@raeburn.org>
 
 	* aclocal.m4 (KRB5_AC_INET6): New macro.

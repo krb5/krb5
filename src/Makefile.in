@@ -6,8 +6,6 @@ MY_SUBDIRS=util include lib @krb524@ kdc kadmin slave clients appl tests \
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 
 
-##DOS##BUILDTOP = .
-
 SRCS =  
 HDRS = 
 
@@ -128,7 +126,7 @@ config-windows:: Makefile-windows
 WINMAKEFILES=Makefile \
 	clients\Makefile clients\kdestroy\Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
-	clients\kpasswd\Makefile \
+	clients\kpasswd\Makefile clients\kvno\Makefile \
 	include\Makefile include\krb5\Makefile \
 	lib\Makefile lib\crypto\Makefile \
 	lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
@@ -174,6 +172,8 @@ WINMAKEFILES=Makefile \
 ##DOS##clients\klist\Makefile: clients\klist\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\kpasswd\Makefile: clients\kpasswd\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##clients\kvno\Makefile: clients\kvno\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -324,9 +324,6 @@ MACFILES= mac/* mac/libraries/* config/* include/* \
 	include/krb5/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
-MITWINFILES= mit/windows/include/* 
-MITWINBINARYFILES= mit/windows/lib/*
-
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
 	windows/*/*.hpj windows/lib/*.lib
 
@@ -365,10 +362,6 @@ kerbsrc.win: kerbsrc.zip
 winfile.list:
 	echo $(FILES) $(WINFILES) | tr ' ' \\012 | \
 		sed -f config/winexclude.sed > winfile.list
-	if test -d mit ; then \
-		echo $(MITWINFILES) | tr ' ' \\012 | \
-		sed -f config/winexclude.sed >> winfile.list ; \
-	fi
 
 MAC_SUBDIRS = lib util
 macfile.list:
@@ -378,7 +371,8 @@ macfile.list:
 
 dos-Makefile:
 	cat config/win-pre.in Makefile.in config/win-post.in | \
-		sed -e "s/^##DOS##//" -e "s/^##DOS//" > Makefile
+		sed -e "s/^##DOS##//" -e "s/^##DOS//" > Makefile.tmp
+	mv Makefile.tmp Makefile
 
 prep-windows: dos-Makefile awk-windows-mac
 
@@ -395,9 +389,6 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -@Dl kerbsrc.zip < winfile.list
 	$(ZIP) -D kerbsrc.zip $(WINBINARYFILES)
-	if test -d mit ; then \
-		$(ZIP) -rD kerbsrc.zip $(MITWINBINARYFILES) ; \
-	fi
 	rm -f $(CLEANUP)
 
 kerbsrc-nt.zip: kerbsrc-nt-is-obsolete
@@ -503,21 +494,35 @@ awk-windows-mac: $(ETOUT) $(HOUT)
 clean-windows-mac:
 	rm -f $(CLEANUP)
 
-KBINDIR=kbin
-
 distclean-windows:
 	config\rm.bat $(CLEANUP:^/=^\)
 	config\rm.bat $(WINMAKEFILES)
 	config\rm.bat $(KBINDIR)\*.dll $(KBINDIR)\*.exe
 	@if exist $(KBINDIR)\nul rmdir $(KBINDIR)
 
-mkbin:
-	@if not exist $(KBINDIR)\nul mkdir $(KBINDIR)
-	$(CP) lib\$(OUTPRE)*.dll $(KBINDIR)\.
-	$(CP) windows\cns\$(OUTPRE)krb5.exe $(KBINDIR)\.
-	$(CP) windows\wintel\$(OUTPRE)telnet.exe $(KBINDIR)\.
-	$(CP) windows\gss\$(OUTPRE)gss.exe $(KBINDIR)\.
-	$(CP) clients\klist\$(OUTPRE)klist.exe $(KBINDIR)\.
-	$(CP) clients\kinit\$(OUTPRE)kinit.exe $(KBINDIR)\.
-	$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe $(KBINDIR)\.
-	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe $(KBINDIR)\.
+install-windows::
+	@if "$(KRB_INSTALL_DIR)"=="" @echo KRB_INSTALL_DIR is not defined!  Please define it.
+	@if "$(KRB_INSTALL_DIR)"=="" @dir /b \nul\nul
+	@if not exist "$(KRB_INSTALL_DIR)\$(NULL)" @echo The directory $(KRB_INSTALL_DIR) does not exist.  Please create it.
+	@if not exist "$(KRB_INSTALL_DIR)\$(NULL)" @dir /b $(KRB_INSTALL_DIR)\nul
+	@if not exist "$(KRB_INSTALL_DIR)\include\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include"
+	@if not exist "$(KRB_INSTALL_DIR)\include\gssapi\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include\gssapi"
+	@if not exist "$(KRB_INSTALL_DIR)\lib\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\lib"
+	@if not exist "$(KRB_INSTALL_DIR)\bin\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\bin"
+	$(CP) include\krb5.h "$(KRB_INSTALL_DIR)\include\."
+	$(CP) include\win-mac.h "$(KRB_INSTALL_DIR)\include\."
+	$(CP) include\profile.h "$(KRB_INSTALL_DIR)\include\."
+	$(CP) include\com_err.h "$(KRB_INSTALL_DIR)\include\."
+	$(CP) include\gssapi\gssapi.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	$(CP) include\gssapi\gssapi_krb5.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	$(CP) lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
+	$(CP) lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) windows\wintel\$(OUTPRE)telnet.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) windows\gss\$(OUTPRE)gss.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) clients\kinit\$(OUTPRE)kinit.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe "$(KRB_INSTALL_DIR)\bin\."
+	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
+	@if exist "$(KRB_INSTALL_DIR)\bin\krb4_32.dll" del "$(KRB_INSTALL_DIR)\bin\krb4_32.dll"
+	@if exist "$(KRB_INSTALL_DIR)\lib\krb4_32.lib" del "$(KRB_INSTALL_DIR)\lib\krb4_32.lib"
