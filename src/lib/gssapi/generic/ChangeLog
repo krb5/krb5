@@ -1,3 +1,8 @@
+Tue Jul 29 22:54:40 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c: Add support for the new OID value for
+		host-based service name.
+
 Tue Jul  8 12:46:17 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* util_ordering.c: Include string.h for prototypes.

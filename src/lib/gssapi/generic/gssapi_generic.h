@@ -38,5 +38,6 @@ KRB5_DLLIMP extern gss_OID gss_nt_machine_uid_name;
 KRB5_DLLIMP extern gss_OID gss_nt_string_uid_name;
 KRB5_DLLIMP extern gss_OID gss_nt_service_name;
 KRB5_DLLIMP extern gss_OID gss_nt_exported_name;
+KRB5_DLLIMP extern gss_OID gss_nt_service_name_v2;
 
 #endif /* _GSSAPI_GENERIC_H_ */

@@ -47,6 +47,9 @@
  * exported_name:
  *      1(iso), 3(org), 6(dod), 1(internet), 5(security), 6(nametypes),
  *	    4(gss-api-exported-name)
+ * host_based_service_name (v2):
+ *      iso (1) org (3), dod (6), internet (1), security (5), nametypes(6),
+ *      gss-host-based-services(2)
  */
 
 static gss_OID_desc oids[] = {
@@ -55,6 +58,7 @@ static gss_OID_desc oids[] = {
    {10, "\052\206\110\206\367\022\001\002\001\003"},
    {10, "\052\206\110\206\367\022\001\002\001\004"},
    { 6, "\053\006\001\005\006\004"},
+   { 6, "\053\006\001\005\006\002"},
 };
 
 KRB5_DLLIMP gss_OID gss_nt_user_name = oids+0;
@@ -62,3 +66,4 @@ KRB5_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
 KRB5_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
 KRB5_DLLIMP gss_OID gss_nt_service_name = oids+3;
 KRB5_DLLIMP gss_OID gss_nt_exported_name = oids+4;
+KRB5_DLLIMP gss_OID gss_nt_service_name_v2 = oids+5;
