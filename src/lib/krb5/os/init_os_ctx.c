@@ -29,7 +29,7 @@
 #define NEED_WINDOWS
 #include "k5-int.h"
 
-#ifdef macintosh
+#ifdef TARGET_OS_MAC
 #include <PreferencesLib.h>
 #endif /* macintosh */
 
@@ -170,7 +170,7 @@ static void
 free_filespecs(files)
 	profile_filespec_t *files;
 {
-#ifndef macintosh
+#if !TARGET_OS_MAC
     char **cp;
 
     if (files == 0)
@@ -187,8 +187,8 @@ os_get_default_config_files(pfiles, secure)
 	profile_filespec_t ** pfiles;
 	krb5_boolean secure;
 {
-    profile_filespec_t* files;
-#ifdef macintosh
+#ifdef TARGET_OS_MAC
+        FSSpec*	files = nil;
 	FSSpec*	preferencesFiles = nil;
 	UInt32	numPreferencesFiles;
 	FSSpec*	preferencesFilesToInit = nil;
@@ -278,6 +278,7 @@ os_get_default_config_files(pfiles, secure)
 		return ENOENT;
 	
 #else /* !macintosh */
+    profile_filespec_t* files;
 #if defined(_MSDOS) || defined(_WIN32)
     krb5_error_code retval = 0;
     char *name = 0;
@@ -386,10 +387,16 @@ os_init_paths(ctx)
 #endif /* KRB5_DNS_LOOKUP */
 
     retval = os_get_default_config_files(&files, secure);
-
+    
     if (!retval) {
+#if TARGET_OS_MAC
+        retval = FSp_profile_init_path(files,
+			      &ctx->profile);
+#else
         retval = profile_init((const_profile_filespec_t *) files,
 			      &ctx->profile);
+#endif
+
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
         if (retval == ENOENT) {
@@ -465,8 +472,15 @@ krb5_get_profile (ctx, profile)
 
     retval = os_get_default_config_files(&files, ctx->profile_secure);
 
-    if (!retval)
-        retval = profile_init((const_profile_filespec_t *) files, profile);
+    if (!retval) {
+#if TARGET_OS_MAC
+        retval = FSp_profile_init_path(files,
+			      profile);
+#else
+        retval = profile_init((const_profile_filespec_t *) files,
+			      profile);
+#endif
+    }
 
     if (files)
         free_filespecs(files);
@@ -484,7 +498,7 @@ krb5_get_profile (ctx, profile)
     return retval;
 }	
 
-#if !defined(macintosh) && !defined(__MACH__)
+#if !TARGET_OS_MAC
 
 krb5_error_code
 krb5_set_config_files(ctx, filenames)
