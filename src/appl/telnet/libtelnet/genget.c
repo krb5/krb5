@@ -35,7 +35,7 @@
 
 #include <ctype.h>
 
-#define	LOWER(x) (isupper(x) ? tolower(x) : (x))
+#define	LOWER(x) (isupper((int) x) ? tolower((int) x) : (x))
 /*
  * The prefix function returns 0 if *s1 is not a prefix
  * of *s2.  If *s1 exactly matches *s2, the negative of
