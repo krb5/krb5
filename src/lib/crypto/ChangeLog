@@ -1,3 +1,9 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (init_once): Variable deleted.
+	(krb5_c_random_add_entropy): Do the initialization once, using
+	the yarrow_lock mutex instead of k5_once to protect it.
+
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_nfold.c (fold_kerberos): Change nbytes argument to unsigned.

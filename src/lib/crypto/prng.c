@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2001, 2002, 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * 
@@ -30,7 +30,6 @@
 
 #include "yarrow.h"
 static Yarrow_CTX y_ctx;
-static k5_once_t init_once = K5_ONCE_INIT;
 static int inited, init_error;
 static k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
@@ -95,17 +94,16 @@ krb5_c_random_add_entropy (krb5_context context, unsigned int randsource,
   yerr = krb5int_crypto_init();
   if (yerr)
       return yerr;
-  /* Run the Yarrow init code, if not done already.  */
-  yerr = k5_once(&init_once, do_yarrow_init);
-  if (yerr)
-      return yerr;
-  /* Return an error if the Yarrow initialization failed.  */
-  if (init_error)
-      return KRB5_CRYPTO_INTERNAL;
   /* Now, finally, feed in the data.  */
   yerr = k5_mutex_lock(&yarrow_lock);
   if (yerr)
       return yerr;
+  if (!inited)
+      do_yarrow_init();
+  if (init_error) {
+      k5_mutex_unlock(&yarrow_lock);
+      return KRB5_CRYPTO_INTERNAL;
+  }
   yerr = krb5int_yarrow_input (&y_ctx, randsource,
 			       data->data, data->length,
 			       entropy_estimate (randsource, data->length));
