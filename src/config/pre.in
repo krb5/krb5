@@ -38,7 +38,8 @@ KRB5_INCDIR = $(KRB5ROOT)/include
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/krb5 \
 	$(KRB5_INCDIR)/asn.1 \
-	$(KRB5_INCDIR)/kerberosIV
+	$(KRB5_INCDIR)/kerberosIV \
+	$(KRB5_INCDIR)/gssapi
 
 
 RM = rm -f
