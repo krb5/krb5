@@ -1,3 +1,9 @@
+Fri Sep 25 19:42:10 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Re-order booleans so that
+	similar doesn't get checked unless (ktype >= 0) to avoid it being
+	stack garbage.
+
 Sun Aug 16 16:52:10 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* Makefile.in (SHLIB_EXPLIBS): Include $(LIBS) so building on AIX works
