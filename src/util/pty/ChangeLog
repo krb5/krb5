@@ -1,3 +1,8 @@
+Tue Oct 28 13:28:54 1997  Ezra Peisach  <epeisach@.mit.edu>
+
+	* pty-int.h: Do not prototype initialize_pty_error_table as
+	        pty-err.h does as well.
+
 Fri Oct 24 09:12:43 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (CFILES): Add $(srcdir).
