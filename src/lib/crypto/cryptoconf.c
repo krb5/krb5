@@ -95,6 +95,16 @@
 #define RAW_DES_CBC_CSENTRY 0
 #endif
 
+#ifdef PROVIDE_DES3_CBC_MD5
+#ifndef _DES_DONE__
+#include "des_int.h"
+#define _DES_DONE__
+#endif
+#define DES3_CBC_MD5_CSENTRY &krb5_des3_md5_cst_entry
+#else
+#define DES3_CBC_MD5_CSENTRY 0
+#endif
+
 
 /* WARNING:
    make sure the order of entries in these tables matches the #defines in
@@ -107,6 +117,7 @@ krb5_cs_table_entry * NEAR krb5_enctype_array[] = {
     0,				/* ENCTYPE_DES_CBC_MD4 */
     DES_CBC_MD5_CSENTRY,	/* ENCTYPE_DES_CBC_MD5 */
     RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
+    DES3_CBC_MD5_CSENTRY,	/* ENCTYPE_DES3_CBC_MD5 */
 };
 
 krb5_enctype krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_array[0]) - 1;
