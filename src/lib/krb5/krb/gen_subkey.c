@@ -40,7 +40,7 @@ krb5_generate_subkey(context, key, subkey)
     if ((retval = krb5_c_random_seed(context, &seed)))
 	return(retval);
 
-    if ((*subkey = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))))
+    if ((*subkey = (krb5_keyblock *) malloc(sizeof(krb5_keyblock))) == NULL)
 	return(ENOMEM);
 
     if ((retval = krb5_c_make_random_key(context, key->enctype, *subkey))) {
