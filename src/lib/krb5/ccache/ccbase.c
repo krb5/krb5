@@ -75,11 +75,12 @@ krb5_cc_register(context, ops, override)
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve (context, name, cache)
    krb5_context context;
-   char *name;
+   const char *name;
    krb5_ccache *cache;
 {
     struct krb5_cc_typelist *tlist;
-    char *pfx, *resid, *cp;
+    char *pfx, *cp;
+    const char *resid;
     int pfxlen;
     
     cp = strchr (name, ':');
