@@ -15,7 +15,7 @@
 @set RANDOMHOST1 daffodil
 @set RANDOMHOST1IP 10.0.0.6
 @set RANDOMHOST2 trillium
-@set RANDOMHOST2IP 253.46.124.7
+@set RANDOMHOST2IP 10.1.2.3
 @set RANDOMUSER johndoe
 @set RANDOMUSER1 jennifer
 @set RANDOMUSER2 david
@@ -26,8 +26,8 @@
 @set ROOTDIR /usr/local
 @set BINDIR /usr/local/bin
 @set LOCALSTATEDIR @value{ROOTDIR}/var
-@set SECONDDOMAIN fubar.org
-@set SECONDREALM FUBAR.ORG
+@set SECONDDOMAIN example.com
+@set SECONDREALM EXAMPLE.COM
 @set UPDATED @today
 
 @ignore

@@ -1,3 +1,7 @@
+2003-01-30  Sam Hartman  <hartmans@mit.edu>
+
+	* definitions.texinfo: Remove bogus sample IPs and domains.
+
 2002-09-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo, dnssrv.texinfo: Documented config file variables
