@@ -73,6 +73,7 @@ void auth_is P((unsigned char *, int));
 void auth_reply P((unsigned char *, int));
 void auth_finished P((Authenticator *, int));
 int auth_wait P((char *));
+int auth_must_encrypt P((void));
 void auth_disable_name P((char *));
 void auth_gen_printsub P((unsigned char *, int, unsigned char *, int));
 

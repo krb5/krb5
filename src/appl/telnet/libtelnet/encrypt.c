@@ -332,7 +332,8 @@ EncryptStartInput()
 		encrypt_send_request_start();
 		return(1);
 	}
-	printf("No previous decryption mode, decryption not enabled\r\n");
+	if (!Server)
+	    printf("No previous decryption mode, decryption not enabled\r\n");
 	return(0);
 }
 
@@ -343,7 +344,8 @@ EncryptStartOutput()
 		encrypt_start_output(encrypt_mode);
 		return(1);
 	}
-	printf("No previous encryption mode, encryption not enabled\r\n");
+	if (!Server)
+	    printf("No previous encryption mode, encryption not enabled\r\n");
 	return(0);
 }
 
@@ -723,27 +725,28 @@ encrypt_request_start(data, cnt)
 
 static unsigned char str_keyid[(MAXKEYLEN*2)+5] = { IAC, SB, TELOPT_ENCRYPT };
 
-encrypt_enc_keyid(keyid, len)
+void encrypt_keyid();
+		
+void encrypt_enc_keyid(keyid, len)
 	unsigned char *keyid;
 	int len;
 {
 	encrypt_keyid(&ki[1], keyid, len);
 }
 
-encrypt_dec_keyid(keyid, len)
+void encrypt_dec_keyid(keyid, len)
 	unsigned char *keyid;
 	int len;
 {
 	encrypt_keyid(&ki[0], keyid, len);
 }
 
-encrypt_keyid(kp, keyid, len)
+void encrypt_keyid(kp, keyid, len)
 	struct key_info *kp;
 	unsigned char *keyid;
 	int len;
 {
 	Encryptions *ep;
-	unsigned char *strp, *cp;
 	int dir = kp->dir;
 	register int ret = 0;
 
@@ -939,7 +942,6 @@ encrypt_send_request_end()
 	void
 encrypt_wait()
 {
-	register int encrypt, decrypt;
 	if (encrypt_debug_mode)
 		printf(">>>%s: in encrypt_wait\r\n", Name);
 	if (!havesessionkey || !(I_SUPPORT_ENCRYPT & remote_supports_decrypt))
@@ -947,6 +949,13 @@ encrypt_wait()
 	while (autoencrypt && !encrypt_output)
 		if (telnet_spin())
 			return;
+}
+
+int encrypt_is_encrypting()
+{
+    if (encrypt_output && decrypt_input)
+	return 1;
+    return 0;
 }
 
 	void

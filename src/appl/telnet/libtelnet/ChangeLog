@@ -1,3 +1,41 @@
+Mon Mar 18 20:56:37 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kerberos5.c (kerberos5_send): Send in as input the
+		authentication type pair (ap->type, ap->way) to be
+		checksumed in the authenticator.
+		(kerberos5_is): If the checksum is present in the
+		authenticator, then validate the authentication type pair
+		against the checksum.
+		(kerberos5_reply): If we didn't do mutual authentication,
+		and we receive a KRB_ACCEPT, then stash away the session
+		key anyway.  This way we have a chance of doing encryption
+		even if mutual authentication wasn't done.
+
+	* encrypt.c (EncryptStartInput, EncryptStartOutput): Added
+		conditional around printf so that these two functions can
+		be called by the server.
+		(encrypt_is_encrypting): New function which returns true
+		only if both sides of the telnet stream is encrypted.
+
+Fri Mar 15 18:19:44 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* auth.c: Added new authentication scheme for Krb5 mutual
+		authentication with mandatory encryption.
+		(auth_send, auth_send_retry): Split auth_send() so that
+		the functionality done by auth_send_retry() is separate.
+		This avoids a really dodgy pointer comparison which was
+		caused by auth_send() being used for two purposes.  
+		If the client has not requested encryption, then don't
+		use the authentication systems which require encryption.
+		(auth_must_encrypt):  New function which returns whether 
+		or not encryption must be negotiated.
+
+	* auth-proto.h: Added prototype for new option
+		auth_must_encrypt().
+
+	* Makefile.in (ENCRYPTION, DES_ENCRYPTION): Added defines to turn
+	        on encryption and des encryption.
+
 Fri Jan 26 01:05:46 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* kerberos5.c (kerberos5_send): Get DES_CBC-CRC credentials.

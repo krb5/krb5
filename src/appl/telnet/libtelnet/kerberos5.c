@@ -188,6 +188,8 @@ kerberos5_send(ap)
 	krb5_creds creds;		/* telnet gets session key from here */
 	krb5_creds * new_creds = 0;
 	int ap_opts;
+	char type_check[2];
+	krb5_data check_data;
 
 #ifdef	ENCRYPTION
 	krb5_keyblock *newkey = 0;
@@ -259,34 +261,47 @@ kerberos5_send(ap)
 	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
 	    
-    if ((r = krb5_auth_con_init(telnet_context, &auth_context))) {
-	if (auth_debug_mode) {
-	    printf("Kerberos V5: failed to init auth_context (%s)\r\n",
-		   error_message(r));
+	if (auth_context) {
+	    krb5_auth_con_free(telnet_context, auth_context);
+	    auth_context = 0;
 	}
-	return(0);
-    }
-    
-    krb5_auth_con_setflags(telnet_context, auth_context,
-                           KRB5_AUTH_CONTEXT_RET_TIME);
+	if ((r = krb5_auth_con_init(telnet_context, &auth_context))) {
+	    if (auth_debug_mode) {
+		printf("Kerberos V5: failed to init auth_context (%s)\r\n",
+		       error_message(r));
+	    }
+	    return(0);
+	}
+	
+	krb5_auth_con_setflags(telnet_context, auth_context,
+			       KRB5_AUTH_CONTEXT_RET_TIME);
+	
+	type_check[0] = ap->type;
+	type_check[1] = ap->way;
+	check_data.magic = KV5M_DATA;
+	check_data.length = 2;
+	check_data.data = (char *) &type_check;
 
-    r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
-			     NULL, new_creds, &auth);
+	r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
+				 &check_data, new_creds, &auth);
 
 #ifdef	ENCRYPTION
 	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, &newkey);
 	if (session_key) {
-krb5_free_keyblock(telnet_context, session_key);
-session_key = 0;
+		krb5_free_keyblock(telnet_context, session_key);
+		session_key = 0;
 	}
 
 	if (newkey) {
 	    /* keep the key in our private storage, but don't use it
 	       yet---see kerberos5_reply() below */
-	    if ((newkey->enctype != ENCTYPE_DES_CBC_CRC) && (newkey-> enctype != ENCTYPE_DES_CBC_MD5)) {
-		if ((new_creds->keyblock.enctype == ENCTYPE_DES_CBC_CRC)||( new_creds->keyblock.enctype == ENCTYPE_DES_CBC_MD5))
+	    if ((newkey->enctype != ENCTYPE_DES_CBC_CRC) &&
+		(newkey-> enctype != ENCTYPE_DES_CBC_MD5)) {
+		if ((new_creds->keyblock.enctype == ENCTYPE_DES_CBC_CRC) ||
+		    (new_creds->keyblock.enctype == ENCTYPE_DES_CBC_MD5))
 		    /* use the session key in credentials instead */
-		    krb5_copy_keyblock(telnet_context,&new_creds->keyblock, &session_key);
+		    krb5_copy_keyblock(telnet_context,&new_creds->keyblock,
+				       &session_key);
 		else
 		    /* XXX ? */;
 	    } else {
@@ -334,9 +349,11 @@ kerberos5_is(ap, data, cnt)
 #ifdef ENCRYPTION
 	Session_Key skey;
 #endif
+	char errbuf[128];
 	char *name;
 	char *getenv();
 	krb5_data inbuf;
+	krb5_authenticator *authenticator;
 
 	if (cnt-- < 1)
 		return;
@@ -370,21 +387,61 @@ kerberos5_is(ap, data, cnt)
 		    krb5_free_principal(telnet_context, server);
 		}
 		if (r) {
-			char errbuf[128];
-
-		    errout:
-			(void) strcpy(errbuf, "Read req failed: ");
+			(void) strcpy(errbuf, "krb5_rd_req failed: ");
 			(void) strcat(errbuf, error_message(r));
-			Data(ap, KRB_REJECT, errbuf, -1);
-			if (auth_debug_mode)
-				printf("%s\r\n", errbuf);
-			return;
+			goto errout;
 		}
+		r = krb5_auth_con_getauthenticator(telnet_context,
+						   auth_context,
+						   &authenticator);
+		if (r) {
+		    (void) strcpy(errbuf,
+				  "krb5_auth_con_getauthenticator failed: ");
+		    (void) strcat(errbuf, error_message(r));
+		    goto errout;
+		}
+		if ((ap->way & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON &&
+		    !authenticator->checksum) {
+			(void) strcpy(errbuf,
+				"authenticator is missing required checksum");
+			goto errout;
+		}
+		if (authenticator->checksum) {
+		    char type_check[2];
+		    krb5_checksum *cksum = authenticator->checksum;
+		    krb5_keyblock *key;
+
+		    type_check[0] = ap->type;
+		    type_check[1] = ap->way;
+
+		    r = krb5_auth_con_getkey(telnet_context, auth_context,
+					     &key);
+		    if (r) {
+			(void) strcpy(errbuf, "krb5_auth_con_getkey failed: ");
+			(void) strcat(errbuf, error_message(r));
+			goto errout;
+		    }
+		    r = krb5_verify_checksum(telnet_checksum,
+					     cksum->checksum_type, cksum,
+					     &type_check, 2, key->contents,
+					     key->length);
+		    if (r) {
+			(void) strcpy(errbuf,
+				      "checksum verification failed: ");
+			(void) strcat(errbuf, error_message(r));
+			goto errout;
+		    }
+		    krb5_free_keyblock(telnet_context, key);
+		}
+		krb5_free_authenticator(telnet_context, authenticator);
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 		    /* do ap_rep stuff here */
 		    if ((r = krb5_mk_rep(telnet_context, auth_context,
-					 &outbuf)))
+					 &outbuf))) {
+			(void) strcpy(errbuf, "Make reply failed: ");
+			(void) strcat(errbuf, error_message(r));
 			goto errout;
+		    }
 
 		    Data(ap, KRB_RESPONSE, outbuf.data, outbuf.length);
 		} 
@@ -403,23 +460,17 @@ kerberos5_is(ap, data, cnt)
 		    free(name);
 		krb5_auth_con_getremotesubkey(telnet_context, auth_context,
 					      &newkey);
+		if (session_key) {
+		    krb5_free_keyblock(telnet_context, session_key);
+		    session_key = 0;
+		}
 	    	if (newkey) {
-		    if (session_key) {
-			krb5_free_keyblock(telnet_context, session_key);
-			session_key = 0;
-		    }
-
-		    krb5_copy_keyblock(telnet_context, newkey,
-					    	&session_key);
+		    krb5_copy_keyblock(telnet_context, newkey, &session_key);
 		    krb5_free_keyblock(telnet_context, newkey);
 		} else {
-		    if (session_key){
-			krb5_free_keyblock(telnet_context, session_key);
-session_key = 0;
-		    }
-		    krb5_copy_keyblock(telnet_context, 
-					   ticket->enc_part2->session,
-					   &session_key);
+		    krb5_copy_keyblock(telnet_context,
+				       ticket->enc_part2->session,
+				       &session_key);
 		}
 		
 #ifdef ENCRYPTION
@@ -458,6 +509,17 @@ session_key = 0;
 		Data(ap, KRB_REJECT, 0, 0);
 		break;
 	}
+	return;
+	
+    errout:
+	Data(ap, KRB_REJECT, errbuf, -1);
+	if (auth_debug_mode)
+	    printf("%s\r\n", errbuf);
+	if (auth_context) {
+	    krb5_auth_con_free(telnet_context, auth_context);
+	    auth_context = 0;
+	}
+	return;
 }
 
 	void
@@ -483,11 +545,20 @@ kerberos5_reply(ap, data, cnt)
 		auth_send_retry();
 		return;
 	case KRB_ACCEPT:
-		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL &&
-		    !mutual_complete) {
-		    printf("[ Kerberos V5 accepted you, but didn't provide mutual authentication! ]\r\n");
-		    auth_send_retry();
-		    return;
+		if (!mutual_complete) {
+		    if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
+			printf("[ Kerberos V5 accepted you, but didn't provide mutual authentication! ]\r\n");
+			auth_send_retry();
+			return;
+		    }
+#ifdef	ENCRYPTION
+		    if (session_key) {
+			skey.type = SK_DES;
+			skey.length = 8;
+			skey.data = session_key->contents;
+			encrypt_session_key(&skey, 0);
+		    }
+#endif	/* ENCRYPTION */
 		}
 		if (cnt)
 		    printf("[ Kerberos V5 accepts you as ``%.*s'' ]\r\n", cnt, data);
@@ -542,6 +613,7 @@ kerberos5_reply(ap, data, cnt)
 			printf("Unknown Kerberos option %d\r\n", data[-1]);
 		return;
 	}
+	return;
 }
 
 	int

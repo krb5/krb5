@@ -95,6 +95,8 @@ extern rsaencpwd_printsub();
 #endif
 
 int auth_debug_mode = 0;
+int auth_has_failed = 0;
+int auth_enable_encrypt = 0;
 static 	char	*Name = "Noname";
 static	int	Server = 0;
 static	Authenticator	*authenticated = 0;
@@ -126,6 +128,16 @@ Authenticator authenticators[] = {
 				spx_printsub },
 #endif
 #ifdef	KRB5
+#ifdef ENCRYPTION
+	{ AUTHTYPE_KERBEROS_V5,
+		  AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL|AUTH_ENCRYPT_ON,
+				kerberos5_init,
+				kerberos5_send,
+				kerberos5_is,
+				kerberos5_reply,
+				kerberos5_status,
+				kerberos5_printsub },
+#endif	
 	{ AUTHTYPE_KERBEROS_V5, AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL,
 				kerberos5_init,
 				kerberos5_send,
@@ -387,10 +399,6 @@ auth_send(data, cnt)
 	unsigned char *data;
 	int cnt;
 {
-	Authenticator *ap;
-	static unsigned char str_none[] = { IAC, SB, TELOPT_AUTHENTICATION,
-					    TELQUAL_IS, AUTHTYPE_NULL, 0,
-					    IAC, SE };
 	if (Server) {
 		if (auth_debug_mode) {
 			printf(">>>%s: auth_send called!\r\n", Name);
@@ -404,63 +412,68 @@ auth_send(data, cnt)
 	}
 
 	/*
-	 * Save the data, if it is new, so that we can continue looking
-	 * at it if the authorization we try doesn't work
+	 * Save the list of authentication mechanisms
 	 */
-	/* ANSI X3.159-1989 section 3.3.6 indicates that this entire 
-	   conditional is undefined. It will probably work on flat address
-	   space UNIX systems though. --eichin@mit.edu */
-	if (data < _auth_send_data ||
-	    data > _auth_send_data + sizeof(_auth_send_data)) {
-		auth_send_cnt = cnt > sizeof(_auth_send_data)
-					? sizeof(_auth_send_data)
-					: cnt;
-		memcpy((void *)_auth_send_data, (void *)data, auth_send_cnt);
-		auth_send_data = _auth_send_data;
-	} else {
-		/*
-		 * This is probably a no-op, but we just make sure
-		 */
-		auth_send_data = data;
-		auth_send_cnt = cnt;
-	}
-	while ((auth_send_cnt -= 2) >= 0) {
-		if (auth_debug_mode)
-			printf(">>>%s: He supports %d\r\n",
-				Name, *auth_send_data);
-		if ((i_support & ~i_wont_support) & typemask(*auth_send_data)) {
-			ap = findauthenticator(auth_send_data[0],
-					       auth_send_data[1]);
-			if (ap && ap->send) {
-				if (auth_debug_mode)
-					printf(">>>%s: Trying %d %d\r\n",
-						Name, auth_send_data[0],
-							auth_send_data[1]);
-				if ((*ap->send)(ap)) {
-					/*
-					 * Okay, we found one we like
-					 * and did it.
-					 * we can go home now.
-					 */
-					if (auth_debug_mode)
-						printf(">>>%s: Using type %d\r\n",
-							Name, *auth_send_data);
-					auth_send_data += 2;
-					return;
-				}
-			}
-			/* else
-			 *	just continue on and look for the
-			 *	next one if we didn't do anything.
-			 */
+	auth_send_cnt = cnt;
+	if (auth_send_cnt > sizeof(_auth_send_data))
+	    auth_send_cnt = sizeof(_auth_send_data);
+	memcpy((void *)_auth_send_data, (void *)data, auth_send_cnt);
+	auth_send_data = _auth_send_data;
+
+	auth_send_retry();
+}
+
+/*
+ * Try the next authentication mechanism on the list, and see if it
+ * works.
+ */
+void auth_send_retry()
+{
+	Authenticator *ap;
+	static unsigned char str_none[] = { IAC, SB, TELOPT_AUTHENTICATION,
+					    TELQUAL_IS, AUTHTYPE_NULL, 0,
+					    IAC, SE };
+	
+	if (Server) {
+		if (auth_debug_mode) {
+			printf(">>>%s: auth_send_retry called!\r\n", Name);
 		}
+		return;
+	}
+
+	for (;(auth_send_cnt -= 2) >= 0; auth_send_data += 2) {
+	    if (auth_debug_mode)
+		printf(">>>%s: He supports %d\r\n", Name, *auth_send_data);
+	    if (!(i_support & typemask(*auth_send_data)))
+		continue;
+	    if (i_wont_support & typemask(*auth_send_data))
+		continue;
+	    ap = findauthenticator(auth_send_data[0], auth_send_data[1]);
+	    if (!ap || !ap->send)
+		continue;
+	    if ((ap->way & AUTH_ENCRYPT_MASK) && !auth_enable_encrypt)
+		continue;
+
+	    if (auth_debug_mode)
+		printf(">>>%s: Trying %d %d\r\n", Name, auth_send_data[0],
+		       auth_send_data[1]);
+	    if ((*ap->send)(ap)) {
+		/*
+		 * Okay, we found one we like and did it.  we can go
+		 * home now.
+		 */
+		if (auth_debug_mode)
+		    printf(">>>%s: Using type %d\r\n", Name, *auth_send_data);
 		auth_send_data += 2;
+		return;
+	    }
 	}
 	net_write(str_none, sizeof(str_none));
 	printsub('>', &str_none[2], sizeof(str_none) - 2);
 	if (auth_debug_mode)
 		printf(">>>%s: Sent failure message\r\n", Name);
 	auth_finished(0, AUTH_REJECT);
+	auth_has_failed = 1;
 #ifdef KANNAN
 	/*
 	 *  We requested strong authentication, however no mechanisms worked.
@@ -469,16 +482,6 @@ auth_send(data, cnt)
 	printf("Unable to securely authenticate user ... exit\n"); 
 	exit(0);
 #endif /* KANNAN */
-}
-
-	void
-auth_send_retry()
-{
-	/*
-	 * if auth_send_cnt <= 0 then auth_send will end up rejecting
-	 * the authentication and informing the other side of this.
-	 */
-	auth_send(auth_send_data, auth_send_cnt);
 }
 
 	void
@@ -619,6 +622,14 @@ auth_wait(name)
 		validuser = (*authenticated->status)(authenticated,
 						     name, validuser);
 	return(validuser);
+}
+
+int auth_must_encrypt()
+{
+    if (authenticated &&
+	((authenticated->way & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON))
+	return 1;
+    return 0;
 }
 
 	void

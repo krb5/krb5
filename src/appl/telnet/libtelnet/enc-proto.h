@@ -77,6 +77,7 @@ void encrypt_send_request_start P((void));
 void encrypt_send_request_end P((void));
 void encrypt_send_end P((void));
 void encrypt_wait P((void));
+int encrypt_is_encrypting P((void));
 void encrypt_send_support P((void));
 void encrypt_send_keyid P((int, unsigned char *, int, int));
 int net_write P((unsigned char *, int));
