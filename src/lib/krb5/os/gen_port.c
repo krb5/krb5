@@ -43,7 +43,7 @@ krb5_gen_portaddr(context, addr, ptr, outaddr)
 
     if (addr->addrtype != ADDRTYPE_INET)
 	return KRB5_PROG_ATYPE_NOSUPP;
-    port = *(krb5_int16 *)ptr;
+    port = *(const krb5_int16 *)ptr;
     
     memcpy((char *)&adr, (char *)addr->contents, sizeof(adr));
     return krb5_make_full_ipaddr(context, adr, port, outaddr);
