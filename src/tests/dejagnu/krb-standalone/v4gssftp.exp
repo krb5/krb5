@@ -501,5 +501,5 @@ if [info exists home] {
 }
 
 if { $status != 0 } {
-    perror "error in gssftp.exp: $msg"
+    perror "error in v4gssftp.exp: $msg"
 }

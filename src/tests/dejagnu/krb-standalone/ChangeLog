@@ -1,3 +1,8 @@
+2005-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4gssftp.exp: Identify file correctly for top-level error
+	messages.
+
 2005-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.exp (kadmin_add_rnd): Add "flags" arg, defaulting to
