@@ -1,3 +1,7 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Define KRB5_PRIVATE=1.
+
 2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Fix up DNS build flags to correspond to new DNS
