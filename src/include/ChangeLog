@@ -1,5 +1,11 @@
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.h: Don't include netdb.h, since port-sockets.h
+	already does.
+	* port-sockets.h: Define _XOPEN_SOURCE_EXTENDED around inclusion
+	of netdb.h if it's not defined and not Windows, as fake-addrinfo.h
+	used to do; otherwise just include it normally.
+
 	* port-sockets.h (inet_ntop): Cast NULL to desired return pointer
 	type.
 

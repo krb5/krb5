@@ -561,13 +561,6 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 # define AI_NUMERICHOST 0
 #endif
 
-#if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(HAVE_MACSOCK_H) && !defined(_WIN32)
-/* Hack for HPUX, to get h_errno.  */
-# define _XOPEN_SOURCE_EXTENDED 1
-# include <netdb.h>
-# undef _XOPEN_SOURCE_EXTENDED
-#endif
-
 #if defined(HAVE_FAKE_GETADDRINFO) || defined(FAI_CACHE)
 #define NEED_FAKE_GETADDRINFO
 #endif
