@@ -539,6 +539,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	  if (!is_duplicate_enctype)
 	      requested_enctypes[i++] = e;
       }
+      krb5_free_ktypes(context, default_enctypes);
       requested_enctypes[i++] = 0;
 
       if ((code = get_credentials(context, cred, ctx->there, now,

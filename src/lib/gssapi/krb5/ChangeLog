@@ -2,6 +2,12 @@
 
 	* init_sec_context.c (make_ap_req_v1): Free checksum_data if
 	needed, to avoid leaking memory.  Found by Kent Wu.
+	(krb5_gss_init_sec_context): Free default_enctypes to avoid
+	leaking returned value from krb5_get_tgs_ktypes.
+
+	* k5unseal.c (kg_unseal_v1): Explicitly set token.value to NULL if
+	token.length == 0, to avoid spurious uninitialized memory
+	references when calling memcpy() with a zero length.
 
 2003-05-13  Tom Yu  <tlyu@mit.edu>
 
