@@ -37,6 +37,7 @@
 #include "profile.h"
 #include "krb.h"
 #include "krb4int.h"
+#include "k5-int.h"		/* for accessor, addrlist stuff */
 #include "port-sockets.h"
 
 #define KRB5_PRIVATE 1
@@ -359,23 +360,6 @@ krb_get_kpasswdhst(
 			    REALMS_V4_PROF_KPASSWD_KDC);
 }
 
-static int
-get_krbhst_default(h, r, n)
-    char *h;
-    char *r;
-    int n;
-{
-    if (n != 1)
-	return KFAILURE;
-    if (strlen(KRB_HOST) + 1 + strlen(r) >= MAXHOSTNAMELEN)
-	return KFAILURE;
-    /* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
-    strcpy(h, KRB_HOST);
-    strcat(h, ".");
-    strcat(h, r);
-    return KSUCCESS;
-}
-
 /*
  * Realm, index -> KDC mapping
  *
@@ -411,6 +395,15 @@ get_krbhst_default(h, r, n)
  * kerberos.  In the long run, this functionality will be provided by a
  * nameserver.
  */
+#ifdef KRB5_DNS_LOOKUP
+static struct {
+    time_t when;
+    char realm[REALM_SZ+1];
+    struct srv_dns_entry *srv;
+} dnscache = { 0, { 0 }, 0 };
+#define DNS_CACHE_TIMEOUT	60 /* seconds */
+#endif
+
 int KRB5_CALLCONV
 krb_get_krbhst(
     char	*host,
@@ -423,9 +416,35 @@ krb_get_krbhst(
     char	linebuf[BUFSIZ];
     char	tr[SCRATCHSZ];
     char	scratch[SCRATCHSZ];
+#ifdef KRB5_DNS_LOOKUP
+    time_t now;
+#endif
 
     if (n < 1 || host == NULL || realm == NULL)
 	return KFAILURE;
+
+#ifdef KRB5_DNS_LOOKUP
+    /* We'll only have this realm's info in the DNS cache if there is
+       no data in the local config files.
+
+       XXX The files could've been updated in the last few seconds.
+       Do we care?  */
+    if (!strncmp(dnscache.realm, realm, REALM_SZ)
+	&& (time(&now), abs(dnscache.when - now) < DNS_CACHE_TIMEOUT)) {
+	struct srv_dns_entry *entry;
+
+    get_from_dnscache:
+	/* n starts at 1, addrs indices run 0..naddrs */
+	for (i = 1, entry = dnscache.srv; i < n && entry; i++)
+	    entry = entry->next;
+	if (entry == NULL)
+	    return KFAILURE;
+	if (strlen(entry->host) + 6 >= MAXHOSTNAMELEN)
+	    return KFAILURE;
+	sprintf(host, "%s:%d", entry->host, entry->port);
+	return KSUCCESS;
+    }
+#endif
 
     result = krb_prof_get_nth(host, MAXHOSTNAMELEN, realm, n,
 			      REALMS_V4_PROF_REALMS_SECTION,
@@ -461,14 +480,43 @@ krb_get_krbhst(
 		i++;
 	}
 	fclose(cnffile);
-	if (result == KSUCCESS && strlen(scratch) < MAXHOSTNAMELEN)
+	if (result == KSUCCESS && strlen(scratch) < MAXHOSTNAMELEN) {
 	    strcpy(host, scratch);
-	else
-	    result = KFAILURE;
+	    return KSUCCESS;
+	}
+	if (i > 0)
+	    /* Found some, but not as many as requested.  */
+	    return KFAILURE;
     } while (0);
-    if (result == KFAILURE)
-	result = get_krbhst_default(host, realm, n);
-    return result;
+#ifdef KRB5_DNS_LOOKUP
+    do {
+	krb5int_access k5;
+	krb5_error_code err;
+	krb5_data realmdat;
+	struct srv_dns_entry *srv;
+
+	err = krb5int_accessor(&k5, KRB5INT_ACCESS_VERSION);
+	if (err)
+	    break;
+
+	realmdat.data = realm;
+	realmdat.length = strlen(realm);
+	err = k5.make_srv_query_realm(&realmdat, "_kerberos-iv", "_udp", &srv);
+	if (err)
+	    break;
+
+	if (srv == 0)
+	    break;
+
+	if (dnscache.srv)
+	    k5.free_srv_dns_data(dnscache.srv);
+	dnscache.srv = srv;
+	strncpy(dnscache.realm, realm, REALM_SZ);
+	dnscache.when = now;
+	goto get_from_dnscache;
+    } while (0);
+#endif
+    return KFAILURE;
 }
 
 /*

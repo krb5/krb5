@@ -38,7 +38,26 @@ krb5_error_code krb5_dk_encrypt
 		const krb5_data *ivec,
 		const krb5_data *input, krb5_data *output);
 
+void krb5int_aes_encrypt_length
+(const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		size_t input, size_t *length);
+
+krb5_error_code krb5int_aes_dk_encrypt
+(const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, krb5_keyusage usage,
+		const krb5_data *ivec,
+		const krb5_data *input, krb5_data *output);
+
 krb5_error_code krb5_dk_decrypt
+(const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, krb5_keyusage usage,
+		const krb5_data *ivec, const krb5_data *input,
+		krb5_data *arg_output);
+
+krb5_error_code krb5int_aes_dk_decrypt
 (const struct krb5_enc_provider *enc,
 		const struct krb5_hash_provider *hash,
 		const krb5_keyblock *key, krb5_keyusage usage,

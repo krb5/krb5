@@ -1,3 +1,16 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* bindresvport.c: Include errno.h.
+	(gssrpc_bindresvport): Don't declare errno.
+	* clnt_tcp.c: Don't declare errno.
+	* svc.c: Don't declare errno.  Include errno.h.
+
+2003-03-24  Tom Yu  <tlyu@mit.edu>
+
+	* xdr_mem.c (xdrmem_create): Perform some additional size checks.
+	(xdrmem_getlong, xdrmem_putlong, xdrmem_getbytes): Check x_handy
+	prior to decrementing it.
+
 2003-01-12  Ezra Peisach  <epeisach@bu.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi_unset_names): If invoked more

@@ -91,6 +91,7 @@
 #include "socket-utils.h"
 
 #ifdef S_SPLINT_S
+/*@-incondefs@*/
 extern int
 getaddrinfo (/*@in@*/ /*@null@*/ const char *,
 	     /*@in@*/ /*@null@*/ const char *,
@@ -108,8 +109,8 @@ getnameinfo (const struct sockaddr *addr, socklen_t addrsz,
     /*@requires (maxSet(h)+1) >= hsz /\ (maxSet(s)+1) >= ssz @*/
     /* too hard: maxRead(addr) >= (addrsz-1) */
     /*@modifies *h, *s@*/;
-extern /*@dependent@*/ char *
-gai_strerror (int code) /*@*/;
+extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
+/*@=incondefs@*/
 #endif
 
 
@@ -125,6 +126,7 @@ gai_strerror (int code) /*@*/;
 
 #ifdef _AIX
 # define NUMERIC_SERVICE_BROKEN
+# define COPY_FIRST_CANONNAME
 #endif
 
 
@@ -151,6 +153,29 @@ gai_strerror (int code) /*@*/;
     { (HP) = gethostbyname (NAME); (ERR) = h_errno; }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
     { (HP) = gethostbyaddr ((ADDR), (ADDRLEN), (FAMILY)); (ERR) = h_errno; }
+#else
+#ifdef _AIX /* XXX should have a feature test! */
+#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+    {									\
+	struct hostent my_h_ent;					\
+	struct hostent_data my_h_ent_data;				\
+	(HP) = (gethostbyname_r((NAME), &my_h_ent, &my_h_ent_data)	\
+		? 0							\
+		: &my_h_ent);						\
+	(ERR) = h_errno;						\
+    }
+/*
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+    {									\
+	struct hostent my_h_ent;					\
+	struct hostent_data my_h_ent_data;				\
+	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
+				&my_h_ent_data)				\
+		? 0							\
+		: &my_h_ent);						\
+	(ERR) = my_h_err;						\
+    }
+*/
 #else
 #ifdef GETHOSTBYNAME_R_RETURNS_INT
 #define GET_HOST_BY_NAME(NAME, HP, ERR) \
@@ -196,7 +221,8 @@ gai_strerror (int code) /*@*/;
 			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
 	(ERR) = my_h_err;						\
     }
-#endif
+#endif /* returns int? */
+#endif /* _AIX */
 #endif
 
 /* Now do the same for getservby* functions.  */
@@ -898,19 +924,19 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
     /* AIX 4.3.3 is broken.  (Or perhaps out of date?)
 
        If a numeric service is provided, and it doesn't correspond to
-       a known service name, an error code (for "host not found") is
-       returned.  If the port maps to a known service, all is
-       well.  */
+       a known service name for tcp or udp (as appropriate), an error
+       code (for "host not found") is returned.  If the port maps to a
+       known service for both udp and tcp, all is well.  */
     if (serv && serv[0] && isdigit(serv[0])) {
 	unsigned long lport;
 	char *end;
 	lport = strtoul(serv, &end, 10);
 	if (!*end) {
-	    if (lport < 0 || lport > 65535)
+	    if (lport > 65535)
 		return EAI_SOCKTYPE;
 	    service_is_numeric = 1;
 	    service_port = htons(lport);
-	    serv = 0;
+	    serv = "discard";	/* defined for both udp and tcp */
 	    if (hint)
 		socket_type = hint->ai_socktype;
 	}
@@ -948,7 +974,10 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        approach: If getaddrinfo sets ai_canonname, we'll replace the
        *first* one with allocated storage, and free up that pointer in
        freeaddrinfo if it's set; the other ai_canonname fields will be
-       left untouched.
+       left untouched.  And we'll just pray that the application code
+       won't mess around with the list structure; if we start doing
+       that, we'll have to start replacing and freeing all of the
+       ai_canonname fields.
 
        Ref: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=133668 .
 
@@ -1017,20 +1046,28 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #endif
 	    return EAI_MEMORY;
 	}
+	/* Zap the remaining ai_canonname fields glibc fills in, in
+	   case the application messes around with the list
+	   structure.  */
+	while ((ai = ai->ai_next) != NULL)
+	    ai->ai_canonname = 0;
     }
 #endif
 
 #ifdef NUMERIC_SERVICE_BROKEN
-    for (ai = *result; ai; ai = ai->ai_next) {
-	if (socket_type != 0 && ai->ai_socktype == 0)
-	    ai->ai_socktype = socket_type;
-	switch (ai->ai_family) {
-	case AF_INET:
-	    ((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
-	    break;
-	case AF_INET6:
-	    ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
-	    break;
+    if (service_port != 0) {
+	for (ai = *result; ai; ai = ai->ai_next) {
+	    if (socket_type != 0 && ai->ai_socktype == 0)
+		/* Is this check actually needed?  */
+		ai->ai_socktype = socket_type;
+	    switch (ai->ai_family) {
+	    case AF_INET:
+		((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
+		break;
+	    case AF_INET6:
+		((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
+		break;
+	    }
 	}
     }
 #endif

@@ -235,7 +235,7 @@ tickets should be checked against the transit path computed from the
 realm names and the [capaths] section of its krb5.conf file
 
 .SH FILES 
-/usr/local/lib/krb5kdc/kdc.conf
+/usr/local/var/krb5kdc/kdc.conf
 
 .SH SEE ALSO
 krb5.conf(5), krb5kdc(8)

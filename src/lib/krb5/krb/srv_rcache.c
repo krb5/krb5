@@ -48,6 +48,9 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
     unsigned long uid = geteuid();
 #endif
     
+    if (piece == NULL)
+	return ENOMEM;
+    
     rcache = (krb5_rcache) malloc(sizeof(*rcache));
     if (!rcache)
 	return ENOMEM;
@@ -58,7 +61,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
 
     len = piece->length + 3 + 1;
     for (i = 0; i < piece->length; i++) {
-	if (piece->data[i] == '\\')
+	if (piece->data[i] == '-')
 	    len++;
 	else if (!isvalidrcname((int) piece->data[i]))
 	    len += 3;
@@ -78,14 +81,14 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
     strcpy(cachename, "rc_");
     p = 3;
     for (i = 0; i < piece->length; i++) {
-	if (piece->data[i] == '\\') {
-	    cachename[p++] = '\\';
-	    cachename[p++] = '\\';
+	if (piece->data[i] == '-') {
+	    cachename[p++] = '-';
+	    cachename[p++] = '-';
 	    continue;
 	}
 	if (!isvalidrcname((int) piece->data[i])) {
 	    sprintf(tmp, "%03o", piece->data[i]);
-	    cachename[p++] = '\\';
+	    cachename[p++] = '-';
 	    cachename[p++] = tmp[0];
 	    cachename[p++] = tmp[1];
 	    cachename[p++] = tmp[2];

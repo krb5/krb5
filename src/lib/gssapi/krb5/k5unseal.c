@@ -224,6 +224,8 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 		return(GSS_S_FAILURE);
 	    }
 	    memcpy(token.value, plain+conflen, token.length);
+	} else {
+	    token.value = NULL;
 	}
     } else if (toktype == KG_TOK_SIGN_MSG) {
 	token = *message_buffer;
