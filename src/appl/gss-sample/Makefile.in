@@ -11,7 +11,8 @@ SRCS= gss-client.c gss-misc.c gss-server.c
 
 OBJS= gss-client.o gss-misc.o gss-server.o
 
-all:: gss-server gss-client
+all-unix:: gss-server gss-client
+all-windows:: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
 
 gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
@@ -19,9 +20,15 @@ gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-clean::
+$(OUTPRE)gss-server.exe: $(OUTPRE)gss-server.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** wsock32.lib
+
+$(OUTPRE)gss-client.exe: $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** wsock32.lib
+
+clean-unix::
 	$(RM) gss-server gss-client
 
-install::
-	$(INSTALL_PROGRAM) gss-client ${DESTDIR}$(CLIENT_BINDIR)/gss-client
-	$(INSTALL_PROGRAM) gss-server ${DESTDIR}$(SERVER_BINDIR)/gss-server
+install-unix::
+	$(INSTALL_PROGRAM) gss-client $(DESTDIR)$(CLIENT_BINDIR)/gss-client
+	$(INSTALL_PROGRAM) gss-server $(DESTDIR)$(SERVER_BINDIR)/gss-server

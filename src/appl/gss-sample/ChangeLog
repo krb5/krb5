@@ -1,3 +1,18 @@
+2000-01-31  Danilo Almeida  <dalmeida@mit.edu>
+
+	* gss-client.c, gss-server.c, gss-misc.c: Include Windows headers
+	instead of Unix headers under Windows.
+
+	* gss-server.c (usage): Fix usage info to reflect that service_name is
+	required.
+
+	* gss-misc.c (read_all, write_all): Change write to send and read
+	to recv for portability.
+	(gettimeofday): Add an implementation of gettimeofday() for
+	Windows.
+
+	* Makefile.in: Build under Windows.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -25,9 +25,13 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#else
+#include <unistd.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -36,6 +40,7 @@ static char *rcsid = "$Header$";
 #include <errno.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#endif
 
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"

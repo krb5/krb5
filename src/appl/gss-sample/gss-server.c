@@ -25,10 +25,15 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -47,7 +52,7 @@ static char *rcsid = "$Header$";
 void usage()
 {
      fprintf(stderr, "Usage: gss-server [-port port] [-verbose]\n");
-     fprintf(stderr, "       [-inetd] [-logfile file] [service_name]\n");
+     fprintf(stderr, "       [-inetd] [-logfile file] service_name\n");
      exit(1);
 }
 

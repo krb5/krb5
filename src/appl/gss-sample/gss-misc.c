@@ -25,8 +25,13 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#else
 #include <sys/types.h>
 #include <netinet/in.h>
+#endif
 #include <errno.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -53,7 +58,7 @@ static int write_all(int fildes, char *buf, unsigned int nbyte)
      char *ptr;
 
      for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	  ret = write(fildes, ptr, nbyte);
+	  ret = send(fildes, ptr, nbyte, 0);
 	  if (ret < 0) {
 	       if (errno == EINTR)
 		    continue;
@@ -72,7 +77,7 @@ static int read_all(int fildes, char *buf, unsigned int nbyte)
      char *ptr;
 
      for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	  ret = read(fildes, ptr, nbyte);
+	  ret = recv(fildes, ptr, nbyte, 0);
 	  if (ret < 0) {
 	       if (errno == EINTR)
 		    continue;
@@ -301,3 +306,20 @@ void print_token(tok)
     fprintf(display_file, "\n");
     fflush(display_file);
 }
+
+#ifdef _WIN32
+#include <sys\timeb.h>
+#include <time.h>
+
+int gettimeofday (struct timeval *tv, void *ignore_tz)
+{
+    struct _timeb tb;
+    _tzset();
+    _ftime(&tb);
+    if (tv) {
+	tv->tv_sec = tb.time;
+	tv->tv_usec = tb.millitm * 1000;
+    }
+    return 0;
+}
+#endif /* _WIN32 */
