@@ -58,8 +58,10 @@ static const char *kpwd_old_pwd_name_fmt = 	"Enter old password for %s: ";
 
 #ifdef	LANGUAGES_SUPPORTED
 static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user] [-l language]\n";
+static const char *kpwd_getoptstring =		"l:u:";
 #else	/* LANGUAGES_SUPPORTED */
 static const char *kpwd_usage_error_fmt =	"%s: usage is %s [-u user]\n";
+static const char *kpwd_getoptstring =		"u:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *kpwd_extra_args =		"extra arguments";
 static const char *kpwd_bad_option_fmt = 	"%s: unrecognized option -%c.\n";
@@ -198,7 +200,7 @@ main(argc, argv)
      * Usage is:
      *	kpasswd [-u user] [-l language]
      */
-    while ((option = getopt(argc, argv, "l:mu:")) != EOF) {
+    while ((option = getopt(argc, argv, kpwd_getoptstring)) != EOF) {
 	switch (option) {
 	case 'u':
 	    if ((name = (char *) malloc(strlen(optarg)+1)) == NULL) {

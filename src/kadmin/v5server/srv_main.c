@@ -47,8 +47,10 @@
 
 #ifdef	LANGUAGES_SUPPORTED
 static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-l langlist] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
+static const char *getopt_string =	"a:d:e:ik:l:r:t:D:M:";
 #else	/* LANGUAGES_SUPPORTED */
 static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
+static const char *getopt_string =	"a:d:e:ik:r:t:D:M:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
 static const char *extra_params =	"%s extra paramters beginning with %s... \n";
@@ -169,7 +171,7 @@ main(argc, argv)
      *			[-M masterkeyname]
      */
     error = 0;
-    while ((option = getopt(argc, argv, "a:d:e:ik:l:m:r:t:D:M:")) != EOF) {
+    while ((option = getopt(argc, argv, getopt_string)) != EOF) {
 	switch (option) {
 	case 'a':
 	    acl_file = optarg;
