@@ -1,3 +1,9 @@
+2000-03-20  Ken Raeburn  <raeburn@mit.edu>
+	    Jeffrey Altman  <jaltman@watsun.cc.columbia.edu>
+
+	* state.c (telrcv): Fix off-by-one error dealing with full
+	buffer.
+
 2000-02-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Remove dependency on libdes425 when krb4 support

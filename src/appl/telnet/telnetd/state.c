@@ -102,7 +102,7 @@ telrcv()
 #endif
 
 	while (ncc > 0) {
-		if ((&ptyobuf[BUFSIZ] - pfrontp) < 2)
+		if ((&ptyobuf[BUFSIZ] - pfrontp) < 1)
 			break;
 		c = *netip++ & 0377, ncc--;
 #ifdef	ENCRYPTION
