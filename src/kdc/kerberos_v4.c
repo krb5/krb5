@@ -384,6 +384,7 @@ main(argc, argv)
 #include <krb5/wordsize.h>
 #include <krb5/mit-des.h>
 #include <krb5/kdb.h>
+#include "extern.h"		/* to pick up master_princ */
 
 static krb5_error_code retval; 
 static krb5_data *response;
@@ -419,18 +420,12 @@ krb5_data **resp;
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
-	retval = krb5_get_default_realm(&lrealm);
-	if (!retval) {
-	    if (strlen(lrealm) < sizeof(local_realm))
-		strcpy(local_realm, lrealm);
-	    else
-		retval = KRB5_CONFIG_NOTENUFSPACE;
-        }
-	if (retval) {
-	    com_err("KRBV4KDC", retval,
-		    "while attempting to get default realm");
-	    exit(1);
-        }
+	/* XXX assumes realm is null-terminated! */
+	lrealm = master_princ->realm.data;
+	if (strlen(lrealm) < sizeof(local_realm))
+	    strcpy(local_realm, lrealm);
+	else
+	    retval = KRB5_CONFIG_NOTENUFSPACE;
     }
     /* convert client_fulladdr to client_sockaddr:
      */
