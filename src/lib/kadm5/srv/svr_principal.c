@@ -738,12 +738,16 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 	 }
 	 if (mask & KADM5_KEY_DATA) {
 	      entry->n_key_data = kdb.n_key_data;
-	      entry->key_data = (krb5_key_data *)
-		   malloc(entry->n_key_data*sizeof(krb5_key_data));
-	      if (entry->key_data == NULL) {
-		   ret = ENOMEM;
-		   goto done;
-	      }
+	      if(entry->n_key_data) {
+		      entry->key_data = (krb5_key_data *)
+			      malloc(entry->n_key_data*sizeof(krb5_key_data));
+		      if (entry->key_data == NULL) {
+			      ret = ENOMEM;
+			      goto done;
+		      }
+	      } else 
+		      entry->key_data = NULL;
+
 	      for (i = 0; i < entry->n_key_data; i++)
 		   if (ret = krb5_copy_key_data_contents(handle->context,
 							 &kdb.key_data[i],
