@@ -1,4 +1,9 @@
 
+Mon Aug 7 14:15:59 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* decrypt_key.c - Deserialize key length into a 16 bit integer, then
+		jam it into the keyblock.
+
+
 Mon Aug 7 13:05:53 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_cpw.c(add_key_rnd) - Manually initialize krbtgt_princ.data to
 		point to krbtgt_princ_entries since some compilers do not

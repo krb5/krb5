@@ -41,6 +41,7 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
     krb5_keysalt 	* keysalt;
 {
     krb5_error_code 	  retval;
+    krb5_int16		  tmplen;
     krb5_octet		* ptr;
 
     keyblock->magic = KV5M_KEYBLOCK;
@@ -54,8 +55,9 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 
     keyblock->length = 0;
     ptr = key_data->key_data_contents[0];
-    krb5_kdb_decode_int16(ptr, keyblock->length);
+    krb5_kdb_decode_int16(ptr, tmplen);
     ptr += 2;
+    keyblock->length = (int) tmplen;
     if ((retval = krb5_decrypt(context, (krb5_pointer) ptr,
 			       (krb5_pointer)keyblock->contents,
 			       key_data->key_data_length[0] - 2, 
