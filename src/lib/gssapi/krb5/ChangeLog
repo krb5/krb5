@@ -1,3 +1,10 @@
+Thu Apr 11 18:53:09 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* acquire_cred.c (acquire_init_cred): Return GSS_S_CRED_UNAVAIL on
+		if krb5_cc_set_flags() returns an error, since that's the
+		call that will return an error if the credentials files
+		doesn't exist.
+
 Wed Apr  3 16:10:24 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): If make_ap_req()
