@@ -12,7 +12,7 @@ PROG	=	ovsec_kadm_srv_tcl
 LIBS	= 	$(LIBADMSRV) $(LIBRPCLIB) $(LIBDYN) $(LIBGSSAPI_KRB5) \
 		$(LIBKDB5) $(LIBKRB5) $(LIBCRYPTO) \
 		$(LIBISODE) $(LIBTCL) $(LIBM) $(LIBDB) $(LIBCOM_ERR) \
-		$(NDBMLIB) $(NETLIB)
+		$(NDBMLIB) $(NETLIB) $(REGEXLIB)
 
 expand Program
 expand Depend
