@@ -7,6 +7,11 @@ Thu Apr 27 16:33:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 			  mk_priv_basic from mk_priv.
 	* mk_safe.c	- Same replaydata fix.
 
+Thu Apr 26 15:59:51 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* Add adm_rw.c - routines to read and write commands from/to the
+	  administrative (kpasswd/kadmin) server.
+
 Wed Apr 27 11:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* init_ctx.c: krb5_init_context wasn't checking return values.
