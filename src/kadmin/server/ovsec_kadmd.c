@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
      if ((params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_klog_syslog(LOG_ERR, "%s: Missing required configuration values "
-			   "(%x) while initializing, aborting\n", whoami,
+			   "while initializing, aborting\n", whoami,
 			   (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  fprintf(stderr, "%s: Missing required configuration values "
 		  "(%x) while initializing, aborting\n", whoami,
