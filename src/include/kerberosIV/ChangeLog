@@ -1,3 +1,8 @@
+Sun Jul  7 18:18:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb4-proto.h: Change prototype for decomp_ticket to match source
+		(addr is not unsigned long *)
+
 Tue Dec 19 17:10:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kparse.h (LineNbr): Remove declaration of LineNbr; no longer

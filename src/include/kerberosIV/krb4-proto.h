@@ -56,7 +56,7 @@ int krb_create_ticket P_TYPE_((KTEXT , unsigned int , char *, char *, char *, lo
 /* debug_decl.c */
 
 /* decomp_ticket.c */
-int decomp_ticket P_TYPE_((KTEXT , unsigned char *, char *, char *, char *, unsigned long *, C_Block , int *, unsigned KRB4_32 *, char *, char *, C_Block , Key_schedule ));
+int decomp_ticket P_TYPE_((KTEXT , unsigned char *, char *, char *, char *, unsigned KRB4_32 *, C_Block , int *, unsigned KRB4_32 *, char *, char *, C_Block , Key_schedule ));
 
 /* dest_tkt.c */
 int dest_tkt P_TYPE_((void ));
