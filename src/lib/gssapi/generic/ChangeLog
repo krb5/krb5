@@ -1,5 +1,7 @@
 Tue Jul 23 16:44:50 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* util_validate.c: Only include <sys/file.h> if building with BSD_DB.
+
 	* gssapiP_generic.h: Must include k5-int.h on Windows and
 		Macintosh builds.
 

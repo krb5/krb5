@@ -31,10 +31,10 @@
 #include "gssapiP_generic.h"
 
 #include <sys/types.h>
-#include <sys/file.h>
 #include <fcntl.h>
 #include <limits.h>
 #ifdef HAVE_BSD_DB
+#include <sys/file.h>
 #include <db.h>
 
 static const int one = 1;
