@@ -1,3 +1,8 @@
+Wed Jul 31 14:20:50 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c: Remove delcaration for getpwuid(); already declared in
+		pwd.h.
+
 Fri Jul 26 14:26:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (install): Actually install kadmin.local.  (Or
