@@ -1,3 +1,7 @@
+Fri Aug  2 14:15:26 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.hin: Add prototype for krb5_free_keyblock_contents
+
 Wed Jul 24 00:38:40 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* k5-int.h: Prototype krb5_setenv and krb5_unsetenv

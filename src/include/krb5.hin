@@ -1679,6 +1679,9 @@ void krb5_free_checksum
 void krb5_free_keyblock
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_keyblock *));
+void krb5_free_keyblock_contents
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_keyblock *));
 void krb5_free_pa_data
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pa_data **));
