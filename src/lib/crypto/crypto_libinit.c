@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "crypto_libinit.h"
 
 static	int		initialized = 0;
 
