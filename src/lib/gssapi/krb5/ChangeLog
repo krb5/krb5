@@ -1,3 +1,14 @@
+2000-12-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5seal.c (make_seal_token_v1): Use ANSI-style definition,
+	instead of K&R plus prototype.  Don't use too-big numbers even as
+	placeholders.
+
+	* accept_sec_context.c (rd_and_store_for_creds): After creating an
+	auth context, set flags to require sequence numbers.
+	(krb5_gss_accept_sec_context): Likewise.
+	* init_sec_context.c (krb5_gss_init_sec_context): Likewise.
+
 2000-10-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): If an error
