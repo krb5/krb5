@@ -1,3 +1,7 @@
+2002-01-29  Tom Yu  <tlyu@mit.edu>
+
+	* def_realm.c: Add terminal newline.  Fixes [krb5-build/1041].
+
 2001-12-03	Miro Jurisic <meeroh@mit.edu>
 
 	* c_ustime.c: punted the accurate microseconds timing code because it
