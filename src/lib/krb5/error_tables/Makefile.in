@@ -8,19 +8,8 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 ##DOS##OBJFILE=..\$(OUTPRE)err_tbls.lst
 ##WIN16##LIBNAME=..\krb5.lib
 
+THDRDIR=$(BUILDTOP)$(S)include
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
-
-# The "unixmac" and "includes" rules need to run in Makefile.in,
-# without all the support glop like $(S) and $(BUILDTOP)...so, fake it.
-#
-# Faking things breaks VPATH support, which is a requirement for me -- TYT.
-# You need to do this right!  Whatever config tools that you're using under
-# the macintosh, is going to need to handle BUILDTOP and SRCTOP explicitly.
-# Setting BUILDTOP and SRCTOP to be the same is Right Out.
-#
-#BUILDTOP2 = ../../..
-#SRCTOP2 = $(BUILDTOP2)
-#EHDRDIR2=$(BUILDTOP2)/include/krb5
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
       kv5m_err.o adm_err.o init_ets.o
@@ -37,7 +26,14 @@ SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c \
 all-unix:: all-libobjs
 all-libobjs: $(HDRS)
 
-unixmac: $(HDRS) $(SRCS)
+includes:: $(HDRS)
+	for f in $(HDRS) ; do \
+		if cmp $$f $(THDRDIR)/$$f >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(THDRDIR)/$$f; \
+			 $(CP) $$f $(THDRDIR)/$$f) ; \
+		fi ; \
+	done
 
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et

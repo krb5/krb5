@@ -1,3 +1,10 @@
+2001-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (includes): New target.  Copy headers into proper
+	include directory.
+	(unixmac): Target deleted.
+	(THDRDIR): New variable.
+
 2000-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_err.et: Add error codes MISMATCH_INDEF and MISSING_EOC.
