@@ -26,6 +26,7 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_cflags=-fpic
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+krb5_cv_shlibs_versioned_filenames = yes # version in filename of library
 	krb5_cv_shlibs_need_nover=no
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag=
@@ -44,6 +45,7 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_cflags=-fPIC
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+krb5_cv_shlibs_versioned_filenames = yes
 	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
@@ -61,7 +63,8 @@ case $krb5_cv_host in
 	echo "Enabling shared libraries for AIX...."
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=a
-	krb5_cv_shlibs_need_nover=yes
+	krb5_cv_shlibs_need_nover=no # need_nover *must* be no if versioned_filenames = no
+	krb5_cv_shlibs_versioned_filenames=no
 	krb5_cv_noshlibs_ext=do-not-make
 	krb5_cv_shlibs_dir=
 	if test $krb5_cv_prog_gcc = yes ; then
@@ -89,6 +92,7 @@ fi
 	fi
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+krb5_cv_shlibs_versioned_filenames = yes
 	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=shared
 	krb5_cv_shlibs_ldflag="-dy"
@@ -107,6 +111,7 @@ alpha-dec-osf*)
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=so
 	krb5_cv_noshlibs_ext=a
+krb5_cv_shlibs_versioned_filenames = yes
 	krb5_cv_shlibs_need_nover=yes
 	krb5_cv_shlibs_dir=
 	krb5_cv_shlibs_ldflag="-call_shared"

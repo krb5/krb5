@@ -1,3 +1,7 @@
+Wed Oct 11 17:21:16 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* makeshlib.sh:  bring in library version and do something with it for AIX.
+
 Mon Oct  9 19:00:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* makeshlib.sh: For NetBSD convert flags designed for cc to ones

@@ -860,27 +860,36 @@ SHEXT=$krb5_cv_shlibs_ext
 AC_SUBST(SHEXT)
 STEXT=$krb5_cv_noshlibs_ext
 AC_SUBST(STEXT)
-dnl export the version of the library....
-krb5_cv_shlib_version_$1=$2
+if test "$krb5_cv_shlibs_versioned_filenames" = "yes" ; then
+VEXT=".$2" # Version of library goes in archive name
 if test "$krb5_cv_shlibs_need_nover" = yes; then
 	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2 $1.\$""(SHEXT)"
 else
 	DO_MAKE_SHLIB="$1.\$""(SHEXT).$2"
 fi
+else # $krb5_cv_shlibs_versioned_filenames
+VEXT=
+	DO_MAKE_SHLIB="$1.\$""(SHEXT)"
+fi
+AC_SUBST(VEXT)
+dnl export the version of the library....
+krb5_cv_shlib_version_$1=$2
 AC_SUBST(SHLIB_NAME)
 AC_PUSH_MAKEFILE()dnl
 
 all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
 
 clean-unix:: 
-	$(RM) $1.[$](SHEXT).$2 $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
+	$(RM) $1.[$](SHEXT)$(VEXT) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
 
-$1.[$](SHEXT).$2: [$](LIBDONE) [$](DEPLIBS)
+$1.[$](SHEXT)$(VEXT): [$](LIBDONE) [$](DEPLIBS)
 	[$](BUILDTOP)/util/makeshlib [$]@	\
 		"[$](SHLIB_LIBDIRS)" \
-		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" [$](LIB_SUBDIRS)
+		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" "$2" [$](LIB_SUBDIRS)
 AC_POP_MAKEFILE()dnl
+if test "$krb5_cv_shlibs_versioned_filenames" = "yes" ; then
 LinkFile($1.[$](SHEXT),$1.[$](SHEXT).$2)
+fi
 ],[
 STEXT=$krb5_cv_noshlibs_ext
 AC_SUBST(STEXT)
@@ -897,7 +906,12 @@ AC_SUBST(SHLIB_STATIC_TARGET)
 
 AC_ARG_ENABLE([shared],
 [  --enable-shared         build shared libraries],[
-LinkFileDir($3/$1.[$](SHEXT).$2, $1.[$](SHEXT).$2, $4)
+# Note that even if we aren't installing versions of the library with
+# Version identifiers in the file name, we still need to make the links
+# in ${BUILDTOP}/lib for dependencies.
+# The following makes sure that the path of symlinks traces back to the real library; it is
+# not an error that $2 is used in some places and $VEXT in others.
+LinkFileDir($3/$1.[$](SHEXT).$2, $1.[$](SHEXT)[$](VEXT), $4)
 AppendRule([$3/$1.[$](SHEXT): $3/$1.[$](SHEXT).$2
 	[$](RM) $3/$1.[$](SHEXT)
 	[$](LN) $1.[$](SHEXT).$2 $3/$1.[$](SHEXT)
@@ -908,12 +922,12 @@ AppendRule(clean::[
 if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
 AppendRule([all-unix:: $3/$1.$(SHEXT).$2 $3/$1.$(SHEXT)])
 else
-AppendRule([all-unix:: $3/$1.$(SHEXT).$2])
+AppendRule([all-unix:: $3/$1.$(SHEXT)[$](VEXT)])
 fi
-AppendRule([install::	$1.[$](SHEXT).$2
-	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT).$2
-	[$](INSTALL_DATA) $1.[$](SHEXT).$2	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT).$2
+AppendRule([install::	$1.[$](SHEXT)[$](VEXT)
+	[$](RM) [$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)[$](VEXT)
+	[$](INSTALL_DATA) $1.[$](SHEXT)[$](VEXT)	\
+		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)$1.[$](SHEXT)[$](VEXT)
 ])
 if test "$krb5_cv_shlibs_need_nover" = "yes" ; then
 AppendRule([install::	$1.[$](SHEXT).$2
@@ -958,3 +972,7 @@ else
 fi
 AC_SUBST(LDARGS)
 ])dnl
+
+
+
+

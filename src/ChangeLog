@@ -1,3 +1,9 @@
+Wed Oct 11 17:23:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: For all platforms, set krb5_cv_shlibs_versioned_filenames; no for AIX, yes for all others
+
+	* aclocal.m4 (v5_make_shlib): Add ability not to make versioned archive files for AIX
+
 Tue Oct 10 21:43:15 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* wconfig.c: Use win-post.in instead of post.in.

@@ -1,3 +1,7 @@
+Wed Oct 11 18:13:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* pre.in (DO_MAKE_SHLIB):  substitute VEXT, for the version extension for shared libs
+
 Tue Oct 10 21:42:14 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* win-post.in: New file
