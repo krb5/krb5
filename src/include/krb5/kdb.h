@@ -94,7 +94,7 @@
 typedef struct _krb5_tl_data {
     struct _krb5_tl_data* tl_data_next;		/* NOT saved */
     krb5_int16 		  tl_data_type;		
-    krb5_int16		  tl_data_length;	
+    krb5_ui_2		  tl_data_length;	
     krb5_octet 	        * tl_data_contents;	
 } krb5_tl_data;
 
@@ -108,7 +108,7 @@ typedef struct _krb5_key_data {
     krb5_int16 		  key_data_ver;		/* Version */
     krb5_int16		  key_data_kvno;	/* Key Version */
     krb5_int16		  key_data_type[2];	/* Array of types */
-    krb5_int16		  key_data_length[2];	/* Array of lengths */
+    krb5_ui_2		  key_data_length[2];	/* Array of lengths */
     krb5_octet 	        * key_data_contents[2];	/* Array of pointers */
 } krb5_key_data;
 
@@ -121,7 +121,7 @@ typedef struct _krb5_keysalt {
 
 typedef struct _krb5_db_entry_new {
     krb5_magic 		  magic;		/* NOT saved */
-    krb5_int16		  len;			
+    krb5_ui_2		  len;			
     krb5_flags 		  attributes;
     krb5_deltat		  max_life;
     krb5_deltat		  max_renewable_life;
@@ -132,7 +132,7 @@ typedef struct _krb5_db_entry_new {
     krb5_kvno 	 	  fail_auth_count; 	/* # of failed passwd attempt */
     krb5_int16 		  n_tl_data;
     krb5_int16 		  n_key_data;
-    krb5_int16		  e_length;		/* Length of extra data */
+    krb5_ui_2		  e_length;		/* Length of extra data */
     krb5_octet		* e_data;		/* Extra data to be saved */
 
     krb5_principal 	  princ;		/* Length, data */	
@@ -326,79 +326,5 @@ krb5_error_code krb5_ser_db_context_init (krb5_context);
  
 #define KRB5_KDB_DEF_FLAGS	0
 
-#ifdef KRB5_OLD_AND_KRUFTY
-/* this is the same structure as krb5_keyblock, but with a different name to
-   enable compile-time catching of programmer confusion between encrypted &
-   decrypted keys in the database */
-
-typedef struct _krb5_encrypted_keyblock {
-    krb5_magic magic;
-    short enctype;			/* XXX this is SO ugly --- proven */
-    int length;
-    krb5_octet *contents;
-} krb5_encrypted_keyblock;
-
-typedef struct _krb5_db_entry {
-    krb5_magic magic;
-    krb5_principal principal;
-    krb5_encrypted_keyblock key;
-    krb5_kvno kvno;
-    krb5_deltat	max_life;
-    krb5_deltat	max_renewable_life;
-    krb5_kvno mkvno;			/* master encryption key vno */
-    
-    krb5_timestamp expiration;		/* This is when the client expires */
-    krb5_timestamp pw_expiration; 	/* This is when its password does */
-    krb5_timestamp last_pwd_change; 	/* Last time of password change  */
-    krb5_timestamp last_success;	/* Last successful password */
-    
-    krb5_timestamp last_failed;		/* Last failed password attempt */
-    krb5_kvno fail_auth_count; 		/* # of failed password attempts */
-    
-    krb5_principal mod_name;
-    krb5_timestamp mod_date;
-    krb5_flags attributes;
-    krb5_int32 salt_type:8,
- 	       salt_length:24;
-    krb5_octet *salt;
-    krb5_encrypted_keyblock alt_key;
-    krb5_int32 alt_salt_type:8,
- 	       alt_salt_length:24;
-    krb5_octet *alt_salt;
-    
-    krb5_int32 expansion[8];
-} krb5_db_entry_OLD;
-
-#endif	/* KRB5_OLD_AND_KRUFTY */
-
-/* This is now a structure that is private to the database backend. */
-#ifdef notdef
-#ifdef	KDB5_DISPATCH
-/*
- * Database operation dispatch table.  This table determines the procedures
- * to be used to access the KDC database.  Replacement of this structure is
- * not supported.
- */
-typedef struct _kdb5_dispatch_table {
-    char *	kdb5_db_mech_name;
-    char *	kdb5_db_index_ext;
-    char *	kdb5_db_data_ext;
-    char *	kdb5_db_lock_ext;
-    DBM *	(*kdb5_dbm_open) (const char *, int, int);
-    void	(*kdb5_dbm_close) (DBM *);
-    datum	(*kdb5_dbm_fetch) (DBM *, datum);
-    datum	(*kdb5_dbm_firstkey) (DBM *);
-    datum	(*kdb5_dbm_nextkey) (DBM *);
-    int		(*kdb5_dbm_delete) (DBM *, datum);
-    int		(*kdb5_dbm_store) (DBM *, datum, datum, int);
-    int		(*kdb5_dbm_dirfno) (DBM *);
-    int		(*kdb5_dbm_pagfno) (DBM *);
-} kdb5_dispatch_table;
-
-krb5_error_code kdb5_db_set_dbops (krb5_context, kdb5_dispatch_table *);
-#else
-typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
-#endif	/* KDB5_DISPATCH */
-#endif /* notdef */
 #endif /* !defined(macintosh) && !defined(_MSDOS) &&!defined(_WIN32) */
 #endif /* KRB5_KDB5__ */

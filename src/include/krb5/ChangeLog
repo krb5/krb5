@@ -1,3 +1,11 @@
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb.h: For structs krb5_tl_data (tl_data_length), krb5_key_data
+	(key-data_length), krb5_db_entry (len, e_length) change the
+	storage types from krb5_int16 to krb5_ui_2. This does not require
+	a database version change as the field sizes are the same. Remove
+	the code ifdefed under KRB5_OLD_AND_KRUFTY.
+
 2001-04-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* .cvsignore: Add stamp-h.in
