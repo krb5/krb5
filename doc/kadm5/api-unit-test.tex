@@ -248,8 +248,7 @@ the init doesn't succeed.
 %\Reason{A non-null password causes reading from the kstash.}
 %\Conditions{local}
 %\Status{Implemented}
-
-}
+%}
 
 \numtest{24}{
 \Reason{Null service name is ignored in local invocation.}
@@ -792,10 +791,10 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
-\numtest{21.5}
+\numtest{21.5}{
 \Reason{Policy reference count remains unchanged when policy is
 	changed to itself.}
-\status{Implemented.}
+\Status{Implemented.}
 }
 
 \numtest{22}{
@@ -1756,7 +1755,7 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail \\ \hline
 
 \numtest{4}{
 \Reason{Fails for mask with REF_COUNT bit set.}
-\status{Implemented}
+\Status{Implemented}
 }
 
 \numtest{5}{
