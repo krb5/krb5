@@ -20,7 +20,7 @@ SRCS	= ftpd.c ftpcmd.y popen.c vers.c \
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
+KLIB = -lgssapi_krb5 -lkrb5 -lcrypto -lcom_err
 DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
 		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
 

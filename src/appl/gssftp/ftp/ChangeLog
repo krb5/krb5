@@ -1,3 +1,7 @@
+Tue Mar 30 22:30:14 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (KLIB): -lcom_err, not $(COMERRLIB)
+
 Thu Feb 25 23:05:03 1999  Tom Yu  <tlyu@mit.edu>
 
 	* secure.c (secure_putbuf): Revert Sam's last change; if
