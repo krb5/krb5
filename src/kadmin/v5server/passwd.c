@@ -277,9 +277,16 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 				&entry2write.alt_key))
 	goto cleanup;
 
-    /* Set the time */
-    if (kret = krb5_timeofday(kcontext, &entry2write.mod_date))
+    /* Set the time for last successful password change */
+    if (kret = krb5_timeofday(kcontext, &entry2write.last_pwd_change))
 	goto cleanup;
+
+    /* Set entry modifier and modification time. */
+    entry2write.mod_name = princ;
+    entry2write.mod_date = entry2write.last_pwd_change;
+
+    /* Update the kvno */
+    entry2write.kvno++;
 
     /* Salt? */
 

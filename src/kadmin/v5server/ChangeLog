@@ -1,4 +1,9 @@
 
+Thu Apr 27 17:05:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Update last_pwd_change, mod_name and kvno when changing password
+	successfully.
+
 Wed Apr 26 16:00:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	Add new administrative protocol server which only responds to
