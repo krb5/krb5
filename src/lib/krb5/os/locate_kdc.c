@@ -249,7 +249,27 @@ static int translate_ai_error (int err)
 
 static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
 {
-    return add_sockaddr_to_list (lp, a->ai_addr, a->ai_addrlen);
+    int r;
+    r = add_sockaddr_to_list (lp, a->ai_addr, a->ai_addrlen);
+#ifdef TEST
+    switch (a->ai_socktype) {
+    case SOCK_DGRAM:
+	fprintf(stderr, "\tdgram\n");
+	break;
+    case SOCK_STREAM:
+	fprintf(stderr, "\tstream\n");
+	break;
+    case SOCK_RAW:
+	fprintf(stderr, "\traw\n");
+	break;
+    case 0:
+	break;
+    default:
+	fprintf(stderr, "\tsocket type %d\n", a->ai_socktype);
+	break;
+    }
+#endif
+    return r;
 }
 
 static void set_port_num (struct sockaddr *addr, int num)
@@ -270,28 +290,20 @@ static int
 add_host_to_list (struct addrlist *lp, const char *hostname,
 		  int port, int secport)
 {
-    struct addrinfo *addrs, *a;
-    /* Must set err to 0 for the case we return err without ever
-       setting it -- !HAVE_GETADDRINFO and !hp */
-    int err = 0;
+    struct addrinfo *addrs, *a, hint;
+    int err;
 
 #ifdef TEST
     fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
 	     ntohs (port), ntohs (secport));
 #endif
 
-    err = getaddrinfo (hostname, NULL, NULL, &addrs);
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_socktype = SOCK_DGRAM;
+    err = getaddrinfo (hostname, NULL, &hint, &addrs);
     if (err)
 	return translate_ai_error (err);
     for (a = addrs; a; a = a->ai_next) {
-	/* AIX 4.3.3 libc is broken.  */
-	if (a->ai_addr->sa_family == 0)
-	    a->ai_addr->sa_family = a->ai_family;
-#ifdef HAVE_SA_LEN
-	if (a->ai_addr->sa_len == 0)
-	    a->ai_addr->sa_len = a->ai_addrlen;
-#endif
-
 	set_port_num (a->ai_addr, port);
 	err = add_addrinfo_to_list (lp, a);
 	if (err)

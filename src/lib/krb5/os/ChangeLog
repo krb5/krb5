@@ -1,3 +1,11 @@
+2002-04-12  Ken Raeburn  <raeburn@raeburn.org>
+
+	* locate_kdc.c (add_addrinfo_to_list) [TEST]: Print out socket
+	type before returning.
+	(add_host_to_list): Don't need to initialize err.  Supply
+	getaddrinfo hint to select datagram addresses only.  Delete AIX
+	bug workaround code.
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* locate_kdc.c (translate_ai_error), hst_realm.c
