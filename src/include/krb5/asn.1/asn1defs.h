@@ -93,6 +93,10 @@ struct type_KRB5_KDC__REP *krb5_as_rep2KRB5_KDC__REP
 struct type_KRB5_KDC__REP *krb5_tgs_rep2KRB5_KDC__REP
 	PROTOTYPE((const krb5_kdc_rep *,
 		   int * ));
+struct type_KRB5_KDC__REP *krb5_kdc_rep2KRB5_KDC__REP
+	PROTOTYPE((const krb5_kdc_rep *,
+		   const krb5_msgtype,
+		   int * ));
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
 	PROTOTYPE((const struct type_KRB5_KDC__REP *,
 		   krb5_msgtype *,
@@ -175,5 +179,8 @@ struct type_KRB5_EncKrbPrivPart *krb5_priv_enc_part2KRB5_EncKrbPrivPart
 krb5_priv_enc_part *KRB5_EncKrbPrivPart2krb5_priv_enc_part
 	PROTOTYPE((const struct type_KRB5_EncKrbPrivPart *,
 		   int * ));
+
+struct type_UNIV_GeneralizedTime *unix2gentime
+	PROTOTYPE((const int, register int *));
 
 #endif /* KRB5_ASN1DEFS__ */
