@@ -151,10 +151,11 @@ admin_merge_keys(kcontext, dbentp, unique,
     krb5_key_data	*kp1, *kp2;
 
     keylist = (krb5_key_data *) NULL;
+    kret = 0;
+    numout = 0;
     if ((keylist = (krb5_key_data *) malloc(sizeof(krb5_key_data) *
 					    (nkeys1+nkeys2)))) {
 	memset(keylist, 0, sizeof(krb5_key_data) * (nkeys1+nkeys2));
-	numout = 0;
 	if (!unique) {
 	    /* The easy case */
 	    /*
@@ -281,7 +282,12 @@ admin_merge_keys(kcontext, dbentp, unique,
 	*nkeysout = numout;
     }
     else {
-	free(keylist);
+	if (keylist) {
+	    if (numout)
+		key_free_key_data(keylist, numout);
+	    else
+		free(keylist);
+	}
     }
     return(kret);
 }
@@ -744,6 +750,8 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 					   ((should_exist) ? 
 					    &new_dbentry : &cur_dbentry),
 					   1);
+		    if (should_exist)
+			principal = (krb5_principal) NULL;
 		}
 		else {
 		    /* Database entry failed or yielded unexpected results */
@@ -772,8 +780,9 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 		    }
 		}
 
-		/* Clean up from krb5_parse_name */
-		krb5_free_principal(kcontext, principal);
+		/* Clean up from krb5_parse_name (If left over) */
+		if (principal)
+		    krb5_free_principal(kcontext, principal);
 	    }
 	    else {
 		/* Principal name parse failed */
@@ -1053,12 +1062,13 @@ admin_keysalt_parse(kcontext, debug_level, nents, entries, dups,
     int			i,j;
     char		*kvnop;
     int			ncolon;
-    krb5_int32		nparsed;
+    krb5_int32		nparsed, onparsed;
 
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_parse()\n"));
     retval = 0;
     ndone = 0;
     keysalts = (krb5_key_salt_tuple *) NULL;
+    nparsed = 0;
     if (kvnolist = (krb5_int32 *) malloc(nents * sizeof(krb5_int32))) {
 	for (i=0; i<nents; i++)
 	    kvnolist[i] = -1;
@@ -1093,13 +1103,14 @@ admin_keysalt_parse(kcontext, debug_level, nents, entries, dups,
 	     * Parse the string.  Don't allow more than one pair per entry,
 	     * but allow duplicate entries if we're told so.
 	     */
+	    onparsed = nparsed;
 	    if (!krb5_string_to_keysalts(entries[i].data,
 					 "",
 					 ":",
 					 dups,
 					 &keysalts,
 					 &nparsed)) {
-		if (nparsed == 1) {
+		if (nparsed == (onparsed+1)) {
 		    if (kvnop) {
 			if (sscanf(kvnop,"%d", &kvnolist[ndone]) != 1) {
 			    retval = KRB5_ADM_BAD_OPTION;
@@ -1156,6 +1167,7 @@ admin_keysalt_verify(kcontext, debug_level, dbentp, should_be_there,
 
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_verify()\n"));
     for (i=0; i<nksents; i++) {
+	kdata = (krb5_key_data *) NULL;
 	(void) key_name_to_data(dbentp, &kslist[i], kvnolist[i], &kdata);
 	if (should_be_there && !kdata) {
 	    retval = KRB5_ADM_KEY_DOES_NOT_EXIST;
@@ -1191,8 +1203,11 @@ admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
     krb5_key_data	*kdata, *ekdata;
     krb5_int32		num_keys, num_ekeys;
     krb5_int16		count;
+    krb5_db_entry	tmpent;
 
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_keysalt_operate()\n"));
+    memset(&tmpent, 0, sizeof(krb5_db_entry));
+    tmpent.princ = dbentp->princ;	/* Needed for salts in string2key */
     if (keyectomy) {
 	count = dbentp->n_key_data;
 	for (i=0; i<nksents; i++) {
@@ -1241,14 +1256,14 @@ admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
 	/* Convert the string to key for the new key types */
 	kdata = ekdata = (krb5_key_data *) NULL;
 	if (!key_string_to_keys(kcontext,
-				dbentp,
+				&tmpent,
 				password,
 				nksents,
 				kslist,
 				&num_keys,
 				&kdata) &&
 	    !key_encrypt_keys(kcontext,
-			      dbentp,
+			      &tmpent,
 			      &num_keys,
 			      kdata,
 			      &ekdata)) {
@@ -1271,6 +1286,8 @@ admin_keysalt_operate(kcontext, debug_level, dbentp, password, keyectomy,
 	    key_free_key_data(kdata, num_keys);
 	if (ekdata && num_keys)
 	    key_free_key_data(ekdata, num_keys);
+	if (tmpent.key_data && tmpent.n_key_data)
+	    key_free_key_data(tmpent.key_data, tmpent.n_key_data);
     }
     DPRINT(DEBUG_CALLS, debug_level, ("X admin_keysalt_operate() = %d\n",
 				     retval));
@@ -1373,7 +1390,7 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 			    !(retval = admin_keysalt_operate(kcontext,
 							     debug_level,
 							     &entry,
-							     arglist[1],
+							     &arglist[1],
 							     is_delete,
 							     nkeysalts,
 							     keysalt_list,
