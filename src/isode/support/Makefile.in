@@ -11,8 +11,8 @@ TOPDIR = $(BUILDTOP)
 OPTIONS	=	-I. -I$(HDIR) $(PEPYPATH) $(KRBOPT)
 CFLAGS  =       $(OPTIONS) $(LOPTIONS) 
 
-HDIR	=	$(TOPDIR)isode/h/
-UTILDIR	=	$(TOPDIR)isode/util/
+HDIR	=	$(srcdir)/$(TOPDIR)isode/h/
+UTILDIR	=	$(srcdir)/$(BUILDTOP)isode/util/
 INCDIRM	=	$(HDIR)
 INCDIR	=	$(INCDIRM)/
 PEPSYDIRM=	$(INCDIR)pepsy

@@ -107,6 +107,7 @@ inst-pepsy:	$(BINDIR)pepsy
 #		-@echo ""
 
 pepsy:		xpepsy
+		-rm -f pepsy.old
 		-mv pepsy pepsy.old
 		$(LN) xpepsy pepsy
 		-@echo ""
@@ -201,7 +202,7 @@ $(PEPSYDIR)$(TARGET):	$(TARGET)
 UNIV_tables.o:	UNIV_tables.c UNIV-types.h
 
 UNIV-types.h UNIV_tables.c: UNIV.py xpepsy
-		./xpepsy -A -f -h -m UNIV.py
+		./xpepsy -A -f -h -m $(srcdir)/UNIV.py
 
 l-libpepsy:	$(CFILES) $(T_FILES) true
 		$(LINT) $(LFLAGS) $(CFILES) $(T_FILES) \
