@@ -1,11 +1,11 @@
 Sat May 15 19:48:31 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* makeshlib.sh (library): Add -bnoentry to the AIX shared library
-		link line so that the shared libraries can be dynamically
-		loaded.  (Patch from Duke, needed for SAP.  Note: I didn't
-		take their addition of -lbsd, since I don't think that's
-		needed or a good idea).  Also make the library file
-		executable, which is apparently also necessary.
+ 		link line so that the shared libraries can be dynamically
+ 		loaded.  Also make the library file executable, which is
+ 		apparently also necessary.  (Patch from Duke, needed for
+ 		SAP.  Note: I didn't take their addition of -lbsd, since I
+ 		don't think that's needed or a good idea).
 
 1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
