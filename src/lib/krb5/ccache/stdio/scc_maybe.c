@@ -164,12 +164,30 @@ krb5_scc_open_file (context, id, mode)
 	 data->version = (fvno_bytes[0] << 8) + fvno_bytes[1];
 	 if ((data->version != KRB5_SCC_FVNO_1) &&
 	     (data->version != KRB5_SCC_FVNO_2) &&
-	     (data->version != KRB5_SCC_FVNO_3)) {
+	     (data->version != KRB5_SCC_FVNO_3) &&
+	     (data->version != KRB5_SCC_FVNO_4)) {
 	     (void) krb5_unlock_file(context, fileno(f));
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-     }
-     data->file = f;
-     return 0;
+	if (data->version == KRB5_SCC_FVNO_4) {
+	    char buf[1024];
+	    int len;
+
+	    if (!fread((char *)fvno_bytes, sizeof(fvno_bytes), 1, f)) {
+	     	(void) krb5_unlock_file(context, fileno(f));
+	     	(void) fclose(f);
+	     	return KRB5_CCACHE_BADVNO;
+	    }
+	    if (len = (fvno_bytes[0] << 8) + fvno_bytes[1]) {
+	    	if (!fread(buf, len, 1, f)) {
+	     	    (void) krb5_unlock_file(context, fileno(f));
+	     	    (void) fclose(f);
+	     	    return KRB5_CCACHE_BADVNO;
+		}
+	    }
+	}
+    }
+    data->file = f;
+    return 0;
 }

@@ -106,6 +106,16 @@ krb5_scc_generate_new (context, id)
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
 	     goto err_out;
 	 }
+ 	 /* For version 4 we save a length for the rest of the header */
+          if (KRB5_SCC_DEFAULT_FVNO == KRB5_SCC_FVNO_4) {
+	     unsigned char scc_flen[2] = { 0, 0 };
+	     if (!fwrite((char *)scc_flen, sizeof(scc_flen), 1, f)) {
+	        retcode = krb5_scc_interpret(context, errno);
+	        (void) fclose(f);
+	        (void) remove(((krb5_scc_data *) lid->data)->filename);
+                goto err_out;
+            }
+	 }
 	 if (fclose(f) == EOF) {
 	     retcode = krb5_scc_interpret(context, errno);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);

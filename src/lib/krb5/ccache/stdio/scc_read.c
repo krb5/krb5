@@ -199,12 +199,10 @@ krb5_scc_read_keyblock(context, id, keyblock)
      kret = krb5_scc_read_ui_2(context, id, &ui2);
      keyblock->keytype = ui2;
      CHECK(kret);
-     if ((data->version == KRB5_SCC_FVNO_1) ||
-	 (data->version == KRB5_SCC_FVNO_2))
-	     keyblock->etype = ETYPE_UNKNOWN;
-     else {
+     if (data->version == KRB5_SCC_FVNO_3) {
+		/* This works because the old etype is the same as the new keytype. */
 	     kret = krb5_scc_read_ui_2(context, id, &ui2);
-	     keyblock->etype = ui2;
+	     keyblock->keytype = ui2;
 	     CHECK(kret);
      }
 

@@ -1,4 +1,13 @@
 
+Tue Sep 05 22:58:52 1995
+
+        * scc.h : Add another KRB5_SCC_FVNO but don't up the default.
+        * scc_gennew.c, scc_maybe.c : New version saves a length after
+                version for whatever we want to put into the ccache before
+                the first credential (like a time skew)
+        * scc_read.c, scc_write.c : Remove krb5_enctype references, and
+                replace with krb5_keytype where appropriate
+
 Tue Aug 29 13:36:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* scc_reslv.c - Set magic number in successfully resolved ccache.
 
