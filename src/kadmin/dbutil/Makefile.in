@@ -11,6 +11,8 @@ all:: $(PROG)
 $(PROG): $(OBJS) $(DEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
 
+kdb5_util_ct.o: kdb5_util_ct.c
+
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 

@@ -1,3 +1,7 @@
+Tue Jul 23 17:03:42 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: add dependency for kdb5_util_ct.o
+
 Thu Jul 18 19:22:04 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in: removed SS_RULES
