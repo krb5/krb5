@@ -26,10 +26,19 @@
  * srv_key.c - Handle Kerberos key related functions.
  */
 #include "k5-int.h"
+#include "adm.h"
 #include "com_err.h"
 #include "kadm5_defs.h"
 #include "mit-des.h"
 
+static const char *key_cpw_ufokey_fmt = "%s: no keys in database entry for %s.\n";
+static const char *key_cpw_decerr_fmt = "%s: cannot decode keys for %s.\n";
+static const char *key_add_cpw_err_fmt = "%s: cannot add entry for %s (%s).\n";
+static const char *key_add_cpw_succ_fmt = "Added password changing service principal (%s).";
+static const char *key_cpw_encerr_fmt = "%s: cannot encode keys for %s.\n";
+static const char *key_cpw_rkeyerr_fmt = "%s: cannot make random key for %s.\n";
+static const char *key_cpw_uniqerr_fmt = "%s: database entry for %s is not unique.\n";
+static const char *key_cpw_parserr_fmt = "%s: cannot parse %s.\n";
 static const char *key_keytab_fmt = "%s: cannot resolve keytab %s (%s).\n";
 static const char *key_bad_etype_fmt = "%s: bad etype %d (%s).\n";
 static const char *key_def_realm_fmt = "%s: cannot find default realm (%s).\n";
@@ -42,6 +51,7 @@ static const char *key_bad_name_fmt = "%s: cannot set database name to %s (%s).\
 static const char *key_cant_init_fmt = "%s: cannot initialize database (%s).\n";
 static const char *key_vmast_key_fmt = "%s: cannot verify master key (%s).\n";
 static const char *key_key_pp_fmt = "%s: cannot preprocess key (%s).\n";
+static const char *key_rkey_fmt = "%s: cannot initialize random key generator (%s).\n";
 static const char *key_getm_fmt = "%s: cannot get master entry (%s).\n";
 
 static int		mprinc_init = 0;
@@ -65,9 +75,208 @@ static char		*master_realm = (char *) NULL;
 static int		mkeytab_init = 0;
 static krb5_keytab	key_keytab = (krb5_keytab) NULL;
 
+static int		madmin_key_init = 0;
+static krb5_keyblock	madmin_key;
+
 static int key_debug_level = 0;
 
 extern char *programname;
+
+/*
+ * key_get_admin_entry()	- Find the admin entry or create one.
+ */
+static krb5_error_code
+key_get_admin_entry(kcontext)
+    krb5_context	kcontext;
+{
+    krb5_error_code	kret;
+    char		*realm_name;
+    char		*admin_princ_name;
+    krb5_principal	admin_principal;
+    int			number_of_entries;
+    krb5_boolean	more_entries;
+    krb5_db_entry	madmin_entry;
+    krb5_keyblock	pkey, akey;
+
+    DPRINT(DEBUG_CALLS, key_debug_level, ("* key_get_admin_entry()\n"));
+    kret = ENOMEM;
+    realm_name = key_master_realm();
+    /*
+     * The admin principal format is:
+     *	<admin-service-name>/<realm>@<realm>
+     */
+    admin_princ_name = (char *) malloc((size_t)
+				       ((2*strlen(realm_name)) + 2 +
+					strlen(KRB5_ADM_SERVICE_NAME)));
+    if (admin_princ_name) {
+	/* Format the admin name */
+	sprintf(admin_princ_name, "%s/%s@%s", KRB5_ADM_SERVICE_NAME,
+		realm_name, realm_name);
+	DPRINT(DEBUG_REALM, key_debug_level,
+	       ("- setting up admin principal %s\n", admin_princ_name));
+	/* Parse the admin name */
+	if (!(kret = krb5_parse_name(kcontext,
+				     admin_princ_name,
+				     &admin_principal))) {
+	    number_of_entries = 1;
+	    more_entries = 0;
+	    /*
+	     * Attempt to get the database entry.
+	     */
+	    if (!(kret = krb5_db_get_principal(kcontext,
+					       admin_principal,
+					       &madmin_entry,
+					       &number_of_entries,
+					       &more_entries)) &&
+		(number_of_entries == 1) &&
+		(!more_entries)) {
+		DPRINT(DEBUG_REALM, key_debug_level,
+		       ("- found database entry for %s\n", admin_princ_name));
+		/*
+		 * If the entry's present and it's unique, then we can
+		 * just proceed and decrypt the key.
+		 */
+		if (!(kret = key_decrypt_keys(kcontext,
+					      admin_principal,
+					      &madmin_entry.key,
+					      &madmin_entry.alt_key,
+					      &pkey,
+					      &akey))) {
+		    if (pkey.contents) {
+			DPRINT(DEBUG_REALM, key_debug_level,
+			       ("- using primary key\n"));
+			memcpy((char *) &madmin_key,
+			       (char *) &pkey,
+			       sizeof(pkey));
+			if (akey.contents)
+			    krb5_free_keyblock(kcontext, &akey);
+			madmin_key_init = 1;
+		    }
+		    else {
+			if (akey.contents) {
+			    DPRINT(DEBUG_REALM, key_debug_level,
+				   ("- using alternate key\n"));
+			    memcpy((char *) &madmin_key,
+				   (char *) &akey,
+				   sizeof(akey));
+			    madmin_key_init = 1;
+			}
+			else {
+			    DPRINT(DEBUG_REALM, key_debug_level,
+				   ("- NO KEY PRESENT\n"));
+			    fprintf(stderr,
+				    key_cpw_ufokey_fmt,
+				    programname,
+				    admin_princ_name);
+			    kret = KRB5KRB_ERR_GENERIC;
+			}
+		    }
+		}
+		else
+		    fprintf(stderr,
+			    key_cpw_decerr_fmt,
+			    programname,
+			    admin_princ_name);
+		krb5_db_free_principal(kcontext,
+				       &madmin_entry,
+				       number_of_entries);
+	    }
+	    else {
+		/*
+		 * We failed to find a unique entry.  See if the entry
+		 * wasn't present.  If so, then try to create it.
+		 */
+		if (!kret && !number_of_entries) {
+		    krb5_keyblock	rkey, akey;
+
+		    DPRINT(DEBUG_REALM, key_debug_level,
+			   ("- no database entry for %s\n", admin_princ_name));
+		    /*
+		     * Not present - Set up our database entry.
+		     */
+		    memset((char *) &madmin_entry, 0, sizeof(madmin_entry));
+		    madmin_entry.kvno = 1;
+		    madmin_entry.attributes = KRB5_KDB_PWCHANGE_SERVICE;
+		    madmin_entry.principal = admin_principal;
+		    madmin_entry.mod_name = admin_principal;
+		    krb5_timeofday(kcontext, &madmin_entry.mod_date);
+		    madmin_entry.last_pwd_change = madmin_entry.mod_date;
+		    madmin_entry.mkvno = key_master_entry()->kvno;
+		    number_of_entries = 1;
+
+		    /*
+		     * Generate a random key.
+		     */
+		    memset((char *) &rkey, 0, sizeof(rkey));
+		    memset((char *) &akey, 0, sizeof(akey));
+		    if (!(kret = key_random_key(kcontext, &rkey))) {
+			if (!(kret = key_encrypt_keys(kcontext,
+						      admin_principal,
+						      &rkey,
+						      &akey,
+						      &madmin_entry.key,
+						      &madmin_entry.alt_key))
+			    )  {
+			    if (kret = 
+				krb5_db_put_principal(kcontext,
+						      &madmin_entry,
+						      &number_of_entries)) {
+				fprintf(stderr,
+					key_add_cpw_err_fmt,
+					programname,
+					admin_princ_name,
+					error_message(kret));
+			    }
+			    else
+				com_err(programname, 0,
+					key_add_cpw_succ_fmt,
+					admin_princ_name);
+			}
+			else
+			    fprintf(stderr,
+				    key_cpw_encerr_fmt,
+				    programname,
+				    admin_princ_name);
+			if (kret) {
+			    krb5_free_keyblock(kcontext, &rkey);
+			}
+			else {
+			    memcpy((char *) &madmin_key,
+				   (char *) &rkey,
+				   sizeof(rkey));
+			    madmin_key_init = 1;
+			}
+		    }
+		    else
+			fprintf(stderr,
+				key_cpw_rkeyerr_fmt,
+				programname,
+				admin_princ_name);
+		}
+		else {
+		    if (!kret && more_entries)
+			krb5_db_free_principal(kcontext,
+					       &madmin_entry,
+					       number_of_entries);
+		    fprintf(stderr,
+			    key_cpw_uniqerr_fmt,
+			    programname,
+			    admin_princ_name);
+		}
+	    }
+	    krb5_free_principal(kcontext, admin_principal);
+	}
+	else
+	    fprintf(stderr,
+		    key_cpw_parserr_fmt,
+		    programname,
+		    admin_princ_name);
+	free(admin_princ_name);
+    }
+    DPRINT(DEBUG_CALLS, key_debug_level,
+	   ("X key_get_admin_entry() = %d\n", kret));
+    return(kret);
+}
 
 /*
  * key_init()	- Initialize key context.
@@ -248,8 +457,18 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 				&master_encblock,
 				&master_keyblock,
 				&master_random);
-    if (!kret)
-	mrand_init = 1;
+    if (kret) {
+	fprintf(stderr, key_rkey_fmt, programname, error_message(kret));
+	goto leave;
+    }
+    mrand_init = 1;
+
+    /*
+     * We're almost home.  We now want to find our service entry and if there
+     * is none, then we want to create it.  This way, kadmind5 becomes just
+     * a plug in and go kind of utility.
+     */
+    kret = key_get_admin_entry(kcontext, debug_level);
 
  cleanup:
     if (kret) {
@@ -280,6 +499,10 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 		krb5_kt_close(kcontext, key_keytab);
 	    key_keytab = (krb5_keytab) NULL;
 	    mkeytab_init = 0;
+	}
+	if (madmin_key_init) {
+	    krb5_free_keyblock(kcontext, &madmin_key);
+	    madmin_key_init = 0;
 	}
     }
  leave:
@@ -327,6 +550,10 @@ key_finish(kcontext, debug_level)
 	    krb5_kt_close(kcontext, key_keytab);
 	key_keytab = (krb5_keytab) NULL;
 	mkeytab_init = 0;
+    }
+    if (madmin_key_init) {
+	krb5_free_keyblock(kcontext, &madmin_key);
+	madmin_key_init = 0;
     }
     krb5_db_fini(kcontext);
     /* memset((char *) tgs_key.contents, 0, tgs_key.length); */
@@ -641,4 +868,13 @@ krb5_keytab
 key_keytab_id()
 {
     return((mkeytab_init) ? key_keytab : (krb5_keytab) NULL);
+}
+
+/*
+ * key_admin_key()	- Get a copy of the admin key.
+ */
+krb5_keyblock *
+key_admin_key()
+{
+    return((madmin_key_init) ? &madmin_key : (krb5_keyblock *) NULL);
 }
