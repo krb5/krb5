@@ -1,3 +1,7 @@
+Sun Feb 23 01:26:27 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Define BUILDTOP for Win16/Win32
+
 Sat Feb  8 15:27:31 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Added win32 rules (kinit,kdestroy,klist console apps)
