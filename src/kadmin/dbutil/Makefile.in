@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=kadmin/dbutil
+mydir=dbutil
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -DKDB4_DISABLE -I. $(LOCALINCLUDE) @KRB4_INCLUDES@ 
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)

@@ -1,4 +1,6 @@
 thisconfigdir=./../..
+myfulldir=kadmin/v4server/unit-test
+mydir=v4server/unit-test
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 #
 # $Id$

@@ -1,3 +1,8 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
 Tue Mar  3 10:30:11 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (check): Use the variable DO_V4_TEST to distinguish

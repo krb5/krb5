@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=kadmin/v4server
+mydir=v4server
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(PW_CHECK) \
 	-DKADM5 -DNEED_SOCKETS @HESIOD_DEFS@

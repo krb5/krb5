@@ -1,3 +1,8 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
 Sun Mar  1 21:13:06 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (env-setup.stmp): If env-setup.stamp needs to be

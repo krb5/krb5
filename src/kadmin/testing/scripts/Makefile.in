@@ -1,4 +1,6 @@
 thisconfigdir=./../..
+myfulldir=kadmin/testing/scripts
+mydir=testing/scripts
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 PERL=@PERL@
 

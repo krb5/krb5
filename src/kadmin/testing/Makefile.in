@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=kadmin/testing
+mydir=testing
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS)
 LOCAL_SUBDIRS = scripts util

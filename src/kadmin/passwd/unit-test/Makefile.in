@@ -1,4 +1,6 @@
 thisconfigdir=./../..
+myfulldir=kadmin/passwd/unit-test
+mydir=passwd/unit-test
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 check unit-test:: unit-test-@DO_TEST@
 

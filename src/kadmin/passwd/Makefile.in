@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=kadmin/passwd
+mydir=passwd
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I. -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)
