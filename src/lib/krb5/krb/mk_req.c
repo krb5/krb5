@@ -79,8 +79,9 @@ krb5_data *outbuf;
 				  &creds,
 				  0, 	/* We don't need the authenticator */
 				  outbuf);
-    creds.server = 0;			/* don't free it, someone else
-					   owns it. */
+    /* creds.server and the rest of the creds.* fields are filled in
+       by the ccache fetch or the kdc fetch, so we should allow it to be
+       freed */
     krb5_free_cred_contents(&creds);
     return retval;
 }
