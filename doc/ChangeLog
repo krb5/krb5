@@ -1,3 +1,8 @@
+2003-06-20  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (Installing the Binaries): New node; describe
+	basic "make install", along with "DESTDIR=...".
+
 2003-06-19  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo (HPUX): Fix typo.
