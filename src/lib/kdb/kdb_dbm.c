@@ -524,7 +524,7 @@ krb5_db_entry *entry;
 	return(ENOMEM);
     }
     nextloc = contents->dptr;
-    *nextloc++ = 1;		/* Version number 1.0 */
+    *nextloc++ = 2;		/* Version number 2.0 */
     *nextloc++ = 0;
     (void) memcpy(nextloc, (char *)&copy_princ, sizeof(copy_princ));
     nextloc += sizeof(copy_princ);
@@ -599,7 +599,7 @@ krb5_db_entry *entry;
 	minor_version = *nextloc;
 	nextloc++; sizeleft--;
     }
-    if (major_version < 0 || major_version > 1)
+    if (major_version != 2)
 	return KRB5_KDB_BAD_VERSION;
     
     sizeleft -= sizeof(*entry);

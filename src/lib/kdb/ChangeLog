@@ -1,5 +1,13 @@
 Mon Oct  3 22:47:49 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kdb_dbm.c (decode_princ_contents): Force an incompatible version
+		number change to the database --- we are now at database
+		entry version 2.0.  Unfortunately, the way we encode the
+		database is completely broken, and any structure changes
+		change the encoding format.  We will need to redo this
+		completely at some point, so we don't have to make people
+		go through this again.
+
 	* Makefile.in: make install obey $(DESTDIR)
 
 Thu Aug  4 03:41:44 1994  Tom Yu  (tlyu@dragons-lair)
