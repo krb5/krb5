@@ -1,3 +1,17 @@
-./util/autoconf/autoconf --recur --macrodir=util/autoconf
+#!/bin/sh
+
+for i in `find . -name configure.in -print` 
+do
+	config=`echo $i | sed -e 's/.in$//'`
+	if test ! -f $config || \
+	   find $i -newer $config -print | grep configure.in  > /dev/null
+	then
+		dir=`dirname $i`
+		topdir=`echo $dir | sed -e 's;/[^/]*;/..;g'`
+		echo "cd $dir; $topdir/util/autoconf/autoconf --topdir=$topdir --macrodir=$topdir/util/autoconf"
+		(  cd $dir; $topdir/util/autoconf/autoconf --topdir=$topdir --macrodir=$topdir/util/autoconf )
+	fi
+done
+
 cd include/krb5
 ../../util/autoconf/autoheader --macrodir=../../util/autoconf
