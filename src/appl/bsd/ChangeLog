@@ -1,3 +1,8 @@
+Fri Nov 11 00:53:57 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* forward.c (mk_cred, rd_cred): Move mk_cred and rd_cred to
+		libkrb.a.
+
 Tue Nov  8 23:52:58 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krshd.c (setpgrp): Defining setpgrp(a,b) to setpgrp() if
