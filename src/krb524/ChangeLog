@@ -1,5 +1,8 @@
 2002-06-14  Tom Yu  <tlyu@mit.edu>
 
+	* krb524.h: Change multiple-inclusion test macro to not stomp on
+	implementation namespace.  Fix up BEGIN_DECLS.
+
 	* krb524.h: Back out erroneous merge of post-1.2.5 change
 	temporarily.
 

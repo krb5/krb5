@@ -20,8 +20,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __KRB524_H__
-#define __KRB524_H__
+#ifndef KRB524_H
+#define KRB524_H
 
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
@@ -38,12 +38,14 @@
 	#endif
 #endif	
 
-#if defined(__cplusplus) && !defined(KRB524INT_BEGIN_DECLS)
+#ifndef KRB524INT_BEGIN_DECLS
+#ifdef __cplusplus
 #define KRB524INT_BEGIN_DECLS	extern "C" {
 #define KRB524INT_END_DECLS	}
 #else
 #define KRB524INT_BEGIN_DECLS
 #define KRB524INT_END_DECLS
+#endif
 #endif
 
 #if TARGET_OS_MAC
@@ -120,4 +122,4 @@ int krb524_sendto_kdc
 
 KRB524INT_END_DECLS
 
-#endif /* __KRB524_H__ */
+#endif /* KRB524_H */
