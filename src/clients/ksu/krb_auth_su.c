@@ -52,12 +52,13 @@ krb5_preauthtype * preauth_ptr = NULL;
 
 
 krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
-			     target_user, cc, path_passwd)
+			     target_user, cc, path_passwd, target_uid)
     krb5_context context;
     krb5_principal client_pname;
     char *hostname;
     opt_info *options;
     char *target_user;
+uid_t target_uid;
     krb5_ccache cc;
     int *path_passwd;
 {
@@ -143,6 +144,11 @@ krb5_boolean zero_password;
 	if (! got_it){
 
 #ifdef GET_TGT_VIA_PASSWD
+	  if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
+	    com_err("ksu", errno, "while switching to target uid");
+	    return FALSE;
+	  }
+	  
 
 		fprintf(stderr,"WARNING: Your password may be exposed if you enter it here and are logged \n");
 		fprintf(stderr,"         in remotely using an unsecure (non-encrypted) channel. \n");
@@ -150,9 +156,16 @@ krb5_boolean zero_password;
 		/*get the ticket granting ticket, via passwd(promt for passwd)*/
 	 	if (krb5_get_tkt_via_passwd (context, &cc, client, tgtq.server,
 				       options, & zero_password) == FALSE){ 
+krb5_seteuid(0);
+
 				return FALSE;
 		}
 		*path_passwd = 1;
+		if (krb5_seteuid(0)) {
+		  com_err("ksu", errno, "while reclaiming root uid");
+		  return FALSE;
+		}
+
 #else
 	plain_dump_principal (client);
 	fprintf(stderr,"does not have any appropriate tickets in the cache.\n");

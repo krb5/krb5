@@ -79,7 +79,7 @@ typedef struct opt_info{
 /* krb_auth_su.c */
 extern krb5_boolean krb5_auth_check
         PROTOTYPE((krb5_context, krb5_principal, char *, opt_info *,
-		   char *, krb5_ccache, int *));
+		   char *, krb5_ccache, int *, uid_t));
 
 extern krb5_boolean krb5_fast_auth
         PROTOTYPE((krb5_context, krb5_principal, krb5_principal, char *,
@@ -105,7 +105,7 @@ extern krb5_error_code get_best_principal
 /* ccache.c */
 extern krb5_error_code krb5_ccache_copy
 	PROTOTYPE((krb5_context, krb5_ccache, char *, krb5_principal, 
-		   krb5_ccache *, krb5_boolean *));
+		   krb5_ccache *, krb5_boolean *, uid_t));
 
 extern krb5_error_code krb5_store_all_creds
 	PROTOTYPE((krb5_context, krb5_ccache, krb5_creds **, krb5_creds **));
@@ -141,7 +141,7 @@ extern krb5_error_code krb5_store_some_creds
 
 extern krb5_error_code krb5_ccache_copy_restricted
 	PROTOTYPE((krb5_context, krb5_ccache, char *, krb5_principal, 
-		   krb5_ccache *, krb5_boolean *));
+		   krb5_ccache *, krb5_boolean *, uid_t));
 
 extern krb5_error_code krb5_ccache_refresh
 	PROTOTYPE((krb5_context, krb5_ccache));

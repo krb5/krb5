@@ -44,12 +44,13 @@ void show_credential();
 */
 
 krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag, 
-				  primary_principal, cc_out, stored)
+				  primary_principal, cc_out, stored, target_uid)
     /* IN */
     krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal primary_principal;
+uid_t target_uid;
     /* OUT */
     krb5_ccache *cc_out;
     krb5_boolean *stored;
@@ -74,6 +75,7 @@ struct stat st_temp;
     cc_def_name = krb5_cc_get_name(context, cc_def);    
     cc_other_name = krb5_cc_get_name(context, *cc_other);    
 
+
     if ( ! stat(cc_def_name, &st_temp)){
 	if((retval = krb5_get_nonexp_tkts(context,cc_def,&cc_def_creds_arr))){
 		return retval;
@@ -83,7 +85,19 @@ struct stat st_temp;
     *stored = krb5_find_princ_in_cred_list(context, cc_def_creds_arr,
 					   primary_principal);
 
-
+#ifdef HAVE_LSTAT
+    if (!lstat( cc_other_name, &st_temp)) {
+#else /*HAVE_LSTAT*/
+    if (!stat( cc_other_name, &st_temp)) {
+#endif
+      return EINVAL;
+    }
+    
+      if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
+	return errno;
+      }
+      
+      
     if ((retval = krb5_cc_initialize(context, *cc_other, primary_principal))){
 	return retval; 
     }
@@ -621,11 +635,12 @@ with k5 beta 3 release.
 ************************************************************************/
 
 krb5_error_code krb5_ccache_copy_restricted (context, cc_def, cc_other_tag, 
-					     prst, cc_out, stored)
+					     prst, cc_out, stored, target_uid)
     krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal prst;
+uid_t target_uid;
     /* OUT */
     krb5_ccache *cc_out;
     krb5_boolean *stored;
@@ -658,6 +673,19 @@ struct stat st_temp;
 
     }
 
+#ifdef HAVE_LSTAT
+    if (!lstat( cc_other_name, &st_temp)) {
+#else /*HAVE_LSTAT*/
+    if (!stat( cc_other_name, &st_temp)) {
+#endif
+      return EINVAL;
+    }
+    
+      if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
+	return errno;
+      }
+      
+    
     if ((retval = krb5_cc_initialize(context, *cc_other, prst))){
 	return retval; 
     }

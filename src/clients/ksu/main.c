@@ -67,6 +67,9 @@ void usage (){
 
 #define DEBUG
 
+/* These are file static so sweep_up can get to them*/
+static uid_t source_uid, target_uid;
+
 int
 main (argc, argv)
 	int argc;
@@ -90,7 +93,6 @@ char * source_user;
 
 krb5_ccache cc_source = NULL;
 char * cc_source_tag = NULL; 
-uid_t source_uid, target_uid;
 uid_t source_gid, target_gid;
 char * cc_source_tag_tmp = NULL;
 char * cc_target_tag_tmp=NULL; 
@@ -375,6 +377,10 @@ char * dir_of_cc_source;
 		if (cc_source_tag_tmp == (char *) 1) 
 			cc_source_tag_tmp = cc_source_tag;
 	}
+	if (krb5_seteuid(source_uid)) {
+	  com_err ( prog_name, errno, "while setting euid to source user");
+	  exit(1);
+	}
 	
 	/* get a handle for the cache */      
 	if ((retval = krb5_cc_resolve(ksu_context, cc_source_tag, &cc_source))){
@@ -382,6 +388,12 @@ char * dir_of_cc_source;
 		exit(1);
 	}
 
+	if (((retval = krb5_cc_set_flags(ksu_context,  cc_source, 0x0)) != 0)
+	    && (retval != KRB5_FCC_NOFILE)) {
+	  com_err(prog_name, retval, "while opening ccache");
+	  exit(1);
+	}
+	  
 	if ((retval = get_best_princ_for_target(ksu_context, source_uid,
 			target_uid, source_user, target_user, cc_source, 
 			&options, cmd, localhostname, &client, &hp))){
@@ -389,6 +401,15 @@ char * dir_of_cc_source;
 		exit(1);
 	}
 
+	/* We may be running as either source or target, depending on
+	   what happened; become source.*/
+	if ( geteuid() != source_uid) {
+	  if (krb5_seteuid(0) || krb5_seteuid(source_uid) ) {
+	    com_err(prog_name, errno, "while returning to source uid after finding best principal");
+	    exit(1);
+	  }
+	}
+	
 	if (auth_debug){
 		if (hp){	
 			fprintf(stderr,
@@ -426,12 +447,6 @@ char * dir_of_cc_source;
 					"while initializing source cache");    
 				exit(1);
 			}
-			if (chown(cc_source_tag_tmp, source_uid, source_gid)){  
-				com_err(prog_name, errno, 
-					"while changing owner for %s",
-					cc_source_tag_tmp);   
-	       			exit(1);
-			}
 		}
 	}
 
@@ -439,13 +454,17 @@ char * dir_of_cc_source;
 	if (cc_target_tag == NULL) {
 
 		cc_target_tag = (char *)calloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
+		/* make sure that the new ticket file does not already exist
+		   This is run as source_uid because it is reasonable to
+		   require the source user to have write to where the target
+		   cache will be created.*/
+		
 		do {
 			sprintf(cc_target_tag, "%s%d.%d", KRB5_SECONDARY_CACHE,
 				target_uid, gen_sym());
 			cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
 
 		}while ( !stat ( cc_target_tag_tmp, &st_temp)); 
-		/* make sure that the new ticket file does not already exist */ 
 	}
 
 
@@ -469,6 +488,11 @@ char * dir_of_cc_source;
 	   takes place, the target user becomes the owner of the cache.         
 	 */           
 
+	/* we continue to run as source uid until
+	   the middle of the copy, when becomewe become the target user
+	   The cache is owned by the target user.*/
+	
+	
 	if (! use_source_cache){
 			
 		/* if root ksu's to a regular user, then      
@@ -478,16 +502,16 @@ char * dir_of_cc_source;
 		if ((source_uid == 0) && (target_uid != 0)) {
 
 			if ((retval = krb5_ccache_copy_restricted(ksu_context,  cc_source,
-				cc_target_tag, client, &cc_target, &stored))){
+				cc_target_tag, client, &cc_target, &stored, target_uid))){
 	    			com_err (prog_name, retval, 
 				     "while copying cache %s to %s",
 				     krb5_cc_get_name(ksu_context, cc_source),cc_target_tag);
 				exit(1);
 			}
 
-        } else{
+		} else{
 			if ((retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
-					     client,&cc_target, &stored))){
+					     client,&cc_target, &stored, target_uid))){
 	    			com_err (prog_name, retval, 
 					"while copying cache %s to %s",
 			     		krb5_cc_get_name(ksu_context, cc_source),
@@ -508,6 +532,13 @@ char * dir_of_cc_source;
 				"while searching for client in source ccache");
 				exit(1);
 		}
+
+	}
+		/* Become root for authentication*/
+
+	if (krb5_seteuid(0)) {
+	com_err(prog_name, errno, "while reclaiming root uid");
+	exit(1);
 	}
 
 	if ((source_uid == 0) || (target_uid == source_uid)){
@@ -553,9 +584,9 @@ char * dir_of_cc_source;
 		char * client_name;
 
        		auth_val = krb5_auth_check(ksu_context, client, localhostname, &options,
-				target_user,cc_target, &path_passwd); 
+				target_user,cc_target, &path_passwd, target_uid); 
 		
-		/* if kerbereros authentication failed then exit */     
+		/* if Kerberos authentication failed then exit */     
 		if (auth_val ==FALSE){
 			fprintf(stderr, "Authentication failed.\n");
 		  	 syslog(LOG_WARNING,
@@ -565,6 +596,12 @@ char * dir_of_cc_source;
 			exit(1);
 		}
 
+#if 0
+		/* At best, this avoids a single kdc request
+		   It is hard to implement dealing with file permissions and
+		   is unnecessary.  It is important
+		   to properly handle races in chown if this code is ever re-enabled.
+		   */
 		/* cache the tickets if possible in the source cache */ 
 		if (!path_passwd && !use_source_cache){ 	
 
@@ -584,7 +621,8 @@ char * dir_of_cc_source;
 	       			exit(1);
 			}
 		}
-			
+#endif /*0*/
+
 		if ((retval = krb5_unparse_name(ksu_context, client, &client_name))) {
                		 com_err (prog_name, retval, "When unparsing name");
 			 sweep_up(ksu_context, use_source_cache, cc_target);
@@ -596,13 +634,26 @@ char * dir_of_cc_source;
 			prog_name,target_user,client_name,
 			source_user,ontty());
 
+		/* Run authorization as target.*/
+		if (krb5_seteuid(target_uid)) {
+		  com_err(prog_name, errno, "whiel switching to target for authorization check");
+		    sweep_up(ksu_context, use_source_cache, cc_target);
+		  exit(1);
+		}
+		
 		if ((retval = krb5_authorization(ksu_context, client,target_user,
 		 	 cmd, &authorization_val, &exec_cmd))){
                	       com_err(prog_name,retval,"while checking authorization");
+krb5_seteuid(0); /*So we have some chance of sweeping up*/
 		       sweep_up(ksu_context, use_source_cache, cc_target);
 		       exit(1);
 		}
 
+		if (krb5_seteuid(0)) {
+		  com_err(prog_name, errno, "while switching back from  target after authorization check");
+		    sweep_up(ksu_context, use_source_cache, cc_target);
+		  exit(1);
+		}
 		if (authorization_val == TRUE){
 
 		   if (cmd) {	
@@ -719,15 +770,6 @@ char * dir_of_cc_source;
 
 
 	if (!use_source_cache){	
-
-	/* set up ownership  on cache for target user */       
-
-		if (chown(cc_target_tag_tmp, target_uid, target_gid)){      
-			com_err(prog_name, errno, "while changing owner for %s",
-				cc_target_tag_tmp);   
-	       		sweep_up(ksu_context, use_source_cache, cc_target);
-	       		exit(1);
-		}
 
 	}
 	
@@ -884,7 +926,10 @@ krb5_error_code retval;
 char * cc_name;
 struct stat  st_temp;
 
-	if (! use_source_cache){
+krb5_seteuid(0);
+krb5_seteuid(target_uid);
+
+if (! use_source_cache){
 		cc_name = krb5_cc_get_name(context, cc);
 		if ( ! stat(cc_name, &st_temp)){
 			if ((retval = krb5_cc_destroy(context, cc))){

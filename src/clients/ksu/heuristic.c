@@ -555,52 +555,11 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
 
     cc_source_name = krb5_cc_get_name(context, cc_source);
 
-	/* Reset the euid while we open the source ccache */
-#if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
-    if (seteuid(source_uid)) {
-	com_err(prog_name, errno, "while setting the effective uid");
-	exit(1);
-    }
-#else
-# if defined(HAVE_SETRESUID)
-    if (setresuid(-1, source_uid, -1)) {
-	com_err(prog_name, errno, "while setting the effective uid");
-	exit(1);
-    }
-# else
-#  if defined(HAVE_SETREUID)
-    if (setreuid(0, source_uid)) {
-	com_err(prog_name, errno, "while setting the real/effective uid");
-	exit(1);
-    }
-#  endif /* HAVE_SETREUID */
-# endif /* HAVE_SETRESUID */
-#endif /* _POSIX_SAVED_IDS */
 	
     if (! stat(cc_source_name, &st_temp))
 	if (retval = krb5_cc_get_principal(context, cc_source, &cc_def_princ))
 	    return retval;
 
-#if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
-    if (seteuid(0)) {
-	com_err(prog_name, errno, "while setting the effective uid");
-	exit(1);
-    }
-#else
-# if defined(HAVE_SETRESUID)
-    if (setresuid(-1, 0, -1)) {
-	com_err(prog_name, errno, "while setting the effective uid");
-	exit(1);
-    }
-# else
-#  if defined(HAVE_SETREUID)
-    if (setreuid(source_uid, 0)) {
-	com_err(prog_name, errno, "while setting the real/effective uid");
-	exit(1);
-    }
-#  endif /* HAVE_SETREUID */
-# endif /* HAVE_SETRESUID */
-#endif /* _POSIX_SAVED_IDS */
 	
     if (retval=krb5_parse_name(context, target_user, &target_client))
 	return retval;
@@ -636,6 +595,11 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
 	return 0;
     }
 
+    /* Become root, then target for looking at .k5login.*/
+    if (krb5_seteuid(0) || krb5_seteuid(target_uid) ) {
+      return errno;
+    }
+    
     /* if .k5users and .k5login do not exist */  	
     if (stat(k5login_path, &tb) && stat(k5users_path, &tb) ){
 	*client = target_client;

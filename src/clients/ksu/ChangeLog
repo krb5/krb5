@@ -1,3 +1,27 @@
+Sun May 19 13:41:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c: Force source ccache to stay open between transactions.
+
+Sun May 19 03:24:26 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb_auth_su.c: Use target uid while creating ccache
+
+	* ccache.c: Set uid to target before creating target cache.
+
+	* ksu.h: Add target_uid to copy_ccache and copy_ccache_restricted
+
+Sat May 18 16:39:15 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Use libkrb5util to get krb5_seteuid
+
+	* heuristic.c (get_best_princ_for_target): Remove seteuid around stat call and insert call to krb5_seteuid before accessing .k5login or .k5users.
+
+	* main.c (main): Insert appropriate calls to krb5_seteuid so that
+        files are accessed as appropriate.  Also, remove code to copy
+        tickets obtained while running ksu overthe source cache; this is
+        not appropriate because it changes the ownership of the source
+        cache.
+
 Mon May 13 06:50:12 1996  Richard Basch  <basch@lehman.com>
 
 	* authorization.c: users in the .k5login were not permitted to use
