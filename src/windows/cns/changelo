@@ -1,3 +1,7 @@
+
+Mon Jun 5 14:19:51 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kpasswd.c : Use new krb5_adm_connect() calling sequence.
+
 Fri Jun 2 11:45:23 1995 Keith Vetter (keithv@fusion.com)
 
 	* makefile: cleaned up and made consistent with telnet's makefile.

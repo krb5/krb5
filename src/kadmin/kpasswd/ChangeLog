@@ -1,4 +1,9 @@
 
+Mon Jun 5 13:48:23 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kpasswd.c - Change argument list to krb5_adm_connect() for new
+		calling sequence.  We take the defaults here.
+
+
 Tue May 9 15:27:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	Fix compiler warnings.
 

@@ -280,7 +280,9 @@ main(argc, argv)
 				opassword,
 				&conn_socket, 
 				&auth_context,
-				&ccache)) {
+				&ccache,
+				(char *) NULL,
+				0)) {
 	switch (kret) {
 	case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN:
 	    fprintf(stderr, kpwd_bad_client_fmt, argv[0],

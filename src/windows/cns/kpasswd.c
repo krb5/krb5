@@ -130,12 +130,13 @@ k5_change_password (
 	if (name == NULL)
 		return ENOMEM;
 	sprintf (name, "%s@%s", user, realm);
+	ccache = (krb5_ccache) NULL;
 
 /*
 ** Establish the connection.
 */
 	kret = krb5_adm_connect (k5context, name,	NULL, opasswd, &conn_socket,
-							&auth_context, &ccache);
+							&auth_context, &ccache, NULL, 0);
 	if (kret)
 		goto done;
 /*
