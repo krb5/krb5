@@ -78,9 +78,7 @@ static struct sigaction s_action;
  * Find the realm entry for a given realm.
  */
 kdc_realm_t *
-find_realm_data(rname, rsize)
-    char 	*rname;
-    krb5_ui_4	rsize;
+find_realm_data(char *rname, krb5_ui_4 rsize)
 {
     int i;
     for (i=0; i<kdc_numrealms; i++) {
@@ -92,8 +90,7 @@ find_realm_data(rname, rsize)
 }
 
 krb5_error_code
-setup_server_realm(sprinc)
-    krb5_principal	sprinc;
+setup_server_realm(krb5_principal sprinc)
 {
     krb5_error_code	kret;
     kdc_realm_t		*newrealm;
@@ -112,8 +109,7 @@ setup_server_realm(sprinc)
 }
 
 static void
-finish_realm(rdp)
-    kdc_realm_t *rdp;
+finish_realm(kdc_realm_t *rdp)
 {
     if (rdp->realm_dbname)
 	free(rdp->realm_dbname);
@@ -154,16 +150,9 @@ finish_realm(rdp)
  * realm data and we should be all set to begin operation for that realm.
  */
 static krb5_error_code
-init_realm(progname, rdp, realm, def_dbname, def_mpname,
-		 def_enctype, def_ports, def_manual)
-    char		*progname;
-    kdc_realm_t		*rdp;
-    char		*realm;
-    char		*def_dbname;
-    char		*def_mpname;
-    krb5_enctype	def_enctype;
-    char		*def_ports;
-    krb5_boolean	def_manual;
+init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
+	   char *def_mpname, krb5_enctype def_enctype, char *def_ports,
+	   krb5_boolean def_manual)
 {
     krb5_error_code	kret;
     krb5_boolean	manual;
@@ -503,8 +492,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 }
 
 krb5_sigtype
-request_exit(signo)
-    int signo;
+request_exit(int signo)
 {
     signal_requests_exit = 1;
 
@@ -516,8 +504,7 @@ request_exit(signo)
 }
 
 krb5_sigtype
-request_hup(signo)
-    int signo;
+request_hup(int signo)
 {
     signal_requests_hup = 1;
 
@@ -529,7 +516,7 @@ request_hup(signo)
 }
 
 void
-setup_signal_handlers()
+setup_signal_handlers(void)
 {
 #ifdef POSIX_SIGNALS
     (void) sigemptyset(&s_action.sa_mask);
@@ -549,24 +536,20 @@ setup_signal_handlers()
 }
 
 krb5_error_code
-setup_sam()
+setup_sam(void)
 {
     return krb5_c_make_random_key(kdc_context, ENCTYPE_DES_CBC_MD5, &psr_key);
 }
 
 void
-usage(name)
-char *name;
+usage(char *name)
 {
     fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-4 v4mode] [-n]\n", name);
     return;
 }
 
 void
-initialize_realms(kcontext, argc, argv)
-    krb5_context 	kcontext;
-    int			argc;
-    char		**argv;
+initialize_realms(krb5_context kcontext, int argc, char **argv)
 {
     int 		c;
     char		*db_name = (char *) NULL;
@@ -731,8 +714,7 @@ initialize_realms(kcontext, argc, argv)
 }
 
 void
-finish_realms(prog)
-    char *prog;
+finish_realms(char *prog)
 {
     int i;
 
@@ -766,9 +748,7 @@ finish_realms(prog)
  exit
  */
 
-int main(argc, argv)
-     int argc;
-     char *argv[];
+int main(int argc, char **argv)
 {
     krb5_error_code	retval;
     krb5_context	kcontext;

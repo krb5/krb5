@@ -70,8 +70,6 @@
 extern void swab(const void *, void *, size_t );
 #endif
 
-extern int errno;
-
 static int compat_decrypt_key (krb5_key_data *, C_Block,
 					 krb5_keyblock *, int);
 static int kerb_get_principal (char *, char *, Principal *, int,
@@ -124,7 +122,7 @@ static long n_appl_req;
 
 static long pause_int = -1;
 
-static void hang();
+static void hang(void);
 
 
 /* v4/v5 backwards-compatibility stub routines,
@@ -184,9 +182,7 @@ static const struct v4mode_lookup_entry  v4mode_table[] = {
 static const int v4mode_table_nents = sizeof(v4mode_table)/
 				      sizeof(v4mode_table[0]);
 
-void process_v4_mode(program_name, string)
-    const char          *program_name;
-    const char          *string;
+void process_v4_mode(const char *program_name, const char *string)
 {
     int i, found;
 
@@ -212,10 +208,8 @@ void process_v4_mode(program_name, string)
 }
 
 krb5_error_code
-process_v4( pkt, client_fulladdr, resp)
-    const krb5_data *pkt;
-    const krb5_fulladdr *client_fulladdr;
-    krb5_data **resp;
+process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
+	   krb5_data **resp)
 {
     struct sockaddr_in client_sockaddr;
     krb5_address *addr = client_fulladdr->address;
@@ -306,12 +300,8 @@ char * v4_klog( type, format, va_alist)
 }
 
 static
-int krb4_sendto(s, msg, len, flags, to, to_len)
-int s;
-const char *msg;
-int len, flags;
-const struct sockaddr *to;
-int to_len;
+int krb4_sendto(int s, const char *msg, int len, int flags,
+		const struct sockaddr *to, int to_len)
 {
     if (  !(response = (krb5_data *) malloc( sizeof *response))) {
 	return ENOMEM;
@@ -325,7 +315,7 @@ int to_len;
     return( 0);
 }
 static void
-hang()
+hang(void)
 {
     if (pause_int == -1) {
         klog(L_KRB_PERR, "Kerberos will pause so as not to loop init");
@@ -358,11 +348,8 @@ hang()
  * Also, keep old krb5_keyblock around in case we want to use it later.
  */
 static int
-compat_decrypt_key (in5, out4, out5, issrv)
-    krb5_key_data *in5;
-    C_Block out4;
-    krb5_keyblock *out5;
-    int issrv;			/* whether it's a server key */
+compat_decrypt_key (krb5_key_data *in5, unsigned char *out4,
+		    krb5_keyblock *out5, int issrv)
 {
     krb5_error_code retval;
 
@@ -404,17 +391,13 @@ compat_decrypt_key (in5, out4, out5, issrv)
  */
 
 static int
-kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno,
-		   issrv, k5life)
-    char   *name;               /* could have wild card */
-    char   *inst;               /* could have wild card */
-    Principal *principal;
-    int maxn;          /* max number of name structs to return */
-    int    *more;               /* more tuples than room for */
-    krb5_keyblock *k5key;
-    krb5_kvno kvno;
-    int issrv;			/* true if retrieving a service key */
-    krb5_deltat *k5life;
+kerb_get_principal(char *name, char *inst, /* could have wild cards */
+		   Principal *principal,
+		   int maxn,	/* max # name structs to return */
+		   int *more,	/* more tuples than room for */
+		   krb5_keyblock *k5key, krb5_kvno kvno,
+		   int issrv,	/* true if retrieving a service key */
+		   krb5_deltat *k5life)
 {
     /* Note that this structure should not be passed to the
        krb5_free* functions, because the pointers within it point
@@ -575,9 +558,7 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno,
     return( nprinc);
 }
 
-static void str_length_check(str, max_size)
-	char 	*str;
-	int	max_size;
+static void str_length_check(char *str, int max_size)
 {
 	int	i;
 	char	*cp;
@@ -590,9 +571,7 @@ static void str_length_check(str, max_size)
 }
 
 void
-kerberos_v4(client, pkt)
-    struct sockaddr_in *client;
-    KTEXT   pkt;
+kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 {
     static KTEXT_ST rpkt_st;
     KTEXT   rpkt = &rpkt_st;
@@ -1012,12 +991,7 @@ kerberos_v4(client, pkt)
  */
 
 void
-kerb_err_reply(client, pkt, err, string)
-    struct sockaddr_in *client;
-    KTEXT   pkt;
-    long    err;
-    char   *string;
-
+kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string)
 {
     static KTEXT_ST e_pkt_st;
     KTEXT   e_pkt = &e_pkt_st;
@@ -1040,13 +1014,12 @@ kerb_err_reply(client, pkt, err, string)
  * "25-Jan-88 10:17:56"
  */
 
-static char *krb4_stime(t)
-    long *t;
+static char *krb4_stime(long int *t)
 {
     static char st[40];
     static time_t adjusted_time;
     struct tm *tm;
-    char *month_sname();
+    extern char *month_sname(int);
 
     adjusted_time = *t /* - CONVERT_TIME_EPOCH */;
     tm = localtime(&adjusted_time);
@@ -1057,15 +1030,8 @@ static char *krb4_stime(t)
 }
 
 static int
-check_princ(p_name, instance, lifetime, p, k5key, issrv, k5life)
-    char   *p_name;
-    char   *instance;
-    int    lifetime;
-
-    Principal *p;
-    krb5_keyblock *k5key;
-    int issrv;			/* whether this is a server key */
-    krb5_deltat *k5life;
+check_princ(char *p_name, char *instance, int lifetime, Principal *p,
+	    krb5_keyblock *k5key, int issrv, krb5_deltat *k5life)
 {
     static int n;
     static int more;
@@ -1168,9 +1134,7 @@ check_princ(p_name, instance, lifetime, p, k5key, issrv, k5life)
 
 /* Set the key for krb_rd_req so we can check tgt */
 static int
-set_tgtkey(r, kvno)
-    char   *r;			/* Realm for desired key */
-    krb5_kvno kvno;
+set_tgtkey(char *r, krb5_kvno kvno)
 {
     int     n;
     static char lastrealm[REALM_SZ] = "";

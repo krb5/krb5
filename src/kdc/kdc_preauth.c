@@ -185,9 +185,7 @@ static krb5_preauth_systems preauth_systems[] = {
 #define MAX_PREAUTH_SYSTEMS (sizeof(preauth_systems)/sizeof(preauth_systems[0]))
 
 static krb5_error_code
-find_pa_system(type, preauth)
-    int			type;
-    krb5_preauth_systems	**preauth;
+find_pa_system(int type, krb5_preauth_systems **preauth)
 {
     krb5_preauth_systems 	*ap = preauth_systems;
     
@@ -199,9 +197,9 @@ find_pa_system(type, preauth)
     return 0;
 } 
 
-const char *missing_required_preauth(client, server, enc_tkt_reply)
-    krb5_db_entry *client, *server;
-    krb5_enc_tkt_part *enc_tkt_reply;
+const char *missing_required_preauth(krb5_db_entry *client,
+				     krb5_db_entry *server,
+				     krb5_enc_tkt_part *enc_tkt_reply)
 {
 #if 0
     /*
@@ -236,10 +234,8 @@ const char *missing_required_preauth(client, server, enc_tkt_reply)
     return 0;
 }
 
-void get_preauth_hint_list(request, client, server, e_data)
-    krb5_kdc_req *request;
-    krb5_db_entry *client, *server;
-    krb5_data *e_data;
+void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
+			   krb5_db_entry *server, krb5_data *e_data)
 {
     int hw_only;
     krb5_preauth_systems *ap;
@@ -306,11 +302,8 @@ errout:
  */
 
 krb5_error_code
-check_padata (context, client, request, enc_tkt_reply)
-    krb5_context	context;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_enc_tkt_part * enc_tkt_reply;
+check_padata (krb5_context context, krb5_db_entry *client,
+	      krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code retval = 0;
     krb5_pa_data **padata;
@@ -373,14 +366,9 @@ check_padata (context, client, request, enc_tkt_reply)
  * structures which should be returned by the KDC to the client
  */
 krb5_error_code
-return_padata(context, client, request, reply,
-	      client_key, encrypting_key)
-    krb5_context	context;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_kdc_rep *	reply;
-    krb5_key_data *	client_key;
-    krb5_keyblock *	encrypting_key;
+return_padata(krb5_context context, krb5_db_entry *client,
+	      krb5_kdc_req *request, krb5_kdc_rep *reply,
+	      krb5_key_data *client_key, krb5_keyblock *encrypting_key)
 {
     krb5_error_code		retval;
     krb5_pa_data **		padata;
@@ -436,12 +424,9 @@ cleanup:
 }
 
 static krb5_error_code
-verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
-    krb5_context	context;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_enc_tkt_part * enc_tkt_reply;
-    krb5_pa_data *	pa;
+verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
+		     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+		     krb5_pa_data *pa)
 {
     krb5_pa_enc_ts *		pa_enc = 0;
     krb5_error_code		retval;
@@ -517,12 +502,9 @@ cleanup:
  * message.
  */
 static krb5_error_code
-get_etype_info(context, request, client, server, pa_data)
-    krb5_context 	context;
-    krb5_kdc_req *	request;
-    krb5_db_entry *	client;
-    krb5_db_entry *	server;
-    krb5_pa_data *	pa_data;
+get_etype_info(krb5_context context, krb5_kdc_req *request,
+	       krb5_db_entry *client, krb5_db_entry *server,
+	       krb5_pa_data *pa_data)
 {
     krb5_etype_info_entry **	entry = 0;
     krb5_key_data		*client_key;
@@ -600,16 +582,10 @@ cleanup:
 }
 
 static krb5_error_code
-return_pw_salt(context, in_padata, client, request, reply, client_key,
-	       encrypting_key, send_pa)
-    krb5_context	context;
-    krb5_pa_data *	in_padata;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_kdc_rep *	reply;
-    krb5_key_data *	client_key;
-    krb5_keyblock *	encrypting_key;
-    krb5_pa_data **	send_pa;
+return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
+	       krb5_db_entry *client, krb5_kdc_req *request,
+	       krb5_kdc_rep *reply, krb5_key_data *client_key,
+	       krb5_keyblock *encrypting_key, krb5_pa_data **send_pa)
 {
     krb5_error_code	retval;
     krb5_pa_data *	padata;
@@ -688,16 +664,10 @@ cleanup:
 }
 
 static krb5_error_code
-return_sam_data(context, in_padata, client, request, reply, client_key,
-	        encrypting_key, send_pa)
-    krb5_context	context;
-    krb5_pa_data *	in_padata;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_kdc_rep *	reply;
-    krb5_key_data *	client_key;
-    krb5_keyblock *	encrypting_key;
-    krb5_pa_data **	send_pa;
+return_sam_data(krb5_context context, krb5_pa_data *in_padata,
+		krb5_db_entry *client, krb5_kdc_req *request,
+		krb5_kdc_rep *reply, krb5_key_data *client_key,
+		krb5_keyblock *encrypting_key, krb5_pa_data **send_pa)
 {
     krb5_error_code	retval;
     krb5_data		scratch;
@@ -834,12 +804,9 @@ static struct {
 };
 
 static krb5_error_code
-get_sam_edata(context, request, client, server, pa_data)
-    krb5_context 	context;
-    krb5_kdc_req *	request;
-    krb5_db_entry *	client;
-    krb5_db_entry *	server;
-    krb5_pa_data *	pa_data;
+get_sam_edata(krb5_context context, krb5_kdc_req *request,
+	      krb5_db_entry *client, krb5_db_entry *server,
+	      krb5_pa_data *pa_data)
 {
     krb5_error_code		retval;
     krb5_sam_challenge		sc;
@@ -1209,12 +1176,9 @@ cleanup:
 }
 
 static krb5_error_code
-verify_sam_response(context, client, request, enc_tkt_reply, pa)
-    krb5_context	context;
-    krb5_db_entry *	client;
-    krb5_kdc_req *	request;
-    krb5_enc_tkt_part * enc_tkt_reply;
-    krb5_pa_data *	pa;
+verify_sam_response(krb5_context context, krb5_db_entry *client,
+		    krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+		    krb5_pa_data *pa)
 {
     krb5_error_code		retval;
     krb5_data			scratch;

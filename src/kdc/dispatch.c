@@ -39,10 +39,7 @@
 static krb5_int32 last_usec = 0, last_os_random = 0;
 
 krb5_error_code
-dispatch(pkt, from, response)
-    krb5_data *pkt;
-    const krb5_fulladdr *from;
-    krb5_data **response;
+dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
 {
 
     krb5_error_code retval;

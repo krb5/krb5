@@ -51,10 +51,8 @@ static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(request, from, response)
-    krb5_kdc_req *request;
-    const krb5_fulladdr *from;	/* who sent it ? */
-    krb5_data **response;	/* filled in with a response packet */
+process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
+	       krb5_data **response)
 {
     krb5_db_entry client, server;
     krb5_kdc_rep reply;

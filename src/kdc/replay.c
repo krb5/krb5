@@ -71,10 +71,8 @@ static int num_entries = 0;
    FALSE if the caller should do the work */
 
 krb5_boolean
-kdc_check_lookaside(inpkt, from, outpkt)
-    register krb5_data *inpkt;
-    register const krb5_fulladdr *from;
-    register krb5_data **outpkt;
+kdc_check_lookaside(krb5_data *inpkt, const krb5_fulladdr *from,
+		    krb5_data **outpkt)
 {
     krb5_int32 timenow;
     register krb5_kdc_replay_ent *eptr, *last, *hold;
@@ -127,10 +125,8 @@ kdc_check_lookaside(inpkt, from, outpkt)
    already there, and can fail softly due to other weird errors. */
 
 void
-kdc_insert_lookaside(inpkt, from, outpkt)
-    register krb5_data *inpkt;
-    register const krb5_fulladdr *from;
-    register krb5_data *outpkt;
+kdc_insert_lookaside(krb5_data *inpkt, const krb5_fulladdr *from,
+		     krb5_data *outpkt)
 {
     register krb5_kdc_replay_ent *eptr;    
     krb5_int32 timenow;

@@ -58,8 +58,6 @@
 
 #include "fake-addrinfo.h"
 
-extern int errno;
-
 static int *udp_port_fds = (int *) NULL;
 static u_short *udp_port_nums = (u_short *) NULL;
 static int n_udp_ports = 0;
@@ -70,8 +68,7 @@ static int select_nfds;
 
 #define safe_realloc(p,n) ((p)?(realloc(p,n)):(malloc(n)))
 
-static krb5_error_code add_port(port)
-     u_short port;
+static krb5_error_code add_port(u_short port)
 {
     int	i;
     u_short *new_ports;
@@ -214,8 +211,7 @@ setup_port(void *P_data, struct sockaddr *addr)
 }
 
 krb5_error_code
-setup_network(prog)
-    const char *prog;
+setup_network(const char *prog)
 {
     struct socksetup setup_data;
     krb5_error_code retval;
@@ -257,9 +253,7 @@ setup_network(prog)
     return 0;
 }
 
-static void process_packet(port_fd, prog)
-    int	port_fd;
-    const char	*prog;
+static void process_packet(int port_fd, const char *prog)
 {
     int cc, saddr_len;
     krb5_fulladdr faddr;
@@ -343,8 +337,7 @@ static void process_packet(port_fd, prog)
 }
 
 krb5_error_code
-listen_and_process(prog)
-const char *prog;
+listen_and_process(const char *prog)
 {
     int			nfound;
     fd_set		readfds;
@@ -379,8 +372,7 @@ const char *prog;
 }
 
 krb5_error_code
-closedown_network(prog)
-const char *prog;
+closedown_network(const char *prog)
 {
     int i;
 

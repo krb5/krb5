@@ -55,10 +55,8 @@ static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(pkt, from, response)
-    krb5_data *pkt;
-    const krb5_fulladdr *from;	/* who sent it ? */
-    krb5_data **response;	/* filled in with a response packet */
+process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
+		krb5_data **response)
 {
     krb5_keyblock * subkey;
     krb5_kdc_req *request = 0;

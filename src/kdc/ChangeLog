@@ -1,5 +1,10 @@
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_preauth.c,
+	kdc_util.c, kerberos_v4.c, main.c, network.c, policy.c, replay.c,
+	rtest.c: Use prototype-style function definitions and
+	declarations.  Don't declare errno.
+
 	* do_as_req.c (prepare_error_as): New argument, the error message
 	text as determined *before* possibly replacing the error code with
 	"generic error".
