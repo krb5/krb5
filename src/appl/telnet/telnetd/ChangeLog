@@ -1,3 +1,7 @@
+
+Tue Aug 8 17:25:22 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* sys_term.c - Cast argument to fatalperror().
+
 Mon Aug  7 18:29:21 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* sys_term.c: Use new interface to pty_update_utmp.

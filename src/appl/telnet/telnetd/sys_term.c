@@ -960,7 +960,7 @@ getptyslave()
 
 	if ( (retval = pty_open_slave (line, &t)) != 0 )
 	    {
-		fatalperror(net, error_message(retval));
+		fatalperror(net, (char *) error_message(retval));
 	    }
 
 #ifdef  STREAMSPTY
