@@ -1,3 +1,7 @@
+Tue Oct 21 09:02:51 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kparse.c: Include stdlib.h if present (for malloc prototyp)
+
 Tue Sep 30 19:00:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* tkt_string.c: Replace HAS_STDLIB_H with something more sane.
