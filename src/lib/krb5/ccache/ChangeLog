@@ -1,3 +1,6 @@
+2001-11-16  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch: LoginLib #include changes
+	
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
 	* Makefile.in: Added ccfns.c
