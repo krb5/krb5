@@ -10,6 +10,10 @@
 #include <krb5/adm_proto.h>
 #include "kadm5_defs.h"
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 static krb5_keytab keytab;
 char *programname;
 kadm5_config_params params;

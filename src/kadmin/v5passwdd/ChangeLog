@@ -1,3 +1,7 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c: Add prototype for daemon if needed.
+
 Mon Feb 26 15:22:44 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	*adm_conn.c, adm_rw.c, kadm5_defs.h, kpasswd.c, main.c,
