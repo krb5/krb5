@@ -127,7 +127,7 @@ Changes in 1.1a3:
  fixed memory leak in krb5_stdcc_destroy
  added traceback tables to PPC versions
 
-2.5a3
- from tag Mac_GSSKerberos5_2_5a3
+2.5b1
+ from tag Mac_GSSKerberos5_2_5b1
  separated com_err lib
  now tracking krb5-1-1 branch
