@@ -1,5 +1,9 @@
 2004-07-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-platform.h (k5_call_init_function) [DELAY_INITIALIZER]
+	[__GNUC__]: Use a statement expression so any line number info
+	printed by assertion failures is useful.
+
 	* k5-thread.h (k5_os_mutex_init, k5_os_mutex_destroy): If
 	USE_PTHREAD_LOCK_ONLY_IF_LOADED is defined, use pthread_mutex_init
 	and _destroy only if pthread support is loaded.

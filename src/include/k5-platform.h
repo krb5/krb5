@@ -168,6 +168,18 @@ typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init
 	static int NAME(void)
 # define CALL_INIT_FUNCTION(NAME)	\
 	k5_call_init_function(& JOIN__2(NAME, once))
+# ifdef __GNUC__
+/* Do it in macro form so we get the file/line of the invocation if
+   the assertion fails.  */
+#  define k5_call_init_function(I)					\
+	(__extension__ ({						\
+		k5_init_t *k5int_i = (I);				\
+		int k5int_err = k5_once(&k5int_i->once, k5int_i->fn);	\
+		(k5int_err						\
+		 ? k5int_err						\
+		 : (assert(k5int_i->did_run != 0), k5int_i->error));	\
+	    }))
+# else
 static inline int k5_call_init_function(k5_init_t *i)
 {
     int err;
@@ -177,6 +189,7 @@ static inline int k5_call_init_function(k5_init_t *i)
     assert (i->did_run != 0);
     return i->error;
 }
+# endif
 /* This should be called in finalization only, so we shouldn't have
    multiple active threads mucking around in our library at this
    point.  So ignore the once_t object and just look at the flag.
