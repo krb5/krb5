@@ -24,6 +24,7 @@ krb5_kt_free_entry (entry)
 krb5_keytab_entry *entry;
 {
     krb5_free_principal(entry->principal);
+    bzero((char *)entry->key.contents, entry->key.length);
     xfree(entry->key.contents);
     return 0;
 }
