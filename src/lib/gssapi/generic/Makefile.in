@@ -71,6 +71,8 @@ all-windows::
 	copy gssapi.h $(EHDRDIR)
 	copy gssapi_generic.h $(EHDRDIR)
 
+unixmac: $(SRCS) $(HDRS) includes
+
 clean:: clean-$(WHAT)
 
 clean-unix::
