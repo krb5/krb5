@@ -1,3 +1,9 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* kparse.h: Add prototypes for fGetChar(), fGetParameterSet(),
+	ParmCompare(), FreeParameterSet(), fGetKeywordValue(),
+	fGetToken(), fGetLiteral(), fUngetChar().
+
 2000-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* krb.h: Add prototypes for krb_life_to_time() and
