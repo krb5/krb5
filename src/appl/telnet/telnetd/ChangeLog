@@ -1,3 +1,8 @@
+Sat Sep  8 08:24:51 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* telnetd.c: Move include of fake-addrinfo.c to after stdlib.h so
+ 	that malloc prototype povided.
+
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for ipv6 support.

@@ -42,9 +42,6 @@ static char copyright[] =
 #include "telnetd.h"
 #include "pathnames.h"
 
-#define FAI_PREFIX telnetd
-#include "fake-addrinfo.c"
-
 extern int getent(char *, char *);
 extern int tgetent(char *, char *);
 
@@ -80,6 +77,8 @@ struct	socket_security ss;
 # endif /* SO_SEC_MULTI */
 #endif	/* _SC_CRAY_SECURE_SYS */
 
+#define FAI_PREFIX telnetd
+#include "fake-addrinfo.c"
 
 #ifdef KRB5
 #include "krb5.h"
