@@ -553,6 +553,7 @@ void k_init (ttyn)
 #ifdef KRB5_GET_TICKETS
 int k5_get_password (user_pwstring, pwsize)
     char *user_pwstring;
+    unsigned int pwsize;
 {
     krb5_error_code code;
     char prompt[255];			

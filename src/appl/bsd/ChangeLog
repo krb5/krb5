@@ -1,3 +1,8 @@
+2000-10-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* login.c (k5_get_password): Declare second argument as unsigned
+	int length.
+
 Tue Oct 10 04:59:04 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* kcmd.c (kcmd): Use krb5_set_principal_realm() instead of freeing the
