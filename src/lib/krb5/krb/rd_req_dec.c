@@ -63,15 +63,15 @@ extern krb5_deltat krb5_clockskew;
 krb5_error_code
 krb5_rd_req_decoded(req, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 		    rcache, tktauthent)
-krb5_ap_req *req;
-krb5_principal server;
-krb5_address *sender_addr;
-krb5_pointer fetchfrom;
+const krb5_ap_req *req;
+const krb5_principal server;
+const krb5_address *sender_addr;
+const krb5_pointer fetchfrom;
 krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer,
 				      krb5_principal,
 				      krb5_kvno,
 				      krb5_keyblock **));
-krb5_pointer keyprocarg;
+const krb5_pointer keyprocarg;
 krb5_rcache rcache;
 krb5_tkt_authent *tktauthent;
 {

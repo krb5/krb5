@@ -40,17 +40,17 @@ static char rcsid_mk_safe_c[] =
  returns system errors
 */
 krb5_error_code
-krb5_mk_safe(DECLARG(krb5_data *, userdata),
-	     DECLARG(krb5_cksumtype, sumtype),
-	     DECLARG(krb5_keyblock *, key),
-	     DECLARG(krb5_fulladdr *, sender_addr),
-	     DECLARG(krb5_fulladdr *, recv_addr),
+krb5_mk_safe(DECLARG(const krb5_data *, userdata),
+	     DECLARG(const krb5_cksumtype, sumtype),
+	     DECLARG(const krb5_keyblock *, key),
+	     DECLARG(const krb5_fulladdr *, sender_addr),
+	     DECLARG(const krb5_fulladdr *, recv_addr),
 	     DECLARG(krb5_data *, outbuf))
-OLDDECLARG(krb5_data *, userdata)
-OLDDECLARG(krb5_cksumtype, sumtype)
-OLDDECLARG(krb5_keyblock *, key)
-OLDDECLARG(krb5_fulladdr *, sender_addr)
-OLDDECLARG(krb5_fulladdr *, recv_addr)
+OLDDECLARG(const krb5_data *, userdata)
+OLDDECLARG(const krb5_cksumtype, sumtype)
+OLDDECLARG(const krb5_keyblock *, key)
+OLDDECLARG(const krb5_fulladdr *, sender_addr)
+OLDDECLARG(const krb5_fulladdr *, recv_addr)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;

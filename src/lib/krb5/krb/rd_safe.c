@@ -42,10 +42,10 @@ extern krb5_deltat krb5_clockskew;
  */
 krb5_error_code
 krb5_rd_safe(inbuf, key, sender_addr, recv_addr, outbuf)
-krb5_data *inbuf;
-krb5_keyblock *key;
-krb5_fulladdr *sender_addr;
-krb5_fulladdr *recv_addr;
+const krb5_data *inbuf;
+const krb5_keyblock *key;
+const krb5_fulladdr *sender_addr;
+const krb5_fulladdr *recv_addr;
 krb5_data *outbuf;
 {
     krb5_error_code retval;

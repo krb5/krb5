@@ -56,16 +56,16 @@ static char mk_req_ext_c[] =
  returns system errors
 */
 static krb5_error_code generate_authenticator PROTOTYPE((krb5_authenticator *,
-							 krb5_creds *,
-							 krb5_checksum *));
+							 const krb5_creds *,
+							 const krb5_checksum *));
 
 krb5_error_code
 krb5_mk_req_extended(ap_req_options, checksum, times, kdc_options, ccache,
 		     creds, outbuf)
-krb5_flags ap_req_options;
-krb5_checksum *checksum;
-krb5_ticket_times *times;
-krb5_flags kdc_options;
+const krb5_flags ap_req_options;
+const krb5_checksum *checksum;
+const krb5_ticket_times *times;
+const krb5_flags kdc_options;
 krb5_ccache ccache;
 krb5_creds *creds;
 krb5_data *outbuf;
@@ -171,8 +171,8 @@ krb5_data *outbuf;
 static krb5_error_code
 generate_authenticator(authent, creds, cksum)
 krb5_authenticator *authent;
-krb5_creds *creds;
-krb5_checksum *cksum;
+const krb5_creds *creds;
+const krb5_checksum *cksum;
 {
     authent->client = creds->client;
     authent->checksum = cksum;

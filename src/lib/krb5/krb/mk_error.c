@@ -32,7 +32,7 @@ static char rcsid_mk_error_c [] =
  */
 krb5_error_code
 krb5_mk_error(dec_err, enc_err)
-krb5_error *dec_err;
+const krb5_error *dec_err;
 krb5_data *enc_err;
 {
     krb5_error_code retval;

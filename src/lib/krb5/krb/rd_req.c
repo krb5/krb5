@@ -50,15 +50,15 @@ static char rd_req_c[] =
 krb5_error_code
 krb5_rd_req(inbuf, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 	    rcache, authdat)
-krb5_data *inbuf;
-krb5_principal server;
-krb5_address *sender_addr;
-krb5_pointer fetchfrom;
+const krb5_data *inbuf;
+const krb5_principal server;
+const krb5_address *sender_addr;
+const krb5_pointer fetchfrom;
 krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer, 
 				      krb5_principal,
 				      krb5_kvno,
 				      krb5_keyblock **));
-krb5_pointer keyprocarg;
+const krb5_pointer keyprocarg;
 krb5_rcache rcache;
 krb5_tkt_authent *authdat;
 {
