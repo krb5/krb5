@@ -25,9 +25,9 @@ if { $PRIOCNTL_HACK } {
 	set inflags 1
 	set eatnext 0
 	foreach arg $args {
-	    if { $arg eq "-ignore" ||
-		 $arg eq "-open" ||
-		 $arg eq "-leaveopen" } {
+	    if { $arg == "-ignore" \
+		     || $arg == "-open" \
+		     || $arg == "-leaveopen" } {
 		lappend newargs $arg
 		set eatnext 1
 		continue
