@@ -1,3 +1,10 @@
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (DLL_FILE_DEF): Tell the Makefile template that we
+		are building object files for the GSSAPI DLL.
+
+	* krb5_gss_glue.c: Change use of KRB5_DLLIMP to be GSS_DLLIMP.
+
 Mon Dec 21 19:50:04 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Eliminate

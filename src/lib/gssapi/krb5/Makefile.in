@@ -9,6 +9,8 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 ##DOS##OBJFILE = ..\krb5.lst
 ##WIN16##LIBNAME=..\gssapi.lib
 
+##DOS##DLL_EXP_TYPE=GSS
+
 ETSRCS= gssapi_err_krb5.c
 ETOBJS= gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
