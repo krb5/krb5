@@ -22,7 +22,7 @@ static char rcsid_port2ip_c[] =
 #ifdef KRB5_USE_INET
 
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include "os-proto.h"
 #include <netinet/in.h>
 

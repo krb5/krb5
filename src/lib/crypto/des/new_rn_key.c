@@ -24,7 +24,7 @@ static char rcsid_new_rn_key_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include "des_int.h"
 
 #ifndef min

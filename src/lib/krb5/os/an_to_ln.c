@@ -19,7 +19,7 @@ static char rcsid_an_to_ln_c[] =
 #include <krb5/osconf.h>
 
 #include <krb5/krb5.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
 #ifdef USE_DBM_LNAME

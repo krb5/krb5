@@ -20,7 +20,7 @@
 #include <netdb.h>
 #include <krb.h>
 #include <krb5/krb5.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/asn1.h>
 #include <netinet/in.h>
 #include <stdio.h>

@@ -18,7 +18,7 @@ static char rcsid_send_tgs_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 /*
  Sends a request to the TGS and waits for a response.

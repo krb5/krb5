@@ -20,7 +20,7 @@ static char rcsid_gen_seqnum_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 #ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))

@@ -21,7 +21,7 @@ static char rcsid_gen_rname_c[] =
 #include <krb5/osconf.h>
 
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include "os-proto.h"
 #ifdef KRB5_USE_INET
 #include <sys/types.h>

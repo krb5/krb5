@@ -20,7 +20,7 @@ static char rcsid_read_password_c[] =
 #endif	/* lint */
 
 #include <krb5/krb5.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 #include "des.h"
 

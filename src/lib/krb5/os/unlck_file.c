@@ -20,7 +20,7 @@ static char rcsid_unlock_file_c [] =
 
 #include <krb5/krb5.h>
 #include <krb5/libos.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 krb5_error_code
 krb5_unlock_file(filep, pathname)

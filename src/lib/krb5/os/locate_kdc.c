@@ -21,7 +21,7 @@ static char rcsid_locate_kdc_c[] =
 
 #include <krb5/ext-proto.h>
 #include <stdio.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>

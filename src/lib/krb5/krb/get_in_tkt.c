@@ -18,7 +18,7 @@ static char rcsid_get_in_tkt_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
 /*

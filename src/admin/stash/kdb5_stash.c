@@ -20,7 +20,7 @@ static char rcsid_kdb_stash_c[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/sysincl.h>
 
 #include <com_err.h>

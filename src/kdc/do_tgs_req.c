@@ -18,7 +18,7 @@ static char rcsid_do_tgs_req_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
 #include <krb5/ext-proto.h>

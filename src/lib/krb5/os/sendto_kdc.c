@@ -24,7 +24,7 @@ static char rcsid_sendto_kdc_c[] =
 #include <sys/socket.h>
 #include <sys/time.h>
 
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include "os-proto.h"
 
 /*

@@ -20,7 +20,7 @@ static char rcsid_free_hstrl_c[] =
 
 #include <krb5/ext-proto.h>
 #include <stdio.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 /*
  Frees the storage taken by a realm list returned by krb5_get_local_realm.

@@ -19,7 +19,7 @@ static char rcsid_store_mkey_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 #include "kdbint.h"
 #include <krb5/sysincl.h>		/* for MAXPATHLEN */

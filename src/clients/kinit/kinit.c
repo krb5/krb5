@@ -21,7 +21,7 @@ static char rcsid_kinit_c [] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>			/* for TGTNAME */
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 
 #include <com_err.h>
 
