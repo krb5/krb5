@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -547,7 +543,7 @@ static void parse_oid(char *mechanism, gss_OID *oid)
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
     
-    if (isdigit(mechanism[0])) {
+    if (isdigit((int) mechanism[0])) {
 	mechstr = malloc(strlen(mechanism)+5);
 	if (!mechstr) {
 	    fprintf(stderr, "Couldn't allocate mechanism scratch!\n");

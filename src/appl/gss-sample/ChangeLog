@@ -1,3 +1,9 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* gss-client.c (parse_oid): Cast argument to isdigit() to int.
+
+	* gss-server.c (sign_server): Cast argument to isspace() to int.
+
 2001-05-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* gss-server.c (usage): Fix usage info *again* to reflect that

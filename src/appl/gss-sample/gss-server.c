@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
@@ -457,8 +453,8 @@ static int sign_server(s, server_creds, export)
        if (log) {
 	 fprintf(log, "Received message: ");
 	 cp = msg_buf.value;
-	 if ((isprint(cp[0]) || isspace(cp[0])) &&
-	    (isprint(cp[1]) || isspace(cp[1]))) {
+	 if ((isprint((int) cp[0]) || isspace((int) cp[0])) &&
+	    (isprint((int) cp[1]) || isspace((int) cp[1]))) {
 	   fprintf(log, "\"%.*s\"\n", (int) msg_buf.length, 
 		   (char *) msg_buf.value);
 	 } else {
