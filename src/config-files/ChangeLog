@@ -1,3 +1,9 @@
+Mon May 13 20:39:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.conf: Change the default ticket lifetime to something
+		reasonable (10 hours, instead of 10 minutes).  Also change
+		the label of this parameter to be tkt_lifetime.
+
 Tue Apr  2 22:31:48 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5.conf.M, krb5.conf: add default_tkt_enctypes.
