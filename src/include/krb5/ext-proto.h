@@ -19,8 +19,8 @@
 #ifdef __STDC__
 #include <stdlib.h>
 #else
-extern char *malloc(), *index(), *calloc();
-extern char *getenv();
+extern char *malloc(), *realloc(), *calloc();
+extern char *getenv(), *index();
 #endif /* ! __STDC__ */
 
 #include <string.h>
