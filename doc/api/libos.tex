@@ -92,6 +92,21 @@ The caller should arrange that both \funcparam{filep} and
 \funcparam{pathname} refer to the same file.  The implementation may
 use whichever is more convenient.
 
+\begin{funcdecl}{krb5_create_secure_file}{krb5_error_code}{\funcin}
+\funcarg{const char *}{pathname}
+\end{funcdecl}
+
+Creates a file named pathname which can only be read by the current
+user.
+
+\begin{funcdecl}{krb5_sync_disk_file}{krb5_error_code}{\funcin}
+\funcarg{FILE *}{fp}
+\end{funcdecl}
+
+Assures that the changes made to the file pointed to by the file
+handle
+fp are forced out to disk.
+
 \begin{funcdecl}{krb5_timeofday}{krb5_error_code}{\funcout}
 \funcarg{krb5_int32 *}{timeret}
 \end{funcdecl}
@@ -139,6 +154,24 @@ or returns -1 and sets errno.
 
 Only useful on stream sockets and pipes.
 
+\begin{funcdecl}{krb5_write_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_pointer}{fd}
+\funcarg{krb5_data *}{data}
+\end{funcdecl}
+
+
+\funcname{krb5_write_message} writes data to the network as a message,
+using the network connection pointed to by \funcparam{fd}.
+
+\begin{funcdecl}{krb5_read_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_pointer}{fd}
+\funcout
+\funcarg{krb5_data *}{data}
+\end{funcdecl}
+
+Reads data from the network as a message, using the network connection
+pointed to by fd.
+
 \begin{funcdecl}{krb5_os_localaddr}{krb5_error_code}{\funcout}
 \funcarg{krb5_address ***}{addr}
 \end{funcdecl}
@@ -154,8 +187,8 @@ when no longer needed.
 
 
 \begin{funcdecl}{krb5_sendto_kdc}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{send}
-\funcarg{krb5_data *}{realm}
+\funcarg{const krb5_data *}{send}
+\funcarg{const krb5_data *}{realm}
 \funcout
 \funcarg{krb5_data *}{receive}
 \end{funcdecl}
@@ -170,16 +203,14 @@ The storage for \funcparam{receive} is allocated and should be freed by
 the caller when finished.
 
 \begin{funcdecl}{krb5_get_krbhst}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{realm}
+\funcarg{const krb5_data *}{realm}
 \funcout
 \funcarg{char ***}{hostlist}
 \end{funcdecl}
 
 Figures out the Kerberos server names for the given \funcparam{realm},
-filling in
-\funcparam{hostlist} with a
-pointer to an argv[] style list of names, terminated with a null
-pointer.
+filling in \funcparam{hostlist} with a null terminated array of
+pointers to hostnames. 
  
 If \funcparam{realm} is unknown, the filled-in pointer is set to NULL.
 
@@ -189,13 +220,13 @@ and should be freed by the caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_free_krbhst}{krb5_error_code}{\funcin}
-\funcarg{char **}{hostlist}
+\funcarg{char * const *}{hostlist}
 \end{funcdecl}
 
 Frees the storage taken by a host list returned by \funcname{krb5_get_krbhst}.
 
 \begin{funcdecl}{krb5_aname_to_localname}{krb5_error_code}{\funcin}
-\funcarg{krb5_principal}{aname}
+\funcarg{krb5_const_principal}{aname}
 \funcarg{int}{lnsize}
 \funcout
 \funcarg{char *}{lname}
@@ -227,7 +258,7 @@ pointed to be \funcparam{lream} when it is finished with it.
 Returns system errors.
 
 \begin{funcdecl}{krb5_get_host_realm}{krb5_error_code}{\funcin}
-\funcarg{char *}{host}
+\funcarg{const char *}{host}
 \funcout
 \funcarg{char ***}{realmlist}
 \end{funcdecl}
@@ -247,7 +278,7 @@ and should be freed by the caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_free_host_realm}{krb5_error_code}{\funcin}
-\funcarg{char **}{realmlist}
+\funcarg{char * const *}{realmlist}
 \end{funcdecl}
 
 Frees the storage taken by a \funcparam{realmlist} returned by
@@ -310,16 +341,37 @@ finished using it.  When using IP addresses, the components in
 \begin{funcdecl}{krb5_sname_to_principal}{krb5_error_code}{\funcin}
 \funcarg{const char *}{hostname}
 \funcarg{const char *}{sname}
+\funcarg{krb5_int32}{type}
 \funcout
 \funcarg{krb5_principal *}{ret_princ}
 \end{funcdecl}
 
 Given a hostname \funcparam{hostname} and a generic service name
 \funcparam{sname}, this function generates a full principal name to be
-used when authenticating with the named service on the host.
-\funcparam{hostname} is placed into canonical form before being composed
-into the returned principal \funcparam{ret_princ}.  The realm of the
+used when authenticating with the named service on the host.  The full
+prinicpal name is  returned  in \funcparam{ret_princ}.
+
+The realm of the
 principal is determined internally by calling \funcname{krb5_get_host_realm}.
+
+The \funcparam{type} argument controls how
+\funcname{krb5_sname_to_principal} generates the principal name,
+\funcparam{ret_princ}, for the named service, \funcparam{sname}.
+Currently, two values 	are supported: KRB5_NT_SRV_HOST, and
+KRB5_NT_UNKNOWN.  
+
+If \funcparam{type} is set to
+KRB5_NT_SRV_HOST, the hostname will be
+canonicalized, i.e. a fully qualified lowercase hostname using
+the primary name and the domain name, before \funcparam{ret_princ} is
+generated in the form
+"sname/hostname@LOCAL.REALM." Most applications should use
+KRB5_NT_SRV_HOST.  
+
+However, if \funcparam{type} is set to KRB5_NT_UNKNOWN,
+while the generated principal name will have 	the form
+"sname/hostname@LOCAL.REALM" the hostname will not be canonicalized
+first.  It will appear exactly as it was passed in \funcparam{hostname}.  
 
 The caller should release \funcparam{ret_princ}'s storage by calling
 \funcname{krb5_free_principal} when it is finished with the principal.

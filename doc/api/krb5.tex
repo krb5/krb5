@@ -2,13 +2,13 @@ The main functions deal with the nitty-gritty details: verifying
 tickets, creating authenticators, and the like.
 
 \begin{funcdecl}{krb5_encode_kdc_rep}{krb5_error_code}{\funcin}
-\funcarg{krb5_msgtype}{type}
-\funcarg{krb5_enc_kdc_rep_part *}{encpart}
-\funcarg{krb5_keyblock *}{client_key}
+\funcarg{const krb5_msgtype}{type}
+\funcarg{const krb5_enc_kdc_rep_part *}{encpart}
+\funcarg{const krb5_keyblock *}{client_key}
 \funcinout
 \funcarg{krb5_kdc_rep *}{dec_rep}
 \funcout
-\funcarg{krb5_data *}{enc_rep}
+\funcarg{krb5_data **}{enc_rep}
 \end{funcdecl}
 
 Takes KDC rep parts in \funcparam{*rep} and \funcparam{*encpart}, and
@@ -23,8 +23,8 @@ Returns system errors.
 
 \begin{funcdecl}{krb5_decode_kdc_rep}{krb5_error_code}{\funcin}
 \funcarg{krb5_data *}{enc_rep}
-\funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_enctype}{etype}
+\funcarg{const krb5_keyblock *}{key}
+\funcarg{const krb5_enctype}{etype}
 \funcout
 \funcarg{krb5_kdc_rep **}{dec_rep}
 \end{funcdecl}
@@ -42,8 +42,8 @@ the decoding routines (usually ISODE_50_LOCAL_ERR_BADDECODE).
 Returns errors from encryption routines, system errors.
 
 \begin{funcdecl}{krb5_kdc_rep_decrypt_proc}{krb5_error_code}{\funcin}
-\funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_pointer}{decryptarg}
+\funcarg{const krb5_keyblock *}{key}
+\funcarg{krb5_const_pointer}{decryptarg}
 \funcinout
 \funcarg{krb5_kdc_rep *}{dec_rep}
 \end{funcdecl}
@@ -58,7 +58,7 @@ This function is suitable for use as the \funcparam{decrypt_proc}
 argument to \funcname{krb5_get_in_tkt}.
 
 \begin{funcdecl}{krb5_encrypt_tkt_part}{krb5_error_code}{ \funcin}
-\funcarg{krb5_keyblock *}{srv_key}
+\funcarg{const krb5_keyblock *}{srv_key}
 \funcinout
 \funcarg{krb5_ticket *}{dec_ticket}
 \end{funcdecl}
@@ -77,7 +77,7 @@ Returns errors from encryption routines, system errors
 encrypted stuff.
 
 \begin{funcdecl}{krb5_decrypt_tkt_part}{krb5_error_code}{\funcin}
-\funcarg{krb5_keyblock *}{srv_key}
+\funcarg{const krb5_keyblock *}{srv_key}
 \funcinout
 \funcarg{krb5_ticket *}{dec_ticket}
 \end{funcdecl}
@@ -91,14 +91,15 @@ using \funcparam{srv_key}, and places result in
 Returns errors from encryption routines, system errors
 
 \begin{funcdecl}{krb5_send_tgs}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{options}
-\funcarg{krb5_ticket_times *}{timestruct}
-\funcarg{krb5_enctype}{etype}
-\funcarg{krb5_cksumtype}{sumtype}
-\funcarg{krb5_principal}{sname}
-\funcarg{krb5_address **}{addrs}
-\funcarg{krb5_authdata **}{authorization_data}
-\funcarg{krb5_data *}{second_ticket}
+\funcarg{const krb5_flags}{options}
+\funcarg{const krb5_ticket_times *}{timestruct}
+\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_cksumtype}{sumtype}
+\funcarg{krb5_const_principal}{sname}
+\funcarg{krb5_address * const *}{addrs}
+\funcarg{krb5_authdata * const *}{authorization_data}
+\funcarg{krb5_pa_data * const *}{padata}
+\funcarg{const krb5_data *}{second_ticket}
 \funcinout
 \funcarg{krb5_creds *}{usecred}
 \funcout
@@ -113,7 +114,10 @@ KRB_TGS_REQ.
 \funcparam{sumtype} is used for the checksum in the AP_REQ in the KRB_TGS_REQ.
 \funcparam{sname} is used for sname in the KRB_TGS_REQ.
 \funcparam{addrs}, if non-NULL, is used for addresses in the KRB_TGS_REQ.
-\funcparam{authorization_dat}, if non-NULL, is used for authorization_dat in the KRB_TGS_REQ.
+\funcparam{authorization_data}, if non-NULL, is used for
+\funcparam{authorization_data} in the KRB_TGS_REQ.  
+\funcparam{ padata}, if non-NULL, is combined with any other supplied
+pre-authentication data for the KRB_TGS_REQ.
 \funcparam{second_ticket}, if required by options, is used for the 2nd
 ticket in the KRB_TGS_REQ.
 \funcparam{usecred} is used for the ticket and session key in the KRB_AP_REQ header in the KRB_TGS_REQ.
@@ -131,7 +135,7 @@ Returns system errors.
 \funcinout
 \funcarg{krb5_creds *}{creds}
 \funcout			
-\funcparam{krb5_creds ***}{tgts }
+\funcarg{krb5_creds ***}{tgts }
 \end{funcdecl}
 
 Retrieve credentials for principal \funcparam{creds{\ptsto}client},
@@ -167,7 +171,7 @@ Frees the TGT credentials \funcparam{tgts} returned by
 \funcname{krb5_get_cred_from_kdc}.
 
 \begin{funcdecl}{krb5_get_credentials}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{options}
+\funcarg{const krb5_flags}{options}
 \funcarg{krb5_ccache}{ccache}
 \funcinout
 \funcarg{krb5_creds *}{creds}
@@ -181,9 +185,10 @@ expiration date specified in \funcparam{creds{\ptsto}times.endtime} (0
 means as long as possible), session key type specified in
 \funcparam{creds{\ptsto}keyblock.keytype} (if non-zero).
 
-If \funcparam{options} specifies KRB5_GC_CACHED, \funcname{get_credentials}
-will only search the credentials cache for a ticket.  If
-\funcparam{options} specifies KRB5_GC_USER_USER, \funcname{get_credentials}
+If \funcparam{options} specifies KRB5_GC_CACHED,
+\funcname{krb5_get_credentials} will only search the credentials cache
+for a ticket.  If \funcparam{options} specifies KRB5_GC_USER_USER,
+\funcname{krb5_get_credentials} 
 will set the KDC_OPT_ENC_TKT_IN_SKEY flag in the KDC request.
 \funcparam{creds{\ptsto}second_ticket} must contain a ticket.
 
@@ -193,42 +198,56 @@ stored in \funcparam{ccache}.
 Returns errors from encryption routines, system errors.
 
 \begin{funcdecl}{krb5_get_in_tkt}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{options}
-\funcarg{krb5_address **}{addrs}
-\funcarg{krb5_enctype}{etype}
-\funcarg{krb5_keytype}{keytype}
+\funcarg{const krb5_flags}{options}
+\funcarg{krb5_address * const *}{addrs}
+\funcarg{const krb5_preauthtype}{pre_auth_type}
+\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_keytype}{keytype}
 \funcfuncarg{krb5_error_code}{(*key_proc)}
-	\funcarg{krb5_keytype}{type}
+	\funcarg{const krb5_keytype}{type}
 	\funcarg{krb5_keyblock **}{key}
-	\funcarg{krb5_pointer}{keyseed}
+	\funcarg{krb5_const_pointer}{keyseed}
+	\funcarg{krb5_pa_data **}{padata}
 \funcendfuncarg
-\funcarg{krb5_pointer}{keyseed}
+\funcarg{krb5_const_pointer}{keyseed}
 \funcfuncarg{krb5_error_code}{(*decrypt_proc)}
-	\funcarg{krb5_keyblock *}{key}
-	\funcarg{krb5_pointer}{decryptarg}
+	\funcarg{const krb5_keyblock *}{key}
+	\funcarg{krb5_const_pointer}{decryptarg}
 	\funcarg{krb5_kdc_rep *}{dec_rep}
 \funcendfuncarg
-\funcarg{krb5_pointer}{decryptarg}
+\funcarg{krb5_const_pointer}{decryptarg}
 \funcinout
 \funcarg{krb5_creds *}{creds}
 \funcarg{krb5_ccache}{ccache}
+\funcarg{krb5_kdc_rep **}{ret_as_reply}
 \end{funcdecl}
 
 All-purpose initial ticket routine, usually called via
 \funcname{krb5_get_in_tkt_with_password} or
 \funcname{krb5_get_in_tkt_with_skey}.
 
-Attempts to get an initial ticket for \funcparam{creds{\ptsto}client} to use server
-\funcparam{creds{\ptsto}server}, (realm is taken from
-\funcparam{creds{\ptsto}client}), with options 
-\funcparam{options}, requesting encryption type \funcparam{etype}, and using
-\funcparam{creds{\ptsto}times.starttime},  \funcparam{creds{\ptsto}times.endtime},
-\funcparam{creds{\ptsto}times.renew_till}
+
+Attempts to get an initial ticket for \funcparam{creds{\ptsto}client}
+to use server \funcparam{creds{\ptsto}server}, using the following:
+the realm from \funcparam{creds{\ptsto}client}; the options in
+\funcparam{options}; and \funcparam{ pre_auth_type}, the preauthentication
+method, which could be KRB5_PADATA_NONE if no preauthentication is
+desired.  \funcname{krb5_get_in_tkt} requests encryption type
+\funcparam{etype}, using \funcparam{creds{\ptsto}times.starttime},
+\funcparam{creds{\ptsto}times.endtime},
+\funcparam{creds{\ptsto}times.renew_till} 
 as from, till, and rtime.  \funcparam{creds{\ptsto}times.renew_till} is
 ignored unless the RENEWABLE option is requested.
 
+% This paragraph needs to be expanded. ?? Along the lines of the
+% comment below:
+
 \funcparam{key_proc} is called to fill in the key to be used for decryption.
-\funcparam{keyseed} is passed on to \funcparam{key_proc}.
+\funcparam{keyseed} and \funcparam{padata} passed on to
+\funcparam{key_proc}.  
+
+%\funcparam{padata} may contain a hint of the
+%proper salting argument for \funcname{ string_to_key}.
 
 \funcparam{decrypt_proc} is called to perform the decryption of the
 response (the encrypted part is in \funcparam{dec_rep{\ptsto}enc_part}; the
@@ -239,6 +258,13 @@ decrypted part should be allocated and filled into
 If \funcparam{addrs} is non-NULL, it is used for the addresses
 requested.  If it is null, the system standard addresses are used.
 
+If \funcparam{ret_as_reply} is non_null, it is filled in with a
+pointer to a structure containing the reply packet from the KDC.  Some
+programs may find it useful to have direct access to this information.
+For example, it can be used to obtain the pre-authentication data
+passed back from the KDC.  The caller is responsible for freeing this
+structure by using \funcname{krb5_free_kdc_rep}.
+
 A succesful call will place the ticket in the credentials cache
 \funcparam{ccache} and fill in \funcparam{creds} with the ticket
 information used/returned.
@@ -246,14 +272,16 @@ information used/returned.
 Returns system errors, encryption errors.
 
 \begin{funcdecl}{krb5_get_in_tkt_with_password}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{options}
-\funcarg{krb5_address **}{addrs}
-\funcarg{krb5_enctype}{etype}
-\funcarg{krb5_keytype}{keytype}
-\funcarg{char *}{password}
+\funcarg{const krb5_flags}{options}
+\funcarg{krb5_address * const *}{addrs}
+\funcarg{const krb5_preauthtype}{pre_auth_type}
+\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_keytype}{keytype}
+\funcarg{const char *}{password}
 \funcarg{krb5_ccache}{ccache}
 \funcinout
 \funcarg{krb5_creds *}{creds}
+\funcarg{krb5_kdc_rep **}{ret_as_reply}
 \end{funcdecl}
 
 
@@ -275,19 +303,28 @@ cryptosystem entry point for a string conversion routine, seeded with
 the client's principal name.  If \funcparam{password} is passed as NULL,
 the password is read from the terminal, and then converted into a key.
 
+If \funcparam{ret_as_reply} is non_null, it is filled in with a
+pointer to a structure containing the reply packet from the KDC.  Some
+programs may find it useful to have direct access to this information.
+For example, it can be used to obtain the pre-authentication data
+passed back from the KDC.  The caller is responsible for freeing this
+structure by using \funcname{krb5_free_kdc_rep}.
+
 A succesful call will place the ticket in the credentials cache
 \funcparam{ccache}.
 
 Returns system errors, encryption errors.
 
 \begin{funcdecl}{krb5_get_in_tkt_with_skey}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{options}
-\funcarg{krb5_address **}{addrs}
-\funcarg{krb5_enctype}{etype}
-\funcarg{krb5_keyblock *}{key}
+\funcarg{const krb5_flags}{options}
+\funcarg{krb5_address * const *}{addrs}
+\funcarg{const krb5_preauthtype}{pre_auth_type}
+\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_keyblock *}{key}
 \funcarg{krb5_ccache}{ccache}
 \funcinout
 \funcarg{krb5_creds *}{creds}
+\funcarg{krb5_kdc_rep **}{ret_as_reply}
 \end{funcdecl}
 Similar to \funcname{krb5_get_in_tkt_with_password}.
 
@@ -308,15 +345,22 @@ If \funcparam{keyblock} is NULL, an appropriate key for
 \filename{/etc/v5srvtab}).  If \funcparam{keyblock} is non-NULL, it is
 used as the decryption key.
 
+If \funcparam{ret_as_reply} is non_null, it is filled in with a
+pointer to a structure containing the reply packet from the KDC.  Some
+programs may find it useful to have direct access to this information.
+For example, it can be used to obtain the pre-authentication data
+passed back from the KDC.  The caller is responsible for freeing this
+structure by using \funcname{krb5_free_kdc_rep}.
+
 A succesful call will place the ticket in the credentials cache
 \funcparam{ccache}.
 
 Returns system errors, encryption errors.
 
 \begin{funcdecl}{krb5_mk_req}{krb5_error_code}{\funcin}
-\funcarg{krb5_principal}{server}
-\funcarg{krb5_flags}{ap_req_options}
-\funcarg{krb5_checksum *}{checksum}
+\funcarg{krb5_const_principal}{server}
+\funcarg{const krb5_flags}{ap_req_options}
+\funcarg{const krb5_checksum *}{checksum}
 \funcarg{krb5_ccache}{ccache}
 \funcout
 \funcarg{krb5_data *}{outbuf}
@@ -341,9 +385,9 @@ Returns system errors.
 
 
 \begin{funcdecl}{krb5_mk_req_extended}{krb5_error_code}{\funcin}
-\funcarg{krb5_flags}{ap_req_options}
-\funcarg{krb5_checksum *}{checksum}
-\funcarg{krb5_flags}{kdc_options}
+\funcarg{const krb5_flags}{ap_req_options}
+\funcarg{const krb5_checksum *}{checksum}
+\funcarg{const krb5_flags}{kdc_options}
 \funcarg{krb5_int32}{sequence}
 \funcarg{krb5_keyblock **}{newkey}
 \funcarg{krb5_ccache}{ccache}
@@ -451,10 +495,10 @@ Returns system errors, encryption errors, replay errors.
 
 
 \begin{funcdecl}{krb5_rd_req}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{inbuf}
-\funcarg{krb5_principal}{server}
-\funcarg{krb5_address *}{sender_addr}
-\funcarg{krb5_pointer}{fetchfrom}
+\funcarg{const krb5_data *}{inbuf}
+\funcarg{krb5_const_principal}{server}
+\funcarg{const krb5_address *}{sender_addr}
+\funcarg{krb5_const_pointer}{fetchfrom}
 \funcfuncarg{krb5_error_code}{(*keyproc)}
 \funcarg{krb5_pointer}{keyprocarg}
 \funcarg{krb5_principal}{principal}
@@ -501,15 +545,15 @@ structures; the caller should free them when finished.
 Returns system errors, encryption errors, replay errors.
 
 \begin{funcdecl}{krb5_rd_req_decoded}{krb5_error_code}{\funcin}
-\funcarg{krb5_ap_req *}{req}
-\funcarg{krb5_principal}{server}
-\funcarg{krb5_address *}{sender_addr}
-\funcarg{krb5_pointer}{fetchfrom}
+\funcarg{const krb5_ap_req *}{req}
+\funcarg{krb5_const_principal}{server}
+\funcarg{const krb5_address *}{sender_addr}
+\funcarg{krb5_const_pointer}{fetchfrom}
 \funcfuncarg{krb5_error_code}{(*keyproc)}
-\funcarg{krb5_pointer}{keyprocarg}
-\funcarg{krb5_principal}{principal}
-\funcarg{krb5_kvno}{vno}
-\funcarg{krb5_keyblock **}{key}
+	\funcarg{krb5_pointer}{keyprocarg}
+	\funcarg{krb5_principal}{principal}
+	\funcarg{krb5_kvno}{vno}
+	\funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_pointer}{keyprocarg}
 \funcarg{krb5_rcache}{rcache}
@@ -553,7 +597,7 @@ The key in \funcparam{*kblock} is used to decrypt the message.
 Returns system errors.
 
 \begin{funcdecl}{krb5_mk_error}{krb5_error_code}{\funcin}
-\funcarg{krb5_error *}{dec_err}
+\funcarg{const krb5_error *}{dec_err}
 \funcout
 \funcarg{krb5_data *}{enc_err}
 \end{funcdecl}
@@ -567,7 +611,7 @@ caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_rd_error}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{enc_errbuf}
+\funcarg{const krb5_data *}{enc_errbuf}
 \funcout
 \funcarg{krb5_error **}{dec_error}
 \end{funcdecl}
@@ -671,9 +715,15 @@ packet that was sent from the server will be filled into
 \funcarg{krb5_principal}{server}
 \funcarg{krb5_address *}{sender_addr}
 \funcarg{krb5_pointer}{fetchfrom}
-\funcarg{krb5_rdreq_key_proc}{keyproc}
+\funcfuncarg{krb5_error_code}{(*keyproc)}
+	\funcarg{krb5_pointer}{keyprocarg}
+	\funcarg{krb5_principal}{principal}
+	\funcarg{krb5_kvno}{vno}
+	\funcarg{krb5_keyblock **}{key}
+\funcendfuncarg
 \funcarg{krb5_pointer}{keyprocarg}
 \funcarg{char *}{rc_type}
+\funcarg{krb5_int32}{flags}
 \funcout
 \funcarg{krb5_int32 *}{sequence}
 \funcarg{krb5_principal *}{client}
@@ -681,12 +731,16 @@ packet that was sent from the server will be filled into
 \funcarg{krb5_authenticator **}{authent}
 \end{funcdecl}
 
-\funcname{krb5_sendauth} provides a convenient means for client and
+\funcname{krb5_recvauth} provides a convenient means for client and
 server programs to send authenticated messages to one another through
-network connections.  \funcname{krb5_recvauth} receives the ticket from
-sent by \funcparam{krb5_sendauth}, and, if requested by the client, will
-perform mutual authentication to prove to the client that the server
-represented by \funcparam{krb5_recvauth} is legitimate.
+network connections.  \funcname{krb5_sendauth} is the matching routine
+to \funcname{ krb5_recvauth} for the server.  \funcname{
+krb5_recvauth} will engage in an authentication dialogue with the
+client program running \funcname{krb5_sendauth} to authenticate the
+client to the server.  In addition, if requested by the client,
+\funcname{krb5_recvauth} will also provide mutual authentication to
+prove to the client that the server represented by
+\funcname{krb5_recvauth} is legitmate. 
 
 \funcparam{fd} is a pointer to the network connection.  As in
 \funcname{krb5_sendauth}, \funcparam{fd} is a pointer to a file
@@ -707,10 +761,14 @@ cache \funcname{krb5_recvauth} should use.  \funcname{krb5_recvauth}
 uses a standard convention for determining the name of the replay cache
 to be used.
 
-All of the output paramters are optional and they are only filled in if
-they are non-NULL.  \funcparam{sequence} is filled in with the
-sequence number which the server should use (if desired) for sending or
-receiving message using \funcname{krb5_mk_safe} and
+The \funcparam{flags} argument allows the caller to modify the behavior of
+\funcname{krb5_recvauth}.  For non-library callers, \funcparam{flags}
+should be 0. 
+
+All of the output paramters are optional and they are only filled in
+if they are non-NULL.  \funcparam{sequence} is filled in with the
+sequence number which the server should use (if desired) for sending
+or receiving message using \funcname{krb5_mk_safe} and
 \funcname{krb5_mk_priv}.   The client's sequence number is passed back
 as part of the authenticator structure which is filled in if
 \funcparam{authent} is nonzero.  
@@ -719,11 +777,11 @@ as part of the authenticator structure which is filled in if
 initiated the authenticated connection.
 
 \begin{funcdecl}{krb5_mk_safe}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{userdata}
-\funcarg{krb5_cksumtype}{sumtype}
-\funcarg{krb5_keyblock *}{key,}
-\funcarg{krb5_fulladdr *}{sender_addr}
-\funcarg{krb5_fulladdr *}{recv_addr}
+\funcarg{const krb5_data *}{userdata}
+\funcarg{const krb5_cksumtype}{sumtype}
+\funcarg{const krb5_keyblock *}{key,}
+\funcarg{const krb5_fulladdr *}{sender_addr}
+\funcarg{const krb5_fulladdr *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{safe_flags}
 \funcarg{krb5_rcache}{rcache}
@@ -757,10 +815,10 @@ caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_rd_safe}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{inbuf}
-\funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_address *}{sender_addr}
-\funcarg{krb5_address *}{recv_addr}
+\funcarg{const krb5_data *}{inbuf}
+\funcarg{const krb5_keyblock *}{key}
+\funcarg{const krb5_address *}{sender_addr}
+\funcarg{const krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{safe_flags}
 \funcinout
@@ -794,11 +852,11 @@ replay cache appropriate to use as \funcparam{rcache}.
 Returns system errors, integrity errors.
 
 \begin{funcdecl}{krb5_mk_priv}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{userdata}
-\funcarg{krb5_enctype}{etype}
-\funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_address *}{sender_addr}
-\funcarg{krb5_address *}{recv_addr}
+\funcarg{const krb5_data *}{userdata}
+\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_keyblock *}{key}
+\funcarg{const krb5_address *}{sender_addr}
+\funcarg{const krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{priv_flags}
 \funcarg{krb5_rcache}{rcache}
@@ -836,10 +894,10 @@ caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_rd_priv}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{inbuf}
-\funcarg{krb5_keyblock *}{key}
-\funcarg{krb5_address *}{sender_addr}
-\funcarg{krb5_address *}{recv_addr}
+\funcarg{const krb5_data *}{inbuf}
+\funcarg{const krb5_keyblock *}{key}
+\funcarg{const krb5_address *}{sender_addr}
+\funcarg{const krb5_address *}{recv_addr}
 \funcarg{krb5_int32}{seq_number}
 \funcarg{krb5_int32}{priv_flags}
 \funcinout
@@ -878,7 +936,7 @@ replay cache appropriate to use as \funcparam{rcache}.
 Returns system errors, integrity errors.
 
 \begin{funcdecl}{krb5_parse_name}{krb5_error_code}{\funcin}
-\funcarg{char *}{name}
+\funcarg{const char *}{name}
 \funcout
 \funcarg{krb5_principal *}{principal}
 \end{funcdecl}
@@ -894,7 +952,7 @@ the caller (using \funcname{krb5_free_principal}) after use.
 allocated.
 
 \begin{funcdecl}{krb5_unparse_name}{krb5_error_code}{\funcin}
-\funcarg{krb5_principal}{principal}
+\funcarg{krb5_const_principal}{principal}
 \funcout
 \funcarg{char **}{name}
 \end{funcdecl}
@@ -949,30 +1007,30 @@ The last string must be followed in the argument list by a null pointer.
 A length of zero indicates the end of the list.
 
 \begin{funcdecl}{krb5_address_search}{krb5_boolean}{\funcin}
-\funcarg{krb5_address *}{addr}
-\funcarg{krb5_address **}{addrlist}
+\funcarg{const krb5_address *}{addr}
+\funcarg{krb5_address * const *}{addrlist}
 \end{funcdecl}
 
 If \funcparam{addr} is listed in \funcparam{addrlist}, or
 \funcparam{addrlist} is null, return TRUE.  If not listed, return FALSE.
 
 \begin{funcdecl}{krb5_address_compare}{krb5_boolean}{\funcin}
-\funcarg{krb5_address *}{addr1}
-\funcarg{krb5_address *}{addr2}
+\funcarg{const krb5_address *}{addr1}
+\funcarg{const krb5_address *}{addr2}
 \end{funcdecl}
 
 If the two addresses are the same, return TRUE, else return FALSE.
 
 \begin{funcdecl}{krb5_principal_compare}{krb5_boolean}{\funcin}
-\funcarg{krb5_principal}{p1}
-\funcarg{krb5_principal}{p2}
+\funcarg{krb5_const_principal}{p1}
+\funcarg{krb5_const_principal}{p2}
 \end{funcdecl}
 
 If the two principals are the same, return TRUE, else return FALSE.
 
 \begin{funcdecl}{krb5_fulladdr_order}{int}{\funcin}
-\funcarg{krb5_fulladdr *}{addr1}
-\funcarg{krb5_fulladdr *}{addr2}
+\funcarg{const krb5_fulladdr *}{addr1}
+\funcarg{const krb5_fulladdr *}{addr2}
 \end{funcdecl}
 
 Return an ordering on the two full addresses:  0 if the same,
@@ -987,7 +1045,7 @@ Return an ordering on the two addresses:  0 if the same,
 $< 0$ if first is less than 2nd, $> 0$ if first is greater than 2nd.
 
 \begin{funcdecl}{krb5_copy_keyblock}{krb5_error_code}{\funcin}
-\funcarg{krb5_keyblock *}{from}
+\funcarg{const krb5_keyblock *}{from}
 \funcout
 \funcarg{krb5_keyblock **}{to}
 \end{funcdecl}
@@ -997,7 +1055,7 @@ allocated copy, which should be freed with
 \funcname{krb5_free_keyblock}. 
 
 \begin{funcdecl}{krb5_copy_keyblock_contents}{krb5_error_code}{\funcin}
-\funcarg{krb5_keyblock *}{from}
+\funcarg{const krb5_keyblock *}{from}
 \funcout
 \funcarg{krb5_keyblock *}{to}
 \end{funcdecl}
@@ -1007,7 +1065,7 @@ allocated storage.  The allocated storage in \funcparam{to} should be
 freed by using {\bf free}(\funcparam{to->contents}).
 
 \begin{funcdecl}{krb5_copy_creds}{krb5_error_code}{\funcin}
-\funcarg{krb5_creds *}{incred}
+\funcarg{const krb5_creds *}{incred}
 \funcout
 \funcarg{krb5_creds **}{outcred}
 \end{funcdecl}
@@ -1017,16 +1075,16 @@ to the newly allocated copy, which should be freed with
 \funcname{krb5_free_creds}.
 
 \begin{funcdecl}{krb5_copy_data}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{indata}
+\funcarg{const krb5_data *}{indata}
 \funcout
 \funcarg{krb5_data **}{outdata}
 \end{funcdecl}
 
-Copy a data strucutre, filling in \funcparam{*outdata} to point to the
+Copy a data structure, filling in \funcparam{*outdata} to point to the
 newly allocated copy, which should be freed with \funcname{krb5_free_data}.
 
 \begin{funcdecl}{krb5_copy_principal}{krb5_error_code}{\funcin}
-\funcarg{krb5_principal}{inprinc}
+\funcarg{krb5_const_principal}{inprinc}
 \funcout
 \funcarg{krb5_principal *}{outprinc}
 \end{funcdecl}
@@ -1050,9 +1108,8 @@ should be freed when \funcparam{*rep} is no longer needed.
 \funcarg{krb5_rcache *}{ret_rcache}
 \end{funcdecl}
 Generate a replay cache name, allocate space for its handle, and open
-it.  \funcarg{piece} is used to distinguish this replay cache from
+it.  \funcparam{piece} is used to distinguish this replay cache from
 others currently in use on the system.
-Upon successful return, \funcarg{ret_rcache} is filled in to contain a
+Upon successful return, \funcparam{ret_rcache} is filled in to contain a
 handle to an open rcache, which should be closed with
-\funcname{krb5_rc_close} and then freed with \funcname{xfree} when the
-caller is finished using it.
+\funcname{krb5_rc_close}.
