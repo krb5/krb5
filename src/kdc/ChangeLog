@@ -1,3 +1,7 @@
+2001-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Don't cause net/if.h to be included multiple times.
+
 2001-10-25  Tom Yu  <tlyu@mit.edu>
 
 	* do_as_req.c (process_as_req: Treat SUPPORT_DESMD5 as if it were
