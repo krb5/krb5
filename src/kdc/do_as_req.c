@@ -291,6 +291,7 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.times.authtime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
+	setflag(enc_tkt_reply.flags, TKT_FLG_POSTDATED);
 	setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
 	enc_tkt_reply.times.starttime = request->from;
     } else
