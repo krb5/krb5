@@ -86,15 +86,9 @@ typedef struct {
   unsigned char digest[16];		/* actual digest after MD4Final call */
 } krb5_MD4_CTX;
 
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)
 extern void krb5_MD4Init(krb5_MD4_CTX FAR *);
 extern void krb5_MD4Update(krb5_MD4_CTX FAR *, const unsigned char FAR *, unsigned int);
 extern void krb5_MD4Final(krb5_MD4_CTX FAR *);
-#else
-void krb5_MD4Init ();
-void krb5_MD4Update ();
-void krb5_MD4Final ();
-#endif
 
 /*
  **********************************************************************

@@ -1,3 +1,12 @@
+2001-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* md4.c (GG, HH, krb5_MD4Init): Use UL suffix on numbers, don't
+	bother with UL macro.
+	(UL): Macro deleted.
+	(Transform): Always declare with prototype.
+
+	* rsa-md4.h: Always use prototypes.
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* md4.c (PADDING): Now const.
