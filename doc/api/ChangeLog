@@ -1,3 +1,7 @@
+Thu Jun  6 15:50:39 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.tex: Update function prototype for krb5_encrypt_tkt_part
+
 Mon Sep  4 21:13:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* libos.tex: Update krb5_lock_file and krb5_unlock_file no longer

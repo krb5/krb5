@@ -618,7 +618,6 @@ argument to \funcname{krb5_get_in_tkt}.
 \begin{funcdecl}{krb5_encrypt_tkt_part}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
-\funcarg{krb5_encrypt_block *}{eblock}
 \funcarg{const krb5_keyblock *}{srv_key}
 \funcinout
 \funcarg{krb5_ticket *}{dec_ticket}
@@ -627,13 +626,12 @@ argument to \funcname{krb5_get_in_tkt}.
 \internalfunc
 
 \begin{sloppypar}
-Takes unencrypted \funcparam{dec_ticket} and
-\funcparam{dec_ticket{\ptsto}enc_part2}, encrypts with
-the encryption system specified by \funcparam{eblock} using
+Encrypts the unecrypted part of the ticket found in 
+\funcparam{dec_ticket{\ptsto}enc_part2} using
 \funcparam{srv_key}, and places result in 
 \funcparam{dec_ticket{\ptsto}enc_part}.
-The string \funcparam{dec_ticket{\ptsto}enc_part} will be allocated
-before formatting.
+The \funcparam{dec_ticket{\ptsto}enc_part} will be allocated by this
+function.
 \end{sloppypar}
 
 Returns errors from encryption routines, system errors
