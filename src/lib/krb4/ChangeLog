@@ -1,3 +1,10 @@
+2003-07-07  Alexandra Ellwood  <lxs@mit.edu>
+
+        * RealmsConfig-glue.c: krb_prof_get_nth() no longer assumes that
+        its retlen argument is correct (call strcpy instead of strncpy)
+        because this argument is a guess for some callers 
+        (eg: krb_get_admhst())
+
 2003-06-11  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (KRB_ERR_C): New variable; Darwin needs err_txt.o to
