@@ -1,3 +1,35 @@
+2001-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Use the interface variable $TMPDIR to allow the
+	specification of an alternative temporary directory.  Wrap a loop
+	around various testings and settings of interface variables that
+	specify the locations of programs to be tested, e.g. $KADMIND.
+	Add some support for having different sets of enctypes on client,
+	server, and kdc.  The envstack changes and multiple config file
+	support should get cleaned up somewhat later to possibly allow for
+	programs to execute on different hosts.
+	(check_k5login): Fix up to reflect actual (perhaps bogus) behavior
+	of krb5_kuserok(), which doesn't do quite what we expect, so there
+	really does need to be something like "luser@KRBTEST.COM" in the
+	.k5login file.
+	(check_klogin): New procedure; .klogin also needs to be checked
+	for the v4gssftp test.
+	(envstack_push, envstack_pop): New procedure; keep a stack of
+	environment variable state, which is useful for running different
+	programs with different config files.
+	(setup_runtime_flags, setup_kerberos_env): Rewrite somewhat so
+	they play nice with the envstack.
+	(setup_krb5_conf): New procedure; write a config file with the
+	contents parameterized based on the type of program that will use
+	it.
+	(setup_kerberos_files): Create different krb5.conf files for
+	client, server, and kdc.
+	(setup_kadmind_srvtab, setup_kerberos_db, start_kerberos_daemons):
+	Rewrite to play nice with envstack.
+	(setup_root_shell_noremote): New procedure from raeburn; handle
+	the case where we're already running as root.
+	(setup_root_shell): Call setup_root_shell_noremote as appropriate.
+	
 2001-06-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp: Add an entry for krb524_server for the localhost
