@@ -58,7 +58,7 @@ sap_glue.obj: win_glue.c
 
 sapkrb5.dll:: $(GLIB) $(LIBS) gssapi.def sap_glue.obj
 	link /co /seg:400 /noe /nod /nol sap_glue, sapkrb5.dll, sapkrb5.map, \
-	   $(LIBS) $(VERS_DIR)/vswin.lib ldllcew libw oldnames, sapkrb5.def
+	   $(LIBS) $(VERS_DIR)\vswin.lib ldllcew libw oldnames, sapkrb5.def
 	rc /nologo /p /k sapkrb5.dll
 
 winsock.lib:  winsock.def

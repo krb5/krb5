@@ -40,14 +40,14 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 	char FAR *app_title;
 	char FAR *app_version;
 	char FAR *app_ini;
-	char FAR *code_cover
+	char FAR *code_cover;
 {
 	VS_Request vrequest;
 	VS_Status  vstatus;
 
 	SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-	vrequest = VSFormRequest(app_title, app_ver, app_ini,
+	vrequest = VSFormRequest(app_title, app_version, app_ini,
 				 code_cover, NULL, V_CHECK_AND_LOG);
 
 	SetCursor(LoadCursor(NULL, IDC_ARROW));
