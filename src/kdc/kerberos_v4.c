@@ -397,9 +397,10 @@ char *free(), *malloc();
 krb5_error_code krb5_timeofday(), krb5_get_default_realm();
  
 krb5_error_code
-process_v4( pkt, client_fulladdr, resp)
+process_v4( pkt, client_fulladdr, is_secondary, resp)
 const krb5_data *pkt;
 const krb5_fulladdr *client_fulladdr;
+int	is_secondary;
 krb5_data **resp;
 {
     struct sockaddr_in client_sockaddr;
@@ -586,7 +587,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
        krb5_free* functions, because the pointers within them point
        to data with other references.  */
     krb5_data search_stg[2];
-    krb5_principal_data search;
+    krb5_principal search;
 
     krb5_db_entry entries;	/* filled in by krb5_db_get_principal() */
     int nprinc;			/* how many found */
@@ -614,21 +615,17 @@ kerb_get_principal(name, inst, principal, maxn, more)
      *     in v5, null instance means the null-component doesn't exist.
      */
 
-    krb5_princ_set_realm_data (&search, local_realm);
-    krb5_princ_set_realm_length (&search, strlen(local_realm));
-    search.data = search_stg;
-    search.type = 0;
-    search_stg[0].data = name;
-    search_stg[0].length = strlen(name);
-    if (inst && *inst) {
-	search_stg[1].data = inst;
-	search_stg[1].length = strlen(inst);
-	search.length = 2;
-      } else
-	search.length = 1;
-    if (retval = krb5_db_get_principal(&search, &entries, &nprinc, &more5)) {
-	more = 0;
-        return( 0);
+
+    retval = krb5_425_conv_principal(name, inst, local_realm, &search);
+    if (retval) {
+	    *more = 0;
+	    return(0);
+    }
+    retval = krb5_db_get_principal(search, &entries, &nprinc, &more5);
+    krb5_free_principal(search);
+    if (retval) {
+	*more = 0;
+        return(0);
     }
     principal->key_low = principal->key_high = 0;
 
