@@ -1,3 +1,8 @@
+Tue Aug  5 18:40:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* version.rc: New file containing the version resource information
+		for MIT releases of the Krb5 software.
+
 Fri Apr 28 11:21:01 1995 Keith Vetter (keithv@fusion.com)
 
 	* makefile: added gss, new subdirectory for gss demo.
