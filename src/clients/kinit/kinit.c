@@ -1117,7 +1117,7 @@ main(argc, argv)
 #endif
     if (!authed_k4)
 	authed_k4 = k4_kinit(&opts, &k4, k5.ctx);
-#ifdef KRB5_KRB4_COMPATH
+#ifdef KRB5_KRB4_COMPAT
     memset(stash_password, 0, sizeof(stash_password));
 #endif
 

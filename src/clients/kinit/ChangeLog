@@ -1,3 +1,8 @@
+2001-12-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kinit.c (main): Fix typo in #ifdef KRB5_KRB4_COMPAT.  Thanks to
+	rbasch@mit.edu
+
 2001-09-24  Mitchell Berger  <mitchb@mit.edu>
 
 	* kinit.M: Correct some typos.  Thanks to Dennis Davis
