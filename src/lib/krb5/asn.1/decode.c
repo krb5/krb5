@@ -60,7 +60,7 @@ free_func free_translation;
     *output = (*translator)(isode_temp, &error);
     pe_free(pe);
     ps_free(ps);
-    free_translation(isode_temp);
+    (*free_translation)(isode_temp);
     return(error);			/* may be error if output
 					   failed above */
 }
