@@ -37,6 +37,9 @@
 #ifndef PepsyCmd
 #define PepsyCmd pepsy
 #endif
+#ifndef IsodeLib
+#define	IsodeLib -lisode
+#endif
 #ifndef ArAddCmd
 #define ArAddCmd ar cruv
 #endif
@@ -76,7 +79,7 @@
 #ifndef PepsyTarget
 #define	PepsyTarget(basename)						@@\
 .SUFFIXES:	.py							@@\
-basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables.c\: basename-asn.py					@@\
+basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables.c: basename-asn.py					@@\
 	@echo '***Ignore the warning message "Warning: Can'\''t find UNIV.ph failed"' @@\
 	$(PEPSY) $(PSYFLAGS) basename-asn.py
 #endif /* PepsyTarget */
