@@ -1,3 +1,8 @@
+2004-02-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Add apputils.
+	(CLEANLIBS): Add libapputils.a.
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5_32.def: Remove exports added on 2003-12-13.  Moved

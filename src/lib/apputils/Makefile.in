@@ -3,10 +3,10 @@ bindir=@bindir@
 datadir=@datadir@
 mydatadir=$(datadir)/apputils
 thisconfigdir=.
-myfulldir=util/apputils
+myfulldir=lib/apputils
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-RELDIR=../util/apputils
+RELDIR=../lib/apputils
 SED = sed
 
 ##DOS##BUILDTOP = ..\..

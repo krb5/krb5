@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib
 mydir=lib
-MY_SUBDIRS=crypto krb5 des425 @KRB4@ kdb gssapi rpc kadm5
+MY_SUBDIRS=crypto krb5 des425 @KRB4@ kdb gssapi rpc kadm5 apputils
 BUILDTOP=$(REL)..
 
 MAC_SUBDIRS = crypto krb5 gssapi
@@ -12,7 +12,7 @@ all-mac::
 
 CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a \
 	libkrb425.a libkadm.a libkrb4.a libcom_err.a libpty.a \
-	libss.a libgssapi.a \
+	libss.a libgssapi.a libapputils.a \
 	libkrb5.so libcrypto.so libkrb4.so libdes425.so
 
 clean-mac:: clean-unix

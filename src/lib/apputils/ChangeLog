@@ -1,0 +1,6 @@
+2004-02-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory.
+	* Makefile.in, configure.in, dummy.c, daemon.c: Moved here from
+	util/apputils.
+

@@ -1,3 +1,7 @@
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Configure lib/apputils, not util/apputils.
+
 2004-02-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_NEED_DAEMON): Don't use AC_REPLACE_FUNCS.

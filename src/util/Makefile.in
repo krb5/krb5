@@ -7,7 +7,7 @@ mydir=util
 ##WIN32### below in the 'all-windows' target anyways, so just hide this.
 ##WIN32##!if 0
 MY_SUBDIRS=$(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
-	profile pty $(MAYBE_DB_@DB_VERSION@) send-pr apputils
+	profile pty $(MAYBE_DB_@DB_VERSION@) send-pr
 ##WIN32##!endif
 BUILDTOP=$(REL)..
 
