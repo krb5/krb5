@@ -1,3 +1,30 @@
+Mon Mar 18 20:31:44 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Added flags to turn on the encryption option.
+
+	* authenc.c (telnet_spin): Implemented the telnet spin function,
+		which works by calling the Scheduler with the tty_lockout
+		flag set.
+
+	* main.c (main): If the -x option is given, set the autologin,
+		wantencryption, and auth_enable_encrypt flag.  They enable
+		authentication, enforcement of the encryption option, and
+		a flag to the auth layer to negotiate authentication with
+		mandatory encryption option.
+
+	* telnet.c (telnet): If the wantencryption flag is set (because
+		the user has given the -x option, then we enforce that
+		encryption must be turned on.  The user will not be able
+		to type to the network stream until encryption is enabled,
+		and if encryption is refused, the client will print an
+		error message.
+		(Scheduler): If the tty_lockout flag is set, then don't
+		process keyboard read events.  This prevents the user from
+		typing over the network until encryption is enabled.
+
+	* utilities.c (printsub): Added print support for the
+		authentication must-encrypt option.
+
 Sun Feb 25 20:32:57 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Check for arpa/nameser.h

@@ -436,12 +436,13 @@ printsub(direction, pointer, length)
 		    fprintf(NetTrace, "(partial suboption??\?)");
 		    break;
 		}
-		fprintf(NetTrace, "%s|%s",
+		fprintf(NetTrace, "%s|%s%s",
 			((pointer[3] & AUTH_WHO_MASK) == AUTH_WHO_CLIENT) ?
 			"CLIENT" : "SERVER",
 			((pointer[3] & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) ?
-			"MUTUAL" : "ONE-WAY");
-
+			"MUTUAL" : "ONE-WAY",
+			((pointer[3] & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON) ?
+			"|ENCRYPT" : "");
 		auth_printsub(&pointer[1], length - 1, buf, sizeof(buf));
 		fprintf(NetTrace, "%s", buf);
 		break;
@@ -458,11 +459,13 @@ printsub(direction, pointer, length)
 			fprintf(NetTrace, "(partial suboption??\?)");
 			break;
 		    }
-		    fprintf(NetTrace, "%s|%s ",
+		    fprintf(NetTrace, "%s|%s%s ",
 			((pointer[i] & AUTH_WHO_MASK) == AUTH_WHO_CLIENT) ?
 							"CLIENT" : "SERVER",
 			((pointer[i] & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) ?
-							"MUTUAL" : "ONE-WAY");
+							"MUTUAL" : "ONE-WAY",
+			((pointer[i] & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON) ?
+							"|ENCRYPT" : "");
 		    ++i;
 		}
 		break;

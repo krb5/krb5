@@ -92,6 +92,7 @@ int
 	askedSGA = 0,	/* We have talked about suppress go ahead */
 #endif	/* defined(TN3270) */
 	telnetport,
+        wantencryption = 0,
 	SYNCHing,	/* we are in TELNET SYNCH mode */
 	flushout,	/* flush output */
 	autoflush = 0,	/* flush output when interrupting? */
@@ -105,6 +106,8 @@ int
 	globalmode;
 
 char *prompt = 0;
+
+int scheduler_lockout_tty = 0;
 
 cc_t escape;
 cc_t rlogin;
@@ -2203,6 +2206,10 @@ Scheduler(block)
     }
 #endif	/* defined(TN3270) && defined(unix) */
 
+    if (scheduler_lockout_tty) {
+	ttyin = ttyout = 0;
+    }
+
     /* Call to system code to process rings */
 
     returnValue = process_rings(netin, netout, netex, ttyin, ttyout, !block);
@@ -2260,15 +2267,17 @@ telnet(user)
     }
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
 #   if !defined(TN3270)
-    if (telnetport) {
 #if	defined(AUTHENTICATION)
-	if (autologin)
-		send_will(TELOPT_AUTHENTICATION, 1);
+    if (autologin)
+	send_will(TELOPT_AUTHENTICATION, 1);
 #endif
 #ifdef	ENCRYPTION
+    if (telnetport || wantencryption) {
 	send_do(TELOPT_ENCRYPT, 1);
 	send_will(TELOPT_ENCRYPT, 1);
+    }
 #endif	/* ENCRYPTION */
+    if (telnetport) {
 	send_do(TELOPT_SGA, 1);
 	send_will(TELOPT_TTYPE, 1);
 	send_will(TELOPT_NAWS, 1);
@@ -2283,6 +2292,46 @@ telnet(user)
 	    tel_enter_binary(eight);
     }
 #   endif /* !defined(TN3270) */
+
+#ifdef ENCRYPTION
+    /*
+     * Note: we assume a tie to the authentication option here.  This
+     * is necessary so that authentication fails, we don't spin
+     * forever. 
+     */
+    if (wantencryption) {
+	extern int auth_has_failed;
+	time_t timeout = time(0) + 60;
+
+	send_do(TELOPT_ENCRYPT, 1);
+	send_will(TELOPT_ENCRYPT, 1);
+	while (1) {
+	    if (my_want_state_is_wont(TELOPT_AUTHENTICATION)) {
+		printf("Server refused to negotiation authentication, which is required\n");
+		printf("for encryption.  Good bye.\n\r");
+		Exit(1);
+	    }
+	    if (auth_has_failed) {
+		printf("Authentication negotation has failed, which is required for\n");
+		printf("encryption.  Good bye.\n\r");
+		Exit(1);
+	    }
+	    if (my_want_state_is_dont(TELOPT_ENCRYPT) ||
+		my_want_state_is_wont(TELOPT_ENCRYPT)) {
+		printf("Server refused to negotiate encryption.  Good bye.\n\r");
+		Exit(1);
+	    }
+	    if (encrypt_is_encrypting())
+		break;
+	    if (time(0) > timeout) {
+		printf("Encryption could not be enabled.  Goodbye.\n\r");
+		Exit(1);
+	    }
+	    telnet_spin();
+	}
+    }
+#endif
+
 
 #   if !defined(TN3270)
     for (;;) {

@@ -121,6 +121,9 @@ main(argc, argv)
 #ifdef	FORWARD
 	extern int forward_flags;
 #endif	/* FORWARD */
+#ifdef ENCRYPTION
+	extern int auth_enable_encrypt;
+#endif /* ENCRYPTION */
 
 	tninit();		/* Clear out things */
 #if	defined(CRAY) && !defined(__STDC__)
@@ -279,6 +282,9 @@ main(argc, argv)
 #ifdef	ENCRYPTION
 			encrypt_auto(1);
 			decrypt_auto(1);
+			wantencryption = 1;
+			autologin = 1;
+			auth_enable_encrypt = 1;
 #else
 			fprintf(stderr,
 			    "%s: Warning: -x ignored, no ENCRYPT support.\n",

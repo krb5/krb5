@@ -137,6 +137,7 @@ extern int
     localchars,		/* we recognize interrupt/quit */
     donelclchars,		/* the user has set "localchars" */
     showoptions,
+    wantencryption,	/* User has requested encryption */
     net,		/* Network file descriptor */
     tin,		/* Terminal input file descriptor */
     tout,		/* Terminal output file descriptor */
