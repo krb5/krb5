@@ -47,12 +47,11 @@
 #define TRUE 1
 #endif
 
-#define void int
-
 #define MAXKEY          80
 #define MAXVALUE        80
 
-static char *strutol();
+static char *strutol PROTOTYPE((char *));
+
 
 #ifndef HAVE_STRDUP
 static char *strdup();
@@ -327,6 +326,7 @@ int fGetKeywordValue( fp, keyword, klen, value, vlen )
 
     } while ( !gotit );
     /*NOTREACHED*/
+    return 0; /* to keep gcc happy */
 }
 
 /*

@@ -1,3 +1,8 @@
+Tue Oct 10 05:03:50 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* kparse.c: Provide prototype for static struol(). Do not define
+ 	void as int (autoconf can handle that). 
+
 2000-10-07  Tom Yu  <tlyu@mit.edu>
 
 	* g_tkt_svc.c (CredIsExpired): Fix logic bug.
