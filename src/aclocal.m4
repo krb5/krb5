@@ -719,8 +719,8 @@ dnl This rule supports the generation of the shared library object files
 dnl
 define(V5_SHARED_LIB_OBJS,[
 if test ${krb5_cv_shlibs_dir}x != x; then
-SHARED_RULE="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$(srcdir)/\$""*.c"
-SHARED_RULE_LOCAL="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""*.c"
+SHARED_RULE="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""<"
+SHARED_RULE_LOCAL="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""<"
 else
 SHARED_RULE=
 SHARED_RULE_LOCAL=
