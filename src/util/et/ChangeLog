@@ -1,3 +1,9 @@
+Mon Aug  7 19:22:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (compile_et): Add $(SHELL) to invocation of
+		config_script, so that the tree can build even after
+		checked into a broken SCCS system.
+
 Thu Jul 13 15:40:56 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* com_err.h: error_message should be const char * (as it is in

@@ -72,7 +72,8 @@ shared:
 #	$(INSTALLPROG) compile_et $(DESTDIR)$(PROGDIR)/compile_et
 
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
-	$(srcdir)/config_script $(srcdir)/compile_et.sh $(AWK) $(SED) > compile_et
+	$(SHELL) $(srcdir)/config_script $(srcdir)/compile_et.sh \
+		$(AWK) $(SED) > compile_et
 	chmod 755 compile_et	
 
 et_c.awk: $(srcdir)/et_c.awk
