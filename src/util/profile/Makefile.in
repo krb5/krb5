@@ -24,6 +24,8 @@ SRCS = $(srcdir)/prof_tree.c \
 
 LIBS = ../et/libcom_err.$(LIBEXT)
 
+install::
+
 all:: all-$(WHAT)
 
 all-max:: all-unix
