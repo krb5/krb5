@@ -12,9 +12,16 @@
    enough room; no overrun.  Largest gap: 43.  (NetBSD now has
    getifaddrs.)
 
-   Solaris 2.7: Return EINVAL if the buffer space is too small for all
+   BSD/OS 4.0.1 (courtesy djm): The returned ifc_len is equal to or
+   less than the supplied ifc_len.  Sometimes the entire buffer is
+   used; sometimes N-1 bytes; occasionally, the buffer must have quite
+   a bit of extra room before the next structure will be added.
+   Largest gap: 39.
+
+   Solaris 7,8: Return EINVAL if the buffer space is too small for all
    the data to be returned, including ifc_len==0.  Solaris is the only
    system I've found so far that actually returns an error.  No gap.
+   However, SIOCGIFNUM may be used to query the number of interfaces.
 
    Linux 2.2.12 (RH 6.1 dist, x86): The buffer is filled in with as
    many entries as will fit, and the size used is returned in ifc_len.
