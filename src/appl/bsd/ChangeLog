@@ -1,3 +1,7 @@
+Sun May 19 15:22:06 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c (destroy_tickets main):  Use a secure context
+
 Thu May  9 00:09:14 1996  Richard Basch  <basch@lehman.com>
 
 	* krlogind.c krshd.c:

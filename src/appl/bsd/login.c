@@ -451,6 +451,7 @@ void k_init (ttyn)
 {
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
+krb5_secure_config_files (kcontext);
     login_get_kconf(kcontext);
 
     /* Set up the credential cache environment variable */
@@ -970,7 +971,7 @@ destroy_tickets()
 
 	if (login_krb5_get_tickets) {
 	krb5_init_context(&c);
-	
+	krb5_secure_config_files (c);
 	if(!krb5_cc_default(c, &cache))
 		krb5_cc_destroy (c, cache);
 	}
