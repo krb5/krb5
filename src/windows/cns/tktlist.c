@@ -28,7 +28,6 @@
 #ifdef KRB5
 	#define	NEED_SOCKETS
 	#include "krb5.h"
-	#include "krbini.h"
     #include "com_err.h"
 
 	#define DEFAULT_TKT_LIFE 120
@@ -135,10 +134,11 @@ ticket_init_list (
 			strcpy(buf, " ");
 			strcat(buf, short_date(c.issue_date - kwin_get_epoch()));
 			expiration = c.issue_date - kwin_get_epoch() + (long) c.lifetime * 5L * 60L;
-			strcat(buf, "  ");
+            strcat (buf, "      ");
 			strcat(buf, short_date(expiration));
+            strcat (buf, "      ");
 			l = strlen(buf);
-	  		sprintf(&buf[l], "  %s%s%s%s%s (%d)",
+	  		sprintf(&buf[l], "%s%s%s%s%s (%d)",
 		 		c.service, (c.instance[0] ? "." : ""), c.instance,
 		 		(c.realm[0] ? "@" : ""), c.realm, c.kvno);
 			l = strlen(buf);
@@ -169,14 +169,10 @@ ticket_init_list (
         flags = 0;
         if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
             if (code != KRB5_FCC_NOFILE) {
-                //com_err (NULL, code,
-                //    "while setting cache flags (ticket cache %s)",
-                //    krb5_cc_get_name(k5_context, k5_ccache));
                 return -1;
             }
         } else {
             if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
-                //com_err (NULL, code, "while starting to retrieve tickets");
                 return -1;
             }
 
@@ -188,9 +184,9 @@ ticket_init_list (
     			ncred++;
                 strcpy (buf, "  ");
                 strcat (buf, short_date (c.times.starttime - kwin_get_epoch()));
-                strcat (buf, "  ");
+                strcat (buf, "      ");
                 strcat (buf, short_date (c.times.endtime - kwin_get_epoch()));
-                strcat (buf, "  ");
+                strcat (buf, "      ");
 
                 /* Add ticket service name and realm */
                 code = krb5_unparse_name (k5_context, c.server, &sname);
@@ -223,16 +219,13 @@ ticket_init_list (
 
             if (code == KRB5_CC_END) {               /* End of ccache */
                 if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
-                    //com_err(NULL, code, "while finishing ticket retrieval");
                     return -1;
                 }
                 flags = KRB5_TC_OPENCLOSE;          /* turns on OPENCLOSE mode */
                 if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
-                    //com_err(NULL, code, "while closing ccache");
                     return -1;
                 }
             } else {
-                //com_err(NULL, code, "while retrieving a ticket");
                 return -1;
             }
         }
