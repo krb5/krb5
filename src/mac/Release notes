@@ -88,3 +88,17 @@ Changes in 1.1a3:
  added custom icon, vend, CCIª and hfdr resources
  renamed glue files
  updated readme
+ 
+2.0.1b1
+ Microseconds support added
+ Microseconds fixed on machines that don't have hardware support (Chas Williams)
+ Fixed a bunch of missing krb5_auth_con_* exports
+ Added NRL config file name (Chas Williams)
+ Fixed profile layer to handle missing files correctly when looking for multiple ones
+
+2.1d1
+ updated to sockets library
+ 
+2.1d2
+ fixed oodles for sockets errno problems
+ fixed exports to include krb5_auth_con_* and krb5_rc_*
