@@ -1,3 +1,14 @@
+Sun Nov 12 05:26:08 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* g_cnffile.c (krb__get_srvtabname): new function, looks up
+	[libdefaults]krb4_srvtab for use where KEYFILE used to be.
+	* g_cnffile.c (krb__v5_get_file): new function, looks up argument
+	in [libdefaults] and tries to open it as a filename. Returns
+	filehandle (or NULL, if fopen failed.)
+	(krb__get_cnffile, krb__get_realmsfile): use krb__v5_get_file to
+	look up "krb4_config" or "krb4_realms" respectively. Also add
+	$KRB_REALMS override for realms file.
+
 Mon Oct  2 11:12:05 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in (V5_MAKE_SHARED_LIB): Change rule to install
