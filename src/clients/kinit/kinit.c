@@ -129,7 +129,7 @@ main(argc, argv)
 	exit(1);
     }
 
-    memset(&my_creds, 0, sizeof(my_creds));
+    memset((char *)&my_creds, 0, sizeof(my_creds));
     
     my_creds.client = me;
     my_creds.server = server;
