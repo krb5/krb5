@@ -57,7 +57,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_create [-d dbpathname] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k keytype] [-M mkeyname]\n");
+    fprintf(stderr, "\t [-D depth] [-k enctype] [-M mkeyname]\n");
 
     exit(status);
 }
@@ -101,7 +101,7 @@ char *argv[];
 
     krb5_error_code retval;
     char *dbname = 0;
-    int keytypedone = 0;
+    int enctypedone = 0;
     register krb5_cryptosystem_entry *csentry;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     int num_to_create;
@@ -143,8 +143,8 @@ char *argv[];
 	    cur_realm = optarg;
 	    break;
 	case 'k':
-	    master_keyblock.keytype = atoi(optarg);
-	    keytypedone++;
+	    master_keyblock.enctype = atoi(optarg);
+	    enctypedone++;
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
@@ -168,16 +168,16 @@ char *argv[];
 	exit(1);
     }
 
-    if (!keytypedone)
-	master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
+    if (!enctypedone)
+	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
-    if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-		"while setting up keytype %d", master_keyblock.keytype);
+    if (!valid_enctype(master_keyblock.enctype)) {
+	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
+		"while setting up enctype %d", master_keyblock.enctype);
 	exit(1);
     }
 
-    krb5_use_keytype(test_context, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(test_context, &master_encblock, master_keyblock.enctype);
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)
@@ -281,7 +281,7 @@ add_princ(context, str_newprinc)
     	pwd.length = strlen(princ_name);
     	pwd.data = princ_name;  /* must be able to regenerate */
     	if (retval = krb5_string_to_key(context, &master_encblock, 
-				        master_keyblock.keytype, 
+				        master_keyblock.enctype, 
 				        &key, &pwd, &salt)) {
 	    com_err(progname,retval,"while converting password to key for '%s'",
 		    princ_name);
@@ -361,7 +361,7 @@ char *dbname;
 	    return(1);
 	}
 	if (retval = krb5_string_to_key(test_context, &master_encblock, 
-				    master_keyblock.keytype, &master_keyblock, 
+				    master_keyblock.enctype, &master_keyblock, 
 				    &pwd, &scratch)) {
 	    com_err(pname, retval,
 		    "while transforming master key from password");
