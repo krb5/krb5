@@ -50,6 +50,8 @@ if(class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
+time_t gmt_mktime PROTOTYPE((struct tm *));
+
 asn1_error_code INTERFACE asn1_decode_integer(buf, val)
      asn1buf * buf;
      long * val;
@@ -172,7 +174,6 @@ asn1_error_code INTERFACE asn1_decode_generaltime(buf, val)
   char *s;
   struct tm ts;
   time_t t;
-  time_t gmt_mktime PROTOTYPE((struct tm *));
 
   tag(ASN1_GENERALTIME);
 

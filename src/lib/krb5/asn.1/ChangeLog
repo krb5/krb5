@@ -1,3 +1,9 @@
+Sat Mar 25 14:12:31 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* asn1_decode.c: move declaration of gmt_mktime() outside of
+	asn1_decode_generaltime() so that compilers like Ultrix cc that
+	don't support prototypes within function bodies don't break
+
 Fri Mar 17 19:05:22 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in:  Remove redundant definitions from config/pre.in
