@@ -310,6 +310,10 @@ char 	*progname;
 
 static	int Pfd;
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 #if (defined(_AIX) && defined(i386)) || defined(ibm032) || (defined(vax) && !defined(ultrix)) || (defined(SunOS) && SunOS > 40) || defined(solaris20)
 #define VHANG_FIRST
 #endif

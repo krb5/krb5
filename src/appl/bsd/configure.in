@@ -75,6 +75,11 @@ AC_CHECK_FUNCS(isatty inet_aton gettosbyname killpg initgroups setpriority setre
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h krb4-proto.h sys/ioctl_compat.h paths.h arpa/nameser.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
+dnl
+KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],daemon,1)
+dnl
 KRB5_SIGTYPE
 CHECK_SIGNALS
 CHECK_SETJMP
