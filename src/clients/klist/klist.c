@@ -652,7 +652,7 @@ show_credential(cred)
 void one_addr(a)
     krb5_address *a;
 {
-    struct hostent *h;
+    struct hostent *h = 0;
 
     if ((a->addrtype == ADDRTYPE_INET && a->length == 4)
 #ifdef AF_INET6
@@ -674,7 +674,7 @@ void one_addr(a)
 	if (no_resolve || !h) {
 #ifdef HAVE_INET_NTOP
 	    char buf[46];
-	    const char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
+	    const char *name = inet_ntop(af, a->contents, buf, sizeof(buf));
 	    if (name) {
 		printf ("%s", name);
 		return;
@@ -686,6 +686,8 @@ void one_addr(a)
 		return;
 	    }
 #endif
+	    printf("unprintable address (type %d)", a->addrtype);
+	    return;
 	}
     }
     printf("unknown addr type %d", a->addrtype);
