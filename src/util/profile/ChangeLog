@@ -1,5 +1,9 @@
 2003-01-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* prof_file.c (make_hard_link): New function.
+	(profile_flush_file_data): Use it to attempt a safe profile file
+	replacement.
+
 	* prof_parse.c (profile_parse_file)
 	[PROFILE_SUPPORTS_FOREIGN_NEWLINES]: Look for \r and treat it as a
 	line break.

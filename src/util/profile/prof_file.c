@@ -217,6 +217,16 @@ errcode_t profile_update_file_data(prf_data_t data)
 	return 0;
 }
 
+static int
+make_hard_link(const char *oldpath, const char *newpath)
+{
+#ifdef _WIN32
+    return -1;
+#else
+    return link(oldpath, newpath);
+#endif
+}
+
 errcode_t profile_flush_file_data(data)
 	prf_data_t data;
 {
@@ -279,14 +289,31 @@ errcode_t profile_flush_file_data(data)
 #endif
 
 	unlink(old_file);
-	if (rename(data->filespec, old_file)) {
+	if (make_hard_link(data->filespec, old_file) == 0) {
+	    /* Okay, got the hard link.  Yay.  Now we've got our
+	       backup version, so just put the new version in
+	       place.  */
+	    if (rename(new_file, data->filespec)) {
+		/* Weird, the rename didn't work.  But the old version
+		   should still be in place, so no special cleanup is
+		   needed.  */
 		retval = errno;
 		goto errout;
-	}
-	if (rename(new_file, data->filespec)) {
+	    }
+	} else {
+	    /* Couldn't make the hard link, so there's going to be a
+	       small window where data->filespec does not refer to
+	       either version.  */
+	    sync();
+	    if (rename(data->filespec, old_file)) {
+		retval = errno;
+		goto errout;
+	    }
+	    if (rename(new_file, data->filespec)) {
 		retval = errno;
 		rename(old_file, data->filespec); /* back out... */
 		goto errout;
+	    }
 	}
 
 	data->flags = 0;
