@@ -15,6 +15,7 @@ OBJS= \
 	ccdefname.o	\
 	free_krbhs.o	\
 	free_hstrl.o	\
+	full_ipadr.o	\
 	get_krbhst.o	\
 	hst_realm.o	\
 	ktdefname.o	\
@@ -25,6 +26,7 @@ OBJS= \
 	net_read.o	\
 	net_write.o	\
 	osconfig.o	\
+	port2ip.o	\
 	rnd_confoun.o	\
 	read_pwd.o	\
 	sendto_kdc.o	\
@@ -38,6 +40,7 @@ SRCS= \
 	ccdefname.c	\
 	free_krbhs.c	\
 	free_hstrl.c	\
+	full_ipadr.c	\
 	get_krbhst.c	\
 	hst_realm.c	\
 	ktdefname.c	\
@@ -49,6 +52,7 @@ SRCS= \
 	net_write.c	\
 	osconfig.c	\
 	read_pwd.c	\
+	port2ip.c	\
 	rnd_confoun.c	\
 	sendto_kdc.c	\
 	timeofday.c	\
