@@ -182,9 +182,8 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context, krb5_creds *
     memset(pcred->tickets, 0, sizeof(krb5_ticket *) * (ncred +1));
 
     /* Get keyblock */
-    if ((keyblock = auth_context->local_subkey) == NULL) 
-	if ((keyblock = auth_context->remote_subkey) == NULL) 
-	    keyblock = auth_context->keyblock;
+    if ((keyblock = auth_context->send_subkey) == NULL) 
+	keyblock = auth_context->keyblock;
 
     /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&

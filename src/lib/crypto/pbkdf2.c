@@ -158,6 +158,7 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 {
     int l, r, i;
     char *utmp1, *utmp2;
+    char utmp3[20];		/* XXX length shouldn't be hardcoded! */
 
     if (output->length == 0 || hlen == 0)
 	abort();
@@ -169,7 +170,13 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
     r = output->length - (l - 1) * hlen;
 
     utmp1 = /*output + dklen; */ malloc(hlen);
+    if (utmp1 == NULL)
+	return errno;
     utmp2 = /*utmp1 + hlen; */ malloc(salt->length + 4 + hlen);
+    if (utmp2 == NULL) {
+	free(utmp1);
+	return errno;
+    }
 
     /* Step 3.  */
     for (i = 1; i <= l; i++) {
@@ -177,11 +184,21 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 	int j;
 #endif
 	krb5_error_code err;
+	char *out;
 
-	err = F(output->data + (i-1) * hlen, utmp1, utmp2, prf, hlen,
-		pass, salt, count, i);
-	if (err)
+	if (i == l)
+	    out = utmp3;
+	else
+	    out = output->data + (i-1) * hlen;
+	err = F(out, utmp1, utmp2, prf, hlen, pass, salt, count, i);
+	if (err) {
+	    free(utmp1);
+	    free(utmp2);
 	    return err;
+	}
+	if (i == l)
+	    memcpy(output->data + (i-1) * hlen, utmp3,
+		   output->length - (i-1) * hlen);
 
 #if 0
 	printf("after F(%d), @%p:\n", i, output->data);
@@ -190,6 +207,8 @@ krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 	printf ("\n");
 #endif
     }
+    free(utmp1);
+    free(utmp2);
     return 0;
 }
 
@@ -199,7 +218,10 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     char tmp[40];
     size_t blocksize, hashsize;
     krb5_error_code err;
+    krb5_keyblock k;
 
+    k = *key;
+    key = &k;
     if (debug_hmac)
 	printk(" test key", key);
     h->block_size(&blocksize);
@@ -235,8 +257,6 @@ foo(krb5_keyblock *pass, krb5_data *salt, krb5_data *out)
 
     memset(out->data, 0, out->length);
     err = hmac1 (&krb5int_hash_sha1, pass, salt, out);
-    if (err)
-	com_err("foo", err, "computing hmac");
     return err;
 }
 

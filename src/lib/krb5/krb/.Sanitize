@@ -37,6 +37,7 @@ chk_trans.c
 cleanup.h
 configure
 configure.in
+conv_creds.c
 conv_princ.c
 copy_addrs.c
 copy_athctr.c
@@ -60,8 +61,6 @@ gen_seqnum.c
 gen_subkey.c
 get_creds.c
 get_in_tkt.c
-in_tkt_ktb.c
-in_tkt_pwd.c
 in_tkt_sky.c
 init_ctx.c
 int-proto.h
@@ -106,6 +105,7 @@ t_ref_kerb.out
 t_ser.c
 tgtname.c
 unparse.c
+v4lifetime.c
 valid_times.c
 walk_rtree.c
 

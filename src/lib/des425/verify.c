@@ -37,8 +37,6 @@
 #include "des_int.h"
 #include "des.h"
 
-extern char *errmsg();
-extern int errno;
 char *progname;
 int nflag = 2;
 int vflag;

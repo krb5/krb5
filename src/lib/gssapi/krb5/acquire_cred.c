@@ -92,7 +92,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
 	free(krb5_gss_keytab);
 
     len = strlen(keytab);
-    krb5_gss_keytab = malloc(len);
+    krb5_gss_keytab = malloc(len + 1);
     if (krb5_gss_keytab == NULL)
 	return GSS_S_FAILURE;
 
@@ -190,8 +190,13 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    cred->ccache = NULL;
 
-   /* open the default credential cache */
+   /* load the GSS ccache name into the kg_context */
+   
+   if (GSS_ERROR(kg_sync_ccache_name(minor_status)))
+       return(GSS_S_FAILURE);
 
+   /* open the default credential cache */
+   
    if ((code = krb5int_cc_default(context, &ccache))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
@@ -201,6 +206,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    flags = 0;		/* turns off OPENCLOSE mode */
    if ((code = krb5_cc_set_flags(context, ccache, flags))) {
+      (void)krb5_cc_close(context, ccache);
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }

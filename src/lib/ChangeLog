@@ -1,3 +1,65 @@
+2004-03-31  Jeffrey Altman <jaltman@mit.edu>
+
+    * Makefile.in: Delay Load the ADVAPI32.DLL and SECUR32.DLL libraries
+      to enable the KRB5_32.DLL to load on Windows 9x systems which do
+      not support the LSA Kerberos functionality.
+
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5_32.def: Remove exports added on 2003-12-13.  Moved
+          to krb5int_accessor
+
+2003-12-13  Jeffrey Altman <jaltman@mit.edu>
+   
+        * krb4_32.def: Remove exports from KfM not yet compiled in KfW
+            krb_ad_tkt, krb_pw_tkt, kuserok, tkt_string, FSp_xxx
+        
+        * krb5_32.def: Add exports of private functions necessary for 
+            building new gssapi32.dll:
+              krb5int_c_mandatory_cksumtype   ; PRIVATE GSSAPI k5-int.h
+              krb5_ser_pack_int64             ; PRIVATE GSSAPI k5-int.h
+              krb5_ser_unpack_int64           ; PRIVATE GSSAPI k5-int.h
+
+2003-12-11  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: Add secur32.lib to libraries necessary to build 
+          krb5_32.dll.  Necessary to support the new MSLSA ccache type.
+
+2003-12-08  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb4_32.def: Add exports for functions exported by KfM
+
+2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5_32.def: Export krb5_principal2salt.
+
+2003-07-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * gssapi32.def: Export GSS OID constants
+
+2003-07-09  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5_32.def: Export krb5_get_permitted_enctypes and 
+        krb5_set_real_time for Samba.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_32.def: Add krb5_524_convert_creds.
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_32.def: Add krb5_c_string_to_key_with_params
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_32.def: Add krb5_auth_con_getrecvsubkey,
+	krb5_auth_con_getsendsubkey, krb5_auth_con_setrecvsubkey,
+	krb5_auth_con_setsendsubkey.
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_32.def: Add krb5_set_password and krb5_set_password_using_ccache
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (K4LIBS): Revert previous.
