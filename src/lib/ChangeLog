@@ -1,3 +1,7 @@
+Mon Oct  3 23:38:03 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Don't build the krb425 library.  It is deprecated.
+
 Fri Sep 30 16:35:16 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Also delete libkdb5.a on make clean.
