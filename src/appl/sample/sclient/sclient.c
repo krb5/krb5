@@ -170,7 +170,7 @@ char *argv[];
     }
     if (retval == KRB5_SENDAUTH_REJECTED) {
 	/* got an error */
-	printf("sendauth rejected, error reply is:\n\t\"%*s\"",
+	printf("sendauth rejected, error reply is:\n\t\"%*s\"\n",
 	       err_ret->text.length, err_ret->text.data);
     } else if (rep_ret) {
 	/* got a reply */
