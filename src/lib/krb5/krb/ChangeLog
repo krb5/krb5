@@ -1,3 +1,7 @@
+Tue Nov  5 08:09:23 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* serialize.c (krb5_register_serializer): Do not free a NULL pointer. 
+
 Thu Oct 31 13:48:14 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_ctx.c (krb5_init_context): Make it more obvious that
