@@ -1,3 +1,7 @@
+2004-12-21  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.
+
 2004-12-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
