@@ -22,8 +22,13 @@
 # or implied warranty.
 # 
 # 
-#define IHaveSubdirs
-#define PassCDebugFlags
 
-SUBDIRS=sclient sserver
-MakeSubdirs($(SUBDIRS))
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+           SRCS = sclient.o sserver.o
+
+SimpleTestProgramTarget(sclient)
+SimpleTestProgramTarget(sserver)
+
+DependTarget()
+LintTarget()
