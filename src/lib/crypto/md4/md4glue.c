@@ -41,7 +41,7 @@ krb5_checksum *outcksum;
        "close out" the MD4 algorithm */
     MDupdate(&working, input, i*8);
 
-    outcksum->checksum_type = RSA_MD4_CKSUMTYPE;
+    outcksum->checksum_type = CKSUMTYPE_RSA_MD4;
     outcksum->length = RSA_MD4_CKSUM_LENGTH;
 
     /* the output code here is adapted from MDprint */
