@@ -57,6 +57,7 @@
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/adb.h>
+#include <krb5/adm_proto.h>
 #include "kdb5_util.h"
 
 enum ap_op {

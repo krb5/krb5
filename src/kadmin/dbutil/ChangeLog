@@ -1,3 +1,8 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_create.c: Include <krb5/adm_proto.h> for
+	krb5_keysalt_iterate() prototype.
+
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* kdb5_create.c (kdb5_create): Fixed typo in com_err message.
