@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <ctype.h>
 
 char *g_canonicalize_host(hostname)
      char *hostname;
