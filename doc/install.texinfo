@@ -244,6 +244,12 @@ hostname-by-hostname basis.  Since greater specificity takes precedence,
 you would do this by specifying the mappings for a given domain or
 subdomain and listing the exceptions.
 
+The @value{PRODUCT} System Administrator's Guide contains a thorough
+description of the parts of the @code{krb5.conf}file and what may be
+specified in each.  A sample @code{krb5.conf} file appears in
+@ref{krb5.conf}.  You should be able to use this file, substituting the
+relevant information for your Kerberos instllation for the samples.
+
 @node Ports for the KDC and Admin Services, Slave KDCs, Mapping Hostnames onto Kerberos Realms, Realm Configuration Decisions
 @section Ports for the KDC and Admin Services
 
@@ -1355,7 +1361,8 @@ terminology.
 
 @node Bug Reports for Kerberos V5, Files, Upgrading Existing Kerberos V5 Installations, Top
 @chapter Bug Reports for @value{PRODUCT}
-@include bug-report.texinfo
+
+@include send-pr.texinfo
 
 @node Files,  , Bug Reports for Kerberos V5, Top
 @appendix Files

@@ -1,5 +1,8 @@
 Wed Nov 27 18:27:18 1996  Jeffrey C. G. Bigler  <jcb@viola.cygnus.com>
 
+	* Makefile: Added send-pr.texinfo to ADMIN_INCLUDES and
+	INSTALL_INCLUDES.
+
 	* admin.texinfo: Added chapter on config files.  Changed bug
 	reporting section to include send-pr file.
 
