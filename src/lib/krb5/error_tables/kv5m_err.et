@@ -79,5 +79,6 @@ error_code KV5M_SAM_RESPONSE,	"Bad magic number for krb5_sam_response"
 error_code KV5M_PREDICTED_SAM_RESPONSE,	"Bad magic number for krb5_predicted_sam_response"
 error_code KV5M_PASSWD_PHRASE_ELEMENT,	"Bad magic number for passwd_phrase_element"
 error_code KV5M_GSS_OID,	"Bad magic number for GSSAPI OID"
+error_code KV5M_GSS_QUEUE,	"Bad magic number for GSSAPI QUEUE"
 
 end

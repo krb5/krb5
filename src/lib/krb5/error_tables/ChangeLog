@@ -1,8 +1,8 @@
 Fri Oct 18 17:49:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
-	* kv5m_err.et: Add magic code for GSS OID, which is needed for the
-		serialization routines.
-
+	* kv5m_err.et: Add magic code for GSSAPI OID and GSSAPI QUEUE,
+ 		which are needed for the serialization routines.
+		
 Wed Jul 24 16:03:52 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5_err.et: Added new error code KRB5_KT_NAME_TOOLONG
