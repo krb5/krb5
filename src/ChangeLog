@@ -1,3 +1,10 @@
+2004-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_GCC_ATTRS): On AIX 4, mark the destructor
+	attribute as always not working, until we can construct a good
+	test for the order of destructors in the multiple shared library
+	case.
+
 2004-05-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Generate a makefile in util/support.  Include

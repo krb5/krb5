@@ -1602,6 +1602,19 @@ void foo2() { unlink("conftest.2"); }
 int main () { return 0; }],
 [test -r conftest.1 || a=yes
 test -r conftest.2 || b=yes], , AC_MSG_ERROR(Cannot test for constructor/destructor support when cross compiling))
+case $krb5_cv_host in
+*-*-aix4.*)
+	# Under AIX 4.3.3, at least, shared library destructor functions
+	# appear to get executed in reverse link order (right to left),
+	# so that a library's destructor function may run after that of
+	# libraries it depends on, and may still have to access in the
+	# destructor.
+	#
+	# That counts as "not working", for me, but it's a much more
+	# complicated test case to set up.
+	b=no
+	;;
+esac
 krb5_cv_attr_constructor_destructor="$a,$b"
 ])
 # Okay, krb5_cv_... should be set now.
