@@ -111,11 +111,25 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     in_creds.keyblock.enctype = 0;
 
+    /*
+     * Initial iteration is necessary to catch a non-matching
+     * credential prior to looping through the GSSAPI-supported
+     * enctypes, since an enctype mismatch in the loop below will
+     * return KRB5_CC_NOTFOUND rather than one of the other error
+     * codes.
+     */
+    code = krb5_get_credentials(context, 0, cred->ccache,
+				&in_creds, out_creds);
+    if (code)
+	goto cleanup;
+    krb5_free_creds(context, *out_creds);
+    *out_creds = NULL;
     for (i = 0; enctypes[i]; i++) {
 	in_creds.keyblock.enctype = enctypes[i];
 	code = krb5_get_credentials(context, 0, cred->ccache, 
 				    &in_creds, out_creds);
-	if (code != KRB5_CC_NOT_KTYPE && code != KRB5KDC_ERR_ETYPE_NOSUPP)
+	if (code != KRB5_CC_NOT_KTYPE && code != KRB5_CC_NOTFOUND
+	    && code != KRB5KDC_ERR_ETYPE_NOSUPP)
 	    break;
     }
     if (enctypes[i] == 0) {

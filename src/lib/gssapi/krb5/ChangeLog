@@ -1,3 +1,10 @@
+2000-06-27  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): Add initial iteration of
+	krb5_get_credentials in order to differentiate between an actual
+	missing credential and merely a bad match based on enctype.  This
+	was causing problems with kadmin.
+
 2000-06-09  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (get_credentials): The KDC as well as the
