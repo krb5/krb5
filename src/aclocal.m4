@@ -1274,7 +1274,7 @@ mips-*-netbsd*)
 	SHLIBSEXT='.$(LIBMAJOR).dylib'
 	SHLIB_EXPFLAGS='$(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	SHLIBEXT=.dylib
-	LDCOMBINE='$(CC) $(LDFLAGS) -undefined warning -dynamiclib -dylib_compatibility_version=0.1 -dylib_current_version=$(LIBMAJOR).$(LIBMINOR)'
+	LDCOMBINE='$(CC) $(LDFLAGS) -undefined warning -dynamiclib -compatibility_version $(LIBMAJOR) -current_version $(LIBMAJOR).$(LIBMINOR) -install_name "$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBVEXT)"'
 	CC_LINK_SHARED='$(CC) $(LDFLAGS) $(PROG_LIBPATH) -dynamic'
 	CC_LINK_STATIC='$(CC) $(LDFLAGS) $(PROG_LIBPATH)'
 	RUN_ENV='DYLD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export DYLD_LIBRARY_PATH;'

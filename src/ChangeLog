@@ -3,6 +3,10 @@
 	* config/pre.in: Set KRB5_INCDIR from @includedir@ so configure
 	--includedir=foo works.
 
+	* aclocal.m4 (Darwin): Settle on LIBMAJOR as compat
+	version. Change "-dylib_foo=X" options to "-foo X", which actually
+	work. Specify -install_name path.
+
 2000-05-04  Wilfredo Sanchez <tritan@mit.edu>
 
 	* Makefile.in: kadmin server binaries install into SERVER_BINDIR
