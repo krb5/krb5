@@ -1,3 +1,8 @@
+Wed Jan 10 21:26:20 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kcmd.c: Removed extern global of krb5_kdc_req_sumtype, which
+		wasn't being used anyway.
+
 Tue Jan  9 22:51:16 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* forward.c (get_for_creds): Removed no longer used function.

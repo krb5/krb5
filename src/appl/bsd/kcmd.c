@@ -64,7 +64,6 @@
 #define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 
-extern krb5_cksumtype krb5_kdc_req_sumtype;
 extern krb5_context bsd_context;
 
 krb5_enctype bsd_ktypes[] = { ENCTYPE_DES_CBC_CRC , 0 };
