@@ -1,3 +1,9 @@
+2004-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): On HP-UX, define some
+	preprocessor symbols that -pthread defines, but don't use -pthread
+	so we can avoid forcing linking against pthread libraries.
+
 2004-09-24  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Update to get RELTAIL from patchlevel.h as well.

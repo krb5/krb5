@@ -159,6 +159,12 @@ if test "$enable_thread_support" = yes; then
       PTHREAD_LIBS=
       PTHREAD_CFLAGS=
       ;;
+    hpux*)
+      # These are the flags that "gcc -pthread" adds.  But we don't
+      # want "-pthread" because that has link-time effects, and we
+      # don't exclude CFLAGS when linking.  *sigh*
+      CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
+      ;;
   esac
 fi
 dnl We want to know where these routines live, so on systems with weak
