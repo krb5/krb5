@@ -62,6 +62,7 @@ krb5_fcc_generate_new (id)
 {
      krb5_ccache lid;
      int ret;
+     krb5_error_code    retcode = 0;
      char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
 					    NUL */
      
@@ -82,6 +83,11 @@ krb5_fcc_generate_new (id)
 	  return KRB5_CC_NOMEM;
      }
 
+     /*
+      * The file is initially closed at the end of this call...
+      */
+     ((krb5_fcc_data *) lid->data)->fd = -1;
+
      ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
@@ -98,9 +104,10 @@ krb5_fcc_generate_new (id)
      /* Make sure the file name is reserved */
      ret = open(((krb5_fcc_data *) lid->data)->filename,
 		O_CREAT | O_EXCL | O_WRONLY, 0);
-     if (ret == -1)
-	  return krb5_fcc_interpret(errno);
-     else {
+     if (ret == -1) {
+	  retcode = krb5_fcc_interpret(errno);
+          goto err_out;
+     } else {
 	  krb5_int16 fcc_fvno = htons(KRB5_FCC_FVNO);
 	  int errsave, cnt;
 
@@ -111,16 +118,23 @@ krb5_fcc_generate_new (id)
 	      errsave = errno;
 	      (void) close(ret);
 	      (void) unlink(((krb5_fcc_data *) lid->data)->filename);
-	      return (cnt == -1) ? krb5_fcc_interpret(errsave) : KRB5_CC_IO;
+	      retcode = (cnt == -1) ? krb5_fcc_interpret(errsave) : KRB5_CC_IO;
+              goto err_out;
 	  }
 	  if (close(ret) == -1) {
 	      errsave = errno;
 	      (void) unlink(((krb5_fcc_data *) lid->data)->filename);
-	      return krb5_fcc_interpret(errsave);
+	      retcode = krb5_fcc_interpret(errsave);
+              goto err_out;
 	  }
 
-	  close(ret);
 	  *id = lid;
 	  return KRB5_OK;
      }
+
+err_out:
+     xfree(((krb5_fcc_data *) lid->data)->filename);
+     xfree(((krb5_fcc_data *) lid->data));
+     xfree(lid);
+     return retcode;
 }
