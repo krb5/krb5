@@ -24,6 +24,8 @@
 
 void KerberosProfileInit (CFStringRef inBundleID)
 {
+#if USE_HARDCODED_FALLBACK_ERROR_TABLES
 	/* Initialize the error tables */
 	add_error_table(&et_prof_error_table);
+#endif
 }

@@ -29,6 +29,8 @@ void Kerberos5Init (CFStringRef inBundleID)
 {
 	krb5int_initialize_library ();
     cryptoint_initialize_library ();
+#if USE_HARDCODED_FALLBACK_ERROR_TABLES
     add_error_table (&et_k524_error_table);
+#endif
 }
 
