@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.3
+		  Kerberos Version 5, Release 1.2.4
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.3.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.4.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.3.tar.gz
+	gtar zxpf krb5-1.2.4.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.3.tar.gz | tar xpf -
+	gzcat krb5-1.2.4.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.3/src
-and the documentation into DIST/krb5-1.2.3/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.4/src
+and the documentation into DIST/krb5-1.2.4/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,77 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.4
+----------------------------------------------
+
+Notes:
+
+* Like the 1.2.3 release, this is a patch release.  One critical login
+  problem is fixed, and an problem with interoperability with
+  Microsoft software is worked around.
+
+Major Changes:
+
+* The one-character bug introduced into the login.krb5 program that
+  caused 8-character usernames to be rejected in some circumstances
+  has been fixed.
+
+* The handling of key version numbers has been modified in places.
+  The current formats for keytab and srvtab files, and parts of the
+  remote kadmin protocol, handle key version numbers as 8-bit
+  quantities, when in fact they are 32-bit quantities.
+
+  * In the keytab and srvtab support for krb5, searching for the
+    "highest numbered" key version now has some heuristics to deal
+    with the 8-bit kvno wrapping from 255 to 0 to 1....  If a kvno
+    greater than 240 is found, the kvno values are assumed to range
+    from 128 to 383 (127+256).  This should handle cases like storing
+    kvno values 255 and 256 in the file.
+
+  * In the keytab and srvtab support for krb5, when looking for a key
+    with a specific version number, the low 8 bits of the requested
+    kvno are compared against the value stored in the file.
+
+  * The "ktutil" program also has a new heuristic for choosing the
+    "highest numbered" key in a keytab to be written out into a krb4
+    srvtab file.
+
+  These heuristics all assume that key version numbers will be
+  assigned sequentially, and that there will not be a large set of key
+  version numbers in use at one time for any given principal in a
+  keytab file.
+
+  These changes were prompted by the discovery by Microsoft (while
+  trying to write tools to generate MIT-style keytab files) that we
+  could not store arbitrary 32-bit version numbers for keys.
+
+Minor Changes:
+
+* A few compilation problems have been fixed.
+
+* New test cases have been added to the test suite to exercise some of
+  the new changes.
+
+Known Bugs:
+
+* Non-sequential key version numbering will confuse the new kvno
+  handling heuristics.
+
+* Long-standing but newly recognized:
+
+  * The remote kadmin protocol will produce incorrect results when key
+    version numbers greater than 255 are being retrieved or stored.
+    The kadmin.local program does not suffer from this problem.
+
+  * We do not support storing multiple key versions for a principal in
+    a srvtab file.
+
+  * We do not support acquiring krb4 tickets using a srvtab or keytab
+    file without acquiring krb5 tickets at the same time (i.e., the
+    old krb4 "ksrvtgt" program).
+
+* Most other bugs from 1.2.3.
 
 Notes, Major Changes, and Known Bugs for 1.2.3
 ----------------------------------------------
