@@ -81,7 +81,7 @@ main(argc, argv)
 	    argc--; argv++;
 	}
 
-	if (argc > 1) {
+	if (argc >= 1) {
 		strncpy(myname, *argv, MAXHOSTNAMELEN);
 	} else {
 		if(gethostname(myname, MAXHOSTNAMELEN)) {

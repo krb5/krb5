@@ -1,3 +1,7 @@
+Wed Sep 13 13:57:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* resolve.c (main): Fix fencepost error; use argv[1] to test for a
+		specfied host if argc is >= 1, not just > 1.
 
 Wed Jul 12 12:32:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add LD_LIBRARY_PATH in case we were linked with shared
