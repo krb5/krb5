@@ -517,6 +517,82 @@ typedef struct _krb5_etype_info_entry {
 typedef krb5_etype_info_entry ** krb5_etype_info;
 
 /*
+ * a sam_challenge is returned for alternate preauth 
+ */
+/*
+          SAMFlags ::= BIT STRING {
+              use-sad-as-key[0],
+              send-encrypted-sad[1],
+              must-pk-encrypt-sad[2]
+          }
+ */
+/*
+          PA-SAM-CHALLENGE ::= SEQUENCE {
+              sam-type[0]                 INTEGER,
+              sam-flags[1]                SAMFlags,
+              sam-type-name[2]            GeneralString OPTIONAL,
+              sam-track-id[3]             GeneralString OPTIONAL,
+              sam-challenge-label[4]      GeneralString OPTIONAL,
+              sam-challenge[5]            GeneralString OPTIONAL,
+              sam-response-prompt[6]      GeneralString OPTIONAL,
+              sam-pk-for-sad[7]           EncryptionKey OPTIONAL,
+              sam-nonce[8]                INTEGER OPTIONAL,
+              sam-cksum[9]                Checksum OPTIONAL
+          }
+*/
+/* sam_type values -- informational only */
+#define PA_SAM_TYPE_ENIGMA     1   /*  Enigma Logic */
+#define PA_SAM_TYPE_DIGI_PATH  2   /*  Digital Pathways */
+#define PA_SAM_TYPE_SKEY_K0    3   /*  S/key where  KDC has key 0 */
+#define PA_SAM_TYPE_SKEY       4   /*  Traditional S/Key */
+#define PA_SAM_TYPE_SECURID    5   /*  Security Dynamics */
+#define PA_SAM_TYPE_GRAIL    128 /* experimental */
+
+typedef struct _krb5_predicted_sam_response {
+	krb5_magic	magic;
+	krb5_keyblock	sam_key;
+} krb5_predicted_sam_response;
+
+typedef struct _krb5_sam_challenge {
+	krb5_magic	magic;
+	krb5_int32	sam_type; /* information */
+	krb5_flags	sam_flags; /* KRB5_SAM_* values */
+	krb5_data	sam_type_name;
+	krb5_data	sam_track_id;
+	krb5_data	sam_challenge_label;
+	krb5_data	sam_challenge;
+	krb5_data	sam_response_prompt;
+	krb5_data	sam_pk_for_sad;
+	krb5_int32	sam_nonce;
+	krb5_checksum	sam_cksum;
+} krb5_sam_challenge;
+
+typedef struct _krb5_sam_key {	/* reserved for future use */
+	krb5_magic	magic;
+	krb5_keyblock	sam_key;
+} krb5_sam_key;
+
+typedef struct _krb5_enc_sam_response_enc {
+	krb5_magic	magic;
+	krb5_int32	sam_nonce;
+	krb5_timestamp	sam_timestamp;
+	krb5_int32	sam_usec;
+	krb5_data	sam_passcode;
+} krb5_enc_sam_response_enc;
+
+typedef struct _krb5_sam_response {
+	krb5_magic	magic;
+	krb5_int32	sam_type; /* informational */
+	krb5_flags	sam_flags; /* KRB5_SAM_* values */
+	krb5_data	sam_track_id; /* copied */
+	krb5_enc_data	sam_enc_key; /* krb5_sam_key - future use */
+	krb5_enc_data	sam_enc_nonce_or_ts; /* krb5_enc_sam_response_enc */
+	krb5_int32	sam_nonce;
+	krb5_timestamp	sam_patimestamp;
+} krb5_sam_response;
+
+
+/*
  * Begin "dbm.h"
  */
 #if !defined(_MACINTOSH) && !defined(_MSDOS)
@@ -1104,6 +1180,21 @@ krb5_error_code encode_krb5_enc_data
 krb5_error_code encode_krb5_pa_enc_ts
     	KRB5_PROTOTYPE((const krb5_pa_enc_ts *, krb5_data **));
 
+krb5_error_code encode_krb5_sam_challenge
+	KRB5_PROTOTYPE((const krb5_sam_challenge * , krb5_data **));
+
+krb5_error_code encode_krb5_sam_key
+	KRB5_PROTOTYPE((const krb5_sam_key * , krb5_data **));
+
+krb5_error_code encode_krb5_enc_sam_response_enc
+	KRB5_PROTOTYPE((const krb5_enc_sam_response_enc * , krb5_data **));
+
+krb5_error_code encode_krb5_sam_response
+	KRB5_PROTOTYPE((const krb5_sam_response * , krb5_data **));
+
+krb5_error_code encode_krb5_predicted_sam_response
+	KRB5_PROTOTYPE((const krb5_predicted_sam_response * , krb5_data **));
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1204,6 +1295,21 @@ krb5_error_code decode_krb5_enc_data
 
 krb5_error_code decode_krb5_pa_enc_ts
 	KRB5_PROTOTYPE((const krb5_data *output, krb5_pa_enc_ts **rep));
+
+krb5_error_code decode_krb5_sam_challenge
+	KRB5_PROTOTYPE((const krb5_data *, krb5_sam_challenge **));
+
+krb5_error_code decode_krb5_sam_key
+	KRB5_PROTOTYPE((const krb5_data *, krb5_sam_key **));
+
+krb5_error_code decode_krb5_enc_sam_response_enc
+	KRB5_PROTOTYPE((const krb5_data *, krb5_enc_sam_response_enc **));
+
+krb5_error_code decode_krb5_sam_response
+	KRB5_PROTOTYPE((const krb5_data *, krb5_sam_response **));
+
+krb5_error_code decode_krb5_predicted_sam_response
+	KRB5_PROTOTYPE((const krb5_data *, krb5_predicted_sam_response **));
 
 /*************************************************************************
  * End of prototypes for krb5_decode.c
