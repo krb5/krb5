@@ -49,7 +49,7 @@ krb5_os_init_context(ctx)
 }
 
 void
-krb5_free_os_context(ctx)
+krb5_os_free_context(ctx)
 	krb5_context	ctx;
 {
 	krb5_os_context os_ctx;

@@ -1,5 +1,11 @@
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
+	* Actually move the file init_ctx.c to init_os_ctx.c in the CVS
+		repository and also rename the routine  krb5_free_os_context()
+		to krb5_os_free_context().
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
     * Added krb5_context to all krb5_routines
 
 	* Moved init_ctx.c to init_os_ctx.c because a library cannot
