@@ -19,30 +19,32 @@
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
+LIB=krb524
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=../krb524
+STOBJLISTS=OBJS.ST
+
 CFLAGS = $(CCOPTS) -DUSE_MASTER  $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
-
-all::
-
 KRB524_DEPLIB	= libkrb524.a
 KRB524_LIB	= libkrb524.a
 
 LOCALINCLUDE= $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 # Library sources
-SRCS	= conv_creds.c conv_princ.c conv_tkt.c cnv_tkt_skey.c \
+SRCS	= conv_creds.c conv_princ.c cnv_tkt_skey.c \
 	encode.c misc.c globals.c sendmsg.c krb524_err.et
-OBJS	= conv_creds.o conv_princ.o conv_tkt.o cnv_tkt_skey.o \
+STLIBOBJS = conv_creds.o conv_princ.o cnv_tkt_skey.o \
 	encode.o misc.o globals.o sendmsg.o krb524_err.o
 
 GENS	= krb524_err.c krb524_err.h
 
-all:: $(GENS) libkrb524.a krb524d krb524test k524init
+all:: $(GENS)
+all:: all-libs
 
-libkrb524.a: $(OBJS)
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
+all:: krb524d krb524test k524init
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
@@ -53,12 +55,10 @@ krb524d: krb524d.o $(KADMSRV_DEPLIBS) $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 k524init: k524init.o  $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init k524init.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-install::
-	$(INSTALL_DATA) libkrb524.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a
+install:: install-libs
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
 	$(INSTALL_PROGRAM) k524init $(DESTDIR)$(CLIENT_BINDIR)/krb524init
 
-clean::
-	$(RM) libkrb524.a $(OBJS) $(GENS) core *~ *.bak #*
+clean:: clean-libs clean-libobjs
+	$(RM) $(OBJS) $(GENS) core *~ *.bak #*
 	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o

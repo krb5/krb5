@@ -1,3 +1,21 @@
+Mon Aug 11 21:12:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* convt_tkt.c: Delete; it's not needed anymore.
+
+	* test.c: Remove reference to krb524_convert_creds_addr, as that
+	doesn't exist anymore.
+
+	* conv_creds.c: Clean up substantially to be less convoluted.
+
+	* sendmsg.c: Fix to not do a full series of timeouts on each
+	server; loop over the whole list before increasing the timeout.
+
+	* configure.in: Update to use the new library build system to
+	build libkrb524.
+
+	* Makefile.in: Update to reflect changes in the library.  Also,
+	use the new library build system to build libkrb524.
+
 Thu Aug  7 17:34:59 1997  Tom Yu  <tlyu@mit.edu>
 
 	* cnv_tkt_skey.c:

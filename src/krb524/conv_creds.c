@@ -30,36 +30,56 @@
 
 #include "krb524.h"
 
-int krb524_convert_creds_plain
+krb5_error_code krb524_convert_creds_plain
 KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds));
 
+krb5_error_code krb524_sendto_kdc
+KRB5_PROTOTYPE((krb5_context context, const krb5_data *message,
+		krb5_data *realm, krb5_data *reply));
 
-int krb524_convert_creds_addr(context, v5creds, v4creds, saddr)
+krb5_error_code
+krb524_convert_creds_kdc(context, v5creds, v4creds)
      krb5_context context;
      krb5_creds *v5creds;
      CREDENTIALS *v4creds;
-     struct sockaddr *saddr;
 {
-     int ret;
+     krb5_error_code ret;
+     krb5_data reply;
+     char *p;
 
-     if ((ret = krb524_convert_creds_plain(context, v5creds, v4creds)))
-	  return ret;
+     ret = krb524_convert_creds_plain(context, v5creds, v4creds);
+     if (ret)
+	 return ret;
 
-     return krb524_convert_tkt(v5creds->server, &v5creds->ticket,
-			       &v4creds->ticket_st,
-			       &v4creds->kvno,
-			       (struct sockaddr_in *) saddr);
+     reply.data = NULL;
+     ret = krb524_sendto_kdc(context, &v5creds->ticket,
+			     &v5creds->server->realm, &reply);
+     if (ret)
+	 return ret;
+
+     p = reply.data;
+     ret = ntohl(*((krb5_error_code *) p));
+     p += sizeof(krb5_error_code);
+     reply.length -= sizeof(krb5_error_code);
+     if (ret)
+	 goto fail;
+
+     v4creds->kvno = ntohl(*((krb5_error_code *) p));
+     p += sizeof(int);
+     reply.length -= sizeof(int);
+     ret = decode_v4tkt(&v4creds->ticket_st, p, &reply.length);
+
+fail:
+     if (reply.data) 
+	 free(reply.data);
+     reply.data = NULL;
+     return ret;
 }
 
-int krb524_convert_creds_kdc(context, v5creds, v4creds)
-     krb5_context context;
-     krb5_creds *v5creds;
-     CREDENTIALS *v4creds;
+#if 0
+int broken()
 {
-     struct sockaddr_in *addrs;
-     int ret, naddrs, i;
-
      if ((ret = krb5_locate_kdc(context, &v5creds->server->realm, &addrs,
 			       &naddrs)))
 	  return ret;
@@ -92,8 +112,10 @@ int krb524_convert_creds_kdc(context, v5creds, v4creds)
      free(addrs);
      return ret;
 }
+#endif
 
-int krb524_convert_creds_plain(context, v5creds, v4creds)
+krb5_error_code
+krb524_convert_creds_plain(context, v5creds, v4creds)
      krb5_context context;
      krb5_creds *v5creds;
      CREDENTIALS *v4creds;
