@@ -1,4 +1,5 @@
-AC_PREREQ(2.52)
+AC_PREREQ(2.53)
+dnl 2.53 needed so we don't have to worry about using --localdir
 AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 Massachusetts Institute of Technology.
 ])
@@ -79,9 +80,7 @@ dnl else
 	AUTOCONFFLAGS=
 	AUTOHEADER=autoheader
 	AUTOHEADERFLAGS=
-dnl Autoconf 2.54+ use --include, --localdir is obsolete and removed
-ifdef([AC_MSG_FAILURE],	AUTOCONFINCFLAGS="--include", dnl
-       AUTOCONFINCFLAGS="--localdir")
+	AUTOCONFINCFLAGS="--include"
 dnl fi
 AC_SUBST(AUTOCONF)
 AC_SUBST(AUTOCONFFLAGS)
