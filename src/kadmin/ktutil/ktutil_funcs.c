@@ -95,7 +95,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     int use_pass;
 {
     krb5_keytab_entry *entry;
-    krb5_kt_list lp = NULL, tail = NULL, back = NULL;
+    krb5_kt_list lp = NULL, prev = NULL;
     krb5_principal princ;
     krb5_enctype enctype;
     krb5_timestamp now;
@@ -108,9 +108,6 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     char *cp;
     int i, tmp, pwsize = BUFSIZ;
 
-    retval = krb5_timeofday(context, &now);
-    if (retval)
-        return retval;
     retval = krb5_parse_name(context, princ_str, &princ);
     if (retval)
         return retval;
@@ -122,13 +119,14 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     retval = krb5_string_to_enctype(enctype_str, &enctype);
     if (retval) 
         return KRB5_BAD_ENCTYPE;
+    retval = krb5_timeofday(context, &now);
+    if (retval)
+        return retval;
 
     if (*list) {
         /* point lp at the tail of the list */
         for (lp = *list; lp->next; lp = lp->next);
-	back = lp;
     }
-
     entry = (krb5_keytab_entry *) malloc(sizeof(krb5_keytab_entry));
     if (!entry) {
         return ENOMEM;
@@ -145,25 +143,32 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
 	if (!lp->next) {
 	    return ENOMEM;
 	}
+	prev = lp;
 	lp = lp->next;
     }          
-
-    if (!tail)
-        tail = lp;
     lp->next = NULL;
     lp->entry = entry;
 
     if (use_pass) {
         password.length = pwsize;
 	password.data = (char *) malloc(pwsize);
-	if (!password.data)
-	    return ENOMEM;
+	if (!password.data) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
 
 	sprintf(promptstr, "Password for %.1000s: ", princ_str);
-        krb5_read_password(context, promptstr, NULL, password.data,
-			   &password.length);
-	krb5_principal2salt(context, princ, &salt);
-	krb5_c_string_to_key(context, enctype, &password, &salt, &key);
+        retval = krb5_read_password(context, promptstr, NULL, password.data,
+				    &password.length);
+	if (retval)
+	    goto cleanup;
+	retval = krb5_principal2salt(context, princ, &salt);
+	if (retval)
+	    goto cleanup;
+	retval = krb5_c_string_to_key(context, enctype, &password,
+				      &salt, &key);
+	if (retval)
+	    goto cleanup;
 	memset(password.data, 0, password.length);
 	password.length = 0;
 	memcpy(&lp->entry->key, &key, sizeof(krb5_keyblock));
@@ -181,19 +186,23 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
 	buf[strlen(buf) - 1] = strlen(buf) % 2 ? '\0' : '0';
 	if (strlen(buf) == 0) {
 	    fprintf(stderr, "addent: Error reading key.\n");
-	    return 0;
+	    retval = 0;
+	    goto cleanup;
 	}
 	
         lp->entry->key.enctype = enctype;
 	lp->entry->key.contents = (krb5_octet *) malloc((strlen(buf) + 1) / 2);
-	if (!lp->entry->key.contents)
-	    return ENOMEM;
+	if (!lp->entry->key.contents) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
 
 	i = 0;
 	for (cp = buf; *cp; cp += 2) {
 	    if (!isxdigit(cp[0]) || !isxdigit(cp[1])) {
 	        fprintf(stderr, "addent: Illegal character in key.\n");
-		return 0;
+		retval = 0;
+		goto cleanup;
 	    }
 	    sscanf(cp, "%02x", &tmp);
 	    lp->entry->key.contents[i++] = (krb5_octet) tmp;
@@ -205,9 +214,15 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     lp->entry->timestamp = now;
 
     if (!*list)
-	*list = tail;
+	*list = lp;
 
     return 0;
+
+ cleanup:
+    if (prev)
+        prev->next = NULL;
+    ktutil_free_kt_list(context, lp);
+    return retval;
 }
 
 /*

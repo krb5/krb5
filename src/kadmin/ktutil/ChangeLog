@@ -1,3 +1,8 @@
+1999-08-17  Geoffrey King  <gjking@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Cleanup newly allocated keytab
+	entry and tail of linked list when an error occurs.
+
 1999-08-16  Geoffrey King  <gjking@mit.edu>
 
 	* ktutil.c (ktutil_add_entry):
