@@ -1,3 +1,8 @@
+Sat Jul 29 03:17:21 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* localaddr.c (krb5_crypto_os_localaddr): Don't bash the return
+		from SIOCGIFCONF with the output of a SIOCGIFFLAGS.  Duh.
+
 Wed Jul 19 17:17:54 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* localaddr.c: also add definition of max if it's not there.

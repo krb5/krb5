@@ -75,7 +75,8 @@
  */
 
 /*
- * BSD 4.4 defines the size of an ifreq to be max(sizeof(ifreq), sizeof(ifr.ifr_name)+ifreq.ifr_ifr_addr.sa_len
+ * BSD 4.4 defines the size of an ifreq to be
+ * max(sizeof(ifreq), sizeof(ifreq.ifr_name)+ifreq.ifr_addr.sa_len
  * However, under earlier systems, sa_len isn't present, so the size is 
  * just sizeof(struct ifreq)
  */
@@ -108,7 +109,7 @@ krb5_error_code INTERFACE
 krb5_crypto_os_localaddr(addr)
     krb5_address ***addr;
 {
-    struct ifreq *ifr;
+    struct ifreq *ifr, ifreq;
     struct ifconf ifc;
     int s, code, n, i;
     char buf[1024];
@@ -135,21 +136,18 @@ n_found = 0;
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	krb5_address *address;
 	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
-	
-	if (ioctl (s, SIOCGIFFLAGS, (char *)ifr) < 0)
+
+	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
+	if (ioctl (s, SIOCGIFFLAGS, (char *)&ifreq) < 0)
 	    continue;
 
 #ifdef IFF_LOOPBACK
-	if (ifr->ifr_flags & IFF_LOOPBACK) 
+	if (ifreq.ifr_flags & IFF_LOOPBACK) 
 	    continue;
 #endif
 
-	if (!(ifr->ifr_flags & IFF_UP)) 
+	if (!(ifreq.ifr_flags & IFF_UP)) 
 	    /* interface is down; skip */
-	    continue;
-
-	if (ioctl (s, SIOCGIFADDR, (char *)ifr) < 0)
-	    /* can't get address */
 	    continue;
 
 	/* ifr->ifr_addr has what we want! */
@@ -183,7 +181,7 @@ n_found = 0;
 	    case AF_XNS:
 	    {  
 		struct sockaddr_ns *ns =
-		    (struct sockaddr_ns *)&ifr->ifr_addr;		    
+		    (struct sockaddr_ns *)&ifr->ifr_addr;
 		address = (krb5_address *)
 		    malloc (sizeof (krb5_address) + sizeof (struct ns_addr));
 		if (address) {
