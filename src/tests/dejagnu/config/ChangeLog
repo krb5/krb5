@@ -1,3 +1,8 @@
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Protect Quote quotation marks in multipass variable
+	assignments. Dejagnu (June 1999 release) fails overwise. 
+
 2000-07-22  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Add code to handle setting of PASS to constrain
