@@ -254,10 +254,15 @@ P_TIME_DEFS=-DUseTimeH -UUseSysTimeH
 #else
 P_TIME_DEFS=-DUseSysTimeH -UUseTimeH
 #endif
-#if NeedNarrowPrototypes
-P_PROTOS=-DUseNarrowPrototypes
+#if WantPrototypes
+P_PROTOS=-DProvidePrototypes
 #else
-P_PROTOS=-UUseNarrowPrototypes
+P_PROTOS=-UProvidePrototypes
+#endif
+#if NeedNarrowPrototypes
+P_NPROTO=-DUseNarrowPrototypes
+#else
+P_NPROTO=-UUseNarrowPrototypes
 #endif
 
 /*
@@ -281,7 +286,7 @@ P_PROTOS=-UUseNarrowPrototypes
          ZEPHLIBS = ZephyrLibs
 #endif
 
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) -DUnifdefRan
        DESDEFINES = DesDefines
           TOPLIBD = $(TOP)/lib
             OSLIB = os
