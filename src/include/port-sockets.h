@@ -25,20 +25,8 @@ int win_socket_initialize();
 
 #ifdef HAVE_MACSOCK_H		/* Sockets stuff differs on Mac */
 #include "macsock.h"		/* Macintosh sockets emulation library */
-
-/* Some of our own infrastructure where the WinSock stuff was too hairy
-   to dump into a clean Unix program...  */
-
-#define	SOCKET_INITIALIZE()	(WSAStartup(0x0101, (WSADATA *)0))
-#define	SOCKET_CLEANUP()	(WSACleanup())
-#define	SOCKET_ERRNO		(WSAGetLastError())
-#define	SOCKET_SET_ERRNO(x)	(WSASetLastError(x))
-#define	SOCKET_NFDS(f)		(0)	/* select()'s first arg is ignored */
-#define SOCKET_READ(fd, b, l)	(recv(fd, b, l, 0))
-#define SOCKET_WRITE(fd, b, l)	(send(fd, b, l, 0))
-#define SOCKET_EINTR		WSAEINTR
-
 #else  /* ! HAVE_MACSOCK_H */	/* Sockets stuff for Unix machines */
+
 #include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */

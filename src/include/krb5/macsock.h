@@ -22,6 +22,10 @@
 #ifndef macsock_h
 #define macsock_h
 
+#include <Sockets.h>
+#include <ErrorLib.h>
+#include <netdb.h>
+
 /* Handle ANSI C versus traditional C */
 #ifndef __STDC__
 #define const
@@ -42,192 +46,52 @@
 
 /* Error codes */
 /* FIXME -- picked at random */
-#define	WSAVERNOTSUPPORTED	14563	/* WinSock version not supported */
-#define	EMSGSIZE		14567	/* Received packet truncated */
-#define	WSAEINTR		14568	/* Interrupted system call */
-#define	ECONNABORTED		14569	/* Interrupted system call */
+/*#define	WSAVERNOTSUPPORTED	14563	/* WinSock version not supported */
+/*#define	EMSGSIZE		14567	/* Received packet truncated */
+/*#define	WSAEINTR		14568	/* Interrupted system call */
+/*#define	ECONNABORTED		14569	/* Interrupted system call */
 
+/* Socket functions as defined by SocketsLib */
+#define closesocket  socket_close
+#define connect      socket_connect
+#define bind         socket_bind
 
-/* Struct for initializing the socket library */
-struct WSAData {
-	WORD	wVersion;
-	WORD	wHighVersion;
-#define	WSADESCRIPTION_LEN	256
-	char	szDescription[WSADESCRIPTION_LEN+1];
-#define	WSASYSSTATUS_LEN	256
-	char	szSystemStatus[WSASYSSTATUS_LEN+1];
-	unsigned short	iMaxSockets;
-	unsigned short	iMaxUdpDg;
-	char 	*lpVendorInfo;
-};
+#define sendto       socket_sendto
+#define send         socket_send
+#define recvfrom     socket_recvfrom
+#define recv         socket_recv
 
-typedef struct WSAData WSADATA;
+#define select       socket_select
 
-/*
- * Internet address.  New code should use only the s_addr field.
- */
-struct in_addr {
-	unsigned long s_addr;
-};
+#define getsockname  socket_getsockname
+#define getpeername  socket_getpeername
 
+#define SOCKET_READ  socket_read
+#define SOCKET_WRITE socket_write
 
-/*
- * Socket address, internet style.
- */
-struct sockaddr_in {
-	short	sin_family;
-	unsigned short	sin_port;
-	struct	in_addr sin_addr;
-	char	sin_zero[8];
-};
-
-/* Socket address, other styles */
-#define	sockaddr sockaddr_in
-#define	sa_family sin_family
-
-
-/* The socket data structure itself.   */
-struct socket {
-	short		fMacTCPRef;		/* refnum of MacTCP driver */
-	short		fType;			/* UDP == SOCK_DGRAM or TCP == SOCK_STREAM Socket */
-	unsigned long	fStream;		/* MacTCP socket/stream */
-	struct sockaddr_in connect_addr;	/* Address from connect call */
-#	define		UDPbuflen	4096
-#	define		TCPbuflen	(8*1024)
-//	char		fRecvBuf[UDPbuflen];	/* receive buffer area */
-	char		fRecvBuf[TCPbuflen];	/* receive buffer area */
-};
-
-typedef struct socket *SOCKET;
-
-/*
- * Host name<->address mapping entries
- */
-struct    hostent {
-    char *h_name;  /* official name of host */
-    char **h_aliases;   /* alias list */
-    int  h_addrtype;    /* address type */
-    int  h_length; /* length of address */
-    char **h_addr_list; /* list of addresses from name server */
-#define	h_addr	h_addr_list[0]	/* address, for backward compatiblity */
-};
-
-/*
- * Service name<->port mapping
- */
-struct	servent {
-	char	*s_name;	/* official service name */
-	char	**s_aliases;	/* alias list */
-	int	s_port;		/* port # */
-	char	*s_proto;	/* protocol to use */
-};
-
-#ifndef __MWERKS__
-/* Timeout values */
-struct timeval {
-	long tv_sec;			/* Seconds */
-	long tv_usec;			/* Microseconds */
-};
-#endif
-
-/* True Kludge version of select argument fd_set's */
-typedef int		fd_set;
-#define	FD_ZERO(x)	0
-#define	FD_CLEAR(x)	/* nothing */
-#define	FD_SET(fd,x)	/* nothing */
-#define	FD_ISSET(fd, x)	1
-
-/* Other misc constants */
-#define	MAXHOSTNAMELEN	512	/* Why be stingy? */
-#define	SOCK_DGRAM	2		/* Datagram socket type */
-#define	AF_INET	2			/* Internet address family */
-#define PF_INET AF_INET
-#define	INADDR_ANY	((unsigned long)0)	/* Internet addr: any host */
-#define SOCK_STREAM 3		/* Stream socket type */
-
-
-/* Start using sockets */
-extern int
-WSAStartup PROTOTYPE ((WORD version, struct WSAData *));
-
-/* Finish using sockets */
-extern int
-WSACleanup PROTOTYPE ((void));
-
-/* Get a particular socket */
-extern SOCKET
-socket PROTOTYPE ((int af, int type, int protocol));
-
-/* Finish using a particular socket.  */
-extern int
-closesocket PROTOTYPE ((SOCKET theUDP));
-
-/* Bind a socket to a particular address.
-   In our case, this is just a no-op for bug-compatability with
-   the FTP Software WINSOCK library.  */
-extern int
-bind PROTOTYPE ((SOCKET s, const struct sockaddr *name, int namelen));
-
-/* Send a packet to a UDP peer.  */
-extern int
-sendto PROTOTYPE ((SOCKET theUDP, const char *buf, const int len, int flags,
-	const struct sockaddr *to, int tolen));
-
-/* Send a packet to a connected UDP peer.  */
-extern int
-send PROTOTYPE ((SOCKET theUDP, const char *buf, const int len, int flags));
-
-/* Select for sockets that are ready for I/O.
-   This version just remembers the timeout for a future receive...
-   It always reports that one socket is ready for I/O.  */
-extern int
-select PROTOTYPE ((int nfds, fd_set *readfds, fd_set *writefds,
-		   fd_set *exceptfds, const struct timeval *timeout));
-
-/* Receive a packet from a UDP peer.  */
-extern int
-recvfrom PROTOTYPE ((SOCKET theUDP, char *buf, int len, int flags,
-		     struct sockaddr *from, int *fromlen));
-
-/* Receive a packet from a connected UDP peer.  */
-extern int
-recv PROTOTYPE ((SOCKET theUDP, char *buf, int len, int flags));
-
-extern char *
-inet_ntoa PROTOTYPE ((struct in_addr ina));
-
-extern struct hostent *
-gethostbyname PROTOTYPE ((char *));
-
-extern struct hostent *
-gethostbyaddr PROTOTYPE ((char *addr, int len, int type));
-
-extern struct hostent *
-getmyipaddr PROTOTYPE ((void));
-
-extern int
-getsockname PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
-
-extern int
-getpeername PROTOTYPE((SOCKET, struct sockaddr_in *, int *));
-    
-/* Bypass a few other functions we don't really need. */
-
-#define	getservbyname(name,prot)	0
-
-/* Macs operate in network byte order (big-endian).  */
-#define	htonl(x)	(x)
-#define	htons(x)	(x)
-#define	ntohl(x)	(x)
-#define	ntohs(x)	(x)
-
+typedef int SOCKET;
 /*
  * Compatability with WinSock calls on MS-Windows...
  */
-#define	INVALID_SOCKET	((SOCKET)~0)
-#define	SOCKET_ERROR	(-1)
-#define	WSAGetLastError()	(errno)
-#define	WSASetLastError(x)	(errno = (x))
+ 
+#define	SOCKET_INITIALIZE()	()
+#define	SOCKET_CLEANUP()	
+ 
+#define	INVALID_SOCKET	    (-1L)
+#define	SOCKET_ERROR	    (-1)
+#define SOCKET_EINTR		EINTR
+#define WSAECONNABORTED     kECONNABORTEDErr
 
-extern int errno;
+#define MAXHOSTNAMELEN      MAXHOSTNAMESIZE
+
+#define	SOCKET_NFDS(f)		(FD_SETSIZE)	/* select()'s first arg is maxed out */
+
+#define	WSAGetLastError()	(GetMITLibError())
+#define	WSASetLastError(x)	(SetMITLibError(x))
+#define	SOCKET_ERRNO		(GetMITLibError())
+#define	SOCKET_SET_ERRNO(x)	(SetMITLibError(x))
+
+#define local_addr_fallback_kludge() (0)
+
+
 #endif /* macsock_h */
