@@ -1213,7 +1213,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 
 	 fflag = hflag = pflag = rflag = kflag = Kflag = eflag = 0;
 	passwd_req = 1;
-	while ((ch = getopt(argc, argv, "Ffeh:pr:k:K:")) != EOF)
+	while ((ch = getopt(argc, argv, "Ffeh:pr:k:K:")) != -1)
 		switch (ch) {
 		case 'f':
 			EXCL_AUTH_TEST;

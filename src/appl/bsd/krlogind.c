@@ -341,7 +341,7 @@ int main(argc, argv)
     
     /* Analyse parameters. */
     opterr = 0;
-    while ((ch = getopt(argc, argv, ARGSTR)) != EOF)
+    while ((ch = getopt(argc, argv, ARGSTR)) != -1)
       switch (ch) {
 #ifdef KERBEROS
 	case 'k':
