@@ -37,6 +37,8 @@ static char rcsid_getaddr_c[] =
 
 #include <krb5/ext-proto.h>
 
+/* needed for solaris, harmless elsewhere... */
+#define BSD_COMP
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/time.h>
