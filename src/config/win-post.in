@@ -1,0 +1,45 @@
+# config/post.in
+# put all:: first just in case no other rules occur here
+#
+all::
+
+.c.obj:
+	$(CC) $(CFLAGS) /c $*.c
+!if defined(LIBNAME)
+!if "$(LIBCMD)"!="rem"
+	$(LIBCMD) /nologo $(LIBNAME) -+$@;
+!endif
+!endif
+
+check::
+check-windows::
+
+.depend: $(SRCS) $(SRCTOP)/util/depfix.sed
+	if test -n "$(SRCS)" ; then \
+		$(CC) -M $(CFLAGS) $(SRCS) | \
+			sed -f $(SRCTOP)/util/depfix.sed | \
+			sed -e 's; $(SRCTOP)/; $$(SRCTOP)/;g' | \
+			sed -e 's; $(srcdir)/; $$(srcdir)/;g' | \
+			sed -e 's; $(BUILDTOP)/; $$(BUILDTOP)/;g' | \
+			sed -e 's; \./; ;g' > .depend; \
+	else :; fi
+
+depend:: .depend
+	if test -n "$(SRCS)" ; then \
+		sed -e '/^# +++ Dependency line eater +++/,$$d' \
+			< $(srcdir)/Makefile.in | cat - .depend \
+			> $(srcdir)/Makefile.in.new; \
+	$(MV) $(srcdir)/Makefile.in $(srcdir)/Makefile.in.old; \
+	$(MV) $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in; \
+	else :; fi
+
+clean:: clean-$(WHAT)
+	$(RM) config.log pre.out post.out Makefile.out
+
+clean-unix::
+	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
+	$(RM) .depend
+
+clean-windows::
+	$(RM) *.$(OBJEXT)
+	$(RM) msvc.pdb *.err

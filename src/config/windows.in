@@ -69,14 +69,6 @@ EXEEXT=.exe
 
 MFLAGS=$(MAKEFLAGS)
 
-.c.obj:
-	$(CC) $(CFLAGS) /c $*.c
-!if defined(LIBNAME)
-!if "$(LIBCMD)"!="rem"
-	$(LIBCMD) /nologo $(LIBNAME) -+$@;
-!endif
-!endif
-
 #
 # End of Microsoft Windows config lines
 #

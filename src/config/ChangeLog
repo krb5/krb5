@@ -1,3 +1,11 @@
+Tue Oct 10 21:42:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* win-post.in: New file
+
+	* windows.in: Moved .c -> .obj rule to win-post.in, since we need
+		it after the LIBNAME makefile variable is defined in the
+		main body of the Makefile.
+
 Wed Sep 27 00:51:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* winexclude.sed: New file, used for generating DOS zip files.
