@@ -287,7 +287,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
 	  code_string = "KADM5_AUTH_INSUFFICIENT"; break;
      case KADM5_BAD_DB: code_string = "KADM5_BAD_DB"; break;
      case KADM5_DUP: code_string = "KADM5_DUP"; break;
-     case /*KADM5_RPC_ERROR*/ (43787528L): code_string = "KADM5_RPC_ERROR"; break;
+     case KADM5_RPC_ERROR: code_string = "KADM5_RPC_ERROR"; break;
      case KADM5_NO_SRV: code_string = "KADM5_NO_SRV"; break;
      case KADM5_BAD_HIST_KEY:
 	  code_string = "KADM5_BAD_HIST_KEY"; break;

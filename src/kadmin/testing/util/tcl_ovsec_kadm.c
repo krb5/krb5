@@ -268,7 +268,7 @@ static Tcl_DString *unparse_err(ovsec_kadm_ret_t code)
 	  code_string = "OVSEC_KADM_AUTH_INSUFFICIENT"; break;
      case OVSEC_KADM_BAD_DB: code_string = "OVSEC_KADM_BAD_DB"; break;
      case OVSEC_KADM_DUP: code_string = "OVSEC_KADM_DUP"; break;
-     case /*OVSEC_KADM_RPC_ERROR*/(43787528L): code_string = "OVSEC_KADM_RPC_ERROR"; break;
+     case OVSEC_KADM_RPC_ERROR: code_string = "OVSEC_KADM_RPC_ERROR"; break;
      case OVSEC_KADM_NO_SRV: code_string = "OVSEC_KADM_NO_SRV"; break;
      case OVSEC_KADM_BAD_HIST_KEY:
 	  code_string = "OVSEC_KADM_BAD_HIST_KEY"; break;
