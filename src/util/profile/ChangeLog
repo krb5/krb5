@@ -1,3 +1,10 @@
+Fri May  5 00:02:41 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* prof_init.c (profile_get_values): Return PROF_NO_PROFILE if the
+		passed-in profile variable is NULL (instead of core dumping).
+	
+	* prof_err.et (PROF_NO_PROFILE): Defined new error code.
+
 Thu May  4 23:57:56 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* prof_tree.c (profile_free_node): Copy child->next to a scratch

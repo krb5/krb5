@@ -126,6 +126,9 @@ errcode_t profile_get_values(profile, names, ret_values)
     struct string_list values;
     const char		**cpp;
 
+    if (profile == 0)
+	return PROF_NO_PROFILE;
+
     if (names == 0 || names[0] == 0 || names[1] == 0)
 	return PROF_BAD_NAMESET;
 

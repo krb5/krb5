@@ -37,5 +37,6 @@ error_code	PROF_TOPSECTION_ITER_NOSUPP,
 error_code	PROF_INVALID_SECTION,	"Invalid profile_section object"
 error_code	PROF_END_OF_SECTIONS,	"No more sections"
 error_code	PROF_BAD_NAMESET,	"Bad nameset passed to query routine"
+error_code	PROF_NO_PROFILE,	"No profile file open"
 
 end
