@@ -1,3 +1,12 @@
+Mon Nov  4 22:29:30 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* main.c (initialize_realms): Remove rather pointless use of
+ 		krb5.conf to find the kdc.conf used to get the default
+ 		port list.  It's not useful for anything else, and will
+		just confuse people.
+		(init_realm): Reformat function to be readable.  Add error
+		checking to call of krb5_read_realm_params
+
 Wed Sep 18 16:03:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kdc_util.c: Added magic number to initializer of nolrentry.
