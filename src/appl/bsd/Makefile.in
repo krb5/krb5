@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=appl/bsd
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DEFINES)
 LOCALINCLUDE=@KRB4_INCLUDES@
