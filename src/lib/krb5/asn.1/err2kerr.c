@@ -44,20 +44,26 @@ register int *error;
     xbzero(retval, sizeof(*retval));
 
 
-    retval->ctime = gentime2unix(val->ctime, error);
-    if (*error) {
-    errout:
-	krb5_free_error(retval);
-	return(0);
-    }	
-    retval->cmsec = val->cmsec;
+    if (val->ctime) {
+	retval->ctime = gentime2unix(val->ctime, error);
+	if (*error) {
+	errout:
+	    krb5_free_error(retval);
+	    return(0);
+	}	
+    }
+    if (val->optionals & opt_KRB5_KRB__ERROR_cmsec)
+	retval->cmsec = val->cmsec;
+    else
+	retval->cmsec = 0;
+
     retval->stime = gentime2unix(val->stime, error);
     if (*error) {
 	goto errout;
     }	
     retval->smsec = val->smsec;
-    retval->error = val->error;
-    if (val->crealm) {
+    retval->error = val->error__code;
+    if (val->crealm && val->cname) {
 	retval->client = KRB5_PrincipalName2krb5_principal(val->cname,
 							   val->crealm,
 							   error);
@@ -65,15 +71,24 @@ register int *error;
 	    goto errout;
 	}
     }
-    if (val->sname) {
+    if (val->sname && val->realm) {
 	retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
-							   val->srealm,
+							   val->realm,
 							   error);
 	if (!retval->server) {
 	    goto errout;
 	}
     }
     if (val->e__text) {
+	temp = qbuf2krb5_data(val->e__text, error);
+	if (temp) {
+	    retval->text = *temp;
+	    xfree(temp);
+	} else {
+	    goto errout;
+	}
+    }
+    if (val->e__data) {
 	temp = qbuf2krb5_data(val->e__text, error);
 	if (temp) {
 	    retval->text = *temp;

@@ -34,7 +34,7 @@ const register struct type_KRB5_Ticket *val;
 register int *error;
 {
     register krb5_ticket *retval;
-    krb5_data *temp;
+    krb5_enc_data *temp;
 
     retval = (krb5_ticket *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -45,16 +45,14 @@ register int *error;
 
 
     retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
-						       val->srealm,
+						       val->realm,
 						       error);
     if (!retval->server) {
 	xfree(retval);
 	return(0);
     }
-    retval->etype = val->etype;
-    retval->skvno = val->skvno;
 
-    temp = qbuf2krb5_data(val->enc__part, error);
+    temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
 	xfree(temp);

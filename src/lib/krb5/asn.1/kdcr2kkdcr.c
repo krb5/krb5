@@ -35,7 +35,7 @@ krb5_msgtype *type;
 register int *error;
 {
     register krb5_kdc_rep *retval;
-    krb5_data *temp;
+    krb5_enc_data *temp;
 
     retval = (krb5_kdc_rep *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -54,15 +54,12 @@ register int *error;
 	return(0);
     }
 
-    retval->etype = val->etype;
-    retval->ckvno = val->ckvno;
-
     retval->ticket = KRB5_Ticket2krb5_ticket(val->ticket, error);
     if (!retval->ticket) {
 	krb5_free_kdc_rep(retval);
 	return(0);
     }
-    temp = qbuf2krb5_data(val->enc__part, error);
+    temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
 	xfree(temp);

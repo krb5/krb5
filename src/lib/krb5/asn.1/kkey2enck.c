@@ -59,7 +59,7 @@ register int *error;
     }
 
     retval->keytype = val->keytype;
-    retval->session = temp;
+    retval->keyvalue = temp;
     
     return(retval);
 }

@@ -29,8 +29,8 @@ static char rcsid_ekrp2kekrp_c[] =
 /* ISODE defines max(a,b) */
 
 krb5_enc_kdc_rep_part *
-KRB5_EncKDCRepPart2krb5_enc_kdc_rep_part(val, error)
-const register struct type_KRB5_EncKDCRepPart *val;
+KRB5_EncTGSRepPart2krb5_enc_kdc_rep_part(val, error)
+const register struct type_KRB5_EncTGSRepPart *val;
 register int *error;
 {
     register krb5_enc_kdc_rep_part *retval;
@@ -42,7 +42,6 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->confounder = val->confounder;
     retval->session = KRB5_EncryptionKey2krb5_keyblock(val->key, error);
     if (!retval->session) {
 	xfree(retval);
@@ -56,15 +55,14 @@ register int *error;
 	return(0);
     }
 
-    retval->ctime = gentime2unix(val->ctime, error);
-    if (*error) {
-	goto errout;
-    }
-    retval->key_exp = gentime2unix(val->key__exp, error);
-    if (*error) {
-	goto errout;
-    }
+    retval->nonce = val->nonce;
 
+    if (val->key__expiration) {
+	retval->key_exp = gentime2unix(val->key__expiration, error);
+	if (*error) {
+	    goto errout;
+	}
+    }
     retval->flags = KRB5_TicketFlags2krb5_flags(val->flags, error);
     if (*error) {
 	goto errout;
@@ -73,9 +71,11 @@ register int *error;
     if (*error) {
 	goto errout;
     }
-    retval->times.starttime = gentime2unix(val->starttime, error);
-    if (*error) {
-	goto errout;
+    if (val->starttime) {
+	retval->times.starttime = gentime2unix(val->starttime, error);
+	if (*error) {
+	    goto errout;
+	}
     }
     retval->times.endtime = gentime2unix(val->endtime, error);
     if (retval->flags & TKT_FLG_RENEWABLE) {
@@ -85,7 +85,7 @@ register int *error;
 	}
     }
     retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
-						       val->srealm,
+						       val->realm,
 						       error);
     if (!retval->server) {
 	goto errout;

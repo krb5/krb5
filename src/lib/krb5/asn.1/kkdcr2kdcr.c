@@ -18,7 +18,6 @@ static char rcsid_kkdcr2kdcr_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
-/*#include <time.h> */
 #include <isode/psap.h>
 #include "KRB5-types.h"
 #include "asn1glue.h"
@@ -59,16 +58,13 @@ OLDDECLARG(register int *,error)
     if (!retval->cname) {
 	goto errout;
     }
-    retval->etype = val->etype;
-    retval->ckvno = val->ckvno;
-
     retval->ticket = krb5_ticket2KRB5_Ticket(val->ticket, error);
     if (!retval->ticket) {
 	goto errout;
     }
-    retval->enc__part = krb5_data2qbuf(&(val->enc_part));
+    retval->enc__part = krb5_enc_data2KRB5_EncryptedData(&(val->enc_part),
+							 error);
     if (!retval->enc__part) {
-	*error = ENOMEM;
 	goto errout;
     }
     return(retval);

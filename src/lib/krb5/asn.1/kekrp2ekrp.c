@@ -28,21 +28,20 @@ static char rcsid_kekrp2ekrp_c[] =
 
 /* ISODE defines max(a,b) */
 
-struct type_KRB5_EncKDCRepPart *
-krb5_enc_kdc_rep_part2KRB5_EncKDCRepPart(val, error)
+struct type_KRB5_EncTGSRepPart *
+krb5_enc_kdc_rep_part2KRB5_EncTGSRepPart(val, error)
 const register krb5_enc_kdc_rep_part *val;
 register int *error;
 {
-    register struct type_KRB5_EncKDCRepPart *retval;
+    register struct type_KRB5_EncTGSRepPart *retval;
 
-    retval = (struct type_KRB5_EncKDCRepPart *)xmalloc(sizeof(*retval));
+    retval = (struct type_KRB5_EncTGSRepPart *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->confounder = val->confounder;
     retval->key = krb5_keyblock2KRB5_EncryptionKey(val->session, error);
     if (!retval->key) {
 	xfree(retval);
@@ -51,16 +50,15 @@ register int *error;
     retval->last__req = krb5_last_req2KRB5_LastReq(val->last_req, error);
     if (!retval->last__req) {
     errout:
-	free_KRB5_EncKDCRepPart(retval);
+	free_KRB5_EncTGSRepPart(retval);
 	return(0);
     }
-    retval->ctime = unix2gentime(val->ctime, error);
-    if (!retval->ctime) {
-	goto errout;
-    }
-    retval->key__exp = unix2gentime(val->key_exp, error);
-    if (!retval->key__exp) {
-	goto errout;
+    retval->nonce = val->nonce;
+    if (val->key_exp) {
+	retval->key__expiration = unix2gentime(val->key_exp, error);
+	if (!retval->key__expiration) {
+	    goto errout;
+	}
     }
     retval->flags = krb5_flags2KRB5_TicketFlags(val->flags, error);
     if (!retval->flags) {
@@ -70,9 +68,11 @@ register int *error;
     if (!retval->authtime) {
 	goto errout;
     }
-    retval->starttime = unix2gentime(val->times.starttime, error);
-    if (!retval->starttime) {
-	goto errout;
+    if (val->times.starttime) {
+	retval->starttime = unix2gentime(val->times.starttime, error);
+	if (!retval->starttime) {
+	    goto errout;
+	}
     }
     retval->endtime = unix2gentime(val->times.endtime, error);
     if (!retval->endtime) {
@@ -84,8 +84,8 @@ register int *error;
 	    goto errout;
 	}
     }
-    retval->srealm = krb5_data2qbuf(val->server[0]);
-    if (!retval->srealm) {
+    retval->realm = krb5_data2qbuf(val->server[0]);
+    if (!retval->realm) {
 	*error = ENOMEM;
 	goto errout;
     }

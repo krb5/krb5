@@ -34,7 +34,7 @@ const register struct type_KRB5_KRB__PRIV *val;
 register int *error;
 {
     register krb5_priv *retval;
-    krb5_data *temp;
+    krb5_enc_data *temp;
 
     retval = (krb5_priv *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -43,9 +43,7 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->etype = val->etype;
-
-    temp = qbuf2krb5_data(val->enc__part, error);
+    temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {
 	retval->enc_part = *temp;
 	xfree(temp);

@@ -36,13 +36,13 @@ register int *error;
 {
     krb5_keyblock *retval;
 
-    if (!val->session) {
+    if (!val->keyvalue) {
 	*error = EINVAL;
 	return(0);
     } else
 	*error = 0;
     /* pull up, then play with the single string */
-    if (qb_pullup(val->session) != OK) {
+    if (qb_pullup(val->keyvalue) != OK) {
     nomem:
 	*error = ENOMEM;
 	return(0);
@@ -51,15 +51,15 @@ register int *error;
     if (!retval) {
 	goto nomem;
     }
-    retval->contents = (unsigned char *) xmalloc(val->session->qb_forw->qb_len);
+    retval->contents = (unsigned char *) xmalloc(val->keyvalue->qb_forw->qb_len);
     if (!retval->contents) {
 	xfree(retval);
 	goto nomem;
     }
     retval->keytype = val->keytype;
-    retval->length = val->session->qb_forw->qb_len;
-    xbcopy(val->session->qb_forw->qb_data, retval->contents,
-	  val->session->qb_forw->qb_len);
+    retval->length = val->keyvalue->qb_forw->qb_len;
+    xbcopy(val->keyvalue->qb_forw->qb_data, retval->contents,
+	  val->keyvalue->qb_forw->qb_len);
     return(retval);
 }
 

@@ -52,13 +52,18 @@ register int *error;
 	retval->element_KRB5_4[i] = (struct element_KRB5_5 *)
 	    xmalloc(sizeof(*(retval->element_KRB5_4[i])));
 	if (!retval->element_KRB5_4[i]) {
+	    *error = ENOMEM;
+	errout:
 	    retval->nelem = i;
 	    free_KRB5_LastReq(retval);
-	    *error = ENOMEM;
 	    return(0);
 	}	    
 	retval->element_KRB5_4[i]->lr__type = val[i]->lr_type;
-	retval->element_KRB5_4[i]->lr__value = val[i]->value;
+	retval->element_KRB5_4[i]->lr__value = unix2gentime(val[i]->value,
+							    error);
+	if (!retval->element_KRB5_4[i]->lr__value) {
+	    goto errout;
+	}
     }
     return(retval);
 }

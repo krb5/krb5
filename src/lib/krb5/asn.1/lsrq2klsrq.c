@@ -50,7 +50,13 @@ register int *error;
 	    *error = ENOMEM;
 	    return(0);
 	}
-	retval[i]->value = val->element_KRB5_4[i]->lr__value;
+	retval[i]->value = gentime2unix(val->element_KRB5_4[i]->lr__value,
+					error);
+	if (*error) {
+	    /* value is zero if error, so it won't get freed... */
+	    krb5_free_last_req(retval);
+	    return(0);
+	}
 	retval[i]->lr_type = val->element_KRB5_4[i]->lr__type;
     }
     retval[i] = 0;

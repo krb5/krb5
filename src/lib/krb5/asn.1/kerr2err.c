@@ -45,12 +45,17 @@ register int *error;
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_ERROR;
 
-    retval->ctime = unix2gentime(val->ctime, error);
-    if (!retval->ctime) {
-	xfree(retval);
-	return(0);
+    if (val->ctime) {
+	retval->ctime = unix2gentime(val->ctime, error);
+	if (!retval->ctime) {
+	    xfree(retval);
+	    return(0);
+	}
     }
-    retval->cmsec = val->cmsec;
+    if (val->cmsec) {
+	retval->cmsec = val->cmsec;
+	retval->optionals = opt_KRB5_KRB__ERROR_cmsec;
+    }
 
     retval->stime = unix2gentime(val->stime, error);
     if (!retval->stime) {
@@ -59,7 +64,7 @@ register int *error;
 	return(0);
     }
     retval->smsec = val->smsec;
-    retval->error = val->error;
+    retval->error__code = val->error;
 
     if (val->client) {
 	retval->crealm = krb5_data2qbuf(val->client[0]);
@@ -73,9 +78,10 @@ register int *error;
 	}
     }
 
+    /* server is technically not optional, but... */
     if (val->server) {
-	retval->srealm = krb5_data2qbuf(val->server[0]);
-	if (!retval->srealm) {
+	retval->realm = krb5_data2qbuf(val->server[0]);
+	if (!retval->realm) {
 	    *error = ENOMEM;
 	    goto errout;
 	}
@@ -87,6 +93,13 @@ register int *error;
     if (val->text.data) {
 	retval->e__text = krb5_data2qbuf(&val->text);
 	if (!retval->e__text) {
+	    *error = ENOMEM;
+	    goto errout;
+	}
+    }
+    if (val->e_data.data) {
+	retval->e__data = krb5_data2qbuf(&val->e_data);
+	if (!retval->e__data) {
 	    *error = ENOMEM;
 	    goto errout;
 	}

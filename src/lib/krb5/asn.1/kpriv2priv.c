@@ -45,12 +45,10 @@ register int *error;
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_PRIV;
 
-    retval->etype = val->etype;
- 
-    retval->enc__part = krb5_data2qbuf(&(val->enc_part));
+    retval->enc__part = krb5_enc_data2KRB5_EncryptedData(&(val->enc_part),
+							 error);
     if (!retval->enc__part) {
-	free_KRB5_KRB__PRIV(retval);
-	*error = ENOMEM;
+	xfree(retval);
 	return(0);
     }
     return(retval);

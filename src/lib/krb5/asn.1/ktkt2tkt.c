@@ -43,8 +43,8 @@ register int *error;
     xbzero(retval, sizeof(*retval));
 
     retval->tkt__vno = KRB5_PVNO;
-    retval->srealm = krb5_data2qbuf(val->server[0]);
-    if (!retval->srealm) {
+    retval->realm = krb5_data2qbuf(val->server[0]);
+    if (!retval->realm) {
 	*error = ENOMEM;
     errout:
 	free_KRB5_Ticket(retval);
@@ -55,12 +55,9 @@ register int *error;
 	goto errout;
     }
 
-    retval->etype = val->etype;
-
-    retval->skvno = val->skvno;
-    retval->enc__part = krb5_data2qbuf(&(val->enc_part));
+    retval->enc__part = krb5_enc_data2KRB5_EncryptedData(&(val->enc_part),
+							 error);
     if (!retval->enc__part) {
-	*error = ENOMEM;
 	goto errout;
     }
     return(retval);
