@@ -22,7 +22,9 @@
 
 #include <string.h>
 #include <limits.h>
-#if !defined(WIN32)
+#ifdef _WIN32
+#include "port-sockets.h"
+#else
 #   include <unistd.h>
 #   if defined(macintosh)
 #       include <Memory.h>

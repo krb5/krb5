@@ -1,3 +1,9 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* yarrow.c: Use the canonical _WIN32 instead of WIN32 to test for
+	Win32.  Include port-sockets.h on Win32 (now that using
+	WIN32_LEAN_AND_MEAN).
+
 2002-01-14  Sam Hartman  <hartmans@mit.edu>
 
 	* yarrow.c (krb5int_yarrow_reseed): The MS word of  the integer
