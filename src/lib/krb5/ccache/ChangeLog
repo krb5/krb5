@@ -1,3 +1,10 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+          - Activate support for KerbSubmitTicketMessage
+          - Activate support for KerbQueryTicketCacheEx2Message
+          - Add locale support for regions which use MultiByte characters
+
 2004-10-07  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Fix the forced setting of the Initial Ticket Flag
                 on Win2000 and add it to XP and 2003 SP1
