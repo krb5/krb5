@@ -35,6 +35,7 @@ static char enc_dec_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/crc-32.h>
 
 #include "des_int.h"
 
@@ -57,15 +58,15 @@ OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
     krb5_checksum cksum;
-    krb5_octet 	contents[4];
+    krb5_octet 	contents[CRC32_CKSUM_LENGTH];
     char 	*p;
     krb5_error_code retval, mit_des_encrypt_f();
 
     if ( size < sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE;
 
-    p = (char *)in + size - 4;
-    bzero(p, 4);
+    p = (char *)in + size - CRC32_CKSUM_LENGTH;
+    bzero(p, CRC32_CKSUM_LENGTH);
     cksum.contents = contents; 
 
     if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
@@ -76,7 +77,7 @@ OLDDECLARG(krb5_pointer, ivec)
                             &cksum)) 
 	return retval;
     
-    bcopy((char *)contents, p, 4);
+    bcopy((char *)contents, p, CRC32_CKSUM_LENGTH);
  
     return (mit_des_encrypt_f(in, out, size, key, ivec));
 }
@@ -131,8 +132,8 @@ OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
     krb5_checksum cksum;
-    krb5_octet 	contents_prd[4];
-    krb5_octet  contents_get[4];
+    krb5_octet 	contents_prd[CRC32_CKSUM_LENGTH];
+    krb5_octet  contents_get[CRC32_CKSUM_LENGTH];
     char 	*p;
     krb5_error_code   retval, mit_des_decrypt_f();
 
@@ -143,9 +144,9 @@ OLDDECLARG(krb5_pointer, ivec)
 	return retval;
 
     cksum.contents = contents_prd;
-    p = (char *)out + size - 4;
-    bcopy(p, (char *)contents_get, 4);
-    bzero(p, 4);
+    p = (char *)out + size - CRC32_CKSUM_LENGTH;
+    bcopy(p, (char *)contents_get, CRC32_CKSUM_LENGTH);
+    bzero(p, CRC32_CKSUM_LENGTH);
 
     if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
                   sum_func)(out,
@@ -155,7 +156,7 @@ OLDDECLARG(krb5_pointer, ivec)
                             &cksum)) 
 	return retval;
 
-    if ( bcmp((char *)contents_get, (char *)contents_prd, 4) )
+    if ( bcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     return 0;

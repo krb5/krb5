@@ -41,10 +41,13 @@ $(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
-EXT_LIB = $(TOP)/error_tables/krb5_err.o $(TOP)/error_tables/isode_err.o \
-libdes.a -lcom_err
+EXT_LIB = $(TOP)/error_tables/krb5_err.o \
+                  $(TOP)/error_tables/isode_err.o \
+                  $(TOP)/lib/cryptoconf.o \
+                  $(TOP)/lib/crc-32/libcrc32.a \
+                  libdes.a -lcom_err
 
-NormalProgramTarget(verify, $(VERIFYOBJ), EXT_LIB, EXT_LIB, -lcom_err)
+NormalProgramTarget(verify, $(VERIFYOBJ), ,$(EXT_LIB),)
 
 NormalProgramTarget(make_e, make_e.o, misc.o, misc.o, )
 
