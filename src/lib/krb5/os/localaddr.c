@@ -54,7 +54,11 @@
 #include <netinet/in.h>
 
 #ifndef USE_AF
+#ifdef AF_INET6
+#define USE_AF AF_INET6
+#else
 #define USE_AF AF_INET
+#endif
 #define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
 #endif
@@ -115,8 +119,8 @@ krb5_os_localaddr(context, addr)
     struct ifreq *ifr, ifreq;
     struct ifconf ifc;
     int s, code, n, i;
-    char buf[1024];
-    krb5_address *addr_temp [ 1024/sizeof(struct ifreq) ];
+    char buf[1024*10];
+    krb5_address *addr_temp [ sizeof(buf)/sizeof(struct ifreq) ];
     int n_found;
     int mem_err = 0;
     
@@ -181,9 +185,39 @@ n_found = 0;
 		    }
 		} else mem_err++;
 	    }
-#endif
+#ifdef AF_INET6
+	case AF_INET6:
+	    {
+		struct sockaddr_in6 *in =
+		    (struct sockaddr_in6 *)&ifr->ifr_addr;
+
+		if (IN6_IS_ADDR_LINKLOCAL (&in->sin6_addr))
+		    continue;
+
+		address = (krb5_address *)
+		    malloc (sizeof(krb5_address));
+		if (address) {
+		    address->magic = KV5M_ADDRESS;
+		    address->addrtype = ADDRTYPE_INET6;
+		    address->length = sizeof(struct in6_addr);
+		    address->contents = (unsigned char *)malloc(address->length);
+		    if (!address->contents) {
+			krb5_xfree(address);
+			address = 0;
+			mem_err++;
+		    } else {
+			memcpy ((char *)address->contents,
+				(char *)&in->sin6_addr,
+				address->length);
+			break;
+		    }
+		} else mem_err++;
+	    }
+#endif /* AF_INET6 */
+#endif /* netinet/in.h */
+
 #ifdef KRB5_USE_NS
-	    case AF_XNS:
+	case AF_XNS:
 	    {  
 		struct sockaddr_ns *ns =
 		    (struct sockaddr_ns *)&ifr->ifr_addr;

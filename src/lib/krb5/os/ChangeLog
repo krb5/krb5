@@ -1,3 +1,8 @@
+1999-10-17  Ken Raeburn  <raeburn@raeburn.org>
+
+	* localaddr.c (krb5_os_localaddr): Raise buffer size to 10K.
+	Handle INET6 addresses.
+
 1999-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* changepw.c (krb5_locate_kpasswd): Declare local variable i even
