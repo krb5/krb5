@@ -41,8 +41,7 @@ static char *v4_mkeyfile = "/.k";
 
 #include "k5-int.h"
 #include "com_err.h"
-#include "adm.h"
-#include "adm_proto.h"
+#include <kadm5/admin.h>
 #include <stdio.h>
 
 #include <netinet/in.h>			/* ntohl */
@@ -155,6 +154,8 @@ char *argv[];
     char *stash_file = (char *) NULL;
     krb5_realm_params *rparams;
     int	persist, op_ind;
+    kadm5_config_params newparams;
+    extern kadm5_config_params global_params;
 
     krb5_init_context(&context);
 
@@ -426,6 +427,33 @@ master key name '%s'\n",
     (void) krb5_finish_key(context, &master_encblock);
     (void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+
+    /*
+     * Cons up config params for new policy database (which will be
+     * empty).  The policy dbname keys off the dbname.
+     */
+    newparams = global_params;
+    newparams.mask &= ~(KADM5_CONFIG_ADBNAME | KADM5_CONFIG_ADB_LOCKFILE);
+    newparams.dbname = dbname;
+    newparams.mask |= KADM5_CONFIG_DBNAME;
+    if (retval = kadm5_get_config_params(context, NULL, NULL, &newparams,
+				       &newparams)) {
+	 com_err(PROGNAME, retval, "while retrieiving configuration "
+		 "parameters");
+	 return;
+    }
+    /*
+     * Always create the policy db, even if we are not loading a dump
+     * file with policy info, because they are probably loading an old
+     * dump intending to use it with the new kadm5 system (ie: using
+     * load as create).
+     */
+    if (retval = osa_adb_create_policy_db(&newparams)) {
+	 com_err(PROGNAME, retval, "while creating policy database");
+	 kadm5_free_config_params(context, &newparams);
+	 return;
+    }
+
     krb5_free_context(context);
     return;
 }

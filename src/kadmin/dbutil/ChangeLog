@@ -1,5 +1,9 @@
 Thu Aug  1 14:34:51 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
+	* loadv4.c: create empty policy database after loading V4 dump file
+
+	* dumpv4.c (dump_v4db): use global_params.stash_file
+
 	* Makefile.in, Makefile.ov, configure.in, dump.c: add support for
         dump/load of OV*Secure-compatible format.
 

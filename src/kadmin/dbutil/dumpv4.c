@@ -36,6 +36,7 @@
 #include <kdc.h>
 
 #include <stdio.h>
+#include <kadm5/admin.h>
 #include "kdb5_util.h"
 
 struct dump_record {
@@ -54,6 +55,7 @@ extern krb5_principal master_princ;
 extern krb5_boolean dbactive;
 extern int exit_status;
 extern krb5_context util_context;
+extern kadm5_config_params global_params;
 
 void update_ok_file();
 
@@ -352,7 +354,8 @@ int handle_keys(arg)
     krb5_use_enctype(util_context, &master_encblock, DEFAULT_KDC_ENCTYPE);
     if (retval = krb5_db_fetch_mkey(util_context, master_princ, 
 				    &master_encblock, 0,
-				    0, (char *) NULL, 0, &master_keyblock)) {
+				    0, global_params.stash_file, 0,
+				    &master_keyblock)) { 
 	com_err(arg->comerr_name, retval, "while reading master key");
 	exit(1);
     }
