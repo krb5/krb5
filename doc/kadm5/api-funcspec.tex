@@ -449,8 +449,11 @@ table name will be ``ovk'', and the offsets will be the same as the
 order presented here. As mentioned above, the error table include file
 will be $<$ovsec_admin/kadm_err.h$>$.
 
-The integer value of OVSEC_KADM_FAILURE is 43787520; the remaining
-values are assigned in sequentially increasing order.
+Note that these error codes are also used as protocol error code
+constants and therefore must not change between product releases.
+Additional codes should be added at the end of the list, not in the
+middle.  The integer value of OVSEC_KADM_FAILURE is 43787520; the
+remaining values are assigned in sequentially increasing order.
 
 \begin{description}
 \item[* OVSEC_KADM_FAILURE] Operation failed for unspecified reason
