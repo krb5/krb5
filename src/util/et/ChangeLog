@@ -1,3 +1,8 @@
+Wed Jun 22 18:47:36 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* com_err.h: Only set STDARG_PROTOTYPES based on STDC if it isn't
+	set already (clean up warnings.)
+
 Wed Jun 22 17:55:48 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* Makefile.in (CP): set CP so CopySrcHeader actually works.

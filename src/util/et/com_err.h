@@ -10,9 +10,11 @@
 
 #ifndef __COM_ERR_H
 
+#ifndef STDARG_PROTOTYPES
 /* Imake needs this -- oh well */
 #ifdef __STDC__
 #define STDARG_PROTOTYPES
+#endif
 #endif
 
 #ifdef STDARG_PROTOTYPES
