@@ -69,8 +69,8 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     char *cname = 0, *sname = 0, *fromstring = 0;
-    krb5_last_req_entry *nolrarray[1];
-    krb5_address *noaddrarray[1];
+    krb5_last_req_entry *nolrarray[2], nolrentry;
+/*    krb5_address *noaddrarray[1]; */
     krb5_enctype useetype;
     register int i;
     int firstpass = 1;
@@ -195,8 +195,8 @@ tgt_again:
     /* don't use new addresses unless forwarded, see below */
 
     enc_tkt_reply.caddrs = header_ticket->enc_part2->caddrs;
-    noaddrarray[0] = 0;
-    reply_encpart.caddrs = noaddrarray;
+    /* noaddrarray[0] = 0; */
+    reply_encpart.caddrs = 0;		/* optional...don't put it in */
 
         /* It should be noted that local policy may affect the  */
         /* processing of any of these flags.  For example, some */
@@ -509,7 +509,10 @@ tgt_again:
     reply_encpart.times.authtime = kdc_time;
 
 
-    nolrarray[0] = 0;
+    nolrentry.lr_type = 0;		/* XXX 0 is unused?  cf. kdc_util.c */
+    nolrentry.value = 0;
+    nolrarray[0] = &nolrentry;
+    nolrarray[1] = 0;
     reply_encpart.last_req = nolrarray;	/* not available for TGS reqs */
     reply_encpart.key_exp = 0;		/* ditto */
     reply_encpart.flags = enc_tkt_reply.flags;
