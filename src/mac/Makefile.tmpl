@@ -32,11 +32,11 @@ AUTOGEN_C_FROM_ET = /util/et/et_c.perl
 AUTOGEN_OUTPUT = 	/include/asn1_err.h /include/kdb5_err.h /include/krb5_err.h \
 	/include/kv5m_err.h /include/adm_err.h \
 	/lib/gssapi/generic/gssapi_err_generic.h \
-	/lib/gssapi/krb5/gssapi_err_krb5.h \
+	/lib/gssapi/krb5/gssapi_err_krb5.h /util/profile/prof_err.c \
 	/lib/krb5/error_tables/asn1_err.c /lib/krb5/error_tables/kdb5_err.c \
 	/lib/krb5/error_tables/krb5_err.c /lib/krb5/error_tables/kv5m_err.c \
 	/lib/krb5/error_tables/adm_err.c /lib/gssapi/generic/gssapi_err_generic.c \
-	/lib/gssapi/krb5/gssapi_err_krb5.c \
+	/lib/gssapi/krb5/gssapi_err_krb5.c /util/profile/prof_err.h \
 	/include/krb5.h /util/profile/profile.h \
 	/include/profile.h /include/krb5/osconf.h /lib/gssapi/generic/gssapi.h \
 	/include/autoconf.h
@@ -445,9 +445,11 @@ GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
 	MergeFragment "MSL RuntimePPC.DLL" -t 'pwpc' GSSLib
 	MergeFragment "MSL RuntimeCFM68K.DLL" -t 'm68k' GSSLib
 	
+################################################################################
 ##
 ## Clean targets
 ##
+################################################################################
 
 clean : autogenerate-clean
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC} {GSSOBJS68KCFM} \
@@ -455,6 +457,17 @@ clean : autogenerate-clean
 		{KH68K} {KHPPC} {KHCFM-68K} \
 		{GSSSHLIBOBJ68KCFM} {GSSSHLIBOBJPPC} \
 		{K5SHLIBOBJ68KCFM} {K5SHLIBOBJPPC}
+
+dist-clean : clean
+	Delete -i -y /bin
+	Delete -i GSSLib GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K \
+		GSSLibrary68K.MAP GSSLibrary68K.SYM GSSLibraryPPC.MAP GSSLibraryPPC.xSYM \
+		K5Library68K.MAP K5Library68K.SYM K5LibraryPPC.MAP K5LibraryPPC.xSYM \
+		libkrb5.68K libgss.68K libkrb5.PPC libgss.PPC \
+		"MSL C.PPC.DLL" "MSL C.CFM68K.DLL" "MSL RuntimePPC.DLL" "MSL RuntimeCFM68K.DLL" \
+		/mac/libraries/KerberosHeaders.pch.68k.o /mac/libraries/KerberosHeaders.pch.ppc.o \
+		Makefile
+
 # clean-mit :
 # 	Delete -i {GSSOBJ68KCFM-TT} {GSSOBJPPC-TT}
 	
