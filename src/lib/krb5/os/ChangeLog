@@ -1,3 +1,9 @@
+Fri Jul 26 15:58:32 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in, an_to_ln.c (do_replacement, aname_do_match): use
+ 	the compile() function in -lgen on solaris.  Check for the
+ 	relevant stuff at configure-time
+
 Fri Jul 12 21:38:15 1996  Marc Horowitz  <marc@mit.edu>
 
 	* ktdefname.c (krb5_kt_default_name): allow the default keytab name
