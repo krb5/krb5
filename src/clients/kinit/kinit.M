@@ -17,7 +17,10 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 ] [
 .B \-p
 ] [
+.B \-f
+] [
 .B \-r
+.I rlife
 ] [
 .B \-c
 .I cachename
@@ -30,9 +33,9 @@ obtains and caches an initial ticket-granting ticket for
 .IR principal .
 The
 .B \-l
-option specifies the lifetime to be requested for the ticket; if this
-option is not specified, the default ticket lifetime (configured by each site)
-is used instead.
+option specifies the lifetime (in hours) to be requested for the ticket;
+if this option is not specified, the default ticket lifetime (configured
+by each site) is used instead.
 .PP
 The
 .B \-p
@@ -40,9 +43,15 @@ option specifies that the PROXIABLE option should be requested for the
 ticket.
 .PP
 The
-.B \-r
-option specifies that the RENEWABLE option should be requested for the
+.B \-f
+option specifies that the FORWARDABLE option should be requested for the
 ticket.
+.PP
+The
+.B \-r
+.I rlife
+option specifies that the RENEWABLE option should be requested for the
+ticket, and specifies (in hours) the desired total lifetime of the ticket.
 .PP
 The
 .B \-c
