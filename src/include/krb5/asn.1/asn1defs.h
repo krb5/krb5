@@ -169,6 +169,8 @@ struct type_KRB5_KRB__SAFE *krb5_safe2KRB5_KRB__SAFE
 	PROTOTYPE((const krb5_safe *, int *));
 
 /* ktgrq2tgrq.c */
+struct type_KRB5_KDC__REQ__BODY *krb5_kdc_req2KRB5_KDC__REQ__BODY
+	PROTOTYPE((const krb5_kdc_req *, int *));
 struct type_KRB5_TGS__REQ *krb5_kdc_req2KRB5_TGS__REQ
 	PROTOTYPE((const krb5_kdc_req *, int *));
 
@@ -205,6 +207,8 @@ krb5_safe *KRB5_KRB__SAFE2krb5_safe
 	PROTOTYPE((const struct type_KRB5_KRB__SAFE *, int *));
 
 /* tgrq2ktgrq.c */
+krb5_kdc_req *KRB5_KDC__REQ__BODY2krb5_kdc_req
+	PROTOTYPE((const struct type_KRB5_KDC__REQ__BODY *, int *));
 krb5_kdc_req *KRB5_TGS__REQ2krb5_kdc_req
 	PROTOTYPE((const struct type_KRB5_TGS__REQ *, int *));
 
