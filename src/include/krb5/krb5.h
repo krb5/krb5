@@ -3,7 +3,7 @@
  * $Author$
  * $Id$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/mit-copyright.h>.
@@ -26,7 +26,8 @@
 #include <krb5/fieldbits.h>
 #include <krb5/errors.h>
 #include <krb5/proto.h>
-#include <krb5/tcache.h>
+#include <krb5/ccache.h>
+#include <krb5/rcache.h>
 
 /* Time set */
 typedef struct _krb5_ticket_times {
@@ -41,7 +42,7 @@ typedef struct _krb5_ticket_times {
 typedef struct _krb5_authdata {
     krb5_authdatatype ad_type;
     int length;
-    krb5_octet contents[1];			/* actually can be more, depending
+    krb5_octet contents[1];		/* actually can be more, depending
 					   on length */
 } krb5_authdata;
 
@@ -204,4 +205,7 @@ typedef struct _krb5_priv_enc_part {
     krb5_ui_2 msec;			/* millisecond portion of time */
     krb5_address **addresses;		/* array of ptrs to addresses */
 } krb5_priv_enc_part;
+
+#include <krb5/func-proto.h>
+
 #endif /* __KRB5_GENERAL__ */
