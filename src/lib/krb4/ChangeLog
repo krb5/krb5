@@ -1,0 +1,1135 @@
+Tue Mar 28 09:19:23 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* send_to_kdc.c (send_to_kdc): only use secondary port if entry
+	for primary doesn't have an explicit port number. Secondary port
+	is still guessed to be 750. Also *don't* switch to the secondary
+	port in general, since we might be using multiple realms.
+
+Tue Feb 14 23:24:50 1995  John Gilmore  <gnu@cygnus.com>
+
+	* sendauth.c (krb_net_rd_sendauth):  Result is a Kerberos error
+	code, not an errno.
+
+Mon Feb  6 16:11:52 1995  John Gilmore  (gnu at toad.com)
+
+	* mac_store.c (DeleteServerMap):  When skipping a realm map, skip
+	also the admin-flag byte; else walking the list of strings gets
+	very confused. 
+
+	* mac_stubs.c (kdriver):  Rename static variable to mac_stubs_kdriver,
+	and export it to callers.
+	(krb_get_ticket_for_service):  Circumvent MPW compiler bug that
+	doesn't like array->memb inside a sizeof.  array[0].memb works.
+
+Wed Feb 1 12:00:00 1995  John Rivlin  <jrivlin@cygnus.com>
+
+	* Makefile.in: Modify install-windows and clean-windows
+	targets to install libraries into src/windows directory.
+
+Tue Jan 24 10:35:31 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* g_pw_in_tkt.c (krb_get_pw_in_tkt_preauth): Check for a NULL
+	password if _WINDOWS or macintosh.
+
+Mon Jan 23 17:06:10 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* g_pw_in_tkt.c (passwd_to_key): When not _WINDOWS or macintosh,
+	restore code to call des_read_password if passwd is NULL.
+	(krb_get_pw_in_tkt): Only error out if password is NULL if
+	_WINDOWS or macintosh.
+
+	* g_krbhst.c (get_krbhst_default): New static function.
+	(krb_get_krbhst): Use get_krbhst_default.
+
+Fri Jan 20 12:00:00 1995  John Rivlin  (jrivlin@fusion.com)
+
+	* Makefile.in: Changed libentry to debug in link command as
+	libentry is no longer provided in the Visual C++ environment.
+	Libentry is part of the library in Visual C++.  Debug is used
+	purely to satisfy the syntax requirements of the link command.
+
+Thu Jan 19 14:18:10 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* sendauth.c (krb_net_rd_sendauth): If the raw ticket length looks
+	like the start of a warning from SunOS4 ld.so, just ignore the
+	warning message, and look for the ticket after it.
+
+Mon Jan 16 16:11:21 1995  John Gilmore  <gnu@cygnus.com>
+
+	* kuserok.c (kuserok):  Allow realm to be defaulted in the
+	~/.klogin file; this simplfies DejaGnu testing of Kerberos.
+	Fix bug that left kname_parse arguments uninitialized. 
+
+Mon Jan 16 11:54:01 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* krb_err.et: Change KRBET_RD_APTIME message from ``delta_t too
+	big'' to ``time is out of bounds.''
+
+	* send_to_kdc.c: If POSIX, include <stdlib.h> instead of declaring
+	malloc, calloc, and realloc.
+	(cached_krb_udp_port): Make static.
+	(send_to_kdc): If send_recv fails, and the kerberos port number
+	used is from getservbyname, and is not 750, then try sending to
+	port 750.
+
+	* realmofhost.c (krb_realmofhost): If DO_REVERSE_RESOLVE is
+	defined, canonicalize using gethostbyaddr.
+
+Thu Jan 12 17:40:26 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* in_tkt.c (in_tkt): Set umask to 077 around creation of ticket
+	file to ensure that it is created with write access, even if the
+	user has a screwy umask value.
+
+Thu Dec 29 23:59:49 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): factored out into
+	krb_mk_in_tkt_preauth and krb_parse_in_tkt. This simplifies the
+	SNK4 support on platforms that can't do callbacks from (shared)
+	libraries.
+
+Tue Dec 27 11:12:54 1994  Ian Lance Taylor  <ian@cygnus.com>
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): Rewrite switch statement to
+	work when compiled by SCO 3.2v4 native C compiler.
+	* g_ad_tkt.c (get_ad_tkt): Likewise.
+
+Fri Dec 23 15:47:20 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* memcache.c (unix): Define if _AIX is defined (AIX compiler does
+	not predefine unix).
+
+Fri Dec 16 18:57:40 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* memcache.h: Use PROTOTYPE in declarations.
+	* memcache.c: Rewrite function definitions to use Classic C
+	parameter repetition rather than prototypes.
+
+Thu Dec 15 18:23:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* memcache.c: Add typedefs and macro definitions to make this file
+	compile on Unix as well as on Windows and the Mac.
+
+Wed Dec 14 19:31:24 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): Comment out assignment to
+	exp_date, since it is not used.
+
+Wed Nov 23 12:30:49 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* fakeenv.c (_findenv, unsetenv): New functions, copied in from
+	setenv.c.  The telnet server uses unsetenv.
+
+Wed Nov 23 00:53:10 1994  John Gilmore  (gnu@cygnus.com)
+
+	* realmofhost.c (krb_realmofhost):  Allow arbitrary host
+	names here, as in krb_get_phost, by canonicalizing the name
+	into a fully qualified name using gethostbyname().  This
+	has the effect of letting users not set the "local realm"
+	config knob in more cases, since a name without a dot will
+	be canonicalized and searched-for in the domain-to-realm
+	database, rather than being assumed to be in the local realm.
+	This problem was found by using unqualified hostnames in Wintel.
+
+Wed Nov 23 00:26:17 1994  John Gilmore  (gnu@cygnus.com)
+
+	Clean up a few misleading error messages.
+
+	* memcache.c (krb_get_tf_fullname):  Return NO_TKT_FIL if
+	there are no tickets cached, just like from tf_util.c.
+	* g_ad_tkt.c (get_ad_ticket):  If we try cross-realm 
+	authentication, and it fails for lack of a key in the
+	kerberos database, return AD_NOTGT ("No ticket-
+	granting ticket") rather than KDC_PR_UNKNOWN ("Principal unknown").
+	* krb_err.et, err_txt.c:  Update NO_TKT_FIL error message from
+	"No ticket file (tf_util)" to "You have no tickets cached".
+
+Thu Nov 17 12:31:27 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mk_preauth.c (krb_mk_preauth): des_key_sched takes a des_cblock
+	argument, not des_cblock *, so remove the cast.
+	* rd_preauth.c (krb_rd_preauth): Likewise.
+
+Wed Nov 16 22:13:28 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* mk_preauth.c (krb_mk_preauth): use des_key_sched instead; check
+	its return value and fail if it fails.
+	* rd_preauth.c (krb_rd_preauth): ditto.
+
+Wed Nov 16 17:35:07 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* mk_preauth.c (krb_mk_preauth): add R3 implementation (and
+	NOENCRYPTION version) which passes encrypted aname.
+	(krb_free_preauth): free storage from both implementations.
+	* rd_preauth.c (krb_rd_preauth): add R3 implementation.
+
+Wed Nov 16 17:28:14 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* g_pw_in_tkt.c (stub_key): use memcpy, in case the C_Block is an
+	array and not a struct.
+
+Wed Nov  9 12:45:02 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* in_tkt.c: Fix thinko in last change.
+
+Fri Nov  4 12:05:57 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* in_tkt.c: Don't redefine setreuid if both hpux and __svr4__.
+
+Fri Nov  4 02:10:58 1994  John Gilmore  (gnu@cygnus.com)
+
+	Make it build on MS-Windows again.
+
+	* Makefile.in (NETIO_SRCS, NETIO_OBJS):  Break out, since these
+	are required on MS-Windows and prohibited on Mac.
+	(kerberos.dll):  Avoid line-length problems by copying 
+	libraries from other directories and using very short names.
+
+Tue Nov  1 15:47:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* dest_tkt.c: Include "krb.h" before <stdio.h>.
+
+Mon Oct 31 19:41:14 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Makefile.in (CODE): Use Makefile.in instead of Imakefile.
+
+Fri Oct 28 15:21:56 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* month_sname.c: Include conf.h.
+	* one.c: Likewise.
+
+	* rd_req.c (krb_rd_req): Pass address of the array ad->session, to
+	match function definition.
+
+Wed Oct 12 00:37:46 1994  Julia Menapace  (jcm at toad.com)
+
+	* Password.c: Include kerberos.h not Krb.h.  Define KRB_DEFS to
+	avoid multiple symbol definitions from krb_driver.h.  Needs further
+	cleanup but not just before release.
+
+Mon Oct 10 20:07:56 1994  Julia Menapace  (jcm at toad.com)
+
+	* g_tkt_svc.c: (cacheInitialTicket) moved to new file Password.c
+
+	* mac_glue.c:  Remove superfluous comment.
+
+	* mac_stubs.c: Add code translating unix function call to mac
+	driver control call for krb_get_tf_fullname
+
+	* macsock.c: Remove superflous comment.
+
+	* memcache.c: Remove unused #includes
+	(krb_get_tf_realm) pass tktfile instead of blank to
+	krb_get_tf_fullname.
+
+	(get_tf_fullname): Because the symantics of GetNthCredentials
+	(called by this routine) were changed to disable multiple named
+	caches (for UNIX compatability) we have to replace the user name
+	and instance it returns with the actual name and instance of the
+	current cache, set by in_tkt and stored in file static global
+	variables.
+
+Mon Oct 10 13:37:34 1994  Julia Menapace  (jcm at toad.com)
+
+	* mk_auth.c:  New file, created from sendauth.c.  Contains just
+	the portable parts of sendauth.c (krb_mk_auth and krb_check_auth).
+	* sendauth.c (krb_mk_auth, mrb_check_auth):  Move these functions
+	to mk_auth.c.
+	* Makefile.in (SRCS, OBJS, SERVER_KRB_SRCS, SERVER_KRB_OBJS):
+	Add mk_auth.c to SRCS/OBJS; remove sendauth.c, netread.c, and 
+	netwrite.c from SRCS/OBJS to SERVER_KRB_SRCS/OBJS.
+
+Thu Sep 29 15:31:24 1994  John Gilmore  (gnu@cygnus.com)
+
+	* realmofhost.c (krb_realmofhost):  Correct off-by-one error in
+	default handling of top and second-level domains.
+
+Fri Sep 23 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* Makefile.in: Added kstream library to kerberos.dll
+
+	* kerberos.def: Added kstream library to kerberos.dll
+
+Fri Aug 19 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* g_pw_in_.c: Added (key_proc_type) cast for stub_key to remove
+	warnings with prototypes active.
+
+	* kerberos.def: Added des_ecb_encrypt to externals for telnet.
+
+Wed Sep 14 12:58:05 1994  Julia Menapace  (jcm@cygnus.com)
+
+	* mac_stubs.c (krb_get_err_text): make return type const.
+	(GetNthRealmMap): add routine to stubs library to generate a
+	driver call returning the Nth Realm mapping.
+	(GetNthServerMap): add routine to stubs library to generate a
+	driver call returning the Nth server mapping.
+	* g_tkt_svc.c (CacheInitialTicket): If user name has changed save
+	it.
+	* memcache.c (krb_save_credentials): Fill in credential with
+	currently authorized user name and instance expected by kerberos,
+	(passed to and stored by in_tkt) instead of FIXED user name and
+	instance used to select credentials cache (is same for all cases to
+	disable multi named caches, using/reusing single named cache for
+	all cases).
+
+Tue Sep 13 16:45:01 1994 Julia Menapace (jcm@cygnus.com)
+
+	* err_txt.c (MULTIDIMENSIONAL_ERR_TXT):  Rename from 
+	UNIDIMENSIONAL_ARRAYS to reflect what's actually going on.
+
+Thu Aug 18 20:26:16 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* g_tkt_svc.c (CredIsExpired): use proper style of declaration so
+	that it works with k&r compilers.
+
+Wed Aug 10 13:47:55 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* err_txt.c (krb_err_txt): Export it again, to avoid gratuitous
+	incompatibility. Programs that can't deal with the use of the
+	array don't have to use it.
+
+Fri Aug  5 15:55:02 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* tf_util.c (tf_save_cred): cast 0 to (off_t), don't assume 0L
+	will work (it doesn't in netbsd.)
+
+Mon Aug 6 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* g_cnffile.c: Added definition for getenv.
+
+	* Makefile.in: Added KADM_LIB_FOR_DLL library in kerberos.dll
+	Updated clean target to avoid deleteion of krb_err.h under
+	Windows.
+
+	* kerberos.def: Added inteface for KRB_GET_NOTIFICATION_MESSAGE,
+	KADM_INIT_LINK, KADM_CHANGE_PW, KADM_CHANGE_PW and KADM_GET_ERR_TEXT
+	and renumbered entrypoints for consistency.
+
+	* memcache.c (change_session_count, change_cache): Changed 
+	change_session_count to change_cache.  This
+	routine now maintains the lock on the library as well as sending
+	ot broadcast messages to all to level windows when the cache
+	changes. Also changed all calls to above routine throughout 
+	memcache.c.
+
+	* netwrite.c: use newly added SOCKET_READ and SOCKET_EINTR values
+	to avoid use of read on Windows.  VMS dependencies moved to c-vms.h
+	for uniformity with other platforms.
+
+	* netread.c: use newly added SOCKET_READ and SOCKET_EINTR values
+	to avoid use of read on Windows.  VMS dependencies moved to c-vms.h
+	for uniformity with other platforms.
+	
+	* memcache.c: sname, sinst, srealm not stored if null pointers
+	passed in.  This avoids problems found porting kpasssd.
+
+Mon Aug 1 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* kerberos.def: Changed heapsize to 8192 to avoid LocalAlloc
+	failure messages on startup. Added kadm_change_pw2 to external
+	interface.
+	
+	* win_glue.c (krb_get_default_user, krb_set_default_user): Have
+	been moved to win_store.c.
+
+	* win_store.c: Use KERBEROS_INI and INI_xxx values in c-windows.h
+	rather than hard coded strings.
+
+	* win_store.c (krb_get_default_user, krb_set_default_user): Added
+	to save and retieve value of "[DEFAULTS] user =" in kerberos.ini
+	file.
+
+	* realmofhost.c (krb_realmofhost): Now calls krb__get_relmsfile
+	rather than opening up the krb.realms file directly so that
+	Windows version can override the location of the file.
+
+	* win_stor.c: Stores the 
+
+Wed Jul 27 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* g_cnffil.c (krb__get_realmsfile): Added a routine to open
+	the krb.realms file so that the routine can be overridden
+	in Windows implementation with a routine which looks up
+	the name of the realms file in the kerberos.ini file.
+
+	* win_store.c: Created to parallel the Mac implementation.
+	Routines in this file will provide access to the krb.conf,
+	krb.realms files and other configuration information.
+
+	* ren.msg: Created entry for win_store.
+
+	* Makefile.in: Move g_cnffile.c to REALMDBSRCS to allow 
+	Windows to override this functionality with a routine in 
+	win_store.c routine.
+
+Tue Jul 26 12:00:00 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* netread.c: errno redefinition under Windows ifdefed out.
+	* netwrite.c: errno redefinition under Windows ifdefed out.
+
+Fri Jul 22 23:07:21 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* rd_preauth.c (krb_rd_preauth): change interface to include the
+	decrypted key (since the server has already looked it up.)
+
+Thu Jul 21 17:24:13 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* g_krbrlm.c (krb_get_lrealm): use krb__get_cnffile, don't
+	(mis)declare fopen.
+	* g_krbhst.c (krb_get_krbhst): ditto.
+	* g_admhst.c (krb_get_admhst): ditto.
+	* Makefile.in (OBJS, SRCS): build get_cnffile.c.
+
+Thu Jul 21 17:10:35 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* g_pw_in_tkt.c (krb_get_pw_in_tkt_preauth): *MUST* continue to
+	allow the password not to be passed in, since there is code that
+	does interesting things in the passwd_to_key routine.
+
+	* g_svc_in_tkt.c (stub_key): don't assume C_Block is a struct; use
+	memcpy instead of *.
+
+	* log.c (krb_log): use char* instead of int for default args.
+	Don't declare fopen explicitly, let stdio.h do it.
+	Don't include sys/time.h under VMS.
+	* klog.c (klog): ditto.
+
+Wed Jul 20 22:34:11 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* rd_safe.c (krb_rd_safe): handle direction bit correctly when
+	krb_ignore_ip_address is set.
+
+	* rd_priv.c (krb_rd_priv): same.
+
+	* send_to_kdc.c: support arbitrary KDC port number in krb.conf file.
+
+	* g_cnffile.c: new file. common interface to krb.conf.
+	vmslink.com: new file. linker script to build libkrb.olb under
+	VMS; run as @vmslink.
+	vmsswab.c: vms runtime doesn't have swab.
+
+Wed Jul 20 20:38:19 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kparse.c (strsave): only define locally if HAVE_STRSAVE isn't set.
+
+Tue Jul 19 12:00:00 1994  John Rivlin (jrivlin@fusion.com)
+
+	* memcache.c (NewHandle, SetHandleSize, MemError): Updated to return
+	valid Mac compatable error codes.  Got rid of warning messages for 
+	pointer mismatches.
+
+	* memcache.c (change_session_count): added routine and calls to it
+	to facilitate cross session ticket cacheing under Windows.  
+	Moved fNumSessions definition up so that Windows code can get to it.
+	
+	* win_glue.c (LibMain, get_lib_instance): added to return HINSTANCE 
+	of library which is now saved in LibMain.
+
+Tue Jul 19 16:08:49 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* klog.c (klog): Leave local static array logtype_array
+	uninitialized, to put it in bss.
+
+	* g_ad_tkt.c (rep_err_code): Variable deleted.
+	(get_ad_tkt): Make it automatic here.  Local variables pkt_st,
+	rpkt_st, cip_st, tkt_st no longer static.
+	* kname_parse.c (kname_parse): Local variable buf no longer
+	static.
+	* rd_req.c (krb_rd_req): Local variables ticket, tkt, req_id_st,
+	seskey_sched, swap_bytes, mutual, s_kvno no longer static.
+	* rd_safe.c (calc_cksum, big_cksum, swap_bytes): Variables
+	deleted.
+	(krb_rd_safe): Make them automatic variables here.  Local variable
+	src_addr no longer static.
+	* rd_priv.c (c_length, swap_bytes, t_local, delta_t): Variables
+	deleted.
+	(krb_rd_priv): Make them automatic variables here.  Local variable
+	src_addr no longer static.
+	* mk_safe.c (cksum, big_cksum, msg_secs, msg_usecs, msg_time_5ms,
+	msg_time_seg): Variables deleted.
+	(krb_mk_safe): Make them automatic variables here.
+	* mk_priv.c (c_length, msg_time_5ms, msg_time_sec, msg_time_usec):
+	Variables deleted.
+	(krb_mk_priv): Make them automatic variables here.  Local variable
+	c_length_ptr also no longer static.
+
+	* pkt_clen.c (swap_bytes): No longer explicitly extern.
+	* g_ad_tkt.c (swap_bytes): Make it extern here.
+
+	* kparse.c (LineNbr, ErrorMsg): Now static.
+
+	* err_txt.c (krb_err_txt): Don't export this name.  Make it const
+	again.
+
+	* netread.c: Include errno.h.
+	(errno): Declare.
+	(krb_net_read): On EINTR, retry read.
+	* netwrite.c: Include errno.h.
+	(errno): Declare.
+	(krb_net_write): On EINTR, retry write.
+
+Mon Jul 18 19:04:03 1994  Julia Menapace (jcm@cygnus.com)
+
+	* err_txt.c (krb_err_txt): if the C compiler can't initialize
+	multidimentional arrays, declare it differently (controlled by
+	UNIDIMENSIONAL_ARRAYS).
+
+	* mac_stubs.c (krb_get_cred, krb_save_credentials,
+	krb_delete_cred, krb_get_nth_cred, krb_get_num_cred): new
+	functions to implement credentials caching.
+
+	* memcache.c  (krb_get_cred, krb_save_credentials,
+	krb_delete_cred, krb_get_nth_cred, krb_get_num_cred): actual
+	implementation of this functionality.
+
+Fri Jul 15 17:35:30 1994  John Rivlin (jrivlin@fusion.com)
+
+	* ren.msg: updated to handle all files (changelogs, makefiles etc)
+
+	* Makefile.in: added "-" on clean: to avoid stupid messages
+
+	* g_pw_in_tkt.c (get_pw_in_tkt_preauth): added INTERFACE 
+	for kinit.
+
+	* kerberos.def: clean up, removed unused function references
+	
+	* win_glue.c (krb_start_session): fixed syntax error
+
+	* win_glue.c (krb_end_session): fixed syntax error
+
+Tue Jul 12 17:35:30 1994  D. V. Henkel-Wallace  (gumby@rtl.cygnus.com)
+
+	* ren.msg: add record for g_tkt_svc.c
+
+Fri June 8 02:40:54 1994  John Rivlin  (jrivlin@fusion.com)
+
+	* makefile.in: Updated file with portable directory syntax for PC.
+	Changed .o and .a references to portable syntax
+	Removed all response files which needed to be generated under unix
+	to simplify configure process so that it may be run on the PC.
+	Placed objects in .lib file so that DLL construction can take place
+	without a response file.  This solves a problem with running out of
+	memory on the PC during builds.
+	Updated clean: target to place rm commands on seperate lines for
+	compatibility with PC DEL command.
+
+	* win_glue (krb_start_session): Added a dummy parameter to match 
+	prototype.
+
+	* win_glue (krb_end_session): Added a dummy parameter to match 
+	prototype.
+
+Tue Jul  5 11:25:31 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* err_txt.c (krb_err_txt): Now const.
+	(krb_get_err_text): Returns pointer to const.
+	* month_sname.c (month_sname): Month name array and return type
+	now both const.
+	* one.c (krbONE): Now const.
+
+	* g_tkt_svc.c: Include string.h.
+
+	* kntoln.c (krb_kntoln): Static variable lrealm is no longer
+	explicitly initialized; now in bss.
+	* tf_util.c (krb_shm_addr, tmp_shm_addr, krb_dummy_skey): Ditto.
+	* tkt_string.c (krb_ticket_string): Ditto.
+
+	* mk_req.c (krb_mk_req): Removed "static" from many function
+	variables.
+
+	* tkt_string.c (krb_set_tkt_string): Deleted extra whitespace,
+	unnecessary "return" statement.
+
+Fri Jul  1 04:50:06 1994  John Gilmore  (gnu@cygnus.com)
+
+	* macsock.c:  Eliminate "TCPTB.h".
+	* mac_stubs.c (isname, isinst, isrealm):  Remove, useless.
+	(krb_get_pw_in_tkt_preauth):  Stub out to be the same as
+	krb_get_pw_in_tkt, for kinit's sake.
+
+	* mac_stubs.c (hicall):  Fix error handling somewhat.
+
+	* Makefile.in (SRCS, OBJS):  Add g_tkt_svc.c, .o.
+
+	* kname_parse.c, rd_priv.c, rd_safe.c, unix_glue.c:  Typos.
+
+Fri Jul  1 03:55:29 1994  John Gilmore  (gnu@cygnus.com)
+
+	Make Kerberos work in a Macintosh driver using Think C.
+
+	* %KrbLib-project:  Think C "project file" (sort of
+	makefile and object files rolled into one -- all binary)
+	for the Kerberos library built for linking into applications
+	(for debugging).
+	* %KrbLib-project-A4:  Ditto, for linking into device drivers.
+
+	* mac_stubs.c:  New file, implements the function-call
+	interface of "kerberos.h" by making calls to a device-driver
+	using the hairy Mac interface of "krb_driver.h".  If you
+	link with this, your Mac program can use a portable, clean
+	interface to Kerberos.
+
+	* g_tkt_svc.c:  New file, krb_get_ticket_for_service,
+	an "easy application kerberizer", derived from kclient.
+
+	* err_txt.c (krb_err_txt):  Avoid pointers to string initializers,
+	since Think C can't cope with this in device drivers.
+	(krb_get_err_table):  Remove interface, unused.
+
+	* month_sname.c:  Avoid pointers to string initializers.
+	* kname_parse.c:  Add FIXME comment about args.
+	* mac_glue.c (read, write krb_ignore_ip_address):  Stub out.
+	* macsock.c, memcache.c, sendauth.c:  Lint.  Think includes.
+
+	* mac_store.h:  Eliminate static and obsolete stuff.
+	* mac_store.c:  Update includes for Think.
+	(gUserName):  Make static.
+	(krb_get_default_user, krb_set_default_user):  Add.
+	* unix_glue.c, win_glue.c (krb_set_default_user):  Add stub.
+
+	* g_ad_tkt.c, kname_parse.c, memcache.c, mk_priv.c, mk_req.c,
+	mk_safe.c, pkt_clen.c, rd_priv.c, rd_safe.c:  Remove uses of
+	printf, by using DEB macro.
+
+	* send_to_kdc.c:  Change to "krbports.h".
+	(DEB):  Remove definition in favor of krb.h.
+	(all calls to DEB):  Avoid passing stdout or stderr.
+
+Thu Jun 30 22:58:59 1994  John Gilmore  (gnu@tweedledumb.cygnus.com)
+
+	* *.c:  Remove remaining RCS ID strings.  Strings used as `char *'
+	initializers upset Think C when building device drivers, since it
+	doesn't have a good way to relocate the pointers when the driver
+	is loaded.
+
+	* *.c:  Use #include "..." rather than #include <...> for
+	our own local include files, because Think C can't find them
+	when enclosed in <...>.
+
+Thu Jun 30 17:48:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* send_to_kdc.c (prog): Now const pointer to const.
+	(timeout): Static var deleted.
+	(send_recv): Use a local timeout structure instead, reinitialized
+	before each use, in case select modifies its value.
+
+Wed Jun 22 19:42:50 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* mk_preauth.c (krb_free_preauth): New function to free up storage
+	allocated by krb_mk_preauth (if any.)
+
+	* g_pw_in_tkt.c (krb_get_pw_in_tkt_preauth): use krb_free_preauth
+	to possibly release storage used by krb_mk_preauth.
+
+	* g_svc_in_tkt.c (krb_get_svc_in_tkt_preauth): use
+	krb_free_preauth to possibly release storage used by krb_mk_preauth.
+
+Wed Jun 22 19:33:21 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* put_svc_key.c: USE_UNISTD_H to get SEEK_CUR if neccessary.
+
+Wed Jun 22 18:11:49 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* sendauth.c (krb_mk_auth): Don't call memset with BUFSIZ, since
+	the field in question is only MAX_KTXT_LEN bytes long.
+
+	* in_tkt.c, mk_priv.c, mk_safe.c, pkt_cipher.c, pkt_clen.c,
+	rd_err.c, rd_priv.c, rd_safe.c, tf_util.c: Include string.h.
+
+Wed Jun 22 15:11:35 1994  John Gilmore  (gnu@cygnus.com)
+
+	* ren.msg:  Add put_svc_key.c.
+
+Wed Jun 22 15:03:53 1994  Mark Eichin  (eichin at tweedledumber.cygnus.com)
+
+	* put_svc_key.c (put_svc_key): new file, new function.
+	* Makefile.in: add put_svc_key to SERVER_KRB_*.
+
+Tue Jun 21 01:20:44 1994  John Gilmore  (gnu@cygnus.com)
+
+	* kname_parse.c (kname_parse, isinst):  Allow periods in instance
+	names.  Pull RCS crud.
+
+Tue Jun 21 00:20:20 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (all):  First rule in file just calls all-really.
+	(all-really):  Call $(ALL_WHAT) after it's been set.
+	* memcache.c:  Remove typedef kludges to
+	../../include/mt-windows.h.  Add Size.  WINDOWS -> _WINDOWS.	
+
+Sat Jun 18 09:11:49 1994  John Gilmore  (gnu@cygnus.com)
+
+	Make DES library independent of krb library.
+
+	* unix_glue.c, mac_glue.c, win_glue.c:  Remove time-handling
+	code to ../../lib/des/*_time.c.
+
+Sat Jun 18 07:46:32 1994  John Gilmore  (gnu@cygnus.com)
+
+	* send_to_kdc.c (send_recv):  Use SOCKET_NFDS as first arg to
+	select().
+	* macsock.c (gethostname):  Add incomplete stab at gethostname(),
+	under #if 0.
+	* cr_ciph.c, cr_tkt.c, decomp_tkt.c, g_ad_tkt.c, mac_store.c,
+	mk_req.c, mk_safe.c: Lint.
+
+Fri Jun 17 02:02:00 1994  John Gilmore  (gnu@cygnus.com)
+
+	* DNR.c:  New file of MacTCP interface code.
+	* macsock.c:  To avoid using StreamPtr in <macsock.h>, declare
+	fStream as unsigned long.  Cast it whenever we need it.  This
+	removes the need to include MacTCP header files in <macsock.h>.
+	* macsock.c, mac_glue.c:  Eliminate inclusion of "mac_glue.h".
+	* mac_glue.h:  Remove.
+
+Thu Jun 16 17:30:04 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (unixmac):  New target.
+	* g_in_tkt.c:  MPW complains about types without a cast.
+	* mac_glue.c:  Pull networking code out into macsock.c.
+	(krb_get_phost):  Pull this; use ordinary common version.
+	(krb_start_session, krb_end_session):  Add.
+	* mac_store.c (gUserName):  Add definition.
+	Move static declarations above where they're needed.
+	(krb_realmofhost):  Return null pointer, not KFAILURE.
+	* macsock.c:  New file, implements socket abstraction for UDP.
+	* memcache.c: Update header file handling.  FIXME, works on Mac,
+	not on Windows too.
+	* send_to_kdc.c (send_to_kdc):  Clean up error handling.
+	Improve comments.  Add prototype for static function.
+	* stime.c:  #define NEED_TIME_H.  Use proper type for time_t.
+
+Wed Jun 15 16:35:52 1994  John Gilmore  (gnu@cygnus.com)
+
+	* unix_glue.c (krb_start_session, krb_end_session):  Take
+	args and ignore them, to match the prototypes.
+
+Fri Jun 10 22:52:14 1994  John Gilmore  (gnu@cygnus.com)
+
+	* g_in_tkt.c (swap_bytes):  Declare extern, not common.
+	* mac_glue.h:  New (was called MacMachineDependencies.h in
+	an earlier incarnation).
+	* mac_glue.c:  Add code for time zone and Domain Name
+	Service resolution.
+	* mac_store.c:  Eliminate credential storage, leaving just
+	configuration storage.  Initialize the store whenever a
+	high-level routine is called and we haven't initialized.
+	Return result from init_store, so callers can return
+	KFAILURE if we can't read the config data.
+	* mac_store.h:  Pull credential storage (now in memcache.h).
+	* unix_glue.c (krb_start_session, krb_end_session,
+	krb_get_default_user):  Provide dummy ones on Unix.
+
+Thu Jun  9 00:47:59 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (SRCS, OBJS):  Move cr_death_pkt.c and kparse.c
+	to SERVER_SRCS and SERVER_OBJS.
+	(DELIVERABLES, INSTALL_DELIVERABLES):  Replace with ALL_WHAT
+	and INSTALL_WHAT, which actually work.
+	(all-unix):  Main rule for building on Unix now.
+	(clean):  Consolidate `make clean' entries so it actually works.
+
+Wed Jun  8 23:47:30 1994  John Gilmore  (gnu@cygnus.com)
+
+	Further DLL support for Windows, plus, make previous
+	changes work on Unix again.
+
+	* memcache.c:  New file implements ticket cacheing in RAM.
+	* memcache.h:  Interface for memcache.c.
+
+	* win_glue.c: Remove stub interfaces for in_tkt, save_credentials,
+	krb_save_credentials, krb_get_cred, dest_tkt, krb_get_tf_realm.
+
+	* g_ad_tkt.c, g_in_tkt.c:  Rename save_credentials to
+	krb_save_credentials.
+	* save_creds.c (save_credentials):  Remove.
+	* g_in_tkt.c (decrypt_tkt, krb_get_in_tkt_preauth):
+	Declare and use new key_proc_type and decrypt_tkt_type
+	typedefs for pointers to function prototypes.
+	(krb_get_in_tkt):  Move after krb_get_in_tkt_preauth.
+	* mk_preauth.c (krb_mk_preauth):  Declare and use key_proc_type.
+
+	* dest_tkt.c (dest_tkt), in_tkt.c (in_tkt), g_tf_fname.c
+	(krb_get_tf_fullname): If ticket cache selector is null, use
+	default cache.  (Cache selector used to be the result of
+	tkt_string; now tkt_string is called when it is null.)
+
+	* send_to_kdc.c:  Replace all debug printf's with calls to
+	the DEB macro, which is a no-op unless #define DEBUG.
+	Insert #ifdef DEBUG where that is inconvenient.  (DLL libc
+	doesn't seem to have printf.)  Lint.
+
+	* g_krbrlm.c (krb_get_lrealm):  Declare as INTERFACE.
+	Break out KRB_CONF into a static variable so we can debug it
+	easier.
+	
+	* g_pw_in_tkt.c (krb_get_pw_in_tkt):  Declare as INTERFACE.
+	Give an explicit error if the supplied password is null;
+	this forces the caller to supply us one, rather than relying
+	on a Kerberos library routine to interact with the user.  Lint.
+	(passwd_to_key):  Make extern.  Don't call *_read_password.
+	(krb_get_pw_in_tkt_preauth):  Give error for null password.	
+	(placebo_read_password):  Add FIXME comment.
+
+	* kerberos.def:  Use PASCAL calling sequence (uppercase names,
+	no leading underlines) for interface functions.
+
+	* in_tkt.c, g_pw_in_tkt.c, kparse.c:  Remove RCS crud.
+
+Fri May 27 09:25:14 1994  John Gilmore  (gnu@cygnus.com)
+
+	Initial Dynamic Link Library support for MS-Windows.
+
+	* Makefile.in:  Move more files to only build on SERVER machines.
+	(kerberos.dll, c-krbdll.rsp):  Build dynamic link library for
+	MS-Windows.
+	(kerberos.lib):  Build import library for MS-Windows.
+	(all-windows, install-windows):  New targets for MS-Windows.
+
+	* kerberos.def:  New file defines the Kerberos DLL interface.
+
+	* winsock.def:  New file defines the WinSock DLL interface that
+	we rely upon.  This file is from FTP:
+	//sunsite.unc.edu/pub/micro/pc-stuff/ms-windows/winsock/winsock-1.1
+	except that we made all the routine names uppercase, to match what
+	MicroSoft C does when you declare an interface routine PASCAL
+	(like all these routines).
+
+	* err_txt.c (krb_get_err_table, krb_get_err_text):  New
+	functions for DLL access to the error table.
+
+	* g_admhst.c, g_cred.c, g_krbhst.c, g_phost.c, g_svc_in_tkt.c,
+	kname_parse.c, mk_err.c, mk_priv.c, mk_req.c, mk_safe.c, rd_err.c,
+	rd_priv.c, rd_req.c, rd_safe.c, realmofhost.c, recvauth.c,
+	sendauth.c: Add INTERFACE declaration to definitions of functions
+	that are exported via the DLL interface.
+
+	* win_glue.c (win_time_gmt_unixsec):  Use static storage for
+	_ftime() arg, since it takes a near pointer and can't point to
+	stack storage when SS!=DS.
+	(in_tkt, save_credentials, krb_save_credentials, krb_get_cred,
+	dest_tkt, krb_get_tf_realm, krb_set_tkt_string,
+	krb_ignore_ip_address):  Dummy routines for now.
+	(LibMain, WEP):  No-op routines required for DLL initialization.
+	(krb_start_session, krb_end_session): No-op routines required for
+	Kerberos Mac interface compatability.
+
+	* save_creds.c (krb_save_credentials):  Add new interface function
+	to replace save_credentials, which isn't well enough named to
+	export as part of the Kerberos interface.
+
+	* kname_parse.c, kparse.c, rd_safe.c, send_to_kdc.c:  Move
+	printf's under #ifdef DEBUG since printf is not usually available
+	in MS-Windows.  Change exit()'s under "can't happen" conditions to
+	return statements.
+
+	* g_krbhst.c:  Clean up #ifdef'd braces so they match up.
+	* sendauth.c:  Remove unused "extern int errno;".
+	* kname_parse.c:  Remove unused extern of krb_err_txt.
+	* mk_err.c, save_creds.c:  Remove RCS crud.
+	* ren.msg:  Add rd_preauth.c and mk_preauth.c to DOS rename table.
+
+Wed May 25 09:17:06 1994  D V Henkel-Wallace  (gumby@tweedledumb.cygnus.com)
+
+	* g_pw_in_tkt.c: when read_password.c was inserted whole into this
+	file, des.h and conf.h were #include'ed, which causes circularity
+	problems.  #include's removed; they weren't needed anyway.
+
+Tue May 24 00:55:30 1994  John Gilmore  (gnu@cygnus.com)
+
+	* sendauth.c:  Break up into separately callable functions to
+	avoid pushing binary data down a socket supposedly controlled
+	by the kerberos library's caller.
+	(krb_mk_auth):  New; builds a packet and returns it to you.
+	(krb_net_rd_sendauth):  Reads a packet from the net.
+	(krb_check_auth):  Checks an incoming response for validity.
+	FIXME:  ATHENA_COMPAT code in here is now broken.  Remove it?
+	FIXME:  Break up into separate files so that the non file
+	descriptor part can be included on Mac.
+
+	* g_admhst.c, mk_req.c:  Pull RCS crud.
+
+	* mk_req.c:  Allow the realm argument to be defaulted with a null
+	pointer.  This makes it suitable for building krb_sendauth
+	messages directly.
+
+	* tf_util.c (tf_init): If argument is null, call tkt_string to
+	select a ticket cache.  See also ../../include/krb-sed.h, where
+	the default argument was changed to be null.
+
+	* send_to_kdc.c (MAX_HSTNM):  Eliminate only use of this obsolete
+	define; use MAXHOSTNAMELEN which is set properly in each system.
+
+	* fakeenv.c:  Update copyright notice (it's now public domain,
+	freed by Cygnus Support, for whom the work was done for hire).
+
+Mon May 23 00:19:46 1994  Mark Eichin  (eichin at tweedledumb.cygnus.com)
+
+	* rd_svc_key.c (get_service_key): new function. Same as original
+	read_service_key except that it takes argument kvno by reference,
+	so the caller can figure out what key actually matched. Also
+	defaults to KEYFILE if file argument is NULL (instead of just
+	calling open with that value.) Also defaults to current realm if
+	realm argument not passed in.
+	(read_service_key): now calls get_service_key.
+
+	* rd_safe.c (krb_rd_safe): check krb_ignore_ip_address before
+	deciding to fail on an IP address check.
+	(krb_rd_safe): remove "direction checking" code which doesn't
+	actually help, and can interfere if IP addresses are optional.
+
+	* rd_req.c (krb_rd_req): check krb_ignore_ip_address before
+	deciding to fail on an IP address check; move test to end of
+	function as well (to provide more information value in the
+	RD_AP_BADD error return.)
+
+	* rd_req.c: define (allocate) krb_ignore_ip_address.
+
+	* rd_priv.c (krb_rd_priv): check global variable
+	krb_ignore_ip_address before deciding to fail on an IP address
+	check.
+	(krb_rd_priv): remove "direction checking" code which doesn't
+	actually help, and can interfere if IP addresses are optional.
+
+	* netread.c (krb_net_read): use socket_read under VMS, assuming
+	MultiNet. 
+
+	* netwrite.c (krb_net_write): use socket_write under VMS, assuming
+	MultiNet. 
+
+	* mk_priv.c (krb_mk_priv): If private_msg_ver isn't set yet, use
+	the expected version (KRB_PROT_VERSION) instead.
+
+	* Makefile.in (SRCS, OBJS): added mk_preauth, rd_preauth.
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): New function. Supports
+	simple preauthentication by appending data to the initial packet.
+	Demonstration hooks only.
+
+	* g_svc_in_tkt.c (krb_get_svc_in_tkt_preauth): New function.
+	Preauthentication support for initial tickets for servers.
+	(krb_svc_init): New function. An interface to krb_get_svc_in_tkt
+	that is provided by DEC's dss-kerberos, added here for
+	compatibility.
+	(krb_svc_init_preauth): preauthentication version of krb_svc_init.
+
+	* g_pw_in_tkt.c	(krb_get_pw_in_tkt_preauth): New function.
+	Higher level interface to g_in_tkt for users.
+
+	* g_pw_in_tkt.c: in NOENCRYPTION section, pull in <sgtty.h>
+	under __svr4__ so the ioctls work under Solaris.
+
+Sat May 21 04:02:59 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (c-libkrb.${LIBEXT}):  Typos, do .o->.obj.
+	* gethostname.c:  Simplify to call GETHOSTNAME macro.
+	* stime.c:  Arg is *time, not time.  Oops.  Also simplify.
+	* win_glue.c:  Support CONVERT_TIME_EPOCH and make it work
+	for the odd epoch on MSC 7.0.
+	(win_socket_initialize):  New routine implements SOCKET_INITIALIZE.
+	(in_tkt, save_credentials, dest_tkt):  Stubs to link kinit with.
+
+	First FAR crap in our clean sources (sigh).
+
+	* win_glue.c (far_fputs):  Print a far string returned by WinSock.
+	* ad_print.c:  Handle FAR pointer from inet_ntoa.
+	* g_phost.c:  Handle FAR pointer returned by gethostby*.
+	
+	* send_to_kdc.c: Convert to WinSock plus local macros that make
+	compatability easier.  Initialize and terminate WinSock access
+	each time we are called.  Handle FAR pointer from get*by* and
+	inet_ntoa.  Bind the datagram socket before using it, to get
+	beyond a bug in FTP Software's WinSock libraries.  Improve debug
+	messages.
+
+Thu May 19 22:57:13 1994  John Gilmore  (gnu@cygnus.com)
+
+	More Windows support.
+
+	* Makefile.in (LIBEXT):  Use everywhere.
+	(SERVER_KRB_{SRCS,OBJS}):  Rename from SERVERSIDE*.
+	(ARCHIVEARGS):  Implement MSC LIB support.
+	(####):  Move insertion point of host-configuration fragments
+	down so they can override the various Makefile macros.
+	(libkrb.$(LIBEXT)):  Avoid keeping a .bak file.  Use ARCHIVEARGS.
+	(unixdos):  New target for things that have to run on Unix
+	after configuring for DOS.  (FIXME, make these work on DOS.)
+	(c-libkrb.$(LIBEXT)):  Build control file for MSC.  This
+	currently must run on Unix (FIXME).
+
+	* stime.c:  Use CONVERT_TIME_EPOCH.
+
+Sat May 14 00:49:11 1994  John Gilmore  (gnu@cygnus.com)
+
+	More Macintosh merging.
+
+	* Makefile.in (CACHESRCS, CACHEOBJS, REALMDBSRCS, REALMDBOBJS,
+	SERVERSIDESRCS, SERVERSIDEOBJS):  Update the lists of files that
+	belong to each category.
+	* unix-glue.c, mac-glue.c, win-glue.c:  Rename to unix_glue.c,
+	mac_glue.c, win_glue.c.
+	* g_ad_tkt.c:  Improve comments on cross-realm support.
+	* g_phost.c:  Remove RCS crud.
+	* store.c, store.h:  Rename to mac_store.c, mac_store.h.  Insert
+	all the Kerberos glue routines needed to talk to the Cygnus code.
+
+Fri May 13 17:40:02 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (SERVERSIDESRCS, SERVERSIDEOBJS):  Create
+	as lists of lib/krb files only used on servers, so they can
+	be avoided when on client-only machines.
+	(CACHESRCS, CACHEOBJS):  Put all the rightful files in there.
+	* realmofhost.c:  Pull <sys/param.h> and default MAXHOSTNAMELEN.
+	* dest_tkt.c, realmofhost.c, tf_shm.c:  Remove RCS crud.
+	* rd_safe.c, tf_shm.c:  Remove errno declaration, <errno.h>, etc.
+	* mk_priv.c:  Comment changes.
+	* g_ad_tkt.c:  Remove obsolete defn of <sys/time.h>.
+
+Fri May 13 12:17:32 1994  John Gilmore  (gnu@cygnus.com)
+
+	Macintosh changes.
+
+	* store.h, store.c:  Ticket storage in memory on the Mac.
+	* mac-glue.c:  New file, deals with OS and time interface.
+	* Makefile.in:  Pull tf_util.[co] out into CACHESRCS and
+	CACHEOBJS, so it can be excluded on Mac and Windows.
+	* g_in_tkt.c:  Don't declare signed difference t_diff as unsigned!
+	* g_ad_tkt.c, rd_safe.c, rd_req.c, rd_priv.c, mk_safe.c, mk_req.c:
+	Remove <sys/time.h>.  Use TIME_GMT_UNIXSEC and clean up datatype
+	issues around clock-skew/ticket-replay checking.  Remove __i960__
+	conditionals, which should be handled by changing CLOCK_SKEW in
+	960-specific config files.
+	* mk_priv.c:  Rename TIME_GMT_UNIXSEC_MS to TIME_GMT_UNIXSEC_US.
+	* setenv.c:  Remove <sys/types.h>.
+	* rd_priv.c, mk_safe.c:  Remove <errno.h>, and decls of errno and
+	errmsg.
+	* rd_req.c, stime.c, mk_safe.c:  Remove RCS crud.
+
+Fri May 13 02:02:56 1994  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Support glue files for each major architecture
+	(Unix, mac, windows).  Replace {} with () for DOS NMAKE.
+	Build krb_err.h without `make depend'.  Remove -DBSD42 since it
+	is no longer used.
+	* unix-glue.c:  New file, interfaces to Unix gettimeofday.
+	* win-glue.c:  New file, interfaces to Windows _ftime.
+	* g_in_tkt.c, mk_priv.c:  Pull <sys/time.h>, use new macro interface
+	TIME_GMT_UNIXSEC to get the time.
+	* gethostname.c:  Pull BSD42.  Insert FIXME comments about the
+	poor DOS support.
+	* mk_priv.c:  Pull <errno.h>, errno, and errmsg as unused.
+
+	* ad_print.c:  Pull <arpa/inet.h>, which is now in <krb.h>.
+	* decomp_tkt.c:  Add file name to title comments.
+	* fakeenv.c:  Pull <sys/types.h> and <stdio.h>.
+	* g_phost.c:  Replace <netdb.h> and <osconf.h> with <krb.h>.
+	* ren.msg:  Remove get_request.c (g_request.c), now gone.
+	* send_to_kdc.c:  Pull <netdb.h>.
+	* setenv.c:  Add "conf.h" for non-cmd-line configuration.
+
+Sun May  8 23:34:16 1994  John Gilmore  (gnu@cygnus.com)
+
+	Include-file straightening:  Remove Unix include
+	files from as many routines as possible -- particularly
+	<sys/types.h> and network include files.
+
+	* ad_print.c:  Use DEFINE_SOCKADDR to get struct sockaddr_in.
+	Lint.  Pull RCS crud.
+	* cr_err_repl.c, tf_shm.c, tf_util.c, tkt_string.c:  Pull
+	<sys/types.h>.
+	* cr_tkt.c, decomp_tkt.c:  Pull <stdio.h>.
+	* dest_tkt.c, in_tkt.c, mk_err.c:  Pull <sys/types.h>
+	* g_ad_tkt.c:  Pull <sys/types.h>, <errno.h>, RCS crud.
+	* g_cred.c:  Pull RCS crud, add <string.h>.
+	* g_in_tkt.c:  Pull <sys/types.h>, <errno.h>, <stdio.h>, RCS crud.
+	* g_tf_fname.c:  Lint, pull RCS crud.
+	* kuserok.c:  <pull <sys/types.h> and <sys/socket.h>.
+	* rd_err.c:  Pull <stdio.h>, <errno.h>, <sys/types.h>, <sys/times.h>.
+	* mk_priv.c, mk_safe.c, rd_err.c, rd_priv.c, rd_safe.c,
+	recvauth.c, send_to_kdc.c, sendauth.c:  Use DEFINE_SOCKADDR to get
+	struct sockaddr_in.
+	* cr_tkt.c, debug.c, mk_safe.c, rd_err.c, rd_safe.c, recvauth.c,
+	sendauth.c:  Pull RCS crud. 
+	* rd_safe.c, sendauth.c:  Lint.
+	* strcasecmp.c:  Remove <sys/types.h> and change the few
+	occurrances of u_foo types to `unsigned foo'.  Pull SCCS crud(!).
+
+Sun May  8 19:24:08 1994  John Gilmore  (gnu@cygnus.com)
+
+	* add_tkt.c, ext_tkt.c:  Remove, unused.  As its comments say:
+	This routine is now obsolete.  It used to be possible to request
+	more than one ticket at a time from the authentication server, and
+	it looks like this routine was used by the server to package the
+	tickets to be returned to the client.
+
+	* g_request.c:  Remove, unused.  Its comments:
+	This procedure is obsolete.  It is used in the kerberos_slave
+	code for Version 3 tickets.
+
+	* getopt.c:  Remove, unused.
+	* Makefile.in:  Remove unused files.
+
+Sat May  7 13:44:20 1994  John Gilmore  (gnu@cygnus.com)
+
+	* krbglue.c:  Remove, unused.  Mark Eichin says:
+	krbglue, if I recall correctly, was backwards compatibility code so
+	that programs that were written with V3 could be relinked with V4
+	without recompiling. The Zephyr code used it at one point, though I
+	doubt it does anymore. It's probably sufficient to note that in the
+	cvs log when you delete it.
+
+	* krbglue.c, recvauth.c, sendauth.c:  Lint.
+
+Fri May  6 21:11:10 1994  John Gilmore  (gnu@cygnus.com)
+
+	* ren-cyg.sh, ren-pc.sh, ren-pl10.sh, ren.msg.sh, ren2dos,
+	ren2long.sh sed-cyg.sh, ren-pc.bat, sed-pc.sh:  Update for final
+	DOS renaming.
+
+Fri May  6 18:32:11 1994  John Gilmore  (gnu@cygnus.com)
+
+	* rd_priv.c, mk_priv.c, rd_safe.c, mk_safe.c:  Rename include
+	file "lsb_addr_comp.h" to "lsb_addr_cmp.h" for DOS/SYSV.
+
+Fri May  6 02:10:50 1994  John Gilmore  (gnu@cygnus.com)
+
+	* krbglue.c: Move Kerberos function prototypes to ../include/krb.h.
+	Yank RCS.  Lint.
+	* mk_priv.c (krb_mk_priv), rd_priv.c (krb_rd_priv):  Lint.  Yank RCS.
+
+Thu May  5 12:49:34 1994  John Gilmore  (gnu@cygnus.com)
+
+	* decomp_tkt.c: Remove need for <sys/file.h> under KRB_CRYPT_DEBUG
+	by using stdio.  Call krb_log, not log.  Lint.  Remove RCS ID's.
+
+	* g_tf_realm.c:  Lint.
+
+Tue Apr 26 20:54:29 1994  John Gilmore  (gnu@tweedledumb.cygnus.com)
+
+	Massive file renaming for DOS compatability.
+
+	* ren.msg, ren-cyg.sh, sed-cyg.sh:  New files.
+
+	* Imakefile, Makefile.in:  File names edited throughout.
+
+	* add_ticket.c, cr_auth_reply.c, cr_err_reply.c, create_ciph.c,
+	create_ticket.c, debug_decl.c, decomp_ticket.c, extract_tkt.c,
+	get_ad_tkt.c, get_admhst.c, get_cred.c, get_in_tkt.c, get_krbhst.c,
+	get_krbrlm.c, get_phost.c, get_pw_tkt.c, get_request.c, get_svc_in.c,
+	get_tf_fname.c, get_tf_realm.c, getrealm.c, k_gethostname.c,
+	krb_err_txt.c, krb_get_in.c, read_svc_key.c, util.c:  Renamed.
+
+	* ad_print.c, add_tkt.c, cr_auth_repl.c, cr_ciph.c, cr_err_repl.c,
+	cr_tkt.c, debug.c, decomp_tkt.c, err_txt.c, ext_tkt.c, g_ad_tkt.c,
+	g_admhst.c, g_cred.c, g_in_tkt.c, g_krbhst.c, g_krbrlm.c,
+	g_phost.c, g_pw_in_tkt.c, g_pw_tkt.c, g_request.c, g_svc_in_tkt.c,
+	g_tf_fname.c, g_tf_realm.c, gethostname.c, rd_svc_key.c,
+	realmofhost.c:  Same files, renamed.
+
+Sun Jan 30 17:28:57 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* getrealm.c (krb_realmofhost): Rearrange loop so that strcasecmp
+	is called only once for domains listed in krb.conf, and exiting
+	function is cleaner.
+

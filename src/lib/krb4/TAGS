@@ -1,0 +1,546 @@
+
+DNR.c,663
+#define OPENRESOLVER	22,556
+#define CLOSERESOLVER	23,580
+#define STRTOADDR	24,605
+#define	ADDRTOSTR	25,627
+#define	ENUMCACHE	26,649
+#define ADDRTONAME	27,671
+#define	HINFO	28,694
+#define MXINFO	29,713
+typedef OSErr (*OSErrProcPtr)OSErrProcPtr33,758
+TrapType GetTrapType(37,825
+Boolean TrapAvailable(46,963
+void GetSystemFolder(67,1459
+void GetCPanelFolder(79,1685
+short SearchFolderForDNRP(105,2393
+short OpenOurRF(145,3485
+OSErr OpenResolver(170,4133
+OSErr CloseResolver(216,5135
+OSErr StrToAddr(232,5411
+OSErr AddrToStr(245,5710
+OSErr EnumCache(257,5919
+OSErr AddrToName(269,6134
+extern OSErr HInfo(283,6440
+extern OSErr MXInfo(297,6749
+
+Password.c,991
+#define KRB_DEFS2,22
+#define kLoginDLOGID	27,452
+#define kErrorALERTID	28,480
+#define kLoginOKItem	29,509
+#define kLoginCnclItem	30,533
+#define kLoginNameItem	31,559
+#define kLoginVisPwItem	32,586
+#define kLoginFrameItem	33,613
+#define kLoginIvisPwItem	34,640
+#define kBadUserError	35,667
+#define kNotUniqueError	36,692
+#define kGenError	37,719
+#define kIntegrityError	38,741
+#define kBadPasswordError	39,768
+#define cr 40,796
+#define enter 41,817
+#define bs 42,840
+#define tab 43,861
+#define larrow 44,882
+#define rarrow 45,906
+#define uarrow 46,930
+#define darrow 47,954
+#define DialogNotDone 48,978
+} Proc2Hand;Proc2Hand53,1090
+void GetExtensionsFolder(66,1422
+short SearchFolderForINIT(88,1960
+short OpenInitRF(114,2754
+int DisplayError(138,3362
+OSErr GetUserInfo(157,3679
+static pascal void FrameOKbtn(292,8039
+static pascal Boolean TwoItemFilter(304,8348
+static int SetOKEnable(371,10583
+static int OKIsEnabled(388,11096
+CacheInitialTicket(400,11349
+
+ad_print.c,79
+#define	DEFINE_SOCKADDR	13,251
+ad_print(26,573
+placebo_cblock_print(52,1219
+
+cr_auth_repl.c,27
+create_auth_reply(61,1603
+
+cr_ciph.c,21
+create_ciph(56,1230
+
+cr_death_pkt.c,32
+krb_create_death_packet(44,991
+
+cr_err_repl.c,22
+cr_err_reply(54,1331
+
+cr_tkt.c,31
+int krb_create_ticket(73,1787
+
+debug.c,0
+
+decomp_tkt.c,23
+decomp_ticket(50,1450
+
+dest_tkt.c,17
+dest_tkt(34,732
+
+err_txt.c,27
+krb_get_err_text 287,7833
+
+fakeenv.c,51
+setenv(15,278
+_findenv(53,1645
+unsetenv(76,2062
+
+fgetst.c,15
+fgetst(22,669
+
+g_ad_tkt.c,20
+get_ad_tkt(55,1537
+
+g_admhst.c,24
+krb_get_admhst(38,1153
+
+g_cnffile.c,54
+krb__get_cnffile(22,747
+krb__get_realmsfile(39,1037
+
+g_cred.c,21
+krb_get_cred(26,675
+
+g_in_tkt.c,246
+typedef int (*key_proc_type)key_proc_type26,648
+typedef int (*decrypt_tkt_type)decrypt_tkt_type30,782
+decrypt_tkt(41,1089
+krb_mk_in_tkt_preauth(120,3778
+krb_parse_in_tkt(236,7145
+krb_get_in_tkt_preauth(335,10019
+krb_get_in_tkt(370,10932
+
+g_krbhst.c,52
+get_krbhst_default(49,1607
+krb_get_krbhst(65,1896
+
+g_krbrlm.c,24
+krb_get_lrealm(35,1036
+
+g_phost.c,55
+#define	DEFINE_SOCKADDR	11,205
+krb_get_phost(36,1122
+
+g_pw_in_tkt.c,295
+#define NULL 15,264
+passwd_to_key(44,1139
+krb_get_pw_in_tkt(90,2830
+static int stub_key(120,3852
+krb_get_pw_in_tkt_preauth(129,4064
+placebo_read_password(192,5623
+placebo_read_pw_string(223,6146
+static push_signals(321,8059
+static pop_signals(328,8174
+static void sig_restore(335,8274
+
+g_pw_tkt.c,20
+get_pw_tkt(44,1500
+
+g_svc_in_tkt.c,202
+#define NULL 15,265
+static int srvtab_to_key(41,1088
+krb_get_svc_in_tkt(63,1791
+static int stub_key(75,2164
+krb_get_svc_in_tkt_preauth(83,2337
+krb_svc_init(104,2954
+krb_svc_init_preauth(120,3286
+
+g_tf_fname.c,28
+krb_get_tf_fullname(30,757
+
+g_tf_realm.c,25
+krb_get_tf_realm(24,453
+
+g_tkt_svc.c,165
+#define	DEFINE_SOCKADDR8,102
+#define	KRB_SENDAUTH_VERS 12,210
+ParseFullName(16,299
+CopyTicket(40,813
+CredIsExpired(71,1637
+krb_get_ticket_for_service 106,2706
+
+gethostname.c,81
+#define	DEFINE_SOCKADDR11,215
+#define	GETHOSTNAME	15,277
+k_gethostname(25,603
+
+getst.c,14
+getst(22,665
+
+in_tkt.c,65
+#define setreuid(36,783
+#define setreuid(39,845
+in_tkt(43,892
+
+klog.c,44
+char * klog(52,1310
+kset_logfile(104,2777
+
+kname_parse.c,167
+#define FULL_SZ 17,301
+#define NAME 19,350
+#define INST 20,398
+#define REALM 21,416
+kname_parse(55,1544
+k_isname(137,3567
+k_isinst(175,4272
+k_isrealm(205,4807
+
+kntoln.c,20
+krb_kntoln(41,1276
+
+kparse.c,479
+#define FALSE 42,1412
+#define TRUE 43,1428
+#define void 46,1451
+#define MAXKEY 48,1469
+#define MAXVALUE 49,1496
+int fGetParameterSet(63,1850
+int ParmCompare(129,3679
+void FreeParameterSet(149,4117
+int fGetKeywordValue(163,4368
+int fGetToken(355,9540
+int fGetLiteral(451,12130
+int fUngetChar(528,13897
+int fGetChar(541,14110
+static char * strsave(569,14601
+static char * strutol(582,14833
+#define MAXTOKEN 594,15059
+main(598,15106
+main(653,16115
+main(712,17445
+
+kuserok.c,192
+#define seteuid(31,564
+#define setegid(32,602
+#define OK 35,648
+#define NOTOK 36,661
+#define MAX_USERNAME 37,677
+#define REALM_SUBSCRIPT 83,2464
+#define KPARMS 91,2682
+kuserok(94,2728
+
+log.c,69
+void krb_log(57,1405
+krb_set_logfile(86,2175
+krb_new_log(101,2508
+
+mac_glue.c,152
+#define	DEFINE_SOCKADDR	13,264
+void swab(22,486
+mymemset(24,534
+krb_start_session 33,723
+krb_end_session 40,792
+int read(47,888
+int write 48,911
+
+mac_store.c,856
+#define	prefname	31,711
+#define kNumTemplates 39,1000
+#define kFirstTemplate 40,1024
+#define kMapResNum 41,1051
+krb_get_admhst 88,2480
+int	krb_get_krbhst(118,3439
+int	krb_get_lrealm(143,4151
+char *krb_realmofhost(170,4907
+krb_get_default_user 185,5148
+krb_set_default_user 196,5281
+void GetPrefsFolder(213,5549
+init_store(243,6441
+OSErr	OpenPrefsFile(306,7953
+OSErr	CreatePrefFile(332,8652
+OSErr	WriteUser(372,9704
+OSErr	WritePref(387,9953
+OSErr	WritePrefStr(426,11022
+OSErr	WriteRealmMap(439,11365
+OSErr	WriteServerMap(454,11622
+OSErr	GetLocalRealm(469,11877
+OSErr	SetLocalRealm(478,12001
+OSErr	GetRealm(498,12358
+OSErr	AddRealmMap(533,13063
+OSErr	DeleteRealmMap(556,13600
+OSErr	GetNthRealmMap(594,14515
+OSErr	GetNthServer(613,14906
+OSErr	AddServerMap(639,15506
+OSErr	DeleteServerMap(665,16119
+OSErr	GetNthServerMap(712,17212
+
+mac_store.h,0
+
+mac_stubs.c,665
+#define	DEFINE_SOCKADDR	11,258
+#define	kdriver 24,712
+short lowcall 30,831
+short hicall 50,1309
+krb_start_session 70,1798
+krb_end_session 90,2068
+krb_realmofhost 108,2319
+krb_get_lrealm 126,2662
+kname_parse 146,2917
+krb_get_err_text 163,3262
+krb_get_pw_in_tkt(178,3529
+krb_get_pw_in_tkt_preauth(201,4083
+krb_get_default_user 224,4567
+krb_set_default_user 239,4831
+krb_get_cred 251,5020
+krb_save_credentials 272,5363
+krb_delete_cred 305,6163
+dest_tkt 323,6467
+krb_get_nth_cred 339,6793
+krb_get_num_cred 363,7251
+GetNthRealmMap(387,7716
+GetNthServerMap(411,8268
+krb_get_ticket_for_service 448,9169
+krb_get_tf_fullname 486,10223
+	if 512,10747
+
+macsock.c,319
+#define	ENOMEM	27,575
+#define	SOCKET_SET_ERRNO	39,895
+WSAStartup(67,1843
+WSACleanup(79,2117
+socket(86,2183
+closesocket 145,3382
+bind 167,3808
+sendto 194,4301
+select 243,5537
+recvfrom 261,5973
+inet_ntoa(327,7560
+gethostbyname 352,8177
+gethostbyaddr 392,9310
+DNRresultproc(433,10537
+ gethostname(449,10974
+
+memcache.c,952
+#define unix22,484
+#define _nmalloc 38,701
+#define _nfree 39,725
+#define _nrealloc 40,745
+#define NPSTR 41,771
+#define OFFSETOF(42,792
+typedef int OSErr;OSErr44,815
+#define noErr 45,834
+#define memFullErr 46,850
+#define change_cache(59,1053
+#define	Handle	64,1169
+#define	Size	65,1192
+NewHandleSys(77,1585
+DisposHandle(112,2094
+SetHandleSize(129,2545
+MemError(163,2944
+change_cache(184,3535
+krb_get_notification_message(210,4094
+in_tkt(268,5927
+dest_tkt(295,6451
+int	dest_all_tkts(320,6865
+krb_get_tf_realm 354,7399
+krb_get_tf_fullname 366,7696
+krb_get_cred 417,9236
+krb_save_credentials(457,10308
+krb_delete_cred 488,11202
+krb_get_nth_cred 508,11604
+krb_get_num_cred 525,11970
+OSErr	GetNumSessions(539,12136
+GetNthSession(548,12243
+OSErr	DeleteSession(566,12615
+OSErr	GetCredentials(605,13426
+OSErr	AddCredentials(649,14313
+DeleteCredentials 733,16435
+OSErr	GetNumCredentials(786,17522
+GetNthCredentials(822,18182
+
+memcache.h,78
+struct Session Session11,218
+typedef struct Session Session;Session18,349
+
+mk_auth.c,113
+#define	DEFINE_SOCKADDR	14,276
+#define	KRB_SENDAUTH_VERS 20,424
+krb_mk_auth(102,3181
+krb_check_auth 189,6067
+
+mk_err.c,19
+krb_mk_err(37,958
+
+mk_preauth.c,100
+typedef int (*key_proc_type)key_proc_type22,912
+krb_mk_preauth(27,1018
+krb_free_preauth(72,2223
+
+mk_priv.c,53
+#define	DEFINE_SOCKADDR	23,490
+krb_mk_priv(83,2295
+
+mk_req.c,78
+#define	DEFINE_SOCKADDR11,198
+krb_mk_req(72,2283
+krb_set_lifetime(207,7103
+
+mk_safe.c,53
+#define	DEFINE_SOCKADDR	23,519
+krb_mk_safe(64,1795
+
+month_sname.c,32
+const char *month_sname(20,427
+
+netread.c,52
+#define	DEFINE_SOCKADDR12,230
+krb_net_read(28,638
+
+netwrite.c,53
+#define	DEFINE_SOCKADDR12,231
+krb_net_write(27,564
+
+one.c,0
+
+pkt_cipher.c,19
+pkt_cipher(25,484
+
+pkt_clen.c,17
+pkt_clen(27,655
+
+put_svc_key.c,44
+#define KEYSZ 36,1152
+put_svc_key(42,1333
+
+rd_err.c,19
+krb_rd_err(36,862
+
+rd_preauth.c,23
+krb_rd_preauth(24,745
+
+rd_priv.c,53
+#define	DEFINE_SOCKADDR	28,728
+krb_rd_priv(69,2013
+
+rd_req.c,42
+krb_set_key(64,2022
+krb_rd_req(123,4100
+
+rd_safe.c,53
+#define	DEFINE_SOCKADDR	26,591
+krb_rd_safe(52,1501
+
+rd_svc_key.c,321
+#define open 50,1523
+#define close 51,1556
+#define getst 52,1591
+#define read 53,1626
+int vxworks_srvtab_getchar(57,1720
+int vxworks_srvtab_getst(71,1971
+int vxworks_srvtab_open(84,2224
+int vxworks_srvtab_close(92,2347
+int vxworks_srvtab_read(99,2432
+int read_service_key(112,2649
+int get_service_key(126,3256
+
+realmofhost.c,57
+#define	DEFINE_SOCKADDR	21,387
+krb_realmofhost(45,1173
+
+recvauth.c,111
+#define	DEFINE_SOCKADDR	12,213
+#define	KRB_SENDAUTH_VERS	19,362
+#define	max(112,4010
+krb_recvauth(116,4085
+
+save_creds.c,29
+krb_save_credentials(32,921
+
+send_to_kdc.c,97
+#define	DEFINE_SOCKADDR	12,216
+#define S_AD_SZ 19,385
+send_to_kdc(67,1871
+send_recv(299,8782
+
+sendauth.c,171
+#define	DEFINE_SOCKADDR	13,216
+#define	KRB_SENDAUTH_VERS 19,364
+#define raw_tkt_len 111,3858
+krb_net_rd_sendauth 124,4235
+krb_sendauth(182,6044
+krb_sendsvc(259,8501
+
+setenv.c,74
+int setenv(31,1159
+unsetenv(89,2635
+getenv(129,3954
+_findenv(148,4386
+
+stime.c,82
+#define	DEFINE_SOCKADDR12,224
+#define NEED_TIME_H13,248
+char *krb_stime(25,559
+
+strcasecmp.c,41
+strcasecmp(58,3120
+strncasecmp(71,3362
+
+swab.c,11
+swab(3,38
+
+tf_shm.c,105
+#define MAX_BUFF 23,478
+krb_shm_create(35,700
+int krb_is_diskless(123,3062
+int krb_shm_dest(136,3284
+
+tf_util.c,415
+#define TOO_BIG 26,439
+#define TF_LCK_RETRY 27,458
+int utimes(51,897
+#define   LOCK_SH 62,1105
+#define   LOCK_EX 63,1148
+#define   LOCK_NB 64,1194
+#define   LOCK_UN 65,1250
+int emul_flock(73,1381
+#define flock(90,1677
+int tf_init(176,4583
+int tf_get_pname(319,8154
+int tf_get_pinst(342,8870
+int tf_get_cred(366,9520
+tf_close(431,11158
+tf_gets(469,12193
+tf_read(511,13102
+int tf_save_cred(547,14097
+
+tkt_string.c,53
+char *tkt_string(35,945
+krb_set_tkt_string(66,1900
+
+unix_glue.c,108
+krb_start_session 15,300
+krb_end_session 22,369
+krb_get_default_user 29,443
+krb_set_default_user 35,510
+
+vmsswab.c,13
+swab(19,739
+
+win_glue.c,218
+#define	DEFINE_SOCKADDR10,175
+win_socket_initialize(30,651
+far_fputs(60,1474
+LibMain(69,1594
+WEP(82,1763
+get_lib_instance(90,1815
+krb_start_session(97,1876
+krb_end_session(104,1948
+krb_set_tkt_string(111,2009
+
+win_store.c,115
+krb__get_cnffile(27,682
+krb__get_realmsfile(59,1447
+krb_get_default_user(88,2057
+krb_set_default_user(103,2323
