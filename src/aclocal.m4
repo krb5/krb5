@@ -53,6 +53,7 @@ WITH_LDOPTS dnl
 WITH_KRB4 dnl
 KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
+KRB5_AC_CHOOSE_DB dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
 ADD_DEF([-DKRB5_PRIVATE=1]) dnl
 ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
@@ -1447,3 +1448,38 @@ fi
 AC_SUBST(SS_LIB)
 AC_SUBST(SS_VERSION)
 ])
+dnl
+AC_DEFUN([KRB5_AC_CHOOSE_DB],[
+AC_ARG_WITH(system-db,
+	    AC_HELP_STRING(--with-system-db,use system Berkeley db library @<:@default: use a private version@:>@))
+AC_ARG_VAR(DB_HEADER,[header file to include for Berkeley db package, if --with-system-db was specified [db.h]])
+AC_ARG_VAR(DB_LIB,[system library for Berkeley db package, if --with-system-db was specified [-ldb]])
+if test "x$with_system_db" = xyes ; then
+  DB_VERSION=sys
+  # TODO: Do we have specific routines we should check for?
+  # How about known, easily recognizable bugs?
+  # We want to use bt_rseq in some cases, but no other version but
+  # ours has it right now.
+  #
+  # Okay, check the variables.
+  test "x${DB_HEADER+set}" = xset || DB_HEADER=db.h
+  test "x${DB_LIB+set}" = xset || DB_LIB=-ldb
+  #
+  if test "x${DB_HEADER}" = xdb.h ; then
+    DB_HEADER_VERSION=sys
+  else
+    DB_HEADER_VERSION=redirect
+  fi
+else
+  DB_VERSION=k5
+  AC_DEFINE(HAVE_BT_RSEQ,1,[Define if bt_rseq is available, for recursive btree traversal.])
+  DB_HEADER=db.h
+  DB_HEADER_VERSION=k5
+  DB_LIB=-ldb
+fi
+AC_SUBST(DB_VERSION)
+AC_SUBST(DB_HEADER)
+AC_SUBST(DB_HEADER_VERSION)
+AC_SUBST(DB_LIB)
+])
+dnl
