@@ -107,7 +107,7 @@ krb5_get_realm_domain(realm, domain)
 	trans_realm[sizeof(trans_realm)-1] = '\0';
 	if (!strcmp(trans_realm, realm)) {
 	    if (trans_host[0] == '.') {
-		if ((retdomain = malloc(strlen(trans_realm) + 1)) == NULL) {
+		if ((retdomain = malloc(strlen(trans_host) + 1)) == NULL) {
 		    if (realmlist != NULL) {
 			krb5_xfree(realmlist[0]);
 			krb5_xfree(realmlist);

@@ -1,3 +1,8 @@
+Mon Dec 19 15:20:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* realm_dom.c (krb5_get_realm_domain): Fixed minor bug where the
+		length of the returned domain was calculated incorrectly.
+
 Mon Oct 31 17:04:08 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* lock_file.c: Back out POSIX_FILE_LOCKS change.  (Should be
