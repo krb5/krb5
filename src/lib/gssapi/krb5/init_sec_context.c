@@ -561,9 +561,18 @@ new_connection(
    ctx_free = 0;
 
 #ifdef CFX_EXERCISE
+   {
+       krb5_data *p1 = &ctx->there->data[0];
+       _log("%s:%d: principal's first component is (%d) '%*s'\n",
+	    SFILE, __LINE__, p1->length, p1->length, p1->data);
+   }
    if (ctx->proto == 1
-       && (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
-       && (rand() & 3)) {
+       /* I think the RPC code may be broken.  Don't mess around
+	  if we're authenticating to "kadmin/whatever".  */
+       && ctx->there->data[0].data[0] != 'k'
+       /* I *know* the FTP server code is broken.  */
+       && ctx->there->data[0].data[0] != 'f'
+       ) {
        /* Create a bogus token and return it, with status
 	  GSS_S_CONTINUE_NEEDED.  Save enough data that we can resume
 	  on the next call.  */
