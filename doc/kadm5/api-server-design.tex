@@ -299,6 +299,67 @@ osa_adb_close_T(osa_adb_T_t db);
 Close an open database.
 
 \begin{verbatim}
+osa_adb_ret_t osa_adb_get_lock(osa_adb_T_t db, int mode)
+\end{verbatim}
+
+Acquire a lock on the administration databases; note that both
+databases are locked simultaneously by a single call.  The mode
+argument can be OSA_ADB_SHARED, OSA_ADB_EXCLUSIVE, or
+OSA_ADB_PERMANENT.  The first two and the third are really disjoint
+locking semantics and should not be interleaved.
+
+Shared and exclusive locks have the usual semantics, and a program can
+upgrade a shared lock to an exclusive lock by calling the function
+again.  A reference count of open locks is maintained by this function
+and osa_adb_release_lock so the functions can be called multiple
+times; the actual lock is not released until the final
+osa_adb_release_lock.  Note, however, that once a lock is upgraded
+from shared to exclusive it is not downgraded again until released
+completely.  In other words, get_lock(SHARED), get_lock(EXCLUSIVE),
+release_lock() leaves the process with an exclusive lock with a
+reference count of one.  An attempt to get a shared or exclusive lock
+that conflicts with another process results in the OSA_ADB_CANLOCK_DB
+error code.
+
+This function and osa_adb_release_lock are called automatically as
+needed by all other osa_adb functions to acquire shared and exclusive
+locks and so are not normally needed.  They can be used explicitly by
+a program that wants to perform multiple osa_adb functions within the
+context of a single lock (ie: ovsec_adm_export).
+
+Acquiring an OSA_ADB_PERMANENT lock is different.  A permanent lock
+consists of first acquiring an exclusive lock and then {\it deleting
+the lock file}.  Any subsequent attempt to acquire a lock by a
+different process will fail with OSA_ADB_NOLOCKFILE instead of
+OSA_ADB_CANTLOCK_DB (attempts in the same process will ``succeed''
+because only the reference count gets incremented).  Releasing a
+permanent lock re-creates the lock file.
+
+The purpose of a permanent lock is to absolutely ensure that the
+database remain locked during non-atomic operations.  If the locking
+process dies while holding a permanent lock, all subsequent osa_adb
+operations will fail, even through a system reboot.  This is useful,
+for example, for ovsec_adm_import which creates both new database
+files in a temporary location and renames them into place.  If both
+renames do not fully complete the database will probably be
+inconsistent and everything should stop working until an administrator
+can clean it up.
+
+\begin{verbatim}
+osa_adb_ret_t osa_adb_release_lock(osa_adb_T_t db)
+\end{verbatim}
+
+Releases a shared or exclusive lock acquired with osa_adb_get_lock, or
+decrements the reference count if multiple locks have been requested.
+Releasing a permanent lock re-creates the lock file and releases all
+of the processes locks (ie: the reference count is set back to zero).
+
+All of a process' shared or exclusive database locks are released when
+the process terminates.  A permanent lock is {\it not} released when
+the process exits (although the exclusive lock it begins with
+obviously is).
+
+\begin{verbatim}
 osa_adb_ret_t
 osa_adb_create_T(osa_adb_T_t db, osa_T_ent_t entry);
 \end{verbatim}
