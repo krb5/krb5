@@ -1,3 +1,7 @@
+Fri May 26 20:07:13 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for shared libraries.
+
 Sat May  6 17:21:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* test_parse.c: Include prof_int.h - this program relies on

@@ -6,6 +6,10 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 LOCALINCLUDE=-I. -I$(srcdir)/../et
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS = prof_tree.$(OBJEXT) \
 	prof_file.$(OBJEXT) \
 	prof_parse.$(OBJEXT) \
@@ -23,7 +27,10 @@ LIBS = ../et/libcom_err.$(LIBEXT)
 all:: all-$(WHAT)
 
 all-max:: all-unix
-all-unix:: includes libprofile.a test_parse test_profile
+all-unix:: shared includes libprofile.a test_parse test_profile
+
+shared:
+	mkdir shared
 
 all-windows: $(OBJS)
 
@@ -58,12 +65,16 @@ prof_err.h: $(srcdir)/prof_err.et
 
 prof_err.c: $(srcdir)/prof_err.et
 
+prof_err.o: prof_err.c
+	$(CC) $(CFLAGS) -c prof_err.c
+@SHARED_RULE_LOCAL@
+
 clean:: clean-$(WHAT)
 
 clean-mac:: clean-unix
 clean-unix::
 	rm -f $(PROGS) *.o *~ test_parse core libprofile.a prof_err.h \
-		prof_err.c test_profile profile.h
+		prof_err.c test_profile profile.h shared/*
 
 clean-windows::
 	$(RM) profile.lib profile.bak test_parse.exe test_profile.exe
