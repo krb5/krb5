@@ -49,39 +49,20 @@
 #include "gssapiP_krb5.h"
 
 static krb5_error_code
-make_seal_token_v1 PROTOTYPE((krb5_context context,
-			      krb5_keyblock *enc,
-			      krb5_keyblock *seq,
-			      krb5_int32 *seqnum,
-			      int direction,
-			      gss_buffer_t text,
-			      gss_buffer_t token,
-			      int signalg,
-			      int cksum_size,
-			      int sealalg,
-			      int encrypt,
-			      int toktype,
-			      int bigend,
-			      gss_OID oid));
-
-static krb5_error_code
-make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
-		   signalg, cksum_size, sealalg, encrypt, toktype,
-		   bigend, oid)
-    krb5_context context;
-    krb5_keyblock *enc;
-    krb5_keyblock *seq;
-    krb5_int32 *seqnum;
-    int direction;
-    gss_buffer_t text;
-    gss_buffer_t token;
-    int signalg;
-    int cksum_size;
-    int sealalg;
-    int encrypt;
-    int toktype;
-    int bigend;
-    gss_OID oid;
+make_seal_token_v1 (krb5_context context,
+		    krb5_keyblock *enc,
+		    krb5_keyblock *seq,
+		    krb5_int32 *seqnum,
+		    int direction,
+		    gss_buffer_t text,
+		    gss_buffer_t token,
+		    int signalg,
+		    int cksum_size,
+		    int sealalg,
+		    int encrypt,
+		    int toktype,
+		    int bigend,
+		    gss_OID oid)
 {
     krb5_error_code code;
     size_t sumlen;
@@ -119,7 +100,7 @@ make_seal_token_v1(context, enc, seq, seqnum, direction, text, token,
 	break;
     default:
 	abort ();
-	return 12345654321;
+	return 12345654;
     }
 
     /* create the token buffer */

@@ -94,7 +94,8 @@ rd_and_store_for_creds(context, inbuf, out_cred)
     if ((retval = krb5_auth_con_init(context, &auth_context)))
 	return(retval);
 
-    krb5_auth_con_setflags(context, auth_context, 0);
+    krb5_auth_con_setflags(context, auth_context,
+			   KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
     if ((retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL))) 
 	goto cleanup;
@@ -333,6 +334,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        major_status = GSS_S_FAILURE;
        goto fail;
    }
+   krb5_auth_con_setflags(context, auth_context,
+			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
    if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
        major_status = GSS_S_FAILURE;
        goto fail;

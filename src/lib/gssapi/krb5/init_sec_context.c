@@ -461,6 +461,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       ctx_free = ctx;
       if ((code = krb5_auth_con_init(context, &ctx->auth_context)))
 	  goto fail;
+      krb5_auth_con_setflags(context, ctx->auth_context,
+			     KRB5_AUTH_CONTEXT_DO_SEQUENCE);
       ctx->initiate = 1;
       ctx->gss_flags = KG_IMPLFLAGS(req_flags);
       ctx->seed_init = 0;
