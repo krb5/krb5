@@ -9,7 +9,9 @@ C=./
 S=/
 U=../
 
+SRCTOP = @SRCTOP@
 BUILDTOP = @BUILDTOP@
+SUBDIRS = @subdirs@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -67,8 +69,6 @@ SHEXT = @SHEXT@
 STEXT=@STEXT@
 DO_MAKE_SHLIB = @DO_MAKE_SHLIB@
 SHLIB_STATIC_TARGET=@SHLIB_STATIC_TARGET@
-SRCTOP = $(srcdir)/$(BUILDTOP)
-SUBDIRS = @subdirs@
 
 TOPLIBD = $(BUILDTOP)/lib
 

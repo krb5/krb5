@@ -1,3 +1,8 @@
+Fri Jun 23 14:24:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* pre.in (SRCTOP): Change SRCTOP so that it's defined in configure
+		script, instead of being hardcoded as $(srcdir)/$(BUILDTOP).
+
 Thu Jun 22 13:27:00 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* pre.in (STEXT): Add definitions for STEXT and STATIC_TARGET
