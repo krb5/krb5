@@ -116,7 +116,6 @@ OLDDECLARG(krb5_creds *, cred)
 	krb5_free_error(err_reply);
 	cleanup();
 	return retval;
-	break;				/* not strictly necessary... */
     }
     retval = krb5_decode_kdc_rep(&tgsrep.response,
 				 &tgt->keyblock,
