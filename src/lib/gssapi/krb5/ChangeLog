@@ -1,3 +1,10 @@
+2004-07-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* acquire_cred.c: Include gss_libinit.h.
+	(gssint_krb5_keytab_lock): New mutex.
+	(krb5_gss_register_acceptor_identity, acquire_accept_cred): Lock
+	the mutex while manipulating krb5_gss_keytab.
+
 2004-07-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Add $(srcdir)/.. to the list.

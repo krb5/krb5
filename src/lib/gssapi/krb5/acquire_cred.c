@@ -71,6 +71,7 @@
  */
 
 #include "k5-int.h"
+#include "gss_libinit.h"
 #include "gssapiP_krb5.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -78,6 +79,7 @@
 #include <strings.h>
 #endif
 
+k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
 /* Heimdal calls this gsskrb5_register_acceptor_identity. */
@@ -85,19 +87,32 @@ OM_uint32 KRB5_CALLCONV
 krb5_gss_register_acceptor_identity(const char *keytab)
 {
     size_t	len;
+    char *new, *old;
+    int err;
+
+    err = gssint_initialize_library();
+    if (err != 0)
+	return GSS_S_FAILURE;
 
     if (keytab == NULL)
 	return GSS_S_FAILURE;
-    if (krb5_gss_keytab != NULL)
-	free(krb5_gss_keytab);
 
     len = strlen(keytab);
-    krb5_gss_keytab = malloc(len + 1);
-    if (krb5_gss_keytab == NULL)
+    new = malloc(len + 1);
+    if (new == NULL)
 	return GSS_S_FAILURE;
+    strcpy(new, keytab);
 
-    strcpy(krb5_gss_keytab, keytab);
-
+    err = k5_mutex_lock(&gssint_krb5_keytab_lock);
+    if (err) {
+	free(new);
+	return GSS_S_FAILURE;
+    }
+    old = krb5_gss_keytab;
+    krb5_gss_keytab = new;
+    k5_mutex_unlock(&gssint_krb5_keytab_lock);
+    if (old != NULL)
+	free(old);
     return GSS_S_COMPLETE;
 }
 
@@ -126,10 +141,23 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default keytab */
 
-   if (krb5_gss_keytab != NULL)
+   code = gssint_initialize_library();
+   if (code != 0) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
+   code = k5_mutex_lock(&gssint_krb5_keytab_lock);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
+   if (krb5_gss_keytab != NULL) {
       code = krb5_kt_resolve(context, krb5_gss_keytab, &kt);
-   else
+      k5_mutex_unlock(&gssint_krb5_keytab_lock);
+   } else {
+      k5_mutex_unlock(&gssint_krb5_keytab_lock);
       code = krb5_kt_default(context, &kt);
+   }
 
    if (code) {
       *minor_status = code;
