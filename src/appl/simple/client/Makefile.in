@@ -1,4 +1,7 @@
 thisconfigdir=./..
+myfulldir=appl/simple/client
+mydir=client
+MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
