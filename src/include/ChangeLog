@@ -1,3 +1,6 @@
+Wed May  3 10:32:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.h: (krb5_auth_con_setports): Added missing prototype.
 
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 

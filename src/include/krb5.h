@@ -1810,6 +1810,12 @@ krb5_error_code krb5_auth_con_getaddrs
 		   krb5_address **,
 		   krb5_address **));
 
+krb5_error_code krb5_auth_con_setports
+	PROTOTYPE((krb5_context,
+		   krb5_auth_context *,
+		   krb5_address *,
+		   krb5_address *));
+
 krb5_error_code krb5_auth_con_setuseruserkey
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context *,
