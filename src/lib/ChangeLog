@@ -1,3 +1,7 @@
+Fri May 26 10:18:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: add kadm directory for the PC.
+
 Tue May 23 22:25:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove symlinks to libkrb4.a and
