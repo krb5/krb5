@@ -5,7 +5,6 @@ AC_PROG_YACC
 AC_HAVE_HEADERS(pwd.h regex.h regexp.h)
 AC_HAVE_FUNCS(strptime re_comp regcomp getcwd)
 AC_CONST
-SS_RULES
 USE_KADM_LIBRARY
 USE_KDB5_LIBRARY
 USE_KRB4_LIBRARY

@@ -1,3 +1,7 @@
+Thu Jun 13 21:41:42 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to SS_RULES
+
 Sun Jun  9 22:04:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* util.c (strstr): Replace crusty OS specific ifdef with configure

@@ -1,3 +1,7 @@
+Thu Jun 13 21:42:36 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to SS_RULES
+
 Sun Mar 31 17:49:01 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kadmin5.c (kadmin_extract_snk4): new command to get the key data
