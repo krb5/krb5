@@ -63,7 +63,8 @@ AC_FUNC_CHECK(grantpt,AC_DEFINE(HAVE_GRANTPT))
 AC_FUNC_CHECK(openpty,AC_DEFINE(HAVE_OPENPTY))
 AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h utmpx.h utmp.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
-AC_REPLACE_FUNCS(getdtablesize)
+AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_FUNCS(waitpid)
 DECLARE_SYS_ERRLIST
 KRB5_SIGTYPE
 CHECK_SIGNALS

@@ -20,6 +20,9 @@
 #include <com_err.h>
 #include "libpty.h"
 #include "pty-int.h"
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 long pty_cleanup (slave, pid, update_utmp)
     char *slave;
@@ -53,9 +56,46 @@ long pty_cleanup (slave, pid, update_utmp)
     }
 #else /* HAVE_REVOKE*/
 #ifdef VHANG_LAST
-    if ( retval = ( pty_open_ctty( slave, &fd ))) 
-	return retval;
-    ptyint_vhangup();
+    {
+      int status;
+#ifdef POSIX_SIGNALS
+      sigset_t old, new;
+      sigemptyset(&new);
+      sigaddset(&new, SIGCHLD);
+      sigprocmask ( SIG_BLOCK, &new, &old);
+#else /*POSIX_SIGNALS*/
+      int mask = sigblock(sigmask(SIGCHLD));
+#endif /*POSIX_SIGNALS*/
+      switch (retval = fork()) {
+      case -1:
+#ifdef POSIX_SIGNALS
+	sigprocmask(SIG_SETMASK, &old, 0);
+#else /*POSIX_SIGNALS*/
+	sigsetmask(mask);
+#endif /*POSIX_SIGNALS*/
+	return errno;
+      case 0:
+	ptyint_void_association();
+	if ( retval = ( pty_open_ctty( slave, &fd ))) 
+	  exit(retval);
+	ptyint_vhangup();
+	exit(0);
+	break;
+      default:
+#ifdef HAVE_WAITPID
+	waitpid(retval, &status, 0);
+#else /*HAVE_WAITPID*/
+	wait(&status);
+#endif
+#ifdef POSIX_SIGNALS
+	sigprocmask(SIG_SETMASK, &old, 0);
+#else /*POSIX_SIGNALS*/
+	sigsetmask(mask);
+#endif /*POSIX_SIGNALS*/
+
+	break;
+      }
+    }
 #endif /*VHANG_LAST*/
 #endif /* HAVE_REVOKE*/
 #ifndef HAVE_STREAMS

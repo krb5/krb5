@@ -1,3 +1,16 @@
+Sun Apr 14 00:36:33 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* pty-int.h: Don't include sys/wait.h here.
+
+	* configure.in : Check for waitpid.
+
+Sat Apr 13 18:58:43 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* cleanup.c (pty_cleanup): If we are doing a vhangup, then fork
+ 	and dissociate on hangup.  This makes the HP happy, because there
+ 	is no way to get rid of a controlling terminal besides setsid() on
+ 	the HP.
+
 Sun Mar 24 19:59:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in : Do streams handling by deciding what modules to

@@ -99,7 +99,10 @@ long pty_cleanup(char *slave, pid_t pid, int update_wtmp)
 the pty, HUPing processes associated with it.  (pid is the pid of the
 slave process that may have died, slave is the name of the slave
 terminal.)  PID is allowed to be zero if unknown; this may disable
-some cleanup operations.
+some cleanup operations.  This routine may fork on some systems.  As
+such, SIGCHLD may be generated and blocked for some time during the
+routine.  In addition, on systems without waitpid() or wait4(), wait()
+may be called.
 
 
     

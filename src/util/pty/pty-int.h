@@ -23,7 +23,6 @@
 
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/wait.h>
 #include <sys/file.h>
 #include <sys/time.h>
 #include <ctype.h>
