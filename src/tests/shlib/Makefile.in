@@ -12,7 +12,7 @@ VALGRINDFLAGS=--tool=memcheck --leak-check=yes --show-reachable=yes
 
 SRCS=$(srcdir)/t_loader.c
 
-all:: t_loader
+all::
 
 run-t_loader: t_loader
 	$(RUN_SETUP) ./t_loader
