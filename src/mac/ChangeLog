@@ -1,3 +1,8 @@
+Wed Jul  1 17:56:04 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.tmpl: Commit sarac's changes which make the Mac
+		dependencies more sane.
+
 Mon Mar 17 15:03:36 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.tmpl (GSSRTLCFMPPC): Add double quotes to prevent Mac
