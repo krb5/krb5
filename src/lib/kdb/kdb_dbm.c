@@ -758,14 +758,14 @@ krb5_boolean *more;			/* are there more? */
 	    goto cleanup;
 
 	contents = dbm_fetch(db, key);
-	if (contents.dptr == NULL) {
-	    found = 0;
-	} else {
-	    if (retval = decode_princ_contents(&contents, entries))
-		goto cleanup;
-	    found = 1;
-	}
 	free_encode_princ_dbmkey(&key);
+
+	if (contents.dptr == NULL)
+	    found = 0;
+	else if (retval = decode_princ_contents(&contents, entries))
+	    goto cleanup;
+	else found = 1;
+
 	(void) dbm_close(db);
 	(void) krb5_dbm_db_unlock();	/* unlock read lock */
 	if (krb5_dbm_db_end_read(transaction) == 0)
