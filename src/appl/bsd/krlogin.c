@@ -715,8 +715,10 @@ struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
 #ifndef POSIX_TERMIOS
 struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
+#ifndef TIOCGLTC
 struct	ltchars defltc;
 struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
+#endif
 #endif
 
 doit(oldmask)

@@ -1,3 +1,7 @@
+Tue Jun 27 23:50:56 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* krlogin.c: don't redeclare noltc, defltc if we happen to have
+		TIOCGLTC in addition to POSIX_TERMIOS
 
 Tue Jun 27 16:18:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - When checking number/type of arguments to {get,set}pgrp
