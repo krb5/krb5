@@ -70,8 +70,6 @@
 	_krb5_get_in_tkt_with_keytab
 	_krb5_get_in_tkt_with_password
 	_krb5_get_in_tkt_with_skey
-    _krb5_read_password
-    _krb5_prompter_posix
     _krb5_get_init_creds_opt_init
 	_krb5_get_init_creds_opt_set_tkt_life
 	_krb5_get_init_creds_opt_set_renew_life
@@ -242,4 +240,10 @@
 	_krb5_cc_remove_cred
 	_krb5_cc_set_flags
 	_krb5_cc_get_type
-        
+    
+# Added for Mac OS X
+    _krb5_read_password
+    _krb5_prompter_posix
+    _krb5_kuserok
+    _krb5_aname_to_localname
+    
