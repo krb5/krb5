@@ -271,24 +271,29 @@ krb5_fcc_open_file (context, id, mode)
 	 if (data->version == KRB5_FCC_FVNO_4) {
 	     /* V4 of the credentials cache format allows for header tags */
 
-	     fcc_flen = (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
+	     fcc_flen = 0;
+
+	     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
+		 fcc_flen += (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
 
 	     /* Write header length */
 	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_flen);
 	     if (retval) goto done;
 
-	     /* Write time offset tag */
-	     fcc_tag = FCC_TAG_DELTATIME;
-	     fcc_taglen = 2*sizeof(krb5_int32);
-
-	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_tag);
-	     if (retval) goto done;
-	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_taglen);
-	     if (retval) goto done;
-	     retval = krb5_fcc_store_int32(context, id, os_ctx->time_offset);
-	     if (retval) goto done;
-	     retval = krb5_fcc_store_int32(context, id, os_ctx->usec_offset);
-	     if (retval) goto done;
+	     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
+		 /* Write time offset tag */
+		 fcc_tag = FCC_TAG_DELTATIME;
+		 fcc_taglen = 2*sizeof(krb5_int32);
+		 
+		 retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)fcc_tag);
+		 if (retval) goto done;
+		 retval = krb5_fcc_store_ui_2(context,id,(krb5_int32)fcc_taglen);
+		 if (retval) goto done;
+		 retval = krb5_fcc_store_int32(context,id,os_ctx->time_offset);
+		 if (retval) goto done;
+		 retval = krb5_fcc_store_int32(context,id,os_ctx->usec_offset);
+		 if (retval) goto done;
+	     }
 	 }
 	 goto done;
      }
