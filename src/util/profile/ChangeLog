@@ -1,3 +1,8 @@
+2003-07-03 Alexandra Ellwood <lxs@mit.edu>
+
+    * profile.hin: Remove leading spaces in #define and #include 
+    in public headers to support K&R C compilers
+    
 2003-03-06 Alexandra Ellwood <lxs@mit.edu>
     * profile.hin, prof_file.c (profile_flush_file_data): Stop copying
     the resource fork.  We stopped writing resources to the krb5
