@@ -1,3 +1,9 @@
+
+Thu Jun 22 11:52:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_proto.h - Add prototypes for kadm library profile handling
+		routines.  These are wrappers for profile routines.
+	* kdb.h - Remove KDB_CONVERT_KEY_{TO,OUTOF}_DB.
+
 Wed Jun 21 17:39:25 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Replace krb5_sigtype tests with KRB5_SIGTYPE which
