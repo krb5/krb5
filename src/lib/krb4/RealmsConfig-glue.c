@@ -190,76 +190,104 @@ krb_get_lrealm(
     char	*realm,
     int		n)
 {
-    long	profErr = 0;
-    char	*realmString = NULL;
-    char	*realmStringV4 = NULL;
-    profile_t	profile = NULL;
-    int		result;
-    FILE	*cnffile = NULL;
-    char	scratch[SCRATCHSZ];
+    int         result = KSUCCESS;
+    profile_t   profile = NULL;
+    char       *profileDefaultRealm = NULL;
+    char      **profileV4Realms = NULL;
+    int         profileHasDefaultRealm = 0;
+    int         profileDefaultRealmIsV4RealmInProfile = 0;
+    char        krbConfLocalRealm[REALM_SZ];
+    int         krbConfHasLocalRealm = 0;
 
-    if (n != 1 || realm == NULL)
-	return KFAILURE;
+    if (result == KSUCCESS) {
+        int profileErr = krb_get_profile (&profile);
 
-    result = KFAILURE;		/* Start out with failure. */
+        if (!profileErr) {
+            /* Get the default realm from the profile */
+            profileErr = profile_get_string(profile, REALMS_V4_PROF_LIBDEFAULTS_SECTION,
+                                            REALMS_V4_DEFAULT_REALM, NULL, NULL,
+                                            &profileDefaultRealm);
+            if (profileDefaultRealm == NULL) { profileErr = KFAILURE; }
+        }
 
-    profErr = krb_get_profile(&profile);
-    if (profErr)
-	goto cleanup;
+        if (!profileErr) {
+            /* If there is an equivalent v4 realm to the default realm, use that instead */
+            char *profileV4EquivalentRealm = NULL;
 
-    profErr = profile_get_string(profile, REALMS_V4_PROF_LIBDEFAULTS_SECTION,
-				 REALMS_V4_DEFAULT_REALM, NULL, NULL,
-				 &realmString);
-    if (profErr || realmString == NULL)
-	goto cleanup;
+            if (profile_get_string (profile, "realms", profileDefaultRealm, "v4_realm", NULL,
+                                    &profileV4EquivalentRealm) == 0 &&
+                profileV4EquivalentRealm != NULL) {
 
-    if (strlen(realmString) >= REALM_SZ)
-	goto cleanup;
-    strncpy(realm, realmString, REALM_SZ);
-    /*
-     * Step 2: the default realm is actually v5 realm, so we have to
-     * check for the case where v4 and v5 realms are different.
-     */
-    profErr = profile_get_string(profile, "realms", realm, "v4_realm",
-				 NULL, &realmStringV4);
-    if (profErr || realmStringV4 == NULL)
-	goto cleanup;
+                profile_release_string (profileDefaultRealm);
+                profileDefaultRealm = profileV4EquivalentRealm;
+            }
+        }
 
-    if (strlen(realmStringV4) >= REALM_SZ)
-	goto cleanup;
-    strncpy(realm, realmStringV4, REALM_SZ);
-    result = KSUCCESS;
-cleanup:
-    if (realmString != NULL)
-	profile_release_string(realmString);
-    if (realmStringV4 != NULL)
-	profile_release_string(realmStringV4);
-    if (profile != NULL)
-	profile_abandon(profile);
+        if (!profileErr) {
+            if (strlen (profileDefaultRealm) < REALM_SZ) {
+                profileHasDefaultRealm = 1;  /* a reasonable default realm */
+            }
+        }
 
-    if (result == KSUCCESS)
-	return result;
-    /*
-     * Do old-style config file lookup.
-     */
-    do {
-	cnffile = krb__get_cnffile();
-	if (cnffile == NULL)
-	    break;
-	if (fscanf(cnffile, SCNSCRATCH, scratch) == 1) {
-	    if (strlen(scratch) >= REALM_SZ)
-		result = KFAILURE;
-	    else {
-		strncpy(realm, scratch, REALM_SZ);
-		result = KSUCCESS;
-	    }
-	}
-	fclose(cnffile);
-    } while (0);
-    if (result == KFAILURE && strlen(KRB_REALM) < REALM_SZ) {
-	strncpy(realm, KRB_REALM, REALM_SZ);
-	result = KSUCCESS;
+        if (!profileErr) {
+            /* Walk through the v4 realms list looking for the default realm */
+            const char *profileV4RealmsList[] = { REALMS_V4_PROF_REALMS_SECTION, NULL };
+
+            if (profile_get_subsection_names (profile, profileV4RealmsList,
+                                              &profileV4Realms) == 0 &&
+                profileV4Realms != NULL) {
+
+                char **profileRealm;
+                for (profileRealm = profileV4Realms; *profileRealm != NULL; profileRealm++) {
+                    if (strcmp (*profileRealm, profileDefaultRealm) == 0) {
+                        /* default realm is a v4 realm */
+                        profileDefaultRealmIsV4RealmInProfile = 1;
+                        break;
+                    }
+                }
+            }
+        }
     }
+    
+    if (result == KSUCCESS) {
+        /* Try to get old-style config file lookup for fallback. */
+        FILE	*cnffile = NULL;
+        char	scratch[SCRATCHSZ];
+
+        cnffile = krb__get_cnffile();
+        if (cnffile != NULL) {
+            if (fscanf(cnffile, SCNSCRATCH, scratch) == 1) {
+                if (strlen(scratch) < REALM_SZ) {
+                    strncpy(krbConfLocalRealm, scratch, REALM_SZ);
+                    krbConfHasLocalRealm = 1;
+                } else {
+                    result = KFAILURE; /* Invalid config file! */
+                }
+            }
+            fclose(cnffile);
+        }
+    }
+
+    if (result == KSUCCESS) {
+        /*
+         * We want to favor the profile value over the krb.conf value
+         * but not stop suppporting its use with a v5-only profile. 
+         * So we only use the krb.conf realm when the default profile
+         * realm doesn't exist in the v4 realm section of the profile.
+         */
+        if (krbConfHasLocalRealm && !profileDefaultRealmIsV4RealmInProfile) {
+            strncpy (realm, krbConfLocalRealm, REALM_SZ);
+        } else if (profileHasDefaultRealm) {
+            strncpy (realm, profileDefaultRealm, REALM_SZ);
+        } else {
+            result = KFAILURE;  /* No default realm */
+        }
+    }
+
+    if (profileDefaultRealm != NULL) { profile_release_string (profileDefaultRealm); }
+    if (profileV4Realms     != NULL) { profile_free_list (profileV4Realms); }
+    if (profile             != NULL) { profile_abandon (profile); }
+
     return result;
 }
 

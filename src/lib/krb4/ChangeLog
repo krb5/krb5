@@ -1,3 +1,10 @@
+2003-07-10  Alexandra Ellwood  <lxs@mit.edu>
+
+        * RealmsConfig-glue.c: krb_get_lrealm fix so that if there is no
+        "v4_realm" tag, krb_get_lrealm doesn't just always return
+        ATHENA.MIT.EDU even though a different realm is specified in
+        krb5.conf and there is a [v4 realm] config
+
 2003-07-07  Alexandra Ellwood  <lxs@mit.edu>
 
         * RealmsConfig-glue.c: krb_prof_get_nth() no longer assumes that
