@@ -90,7 +90,8 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 				      KRB5_TGS_NAME_SIZE,
 				      KRB5_TGS_NAME,
 				      db_entry->princ->realm.length,
-				      db_entry->princ->realm.data);
+				      db_entry->princ->realm.data,
+				      0);
     if (retval)
 	return retval;
 

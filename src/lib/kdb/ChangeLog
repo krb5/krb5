@@ -1,3 +1,8 @@
+
+Wed Aug 9 09:47:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_cpw.c(add_key_rnd) - Terminate the variable length argument list
+		to krb5_build_principal_ext() with a zero.
+
 Tue Aug  8 21:32:30 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* kdb_cpw.c (add_key_rnd): remove bletcherous aggregate
