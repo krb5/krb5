@@ -130,7 +130,7 @@ kadm_inq_user(context, auth_context, my_creds, local_socket, principal)
         return(0);
     }
 
-    my_data = malloc(msg_data.length + 1);
+    my_data = (char *)malloc(msg_data.length + 1);
     if (!my_data) {
 	fprintf(stderr, "kadmin_inq: Couldn't allocate space for my_data!\n");
 	exit(1);

@@ -1,3 +1,7 @@
+Fri Mar 17 15:36:07 1995  Chris Provenzano (proven@mit.edu)
+
+        * kadmin_inq.c, kadmin.c:
+		Cast malloc() return value to shut compiler up.
 
 Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
 
@@ -29,7 +33,7 @@ Fri Feb 10 17:50:39 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
-        * kadmin.c Removed krb5_keytype, changed krb5_enctype to
+        * kadmin.c: Removed krb5_keytype, changed krb5_enctype to
                 krb5_enctype *, changed krb5_preauthtype to krb5_preauthtype *
                 for krb5_get_in_tkt_with_password() rotuine.
 

@@ -679,7 +679,7 @@ void decode_kadmind_reply(data, response)
     response->oper_code = data.data[1];
     response->retn_code = data.data[2];
     if (data.length > 3 && data.data[3]) {
-	response->message = malloc(data.length - 2);
+	response->message = (char *)malloc(data.length - 2);
 	if (response->message) {
 	    memcpy(response->message, data.data + 3, data.length - 3);
 	    response->message[data.length - 3] = 0;
