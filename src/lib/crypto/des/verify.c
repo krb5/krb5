@@ -26,10 +26,16 @@ static char rcsid_verify_c[] =
 #include <krb5/krb5.h>
 #include <krb5/mit-des.h>
 #include <krb5/krb5_err.h>
+#include <krb5/ext-proto.h>
 #include <com_err.h>
 
 extern int errno;
 extern krb5_cryptosystem_entry mit_des_cryptosystem_entry;
+extern mit_des_encrypt_f();
+extern mit_des_decrypt_f();
+extern mit_des_ecb_encrypt();
+extern mit_des_cbc_cksum();
+
 char *progname;
 int nflag = 2;
 int vflag;
@@ -65,6 +71,20 @@ unsigned char zero_key[8] = {1,1,1,1,1,1,1,1}; /* just parity bits */
 int i,j;
 krb5_error_code retval;
 
+unsigned char cipher1[8] = {
+    0x25,0xdd,0xac,0x3e,0x96,0x17,0x64,0x67
+};
+unsigned char cipher2[8] = {
+    0x3f,0xa4,0x0e,0x8a,0x98,0x4d,0x48,0x15
+};
+unsigned char cipher3[64] = {
+    0xe5,0xc7,0xcd,0xde,0x87,0x2b,0xf2,0x7c,
+    0x43,0xe9,0x34,0x00,0x8c,0x38,0x9c,0x0f,
+    0x68,0x37,0x88,0x49,0x9a,0x7c,0x05,0xf6
+};
+unsigned char checksum[8] = {
+    0x58,0xd2,0xe7,0x7e,0x86,0x06,0x27,0x33
+};
 /*
  * Can also add :
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
@@ -76,7 +96,7 @@ main(argc,argv)
     char *argv[];
 {
     /* Local Declarations */
-    long in_length;
+    int	 in_length;
     void do_encrypt();
     void do_decrypt();
 
@@ -198,6 +218,12 @@ main(argc,argv)
 	    com_err("des verify", retval, "can't finish key2");
 	    exit(-1);
 	}
+	if ( bcmp((char *)cipher_text, (char *)cipher1, 8) ) {
+	    printf("verify: error in ECB encryption\n");
+	    exit(-1);
+	}
+	else 
+	    printf("verify: ECB encription is correct\n\n");
     }
 
     /* ECB mode */
@@ -220,6 +246,12 @@ main(argc,argv)
 	}
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
+	if ( bcmp((char *)cipher_text, (char *)cipher2, 8) ) {
+	    printf("verify: error in ECB encryption\n");
+	    exit(-1);
+	}
+	else 
+	    printf("verify: ECB encription is correct\n\n");
     }
 
     /* CBC mode */
@@ -231,12 +263,11 @@ main(argc,argv)
     printf("\t\t\t68 37 88 49 9a 7c 05 f6\n");
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
-    in_length = strlen(input);
-    if (retval =
-        (*eblock.crypto_entry->encrypt_func)((krb5_pointer) input,
-                                             (krb5_pointer) cipher_text,
-                                             (size_t) in_length, 
-					     &eblock, (krb5_pointer) ivec)) {
+    in_length =  strlen((char *)input);
+    if (retval = mit_des_encrypt_f((krb5_pointer) input,
+				   (krb5_pointer) cipher_text,
+				   (size_t) in_length, 
+				   &eblock, (krb5_pointer) ivec)) {
 	com_err("des verify", retval, "can't encrypt");
 	exit(-1);
     }
@@ -248,15 +279,21 @@ main(argc,argv)
 	}
 	printf("\n");
     }
-    if (retval =
-        (*eblock.crypto_entry->decrypt_func)((krb5_pointer) cipher_text,
-                                             (krb5_pointer) clear_text,
-					     (size_t) in_length, 
-					     &eblock, (krb5_pointer) ivec)) {
+    if (retval = mit_des_decrypt_f((krb5_pointer) cipher_text,
+				   (krb5_pointer) clear_text,
+				   (size_t) in_length, 
+				   &eblock, (krb5_pointer) ivec)) {
 	com_err("des verify", retval, "can't decrypt");
 	exit(-1);
     }
     printf("\tdecrypted clear_text = \"%s\"\n",clear_text);
+
+    if ( bcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
+	printf("verify: error in CBC encryption\n");
+	exit(-1);
+    }
+    else 
+	printf("verify: CBC encription is correct\n\n");
 
     printf("EXAMPLE CBC checksum");
     printf("\tkey =  0123456789abcdef\tiv =  1234567890abcdef\n");
@@ -264,7 +301,8 @@ main(argc,argv)
     printf("\tchecksum\t58 d2 e7 7e 86 06 27 33, ");
     printf("or some part thereof\n");
     input = clear_text2;
-    mit_des_cbc_cksum(input,cipher_text,(long) strlen(input),eblock.priv,ivec,1);
+    mit_des_cbc_cksum(input,cipher_text,(long) strlen((char *)input),
+		      eblock.priv,ivec,1);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
@@ -274,6 +312,12 @@ main(argc,argv)
 	com_err("des verify", retval, "can't finish key2");
 	exit(-1);
     }
+    if ( bcmp((char *)cipher_text, (char *)checksum, 8) ) {
+	printf("verify: error in CBC cheksum\n");
+	exit(-1);
+    }
+    else 
+	printf("verify: CBC checksum is correct\n\n");
     exit(0);
 }
 
