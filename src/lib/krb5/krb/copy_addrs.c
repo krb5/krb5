@@ -65,6 +65,11 @@ krb5_address ***outaddr;
     krb5_address ** tempaddr;
     register int nelems = 0;
 
+    if (!inaddr) {
+	    *outaddr = 0;
+	    return 0;
+    }
+    
     while (inaddr[nelems]) nelems++;
 
     /* one more for a null terminated list */
@@ -106,7 +111,7 @@ krb5_address ***outaddr;
     while (inaddr[nelems]) nelems++;
     while (tempaddr2[norigelems]) norigelems++;
 
-    tempaddr = realloc((char *)*outaddr,
+    tempaddr = (krb5_address **) realloc((char *)*outaddr,
 		       (nelems + norigelems + 1) * sizeof(*tempaddr));
     if (!tempaddr)
 	return ENOMEM;
@@ -130,7 +135,8 @@ krb5_address ***outaddr;
 	krb5_free_address(tempaddr[norigelems + nelems]);
 
     /* Try to allocate a smaller amount of memory for *outaddr.  */
-    tempaddr = realloc((char *)tempaddr, (norigelems + 1) * sizeof(*tempaddr));
+    tempaddr = (krb5_address **) realloc((char *)tempaddr,
+					 (norigelems + 1) * sizeof(*tempaddr));
     if (tempaddr)
 	*outaddr = tempaddr;
     return retval;
