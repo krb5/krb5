@@ -1,3 +1,7 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't look for getipnodebyaddr.
+
 2001-04-03  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add checks for unsetenv and getenv.  Compile
