@@ -1,6 +1,7 @@
 Tue Jul  1 02:34:46 1997  Tom Yu  <tlyu@mit.edu>
 
 	* client_principal.c, client_rpc.c: Add support for setv4key.
+
 Mon Mar 31 17:40:48 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* client_principal.c, client_rpc.c: add support for
