@@ -104,7 +104,7 @@ setup_com_err()
     return;
 }
 
-sigtype
+krb5_sigtype
 request_exit()
 {
     signal_requests_exit = 1;
@@ -317,8 +317,8 @@ char *argv[];
     krb5_error_code retval;
     int errout = 0;
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     setup_com_err();
 
