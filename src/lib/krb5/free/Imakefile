@@ -53,32 +53,32 @@ OBJS=	\
 	f_tkt_auth.o
 
 SRCS=	\
-	f_addr.c	\
-	f_address.c	\
-	f_arep_enc.c	\
-	f_ap_rep.c	\
-	f_ap_req.c	\
-	f_authdata.c	\
-	f_authent.c	\
-	f_cksum.c	\
-	f_creds.c	\
-	f_cred_cnt.c	\
-	f_enc_kdc.c	\
-	f_enc_tkt.c	\
-	f_error.c	\
-	f_kdc_rep.c	\
-	f_kdc_req.c	\
-	f_keyblock.c	\
-	f_last_req.c	\
-	f_padata.c	\
-	f_princ.c	\
-	f_priv.c	\
-	f_priv_enc.c	\
-	f_safe.c	\
-	f_ticket.c	\
-	f_tickets.c	\
-	f_tgt_cred.c	\
-	f_tkt_auth.c
+	$(SRCDIR)f_addr.c	\
+	$(SRCDIR)f_address.c	\
+	$(SRCDIR)f_arep_enc.c	\
+	$(SRCDIR)f_ap_rep.c	\
+	$(SRCDIR)f_ap_req.c	\
+	$(SRCDIR)f_authdata.c	\
+	$(SRCDIR)f_authent.c	\
+	$(SRCDIR)f_cksum.c	\
+	$(SRCDIR)f_creds.c	\
+	$(SRCDIR)f_cred_cnt.c	\
+	$(SRCDIR)f_enc_kdc.c	\
+	$(SRCDIR)f_enc_tkt.c	\
+	$(SRCDIR)f_error.c	\
+	$(SRCDIR)f_kdc_rep.c	\
+	$(SRCDIR)f_kdc_req.c	\
+	$(SRCDIR)f_keyblock.c	\
+	$(SRCDIR)f_last_req.c	\
+	$(SRCDIR)f_padata.c	\
+	$(SRCDIR)f_princ.c	\
+	$(SRCDIR)f_priv.c	\
+	$(SRCDIR)f_priv_enc.c	\
+	$(SRCDIR)f_safe.c	\
+	$(SRCDIR)f_ticket.c	\
+	$(SRCDIR)f_tickets.c	\
+	$(SRCDIR)f_tgt_cred.c	\
+	$(SRCDIR)f_tkt_auth.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
