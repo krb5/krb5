@@ -41,36 +41,43 @@ gss-library-output-folder							= {root-folder}:GSSLib:Binaries:
 krb5-library-output-folder							= {root-folder}:Kerberos5Lib:Binaries:
 krb5-globals-library-output-folder					= {root-folder}:Kerberos5GlobalsLib:Binaries:
 krb5-globals-data-library-output-folder				= {krb5-globals-library-output-folder}
+profile-library-output-folder						= {root-folder}:KerberosProfileLib:Binaries:
 
 gss-library-name									= GSSLib
 krb5-library-name									= Kerberos5Lib
 krb5-globals-library-name							= Krb5GlobalsLib
 krb5-globals-data-library-name						= Krb5GlobalsDataLib
+profile-library-name								= KrbProfileLib
 
 gss-library-export									= {root-folder}mac:GSSLibrary.exp
 krb5-library-export									= {root-folder}mac:K5Library.exp
 krb5-globals-library-export							= {krb5-globals-root-folder}Krb5Globals.exp
 krb5-globals-data-library-export					= {krb5-globals-root-folder}Krb5GlobalsData.exp
+profile-library-export								= {root-folder}util:profile:profile.exp
 
 gss-library-fragment-name							= "MIT Kerberos¥GSSLib"
 krb5-library-fragment-name							= "MIT Kerberos¥Kerberos5Lib"
 krb5-globals-library-fragment-name					= "MIT Kerberos¥Kerberos5GlobalsLib"
 krb5-globals-data-library-fragment-name				= "MIT Kerberos¥Kerberos5GlobalsDataLib"
+profile-library-fragment-name						= "MIT Kerberos¥KerberosProfileLib"
 
 gss-library-main									= ¶"¶"
 krb5-library-main									= ¶"¶"
 krb5-globals-library-main							= ¶"¶"
 krb5-globals-data-library-main						= ¶"¶"
+profile-library-main								= ¶"¶"
 
 gss-library-init									= __initializeGSS
 krb5-library-init									= __initializeK5
 krb5-globals-library-init							= __initialize_Kerberos5GlobalsLib
 krb5-globals-data-library-init						= __initialize
+profile-library-init								= InitializeProfileLib
 	
 gss-library-term 									= __terminateGSS
 krb5-library-term									= __terminateK5
 krb5-globals-library-term							= __terminate_Kerberos5GlobalsLib
 krb5-globals-data-library-term						= __terminate
+profile-library-term								= TerminateProfileLib
 
 gss-library-current-version							= 1
 gss-library-definition-version						= 1
@@ -88,11 +95,16 @@ krb5-globals-data-library-current-version			= 0
 krb5-globals-data-library-definition-version		= 0
 krb5-globals-data-library-implementation-version	= 0
 
+profile-library-current-version						= 0
+profile-library-definition-version					= 0
+profile-library-implementation-version				= 0
+
 ##############################################################################################################
 ###			Generation of file lists
 ##############################################################################################################
 
-list-generation-script = ":macfile_gen.pl"
+list-generation-script-folder = "{root-folder}mac:"
+list-generation-script = "{list-generation-script-folder}macfile_gen.pl"
 list-generation-script-root = ".."
 list-generation-script-prefix = ":"
 
@@ -103,6 +115,7 @@ include-folders-list							= {root-folder}"Include folders.list"
 
 gss-sources-list								= {root-folder}"GSS sources.list"
 krb5-sources-list								= {root-folder}"Krb5 sources.list"
+profile-sources-list							= {root-folder}"Profile sources.list"
 
 gss-objects-ppc-debug-list						= {root-folder}"GSS objects PPC debug.list"
 gss-objects-68k-debug-list						= {root-folder}"GSS objects 68K debug.list"
@@ -113,6 +126,11 @@ krb5-objects-ppc-debug-list						= {root-folder}"Krb5 objects PPC debug.list"
 krb5-objects-68k-debug-list						= {root-folder}"Krb5 objects 68K debug.list"
 krb5-objects-ppc-final-list						= {root-folder}"Krb5 objects PPC final.list"
 krb5-objects-68k-final-list						= {root-folder}"Krb5 objects 68K final.list"
+
+profile-objects-ppc-debug-list					= {root-folder}"Profile objects PPC debug.list"
+profile-objects-68k-debug-list					= {root-folder}"Profile objects 68K debug.list"
+profile-objects-ppc-final-list					= {root-folder}"Profile objects PPC final.list"
+profile-objects-68k-final-list					= {root-folder}"Profile objects 68K final.list"
 
 all-lists = ¶
 	{all-files-list} ¶
@@ -128,64 +146,88 @@ all-lists = ¶
 	{krb5-objects-ppc-debug-list} ¶
 	{krb5-objects-68k-debug-list} ¶
 	{krb5-objects-ppc-final-list} ¶
-	{krb5-objects-68k-final-list}
+	{krb5-objects-68k-final-list} ¶
+	{profile-objects-ppc-debug-list} ¶
+	{profile-objects-68k-debug-list} ¶
+	{profile-objects-ppc-final-list} ¶
+	{profile-objects-68k-final-list}
 
 file-lists Ä {all-lists}
 
+# Note that even though the list generation script tries to have a mechanism allowing you to run it
+# in different directories, it actually doesn't work too well because it wants a UNIX-style relative
+# path to root Makefile.in. This is why we run it with -x to specify the root.
+
 {all-files-list} Ä {list-generation-script} {makefile-name}
-	perl {list-generation-script} all-files {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} all-files {list-generation-script-root} {list-generation-script-prefix} ¶
  > {Targ}
 
 {all-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} all-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} all-sources {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {all-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} all-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} all-folders {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {include-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} include-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} include-folders {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {gss-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} gss-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} gss-sources {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {krb5-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} krb5-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-sources {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} gss-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} gss-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} gss-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl {list-generation-script} krb5-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+ < {all-files-list} > {Targ}
+
+{profile-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+ < {all-files-list} > {Targ}
+
+{profile-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+ < {all-files-list} > {Targ}
+
+{profile-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+ < {all-files-list} > {Targ}
+
+{profile-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
  < {all-files-list} > {Targ}
 
 ##############################################################################################################
@@ -334,6 +376,17 @@ autogenerated-files = ¶
 ###			krb5-globals-library-init						-- name of Krb5 globals library initialization routine
 ###			krb5-globals-library-term						-- name of Krb5 globals library termination routine
 ###			krb5-globals-library-linker-options				-- all other Krb5 globals library linker options
+###		For profile library
+###			profile-library-output-folder					-- destination of Krb5 globals library output
+###			profile-library-name							-- name of the Krb5 globals library
+###			profile-library-export							-- name of gss Krb5 globals library export file
+###			profile-library-libraries						-- list of libraries Krb5 globals library links against
+###			profile-library-objects							-- list of object files Krb5 globals library links
+###			profile-library-fragment-name					-- name of Krb5 globals library fragment
+###			profile-library-main							-- name of Krb5 globals library main entry point
+###			profile-library-init							-- name of Krb5 globals library initialization routine
+###			profile-library-term							-- name of Krb5 globals library termination routine
+###			profile-library-linker-options					-- all other Krb5 globals library linker options
 ###		General
 ###			library-linker									-- linker to use
 ###			autogenerated-files								-- list of autogenerated files
@@ -421,6 +474,7 @@ krb5-library-libraries-ppc-debug = ¶
 	{socketslib-ppc-debug} ¶
 	{errorlib-ppc-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-debug} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-debug = ¶
@@ -428,13 +482,15 @@ krb5-library-libraries-68k-debug = ¶
 	{ccachelib-68k-debug} ¶
 	{socketslib-68k-debug} ¶
 	{errorlib-68k-debug} ¶
-	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-debug}
+	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-debug} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug}
 krb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccachelib-ppc-final} ¶
 	{socketslib-ppc-final} ¶
 	{errorlib-ppc-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-final} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final} ¶
 	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-final = ¶
@@ -442,7 +498,8 @@ krb5-library-libraries-68k-final = ¶
 	{ccachelib-68k-final} ¶
 	{socketslib-68k-final} ¶
 	{errorlib-68k-final} ¶
-	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-final}
+	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-final} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final}
 
 krb5-globals-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
@@ -463,6 +520,15 @@ krb5-globals-library-libraries-68k-final = ¶
 	
 krb5-globals-data-library-libraries-ppc = ¶"{MWPPCLibraries}MSL RuntimePPC.Lib¶"
 krb5-globals-data-library-libraries-68k = ¶"{MW68KLibraries}MSL MWCFM68KRuntime.Lib¶"
+
+profile-library-libraries-ppc-debug = ¶
+	{standard-libraries-ppc-debug}
+profile-library-libraries-68k-debug = ¶
+	{standard-libraries-68k-debug}
+profile-library-libraries-ppc-final = ¶
+	{standard-libraries-ppc-final}
+profile-library-libraries-68k-final = ¶
+	{standard-libraries-68k-final}
 
 ### Construct linker options. 
 
@@ -509,6 +575,16 @@ krb5-globals-data-library-common-linker-options = ¶
 krb5-globals-data-library-linker-options-ppc = {common-linker-options-debug} {krb5-globals-data-library-common-linker-options}
 krb5-globals-data-library-linker-options-68k = {common-linker-options-debug} {krb5-globals-data-library-common-linker-options}
 
+profile-library-common-linker-options = ¶
+	-cv {profile-library-current-version} ¶
+	-dv {profile-library-definition-version} ¶
+	-uv {profile-library-implementation-version}
+
+profile-library-linker-options-ppc-debug = {common-linker-options-debug} {profile-library-common-linker-options}
+profile-library-linker-options-68k-debug = {common-linker-options-debug} {profile-library-common-linker-options}
+profile-library-linker-options-ppc-final = {common-linker-options-final} {profile-library-common-linker-options}
+profile-library-linker-options-68k-final = {common-linker-options-final} {profile-library-common-linker-options}
+
 gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
 gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-68k-debug}
 gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-final}
@@ -534,6 +610,11 @@ krb5-globals-library-objects-68k-final = ¶
 
 krb5-globals-data-library-objects-ppc = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-ppc-data}
 krb5-globals-data-library-objects-68k = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-68k-data}
+
+profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
+profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
+profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
+profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
 
 library-linker-ppc						= MWLinkPPC
 library-linker-68K						= MWLink68K
@@ -621,7 +702,14 @@ make-options-common = ¶
 	-d krb5-globals-data-library-fragment-name={krb5-globals-data-library-fragment-name} ¶
 	-d krb5-globals-data-library-main="{krb5-globals-data-library-main}" ¶
 	-d krb5-globals-data-library-init="{krb5-globals-data-library-init}" ¶
-	-d krb5-globals-data-library-term="{krb5-globals-data-library-term}"
+	-d krb5-globals-data-library-term="{krb5-globals-data-library-term}" ¶
+	-d profile-library-output-folder="{profile-library-output-folder}" ¶
+	-d profile-library-name="{profile-library-name}" ¶
+	-d profile-library-export="{profile-library-export}" ¶
+	-d profile-library-fragment-name={profile-library-fragment-name} ¶
+	-d profile-library-main="{profile-library-main}" ¶
+	-d profile-library-init="{profile-library-init}" ¶
+	-d profile-library-term="{profile-library-term}"
 
 make-options-ppc-debug = ¶
 	-d library-linker="{library-linker-ppc}" ¶
@@ -639,6 +727,9 @@ make-options-ppc-debug = ¶
 	-d krb5-globals-data-library-libraries="{krb5-globals-data-library-libraries-ppc}" ¶
 	-d krb5-globals-data-library-objects="{krb5-globals-data-library-objects-ppc}" ¶
 	-d krb5-globals-data-library-linker-options="{krb5-globals-data-library-linker-options-ppc}" ¶
+	-d profile-library-libraries="{profile-library-libraries-ppc-debug}" ¶
+	-d profile-library-objects="{profile-library-objects-ppc-debug}" ¶
+	-d profile-library-linker-options="{profile-library-linker-options-ppc-debug}" ¶
 	-d object-suffix="{object-suffix-ppc-debug}" ¶
 	-d object-suffix-data="{object-suffix-ppc-data}" ¶
 	-d compiler-options="{compiler-options-ppc-debug}" ¶
@@ -661,6 +752,9 @@ make-options-68k-debug = ¶
 	-d krb5-globals-data-library-libraries="{krb5-globals-data-library-libraries-68k}" ¶
 	-d krb5-globals-data-library-objects="{krb5-globals-data-library-objects-68k}" ¶
 	-d krb5-globals-data-library-linker-options="{krb5-globals-data-library-linker-options-68k}" ¶
+	-d profile-library-libraries="{profile-library-libraries-68k-debug}" ¶
+	-d profile-library-objects="{profile-library-objects-68k-debug}" ¶
+	-d profile-library-linker-options="{profile-library-linker-options-68k-debug}" ¶
 	-d object-suffix="{object-suffix-68k-debug}" ¶
 	-d object-suffix-data="{object-suffix-68k-data}" ¶
 	-d compiler-options="{compiler-options-68k-debug}" ¶
@@ -684,6 +778,9 @@ make-options-ppc-final = ¶
 	-d krb5-globals-data-library-libraries="{krb5-globals-data-library-libraries-ppc}" ¶
 	-d krb5-globals-data-library-objects="{krb5-globals-data-library-objects-ppc}" ¶
 	-d krb5-globals-data-library-linker-options="{krb5-globals-data-library-linker-options-ppc}" ¶
+	-d profile-library-libraries="{profile-library-libraries-ppc-final}" ¶
+	-d profile-library-objects="{profile-library-objects-ppc-final}" ¶
+	-d profile-library-linker-options="{profile-library-linker-options-ppc-final}" ¶
 	-d object-suffix="{object-suffix-ppc-final}" ¶
 	-d object-suffix-data="{object-suffix-ppc-data}" ¶
 	-d compiler-options="{compiler-options-ppc-final}" ¶
@@ -706,6 +803,9 @@ make-options-68k-final = ¶
 	-d krb5-globals-data-library-libraries="{krb5-globals-data-library-libraries-68k}" ¶
 	-d krb5-globals-data-library-objects="{krb5-globals-data-library-objects-68k}" ¶
 	-d krb5-globals-data-library-linker-options="{krb5-globals-data-library-linker-options-68k}" ¶
+	-d profile-library-libraries="{profile-library-libraries-68k-final}" ¶
+	-d profile-library-objects="{profile-library-objects-68k-final}" ¶
+	-d profile-library-linker-options="{profile-library-linker-options-68k-final}" ¶
 	-d object-suffix="{object-suffix-68k-final}" ¶
 	-d object-suffix-data="{object-suffix-68k-data}" ¶
 	-d compiler-options="{compiler-options-68k-final}" ¶
@@ -715,19 +815,23 @@ make-options-68k-final = ¶
 make-output = "{TempFolder}GSS/Kerberos Makefile script"
 submakefile-target = gss-library
 
-ppc-debug Ä {makefile-name} {gss-objects-ppc-debug-list} {krb5-objects-ppc-debug-list} {include-folders-list}
+ppc-debug Ä {makefile-name} {gss-objects-ppc-debug-list} {krb5-objects-ppc-debug-list} ¶
+	{profile-objects-ppc-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-ppc-debug} {submakefile-target} > {make-output}
 	{make-output}
 	
-68k-debug Ä {makefile-name} {gss-objects-68k-debug-list} {krb5-objects-68k-debug-list} {include-folders-list}
+68k-debug Ä {makefile-name} {gss-objects-68k-debug-list} {krb5-objects-68k-debug-list} ¶
+	 {profile-objects-68k-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-68k-debug} {submakefile-target} > {make-output}
 	{make-output}
 	
-ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final-list} {include-folders-list}
+ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final-list} ¶
+	{profile-objects-ppc-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-ppc-final} {submakefile-target} > {make-output}
 	{make-output}
 	
-68k-final Ä {makefile-name} {gss-objects-68k-final-list} {krb5-objects-68k-final-list} {include-folders-list}
+68k-final Ä {makefile-name} {gss-objects-68k-final-list} {krb5-objects-68k-final-list} ¶
+	{profile-objects-68k-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-68k-final} {submakefile-target} > {make-output}
 	{make-output}
 	
@@ -750,7 +854,7 @@ ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final
 ###		For Krb5 library
 ###			krb5-library-output-folder						-- destination of Krb5 library output
 ###			krb5-library-name								-- name of the Krb5 library
-###			krb5-library-export								-- name of gss Krb5 library export file
+###			krb5-library-export								-- name of Krb5 library export file
 ###			krb5-library-libraries							-- list of libraries Krb5 library links against
 ###			krb5-library-objects							-- list of object files Krb5 library links
 ###			krb5-library-fragment-name						-- name of Krb5 library fragment
@@ -780,6 +884,17 @@ ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final
 ###			krb5-globals-data-library-init					-- name of Krb5 globals library initialization routine
 ###			krb5-globals-data-library-term					-- name of Krb5 globals library termination routine
 ###			krb5-globals-data-library-linker-options		-- all other Krb5 globals library linker options
+###		For profile library
+###			profile-library-output-folder					-- destination of profile library output
+###			profile-library-name							-- name of the profile library
+###			profile-library-export							-- name of profile library export file
+###			profile-library-libraries						-- list of libraries profile library links against
+###			profile-library-objects							-- list of object files profile library links
+###			profile-library-fragment-name					-- name of profile library fragment
+###			profile-library-main							-- name of profile library main entry point
+###			profile-library-init							-- name of profile library initialization routine
+###			profile-library-term							-- name of profile library termination routine
+###			profile-library-linker-options					-- all other profile library linker options
 ###		General
 ###			library-linker									-- linker to use
 ###			autogenerated-files								-- list of autogenerated files
@@ -810,6 +925,9 @@ krb5-globals-data-library-linker-options =
 precompiled-headers =
 object-suffix = .ignore.me
 object-suffix-data = .ignore.me.too
+profile-library-libraries =
+profile-library-objects =
+profile-library-linker-options =
 
 ###	Generate various major components of build commands from the above variables
 gss-library-output-files = ¶
@@ -876,12 +994,29 @@ krb5-globals-data-library-build-command = ¶
 	{krb5-globals-data-library-linker-options} ¶
 	{krb5-globals-data-library-objects} {krb5-globals-data-library-libraries}
 
+profile-library-output-files = ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform}{library-kind}
+profile-library-dependencies = ¶
+	{autogenerated-files} {profile-library-export} {profile-library-libraries} {profile-library-objects}
+profile-library-build-command = ¶
+	{library-linker} ¶
+	-name "{profile-library-fragment-name}{library-kind}" ¶
+	-main {profile-library-main} ¶
+	-init {profile-library-init} ¶
+	-term {profile-library-term} ¶
+	-@export {profile-library-export} ¶
+	-map {profile-library-output-folder}{profile-library-name}{library-platform}{library-kind}.MAP ¶
+	-o {profile-library-output-folder}{profile-library-name}{library-platform}{library-kind} ¶
+	{profile-library-linker-options} ¶
+	{profile-library-objects} {profile-library-libraries}
+
 ###	Build commands
 
 gss-library Ä {gss-library-output-files}
 krb5-library Ä {krb5-library-output-files}
 krb5-globals-library Ä {krb5-globals-library-output-files}
 krb5-globals-data-library Ä {krb5-globals-data-library-output-files}
+profile-library Ä {profile-library-output-files}
 
 {gss-library-output-files} ÄÄ {gss-library-dependencies} {makefile-name}
 	{create-folder} {gss-library-output-folder}
@@ -898,6 +1033,10 @@ krb5-globals-data-library Ä {krb5-globals-data-library-output-files}
 {krb5-globals-data-library-output-files} ÄÄ {krb5-globals-data-library-dependencies} {makefile-name}
 	{create-folder} {krb5-globals-data-library-output-folder}
 	{krb5-globals-data-library-build-command}
+
+{profile-library-output-files} ÄÄ {profile-library-dependencies} {makefile-name}
+	{create-folder} {profile-library-output-folder}
+	{profile-library-build-command}
 
 ##############################################################################################################
 ###			Default compilation rules
