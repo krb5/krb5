@@ -1,3 +1,7 @@
+2003-12-19  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c: Include k5-int.h for accessor.
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
    * accept_sec_context.c, init_sec_context.c, ser_sctx.c:
