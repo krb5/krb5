@@ -1,3 +1,8 @@
+Tue Jul 30 19:58:22 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Remove #include <netdb.h> (already gotten by
+		kadm5/admin.h)
+
 Fri Jul 19 20:22:47 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in: added AC_PROG_AWK and USE_GSSAPI_LIBRARY
