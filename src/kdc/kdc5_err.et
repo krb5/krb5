@@ -1,0 +1,18 @@
+#
+# $Source$
+# $Author$
+#
+# Copyright 1990 by the Massachusetts Institute of Technology.
+#
+# For copying and distribution information, please see the file
+# <krb5/copyright.h>.
+#
+# KDC internal error table.
+
+error_table	kdc5
+
+error_code KDC5_RCSID,		"$Id$"
+error_code KDC5_NOPORT,		"No server port found"
+error_code KDC5_NONET,		"Network not initialized"
+
+end
