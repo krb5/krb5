@@ -64,8 +64,9 @@ static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 						    krb5_data **));
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(request, from, is_secondary, response)
+process_tgs_req(request, pkt, from, is_secondary, response)
 krb5_kdc_req *request;
+krb5_data *pkt;
 const krb5_fulladdr *from;		/* who sent it ? */
 int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
@@ -106,7 +107,7 @@ krb5_data **response;			/* filled in with a response packet */
 
     header_ticket = 0;
     req_authdat = 0;
-    retval = kdc_process_tgs_req(request, from, &req_authdat);
+    retval = kdc_process_tgs_req(request, from, pkt, &req_authdat);
     if (req_authdat)
 	header_ticket = req_authdat->ticket;
     if (retval) {
