@@ -38,7 +38,7 @@
  * system errors
  * permission errors
  */
-void krb5_mcc_free(krb5_context context, krb5_ccache id);
+void krb5_mcc_free KRB5_PROTOTYPE((krb5_context context, krb5_ccache id));
 
 krb5_error_code INTERFACE
 krb5_mcc_initialize(context, id, princ)
