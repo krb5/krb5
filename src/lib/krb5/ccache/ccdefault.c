@@ -15,9 +15,11 @@ static char rcsid_default_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
+#include <stdio.h>
+#include <assert.h>
+
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <assert.h>
 
 static krb5_ccache default_ccache;
 
