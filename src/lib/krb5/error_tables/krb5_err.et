@@ -218,5 +218,6 @@ error_code KRB5_KT_UNKNOWN_TYPE,	"Unknown Key table type"
 error_code KRB5_KT_NOTFOUND,		"Key table entry not found"
 error_code KRB5_KT_END,			"End of key table reached"
 error_code KRB5_KT_NOWRITE,		"Cannot write to specified key table"
+error_code KRB5_KT_IOERR,		"Error writing to key table"
 
 end
