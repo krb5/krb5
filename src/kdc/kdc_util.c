@@ -257,7 +257,7 @@ krb5_ticket **ticket;
 			    &our_cksum)) {
 	krb5_free_tkt_authent(authdat);
 	xfree(our_cksum.contents);
-	xfree(scratch->data);
+	krb5_free_data(scratch);
 	cleanup_apreq();
 	return retval;
     }
@@ -267,11 +267,11 @@ krb5_ticket **ticket;
 	       our_cksum.length)) {
 	krb5_free_tkt_authent(authdat);
 	xfree(our_cksum.contents);
-	xfree(scratch->data);
+	krb5_free_data(scratch);
 	cleanup_apreq();
 	return KRB5KRB_AP_ERR_BAD_INTEGRITY; /* XXX wrong code? */
     }
-    xfree(scratch->data);
+    krb5_free_data(scratch);
     xfree(our_cksum.contents);
 
     krb5_free_tkt_authent(authdat);

@@ -76,12 +76,14 @@ register int *error;
 	(swbits[(val >> 16) & 0xff] << 8) | swbits[(val >> 24) & 0xff];
     
     tmp = int2strb(useval, 32);		/* XXX hardcode 32 bits */
-    
+    /* tmp points to static buffer */
+
     pe = strb2bitstr(tmp, 32, PE_CLASS_UNIV, PE_PRIM_BITS);
     if (!pe)
 	*error = ENOMEM;
     else
 	*error = 0;
+
     return(pe);
 }
 
@@ -103,6 +105,8 @@ register int *error;
 	*error = 0;
     
     result = strb2int(tmp, length);
+
+    free(tmp);
 
     /* need to reverse bits in result, so that 0 is msb */
     result = (swbits[(result & 0xff)] << 24) |
