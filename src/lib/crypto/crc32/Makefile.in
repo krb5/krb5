@@ -9,7 +9,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 OBJS=	crc.$(OBJEXT)
 
-SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
+SRCS=	$(srcdir)/crc.c
 
 all-unix:: shared $(OBJS) 
 all-mac:: shared $(OBJS) 

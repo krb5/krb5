@@ -1,3 +1,8 @@
+Sat Mar 30 22:54:12 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Removed crctest.c from the SRCS list, since
+		it's only a test program and it confuses the Macintosh build.
+
 Fri Oct  6 21:59:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (CFLAGS): Remove ##DOS!include of config/windows.in.
