@@ -7,4 +7,5 @@ check::
 
 clean::
 	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
+	$(RM) config.log pre.out post.out Makefile.out
 

@@ -1,3 +1,8 @@
+Tue Nov  1 14:11:57 1994    (tytso@rsx-11)
+
+	* post.in (clean): Also clean up config.log, pre.out, post.out and
+		Makefile.out 
+
 Thu Oct  6 19:41:52 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* post.in: add default "check" rule for Makefiles that don't do
