@@ -1,0 +1,7 @@
+#include <KrbProfileLib.glue.h>
+
+Boolean KerberosProfileLibraryIsPresent ()
+{
+	Ptr	symAddr;
+	return (Find_Symbol (&symAddr, "\pprofile_init", profile_init_ProcInfo)) == noErr;
+}
