@@ -40,7 +40,7 @@ depend:: includes
 
 install-mkdirs:
 	@for i in $(INSTALLMKDIRS); do \
-		if test -d $$i; then :; else (set -x; mkdir $$i); fi \
+		if test -d $(DESTDIR)$$i; then :; else (set -x; mkdir $(DESTDIR)$$i); fi \
 	done
 
 # install::

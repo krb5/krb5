@@ -1,3 +1,7 @@
+Mon Oct  3 22:48:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: make install obey $(DESTDIR)
+
 Thu Aug  4 03:40:55 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: oops look for install program

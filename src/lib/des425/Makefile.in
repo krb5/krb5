@@ -49,7 +49,7 @@ libdes425.a: $(OBJS)
 
 install:: libdes425.a
 	$(INSTALL_DATA) libdes425.a $(KRB5_LIBDIR)/libdes425.a
-	$(RANLIB) $(KRB5_LIBDIR)/libdes425.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdes425.a
 
 clean::
 	$(RM) libdes425.a
