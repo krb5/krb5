@@ -1,0 +1,34 @@
+DEFINES = -DLOCAL_REALM='"."' -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
+CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+SRCS = \
+	$(srcdir)/krb_auth_su.c \
+	$(srcdir)/ccache.c \
+	$(srcdir)/authorization.c \
+	$(srcdir)/main.c \
+	$(srcdir)/heuristic.c
+OBJS = \
+	krb_auth_su.o \
+	ccache.o \
+	authorization.o \
+	main.o \
+	heuristic.o
+
+all:: ksu
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+ksu: $(OBJS)
+	$(CC) $(CFLAGS) -o ksu $(OBJS) $(KLIB) $(LIBS)
+
+clean::
+	$(RM) ksu
+
+install::
+	$(INSTALL_PROGRAM) ksu ${DESTDIR}$(CLIENT_BINDIR)/ksu
+	$(INSTALL_DATA) ksu.1 ${DESTDIR}$(CLIENT_MANDIR)/ksu.1
