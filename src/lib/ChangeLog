@@ -1,3 +1,7 @@
+2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
+
+        * krb5_32.def: Export krb5_principal2salt.
+
 2003-07-09  Alexandra Ellwood  <lxs@mit.edu>
 
         * krb5_32.def: Export krb5_get_permitted_enctypes and 
