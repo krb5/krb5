@@ -119,7 +119,7 @@ krb5_sendauth(context, auth_context,
 	if (!in_creds || !in_creds->ticket.length) {
 		if (ccache)
 			use_ccache = ccache;
-		else if ((retval = krb5_cc_default(context, &use_ccache)))
+		else if ((retval = krb5int_cc_default(context, &use_ccache)))
 			goto error_return;
 	}
 	if (!in_creds) {

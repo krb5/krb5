@@ -178,7 +178,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default credential cache */
 
-   if ((code = krb5_cc_default(context, &ccache))) {
+   if ((code = krb5int_cc_default(context, &ccache))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
