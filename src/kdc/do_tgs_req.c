@@ -397,7 +397,7 @@ krb5_data **response;
 	return ENOMEM;
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
-    retval = encode_krb5_error(&errpkt, &response);
+    retval = encode_krb5_error(&errpkt, response);
     free(errpkt.text.data);
     return retval;
 }
