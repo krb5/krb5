@@ -1,3 +1,8 @@
+Sat Mar 18 18:44:03 1995  John Gilmore  (gnu at toad.com)
+
+	* com_err.c, com_err.h:  Use HAVE_STDARG_H, not STDARG_PROTOTYPES.
+	* configure.in:  Use AC_CHECK_HEADERS(stdarg.h), not CHECK_STDARG.
+
 Wed Mar 16 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* com_err.h: problem with this file needing k5-config for windows

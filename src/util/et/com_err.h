@@ -4,20 +4,22 @@
  * Copyright 1988, Student Information Processing Board of the
  * Massachusetts Institute of Technology.
  *
+ * Copyright 1995 by Cygnus Support.
+ *
  * For copyright and distribution info, see the documentation supplied
  * with this package.
  */
 
 #ifndef __COM_ERR_H
 
-#ifndef STDARG_PROTOTYPES
-/* Imake needs this -- oh well */
+#ifndef HAVE_STDARG_H
+/* End-user programs may need this -- oh well */
 #ifdef __STDC__
-#define STDARG_PROTOTYPES
+#define HAVE_STDARG_H 1
 #endif
 #endif
 
-#ifdef STDARG_PROTOTYPES
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>

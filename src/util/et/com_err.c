@@ -8,7 +8,7 @@
 #include <string.h>
 #include "mit-sipb-copyright.h"
 
-#if defined(__STDC__) || defined(STDARG_PROTOTYPES)
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
