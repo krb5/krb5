@@ -21,15 +21,6 @@ Wed Jul  1 17:59:26 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* t_kerb.c: Add ability to test krb5_string_to_timestamp
 
-Mon May  4 15:54:07 1998  Tom Yu  <tlyu@mit.edu>
-
-	* get_in_tkt.c: Add prototype for make_preauth_list.
-
-Sat May  2 21:46:02 1998  Tom Yu  <tlyu@mit.edu>
-
-	* get_in_tkt.c (krb5_get_in_tkt): Add missing argument to call to
-	make_preauth_list to avoid stack smashing.  Pointed out by lxs.
-
 Mon Mar 16 19:50:55 1998  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c (krb5_check_transited_list): Check lengths when
