@@ -1,3 +1,11 @@
+2001-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* post.in (all-recurse clean-recurse distclean-recurse
+	install-recurse check-recurse Makefiles-recurse): Do not pass down
+	CC and CCOPTS to subdirs. This causes automatic reconfiguration to
+	fail with autoconf 2.52 where config.status is invoked with
+	different environment variables.
+
 2001-07024  Jeffrey Altman <jaltman@columbia.edu>
 
         * win-pre.in:  the proper #define is KRB5_DNS_LOOKUP_REALM

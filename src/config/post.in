@@ -66,7 +66,7 @@ all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefi
 		case $$i in .);; *) \
 			target=`echo $@|sed s/-recurse//`; \
 			echo "making $$target in $(CURRENT_DIR)$$i..."; \
-			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
+			if (cd $$i ; $(MAKE) \
 			    CURRENT_DIR=$(CURRENT_DIR)$$i/ $$target) then :; \
 			else eval $$e; fi; \
 			;; \
