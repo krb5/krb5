@@ -33,3 +33,4 @@
 	_krb5_c_encrypt_length
 	_krb5int_cc_default
     _krb5_set_default_tgs_enctypes
+    _krb5_get_tgs_ktypes

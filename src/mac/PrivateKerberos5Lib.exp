@@ -32,3 +32,5 @@
 	krb5_c_encrypt_length				# GSSAPI
 	krb5int_cc_default					# GSSAPI
     krb5_set_default_tgs_enctypes		# GSSAPI
+    krb5_get_tgs_ktypes					# GSSAPI
+    
