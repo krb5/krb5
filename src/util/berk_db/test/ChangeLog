@@ -1,3 +1,11 @@
+Wed Jun 28 00:19:52 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* dbtest.c (xmalloc): use memcpy, memmove isn't needed.
+
+Wed Jun 28 00:17:44 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use AC_CHECK_FUNCS for index, and check for memmove.
+
 Wed Jun 28 00:04:07 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* run.test: look in /usr/share/lib/dict/words to find the words

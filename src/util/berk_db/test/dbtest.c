@@ -722,7 +722,7 @@ xmalloc(text, len)
 
 	if ((p = (void *)malloc(len)) == NULL)
 		err("%s", strerror(errno));
-	memmove(p, text, len);
+	memcpy(p, text, len);
 	return (p);
 }
 
