@@ -1,3 +1,12 @@
+Sat Feb 22 01:07:34 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* read_passwd.c: Don't base definitions on unix being defined.
+
+
+Fri Feb 21 19:11:33 1997  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Depend on -lcrypto
+
 Sun Feb 16 23:29:09 1997  Richard Basch  <basch@lehman.com>
 
 	* pcbc_encrypt.c: Export des_pcbc_encrypt (win16/win32)

@@ -27,7 +27,7 @@
  * echoing.
  */
 
-#if defined(unix)
+#if !defined(_MSDOS)&&!defined(_WIN32)
 
 #include "des.h"
 #include <stdio.h>
@@ -184,4 +184,4 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 /*
  * These are all just dummy functions to make the rest of the library happy...
  */
-#endif /* unix */
+#endif /* _WINDOWS */

@@ -16,7 +16,7 @@ RELDIR=des425
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libcrypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err 
+SHLIB_EXPLIBS=-lkrb5 -lcom_err -lcrypto
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
