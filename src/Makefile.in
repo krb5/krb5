@@ -80,6 +80,17 @@ dist: $(DISTFILES)
 	tar chzf `cat .fname`.tar.gz `cat .fname`
 	rm -rf `cat .fname` .fname
 
+GZIPPROG= gzip -9v
+PKGDIR=`pwd`/pkgdir
+pkgdir:
+	if test ! -d $(PKGDIR); then mkdir $(PKGDIR); else true; fi
+tgz-bin: pkgdir
+	rm -rf $(PKGDIR)/install cns5-bin.tgz
+	mkdir $(PKGDIR)/install
+	$(MAKE) install DESTDIR=$(PKGDIR)/install
+	(cd $(PKGDIR)/install && tar cf - usr/cygnus) | $(GZIPPROG) > cns5-bin.tgz
+	rm -rf $(PKGDIR)/install
+
 # Macintosh build process...
 
 # Build all things for the Mac build, which need to be built on

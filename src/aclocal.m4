@@ -82,9 +82,11 @@ define(MAKE_SUBDIRS,[dnl
 AC_PUSH_MAKEFILE()dnl
 changequote(<<<,>>>)dnl
 
-$2::<<<
-	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) e=:;; *) e="exit 1";; esac; \
+$2::
+dnl These don't work well with some versions of GNU make.
+dnl	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
+dnl		*[ik]*) e=:;; *) e="exit 1";; esac; \
+<<<	@e="exit 1";\
 	for i in $(SUBDIRS) ; do \
 		if test -d $$i ; then \
 			echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
@@ -790,7 +792,9 @@ AC_ARG_WITH([netlib],
 	AC_MSG_RESULT("netlib will use \'$withval\'")
   fi
 ,dnl
-[AC_CHECK_LIB(socket,main)
+[if test "`(uname) 2>/dev/null`" != IRIX ; then
+  AC_CHECK_LIB(socket,main)
+fi
 AC_CHECK_LIB(nsl,main)]
 )])dnl
 dnl

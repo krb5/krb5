@@ -3,6 +3,9 @@
    as aclocal.m4, so autoreconf causes autoheader to find it. Nothing actually
    includes this file, it is always processed into something else. */
 
+/* Don't use too large a block, because the autoheader processing can't
+   handle it on some systems.  */
+
 #undef ANSI_STDIO
 #undef HAS_SETVBUF
 #undef HAS_STDLIB_H

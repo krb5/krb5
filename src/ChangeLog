@@ -1,3 +1,13 @@
+Tue Apr 30 23:25:07 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (tgz-bin, pkgdir): New targets.
+	(PKGDIR, GZIPPROG): New variables.
+
+	* aclocal.m4 (WITH_NETLIB): Don't look for socket lib on Irix.
+
+	* aclocal.m4 (MAKE_SUBDIRS): Disable hack that tries to determine
+	if "-k" or "-i" was given.
+
 Wed Apr 24 03:49:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (V5_USE_SHARED_LIB): Remove another dependency in the
