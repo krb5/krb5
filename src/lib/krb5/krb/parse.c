@@ -189,12 +189,11 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 				krb5_princ_component(context, principal, i)->length = size;
 		if (i + 1 != components) {
 #if !defined(_WIN32) && !defined(macintosh)
-			fprintf(stderr,
-				"Programming error in krb5_parse_name!");
-			exit(1);
-#else
-         /* Need to come up with windows error handling mechanism */
+		    fprintf(stderr,
+			    "Programming error in krb5_parse_name!");
 #endif
+		    assert(i + 1 == components);
+		    abort();
 		}
 	} else {
 		/*

@@ -1,5 +1,7 @@
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* parse.c (krb5_parse_name): Use assert and abort, not exit.
+
 	* srv_rcache.c (krb5_get_server_rcache): Don't forget to actually
 	include the cache type in the cache name, after looking it up.
 
