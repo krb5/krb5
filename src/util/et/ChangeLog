@@ -2,6 +2,9 @@
 
 	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.
 
+	* error_message.c (com_err_terminate): Free heap storage in
+	et_list_dynamic.
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	Delete support for old globally-visible linked list, necessary

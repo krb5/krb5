@@ -54,9 +54,14 @@ int com_err_initialize(void)
 
 void com_err_terminate(void)
 {
+    struct dynamic_et_list *e, *enext;
     if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING())
 	return;
     k5_mutex_destroy(&et_list_lock);
+    for (e = et_list_dynamic; e; e = enext) {
+	enext = e->next;
+	free(e);
+    }
 }
 
 #ifndef DEBUG_TABLE_LIST
