@@ -3,6 +3,20 @@
 ## common prefix for all Makefile.in in the Kerberos V5 tree.
 ##
 
+# These are set per-directory by autoconf 2.52 and 2.53:
+#  srcdir=@srcdir@
+#  top_srcdir=@top_srcdir@
+# but these are only set by autoconf 2.53, and thus not useful to us on
+# Mac OS X yet (as of 10.2):
+#  abs_srcdir=@abs_srcdir@
+#  abs_top_srcdir=@abs_top_srcdir@
+#  builddir=@builddir@
+#  abs_builddir=@abs_builddir@
+#  top_builddir=@top_builddir@
+#  abs_top_builddir=@abs_top_builddir@
+# The "top" variables refer to the directory with the configure (or
+# config.status) script.
+
 WHAT = unix
 SHELL=/bin/sh
 
