@@ -20,15 +20,19 @@ main(int argc, char **argv)
      osa_policy_ent_t entry;
      krb5_context context;
      kadm5_config_params params;
+     krb5_error_code kret;
 
      whoami = argv[0];
 
-     krb5_init_context(&context);
-     
+     kret = krb5_init_context(&context);
+     if (kret) {
+	 com_err(whoami, kret, "while initializing krb5");
+	 exit(1);
+     }
+
      initialize_ovk_error_table();
      initialize_adb_error_table();
      initialize_ovku_error_table();
-     krb5_init_ets(context);
 
      params.mask = 0;
      if (ret = kadm5_get_config_params(context, NULL, NULL, &params,
