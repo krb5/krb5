@@ -421,8 +421,8 @@ krb5-library-libraries-ppc-debug = ¶
 	{socketslib-ppc-debug} ¶
 	{errorlib-ppc-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-debug} ¶
-	"{PPCLibraries}PPCMath64Lib.o" ¶
-	"{SharedLibraries}DriverServicesLib"
+	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
+	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-debug = ¶
 	{standard-libraries-68k-debug} ¶
 	{ccachelib-68k-debug} ¶
@@ -435,8 +435,8 @@ krb5-library-libraries-ppc-final = ¶
 	{socketslib-ppc-final} ¶
 	{errorlib-ppc-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-final} ¶
-	"{PPCLibraries}PPCMath64Lib.o" ¶
-	"{SharedLibraries}DriverServicesLib"
+	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
+	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-final = ¶
 	{standard-libraries-68k-final} ¶
 	{ccachelib-68k-final} ¶
