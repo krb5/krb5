@@ -113,7 +113,7 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_gss_enc_desc enc;
    krb5_gss_enc_desc seq;
    krb5_timestamp endtime;
-   krb5_flags flags;
+   krb5_flags krb_flags;
    krb5_int32 seq_send;
    krb5_int32 seq_recv;
    void *seqstate;

@@ -9,11 +9,11 @@ GZIP=gzip -9
 MANPS=./man2ps
 
 ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	glossary.texinfo
+	glossary.texinfo send-pr.texinfo
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
 INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	build.texinfo bug-report.texinfo
+	build.texinfo bug-report.texinfo send-pr.texinfo
 INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
@@ -42,9 +42,9 @@ admin.html: $(ADMIN_DEPS)
 	$(HTML) admin.texinfo
 
 .PHONY: admin-guide-info
-admin-guide-info:: kerberos-admin.info
+admin-guide-info:: krb5-admin.info
 
-kerberos-admin.info: $(ADMIN_DEPS)
+krb5-admin.info: $(ADMIN_DEPS)
 	$(INFO) admin.texinfo
 
 .PHONY: install-guide-full

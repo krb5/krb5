@@ -1,4 +1,5 @@
-KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
+KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h \
+	krb_err.h
 
 all::
 

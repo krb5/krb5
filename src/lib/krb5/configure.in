@@ -16,7 +16,7 @@ dnl
 AC_CHECK_LIB(gen,compile,SHLIB_GEN=-lgen,SHLIB_GEN='')
 AC_SUBST(SHLIB_GEN)
 dnl
-V5_MAKE_SHARED_LIB(libkrb5,0.1,.., ./krb5)
+V5_MAKE_SHARED_LIB(libkrb5,1.0,.., ./krb5)
 CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
 AC_SUBST(CRYPTO_SH_VERS)
 COMERR_SH_VERS=$krb5_cv_shlib_version_libcom_err

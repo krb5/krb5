@@ -1,3 +1,10 @@
+Fri Nov 22 15:51:55 1996  unknown  <bjaspan@mit.edu>
+
+	* gss-client.c (connect_to_server): use sizeof instead of h_length
+ 	to determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
+
 Thu 26 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* Created GSS Sample program

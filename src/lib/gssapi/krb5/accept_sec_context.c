@@ -384,8 +384,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    ctx->mech_used = mech_used;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
-   ctx->gss_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
-	(gss_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG));
+   ctx->gss_flags = KG_IMPLFLAGS(gss_flags);
    ctx->seed_init = 0;
    ctx->big_endian = bigend;
 
@@ -415,6 +414,29 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       xfree(ctx);
       *minor_status = code;
       return(GSS_S_FAILURE);
+   }
+
+   /* use the session key if the subkey isn't present */
+
+   if (ctx->subkey == NULL) {
+       if ((code = krb5_auth_con_getkey(context, auth_context,
+					&ctx->subkey))) {
+	   krb5_free_principal(context, ctx->there);
+	   krb5_free_principal(context, ctx->here);
+	   xfree(ctx);
+	   *minor_status = code;
+	   return(GSS_S_FAILURE);
+       }
+   }
+
+   if (ctx->subkey == NULL) {
+       krb5_free_principal(context, ctx->there);
+       krb5_free_principal(context, ctx->here);
+       xfree(ctx);
+       /* this isn't a very good error, but it's not clear to me this
+	  can actually happen */
+       *minor_status = KRB5KDC_ERR_NULL_KEY;
+       return(GSS_S_FAILURE);
    }
 
    switch(ctx->subkey->enctype) {
@@ -464,7 +486,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    ctx->endtime = ticket->enc_part2->times.endtime;
-   ctx->flags = ticket->enc_part2->flags;
+   ctx->krb_flags = ticket->enc_part2->flags;
 
    krb5_free_ticket(context, ticket); /* Done with ticket */
 
@@ -487,8 +509,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
-		(gss_flags & GSS_C_REPLAY_FLAG) != 0,
-		(gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+		(ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */
@@ -545,7 +567,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       *time_rec = ctx->endtime - now;
 
    if (ret_flags)
-      *ret_flags = KG_IMPLFLAGS(gss_flags);
+      *ret_flags = ctx->gss_flags;
 
    ctx->established = 1;
 
