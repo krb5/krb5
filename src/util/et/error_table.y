@@ -2,7 +2,11 @@
 #include <stdio.h>
 char *str_concat(), *ds(), *quote();
 #ifndef __STDC__
-char *malloc(), *realloc();  
+#ifdef _AIX
+#include <stdlib.h>
+#else
+char *malloc(), *realloc(); 
+#endif
 #endif
 char *current_token = (char *)NULL;
 extern char *table_name;

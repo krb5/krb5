@@ -1,4 +1,21 @@
-#### insert configury here
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+
+ARCHIVE = @ARCHIVE@
+RANLIB = @RANLIB@
+RM = rm -f
+
+all::
+
 BUILDTOP=../..
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
@@ -62,7 +79,7 @@ all:: libcom_err.a
 
 libcom_err.a: $(LIBOBJS)
 	$(RM) $@.bak
-	-$(MV) $@ $@.bak
+	-mv $@ $@.bak
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 

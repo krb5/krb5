@@ -8,7 +8,7 @@
 #include "mit-sipb-copyright.h"
 
 /* Need <krb5/config.h> for STDARG_PROTOTYPES */
-#include <krb5/krb5.h>
+/* #include <krb5/krb5.h> -- now tested locally*/
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
