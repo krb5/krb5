@@ -28,7 +28,7 @@ SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@
 DL_COMPILE=@DL_COMPILE@
 DL_COMPILE_TAIL=@DL_COMPILE_TAIL@
 
-all-recurse: libupdate makeshlib
+all-recurse:
 all-unix:: $(FAKEPREFIX)/lib
 all-mac::
 
@@ -62,17 +62,6 @@ clean-windows::
 	cd ..\profile
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
-
-libupdate: $(srcdir)/libupdate.sh
-	$(RM) $@ $@.tmp
-	$(editsh) $(srcdir)/libupdate.sh > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
-
-makeshlib: $(srcdir)/makeshlib.sh Makefile
-	 $(RM) $@ $@.tmp
-	 $(SLIBSH) $(srcdir)/makeshlib.sh >$@.tmp&&chmod a+x $@.tmp&&mv $@.tmp $@
-
-clean::
-	$(RM) libupdate makeshlib
 
 install::
 	@echo nothing to install in util
