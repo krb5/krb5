@@ -1,6 +1,6 @@
 Fri Feb  3 06:50:46 1995  Theodore Y. Ts'o  (tytso@dcl)
 
-	* krb.h: Add changes to make this work on Alpha's.  
+	* krb.h: Add changes to make this work on Alpha's.  (From Ezra).
 
 Wed Jan 25 19:25:02 1995  Mark Eichin  (eichin@cygnus.com)
 
