@@ -1,3 +1,9 @@
+2002-09-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_CHOOSE_SS): Check that the indicated system
+	ss package can actually be linked against and will produce
+	programs that run.
+
 2002-09-15  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Set TCL_LIBPATH and

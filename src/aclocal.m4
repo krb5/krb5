@@ -1437,13 +1437,31 @@ AC_DEFUN([KRB5_AC_CHOOSE_SS],[
 AC_ARG_WITH(system-ss,
 	    AC_HELP_STRING(--with-system-ss,use system -lss and mk_cmds @<:@default: use a private version@:>@))
 AC_ARG_VAR(SS_LIB,[system libraries for 'ss' package, if --with-system-ss was specified [-lss]])
+AC_MSG_CHECKING(which version of subsystem package to use)
 if test "x$with_system_ss" = xyes ; then
   SS_VERSION=sys
+  AC_MSG_RESULT(system)
   # todo: check for various libraries we might need
   # in the meantime...
   test "x${SS_LIB+set}" = xset || SS_LIB=-lss
+  old_LIBS="$LIBS"
+  LIBS="$LIBS $SS_LIB"
+  AC_CACHE_CHECK(whether system ss package works, krb5_cv_system_ss_okay,[
+  AC_TRY_RUN([
+#include <ss/ss.h>
+int main(int argc, char *argv[]) {
+  if (argc == 42) {
+    int i, err;
+    i = ss_create_invocation("foo","foo","",0,&err);
+    ss_listen(i);
+  }
+  return 0;
+}], krb5_cv_system_ss_okay=yes, AC_MSG_ERROR(cannot run test program),
+  krb5_cv_system_ss_okay="assumed")])
+  LIBS="$old_LIBS"
 else
   SS_VERSION=k5
+  AC_MSG_RESULT(krb5)
 fi
 AC_SUBST(SS_LIB)
 AC_SUBST(SS_VERSION)
