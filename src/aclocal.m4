@@ -1348,7 +1348,7 @@ AC_DEFUN(AC_LIBRARY_NET, [
           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
                [AC_CHECK_LIB(resolv, gethostbyname,
-			     LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv)],
+			     LIBS="-lresolv $LIBS" )],
              -lnsl)
        ])
      ])
@@ -1357,16 +1357,16 @@ AC_DEFUN(AC_LIBRARY_NET, [
     AC_CHECK_LIB(socket, socket, LIBS="-lsocket -lnsl $LIBS", , -lnsl)))
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
-    AC_CHECK_FUNC(res_nsearch, , [AC_CHECK_LIB(resolv, res_nsearch,
-	[LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv
-	 AC_DEFINE(HAVE_RES_NSEARCH,1,[Define if BIND 8 routine res_nsearch is available])
-	],
-	[AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
-	    LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
-	    AC_MSG_ERROR(Cannot find resolver support routine res_search in -lresolv.)
-	))])])
+    dnl We assume that if libresolv exists we can link against it
+    dnl This may get us a gethostby* that doesn't respect nsswitch
+    AC_CHECK_LIB(resolv, main)
+    AC_CHECK_DECL(res_nsearch, 
+	AC_DEFINE(HAVE_RES_NSEARCH,,[Have the RES_NSEARCH function]),
+	[AC_CHECK_DECL(res_search, 
+	    AC_DEFINE(HAVE_RES_SEARCH,,[Have the res_search function]), 
+	    AC_MSG_ERROR(Failed to  find resolver search routine), [#include <resolv.h>])],
+	[#include <resolv.h>])
   fi
-  AC_SUBST(RESOLV_LIB)
   ])
 dnl
 dnl

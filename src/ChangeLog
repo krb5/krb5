@@ -1,3 +1,12 @@
+2004-09-08  Sam Hartman  <hartmans@krbdev-linux.mit.edu>
+
+	* aclocal.m4 : Remove use of resolv_lib; none of the makefiles
+	actually use it and if we don't set it we can simplify the DNS
+	tests significantly.   If the -lresolv library exists we use it.
+	This may create a bit of a problem for people with nsswitch
+	configurations that don't prefer dns.  We include resolv.h before
+	checking for res_*.
+
 2004-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Install krb5-config manpage.
