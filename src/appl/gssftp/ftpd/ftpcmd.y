@@ -68,7 +68,7 @@ extern	char *auth_type;
 unsigned int maxbuf, actualbuf;
 unsigned char *ucbuf;
 
-#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))
+#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS)) || defined(HAVE_STDARG_H)
 extern reply(int, char *, ...);
 extern lreply(int, char *, ...);
 #endif

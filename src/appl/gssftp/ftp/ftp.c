@@ -62,7 +62,7 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <fcntl.h>
 #include <pwd.h>
 #ifndef STDARG
-#if defined(__STDC__) && ! defined(VARARGS)
+#if (defined(__STDC__) && ! defined(VARARGS)) || defined(HAVE_STDARG_H)
 #define STDARG
 #endif
 #endif

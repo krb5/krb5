@@ -1,3 +1,10 @@
+Mon Mar 18 12:12:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_HEADER_STDARG
+
+	* ftpcmd.y, ftpd.c: Declard STDARG if HAVE_STDARG_H is
+		declared. 
+
 Fri Mar 15 14:16:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ftpd.c (auth_data): Do not fail if last gss_service is not

@@ -120,7 +120,7 @@ looping_read(fd, buf, len)
 #endif
 
 
-#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))
+#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS)) || defined(HAVE_STDARG_H)
 extern secure_error(char *, ...);
 #else
 extern secure_error();

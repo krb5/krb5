@@ -1,3 +1,10 @@
+Mon Mar 18 12:12:44 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* secure.c, ftp.c, ftp_var.h: Define STDARG if HAVE_STDARG_H is
+		defined (in addition to the other tests)
+
+	* configure.in: Add AC_HEADER_STDARG
+
 Fri Feb 16 15:50:51 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* ftp.c (do_auth): return status handling fixes from kbalk@hp.com.

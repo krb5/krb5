@@ -134,6 +134,6 @@ extern	char *remglob();
 extern	int errno;
 extern	char *mktemp();
 
-#if defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))
+#if (defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))) || defined(HAVE_STDARG_H)
 extern command(char *, ...);
 #endif

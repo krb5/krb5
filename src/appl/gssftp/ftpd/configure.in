@@ -9,6 +9,7 @@ CHECK_SIGPROCMASK
 CHECK_WAIT_TYPE
 DECLARE_SYS_ERRLIST
 AC_FUNC_VFORK
+AC_HEADER_STDARG
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
 AC_REPLACE_FUNCS(getdtablesize)
 AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
