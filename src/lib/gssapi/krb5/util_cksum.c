@@ -41,7 +41,7 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
    krb5_error_code code;
 
    /* initialize the the cksum and allocate the contents buffer */
-   if (code = krb_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+   if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
        return(code);
 
    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
