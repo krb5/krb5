@@ -41,6 +41,10 @@ static char rcsid_sendto_kdc_c[] =
 #include <krb5/los-proto.h>
 #include "os-proto.h"
 
+#ifdef _AIX
+#include <sys/select.h>
+#endif
+
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
  * return the response (if any) in 'reply'.
@@ -118,20 +122,22 @@ OLDDECLARG(krb5_data *, reply)
 		    continue;		/* try other hosts */
 	    }
 	    /* have a socket to send/recv from */
-	    if (sendto(socklist[addr[host].sa_family],
-		       message->data,
-		       message->length,
-		       0,
-		       &addr[host],
-		       sizeof(addr[host])) != message->length)
-		continue;
-	    else
-		sent = 1;
+	    /* On BSD systems, a connected UDP socket will get connection
+	       refused and net unreachable errors while an unconnected
+	       socket will time out, so use connect, send, recv instead of
+	       sendto, recvfrom.  The connect here may return an error if
+	       the destination host is known to be unreachable. */
+	    if (connect(socklist[addr[host].sa_family],
+			&addr[host], sizeof(addr[host])) == -1)
+	      continue;
+	    if (send(socklist[addr[host].sa_family],
+		       message->data, message->length, 0) != message->length)
+	      continue;
 	    waitlen.tv_usec = 0;
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
 	    FD_SET(socklist[addr[host].sa_family], &readable);
-	    if (nready = select(1<<socklist[addr[host].sa_family],
+	    if (nready = select(1 + socklist[addr[host].sa_family],
 				&readable,
 				0,
 				0,
@@ -142,12 +148,9 @@ OLDDECLARG(krb5_data *, reply)
 		    retval = errno;
 		    goto out;
 		}
-		if ((cc = recvfrom(socklist[addr[host].sa_family],
-				   reply->data,
-				   reply->length,
-				   0,
-				   &fromaddr,
-				   &fromlen)) == -1)
+		if ((cc = recv(socklist[addr[host].sa_family],
+			       reply->data, reply->length, 0)) == -1)
+		  {
 		    /* man page says error could be:
 		       EBADF: won't happen
 		       ENOTSOCK: it's a socket.
@@ -155,9 +158,16 @@ OLDDECLARG(krb5_data *, reply)
 		       EINTR: could happen
 		       EFAULT: we allocated the reply packet.
 
-		       so we continue on an EINTR.
+		       In addition, net related errors like ECONNREFUSED
+		       are possble (but undocumented).  Assume anything
+		       other than EINTR is a permanent error for the
+		       server (i.e. don't set sent = 1).
 		       */
+
+		    if (errno == EINTR)
+		      sent = 1;
 		    continue;
+		  }
 
 		/* We might consider here verifying that the reply
 		   came from one of the KDC's listed for that address type,
@@ -169,6 +179,9 @@ OLDDECLARG(krb5_data *, reply)
 		reply->length = cc;
 		retval = 0;
 		goto out;
+	    } else if (nready == 0) {
+		/* timeout */
+	        sent = 1;
 	    }
 	    /* not ready, go on to next server */
 	}
