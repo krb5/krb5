@@ -66,29 +66,35 @@ BEGIN
     LTEXT           "The following items are optional and should only be altered by those who understand their implications.",
                     IDC_STATIC_OPTIONS,10,85,305,20
     CONTROL         "Verbose Output",GSS_VERBOSE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,70,135,65,10
+                    WS_TABSTOP,72,138,65,10
     CONTROL         "Delegation",GSS_DELEGATION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,170,135,50,10
+                    WS_TABSTOP,72,150,50,10
     CONTROL         "Version 1",GSS_VERSION_ONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,270,135,45,10
+                    WS_TABSTOP,150,138,45,10
     CONTROL         "No Auth",GSS_NO_AUTH,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,70,155,42,10
+                    WS_TABSTOP,72,162,42,10
     CONTROL         "No Wrap",GSS_NO_WRAP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,135,155,45,10
+                    WS_TABSTOP,132,162,45,10
     CONTROL         "No Encrypt",GSS_NO_ENCRYPT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,205,155,51,10
+                    WS_TABSTOP,198,162,51,10
     CONTROL         "No Mic",GSS_NO_MIC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,275,155,39,10
+                    WS_TABSTOP,270,162,39,10
     CONTROL         "Slider1",GSS_CALL_COUNT,"msctls_trackbar32",TBS_BOTH | 
-                    WS_TABSTOP,70,170,100,15
+                    WS_TABSTOP,66,174,100,15
     CONTROL         "Slider2",GSS_MESSAGE_COUNT,"msctls_trackbar32",TBS_BOTH | 
-                    WS_TABSTOP,205,170,100,15
-    CTEXT           "Call Count",IDC_STATIC_CCOUNT,75,185,90,8
-    CTEXT           "Message Count",IDC_STATIC_MSG_COUNT,210,185,90,8
+                    WS_TABSTOP,204,174,100,15
+    CTEXT           "Call Count",IDC_STATIC_CCOUNT,72,192,90,8
+    CTEXT           "Message Count",IDC_STATIC_MSG_COUNT,210,192,90,8
     GROUPBOX        "Output",IDC_GROUP_OUTPUT,0,210,325,75
     GROUPBOX        "Configuration Options",IDC_GROUP_OPTIONS,0,0,325,205
     EDITTEXT        GSS_OUTPUT,0,220,320,60,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL | WS_HSCROLL
+    CONTROL         "Mutual",GSS_MUTUAL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,132,150,37,10
+    CONTROL         "Replay",GSS_REPLAY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,198,150,38,10
+    CONTROL         "Sequence",GSS_SEQUENCE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,270,150,49,10
 END
 
 
@@ -135,8 +141,8 @@ END
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
+
 #include <winver.h>
 #include "..\version.rc"
 
 TestTrackerMOTD TEXT ver_serv.txt
-

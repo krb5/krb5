@@ -34,6 +34,9 @@
 #define INI_LAST_MECH "Mechanism"
 #define INI_LAST_MSG  "Message"
 #define INI_LAST_DELEGATE  "Delegation"
+#define INI_LAST_SEQUENCE  "Sequence"
+#define INI_LAST_MUTUAL    "Mutual"
+#define INI_LAST_REPLAY    "Replay"
 #define INI_LAST_VERBOSE   "Verbose"
 #define INI_LAST_CCOUNT    "Call Count"
 #define INI_LAST_MCOUNT    "Message Count"
@@ -56,6 +59,9 @@ char szMech[256];			// OID to use
 char szCCache[256];         // CCache to use
 int port = 0;				// Which port to use
 int delegate = 0;           // Delegate?
+int replay = 1;             // Replay?
+int mutual = 1;             // Mutual?
+int sequence = 0;           // Sequence?
 int verbose = 1;            // Verbose?
 int ccount = 1;             // Call Count
 int mcount = 1;             // Message Count
@@ -124,7 +130,8 @@ do_gssapi_test (void) {
 
 	hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
 	n = gss (szHost, szService, szMech, szMessage[0] ? szMessage : "Test Gssapi Message", port,
-             verbose, delegate, gssv1, !noauth, !nowrap, !nocrypt, !nomic, ccount, mcount, 
+             verbose, delegate, mutual, replay, sequence, 
+             gssv1, !noauth, !nowrap, !nocrypt, !nomic, ccount, mcount,
              szCCache);
 	SetCursor(hcursor);
 
@@ -262,6 +269,9 @@ OpenGssapiDlg(
 
             verbose = IsDlgButtonChecked(hDlg, GSS_VERBOSE);
             delegate = IsDlgButtonChecked(hDlg, GSS_DELEGATION);
+            mutual = IsDlgButtonChecked(hDlg, GSS_MUTUAL);
+            replay = IsDlgButtonChecked(hDlg, GSS_REPLAY);
+            sequence = IsDlgButtonChecked(hDlg, GSS_SEQUENCE);
             gssv1 = IsDlgButtonChecked(hDlg, GSS_VERSION_ONE);
 
             noauth = IsDlgButtonChecked(hDlg, GSS_NO_AUTH);
@@ -397,6 +407,15 @@ read_saved (void) {
     GetPrivateProfileString(INI_LAST, INI_LAST_DELEGATE, "", buff, 32, GSSAPI_INI);
     if ( buff[0] )  
         delegate = atoi(buff);
+    GetPrivateProfileString(INI_LAST, INI_LAST_MUTUAL, "", buff, 32, GSSAPI_INI);
+    if ( buff[0] )  
+        mutual = atoi(buff);
+    GetPrivateProfileString(INI_LAST, INI_LAST_REPLAY, "", buff, 32, GSSAPI_INI);
+    if ( buff[0] )  
+        replay = atoi(buff);
+    GetPrivateProfileString(INI_LAST, INI_LAST_SEQUENCE, "", buff, 32, GSSAPI_INI);
+    if ( buff[0] )  
+        sequence = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_VERBOSE, "", buff, 32, GSSAPI_INI);
     if ( buff[0] )  
         verbose = atoi(buff);
@@ -468,6 +487,12 @@ write_saved () {
     WritePrivateProfileString(INI_LAST, INI_LAST_MSG, szMessage, GSSAPI_INI);
     wsprintf(buff, "%d", delegate);
     WritePrivateProfileString(INI_LAST, INI_LAST_DELEGATE, buff, GSSAPI_INI);
+    wsprintf(buff, "%d", mutual);
+    WritePrivateProfileString(INI_LAST, INI_LAST_MUTUAL, buff, GSSAPI_INI);
+    wsprintf(buff, "%d", replay);
+    WritePrivateProfileString(INI_LAST, INI_LAST_REPLAY, buff, GSSAPI_INI);
+    wsprintf(buff, "%d", sequence);
+    WritePrivateProfileString(INI_LAST, INI_LAST_SEQUENCE, buff, GSSAPI_INI);
     wsprintf(buff, "%d", verbose);
     WritePrivateProfileString(INI_LAST, INI_LAST_VERBOSE, buff, GSSAPI_INI);
     wsprintf(buff, "%d", ccount);
@@ -624,6 +649,9 @@ fill_combo (HWND hDlg) {
 
     CheckDlgButton(hDlg, GSS_VERBOSE, verbose);
     CheckDlgButton(hDlg, GSS_DELEGATION, delegate);
+    CheckDlgButton(hDlg, GSS_MUTUAL, mutual);
+    CheckDlgButton(hDlg, GSS_REPLAY, replay);
+    CheckDlgButton(hDlg, GSS_SEQUENCE, sequence);
     CheckDlgButton(hDlg, GSS_VERSION_ONE, gssv1);
     CheckDlgButton(hDlg, GSS_NO_AUTH, noauth);
     CheckDlgButton(hDlg, GSS_NO_WRAP, nowrap);
