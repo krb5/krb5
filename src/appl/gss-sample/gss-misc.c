@@ -214,7 +214,7 @@ int recv_token(s, flags, tok)
      }
 	  
      tok->length = ntohl(tok->length);
-     tok->value = (char *) malloc(tok->length);
+     tok->value = (char *) malloc(tok->length ? tok->length : 1);
      if (tok->length && tok->value == NULL) {
 	 if (display_file)
 	     fprintf(display_file, 
