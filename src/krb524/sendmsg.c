@@ -68,7 +68,7 @@ krb524_sendto_kdc (context, message, realm, reply)
     krb5_data * reply;
 {
     register int timeout, host, i;
-    struct sockaddr *addr;
+    struct sockaddr **addr;
     int naddr;
     struct servent *serv;
     int sent, nready;
@@ -78,14 +78,35 @@ krb524_sendto_kdc (context, message, realm, reply)
     struct timeval waitlen;
     int cc;
     krb5int_access internals;
+    int port;
 
-    if (retval = krb5int_accessor(&internals, KRB5INT_ACCESS_VERSION))
+    retval = krb5int_accessor(&internals, KRB5INT_ACCESS_VERSION);
+    if (retval)
 	return retval;
     /*
      * find KDC location(s) for realm
      */
 
-    if ((retval = internals.krb5_locate_kdc(context, realm, &addr, &naddr, 0)))
+    serv = getservbyname(KRB524_SERVICE, "udp");
+    port = serv ? serv->s_port : htons (KRB524_PORT);
+
+    retval = internals.krb5_locate_server(context, realm, &addr, &naddr, 0,
+					  "krb524_server", "_krb524",
+					  0, port, 0);
+    if (retval == KRB5_REALM_CANT_RESOLVE) {
+	/* Fallback heuristic: Assume krb524 port on every KDC might
+	   work.  */
+	retval = internals.krb5_locate_kdc(context, realm, &addr, &naddr, 0);
+	/*
+	 * Bash the ports numbers.
+	 */
+	if (retval == 0)
+	    for (i = 0; i < naddr; i++) {
+		if (addr[i]->sa_family == AF_INET)
+		    sa2sin (addr[i])->sin_port = port;
+	    }
+    }
+    if (retval)
 	return retval;
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
@@ -97,16 +118,6 @@ krb524_sendto_kdc (context, message, realm, reply)
     }
     for (i = 0; i < naddr; i++)
 	socklist[i] = INVALID_SOCKET;
-
-    /*
-     * Bash the ports numbers.
-     */
-    serv = getservbyname(KRB524_SERVICE, "udp");
-    for (i = 0; i < naddr; i++)
-	if (serv)
-	    ((struct sockaddr_in *)&addr[i])->sin_port = serv->s_port;
-	else
-	    ((struct sockaddr_in *)&addr[i])->sin_port = htons(KRB524_PORT);
 
     if (!(reply->data = malloc(internals.krb5_max_dgram_size))) {
 	free(addr);
@@ -152,7 +163,7 @@ krb524_sendto_kdc (context, message, realm, reply)
 		 * protocol exists to support a particular socket type
 		 * within a given protocol family.
 		 */
-		socklist[host] = socket(addr[host].sa_family, SOCK_DGRAM, 0);
+		socklist[host] = socket(addr[host]->sa_family, SOCK_DGRAM, 0);
 		if (socklist[host] == INVALID_SOCKET)
 		    continue;		/* try other hosts */
 		/* have a socket to send/recv from */
@@ -162,7 +173,7 @@ krb524_sendto_kdc (context, message, realm, reply)
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
 		if (connect(socklist[host],
-			    &addr[host], sizeof(addr[host])) == SOCKET_ERROR)
+			    addr[host], socklen(addr[host])) == SOCKET_ERROR)
 		  continue;
 	    }
 	    if (send(socklist[host],

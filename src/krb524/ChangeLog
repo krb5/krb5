@@ -1,3 +1,8 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Updated to use new
+	krb5int_locate_server function, via internals-accessor hook.
+
 2001-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* k524init.c (prog): New variable.
