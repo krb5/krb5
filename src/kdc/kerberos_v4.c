@@ -1065,8 +1065,8 @@ check_princ(p_name, instance, lifetime, p, k5key, issrv)
     }
 
     /* If the user's key is null, we want to return an error */
-    if ((p->key_low == 0) && (p->key_high == 0)) {
-	if (k5key->contents != NULL && K4KDC_ENCTYPE_OK(k5key->enctype)) {
+    if (k5key->contents != NULL && K4KDC_ENCTYPE_OK(k5key->enctype)) {
+	if ((p->key_low == 0) && (p->key_high == 0)) {
 	    /* User has a null key */
 	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
 		      instance, 0);

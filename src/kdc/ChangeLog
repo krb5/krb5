@@ -1,3 +1,8 @@
+Fri Sep 25 19:47:26 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (check_princ): Re-order if statements that check
+	for null keys to make Purify shut up.
+
 Thu Sep 17 18:21:51 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (kdc_get_server_key): Fix to not use cached tgs key
