@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$(srcdir)/md5
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$(srcdir)/md5 -I$(srcdir)/sha
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=crypto.lib
@@ -16,7 +16,7 @@ OBJS=	cryptoconf.$(OBJEXT) \
 	decrypt_data.$(OBJEXT) \
 	des_crc.$(OBJEXT) \
 	des_md5.$(OBJEXT) \
-	des3_md5.$(OBJEXT) \
+	des3_sha.$(OBJEXT) \
 	des3_raw.$(OBJEXT) \
 	raw_des.$(OBJEXT)
 
@@ -25,13 +25,13 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/decrypt_data.c \
 	$(srcdir)/des_crc.c \
 	$(srcdir)/des_md5.c \
-	$(srcdir)/des3_md5.c \
+	$(srcdir)/des3_sha.c \
 	$(srcdir)/des3_raw.c \
 	$(srcdir)/raw_des.c 
 
-LIB_SUBDIRS= des md4 md5 crc32 os .
+LIB_SUBDIRS= des md4 md5 sha crc32 os .
 LIBUPDATE= $(BUILDTOP)/util/libupdate
-LIBDONE= ./des/DONE ./md4/DONE ./md5/DONE ./crc32/DONE ./os/DONE ./DONE
+LIBDONE= ./des/DONE ./md4/DONE ./md5/DONE ./sha/DONE ./crc32/DONE ./os/DONE ./DONE
 
 # No dependencies.  Record places to find this shared object if the target
 # link editor and loader support it.
@@ -94,6 +94,9 @@ all-windows::
 	cd ..\md5
 	@echo Making in crypto\md5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\sha
+	@echo Making in crypto\sha
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::
@@ -108,6 +111,9 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\md5
 	@echo Making clean in crypto\md5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\sha
+	@echo Making clean in crypto\sha
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\os
 	@echo Making clean in crypto\os
@@ -127,6 +133,9 @@ check-windows::
 	-$(MAKE) -$(MFLAGS) check
 	cd ..\md5
 	@echo Making check in crypto\md5
+	-$(MAKE) -$(MFLAGS) check
+	cd ..\sha
+	@echo Making check in crypto\sha
 	-$(MAKE) -$(MFLAGS) check
 	cd ..\os
 	@echo Making check in crypto\os
