@@ -1,3 +1,7 @@
+Thu Apr 20 11:47:53 1995    <tytso@rsx-11.mit.edu>
+
+	* adm_extern.h: #include adm_defs.h, since that's no longer
+		included by krb5.h
 
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 

@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 
 #include <krb5.h>
+#include "adm_defs.h"
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024

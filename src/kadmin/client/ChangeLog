@@ -1,3 +1,10 @@
+Thu Apr 20 11:45:10 1995    <tytso@rsx-11.mit.edu>
+
+	* kadmin.c, kadmin_add.c, kadmin_adr.c, kadmin_cpr.c kadmin_cpw.c,
+        kadmin_del.c, kadmin_done.c, kadmin_inq.c, kadmin_mod.c,
+        kadmin_msnd.c: Add include of adm_defs.h, since that's no longer
+		included by krb5.h.
+
 Fri Mar 17 15:36:07 1995  Chris Provenzano (proven@mit.edu)
 
         * kadmin_inq.c, kadmin.c:

@@ -29,6 +29,8 @@
 #ifndef __ADM_EXTERN__
 #define __ADM_EXTERN__
 
+#include "adm_defs.h"
+
 typedef struct {
 	/* Client Info */
   struct sockaddr_in client_name;

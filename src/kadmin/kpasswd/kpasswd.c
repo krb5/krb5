@@ -40,6 +40,7 @@
 #include <strings.h>
 #endif
 #include "com_err.h"
+#include "adm_defs.h"
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024

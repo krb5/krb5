@@ -32,6 +32,7 @@
 #include <sys/param.h>
 
 #include <krb5.h>
+#include "adm_defs.h"
 
 void decode_kadmind_reply();
 int print_status_message();

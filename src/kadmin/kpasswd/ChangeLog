@@ -1,8 +1,3 @@
-Fri Apr 14 22:02:27 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
-
-	* kpasswd.c: Remove unneeded include of adm_defs.h (since it's now
-	        included by krb5.h)
-
 Fri Mar 17 15:36:07 1995  Chris Provenzano (proven@mit.edu)
 
 	* kpasswd.c: Cast malloc() return value to shut compiler up.

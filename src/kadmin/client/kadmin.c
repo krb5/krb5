@@ -36,6 +36,7 @@
 #endif
 
 #include "krb5.h"
+#include "adm_defs.h"
 
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,

@@ -29,6 +29,7 @@
 #include <com_err.h>
 
 #include <krb5.h>
+#include "adm_defs.h"
 
 krb5_error_code
 kadm_done(context, auth_context, my_creds, local_socket, seqno)
