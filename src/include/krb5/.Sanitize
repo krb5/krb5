@@ -1,0 +1,76 @@
+# Sanitize.in for Kerberos V5
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+.cvsignore
+.rconf
+AddressXlation.h
+ChangeLog
+GetMyIPAddr.h
+MacTCPCommonTypes.h
+Makefile.in
+TCPPB.h
+UDPPB.h
+adm_defs.h
+asn.1
+asn1.h
+autoconf.h.in
+base-defs.h
+ccache.h
+configure
+configure.in
+copyright.h
+dbm.h
+encryption.h
+error_def.h
+ext-proto.h
+fieldbits.h
+func-proto.h
+hostaddr.h
+k5-config.h
+k5-errors.h
+k5-free.h
+kdb.h
+kdb_dbm.h
+keytab.h
+libos.h
+los-proto.h
+macros.h
+macsock.h
+mit-des.h
+preauth.h
+proto.h
+rcache.h
+rsa-md5.h
+safepriv.h
+stock
+sysincl.h
+winsock.h
+wordsize.h
+
+Things-to-lose:
+
+Do-last:
+
+# End of file.
