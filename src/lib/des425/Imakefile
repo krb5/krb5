@@ -37,18 +37,18 @@ OBJS=	cksum.o		\
 	string_to_key.o	\
 	weak_key.o	
 
-SRCS=	cksum.c		\
-	des.c		\
-	enc_dec.c	\
-	key_parity.c	\
-	key_sched.c	\
-	new_rnd_key.c	\
-	pcbc_encrypt.c	\
-	quad_cksum.c	\
-	random_key.c	\
-	read_password.c \
-	string_to_key.c	\
-	weak_key.c	
+SRCS=	$(SRCDIR)cksum.c	\
+	$(SRCDIR)des.c		\
+	$(SRCDIR)enc_dec.c	\
+	$(SRCDIR)key_parity.c	\
+	$(SRCDIR)key_sched.c	\
+	$(SRCDIR)new_rnd_key.c	\
+	$(SRCDIR)pcbc_encrypt.c	\
+	$(SRCDIR)quad_cksum.c	\
+	$(SRCDIR)random_key.c	\
+	$(SRCDIR)read_password.c \
+	$(SRCDIR)string_to_key.c \
+	$(SRCDIR)weak_key.c	
 
 DEFINES = $(DESDEFINES)
 
@@ -57,11 +57,7 @@ VERIFYOBJ = verify.o
 Krb5LibraryTarget(des425,$(OBJS))
 
 
-EXT_LIB=          $(TOP)/lib/cryptoconf.o \
-		$(TOP)/lib/crc-32/libcrc32.a \
-		libdes425.a \
-		$(TOP)/lib/des/libdes.a \
-		$(OSLIB) $(COMERRLIB)
+EXT_LIB= $(TOP)/lib/cryptoconf.o $(TOP/lib/$(DESLIB) libdes425.a $(COMERRLIB)
 
 NormalProgramTarget(verify,$(VERIFYOBJ),libdes425.a,$(EXT_LIB),)
 
