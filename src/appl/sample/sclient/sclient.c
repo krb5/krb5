@@ -42,6 +42,10 @@
 #include <netdb.h>
 #include <signal.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
@@ -57,7 +61,7 @@ char *argv[];
 {
     struct servent *sp;
     struct hostent *hp;
-    struct sockaddr_in sin, lsin;
+    struct sockaddr_in sockin, lsockin;
     int sock, namelen;
     krb5_context context;
     krb5_data recv_data;
@@ -89,11 +93,11 @@ char *argv[];
     }
 
     /* clear out the structure first */
-    (void) memset((char *)&sin, 0, sizeof(sin));
+    (void) memset((char *)&sockin, 0, sizeof(sockin));
 
     if (argc > 2) {
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(atoi(argv[2]));
+	sockin.sin_family = AF_INET;
+	sockin.sin_port = htons(atoi(argv[2]));
     } else {
 	/* find the port number for knetd */
 	sp = getservbyname(SAMPLE_PORT, "tcp");
@@ -104,8 +108,8 @@ char *argv[];
 	    exit(1);
 	}
 	/* copy the port number */
-	sin.sin_port = sp->s_port;
-	sin.sin_family = AF_INET;
+	sockin.sin_port = sp->s_port;
+	sockin.sin_family = AF_INET;
     }
     if (argc > 3) {
 	service = argv[3];
@@ -118,16 +122,17 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_sname_to_principal(context, argv[1], service,
-					 KRB5_NT_SRV_HST, &server)) {
+    retval = krb5_sname_to_principal(context, argv[1], service,
+				     KRB5_NT_SRV_HST, &server);
+    if (retval) {
 	com_err(argv[0], retval, "while creating server name for %s/%s",
 		argv[1], service);
 	exit(1);
     }
 
     /* set up the address of the foreign socket for connect() */
-    sin.sin_family = hp->h_addrtype;
-    (void) memcpy((char *)&sin.sin_addr,
+    sockin.sin_family = hp->h_addrtype;
+    (void) memcpy((char *)&sockin.sin_addr,
 		  (char *)hp->h_addr,
 		  sizeof(hp->h_addr));
 
@@ -139,15 +144,15 @@ char *argv[];
     }
 
     /* connect to the server */
-    if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+    if (connect(sock, (struct sockaddr *)&sockin, sizeof(sockin)) < 0) {
 	perror("connect");
 	close(sock);
 	exit(1);
     }
 
     /* find out who I am, now that we are connected and therefore bound */
-    namelen = sizeof(lsin);
-    if (getsockname(sock, (struct sockaddr *) &lsin, &namelen) < 0) {
+    namelen = sizeof(lsockin);
+    if (getsockname(sock, (struct sockaddr *) &lsockin, &namelen) < 0) {
 	perror("getsockname");
 	close(sock);
 	exit(1);
@@ -156,12 +161,14 @@ char *argv[];
     cksum_data.data = argv[1];
     cksum_data.length = strlen(argv[1]);
 
-    if (retval = krb5_cc_default(context, &ccdef)) {
+    retval = krb5_cc_default(context, &ccdef);
+    if (retval) {
 	com_err(argv[0], retval, "while getting default ccache");
 	exit(1);
     }
 
-    if (retval = krb5_cc_get_principal(context, ccdef, &client)) {
+    retval = krb5_cc_get_principal(context, ccdef, &client);
+    if (retval) {
 	com_err(argv[0], retval, "while getting client principal name");
 	exit(1);
     }
@@ -198,7 +205,7 @@ char *argv[];
 	    exit(1);
 	}
 	recv_data.length = ntohs(xmitlen);
-	if (!(recv_data.data = (char *)malloc(recv_data.length + 1))) {
+	if (!(recv_data.data = (char *)malloc((size_t) recv_data.length + 1))) {
 	    com_err(argv[0], ENOMEM,
 		    "while allocating buffer to read from server");
 	    exit(1);
