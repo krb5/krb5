@@ -1,3 +1,8 @@
+Wed Apr 30 14:59:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* cmds.c (getit): Fix Y2K bug in the parsing of the MDTM command.
+		[krb5-appl/399]
+
 Wed Feb  5 20:29:31 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
