@@ -28,13 +28,13 @@
 #ifndef KRB5_ERROR_DEF__
 #define KRB5_ERROR_DEF__
 
-#include <krb5/krb5_err.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/kv5m_err.h>
+#include "krb5_err.h"
+#include "kdb5_err.h"
+#include "kv5m_err.h"
 #ifndef KRB5_USE_ISODE
-#include <krb5/asn1_err.h>
+#include "asn1_err.h"
 #else
-#include <krb5/isode_err.h>
+#include "isode_err.h"
 #endif
 #include <errno.h>
 

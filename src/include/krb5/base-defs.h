@@ -27,7 +27,7 @@
 #ifndef KRB5_BASE_DEFS__
 #define KRB5_BASE_DEFS__
 
-#include <krb5/wordsize.h>
+#include "wordsize.h"
 
 #ifndef FALSE
 #define	FALSE	0

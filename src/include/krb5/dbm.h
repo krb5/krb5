@@ -28,7 +28,7 @@
 #ifndef KRB5_DBM_COMPAT__
 #define KRB5_DBM_COMPAT__
 
-#include <krb5/osconf.h>
+#include "osconf.h"
 
 #ifndef ODBM
 #include <ndbm.h>

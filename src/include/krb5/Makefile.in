@@ -57,7 +57,7 @@ OSCONFSRC = $(srcdir)/stock/osconf.h
 osconf.h: $(OSCONFSRC)
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
 	@if cmp -s osconf.new osconf.h ; then :; \
-	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h) fi
+	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h; $(RM) osconf.new) fi
 
 clean:: clean-$(WHAT)
 	$(RM) osconf.new $(BUILT_HEADERS)

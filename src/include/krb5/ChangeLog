@@ -1,3 +1,21 @@
+Mon Feb 27 23:47:58 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (osconf.h):  Remove temp file osconf.new.
+
+	* krb5.h:  Rename to ../krb5.h so it can be #included by end users
+	without the use of slashes or extra -I options.  First step in
+	making it stand alone without a train of a dozen other include
+	files tagging along behind.
+
+	* base-defs.h, dbm.h, error_def.h, sysincl.h:  Avoid #include
+	<krb5/...> form; use "..." form.
+
+	* config.h:  Rename to k5-config.h.  This is too common a
+	name, now that we use -I..../include/krb5.
+	* free.h:  Rename to k5-free.h.
+
+	* configure.in (AC_INIT):  Use another file (not krb5.h) as src test.
+
 Mon Feb 27 11:35:49 1995 Keith Vetter (keithv@fusion.com)
 
         * config.h: added windows interface keyword for varargs functions,

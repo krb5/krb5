@@ -33,7 +33,7 @@
 #include <sys/types.h>			/* needed for much of the reset */
 #endif /* KRB5_SYSTYPES__ */
 
-#include <krb5/osconf.h>		/* USE*TIME_H macros */
+#include "osconf.h"			/* USE*TIME_H macros */
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
