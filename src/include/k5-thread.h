@@ -426,20 +426,20 @@ typedef struct {
 # define k5_os_mutex_lock(M)			\
 	(K5_PTHREADS_LOADED			\
 	 ? pthread_mutex_lock(&(M)->p)		\
-	 : k5_os_nothread_lock(&(M)->n))
+	 : k5_os_nothread_mutex_lock(&(M)->n))
 # define k5_os_mutex_unlock(M)			\
 	(K5_PTHREADS_LOADED			\
 	 ? pthread_mutex_unlock(&(M)->p)	\
-	 : k5_os_nothread_unlock(&(M)->n))
+	 : k5_os_nothread_mutex_unlock(&(M)->n))
 
 # define k5_os_mutex_assert_unlocked(M)			\
 	(K5_PTHREADS_LOADED				\
 	 ? k5_pthread_assert_unlocked(&(M)->p)		\
-	 : k5_os_nothread_assert_unlocked(&(M)->n))
+	 : k5_os_nothread_mutex_assert_unlocked(&(M)->n))
 # define k5_os_mutex_assert_locked(M)			\
 	(K5_PTHREADS_LOADED				\
 	 ? k5_pthread_assert_locked(&(M)->p)		\
-	 : k5_os_nothread_assert_locked(&(M)->n))
+	 : k5_os_nothread_mutex_assert_locked(&(M)->n))
 
 #else
 

@@ -1,5 +1,10 @@
 2004-07-11  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-thread.h (k5_os_mutex_lock, k5_os_mutex_unlock,
+	k5_os_mutex_assert_locked, k5_os_mutex_assert_unlocked)
+	[USE_PTHREAD_LOCK_ONLY_IF_LOADED]: Fix typo in accessing
+	non-pthread versions.
+
 	* configure.in: Check krb5_cv_inet6_with_dinet6 as well as
 	krb5_cv_inet6 when deciding whether to test for in6addr_any.  If
 	gcc is in use, suppress pedantic warnings about "inline".
