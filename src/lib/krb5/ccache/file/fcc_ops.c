@@ -19,7 +19,7 @@ static char fcc_ops_c[] = "$Id$";
 #include "fcc.h"
 
 krb5_cc_ops krb5_fcc_ops = {
-     "file",
+     "FILE",
      krb5_fcc_get_name,
      krb5_fcc_resolve,
      krb5_fcc_generate_new,
