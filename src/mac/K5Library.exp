@@ -201,10 +201,12 @@
 	krb5_rc_default_type 
 	krb5_rc_default_name 
 	krb5_auth_to_rep 
+#
+	krb5_get_profile
 
 #Temporary exports (DO NOT USE)
 	decode_krb5_ticket
-	profile_get_values
+#	profile_get_values
 	krb5_random_confounder
 	krb5_size_opaque
 	krb5_internalize_opaque
@@ -222,7 +224,7 @@
 	krb5_mcc_ops
 
 #com_err -- we should really have this in a separate lib!
-	add_error_table
-	remove_error_table
-	error_message
+#	add_error_table
+#	remove_error_table
+#	error_message
 	
