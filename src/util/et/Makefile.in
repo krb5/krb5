@@ -163,10 +163,10 @@ et_h.awk: $(srcdir)/et_h.awk
 rebuild: rebuild-c rebuild-h
 rebuild-c:
 	a2p < $(srcdir)/et_c.awk > $(srcdir)/et_c.tmp
-	mv -f $(srcdir)/et_c.tmp $(srcdir)/et_c.pl
+	mv -f $(srcdir)/et_c.tmp $(srcdir)/et_c.perl
 rebuild-h:
 	a2p < $(srcdir)/et_h.awk > $(srcdir)/et_h.tmp
-	mv -f $(srcdir)/et_h.tmp $(srcdir)/et_h.pl
+	mv -f $(srcdir)/et_h.tmp $(srcdir)/et_h.perl
 
 clean-unix::
 	$(RM) compile_et
