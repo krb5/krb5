@@ -3,6 +3,14 @@
 #
 all::
 
+# Build the Makefile unless we are in the top-level
+#(where there is already an explicit rule).
+!if !defined(ZIP) && !defined(WINFILES)
+Makefile: Makefile.in $(BUILDTOP)\config\windows.in $(BUILDTOP)\config\win-post.in
+	$(BUILDTOP)\wconfig $(BUILDTOP)\config < Makefile.in > Makefile
+!endif
+
+
 .c.obj:
 	$(CC) $(CFLAGS) /c $*.c
 !if defined(LIBNAME)
@@ -18,8 +26,25 @@ all::
 ##WIN32##all-windows:: $(LIBNAME)
 ##WIN32##$(LIBNAME): $(OBJFILEDEP)
 ##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $(OBJFILELIST)
-
 !endif
+
+
+!if defined(OBJFILE)
+all-windows:: $(OBJFILE)
+clean-windows::
+	$(RM) $(OBJFILE)
+!if defined(LIBOBJS)
+##DOS$(OBJFILE): $(LIBOBJS)
+##DOS	$(RM) $(OBJFILE)
+##WIN16##	$(CP) nul: $(OBJFILE)
+!if defined(PREFIXDIR)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $** > $(OBJFILE)
+!else
+##WIN32##	$(LIBECHO) $** > $(OBJFILE)
+!endif
+!endif
+!endif
+
 
 check::
 check-windows::
@@ -52,7 +77,7 @@ clean-unix::
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
-	$(RM) msvc.pdb *.err *.exe
+	$(RM) msvc.pdb *.err *.exe *.bak
 
 !if defined(LIBNAME)
 clean-windows::

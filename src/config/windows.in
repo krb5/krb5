@@ -2,11 +2,8 @@
 WHAT=windows
 
 all:: all-$(WHAT)
-
 clean:: clean-$(WHAT)
-
 install:: install-$(WHAT)
-
 check:: check-$(WHAT)
 
 all-windows::
@@ -14,6 +11,7 @@ clean-windows::
 install-windows::
 check-windows::
 
+all-windows:: Makefile
 
 # Directory syntax:
 R=\		# root

@@ -1,3 +1,8 @@
+Sat Feb 22 18:42:32 1997  Richard Basch  <basch@lehman.com>
+
+	* win-post.in: Move library list file rule from various
+		Makefile.in files to win-post.in
+
 Mon Feb 17 19:29:27 1997  Richard Basch  <basch@lehman.com>
 
 	* windows.in: Define K4LIB as the krb4 library
