@@ -252,9 +252,9 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
     if (g_OID_equal(desired_mech, gss_mech_krb5_old))
 	cred->prerfc_mech = 1;
-    else if (g_OID_equal(desired_mech, gss_mech_krb5_old))
+    else if (g_OID_equal(desired_mech, gss_mech_krb5))
 	cred->rfc_mech = 1;
-    else if (g_OID_equal(desired_mech, gss_mech_krb5_old))
+    else if (g_OID_equal(desired_mech, gss_mech_krb5_v2))
 	cred->rfcv2_mech = 1;
 
     /* set the outputs */
