@@ -31,20 +31,20 @@
  * Mountain View, California  94043
  */
 /*	@(#)rpc.h 1.8 87/07/24 SMI	*/
-
+#include <rpc/types.h>
 /* since the gssrpc library requires that any application using it be
 built with these header files, I am making the decision that any app
 which uses the rpcent routines must use this header file, or something
 compatible (which most <netdb.h> are) --marc */
 
 /* Really belongs in <netdb.h> */
-
+#ifndef STRUCT_RPCENT_ALREADY_PROVIDED
 struct rpcent {
       char    *r_name;        /* name of server for this rpc program */
       char    **r_aliases;    /* alias list */
       int     r_number;       /* rpc program number */
 };
-
+#endif /*STRUCT_RPCENT_ALREADY_PROVIDED*/
 struct rpcent *getrpcbyname(), *getrpcbynumber(), *getrpcent();
 
 #endif

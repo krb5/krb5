@@ -1,3 +1,13 @@
+Mon Jul 29 22:02:47 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Determine whether netdb.h defines struct rpcent.
+
+	* types.hin: Expand rpcent_define to be a null string or a #define
+        on Linux.
+
+	* netdb.h: Include rpc/types.h and only define struct rpcent if
+        needed.
+
 Wed Jul 24 07:58:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* pmap_rmt.c (clnt_broadcast): Use memset insetad of bzero.
