@@ -84,6 +84,16 @@ char copyright[] =
 #define LOG_REMOTE_REALM
 #define LOG_CMD
      
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef __SCO__
+#include <sys/unistd.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
@@ -91,19 +101,12 @@ char copyright[] =
 #include <sys/file.h>
 #include <sys/time.h>
 
+#include <fcntl.h>
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
      
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
-#ifdef USE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef __SCO__
-#include <sys/unistd.h>
-#endif
 
 /** XXX -- this may be bogus **/
 #if defined(CRAY) || defined(sysvimp) || defined(aux20)
@@ -761,22 +764,13 @@ doit(f, fromp)
     if (port) {
 	/* Place entry into wtmp */
 	sprintf(ttyn,"krsh%1d",getpid());
-#ifdef SYSV
-	logwtmp(ttyn,locuser,hostname,1,1); /*Leave wtmp open*/
-#else
-	logwtmp(ttyn,locuser,hostname,1);  /*Leave wtmp open*/
-#endif
+	logwtmp(ttyn,locuser,hostname,1);
     }
     /*      We are simply execing a program over rshd : log entry into wtmp,
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-	sprintf(ttyn,"kexe%1d",getpid());
-#ifdef SYSV
-	logwtmp(ttyn,locuser,hostname,1,1);  /* Leave open wtmp */
-#else
-	logwtmp(ttyn,locuser,hostname,1);       /* Leave open wtmp */
-#endif
+	logwtmp(ttyn,locuser,hostname,1);
     }
     
 #ifdef CRAY
@@ -1101,11 +1095,7 @@ doit(f, fromp)
 		   "Shell process completed.");
 #endif
 	    /* Finish session in wmtp */
-#ifdef SYSV
-	    logwtmp(ttyn,"","",0,0); /* Close wtmp */
-#else
-	    logwtmp(ttyn,"","",0);   /* Close wtmp */
-#endif
+	    logwtmp(ttyn,"","",0);
 	    exit(0);
 	}
 #ifdef SETPGRP_TWOARG
@@ -1122,11 +1112,7 @@ doit(f, fromp)
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
-#ifdef SYSV
-	logwtmp(ttyn,"","",0,0);		/* Close wtmp */
-#else
-	logwtmp(ttyn,"","",0);	 /* Close wtmp */
-#endif
+	logwtmp(ttyn,"","",0);
     }
     
     if (*pwd->pw_shell == '\0')
@@ -1156,11 +1142,7 @@ doit(f, fromp)
     exit(1);
     
   signout_please:
-#ifdef SYSV
-    logwtmp(ttyn,"","",0,0);                /* Close wtmp */
-#else
-    logwtmp(ttyn,"","",0);   /* Close wtmp */
-#endif
+    logwtmp(ttyn,"","",0);
     exit(1);
 }
     
@@ -1229,11 +1211,7 @@ krb5_sigtype
 #endif
     wait(0);
     
-#ifdef SYSV
-    logwtmp(ttyn,"","",0,0); /* Close wtmp */
-#else
-    logwtmp(ttyn,"","",0);   /* Close wtmp */
-#endif
+    logwtmp(ttyn,"","",0);
     syslog(LOG_INFO ,"Shell process completed.");
     exit(0);
 }
