@@ -60,6 +60,7 @@ installation.
 * Introduction::                
 * How Kerberos Works::          
 * Configuration Files::         
+* Using DNS::                   
 * Administrating Kerberos Database Entries::  
 * Application Servers::         
 * Backups of Secure Hosts::     
@@ -331,7 +332,7 @@ Following are definitions of some of the Kerberos terminology.
 
 @include glossary.texinfo
 
-@node Configuration Files, Administrating Kerberos Database Entries, How Kerberos Works, Top
+@node Configuration Files, Using DNS, How Kerberos Works, Top
 @chapter Configuration Files
 
 @menu
@@ -989,7 +990,25 @@ Here's an example of a @code{kdc.conf} file:
 @end group
 @end smallexample
 
-@node Administrating Kerberos Database Entries, Application Servers, Configuration Files, Top
+@node Using DNS, Administrating Kerberos Database Entries, Configuration Files, Top
+@chapter Using DNS
+
+@menu
+* Mapping Hostnames onto Kerberos Realms::  
+* Hostnames for KDCs::          
+@end menu
+
+@node Mapping Hostnames onto Kerberos Realms, Hostnames for KDCs, Using DNS, Using DNS
+@section Mapping Hostnames onto Kerberos Realms
+
+@include dnstxt.texinfo
+
+@node Hostnames for KDCs,  , Mapping Hostnames onto Kerberos Realms, Using DNS
+@section Hostnames for KDCs
+
+@include dnssrv.texinfo
+
+@node Administrating Kerberos Database Entries, Application Servers, Using DNS, Top
 @chapter Administrating the Kerberos Database
 
 Your Kerberos database contains all of your realm's Kerberos principals,
