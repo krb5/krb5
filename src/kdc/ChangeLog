@@ -1,3 +1,9 @@
+2004-02-19  Ken Hornstein  <kenh@mit.edu>
+
+	* fakeka.c (main): Bug from David Thompson <thomas@cs.wisc.edu>.
+	Bug originally introduced during conversion from bcopy() to
+	memcpy().
+
 2004-02-12  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_util.c (validate_tgs_request): Fix logic error
