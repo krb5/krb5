@@ -1,3 +1,8 @@
+Wed Jul  1 19:14:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* win-mac.h: Make size_t to be an unsigned long instead of
+		unsigned int.
+
 1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5.hin: Declare krb5_auth_con_setrcache and

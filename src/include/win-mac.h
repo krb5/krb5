@@ -237,7 +237,7 @@ HINSTANCE get_lib_instance(void);
 #define ENOMEM -1
 #define ANSI_STDIO
 #ifndef _SIZET
-typedef unsigned int size_t;
+typedef unsigned long size_t;
 #define _SIZET
 #endif
 #include <unix.h>
