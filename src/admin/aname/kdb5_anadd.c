@@ -46,15 +46,15 @@ char *argv[];
     int optchar;
     extern char *optarg;
     extern int optind;
-    int delete = 0, add = 0;
+    int del = 0, add = 0;
     char *lname, *pname;
     extern char *krb5_lname_file;
     char *andbname = krb5_lname_file;
 
     while ((optchar = getopt(argc, argv, "dan:")) != EOF) {
 	switch(optchar) {
-	case 'd':			/* delete */
-	    delete++;
+	case 'd':			/* del */
+	    del++;
 	    if (add) {
 		fprintf(stderr, "only one of -a, -d\n");
 		usage(argv[0], 1);
@@ -62,7 +62,7 @@ char *argv[];
 	    break;
 	case 'a':			/* add */
 	    add++;
-	    if (delete) {
+	    if (del) {
 		fprintf(stderr, "only one of -a, -d\n");
 		usage(argv[0], 1);
 	    }
@@ -76,7 +76,7 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
-    if (!delete && !add) {
+    if (!del && !add) {
 	printf("assuming you want to add\n");
 	add = 1;
     }
@@ -99,7 +99,7 @@ char *argv[];
     key.dptr = pname;
     key.dsize = strlen(pname)+1;	/* include the null */
 
-    if (delete) {
+    if (del) {
 	if (dbm_delete(db, key)) {
 	    com_err(argv[0], 0, "No such entry while deleting %s from %s",
 		    pname, andbname);
