@@ -41,6 +41,8 @@ SRCS=	cksum.c		\
 	new_rn_key.c	\
 	weak_key.c
 
+DEFINES = $(DESDEFINES)
+
 VERIFYOBJ = verify.o
 
 DESTESTOBJ = destest.o
