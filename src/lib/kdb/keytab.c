@@ -120,6 +120,11 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
         return(kerror);
     }
 
+    if (n != 1)
+      {
+	krb5_dbm_db_close_database(context);
+	return KRB5_KT_NOTFOUND;
+      }
     /* match key */
     krb5_dbm_db_get_mkey(context, id->ops, &master_key);
     krb5_dbe_find_enctype(context, &db_entry, enctype, -1, kvno, &key_data);

@@ -8,9 +8,15 @@ Thu Aug  8 20:26:47 1996  Tom Yu  <tlyu@mit.edu>
 	* Makefile.in (shared): Always mkdir shared; test -d shared ||
 		mkdir shared breaks under Ultrix sh (grrr...).
 
+Thu Aug  8 18:29:15 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): Return KRB5_KT_NOTFOUND if the
+ 	principal doesn't exist instead of dereferencing a null pointer.
+
 Fri Aug  2 14:08:03 1996  Sam Hartman  <hartmans@mit.edu>
 
-	* configure.in(LIBS): AIX wants to link against -ldb when building the shared lib.
+	* configure.in(LIBS): AIX wants to link against -ldb when building
+ 	the shared lib.
 
 Mon Jul 29 23:07:14 1996  Samuel D Hartman  (hartmans@vorlon)
 
