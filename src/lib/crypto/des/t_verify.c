@@ -196,6 +196,8 @@ main(argc,argv)
 	    printf("verify: error in zero key test\n");
 	    exit(-1);
 	}
+
+	krb5_free_context(context);
 	exit(0);
     }
 
@@ -224,6 +226,7 @@ main(argc,argv)
 	    printf("verify: error in msb test\n");
 	    exit(-1);
 	}
+	krb5_free_context(context);
 	exit(0);
     }
 
@@ -375,6 +378,8 @@ main(argc,argv)
 	};
     }
     printf("verify: N-fold is correct\n\n");
+
+    krb5_free_context(context);
     
     exit(0);
 }

@@ -54,6 +54,9 @@ char *argv[];
     int num = 0;
 
     int error = 0;
+    /* This is a crock and we know it... We win because 
+       none of these tests rely on a valid context pointer */
+    context = 0;
 
     /* do some initialisation */
     initialize_krb5_error_table();

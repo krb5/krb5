@@ -1,3 +1,11 @@
+Mon Oct  6 11:32:51 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* destest.c (main): Initialize context to 0 so it will not be
+	        treated as unset by purify.
+
+	* t_verify.c (main): Use krb5_free_context to release memory in use.
+
+
 Sat Feb 22 18:50:35 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Use some of the new library list build rules in
