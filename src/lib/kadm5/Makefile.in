@@ -71,6 +71,7 @@ SRC_HDRS = adb.h admin.h admin_internal.h admin_xdr.h kadm_rpc.h \
 includes:: $(SRC_HDRS) $(BUILD_HDRS)
 	if [ -d $(HDRDIR) ]; then :; else mkdir -p $(HDRDIR); fi
 	for i in $(SRC_HDRS) ; do \
+		i=`basename $$i`; \
 		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
 		else \
 			(set -x; $(RM) $(HDRDIR)/$$i; \
@@ -78,6 +79,7 @@ includes:: $(SRC_HDRS) $(BUILD_HDRS)
 		fi ; \
 	done
 	for i in $(BUILD_HDRS) ; do \
+		i=`basename $$i`; \
 		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
 		else \
 			(set -x; $(RM) $(HDRDIR)/$$i; \

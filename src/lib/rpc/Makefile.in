@@ -187,6 +187,7 @@ SRC_HDRS = auth.h auth_gssapi.h auth_unix.h clnt.h netdb.h pmap_clnt.h \
 includes:: $(SRC_HDRS) $(BUILD_HDRS)
 	if [ -d $(HDRDIR) ]; then :; else mkdir -p $(HDRDIR); fi
 	for i in $(SRC_HDRS) ; do \
+		i=`basename $$i`; \
 		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
 		else \
 			(set -x; $(RM) $(HDRDIR)/$$i; \
@@ -194,6 +195,7 @@ includes:: $(SRC_HDRS) $(BUILD_HDRS)
 		fi ; \
 	done
 	for i in $(BUILD_HDRS) ; do \
+		i=`basename $$i`; \
 		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
 		else \
 			(set -x; $(RM) $(HDRDIR)/$$i; \

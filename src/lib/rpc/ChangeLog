@@ -1,3 +1,9 @@
+2000-02-22  Donn Cave  <donn@u.washington.edu>
+
+	* Makefile.in (includes): Extract basename of header file to be
+	installed, since Digital UNIX 4.0 native make substitutes the
+	VPATH-derived pathname here.
+
 2000-02-17  Tom Yu  <tlyu@mit.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi): Don't explicitly free
