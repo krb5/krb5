@@ -1,5 +1,13 @@
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
+	* test/dbtest.c: Cast argument to isspace() to int. Do not shadow
+	global variables type and flags.
+
+	* btree/bt_search.c, btree/bt_seq.c, recno/rec_search.c: Change
+	local variable index to idx.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
 	* btree/bt_delete.c, btree/bt_put.c, recno/rec_delete.c,
  	recno/rec_put.c: Change local variable index to idx.
 

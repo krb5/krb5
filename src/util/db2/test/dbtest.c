@@ -177,7 +177,7 @@ main(argc, argv)
 		/* Delete the newline, displaying the key/data is easier. */
 		if (ofd == STDOUT_FILENO && (t = strchr(p, '\n')) != NULL)
 			*t = '\0';
-		if ((len = strlen(buf)) == 0 || isspace(*p) || *p == '#')
+		if ((len = strlen(buf)) == 0 || isspace((int) *p) || *p == '#')
 			continue;
 
 		/* Convenient gdb break point. */
@@ -503,17 +503,17 @@ dump(dbp, rev)
 	int rev;
 {
 	DBT key, data;
-	int flags, nflags;
+	int lflags, nflags;
 
 	if (rev) {
-		flags = R_LAST;
+		lflags = R_LAST;
 		nflags = R_PREV;
 	} else {
-		flags = R_FIRST;
+		lflags = R_FIRST;
 		nflags = R_NEXT;
 	}
-	for (;; flags = nflags)
-		switch (dbp->seq(dbp, &key, &data, flags)) {
+	for (;; lflags = nflags)
+		switch (dbp->seq(dbp, &key, &data, lflags)) {
 		case 0:
 			(void)write(ofd, data.data, data.size);
 			if (ofd == STDOUT_FILENO)
@@ -535,7 +535,7 @@ setflags(s)
 {
 	char *p;
 
-	for (; isspace(*s); ++s);
+	for (; isspace((int) *s); ++s);
 	if (*s == '\n' || *s == '\0')
 		return (0);
 	if ((p = strchr(s, '\n')) != NULL)
@@ -555,10 +555,10 @@ setflags(s)
 }
 
 char *
-sflags(flags)
-	int flags;
+sflags(lflags)
+	int lflags;
 {
-	switch (flags) {
+	switch (lflags) {
 	case R_CURSOR:		return ("R_CURSOR");
 	case R_FIRST:		return ("R_FIRST");
 	case R_IAFTER:		return ("R_IAFTER");
@@ -588,8 +588,8 @@ dbtype(s)
 }
 
 void *
-setinfo(type, s)
-	DBTYPE type;
+setinfo(db_type, s)
+	DBTYPE db_type;
 	char *s;
 {
 	static BTREEINFO ib;
@@ -600,10 +600,10 @@ setinfo(type, s)
 	if ((eq = strchr(s, '=')) == NULL)
 		err("%s: illegal structure set statement", s);
 	*eq++ = '\0';
-	if (!isdigit(*eq))
+	if (!isdigit((int) *eq))
 		err("%s: structure set statement must be a number", s);
 		
-	switch (type) {
+	switch (db_type) {
 	case DB_BTREE:
 		if (!strcmp("flags", s)) {
 			ib.flags = atoi(eq);
@@ -693,7 +693,7 @@ rfile(name, lenp)
 	int fd;
 	char *np;
 
-	for (; isspace(*name); ++name);
+	for (; isspace((int) *name); ++name);
 	if ((np = strchr(name, '\n')) != NULL)
 		*np = '\0';
 	if ((fd = open(name, O_RDONLY, 0)) < 0 ||
