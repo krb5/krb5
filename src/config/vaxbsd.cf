@@ -34,7 +34,6 @@
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
-#define StandardDefines
 #define DesDefines -DBIG -DLSBFIRST
 #undef HasGcc
 #define HasGcc YES
