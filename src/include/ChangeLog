@@ -1,3 +1,7 @@
+2002-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin: Delete inclusion of profile.h again.
+
 2002-06-15  Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5.hin: Conditionalize KRB5_CALLCONV_WRONG separately

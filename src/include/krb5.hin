@@ -105,12 +105,6 @@
 #include <stdlib.h>
 #include <limits.h>		/* for *_MAX */
 
-#if TARGET_OS_MAC
-    #include <Kerberos/profile.h>
-#else
-    #include <profile.h>
-#endif
-
 #ifndef KRB5INT_BEGIN_DECLS
 #if defined(__cplusplus)
 #define KRB5INT_BEGIN_DECLS	extern "C" {
