@@ -128,7 +128,8 @@ cc_retr.so cc_retr.po $(OUTPRE)cc_retr.$(OBJEXT): cc_retr.c $(SRCTOP)/include/k5
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  cc-int.h
 cc_file.so cc_file.po $(OUTPRE)cc_file.$(OBJEXT): cc_file.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
