@@ -1,5 +1,26 @@
 #! /bin/sh
 
+
+kadm_deplib=''
+kadm_lib=''
+
+kdb5_deplib=''
+kdb5_lib=''
+
+kdb4_deplib=''
+kdb4_lib=''
+
+krb4_deplib=''
+krb5_lib=''
+
+ss_deplib=''
+ss_lib=''
+
+
+
+
+
+
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.4 
 # Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
@@ -522,6 +543,25 @@ if test "$PERL" != no; then
 else
   echo "configure: warning: autoscan will not be built since perl is not found" 1>&2
 fi
+
+ac_aux_dir=
+for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
+  if test -f $ac_dir/install-sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install-sh -c"
+    break
+  elif test -f $ac_dir/install.sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install.sh -c"
+    break
+  fi
+done
+if test -z "$ac_aux_dir"; then
+  { echo "configure: error: can not find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." 1>&2; exit 1; }
+fi
+ac_config_guess=$ac_aux_dir/config.guess
+ac_config_sub=$ac_aux_dir/config.sub
+ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or

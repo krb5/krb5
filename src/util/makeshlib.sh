@@ -29,6 +29,16 @@ case $host  in
 	ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
 	stat=$?
 	;;
+*-*-linux*)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
+	done`
+ 
+	echo $CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist 
+	$CC --shared $ldflags -o $library $FILES $libdirfl $liblist
+	stat=$?
+	;;
 *-*-solaris*)
 	FILES=`for i 
 	do
