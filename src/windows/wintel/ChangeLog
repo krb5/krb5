@@ -1,0 +1,5 @@
+Tue Sep 26 20:11:18 1995    <tytso@rsts-11.mit.edu>
+
+	* auth.c: Don't include los-proto.h; it's no longer present.
+
+

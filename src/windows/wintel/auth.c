@@ -15,7 +15,6 @@
     #include "krb5.h"
     #include "des_int.h"
     #include "com_err.h"
-    #include "los-proto.h"
 #endif
 
 #include "telnet.h"
