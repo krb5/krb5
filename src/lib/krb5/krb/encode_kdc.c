@@ -36,13 +36,18 @@ static char rcsid_encode_kdc_c [] =
 
  dec_rep->enc_part is allocated and filled in.
 */
+/* due to promotion rules, we need to play with this... */
 krb5_error_code
-krb5_encode_kdc_rep(type, dec_rep, encpart, client_key, enc_rep)
-krb5_msgtype type;
-register krb5_kdc_rep *dec_rep;
-register krb5_enc_kdc_rep_part *encpart;
-krb5_keyblock *client_key;
-krb5_data **enc_rep;
+krb5_encode_kdc_rep(DECLARG(krb5_msgtype, type),
+		    DECLARG(register krb5_kdc_rep *, dec_rep),
+		    DECLARG(register krb5_enc_kdc_rep_part *, encpart),
+		    DECLARG(krb5_keyblock *, client_key),
+		    DECLARG(krb5_data **, enc_rep))
+OLDDECLARG(krb5_msgtype, type)
+OLDDECLARG(register krb5_kdc_rep *, dec_rep)
+OLDDECLARG(register krb5_enc_kdc_rep_part *, encpart)
+OLDDECLARG(krb5_keyblock *, client_key)
+OLDDECLARG(krb5_data **, enc_rep)
 {
     krb5_data *scratch;
     krb5_encrypt_block eblock;
