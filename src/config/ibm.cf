@@ -17,6 +17,10 @@
 
 #undef HasGcc
 #define HasGcc NO
+/* If you have a STDC compiler cobbled together from High C, use these
+   two lines: */
+#undef CcCmd
+#define CcCmd c89 -Dunix
 
 #define	Bitsize32
 
@@ -29,13 +33,13 @@
 #define	HasStringH		YES
 #define	HaveSetenv		YES
 
-/* #define DefaultCCOptions	*/
 
 #define	HasPosixTermios		NO
 #define	HasPosixFileLocks	NO
 #define	HasPosixTypes		NO		/* ??? */
 
 #define	HasInet			YES
+#define	WantPrototypes		YES
 #define	NeedNarrowPrototypes	YES
 
 #define HCRevision	21025
