@@ -1,3 +1,11 @@
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_dfl.c (alive): Take a timestamp argument instead of the
+	context, and don't check the current time here.  All callers
+	changed to pass in the current time.
+	(rc_store): Take a timestamp argument.  All callers changed to
+	pass in the current time.
+
 2003-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.

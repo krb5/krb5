@@ -89,11 +89,9 @@ cmp(krb5_donot_replay *old, krb5_donot_replay *new1, krb5_deltat t)
 }
 
 static int
-alive(krb5_context context, krb5_donot_replay *new1, krb5_deltat t)
+alive(krb5_int32 mytime, krb5_donot_replay *new1, krb5_deltat t)
 {
-    krb5_int32 mytime;
-
-    if (krb5_timeofday(context, &mytime))
+    if (mytime == 0)
 	return CMP_HOHUM; /* who cares? */
     /* I hope we don't have to worry about overflow */
     if (new1->ctime + t < mytime)
@@ -127,7 +125,8 @@ struct authlist
 /* hash could be forwards since we have to search on match, but naaaah */
 
 static int
-rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
+rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
+	 krb5_int32 now)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
     int rephash;
@@ -141,7 +140,7 @@ rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
 	case CMP_REPLAY:
 	    return CMP_REPLAY;
 	case CMP_HOHUM:
-	    if (alive(context, &ta->rep, t->lifespan) == CMP_EXPIRED)
+	    if (alive(now, &ta->rep, t->lifespan) == CMP_EXPIRED)
 		t->nummisses++;
 	    else
 		t->numhits++;
@@ -391,6 +390,7 @@ krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
     krb5_error_code retval;
     long max_size;
     int expired_entries = 0;
+    krb5_int32 now;
 
     if ((retval = krb5_rc_io_open(context, &t->d, t->name)))
 	return retval;
@@ -413,6 +413,9 @@ krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
     rep->client = NULL;
     rep->server = NULL;
 
+    if (krb5_timeofday(context, &now))
+	now = 0;
+
     /* now read in each auth_replay and insert into table */
     for (;;) {
 	if (krb5_rc_io_mark(context, &t->d)) {
@@ -428,8 +431,8 @@ krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
 	    goto io_fail;
 
 
-	if (alive(context, rep, t->lifespan) != CMP_EXPIRED) {
-	    if (rc_store(context, id, rep) == CMP_MALLOC) {
+	if (alive(now, rep, t->lifespan) != CMP_EXPIRED) {
+	    if (rc_store(context, id, rep, now) == CMP_MALLOC) {
 		retval = KRB5_RC_MALLOC; goto io_fail;
 	    }
 	} else {
@@ -494,8 +497,13 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
 {
     krb5_error_code ret;
     struct dfl_data *t = (struct dfl_data *)id->data;
+    krb5_int32 now;
 
-    switch(rc_store(context, id, rep)) {
+    ret = krb5_timeofday(context, &now);
+    if (ret)
+	return ret;
+
+    switch(rc_store(context, id, rep, now)) {
     case CMP_MALLOC:
 	return KRB5_RC_MALLOC;
     case CMP_REPLAY:
@@ -533,10 +541,14 @@ krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
     struct authlist **qt;
     struct authlist *r;
     struct authlist *rt;
+    krb5_int32 now;
+
+    if (krb5_timestamp(context, &now))
+	now = 0;
 
     for (q = &t->a; *q; q = qt) {
 	qt = &(*q)->na;
-	if (alive(context, &(*q)->rep, t->lifespan) == CMP_EXPIRED) {
+	if (alive(now, &(*q)->rep, t->lifespan) == CMP_EXPIRED) {
 	    FREE((*q)->rep.client);
 	    FREE((*q)->rep.server);
 	    FREE(*q);
