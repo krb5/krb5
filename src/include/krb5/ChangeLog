@@ -1,3 +1,8 @@
+Tue Oct 25 23:54:25 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ext-proto.h (strdup): If the header files have strdup, don't try
+		to redefine it.
+
 Fri Oct 14 00:40:01 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* mit-des.h: Add declaration for krb5_des_md5_cst_entry.

@@ -49,7 +49,9 @@ extern char *getenv();
 #include <strings.h>
 #endif
 
+#ifndef HAS_STRDUP
 extern char *strdup PROTOTYPE((const char *));
+#endif
 
 #ifdef HAS_UNISTD_H
 #include <unistd.h>
