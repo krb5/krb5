@@ -1,9 +1,5 @@
 AC_INIT(configure.in)
-WITH_CCOPTS
-AC_SET_BUILDTOP
-CONFIG_DIRS(sclient sserver)
-MAKE_SUBDIRS("making",all)
-MAKE_SUBDIRS("cleaning",clean)
-MAKE_SUBDIRS("installing",install)
 CONFIG_RULES
+CONFIG_DIRS(sclient sserver)
+DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

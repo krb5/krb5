@@ -1,10 +1,6 @@
-Fri Jun  9 18:36:37 1995    <tytso@rsx-11.mit.edu>
+Fri Jun  9 18:28:55 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
 		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
 		recurse down subdirectories.
-
-Wed Jul 20 23:36:04 1994  Tom Yu  (tlyu at dragons-lair)
-
-	* configure.in: add ksu
 
