@@ -1,3 +1,8 @@
+2004-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_cc.c (cc_test): Rename one of the "resolve" cases so the
+	messages can be distinguished.
+
 2004-07-07  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:  Fix thread safety

@@ -165,7 +165,7 @@ static void cc_test(krb5_context context, const char *name, int flags)
 
      /* ------------------------------------------------- */
      kret = krb5_cc_resolve(context, name, &id);
-     CHECK(kret, "resolve");
+     CHECK(kret, "resolve2");
 
      {
        /* Copy the cache test*/
