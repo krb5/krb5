@@ -65,8 +65,6 @@ struct saltblock {
 extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 
-#define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
-
 struct mblock {
     krb5_deltat max_life;
     krb5_deltat max_rlife;
@@ -348,7 +346,8 @@ OLDDECLARG(krb5_db_entry *, entry)
 	break;
 
     case KRB5_KDB_SALTTYPE_NOREALM:
-	if (retval = norealm_salt(string_princ, &salt.saltdata)) {
+	if (retval = krb5_principal2salt_norealm(string_princ,
+						 &salt.saltdata)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
 	    return(KRB_ERR_GENERIC);

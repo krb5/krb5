@@ -45,8 +45,6 @@ static char rcsid_kdb_edit_c[] =
 
 #include "./kdb5_edit.h"
 
-#define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
-
 struct mblock mblock = {				/* XXX */
     KRB5_KDB_MAX_LIFE,
     KRB5_KDB_MAX_RLIFE,
@@ -1282,7 +1280,8 @@ OLDDECLARG(int, salttype)
 	salt.saltdata.length = 0;
 	break;
     case KRB5_KDB_SALTTYPE_NOREALM:
-	if (retval = norealm_salt(string_princ, &salt.saltdata)) {
+	if (retval = krb5_principal2salt_norealm(string_princ,
+						 &salt.saltdata)) {
 	    com_err(cmdname, retval,
 		    "while converting principal to salt for '%s'", newprinc);
 	    return;

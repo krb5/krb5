@@ -448,7 +448,8 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 	    padat_tmp[0]->length = 0;
 	    break;
 	case KRB5_KDB_SALTTYPE_NOREALM:
-	    if (retval = norealm_salt(request->client, &data_bar)) {
+	    if (retval = krb5_principal2salt_norealm(request->client,
+						     &data_bar)) {
 		cleanup();
 		return retval;
 	    }
