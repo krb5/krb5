@@ -43,6 +43,10 @@ for pid in xxx \
 	esac
 done
 
+# Destroy the kdc replay cache so we don't lose if we try to run the
+# KDC as another unix user.
+rm -f /usr/tmp/krb5kdc_rcache
+
 # restore saved system config files
 if $v4files; then
 	$RESTORE_FILES $start_servers

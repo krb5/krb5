@@ -6,7 +6,10 @@ include $(TOP)/config.mk/template
 GEN_SCRIPTS = compare_dump.pl fixup-conf-files.pl make-host-keytab.pl \
 	simple_dump.pl verify_xrunner_report.pl
 
-all:: $(GEN_SCRIPTS)
+all:: $(GEN_SCRIPTS) restore_files.sh
+
+restore_files.sh:
+	ln -s save_files.sh restore_files.sh
 
 %.pl: %.pl.in
 	-rm -f $@.tmp

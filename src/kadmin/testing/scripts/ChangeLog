@@ -1,3 +1,9 @@
+Mon Sep 23 15:38:58 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* stop_servers_local: delete krb5kdc_rcache after stopping kdc
+
+	* Makefile.ov: create restore_files.sh as symlink to save_files.sh
+
 Wed Sep 11 17:01:06 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* make-host-keytab.pl.in: use kadmin instead of kadm5_keytab
