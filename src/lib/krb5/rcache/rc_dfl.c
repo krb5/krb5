@@ -32,17 +32,13 @@ If NOIOSTUFF is defined at compile time, dfl rcaches will be per-process.
 /*
 Local stuff:
 
-struct auth_replay
-  exactly that info which must not be replayed---by this cache type, that is
-static int hash(struct auth_replay *rep,int hsize)
+static int hash(krb5_donot_replay *rep,int hsize)
   returns hash value of *rep, between 0 and hsize - 1
 HASHSIZE
   size of hash table (constant), can be preset
-static int auth_to_rep(krb5_tkt_authent *auth,struct auth_replay *rep)
-  given auth, take important information and make rep; return -1 if failed
-static int cmp(struct auth_replay *old,struct auth_replay *new,krb5_deltat t)
+static int cmp(krb5_donot_replay *old,krb5_donot_replay *new,krb5_deltat t)
   compare old and new; return CMP_REPLAY or CMP_HOHUM
-static int alive(struct auth_replay *new,krb5_deltat t)
+static int alive(krb5_donot_replay *new,krb5_deltat t)
   see if new is still alive; return CMP_EXPIRED or CMP_HOHUM
 CMP_MALLOC, CMP_EXPIRED, CMP_REPLAY, CMP_HOHUM
   return codes from cmp(), alive(), and store()
@@ -50,7 +46,7 @@ struct dfl_data
   data stored in this cache type, namely "dfl"
 struct authlist
   multilinked list of reps
-static int store(krb5_rcache id,struct auth_replay *rep)
+static int store(krb5_rcache id,krb5_donot_replay *rep)
   store rep in cache id; return CMP_REPLAY if replay, else CMP_MALLOC/CMP_HOHUM
 
 */
@@ -63,44 +59,19 @@ static int store(krb5_rcache id,struct auth_replay *rep)
 #define EXCESSREPS 30
 #endif
 /* The rcache will be automatically expunged when the number of expired
-auth_replays encountered incidentally in searching exceeds the number
-of live auth_replays by EXCESSREPS. With the defaults here, a typical
-cache might build up some 10K of expired auth_replays before an automatic
+krb5_donot_replays encountered incidentally in searching exceeds the number
+of live krb5_donot_replays by EXCESSREPS. With the defaults here, a typical
+cache might build up some 10K of expired krb5_donot_replays before an automatic
 expunge, with the waste basically independent of the number of stores per
 minute. */
 
-struct auth_replay
- {
-  char *server; /* null-terminated */
-  char *client; /* null-terminated */
-  krb5_int32 cusec;
-  krb5_timestamp ctime;
- }
-;
-
 static int hash(rep, hsize)
-struct auth_replay *rep;
+krb5_donot_replay *rep;
 int hsize;
 {
  return (((rep->cusec + rep->ctime + *rep->server + *rep->client)
 	 % hsize) + hsize) % hsize;
  /* We take this opportunity to once again complain about C's idiotic %. */
-}
-
-static krb5_error_code auth_to_rep(auth, rep)
-krb5_tkt_authent *auth;
-struct auth_replay *rep;
-{
- krb5_error_code retval;
- rep->cusec = auth->authenticator->cusec;
- rep->ctime = auth->authenticator->ctime;
- if (retval = krb5_unparse_name(auth->ticket->server,&rep->server))
-   return retval; /* shouldn't happen */
- if (retval = krb5_unparse_name(auth->authenticator->client,&rep->client)) {
-     FREE(rep->server);
-     return retval; /* shouldn't happen. */
- }
- return 0;
 }
 
 #define CMP_MALLOC -3
@@ -110,8 +81,8 @@ struct auth_replay *rep;
 
 /*ARGSUSED*/
 static int cmp(old, new, t)
-struct auth_replay *old;
-struct auth_replay *new;
+krb5_donot_replay *old;
+krb5_donot_replay *new;
 krb5_deltat t;
 {
  if ((old->cusec == new->cusec) && /* most likely to distinguish */
@@ -123,7 +94,7 @@ krb5_deltat t;
 }
 
 static int alive(new, t)
-struct auth_replay *new;
+krb5_donot_replay *new;
 krb5_deltat t;
 {
  krb5_int32 time;
@@ -152,7 +123,7 @@ struct dfl_data
 
 struct authlist
  {
-  struct auth_replay rep;
+  krb5_donot_replay rep;
   struct authlist *na;
   struct authlist *nh;
  }
@@ -163,7 +134,7 @@ struct authlist
 
 static int store(id, rep)
 krb5_rcache id;
-struct auth_replay *rep;
+krb5_donot_replay *rep;
 {
  struct dfl_data *t = (struct dfl_data *)id->data;
  int rephash;
@@ -284,7 +255,7 @@ krb5_rcache id;
 
  struct dfl_data *t = (struct dfl_data *)id->data;
  int i;
- struct auth_replay *rep;
+ krb5_donot_replay *rep;
 
  if (krb5_rc_io_open(&t->d,t->name))
    return KRB5_RC_IO;
@@ -306,7 +277,7 @@ krb5_rcache id;
 #define FREE3 FREE(rep->server); FREE(rep->client); FREE(rep);
    if (krb5_rc_io_mark(&t->d))
      return KRB5_RC_IO;
-   if (!(rep = (struct auth_replay *) malloc(sizeof(struct auth_replay))))
+   if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay))))
      return KRB5_RC_MALLOC;
    switch(krb5_rc_io_read(&t->d,(krb5_pointer) &i,sizeof(i)))
     {
@@ -353,19 +324,13 @@ would be inefficient. */
 #endif
 }
 
-krb5_error_code krb5_rc_dfl_store(id, auth)
+krb5_error_code krb5_rc_dfl_store(id, rep)
 krb5_rcache id;
-krb5_tkt_authent *auth;
+krb5_donot_replay *rep;
 {
  struct dfl_data *t = (struct dfl_data *)id->data;
- struct auth_replay *rep;
  int i;
- krb5_error_code retval;
 
- if (!(rep = (struct auth_replay *) malloc(sizeof(struct auth_replay))))
-   return KRB5_RC_MALLOC;
- if (retval = auth_to_rep(auth,rep))
-  { FREE(rep); return retval; }
  switch(store(id,rep))
   {
    case CMP_MALLOC: FREE(rep->client); FREE(rep->server); FREE(rep);

@@ -24,7 +24,7 @@ krb5_error_code krb5_rc_dfl_init PROTOTYPE((krb5_rcache,krb5_deltat));
 krb5_error_code krb5_rc_dfl_recover PROTOTYPE((krb5_rcache)); 
 krb5_error_code krb5_rc_dfl_destroy PROTOTYPE((krb5_rcache));
 krb5_error_code krb5_rc_dfl_close PROTOTYPE((krb5_rcache));
-krb5_error_code krb5_rc_dfl_store PROTOTYPE((krb5_rcache,krb5_tkt_authent *));
+krb5_error_code krb5_rc_dfl_store PROTOTYPE((krb5_rcache,krb5_donot_replay *));
 krb5_error_code krb5_rc_dfl_expunge PROTOTYPE((krb5_rcache));
 krb5_error_code krb5_rc_dfl_get_span PROTOTYPE((krb5_rcache,krb5_deltat *));
 char *krb5_rc_dfl_get_name PROTOTYPE((krb5_rcache));
