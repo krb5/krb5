@@ -89,7 +89,7 @@ register int *error;
     if (*error) {
 	goto errout;
     }
-    if (retval->kdc_options & KDC_OPT_RENEWABLE) {
+    if (val->rtime) {
 	retval->rtime = gentime2unix(val->rtime, error);
 	if (*error) {
 	    goto errout;
