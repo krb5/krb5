@@ -1,3 +1,8 @@
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* svc.c (svc_getreq, svc_getreqset): Avoid using internal, private
+		fd_set structure elements (Needed for Linux/glibc 2.1)
+
 Thu Apr  1 19:11:50 1999  Tom Yu  <tlyu@mit.edu>
 
 	* rpc_commondata.c: Add initializers to prevent lossage on systems
