@@ -1,3 +1,14 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * disp_com_err_status.c, gssapi_generic.h:  
+    Removed Mac header goober.
+    
+    * gssapiP_generic.h, gssapi.hin: Removed macintosh check because 
+    we don't build on OS 9 anymore.
+    
+    * gssapi.hin: Removed enumsalwaysint because there are no typed
+    enums in this header.  Removed duplicate CFM-68K magic.  
+
 2003-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove stamp rules.  Explicitly creates header

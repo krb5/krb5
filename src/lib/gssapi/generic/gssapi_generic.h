@@ -27,11 +27,7 @@
  * $Id$
  */
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-#include <Kerberos/gssapi.h>
-#else
 #include <gssapi/gssapi.h>
-#endif
 
 #if defined(__cplusplus) && !defined(GSSAPIGENERIC_BEGIN_DECLS)
 #define GSSAPIGENERIC_BEGIN_DECLS	extern "C" {

@@ -25,12 +25,7 @@
  */
 
 #include "gssapiP_generic.h"
-
-#if TARGET_OS_MAC
-#include <Kerberos/com_err.h>
-#else
 #include "com_err.h"
-#endif
 
 /* XXXX internationalization!! */
 

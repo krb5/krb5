@@ -41,7 +41,6 @@ extern "C" {
 #if TARGET_OS_MAC
 #	if defined(__MWERKS__)
 #		pragma import on
-#		pragma enumsalwaysint on
 #	endif
 #	pragma options align=mac68k
 #endif
@@ -69,9 +68,7 @@ extern "C" {
 /*
  * POSIX says that sys/types.h is where size_t is defined.
  */
-#ifndef macintosh
 #include <sys/types.h>
-#endif
 
 /*
  * If the platform supports the xom.h header file, it should be included here.
@@ -784,7 +781,6 @@ OM_uint32 KRB5_CALLCONV gss_canonicalize_name
 
 #if TARGET_OS_MAC
 #  if defined(__MWERKS__)
-#    pragma enumsalwaysint reset
 #    pragma import reset
 #  endif
 #  pragma options align=reset
@@ -805,10 +801,5 @@ OM_uint32 KRB5_CALLCONV gss_canonicalize_name
 
 /* XXXX This is a necessary evil until the spec is fixed */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
-
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
 
 #endif /* _GSSAPI_H_ */
