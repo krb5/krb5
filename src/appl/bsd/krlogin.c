@@ -91,11 +91,13 @@ char copyright[] =
 #include <sys/ptem.h>
 #endif
 
+#ifdef HAVE_STREAMS
 #ifdef HAVE_SYS_PTYVAR_H
 #include <sys/tty.h>
 #include <sys/ttold.h>
 /* solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
+#endif
 #endif
 
 /* how do we tell apart irix 5 and irix 4? */

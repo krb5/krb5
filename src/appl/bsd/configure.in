@@ -69,8 +69,7 @@ dnl
 AC_MSG_CHECKING([streams interface])
 AC_CACHE_VAL(krb5_cv_has_streams,
 [AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <sys/stream.h>
+[#include <sys/stream.h>
 #include <sys/stropts.h>], [],
 krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
 AC_MSG_RESULT($krb5_cv_has_streams)

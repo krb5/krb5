@@ -161,6 +161,8 @@ char copyright[] =
 #include <sys/param.h>
 #include <utmp.h>
 
+#ifdef HAVE_STREAMS
+/* krlogin doesn't test sys/tty... */
 #ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
 #endif
@@ -168,6 +170,7 @@ char copyright[] =
 #ifdef HAVE_SYS_PTYVAR_H
 /* Solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
+#endif
 #endif
 
 
