@@ -3,9 +3,10 @@
 	* netread.c, netwrite.c: Include unistd.h if present on machine
 	for read/write prototypes.
 
-	* in_tkt.c: Argument to umask should be of type uid_t.
+	* in_tkt.c: Argument to umask should be of type mode_t.
 
-	* configure.in: Test for uid_t (AC_TYPE_UID_T).
+	* configure.in: Test for uid_t (AC_TYPE_UID_T) and mode_t
+	(AC_TYPE_MODE_T). 
 	
 
 2000-08-31  Tom Yu  <tlyu@mit.edu>
