@@ -18,43 +18,15 @@
  
 #include "profile.h"
 #include "prof_err.h"
+#include <CoreServices/CoreServices.h>
+#include <Kerberos/com_err.h>
 
-#if TARGET_RT_MAC_CFM
-#include <CodeFragments.h>
+extern "C" {
+void KerberosProfileInit (CFStringRef inBundleID);
+};
 
-OSErr InitializeProfileLib (
-	CFragInitBlockPtr ibp);
-void TerminateProfileLib (void);
-
-OSErr InitializeProfileLib(
-	CFragInitBlockPtr ibp)
+void KerberosProfileInit (CFStringRef inBundleID)
 {
-	OSErr	err = noErr;
-	
-	/* Do normal init of the shared library */
-	err = __initialize(ibp);
-#else
-#define noErr	0
-void __InitializeProfileLib (void);
-void __InitializeProfileLib (void)
-{
-	int	err = noErr;
-#endif
-	
 	/* Initialize the error tables */
-	if (err == noErr) {
-	    add_error_table(&et_prof_error_table);
-	}
-	
-#if TARGET_RT_MAC_CFM
-	return err;
-#endif
+	add_error_table(&et_prof_error_table);
 }
-
-#if TARGET_RT_MAC_CFM
-void TerminateProfileLib(void)
-{
-    remove_error_table(&et_prof_error_table);
-	__terminate();
-}
-#endif

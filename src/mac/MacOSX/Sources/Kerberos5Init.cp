@@ -16,47 +16,20 @@
  * without express or implied warranty.
  */
  
-#if defined(macintosh)
-#include <CodeFragments.h>
+extern "C" {
+
+#include <CoreServices/CoreServices.h>
+#include <Kerberos/com_err.h>
 
 #include "krb5_libinit.h"
 #include "crypto_libinit.h"
 
+void Kerberos5Init (CFStringRef inBundleID);
 
-OSErr __initializeK5(CFragInitBlockPtr ibp);
-void __terminateGSSK5glue(void);
-
-OSErr __initializeK5(CFragInitBlockPtr ibp)
+void Kerberos5Init (CFStringRef inBundleID)
 {
-	OSErr	err = noErr;
-	
-	err = __initialize();
-#else
-#define noErr	0
-void __initializeK5 (void);
-void __initializeK5 (void)
-{
-        int err = noErr;
-#endif
-	if (err == noErr) {
-		err = krb5int_initialize_library ();
-	}
-	
-	if (err == noErr) {
-		err = cryptoint_initialize_library ();
-	}
-#if defined(macintosh)	
-	return err;
-#endif
+	krb5int_initialize_library ();
+    cryptoint_initialize_library ();
 }
 
-#if defined(macintosh)
-void __terminateK5(void)
-{
-
-	cryptoint_cleanup_library ();
-	krb5int_cleanup_library ();
-
-	__terminate();
-}
-#endif
+};
