@@ -31,8 +31,7 @@
  * a usable DES key with odd parity, and then encrypt the set of three usable
  * DES keys using Triple-DES CBC mode.  The result is then treated as three
  * DES keys, and should be corrected for parity.  Any DES key that is weak or
- * semi-weak is to be corrected by eXclusive-ORing the first octet with the
- * value 0xF0.
+ * semi-weak is to be corrected by eXclusive-ORing with 00000000000000F0.
  */
 
 static mit_des_cblock zero_ivec = { 0, 0, 0, 0, 0, 0, 0, 0 };
