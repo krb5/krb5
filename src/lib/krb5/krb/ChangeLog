@@ -1,3 +1,8 @@
+Sun Jun 11 12:31:39 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* auth_con.c (krb5_auth_con_init): Zero newly allocated
+		krb5_auth_context. (Fixed error in redefinitions).
+
 Sat Jun 10 23:05:51 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* auth_con.c, compat_recv.c, mk_cred.c, mk_priv.c, mk_rep.c,

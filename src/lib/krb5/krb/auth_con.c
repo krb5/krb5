@@ -12,7 +12,7 @@ krb5_auth_con_init(context, auth_context)
     if (!*auth_context)
 	    return ENOMEM;
     
-    memset(*auth_context, 0, sizeof(krb5_auth_context));
+    memset(*auth_context, 0, sizeof(struct _krb5_auth_context));
 
     /* Default flags, do time not seq */
     (*auth_context)->auth_context_flags = 
