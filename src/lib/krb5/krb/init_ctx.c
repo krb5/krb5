@@ -70,6 +70,9 @@ krb5_free_context(ctx)
      if (ctx->default_realm)
 	  free(ctx->default_realm);
 
+     if (ctx->ser_ctx_count && ctx->ser_ctx)
+	 free(ctx->ser_ctx);
+
      ctx->magic = 0;
      free(ctx);
 }
