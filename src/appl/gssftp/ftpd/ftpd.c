@@ -102,6 +102,10 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include "pathnames.h"
 #include <libpty.h>
 
+#ifdef NEED_SETENV
+extern int setenv(char *, char *, int);
+#endif
+
 #ifndef L_SET
 #define L_SET 0
 #endif
