@@ -561,7 +561,7 @@ Next you need to add administrative principals to the Kerberos database.
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kadmin.local
-@b{kadmin:} addprinc admin/admin@@@value{PRIMARYREALM}
+@b{kadmin.local:} addprinc admin/admin@@@value{PRIMARYREALM}
 @b{WARNING: no policy specified for "admin/admin@@@value{PRIMARYREALM}";
 defaulting to no policy.}
 @iftex
@@ -573,7 +573,7 @@ Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{@doublele
 Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{<= Type it again.}
 @end ifinfo
 @b{Principal "admin/admin@@@value{PRIMARYREALM}" created.
-kadmin:}
+kadmin.local:}
 @end group
 @end smallexample
 
@@ -586,19 +586,22 @@ give them access to the database.  You need to create the kadmin keytab
 with entries for the principals @code{kadmin/admin} and
 @code{kadmin/changepw}.  (These principals are placed in the Kerberos
 database automatically when you create it.)  To create the kadmin
-keytab, run @code{kadmin} and use the @code{ktadd} command, as in the
-following example.  (The line beginning with @result{} is a continuation
-of the previous line.):
+keytab, run @code{kadmin.local} and use the @code{ktadd} command, as in
+the following example.  (The line beginning with @result{} is a
+continuation of the previous line.):
 
 @smallexample
 @group
-@b{shell%} @value{ROOTDIR}/sbin/kadmin
-@b{kadmin:} ktadd -k @value{ROOTDIR}/lib/krb5kdc/kadm5.keytab
+@b{shell%} @value{ROOTDIR}/sbin/kadmin.local
+@b{kadmin.local:} ktadd -k @value{ROOTDIR}/lib/krb5kdc/kadm5.keytab
 @result{} kadmin/admin kadmin/changepw 
-@b{kadmin: Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
+@b{Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
      WRFILE:@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab.
-kadmin:} quit
+Entry for principal kadmin/changepw@@@value{PRIMARYREALM} with
+     kvno 3, encryption type DES-CBC-CRC added to keytab
+     WRFILE:@value{ROOTDIR}/lib/krb5kdc/kadm5.keytab.
+kadmin.local:} quit
 @b{shell%}
 @end group
 @end smallexample

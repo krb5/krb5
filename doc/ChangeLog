@@ -1,3 +1,8 @@
+Fri Oct 18 13:42:49 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* install.texinfo (Create a kadmind Keytab): use kadmin.local
+ 	instead of kadmin to perform pre-kadmind setup [krb5-admin/28]
+
 Tue Sep 10 20:47:41 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* user-guide.texinfo: The telnet man page only has 9 pages; the
