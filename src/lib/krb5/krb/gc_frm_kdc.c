@@ -50,6 +50,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     krb5_creds ***tgts;
 {
     krb5_creds tgt, tgtq;
+    krb5_error_code retval;
     
     /*
      * we know that the desired credentials aren't in the cache yet.
@@ -70,20 +71,24 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
      * probably not safe...
      */
     tgtq.client = cred->client;
-    /* XXX who frees this memory? */
-    tgtq.server = krb5_tgtname(cred->server, cred->client); 
+
+    if (retval = krb5_tgtname(cred->server, cred->client, &tgtq.server))
+	return retval;
     /* go find it.. */
-    code = krb5_cc_retrieve_cred (ccache,
-				  KRB5_CF_CLIENT|KRB5_CF_SERVER,
-				  &tgtq,
-				  &tgt);
-    if (code != 0) {
-	if (code != KRB5_CC_NOTFOUND)
+    retval = krb5_cc_retrieve_cred (ccache,
+				    KRB5_CF_CLIENT|KRB5_CF_SERVER,
+				    &tgtq,
+				    &tgt);
+    krb5_free_principal(tgtq.server);
+
+    if (retval != 0) {
+	if (retval != KRB5_CC_NOTFOUND)
 	    goto out;
 	/* nope; attempt to get tgt */
     }
     /* got tgt! */
-    code = krb5_get_cred_via_tgt(&tgt, cred);
+    retval = krb5_get_cred_via_tgt(&tgt, cred);
 out:
-    return code;
+    /* XXX what about tgts? */
+    return retval;
 }
