@@ -87,35 +87,6 @@ static krb5_error_code krb5_dbm_db_start_read
 static krb5_error_code krb5_dbm_db_end_read 
 	PROTOTYPE((krb5_context,
 		   time_t  ));
-static krb5_error_code encode_princ_dbmkey 
-	PROTOTYPE((krb5_context,
-		   datum *,
-		   krb5_principal ));
-static void free_encode_princ_dbmkey 
-	PROTOTYPE((krb5_context,
-		   datum * ));
-static krb5_error_code encode_princ_contents
-	PROTOTYPE((krb5_context,
-		   datum *,
-	           krb5_db_entry * ));
-static void free_encode_princ_contents 
-	PROTOTYPE((datum * ));
-static krb5_error_code decode_princ_contents
-    	PROTOTYPE((krb5_context,
-		   datum *,
-	           krb5_db_entry * ));
-static void free_decode_princ_contents 
-	PROTOTYPE((krb5_context,
-		   krb5_db_entry * ));
-
-#if 0
-/* not used */
-static krb5_error_code decode_princ_dbmkey 
-	PROTOTYPE((datum *,
-		   krb5_principal * ));
-static void free_decode_princ_dbmkey 
-	PROTOTYPE((krb5_principal ));
-#endif
 
 
 #ifdef	BERK_DB_DBM
@@ -170,9 +141,8 @@ int dbm_clearerr PROTOTYPE((DBM *));
 /*
  * This module contains all of the code which directly interfaces to
  * the underlying representation of the Kerberos database; this
- * implementation uses a DBM or NDBM indexed "file" (actually
- * implemented as two separate files) to store the relations, plus a
- * third file as a semaphore to allow the database to be replaced out
+ * implementation uses the Berkeley hash db to store the relations, plus a
+ * second file as a semaphore to allow the database to be replaced out
  * from underneath the KDC server.
  */
 static kdb5_dispatch_table kdb5_default_dispatch = {
@@ -693,402 +663,6 @@ krb5_dbm_db_end_read(context, age)
     return 0;
 }
 
-
-static krb5_error_code
-encode_princ_dbmkey(context, key, principal)
-    krb5_context context;
-    datum  *key;
-    krb5_principal principal;
-{
-    char *princ_name;
-    krb5_error_code retval;
-
-    if (retval = krb5_unparse_name(context, principal, &princ_name))
-	return(retval);
-    key->dptr = princ_name;
-    key->dsize = strlen(princ_name)+1;	/* need to store the NULL for
-					   decoding */
-    return 0;
-}
-
-static void
-free_encode_princ_dbmkey(context, key)
-    krb5_context context;
-    datum  *key;
-{
-    (void) free(key->dptr);
-    key->dptr = 0;
-    key->dsize = 0;
-    return;
-}
-
-#if 0
-/* these aren't used, but if they ever should be... */
-static krb5_error_code
-decode_princ_dbmkey(context, key, principal)
-    datum  *key;
-    krb5_principal *principal;
-{
-    return(krb5_parse_name(context, key->dptr, principal));
-}
-
-static void
-free_decode_princ_dbmkey(context, principal)
-    krb5_context context;
-    krb5_principal principal;
-{
-    krb5_free_principal(context, principal);
-    return;
-}
-#endif
-
-static krb5_error_code
-encode_princ_contents(context, contents, entry)
-    krb5_context context;
-    register datum  *contents;
-    krb5_db_entry *entry;
-{
-    krb5_db_entry copy_princ;
-    char *unparse_princ, *unparse_mod_princ;
-    register char *nextloc;
-    int princ_size, mod_size;
-
-    krb5_error_code retval;
-
-    /* since there is some baggage pointing off of the entry
-       structure, we'll encode it by writing the structure, with nulled
-       pointers, followed by the unparsed principal name, then the key, and
-       then the unparsed mod_princ name, and then the salt (if any).
-       */
-    copy_princ = *entry;
-    copy_princ.principal = 0;
-    copy_princ.mod_name = 0;
-    copy_princ.salt = 0;
-    copy_princ.alt_salt = 0;
-    if (!entry->salt)
-	copy_princ.salt_length = 0; /* Safety measures.... */
-    if (!entry->alt_salt)
-	copy_princ.alt_salt_length = 0;
-
-    if (retval = krb5_unparse_name(context, entry->principal, &unparse_princ))
-	return(retval);
-    if (retval = krb5_unparse_name(context, entry->mod_name, &unparse_mod_princ)) {
-	free(unparse_princ);
-	return(retval);
-    }
-    princ_size = strlen(unparse_princ)+1;
-    mod_size = strlen(unparse_mod_princ)+1;
-    contents->dsize = (2 + sizeof(copy_princ) + princ_size
-		       + sizeof(entry->principal->type) + mod_size
-		       + sizeof(copy_princ.key.length) 
-		       + copy_princ.key.length + copy_princ.salt_length
-		       + sizeof(copy_princ.alt_key.length)
-		       + copy_princ.alt_key.length
-		       + copy_princ.alt_salt_length);
-    contents->dptr = malloc(contents->dsize);
-    if (!contents->dptr) {
-	free(unparse_princ);
-	free(unparse_mod_princ);
-	contents->dsize = 0;
-	contents->dptr = 0;
-	return(ENOMEM);
-    }
-    nextloc = contents->dptr;
-    *nextloc++ = 2;		/* Version number 2.0 */
-    *nextloc++ = 0;
-    (void) memcpy(nextloc, (char *)&copy_princ, sizeof(copy_princ));
-    nextloc += sizeof(copy_princ);
-
-    (void) memcpy(nextloc, unparse_princ, princ_size);
-    nextloc += princ_size;
-    (void) memcpy(nextloc, (char *)&entry->principal->type,
-		  sizeof(entry->principal->type));
-    nextloc +=  sizeof(entry->principal->type);
-    (void) memcpy(nextloc, unparse_mod_princ, mod_size);
-    nextloc += mod_size;
-    if (copy_princ.key.length) {
-	(void) memcpy(nextloc, (char *)entry->key.contents, entry->key.length);
-	nextloc += entry->key.length;
-    }
-    if (copy_princ.salt_length) {
-	(void) memcpy(nextloc, (char *)entry->salt, entry->salt_length);
-	nextloc += entry->salt_length;
-    }
-    if (copy_princ.alt_key.length) {
-	(void) memcpy(nextloc, (char *)entry->alt_key.contents,
-		      entry->alt_key.length);
-	nextloc += entry->alt_key.length;
-    }
-    if (copy_princ.alt_salt_length) {
-	(void) memcpy(nextloc, (char *)entry->alt_salt,
-		      entry->alt_salt_length);
-	nextloc += entry->alt_salt_length;
-    }
-    free(unparse_princ);
-    free(unparse_mod_princ);
-    return 0;
-}
-
-static void
-free_encode_princ_contents(contents)
-    datum *contents;
-{
-    free(contents->dptr);
-    contents->dsize = 0;
-    contents->dptr = 0;
-    return;
-}
-
-static krb5_error_code
-decode_princ_contents(context, contents, entry)
-    krb5_context context;
-    datum  *contents;
-    krb5_db_entry *entry;
-{
-    register char *nextloc;
-    krb5_principal princ, mod_princ;
-    krb5_error_code retval;
-    int	sizeleft;
-    int major_version = 0, minor_version = 0;
-
-    /*
-     * undo the effects of encode_princ_contents.
-     */
-    sizeleft = contents->dsize;
-    nextloc = contents->dptr;
-    if (sizeleft <= 0)
-	return KRB5_KDB_TRUNCATED_RECORD;
-
-    /*
-     * First, check the version number.  If the major version number is
-     * greater than zero, then the version number is explicitly
-     * allocated; otherwise, it is part of the zeroed principal pointer.
-     */
-    major_version = *nextloc;
-    if (major_version) {
-	nextloc++; sizeleft--;
-	minor_version = *nextloc;
-	nextloc++; sizeleft--;
-    }
-#ifdef OLD_COMPAT_VERSION_1
-    if (major_version == 0 || major_version == 1) {
-	old_krb5_db_entry old_entry;
-
-	/*
-	 * Copy in structure to old-style structure, and then copy it
-	 * to the new structure.
-	 */
-	sizeleft -= sizeof(old_entry);
-	if (sizeleft < 0) 
-	    return KRB5_KDB_TRUNCATED_RECORD;
-
-	memcpy((char *) &old_entry, nextloc, sizeof(old_entry));
-	nextloc += sizeof(old_entry);	/* Skip past structure */
-	
-	entry->key.keytype = old_entry.key.keytype;
-	entry->key.length = old_entry.key.length;
-
-	entry->kvno = old_entry.kvno;
-	entry->max_life = old_entry.max_life;
-	entry->max_renewable_life = old_entry.max_renewable_life;
-	entry->mkvno = old_entry.mkvno;
-	
-	entry->expiration = old_entry.expiration;
-	entry->pw_expiration = old_entry.pw_expiration;
-	entry->last_pwd_change = old_entry.last_pwd_change;
-	entry->last_success = old_entry.last_success;
-    
-	entry->last_failed = old_entry.last_failed;
-	entry->fail_auth_count = old_entry.fail_auth_count;
-    
-	entry->mod_date = old_entry.mod_date;
-	entry->attributes = old_entry.attributes;
-	entry->salt_type = old_entry.salt_type;
-	entry->salt_length = old_entry.salt_length;
-	
-	entry->alt_key.keytype = old_entry.alt_key.keytype;
-	entry->alt_key.length = old_entry.alt_key.length;
-	entry->alt_salt_type = old_entry.alt_salt_type;
-	entry->alt_salt_length = old_entry.alt_salt_length;
-
-	goto resume_processing;
-    }
-#endif
-    if (major_version != 2)
-	return KRB5_KDB_BAD_VERSION;
-    
-    sizeleft -= sizeof(*entry);
-    if (sizeleft < 0) 
-	return KRB5_KDB_TRUNCATED_RECORD;
-
-    memcpy((char *) entry, nextloc, sizeof(*entry));
-    nextloc += sizeof(*entry);	/* Skip past structure */
-
-#ifdef OLD_COMPAT_VERSION_1
-resume_processing:
-#endif
-    
-    /*
-     * These values should be zero if they are not in use, but just in
-     * case, we clear them to make sure nothing bad happens if we need
-     * to call free_decode_princ_contents().  (What me, paranoid?)
-     */
-    entry->principal = 0;
-    entry->mod_name = 0;
-    entry->salt = 0;
-    entry->alt_salt = 0;
-    entry->key.contents = 0;
-    entry->alt_key.contents = 0;
-
-    /*
-     * Get the principal name for the entry (stored as a string which
-     * gets unparsed.)
-     */
-    sizeleft -= strlen(nextloc)+1;
-    if (sizeleft < 0) {
-	retval = KRB5_KDB_TRUNCATED_RECORD;
-	goto error_out;
-    }
-    retval = krb5_parse_name(context, nextloc, &princ);
-    if (retval)
-	goto error_out;
-    entry->principal = princ;
-    nextloc += strlen(nextloc)+1;	/* advance past 1st string */
-
-    if (major_version >= 1) {		/* Get principal type */
-	sizeleft -= sizeof(entry->principal->type);
-	if (sizeleft < 0) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	memcpy((char *)&entry->principal->type,nextloc,
-	       sizeof(entry->principal->type));
-	nextloc += sizeof(princ->type);
-    }
-    
-    /*
-     * Get the last modified principal for the entry (again stored as
-     * string which gets unparased.)
-     */
-    sizeleft -= strlen(nextloc)+1;	/* check size for 2nd string */
-    if (sizeleft < 0) {
-	retval = KRB5_KDB_TRUNCATED_RECORD;
-	goto error_out;
-    }
-    retval = krb5_parse_name(context, nextloc, &mod_princ);
-    if (retval)
-	goto error_out;
-    entry->mod_name = mod_princ;
-    nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
-    
-    /*
-     * Get the primary key...
-     */
-    if (entry->key.length) {
-	sizeleft -= entry->key.length; 	/* check size for key */
-	if (sizeleft < 0) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	entry->key.contents = (unsigned char *)malloc(entry->key.length);
-	if (!entry->key.contents) {
-	    retval = ENOMEM;
-	    goto error_out;
-	}
-	(void) memcpy((char *)entry->key.contents, nextloc, entry->key.length);
-	nextloc += entry->key.length;	/* advance past key */
-    }
-	
-    /*
-     * ...and the salt, if present...
-     */
-    if (entry->salt_length) {
-	sizeleft -= entry->salt_length;
-	if (sizeleft < 0) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	entry->salt = (krb5_octet *)malloc(entry->salt_length);
-	if (!entry->salt) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	(void) memcpy((char *)entry->salt, nextloc, entry->salt_length);
-	nextloc += entry->salt_length; /* advance past salt */
-    }
-
-    /*
-     * ... and the alternate key, if present...
-     */
-    if (entry->alt_key.length) {
-	sizeleft -= entry->alt_key.length; 	/* check size for alt_key */
-	if (sizeleft < 0) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	entry->alt_key.contents = (unsigned char *) malloc(entry->alt_key.length);
-	if (!entry->alt_key.contents) {
-	    retval = ENOMEM;
-	    goto error_out;
-	}
-	(void) memcpy((char *)entry->alt_key.contents, nextloc,
-		      entry->alt_key.length);
-	nextloc += entry->alt_key.length;	/* advance past alt_key */
-    }
-	
-    /*
-     * ...and the alternate key's salt, if present.
-     */
-    if (entry->alt_salt_length) {
-	sizeleft -= entry->alt_salt_length;
-	if (sizeleft < 0) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	entry->alt_salt = (krb5_octet *)malloc(entry->alt_salt_length);
-	if (!entry->alt_salt) {
-	    retval = KRB5_KDB_TRUNCATED_RECORD;
-	    goto error_out;
-	}
-	(void) memcpy((char *)entry->alt_salt, nextloc,
-		      entry->alt_salt_length);
-	nextloc += entry->alt_salt_length; /* advance past salt */
-    }
-    
-    return 0;
-error_out:
-    free_decode_princ_contents(context, entry);
-    return retval;
-}
-
-static void
-free_decode_princ_contents(context, entry)
-     krb5_context context; 
-     krb5_db_entry *entry;
-{
-    /* erase the key */
-    if (entry->key.contents) {
-	memset((char *)entry->key.contents, 0, entry->key.length);
-	krb5_xfree(entry->key.contents);
-    }
-    if (entry->salt)
-	krb5_xfree(entry->salt);
-    
-    if (entry->alt_key.contents) {
-	memset((char *)entry->alt_key.contents, 0, entry->alt_key.length);
-	krb5_xfree(entry->alt_key.contents);
-    }
-    if (entry->alt_salt)
-	krb5_xfree(entry->alt_salt);
-    
-    if (entry->principal)
-	krb5_free_principal(context, entry->principal);
-    if (entry->mod_name)
-	krb5_free_principal(context, entry->mod_name);
-    (void) memset((char *)entry, 0, sizeof(*entry));
-    return;
-}
-
 krb5_error_code
 krb5_dbm_db_lock(context, mode)
     krb5_context context;
@@ -1431,7 +1005,7 @@ errout:
 	free_dbsuffix (fromdir);
 
     if (retval == 0)
-	retval = krb5_dbm_db_end_update(context, to, trans);
+	return krb5_dbm_db_end_update(context, to, trans);
 
     if (tmpcontext) {
 	k5dbm_clear_context((db_context_t *) context->db_context);
@@ -1488,15 +1062,15 @@ krb5_boolean *more;			/* are there more? */
 	*more = FALSE;
 
 	/* XXX deal with wildcard lookups */
-	if (retval = encode_princ_dbmkey(context, &key, searchfor))
+	if (retval = krb5_encode_princ_dbmkey(context, &key, searchfor))
 	    goto cleanup;
 
 	contents = KDBM_FETCH(db_ctx, db, key);
-	free_encode_princ_dbmkey(context, &key);
+	krb5_free_princ_dbmkey(context, &key);
 
 	if (contents.dptr == NULL)
 	    found = 0;
-	else if (retval = decode_princ_contents(context, &contents, entries))
+	else if (retval = krb5_decode_princ_contents(context,&contents,entries))
 	    goto cleanup;
 	else found = 1;
 
@@ -1534,7 +1108,7 @@ krb5_dbm_db_free_principal(context, entries, nentries)
 {
     register int i;
     for (i = 0; i < nentries; i++)
-	free_decode_princ_contents(context, &entries[i]);
+	krb5_dbe_free_contents(context, &entries[i]);
     return;
 }
 
@@ -1587,19 +1161,19 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 
     /* for each one, stuff temps, and do replace/append */
     for (i = 0; i < *nentries; i++) {
-	if (retval = encode_princ_contents(context, &contents, entries))
+	if (retval = krb5_encode_princ_contents(context, &contents, entries))
 	    break;
 
-	if (retval = encode_princ_dbmkey(context, &key, entries->principal)) {
-	    free_encode_princ_contents(&contents);
+	if (retval = krb5_encode_princ_dbmkey(context, &key, entries->princ)) {
+	    krb5_free_princ_contents(context, &contents);
 	    break;
 	}
 	if (KDBM_STORE(db_ctx, db, key, contents, DBM_REPLACE))
 	    retval = errno;
 	else
 	    retval = 0;
-	free_encode_princ_contents(&contents);
-	free_encode_princ_dbmkey(context, &key);
+	krb5_free_princ_contents(context, &contents);
+	krb5_free_princ_dbmkey(context, &key);
 	if (retval)
 	    break;
 	entries++;			/* bump to next struct */
@@ -1619,16 +1193,16 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 
 krb5_error_code
 krb5_dbm_db_delete_principal(context, searchfor, nentries)
-    krb5_context context;
-krb5_principal searchfor;
-int *nentries;				/* how many found & deleted */
+    krb5_context 	  context;
+    krb5_principal 	  searchfor;
+    int 		* nentries;	/* how many found & deleted */
 {
-    int     found = 0;
-    datum   key, contents, contents2;
-    krb5_db_entry entry;
-    DBM    *db;
-    krb5_error_code retval;
-    db_context_t *db_ctx;
+    krb5_error_code 	  retval;
+    krb5_db_entry 	  entry;
+    db_context_t 	* db_ctx;
+    datum   		  key, contents, contents2;
+    DBM    		* db;
+    int			  i;
 
     if (!k5dbm_inited(context))
 	return KRB5_KDB_DBNOTINITED;
@@ -1648,19 +1222,26 @@ int *nentries;				/* how many found & deleted */
 	}
     }
 
-    if (retval = encode_princ_dbmkey(context, &key, searchfor))
+    if (retval = krb5_encode_princ_dbmkey(context, &key, searchfor))
 	goto cleanup;
 
     contents = KDBM_FETCH(db_ctx, db, key);
     if (contents.dptr == NULL) {
-	found = 0;
 	retval = KRB5_KDB_NOENTRY;
+	*nentries = 0;
     } else {
-	if (retval = decode_princ_contents(context, &contents, &entry))
+	memset((char *)&entry, 0, sizeof(entry));
+	if (retval = krb5_decode_princ_contents(context, &contents, &entry))
 	    goto cleankey;
-	found = 1;
-	memset((char *)entry.key.contents, 0, entry.key.length);
-	if (retval = encode_princ_contents(context, &contents2, &entry))
+	*nentries = 1;
+	/* Clear encrypted key contents */
+	for (i = 0; i < entry.n_key_data; i++) {
+	    if (entry.key_data[i].key_data_length[0]) {
+		memset((char *)entry.key_data[i].key_data_contents[0], 0, 
+		       entry.key_data[i].key_data_length[0]); 
+	    }
+	}
+	if (retval = krb5_encode_princ_contents(context, &contents2, &entry))
 	    goto cleancontents;
 
 	if (KDBM_STORE(db_ctx, db, key, contents2, DBM_REPLACE))
@@ -1671,18 +1252,17 @@ int *nentries;				/* how many found & deleted */
 	    else
 		retval = 0;
 	}
-	free_encode_princ_contents(&contents2);
+	krb5_free_princ_contents(context, &contents2);
     cleancontents:
-	free_decode_princ_contents(context, &entry);
+	krb5_dbe_free_contents(context, &entry);
     cleankey:
-	free_encode_princ_dbmkey(context, &key);
+	krb5_free_princ_dbmkey(context, &key);
     }
 
  cleanup:
     if (db_ctx->db_dbm_ctx == 0)
 	KDBM_CLOSE(db_ctx, db);
     (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
-    *nentries = found;
     return retval;
 }
 
@@ -1719,10 +1299,10 @@ krb5_dbm_db_iterate (context, func, func_arg)
     for (key = KDBM_FIRSTKEY (db_ctx, db);
 	 key.dptr != NULL; key = KDBM_NEXTKEY(db_ctx, db)) {
 	contents = KDBM_FETCH (db_ctx, db, key);
-	if (retval = decode_princ_contents(context, &contents, &entries))
+	if (retval = krb5_decode_princ_contents(context, &contents, &entries))
 	    break;
 	retval = (*func)(func_arg, &entries);
-	free_decode_princ_contents(context, &entries);
+	krb5_dbe_free_contents(context, &entries);
 	if (retval)
 	    break;
     }

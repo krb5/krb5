@@ -33,57 +33,74 @@
  */
 
 krb5_error_code
-krb5_kdb_encrypt_key(context, eblock, in, out)
-    krb5_context context;
-    krb5_encrypt_block *eblock;
-    const krb5_keyblock *in;
-    register krb5_encrypted_keyblock *out;
+krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
+    krb5_context 		  context;
+    krb5_encrypt_block 		* eblock;
+    const krb5_keyblock 	* keyblock;
+    const krb5_keysalt		* keysalt;
+    int				  keyver;
+    krb5_key_data	        * key_data;
 {
-    /* Encrypted rep has the real (unencrypted) key length stored
-       along with the encrypted key.  The length is stored as a 4
-       byte integer, MSB first.  */
+    krb5_error_code 		  retval;
+    krb5_keyblock 		  tmp;
+    krb5_octet			* ptr;
+    krb5_int16			  len;
+    int				  i;
 
-    krb5_error_code retval;
-    krb5_keyblock tmpin;
-    unsigned int length;
+    for (i = 0; i < key_data->key_data_ver; i++)
+	if (key_data->key_data_contents[i])
+	    krb5_xfree(key_data->key_data_contents[i]);
 
-    out->keytype = in->keytype;
-    out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
+    key_data->key_data_ver = 1;
+    key_data->key_data_kvno = keyver;
 
-    /* because of checksum space requirements imposed by the encryption
-       interface, we need to copy the input key into a larger area. */
-    tmpin.length = in->length;
-    tmpin.contents = (krb5_octet *)malloc(out->length);
-    if (!tmpin.contents) {
-	out->length = 0;
+    /* 
+     * The First element of the type/length/contents 
+     * fields is the key type/length/contents
+     */
+    key_data->key_data_type[0] = keyblock->keytype;
+    key_data->key_data_length[0] = krb5_encrypt_size(keyblock->length, 
+						     eblock->crypto_entry) + 2;
+
+    /* 
+     * because of checksum space requirements imposed by the encryption
+     * interface, we need to copy the input key into a larger area. 
+     */
+    tmp.contents = (krb5_octet *)malloc(key_data->key_data_length[0] - 2);
+    len = tmp.length = keyblock->length;
+    if (tmp.contents == NULL)
+	return ENOMEM;
+
+    memcpy((char *)tmp.contents, (const char *)keyblock->contents, tmp.length);
+    key_data->key_data_contents[0] = ptr = (krb5_octet *)malloc(
+					key_data->key_data_length[0] - 2);
+    if (key_data->key_data_contents[0] == NULL) {
+	krb5_xfree(tmp.contents);
 	return ENOMEM;
     }
-    memcpy((char *)tmpin.contents, (const char *)in->contents, tmpin.length);
 
-    out->length += sizeof(out->length);
-    out->contents = (krb5_octet *)malloc(out->length);
-    if (!out->contents) {
-	krb5_xfree(tmpin.contents);
-	out->contents = 0;
-	out->length = 0;
-	return ENOMEM;
+    *ptr++ = len & 0xff;
+    *ptr++ = (len >> 8) & 0xff;
+    if (retval = krb5_encrypt(context, (krb5_pointer) tmp.contents,
+			     (krb5_pointer)(ptr), tmp.length, eblock, 0)) {
+	krb5_xfree(key_data->key_data_contents[0]);
+    	krb5_xfree(tmp.contents);
+	return retval;
     }
 
-    length = tmpin.length;
-    ((char *)out->contents)[0] = length >> 24;
-    ((char *)out->contents)[1] = length >> 16;
-    ((char *)out->contents)[2] = length >> 8;
-    ((char *)out->contents)[3] = length;
-    
-    retval = krb5_encrypt(context, (krb5_pointer) tmpin.contents,
-			  (krb5_pointer) ((char *) out->contents + 4),
-			  tmpin.length, eblock, 0);
-    krb5_xfree(tmpin.contents);
-    if (retval) {
-	krb5_xfree(out->contents);
-	out->contents = 0;
-	out->length = 0;
-    }
+    krb5_xfree(tmp.contents);
 
+    /* After key comes the salt in necessary */
+    if (keysalt) {
+	key_data->key_data_contents[1] =
+	  (krb5_octet *)malloc(keysalt->data.length);
+	if (key_data->key_data_contents[1] == NULL) {
+	    krb5_xfree(key_data->key_data_contents[0]);
+	    return ENOMEM;
+    	}
+ 	key_data->key_data_length[1] = keysalt->data.length;
+	key_data->key_data_type[1] = keysalt->type;
+        key_data->key_data_ver++;
+    }
     return retval;
 }

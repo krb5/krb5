@@ -33,51 +33,50 @@
  */
 
 krb5_error_code
-krb5_kdb_decrypt_key(context, eblock, in, out)
-    krb5_context context;
-    krb5_encrypt_block *eblock;
-    const krb5_encrypted_keyblock *in;
-    krb5_keyblock *out;
+krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
+    krb5_context 	  context;
+    krb5_encrypt_block 	* eblock;
+    const krb5_key_data	* key_data;
+    krb5_keyblock 	* keyblock;
+    krb5_keysalt 	* keysalt;
 {
-    krb5_error_code retval;
+    krb5_error_code 	  retval;
+    krb5_octet		* ptr;
 
-    /* the encrypted version is stored as the unencrypted key length
-       (4 bytes, MSB first) followed by the encrypted key. */
-    out->magic = KV5M_KEYBLOCK;
-    out->etype = ETYPE_UNKNOWN;
-    out->keytype = in->keytype;
-    out->length = krb5_encrypt_size(in->length-sizeof(in->length),
-				    eblock->crypto_entry);
-    out->contents = (krb5_octet *)malloc(out->length);
-    if (!out->contents) {
-	out->contents = 0;
-	out->length = 0;
+    keyblock->magic = KV5M_KEYBLOCK;
+    keyblock->etype = ETYPE_UNKNOWN;
+    keyblock->keytype = key_data->key_data_type[0];
+
+    /* Decrypt key_data_contents */
+    if ((keyblock->contents = (krb5_octet *)malloc(krb5_encrypt_size(
+      key_data->key_data_length[0] - 2, eblock->crypto_entry))) == NULL)
 	return ENOMEM;
-    }
 
-    /* copy out the real length count */
-    out->length  = (((unsigned char *)in->contents)[0] << 24)
-		 + (((unsigned char *)in->contents)[1] << 16)
-		 + (((unsigned char *)in->contents)[2] << 8)
-		 +  ((unsigned char *)in->contents)[3];
-
-    /* remember the contents of the encrypted version has a 4 byte
-       integer length of the real embedded key, followed by the
-       encrypted key, so the offset here is needed */
-    if (retval = krb5_decrypt(context, (krb5_pointer) (
-			      (char *) in->contents + 4),
-			      (krb5_pointer) out->contents,
-			      in->length-sizeof(in->length), eblock, 0)) {
-	krb5_xfree(out->contents);
-	out->contents = 0;
-	out->length = 0;
+    keyblock->length = 0;
+    ptr = key_data->key_data_contents[0];
+    *(((krb5_octet *)(&keyblock->length))) = *ptr++;
+    *(((krb5_octet *)(&keyblock->length)) + 1) = *ptr++;
+    if (retval = krb5_decrypt(context, (krb5_pointer) ptr,
+			      (krb5_pointer)keyblock->contents,
+			      key_data->key_data_length[0] - 2, 
+			      eblock, 0)) {
+    	krb5_xfree(keyblock->contents);
 	return retval;
     }
-    if (out->length < 0) {
-	krb5_xfree(out->contents);
-	out->contents = 0;
-	out->length = 0;
-	return KRB5_KDB_INVALIDKEYSIZE;
+
+    /* Decode salt data */
+    if (keysalt) {
+	if (key_data->key_data_ver == 2) {
+	    keysalt->type = key_data->key_data_type[1];
+	    keysalt->data.length = key_data->key_data_length[1];
+	    if (!(keysalt->data.data = (krb5_octet *)malloc(keysalt->data.length))){
+    	        krb5_xfree(keyblock->contents);
+	        return ENOMEM;
+	    }
+	} else {
+	    keysalt->type = KRB5_KDB_SALTTYPE_NORMAL;
+	    keysalt->data.length = 0;
+	}
     }
     return retval;
 }

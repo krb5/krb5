@@ -64,7 +64,9 @@ krb5_db_verify_master_key(context, mprinc, mkey, eblock)
 	krb5_db_free_principal(context, &master_entry, nprinc);
 	return(retval);
     }
-    if (retval = krb5_kdb_decrypt_key(context, eblock, &master_entry.key, &tempkey)) {
+    if (retval = krb5_dbekd_decrypt_key_data(context, eblock, 
+					     &master_entry.key_data[0],
+					     &tempkey, NULL)) {
 	(void) krb5_finish_key(context, eblock);
 	krb5_db_free_principal(context, &master_entry, nprinc);
 	return retval;

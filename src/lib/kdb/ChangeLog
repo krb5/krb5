@@ -1,3 +1,11 @@
+
+Thu Jul 27 02:59:05 1995        Chris Provenzano (proven@mit.edu)
+        * decrypt_key.c, encrypt_key.c, kdb_dbm.c, kdb_xdr.c:
+		Rewritten for new kdb format.
+	* kdb_cpw.c : New password changing routines for new kdb format.
+	* verify_mky.c, t_kdb.c : Use new kdb format.
+
+
 Tue Jul 25 14:06:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* kdb_dbm.c, t_kdb.c: Add prototype for dbm_error and dbm_clearerr

@@ -137,12 +137,20 @@ static kdb5_dispatch_table dbm_dispatch = {
 #ifdef	dbm_error
     (int (*)()) NULL,		/* Get Database Error	*/
 #else	/* dbm_error */
+#ifdef HAVE_DBM_ERROR
     dbm_error,			/* Get Database Error	*/
+#else
+    (int (*)()) NULL,		/* Get Database Error	*/
+#endif
 #endif	/* dbm_error */
 #ifdef	dbm_clearerr
     (int (*)()) NULL,		/* Clear Database Error	*/
 #else	/* dbm_clearerr */
+#ifdef HAVE_DBM_CLEARERR
     dbm_clearerr,		/* Clear Database Error	*/
+#else
+    (int (*)()) NULL,		/* Clear Database Error	*/
+#endif
 #endif	/* dbm_clearerr */
 #ifdef	dbm_dirfno
     (int (*)()) NULL,		/* Get Database FD num	*/
@@ -255,54 +263,56 @@ principal_found(nvalid, pname)
  */
 krb5_error_code
 add_principal(kcontext, principal, eblock, key, rseed)
-    krb5_context	kcontext;
-    krb5_principal	principal;
-    krb5_encrypt_block	*eblock;
-    krb5_keyblock	*key;
-    krb5_pointer	rseed;
+    krb5_context	  kcontext;
+    krb5_principal	  principal;
+    krb5_encrypt_block	* eblock;
+    krb5_keyblock	* key;
+    krb5_pointer	  rseed;
 {
-    krb5_error_code		kret;
-    krb5_db_entry		dbent;
-    krb5_keyblock		*rkey;
-    krb5_keyblock		*kp;
-    int				nentries = 1;
+    krb5_error_code	  kret;
+    krb5_db_entry	  dbent;
+    krb5_tl_mod_princ	  mod_princ;
+    krb5_keyblock	* rkey = NULL;
+    int			  nentries = 1;
 
     memset((char *) &dbent, 0, sizeof(dbent));
-    rkey = (krb5_keyblock *) NULL;
-    dbent.principal = principal;
-    dbent.kvno = 1;
-    dbent.max_life = KRB5_KDB_MAX_LIFE;
-    dbent.max_renewable_life = KRB5_KDB_MAX_RLIFE;
-    dbent.mkvno = 1;
-    dbent.expiration = KRB5_KDB_EXPIRATION;
-    dbent.mod_name = principal;
-    dbent.attributes = KRB5_KDB_DEF_FLAGS;
-    if (kret = krb5_timeofday(kcontext, &dbent.mod_date))
-	return(kret);
+    dbent.len			= KRB5_KDB_V1_BASE_LENGTH;
+
+    dbent.mkvno 		= 1;
+    dbent.attributes 		= KRB5_KDB_DEF_FLAGS;
+    dbent.max_life 		= KRB5_KDB_MAX_LIFE;
+    dbent.expiration 		= KRB5_KDB_EXPIRATION;
+    dbent.max_renewable_life 	= KRB5_KDB_MAX_RLIFE;
+
+    if (kret = krb5_copy_principal(kcontext, principal, &dbent.princ))
+	goto out;
+
+    mod_princ.mod_princ = principal;
+    if (kret = krb5_timeofday(kcontext, &mod_princ.mod_date))
+	goto out;
+    if (kret = krb5_dbe_encode_mod_princ_data(kcontext, &mod_princ, &dbent))
+	goto out;
 
     if (!key) {
 	if (kret = krb5_random_key(kcontext, eblock, rseed, &rkey))
-	    return(kret);
-	kp = rkey;
-    }
-    else
-	kp = key;
+	    goto out;
+    } else
+	rkey = key;
 
-    if (kret = krb5_kdb_encrypt_key(kcontext, eblock, kp, &dbent.key))
+    if (kret = krb5_dbe_create_key_data(kcontext, &dbent))
+	goto out;
+    if (kret = krb5_dbekd_encrypt_key_data(kcontext, eblock, rkey, NULL, 1,
+					   &dbent.key_data[0]))
 	goto out;
 
-    if (rkey)
+    if (!key)
 	krb5_free_keyblock(kcontext, rkey);
 
-    dbent.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
-    dbent.salt_length = 0;
-    dbent.salt = (krb5_octet *) NULL;
     kret = krb5_db_put_principal(kcontext, &dbent, &nentries);
-    if (!kret && (nentries != 1))
+    if ((!kret) && (nentries != 1))
 	kret = KRB5KRB_ERR_GENERIC;
  out:
-    if (dbent.key.contents)
-	free(dbent.key.contents);
+    krb5_dbe_free_contents(kcontext, &dbent);
     return(kret);
 }
 
@@ -369,32 +379,42 @@ find_principal(kcontext, principal, docompare)
 {
     krb5_error_code	kret;
     krb5_db_entry	dbent;
+    krb5_tl_mod_princ *	mod_princ;
     int			how_many;
     krb5_boolean	more;
 
-    how_many = 1;
     more = 0;
-    if (kret = krb5_db_get_principal(kcontext,
-				     principal,
-				     &dbent,
-				     &how_many,
-				     &more))
+    how_many = 1;
+    if (kret = krb5_db_get_principal(kcontext, principal, &dbent,
+				     &how_many, &more))
 	return(kret);
+    if (how_many == 0) 
+	return(KRB5KRB_ERR_GENERIC);
+
+    if (kret = krb5_dbe_decode_mod_princ_data(kcontext, &dbent, &mod_princ)) {
+	krb5_db_free_principal(kcontext, &dbent, how_many);
+	return(kret);
+    }
+
     if (docompare) {
-	if ((dbent.kvno != 1) ||
+	if ((dbent.mkvno != 1) ||
 	    (dbent.max_life != KRB5_KDB_MAX_LIFE) ||
 	    (dbent.max_renewable_life != KRB5_KDB_MAX_RLIFE) ||
-	    (dbent.mkvno != 1) ||
 	    (dbent.expiration != KRB5_KDB_EXPIRATION) ||
 	    (dbent.attributes != KRB5_KDB_DEF_FLAGS) ||
-	    !krb5_principal_compare(kcontext, principal, dbent.principal) ||
-	    !krb5_principal_compare(kcontext, principal, dbent.mod_name))
+	    !krb5_principal_compare(kcontext, principal, dbent.princ) ||
+	    !krb5_principal_compare(kcontext, principal, mod_princ->mod_princ))
 	    kret = KRB5_PRINC_NOMATCH;
-	krb5_db_free_principal(kcontext, &dbent, how_many);
     }
-    if (!kret && how_many)
-	krb5_db_free_principal(kcontext, &dbent, how_many);
-    return(((how_many == 1) && (more == 0)) ? 0 : KRB5KRB_ERR_GENERIC);
+
+    krb5_db_free_principal(kcontext, &dbent, how_many);
+    krb5_free_principal(kcontext, mod_princ->mod_princ);
+    krb5_xfree(mod_princ);
+    if (!kret) 
+        return(((how_many == 1) && (more == 0)) ? 0 : KRB5KRB_ERR_GENERIC);
+    else
+        return(kret);
+
 }
 
 /*
