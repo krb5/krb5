@@ -1,3 +1,7 @@
+Fri Aug 23 14:22:45 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kerberos_v4.c (check_princ): Assume an expiration date of zero means never expire.
+
 Thu Aug  1 11:13:46 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 
 	* configure.in (withval): Link -ldyn as it is needed by the kadm5

@@ -925,7 +925,8 @@ int check_princ(p_name, instance, lifetime, p)
 	return KERB_ERR_NULL_KEY;
     }
     /* make sure the service hasn't expired */
-    if ((u_long) p->exp_date < (u_long) kerb_time.tv_sec) {
+    if (((u_long) p->exp_date != 0)&&
+	((u_long) p->exp_date <(u_long) kerb_time.tv_sec)) {
 	/* service did expire, log it */
 	lt = klog(L_ERR_SEXP,
 	    "EXPIRED \"%s\" \"%s\"  %s", p->name, p->instance,

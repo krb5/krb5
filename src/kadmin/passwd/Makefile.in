@@ -13,7 +13,7 @@ $(PROG): $(OBJS) $(CLNTDEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
 
 install::
-	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(BINDIR)/$(PROG)
 
 clean::
 	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)

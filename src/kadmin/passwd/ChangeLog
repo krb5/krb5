@@ -1,3 +1,7 @@
+Fri Aug 23 14:17:42 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (install): Install in bin not sbin.
+
 Thu Aug 15 19:30:18 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add USE_KDB5_LIBRARY to pick up -ldb.  Recent
