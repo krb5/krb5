@@ -11,6 +11,16 @@
         file with profile_flush_to_file() or buffer with 
         profile_flush_to_buffer().
 
+2004-10-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (STAT_ONCE_PER_SECOND): Define.
+	(struct _prf_data_t) [STAT_ONCE_PER_SECOND]: New field LAST_STAT.
+	* prof_file.c (scan_shared_trees_locked,
+	scan_shared_trees_unlocked): Redefine to do nothing for now.
+	(profile_update_file_data) [STAT_ONCE_PER_SECOND]: If the current
+	time is the same time as the last stat of the file, just return;
+	otherwise, save away the current time.
+
 2004-10-26  Ken Raeburn  <raeburn@mit.edu>
 
 	Permit exporting profile file data into a buffer.
