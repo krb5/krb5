@@ -24,13 +24,14 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char des_enc_dec_c[] =
+static char enc_dec_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 
 #include <sys/errno.h>
+#include <krb5/krb5_err.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -44,6 +45,42 @@ extern int mit_des_debug;
 #endif
 
 
+krb5_error_code mit_des_encrypt_func(DECLARG(krb5_pointer, in),
+				     DECLARG(krb5_pointer, out),
+				     DECLARG(size_t, size),
+				     DECLARG(krb5_encrypt_block *, key),
+				     DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_pointer, in)
+OLDDECLARG(krb5_pointer, out)
+OLDDECLARG(size_t, size)
+OLDDECLARG(krb5_encrypt_block *, key)
+OLDDECLARG(krb5_pointer, ivec)
+{
+    krb5_checksum cksum;
+    krb5_octet 	contents[4];
+    char 	*p;
+    krb5_error_code retval, mit_des_encrypt_f();
+
+    if ( size < sizeof(mit_des_cblock) )
+	return KRB5_BAD_MSIZE;
+
+    p = (char *)in + size - 4;
+    bzero(p, 4);
+    cksum.contents = contents; 
+
+    if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
+                  sum_func)(in,
+                            size,
+                            (krb5_pointer)key->key->contents,
+                            sizeof(mit_des_cblock),
+                            &cksum)) 
+	return retval;
+    
+    bcopy((char *)contents, p, 4);
+ 
+    return (mit_des_encrypt_f(in, out, size, key, ivec));
+}
+
 /*
 	encrypts "size" bytes at "in", storing result in "out".
 	"eblock" points to an encrypt block which has been initialized
@@ -55,11 +92,11 @@ extern int mit_des_debug;
 	
 	returns: errors
 */
-krb5_error_code mit_des_encrypt_func(DECLARG(krb5_pointer, in),
-				     DECLARG(krb5_pointer, out),
-				     DECLARG(size_t, size),
-				     DECLARG(krb5_encrypt_block *, key),
-				     DECLARG(krb5_pointer, ivec))
+krb5_error_code mit_des_encrypt_f(DECLARG(krb5_pointer, in),
+				  DECLARG(krb5_pointer, out),
+				  DECLARG(size_t, size),
+				  DECLARG(krb5_encrypt_block *, key),
+				  DECLARG(krb5_pointer, ivec))
 OLDDECLARG(krb5_pointer, in)
 OLDDECLARG(krb5_pointer, out)
 OLDDECLARG(size_t, size)
@@ -82,6 +119,48 @@ OLDDECLARG(krb5_pointer, ivec)
 			    MIT_DES_ENCRYPT));
 }    
 
+krb5_error_code mit_des_decrypt_func(DECLARG(krb5_pointer, in),
+				     DECLARG(krb5_pointer, out),
+				     DECLARG(size_t, size),
+				     DECLARG(krb5_encrypt_block *, key),
+				     DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_pointer, in)
+OLDDECLARG(krb5_pointer, out)
+OLDDECLARG(size_t, size)
+OLDDECLARG(krb5_encrypt_block *, key)
+OLDDECLARG(krb5_pointer, ivec)
+{
+    krb5_checksum cksum;
+    krb5_octet 	contents_prd[4];
+    krb5_octet  contents_get[4];
+    char 	*p;
+    krb5_error_code   retval, mit_des_decrypt_f();
+
+    if ( size < sizeof(mit_des_cblock) )
+	return KRB5_BAD_MSIZE;
+
+    if (retval = mit_des_decrypt_f(in, out, size, key, ivec))
+	return retval;
+
+    cksum.contents = contents_prd;
+    p = (char *)out + size - 4;
+    bcopy(p, (char *)contents_get, 4);
+    bzero(p, 4);
+
+    if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
+                  sum_func)(out,
+                            size,
+                            (krb5_pointer)key->key->contents,
+                            sizeof(mit_des_cblock),
+                            &cksum)) 
+	return retval;
+
+    if ( bcmp((char *)contents_get, (char *)contents_prd, 4) )
+        return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+
+    return 0;
+}
+
 /*
 
 	decrypts "size" bytes at "in", storing result in "out".
@@ -95,11 +174,11 @@ OLDDECLARG(krb5_pointer, ivec)
 	returns: errors
 
  */
-krb5_error_code mit_des_decrypt_func(DECLARG(krb5_pointer, in),
-				     DECLARG(krb5_pointer, out),
-				     DECLARG(size_t, size),
-				     DECLARG(krb5_encrypt_block *, key),
-				     DECLARG(krb5_pointer, ivec))
+krb5_error_code mit_des_decrypt_f(DECLARG(krb5_pointer, in),
+				  DECLARG(krb5_pointer, out),
+				  DECLARG(size_t, size),
+				  DECLARG(krb5_encrypt_block *, key),
+				  DECLARG(krb5_pointer, ivec))
 OLDDECLARG(krb5_pointer, in)
 OLDDECLARG(krb5_pointer, out)
 OLDDECLARG(size_t, size)
