@@ -21,8 +21,6 @@ static char rcsid_in_tkt_pwd_c[] =
 #include <errno.h>
 #include <krb5/ext-proto.h>
 
-extern krb5_cryptosystem_entry *string_to_keyarray[]; /* XXX */
-
 struct pwd_keyproc_arg {
     krb5_principal who;
     krb5_data password;
@@ -44,16 +42,17 @@ OLDDECLARG(krb5_pointer, keyseed)
     struct pwd_keyproc_arg *arg;
 
     if (!valid_keytype(type))
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_KEYTYPE_NOSUPP;
     *key = (krb5_keyblock *)malloc(sizeof(**key));
     if (!*key)
 	return ENOMEM;
     
     arg = (struct pwd_keyproc_arg *)keyseed;
-    if (retval = (*string_to_keyarray[type]->string_to_key)(type,
-							    *key,
-							    &arg->password,
-							    arg->who)) {
+    if (retval = (*krb5_keytype_array[type]->system->
+		  string_to_key)(type,
+				 *key,
+				 &arg->password,
+				 arg->who)) {
 	free((char *) *key);
 	return(retval);
     }
