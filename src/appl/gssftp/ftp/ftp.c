@@ -292,7 +292,8 @@ login(host)
 		if (pass == NULL)
 			pass = mygetpass("Password:");
 #ifndef NOENCRYPTION
-		if ((oldlevel = level) == PROT_S) level = PROT_P;
+		oldlevel = level;
+		level = PROT_P;
 #endif
 		n = command("PASS %s", pass);
 #ifndef NOENCRYPTION
