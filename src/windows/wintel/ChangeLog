@@ -1,3 +1,9 @@
+Fri Feb  5 01:42:07 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* enc_des.c (fb64_session): Call des_init_random_number_generator
+		instead of des_set_random_generator_seed, since the
+		compatibility library no longer supports the latter call.
+
 Wed Feb  3 23:00:05 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* auth.c (auth_send): Increase size of buf so we can handle
